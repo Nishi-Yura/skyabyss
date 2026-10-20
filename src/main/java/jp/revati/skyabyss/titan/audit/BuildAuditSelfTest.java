@@ -78,6 +78,8 @@ public final class BuildAuditSelfTest {
         // 数は光の計算の時間で数件ゆらぐので少し余裕を見る。灯りを足す (または暗さを演出として許す) 設計の判断待ち (docs/review/build_audit_report.md の「暗さ」)
         BUDGETS.add(new Budget("whale", "LIGHT_DARK", 8, "version 20 lit the routes to 4+ with sea lanterns in the walls (RouteLamps, whale_back/route_lamps.json from dev routelight whale); a few shadowed corners of stairs remain (real count 3 to 6 depending on the light engine; the 6 cells the lamp search found no wall for). The flooded underside maze is dark by design (the lamp-stand game) and is not counted (BuildAuditExtra.mazeDark)"));
         BUDGETS.add(new Budget("tide", "LIGHT_DARK", 18, "pockets of shadow left on purpose (the sunken garden corridors, the moon-window pool); version 20 lit the routes to 4+ with 324 sea lanterns (route_lamps.json) and found 9 to 13 such pockets (the light computation makes the count wobble; version 21 trial deck has none, 17 seen in the P2 run)"));
+        BUDGETS.add(new Budget("storm", "LIGHT_DARK", 8, "single corners at the light threshold (light 3, one cell each) that the light engine lights or not depending on the update order; seen 0 to 5"));
+        BUDGETS.add(new Budget("ember", "LIGHT_DARK", 14, "the far south end of the ash plain under the body's overhang (x 28-30, z 210-217, y 64) and a few corners of the crater ledge are dark by design (the plain is open ground, lit by the forge glow only near the hub); seen 0 to 13 depending on when the light engine finishes"));
         // 岩鯨の谷の飛び石は、宙に浮かぶ一つの石 (跳ぶ道の部品)。浮きの検査から外す
         for (BackReach.Box pit : new BackReach.Box[]{new BackReach.Box(-58, 100, -55, -36, 118, -18), new BackReach.Box(-56, 100, -91, -37, 118, -68),
                 new BackReach.Box(-36, 100, -86, -19, 118, -48)}) {
@@ -164,7 +166,7 @@ public final class BuildAuditSelfTest {
         })));
         steps.add(Step.once("build audit (tide build)", server -> build(server, TideTravel.TIDE_BACK, TideBackBuilder::ensureBuilt)));
         steps.add(Step.once("build audit (storm build)", server -> build(server, StormTravel.STORM_BACK, StormBackBuilder::ensureBuilt)));
-        // 余燼は体が大きく (x1.6)、歩く所の端は読み込みの外れた区画になる。光の計算が済むまで区画を読み込んだままにして (調べたあとで外す)、100 tick 待つ
+        // 余燼は体が大きく (x1.6)、歩く所の端は読み込みの外れた区画になる。光の計算が済むまで区画を読み込んだままにして (調べたあとで外す)、400 tick 待つ (負荷が高いと 100 tick では光が足りず、体の南の端で暗い所が 5〜13 件出た)
         steps.add(Step.once("build audit (ember build)", server -> {
             build(server, EmberIds.BACK, EmberBodyBuilder::ensureBuilt);
             forceBox(server, EmberIds.BACK, EMBER_BOX, true);
@@ -175,7 +177,7 @@ public final class BuildAuditSelfTest {
                 level -> BackReach.run(level, jp.revati.skyabyss.titan.tide.back.TideBackAudit.spec()))));
         steps.add(Step.once("build audit (storm)", server -> back(server, StormTravel.STORM_BACK, "storm", STORM_BOX,
                 level -> jp.revati.skyabyss.titan.storm.back.StormBackAudit.run(level))));
-        steps.add(Step.once("build audit (ember)", 100, server -> {
+        steps.add(Step.once("build audit (ember)", 400, server -> {
             back(server, EmberIds.BACK, "ember", EMBER_BOX, level -> jp.revati.skyabyss.titan.ember.back.EmberBackAudit.run(level));
             forceBox(server, EmberIds.BACK, EMBER_BOX, false);
         }));

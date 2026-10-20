@@ -174,6 +174,15 @@ public final class Ch1MobsSelfTest {
         T m = type.create(level);
         m.moveTo(x, FLOOR, z, yaw, 0);
         m.setPersistenceRequired();
+        // 狙いを変える仕組み (いちばん近い人を選び直す) を外す。試験が setTarget で決めた相手だけを狙わせる
+        // (外さないと、近くの別の人へ狙いが移って線や当たりが変わる揺らぎが出る。全体を回す負荷のときに目立つ)
+        try {
+            java.lang.reflect.Field selector = Mob.class.getDeclaredField("targetSelector");
+            selector.setAccessible(true);
+            ((net.minecraft.world.entity.ai.goal.GoalSelector) selector.get(m)).removeAllGoals(goal -> true);
+        } catch (ReflectiveOperationException e) {
+            throw new IllegalStateException("could not lock the target of " + m, e);
+        }
         level.addFreshEntity(m);
         return m;
     }

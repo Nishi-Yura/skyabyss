@@ -238,19 +238,24 @@ public final class TravelSelfTest {
     }
 
     private static Map<String, String> lang(String which) {
-        String path = switch (which) {
-            case "gear_story_ja" -> "/assets/skyabyss_gear_story/lang/ja_jp.json";
-            case "gear_story_en" -> "/assets/skyabyss_gear_story/lang/en_us.json";
-            default -> "/assets/skyabyss_ch1/lang/" + which + ".json";
-        };
         Map<String, String> out = new HashMap<>();
-        try (var in = TravelSelfTest.class.getResourceAsStream(path)) {
-            if (in != null) {
-                var o = com.google.gson.JsonParser.parseReader(new java.io.InputStreamReader(in, java.nio.charset.StandardCharsets.UTF_8)).getAsJsonObject();
-                o.entrySet().forEach(e -> out.put(e.getKey(), e.getValue().getAsString()));
+        // 各専用武器の由来の一行は、巨神ごとの名前空間の lang にある
+        List<String> paths = switch (which) {
+            case "gear_story_ja" -> List.of("/assets/skyabyss_gear_story/lang/ja_jp.json");
+            case "gear_story_en" -> List.of("/assets/skyabyss_gear_story/lang/en_us.json");
+            default -> List.of("/assets/skyabyss_ch1/lang/" + which + ".json", "/assets/skyabyss/lang/" + which + ".json",
+                    "/assets/skyabyss_ember/lang/" + which + ".json", "/assets/skyabyss_storm_gear/lang/" + which + ".json",
+                    "/assets/skyabyss_tide_gear/lang/" + which + ".json");
+        };
+        for (String path : paths) {
+            try (var in = TravelSelfTest.class.getResourceAsStream(path)) {
+                if (in != null) {
+                    var o = com.google.gson.JsonParser.parseReader(new java.io.InputStreamReader(in, java.nio.charset.StandardCharsets.UTF_8)).getAsJsonObject();
+                    o.entrySet().forEach(e -> out.put(e.getKey(), e.getValue().getAsString()));
+                }
+            } catch (java.io.IOException | RuntimeException e) {
+                // 読めなければ空 (キーなしの失敗になる)
             }
-        } catch (java.io.IOException | RuntimeException e) {
-            // 読めなければ空 (キーなしの失敗になる)
         }
         return out;
     }
