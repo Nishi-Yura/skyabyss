@@ -28,7 +28,7 @@ public abstract class ToastShiftMixin {
     // 札の列が入るだけの空き (HudLayout の toastCap) しかないとき、同時に出す数を絞る。あふれた札は待たされるだけで消えない (5 は無制限)
     @Inject(method = "freeSlots", at = @At("RETURN"), cancellable = true)
     private void skyabyss$cap(CallbackInfoReturnable<Integer> cir) {
-        int cap = HudManager.result().toastCap;
+        int cap = jp.revati.skyabyss.Config.CARD_PLACE.get() == jp.revati.skyabyss.Config.CardPlace.BOTTOM_RIGHT ? 2 : HudManager.result().toastCap;
         if (cap < 5) {
             cir.setReturnValue(Math.max(0, cir.getReturnValue() - (5 - cap)));
         }

@@ -186,7 +186,8 @@ public final class NoticeClient {
             case TOAST -> gate(NoticeGate.P_CARD, CARD_GAP, () -> {
                 boolean gain = kind == Notice.Kind.GAIN;
                 Component head = Component.translatable(gain ? "gui.skyabyss.notice.head.gain" : "gui.skyabyss.notice.head.unlock");
-                mc.getToasts().addToast(new NoticeToast(mc.font, head, body, gain ? 0xF2C14E : 0x7FD6D0));
+                int accent = gain ? 0xF2C14E : 0x7FD6D0;
+                CardFeed.show(head, body, accent, () -> new NoticeToast(mc.font, head, body, accent));
                 chime(mc, gain ? 1.0f : 0.8f, 0.6f);
             });
             case ACTIONBAR -> mc.gui.setOverlayMessage(body, false);

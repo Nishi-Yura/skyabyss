@@ -1386,5 +1386,8 @@
   "block.skyabyss.relic_lever": "Relic Lever",
   "block.skyabyss.relic_button": "Relic Button",
   "block.skyabyss.relic_plate": "Relic Pressure Plate",
-  "block.skyabyss.relic_bell": "Relic Bell"
+  "block.skyabyss.relic_bell": "Relic Bell",
+  "gui.skyabyss.card.advancement": "Advancement",
+  "gui.skyabyss.card.challenge": "Challenge",
+  "gui.skyabyss.card.lore": "Lore"
 }

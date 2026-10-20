@@ -80,7 +80,9 @@ public final class QuestClient {
         };
         // 会話・場面の最中は溜め、閉じたあとに一枚ずつ (first_hour_log B-2)
         jp.revati.skyabyss.client.notice.NoticeClient.gate(jp.revati.skyabyss.notice.NoticeGate.P_CARD, jp.revati.skyabyss.client.notice.NoticeClient.CARD_GAP, () -> {
-            mc.getToasts().addToast(new QuestToast(Component.translatable(head), title, def != null && def.main()));
+            boolean main = def != null && def.main();
+            jp.revati.skyabyss.client.notice.CardFeed.show(Component.translatable(head), title, main ? 0xF2C14E : 0x7FD6D0,
+                    () -> new QuestToast(Component.translatable(head), title, main));
             playSound(mc, kind, def != null && def.main());
             QuestHud.flash();
         });
