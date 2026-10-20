@@ -1,0 +1,38 @@
+# 都の作り込みの確かめ (一棟ずつ)。./gradlew runShots -Pscript=tools/shots/capital_detail.txt
+# 設計図を変えたら run/shots/capital_detail/saves を消す。at の座標と向きは設計図のもの (yaw 0 = 南、180 = 北、90 = 西、-90 = 東)
+world opening_capital_detail normal
+size 1280 720
+timeout 1200
+render 12
+clouds off
+
+wait 100
+cmd skyabyss cinematic stop
+wait 10
+cmd skyabyss cinematic stop
+cmd time set 2000
+cmd weather clear
+cmd gamerule doDaylightCycle false
+cmd gamemode spectator
+cmd skyabyss dev opening build
+hud off
+cmd skyabyss dev opening at shelter 0 -6 22 -40 150 4
+waitchunks
+wait 20
+shot d_bell_far
+cmd skyabyss dev opening at shelter 0 -17 6 -59 180 -8
+waitchunks
+wait 20
+shot d_story_front
+cmd skyabyss dev opening at shelter 0 -6 8 -66 135 -5
+waitchunks
+wait 20
+shot d_story_side
+cmd skyabyss dev opening at shelter 0 -15 5 -74 160 10
+waitchunks
+wait 20
+shot d_story_inside
+cmd skyabyss dev opening at shelter 0 -19 10 -76 200 20
+waitchunks
+wait 20
+shot d_story_up

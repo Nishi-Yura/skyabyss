@@ -53,11 +53,12 @@ class Town:
         self.used.append((x0, z0, x1, z1))
 
     def house(self, x0, z0, x1, z1, y0, floors, fh, front, axis, sides, ground='window', door=True, extras=(), infill=None,
-              roof=None):
-        """町家一棟。front = 戸のある側、axis = 棟の向き、sides = 飾る側 (隣と接しない側)"""
+              roof=None, sealed=True):
+        """町家一棟。front = 戸のある側、axis = 棟の向き、sides = 飾る側 (隣と接しない側)。
+        sealed = 入れない家 (物語に関係のない家。中は埋め、窓は暗く、戸は壁に貼った跳ね上げ戸)"""
         st, v = self.st, self.v
         b = Body(v, st, x0, z0, x1, z1, y0, floors=floors, fh=fh, bay=4, door_side=front if door else 'none',
-                 ground=ground, sides=sides, infill=infill or self.rng.choice(st.house_infills), pots=0.35).build()
+                 ground=ground, sides=sides, infill=infill or self.rng.choice(st.house_infills), pots=0.35, sealed=sealed).build()
         mat = roof or (self.rng.choice(st.roof_alts) if self.rng.random() < 0.25 else None)
         ridge = gable_roof(v, st, x0, z0, x1, z1, b.top + 1, axis=axis, steep=True,
                            dormers=(1 if (axis == 'x' and x1 - x0 >= 8) or (axis == 'z' and z1 - z0 >= 8) else 0) if 'dormer' in extras else 0,
@@ -66,6 +67,8 @@ class Town:
             cx = x1 if 'east' in sides else x0
             cz = z1 if front == 'south' else z0
             turret(v, st, cx, cz, b.top - 5, 8, half=1, rise=3)
+        if sealed:
+            v.seal(x0 + 1, z0 + 1, x1 - 1, z1 - 1, y0)
         self.claim(x0, z0, x1, z1)
         return b
 
@@ -132,10 +135,10 @@ class Town:
         # 隅の塔と、壁の途中の塔 (40 ごと)
         for cx in (-W - 1, W + 1):
             for cz in (-W - 1, W + 1):
-                tower(v, st, cx, cz, half=5, y0=0, h=22, belfry=False, spire_rise=2, pinnacles=True)
+                tower(v, st, cx, cz, half=5, y0=0, h=22, belfry=False, spire_rise=2, pinnacles=True, sealed=True)
         for k in (-60, -30, 30, 60):
             for (cx, cz) in ((k, -W - 1), (k, W + 1), (-W - 1, k), (W + 1, k)):
-                tower(v, st, cx, cz, half=3, y0=0, h=17, belfry=False, spire_rise=2, pinnacles=False)
+                tower(v, st, cx, cz, half=3, y0=0, h=17, belfry=False, spire_rise=2, pinnacles=False, sealed=True)
         # 四つの門 (門塔 2 本 + 幅 7 の門の口 + 上の楼)
         gates = (('gate_n', 'north'), ('gate_s', 'south'), ('gate_w', 'west'), ('gate_e', 'east'))
         for name, side in gates:
@@ -148,12 +151,13 @@ class Town:
         g.rng = self.rng
         # 門の口 (x -3..3、z -W..-W+T)、門塔 (x -11..-5 と 5..11、z -W-3..-W+4)
         for xt in (-8, 8):
-            tower(g, st, xt, -W + 1, half=3, y0=0, h=20, belfry=False, spire_rise=3, pinnacles=True)
+            tower(g, st, xt, -W + 1, half=3, y0=0, h=20, belfry=False, spire_rise=3, pinnacles=True, sealed=True)
         # 門楼 (口の上の部屋)
         b = Body(g, st, -5, -W - 2, 5, -W + 3, 0, floors=1, fh=8, bay=3, plinth=2, door_side='none', interior=False,
                  sides=('north', 'south'), pots=0)
         b.build()
         gable_roof(g, st, -5, -W - 2, 5, -W + 3, b.top + 1, axis='x', steep=True, finial=True)
+        g.seal(-4, -W - 1, 4, -W + 2, 0)
         # 口を抜く (幅 7、高さ 6) とアーチ
         g.clear(-3, 0, -W - 3, 3, 5, -W + 4)
         for z in (-W - 2, -W + 3):
@@ -262,9 +266,9 @@ class Town:
         for (x, z) in ((-54, -64), (-43, -51), (-54, -51), (-43, -64)):
             tree(v, x, y, z, st.trunk, st.leaves, h=6, r=2)
         # 鐘楼の南の庭 (x -36..-10, z -66..-46)
-        rosette(v, st, -23, -56, 8, y=TER)
-        fountain(v, st, -23, -56, r=3, y=y)
-        for (x, z) in ((-33, -48), (-13, -48), (-33, -64), (-13, -64)):
+        rosette(v, st, -27, -53, 6, y=TER)
+        fountain(v, st, -27, -53, r=2, y=y)
+        for (x, z) in ((-35, -47), (-19, -47), (-35, -58), (-19, -58)):
             double_lamp(v, st, x, y, z, h=4, axis='x')
         for (x, z) in ((-23, -46),):
             bench(v, st, x - 4, y, z, 'south', 3)
@@ -281,63 +285,290 @@ class Town:
 
     # ---------------------------------------------------------------- 大鐘楼と語り部の家
     def bell_tower(self):
+        """大鐘楼 (採用 A「石の鐘楼」を作り込んだもの)。中心 (-30, -76)、胴は 9×9、足もとは 11×11 の台座。
+        台座は四方にアーチの口 (語り部は一階の鐘の足もとに立つ。鐘は一階の天井)。胴は四隅の控え柱 (二度細る)、
+        各面の真ん中に細長いアーチ窓、両わきに盲アーチ、7 段ごとの持ち送りの帯。頂は露台つきの鐘の間 (5 幅のアーチ)、
+        小尖塔の胸壁、屋根窓つきの尖塔。胴の中 (二階より上) は入れないので埋める"""
         st, v = self.st, self.v
-        y = TER + 1
+        y0 = TER + 1
         cx, cz = -30, -76
-        x0, z0, x1, z1 = cx - 4, cz - 4, cx + 4, cz + 4
-        peak = tower(v, st, cx, cz, half=4, y0=y, h=46, belfry=True, spire_rise=4, pinnacles=True, clock=True, fh=6)
-        # 一階: 四方のアーチ (幅 3、高さ 3)。語り部は鐘の足もとに立つ
-        v.clear(x0 + 2, y, z0 + 2, x1 - 2, y + 2, z1 - 2)
-        for side in ('north', 'south', 'east', 'west'):
-            cells, out = _facade_cells(x0, z0, x1, z1, side)
-            mid = len(cells) // 2
-            for i in range(mid - 1, mid + 2):
-                ax, az = cells[i]
-                dx, dz = DX[out]
-                for yy in range(y, y + 3):
-                    v.set(ax, yy, az, 'air')
-                    v.set(ax - dx, yy, az - dz, 'air')
-            for i, f in ((mid - 1, vox._dir_toward(cells, mid - 1, -1)), (mid + 1, vox._dir_toward(cells, mid + 1, 1))):
-                ax, az = cells[i]
-                v.set(ax, y + 2, az, st.trim.stairs(f, 'top'))
-                v.set(ax - DX[out][0], y + 2, az - DX[out][1], st.trim.stairs(f, 'top'))
-            ax, az = cells[mid]
-            v.set(ax, y + 3, az, st.trim2)
-        v.fill(x0 + 1, y - 1, z0 + 1, x1 - 1, y - 1, z1 - 1, st.trim.full)
-        rosette(v, st, cx, cz, 3, y=y - 1)
-        # 一階の天井 (y+3) と鐘
-        v.fill(x0 + 2, y + 3, z0 + 2, x1 - 2, y + 3, z1 - 2, '%s_planks' % st.wood)
-        v.set(cx, y + 2, cz, 'bell[attachment=ceiling,facing=north,powered=false]')
-        self.mark('bell', cx, y + 2, cz)
-        # 頂の鐘の間にも鐘
-        # (tower() の鐘の間は胴の上 4 段。そこの天井に)
-        # 足もとの灯り
-        for dx, dz in ((-6, 6), (6, 6), (-6, -6), (6, -6)):
-            lamp_post(v, st, cx + dx, y, cz + dz, h=3)
-        self.claim(x0 - 1, z0 - 1, x1 + 1, z1 + 1)
+        H = 4            # 胴の半幅
+        BASE_TOP = y0 + 6
+        SHAFT_TOP = y0 + 34
+        BELL0 = SHAFT_TOP + 1       # 鐘の間の床の一つ上
+        BELL1 = BELL0 + 5           # 鐘の間の天井
+        g = Vox()
+        g.rng = self.rng
+        # ---- 南の面 (local: u = 東西 -H..H, z = H が外の面) を書いて、四方へ回す
+        def face(gv: Vox):
+            # 台座 (z = H+1 が外の面)
+            for u in range(-H - 1, H + 2):
+                for y in range(y0, BASE_TOP):
+                    gv.set(u, y, H + 1, st.base.full if (y - y0) < 2 or abs(u) == H + 1 else st.wall_main)
+                gv.set(u, y0, H + 2, st.base.stairs('north', 'bottom'))
+                gv.set(u, BASE_TOP, H + 2, st.trim.stairs('north', 'top'))
+                gv.set(u, BASE_TOP, H + 1, st.trim.full)
+            # 台座のアーチの口 (幅 3、高さ 4)
+            for u in range(-1, 2):
+                for y in range(y0, y0 + 4):
+                    for z in (H, H + 1):
+                        gv.set(u, y, z, 'air')
+            for z in (H, H + 1):
+                gv.set(-1, y0 + 3, z, st.trim.stairs('west', 'top'))
+                gv.set(1, y0 + 3, z, st.trim.stairs('east', 'top'))
+                gv.set(0, y0 + 4, z, st.trim2)
+                gv.set(-2, y0 + 4, z, st.trim.stairs('west', 'top'))
+                gv.set(2, y0 + 4, z, st.trim.stairs('east', 'top'))
+            for u in (-2, 2):
+                gv.fill(u, y0, H + 2, u, y0 + 3, H + 2, st.pilaster)
+                gv.set(u, y0 + 4, H + 2, st.trim.stairs('north', 'top'))
+            gv.set(-2, y0 + 2, H + 3, 'lantern[hanging=false,waterlogged=false]') if False else None
+            # 胴 (z = H)
+            for y in range(BASE_TOP + 1, SHAFT_TOP + 1):
+                for u in range(-H, H + 1):
+                    gv.set(u, y, H, st.wall_main if self.rng.random() > 0.08 else self.rng.choice(st.wall_mix2))
+                    gv.set(u, y, H - 1, st.wall_main)
+            # 持ち送りの帯 (7 段ごと)
+            for yb in range(BASE_TOP + 7, SHAFT_TOP, 7):
+                for u in range(-H, H + 1):
+                    gv.set(u, yb, H, st.band)
+                    gv.set(u, yb, H + 1, st.trim.stairs('north', 'top'))
+                    if u % 2 == 0:
+                        gv.set(u, yb - 1, H + 1, st.trim.stairs('north', 'top'))
+            # 窓: 真ん中に細長いアーチ窓 (高さ 4)、両わきに盲アーチ (高さ 3、奥行き 1)
+            for yb in range(BASE_TOP + 2, SHAFT_TOP - 3, 7):
+                for y in range(yb, yb + 4):
+                    gv.set(0, y, H, 'air')
+                    gv.set(0, y, H - 1, st.glass)
+                gv.set(0, yb - 1, H, st.trim.stairs('north', 'bottom'))
+                gv.set(0, yb + 4, H, st.trim.stairs('north', 'top'))
+                gv.set(0, yb + 5, H, st.trim2)
+                for u in (-2, 2):
+                    for y in range(yb + 1, yb + 4):
+                        gv.set(u, y, H, st.base.full)
+                    gv.set(u, yb + 4, H, st.trim.stairs('north', 'top'))
+                    gv.set(u, yb, H, st.trim.slab('top'))
+            # 丸窓 (上の帯の下)
+            yc = SHAFT_TOP - 3
+            for (a, b) in ((-1, 0), (1, 0), (0, 1), (0, -1)):
+                gv.set(a, yc + b, H + 1, st.trim.full)
+            gv.set(0, yc, H + 1, st.trim2)
+            # 旗 (帯の下に二枚)
+            for u in (-3, 3):
+                gv.set(u, SHAFT_TOP - 9, H + 1, '%s_wall_banner[facing=south]' % st.banner_color)
+            # 鐘の間 (5 幅のアーチ、柱)
+            for y in range(BELL0, BELL1 + 1):
+                for u in range(-H, H + 1):
+                    gv.set(u, y, H, st.wall_main)
+            for u in range(-2, 3):
+                for y in range(BELL0, BELL0 + 4):
+                    gv.set(u, y, H, 'air')
+            gv.set(-2, BELL0 + 3, H, st.trim.stairs('west', 'top'))
+            gv.set(2, BELL0 + 3, H, st.trim.stairs('east', 'top'))
+            gv.set(-1, BELL0 + 4, H, st.trim.stairs('west', 'top'))
+            gv.set(1, BELL0 + 4, H, st.trim.stairs('east', 'top'))
+            gv.set(0, BELL0 + 4, H, st.trim2)
+            for u in (-3, 3):
+                gv.fill(u, BELL0, H, u, BELL0 + 4, H, st.pilaster)
+            # 露台 (鐘の間の床の段を外へ一つ)
+            for u in range(-H - 1, H + 2):
+                gv.set(u, SHAFT_TOP, H + 1, st.trim.full)
+                gv.set(u, SHAFT_TOP - 1, H + 1, st.trim.stairs('north', 'top'))
+                gv.set(u, BELL0, H + 1, st.railing)
+            # 上の蛇腹と胸壁
+            for u in range(-H - 1, H + 2):
+                gv.set(u, BELL1 + 1, H, st.band)
+                gv.set(u, BELL1 + 1, H + 1, st.trim.stairs('north', 'top'))
+                gv.set(u, BELL1 + 2, H + 1, st.trim.wall() if u % 2 == 0 else st.trim.slab('bottom'))
+            # 隅の控え柱 (外へ 1、二度細る)
+            for u in (-H, H):
+                for y in range(BASE_TOP + 1, SHAFT_TOP + 1):
+                    gv.set(u, y, H, st.corner)
+                for y in range(BASE_TOP + 1, BASE_TOP + 15):
+                    gv.set(u, y, H + 1, st.base.full)
+                gv.set(u, BASE_TOP + 15, H + 1, st.base.stairs('north', 'bottom'))
+                for y in range(BASE_TOP + 15, BASE_TOP + 24):
+                    gv.set(u, y, H + 1, st.corner)
+                gv.set(u, BASE_TOP + 24, H + 1, st.trim.stairs('north', 'bottom'))
+
+        face(g)
+        for r in range(4):
+            for (x, y, z), s in g.b.items():
+                X, Z, S = _rot(x, z, s, r)
+                v.set(cx + X, y, cz + Z, S)
+        # 隅の塊 (控え柱の角の 2×2) と、胸壁の角の小尖塔
+        for sx in (-1, 1):
+            for sz in (-1, 1):
+                for y in range(BASE_TOP + 1, BASE_TOP + 15):
+                    v.set(cx + sx * (H + 1), y, cz + sz * (H + 1), st.base.full)
+                v.set(cx + sx * (H + 1), BASE_TOP + 15, cz + sz * (H + 1), st.base.slab('bottom'))
+                for y in range(y0, BASE_TOP):
+                    v.set(cx + sx * (H + 1), y, cz + sz * (H + 1), st.base.full)
+                pinnacle(v, st, cx + sx * (H + 1), BELL1 + 2, cz + sz * (H + 1), h=4)
+        # 中: 一階 (台座の中) は入れる。床・天井・鐘
+        v.clear(cx - H, y0, cz - H, cx + H, y0 + 3, cz + H)
+        for x in range(cx - H, cx + H + 1):
+            for z in range(cz - H, cz + H + 1):
+                v.set(x, y0 - 1, z, st.trim.full)
+        rosette(v, st, cx, cz, 3, y=y0 - 1)
+        v.fill(cx - H, y0 + 4, cz - H, cx + H, y0 + 4, cz + H, '%s_planks' % st.wood)
+        v.set(cx, y0 + 3, cz, '%s_planks' % st.wood)
+        v.set(cx, y0 + 2, cz, 'bell[attachment=ceiling,facing=north,powered=false]')
+        self.mark('bell', cx, y0 + 2, cz)
+        for (dx, dz) in ((-3, -3), (3, -3), (-3, 3), (3, 3)):
+            v.fill(cx + dx, y0, cz + dz, cx + dx, y0 + 3, cz + dz, st.pilaster)
+            v.set(cx + dx, y0 + 2, cz + dz + (1 if dz < 0 else -1), 'lantern[hanging=false,waterlogged=false]') if False else None
+        v.set(cx - 2, y0 + 3, cz, 'lantern[hanging=true,waterlogged=false]')
+        v.set(cx + 2, y0 + 3, cz, 'lantern[hanging=true,waterlogged=false]')
+        # 胴の中は埋める (二階より上、鐘の間の床まで)。鐘の間の床と、頂の鐘
+        v.seal(cx - H + 1, cz - H + 1, cx + H - 1, cz + H - 1, y0 + 5, filler=st.base.full, y1=SHAFT_TOP)
+        for x in range(cx - H + 1, cx + H):
+            for z in range(cz - H + 1, cz + H):
+                v.set(x, SHAFT_TOP, z, '%s_planks' % st.wood)
+                for y in range(BELL0, BELL1 + 1):
+                    v.set(x, y, z, 'air')
+                v.set(x, BELL1 + 1, z, '%s_planks' % st.wood)
+        v.set(cx, BELL1, cz, 'bell[attachment=ceiling,facing=north,powered=false]')
+        # 尖塔 (7×7 から、一段 3 の高さ) と、四面の屋根窓
+        base = BELL1 + 2
+        v.fill(cx - H, base, cz - H, cx + H, base, cz + H, st.trim.full)
+        peak = hip_spire(v, st, cx - 3, cz - 3, cx + 3, cz + 3, base + 1, mat=st.spire, rise=4, flare=True)
+        for (dx, dz, f) in ((0, 4, 'south'), (0, -4, 'north'), (4, 0, 'east'), (-4, 0, 'west')):
+            x, z = cx + dx, cz + dz
+            v.set(x, base + 1, z, st.trim.full)
+            v.set(x, base + 2, z, st.glass)
+            v.set(x, base + 3, z, st.glass)
+            ox, oz = (1, 0) if f in ('north', 'south') else (0, 1)
+            v.set(x - ox, base + 1, z - oz, st.pilaster)
+            v.set(x + ox, base + 1, z + oz, st.pilaster)
+            v.set(x - ox, base + 2, z - oz, st.pilaster)
+            v.set(x + ox, base + 2, z + oz, st.pilaster)
+            v.set(x - ox, base + 3, z - oz, st.spire.stairs(vox.CW[f] if f in ('north', 'south') else vox.CW[f], 'bottom'))
+            v.set(x, base + 4, z, st.spire.full)
+            v.set(x, base + 5, z, st.trim.wall())
+        v.set(cx, peak + 1, cz, 'lightning_rod[facing=up,powered=false,waterlogged=false]')
+        # 足もとの灯り (台座の四隅の外)
+        for dx, dz in ((-7, 7), (7, 7), (-7, -7), (7, -7)):
+            lamp_post(v, st, cx + dx, y0, cz + dz, h=3)
+        self.claim(cx - H - 3, cz - H - 3, cx + H + 3, cz + H + 3)
 
     def storyteller_house(self):
+        """語り部の家 (鐘楼の東、x -22..-12, z -82..-72。入れる)。一階は石、二階は濃い木の骨組みに白い漆喰。
+        南に屋根つきの玄関、柵で囲んだ前庭と花壇。中: 暖炉と煙突、本棚と書見台、机と椅子、敷物。二階に寝台 (梯子で上がる)"""
         st, v = self.st, self.v
         y = TER + 1
         x0, z0, x1, z1 = -22, -82, -12, -72
         b = Body(v, st, x0, z0, x1, z1, y, floors=2, fh=5, bay=4, door_side='south', door_at=5,
-                 infill=st.house_infills[0], pots=0.5).build()
-        gable_roof(v, st, x0, z0, x1, z1, b.top + 1, axis='x', steep=True, dormers=1, chimney=(x0 + 2, z0 + 2))
-        # 中: 寝台・書見台・樽・灯り (一階)
-        v.set(x0 + 2, y, z0 + 2, 'red_bed[facing=south,part=head,occupied=false]')
-        v.set(x0 + 2, y, z0 + 3, 'red_bed[facing=south,part=foot,occupied=false]')
-        v.set(x1 - 2, y, z0 + 2, 'lectern[facing=south,has_book=false,powered=false]')
-        v.set(x1 - 2, y, z1 - 2, 'barrel[facing=up,open=false]')
-        v.set(x1 - 3, y, z1 - 2, 'barrel[facing=up,open=false]')
-        # 煙の出る焚き火 (わら束の上)。家の前
-        v.set(-17, y, -68, 'hay_block[axis=y]')
-        v.set(-17, y + 1, -68, 'campfire[facing=north,lit=true,signal_fire=true,waterlogged=false]')
-        for (dx, dz) in ((-1, 0), (1, 0), (0, -1), (0, 1)):
-            v.set(-17 + dx, y, -68 + dz, st.base.slab('bottom'))
-        self.mark('smoke', -17, y + 1, -68)
-        dx_, _, dz_, _ = b.doors[0] if b.doors else (-17, y, -72, 'south')
-        self.mark('door', b.doors[0][0] if b.doors else -17, y, b.doors[0][2] if b.doors else -72)
-        self.claim(x0 - 1, z0 - 1, x1 + 1, z1 + 1)
+                 infill='stone_bricks', pots=0.6).build()
+        log = '%s_log' % st.wood
+        plaster = 'calcite'
+        # 二階の骨組み (外の面の柱型と帯の段を木に、間を白い漆喰に)
+        y2a, y2b = y + 5, b.top
+        for side in ('north', 'south', 'east', 'west'):
+            cells, out = _facade_cells(x0, z0, x1, z1, side)
+            for i, (px, pz) in enumerate(cells):
+                for yy in range(y2a, y2b + 1):
+                    s = v.get(px, yy, pz)
+                    if s is None or s == 'air' or 'pane' in s or 'stairs' in s or 'slab' in s or 'potted' in s:
+                        continue
+                    if yy in (y2a, y2b):
+                        v.set(px, yy, pz, '%s[axis=%s]' % (log, 'x' if side in ('north', 'south') else 'z'))
+                    elif i in (0, len(cells) - 1) or i % 3 == 0:
+                        v.set(px, yy, pz, '%s[axis=y]' % log)
+                    else:
+                        v.set(px, yy, pz, plaster)
+            # 斜めの筋交いの代わりに、柱のあいだの半分に濃い木の板
+        roof_y = b.top + 1
+        ridge = gable_roof(v, st, x0, z0, x1, z1, roof_y, axis='x', steep=True, dormers=1)
+        # 東の妻の暖炉の煙突 (外に張り出す)
+        cxh = x1 + 1
+        for yy in range(y - 1, ridge + 3):
+            for z in (-78, -77, -76):
+                v.set(cxh, yy, z, st.base.full if yy < ridge + 2 else st.base.wall())
+        v.set(cxh, ridge + 3, -77, 'campfire[facing=north,lit=true,signal_fire=false,waterlogged=false]')
+        # 玄関 (幅 5、奥行き 2): 柱・半ブロックの屋根・段・灯り
+        dx_, dy_, dz_, _ = b.doors[0]
+        px0, px1 = dx_ - 2, dx_ + 2
+        for x in range(px0, px1 + 1):
+            for z in (z1 + 1, z1 + 2):
+                v.set(x, y - 1, z, st.trim.full)
+                v.set(x, y + 3, z, st.roof.stairs('south', 'bottom') if z == z1 + 2 else st.roof.full)
+                v.set(x, y + 4, z, st.roof.stairs('south', 'bottom') if z == z1 + 1 else 'air')
+            v.set(x, y + 3, z1 + 3, st.roof_edge.stairs('south', 'bottom'))
+            v.set(x, y - 1, z1 + 3, st.base.full)
+            v.set(x, y, z1 + 3, st.base.stairs('north', 'bottom') if px0 < x < px1 else 'air')
+        for x in (px0, px1):
+            v.fill(x, y, z1 + 2, x, y + 2, z1 + 2, '%s[axis=y]' % log)
+            v.set(x, y + 2, z1 + 1, '%s_fence' % st.wood)
+        v.set(px0 + 1, y + 2, z1 + 2, 'lantern[hanging=true,waterlogged=false]')
+        v.set(px1 - 1, y + 2, z1 + 2, 'lantern[hanging=true,waterlogged=false]')
+        # 前庭 (柵、花壇、腰掛け)
+        fz0, fz1 = z1 + 4, z1 + 9
+        for x in range(x0 - 1, x1 + 2):
+            v.set(x, y, fz1, st.fence if x not in (dx_, dx_ - 1, dx_ + 1) else 'air')
+        for z in range(fz0, fz1 + 1):
+            v.set(x0 - 1, y, z, st.fence)
+            v.set(x1 + 1, y, z, st.fence)
+        flowerbed(v, st, x0, fz0, dx_ - 3, fz1 - 1, y=y, edge=False, density=0.65)
+        flowerbed(v, st, dx_ + 3, fz0, x1, fz1 - 1, y=y, edge=False, density=0.65)
+        for x in range(dx_ - 1, dx_ + 2):
+            for z in range(z1 + 4, fz1 + 1):
+                v.set(x, y - 1, z, 'gravel' if (x + z) % 3 else st.pave_trim)
+        bench(v, st, x0 + 1, y, fz0, 'north', 2)
+        # ---- 中 (一階): 暖炉、本棚、書見台、机と椅子、敷物、樽
+        ix0, iz0, ix1, iz1 = x0 + 2, z0 + 2, x1 - 2, z1 - 2
+        for x in range(ix0, ix1 + 1):
+            for z in range(iz0, iz1 + 1):
+                v.set(x, y - 1, z, '%s_planks' % st.wood)
+        for x in range(ix0 + 2, ix1 - 1):
+            for z in range(iz0 + 2, iz1 - 1):
+                v.set(x, y, z, 'red_carpet' if (x + z) % 2 == 0 else 'brown_carpet')
+        # 暖炉 (東の壁、内の面に)
+        hx = x1 - 1
+        for z in (-78, -77, -76):
+            v.fill(hx, y, z, hx, y + 3, z, 'bricks')
+        v.set(hx, y, -77, 'campfire[facing=west,lit=true,signal_fire=false,waterlogged=false]')
+        v.set(hx, y + 1, -77, 'air')
+        v.set(hx - 1, y + 2, -78, 'brick_stairs[facing=east,half=top,shape=straight,waterlogged=false]')
+        v.set(hx - 1, y + 2, -77, 'brick_stairs[facing=east,half=top,shape=straight,waterlogged=false]')
+        v.set(hx - 1, y + 2, -76, 'brick_stairs[facing=east,half=top,shape=straight,waterlogged=false]')
+        v.set(hx - 1, y + 3, -77, 'candle[candles=3,lit=true,waterlogged=false]') if False else None
+        # 北の壁の本棚と書見台
+        v.fill(ix0, y, iz0, ix1 - 2, y + 2, iz0, 'bookshelf')
+        v.set(ix0 + 3, y, iz0 + 1, 'lectern[facing=south,has_book=false,powered=false]')
+        # 机と椅子
+        v.set(ix0 + 1, y, iz1 - 1, '%s_fence' % st.wood)
+        v.set(ix0 + 1, y + 1, iz1 - 1, '%s_pressure_plate[powered=false]' % st.wood)
+        v.set(ix0 + 2, y, iz1 - 1, '%s_stairs[facing=west,half=bottom,shape=straight,waterlogged=false]' % st.wood)
+        v.set(ix0, y, iz1 - 1, '%s_stairs[facing=east,half=bottom,shape=straight,waterlogged=false]' % st.wood)
+        v.set(ix0 + 1, y + 2, iz1 - 1, 'air')
+        v.set(ix1, y, iz1, 'barrel[facing=up,open=false]')
+        v.set(ix1 - 1, y, iz1, 'barrel[facing=up,open=false]')
+        v.set(ix1, y + 1, iz1, 'potted_fern')
+        v.set((ix0 + ix1) // 2, y + 3, (iz0 + iz1) // 2, 'lantern[hanging=true,waterlogged=false]')
+        # 二階の床と梯子、寝台・箱・本棚
+        for x in range(ix0, ix1 + 1):
+            for z in range(iz0, iz1 + 1):
+                v.set(x, y + 4, z, '%s_planks' % st.wood)
+        v.set(ix0, y + 4, iz1, 'air')
+        for yy in range(y, y + 5):
+            v.set(ix0, yy, iz1, 'ladder[facing=north,waterlogged=false]')
+        v.set(ix0 - 1 + 1, y, iz1 - 1 + 1, 'ladder[facing=north,waterlogged=false]') if False else None
+        v.set(ix1, y + 5, iz0, 'red_bed[facing=south,part=head,occupied=false]')
+        v.set(ix1, y + 5, iz0 + 1, 'red_bed[facing=south,part=foot,occupied=false]')
+        v.set(ix0, y + 5, iz0, 'chest[facing=south,type=single,waterlogged=false]')
+        v.fill(ix0 + 1, y + 5, iz0, ix0 + 3, y + 6, iz0, 'bookshelf')
+        v.set((ix0 + ix1) // 2, y + 8, (iz0 + iz1) // 2, 'lantern[hanging=true,waterlogged=false]')
+        # 煙の出る焚き火 (わら束の上)。前庭の外、家の前の道
+        sx, sz = -21, -61
+        v.set(sx, y, sz, 'hay_block[axis=y]')
+        v.set(sx, y + 1, sz, 'campfire[facing=north,lit=true,signal_fire=true,waterlogged=false]')
+        for (ddx, ddz) in ((-1, 0), (1, 0), (0, -1), (0, 1)):
+            v.set(sx + ddx, y, sz + ddz, st.base.slab('bottom'))
+        self.mark('smoke', sx, y + 1, sz)
+        self.mark('door', dx_, y, dz_)
+        self.claim(x0 - 1, z0 - 1, x1 + 2, fz1)
+
 
     # ---------------------------------------------------------------- 空見の砦
     def keep(self):
@@ -367,8 +598,8 @@ class Town:
                         v.set(cx, yy, cz, 'iron_bars')
         # 隅の塔 4 と、北東の見張り塔 (高い)
         for (cx, cz) in ((x0 + 2, z0 + 2), (x1 - 2, z0 + 2), (x0 + 2, z1 - 2), (x1 - 2, z1 - 2)):
-            tower(v, st, cx, cz, half=3, y0=y, h=17, belfry=False, spire_rise=3, pinnacles=False)
-        tower(v, st, 44, -84, half=4, y0=y, h=30, belfry=True, spire_rise=3, pinnacles=True)
+            tower(v, st, cx, cz, half=3, y0=y, h=17, belfry=False, spire_rise=3, pinnacles=False, sealed=True)
+        tower(v, st, 44, -84, half=4, y0=y, h=30, belfry=True, spire_rise=3, pinnacles=True, sealed=True)
         # 本丸 (閉じた館): x 18..37, z -80..-69、鉄の戸 (北向きの面の… 南の戸)
         hall = Body(v, st, 18, -80, 37, -69, y, floors=2, fh=6, bay=4, door_side='south', door_at=9, door='iron',
                     pots=0.0).build()

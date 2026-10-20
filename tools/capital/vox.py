@@ -207,6 +207,19 @@ class Vox:
     def mark(self, name, x, y, z):
         self.marks[name] = [x, y, z]
 
+    def seal(self, x0, z0, x1, z1, y0, filler='black_concrete', y1=None):
+        """入れない家の中を埋める: 各列で一番上の物より下の、空き (空気・未設定) を filler に。窓の奥が暗く見え、中は見えない"""
+        tops = {}
+        for (x, y, z), s in self.b.items():
+            if x0 <= x <= x1 and z0 <= z <= z1 and s != 'air' and y >= y0:
+                if tops.get((x, z), -999) < y:
+                    tops[(x, z)] = y
+        for (x, z), yt in tops.items():
+            for y in range(y0, yt if y1 is None else min(yt, y1 + 1)):
+                s = self.b.get((x, y, z))
+                if s is None or s == 'air':
+                    self.b[(x, y, z)] = filler
+
     def pick(self, weighted):
         tot = sum(w for _, w in weighted)
         r = self.rng.uniform(0, tot)
@@ -546,7 +559,7 @@ class Body:
 
     def __init__(self, v: Vox, st: Style, x0, z0, x1, z1, y0=0, floors=2, fh=5, bay=4, plinth=2,
                  door_side='south', door_at=None, door='wood', ground='window', interior=True,
-                 sides=('north', 'south', 'east', 'west'), shutters=None, pots=0.3, infill=None, ornate=True):
+                 sides=('north', 'south', 'east', 'west'), shutters=None, pots=0.3, infill=None, ornate=True, sealed=False):
         self.v, self.st = v, st
         self.x0, self.z0, self.x1, self.z1 = x0, z0, x1, z1
         self.y0, self.floors, self.fh = y0, floors, fh
@@ -558,6 +571,7 @@ class Body:
         self.pots = pots
         self.infill = infill
         self.ornate = ornate
+        self.sealed = sealed  # 入れない家: 床も家具も作らず、戸は壁に貼った跳ね上げ戸 (あとで Vox.seal で中を埋める)
         self.doors = []
 
     def fillb(self):
@@ -584,10 +598,11 @@ class Body:
                 v.set(x0 + 1, y, z, self.fillb())
                 v.set(x1 - 1, y, z, self.fillb())
         # 階の床
-        for f in range(1, self.floors):
+        for f in (range(1, self.floors) if not self.sealed else ()):
             yf = y0 + f * self.fh
             v.fill(x0 + 2, yf, z0 + 2, x1 - 2, yf, z1 - 2, '%s_planks' % st.wood)
-        v.fill(x0 + 2, top, z0 + 2, x1 - 2, top, z1 - 2, '%s_planks' % st.wood)
+        if not self.sealed:
+            v.fill(x0 + 2, top, z0 + 2, x1 - 2, top, z1 - 2, '%s_planks' % st.wood)
         for side in ('north', 'south', 'east', 'west'):
             self._outer(side, side in self.sides)
         # 隅の柱
@@ -597,7 +612,7 @@ class Body:
         # 裾と上の蛇腹
         self.ring(y0, st.base, 'bottom')
         self.ring(top, st.trim, 'top')
-        if self.interior:
+        if self.interior and not self.sealed:
             self._interior()
         return self
 
@@ -783,7 +798,14 @@ class Body:
             d = None
         else:
             d = st.wood + '_door[facing=' + OPP[out] + ',half=%s,hinge=left,open=false,powered=false]'
-        if d:
+        if self.sealed:
+            # 入れない戸: 奥は壁、手前に濃い木の跳ね上げ戸を二枚 (戸に見えるが開けても壁)
+            v.set(cx + ix, y, cz + iz, self.fillb())
+            v.set(cx + ix, y + 1, cz + iz, self.fillb())
+            tp = '%s_trapdoor[facing=%s,half=bottom,open=true,waterlogged=false,powered=false]' % (st.shutter_wood, out)
+            v.set(cx, y, cz, tp)
+            v.set(cx, y + 1, cz, tp)
+        elif d:
             v.set(cx + ix, y, cz + iz, d % 'lower')
             v.set(cx + ix, y + 1, cz + iz, d % 'upper')
         else:
@@ -1033,7 +1055,7 @@ def pinnacle(v: Vox, st: Style, x, y, z, h=3):
 
 
 def tower(v: Vox, st: Style, cx, cz, half=3, y0=0, h=20, belfry=True, spire_rise=2, spire_mat=None, pinnacles=True,
-          door_side=None, door='wood', clock=False, fh=6):
+          door_side=None, door='wood', clock=False, fh=6, sealed=False):
     """四角い塔。中心 (cx, cz)、幅 2*half+1。胴は二重壁の Body、頂に鐘の間 (四方のアーチ)、胸壁、尖り屋根、四隅の小尖塔"""
     x0, z0, x1, z1 = cx - half, cz - half, cx + half, cz + half
     floors = max(1, (h - (5 if belfry else 0)) // fh)
@@ -1041,6 +1063,9 @@ def tower(v: Vox, st: Style, cx, cz, half=3, y0=0, h=20, belfry=True, spire_rise
              door=door, interior=False, pots=0.0, shutters=False)
     b.build()
     top = b.top
+    if sealed:
+        # 入れない塔: 胴の中を埋める (鐘の間の吹き抜けは残す)
+        v.seal(x0 + 1, z0 + 1, x1 - 1, z1 - 1, y0, y1=top if belfry else None)
     if belfry:
         # 鐘の間: 柱だけ残して四方が抜けた 4 段
         yb = top + 1
@@ -1106,7 +1131,9 @@ def turret(v: Vox, st: Style, cx, cz, y0, h, half=1, rise=3):
     tmp = Body(v, st, x0, z0, x1, z1, y0, floors=1, fh=h, plinth=0, interior=False)
     tmp.top = y0 + h - 1
     tmp.ring(y0 + h - 1, st.trim, 'top')
-    return hip_spire(v, st, x0, z0, x1, z1, y0 + h, mat=st.spire, rise=rise, flare=True)
+    peak = hip_spire(v, st, x0, z0, x1, z1, y0 + h, mat=st.spire, rise=rise, flare=True)
+    v.seal(x0 + 1, z0 + 1, x1 - 1, z1 - 1, y0)  # 小塔には入れない
+    return peak
 
 
 def arcade(v: Vox, st: Style, x0, z, x1, y0=0, h=4, step=3, roof=True):
