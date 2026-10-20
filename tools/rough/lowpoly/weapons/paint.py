@@ -30,6 +30,8 @@ PAL = dict(
     PLUME=A_([(110, 122, 150), (150, 162, 188), (190, 200, 220), (226, 232, 246), (248, 250, 255)]),
     VEIN=A_([(120, 176, 240), (170, 214, 255), (220, 240, 255), (255, 255, 255)]),
     CORD=A_([(150, 140, 120), (186, 176, 152), (214, 206, 180), (234, 228, 206)]),
+    SOOT=A_([(14, 12, 14), (28, 22, 22), (46, 36, 32), (70, 54, 44), (98, 78, 62)]),
+    CRACK=A_([(30, 16, 10), (52, 28, 16), (74, 40, 22)]),
     # 余燼
     ROCK=A_([(14, 13, 16), (24, 23, 27), (36, 35, 40), (50, 48, 54), (66, 64, 70), (84, 82, 88)]),
     IRON=A_([(36, 34, 38), (58, 54, 58), (84, 78, 80), (112, 104, 102), (142, 132, 126), (174, 162, 150)]),
@@ -153,6 +155,15 @@ def paint(faces, size, P, N, M, L, titan, rarity="common", plus=0, inlay=None, e
         barb = np.abs(((X * 0.9 + Y * 0.8) % 1.0) - 0.5) < 0.12
         mid = np.abs(X) < 0.35
         put(m("acc"), pick(PL, shaded(PL, 0.80, 0.26, 0.05) - barb + mid * 1))
+        # 嵐に焼けた傷み: 焦げた羽先 (soot)、羽の縁の焦げ、銅のひび (暗い線) と、ひびの中の稲妻 (光る)
+        SO = PAL["SOOT"]
+        put(m("soot"), pick(SO, np.floor(1.4 + 1.6 * lit + 1.2 * bay + 1.2 * (n_mid - 0.5)).astype(int)))
+        sing = np.isin(mats, ["acc", "cloth"]) & (D < 0.8) & (n_mid > 0.55)
+        put(sing, pick(SO, np.floor(1.6 + 1.4 * lit + bay).astype(int)))
+        put(m("cloth"), pick(PAL["STEEL"], shaded(PAL["STEEL"], 0.34, 0.26, 0.06)) * 0.9)
+        rn = np.abs(vnoise(L * 0.26 + 9, 5) - 0.5)
+        crk = np.isin(mats, ["main", "edge", "wrap"]) & (rn < 0.017) & INS & (D > 0.4)
+        put(crk, pick(PAL["CRACK"], np.floor(0.6 + 1.4 * hash1(xx + yy * 3, 2)).astype(int)))
         dark_c = PAL["DARK"]
     else:  # ember
         RO, IR, RW, HA, AS = PAL["ROCK"], PAL["IRON"], PAL["ROCKW"], PAL["HAFT"], PAL["ASH"]
@@ -166,6 +177,13 @@ def paint(faces, size, P, N, M, L, titan, rarity="common", plus=0, inlay=None, e
         stripe = (np.floor(Y * 0.8) % 2) == 0
         put(m("wrap"), pick(AS, shaded(AS, 0.4, 0.3, 0.1) - stripe))
         put(m("acc"), pick(RW, shaded(RW, 0.5, 0.3, 0.14)))
+        # 鍛冶場の使い込み: 鎖 (鉄の輪)、鉄の帯の錆びた斑、玄武岩の上向きの面の灰、焦げた縁
+        put(m("chain"), pick(IR, shaded(IR, 0.34, 0.3, 0.1) - (pit < 0.1)))
+        put(m("soot"), pick(AS, np.floor(0.6 + 1.0 * lit + bay).astype(int)) * 0.55)
+        ashm = np.isin(mats, ["main", "guard", "acc"]) & (N[..., 1] > 0.35) & ((n_mid + 0.5 * n_lo + 0.4 * N[..., 1]) > 1.18)
+        put(ashm, pick(AS, np.floor(1.2 + 1.6 * lit + 1.2 * bay).astype(int)))
+        rust = np.isin(mats, ["spine", "edge"]) & (hash1(xx * 5 + yy * 9 + fi * 3, 4) < 0.07) & (D > 0.7)
+        put(rust, pick(RW, np.floor(3.0 + bay).astype(int)))
         dark_c = PAL["DARK"]
     put(m("cord"), pick(PAL["CORD"], shaded(PAL["CORD"], 0.6, 0.3, 0.06)))
     put(m("dark"), pick(PAL["DARK"], np.floor(1.2 + 1.2 * (0.5 + 0.5 * lit) + 0.8 * bay).astype(int)))

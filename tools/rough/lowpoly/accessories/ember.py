@@ -4,6 +4,7 @@ A = 割れ板 (黒い板が割れて光る) / B = 鉄枠 (鍛冶の鉄の枠が�
 from __future__ import annotations
 
 from common import *
+from em_kit import chain, ridge, band
 
 TITAN = "ember"
 
@@ -30,6 +31,7 @@ def charm_a(r):
     f += block("gem", (0.9, 0.2, 0.0), (1.4, 8.8, 1.2), rot=rot_z(-12))
     f += block("spine", (0, -2.5, 0), (10.6, 1.3, 2.4))
     f += link((0.5, 6.4, 0))
+    f += chain((0.0, -3.2, 0.0), (0.6, -7.0, 0.0), 3, sag=0.3)                          # 鍛冶場の鎖 (下へ垂れる)
     if r in ("rare", "legend"):
         f += block("trim", (0, 4.7, 0), (3.0, 0.8, 2.2))
     return f
@@ -87,6 +89,7 @@ def mantle_a(r):
         f += extrude("main", [(-3.0, -0.6), (3.2, 0.2), (2.6, 2.6), (-2.4, 3.0), (-3.6, 1.2)], 2.2,
                      c=(sx * 7.6, 0.6, -0.4), rot=rot_z(-sx * 14) @ rot_y(sx * 20))
         f += block("gem", (sx * 7.6, 1.4, -1.7), (3.4, 0.6, 0.5), rot=rot_z(-sx * 14))
+        f += ridge((sx * 6.0, 2.6, 0.2), (0, 1, 0), 2, 2.6, (sx * 2.4, 0.0, 0.0), 0.8)       # 肩の背びれ
     f += block("spine", (0, 0.6, -1.2), (3.2, 1.6, 1.4))
     f += block("gem", (0, 0.6, -2.0), (1.0, 1.0, 0.4))
     if r in ("rare", "legend"):
@@ -133,6 +136,8 @@ def lantern_a(r):
     f += block("gem", (0.1, -0.2, 0), (6.0, 0.9, 6.0), rot=rot_y(12))
     f += block("spine", (0.3, 4.3, 0), (6.8, 1.2, 6.8), rot=rot_y(24), taper=(0.35, 0.35))
     f += link((0.3, 6.8, 0), R=1.4, ax="z")
+    f += band((0, -4.2, 0), 3.7, 0.9, sides=4, mat="spine")                               # 太い鉄の帯 (枠)
+    f += band((0.3, 3.0, 0), 3.5, 0.8, sides=4, mat="spine")
     if r in ("rare", "legend"):
         f += block("trim", (0, -4.7, 0), (7.6, 0.7, 7.6))
     if r == "legend":

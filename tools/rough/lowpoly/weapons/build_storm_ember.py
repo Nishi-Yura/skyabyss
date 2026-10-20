@@ -11,21 +11,25 @@ from PIL import ImageDraw, ImageFont
 
 from scene import *
 from paint import paint
-import d_thunder
-import d_ember
-import d_storm_ember as se
 
 OUT = ROOT / "docs/review/lowpoly_roughs/weapons_final"
 SHEET = ROOT / "docs/review/lowpoly_roughs/weapons_final_storm_ember.png"
 
 # id: (日本語名, 巨神, 形の関数, inlay, edge_mats, 引き絵の段数, 描画: (中心 y, 倍率), 強化の見せ方)
+import item_thunder_wing_bow as m_bow
+import item_warden_glaive as m_gl
+import item_raiju_claw as m_cl
+import item_ember_war_axe as m_ax
+import item_smith_hammer as m_hm
+import item_thrall_poker as m_pk
+
 ITEMS = {
-    "thunder_wing_bow": ("雷翼の弓 (翼弓)", "thunder", d_thunder.b, d_thunder.inlay_b, (), 4, (8.0, 10.0)),
-    "warden_glaive": ("羽守の鉤槍", "thunder", se.glaive, se.inlay_glaive, (), 1, (8.0, 9.6)),
-    "raiju_claw": ("雷獣の爪", "thunder", se.claw, se.inlay_claw, (), 1, (8.0, 12.0)),
-    "ember_war_axe": ("余燼の戦斧 (割れ板の斧)", "ember", d_ember.a, d_ember.inlay_a, ("edge",), 1, (8.0, 10.0)),
-    "smith_hammer": ("鍛え手の大鎚", "ember", se.hammer, se.inlay_hammer, ("edge",), 1, (8.5, 6.8)),
-    "thrall_poker": ("灰被りの火かき棒", "ember", se.poker, se.inlay_poker, ("edge",), 1, (8.0, 10.0)),
+    "thunder_wing_bow": ("雷翼の弓 (翼弓)", "thunder", m_bow.faces, m_bow.inlay, m_bow.EDGE, 4, (8.0, 10.0)),
+    "warden_glaive": ("羽守の鉤槍", "thunder", m_gl.faces, m_gl.inlay, m_gl.EDGE, 1, (8.0, 9.6)),
+    "raiju_claw": ("雷獣の爪", "thunder", m_cl.faces, m_cl.inlay, m_cl.EDGE, 1, (8.0, 12.0)),
+    "ember_war_axe": ("余燼の戦斧", "ember", m_ax.faces, m_ax.inlay, m_ax.EDGE, 1, (8.0, 10.0)),
+    "smith_hammer": ("鍛え手の大鎚", "ember", m_hm.faces, m_hm.inlay, m_hm.EDGE, 1, (8.5, 6.8)),
+    "thrall_poker": ("灰被りの火かき棒", "ember", m_pk.faces, m_pk.inlay, m_pk.EDGE, 1, (8.0, 10.0)),
 }
 RAR = ("common", "rare", "legend")
 RAR_JP = dict(common="通常", rare="レア", legend="伝説")
