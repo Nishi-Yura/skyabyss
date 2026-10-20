@@ -20,17 +20,35 @@ def branch(base, pts, ra, twig=None, mat="acc"):
     return f
 
 
+def ribbon(pts, w, mat="cloth", th=0.2):
+    """流れる布の帯 (幅広で薄い、先が細る)。"""
+    n = len(pts)
+    ra = [w * (1 - 0.55 * i / (n - 1)) for i in range(n)]
+    return curve(mat, pts, ra, [th] * n, sides=4, caps=(False, True), hint=(1, 0, 0))
+
+
+def barn(c, n=3, d=(0, 0, -1), sp=0.6):
+    out = []
+    for i in range(n):
+        a = 2.3 * i + 0.6
+        off = V(math.cos(a) * sp, math.sin(a * 1.4) * sp, 0)
+        out += spike(BONE, "guard", V(*c) + off, V(*d), 0.8, 0.38, sides=3, rings=1, hint=(0, 1, 0))
+    return out
+
+
 # ====================================================================== 潮鳴りの護符 (護符・レア)
 def chime_a(r):
-    # 真珠層の貝扇の円盤に桃の真珠。上へ珊瑚の枝が 2 本、下に濡れた石
-    f = hexdisc("main", (0, -0.6, 0), 4.6, 1.8, sides=6, phase=0)
-    f += ell("gem", (0, -0.6, -1.0), (1.8, 1.8, 1.0), segs=6, rings=1)
-    f += block("guard", (0, -5.4, 0), (5.6, 1.6, 2.4), taper=(0.7, 0.8))
-    f += branch(None, [(-1.6, 3.2, 0), (-3.6, 6.0, 0), (-3.2, 8.2, 0)], [0.9, 0.7, 0.2], twig=(1, (-1, 0.3, 0), 2.6))
-    f += branch(None, [(1.6, 3.2, 0), (3.2, 6.6, 0), (2.4, 9.0, 0)], [0.9, 0.7, 0.2], twig=(1, (1, 0.4, 0), 2.4))
-    f += cord((0, 3.4, 0), R=1.0)
+    # 鈴: 真珠層の釣り鐘 (口は下へ開く) に桃の真珠の舌。海藻の輪から下がり、珊瑚の枝と薔薇色の房
+    f = prism("main", (0, 2.4, 0), (0, -3.4, 0), 1.4, 3.6, sides=6, caps=(True, False), phase=0, hint=(1, 0, 0))
+    f += ell("gem", (0, -3.6, -0.4), (1.0, 1.0, 1.0), segs=6, rings=1)
+    f += cord((0, 4.4, 0), R=1.2)
+    f += branch(None, [(1.2, 2.4, 0), (3.6, 4.6, 0), (3.4, 7.2, 0)], [0.9, 0.7, 0.2], twig=(1, (1, 0.5, 0), 2.4))
+    f += ribbon([(-1.6, 2.2, -1.2), (-2.8, -1.0, -1.4), (-2.0, -4.6, -1.0)], 1.0)
     if r in ("rare", "legend"):
-        f += block("trim", (0, -3.7, 0), (5.2, 0.8, 2.2))
+        f += block("trim", (0, -3.5, 0), (7.4, 0.7, 7.0), rot=rot_y(0)) if False else prism("trim", (0, -3.6, 0), (0, -3.0, 0), 3.9, 3.9, sides=6, caps=(False, False), hint=(1, 0, 0))
+        f += ribbon([(1.4, 2.2, -1.2), (2.6, -1.4, -1.4), (1.8, -5.6, -1.0)], 0.9)
+    if r == "legend":
+        f += branch(None, [(-1.2, 2.4, 0), (-3.4, 4.8, 0), (-3.0, 7.6, 0)], [0.9, 0.7, 0.2])
     return f
 
 
@@ -46,10 +64,10 @@ def pearl_a(r):
                     [0.9, 0.7, 0.2], twig=None)
     f += prism("guard", (0, -6.4, 0), (0, -4.2, 0), 2.6, 3.4, sides=6, caps=(True, True), hint=(1, 0, 0))
     f += cord((0, 5.2, 0), R=1.1)
+    f += ribbon([(-2.0, -5.6, -1.0), (-3.0, -8.4, -1.4)], 1.1)
     if r in ("rare", "legend"):
         f += block("trim", (0, -4.2, 0), (6.4, 0.8, 4.4), rot=rot_y(30))
-    if r == "legend":
-        f += torus("trim", (0, 0.8, 0), 4.7, 0.3, 0.3, n=5, k=3, ax="z")
+        f += ribbon([(2.0, -5.6, -1.0), (3.2, -8.8, -1.2)], 1.0)
     return f
 
 
@@ -61,6 +79,7 @@ def watch_a(r):
     f += prism("guard", (0, -6.8, 0), (0, -5.2, 0), 1.7, 2.1, sides=6, caps=(True, True), hint=(1, 0, 0))
     f += ell("gem", (0, -3.6, -0.9), (1.0, 1.1, 0.6), segs=6, rings=1)
     f += spike(BONE, "acc", V(1.0, -6.6, 0), (0.5, -1, 0), 3.2, 0.8, sides=4, rings=1, hint=(0, 0, 1))
+    f += barn((2.4, -4.0, -1.4), 1, (0, 0, -1), 0.5)
     if r in ("rare", "legend"):
         f += block("trim", (0, -5.3, 0), (3.4, 0.7, 2.0))
     return f

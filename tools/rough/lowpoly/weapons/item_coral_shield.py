@@ -7,6 +7,7 @@ import numpy as np
 from wkit import *  # noqa: F401,F403
 from wkit import block, prism, curve, extrude, at, V, rot_z
 from paint import spot_mask, edge_mask
+from td_kit import sash, barnacles
 
 TITAN = "tide"
 GRIP = (0.0, 8.0, 0.0)
@@ -35,6 +36,9 @@ def faces(r="common"):
     # 縁の珊瑚の鋲
     for x, y in ((4.9, 8.5), (-4.9, 8.5), (3.8, 12.4), (-3.8, 12.4), (0, 16.2)):
         f += block("acc", (x, y, -1.15), (1.1, 1.1, 0.7), taper=(0.6, 0.6))
+    # 使い込み: 縁の藤壺と、下の先から垂れる薔薇色の帯
+    f += barnacles((-4.9, 4.6, -1.2), 3, 0.5, 0.4, 0.8)
+    f += sash([(1.2, 0.4, -1.6), (1.8, -4.8, -1.8)], 1.3, th=0.2, taper=0.45)
     # 裏: 握りと腕の帯
     f += block("grip", (0, 8.0, 1.9), (5.6, 1.0, 1.0))
     f += block("dark", (0, 11.2, 1.7), (1.4, 5.0, 0.8))
@@ -50,7 +54,7 @@ def faces(r="common"):
         for dx, ln, dxx in ((0, 1.8, 0.0), (-2.4, 1.4, -0.5), (2.4, 1.4, 0.5)):
             f += spike(BONE, "acc", (dx, 16.4 - 0.6 * abs(dx) * 0.5, -0.3), (dxx, 1, 0), 1.0 + ln * 1.4, 0.8, sides=4, rings=2, hint=(0, 0, 1))
         for s in (1, -1):
-            f += spike(BONE, "acc", (s * 5.2, 11.0, 0), (s * 0.8, 0.6, 0), 2.4, 0.7, sides=4, rings=2, hint=(0, 0, 1))
+            f += spike(BONE, "acc", (s * 5.2, 11.0, 0), (s * 0.8, 0.6, 0), 2.6, 0.7, sides=4, rings=1, hint=(0, 0, 1))
     return f
 
 
