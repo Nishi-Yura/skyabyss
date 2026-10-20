@@ -1,0 +1,271 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>武器・防具の様式 選定</title>
+<style>
+:root{
+  --bg:#eceef0; --panel:#f8f9fa; --ink:#1b2129; --muted:#5b6672; --line:#c9d0d6;
+  --accent:#0a8fa6; --accent-ink:#ffffff; --ok:#2f8a4b; --shot:#14141c;
+  --body:"Zen Kaku Gothic New","Hiragino Sans","Yu Gothic",system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#101318; --panel:#171b22; --ink:#e3e8ee; --muted:#93a0ad; --line:#2a313b;
+  --accent:#5fdcef; --accent-ink:#0b1216; --ok:#6fd18c; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#101318; --panel:#171b22; --ink:#e3e8ee; --muted:#93a0ad; --line:#2a313b;
+  --accent:#5fdcef; --accent-ink:#0b1216; --ok:#6fd18c; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.7;margin:0}
+.wrap{max-width:1100px;margin:0 auto;padding-inline:16px;padding-block:28px 80px}
+h1{font-weight:700;font-size:clamp(24px,4vw,34px);margin:0 0 8px;letter-spacing:.03em;text-wrap:balance}
+h2{font-size:19px;margin:34px 0 10px}
+.intro{color:var(--muted);max-width:70ch;margin:0 0 6px}
+figure{margin:0}
+img{display:block;width:100%;height:auto;background:var(--shot);border:1px solid var(--line);image-rendering:pixelated}
+.option{background:var(--panel);border:1px solid var(--line);padding:14px;margin:16px 0}
+.option h3{margin:0 0 4px;font-size:18px}
+.option p{margin:0 0 10px;color:var(--muted)}
+.option figure + figure{margin-top:8px}
+figcaption{font-size:12px;color:var(--muted);margin-top:2px}
+.scroll{overflow-x:auto}
+.scroll img{min-width:720px}
+.opts{border:0;padding:0;margin:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.opt{display:flex;gap:10px;align-items:center;padding:12px;background:var(--panel);border:1px solid var(--line);cursor:pointer}
+.opt input{position:absolute;opacity:0;pointer-events:none}
+.letter{font-size:22px;font-weight:700;width:36px;height:36px;display:grid;place-items:center;border:1px solid var(--line);flex:none}
+.opt:has(input:checked){border-color:var(--accent)}
+.opt:has(input:checked) .letter{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.opt:has(input:focus-visible){outline:2px solid var(--accent);outline-offset:2px}
+.note{width:100%;font:inherit;color:var(--ink);background:var(--panel);border:1px solid var(--line);padding:8px 10px;resize:vertical}
+.note:focus{outline:2px solid var(--accent)}
+.note-l{font-size:13px;color:var(--muted);display:block;margin:14px 0 4px}
+.save{color:var(--muted);font-size:13px;margin-top:6px}
+@media (max-width:760px){ .opts{grid-template-columns:minmax(0,1fr)} }
+</style>
+<style>
+.sec{border-top:2px solid var(--line);margin-top:40px;padding-top:6px}
+.sec h2{font-size:22px;margin:18px 0 6px}
+.pill{margin:0 0 10px;padding-left:1.2em;color:var(--ink)}
+.pill li{margin:2px 0}
+.two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.kv{font-size:14px;margin:6px 0}
+.kv b{display:inline-block;min-width:5.5em;color:var(--accent)}
+.good{border-left:4px solid var(--ok);padding:2px 10px;margin:6px 0;font-size:14px}
+.bad{border-left:4px solid #c2542d;padding:2px 10px;margin:6px 0;font-size:14px}
+.anim img{min-width:1100px}
+.anim.scroll{overflow-x:auto}
+.rows{display:grid;gap:6px}
+.row{display:flex;flex-wrap:wrap;gap:8px 18px;align-items:center;padding:8px 12px;background:var(--panel);border:1px solid var(--line)}
+.row .lab{min-width:6em;font-weight:700}
+.row label{display:inline-flex;gap:6px;align-items:center;cursor:pointer}
+table.t{border-collapse:collapse;width:100%;font-size:13px}
+table.t th,table.t td{border:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top}
+table.t th{background:var(--panel)}
+.tiny{font-size:12px;color:var(--muted)}
+@media (max-width:760px){ .two{grid-template-columns:minmax(0,1fr)} }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>武器・防具の様式 選定（3 方向）</h1>
+  <p class="intro">ユーザーの要望「防具・武器のモデルを見直して、もっとかっこよくしたい。ダサいものは少し変えたり作り直したり。アニメーションもかっこよく。名前は変えなくていい」への最初の提案です。ほかのゲームの調べ（<code>docs/research/gear_art_research.md</code>）と今の装備の診断（<code>docs/review/gear_audit.md</code>）から、方向を 3 つ作りました。</p>
+  <p class="intro"><b>同じ条件で比べます</b>。題材は岩鯨の一式（大剣・弓・槍・杖・短剣と、兜・胸・脚・靴）。どれも低ポリ + 1 ブロック 32 テクセル、階級は表示がレアの形（階級の並びは別に出します）。形・絵・光る画素はこのページ用のラフで、ゲームの設定ではありません。選ぶと、その方向で全装備を順に作り直します。名前・数値は変えません。</p>
+  <div class="intro tiny">見方: 各方向の絵は ① 並べた姿 ② 武器 5 点の回転（正面・3/4・横・斜め後ろ）③ 防具の回転（正面・3/4・横・背中）と部位の近接 ④ 手に持った姿（三人称の模式）⑤ 階級の並び（大剣のコモン → レア → レジェンド）⑥ 黒塗り（遠目）。最後に、武器 5 種 x 3 方向の一人称の攻撃の動き（絵コンテ）があります。</div>
+
+  <section class="sec">
+    <h2>3 方向の黒塗り比べ（遠目で読めるか）</h2>
+    <p class="intro">黒く塗って、大きいサイズと小さいサイズ（遠目）で並べます。武器 5 点と防具の正面。上から A・B・C。</p>
+    <figure class="scroll"><img src="img/sil_A.png" alt="A の黒塗り" loading="lazy"><figcaption>A 量塊</figcaption></figure>
+    <figure class="scroll"><img src="img/sil_B.png" alt="B の黒塗り" loading="lazy"><figcaption>B 祭具（細い線が多く、小さくすると環が潰れる所がある）</figcaption></figure>
+    <figure class="scroll"><img src="img/sil_C.png" alt="C の黒塗り" loading="lazy"><figcaption>C 遺骸（非対称で個性があるが、小さくすると A より混み合う）</figcaption></figure>
+  </section>
+  <section class="sec">
+    <h2>A 量塊 (Carved Mass)　<span class="tiny">骨と石の大きな塊。太く、止まって見える</span></h2>
+    <div class="option">
+      <p class="kv"><b>参考</b>モンスターハンター（大剣・素材の塊）、ダークソウル（単純で太い輪郭）</p>
+      <ul class="pill"><li>輪郭は太く大きな 1 つ。細い棒・環・布は使わない</li><li>材質は骨と石の 2 つが主役。苔は上向きの面だけ</li><li>光は 1 か所（宝石・視き穴・樋の付け根）だけ</li><li>防具は面の大きな板。肩は二段の石板、兜は視き穴 1 本</li></ul>
+      <p class="kv"><b>武器</b>大剣 = 断ち切りの厚い板（背は直線、先は斜め）／弓 = 太く短い骨弓に石の握り／槍 = 広い葉の穂と下がり羽根／杖 = 骨の環に抱かれた核／短剣 = 肉厚の鉈</p>
+      <p class="kv"><b>防具</b>全面の兜（背びれの冠）、骨の胸板と石の殻、二段の石板の肩（右だけ大きな牙）、太い腿当てと膝の骨、重い鉄靴</p>
+      <p class="kv"><b>面の数</b>武器 大剣 212 / 弓 156 / 槍 170 / 杖 280 / 短剣 176 ／ 防具 4 部位 680（03 の予算: 通常 250・レア 300・レジェンド 350・防具 4 部位 3,000 以下）</p>
+      <div class="good">良い点: 遠目で最も読める（黒塗りで 5 武器と防具がはっきり別）。作りやすく、面の予算に収まる（武器 156〜280 面・防具 680 面）。階級の差も大きな骨の板で出せる</div>
+      <div class="bad">気になる点: 「重い戦士」一本調子になりやすい。潮殻・雷翼・余燼の軽い巨神には重い。物語（使い込み）は少ない</div>
+      <p class="kv"><b>動きの性格</b>動き: 溜めが長く、命中で止まる（ヒットストップ 2〜3 tick）。画面が揺れる。重さが主役</p>
+      <figure class="scroll"><img src="img/hero_A.png" alt="A の一式と武器 5 点" loading="lazy"><figcaption>一式を着た姿（大剣を持つ）と、武器 5 点</figcaption></figure>
+      <figure class="scroll"><img src="img/sheet_weapons_A.png" alt="A の武器 5 点の回転" loading="lazy"><figcaption>武器 5 点（左から 大剣・弓・槍・杖・短剣）。上から 正面・3/4・横・斜め後ろ</figcaption></figure>
+      <figure class="scroll"><img src="img/sheet_armor_A.png" alt="A の防具" loading="lazy"><figcaption>防具 4 部位（上: 正面・3/4・横・背中。下: 兜・胸（肩・背）・脚・靴の近接）</figcaption></figure>
+      <figure class="scroll"><img src="img/sheet_inhand_A.png" alt="A の手に持つ姿" loading="lazy"><figcaption>一式を着て武器を持つ姿（三人称の模式。持ち方は目安で、ゲームの display の値ではありません）</figcaption></figure>
+      <figure class="scroll"><img src="img/sheet_tier_A.png" alt="A の階級の並び" loading="lazy"><figcaption>階級の並び（大剣。左から コモン・レア・レジェンド、各 正面と 3/4）。輪郭が先に変わる</figcaption></figure>
+    </div>
+  </section>
+  <section class="sec">
+    <h2>B 祭具 (Ritual Grace)　<span class="tiny">細く長く、金の縁と垂れる布。動きが見える</span></h2>
+    <div class="option">
+      <p class="kv"><b>参考</b>原神（槍・弓・剣の長い輪郭、環と房）、ゼルダ ティアーズ オブ ザ キングダム（材質の言葉がそろった形）</p>
+      <ul class="pill"><li>輪郭は細く長い。鍔は鯨の尾びれ、頭に環、柄頭に房</li><li>材質は象牙の骨・淡い石・紺の布・金の縁</li><li>光は核と、刃の中心の細い筋</li><li>防具は布が輪郭を作る。頭巾と背に浮く環、長い外套、前垂れ</li></ul>
+      <p class="kv"><b>武器</b>大剣 = 細い長刃と尾びれの鍔・日輪の環・吹き流し／弓 = 先が尾びれに反る長弓／槍 = 柳葉の穂と背の半月の環／杖 = 尾びれが抱く真珠／短剣 = 波刃と環の柄頭</p>
+      <p class="kv"><b>防具</b>頭巾と背の環の兜、金の帯の胴衣、小さな淡い石の肩当てと浮く環、背の長い外套、白い前垂れ、足首に小さな尾びれ</p>
+      <p class="kv"><b>面の数</b>武器 大剣 390 / 弓 276 / 槍 334 / 杖 396 / 短剣 294 ／ 防具 4 部位 1,048（03 の予算: 通常 250・レア 300・レジェンド 350・防具 4 部位 3,000 以下）</p>
+      <div class="good">良い点: 優美で「特別な品」に見える。止まっていても布と環で動きが見える。レジェンドで環を増やすと階級が輪郭で分かる。軽い巨神（潮殻・雷翼）に向く</div>
+      <div class="bad">気になる点: 面が増える（レジェンドの大剣 632 面、防具 1,048 面）ので予算に収める作業が要る。細い線が多く、32px で潰れやすい。重さが出にくい</div>
+      <p class="kv"><b>動きの性格</b>動き: 流れる弧、袈裟 → 返しの二連、回して突く。布と環がたなびく。ヒットストップは短く、残像が長い</p>
+      <figure class="scroll"><img src="img/hero_B.png" alt="B の一式と武器 5 点" loading="lazy"><figcaption>一式を着た姿（大剣を持つ）と、武器 5 点</figcaption></figure>
+      <figure class="scroll"><img src="img/sheet_weapons_B.png" alt="B の武器 5 点の回転" loading="lazy"><figcaption>武器 5 点（左から 大剣・弓・槍・杖・短剣）。上から 正面・3/4・横・斜め後ろ</figcaption></figure>
+      <figure class="scroll"><img src="img/sheet_armor_B.png" alt="B の防具" loading="lazy"><figcaption>防具 4 部位（上: 正面・3/4・横・背中。下: 兜・胸（肩・背）・脚・靴の近接）</figcaption></figure>
+      <figure class="scroll"><img src="img/sheet_inhand_B.png" alt="B の手に持つ姿" loading="lazy"><figcaption>一式を着て武器を持つ姿（三人称の模式。持ち方は目安で、ゲームの display の値ではありません）</figcaption></figure>
+      <figure class="scroll"><img src="img/sheet_tier_B.png" alt="B の階級の並び" loading="lazy"><figcaption>階級の並び（大剣。左から コモン・レア・レジェンド、各 正面と 3/4）。輪郭が先に変わる</figcaption></figure>
+    </div>
+  </section>
+  <section class="sec">
+    <h2>C 遺骸 (Grown Remains)　<span class="tiny">骨そのものを使う。非対称で、使い込まれている</span></h2>
+    <div class="option">
+      <p class="kv"><b>参考</b>エルデンリング・ブラッドボーン（素材そのものの武器、朽ちた装備）、モンスターハンター（怪物の部位を使う）</p>
+      <ul class="pill"><li>輪郭は左右非対称で、欠け・ぎざぎざを 1 点持つ</li><li>骨そのものが武器（顎骨の刃・肋の弓・牙の穂・椎骨の杖頭）</li><li>縄・包帯・護符・ぼろ布・苔で来歴を語る</li><li>光はひびの奥と核だけ（水色）</li></ul>
+      <p class="kv"><b>武器</b>大剣 = 顎骨の欠けた刃（歯のぎざぎざ、折れた先の核）／弓 = 長さの違う肋の弓／槍 = ねじれた牙の穂と返し／杖 = 曲がった骨の杖に椎骨の頭／短剣 = 返しのある反った牙</p>
+      <p class="kv"><b>防具</b>頭骨と顎骨の兜（右に長い角、左は折れ）、肋の外骨格と背の椎骨、左だけ大きな椎骨の肩、包帯の脚と骨の膝、爪先の骨爪</p>
+      <p class="kv"><b>面の数</b>武器 大剣 302 / 弓 268 / 槍 306 / 杖 272 / 短剣 200 ／ 防具 4 部位 1,176（03 の予算: 通常 250・レア 300・レジェンド 350・防具 4 部位 3,000 以下）</p>
+      <div class="good">良い点: 物語がある。巨神の素材らしさが最も出る。非対称で「手で作った品」に見える。レジェンドは肋の反りと鉤が増える</div>
+      <div class="bad">気になる点: 輪郭が複雑で、遠目では A より読みにくい。ぼろ布・護符は面が増える（防具 1,176 面）。やりすぎると散らかる</div>
+      <p class="kv"><b>動きの性格</b>動き: 引きずって薙ぎ上げ、叩きつけて反動でよろける。逆手で刺して裂く。乱暴で重心が崩れる</p>
+      <figure class="scroll"><img src="img/hero_C.png" alt="C の一式と武器 5 点" loading="lazy"><figcaption>一式を着た姿（大剣を持つ）と、武器 5 点</figcaption></figure>
+      <figure class="scroll"><img src="img/sheet_weapons_C.png" alt="C の武器 5 点の回転" loading="lazy"><figcaption>武器 5 点（左から 大剣・弓・槍・杖・短剣）。上から 正面・3/4・横・斜め後ろ</figcaption></figure>
+      <figure class="scroll"><img src="img/sheet_armor_C.png" alt="C の防具" loading="lazy"><figcaption>防具 4 部位（上: 正面・3/4・横・背中。下: 兜・胸（肩・背）・脚・靴の近接）</figcaption></figure>
+      <figure class="scroll"><img src="img/sheet_inhand_C.png" alt="C の手に持つ姿" loading="lazy"><figcaption>一式を着て武器を持つ姿（三人称の模式。持ち方は目安で、ゲームの display の値ではありません）</figcaption></figure>
+      <figure class="scroll"><img src="img/sheet_tier_C.png" alt="C の階級の並び" loading="lazy"><figcaption>階級の並び（大剣。左から コモン・レア・レジェンド、各 正面と 3/4）。輪郭が先に変わる</figcaption></figure>
+    </div>
+  </section>
+  <section class="sec">
+    <h2>どの方向にしますか（様式の選択）</h2>
+    <p class="intro">全体をまとめて 1 つ選ぶか、武器と防具を別々に選べます（例: 武器は C、防具は A）。「混ぜる」を選んだら、メモに「A の面 + C の使い込み」のように書いてください。</p>
+    <div class="rows" id="styleRows">
+      <div class="row" data-field="overall"><span class="lab">全体</span>
+        <label><input type="radio" name="overall" value="A"> A 量塊</label><label><input type="radio" name="overall" value="B"> B 祭具</label>
+        <label><input type="radio" name="overall" value="C"> C 遺骸</label><label><input type="radio" name="overall" value="mix"> 混ぜる（メモに書く）</label></div>
+      <div class="row" data-field="weapons"><span class="lab">武器だけ</span>
+        <label><input type="radio" name="weapons" value="A"> A</label><label><input type="radio" name="weapons" value="B"> B</label><label><input type="radio" name="weapons" value="C"> C</label></div>
+      <div class="row" data-field="armor"><span class="lab">防具だけ</span>
+        <label><input type="radio" name="armor" value="A"> A</label><label><input type="radio" name="armor" value="B"> B</label><label><input type="radio" name="armor" value="C"> C</label></div>
+    </div>
+    <label class="note-l" for="note_style">直してほしい点・混ぜ方・やりすぎ／足りない所（任意）</label>
+    <textarea class="note" id="note_style" rows="4"></textarea>
+    <div class="save" id="save_style">読み込み中…</div>
+    <div class="intro tiny" style="margin-top:10px">私（作った側）の見立て: 武器は A の太い輪郭の上に C の使い込み（巻き・護符・欠け）を足し、B の布と環は<b>レジェンドだけ</b>に使う。防具は A の面の大きさを土台に、B の布（外套・前垂れ）を足して重さと動きの両方を出す。巨神ごとに重さを変える（岩鯨・余燼 = A 寄り、潮殻・雷翼 = B 寄り、深淵の専用伝説 = C 寄り）案も成り立つ。決め手は「遠目で読めること」と「面の予算」。</div>
+  </section>
+  <section class="sec">
+    <h2>攻撃の動き（武器 5 種 x 3 方向。一人称の絵コンテ）</h2>
+    <p class="intro">8 コマで、上段が一人称（透視。腕は箱の模式）、下段が横からの全身（刃先の軌跡 = 残像つき）。コマの下に、動きの名前と tick（1 tick = 1/20 秒 = 50 ms）。ヒットストップ・画面の揺れ・残像・溜めの長さが方向ごとに違います。これはキー姿勢の絵で、ゲームの動き（<code>SwingMove</code>）に落とすときは、コマの間を補間します。弓は引きの 4 段階の絵を使います。</p>
+    <p class="intro tiny">見る所: ① 溜めの長さ（重さ）② 一閃の速さ ③ 命中の止まり（ヒットストップ）④ 残身（流れ）⑤ 武器種ごとの型の違い。一人称の絵は腕が太く見えます（模式）。</p>
+    <h3 style="margin:26px 0 4px;font-size:19px">大剣　<span class="tiny">型: 溜めて断つ</span></h3>
+    <div class="option"><div class="rows">      <div><div class="tiny"><b>A 量塊</b>（断ち下ろし）: 断ち下ろし。頂点で一拍止め、一閃、命中で 3 tick 止まって画面が揺れ、刃が沈む。重さの見せ方が主役</div>
+      <figure class="scroll anim"><img src="img/anim_A_greatsword.png" alt="大剣 A の絵コンテ" loading="lazy"></figure></div>
+      <div><div class="tiny"><b>B 祭具</b>（袈裟斬りから返し）: 袈裟斬り → 切り抜け → 返しの逆袈裟。体をひねり、刃が弧を描いて残像が長い</div>
+      <figure class="scroll anim"><img src="img/anim_B_greatsword.png" alt="大剣 B の絵コンテ" loading="lazy"></figure></div>
+      <div><div class="tiny"><b>C 遺骸</b>（引きずり薙ぎ上げ）: 低く引きずって沈み、薙ぎ上げ → 頭上を越えて叩きつけ。反動でよろける</div>
+      <figure class="scroll anim"><img src="img/anim_C_greatsword.png" alt="大剣 C の絵コンテ" loading="lazy"></figure></div>
+</div>
+      <div class="row" data-field="greatsword"><span class="lab">大剣の動き</span>
+        <label><input type="radio" name="greatsword" value="A"> A</label><label><input type="radio" name="greatsword" value="B"> B</label><label><input type="radio" name="greatsword" value="C"> C</label><label><input type="radio" name="greatsword" value="mix"> 混ぜる</label></div>
+    </div>
+    <h3 style="margin:26px 0 4px;font-size:19px">槍　<span class="tiny">型: 引いて突く</span></h3>
+    <div class="option"><div class="rows">      <div><div class="tiny"><b>A 量塊</b>（大きく引いて一突き）: 大きく引いて一拍止め、一突き。命中で 2 tick 止まり、引き戻す</div>
+      <figure class="scroll anim"><img src="img/anim_A_spear.png" alt="槍 A の絵コンテ" loading="lazy"></figure></div>
+      <div><div class="tiny"><b>B 祭具</b>（回してから二連の突き）: 頭上で回してから突き、返しながら引いて、小さく速い二の突き。吹き流しがなびく</div>
+      <figure class="scroll anim"><img src="img/anim_B_spear.png" alt="槍 B の絵コンテ" loading="lazy"></figure></div>
+      <div><div class="tiny"><b>C 遺骸</b>（すくい上げて引っかける）: 低く沈んですくい上げ、返しの牙を引っかけて引き倒す。肩が痙攣する</div>
+      <figure class="scroll anim"><img src="img/anim_C_spear.png" alt="槍 C の絵コンテ" loading="lazy"></figure></div>
+</div>
+      <div class="row" data-field="spear"><span class="lab">槍の動き</span>
+        <label><input type="radio" name="spear" value="A"> A</label><label><input type="radio" name="spear" value="B"> B</label><label><input type="radio" name="spear" value="C"> C</label><label><input type="radio" name="spear" value="mix"> 混ぜる</label></div>
+    </div>
+    <h3 style="margin:26px 0 4px;font-size:19px">弓　<span class="tiny">型: 引き・狙い・放ち</span></h3>
+    <div class="option"><div class="rows">      <div><div class="tiny"><b>A 量塊</b>（重く引いて、ためて放つ）: 重く構えて引く。満月で腕がわずかに震え、放つと反動で弓が跳ね、弦が震える</div>
+      <figure class="scroll anim"><img src="img/anim_A_bow.png" alt="弓 A の絵コンテ" loading="lazy"></figure></div>
+      <div><div class="tiny"><b>B 祭具</b>（流れるように引き、放って弓を返す）: 腕を弧に開いて流れるように引き、放ったあと弓をくるりと返す</div>
+      <figure class="scroll anim"><img src="img/anim_B_bow.png" alt="弓 B の絵コンテ" loading="lazy"></figure></div>
+      <div><div class="tiny"><b>C 遺骸</b>（肩をねじって乱暴に引き、放って弾かれる）: 肩をねじって乱暴に引き、放つと体ごと弾かれてよろめく</div>
+      <figure class="scroll anim"><img src="img/anim_C_bow.png" alt="弓 C の絵コンテ" loading="lazy"></figure></div>
+</div>
+      <div class="row" data-field="bow"><span class="lab">弓の動き</span>
+        <label><input type="radio" name="bow" value="A"> A</label><label><input type="radio" name="bow" value="B"> B</label><label><input type="radio" name="bow" value="C"> C</label><label><input type="radio" name="bow" value="mix"> 混ぜる</label></div>
+    </div>
+    <h3 style="margin:26px 0 4px;font-size:19px">杖　<span class="tiny">型: 溜めて放つ</span></h3>
+    <div class="option"><div class="rows">      <div><div class="tiny"><b>A 量塊</b>（地を突いて核を叩き起こす）: 持ち上げて頂点で核が脈打ち、振り下ろして地を突く。衝撃で画面が揺れ、余波で止まる</div>
+      <figure class="scroll anim"><img src="img/anim_A_staff.png" alt="杖 A の絵コンテ" loading="lazy"></figure></div>
+      <div><div class="tiny"><b>B 祭具</b>（円を描いて環を放つ）: 腕を開いて円を描き、前へ放つと環が広がって浮く。柄を返して戻る</div>
+      <figure class="scroll anim"><img src="img/anim_B_staff.png" alt="杖 B の絵コンテ" loading="lazy"></figure></div>
+      <div><div class="tiny"><b>C 遺骸</b>（身を縮めて突き出す）: 身を縮めて眼（核）が脈動し、突き出して痙攣、引きずって戻す</div>
+      <figure class="scroll anim"><img src="img/anim_C_staff.png" alt="杖 C の絵コンテ" loading="lazy"></figure></div>
+</div>
+      <div class="row" data-field="staff"><span class="lab">杖の動き</span>
+        <label><input type="radio" name="staff" value="A"> A</label><label><input type="radio" name="staff" value="B"> B</label><label><input type="radio" name="staff" value="C"> C</label><label><input type="radio" name="staff" value="mix"> 混ぜる</label></div>
+    </div>
+    <h3 style="margin:26px 0 4px;font-size:19px">短剣　<span class="tiny">型: 速い連続</span></h3>
+    <div class="option"><div class="rows">      <div><div class="tiny"><b>A 量塊</b>（重い一突きと横一文字）: 引いて重い一突き、命中で 2 tick 止まり、引き抜いて横一文字</div>
+      <figure class="scroll anim"><img src="img/anim_A_dagger.png" alt="短剣 A の絵コンテ" loading="lazy"></figure></div>
+      <div><div class="tiny"><b>B 祭具</b>（X を描く連斬り）: 右上から斜め斬り、左下から切り返して X を描き、突きで止めてくるりと回す</div>
+      <figure class="scroll anim"><img src="img/anim_B_dagger.png" alt="短剣 B の絵コンテ" loading="lazy"></figure></div>
+      <div><div class="tiny"><b>C 遺骸</b>（逆手で刺して引き裂く）: 逆手で振り上げて刺し、引き裂き、ねじり、もう一度裂いて振り払う</div>
+      <figure class="scroll anim"><img src="img/anim_C_dagger.png" alt="短剣 C の絵コンテ" loading="lazy"></figure></div>
+</div>
+      <div class="row" data-field="dagger"><span class="lab">短剣の動き</span>
+        <label><input type="radio" name="dagger" value="A"> A</label><label><input type="radio" name="dagger" value="B"> B</label><label><input type="radio" name="dagger" value="C"> C</label><label><input type="radio" name="dagger" value="mix"> 混ぜる</label></div>
+    </div>
+    <label class="note-l" for="note_anim">動きについて（溜め・止まり・残像・速さ・画面の揺れの強さなど。任意）</label>
+    <textarea class="note" id="note_anim" rows="4"></textarea>
+    <div class="save" id="save_anim">読み込み中…</div>
+  </section>
+
+  <section class="sec">
+    <h2>参考</h2>
+    <p class="intro">調べ: <code>docs/research/gear_art_research.md</code>（かっこよさの作り方・10 か条・動きの原則）／診断: <code>docs/review/gear_audit.md</code>（今の全装備の keep / tweak / rebuild）／作り方: <code>tools/rough/lowpoly/gear_style/</code>（<code>make_sheets.py</code> 絵、<code>make_anim.py</code> 動き、<code>page.py</code> このページ）。</p>
+    <table class="t"><tr><th>武器種</th><th>型</th><th>全体 (tick)</th><th>溜め</th><th>命中の止まり</th></tr>
+      <tr><td>大剣</td><td>溜めて断つ</td><td>28〜36</td><td>12〜13</td><td>A 3 / B なし / C 画面の揺れ</td></tr>
+      <tr><td>槍</td><td>引いて突く</td><td>26〜32</td><td>7〜12</td><td>A 2 / B 二連 / C 引き倒し</td></tr>
+      <tr><td>弓</td><td>引き・狙い・放ち</td><td>26〜34</td><td>引き 12〜18</td><td>反動 + 弦の震え（A 重い・B 返す・C 弾かれる）</td></tr>
+      <tr><td>杖</td><td>溜めて放つ</td><td>28〜32</td><td>12〜14</td><td>A 地を突く / B 環が浮く / C 痙攣</td></tr>
+      <tr><td>短剣</td><td>速い連続</td><td>20〜24</td><td>3〜4</td><td>A 2 / B 連斬り / C 逆手の裂き</td></tr></table>
+  </section>
+</div>
+<script>
+(() => {
+  const dbp = (async () => { const c = window.claude && window.claude.use ? window.claude : null; return c ? await c.use('db') : null; })();
+  function wire(docId, fields, noteId, saveId) {
+    const noteEl = document.getElementById(noteId), saveEl = document.getElementById(saveId);
+    let db = null, timer = null;
+    const state = () => {
+      const o = { at: Date.now(), note: noteEl.value };
+      for (const f of fields) { const r = document.querySelector('input[name=' + f + ']:checked'); o[f] = r ? r.value : ''; }
+      return o;
+    };
+    const save = async () => {
+      if (!db) return;
+      saveEl.textContent = '保存中…';
+      try { await db.doc('choices/' + docId).set(state()); saveEl.textContent = '保存しました'; }
+      catch (e) { saveEl.textContent = '保存できませんでした。もう一度選び直してください'; }
+    };
+    for (const f of fields) document.querySelectorAll('input[name=' + f + ']').forEach(r => r.addEventListener('change', save));
+    noteEl.addEventListener('input', () => { clearTimeout(timer); timer = setTimeout(save, 800); });
+    (async () => {
+      db = await dbp;
+      if (!db) { saveEl.textContent = 'この表示では選択を保存できません (サインインして開いてください)'; return; }
+      try {
+        const snap = await db.collection('choices').get();
+        const docs = snap.docs || snap;
+        for (const d of docs) {
+          if (d.id !== docId) continue;
+          const data = typeof d.data === 'function' ? d.data() : d.data;
+          if (!data) continue;
+          for (const f of fields) if (data[f]) { const r = document.querySelector('input[name=' + f + '][value="' + data[f] + '"]'); if (r) r.checked = true; }
+          if (data.note) noteEl.value = data.note;
+        }
+        saveEl.textContent = '選ぶと自動で保存されます';
+      } catch (e) { saveEl.textContent = '前回の選択を読み込めませんでした'; }
+    })();
+  }
+  wire('gear_style', ['overall', 'weapons', 'armor'], 'note_style', 'save_style');
+  wire('gear_anim', ["greatsword", "spear", "bow", "staff", "dagger"], 'note_anim', 'save_anim');
+})();
+</script>
+</body>
+</html>
