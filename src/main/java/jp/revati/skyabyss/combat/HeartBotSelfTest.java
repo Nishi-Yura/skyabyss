@@ -715,6 +715,12 @@ public final class HeartBotSelfTest {
                 f.add(name + ": no domain for the rule checks");
                 return;
             }
+            // 見える仕掛け: 三つの仕掛けそれぞれに本体・玉・光の線 (Display) が立ち、手順の案内が出ている
+            check(f, HeartDomain.propCount(d, level) == 3 * HeartDomain.NODES, name + ": the gimmick objects are not visible entities (" + HeartDomain.propCount(d, level) + " of " + 3 * HeartDomain.NODES + ")");
+            for (int t = 0; t < 12; t++) {
+                step(rig, bot, driver, level, t);
+            }
+            check(f, !d.lastStandingSig().isEmpty(), name + ": no on-screen instruction was sent");
             if (d instanceof jp.revati.skyabyss.titan.domain.StoneSeaDomain s) {
                 for (int t = 0; t < 10; t++) {
                     step(rig, bot, driver, level, t);
@@ -723,6 +729,7 @@ public final class HeartBotSelfTest {
                 int wrong = order[0] == 0 ? 1 : 0;
                 s.strikeNode(level, wrong, bot);
                 check(f, s.solvedCount() == 0, name + ": a wrong first bone counted");
+                check(f, HeartDomain.lastTell().endsWith(".wrong"), name + ": a wrong bone gave no fail feedback");
                 s.strikeNode(level, order[0], bot);
                 check(f, s.solvedCount() == 1 && s.expected() == order[1], name + ": the right first bone did not count");
                 s.strikeNode(level, order[2], bot);

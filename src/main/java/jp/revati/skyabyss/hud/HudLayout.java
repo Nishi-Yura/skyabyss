@@ -78,6 +78,8 @@ public final class HudLayout {
         V_TOASTS, V_CHAT,
         // ---- 中央 (固定)
         AIM_RING,
+        // ---- 領域の手順の板 (右上の一番上に固定。ボスの技の名前に押されない。上中央の札が避ける『帯』には数えない)
+        BOSS_DOMAIN,
         // ---- ホットバーの左右 (外側へ)
         QUICK_CARD, GROWTH_BAR, SKILL_SLOTS,
         // ---- 左上の帯 (上から下へ)
@@ -87,7 +89,7 @@ public final class HudLayout {
         // ---- 下中央 (下から上へ)
         DOWNED_SELF, HINTS,
         // ---- 上中央 (ボスバーの下へ)
-        BOSS_CUE, BOSS_DOMAIN, BANNER, LEVEL_UP, CENTER_LINE,
+        BOSS_CUE, BANNER, LEVEL_UP, CENTER_LINE,
         // ---- 字幕 (上中央と手がかりのあいだ)
         CAPTION;
 

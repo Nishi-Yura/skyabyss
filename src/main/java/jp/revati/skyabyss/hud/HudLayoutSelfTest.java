@@ -115,7 +115,8 @@ public final class HudLayoutSelfTest {
         q.add(Request.of(Id.CHAPTER, Region.TOP_LEFT, 156, 8));
         q.add(Request.of(Id.OBJECTIVE, Region.TOP_LEFT, 236, 14));
         q.add(Request.of(Id.QUEST, Region.TOP_LEFT, 156, 62));
-        // 右上
+        // 右上 (領域の手順の板は一番上。高さ固定)
+        q.add(Request.of(Id.BOSS_DOMAIN, Region.TOP_RIGHT, clipped(196, 52)));
         q.add(Request.of(Id.VOW, Region.TOP_RIGHT, clipped(250, 22)));
         q.add(Request.of(Id.BACK_GAUGE, Region.TOP_RIGHT, clipped(150, 62)));
         q.add(Request.of(Id.PARTY_LIST, Region.TOP_RIGHT, 88, 3 * 19 + 10).minTop(h / 3));
@@ -124,7 +125,6 @@ public final class HudLayoutSelfTest {
         q.add(Request.of(Id.HINTS, Region.BOTTOM_CENTER, wrapped(300, 3, 13, 0, 3)));
         // 上中央
         q.add(Request.of(Id.BOSS_CUE, Region.TOP_CENTER, wrapped(220, 3, 11, 4, 3)));
-        q.add(Request.of(Id.BOSS_DOMAIN, Region.TOP_CENTER, clipped(180, 32)));
         q.add(Request.of(Id.BANNER, Region.TOP_CENTER, wrapped(Math.max(120, w / 2), 4, 14, 8, 4)).minTop((int) (h * 0.16f)));
         q.add(Request.of(Id.LEVEL_UP, Region.TOP_CENTER, 120, 32).minTop((int) (h * 0.27f)));
         q.add(Request.of(Id.CENTER_LINE, Region.TOP_CENTER, wrapped(Math.max(180, w / 2), 2, 11, 10, 2)).minTop((int) (h * 0.36f)));
@@ -200,7 +200,7 @@ public final class HudLayoutSelfTest {
                     List<Id> drop = new ArrayList<>(r.dropped);
                     drop.remove(Id.CENTER_LINE);
                     if (!drop.isEmpty()) {
-                        f.add(String.format("%dx%d@%d gui %dx%d: dropped %s on a wide screen", win[0], win[1], scale, gw, gh, drop));
+                        f.add(String.format("%dx%d@%d gui %dx%d: dropped %s on a wide screen (placed %s, boss bottom %d)", win[0], win[1], scale, gw, gh, drop, r.placed, s.bossBottom()));
                     }
                 }
             }

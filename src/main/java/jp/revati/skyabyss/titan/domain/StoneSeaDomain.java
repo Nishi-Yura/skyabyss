@@ -17,6 +17,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 
 // 岩鯨の心臓の領域「石の海」(docs/design/02 の 5.9)。床が石の海になり、心臓から波が打ち寄せる。
@@ -156,6 +157,27 @@ public final class StoneSeaDomain extends HeartDomain {
     private int step;
     private int nextShow;
     private int showStart = -1;
+    // いま手本のどこまで見せたか (1〜3。見せていないとき 0)
+    private int shown;
+
+    @Override
+    protected Hint standing() {
+        if (step >= NODES) {
+            return null;
+        }
+        return showStart >= 0 ? new Hint("gui.skyabyss.domain.stone_sea.watch", Math.max(1, shown), NODES)
+                : new Hint("gui.skyabyss.domain.stone_sea.tap", step + 1, NODES);
+    }
+
+    @Override
+    protected Block bodyBlock() {
+        return Blocks.BONE_BLOCK;
+    }
+
+    @Override
+    protected Block capBlock(boolean lit) {
+        return lit ? Blocks.GLOWSTONE : Blocks.CHISELED_STONE_BRICKS;
+    }
 
     // 試験用: 鳴る順と、次に叩く骨 (終われば -1)
     public int[] order() {
@@ -177,7 +199,15 @@ public final class StoneSeaDomain extends HeartDomain {
     }
 
     private void note(ServerLevel level, Node n, boolean show) {
+        n.flash = show ? 16 : 12;
+        n.flashRgb = show ? 0xFFD23C : 0x66E08A;
         tone(level, n.pos, SoundEvents.NOTE_BLOCK_BELL.value(), 2.4f, PITCH[n.index]);
+        if (show) {
+            // 手本は部屋の人の耳元でも鳴らす (遠くても聞こえる)
+            for (ServerPlayer p : inRoom()) {
+                p.playNotifySound(SoundEvents.NOTE_BLOCK_BELL.value(), net.minecraft.sounds.SoundSource.PLAYERS, 1.0f, PITCH[n.index]);
+            }
+        }
         burst(level, n, show ? ParticleTypes.END_ROD : ParticleTypes.NOTE, show ? 14 : 6, 0.25, show ? 0.05 : 0.3);
         column(level, n, show ? 0xFFD76A : 0x66E08A, 1.6f, 8);
     }
@@ -193,10 +223,12 @@ public final class StoneSeaDomain extends HeartDomain {
         if (showStart >= 0) {
             int k = t - showStart;
             if (k % fast(SHOW_GAP) == 0 && k / fast(SHOW_GAP) < NODES) {
+                shown = k / fast(SHOW_GAP) + 1;
                 note(level, nodes.get(order[k / fast(SHOW_GAP)]), true);
             }
             if (k >= fast(SHOW_GAP) * NODES + 20) {
                 showStart = -1;
+                shown = 0;
                 nextShow = t + SHOW_EVERY;
             }
         }
@@ -219,6 +251,8 @@ public final class StoneSeaDomain extends HeartDomain {
             for (Node n : nodes) {
                 n.done = false;
             }
+            node.flash = 16;
+            node.flashRgb = 0xE0402A;
             tone(level, node.pos, SoundEvents.NOTE_BLOCK_BASS.value(), 2.0f, 0.5f);
             burst(level, node, ParticleTypes.SMOKE, 10, 0.3, 0.02);
             tell(level, "message.skyabyss.domain.stone_sea.wrong");

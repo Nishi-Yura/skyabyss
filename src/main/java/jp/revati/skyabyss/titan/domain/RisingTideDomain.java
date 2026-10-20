@@ -17,6 +17,8 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 
 // 潮殻の心臓の領域「満ち潮」(docs/design/08 の 5.5)。床が潮に洗われる。外から内へ満ちる四つの輪 (満ち) と、内から外へ引く四つの輪 (引き) が、
 // 一巡 (RING_STEP × 8 + 余り) ごとにくり返す。
@@ -169,6 +171,36 @@ public final class RisingTideDomain extends HeartDomain {
     }
 
     @Override
+    protected Hint standing() {
+        for (Node n : nodes) {
+            if (n.done && n.state < WARN_TICKS) {
+                return new Hint("gui.skyabyss.domain.rising_tide.warn", solvedCount(), NODES);
+            }
+        }
+        return new Hint("gui.skyabyss.domain.rising_tide.keep", solvedCount(), NODES);
+    }
+
+    @Override
+    protected Block bodyBlock() {
+        return Blocks.PRISMARINE_BRICKS;
+    }
+
+    @Override
+    protected float bodyWidth() {
+        return 1.4f;
+    }
+
+    @Override
+    protected Block capBlock(boolean lit) {
+        return lit ? Blocks.SEA_LANTERN : Blocks.DARK_PRISMARINE;
+    }
+
+    @Override
+    protected boolean lit(Node n, int t) {
+        return n.done;
+    }
+
+    @Override
     protected boolean strike(ServerLevel level, Node node, ServerPlayer player) {
         boolean wasOpen = node.state > 0;
         node.state = fast(OPEN_TICKS);
@@ -191,6 +223,8 @@ public final class RisingTideDomain extends HeartDomain {
             n.state--;
             if (n.state == 0) {
                 n.done = false;
+                n.flash = 16;
+                n.flashRgb = 0xE0402A;
                 tone(level, n.pos, SoundEvents.IRON_DOOR_CLOSE, 2.0f, 0.6f);
                 burst(level, n, ParticleTypes.SMOKE, 12, 0.3, 0.02);
                 tell(level, "message.skyabyss.domain.rising_tide.close");

@@ -87,6 +87,16 @@ public final class BossForceDev {
             case "CHASE" -> 2;
             default -> -1;
         };
+        if (a.equals("DOMAIN_OK") || a.equals("DOMAIN_BAD")) {
+            // 撮影用: 岩鯨の領域の骨を、次に叩く骨 (OK) / 違う骨 (BAD) で叩く
+            if (e instanceof StoneWhaleHeart h && h.domain() != null && e.level() instanceof net.minecraft.server.level.ServerLevel lv
+                    && lv.getNearestPlayer(e, 60) instanceof net.minecraft.server.level.ServerPlayer sp) {
+                int want = h.domain().expected();
+                h.domain().strikeNode(lv, a.equals("DOMAIN_OK") ? want : (want + 1) % 3, sp);
+                return true;
+            }
+            return false;
+        }
         if (kind < 0 && !a.equals("DOMAIN")) {
             return false;
         }
