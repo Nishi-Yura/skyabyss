@@ -191,7 +191,7 @@ public final class EmberLoreSelfTest {
                 keys.add("item.skyabyss." + item + ".desc");
             }
         }
-        keys.addAll(List.of("item.skyabyss.ember_armor.desc", "gear.skyabyss.origin.ember", "gui.skyabyss.forge.exchange_no_clear.ember",
+        keys.addAll(List.of("item.skyabyss.ember_armor.desc", "gear.skyabyss.origin.ember", "gear.skyabyss.origin_weapon.ember", "gui.skyabyss.forge.exchange_no_clear.ember",
                 "gui.skyabyss.forge.exchange_all_owned.ember", "skyabyss_record.h.ember", "tooltip.skyabyss.ember.horn_drunk"));
         for (String key : keys) {
             for (JsonObject lang : langs) {

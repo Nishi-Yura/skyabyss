@@ -100,6 +100,7 @@ public final class SelfTestRunner {
         // brushup の直し: 戦いの最中の復活先 (四つの背)・復活の守りの後始末・lang の重複と ja/en の一致
         steps.add(Step.once("brushup", jp.revati.skyabyss.titan.group.BrushupSelfTest::runSelfTest));
         steps.add(Step.once("lang", LangSelfTest::runSelfTest));
+        steps.add(Step.once("keys", KeyDefaultsSelfTest::runSelfTest));
         // 敵が壁・地面の中に湧かない (すべての湧き口と波に共通の決まり)。SKYABYSS_SELFTEST_ONLY="spawn safety"
         steps.add(Step.once("spawn safety", jp.revati.skyabyss.util.SpawnSafetySelfTest::runSelfTest));
         steps.add(Step.once("lang objective band", ObjectiveBandSelfTest::runSelfTest));

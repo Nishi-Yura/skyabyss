@@ -37,7 +37,7 @@ import net.neoforged.neoforge.network.PacketDistributor;
 @EventBusSubscriber(modid = SkyAbyss.MODID, value = Dist.CLIENT)
 public final class PingClient {
     public static final KeyMapping PING_KEY = new KeyMapping("key.skyabyss.ping", KeyConflictContext.IN_GAME,
-            InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_M, "key.categories.skyabyss");
+            InputConstants.Type.KEYSYM, jp.revati.skyabyss.KeyDefaults.PING, "key.categories.skyabyss");
 
     private record Active(Ping.Show show, int expires) {
     }

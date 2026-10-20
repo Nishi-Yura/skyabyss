@@ -20,7 +20,7 @@ import net.neoforged.neoforge.client.settings.KeyConflictContext;
 @EventBusSubscriber(modid = SkyAbyss.MODID, value = Dist.CLIENT)
 public final class RecordClient {
     public static final KeyMapping OPEN_KEY = new KeyMapping("key.skyabyss_record.open", KeyConflictContext.IN_GAME,
-            InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_B, "key.categories.skyabyss");
+            InputConstants.Type.KEYSYM, jp.revati.skyabyss.KeyDefaults.RECORD, "key.categories.skyabyss");
 
     private RecordClient() {
     }

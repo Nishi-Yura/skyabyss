@@ -217,7 +217,7 @@ public final class TravelSelfTest {
         for (String lang : List.of("ja_jp", "en_us")) {
             Map<String, String> texts = lang(lang);
             for (String key : List.of("item.skyabyss.whale_road_helmet", "item.skyabyss.whale_road_chestplate", "item.skyabyss.whale_road_leggings",
-                    "item.skyabyss.whale_road_boots", "item.skyabyss.whale_road_armor.desc", "gear.skyabyss.origin.whale_road", "item.skyabyss.rock_whetstone",
+                    "item.skyabyss.whale_road_boots", "item.skyabyss.whale_road_armor.desc", "gear.skyabyss.origin.whale_road", "gear.skyabyss.origin_weapon.stone_whale", "gear.skyabyss.origin_weapon.tide_shell", "gear.skyabyss.origin_weapon.thunder_wing", "item.skyabyss.rock_whetstone",
                     "item.skyabyss.rock_whetstone.desc", "item.skyabyss.road_hardtack", "item.skyabyss.road_hardtack.desc", "item.skyabyss.moss_salve",
                     "item.skyabyss.moss_salve.desc", "effect.skyabyss.whetted", "message.skyabyss.whetstone.used", "message.skyabyss.recipe.locked",
                     "message.skyabyss.readiness.remedy.name.travel_gear", "message.skyabyss.readiness.remedy.name.whetstone",

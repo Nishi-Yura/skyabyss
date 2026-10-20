@@ -93,29 +93,53 @@ public final class ObjectiveMarker {
         Vec3 way = LampBandClient.waypoint();
         if (way != null) {
             // 光海の迷路: 次の中継点 (迷路の道のりで次のマス)。見通しのない迷路なので、近いマスでも出す
-            draw(g, mc, way, GOLD, 1f, 3.0);
+            Placement pw = place(g, mc, way, BASE, 3.0);
+            if (pw != null) {
+                show(g, mc, pw, GOLD, false);
+            }
             return;
         }
         ObjectiveStrip.Resolved main = ObjectiveStrip.demo ? new ObjectiveStrip.Resolved(mc.player.blockPosition().offset(60, 3, -30), false) : ObjectiveStrip.resolve(mc);
         BlockPos mainPos = main.pos();
-        if (mainPos != null) {
-            draw(g, mc, Vec3.atCenterOf(mainPos), GOLD, 1f, 5.0);
-        }
         ObjectiveStrip.Resolved sub = ObjectiveStrip.resolveTracked(mc);
         BlockPos subPos = sub.pos();
-        if (subPos != null && (mainPos == null || !subPos.equals(mainPos))) {
-            draw(g, mc, Vec3.atCenterOf(subPos), TEAL, 0.8f, 5.0);
+        Placement pm = mainPos == null ? null : place(g, mc, Vec3.atCenterOf(mainPos), BASE, 5.0);
+        Placement ps = subPos == null || subPos.equals(mainPos) ? null : place(g, mc, Vec3.atCenterOf(subPos), BASE * 0.8f, 5.0);
+        // 同じ場所・近い場所・画面で重なる標は一つにまとめる。金が先で、青緑は小さな点で「サブもここ」と添える
+        if (pm != null && ps != null && merged(pm, ps, mainPos, subPos)) {
+            show(g, mc, pm, GOLD, true);
+            return;
+        }
+        if (pm != null) {
+            show(g, mc, pm, GOLD, false);
+        }
+        if (ps != null) {
+            show(g, mc, ps, TEAL, false);
         }
     }
 
-    // 世界の位置 pos を投影して、標を描く。rgb = 色、k = 大きさの比、hideUnder = これより近いと出さない (ブロック)
-    private static void draw(GuiGraphics g, Minecraft mc, Vec3 pos, int rgb, float k, double hideUnder) {
+    // 3 ブロック以内か、画面の上で重なる (中心が 16 画素以内) なら一つにする
+    static boolean merged(Placement a, Placement b, BlockPos pa, BlockPos pb) {
+        if (pa != null && pb != null && pa.distSqr(pb) <= 9) {
+            return true;
+        }
+        return a.onScreen == b.onScreen && Math.abs(a.x - b.x) < 16 && Math.abs(a.y - b.y) < 16;
+    }
+
+    // 置き場 (画面の中: 標の中心、外: 縁の点と向き)
+    record Placement(int x, int y, boolean onScreen, float vx, float vy, float scale, String label) {
+    }
+
+    static final float BASE = 0.7f;
+
+    // 世界の位置 pos を投影する。k = 大きさの比、hideUnder = これより近いと出さない (ブロック)。出さないなら null
+    private static Placement place(GuiGraphics g, Minecraft mc, Vec3 pos, float k, double hideUnder) {
         Font font = mc.font;
         Camera cam = mc.gameRenderer.getMainCamera();
         Vec3 camPos = cam.getPosition();
         double dist = camPos.distanceTo(pos);
         if (dist < hideUnder) {
-            return;
+            return null;
         }
         Vector3f look = cam.getLookVector();
         Vector3f up = cam.getUpVector();
@@ -131,23 +155,13 @@ public final class ObjectiveMarker {
         float pulse = 0.5f + 0.5f * (float) Math.sin(net.minecraft.Util.getMillis() / 380.0);
         float scale = k * (1f + 0.06f * pulse);
         float time = (net.minecraft.Util.getMillis() % 100000) / 1000f;
-        boolean onScreen = false;
-        int sx = 0;
-        int sy = 0;
         if (fwd > 0.3f) {
             float fx = w / 2f + (rightv / fwd) / tanHalf * (h / 2f);
             float fy = h / 2f - (upv / fwd) / tanHalf * (h / 2f);
             int lw = font.width(label);
             if (fx > lw / 2f + 8 && fx < w - lw / 2f - 8 && fy > 18 && fy < h - 30) {
-                onScreen = true;
-                sx = Math.round(fx);
-                sy = Math.round(fy - 6 - 3 * (float) Math.sin(time * 2.2));
+                return new Placement(Math.round(fx), Math.round(fy - 6 - 3 * (float) Math.sin(time * 2.2)), true, 0, 0, scale, label);
             }
-        }
-        if (onScreen) {
-            diamond(g, sx, sy, rgb, scale, 1f);
-            g.drawString(font, label, sx - font.width(label) / 2, sy + (int) (7 * scale) + 3, 0xFF000000 | rgb, true);
-            return;
         }
         // 画面の外: 縁に標と、その先の向きを指す山形。置き場は HudManager (板・バニラの部品は避ける)
         float vx = rightv;
@@ -164,14 +178,36 @@ public final class ObjectiveMarker {
         vx /= len;
         vy /= len;
         int[] edge = HudManager.edgePoint(vx, vy);
-        int ex = Mth.clamp(edge[0], 14, w - 14);
-        int ey = Mth.clamp(edge[1], 24, h - 36);
-        diamond(g, ex, ey, rgb, scale, 0.95f);
-        // 向きの山形 (標の外側)
-        float ang = (float) Math.atan2(vy, vx) + (float) Math.PI / 2f;
-        chevron(g, ex + Math.round(vx * 12 * scale), ey + Math.round(vy * 12 * scale), ang, rgb);
-        int ty = ey + (vy > 0.3f ? -(int) (7 * scale) - 12 : (int) (7 * scale) + 3);
-        g.drawString(font, label, Mth.clamp(ex - font.width(label) / 2, 3, w - font.width(label) - 3), ty, 0xFF000000 | rgb, true);
+        return new Placement(Mth.clamp(edge[0], 14, w - 14), Mth.clamp(edge[1], 24, h - 36), false, vx, vy, scale, label);
+    }
+
+    private static void show(GuiGraphics g, Minecraft mc, Placement p, int rgb, boolean withSide) {
+        Font font = mc.font;
+        int w = g.guiWidth();
+        int h = g.guiHeight();
+        float scale = p.scale;
+        int sx = p.x;
+        int sy = p.y;
+        if (p.onScreen) {
+            diamond(g, sx, sy, rgb, scale, 1f);
+            g.drawString(font, p.label, sx - font.width(p.label) / 2, sy + (int) (7 * scale) + 3, 0xFF000000 | rgb, true);
+        } else {
+            diamond(g, sx, sy, rgb, scale, 0.95f);
+            float ang = (float) Math.atan2(p.vy, p.vx) + (float) Math.PI / 2f;
+            chevron(g, sx + Math.round(p.vx * 12 * scale), sy + Math.round(p.vy * 12 * scale), ang, rgb);
+            int ty = sy + (p.vy > 0.3f ? -(int) (7 * scale) - 12 : (int) (7 * scale) + 3);
+            g.drawString(font, p.label, Mth.clamp(sx - font.width(p.label) / 2, 3, w - font.width(p.label) - 3), ty, 0xFF000000 | rgb, true);
+        }
+        if (withSide) {
+            sideDot(g, sx + Math.round(6 * scale) + 2, sy - Math.round(6 * scale) - 1);
+        }
+    }
+
+    // サブのクエストも同じ場所にあることを示す小さな青緑の輪 (5 x 5)
+    static void sideDot(GuiGraphics g, int cx, int cy) {
+        g.fill(cx - 2, cy - 2, cx + 3, cy + 3, DARK);
+        g.fill(cx - 1, cy - 1, cx + 2, cy + 2, 0xFF000000 | TEAL);
+        g.fill(cx, cy, cx + 1, cy + 1, DARK);
     }
 
     // ひし形: 暗い縁取り (1 画素ふくらませた同じ形) → 色 → 左上の明るい面

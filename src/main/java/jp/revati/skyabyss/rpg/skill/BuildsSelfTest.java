@@ -170,6 +170,14 @@ final class BuildsSelfTest {
             check(f, SkillCalling.choose(p, "traveler", true) == SkillCalling.Result.BAD_TREE, "the traveler tree was chosen as a calling");
             check(f, d.runeAvailable(Skill.TITAN_CLEAVE), "a rune did not open for a mastered skill before the calling");
             check(f, !d.knows(Skill.STONE_OATH) && d.callingDiscount() == 0, "a keystone or discount existed before the calling");
+            // 始まりの人には案内しない (クリエイティブでも)。巨神が眠ったあと (心臓の報酬のあと) だけ
+            check(f, !SkillCalling.earnedAt(0, false, false), "a calling was offered at the start");
+            check(f, !SkillCalling.earned(p), "a fresh player was offered a calling");
+            check(f, SkillCalling.earnedAt(1, false, false) && !SkillCalling.earnedAt(1, true, false), "the offer after the whale dormancy is wrong");
+            check(f, SkillCalling.earnedAt(3, true, false) && !SkillCalling.earnedAt(3, true, true), "the second offer is wrong");
+            p.setGameMode(net.minecraft.world.level.GameType.CREATIVE);
+            check(f, !SkillCalling.earned(p), "a creative fresh player was offered a calling at the start");
+            p.setGameMode(net.minecraft.world.level.GameType.SURVIVAL);
             // 一つ目: 岩守り。要を授かる・天性・割引 (段 3 つぶん)
             check(f, SkillCalling.choose(p, "rock", true) == SkillCalling.Result.OK && d.calling.equals("rock") && d.calling2.isEmpty(), "the first calling was not set");
             check(f, d.knows(Skill.STONE_OATH) && d.rank(Skill.STONE_OATH) == 1 && !d.ranks.containsKey(Skill.STONE_OATH.id), "the calling keystone was not granted");

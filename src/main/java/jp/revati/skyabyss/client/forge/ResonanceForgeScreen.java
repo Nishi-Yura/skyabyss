@@ -455,8 +455,8 @@ public class ResonanceForgeScreen extends AbstractContainerScreen<ResonanceForge
                     g.drawString(font, Component.translatable("gui.skyabyss.forge.extract_rewrite", Component.translatable(own.skillNameKey())), x, 42, GOLD, false);
                     drawWrapped(g, Component.translatable(own.nameKey()), x, 52, 132, 1, TEXT);
                     drawWrapped(g, Component.translatable(own.effectKey()), x, 62, 132, 4, DIM);
-                    g.drawString(font, Component.translatable("gui.skyabyss.forge.extract_cost", ForgeRules.extractCost(true), ForgeRules.extractCost(false), crystals), x, 108,
-                            minecraft.player.isCreative() || crystals >= ForgeRules.extractCost(true) ? OK : LACK, false);
+                    drawWrapped(g, Component.translatable("gui.skyabyss.forge.extract_cost", ForgeRules.extractCost(true), ForgeRules.extractCost(false), crystals), x, 108, 132, 2,
+                            minecraft.player.isCreative() || crystals >= ForgeRules.extractCost(true) ? OK : LACK);
                 }
             }
             case IMPRINT -> {
