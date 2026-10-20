@@ -130,7 +130,7 @@ def paint(faces, size, P, N, M, L, titan, rarity="common", plus=0):
     gm = m("gem")
     put(gm, ramp(gp, 0.35 + 0.45 * (0.5 + 0.5 * lit) * (0.7 + 0.6 * n_mid) + 0.08 * bay))
     glow |= gm
-    crack_lvl = {"common": 0.012, "rare": 0.018, "legend": 0.028}[rarity]
+    crack_lvl = {"common": 0.005, "rare": 0.008, "legend": 0.013}[rarity]
     if titan == "ember":
         ridge_n = np.abs(vnoise(L * 0.20 + 7, 5) - 0.5)
         crack = np.isin(mats, ["main", "acc"]) & (ridge_n < crack_lvl) & INS & (D > 0.4)

@@ -49,9 +49,9 @@
   "rar": "rare",
   "titan": "ember",
   "tris": {
-   "common": 92,
-   "rare": 104,
-   "legend": 104
+   "common": 128,
+   "rare": 140,
+   "legend": 140
   }
  },
  "ember_mantle": {
@@ -60,9 +60,9 @@
   "rar": "rare",
   "titan": "ember",
   "tris": {
-   "common": 128,
-   "rare": 140,
-   "legend": 140
+   "common": 144,
+   "rare": 156,
+   "legend": 156
   }
  },
  "ember_lantern": {
@@ -71,9 +71,9 @@
   "rar": "legend",
   "titan": "ember",
   "tris": {
-   "common": 84,
-   "rare": 96,
-   "legend": 120
+   "common": 100,
+   "rare": 112,
+   "legend": 136
   }
  },
  "ember_horn": {
