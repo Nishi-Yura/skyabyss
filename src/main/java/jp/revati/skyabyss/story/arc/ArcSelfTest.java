@@ -225,8 +225,28 @@ public final class ArcSelfTest {
         } finally {
             ChapterCards.setBusyForTest(Boolean.FALSE);
         }
-        check(f, ChapterCards.tick(p, Chapters.TIDE, false, 20001), "the title card should show right after the cinematic ends");
-        check(f, !ChapterCards.tick(p, Chapters.TIDE, false, 40000), "...and only once");
+        // 前の章の「完」の札が出ていないあいだは、次の章の題字は出ない (出ないままでも FALLBACK_WAIT で出る)
+        check(f, !ChapterCards.tick(p, Chapters.TIDE, false, 20001) && !ChapterCards.tick(p, Chapters.TIDE, false, 20001 + ChapterCards.TITLE_DELAY + 5),
+                "the next chapter's title must wait for the previous chapter's closing card");
+        check(f, !d.titleShown(Chapters.TIDE), "...and is not used up while waiting");
+        // 余韻 (完の札) が出たあと TITLE_DELAY 空けて題字が出る。画面 (報酬・天職) が開いている間は数えはじめない
+        d.markAftermath(Chapters.WHALE);
+        ChapterCards.setBusyForTest(Boolean.TRUE);
+        try {
+            check(f, !ChapterCards.tick(p, Chapters.TIDE, false, 30000) && !ChapterCards.tick(p, Chapters.TIDE, false, 40000), "no title while the chapter is still settling (screens open)");
+        } finally {
+            ChapterCards.setBusyForTest(Boolean.FALSE);
+        }
+        check(f, !ChapterCards.tick(p, Chapters.TIDE, false, 50000) && !ChapterCards.tick(p, Chapters.TIDE, false, 50000 + ChapterCards.TITLE_DELAY - 1),
+                "the title counts from when the chapter has settled");
+        check(f, ChapterCards.tick(p, Chapters.TIDE, false, 50000 + ChapterCards.TITLE_DELAY), "the next chapter's title shows after the closing card");
+        check(f, !ChapterCards.tick(p, Chapters.TIDE, false, 80000), "...and only once");
+        // 「完」の札のあと、題字までは必ず空く (前の章の札と同じ tick には出ない)
+        d.reset();
+        ChapterCards.forget(p.getUUID());
+        d.markTitle(Chapters.WHALE);
+        check(f, !ChapterCards.tick(p, Chapters.TIDE, false, 100) && !ChapterCards.tick(p, Chapters.TIDE, false, 100 + ChapterCards.FALLBACK_WAIT - 1)
+                && ChapterCards.tick(p, Chapters.TIDE, false, 100 + ChapterCards.FALLBACK_WAIT), "fallback: the title shows after FALLBACK_WAIT when no closing card came");
 
         // 序章・五章・すでに遊んでいた人: 出さず、出したことにする
         d.reset();

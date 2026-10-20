@@ -51,9 +51,11 @@ public final class Aftermath {
 
     // 余韻を出す (済んでいれば何もしない)。受け付けたら true
     static boolean deliver(ServerPlayer player) {
-        if (!ChapterCards.aftermath(player, Chapters.WHALE)) {
+        // 場面・心臓の報酬・天職の選択が済んで地上に戻ってから (済むまでは何もしない。語りと歌は札に合わせて出る)
+        if (!ChapterCards.settled(player) || !ChapterCards.aftermath(player, Chapters.WHALE)) {
             return false;
         }
+        ChapterCards.epilogue(player, SONG_AFTER + SONG_CUT);
         Tasks.later(NARRATE_AFTER, () -> Notice.narrate(player, "message.skyabyss.ch1.aftermath.storyteller"));
         Tasks.later(SONG_AFTER, () -> brokenSong(player));
         return true;

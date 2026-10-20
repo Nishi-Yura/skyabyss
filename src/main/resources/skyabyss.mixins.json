@@ -8,7 +8,8 @@
     "ServerPlaceRecipeMixin"
   ],
   "client": [
-    "GuiGraphicsMixin"
+    "GuiGraphicsMixin",
+    "ToastShiftMixin"
   ],
   "injectors": {
     "defaultRequire": 1

@@ -74,7 +74,9 @@ public final class QuestUx {
                 || player.tickCount % 20 != 7) {
             return;
         }
-        int now = Chapters.of(player).number();
+        // 札 (題字) を出すまでは前の章のまま: 章が終わりきる前に次の章の表示を出さない
+        Chapters cur = Chapters.of(player);
+        int now = cur.number() > 0 && !jp.revati.skyabyss.story.arc.ArcData.of(player).titleShown(cur) ? cur.number() - 1 : cur.number();
         Integer before = SENT.put(player.getUUID(), now);
         if (before == null || before != now) {
             PacketDistributor.sendToPlayer(player, new ChapterPayload(now));
