@@ -69,3 +69,7 @@ def inlay(env, kind):
     if kind == "p10":
         return line_mask(env, ["main"], zz, 6.4, 16.6, 0.5) | (np.isin(env["mats"], ["edge"]) & env["convex"])
     return env["lit"] < -9
+
+
+import wd2  # noqa: E402
+wd2.install(ID, __name__)   # D2 (整え): 面取り + 輪 + 宝石 + 光る線

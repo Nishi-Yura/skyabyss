@@ -43,171 +43,19 @@ mock.POSES["shield"] = dict(arm=62, pitch=0, roll=0, s3=1.0, s1=1.0)
 CH = 0.38
 
 
-# ------------------------------------------------------------------ 追加の部品
-def gbar(pts, r=0.27, mat="gem"):
-    """光る細い線 (表面に半分沈める)。"""
-    return curve(mat, pts, [r] * len(pts), [r] * len(pts), sides=3, caps=(True, True), hint=(0, 0, 1), phase=90.0)
-
-
-def ringb(mat, c, r, h, sides=6, axis="y"):
-    c = V(*c)
-    if axis == "y":
-        return prism(mat, tuple(c - V(0, h / 2, 0)), tuple(c + V(0, h / 2, 0)), r, r, sides=sides, caps=(False, False), hint=(0, 0, 1))
-    return prism(mat, tuple(c - V(0, 0, h / 2)), tuple(c + V(0, 0, h / 2)), r, r, sides=sides, caps=(True, True), hint=(1, 0, 0))
-
-
-def chev(mat, x, y, z, w=1.7, t=0.5, up=1, ang=34):
-    """山形の浮き彫り (山形の 2 本)。"""
-    f = []
-    for s in (1, -1):
-        f += block(mat, (x - s * w * 0.42, y - up * w * 0.17, z), (w, 0.5, t), rot=rot_z(-s * up * ang))
-    return f
-
-
-def interp(xs, ys):
-    return lambda y: float(np.interp(y, xs, ys))
-
-
-def ex_gs(L):
-    cx = interp([5.2, 10, 14.2, 17.4, 20], [0.0, 0.5, 1.1, 1.8, 2.6])
-    tf = interp([5.2, 10, 14.2, 17.4, 19.6], [1.3, 1.5, 1.3, 1.0, 0.8])
-    f = gbar([(cx(y), y, -tf(y) + 0.05) for y in (6.4, 9.5, 13.0, 16.4)])
-    f += ringb("trim", (0, 3.0, 0), 1.75, 0.5)
-    f += ringb("trim", (0, -0.9, 0), 1.6, 0.45)
-    f += block("gem", (0, -2.5, -1.6), (1.1, 1.1, 0.5))
-    if L >= 3:
-        for y in (0.5, 1.7):
-            f += ringb("wrap", (0, y, 0), 1.5, 0.4)
-        for y in (7.8, 10.2):
-            f += chev("spine", cx(y), y, -tf(y) + 0.1, w=2.2)
-        f += ringb("spine", (0, 2.5, 0), 2.7, 0.6, sides=6)
-        f += ringb("trim", (0, 5.0, 0), 3.85, 0.4, sides=6)
-        for s in (1, -1):
-            f += tooth(s * 3.7, 4.8, (s * 0.5, 1, 0), 3.2, 0.75)
-            f += block("gem", (s * 2.3, 4.2, -1.55), (0.7, 0.7, 0.4))
-    return f
-
-
-def spike_acc(s):
-    return wkit.spike(BONE, "acc", (s * 1.8, 12.0, 0), (s * 1.0, 0.5, 0), 2.8, 0.6, sides=4, rings=1, hint=(0, 0, 1))
-
-
-def ex_tr(L):
-    f = gbar([(0, 14.3, -0.98), (0, 17.0, -0.98), (0, 19.6, -0.5)])
-    f += ringb("trim", (0, 4.9, 0), 1.4, 0.5)
-    f += ringb("trim", (0, 8.8, 0), 1.4, 0.45)
-    for s in (1, -1):
-        f += block("acc", (s * 1.7, 12.3, -2.0), (0.9, 0.9, 0.7), taper=(0.6, 0.6))
-    if L >= 3:
-        for y in (6.0, 7.2, 10.2):
-            f += ringb("trim", (0, y, 0), 1.3, 0.3)
-        for y in (15.4, 16.8):
-            f += chev("edge", 0, y, -0.95, w=1.5)
-        for y in (-0.2, 2.2):
-            f += pearl((0.0, y, -1.15), 0.55)
-        for s in (1, -1):
-            f += spike_acc(s)
-        f += ringb("trim", (0, 13.4, 0), 2.9, 0.4, sides=8)
-    return f
-
-
-def ex_bow(L):
-    CYv = 8.0
-    up = [(5.0, 10.6), (4.3, 13.0), (1.8, 15.8), (-2.4, 17.2)]
-    zs = [-0.95, -0.85, -0.65, -0.35]
-    f = []
-    for sg in (1, -1):
-        my = (lambda p: p) if sg > 0 else (lambda p: (p[0], 2 * CYv - p[1]))
-        f += gbar([(*my(up[i]), zs[i]) for i in range(3)], r=0.25)
-        f += sband((*my(up[1]), 0), (1, sg * 0.6, 0), 1.25, 0.6, "trim", sides=6)
-        f += sband((*my(up[3]), 0), (1, sg * 0.3, 0), 0.7, 0.5, "trim", sides=6)
-    for dy in (-0.55, 0.55):
-        f += ringb("wrap", (5.0, CYv + dy, 0), 1.4, 0.35)
-    if L >= 3:
-        for sg in (1, -1):
-            my = (lambda p: p) if sg > 0 else (lambda p: (p[0], 2 * CYv - p[1]))
-            f += sband((*my(up[0]), 0), (1, sg * 0.2, 0), 1.2, 0.5, "trim", sides=6)
-            f += plume((*my((3.0, 12.4)), 0.7), (*my((7.4, 13.4)), 0.7), 0.7, 0.3, bend=-0.3 * sg, scorch=1)
-            f += block("gem", (*my((4.6, 12.0)), -0.95), (0.7, 0.7, 0.4))
-            f += plume((6.0, CYv + sg * 1.8, -0.2), (9.4, CYv + sg * 4.6, -0.2), 0.8, 0.3, bend=-0.6 * sg, scorch=1)
-        f += ringb("spine", (5.0, CYv + 1.9, 0), 1.35, 0.4)
-        f += ringb("spine", (5.0, CYv - 1.9, 0), 1.35, 0.4)
-    return f
-
-
-def wh_charm():
-    from wh_kit import charm
-    return charm(2.0, 4.4, 2.0, z=-1.4)
-
-
-def ex_fang(L):
-    cx = interp([5.8, 8, 11, 14], [0, 0.4, 1.3, 2.5])
-    tf = interp([5.8, 8, 11, 14], [1.1, 1.2, 1.0, 0.6])
-    f = gbar([(cx(y), y, -tf(y) + 0.05) for y in (6.8, 9.0, 11.4, 13.0)], r=0.25)
-    for y in (1.8, 3.0):
-        f += ringb("wrap", (0, y, 0), 1.35, 0.4)
-    f += block("gem", (0, 0.2, -1.55), (0.9, 0.8, 0.4))
-    f += ringb("trim", (0, 3.9, 0), 1.5, 0.4)
-    if L >= 3:
-        for y in (7.4, 9.0):
-            f += chev("spine", cx(y), y, -tf(y) + 0.1, w=1.8)
-        f += ringb("spine", (0, 4.6, 0), 1.75, 0.4)
-        for y in (8.6, 10.6, 12.4):
-            f += tooth(-2.4 + cx(y) * 0.2, y, (-1, 0.35, 0), 1.9, 0.5)
-        f += wh_charm()
-    return f
-
-
-def ex_axe(L):
-    cy = 14.0
-    f = gbar([(-1.0, cy - 2.5, -1.5), (-2.4, cy - 0.8, -1.5), (-3.4, cy - 1.9, -1.5), (-4.6, cy + 0.5, -1.45)])
-    f += ringb("edge", (0, 9.6, 0), 1.45, 0.4)
-    f += ringb("edge", (0, 11.2, 0), 1.45, 0.4)
-    f += block("gem", (0, -2.7, -1.3), (0.9, 0.8, 0.4))
-    if L >= 3:
-        for y in (1.2, 2.6, 4.0, 6.4, 8.0):
-            f += ringb("wrap", (0, y, 0), 1.3, 0.35)
-        pl = [(-1.2, -2.6), (-3.8, -3.4), (-4.9, -0.6), (-4.2, 2.6), (-1.2, 2.8)]
-        for z in (-1.3, 1.3):
-            f += extrude("spine", pl, 0.7, c=(0, cy, z))
-        f += gbar([(-1.2, cy + 1.2, -1.66), (-2.4, cy - 0.2, -1.66), (-3.6, cy + 0.9, -1.66)], r=0.2)
-        f += ridge((1.0, cy + 2.4, 0), (0.1, 1, 0), 3, 2.4, (0.0, 0.0, 0.0), 0.6)
-        f += ringb("trim", (0, cy - 4.2, 0), 1.6, 0.45)
-        f += ringb("trim", (0, cy + 3.6, 0), 1.6, 0.45)
-    return f
-
-
-def ex_shield(L):
-    OUT_ = [(0, -1.0), (3.8, 2.4), (5.6, 7.4), (4.8, 12.4), (2.6, 15.8), (0, 17.0), (-2.6, 15.8), (-4.8, 12.4), (-5.6, 7.4), (-3.8, 2.4)]
-
-    def sh(k):
-        return [(x * k, 8.0 + (y - 8.0) * k) for x, y in OUT_]
-    ring_ = sh(0.66)
-    f = gbar([(x, y, -1.62) for x, y in ring_ + [ring_[0]]], r=0.22)
-    f += ringb("trim", (0, 8.4, -1.6), 2.1, 0.5, axis="z", sides=8)
-    if L >= 3:
-        r2 = sh(0.5)
-        f += gbar([(x, y, -1.62) for x, y in r2 + [r2[0]]], r=0.2, mat="trim")
-        for x, y in sh(0.93)[::2]:
-            f += block("acc", (x, y, -1.2), (0.8, 0.8, 0.6), taper=(0.6, 0.6))
-        for dx in (-3.0, 3.0):
-            f += wkit.spike(BONE, "acc", (dx, 15.0 - abs(dx) * 0.4, -0.3), (dx * 0.12, 1, 0), 2.6, 0.7, sides=4, rings=1, hint=(0, 0, 1))
-        f += wkit.spike(BONE, "acc", (0, 16.4, -0.3), (0, 1, 0), 3.0, 0.8, sides=4, rings=1, hint=(0, 0, 1))
-    return f
-
-
-EX = dict(whalebone_greatsword=ex_gs, tide_shell_trident=ex_tr, thunder_wing_bow=ex_bow, waterway_fang=ex_fang,
-          ember_war_axe=ex_axe, coral_shield=ex_shield)
+from wd2 import *  # noqa: E402,F401,F403  (D2 の部品と EX はここへ移した)
+import wd2  # noqa: E402
 
 
 # ------------------------------------------------------------------ 構築
 def make(wid, mod, level):
     L = LEVELS.index(level) + 1
     wkit.CHAMFER[0] = CH if L >= 2 else 0.0
-    fs = mod.faces("rare") if wid != "thunder_wing_bow" else mod.faces("rare", 0)
-    if L >= 2:
-        fs = fs + EX[wid](L)
+    base = getattr(mod.faces, "__wrapped__", mod.faces)   # 本番は D2 済みなので、素の形を取る
+    fs = base("rare") if wid != "thunder_wing_bow" else base("rare", 0)
     wkit.CHAMFER[0] = 0.0
+    if L >= 2:
+        fs = wd2.d2(wid, lambda *a, **k: base(*a, **k), L)("rare") if wid != "thunder_wing_bow" else wd2.d2(wid, base, L)("rare", 0)
     faces, size, P, N, M, Lc = build(fs)
     atlas, glow = paint(faces, size, P, N, M, Lc, mod.TITAN, "rare", 0, mod.inlay, mod.EDGE)
     return dict(faces=faces, atlas=atlas, glow=glow, tris=tri_count(faces), mod=mod)

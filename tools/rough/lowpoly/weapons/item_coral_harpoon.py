@@ -64,3 +64,7 @@ def faces(r="common"):
 
 inlay = blade_inlay(["main"], CX, (13.6, 15.4), (14.6, 18.6), 13.0, 19.8, 0.45,
                     extra_spots=[(["gem"], (0, 12.4, -1.7), 1.4)])
+
+
+import wd2  # noqa: E402
+wd2.install(ID, __name__)   # D2 (整え): 面取り + 輪 + 宝石 + 光る線

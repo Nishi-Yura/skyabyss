@@ -76,3 +76,7 @@ def inlay(env, kind):
         ang = np.arctan2(env["Y"] - 8.4, env["X"])
         return ok & (ring | ((np.abs(rr - 5.0) < 0.35) & (np.sin(ang * 8.0) > 0.0))) | spot_mask(env, ["spine"], (0, 13.0, -1.7), 0.9)
     return env["lit"] < -9
+
+
+import wd2  # noqa: E402
+wd2.install(ID, __name__)   # D2 (整え): 面取り + 輪 + 宝石 + 光る線
