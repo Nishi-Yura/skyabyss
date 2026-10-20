@@ -539,7 +539,7 @@ public final class TitanBackSelfTest {
             }
             air(level, p.above(), "above resonance stone", failures);
         }
-        // 版 27: 来た道へ戻る抜け道の戸 (紫の封印のブロック) は無い。壁が閉じていて、封印の扉が置かれていないこと
+        // 版 28: 来た道へ戻る抜け道の戸 (紫の封印のブロック) は無い。壁が閉じていて、封印の扉が置かれていないこと
         for (List<BlockPos> gone : List.of(WEST_RETURN, EAST_RETURN, LOWER_RETURN)) {
             for (BlockPos p : gone) {
                 if (level.getBlockState(p).is(ModBlocks.SEALED_GATE.get()) || level.getBlockState(p).isAir()) {

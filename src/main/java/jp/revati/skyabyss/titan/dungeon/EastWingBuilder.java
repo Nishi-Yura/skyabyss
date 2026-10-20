@@ -75,7 +75,7 @@ final class EastWingBuilder {
         kit.palette(ZonePalette.CAPTAIN);
         captainHall(kit);
         throneDais(kit);
-        // 番兵長の広間から鼓動の間へ戻る抜け道の戸は無くした (版 27)。壁を閉じる。広間を掘ったあとに置く
+        // 番兵長の広間から鼓動の間へ戻る抜け道の戸は無くした (版 28)。壁を閉じる。広間を掘ったあとに置く
         for (BlockPos p : EAST_RETURN) {
             kit.set(p, kit.pal().wall());
         }

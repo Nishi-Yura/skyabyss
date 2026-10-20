@@ -293,7 +293,7 @@ public final class TrialHubSelfTest {
         GroupGates.reset(back, keyA);
     }
 
-    // ---------------------------------------------------------------- 版 27: 今週の試練の入口 (光る床・灯りの道・立て札)・個人の戻り・何の部屋かの題
+    // ---------------------------------------------------------------- 版 28: 今週の試練の入口 (光る床・灯りの道・立て札)・個人の戻り・何の部屋かの題
     private static void weekly(List<String> f, ServerLevel back, String titan, BlockPos hub, List<HubTablets.Spot> tablets) {
         WeeklyGate.clearAll();
         WeeklyGate.Site site = WeeklyGate.site(back, titan);

@@ -63,7 +63,7 @@ final class WestWingBuilder {
         placeCourses(kit, ParkourCourses.forSeed(0));
         pathLights(kit);
 
-        // 最後の岩棚から鼓動の間へ下りる抜け道の戸は無くした (版 27)。壁を閉じる
+        // 最後の岩棚から鼓動の間へ下りる抜け道の戸は無くした (版 28)。壁を閉じる
         for (BlockPos p : WEST_RETURN) {
             kit.set(p, kit.pal().wall());
         }

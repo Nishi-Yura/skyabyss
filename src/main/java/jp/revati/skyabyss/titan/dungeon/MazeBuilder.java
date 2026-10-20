@@ -289,7 +289,7 @@ public final class MazeBuilder {
         for (int y = MAZE_EXIT_ROOM.floorY() + 1; y <= FLOOR; y++) {
             kit.set(MAZE_EXIT_ROOM.x1(), y, EXIT_LADDER_Z, ladderEast);
         }
-        // 版 27: 来た道へ戻る抜け道の戸 (紫の封印のブロック) は無くした。壁を閉じる
+        // 版 28: 来た道へ戻る抜け道の戸 (紫の封印のブロック) は無くした。壁を閉じる
         for (BlockPos p : LOWER_RETURN) {
             kit.set(p, kit.pal().wall());
         }

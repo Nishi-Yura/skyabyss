@@ -528,7 +528,7 @@ public final class TitanBackBuilder {
         for (Inscription s : TRIAL_SIGNS) {
             kit.wallSign(s.pos(), s.facing(), s.key());
         }
-        // 版 27: 西・東の来た道へ戻る「抜け道の戸」(紫の封印のブロック。開かないまま残っていた) は無くした。壁を閉じる (ゴールに着けば広間へ戻される)
+        // 版 28: 西・東の来た道へ戻る「抜け道の戸」(紫の封印のブロック。開かないまま残っていた) は無くした。壁を閉じる (ゴールに着けば広間へ戻される)
         for (BlockPos p : WEST_RETURN) {
             kit.set(p, kit.pal().wall());
         }

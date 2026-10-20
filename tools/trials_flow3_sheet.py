@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""tools/shots/trials_flow3.txt が撮った絵から、確認用の一枚を docs/review/previews/trials_flow3_sheet.png に組む (試練の流れ。版 27)。
+"""tools/shots/trials_flow3.txt が撮った絵から、確認用の一枚を docs/review/previews/trials_flow3_sheet.png に組む (試練の流れ。版 28)。
 
 使い方: ./gradlew runShots -Pscript=tools/shots/trials_flow3.txt のあと、python -I tools/trials_flow3_sheet.py
 出力: docs/review/previews/trials_flow3_sheet.png (日本語の見出しつき。落ち着いた色。音なし)
@@ -22,7 +22,7 @@ TILES = [
 ]
 NOTES = [
     "・石は全巨神で無くなった。試練の終わりの光る印に着くと越え、中にいる仲間は 4 秒後に鼓動の間へ戻る。",
-    "・金の「試練済みの封印」は残す。紫の抜け道の戸 (開かなかった) は壁にした。",
+    "・金の「試練済みの封印」は残す。ゴールの横の紫の封印 (抜け道の戸・出口の戸。開かなかった) は無くした。",
     "・今週の試練は個人: 光る床に立った人だけが入口へ移り、越えたらその人だけが鼓動の間へ戻る。",
 ]
 W, H, COLS = 520, 292, 3

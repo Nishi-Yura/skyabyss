@@ -119,7 +119,9 @@ public final class TrialRuntime {
                 GroupGates.place(back, p.entrance(), p.entranceDefaultOpen());
             }
             if (!p.exitGate().isEmpty()) {
-                GroupGates.place(back, p.exitGate(), false);
+                // 版 28: 石のそば・ゴールの床の横に紫の封印の扉 (出口の戸) が立っていた。岩鯨・潮殻・余燼は、出口の戸を開いた (見えず・当たりもない) 状態で置く。
+                // 雷翼の出口の戸は、東の橋・出口の橋をつなぐ仕掛けなので、これまでどおり閉じて置く
+                GroupGates.place(back, p.exitGate(), !Titans.THUNDER_WING.equals(titan));
             }
         }
     }
