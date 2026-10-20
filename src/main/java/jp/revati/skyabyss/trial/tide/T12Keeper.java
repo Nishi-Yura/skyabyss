@@ -222,6 +222,27 @@ public final class T12Keeper implements TrialCell {
         }
     }
 
+    // 自己テスト用
+    public static boolean fightOn(Run run) {
+        return run.data.get("s") instanceof S s && s.phase == 1;
+    }
+
+    public static PearlKeeper keeperOf(ServerLevel back, Run run) {
+        return run.data.get("s") instanceof S s && s.keeperId != null && back.getEntity(s.keeperId) instanceof PearlKeeper k ? k : null;
+    }
+
+    public static int pearlHp(Run run) {
+        return run.data.get("s") instanceof S s ? s.pearlHp : PEARL_HP;
+    }
+
+    public static List<UUID> broodOf(Run run) {
+        return run.data.get("s") instanceof S s ? s.brood : List.of();
+    }
+
+    public static boolean smallStage(Run run) {
+        return run.data.get("s") instanceof S s && s.small;
+    }
+
     private PearlKeeper keeper(ServerLevel back, S s) {
         return s.keeperId != null && back.getEntity(s.keeperId) instanceof PearlKeeper k ? k : null;
     }

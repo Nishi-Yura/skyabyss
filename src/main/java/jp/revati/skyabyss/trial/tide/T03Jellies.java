@@ -66,7 +66,7 @@ public final class T03Jellies implements TrialCell {
 
     private final Def def = TrialCatalog.get("T03");
     private final Ports ports = new Ports(TideDeck.T03_GATE, false, TideDeck.T03_EXIT, TideDeck.T03_STONE, TideDeck.T03_PAD, TideDeck.REST_H2,
-            new net.minecraft.world.phys.AABB(0, G + 1, 75, 17, G + 11, 118), TideDeckRests.of("t03"));
+            new net.minecraft.world.phys.AABB(0, G - 4, 75, 17, G + 11, 118), TideDeckRests.of("t03"));
 
     @Override
     public Def def() {
@@ -170,6 +170,18 @@ public final class T03Jellies implements TrialCell {
 
     private static S st(Run run) {
         return (S) run.data.get("s");
+    }
+
+    // 自己テスト用: いま小魚につつかれている傘の数
+    public static int nibbledNow(Run run, long now) {
+        if (!(run.data.get("s") instanceof S s)) {
+            return 0;
+        }
+        int n = 0;
+        for (long until : s.nibbledUntil) {
+            n += now < until ? 1 : 0;
+        }
+        return n;
     }
 
     @Override

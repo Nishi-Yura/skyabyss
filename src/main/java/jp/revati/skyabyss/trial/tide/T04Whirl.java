@@ -154,6 +154,20 @@ public final class T04Whirl implements TrialCell {
         return (S) run.data.get("s");
     }
 
+    // 自己テスト用: いま各分かれ道で前へ流れる水路・動き始めの tick・押し戻された数
+    public static int[] lanesNow(Run run, long now, int players) {
+        S s = st(run);
+        return forwards(run, s, now, turn(run.mods, players));
+    }
+
+    public static long startTick(Run run) {
+        return st(run).start;
+    }
+
+    public static int washes(Run run) {
+        return st(run).washes;
+    }
+
     @Override
     public void arm(ServerLevel back, Run run) {
         S s = new S();

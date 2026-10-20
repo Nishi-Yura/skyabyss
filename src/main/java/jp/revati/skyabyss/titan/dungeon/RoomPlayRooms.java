@@ -39,6 +39,10 @@ public final class RoomPlayRooms {
             Box w11 = WhaleDeck.W11;
             out.add(new Room(Titans.STONE_WHALE, "w11", Theme.BONE, w11.x1(), w11.x2(), w11.z1(), w11.z2(), w11.floorY(), w11.height(),
                     entrance(WhaleDeck.W11_GATE, w11.floorY()), List.of()));
+            // 潮殻 (試練の階の下の階。大貝の護送 T11 は棺の廊下と同じ作り。真珠守りの試し T12 の円い広間は、湧きを人のそばに寄せるだけ)
+            var t11 = jp.revati.skyabyss.titan.tide.back.TideDeck.T11;
+            out.add(new Room(Titans.TIDE_SHELL, "t11", Theme.TIDE, t11.x1(), t11.x2(), t11.z1(), t11.z2(), t11.floor(), t11.height(),
+                    entrance(jp.revati.skyabyss.titan.tide.back.TideDeck.T11_GATE, t11.floor()), List.of()));
             // 灰の巨神 (試練の階の炉)
             var b = jp.revati.skyabyss.titan.ember.back.EmberDeck.B;
             List<BlockPos> e10 = new ArrayList<>();

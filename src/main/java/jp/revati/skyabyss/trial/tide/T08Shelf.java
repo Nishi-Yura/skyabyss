@@ -263,6 +263,28 @@ public final class T08Shelf implements TrialCell {
         return (S) run.data.get("s");
     }
 
+    // 自己テスト用
+    public static Round round(Run run) {
+        return run.data.get("s") instanceof S s ? s.r : null;
+    }
+
+    public static int roundIndex(Run run) {
+        return run.data.get("s") instanceof S s ? s.round : -1;
+    }
+
+    // 片 i の棚の穴 (置いたあと・持っているときは -1)
+    public static int slotOf(Run run, int i) {
+        return run.data.get("s") instanceof S s && i < s.state.length && s.state[i] == 0 ? s.slotOf[i] : -1;
+    }
+
+    public static int placedCount(Run run) {
+        return run.data.get("s") instanceof S s ? placed(s) : 0;
+    }
+
+    public static int mistakes(Run run) {
+        return run.data.get("s") instanceof S s ? s.mistakes : 0;
+    }
+
     @Override
     public void arm(ServerLevel back, Run run) {
         S s = new S();

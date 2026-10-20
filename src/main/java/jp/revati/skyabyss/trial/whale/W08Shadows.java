@@ -261,6 +261,27 @@ public final class W08Shadows implements TrialCell {
         return (S) run.data.get("s");
     }
 
+    // 自己テスト用: いまの幕・組・灯と柱の位置
+    public static Puzzle puzzle(Run run) {
+        return run.data.get("s") instanceof S s ? s.pz : null;
+    }
+
+    public static int round(Run run) {
+        return run.data.get("s") instanceof S s ? s.round : -1;
+    }
+
+    public static int[] lamps(Run run) {
+        return run.data.get("s") instanceof S s ? s.lamps : new int[0];
+    }
+
+    public static int[] pillars(Run run) {
+        return run.data.get("s") instanceof S s ? s.pillars : new int[0];
+    }
+
+    public static int clicks(Run run) {
+        return run.data.get("s") instanceof S s ? s.clicks : 0;
+    }
+
     @Override
     public void arm(ServerLevel back, Run run) {
         S s = new S();
