@@ -10,7 +10,9 @@ import java.util.Map;
 // 自己テスト (HudLayoutSelfTest) が GUI の倍率 1〜4 と代表的な窓の大きさをすべて当てて、重ならないことを確かめる。
 //
 // 考え方
-//  - バニラの部品 (ホットバー・体力・満腹・空気・経験値・アクションバー・効き目の絵・ボスバー・照準・札 (トースト)) は動かせない「障害物」。
+//  - バニラの部品のうち、ホットバー・体力・満腹・空気・経験値・照準は動かせない「障害物」。
+//  - 動かせるバニラ (ボスバー・効き目の絵・札 (トースト)・アクションバーと持ち物の名前・チャット・字幕・スコアボードの横板) は障害物にしない。
+//    mod の部品を先に置き、そのあとで重なるバニラを空きへずらす (Result.shiftY。クライアントが描画層ごとに平行移動する)。mod 側は動かさない。
 //  - mod の部品は「要求 (Request)」を出す。要求は名前 (Id)・置き場の区分・寸法の決め方 (Fit) だけ。座標は持たない。
 //  - 計算は一回で全部の要求を受け取り、区分ごとに積む。入らなければ寸法を縮め (Fit に幅と高さの上限を渡す)、それでも入らなければ
 //    優先の低いほうを「出さない」(dropped)。重ねて描くことは決してしない。
@@ -75,7 +77,7 @@ public final class HudLayout {
     public enum Id {
         // ---- バニラ (障害物。動かさない)
         V_HOTBAR, V_OFFHAND, V_ATTACK, V_XP, V_HEALTH, V_ARMOR, V_FOOD, V_AIR, V_ITEM_NAME, V_ACTION_BAR, V_EFFECTS, V_BOSS_BARS, V_CROSSHAIR,
-        V_TOASTS, V_CHAT,
+        V_SUBTITLES, V_SIDEBAR, V_TOASTS, V_CHAT,
         // ---- 中央 (固定)
         AIM_RING,
         // ---- 領域の手順の板 (右上の一番上に固定。ボスの技の名前に押されない。上中央の札が避ける『帯』には数えない)
@@ -134,7 +136,12 @@ public final class HudLayout {
 
     // 画面とバニラの状態
     public record Scene(int w, int h, boolean rightHanded, boolean offhand, boolean attackOnHotbar, int healthRows, int effectCols, int effectRows,
-            int bossBottom, int toastH, int chatW, int chatH) {
+            int bossBottom, int toastH, int chatW, int chatH, int sidebarW, int sidebarH, boolean subtitles, int actionBarW, int toastTop) {
+        public Scene(int w, int h, boolean rightHanded, boolean offhand, boolean attackOnHotbar, int healthRows, int effectCols, int effectRows,
+                int bossBottom, int toastH, int chatW, int chatH) {
+            this(w, h, rightHanded, offhand, attackOnHotbar, healthRows, effectCols, effectRows, bossBottom, toastH, chatW, chatH, 0, 0, false, 0, 0);
+        }
+
         public static Scene plain(int w, int h) {
             return new Scene(w, h, true, false, false, 1, 0, 0, 0, 0, 0, 0);
         }
@@ -150,6 +157,8 @@ public final class HudLayout {
         public final Map<Id, Rect> placed = new EnumMap<>(Id.class);
         public final Map<Id, Rect> vanilla = new EnumMap<>(Id.class);
         public final EnumSet<Id> dropped = EnumSet.noneOf(Id.class);
+        // ずらしたバニラの縦の量 (下が正)。ずらさないものは入らない。vanilla にはずらしたあとの長方形が入る
+        public final Map<Id, Integer> shiftY = new EnumMap<>(Id.class);
 
         Result(Scene scene) {
             this.scene = scene;
@@ -180,6 +189,14 @@ public final class HudLayout {
     public static Result compute(Scene s, List<Request> requests) {
         Result r = new Result(s);
         vanilla(s, r);
+        // 動かせるバニラは、mod を置くあいだは障害物にしない (置いたあとで空きへずらす)
+        Map<Id, Rect> movable = new EnumMap<>(Id.class);
+        for (Id id : MOVABLE) {
+            Rect m = r.vanilla.remove(id);
+            if (m != null) {
+                movable.put(id, m);
+            }
+        }
         List<Request> reqs = new ArrayList<>(requests);
         reqs.sort((a, b) -> a.id.compareTo(b.id));
         // 1. 中央の固定 (照準の輪)
@@ -229,6 +246,17 @@ public final class HudLayout {
             }
         }
         stackColumn(s, r, right, true);
+        // ボスバー: 帯 (左上・右上) と重なるなら、帯の下へ下げる。上中央の部品は、下げたボスバーの下に付く
+        int bossBottom = s.bossBottom;
+        Rect boss = movable.get(Id.V_BOSS_BARS);
+        if (boss != null) {
+            int dy = shiftAway(r, boss, 1, Math.max(0, s.h / 2 - 12 - boss.bottom()));
+            if (dy != 0) {
+                r.shiftY.put(Id.V_BOSS_BARS, dy);
+            }
+            bossBottom += dy;
+            r.vanilla.put(Id.V_BOSS_BARS, new Rect(boss.x, boss.y + dy, boss.w, boss.h));
+        }
         // 照準 (と起こす輪) のまわりは空ける: 下中央の部品はその下へ、上中央の部品はその上へ収める
         Rect cross = r.vanilla.get(Id.V_CROSSHAIR);
         int centerTop = cross.y;
@@ -251,7 +279,7 @@ public final class HudLayout {
             if (q.region != Region.BOTTOM_CENTER) {
                 continue;
             }
-            int bcLimit = Math.max(M + (s.bossBottom > 0 ? s.bossBottom : 0), centerBottom + 6);
+            int bcLimit = Math.max(M + (bossBottom > 0 ? bossBottom : 0), centerBottom + 6);
             if (q.id == Id.HINTS) {
                 bcLimit += reserve;
             }
@@ -265,8 +293,8 @@ public final class HudLayout {
         }
         int hintsTop = anchor;
         // 5. 上中央 (ボスバーの下へ。技の名前 → 上の帯 → レベルアップ → 中央の一行)
-        int cursor = s.bossBottom > 0 ? s.bossBottom - 2 : M;
-        int topBottom = s.bossBottom > 0 ? s.bossBottom - 2 : 0;
+        int cursor = bossBottom > 0 ? bossBottom - 2 : M;
+        int topBottom = bossBottom > 0 ? bossBottom - 2 : 0;
         for (Request q : reqs) {
             if (q.region != Region.TOP_CENTER) {
                 continue;
@@ -305,7 +333,59 @@ public final class HudLayout {
                 r.placed.put(q.id, got);
             }
         }
+        // 7. 動かせるバニラ (効き目・札・横板は下へ、アクションバー・名前・字幕・チャットは上へ)。mod の部品はそのまま、重なるバニラを空きへずらす
+        for (Id id : MOVABLE) {
+            Rect n = movable.get(id);
+            if (n == null || id == Id.V_BOSS_BARS) {
+                continue;
+            }
+            boolean down = id == Id.V_EFFECTS || id == Id.V_TOASTS || id == Id.V_SIDEBAR;
+            int dy = shiftAway(r, n, down ? 1 : -1, id == Id.V_CHAT || down ? s.h : 140);
+            if (dy != 0) {
+                r.shiftY.put(id, dy);
+            }
+            r.vanilla.put(id, new Rect(n.x, n.y + dy, n.w, n.h));
+        }
         return r;
+    }
+
+    // ずらせるバニラ。この順に、ずらしたものが次のものの障害物になる
+    private static final List<Id> MOVABLE = List.of(Id.V_BOSS_BARS, Id.V_EFFECTS, Id.V_TOASTS, Id.V_SIDEBAR, Id.V_ACTION_BAR, Id.V_ITEM_NAME, Id.V_SUBTITLES, Id.V_CHAT);
+
+    // 長方形 n を、いま置かれている mod の部品とバニラの障害物に重ならない所へ動かす縦の量。まず dir (1 = 下、-1 = 上) の向きに、重なっている相手の端まで飛んで探し、
+    // 画面からはみ出す・限度 (limit) を超えるなら反対の向きを探す。どちらも入らなければ 0 (動かさない)
+    static int shiftAway(Result r, Rect n, int dir, int limit) {
+        // まず隙間 GAP を空けて探し、入らなければ隙間 1 で探す
+        for (int gap : new int[] {GAP, 1}) {
+            for (int d : new int[] {dir, -dir}) {
+                int got = shiftAway(r, n, d, limit, gap);
+                if (got != Integer.MIN_VALUE) {
+                    return got;
+                }
+            }
+        }
+        return 0;
+    }
+
+    private static int shiftAway(Result r, Rect n, int d, int limit, int gap) {
+        Scene s = r.scene;
+        int dy = 0;
+        for (int i = 0; i < 40; i++) {
+            Rect c = new Rect(n.x, n.y + dy, n.w, n.h);
+            Rect hit = firstBlocker(r, c, true);
+            if (hit == null) {
+                return dy == 0 || (c.y >= 0 && c.bottom() <= s.h - 2 && Math.abs(dy) <= limit) ? dy : Integer.MIN_VALUE;
+            }
+            int next = d > 0 ? hit.bottom() + gap - n.y : hit.y - gap - n.bottom();
+            if (d > 0 ? next <= dy : next >= dy) {
+                next = dy + d;
+            }
+            dy = next;
+            if (n.y + dy < 0 || n.bottom() + dy > s.h - 2 || Math.abs(dy) > limit) {
+                return Integer.MIN_VALUE;
+            }
+        }
+        return Integer.MIN_VALUE;
     }
 
     // 中央に寄せた板が、すでに置いた左上・右上の部品と重なるなら、その下端まで下げた上端を返す
@@ -351,7 +431,9 @@ public final class HudLayout {
         r.vanilla.put(Id.V_FOOD, new Rect(cx + 10, h - 39, 81, 9));
         r.vanilla.put(Id.V_AIR, new Rect(cx + 10, h - 49, 81, 9));
         r.vanilla.put(Id.V_ITEM_NAME, new Rect(cx - 70, h - 59, 140, 9));
-        r.vanilla.put(Id.V_ACTION_BAR, new Rect(cx - 120, h - 76, 240, 14));
+        if (s.actionBarW > 0) {
+            r.vanilla.put(Id.V_ACTION_BAR, new Rect(cx - s.actionBarW / 2 - 4, h - 76, s.actionBarW + 8, 14));
+        }
         r.vanilla.put(Id.V_CROSSHAIR, new Rect(cx - 8, h / 2 - 8, 16, 16));
         if (s.effectCols > 0) {
             int cols = s.effectCols;
@@ -361,8 +443,15 @@ public final class HudLayout {
         if (s.bossBottom > 0) {
             r.vanilla.put(Id.V_BOSS_BARS, new Rect(cx - 91, 3, 182, Math.max(1, s.bossBottom - 3 - 8)));
         }
+        if (s.sidebarW > 0 && s.sidebarH > 0) {
+            r.vanilla.put(Id.V_SIDEBAR, new Rect(w - 3 - s.sidebarW, h / 2 + s.sidebarH / 3 - s.sidebarH, s.sidebarW, s.sidebarH));
+        }
+        if (s.subtitles) {
+            r.vanilla.put(Id.V_SUBTITLES, new Rect(w - 150, h - 30 - 33, 148, 33));
+        }
         if (s.toastH > 0) {
-            r.vanilla.put(Id.V_TOASTS, new Rect(w - 160, 0, 160, s.toastH));
+            int top = Math.min(Math.max(0, s.toastTop), Math.max(0, s.toastH - 1));
+            r.vanilla.put(Id.V_TOASTS, new Rect(w - 160, top, 160, s.toastH - top));
         }
         if (s.chatW > 0 && s.chatH > 0) {
             r.vanilla.put(Id.V_CHAT, new Rect(0, h - 40 - s.chatH, s.chatW, s.chatH));

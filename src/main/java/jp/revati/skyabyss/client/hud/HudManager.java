@@ -41,6 +41,8 @@ public final class HudManager {
     private static int bossBottom;
     // 右上の札 (トースト) の高さの合計 (描画中に数え、次の枠で使う)。出入りで板が跳ねないよう、なめらかに寄せる
     private static int toastNow;
+    private static int toastTopNow = Integer.MAX_VALUE;
+    private static int toastTop;
     private static float toastEased;
     private static long lastChatMs = -100000;
 
@@ -74,8 +76,9 @@ public final class HudManager {
     // 右上の札を描くとき、その下端 (札の枠の位置 + 高さを 32 の枠に丸めたもの) を記す (NoticeToast / QuestToast / LoreToast が呼ぶ)。
     // 札は空いた枠を飛ばさずに積まれるとは限らない (先の札が消えても、あとの札はその枠のまま) ので、一番下の札の下端を使う
     public static void noteToast(net.minecraft.client.gui.GuiGraphics g, int height) {
-        int top = Math.round(g.pose().last().pose().m31());
+        int top = Math.round(g.pose().last().pose().m31()) - VanillaShift.toastShift();
         toastNow = Math.max(toastNow, Math.max(0, top) + Math.max(32, (height + 31) / 32 * 32));
+        toastTopNow = Math.min(toastTopNow, Math.max(0, top));
     }
 
     // 戦いの最中か: ボスバーが出ている・直近 10 秒に敵から傷を受けた。操作の手がかり (手引き・キーの案内) は、戦いの最中は出さない (見せ場の邪魔をしない)
@@ -121,6 +124,8 @@ public final class HudManager {
         // 札の高さをなめらかに (出るときは速く、消えるときはゆっくり)
         float target = toastNow;
         toastNow = 0;
+        toastTop = toastTopNow == Integer.MAX_VALUE ? 0 : toastTopNow;
+        toastTopNow = Integer.MAX_VALUE;
         toastEased += (target - toastEased) * (target > toastEased ? 1f : 0.15f);
         if (Math.abs(toastEased - target) < 0.5f) {
             toastEased = target;
@@ -152,8 +157,23 @@ public final class HudManager {
 
     @SubscribeEvent
     static void onChat(ClientChatReceivedEvent event) {
-        lastChatMs = net.minecraft.Util.getMillis();
+        long now = net.minecraft.Util.getMillis();
+        lastChatMs = now;
+        // 行数を数える (置き場の計算に使うのは、出ている行の分の高さだけ。欄の高さ全部ではない)
+        Minecraft mc = Minecraft.getInstance();
+        int lines = 1;
+        try {
+            var chat = mc.gui.getChat();
+            lines = net.minecraft.client.gui.components.ComponentRenderUtils
+                    .wrapComponents(event.getMessage(), net.minecraft.util.Mth.floor(chat.getWidth() / chat.getScale()), mc.font).size();
+        } catch (RuntimeException e) {
+            // 数えられなければ一行
+        }
+        RECENT_CHAT.add(new long[] {now, Math.max(1, lines)});
     }
+
+    // 直近 10 秒のチャットの (時刻, 行数)
+    private static final java.util.ArrayList<long[]> RECENT_CHAT = new java.util.ArrayList<>();
 
     @SubscribeEvent
     static void onLogout(ClientPlayerNetworkEvent.LoggingOut event) {
@@ -161,6 +181,58 @@ public final class HudManager {
         bossBottomNow = 0;
         toastEased = 0;
         toastNow = 0;
+    }
+
+    // スコアボードの横板 (右の中ほど) の寸法の見積り: {幅, 高さ}。出ていなければ {0, 0}。バニラの描き方 (行数 × 9 + 題) に合わせる
+    private static int[] sidebar(Minecraft mc) {
+        try {
+            net.minecraft.world.scores.Scoreboard board = mc.level.getScoreboard();
+            net.minecraft.world.scores.Objective obj = board.getDisplayObjective(net.minecraft.world.scores.DisplaySlot.SIDEBAR);
+            if (obj == null) {
+                return new int[] {0, 0};
+            }
+            var font = mc.font;
+            int wide = font.width(obj.getDisplayName());
+            int n = 0;
+            for (var score : board.listPlayerScores(obj)) {
+                if (score.isHidden() || n >= 15) {
+                    continue;
+                }
+                n++;
+                wide = Math.max(wide, font.width(score.ownerName().getString()) + 2 + font.width(Integer.toString(score.value())));
+            }
+            return new int[] {wide + 4, (n + 1) * 9 + 1};
+        } catch (RuntimeException e) {
+            return new int[] {0, 0};
+        }
+    }
+
+    // アクションバー (画面下の一行) が出ているときの文の幅。出ていなければ 0。Gui の持つ文を読む (読めなければ 0)
+    private static java.lang.reflect.Field overlayField;
+    private static java.lang.reflect.Field overlayTimeField;
+    private static boolean overlayBroken;
+
+    private static int overlayWidth(Minecraft mc) {
+        if (overlayBroken) {
+            return 0;
+        }
+        try {
+            if (overlayField == null) {
+                overlayField = net.minecraft.client.gui.Gui.class.getDeclaredField("overlayMessageString");
+                overlayField.setAccessible(true);
+                overlayTimeField = net.minecraft.client.gui.Gui.class.getDeclaredField("overlayMessageTime");
+                overlayTimeField.setAccessible(true);
+            }
+            Object text = overlayField.get(mc.gui);
+            int time = overlayTimeField.getInt(mc.gui);
+            if (text instanceof net.minecraft.network.chat.Component c && time > 0) {
+                return Math.min(mc.font.width(c), 400);
+            }
+            return 0;
+        } catch (ReflectiveOperationException | RuntimeException e) {
+            overlayBroken = true;
+            return 0;
+        }
     }
 
     static Scene scene(Minecraft mc, int w, int h) {
@@ -187,10 +259,20 @@ public final class HudManager {
         int effectRows = bad > 0 ? 2 : good > 0 ? 1 : 0;
         int chatW = 0;
         int chatH = 0;
-        if (net.minecraft.Util.getMillis() - lastChatMs < 10000) {
+        long nowMs = net.minecraft.Util.getMillis();
+        RECENT_CHAT.removeIf(e -> nowMs - e[0] >= 10000);
+        if (mc.screen instanceof net.minecraft.client.gui.screens.ChatScreen) {
             chatW = mc.gui.getChat().getWidth();
             chatH = mc.gui.getChat().getHeight();
+        } else if (!RECENT_CHAT.isEmpty()) {
+            int lines = 0;
+            for (long[] e : RECENT_CHAT) {
+                lines += (int) e[1];
+            }
+            chatW = mc.gui.getChat().getWidth();
+            chatH = Math.min(mc.gui.getChat().getHeight(), lines * 9 + 2);
         }
-        return new Scene(w, h, rightHanded, offhand, attack, rows, cols, effectRows, bossBottom, Math.round(toastEased), chatW, chatH);
+        int[] sb = sidebar(mc);
+        return new Scene(w, h, rightHanded, offhand, attack, rows, cols, effectRows, bossBottom, Math.round(toastEased), chatW, chatH, sb[0], sb[1], mc.options.showSubtitles().get(), overlayWidth(mc), toastTop);
     }
 }

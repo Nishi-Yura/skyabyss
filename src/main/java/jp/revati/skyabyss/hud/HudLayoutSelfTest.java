@@ -157,8 +157,8 @@ public final class HudLayoutSelfTest {
                             boolean atk = (mask & 4) != 0;
                             int rows = (mask & 8) != 0 ? 3 : 1;
                             int toast = (mask & 16) != 0 ? 32 * 3 : 0;
-                            boolean chat = rnd.nextInt(3) == 0;
-                            Scene s = scene(gw, gh, boss, eff, eff == 0 ? 0 : eff > 3 ? 2 : 1, right, offhand, atk, rows, toast, chat ? 1 : 0);
+                            int chat = rnd.nextInt(3) == 0 ? 1 : rnd.nextInt(4) == 0 ? 2 : 0;
+                            Scene s = scene(gw, gh, boss, eff, eff == 0 ? 0 : eff > 3 ? 2 : 1, right, offhand, atk, rows, toast, chat);
                             List<Request> all = everything(s, right);
                             check(f, s, all, "all");
                             // 乱数の組み合わせ (部品のありなし)
@@ -209,6 +209,7 @@ public final class HudLayoutSelfTest {
         if (HudLayout.guiSize(1920, 3) != 640 || HudLayout.guiSize(1080, 4) != 270 || HudLayout.maxScale(1920, 1080) != 4 || HudLayout.maxScale(854, 480) != 2) {
             f.add("gui size / max scale math is wrong");
         }
+        stats.append("movable vanilla with no free place (left as is): ").append(stuck).append('\n');
         stats.append("cases: ").append(cases).append('\n');
     }
 
@@ -223,13 +224,48 @@ public final class HudLayoutSelfTest {
     static Scene scene(int w, int h, int bossBars, int effectCols, int effectRows, boolean rightHanded, boolean offhand, boolean attack, int healthRows,
             int toastH, int chat) {
         int bossBottom = bossBars <= 0 ? 0 : 12 + 19 * bossBars;
-        return new Scene(w, h, rightHanded, offhand, attack, healthRows, effectCols, effectRows, bossBottom, toastH, chat > 0 ? 320 : 0, chat > 0 ? 70 : 0);
+        return new Scene(w, h, rightHanded, offhand, attack, healthRows, effectCols, effectRows, bossBottom, toastH, chat > 0 ? 320 : 0, chat > 0 ? 70 : 0, chat > 1 ? 90 : 0, chat > 1 ? 82 : 0, chat > 1, chat != 1 ? 110 + (w % 7) * 20 : 0, toastH > 32 ? 32 : 0);
+    }
+
+    static final java.util.Set<Id> MOVABLE = java.util.EnumSet.of(Id.V_BOSS_BARS, Id.V_EFFECTS, Id.V_TOASTS, Id.V_SIDEBAR, Id.V_ACTION_BAR, Id.V_ITEM_NAME, Id.V_SUBTITLES, Id.V_CHAT);
+    static int stuck;
+
+    // ずらしたバニラ v (いまの長方形 now) を、縦のどこかへ動かせば mod の部品と固定のバニラに重ならずに置けるか (画面の中)
+    static boolean canMove(Result r, Id id, Rect now) {
+        int base = r.shiftY.getOrDefault(id, 0);
+        int lo = id == Id.V_CHAT ? -r.scene.h() : id == Id.V_ACTION_BAR || id == Id.V_ITEM_NAME || id == Id.V_SUBTITLES ? -140 : 0;
+        int hi = id == Id.V_BOSS_BARS ? Math.max(0, r.scene.h() / 2 - 12 - (now.bottom() - base)) : id == Id.V_ACTION_BAR || id == Id.V_ITEM_NAME || id == Id.V_SUBTITLES ? 140 : r.scene.h();
+        for (int dy = lo; dy <= hi; dy++) {
+            Rect c = new Rect(now.x(), now.y() - base + dy - 1, now.w(), now.h() + 2);
+            if (c.y() < -1 || c.bottom() - 1 > r.scene.h() - 2) {
+                continue;
+            }
+            boolean hit = false;
+            for (Rect m : r.placed.values()) {
+                if (m.intersects(c)) {
+                    hit = true;
+                    break;
+                }
+            }
+            if (!hit) {
+                for (Map.Entry<Id, Rect> o : r.vanilla.entrySet()) {
+                    if (o.getKey() != id && (o.getKey() != Id.V_CHAT) && o.getValue().intersects(c)) {
+                        hit = true;
+                        break;
+                    }
+                }
+            }
+            if (!hit) {
+                return true;
+            }
+        }
+        return false;
     }
 
     static void check(List<String> f, Scene s, List<Request> reqs, String what) {
         Result r = HudLayout.compute(s, reqs);
         String where = String.format("gui %dx%d boss %d eff %d/%d rh %s off %s atk %s rows %d toast %d chat %s [%s]", s.w(), s.h(), s.bossBottom(),
-                s.effectCols(), s.effectRows(), s.rightHanded(), s.offhand(), s.attackOnHotbar(), s.healthRows(), s.toastH(), s.chatW() > 0, what);
+                s.effectCols(), s.effectRows(), s.rightHanded(), s.offhand(), s.attackOnHotbar(), s.healthRows(), s.toastH(), s.chatW() > 0, what) + " sb " + s.sidebarW() + " sub " + s.subtitles();
         Rect screen = new Rect(0, 0, s.w(), s.h());
         List<Map.Entry<Id, Rect>> mods = new ArrayList<>(r.placed.entrySet());
         for (Map.Entry<Id, Rect> e : mods) {
@@ -246,13 +282,18 @@ public final class HudLayoutSelfTest {
             }
             for (Map.Entry<Id, Rect> v : r.vanilla.entrySet()) {
                 boolean bottomCenter = mods.get(i).getKey() == Id.HINTS || mods.get(i).getKey() == Id.CAPTION || mods.get(i).getKey() == Id.DOWNED_SELF;
-                if (v.getKey() == Id.V_CHAT && !bottomCenter) {
+                if (v.getKey() == Id.V_CHAT && !bottomCenter && false) {
                     continue;
                 }
                 if (mods.get(i).getKey() == Id.AIM_RING && v.getKey() == Id.V_CROSSHAIR) {
                     continue;
                 }
                 if (mods.get(i).getValue().intersects(v.getValue())) {
+                    // 動かせるバニラは、重なるなら「どこへ動かしても空きがない」ときだけ許す (mod 側は動かさない)
+                    if (MOVABLE.contains(v.getKey()) && !canMove(r, v.getKey(), v.getValue())) {
+                        stuck++;
+                        continue;
+                    }
                     f.add(where + ": " + mods.get(i).getKey() + " " + mods.get(i).getValue() + " overlaps vanilla " + v.getKey() + " " + v.getValue());
                 }
             }
