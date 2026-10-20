@@ -213,6 +213,7 @@ public final class TideBackSelfTest {
         TideIslandBuilder.ENTRANCE_SIGNS.forEach(i -> expected.add(i.pos()));
         if (TideDeck.placed()) {
             TideDeck.SIGNS.forEach(i -> expected.add(i.pos()));
+            TideDeck.SIGNS2.forEach(i -> expected.add(i.pos()));
         }
         TideCaches.CACHES.forEach(c -> expected.add(c.tablet()));
         TideCaches.TABLETS.forEach(t -> expected.add(t.pos()));

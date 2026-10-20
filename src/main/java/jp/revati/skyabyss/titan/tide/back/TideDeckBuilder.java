@@ -341,7 +341,7 @@ public final class TideDeckBuilder {
         t12(kit);
     }
 
-    // H の西の端 (x -8〜-4) から南へ 18 段下る階段。頭上は 6。H の南の壁 (z 47・48) を抜く
+    // H の南の壁 (x 24〜27。T02 と T10 のあいだ) から南へ 18 段下る階段。頭上は 6。H の南の壁 (z 47・48) を抜く
     private static void stairwell(TideKit kit) {
         kit.zone(TideZone.VAULT);
         for (int z = 47; z <= 64; z++) {
@@ -421,6 +421,9 @@ public final class TideDeckBuilder {
                     kit.set(x, bed, z, LAMP);
                 }
             }
+        }
+        for (int x : new int[] {4, 8, 12}) {
+            kit.set(x, bed, 107, LAMP);
         }
         lampsAlong(kit, T03, G + 3, 4);
         for (int z = 76; z <= 108; z += 4) {
@@ -507,6 +510,12 @@ public final class TideDeckBuilder {
         }
         lampsAlong(kit, T11, G + 3, 4);
         lampsAlong(kit, T11, G + 7, 6);
+        // 床の灯り (道の下にも埋める。道は見かけで描き替えるが、光は残る)
+        for (int z = 79; z <= 103; z += 4) {
+            for (int x : new int[] {40, 44, 48}) {
+                floorLamp2(kit, x, z);
+            }
+        }
         for (int z = 77; z <= 105; z += 4) {
             for (int x : new int[] {38, 44, 50}) {
                 kit.lampIn(x, G + 11, z);

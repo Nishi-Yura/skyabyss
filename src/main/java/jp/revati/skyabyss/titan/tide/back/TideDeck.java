@@ -130,12 +130,12 @@ public final class TideDeck {
     public static final List<Area> ROOMS1 = List.of(TC, H, T02, T10, T06, T06_STONE_ROOM, T07, T07_STONE_ROOM);
 
     // ================================================================ P3: 下の階 (docs/design/29 の 3.7)
-    // 試練の広間 H の西の端の階段 (x -8〜-4) を南へ 18 段下ると、下の階の広間 H2 (床 56)。H2 の南の壁に五つの戸が並ぶ:
+    // 試練の広間 H の南の壁の階段 (x 24〜27。T02 と T10 のあいだ) を南へ 18 段下ると、下の階の広間 H2 (床 56)。H2 の南の壁に五つの戸が並ぶ:
     //   くらげの回廊 T03 (x 0〜16) ・渦潮の滑り台 T04 (x 20〜32) ・大貝の護送 T11 (x 36〜52) ・珊瑚の標本棚 T08 (x 56〜72) ・真珠守りの試し T12 (x 75〜95)
     // 床の高さは 56 (人が立つのは 57)。上の階の入江の底 (70)・円環の穴の底 (67) の下に、天井 67 の上は 3 ブロック以上の石が残る。
     public static final int G = 56;
 
-    public static final Area STAIR = new Area(-8, -4, 47, 64, G, 24);
+    public static final Area STAIR = new Area(24, 27, 47, 64, G, 24);
     public static final Area H2 = new Area(-8, 90, 65, 72, G, 10);
     public static final Area T03 = new Area(0, 16, 75, 110, G, 10);
     public static final Area T03_STONE_ROOM = new Area(4, 12, 113, 117, G, 6);
@@ -154,13 +154,13 @@ public final class TideDeck {
     public static final BlockPos BOARD_H2 = new BlockPos(6, G + 1, 65);
 
     public static final List<TideBackLayout.Inscription> SIGNS2 = List.of(
-            new TideBackLayout.Inscription("sign.skyabyss.tide_t03", new BlockPos(8, G + 3, 72), net.minecraft.core.Direction.NORTH),
-            new TideBackLayout.Inscription("sign.skyabyss.tide_t04", new BlockPos(26, G + 3, 72), net.minecraft.core.Direction.NORTH),
-            new TideBackLayout.Inscription("sign.skyabyss.tide_t11", new BlockPos(44, G + 3, 72), net.minecraft.core.Direction.NORTH),
-            new TideBackLayout.Inscription("sign.skyabyss.tide_t08", new BlockPos(64, G + 3, 72), net.minecraft.core.Direction.NORTH),
-            new TideBackLayout.Inscription("sign.skyabyss.tide_t12", new BlockPos(85, G + 3, 72), net.minecraft.core.Direction.NORTH),
+            new TideBackLayout.Inscription("sign.skyabyss.tide_t03", new BlockPos(4, G + 3, 72), net.minecraft.core.Direction.NORTH),
+            new TideBackLayout.Inscription("sign.skyabyss.tide_t04", new BlockPos(22, G + 3, 72), net.minecraft.core.Direction.NORTH),
+            new TideBackLayout.Inscription("sign.skyabyss.tide_t11", new BlockPos(40, G + 3, 72), net.minecraft.core.Direction.NORTH),
+            new TideBackLayout.Inscription("sign.skyabyss.tide_t08", new BlockPos(60, G + 3, 72), net.minecraft.core.Direction.NORTH),
+            new TideBackLayout.Inscription("sign.skyabyss.tide_t12", new BlockPos(81, G + 3, 72), net.minecraft.core.Direction.NORTH),
             new TideBackLayout.Inscription("sign.skyabyss.tide_deck2_guide", new BlockPos(-2, G + 3, 65), net.minecraft.core.Direction.SOUTH),
-            new TideBackLayout.Inscription("sign.skyabyss.tide_stairs", new BlockPos(-6, F + 3, 46), net.minecraft.core.Direction.NORTH));
+            new TideBackLayout.Inscription("sign.skyabyss.tide_stairs", new BlockPos(21, F + 3, 46), net.minecraft.core.Direction.NORTH));
 
     private static List<BlockPos> door2(int x1, int x2, int z1, int z2) {
         List<BlockPos> out = new ArrayList<>();
