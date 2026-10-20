@@ -604,6 +604,13 @@ public class TideShellEntity extends Entity implements GeoEntity, TravelTitan, j
             sampleNow(serverLevel);
         }
         double want = Math.max(ty, Math.max(groundNow, groundAhead));
+        // 休む・寄る最後の 60 ブロックは、休む高さから MAX_RAISE を超えて持ち上げない (腹が水に浸かる深さを保つ。足りない地形は REST_BURY の埋めで受ける)
+        boolean settling = mode == Mode.REST || (mode == Mode.APPROACH && horizontalDistanceTo(restX, restZ) < 60);
+        double cap = Double.POSITIVE_INFINITY;
+        if (settling && level() instanceof ServerLevel lv) {
+            cap = lv.getSeaLevel() - REST_DRAFT + TideOcean.MAX_RAISE;
+            want = Math.min(want, cap);
+        }
         double r = rate;
         if (want > getY()) {
             // 持ち上げるべき差が大きいほど、少しだけ速く (最大で秒 10 ブロック)
@@ -614,6 +621,7 @@ public class TideShellEntity extends Entity implements GeoEntity, TravelTitan, j
         if (ny < groundNow) {
             ny = groundNow;
         }
+        ny = Math.min(ny, cap);
         if (Math.abs(ny - getY()) > 1e-4) {
             setPos(getX(), ny, getZ());
         }

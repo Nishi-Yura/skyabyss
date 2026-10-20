@@ -188,8 +188,9 @@ public final class TideOcean {
         return Double.isFinite(need) ? need - TideShellEntity.REST_BURY - (level.getSeaLevel() - TideShellEntity.REST_DRAFT) : 0.0;
     }
 
-    // 休む場所を選ぶときの持ち上げの上限 (ブロック)。安全の余白だけ。これより持ち上げないと浅瀬・岸にめり込む場所は選ばない (浮いて見えない)
-    public static final double MAX_RAISE = 8.0;
+    // 休む場所を選ぶときの持ち上げの上限 (ブロック)。安全の余白だけ。これより持ち上げないと浅瀬・岸にめり込む場所は選ばない (浮いて見えない。持ち上げは 3 まで)
+    public static final double MAX_RAISE = 3.0;
+    // 休む高さの上限 (底がこれより上へは上がらない)。甲羅の腹がいつも水に 8 ブロック以上浸かる (8 だと腹が 3 ブロックしか沈まず、甲羅が水に浮いて見えた)
 
     // 呼び貝で呼ぶときの休む場所: まず (px, pz) の人の近く (findRestSpot)。人が海から遠いときは、読み込まれている範囲で
     // いちばん近い海辺を、輪を広げながら探す (人から 96〜256 ブロックを 32 ブロックずつ、16 方向)。見つからなければ null。
