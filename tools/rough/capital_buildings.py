@@ -177,6 +177,122 @@ def bell_c(g: Grid, rng=None):
     g.mark("stand", 0, 0, 8)
 
 
+# ---------------------------------------------------------------- 空見の砦 3 案 (天守のない見張りの砦。王の館ではない。本丸は閉じ、塔だけが生きている)
+def _wall_ring(g, x0, z0, x1, z1, h, t=2, wall="stone_bricks", cap=True):
+    for (ax0, az0, ax1, az1) in ((x0, z0, x1, z0 + t - 1), (x0, z1 - t + 1, x1, z1), (x0, z0, x0 + t - 1, z1), (x1 - t + 1, z0, x1, z1)):
+        box(g, ax0, 0, az0, ax1, h, az1, wall)
+    if cap:
+        for i in range(x0, x1 + 1, 2):
+            g.set(i, h + 1, z0, wall)
+            g.set(i, h + 1, z1, wall)
+        for i in range(z0, z1 + 1, 2):
+            g.set(x0, h + 1, i, wall)
+            g.set(x1, h + 1, i, wall)
+
+
+def _tower(g, x0, z0, w, h, wall="deepslate_bricks", cap="deepslate_tile_slab[type=bottom]"):
+    box(g, x0, 0, z0, x0 + w - 1, h, z0 + w - 1, wall)
+    air(g, x0 + 1, 1, z0 + 1, x0 + w - 2, h - 1, z0 + w - 2)
+    box(g, x0, h + 1, z0, x0 + w - 1, h + 1, z0 + w - 1, cap)
+    g.set(x0 + w // 2, h + 2, z0 + w // 2, "lantern[hanging=false]")
+
+
+def _shut_gate(g, x, z, w, h, axis="z"):
+    """閉じた門 (鉄格子) と碑"""
+    if axis == "z":
+        air(g, x - w // 2, 0, z - 1, x + w // 2, h, z)
+        box(g, x - w // 2, 0, z, x + w // 2, h, z, "iron_bars[north=false,south=false,east=true,west=true,waterlogged=false]")
+        g.set(x - w // 2 - 2, 0, z + 1, "skyabyss:tablet[facing=south,standing=true]")
+        lantern_post(g, x - w // 2 - 1, 0, z + 2)
+        lantern_post(g, x + w // 2 + 1, 0, z + 2)
+
+
+def keep_a(g: Grid, rng=None):
+    """A「四隅の塔の砦」: 44×40 の城壁 (高さ 10) と四隅の塔、北東に見張り塔 (高さ 30)。南の門は閉じ、中は閉じた本丸 (低い石の館)"""
+    g.meta = {"rect": [-24, -22, 24, 22], "level": True}
+    x0, z0, x1, z1 = -22, -20, 22, 20
+    box(g, x0, -1, z0, x1, -1, z1, "cobbled_deepslate")
+    _wall_ring(g, x0, z0, x1, z1, 9)
+    for cx, cz in ((x0, z0), (x1 - 5, z0), (x0, z1 - 5), (x1 - 5, z1 - 5)):
+        _tower(g, cx, cz, 6, 13)
+    _tower(g, 8, -16, 9, 29, wall="stone_bricks", cap="spruce_slab[type=bottom]")
+    for y in (8, 16, 24):
+        air(g, 12, y, -16, 12, y + 1, -16)
+        air(g, 12, y, -8, 12, y + 1, -8)
+    # 本丸 (閉じた石の館 20×12、高さ 7)
+    shell(g, -14, 0, -10, 5, 6, 1, "stone_bricks", "deepslate_bricks")
+    box(g, -14, 7, -10, 5, 7, 1, "deepslate_tiles")
+    g.set(-5, 0, 1, "iron_door[facing=north,half=lower,hinge=left,open=false,powered=false]")
+    g.set(-5, 1, 1, "iron_door[facing=north,half=upper,hinge=left,open=false,powered=false]")
+    _shut_gate(g, 0, z1, 5, 4)
+    g.mark("stand", 0, 0, 26)
+
+
+def keep_b(g: Grid, rng=None):
+    """B「一本の大塔」: 低い輪の壁 (高さ 5) の中に、一本の太い見張り塔 (15×15・高さ 40) だけが立つ。塔の足もとに閉じた本丸の戸。「塔だけが生きている」を形に"""
+    g.meta = {"rect": [-24, -22, 24, 22], "level": True}
+    x0, z0, x1, z1 = -22, -20, 22, 20
+    box(g, x0, -1, z0, x1, -1, z1, "cobbled_deepslate")
+    _wall_ring(g, x0, z0, x1, z1, 4, t=2)
+    for cx, cz in ((x0, z0), (x1 - 3, z0), (x0, z1 - 3), (x1 - 3, z1 - 3)):
+        _tower(g, cx, cz, 4, 7)
+    # 大塔 15×15、高さ 40。段ごとに細い窓、上の 3 段は少し広がる見張り台
+    box(g, -7, 0, -7, 7, 36, 7, "stone_bricks")
+    air(g, -6, 1, -6, 6, 35, 6)
+    for cx, cz in ((-7, -7), (7, -7), (-7, 7), (7, 7)):
+        box(g, cx, 0, cz, cx, 36, cz, "deepslate_bricks")
+    for y in range(6, 34, 7):
+        for (ax, az) in ((0, -7), (0, 7), (-7, 0), (7, 0)):
+            air(g, ax, y, az, ax, y + 1, az)
+    box(g, -8, 37, -8, 8, 39, 8, "deepslate_bricks")
+    air(g, -7, 38, -7, 7, 39, 7)
+    for i in range(-8, 9, 2):
+        g.set(i, 40, -8, "deepslate_bricks")
+        g.set(i, 40, 8, "deepslate_bricks")
+        g.set(-8, 40, i, "deepslate_bricks")
+        g.set(8, 40, i, "deepslate_bricks")
+    box(g, -2, 37, -2, 2, 37, 2, "spruce_planks")
+    g.set(0, 41, 0, "lantern[hanging=false]")
+    # 足もとの閉じた戸 (鉄の戸) と碑
+    air(g, 0, 0, 7, 0, 1, 7)
+    g.set(0, 0, 7, "iron_door[facing=north,half=lower,hinge=left,open=false,powered=false]")
+    g.set(0, 1, 7, "iron_door[facing=north,half=upper,hinge=left,open=false,powered=false]")
+    g.set(-3, 0, 8, "skyabyss:tablet[facing=south,standing=true]")
+    _shut_gate(g, 0, z1, 5, 3)
+    g.mark("stand", 0, 0, 26)
+
+
+def keep_c(g: Grid, rng=None):
+    """C「岩の上の砦」: 中央に盛った岩 (高さ 6) の上に小さな砦 (24×18) と見張り塔。岩の南の階段が門へ。壁は岩の縁に沿う低い壁。遠くから「丘の上の砦」に見える"""
+    g.meta = {"rect": [-24, -22, 24, 22], "level": True}
+    x0, z0, x1, z1 = -22, -20, 22, 20
+    box(g, x0, -1, z0, x1, -1, z1, "cobbled_deepslate")
+    _wall_ring(g, x0, z0, x1, z1, 3, t=1, cap=False)
+    # 岩 (段々に 3 段)
+    for i, (hx, hz, y0, y1) in enumerate(((18, 15, 0, 1), (15, 12, 2, 3), (12, 9, 4, 5))):
+        box(g, -hx, y0, -hz, hx, y1, hz, "cobbled_deepslate" if i < 2 else "deepslate_bricks")
+    # 岩の上の砦 24×18 (y 6..13)、四隅の小塔、見張り塔
+    shell(g, -12, 6, -9, 11, 12, 8, "stone_bricks", "deepslate_bricks")
+    box(g, -11, 13, -8, 10, 13, 7, "deepslate_tiles")
+    for cx, cz in ((-12, -9), (9, -9), (-12, 6), (9, 6)):
+        box(g, cx, 6, cz, cx + 2, 15, cz + 2, "deepslate_bricks")
+        g.set(cx + 1, 16, cz + 1, "lantern[hanging=false]")
+    box(g, 2, 6, -8, 8, 30, -2, "stone_bricks")
+    air(g, 3, 7, -7, 7, 29, -3)
+    box(g, 2, 31, -8, 8, 31, -2, "spruce_slab[type=bottom]")
+    g.set(5, 32, -5, "lantern[hanging=false]")
+    # 南の階段 (岩を上る) と、砦の閉じた戸
+    for i in range(6):
+        box(g, -2, i, 15 - i, 2, i, 15 - i, "stone_brick_stairs[facing=north,half=bottom,shape=straight,waterlogged=false]")
+    air(g, -1, 6, 8, 1, 8, 8)
+    box(g, -1, 6, 8, 1, 8, 8, "iron_bars[north=false,south=false,east=true,west=true,waterlogged=false]")
+    g.set(-3, 6, 9, "skyabyss:tablet[facing=south,standing=true]")
+    _shut_gate(g, 0, z1, 5, 2)
+    g.mark("stand", 0, 0, 26)
+
+
+
+
 SUBJECTS = {
     "bell": {
         "title": "大鐘楼（語り部の家つき）",
@@ -184,6 +300,14 @@ SUBJECTS = {
         "notes": {"a": "A 石の鐘楼（別棟の家）", "b": "B 鯨骨の鐘楼（骨の肋）", "c": "C 段の鐘楼（家は塔の中）"},
         "eye": ((0, 1.6, 22), (0, 8, 0)),
     },
+}
+
+
+SUBJECTS["keep"] = {
+    "title": "空見の砦（天守のない見張りの砦）",
+    "options": {"a": keep_a, "b": keep_b, "c": keep_c},
+    "notes": {"a": "A 四隅の塔の砦（城壁と本丸）", "b": "B 一本の大塔（塔だけが生きている）", "c": "C 岩の上の砦（丘の砦）"},
+    "eye": ((0, 1.6, 44), (0, 10, 0)),
 }
 
 
