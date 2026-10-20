@@ -308,6 +308,8 @@ def keep():
     box(30, 5, z1 - 1, 34, 9, z1, 'air')
     box(30, 5, z1, 34, 9, z1, 'iron_bars[north=false,south=false,east=true,west=true,waterlogged=false]')
     tablet(28, 5, z1 + 1, 'south', 'keep')
+    mark('open_keep', 32, 5, z1)
+    mark('open_keep2', 27, 5, -69)
     lantern_post(29, 5, z1 + 2)
     lantern_post(35, 5, z1 + 2)
 
@@ -353,6 +355,7 @@ def hall():
     blk(x0 + 9, 5, z1, 'iron_door[facing=north,half=lower,hinge=left,open=false,powered=false]')
     blk(x0 + 9, 6, z1, 'iron_door[facing=north,half=upper,hinge=left,open=false,powered=false]')
     tablet(x0 + 7, 5, z1 + 1, 'south', 'hall')
+    mark('open_hall', x0 + 9, 5, z1)
     lantern_post(x0 + 6, 5, z1 + 2, 2)
     lantern_post(x0 + 12, 5, z1 + 2, 2)
 
@@ -426,6 +429,7 @@ def guild():
     box(x0 - 3, 4, cz + 3, x0 - 3, 4, cz + 9, 'spruce_slab[type=bottom,waterlogged=false]')
     box(x0 - 3, 1, cz + 5, x0 - 3, 2, cz + 7, 'spruce_planks')
     tablet(x0 - 2, 0, cz - 5, 'west', 'guild')
+    mark('open_guild', x0, 0, cz)
     lantern_post(x0 - 2, 0, cz - 3)
     lantern_post(x0 - 2, 0, cz + 3)
 
@@ -459,6 +463,7 @@ def shrine():
     opening(cx + r, 0, cz - 1, cx + r, 2, cz + 1)
     box(cx + r, 0, cz - 1, cx + r, 2, cz + 1, 'iron_bars[north=false,south=false,east=true,west=true,waterlogged=false]')
     tablet(cx + r + 1, 0, cz + 3, 'east', 'shrine')
+    mark('open_shrine', cx + r, 0, cz)
     lantern_post(cx + r + 2, 0, cz - 3, 3)
 
 

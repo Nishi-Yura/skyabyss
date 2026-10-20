@@ -257,7 +257,8 @@ public final class SiteJob {
             anaX = x0;
             anaInit = true;
         }
-        boolean skipCheck = entry.started || force;
+        // 都 (fillWater) は世界の始まりに一度だけ置く大きな部品なので、人の建物・水の検査で場所を動かさない (整地で吸収する)
+        boolean skipCheck = entry.started || force || bp.fillWater;
         // 人の建物があるかは、地面の少し上まで見れば足りる (高い所は自然の木)
         int height = Math.min(Math.max(bp.maxY, 3) + 3, 16);
         BlockPos.MutableBlockPos p = new BlockPos.MutableBlockPos();
