@@ -2,7 +2,7 @@
 """はじまりの都の建物のラフ (一棟ずつ 3 案。docs/design/33 の 2.2)。
 
     python -I tools/rough/capital_buildings.py bell        # 大鐘楼 (語り部の家つき) の 3 案 → docs/review/town_roughs/bell_tower_sheet.png
-絵は opening_sites.py と同じ描き方 (上から・斜め・人の目線)。採用した案は tools/gen_capital.py に写す。
+絵は opening_sites.py と同じ描き方 (上から・斜め・人の目線)。採用した案は tools/capital/town.py に写す。
 座標: x = 東、z = 南、y = 上。地面の上面は y=-1、構造物の最初の段が y=0。
 """
 from __future__ import annotations
@@ -997,7 +997,7 @@ def render(subject: str):
         iso.save(out / f"{key}_iso.png")
         eye.save(out / f"{key}_eye.png")
         cols.append((sub["notes"][key], [top, iso, eye]))
-    sh = osite.sheet(sub["title"] + " 3 案（上から・斜め・人の目線）", cols, "ブロックの配置をそのまま描いた図。採用案を tools/gen_capital.py に写す。")
+    sh = osite.sheet(sub["title"] + " 3 案（上から・斜め・人の目線）", cols, "ブロックの配置をそのまま描いた図。採用案を tools/capital/town.py に写す。")
     path = OUT / f"{subject}_sheet.png"
     sh.save(path)
     print("wrote", path)
