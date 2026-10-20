@@ -4,6 +4,7 @@ A = 風切羽の重ね (羽の扇が輪郭) / B = 稲妻の折れ (銅の折れ�
 from __future__ import annotations
 
 from common import *
+from st_kit import plume
 
 TITAN = "thunder"
 
@@ -19,7 +20,8 @@ def charm_a(r):
     f += extrude("gem", [(-0.2, 4.7), (2.8, 4.7), (0.6, 0.9), (-2.4, 0.9)], 0.5, c=(0, 0, -1.1))
     f += extrude("gem", [(-3.1, 1.2), (3.9, 1.2), (2.7, -0.6), (-4.3, -0.6)], 0.5, c=(0, 0, -1.1))
     f += extrude("gem", [(-0.5, -0.9), (2.6, -0.9), (-1.7, -5.0)], 0.5, c=(0, 0, -1.1))
-    f += fan("acc", (0, -4.0), 3, 7.0, 26, 1.7, z=1.4)
+    f += fan("acc", (0, -4.0), 2, 7.0, 30, 1.7, z=1.4)
+    f += plume((3.4, 3.4, 1.0), (7.6, 7.6, 1.0), 1.3, 0.45, bend=-0.9)           # 嵐の羽 (先が焦げる)
     f += cord((0, 6.9, 0))
     if r in ("rare", "legend"):
         f += block("trim", (0, 5.3, 0), (2.4, 0.9, 2.2))
@@ -55,7 +57,9 @@ def charm_c(r):
 def anklet_a(r):
     f = torus("main", (0, 0, 0), 6.5, 0.9, 1.6, n=8, k=4, ax="y")
     f += ell("gem", (0, 0, -7.3), (1.1, 1.3, 0.8), segs=6, rings=1)
-    f += fan("acc", (0, -0.8), 3, 6.8, 24, 1.5, z=6.9)
+    for k, ang in enumerate((-22, 0, 22)):
+        a = math.radians(ang)
+        f += plume((math.sin(a) * 1.5, -0.8, 6.9), (math.sin(a) * 6.0, -0.8 - math.cos(a) * 7.2, 6.9 + 0.2 * k), 1.5, 0.45, bend=0.5 * (k - 1))
     if r in ("rare", "legend"):
         f += torus("trim", (0, 1.9, 0), 6.5, 0.6, 0.4, n=8, k=4, ax="y")
     return f
@@ -86,9 +90,9 @@ def anklet_c(r):
 
 # ====================================================================== 嵐の目の羽根 (装飾・伝説・髪に挿す)
 def eye_a(r):
-    f = feather("acc", (0, -6.0, 0), (0.8, 9.0, 0), 2.8, 0.7, big=True)
-    f += feather("acc", (0, -4.6, -0.5), (-4.0, 3.2, -0.5), 1.5, 0.5, big=False)
-    f += feather("acc", (0, -4.6, 0.5), (4.0, 2.4, 0.5), 1.5, 0.5, big=False)
+    f = plume((0, -6.0, 0), (0.8, 9.0, 0), 2.8, 0.7, bend=0.8, big=True)
+    f += plume((0, -4.6, -0.5), (-4.0, 3.2, -0.5), 1.5, 0.5, bend=-0.4)
+    f += plume((0, -4.6, 0.5), (4.0, 2.4, 0.5), 1.5, 0.5, bend=0.4)
     f += ell("gem", (0.3, 2.4, -0.6), (1.3, 2.0, 0.6), segs=6, rings=2)
     f += prism("main", (0, -4.0, -0.5), (0.5, 7.5, -0.5), 0.35, 0.2, sides=4, caps=(True, True), hint=(0, 0, 1))
     f += prism("main", (0, -7.6, 0), (0, -3.8, 0), 1.4, 1.7, sides=6, caps=(True, True), hint=(1, 0, 0))
@@ -130,7 +134,10 @@ def eye_c(r):
 
 # ====================================================================== 風切りの羽根 (滑空の道具・手に持つ)
 def gale_a(r):
-    f = fan("acc", (0, -6.5), 3, 15.5, 9, 3.0, down=False, z=0.0, big=True, dz=0.35)
+    f = []
+    for k, ang in enumerate((-9, 0, 9)):
+        a = math.radians(ang)
+        f += plume((0, -6.5, 0.35 * k), (math.sin(a) * 15.5, -6.5 + math.cos(a) * 15.5, 0.35 * k), 3.0, 0.5, bend=0.8 * (k - 1), big=True)
     for k in range(2):
         f += prism("main", (0, -7.4 + 1.4 * k, 0), (0, -6.5 + 1.4 * k, 0), 1.0, 1.0, sides=6, caps=(True, True), hint=(1, 0, 0))
     f += block("cord", (0.9, -8.8, 0), (0.7, 2.2, 0.7))

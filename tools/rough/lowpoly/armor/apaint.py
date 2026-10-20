@@ -99,6 +99,17 @@ def paint(faces, size, P, N, M, L, titan, rarity="common", plus=0):
         verd = np.isin(mats, ["acc"]) & (concave | ((n_mid > 0.72) & (np.abs(N[..., 1]) < 0.7)))
         put(verd, pick(PA, np.floor(1.0 + 1.6 * lit + bay).astype(int)))
         put(m("cloth"), pick(ST, shaded(ST, 0.30, 0.26, 0.06) - weave * (n_mid > 0.3) + (stripe_v & (n_mid > 0.6))))
+        # 嵐に焼けた傷み: 焦げた羽先 (soot)・羽の縁の焦げ・銅のひび (暗い線) とひびの中の稲妻 (光る)
+        SO = PAL["SOOT"]
+        put(m("soot"), pick(SO, np.floor(1.4 + 1.6 * lit + 1.2 * bay + 1.2 * (n_mid - 0.5)).astype(int)))
+        put(np.isin(mats, ["sec", "edge", "cloth"]) & (D < 0.8) & (n_mid > 0.55), pick(SO, np.floor(1.6 + 1.4 * lit + bay).astype(int)))
+        rn = np.abs(vnoise(L * 0.26 + 9, 5) - 0.5)
+        put(m("acc") & (rn < 0.02) & INS & (D > 0.4), pick(PAL["CRACK"], np.floor(0.6 + 1.4 * hash1(xx + yy * 3, 2)).astype(int)))
+        vlv = {"common": 0.0, "rare": 0.006, "legend": 0.010}[rarity] + (0.004 if plus >= 5 else 0) + (0.006 if plus >= 10 else 0)
+        vn = np.abs(vnoise(L * 0.18 + 21, 3) - 0.5)
+        vein = m("acc") & (vn < vlv) & INS & (D > 0.4)
+        put(vein, ramp(gp, 0.45 + 0.4 * hash1(xx + yy * 3, 6)))
+        glow |= vein
     else:  # ember
         RO, IR, RW, AS = PAL["ROCK"], PAL["IRON"], PAL["ROCKW"], PAL["ASH"]
         facet = hash1(np.floor(Y * 0.5) * 7 + np.floor(X * 0.5) * 3 + fi, 8) * 0.18 - 0.09
@@ -107,6 +118,12 @@ def paint(faces, size, P, N, M, L, titan, rarity="common", plus=0):
         put(m("edge"), pick(IR, shaded(IR, 0.78, 0.30, 0.06) - (pit < 0.03)))
         put(m("acc"), pick(RW, shaded(RW, 0.5, 0.3, 0.14)))
         put(m("cloth"), pick(RW, shaded(RW, 0.58, 0.3, 0.1) - weave * (n_mid > 0.3) - (n_hi > 0.78)))
+        # 鍛冶場の使い込み: 鎖・灰・錆び・焦げ
+        put(m("chain"), pick(IR, shaded(IR, 0.34, 0.3, 0.1) - (pit < 0.1)))
+        put(m("soot"), pick(AS, np.floor(0.6 + 1.0 * lit + bay).astype(int)) * 0.55)
+        ashm = np.isin(mats, ["main", "acc", "cloth"]) & (N[..., 1] > 0.35) & ((n_mid + 0.5 * n_lo + 0.4 * N[..., 1]) > 1.18)
+        put(ashm, pick(AS, np.floor(1.2 + 1.6 * lit + 1.2 * bay).astype(int)))
+        put(np.isin(mats, ["sec", "edge"]) & (hash1(xx * 5 + yy * 9 + fi * 3, 4) < 0.07) & (D > 0.7), pick(RW, np.floor(3.0 + bay).astype(int)))
     put(m("dark"), pick(PAL["DARK"], np.floor(1.2 + 1.2 * (0.5 + 0.5 * lit) + 0.8 * bay).astype(int)))
 
     # ---- 光る面と巨神ごとの地の光

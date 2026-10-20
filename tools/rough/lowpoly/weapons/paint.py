@@ -177,6 +177,13 @@ def paint(faces, size, P, N, M, L, titan, rarity="common", plus=0, inlay=None, e
         stripe = (np.floor(Y * 0.8) % 2) == 0
         put(m("wrap"), pick(AS, shaded(AS, 0.4, 0.3, 0.1) - stripe))
         put(m("acc"), pick(RW, shaded(RW, 0.5, 0.3, 0.14)))
+        # 鍛冶場の使い込み: 鎖 (鉄の輪)、鉄の帯の錆びた斑、玄武岩の上向きの面の灰、焦げた縁
+        put(m("chain"), pick(IR, shaded(IR, 0.34, 0.3, 0.1) - (pit < 0.1)))
+        put(m("soot"), pick(AS, np.floor(0.6 + 1.0 * lit + bay).astype(int)) * 0.55)
+        ashm = np.isin(mats, ["main", "guard", "acc"]) & (N[..., 1] > 0.35) & ((n_mid + 0.5 * n_lo + 0.4 * N[..., 1]) > 1.18)
+        put(ashm, pick(AS, np.floor(1.2 + 1.6 * lit + 1.2 * bay).astype(int)))
+        rust = np.isin(mats, ["spine", "edge"]) & (hash1(xx * 5 + yy * 9 + fi * 3, 4) < 0.07) & (D > 0.7)
+        put(rust, pick(RW, np.floor(3.0 + bay).astype(int)))
         dark_c = PAL["DARK"]
     put(m("cord"), pick(PAL["CORD"], shaded(PAL["CORD"], 0.6, 0.3, 0.06)))
     put(m("dark"), pick(PAL["DARK"], np.floor(1.2 + 1.2 * (0.5 + 0.5 * lit) + 0.8 * bay).astype(int)))
