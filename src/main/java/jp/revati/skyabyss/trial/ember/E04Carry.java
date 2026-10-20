@@ -273,8 +273,8 @@ public final class E04Carry implements TrialCell {
                 }
             }
         }
-        if (!back.getBlockState(BRAZIER).isAir()) {
-            bad.add("E04 brazier is blocked");
+        if (back.getBlockState(BRAZIER).isAir()) {
+            bad.add("E04 brazier is missing");
         }
         if (!back.getBlockState(EmberDeck.E04_STONE).is(jp.revati.skyabyss.titan.ember.back.EmberBackSetup.KINDLE_STONE.get())) {
             bad.add("E04 stone missing");
