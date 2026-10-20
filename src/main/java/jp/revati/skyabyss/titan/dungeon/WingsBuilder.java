@@ -288,14 +288,14 @@ final class WingsBuilder {
                 }
             }
         }
-        kit.set(px + 3 * side, ph + 1, pz, Blocks.SOUL_CAMPFIRE.defaultBlockState().setValue(CampfireBlock.LIT, true).setValue(CampfireBlock.SIGNAL_FIRE, false));
+        kit.set(px + 3 * side, ph + 1, pz, jp.revati.skyabyss.relic.RelicBlocks.hearth(jp.revati.skyabyss.relic.RelicStyle.WHALE, true));
         kit.standingSign(new BlockPos(px + 5 * side, ph + 1, pz + 1), side < 0 ? "sign.skyabyss.fin_left" : "sign.skyabyss.fin_right");
         kit.lantern(px + 5 * side, ph + 1, pz - 2);
         // 先端の見どころ (版 18): 左は碑 (昔の巡礼者の言葉) と小さな宝、右は見晴らしと、風の下の隠し棚の宝
         kit.standingSign(new BlockPos(px + 5 * side, ph + 1, pz - 1), side < 0 ? "sign.skyabyss.fin_left_lore" : "sign.skyabyss.fin_right_lore");
         if (side < 0) {
             BlockPos chest = cachePos(side);
-            kit.set(chest, Blocks.CHEST.defaultBlockState().setValue(net.minecraft.world.level.block.ChestBlock.FACING, Direction.NORTH));
+            kit.set(chest, jp.revati.skyabyss.relic.RelicBlocks.cache(jp.revati.skyabyss.relic.RelicStyle.WHALE, Direction.NORTH));
             kit.set(chest.relative(Direction.WEST), Blocks.BONE_BLOCK.defaultBlockState());
             kit.set(chest.relative(Direction.EAST), Blocks.AMETHYST_CLUSTER.defaultBlockState());
         } else {
@@ -346,7 +346,7 @@ final class WingsBuilder {
         }
         BlockPos chest = cachePos(side);
         kit.set(chest.below(), kit.pal().trim());
-        kit.set(chest, Blocks.CHEST.defaultBlockState().setValue(net.minecraft.world.level.block.ChestBlock.FACING, Direction.NORTH));
+        kit.set(chest, jp.revati.skyabyss.relic.RelicBlocks.cache(jp.revati.skyabyss.relic.RelicStyle.WHALE, Direction.NORTH));
         kit.lantern(px + 2 * side, ph - 2, pz + 7);
         kit.lantern(px + 4 * side, ph - 2, pz + 7);
     }
@@ -411,7 +411,7 @@ final class WingsBuilder {
         // 鎖の祭壇の跡と焚き火
         kit.set(0, CAMP_Y + 1, CAMP_Z, Blocks.CHISELED_DEEPSLATE.defaultBlockState());
         kit.lantern(0, CAMP_Y + 2, CAMP_Z);
-        kit.set(2, CAMP_Y + 1, CAMP_Z, Blocks.SOUL_CAMPFIRE.defaultBlockState().setValue(CampfireBlock.LIT, true).setValue(CampfireBlock.SIGNAL_FIRE, false));
+        kit.set(2, CAMP_Y + 1, CAMP_Z, jp.revati.skyabyss.relic.RelicBlocks.hearth(jp.revati.skyabyss.relic.RelicStyle.WHALE, true));
         kit.set(3, CAMP_Y + 1, CAMP_Z, Blocks.DEEPSLATE_BRICK_SLAB.defaultBlockState());
         kit.set(2, CAMP_Y + 1, CAMP_Z + 1, Blocks.DEEPSLATE_BRICK_SLAB.defaultBlockState());
         kit.standingSign(new BlockPos(-2, CAMP_Y + 1, CAMP_Z - 2), "sign.skyabyss.camp_page");

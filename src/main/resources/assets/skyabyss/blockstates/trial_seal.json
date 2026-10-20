@@ -1,7 +1,16 @@
 {
-  "variants": {
-    "": {
-      "model": "skyabyss:block/trial_seal"
-    }
+ "variants": {
+  "titan=whale": {
+   "model": "skyabyss:block/relic_seal_whale"
+  },
+  "titan=tide": {
+   "model": "skyabyss:block/relic_seal_tide"
+  },
+  "titan=storm": {
+   "model": "skyabyss:block/relic_seal_storm"
+  },
+  "titan=ember": {
+   "model": "skyabyss:block/relic_seal_ember"
   }
+ }
 }

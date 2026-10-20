@@ -332,7 +332,7 @@ final class StormCircuit {
                 }
             }
             for (BlockPos l : c.levers()) {
-                kit.put(l.getX(), l.getY(), l.getZ(), Blocks.LEVER.defaultBlockState().setValue(LeverBlock.FACE, AttachFace.FLOOR)
+                kit.put(l.getX(), l.getY(), l.getZ(), jp.revati.skyabyss.relic.RelicBlocks.leverBase(jp.revati.skyabyss.relic.RelicStyle.STORM).setValue(LeverBlock.FACE, AttachFace.FLOOR)
                         .setValue(LeverBlock.FACING, Direction.NORTH).setValue(LeverBlock.POWERED, false));
             }
         }
@@ -373,14 +373,14 @@ final class StormCircuit {
 
     static void setLever(ServerLevel level, BlockPos p, boolean on) {
         BlockState s = level.getBlockState(p);
-        if (s.is(Blocks.LEVER) && s.getValue(LeverBlock.POWERED) != on) {
+        if (s.is(jp.revati.skyabyss.registry.ModBlocks.RELIC_LEVER.get()) && s.getValue(LeverBlock.POWERED) != on) {
             level.setBlock(p, s.setValue(LeverBlock.POWERED, on), 3);
         }
     }
 
     static boolean leverOn(ServerLevel level, BlockPos p) {
         BlockState s = level.getBlockState(p);
-        return s.is(Blocks.LEVER) && s.getValue(LeverBlock.POWERED);
+        return s.is(jp.revati.skyabyss.registry.ModBlocks.RELIC_LEVER.get()) && s.getValue(LeverBlock.POWERED);
     }
 
     // 導線の床と金の床のあるべき姿 (世界のレバーの状態から)

@@ -147,7 +147,8 @@ public final class TrialHub {
         if (titan == null || BackGroupData.get(level).peek(group) == null) {
             return;
         }
-        net.minecraft.world.level.block.state.BlockState seal = jp.revati.skyabyss.registry.ModBlocks.TRIAL_SEAL.get().defaultBlockState();
+        net.minecraft.world.level.block.state.BlockState seal = jp.revati.skyabyss.registry.ModBlocks.TRIAL_SEAL.get().defaultBlockState()
+                .setValue(jp.revati.skyabyss.relic.RelicStyle.PROP, jp.revati.skyabyss.relic.RelicStyle.ofTitan(titan));
         for (String key : TrialRegions.keys(titan)) {
             if (!HubTablets.cleared(level, group, titan, key)) {
                 continue;

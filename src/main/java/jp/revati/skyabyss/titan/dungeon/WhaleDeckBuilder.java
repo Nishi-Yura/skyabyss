@@ -147,7 +147,7 @@ final class WhaleDeckBuilder {
             kit.set(p, gate);
         }
         // 鐘: 入口の岩棚と中ほどの台
-        BlockState bell = Blocks.BELL.defaultBlockState().setValue(BellBlock.ATTACHMENT, BellAttachType.FLOOR).setValue(BellBlock.FACING, Direction.NORTH);
+        BlockState bell = jp.revati.skyabyss.relic.RelicBlocks.bell(jp.revati.skyabyss.relic.RelicStyle.WHALE, Direction.NORTH);
         kit.set(W02Bell.BELL_A, bell);
         kit.set(W02Bell.BELL_M, bell);
         deckRest(kit, REST_W02_A);
@@ -240,7 +240,7 @@ final class WhaleDeckBuilder {
         BlockPos c = campfire(id);
         int fy = c.getY() - 1;
         kit.set(c.getX(), fy, c.getZ(), BuildKit.CHISELED);
-        kit.set(c, Blocks.SOUL_CAMPFIRE.defaultBlockState().setValue(CampfireBlock.LIT, true).setValue(CampfireBlock.SIGNAL_FIRE, false));
+        kit.set(c, jp.revati.skyabyss.relic.RelicBlocks.hearth(jp.revati.skyabyss.relic.RelicStyle.WHALE, true));
         for (Direction d : Direction.Plane.HORIZONTAL) {
             int bx = c.getX() + d.getStepX() * 2;
             int bz = c.getZ() + d.getStepZ() * 2;

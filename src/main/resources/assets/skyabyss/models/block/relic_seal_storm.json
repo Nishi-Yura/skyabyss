@@ -1,0 +1,6 @@
+{
+ "parent": "minecraft:block/cube_all",
+ "textures": {
+  "all": "skyabyss:block/relic_storm_seal"
+ }
+}

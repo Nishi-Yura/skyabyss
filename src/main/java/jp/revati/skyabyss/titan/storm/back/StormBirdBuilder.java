@@ -254,7 +254,7 @@ public final class StormBirdBuilder {
         }
         // 見晴らしの宝箱 (西・東。見た目だけ。右クリックで StormCaches が贈り物を渡す)
         for (BlockPos c : new BlockPos[] {CACHE_WEST, CACHE_EAST}) {
-            kit.put(c.getX(), c.getY(), c.getZ(), Blocks.CHEST.defaultBlockState().setValue(net.minecraft.world.level.block.ChestBlock.FACING, Direction.SOUTH));
+            kit.put(c.getX(), c.getY(), c.getZ(), jp.revati.skyabyss.relic.RelicBlocks.cache(jp.revati.skyabyss.relic.RelicStyle.STORM, Direction.SOUTH));
             kit.put(c.getX(), c.getY() - 1, c.getZ(), StormKit.COPPER);
             // 宝箱の両脇の灯り
             kit.put(c.getX() - 1, c.getY(), c.getZ(), StormKit.LAMP);
@@ -337,7 +337,7 @@ public final class StormBirdBuilder {
         }
         // 炉 (共鳴の炉) と飾りの焚き火、腰掛け
         kit.put(10, a.floor() + 1, 43, ModBlocks.RESONANCE_FORGE.get().defaultBlockState());
-        kit.put(-10, a.floor() + 1, 43, Blocks.CAMPFIRE.defaultBlockState());
+        kit.put(-10, a.floor() + 1, 43, jp.revati.skyabyss.relic.RelicBlocks.hearth(jp.revati.skyabyss.relic.RelicStyle.STORM, true));
         StormDeco.bench(kit, -12, -9, 30, 30, a.floor() + 1, Direction.SOUTH);
         // 羽軸の柱 (入口の左右)
         for (int sx : new int[] {-9, 9}) {

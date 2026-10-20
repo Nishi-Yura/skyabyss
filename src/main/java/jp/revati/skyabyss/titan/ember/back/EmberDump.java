@@ -30,7 +30,7 @@ public final class EmberDump {
         if (s.is(Blocks.LAVA)) {
             return 'L';
         }
-        if (s.is(Blocks.CHEST)) {
+        if (s.is(jp.revati.skyabyss.registry.ModBlocks.RELIC_CACHE.get())) {
             return 'C';
         }
         if (s.getBlock() instanceof jp.revati.skyabyss.tablet.TabletBlock) {

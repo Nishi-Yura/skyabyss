@@ -297,7 +297,7 @@ public final class TideDeckBuilder {
                 kit.set(T07Seas.scale(tank, k), Blocks.DARK_PRISMARINE.defaultBlockState());
             }
         }
-        BlockState lever = Blocks.LEVER.defaultBlockState().setValue(LeverBlock.FACE, AttachFace.FLOOR).setValue(LeverBlock.FACING, Direction.SOUTH);
+        BlockState lever = jp.revati.skyabyss.relic.RelicBlocks.leverBase(jp.revati.skyabyss.relic.RelicStyle.TIDE).setValue(LeverBlock.FACE, AttachFace.FLOOR).setValue(LeverBlock.FACING, Direction.SOUTH);
         for (BlockPos p : T07Seas.PLUGS) {
             kit.set(p, lever);
         }

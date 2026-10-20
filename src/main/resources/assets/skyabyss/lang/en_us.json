@@ -1372,5 +1372,11 @@
   "sign.skyabyss.deck_hall.4": "doors open",
   "objective.skyabyss.trial_board": "Read the Trial Board to see your trials",
   "objective.skyabyss.trial_deck": "Go up to the Trial Hall",
-  "objective.skyabyss.trial_door": "Enter your trial through the marked door"
+  "objective.skyabyss.trial_door": "Enter your trial through the marked door",
+  "block.skyabyss.relic_cache": "Relic Cache",
+  "block.skyabyss.rest_hearth": "Rest Hearth",
+  "block.skyabyss.relic_lever": "Relic Lever",
+  "block.skyabyss.relic_button": "Relic Button",
+  "block.skyabyss.relic_plate": "Relic Pressure Plate",
+  "block.skyabyss.relic_bell": "Relic Bell"
 }

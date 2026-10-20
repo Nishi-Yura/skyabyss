@@ -390,11 +390,11 @@ public final class T07Seas implements TrialCell {
             }
         }
         for (BlockPos p : PLUGS) {
-            if (!back.getBlockState(p).is(Blocks.LEVER)) {
+            if (!back.getBlockState(p).is(jp.revati.skyabyss.registry.ModBlocks.RELIC_LEVER.get())) {
                 bad.add("T07 plug missing at " + p);
             }
         }
-        if (!back.getBlockState(RESET).is(Blocks.LEVER)) {
+        if (!back.getBlockState(RESET).is(jp.revati.skyabyss.registry.ModBlocks.RELIC_LEVER.get())) {
             bad.add("T07 reset plug missing");
         }
         if (!back.getBlockState(TideDeck.T07_STONE).is(jp.revati.skyabyss.titan.tide.back.TideBackSetup.CHIME_STONE.get())) {

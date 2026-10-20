@@ -98,7 +98,7 @@ public final class TideWatch {
             placeLever(level, slot, plug.from(), plug.to());
         }
         BlockPos plate = PLATES[c.plateTier()];
-        level.setBlock(plate, Blocks.POLISHED_BLACKSTONE_PRESSURE_PLATE.defaultBlockState(), 3);
+        level.setBlock(plate, jp.revati.skyabyss.relic.RelicBlocks.plate(jp.revati.skyabyss.relic.RelicStyle.TIDE), 3);
         TidePuzzle.Plug pp = c.plugs()[c.platePlug()];
         // 重石の床の印: 隣に、つながる栓と同じ印 (元の溜めの色の石に、行き先の溜めの色の敷物)
         level.setBlock(plate.west(), BASIN_STONE[pp.from()], 3);
@@ -196,7 +196,7 @@ public final class TideWatch {
         Direction face = from < 0 ? Direction.NORTH : slot.getZ() <= -12 + WATCH_DZ && slot.getX() < 50 + WATCH_DX ? Direction.SOUTH
                 : slot.getZ() >= -8 + WATCH_DZ && slot.getX() < 50 + WATCH_DX ? Direction.NORTH
                 : slot.getX() >= 54 + WATCH_DX ? Direction.WEST : slot.getX() <= 25 + WATCH_DX ? Direction.EAST : Direction.EAST;
-        level.setBlock(slot.above(), Blocks.LEVER.defaultBlockState().setValue(LeverBlock.FACE, AttachFace.FLOOR)
+        level.setBlock(slot.above(), jp.revati.skyabyss.relic.RelicBlocks.leverBase(jp.revati.skyabyss.relic.RelicStyle.TIDE).setValue(LeverBlock.FACE, AttachFace.FLOOR)
                 .setValue(LeverBlock.FACING, face).setValue(LeverBlock.POWERED, false), 3);
         BlockPos front = slot.relative(face);
         if (to >= 0 && level.getBlockState(front).isAir() && !level.getBlockState(front.below()).isAir()) {
@@ -206,12 +206,12 @@ public final class TideWatch {
 
     static boolean leverOn(ServerLevel level, BlockPos slot) {
         BlockState s = level.getBlockState(slot.above());
-        return s.is(Blocks.LEVER) && s.getValue(LeverBlock.POWERED);
+        return s.is(jp.revati.skyabyss.registry.ModBlocks.RELIC_LEVER.get()) && s.getValue(LeverBlock.POWERED);
     }
 
     static void setLever(ServerLevel level, BlockPos slot, boolean on) {
         BlockState s = level.getBlockState(slot.above());
-        if (s.is(Blocks.LEVER) && s.getValue(LeverBlock.POWERED) != on) {
+        if (s.is(jp.revati.skyabyss.registry.ModBlocks.RELIC_LEVER.get()) && s.getValue(LeverBlock.POWERED) != on) {
             level.setBlock(slot.above(), s.setValue(LeverBlock.POWERED, on), 3);
         }
     }

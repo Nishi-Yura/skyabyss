@@ -95,7 +95,7 @@ public final class StormSites {
         if (at == null) {
             return;
         }
-        job.set(at, Tablets.standingState());
+        job.set(at, Tablets.standingState().setValue(jp.revati.skyabyss.relic.RelicStyle.PROP, jp.revati.skyabyss.relic.RelicStyle.STORM));
         Tablets.write(job.level, at, tabletKey(job.entry.index));
     }
 }

@@ -100,7 +100,7 @@ public final class TideCaches {
     }
 
     private static void put(TideKit kit, Cache c) {
-        kit.set(c.chest(), Blocks.CHEST.defaultBlockState().setValue(ChestBlock.FACING, c.front()));
+        kit.set(c.chest(), jp.revati.skyabyss.relic.RelicBlocks.cache(jp.revati.skyabyss.relic.RelicStyle.TIDE, c.front()));
         kit.wallSign(c.tablet(), c.tabletFace(), c.tabletKey());
     }
 
@@ -133,7 +133,7 @@ public final class TideCaches {
                 || event.getHand() != net.minecraft.world.InteractionHand.MAIN_HAND) {
             return;
         }
-        if (!event.getLevel().getBlockState(event.getPos()).is(Blocks.CHEST)) {
+        if (!event.getLevel().getBlockState(event.getPos()).is(jp.revati.skyabyss.registry.ModBlocks.RELIC_CACHE.get())) {
             return;
         }
         for (Cache c : CACHES) {
@@ -156,6 +156,7 @@ public final class TideCaches {
             return;
         }
         tag.putBoolean(TAG + c.id(), true);
+        jp.revati.skyabyss.relic.RelicCacheBlock.pulse(player.level(), c.chest());
         if (c.shards() > 0) {
             give(player, new ItemStack(TideMobSetup.TIDE_SHELL_SHARD.get(), c.shards()));
         }

@@ -49,7 +49,7 @@ public final class StormCaches {
                 || event.getHand() != net.minecraft.world.InteractionHand.MAIN_HAND) {
             return;
         }
-        if (!event.getLevel().getBlockState(event.getPos()).is(Blocks.CHEST)) {
+        if (!event.getLevel().getBlockState(event.getPos()).is(jp.revati.skyabyss.registry.ModBlocks.RELIC_CACHE.get())) {
             return;
         }
         for (int side : new int[] {-2, -1, 1, 2, 3, 4, 5, 6, 7}) {
@@ -72,6 +72,7 @@ public final class StormCaches {
             return;
         }
         tag.putBoolean(TAG + side, true);
+        jp.revati.skyabyss.relic.RelicCacheBlock.pulse(player.level(), cachePos(side));
         int jerky = switch (side) {
             case -2 -> 5;
             case -1 -> 4;

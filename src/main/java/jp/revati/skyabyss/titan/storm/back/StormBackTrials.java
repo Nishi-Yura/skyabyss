@@ -909,7 +909,7 @@ public final class StormBackTrials {
             EyeMirrors.resetMirrors(level, player);
             return;
         }
-        if (level.getBlockState(pos).is(Blocks.SOUL_CAMPFIRE)) {
+        if (level.getBlockState(pos).is(jp.revati.skyabyss.registry.ModBlocks.REST_HEARTH.get())) {
             event.setCanceled(true);
             if (player.isShiftKeyDown()) {
                 StormWest.strip(player);
