@@ -81,5 +81,9 @@
   "message.skyabyss.capital.opened.guild": "In the east of the city, the guild's door creaked open.",
   "message.skyabyss.capital.opened.shrine": "In the west of the city, the shrine gate opened. Four stones wait for the shards.",
   "message.skyabyss.capital.opened.keep": "The keep's inner door opened. The skywatchers' records can be read.",
-  "message.skyabyss.capital.opened.hall": "The archive of Skywatch Hall opened. Every record of the nation is there."
+  "message.skyabyss.capital.opened.hall": "The archive of Skywatch Hall opened. Every record of the nation is there.",
+  "sign.skyabyss.capital.graveyard.1": "Whale Chasers' Graves",
+  "sign.skyabyss.capital.graveyard.2": "Those who went up",
+  "sign.skyabyss.capital.graveyard.3": "and did not return.",
+  "sign.skyabyss.capital.graveyard.4": "One grave has no name"
 }

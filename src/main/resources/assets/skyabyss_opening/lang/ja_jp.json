@@ -81,5 +81,9 @@
   "message.skyabyss.capital.opened.guild": "都の東で、組合の戸が開く音がした。",
   "message.skyabyss.capital.opened.shrine": "都の西で、社の門が開いた。四つの石が、欠片を待っている。",
   "message.skyabyss.capital.opened.keep": "砦の本丸の戸が開いた。空見の記録が、読める。",
-  "message.skyabyss.capital.opened.hall": "空見の館の書庫が開いた。国の記録が、すべてそこにある。"
+  "message.skyabyss.capital.opened.hall": "空見の館の書庫が開いた。国の記録が、すべてそこにある。",
+  "sign.skyabyss.capital.graveyard.1": "鯨追いの墓地",
+  "sign.skyabyss.capital.graveyard.2": "上って",
+  "sign.skyabyss.capital.graveyard.3": "帰らなかった者。",
+  "sign.skyabyss.capital.graveyard.4": "名のない墓が、一つ"
 }

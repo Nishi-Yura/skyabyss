@@ -549,6 +549,44 @@ def lots():
         n += 1
 
 
+def graveyard():
+    # 鯨追いの墓地 (西門の外。x -136..-108, z -22..18)。丸石の低い壁、石の墓標が列に、名のない新しい墓が一つ、碑と灯り、枯れ木
+    x0, z0, x1, z1 = -136, -22, -108, 18
+    box(x0, -1, z0, x1, -1, z1, 'grass_block')
+    # 門から墓地への道
+    box(-107, -1, -2, -101, -1, 1, 'stone_bricks')
+    wall = 'cobblestone_wall[up=true,north=none,south=none,east=none,west=none,waterlogged=false]'
+    box(x0, 0, z0, x1, 0, z0, wall)
+    box(x0, 0, z1, x1, 0, z1, wall)
+    box(x0, 0, z0, x0, 0, z1, wall)
+    box(x1, 0, z0, x1, 0, z1, wall)
+    opening(x1, 0, -1, x1, 0, 0)
+    box(x1 - 1, -1, -1, x1, -1, 0, 'stone_bricks')
+    box(x1 - 6, -1, -1, x1 - 1, -1, 0, 'gravel')
+    # 墓標 (6 列 × 5)。壁のブロック + 石の半ブロック
+    n = 0
+    for i in range(6):
+        for j in range(5):
+            gx = x0 + 4 + i * 4
+            gz = z0 + 4 + j * 7
+            if (i, j) == (2, 2):
+                continue
+            blk(gx, 0, gz, 'stone_brick_wall[up=true,north=none,south=none,east=none,west=none,waterlogged=false]')
+            blk(gx, 1, gz, 'stone_slab[type=bottom,waterlogged=false]')
+            box(gx, -1, gz + 1, gx, -1, gz + 2, 'coarse_dirt')
+            n += 1
+    # 名のない新しい墓 (石はなく、土が盛られているだけ)
+    box(x0 + 12, -1, z0 + 18, x0 + 12, -1, z0 + 20, 'coarse_dirt')
+    blk(x0 + 12, 0, z0 + 19, 'coarse_dirt')
+    # 真ん中の碑と灯り、枯れ木
+    tablet(x0 + 14, 0, 0, 'east', 'graveyard')
+    lantern_post(x0 + 14, 0, -3, 3)
+    lantern_post(x0 + 14, 0, 3, 3)
+    box(x0 + 3, 0, z1 - 3, x0 + 3, 5, z1 - 3, 'stripped_spruce_log[axis=y]')
+    blk(x0 + 2, 5, z1 - 3, 'stripped_spruce_log[axis=x]')
+    blk(x0 + 4, 4, z1 - 3, 'stripped_spruce_log[axis=x]')
+
+
 def main():
     walls()
     streets()
@@ -564,9 +602,10 @@ def main():
     houses()
     farms()
     lots()
+    graveyard()
     out = {
         'site': 'capital', 'option': 'a', 'palette': palette, 'boxes': boxes, 'blocks': blocks, 'marks': marks,
-        'meta': {'rect': [-100, -100, 100, 100], 'level': True, 'ring': 12, 'fillWater': True, 'height': 40},
+        'meta': {'rect': [-140, -100, 100, 100], 'level': True, 'ring': 12, 'fillWater': True, 'height': 40},
     }
     os.makedirs(DATA, exist_ok=True)
     path = os.path.join(DATA, 'capital.json')
