@@ -65,6 +65,8 @@ public final class DomainClient {
         double radius;
         int percent;
         int remaining;
+        int round = 1;
+        int rounds = 1;
         // 手順の案内: 常時の一行 (key / a / b) と、一瞬の合図 (正解・失敗・状況)
         String standKey = "";
         int standA;
@@ -107,6 +109,12 @@ public final class DomainClient {
                 if (run != null && run.ended == 0) {
                     run.percent = p.a();
                     run.remaining = p.b();
+                }
+            }
+            case DomainPayload.ROUND -> {
+                if (run != null && run.ended == 0) {
+                    run.round = p.a();
+                    run.rounds = p.b();
                 }
             }
             case DomainPayload.HINT -> {
@@ -387,6 +395,10 @@ public final class DomainClient {
         }
         String count = r.remaining + " / " + jp.revati.skyabyss.titan.domain.HeartDomain.NODES;
         g.drawString(mc.font, count, x + pw - 5 - mc.font.width(count), y + 4, ia | 0xC8CCD8, false);
+        if (r.rounds > 1) {
+            Component rd = Component.translatable("gui.skyabyss.domain.round", r.round, r.rounds);
+            g.drawString(mc.font, rd, x + pw - 5 - mc.font.width(count) - 8 - mc.font.width(rd), y + 4, ia | 0xFFE9A8, false);
+        }
         int by = y + 14;
         int bw = pw - 10;
         g.fill(x + 5, by, x + 5 + bw, by + 3, ((int) (a * 170) << 24) | 0x101828);

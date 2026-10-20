@@ -1,0 +1,572 @@
+{
+ "S2": {
+  "whale": {
+   "common": {
+    "tris": 2294,
+    "pieces": {
+     "helmet": 472,
+     "chestplate": 1080,
+     "leggings": 442,
+     "boots": 300
+    },
+    "atlas": {
+     "helmet": 64,
+     "chestplate": 128,
+     "leggings": 64,
+     "boots": 64
+    }
+   },
+   "rare": {
+    "tris": 2354,
+    "pieces": {
+     "helmet": 472,
+     "chestplate": 1120,
+     "leggings": 462,
+     "boots": 300
+    },
+    "atlas": {
+     "helmet": 64,
+     "chestplate": 128,
+     "leggings": 64,
+     "boots": 64
+    }
+   },
+   "legend": {
+    "tris": 2662,
+    "pieces": {
+     "helmet": 472,
+     "chestplate": 1428,
+     "leggings": 462,
+     "boots": 300
+    },
+    "atlas": {
+     "helmet": 64,
+     "chestplate": 128,
+     "leggings": 64,
+     "boots": 64
+    }
+   }
+  },
+  "tide": {
+   "common": {
+    "tris": 2386,
+    "pieces": {
+     "helmet": 552,
+     "chestplate": 1112,
+     "leggings": 442,
+     "boots": 280
+    },
+    "atlas": {
+     "helmet": 64,
+     "chestplate": 128,
+     "leggings": 64,
+     "boots": 64
+    }
+   },
+   "rare": {
+    "tris": 2446,
+    "pieces": {
+     "helmet": 552,
+     "chestplate": 1152,
+     "leggings": 462,
+     "boots": 280
+    },
+    "atlas": {
+     "helmet": 64,
+     "chestplate": 128,
+     "leggings": 64,
+     "boots": 64
+    }
+   },
+   "legend": {
+    "tris": 2770,
+    "pieces": {
+     "helmet": 552,
+     "chestplate": 1476,
+     "leggings": 462,
+     "boots": 280
+    },
+    "atlas": {
+     "helmet": 64,
+     "chestplate": 128,
+     "leggings": 64,
+     "boots": 64
+    }
+   }
+  },
+  "thunder": {
+   "common": {
+    "tris": 2340,
+    "pieces": {
+     "helmet": 512,
+     "chestplate": 1096,
+     "leggings": 442,
+     "boots": 290
+    },
+    "atlas": {
+     "helmet": 64,
+     "chestplate": 128,
+     "leggings": 64,
+     "boots": 64
+    }
+   },
+   "rare": {
+    "tris": 2400,
+    "pieces": {
+     "helmet": 512,
+     "chestplate": 1136,
+     "leggings": 462,
+     "boots": 290
+    },
+    "atlas": {
+     "helmet": 64,
+     "chestplate": 128,
+     "leggings": 64,
+     "boots": 64
+    }
+   },
+   "legend": {
+    "tris": 2716,
+    "pieces": {
+     "helmet": 512,
+     "chestplate": 1452,
+     "leggings": 462,
+     "boots": 290
+    },
+    "atlas": {
+     "helmet": 64,
+     "chestplate": 128,
+     "leggings": 64,
+     "boots": 64
+    }
+   }
+  },
+  "ember": {
+   "common": {
+    "tris": 2274,
+    "pieces": {
+     "helmet": 472,
+     "chestplate": 1080,
+     "leggings": 442,
+     "boots": 280
+    },
+    "atlas": {
+     "helmet": 64,
+     "chestplate": 128,
+     "leggings": 64,
+     "boots": 64
+    }
+   },
+   "rare": {
+    "tris": 2334,
+    "pieces": {
+     "helmet": 472,
+     "chestplate": 1120,
+     "leggings": 462,
+     "boots": 280
+    },
+    "atlas": {
+     "helmet": 64,
+     "chestplate": 128,
+     "leggings": 64,
+     "boots": 64
+    }
+   },
+   "legend": {
+    "tris": 2642,
+    "pieces": {
+     "helmet": 472,
+     "chestplate": 1428,
+     "leggings": 462,
+     "boots": 280
+    },
+    "atlas": {
+     "helmet": 64,
+     "chestplate": 128,
+     "leggings": 64,
+     "boots": 64
+    }
+   }
+  }
+ },
+ "S1": {
+  "whale": {
+   "common": {
+    "tris": 1628,
+    "pieces": {
+     "helmet": 306,
+     "chestplate": 784,
+     "leggings": 238,
+     "boots": 300
+    },
+    "atlas": {
+     "helmet": 64,
+     "chestplate": 128,
+     "leggings": 64,
+     "boots": 64
+    }
+   },
+   "rare": {
+    "tris": 1740,
+    "pieces": {
+     "helmet": 306,
+     "chestplate": 876,
+     "leggings": 258,
+     "boots": 300
+    },
+    "atlas": {
+     "helmet": 64,
+     "chestplate": 128,
+     "leggings": 64,
+     "boots": 64
+    }
+   },
+   "legend": {
+    "tris": 2048,
+    "pieces": {
+     "helmet": 306,
+     "chestplate": 1184,
+     "leggings": 258,
+     "boots": 300
+    },
+    "atlas": {
+     "helmet": 64,
+     "chestplate": 128,
+     "leggings": 64,
+     "boots": 64
+    }
+   }
+  },
+  "tide": {
+   "common": {
+    "tris": 1672,
+    "pieces": {
+     "helmet": 354,
+     "chestplate": 800,
+     "leggings": 238,
+     "boots": 280
+    },
+    "atlas": {
+     "helmet": 64,
+     "chestplate": 128,
+     "leggings": 64,
+     "boots": 64
+    }
+   },
+   "rare": {
+    "tris": 1784,
+    "pieces": {
+     "helmet": 354,
+     "chestplate": 892,
+     "leggings": 258,
+     "boots": 280
+    },
+    "atlas": {
+     "helmet": 64,
+     "chestplate": 128,
+     "leggings": 64,
+     "boots": 64
+    }
+   },
+   "legend": {
+    "tris": 2108,
+    "pieces": {
+     "helmet": 354,
+     "chestplate": 1216,
+     "leggings": 258,
+     "boots": 280
+    },
+    "atlas": {
+     "helmet": 64,
+     "chestplate": 128,
+     "leggings": 64,
+     "boots": 64
+    }
+   }
+  },
+  "thunder": {
+   "common": {
+    "tris": 1656,
+    "pieces": {
+     "helmet": 336,
+     "chestplate": 792,
+     "leggings": 238,
+     "boots": 290
+    },
+    "atlas": {
+     "helmet": 64,
+     "chestplate": 128,
+     "leggings": 64,
+     "boots": 64
+    }
+   },
+   "rare": {
+    "tris": 1768,
+    "pieces": {
+     "helmet": 336,
+     "chestplate": 884,
+     "leggings": 258,
+     "boots": 290
+    },
+    "atlas": {
+     "helmet": 64,
+     "chestplate": 128,
+     "leggings": 64,
+     "boots": 64
+    }
+   },
+   "legend": {
+    "tris": 2084,
+    "pieces": {
+     "helmet": 336,
+     "chestplate": 1200,
+     "leggings": 258,
+     "boots": 290
+    },
+    "atlas": {
+     "helmet": 64,
+     "chestplate": 128,
+     "leggings": 64,
+     "boots": 64
+    }
+   }
+  },
+  "ember": {
+   "common": {
+    "tris": 1608,
+    "pieces": {
+     "helmet": 306,
+     "chestplate": 784,
+     "leggings": 238,
+     "boots": 280
+    },
+    "atlas": {
+     "helmet": 64,
+     "chestplate": 128,
+     "leggings": 64,
+     "boots": 64
+    }
+   },
+   "rare": {
+    "tris": 1720,
+    "pieces": {
+     "helmet": 306,
+     "chestplate": 876,
+     "leggings": 258,
+     "boots": 280
+    },
+    "atlas": {
+     "helmet": 64,
+     "chestplate": 128,
+     "leggings": 64,
+     "boots": 64
+    }
+   },
+   "legend": {
+    "tris": 2028,
+    "pieces": {
+     "helmet": 306,
+     "chestplate": 1184,
+     "leggings": 258,
+     "boots": 280
+    },
+    "atlas": {
+     "helmet": 64,
+     "chestplate": 128,
+     "leggings": 64,
+     "boots": 64
+    }
+   }
+  }
+ },
+ "S3": {
+  "whale": {
+   "common": {
+    "tris": 2610,
+    "pieces": {
+     "helmet": 616,
+     "chestplate": 1252,
+     "leggings": 442,
+     "boots": 300
+    },
+    "atlas": {
+     "helmet": 128,
+     "chestplate": 128,
+     "leggings": 64,
+     "boots": 64
+    }
+   },
+   "rare": {
+    "tris": 2670,
+    "pieces": {
+     "helmet": 616,
+     "chestplate": 1292,
+     "leggings": 462,
+     "boots": 300
+    },
+    "atlas": {
+     "helmet": 128,
+     "chestplate": 128,
+     "leggings": 64,
+     "boots": 64
+    }
+   },
+   "legend": {
+    "tris": 2978,
+    "pieces": {
+     "helmet": 616,
+     "chestplate": 1600,
+     "leggings": 462,
+     "boots": 300
+    },
+    "atlas": {
+     "helmet": 128,
+     "chestplate": 128,
+     "leggings": 64,
+     "boots": 64
+    }
+   }
+  },
+  "tide": {
+   "common": {
+    "tris": 2766,
+    "pieces": {
+     "helmet": 760,
+     "chestplate": 1284,
+     "leggings": 442,
+     "boots": 280
+    },
+    "atlas": {
+     "helmet": 128,
+     "chestplate": 128,
+     "leggings": 64,
+     "boots": 64
+    }
+   },
+   "rare": {
+    "tris": 2826,
+    "pieces": {
+     "helmet": 760,
+     "chestplate": 1324,
+     "leggings": 462,
+     "boots": 280
+    },
+    "atlas": {
+     "helmet": 128,
+     "chestplate": 128,
+     "leggings": 64,
+     "boots": 64
+    }
+   },
+   "legend": {
+    "tris": 3150,
+    "pieces": {
+     "helmet": 760,
+     "chestplate": 1648,
+     "leggings": 462,
+     "boots": 280
+    },
+    "atlas": {
+     "helmet": 128,
+     "chestplate": 128,
+     "leggings": 64,
+     "boots": 64
+    }
+   }
+  },
+  "thunder": {
+   "common": {
+    "tris": 2688,
+    "pieces": {
+     "helmet": 688,
+     "chestplate": 1268,
+     "leggings": 442,
+     "boots": 290
+    },
+    "atlas": {
+     "helmet": 128,
+     "chestplate": 128,
+     "leggings": 64,
+     "boots": 64
+    }
+   },
+   "rare": {
+    "tris": 2748,
+    "pieces": {
+     "helmet": 688,
+     "chestplate": 1308,
+     "leggings": 462,
+     "boots": 290
+    },
+    "atlas": {
+     "helmet": 128,
+     "chestplate": 128,
+     "leggings": 64,
+     "boots": 64
+    }
+   },
+   "legend": {
+    "tris": 3064,
+    "pieces": {
+     "helmet": 688,
+     "chestplate": 1624,
+     "leggings": 462,
+     "boots": 290
+    },
+    "atlas": {
+     "helmet": 128,
+     "chestplate": 256,
+     "leggings": 64,
+     "boots": 64
+    }
+   }
+  },
+  "ember": {
+   "common": {
+    "tris": 2590,
+    "pieces": {
+     "helmet": 616,
+     "chestplate": 1252,
+     "leggings": 442,
+     "boots": 280
+    },
+    "atlas": {
+     "helmet": 128,
+     "chestplate": 128,
+     "leggings": 64,
+     "boots": 64
+    }
+   },
+   "rare": {
+    "tris": 2650,
+    "pieces": {
+     "helmet": 616,
+     "chestplate": 1292,
+     "leggings": 462,
+     "boots": 280
+    },
+    "atlas": {
+     "helmet": 128,
+     "chestplate": 128,
+     "leggings": 64,
+     "boots": 64
+    }
+   },
+   "legend": {
+    "tris": 2958,
+    "pieces": {
+     "helmet": 616,
+     "chestplate": 1600,
+     "leggings": 462,
+     "boots": 280
+    },
+    "atlas": {
+     "helmet": 128,
+     "chestplate": 256,
+     "leggings": 64,
+     "boots": 64
+    }
+   }
+  }
+ }
+}

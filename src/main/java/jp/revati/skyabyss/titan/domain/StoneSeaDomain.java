@@ -78,7 +78,16 @@ public final class StoneSeaDomain extends HeartDomain {
         if (t < 30 || (t - 30) % fast(WAVE_EVERY) != 0) {
             return;
         }
-        int n = waves++;
+        fireWave(level, waves++);
+    }
+
+    // 巡の合間: 波を一本 (筋は二つ。棘・二つ目の輪はなし)
+    @Override
+    protected void interludeAttack(ServerLevel level) {
+        fireWave(level, 0);
+    }
+
+    private void fireWave(ServerLevel level, int n) {
         // 筋の向きは波ごとに ±55°、向きも替える
         gapBase += (n % 2 == 0 ? 1 : -1) * Math.toRadians(55) + Math.toRadians(17);
         int gapCount = n % 3 == 2 ? 3 : 2;
@@ -153,6 +162,8 @@ public final class StoneSeaDomain extends HeartDomain {
     public static final int SHOW_EVERY = 200;
     private static final float[] PITCH = {0.8f, 1.0f, 1.26f};
 
+    // 巡ごとの手本の長さ (骨の鳴る回数): 3 → 4 → 5。巡が変わるたびに新しい手本
+    public static final int[] SEQ_LEN = {3, 4, 5};
     private int[] order = {0, 1, 2};
     private int step;
     private int nextShow;
@@ -165,8 +176,8 @@ public final class StoneSeaDomain extends HeartDomain {
         if (step >= NODES) {
             return null;
         }
-        return showStart >= 0 ? new Hint("gui.skyabyss.domain.stone_sea.watch", Math.max(1, shown), NODES)
-                : new Hint("gui.skyabyss.domain.stone_sea.tap", step + 1, NODES);
+        return showStart >= 0 ? new Hint("gui.skyabyss.domain.stone_sea.watch", Math.max(1, shown), seq())
+                : new Hint("gui.skyabyss.domain.stone_sea.tap", step + 1, seq());
     }
 
     @Override
@@ -185,17 +196,51 @@ public final class StoneSeaDomain extends HeartDomain {
     }
 
     public int expected() {
-        return step >= NODES ? -1 : order[step];
+        return step >= seq() ? -1 : order[step];
+    }
+
+    // いまの巡の手本の長さ
+    public int seq() {
+        return order.length;
     }
 
     @Override
     protected void puzzleBegin(ServerLevel level) {
-        java.util.List<Integer> list = new java.util.ArrayList<>(java.util.List.of(0, 1, 2));
-        java.util.Collections.shuffle(list, new java.util.Random(heart.getRandom().nextLong()));
-        order = new int[] {list.get(0), list.get(1), list.get(2)};
+        int len = SEQ_LEN[Math.min(round(), SEQ_LEN.length - 1)];
+        java.util.Random rnd = new java.util.Random(heart.getRandom().nextLong());
+        int[] prev = order;
+        int[] next;
+        do {
+            next = new int[len];
+            if (len == NODES) {
+                java.util.List<Integer> list = new java.util.ArrayList<>(java.util.List.of(0, 1, 2));
+                java.util.Collections.shuffle(list, rnd);
+                for (int i = 0; i < len; i++) {
+                    next[i] = list.get(i);
+                }
+            } else {
+                // 同じ骨が続けて鳴らない・三本とも使う
+                for (int i = 0; i < len; i++) {
+                    int v;
+                    do {
+                        v = rnd.nextInt(NODES);
+                    } while (i > 0 && v == next[i - 1]);
+                    next[i] = v;
+                }
+            }
+        } while ((round() > 0 && java.util.Arrays.equals(next, prev)) || !usesAll(next));
+        order = next;
         step = 0;
-        nextShow = 30;
+        nextShow = ticks() + 30;
         showStart = -1;
+    }
+
+    private static boolean usesAll(int[] seq) {
+        boolean[] used = new boolean[NODES];
+        for (int v : seq) {
+            used[v] = true;
+        }
+        return used[0] && used[1] && used[2];
     }
 
     private void note(ServerLevel level, Node n, boolean show) {
@@ -214,7 +259,7 @@ public final class StoneSeaDomain extends HeartDomain {
 
     @Override
     protected void puzzleTick(ServerLevel level, int t) {
-        if (step >= NODES) {
+        if (step >= seq()) {
             return;
         }
         if (showStart < 0 && t >= nextShow) {
@@ -222,11 +267,11 @@ public final class StoneSeaDomain extends HeartDomain {
         }
         if (showStart >= 0) {
             int k = t - showStart;
-            if (k % fast(SHOW_GAP) == 0 && k / fast(SHOW_GAP) < NODES) {
+            if (k % fast(SHOW_GAP) == 0 && k / fast(SHOW_GAP) < seq()) {
                 shown = k / fast(SHOW_GAP) + 1;
                 note(level, nodes.get(order[k / fast(SHOW_GAP)]), true);
             }
-            if (k >= fast(SHOW_GAP) * NODES + 20) {
+            if (k >= fast(SHOW_GAP) * seq() + 20) {
                 showStart = -1;
                 shown = 0;
                 nextShow = t + SHOW_EVERY;
@@ -236,15 +281,15 @@ public final class StoneSeaDomain extends HeartDomain {
 
     @Override
     protected boolean strike(ServerLevel level, Node node, ServerPlayer player) {
-        if (step >= NODES) {
+        if (step >= seq()) {
             return true;
         }
         if (node.index == order[step]) {
             node.done = true;
             step++;
             note(level, node, false);
-            if (step < NODES) {
-                tell(level, "message.skyabyss.domain.stone_sea.step", step, NODES);
+            if (step < seq()) {
+                tell(level, "message.skyabyss.domain.stone_sea.step", step, seq());
             }
         } else {
             step = 0;
@@ -265,12 +310,12 @@ public final class StoneSeaDomain extends HeartDomain {
 
     @Override
     public int solvedCount() {
-        return step;
+        return step * NODES / seq();
     }
 
     @Override
     protected boolean complete() {
-        return step >= NODES;
+        return step >= seq();
     }
 
     @Override

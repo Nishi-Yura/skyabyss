@@ -102,6 +102,13 @@ public final class RisingTideDomain extends HeartDomain {
         }
     }
 
+    // 巡の合間: 外の輪と内の円が一度に満ちる (島の上は濡れない)
+    @Override
+    protected void interludeAttack(ServerLevel level) {
+        ring(level, 0);
+        ring(level, RINGS - 1);
+    }
+
     private void ring(ServerLevel level, int k) {
         double in = inner(k);
         double out = outer(k);
@@ -149,11 +156,22 @@ public final class RisingTideDomain extends HeartDomain {
     // 三つが同時に開いていれば潮が引いて解ける。残りが WARN_TICKS (8 秒) を切ると水門が赤く点滅し、音で知らせる。叩き直せば 45 秒に戻る
     public static final int OPEN_TICKS = 900;
     public static final int WARN_TICKS = 160;
+    // 巡ごとの水門の開いている時間 (OPEN_TICKS の割合): 45 秒 → 30 秒 → 21 秒。新しい巡ごとに島の組み合わせも替わる
+    public static final double[] OPEN_SCALE = {1.0, 0.67, 0.47};
+    private int lastSkip = -1;
+
+    public int openTicks() {
+        return fast((int) Math.round(OPEN_TICKS * OPEN_SCALE[Math.min(round(), OPEN_SCALE.length - 1)]));
+    }
 
     @Override
     protected java.util.List<Vec3> nodeSpots() {
         if (Math.abs(cx - (TideHeartArena.CX + 0.5)) < 2) {
-            int skip = heart.getRandom().nextInt(4);
+            int skip;
+            do {
+                skip = heart.getRandom().nextInt(4);
+            } while (skip == lastSkip);
+            lastSkip = skip;
             java.util.List<Vec3> out = new java.util.ArrayList<>();
             int k = 0;
             for (int sx = -1; sx <= 1; sx += 2) {
@@ -203,7 +221,7 @@ public final class RisingTideDomain extends HeartDomain {
     @Override
     protected boolean strike(ServerLevel level, Node node, ServerPlayer player) {
         boolean wasOpen = node.state > 0;
-        node.state = fast(OPEN_TICKS);
+        node.state = openTicks();
         node.done = true;
         tone(level, node.pos, SoundEvents.BUBBLE_COLUMN_UPWARDS_AMBIENT, 2.5f, 1.0f);
         tone(level, node.pos, SoundEvents.BARREL_OPEN, 1.5f, 0.6f);

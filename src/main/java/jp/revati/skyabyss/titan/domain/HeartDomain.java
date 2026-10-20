@@ -20,6 +20,7 @@ import jp.revati.skyabyss.util.Players;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleOptions;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -55,10 +56,18 @@ import org.joml.Vector3f;
 public abstract class HeartDomain {
     public static final int DECLARE_TICKS = 80;
     // 安全網: 領域がこれだけ続いても解けないときは静かに終わる (部屋に誰かが居残っている詰みの保険。普通は届かない)
-    public static final int SAFETY_TICKS = 20 * 60 * 6;
+    public static final int SAFETY_TICKS = 20 * 60 * 10;
     public static final int STUN_TICKS = 100;
     public static final float STUN_TAKEN = 1.5f;
     public static final int NODES = 3;
+    // 巡 (round): 領域は何巡かして解ける。巡の合間 (INTERLUDE_TICKS) は仕掛けが消え、心臓が技を出す (予告つき)。巡が進むほど仕掛けは少し厳しく、配置・手順は毎巡あたらしい
+    public static final int INTERLUDE_TICKS = 100;
+    private static final int ROUND_ATTACK_AT = 30;
+
+    // 巡の数: 通常 2、深淵 3、人が 4 人以上なら 3
+    public static int roundsFor(boolean abyss, int party) {
+        return abyss || party >= 4 ? 3 : 2;
+    }
     public static final String NODE_TAG = "skyabyss_domain_node";
 
     public enum Phase {
@@ -114,6 +123,9 @@ public abstract class HeartDomain {
     private boolean solved;
     private int lastSolved = -1;
     private ServerLevel levelRef;
+    private int round;
+    private int rounds = 2;
+    private int interlude;
 
     protected HeartDomain(Mob heart, String id, double cx, double cz, double floorY, double radius, Predicate<ServerPlayer> victims,
             BiConsumer<ServerPlayer, Float> striker, Supplier<Collection<ServerPlayer>> players, SoundEvent sting) {
@@ -185,8 +197,27 @@ public abstract class HeartDomain {
     // 解いた仕掛けの数 (0〜NODES)
     public abstract int solvedCount();
 
+    // 巡をまたいだ全体の進み (巡の合間は、終えた巡ぶん)
     public int percent() {
-        return Math.min(100, Math.round(100f * solvedCount() / NODES));
+        int inRound = interlude > 0 ? 0 : Math.min(NODES, solvedCount());
+        return Math.min(100, Math.round(100f * (round * NODES + inRound) / (rounds * NODES)));
+    }
+
+    // 巡 (0 始まり。難しさの段)・巡の数・合間か
+    public int round() {
+        return round;
+    }
+
+    public int rounds() {
+        return rounds;
+    }
+
+    public boolean interlude() {
+        return interlude > 0;
+    }
+
+    private int shownSolved() {
+        return interlude > 0 ? 0 : Math.min(NODES, solvedCount());
     }
 
     public List<Node> nodes() {
@@ -209,6 +240,8 @@ public abstract class HeartDomain {
         solved = false;
         stun = 0;
         lastSolved = -1;
+        round = 0;
+        interlude = 0;
         // 領域の長さの欄は、通信が途切れたときに画面が自分で片づける目安 (安全網の長さ)
         send(level, DomainPayload.start(id, DECLARE_TICKS, SAFETY_TICKS, cx, cz, floorY, radius));
         level.playSound(null, cx, floorY + 4, cz, sting, SoundSource.MASTER, 4f, 1f);
@@ -227,21 +260,34 @@ public abstract class HeartDomain {
             if (ticks >= DECLARE_TICKS) {
                 phase = Phase.ACTIVE;
                 ticks = 0;
+                round = 0;
+                rounds = roundsFor(abyss, inRoom().size());
                 spawnNodes(level);
                 puzzleBegin(level);
                 announce(level, "message.skyabyss.domain." + id + ".goal");
                 announce(level, "message.skyabyss.domain.invulnerable");
-                send(level, DomainPayload.progress(id, percent(), solvedCount()));
+                send(level, DomainPayload.round(id, round + 1, rounds));
+                send(level, DomainPayload.progress(id, percent(), shownSolved()));
                 standingHint(level, true);
             }
             return true;
         }
         if (phase == Phase.ACTIVE) {
-            rule(level, ticks);
-            if (ticks % 20 == 0) {
-                keepNodes(level);
+            if (interlude > 0) {
+                interlude--;
+                if (interlude == INTERLUDE_TICKS - ROUND_ATTACK_AT || interlude == INTERLUDE_TICKS - ROUND_ATTACK_AT - 40) {
+                    interludeAttack(level);
+                }
+                if (interlude == 0) {
+                    startRound(level);
+                }
+            } else {
+                rule(level, ticks);
+                if (ticks % 20 == 0) {
+                    keepNodes(level);
+                }
+                puzzleTick(level, ticks);
             }
-            puzzleTick(level, ticks);
             for (Node n : nodes) {
                 if (n.flash > 0) {
                     n.flash--;
@@ -258,19 +304,56 @@ public abstract class HeartDomain {
                 markNodes(level, ticks);
             }
             ticks++;
-            int solvedNow = solvedCount();
+            int solvedNow = shownSolved();
             if (solvedNow != lastSolved) {
                 lastSolved = solvedNow;
                 send(level, DomainPayload.progress(id, percent(), solvedNow));
             }
-            if (complete()) {
-                end(level, true);
+            if (interlude == 0 && complete()) {
+                if (round + 1 < rounds) {
+                    enterInterlude(level);
+                } else {
+                    end(level, true);
+                }
             } else if (ticks >= SAFETY_TICKS) {
                 end(level, false);
             }
             return true;
         }
         return false;
+    }
+
+    // 一巡を解いた: 仕掛けは消え、短い合間のあと、新しい配置・手順で次の巡が始まる
+    private void enterInterlude(ServerLevel level) {
+        round++;
+        interlude = INTERLUDE_TICKS;
+        removeNodes(level);
+        nodes.clear();
+        lastSolved = -1;
+        Telegraph.cancelAll(heart);
+        send(level, DomainPayload.round(id, round + 1, rounds));
+        send(level, DomainPayload.progress(id, percent(), 0));
+        level.playSound(null, cx, floorY + 3, cz, sting, SoundSource.MASTER, 2.5f, 1.25f);
+        for (ServerPlayer p : inRoom()) {
+            p.playNotifySound(SoundEvents.UI_TOAST_CHALLENGE_COMPLETE, SoundSource.PLAYERS, 0.8f, 1.2f);
+            p.playNotifySound(SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.PLAYERS, 1.2f, 0.7f);
+        }
+        level.sendParticles(ParticleTypes.END_ROD, cx, floorY + 3, cz, 60, radius * 0.4, 1.5, radius * 0.4, 0.15);
+        tell(level, "message.skyabyss.domain.round_clear", round, rounds);
+        lastStanding = "";
+    }
+
+    private void startRound(ServerLevel level) {
+        spawnNodes(level);
+        puzzleBegin(level);
+        lastSolved = -1;
+        lastStanding = "";
+        tell(level, "message.skyabyss.domain.round_start", round + 1, rounds);
+        level.playSound(null, cx, floorY + 3, cz, sting, SoundSource.MASTER, 2f, 0.9f);
+    }
+
+    // 巡の合間に心臓が出す技 (予告つき。部屋ごとに書く。合間に 2 回呼ばれる)
+    protected void interludeAttack(ServerLevel level) {
     }
 
     // 領域を終える (解いた / 安全網)。出ている予告は全部消し、解いたなら心臓は 5 秒傷を 1.5 倍受ける
@@ -542,7 +625,7 @@ public abstract class HeartDomain {
     private String lastStanding = "";
 
     private void standingHint(ServerLevel level, boolean force) {
-        Hint h = standing();
+        Hint h = interlude > 0 ? new Hint("gui.skyabyss.domain.round_wait", round + 1, rounds) : standing();
         String sig = h == null ? "" : h.key + "/" + h.a + "/" + h.b;
         if (force || !sig.equals(lastStanding)) {
             lastStanding = sig;

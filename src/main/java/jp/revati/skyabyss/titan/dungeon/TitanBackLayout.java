@@ -64,7 +64,9 @@ public final class TitanBackLayout {
     // 24: 影絵の間 W08 (P3。最南の広間 S1 の北の壁の戸から北へ。docs/design/29 の 3.7)。他の背の版の最大 (余燼 23) の次
     // 25: 試遊の声 2 回目 (四体の最大 24 の次): 東の翼の戦いを 4 → 3 (第二の広間 E2 は戦わない射手の回廊に・幅 7)・西の翼の谷の途中の休み場 (島 wa1 wa2 wb1 wc1) をなくした・
     //     鼓動の間 と 試練の階の光る床 (HUB_PAD・D0_PAD)・案内の碑 (WhaleDeck.SIGNS)・歌の祠をなくした・鼓動の間の碑を弧と台座に。docs/design/26 の 8.8
-    public static final int LAYOUT_VERSION = 26;
+    // 27: 闇の水路の休み場を最低 5×5 の歩ける床に (入口の小部屋 2 つめを 5×5 → 7×7・休み場の火は休み場の遺物に・中ほどの息継ぎのくぼみを 5×5 の足場に)。
+    //     建て直しは、前の版の部屋や小部屋が残らないよう、体の範囲の外の鯨の外周も空にしてから建てる (TitanBackBuilder.clearStale)
+    public static final int LAYOUT_VERSION = 27;
 
     // ---------------------------------------------------------------- 地表
     // 尾の付け根の背の広場 (到着) と、背の中ほどの祠。祠の階段は 1 段ごとに 1 下がり、入口の通路の南の端 (z 15) で床に着く
@@ -206,9 +208,9 @@ public final class TitanBackLayout {
     public static final int MAZE_EXIT_I = 11;
     public static final int MAZE_EXIT_J = 19;
     // 入口のはしごを下りた先の、乾いた小部屋 (迷路の天井の上。床は迷路の天井の石、はしごが北の辺を通る)
-    // 1 つめは 21×14×4 の広い休み場 (6 人が焚き火を囲み、苗床・数え石・掲示板の前に立てる。はしごの穴は北の辺の x 6)。2 つめは 5×5×4
+    // 1 つめは 21×14×4 の広い休み場 (6 人が焚き火を囲み、苗床・数え石・掲示板の前に立てる。はしごの穴は北の辺の x 6)。2 つめは 7×7×4 (はしごの穴は北の辺の真ん中)
     public static final Box MAZE_ENTRY_ROOM = new Box(-4, 16, -49, -36, MAZE_FLOOR + 4, 4);
-    public static final Box MAZE_ENTRY_ROOM2 = new Box(mazeCellX(MAZE_START2_I), mazeCellX(MAZE_START2_I) + 4, mazeCellZ(MAZE_START2_J), mazeCellZ(MAZE_START2_J) + 4, MAZE_FLOOR + 4, 4);
+    public static final Box MAZE_ENTRY_ROOM2 = new Box(mazeCellX(MAZE_START2_I) - 1, mazeCellX(MAZE_START2_I) + 5, mazeCellZ(MAZE_START2_J), mazeCellZ(MAZE_START2_J) + 6, MAZE_FLOOR + 4, 4);
     public static final Box MAZE_EXIT_ROOM = new Box(21, 27, -7, -3, MAZE_FLOOR + 4, 5);
     // 出口の小部屋から入口の通路へ戻る抜け道 (下の石が歌うまで閉じている)。入口の通路の東の壁 (x 4)
     public static final List<BlockPos> LOWER_RETURN = wall(-7, -3, FLOOR + 1, FLOOR + 4, 4, false);
