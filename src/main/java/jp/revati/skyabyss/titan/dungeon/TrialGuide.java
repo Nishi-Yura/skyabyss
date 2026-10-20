@@ -28,7 +28,7 @@ public final class TrialGuide {
     }
 
     // 目的の id の一覧 (lang の確認用)
-    public static final List<String> IDS = List.of("wings", "west", "bell", "east_e1", "east_e2", "east_ck", "east_e3", "east_stone", "maze",
+    public static final List<String> IDS = List.of("wings", "west", "bell", "east_e1", "east_ck", "east_e3", "east_stone", "maze",
             "stone_back", "heart");
 
     static void tick(ServerPlayer player) {
@@ -64,9 +64,6 @@ public final class TrialGuide {
             }
             if (!record.isHallCleared("e1")) {
                 return new Goal("east_e1", E1_EXIT.get(E1_EXIT.size() / 2), 2.5f, 3f, 0.7f);
-            }
-            if (!record.isHallCleared("e2")) {
-                return new Goal("east_e2", E2_EXIT.get(E2_EXIT.size() / 2), 2.5f, 3f, 0.7f);
             }
             if (!record.isHallCleared("ck")) {
                 return new Goal("east_ck", E3_LOCK.get(E3_LOCK.size() / 2), 0.7f, 3f, 2.5f);

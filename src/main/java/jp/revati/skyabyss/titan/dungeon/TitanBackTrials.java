@@ -251,11 +251,7 @@ public final class TitanBackTrials {
                     List.of("sentinel", "sentinel", "crawler", "crawler"),
                     List.of("archer", "archer", "archer", "sentinel", "mortar")), null,
                     NO_CUTS),
-            // 第二の広間 (射手の回廊): 射手の波 (骨棘の射手 3 + 骨の砲手 1)。初回だけ。一人は東の端を封じる
-            new Hall("e2", E2, CE1.aabb(), E2_ENTRANCE, E2_EXIT, List.of(
-                    List.of("archer", "archer", "archer", "mortar"),
-                    List.of("crawler", "crawler", "archer", "sentinel")), "whale_e2",
-                    NO_CUTS),
+            // 版 22: 第二の広間 (射手の回廊) は戦わない通路にした。東の翼の戦いは 3 つ (第一の広間・詰所・番兵長の広間)
             // 番兵の詰所: 盾の壁の列 (骨の番兵 4) → 老番兵。倒すと番兵長の広間への戸 (割符の戸) が開く。初回だけ
             new Hall("ck", CK, CK_PASS.aabb(), CK_ENTRANCE, E3_LOCK, List.of(
                     List.of("sentinel", "sentinel", "sentinel", "sentinel"),
@@ -309,8 +305,8 @@ public final class TitanBackTrials {
 
     // 扉: 建てたときに閉じているもの (進みで開く) と、開いているもの (戦いの間だけ閉じる)
     private static final List<List<BlockPos>> CLOSED_GATES = List.of(GATE, WEST_RETURN, EAST_RETURN, LOWER_RETURN, E1_EXIT,
-            E2_EXIT, E3_LOCK, BELL_GATE);
-    private static final List<List<BlockPos>> OPEN_GATES = List.of(E1_ENTRANCE, E3_ENTRANCE, HEART_GATE, E2_ENTRANCE, CK_ENTRANCE);
+            E3_LOCK, BELL_GATE);
+    private static final List<List<BlockPos>> OPEN_GATES = List.of(E1_ENTRANCE, E3_ENTRANCE, HEART_GATE, CK_ENTRANCE);
 
     private TitanBackTrials() {
     }
@@ -704,6 +700,7 @@ public final class TitanBackTrials {
         // 倒れた人は、前室で目を覚まして 20 秒たち、回数 (skyabyssHeartReentryLimit) が残っているときだけ
         tellFallen(level, state.reentry, inHall, state.participants);
         letParticipantsBack(level, group, hall.entrance(), hall.box().center(), state.participants, state.reentry);
+        clearStrays(level, hall, group);
         if (aliveGuards(level, hall, group) > 0) {
             return;
         }
@@ -723,6 +720,11 @@ public final class TitanBackTrials {
             // 制圧: 出口と入口の両方が (このグループには) 開く。倒れて控えの間で目を覚ました仲間も、先へ進める
             record.markHallCleared(hall.id());
             HALL_STATES.remove(key);
+            // 制圧のあとに、遅れて呼ばれた仲間・取りこぼしを残さない (行く手をふさぐので)
+            for (Mob left : level.getEntitiesOfClass(Mob.class, hall.box().aabb().inflate(14, 2, 14),
+                    e -> e.getTags().contains(MOB_TAG) && group.equals(Groups.keyOf(e)))) {
+                left.discard();
+            }
             GroupGates.open(level, group, hall.exit());
             GroupGates.release(level, group, hall.entrance());
             GroupGates.release(level, group, hall.allWalls());
@@ -853,6 +855,68 @@ public final class TitanBackTrials {
     @Nullable
     public static Mob spawnGuard(ServerLevel level, String kind, BlockPos pos) {
         return spawnGuard(level, kind, pos, null);
+    }
+
+    // その位置を含む番兵の広間 (なければ null)
+    @Nullable
+    private static Hall hallAt(BlockPos pos) {
+        for (Hall h : HALLS) {
+            if (h.box().aabb().inflate(0, 1, 0).contains(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5)) {
+                return h;
+            }
+        }
+        return null;
+    }
+
+    // 広間の中の、spot にいちばん近い立てる床 (壁ぎわ 1 マスは除く)。なければ null
+    @Nullable
+    private static BlockPos insideSpot(ServerLevel level, Hall hall, BlockPos spot) {
+        Box b = hall.box();
+        int x = Math.max(b.x1() + 1, Math.min(b.x2() - 1, spot.getX()));
+        int z = Math.max(b.z1() + 1, Math.min(b.z2() - 1, spot.getZ()));
+        BlockPos p = new BlockPos(x, b.floorY() + 1, z);
+        return level.getBlockState(p.below()).isSolid() && level.getBlockState(p).isAir() && level.getBlockState(p.above()).isAir() ? p : null;
+    }
+
+    // 番兵長・老番兵などが「呼ぶ」仲間 (咆哮の番兵・骨笛の射手)。広間の中の戦いだけで呼べる:
+    //  - 呼ぶ者が倒れた・消えたあと (予告の円が遅れて実るとき) は呼ばない
+    //  - その広間の戦いがもう終わっている (制圧済み・戦いの外) なら呼ばない
+    //  - 位置は広間の中だけ。壁・戸の外なら広間の内へ寄せる (寄せられなければ呼ばない)
+    // 広間でない所 (試練の階のセル) の呼び出しは、呼ぶ者が生きているときだけ通す
+    @Nullable
+    public static Mob spawnSummon(ServerLevel level, String kind, BlockPos pos, @Nullable UUID group, Mob owner) {
+        if (owner == null || !owner.isAlive() || owner.isRemoved()) {
+            return null;
+        }
+        Hall hall = hallAt(owner.blockPosition());
+        if (hall == null) {
+            return spawnGuard(level, kind, pos, group);
+        }
+        if (group != null) {
+            HallState state = HALL_STATES.get(hallKey(group, hall.id()));
+            if (state == null || state.wave == 0 || record(level, group).isHallCleared(hall.id())) {
+                return null;
+            }
+        }
+        BlockPos at = pos;
+        if (hallAt(pos) != hall || !level.getBlockState(pos).isAir()) {
+            at = insideSpot(level, hall, pos);
+            if (at == null) {
+                return null;
+            }
+        }
+        return spawnGuard(level, kind, at, group);
+    }
+
+    // 戦いのさなかに広間の外 (壁の向こう・戸の先) へ出てしまった (湧いた) そのグループの番兵を片づける。数えに入らず、行く手をふさぐので
+    private static void clearStrays(ServerLevel level, Hall hall, UUID group) {
+        net.minecraft.world.phys.AABB room = hall.box().aabb().inflate(0.6, 1.5, 0.6);
+        for (Mob m : level.getEntitiesOfClass(Mob.class, room.inflate(12, 1.5, 12),
+                e -> e.isAlive() && e.getTags().contains(MOB_TAG) && group.equals(Groups.keyOf(e)))) {
+            if (!room.contains(m.position()) && hallAt(m.blockPosition()) == null) {
+                m.discard();
+            }
+        }
     }
 
     // group: そのグループの敵として湧かせる (ほかのグループには見えず、狙われず、傷を受けない)。null なら所属なし
@@ -1816,8 +1880,6 @@ public final class TitanBackTrials {
         switch (cp) {
             case "e0":
                 return hallFighting(group, "e1");
-            case "ce1":
-                return hallFighting(group, "e2");
             case "ckr":
                 return hallFighting(group, "ck");
             case "heart":

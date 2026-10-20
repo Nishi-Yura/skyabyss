@@ -313,7 +313,7 @@ public class ElderSentinel extends GuardMob {
                         .floor(spot.getY()).warn(FLUTE_WARN).harmless().owner(this)
                         .onImpact(s -> {
                             s.sendParticles(ParticleTypes.SOUL, spot.getX() + 0.5, spot.getY() + 0.6, spot.getZ() + 0.5, 14, 0.3, 0.6, 0.3, 0.03);
-                            TitanBackTrials.spawnGuard(s, "archer", spot, groupId());
+                            TitanBackTrials.spawnSummon(s, "archer", spot, groupId(), this);
                         })
                         .start();
             }

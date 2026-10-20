@@ -524,7 +524,7 @@ public final class TitanBackSelfTest {
             air(level, p, "doorway", failures);
             air(level, p.above(), "doorway head", failures);
         }
-        for (List<BlockPos> sealed : List.of(GATE, WEST_RETURN, EAST_RETURN, LOWER_RETURN, E1_EXIT, E2_EXIT, E3_LOCK, BELL_GATE)) {
+        for (List<BlockPos> sealed : List.of(GATE, WEST_RETURN, EAST_RETURN, LOWER_RETURN, E1_EXIT, E3_LOCK, BELL_GATE)) {
             for (BlockPos p : sealed) {
                 if (!level.getBlockState(p).is(ModBlocks.SEALED_GATE.get())) {
                     failures.add("should start sealed: " + p);
@@ -738,7 +738,7 @@ public final class TitanBackSelfTest {
     }
 
     private static void checkHalls(ServerLevel level, List<String> failures) {
-        for (Box hall : List.of(E1, E2, E3, CK)) {
+        for (Box hall : List.of(E1, E3, CK)) {
             for (BlockPos p : EastWingBuilder.spawnPoints(hall)) {
                 air(level, p, "hall spawn point", failures);
                 air(level, p.above(), "hall spawn point head", failures);
@@ -1002,8 +1002,8 @@ public final class TitanBackSelfTest {
     // 倒れて目覚める場所は、戦いの部屋の中ではなく、戦いの扉から離れていること (目の前が戦場にならない)。
     // 休み場がいまの戦いの前室なら、鼓動の間で目覚めること。闇の水路の中ほどの休み場は水路の中の乾いた足場であること
     private static void checkRespawnSafety(ServerLevel level, List<String> failures) {
-        List<TitanBackLayout.Box> fights = List.of(E1, E2, CK, E3, HEART);
-        List<List<BlockPos>> doors = List.of(E1_ENTRANCE, E1_EXIT, E2_ENTRANCE, E2_EXIT, CK_ENTRANCE, E3_LOCK, E3_ENTRANCE, HEART_GATE);
+        List<TitanBackLayout.Box> fights = List.of(E1, CK, E3, HEART);
+        List<List<BlockPos>> doors = List.of(E1_ENTRANCE, E1_EXIT, CK_ENTRANCE, E3_LOCK, E3_ENTRANCE, HEART_GATE);
         for (var e : TitanBackTrials.checkpointSpawns(level).entrySet()) {
             BlockPos spawn = e.getValue();
             for (TitanBackLayout.Box room : fights) {
@@ -1040,7 +1040,7 @@ public final class TitanBackSelfTest {
         // 戦いの前室で休み場を取っていて、その戦いの最中なら、鼓動の間で目覚める (グループごと)
         UUID group = UUID.fromString("00000000-0000-0000-0000-0000000000b1");
         UUID other = UUID.fromString("00000000-0000-0000-0000-0000000000b2");
-        for (String[] pair : new String[][] {{"e0", "e1"}, {"ce1", "e2"}, {"ckr", "ck"}}) {
+        for (String[] pair : new String[][] {{"e0", "e1"}, {"ckr", "ck"}}) {
             if (!pair[0].equals(TitanBackTrials.respawnCheckpoint(level, group, pair[0]))) {
                 failures.add("rest point " + pair[0] + " moved without a fight");
             }

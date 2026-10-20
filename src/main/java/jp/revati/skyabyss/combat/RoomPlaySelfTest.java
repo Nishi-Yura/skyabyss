@@ -99,7 +99,7 @@ public final class RoomPlaySelfTest {
     // ---------------------------------------------------------------- A. 湧き場所
     private static void spawns(List<String> f, List<String> notes) {
         StringBuilder sb = new StringBuilder("spawn mean distance from the entrance (n=1..6):");
-        for (String id : List.of("e1", "e2", "ck", "e3")) {
+        for (String id : List.of("e1", "ck", "e3")) {
             Room r = RoomPlayRooms.byId(id);
             List<BlockPos> all = r.keepClear();
             double prevReach = -1;

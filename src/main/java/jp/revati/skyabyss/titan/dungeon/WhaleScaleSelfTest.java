@@ -88,7 +88,7 @@ public final class WhaleScaleSelfTest {
         for (int side : new int[]{-1, 1}) {
             check(f, back.getBlockState(WingsBuilder.cachePos(side)).is(net.minecraft.world.level.block.Blocks.CHEST), "fin cache chest missing for side " + side);
         }
-        // 東の翼は一本道: 戸は北へ順に E1_EXIT → E2_EXIT → 詰所の入口
+        // 東の翼は一本道 (戦いは 3 つ): 戸は北へ順に E1_EXIT → 射手の回廊 (戸なし) → 詰所の入口
         check(f, E1_EXIT.get(0).getZ() > E2_EXIT.get(0).getZ() && E2_EXIT.get(0).getZ() > CK_ENTRANCE.get(0).getZ(), "the east wing doors are not in a forward order");
         // 次の目的: 記録だけから決まる
         BackGroupData.Record r = BackGroupData.get(back).of(UUID.randomUUID());
@@ -98,8 +98,7 @@ public final class WhaleScaleSelfTest {
         check(f, g1 != null && g1.id().equals("east_e1"), "guide in the first hall: " + g1);
         r.markHallCleared("e1");
         g1 = TrialGuide.next(r, CE1.center());
-        check(f, g1 != null && g1.id().equals("east_e2"), "guide after the first hall: " + g1);
-        r.markHallCleared("e2");
+        check(f, g1 != null && g1.id().equals("east_ck"), "guide after the first hall: " + g1);
         r.markHallCleared("ck");
         g1 = TrialGuide.next(r, E3.center());
         check(f, g1 != null && g1.id().equals("east_e3"), "guide at the captain: " + g1);
@@ -133,7 +132,7 @@ public final class WhaleScaleSelfTest {
         BackMetrics.checkWhale().forEach(p -> f.add("metrics: " + p));
         BackMetrics.table("whale").forEach((k, v) -> SkyAbyss.LOGGER.info("SELFTEST whale metrics {}: {}", k, v));
         // ---- 幕
-        for (var pair : List.of(java.util.Map.entry(VEIL_E1, E1), java.util.Map.entry(VEIL_E1_SOLO, E1), java.util.Map.entry(VEIL_E2, E2), java.util.Map.entry(VEIL_E3, E3))) {
+        for (var pair : List.of(java.util.Map.entry(VEIL_E1, E1), java.util.Map.entry(VEIL_E1_SOLO, E1), java.util.Map.entry(VEIL_E3, E3))) {
             for (BlockPos p : pair.getKey()) {
                 if (!pair.getValue().contains(p)) {
                     f.add("a veil block is outside its hall at " + p);
@@ -158,7 +157,7 @@ public final class WhaleScaleSelfTest {
             // 初回だけの部屋と、既知の道で開く戸
             TitanBackTrials.installGates(back);
             WhaleFirstRun.register();
-            for (String id : List.of(BellTower.FIRST_ROOM, WhaleFirstRun.E2, WhaleFirstRun.CK)) {
+            for (String id : List.of(BellTower.FIRST_ROOM, WhaleFirstRun.CK)) {
                 check(f, FirstRun.room(id) != null && FirstRun.room(id).firstRunOnly, "first-run room is not registered: " + id);
             }
             check(f, FirstRun.room(WhaleFirstRun.LIBRARY_ROOM) != null && !FirstRun.room(WhaleFirstRun.LIBRARY_ROOM).firstRunOnly, "the library is not an optional wing");

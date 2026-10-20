@@ -153,13 +153,14 @@ public final class TitanBackLayout {
     public static final Box LIBRARY_PASS = new Box(-11, -4, 3, 9, FLOOR, 6);
 
     // ---------------------------------------------------------------- 東の翼 (戦闘。版 18: 一本道。戻らずに先へ進む)
-    // 東の前室 E0 → 第一の広間 E1 → (北の戸) 控えの間 CE1 (休み場) → 第二の広間 E2 → (北の戸) 前室 CK_PASS (休み場) → 番兵の詰所 CK (老番兵)
+    // 東の前室 E0 → 第一の広間 E1 → (北の戸) 控えの間 CE1 (休み場) → 射手の回廊 E2 (通路。戦わない。版 22) → 前室 CK_PASS (休み場) → 番兵の詰所 CK (老番兵)
     //   → (西の戸 = 割符の戸) 通路 E3_CORRIDOR (休み場) → 番兵長の広間 E3 (共鳴石) → 鼓動の間へ戻る扉
     // どの戸も、手前の広間を鎮めたあとにだけ開く (道の途中で二つの戸が同時に開くことはない)。戦いの広間の入口は、戦いの間だけ閉じる
     public static final Box E0 = new Box(26, 32, -42, -29, FLOOR, 8);
     public static final Box E1 = new Box(34, 54, -54, -8, FLOOR, 11);
     public static final Box CE1 = new Box(41, 53, -68, -56, FLOOR, 7);
-    public static final Box E2 = new Box(41, 55, -92, -70, FLOOR, 12);
+    // 版 22: 第二の広間は戦わない「射手の回廊」(ただの通路) にした。東の翼の戦いは 3 つ (E1・詰所 CK・E3)
+    public static final Box E2 = new Box(44, 50, -92, -70, FLOOR, 8);
     public static final Box CK_PASS = new Box(42, 54, -99, -94, FLOOR, 6);
     public static final Box CK = new Box(41, 55, -118, -101, FLOOR, 8);
     public static final Box E3_CORRIDOR = new Box(34, 39, -105, -101, FLOOR, 6);
@@ -179,11 +180,9 @@ public final class TitanBackLayout {
     // 仕切りの候補 (版 18。**いまは建てず、使わない**。広さの扱いはユーザーの判断待ち: 設計書 26 の 8.7 の案 A〜C)。案 A を採るときは、
     // 少人数のグループだけに、広間の中へ立てる封印の壁 (GroupGates。そのグループにだけ見える)。外側は封じられ、湧きも戸口・出口・共鳴石のある側だけ。戦いが終われば開く。
     //   第一の広間 E1: 二人以下は南 (z -26〜-8) を、一人はさらに東 (x 48〜54) を封じる (21×47 → 21×27 → 13×27)
-    //   第二の広間 E2: 一人は東の端 (x 51〜55) を封じる (15×23 → 10×23)
     //   番兵長の広間 E3: 二人以下は南 (z -75〜-52。共鳴石の側) を封じる。倒すと開き、共鳴石へ行ける (13×55 → 13×30)
     public static final List<BlockPos> VEIL_E1 = wall(E1.x1(), E1.x2(), FLOOR + 1, FLOOR + 11, -27, true);
     public static final List<BlockPos> VEIL_E1_SOLO = wall(E1.z1(), -28, FLOOR + 1, FLOOR + 11, 47, false);
-    public static final List<BlockPos> VEIL_E2 = wall(E2.z1(), E2.z2(), FLOOR + 1, FLOOR + 12, 50, false);
     public static final List<BlockPos> VEIL_E3 = wall(E3.x1(), E3.x2(), FLOOR + 1, FLOOR + 11, -76, true);
     // 東の前室 → 第一の広間 のつなぎ / 鼓動の間 → 東の前室
     public static final Box EAST_HALL = new Box(19, 25, -38, -34, FLOOR, 6);
@@ -242,7 +241,6 @@ public final class TitanBackLayout {
             new Inscription("sign.skyabyss.hall_e1", new BlockPos(34, FLOOR + 3, -40), net.minecraft.core.Direction.EAST),
             new Inscription("sign.skyabyss.door_next", new BlockPos(39, FLOOR + 3, -54), net.minecraft.core.Direction.SOUTH),
             new Inscription("sign.skyabyss.hall_e2", new BlockPos(44, FLOOR + 3, -68), net.minecraft.core.Direction.SOUTH),
-            new Inscription("sign.skyabyss.door_next", new BlockPos(44, FLOOR + 3, -92), net.minecraft.core.Direction.SOUTH),
             new Inscription("sign.skyabyss.hall_ck", new BlockPos(51, FLOOR + 3, -99), net.minecraft.core.Direction.SOUTH),
             new Inscription("sign.skyabyss.door_tally", new BlockPos(41, FLOOR + 3, -107), net.minecraft.core.Direction.EAST),
             new Inscription("sign.skyabyss.hall_e3", new BlockPos(32, FLOOR + 3, -96), net.minecraft.core.Direction.WEST),
