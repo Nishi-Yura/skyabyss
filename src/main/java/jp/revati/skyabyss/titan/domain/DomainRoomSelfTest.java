@@ -165,6 +165,33 @@ public final class DomainRoomSelfTest {
                 maxFromCenter = Math.max(maxFromCenter, Math.hypot(p.x - d.centerX(), p.z - d.centerZ()));
             }
         }
+        // 巡: 通常 2・深淵 3・4 人以上で 3。巡が進むほど手本は長く、水門は短く、雷は速く、核は熱を取り戻すのが速い
+        if (name.equals("whale")) {
+            int[] seq = StoneSeaDomain.SEQ_LEN;
+            for (int i = 1; i < seq.length; i++) {
+                if (seq[i] <= seq[i - 1]) {
+                    f.add("whale: the bone sequence does not get longer each round");
+                }
+            }
+            double[] open = RisingTideDomain.OPEN_SCALE;
+            double[] charge = ThunderCageDomain.CHARGE_SCALE;
+            int[] reheat = HearthCoreDomain.REHEAT;
+            for (int i = 1; i < HeartDomain.roundsFor(true, 1); i++) {
+                if (open[i] >= open[i - 1]) {
+                    f.add("tide: the valve window does not get shorter each round");
+                }
+                if (charge[i] >= charge[i - 1]) {
+                    f.add("storm: the strike window does not get shorter each round");
+                }
+                if (reheat[i] < reheat[i - 1] || (i == reheat.length - 1 && reheat[i] <= reheat[0])) {
+                    f.add("ember: the cores do not re-heat faster each round");
+                }
+            }
+            if (HeartDomain.roundsFor(false, 1) != 2 || HeartDomain.roundsFor(false, 3) != 2 || HeartDomain.roundsFor(false, 4) != 3
+                    || HeartDomain.roundsFor(true, 1) != 3) {
+                f.add("the round counts are not 2 (solo) / 3 (4+ players or abyss)");
+            }
+        }
         d.abort(level);
         notes.add(String.format(java.util.Locale.ROOT, "%s %d draws, %d walled, %d unreachable, farthest %.1f from center", name, total, bad, far, maxFromCenter));
     }

@@ -464,8 +464,12 @@ public final class HeartBotSelfTest {
             check(f, d != null && d.isAbyss(), name + ": the domain is not an abyss domain");
             if (d != null) {
                 double before = bot.taken(rig.stage());
+                check(f, d.rounds() == 3, name + ": the abyss domain has " + d.rounds() + " rounds (needs 3)");
                 int solvedAt = solve(rig, bot, reader, level, d, f);
-                check(f, d.phase() == HeartDomain.Phase.DONE && d.solved(), name + ": a lone bot did not solve the abyss domain (" + d.solvedCount() + "/3 after " + solvedAt + " ticks)");
+                check(f, d.phase() == HeartDomain.Phase.DONE && d.solved(), name + ": a lone bot did not solve the abyss domain (" + d.solvedCount() + "/3 after " + solvedAt + " ticks, round " + (d.round() + 1) + ")");
+                check(f, solveInterludes == 2 && solveRoundsSeen == 3, name + ": the abyss domain went through " + solveRoundsSeen + " rounds / " + solveInterludes + " breaks (needs 3 / 2)");
+                check(f, solveInterludeTelegraphs >= 2, name + ": the heart did not attack between abyss rounds (" + solveInterludeTelegraphs + " telegraphs)");
+                check(f, solvedAt > 0 && solvedAt < 20 * 70 * 3, name + ": the abyss domain took " + solvedAt + " ticks for one player (needs under 210 s)");
                 double taken = (bot.taken(rig.stage()) - before) / HeartBalance.expectedHealth(rig.stage());
                 check(f, taken <= 0.9, name + ": the solver bot took " + fmt(taken) + " in the abyss domain (needs <= 0.9)");
                 notes.add(String.format(Locale.ROOT, "%s: reader %.2f, %d abyss attacks, domain solved in %.1f s (took %.2f)", name, read, fired, solvedAt / 20.0, taken));
@@ -577,8 +581,11 @@ public final class HeartBotSelfTest {
             if (d != null) {
                 double before = bot.taken(rig.stage());
                 int solvedAt = solve(rig, bot, reader, level, d, f);
-                check(f, d.phase() == HeartDomain.Phase.DONE && d.solved() && d.broken(), name + ": a lone bot did not solve the domain (" + d.solvedCount() + "/3 after " + solvedAt + " ticks)");
-                check(f, solvedAt > 0 && solvedAt < 20 * 70, name + ": solving took " + solvedAt + " ticks (needs under 70 s for one player)");
+                check(f, d.rounds() == 2, name + ": a solo domain has " + d.rounds() + " rounds (needs 2)");
+                check(f, d.phase() == HeartDomain.Phase.DONE && d.solved() && d.broken(), name + ": a lone bot did not solve the domain (" + d.solvedCount() + "/3 after " + solvedAt + " ticks, round " + (d.round() + 1) + ")");
+                check(f, solveInterludes == 1 && solveRoundsSeen == 2, name + ": the domain went through " + solveRoundsSeen + " rounds / " + solveInterludes + " breaks (needs 2 / 1)");
+                check(f, solveInterludeTelegraphs >= 2, name + ": the heart did not attack between rounds (" + solveInterludeTelegraphs + " telegraphs)");
+                check(f, solvedAt > 0 && solvedAt < 20 * 70 * 2, name + ": solving took " + solvedAt + " ticks (needs under 140 s for one player, 2 rounds)");
                 double taken = (bot.taken(rig.stage()) - before) / HeartBalance.expectedHealth(rig.stage());
                 check(f, taken <= 0.8, name + ": the solver bot took " + fmt(taken) + " of the expected health while solving (needs <= 0.8)");
                 check(f, d.takenMultiplier() > 1.4f, name + ": no 1.5x window after the domain was solved");
@@ -610,8 +617,19 @@ public final class HeartBotSelfTest {
     }
 
     // 一人で解く。仕掛けごとの手順 (歩く時間を見込む)。解けるまでの tick (解けなければ上限) を返す
+    // 直近の solve の記録: 見た巡の数・巡の合間の数・合間に出た心臓の予告の数
+    private static int solveRoundsSeen;
+    private static int solveInterludes;
+    private static int solveInterludeTelegraphs;
+
     private static int solve(Rig rig, Bot bot, Driver reader, ServerLevel level, HeartDomain d, List<String> f) {
         String name = rig.name();
+        solveRoundsSeen = 1;
+        solveInterludes = 0;
+        solveInterludeTelegraphs = 0;
+        boolean[] inBreak = {false};
+        int[] breakStartTg = {0};
+        int[] lastRound = {d.round()};
         boolean[] hold = {false};
         boolean[] dodging = {false};
         int[] holdNode = {-1};
@@ -625,10 +643,28 @@ public final class HeartBotSelfTest {
         };
         int[] lastAct = {0};
         Vec3[] at = {bot.position()};
-        for (int t = 1; t < 20 * 90 && d.phase() == HeartDomain.Phase.ACTIVE; t++) {
+        for (int t = 1; t < 20 * 240 && d.phase() == HeartDomain.Phase.ACTIVE; t++) {
+            int tgBefore = Telegraph.damagingCreated();
             step(rig, bot, driver, level, t);
             if (d.phase() != HeartDomain.Phase.ACTIVE) {
                 return t;
+            }
+            if (d.interlude()) {
+                if (!inBreak[0]) {
+                    inBreak[0] = true;
+                    solveInterludes++;
+                    hold[0] = false;
+                    holdNode[0] = -1;
+                    bot.setShiftKeyDown(false);
+                }
+                solveInterludeTelegraphs += Telegraph.damagingCreated() - tgBefore;
+                continue;
+            }
+            inBreak[0] = false;
+            if (d.round() != lastRound[0]) {
+                lastRound[0] = d.round();
+                solveRoundsSeen++;
+                lastAct[0] = t;
             }
             if (d instanceof jp.revati.skyabyss.titan.domain.StoneSeaDomain s) {
                 int e = s.expected();
@@ -657,7 +693,7 @@ public final class HeartBotSelfTest {
                 if (rod >= 0) {
                     Vec3 np = c.nodes().get(rod).pos;
                     int walk = legTicks(at[0], np);
-                    check(f, walk <= jp.revati.skyabyss.titan.domain.ThunderCageDomain.CHARGE - 50, name + ": a rod is " + walk + " ticks of walking away (charge is " + jp.revati.skyabyss.titan.domain.ThunderCageDomain.CHARGE + ")");
+                    check(f, walk <= c.chargeTicks() - (c.round() == 0 ? 50 : 25), name + ": a rod is " + walk + " ticks of walking away (charge is " + c.chargeTicks() + " in round " + (c.round() + 1) + ")");
                     if (d.ticks() - c.chargeStart() >= walk) {
                         // 溜まり始めからの時間で、歩いて着く
                         bot.moveTo(np.x + 1, np.y, np.z);
@@ -699,7 +735,7 @@ public final class HeartBotSelfTest {
             }
         }
         bot.setShiftKeyDown(false);
-        return d.phase() == HeartDomain.Phase.ACTIVE ? -1 : 20 * 90;
+        return d.phase() == HeartDomain.Phase.ACTIVE ? -1 : 20 * 240;
     }
 
     // 仕掛けごとの決まり: 間違い・保たない・逃す・離れる・叩きだけでは効かない
