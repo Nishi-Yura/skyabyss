@@ -20,6 +20,8 @@
 | 旅嚢・死・墓・パーティ | 旅嚢（品ごとの固定枠、倒れても残る）、柔らかい死（墓から立て直し）、倒れた仲間の蘇生、6 人まで | 22・11・10 |
 | モデル | 低ポリのメッシュ（水密・関節は親に沈める）。平らな絵は 32×32 | 15・16 と tools/README |
 | サイト | `site/`（GitHub Pages、日英、ドット絵のみ）。`python tools/site/gen_art.py` の後に `python tools/site/build.py`。生成物の `site/*.html` もコミットする | tools/site/ |
+| 画面と札（2026-10-21 夜） | **仮に推薦案で入れた（選択ページの「画面と札」で選んでもらう）**。札（獲得・進展・クエスト・伝承・バニラと mod の進捗）は `client/notice/CardFeed` の一つの出口、置き場は設定 `cardPlace`（既定 LEFT_FEED = 左の目的の帯の下に一行ずつ）。バニラの進捗の札は `mixin/ToastAddMixin` で mod の札に、レシピ・操作説明の札は出さない。バニラの画面は同梱のリソースパック `skyabyss_ui_a/b/c`（`tools/ui/gen_vanilla_skin.py`、既定 A をはじめての起動で選ぶ。`client/ui/UiSkin`）。見出しの文字・ツールチップの色も絵柄に合わせる。撮影は `SKYABYSS_UI_SKIN=a|b|c|none` | 18 の 3.1・3.2 |
+| 最適化（2026-10-21 夜） | 見た目・中身を変えない形で: HUD の配置の計算が入力の同じフレームで飛ぶように（Fit を入力で比べる `Fit.keyed`）、ボスバーの持ち主探しを tick ごとに一回（`client/BossOwners`）、光の筋の 128KB の置き場を使い回し、クエストの札の組み立てを一フレーム一回、蛾と野営の探しはチャンクの区画の表で先に見る（`util/SectionScan`）、装備の打ち消しの早抜け。残り候補（未着手）: `VowEvents.applyFoeHealth` の全実体走査、`GuideTrailRenderer` の床探しのキャッシュ、`EmberTrials` の毎 tick の箱探し | — |
 
 ## 2. 動かす・試す・撮る
 
@@ -63,6 +65,7 @@
   - 順路の記録はグループの記録 `BackGroupData.Record` の `keep.trial.*`（`TrialData` に定数。`keep.` はリセットで消えない）。グループの人は `Groups.online/inBox`。
   - 消す対象（32 の 7 章）: `trial/TrialHub`（封・碑）、`trial/HubTablets`、`trial/TrialBoard*`、`trial/TrialTabletBlock`、`trial/TrialSealBlock`、`trial/WeeklyGate`、各 `*Deck*`（回廊・戸・案内。`TrialCell.build` は残す）、各背の任意の翼と広場・祠・踏み跡の建て方、`FirstRun` の既知の道。
 - **一章の敵がフルスイートの負荷で不安定**: 自己テストの全体を回すと、一章の mob の段が時々落ちる。単独の `SKYABYSS_SELFTEST_ONLY` では通る。
+- **新しい世界で揺れる自己テスト（2026-10-21 に 3 回流して確認）**: `heartbeat ward`・`site cave`・`ch2`・`young`（着地）・`ch1 back mobs`（突進）・`build audit` の背の明るさと足跡・骨の丘の段は、世界ごとに通ったり落ちたりする（都の作り直しの前から。都の飾りの階段は監査で許可済み）。
 - **岩鯨の広間の広さ**（26 の 8.6）: 1〜2 人には広い。判断待ち。
 - **実機で確かめていないもの**: 深淵の心臓の戦い・専用伝説 4 点の見た目と効き、紋の盤・変異の画面、転生の台座から転生を終えるまで（本番の jar）、順位の石・飾り板の複数人での表示、版 22・23 の試練の階の歩き（雷翼・余燼）、巨神の子の遠い旅。
 
