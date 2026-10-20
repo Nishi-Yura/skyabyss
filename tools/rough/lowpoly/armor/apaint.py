@@ -54,10 +54,15 @@ def paint(faces, size, P, N, M, L, titan, rarity="common", plus=0):
         put(m("sec"), pick(B, shaded(B, 0.66, 0.34, 0.08) - ((np.sin(Y * 1.1 + 3.0 * n_lo) > 0.74) & (n_mid > 0.35)) - (pit < 0.04)))
         put(m("edge"), pick(B, shaded(B, 0.84, 0.26, 0.05) - (pit < 0.03)))
         put(m("acc"), pick(MO, shaded(MO, 0.55, 0.3, 0.14)))
-        put(m("cloth"), pick(S, shaded(S, 0.34, 0.3, 0.08) - weave * (n_mid > 0.3) - 1 * (stripe_v & (n_mid > 0.6))))
+        # 下着: 格子をやめ、暗い石のなめらかな面 (かごに見えない)。縄は縞、骨・石に欠けと暗いひび
+        put(m("cloth"), pick(S, shaded(S, 0.30, 0.3, 0.08) - (n_hi > 0.8)))
         put(m("cloth") & (n_lo > 0.74), pick(MO, np.floor(1.6 + 1.4 * lit + bay).astype(int)))
-        mo = np.isin(mats, ["main"]) & ((n_mid + 0.5 * n_lo + 0.55 * np.clip(N[..., 1], 0, 1)) > 1.36)
+        TN = PAL["TAN"] if "TAN" in PAL else PAL["CORD"]
+        put(m("cord"), pick(PAL["CORD"], np.floor(1.2 + 1.2 * lit + 0.8 * bay - 0.9 * ((LU + LV) % 3 == 0)).astype(int)) * 0.62)
+        mo = np.isin(mats, ["main"]) & ((n_mid + 0.5 * n_lo + 0.55 * np.clip(N[..., 1], 0, 1)) > 1.30)
         put(mo, pick(MO, np.floor(1.5 + 1.5 * lit + 1.2 * bay).astype(int)))
+        chip = np.isin(mats, ["sec", "edge"]) & (hash1(xx * 11 + yy * 5 + fi, 6) < 0.035) & (D > 0.9)
+        put(chip, pick(PAL["DARK"], A_(2)))
     elif titan == "tide":
         S, PE, WE, CO, KE = PAL["SHELL"], PAL["PEARL"], PAL["WET"], PAL["CORAL"], PAL["KELP"]
         irid = n_mid * 0.6 + 0.4 * np.sin(Y * 0.5 + X * 0.3)

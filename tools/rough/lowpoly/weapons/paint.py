@@ -96,7 +96,12 @@ def paint(faces, size, P, N, M, L, titan, rarity="common", plus=0, inlay=None, e
         # 苔: 石の上向きの面のまだら
         mo = np.isin(mats, ["guard", "spine", "grip"]) & ((n_mid * 1.0 + 0.5 * n_lo + 0.5 * np.clip(N[..., 1], 0, 1)) > 1.32)
         put(mo, pick(MO, np.floor(1.5 + 1.5 * lit + 1.2 * bay).astype(int)))
-        # 骨の白い割れと石の割れ
+        # 使い込み (様式 C): ぼろ布・骨の暗いひび・欠けた画素
+        put(m("cloth"), pick(PAL["TRIM_N"], shaded(PAL["TRIM_N"], 0.42, 0.3, 0.1) - (n_hi > 0.7)))
+        put(m("cloth") & (n_lo > 0.66), pick(MO, np.floor(1.4 + 1.4 * lit + bay).astype(int)))
+        rn = np.abs(vnoise(L * 0.24 + 7, 5) - 0.5)
+        ck = np.isin(mats, ["main", "edge"]) & (rn < 0.0) & INS & (D > 0.4)
+        put(ck, pick(PAL["DARK"], A_(1)))
         dark_c = PAL["DARK"]
     elif titan == "tide":
         S, PE, WE, CO, KE = PAL["SHELL"], PAL["PEARL"], PAL["WET"], PAL["CORAL"], PAL["KELP"]
