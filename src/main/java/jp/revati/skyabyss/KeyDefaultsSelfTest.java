@@ -12,8 +12,8 @@ public final class KeyDefaultsSelfTest {
 
     public static void runSelfTest(MinecraftServer server) {
         List<String> f = KeyDefaults.conflicts();
-        if (KeyDefaults.all().size() != 17) {
-            f.add("the key list has " + KeyDefaults.all().size() + " entries (expected 17); update KeyDefaults.all() when a key is added");
+        if (KeyDefaults.all().size() != 18) {
+            f.add("the key list has " + KeyDefaults.all().size() + " entries (expected 18); update KeyDefaults.all() when a key is added");
         }
         if (f.isEmpty()) {
             SkyAbyss.LOGGER.info("SELFTEST keys PASSED ({} default keys, no duplicates, none on a vanilla default)", KeyDefaults.all().size());

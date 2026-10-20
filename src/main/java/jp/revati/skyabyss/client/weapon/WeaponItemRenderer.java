@@ -70,7 +70,7 @@ public final class WeaponItemRenderer extends BlockEntityWithoutLevelRenderer {
         if (LowPoly.weaponMeshes || id.startsWith("abyss_")) {
             LowPolyMesh mesh = LowPolyMeshes.get("items/" + id + "/" + tierName(stack) + (stage >= 0 ? "_pull" + stage : ""));
             if (mesh != null) {
-                renderMesh(mesh, id, tierName(stack), level(stack), stack.hasFoil(), pose, buffers, light, overlay);
+                renderMesh(mesh, id, tierName(stack), level(stack), stack.hasFoil(), context, pose, buffers, light, overlay);
                 return;
             }
         }
@@ -79,7 +79,22 @@ public final class WeaponItemRenderer extends BlockEntityWithoutLevelRenderer {
 
     // ---------------------------------------------------------------- メッシュ
 
-    private static void renderMesh(LowPolyMesh mesh, String id, String tier, int level, boolean foil, PoseStack pose, MultiBufferSource buffers, int light, int overlay) {
+    // 今の軌跡の濃さと光の強まり ([0] = 軌跡、[1] = 光)。手 (一人称) は WeaponClient が入れた値、三人称は持っている人の今の動き、それ以外 (地面・額縁・画面) は 0
+    private static float[] effects(ItemDisplayContext context) {
+        if (context.firstPerson()) {
+            return new float[] {WeaponFeel.fpTrail, WeaponFeel.fpGlow};
+        }
+        if (holder != null && (context == ItemDisplayContext.THIRD_PERSON_RIGHT_HAND || context == ItemDisplayContext.THIRD_PERSON_LEFT_HAND)) {
+            SwingClock.Active a = SwingClock.current(holder, SwingClock.partial());
+            if (a != null) {
+                return new float[] {a.step().get(jp.revati.skyabyss.weapon.MoveSet.TRAIL, a.t(), 0f) * a.w(),
+                        a.step().get(jp.revati.skyabyss.weapon.MoveSet.GLOW, a.t(), 0f) * a.w()};
+            }
+        }
+        return new float[] {0f, 0f};
+    }
+
+    private static void renderMesh(LowPolyMesh mesh, String id, String tier, int level, boolean foil, ItemDisplayContext context, PoseStack pose, MultiBufferSource buffers, int light, int overlay) {
         ResourceLocation[] tex = variant(mesh.texture, level);
         pose.pushPose();
         // 元のボクセルは盾以外、全部の要素を z 軸まわりに -45 度 (中心 8,8,8) 傾けていて、display (持ち方) はその傾きを前提にしている。メッシュは刃を立てて作ってあるので、同じだけ傾ける
@@ -102,6 +117,13 @@ public final class WeaponItemRenderer extends BlockEntityWithoutLevelRenderer {
         if (tex[1] != null) {
             LowPoly.drawAll(pose, buffers.getBuffer(RenderType.entityTranslucentEmissive(tex[1])), mesh, FULL_BRIGHT, overlay, WHITE);
         }
+        // 動きの間だけ: 光る画素をもう一度重ねて強め (GLOW)、刃の軌跡の帯を引く (TRAIL)
+        float[] fx = effects(context);
+        if (fx[1] > 0.02f && tex[1] != null) {
+            int a = Math.min(255, (int) (fx[1] * 255f));
+            LowPoly.drawAll(pose, buffers.getBuffer(RenderType.entityTranslucentEmissive(tex[1])), mesh, FULL_BRIGHT, overlay, (a << 24) | 0xFFFFFF);
+        }
+        WeaponTrail.draw(pose, buffers, mesh, id, context.firstPerson() ? -1 : holder == null ? -2 : holder.getId(), !context.firstPerson(), fx[0]);
         pose.popPose();
     }
 

@@ -21,6 +21,7 @@ public final class KeyDefaults {
     public static final int STATUS = 74; // J
     public static final int SKILLS = 75; // K
     public static final int STANCE = 46; // .
+    public static final int WEAPON_INSPECT = 91; // [ 武器の点検 (かざして回す)
     public static final int[] SLOTS = {82, 71, 86, 90, 44}; // R G V Z ,
 
     private KeyDefaults() {
@@ -41,6 +42,7 @@ public final class KeyDefaults {
         m.put("status", STATUS);
         m.put("skills", SKILLS);
         m.put("stance", STANCE);
+        m.put("weapon_inspect", WEAPON_INSPECT);
         for (int i = 0; i < SLOTS.length; i++) {
             m.put("slot_" + (i + 1), SLOTS[i]);
         }

@@ -1,0 +1,22 @@
+{
+  "item": "abyss_storm_bow",
+  "label": "深淵の雷弓: 重く引き絞り、放して弓が揺れる",
+  "family": "BOW",
+  "strike": 0.0,
+  "reach": 0.0,
+  "window": 0,
+  "fixedDuration": 18,
+  "idle": {"sway": 0.035, "hz": 0.24},
+  "steps": [
+    {
+      "name": "放ちの揺れ", "hitstop": 0, "shake": 0.2, "blendIn": 0.04, "blendOut": 0.12,
+      "keys": [
+        {"t": 0.0, "e": "smooth", "v": {"TX": 0, "TY": 0, "TZ": 0, "RX": 0, "RY": 0, "RZ": 0, "GLOW": 1}},
+        {"t": 0.1, "e": "out", "v": {"TX": 0, "TY": 0.05, "TZ": 0.14, "RX": 12, "RY": 0, "RZ": -3, "GLOW": 1}},
+        {"t": 0.35, "e": "in_out", "v": {"TX": -0.02, "TY": 0.07, "TZ": 0.08, "RX": 6, "RY": -6, "RZ": -14, "GLOW": 0.8}},
+        {"t": 0.65, "e": "spring", "v": {"TX": 0, "TY": 0.02, "TZ": 0.03, "RX": 2, "RY": -2, "RZ": 6, "GLOW": 0.4}},
+        {"t": 1.0, "e": "out", "v": {"TX": 0, "TY": 0, "TZ": 0, "RX": 0, "RY": 0, "RZ": 0, "GLOW": 0}}
+      ]
+    }
+  ]
+}

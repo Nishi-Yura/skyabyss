@@ -25,6 +25,8 @@ public final class BowRecoil {
         int drawTicks;
         long releasedAt = Long.MIN_VALUE / 2;
         float power;
+        // 放したあとの返しの長さ (tick。MoveSet の fixedDuration)
+        int fixed;
     }
 
     private static final Int2ObjectOpenHashMap<State> STATES = new Int2ObjectOpenHashMap<>();
@@ -32,9 +34,27 @@ public final class BowRecoil {
     private BowRecoil() {
     }
 
-    // 雷翼の弓を引いているか
+    // 雷翼の弓・深淵の雷弓を引いているか
     static boolean drawing(LivingEntity entity) {
-        return entity.isUsingItem() && entity.getUseItem().getItem() == jp.revati.skyabyss.item.storm.StormGearSetup.BOW.get();
+        return entity.isUsingItem() && isBow(entity.getUseItem().getItem());
+    }
+
+    static boolean isBow(net.minecraft.world.item.Item item) {
+        return item == jp.revati.skyabyss.item.storm.StormGearSetup.BOW.get() || item == jp.revati.skyabyss.abyss.AbyssSetup.STORM_BOW_ITEM.get();
+    }
+
+    // 放したあとの返し (MoveSet の steps[0]。一人称) の進み 0..1。なければ -1。長さは MoveSet の fixedDuration
+    static float flourish(LivingEntity entity) {
+        float forced = WeaponClient.forcedSwing;
+        if (forced >= 0f && entity == Minecraft.getInstance().player) {
+            return forced;
+        }
+        State s = STATES.get(entity.getId());
+        if (s == null || drawing(entity) || s.fixed <= 0) {
+            return -1f;
+        }
+        float age = entity.level().getGameTime() - s.releasedAt + Minecraft.getInstance().getTimer().getGameTimeDeltaPartialTick(false);
+        return age < 0f || age >= s.fixed ? -1f : age / s.fixed;
     }
 
     @SubscribeEvent
@@ -50,6 +70,8 @@ public final class BowRecoil {
             boolean drawing = drawing(player);
             if (drawing) {
                 s.drawTicks = player.getTicksUsingItem();
+                var mv = jp.revati.skyabyss.weapon.MoveSets.get(net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(player.getUseItem().getItem()).getPath());
+                s.fixed = mv == null ? 0 : mv.fixedDuration;
             } else if (s.wasDrawing && s.drawTicks >= 3) {
                 s.releasedAt = level.getGameTime();
                 s.power = Math.min(1f, s.drawTicks / 20f);

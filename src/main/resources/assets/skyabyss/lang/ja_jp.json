@@ -1357,5 +1357,8 @@
   "message.skyabyss.skill.ext_failed.not_quiet": "紋の差し替えは、戦いの外（30 秒）で",
   "message.skyabyss.skill.ext_failed.bag_full": "紋を持ちきれない",
   "message.skyabyss.skill.ext_failed.bad": "できなかった",
-  "message.skyabyss.room_trap": "床の板を踏むと、少しのち崩れる・噴き上がる。敵を誘い込め"
+  "message.skyabyss.room_trap": "床の板を踏むと、少しのち崩れる・噴き上がる。敵を誘い込め",
+  "skyabyss.configuration.weaponShake": "武器の一撃の画面の揺れ",
+  "skyabyss.configuration.weaponTrail": "刃の軌跡の光",
+  "key.skyabyss.weapon_inspect": "武器の点検（かざして回す）"
 }

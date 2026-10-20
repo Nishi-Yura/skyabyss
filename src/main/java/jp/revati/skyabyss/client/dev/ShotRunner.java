@@ -682,6 +682,16 @@ public final class ShotRunner {
                 jp.revati.skyabyss.client.weapon.WeaponClient.forcedSwing = line.arg(0).equalsIgnoreCase("off") ? -1f : (float) line.doubleArg(0);
                 return true;
             }
+            case "swingstep" -> {
+                // swingstep <段 0..> : swingpose で止める連撃の段
+                jp.revati.skyabyss.client.weapon.SwingClock.forcedStep = (int) line.doubleArg(0);
+                return true;
+            }
+            case "inspectpose" -> {
+                // inspectpose <0..1|off> : 武器の点検 (かざして回す) の途中の姿で止める
+                jp.revati.skyabyss.client.weapon.SwingClock.forcedInspect = line.arg(0).equalsIgnoreCase("off") ? -1f : (float) line.doubleArg(0);
+                return true;
+            }
             case "swingclock" -> {
                 // swingclock on|off : 武器の振りの長さ (攻撃速度で決まる) の入り切り。off = 昔のバニラの 6 tick (変更前後の比べ用)
                 jp.revati.skyabyss.client.weapon.SwingClock.legacy = line.arg(0).equalsIgnoreCase("off");
