@@ -24,7 +24,9 @@ def font(n):
     return ImageFont.load_default()
 
 
-def crop(img, view):
+def crop(img, view, item=''):
+    if item == 'coral_shield' and view.startswith('fp'):  # 盾の一人称は左寄りなので全体を縮める
+        return img.resize((W, H))
     if view.startswith("tp"):
         return img.crop((360, 110, 680, 370)).resize((W, int(W * 260 / 320)))
     return img.crop((440, 150, 960, 540)).resize((W, H))
@@ -43,7 +45,7 @@ def grid(rows, cols, label_of, path_of, out):
         for c, (_, tier, view) in enumerate(cols):
             p = path_of(it, tier, view)
             if p.exists():
-                sheet.paste(crop(Image.open(p).convert("RGB"), view), (LABEL + c * W, y))
+                sheet.paste(crop(Image.open(p).convert("RGB"), view, it), (LABEL + c * W, y))
     return sheet
 
 
@@ -55,10 +57,21 @@ def main():
     cols2 = [("一人称", "", "fp"), ("三人称 正面", "", "tp"), ("三人称 斜め", "", "tpSide")]
     shield = grid(["coral_shield"], [("一人称 構え", "common", "fpIdle"), ("一人称 防ぐ", "common", "fpGuard"), ("三人称 防ぐ", "common", "tpGuard"),
                                      ("三人称 斜め", "common", "tpGuardSide"), ("三人称 構え", "common", "tpIdle")], lab, lambda it, t, v: D / f"{it}_{t}_{v}.png", out)
-    bcols = [("引き 序 (5t)", "", "Draw0"), ("引き 中 (15t)", "", "Draw1"), ("引き 満 (26t)", "", "Draw2"), ("放つ (満)", "", "Release2")]
-    parts = [a, shield]
-    for tag, name in (("fp", "弓 一人称"), ("tp", "弓 三人称")):
-        parts.append(grid([f"thunder_wing_bow"], [(n, t, f"{tag}{v}") for n, t, v in bcols], lambda it, nm=name: nm, lambda it, t, v: D / f"{it}_{v}.png", out))
+    bcols = [("引き 序 (5t)", "", "Draw0"), ("引き 中 (15t)", "", "Draw1"), ("引き 満 (26t)", "", "Draw2"), ("放つ (満)", "", "Release2b")]
+    # 大きさの比べ: 三人称を横から、同じ距離・同じ切り出しで (伝説 = いちばん大きい階級)
+    f = font(16)
+    strip = Image.new("RGB", (1920, 2 * (192 + 26) + 30), (24, 26, 32))
+    d = ImageDraw.Draw(strip)
+    d.text((8, 4), "大きさの比べ (三人称 横・伝説・同じ距離): 短剣 < 槍・斧 < 大剣", font=f, fill=(255, 255, 255))
+    for n, it in enumerate(ITEMS):
+        x, y = (n % 6) * 320, 30 + (n // 6) * 218
+        p = D / f"{it}_legend_tpSide.png"
+        if p.exists():
+            strip.paste(Image.open(p).convert("RGB").crop((200, 90, 700, 390)).resize((320, 192)), (x, y))
+        d.text((x + 6, y + 194), lab(it), font=f, fill=(255, 230, 160))
+    parts = [a, shield, strip]
+    for tag, name in (("fp", "弓 一人称"), ("tp", "弓 三人称 (放つのは背中側から)")):
+        parts.append(grid([f"thunder_wing_bow"], [(n, t, f"{tag}{v}") for n, t, v in (bcols if tag == "fp" else bcols[:3] + [("放つ (満)", "", "Release2b")])], lambda it, nm=name: nm, lambda it, t, v: D / f"{it}_{v}.png", out))
     w = max(p.width for p in parts)
     sheet = Image.new("RGB", (w, sum(p.height for p in parts)), (24, 26, 32))
     y = 0

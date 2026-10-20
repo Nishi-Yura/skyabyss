@@ -56,17 +56,17 @@ def main():
         v("coral_shield_common_fpIdle", "first", True)
         v("coral_shield_common_tpIdle", "front", False, 0)
         out.extend(["perspective first", "bodyyaw 0", "hud on", "use", "wait 12", "chat clear", "shot coral_shield_common_fpGuard", "perspective front", "hud off", "wait 4",
-                    "shot coral_shield_common_tpGuard", "bodyyaw 70", "wait 4", "shot coral_shield_common_tpGuardSide", "stopuse", "wait 20"])
+                    "shot coral_shield_common_tpGuard", "bodyyaw 45", "shot coral_shield_common_tpGuardSide", "stopuse", "wait 20"])
         # 副の手に盾、主の手に槍 (ふつうの使い方)
         out.extend(["cmd item replace entity @s weapon.mainhand with skyabyss:captain_pike", "cmd item replace entity @s weapon.offhand with skyabyss:coral_shield",
                     "perspective first", "bodyyaw 0", "hud on", "wait 10", "chat clear", "shot offhand_shield_fpIdle", "use", "wait 12", "chat clear", "shot offhand_shield_fpGuard",
-                    "perspective front", "hud off", "wait 4", "shot offhand_shield_tpGuard", "bodyyaw 70", "wait 4", "shot offhand_shield_tpGuardSide", "stopuse", "wait 10",
+                    "perspective front", "hud off", "wait 4", "shot offhand_shield_tpGuard", "bodyyaw 45", "shot offhand_shield_tpGuardSide", "stopuse", "wait 10",
                     "cmd item replace entity @s weapon.offhand with minecraft:air"])
     if want("bow"):
         out.append(f"cmd item replace entity @s weapon.mainhand with skyabyss:{BOW}")
         for persp, tag, hud in (("first", "fp", True), ("front", "tp", False)):
             for n, ticks in enumerate((5, 15, 26)):
-                out.extend([f"perspective {persp}", "bodyyaw 0", "hud on" if hud else "hud off", "use", f"wait {ticks}", "chat clear", f"shot {BOW}_{tag}Draw{n}", "stopuse", "wait 3", f"shot {BOW}_{tag}Release{n}", "wait 25"])
+                out.extend([f"perspective {persp}", "bodyyaw 0", "hud on" if hud else "hud off", "use", f"wait {ticks}", "chat clear", f"shot {BOW}_{tag}Draw{n}", "stopuse", "wait 1", f"shot {BOW}_{tag}Release{n}a", "wait 2", f"shot {BOW}_{tag}Release{n}"] + (["perspective back", "wait 3", f"shot {BOW}_{tag}Release{n}b"] if tag == "tp" else ["wait 4", f"shot {BOW}_{tag}Release{n}b"]) + ["wait 25"])
     out.append("quit")
     (ROOT / "tools/shots/weapon_hold2.txt").write_text(chr(10).join(out) + chr(10), encoding="utf-8")
 

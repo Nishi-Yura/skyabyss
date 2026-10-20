@@ -69,10 +69,25 @@ public final class WeaponClient {
 
     // 一人称: 動きの一コマ (MoveSet の段) を手元に足す。回転の軸は、バニラの振りと同じに斜め 45 度 (体の中心へ向かう向き) に取る:
     // 前後に傾ける RX、ひねる RZ、横へ薙ぐ RY。RY・RZ の全回転は、混ぜ具合をかけても巻き戻らないよう角度を丸めてから混ぜる
+    // 一人称では重い武器 (大鎚・戦斧・大剣・鎌) は画面を覆わないよう、動きの手元の移動・回転を弱める (三人称の腕・胴の動きはそのまま)
+    private static float fpDamp(String id) {
+        return switch (id) {
+            case "smith_hammer" -> 0.5f;
+            case "ember_war_axe", "abyss_ash_scythe" -> 0.65f;
+            case "whalebone_greatsword", "abyss_greatsword" -> 0.75f;
+            default -> 1f;
+        };
+    }
+
     private static void applyStep(PoseStack pose, int i, SwingClock.Active a, boolean frozen, long tick) {
+        applyStep(pose, i, a, frozen, tick, 1f);
+    }
+
+    private static void applyStep(PoseStack pose, int i, SwingClock.Active a, boolean frozen, long tick, float k) {
         MoveSet.Step st = a.step();
         float t = a.t();
         float w = a.w();
+        w *= k;
         pose.translate(i * st.get(MoveSet.TX, t, 0f) * w, st.get(MoveSet.TY, t, 0f) * w, st.get(MoveSet.TZ, t, 0f) * w);
         if (frozen) {
             // ヒットストップ: 止まっている間、ほんの小さく震える
@@ -82,8 +97,8 @@ public final class WeaponClient {
         pose.mulPose(Axis.ZP.rotationDegrees(i * WeaponArmPoses.wrap(st.get(MoveSet.RZ, t, 0f)) * w));
         pose.mulPose(Axis.XP.rotationDegrees(st.get(MoveSet.RX, t, 0f) * w));
         pose.mulPose(Axis.YP.rotationDegrees(i * -45f));
-        WeaponFeel.fpTrail = st.get(MoveSet.TRAIL, t, 0f) * w;
-        WeaponFeel.fpGlow = st.get(MoveSet.GLOW, t, 0f) * w;
+        WeaponFeel.fpTrail = st.get(MoveSet.TRAIL, t, 0f) * a.w();
+        WeaponFeel.fpGlow = st.get(MoveSet.GLOW, t, 0f) * a.w();
     }
 
     // 一人称: 待機のゆれ (呼吸)
@@ -255,7 +270,7 @@ public final class WeaponClient {
             MoveSet ms = MoveSets.get(id);
             SwingClock.Active a = stack == player.getMainHandItem() ? SwingClock.current(player, partialTick) : null;
             if (a != null) {
-                applyStep(pose, i, a, SwingClock.frozen(player), player.tickCount);
+                applyStep(pose, i, a, SwingClock.frozen(player), player.tickCount, fpDamp(id));
             } else if (ms != null) {
                 applyIdle(pose, i, ms, player, partialTick);
             }
