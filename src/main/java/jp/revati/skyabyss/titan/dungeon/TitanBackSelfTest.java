@@ -899,12 +899,13 @@ public final class TitanBackSelfTest {
         int flooded = 0;
         BlockPos mid = MazeBuilder.pockets(MazeBuilder.maze(TitanBackData.get(level).mazeSeed())).isEmpty() ? null
                 : MazeBuilder.midPocket(MazeBuilder.maze(TitanBackData.get(level).mazeSeed()));
+        boolean[][] midLane = mid == null ? null : MazeBuilder.midLanes(MazeBuilder.maze(TitanBackData.get(level).mazeSeed()), MazePlan.compute(MazeBuilder.maze(TitanBackData.get(level).mazeSeed())));
         for (BlockPos p : pockets) {
             String bad = null;
             for (int dx = 0; dx < MAZE_CELL && bad == null; dx++) {
                 for (int dz = 0; dz < MAZE_CELL && bad == null; dz++) {
                     // 中ほどの休み場は、真ん中の一マスの水の穴を除く全面が乾いた足場 (版 27) (水の二段目が石、その上は紫水晶があってもよい)
-                    boolean ledge = p.equals(mid) && (dx != MAZE_CELL / 2 || dz != MAZE_CELL / 2);
+                    boolean ledge = p.equals(mid) && (dx != MAZE_CELL / 2 || dz != MAZE_CELL / 2) && !midLane[dx][dz];
                     if (ledge) {
                         if (!level.getBlockState(p.offset(dx, 1, dz)).is(Blocks.POLISHED_DEEPSLATE)) {
                             bad = "the rest ledge corner is missing at " + p.offset(dx, 1, dz).toShortString();

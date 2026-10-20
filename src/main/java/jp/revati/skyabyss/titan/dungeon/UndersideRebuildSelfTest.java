@@ -74,7 +74,7 @@ final class UndersideRebuildSelfTest {
         var maze = MazeBuilder.maze(TitanBackData.get(back).mazeSeed());
         if (!MazeBuilder.pockets(maze).isEmpty()) {
             BlockPos p = MazeBuilder.midPocket(maze);
-            checkRoom(back, "mid rest pocket", p.getX(), p.getX() + MAZE_CELL - 1, p.getZ(), p.getZ() + MAZE_CELL - 1, p.getY() + 1, 2, 20, f);
+            checkRoom(back, "mid rest pocket", p.getX(), p.getX() + MAZE_CELL - 1, p.getZ(), p.getZ() + MAZE_CELL - 1, p.getY() + 1, 2, 16, f);
         }
     }
 
