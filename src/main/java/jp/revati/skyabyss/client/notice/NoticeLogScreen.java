@@ -12,7 +12,7 @@ import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
 
 // 知らせの記録 (N)。流れた語り・獲得・場所の名前を、時刻つきで新しい順に読み返す窓。クエストログと同じ暗い石板の色
-public class NoticeLogScreen extends Screen {
+public class NoticeLogScreen extends Screen implements jp.revati.skyabyss.client.ui.TextBounded {
     private static final int W = 300;
     private static final int H = 200;
     private static final int PANEL = 0xFA101318;
@@ -78,5 +78,10 @@ public class NoticeLogScreen extends Screen {
             y += 10;
         }
         g.drawString(font, Component.translatable("gui.skyabyss.notice.log_hint"), left + 10, top + H - 11, SOFT, false);
+    }
+
+    @Override
+    public int[] textBounds() {
+        return new int[] {(width - W) / 2, (height - H) / 2, W, H};
     }
 }

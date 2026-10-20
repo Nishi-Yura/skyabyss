@@ -22,7 +22,7 @@ import net.neoforged.neoforge.network.PacketDistributor;
 
 // 称号と飾りの画面 (C04・C23)。左 = 称号の一覧 (解けたものを選ぶ。解けていないものは条件が見える)、右 = 見せ方の切り替え (名札の効果・称号・背中の飾り・光・プリズムを止める・順位表に載せる)。
 // 色の段と記号は固定で切れない。記録画面の「称号」から、または /rebirthfx で開く
-public final class RebirthScreen extends Screen {
+public final class RebirthScreen extends Screen implements jp.revati.skyabyss.client.ui.TextBounded {
     private static final int W = 320;
     private static final int H = 196;
     private static final int ROW = 14;
@@ -203,5 +203,10 @@ public final class RebirthScreen extends Screen {
     @Override
     public boolean isPauseScreen() {
         return false;
+    }
+
+    @Override
+    public int[] textBounds() {
+        return new int[] {left - 6, top - 6, W + 12, H + 12};
     }
 }

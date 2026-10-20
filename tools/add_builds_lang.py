@@ -104,7 +104,7 @@ SK = {
     "still_string": ("静かな弦", "Still String", "引き絞って待つ者の矢は、重い。", "The arrow of one who draws and waits is heavy.",
                      "%2$s 秒動かずにいて放った矢（と雲穿ち）の威力が %1$s%% 増える。動くとやり直し。",
                      "An arrow (or Cloud Pierce) loosed after standing still for %2$s s deals %1$s%% more. Moving resets it.", "", ""),
-    "signal": ("合図", "Signal", "声を出さずとも、光は伝わる。", "Light carries even where no voice does.",
+    "signal": ("標を打つ", "Mark Target", "声を出さずとも、光は伝わる。", "Light carries even where no voice does.",
                "見ている先（%1$s ブロック）に %2$s 秒の光の標を立てる。仲間全員に見える。敵に当てると %4$s 秒の印（%3$s%%。鷹の目と同じ。高いほう）。",
                "Raises a beacon of light %1$s blocks ahead for %2$s s, visible to all allies. Hitting a foe marks it for %4$s s (%3$s%%, like Hawk Eye; the higher applies).", "", ""),
     "readiness_reward": ("備えの報い", "Readiness Reward", "備えた者には、道がやさしい。", "The road is kind to those who prepared.",

@@ -16,7 +16,7 @@ import net.neoforged.neoforge.network.PacketDistributor;
 // 語り部に頼む墓の一覧の画面。古い順に、場所・品の数・経験値・経った時間を一行ずつ並べ、「呼び戻す」で一つ選ぶ。
 // 中身はサーバーが決めて送る (GraveNetwork.Open)。選ぶとサーバーが確かめて救い、残りの一覧を送り返す (空なら閉じる)。
 // 行が多いときはホイールで送る
-public class GraveScreen extends Screen {
+public class GraveScreen extends Screen implements jp.revati.skyabyss.client.ui.TextBounded {
     private static final int W = 316;
     private static final int ROW_H = 28;
     private static final int MAX_ROWS = 6;
@@ -165,5 +165,10 @@ public class GraveScreen extends Screen {
                     new GraveNetwork.Entry(java.util.UUID.nameUUIDFromBytes("b".getBytes()), "minecraft:overworld", -388, 12, 64, 9, 120, 1200L * 55),
                     new GraveNetwork.Entry(java.util.UUID.nameUUIDFromBytes("c".getBytes()), "minecraft:the_nether", 40, 64, 18, 31, 0, 1200L * 8))));
         }
+    }
+
+    @Override
+    public int[] textBounds() {
+        return new int[] {left, top, W, panelH};
     }
 }

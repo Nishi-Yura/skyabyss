@@ -26,7 +26,7 @@ import net.neoforged.neoforge.network.PacketDistributor;
 // K 画面の「転生」パネル (docs/design/31、見取り図は docs/review/rebirth/index.html)。
 // 左: 転生の準備 (いまと転生後、代価、恩恵の 3 択、ボタン)。中: 残るもの・戻るもの・魂盤の力。右: 魂盤 (6 つの腕。次の節を足す腕を選ぶ)。
 // ボタンは二度押しで送る (押しまちがえない)。Lv 50 になるまで・20 回を超えたあとは、灰色の説明だけ
-public class SoulScreen extends Screen {
+public class SoulScreen extends Screen implements jp.revati.skyabyss.client.ui.TextBounded {
     static final int W = 380;
     static final int H = 184;
 
@@ -463,5 +463,10 @@ public class SoulScreen extends Screen {
         protected void updateWidgetNarration(NarrationElementOutput output) {
             defaultButtonNarrationText(output);
         }
+    }
+
+    @Override
+    public int[] textBounds() {
+        return new int[] {left - 1, top - 18, W + 2, H + 19};
     }
 }

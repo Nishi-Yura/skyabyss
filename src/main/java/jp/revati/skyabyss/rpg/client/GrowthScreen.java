@@ -23,7 +23,7 @@ import net.neoforged.neoforge.network.PacketDistributor;
 
 // ステータス画面 (J キー)。力を仮に振ってから「決定」でサーバーへ送る (押しまちがえを戻せるように)。
 // 背景は tools/gen_growth_assets.py で作る 2 倍密度のテクスチャ (480x368 を 240x184 で描く)
-public class GrowthScreen extends Screen {
+public class GrowthScreen extends Screen implements jp.revati.skyabyss.client.ui.TextBounded {
     static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "textures/gui/growth/status.png");
     static final int TEX = 512;
     static final int W = 240;
@@ -335,5 +335,10 @@ public class GrowthScreen extends Screen {
         protected void updateWidgetNarration(NarrationElementOutput output) {
             defaultButtonNarrationText(output);
         }
+    }
+
+    @Override
+    public int[] textBounds() {
+        return new int[] {left, top - 18, W, H + 18};
     }
 }

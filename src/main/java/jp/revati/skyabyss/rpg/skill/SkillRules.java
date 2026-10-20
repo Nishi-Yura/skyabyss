@@ -593,8 +593,10 @@ public final class SkillRules {
     public static final double SIGNAL_RANGE = 32;
     public static final int SIGNAL_TICKS = 20 * SECOND;
 
+    public static final int SIGNAL_MARK_TICKS = 8 * SECOND;
+
     public static double signalMark(int rank) {
-        return rank >= 2 ? 0.08 : 0.05;
+        return rank >= 2 ? 0.15 : 0.10;
     }
 
     // 備えの報い: 備えの三灯がすべて青 (緑) のとき、最大マナ +4 / 8 / 12、攻撃力 +1 / 2 / 3%
@@ -661,7 +663,7 @@ public final class SkillRules {
             case HAWK_EYE -> new Object[] {fmt(markBonus(r) * 100), MARK_TICKS / SECOND};
             case SKY_RAIN -> new Object[] {fmt(RAIN_RADIUS), RAIN_PULSES, fmt(rainDamage(r)), fmtSeconds(cooldownTicks(skill, r))};
             case STILL_STRING -> new Object[] {pct(STILL_BONUS), STILL_TICKS / SECOND};
-            case SIGNAL -> new Object[] {fmt(SIGNAL_RANGE), SIGNAL_TICKS / SECOND, fmt(signalMark(r) * 100), MARK_TICKS / SECOND};
+            case SIGNAL -> new Object[] {fmt(SIGNAL_RANGE), SIGNAL_TICKS / SECOND, fmt(signalMark(r) * 100), SIGNAL_MARK_TICKS / SECOND};
             case READINESS_REWARD -> new Object[] {fmt(readinessMana(r)), fmt(readinessAttack(r) * 100)};
             case CAMP_HAND -> new Object[] {fmt(campRegen(r)), fmt(campHunger(r) * 100)};
             case APPRAISER -> new Object[] {1};

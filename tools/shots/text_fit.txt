@@ -1,0 +1,193 @@
+# 文字のはみ出し点検: 忙しい画面を GUI 2・3・4 で撮る (ja_jp)。 ./gradlew runShots -Pscript=tools/shots/text_fit.txt → python tools/text_fit_sheet.py
+world shots flat
+size 1920 1080
+timeout 600
+render 6
+clouds off
+
+cmd time set noon
+cmd weather clear
+cmd gamemode survival
+cmd skyabyss level set @p 30
+cmd skyabyss skill forget @p
+cmd skyabyss skill points @p 8
+cmd skyabyss skill learn @p signal 2
+cmd skyabyss skill learn @p titan_cleave 2
+hud on
+camera 0 -60 8 0 0
+waitchunks
+chat clear
+wait 40
+
+guiscale 2
+wait 10
+open skills_signal
+wait 12
+shot tf2_skills_signal
+close
+wait 4
+open skills_cleave
+wait 12
+shot tf2_skills_cleave
+close
+wait 4
+open skills_build
+wait 12
+shot tf2_skills_build
+close
+wait 4
+open calling
+wait 12
+shot tf2_calling
+close
+wait 4
+open growth
+wait 12
+shot tf2_growth
+close
+wait 4
+open quests
+wait 12
+shot tf2_quests
+close
+wait 4
+open lore
+wait 12
+shot tf2_lore
+close
+wait 4
+open party
+wait 12
+shot tf2_party
+close
+wait 4
+open grave
+wait 12
+shot tf2_grave
+close
+wait 4
+open notices
+wait 12
+shot tf2_notices
+close
+wait 4
+key key.skyabyss_record.open
+wait 30
+shot tf2_record
+close
+wait 4
+guiscale 3
+wait 10
+open skills_signal
+wait 12
+shot tf3_skills_signal
+close
+wait 4
+open skills_cleave
+wait 12
+shot tf3_skills_cleave
+close
+wait 4
+open skills_build
+wait 12
+shot tf3_skills_build
+close
+wait 4
+open calling
+wait 12
+shot tf3_calling
+close
+wait 4
+open growth
+wait 12
+shot tf3_growth
+close
+wait 4
+open quests
+wait 12
+shot tf3_quests
+close
+wait 4
+open lore
+wait 12
+shot tf3_lore
+close
+wait 4
+open party
+wait 12
+shot tf3_party
+close
+wait 4
+open grave
+wait 12
+shot tf3_grave
+close
+wait 4
+open notices
+wait 12
+shot tf3_notices
+close
+wait 4
+key key.skyabyss_record.open
+wait 30
+shot tf3_record
+close
+wait 4
+guiscale 4
+wait 10
+open skills_signal
+wait 12
+shot tf4_skills_signal
+close
+wait 4
+open skills_cleave
+wait 12
+shot tf4_skills_cleave
+close
+wait 4
+open skills_build
+wait 12
+shot tf4_skills_build
+close
+wait 4
+open calling
+wait 12
+shot tf4_calling
+close
+wait 4
+open growth
+wait 12
+shot tf4_growth
+close
+wait 4
+open quests
+wait 12
+shot tf4_quests
+close
+wait 4
+open lore
+wait 12
+shot tf4_lore
+close
+wait 4
+open party
+wait 12
+shot tf4_party
+close
+wait 4
+open grave
+wait 12
+shot tf4_grave
+close
+wait 4
+open notices
+wait 12
+shot tf4_notices
+close
+wait 4
+key key.skyabyss_record.open
+wait 30
+shot tf4_record
+close
+wait 4
+quit

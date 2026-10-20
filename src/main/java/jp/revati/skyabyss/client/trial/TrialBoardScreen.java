@@ -20,7 +20,7 @@ import net.minecraft.util.Mth;
 //   いまの三つ : 引いた三つの試練。枠 (歩・智・闘) の絵・名前・類・段・修飾の札。稀は金の縁、極は赤紫の縁。極のうち一つは「？」(入ってから分かる)
 //   図鑑       : その巨神の試練ごとに、済んだ回数・任意の目標の数・出会った修飾の数。まだ引いていないものは「？」。称号
 // Tab で頁を替える。Esc で閉じる。見せるだけで、決めるのはサーバー
-public class TrialBoardScreen extends Screen {
+public class TrialBoardScreen extends Screen implements jp.revati.skyabyss.client.ui.TextBounded {
     private static final ResourceLocation ICONS = ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "textures/gui/trial/icons.png");
     private static final int SHEET_W = 256;
     private static final int SHEET_H = 96;
@@ -364,5 +364,10 @@ public class TrialBoardScreen extends Screen {
         }
         g.drawString(font, font.plainSubstrByWidth(titles.getString(), W - 28), px + 14, y + 14, argb(1f, GOLD), false);
         g.drawString(font, Component.translatable("gui.skyabyss.trial.help"), px + 14, y + 27, argb(1f, DIM), false);
+    }
+
+    @Override
+    public int[] textBounds() {
+        return new int[] {(width - W) / 2, (height - H) / 2, W, H};
     }
 }

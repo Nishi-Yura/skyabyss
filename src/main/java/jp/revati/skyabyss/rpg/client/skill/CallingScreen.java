@@ -19,7 +19,7 @@ import net.neoforged.neoforge.network.PacketDistributor;
 
 // 天職を選ぶ画面 (心臓の報酬のあと・K の画面から)。五つの木が左に並び、右に天性・役目・開くもの。
 // 「継ぐ」は二度押し。一つ目の天職は木が全部開く、二つ目は 3 行目まで (要と天性はなし)
-public class CallingScreen extends Screen {
+public class CallingScreen extends Screen implements jp.revati.skyabyss.client.ui.TextBounded {
     private static final int W = 300;
     private static final int H = 168;
     private static final int ROW_Y = 30;
@@ -194,5 +194,10 @@ public class CallingScreen extends Screen {
             y += 10;
         }
         return y;
+    }
+
+    @Override
+    public int[] textBounds() {
+        return new int[] {(width - W) / 2, (height - H) / 2, W, H};
     }
 }

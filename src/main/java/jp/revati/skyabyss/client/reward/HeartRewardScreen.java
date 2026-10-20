@@ -885,7 +885,7 @@ public class HeartRewardScreen extends Screen {
         }
         // 名前 (階級の色)
         int innerW = w - 14;
-        for (FormattedCharSequence line2 : font.split(c.name(), innerW)) {
+        for (FormattedCharSequence line2 : jp.revati.skyabyss.client.ui.TextClip.limit(font, font.split(c.name(), innerW), innerW, 2)) {
             TextStyle.BODY.drawCentered(g, font, line2, cx, ty, alpha, 0xFFFFFF);
             ty += 11;
         }
@@ -1024,7 +1024,7 @@ public class HeartRewardScreen extends Screen {
             break;
         }
         ty += 6;
-        for (FormattedCharSequence line : font.split(body, r[2] - 28)) {
+        for (FormattedCharSequence line : jp.revati.skyabyss.client.ui.TextClip.limit(font, font.split(body, r[2] - 28), r[2] - 28, Math.max(1, (y + r[3] - 30 - ty) / 10))) {
             TextStyle.BODY.drawCentered(g, font, line, cx, ty, a * 0.85f, 0xC8D0D8);
             ty += 10;
         }

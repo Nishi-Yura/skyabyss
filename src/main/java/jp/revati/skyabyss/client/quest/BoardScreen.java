@@ -21,7 +21,7 @@ import net.neoforged.neoforge.network.PacketDistributor;
 // 言伝ての板の画面。今日の頼みごと (日替わり) と、今週の頼みごと (週替わり) を紙の札のように並べる。
 // 受けられるものには「受ける」。まだ物語が届かないものは題を伏せる (「？？？」と、何をすれば開くか)。
 // 状態はすべてサーバーが決めて送る (BoardNetwork.Open)。押すとサーバーが確かめ直して、新しい中身を送り返す
-public class BoardScreen extends Screen {
+public class BoardScreen extends Screen implements jp.revati.skyabyss.client.ui.TextBounded {
     private static final int W = 316;
     private static final int ROW_H = 30;
     private static final int PANEL = 0xFA15120E;
@@ -177,5 +177,10 @@ public class BoardScreen extends Screen {
         if (hoverTip != null) {
             g.renderTooltip(Minecraft.getInstance().font, hoverTip, mouseX, mouseY);
         }
+    }
+
+    @Override
+    public int[] textBounds() {
+        return new int[] {left, top, W, height0};
     }
 }
