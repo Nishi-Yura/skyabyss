@@ -1,0 +1,57 @@
+{
+  "category": "sub",
+  "order": 211,
+  "giver": "skyabyss:guest_bellkeeper",
+  "chapter": "titan_whale",
+  "min_stage": 0,
+  "stages": [
+    {
+      "id": "meet",
+      "objectives": [
+        {
+          "id": "meet",
+          "type": "talk",
+          "target": "skyabyss:guest_bellkeeper",
+          "topic": "meet"
+        }
+      ]
+    },
+    {
+      "id": "ring",
+      "objectives": [
+        {
+          "id": "ring",
+          "type": "signal",
+          "target": "town_tower_bell",
+          "party": false
+        }
+      ]
+    },
+    {
+      "id": "back",
+      "objectives": [
+        {
+          "id": "back",
+          "type": "talk",
+          "target": "skyabyss:guest_bellkeeper",
+          "topic": "back"
+        }
+      ],
+      "do": [
+        {
+          "type": "lore",
+          "entry": "town/bell_echo"
+        }
+      ]
+    }
+  ],
+  "reward": {
+    "xp": 40,
+    "items": [
+      {
+        "item": "skyabyss:bell_coin",
+        "count": 10
+      }
+    ]
+  }
+}

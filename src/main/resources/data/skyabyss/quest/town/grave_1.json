@@ -1,0 +1,46 @@
+{
+  "category": "sub",
+  "order": 250,
+  "giver": "skyabyss:attendant_gravekeeper",
+  "chapter": "titan_whale",
+  "min_stage": 0,
+  "stages": [
+    {
+      "id": "flower",
+      "objectives": [
+        {
+          "id": "flower",
+          "type": "collect",
+          "target": "#minecraft:small_flowers",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "id": "lay",
+      "objectives": [
+        {
+          "id": "lay",
+          "type": "signal",
+          "target": "town_hand:attendant_gravekeeper",
+          "party": false
+        }
+      ],
+      "do": [
+        {
+          "type": "lore",
+          "entry": "town/grave_1"
+        }
+      ]
+    }
+  ],
+  "reward": {
+    "xp": 20,
+    "items": [
+      {
+        "item": "skyabyss:bell_coin",
+        "count": 6
+      }
+    ]
+  }
+}

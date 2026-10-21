@@ -1,0 +1,46 @@
+{
+  "category": "sub",
+  "order": 260,
+  "giver": "skyabyss:attendant_drunkard",
+  "chapter": "titan_whale",
+  "min_stage": 0,
+  "stages": [
+    {
+      "id": "honey",
+      "objectives": [
+        {
+          "id": "honey",
+          "type": "collect",
+          "target": "minecraft:honey_bottle",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "id": "hand",
+      "objectives": [
+        {
+          "id": "hand",
+          "type": "signal",
+          "target": "town_hand:attendant_drunkard",
+          "party": false
+        }
+      ],
+      "do": [
+        {
+          "type": "lore",
+          "entry": "town/cellar_1"
+        }
+      ]
+    }
+  ],
+  "reward": {
+    "xp": 20,
+    "items": [
+      {
+        "item": "skyabyss:bell_coin",
+        "count": 5
+      }
+    ]
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "chapter": "titan_whale",
+  "order": 11,
+  "unlock": [
+    {
+      "type": "manual"
+    }
+  ]
+}

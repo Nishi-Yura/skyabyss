@@ -1,0 +1,61 @@
+{
+  "category": "sub",
+  "order": 231,
+  "giver": "skyabyss:guest_weaver",
+  "chapter": "titan_storm",
+  "min_stage": 2,
+  "stages": [
+    {
+      "id": "meet",
+      "objectives": [
+        {
+          "id": "meet",
+          "type": "talk",
+          "target": "skyabyss:guest_weaver",
+          "topic": "meet"
+        }
+      ]
+    },
+    {
+      "id": "gather",
+      "objectives": [
+        {
+          "id": "copper",
+          "type": "collect",
+          "target": "minecraft:copper_ingot",
+          "count": 6
+        },
+        {
+          "id": "rod",
+          "type": "collect",
+          "target": "minecraft:lightning_rod",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "id": "hand",
+      "objectives": [
+        {
+          "id": "hand",
+          "type": "signal",
+          "target": "town_hand:guest_weaver",
+          "party": false
+        }
+      ]
+    }
+  ],
+  "reward": {
+    "xp": 60,
+    "items": [
+      {
+        "item": "skyabyss:bell_coin",
+        "count": 25
+      },
+      {
+        "item": "minecraft:spyglass",
+        "count": 1
+      }
+    ]
+  }
+}

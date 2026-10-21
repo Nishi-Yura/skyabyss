@@ -1,0 +1,260 @@
+{
+  "npc": "skyabyss:attendant_drunkard",
+  "extends": true,
+  "add_options": {
+    "menu": {
+      "before": "about",
+      "options": [
+        {
+          "id": "town_cellar1",
+          "goto": "town_c1_ask",
+          "kind": "quest",
+          "if": {
+            "type": "all",
+            "of": [
+              {
+                "type": "stage",
+                "min": 0
+              },
+              {
+                "type": "quest",
+                "quest": "town/cellar_1",
+                "is": "none"
+              }
+            ]
+          },
+          "do": [
+            {
+              "type": "quest_start",
+              "quest": "town/cellar_1"
+            }
+          ]
+        },
+        {
+          "id": "town_c1_hand",
+          "goto": "town_c1_done",
+          "kind": "give",
+          "if": {
+            "type": "all",
+            "of": [
+              {
+                "type": "quest",
+                "quest": "town/cellar_1",
+                "is": "active",
+                "stage": "hand"
+              },
+              {
+                "type": "item",
+                "item": "minecraft:honey_bottle",
+                "count": 1
+              }
+            ]
+          },
+          "do": [
+            {
+              "type": "take",
+              "item": "minecraft:honey_bottle",
+              "count": 1
+            },
+            {
+              "type": "give",
+              "item": "minecraft:glass_bottle",
+              "count": 1
+            },
+            {
+              "type": "signal",
+              "signal": "town_hand:attendant_drunkard"
+            }
+          ]
+        },
+        {
+          "id": "town_cellar2",
+          "goto": "town_c2_ask",
+          "kind": "quest",
+          "if": {
+            "type": "all",
+            "of": [
+              {
+                "type": "stage",
+                "min": 2
+              },
+              {
+                "type": "quest",
+                "quest": "town/cellar_2",
+                "is": "none"
+              },
+              {
+                "type": "quest",
+                "quest": "town/cellar_1",
+                "is": "done"
+              }
+            ]
+          },
+          "do": [
+            {
+              "type": "quest_start",
+              "quest": "town/cellar_2"
+            }
+          ]
+        },
+        {
+          "id": "town_c2_back",
+          "goto": "town_c2_back",
+          "kind": "quest",
+          "if": {
+            "type": "quest",
+            "quest": "town/cellar_2",
+            "is": "active",
+            "stage": "back"
+          }
+        },
+        {
+          "id": "town_cellar3",
+          "goto": "town_c3_ask",
+          "kind": "quest",
+          "if": {
+            "type": "all",
+            "of": [
+              {
+                "type": "stage",
+                "min": 3
+              },
+              {
+                "type": "quest",
+                "quest": "town/cellar_3",
+                "is": "none"
+              },
+              {
+                "type": "quest",
+                "quest": "town/cellar_2",
+                "is": "done"
+              }
+            ]
+          },
+          "do": [
+            {
+              "type": "quest_start",
+              "quest": "town/cellar_3"
+            }
+          ]
+        },
+        {
+          "id": "town_c3_open",
+          "goto": "town_c3_open",
+          "kind": "quest",
+          "if": {
+            "type": "quest",
+            "quest": "town/cellar_3",
+            "is": "active",
+            "stage": "open"
+          },
+          "do": [
+            {
+              "type": "town",
+              "act": "open_cellar"
+            },
+            {
+              "type": "signal",
+              "signal": "town_cellar_open"
+            }
+          ]
+        },
+        {
+          "id": "town_c3_back",
+          "goto": "town_c3_back",
+          "kind": "quest",
+          "if": {
+            "type": "quest",
+            "quest": "town/cellar_3",
+            "is": "active",
+            "stage": "back"
+          }
+        }
+      ]
+    }
+  },
+  "nodes": {
+    "town_c1_ask": {
+      "face": "neutral",
+      "options": [
+        {
+          "id": "ok",
+          "goto": "end",
+          "kind": "talk"
+        }
+      ]
+    },
+    "town_c1_done": {
+      "face": "neutral",
+      "next": "town_c1_done2"
+    },
+    "town_c1_done2": {
+      "face": "smile",
+      "options": [
+        {
+          "id": "ok",
+          "goto": "end",
+          "kind": "talk"
+        }
+      ]
+    },
+    "town_c2_ask": {
+      "face": "neutral",
+      "options": [
+        {
+          "id": "ok",
+          "goto": "end",
+          "kind": "talk"
+        }
+      ]
+    },
+    "town_c2_back": {
+      "face": "grave",
+      "next": "town_c2_back2"
+    },
+    "town_c2_back2": {
+      "face": "neutral",
+      "options": [
+        {
+          "id": "ok",
+          "goto": "end",
+          "kind": "talk"
+        }
+      ]
+    },
+    "town_c3_ask": {
+      "face": "grave",
+      "options": [
+        {
+          "id": "ok",
+          "goto": "end",
+          "kind": "talk"
+        }
+      ]
+    },
+    "town_c3_open": {
+      "face": "grave",
+      "options": [
+        {
+          "id": "ok",
+          "goto": "end",
+          "kind": "talk"
+        }
+      ]
+    },
+    "town_c3_back": {
+      "face": "grave",
+      "next": "town_c3_back2"
+    },
+    "town_c3_back2": {
+      "face": "neutral",
+      "options": [
+        {
+          "id": "ok",
+          "goto": "end",
+          "kind": "talk"
+        }
+      ]
+    }
+  }
+}

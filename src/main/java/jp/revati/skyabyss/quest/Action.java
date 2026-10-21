@@ -37,9 +37,10 @@ import net.minecraft.world.item.ItemStack;
 //   remake_ward {titan}            : その巨神の鼓動守を編み直して渡す (持っていない人だけ、1 日 1 つまで。条件 ward_ok と組。素材は別に take)
 //   open_board                     : 言伝ての板の画面を開く (板のない所で、NPC が代わりに頼みごとを見せる)
 //   facility    {open, shop}       : 都の施設の働き (店・預かり所・宿・止まり木・地図・ギルド・修理。facility.FacilityActions)
+//   town        {act}              : 町のクエストと裏通りの働き (酒場の地下の壁を開ける・地図屋の噂と描き足し。town.TownActions)
 public final class Action {
     public static final Set<String> TYPES = Set.of("quest_start", "signal", "affinity", "flag", "unflag", "lore", "give", "take", "xp",
-            "open_board", "grave_rescue", "grave_choose", "give_notes", "unlock_recipes", "remake_ward", "facility");
+            "open_board", "grave_rescue", "grave_choose", "give_notes", "unlock_recipes", "remake_ward", "facility", "town");
 
     private final String type;
     private final JsonObject json;
@@ -113,6 +114,7 @@ public final class Action {
             case "give_notes", "unlock_recipes" -> "chapter";
             case "remake_ward" -> "titan";
             case "facility" -> "open";
+            case "town" -> "act";
             default -> null;
         };
         if (need != null && !o.has(need)) {
@@ -121,6 +123,10 @@ public final class Action {
         }
         if (type.equals("facility") && !jp.revati.skyabyss.facility.FacilityActions.OPENS.contains(GsonHelper.getAsString(o, "open"))) {
             errors.add(where + ": unknown facility " + GsonHelper.getAsString(o, "open"));
+            return null;
+        }
+        if (type.equals("town") && !jp.revati.skyabyss.town.TownActions.ACTS.contains(GsonHelper.getAsString(o, "act"))) {
+            errors.add(where + ": unknown town act " + GsonHelper.getAsString(o, "act"));
             return null;
         }
         // give の optional: 別の担当がまだ登録していない品。ないうちは何も渡さない (読み込みは止めない)
@@ -178,6 +184,7 @@ public final class Action {
             }
             case "open_board" -> jp.revati.skyabyss.quest.free.Board.open(player, ctx.npc() != null ? ctx.npc().blockPosition() : player.blockPosition(), true);
             case "facility" -> jp.revati.skyabyss.facility.FacilityActions.run(player, ctx.npc(), str("open"), optStr("shop"));
+            case "town" -> jp.revati.skyabyss.town.TownActions.run(player, ctx.npc(), str("act"));
             case "grave_rescue" -> jp.revati.skyabyss.grave.GraveRescue.run(player);
             case "grave_choose" -> jp.revati.skyabyss.grave.GraveChooser.open(player);
             case "xp" -> {

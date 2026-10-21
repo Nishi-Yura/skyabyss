@@ -1,0 +1,38 @@
+{
+  "npc": "skyabyss:attendant_guild_clerk",
+  "extends": true,
+  "add_options": {
+    "menu": {
+      "before": "about",
+      "options": [
+        {
+          "id": "town_test",
+          "goto": "town_test",
+          "kind": "quest",
+          "if": {
+            "type": "quest",
+            "quest": "town/ch1_apprentice",
+            "is": "active",
+            "stage": "clerk"
+          }
+        }
+      ]
+    }
+  },
+  "nodes": {
+    "town_test": {
+      "face": "neutral",
+      "next": "town_test2"
+    },
+    "town_test2": {
+      "face": "grave",
+      "options": [
+        {
+          "id": "ok",
+          "goto": "end",
+          "kind": "talk"
+        }
+      ]
+    }
+  }
+}
