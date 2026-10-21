@@ -9,6 +9,12 @@ cmd gamemode creative
 hud on
 waitchunks
 wait 20
+cmd skyabyss cinematic stop
+wait 10
+cmd skyabyss playtest skip opening
+wait 60
+cmd skyabyss cinematic stop
+wait 20
 open lore
 wait 20
 shot lore_tabs

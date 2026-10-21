@@ -287,9 +287,18 @@ public class LoreBookScreen extends Screen implements jp.revati.skyabyss.client.
             }
         }
         g.blit(BOOK, left, top, BW, BH, 0, 0, BOOK_TEX_W, BOOK_TEX_H, BOOK_TEX_W, BOOK_TEX_H);
+        // しおりの章の名は書の後に、書の上端より上だけに描く (書に下半分が隠れて読めなかった。2026-10-21 の試遊)
+        g.enableScissor(0, 0, width, top + 1);
+        for (int i = 0; i < chapters.size(); i++) {
+            if (i != chapterIndex) {
+                drawTabLabel(g, i, chapters.get(i), false, mouseX, mouseY);
+            }
+        }
+        g.disableScissor();
         LoreChapter chapter = chapter();
         if (chapter != null) {
             drawTab(g, chapterIndex, chapter, true, mouseX, mouseY);
+            drawTabLabel(g, chapterIndex, chapter, true, mouseX, mouseY);
             drawLeftPage(g, chapter, mouseX, mouseY);
         } else {
             g.drawString(font, Component.translatable("gui.skyabyss.lore.empty"), left + LEFT_X, top + HEADER_Y, FADED, false);
@@ -307,13 +316,19 @@ public class LoreBookScreen extends Screen implements jp.revati.skyabyss.client.
         int x = left + TAB_X0 + index * TAB_STEP;
         int y = top - (on ? 18 : 15);
         blitWidget(g, x, y, on ? W_TAB_ON : W_TAB_OFF);
+    }
+
+    // しおりの章の名と NEW の印 (しおりの上の段に。書の上端にかからない高さ)
+    private void drawTabLabel(GuiGraphics g, int index, LoreChapter chapter, boolean on, int mouseX, int mouseY) {
+        int x = left + TAB_X0 + index * TAB_STEP;
+        int y = top - (on ? 18 : 15);
         boolean known = chapterKnown(chapter);
         Component label = Component.translatable(chapter.tabKey());
         int color = on ? TITLE : known ? INK : TAB_LOCKED;
         if (!on && hoverTab(index, mouseX, mouseY)) {
             color = TEAL;
         }
-        g.drawString(font, label, x + (TAB_STEP - font.width(label)) / 2, y + 5, color, false);
+        g.drawString(font, label, x + (TAB_STEP - font.width(label)) / 2, y + 3, color, false);
         if (chapterHasNew(chapter)) {
             blitWidget(g, x + TAB_STEP - 9, y + 2, W_MARK_NEW);
         }

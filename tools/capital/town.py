@@ -644,8 +644,9 @@ class Town(Facilities):
         v.set(ix0, y + 6, iz0, 'chest[facing=south,type=single,waterlogged=false]')
         v.fill(ix0 + 1, y + 6, iz0, ix0 + 3, y + 7, iz0, 'bookshelf')
         v.set((ix0 + ix1) // 2, y + 9, (iz0 + iz1) // 2, 'lantern[hanging=true,waterlogged=false]')
-        # 煙の出る焚き火 (わら束の上)。前庭の外、家の前の道
-        sx, sz = -21, -61
+        # 煙の出る焚き火 (わら束の上)。大鐘楼の南の口の前の広場 (語り部は鐘楼の一階に立つ。煙のすぐそばで会えるように。
+        # 2026-10-21 の試遊: 家の前の道だと語り部から遠く、一瞬迷った)。口の筋 (x -30) からは西へ外す
+        sx, sz = -33, -67
         v.set(sx, y, sz, 'hay_block[axis=y]')
         v.set(sx, y + 1, sz, 'campfire[facing=north,lit=true,signal_fire=true,waterlogged=false]')
         for (ddx, ddz) in ((-1, 0), (1, 0), (0, -1), (0, 1)):
