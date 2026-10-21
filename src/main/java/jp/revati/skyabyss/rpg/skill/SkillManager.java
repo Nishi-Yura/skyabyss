@@ -215,20 +215,26 @@ public final class SkillManager {
     // 共鳴の炉のそばで、共鳴の結晶を払って振り直す (初回は無料)。クリエイティブは炉も結晶も要らない。
     // Lv 15 になるまでは、どこでも無料
     public static RespecResult respec(ServerPlayer player) {
+        return respec(player, false, true);
+    }
+
+    // atPlace = 炉のそばと同じに扱う (都の訓練場の師範。facility.TrainingMaster)、crystals = 結晶で払う
+    // (false なら結晶を取らない。代わりの代価 (鐘銭) は呼ぶ側が先に確かめて、OK のあとで取る)
+    public static RespecResult respec(ServerPlayer player, boolean atPlace, boolean crystals) {
         SkillData d = get(player);
         if (d.ranks.isEmpty()) {
             return RespecResult.NOTHING;
         }
         boolean early = freeRespec(player);
         boolean free = player.isCreative() || early;
-        if (!free && !nearForge(player)) {
+        if (!free && !atPlace && !nearForge(player)) {
             return RespecResult.NO_FORGE;
         }
         int cost = respecCostFor(player);
-        if (!free && countCrystals(player) < cost) {
+        if (!free && crystals && countCrystals(player) < cost) {
             return RespecResult.NO_CRYSTALS;
         }
-        if (!free) {
+        if (!free && crystals) {
             removeCrystals(player, cost);
         }
         d.clearSkills();

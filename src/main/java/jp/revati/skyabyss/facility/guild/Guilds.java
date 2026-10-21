@@ -38,7 +38,18 @@ public final class Guilds {
         NOT_LEADER("not_leader"),
         NOT_APPLICANT("not_applicant"),
         NOT_MEMBER("not_member"),
-        JOINED("joined");
+        JOINED("joined"),
+        NOT_OFFICER("not_officer"),
+        NO_COINS("no_coins"),
+        LOT_TAKEN("lot_taken"),
+        HAS_LOT("has_lot"),
+        NO_LOT("no_lot"),
+        REQ_DONE("req_done"),
+        NOTHING_TO_GIVE("nothing_to_give"),
+        BANNER("banner"),
+        RENTED("rented"),
+        RELEASED("released"),
+        DELIVERED("delivered");
 
         public final String key;
 
@@ -47,7 +58,7 @@ public final class Guilds {
         }
 
         public boolean ok() {
-            return this == OK || this == APPLIED || this == JOINED;
+            return this == OK || this == APPLIED || this == JOINED || this == BANNER || this == RENTED || this == RELEASED || this == DELIVERED;
         }
     }
 
@@ -128,22 +139,24 @@ public final class Guilds {
             return Result.ALREADY_APPLIED;
         }
         data.setDirty();
-        ServerPlayer leader = player.server.getPlayerList().getPlayer(g.leader);
-        if (leader != null) {
-            Notice.hint(leader, "message.skyabyss.guild.new_applicant", player.getGameProfile().getName(), g.name);
+        for (UUID m : g.members) {
+            ServerPlayer officer = g.rank(m) >= GuildData.RANK_OFFICER ? player.server.getPlayerList().getPlayer(m) : null;
+            if (officer != null) {
+                Notice.hint(officer, "message.skyabyss.guild.new_applicant", player.getGameProfile().getName(), g.name);
+            }
         }
         return Result.APPLIED;
     }
 
-    // 長が申請を受ける / 断る
+    // 長か副長が申請を受ける / 断る
     public static Result answer(ServerPlayer leader, UUID applicant, boolean accept) {
         GuildData data = GuildData.get(leader.server);
         GuildData.Guild g = data.of(leader.getUUID());
         if (g == null) {
             return Result.NOT_IN_GUILD;
         }
-        if (!g.leader.equals(leader.getUUID())) {
-            return Result.NOT_LEADER;
+        if (g.rank(leader.getUUID()) < GuildData.RANK_OFFICER) {
+            return Result.NOT_OFFICER;
         }
         if (!g.applicants.remove(applicant)) {
             return Result.NOT_APPLICANT;
@@ -215,6 +228,7 @@ public final class Guilds {
     static void removeMember(MinecraftServer server, GuildData.Guild g, UUID who) {
         GuildData data = GuildData.get(server);
         g.members.remove(who);
+        g.officers.remove(who);
         data.setDirty();
         ServerPlayer p = server.getPlayerList().getPlayer(who);
         if (p != null) {
@@ -222,12 +236,23 @@ public final class Guilds {
             Notice.hint(p, "message.skyabyss.guild.left", g.name);
         }
         if (g.members.isEmpty()) {
+            // 倉庫の中身は最後の人へ (いなければ消える)。借りていた区画は空く
+            if (p != null) {
+                for (net.minecraft.world.item.ItemStack s : g.storage) {
+                    if (!s.isEmpty()) {
+                        jp.revati.skyabyss.quest.Quests.give(p, s.copy());
+                    }
+                }
+            }
             data.remove(g);
             SkyAbyss.LOGGER.info("[guild] {} disbanded (no members)", g.name);
             return;
         }
         if (g.leader.equals(who)) {
-            g.leader = g.members.iterator().next();
+            // 副長がいれば古い副長から、いなければいちばん古い人
+            UUID nextId = g.officers.isEmpty() ? g.members.iterator().next() : g.officers.iterator().next();
+            g.officers.remove(nextId);
+            g.leader = nextId;
             ServerPlayer next = server.getPlayerList().getPlayer(g.leader);
             if (next != null) {
                 Notice.hint(next, "message.skyabyss.guild.now_leader", g.name);
@@ -248,6 +273,98 @@ public final class Guilds {
         g.open = open;
         data.setDirty();
         return Result.OK;
+    }
+
+    // ---------------------------------------------------------------- 位・倉庫の決まり・旗
+    // 長が人を副長にする / 副長から戻す
+    public static Result setOfficer(ServerPlayer leader, UUID member, boolean officer) {
+        GuildData data = GuildData.get(leader.server);
+        GuildData.Guild g = data.of(leader.getUUID());
+        if (g == null) {
+            return Result.NOT_IN_GUILD;
+        }
+        if (!g.leader.equals(leader.getUUID())) {
+            return Result.NOT_LEADER;
+        }
+        if (member.equals(g.leader) || !g.members.contains(member)) {
+            return Result.NOT_MEMBER;
+        }
+        if (officer) {
+            g.officers.add(member);
+        } else {
+            g.officers.remove(member);
+        }
+        data.setDirty();
+        return Result.OK;
+    }
+
+    // 長が倉庫から取り出せる位を決める (0 = 誰でも、1 = 副長から、2 = 長だけ)
+    public static Result setTakeRank(ServerPlayer leader, int rank) {
+        GuildData data = GuildData.get(leader.server);
+        GuildData.Guild g = data.of(leader.getUUID());
+        if (g == null) {
+            return Result.NOT_IN_GUILD;
+        }
+        if (!g.leader.equals(leader.getUUID())) {
+            return Result.NOT_LEADER;
+        }
+        g.takeRank = Math.max(GuildData.RANK_MEMBER, Math.min(GuildData.RANK_LEADER, rank));
+        data.setDirty();
+        return Result.OK;
+    }
+
+    // 長が旗 (印と色) を作り直す
+    public static Result setEmblem(ServerPlayer leader, String rawTag, int color, int accent) {
+        GuildData data = GuildData.get(leader.server);
+        GuildData.Guild g = data.of(leader.getUUID());
+        if (g == null) {
+            return Result.NOT_IN_GUILD;
+        }
+        if (!g.leader.equals(leader.getUUID())) {
+            return Result.NOT_LEADER;
+        }
+        String tag = cleanTag(rawTag);
+        if (tag.isEmpty() || tag.codePointCount(0, tag.length()) > GuildData.TAG_MAX) {
+            return Result.TAG_LENGTH;
+        }
+        g.tag = tag;
+        g.color = clampDye(color);
+        g.accent = clampDye(accent);
+        data.setDirty();
+        refresh(leader.server, g);
+        return Result.OK;
+    }
+
+    // 旗の値段 (鐘銭)
+    public static final int BANNER_COST = 3;
+
+    // ギルドの旗の品 (地の色に、模様の色の中の帯と縁。画面の旗と同じ形)
+    public static net.minecraft.world.item.ItemStack bannerItem(MinecraftServer server, GuildData.Guild g) {
+        net.minecraft.world.item.DyeColor base = net.minecraft.world.item.DyeColor.byId(g.color);
+        net.minecraft.world.item.DyeColor ac = net.minecraft.world.item.DyeColor.byId(g.accent);
+        net.minecraft.world.item.ItemStack stack = new net.minecraft.world.item.ItemStack(
+                net.minecraft.world.level.block.BannerBlock.byColor(base).asItem());
+        var patterns = server.registryAccess().lookupOrThrow(net.minecraft.core.registries.Registries.BANNER_PATTERN);
+        var layers = new net.minecraft.world.level.block.entity.BannerPatternLayers.Builder()
+                .add(patterns.getOrThrow(net.minecraft.world.level.block.entity.BannerPatterns.STRIPE_MIDDLE), ac)
+                .add(patterns.getOrThrow(net.minecraft.world.level.block.entity.BannerPatterns.BORDER), ac)
+                .build();
+        stack.set(net.minecraft.core.component.DataComponents.BANNER_PATTERNS, layers);
+        stack.set(net.minecraft.core.component.DataComponents.ITEM_NAME, Component.translatable("item.skyabyss.guild_banner", g.name));
+        return stack;
+    }
+
+    // 受付で旗を受け取る (鐘銭 BANNER_COST)
+    public static Result takeBanner(ServerPlayer player) {
+        GuildData.Guild g = of(player);
+        if (g == null) {
+            return Result.NOT_IN_GUILD;
+        }
+        if (!jp.revati.skyabyss.facility.Coins.take(player, BANNER_COST)) {
+            return Result.NO_COINS;
+        }
+        jp.revati.skyabyss.quest.Quests.give(player, bannerItem(player.server, g));
+        return Result.BANNER;
     }
 
     // ---------------------------------------------------------------- 名札の印

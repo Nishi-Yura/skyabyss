@@ -38,6 +38,7 @@ public final class FacilityNetwork {
                 .playToClient(GuildView.TYPE, GuildView.STREAM_CODEC, (p, c) -> FacilityClient.guild(p))
                 .playToClient(CloseScreen.TYPE, CloseScreen.STREAM_CODEC, (p, c) -> FacilityClient.close())
                 .playToClient(OpenMap.TYPE, OpenMap.STREAM_CODEC, (p, c) -> FacilityClient.openMap())
+                .playToClient(KeepRecords.View.TYPE, KeepRecords.View.STREAM_CODEC, (p, c) -> FacilityClient.records(p))
                 .playToServer(ShopBuy.TYPE, ShopBuy.STREAM_CODEC, (p, c) -> {
                     if (c.player() instanceof ServerPlayer player) {
                         ShopService.buy(player, p.shop(), p.good(), p.times());
@@ -202,12 +203,25 @@ public final class FacilityNetwork {
     public record GuildRow(String id, String name, String tag, int color, int accent, int members, boolean open, boolean applied, String leader) {
     }
 
-    public record MemberRow(UUID id, String name, boolean leader, boolean online) {
+    // rank = 位 (2 長・1 副長・0 人)
+    public record MemberRow(UUID id, String name, boolean leader, boolean online, int rank) {
+    }
+
+    // 週替わりの頼み。icon = 絵の品、kill = 狩る頼み、mine = 自分の納めた量、top = 多く納めた人 (名前と量。多い順に 5 人まで)
+    public record ReqView(String id, ItemStack icon, int target, int progress, boolean done, boolean kill, int mine, List<String> topNames,
+                          List<Integer> topCounts) {
+        public static final ReqView NONE = new ReqView("", ItemStack.EMPTY, 0, 0, false, false, 0, List.of(), List.of());
+    }
+
+    // 空き区画。holder = 借りているギルドの名前 (空 = 空き)、mine = 自分のギルドが借りている
+    public record LotRow(String id, String holder, String tag, int color, int accent, boolean mine) {
     }
 
     // mine = 入っているギルドの ID (空 = 入っていない)、leader = 自分が長か、open = 自分のギルドが誰でも入れるか
+    // rank = 自分の位、takeRank = 倉庫から取り出せる位、req = 今週の頼み、lots = 空き区画、rent / banner = 区画と旗の値段、
+    // tab = 開くつまみ (-1 = 今のまま。/guild menu <つまみ>)
     public record GuildView(String mine, boolean leader, boolean open, List<GuildRow> guilds, List<MemberRow> members, List<MemberRow> applicants,
-                            int max) implements CustomPacketPayload {
+                            int max, int rank, int takeRank, ReqView req, List<LotRow> lots, int rent, int banner, int tab) implements CustomPacketPayload {
         public static final Type<GuildView> TYPE = typeOf("guild_view");
         public static final StreamCodec<RegistryFriendlyByteBuf, GuildView> STREAM_CODEC = StreamCodec.of(
                 (buf, p) -> {
@@ -229,6 +243,32 @@ public final class FacilityNetwork {
                     writeMembers(buf, p.members);
                     writeMembers(buf, p.applicants);
                     buf.writeVarInt(p.max);
+                    buf.writeVarInt(p.rank);
+                    buf.writeVarInt(p.takeRank);
+                    buf.writeUtf(p.req.id());
+                    ItemStack.OPTIONAL_STREAM_CODEC.encode(buf, p.req.icon());
+                    buf.writeVarInt(p.req.target());
+                    buf.writeVarInt(p.req.progress());
+                    buf.writeBoolean(p.req.done());
+                    buf.writeBoolean(p.req.kill());
+                    buf.writeVarInt(p.req.mine());
+                    buf.writeVarInt(p.req.topNames().size());
+                    for (int i = 0; i < p.req.topNames().size(); i++) {
+                        buf.writeUtf(p.req.topNames().get(i));
+                        buf.writeVarInt(p.req.topCounts().get(i));
+                    }
+                    buf.writeVarInt(p.lots.size());
+                    for (LotRow l : p.lots) {
+                        buf.writeUtf(l.id());
+                        buf.writeUtf(l.holder());
+                        buf.writeUtf(l.tag());
+                        buf.writeVarInt(l.color());
+                        buf.writeVarInt(l.accent());
+                        buf.writeBoolean(l.mine());
+                    }
+                    buf.writeVarInt(p.rent);
+                    buf.writeVarInt(p.banner);
+                    buf.writeVarInt(p.tab + 1);
                 },
                 buf -> {
                     String mine = buf.readUtf();
@@ -242,7 +282,30 @@ public final class FacilityNetwork {
                     }
                     List<MemberRow> members = readMembers(buf);
                     List<MemberRow> applicants = readMembers(buf);
-                    return new GuildView(mine, leader, open, rows, members, applicants, buf.readVarInt());
+                    int max = buf.readVarInt();
+                    int rank = buf.readVarInt();
+                    int take = buf.readVarInt();
+                    String rid = buf.readUtf();
+                    ItemStack icon = ItemStack.OPTIONAL_STREAM_CODEC.decode(buf);
+                    int target = buf.readVarInt();
+                    int progress = buf.readVarInt();
+                    boolean done = buf.readBoolean();
+                    boolean kill = buf.readBoolean();
+                    int myN = buf.readVarInt();
+                    int tn = buf.readVarInt();
+                    List<String> names = new ArrayList<>(tn);
+                    List<Integer> counts = new ArrayList<>(tn);
+                    for (int i = 0; i < tn; i++) {
+                        names.add(buf.readUtf());
+                        counts.add(buf.readVarInt());
+                    }
+                    ReqView req = new ReqView(rid, icon, target, progress, done, kill, myN, names, counts);
+                    int ln = buf.readVarInt();
+                    List<LotRow> lots = new ArrayList<>(ln);
+                    for (int i = 0; i < ln; i++) {
+                        lots.add(new LotRow(buf.readUtf(), buf.readUtf(), buf.readUtf(), buf.readVarInt(), buf.readVarInt(), buf.readBoolean()));
+                    }
+                    return new GuildView(mine, leader, open, rows, members, applicants, max, rank, take, req, lots, buf.readVarInt(), buf.readVarInt(), buf.readVarInt() - 1);
                 });
 
         @Override
@@ -258,6 +321,7 @@ public final class FacilityNetwork {
             buf.writeUtf(m.name());
             buf.writeBoolean(m.leader());
             buf.writeBoolean(m.online());
+            buf.writeVarInt(m.rank());
         }
     }
 
@@ -265,13 +329,15 @@ public final class FacilityNetwork {
         int n = buf.readVarInt();
         List<MemberRow> out = new ArrayList<>(n);
         for (int i = 0; i < n; i++) {
-            out.add(new MemberRow(UUIDUtil.STREAM_CODEC.decode(buf), buf.readUtf(), buf.readBoolean(), buf.readBoolean()));
+            out.add(new MemberRow(UUIDUtil.STREAM_CODEC.decode(buf), buf.readUtf(), buf.readBoolean(), buf.readBoolean(), buf.readVarInt()));
         }
         return out;
     }
 
-    // 参加者 → サーバー: ギルドの画面で押した (op = create / apply / leave / accept / deny / kick / open)。
-    // target = ギルドの ID か人の UUID、text = 新しいギルドの名前、tag = 印、color / accent = 旗の色、flag = 誰でも入れる
+    // 参加者 → サーバー: ギルドの画面で押した (op = create / apply / leave / accept / deny / kick / open / officer / take / emblem /
+    // banner / storage / deliver / rent / release)。
+    // target = ギルドの ID か人の UUID か区画、text = 新しいギルドの名前、tag = 印、color / accent = 旗の色 (take は color が位)、
+    // flag = 誰でも入れる・副長にする
     public record GuildAction(String op, String target, String text, String tag, int color, int accent, boolean flag) implements CustomPacketPayload {
         public static final Type<GuildAction> TYPE = typeOf("guild_action");
         public static final StreamCodec<RegistryFriendlyByteBuf, GuildAction> STREAM_CODEC = StreamCodec.of(

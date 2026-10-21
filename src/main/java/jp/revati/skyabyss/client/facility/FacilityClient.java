@@ -38,6 +38,10 @@ public final class FacilityClient {
         }
     }
 
+    public static void records(jp.revati.skyabyss.facility.KeepRecords.View view) {
+        Minecraft.getInstance().setScreen(new RecordsScreen(view));
+    }
+
     public static void close() {
         Minecraft mc = Minecraft.getInstance();
         if (mc.screen instanceof ShopScreen s) {

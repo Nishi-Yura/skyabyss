@@ -35,9 +35,74 @@
       "face": "neutral",
       "next": "menu"
     },
-    "vow": {
+    "keys": {
       "face": "neutral",
       "next": "menu"
+    },
+    "vow": {
+      "face": "neutral",
+      "options": [
+        {
+          "id": "hardy",
+          "kind": "talk",
+          "goto": "vow_hardy",
+          "text": "vow.skyabyss.hardy"
+        },
+        {
+          "id": "sharp",
+          "kind": "talk",
+          "goto": "vow_sharp",
+          "text": "vow.skyabyss.sharp"
+        },
+        {
+          "id": "thin",
+          "kind": "talk",
+          "goto": "vow_thin",
+          "text": "vow.skyabyss.thin"
+        },
+        {
+          "id": "bare",
+          "kind": "talk",
+          "goto": "vow_bare",
+          "text": "vow.skyabyss.bare"
+        },
+        {
+          "id": "hasty",
+          "kind": "talk",
+          "goto": "vow_hasty",
+          "text": "vow.skyabyss.hasty"
+        },
+        {
+          "id": "back",
+          "kind": "talk",
+          "goto": "menu"
+        }
+      ]
+    },
+    "vow_hardy": {
+      "face": "neutral",
+      "text": "vow.skyabyss.hardy.desc",
+      "next": "vow"
+    },
+    "vow_sharp": {
+      "face": "neutral",
+      "text": "vow.skyabyss.sharp.desc",
+      "next": "vow"
+    },
+    "vow_thin": {
+      "face": "neutral",
+      "text": "vow.skyabyss.thin.desc",
+      "next": "vow"
+    },
+    "vow_bare": {
+      "face": "neutral",
+      "text": "vow.skyabyss.bare.desc",
+      "next": "vow"
+    },
+    "vow_hasty": {
+      "face": "neutral",
+      "text": "vow.skyabyss.hasty.desc",
+      "next": "vow"
     },
     "menu": {
       "face": "neutral",
@@ -51,6 +116,37 @@
           "id": "vow",
           "kind": "talk",
           "goto": "vow"
+        },
+        {
+          "id": "offer",
+          "kind": "talk",
+          "do": [
+            {
+              "type": "facility",
+              "open": "key_offer"
+            }
+          ],
+          "goto": "end"
+        },
+        {
+          "id": "return",
+          "kind": "talk",
+          "if": {
+            "type": "stage",
+            "min": 1
+          },
+          "do": [
+            {
+              "type": "facility",
+              "open": "key_return"
+            }
+          ],
+          "goto": "end"
+        },
+        {
+          "id": "keys",
+          "kind": "talk",
+          "goto": "keys"
         },
         {
           "id": "about",

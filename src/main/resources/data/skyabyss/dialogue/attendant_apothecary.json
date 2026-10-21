@@ -35,6 +35,24 @@
       "face": "neutral",
       "next": "menu"
     },
+    "lesson": {
+      "face": "neutral",
+      "do": [
+        {
+          "type": "flag",
+          "flag": "brew_lesson"
+        },
+        {
+          "type": "facility",
+          "open": "brew_lesson"
+        }
+      ],
+      "next": "menu"
+    },
+    "lesson_review": {
+      "face": "neutral",
+      "next": "menu"
+    },
     "menu": {
       "face": "neutral",
       "options": [
@@ -52,7 +70,41 @@
         {
           "id": "brew",
           "kind": "talk",
+          "if": {
+            "type": "stage",
+            "max": 2
+          },
           "goto": "brew"
+        },
+        {
+          "id": "learn",
+          "kind": "talk",
+          "if": {
+            "type": "all",
+            "of": [
+              {
+                "type": "stage",
+                "min": 3
+              },
+              {
+                "type": "not",
+                "of": {
+                  "type": "flag",
+                  "flag": "brew_lesson"
+                }
+              }
+            ]
+          },
+          "goto": "lesson"
+        },
+        {
+          "id": "review",
+          "kind": "talk",
+          "if": {
+            "type": "flag",
+            "flag": "brew_lesson"
+          },
+          "goto": "lesson_review"
         },
         {
           "id": "about",

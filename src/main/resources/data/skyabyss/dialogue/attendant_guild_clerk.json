@@ -50,6 +50,17 @@
           "goto": "end"
         },
         {
+          "id": "storage",
+          "kind": "talk",
+          "do": [
+            {
+              "type": "facility",
+              "open": "guild_storage"
+            }
+          ],
+          "goto": "end"
+        },
+        {
           "id": "board",
           "kind": "talk",
           "do": [

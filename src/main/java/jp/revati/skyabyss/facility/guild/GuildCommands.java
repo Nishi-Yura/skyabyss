@@ -10,6 +10,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
 
 import jp.revati.skyabyss.SkyAbyss;
+import jp.revati.skyabyss.notice.Notice;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
@@ -28,7 +29,11 @@ import net.neoforged.neoforge.event.RegisterCommandsEvent;
 //   /guild kick <人>                                長が外す
 //   /guild open <true|false>                        長が「誰でも入れる」を切り替える
 //   /guild info [名前] / list                       中身 / 一覧
-//   /guild menu                                     ギルドの画面を開く (組合の受付と同じ)
+//   /guild menu [つまみ 0..2]                       ギルドの画面を開く (組合の受付と同じ。0 人・1 頼み・2 家と旗)
+//   /guild officer <人> <true|false>                長が副長にする / 戻す
+//   /guild take <0..2>                              長が倉庫から取り出せる位を決める (0 誰でも・1 副長から・2 長だけ)
+//   /guild storage / deliver / banner               倉庫を開く / 今週の頼みに納める / 旗を受け取る
+//   /guild rent <lot_1..5> / release                長が空き区画を借りる / 手放す
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class GuildCommands {
     private static final SuggestionProvider<CommandSourceStack> NAMES = (ctx, b) -> SharedSuggestionProvider.suggest(
@@ -76,7 +81,29 @@ public final class GuildCommands {
                 .then(Commands.literal("menu").executes(c -> {
                     GuildService.open(c.getSource().getPlayerOrException(), null);
                     return 1;
-                })));
+                }).then(Commands.argument("tab", com.mojang.brigadier.arguments.IntegerArgumentType.integer(0, 2)).executes(c -> {
+                    GuildService.open(c.getSource().getPlayerOrException(), com.mojang.brigadier.arguments.IntegerArgumentType.getInteger(c, "tab"));
+                    return 1;
+                })))
+                .then(Commands.literal("officer").then(Commands.argument("player", net.minecraft.commands.arguments.EntityArgument.player())
+                        .then(Commands.argument("on", com.mojang.brigadier.arguments.BoolArgumentType.bool()).executes(c -> report(c,
+                                Guilds.setOfficer(c.getSource().getPlayerOrException(), net.minecraft.commands.arguments.EntityArgument.getPlayer(c, "player").getUUID(),
+                                        com.mojang.brigadier.arguments.BoolArgumentType.getBool(c, "on")))))))
+                .then(Commands.literal("take").then(Commands.argument("rank", com.mojang.brigadier.arguments.IntegerArgumentType.integer(0, 2))
+                        .executes(c -> report(c, Guilds.setTakeRank(c.getSource().getPlayerOrException(),
+                                com.mojang.brigadier.arguments.IntegerArgumentType.getInteger(c, "rank"))))))
+                .then(Commands.literal("storage").executes(c -> GuildStorage.open(c.getSource().getPlayerOrException(), null) ? 1 : 0))
+                .then(Commands.literal("deliver").executes(c -> report(c, GuildRequests.deliver(c.getSource().getPlayerOrException()))))
+                .then(Commands.literal("banner").executes(c -> report(c, Guilds.takeBanner(c.getSource().getPlayerOrException()))))
+                .then(Commands.literal("rent").then(Commands.argument("lot", StringArgumentType.word())
+                        .suggests((ctx, b) -> SharedSuggestionProvider.suggest(GuildLots.LOTS.stream().map(GuildLots.Lot::id), b))
+                        .executes(c -> report(c, GuildLots.rent(c.getSource().getPlayerOrException(), StringArgumentType.getString(c, "lot"))))))
+                .then(Commands.literal("release").executes(c -> report(c, GuildLots.release(c.getSource().getPlayerOrException())))));
+    }
+
+    private static int report(CommandContext<CommandSourceStack> c, Guilds.Result r) throws CommandSyntaxException {
+        Notice.hint(c.getSource().getPlayerOrException(), r.key);
+        return r.ok() ? 1 : 0;
     }
 
     private static int create(CommandContext<CommandSourceStack> c, String color, String accent) throws CommandSyntaxException {

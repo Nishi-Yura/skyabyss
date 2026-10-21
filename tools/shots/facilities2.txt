@@ -1,0 +1,86 @@
+# 都の施設の続き (docs/design/35 の 3.2・6.5・6.7): 木偶の数字、ギルドの 3 つのつまみと倉庫、試練の記録、師範の振り直し・祭司の誓いの会話
+# ./gradlew runShots -Pscript=tools/shots/facilities2.txt -PshotsName=facilities2 --no-daemon --offline  (絵は docs/review/facilities2/ へ写す)
+world shots flat
+size 1280 720
+timeout 600
+render 6
+clouds off
+wait 100
+cmd skyabyss cinematic stop
+wait 10
+cmd skyabyss cinematic stop
+cmd time set noon
+cmd weather clear
+cmd gamerule doDaylightCycle false
+cmd gamemode creative
+cmd kill @e[type=!minecraft:player,distance=..64]
+cmd fill -6 -60 -6 6 -58 6 minecraft:air
+cmd setblock -2 -60 -3 minecraft:oak_fence
+cmd setblock -2 -59 -3 minecraft:hay_block
+cmd setblock -2 -58 -3 minecraft:carved_pumpkin[facing=south]
+cmd setblock 2 -60 -3 minecraft:oak_fence
+cmd setblock 2 -59 -3 minecraft:hay_block
+cmd setblock 2 -58 -3 minecraft:carved_pumpkin[facing=south]
+camera minecraft:overworld 0 -60 2 180 8
+waitchunks
+cmd skyabyss facility dummy
+wait 20
+hud on
+chat clear
+cmd damage @e[type=skyabyss:training_dummy,limit=1,sort=nearest] 7 minecraft:player_attack by @s
+wait 4
+cmd damage @e[type=skyabyss:training_dummy,limit=1,sort=furthest] 12.5 minecraft:player_attack by @s
+wait 6
+shot dummy_hit
+wait 20
+# ギルド
+cmd skyabyss facility coins 200
+cmd guild create "鐘の守り" KANE blue white
+cmd give @s minecraft:iron_ingot 30
+cmd guild deliver
+cmd guild rent lot_2
+chat clear
+cmd guild menu 0
+wait 30
+shot guild_members
+cmd guild menu 1
+wait 30
+shot guild_request
+cmd guild menu 2
+wait 30
+shot guild_house
+close
+cmd give @s minecraft:bread 16
+cmd guild storage
+wait 30
+shot guild_storage
+close
+cmd guild release
+cmd guild leave
+# 試練の記録
+cmd skyabyss facility records
+wait 30
+shot records
+close
+# 会話: 師範の振り直し、祭司の誓い
+cmd summon skyabyss:attendant 0.5 -60 -1.5 {NoAI:1b,Role:"training_master",Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:attendant 3.5 -60 -1.5 {NoAI:1b,Role:"shrine_priest",Rotation:[0f,0f],PersistenceRequired:1b}
+wait 10
+chat clear
+cmd skyabyss dev talk "skyabyss:attendant_training_master"
+wait 40
+cmd skyabyss dev talk say continue
+wait 30
+cmd skyabyss dev talk say 0
+wait 40
+shot talk_respec
+close
+cmd skyabyss dev talk "skyabyss:attendant_shrine_priest"
+wait 40
+cmd skyabyss dev talk say continue
+wait 30
+cmd skyabyss dev talk say 1
+wait 40
+shot talk_vows
+close
+quit
