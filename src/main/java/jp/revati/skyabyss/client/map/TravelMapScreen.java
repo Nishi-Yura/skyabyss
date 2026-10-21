@@ -146,6 +146,11 @@ public class TravelMapScreen extends Screen {
         }
     }
 
+    // 撮影の台本 (mapscale) から縮尺を替える (0 = 町のまわり、1 = 世界)
+    public void scale(int s) {
+        this.scale = Mth.clamp(s, 0, RANGE.length - 1);
+    }
+
     // 撮影の台本 (mapstyle) から見た目を替える
     public void styleOverride(@Nullable Config.MapStyle s) {
         this.styleOverride = s;

@@ -795,6 +795,13 @@ public final class ShotRunner {
                 }
                 return true;
             }
+            case "mapscale" -> {
+                // mapscale near|far : 開いている旅の地図の縮尺 (町のまわり 600 / 世界 2,400)
+                if (mc.screen instanceof jp.revati.skyabyss.client.map.TravelMapScreen map) {
+                    map.scale(line.arg(0).equals("far") ? 1 : 0);
+                }
+                return true;
+            }
             case "key" -> {
                 // key <キーの名前> : そのキーを押したことにする (mod のキーの KeyMapping。OS の入力ではない)。例 key key.skyabyss.record
                 press(mc, line.arg(0));
