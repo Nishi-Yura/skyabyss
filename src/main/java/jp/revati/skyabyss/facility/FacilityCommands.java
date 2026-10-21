@@ -31,6 +31,7 @@ import net.neoforged.neoforge.event.RegisterCommandsEvent;
 //   /skyabyss facility mapcopy                    書庫番の地図の写し (祭司・書庫番の働きと同じ)
 //   /skyabyss facility respec <skills|stats> [coins]   師範の振り直し
 //   /skyabyss facility brew                       薬師の醸造の手ほどき (四章の決まりのまま)
+//   /skyabyss facility trade                      取引所の画面を番の前と同じに開く (出す・申請ができる。だれでもの /trade は番の前でない)
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class FacilityCommands {
     private static final SuggestionProvider<CommandSourceStack> ROLES = (ctx, b) -> SharedSuggestionProvider.suggest(
@@ -96,7 +97,11 @@ public final class FacilityCommands {
                                         == jp.revati.skyabyss.rpg.skill.SkillManager.RespecResult.OK ? 1 : 0)
                                 .then(Commands.literal("coins").executes(c -> TrainingMaster.respec(c.getSource().getPlayerOrException(),
                                         StringArgumentType.getString(c, "what").equals("stats"), true) == jp.revati.skyabyss.rpg.skill.SkillManager.RespecResult.OK ? 1 : 0))))
-                        .then(Commands.literal("brew").executes(c -> FacilityActions.brewLesson(c.getSource().getPlayerOrException()) ? 1 : 0))));
+                        .then(Commands.literal("brew").executes(c -> FacilityActions.brewLesson(c.getSource().getPlayerOrException()) ? 1 : 0))
+                        .then(Commands.literal("trade").executes(c -> {
+                            jp.revati.skyabyss.facility.trade.TradeService.open(c.getSource().getPlayerOrException(), null);
+                            return 1;
+                        }))));
     }
 
     private static int spawn(CommandSourceStack src, String roleId, int look) throws com.mojang.brigadier.exceptions.CommandSyntaxException {

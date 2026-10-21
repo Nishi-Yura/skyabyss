@@ -9,11 +9,9 @@ import java.util.UUID;
 import com.mojang.authlib.GameProfile;
 
 import jp.revati.skyabyss.SkyAbyss;
-import jp.revati.skyabyss.facility.guild.GuildLots;
 import jp.revati.skyabyss.map.MapMarks;
 import jp.revati.skyabyss.npc.Dialogue;
 import jp.revati.skyabyss.npc.DialogueManager;
-import jp.revati.skyabyss.opening.site.Blueprint;
 import jp.revati.skyabyss.progress.Titans;
 import jp.revati.skyabyss.record.Keepsakes;
 import jp.revati.skyabyss.registry.ModItems;
@@ -68,7 +66,6 @@ public final class FacilityExtrasSelfTest {
             keyRoom(f, server, p);
             records(f, server, p);
             marks(f, p);
-            lots(f);
         } catch (RuntimeException e) {
             SkyAbyss.LOGGER.error("SELFTEST facility extras crashed", e);
             f.add("crashed: " + e);
@@ -77,7 +74,7 @@ public final class FacilityExtrasSelfTest {
             KeyRoom.Data.get(server).offered.remove(p.getUUID());
         }
         if (f.isEmpty()) {
-            SkyAbyss.LOGGER.info("SELFTEST facility extras PASSED (dialogue options, respec at the master, dummies, key room, records, map copy, brewing lesson, lots)");
+            SkyAbyss.LOGGER.info("SELFTEST facility extras PASSED (dialogue options, respec at the master, dummies, key room, records, map copy, brewing lesson)");
         } else {
             f.forEach(m -> SkyAbyss.LOGGER.error("SELFTEST facility extras FAILED: {}", m));
         }
@@ -276,19 +273,5 @@ public final class FacilityExtrasSelfTest {
         p.setGameMode(GameType.SURVIVAL);
         p.getInventory().clearContent();
         FacilityActions.loreBook(p);
-    }
-
-    // 空き区画の座標の写しが、設計図の碑の印 sign_lot_<n> と合う
-    private static void lots(List<String> f) {
-        Blueprint bp = Blueprint.get("capital");
-        if (bp == null || bp.marks.isEmpty()) {
-            f.add("capital blueprint not readable");
-            return;
-        }
-        for (GuildLots.Lot l : GuildLots.LOTS) {
-            int[] m = bp.marks.get("sign_" + l.id());
-            int[] s = l.sign();
-            check(f, m != null && m[0] == s[0] && m[2] == s[2], "lot " + l.id() + " matches its sign mark " + (m == null ? "none" : m[0] + "," + m[2]));
-        }
     }
 }

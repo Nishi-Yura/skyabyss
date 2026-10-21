@@ -1,4 +1,4 @@
-"""都の施設の番人 (facility attendants) 低ポリ ラフ 3 案 x 15 役。
+"""都の施設の番人 (facility attendants) 低ポリ ラフ 3 案 x 16 役。
 
 役ごとに一人、施設の前に立つ。旅の職人と同じ NPC の作り (骨 7 本・同じピボット) なので、旅の職人のアニメ
 (idle / walk / talk) がそのまま動く。案ごとにメッシュは 1 つ・UV も 1 つで、役の違いは絵 (アトラスの色) だけ。
@@ -15,7 +15,7 @@
 
   python tools/rough/lowpoly/fac/attendants.py
     -> docs/review/npc_roughs/{a,b,c}/attendant_<look>_mesh.json, attendant_<look>_<role>_atlas.png, attendant_<look>_detail.png
-       docs/review/npc_roughs/look_{a,b,c}.png (15 役の前 3/4) と compare.png (3 案 x 数役)
+       docs/review/npc_roughs/look_{a,b,c}.png (16 役の前 3/4) と compare.png (3 案 x 数役)
 """
 import json
 import sys
@@ -40,11 +40,12 @@ BONES = ART.BONES
 
 ROLES = ["guild_clerk", "smith", "tool_merchant", "apothecary", "storage_keeper", "innkeeper", "perch_keeper",
          "shrine_priest", "keep_veteran", "archivist", "training_master", "black_marketeer", "gravekeeper",
-         "mapmaker", "drunkard"]
+         "mapmaker", "drunkard", "trade_keeper"]
 ROLE_JA = {"guild_clerk": "組合の受付の書記", "smith": "鍛冶師", "tool_merchant": "道具屋", "apothecary": "薬師",
            "storage_keeper": "預かり番", "innkeeper": "宿の女将", "perch_keeper": "止まり木の番", "shrine_priest": "社の祭司",
            "keep_veteran": "砦の老兵", "archivist": "書庫番", "training_master": "師範", "black_marketeer": "顔を隠した商人",
-           "gravekeeper": "墓守", "mapmaker": "地図屋", "drunkard": "酔いどれ"}
+           "gravekeeper": "墓守", "mapmaker": "地図屋", "drunkard": "酔いどれ",
+           "trade_keeper": "取引所の番"}
 
 
 # ====================================================================== 色
@@ -85,6 +86,7 @@ PAL = {
     "gravekeeper":     dict(coat=(92, 92, 88), role=(74, 86, 70), trim=(50, 52, 50), acc=(150, 146, 132), hair=(176, 174, 168), skin="pale", guard=(72, 72, 70), sash=(56, 60, 54)),
     "mapmaker":        dict(coat=(54, 104, 112), role=(196, 172, 122), trim=(40, 52, 76), acc=(186, 146, 70), hair=(150, 96, 56), skin="mid", guard=(70, 96, 100), sash=(150, 70, 50)),
     "drunkard":        dict(coat=(110, 92, 70), role=(122, 62, 78), trim=(76, 60, 46), acc=(140, 120, 80), hair=(96, 76, 58), skin="ruddy", guard=(100, 84, 66), sash=(98, 70, 50), drunk=True),
+    "trade_keeper":    dict(coat=(44, 84, 82), role=(196, 160, 82), trim=(58, 40, 28), acc=(214, 184, 104), hair=(70, 52, 40), skin="mid", guard=(52, 72, 70), sash=(150, 110, 50)),
 }
 
 LEATHER = CK.BROWN

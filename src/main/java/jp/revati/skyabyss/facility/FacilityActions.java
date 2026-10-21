@@ -41,10 +41,11 @@ import net.minecraft.world.level.block.BedBlock;
 //   key_offer / key_return : 社の祭司。鍵の間に欠片を納める / 返してもらう (KeyRoom)
 //   records   : 砦の老兵の試練の記録 (KeepRecords → client RecordsScreen)
 //   brew_lesson : 薬師が醸造を教える (四章。手ほどきの品を一度だけ)
+//   trade     : 取引所の番。取引所の画面 (trade/TradeService。番の前なので出す・申請ができる)
 public final class FacilityActions {
     public static final java.util.Set<String> OPENS = java.util.Set.of("shop", "stash", "inn_rest", "rumor", "perch", "map", "guild", "repair",
             "guild_storage", "respec_quote", "respec_skills", "respec_skills_coins", "respec_stats", "respec_stats_coins", "lore_book", "map_copy",
-            "key_offer", "key_return", "records", "brew_lesson");
+            "key_offer", "key_return", "records", "brew_lesson", "trade");
 
     private FacilityActions() {
     }
@@ -79,6 +80,7 @@ public final class FacilityActions {
             case "key_return" -> KeyRoom.giveBack(player);
             case "records" -> KeepRecords.open(player);
             case "brew_lesson" -> brewLesson(player);
+            case "trade" -> jp.revati.skyabyss.facility.trade.TradeService.open(player, npc);
             default -> SkyAbyss.LOGGER.warn("[facility] unknown open {}", open);
         }
     }

@@ -33,7 +33,7 @@ import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.common.util.FakePlayer;
 
 // 都の施設 (docs/design/35 の F2・F3) の自己テスト。段: "facility" (係の人・鐘銭・店・預かり所・宿・修理)、"facility guild" (GuildSelfTest)、
-// "facility extras" (章で開く施設と訓練場。FacilityExtrasSelfTest)。
+// "facility extras" (章で開く施設と訓練場。FacilityExtrasSelfTest)、"facility trade" (取引所。trade/TradeSelfTest)。
 //   絵: 3 案の形・骨だけの geo・役ごとの 15 枚の絵・対話の顔・施設の印・鐘銭の絵と形
 //   会話: 15 人の会話がそろい、初めては一言の説明から、二度目からはできることの選択肢。施設の結果 (facility) の名前を読み込みで調べる
 //   立たせる: 印 npc_<役> に立ち、二人目は立たせず、離れたら戻す。役と見た目の案を保存する。読む印の名前 (ours)
@@ -48,7 +48,8 @@ public final class FacilitySelfTest {
     public static List<SelfTestRunner.Step> steps() {
         return List.of(SelfTestRunner.Step.once("facility", FacilitySelfTest::run),
                 SelfTestRunner.Step.once("facility guild", GuildSelfTest::run),
-                SelfTestRunner.Step.once("facility extras", FacilityExtrasSelfTest::run));
+                SelfTestRunner.Step.once("facility extras", FacilityExtrasSelfTest::run),
+                SelfTestRunner.Step.once("facility trade", jp.revati.skyabyss.facility.trade.TradeSelfTest::run));
     }
 
     static void check(List<String> f, boolean ok, String what) {
@@ -76,7 +77,7 @@ public final class FacilitySelfTest {
             p.getInventory().clearContent();
         }
         if (f.isEmpty()) {
-            SkyAbyss.LOGGER.info("SELFTEST facility PASSED (assets 3 looks x 15 roles, dialogues, attendant spawn/keep/save, coins, shops buy/sell/rotation, stash, inn, repair)");
+            SkyAbyss.LOGGER.info("SELFTEST facility PASSED (assets 3 looks x 16 roles, dialogues, attendant spawn/keep/save, coins, shops buy/sell/rotation, stash, inn, repair)");
         } else {
             f.forEach(m -> SkyAbyss.LOGGER.error("SELFTEST facility FAILED: {}", m));
         }
@@ -148,6 +149,7 @@ public final class FacilitySelfTest {
                 case PERCH_KEEPER -> "perch";
                 case GUILD_CLERK -> "guild";
                 case SMITH -> "repair";
+                case TRADE_KEEPER -> "trade";
                 default -> null;
             };
             if (need != null && menu != null) {

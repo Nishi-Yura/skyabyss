@@ -25,15 +25,18 @@ import net.neoforged.neoforge.event.RegisterCommandsEvent;
 //   /guild create <名前> <印> [地の色] [模様の色]   作る (色は white / red / … の DyeColor の名前)
 //   /guild apply <名前>                             申請する (誰でも入れるギルドならそのまま入る)。join も同じ
 //   /guild accept <人> / deny <人>                  長が申請を受ける / 断る
-//   /guild leave                                    抜ける (長が抜けると、いちばん古い人が長に。誰もいなくなると解散)
+//   /guild leave                                    抜ける (長は抜けられない。先に leader で譲るか disband で解散する)
 //   /guild kick <人>                                長が外す
 //   /guild open <true|false>                        長が「誰でも入れる」を切り替える
 //   /guild info [名前] / list                       中身 / 一覧
-//   /guild menu [つまみ 0..2]                       ギルドの画面を開く (組合の受付と同じ。0 人・1 頼み・2 家と旗)
+//   /guild menu [つまみ 0..3]                       ギルドの画面を開く (組合の受付と同じ。0 人・1 頼み・2 旗・3 功績)
 //   /guild officer <人> <true|false>                長が副長にする / 戻す
 //   /guild take <0..2>                              長が倉庫から取り出せる位を決める (0 誰でも・1 副長から・2 長だけ)
 //   /guild storage / deliver / banner               倉庫を開く / 今週の頼みに納める / 旗を受け取る
-//   /guild rent <lot_1..5> / release                長が空き区画を借りる / 手放す
+//   /guild leader <人>                              長がほかの人に長を譲る (前の長は副長に)
+//   /guild disband confirm                          長がギルドを解散する (confirm を付けないと、やり方を言うだけ)
+//   /guild pattern <模様> / plate <色|none>         長が旗の模様 / 名札の特別な色を替える (はじめからのものか、功績で開いたもの)
+//   /guild achievements                             ギルドの功績の進み
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class GuildCommands {
     private static final SuggestionProvider<CommandSourceStack> NAMES = (ctx, b) -> SharedSuggestionProvider.suggest(
@@ -81,7 +84,7 @@ public final class GuildCommands {
                 .then(Commands.literal("menu").executes(c -> {
                     GuildService.open(c.getSource().getPlayerOrException(), null);
                     return 1;
-                }).then(Commands.argument("tab", com.mojang.brigadier.arguments.IntegerArgumentType.integer(0, 2)).executes(c -> {
+                }).then(Commands.argument("tab", com.mojang.brigadier.arguments.IntegerArgumentType.integer(0, 3)).executes(c -> {
                     GuildService.open(c.getSource().getPlayerOrException(), com.mojang.brigadier.arguments.IntegerArgumentType.getInteger(c, "tab"));
                     return 1;
                 })))
@@ -95,10 +98,63 @@ public final class GuildCommands {
                 .then(Commands.literal("storage").executes(c -> GuildStorage.open(c.getSource().getPlayerOrException(), null) ? 1 : 0))
                 .then(Commands.literal("deliver").executes(c -> report(c, GuildRequests.deliver(c.getSource().getPlayerOrException()))))
                 .then(Commands.literal("banner").executes(c -> report(c, Guilds.takeBanner(c.getSource().getPlayerOrException()))))
-                .then(Commands.literal("rent").then(Commands.argument("lot", StringArgumentType.word())
-                        .suggests((ctx, b) -> SharedSuggestionProvider.suggest(GuildLots.LOTS.stream().map(GuildLots.Lot::id), b))
-                        .executes(c -> report(c, GuildLots.rent(c.getSource().getPlayerOrException(), StringArgumentType.getString(c, "lot"))))))
-                .then(Commands.literal("release").executes(c -> report(c, GuildLots.release(c.getSource().getPlayerOrException())))));
+                .then(Commands.literal("leader").then(Commands.argument("player", StringArgumentType.word())
+                        .executes(c -> {
+                            ServerPlayer leader = c.getSource().getPlayerOrException();
+                            UUID who = find(leader, StringArgumentType.getString(c, "player"), false);
+                            return tell(c, who == null ? Guilds.Result.NOT_MEMBER : Guilds.transfer(leader, who));
+                        })))
+                .then(Commands.literal("disband")
+                        .executes(c -> {
+                            c.getSource().sendFailure(Component.translatable("message.skyabyss.guild.disband_confirm"));
+                            return 0;
+                        })
+                        .then(Commands.literal("confirm").executes(c -> tell(c, Guilds.disband(c.getSource().getPlayerOrException())))))
+                .then(Commands.literal("pattern").then(Commands.argument("pattern", StringArgumentType.word())
+                        .suggests((ctx, b) -> SharedSuggestionProvider.suggest(GuildEmblems.ALL.stream().map(GuildEmblems.Emblem::id), b))
+                        .executes(c -> {
+                            ServerPlayer p = c.getSource().getPlayerOrException();
+                            GuildData.Guild g = Guilds.of(p);
+                            if (g == null) {
+                                return tell(c, Guilds.Result.NOT_IN_GUILD);
+                            }
+                            String id = StringArgumentType.getString(c, "pattern");
+                            if (GuildEmblems.byId(id) == null) {
+                                return tell(c, Guilds.Result.PATTERN_LOCKED);
+                            }
+                            return tell(c, Guilds.setEmblem(p, g.tag, g.color, g.accent, id, g.plate));
+                        })))
+                .then(Commands.literal("plate").then(Commands.argument("plate", StringArgumentType.word())
+                        .suggests((ctx, b) -> SharedSuggestionProvider.suggest(java.util.stream.Stream.concat(java.util.stream.Stream.of("none"),
+                                GuildEmblems.PLATES.stream().map(GuildEmblems.Plate::id)), b))
+                        .executes(c -> {
+                            ServerPlayer p = c.getSource().getPlayerOrException();
+                            GuildData.Guild g = Guilds.of(p);
+                            if (g == null) {
+                                return tell(c, Guilds.Result.NOT_IN_GUILD);
+                            }
+                            String id = StringArgumentType.getString(c, "plate");
+                            return tell(c, Guilds.setEmblem(p, g.tag, g.color, g.accent, g.pattern, id.equals("none") ? "" : id));
+                        })))
+                .then(Commands.literal("achievements").executes(GuildCommands::achievements)));
+    }
+
+    private static int achievements(CommandContext<CommandSourceStack> c) throws CommandSyntaxException {
+        GuildData.Guild g = Guilds.of(c.getSource().getPlayerOrException());
+        if (g == null) {
+            return tell(c, Guilds.Result.NOT_IN_GUILD);
+        }
+        for (GuildAchievements.Achievement a : GuildAchievements.ALL) {
+            boolean done = g.unlocked.contains(a.id());
+            int v = Math.min(a.target(), GuildAchievements.value(g, a.kind()));
+            net.minecraft.network.chat.MutableComponent line = Component.literal(done ? "✔ " : "・ ").append(Component.translatable(a.nameKey()))
+                    .append("  " + v + "/" + a.target() + "  ");
+            for (Component r : GuildAchievements.rewards(a.id())) {
+                line.append(r).append(" ");
+            }
+            c.getSource().sendSuccess(() -> line, false);
+        }
+        return 1;
     }
 
     private static int report(CommandContext<CommandSourceStack> c, Guilds.Result r) throws CommandSyntaxException {

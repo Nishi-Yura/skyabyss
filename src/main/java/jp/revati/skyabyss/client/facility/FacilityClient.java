@@ -38,6 +38,15 @@ public final class FacilityClient {
         }
     }
 
+    public static void trade(jp.revati.skyabyss.facility.trade.TradeNetwork.View view) {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.screen instanceof TradeScreen s) {
+            s.update(view);
+        } else {
+            mc.setScreen(new TradeScreen(view));
+        }
+    }
+
     public static void records(jp.revati.skyabyss.facility.KeepRecords.View view) {
         Minecraft.getInstance().setScreen(new RecordsScreen(view));
     }
