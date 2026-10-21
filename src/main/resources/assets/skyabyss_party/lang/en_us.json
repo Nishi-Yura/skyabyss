@@ -44,6 +44,8 @@
   "gui.skyabyss.party.title": "Story and Party",
   "gui.skyabyss.party.story": "Hearts stilled %s / %s   Level cap %s",
   "gui.skyabyss.party.story_next": "Next: the depths of the %s's back",
+  "gui.skyabyss.party.story_next_shadow": "Next: follow the shadow in the sky",
+  "gui.skyabyss.party.story_next_unseen": "Next: find the titan you have not seen yet",
   "gui.skyabyss.party.story_done": "All titans of chapter 1 are stilled",
   "gui.skyabyss.party.world": "Hearts stilled in this world %s / %s",
   "gui.skyabyss.party.invite_from": "Invitation from %s",

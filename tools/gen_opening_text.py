@@ -119,7 +119,7 @@ OPENING = {
 OBJECTIVES = [
     # (ID, 日本語, 英語, いつ出すか)
     ("examine_camp", "野営地の跡を調べてみよう", "Search the abandoned camp", "B0 目覚めてから、帳面を拾うまで"),
-    ("follow_smoke", "煙の立つ方へ向かってみよう", "Head toward the rising smoke", "B1 帳面を拾ってから、鐘の宿りの語り部と話すまで (メインの段 follow_smoke)"),
+    ("follow_smoke", "煙の立つ方へ向かおう", "Head toward the rising smoke", "B1 帳面を拾ってから、鐘の宿りの語り部と話すまで (メインの段 follow_smoke)"),
     ("watch_sky", "晴れた昼に、空を見上げてみよう", "Look up at the sky on a clear midday", "B2〜B4 語り部と話してから、最初の影を見るまで (メインの段 watch_sky)"),
     ("read_page", "破れた頁を拾って、読んでみよう", "Take the torn page, and read it", "B4 影が去ってから、落ちてきた破れた頁を読むまで (メインの段 watch_sky のまま。OpeningLogic.objective)"),
     ("ask_storyteller", "宿りの語り部に話しかけよう", "Talk to the lodge storyteller", "B4 影を見てから、語り部に尋ねるまで (メインの段 ask_storyteller)"),
