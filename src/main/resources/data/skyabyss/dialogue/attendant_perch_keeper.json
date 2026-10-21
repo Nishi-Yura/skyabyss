@@ -1,0 +1,81 @@
+{
+  "npc": "skyabyss:attendant_perch_keeper",
+  "entries": [
+    {
+      "if": {
+        "type": "not",
+        "of": {
+          "type": "flag",
+          "flag": "intro"
+        }
+      },
+      "node": "intro"
+    },
+    {
+      "node": "menu"
+    }
+  ],
+  "nodes": {
+    "intro": {
+      "face": "smile",
+      "do": [
+        {
+          "type": "flag",
+          "flag": "intro"
+        }
+      ],
+      "next": "menu"
+    },
+    "again": {
+      "face": "neutral",
+      "next": "menu",
+      "text": "dialogue.skyabyss.attendant_perch_keeper.intro"
+    },
+    "rule": {
+      "face": "neutral",
+      "next": "menu"
+    },
+    "menu": {
+      "face": "neutral",
+      "options": [
+        {
+          "id": "call",
+          "kind": "talk",
+          "do": [
+            {
+              "type": "facility",
+              "open": "perch"
+            }
+          ],
+          "goto": "end"
+        },
+        {
+          "id": "map",
+          "kind": "talk",
+          "do": [
+            {
+              "type": "facility",
+              "open": "map"
+            }
+          ],
+          "goto": "end"
+        },
+        {
+          "id": "rule",
+          "kind": "talk",
+          "goto": "rule"
+        },
+        {
+          "id": "about",
+          "kind": "talk",
+          "goto": "again"
+        },
+        {
+          "id": "bye",
+          "kind": "leave",
+          "goto": "end"
+        }
+      ]
+    }
+  }
+}

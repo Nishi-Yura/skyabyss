@@ -155,6 +155,8 @@ public final class SelfTestRunner {
         // 旅装・砥石・糧と薬 (P5) と旅の職人 (P4)。docs/design/21 の 1.2・1.4
         steps.addAll(jp.revati.skyabyss.guide.TravelSelfTest.steps());
         steps.addAll(jp.revati.skyabyss.npc.ArtisanSelfTest.steps());
+        // 都の施設 (係の人・鐘銭・店・預かり所・宿・ギルド)。docs/design/35。SKYABYSS_SELFTEST_ONLY=facility
+        steps.addAll(jp.revati.skyabyss.facility.FacilitySelfTest.steps());
         // 倒れたときの決まりと墓 (docs/design/11 の 6 章)
         steps.add(Step.once("grave (load)", jp.revati.skyabyss.grave.GraveSelfTest::load));
         steps.add(Step.once("grave", 40, jp.revati.skyabyss.grave.GraveSelfTest::runSelfTest));

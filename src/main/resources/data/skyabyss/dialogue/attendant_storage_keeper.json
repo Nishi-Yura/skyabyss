@@ -1,0 +1,61 @@
+{
+  "npc": "skyabyss:attendant_storage_keeper",
+  "entries": [
+    {
+      "if": {
+        "type": "not",
+        "of": {
+          "type": "flag",
+          "flag": "intro"
+        }
+      },
+      "node": "intro"
+    },
+    {
+      "node": "menu"
+    }
+  ],
+  "nodes": {
+    "intro": {
+      "face": "smile",
+      "do": [
+        {
+          "type": "flag",
+          "flag": "intro"
+        }
+      ],
+      "next": "menu"
+    },
+    "again": {
+      "face": "neutral",
+      "next": "menu",
+      "text": "dialogue.skyabyss.attendant_storage_keeper.intro"
+    },
+    "menu": {
+      "face": "neutral",
+      "options": [
+        {
+          "id": "stash",
+          "kind": "talk",
+          "do": [
+            {
+              "type": "facility",
+              "open": "stash"
+            }
+          ],
+          "goto": "end"
+        },
+        {
+          "id": "about",
+          "kind": "talk",
+          "goto": "again"
+        },
+        {
+          "id": "bye",
+          "kind": "leave",
+          "goto": "end"
+        }
+      ]
+    }
+  }
+}

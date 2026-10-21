@@ -36,9 +36,10 @@ import net.minecraft.world.item.ItemStack;
 //   unlock_recipes {chapter}       : その章の旅の覚書のレシピを解く (旅装・砥石・糧と薬。guide.WayfarerNotes。職人が教える)。新しく解けた数を一行で知らせる
 //   remake_ward {titan}            : その巨神の鼓動守を編み直して渡す (持っていない人だけ、1 日 1 つまで。条件 ward_ok と組。素材は別に take)
 //   open_board                     : 言伝ての板の画面を開く (板のない所で、NPC が代わりに頼みごとを見せる)
+//   facility    {open, shop}       : 都の施設の働き (店・預かり所・宿・止まり木・地図・ギルド・修理。facility.FacilityActions)
 public final class Action {
     public static final Set<String> TYPES = Set.of("quest_start", "signal", "affinity", "flag", "unflag", "lore", "give", "take", "xp",
-            "open_board", "grave_rescue", "grave_choose", "give_notes", "unlock_recipes", "remake_ward");
+            "open_board", "grave_rescue", "grave_choose", "give_notes", "unlock_recipes", "remake_ward", "facility");
 
     private final String type;
     private final JsonObject json;
@@ -111,10 +112,15 @@ public final class Action {
             case "xp" -> "once";
             case "give_notes", "unlock_recipes" -> "chapter";
             case "remake_ward" -> "titan";
+            case "facility" -> "open";
             default -> null;
         };
         if (need != null && !o.has(need)) {
             errors.add(where + ": action '" + type + "' needs '" + need + "'");
+            return null;
+        }
+        if (type.equals("facility") && !jp.revati.skyabyss.facility.FacilityActions.OPENS.contains(GsonHelper.getAsString(o, "open"))) {
+            errors.add(where + ": unknown facility " + GsonHelper.getAsString(o, "open"));
             return null;
         }
         // give の optional: 別の担当がまだ登録していない品。ないうちは何も渡さない (読み込みは止めない)
@@ -171,6 +177,7 @@ public final class Action {
                 }
             }
             case "open_board" -> jp.revati.skyabyss.quest.free.Board.open(player, ctx.npc() != null ? ctx.npc().blockPosition() : player.blockPosition(), true);
+            case "facility" -> jp.revati.skyabyss.facility.FacilityActions.run(player, ctx.npc(), str("open"), optStr("shop"));
             case "grave_rescue" -> jp.revati.skyabyss.grave.GraveRescue.run(player);
             case "grave_choose" -> jp.revati.skyabyss.grave.GraveChooser.open(player);
             case "xp" -> {

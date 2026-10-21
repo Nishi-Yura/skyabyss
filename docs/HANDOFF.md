@@ -23,6 +23,7 @@
 | モデル | 低ポリのメッシュ（水密・関節は親に沈める）。平らな絵は 32×32 | 15・16 と tools/README |
 | サイト | `site/`（GitHub Pages、日英、ドット絵のみ）。`python tools/site/gen_art.py` の後に `python tools/site/build.py`。生成物の `site/*.html` もコミットする | tools/site/ |
 | 画面と札（2026-10-21 夜） | **決定（2026-10-21: 札 B 左の帯の下、進捗のチャットは残す、絵柄 A 暗い板）**。札（獲得・進展・クエスト・伝承・バニラと mod の進捗）は `client/notice/CardFeed` の一つの出口、置き場は設定 `cardPlace`（既定 LEFT_FEED = 左の目的の帯の下に一行ずつ）。バニラの進捗の札は `mixin/ToastAddMixin` で mod の札に、レシピ・操作説明の札は出さない。バニラの画面は同梱のリソースパック `skyabyss_ui_a/b/c`（`tools/ui/gen_vanilla_skin.py`、既定 A をはじめての起動で選ぶ。`client/ui/UiSkin`）。見出しの文字・ツールチップの色も絵柄に合わせる。撮影は `SKYABYSS_UI_SKIN=a|b|c|none` | 18 の 3.1・3.2 |
+| 都の施設（35 の F2・F3。2026-10-21、枝 `wip/fac`） | **仕組みはできている**: 係の人 15 役（`facility/`。エンティティ `skyabyss:attendant` 一つに役。会話 `attendant_<役>`、初めは一言の説明 → できることの選択肢、頭に施設の印、見た目は低ポリ 3 案で既定 A）、鐘銭 `bell_coin`（頼み・敵の落とし物・売り）、店（`data/skyabyss/shop/`、道具屋・薬師・闇市の日替わり、画面 `client/facility/ShopScreen`）、預かり所（人ごと 54 枠）、宿の寝台（目覚める場所）と噂の入口、止まり木の番（子を呼ぶ・地図）、鍛冶師の修理、プレイヤーのギルド（作る・申請・抜ける・30 人・名札の [印]・`/guild`）。生成は `python tools/gen_facility_content.py`。自己テスト `facility`。**まだ**: 都の設計図が印 `npc_<役>`・`inn_bed` を置いていない（35 の 6.6 の表。置けば次の建て直しか見回りで立つ）、ギルドの倉庫と週替わりの頼み、技の振り直し、書庫の閲覧 | 35 の 6 章 |
 | 最適化（2026-10-21 夜） | 見た目・中身を変えない形で: HUD の配置の計算が入力の同じフレームで飛ぶように（Fit を入力で比べる `Fit.keyed`）、ボスバーの持ち主探しを tick ごとに一回（`client/BossOwners`）、光の筋の 128KB の置き場を使い回し、クエストの札の組み立てを一フレーム一回、蛾と野営の探しはチャンクの区画の表で先に見る（`util/SectionScan`）、装備の打ち消しの早抜け。残りの候補は見直して不要と判断（`EmberTrials` は人のいる部屋だけ・小さな箱だけ、`VowEvents` は毎秒の型の確認だけ）。`GuideTrailRenderer` の床探しは効果が小さく未着手 | — |
 
 ## 2. 動かす・試す・撮る

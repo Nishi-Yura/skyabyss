@@ -1,0 +1,44 @@
+{
+ "a": {
+  "tris": 580,
+  "atlas": 256,
+  "buried": [],
+  "bones": {
+   "root": 0,
+   "body": 262,
+   "head": 146,
+   "armL": 46,
+   "armR": 46,
+   "legL": 40,
+   "legR": 40
+  }
+ },
+ "b": {
+  "tris": 550,
+  "atlas": 256,
+  "buried": [],
+  "bones": {
+   "root": 0,
+   "body": 212,
+   "head": 166,
+   "armL": 46,
+   "armR": 46,
+   "legL": 40,
+   "legR": 40
+  }
+ },
+ "c": {
+  "tris": 580,
+  "atlas": 256,
+  "buried": [],
+  "bones": {
+   "root": 0,
+   "body": 262,
+   "head": 146,
+   "armL": 46,
+   "armR": 46,
+   "legL": 40,
+   "legR": 40
+  }
+ }
+}

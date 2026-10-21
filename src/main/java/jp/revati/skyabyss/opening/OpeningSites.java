@@ -220,6 +220,20 @@ public final class OpeningSites {
         return e == null ? Optional.empty() : Optional.of(e.pos);
     }
 
+    // 都の設計図の印のうち、名前が prefix で始まるもの (名前 → 位置。係の人の npc_<役>・宿の寝台 inn_bed など。docs/design/35 の 6 章)
+    public static java.util.Map<String, BlockPos> shelterExtras(MinecraftServer server, String prefix) {
+        java.util.Map<String, BlockPos> out = new java.util.LinkedHashMap<>();
+        SiteData.Entry e = data(server).first(Kind.SHELTER.id);
+        if (e != null) {
+            for (int i = 0; i < e.extraNames.size(); i++) {
+                if (e.extraNames.get(i).startsWith(prefix)) {
+                    out.put(e.extraNames.get(i), e.extraPos.get(i));
+                }
+            }
+        }
+        return out;
+    }
+
     private static Optional<BlockPos> extra(MinecraftServer server, Kind kind, String name) {
         SiteData.Entry e = data(server).first(kind.id);
         return e == null ? Optional.empty() : Optional.ofNullable(e.extra(name));
