@@ -19,6 +19,7 @@ import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import vox  # noqa: E402
+from facilities import Facilities  # noqa: E402
 from vox import (Vox, Body, Mat, DX, OPP, gable_roof, hip_spire, tower, turret, arcade, fountain, rosette, pave,  # noqa: E402
                  flowerbed, lamp_post, double_lamp, tree, bench, planter, bush, pinnacle, _facade_cells)
 
@@ -35,9 +36,10 @@ TERX = 60        # 北の段の東西の縁 (|x|)
 GAP = 3          # 町家と町家のあいだ (路地。軒が 1 出るので、軒のあいだに 1 の空き)
 
 
-class Town:
+class Town(Facilities):
     def __init__(self, st):
         self.st = st
+        self._init_fac()
         self.v = Vox(seed=20261021)
         self.rng = self.v.rng
         self.used: list[tuple[int, int, int, int]] = []  # 建物で埋めた範囲 (x0, z0, x1, z1)
@@ -56,10 +58,15 @@ class Town:
         self.parts.append((name, x0, z0, x1, z1))
 
     def house(self, x0, z0, x1, z1, y0, floors, fh, front, axis, sides, ground='window', door=True, extras=(), infill=None,
-              roof=None, sealed=True):
+              roof=None, sealed=True, quest=False):
         """町家一棟。front = 戸のある側、axis = 棟の向き、sides = 飾る側 (隣と接しない側)。
-        sealed = 入れない家 (物語に関係のない家。中は埋め、窓は暗く、戸は壁に貼った跳ね上げ戸)"""
+        sealed = 入れない家 (物語に関係のない家。中は埋め、窓は暗く、戸は壁に貼った跳ね上げ戸)
+        quest = 大通りの 1 列目の入れる家 (二階建て。中を作り、印 quest_house_<n>。facilities.furnish_home)"""
         st, v = self.st, self.v
+        if quest:
+            sealed = False
+            floors, fh = 2, 5
+            extras = tuple(e for e in extras if e != 'turret')
         b = Body(v, st, x0, z0, x1, z1, y0, floors=floors, fh=fh, bay=4, door_side=front if door else 'none',
                  ground=ground, sides=sides, infill=infill or self.rng.choice(st.house_infills), pots=0.35, sealed=sealed).build()
         if floors >= 2 and self.rng.random() < 0.3:
@@ -76,7 +83,9 @@ class Town:
             turret(v, st, cx, cz, b.top - 5, 8, half=1, rise=3)
         if sealed:
             v.seal(x0 + 1, z0 + 1, x1 - 1, z1 - 1, y0)
-        self.claim(x0 - 1, z0 - 1, x1 + 1, z1 + 1, 'house@%d,%d' % (x0, z0))
+        if quest:
+            self.furnish_home(b)
+        self.claim(x0 - 1, z0 - 1, x1 + 1, z1 + 1, ('quest@%d,%d' if quest else 'house@%d,%d') % (x0, z0))
         return b
 
     # ---------------------------------------------------------------- 地面と通り
@@ -99,15 +108,36 @@ class Town:
                 v.set(x, -1, 0, st.pave_inlay[0])
 
     def street_lamps(self):
+        """大通りの灯り。戸と施設の口の前 (外へ 4 まで、横に 1) には立てない"""
         st, v = self.st, self.v
+        fronts = set()
+        outs = list(self.openings) + [(x, z, o) for (x, y, z, o) in v.fake_doors]
+        for (x, y, z), s in v.b.items():
+            if '_door[' in s and 'trapdoor' not in s and 'half=lower' in s and y == 0:
+                f = s.split('facing=')[1].split(',')[0].split(']')[0]
+                outs.append((x, z, OPP[f]))
+        for (x, z, o) in outs:
+            dx, dz = DX[o]
+            for k in range(1, 5):
+                for j in (-1, 0, 1):
+                    fronts.add((x + dx * k + (j if dz else 0), z + dz * k + (j if dx else 0)))
+        for nm, (x, y, z) in v.marks.items():
+            if nm.startswith('sign_') and y == 0:
+                for ddx in (-1, 0, 1):
+                    for ddz in (-1, 0, 1):
+                        fronts.add((x + ddx, z + ddz))
+
+        def lamp(x, z, arm):
+            if (x, z) not in fronts:
+                lamp_post(v, st, x, 0, z, h=4, arm=arm)
         for z in range(-36, IN - 2, 12):
             if -8 <= z <= 6:
                 continue
-            lamp_post(v, st, -5, 0, z, h=4, arm='east')
-            lamp_post(v, st, 4, 0, z, h=4, arm='west')
+            lamp(-5, z, 'east')
+            lamp(4, z, 'west')
         for x in list(range(-IN + 4, -34, 12)) + list(range(36, IN - 2, 12)):
-            lamp_post(v, st, x, 0, -5, h=4, arm='south')
-            lamp_post(v, st, x, 0, 4, h=4, arm='north')
+            lamp(x, -5, 'south')
+            lamp(x, 4, 'north')
 
     # ---------------------------------------------------------------- 壁と門
     def walls(self):
@@ -607,19 +637,13 @@ class Town:
         v.set(ix1 - 1, y, iz1, 'barrel[facing=up,open=false]')
         v.set(ix1, y + 1, iz1, 'potted_fern')
         v.set((ix0 + ix1) // 2, y + 3, (iz0 + iz1) // 2, 'lantern[hanging=true,waterlogged=false]')
-        # 二階の床と梯子、寝台・箱・本棚
-        for x in range(ix0, ix1 + 1):
-            for z in range(iz0, iz1 + 1):
-                v.set(x, y + 4, z, '%s_planks' % st.wood)
-        v.set(ix0, y + 4, iz1, 'air')
-        for yy in range(y, y + 5):
-            v.set(ix0, yy, iz1, 'ladder[facing=east,waterlogged=false]')
-        v.set(ix0 - 1 + 1, y, iz1 - 1 + 1, 'ladder[facing=north,waterlogged=false]') if False else None
-        v.set(ix1, y + 5, iz0, 'red_bed[facing=north,part=head,occupied=false]')
-        v.set(ix1, y + 5, iz0 + 1, 'red_bed[facing=north,part=foot,occupied=false]')
-        v.set(ix0, y + 5, iz0, 'chest[facing=south,type=single,waterlogged=false]')
-        v.fill(ix0 + 1, y + 5, iz0, ix0 + 3, y + 6, iz0, 'bookshelf')
-        v.set((ix0 + ix1) // 2, y + 8, (iz0 + iz1) // 2, 'lantern[hanging=true,waterlogged=false]')
+        # 二階 (床の段 y+5、立つ所 y+6) への梯子 (窓のない壁に)、寝台・箱・本棚
+        self.place_ladder(ix0, iz0, ix1, iz1, y, y + 5, door=(b.doors[0][0], b.doors[0][2]))
+        v.set(ix1, y + 6, iz0, 'red_bed[facing=north,part=head,occupied=false]')
+        v.set(ix1, y + 6, iz0 + 1, 'red_bed[facing=north,part=foot,occupied=false]')
+        v.set(ix0, y + 6, iz0, 'chest[facing=south,type=single,waterlogged=false]')
+        v.fill(ix0 + 1, y + 6, iz0, ix0 + 3, y + 7, iz0, 'bookshelf')
+        v.set((ix0 + ix1) // 2, y + 9, (iz0 + iz1) // 2, 'lantern[hanging=true,waterlogged=false]')
         # 煙の出る焚き火 (わら束の上)。前庭の外、家の前の道
         sx, sz = -21, -61
         v.set(sx, y, sz, 'hay_block[axis=y]')
@@ -790,7 +814,7 @@ class Town:
                     if not inside(x, z, rr):
                         continue
                     edge = not inside(x + 1, z, rr) or not inside(x - 1, z, rr) or not inside(x, z + 1, rr) or not inside(x, z - 1, rr)
-                    if edge and rr > 0:
+                    if edge and rr > 1:
                         # 外へ向く側の階段
                         if not inside(x, z - 1, rr):
                             s = st.spire.stairs('south')
@@ -837,9 +861,9 @@ class Town:
                         axis='x' if k % 4 in (0,) or k % 4 == 2 else 'z')
         for (x, z, f) in ((-8, -2, 'south'), (5, -2, 'south'), (-8, -31, 'north'), (5, -31, 'north')):
             bench(v, st, x, 0, z, f, 3)
-        # 四隅の花壇と木
-        for (x, z) in ((-26, -34), (26, -34), (-26, 0), (26, 0)):
-            flowerbed(v, st, x - 3, z - 3, x + 3, z + 3, density=0.5)
+        # 四隅の花壇と木 (東西の大通りの口 z -4..3 と、広場の東の角の道具屋の戸 z -32 の前は空ける)
+        for (x, z) in ((-26, -35), (26, -35), (-26, -10), (26, -10)):
+            flowerbed(v, st, x - 2, z - 2, x + 2, z + 2, density=0.5)
             tree(v, x, 0, z, st.trunk2, st.leaves2, h=6, r=2)
         self.claim(-30, -38, 30, 4, 'plaza')
 
@@ -1034,7 +1058,7 @@ class Town:
             for j in range(5):
                 gx = x0 + 4 + i * 4
                 gz = z0 + 4 + j * 7
-                if (i, j) == (2, 2):
+                if (i, j) == (2, 2) or (gx <= -122 and gz <= -9):  # 北西の隅は墓守の小屋 (facilities.gravekeeper_hut)
                     continue
                 v.set(gx, 0, gz, 'stone_brick_wall')
                 v.set(gx, 1, gz, 'stone_slab[type=bottom,waterlogged=false]')
@@ -1051,9 +1075,11 @@ class Town:
         v.set(x0 + 4, 4, z1 - 3, 'stripped_spruce_log[axis=x]')
 
     # ---------------------------------------------------------------- 街区 (町家の並び)
-    def block(self, x0, z0, x1, z1, fronts, depth=11, y0=0, shops=(), courtyard=True, lot=None):
+    def block(self, x0, z0, x1, z1, fronts, depth=11, y0=0, shops=(), courtyard=True, lot=None, reserve=(), usable=(), prio='ns'):
         """街区 x0..x1 / z0..z1 の、fronts の側 (通りに面する側) に町家を隙間なく並べる。内は中庭。
-        shops = 一階を店にする側。lot = 空き区画 (x0, z0, x1, z1, 名) を残す"""
+        shops = 一階を店にする側。lot = 空き区画 (x0, z0, x1, z1, 名) を残す。reserve = 施設のために空けておく範囲の並び。
+        usable = 入れる家 (町のクエストの家) にする側 (大通りの 1 列目)。prio = 'ew' なら東西の並びを端から端まで先に取る
+        (南の大通りに面する街区。大通りに面する並びが角まで続く)"""
         st, v, rng = self.st, self.v, self.rng
         D = depth
         # 背中合わせの並びは、あいだに路地を残す (浅い街区では奥行きを縮める)
@@ -1061,71 +1087,80 @@ class Town:
             D = max(6, (z1 - z0 + 1 - GAP) // 2)
         if 'west' in fronts and 'east' in fronts and (x1 - x0 + 1) < 2 * D + GAP:
             D = max(6, (x1 - x0 + 1 - GAP) // 2)
-        taken = []
+        taken = [tuple(r) for r in reserve]
         if lot:
             lx0, lz0, lx1, lz1, lname = lot
             taken.append((lx0, lz0, lx1, lz1))
-        # 南北の側 (x 方向の並び)
-        for side in ('north', 'south'):
-            if side not in fronts:
-                continue
-            zz0, zz1 = (z0, z0 + D - 1) if side == 'north' else (z1 - D + 1, z1)
-            xs = x0
-            while xs <= x1:
-                w = rng.choice([7, 8, 9, 9, 10, 11])
-                xe = min(x1, xs + w - 1)
-                if x1 - xe < 6 + GAP:
-                    xe = x1
-                if xe - xs < 5:
-                    break
-                if any(not (xe + GAP < a or xs - GAP > c or zz1 < b or zz0 > d) for (a, b, c, d) in taken):
+        self._reserved = list(taken)
+
+        def ns_rows(xa, xb):
+            for side in ('north', 'south'):
+                if side not in fronts:
+                    continue
+                zz0, zz1 = (z0, z0 + D - 1) if side == 'north' else (z1 - D + 1, z1)
+                quest = side in usable
+                xs = xa
+                while xs <= xb:
+                    w = rng.choice([9, 10, 11]) if quest else rng.choice([7, 8, 9, 9, 10, 11])
+                    xe = min(xb, xs + w - 1)
+                    if xb - xe < 6 + GAP:
+                        xe = xb
+                    if xe - xs < 5:
+                        break
+                    if any(not (xe + GAP < a or xs - GAP > c or zz1 + GAP < b or zz0 - GAP > d) for (a, b, c, d) in taken):
+                        xs = xe + 1 + GAP
+                        continue
+                    sides = [side, 'west', 'east', OPP[side]]
+                    floors = rng.choice([2, 3, 3, 4]) if D >= 11 else rng.choice([2, 3])
+                    axis = 'z' if rng.random() < 0.7 else 'x'
+                    extras = []
+                    if rng.random() < 0.5:
+                        extras.append('chimney')
+                    if axis == 'x':
+                        extras.append('dormer')
+                    if (xe == x1 or xs == x0) and rng.random() < 0.6:
+                        extras.append('turret')
+                    self.house(xs, zz0, xe, zz1, y0, floors, 5, side, axis, tuple(sides),
+                               ground='shop' if side in shops else 'window', extras=tuple(extras), quest=quest)
+                    taken.append((xs, zz0, xe, zz1))
+                    self.alley(xe + 1, zz0, xe + GAP, zz1, y0) if xe + GAP < xb else None
                     xs = xe + 1 + GAP
+
+        def ew_rows(za, zb):
+            for side in ('west', 'east'):
+                if side not in fronts:
                     continue
-                # 隣の家とは間を空ける (くっつくと屋根と壁がぶつかって変に見える)。どの面も見えるので四方を飾る
-                sides = [side, 'west', 'east', OPP[side]]
-                floors = rng.choice([2, 3, 3, 4]) if D >= 11 else rng.choice([2, 3])
-                axis = 'z' if rng.random() < 0.7 else 'x'
-                extras = []
-                if rng.random() < 0.5:
-                    extras.append('chimney')
-                if axis == 'x':
-                    extras.append('dormer')
-                if (xe == x1 or xs == x0) and rng.random() < 0.6:
-                    extras.append('turret')
-                self.house(xs, zz0, xe, zz1, y0, floors, 5, side, axis, tuple(sides),
-                           ground='shop' if side in shops else 'window', extras=tuple(extras))
-                taken.append((xs, zz0, xe, zz1))
-                self.alley(xe + 1, zz0, xe + GAP, zz1, y0) if xe + GAP < x1 else None
-                xs = xe + 1 + GAP
-        # 東西の側 (z 方向の並び。南北の並びのあいだ)
-        za = z0 + (D + GAP if 'north' in fronts else 0)
-        zb = z1 - (D + GAP if 'south' in fronts else 0)
-        for side in ('west', 'east'):
-            if side not in fronts:
-                continue
-            xx0, xx1 = (x0, x0 + D - 1) if side == 'west' else (x1 - D + 1, x1)
-            zs = za
-            while zs <= zb:
-                w = rng.choice([7, 8, 9, 10])
-                ze = min(zb, zs + w - 1)
-                if zb - ze < 6 + GAP:
-                    ze = zb
-                if ze - zs < 5:
-                    break
-                if any(not (xx1 + GAP < a or xx0 - GAP > c or ze + GAP < b or zs - GAP > d) for (a, b, c, d) in taken):
+                xx0, xx1 = (x0, x0 + D - 1) if side == 'west' else (x1 - D + 1, x1)
+                quest = side in usable
+                zs = za
+                while zs <= zb:
+                    w = rng.choice([9, 10, 11]) if quest else rng.choice([7, 8, 9, 10])
+                    ze = min(zb, zs + w - 1)
+                    if zb - ze < 6 + GAP:
+                        ze = zb
+                    if ze - zs < 5:
+                        break
+                    if any(not (xx1 + GAP < a or xx0 - GAP > c or ze + GAP < b or zs - GAP > d) for (a, b, c, d) in taken):
+                        zs = ze + 1 + GAP
+                        continue
+                    sides = [side, OPP[side], 'north', 'south']
+                    floors = rng.choice([2, 3, 3])
+                    axis = 'x' if rng.random() < 0.7 else 'z'
+                    extras = ['chimney'] if rng.random() < 0.5 else []
+                    if axis == 'z':
+                        extras.append('dormer')
+                    self.house(xx0, zs, xx1, ze, y0, floors, 5, side, axis, tuple(sides),
+                               ground='shop' if side in shops else 'window', extras=tuple(extras), quest=quest)
+                    taken.append((xx0, zs, xx1, ze))
+                    self.alley(xx0, ze + 1, xx1, ze + GAP, y0) if ze + GAP < zb else None
                     zs = ze + 1 + GAP
-                    continue
-                sides = [side, OPP[side], 'north', 'south']
-                floors = rng.choice([2, 3, 3])
-                axis = 'x' if rng.random() < 0.7 else 'z'
-                extras = ['chimney'] if rng.random() < 0.5 else []
-                if axis == 'z':
-                    extras.append('dormer')
-                self.house(xx0, zs, xx1, ze, y0, floors, 5, side, axis, tuple(sides),
-                           ground='shop' if side in shops else 'window', extras=tuple(extras))
-                taken.append((xx0, zs, xx1, ze))
-                self.alley(xx0, ze + 1, xx1, ze + GAP, y0) if ze + GAP < zb else None
-                zs = ze + 1 + GAP
+
+        if prio == 'ew':
+            ew_rows(z0, z1)
+            ns_rows(x0 + (D + GAP if 'west' in fronts else 0), x1 - (D + GAP if 'east' in fronts else 0))
+        else:
+            ns_rows(x0, x1)
+            ew_rows(z0 + (D + GAP if 'north' in fronts else 0), z1 - (D + GAP if 'south' in fronts else 0))
         # 中庭
         if courtyard:
             cx0 = x0 + (D + 1 if 'west' in fronts else 0)
@@ -1159,22 +1194,28 @@ class Town:
                 v.set(x, y0 - 1, z, 'grass_block[snowy=false]')
         # 小道 (十字)、井戸か小さな噴水、木と花
         mx, mz = (x0 + x1) // 2, (z0 + z1) // 2
+        res = getattr(self, '_reserved', [])
+
+        def near_res(x, z, r):
+            return any(a - r <= x <= c + r and b - r <= z <= d + r for (a, b, c, d) in res)
         for x in range(x0, x1 + 1):
-            v.set(x, y0 - 1, mz, 'gravel' if rng.random() < 0.5 else 'coarse_dirt')
+            if not near_res(x, mz, 0):
+                v.set(x, y0 - 1, mz, 'gravel' if rng.random() < 0.5 else 'coarse_dirt')
         for z in range(z0, z1 + 1):
-            v.set(mx, y0 - 1, z, 'gravel' if rng.random() < 0.5 else 'coarse_dirt')
-        if x1 - x0 >= 8 and z1 - z0 >= 8:
+            if not near_res(mx, z, 0):
+                v.set(mx, y0 - 1, z, 'gravel' if rng.random() < 0.5 else 'coarse_dirt')
+        if x1 - x0 >= 8 and z1 - z0 >= 8 and not near_res(mx, mz, 5):
             fountain(v, st, mx, mz, r=2, y=y0)
         for (x, z) in ((x0 + 2, z0 + 2), (x1 - 2, z0 + 2), (x0 + 2, z1 - 2), (x1 - 2, z1 - 2)):
-            if x1 - x0 >= 6 and z1 - z0 >= 6:
+            if x1 - x0 >= 6 and z1 - z0 >= 6 and not near_res(x, z, 5):
                 tree(v, x, y0, z, rng.choice([st.trunk, st.trunk2]), rng.choice([st.leaves, st.leaves2]), h=rng.choice([4, 5, 6]), r=2)
         for _ in range(max(1, (x1 - x0) * (z1 - z0) // 30)):
             x = rng.randint(x0, x1)
             z = rng.randint(z0, z1)
-            if x != mx and z != mz and v.get(x, y0, z) is None:
+            if x != mx and z != mz and v.get(x, y0, z) is None and not near_res(x, z, 2):
                 v.set(x, y0, z, rng.choice(st.flowers + ['short_grass', 'short_grass']))
         # 洗濯の綱 (フェンスの柱)
-        if z1 - z0 >= 6:
+        if z1 - z0 >= 6 and not near_res(x0 + 1, z0 + 1, 2):
             v.fill(x0 + 1, y0, z0 + 1, x0 + 1, y0 + 2, z0 + 1, st.fence)
 
     def lot(self, x0, z0, x1, z1, name):
@@ -1520,24 +1561,22 @@ class Town:
         v.set(x0 - 2, 8, dzc - 2, 'bone_block[axis=x]')
         v.set(x0 - 2, 8, dzc + 1, 'bone_block[axis=x]')
         v.set(x0 - 2, 7, dzc - 2, 'black_concrete') if False else None
-        # 前庭の顎骨の門 (二本の反った骨が上で寄る)
+        # 前庭の顎骨の門 (二本の反った骨が上で寄る。北の道具屋と南の預かり所のあいだ、幅 7)
         gx = 38
-        for (zc, sgn) in ((dzc - 5, 1), (dzc + 4, -1)):
-            pts = [(0, 0), (0, 1), (0, 2), (0, 3), (sgn, 4), (sgn, 5), (2 * sgn, 6), (3 * sgn, 7), (4 * sgn, 7)]
-            for (dz, yy) in pts:
-                v.set(gx, yy, zc + dz, 'bone_block[axis=y]')
-        v.set(gx, 8, dzc - 1, 'lantern[hanging=false,waterlogged=false]')
-        v.set(gx, 6, dzc - 1, 'chain[axis=y,waterlogged=false]')
-        v.set(gx, 5, dzc - 1, 'lantern[hanging=true,waterlogged=false]')
-        # 銛の掛け台 (柵に避雷針の穂先) と綱の樽
-        for z in range(z1 - 6, z1 - 1):
-            v.set(x0 - 5, 0, z, '%s_fence' % st.wood)
-            v.set(x0 - 5, 1, z, '%s_fence' % st.wood)
-            v.set(x0 - 5, 2, z, 'lightning_rod[facing=up,powered=false,waterlogged=false]')
-        v.fill(x0 - 5, 3, z1 - 6, x0 - 5, 3, z1 - 2, '%s_slab[type=bottom,waterlogged=false]' % st.wood)
-        for (x, z) in ((x0 - 6, z0 + 3), (x0 - 6, z0 + 4), (x0 - 7, z0 + 3)):
+        for sgn in (1, -1):
+            for (dz, yy) in ((-3, 0), (-3, 1), (-3, 2), (-3, 3), (-2, 4), (-2, 5), (-1, 6), (0, 7)):
+                v.set(gx, yy, dzc + sgn * dz, 'bone_block[axis=y]')
+        v.set(gx, 8, dzc, 'lantern[hanging=false,waterlogged=false]')
+        v.set(gx, 6, dzc, 'chain[axis=y,waterlogged=false]')
+        v.set(gx, 5, dzc, 'lantern[hanging=true,waterlogged=false]')
+        # 銛の掛け台 (柵に避雷針の穂先) と綱の樽 (柱廊の北の端)
+        for z in range(z0 + 3, z0 + 6):
+            v.set(x0 - 3, 0, z, '%s_fence' % st.wood)
+            v.set(x0 - 3, 1, z, '%s_fence' % st.wood)
+            v.set(x0 - 3, 2, z, 'lightning_rod[facing=up,powered=false,waterlogged=false]')
+        v.fill(x0 - 3, 3, z0 + 3, x0 - 3, 3, z0 + 5, '%s_slab[type=bottom,waterlogged=false]' % st.wood)
+        for (x, z) in ((x0 - 3, z0 + 1), (x0 - 3, z0 + 2)):
             v.set(x, 0, z, 'barrel[facing=up,open=false]')
-        v.set(x0 - 6, 1, z0 + 3, 'barrel[facing=up,open=false]')
 
     def shrine_extra(self):
         """四巨神の社: 低い壁の上に柱と梁の輪、真ん中に三段の祭壇、四方に篝火"""
@@ -1621,14 +1660,17 @@ class Town:
         self.exteriors()
         self.decorate_interiors()
         self.districts()
+        self.facilities()
         self.street_lamps()
         self.graveyard()
+        self.gravekeeper_hut()
         self.mark('stand', 0, 0, 94)
         self.attendants()
         n = 7
         for (x, z) in ((-30, 31), (30, 31), (-30, 65), (30, 65)):
             self.mark('villager_%d' % n, x, 0, z)
             n += 1
+        self.tidy_for_walkers()
         self.v.connect()
         return self.v
 
@@ -1658,43 +1700,83 @@ class Town:
                         self.mark(name, x, sy, z)
                         return
 
-        put('npc_guild_clerk', m.get('open_guild'), (1, 0))
         put('npc_shrine_priest', m.get('open_shrine'), (-1, 0))
         put('npc_keep_veteran', m.get('open_keep'), (0, -1))
         put('npc_archivist', m.get('open_hall'), (0, -1))
-        put('npc_smith', (22, 0, 26), (0, -1))
+
+    def tidy_for_walkers(self):
+        """入れる建物のまわりと中の、歩く人のじゃまになる飾りを直す (ゲーム内の建築の監査に合わせる)。
+        - 柵の上の感圧板の机 → 板の上付きの半ブロックの机 (感圧板は丸いブロックの上にだけ)
+        - 戸の内と外の一つ目の敷物を外す (戸の前は空ける)
+        - 入れる建物 (施設・町のクエストの家・組合・館) の外の面の、低い所の開いた鎧戸を外す (歩く人の頭に当たる)"""
+        v, st = self.v, self.st
+        for (x, y, z), s_ in list(v.b.items()):
+            if 'pressure_plate' in s_ and (v.get(x, y - 1, z) or '').endswith('_fence'):
+                v.set(x, y - 1, z, '%s_slab[type=top,waterlogged=false]' % st.wood)
+                v.set(x, y, z, self.air(y))
+        for (x, y, z), s_ in list(v.b.items()):
+            if '_door[' in s_ and 'trapdoor' not in s_ and 'half=lower' in s_:
+                f = s_.split('facing=')[1].split(',')[0].split(']')[0]
+                dx, dz = DX[f]
+                for k in (1, -1, 2, -2):
+                    c = v.get(x + dx * k, y, z + dz * k) or ''
+                    if c.endswith('carpet'):
+                        v.set(x + dx * k, y, z + dz * k, 'air')
+        open_parts = [p for p in self.parts if p[0].startswith('quest@') or p[0] in self.fac_names or p[0] in ('guild', 'hall')]
+        for (nm, x0, z0, x1, z1) in open_parts:
+            ytop = 14 if nm in ('guild', 'hall') else 4
+            for x in range(x0, x1 + 1):
+                for z in range(z0, z1 + 1):
+                    if x not in (x0, x1) and z not in (z0, z1):
+                        continue
+                    for y in range(-1, ytop + 6):
+                        c = v.get(x, y, z) or ''
+                        if '_trapdoor[' in c and 'open=true' in c:
+                            v.set(x, y, z, 'air')
+                        # 柱型の足の上の飾りの階段 (高さ 2) は、灯りの柱や柱廊とのあいだで頭に当たるので外す
+                        elif y == 2 and c.startswith(st.trim.stem + '_stairs') and 'half=bottom' in c:
+                            v.set(x, y, z, 'air')
 
     def districts(self):
-        # 段のふもとの通り (z -40..-36) の北は段。広場の東西の並び
-        # 広場の東西の並びは北半分だけ (南半分は組合と社の前庭として広場へ開く)
-        self.block(-47, -38, -33, -27, ('east', 'south'), depth=11, shops=('east',), courtyard=False)
-        self.block(32, -38, 46, -27, ('west', 'south'), depth=11, shops=('west',), courtyard=False)
+        """街区 (町家の並び)。施設の所は reserve で空け、大通りの 1 列目は usable で入れる家にする (docs/design/35 の 2.1)"""
+        # 広場の西の並び (北半分)。南の面は社と広場のあいだの空き地 (広場から西の大通りへ) に面するので入れる家
+        self.block(-47, -38, -33, -27, ('east', 'south'), depth=11, shops=('east',), courtyard=False, usable=('south',))
+        # 広場の東の角は道具屋 (facilities.tool_shop)
         # 北西・北東の角 (段の外、x ±61..97、z -97..-44)
         self.block(-IN2, -IN2, -63, -45, ('south', 'east', 'north', 'west'), depth=11, lot=(-80, -80, -64, -64, 'lot_1'))
         self.block(63, -IN2, IN2, -45, ('south', 'west', 'north', 'east'), depth=11, lot=(64, -80, 80, -64, 'lot_2'))
-        # 社の西 (x -97..-82)
-        self.block(-IN2, -40, -81, -7, ('east', 'north', 'south', 'west'), depth=10, courtyard=False)
-        # 社と広場のあいだの北 (段のふもと) は通り
-        # 南: 東西の通り z 30..34 と 64..68、南北の通り x -50..-46 と 46..50
-        S = [(6, 27), (35, 61), (69, IN2)]
-        for j, (za, zb) in enumerate(S):
-            fr_n = ('north',)
-            fr_s = ('south',)
-            # 南西
-            self.block(-IN2, za, -53, zb, ('north', 'east', 'west') + fr_s, depth=11, shops=('north',) if j == 0 else (),
-                       lot=(-80, 76, -64, 92, 'lot_3') if j == 2 else None)
-            self.block(-45, za, -7, zb, ('north', 'west', 'east') + fr_s, depth=11, shops=('east', 'north') if j == 0 else ('east',))
-            # 南東 (鍛冶場は一つ目の街区)
-            if j == 0:
-                self.block(5, 30 - 0, 45, 29, (), courtyard=False) if False else None
-                self.block(40, za, 45, zb, ('east',), depth=6, courtyard=False)
-            else:
-                self.block(7, za, 45, zb, ('north', 'west', 'east') + fr_s, depth=11, shops=('west',),
-                           lot=(19, 75, 33, 89, 'lot_4') if j == 2 else None)
-            self.block(53, za, IN2, zb, ('north', 'west', 'east') + fr_s, depth=11, shops=('west',) if j == 0 else (),
-                       lot=(64, 76, 80, 92, 'lot_5') if j == 2 else None)
-        for k in (1, 2, 3, 4, 5):
-            pass
+        # 社の西 (x -97..-82)。南の面は西の大通りに面するので入れる家
+        self.block(-IN2, -40, -81, -7, ('east', 'north', 'south', 'west'), depth=10, courtyard=False, usable=('south',))
+        # 南: 東西の通り z 28..34 と 62..68、南北の横通り x -52..-46 と 46..52
+        # 帯 0 (z 6..27): 止まり木 (x -94..-71)、入れる家と裏の並び、宿 (x -44..-8)、鍛冶場、狭い並び、薬師の店・入れる家・裏の並び
+        self.block(-67, 6, -53, 27, ('north', 'east', 'south'), depth=10, usable=('north',))
+        self.block(40, 6, 45, 27, ('east',), depth=6, courtyard=False)
+        self.block(70, 6, IN2, 16, ('north',), depth=11, courtyard=False, usable=('north',))
+        self.block(53, 21, IN2, 27, ('south',), depth=7, courtyard=False)
+        # 帯 1 (z 35..61): 古井戸の小広場、酒場、訓練場、闇市
+        self.block(-IN2, 35, -53, 61, ('north', 'east', 'west', 'south'), depth=11, reserve=[(-64, 43, -53, 53)])
+        self.block(-45, 35, -7, 61, ('north', 'west', 'east', 'south'), depth=11, usable=('east',), prio='ew', reserve=[(-40, 36, -28, 46)])
+        self.block(53, 35, IN2, 61, ('north', 'west', 'east', 'south'), depth=11, reserve=[(53, 40, 63, 50)])
+        # 帯 2 (z 69..94): 空き区画 3・4・5、地図屋
+        self.block(-IN2, 69, -53, IN2, ('north', 'east', 'west', 'south'), depth=11, lot=(-80, 76, -64, 92, 'lot_3'))
+        self.block(-45, 69, -7, IN2, ('north', 'west', 'east', 'south'), depth=11, usable=('east',), prio='ew')
+        self.block(7, 69, 45, IN2, ('north', 'west', 'east', 'south'), depth=11, usable=('west',), prio='ew', lot=(22, 75, 36, 89, 'lot_4'))
+        self.block(53, 69, IN2, IN2, ('north', 'west', 'east', 'south'), depth=11, lot=(64, 76, 80, 92, 'lot_5'), reserve=[(83, 69, 94, 79)])
+
+    def facilities(self):
+        """施設 (facilities.py)。街区のあとに建てる (街区は reserve で場所を空けている)"""
+        self.tool_shop()
+        self.storage()
+        self.apothecary()
+        self.guild_desk()
+        self.smithy_front()
+        self.inn()
+        self.perch()
+        self.training_yard()
+        self.old_well()
+        self.black_market()
+        self.mapmaker()
+        self.tavern()
 
 
 def _rot(x, z, s, rot):

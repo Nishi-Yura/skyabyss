@@ -1,0 +1,205 @@
+# 都の施設 (docs/design/35 の 2.1 見取り図 A) を撮る: 上から・四つの大通り・施設の中と係の人。
+# ./gradlew runShots -Pscript=tools/shots/capital_rebuild.txt  (設計図を変えたら run/shots/capital_rebuild/saves を消す)
+# at shelter 0 <x> <y> <z> <yaw> <pitch>: 設計図の座標と向き (yaw 0 = 南、180 = 北、90 = 西、-90 = 東)
+world opening_capital_rebuild normal
+size 1280 720
+timeout 2400
+render 16
+clouds off
+
+wait 100
+cmd skyabyss cinematic stop
+wait 10
+cmd skyabyss cinematic stop
+cmd time set 5000
+cmd weather clear
+cmd gamerule doDaylightCycle false
+cmd gamemode spectator
+cmd skyabyss dev opening build
+hud off
+cmd skyabyss dev opening at shelter 0 0 150 60 180 62
+waitchunks
+cmd skyabyss facility place
+wait 200
+shot r_over_top
+cmd skyabyss dev opening at shelter 0 0 70 150 180 26
+waitchunks
+cmd skyabyss facility place
+wait 120
+shot r_over_south
+cmd skyabyss dev opening at shelter 0 -150 60 -40 -70 22
+waitchunks
+cmd skyabyss facility place
+wait 30
+shot r_over_west
+cmd skyabyss dev opening at shelter 0 20 4 0 -90 6
+waitchunks
+cmd skyabyss facility place
+wait 30
+shot r_ave_east
+cmd skyabyss dev opening at shelter 0 75 4 0 90 6
+waitchunks
+cmd skyabyss facility place
+wait 30
+shot r_ave_east_back
+cmd skyabyss dev opening at shelter 0 -20 4 0 90 6
+waitchunks
+cmd skyabyss facility place
+wait 30
+shot r_ave_west
+cmd skyabyss dev opening at shelter 0 0 4 8 0 6
+waitchunks
+cmd skyabyss facility place
+wait 30
+shot r_ave_south
+cmd skyabyss dev opening at shelter 0 0 4 70 180 6
+waitchunks
+cmd skyabyss facility place
+wait 30
+shot r_ave_south_back
+cmd skyabyss dev opening at shelter 0 18 4 -33 -90 4
+waitchunks
+cmd skyabyss facility place
+wait 30
+shot r_plaza_toolshop
+cmd skyabyss dev opening at shelter 0 36 1 -32 -90 8
+waitchunks
+cmd skyabyss facility place
+wait 40
+shot r_in_tool_shop
+cmd skyabyss dev opening at shelter 0 38 1 -9 180 8
+waitchunks
+cmd skyabyss facility place
+wait 30
+shot r_in_storage
+cmd skyabyss dev opening at shelter 0 59 1 8 0 8
+waitchunks
+cmd skyabyss facility place
+wait 30
+shot r_in_apothecary
+cmd skyabyss dev opening at shelter 0 58 1 -22 140 8
+waitchunks
+cmd skyabyss facility place
+wait 30
+shot r_in_guild
+cmd skyabyss dev opening at shelter 0 14 1 18 165 8
+waitchunks
+cmd skyabyss facility place
+wait 30
+shot r_in_smithy
+cmd skyabyss dev opening at shelter 0 -3 3 17 -90 5
+waitchunks
+cmd skyabyss facility place
+wait 30
+shot r_smithy_front
+cmd skyabyss dev opening at shelter 0 -26 3 -2 0 10
+waitchunks
+cmd skyabyss facility place
+wait 30
+shot r_inn_front
+cmd skyabyss dev opening at shelter 0 -26 1 9 -90 8
+waitchunks
+cmd skyabyss facility place
+wait 30
+shot r_in_inn_desk
+cmd skyabyss dev opening at shelter 0 -29 2 14 90 10
+waitchunks
+cmd skyabyss facility place
+wait 30
+shot r_in_inn_hall
+cmd skyabyss dev opening at shelter 0 -33 1 22 -60 0
+waitchunks
+cmd skyabyss facility place
+wait 30
+shot r_in_inn_stairs
+cmd skyabyss dev opening at shelter 0 -12 8 16 90 5
+waitchunks
+cmd skyabyss facility place
+wait 30
+shot r_in_inn_corridor
+cmd skyabyss dev opening at shelter 0 -25 7 13 180 15
+waitchunks
+cmd skyabyss facility place
+wait 30
+shot r_in_inn_room
+cmd skyabyss dev opening at shelter 0 -90 1 8 0 8
+waitchunks
+cmd skyabyss facility place
+wait 30
+shot r_in_perch
+cmd skyabyss dev opening at shelter 0 -76 8 6 0 25
+waitchunks
+cmd skyabyss facility place
+wait 30
+shot r_perch_ring
+cmd skyabyss dev opening at shelter 0 0 4 48 -90 5
+waitchunks
+cmd skyabyss facility place
+wait 30
+shot r_training_gate
+cmd skyabyss dev opening at shelter 0 13 1 47 160 8
+waitchunks
+cmd skyabyss facility place
+wait 30
+shot r_in_training
+cmd skyabyss dev opening at shelter 0 26 18 26 0 35
+waitchunks
+cmd skyabyss facility place
+wait 30
+shot r_training_over
+cmd skyabyss dev opening at shelter 0 55 1 45 -90 8
+waitchunks
+cmd skyabyss facility place
+wait 30
+shot r_in_black_market
+cmd skyabyss dev opening at shelter 0 90 7 75 135 8
+waitchunks
+cmd skyabyss facility place
+wait 30
+shot r_in_mapmaker
+cmd skyabyss dev opening at shelter 0 89 1 72 180 15
+waitchunks
+cmd skyabyss facility place
+wait 30
+shot r_in_mapmaker_down
+cmd skyabyss dev opening at shelter 0 -34 3 31 0 8
+waitchunks
+cmd skyabyss facility place
+wait 30
+shot r_tavern_front
+cmd skyabyss dev opening at shelter 0 -33 1 39 0 15
+waitchunks
+cmd skyabyss facility place
+wait 30
+shot r_in_tavern
+cmd skyabyss dev opening at shelter 0 -36 -4 43 -110 5
+waitchunks
+cmd skyabyss facility place
+wait 30
+shot r_in_cellar
+cmd skyabyss dev opening at shelter 0 -128 1 -15 90 8
+waitchunks
+cmd skyabyss facility place
+wait 30
+shot r_in_gravekeeper
+cmd skyabyss dev opening at shelter 0 -120 4 -8 135 15
+waitchunks
+cmd skyabyss facility place
+wait 30
+shot r_gravekeeper_out
+cmd skyabyss dev opening at shelter 0 -48 4 48 90 18
+waitchunks
+cmd skyabyss facility place
+wait 30
+shot r_old_well
+cmd skyabyss dev opening at shelter 0 -9 1 40 90 10
+waitchunks
+cmd skyabyss facility place
+wait 30
+shot r_in_quest_house
+cmd skyabyss dev opening at shelter 0 -50 3 -10 0 5
+waitchunks
+cmd skyabyss facility place
+wait 30
+shot r_plaza_west_houses
+quit

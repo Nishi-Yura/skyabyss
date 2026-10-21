@@ -59,7 +59,7 @@ def stand_ok(b, x, y, z):
             return True
         return False
     below = b.get((x, y - 1, z))
-    return below is not None and below != 'air'
+    return below is not None and name(below) not in ('air', 'cave_air')
 
 
 def main():
@@ -169,6 +169,45 @@ def main():
         if nm.startswith('sign_') or nm.startswith('villager_') or nm in ('chaser', 'smoke'):
             if not reach(x, y, z, 2):
                 problems.append('mark %s at %s: cannot be reached on foot' % (nm, (x, y, z)))
+    # 施設の印 (docs/design/35 の 6.6): 係の人 npc_<役> は足もとの 2 マスが空いて下が床、机ごしに話せる (3 以内まで歩いて行ける)。
+    # 町のクエストの家 quest_house_<n> は立てて、歩いて届く。宿の寝台 inn_bed* は寝台のそばまで歩いて届く
+    for nm, (x, y, z) in v.marks.items():
+        if nm.startswith('npc_') or nm.startswith('quest_house_'):
+            if not (passable(full.get((x, y, z))) and passable(full.get((x, y + 1, z)))
+                    and name(full.get((x, y - 1, z))) not in ('air', 'cave_air') and full.get((x, y - 1, z)) is not None):
+                problems.append('mark %s at %s: the attendant cannot stand (%s / %s / below %s)' % (
+                    nm, (x, y, z), name(full.get((x, y, z))), name(full.get((x, y + 1, z))), name(full.get((x, y - 1, z)))))
+            if not reach(x, y, z, 3 if nm.startswith('npc_') else 1):
+                problems.append('mark %s at %s: cannot be reached on foot' % (nm, (x, y, z)))
+        elif nm.startswith('inn_bed'):
+            if 'bed' not in name(full.get((x, y, z))):
+                problems.append('mark %s at %s: not on a bed (%s)' % (nm, (x, y, z), name(full.get((x, y, z)))))
+            if not reach(x, y, z, 2):
+                problems.append('mark %s at %s: the bed cannot be reached on foot' % (nm, (x, y, z)))
+    # 本物の戸の内側: 戸の一つ奥 (足と頭) が空いている (中の家具が戸を塞がない)
+    for (x, y, z), s in full.items():
+        n = name(s)
+        if n.endswith('_door') and 'trapdoor' not in n and 'half=lower' in s:
+            f = s.split('facing=')[1].split(',')[0].split(']')[0]
+            dx, dz = DX[f]
+            if not (passable(full.get((x + dx, y, z + dz))) and passable(full.get((x + dx, y + 1, z + dz)))):
+                problems.append('door at %s: blocked inside (%s / %s)' % ((x, y, z), name(full.get((x + dx, y, z + dz))), name(full.get((x + dx, y + 1, z + dz)))))
+    # 梯子: 背の壁が丸ごとのブロック、一番下に歩いて届き、一番上の隣に立てる
+    ladders = {}
+    for (x, y, z), s in full.items():
+        if name(s) == 'ladder':
+            f = s.split('facing=')[1].split(',')[0].split(']')[0]
+            dx, dz = DX[OPP[f]]
+            bn = name(full.get((x + dx, y, z + dz)))
+            if bn == 'air' or any(t in bn for t in ('pane', 'glass', 'door', 'stairs', 'slab', 'fence', 'wall', 'lantern', 'leaves', 'ladder', 'bars')):
+                problems.append('ladder at %s: no solid wall behind (%s)' % ((x, y, z), bn))
+            ladders.setdefault((x, z), []).append(y)
+    for (x, z), ys in ladders.items():
+        lo, hi = min(ys), max(ys)
+        if not reach(x, lo, z, 1):
+            problems.append('ladder at %s: the bottom cannot be reached on foot' % ((x, lo, z),))
+        if not any(stand_ok(full, x + ddx, yy, z + ddz) for (ddx, ddz) in ((1, 0), (-1, 0), (0, 1), (0, -1)) for yy in (hi, hi + 1)):
+            problems.append('ladder at %s: no floor to step off at the top' % ((x, hi, z),))
     bx, by, bz = v.marks['bell']
     if not reach(bx, by - 2, bz, 3):
         problems.append('bell: the storyteller spot cannot be reached on foot')
@@ -183,6 +222,11 @@ def main():
             gz = max(a_[2], b_[2]) - min(a_[4], b_[4])
             if gx <= 0 and gz <= 0:
                 problems.append('buildings touch: %s and %s (gap x %d, z %d)' % (a_[0], b_[0], gx - 1, gz - 1))
+    # 地面より下 (y <= -1) の空気は設計図に書かれない (地面のまま残る)。地下の部屋・穴は cave_air で書く
+    for (x, y, z), s_ in full.items():
+        if y <= -1 and s_ == 'air':
+            problems.append('plain air below ground at %s (use cave_air)' % ((x, y, z),))
+    print('houses: %d sealed, %d quest houses (enterable), facilities: %s' % (len(v.fake_doors), t.quest_n, ', '.join(t.fac_names)))
     print('walkable cells from the south gate: %d' % len(seen))
     print('checked %d doors, %d marks' % (doors, len(v.marks)))
     for p in problems:

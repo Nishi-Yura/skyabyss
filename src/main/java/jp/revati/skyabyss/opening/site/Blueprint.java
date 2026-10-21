@@ -53,6 +53,8 @@ public final class Blueprint {
     public boolean wetOk;
     // 範囲の中の水 (池・川) を土で埋めて建てる (都。wetOk と違い、水の列も整える)
     public boolean fillWater;
+    // 床の段 (y=-1) より下にも部品のある列 (都の酒場の地下・古井戸の穴)。整地の「床の下を埋める」をしない (BlockPos.asLong(x, 0, z))
+    public final java.util.Set<Long> deepColumns = new java.util.HashSet<>();
 
     private Blueprint(String name) {
         this.name = name;
@@ -127,6 +129,9 @@ public final class Blueprint {
             for (Cell c : bp.cells) {
                 bp.minY = Math.min(bp.minY, c.y());
                 bp.maxY = Math.max(bp.maxY, c.y());
+                if (c.y() < -1) {
+                    bp.deepColumns.add(net.minecraft.core.BlockPos.asLong(c.x(), 0, c.z()));
+                }
             }
             if (bp.cells.isEmpty()) {
                 bp.minY = 0;

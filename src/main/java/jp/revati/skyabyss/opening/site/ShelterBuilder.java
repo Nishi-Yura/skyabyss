@@ -39,19 +39,32 @@ public final class ShelterBuilder {
             job.entry.extra("door", door);
         }
         // 都: 門・閉じた施設・空き区画の碑と、市と住まいの村人 (docs/design/33 の 2.2)
-        for (String key : List.of("gate_n", "gate_e", "gate_s", "gate_w", "keep", "hall", "guild", "shrine", "smithy", "lot_1", "lot_2", "lot_3", "lot_4", "lot_5", "graveyard", "guild_roll")) {
+        // 施設の碑 (docs/design/35 の 2.1): 道具屋・薬師・預かり所・宿・止まり木・訓練場・闇市・地図屋・酒場・古井戸
+        for (String key : List.of("gate_n", "gate_e", "gate_s", "gate_w", "keep", "hall", "guild", "shrine", "smithy", "lot_1", "lot_2", "lot_3", "lot_4", "lot_5", "graveyard", "guild_roll",
+                "tool_shop", "apothecary", "storage", "inn", "perch", "training", "black_market", "mapmaker", "tavern", "well")) {
             BlockPos at = job.mark("sign_" + key);
             if (at != null && job.level.getBlockState(at).is(jp.revati.skyabyss.registry.ModBlocks.TABLET.get())) {
                 SiteKit.writeSign(job.level, at, "sign.skyabyss.capital." + (key.startsWith("lot_") ? "lot" : key));
             }
         }
         // 章で開く施設の戸の印と碑の印 (CapitalDoors が読む)
-        for (String key : List.of("open_guild", "open_shrine", "open_keep", "open_keep2", "open_hall",
-                "sign_guild", "sign_shrine", "sign_keep", "sign_hall", "chaser", "altar",
-                "stone_stone_whale", "stone_tide_shell", "stone_thunder_wing", "stone_ember")) {
+        for (String key : List.of("open_guild", "open_shrine", "open_keep", "open_keep2", "open_hall", "open_training",
+                "sign_guild", "sign_shrine", "sign_keep", "sign_hall", "sign_training", "chaser", "altar",
+                "stone_stone_whale", "stone_tide_shell", "stone_thunder_wing", "stone_ember",
+                // あとで町のクエスト・裏通りの仕組みが読む置き場 (35 の 3.3・3.5): 止まり木の台、古井戸の格子、酒場の地下の奥の壁
+                "perch", "old_well", "cellar_wall")) {
             BlockPos at = job.mark(key);
             if (at != null) {
                 job.entry.extra(key, at);
+            }
+        }
+        // 町のクエストの家 (大通りの 1 列目の入れる家) quest_house_<n>
+        for (String key : job.bp.marks.keySet()) {
+            if (key.startsWith("quest_house_")) {
+                BlockPos at = job.mark(key);
+                if (at != null) {
+                    job.entry.extra(key, at);
+                }
             }
         }
         // 都の言伝ての板は組合の中 (設計図が置く)。鐘のそばに自動で立てる板は出さない

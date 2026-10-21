@@ -25,7 +25,8 @@ import jp.revati.skyabyss.tablet.Tablets;
 import jp.revati.skyabyss.util.Players;
 
 // 都の閉じた施設が、章の進みで開く (docs/design/33 の 2.2「都が目を覚ます順」)。
-//   組合 = イサナと会う / 社と砦の本丸 = 心臓を二つ止めた (三章の始まり) / 館 = 心臓を三つ止めた (四章の始まり)
+//   組合 = イサナと会う / 訓練場 = 心臓を一つ止めた (二章の始まり。docs/design/35 の 3.2) /
+//   社と砦の本丸 = 心臓を二つ止めた (三章の始まり) / 館 = 心臓を三つ止めた (四章の始まり)
 // 世界で一度: 誰かが段に着いたとき、鉄の戸と鉄格子を外し、碑の文を「開いた」文にする。記録は宿りの場所の extra ("opened_<施設>")。
 // (章は人ごとだが、都は一つの共有の場所なので、最初に着いた人が開ける。閉じたままの人にだけ閉じて見せる上書きは背の仕組みに
 //  限られているので、ここでは世界の状態にする)
@@ -39,6 +40,7 @@ public final class CapitalDoors {
 
     public static final List<Facility> ALL = List.of(
             new Facility("guild", List.of("open_guild"), CapitalDoors::metIsana),
+            new Facility("training", List.of("open_training"), p -> Progression.stage(p) >= 1),
             new Facility("shrine", List.of("open_shrine"), p -> Progression.stage(p) >= 2),
             new Facility("keep", List.of("open_keep", "open_keep2"), p -> Progression.stage(p) >= 2),
             new Facility("hall", List.of("open_hall"), p -> Progression.stage(p) >= 3));
