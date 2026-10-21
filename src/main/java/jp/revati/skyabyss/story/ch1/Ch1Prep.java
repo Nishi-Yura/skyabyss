@@ -9,48 +9,44 @@ import jp.revati.skyabyss.rpg.GrowthRewards;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 
-// 一章の備えの導き (docs/design/21 の 3.1〜3.2、P6) の名前と、職人 (P4)・旅装と砥石 (P5) の済んだ分、あとの担当 (P7 地上の敵・P8 背中) への差し込み口の一覧。
+// 一章の支度 (docs/design/34 の 4.2、21 の 3.1〜3.2) の名前と、職人 (P4)・旅装と砥石 (P5)・地上の敵 (P7)・岩鯨の背 (P8) との差し込み口の一覧。
 //
-// 備えの頼み 3 本は data/skyabyss/quest/ch1/prep_gear|prep_blade|prep_pulse.json (tools/gen_ch1_prep.py)。型の決まりは 07 の 6.8。
-//   prep_gear  (身ごしらえ。80)  鉄 7・岩殻片 12・革 3・骨片 2 をそろえる (旅装 4 部位の素材の合計) → 職人に作り方を教わって (覚書でも可) 旅装を一式作る (合図 ch1_travel_gear_made)
-//   prep_blade (刃を研ぐ。160)   割れ殻の洞をクリアする (合図 site_clear:ch1_cleft_shell_cave) + 岩の砥石を使う (合図 ch1_whetstone_used) → 職人に戻って話す
-//   prep_pulse (鼓動を聞く。60)  護り糸 (洞の宝) を持ち帰る → 職人に鼓動守 (岩鯨) を編んでもらう。鼓動守は報酬
+// 支度の段 3 本 (メインの段。順不同) は data/skyabyss/quest/ch1/trail_iron|trail_blade|trail_shield.json (tools/gen_ch1_trails.py)。型の決まりは 07 の 6.8。
+// イサナの「鯨の話」(印 c_whale_heard) のあと、一章の人に三本とも出る。旧い備えの頼み (prep_gear・prep_blade・prep_pulse) はこの三本に吸収した。
+//   trail_iron   (鉄の跡。イサナ。100)   骨の坑 (BonePit) の奥の前の私の荷で頁 ch1/trail_iron → 鉄の防具 4 部位を着る (目的 wear)
+//   trail_blade  (折れた剣。職人。100)  割れ殻の洞 (CleftCave) を抜けると台座に折れた剣 = 頁 ch1/trail_blade → 職人に話す (作り方を教わる) →
+//                                       鉄の剣を持つ + 岩の砥石を使う (合図 SIGNAL_WHETSTONE_USED)
+//   trail_shield (盾と糧。語り部。50)   盾と道の固焼き 8 を持つ。報酬で頁 ch1/trail_shield。鼓動守 (護り糸を職人に編んでもらう) と鯨道の旅装は任意
+//   三本そろう   合図 ch1_ready (PrepQuests) と記念品「鯨追いの印」(WHALE_CHASER_MARK。見た目だけ)、進捗 whale_trail
 //
-// ---------------------------------------------------------------- 差し込み口の状況 (P4 職人・P5 旅装など: 済。P7・P8 は未)
-//   [P4 職人 済]  旅の職人 (skyabyss:artisan。低ポリのモデルは案 B、章ごとの 4 色。npc/NpcSetup・client/npc/NpcRenderer) が頼みの依頼主。
-//              立つ所は荷車の傍らの道 (印 "artisan") = npc/ArtisanSpawner の Spot (章・場所の ID・印・条件の表。二〜四章は Spot を足すだけ)。
-//              会話は dialogue/artisan.json (全章の共通) + dialogue/ch1/artisan.json (一章の足し書き。tools/gen_artisan_dialogue.py)、
-//              語り部 (dialogue/ch1/storyteller_prep.json) には「荷車の職人」を指す一言だけ残した。
-//              護り糸の補充 (鼓動守の再編) は職人の選択肢 (岩殻片 8 つ・1 日 1 つ・鼓動守を持っていない人。Action remake_ward / Condition ward_ok)。
-//   [P5 旅装など 済] 鯨道の旅装 (案 A 殻肩。guide/TravelGear・WhaleRoadArmorItem)・岩の砥石・道の固焼き・苔の軟膏と、そのレシピ (data/skyabyss/recipe。
-//              tools/gen_ch1_travel.py) は RECIPES の名前で WayfarerNotes に登録済みで、覚書を開く・職人に教わる (Action unlock_recipes) までは作れない
-//              (guide/RecipeLock)。旅装を一式作ると合図 SIGNAL_GEAR_MADE が立ち、prep_gear が済む。砥石は Readiness.registerWhetstone で登録 (刃の手段の言い回しが替わる)。
-//              prep_blade の洞の段は「洞を抜ける」+「砥石を使う (SIGNAL_WHETSTONE_USED)」。素材 4 つ (岩殻片・骨片・棘針・護り糸) は guide/GuideSetup に置いてある。
-//              骨の集め場・洞の宝の「道の固焼き」は road_hardtack (guide/TravelGear)
-//   [P7 地上の敵] 入った (21 の 3.1。Ch1Mobs・entity/RockShellBeetle・SpineHare・BoneHauler・ElderSentry)。CleftCave.pads() は新しい敵を使う
-//              (入口の間 岩殻虫 3、棘の間 棘うさぎ 3、奥の間 老いた歩哨 1)。ひとり歩きは Ch1Mobs.registerWanderers、骨負いは Ch1Mobs の骨の集め場の巡回。
-//              残り: ch1/follow_hauler (語り部の頼み。50)
-//              「研いだ刃で洞の主を倒す」への締めは見送り: 洞の主は一度倒すと湧き直さないので、砥石なしで倒した人が詰む。今は「洞を抜ける + 砥石を使う」(順不同) のまま
-//   [P8 岩鯨の背] 歌の間の壁画の順 (BELL_ORDER) は数え歌の鐘楼 (西の翼 WD) が同じ並びを読む。歩哨の割符 (SENTRY_TALLY = GuideSetup.SENTRY_TALLY) は
-//              老いた歩哨の落とし物 (そこにいる人ごとに一つ。持っていれば出ない)。
-//              詰所の戸の鍵として P8 が読む (持つ人がいればそのグループは老番兵を倒さずに戸を開けられる)
+// ---------------------------------------------------------------- 差し込み口の状況
+//   [P4 職人 済]  旅の職人 (skyabyss:artisan) が trail_blade の依頼主。立つ所は荷車の傍らの道 (印 "artisan") = npc/ArtisanSpawner の Spot。
+//              会話は dialogue/artisan.json (全章の共通) + dialogue/ch1/artisan.json (一章の足し書き。tools/gen_artisan_dialogue.py)。
+//              護り糸から最初の鼓動守を編む (入口 ch1t_ward_weave)・編み直し (選択肢 ward。岩殻片 8 つ・1 日 1 つ。Action remake_ward / Condition ward_ok)
+//   [P5 旅装など 済] 鯨道の旅装 (guide/TravelGear)・岩の砥石・道の固焼き・苔の軟膏のレシピは RECIPES の名前で WayfarerNotes に登録済みで、
+//              覚書を開く・職人に教わる (Action unlock_recipes) までは作れない (guide/RecipeLock)。旅装は任意 (一式で合図 SIGNAL_GEAR_MADE。今はどの段も読まない)
+//   [P7 地上の敵] 入った (Ch1Mobs)。割れ殻の洞: 入口の間 岩殻虫 3、棘の間 棘うさぎ 3、奥の間 老いた歩哨 1。骨の坑: 坑口の間 苔這い 3、巣の間 苔這い 2、荷の間 岩殻虫 2
+//   [P8 岩鯨の背] 歌の間の壁画の順 (BELL_ORDER) は数え歌の鐘楼が同じ並びを読む。歩哨の割符 (SENTRY_TALLY) は老いた歩哨の落とし物。
 public final class Ch1Prep {
-    public static final String Q_GEAR = PrepQuests.id(1, "gear");
-    public static final String Q_BLADE = PrepQuests.id(1, "blade");
-    public static final String Q_PULSE = PrepQuests.id(1, "pulse");
+    // 支度の段 (PrepQuests.ids(1) と同じ並び)
+    public static final String Q_IRON = "ch1/trail_iron";
+    public static final String Q_BLADE = "ch1/trail_blade";
+    public static final String Q_SHIELD = "ch1/trail_shield";
+    public static final List<String> TRAILS = List.of(Q_IRON, Q_BLADE, Q_SHIELD);
 
     // 地上の新しい場所の要素 ID (ChapterSites)
     public static final String CAIRN_PREFIX = "ch1_road_cairn_";
     public static final int CAIRNS = 7;
     public static final String BONE_CACHE = "ch1_bone_cache";
     public static final String CLEFT_CAVE = "ch1_cleft_shell_cave";
+    public static final String BONE_PIT = "ch1_bone_pit";
     // 荷車の傍らの道は失せ物の荷車 (ch1_lost_cart) の建て終わりに隣へ置く (印 "artisan" = 職人が立つ所)
     public static final String CART_TRACK_BLUEPRINT = "ch1_cart_track";
     public static final String SONG_CHAMBER_BLUEPRINT = "ch1_song_chamber";
 
     // 合図
     public static final String SIGNAL_GEAR_MADE = "ch1_travel_gear_made";
-    // 岩の砥石を使った (TravelGear.applyWhetstone)。prep_blade の洞の段の「砥石を使う」
+    // 岩の砥石を使った (TravelGear.applyWhetstone)。trail_blade の鍛えの段の「砥石を使う」
     public static final String SIGNAL_WHETSTONE_USED = "ch1_whetstone_used";
 
     // 歌の間の壁画の順 (鐘楼 P8 が読む。柱の高さ 1〜5 を低い順。歌石と同じ)
@@ -62,8 +58,13 @@ public final class Ch1Prep {
     public static final String ROAD_CAIRNS = "ch1/road_cairns";
     public static final String SONG_CHAMBER = "ch1/song_chamber";
     public static final String CLEFT_CAVE_LORE = "ch1/cleft_cave";
-    public static final List<String> LORE = List.of(ROAD_CAIRNS, SONG_CHAMBER, CLEFT_CAVE_LORE);
-    // 「はじめて見た物」の経験値 (一人一回。章の枠では「既存の小要素」の側に数える小さな分)
+    // 前の私の頁 (支度の段。34 の 5 章) と冷えの戸の碑文
+    public static final String PAGE_IRON = "ch1/trail_iron";
+    public static final String PAGE_BLADE = "ch1/trail_blade";
+    public static final String PAGE_SHIELD = "ch1/trail_shield";
+    public static final String COLD_DOOR = "ch1/cold_door";
+    public static final List<String> LORE = List.of(ROAD_CAIRNS, SONG_CHAMBER, CLEFT_CAVE_LORE, PAGE_IRON, PAGE_BLADE, PAGE_SHIELD, COLD_DOOR);
+    // 「はじめて見た物」の経験値 (一人一回。章の枠では「既存の小要素」の側に数える小さな分。頁は 0 = 経験値は支度の段が持つ)
     public static final Map<String, Integer> LORE_XP = Map.of(ROAD_CAIRNS, 10, SONG_CHAMBER, 10, CLEFT_CAVE_LORE, 0);
 
     // 旅の覚書 (一章) が解くレシピ (data/skyabyss/recipe。解くまで作れない = guide/RecipeLock。hare_quill_arrow は予約だけ (棘針の矢。まだ無い。存在しない ID は WayfarerNotes が無視する))

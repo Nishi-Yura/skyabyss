@@ -1,0 +1,82 @@
+# 一章の骨の坑 (34 の 4.2.1) と支度の段の帯を、平らな世界に置いて撮る。./gradlew runShots -Pscript=tools/shots/ch1_bone_pit.txt
+# 絵は run/shots/ch1_bone_pit/shots/ch1_bone_pit/*.png (開発コマンド skyabyss dev ch1 place は部品をそのまま置く。碑の文と荷の中身は本番の建て方だけ)
+world ch1bonepit flat
+size 1280 720
+timeout 900
+render 12
+clouds off
+
+wait 100
+cmd skyabyss cinematic stop
+wait 10
+cmd skyabyss cinematic stop
+cmd time set noon
+cmd weather clear
+cmd gamerule doDaylightCycle false
+cmd gamemode spectator
+hud off
+
+# ---- 坑の台地 (石の塊の上に草。地面の上面 y=-30。坑の床は -43)
+cmd forceload add -42 -14 14 44
+wait 120
+cmd fill -42 -50 -14 -28 -31 44 stone
+cmd fill -27 -50 -14 -14 -31 44 stone
+cmd fill -13 -50 -14 0 -31 44 stone
+cmd fill 1 -50 -14 14 -31 44 stone
+cmd fill -42 -30 -14 14 -30 44 grass_block
+cmd skyabyss dev ch1 place ch1_bone_pit 0 -30 0 0
+
+cmd skyabyss cinematic stop
+# 坑口: 肋骨の弧と木の枠の口、坑口の碑
+camera 7.5 -24 -14 30 22
+waitchunks
+wait 20
+shot 01_mouth
+# 階段を下りる
+camera 0.5 -31 2.5 0 22
+waitchunks
+wait 20
+shot 02_stairs
+# 坑口の間: 坑木・線路・鉄鉱石の筋
+camera 0.5 -40.4 12.5 0 8
+waitchunks
+wait 20
+shot 03_gallery
+# 水の底の井戸 (奥へ西に水没の坑道)
+camera 1.5 -39 25.5 120 35
+waitchunks
+wait 20
+shot 04_well
+# 水没の坑道の中 (息継ぎの天井の光)
+camera -5.5 -44.4 28.5 90 -5
+waitchunks
+wait 20
+shot 05_flooded
+# 巣の間
+camera -20.5 -39.6 35.5 135 12
+waitchunks
+wait 20
+shot 06_nest
+# 荷の間: 前の私の荷と灯り
+camera -13.5 -39.6 3.5 135 14
+waitchunks
+wait 20
+shot 07_pack_room
+# 冷えの戸
+camera -23.5 -40.4 0.5 90 4
+waitchunks
+wait 20
+shot 08_cold_door
+# 戸を開けた奥: 氷の小部屋と碑
+cmd fill -28 -42 -1 -28 -40 1 air
+camera -27.5 -40.6 0.5 90 14
+waitchunks
+wait 20
+shot 09_cold_room
+# 出口の縦穴 (上から)
+camera -10.5 -27 0.5 90 70
+waitchunks
+wait 20
+shot 10_exit_shaft
+
+echo ch1_bone_pit done (目的の帯の文は自己テスト ch1 p6 と lang objective band が見る)

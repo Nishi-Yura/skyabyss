@@ -3,45 +3,54 @@
   "extends": true,
   "entries": [
     {
-      "node": "ch1p_gear_teach",
+      "node": "ch1t_blade_show",
+      "if": {
+        "type": "quest",
+        "quest": "ch1/trail_blade",
+        "is": "active",
+        "stage": "show"
+      }
+    },
+    {
+      "node": "ch1t_blade_tell",
       "if": [
         {
           "type": "quest",
-          "quest": "ch1/prep_gear",
+          "quest": "ch1/trail_blade",
           "is": "active",
-          "stage": "weave"
+          "stage": "cave"
         },
         {
           "type": "not",
           "of": {
             "type": "flag",
-            "flag": "ch1p_taught"
+            "flag": "ch1t_blade_told"
           }
+        },
+        {
+          "type": "flag",
+          "flag": "met"
         }
       ]
     },
     {
-      "node": "ch1p_blade_report",
-      "if": {
-        "type": "quest",
-        "quest": "ch1/prep_blade",
-        "is": "active",
-        "stage": "report"
-      }
-    },
-    {
-      "node": "ch1p_pulse_weave",
+      "node": "ch1t_ward_weave",
       "if": [
-        {
-          "type": "quest",
-          "quest": "ch1/prep_pulse",
-          "is": "active",
-          "stage": "weave"
-        },
         {
           "type": "item",
           "item": "skyabyss:rock_shell_thread",
           "count": 1
+        },
+        {
+          "type": "not",
+          "of": {
+            "type": "flag",
+            "flag": "ch1t_woven"
+          }
+        },
+        {
+          "type": "ward_ok",
+          "titan": "stone_whale"
         }
       ]
     },
@@ -147,8 +156,8 @@
       ],
       "next": "a_menu"
     },
-    "ch1p_gear_teach": {
-      "face": "smile",
+    "ch1t_blade_show": {
+      "face": "grave",
       "do": [
         {
           "type": "unlock_recipes",
@@ -165,23 +174,32 @@
       ],
       "next": "a_menu"
     },
-    "ch1p_blade_report": {
+    "ch1t_blade_tell": {
       "face": "neutral",
       "do": [
         {
-          "type": "affinity",
-          "amount": 2
+          "type": "flag",
+          "flag": "ch1t_blade_told"
         }
       ],
       "next": "a_menu"
     },
-    "ch1p_pulse_weave": {
+    "ch1t_ward_weave": {
       "face": "smile",
       "do": [
         {
           "type": "take",
           "item": "skyabyss:rock_shell_thread",
           "count": 1
+        },
+        {
+          "type": "give",
+          "item": "skyabyss:heartbeat_ward_stone_whale",
+          "count": 1
+        },
+        {
+          "type": "flag",
+          "flag": "ch1t_woven"
         },
         {
           "type": "affinity",
@@ -271,7 +289,7 @@
           "kind": "quest",
           "if": {
             "type": "quest",
-            "quest": "ch1/prep_gear",
+            "quest": "ch1/trail_blade",
             "is": "started"
           },
           "goto": "ch1p_teach"
@@ -281,7 +299,7 @@
           "kind": "quest",
           "if": {
             "type": "quest",
-            "quest": "ch1/prep_gear",
+            "quest": "ch1/trail_blade",
             "is": "started"
           },
           "goto": "ch1a_notes"
@@ -291,9 +309,8 @@
           "kind": "give",
           "if": [
             {
-              "type": "quest",
-              "quest": "ch1/prep_pulse",
-              "is": "done"
+              "type": "flag",
+              "flag": "ch1t_woven"
             },
             {
               "type": "ward_ok",
@@ -312,9 +329,8 @@
           "kind": "quest",
           "if": [
             {
-              "type": "quest",
-              "quest": "ch1/prep_pulse",
-              "is": "done"
+              "type": "flag",
+              "flag": "ch1t_woven"
             },
             {
               "type": "ward_ok",

@@ -90,6 +90,20 @@ public final class QuestItems {
         return n;
     }
 
+    // 着ている (防具の枠の) 品のうち、targets の種類がいくつそろっているか (目的 wear。同じ種類は 1 と数える)
+    public static int worn(Player player, java.util.List<String> targets) {
+        int n = 0;
+        for (String target : targets) {
+            for (ItemStack s : player.getInventory().armor) {
+                if (matches(s, target, null)) {
+                    n++;
+                    break;
+                }
+            }
+        }
+        return n;
+    }
+
     // 足りなければ何もしない。取ったら true
     public static boolean take(Player player, String target, @Nullable String token, int count) {
         if (count(player, target, token) < count) {

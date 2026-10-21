@@ -24,6 +24,7 @@ import jp.revati.skyabyss.lore.Lore;
 import jp.revati.skyabyss.quest.Action;
 import jp.revati.skyabyss.quest.Condition;
 import jp.revati.skyabyss.quest.QuestDef;
+import jp.revati.skyabyss.quest.QuestLog;
 import jp.revati.skyabyss.quest.QuestManager;
 import jp.revati.skyabyss.quest.Quests;
 import jp.revati.skyabyss.quest.StoryContext;
@@ -327,43 +328,50 @@ public final class ArtisanSelfTest {
         check(f, shown(d, "a_menu", c).equals(Set.of("hammer", "whet", "hands", "bye")), "affinity 60 should open the hands talk: " + shown(d, "a_menu", c));
         Affinity.set(p, ROLE, 0);
 
-        // 備えの頼み: 受けると覚書の渡し直しと作り方の選択肢が出る
-        Quests.start(p, Ch1Prep.Q_GEAR);
+        // 支度の段「折れた剣」: 受けると作り方と覚書の選択肢が出る。洞の段のうちは一度だけ「折れた剣を見た」
+        Quests.start(p, Ch1Prep.Q_BLADE);
         Set<String> menu = shown(d, "a_menu", c);
-        check(f, menu.contains("teach") && menu.contains("notes"), "starting prep_gear should open the teach / notes options: " + menu);
-        // 材料がそろって仕上げの段 → 作り方の入口 (一度)
-        p.getInventory().add(new ItemStack(Items.IRON_INGOT, 7));
-        p.getInventory().add(new ItemStack(GuideSetup.ROCK_SHELL_SCRAP.get(), 12));
-        p.getInventory().add(new ItemStack(Items.LEATHER, 3));
-        p.getInventory().add(new ItemStack(GuideSetup.BONE_CHIP.get(), 2));
+        check(f, menu.contains("teach") && menu.contains("notes"), "starting trail_blade should open the teach / notes options: " + menu);
+        check(f, entry(d, c).equals("ch1t_blade_tell"), "the cave stage should open ch1t_blade_tell, got " + entry(d, c));
+        d.nodes().get("ch1t_blade_tell").actions().forEach(a -> a.run(c));
+        check(f, entry(d, c).equals("a_menu"), "the broken sword pointer came twice, got " + entry(d, c));
+        // 洞の台座の頁 → 話す段: 作り方を教わる (レシピが解け、入口は段が進めば出ない)
+        jp.revati.skyabyss.lore.Lore.unlock(p, Ch1Prep.PAGE_BLADE, false);
         Quests.poll(p, true);
-        check(f, entry(d, c).equals("ch1p_gear_teach"), "the make stage should open ch1p_gear_teach, got " + entry(d, c));
-        // 作り方を教わる (結果): レシピが解け、入口は二度出ない
-        var helmetHolder = level.getServer().getRecipeManager().byKey(ResourceLocation.fromNamespaceAndPath("skyabyss", "whale_road_helmet"));
-        check(f, helmetHolder.isPresent(), "the helmet recipe is missing");
-        helmetHolder.ifPresent(h -> p.getRecipeBook().remove(h));
-        for (Action a : d.nodes().get("ch1p_gear_teach").actions()) {
+        check(f, entry(d, c).equals("ch1t_blade_show"), "the show stage should open ch1t_blade_show, got " + entry(d, c));
+        var whetHolder = level.getServer().getRecipeManager().byKey(ResourceLocation.fromNamespaceAndPath("skyabyss", "rock_whetstone"));
+        check(f, whetHolder.isPresent(), "the whetstone recipe is missing");
+        whetHolder.ifPresent(h -> p.getRecipeBook().remove(h));
+        for (Action a : d.nodes().get("ch1t_blade_show").actions()) {
             a.run(c);
         }
-        check(f, helmetHolder.isPresent() && p.getRecipeBook().contains(helmetHolder.get()), "the artisan did not teach the recipes");
-        check(f, !entry(d, c).equals("ch1p_gear_teach"), "the teaching entry came twice");
-        Quests.signal(p, Ch1Prep.SIGNAL_GEAR_MADE);
-
-        // 刃を研ぐ: 洞と砥石のあとの報告
-        Quests.start(p, Ch1Prep.Q_BLADE);
-        Quests.signal(p, "site_clear:ch1_cleft_shell_cave");
-        Quests.signal(p, Ch1Prep.SIGNAL_WHETSTONE_USED);
-        check(f, entry(d, c).equals("ch1p_blade_report"), "the report stage should open ch1p_blade_report, got " + entry(d, c));
-        Quests.onTalk(p, ROLE, "ch1p_blade_report");
-
-        // 鼓動を聞く: 糸を持って編んでもらう
-        Quests.start(p, Ch1Prep.Q_PULSE);
-        p.getInventory().add(new ItemStack(GuideSetup.ROCK_SHELL_THREAD.get(), 1));
+        check(f, whetHolder.isPresent() && p.getRecipeBook().contains(whetHolder.get()), "the artisan did not teach the recipes");
+        Quests.onTalk(p, ROLE, "ch1t_blade_show");
+        check(f, !entry(d, c).equals("ch1t_blade_show"), "the show entry came again after the talk");
+        // 鍛えの段: 鉄の剣と砥石 (どちらが先でもよい)
+        p.getInventory().add(new ItemStack(Items.IRON_SWORD));
         Quests.poll(p, true);
-        check(f, entry(d, c).equals("ch1p_pulse_weave"), "a thread in hand should open ch1p_pulse_weave, got " + entry(d, c));
-        Quests.onTalk(p, ROLE, "ch1p_pulse_weave");
-        check(f, Ch1PrepDone.allDone(p), "the three prep quests are not all done");
-        // 乗る前の一言 (三本そろった)
+        check(f, !QuestLog.of(p).entry(Ch1Prep.Q_BLADE).done, "trail_blade finished without the whetstone");
+        Quests.signal(p, Ch1Prep.SIGNAL_WHETSTONE_USED);
+        check(f, QuestLog.of(p).entry(Ch1Prep.Q_BLADE).done, "an iron sword and a used whetstone did not finish trail_blade");
+
+        // 護り糸 → 最初の鼓動守 (人ごとに一度。頼みは要らない)
+        p.getInventory().add(new ItemStack(GuideSetup.ROCK_SHELL_THREAD.get(), 1));
+        check(f, entry(d, c).equals("ch1t_ward_weave"), "a thread in hand should open ch1t_ward_weave, got " + entry(d, c));
+        d.nodes().get("ch1t_ward_weave").actions().forEach(a -> a.run(c));
+        check(f, p.getInventory().countItem(GuideSetup.HEARTBEAT_WARD_STONE_WHALE.get()) == 1 && p.getInventory().countItem(GuideSetup.ROCK_SHELL_THREAD.get()) == 0,
+                "the first ward was not woven from the thread");
+        p.getInventory().add(new ItemStack(GuideSetup.ROCK_SHELL_THREAD.get(), 1));
+        check(f, !entry(d, c).equals("ch1t_ward_weave"), "the first-ward entry came twice");
+
+        // 乗る前の一言 (三本そろった。鉄の跡・盾と糧は段を飛ばして済ませる)
+        for (String id : List.of(Ch1Prep.Q_IRON, Ch1Prep.Q_SHIELD)) {
+            Quests.start(p, id);
+            for (int i = 0; i < 4 && !QuestLog.of(p).entry(id).done; i++) {
+                Quests.forceStage(p, id);
+            }
+        }
+        check(f, Ch1PrepDone.allDone(p), "the three trail steps are not all done");
         check(f, entry(d, c).equals("ch1a_ready"), "all three done should open ch1a_ready, got " + entry(d, c));
 
         // 鼓動守の編み直し: 持っていない・今日まだ・岩殻片 8 つ
@@ -393,11 +401,9 @@ public final class ArtisanSelfTest {
         d.nodes().get("ch1a_notes").actions().forEach(a -> a.run(c));
         check(f, WayfarerNotes.has(p, 1), "the artisan did not hand the notes back");
 
-        // 依頼主は職人。頼みの会話は職人へ移り、語り部には一言だけ残る
-        for (String id : List.of(Ch1Prep.Q_GEAR, Ch1Prep.Q_BLADE, Ch1Prep.Q_PULSE)) {
-            QuestDef def = QuestManager.quest(id);
-            check(f, def != null && ROLE.equals(def.giver()), id + " is not given by the artisan");
-        }
+        // 折れた剣の依頼主は職人。語り部には職人を指す一言が残る
+        QuestDef bladeDef = QuestManager.quest(Ch1Prep.Q_BLADE);
+        check(f, bladeDef != null && ROLE.equals(bladeDef.giver()), Ch1Prep.Q_BLADE + " is not given by the artisan");
         Dialogue st = DialogueManager.dialogue(NpcSetup.STORYTELLER_ID);
         check(f, st != null && st.nodes().containsKey("ch1p_artisan_pointer") && !st.nodes().containsKey("ch1p_gear_weave")
                 && !st.nodes().containsKey("ch1p_blade_report") && !st.nodes().containsKey("ch1p_pulse_weave"), "the storyteller keeps only the pointer line");

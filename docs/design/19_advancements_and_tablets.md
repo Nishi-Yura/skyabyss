@@ -16,19 +16,19 @@
 
 ## 2. 進捗の木
 
-データは `data/skyabyss/advancement/*.json`、文は `assets/skyabyss/lang/{ja_jp,en_us}.json` の `advancement.skyabyss.*`。**生成は `tools/gen_advancements.py`**（直すときはここを直して再生成。背景の絵 `textures/gui/advancements/backgrounds/skyabyss.png` も作る）。36 個。
+データは `data/skyabyss/advancement/*.json`、文は `assets/skyabyss/lang/{ja_jp,en_us}.json` の `advancement.skyabyss.*`。**生成は `tools/gen_advancements.py`**（直すときはここを直して再生成。背景の絵 `textures/gui/advancements/backgrounds/skyabyss.png` も作る。ほかの道具が書く進捗 = 転生の `rebirth_*` は消さない）。38 個。
 
 | 枝 | 進捗（id） |
 | --- | --- |
 | 根 | `root`（「天と淵のあいだ」。入った時点で付く。アイコンは天の鍵の欠片、背景は暗い石） |
-| 序盤 | `camp` 消えた火の跡 → `footprint` 巨大な足跡 → `sky_shadow` 空を渡る影 → `bell_lodge` 鐘の宿り → `storyteller` 語り部 → `lore_book` 伝承の書 / `isana` 鯨を追う人 → `bone_hill` 骨の丘 |
+| 序盤 | `camp` 消えた火の跡 → `footprint` 巨大な足跡 → `sky_shadow` 空を渡る影 → `bell_lodge` 鐘の宿り → `storyteller` 語り部 → `lore_book` 伝承の書 / `isana` 鯨を追う人 → `bone_hill` 骨の丘 / `isana` → `bone_pit` 骨の坑（坑の頁 `lore:ch1/trail_iron`。アイコンは鉄鉱石）→ `whale_trail` 鯨追いの支度（支度の段 3 本 `signal:ch1_ready`。goal。アイコンは鯨追いの印） |
 | 岩鯨 | `stone_whale_board` 岩鯨の背（背に乗る）→ `tablet` 刻まれた言葉 / `stone_whale_trial` 最初の試練 → `stone_whale_heart` 岩鯨の心臓 → `voyage` 巨神の旅 |
 | 潮殻・雷翼・余燼 | それぞれ `*_board`（背）→ `*_trial`（試練を一つ越える）→ `*_heart`（心臓を止める）。前の巨神の心臓を止めるまで見えない（hidden） |
 | 鍵 | `sky_key` 天の鍵（余燼の心臓のあと。hidden） |
 | 成長 | `skill` 最初の技 → `tree_sword` 剣の道 / `tree_bow` 弓の道。`level_5` → `level_10` → `level_20` → `level_30`（hidden）→ `level_40` → `level_50` |
 | 鍛え | `forge` 共鳴の炉 → `forge_enhance` 一打ち → `forge_dismantle` 砕いて、残す |
 
-- **章**（[05](05_lore_npc_quest.md) の 8 章、`story/Chapters`）: 進捗の id・親子・条件は変えず、**文（description）の頭に章の名前を付けて**枝を章ごとに読めるようにする（「一章　岩鯨　岩の鯨の背に乗った。」、英語は「Ch. I Stone Whale: …」）。序章 = `camp`〜`lore_book`（B0〜B6）、一章 = `isana`・`bone_hill`・岩鯨の枝・`voyage`、二章 = 潮殻の枝、三章 = 雷翼の枝、四章 = 余燼の枝と `sky_key`。根・成長・鍛えの枝は章に属さない。章の名は `tools/regroup_lore_chapters.py` の表を `gen_advancements.py` が読む（`CHAPTER_OF` が id → 章）。
+- **章**（[05](05_lore_npc_quest.md) の 8 章、`story/Chapters`）: 進捗の id・親子・条件は変えず、**文（description）の頭に章の名前を付けて**枝を章ごとに読めるようにする（「一章　岩鯨　岩の鯨の背に乗った。」、英語は「Ch. I Stone Whale: …」）。序章 = `camp`〜`lore_book`（B0〜B6）、一章 = `isana`・`bone_hill`・`bone_pit`・`whale_trail`・岩鯨の枝・`voyage`、二章 = 潮殻の枝、三章 = 雷翼の枝、四章 = 余燼の枝と `sky_key`。根・成長・鍛えの枝は章に属さない。章の名は `tools/regroup_lore_chapters.py` の表を `gen_advancements.py` が読む（`CHAPTER_OF` が id → 章）。
 - 枠: 通常は `task`、巨神の背・最初の試練・技の木・巨神の旅は `goal`、心臓・天の鍵・高いレベルは `challenge`。
 - チャットには流さない（`announce_to_chat: false`）。画面の右上に札（トースト）だけ出す。
 - クラスを選ぶ画面はない（04 の 7 章）ので、「クラスの選択」は「その木の最初の技を覚えた」（`tree_*`）で代える。
@@ -72,7 +72,7 @@
 - 読み方: **右クリック**か、**4.5 ブロック以内で目を向ける**（0.25 秒ごとに見回す）と、刻まれた文が画面下中央の字幕（NARRATE、[18](18_notices.md)）に、看板だった時の行のまま出る。同じ碑は 30 秒たつまで読み直さない。読むと伝承の条件 `sign`（05）と進捗 `tablet:read` が進む。
 - 文: lang の `sign.skyabyss.<名前>.1〜4`（看板の時のキーのまま。空の行は飛ばす）。
 - 置き方: 各背のキット（`BuildKit` `TideKit` `StormKit` `EmberKit`）の `wallSign` と、立てる碑の `standingSign` / `standingTablet`。呼び出しは変えず、中身を碑に替えた。序盤の石板は blueprint `opening/slab.json`（`tools/rough/opening_sites.py` の `slab`）に碑を入れ、`RibBuilder` が文を刻む。
-- 置いてある所: 岩鯨の背 9（碑文 5・試練の入口 4）、潮殻 9、雷翼 9、余燼 9、序盤の骨の石板 1。
+- 置いてある所: 岩鯨の背 9（碑文 5・試練の入口 4）、潮殻 9、雷翼 9、余燼 9、序盤の骨の石板 1、骨の坑 2（坑口 `sign.skyabyss.ch1_bone_pit`・冷えの戸の奥 `sign.skyabyss.ch1_cold_door`。部品の碑に `BonePit.finish` が刻む）。
 - `dev/StructureDump` は碑を看板と同じ欄（`signs`）に 4 行のキーで書く（`tools/structure` の `## signs` で見える）。
 
 ### 3.1 自己テスト

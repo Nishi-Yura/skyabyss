@@ -1,0 +1,31 @@
+{
+  "parent": "skyabyss:bone_pit",
+  "display": {
+    "icon": {
+      "id": "skyabyss:whale_chaser_mark"
+    },
+    "title": {
+      "translate": "advancement.skyabyss.whale_trail.title"
+    },
+    "description": {
+      "translate": "advancement.skyabyss.whale_trail.description"
+    },
+    "frame": "goal",
+    "show_toast": true,
+    "announce_to_chat": false,
+    "hidden": false
+  },
+  "criteria": {
+    "done": {
+      "trigger": "skyabyss:beat",
+      "conditions": {
+        "event": "signal:ch1_ready"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "done"
+    ]
+  ]
+}

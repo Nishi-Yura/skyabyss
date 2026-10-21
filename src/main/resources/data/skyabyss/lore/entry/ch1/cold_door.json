@@ -1,0 +1,12 @@
+{
+  "chapter": "titan_whale",
+  "order": 22,
+  "unlock": [
+    {
+      "type": "sign",
+      "target": "sign.skyabyss.ch1_cold_door"
+    }
+  ],
+  "related": [],
+  "inscription_sign": "sign.skyabyss.ch1_cold_door"
+}

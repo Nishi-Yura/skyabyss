@@ -280,18 +280,8 @@ public final class TravelSelfTest {
                 }
             });
         }
-        // 4 部位の合計 = 備えの頼み「身ごしらえ」の集める数 (岩殻片 12・鉄 7・革 3・骨片 2)
-        Map<Item, Integer> ask = new HashMap<>();
-        var gear = jp.revati.skyabyss.quest.QuestManager.quest(Ch1Prep.Q_GEAR);
-        check(f, gear != null && gear.stages().size() == 2, "prep_gear must have two stages (gather, make)");
-        if (gear != null && !gear.stages().isEmpty()) {
-            for (var ob : gear.stages().get(0).objectives()) {
-                if (ob.type().equals("collect")) {
-                    ask.put(net.minecraft.core.registries.BuiltInRegistries.ITEM.get(ResourceLocation.parse(ob.targets().get(0))), ob.count());
-                }
-            }
-        }
-        check(f, total.equals(ask) && total.size() == 4, "the armor recipes need " + total + " but prep_gear asks for " + ask);
+        // 4 部位の合計 (岩殻片 12・鉄 7・革 3・骨片 2)。旅装は任意 (支度の段の鉄の跡はバニラの鉄の防具)
+        check(f, jp.revati.skyabyss.quest.QuestManager.quest("ch1/prep_gear") == null, "the old prep_gear quest should be absorbed into the trail steps");
         check(f, total.getOrDefault(GuideSetup.ROCK_SHELL_SCRAP.get(), 0) == 12 && total.getOrDefault(Items.IRON_INGOT, 0) == 7
                 && total.getOrDefault(Items.LEATHER, 0) == 3 && total.getOrDefault(GuideSetup.BONE_CHIP.get(), 0) == 2, "the set costs " + total + " (want scrap 12, iron 7, leather 3, bone chip 2)");
         for (String other : List.of("rock_whetstone", "road_hardtack", "moss_salve")) {
@@ -392,28 +382,19 @@ public final class TravelSelfTest {
         }
     }
 
-    // ---------------------------------------------------------------- 旅装を一式作ると合図
+    // ---------------------------------------------------------------- 旅装を一式作ると合図 (任意。どの段も読まないが、合図は残す)
     private static void gearSignal(List<String> f, FakePlayer a) {
         Quests.forgetAll(a);
         a.getInventory().clearContent();
-        Quests.start(a, Ch1Prep.Q_GEAR);
-        a.getInventory().add(new ItemStack(Items.IRON_INGOT, 7));
-        a.getInventory().add(new ItemStack(GuideSetup.ROCK_SHELL_SCRAP.get(), 12));
-        a.getInventory().add(new ItemStack(Items.LEATHER, 3));
-        a.getInventory().add(new ItemStack(GuideSetup.BONE_CHIP.get(), 2));
-        Quests.poll(a, true);
-        QuestLog.Entry entry = QuestLog.of(a).entry(Ch1Prep.Q_GEAR);
-        check(f, entry != null && entry.stage == 1 && !entry.done, "prep_gear did not reach the make stage");
         // 一部だけでは合図は出ない
-        a.getInventory().clearContent();
         a.getInventory().add(new ItemStack(TravelGear.HELMET.get()));
         a.getInventory().add(new ItemStack(TravelGear.CHESTPLATE.get()));
-        check(f, !TravelGear.hasFullSet(a) && !TravelGear.signalIfComplete(a) && !QuestLog.of(a).entry(Ch1Prep.Q_GEAR).done, "half a set finished prep_gear");
+        check(f, !TravelGear.hasFullSet(a) && !TravelGear.signalIfComplete(a), "half a set counted as the full set");
         // 着ている分と持ち物の分を合わせて一式 (着ている分も数える)
         a.setItemSlot(EquipmentSlot.LEGS, new ItemStack(TravelGear.LEGGINGS.get()));
         a.getInventory().add(new ItemStack(TravelGear.BOOTS.get()));
         check(f, TravelGear.hasFullSet(a), "worn and carried pieces were not counted as a set");
-        check(f, TravelGear.signalIfComplete(a) && QuestLog.of(a).entry(Ch1Prep.Q_GEAR).done, "the full set did not finish prep_gear (signal " + Ch1Prep.SIGNAL_GEAR_MADE + ")");
+        check(f, TravelGear.signalIfComplete(a), "the full set did not send " + Ch1Prep.SIGNAL_GEAR_MADE);
         a.setItemSlot(EquipmentSlot.LEGS, ItemStack.EMPTY);
     }
 }

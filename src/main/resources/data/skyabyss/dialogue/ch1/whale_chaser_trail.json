@@ -1,0 +1,67 @@
+{
+  "npc": "skyabyss:whale_chaser",
+  "extends": true,
+  "entries": [
+    {
+      "node": "ch1t_c_iron",
+      "if": [
+        {
+          "type": "quest",
+          "quest": "ch1/trail_iron",
+          "is": "done"
+        },
+        {
+          "type": "not",
+          "of": {
+            "type": "flag",
+            "flag": "ch1t_c_iron_told"
+          }
+        }
+      ]
+    },
+    {
+      "node": "ch1t_c_page",
+      "if": [
+        {
+          "type": "quest",
+          "quest": "ch1/trail_iron",
+          "is": "active",
+          "stage": "armor"
+        },
+        {
+          "type": "not",
+          "of": {
+            "type": "flag",
+            "flag": "ch1t_c_page_told"
+          }
+        }
+      ]
+    }
+  ],
+  "nodes": {
+    "ch1t_c_page": {
+      "face": "neutral",
+      "do": [
+        {
+          "type": "flag",
+          "flag": "ch1t_c_page_told"
+        }
+      ],
+      "next": "c_menu"
+    },
+    "ch1t_c_iron": {
+      "face": "smile",
+      "do": [
+        {
+          "type": "flag",
+          "flag": "ch1t_c_iron_told"
+        },
+        {
+          "type": "affinity",
+          "amount": 1
+        }
+      ],
+      "next": "c_menu"
+    }
+  }
+}

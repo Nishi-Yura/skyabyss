@@ -552,7 +552,16 @@ public final class NpcQuestSelfTest {
         next(a);
         check(stage(a, "main_song").equals("see_whale"), "talking to the chaser did not advance to see_whale: " + stage(a, "main_song"), failures);
         next(a);
+        // 鉄を着ていた旅人の一言 (一章の支度の段の理由。34 の 4.2)
+        check(node(a).equals("c_whale_iron"), "the chaser should mention the traveller who wore iron, got " + node(a), failures);
+        next(a);
         pick(a, WC, "grab", failures);
+        // 鯨の話のあと、一章の支度の段 3 本が出る。語り部の入口に割り込む一言 (職人を指す・足音の晩の話) は、ここで済ませておく
+        Quests.poll(a, true);
+        check(QuestLog.of(a).entry("ch1/trail_iron") != null && QuestLog.of(a).entry("ch1/trail_blade") != null && QuestLog.of(a).entry("ch1/trail_shield") != null,
+                "the trail steps did not start after the chaser's whale talk", failures);
+        NpcBonds.of(a).bond(ST).flags().add("ch1p_pointer_told");
+        Quests.onTalk(a, ST, "ch1t_shield_tale");
 
         // 伝承の記録で段階が進む (見る → 乗る → 碑文 3 つ → 心臓と欠片 → 戻る)
         Lore.unlock(a, "chapter1/stone_whale", false);
@@ -657,6 +666,8 @@ public final class NpcQuestSelfTest {
         DialogueService.open(a, st);
         check(node(a).equals("deja_vu_song"), "after a loop, a song listener should get deja_vu_song, got " + node(a), failures);
         DialogueService.close(a);
+        // 職人を指す一言はループごとに一度 (印が記憶へ移ったので、もう一度出る)。ここでは済ませておく
+        NpcBonds.of(a).bond(ST).flags().add("ch1p_pointer_told");
         DialogueService.open(a, st);
         check(node(a).equals("menu"), "the deja vu should happen once per loop, got " + node(a), failures);
         DialogueService.close(a);

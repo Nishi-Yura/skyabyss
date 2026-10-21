@@ -56,6 +56,9 @@ public final class SiteTargets {
         bind("main_thunder/see", TITAN_PREFIX + "thunder_wing");
         bind("main_thunder/board", TITAN_PREFIX + "thunder_wing");
         bind("main_ember/see", TITAN_PREFIX + "ember");
+        // 一章の支度の段: 骨の坑の荷・割れ殻の洞の台座 (SiteNetwork.CHAPTER_TARGETS)
+        bind("ch1/trail_iron/pit", "ch1_bone_pit");
+        bind("ch1/trail_blade/cave", "ch1_cleft_shell_cave");
     }
 
     // 語り部・鯨追いなど、話す相手の居場所 (サーバーが SiteNetwork で送る。キー npc.<役の名前>)

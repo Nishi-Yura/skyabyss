@@ -2,6 +2,8 @@ package jp.revati.skyabyss.guide;
 
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -16,23 +18,31 @@ import jp.revati.skyabyss.rpg.Growth;
 import jp.revati.skyabyss.story.Chapters;
 import net.minecraft.server.level.ServerPlayer;
 
-// 備えの頼み (docs/design/21 の 1.4、P3)。各章 (一〜四章) に 3 本のサブクエスト。章の頭に、クエストログへ自動で出る。
+// 支度の段・備えの頼み (docs/design/21 の 1.4、34 の 3 章)。各章 (一〜四章) に 3 本。章の頭に、クエストログへ自動で出る。
 //
-// ---------------------------------------------------------------- 追加ファイルの規則 (章の担当 P6・P11・P15・P19 が守る)
-//   置き場   data/skyabyss/quest/ch<n>/prep_gear.json (身ごしらえ) / prep_blade.json (刃を研ぐ) / prep_pulse.json (鼓動を聞く)。n = 1〜4。
-//            ID は ch<n>/prep_<kind>、文のキーは quest.skyabyss.ch<n>.prep_<kind>.title など (QuestDef.keyBase)。
-//   必須     category = sub、chapter = その章の ID (一章なら titan_whale)、start_when (章の頭に自動で出る。たとえば章が開いた = stage の条件)、
-//            repeat と board は付けない (一度きりの頼みで、板には出さない)。giver は旅の職人の役 (P4。それまでは語り部でもよい)。
-//            守っていなければ読み込みの警告 (QuestManager.loadErrors) になる (PrepQuests.validate)。
-//   順番     ふさがない。どれから受けても終えてもよい (ログの並びは order で 1→2→3)。
+// ---------------------------------------------------------------- 章ごとの 3 本
+//   一章     支度の段 (34 の 4.2。メインの段 = category main): ch1/trail_iron (鉄の跡)・ch1/trail_blade (折れた剣)・ch1/trail_shield (盾と糧)。
+//            tools/gen_ch1_trails.py が書く。旧い備えの頼み ch1/prep_* は、この 3 本に吸収した (置くと読み込みの警告)
+//   二〜四章 既定の形 (まだ中身なし): data/skyabyss/quest/ch<n>/prep_gear.json (身ごしらえ) / prep_blade.json (刃を研ぐ) / prep_pulse.json (鼓動を聞く)。
+//            ID は ch<n>/prep_<kind>、文のキーは quest.skyabyss.ch<n>.prep_<kind>.title など (QuestDef.keyBase)。章の担当が 34 の段の名前に
+//            替えるときは、下の CHAPTER_IDS に一行足す
+//   必須     chapter = その章の ID (一章なら titan_whale)、start_when (章の頭に自動で出る)、repeat と board は付けない。
+//            category は支度の段 (CHAPTER_IDS) なら main、既定の備えの頼みなら sub。守っていなければ読み込みの警告 (QuestManager.loadErrors。validate)。
+//   順番     ふさがない。どれから受けても終えてもよい (ログの並びは order)。
 //   合図     三本が終わったとき (どの順でも)、その人に合図 `ch<n>_ready` (Quests.signal) を一度だけ送る。以降はいつでも `ready(player, n)` が真。
-//            クエストの条件では {"type":"prep","chapter":n,"min":k} (k 本以上。省くと全部) で読める。一章の岩鯨の降下の条件 (日 4 の朝以降で 2 本、または日 6 以降。21 の 3.2) は story.ch1.Ch1Descent が見る (実装済み。初めて現れる条件は別で、OpeningLogic / TitanEvents.whaleMayAppear)。
-//            三本ぜんぶの定義がそろっていない章は、合図は出ない (まだ中身がない章)。
-//   覚書     ch<n>/prep_gear を受けたとき、その章の旅の覚書 (WayfarerNotes) を人ごとに一度渡す。
+//            クエストの条件では {"type":"prep","chapter":n,"min":k} (k 本以上。省くと全部) で読める。一章の岩鯨の降下の条件 (日 4 の朝以降で 2 本、
+//            または日 6 以降。21 の 3.2) は story.ch1.Ch1Descent が見る。三本ぜんぶの定義がそろっていない章は、合図は出ない (まだ中身がない章)。
+//            章ごとの仕上げ (一章の記念品「鯨追いの印」) は onReady で足す (合図のあと、人ごとに一度)
+//   覚書     その章の 3 本のどれかを受けたとき、その章の旅の覚書 (WayfarerNotes) を人ごとに一度渡す。
 //   マルチ   ready / atLeast は人ごと。「グループの誰かが満たせば」は groupAtLeast (オンラインの仲間まで)。
 public final class PrepQuests {
     public static final List<String> KINDS = List.of("gear", "blade", "pulse");
     private static final Pattern ID = Pattern.compile("ch([1-4])/prep_([a-z_]+)");
+    // 既定の形 (ch<n>/prep_<kind>) でない章の 3 本 (章 → ID の並び。kind は ID の最後の「_」より後ろ)
+    private static final Map<Integer, List<String>> CHAPTER_IDS = Map.of(
+            1, List.of("ch1/trail_iron", "ch1/trail_blade", "ch1/trail_shield"));
+    // 三本そろったときの章ごとの仕上げ
+    private static final Map<Integer, Consumer<ServerPlayer>> ON_READY = new ConcurrentHashMap<>();
 
     private PrepQuests() {
     }
@@ -41,25 +51,53 @@ public final class PrepQuests {
         return "ch" + chapter + "/prep_" + kind;
     }
 
+    // その章の 3 本の ID
+    public static List<String> ids(int chapter) {
+        List<String> fixed = CHAPTER_IDS.get(chapter);
+        return fixed != null ? fixed : KINDS.stream().map(k -> id(chapter, k)).toList();
+    }
+
+    // 支度の段の章か (3 本がメインの段)
+    public static boolean isTrail(int chapter) {
+        return CHAPTER_IDS.containsKey(chapter);
+    }
+
+    public static void onReady(int chapter, Consumer<ServerPlayer> action) {
+        ON_READY.put(chapter, action);
+    }
+
     public static String readySignal(int chapter) {
         return "ch" + chapter + "_ready";
     }
 
-    // 備えの頼みの ID なら章 (1〜4)、違えば 0
+    // 支度の段・備えの頼みの ID なら章 (1〜4)、違えば 0。支度の段の章の ch<n>/prep_* は 0 (もう使わない)
     public static int chapterOf(String questId) {
+        for (Map.Entry<Integer, List<String>> e : CHAPTER_IDS.entrySet()) {
+            if (e.getValue().contains(questId)) {
+                return e.getKey();
+            }
+        }
         Matcher m = ID.matcher(questId);
-        return m.matches() ? Integer.parseInt(m.group(1)) : 0;
+        if (!m.matches()) {
+            return 0;
+        }
+        int chapter = Integer.parseInt(m.group(1));
+        return CHAPTER_IDS.containsKey(chapter) ? 0 : chapter;
     }
 
     public static String kindOf(String questId) {
+        int chapter = chapterOf(questId);
+        if (chapter > 0 && CHAPTER_IDS.containsKey(chapter)) {
+            return questId.substring(questId.lastIndexOf('_') + 1);
+        }
         Matcher m = ID.matcher(questId);
         return m.matches() ? m.group(2) : "";
     }
 
-    // その章の備えの頼みが 3 本ともデータにそろっているか
+    // その章の 3 本がデータにそろっているか
     public static boolean defined(int chapter) {
-        for (String kind : KINDS) {
-            if (QuestManager.quest(id(chapter, kind)) == null) {
+        for (String id : ids(chapter)) {
+            if (QuestManager.quest(id) == null) {
                 return false;
             }
         }
@@ -70,8 +108,8 @@ public final class PrepQuests {
     public static int done(ServerPlayer player, int chapter) {
         QuestLog log = QuestLog.of(player);
         int n = 0;
-        for (String kind : KINDS) {
-            QuestLog.Entry e = log.entry(id(chapter, kind));
+        for (String id : ids(chapter)) {
+            QuestLog.Entry e = log.entry(id);
             if (e != null && e.done) {
                 n++;
             }
@@ -80,12 +118,12 @@ public final class PrepQuests {
     }
 
     public static boolean ready(ServerPlayer player, int chapter) {
-        return defined(chapter) && done(player, chapter) >= KINDS.size();
+        return defined(chapter) && done(player, chapter) >= ids(chapter).size();
     }
 
     // n 本以上 (n が 3 以上なら全部)
     public static boolean atLeast(ServerPlayer player, int chapter, int n) {
-        return n >= KINDS.size() ? ready(player, chapter) : done(player, chapter) >= Math.max(1, n);
+        return n >= ids(chapter).size() ? ready(player, chapter) : done(player, chapter) >= Math.max(1, n);
     }
 
     // グループ (パーティ、または一人) のオンラインの誰かが満たしているか
@@ -108,20 +146,24 @@ public final class PrepQuests {
     // ---------------------------------------------------------------- クエストからの呼び出し (Quests.start / finish)
     public static void onStarted(ServerPlayer player, QuestDef def) {
         int chapter = chapterOf(def.id());
-        if (chapter > 0 && kindOf(def.id()).equals("gear")) {
+        if (chapter > 0) {
             WayfarerNotes.give(player, chapter);
         }
     }
 
     public static void onFinished(ServerPlayer player, QuestDef def) {
         int chapter = chapterOf(def.id());
-        if (chapter == 0 || !KINDS.contains(kindOf(def.id())) || !ready(player, chapter)) {
+        if (chapter == 0 || !ready(player, chapter)) {
             return;
         }
         // 合図は人ごとに一度 (経験値と同じ鍵の流儀。やり直しで二度鳴らさない)
         if (Growth.discover(player, "prep_ready:" + chapter)) {
             Notice.alert(player, "message.skyabyss.prep.ready", WayfarerNotes.chapterName(chapter));
             Quests.signal(player, readySignal(chapter));
+            Consumer<ServerPlayer> extra = ON_READY.get(chapter);
+            if (extra != null) {
+                extra.accept(player);
+            }
         }
     }
 
@@ -131,16 +173,20 @@ public final class PrepQuests {
             int chapter = chapterOf(def.id());
             if (chapter == 0) {
                 if (def.id().matches("ch\\d+/prep_.*")) {
-                    errors.add("quest " + def.id() + ": a prep quest must be ch1〜ch4/prep_<gear|blade|pulse>");
+                    errors.add("quest " + def.id() + ": a prep quest must be ch2〜ch4/prep_<gear|blade|pulse> (chapter 1 uses " + ids(1) + ")");
                 }
                 continue;
             }
             String where = "prep quest " + def.id();
-            if (!KINDS.contains(kindOf(def.id()))) {
+            boolean trail = CHAPTER_IDS.containsKey(chapter);
+            if (!trail && !KINDS.contains(kindOf(def.id()))) {
                 errors.add(where + ": the kind must be one of " + KINDS);
             }
-            if (def.main()) {
+            if (!trail && def.main()) {
                 errors.add(where + ": must be a sub quest");
+            }
+            if (trail && !def.main()) {
+                errors.add(where + ": a trail step of the chapter must be a main quest");
             }
             if (!def.chapter().equals(Chapters.values()[chapter].id())) {
                 errors.add(where + ": chapter must be " + Chapters.values()[chapter].id());

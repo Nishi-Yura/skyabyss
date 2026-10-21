@@ -38,8 +38,11 @@ import net.neoforged.neoforge.common.util.FakePlayerFactory;
 //   sites    新しい場所が全部建つ (石標 7・骨の集め場・割れ殻の洞)・拠点から 150 以内・鯨道の石標の道すじ (遠くなる順)・洞の部品が人のブロックを壊さない・
 //            洞の部屋の敵の立ち位置が空気 (向きが合っている)・鳴り石と格子の印・荷車の傍らの道・歌の間 (人の建てた物には置かない・置く・戸が開く・壁画)
 //   cave     洞の湧き台: 二つのグループが同時に入れる・敵が部屋に立つ・鳴り石の順 (誤りで戻る・低い順で格子が開く)・クリアの記録 (経験値・宝・合図)
-//   prep     備えの頼み 3 本: 受けたとき覚書が渡る・集める → 話す・洞の合図・護り糸 → 鼓動守・三本で ch1_ready
-//   descent  岩鯨の降下の条件 (日 4 の朝以降 + 備え 2 本、または日 6 以降。人ごと)、経験値の枠
+//   pit      骨の坑 (34 の 4.2.1): 碑 2 枚の文・荷の樽・冷えの戸 9 マス・鉄鉱石の筋・水の坑道・出口の梯子・湧き台の立ち位置、
+//            冷えの戸 (鉄なしでは開かない・鉄の兜で開く)、湧き台 (グループの分だけ湧く → 倒しきるとクリアの記録・経験値・粗鉄)
+//   trails   支度の段 3 本 (34 の 4.2): イサナの鯨の話のあとに三本とも出る・覚書が渡る・鉄の跡 (荷の頁 → 鉄の防具 4 部位を着る)・
+//            折れた剣 (洞の台座の頁 → 職人 → 鉄の剣 + 砥石)・盾と糧 (語り部の話 → 盾 + 固焼き 8)・三本で ch1_ready と鯨追いの印 (一度)
+//   descent  岩鯨の降下の条件 (日 4 の朝以降 + 支度 2 本、または日 6 以降。人ごと)、経験値の枠
 public final class Ch1SitesSelfTest {
     private static final List<String> F = new ArrayList<>();
 
@@ -66,7 +69,9 @@ public final class Ch1SitesSelfTest {
     public static void load(MinecraftServer server, FakePlayer base) {
         ServerLevel level = server.overworld();
         loadWait = 0;
-        for (var c : ChapterSites.sitesFor(server, base.getUUID(), CleftCave.SITE)) {
+        List<ChapterSites.Site> around = new ArrayList<>(ChapterSites.sitesFor(server, base.getUUID(), CleftCave.SITE));
+        around.addAll(ChapterSites.sitesFor(server, base.getUUID(), BonePit.SITE));
+        for (var c : around) {
             for (int dx = -2; dx <= 2; dx++) {
                 for (int dz = -2; dz <= 2; dz++) {
                     var cp = new net.minecraft.world.level.ChunkPos((c.pos().getX() >> 4) + dx, (c.pos().getZ() >> 4) + dz);
@@ -86,7 +91,8 @@ public final class Ch1SitesSelfTest {
         try {
             sites(server, base);
             cave(server, base);
-            prep(server);
+            pit(server, base);
+            trails(server);
             descent(server);
         } catch (RuntimeException e) {
             SkyAbyss.LOGGER.error("SELFTEST ch1 p6 crashed", e);
@@ -99,7 +105,7 @@ public final class Ch1SitesSelfTest {
         }
         if (F.isEmpty()) {
             SkyAbyss.LOGGER.info("SELFTEST ch1 p6 PASSED (7 road cairns outward, bone cache, cleft shell cave with rooms/mechanism/clear, cart track, song chamber, "
-                    + "3 prep quests to ch1_ready, whale descent gate, xp within the budget)");
+                    + "bone pit with tablets/pack/cold door/clear, 3 trail steps to ch1_ready and the whale chaser's mark, whale descent gate, xp within the budget)");
         } else {
             F.forEach(m -> SkyAbyss.LOGGER.error("SELFTEST ch1 p6 FAILED: {}", m));
         }
@@ -287,9 +293,9 @@ public final class Ch1SitesSelfTest {
             // 洞の中にいるつもり (向きのせいで部屋の中とは限らないので、基点の近く = 48 以内)
             long now = level.getGameTime();
             int total = def.pads().stream().mapToInt(p -> p.spawns().stream().mapToInt(SiteSpawner.Spawn::count).sum()).sum();
+            Lore.lock(a, Ch1Prep.PAGE_BLADE);
+            Lore.lock(a, Ch1Prep.CLEFT_CAVE_LORE);
             Quests.start(a, Ch1Prep.Q_BLADE);
-            // 洞の段は「洞を抜ける」と「砥石を使う」(どちらが先でもよい)。先に砥石を使っておく
-            Quests.signal(a, Ch1Prep.SIGNAL_WHETSTONE_USED);
             SiteSpawner.tick(level, List.of(a, b), now);
             // a と b は別々のグループ (パーティなし)
             UUID ga = Groups.keyOf(a);
@@ -349,14 +355,21 @@ public final class Ch1SitesSelfTest {
             check(jp.revati.skyabyss.pouch.Pouch.countAll(a, GuideSetup.ROCK_SHELL_THREAD.get()) == 1, "the first clear should hand over one ward thread");
             check(jp.revati.skyabyss.pouch.Pouch.countAll(a, GuideSetup.ROCK_SHELL_SCRAP.get()) >= 4, "the first clear should hand over shell scraps");
             check(Growth.get(a).discoveries.contains("site:" + CleftCave.SITE) && Growth.get(a).xp >= xpBefore, "the clear xp was not granted");
+            // 台座の折れた剣: クリアの場の人に頁 (少し遅れて記す) → 折れた剣の洞の段が済む
+            Tasks.flush();
+            Quests.poll(a, true);
+            check(Lore.state(a).has(Ch1Prep.PAGE_BLADE) && Lore.state(a).has(Ch1Prep.CLEFT_CAVE_LORE), "clearing the cave did not record the broken sword page and the cave lore");
+            check(!Lore.state(b).has(Ch1Prep.PAGE_BLADE), "the broken sword page leaked to the other group");
             QuestLog.Entry e = QuestLog.of(a).entry(Ch1Prep.Q_BLADE);
-            check(e != null && e.stage >= 1, "the clear signal (with the whetstone used) did not finish the cave stage of prep_blade");
+            check(e != null && e.stage >= 1, "the broken sword page did not finish the cave stage of trail_blade");
             check(SiteSpawner.liveCount(CleftCave.SITE, origin, gb) + SiteSpawner.pendingCount(CleftCave.SITE, origin, gb) > 0, "clearing group A changed group B's cave");
         } finally {
             SiteSpawner.clearAll(level);
             for (FakePlayer p : List.of(a, b)) {
                 progress.forget(p.getUUID(), CleftCave.SITE);
                 progress.forgetTreasure(p.getUUID(), CleftCave.TREASURE);
+                Lore.lock(p, Ch1Prep.PAGE_BLADE);
+                Lore.lock(p, Ch1Prep.CLEFT_CAVE_LORE);
                 Quests.forgetAll(p);
                 Growth.get(p).discoveries.clear();
                 p.getInventory().clearContent();
@@ -365,84 +378,221 @@ public final class Ch1SitesSelfTest {
         }
     }
 
-    // ---------------------------------------------------------------- prep
-    private static void prep(MinecraftServer server) {
+    // ---------------------------------------------------------------- pit (骨の坑)
+    private static void pit(MinecraftServer server, FakePlayer base) {
         ServerLevel level = server.overworld();
-        FakePlayer p = fake(server, "prep");
-        FakePlayer q = fake(server, "prep_q");
+        SiteData.Entry pit = null;
+        for (SiteData.Entry c : BonePit.entries(server)) {
+            if (ChapterSites.sitesFor(server, base.getUUID(), BonePit.SITE).stream().anyMatch(s -> s.pos().equals(c.pos))) {
+                pit = c;
+            }
+        }
+        check(pit != null, "the bone pit is not built for the base player");
+        if (pit == null) {
+            return;
+        }
+        // 碑 2 枚 (坑口・冷えの戸の奥) と文
+        for (String[] t : new String[][] {{"tablet", BonePit.SIGN}, {"cold_tablet", BonePit.COLD_SIGN}}) {
+            BlockPos at = pit.extra(t[0]);
+            check(at != null && level.getBlockEntity(at) instanceof jp.revati.skyabyss.tablet.TabletBlockEntity tb && tb.key().equals(t[1]),
+                    "the " + t[0] + " of the bone pit does not carry " + t[1] + " (at " + at + ")");
+        }
+        BlockPos packAt = pit.extra("pack");
+        check(packAt != null && level.getBlockState(packAt).is(Blocks.BARREL), "the earlier traveller's pack (barrel) is missing at " + packAt);
+        int door = 0;
+        for (int k = 0; k < BonePit.COLD_CELLS; k++) {
+            BlockPos c = pit.extra("cold" + k);
+            if (c != null && level.getBlockState(c).is(Blocks.POLISHED_DEEPSLATE)) {
+                door++;
+            }
+        }
+        check(door == BonePit.COLD_CELLS || BonePit.doorOpen(level, pit), "the cold door should be nine stone cells (found " + door + ")");
+        // 鉄鉱石の筋・水の坑道・出口の梯子 (坑の箱の中を数える。向きは回っているので基点のまわりの広い箱)
+        int ore = 0;
+        int water = 0;
+        int ladder = 0;
+        BlockPos o = pit.pos;
+        for (BlockPos q : BlockPos.betweenClosed(o.offset(-38, -18, -38), o.offset(38, 1, 38))) {
+            var st = level.getBlockState(q);
+            if (st.is(Blocks.IRON_ORE)) {
+                ore++;
+            } else if (st.is(Blocks.WATER)) {
+                water++;
+            } else if (st.is(Blocks.LADDER)) {
+                ladder++;
+            }
+        }
+        check(ore >= BonePit.IRON_VEINS - 2, "the pit walls should carry about " + BonePit.IRON_VEINS + " iron ore (found " + ore + ")");
+        check(water >= 100, "the flooded passage is missing (" + water + " water)");
+        check(ladder >= 10, "the exit shaft ladder is missing (" + ladder + ")");
+        // 湧き台の立ち位置: 床の上の空気 2 つ
+        SiteSpawner.Def def = SiteSpawner.def(BonePit.SITE);
+        check(def != null, "the bone pit has no spawn pads");
+        if (def == null) {
+            return;
+        }
+        BonePit.origins(server);
+        for (SiteSpawner.Pad pad : def.pads()) {
+            BlockPos at = def.padAt(pad, pit.pos);
+            check(level.getBlockState(at).isAir() && level.getBlockState(at.above()).isAir() && !level.getBlockState(at.below()).isAir(),
+                    "pit pad " + pad.room() + " at " + at + " is not standing room on a floor (" + level.getBlockState(at) + " / below " + level.getBlockState(at.below()) + ")");
+        }
+        check(def.lastRoom().equals(BonePit.ROOM_PACK), "the pack room should be the room that comes back on a revisit");
+        Blueprint bp = Blueprint.get(BonePit.SITE);
+        check(bp.minY >= -18 && bp.maxY <= 6, "the pit blueprint reaches y " + bp.minY + ".." + bp.maxY);
+
+        FakePlayer a = fake(server, "pit_a");
+        SiteProgressData progress = SiteProgressData.get(server);
         try {
+            progress.forget(a.getUUID(), BonePit.SITE);
+            progress.forgetTreasure(a.getUUID(), BonePit.TREASURE);
+            a.getInventory().clearContent();
+            // 冷えの戸: 鉄なしでは開かない、鉄の兜一つで開く (世界に一つ。前の実行で開いていれば確かめない)
+            if (!BonePit.doorOpen(level, pit)) {
+                check(!BonePit.touchDoor(a, level, pit) && !BonePit.doorOpen(level, pit), "the cold door opened for a player without iron");
+                a.setItemSlot(net.minecraft.world.entity.EquipmentSlot.HEAD, new ItemStack(Items.IRON_HELMET));
+                check(BonePit.ironWorn(a) == 1 && BonePit.touchDoor(a, level, pit) && BonePit.doorOpen(level, pit), "the cold door did not open for a player wearing an iron helmet");
+                a.setItemSlot(net.minecraft.world.entity.EquipmentSlot.HEAD, ItemStack.EMPTY);
+            }
+            // 湧き台: 一人のグループの分だけ湧き、倒しきるとクリア (経験値・粗鉄 4)
+            a.setPos(pit.pos.getX() + 0.5, pit.pos.getY() - 12, pit.pos.getZ() + 0.5);
+            long now = level.getGameTime();
+            int total = def.pads().stream().mapToInt(p -> p.spawns().stream().mapToInt(SiteSpawner.Spawn::count).sum()).sum();
+            SiteSpawner.tick(level, List.of(a), now);
+            UUID ga = Groups.keyOf(a);
+            int live = SiteSpawner.liveCount(BonePit.SITE, pit.pos, ga) + SiteSpawner.pendingCount(BonePit.SITE, pit.pos, ga);
+            check(live == total, "the pit should hold " + total + " enemies for the group (" + live + ")");
+            for (UUID id : SiteSpawner.liveIds(BonePit.SITE, pit.pos, ga)) {
+                Entity e = level.getEntity(id);
+                if (e != null) {
+                    e.discard();
+                }
+            }
+            SiteSpawner.tick(level, List.of(a), now + 40);
+            check(progress.cleared(a.getUUID(), BonePit.SITE), "clearing the pit was not recorded");
+            check(Growth.get(a).discoveries.contains("site:" + BonePit.SITE), "the pit clear xp was not granted");
+            check(jp.revati.skyabyss.quest.QuestItems.count(a, "minecraft:raw_iron", null) >= 4, "the first pit clear should hand over raw iron");
+        } finally {
+            SiteSpawner.clearAll(level);
+            progress.forget(a.getUUID(), BonePit.SITE);
+            progress.forgetTreasure(a.getUUID(), BonePit.TREASURE);
+            Growth.get(a).discoveries.clear();
+            a.getInventory().clearContent();
+        }
+    }
+
+    // ---------------------------------------------------------------- trails (支度の段 3 本)
+    private static void trails(MinecraftServer server) {
+        ServerLevel level = server.overworld();
+        FakePlayer p = fake(server, "trail");
+        List<String> pages = List.of(Ch1Prep.PAGE_IRON, Ch1Prep.PAGE_BLADE, Ch1Prep.PAGE_SHIELD);
+        Runnable clean = () -> {
             Quests.forgetAll(p);
-            Quests.forgetAll(q);
             Growth.get(p).discoveries.clear();
             p.getInventory().clearContent();
-            check(PrepQuests.defined(1), "the three chapter-1 prep quests are not all defined (" + QuestManager.loadErrors() + ")");
-            check(QuestManager.loadErrors().stream().noneMatch(s -> s.contains("prep")), "prep quests were flagged: " + QuestManager.loadErrors());
-            // 受けたとき覚書 (一章) が渡る
-            check(!WayfarerNotes.has(p, 1), "the player already has the notes");
-            Quests.start(p, Ch1Prep.Q_GEAR);
-            check(WayfarerNotes.has(p, 1), "starting prep_gear did not hand over the chapter-1 notes");
-            Quests.start(p, Ch1Prep.Q_BLADE);
-            Quests.start(p, Ch1Prep.Q_PULSE);
-            check(PrepQuests.done(p, 1) == 0 && !PrepQuests.ready(p, 1), "nothing is done yet");
-
-            // 身ごしらえ: 材料を集める → 語り部に頼む
-            Quests.poll(p, true);
-            check(QuestLog.of(p).entry(Ch1Prep.Q_GEAR).stage == 0, "prep_gear moved on without the materials");
-            p.getInventory().add(new ItemStack(Items.IRON_INGOT, 7));
-            p.getInventory().add(new ItemStack(GuideSetup.ROCK_SHELL_SCRAP.get(), 12));
-            Quests.poll(p, true);
-            check(QuestLog.of(p).entry(Ch1Prep.Q_GEAR).stage == 0, "prep_gear moved on without the leather and the bone chips");
-            p.getInventory().add(new ItemStack(Items.LEATHER, 3));
-            p.getInventory().add(new ItemStack(GuideSetup.BONE_CHIP.get(), 2));
-            Quests.poll(p, true);
-            check(QuestLog.of(p).entry(Ch1Prep.Q_GEAR).stage == 1, "prep_gear did not reach the make stage with 7 iron, 12 shell scraps, 3 leather and 2 bone chips");
-            // 話しただけでは済まない (旅装を作るまで)。作ると合図 (P5。TravelSelfTest が作業台とアイテムの側を確かめる)
-            Quests.onTalk(p, "skyabyss:artisan", "ch1p_gear_teach");
-            check(!QuestLog.of(p).entry(Ch1Prep.Q_GEAR).done, "talking finished prep_gear without the gear being made");
-            Quests.signal(p, Ch1Prep.SIGNAL_GEAR_MADE);
-            check(QuestLog.of(p).entry(Ch1Prep.Q_GEAR).done, "the gear-made signal did not finish prep_gear");
-            // 別の人も同じ道
-            Quests.start(q, Ch1Prep.Q_GEAR);
-            q.getInventory().add(new ItemStack(Items.IRON_INGOT, 7));
-            q.getInventory().add(new ItemStack(GuideSetup.ROCK_SHELL_SCRAP.get(), 12));
-            q.getInventory().add(new ItemStack(Items.LEATHER, 3));
-            q.getInventory().add(new ItemStack(GuideSetup.BONE_CHIP.get(), 2));
-            Quests.poll(q, true);
-            Quests.signal(q, Ch1Prep.SIGNAL_GEAR_MADE);
-            check(QuestLog.of(q).entry(Ch1Prep.Q_GEAR).done, "the gear-made signal did not finish prep_gear for the second player");
-
-            // 刃を研ぐ: 洞の合図 → 話す
-            Quests.signal(p, SiteSpawner.signal(Ch1Prep.CLEFT_CAVE));
-            check(QuestLog.of(p).entry(Ch1Prep.Q_BLADE).stage == 0, "the cave stage finished without a whetstone being used");
-            Quests.signal(p, Ch1Prep.SIGNAL_WHETSTONE_USED);
-            check(QuestLog.of(p).entry(Ch1Prep.Q_BLADE).stage == 1, "the cave signal and the whetstone did not finish the cave stage");
-            Quests.onTalk(p, "skyabyss:artisan", "ch1p_blade_report");
-            check(QuestLog.of(p).entry(Ch1Prep.Q_BLADE).done, "reporting did not finish prep_blade");
-            check(Lore.state(p).has(Ch1Prep.CLEFT_CAVE_LORE), "prep_blade did not record the cave lore");
-            check(PrepQuests.done(p, 1) == 2 && !PrepQuests.ready(p, 1), "two prep quests are done, three are not");
-
-            // 鼓動を聞く: 護り糸 → 編んでもらう → 鼓動守
-            p.getInventory().add(new ItemStack(GuideSetup.ROCK_SHELL_THREAD.get(), 1));
-            Quests.poll(p, true);
-            check(QuestLog.of(p).entry(Ch1Prep.Q_PULSE).stage == 1, "prep_pulse did not reach the weave stage with a ward thread");
-            Quests.onTalk(p, "skyabyss:artisan", "ch1p_pulse_weave");
-            check(QuestLog.of(p).entry(Ch1Prep.Q_PULSE).done, "weaving did not finish prep_pulse");
-            check(p.getInventory().countItem(GuideSetup.HEARTBEAT_WARD_STONE_WHALE.get()) == 1, "prep_pulse did not give the Stone Whale heartbeat ward");
-            check(PrepQuests.done(p, 1) == 3 && PrepQuests.ready(p, 1), "three prep quests should raise ch1_ready");
-            check(Growth.get(p).discoveries.contains("prep_ready:1"), "the ch1_ready signal was not sent once");
-            // 開始の条件: 一章の人・イサナと会った・日 2 以降
-            for (String id : List.of(Ch1Prep.Q_GEAR, Ch1Prep.Q_BLADE, Ch1Prep.Q_PULSE)) {
+            for (var slot : List.of(net.minecraft.world.entity.EquipmentSlot.HEAD, net.minecraft.world.entity.EquipmentSlot.CHEST,
+                    net.minecraft.world.entity.EquipmentSlot.LEGS, net.minecraft.world.entity.EquipmentSlot.FEET)) {
+                p.setItemSlot(slot, ItemStack.EMPTY);
+            }
+            pages.forEach(id -> Lore.lock(p, id));
+            SiteProgressData.get(server).forgetTreasure(p.getUUID(), BonePit.PACK);
+            jp.revati.skyabyss.npc.NpcBonds.of(p).bond("skyabyss:whale_chaser").flags().clear();
+        };
+        try {
+            clean.run();
+            check(PrepQuests.defined(1) && PrepQuests.ids(1).equals(Ch1Prep.TRAILS), "the three chapter-1 trail steps are not all defined (" + QuestManager.loadErrors() + ")");
+            check(QuestManager.loadErrors().stream().noneMatch(s -> s.contains("prep")), "trail steps were flagged: " + QuestManager.loadErrors());
+            for (String id : Ch1Prep.TRAILS) {
                 var def = QuestManager.quest(id);
-                check(def != null && def.startWhen() != null && !def.repeats() && !def.board() && def.chapter().equals(Chapters.WHALE.id()),
-                        id + ": needs start_when, chapter titan_whale, no repeat or board");
+                check(def != null && def.main() && def.startWhen() != null && !def.repeats() && !def.board() && def.chapter().equals(Chapters.WHALE.id()),
+                        id + ": needs to be a main quest with start_when, chapter titan_whale, no repeat or board");
+            }
+            check(QuestManager.quest("ch1/prep_gear") == null && QuestManager.quest("ch1/prep_blade") == null && QuestManager.quest("ch1/prep_pulse") == null,
+                    "the old prep quests should be absorbed");
+            // 開始: イサナの鯨の話 (印 c_whale_heard) のあと、三本とも出る。覚書も渡る
+            Quests.poll(p, false);
+            check(QuestLog.of(p).entry(Ch1Prep.Q_IRON) == null, "the trail steps appeared before Isana's whale talk");
+            jp.revati.skyabyss.quest.StoryContext ctx = jp.revati.skyabyss.quest.StoryContext.of(p);
+            jp.revati.skyabyss.quest.Action.parseList(com.google.gson.JsonParser.parseString(
+                    "{\"type\":\"flag\",\"flag\":\"c_whale_heard\",\"npc\":\"skyabyss:whale_chaser\"}"), new ArrayList<>(), "t").get(0).run(ctx);
+            Quests.poll(p, false);
+            for (String id : Ch1Prep.TRAILS) {
+                check(QuestLog.of(p).entry(id) != null, id + " did not start after Isana's whale talk");
+            }
+            check(WayfarerNotes.has(p, 1), "starting the trail steps did not hand over the chapter-1 notes");
+
+            // 鉄の跡: 骨の坑の荷 (人ごとに一度、鉄 2・松明 8・頁) → 鉄の防具 4 部位を着る
+            check(BonePit.openPack(p, level, null), "the pack did not open the first time");
+            check(!BonePit.openPack(p, level, null), "the pack gave its contents twice");
+            Tasks.flush();
+            check(Lore.state(p).has(Ch1Prep.PAGE_IRON), "the pack did not record the page");
+            check(jp.revati.skyabyss.quest.QuestItems.count(p, "minecraft:iron_ingot", null) == 2 && jp.revati.skyabyss.quest.QuestItems.count(p, "minecraft:torch", null) == 8,
+                    "the pack should hold two iron ingots and eight torches");
+            Quests.poll(p, true);
+            QuestLog.Entry iron = QuestLog.of(p).entry(Ch1Prep.Q_IRON);
+            check(iron.stage == 1 && !iron.done, "the page did not move the iron trail to the armor stage");
+            for (var it : List.of(Items.IRON_HELMET, Items.IRON_CHESTPLATE, Items.IRON_LEGGINGS, Items.IRON_BOOTS)) {
+                p.getInventory().add(new ItemStack(it));
+            }
+            Quests.poll(p, true);
+            check(!QuestLog.of(p).entry(Ch1Prep.Q_IRON).done && QuestLog.of(p).entry(Ch1Prep.Q_IRON).progress(0) == 0, "carried (not worn) armor counted");
+            p.getInventory().clearContent();
+            p.setItemSlot(net.minecraft.world.entity.EquipmentSlot.CHEST, new ItemStack(Items.IRON_CHESTPLATE));
+            p.setItemSlot(net.minecraft.world.entity.EquipmentSlot.LEGS, new ItemStack(Items.IRON_LEGGINGS));
+            Quests.poll(p, true);
+            check(QuestLog.of(p).entry(Ch1Prep.Q_IRON).progress(0) == 2, "two worn pieces should read 2/4 (" + QuestLog.of(p).entry(Ch1Prep.Q_IRON).progress(0) + ")");
+            p.setItemSlot(net.minecraft.world.entity.EquipmentSlot.HEAD, new ItemStack(Items.IRON_HELMET));
+            p.setItemSlot(net.minecraft.world.entity.EquipmentSlot.FEET, new ItemStack(Items.IRON_BOOTS));
+            Quests.poll(p, true);
+            check(QuestLog.of(p).entry(Ch1Prep.Q_IRON).done, "four worn iron pieces did not finish the iron trail");
+            check(PrepQuests.done(p, 1) == 1 && !PrepQuests.ready(p, 1), "one trail step should count as one");
+
+            // 折れた剣: 洞の台座の頁 → 職人に話す → 鉄の剣と砥石
+            Lore.unlock(p, Ch1Prep.PAGE_BLADE, false);
+            Quests.poll(p, true);
+            check(QuestLog.of(p).entry(Ch1Prep.Q_BLADE).stage == 1, "the broken sword page did not move trail_blade to the talk stage");
+            Quests.onTalk(p, "skyabyss:artisan", "ch1t_blade_show");
+            check(QuestLog.of(p).entry(Ch1Prep.Q_BLADE).stage == 2, "talking to the artisan did not move trail_blade to the forge stage");
+            p.getInventory().add(new ItemStack(Items.IRON_SWORD));
+            Quests.poll(p, true);
+            Quests.signal(p, Ch1Prep.SIGNAL_WHETSTONE_USED);
+            check(QuestLog.of(p).entry(Ch1Prep.Q_BLADE).done, "an iron sword and the whetstone did not finish trail_blade");
+
+            // 盾と糧: 語り部の足音の晩の話 (伝承) → 盾と固焼き 8
+            var st = jp.revati.skyabyss.npc.DialogueManager.dialogue(jp.revati.skyabyss.npc.NpcSetup.STORYTELLER_ID);
+            check(st != null && st.nodes().containsKey("ch1t_shield_tale"), "the storyteller has no shield tale");
+            if (st != null && st.nodes().containsKey("ch1t_shield_tale")) {
+                st.nodes().get("ch1t_shield_tale").actions().forEach(x -> x.run(ctx));
+                check(Lore.state(p).has(Ch1Prep.PAGE_SHIELD), "the shield tale did not record its page");
+            }
+            Quests.onTalk(p, "skyabyss:storyteller", "ch1t_shield_tale");
+            check(QuestLog.of(p).entry(Ch1Prep.Q_SHIELD).stage == 1, "the tale did not move trail_shield to the pack stage");
+            p.getInventory().add(new ItemStack(Items.SHIELD));
+            p.getInventory().add(new ItemStack(jp.revati.skyabyss.guide.TravelGear.ROAD_HARDTACK.get(), 7));
+            Quests.poll(p, true);
+            check(!QuestLog.of(p).entry(Ch1Prep.Q_SHIELD).done, "seven hardtack finished trail_shield");
+            p.getInventory().add(new ItemStack(jp.revati.skyabyss.guide.TravelGear.ROAD_HARDTACK.get(), 1));
+            Quests.poll(p, true);
+            check(QuestLog.of(p).entry(Ch1Prep.Q_SHIELD).done, "a shield and eight hardtack did not finish trail_shield");
+
+            // 三本で ch1_ready と鯨追いの印 (一度だけ)
+            check(PrepQuests.ready(p, 1) && Growth.get(p).discoveries.contains("prep_ready:1"), "the three trail steps did not raise ch1_ready");
+            check(p.getInventory().countItem(GuideSetup.WHALE_CHASER_MARK.get()) == 1, "the whale chaser's mark was not given once");
+            Quests.forget(p, Ch1Prep.Q_SHIELD);
+            Quests.start(p, Ch1Prep.Q_SHIELD);
+            for (int i = 0; i < 3 && !QuestLog.of(p).entry(Ch1Prep.Q_SHIELD).done; i++) {
+                Quests.forceStage(p, Ch1Prep.Q_SHIELD);
+            }
+            check(p.getInventory().countItem(GuideSetup.WHALE_CHASER_MARK.get()) == 1, "the whale chaser's mark was given twice");
+            // 文 (日英)
+            for (String key : List.of("item.skyabyss.whale_chaser_mark", "item.skyabyss.whale_chaser_mark.lore", "message.skyabyss.ch1.pit.pack",
+                    "message.skyabyss.ch1.pit.cold_open", "quest.skyabyss.ch1.trail_iron.armor.wear", "lore.skyabyss.ch1.cold_door.body",
+                    BonePit.SIGN + ".1", BonePit.COLD_SIGN + ".4")) {
+                check(jp.revati.skyabyss.SignFit.lang("ja_jp").containsKey(key) && jp.revati.skyabyss.SignFit.lang("en_us").containsKey(key),
+                        "missing ja/en text " + key);
             }
         } finally {
-            Quests.forgetAll(p);
-            Quests.forgetAll(q);
-            Growth.get(p).discoveries.clear();
-            Growth.get(q).discoveries.clear();
-            p.getInventory().clearContent();
-            q.getInventory().clearContent();
+            clean.run();
         }
     }
 
@@ -450,8 +600,8 @@ public final class Ch1SitesSelfTest {
     private static void descent(MinecraftServer server) {
         // 式
         check(!Ch1Descent.allows(2, 3), "day 3 should not lower the chain, whatever the prep");
-        check(!Ch1Descent.allows(3, 1), "day 4 morning with one prep quest should not lower the chain");
-        check(Ch1Descent.allows(3, 2), "day 4 morning with two prep quests should lower the chain");
+        check(!Ch1Descent.allows(3, 1), "day 4 morning with one trail step should not lower the chain");
+        check(Ch1Descent.allows(3, 2), "day 4 morning with two trail steps should lower the chain");
         check(!Ch1Descent.allows(4, 0), "day 5 with no prep should not lower the chain");
         check(Ch1Descent.allows(5, 0) && Ch1Descent.allows(9, 0), "day 6 on should lower the chain with no prep");
         // 降りる速さ (first_hour_log B-5): 遠いほど速く (上限 0.45)、近づくと 0.12。単調で、巡航 (0.2) の 2 倍強まで
@@ -521,30 +671,23 @@ public final class Ch1SitesSelfTest {
             a.getInventory().clearContent();
             b.getInventory().clearContent();
         }
-        // 経験値の枠: 一章の新しい分 (備え 300 + 洞 40) は 400 に収まる
+        // 経験値の枠: 一章の新しい分 (支度の段 250 + 洞 40 + 骨の坑 40) は 400 に収まる
         int fresh = ChapterXpBudget.newXp(QuestManager.all(), 1);
         check(fresh <= ChapterXpBudget.NEW_CAP[1], "chapter 1 new xp " + fresh + " exceeds " + ChapterXpBudget.NEW_CAP[1]);
-        check(fresh >= 300 + CleftCave.XP, "chapter 1 new xp " + fresh + " does not count the prep quests and the cave");
+        check(fresh >= 250 + CleftCave.XP + BonePit.XP, "chapter 1 new xp " + fresh + " does not count the trail steps, the cave and the pit");
         check(ChapterXpBudget.overruns(QuestManager.all(), 1).isEmpty(), "chapter 1 is over its xp budget: " + ChapterXpBudget.overruns(QuestManager.all(), 1));
         int lore = Ch1Prep.LORE_XP.values().stream().mapToInt(Integer::intValue).sum();
         check(ChapterXpBudget.EXISTING[1] + fresh + lore <= (int) (ChapterXpBudget.LEVEL_XP[1] * ChapterXpBudget.MAX_RATIO),
                 "chapter 1 small-element xp with the new lore (" + (ChapterXpBudget.EXISTING[1] + fresh + lore) + ") passes the ratio");
     }
 
-    // p に備えの頼みを n 本終えさせる (gear、blade の順)
+    // p に支度の段を n 本終えさせる (鉄の跡、折れた剣の順。段を飛ばす)
     private static void finish(FakePlayer p, int n) {
-        Quests.start(p, Ch1Prep.Q_GEAR);
-        p.getInventory().add(new ItemStack(Items.IRON_INGOT, 7));
-        p.getInventory().add(new ItemStack(GuideSetup.ROCK_SHELL_SCRAP.get(), 12));
-        p.getInventory().add(new ItemStack(Items.LEATHER, 3));
-        p.getInventory().add(new ItemStack(GuideSetup.BONE_CHIP.get(), 2));
-        Quests.poll(p, true);
-        Quests.signal(p, Ch1Prep.SIGNAL_GEAR_MADE);
-        if (n >= 2) {
-            Quests.start(p, Ch1Prep.Q_BLADE);
-            Quests.signal(p, SiteSpawner.signal(Ch1Prep.CLEFT_CAVE));
-            Quests.signal(p, Ch1Prep.SIGNAL_WHETSTONE_USED);
-            Quests.onTalk(p, "skyabyss:artisan", "ch1p_blade_report");
+        for (String id : Ch1Prep.TRAILS.subList(0, Math.min(n, 2))) {
+            Quests.start(p, id);
+            for (int i = 0; i < 4 && !QuestLog.of(p).entry(id).done; i++) {
+                Quests.forceStage(p, id);
+            }
         }
     }
 }

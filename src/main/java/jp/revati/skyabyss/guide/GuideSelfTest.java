@@ -113,12 +113,15 @@ public final class GuideSelfTest {
         Runnable restore = null;
         try {
             // 規則 (ID・種類・検査)
-            check(f, PrepQuests.chapterOf("ch1/prep_gear") == 1 && PrepQuests.chapterOf("ch4/prep_pulse") == 4 && PrepQuests.chapterOf("ch5/prep_gear") == 0
-                    && PrepQuests.chapterOf("ch1/day1_cairns") == 0 && PrepQuests.chapterOf("main_song") == 0, "chapterOf does not read ch1〜ch4/prep_*");
-            check(f, PrepQuests.kindOf("ch2/prep_blade").equals("blade") && PrepQuests.readySignal(3).equals("ch3_ready")
-                    && PrepQuests.id(2, "pulse").equals("ch2/prep_pulse"), "kind / signal / id helpers are wrong");
+            // 一章は支度の段 (ch1/trail_*)。二〜四章は既定の形 (ch<n>/prep_*)。一章の ch1/prep_* はもう 3 本に数えない
+            check(f, PrepQuests.chapterOf("ch1/trail_iron") == 1 && PrepQuests.chapterOf("ch1/trail_shield") == 1 && PrepQuests.chapterOf("ch1/prep_gear") == 0
+                    && PrepQuests.chapterOf("ch2/prep_gear") == 2 && PrepQuests.chapterOf("ch4/prep_pulse") == 4 && PrepQuests.chapterOf("ch5/prep_gear") == 0
+                    && PrepQuests.chapterOf("ch1/day1_cairns") == 0 && PrepQuests.chapterOf("main_song") == 0, "chapterOf does not read ch1/trail_* and ch2〜ch4/prep_*");
+            check(f, PrepQuests.kindOf("ch2/prep_blade").equals("blade") && PrepQuests.kindOf("ch1/trail_shield").equals("shield") && PrepQuests.readySignal(3).equals("ch3_ready")
+                    && PrepQuests.id(2, "pulse").equals("ch2/prep_pulse") && PrepQuests.ids(1).equals(List.of("ch1/trail_iron", "ch1/trail_blade", "ch1/trail_shield"))
+                    && PrepQuests.isTrail(1) && !PrepQuests.isTrail(2), "kind / signal / id helpers are wrong");
             List<String> errors = new ArrayList<>();
-            List<QuestDef> good = prepDefs(errors, "titan_whale", 1);
+            List<QuestDef> good = prepDefs(errors, "titan_tide", 2);
             check(f, errors.isEmpty(), "the test prep quests did not parse: " + errors);
             java.util.Map<String, QuestDef> map = new java.util.LinkedHashMap<>();
             good.forEach(d -> map.put(d.id(), d));
@@ -128,86 +131,92 @@ public final class GuideSelfTest {
             // 規則違反: main、章違い、start_when なし、繰り返し、板、名前違い
             List<String> junk = new ArrayList<>();
             java.util.Map<String, QuestDef> bad = new java.util.LinkedHashMap<>();
-            bad.put("ch1/prep_gear", quest("ch1/prep_gear", prepJson("x", 1).replace("\"sub\"", "\"main\""), junk));
-            bad.put("ch1/prep_blade", quest("ch1/prep_blade", prepJson("x", 1).replace("titan_whale", "titan_tide"), junk));
-            bad.put("ch1/prep_pulse", quest("ch1/prep_pulse", prepJson("x", 1).replace("\"start_when\":{\"type\":\"true\"},", ""), junk));
+            bad.put("ch4/prep_gear", quest("ch4/prep_gear", prepJson("x", 1).replace("\"sub\"", "\"main\"").replace("titan_whale", "titan_ember"), junk));
+            bad.put("ch4/prep_blade", quest("ch4/prep_blade", prepJson("x", 1).replace("titan_whale", "titan_tide"), junk));
+            bad.put("ch4/prep_pulse", quest("ch4/prep_pulse", prepJson("x", 1).replace("\"start_when\":{\"type\":\"true\"},", "").replace("titan_whale", "titan_ember"), junk));
+            bad.put("ch1/prep_gear", quest("ch1/prep_gear", prepJson("x", 1), junk));
+            bad.put("ch1/trail_iron", quest("ch1/trail_iron", prepJson("x", 1), junk));
             bad.put("ch2/prep_gear", quest("ch2/prep_gear", prepJson("x", 0).replace("\"reward\":{\"xp\":0}", "\"reward\":{\"xp\":0},\"repeat\":\"daily\"")
                     .replace("\"start_when\":{\"type\":\"true\"},", "").replace("titan_whale", "titan_tide"), junk));
             bad.put("ch2/prep_odd", quest("ch2/prep_odd", prepJson("x", 1).replace("titan_whale", "titan_tide"), junk));
             bad.put("ch3/prep_blade", quest("ch3/prep_blade", prepJson("x", 1).replace("titan_whale", "titan_storm").replace("\"sub\"", "\"sub\",\"board\":true"), junk));
             List<String> be = new ArrayList<>();
             PrepQuests.validate(bad, be);
-            check(f, be.stream().anyMatch(s -> s.contains("ch1/prep_gear") && s.contains("sub quest")), "a main prep quest was not flagged");
-            check(f, be.stream().anyMatch(s -> s.contains("ch1/prep_blade") && s.contains("chapter must be")), "a prep quest in the wrong chapter was not flagged");
-            check(f, be.stream().anyMatch(s -> s.contains("ch1/prep_pulse") && s.contains("start_when")), "a prep quest without start_when was not flagged");
+            check(f, be.stream().anyMatch(s -> s.contains("ch4/prep_gear") && s.contains("sub quest")), "a main prep quest was not flagged");
+            check(f, be.stream().anyMatch(s -> s.contains("ch4/prep_blade") && s.contains("chapter must be")), "a prep quest in the wrong chapter was not flagged");
+            check(f, be.stream().anyMatch(s -> s.contains("ch4/prep_pulse") && s.contains("start_when")), "a prep quest without start_when was not flagged");
+            check(f, be.stream().anyMatch(s -> s.contains("ch1/prep_gear") && s.contains("chapter 1 uses")), "an old chapter-1 prep quest was not flagged");
+            check(f, be.stream().anyMatch(s -> s.contains("ch1/trail_iron") && s.contains("main quest")), "a chapter-1 trail step as a sub quest was not flagged");
             check(f, be.stream().anyMatch(s -> s.contains("ch2/prep_gear") && s.contains("repeat")), "a repeating prep quest was not flagged");
             check(f, be.stream().anyMatch(s -> s.contains("ch2/prep_odd") && s.contains("kind")), "an unknown prep kind was not flagged");
             check(f, be.stream().anyMatch(s -> s.contains("ch3/prep_blade") && s.contains("board")), "a prep quest on the board was not flagged");
 
             // 三本が定義されていない章は、準備ができたことにならない
-            check(f, !PrepQuests.defined(1) || QuestManager.quest("ch1/prep_gear") != null, "defined() disagrees with the loaded data");
-            // 流れ: 仮の三本 (一章) + 合図を受ける見張り
+            check(f, PrepQuests.defined(1) == (QuestManager.quest("ch1/trail_iron") != null && QuestManager.quest("ch1/trail_blade") != null
+                    && QuestManager.quest("ch1/trail_shield") != null), "defined() disagrees with the loaded data");
+            check(f, !PrepQuests.defined(2), "chapter 2 should not have prep quests in the shipped data yet");
+            // 流れ: 仮の三本 (二章) + 合図を受ける見張り
             List<QuestDef> temp = new ArrayList<>(good);
             temp.add(quest("selftest/ready_probe", "{\"category\":\"sub\",\"order\":99,\"stages\":[{\"id\":\"w\",\"objectives\":[{\"id\":\"r\",\"type\":\"signal\","
-                    + "\"target\":\"ch1_ready\",\"party\":false}]}]}", errors));
+                    + "\"target\":\"ch2_ready\",\"party\":false}]}]}", errors));
             restore = QuestManager.addTemporary(temp);
             Runnable restoreNow = restore;
-            check(f, PrepQuests.defined(1) && !PrepQuests.defined(2), "defined() is wrong for the injected chapter");
-            check(f, !PrepQuests.ready(a, 1) && PrepQuests.done(a, 1) == 0, "a fresh player was ready");
+            check(f, PrepQuests.defined(2) && !PrepQuests.defined(3), "defined() is wrong for the injected chapter");
+            check(f, !PrepQuests.ready(a, 2) && PrepQuests.done(a, 2) == 0, "a fresh player was ready");
             Quests.start(a, "selftest/ready_probe");
             // 章の頭に自動で出る (start_when)
             Quests.poll(a, false);
             QuestLog log = QuestLog.of(a);
-            check(f, log.entry("ch1/prep_gear") != null && log.entry("ch1/prep_blade") != null && log.entry("ch1/prep_pulse") != null,
+            check(f, log.entry("ch2/prep_gear") != null && log.entry("ch2/prep_blade") != null && log.entry("ch2/prep_pulse") != null,
                     "the prep quests did not appear on their own (start_when)");
-            // 覚書: prep_gear を受けたとき、人ごとに一度
-            check(f, WayfarerNotes.has(a, 1) && countNotes(a, 1) == 1, "the notes were not handed over when prep_gear started");
-            Quests.forget(a, "ch1/prep_gear");
-            Quests.start(a, "ch1/prep_gear");
-            check(f, countNotes(a, 1) == 1, "the notes were handed over twice");
-            check(f, !WayfarerNotes.has(b, 1), "another player got the notes");
+            // 覚書: 3 本のどれかを受けたとき、人ごとに一度
+            check(f, WayfarerNotes.has(a, 2) && countNotes(a, 2) == 1, "the notes were not handed over when the prep quests started");
+            Quests.forget(a, "ch2/prep_gear");
+            Quests.start(a, "ch2/prep_gear");
+            check(f, countNotes(a, 2) == 1, "the notes were handed over twice");
+            check(f, !WayfarerNotes.has(b, 2), "another player got the notes");
 
             // 順番はふさがない: 刃 → 糧 のあと身ごしらえ。二本のとき ready ではないが atLeast(2)
-            Condition two = Condition.parse(JsonParser.parseString("{\"type\":\"prep\",\"chapter\":1,\"min\":2}"), errors, "t");
-            Condition all = Condition.parse(JsonParser.parseString("{\"type\":\"prep\",\"chapter\":1}"), errors, "t");
+            Condition two = Condition.parse(JsonParser.parseString("{\"type\":\"prep\",\"chapter\":2,\"min\":2}"), errors, "t");
+            Condition all = Condition.parse(JsonParser.parseString("{\"type\":\"prep\",\"chapter\":2}"), errors, "t");
             StoryContext ctx = StoryContext.of(a);
             check(f, !two.test(ctx) && !all.test(ctx), "the prep condition was true with nothing done");
-            Quests.signal(a, "t_blade1");
-            check(f, PrepQuests.done(a, 1) == 1 && !two.test(ctx), "one prep quest counted wrong");
-            Quests.signal(a, "t_pulse1");
-            check(f, PrepQuests.done(a, 1) == 2 && two.test(ctx) && !all.test(ctx) && PrepQuests.atLeast(a, 1, 2) && !PrepQuests.ready(a, 1),
+            Quests.signal(a, "t_blade2");
+            check(f, PrepQuests.done(a, 2) == 1 && !two.test(ctx), "one prep quest counted wrong");
+            Quests.signal(a, "t_pulse2");
+            check(f, PrepQuests.done(a, 2) == 2 && two.test(ctx) && !all.test(ctx) && PrepQuests.atLeast(a, 2, 2) && !PrepQuests.ready(a, 2),
                     "two prep quests did not satisfy min 2 / did not stay short of ready");
             check(f, QuestLog.of(a).entry("selftest/ready_probe") != null && !QuestLog.of(a).entry("selftest/ready_probe").done,
                     "ch1_ready fired before the third prep quest");
-            Quests.signal(a, "t_gear1");
-            check(f, PrepQuests.done(a, 1) == 3 && PrepQuests.ready(a, 1) && all.test(ctx) && PrepQuests.groupAtLeast(a, 1, 3),
+            Quests.signal(a, "t_gear2");
+            check(f, PrepQuests.done(a, 2) == 3 && PrepQuests.ready(a, 2) && all.test(ctx) && PrepQuests.groupAtLeast(a, 2, 3),
                     "three prep quests did not make the player ready");
             check(f, QuestLog.of(a).entry("selftest/ready_probe").done, "the ch1_ready signal was not sent when the third quest finished");
             // 合図は一度だけ (記録を戻して終え直しても、もう一度は鳴らない)
             Quests.forget(a, "selftest/ready_probe");
             Quests.start(a, "selftest/ready_probe");
-            Quests.forget(a, "ch1/prep_pulse");
-            Quests.start(a, "ch1/prep_pulse");
-            Quests.signal(a, "t_pulse1");
-            check(f, PrepQuests.ready(a, 1) && !QuestLog.of(a).entry("selftest/ready_probe").done, "the ready signal fired twice for one player");
+            Quests.forget(a, "ch2/prep_pulse");
+            Quests.start(a, "ch2/prep_pulse");
+            Quests.signal(a, "t_pulse2");
+            check(f, PrepQuests.ready(a, 2) && !QuestLog.of(a).entry("selftest/ready_probe").done, "the ready signal fired twice for one player");
 
             // 別の順番 (人ごと): 糧 → 身ごしらえ → 刃
             Quests.poll(b, false);
-            Quests.signal(b, "t_pulse1");
-            Quests.signal(b, "t_gear1");
-            check(f, !PrepQuests.ready(b, 1) && PrepQuests.done(b, 1) == 2 && !PrepQuests.ready(a, 2), "progress leaked between players or chapters");
-            Quests.signal(b, "t_blade1");
-            check(f, PrepQuests.ready(b, 1), "a different order did not finish the chain");
+            Quests.signal(b, "t_pulse2");
+            Quests.signal(b, "t_gear2");
+            check(f, !PrepQuests.ready(b, 2) && PrepQuests.done(b, 2) == 2 && !PrepQuests.ready(a, 3), "progress leaked between players or chapters");
+            Quests.signal(b, "t_blade2");
+            check(f, PrepQuests.ready(b, 2), "a different order did not finish the chain");
 
             // 結果 give_notes: なくした人に渡し直す。持っていれば渡さない
             List<String> ae = new ArrayList<>();
-            List<Action> give = Action.parseList(JsonParser.parseString("{\"type\":\"give_notes\",\"chapter\":1}"), ae, "t");
+            List<Action> give = Action.parseList(JsonParser.parseString("{\"type\":\"give_notes\",\"chapter\":2}"), ae, "t");
             check(f, ae.isEmpty() && give.size() == 1, "give_notes did not parse: " + ae);
             give.get(0).run(StoryContext.of(a));
-            check(f, countNotes(a, 1) == 1, "give_notes gave a second copy to someone who has one");
+            check(f, countNotes(a, 2) == 1, "give_notes gave a second copy to someone who has one");
             a.getInventory().clearContent();
             give.get(0).run(StoryContext.of(a));
-            check(f, countNotes(a, 1) == 1, "give_notes did not replace lost notes");
+            check(f, countNotes(a, 2) == 1, "give_notes did not replace lost notes");
             // 条件の検査: 章が 1〜4 でなければ警告
             List<String> ce = new ArrayList<>();
             Condition.parse(JsonParser.parseString("{\"type\":\"prep\",\"chapter\":9}"), ce, "t");
@@ -755,8 +764,8 @@ public final class GuideSelfTest {
             for (String id : ChapterXpBudget.LEGACY) {
                 check(f, QuestManager.quest(id) != null, "LEGACY lists a quest that does not exist: " + id);
             }
-            // 新しい分の数え方: 一章の新しいクエスト (10 + 10 + 10。本物の備えの頼みと重ならない ID) を足すと数える。既存・繰り返し・ほかの章は数えない
-            // (一章の本物の備えの頼み 300 と洞 40 が入っているので、足せるのは 60 まで)
+            // 新しい分の数え方: 一章の新しいクエスト (10 + 10 + 10。本物の支度の段と重ならない ID) を足すと数える。既存・繰り返し・ほかの章は数えない
+            // (一章の本物の支度の段 250 と洞 40・骨の坑 40 が入っているので、足せるのは 70 まで)
             List<String> errors = new ArrayList<>();
             List<QuestDef> defs = new ArrayList<>();
             for (String probe : List.of("a", "b", "c")) {

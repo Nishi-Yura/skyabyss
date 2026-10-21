@@ -436,7 +436,11 @@ st.node("fragment",
 st.node("fragment2",
         "温かい……。脈を打っているよ。まるで、生きているみたいだ。\n言い伝えでは、空の扉の鍵は四つに分かれているという。ひとつは鯨が。残りは……さあ、どこだろうね。",
         "Warm... It's beating. As if it were alive.\nThe old tales say the key to the sky's door was split in four. One the whale had. The rest... who knows where.",
-        face="grave", next="fragment3")
+        face="grave", next="fragment_verse")
+st.node("fragment_verse",
+        "……数え歌の、ひとつめを覚えているかい。「ひとつ　ひるまにかげがくる」。\nあれは、鯨の影のことだったのかもしれないね。子どもらは、知らずに歌っていたんだ。",
+        "...Do you remember the first line of the counting song? \"One, at noon the shadow comes.\"\nPerhaps it was the whale's shadow all along. The children sang it without knowing.",
+        face="grave", next="fragment3", note="一章の報告: 数え歌のひとつめを取り戻す (34 の 1 章の五章への糸)")
 st.node("fragment3",
         "あんたは、空へ行くんだね。……止めはしないよ。\nただ、七日目の夜だけは、気をつけるんだよ。",
         "You're going to the sky, aren't you. ...I won't stop you.\nOnly, be careful on the seventh night.",
@@ -526,7 +530,11 @@ wc.node("c_whale1",
 wc.node("c_whale2",
         "ときどき雲の下まで降りてきて、地面に届くほど長い鎖を垂らすんだ。\n俺は……一度も、つかめたことがない。降りてくるのは、いつも遠くの誰かの上なんだ。",
         "Sometimes it comes down below the clouds and lets down a chain long enough to reach the ground.\nI've... never once caught it. It always comes down over someone far away.",
-        face="grave", next="c_whale3", note="ここに入るとメインの「鯨追いに話を聞く」が済む")
+        face="grave", next="c_whale_iron", note="ここに入るとメインの「鯨追いに話を聞く」が済む")
+wc.node("c_whale_iron",
+        "鎖は、素手では上れない。……前にここへ来た旅人は、鉄を着ていた。\n丘を越えていく石標が、その人の道だ。行き着く先は、骨の坑と呼ばれている。",
+        "You cannot climb the chain bare-handed. ...The traveller who came here before wore iron.\nThe cairns over the hills are that one's road. Where they end is called the Bone Pit.",
+        next="c_whale3", note="一章の支度の段「鉄の跡」(ch1/trail_iron) の理由。この話のあと、支度の段 3 本が出る (34 の 4.2)")
 wc.node("c_whale3",
         "あんたの上には、来るかもしれないな。\n……もし鎖が届いたら、迷わずつかめ。",
         "Maybe it'll come over you.\n...If the chain reaches you, grab it without hesitating.",
@@ -589,7 +597,12 @@ wc.node("c_fragment",
 wc.node("c_fragment2",
         "語り部のばあさんにも見せてやれ。あの人は、何か知っているはずだ。\n俺は……もう少し、ここで空を見ている。",
         "Show it to the old storyteller too. She must know something.\nMe... I'll watch the sky here a while longer.",
-        options=[("bye", "じゃあ、また。", "See you.", {"kind": "leave"})], note="ここに入るとメインが終わる")
+        options=[("hand", "あの頁の字のことだけど……", "About the writing on that page...", {"if": lore("ch1/trail_iron"), "goto": "c_fragment_hand"}),
+                 ("bye", "じゃあ、また。", "See you.", {"kind": "leave"})], note="ここに入るとメインが終わる")
+wc.node("c_fragment_hand",
+        "坑の荷の頁か。……俺も、気になっていた。\nあの字、鯨骨の船長の日誌と同じ字に見えた。……いや、そんなはずはない。何百年も前の日誌だ。",
+        "The page from the pack in the pit. ...It has been on my mind too.\nThat hand looked like the writing in the whalebone captain's log. ...No, it cannot be. That log is centuries old.",
+        face="grave", options=[("bye", "じゃあ、また。", "See you.", {"kind": "leave"})], note="報告のほのめかし (34 の 4.2。前の私の頁を見つけた人だけ)")
 
 DIALOGUES = [st, wc]
 
@@ -681,7 +694,7 @@ quest(MAIN, "main", 10, ST,
            "objectives": [{"id": "ride", "type": "lore", "targets": ["chapter1/sky_ruins"],
                            "ja": "鎖をのぼって、岩鯨の背中へ渡ろう", "en": "Climb the chain to its back",
                            "sub": {"wait": ("鎖が降りるまで、備えを整えよう", "Prepare and await the chain"),
-                                   "wait.prep": ("備えの頼み %s/2 と三灯を整えよう", "Prep quests %s/2; ready lamps"),
+                                   "wait.prep": ("支度 %s/2 と三灯を整えよう", "Preparations %s/2; ready lamps"),
                                    "wait.lamps": ("三灯をそろえて、鎖を待とう", "Ready the lamps; await the chain")}}]},
           {"id": "inscriptions", "xp": 90,
            "journal": ("背中には、崩れた町があった。祠の階段を下りると、三つの道が奥へ続いている。\nどの道の先にも、背中の民が碑文を残しているはずだ。",

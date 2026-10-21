@@ -1022,6 +1022,10 @@
     },
     "fragment2": {
       "face": "grave",
+      "next": "fragment_verse"
+    },
+    "fragment_verse": {
+      "face": "grave",
       "next": "fragment3"
     },
     "fragment3": {

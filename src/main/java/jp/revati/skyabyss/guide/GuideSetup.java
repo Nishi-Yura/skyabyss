@@ -45,6 +45,10 @@ public final class GuideSetup {
     public static final DeferredItem<Item> SENTRY_TALLY = ITEMS.register("sentry_tally",
             () -> new Item(new Item.Properties().stacksTo(1).rarity(Rarity.UNCOMMON)));
 
+    // 鯨追いの印 (一章の支度の段を三本とも終えた記念品。見た目だけ。34 の 4.2。story.ch1.Ch1Trails が渡す)
+    public static final DeferredItem<Item> WHALE_CHASER_MARK = ITEMS.register("whale_chaser_mark",
+            () -> new Item(new Item.Properties().stacksTo(1).rarity(Rarity.UNCOMMON)));
+
     private GuideSetup() {
     }
 
@@ -68,6 +72,7 @@ public final class GuideSetup {
             event.accept(HARE_QUILL.get());
             event.accept(ROCK_SHELL_THREAD.get());
             event.accept(SENTRY_TALLY.get());
+            event.accept(WHALE_CHASER_MARK.get());
             event.accept(HEARTBEAT_WARD_STONE_WHALE.get());
             event.accept(HEARTBEAT_WARD_TIDE_SHELL.get());
             event.accept(HEARTBEAT_WARD_THUNDER_WING.get());

@@ -618,7 +618,7 @@
   "item.skyabyss.heartbeat_ward_thunder_wing": "Thunder Wing Heartbeat Ward",
   "item.skyabyss.heartbeat_ward_ember": "Ember Heartbeat Ward",
   "item.skyabyss.heartbeat_ward.desc": "Worn in an accessory slot, it lets you survive one lethal blow at 1 HP, once per heart fight. It shatters when used",
-  "message.skyabyss.notes.given": "New prep requests. Wayfarer's Notes (%s) came with your pack as a guide",
+  "message.skyabyss.notes.given": "Your preparations begin. Wayfarer's Notes (%s) came with your pack as a guide",
   "message.skyabyss.notes.recipes": "The notes remind you of %s recipes",
   "message.skyabyss.prep.ready": "You are ready for %s",
   "message.skyabyss.heartbeat_ward.used": "The heartbeat ward shattered and held you back",
@@ -1389,5 +1389,9 @@
   "block.skyabyss.relic_bell": "Relic Bell",
   "gui.skyabyss.card.advancement": "Advancement",
   "gui.skyabyss.card.challenge": "Challenge",
-  "gui.skyabyss.card.lore": "Lore"
+  "gui.skyabyss.card.lore": "Lore",
+  "advancement.skyabyss.bone_pit.title": "The Bone Pit",
+  "advancement.skyabyss.bone_pit.description": "Ch. I Stone Whale: Deep in the pit, someone's pack was left behind.",
+  "advancement.skyabyss.whale_trail.title": "Ready to Chase the Whale",
+  "advancement.skyabyss.whale_trail.description": "Ch. I Stone Whale: Iron on, blade honed, shield and provisions on your back."
 }

@@ -38,7 +38,7 @@ public record QuestDef(String id, String category, int order, @Nullable String g
     public static final Set<String> CATEGORIES = Set.of("main", "sub");
     public static final Set<String> REPEATS = Set.of("", "daily", "weekly");
     public static final Set<String> OBJECTIVE_TYPES = Set.of("talk", "kill", "collect", "lore", "visit", "near", "signal", "condition",
-            "turn_in", "herd");
+            "turn_in", "herd", "wear");
 
     // 段階。mode が all なら目的をすべて、any ならどれか一つで次へ。skipIf が真なら、着いたとたんに済ませる
     public record Stage(String id, String mode, List<Objective> objectives, Condition skipIf, int xp, List<Action> actions) {
@@ -51,6 +51,7 @@ public record QuestDef(String id, String category, int order, @Nullable String g
     // near=生き物、signal=合図の名前)。count は必要な数 (lore は「targets のうちいくつ」)
     // party: 倒す・合図の目的を、パーティの仲間 (経験値の分け前と同じ条件) も数える。token: 品の印 (QuestItems。collect / turn_in)
     // turn_in: 品を言伝ての板 (か依頼主の会話) で納める。herd: 受けた場所 (板) の radius 以内に、その生き物を count 頭そろえる
+    // wear: targets の品 (防具) のうち count 種類を着ている (防具の枠。脱げば戻る。既定は全部。一章の鉄の跡「鉄の防具を作ろう（2/4）」)
     public record Objective(String id, String type, List<String> targets, @Nullable String topic, int count, double radius, Condition condition,
                             boolean party, @Nullable String token) {
     }
@@ -227,9 +228,16 @@ public record QuestDef(String id, String category, int order, @Nullable String g
         if ((type.equals("collect") || type.equals("turn_in")) && targets.size() == 1 && !QuestItems.known(targets.get(0))) {
             errors.add(w + ": unknown item or tag " + targets.get(0));
         }
-        int fallback = type.equals("lore") ? targets.size() : 1;
+        if (type.equals("wear")) {
+            for (String t : targets) {
+                if (!QuestItems.known(t)) {
+                    errors.add(w + ": unknown item or tag " + t);
+                }
+            }
+        }
+        int fallback = type.equals("lore") || type.equals("wear") ? targets.size() : 1;
         int count = GsonHelper.getAsInt(o, "count", fallback);
-        if (count < 1 || (type.equals("lore") && count > targets.size())) {
+        if (count < 1 || ((type.equals("lore") || type.equals("wear")) && count > targets.size())) {
             errors.add(w + ": bad count " + count);
         }
         Condition condition = type.equals("condition") ? Condition.parse(o.get("if"), errors, w + " if") : Condition.ALWAYS;

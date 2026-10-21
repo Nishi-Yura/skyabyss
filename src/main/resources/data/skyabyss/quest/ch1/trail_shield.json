@@ -1,0 +1,69 @@
+{
+  "category": "main",
+  "order": 13,
+  "giver": "skyabyss:storyteller",
+  "chapter": "titan_whale",
+  "start_when": {
+    "type": "all",
+    "of": [
+      {
+        "type": "stage",
+        "max": 0
+      },
+      {
+        "type": "any",
+        "of": [
+          {
+            "type": "flag",
+            "flag": "c_whale_heard",
+            "npc": "skyabyss:whale_chaser"
+          },
+          {
+            "type": "lore",
+            "entry": "chapter1/stone_whale"
+          }
+        ]
+      }
+    ]
+  },
+  "stages": [
+    {
+      "id": "tale",
+      "objectives": [
+        {
+          "id": "talk",
+          "type": "talk",
+          "target": "skyabyss:storyteller",
+          "topic": "ch1t_shield_tale"
+        }
+      ]
+    },
+    {
+      "id": "pack",
+      "mode": "all",
+      "objectives": [
+        {
+          "id": "shield",
+          "type": "collect",
+          "target": "minecraft:shield",
+          "count": 1,
+          "party": false
+        },
+        {
+          "id": "hardtack",
+          "type": "collect",
+          "target": "skyabyss:road_hardtack",
+          "count": 8,
+          "party": false
+        }
+      ]
+    }
+  ],
+  "reward": {
+    "xp": 50,
+    "items": [],
+    "affinity": {
+      "skyabyss:storyteller": 3
+    }
+  }
+}

@@ -427,6 +427,9 @@ public final class FreeQuestSelfTest {
         }
         DialogueService.close(a);
         check(stage(a, "main_song").equals("done"), "main quest did not finish in the free quest test", failures);
+        // 岩鯨を見たので一章の支度の段も出ている。語り部の入口に割り込む一言 (職人を指す・足音の晩の話) は済ませておく
+        jp.revati.skyabyss.npc.NpcBonds.of(a).bond("skyabyss:storyteller").flags().add("ch1p_pointer_told");
+        Quests.onTalk(a, "skyabyss:storyteller", "ch1t_shield_tale");
         talk(a, st);
         check(node(a).equals("fq_gaps_done"), "storyteller did not greet with the book: " + node(a), failures);
         next(a);

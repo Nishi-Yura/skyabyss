@@ -37,7 +37,7 @@ public final class Sites {
     public static final String DIARY_SPOT = "ch1_diary_spot";
     public static final List<String> WHALE = List.of(TRACE_WELL, TRACE_PACK, LOOKOUT, LOST_CART, DIARY_SPOT,
             songStoneId(1), songStoneId(2), songStoneId(3), songStoneId(4), songStoneId(5));
-    // 一章の地上の新しい場所 (21 の 3.1、P6): 鯨道の石標 7 (7 つ目が祠)・骨の集め場・割れ殻の洞。荷車の傍らの道は失せ物の荷車の隣 (LOST_CART の post)、
+    // 一章の地上の新しい場所 (21 の 3.1、P6。34 の 4.2.1): 鯨道の石標 7 (7 つ目が祠)・骨の集め場・割れ殻の洞・骨の坑。荷車の傍らの道は失せ物の荷車の隣 (LOST_CART の post)、
     // 歌の間は宿りの鐘の下 (SongChamber)
     public static final List<String> WHALE_P6 = buildP6();
 
@@ -51,6 +51,7 @@ public final class Sites {
         }
         ids.add(Ch1Prep.BONE_CACHE);
         ids.add(Ch1Prep.CLEFT_CAVE);
+        ids.add(Ch1Prep.BONE_PIT);
         return List.copyOf(ids);
     }
 
@@ -123,6 +124,8 @@ public final class Sites {
             }
         }).register();
         CleftCave.register();
+        BonePit.register();
+        Ch1Trails.register();
         Ch1Prep.register();
         Ch1Mobs.registerWanderers();
     }
