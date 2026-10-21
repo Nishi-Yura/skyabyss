@@ -277,6 +277,34 @@ public final class RecordBuilder {
                 n[2] == 0 ? RecordSnapshot.MARK_SAFE : n[0] + n[1] > 0 ? RecordSnapshot.MARK_ATTENTION : RecordSnapshot.MARK_NONE, detail);
     }
 
+    // 順路 (docs/design/32 の 6 章): 今の段 (歩・智・闘・中ボス・心臓) と、引いてある三つ、順路の記録 (越えた回数・最速)
+    private static Row routeRow(ServerPlayer p, String titan) {
+        var dim = jp.revati.skyabyss.progress.Titans.backOf(titan);
+        net.minecraft.server.level.ServerLevel back = dim == null ? null : p.server.getLevel(dim);
+        if (back == null) {
+            return value("route", t("r.route"), t("r.unknown"), RecordSnapshot.MARK_LOCKED, List.of(t("d.route_none")));
+        }
+        java.util.UUID group = jp.revati.skyabyss.titan.group.Groups.keyOf(p);
+        jp.revati.skyabyss.trial.TrialDraw.Draw draw = jp.revati.skyabyss.trial.TrialData.current(back, group);
+        int step = jp.revati.skyabyss.trial.TrialRoute.step(back, group);
+        boolean mid = jp.revati.skyabyss.trial.TrialRoute.mid(back, group);
+        Component v = step <= 0 ? t("v.route_idle") : mid ? t("v.route_mid") : step >= jp.revati.skyabyss.trial.TrialRoute.LAST_STEP ? t("v.route_heart")
+                : t("v.route_step", step, 3);
+        List<Component> detail = new ArrayList<>();
+        detail.add(t("d.route", draw.cycle()));
+        for (int i = 1; i <= draw.picks().size(); i++) {
+            jp.revati.skyabyss.trial.Trial.Def d = jp.revati.skyabyss.trial.TrialRoute.defOf(draw, i);
+            if (d != null) {
+                detail.add(t("d.route_line", i, Component.translatable("trial.skyabyss.slot." + d.slot().id), Component.translatable(d.nameKey())));
+            }
+        }
+        jp.revati.skyabyss.trial.TrialCodex codex = jp.revati.skyabyss.trial.TrialCodex.get(p.server);
+        int clears = codex.routeClears(p.getUUID(), titan);
+        long best = codex.routeBest(p.getUUID(), titan) / 20;
+        detail.add(clears > 0 ? t("d.route_record", clears, String.format("%d:%02d", best / 60, best % 60)) : t("d.route_record_none"));
+        return value("route", t("r.route"), v, step > 0 ? RecordSnapshot.MARK_ATTENTION : RecordSnapshot.MARK_NONE, detail);
+    }
+
     // 墓 (grave パッケージ。倒れたときの持ち物の入口)。場所・中身の数・救いの決まりを出す
     private static Row graveRow(ServerPlayer p) {
         List<jp.revati.skyabyss.grave.GraveData.Grave> graves = jp.revati.skyabyss.grave.GraveData.get(p.server).owned(p.getUUID());
@@ -484,6 +512,7 @@ public final class RecordBuilder {
         rows.add(value("clears", t("r.clears"), t("v.times", r.clears), RecordSnapshot.MARK_NONE, List.of(t("d.clears"))));
         rows.addAll(fightBadgeRows(p, titan));
         rows.add(stelesRow(p, titan));
+        rows.add(routeRow(p, titan));
         // 誓い (周回の縛り) の最高の段。称号は飾りだけ (docs/design/21 の 1.8)
         int vowBest = jp.revati.skyabyss.titan.group.FirstRunData.get(p.server).vowBest(p.getUUID(), titan);
         int vowTier = jp.revati.skyabyss.titan.vow.Vows.titleTier(vowBest);

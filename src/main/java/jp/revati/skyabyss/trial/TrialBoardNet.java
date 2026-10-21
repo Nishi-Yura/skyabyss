@@ -12,10 +12,11 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 
-// 試練の板の画面のパケット (docs/design/29 の 2.7・4.2)。決めるのは全部サーバー。クライアントは見せるだけ。
+// 祠の画面と順路のパケット (docs/design/29 の 2.7・4.2、32 の 6 章)。決めるのは全部サーバー。クライアントは見せるだけ。
+//   RouteState (サーバー → グループの人): 順路の今の段 (目的の帯・パーティの札が読む。step 0 = 順路の外)
 //   Open (サーバー → 持ち主): 祠の画面を開く。いまの三つ (名前・類・段・稀さ・修飾の札・済んだか)、歌片の数、順路の記録、図鑑の行、称号
 public final class TrialBoardNet {
-    private static final String PROTOCOL_VERSION = "trial_board-2";
+    private static final String PROTOCOL_VERSION = "trial_board-3";
 
     private TrialBoardNet() {
     }
@@ -31,6 +32,37 @@ public final class TrialBoardNet {
 
     // 図鑑の行 1 つ
     public record Row(String cellId, boolean seen, int cleared, int goals, int modsSeen, int modsTotal) {
+    }
+
+    // 順路の今の段。titan = 巨神の名前、step 0〜4、mid = 中ボスの段、cellId = 今の段の試練 (なければ "")、slot = 枠 (walk/wit/fight)、cycle = 周
+    public record RouteState(String titan, int step, boolean mid, String cellId, String slot, int cycle) implements CustomPacketPayload {
+        public static final Type<RouteState> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "route_state"));
+        public static final StreamCodec<RegistryFriendlyByteBuf, RouteState> STREAM_CODEC = StreamCodec.of(
+                (buf, t) -> {
+                    buf.writeUtf(t.titan, 32);
+                    buf.writeVarInt(t.step);
+                    buf.writeBoolean(t.mid);
+                    buf.writeUtf(t.cellId, 16);
+                    buf.writeUtf(t.slot, 16);
+                    buf.writeVarInt(t.cycle);
+                }, buf -> new RouteState(buf.readUtf(32), buf.readVarInt(), buf.readBoolean(), buf.readUtf(16), buf.readUtf(16), buf.readVarInt()));
+
+        @Override
+        public Type<? extends CustomPacketPayload> type() {
+            return TYPE;
+        }
+    }
+
+    // 歌片を作る (クライアント → サーバー。docs/design/32 の 3.2「祠のまわりの共鳴の炉で、その巨神の素材から作る」)。足りるかはサーバーが確かめる
+    public record CraftShard(String titan) implements CustomPacketPayload {
+        public static final Type<CraftShard> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "shrine_craft_shard"));
+        public static final StreamCodec<RegistryFriendlyByteBuf, CraftShard> STREAM_CODEC = StreamCodec.of(
+                (buf, t) -> buf.writeUtf(t.titan, 32), buf -> new CraftShard(buf.readUtf(32)));
+
+        @Override
+        public Type<? extends CustomPacketPayload> type() {
+            return TYPE;
+        }
     }
 
     // 深淵のつまみ (クライアント → サーバー。docs/design/31 の B04): on = 深淵にする。サーバーが転生 3 回以上かを確かめる
@@ -136,9 +168,15 @@ public final class TrialBoardNet {
     static void register(RegisterPayloadHandlersEvent event) {
         // クライアント側の処理はラムダの中だけで呼ぶので、専用サーバーでも安全
         event.registrar(PROTOCOL_VERSION).playToClient(Open.TYPE, Open.STREAM_CODEC, (p, ctx) -> jp.revati.skyabyss.client.trial.TrialBoardClient.onOpen(p))
+                .playToClient(RouteState.TYPE, RouteState.STREAM_CODEC, (p, ctx) -> jp.revati.skyabyss.client.trial.TrialBoardClient.onRoute(p))
                 .playToServer(AbyssToggle.TYPE, AbyssToggle.STREAM_CODEC, (p, ctx) -> {
                     if (ctx.player() instanceof net.minecraft.server.level.ServerPlayer sp) {
                         ctx.enqueueWork(() -> TrialBoard.toggleAbyss(sp, p.titan(), p.on()));
+                    }
+                })
+                .playToServer(CraftShard.TYPE, CraftShard.STREAM_CODEC, (p, ctx) -> {
+                    if (ctx.player() instanceof net.minecraft.server.level.ServerPlayer sp) {
+                        ctx.enqueueWork(() -> TrialBoard.craftShard(sp, p.titan()));
                     }
                 });
     }

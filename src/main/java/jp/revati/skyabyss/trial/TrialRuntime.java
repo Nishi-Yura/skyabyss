@@ -595,13 +595,31 @@ public final class TrialRuntime {
         for (UUID player : fighters) {
             UUID group = Groups.keyOf(back.getServer(), player);
             BackGroupData.Record r = GroupProgress.of(back, group);
-            if (heartCounted.add(group + "@" + r.epoch())) {
+            String epoch = group + "@" + r.epoch();
+            // 歌片 (順路の鍵。docs/design/32 の 3.2): 心臓を止めるたびに、戦った人に一つ (次の周の分。初回も渡す)
+            if (shardGiven.add(player + "@" + epoch)) {
+                net.minecraft.server.level.ServerPlayer p = back.getServer().getPlayerList().getPlayer(player);
+                String titan = Titans.titanOfBack(back.dimension());
+                if (p != null && titan != null) {
+                    jp.revati.skyabyss.pouch.PouchRouting.placeBack(p, new ItemStack(jp.revati.skyabyss.registry.ModItems.songShard(titan)));
+                    Notice.gain(p, ModText.progress("message.skyabyss.shrine.shard_gained", jp.revati.skyabyss.registry.ModItems.songShard(titan).getDescription()));
+                }
+            }
+            if (heartCounted.add(epoch)) {
                 // 順路の記録 (越えた回数・最速) を控えてから、周を進める (順路の記録も消える)
                 TrialRoute.onHeartStopped(back, r);
                 TrialData.onHeartStopped(r);
+                // 巨神の祠を建てる (まだなら。周回の入口)
+                String titan = Titans.titanOfBack(back.dimension());
+                if (titan != null) {
+                    jp.revati.skyabyss.titan.shrine.TitanShrine.ensure(back.getServer(), titan);
+                }
             }
         }
     }
+
+    // 歌片を渡した (人@グループ@epoch)
+    private static final Set<String> shardGiven = new LinkedHashSet<>();
 
     // 同じ周の同じ心臓で二重に数えない (グループごとに epoch が同じうちは一度)
     private static final Set<String> heartCounted = new LinkedHashSet<>();
@@ -622,6 +640,7 @@ public final class TrialRuntime {
     public static void clearAll() {
         RUNS.clear();
         heartCounted.clear();
+        shardGiven.clear();
         TrialRoute.clearAll();
     }
 }

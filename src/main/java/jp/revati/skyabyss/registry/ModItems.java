@@ -98,6 +98,15 @@ public final class ModItems {
             () -> new MaterialItem(new Item.Properties().rarity(Rarity.RARE), 0xFFD866, "item.skyabyss.resonance_shard_thunder_wing.desc", false));
     public static final DeferredItem<Item> RESONANCE_SHARD_EMBER = ITEMS.register("resonance_shard_ember",
             () -> new MaterialItem(new Item.Properties().rarity(Rarity.RARE), 0xFF9A5A, "item.skyabyss.resonance_shard_ember.desc", false));
+    // 歌片 (順路の鍵。docs/design/32 の 3.2): 巨神の祠で一つ使うと、その巨神の順路へ呼ばれる。巨神ごとに一種類
+    public static final DeferredItem<Item> SONG_SHARD_STONE_WHALE = ITEMS.register("song_shard_stone_whale",
+            () -> new MaterialItem(new Item.Properties().rarity(Rarity.EPIC), 0xE8DDB8, "item.skyabyss.song_shard_stone_whale.desc", true));
+    public static final DeferredItem<Item> SONG_SHARD_TIDE_SHELL = ITEMS.register("song_shard_tide_shell",
+            () -> new MaterialItem(new Item.Properties().rarity(Rarity.EPIC), 0x9FF0E4, "item.skyabyss.song_shard_tide_shell.desc", true));
+    public static final DeferredItem<Item> SONG_SHARD_THUNDER_WING = ITEMS.register("song_shard_thunder_wing",
+            () -> new MaterialItem(new Item.Properties().rarity(Rarity.EPIC), 0xFFE58A, "item.skyabyss.song_shard_thunder_wing.desc", true));
+    public static final DeferredItem<Item> SONG_SHARD_EMBER = ITEMS.register("song_shard_ember",
+            () -> new MaterialItem(new Item.Properties().rarity(Rarity.EPIC), 0xFFB27A, "item.skyabyss.song_shard_ember.desc", true));
     public static final DeferredItem<Item> STONE_WHALE_CORE = ITEMS.register("stone_whale_core",
             () -> new MaterialItem(new Item.Properties().stacksTo(16).rarity(Rarity.EPIC).fireResistant(), 0x7FD6D0,
                     "item.skyabyss.stone_whale_core.desc", true));
@@ -192,6 +201,10 @@ public final class ModItems {
                 output.accept(RESONANCE_SHARD_TIDE_SHELL.get());
                 output.accept(RESONANCE_SHARD_THUNDER_WING.get());
                 output.accept(RESONANCE_SHARD_EMBER.get());
+                output.accept(SONG_SHARD_STONE_WHALE.get());
+                output.accept(SONG_SHARD_TIDE_SHELL.get());
+                output.accept(SONG_SHARD_THUNDER_WING.get());
+                output.accept(SONG_SHARD_EMBER.get());
                 for (jp.revati.skyabyss.item.extra.Element e : jp.revati.skyabyss.item.extra.Element.values()) {
                     output.accept(socketShard(e).get());
                 }
@@ -229,6 +242,27 @@ public final class ModItems {
             .build());
 
     private ModItems() {
+    }
+
+    // 巨神の id に合う歌片 (順路の鍵)。知らない巨神は岩鯨のもの
+    public static Item songShard(String titan) {
+        return switch (titan) {
+            case "tide_shell" -> SONG_SHARD_TIDE_SHELL.get();
+            case "thunder_wing" -> SONG_SHARD_THUNDER_WING.get();
+            case "ember" -> SONG_SHARD_EMBER.get();
+            default -> SONG_SHARD_STONE_WHALE.get();
+        };
+    }
+
+    // 歌片の巨神 (歌片でなければ null)
+    @javax.annotation.Nullable
+    public static String songShardTitan(Item item) {
+        for (String titan : jp.revati.skyabyss.progress.Titans.all()) {
+            if (songShard(titan) == item) {
+                return titan;
+            }
+        }
+        return null;
     }
 
     // 巨神の id (stone_whale / tide_shell / thunder_wing / ember) に合う共鳴の欠片。知らない巨神は岩鯨のもの

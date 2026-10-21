@@ -50,6 +50,12 @@ import software.bernie.geckolib.util.GeckoLibUtil;
 // 当たり判定は小さく、見た目は描画側で 8 倍にする (岩鯨・潮殻と同じ。巨大なモデルには当たり判定を付けない)。
 // 位置の y はモデルの底 (geo の y=0)。geo の 1 単位は 0.5 ブロック。頭は前 (geo の -Z)
 public class EmberTitanEntity extends Entity implements GeoEntity, jp.revati.skyabyss.titan.end.DormantTitan, jp.revati.skyabyss.titan.solid.SolidTitan {
+    // 巨神の見え方 (docs/design/32 の 3.3): 章を終えた人 (とそのパーティでない人) には実体を送らない
+    @Override
+    public boolean broadcastToPlayer(net.minecraft.server.level.ServerPlayer player) {
+        return super.broadcastToPlayer(player) && jp.revati.skyabyss.titan.TitanVisibility.sees(player, jp.revati.skyabyss.progress.Titans.EMBER);
+    }
+
     private static final EntityDataAccessor<Byte> MODE = SynchedEntityData.defineId(EmberTitanEntity.class, EntityDataSerializers.BYTE);
     private static final EntityDataAccessor<Byte> BREATH = SynchedEntityData.defineId(EmberTitanEntity.class, EntityDataSerializers.BYTE);
     // 眠りの姿 (TitanDormancy)。起きていれば -1、眠って土に埋まりはじめてからは tick (600 で止まる)
@@ -352,7 +358,7 @@ public class EmberTitanEntity extends Entity implements GeoEntity, jp.revati.sky
                 moveTicks = 0;
                 setMode(Mode.SINK);
                 removeMouth(level);
-                level.playSound(null, getX(), getY() + 10, getZ(), EmberTitanSetup.RUMBLE.get(), SoundSource.AMBIENT, 12f, 0.5f);
+                jp.revati.skyabyss.titan.TitanVisibility.playSound(level, jp.revati.skyabyss.progress.Titans.EMBER, getX(), getY() + 10, getZ(), EmberTitanSetup.RUMBLE.get(), SoundSource.AMBIENT, 12f, 0.5f);
             }
             case SINK -> tickSink(level);
             default -> {
@@ -488,7 +494,7 @@ public class EmberTitanEntity extends Entity implements GeoEntity, jp.revati.sky
         moveFromY = getY();
         moveTicks = 0;
         setMode(Mode.RISE);
-        level.playSound(null, ridgePoint().x, restGround, ridgePoint().z, EmberTitanSetup.RUMBLE.get(), SoundSource.AMBIENT, 12f, 0.7f);
+        jp.revati.skyabyss.titan.TitanVisibility.playSound(level, jp.revati.skyabyss.progress.Titans.EMBER, ridgePoint().x, restGround, ridgePoint().z, EmberTitanSetup.RUMBLE.get(), SoundSource.AMBIENT, 12f, 0.7f);
         // 四章の中盤の出来事: ワールドで初めて浮かぶ夜だけ (粒・音・揺れ。ブロックは触らない)
         EmberRising.onRiseStart(level, this);
     }
@@ -552,7 +558,7 @@ public class EmberTitanEntity extends Entity implements GeoEntity, jp.revati.sky
             moveTicks = 0;
             setMode(Mode.SINK);
             removeMouth(level);
-            level.playSound(null, getX(), getY() + 10, getZ(), EmberTitanSetup.RUMBLE.get(), SoundSource.AMBIENT, 12f, 0.6f);
+            jp.revati.skyabyss.titan.TitanVisibility.playSound(level, jp.revati.skyabyss.progress.Titans.EMBER, getX(), getY() + 10, getZ(), EmberTitanSetup.RUMBLE.get(), SoundSource.AMBIENT, 12f, 0.6f);
             return;
         }
         Breath before = breathAt(breathTick);
@@ -562,9 +568,9 @@ public class EmberTitanEntity extends Entity implements GeoEntity, jp.revati.sky
         Vec3 mouth = mouthCenter();
         if (now != before || breathTick == 1) {
             if (now == Breath.IN) {
-                level.playSound(null, mouth.x, mouth.y, mouth.z, EmberTitanSetup.BREATH_IN.get(), SoundSource.AMBIENT, 6f, 1.0f);
+                jp.revati.skyabyss.titan.TitanVisibility.playSound(level, jp.revati.skyabyss.progress.Titans.EMBER, mouth.x, mouth.y, mouth.z, EmberTitanSetup.BREATH_IN.get(), SoundSource.AMBIENT, 6f, 1.0f);
             } else if (now == Breath.OUT) {
-                level.playSound(null, mouth.x, mouth.y, mouth.z, EmberTitanSetup.BREATH_OUT.get(), SoundSource.AMBIENT, 6f, 1.0f);
+                jp.revati.skyabyss.titan.TitanVisibility.playSound(level, jp.revati.skyabyss.progress.Titans.EMBER, mouth.x, mouth.y, mouth.z, EmberTitanSetup.BREATH_OUT.get(), SoundSource.AMBIENT, 6f, 1.0f);
             }
         }
         breathOnPlayers(level, now);
@@ -600,7 +606,8 @@ public class EmberTitanEntity extends Entity implements GeoEntity, jp.revati.sky
         double fx = EmberGround.forwardX(yaw);
         double fz = EmberGround.forwardZ(yaw);
         for (ServerPlayer p : level.getEntitiesOfClass(ServerPlayer.class, new AABB(mouth, mouth).inflate(FAN_REACH - MOUTH_FORWARD + 4, 16, FAN_REACH - MOUTH_FORWARD + 4))) {
-            if (p.isSpectator() || (p.isCreative() && p.getAbilities().flying) || !inBreathFan(p.getX(), p.getY(), p.getZ())) {
+            if (p.isSpectator() || (p.isCreative() && p.getAbilities().flying) || !inBreathFan(p.getX(), p.getY(), p.getZ())
+                    || !jp.revati.skyabyss.titan.TitanVisibility.sees(p, jp.revati.skyabyss.progress.Titans.EMBER)) {
                 continue;
             }
             if (now == Breath.IN) {
@@ -757,7 +764,8 @@ public class EmberTitanEntity extends Entity implements GeoEntity, jp.revati.sky
     private void rumble(ServerLevel level, double range, float volume, float shake) {
         Vec3 ridge = ridgePoint();
         for (ServerPlayer p : Players.snapshot(level.players())) {
-            if (p.isSpectator() || Math.hypot(p.getX() - ridge.x, p.getZ() - ridge.z) > range) {
+            if (p.isSpectator() || Math.hypot(p.getX() - ridge.x, p.getZ() - ridge.z) > range
+                    || !jp.revati.skyabyss.titan.TitanVisibility.sees(p, jp.revati.skyabyss.progress.Titans.EMBER)) {
                 continue;
             }
             p.playNotifySound(EmberTitanSetup.RUMBLE.get(), SoundSource.AMBIENT, volume, 0.8f + random.nextFloat() * 0.2f);

@@ -83,10 +83,15 @@ public abstract class TitanKeeper<T extends Entity> {
         return false;
     }
 
-    // 呼び直しの宛先: 優先する人がいればその中から、いなければ誰か一人 (観戦者・倒れている人を除く)
+    // 呼び直しの宛先: 優先する人がいればその中から、いなければ誰か一人 (観戦者・倒れている人を除く)。
+    // この巨神が見えない人 (章を終えた人。docs/design/32 の 3.3。名前は slotId) のところへは来ない
     protected ServerPlayer pickTarget(ServerLevel level) {
-        List<ServerPlayer> preferred = level.players().stream().filter(p -> eligible(p) && preferred(p)).toList();
-        return preferred.isEmpty() ? randomEligible(level) : preferred.get(level.random.nextInt(preferred.size()));
+        List<ServerPlayer> seeing = level.players().stream().filter(p -> eligible(p) && TitanVisibility.sees(p, slotId)).toList();
+        List<ServerPlayer> preferred = seeing.stream().filter(this::preferred).toList();
+        if (!preferred.isEmpty()) {
+            return preferred.get(level.random.nextInt(preferred.size()));
+        }
+        return seeing.isEmpty() ? null : seeing.get(level.random.nextInt(seeing.size()));
     }
 
     protected boolean inVoyage(T titan) {

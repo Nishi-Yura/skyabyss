@@ -42,6 +42,7 @@ public class TrialBoardScreen extends Screen implements jp.revati.skyabyss.clien
     private static final int H = 244;
 
     private static final int ABYSS_W = 118;
+    private static final int CRAFT_W = 86;
 
     private TrialBoardNet.Open data;
     private int tab;
@@ -99,6 +100,12 @@ public class TrialBoardScreen extends Screen implements jp.revati.skyabyss.clien
                     tab = t;
                     return true;
                 }
+            }
+            // 歌片を作る (祠の炉。足りるかはサーバーが確かめる)
+            int cx = px + W - 12 - ABYSS_W - 6 - CRAFT_W;
+            if (mx >= cx && mx < cx + CRAFT_W) {
+                net.neoforged.neoforge.network.PacketDistributor.sendToServer(new TrialBoardNet.CraftShard(data.titan()));
+                return true;
             }
             // 深淵のつまみ (転生 3 回以上の人だけ押せる。グループごと。サーバーが確かめる)
             int ax = px + W - 12 - ABYSS_W;
@@ -197,6 +204,7 @@ public class TrialBoardScreen extends Screen implements jp.revati.skyabyss.clien
             g.drawString(font, label, tx + 52 - font.width(label) / 2, py + 38, argb(1f, on ? GOLD : DIM), false);
         }
         renderAbyssToggle(g, font, px + W - 12 - ABYSS_W, py + 34, mouseX, mouseY);
+        renderCraft(g, font, px + W - 12 - ABYSS_W - 6 - CRAFT_W, py + 34, mouseX, mouseY);
         if (tab == 0) {
             renderNow(g, font, px, py);
         } else {
@@ -204,6 +212,18 @@ public class TrialBoardScreen extends Screen implements jp.revati.skyabyss.clien
         }
         // 足: 順路の記録・歌片・称号
         renderFoot(g, font, px, py);
+    }
+
+    // 歌片を作るボタン (祠の東の縁の共鳴の炉)
+    private void renderCraft(GuiGraphics g, Font font, int x, int y, int mx, int my) {
+        boolean hover = mx >= x && mx < x + CRAFT_W && my >= y && my < y + 16;
+        frame(g, x, y, CRAFT_W, 16, hover ? GOLD : 0x4A4A2C, hover ? 0x2A2618 : CARD);
+        Component label = Component.translatable("gui.skyabyss.shrine.craft");
+        g.drawString(font, label, x + CRAFT_W / 2 - font.width(label) / 2, y + 4, argb(1f, hover ? GOLD : TEAL), false);
+        if (hover) {
+            g.renderTooltip(font, Component.translatable("gui.skyabyss.shrine.craft_tip", jp.revati.skyabyss.trial.TrialBoard.SHARD_MATERIALS,
+                    jp.revati.skyabyss.trial.TrialBoard.SHARD_RESONANCE), mx, my);
+        }
     }
 
     // 深淵のつまみ: 閉じている (転生 3 回未満) は灰、選んでいないは暗い縁、選んでいるは赤い縁で脈打つ

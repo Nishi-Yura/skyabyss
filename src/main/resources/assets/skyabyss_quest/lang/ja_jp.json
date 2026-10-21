@@ -174,5 +174,11 @@
   "quest.skyabyss.daily_tide_rounds.unlock_hint": "村外れの旅人と話すと、受けられる",
   "quest.skyabyss.weekly_heart_again.unlock_hint": "村外れの旅人と話すと、受けられる",
   "quest.skyabyss.weekly_storm_heart.unlock_hint": "村外れの旅人と話すと、受けられる",
-  "quest.skyabyss.weekly_tide_heart.unlock_hint": "村外れの旅人と話すと、受けられる"
+  "quest.skyabyss.weekly_tide_heart.unlock_hint": "村外れの旅人と話すと、受けられる",
+  "quest.skyabyss.weekly_route.title": "順路を越える",
+  "quest.skyabyss.weekly_route.summary": "巨神の祠から順路に挑み、心臓まで越える。どの巨神でもよい。",
+  "quest.skyabyss.weekly_route.done": "順路の果てで、心臓が止まった。",
+  "quest.skyabyss.weekly_route.route.journal": "板の紙：「祠の歌に呼ばれて、もう一度背を渡ってきてほしい。——鯨追い」",
+  "quest.skyabyss.weekly_route.route.route": "順路を心臓まで越える",
+  "quest.skyabyss.weekly_route.unlock_hint": "巨神の心臓を一度止めると、受けられる"
 }

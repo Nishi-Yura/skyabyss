@@ -32,6 +32,12 @@ import net.minecraft.world.phys.Vec3;
 // 半径 2.5、地面から羽根の門 (底から 25) の高さまで。中に入った人を Updraft.lift で持ち上げ、頂で白い閃光と雷鳴のあと背中へ渡す。
 // 巨神が止まっているあいだだけ在る (飛び立てば消える)。保存しない (StormSetup で noSave)。
 public class GaleColumnEntity extends Entity {
+    // 巨神の見え方 (docs/design/32 の 3.3): 章を終えた人 (とそのパーティでない人) には実体を送らない
+    @Override
+    public boolean broadcastToPlayer(net.minecraft.server.level.ServerPlayer player) {
+        return super.broadcastToPlayer(player) && jp.revati.skyabyss.titan.TitanVisibility.sees(player, jp.revati.skyabyss.progress.Titans.THUNDER_WING);
+    }
+
     public static final double RADIUS = 2.5;
     // 入れる広さ (見える柱・光の枠より少し広く。踏み込めば確実に持ち上がる)
     public static final double ENTRY_RADIUS = RADIUS + 1.5;
@@ -105,7 +111,7 @@ public class GaleColumnEntity extends Entity {
         }
         Set<UUID> inside = new HashSet<>();
         for (ServerPlayer p : java.util.List.copyOf(level.players())) { // arrive() で別の次元へ移すので写しを回す
-            if (!TitanKeeper.eligible(p) || !inColumn(p.getX(), p.getY(), p.getZ())) {
+            if (!TitanKeeper.eligible(p) || !inColumn(p.getX(), p.getY(), p.getZ()) || !jp.revati.skyabyss.titan.TitanVisibility.sees(p, Titans.THUNDER_WING)) {
                 continue;
             }
             inside.add(p.getUUID());

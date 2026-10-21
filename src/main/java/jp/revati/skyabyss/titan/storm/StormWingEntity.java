@@ -42,6 +42,12 @@ import software.bernie.geckolib.util.GeckoLibUtil;
 // 当たり判定は小さく、見た目は描画側で 8 倍にする (潮殻と同じ)。位置の y はモデルの底 (geo の y=0)
 // 地上の人には、この中心の周りを回る巨神として見える。地形は変えない (エンティティと粒だけ)
 public class StormWingEntity extends Entity implements GeoEntity, jp.revati.skyabyss.titan.end.DormantTitan, jp.revati.skyabyss.titan.solid.SolidTitan {
+    // 巨神の見え方 (docs/design/32 の 3.3): 章を終えた人 (とそのパーティでない人) には実体を送らない
+    @Override
+    public boolean broadcastToPlayer(net.minecraft.server.level.ServerPlayer player) {
+        return super.broadcastToPlayer(player) && jp.revati.skyabyss.titan.TitanVisibility.sees(player, jp.revati.skyabyss.progress.Titans.THUNDER_WING);
+    }
+
     private static final EntityDataAccessor<Byte> MODE = SynchedEntityData.defineId(StormWingEntity.class, EntityDataSerializers.BYTE);
     private static final EntityDataAccessor<Boolean> LOOK = SynchedEntityData.defineId(StormWingEntity.class, EntityDataSerializers.BOOLEAN);
     // 眠りの姿 (TitanDormancy)。起きていれば -1、眠って峰へ向かいはじめてからは tick (600 で止まる)
@@ -328,7 +334,7 @@ public class StormWingEntity extends Entity implements GeoEntity, jp.revati.skya
                 departing = false;
                 entityData.set(REST, -1);
                 hasCover = false;
-                level.playSound(null, getX(), getY(), getZ(), StormSetup.WING_CALL.get(), SoundSource.AMBIENT, 12f, 0.8f);
+                jp.revati.skyabyss.titan.TitanVisibility.playSound(level, jp.revati.skyabyss.progress.Titans.THUNDER_WING, getX(), getY(), getZ(), StormSetup.WING_CALL.get(), SoundSource.AMBIENT, 12f, 0.8f);
                 beginTakeOff(level);
             }
             return false;
@@ -372,7 +378,7 @@ public class StormWingEntity extends Entity implements GeoEntity, jp.revati.skya
         if (!departing) {
             departing = true;
             setMode(Mode.TAKE_OFF);
-            level.playSound(null, getX(), getY(), getZ(), StormSetup.WING_CALL.get(), SoundSource.AMBIENT, 16f, 0.7f);
+            jp.revati.skyabyss.titan.TitanVisibility.playSound(level, jp.revati.skyabyss.progress.Titans.THUNDER_WING, getX(), getY(), getZ(), StormSetup.WING_CALL.get(), SoundSource.AMBIENT, 16f, 0.7f);
         }
         float ramp = jp.revati.skyabyss.titan.end.TitanDormancy.departProgress(age);
         double yaw = Math.toRadians(getYRot());
@@ -561,7 +567,7 @@ public class StormWingEntity extends Entity implements GeoEntity, jp.revati.skya
         setMode(Mode.PERCH);
         // 止まり木には 20 分とどまる (夕立の刻の長さでは去らない。TitanStay)
         forcedTicks = TitanStay.TICKS;
-        level.playSound(null, getX(), getY(), getZ(), StormSetup.WING_CALL.get(), SoundSource.AMBIENT, 12f, 0.9f);
+        jp.revati.skyabyss.titan.TitanVisibility.playSound(level, jp.revati.skyabyss.progress.Titans.THUNDER_WING, getX(), getY(), getZ(), StormSetup.WING_CALL.get(), SoundSource.AMBIENT, 12f, 0.9f);
     }
 
     private final TitanStay.Warner stayWarner = new TitanStay.Warner();

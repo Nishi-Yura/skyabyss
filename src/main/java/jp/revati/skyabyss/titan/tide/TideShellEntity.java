@@ -43,6 +43,12 @@ import software.bernie.geckolib.util.GeckoLibUtil;
 // 巨神での移動 (09 の 16 章): TravelTitan を実装する。旅の間は自分の動き (巡航・干潮) を止め、動きは旅の操縦 (titan.travel.SeaVoyage) が決める。
 // 乗り場は潮門の前の水 (泡の柱)、座席は甲羅の頂
 public class TideShellEntity extends Entity implements GeoEntity, TravelTitan, jp.revati.skyabyss.titan.end.DormantTitan, jp.revati.skyabyss.titan.solid.SolidTitan {
+    // 巨神の見え方 (docs/design/32 の 3.3): 章を終えた人 (とそのパーティでない人) には実体を送らない
+    @Override
+    public boolean broadcastToPlayer(net.minecraft.server.level.ServerPlayer player) {
+        return super.broadcastToPlayer(player) && jp.revati.skyabyss.titan.TitanVisibility.sees(player, jp.revati.skyabyss.progress.Titans.TIDE_SHELL);
+    }
+
     private static final EntityDataAccessor<Byte> MODE = SynchedEntityData.defineId(TideShellEntity.class, EntityDataSerializers.BYTE);
     private static final EntityDataAccessor<Boolean> LOOK = SynchedEntityData.defineId(TideShellEntity.class, EntityDataSerializers.BOOLEAN);
     // 眠りの姿 (TitanDormancy)。起きていれば -1、眠って沈みはじめてからは tick (600 で止まる)
@@ -289,7 +295,7 @@ public class TideShellEntity extends Entity implements GeoEntity, TravelTitan, j
         }
         if (--songCooldown <= 0) {
             songCooldown = 2400 + random.nextInt(2400);
-            level.playSound(null, getX(), level.getSeaLevel(), getZ(), TideSetup.SONG.get(), SoundSource.AMBIENT, 16f, 0.9f + random.nextFloat() * 0.1f);
+            jp.revati.skyabyss.titan.TitanVisibility.playSound(level, jp.revati.skyabyss.progress.Titans.TIDE_SHELL, getX(), level.getSeaLevel(), getZ(), TideSetup.SONG.get(), SoundSource.AMBIENT, 16f, 0.9f + random.nextFloat() * 0.1f);
         }
     }
 
@@ -306,7 +312,7 @@ public class TideShellEntity extends Entity implements GeoEntity, TravelTitan, j
                 setMode(Mode.CRUISE);
                 hasTarget = false;
                 songCooldown = 400;
-                level.playSound(null, getX(), level.getSeaLevel(), getZ(), TideSetup.SONG.get(), SoundSource.AMBIENT, 16f, 0.8f);
+                jp.revati.skyabyss.titan.TitanVisibility.playSound(level, jp.revati.skyabyss.progress.Titans.TIDE_SHELL, getX(), level.getSeaLevel(), getZ(), TideSetup.SONG.get(), SoundSource.AMBIENT, 16f, 0.8f);
             }
             return false;
         }
@@ -364,7 +370,7 @@ public class TideShellEntity extends Entity implements GeoEntity, TravelTitan, j
         steer(targetX, targetZ, cruiseHeight(level), CRUISE_SPEED, CRUISE_RISE);
         if (--stepCooldown <= 0) {
             stepCooldown = 160 + random.nextInt(160);
-            level.playSound(null, getX(), getY() + 4, getZ(), TideSetup.STEP.get(), SoundSource.AMBIENT, 5f, 0.8f + random.nextFloat() * 0.2f);
+            jp.revati.skyabyss.titan.TitanVisibility.playSound(level, jp.revati.skyabyss.progress.Titans.TIDE_SHELL, getX(), getY() + 4, getZ(), TideSetup.STEP.get(), SoundSource.AMBIENT, 5f, 0.8f + random.nextFloat() * 0.2f);
         }
         if (tickCount % 200 == 0) {
             tryGather(level);
@@ -445,7 +451,7 @@ public class TideShellEntity extends Entity implements GeoEntity, TravelTitan, j
         hasLastRest = true;
         lastRestX = getX();
         lastRestZ = getZ();
-        level.playSound(null, getX(), level.getSeaLevel(), getZ(), TideSetup.SONG.get(), SoundSource.AMBIENT, 16f, 0.8f);
+        jp.revati.skyabyss.titan.TitanVisibility.playSound(level, jp.revati.skyabyss.progress.Titans.TIDE_SHELL, getX(), level.getSeaLevel(), getZ(), TideSetup.SONG.get(), SoundSource.AMBIENT, 16f, 0.8f);
     }
 
     private final TitanStay.Warner stayWarner = new TitanStay.Warner();
@@ -464,7 +470,7 @@ public class TideShellEntity extends Entity implements GeoEntity, TravelTitan, j
             forcedTicks = 0;
             setMode(Mode.CRUISE);
             hasTarget = false;
-            level.playSound(null, getX(), level.getSeaLevel(), getZ(), TideSetup.SURF.get(), SoundSource.AMBIENT, 8f, 0.8f);
+            jp.revati.skyabyss.titan.TitanVisibility.playSound(level, jp.revati.skyabyss.progress.Titans.TIDE_SHELL, getX(), level.getSeaLevel(), getZ(), TideSetup.SURF.get(), SoundSource.AMBIENT, 8f, 0.8f);
             return;
         }
         {
@@ -487,7 +493,7 @@ public class TideShellEntity extends Entity implements GeoEntity, TravelTitan, j
             Vec3 d = dockCenter();
             AABB around = new AABB(d, d).inflate(DOCK_RADIUS + 14);
             for (ServerPlayer player : level.getEntitiesOfClass(ServerPlayer.class, around)) {
-                if (TitanKeeper.eligible(player) && inGateMouth(player)) {
+                if (TitanKeeper.eligible(player) && inGateMouth(player) && jp.revati.skyabyss.titan.TitanVisibility.sees(player, jp.revati.skyabyss.progress.Titans.TIDE_SHELL)) {
                     TideTravel.boardFromGate(player, this);
                 }
             }
@@ -778,7 +784,7 @@ public class TideShellEntity extends Entity implements GeoEntity, TravelTitan, j
         entityData.set(LOOK, false);
         if (moving && --stepCooldown <= 0) {
             stepCooldown = 100 + random.nextInt(80);
-            level.playSound(null, getX(), level.getSeaLevel(), getZ(), TideSetup.STEP.get(), SoundSource.AMBIENT, 6f, 0.8f + random.nextFloat() * 0.2f);
+            jp.revati.skyabyss.titan.TitanVisibility.playSound(level, jp.revati.skyabyss.progress.Titans.TIDE_SHELL, getX(), level.getSeaLevel(), getZ(), TideSetup.STEP.get(), SoundSource.AMBIENT, 6f, 0.8f + random.nextFloat() * 0.2f);
         }
     }
 

@@ -1,0 +1,7 @@
+{
+  "parent": "skyabyss:block/titan_waymark",
+  "textures": {
+    "cap": "minecraft:block/oxidized_cut_copper",
+    "base": "minecraft:block/polished_deepslate"
+  }
+}

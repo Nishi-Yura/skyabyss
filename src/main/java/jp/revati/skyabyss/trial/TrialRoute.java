@@ -77,6 +77,8 @@ public final class TrialRoute {
     public static final int TICK_EVERY = 10;
     public static final int LAST_STEP = 4;
     public static final String HEART_REST = "heart";
+    // 順路を越えた (心臓を止めた) ときのクエストの合図 (自由なモードの依頼「順路を越える」)
+    public static final String QUEST_SIGNAL = "route_cleared";
 
     private record Pending(UUID group, String titan, int step, boolean mid, long due) {
     }
@@ -279,6 +281,7 @@ public final class TrialRoute {
         ENTRY_START.remove(group);
         EMPTY_SINCE.remove(group);
         CLEARED_KEYS.removeIf(s -> s.startsWith(group + "|"));
+        sync(back, group);
     }
 
     // ---------------------------------------------------------------- 始める・進める・運ぶ
@@ -307,6 +310,10 @@ public final class TrialRoute {
         TrialSlot.assign(back, r);
         r.changed();
         ENTRY_START.remove(group);
+        for (ServerPlayer p : party) {
+            // 入口が開く (既存の石の音)
+            p.playNotifySound(SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.PLAYERS, 1f, 0.6f);
+        }
         SkyAbyss.LOGGER.info("Route of the {} started for group {} ({}, party {}, slot {})", titan, group, ids, party.size(), TrialSlot.of(r));
         TrialRuntime.syncGates(back, group, titan, draw);
         carry(back, group, titan, 1, false);
@@ -374,6 +381,26 @@ public final class TrialRoute {
         SkyAbyss.LOGGER.info("Route of the {}: group {} beat the mid-boss", titan, group);
     }
 
+    // グループのオンラインの人へ、順路の今の段を送る (目的の帯・パーティの札。docs/design/32 の 6 章)
+    public static void sync(ServerLevel back, UUID group) {
+        String titan = Titans.titanOfBack(back.dimension());
+        if (titan == null) {
+            return;
+        }
+        BackGroupData.Record r = BackGroupData.get(back).peek(group);
+        int step = r == null ? 0 : step(r);
+        boolean mid = r != null && r.getInt(MID) > 0;
+        TrialDraw.Draw draw = step > 0 ? TrialData.current(back, group) : null;
+        Def d = draw == null || mid ? null : defOf(draw, step);
+        TrialBoardNet.RouteState state = new TrialBoardNet.RouteState(titan, step, mid, d == null ? "" : d.id(), d == null ? "" : d.slot().id,
+                draw == null ? 0 : draw.cycle());
+        for (ServerPlayer p : Players.snapshot(back.getServer().getPlayerList().getPlayers())) {
+            if (Groups.isMember(p, group) && !(p instanceof net.neoforged.neoforge.common.util.FakePlayer)) {
+                net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(p, state);
+            }
+        }
+    }
+
     private static void queue(ServerLevel back, UUID group, String titan, int step, boolean mid) {
         PENDING.put(group, new Pending(group, titan, step, mid, back.getGameTime() + CARRY_DELAY));
     }
@@ -434,6 +461,7 @@ public final class TrialRoute {
             RouteCard.show(p, back, group, titan, draw, step, mid);
         }
         back.playSound(null, at.getX() + 0.5, at.getY(), at.getZ() + 0.5, SoundEvents.BEACON_ACTIVATE, SoundSource.PLAYERS, 0.8f, 1.6f);
+        sync(back, group);
         SkyAbyss.LOGGER.info("Route of the {}: group {} carried to step {}{} ({}) x{}", titan, group, step, mid ? " (mid)" : "", rest, n);
         return n;
     }
@@ -569,6 +597,10 @@ public final class TrialRoute {
             if (r.getInt(MID) > 0 && !PENDING.containsKey(group) && TrialMidBoss.defeated(back, group, titan)) {
                 onMidBossDefeated(back, group, titan);
             }
+            if (now % 200 == 0) {
+                // 入り直した人・ログインし直した人にも、今の段を送り直す
+                sync(back, group);
+            }
             if (!members(back, group).isEmpty() || PENDING.containsKey(group)) {
                 EMPTY_SINCE.remove(group);
                 continue;
@@ -590,6 +622,8 @@ public final class TrialRoute {
             fullReset(back, group, titan);
         }
         TrialRuntime.stopGroup(back, group);
+        // 誓いは順路が終わると降りる (docs/design/32 の 3.1)
+        jp.revati.skyabyss.titan.vow.Vows.lift(back, group);
     }
 
     // 巨神ごとのグループのリセット (戦い・敵・部屋の持ち主・進み。人は動かさない形で呼ぶ)。順路の記録も消える (onGroupReset)
@@ -646,6 +680,7 @@ public final class TrialRoute {
             if (!p.getUUID().equals(by.getUUID())) {
                 p.sendSystemMessage(Component.empty().append(ask).append(" ").append(yesBtn).append(" ").append(noBtn));
                 Notice.bar(p, ask);
+                p.playNotifySound(SoundEvents.BELL_RESONATE, SoundSource.PLAYERS, 0.7f, 0.8f);
             }
         }
         Notice.hint(by, "message.skyabyss.route.abandon_proposed");
@@ -735,6 +770,10 @@ public final class TrialRoute {
         for (UUID id : party(r)) {
             ServerPlayer p = back.getServer().getPlayerList().getPlayer(id);
             boolean best = codex.addRoute(id, titan, t);
+            if (p != null) {
+                // 自由なモードの依頼「順路を越える」(07 の 8 章)
+                jp.revati.skyabyss.quest.Quests.signal(p, QUEST_SIGNAL);
+            }
             if (p != null && best) {
                 Notice.hint(p, "message.skyabyss.route.best", String.format("%d:%02d", t / 20 / 60, t / 20 % 60));
             }

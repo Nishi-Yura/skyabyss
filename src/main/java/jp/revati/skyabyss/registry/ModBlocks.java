@@ -55,6 +55,10 @@ public final class ModBlocks {
             () -> new jp.revati.skyabyss.grave.GraveBlock(unbreakable(MapColor.COLOR_GREEN).sound(SoundType.MOSS).lightLevel(state -> 5)
                     .pushReaction(net.minecraft.world.level.material.PushReaction.BLOCK)));
 
+    // 巨神の祠の碑 (docs/design/32 の 3.1)。地上に巨神ごとに一つ。壊せない。右クリックで祠の画面、歌片を持って長押しで順路へ
+    public static final DeferredBlock<jp.revati.skyabyss.titan.shrine.TitanShrineBlock> TITAN_SHRINE = BLOCKS.register("titan_shrine",
+            () -> new jp.revati.skyabyss.titan.shrine.TitanShrineBlock(unbreakable(MapColor.DEEPSLATE).noOcclusion().lightLevel(state -> 9)));
+
     // ---- 遺物ブロック (見た目だけ巨神ごと: titan = whale / tide / storm / ember。挙動はバニラの箱・焚き火・レバー等と同じ)
     // 遺物の箱 (宝のキャッシュ)。光る錠。OPEN で蓋が上がる
     public static final DeferredBlock<jp.revati.skyabyss.relic.RelicCacheBlock> RELIC_CACHE = BLOCKS.register("relic_cache",

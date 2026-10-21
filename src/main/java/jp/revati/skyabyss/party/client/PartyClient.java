@@ -127,7 +127,11 @@ public final class PartyClient {
         for (PartyNetwork.Member m : others(mc)) {
             g.fill(x - 2, y - 2, x + W + 2, y + 15, 0x60000000);
             int color = !m.online() ? 0x707070 : m.sameDim() ? 0xE8F4FF : 0x9AA6B8;
-            String name = (m.leader() ? "★" : "") + m.name();
+            // 順路の段 (docs/design/32 の 6 章): 同じ背にいる仲間には、いまの段の番号を添える
+            String step = m.sameDim() && jp.revati.skyabyss.client.trial.TrialBoardClient.routeActive(mc)
+                    ? net.minecraft.network.chat.Component.translatable("gui.skyabyss.party.route_step", jp.revati.skyabyss.client.trial.TrialBoardClient.route().step()).getString()
+                    : "";
+            String name = step + (m.leader() ? "★" : "") + m.name();
             g.drawString(font, font.plainSubstrByWidth(name, W - 28), x, y, color, true);
             if (m.online()) {
                 String lv = "Lv" + m.level();

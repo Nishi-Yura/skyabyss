@@ -129,6 +129,13 @@ public final class YoungReach {
             }
             list.add(d);
         }
+        // 巨神の祠 (docs/design/32 の 3.1。心臓を止めた巨神の祠だけ。祠は時間・天気・眠りで閉じない)
+        for (String titan : Titans.all()) {
+            BlockPos shrine = jp.revati.skyabyss.titan.shrine.TitanShrine.posOf(player.server, titan);
+            if (shrine != null && jp.revati.skyabyss.progress.Progression.stopped(player.server, player.getUUID(), titan)) {
+                list.add(build(level, kind, origin, "s:" + titan, titan, "", shrine.south(3), 3, true, bond));
+            }
+        }
         return list;
     }
 

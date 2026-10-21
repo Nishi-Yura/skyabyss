@@ -28,7 +28,8 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
 
-// /vow : 誓いの選び方 (周回の縛り。docs/design/21 の 1.8)。チャットの一覧の [+] [-] を押して選ぶ。
+// /vow : 誓いの選び方 (周回の縛り。docs/design/21 の 1.8)。巨神の祠 (しゃがんで右クリック) で出る一覧の [+] [-] を押して選ぶ。
+// 選び直せるのは、その巨神の祠のそば (docs/design/32 の 3.1。背の中では変えられない) で、順路が動いていないあいだ
 //   /vow                          今いる背中の巨神 (背中の外では、周回の巨神のうち最初の一つ) の一覧
 //   /vow <巨神>                   その巨神の一覧
 //   /vow <巨神> add|remove <誓い>  足す・外す (最大 3 つ。選べるのは周回で、試練を進める前まで)
@@ -85,16 +86,19 @@ public final class VowCommands {
         }
         UUID group = Groups.keyOf(p);
         Vows.Result can = Vows.canChange(p.server, group, titan);
+        boolean here = jp.revati.skyabyss.titan.shrine.TitanShrine.near(p, titan);
         List<Vow> active = Vows.active(Vows.backLevel(p.server, titan), group);
         p.sendSystemMessage(ModText.title("message.skyabyss.vow.menu_head").copy().append(Component.literal(" ")).append(Progression.titanName(titan)));
         if (can != Vows.Result.OK) {
             p.sendSystemMessage(ModText.hint("message.skyabyss.vow.closed." + can.name().toLowerCase()));
+        } else if (!here) {
+            p.sendSystemMessage(ModText.hint("message.skyabyss.vow.closed.shrine"));
         }
         for (Vow v : Vows.all()) {
             boolean on = active.contains(v);
             MutableComponent line = Component.literal(on ? "[x] " : "[ ] ").append(Component.translatable(v.nameKey()))
                     .append(Component.literal("  +" + v.points() + "  ")).append(ModText.hint(v.descKey()));
-            if (can == Vows.Result.OK) {
+            if (can == Vows.Result.OK && here) {
                 String cmd = "/vow " + titan + (on ? " remove " : " add ") + v.id();
                 line.append(Component.literal(on ? "  [-]" : "  [+]")
                         .withStyle(Style.EMPTY.withColor(on ? 0xD9779A : 0x9FE8FF).withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, cmd))));
@@ -111,6 +115,10 @@ public final class VowCommands {
         String titan = StringArgumentType.getString(ctx, "titan");
         String id = StringArgumentType.getString(ctx, "vow");
         UUID group = Groups.keyOf(p);
+        if (!jp.revati.skyabyss.titan.shrine.TitanShrine.near(p, titan)) {
+            p.sendSystemMessage(ModText.deny("message.skyabyss.vow.closed.shrine"));
+            return 0;
+        }
         Vows.Result r = add ? Vows.add(p.server, group, titan, id) : Vows.remove(p.server, group, titan, id);
         if (r == Vows.Result.OK) {
             Vow v = Vows.get(id);
@@ -130,6 +138,10 @@ public final class VowCommands {
     private static int clear(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
         ServerPlayer p = ctx.getSource().getPlayerOrException();
         String titan = StringArgumentType.getString(ctx, "titan");
+        if (!jp.revati.skyabyss.titan.shrine.TitanShrine.near(p, titan)) {
+            p.sendSystemMessage(ModText.deny("message.skyabyss.vow.closed.shrine"));
+            return 0;
+        }
         Vows.Result r = Vows.clear(p.server, Groups.keyOf(p), titan);
         if (r != Vows.Result.OK) {
             p.sendSystemMessage(ModText.deny("message.skyabyss.vow.fail." + r.name().toLowerCase()));

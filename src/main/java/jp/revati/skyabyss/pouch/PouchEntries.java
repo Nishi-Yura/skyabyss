@@ -109,7 +109,7 @@ public final class PouchEntries {
         Item key = StorySetup.SKY_KEY.get();
         // 使う道具: 呼び笛・呼び貝 (守る品の一覧から)、潮見の貝、風見鶏
         for (Item item : Keepsakes.guardedItems()) {
-            if (item != fragment && item != key && !isCore(item)) {
+            if (item != fragment && item != key && !isCore(item) && ModItems.songShardTitan(item) == null) {
                 add(list, item, Category.TOOL, 1, true, false);
             }
         }
@@ -122,6 +122,10 @@ public final class PouchEntries {
             if (isCore(item)) {
                 add(list, item, Category.KEY, 99, false, false);
             }
+        }
+        // 歌片 (順路の鍵。巨神ごと)
+        for (String titan : jp.revati.skyabyss.progress.Titans.all()) {
+            add(list, ModItems.songShard(titan), Category.KEY, 64, false, false);
         }
         // 共鳴
         add(list, ModItems.RESONANCE_CRYSTAL.get(), Category.RESONANCE, 999, false, false);

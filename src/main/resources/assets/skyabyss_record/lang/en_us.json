@@ -261,5 +261,15 @@
   "skyabyss_record.v.fight_none": "Not won yet",
   "skyabyss_record.v.fight_oath": "Unscarred Oath",
   "skyabyss_record.v.fight_steady": "Steady Stride (%s)",
-  "skyabyss_record.v.fight_falls": "No badge (%s falls)"
+  "skyabyss_record.v.fight_falls": "No badge (%s falls)",
+  "skyabyss_record.r.route": "Route",
+  "skyabyss_record.v.route_idle": "Not started",
+  "skyabyss_record.v.route_step": "Trial %s of %s",
+  "skyabyss_record.v.route_mid": "Mid-boss",
+  "skyabyss_record.v.route_heart": "To the heart",
+  "skyabyss_record.d.route": "Cross them one by one: walk, wit, fight, mid-boss, heart. Cycle %s:",
+  "skyabyss_record.d.route_line": "%s. %s  %s",
+  "skyabyss_record.d.route_record": "Cleared %s times, best %s",
+  "skyabyss_record.d.route_record_none": "Not cleared yet",
+  "skyabyss_record.d.route_none": "This titan's back is still out of reach"
 }

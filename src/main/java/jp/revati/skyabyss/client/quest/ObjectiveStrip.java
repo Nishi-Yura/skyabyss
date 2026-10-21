@@ -109,11 +109,17 @@ public final class ObjectiveStrip {
             text = Component.translatable("objective.skyabyss.back_return").getString();
             target = Resolved.NONE;
         }
-        // 巨神の背の中: いまの試練の次の目的 (岩鯨の背の TrialGuide。小さな光の柱とともに送られてくる)
+        // 巨神の背の中: 順路の今の段 (docs/design/32 の 6 章) と、いまの試練の次の目的 (岩鯨の背の TrialGuide など。小さな光の柱とともに送られてくる)
         if (mc.level != null && jp.revati.skyabyss.progress.Titans.titanOfBack(mc.level.dimension()) != null) {
+            String route = jp.revati.skyabyss.client.trial.TrialBoardClient.routeLine(mc);
+            if (route != null) {
+                text = route;
+                target = Resolved.NONE;
+            }
             var trial = jp.revati.skyabyss.client.titan.BoardBeamClient.byPrefix("trial_obj:");
             if (trial != null) {
-                text = Component.translatable("objective.skyabyss.trial_" + trial.key().substring("trial_obj:".length())).getString();
+                String next = Component.translatable("objective.skyabyss.trial_" + trial.key().substring("trial_obj:".length())).getString();
+                text = route == null ? next : route + "：" + next;
                 target = new Resolved(BlockPos.containing(trial.cx(), trial.cy() - 1.0, trial.cz()), false);
             }
         }

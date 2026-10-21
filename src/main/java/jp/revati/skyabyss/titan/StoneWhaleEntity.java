@@ -37,6 +37,12 @@ import software.bernie.geckolib.util.GeckoLibUtil;
 // ときどきプレイヤーの近くまで降りてきて、背中の尾の側にある錨石から脇腹ごしに鎖を地上へ垂らす。
 // 鎖を右クリックすると、巻き上げられて背中へ引き上げられる。
 public class StoneWhaleEntity extends Entity implements GeoEntity, TravelTitan, jp.revati.skyabyss.titan.end.DormantTitan, jp.revati.skyabyss.titan.solid.SolidTitan {
+    // 巨神の見え方 (docs/design/32 の 3.3): 章を終えた人 (とそのパーティでない人) には実体を送らない
+    @Override
+    public boolean broadcastToPlayer(net.minecraft.server.level.ServerPlayer player) {
+        return super.broadcastToPlayer(player) && jp.revati.skyabyss.titan.TitanVisibility.sees(player, jp.revati.skyabyss.progress.Titans.STONE_WHALE);
+    }
+
     private static final EntityDataAccessor<Float> CHAIN = SynchedEntityData.defineId(StoneWhaleEntity.class, EntityDataSerializers.FLOAT);
     // 鎖が頭の乗り場から垂れているか (巨神での移動。titan.travel)。false なら背中の錨石から垂れる
     private static final EntityDataAccessor<Boolean> HEAD_CHAIN = SynchedEntityData.defineId(StoneWhaleEntity.class, EntityDataSerializers.BOOLEAN);
@@ -252,7 +258,7 @@ public class StoneWhaleEntity extends Entity implements GeoEntity, TravelTitan, 
         }
         if (--songCooldown <= 0) {
             songCooldown = 1600 + random.nextInt(1600);
-            level.playSound(null, getX(), getY(), getZ(), ModSounds.TITAN_SONG.get(), SoundSource.AMBIENT, 16f, 0.9f + random.nextFloat() * 0.15f);
+            jp.revati.skyabyss.titan.TitanVisibility.playSound(level, jp.revati.skyabyss.progress.Titans.STONE_WHALE, getX(), getY(), getZ(), ModSounds.TITAN_SONG.get(), SoundSource.AMBIENT, 16f, 0.9f + random.nextFloat() * 0.15f);
         }
     }
 
@@ -325,8 +331,8 @@ public class StoneWhaleEntity extends Entity implements GeoEntity, TravelTitan, 
                 hold = held;
                 restTicks += held;
             } else {
-                level.playSound(null, getX(), getY(), getZ(), ModSounds.TITAN_CHAIN.get(), SoundSource.AMBIENT, 6f, 0.8f);
-                level.playSound(null, getX(), getY(), getZ(), ModSounds.TITAN_SONG.get(), SoundSource.AMBIENT, 16f, 0.85f);
+                jp.revati.skyabyss.titan.TitanVisibility.playSound(level, jp.revati.skyabyss.progress.Titans.STONE_WHALE, getX(), getY(), getZ(), ModSounds.TITAN_CHAIN.get(), SoundSource.AMBIENT, 6f, 0.8f);
+                jp.revati.skyabyss.titan.TitanVisibility.playSound(level, jp.revati.skyabyss.progress.Titans.STONE_WHALE, getX(), getY(), getZ(), ModSounds.TITAN_SONG.get(), SoundSource.AMBIENT, 16f, 0.85f);
                 for (ServerPlayer player : Players.snapshot(level.players())) {
                     if (player.distanceToSqr(this) < 200 * 200) {
                         Notice.narrate(player, "message.skyabyss.titan_descends");
@@ -367,7 +373,7 @@ public class StoneWhaleEntity extends Entity implements GeoEntity, TravelTitan, 
             hasTarget = false;
             restCooldown = STAY_COOLDOWN_MIN + random.nextInt(STAY_COOLDOWN_SPREAD);
             dropChainHandle();
-            level.playSound(null, getX(), getY(), getZ(), ModSounds.TITAN_CHAIN.get(), SoundSource.AMBIENT, 6f, 0.7f);
+            jp.revati.skyabyss.titan.TitanVisibility.playSound(level, jp.revati.skyabyss.progress.Titans.STONE_WHALE, getX(), getY(), getZ(), ModSounds.TITAN_CHAIN.get(), SoundSource.AMBIENT, 6f, 0.7f);
         }
     }
 
@@ -385,7 +391,7 @@ public class StoneWhaleEntity extends Entity implements GeoEntity, TravelTitan, 
                 hasTarget = false;
                 restCooldown = 1800 + random.nextInt(1200);
                 songCooldown = 400;
-                level.playSound(null, getX(), getY(), getZ(), ModSounds.TITAN_SONG.get(), SoundSource.AMBIENT, 16f, 0.8f);
+                jp.revati.skyabyss.titan.TitanVisibility.playSound(level, jp.revati.skyabyss.progress.Titans.STONE_WHALE, getX(), getY(), getZ(), ModSounds.TITAN_SONG.get(), SoundSource.AMBIENT, 16f, 0.8f);
             }
             return false;
         }
@@ -454,7 +460,7 @@ public class StoneWhaleEntity extends Entity implements GeoEntity, TravelTitan, 
             hold = 0;
             songCooldown = Math.max(songCooldown, 1200);
             if (level() instanceof ServerLevel level) {
-                level.playSound(null, getX(), getY(), getZ(), ModSounds.TITAN_CHAIN.get(), SoundSource.AMBIENT, 6f, 0.8f);
+                jp.revati.skyabyss.titan.TitanVisibility.playSound(level, jp.revati.skyabyss.progress.Titans.STONE_WHALE, getX(), getY(), getZ(), ModSounds.TITAN_CHAIN.get(), SoundSource.AMBIENT, 6f, 0.8f);
             }
         }
     }
@@ -517,7 +523,8 @@ public class StoneWhaleEntity extends Entity implements GeoEntity, TravelTitan, 
                 continue;
             }
             if (player.isSpectator() || !player.isAlive() || player.isPassenger() || !player.onGround()
-                    || jp.revati.skyabyss.titan.TitanTravel.isLifting(player.getUUID())) {
+                    || jp.revati.skyabyss.titan.TitanTravel.isLifting(player.getUUID())
+                    || !jp.revati.skyabyss.titan.TitanVisibility.sees(player, jp.revati.skyabyss.progress.Titans.STONE_WHALE)) {
                 continue;
             }
             int last = standCooldown.getOrDefault(player.getUUID(), -1000);
