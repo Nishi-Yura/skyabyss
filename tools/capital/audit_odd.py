@@ -22,7 +22,7 @@ from collections import deque
 DX = vox.DX
 OPP = vox.OPP
 AIRS = ('air', 'cave_air', 'light')
-FREE = ('chain', 'lantern', 'banner', 'end_rod', 'torch', 'candle', 'flower_pot', 'skull', 'head', 'bell')
+FREE = ('chain', 'lantern', 'banner', 'end_rod', 'torch', 'skull', 'head', 'bell')
 
 
 def prop(s, k):
@@ -63,7 +63,7 @@ def main():
                 need = (x + dx, y, z + dz)
         elif n in ('lantern', 'soul_lantern'):
             need = (x, y + 1, z) if prop(s, 'hanging') == 'true' else (x, y - 1, z)
-        elif n in ('torch', 'soul_torch') or n.endswith('_carpet') or n.endswith('_pressure_plate') or n == 'candle' or n.endswith('_candle'):
+        elif n in ('torch', 'soul_torch', 'decorated_pot') or n.startswith('potted_') or n.endswith('_carpet') or n.endswith('_pressure_plate') or n == 'candle' or n.endswith('_candle'):
             need = (x, y - 1, z)
         elif n.endswith('_hanging_sign'):
             need = (x, y + 1, z)

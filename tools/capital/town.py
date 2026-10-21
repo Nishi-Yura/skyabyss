@@ -1776,8 +1776,27 @@ class Town(Facilities):
             self.mark('villager_%d' % n, x, 0, z)
             n += 1
         self.tidy_for_walkers()
+        self.drop_floaters()
         self.v.connect()
         return self.v
+
+    def drop_floaters(self):
+        """床に置く小物 (壺・鉢・ろうそく・置いた灯り・敷物) で、下が空いているものを消す。
+        棚や机をあとの手で消したとき、上の小物だけが宙に残る (audit_odd.py の「支えのない付き物」)"""
+        v = self.v
+        small = ('decorated_pot', 'potted_', 'candle', '_carpet', 'flower_pot')
+        for (x, y, z), s in list(v.b.items()):
+            n = s.split('[')[0]
+            hang = n.endswith('lantern') and 'hanging=true' in s
+            if any(t in n for t in small) or (n.endswith('lantern') and not hang):
+                below = v.b.get((x, y - 1, z))
+                if y > 0 and (below is None or below in ('air', 'cave_air')):
+                    v.set(x, y, z, 'air')
+            # 木の切れ端 (葉・幹がひとつだけ宙に残ったもの)
+            elif n.endswith('_leaves') or n.endswith('_log'):
+                nb = [v.b.get((x + dx, y + dy, z + dz)) for dx, dy, dz in ((1, 0, 0), (-1, 0, 0), (0, 1, 0), (0, -1, 0), (0, 0, 1), (0, 0, -1))]
+                if y > 0 and all(t is None or t in ('air', 'cave_air') for t in nb):
+                    v.set(x, y, z, 'air')
 
     # 係の人の印 (docs/design/35 の 6.6)。今ある施設の戸 (open_* の印や開いた正面) から中へ歩き、
     # 戸から 3 歩以上入り、戸の筋から 2 横にずれた所で、足もと 2 マスが空き、下が床の最初の場所に置く。見つからない役は置かない (Attendants が飛ばす)
