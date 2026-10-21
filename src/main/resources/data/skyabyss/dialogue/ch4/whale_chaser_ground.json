@@ -1,0 +1,124 @@
+{
+  "npc": "skyabyss:whale_chaser",
+  "extends": true,
+  "entries": [
+    {
+      "node": "ms_c_key3",
+      "if": [
+        {
+          "type": "quest",
+          "quest": "main_key",
+          "is": "active",
+          "stage": "show"
+        },
+        {
+          "type": "flag",
+          "flag": "c_key_seen"
+        }
+      ]
+    },
+    {
+      "node": "ch4g_c_board",
+      "if": [
+        {
+          "type": "quest",
+          "quest": "main_ember",
+          "is": "active",
+          "stage": "board"
+        },
+        {
+          "type": "not",
+          "of": {
+            "type": "flag",
+            "flag": "ch4g_board_told"
+          }
+        }
+      ]
+    },
+    {
+      "node": "ch4g_c_dragger",
+      "if": [
+        {
+          "type": "quest",
+          "quest": "ch4/dragger_trail",
+          "is": "active"
+        },
+        {
+          "type": "not",
+          "of": {
+            "type": "flag",
+            "flag": "ch4g_dragger_told"
+          }
+        },
+        {
+          "type": "not",
+          "of": {
+            "type": "quest",
+            "quest": "main_key",
+            "is": "active"
+          }
+        }
+      ]
+    },
+    {
+      "node": "ch4g_c_watch",
+      "if": [
+        {
+          "type": "flag",
+          "flag": "ch4g_watch_seen"
+        },
+        {
+          "type": "not",
+          "of": {
+            "type": "flag",
+            "flag": "ch4g_watch_told"
+          }
+        },
+        {
+          "type": "not",
+          "of": {
+            "type": "quest",
+            "quest": "main_key",
+            "is": "active"
+          }
+        }
+      ]
+    }
+  ],
+  "nodes": {
+    "ch4g_c_board": {
+      "face": "grave",
+      "do": [
+        {
+          "type": "flag",
+          "flag": "ch4g_board_told"
+        }
+      ],
+      "next": "c_menu"
+    },
+    "ch4g_c_dragger": {
+      "face": "smile",
+      "do": [
+        {
+          "type": "flag",
+          "flag": "ch4g_dragger_told"
+        }
+      ],
+      "next": "c_menu"
+    },
+    "ch4g_c_watch": {
+      "face": "grave",
+      "do": [
+        {
+          "type": "flag",
+          "flag": "ch4g_watch_told"
+        },
+        {
+          "type": "affinity",
+          "amount": 1
+        }
+      ],
+      "next": "c_menu"
+    }
+  }
+}

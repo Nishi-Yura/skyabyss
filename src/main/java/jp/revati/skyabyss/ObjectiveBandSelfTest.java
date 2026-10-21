@@ -28,7 +28,8 @@ public final class ObjectiveBandSelfTest {
             "objective.skyabyss.examine_camp", "objective.skyabyss.follow_smoke", "objective.skyabyss.ask_storyteller",
             "objective.skyabyss.find_isana", "objective.skyabyss.bone_hill",
             "quest.skyabyss.main_song.board.", "quest.skyabyss.main_tide.see.", "quest.skyabyss.main_tide.board.",
-            "quest.skyabyss.main_thunder.see.", "quest.skyabyss.main_thunder.board.", "quest.skyabyss.main_ember.see.");
+            "quest.skyabyss.main_thunder.see.", "quest.skyabyss.main_thunder.board.", "quest.skyabyss.main_ember.see.",
+            "quest.skyabyss.main_ember.board.", "quest.skyabyss.ch4.forge_ruins.pit.", "quest.skyabyss.ch4.ash_road.trace.", "quest.skyabyss.ch4.dragger_trail.follow.");
 
     private ObjectiveBandSelfTest() {
     }

@@ -253,6 +253,8 @@ public final class SelfTestRunner {
         steps.addAll(jp.revati.skyabyss.titan.storm.chapter.StormChapterSelfTest.siteSteps());
         // 三章の地上 (避雷の柱・焼けた見張り塔・空の石・風の道の旗・雷拾いの原・風読みの崖・眼の間の遅れた影)。docs/design/34 の C3。SKYABYSS_SELFTEST_ONLY="ch3 ground"
         steps.addAll(jp.revati.skyabyss.titan.storm.chapter.Ch3GroundSelfTest.steps());
+        // 四章の地上 (火除けの薬・炉跡・消えた炉の坑・灰の道の標・煤の窯の跡・敵 4 種・四章を心臓と天の鍵まで通す)。docs/design/34 の C4。SKYABYSS_SELFTEST_ONLY="ch4"
+        steps.addAll(jp.revati.skyabyss.story.ch4.Ch4GroundSelfTest.steps());
         steps.add(Step.once("storm mobs (load)", jp.revati.skyabyss.titan.storm.mob.StormMobSelfTest::load));
         steps.add(Step.until("storm mobs (wait)", jp.revati.skyabyss.titan.storm.mob.StormMobSelfTest::ready));
         steps.add(Step.once("storm mobs", 5, jp.revati.skyabyss.titan.storm.mob.StormMobSelfTest::runSelfTest));

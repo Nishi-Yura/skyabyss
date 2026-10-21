@@ -440,14 +440,21 @@ public final class StorySelfTest {
         check(stage(p, "main_ember").equals("done") && stage(p, "main_key").equals("show"), "the key did not open main_key: " + stage(p, "main_key"), f);
         talk(p, st, "ms_key", f);
         next(p);
+        check(node(p).equals("ms_key2"), "expected ms_key2, got " + node(p), f);
+        next(p);
+        check(node(p).equals("ms_key_four"), "the fourth verse (ms_key_four) did not follow: " + node(p), f);
         next(p);
         check(Lore.state(p).has("chapter1/fifth_verse"), "the fifth verse was not recorded", f);
         next(p);
-        check(node(p).equals("ms_key4") && stage(p, "main_key").equals("done"), "main_key did not finish: " + node(p), f);
+        check(node(p).equals("ms_key_return"), "the storyteller's answer (ms_key_return) did not follow: " + node(p), f);
+        next(p);
+        check(node(p).equals("ms_key4") && stage(p, "main_key").equals("show"), "main_key should wait for Isana's answer: " + node(p) + " / " + stage(p, "main_key"), f);
         pick(p, ST, "ok", f);
-        // イサナは一度だけ鍵の話をする
+        // イサナは一度だけ鍵の話をする。答え (ms_c_key3) でメイン「天の鍵」が終わる (34 の 4.5: 二人の別々の答え)
         talk(p, wc, "ms_c_key", f);
         next(p);
+        next(p);
+        check(node(p).equals("ms_c_key3") && stage(p, "main_key").equals("done"), "main_key did not finish at Isana's answer: " + node(p) + " / " + stage(p, "main_key"), f);
         pick(p, WC, "ok", f);
         DialogueService.open(p, wc);
         check(!node(p).equals("ms_c_key"), "Isana talked about the key twice", f);
@@ -516,8 +523,25 @@ public final class StorySelfTest {
 
     // ---------------------------------------------------------------- 会話の手伝い (NpcQuestSelfTest と同じ形)
     private static void talk(FakePlayer p, NpcEntity npc, String expected, List<String> f) {
+        quietTrails(p);
         DialogueService.open(p, npc);
         check(node(p).equals(expected), "expected node " + expected + ", got " + node(p), f);
+    }
+
+    // 章の地上の頼み (ch<n>/…。支度の段・サブ) は、章が開くと自動で出て、会話の入口を先に取る。この試験はメインの筋だけを見るので、
+    // 話す前に、まだ済んでいない章の頼みを外し、章の終わりの一言 (イサナの決意・数え歌のみっつ) は聞いたことにする
+    private static void quietTrails(FakePlayer p) {
+        QuestLog log = QuestLog.of(p);
+        for (QuestDef def : QuestManager.all()) {
+            String id = def.id();
+            QuestLog.Entry e = log.entry(id);
+            if (e != null && !e.done && id.matches("ch[1-4]/.*")) {
+                Quests.forget(p, id);
+            }
+        }
+        NpcBonds bonds = NpcBonds.of(p);
+        bonds.bond(WC).flags().add("ch3g_stay_told");
+        bonds.bond(ST).flags().add("ch3g_verse_told");
     }
 
     private static String node(FakePlayer p) {

@@ -115,6 +115,11 @@ add("thunder_wing_trial", "thunder_wing_board", "skyabyss:resonance_crystal", "g
 add("thunder_wing_heart", "thunder_wing_trial", "skyabyss:thunder_wing_core", "challenge", beat("stopped:thunder_wing"),
     ("雷翼の心臓", "雷翼の心臓を止めた。"), ("Heart of the Thunder Wing", "You stilled the thunder wing's heart."), hidden=True)
 
+# 四章の支度の段 (34 の 4.5)。消えた炉の坑の奥の頁 → 二本 (火除けの薬・炉跡) をそろえる
+add("dead_forge_pit", "thunder_wing_heart", "minecraft:blast_furnace", "task", beat("lore:ch4/forge_page"),
+    ("消えた炉の坑", "冷えた金床の上に、破れた頁があった。"), ("The Dead Forge Pit", "A torn page lay on the cold anvil."), hidden=True)
+add("ember_trail", "dead_forge_pit", "minecraft:magma_cream", "goal", beat("signal:ch4_ready"),
+    ("灰の地へ行く支度", "火の薬を作り、炉跡の頁を見つけた。"), ("Ready for the Ash", "Fire draughts brewed, the forge page found."), hidden=True)
 add("ember_board", "thunder_wing_heart", "skyabyss:ember_shard", "goal", dimension("ember_back"),
     ("余燼の背", "燃え残る火の巨神の背に乗った。"), ("On the Ember", "You climbed onto the titan of lingering fire."), hidden=True)
 add("ember_trial", "ember_board", "skyabyss:resonance_crystal", "goal", beat("trial:ember"),
@@ -182,6 +187,8 @@ for _id, _ch in (("tide_shell", "titan_tide"), ("thunder_wing", "titan_storm"), 
 CHAPTER_OF["scorched_watch"] = "titan_storm"
 CHAPTER_OF["storm_trail"] = "titan_storm"
 CHAPTER_OF["sky_key"] = "titan_ember"
+CHAPTER_OF["dead_forge_pit"] = "titan_ember"
+CHAPTER_OF["ember_trail"] = "titan_ember"
 _CH = {c[0]: c for c in CHAPTERS}
 
 

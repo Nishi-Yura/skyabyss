@@ -1332,5 +1332,9 @@
   "advancement.skyabyss.achievement.respec.title": "鍛え直し",
   "advancement.skyabyss.achievement.respec.description": "訓練場の師範のもとで、技か力を振り直した。\n報酬: 鐘銭 3",
   "advancement.skyabyss.achievement.grave.title": "置いてきたもの",
-  "advancement.skyabyss.achievement.grave.description": "自分の墓から、品を取り戻した。\n報酬: 鐘銭 3"
+  "advancement.skyabyss.achievement.grave.description": "自分の墓から、品を取り戻した。\n報酬: 鐘銭 3",
+  "advancement.skyabyss.dead_forge_pit.title": "消えた炉の坑",
+  "advancement.skyabyss.dead_forge_pit.description": "四章　余燼　冷えた金床の上に、破れた頁があった。\n報酬: 鐘銭 3",
+  "advancement.skyabyss.ember_trail.title": "灰の地へ行く支度",
+  "advancement.skyabyss.ember_trail.description": "四章　余燼　火の薬を作り、炉跡の頁を見つけた。\n報酬: 鐘銭 10"
 }

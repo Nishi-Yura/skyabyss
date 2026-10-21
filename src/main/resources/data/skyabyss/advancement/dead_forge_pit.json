@@ -1,0 +1,34 @@
+{
+  "parent": "skyabyss:thunder_wing_heart",
+  "display": {
+    "icon": {
+      "id": "minecraft:blast_furnace"
+    },
+    "title": {
+      "translate": "advancement.skyabyss.dead_forge_pit.title"
+    },
+    "description": {
+      "translate": "advancement.skyabyss.dead_forge_pit.description"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": false,
+    "hidden": true
+  },
+  "criteria": {
+    "done": {
+      "trigger": "skyabyss:beat",
+      "conditions": {
+        "event": "lore:ch4/forge_page"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "done"
+    ]
+  ],
+  "rewards": {
+    "function": "skyabyss:reward/coins_3"
+  }
+}

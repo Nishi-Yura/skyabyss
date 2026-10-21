@@ -2,7 +2,7 @@
 
 - 文書番号: 34
 - 範囲: 序章〜四章の物語の背骨（章ごとに何が分かり、なぜ巨神に挑むのか）、各章のメインクエストの段（噂 → 支度 → 見る → 乗る → 背 → 心臓 → 報告）、支度の段でバニラの進み（鉄・エンチャント・ダイヤ・醸造）を物語の理由つきで通す作り、ミニダンジョン、NPC の筋、五章へ渡す糸、作る順。
-- 状態: **採用（2026-10-20。214〜216 は回答済み。00 の付録）**。**C1（一章）・C2（二章）は実装済み**（4.2.2）。**C3（三章）も実装済み**（4.4.1）。地上の場所・敵・品の一覧は [21](21_content_expansion.md) が持つ（この書類は筋と段）。決まったら 07 のクエストの表と 05 の伝承に落とす
+- 状態: **採用（2026-10-20。214〜216 は回答済み。00 の付録）**。**C1（一章）・C2（二章）は実装済み**（4.2.2）。**C3（三章）も実装済み**（4.4.1）。**C4（四章）も実装済み**（4.5.1）。地上の場所・敵・品の一覧は [21](21_content_expansion.md) が持つ（この書類は筋と段）。決まったら 07 のクエストの表と 05 の伝承に落とす
 - 関連: [01](01_overview.md)（世界観・章の型 4.2）、[17](17_opening_and_rpg_feel.md)（序章〜一章の拍子）、[07](07_npc_quest.md)（メイン「雲の下の歌」と 1 章の続き）、[05](05_lore_npc_quest.md)、[21](21_content_expansion.md)、[33](33_world_and_map.md)（跡地の場所）、[32](32_titan_raid_route.md)（背の順路）
 
 ユーザーの声（2026-10-20）: 「岩鯨に行くまでに、ミニダンジョンや鉄フルへ誘導するメインクエストを。メインを進めていたら、いつの間にか mod を理解して鉄フル鉄剣になっている。ただ手に入れさせるのではなく、話のつながりを。二章以降も世界観を解き明かす筋で、装備が強くなりつつ、巨神に挑む意味を深めながら巨神に会う。四章までを形にして、五章以降を作りやすく。」
@@ -190,6 +190,27 @@ B0〜B6（17）。初日のお使い 2 本。帳面・煙・語り部・影・�
 | `heart` → `key` | （既存） | 鍛え手の構えの前の一言（13 に足す）「返しに来たか」。心臓。鍵がそろう場面（14 の 3.3） | 既存 |
 | 報告 `main_key` | 語り部 | 鍵は下を向く。数え歌「よっつ」→「いつつ　いきづく　つちのそこ」。語り部とイサナの別々の答え（1 章の表） | 既存の `main_key` に二人の節を足す |
 
+- `fire_draught` と `forge_ruins` は**順不同**（二章と同じ二本）。二本そろうと合図 `ch4_ready`（記念品はない。一行の語りだけ）。`warm_coal` はサブのまま（ネザーへマグマクリームを取りに行く理由。耐火の薬の材料と同じ）。
+- 醸造は都の薬師の店の手ほどき（醸造台・ブレイズパウダー・ネザーウォート 2・ガラス瓶 3。四章から）を勧める。鍵ではない。
+
+**4.5.1 実装（C4）**
+
+| もの | 中身 | 置き場 |
+| --- | --- | --- |
+| 支度の段 2 本 | `ch4/fire_draught`（職人。段 `brew` 耐火のポーション 2 = 目的 `collect` の `minecraft:potion@minecraft:fire_resistance`（延長版も数える）→ `show` 職人に見せる（伝承 `ch4/fire_draught`）。180）・`ch4/forge_ruins`（語り部。`pit` 消えた炉の坑の頁（伝承 `ch4/forge_page`）→ `tell` 語り部に見せる。220）。どちらも `category` = `main`・順不同。四章（段階 3）でメイン「灰の昇る山」が始まると二本とも出る | `tools/gen_ch4_ground.py`、`guide/PrepQuests`（章の表）、`story/ch4/Ch4Ground` |
+| 二本そろう | 合図 `ch4_ready`、進捗 `ember_trail`（その前に `dead_forge_pit`）。記念品はない | `PrepQuests.onReady(4)`、19 |
+| 乗る | メイン「灰の昇る山」に段 `board`（伝承 `chapter1/ember_ruins` = 背に入る。心臓を先に止めれば飛ばす。60）。帯は余燼の方角と距離。イサナの一言 `ch4g_c_board`（吸うときに口が開く） | `quest/main_ember.json`（`gen_ch4_ground.py` の `story_patch` が足す） |
+| 消えた炉の坑 | 21 の 6.1 の三部屋（地下 13）+ 地上の坑口と崩れた煙突・坑口の碑・職人の野営 + 出口の梯子の縦穴。入口の間 熾り蟲 4 と温石の台（温石を持って触れると 30 秒温まり、熾り蟲は人より台へ寄る）、鍛えの跡 灰被りの屑 2、奥の間 古い灰被り（名づき）と炉の壇（碑「四つ 返したら 下へ 今度こそ」・前の私の荷 = 人ごとに一度ブレイズパウダー 1・松明 8）。初回のクリアで経験値 80・煤鉄 4・灰麻 4・石炭 4、頁 `ch4/forge_page`。再訪は 1 日ごとに奥の間の主が戻る | `story/ch4/DeadForgePit`、部品 `ch4_dead_forge_pit` |
+| ほかの場所 | 灰の道の標 5（合図 `ch4_ash_mark`。五つ目で一行）・温かい岩の群れ 2（温石を持って台に触れると岩が熱を返す）・煤の窯の跡（人ごとに一度、煤鉄 4・灰麻 3、碑と伝承 `ch4/soot_kiln`、合図 `ch4_kiln`、灰ひきずりの巣）・灰降りの高台（碑。夜に着くと灰の地の眠る場所の上に赤い粒） | `Ch4Ground` |
+| 鍛え手の一言 | 灰の鍛え手（背中の中ボス）が現れたとき、まわりの人に一度「……返しに来たか」と伝承 `ch4/return_the_beat`（鍛え手のコードは触らず、現れたことを聞いて出す） | `Ch4Ground.onSmithJoin` |
+| 報告 `main_key` | 語り部: `ms_key2` → `ms_key_four`（数え歌のよっつめ）→ `ms_key3`（いつつめ。伝承 `chapter1/fifth_verse`）→ `ms_key_return`（答え「返せ」）→ `ms_key4`。イサナ: `ms_c_key` → `ms_c_key2` → `ms_c_key3`（答え「眠らせてよかったのか」）。目的は二人とも（どちらから聞いてもよい）。鍵の話を先に聞いた人も、メインのあいだはイサナの答えを聞き直せる | `quest/main_key.json`、`dialogue/storyteller_story.json`・`whale_chaser_story.json`（`story_patch`）、`dialogue/ch4/whale_chaser_ground.json` |
+| 頁 4 | `ch4/fire_draught`（灰の民の薬）・`ch4/forge_page`（炉跡の頁「四つ返したら、下へ。今度こそ」）・`ch4/return_the_beat`（返しに来たか）・`ch4/soot_kiln`（煤の窯の跡）。いつつめは既存の `chapter1/fifth_verse` | 5 章の表 |
+| NPC の一言 | 語り部: `ch4g_forge_tale`（灰の民の炉跡）・`ch4g_forge_read`（この字、どこかで。今度こそ）・`ch4g_road_tale`（灰の道の標）・`ch4g_s_kiln`（窯の跡のあと）。イサナ: `ch4g_c_board`・`ch4g_c_dragger`（灰ひきずり）・`ch4g_c_watch`（高台のあと。火ではなく息）。職人: `ch4a_first`（四章の覚書）・`ch4g_draught_tell`・`ch4g_draught_show`・`ch4p_teach`（煤の砥石と冷やし水）・`ch4t_ward_weave`（灰の護り糸 → 余燼の鼓動守）・編み直し（煤鉄 8） | `dialogue/ch4/*_ground.json`・`artisan.json` |
+| サブ・日替わり | `ch4/ash_road`（語り部。標 5。160）・`ch4/dragger_trail`（イサナ。窯の跡に着く。120）・`daily_mite_clear`（板。熾り蟲 10。報酬 60 と煤鉄 2。枠に数えない） | 同上 |
+| 目的の帯 | 「耐火のポーションを作る（n/2）」→「耐火の薬を、旅の職人に見せる」、「消えた炉の坑の奥の番を倒す」（坑の距離と方角）→「炉跡の頁を、語り部に見せる」、「吸うあいだに、余燼の口へ入ろう」（余燼の距離と方角）、「灰の道の標を辿る（n/5）」（標の方角）、「灰ひきずりを追い、窯の跡を探す」（窯の方角）、天の鍵「語り部に、鍵を見せに行こう」「イサナにも、鍵を見せよう」 | `story/ch4/client/Ch4Renderers`（`SiteTargets.bind`）、`SiteNetwork.EXTRA_TARGETS` |
+| 試遊 | `/skyabyss playtest chapter 4` のあと `/skyabyss playtest now` を繰り返すと、耐火の薬 2 → 見せた扱い → 坑の口へ → 頁 → 見せた扱い → 余燼を呼ぶ → 背の心臓、の順に進む | `story/ch4/Ch4Playtest`、`playtest/Playtest` |
+| 確かめ | 自己テスト `ch4 ground`（データ・二本の流れ・合図・荷と箱・温石の台・砥石と冷やし水）、`ch4 mobs`、`ch4 flow`（段階 3 から天の鍵と余韻の終わりまで通す。行き止まりなし）、`ch4 ground (sites)`（本物の跡地の坑・標・窯・岩・高台）。撮影 `tools/shots/ch4_ground.txt`（絵は `docs/review/ch4_ground/`） | — |
+
 ### 4.6 NPC の筋（四章ぶん）
 
 | | 語り部 | イサナ | 旅の職人 |
@@ -209,7 +230,7 @@ B0〜B6（17）。初日のお使い 2 本。帳面・煙・語り部・影・�
 | 一 | `ch1/trail_iron`（坑の頁）、`ch1/trail_blade`（折れた剣）、`ch1/trail_shield`（足音の晩の盾）、`ch1/cold_door`（冷えの戸の碑文） | それぞれの段 |
 | 二 | `ch2/salt_vault`（蔵の刻み）、`ch2/wreck_page`（難破船の頁）、`ch2/why_they_rode`（村の記憶: 民はなぜ乗ったか） | 蔵・難破船・報告 |
 | 三 | `ch3/pillars`（風の民の柱）、`ch3/stayer_returns`（留まる者は、また来た）、`ch3/mirror_lag`（遅れて映る影） | 柱・頁・眼の間 |
-| 四 | `ch4/fire_draught`（灰の民の薬）、`ch4/return_the_beat`（返しに来たか）、`ch4/fifth_verse`（いつつめ） | 薬・鍛え手・鍵 |
+| 四 | `ch4/fire_draught`（灰の民の薬）、`ch4/forge_page`（炉跡の頁）、`ch4/return_the_beat`（返しに来たか）、`ch4/soot_kiln`（煤の窯の跡）。いつつめは `chapter1/fifth_verse` | 薬・坑・鍛え手・窯・鍵 |
 
 ---
 
@@ -220,7 +241,7 @@ B0〜B6（17）。初日のお使い 2 本。帳面・煙・語り部・影・�
 | C1（済） | 一章: 骨の坑、`trail_iron/blade/shield` の段（既存の prep_* を吸収）、頁 4、イサナ・語り部・職人の一言、進捗、目的の帯の文。自己テスト（4.2.2） | 6 |
 | C2（済） | 二章: 21 の 4.1 の地上（塩の道・蔵・筏・杭・敵 4・品）を建て、`salt_road/ebb_boat` の段、難破船の確保、報告の節 | 8 |
 | C3（済） | 三章: 21 の 5.1 の地上、`lightning_pillars/sky_stone` の段、眼の間の遅れた影、イサナの決意 | 8 |
-| C4 | 四章: 21 の 6.1 の地上、`fire_draught/forge_ruins/board` の段、鍛え手の一言、`main_key` の二人の答え | 8 |
+| C4（済） | 四章: 21 の 6.1 の地上、`fire_draught/forge_ruins/board` の段、鍛え手の一言、`main_key` の二人の答え（4.5.1） | 8 |
 | C5 | 通し（一人・二人）で章ごとの長さと Lv の目安（01 の 4.1）を合わせる | 2 |
 
 - 二〜四章の地上の新しい場所（C2〜C4）は、33 の跡地（W2。実装済み）の中に `atGround` で置く。

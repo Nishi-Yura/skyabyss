@@ -1,0 +1,34 @@
+{
+  "parent": "skyabyss:dead_forge_pit",
+  "display": {
+    "icon": {
+      "id": "minecraft:magma_cream"
+    },
+    "title": {
+      "translate": "advancement.skyabyss.ember_trail.title"
+    },
+    "description": {
+      "translate": "advancement.skyabyss.ember_trail.description"
+    },
+    "frame": "goal",
+    "show_toast": true,
+    "announce_to_chat": false,
+    "hidden": true
+  },
+  "criteria": {
+    "done": {
+      "trigger": "skyabyss:beat",
+      "conditions": {
+        "event": "signal:ch4_ready"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "done"
+    ]
+  ],
+  "rewards": {
+    "function": "skyabyss:reward/coins_10"
+  }
+}

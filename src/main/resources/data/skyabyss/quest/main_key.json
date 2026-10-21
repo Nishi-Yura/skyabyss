@@ -26,6 +26,12 @@
           "type": "talk",
           "target": "skyabyss:storyteller",
           "topic": "ms_key4"
+        },
+        {
+          "id": "isana",
+          "type": "talk",
+          "target": "skyabyss:whale_chaser",
+          "topic": "ms_c_key3"
         }
       ]
     }

@@ -1332,5 +1332,9 @@
   "advancement.skyabyss.achievement.respec.title": "Back to Basics",
   "advancement.skyabyss.achievement.respec.description": "Reset your skills or stats with the training master.\nReward: 3 bell coins",
   "advancement.skyabyss.achievement.grave.title": "What Was Left Behind",
-  "advancement.skyabyss.achievement.grave.description": "Took your things back from your grave.\nReward: 3 bell coins"
+  "advancement.skyabyss.achievement.grave.description": "Took your things back from your grave.\nReward: 3 bell coins",
+  "advancement.skyabyss.dead_forge_pit.title": "The Dead Forge Pit",
+  "advancement.skyabyss.dead_forge_pit.description": "Ch. IV Ember: A torn page lay on the cold anvil.\nReward: 3 bell coins",
+  "advancement.skyabyss.ember_trail.title": "Ready for the Ash",
+  "advancement.skyabyss.ember_trail.description": "Ch. IV Ember: Fire draughts brewed, the forge page found.\nReward: 10 bell coins"
 }

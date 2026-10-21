@@ -1,0 +1,29 @@
+{
+  "category": "sub",
+  "order": 66,
+  "repeat": "daily",
+  "board": true,
+  "min_stage": 3,
+  "stages": [
+    {
+      "id": "sweep",
+      "objectives": [
+        {
+          "id": "kill",
+          "type": "kill",
+          "target": "skyabyss:cinder_mite",
+          "count": 10
+        }
+      ]
+    }
+  ],
+  "reward": {
+    "xp": 60,
+    "items": [
+      {
+        "item": "skyabyss:soot_iron",
+        "count": 2
+      }
+    ]
+  }
+}

@@ -1,0 +1,222 @@
+# 四章の地上 (docs/design/34 の C4、21 の 6.1) の場所・小さなダンジョン・敵・目的の帯・会話を、平らな世界に置いて撮る。
+# ./gradlew runShots -Pscript=tools/shots/ch4_ground.txt -PshotsName=ch4_ground   → run/shots/ch4_ground/shots/ch4_ground/*.png (docs/review/ch4_ground/ へ写す)
+# 開発コマンド skyabyss dev ch1 place は部品をそのまま置く (碑の文・樽の中身は本番の建て方だけ)。地面の上面 y=-61。
+# 消えた炉の坑は地下 13 まで掘るので、石の台地 (上面 y=-41) を先に積んで、その上に置く
+world ch4ground flat
+size 1280 720
+timeout 1500
+render 12
+clouds off
+
+wait 100
+cmd skyabyss cinematic stop
+wait 10
+cmd skyabyss cinematic stop
+cmd time set 6000
+cmd weather clear
+cmd gamerule doDaylightCycle false
+cmd gamerule doMobSpawning false
+cmd gamemode spectator
+hud off
+
+cmd forceload add -40 -20 140 60
+wait 60
+cmd fill -28 -60 -14 12 -41 8 minecraft:stone
+cmd fill -28 -60 9 12 -41 30 minecraft:stone
+cmd skyabyss dev ch1 place ch4_dead_forge_pit 0 -41 0 0
+cmd skyabyss dev ch1 place ch4_ash_mark 40 -61 0 0
+cmd skyabyss dev ch1 place ch4_ash_mark 40 -61 8 0
+cmd skyabyss dev ch1 place ch4_warm_rocks 40 -61 30 0
+cmd skyabyss dev ch1 place ch4_soot_kiln 70 -61 0 0
+cmd skyabyss dev ch1 place ch4_ash_watch 70 -61 30 0
+cmd skyabyss cinematic stop
+wait 300
+cmd skyabyss cinematic stop
+
+# ---- 消えた炉の坑: 坑口と崩れた煙突
+camera 8.5 -34 12.5 141 25
+waitchunks
+wait 20
+shot 01_pit_mouth
+# 入口の間: 熾り蟲 4 と、温石を置いて温まった台 (西の壁ぎわ)
+cmd summon skyabyss:cinder_mite -1.5 -52 16.5 {NoAI:1b,Rotation:[180f,0f]}
+cmd summon skyabyss:cinder_mite 2.5 -52 18.5 {NoAI:1b,Rotation:[150f,0f]}
+cmd summon skyabyss:cinder_mite -0.5 -52 20.5 {NoAI:1b,Rotation:[200f,0f]}
+cmd summon skyabyss:cinder_mite 3.5 -52 22.5 {NoAI:1b,Rotation:[120f,0f]}
+cmd skyabyss dev ch4 warm -3 -51 23
+camera 0.5 -49.5 12.8 10 22
+wait 40
+shot 02_pit_entry
+# 鍛えの跡: 灰被りの屑 2、冷えた金床・水の釜・道具棚
+cmd summon skyabyss:ash_husk -16.5 -52 15.5 {NoAI:1b,Rotation:[-30f,0f]}
+cmd summon skyabyss:ash_husk -13.5 -52 21.5 {NoAI:1b,Rotation:[-60f,0f]}
+camera -11.5 -49.5 12.8 50 18
+wait 40
+shot 03_pit_forge
+# 奥の間: 古い灰被りと、北の壇 (碑・前の私の荷・冷えた金床・消えた炉)
+cmd summon skyabyss:elder_thrall -13.5 -52 -2.5 {NoAI:1b,Rotation:[-45f,0f]}
+camera -7.5 -49 2.5 135 14
+wait 40
+shot 04_pit_deep
+camera -14.5 -50.5 -5.5 180 8
+wait 20
+shot 05_pit_altar
+# 古い灰被りの技: 亀裂 (足もとの円) と、殻が割れた熱の波・燃え上がった姿
+cmd gamemode adventure
+cmd skyabyss playtest god on @s
+camera -10.5 -52 -0.5 120 55
+wait 20
+cmd skyabyss dev ch4 crack
+wait 12
+shot 06_elder_cracks
+camera -7.5 -49 2.5 135 18
+wait 40
+cmd skyabyss dev ch4 wave
+wait 10
+shot 07_elder_wave
+wait 40
+shot 08_elder_flared
+cmd gamemode spectator
+cmd kill @e[type=skyabyss:elder_thrall]
+
+# ---- 灰の道の標・温かい岩の群れ・煤の窯の跡・灰降りの高台
+camera 46.5 -56 12.5 143 25
+waitchunks
+wait 10
+shot 09_ash_marks
+camera 46.5 -56 38.5 143 28
+waitchunks
+wait 10
+shot 10_warm_rocks
+camera 77.5 -56 8.5 139 24
+waitchunks
+wait 10
+shot 11_soot_kiln
+camera 76.5 -57 36.5 143 24
+waitchunks
+wait 10
+shot 12_ash_watch
+
+# ---- 敵の並び (熾り蟲・灰被りの屑・灰ひきずり・古い灰被り) と、丸まった灰ひきずり
+cmd summon skyabyss:cinder_mite 100.5 -60 0.5 {NoAI:1b,Rotation:[180f,0f]}
+cmd summon skyabyss:ash_husk 102.5 -60 0.5 {NoAI:1b,Rotation:[180f,0f]}
+cmd summon skyabyss:ash_dragger 105.5 -60 0.5 {NoAI:1b,Rotation:[180f,0f]}
+cmd summon skyabyss:elder_thrall 108.5 -60 0.5 {NoAI:1b,Rotation:[180f,0f]}
+camera 104.5 -58.2 7.5 180 8
+waitchunks
+wait 40
+shot 13_mobs
+cmd summon skyabyss:ash_dragger 105.5 -60 4.5 {NoAI:1b,Rotation:[180f,0f]}
+cmd skyabyss dev ch4 curl
+camera 105.5 -59 7.5 180 25
+wait 30
+shot 14_dragger_curled
+
+# ---- 会話: 旅の職人 (四章の初め・火除けの薬)、語り部 (炉跡)、イサナ (乗る)、天の鍵の二人の答え
+cmd gamemode creative
+cmd skyabyss playtest skip opening @s
+cmd skyabyss progress grant @s stone_whale
+cmd skyabyss progress grant @s tide_shell
+cmd skyabyss progress grant @s thunder_wing
+cmd skyabyss quest forget @s all
+wait 60
+cmd skyabyss quest start @s main_ember
+cmd skyabyss quest start @s "ch4/fragments"
+cmd skyabyss quest next @s "ch4/fragments"
+cmd skyabyss quest next @s "ch4/fragments"
+wait 40
+cmd execute positioned 130.5 -60 3.5 run skyabyss npc spawn artisan 4
+cmd execute positioned 133.5 -60 3.5 run skyabyss npc spawn storyteller
+cmd execute positioned 136.5 -60 3.5 run skyabyss npc spawn whale_chaser
+hud on
+camera 130.5 -60 0.5 0 5
+waitchunks
+wait 40
+chat clear
+cmd skyabyss dev talk "skyabyss:artisan"
+wait 60
+shot 15_talk_artisan_first
+cmd skyabyss dev talk say continue
+wait 20
+close
+cmd skyabyss dev talk "skyabyss:artisan"
+wait 60
+shot 16_talk_artisan_draught
+cmd skyabyss dev talk say continue
+wait 20
+close
+camera 133.5 -60 0.5 0 5
+wait 20
+cmd skyabyss dev talk "skyabyss:storyteller"
+wait 60
+shot 17_talk_storyteller_forge
+cmd skyabyss dev talk say continue
+wait 20
+close
+cmd skyabyss quest stage @s main_ember board
+wait 20
+camera 136.5 -60 0.5 0 5
+wait 20
+cmd skyabyss dev talk "skyabyss:whale_chaser"
+wait 60
+shot 18_talk_isana_board
+cmd skyabyss dev talk say continue
+wait 20
+close
+cmd skyabyss lore unlock @s chapter1/sky_key_whole
+cmd skyabyss quest start @s main_key
+wait 40
+camera 133.5 -60 0.5 0 5
+wait 20
+cmd skyabyss dev talk "skyabyss:storyteller"
+wait 40
+cmd skyabyss dev talk say continue
+wait 20
+cmd skyabyss dev talk say continue
+wait 20
+cmd skyabyss dev talk say continue
+wait 20
+cmd skyabyss dev talk say continue
+wait 40
+shot 19_talk_key_return
+cmd skyabyss dev talk say continue
+wait 20
+cmd skyabyss dev talk say 0
+wait 20
+close
+camera 136.5 -60 0.5 0 5
+wait 20
+cmd skyabyss dev talk "skyabyss:whale_chaser"
+wait 40
+cmd skyabyss dev talk say continue
+wait 20
+cmd skyabyss dev talk say continue
+wait 40
+shot 20_talk_key_sleep
+cmd skyabyss dev talk say 0
+wait 20
+close
+
+# ---- 目的の帯: 火除けの薬 (1/2)、炉跡 (坑の距離と方角)、灰の道の標。地上では序盤の目的が帯を取るので、ネザーで撮る
+cmd skyabyss quest forget @s all
+wait 60
+cmd skyabyss quest start @s "ch4/fire_draught"
+cmd give @s minecraft:potion[minecraft:potion_contents={potion:"minecraft:fire_resistance"}] 1
+camera minecraft:the_nether 0.5 70 0.5 0 10
+waitchunks
+wait 80
+shot 21_band_draught
+cmd skyabyss quest forget @s all
+wait 60
+cmd skyabyss quest start @s "ch4/forge_ruins"
+wait 80
+shot 22_band_forge
+cmd skyabyss quest forget @s all
+wait 60
+cmd skyabyss quest start @s "ch4/ash_road"
+cmd skyabyss quest signal @s ch4_ash_mark
+cmd skyabyss quest signal @s ch4_ash_mark
+wait 80
+shot 23_band_ash_road
+
+echo ch4_ground done

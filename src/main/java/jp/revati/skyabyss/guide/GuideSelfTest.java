@@ -111,6 +111,9 @@ public final class GuideSelfTest {
         FakePlayer a = player(level, "prep_a");
         FakePlayer b = player(level, "prep_b");
         Runnable restore = null;
+        // 二章・四章は支度の段の章 (CHAPTER_IDS) だが、既定の形 (ch<n>/prep_*) の決まりを試すために、この段のあいだだけ既定の形に戻す
+        Runnable form2 = PrepQuests.testDefaultForm(2);
+        Runnable form4 = PrepQuests.testDefaultForm(4);
         try {
             // 規則 (ID・種類・検査)
             // 一章は支度の段 (ch1/trail_*)。二〜四章は既定の形 (ch<n>/prep_*)。一章の ch1/prep_* はもう 3 本に数えない
@@ -231,6 +234,8 @@ public final class GuideSelfTest {
             if (restore != null) {
                 restore.run();
             }
+            form2.run();
+            form4.run();
             for (FakePlayer p : List.of(a, b)) {
                 Quests.forgetAll(p);
                 Growth.get(p).discoveries.clear();
@@ -794,10 +799,11 @@ public final class GuideSelfTest {
             restore = null;
             check(f, ChapterXpBudget.allowSite(Chapters.WHALE, 50) == 50, "a site lost its xp after the budget was restored");
             // 場所の経験値も数える
+            int site4 = ChapterXpBudget.siteXp(4);
             SiteSpawner.register(new SiteSpawner.Def("selftest_budget_site", Chapters.EMBER, List.of(), 1300, null, null, 12, s -> List.of()));
-            check(f, ChapterXpBudget.siteXp(4) == 1300 && !ChapterXpBudget.overruns(QuestManager.all()).isEmpty(), "a site's xp was not counted against its chapter");
+            check(f, ChapterXpBudget.siteXp(4) == site4 + 1300 && !ChapterXpBudget.overruns(QuestManager.all()).isEmpty(), "a site's xp was not counted against its chapter");
             SiteSpawner.unregister("selftest_budget_site");
-            check(f, ChapterXpBudget.siteXp(4) == 0 && ChapterXpBudget.overruns(QuestManager.all()).isEmpty(), "the budget did not recover after the site was removed");
+            check(f, ChapterXpBudget.siteXp(4) == site4 && ChapterXpBudget.overruns(QuestManager.all()).isEmpty(), "the budget did not recover after the site was removed");
         } catch (RuntimeException e) {
             SkyAbyss.LOGGER.error("SELFTEST xp budget crashed", e);
             f.add("crashed: " + e);

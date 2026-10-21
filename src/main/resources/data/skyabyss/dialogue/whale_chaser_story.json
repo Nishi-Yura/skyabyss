@@ -214,12 +214,7 @@
     },
     "ms_c_key2": {
       "face": "neutral",
-      "options": [
-        {
-          "id": "ok",
-          "goto": "end"
-        }
-      ]
+      "next": "ms_c_key3"
     },
     "ms_c_map_offer": {
       "face": "neutral",
@@ -299,6 +294,21 @@
         {
           "id": "ok",
           "goto": "end"
+        }
+      ]
+    },
+    "ms_c_key3": {
+      "face": "grave",
+      "options": [
+        {
+          "id": "ok",
+          "goto": "end",
+          "do": [
+            {
+              "type": "affinity",
+              "amount": 2
+            }
+          ]
         }
       ]
     }

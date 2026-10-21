@@ -1,0 +1,31 @@
+{
+  "category": "sub",
+  "order": 48,
+  "giver": "skyabyss:whale_chaser",
+  "chapter": "titan_ember",
+  "min_stage": 3,
+  "start_when": {
+    "type": "stage",
+    "min": 3,
+    "max": 3
+  },
+  "stages": [
+    {
+      "id": "follow",
+      "objectives": [
+        {
+          "id": "kiln",
+          "type": "signal",
+          "target": "ch4_kiln",
+          "party": false
+        }
+      ]
+    }
+  ],
+  "reward": {
+    "xp": 120,
+    "affinity": {
+      "skyabyss:whale_chaser": 2
+    }
+  }
+}

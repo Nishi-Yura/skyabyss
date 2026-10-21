@@ -1,0 +1,54 @@
+{
+  "category": "main",
+  "order": 41,
+  "giver": "skyabyss:artisan",
+  "chapter": "titan_ember",
+  "start_when": {
+    "type": "all",
+    "of": [
+      {
+        "type": "stage",
+        "min": 3,
+        "max": 3
+      },
+      {
+        "type": "quest",
+        "quest": "main_ember",
+        "is": "started"
+      }
+    ]
+  },
+  "stages": [
+    {
+      "id": "brew",
+      "xp": 60,
+      "objectives": [
+        {
+          "id": "potion",
+          "type": "collect",
+          "target": "minecraft:potion@minecraft:fire_resistance",
+          "count": 2,
+          "party": false
+        }
+      ]
+    },
+    {
+      "id": "show",
+      "objectives": [
+        {
+          "id": "talk",
+          "type": "talk",
+          "target": "skyabyss:artisan",
+          "topic": "ch4g_draught_show"
+        }
+      ]
+    }
+  ],
+  "reward": {
+    "xp": 120,
+    "items": [],
+    "affinity": {
+      "skyabyss:artisan": 3
+    }
+  }
+}

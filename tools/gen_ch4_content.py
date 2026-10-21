@@ -160,7 +160,11 @@ def write_lang() -> None:
     ember_en = {k: EN[k] for k in ember}
     for code, texts, only in (("ja_jp", JA, ember), ("en_us", EN, ember_en)):
         # 四章の lang (伝承以外)
-        dump(RES / f"assets/skyabyss_ch4/lang/{code}.json", {k: v for k, v in sorted(texts.items()) if k not in only})
+        # 自分の持たないキー (四章の地上 tools/gen_ch4_ground.py の分) は残す
+        path4 = RES / f"assets/skyabyss_ch4/lang/{code}.json"
+        merged = json.loads(path4.read_text(encoding="utf-8")) if path4.exists() else {}
+        merged.update({k: v for k, v in texts.items() if k not in only})
+        dump(path4, dict(sorted(merged.items())))
         # 余燼の lang に伝承の文を足す (「__ember.H」の区切りの下、ファイルの終わりに。実行のたびに H 以下を書き直す。ほかの行は文字のまま触らない)
         path = RES / f"assets/skyabyss_ember/lang/{code}.json"
         lines = path.read_text(encoding="utf-8").rstrip().split(chr(10))

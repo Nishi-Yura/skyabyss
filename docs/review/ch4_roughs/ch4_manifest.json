@@ -1,0 +1,223 @@
+{
+ "title": "四章の地上の敵と小物 ラフ 3 案 (熾り蟲・灰被りの屑・灰ひきずり・古い灰被り・煤鉄・灰麻・灰の護り糸・煤の砥石・灰の冷やし水)",
+ "intro": "四章 (余燼) の地上の敵と品のラフです (設計書 21 の 6.1、P19・P20)。色の言葉は灰・炭・黒石・熾の橙。灰被りの屑と古い灰被りは、背中の灰被り (A 灰衣の火番) に部品を足し引きした変種です。実装は仮の選定 (熾り蟲 A・屑 B・灰ひきずり A・古い灰被り A、小物はすべて A) で入れてあります。別の案を選ぶときは tools/gen_ch4_ground_mobs.py の CHOICE / ITEM_CHOICE を変えて流し直します。",
+ "done": [],
+ "subjects": [
+  {
+   "id": "ch4_cinder_mite",
+   "short": "熾り蟲",
+   "kind": "地上の敵 3案 (P20)",
+   "title": "熾り蟲 (cinder_mite) — 熱に寄る小さな群れ・低ポリ + ドット絵 3 案",
+   "sheets": [
+    "ch4_roughs/cinder_mite.png"
+   ],
+   "extra": "四章の言葉 (灰・炭・黒石・熾の橙)。骨 10 本 (root > body > head / tail / leg_l1..3 / leg_r1..3)。湧くのは 3〜5 匹の群れなので、一匹は小さく (幅 0.4 ブロック) 三角形は少なめ。 三角形 (全身): A 168 / B 184 / C 177 (目安 地上の小物 300〜500 (群れなので 300 以下))。埋まった部品の検査: A なし / B なし / C なし 。メッシュ・アトラス・光る画素のマスクは docs/review/ch4_roughs/cinder_mite/{a,b,c}/。生成: tools/rough/lowpoly/ch4/cinder_mite.py。",
+   "options": {
+    "a": {
+     "name": "A 熾の粒虫 (168 三角形)",
+     "desc": "丸い炭の背に熾のひびが三筋、短い 6 本の脚。遠目には転がる燠そのもので、群れが床を這うと火の粉が歩いているように見える。光る所が背なので上から読みやすい。"
+    },
+    "b": {
+     "name": "B 火打ちの甲虫 (184 三角形)",
+     "desc": "平たい黒石の甲と、前に突き出た火打ちの大顎 (先に火の粉の粒)。背の中央に熾の筋。玄武岩の床に紛れ、動くと顎の火の粉で見つかる。触れて 3 の痛さが一番伝わる形。"
+    },
+    "c": {
+     "name": "C 灰の蚤 (177 三角形)",
+     "desc": "灰色の細い体と太い後ろ脚、尾の先に熾の玉。灰の地の色に溶け、尾の玉だけが光る。小さく速そうで、群れが一斉に向きを変える姿が分かりやすい。"
+    }
+   }
+  },
+  {
+   "id": "ch4_ash_husk",
+   "short": "灰被りの屑",
+   "kind": "地上の敵 3案 (P20)",
+   "title": "灰被りの屑 (ash_husk) — 灰被りの変種・低ポリ 3 案",
+   "sheets": [
+    "ch4_roughs/ash_husk.png"
+   ],
+   "extra": "背中の灰被り (A 灰衣の火番) の殻を削る・足すだけの変種。骨とアニメは灰被りと同じ。メッシュ・アトラス (殻 / 燃え上がり) は docs/review/ch4_roughs/ash_husk/{a,b,c}/。生成: tools/rough/lowpoly/ch4/thrall_variants.py。",
+   "options": {
+    "a": {
+     "name": "A 欠けた殻 (512 三角形)",
+     "desc": "頭巾の上半分・外套の裾・左腕の殻がまだない。殻の欠けから黒い体と熾がのぞき、どこを叩けば殻が割れるかが見える。灰被りの「途中」が一番素直に伝わる。"
+    },
+    "b": {
+     "name": "B 灰の繭 (488 三角形)",
+     "desc": "頭巾も肩の板もなく、灰の塊が胴にまだらに付いた繭のような姿。頭はむき出しの炭。灰被りとの見分けが一番つく (遠目にも別の敵)。"
+    },
+    "c": {
+     "name": "C 練りかけの土偶 (510 三角形)",
+     "desc": "殻が灰を練った土色で、撫でた筋が残る。片腕は殻なし、胸に打ちかけの熾の釘。鍛えの跡 (作りかけ) の部屋の話に合う。"
+    }
+   }
+  },
+  {
+   "id": "ch4_ash_dragger",
+   "short": "灰ひきずり",
+   "kind": "地上の敵 3案 (P20)",
+   "title": "灰ひきずり (ash_dragger) — 追いかけっこの虫 (敵意なし)・低ポリ + ドット絵 3 案",
+   "sheets": [
+    "ch4_roughs/ash_dragger.png"
+   ],
+   "extra": "四章の言葉 (灰・煤・黒石・熾)。骨 11 本 (root > roll > body > head / tail / leg_l1..3 / leg_r1..3)。丸まると脚は隠す (燠虫と同じ描き方)。 三角形 (全身): A 380 / B 183 / C 348 (目安 地上の小物 300〜500)。埋まった部品の検査: A なし / B なし / C なし 。メッシュ・アトラス・光る画素のマスクは docs/review/ch4_roughs/ash_dragger/{a,b,c}/。生成: tools/rough/lowpoly/ch4/ash_dragger.py。",
+   "options": {
+    "a": {
+     "name": "A 灰袋の団子虫 (380 三角形)",
+     "desc": "灰青の節の甲の団子虫が、尾に結んだ灰麻の袋を引きずる (名前どおり「灰を引きずる」)。袋から灰がこぼれて跡になり、追う道が地面に見える。丸まると玉、落とす灰麻と形がつながる。"
+    },
+    "b": {
+     "name": "B 灰毛の芋虫 (183 三角形)",
+     "desc": "煤色の太い芋虫の背に灰の毛の房が並び、歩くと灰が落ちる。顔に熾の仮面。丸まると毛の輪になって転がる。柔らかく、追いかけたくなる見た目。"
+    },
+    "c": {
+     "name": "C 煤板の鎧蟲 (348 三角形)",
+     "desc": "煤けた黒い板の甲 (6 枚) の隙間に熾がのぞき、尾の二枚の板が灰を掻いて跡を残す。燠虫を小さく丸く穏やかにした形で、背中の燠虫の予習が一番伝わる。"
+    }
+   }
+  },
+  {
+   "id": "ch4_elder_thrall",
+   "short": "古い灰被り",
+   "kind": "地上の敵 3案 (P20)",
+   "title": "古い灰被り (elder_thrall) — 灰被りの変種・低ポリ 3 案",
+   "sheets": [
+    "ch4_roughs/elder_thrall.png"
+   ],
+   "extra": "背中の灰被り (A 灰衣の火番) の殻を削る・足すだけの変種。骨とアニメは灰被りと同じ。メッシュ・アトラス (殻 / 燃え上がり) は docs/review/ch4_roughs/elder_thrall/{a,b,c}/。生成: tools/rough/lowpoly/ch4/thrall_variants.py。",
+   "options": {
+    "a": {
+     "name": "A 煤の釜 (745 三角形)",
+     "desc": "灰被りに厚い肩の板と脚の殻を重ね、背に縄で煤の釜を負う。釜の口に熾。21 の「背に煤の釜」そのままで、灰被りの年を経た姿と読める。"
+    },
+    "b": {
+     "name": "B 厚い灰の鎧 (760 三角形)",
+     "desc": "殻を二重にし、頭巾のまわりに灰の棘の冠。釜は小さく腰に下げる。名づきの格が一番出る (遠くから主と分かる)。"
+    },
+    "c": {
+     "name": "C 炉の背負い子 (717 三角形)",
+     "desc": "背に木の枠と小さな炉 (黒石の箱・熾の焚き口・煙突)。肩だけ厚い殻。「消えた炉」の坑の主として、炉そのものを背負っている。"
+    }
+   }
+  },
+  {
+   "id": "ch4_soot_iron",
+   "short": "煤鉄",
+   "kind": "小物 3案 (32x32)",
+   "title": "煤鉄 (soot_iron) — 32x32 のドット絵 3 案",
+   "sheets": [
+    "ch4_roughs/items/icons_ch4.png"
+   ],
+   "extra": "絵は docs/review/ch4_roughs/items/icons/soot_iron_{a,b,c}_32.png (選ばなかった案は tools/sources/soot_iron/)。生成: tools/rough/lowpoly/ch4/icons_ch4.py。",
+   "options": {
+    "a": {
+     "name": "A 煤けた延べ棒",
+     "desc": "煤けた延べ棒"
+    },
+    "b": {
+     "name": "B 煤の塊",
+     "desc": "煤の塊"
+    },
+    "c": {
+     "name": "C 二本重ね",
+     "desc": "二本重ね"
+    }
+   }
+  },
+  {
+   "id": "ch4_ash_hemp",
+   "short": "灰麻",
+   "kind": "小物 3案 (32x32)",
+   "title": "灰麻 (ash_hemp) — 32x32 のドット絵 3 案",
+   "sheets": [
+    "ch4_roughs/items/icons_ch4.png"
+   ],
+   "extra": "絵は docs/review/ch4_roughs/items/icons/ash_hemp_{a,b,c}_32.png (選ばなかった案は tools/sources/ash_hemp/)。生成: tools/rough/lowpoly/ch4/icons_ch4.py。",
+   "options": {
+    "a": {
+     "name": "A 縛った茎の束",
+     "desc": "縛った茎の束"
+    },
+    "b": {
+     "name": "B 繊維の玉",
+     "desc": "繊維の玉"
+    },
+    "c": {
+     "name": "C 葉の付いた茎",
+     "desc": "葉の付いた茎"
+    }
+   }
+  },
+  {
+   "id": "ch4_ash_ward_thread",
+   "short": "灰の護り糸",
+   "kind": "小物 3案 (32x32)",
+   "title": "灰の護り糸 (ash_ward_thread) — 32x32 のドット絵 3 案",
+   "sheets": [
+    "ch4_roughs/items/icons_ch4.png"
+   ],
+   "extra": "絵は docs/review/ch4_roughs/items/icons/ash_ward_thread_{a,b,c}_32.png (選ばなかった案は tools/sources/ash_ward_thread/)。生成: tools/rough/lowpoly/ch4/icons_ch4.py。",
+   "options": {
+    "a": {
+     "name": "A かせに熾の玉",
+     "desc": "かせに熾の玉"
+    },
+    "b": {
+     "name": "B 護り結び",
+     "desc": "護り結び"
+    },
+    "c": {
+     "name": "C 煤鉄の糸巻き",
+     "desc": "煤鉄の糸巻き"
+    }
+   }
+  },
+  {
+   "id": "ch4_soot_whetstone",
+   "short": "煤の砥石",
+   "kind": "小物 3案 (32x32)",
+   "title": "煤の砥石 (soot_whetstone) — 32x32 のドット絵 3 案",
+   "sheets": [
+    "ch4_roughs/items/icons_ch4.png"
+   ],
+   "extra": "絵は docs/review/ch4_roughs/items/icons/soot_whetstone_{a,b,c}_32.png (選ばなかった案は tools/sources/soot_whetstone/)。生成: tools/rough/lowpoly/ch4/icons_ch4.py。",
+   "options": {
+    "a": {
+     "name": "A 黒い砥石",
+     "desc": "黒い砥石"
+    },
+    "b": {
+     "name": "B 煤鉄の帯",
+     "desc": "煤鉄の帯"
+    },
+    "c": {
+     "name": "C 割れ目に熾",
+     "desc": "割れ目に熾"
+    }
+   }
+  },
+  {
+   "id": "ch4_ash_cooler",
+   "short": "灰の冷やし水",
+   "kind": "小物 3案 (32x32)",
+   "title": "灰の冷やし水 (ash_cooler) — 32x32 のドット絵 3 案",
+   "sheets": [
+    "ch4_roughs/items/icons_ch4.png"
+   ],
+   "extra": "絵は docs/review/ch4_roughs/items/icons/ash_cooler_{a,b,c}_32.png (選ばなかった案は tools/sources/ash_cooler/)。生成: tools/rough/lowpoly/ch4/icons_ch4.py。",
+   "options": {
+    "a": {
+     "name": "A 丸い瓶と灰の粒",
+     "desc": "丸い瓶と灰の粒"
+    },
+    "b": {
+     "name": "B 四角い瓶",
+     "desc": "四角い瓶"
+    },
+    "c": {
+     "name": "C 素焼きの小壺",
+     "desc": "素焼きの小壺"
+    }
+   }
+  }
+ ]
+}
