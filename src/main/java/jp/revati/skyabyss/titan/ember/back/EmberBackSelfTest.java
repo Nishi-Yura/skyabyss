@@ -312,7 +312,8 @@ public final class EmberBackSelfTest {
         BlockState s = l.getBlockState(p);
         if (s.is(ModBlocks.SEALED_GATE.get())) {
             // 周回の前の湖の出口の戸 (版 31) は周回のグループに開く。歩いて届くかだけを見る (開け閉めは trial walk が調べる)
-            if (mechanisms && SMITH_DOOR.contains(p) || EmberDeck.isPoolGate(p) || isCellEntrance(p) || WEST_PRE_GATE.contains(p)) {
+            if (mechanisms && SMITH_DOOR.contains(p) || EmberDeck.isPoolGate(p) || isCellEntrance(p) || WEST_PRE_GATE.contains(p)
+                    || jp.revati.skyabyss.trial.RouteSeals.isSeal(l, p)) {
                 // 試練の階の戸は引き (試練のプール) で開く。歩いて届くかだけを見る (引きと戸は trial pool ember が調べる)
                 return true;
             }
