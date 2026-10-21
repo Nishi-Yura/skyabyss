@@ -25,6 +25,12 @@ import net.neoforged.neoforge.event.RegisterCommandsEvent;
 //   /skyabyss facility stash                      預かり所を開く (どこからでも)
 //   /skyabyss facility coins <枚>                 鐘銭を渡す
 //   /skyabyss facility look <0..3>                近くの係の人の見た目の案を替える (撮影用)
+//   /skyabyss facility records                    砦の老兵の試練の記録を開く
+//   /skyabyss facility dummy                      足もとのまわり 8 の木偶の柱に的をかぶせる (撮影・試し用)
+//   /skyabyss facility keyroom offer|return       鍵の間に欠片を納める / 返してもらう (祭司と同じ)
+//   /skyabyss facility mapcopy                    書庫番の地図の写し (祭司・書庫番の働きと同じ)
+//   /skyabyss facility respec <skills|stats> [coins]   師範の振り直し
+//   /skyabyss facility brew                       薬師の醸造の手ほどき (四章の決まりのまま)
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class FacilityCommands {
     private static final SuggestionProvider<CommandSourceStack> ROLES = (ctx, b) -> SharedSuggestionProvider.suggest(
@@ -69,7 +75,28 @@ public final class FacilityCommands {
                                     var list = p.serverLevel().getEntities(FacilitySetup.ATTENDANT.get(), p.getBoundingBox().inflate(48), e -> true);
                                     list.forEach(a -> a.setVariant(look));
                                     return list.size();
-                                })))));
+                                })))
+                        .then(Commands.literal("records").executes(c -> {
+                            KeepRecords.open(c.getSource().getPlayerOrException());
+                            return 1;
+                        }))
+                        .then(Commands.literal("dummy").executes(c -> {
+                            ServerPlayer p = c.getSource().getPlayerOrException();
+                            int n = TrainingYard.ensureDummies(p.serverLevel(), TrainingYard.findColumns(p.serverLevel(), p.blockPosition(), 8));
+                            c.getSource().sendSuccess(() -> Component.literal("dummies: " + n), false);
+                            return n;
+                        }))
+                        .then(Commands.literal("keyroom")
+                                .then(Commands.literal("offer").executes(c -> KeyRoom.offerAll(c.getSource().getPlayerOrException())))
+                                .then(Commands.literal("return").executes(c -> KeyRoom.giveBack(c.getSource().getPlayerOrException()))))
+                        .then(Commands.literal("mapcopy").executes(c -> FacilityActions.mapCopy(c.getSource().getPlayerOrException()) ? 1 : 0))
+                        .then(Commands.literal("respec").then(Commands.argument("what", StringArgumentType.word())
+                                .suggests((ctx, b) -> net.minecraft.commands.SharedSuggestionProvider.suggest(java.util.List.of("skills", "stats"), b))
+                                .executes(c -> TrainingMaster.respec(c.getSource().getPlayerOrException(), StringArgumentType.getString(c, "what").equals("stats"), false)
+                                        == jp.revati.skyabyss.rpg.skill.SkillManager.RespecResult.OK ? 1 : 0)
+                                .then(Commands.literal("coins").executes(c -> TrainingMaster.respec(c.getSource().getPlayerOrException(),
+                                        StringArgumentType.getString(c, "what").equals("stats"), true) == jp.revati.skyabyss.rpg.skill.SkillManager.RespecResult.OK ? 1 : 0))))
+                        .then(Commands.literal("brew").executes(c -> FacilityActions.brewLesson(c.getSource().getPlayerOrException()) ? 1 : 0))));
     }
 
     private static int spawn(CommandSourceStack src, String roleId, int look) throws com.mojang.brigadier.exceptions.CommandSyntaxException {

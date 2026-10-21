@@ -31,9 +31,69 @@
       "next": "menu",
       "text": "dialogue.skyabyss.attendant_training_master.intro"
     },
-    "respec": {
+    "dummy": {
       "face": "neutral",
       "next": "menu"
+    },
+    "respec": {
+      "face": "neutral",
+      "do": [
+        {
+          "type": "facility",
+          "open": "respec_quote"
+        }
+      ],
+      "options": [
+        {
+          "id": "skills",
+          "kind": "talk",
+          "goto": "end",
+          "do": [
+            {
+              "type": "facility",
+              "open": "respec_skills"
+            }
+          ]
+        },
+        {
+          "id": "skills_coins",
+          "kind": "talk",
+          "goto": "end",
+          "do": [
+            {
+              "type": "facility",
+              "open": "respec_skills_coins"
+            }
+          ]
+        },
+        {
+          "id": "stats",
+          "kind": "talk",
+          "goto": "end",
+          "do": [
+            {
+              "type": "facility",
+              "open": "respec_stats"
+            }
+          ]
+        },
+        {
+          "id": "stats_coins",
+          "kind": "talk",
+          "goto": "end",
+          "do": [
+            {
+              "type": "facility",
+              "open": "respec_stats_coins"
+            }
+          ]
+        },
+        {
+          "id": "back",
+          "kind": "talk",
+          "goto": "menu"
+        }
+      ]
     },
     "menu": {
       "face": "neutral",
@@ -42,6 +102,11 @@
           "id": "respec",
           "kind": "talk",
           "goto": "respec"
+        },
+        {
+          "id": "dummy",
+          "kind": "talk",
+          "goto": "dummy"
         },
         {
           "id": "about",

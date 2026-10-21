@@ -86,6 +86,9 @@ public final class MapMarks {
         waymarkMarks(Voyages.state(player), TravelWorldData.get(player.server), out);
         titanMarks(player, over, out);
         shrineMarks(player, out);
+        if (jp.revati.skyabyss.facility.FacilityMarks.has(player, jp.revati.skyabyss.facility.FacilityMarks.MAP_COPY)) {
+            archiveMarks(player.server, data.grounds(), Chapters.of(player), out);
+        }
         if (data.first("camp") == null) {
             BlockPos s = over.getSharedSpawnPos();
             out.add(new Mark(Kind.SPAWN, "spawn", "spawn", "", s.getX(), s.getZ(), false, 0));
@@ -179,6 +182,29 @@ public final class MapMarks {
             } else if (town != null) {
                 BlockPos r = rumor(town, g.center, name.hashCode());
                 out.add(new Mark(Kind.SITE, "ground:" + ch.id(), name, ch.id(), r.getX(), r.getZ(), true, color));
+            }
+        }
+    }
+
+    // 書庫番の地図の写し (35 の 3.2): 開いた章の跡地の噂を本当の位置に、建った祠 (32 の 3.1) を見た印で足す
+    public static void archiveMarks(net.minecraft.server.MinecraftServer server, List<SiteData.Ground> grounds, Chapters now, List<Mark> out) {
+        for (SiteData.Ground g : grounds) {
+            Chapters ch = Chapters.byId(g.chapter);
+            if (ch == null || now.ordinal() < ch.ordinal()) {
+                continue;
+            }
+            String id = "ground:" + ch.id();
+            for (int i = 0; i < out.size(); i++) {
+                Mark m = out.get(i);
+                if (m.id().equals(id) && m.rumor()) {
+                    out.set(i, new Mark(m.kind(), m.id(), m.name(), m.extra(), g.center.getX(), g.center.getZ(), false, m.color()));
+                }
+            }
+        }
+        for (String titan : Titans.all()) {
+            BlockPos at = jp.revati.skyabyss.titan.shrine.TitanShrine.posOf(server, titan);
+            if (at != null) {
+                out.add(new Mark(Kind.SHRINE, "shrine:" + titan, titan, "", at.getX(), at.getZ(), false, TravelDest.titanColor(titan)));
             }
         }
     }

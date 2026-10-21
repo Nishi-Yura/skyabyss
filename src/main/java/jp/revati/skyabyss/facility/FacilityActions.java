@@ -34,8 +34,17 @@ import net.minecraft.world.level.block.BedBlock;
 //   map      : 旅の地図 (M) を開く
 //   guild    : ギルドの画面
 //   repair   : 鍛冶師の修理 (手に持った品。傷みに応じた鐘銭)
+//   guild_storage : ギルドの倉庫 (GuildStorage)
+//   respec_quote / respec_skills / respec_skills_coins / respec_stats / respec_stats_coins : 訓練場の師範の振り直し (TrainingMaster)
+//   lore_book : 書庫番の伝承の読み返し (伝承の書の画面を開く)
+//   map_copy  : 書庫番の地図の写し (M の地図に祠と跡地のありか。FacilityMarks.MAP_COPY → MapMarks)
+//   key_offer / key_return : 社の祭司。鍵の間に欠片を納める / 返してもらう (KeyRoom)
+//   records   : 砦の老兵の試練の記録 (KeepRecords → client RecordsScreen)
+//   brew_lesson : 薬師が醸造を教える (四章。手ほどきの品を一度だけ)
 public final class FacilityActions {
-    public static final java.util.Set<String> OPENS = java.util.Set.of("shop", "stash", "inn_rest", "rumor", "perch", "map", "guild", "repair");
+    public static final java.util.Set<String> OPENS = java.util.Set.of("shop", "stash", "inn_rest", "rumor", "perch", "map", "guild", "repair",
+            "guild_storage", "respec_quote", "respec_skills", "respec_skills_coins", "respec_stats", "respec_stats_coins", "lore_book", "map_copy",
+            "key_offer", "key_return", "records", "brew_lesson");
 
     private FacilityActions() {
     }
@@ -58,6 +67,18 @@ public final class FacilityActions {
             case "map" -> ShopService.send(player, new FacilityNetwork.OpenMap());
             case "guild" -> GuildService.open(player, npc);
             case "repair" -> repair(player);
+            case "guild_storage" -> jp.revati.skyabyss.facility.guild.GuildStorage.open(player, npc);
+            case "respec_quote" -> TrainingMaster.quote(player);
+            case "respec_skills" -> TrainingMaster.respec(player, false, false);
+            case "respec_skills_coins" -> TrainingMaster.respec(player, false, true);
+            case "respec_stats" -> TrainingMaster.respec(player, true, false);
+            case "respec_stats_coins" -> TrainingMaster.respec(player, true, true);
+            case "lore_book" -> loreBook(player);
+            case "map_copy" -> mapCopy(player);
+            case "key_offer" -> KeyRoom.offerAll(player);
+            case "key_return" -> KeyRoom.giveBack(player);
+            case "records" -> KeepRecords.open(player);
+            case "brew_lesson" -> brewLesson(player);
             default -> SkyAbyss.LOGGER.warn("[facility] unknown open {}", open);
         }
     }
@@ -144,6 +165,46 @@ public final class FacilityActions {
             }
         }
         return false;
+    }
+
+    // ---------------------------------------------------------------- 書庫
+    // 伝承の書の画面を開く (書を持っていなくても読める。中身は人の記録)
+    public static void loreBook(ServerPlayer player) {
+        jp.revati.skyabyss.lore.Lore.sync(player);
+        ShopService.send(player, new jp.revati.skyabyss.pouch.PouchNet.OpenBook());
+    }
+
+    // 地図の写し: 祠と、開いた章の跡地のありかが M の地図に載る (一度で、あとはずっと)。地図を開いて見せる
+    public static boolean mapCopy(ServerPlayer player) {
+        boolean first = FacilityMarks.add(player, FacilityMarks.MAP_COPY);
+        Notice.hint(player, first ? "message.skyabyss.archive.map_copied" : "message.skyabyss.archive.map_again");
+        ShopService.send(player, new FacilityNetwork.OpenMap());
+        return first;
+    }
+
+    // ---------------------------------------------------------------- 醸造の手ほどき (四章)
+    public static final int BREW_CHAPTER_STAGE = 3;
+
+    // 四章 (心臓を三つ止めた) から。手ほどきの品 (醸造台・ブレイズパウダー・ネザーウォート 2・ガラス瓶 3) は一度だけ
+    public static boolean brewLesson(ServerPlayer player) {
+        if (jp.revati.skyabyss.progress.Progression.stage(player) < BREW_CHAPTER_STAGE && !player.isCreative()) {
+            Notice.hint(player, "message.skyabyss.apothecary.not_yet");
+            return false;
+        }
+        if (!FacilityMarks.add(player, FacilityMarks.BREW_LESSON)) {
+            Notice.hint(player, "message.skyabyss.apothecary.lesson_again");
+            return false;
+        }
+        for (ItemStack s : brewKit()) {
+            jp.revati.skyabyss.quest.Quests.give(player, s);
+        }
+        Notice.gain(player, "message.skyabyss.apothecary.lesson_kit");
+        return true;
+    }
+
+    public static List<ItemStack> brewKit() {
+        return List.of(new ItemStack(net.minecraft.world.item.Items.BREWING_STAND), new ItemStack(net.minecraft.world.item.Items.BLAZE_POWDER),
+                new ItemStack(net.minecraft.world.item.Items.NETHER_WART, 2), new ItemStack(net.minecraft.world.item.Items.GLASS_BOTTLE, 3));
     }
 
     // ---------------------------------------------------------------- 修理
