@@ -30,7 +30,7 @@ public final class ThunderCageDomain extends HeartDomain {
     public static final int PULSE = 64;
     public static final int WARN = 30;
     public static final double GRID = 7.0;
-    public static final double HALF_WIDTH = 1.1;
+    public static final double HALF_WIDTH = 0.8;   // 2026-10-22 の二人の試遊で細く (1.1 → 0.8)
     public static final double REACH = 24;
     public static final float DAMAGE = 20f;
     public static final int FIRST = 24;
@@ -153,7 +153,7 @@ public final class ThunderCageDomain extends HeartDomain {
     public int chargeTicks() {
         return fast((int) Math.round(CHARGE * CHARGE_SCALE[Math.min(round(), CHARGE_SCALE.length - 1)]));
     }
-    public static final double ROD_RADIUS = 3.4;
+    public static final double ROD_RADIUS = 2.6;   // 2026-10-22: 3.4 → 2.6
     public static final float ROD_DAMAGE = 14f;
 
     private int[] order = {0, 1, 2};

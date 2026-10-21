@@ -117,6 +117,8 @@ public final class TitanBackBuilder {
                 }
             }
         });
+        // 順路の部屋を分ける封じ (入口の箱の先・鼓動の間・入口の通路。trial/RouteSeals。32 の 2.5)
+        s.then("route seals", () -> jp.revati.skyabyss.trial.RouteSeals.place(level, jp.revati.skyabyss.progress.Titans.STONE_WHALE));
         // 背・ひれの上の、落ちたら出られない凹み (詰み監査で見つけて埋める。部屋・通路の中は直さずに報告に残す)。tick をまたいで進める
         jp.revati.skyabyss.titan.audit.BackReach.RepairJob[] repair = new jp.revati.skyabyss.titan.audit.BackReach.RepairJob[1];
         s.thenJob("repair", () -> repair[0] = new jp.revati.skyabyss.titan.audit.BackReach.RepairJob(level, TitanBackAudit::spec,

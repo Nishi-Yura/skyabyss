@@ -23,7 +23,7 @@ import net.minecraft.world.level.block.Blocks;
 //  一巡 = 4 つの型を 60 tick おきに: 輪 A (外側の帯と中の帯)、輪 B (その間の帯)、扇 A (3 方向)、扇 B (その間の 3 方向)。
 //  どの型も、予告 1.7 秒のあと 2.5 秒のあいだ 10 tick ごとに傷 (熱い床)。次の型の予告は前の型が熱いうちに始まるが、前の型は次の型が当たる前に冷める
 //  (型の間隔 60 tick = 前の型の熱い時間 50 tick + 予告の始めの 10 tick の余り)。同じ組が続けて熱くなることはなく、組が入れ替わる (逃げ先がいつもある)。
-//  輪の組: A = 外 [R×0.75, R] と 内 [R×0.25, R×0.5] / B = [R×0.5, R×0.75] と 中心の円 [0, R×0.25]。扇は 60° 幅 6 枚を交互に
+//  輪の組: A = 外 [R×0.8, R] と 内 [R×0.3, R×0.45] / B = [R×0.55, R×0.7] と 中心の円 [0, R×0.15]。扇は 45° 幅 3 枚を二組交互に (2026-10-22 に細くした)
 // 回り続けると、必ず輪か扇に当たる。技の名前: ember.core_rings / ember.core_fans。傷 7 × 最大 5 回。
 public final class HearthCoreDomain extends HeartDomain {
     public static final String ID = "hearth_core";
@@ -33,6 +33,8 @@ public final class HearthCoreDomain extends HeartDomain {
     public static final int REPEAT = 10;
     public static final float DAMAGE = 7f;
     public static final int FIRST = 24;
+    // 扇の半角 (2026-10-22 の二人の試遊で細く: 30° → 22.5°)。輪は幅 R×0.2 / R×0.15 (前は R×0.25)
+    public static final double FAN_HALF = Math.PI / 8;
 
     private int steps;
     // 試験用: 最後に出した型 (0 輪 A / 1 輪 B / 2 扇 A / 3 扇 B)
@@ -76,13 +78,13 @@ public final class HearthCoreDomain extends HeartDomain {
         switch (kind) {
             case 0 -> {
                 BossCue.send(heart, "ember", "core_rings", WARN);
-                band(level, r * 0.75, r);
-                band(level, r * 0.25, r * 0.5);
+                band(level, r * 0.8, r);
+                band(level, r * 0.3, r * 0.45);
             }
             case 1 -> {
                 BossCue.send(heart, "ember", "core_rings", WARN);
-                band(level, r * 0.5, r * 0.75);
-                band(level, 0, r * 0.25);
+                band(level, r * 0.55, r * 0.7);
+                band(level, 0, r * 0.15);
             }
             default -> {
                 BossCue.send(heart, "ember", "core_fans", WARN);
@@ -100,7 +102,7 @@ public final class HearthCoreDomain extends HeartDomain {
     }
 
     private void fan(ServerLevel level, double angle) {
-        heat(level, TelegraphShape.cone(cx, cz, angle, radius + 1, Math.PI / 6), radius * 0.6);
+        heat(level, TelegraphShape.cone(cx, cz, angle, radius + 1, FAN_HALF), radius * 0.6);
     }
 
     private void heat(ServerLevel level, TelegraphShape shape, double rr) {

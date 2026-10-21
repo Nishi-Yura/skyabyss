@@ -89,6 +89,8 @@ public final class TideBackBuilder {
     }
 
     private static void markBuilt(ServerLevel back, TitanBackData data, long start) {
+        // 順路の部屋を分ける封じ (入口の箱の先・潮の広間。trial/RouteSeals。32 の 2.5)
+        jp.revati.skyabyss.trial.RouteSeals.place(back, jp.revati.skyabyss.progress.Titans.TIDE_SHELL);
         data.markBuilt(LAYOUT_VERSION);
         TideBackTrials.afterBuild(back);
         jp.revati.skyabyss.titan.light.RouteLamps.place(back, "tide");

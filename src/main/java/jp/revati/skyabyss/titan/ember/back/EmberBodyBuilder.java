@@ -166,6 +166,8 @@ public final class EmberBodyBuilder {
         s.then("deck content", () -> holder[0].deckContent());
         // ボス部屋の大門 (熾の底の入口・鍛え手の扉)。部屋・休み場・碑文を置いたあと
         s.then("boss gates", () -> EmberBossGates.build(back));
+        // 順路の部屋を分ける封じ (入口の箱の先・炉心の広間。trial/RouteSeals。32 の 2.5)
+        s.then("route seals", () -> jp.revati.skyabyss.trial.RouteSeals.place(back, jp.revati.skyabyss.progress.Titans.EMBER));
         jp.revati.skyabyss.titan.audit.BackReach.RepairJob[] repair = new jp.revati.skyabyss.titan.audit.BackReach.RepairJob[1];
         s.thenJob("repair", () -> repair[0] = holder[0].repairJob(back));
         int[] dimples = new int[1];

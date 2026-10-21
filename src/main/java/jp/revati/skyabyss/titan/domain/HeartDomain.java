@@ -563,8 +563,9 @@ public abstract class HeartDomain {
     }
 
     // 予告の組み立て (持ち主は心臓。当たるのは部屋の人)
+    // 領域の決まりは壁を抜ける (部屋の全体にかかる決まり。濃い赤・破線の印。2026-10-22)
     protected Telegraph.Builder tg(ServerLevel level, jp.revati.skyabyss.combat.TelegraphShape shape, int warn) {
-        return Telegraph.in(level, shape).floor(floorY).warn(warn).danger().owner(heart).victims(victims).reach(3.5);
+        return Telegraph.in(level, shape).floor(floorY).warn(warn).danger().piercing().owner(heart).victims(victims).reach(3.5);
     }
 
     // ---- 手がかりの演出 (部屋の人にだけ) ----

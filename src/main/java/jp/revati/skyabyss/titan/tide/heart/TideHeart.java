@@ -62,7 +62,7 @@ public class TideHeart extends HeartBoss {
     public static final int ROAR_TICKS = 60;
     public static final float MAX_HEALTH = jp.revati.skyabyss.combat.HeartBalance.MAX_HP;
     // 基本の硬さ (最大体力に掛けた値が実質の体力 1580。人数でさらに HeartBalance.partyScale 倍)
-    public static final float BASE_RESIST = 1.58f;
+    public static final float BASE_RESIST = 1.44f;   // 2026-10-22: 1.58 → 1.44 (帯の短い側へ。避けそこねの多い人が残りの備えだけで生き残らない所まで)
     // 段階2 (開いた殻) で受ける傷の倍率
     public static final float OPEN_SHELL_TAKEN = 1.2f;
 

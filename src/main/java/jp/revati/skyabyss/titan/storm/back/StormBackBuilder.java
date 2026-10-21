@@ -68,6 +68,8 @@ public final class StormBackBuilder {
     private static void finishSteps(jp.revati.skyabyss.titan.BackBuildJobs.Steps s, ServerLevel back, TitanBackData data, long start) {
         // ボス部屋の大門 (竜骨の間の入口・雷獣の巣の口)。部屋と回廊を掘ったあと
         s.then("boss gates", () -> StormBossGates.build(back));
+        // 順路の部屋を分ける封じ (入口の箱の先・風の広間・尾の間。trial/RouteSeals。32 の 2.5)
+        s.then("route seals", () -> jp.revati.skyabyss.trial.RouteSeals.place(back, jp.revati.skyabyss.progress.Titans.THUNDER_WING));
         // 印を付けるのは修復のあと (印のあとに人が入ると、建てかけの背を見る)。afterBuild と灯りは印の前と同じ順
         jp.revati.skyabyss.titan.audit.BackReach.RepairJob[] repair = new jp.revati.skyabyss.titan.audit.BackReach.RepairJob[1];
         s.then("after build", () -> {
