@@ -696,6 +696,11 @@ public final class GuideSelfTest {
         BlockPos spawn = level.getSharedSpawnPos();
         a.setPos(spawn.getX() + 0.5, level.getHeight(Heightmap.Types.MOTION_BLOCKING, spawn.getX(), spawn.getZ()), spawn.getZ() + 0.5);
         UUID ga = Groups.keyOf(a);
+        // 本物のひとり歩き (二章・三章の地上の敵) は、この段のあいだ外しておく (戻すのは finally)
+        List<ChapterMobSpawner.Wanderer> real = ChapterMobSpawner.registered();
+        for (ChapterMobSpawner.Wanderer w : real) {
+            ChapterMobSpawner.unregister(w.id());
+        }
         try {
             ChapterMobSpawner.register(new ChapterMobSpawner.Wanderer("selftest_wanderer", Chapters.WHALE, "skyabyss:moss_crawler", 5, ChapterMobSpawner.Time.ANY));
             ChapterMobSpawner.chapterOverride = p -> Chapters.WHALE;
@@ -739,6 +744,9 @@ public final class GuideSelfTest {
             check(f, ChapterMobSpawner.liveIds().isEmpty() && entities(level, live).stream().noneMatch(Entity::isAlive), "wanderers stayed after the group left");
         } finally {
             ChapterMobSpawner.unregister("selftest_wanderer");
+            for (ChapterMobSpawner.Wanderer w : real) {
+                ChapterMobSpawner.register(w);
+            }
             ChapterMobSpawner.chapterOverride = null;
             ChapterMobSpawner.anchorOverride = null;
             ChapterMobSpawner.clearAll(level);
