@@ -1,0 +1,57 @@
+{
+  "category": "main",
+  "order": 33,
+  "giver": "skyabyss:whale_chaser",
+  "chapter": "titan_storm",
+  "start_when": {
+    "type": "all",
+    "of": [
+      {
+        "type": "stage",
+        "min": 2,
+        "max": 2
+      },
+      {
+        "type": "quest",
+        "quest": "main_thunder",
+        "is": "started"
+      }
+    ]
+  },
+  "stages": [
+    {
+      "id": "dig",
+      "mode": "any",
+      "objectives": [
+        {
+          "id": "diamonds",
+          "type": "collect",
+          "target": "minecraft:diamond",
+          "count": 5,
+          "party": false
+        },
+        {
+          "id": "chest",
+          "type": "collect",
+          "target": "minecraft:diamond_chestplate",
+          "count": 1,
+          "party": false
+        },
+        {
+          "id": "sword",
+          "type": "collect",
+          "target": "minecraft:diamond_sword",
+          "count": 1,
+          "party": false
+        }
+      ]
+    }
+  ],
+  "reward": {
+    "xp": 120,
+    "items": [],
+    "affinity": {
+      "skyabyss:whale_chaser": 3
+    }
+  }
+}

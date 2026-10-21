@@ -178,12 +178,20 @@ public final class StormChapterSelfTest {
         check(f, ChapterSky.stage(Chapters.STORM).moonBias() > 0 && ChapterSky.stage(Chapters.STORM).tintStrength() <= 0.35f, "sky stage within bounds");
 
         List<String> ids = ChapterSites.elements(Chapters.STORM).stream().map(ChapterSites.Element::id).toList();
-        check(f, Set.copyOf(ids).equals(Set.copyOf(StormSites.ELEMENTS)) && ids.size() == 4, "the storm chapter should register 4 small elements: " + ids);
+        // 小要素 4 種 (StormSites) と三章の地上の 4 種 (Ch3Ground。中身は自己テスト ch3 ground)
+        check(f, Set.copyOf(ids).containsAll(StormSites.ELEMENTS) && Set.copyOf(ids).containsAll(Ch3Ground.ELEMENTS)
+                && ids.size() == StormSites.ELEMENTS.size() + Ch3Ground.ELEMENTS.size(), "the storm chapter should register 4 + 4 small elements: " + ids);
         int total = 0;
         for (ChapterSites.Element e : ChapterSites.elements(Chapters.STORM)) {
             total += e.rules().count();
             Blueprint bp = Blueprint.get(e.blueprint());
-            check(f, !bp.cells.isEmpty() && bp.rx1 - bp.rx0 <= 8 && bp.rz1 - bp.rz0 <= 8, e.id() + ": blueprint should be small");
+            check(f, e.rules().maxDist() <= 150, e.id() + ": must stay within 150 blocks");
+            if (!StormSites.ELEMENTS.contains(e.id())) {
+                continue;
+            }
+            // 避雷の塔の跡は台 4 と見本の柱のぶん広い (ch3_rod_tower)
+            int span = e.id().equals(StormSites.RUIN) ? 18 : 8;
+            check(f, !bp.cells.isEmpty() && bp.rx1 - bp.rx0 <= span && bp.rz1 - bp.rz0 <= span, e.id() + ": blueprint should be small");
             String mark = switch (e.id()) {
                 case StormSites.VANE -> "top";
                 case StormSites.RUIN -> "rod";
@@ -193,7 +201,8 @@ public final class StormChapterSelfTest {
             check(f, bp.marks.containsKey(mark), e.id() + ": blueprint needs mark " + mark);
             check(f, e.rules().maxDist() <= 150, e.id() + ": must stay within 150 blocks");
         }
-        check(f, total >= 3 && total <= 7, "3 to 7 placed elements (3-5 kinds): " + total);
+        int ground = Ch3Ground.FLAGS + Ch3Ground.ELEMENTS.size() - 1;
+        check(f, total >= 3 + ground && total <= 7 + ground, "3 to 7 placed small elements (3-5 kinds) plus the chapter-3 ground's " + ground + ": " + total);
         ChapterSites.Element vane = ChapterSites.elements(Chapters.STORM).stream().filter(e -> e.id().equals(StormSites.VANE)).findFirst().orElse(null);
         check(f, vane != null && vane.rules().prefer() == ChapterSites.Prefer.HIGH && vane.post() != null && vane.onArrive() != null, "the vane hill wants high ground and has a finish");
 
@@ -566,7 +575,7 @@ public final class StormChapterSelfTest {
 
     private static List<ChapterSites.Site> mySites(MinecraftServer server) {
         List<ChapterSites.Site> out = new ArrayList<>();
-        for (String id : StormSites.ELEMENTS) {
+        for (String id : ChapterSites.elements(Chapters.STORM).stream().map(ChapterSites.Element::id).toList()) {
             out.addAll(ChapterSites.sitesFor(server, SITE_ID, id));
         }
         return out;

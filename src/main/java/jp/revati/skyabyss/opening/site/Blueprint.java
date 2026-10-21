@@ -55,6 +55,10 @@ public final class Blueprint {
     public boolean fillWater;
     // 床の段 (y=-1) より下にも部品のある列 (都の酒場の地下・古井戸の穴)。整地の「床の下を埋める」をしない (BlockPos.asLong(x, 0, z))
     public final java.util.Set<Long> deepColumns = new java.util.HashSet<>();
+    // 地下の部屋 (部品の y が DEEP 以下) の列ごとのいちばん上の段。小要素は、どの列でも自然の地面がこの段より上に来る所にだけ建てる
+    // (骨の坑・割れ殻の洞が斜面で地上へ顔を出さないように。2026-10-21 の試遊)
+    public static final int DEEP = -5;
+    public final java.util.Map<Long, Integer> deepRoofs = new java.util.HashMap<>();
 
     private Blueprint(String name) {
         this.name = name;
@@ -131,6 +135,9 @@ public final class Blueprint {
                 bp.maxY = Math.max(bp.maxY, c.y());
                 if (c.y() < -1) {
                     bp.deepColumns.add(net.minecraft.core.BlockPos.asLong(c.x(), 0, c.z()));
+                }
+                if (c.y() <= DEEP) {
+                    bp.deepRoofs.merge(net.minecraft.core.BlockPos.asLong(c.x(), 0, c.z()), c.y(), Math::max);
                 }
             }
             if (bp.cells.isEmpty()) {

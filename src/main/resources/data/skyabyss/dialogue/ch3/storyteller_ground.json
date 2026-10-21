@@ -1,0 +1,71 @@
+{
+  "npc": "skyabyss:storyteller",
+  "extends": true,
+  "entries": [
+    {
+      "node": "ch3g_pillars_tale",
+      "if": [
+        {
+          "type": "quest",
+          "quest": "ch3/lightning_pillars",
+          "is": "active",
+          "stage": "raise"
+        },
+        {
+          "type": "not",
+          "of": {
+            "type": "flag",
+            "flag": "ch3g_pillars_told"
+          }
+        }
+      ]
+    },
+    {
+      "node": "ch3g_s_verse",
+      "if": [
+        {
+          "type": "quest",
+          "quest": "main_thunder",
+          "is": "done"
+        },
+        {
+          "type": "not",
+          "of": {
+            "type": "flag",
+            "flag": "ch3g_verse_told"
+          }
+        }
+      ]
+    }
+  ],
+  "nodes": {
+    "ch3g_pillars_tale": {
+      "face": "grave",
+      "do": [
+        {
+          "type": "flag",
+          "flag": "ch3g_pillars_told"
+        }
+      ],
+      "next": "ch3g_pillars_tale2"
+    },
+    "ch3g_pillars_tale2": {
+      "face": "neutral",
+      "next": "menu"
+    },
+    "ch3g_s_verse": {
+      "face": "grave",
+      "do": [
+        {
+          "type": "flag",
+          "flag": "ch3g_verse_told"
+        },
+        {
+          "type": "affinity",
+          "amount": 1
+        }
+      ],
+      "next": "menu"
+    }
+  }
+}

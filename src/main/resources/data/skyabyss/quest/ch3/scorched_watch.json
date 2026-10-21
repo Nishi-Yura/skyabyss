@@ -1,0 +1,54 @@
+{
+  "category": "main",
+  "order": 32,
+  "giver": "skyabyss:artisan",
+  "chapter": "titan_storm",
+  "start_when": {
+    "type": "all",
+    "of": [
+      {
+        "type": "stage",
+        "min": 2,
+        "max": 2
+      },
+      {
+        "type": "quest",
+        "quest": "main_thunder",
+        "is": "started"
+      }
+    ]
+  },
+  "stages": [
+    {
+      "id": "clear",
+      "xp": 40,
+      "objectives": [
+        {
+          "id": "page",
+          "type": "lore",
+          "targets": [
+            "ch3/scorched_watch"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "show",
+      "objectives": [
+        {
+          "id": "talk",
+          "type": "talk",
+          "target": "skyabyss:artisan",
+          "topic": "ch3g_watch_show"
+        }
+      ]
+    }
+  ],
+  "reward": {
+    "xp": 80,
+    "items": [],
+    "affinity": {
+      "skyabyss:artisan": 3
+    }
+  }
+}

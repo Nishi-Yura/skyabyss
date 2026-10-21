@@ -99,6 +99,13 @@ public final class ObjectiveMarker {
         BlockPos mainPos = main.pos();
         ObjectiveStrip.Resolved sub = ObjectiveStrip.resolveTracked(mc);
         BlockPos subPos = sub.pos();
+        // 目的の場所 (洞の口など) の下の地下に入ったら、口のひし形は出さない (割れ殻の洞で、入っても入口にひし形が残ってうるさかった)
+        if (mainPos != null && underNear(mc, mainPos)) {
+            mainPos = null;
+        }
+        if (subPos != null && underNear(mc, subPos)) {
+            subPos = null;
+        }
         Placement pm = mainPos == null ? null : place(g, mc, Vec3.atCenterOf(mainPos), BASE, 5.0);
         Placement ps = subPos == null || subPos.equals(mainPos) ? null : place(g, mc, Vec3.atCenterOf(subPos), BASE * 0.8f, 5.0);
         // 同じ場所・近い場所・画面で重なる標は一つにまとめる。金が先で、青緑は小さな点で「サブもここ」と添える
@@ -112,6 +119,13 @@ public final class ObjectiveMarker {
         if (ps != null) {
             show(g, mc, ps, TEAL, false);
         }
+    }
+
+    // 目的の場所から横に 40 以内で、4 ブロックより下にいる (その場所の地下の部屋に入った)
+    static boolean underNear(Minecraft mc, BlockPos target) {
+        double dx = mc.player.getX() - (target.getX() + 0.5);
+        double dz = mc.player.getZ() - (target.getZ() + 0.5);
+        return dx * dx + dz * dz < 40 * 40 && mc.player.getY() < target.getY() - 4;
     }
 
     // 3 ブロック以内か、画面の上で重なる (中心が 16 画素以内) なら一つにする

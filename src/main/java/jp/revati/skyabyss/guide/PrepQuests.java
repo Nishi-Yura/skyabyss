@@ -23,7 +23,8 @@ import net.minecraft.server.level.ServerPlayer;
 // ---------------------------------------------------------------- 章ごとの 3 本
 //   一章     支度の段 (34 の 4.2。メインの段 = category main): ch1/trail_iron (鉄の跡)・ch1/trail_blade (折れた剣)・ch1/trail_shield (盾と糧)。
 //            tools/gen_ch1_trails.py が書く。旧い備えの頼み ch1/prep_* は、この 3 本に吸収した (置くと読み込みの警告)
-//   二〜四章 既定の形 (まだ中身なし): data/skyabyss/quest/ch<n>/prep_gear.json (身ごしらえ) / prep_blade.json (刃を研ぐ) / prep_pulse.json (鼓動を聞く)。
+//   三章     支度の段: ch3/lightning_pillars (避雷の柱)・ch3/scorched_watch (焼けた見張り塔)・ch3/sky_stone (空の石)。tools/gen_ch3_ground.py
+//   二・四章 既定の形 (まだ中身なし): data/skyabyss/quest/ch<n>/prep_gear.json (身ごしらえ) / prep_blade.json (刃を研ぐ) / prep_pulse.json (鼓動を聞く)。
 //            ID は ch<n>/prep_<kind>、文のキーは quest.skyabyss.ch<n>.prep_<kind>.title など (QuestDef.keyBase)。章の担当が 34 の段の名前に
 //            替えるときは、下の CHAPTER_IDS に一行足す
 //   必須     chapter = その章の ID (一章なら titan_whale)、start_when (章の頭に自動で出る)、repeat と board は付けない。
@@ -40,7 +41,9 @@ public final class PrepQuests {
     private static final Pattern ID = Pattern.compile("ch([1-4])/prep_([a-z_]+)");
     // 既定の形 (ch<n>/prep_<kind>) でない章の 3 本 (章 → ID の並び。kind は ID の最後の「_」より後ろ)
     private static final Map<Integer, List<String>> CHAPTER_IDS = Map.of(
-            1, List.of("ch1/trail_iron", "ch1/trail_blade", "ch1/trail_shield"));
+            1, List.of("ch1/trail_iron", "ch1/trail_blade", "ch1/trail_shield"),
+            // 三章の支度の段 (34 の 4.4。避雷の柱・焼けた見張り塔・空の石。tools/gen_ch3_ground.py)
+            3, List.of("ch3/lightning_pillars", "ch3/scorched_watch", "ch3/sky_stone"));
     // 三本そろったときの章ごとの仕上げ
     private static final Map<Integer, Consumer<ServerPlayer>> ON_READY = new ConcurrentHashMap<>();
 

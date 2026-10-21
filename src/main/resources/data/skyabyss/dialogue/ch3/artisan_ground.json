@@ -1,0 +1,55 @@
+{
+  "npc": "skyabyss:artisan",
+  "extends": true,
+  "entries": [
+    {
+      "node": "ch3g_watch_show",
+      "if": {
+        "type": "quest",
+        "quest": "ch3/scorched_watch",
+        "is": "active",
+        "stage": "show"
+      }
+    },
+    {
+      "node": "ch3g_watch_tell",
+      "if": [
+        {
+          "type": "quest",
+          "quest": "ch3/scorched_watch",
+          "is": "active",
+          "stage": "clear"
+        },
+        {
+          "type": "not",
+          "of": {
+            "type": "flag",
+            "flag": "ch3g_watch_told"
+          }
+        }
+      ]
+    }
+  ],
+  "nodes": {
+    "ch3g_watch_tell": {
+      "face": "neutral",
+      "do": [
+        {
+          "type": "flag",
+          "flag": "ch3g_watch_told"
+        }
+      ],
+      "next": "a_menu"
+    },
+    "ch3g_watch_show": {
+      "face": "smile",
+      "do": [
+        {
+          "type": "affinity",
+          "amount": 1
+        }
+      ],
+      "next": "a_menu"
+    }
+  }
+}

@@ -194,7 +194,16 @@ public class TravelMapScreen extends Screen {
     }
 
     // ---------------------------------------------------------------- 位置
-    private int centerX() {
+    // 盤の真ん中は自分 (地上にいないときは町)。左ボタンで引くと動かせる (知っている所 = 自分・町・載っている印の範囲まで)。右クリックで自分へ戻す。
+    // 2026-10-21 の試遊: 「自分の周りを映したい」「通ってきた範囲ならマウスで動かしたい」
+    private double panX;
+    private double panZ;
+
+    private int baseX() {
+        double[] me = self();
+        if (me != null && !demo) {
+            return (int) Math.floor(me[0]);
+        }
         if (sheet != null) {
             return sheet.centerX();
         }
@@ -202,12 +211,67 @@ public class TravelMapScreen extends Screen {
         return mc.player == null ? 0 : mc.player.getBlockX();
     }
 
-    private int centerZ() {
+    private int baseZ() {
+        double[] me = self();
+        if (me != null && !demo) {
+            return (int) Math.floor(me[1]);
+        }
         if (sheet != null) {
             return sheet.centerZ();
         }
         Minecraft mc = Minecraft.getInstance();
         return mc.player == null ? 0 : mc.player.getBlockZ();
+    }
+
+    private int centerX() {
+        return baseX() + (int) Math.round(panX);
+    }
+
+    private int centerZ() {
+        return baseZ() + (int) Math.round(panZ);
+    }
+
+    // 動かせる範囲 (世界の座標の {x0, z0, x1, z1}): 自分・町・載っている印を囲む長方形
+    private int[] knownBounds() {
+        int x0 = baseX();
+        int x1 = x0;
+        int z0 = baseZ();
+        int z1 = z0;
+        if (sheet != null) {
+            if (sheet.townKnown()) {
+                x0 = Math.min(x0, sheet.centerX());
+                x1 = Math.max(x1, sheet.centerX());
+                z0 = Math.min(z0, sheet.centerZ());
+                z1 = Math.max(z1, sheet.centerZ());
+            }
+            for (MapMarks.Mark m : sheet.marks()) {
+                x0 = Math.min(x0, m.x());
+                x1 = Math.max(x1, m.x());
+                z0 = Math.min(z0, m.z());
+                z1 = Math.max(z1, m.z());
+            }
+        }
+        return new int[] {x0, z0, x1, z1};
+    }
+
+    private void clampPan() {
+        int[] b = knownBounds();
+        double bx = baseX();
+        double bz = baseZ();
+        panX = Mth.clamp(panX, b[0] - bx, b[2] - bx);
+        panZ = Mth.clamp(panZ, b[1] - bz, b[3] - bz);
+    }
+
+    @Override
+    public boolean mouseDragged(double mx, double my, int button, double dx, double dy) {
+        if (button == 0 && radius > 0 && Math.hypot(mx - cx, my - cy) <= radius + 8) {
+            double k = RANGE[scale] / (double) radius;
+            panX -= dx * k;
+            panZ -= dy * k;
+            clampPan();
+            return true;
+        }
+        return super.mouseDragged(mx, my, button, dx, dy);
     }
 
     // 世界の (x, z) を画面へ。縁より外は縁に寄せる (out[2] = 1 なら縁に寄せた)
@@ -385,7 +449,7 @@ public class TravelMapScreen extends Screen {
         long time = Minecraft.getInstance().level == null ? 0 : Minecraft.getInstance().level.getGameTime();
         List<MapMarks.Mark> marks = sheet == null ? List.of() : sheet.marks();
         // 道しるべの線: 町から積み石を近い順にたどり、野営地まで
-        drawRoad(g, p, marks);
+        // 道 (町から道しるべをつなぐ線) は描かない (2026-10-21 の試遊: ごちゃつく)
         // 下から: 噂 → 章の場所・碑・足跡・骨 → 野営地・町 → 巨神
         List<MapMarks.Mark> ordered = new ArrayList<>(marks);
         ordered.sort(Comparator.comparingInt(TravelMapScreen::layer));
@@ -708,6 +772,11 @@ public class TravelMapScreen extends Screen {
     public boolean mouseClicked(double mx, double my, int button) {
         int mouseX = (int) mx;
         int mouseY = (int) my;
+        if (button == 1 && radius > 0 && Math.hypot(mx - cx, my - cy) <= radius + 8) {
+            panX = 0;
+            panZ = 0;
+            return true;
+        }
         if (chart == null) {
             return super.mouseClicked(mx, my, button);
         }

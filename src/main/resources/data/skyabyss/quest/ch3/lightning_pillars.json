@@ -1,0 +1,55 @@
+{
+  "category": "main",
+  "order": 31,
+  "giver": "skyabyss:storyteller",
+  "chapter": "titan_storm",
+  "start_when": {
+    "type": "all",
+    "of": [
+      {
+        "type": "stage",
+        "min": 2,
+        "max": 2
+      },
+      {
+        "type": "quest",
+        "quest": "main_thunder",
+        "is": "started"
+      }
+    ]
+  },
+  "stages": [
+    {
+      "id": "raise",
+      "xp": 50,
+      "objectives": [
+        {
+          "id": "rods",
+          "type": "signal",
+          "target": "ch3_pillar",
+          "count": 4,
+          "party": false
+        }
+      ]
+    },
+    {
+      "id": "vault",
+      "objectives": [
+        {
+          "id": "page",
+          "type": "lore",
+          "targets": [
+            "ch3/stayer_returns"
+          ]
+        }
+      ]
+    }
+  ],
+  "reward": {
+    "xp": 100,
+    "items": [],
+    "affinity": {
+      "skyabyss:storyteller": 3
+    }
+  }
+}

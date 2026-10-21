@@ -1,0 +1,31 @@
+{
+  "parent": "skyabyss:tide_shell_heart",
+  "display": {
+    "icon": {
+      "id": "minecraft:lightning_rod"
+    },
+    "title": {
+      "translate": "advancement.skyabyss.scorched_watch.title"
+    },
+    "description": {
+      "translate": "advancement.skyabyss.scorched_watch.description"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": false,
+    "hidden": true
+  },
+  "criteria": {
+    "done": {
+      "trigger": "skyabyss:beat",
+      "conditions": {
+        "event": "lore:ch3/scorched_watch"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "done"
+    ]
+  ]
+}

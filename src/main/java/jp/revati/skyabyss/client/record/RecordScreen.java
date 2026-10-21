@@ -794,6 +794,7 @@ public class RecordScreen extends Screen implements jp.revati.skyabyss.client.ui
 
     @Override
     public int[] textBounds() {
-        return new int[] {left, top, BW, BH};
+        // 上のつまみ (top - 21 から) も文字の範囲に入れる (書の上端で切っていて、つまみの名が出なかった)
+        return new int[] {left, top - 24, BW, BH + 24};
     }
 }
