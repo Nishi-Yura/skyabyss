@@ -216,6 +216,19 @@ public final class TrialRouteSelfTest {
             BlockPos at = TrialRoute.spawnOf(back, titan, id);
             check(f, at != null && at.distSqr(arrival) > 36, titan + ": rest " + id + " resolves to the arrival (unknown rest?) " + at);
         }
+        // 入口の箱は床の上にある: 箱のまんなかの列に、箱の高さの中で立てる所 (固い足場の上に空気 2 つ) がある (宙に浮いた箱では始まらない)
+        AABB box = TrialRoute.entryBox(titan);
+        if (box != null) {
+            int cx = (int) Math.floor(box.getCenter().x);
+            int cz = (int) Math.floor(box.getCenter().z);
+            boolean floor = false;
+            for (int y = (int) Math.floor(box.minY); y < (int) Math.ceil(box.maxY) && !floor; y++) {
+                BlockPos feet = new BlockPos(cx, y, cz);
+                floor = back.getBlockState(feet.below()).isSolidRender(back, feet.below()) || !back.getBlockState(feet.below()).getCollisionShape(back, feet.below()).isEmpty();
+                floor = floor && back.getBlockState(feet).getCollisionShape(back, feet).isEmpty() && back.getBlockState(feet.above()).getCollisionShape(back, feet.above()).isEmpty();
+            }
+            check(f, floor, titan + ": the entry box " + box + " has no floor to stand on in its middle column");
+        }
     }
 
     private static FakePlayer fake(ServerLevel back, String id, String name) {

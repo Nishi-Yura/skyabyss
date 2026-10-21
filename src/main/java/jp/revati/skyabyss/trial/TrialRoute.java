@@ -177,9 +177,10 @@ public final class TrialRoute {
     @Nullable
     public static AABB entryBox(String titan) {
         return switch (titan) {
-            // 登り口の階段の最初の 5 段 (台の北寄りから東へ)
+            // 登り口の階段の最初の 5 段 (台の北寄りから東へ)。段の足の高さは台の床 (FLANK_FLOOR_Y) から。広場の高さ (platformY) で
+            // 箱を置くと、箱が階段の 50 ブロック上の宙に浮いて、初回の順路が始まらなかった (R6 の撮影で見つけた)
             case Titans.STONE_WHALE -> {
-                int y = TitanBackLayout.platformY() + 1;
+                int y = TitanBackLayout.FLANK_FLOOR_Y + 1;
                 yield new AABB(TitanBackLayout.STAIR_X0, y, TitanBackLayout.STAIR_Z0,
                         TitanBackLayout.STAIR_X0 + 5, y + TitanBackLayout.STAIR_HEIGHT + 2, TitanBackLayout.STAIR_Z1 + 1);
             }
