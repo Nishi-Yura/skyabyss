@@ -1,0 +1,76 @@
+{
+  "npc": "skyabyss:whale_chaser",
+  "extends": true,
+  "entries": [
+    {
+      "node": "ch3g_c_stay",
+      "if": [
+        {
+          "type": "quest",
+          "quest": "main_thunder",
+          "is": "done"
+        },
+        {
+          "type": "not",
+          "of": {
+            "type": "flag",
+            "flag": "ch3g_stay_told"
+          }
+        }
+      ]
+    },
+    {
+      "node": "ch3g_stone_offer",
+      "if": [
+        {
+          "type": "quest",
+          "quest": "ch3/sky_stone",
+          "is": "active",
+          "stage": "dig"
+        },
+        {
+          "type": "not",
+          "of": {
+            "type": "flag",
+            "flag": "ch3g_stone_told"
+          }
+        }
+      ]
+    }
+  ],
+  "nodes": {
+    "ch3g_stone_offer": {
+      "face": "neutral",
+      "do": [
+        {
+          "type": "flag",
+          "flag": "ch3g_stone_told"
+        }
+      ],
+      "next": "c_menu"
+    },
+    "ch3g_c_stay": {
+      "face": "grave",
+      "next": "ch3g_c_stay2"
+    },
+    "ch3g_c_stay2": {
+      "face": "smile",
+      "do": [
+        {
+          "type": "flag",
+          "flag": "ch3g_stay_told"
+        },
+        {
+          "type": "affinity",
+          "amount": 2
+        },
+        {
+          "type": "give",
+          "item": "skyabyss:warm_stone",
+          "count": 1
+        }
+      ],
+      "next": "c_menu"
+    }
+  }
+}

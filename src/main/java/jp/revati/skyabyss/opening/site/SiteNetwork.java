@@ -20,7 +20,7 @@ import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 public final class SiteNetwork {
     private static final String PROTOCOL_VERSION = "opening-sites-1";
     // 目的の帯の行き先として送る章の要素 (クライアントの SiteTargets.bindChapterTargets が段に結ぶ)
-    static final java.util.List<String> CHAPTER_TARGETS = java.util.List.of("ch1_bone_pit", "ch1_cleft_shell_cave");
+    static final java.util.List<String> CHAPTER_TARGETS = java.util.List.of("ch1_bone_pit", "ch1_cleft_shell_cave", "storm_ruin", "ch3_scorched_watch");
 
     private SiteNetwork() {
     }

@@ -139,7 +139,8 @@ public final class GuideSelfTest {
             bad.put("ch2/prep_gear", quest("ch2/prep_gear", prepJson("x", 0).replace("\"reward\":{\"xp\":0}", "\"reward\":{\"xp\":0},\"repeat\":\"daily\"")
                     .replace("\"start_when\":{\"type\":\"true\"},", "").replace("titan_whale", "titan_tide"), junk));
             bad.put("ch2/prep_odd", quest("ch2/prep_odd", prepJson("x", 1).replace("titan_whale", "titan_tide"), junk));
-            bad.put("ch3/prep_blade", quest("ch3/prep_blade", prepJson("x", 1).replace("titan_whale", "titan_storm").replace("\"sub\"", "\"sub\",\"board\":true"), junk));
+            // 三章は支度の段の章 (ch3/prep_* は使わない) なので、板の検査は二章の既定の形で
+            bad.put("ch2/prep_pulse", quest("ch2/prep_pulse", prepJson("x", 1).replace("titan_whale", "titan_tide").replace("\"sub\"", "\"sub\",\"board\":true"), junk));
             List<String> be = new ArrayList<>();
             PrepQuests.validate(bad, be);
             check(f, be.stream().anyMatch(s -> s.contains("ch4/prep_gear") && s.contains("sub quest")), "a main prep quest was not flagged");
@@ -149,7 +150,7 @@ public final class GuideSelfTest {
             check(f, be.stream().anyMatch(s -> s.contains("ch1/trail_iron") && s.contains("main quest")), "a chapter-1 trail step as a sub quest was not flagged");
             check(f, be.stream().anyMatch(s -> s.contains("ch2/prep_gear") && s.contains("repeat")), "a repeating prep quest was not flagged");
             check(f, be.stream().anyMatch(s -> s.contains("ch2/prep_odd") && s.contains("kind")), "an unknown prep kind was not flagged");
-            check(f, be.stream().anyMatch(s -> s.contains("ch3/prep_blade") && s.contains("board")), "a prep quest on the board was not flagged");
+            check(f, be.stream().anyMatch(s -> s.contains("ch2/prep_pulse") && s.contains("board")), "a prep quest on the board was not flagged");
 
             // 三本が定義されていない章は、準備ができたことにならない
             check(f, PrepQuests.defined(1) == (QuestManager.quest("ch1/trail_iron") != null && QuestManager.quest("ch1/trail_blade") != null
@@ -161,7 +162,7 @@ public final class GuideSelfTest {
                     + "\"target\":\"ch2_ready\",\"party\":false}]}]}", errors));
             restore = QuestManager.addTemporary(temp);
             Runnable restoreNow = restore;
-            check(f, PrepQuests.defined(2) && !PrepQuests.defined(3), "defined() is wrong for the injected chapter");
+            check(f, PrepQuests.defined(2) && !PrepQuests.defined(4), "defined() is wrong for the injected chapter");
             check(f, !PrepQuests.ready(a, 2) && PrepQuests.done(a, 2) == 0, "a fresh player was ready");
             Quests.start(a, "selftest/ready_probe");
             // 章の頭に自動で出る (start_when)

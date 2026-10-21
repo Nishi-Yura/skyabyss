@@ -59,6 +59,10 @@ public final class SiteTargets {
         // 一章の支度の段: 骨の坑の荷・割れ殻の洞の台座 (SiteNetwork.CHAPTER_TARGETS)
         bind("ch1/trail_iron/pit", "ch1_bone_pit");
         bind("ch1/trail_blade/cave", "ch1_cleft_shell_cave");
+        // 三章の支度の段: 避雷の塔の跡 (台と戸)・焼けた見張り塔
+        bind("ch3/lightning_pillars/raise", "storm_ruin");
+        bind("ch3/lightning_pillars/vault", "storm_ruin");
+        bind("ch3/scorched_watch/clear", "ch3_scorched_watch");
     }
 
     // 語り部・鯨追いなど、話す相手の居場所 (サーバーが SiteNetwork で送る。キー npc.<役の名前>)

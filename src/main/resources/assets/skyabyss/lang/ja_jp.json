@@ -1306,5 +1306,9 @@
   "advancement.skyabyss.bone_pit.title": "骨の坑",
   "advancement.skyabyss.bone_pit.description": "一章　岩鯨　坑の奥に、誰かの荷が残っていた。",
   "advancement.skyabyss.whale_trail.title": "鯨追いの支度",
-  "advancement.skyabyss.whale_trail.description": "一章　岩鯨　鉄を着て、剣を研ぎ、盾と糧を背負った。"
+  "advancement.skyabyss.whale_trail.description": "一章　岩鯨　鉄を着て、剣を研ぎ、盾と糧を背負った。",
+  "advancement.skyabyss.scorched_watch.title": "焼けた見張り塔",
+  "advancement.skyabyss.scorched_watch.description": "三章　雷翼　塔の頂の柱に、雷が落ち続けていた。",
+  "advancement.skyabyss.storm_trail.title": "峰へ行く支度",
+  "advancement.skyabyss.storm_trail.description": "三章　雷翼　針を立て、塔を抜け、空の石を手にした。"
 }

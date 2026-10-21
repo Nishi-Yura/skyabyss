@@ -1,0 +1,29 @@
+{
+  "category": "sub",
+  "order": 45,
+  "giver": "skyabyss:storyteller",
+  "chapter": "titan_storm",
+  "min_stage": 2,
+  "start_when": {
+    "type": "stage",
+    "min": 2,
+    "max": 2
+  },
+  "stages": [
+    {
+      "id": "trace",
+      "objectives": [
+        {
+          "id": "flags",
+          "type": "signal",
+          "target": "ch3_flag",
+          "count": 5,
+          "party": false
+        }
+      ]
+    }
+  ],
+  "reward": {
+    "xp": 120
+  }
+}

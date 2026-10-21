@@ -92,6 +92,11 @@ add("tide_shell_trial", "tide_shell_board", "skyabyss:resonance_crystal", "goal"
 add("tide_shell_heart", "tide_shell_trial", "skyabyss:tide_shell_core", "challenge", beat("stopped:tide_shell"),
     ("潮殻の心臓", "潮殻の心臓を止めた。"), ("Heart of the Tide Shell", "You stilled the tide shell's heart."), hidden=True)
 
+# 三章の支度の段 (34 の 4.4)。焼けた見張り塔の頂の頁 → 三本 (避雷の柱・焼けた見張り塔・空の石) をそろえる
+add("scorched_watch", "tide_shell_heart", "minecraft:lightning_rod", "task", beat("lore:ch3/scorched_watch"),
+    ("焼けた見張り塔", "塔の頂の柱に、雷が落ち続けていた。"), ("The Scorched Watch", "Lightning kept falling on the pillar atop the tower."), hidden=True)
+add("storm_trail", "scorched_watch", "minecraft:diamond", "goal", beat("signal:ch3_ready"),
+    ("峰へ行く支度", "針を立て、塔を抜け、空の石を手にした。"), ("Ready for the Peaks", "Rods raised, the tower climbed, sky stone in hand."), hidden=True)
 add("thunder_wing_board", "tide_shell_heart", "skyabyss:thunder_wing_shard", "goal", dimension("storm_back"),
     ("雷翼の背", "雷をまとう鳥の背に乗った。"), ("On the Thunder Wing", "You climbed onto the storm-winged bird."), hidden=True)
 add("thunder_wing_trial", "thunder_wing_board", "skyabyss:resonance_crystal", "goal", beat("trial:thunder_wing"),
@@ -140,6 +145,8 @@ for _id in ("isana", "bone_hill", "bone_pit", "whale_trail", "stone_whale_board"
 for _id, _ch in (("tide_shell", "titan_tide"), ("thunder_wing", "titan_storm"), ("ember", "titan_ember")):
     for _suffix in ("board", "trial", "heart"):
         CHAPTER_OF[f"{_id}_{_suffix}"] = _ch
+CHAPTER_OF["scorched_watch"] = "titan_storm"
+CHAPTER_OF["storm_trail"] = "titan_storm"
 CHAPTER_OF["sky_key"] = "titan_ember"
 _CH = {c[0]: c for c in CHAPTERS}
 
