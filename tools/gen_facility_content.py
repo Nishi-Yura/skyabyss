@@ -43,7 +43,7 @@ ROLES = {
                      "Welcome to the Whale-Chasers' Hall. You can found a guild here, or apply to join one. The message board's errands are here too."),
                     [("guild", "talk", [fac("guild")], None, "ギルドの窓口 (作る・入る・抜ける)", "Guild desk (found, join, leave)", None, None),
                      ("board", "talk", [{"type": "open_board"}], None, "言伝ての板を見る", "Look at the message board", None, None),
-                     ("about", "talk", None, "about", "ギルドとは", "What is a guild?",
+                     ("what", "talk", None, "what", "ギルドとは", "What is a guild?",
                       "ギルドは旅人が作る集まりです。旗の色を選んで名前を付ければ、三十人まで入れます。名札にギルドの印が出ますよ。",
                       "A guild is a fellowship travellers make themselves. Pick banner colours and a name, and up to thirty may join. Its tag shows on your name plate.")]),
     "smith": ("鍛冶師", "Smith",

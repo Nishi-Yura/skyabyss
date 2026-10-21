@@ -167,9 +167,9 @@ public final class FacilitySelfTest {
         check(f, Attendants.ours("npc_smith") && Attendants.ours("inn_bed") && Attendants.ours("inn_bed_2"), "reads npc_<role> and inn_bed marks");
         check(f, !Attendants.ours("npc_nobody") && !Attendants.ours("villager_1"), "ignores other marks");
         check(f, AttendantRole.byMark("npc_tool_merchant") == AttendantRole.TOOL_MERCHANT, "role by mark");
+        // 出現地点のまわり (始めから読み込まれている) の空の上
         BlockPos base = level.getSharedSpawnPos();
-        BlockPos spot = new BlockPos(base.getX() + 40, level.getMinBuildHeight() + 200, base.getZ() + 40);
-        level.getChunk(spot);
+        BlockPos spot = new BlockPos(base.getX() + 3, level.getMaxBuildHeight() - 20, base.getZ() + 3);
         AttendantEntity a = Attendants.ensure(level, AttendantRole.SMITH, spot);
         if (a == null) {
             f.add("ensure did not place");
@@ -267,9 +267,9 @@ public final class FacilitySelfTest {
         // 素材の値段
         check(f, ShopService.buy(p, tools, "resonance", 1) == ShopService.Result.NO_MATERIALS, "material price needs materials");
         p.getInventory().add(new ItemStack(ModItems.STONE_WHALE_SHARD.get(), 3));
-        int before = p.getInventory().countItem(ModItems.RESONANCE_SHARD.get());
+        int before = jp.revati.skyabyss.quest.QuestItems.count(p, "skyabyss:resonance_shard", null);
         check(f, ShopService.buy(p, tools, "resonance", 1) == ShopService.Result.OK
-                && p.getInventory().countItem(ModItems.RESONANCE_SHARD.get()) == before + 1
+                && jp.revati.skyabyss.quest.QuestItems.count(p, "skyabyss:resonance_shard", null) == before + 1
                 && jp.revati.skyabyss.quest.QuestItems.count(p, "skyabyss:stone_whale_shard", null) == 0, "pay with titan materials");
         // 章の届かない品
         check(f, ShopService.buy(p, tools, "socket_stone", 1) == ShopService.Result.LOCKED, "chapter-locked goods");
@@ -333,9 +333,8 @@ public final class FacilitySelfTest {
 
     // ---------------------------------------------------------------- 宿・修理
     private static void inn(List<String> f, ServerLevel level, FakePlayer p) {
-        BlockPos spot = level.getSharedSpawnPos().offset(-30, 0, -30);
-        spot = new BlockPos(spot.getX(), level.getMinBuildHeight() + 200, spot.getZ());
-        level.getChunk(spot);
+        BlockPos spot = level.getSharedSpawnPos().offset(-3, 0, -3);
+        spot = new BlockPos(spot.getX(), level.getMaxBuildHeight() - 30, spot.getZ());
         AttendantEntity keeper = Attendants.ensure(level, AttendantRole.INNKEEPER, spot);
         try {
             BlockPos bed = FacilityActions.innBed(p, keeper);

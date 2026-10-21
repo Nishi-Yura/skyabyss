@@ -31,7 +31,7 @@
       "next": "menu",
       "text": "dialogue.skyabyss.attendant_guild_clerk.intro"
     },
-    "about": {
+    "what": {
       "face": "neutral",
       "next": "menu"
     },
@@ -60,9 +60,9 @@
           "goto": "end"
         },
         {
-          "id": "about",
+          "id": "what",
           "kind": "talk",
-          "goto": "about"
+          "goto": "what"
         },
         {
           "id": "about",
