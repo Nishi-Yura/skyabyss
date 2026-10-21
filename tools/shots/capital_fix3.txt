@@ -20,13 +20,15 @@ waitchunks
 cmd skyabyss facility place
 wait 200
 shot f3_over_top
-cmd skyabyss dev opening at shelter 0 66 8 6 180 18
+cmd skyabyss dev opening at shelter 0 46 6 -2 -90 8
 waitchunks
 wait 80
+wait 140
 shot f3_east_avenue_labels
-cmd skyabyss dev opening at shelter 0 88 6 0 180 12
+cmd skyabyss dev opening at shelter 0 88 4 -3 180 4
 waitchunks
 wait 60
+wait 140
 shot f3_trade_front
 cmd skyabyss dev opening at shelter 0 88 2 -17 180 10
 waitchunks

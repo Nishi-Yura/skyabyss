@@ -41,8 +41,8 @@ import net.neoforged.neoforge.event.level.ExplosionEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
 
 // 荒らしよけと、都の中の安全 (2026-10-21 の試遊: 「町の建築壊せちゃう」「いろんなプレイヤーがいるので荒らし対策も」「町ではプレイヤーは無敵、mod の敵も湧かない・入れない」)。
-//   都 (設計図 capital の範囲): ブロックを壊す・置く・バケツ・火打ち石・TNT・爆発・敵の持ち去り・畑の踏み荒らしを止める (都に空き区画は置かない。2026-10-21)。
-//   中の人は傷を受けない (/kill と奈落は別)。敵は湧かず、入ったら 1 秒ごとの見回りで消える。
+//   都 (設計図 capital の範囲): ブロックを壊す・置く・バケツ・火打ち石・TNT・爆発・敵の持ち去り・畑の踏み荒らしを止める (空き区画はない)
+//   (借りた区画はそのギルドの人だけ、借りていない区画は誰でも)。中の人は傷を受けない (/kill と奈落は別)。敵は湧かず、入ったら 1 秒ごとの見回りで消える。
 //   章の小要素 (割れ殻の洞・骨の坑など): 設計図で置いたブロックだけを守る (まわりの自然の地面は掘れる)。割れ殻の洞は地表の口 (門と低い壁) だけ壊せる。
 //   OP のクリエイティブは除く。docs/design/33 の 2 章 (保護と安全)
 @EventBusSubscriber(modid = SkyAbyss.MODID)
@@ -97,7 +97,7 @@ public final class SiteGuard {
         }
         int rot = SiteFinder.rot(e.yaw);
         boolean mirror = SiteFinder.mirror(e.yaw);
-        BlockPos origin = origin(e, bp, rot, mirror);
+        BlockPos origin = originOf(e, bp, rot, mirror);
         if (origin == null) {
             origin = e.pos.below();
         }
@@ -109,10 +109,7 @@ public final class SiteGuard {
 
     // 建てたときの設計図の原点 (SiteJob.mark は transform(x, y + 1, z, …, origin))。写した付属の点の一つから逆に求める
     @Nullable
-    public static BlockPos origin(SiteData.Entry e, @Nullable Blueprint bp, int rot, boolean mirror) {
-        if (bp == null) {
-            return null;
-        }
+    public static BlockPos originOf(SiteData.Entry e, Blueprint bp, int rot, boolean mirror) {
         for (int i = 0; i < e.extraNames.size(); i++) {
             int[] m = bp.marks.get(e.extraNames.get(i));
             if (m == null) {
@@ -197,7 +194,7 @@ public final class SiteGuard {
         return p != null && p.isCreative() && p.hasPermissions(2);
     }
 
-    // 都の中で、この人がここのブロックを変えてはいけないか
+    // 都の中で、この人がここのブロックを変えてはいけないか (都に空き区画はない。35 の 7 章)
     private static boolean capitalLocked(Level level, @Nullable Player p, BlockPos pos) {
         return !bypass(p) && inCapital(level, pos);
     }
@@ -322,6 +319,12 @@ public final class SiteGuard {
     @SubscribeEvent
     static void onTick(ServerTickEvent.Post event) {
         MinecraftServer server = event.getServer();
+        if (server.getTickCount() % 100 == 41) {
+            SiteData.Entry shelter = SiteData.get(server.overworld()).first("shelter");
+            if (shelter != null && shelter.built) {
+                ShelterBuilder.keepLabels(server.overworld(), shelter);
+            }
+        }
         if (server.getTickCount() % 20 != 7 || safetyOff()) {
             return;
         }

@@ -22,6 +22,14 @@ public final class ShelterBuilder {
     static final java.util.Set<String> LABEL_HIDDEN = java.util.Set.of("black_market", "mapmaker");
     public static final String LABEL_TAG = "skyabyss_facility_label";
 
+    private static net.minecraft.nbt.ListTag floats(float... v) {
+        net.minecraft.nbt.ListTag l = new net.minecraft.nbt.ListTag();
+        for (float f : v) {
+            l.add(net.minecraft.nbt.FloatTag.valueOf(f));
+        }
+        return l;
+    }
+
     // 文字の表示 (バニラの text_display) を一つ置く。前に置いた同じ所の表示は消してから
     static boolean placeLabel(net.minecraft.server.level.ServerLevel level, BlockPos at, String name) {
         net.minecraft.world.phys.AABB near = new net.minecraft.world.phys.AABB(at).inflate(1.5);
@@ -34,7 +42,14 @@ public final class ShelterBuilder {
         tag.putString("billboard", "center");
         tag.putInt("background", 0x6A0A0C10);
         tag.putInt("line_width", 200);
-        tag.putFloat("view_range", 0.6f);
+        tag.putFloat("view_range", 0.8f);
+        // 2 倍の大きさ (通りの向こうからでも読める)
+        net.minecraft.nbt.CompoundTag tf = new net.minecraft.nbt.CompoundTag();
+        tf.put("left_rotation", floats(0f, 0f, 0f, 1f));
+        tf.put("right_rotation", floats(0f, 0f, 0f, 1f));
+        tf.put("translation", floats(0f, 0f, 0f));
+        tf.put("scale", floats(2f, 2f, 2f));
+        tag.put("transformation", tf);
         net.minecraft.nbt.ListTag tags = new net.minecraft.nbt.ListTag();
         tags.add(net.minecraft.nbt.StringTag.valueOf(LABEL_TAG));
         tag.put("Tags", tags);
@@ -43,6 +58,24 @@ public final class ShelterBuilder {
             return en;
         });
         return e != null && level.addFreshEntity(e);
+    }
+
+    // 5 秒ごと (SiteGuard の見回りから): 都の施設の名の表示が無ければ置き直す (生き物の動いているチャンクだけ)
+    static void keepLabels(net.minecraft.server.level.ServerLevel level, SiteData.Entry e) {
+        for (int i = 0; i < e.extraNames.size(); i++) {
+            String key = e.extraNames.get(i);
+            if (!key.startsWith("label_") || LABEL_HIDDEN.contains(key.substring(6))) {
+                continue;
+            }
+            BlockPos at = e.extraPos.get(i);
+            if (!level.isPositionEntityTicking(at)) {
+                continue;
+            }
+            net.minecraft.world.phys.AABB near = new net.minecraft.world.phys.AABB(at).inflate(1.5);
+            if (level.getEntitiesOfClass(net.minecraft.world.entity.Display.TextDisplay.class, near, d -> d.getTags().contains(LABEL_TAG)).isEmpty()) {
+                placeLabel(level, at, key.substring(6));
+            }
+        }
     }
 
     static void finish(SiteJob job) {
@@ -120,8 +153,12 @@ public final class ShelterBuilder {
                 continue;
             }
             BlockPos at = job.mark(key);
-            if (at != null && placeLabel(job.level, at, key.substring(6))) {
-                labels++;
+            if (at != null) {
+                // 位置を記録して、建てたときに生き物の読み込まれていないチャンクでも、見回り (keepLabels) が置き直す
+                job.entry.extra(key, at);
+                if (job.level.isPositionEntityTicking(at) && placeLabel(job.level, at, key.substring(6))) {
+                    labels++;
+                }
             }
         }
         if (labels > 0) {

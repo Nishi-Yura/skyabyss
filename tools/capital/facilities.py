@@ -84,7 +84,8 @@ class Facilities(Interiors, BackAlley):
         hanging_sign(v, st, ox, y + 3, oz, out)
         # 戸の上に浮く施設の名 (建物のほかに、遠くからでも入れる店と分かるように。ShelterBuilder が文字の表示を置く)
         if sign:
-            self.mark('label_' + sign, ox, y + 5, oz)
+            # 戸の外の壁は二重なので、さらに一つ外 (通りの上) に浮かべる
+            self.mark('label_' + sign, ox + dx, y + 4, oz + dz)
         if sign:
             for s in (sign_side, -sign_side):
                 tx, tz = ox + 2 * sx * s + dx, oz + 2 * sz * s + dz
