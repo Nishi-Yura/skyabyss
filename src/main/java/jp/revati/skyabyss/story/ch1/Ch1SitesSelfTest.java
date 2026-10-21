@@ -638,7 +638,13 @@ public final class Ch1SitesSelfTest {
                 "the distance label should hide under 5 m and round to 10 m");
         // 鎖の待ちの帯は一本だけ (支度の本数・三灯の版は無い。降りるまでの間がごく短いので「追いかけよう」)
         for (String lang : List.of("ja_jp", "en_us")) {
-            var table = jp.revati.skyabyss.SignFit.lang(lang);
+            java.util.Map<String, String> table;
+            try {
+                table = jp.revati.skyabyss.LangSelfTest.table(lang);
+            } catch (java.io.IOException e) {
+                check(false, lang + ": lang table could not be read: " + e);
+                continue;
+            }
             check(table.containsKey("quest.skyabyss.main_song.board.ride.wait"), lang + ": the chain-wait band text is missing");
             String waitKey = "quest.skyabyss.main_song.board.ride.wait";
             check(!table.containsKey(waitKey + ".prep") && !table.containsKey(waitKey + ".lamps"),

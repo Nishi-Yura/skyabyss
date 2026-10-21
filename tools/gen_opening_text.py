@@ -125,7 +125,7 @@ OBJECTIVES = [
     ("ask_storyteller", "宿りの語り部に話しかけよう", "Talk to the lodge storyteller", "B4 影を見てから、語り部に尋ねるまで (メインの段 ask_storyteller)"),
     ("find_isana", "外れの焚き火の旅人に話しかけよう", "Talk to the traveler at the fire", "B5 語り部のあと、イサナと話すまで (メインの段 find_chaser)"),
     ("wait_steps", "夜は、明かりのそばで過ごそう", "Spend the night near a light", "B7 イサナと話してから、夜の足音 (B6) を聞くまで (メインの段 see_whale。夜 1 に来るのは足音だけなので歌とは言わない。first_hour_log B-1)"),
-    ("see_whale", "夜の空に、耳をすませてみよう（明かりのそばで）", "Listen to the night sky (near a light)", "B7〜B10 足音のあと、歌 (B9) を聞くまで (メインの段 see_whale)"),
+    ("see_whale", "夜空に耳をすませよう（明かりのそばで）", "Listen to the night sky (near a light)", "B7〜B10 足音のあと、歌 (B9) を聞くまで (メインの段 see_whale)"),
     ("wait_whale", "夕方の空に、岩鯨を探そう", "Look for the stone whale in the dusk sky", "歌を聞き、イサナと会ったあと、岩鯨を見るまで (メインの段 see_whale。歌のあとで帯が変わる)"),
     ("bone_hill", "白く霞む丘を確かめに行ってみよう", "Check the hazy white hill", "B8 日 2 の昼の寄り道 (任意。出さなくてもよい)"),
 ]
