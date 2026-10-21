@@ -173,18 +173,15 @@ public final class EmberBackLayout {
     public static final int WELL_BOTTOM = 119;
     public static final BlockPos WELL_STAIR = new BlockPos(14, FLOOR_HUB, -31);
 
-    // ---------------------------------------------------------------- 熾り石・抜け道の光る床・碑文 (→ B が置く。担当の箱の中の reserved)
+    // ---------------------------------------------------------------- 熾り石・碑文 (→ B が置く。担当の箱の中の reserved)
     // 熾り石 (ブロックの位置。床 +1)。西は奥の岸、東は鍛え手の間の奥、南は谷の奥 (火床の向こう)
     public static final BlockPos STONE_WEST = new BlockPos(TUBE_WEST_X, FLOOR_WEST + 1, 111);
     public static final BlockPos STONE_EAST = new BlockPos(TUBE_EAST_X, FLOOR_EAST + 1, 85);
     public static final BlockPos STONE_SOUTH = new BlockPos(0, FLOOR_SOUTH + 1, 64);
-    // 抜け道の光る床 (3 × 3 の中心の床のブロック)。石が鳴ると光り、踏むと広間の扉の内側 (SHORTCUT_*_TO) へ運ぶ
-    public static final BlockPos PAD_WEST = new BlockPos(TUBE_WEST_X, FLOOR_WEST, 107);
-    public static final BlockPos PAD_EAST = new BlockPos(TUBE_EAST_X, FLOOR_EAST, 81);
-    public static final BlockPos PAD_SOUTH = new BlockPos(0, FLOOR_SOUTH, 60);
-    public static final BlockPos SHORTCUT_WEST_TO = new BlockPos(-23, FLOOR_HUB + 1, -54);
-    public static final BlockPos SHORTCUT_EAST_TO = new BlockPos(23, FLOOR_HUB + 1, -54);
-    public static final BlockPos SHORTCUT_SOUTH_TO = new BlockPos(0, FLOOR_HUB + 1, -31);
+    // 試練の部屋から広間の扉の内側へ戻すときの着き場 (EmberRooms の eject。抜け道の床は無い)
+    public static final BlockPos EJECT_WEST = new BlockPos(-23, FLOOR_HUB + 1, -54);
+    public static final BlockPos EJECT_EAST = new BlockPos(23, FLOOR_HUB + 1, -54);
+    public static final BlockPos EJECT_SOUTH = new BlockPos(0, FLOOR_HUB + 1, -31);
 
     // 碑文 (9.2節。看板の位置と、文が向く向き。看板の後ろか下に台のブロックを B が置く)
     public record Inscription(String id, BlockPos pos, Direction facing) {

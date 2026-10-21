@@ -512,10 +512,8 @@ public final class EmberBackSelfTest {
         expect(!state.rung(EmberBackState.Trial.EAST), "the east stone rang before the smith fell");
         EmberBackTrials.useStone(back, STONE_WEST, p);
         expect(state.rung(EmberBackState.Trial.WEST), "the west stone did not ring");
-        // 光る石と床はグループの見かけ。ワールドのブロックは鳴っていない姿のまま、ほかのグループには見えない
+        // 光る石はグループの見かけ。ワールドのブロックは鳴っていない姿のまま、ほかのグループには見えない
         expect(overlayHas(back, GROUP_A, STONE_WEST, s -> jp.revati.skyabyss.trial.TrialGoal.isReached(s)), "the rung west stone is not lit for its group");
-        expect(overlayHas(back, GROUP_A, PAD_WEST, s -> s.is(EmberKit.EMBERLIGHT.getBlock())), "the west shortcut floor is not lit for its group");
-        expect(!overlayHas(back, GROUP_A, PAD_EAST, s -> s.is(EmberKit.EMBERLIGHT.getBlock())), "the east shortcut floor is lit before its stone");
         expect(!jp.revati.skyabyss.trial.TrialGoal.isReached(back.getBlockState(STONE_WEST)), "ringing changed the world block of the stone");
         expect(!overlayHas(back, GROUP_B, STONE_WEST, s -> jp.revati.skyabyss.trial.TrialGoal.isReached(s)) && EmberBackState.of(back, GROUP_B).rungCount() == 0,
                 "group B sees or has group A's rung stone");

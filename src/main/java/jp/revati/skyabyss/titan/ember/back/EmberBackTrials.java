@@ -94,7 +94,6 @@ public final class EmberBackTrials {
     // グループごとの門の開く演出の残り tick と、心臓を倒したあと門の奥にグループの誰もいない時間
     private static final Map<UUID, Integer> GATE_TIMERS = new HashMap<>();
     private static final Map<UUID, Integer> AFTER_HEART = new HashMap<>();
-    private static final Map<UUID, Integer> ON_PAD = new HashMap<>();
     private static final Set<UUID> REVIVING = new HashSet<>();
 
     private EmberBackTrials() {
@@ -172,12 +171,6 @@ public final class EmberBackTrials {
                 continue;
             }
             out.accept(stonePos(t), jp.revati.skyabyss.trial.TrialGoal.reached());
-            BlockPos pad = padPos(t);
-            for (int dx = -1; dx <= 1; dx++) {
-                for (int dz = -1; dz <= 1; dz++) {
-                    out.accept(pad.offset(dx, 0, dz), dx == 0 && dz == 0 ? EmberKit.EMBERLIGHT : Blocks.SHROOMLIGHT.defaultBlockState());
-                }
-            }
         }
         if (!gateOpenFor(level, group)) {
             BlockState fire = jp.revati.skyabyss.relic.RelicBlocks.hearth(jp.revati.skyabyss.relic.RelicStyle.EMBER, fireLit(group));
@@ -286,15 +279,6 @@ public final class EmberBackTrials {
             if (!level.getBlockState(s).equals(want)) {
                 level.setBlock(s, want, 3);
             }
-            BlockPos pad = padPos(t);
-            for (int dx = -1; dx <= 1; dx++) {
-                for (int dz = -1; dz <= 1; dz++) {
-                    BlockState p = dx == 0 && dz == 0 ? EmberKit.RUIN_CHISELED : EmberKit.RUIN_DARK;
-                    if (!level.getBlockState(pad.offset(dx, 0, dz)).equals(p)) {
-                        level.setBlock(pad.offset(dx, 0, dz), p, 3);
-                    }
-                }
-            }
         }
     }
 
@@ -325,22 +309,6 @@ public final class EmberBackTrials {
             case WEST -> STONE_WEST;
             case EAST -> STONE_EAST;
             case SOUTH -> STONE_SOUTH;
-        };
-    }
-
-    static BlockPos padPos(EmberBackState.Trial t) {
-        return switch (t) {
-            case WEST -> PAD_WEST;
-            case EAST -> PAD_EAST;
-            case SOUTH -> PAD_SOUTH;
-        };
-    }
-
-    static BlockPos shortcutTo(EmberBackState.Trial t) {
-        return switch (t) {
-            case WEST -> SHORTCUT_WEST_TO;
-            case EAST -> SHORTCUT_EAST_TO;
-            case SOUTH -> SHORTCUT_SOUTH_TO;
         };
     }
 
@@ -408,9 +376,6 @@ public final class EmberBackTrials {
         soundTo(level, group, Vec3.atCenterOf(pos), EmberBackSetup.STONE_RING.get(), 3f, 1f);
         particlesTo(level, group, ParticleTypes.LAVA, pos.getX() + 0.5, pos.getY() + 1.2, pos.getZ() + 0.5, 16, 0.3, 0.3, 0.3, 0.05);
         particlesTo(level, group, ParticleTypes.FLAME, pos.getX() + 0.5, pos.getY() + 1.2, pos.getZ() + 0.5, 30, 0.3, 0.8, 0.3, 0.03);
-        if (by != null) {
-            Notice.bar(by, ModText.hint(EmberIds.LANG_BACK + "shortcut_opened"));
-        }
         Component msg = ModText.progress(EmberIds.LANG_BACK + "stone_ringing", Component.translatable("trial.skyabyss.ember_" + trial.id()),
                 state.rungCount(), 3);
         Groups.tell(level, group, msg);
@@ -508,37 +473,14 @@ public final class EmberBackTrials {
         tickPeaceful(level, level.getDifficulty() == Difficulty.PEACEFUL);
     }
 
-    // ---------------------------------------------------------------- 抜け道の光る床・休み場の記録 (人ごと)
+    // ---------------------------------------------------------------- 休み場の記録 (人ごと)
     @SubscribeEvent
     static void onPlayerTick(PlayerTickEvent.Post event) {
         if (!(event.getEntity() instanceof ServerPlayer player) || !onBack(player.serverLevel()) || player.tickCount % 5 != 0) {
             return;
         }
         ServerLevel level = player.serverLevel();
-        // 光る床: そのグループが鳴らした石のそばの 3 × 3 に 0.5 秒いると、広間の扉の内側へ
         EmberBackState state = EmberBackState.of(level, player);
-        boolean onPad = false;
-        if (!player.isSpectator()) {
-            for (EmberBackState.Trial t : EmberBackState.Trial.values()) {
-                BlockPos pad = padPos(t);
-                if (state.rung(t) && Math.abs(player.getX() - (pad.getX() + 0.5)) < 1.6 && Math.abs(player.getZ() - (pad.getZ() + 0.5)) < 1.6
-                        && player.getY() >= pad.getY() + 0.9 && player.getY() < pad.getY() + 2.5) {
-                    onPad = true;
-                    int n = ON_PAD.merge(player.getUUID(), 5, Integer::sum);
-                    if (n >= 10) {
-                        ON_PAD.remove(player.getUUID());
-                        BlockPos to = shortcutTo(t);
-                        player.fallDistance = 0;
-                        player.teleportTo(level, to.getX() + 0.5, to.getY(), to.getZ() + 0.5, player.getYRot(), 0f);
-                        soundTo(level, state.group(), Vec3.atCenterOf(to), SoundEvents.FIRECHARGE_USE, 0.8f, 0.6f);
-                        Notice.bar(player, ModText.lore(EmberIds.LANG_BACK + "shortcut"));
-                    }
-                }
-            }
-        }
-        if (!onPad) {
-            ON_PAD.remove(player.getUUID());
-        }
         // 休み場の記録 (試練の番号は、その人のグループのもの)
         int epoch = state.epoch();
         CompoundTag tag = persisted(player);
@@ -880,7 +822,6 @@ public final class EmberBackTrials {
     static void onServerStopped(ServerStoppedEvent event) {
         GATE_TIMERS.clear();
         AFTER_HEART.clear();
-        ON_PAD.clear();
         REVIVING.clear();
     }
 
