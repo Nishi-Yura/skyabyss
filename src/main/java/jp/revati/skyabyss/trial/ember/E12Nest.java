@@ -36,6 +36,12 @@ import net.minecraft.world.level.block.state.BlockState;
 //   灰被りの群れ (敵の組 2) が一緒に来るときは、大燠虫の影に隠れる。
 // 修飾: 配置 3 (穴の場所)・数字 2 (一波の大燠虫 2・3・4 / 波の数 1・2・3)・敵の組 2 (大燠虫だけ / 灰被りつき)・障害 (噴気)・任意の目標 (噴気を踏まずに)
 public final class E12Nest implements TrialCell {
+    // 区画の写しで動かせる (決まりは arm・tick・onUse・disarm・overlay の中だけで座標を使う。docs/design/32 の 5 章)
+    @Override
+    public boolean relocatable() {
+        return true;
+    }
+
     // 穴 (大燠虫が出てくる所)。配置ごと
     public static final int[][][] HOLES = {
             {{-6, 113}, {6, 113}, {0, 117}},

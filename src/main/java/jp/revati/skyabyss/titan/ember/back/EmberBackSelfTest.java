@@ -732,7 +732,8 @@ public final class EmberBackSelfTest {
         expect(EmberHeat.add(p, 20, EmberHeat.Reason.VENT) == 10f, "fire resistance does not halve heat gain");
         p.removeAllEffects();
         expect(Math.abs(EmberHeat.gainMultiplier(p, EmberHeat.Reason.VENT) - 1f) < 1e-6, "the multiplier is not 1 without gear");
-        // 焦げ: 100 で 1 秒に 2、85 を切るまで
+        // 焦げ: 100 で 1 秒に 2、85 を切るまで (熱の動かない休み場で見る)
+        p.moveTo(rest.getX() + 0.5, rest.getY(), rest.getZ() + 0.5);
         EmberHeat.set(p, 100);
         float hp = p.getHealth();
         p.tickCount = 40;

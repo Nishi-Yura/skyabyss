@@ -37,6 +37,12 @@ import net.minecraft.world.level.block.state.BlockState;
 //   足を踏み外したら、直前の休み場へ戻される。向こうの岩棚に着けば済み (石は岩棚の端、戻りの光る床つき)。
 // 修飾: 配置 3 (梁の並び)・数字 2 (周期・止まる長さ)・障害 2 (突風・こだま)・任意の目標 (一度も落ちずに)
 public final class W02Bell implements TrialCell {
+    // 区画の写しで動かせる (決まりは arm・tick・onUse・disarm・overlay の中だけで座標を使う。docs/design/32 の 5 章)
+    @Override
+    public boolean relocatable() {
+        return true;
+    }
+
     public static final int BEAMS = 6;
     // 梁の北端の z (梁は 3×3)。間の z 41〜47 は中ほどの台
     public static final int[] BEAM_Z = {28, 33, 38, 48, 53, 58};

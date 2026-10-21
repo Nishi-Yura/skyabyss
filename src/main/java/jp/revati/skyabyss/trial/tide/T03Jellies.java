@@ -38,6 +38,12 @@ import net.minecraft.world.level.block.state.BlockState;
 //   「小魚」の障害は、ときどき一つの傘をつつく (予告の泡。つつかれた傘は倍の速さで沈む)。
 // 修飾: 配置 3 (傘の並び)・数字 2 (傘の沈むまで・払う間隔)・障害 (小魚)・任意の目標 (一度も水に落ちずに)
 public final class T03Jellies implements TrialCell {
+    // 区画の写しで動かせる (決まりは arm・tick・onUse・disarm・overlay の中だけで座標を使う。docs/design/32 の 5 章)
+    @Override
+    public boolean relocatable() {
+        return true;
+    }
+
     public static final int Y = G;
     public static final int BED = G - 4;
     public static final int X1 = 0;

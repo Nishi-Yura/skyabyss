@@ -108,31 +108,41 @@ public final class StormGuides {
     // 島の中: 次の島・風の穴・守り・石
     @Nullable
     public static Target inCell(ServerLevel back, ServerPlayer player) {
-        Vec3 v = player.position();
         UUID group = Groups.keyOf(player);
         for (String id : new String[] {"S02", "S03", "S09", "S10", "S04", "S07", "S08", "S11", "S12"}) {
             TrialCell cell = TrialCells.get(id);
-            if (cell == null || !cell.ports().area().contains(v)) {
+            if (cell == null) {
                 continue;
             }
-            TrialCell.Run run = TrialRuntime.runOf(group, id);
-            Def d = unrung(back, group);
-            if (run != null && run.cleared) {
-                return stone(id);
+            // 区画の写しで遊んでいるなら、手本の座標で決めて、目印を写しの座標へずらす (docs/design/32 の 5 章)
+            jp.revati.skyabyss.trial.TrialFrame f = jp.revati.skyabyss.trial.TrialSlot.frameOf(back, group, cell);
+            Vec3 v = f.local(player.position());
+            if (!cell.ports().area().contains(v)) {
+                continue;
             }
-            return switch (id) {
-                case "S02" -> s02(v);
-                case "S03" -> s03(v);
-                case "S10" -> s10(run, v);
-                case "S04" -> s04(v);
-                case "S07" -> s07(run);
-                case "S08" -> new Target("storm_deck_s08", StormDeck2.s08Valve(1), 3f, 1f, 1.5f);
-                case "S11" -> s11(run);
-                case "S12" -> s12(run);
-                default -> s09(run);
-            };
+            Target t = inCell(back, group, id, v);
+            return t == null ? null : new Target(t.id(), f.at(t.at()), t.hx(), t.hy(), t.hz());
         }
         return null;
+    }
+
+    @Nullable
+    private static Target inCell(ServerLevel back, UUID group, String id, Vec3 v) {
+        TrialCell.Run run = TrialRuntime.runOf(group, id);
+        if (run != null && run.cleared) {
+            return stone(id);
+        }
+        return switch (id) {
+            case "S02" -> s02(v);
+            case "S03" -> s03(v);
+            case "S10" -> s10(run, v);
+            case "S04" -> s04(v);
+            case "S07" -> s07(run);
+            case "S08" -> new Target("storm_deck_s08", StormDeck2.s08Valve(1), 3f, 1f, 1.5f);
+            case "S11" -> s11(run);
+            case "S12" -> s12(run);
+            default -> s09(run);
+        };
     }
 
     private static Target stone(String id) {

@@ -38,6 +38,12 @@ import net.minecraft.world.level.block.state.BlockState;
 //   一人: 吹き上げが長い。 複数: 一人が「栓の台」に立つと、みなの吹き上げが 5 割長くなる (昇る人と栓の人に分かれる)。 落ちても底へふわりと降りるだけ。
 // 修飾: 配置 3 (岩棚の並び)・数字 2 (孔の周期・吹き上げの長さ)・障害 (落石)・任意の目標 (一度も底へ戻らずに)
 public final class W04Vents implements TrialCell {
+    // 区画の写しで動かせる (決まりは arm・tick・onUse・disarm・overlay の中だけで座標を使う。docs/design/32 の 5 章)
+    @Override
+    public boolean relocatable() {
+        return true;
+    }
+
     public static final int X0 = -30;
     public static final int Z0 = 129;
     // 底の床・三つの岩棚の上面のブロックの y

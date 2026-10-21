@@ -41,6 +41,12 @@ import net.minecraft.world.level.block.state.BlockState;
 //   一人: 栓を順に引くだけ。 複数: 栓は離れていて、手分けして引く。人数が増えると目盛りが遠くなる。 「泡吹き」の障害は、広間を泡吹きが漂って邪魔をする。
 // 修飾: 配置 3 (栓の働きの組と最初の水位)・数字 2 (目盛りまでの引きの数・保つ長さ)・障害 (泡吹き)・任意の目標 (戻しの栓を使わずに)
 public final class T07Seas implements TrialCell {
+    // 区画の写しで動かせる (決まりは arm・tick・onUse・disarm・overlay の中だけで座標を使う。docs/design/32 の 5 章)
+    @Override
+    public boolean relocatable() {
+        return true;
+    }
+
     public static final int MAX = 8;
     // 水槽 A・B の中心 (x, z)。内側は 3×3、ガラスの囲いは 5×5。目盛りの柱は外側の隣
     public static final int[] TANK_X = {76, 84};

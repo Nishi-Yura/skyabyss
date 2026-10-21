@@ -37,6 +37,12 @@ import net.minecraft.world.phys.Vec3;
 //   熾を取るのは、右クリックの石 (熾り石)。持っているあいだ、ほかの人は取れない。水で消えたら、また石から取れる。
 // 修飾: 配置 3 (道の曲がり方・水の場所)・数字 2 (風の間隔 160・120・90 tick / 水の溜まり 1・2・3)・障害 (風)・任意の目標 (一度も消さずに)
 public final class E04Carry implements TrialCell {
+    // 区画の写しで動かせる (決まりは arm・tick・onUse・disarm・overlay の中だけで座標を使う。docs/design/32 の 5 章)
+    @Override
+    public boolean relocatable() {
+        return true;
+    }
+
     // 道 (配置ごと。各点は (x, z)。道の上の床は見える色で光る)
     static final int[][][] ROUTE = {
             // 0: 横に行って、奥で南へ

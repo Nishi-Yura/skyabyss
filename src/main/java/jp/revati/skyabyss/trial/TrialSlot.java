@@ -1,18 +1,36 @@
 package jp.revati.skyabyss.trial;
 
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeSet;
 import java.util.UUID;
 
+import javax.annotation.Nullable;
+
+import jp.revati.skyabyss.SkyAbyss;
 import jp.revati.skyabyss.titan.group.BackGroupData;
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.TicketType;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.AABB;
 
 // 順路の区画 (docs/design/32 の 5 章)。一つの順路に一つの番号 (1〜MAX) を割り当て、グループの記録 keep.trial.slot に書く。
-// 番号は小さい空きから。順路が終わると返し、REUSE_AFTER のあいだは同じ番号を別の順路に渡さない (終わった順路の後片付けの間)。
-// 今の作り: セルの部屋は背の中に一組だけあり、区画ごとの写しは建てない。どのセルもグループごとの見かけの上書き (GroupOverlays)・
-// 敵の持ち主 (GroupOwned)・戸 (GroupGates) で動くので、同じ部屋に別の区画のグループが同時にいても互いに見えず、待ちも出ない。
-// 番号は、区画ごとに建てる形 (背の次元の遠くにセルを写す) へ移るときの置き場の鍵になる
+// 番号は小さい空きから。順路が終わると返し、REUSE_AFTER のあいだは同じ番号を別の順路に渡さない (空きがなければ渡す)。
+// 区画の場所は背の次元の体から遠い所 (x = ORIGIN_X + 番号 × STRIDE、z = ORIGIN_Z)。手本の座標にこのずれを足した所へ、
+// その順路が引いた三つのうち写せるセル (TrialCell.relocatable) を、背の中の手本の部屋からブロックごと写す (build)。順路が終わると空気に戻す (clear)。
+// 写しのセルの決まりは TrialRuntime が手本の座標で動かす (TrialFrame)。そのあいだ手本の部屋のチャンクを読み込んでおく (TICKET)。
+// 写せないセル・原型は、背の中の手本の部屋をグループごとの上書きで共有する
 public final class TrialSlot {
     private TrialSlot() {
     }
@@ -20,9 +38,17 @@ public final class TrialSlot {
     public static final String SLOT = "keep.trial.slot";
     public static final int MAX = 32;
     public static final int REUSE_AFTER = 20 * 60 * 3;
+    public static final int ORIGIN_X = 4096;
+    public static final int ORIGIN_Z = 4096;
+    public static final int STRIDE = 1024;
+    private static final TicketType<ChunkPos> TICKET = TicketType.create("skyabyss_trial_slot", Comparator.comparingLong(ChunkPos::toLong));
 
     // 返した番号 → 返した時刻 (背ごと)
     private static final Map<String, Map<Integer, Long>> RELEASED = new HashMap<>();
+    // 写した箱 (背 + 番号 → 写しの座標の箱)。空気に戻すとき使う
+    private static final Map<String, List<AABB>> COPIED = new HashMap<>();
+    // 写しを動かしているあいだ読み込む、手本の部屋のチャンク (背 → チャンク → 使っている番号)
+    private static final Map<String, Map<Long, Set<Integer>>> HELD = new HashMap<>();
 
     public static int of(BackGroupData.Record r) {
         return Math.max(0, r.getInt(SLOT));
@@ -30,6 +56,23 @@ public final class TrialSlot {
 
     private static String dim(ServerLevel back) {
         return back.dimension().location().toString();
+    }
+
+    // 番号 n の区画のずれ
+    public static TrialFrame frame(int n) {
+        return n <= 0 ? TrialFrame.ZERO : new TrialFrame(ORIGIN_X + n * STRIDE, 0, ORIGIN_Z);
+    }
+
+    // そのグループが、そのセルを区画の写しで動かすか (順路が動いていて、番号があり、そのセルを引いていて、写せるセル)
+    public static TrialFrame frameOf(ServerLevel back, UUID group, TrialCell cell) {
+        if (!cell.relocatable()) {
+            return TrialFrame.ZERO;
+        }
+        BackGroupData.Record r = BackGroupData.get(back).peek(group);
+        if (r == null || TrialRoute.step(r) <= 0 || of(r) <= 0 || !(',' + r.getString(TrialRoute.ROUTE) + ',').contains(',' + cell.def().id() + ',')) {
+            return TrialFrame.ZERO;
+        }
+        return frame(of(r));
     }
 
     // いま使っている番号
@@ -72,22 +115,162 @@ public final class TrialSlot {
         }
         if (pick > 0) {
             r.putInt(SLOT, pick);
-            RELEASED.getOrDefault(dim(back), new HashMap<>()).remove(pick);
+            Map<Integer, Long> rel = RELEASED.get(dim(back));
+            if (rel != null) {
+                rel.remove(pick);
+            }
         }
         return pick;
     }
 
-    // 番号を返す
+    // 番号を返す (写しを空気に戻し、手本の部屋の読み込みをやめる)
     public static void release(ServerLevel back, BackGroupData.Record r) {
         int n = of(r);
         if (n <= 0) {
             return;
         }
         r.remove(SLOT);
+        clear(back, n);
         RELEASED.computeIfAbsent(dim(back), k -> new HashMap<>()).put(n, back.getGameTime());
+    }
+
+    // ---------------------------------------------------------------- 写す・空気に戻す
+    // その順路の引いた三つのうち、写せるセルを番号 n の区画へ写す。写したセルの数
+    public static int build(ServerLevel back, int n, TrialDraw.Draw draw) {
+        if (n <= 0) {
+            return 0;
+        }
+        clear(back, n);
+        TrialFrame f = frame(n);
+        List<AABB> copied = new ArrayList<>();
+        int cells = 0;
+        long blocks = 0;
+        long t0 = System.nanoTime();
+        for (TrialDraw.Pick p : draw.picks()) {
+            TrialCell cell = TrialCells.get(p.cellId());
+            if (cell == null || !cell.relocatable()) {
+                continue;
+            }
+            AABB box = cell.buildBox();
+            blocks += copy(back, box, f);
+            copied.add(f.box(box));
+            hold(back, box, n);
+            cells++;
+        }
+        COPIED.put(dim(back) + "#" + n, copied);
+        if (cells > 0) {
+            SkyAbyss.LOGGER.info("Trial slot {}: copied {} cell(s), {} blocks in {} ms", n, cells, blocks, (System.nanoTime() - t0) / 1_000_000);
+        }
+        return cells;
+    }
+
+    // 手本の箱を、ずれ f の所へブロックごと写す (ブロックの実体の中身も)。置いたブロックの数
+    static long copy(ServerLevel back, AABB box, TrialFrame f) {
+        int x0 = (int) Math.floor(box.minX);
+        int y0 = Math.max(back.getMinBuildHeight(), (int) Math.floor(box.minY));
+        int z0 = (int) Math.floor(box.minZ);
+        int x1 = (int) Math.ceil(box.maxX) - 1;
+        int y1 = Math.min(back.getMaxBuildHeight() - 1, (int) Math.ceil(box.maxY) - 1);
+        int z1 = (int) Math.ceil(box.maxZ) - 1;
+        long n = 0;
+        BlockPos.MutableBlockPos src = new BlockPos.MutableBlockPos();
+        for (int x = x0; x <= x1; x++) {
+            for (int z = z0; z <= z1; z++) {
+                for (int y = y0; y <= y1; y++) {
+                    src.set(x, y, z);
+                    BlockState s = back.getBlockState(src);
+                    BlockPos dst = f.at(src.immutable());
+                    if (back.getBlockState(dst) != s) {
+                        back.setBlock(dst, s, Block.UPDATE_CLIENTS | Block.UPDATE_KNOWN_SHAPE);
+                        n++;
+                    }
+                    BlockEntity be = back.getBlockEntity(src);
+                    if (be != null) {
+                        CompoundTag tag = be.saveWithFullMetadata(back.registryAccess());
+                        BlockEntity to = back.getBlockEntity(dst);
+                        if (to != null) {
+                            to.loadWithComponents(tag, back.registryAccess());
+                            to.setChanged();
+                        }
+                    }
+                }
+            }
+        }
+        return n;
+    }
+
+    // 番号 n の区画の写しを空気に戻す
+    public static void clear(ServerLevel back, int n) {
+        List<AABB> boxes = COPIED.remove(dim(back) + "#" + n);
+        if (boxes != null) {
+            BlockState air = Blocks.AIR.defaultBlockState();
+            for (AABB box : boxes) {
+                for (BlockPos p : BlockPos.betweenClosed((int) Math.floor(box.minX), (int) Math.floor(box.minY), (int) Math.floor(box.minZ),
+                        (int) Math.ceil(box.maxX) - 1, (int) Math.ceil(box.maxY) - 1, (int) Math.ceil(box.maxZ) - 1)) {
+                    if (!back.getBlockState(p).isAir()) {
+                        back.setBlock(p, air, Block.UPDATE_CLIENTS | Block.UPDATE_KNOWN_SHAPE);
+                    }
+                }
+            }
+        }
+        unhold(back, n);
+    }
+
+    // 写しの箱 (自己テスト)
+    public static List<AABB> copied(ServerLevel back, int n) {
+        return COPIED.getOrDefault(dim(back) + "#" + n, List.of());
+    }
+
+    // ---------------------------------------------------------------- 手本の部屋の読み込み
+    private static void hold(ServerLevel back, AABB box, int n) {
+        Map<Long, Set<Integer>> held = HELD.computeIfAbsent(dim(back), k -> new HashMap<>());
+        for (int cx = ((int) Math.floor(box.minX)) >> 4; cx <= ((int) Math.ceil(box.maxX)) >> 4; cx++) {
+            for (int cz = ((int) Math.floor(box.minZ)) >> 4; cz <= ((int) Math.ceil(box.maxZ)) >> 4; cz++) {
+                ChunkPos cp = new ChunkPos(cx, cz);
+                Set<Integer> users = held.computeIfAbsent(cp.toLong(), k -> new HashSet<>());
+                if (users.isEmpty()) {
+                    back.getChunkSource().addRegionTicket(TICKET, cp, 2, cp);
+                }
+                users.add(n);
+            }
+        }
+    }
+
+    private static void unhold(ServerLevel back, int n) {
+        Map<Long, Set<Integer>> held = HELD.get(dim(back));
+        if (held == null) {
+            return;
+        }
+        for (Map.Entry<Long, Set<Integer>> e : new ArrayList<>(held.entrySet())) {
+            if (e.getValue().remove(n) && e.getValue().isEmpty()) {
+                ChunkPos cp = new ChunkPos(e.getKey());
+                back.getChunkSource().removeRegionTicket(TICKET, cp, 2, cp);
+                held.remove(e.getKey());
+            }
+        }
+    }
+
+    // その座標がどの区画か (番号)。区画の外なら 0
+    public static int slotAt(double x, double z) {
+        int n = (int) Math.floor((x - ORIGIN_X + STRIDE / 2.0) / STRIDE);
+        if (n < 1 || n > MAX || Math.abs(z - ORIGIN_Z) > STRIDE / 2.0) {
+            return 0;
+        }
+        return n;
+    }
+
+    @Nullable
+    public static AABB area(int n) {
+        if (n <= 0) {
+            return null;
+        }
+        TrialFrame f = frame(n);
+        return new AABB(f.dx() - STRIDE / 2.0, -64, f.dz() - STRIDE / 2.0, f.dx() + STRIDE / 2.0, 400, f.dz() + STRIDE / 2.0);
     }
 
     public static void clearAll() {
         RELEASED.clear();
+        COPIED.clear();
+        HELD.clear();
     }
 }

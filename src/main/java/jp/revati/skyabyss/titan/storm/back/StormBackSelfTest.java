@@ -617,7 +617,8 @@ public final class StormBackSelfTest {
     static boolean passable(ServerLevel l, BlockPos p) {
         BlockState s = l.getBlockState(p);
         if (s.is(ModBlocks.SEALED_GATE.get())) {
-            return GroupGates.isOpen(l, walker, p);
+            // 試練の入口の戸は順路の今の段だけに開く (docs/design/32)。順路は入口の休み場へ運ぶので、歩いて届くかはその戸を開いたものとして見る
+            return GroupGates.isOpen(l, walker, p) || jp.revati.skyabyss.trial.TrialRuntime.isTrialEntrance(p);
         }
         return s.getCollisionShape(l, p).isEmpty();
     }

@@ -32,6 +32,12 @@ import net.minecraft.world.level.block.state.BlockState;
 //   一人でも: 注ぎ口を見て覚え、鋳型へ戻って注ぐ。人数が四人から、示しが一つ増える。
 // 修飾: 配置 3 (鋳型の並び・印の示し)・数字 2 (示しの数 3・4・5 / 色ごとの時間 30・24・18 tick)・障害 (湯気)・任意の目標 (一度で)
 public final class E08Mold implements TrialCell {
+    // 区画の写しで動かせる (決まりは arm・tick・onUse・disarm・overlay の中だけで座標を使う。docs/design/32 の 5 章)
+    @Override
+    public boolean relocatable() {
+        return true;
+    }
+
     public static final int COLORS = 3;
     // 色 (0 赤・1 黄・2 白) の鋳型の x (配置ごと)。鋳型は z = 15、注ぎ口は (29, 8)
     static final int[][] MOLD_X = {{25, 29, 33}, {33, 25, 29}, {29, 33, 25}};

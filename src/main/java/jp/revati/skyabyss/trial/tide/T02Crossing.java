@@ -42,6 +42,12 @@ import net.minecraft.world.level.block.state.BlockState;
 // 潮は島の潮の時計 (TideClock) を使う (潮の速さの数字で、この入江の潮だけ速くなる)。
 // 修飾: 配置 3 (砂州と浮き石の並び)・数字 2 (道の重なり・潮の速さ)・障害 (渦)・任意の目標 (一度も水に落ちずに)
 public final class T02Crossing implements TrialCell {
+    // 区画の写しで動かせる (決まりは arm・tick・onUse・disarm・overlay の中だけで座標を使う。docs/design/32 の 5 章)
+    @Override
+    public boolean relocatable() {
+        return true;
+    }
+
     public static final int Y = F;
     // 配置ごとの砂州・浮き石の座標 (x, z)。0 = 西が砂州・東が浮き石 / 1 = その鏡 / 2 = 砂州は真ん中、浮き石は両側
     // 砂州 = {中心線の折れ線 (x, z, x, z, ...), 幅 3}。浮き石 = 2×2 の北西の隅

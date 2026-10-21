@@ -45,6 +45,12 @@ import net.minecraft.world.phys.Vec3;
 // 人数: 守りのいる台が増える (一人は 2 台 = 台 2・4、二〜三人は 3 台、四人以上は 4 台)。羽守が二人ごとに一体多い。台ごとに手分けできる
 // 修飾: 配置 3 (守りの湧く向き)・数字 2 (羽守の数 −1/0/+1・守りのいる台の数 −1/0/+1)・敵の組 2 (羽守と雷蛾 / 羽守と雷乞い)・障害 2 (横風・空の雷)・任意の目標 (無傷で)
 public final class S10Watch extends StormCell implements StormCell.PerTick {
+    // 区画の写しで動かせる (決まりは arm・tick・onUse・disarm・overlay の中だけで座標を使う。docs/design/32 の 5 章)
+    @Override
+    public boolean relocatable() {
+        return true;
+    }
+
     static final int PLATFORMS = StormDeck.S10_PLATFORMS.length;
     // 空の雷 (障害): 間隔・予告
     static final int SKY_EVERY = 120;
@@ -139,7 +145,7 @@ public final class S10Watch extends StormCell implements StormCell.PerTick {
         for (ServerPlayer p : inside) {
             if (!GaleFeather.holds(p) && p.isAlive() && !p.isSpectator() && p.getInventory().add(new ItemStack(StormBackSetup.GALE_FEATHER.get()))) {
                 Notice.bar(p, ModText.hint("message.skyabyss.trial.s10.feather"));
-                back.playSound(null, p.blockPosition(), StormSetup.GALE.get(), SoundSource.PLAYERS, 0.8f, 1.4f);
+                jp.revati.skyabyss.trial.TrialFx.worldSound(back, p.blockPosition(), StormSetup.GALE.get(), SoundSource.PLAYERS, 0.8f, 1.4f);
             }
         }
         // 落ちた: 休み場へ
@@ -177,7 +183,7 @@ public final class S10Watch extends StormCell implements StormCell.PerTick {
                         visual = true;
                         if (p < PLATFORMS - 1) {
                             bar(inside, ModText.progress("message.skyabyss.trial.s10.quiet"));
-                            back.playSound(null, StormDeck.s10Vent(p), StormSetup.GALE.get(), SoundSource.BLOCKS, 1.0f, 1.2f);
+                            jp.revati.skyabyss.trial.TrialFx.worldSound(back, StormDeck.s10Vent(p), StormSetup.GALE.get(), SoundSource.BLOCKS, 1.0f, 1.2f);
                         }
                     }
                 }
@@ -190,7 +196,7 @@ public final class S10Watch extends StormCell implements StormCell.PerTick {
                     visual = true;
                     if (p < PLATFORMS - 1) {
                         bar(inside, ModText.progress("message.skyabyss.trial.s10.cleared_platform"));
-                        back.playSound(null, StormDeck.s10Vent(p), StormSetup.GALE.get(), SoundSource.BLOCKS, 1.4f, 1.0f);
+                        jp.revati.skyabyss.trial.TrialFx.worldSound(back, StormDeck.s10Vent(p), StormSetup.GALE.get(), SoundSource.BLOCKS, 1.4f, 1.0f);
                         TrialFx.sound(back, run.group, StormDeck.s10Vent(p), SoundEvents.BELL_RESONATE, 1.0f, 1.2f);
                     }
                 }
@@ -244,7 +250,7 @@ public final class S10Watch extends StormCell implements StormCell.PerTick {
                 mobs(run, p).add(m.getUUID());
             }
         }
-        back.playSound(null, BlockPos.containing(is.cx(), Y + 2, is.cz()), SoundEvents.RAVAGER_ROAR, SoundSource.HOSTILE, 0.8f, 1.1f);
+        jp.revati.skyabyss.trial.TrialFx.worldSound(back, BlockPos.containing(is.cx(), Y + 2, is.cz()), SoundEvents.RAVAGER_ROAR, SoundSource.HOSTILE, 0.8f, 1.1f);
     }
 
     // 台から出た守りを戻す
@@ -315,7 +321,7 @@ public final class S10Watch extends StormCell implements StormCell.PerTick {
                     puff(back, run.group, ParticleTypes.CLOUD, p.getX(), p.getY() + 1, p.getZ() - dir * 6, 4, 0.4, 0.8, 1.0, 0.0);
                 }
                 if (ph == 0) {
-                    back.playSound(null, p.blockPosition(), StormSetup.CROSSWIND.get(), SoundSource.AMBIENT, 1.2f, 1f);
+                    jp.revati.skyabyss.trial.TrialFx.worldSound(back, p.blockPosition(), StormSetup.CROSSWIND.get(), SoundSource.AMBIENT, 1.2f, 1f);
                 }
             } else if (ph < GUST_WARN + GUST_BLOW && GaleFeather.gliding(p)) {
                 Vec3 d = Updraft.actualMotion(p);

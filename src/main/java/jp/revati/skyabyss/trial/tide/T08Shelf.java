@@ -42,6 +42,12 @@ import net.minecraft.world.level.block.state.BlockState;
 // 修飾: 配置 3 (三つ目の札の型: 色も丈も別 / 色がかぶる / 丈がかぶる)・数字 2 (片の数 10・12・14 / 札の見え方 出しっぱなし・25 秒・12 秒)・
 //       障害 (潮替え: ときどき二つの鉢の札が入れ替わる。予告つき)・任意の目標 (戻さずに = 一度も間違えずに)
 public final class T08Shelf implements TrialCell {
+    // 区画の写しで動かせる (決まりは arm・tick・onUse・disarm・overlay の中だけで座標を使う。docs/design/32 の 5 章)
+    @Override
+    public boolean relocatable() {
+        return true;
+    }
+
     public static final int SLOTS = 14;
     public static final int COLORS = 5;
     // 棚 (東の壁ぎわの二列。x 71・69、z 78〜90 の 2 おき)

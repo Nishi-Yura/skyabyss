@@ -307,7 +307,8 @@ public final class TrialRoute {
         }
         r.putString(PARTY, String.join(",", who));
         r.putLong(START, back.getGameTime());
-        TrialSlot.assign(back, r);
+        // 区画の番号を取り、引いた三つのうち写せるセルを区画へ写す (docs/design/32 の 5 章)
+        TrialSlot.build(back, TrialSlot.assign(back, r), draw);
         r.changed();
         ENTRY_START.remove(group);
         for (ServerPlayer p : party) {
@@ -348,6 +349,10 @@ public final class TrialRoute {
         // 試練を越えた人に紋が 1 つ (同じ試練では一度だけ。docs/design/31 の A14)
         for (ServerPlayer m : members(back, group)) {
             jp.revati.skyabyss.rpg.skill.SkillExtOps.award(m, titan, key);
+        }
+        if (Titans.STONE_WHALE.equals(titan)) {
+            // 岩鯨の試練の踏破の経験値と依頼の合図 (ほかの巨神は各背の石の仕組みが渡す)
+            jp.revati.skyabyss.rpg.GrowthRewards.onWhaleTrialCleared(back, members(back, group));
         }
         boolean mid = step == 3 && TrialMidBoss.needed(titan, draw);
         int next = mid ? 3 : step + 1;
@@ -448,6 +453,8 @@ public final class TrialRoute {
             SkyAbyss.LOGGER.warn("Route of the {}: no rest for step {}{}", titan, step, mid ? " (mid)" : "");
             return 0;
         }
+        // 区画の写しで遊ぶ段は、写しの入口の休み場へ
+        at = frameOfStep(back, group, draw, step, mid).at(at);
         if (mid) {
             TrialMidBoss.prime(back, group, titan);
         }
@@ -464,6 +471,41 @@ public final class TrialRoute {
         sync(back, group);
         SkyAbyss.LOGGER.info("Route of the {}: group {} carried to step {}{} ({}) x{}", titan, group, step, mid ? " (mid)" : "", rest, n);
         return n;
+    }
+
+    // 段 step の試練を区画の写しで遊ぶなら、そのずれ (中ボス・心臓・原型・写せないセルは ZERO)
+    public static TrialFrame frameOfStep(ServerLevel back, UUID group, TrialDraw.Draw draw, int step, boolean mid) {
+        if (mid || step < 1 || step >= LAST_STEP) {
+            return TrialFrame.ZERO;
+        }
+        Def d = defOf(draw, step);
+        TrialCell cell = d == null ? null : TrialCells.get(d.id());
+        return cell == null ? TrialFrame.ZERO : TrialSlot.frameOf(back, group, cell);
+    }
+
+    // 写しで遊んでいる段の参加者が、手本の部屋に出てしまったら (倒れて休み場で目を覚ました・決まりの外の戻し) 写しへ移す
+    private static void keepInCopy(ServerLevel back, UUID group, BackGroupData.Record r) {
+        int step = step(r);
+        if (r.getInt(MID) > 0 || step < 1 || step >= LAST_STEP || PENDING.containsKey(group)) {
+            return;
+        }
+        TrialDraw.Draw draw = TrialData.current(back, group);
+        TrialFrame f = frameOfStep(back, group, draw, step, false);
+        if (f.isZero()) {
+            return;
+        }
+        Def d = defOf(draw, step);
+        TrialCell cell = d == null ? null : TrialCells.get(d.id());
+        if (cell == null) {
+            return;
+        }
+        AABB template = cell.buildBox();
+        for (ServerPlayer p : members(back, group)) {
+            if (template.contains(p.position())) {
+                Vec3 to = f.world(p.position());
+                move(back, p, BlockPos.containing(to));
+            }
+        }
     }
 
     static void move(ServerLevel back, ServerPlayer p, BlockPos at) {
@@ -601,6 +643,7 @@ public final class TrialRoute {
                 // 入り直した人・ログインし直した人にも、今の段を送り直す
                 sync(back, group);
             }
+            keepInCopy(back, group, r);
             if (!members(back, group).isEmpty() || PENDING.containsKey(group)) {
                 EMPTY_SINCE.remove(group);
                 continue;

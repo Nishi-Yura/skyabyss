@@ -38,6 +38,12 @@ import net.minecraft.world.level.block.state.BlockState;
 //   渡りきると、向こうの岸 (x ≤ -30) の熾り石を鳴らせる。石の前の光る床で休み場へ戻れる。
 // 修飾: 配置 3 (冷やしの段の位置・最初から赤い段・奥が速い)・数字 2 (熱くなるまで 70・56・44 tick / 冷める 60・44・32 tick)・障害 (蛾: 火の粉蛾が坑の上を漂う)・任意の目標 (一度も焼かれず・落ちず)
 public final class E03Chain implements TrialCell {
+    // 区画の写しで動かせる (決まりは arm・tick・onUse・disarm・overlay の中だけで座標を使う。docs/design/32 の 5 章)
+    @Override
+    public boolean relocatable() {
+        return true;
+    }
+
     // 段の数と並び (段 i は x = -14 - i、z = 10)。段 0 は入口の戸のすぐ内側
     public static final int ROW_Z = 10;
     public static final int PLANKS = 16;

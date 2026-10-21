@@ -45,6 +45,12 @@ import net.minecraft.world.level.block.state.BlockState;
 //   一人・二人: 幕で狭い広間 (半径 6.8 の内側。守り手の舞台も小さい)。 三人から: 全面 (舞台の半径 8.5)・群れが増える。
 // 修飾: 配置 3 (真珠の台の向きと群れの湧く間隔)・数字 2 (群れの数 2・3・4 / 守り手の体力 小・標準・大)・敵の組 2 (技の組と群れの種類)・障害 (高波)・任意の目標 (真珠を割らずに)
 public final class T12Keeper implements TrialCell {
+    // 区画の写しで動かせる (決まりは arm・tick・onUse・disarm・overlay の中だけで座標を使う。docs/design/32 の 5 章)
+    @Override
+    public boolean relocatable() {
+        return true;
+    }
+
     public static final int Y = G;
     public static final int CX = TideDeck.T12_CX;
     public static final int CZ = TideDeck.T12_CZ;

@@ -201,8 +201,10 @@ public class PearlKeeper extends TideMob {
 
     // 試練の舞台: 円の中心と半径 (突進の行き先・吹き上げの散らばりをこの円の中に収める)。名前は技の名前 (UPDRAFT・DOWNDRAFT・CHARGE・VOLLEY)。null = 全部使える
     public void setTrialArena(double cx, double cz, double radius) {
-        arenaCx = cx;
-        arenaCz = cz;
+        // 区画の写しのセルの決まりの中 (TrialFrame) では、写しの座標の円にする (使うのは自分の tick)
+        net.minecraft.world.phys.Vec3 c = jp.revati.skyabyss.trial.TrialFrame.current().world(new net.minecraft.world.phys.Vec3(cx, 0, cz));
+        arenaCx = c.x;
+        arenaCz = c.z;
         arenaR = radius;
     }
 
@@ -254,7 +256,8 @@ public class PearlKeeper extends TideMob {
         moveTo(at.x, at.y, at.z, getYRot(), 0);
         playAction("emerge");
         sound(TideBackSetup.BECKONER_EMERGE.get(), 3f, 0.8f);
-        level.sendParticles(ParticleTypes.BUBBLE_POP, at.x, at.y + 0.6, at.z, 60, 1.5, 0.8, 1.5, 0.1);
+        Vec3 fx = jp.revati.skyabyss.trial.TrialFrame.current().world(at);
+        level.sendParticles(ParticleTypes.BUBBLE_POP, fx.x, fx.y + 0.6, fx.z, 60, 1.5, 0.8, 1.5, 0.1);
         invulnerableTicks = 24;
     }
 

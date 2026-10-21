@@ -40,6 +40,12 @@ import net.minecraft.world.phys.Vec3;
 // 人数: 橙の形が人数で広がる (二人ごとに一段)、周期が人数で短くなる (一人ごとに 6%、四人分まで)。一人でも金の床と予告で渡れる
 // 修飾: 配置 3 (橙の形の並び)・数字 2 (雷の周期 110/90/72・形の段 0/1/2)・障害 2 (放電の線 = 地を這う線は跳ぶ・雷蛾)・任意の目標 (無傷で)
 public final class S03Pillars extends StormCell {
+    // 区画の写しで動かせる (決まりは arm・tick・onUse・disarm・overlay の中だけで座標を使う。docs/design/32 の 5 章)
+    @Override
+    public boolean relocatable() {
+        return true;
+    }
+
     // 橙の形 (5x5 の格子。i は東向きの列、j は南向きの行。真ん中 (2, 2) の金の床はどれにも入らない)
     static final int N = 0, S = 1, C = 2, W = 3, E = 4, B = 5, X = 6, ALL = 7;
     static final long[] MASKS = new long[8];
@@ -191,7 +197,7 @@ public final class S03Pillars extends StormCell {
                 visual = true;
                 if (mask != 0) {
                     BlockPos c = tile(k, 2, 2);
-                    back.playSound(null, c, SoundEvents.BEACON_POWER_SELECT, SoundSource.BLOCKS, 0.6f, 1.7f);
+                    jp.revati.skyabyss.trial.TrialFx.worldSound(back, c, SoundEvents.BEACON_POWER_SELECT, SoundSource.BLOCKS, 0.6f, 1.7f);
                 }
             }
             if (mask != 0) {
@@ -288,7 +294,7 @@ public final class S03Pillars extends StormCell {
             for (int k = 0; k < StormDeck.S03_PILLARS.length; k++) {
                 if (pillar(k).over(target.getX(), target.getZ())) {
                     list.add(new long[] {k, new Random(run.seed + now).nextInt(5), now + ARC_WARN});
-                    back.playSound(null, target.blockPosition(), SoundEvents.BEACON_POWER_SELECT, SoundSource.HOSTILE, 0.6f, 1.9f);
+                    jp.revati.skyabyss.trial.TrialFx.worldSound(back, target.blockPosition(), SoundEvents.BEACON_POWER_SELECT, SoundSource.HOSTILE, 0.6f, 1.9f);
                     break;
                 }
             }
@@ -307,7 +313,7 @@ public final class S03Pillars extends StormCell {
             }
             it.remove();
             StormFx.to(run.group, () -> StormFx.line(back, ParticleTypes.END_ROD, from, to, 0.4));
-            back.playSound(null, BlockPos.containing(x, p.y() + 1, p.cz()), SoundEvents.LIGHTNING_BOLT_IMPACT, SoundSource.HOSTILE, 0.8f, 1.8f);
+            jp.revati.skyabyss.trial.TrialFx.worldSound(back, BlockPos.containing(x, p.y() + 1, p.cz()), SoundEvents.LIGHTNING_BOLT_IMPACT, SoundSource.HOSTILE, 0.8f, 1.8f);
             for (ServerPlayer pl : inside) {
                 if (pl.isCreative() || !p.over(pl.getX(), pl.getZ()) || Math.abs(pl.getX() - x) > 0.8) {
                     continue;

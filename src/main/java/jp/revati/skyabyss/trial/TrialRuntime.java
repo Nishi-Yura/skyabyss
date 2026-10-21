@@ -33,6 +33,7 @@ import jp.revati.skyabyss.trial.Trial.Mods;
 import jp.revati.skyabyss.trial.Trial.Rarity;
 import jp.revati.skyabyss.util.Players;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
@@ -86,6 +87,11 @@ public final class TrialRuntime {
         return entranceKeys.contains(key);
     }
 
+    // 試練の入口の戸のブロックか (自己テストの歩ける所の検査が、順路の戸を開いたものとして見るため)
+    public static boolean isTrialEntrance(BlockPos pos) {
+        return isEntranceKey(pos.asLong());
+    }
+
     private static String key(UUID group, String id) {
         return group + ":" + id;
     }
@@ -137,7 +143,12 @@ public final class TrialRuntime {
                 continue;
             }
             if (current != null && current.id().equals(cell.def().id())) {
-                GroupGates.open(back, group, p.entrance());
+                // 区画の写しで遊ぶセルは、写しの入口を開ける (手本の入口は閉じたまま)
+                TrialFrame f = TrialSlot.frameOf(back, group, cell);
+                GroupGates.open(back, group, f.at(p.entrance()));
+                if (!f.isZero()) {
+                    GroupGates.seal(back, group, p.entrance());
+                }
             } else {
                 GroupGates.seal(back, group, p.entrance());
             }
@@ -206,9 +217,12 @@ public final class TrialRuntime {
                 if (!cell.runtime()) {
                     continue;
                 }
+                // 区画の写しで動かすセルは、写しの床の範囲で数える (docs/design/32 の 5 章)
+                TrialFrame frame = TrialSlot.frameOf(level, group, cell);
+                AABB area = frame.box(cell.ports().area());
                 List<ServerPlayer> inside = new ArrayList<>();
                 for (ServerPlayer p : members) {
-                    if (cell.ports().area().contains(p.position())) {
+                    if (area.contains(p.position())) {
                         inside.add(p);
                     }
                 }
@@ -217,9 +231,11 @@ public final class TrialRuntime {
                 }
                 TrialCell.Run run = armed(level, group, cell, draw, now);
                 run.lastPresent = now;
-                cell.tick(level, run, inside, now);
-                tickPad(level, run, inside);
-                autoRing(level, group, cell, run, draw, inside, now);
+                TrialWindow.run(level, group, cell, run.frame, () -> {
+                    cell.tick(level, run, inside, now);
+                    tickPad(level, run, inside);
+                    autoRing(level, group, cell, run, draw, inside, now);
+                });
             }
         }
         // 誰もいなくなったセルを止める
@@ -250,8 +266,13 @@ public final class TrialRuntime {
     public static TrialCell.Run armed(ServerLevel back, UUID group, TrialCell cell, TrialDraw.Draw draw, long now) {
         String k = key(group, cell.def().id());
         TrialCell.Run run = RUNS.get(k);
-        if (run != null) {
+        TrialFrame frame = TrialSlot.frameOf(back, group, cell);
+        if (run != null && run.frame.equals(frame)) {
             return run;
+        }
+        if (run != null) {
+            // 手本と写しを行き来した (順路が始まった・終わった): 一度止めて、新しい場所で組み直す
+            stop(back, run);
         }
         String titan = cell.def().titan();
         Mods mods = modsFor(back, group, titan, cell.def(), draw);
@@ -259,15 +280,17 @@ public final class TrialRuntime {
         long seed = TrialDraw.seed(TrialData.worldSeed(back), group, titan, TrialData.cycle(r)) ^ cell.def().id().hashCode() ^ now;
         run = new TrialCell.Run(group, cell, mods, seed, now);
         run.cleared = TrialData.isCleared(r, cell.def().id()) && TrialBacks.of(titan).isRung(back, group, cell.def(), draw.has(cell.def().id()));
+        run.frame = frame;
         RUNS.put(k, run);
-        cell.arm(back, run);
+        TrialCell.Run armedRun = run;
+        TrialWindow.run(back, group, cell, frame, () -> cell.arm(back, armedRun));
         GroupOverlays.refresh(back, group);
         return run;
     }
 
     private static void stop(ServerLevel back, TrialCell.Run run) {
         RUNS.remove(key(run.group, run.cell.def().id()));
-        run.cell.disarm(back, run);
+        TrialWindow.run(back, run.group, run.cell, run.frame, () -> run.cell.disarm(back, run));
         GroupOverlays.refresh(back, run.group);
     }
 
@@ -323,11 +346,13 @@ public final class TrialRuntime {
                 continue;
             }
             if (backKind.isRung(level, group, cell.def(), draw.has(cell.def().id()))) {
-                out.accept(stone, backKind.lit());
+                out.accept(TrialSlot.frameOf(level, group, cell).at(stone), backKind.lit());
             }
         }
         for (TrialCell.Run run : runsOf(group)) {
-            run.cell.overlay(level, run, out);
+            // 写しのセルは、手本の座標の見かけを写しの座標へずらして出す
+            TrialFrame f = run.frame;
+            TrialFrame.with(f, () -> run.cell.overlay(level, run, f.isZero() ? out : (p, s) -> out.accept(f.at(p), s)));
         }
     }
 
@@ -344,11 +369,15 @@ public final class TrialRuntime {
         }
         BlockPos pos = event.getPos();
         String backTitan = Titans.titanOfBack(back.dimension());
+        UUID clicker = Groups.keyOf(sp);
         for (TrialCell cell : TrialCells.of(backTitan)) {
-            if (!cell.runtime() || !cell.interactive().contains(pos)) {
+            // 写しのセルは、押された所を手本の座標に戻して比べる
+            TrialFrame f = cell.runtime() ? TrialSlot.frameOf(back, clicker, cell) : TrialFrame.ZERO;
+            BlockPos local = f.local(pos);
+            if (!cell.runtime() || !cell.interactive().contains(local)) {
                 continue;
             }
-            UUID group = Groups.keyOf(sp);
+            UUID group = clicker;
             TrialDraw.Draw draw = TrialData.current(back, group);
             if (!liveCells(back, backTitan, draw).contains(cell)) {
                 return;
@@ -356,7 +385,9 @@ public final class TrialRuntime {
             long now = back.getGameTime();
             TrialCell.Run run = armed(back, group, cell, draw, now);
             run.lastPresent = now;
-            if (cell.onUse(back, run, sp, pos, sp.isShiftKeyDown(), now)) {
+            boolean[] used = {false};
+            TrialWindow.run(back, group, cell, run.frame, () -> used[0] = cell.onUse(back, run, sp, local, sp.isShiftKeyDown(), now));
+            if (used[0]) {
                 event.setCanceled(true);
                 event.setCancellationResult(InteractionResult.SUCCESS);
             }
@@ -373,7 +404,9 @@ public final class TrialRuntime {
         }
         UUID group = Groups.keyOf(sp);
         for (TrialCell.Run run : runsOf(group)) {
-            if (run.cell.ports().area().contains(sp.position())) {
+            // 写しのセルの決まりの中で受けた傷は、手本の座標で起きる (TrialWindow)
+            AABB area = TrialFrame.current().equals(run.frame) ? run.cell.ports().area() : run.frame.box(run.cell.ports().area());
+            if (area.contains(sp.position())) {
                 run.put("hits", run.getInt("hits") + 1);
             }
         }
@@ -450,7 +483,8 @@ public final class TrialRuntime {
         if (now - at < AUTO_RING_DELAY) {
             return;
         }
-        ringCell(back, group, cell, run, drawn, inside.get(0), stone, kind);
+        // 石の合図は背全体の仕組み (心臓の門など) を動かすので、区画のずれの外で鳴らす
+        TrialFrame.with(TrialFrame.ZERO, () -> ringCell(back, group, cell, run, drawn, inside.get(0), stone, kind));
     }
 
     // ゴールの知らせの数え (TrialSteles.onRung) が、原型の石として数えないようにして動かす (新作の石は自分で数える)

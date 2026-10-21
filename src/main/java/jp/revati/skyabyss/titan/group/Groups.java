@@ -109,7 +109,9 @@ public final class Groups {
     public static void sound(ServerLevel level, UUID group, double x, double y, double z, net.minecraft.sounds.SoundEvent sound,
             net.minecraft.sounds.SoundSource source, float volume, float pitch) {
         var holder = net.minecraft.core.registries.BuiltInRegistries.SOUND_EVENT.wrapAsHolder(sound);
-        var packet = new net.minecraft.network.protocol.game.ClientboundSoundPacket(holder, source, x, y, z, volume, pitch, level.random.nextLong());
+        // 区画の写しのセルの決まりの中 (TrialFrame): 人は手本の座標にいるので距離は手本で比べ、音は写しの座標で鳴らす
+        var at = jp.revati.skyabyss.trial.TrialFrame.current().world(new net.minecraft.world.phys.Vec3(x, y, z));
+        var packet = new net.minecraft.network.protocol.game.ClientboundSoundPacket(holder, source, at.x, at.y, at.z, volume, pitch, level.random.nextLong());
         for (ServerPlayer player : online(level, group)) {
             if (player.distanceToSqr(x, y, z) < 64 * 64 && player.connection != null) {
                 player.connection.send(packet);

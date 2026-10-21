@@ -38,6 +38,12 @@ import net.minecraft.world.level.block.state.BlockState;
 //   人数が増えると周期が 5% ずつ縮む (下限 75%。光る長さは変えない)。
 // 修飾: 配置 3 (帯の並び)・数字 2 (周期 130・104・84 tick / 予告 28・24・20 tick。予告の最短 16 tick は割らない)・障害 2 (突風・火の粉蛾)・任意の目標 (一度も焼かれずに)
 public final class E02Vents implements TrialCell {
+    // 区画の写しで動かせる (決まりは arm・tick・onUse・disarm・overlay の中だけで座標を使う。docs/design/32 の 5 章)
+    @Override
+    public boolean relocatable() {
+        return true;
+    }
+
     public static final int LANES = 7;
     public static final int BANDS = 4;
     // 帯の北端の z (帯は 3 深さ)。筋 i は x = 14 + 3i 〜 16 + 3i

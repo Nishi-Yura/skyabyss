@@ -36,6 +36,12 @@ import net.minecraft.world.level.block.state.BlockState;
 // 人数: 目盛りまでの回しの数が人数で増える (二人ごとに +1、最大 +2)。弁は離れていて、手分けして回せる (音の高さで圧が分かる: 高いほど高圧)
 // 修飾: 配置 3 (板の組と最初の圧)・数字 2 (回しの数・保つ長さ 3/5/7 秒)・障害 2 (気嚢の漏れ・雷蛾)・任意の目標 (回しを少なく)
 public final class S08Valves extends StormCell {
+    // 区画の写しで動かせる (決まりは arm・tick・onUse・disarm・overlay の中だけで座標を使う。docs/design/32 の 5 章)
+    @Override
+    public boolean relocatable() {
+        return true;
+    }
+
     public static final int MAX = 5;
     public static final int TANKS = 4;
     // 第一の段の弁 {v0, v1} の効き {A, B}、第二の段の弁 {v0, v1, v2} の効き {A, B, C, D} (配置ごと)

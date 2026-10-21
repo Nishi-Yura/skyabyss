@@ -38,6 +38,12 @@ import net.minecraft.world.level.block.state.BlockState;
 //   間を重ねて、最後の抜け口を開けると炉の扉が開く。一人でも蓋は一つずつ開けるだけで、仲間は要らない。人数が増えると煙突が増える (3 人で +1・5 人で +2。上限 8)。
 // 修飾: 配置 3 (煙突の位置の入れ替え)・数字 2 (煙突の数 5・6・8 / 間の数 2・3・4)・障害 (突風: 煙が 3 秒乱れる)・任意の目標 (間違えずに)
 public final class E06Flues implements TrialCell {
+    // 区画の写しで動かせる (決まりは arm・tick・onUse・disarm・overlay の中だけで座標を使う。docs/design/32 の 5 章)
+    @Override
+    public boolean relocatable() {
+        return true;
+    }
+
     public static final int SITES = 8;
     // 煙突の位置: 手前の列 (z 33) と奥の列 (z 43)。八本とも常に立っている (配置は、第 1 の間にどの四本が煙を出すか)
     public static final int[] SITE_X = {-31, -26, -22, -17};

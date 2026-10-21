@@ -44,12 +44,13 @@ public final class StormCellTicks {
                 }
                 List<ServerPlayer> inside = new ArrayList<>();
                 for (ServerPlayer p : e.getValue()) {
-                    if (run.cell.ports().area().contains(p.position())) {
+                    if (run.frame.box(run.cell.ports().area()).contains(p.position())) {
                         inside.add(p);
                     }
                 }
                 if (!inside.isEmpty()) {
-                    pt.perTick(level, run, inside, now);
+                    // 区画の写しのセルは、手本の座標で動かす (TrialWindow)
+                    jp.revati.skyabyss.trial.TrialWindow.run(level, run.group, run.cell, run.frame, () -> pt.perTick(level, run, inside, now));
                 }
             }
         }

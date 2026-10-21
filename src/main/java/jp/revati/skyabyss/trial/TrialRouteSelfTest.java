@@ -174,6 +174,8 @@ public final class TrialRouteSelfTest {
     private static boolean near(ServerPlayer p, ServerLevel back, String titan, TrialDraw.Draw draw, int step, boolean mid) {
         String rest = TrialRoute.restOf(titan, draw, step, mid);
         BlockPos at = rest == null ? null : TrialRoute.spawnOf(back, titan, rest);
+        // 区画の写しで遊ぶ段は、写しの入口の休み場
+        at = at == null ? null : TrialRoute.frameOfStep(back, Groups.keyOf(p), draw, step, mid).at(at);
         return at != null && p.position().distanceTo(Vec3.atBottomCenterOf(at)) < 2.5;
     }
 

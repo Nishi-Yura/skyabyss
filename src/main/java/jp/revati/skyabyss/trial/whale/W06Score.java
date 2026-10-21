@@ -32,6 +32,18 @@ import net.minecraft.world.level.block.state.BlockState;
 //   間違えたら最初から (損はない)。叩いた順は壁の「進み」の灯に残る。見返しの台 (書見台) を押すと、譜が 6 秒だけ出る。
 //   譜の長さ 3・4・6 (数字)、見え方 (数字: 出しっぱなし / 叩き始めたら隠れる / 6 秒だけ)、肋骨の色の割り当て 3 通り (配置)。任意の目標: 間違えずに
 public final class W06Score implements TrialCell {
+    // 区画の写しで動かせる (決まりは arm・tick・onUse・disarm・overlay の中だけで座標を使う。docs/design/32 の 5 章)
+    @Override
+    public boolean relocatable() {
+        return true;
+    }
+
+    // 入口の休み場が戸の前の広間 D0 と通路 C1なので、それも写す
+    @Override
+    public net.minecraft.world.phys.AABB buildBox() {
+        return TrialCell.super.buildBox().minmax(WhaleDeck.D0.aabb().inflate(1)).minmax(WhaleDeck.C1.aabb().inflate(1));
+    }
+
     public static final int RIBS = 6;
     public static final int[] RIB_X = {26, 28, 30, 32, 34, 36};
     public static final int RIB_Z = 34;

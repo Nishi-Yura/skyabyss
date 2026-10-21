@@ -33,6 +33,12 @@ import net.minecraft.world.level.block.state.BlockState;
 // 敵: 磯のはさみ虫と珊瑚の下僕 / 泡吹きつき。人数で増える。最後の波は、下僕が増える。水に浸かった人がいたかは任意の目標に数える。
 // 修飾: 配置 3 (沈む順)・数字 2 (波の敵の数・沈む前の予告)・敵の組 2 (群れ / 泡吹きつき)・障害 (高波)・任意の目標 (水に浸からずに)
 public final class T10Ring extends RingArenaCell {
+    // 区画の写しで動かせる (決まりは arm・tick・onUse・disarm・overlay の中だけで座標を使う。docs/design/32 の 5 章)
+    @Override
+    public boolean relocatable() {
+        return true;
+    }
+
     private final Def def = TrialCatalog.get("T10");
     private final Ports ports = new Ports(TideDeck.T10_GATE, false, List.of(), TideDeck.T10_STONE, TideDeck.T10_PAD, TideDeck.REST_H, TideDeck.T10.aabb(),
             TideDeckRests.of("t10"));

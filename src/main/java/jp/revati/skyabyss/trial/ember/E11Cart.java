@@ -35,6 +35,12 @@ import net.minecraft.world.level.block.state.BlockState;
 //   押す人は荷車の二マス以内。守る人は敵の前に立つ。荷車は止めると静まる。
 // 修飾: 配置 3 (襲撃の来る側)・数字 2 (襲撃の回数 2・3・4 / 押す速さ 40・30・24 tick)・敵の組 2 (灰被りの群れ / 大燠虫つき)・障害 (火の粉蛾)・任意の目標 (荷車を無傷で)
 public final class E11Cart implements TrialCell {
+    // 区画の写しで動かせる (決まりは arm・tick・onUse・disarm・overlay の中だけで座標を使う。docs/design/32 の 5 章)
+    @Override
+    public boolean relocatable() {
+        return true;
+    }
+
     // 道 (x = -27 + i、z = 114)。荷車は index 0 から始まり、index 10 (x = -17) で炉に着く
     public static final int ROAD_Z = 114;
     public static final int ROAD_X0 = -27;

@@ -943,13 +943,15 @@ public final class TitanBackTrials {
     // 粒を、グループの人にだけ送る (group が null なら近くの全員)
     private static void sendParticlesTo(ServerLevel level, @Nullable UUID group, net.minecraft.core.particles.ParticleOptions particle,
             double x, double y, double z, int count, double dx, double dy, double dz, double speed) {
+        // 区画の写しのセルの決まりの中 (TrialFrame) では、写しの座標に出す
+        net.minecraft.world.phys.Vec3 at = jp.revati.skyabyss.trial.TrialFrame.current().world(new net.minecraft.world.phys.Vec3(x, y, z));
         if (group == null) {
-            level.sendParticles(particle, x, y, z, count, dx, dy, dz, speed);
+            level.sendParticles(particle, at.x, at.y, at.z, count, dx, dy, dz, speed);
             return;
         }
         for (ServerPlayer player : Groups.online(level, group)) {
             if (player.distanceToSqr(x, y, z) < 64 * 64) {
-                level.sendParticles(player, particle, false, x, y, z, count, dx, dy, dz, speed);
+                level.sendParticles(player, particle, false, at.x, at.y, at.z, count, dx, dy, dz, speed);
             }
         }
     }

@@ -326,7 +326,7 @@ public final class S09Nest extends StormCell {
             if (now < due[i]) {
                 StormFx.to(run.group, () -> StormFx.ring(back, ParticleTypes.ELECTRIC_SPARK, at.add(0, 0.2, 0), BLAST_R, 14));
                 if (now % 10 == 0) {
-                    back.playSound(null, base, SoundEvents.BEACON_POWER_SELECT, SoundSource.BLOCKS, 0.9f, 1.8f);
+                    jp.revati.skyabyss.trial.TrialFx.worldSound(back, base, SoundEvents.BEACON_POWER_SELECT, SoundSource.BLOCKS, 0.9f, 1.8f);
                 }
                 continue;
             }
