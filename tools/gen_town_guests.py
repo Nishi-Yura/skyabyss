@@ -39,6 +39,10 @@ PAL = {
     "weaver":         dict(coat=(90, 100, 140), role=(200, 170, 150), trim=(60, 66, 100), acc=(170, 80, 90), hair=(60, 40, 40), skin="mid", guard=(100, 108, 140), sash=(170, 80, 90), lady=True),
     "ash_apprentice": dict(coat=(64, 58, 56), role=(150, 70, 40), trim=(36, 32, 30), acc=(220, 120, 50), hair=(40, 30, 28), skin="tan", guard=(54, 48, 46), sash=(120, 56, 32)),
     "herbalist":      dict(coat=(88, 100, 70), role=(150, 120, 90), trim=(60, 70, 48), acc=(140, 160, 90), hair=(200, 198, 190), skin="old", guard=(96, 104, 80), sash=(110, 130, 80), lady=True),
+    # 選定 第 2 期 q_houses A (家 2・5・6)
+    "sailor":         dict(coat=(44, 60, 90), role=(210, 200, 180), trim=(30, 40, 62), acc=(190, 160, 90), hair=(214, 210, 200), skin="old", guard=(60, 74, 100), sash=(160, 60, 50)),
+    "mother":         dict(coat=(150, 90, 70), role=(220, 210, 180), trim=(100, 60, 46), acc=(200, 170, 110), hair=(110, 70, 44), skin="mid", guard=(160, 110, 90), sash=(90, 110, 70), lady=True),
+    "baker":          dict(coat=(210, 196, 170), role=(150, 100, 60), trim=(160, 140, 110), acc=(200, 140, 70), hair=(150, 100, 60), skin="pale", guard=(190, 176, 150), sash=(120, 80, 50)),
 }
 # 肖像の色 (gen_attendant_portraits.R と同じ形)
 R = {
@@ -50,9 +54,12 @@ R = {
     "weaver":         dict(skin=(196, 150, 112), hair=(60, 40, 40), coat=(90, 100, 140), role=(200, 170, 150), acc=(170, 80, 90), head="kerchief", headc=(170, 80, 90), lady=True, bg=(150, 110, 180)),
     "ash_apprentice": dict(skin=(176, 120, 82), hair=(40, 30, 28), coat=(64, 58, 56), role=(150, 70, 40), acc=(220, 120, 50), head="band", headc=(90, 80, 76), bg=(230, 110, 50)),
     "herbalist":      dict(skin=(206, 180, 160), hair=(204, 200, 192), coat=(88, 100, 70), role=(150, 120, 90), acc=(140, 160, 90), head="kerchief", headc=(110, 130, 80), lady=True, old=True, bg=(120, 170, 100)),
+    "sailor":         dict(skin=(190, 150, 120), hair=(216, 212, 204), coat=(44, 60, 90), role=(210, 200, 180), acc=(190, 160, 90), head="kerchief", headc=(44, 60, 90), beard=True, old=True, bg=(70, 120, 170)),
+    "mother":         dict(skin=(200, 160, 128), hair=(110, 70, 44), coat=(150, 90, 70), role=(220, 210, 180), acc=(200, 170, 110), head="kerchief", headc=(90, 110, 70), lady=True, bg=(200, 140, 110)),
+    "baker":          dict(skin=(214, 180, 150), hair=(150, 100, 60), coat=(210, 196, 170), role=(150, 100, 60), acc=(200, 140, 70), head="band", headc=(220, 214, 200), bg=(220, 170, 100)),
 }
 JA = {"apprentice": "鯨追いの見習い", "bellkeeper": "鐘守", "fisher": "浜を捨てた漁師", "bard": "旅の吟遊詩人",
-      "child": "雷を怖がる子", "weaver": "機織り", "ash_apprentice": "灰を運ぶ弟子", "herbalist": "薬草摘みの老婆"}
+      "child": "雷を怖がる子", "weaver": "機織り", "ash_apprentice": "灰を運ぶ弟子", "herbalist": "薬草摘みの老婆", "sailor": "年寄りの船乗り", "mother": "子だくさんの母", "baker": "パン焼き"}
 GUESTS = list(PAL)
 
 

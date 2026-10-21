@@ -1,0 +1,61 @@
+{
+  "category": "sub",
+  "order": 223,
+  "giver": "skyabyss:guest_sailor",
+  "chapter": "titan_tide",
+  "min_stage": 1,
+  "stages": [
+    {
+      "id": "meet",
+      "objectives": [
+        {
+          "id": "meet",
+          "type": "talk",
+          "target": "skyabyss:guest_sailor",
+          "topic": "meet"
+        }
+      ]
+    },
+    {
+      "id": "make",
+      "objectives": [
+        {
+          "id": "compass",
+          "type": "collect",
+          "target": "minecraft:compass",
+          "count": 1
+        },
+        {
+          "id": "map",
+          "type": "collect",
+          "target": "minecraft:map",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "id": "hand",
+      "objectives": [
+        {
+          "id": "hand",
+          "type": "signal",
+          "target": "town_hand:guest_sailor",
+          "party": false
+        }
+      ]
+    }
+  ],
+  "reward": {
+    "xp": 60,
+    "items": [
+      {
+        "item": "skyabyss:bell_coin",
+        "count": 20
+      },
+      {
+        "item": "minecraft:spyglass",
+        "count": 1
+      }
+    ]
+  }
+}

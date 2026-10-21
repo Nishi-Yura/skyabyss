@@ -1,0 +1,113 @@
+{
+  "npc": "skyabyss:guest_baker",
+  "entries": [
+    {
+      "node": "meet",
+      "if": {
+        "type": "quest",
+        "quest": "town/ch4_baker",
+        "is": "active",
+        "stage": "meet"
+      }
+    },
+    {
+      "node": "wait",
+      "if": {
+        "type": "quest",
+        "quest": "town/ch4_baker",
+        "is": "active",
+        "stage": "gather"
+      }
+    },
+    {
+      "node": "hand_ask",
+      "if": {
+        "type": "quest",
+        "quest": "town/ch4_baker",
+        "is": "active",
+        "stage": "hand"
+      }
+    },
+    {
+      "node": "idle"
+    }
+  ],
+  "nodes": {
+    "meet": {
+      "face": "grave",
+      "next": "meet2"
+    },
+    "meet2": {
+      "face": "neutral",
+      "options": [
+        {
+          "id": "ok",
+          "goto": "end",
+          "kind": "talk"
+        }
+      ]
+    },
+    "wait": {
+      "face": "neutral"
+    },
+    "hand_ask": {
+      "face": "neutral",
+      "options": [
+        {
+          "id": "give",
+          "goto": "handed",
+          "kind": "give",
+          "if": {
+            "type": "all",
+            "of": [
+              {
+                "type": "item",
+                "item": "minecraft:wheat",
+                "count": 16
+              },
+              {
+                "type": "item",
+                "item": "minecraft:coal",
+                "count": 4
+              }
+            ]
+          },
+          "do": [
+            {
+              "type": "take",
+              "item": "minecraft:wheat",
+              "count": 16
+            },
+            {
+              "type": "take",
+              "item": "minecraft:coal",
+              "count": 4
+            },
+            {
+              "type": "signal",
+              "signal": "town_hand:guest_baker"
+            }
+          ]
+        },
+        {
+          "id": "later",
+          "goto": "end",
+          "kind": "leave"
+        }
+      ]
+    },
+    "handed": {
+      "face": "smile",
+      "options": [
+        {
+          "id": "ok",
+          "goto": "end",
+          "kind": "talk"
+        }
+      ]
+    },
+    "idle": {
+      "face": "neutral"
+    }
+  }
+}
