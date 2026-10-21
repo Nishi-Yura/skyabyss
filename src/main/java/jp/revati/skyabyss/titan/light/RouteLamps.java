@@ -88,7 +88,8 @@ public final class RouteLamps {
         int n = 0;
         for (BlockPos p : load(titan)) {
             BlockState cur = level.getBlockState(p);
-            if (cur != lamp && replaceable(cur) && !reserved(titan, p)) {
+            // 封じた広間 (誰も入らない) には置かない (trial/RouteSeals.inHall)
+            if (cur != lamp && replaceable(cur) && !reserved(titan, p) && !jp.revati.skyabyss.trial.RouteSeals.inHall(titan, p)) {
                 level.setBlock(p, lamp, Block.UPDATE_CLIENTS | Block.UPDATE_KNOWN_SHAPE);
                 n++;
             }

@@ -162,6 +162,22 @@ public final class WhaleKeeper {
         }
     }
 
+    // 試す所の五つのチャンクが、すべて敵の動く状態になったか (上限 600 tick で先へ進む)
+    private static int readyWait;
+
+    public static boolean selfTestReady(net.minecraft.server.MinecraftServer server) {
+        ServerLevel level = server.overworld();
+        boolean all = true;
+        for (int dx = 0; dx <= 4; dx++) {
+            all &= level.isPositionEntityTicking(new net.minecraft.core.BlockPos(TEST_X + dx * 16 + 8, 64, TEST_Z + 8));
+        }
+        if (all || ++readyWait >= 600) {
+            readyWait = 0;
+            return true;
+        }
+        return false;
+    }
+
     public static void selfTestRun(net.minecraft.server.MinecraftServer server) {
         runSelfTest(server.overworld());
     }

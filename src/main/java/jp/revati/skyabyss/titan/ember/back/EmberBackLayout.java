@@ -31,7 +31,8 @@ public final class EmberBackLayout {
     // 23: 試練の階 (EmberDeck。docs/design/29): 螺旋の踊り場から南の浅い所に、新作の試練 E02・E06・E07・E10 の四つのセルと広間・回廊・休み場 6 つ・試練の板。冷えた溶岩洞の口の戸 (原型の三つ)
     // 20: 体を x1.6・y1.3 に (26 の 11 章)。喉・広間・三つの試練・井戸を引き直し、冷えた溶岩洞・灰降りの庭・尾根の広間・任意の翼を足した
     // 31: 順路の入口の箱 (喉の坂の休み場) の灯り。周回の灰の道の前の湖 (32 の 4 章、R5)
-    public static final int LAYOUT_VERSION = 31;
+    // 32: 封じた炉心の広間に歩く道の灯りを置かない (RouteLamps。trial/RouteSeals)
+    public static final int LAYOUT_VERSION = 32;
     // 灰の原のいちばん上のブロックの y (dimension/ember_back.json の層と合わせる)
     public static final int PLAIN_TOP = 63;
     // 体の中心 (遠くへ歩いたかを見る。体の長さ 621 の半分に余白)

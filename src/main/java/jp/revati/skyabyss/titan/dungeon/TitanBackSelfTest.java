@@ -1025,7 +1025,7 @@ public final class TitanBackSelfTest {
                 failures.add("the waterway rest point has no ceiling at " + mz);
             }
         }
-        // 戦いの前室で休み場を取っていて、その戦いの最中なら、鼓動の間で目覚める (グループごと)
+        // 戦いの前室で休み場を取っていて、その戦いの最中でも、その休み場で目覚める (鼓動の間は封じた)
         UUID group = UUID.fromString("00000000-0000-0000-0000-0000000000b1");
         UUID other = UUID.fromString("00000000-0000-0000-0000-0000000000b2");
         for (String[] pair : new String[][] {{"e0", "e1"}, {"ckr", "ck"}}) {
@@ -1033,8 +1033,9 @@ public final class TitanBackSelfTest {
                 failures.add("rest point " + pair[0] + " moved without a fight");
             }
             TitanBackTrials.testBeginFight(group, pair[1], Set.of());
-            if (!"hub".equals(TitanBackTrials.respawnCheckpoint(level, group, pair[0]))) {
-                failures.add("a player who fell in " + pair[1] + " would wake up next to the fight (rest point " + pair[0] + ")");
+            // 順路では鼓動の間を封じたので、戦いの最中でもその段の休み場で目覚める (32 の 2.4)
+            if (!pair[0].equals(TitanBackTrials.respawnCheckpoint(level, group, pair[0]))) {
+                failures.add("a player who fell in " + pair[1] + " would not wake up at the rest point " + pair[0]);
             }
             if (!pair[0].equals(TitanBackTrials.respawnCheckpoint(level, other, pair[0]))) {
                 failures.add("another group's fight moved this group's rest point " + pair[0]);

@@ -135,6 +135,8 @@ public final class EmberBodyBuilder {
         BackBuildJobs.Steps s = new BackBuildJobs.Steps("ember back body");
         EmberBodyBuilder[] holder = new EmberBodyBuilder[1];
         long[] t = new long[4];
+        // 仕上げが触る範囲 (背の監査の範囲) のチャンクを先に読み込む (読みに行くと、その場で tick が止まる)
+        s.thenJob("load area", () -> BackBuildJobs.loadArea(back, -165, -292, 165, 365));
         s.then("underground", () -> {
             holder[0] = new EmberBodyBuilder(back);
             t[0] = System.currentTimeMillis();

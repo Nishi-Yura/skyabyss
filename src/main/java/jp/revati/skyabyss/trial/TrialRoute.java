@@ -408,6 +408,7 @@ public final class TrialRoute {
         r.changed();
         TrialRuntime.syncGates(back, group, titan, draw);
         queue(back, group, titan, next, mid);
+        sync(back, group);
         Component what = mid ? TrialMidBoss.name(titan) : next >= LAST_STEP ? Component.empty() : trialName(defOf(draw, next));
         for (ServerPlayer p : members(back, group)) {
             Notice.bar(p, ModText.progress(mid ? "message.skyabyss.route.next_mid" : next >= LAST_STEP ? "message.skyabyss.route.next_heart" : "message.skyabyss.route.next", what));
@@ -490,7 +491,7 @@ public final class TrialRoute {
         TrialDraw.Draw draw = step > 0 ? TrialData.current(back, group) : null;
         Def d = draw == null || mid ? null : defOf(draw, step);
         return new TrialBoardNet.RouteState(titan, step, mid, d == null ? "" : d.id(), d == null ? "" : d.slot().id,
-                draw == null ? 0 : draw.cycle());
+                draw == null ? 0 : draw.cycle(), step > 0 && PENDING.containsKey(group));
     }
 
     // グループのオンラインの人へ、順路の今の段を送る (目的の帯・パーティの札。docs/design/32 の 6 章)
@@ -1022,6 +1023,11 @@ public final class TrialRoute {
     // ---------------------------------------------------------------- 自己テスト・開発用
     public static int pendingCount() {
         return PENDING.size();
+    }
+
+    // あきらめの提案の間隔の待ちを消す (自己テスト)
+    public static void clearCooldownForTest(UUID group) {
+        ABANDON_LAST.remove(group);
     }
 
     public static boolean abandonPending(UUID group) {

@@ -122,7 +122,8 @@ public final class ReturnBeacons {
     // その背中の真ん中 (鼓動の間・休み場 "hub") の、戻ってきたとき立つ所
     @Nullable
     public static BlockPos hubOf(String titan) {
-        return restSpots(titan).get("hub");
+        // 広間は封じた (trial/RouteSeals)。戻る所は到着の台 (入口の箱の手前)
+        return restSpots(titan).containsKey("hub") ? jp.revati.skyabyss.trial.RouteSeals.safeFeet(titan) : null;
     }
 
     // 到着点の位置 (自己テスト・開発用)

@@ -25,21 +25,23 @@ final class StormSilhouette {
     }
 
     static void build(StormKit kit) {
-        hubVault(kit);
-        tailRibs(kit);
-        bays(kit, W0, Style.BONE, 6, 3);
-        bays(kit, E0, Style.THUNDER, 6, 3);
-        eyeDome(kit);
-        featherWall(kit, HUB.x1() - 1, HUB.z1(), HUB.z2(), HUB.floor(), HUB.height(), true);
-        featherWall(kit, HUB.x2() + 1, HUB.z1(), HUB.z2(), HUB.floor(), HUB.height(), true);
-        featherWall(kit, HUB.z1() - 1, HUB.x1(), HUB.x2(), HUB.floor(), HUB.height(), false);
-        featherWall(kit, TAIL_HALL.x1() - 1, TAIL_HALL.z1(), TAIL_HALL.z2(), TAIL_HALL.floor(), TAIL_HALL.height(), true);
-        featherWall(kit, TAIL_HALL.x2() + 1, TAIL_HALL.z1(), TAIL_HALL.z2(), TAIL_HALL.floor(), TAIL_HALL.height(), true);
-        // 銅の筋: 東の肩の部屋と東の肩の階段、東の通路の入口の前
-        veinWall(kit, E0.z1() - 1, E0.x1(), E0.x2(), E0.floor(), E0.height(), false, 3);
-        veinWall(kit, E0.z2() + 1, E0.x1(), E0.x2(), E0.floor(), E0.height(), false, 5);
-        veinWall(kit, EAST_PASS.z1() - 1, EAST_PASS.x1() + 4, EAST_PASS.x2(), EAST_PASS.floor() + 14, EAST_PASS.height(), false, 7);
-        veinWall(kit, EAST_PASS.z2() + 1, EAST_PASS.x1() + 4, EAST_PASS.x2(), EAST_PASS.floor() + 14, EAST_PASS.height(), false, 9);
+        parts().forEach(r -> r.accept(kit));
+    }
+
+    // 外形の手順 (一つずつ tick に分けて進める。StormBirdBuilder.restSteps)。
+    // 版 32: 風の広間の丸天井と羽の壁、尾の間の肋と羽の壁は置かない (封じた広間。trial/RouteSeals。誰も見ない)
+    static java.util.List<java.util.function.Consumer<StormKit>> parts() {
+        return java.util.List.of(
+                kit -> bays(kit, W0, Style.BONE, 6, 3),
+                kit -> bays(kit, E0, Style.THUNDER, 6, 3),
+                StormSilhouette::eyeDome,
+                kit -> {
+                    // 銅の筋: 東の肩の部屋と東の肩の階段、東の通路の入口の前
+                    veinWall(kit, E0.z1() - 1, E0.x1(), E0.x2(), E0.floor(), E0.height(), false, 3);
+                    veinWall(kit, E0.z2() + 1, E0.x1(), E0.x2(), E0.floor(), E0.height(), false, 5);
+                    veinWall(kit, EAST_PASS.z1() - 1, EAST_PASS.x1() + 4, EAST_PASS.x2(), EAST_PASS.floor() + 14, EAST_PASS.height(), false, 7);
+                    veinWall(kit, EAST_PASS.z2() + 1, EAST_PASS.x1() + 4, EAST_PASS.x2(), EAST_PASS.floor() + 14, EAST_PASS.height(), false, 9);
+                });
     }
 
     // ---------------------------------------------------------------- 肋のある丸天井
@@ -77,42 +79,6 @@ final class StormSilhouette {
     private static void rib(StormKit kit, int x, int y, int z) {
         if (plain(kit, x, y, z)) {
             kit.put(x, y, z, StormKit.COPPER);
-        }
-    }
-
-    private static void hubVault(StormKit kit) {
-        Area a = HUB;
-        int ceil = a.floor() + a.height() + 1;
-        for (int x = a.x1() + 3; x <= a.x2() - 3; x++) {
-            for (int z = a.z1() + 3; z <= a.z2() - 3; z++) {
-                if (x * x + (z + 12) * (z + 12) <= (SKYLIGHT_R + 3) * (SKYLIGHT_R + 3)) {
-                    continue;
-                }
-                int zr = z - a.z1();
-                if (zr % 9 <= 1) {
-                    rib(kit, x, ceil, z);
-                    continue;
-                }
-                int raise = Math.abs(x) <= 9 ? 3 : Math.abs(x) <= 15 ? 2 : 1;
-                int cap = lift(kit, x, z, ceil, raise, Style.FEATHER);
-                if (cap > 0 && zr % 9 == 5 && Math.floorMod(x, 8) == 0) {
-                    kit.put(x, cap, z, StormKit.LAMP);
-                }
-            }
-        }
-    }
-
-    // 尾の間: 真ん中の持ち上がった天井に、銅の肋 (4 おき)。灯りは残す
-    private static void tailRibs(StormKit kit) {
-        Area a = TAIL_HALL;
-        int cap = a.floor() + a.height() + 3;
-        for (int x = -8; x <= 8; x += 4) {
-            for (int z = a.z1() + 2; z <= a.z2() - 2; z++) {
-                BlockState s = kit.get(x, cap, z);
-                if (!s.is(StormKit.LAMP.getBlock()) && PLAIN.contains(s.getBlock())) {
-                    kit.put(x, cap, z, StormKit.COPPER);
-                }
-            }
         }
     }
 
@@ -154,28 +120,6 @@ final class StormSilhouette {
                 double d = Math.sqrt(x * x + (z - cz) * (z - cz));
                 if (d > 10 && d <= 11 && plain(kit, x, ceil, z)) {
                     kit.put(x, ceil, z, StormKit.COPPER);
-                }
-            }
-        }
-    }
-
-    // ---------------------------------------------------------------- 羽の壁
-    // 壁の面 (axisX = true なら x = fixed の壁で s は z、false なら z = fixed の壁で s は x)。壁の石だけ塗り替える
-    private static void featherWall(StormKit kit, int fixed, int s1, int s2, int floor, int height, boolean axisX) {
-        for (int s = s1; s <= s2; s++) {
-            int p = Math.floorMod(s, 8);
-            for (int y = floor + 1; y <= floor + height; y++) {
-                int x = axisX ? fixed : s;
-                int z = axisX ? s : fixed;
-                if (!plain(kit, x, y, z)) {
-                    continue;
-                }
-                int q = Math.floorMod(y - floor, 8);
-                BlockState cur = kit.get(x, y, z);
-                if (p == 4) {
-                    kit.put(x, y, z, Blocks.QUARTZ_PILLAR.defaultBlockState());
-                } else if (q > 0 && (Math.abs(p - 4) + q) % 4 == 0 && !cur.is(Blocks.SMOOTH_QUARTZ)) {
-                    kit.put(x, y, z, StormKit.ANDESITE);
                 }
             }
         }

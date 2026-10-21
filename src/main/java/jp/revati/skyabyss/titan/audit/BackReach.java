@@ -208,7 +208,12 @@ public final class BackReach {
                     break;
                 }
                 if (audit == null) {
-                    audit = new Audit(level, spec.get());
+                    Spec sp = spec.get();
+                    // tick の中で回すときは、歩く範囲のチャンクを先に読み込んで待つ (読みに行くとその場で tick が止まる。余燼の灰の野で 2 秒を超えていた)
+                    if (deadlineNanos != Long.MAX_VALUE && !loaded(sp.bounds)) {
+                        return false;
+                    }
+                    audit = new Audit(level, sp);
                     audit.walkBegin();
                 }
                 if (!audit.walkStep(deadlineNanos)) {
@@ -241,6 +246,20 @@ public final class BackReach {
                 }
             }
             return true;
+        }
+
+        // 範囲のチャンクが読み込まれているか。まだなら読み込みを頼む (建て終わるまで残す。BackBuildJobs.hold)
+        private boolean loaded(Box b) {
+            boolean all = true;
+            for (int cx = b.x1() >> 4; cx <= b.x2() >> 4; cx++) {
+                for (int cz = b.z1() >> 4; cz <= b.z2() >> 4; cz++) {
+                    if (level.getChunkSource().getChunkNow(cx, cz) == null) {
+                        jp.revati.skyabyss.titan.BackBuildJobs.hold(level, new net.minecraft.world.level.ChunkPos(cx, cz));
+                        all = false;
+                    }
+                }
+            }
+            return all;
         }
 
         @Override
@@ -672,7 +691,8 @@ public final class BackReach {
                     rep.failures.add(spec.name + ": walk graph exceeded " + MAX_NODES + " cells (leak outside the layout?)");
                     break;
                 }
-                if ((++n & 15) == 0 && System.nanoTime() >= deadlineNanos) {
+                // 一つの立ち位置の跳びの数え上げが重い所 (余燼の溶岩の湖) があるので、毎回見る (16 回に一度では一切れが 2 秒を超えていた)
+                if (deadlineNanos != Long.MAX_VALUE && ++n > 0 && System.nanoTime() >= deadlineNanos) {
                     return false;
                 }
                 long k = queue.poll();

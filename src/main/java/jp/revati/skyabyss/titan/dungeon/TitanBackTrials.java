@@ -411,7 +411,7 @@ public final class TitanBackTrials {
     // 試練の中 (体内で、鼓動の間とその周り以外) にいるなら、鼓動の間へ移す (記録が変わるので、先の部屋に取り残さない)
     private static void moveOutOfBody(ServerLevel level, ServerPlayer player) {
         if (player.isAlive() && !player.isSpectator() && isBelowSurface(player) && !inSafeArea(player)) {
-            BlockPos hub = safeSpot(level, checkpointSpawnRaw("hub"));
+            BlockPos hub = safeSpot(level, jp.revati.skyabyss.trial.RouteSeals.safeFeet(jp.revati.skyabyss.progress.Titans.STONE_WHALE));
             player.fallDistance = 0;
             player.teleportTo(level, hub.getX() + 0.5, hub.getY(), hub.getZ() + 0.5, player.getYRot(), 0f);
             Notice.narrate(player, "message.skyabyss.rest_point_lost");
@@ -428,7 +428,8 @@ public final class TitanBackTrials {
     // ---------------------------------------------------------------- 起動時: 背中がまだなければ建てる
     @SubscribeEvent
     static void onServerStarted(ServerStartedEvent event) {
-        if (System.getenv("SKYABYSS_SELFTEST") != null) {
+        // 自己テストは各段が建てる。ただし "back builds" (起動時の裏の建設を測る) のときは本番と同じに建てる
+        if (System.getenv("SKYABYSS_SELFTEST") != null && !String.valueOf(System.getenv("SKYABYSS_SELFTEST_ONLY")).contains("back builds")) {
             return;
         }
         ServerLevel back = event.getServer().getLevel(TitanTravel.TITAN_BACK);
@@ -1409,7 +1410,7 @@ public final class TitanBackTrials {
     }
 
     private static void toArrival(ServerPlayer player) {
-        BlockPos a = plaza();
+        BlockPos a = jp.revati.skyabyss.trial.RouteSeals.safeFeet(jp.revati.skyabyss.progress.Titans.STONE_WHALE);
         player.fallDistance = 0;
         player.teleportTo(player.serverLevel(), a.getX() + 0.5, a.getY(), a.getZ() + 0.5, player.getYRot(), 0f);
     }
@@ -1457,7 +1458,7 @@ public final class TitanBackTrials {
         // 試練の階のセルを止め、引いた試練の戸を開け直す (戸の上書きはいま消えた。引きは keep.* なので残る)
         jp.revati.skyabyss.trial.TrialRuntime.onGroupReset(level, group);
         int epoch = record(level, group).epoch();
-        BlockPos hub = safeSpot(level, checkpointSpawnRaw("hub"));
+        BlockPos hub = safeSpot(level, jp.revati.skyabyss.trial.RouteSeals.safeFeet(jp.revati.skyabyss.progress.Titans.STONE_WHALE));
         for (ServerPlayer player : Groups.online(level, group)) {
             CompoundTag tag = persisted(player);
             tag.remove(TAG_CHECKPOINT);
@@ -1880,7 +1881,7 @@ public final class TitanBackTrials {
                 int epoch = epochOf(back, player);
                 String cp = validCheckpoint(tag, epoch);
                 // 休み場が、いまの戦いの扉の前室なら、戦場の目の前で目覚めないよう鼓動の間 (安全な所) にする
-                BlockPos spawn = cp.isEmpty() ? plaza() : checkpointSpawn(back, respawnCheckpoint(back, Groups.keyOf(player), cp));
+                BlockPos spawn = cp.isEmpty() ? jp.revati.skyabyss.trial.RouteSeals.safeFeet(jp.revati.skyabyss.progress.Titans.STONE_WHALE) : checkpointSpawn(back, respawnCheckpoint(back, Groups.keyOf(player), cp));
                 REVIVING.add(player.getUUID());
                 try {
                     player.teleportTo(back, spawn.getX() + 0.5, spawn.getY(), spawn.getZ() + 0.5, player.getYRot(), 0f);
@@ -1902,7 +1903,8 @@ public final class TitanBackTrials {
     // 倒れて目覚める休み場。その休み場が戦いの部屋の前室で、そのグループがいま戦っている最中なら、鼓動の間にする
     // (倒れて戻れない扉の前、または戦場のすぐそばで目覚めないように。02 の 7.3)
     static String respawnCheckpoint(ServerLevel level, UUID group, String cp) {
-        return isFightNear(group, cp) ? "hub" : cp;
+        // 順路では、広間 (hub) は封じて誰も入らない (trial/RouteSeals)。戦いの前室でも、その段の休み場で目覚める (32 の 2.4)
+        return cp;
     }
 
     // 休み場 cp が、そのグループの戦っている部屋の前室か
@@ -1943,7 +1945,7 @@ public final class TitanBackTrials {
                         return;
                     }
                     clearCheckpoint(player);
-                    BlockPos a = plaza();
+                    BlockPos a = jp.revati.skyabyss.trial.RouteSeals.safeFeet(jp.revati.skyabyss.progress.Titans.STONE_WHALE);
                     player.teleportTo(player.serverLevel(), a.getX() + 0.5, a.getY(), a.getZ() + 0.5, 180f, 0f);
                     Notice.narrate(player, "message.skyabyss.gave_up");
                 } else {

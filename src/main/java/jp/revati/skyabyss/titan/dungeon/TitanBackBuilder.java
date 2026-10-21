@@ -52,7 +52,8 @@ public final class TitanBackBuilder {
         BuildKit kit = new BuildKit(level, RandomSource.create(20261015L));
         data.reseed(level.getRandom());
         long start = System.currentTimeMillis();
-        BackBuildJobs.schedule("stone whale back", level, restSteps(level, data, kit, start, () -> WhaleShape.jobWithClear(kit)), () -> {
+        BackBuildJobs.schedule("stone whale back", level, restSteps(level, data, kit, start,
+                () -> jp.revati.skyabyss.titan.BackBuildJobs.afterAsync(WhaleShape::preload, () -> WhaleShape.jobWithClear(kit))), () -> {
         });
     }
 
@@ -63,17 +64,14 @@ public final class TitanBackBuilder {
         if (body != null) {
             s.thenJob("body", body);
         }
+        // 仕上げが触る範囲のチャンクを先に読み込む (読みに行くと、その場で tick が止まる)
+        s.thenJob("load area", () -> BackBuildJobs.loadArea(level, -RX, -RZ, RX, RZ));
         s.then("surface", () -> buildSurface(kit));
         s.then("hub", () -> buildHub(kit));
         s.then("treasury", () -> buildTreasury(kit));
         // 北の封印の先: 心臓の回廊と、最終ボスの心臓の間
         s.then("heart arena", () -> HeartArenaBuilder.build(kit));
-        // 鼓動の間の柱は、戸口・はしご・封印・碑文をすべて置いたあとに立てる (それらの前を避けるため)
-        s.then("hub pillars", () -> {
-            kit.pilasters(HUB, 5);
-            kit.wallLamps(HUB, 5, FLOOR + 6);
-            kit.wallLamps(ENTRY, 4, FLOOR + 4);
-        });
+        // 鼓動の間と入口の通路は封じて誰も入らない (trial/RouteSeals)。柱・壁の灯りは置かない (版 32)
         s.then("west wing", () -> WestWingBuilder.build(kit));
         s.then("east wing", () -> EastWingBuilder.build(kit));
         // 建築の監査 (版 18): 四方が 1 高い床の中で 1 マスだけ低いくぼみを埋める (背の殻の模型の窪みと、ひれの道の縁)
@@ -504,69 +502,27 @@ public final class TitanBackBuilder {
                     }
                 }
             }
-            if (i % 3 == 1 && y + SHRINE_STAIR_HEIGHT + 1 < sy) {
-                kit.lantern(SHRINE_STAIR_HALF + 1, y + 2, z);
-                kit.lantern(-SHRINE_STAIR_HALF - 1, y + 2, z);
-            }
+            // 版 32: 体内への階段は封じた側 (入口の箱の先) なので、灯りは置かない
         }
     }
 
-    // ---------------------------------------------------------------- 鼓動の間
+    // ---------------------------------------------------------------- 鼓動の間 (形だけ)
     private static void buildHub(BuildKit kit) {
         kit.room(HUB);
         kit.room(ENTRY);
         // 西・東の翼へ向かう通路
         kit.room(WEST_HALL);
         kit.room(EAST_HALL);
-        kit.ribs(HUB, 5, true);
-        kit.ribs(ENTRY, 4, true);
-        kit.floorBorder(HUB);
-        // 中央: 眠っている心臓の台座と、それを囲む模様
-        kit.set(HUB_CX, FLOOR + 1, HUB_CZ, Blocks.REINFORCED_DEEPSLATE.defaultBlockState());
-        kit.set(HUB_CX, FLOOR + 2, HUB_CZ, Blocks.REINFORCED_DEEPSLATE.defaultBlockState());
-        for (Direction d : Direction.Plane.HORIZONTAL) {
-            kit.set(HUB_CX + d.getStepX() * 2, FLOOR + 1, HUB_CZ + d.getStepZ() * 2,
-                    Blocks.CANDLE.defaultBlockState().setValue(CandleBlock.CANDLES, 4).setValue(CandleBlock.LIT, true));
-        }
-        for (int x = -6; x <= 6; x++) {
-            for (int z = HUB_CZ - 6; z <= HUB_CZ + 6; z++) {
-                int r = Math.max(Math.abs(x - HUB_CX), Math.abs(z - HUB_CZ));
-                if (r == 6 || r == 3 || (r == 1 && (x == HUB_CX || z == HUB_CZ))) {
-                    kit.set(x, FLOOR, z, BuildKit.CHISELED);
-                }
-            }
-        }
-        // 灯りは床の近くまで低く吊るす (天井が高いので、高く吊るすと床に光が届かない)。広間のどこでも光度 4 以上
-        for (int x : new int[]{-12, -6, 6, 12}) {
-            for (int z : new int[]{-50, -42, -30, -20}) {
-                kit.hangingLantern(x, z, HUB.ceilingY(), 9);
-            }
-        }
-        // 床に埋めた灯りの道 (入口の通路から台座の脇を通って北の封印まで)
-        kit.routeStrip(FLOOR, BuildKit.line(0, -16, 0, -29), Blocks.SEA_LANTERN.defaultBlockState(), BuildKit.POLISHED);
-        kit.routeStrip(FLOOR, BuildKit.line(0, -41, 0, -54), Blocks.SEA_LANTERN.defaultBlockState(), BuildKit.POLISHED);
-        kit.lantern(-2, FLOOR + 1, -3);
-        kit.lantern(2, FLOOR + 1, 2);
-        kit.moss(HUB, 0.04f);
-        for (int[] s : new int[][]{{-14, -20}, {14, -50}, {-12, -50}, {14, -20}, {0, -51}, {0, -19}}) {
-            kit.stalactite(s[0], HUB.ceilingY(), s[1], 3);
-        }
+        // 版 32: 鼓動の間は封じて誰も入らない (trial/RouteSeals)。肋・床の模様・台座・灯り・苔・鍾乳石は置かない (部屋の形だけ)
     }
 
     // ---------------------------------------------------------------- 北の封印 (心臓の回廊の入口)
     // 版 18: 宝物庫の部屋は無くした (天の鍵の欠片は心臓を倒すと受け取る)。三つの石が歌うと、鼓動の間の北の封印が開き、そのまま心臓の回廊へ入る。
-    // 封印の両脇に、泣く黒曜石の柱 (灯りを兼ねる) を立てる
     private static void buildTreasury(BuildKit kit) {
         for (BlockPos p : GATE) {
             kit.set(p, ModBlocks.SEALED_GATE.get().defaultBlockState());
         }
-        for (int side = -1; side <= 1; side += 2) {
-            int x = 4 * side;
-            for (int y = FLOOR + 1; y <= FLOOR + 6; y++) {
-                kit.set(x, y, HUB.z1(), y == FLOOR + 6 ? Blocks.CHISELED_DEEPSLATE.defaultBlockState()
-                        : y == FLOOR + 3 || y == FLOOR + 4 ? Blocks.CRYING_OBSIDIAN.defaultBlockState() : Blocks.POLISHED_DEEPSLATE.defaultBlockState());
-            }
-        }
+        // 版 32: 封印の両脇の柱は置かない (鼓動の間は封じて誰も入らない)
     }
 
     static BlockState sealed() {

@@ -9,7 +9,7 @@ public final class TrialBoardClient {
     }
 
     // 順路の今の段 (目的の帯・パーティの札が読む)。step 0 なら順路の外
-    private static volatile TrialBoardNet.RouteState route = new TrialBoardNet.RouteState("", 0, false, "", "", 0);
+    private static volatile TrialBoardNet.RouteState route = new TrialBoardNet.RouteState("", 0, false, "", "", 0, false);
 
     public static void onRoute(TrialBoardNet.RouteState state) {
         route = state;
@@ -32,6 +32,14 @@ public final class TrialBoardClient {
             return null;
         }
         TrialBoardNet.RouteState r = route;
+        // 段を越えて運ばれるのを待つあいだ: 次の行き先だけを言う (前の試練の目的は出さない)
+        if (r.carrying()) {
+            net.minecraft.network.chat.Component next = r.mid()
+                    ? net.minecraft.network.chat.Component.translatable("trial.skyabyss.midboss." + jp.revati.skyabyss.trial.TrialRegions.signalTitan(r.titan()))
+                    : r.step() >= jp.revati.skyabyss.trial.TrialRoute.LAST_STEP ? net.minecraft.network.chat.Component.translatable("objective.skyabyss.route_heart_room")
+                    : net.minecraft.network.chat.Component.translatable("trial.skyabyss.cell." + r.cellId());
+            return net.minecraft.network.chat.Component.translatable("objective.skyabyss.route_carrying", next).getString();
+        }
         if (r.mid()) {
             return net.minecraft.network.chat.Component.translatable("objective.skyabyss.route_mid",
                     net.minecraft.network.chat.Component.translatable("trial.skyabyss.midboss." + jp.revati.skyabyss.trial.TrialRegions.signalTitan(r.titan()))).getString();

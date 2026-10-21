@@ -30,7 +30,7 @@ public final class EmberGuide {
     }
 
     // 目的の板の文の id (lang の gui.skyabyss.ember_goal.<id>)。自己テストが ja・en の両方にあることを見る
-    public static final List<String> GOAL_IDS = List.of("west.urn", "west.cross", "west.stone", "west.done", "east.bellows", "east.strike.red",
+    public static final List<String> GOAL_IDS = List.of("west.pre.urn", "west.pre.cross", "west.urn", "west.cross", "west.stone", "west.done", "east.bellows", "east.strike.red",
             "east.strike.orange", "east.strike.yellow", "east.quench", "east.door", "east.smith", "east.stone", "east.done", "south.coal", "south.feed",
             "south.stone", "south.done", "hub.stones", "hub.heart");
 
@@ -51,6 +51,10 @@ public final class EmberGuide {
                 return new Goal("west.stone", 2, 3, 0, 0);
             }
             boolean urn = EmberTrials.count(p, EmberTrialSetup.ASH_URN.get()) > 0;
+            // 周回の前の湖 (WEST_PRE): 壺の台は北の岸、渡った先は庭への戸 (庭の文とは分ける)
+            if (EmberBackLayout.WEST_PRE.contains(at) && !EmberBackLayout.WEST.contains(at)) {
+                return new Goal(urn ? "west.pre.cross" : "west.pre.urn", 0, 3, 0, 0);
+            }
             return new Goal(urn ? "west.cross" : "west.urn", urn ? 1 : 0, 3, 0, 0);
         }
         if (EmberBackLayout.EAST.contains(at) || EmberBackLayout.SMITH.contains(at)) {

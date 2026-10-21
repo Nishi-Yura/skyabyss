@@ -45,6 +45,8 @@ public final class TideIslandBuilder {
 
     // buildRest の手順 (順は同じ。tick に分けて進められる)
     public static void restSteps(jp.revati.skyabyss.titan.BackBuildJobs.Steps s, TideKit kit) {
+        // 仕上げが触る範囲 (背の監査の範囲) のチャンクを先に読み込む (読みに行くと、その場で tick が止まる)
+        s.thenJob("load area", () -> jp.revati.skyabyss.titan.BackBuildJobs.loadArea(kit.level(), -190, -245, 190, 170));
         s.then("trenches", () -> fillTrenches(kit));
         s.then("beach", () -> beach(kit));
         s.then("gate", () -> gate(kit));
@@ -59,7 +61,11 @@ public final class TideIslandBuilder {
         s.then("flats gates", () -> TideBossGates.flats(kit.level()));
         s.then("spiral", () -> spiral(kit));
         s.then("heart arena", () -> TideHeartArena.build(kit.level()));
-        s.then("skin", () -> skin(kit));
+        // 皮は x の帯ごとに一つの手順にする (一度に置くと一 tick に 0.6〜0.8 秒かかっていた)。置くのは固い所を別の固い所に替えるだけなので、順は結果を変えない
+        for (int x0 = -SHELL_RX - 14; x0 <= SHELL_RX + 14; x0 += SKIN_BAND) {
+            int a = x0;
+            s.then("skin", () -> skin(kit, a, Math.min(a + SKIN_BAND - 1, SHELL_RX + 14)));
+        }
         // 試練の階 (潮の広間の南の戸口から。docs/design/29)。休み場の焚き火は fixtures が RESTS から置く
         s.then("deck", () -> TideDeckBuilder.build(kit));
         s.then("fixtures", () -> fixtures(kit));
@@ -506,19 +512,16 @@ public final class TideIslandBuilder {
                         } else if (Math.hypot(x, z - MOON_CZ) <= MOON_R + 1.5) {
                             s = TideKit.DARK;
                         } else {
-                            // 天井: 放射状の肋 (骨と方解石)、ところどころ灯り
-                            s = ribLine ? (r > 12 && Math.floorMod((int) Math.round(r), 5) == 0 ? TideKit.LAMP : Blocks.BONE_BLOCK.defaultBlockState())
-                                    : (Math.floorMod(x * 3 + z * 7, 13) == 0 ? TideKit.LAMP : Blocks.CALCITE.defaultBlockState());
+                            // 天井: 放射状の肋 (骨と方解石)。版 32: 潮の広間は封じて誰も入らない (trial/RouteSeals) ので灯りは置かない
+                            s = ribLine ? Blocks.BONE_BLOCK.defaultBlockState() : Blocks.CALCITE.defaultBlockState();
                         }
                     } else if (r <= HUB_R + 2.5) {
                         if (y > ceilY) {
                             continue;
                         }
-                        // 壁: 潮の高さ (71〜73) は暗い帯、上は真珠層の筋、灯りは縁の段の高さと、その 6 上
+                        // 壁: 潮の高さ (71〜73) は暗い帯、上は真珠層の筋 (版 32: 灯りは置かない)
                         if (y >= HUB_FLOOR + 1 && y <= HUB_FLOOR + 3) {
                             s = TideKit.DARK;
-                        } else if ((y == HUB_LEDGE + 3 || y == HUB_LEDGE + 10) && Math.floorMod((int) Math.round(ang * 12 / Math.PI), 3) == 0 && r <= HUB_R + 1.5) {
-                            s = TideKit.LAMP;
                         } else {
                             s = kit.wall(x, y, z);
                         }
@@ -529,14 +532,7 @@ public final class TideIslandBuilder {
                 }
             }
         }
-        // 壁の柱 (4 本。縁の段・戸口のない角度。骨と方解石)
-        for (double deg : new double[] {22.5, 67.5, 247.5, 292.5}) {
-            int px = (int) Math.round(Math.cos(Math.toRadians(deg)) * (HUB_R + 1));
-            int pz = (int) Math.round(Math.sin(Math.toRadians(deg)) * (HUB_R + 1));
-            for (int y = HUB_LEDGE; y <= hubCeil(HUB_R + 1) - 1; y++) {
-                kit.set(px, y, pz, y == HUB_LEDGE + 8 ? TideKit.LAMP : y == hubCeil(HUB_R + 1) - 1 ? Blocks.CHISELED_QUARTZ_BLOCK.defaultBlockState() : Blocks.CALCITE.defaultBlockState());
-            }
-        }
+        // 版 32: 壁の柱 (骨と方解石と灯り) は置かない (封じた広間)
         // 月の窓の縦穴: 広間の天井から気室 A の底の下まで
         for (int x = -MOON_R - 1; x <= MOON_R + 1; x++) {
             for (int z = MOON_CZ - MOON_R - 1; z <= MOON_CZ + MOON_R + 1; z++) {
@@ -784,10 +780,13 @@ public final class TideIslandBuilder {
     }
 
     // ---------------------------------------------------------------- 掘った所の内壁を、潮の民の石にする (体の芯の凝灰岩が見えたら)
-    private static void skin(TideKit kit) {
+    // 皮の手順の x の幅
+    static final int SKIN_BAND = 16;
+
+    private static void skin(TideKit kit, int x1, int x2) {
         BlockPos.MutableBlockPos m = new BlockPos.MutableBlockPos();
         BlockPos.MutableBlockPos n = new BlockPos.MutableBlockPos();
-        for (int x = -SHELL_RX - 14; x <= SHELL_RX + 14; x++) {
+        for (int x = x1; x <= x2; x++) {
             for (int z = SHELL_CZ - SHELL_RZ - 14; z <= SHELL_CZ + SHELL_RZ + 14; z++) {
                 int top = shellTop(x, z);
                 if (top == Integer.MIN_VALUE) {

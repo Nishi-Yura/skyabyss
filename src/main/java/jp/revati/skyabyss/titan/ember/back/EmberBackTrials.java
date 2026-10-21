@@ -531,7 +531,8 @@ public final class EmberBackTrials {
     // 倒れて目覚める休み場。その休み場が戦いの部屋の前室で、そのグループがいま戦っている最中なら、鼓動の間 (hub) にする
     // (岩鯨の背と同じ。戦場のすぐそばで目覚めないように。02 の 7.3、brushup P1-1)
     public static String respawnCheckpoint(java.util.UUID group, String cp) {
-        return isFightNear(group, cp) ? "hub" : cp;
+        // 順路では、広間 (hub) は封じて誰も入らない (trial/RouteSeals)。戦いの前室でも、その段の休み場で目覚める (32 の 2.4)
+        return cp;
     }
 
     static boolean isFightNear(java.util.UUID group, String cp) {
@@ -558,9 +559,10 @@ public final class EmberBackTrials {
 
     // 広間の休み場へ移す (リセット・ピースフル・グループが変わった)。熱は 0
     public static void toHub(ServerPlayer p) {
-        BlockPos h = rest("hub").floor().above();
+        // 炉心の広間は封じた (trial/RouteSeals)。到着の台 (入口の箱の手前) へ
+        BlockPos h = jp.revati.skyabyss.trial.RouteSeals.safeFeet(jp.revati.skyabyss.progress.Titans.EMBER);
         p.fallDistance = 0;
-        p.teleportTo(p.serverLevel(), h.getX() + 0.5, h.getY(), h.getZ() + 0.5, rest("hub").yaw(), 0f);
+        p.teleportTo(p.serverLevel(), h.getX() + 0.5, h.getY(), h.getZ() + 0.5, ARRIVAL_YAW, 0f);
         EmberHeat.reset(p);
     }
 

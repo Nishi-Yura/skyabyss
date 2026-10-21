@@ -431,7 +431,8 @@ public final class BuildAuditExtra {
         LongIterator it = route.iterator();
         while (it.hasNext()) {
             BlockPos p = BlockPos.of(it.nextLong());
-            if (!box.contains(p) || mazeDark(st, p)) {
+            // 封じた広間 (誰も入らない。灯りを置かない) は数えない
+            if (!box.contains(p) || mazeDark(st, p) || jp.revati.skyabyss.trial.RouteSeals.inHall(st, p)) {
                 continue;
             }
             int l = g.light(p);
