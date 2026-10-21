@@ -95,6 +95,8 @@ public final class LoreSelfTest {
         signKeys.addAll(jp.revati.skyabyss.titan.storm.lore.StormLore.INSCRIPTIONS.values());
         // 余燼の背の碑文 (13 の 9.2節。文は担当 G、看板は B が置く)
         signKeys.addAll(jp.revati.skyabyss.titan.ember.lore.EmberLore.inscriptionSigns());
+        // 一章の地上: 骨の坑の冷えの戸の奥の碑 (34 の 4.2.1。BonePit.finish が刻む)
+        signKeys.add(jp.revati.skyabyss.story.ch1.BonePit.COLD_SIGN);
         // 雷翼の巨神・雷獣・心臓・背中は別の担当が登録する。まだないうちは失敗にせず、待っているものとして書き出す
         Set<String> pending = new java.util.TreeSet<>();
         Set<String> usedSigns = new HashSet<>();
@@ -196,7 +198,7 @@ public final class LoreSelfTest {
             }
             // 潮殻の背の看板の文は skyabyss_tide にある
             // 雷翼の背の看板の文は skyabyss_storm に、都の碑の文は skyabyss_opening にある
-            for (String ns : List.of("skyabyss_tide", "skyabyss_storm", "skyabyss_ember", "skyabyss_ch3", "skyabyss_opening")) {
+            for (String ns : List.of("skyabyss_tide", "skyabyss_storm", "skyabyss_ember", "skyabyss_ch3", "skyabyss_opening", "skyabyss_ch1")) {
                 JsonObject backSigns = json("/assets/" + ns + "/lang/" + lang + ".json", failures);
                 if (backSigns != null) {
                     backSigns.entrySet().forEach(e -> {
