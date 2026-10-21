@@ -75,6 +75,16 @@ public final class ObjectiveStrip {
         return OpeningClient.objective() != null || current(mc, QuestLog.of(mc.player)) != null;
     }
 
+    // 帯がいまこのクエストを出しているか (出していなければ、追跡の札の側が出す。序盤の目的を帯が出しているときなど)
+    static boolean showsQuest(QuestDef def) {
+        Minecraft mc = Minecraft.getInstance();
+        if (!active() || demo || OpeningClient.objective() != null) {
+            return false;
+        }
+        QuestDef cur = current(mc, QuestLog.of(mc.player));
+        return cur != null && cur.id().equals(def.id());
+    }
+
     // 帯の幅: 画面が小さい (GUI 倍率が高い) ほど狭く、折り返して行を足す。広い画面でも最大 WIDTH。
     // 倍率 4 (1920 幅で GUI 幅 480) では約 115 になり、背景が画面の半ばまで伸びない
     public static int bandWidth(Minecraft mc) {
@@ -164,12 +174,13 @@ public final class ObjectiveStrip {
                 return null;
             }
             int extra = far ? (mazeBig ? 26 : 11) : 0;
-            int maxLines = (maxH - 2 - extra) / 10;
+            int maxLines = (maxH - 5 - extra) / 10;
             if (maxLines < 1) {
                 return null;
             }
             java.util.List<String> lines = wrap(font, c.text, w - 6, Math.min(maxLines, 6));
-            return new jp.revati.skyabyss.hud.HudLayout.Size(w + 6, lines.size() * 10 + 2 + extra);
+            // 下に 3 画素の余白 (日本語の字は行の高さいっぱいに描かれ、背景の下へはみ出していた)
+            return new jp.revati.skyabyss.hud.HudLayout.Size(w + 6, lines.size() * 10 + 5 + extra);
         })));
     }
 
@@ -335,8 +346,8 @@ public final class ObjectiveStrip {
         boolean withArrow = arrow && target != null && !far.isEmpty();
         int w = rect.w() - 6;
         int extra = far.isEmpty() ? 0 : big ? 26 : 11;
-        java.util.List<String> lines = wrap(font, text, w - 6, Math.max(1, (rect.h() - 2 - extra) / 10));
-        int bottom = y + lines.size() * 10 + extra - 2;
+        java.util.List<String> lines = wrap(font, text, w - 6, Math.max(1, (rect.h() - 5 - extra) / 10));
+        int bottom = y + lines.size() * 10 + extra + 1;
         float glow = now < flashUntil ? Mth.clamp((flashUntil - now) / 1400f, 0f, 1f) : 0f;
         int bg = ((int) ((0x50 + glow * 0x50) * a)) << 24 | 0x0A0C10;
         g.fill(x - 3, y - 2, x + w + 3, bottom, bg);

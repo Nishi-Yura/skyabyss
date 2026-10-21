@@ -1,0 +1,20 @@
+# 伝承の書と控え帳の上のつまみ (章の名) の確かめ
+world shots flat
+size 1280 720
+timeout 300
+render 6
+clouds off
+cmd time set noon
+cmd gamemode creative
+hud on
+waitchunks
+wait 20
+open lore
+wait 20
+shot lore_tabs
+close
+key key.skyabyss_record.open
+wait 40
+shot record_tabs
+close
+quit
