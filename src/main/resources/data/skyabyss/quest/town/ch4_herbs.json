@@ -17,19 +17,13 @@
       ]
     },
     {
-      "id": "gather",
+      "id": "brew",
       "objectives": [
         {
-          "id": "stand",
+          "id": "potion",
           "type": "collect",
-          "target": "minecraft:brewing_stand",
-          "count": 1
-        },
-        {
-          "id": "wart",
-          "type": "collect",
-          "target": "minecraft:nether_wart",
-          "count": 3
+          "target": "minecraft:potion",
+          "count": 2
         }
       ]
     },
