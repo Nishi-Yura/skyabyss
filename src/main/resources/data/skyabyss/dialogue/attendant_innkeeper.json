@@ -1,0 +1,81 @@
+{
+  "npc": "skyabyss:attendant_innkeeper",
+  "entries": [
+    {
+      "if": {
+        "type": "not",
+        "of": {
+          "type": "flag",
+          "flag": "intro"
+        }
+      },
+      "node": "intro"
+    },
+    {
+      "node": "menu"
+    }
+  ],
+  "nodes": {
+    "intro": {
+      "face": "smile",
+      "do": [
+        {
+          "type": "flag",
+          "flag": "intro"
+        }
+      ],
+      "next": "menu"
+    },
+    "again": {
+      "face": "neutral",
+      "next": "menu",
+      "text": "dialogue.skyabyss.attendant_innkeeper.intro"
+    },
+    "meet": {
+      "face": "neutral",
+      "next": "menu"
+    },
+    "menu": {
+      "face": "neutral",
+      "options": [
+        {
+          "id": "rest",
+          "kind": "talk",
+          "do": [
+            {
+              "type": "facility",
+              "open": "inn_rest"
+            }
+          ],
+          "goto": "end"
+        },
+        {
+          "id": "rumor",
+          "kind": "talk",
+          "do": [
+            {
+              "type": "facility",
+              "open": "rumor"
+            }
+          ],
+          "goto": "end"
+        },
+        {
+          "id": "meet",
+          "kind": "talk",
+          "goto": "meet"
+        },
+        {
+          "id": "about",
+          "kind": "talk",
+          "goto": "again"
+        },
+        {
+          "id": "bye",
+          "kind": "leave",
+          "goto": "end"
+        }
+      ]
+    }
+  }
+}

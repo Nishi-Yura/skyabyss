@@ -1,0 +1,80 @@
+{
+  "npc": "skyabyss:attendant_guild_clerk",
+  "entries": [
+    {
+      "if": {
+        "type": "not",
+        "of": {
+          "type": "flag",
+          "flag": "intro"
+        }
+      },
+      "node": "intro"
+    },
+    {
+      "node": "menu"
+    }
+  ],
+  "nodes": {
+    "intro": {
+      "face": "smile",
+      "do": [
+        {
+          "type": "flag",
+          "flag": "intro"
+        }
+      ],
+      "next": "menu"
+    },
+    "again": {
+      "face": "neutral",
+      "next": "menu",
+      "text": "dialogue.skyabyss.attendant_guild_clerk.intro"
+    },
+    "about": {
+      "face": "neutral",
+      "next": "menu"
+    },
+    "menu": {
+      "face": "neutral",
+      "options": [
+        {
+          "id": "guild",
+          "kind": "talk",
+          "do": [
+            {
+              "type": "facility",
+              "open": "guild"
+            }
+          ],
+          "goto": "end"
+        },
+        {
+          "id": "board",
+          "kind": "talk",
+          "do": [
+            {
+              "type": "open_board"
+            }
+          ],
+          "goto": "end"
+        },
+        {
+          "id": "about",
+          "kind": "talk",
+          "goto": "about"
+        },
+        {
+          "id": "about",
+          "kind": "talk",
+          "goto": "again"
+        },
+        {
+          "id": "bye",
+          "kind": "leave",
+          "goto": "end"
+        }
+      ]
+    }
+  }
+}

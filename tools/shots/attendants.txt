@@ -1,0 +1,123 @@
+# 都の施設の係の人 (docs/design/35 の 6 章): 3 案の見た目 x 15 役の並び、近くの 5 役、頭の施設の印、会話・店・ギルド・預かり所の画面
+# ./gradlew runShots -Pscript=tools/shots/attendants.txt --no-daemon --offline  (絵は docs/review/npc_roughs/ingame_*.png へ写す)
+world shots flat
+size 1280 720
+timeout 900
+render 8
+clouds off
+cmd time set noon
+cmd weather clear
+cmd gamerule doDaylightCycle false
+cmd gamemode spectator
+cmd fill -16 -61 -10 16 -61 14 minecraft:polished_andesite destroy
+cmd fill -16 -60 -10 16 -60 -3 minecraft:polished_andesite destroy
+cmd kill @e[type=!minecraft:player,distance=..64]
+cmd summon skyabyss:attendant -6.3 -60 0.5 {NoAI:1b,Role:"guild_clerk",Variant:1,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:attendant -4.5 -60 0.5 {NoAI:1b,Role:"smith",Variant:1,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:attendant -2.7 -60 0.5 {NoAI:1b,Role:"tool_merchant",Variant:1,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:attendant -0.9 -60 0.5 {NoAI:1b,Role:"apothecary",Variant:1,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:attendant 0.9 -60 0.5 {NoAI:1b,Role:"storage_keeper",Variant:1,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:attendant 2.7 -60 0.5 {NoAI:1b,Role:"innkeeper",Variant:1,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:attendant 4.5 -60 0.5 {NoAI:1b,Role:"perch_keeper",Variant:1,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:attendant 6.3 -60 0.5 {NoAI:1b,Role:"shrine_priest",Variant:1,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:attendant -5.4 -59 -3.5 {NoAI:1b,Role:"keep_veteran",Variant:1,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:attendant -3.6 -59 -3.5 {NoAI:1b,Role:"archivist",Variant:1,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:attendant -1.8 -59 -3.5 {NoAI:1b,Role:"training_master",Variant:1,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:attendant 0.0 -59 -3.5 {NoAI:1b,Role:"black_marketeer",Variant:1,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:attendant 1.8 -59 -3.5 {NoAI:1b,Role:"gravekeeper",Variant:1,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:attendant 3.6 -59 -3.5 {NoAI:1b,Role:"mapmaker",Variant:1,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:attendant 5.4 -59 -3.5 {NoAI:1b,Role:"drunkard",Variant:1,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd skyabyss facility look 1
+hud off
+camera minecraft:overworld 0 -57.6 9.5 180 10
+waitchunks
+wait 40
+shot look_a_all
+camera minecraft:overworld -3.6 -58.9 3.6 180 4
+wait 20
+shot look_a_near
+camera minecraft:overworld 3.6 -58.6 3.6 200 6
+wait 20
+shot look_a_near2
+camera minecraft:overworld -2.0 -58.2 -7.5 0 12
+wait 20
+shot look_a_back
+cmd skyabyss facility look 2
+hud off
+camera minecraft:overworld 0 -57.6 9.5 180 10
+waitchunks
+wait 40
+shot look_b_all
+camera minecraft:overworld -3.6 -58.9 3.6 180 4
+wait 20
+shot look_b_near
+camera minecraft:overworld 3.6 -58.6 3.6 200 6
+wait 20
+shot look_b_near2
+camera minecraft:overworld -2.0 -58.2 -7.5 0 12
+wait 20
+shot look_b_back
+cmd skyabyss facility look 3
+hud off
+camera minecraft:overworld 0 -57.6 9.5 180 10
+waitchunks
+wait 40
+shot look_c_all
+camera minecraft:overworld -3.6 -58.9 3.6 180 4
+wait 20
+shot look_c_near
+camera minecraft:overworld 3.6 -58.6 3.6 200 6
+wait 20
+shot look_c_near2
+camera minecraft:overworld -2.0 -58.2 -7.5 0 12
+wait 20
+shot look_c_back
+cmd skyabyss facility look 0
+hud on
+camera minecraft:overworld 0 -57.6 9.5 180 10
+wait 30
+shot icons_all
+camera minecraft:overworld -3.6 -58.9 3.6 180 4
+wait 20
+shot icons_near
+cmd gamemode creative
+camera minecraft:overworld -2.7 -60 3.0 180 0
+wait 10
+cmd skyabyss dev talk "skyabyss:attendant_tool_merchant"
+wait 60
+shot dialogue_intro
+cmd skyabyss dev talk say continue
+wait 60
+shot dialogue_menu
+close
+cmd clear @s
+cmd skyabyss facility coins 40
+cmd give @s skyabyss:stone_whale_shard 2
+cmd give @s skyabyss:bone_chip 9
+cmd skyabyss facility shop tool_shop
+wait 30
+shot shop_tool
+close
+cmd skyabyss facility shop apothecary
+wait 30
+shot shop_apothecary
+close
+cmd skyabyss facility shop black_market
+wait 30
+shot shop_black_market
+close
+cmd skyabyss facility stash
+wait 30
+shot stash
+close
+cmd guild menu
+wait 30
+shot guild_none
+close
+cmd guild create "鐘の守り" KANE blue white
+cmd guild menu
+wait 30
+shot guild_mine
+close
+cmd guild leave
+quit

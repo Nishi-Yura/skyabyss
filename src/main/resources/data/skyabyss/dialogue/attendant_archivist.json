@@ -1,0 +1,70 @@
+{
+  "npc": "skyabyss:attendant_archivist",
+  "entries": [
+    {
+      "if": {
+        "type": "not",
+        "of": {
+          "type": "flag",
+          "flag": "intro"
+        }
+      },
+      "node": "intro"
+    },
+    {
+      "node": "menu"
+    }
+  ],
+  "nodes": {
+    "intro": {
+      "face": "smile",
+      "do": [
+        {
+          "type": "flag",
+          "flag": "intro"
+        }
+      ],
+      "next": "menu"
+    },
+    "again": {
+      "face": "neutral",
+      "next": "menu",
+      "text": "dialogue.skyabyss.attendant_archivist.intro"
+    },
+    "lore": {
+      "face": "neutral",
+      "next": "menu"
+    },
+    "menu": {
+      "face": "neutral",
+      "options": [
+        {
+          "id": "map",
+          "kind": "talk",
+          "do": [
+            {
+              "type": "facility",
+              "open": "map"
+            }
+          ],
+          "goto": "end"
+        },
+        {
+          "id": "lore",
+          "kind": "talk",
+          "goto": "lore"
+        },
+        {
+          "id": "about",
+          "kind": "talk",
+          "goto": "again"
+        },
+        {
+          "id": "bye",
+          "kind": "leave",
+          "goto": "end"
+        }
+      ]
+    }
+  }
+}

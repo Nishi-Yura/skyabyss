@@ -92,6 +92,7 @@ public final class Guilds {
         GuildData.Guild g = data.create(name, tag, clampDye(color), clampDye(accent), player.getUUID(), player.getGameProfile().getName(),
                 player.server.overworld().getGameTime());
         refresh(player.server, g);
+        setBadge(player, g.badge());
         SkyAbyss.LOGGER.info("[guild] {} created {} [{}]", player.getGameProfile().getName(), g.name, g.tag);
         return Result.OK;
     }
@@ -120,6 +121,7 @@ public final class Guilds {
         g.names.put(player.getUUID(), player.getGameProfile().getName());
         if (g.open) {
             join(player.server, g, player.getUUID());
+            setBadge(player, g.badge());
             return Result.JOINED;
         }
         if (!g.applicants.add(player.getUUID())) {
@@ -190,6 +192,7 @@ public final class Guilds {
             return Result.NOT_IN_GUILD;
         }
         removeMember(player.server, g, player.getUUID());
+        setBadge(player, GuildBadge.NONE);
         return Result.OK;
     }
 

@@ -1,0 +1,131 @@
+{
+  "goods": [],
+  "rotation": {
+    "count": 4,
+    "pool": [
+      {
+        "id": "crystal",
+        "item": "skyabyss:resonance_crystal",
+        "count": 1,
+        "coins": 30,
+        "materials": [
+          {
+            "item": "skyabyss:stone_whale_shard",
+            "count": 4
+          }
+        ],
+        "limit": 1
+      },
+      {
+        "id": "aspect",
+        "item": "skyabyss:aspect_core",
+        "count": 1,
+        "coins": 40,
+        "materials": [
+          {
+            "item": "skyabyss:tide_shell_shard",
+            "count": 4
+          }
+        ],
+        "limit": 1,
+        "chapter": 2
+      },
+      {
+        "id": "rune",
+        "item": "skyabyss:skill_rune",
+        "count": 1,
+        "coins": 35,
+        "materials": [
+          {
+            "item": "skyabyss:stone_whale_shard",
+            "count": 2
+          }
+        ],
+        "limit": 1
+      },
+      {
+        "id": "bone_socket",
+        "item": "skyabyss:socket_shard_bone",
+        "count": 1,
+        "coins": 25,
+        "materials": [
+          {
+            "item": "skyabyss:stone_whale_shard",
+            "count": 3
+          }
+        ],
+        "limit": 1
+      },
+      {
+        "id": "anemone",
+        "item": "skyabyss:glow_anemone",
+        "count": 2,
+        "coins": 6,
+        "limit": 2
+      },
+      {
+        "id": "jerky",
+        "item": "skyabyss:cloud_jerky",
+        "count": 2,
+        "coins": 8,
+        "limit": 2
+      },
+      {
+        "id": "tide_socket",
+        "item": "skyabyss:socket_shard_tide",
+        "count": 1,
+        "coins": 30,
+        "materials": [
+          {
+            "item": "skyabyss:tide_shell_shard",
+            "count": 3
+          }
+        ],
+        "limit": 1,
+        "chapter": 3
+      },
+      {
+        "id": "wind_socket",
+        "item": "skyabyss:socket_shard_wind",
+        "count": 1,
+        "coins": 30,
+        "materials": [
+          {
+            "item": "skyabyss:thunder_wing_shard",
+            "count": 3
+          }
+        ],
+        "limit": 1,
+        "chapter": 4
+      },
+      {
+        "id": "ash_socket",
+        "item": "skyabyss:socket_shard_ash",
+        "count": 1,
+        "coins": 30,
+        "materials": [
+          {
+            "item": "skyabyss:ember_shard",
+            "count": 3
+          }
+        ],
+        "limit": 1,
+        "chapter": 5
+      },
+      {
+        "id": "spike_arrow",
+        "item": "skyabyss:bone_spike_arrow",
+        "count": 8,
+        "coins": 10,
+        "limit": 2
+      }
+    ]
+  },
+  "buys": [
+    {
+      "item": "skyabyss:resonance_shard",
+      "per": 1,
+      "coins": 3
+    }
+  ]
+}
