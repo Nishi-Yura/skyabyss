@@ -31,14 +31,14 @@ SOURCES = os.path.join(ROOT, "tools", "sources")
 PIECES = ["helmet", "chestplate", "leggings", "boots"]
 
 # 仮の選定 (ユーザーの確認待ち)
-CHOICE = {
+CHOICE = {  # 選定 第 2 期 (2026-10-22)
     "peak_crossing": "a",        # A 羽の肩
-    "scorched_feather": "b",     # 青い筋の黒い羽
-    "static_cotton": "b",        # 三つの房と稲妻
+    "scorched_feather": "c",     # 二枚を銅で束ねる
+    "static_cotton": "a",        # 火花の毛の玉
     "copper_wire": "b",          # 木の芯に巻く
     "thunder_ward_thread": "b",  # 稲妻の房の護り結び
     "thunder_whetstone": "b",    # 黒い石に光るひび
-    "wind_dumpling": "a",        # 串の三つ
+    "wind_dumpling": "c",        # 羽を挿した団子
     "lightning_oil": "a",        # 硝子の小瓶
     "wind_streamer": "a",        # 白い吹き流し
 }
