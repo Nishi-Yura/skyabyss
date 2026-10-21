@@ -18,7 +18,7 @@ import net.minecraft.world.level.block.state.BlockState;
 // 雷翼の背の鳥を建てる (12 の 3.2〜3.3節・26 の 3.3)。サーバーの起動のときに一度だけ動く。
 // 順番: 鳥の形 (BackShape storm_back/bird.bin。中は詰まっている) → 尾羽の上の到着・羽軸の道・羽の広場 → 羽根の門と腰の回廊 → 尾の間 →
 //       風の広間 (昇り風・凪の塔・上の回廊・天窓・竜骨の門・羽軸の柱・行き先の線) → 西の骨・東の骨 (StormWingBuilder) → 首・冠の間・眼の間 (StormHeadBuilder) →
-//       竜骨の下の道と前室と竜骨の間 → 掘った所の内壁を風の民の石に (skin) → 休み場・碑文・石・抜け道の床
+//       竜骨の下の道と前室と竜骨の間 → 掘った所の内壁を風の民の石に (skin) → 休み場・碑文・石
 // 拍で動く所 (昇り風、横風、落雷、骨の戸の開け閉め、鏡の向き) は試練の側 (StormBackTrials ほか) が置く
 public final class StormBirdBuilder {
     public static final BackShape BIRD = new BackShape("/data/skyabyss/storm_back/bird.bin");
@@ -649,7 +649,7 @@ public final class StormBirdBuilder {
         }
     }
 
-    // ---------------------------------------------------------------- 休み場・碑文・石・抜け道の床・広間の灯り
+    // ---------------------------------------------------------------- 休み場・碑文・石・広間の灯り
     private static void fixtures(StormKit kit) {
         for (StormBackLayout.Rest r : RESTS) {
             kit.campfire(r.campfire());
@@ -663,9 +663,6 @@ public final class StormBirdBuilder {
         }
         for (Inscription i : ENTRANCE_SIGNS) {
             kit.wallSign(i.pos(), i.facing(), i.key());
-        }
-        for (BlockPos p : new BlockPos[] {RETURN_WEST, RETURN_EAST, RETURN_FRONT}) {
-            kit.put(p.getX(), p.getY(), p.getZ(), StormKit.SLATE);
         }
         for (BlockPos p : new BlockPos[] {LAMP_WEST, LAMP_EAST, LAMP_FRONT}) {
             kit.put(p.getX(), p.getY(), p.getZ(), StormKit.SLATE);

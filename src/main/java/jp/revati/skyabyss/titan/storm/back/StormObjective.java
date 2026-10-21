@@ -177,7 +177,7 @@ final class StormObjective {
     // 西: 割れた床 → 肋の間 (次の岩棚) → 頂の石 → 光る床で戻る
     private static Goal west(StormProgress pr, Vec3 v) {
         if (pr.rung(Trial.WEST)) {
-            return goal("storm_back_w", RETURN_WEST, 1.5f, 0.6f, 1.5f);
+            return goal("storm_back_w", new BlockPos(WEST_PASS.x2() + 1, HUB.floor() + 1, WZ), 0.7f, 3f, 3.5f);
         }
         for (int[] g : WEST_GAPS) {
             if (v.x > g[0] - 1) {
@@ -194,7 +194,7 @@ final class StormObjective {
     // 東: いちばん近い、まだの回路 (レバー → 金の床)。戸が全部開けば雷獣、倒せば頂の石
     private static Goal east(ServerLevel level, ServerPlayer player, StormProgress pr, Vec3 v) {
         if (pr.rung(Trial.EAST)) {
-            return goal("storm_back_e", RETURN_EAST, 1.5f, 0.6f, 1.5f);
+            return goal("storm_back_e", new BlockPos(EAST_PASS.x1() - 1, HUB.floor() + 1, WZ), 0.7f, 3f, 3.5f);
         }
         if (pr.raijuDefeated()) {
             return goal("storm_east_stone", EAST_STONE, 0.7f, 1f, 0.7f);
@@ -228,7 +228,7 @@ final class StormObjective {
     // 前: 冠の間 → 冠の道 → 眼の間 (光を導く) → 戸が開けば嘴の石 → 光る床で戻る
     private static Goal front(StormProgress pr, Vec3 v) {
         if (pr.rung(Trial.FRONT)) {
-            return goal("storm_back_f", RETURN_FRONT, 1.5f, 0.6f, 1.5f);
+            return goal("storm_back_f", new BlockPos(HUB_UPDRAFT.getX(), HUB.floor() + 1, HUB_UPDRAFT.getZ()), 1.5f, 2f, 1.5f);
         }
         if (pr.receivers() == 7) {
             return goal("storm_front_stone", FRONT_STONE, 0.7f, 1f, 0.7f);

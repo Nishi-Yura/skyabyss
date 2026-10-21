@@ -264,12 +264,7 @@ public final class StormBackLayout {
     // 竜骨の間の入口 (入ると閉じる)。前室の北の口
     public static final AABB HEART_DOOR = new AABB(-1, KEEL_ANTE.floor() + 1, -40, 2, KEEL_ANTE.floor() + 4, -39);
 
-    // ---------------------------------------------------------------- 抜け道 (石が鳴ると光る床。踏むと広間の近くへ)
-    public static final BlockPos RETURN_WEST = RIB_TOP.offset(2, 0, 0);
-    public static final BlockPos RETURN_EAST = new BlockPos(RAIJU_NEST.getX(), BONE_FLOOR + 1, WZ + 6);
-    public static final BlockPos RETURN_FRONT = new BlockPos(2, 148, -142);
-    public static final Map<String, BlockPos> RETURN_TO = Map.of(
-            "west", new BlockPos(-52, BONE_FLOOR + 1, WZ), "east", new BlockPos(52, BONE_FLOOR + 1, WZ), "front", new BlockPos(0, UPPER_GALLERY_Y + 1, -92));
+    // ---------------------------------------------------------------- 広間の灯り (鳴った石の三つ)
     // 広間の床の三つの灯り (鳴った石)
     public static final BlockPos LAMP_WEST = new BlockPos(-5, 134, 7);
     public static final BlockPos LAMP_EAST = new BlockPos(5, 134, 7);

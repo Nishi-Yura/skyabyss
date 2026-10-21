@@ -244,7 +244,6 @@ for k, ja, en in [
      "The three wind stones sing together. On the hall floor, the ring of feathers comes undone..."),
     ("message.skyabyss.storm.keel_opened", "竜骨の門が開いた。下から、風が吹き上がってくる", "The keel gate is open. Wind rushes up from below"),
     ("message.skyabyss.storm.return_opened", "近くの床が光った。広間への抜け道が開いた", "The floor nearby lights up. A shortcut to the hall is open"),
-    ("message.skyabyss.storm.return_path", "光る床が、広間の近くへ運んでくれた", "The glowing floor carried you near the hall"),
     ("message.skyabyss.storm.trials_renewed", "雷翼の心臓が、再び打ちはじめた。背中の試練が、元の形に戻った",
      "The thunder wing's heart beats again. The trials on its back are as they were"),
     ("message.skyabyss.storm.sleeping_west", "今日、西の石はすでに鳴っている (風切りの骨は眠っている)", "Today the west stone is already singing (the Windbone sleeps)"),

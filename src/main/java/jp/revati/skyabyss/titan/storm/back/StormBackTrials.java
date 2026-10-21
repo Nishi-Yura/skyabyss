@@ -241,7 +241,7 @@ public final class StormBackTrials {
     }
 
     // ---------------------------------------------------------------- 見かけ (グループごと)
-    // 鳴った風鳴り石・広間の床の灯り・抜け道の床 (当たり判定は同じ)。ワールドのブロックはまだ鳴っていない姿
+    // 鳴った風鳴り石・広間の床の灯り (当たり判定は同じ)。ワールドのブロックはまだ鳴っていない姿
     static void overlay(ServerLevel level, UUID group, BiConsumer<BlockPos, BlockState> out) {
         if (level.dimension() != StormTravel.STORM_BACK) {
             return;
@@ -255,7 +255,6 @@ public final class StormBackTrials {
             if (p.rung(t)) {
                 out.accept(stonePos(t), jp.revati.skyabyss.trial.TrialGoal.reached());
                 out.accept(lampPos(t), StormKit.LAMP);
-                out.accept(padPos(t), StormKit.LAMP);
             }
         }
     }
@@ -301,7 +300,6 @@ public final class StormBackTrials {
         }
         if (gt % 5 == 0) {
             tickKeel(level);
-            tickPads(level);
             tickPeaceful(level, peaceful);
             tickGateFace(level);
             StormHelm.tick(level);
@@ -377,28 +375,6 @@ public final class StormBackTrials {
         groupSound(level, p.group, HUB_CENTER, SoundEvents.BEACON_ACTIVATE, 3f, 0.6f);
         for (ServerPlayer pl : Groups.online(level, p.group)) {
             Notice.narrate(pl, "message.skyabyss.storm.keel_opened");
-        }
-    }
-
-    // ---------------------------------------------------------------- 抜け道の床 (石が鳴ると光り、踏むと広間の近くへ。その人のグループの石で)
-    private static void tickPads(ServerLevel level) {
-        for (ServerPlayer p : Players.snapshot(level.players())) {
-            if (p.isSpectator()) {
-                continue;
-            }
-            BlockPos below = p.blockPosition().below();
-            String to = below.equals(RETURN_WEST) ? "west" : below.equals(RETURN_EAST) ? "east" : below.equals(RETURN_FRONT) ? "front" : null;
-            if (to == null) {
-                continue;
-            }
-            StormBackState.Trial t = StormBackState.Trial.byId(to);
-            if (t != null && StormProgress.of(level, p).rung(t)) {
-                BlockPos dest = RETURN_TO.get(to);
-                p.fallDistance = 0;
-                p.teleportTo(level, dest.getX() + 0.5, dest.getY(), dest.getZ() + 0.5, p.getYRot(), p.getXRot());
-                level.playSound(null, dest, StormSetup.GALE.get(), SoundSource.PLAYERS, 1f, 1.2f);
-                Notice.bar(p, ModText.hint("message.skyabyss.storm.return_path"));
-            }
         }
     }
 
@@ -484,15 +460,7 @@ public final class StormBackTrials {
         };
     }
 
-    static BlockPos padPos(StormBackState.Trial t) {
-        return switch (t) {
-            case WEST -> RETURN_WEST;
-            case EAST -> RETURN_EAST;
-            case FRONT -> RETURN_FRONT;
-        };
-    }
-
-    // 三つの石・広間の床の灯り・抜け道の床のワールドの姿 (まだ鳴っていない)。鳴った姿はグループごとの見かけ (overlay)
+    // 三つの石・広間の床の灯りのワールドの姿 (まだ鳴っていない)。鳴った姿はグループごとの見かけ (overlay)
     static void applyStones(ServerLevel level) {
         for (StormBackState.Trial t : StormBackState.Trial.values()) {
             BlockState want = jp.revati.skyabyss.trial.TrialGoal.mark();
@@ -502,9 +470,6 @@ public final class StormBackTrials {
             }
             if (!level.getBlockState(lampPos(t)).equals(StormKit.SLATE)) {
                 level.setBlock(lampPos(t), StormKit.SLATE, 3);
-            }
-            if (!level.getBlockState(padPos(t)).equals(StormKit.SLATE)) {
-                level.setBlock(padPos(t), StormKit.SLATE, 3);
             }
         }
     }
