@@ -370,6 +370,10 @@ public final class StorySelfTest {
         talk(p, st, "ms_tide_back", f);
         next(p);
         check(stage(p, "main_tide").equals("done"), "main_tide did not finish at the storyteller", f);
+        // 報告の続き: 村の記憶 → 数え歌のふたつめ (dialogue/ch2/storyteller_trail.json)
+        next(p);
+        next(p);
+        check(node(p).equals("ms_tide_verse"), "the tide report should end at the second verse: " + node(p), f);
         pick(p, ST, "ok", f);
 
         // 雷翼: 語り部の言い伝え → 見る (担当が伝承を記す) → 心臓 → 報告 (イサナ)

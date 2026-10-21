@@ -171,7 +171,7 @@ public final class Ch4GroundSelfTest {
                 {"skyabyss:storyteller", "ch4g_s_kiln"}, {"skyabyss:storyteller", "ms_key_four"}, {"skyabyss:storyteller", "ms_key_return"},
                 {"skyabyss:whale_chaser", "ch4g_c_board"}, {"skyabyss:whale_chaser", "ch4g_c_dragger"}, {"skyabyss:whale_chaser", "ch4g_c_watch"},
                 {"skyabyss:whale_chaser", "ms_c_key3"}, {"skyabyss:artisan", "ch4a_first"}, {"skyabyss:artisan", "ch4g_draught_tell"},
-                {"skyabyss:artisan", "ch4g_draught_show"}, {"skyabyss:artisan", "ch4t_ward_weave"}, {"skyabyss:artisan", "ch4p_teach"}}) {
+                {"skyabyss:artisan", "ch4g_draught_show"}, {"skyabyss:artisan", "ch4t_ward_weave"}}) {
             var d = DialogueManager.dialogue(n[0]);
             check(f, d != null && d.nodes().containsKey(n[1]), n[0] + " has no node " + n[1]);
         }

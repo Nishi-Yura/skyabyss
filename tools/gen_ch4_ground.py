@@ -468,7 +468,7 @@ def quests():
         '坑の奥の古い灰被りを倒せば、炉跡を見られるだろう。灰の殻は熱で割れやすい。床の亀裂が赤く脈を打ったら、そこを離れること。',
         'The storyteller said: "Under the hills of the southern ash, there is a forge of the ash people. An old thrall still keeps its fire, they say."\n'
         'Fell the old thrall at the bottom of the pit and the forge will be yours to see. Ash shells crack under heat. When a crack in the floor starts to pulse red, step away.')
-    put(b + 'pit.page', '消えた炉の坑の奥の番を倒す', 'Fell the keeper of the dead forge')
+    put(b + 'pit.page', '消えた炉の坑の奥の番を倒す', "Fell the pit's old keeper")
     put(b + 'tell.journal', '冷えた金床の上に、破れた頁があった。語り部に見せよう。', 'A torn page lay on the cold anvil. Show it to the storyteller.')
     put(b + 'tell.talk', '炉跡の頁を、語り部に見せる', 'Show the forge page to the storyteller')
     put(b + 'done', '「四つ返したら、下へ」。……返しに行くんだね。', '"Return four, then go down." ...You are going to give it back, then.')
@@ -580,20 +580,15 @@ def dialogue():
                            'next': 'a_menu'},
             'ch4g_draught_tell': {'face': 'neutral', 'do': [flag('ch4g_draught_told')], 'next': 'a_menu'},
             'ch4g_draught_show': {'face': 'smile', 'do': [{'type': 'lore', 'entry': 'ch4/fire_draught'}, {'type': 'affinity', 'amount': 1}], 'next': 'a_menu'},
-            'ch4p_teach': {'face': 'neutral', 'do': [{'type': 'unlock_recipes', 'chapter': 4}, flag('ch4p_taught')], 'next': 'a_menu'},
             'ch4t_ward_weave': {'face': 'smile', 'do': [{'type': 'take', 'item': 'skyabyss:ash_ward_thread', 'count': 1},
                                                          {'type': 'give', 'item': 'skyabyss:heartbeat_ward_ember', 'count': 1}, flag('ch4t_woven'),
                                                          {'type': 'affinity', 'amount': 2}], 'next': 'a_menu'},
             'ch4a_ward': {'face': 'smile', 'do': [{'type': 'take', 'item': 'skyabyss:soot_iron', 'count': 8}, {'type': 'remake_ward', 'titan': 'ember'},
                                                    {'type': 'affinity', 'amount': 1}], 'next': 'a_menu'},
-            'ch4a_ward_ask': {'face': 'neutral', 'next': 'a_menu'},
         },
         'add_options': {'a_menu': {'before': 'bye', 'options': [
-            {'id': 'teach4', 'kind': 'quest', 'if': [{'type': 'stage', 'min': 3}, flag('ch4a_met')], 'goto': 'ch4p_teach'},
             {'id': 'ward4', 'kind': 'give', 'if': [flag('ch4t_woven'), {'type': 'ward_ok', 'titan': 'ember'},
                                                   {'type': 'item', 'item': 'skyabyss:soot_iron', 'count': 8, 'optional': True}], 'goto': 'ch4a_ward'},
-            {'id': 'ward_ask4', 'kind': 'quest', 'if': [flag('ch4t_woven'), {'type': 'ward_ok', 'titan': 'ember'},
-                                                       not_({'type': 'item', 'item': 'skyabyss:soot_iron', 'count': 8, 'optional': True})], 'goto': 'ch4a_ward_ask'},
         ]}},
     })
     a = 'dialogue.skyabyss.artisan.'
@@ -606,17 +601,11 @@ def dialogue():
     put(a + 'ch4g_draught_show',
         '耐火の薬か。よく作ったな。\n道具は覚えている。持ち主は、そうでもない。……火の薬だけは、飲んだ者が覚えているもんだ。',
         'Fire draughts. Well brewed.\nTools remember. Their owners, less so. ...Only a fire draught is remembered by the one who drinks it.')
-    put(a + 'ch4p_teach',
-        '煤の砥石と、灰の冷やし水だ。煤鉄と灰麻があれば作れる。\n冷やし水は、熱の中で飲め。体の芯の火照りが引く。……覚書にも書いておいた。',
-        'The soot whetstone and the ash cooler. Soot iron and ash hemp are all you need.\nDrink the cooler in the heat. It draws the burn out of your core. ...It is in the notes too.')
     put(a + 'ch4t_ward_weave',
         '灰の護り糸か。古い灰被りの背の釜に、編みかけで入っていたんだろう。\n鼓動守に仕上げよう。熱の中で鼓動が速くなったら、握るといい。',
         'Ash ward thread. It must have been in the old thrall\'s pot, half woven.\nI will finish it into a heartbeat ward. When your heart races in the heat, hold it.')
     put(a + 'ch4a_ward', '煤鉄で編み直した。……今度は、溶かすなよ。', 'Rewoven with soot iron. ...Don\'t melt this one.')
-    put(a + 'ch4a_ward_ask', '余燼の鼓動守を編み直すなら、煤鉄を八つ持ってきてくれ。', 'Bring eight soot iron and I will reweave your ember heartbeat ward.')
-    put(a + 'a_menu.teach4', '煤の砥石と冷やし水を教えてほしい', 'Teach me the soot whetstone and the cooler')
     put(a + 'a_menu.ward4', '余燼の鼓動守を編み直してほしい', 'Reweave my ember heartbeat ward')
-    put(a + 'a_menu.ward_ask4', '余燼の鼓動守のことを聞きたい', 'About the ember heartbeat ward')
 
 
 # ================================================================ 伝承

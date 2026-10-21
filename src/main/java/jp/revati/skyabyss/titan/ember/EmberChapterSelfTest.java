@@ -157,7 +157,8 @@ public final class EmberChapterSelfTest {
         }
         List<String> sites = new ArrayList<>();
         ChapterSites.elements(Chapters.EMBER).forEach(e -> sites.add(e.id()));
-        expect(sites.containsAll(EmberChapter.SITES) && sites.size() >= 3 && sites.size() <= 5, "the ember small elements are not registered (3-5): " + sites, f);
+        // 四章の地上の場所 (story/ch4/Ch4Ground の 5 種) も同じ章の要素なので、数の上限は見ない (この 3 つがそろっていること)
+        expect(sites.containsAll(EmberChapter.SITES) && sites.size() >= 3, "the ember small elements are not registered: " + sites, f);
         expect(ChapterSky.stage(Chapters.EMBER).equals(EmberChapter.SKY) && EmberChapter.SKY.moonBias() > 0 && EmberChapter.SKY.tintStrength() <= 0.35f,
                 "the ember sky stage is not registered", f);
         for (String name : List.of("ember_hearth_ruin", "ember_ash_post", "ember_warm_ledge")) {

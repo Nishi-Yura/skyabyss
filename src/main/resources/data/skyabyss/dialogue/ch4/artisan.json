@@ -116,20 +116,6 @@
       ],
       "next": "a_menu"
     },
-    "ch4p_teach": {
-      "face": "neutral",
-      "do": [
-        {
-          "type": "unlock_recipes",
-          "chapter": 4
-        },
-        {
-          "type": "flag",
-          "flag": "ch4p_taught"
-        }
-      ],
-      "next": "a_menu"
-    },
     "ch4t_ward_weave": {
       "face": "smile",
       "do": [
@@ -172,31 +158,12 @@
         }
       ],
       "next": "a_menu"
-    },
-    "ch4a_ward_ask": {
-      "face": "neutral",
-      "next": "a_menu"
     }
   },
   "add_options": {
     "a_menu": {
       "before": "bye",
       "options": [
-        {
-          "id": "teach4",
-          "kind": "quest",
-          "if": [
-            {
-              "type": "stage",
-              "min": 3
-            },
-            {
-              "type": "flag",
-              "flag": "ch4a_met"
-            }
-          ],
-          "goto": "ch4p_teach"
-        },
         {
           "id": "ward4",
           "kind": "give",
@@ -217,30 +184,6 @@
             }
           ],
           "goto": "ch4a_ward"
-        },
-        {
-          "id": "ward_ask4",
-          "kind": "quest",
-          "if": [
-            {
-              "type": "flag",
-              "flag": "ch4t_woven"
-            },
-            {
-              "type": "ward_ok",
-              "titan": "ember"
-            },
-            {
-              "type": "not",
-              "of": {
-                "type": "item",
-                "item": "skyabyss:soot_iron",
-                "count": 8,
-                "optional": true
-              }
-            }
-          ],
-          "goto": "ch4a_ward_ask"
         }
       ]
     }
