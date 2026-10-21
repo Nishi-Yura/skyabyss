@@ -44,6 +44,8 @@ public final class EyeMirrors {
     static final int[][] STEP = {{0, -1}, {1, 0}, {0, 1}, {-1, 0}};
     static final int[][] PAIRS = {{0, 1}, {1, 2}, {2, 3}, {3, 0}};
     public static final int RESET_COOLDOWN = 20 * 30;
+    // 周回の長い眼の間 (32 の 4 章、R5): 配置を二つ続けて解く。一つ目を解くと眼が向きを変え、次の配置 (ちがう鏡の並び) が現れる
+    public static final int STAGES_LONG = 2;
 
     // 壁の受け羽: side = 光が出ていく向き (0 北の壁・1 東の壁・2 南の壁・3 西の壁)、index = 北・南の壁なら列、東・西の壁なら行
     public record Wall(int side, int index) {
@@ -558,6 +560,10 @@ public final class EyeMirrors {
                 Notice.bar(pl, ModText.progress("message.skyabyss.storm.feather_lit", Integer.bitCount(progress.receivers())));
             }
         }
+        if (progress.receivers() == 7 && progress.mirrorStage() + 1 < progress.mirrorStagesNeeded()) {
+            nextStage(level, progress);
+            return;
+        }
         if (progress.receivers() == 7) {
             GroupGates.open(level, progress.group, beakDoor());
             level.playSound(null, new BlockPos(0, EYE_HALL.floor() + 2, BEAK_DOOR_Z1), net.minecraft.sounds.SoundEvents.IRON_DOOR_OPEN, SoundSource.BLOCKS, 2f, 0.7f);
@@ -565,6 +571,41 @@ public final class EyeMirrors {
                 if (inFront(pl.position())) {
                     Notice.bar(pl, ModText.progress("message.skyabyss.storm.beak_opened"));
                 }
+            }
+        }
+    }
+
+    // 自己テスト用: 今の配置の受け羽を全部光らせる (light と同じ道)
+    public static void testLightAll(ServerLevel level, StormProgress progress) {
+        Config cfg = progress.config();
+        for (int i = 0; i < cfg.receivers().size(); i++) {
+            if ((progress.receivers() & (1 << i)) == 0) {
+                light(level, progress, cfg, i);
+                cfg = progress.config();
+                if (progress.receivers() == 0) {
+                    return;
+                }
+            }
+        }
+    }
+
+    // 長い周の一つ目の配置を解いた: 受け羽を消し、次の配置 (今と違う 1〜3) に置き直す
+    static void nextStage(ServerLevel level, StormProgress progress) {
+        int cur = progress.mirrorConfig();
+        int next = 1 + Math.floorMod(cur, CONFIGS.size() - 1);
+        if (next == cur) {
+            next = 1 + Math.floorMod(next, CONFIGS.size() - 1);
+        }
+        progress.setMirrorStage(progress.mirrorStage() + 1);
+        progress.setMirrorConfig(next);
+        progress.setReceivers(0);
+        if (progress.group.equals(RoomLocks.owner(StormBackTrials.EYE_ROOM))) {
+            apply(level, progress);
+        }
+        level.playSound(null, new BlockPos(0, EYE_HALL.floor() + 2, BEAK_DOOR_Z1), StormSetup.RECEIVER_LIT.get(), SoundSource.BLOCKS, 2f, 0.6f);
+        for (ServerPlayer pl : Groups.online(level, progress.group)) {
+            if (inFront(pl.position())) {
+                Notice.narrate(pl, "message.skyabyss.storm.eye_turns");
             }
         }
     }

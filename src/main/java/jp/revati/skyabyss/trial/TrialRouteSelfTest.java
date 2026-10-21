@@ -70,6 +70,7 @@ public final class TrialRouteSelfTest {
                     SkyAbyss.LOGGER.info("SELFTEST trial route: {} back is not built here, checked the shape only", titan);
                 }
             }
+            fattened(f, server);
         } catch (RuntimeException e) {
             SkyAbyss.LOGGER.error("SELFTEST trial route crashed", e);
             f.add("crashed: " + e);
@@ -79,11 +80,63 @@ public final class TrialRouteSelfTest {
             TrialRoute.PLAYERS = l -> jp.revati.skyabyss.util.Players.snapshot(l.players());
         }
         if (f.isEmpty()) {
-            SkyAbyss.LOGGER.info("SELFTEST trial route PASSED (shape for four titans; walked first runs and replays in {} built back(s))", worlds);
+            SkyAbyss.LOGGER.info("SELFTEST trial route PASSED (shape for four titans; walked first runs and replays in {} built back(s); long prototypes on replays)", worlds);
         } else {
             for (String s : f) {
                 SkyAbyss.LOGGER.error("SELFTEST trial route FAILED: {}", s);
             }
+        }
+    }
+
+    // ---------------------------------------------------------------- 太らせた原型 (R5。32 の 4 章)
+    // 周回のグループ (心臓を一度止めた) だけが長い。初回は今の長さ。長さは 1.5〜2 倍
+    private static void fattened(List<String> f, MinecraftServer server) {
+        ServerLevel any = server.getLevel(Titans.backOf(Titans.STONE_WHALE));
+        if (any != null) {
+            UUID probe = UUID.randomUUID();
+            BackGroupData.Record fresh = BackGroupData.get(any).of(probe);
+            check(f, !RouteLength.extended(fresh), "a first-run group should play the prototypes at their usual length");
+            fresh.markFirstCleared();
+            check(f, RouteLength.extended(fresh) && RouteLength.extended(any, probe), "a replaying group should play the long prototypes");
+            BackGroupData.get(any).remove(probe);
+        }
+        double waves = jp.revati.skyabyss.titan.dungeon.TitanBackTrials.replayWaves(true) / (double) jp.revati.skyabyss.titan.dungeon.TitanBackTrials.replayWaves(false);
+        check(f, waves >= 1.5 && waves <= 2.0, "W09: the replay halls should have 1.5-2x the waves: " + waves);
+        double nests = jp.revati.skyabyss.titan.tide.back.TideBackLayout.NEST_COUNT_LONG / (double) jp.revati.skyabyss.titan.tide.back.TideBackLayout.NEST_COUNT;
+        check(f, nests >= 1.5 && nests <= 2.0 && jp.revati.skyabyss.titan.tide.back.TideBackLayout.NEST_COUNT_LONG <= jp.revati.skyabyss.titan.tide.back.TideBackLayout.NEST_SITES.length,
+                "T09: the long flats should have 1.5-2x the nests within the sites: " + nests);
+        check(f, jp.revati.skyabyss.titan.tide.back.TideWatch.STAGES_LONG == 2 && jp.revati.skyabyss.titan.storm.back.EyeMirrors.STAGES_LONG == 2
+                && jp.revati.skyabyss.titan.ember.back.trial.Forge.KEYS_LONG == 2 && jp.revati.skyabyss.titan.ember.back.trial.Hearth.FLARES_LONG == 2,
+                "T05/S06/E05/E09: the long rooms should ask for two rounds");
+        float hearth = (jp.revati.skyabyss.titan.ember.back.trial.Hearth.MAX - jp.revati.skyabyss.titan.ember.back.trial.Hearth.START
+                + jp.revati.skyabyss.titan.ember.back.trial.Hearth.MAX - jp.revati.skyabyss.titan.ember.back.trial.Hearth.RELIGHT)
+                / (jp.revati.skyabyss.titan.ember.back.trial.Hearth.MAX - jp.revati.skyabyss.titan.ember.back.trial.Hearth.START);
+        check(f, hearth >= 1.5 && hearth <= 2.0, "E09: the long hearth should burn 1.5-2x the fire: " + hearth);
+        // 眼の間: 長い周は一つ目の配置を解くと次の配置に替わり、二つ目で嘴の戸が開く
+        ServerLevel storm = server.getLevel(Titans.backOf(Titans.THUNDER_WING));
+        if (storm != null) {
+            UUID g = UUID.randomUUID();
+            jp.revati.skyabyss.titan.storm.back.StormProgress sp = jp.revati.skyabyss.titan.storm.back.StormProgress.of(storm, g);
+            BackGroupData.get(storm).of(g).markFirstCleared();
+            int cfg0 = sp.mirrorConfig();
+            jp.revati.skyabyss.titan.storm.back.EyeMirrors.testLightAll(storm, sp);
+            check(f, sp.mirrorStage() == 1 && sp.receivers() == 0 && sp.mirrorConfig() != cfg0 && !sp.beakOpen(),
+                    "S06: the long eye room should turn to a new pattern after the first: stage " + sp.mirrorStage() + " config " + sp.mirrorConfig());
+            jp.revati.skyabyss.titan.storm.back.EyeMirrors.testLightAll(storm, sp);
+            check(f, sp.receivers() == 7 && sp.beakOpen(), "S06: the second pattern should open the beak");
+            BackGroupData.get(storm).remove(g);
+        }
+        ServerLevel tide = server.getLevel(Titans.backOf(Titans.TIDE_SHELL));
+        if (tide != null) {
+            UUID g = UUID.randomUUID();
+            jp.revati.skyabyss.titan.tide.back.TideBackState.Group tg = jp.revati.skyabyss.titan.tide.back.TideBackState.of(tide, g);
+            check(f, tg.eastStagesNeeded() == 1, "T05: a first-run group solves one watch pattern");
+            BackGroupData.get(tide).of(g).markFirstCleared();
+            int c0 = tg.eastConfig();
+            tg.nextEastStage();
+            check(f, tg.eastStagesNeeded() == 2 && tg.eastStage() == 1 && tg.eastConfig() != c0 && tg.eastConfig() >= 1,
+                    "T05: the long watch room should move to another pattern: " + tg.eastConfig());
+            BackGroupData.get(tide).remove(g);
         }
     }
 

@@ -680,6 +680,17 @@ public final class ChapterGrounds {
 
     // 整えたあとの地面の高さ (いちばん上の固いブロック)。形の外なら Integer.MIN_VALUE。natural = 今の地面の高さ。
     // 入り江の水の所は「海底」の高さ (海面より下 = 水)
+    // 盛る形 (丘・峰) の裾の高さの基準: 内側は測った地面の高さ、外の 4 割はその列の元の地面へなだらかに寄せる
+    // (斜面や谷のそばで、形の縁が切り立った壁にならないように)
+    static double skirtBase(int baseY, int natural, double u) {
+        if (u <= 0.6) {
+            return baseY;
+        }
+        double w = Math.min(1, (u - 0.6) / 0.4);
+        w = w * w * (3 - 2 * w);
+        return baseY * (1 - w) + natural * w;
+    }
+
     public static int shapeTop(SiteData.Ground g, int x, int z, int natural, int sea) {
         Shape s = shapeOf(g);
         int h = half(s);
@@ -695,7 +706,7 @@ public final class ChapterGrounds {
                     return Integer.MIN_VALUE;
                 }
                 double u = r / HILL_HALF;
-                int target = g.baseY + (int) Math.round(HILL_RISE * (Math.cos(Math.PI * u) + 1) / 2);
+                int target = (int) Math.round(skirtBase(g.baseY, natural, u) + HILL_RISE * (Math.cos(Math.PI * u) + 1) / 2);
                 return Math.max(natural, target);
             }
             case PEAK -> {
@@ -706,7 +717,7 @@ public final class ChapterGrounds {
                 // 尾根の筋 (向きで少し波打つ) をつけた円錐
                 double ridge = 1 + 0.12 * Math.sin(Math.atan2(dz, dx) * 5 + g.shapeCenter.getX() * 0.01);
                 double p = Math.pow(Math.max(0, 1 - u * ridge * 0.95), 1.5);
-                int target = g.baseY + (int) Math.round(PEAK_RISE * Math.min(1, p));
+                int target = (int) Math.round(skirtBase(g.baseY, natural, u) + PEAK_RISE * Math.min(1, p));
                 return Math.max(natural, target);
             }
             case BASIN -> {

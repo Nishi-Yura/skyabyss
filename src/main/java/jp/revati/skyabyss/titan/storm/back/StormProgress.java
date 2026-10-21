@@ -27,6 +27,8 @@ public final class StormProgress {
     static final String MIRROR_CONFIG = "storm.mirror_config";
     static final String MIRROR_ROTS = "storm.mirror_rots";
     static final String RECEIVERS = "storm.receivers";
+    // 周回の長い眼の間 (32 の 4 章、R5): 解いた配置の数 (0 = まだ。長い周は 2 つ解くと嘴の戸が開く)
+    static final String MIRROR_STAGE = "storm.mirror_stage";
     static final String RIB = "storm.rib";
     static final String RIB_RINGS = "storm.rib_rings";
     static final String EVER_DEFEATED = "keep.storm.ever_defeated";
@@ -217,6 +219,19 @@ public final class StormProgress {
 
     public int receivers() {
         return record.getInt(RECEIVERS);
+    }
+
+    public int mirrorStage() {
+        return record.getInt(MIRROR_STAGE);
+    }
+
+    public void setMirrorStage(int v) {
+        record.putInt(MIRROR_STAGE, v);
+    }
+
+    // 嘴の戸を開けるまでに解く配置の数 (周回のグループは 2)
+    public int mirrorStagesNeeded() {
+        return jp.revati.skyabyss.trial.RouteLength.extended(record) ? EyeMirrors.STAGES_LONG : 1;
     }
 
     public void setReceivers(int bits) {

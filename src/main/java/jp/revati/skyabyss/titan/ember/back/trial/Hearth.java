@@ -62,7 +62,12 @@ public final class Hearth {
     // 静かな周 (13 の 10.2節): 火の弱まりは半分、灰運びは 2 倍ゆっくり一体ずつ、蛾と燠虫は出ない
     public static final float QUIET_DECAY = 0.5f;
     public static final int QUIET_CARRIER_SLOWER = 2;
+    // 周回の長い火守り (32 の 4 章、R5): 火を 100 まで二度燃やす。一度目に 100 に届くと火が燃え上がって RELIGHT まで落ち、谷の奥から灰運びが続けて来る
+    public static final int FLARES_LONG = 2;
+    public static final float RELIGHT = 45f;
     private static float strength = START;
+    // 100 に届いた回数 (長い周の途中)
+    private static int flares;
     private static boolean done;
     private static boolean spawned;
     private static long lastCarrier;
@@ -74,6 +79,7 @@ public final class Hearth {
 
     static void clearMemory() {
         strength = START;
+        flares = 0;
         done = false;
         spawned = false;
         MOTH_TOUCHED.clear();
@@ -176,8 +182,37 @@ public final class Hearth {
         }
         show(level);
         if (strength >= MAX) {
-            complete(level);
+            if (flares + 1 < flaresNeeded(level)) {
+                flare(level);
+            } else {
+                complete(level);
+            }
         }
+    }
+
+    // 何度 100 まで燃やすか (周回の持ち主のグループなら 2)
+    static int flaresNeeded(ServerLevel level) {
+        java.util.UUID owner = EmberRooms.owner(EmberBackState.Trial.SOUTH.id());
+        boolean extended = owner != null ? jp.revati.skyabyss.trial.RouteLength.extended(level, owner)
+                : Boolean.TRUE.equals(jp.revati.skyabyss.trial.RouteLength.force);
+        return extended ? FLARES_LONG : 1;
+    }
+
+    public static int flares() {
+        return flares;
+    }
+
+    // 一度目の 100: 火が燃え上がって落ち着く。灰運びはすぐ次が来る
+    private static void flare(ServerLevel level) {
+        flares++;
+        strength = RELIGHT;
+        lastCarrier = 0;
+        level.playSound(null, HEARTH, EmberTrialSetup.HEARTH_FEED.get(), SoundSource.BLOCKS, 1.6f, 0.8f);
+        level.sendParticles(ParticleTypes.FLAME, HEARTH.getX() + 0.5, HEARTH.getY() + 1.2, HEARTH.getZ() + 0.5, 40, 0.4, 0.8, 0.4, 0.08);
+        for (ServerPlayer p : EmberTrials.playersIn(level, EmberBackLayout.SOUTH)) {
+            Notice.narrate(p, EmberIds.LANG_SOUTH + "flare");
+        }
+        show(level);
     }
 
     private static void complete(ServerLevel level) {

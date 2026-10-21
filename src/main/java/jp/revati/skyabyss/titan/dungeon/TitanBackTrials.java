@@ -257,6 +257,34 @@ public final class TitanBackTrials {
                     List.of("sentinel", "sentinel", "archer", "crawler", "crawler"),
                     List.of("captain")), NO_CUTS));
 
+    // 周回の長い広間 (32 の 4 章、R5): 第一の広間と番兵長の広間に一波ずつ足す (詰所は初回だけなので、周回の戦いは 4 波 → 6 波)
+    static final Map<String, List<List<String>>> LONG_WAVES = Map.of(
+            "e1", List.of(
+                    List.of("sentinel", "sentinel", "crawler", "crawler"),
+                    List.of("archer", "archer", "archer", "sentinel", "mortar"),
+                    List.of("crawler", "crawler", "sentinel", "archer", "sentinel")),
+            "e3", List.of(
+                    List.of("sentinel", "sentinel", "archer", "crawler", "crawler"),
+                    List.of("archer", "archer", "sentinel", "sentinel", "mortar"),
+                    List.of("captain")));
+
+    // 周回で戦う広間 (第一の広間・番兵長の広間) の波の数の合計。extended = 周回の長い並び (自己テスト用)
+    public static int replayWaves(boolean extended) {
+        int n = 0;
+        for (Hall h : HALLS) {
+            if (LONG_WAVES.containsKey(h.id())) {
+                n += extended ? LONG_WAVES.get(h.id()).size() : h.waves().size();
+            }
+        }
+        return n;
+    }
+
+    // その広間の波の並び (周回のグループは LONG_WAVES)
+    static List<List<String>> wavesOf(ServerLevel level, UUID group, Hall hall) {
+        List<List<String>> longer = LONG_WAVES.get(hall.id());
+        return longer != null && jp.revati.skyabyss.trial.RouteLength.extended(level, group) ? longer : hall.waves();
+    }
+
     // ---------------------------------------------------------------- 状態 (グループごと)
     // 試練の進み (制圧した広間・宝物庫の封印・心臓の撃破・鳴らした石・扉の開け閉め) は、グループ (パーティ、または一人) の記録
     // (BackGroupData.Record) にある。ここにあるのは、戦いの最中のメモリの状態 (保存しない) だけで、(グループ, 広間) ごとに持つ。
@@ -278,9 +306,13 @@ public final class TitanBackTrials {
         // この戦いでパーティが倒れた回数 (倒れた状態 + 倒れずに死んだ回数)。番兵長に勝ったときの札に使う
         int falls;
 
+        // この戦いの波の並び (周回は長い。wavesOf)
+        List<List<String>> waves;
+
         HallState(UUID group, Hall hall) {
             this.group = group;
             this.hall = hall;
+            this.waves = hall.waves();
         }
     }
 
@@ -633,6 +665,7 @@ public final class TitanBackTrials {
                 if (!inside.isEmpty()) {
                     // 集合: 扉は開いたまま、5 秒待つ
                     state = new HallState(group, hall);
+                    state.waves = wavesOf(level, group, hall);
                     HALL_STATES.put(key, state);
                     announceGathering(level, group, key, hall.box());
                     applyVeil(level, group, hall, groupNear(level, group, hall));
@@ -693,7 +726,7 @@ public final class TitanBackTrials {
         }
         if (state.delay == 0) {
             state.delay = WAVE_DELAY;
-            if (state.wave < hall.waves().size()) {
+            if (state.wave < state.waves.size()) {
                 broadcast(level, group, hall.box(), ModText.battle("message.skyabyss.arena_next"));
             }
             return;
@@ -703,7 +736,7 @@ public final class TitanBackTrials {
             return;
         }
         state.delay = 0;
-        if (state.wave >= hall.waves().size()) {
+        if (state.wave >= state.waves.size()) {
             // 制圧: 出口と入口の両方が (このグループには) 開く。倒れて控えの間で目を覚ました仲間も、先へ進める
             record.markHallCleared(hall.id());
             HALL_STATES.remove(key);
@@ -776,7 +809,7 @@ public final class TitanBackTrials {
         // 設計書 26 の 8.7 の B: 広間の大きさは同じ。一人・二人は、湧き場所を入口側に寄せる (広間いっぱいは 4 人から)
         BlockPos entrance = RoomPlayRooms.entranceOf(hall.id());
         spawns = RoomPlay.spawnNear(spawns, entrance, state.players);
-        List<String> wave = new ArrayList<>(hall.waves().get(state.wave - 1));
+        List<String> wave = new ArrayList<>(state.waves.get(state.wave - 1));
         // 人数が多いほど番兵も増える (1人増えるごとに2体。番兵長の波では骨の番兵が増える。最大 6 人分)。
         // 老番兵の波は骨の番兵が増える (老番兵は体力が増える)。骨の砲手は 4 人から 2 体
         boolean elderWave = wave.get(0).equals("elder");
@@ -819,7 +852,7 @@ public final class TitanBackTrials {
                 }
             }
         }
-        broadcast(level, state.group, hall.box(), ModText.battle("message.skyabyss.arena_wave", state.wave, hall.waves().size()));
+        broadcast(level, state.group, hall.box(), ModText.battle("message.skyabyss.arena_wave", state.wave, state.waves.size()));
     }
 
     // 番兵長・老番兵の立つ場所: 4 人からは広間の真ん中。一人・二人は入口から真ん中へ向かう道の途中 (45%・60%・80%)。

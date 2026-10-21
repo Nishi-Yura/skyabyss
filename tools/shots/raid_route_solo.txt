@@ -1,0 +1,132 @@
+# 巨神の順路 (docs/design/32 の 8.2 の R6) を一人で通す撮影: 四体の到着の台・入口の箱 (予告と段 1 への運び)・段 1 の入口・中ボスの前室・心臓の前室。
+# ./gradlew runShots -Pscript=tools/shots/raid_route_solo.txt   絵は run/shots/raid_route_solo/shots/raid_route_solo/ → docs/review/raid_route/
+# playtest board が巨神を呼んで乗せる (前の巨神は止めた扱い)。skyroute enter は入口の箱のまんなかへ立たせる (初回は予告のあと段 1 へ運ばれる)。
+# 中ボスの前室・心臓は playtest goto で移す (歩きの代わり)。帯と段の札が見えるよう HUD は出したまま撮る
+world raid_route_solo normal
+size 1280 720
+timeout 3000
+render 12
+clouds off
+
+wait 100
+cmd skyabyss cinematic stop
+wait 10
+cmd skyabyss cinematic stop
+cmd skyabyss playtest skip opening
+cmd time set noon
+cmd weather clear
+cmd gamerule doDaylightCycle false
+cmd skyabyss playtest god on
+
+# ---- whale
+cmd skyabyss playtest gear whale
+cmd skyabyss playtest board whale
+wait 200
+waitchunks
+wait 40
+chat clear
+shot whale_01_arrival
+cmd skyroute enter
+wait 30
+shot whale_02_entry_box
+wait 160
+waitchunks
+wait 30
+shot whale_03_step1
+cmd skyroute status
+cmd skyabyss playtest goto whale ckr
+wait 40
+waitchunks
+wait 20
+shot whale_04_midboss
+cmd skyabyss playtest goto whale heart
+wait 40
+waitchunks
+wait 20
+shot whale_05_heart
+cmd skyroute clear
+
+# ---- tide
+cmd skyabyss playtest gear tide
+cmd skyabyss playtest board tide
+wait 200
+waitchunks
+wait 40
+chat clear
+shot tide_01_arrival
+cmd skyroute enter
+wait 30
+shot tide_02_entry_box
+wait 160
+waitchunks
+wait 30
+shot tide_03_step1
+cmd skyroute status
+cmd skyabyss playtest goto tide f0
+wait 40
+waitchunks
+wait 20
+shot tide_04_midboss
+cmd skyabyss playtest goto tide heart
+wait 40
+waitchunks
+wait 20
+shot tide_05_heart
+cmd skyroute clear
+
+# ---- storm
+cmd skyabyss playtest gear storm
+cmd skyabyss playtest board storm
+wait 200
+waitchunks
+wait 40
+chat clear
+shot storm_01_arrival
+cmd skyroute enter
+wait 30
+shot storm_02_entry_box
+wait 160
+waitchunks
+wait 30
+shot storm_03_step1
+cmd skyroute status
+cmd skyabyss playtest goto storm e1
+wait 40
+waitchunks
+wait 20
+shot storm_04_midboss
+cmd skyabyss playtest goto storm heart
+wait 40
+waitchunks
+wait 20
+shot storm_05_heart
+cmd skyroute clear
+
+# ---- ember
+cmd skyabyss playtest gear ember
+cmd skyabyss playtest board ember
+wait 200
+waitchunks
+wait 40
+chat clear
+shot ember_01_arrival
+cmd skyroute enter
+wait 30
+shot ember_02_entry_box
+wait 160
+waitchunks
+wait 30
+shot ember_03_step1
+cmd skyroute status
+cmd skyabyss playtest goto ember e0
+wait 40
+waitchunks
+wait 20
+shot ember_04_midboss
+cmd skyabyss playtest goto ember heart
+wait 40
+waitchunks
+wait 20
+shot ember_05_heart
+cmd skyroute clear
+

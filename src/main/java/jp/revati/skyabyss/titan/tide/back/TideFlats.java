@@ -403,7 +403,7 @@ public final class TideFlats {
                 left++;
             }
         }
-        broadcast(level, group, left > 0 ? ModText.progress("message.skyabyss.tide.nest_broken", NEST_COUNT - left, NEST_COUNT)
+        broadcast(level, group, left > 0 ? ModText.progress("message.skyabyss.tide.nest_broken", Integer.bitCount(state.nestSites()) - left, Integer.bitCount(state.nestSites()))
                 : ModText.lore("message.skyabyss.tide.nests_all_broken"));
         if (left == 0 && group.equals(owner())) {
             beginGather(level);
