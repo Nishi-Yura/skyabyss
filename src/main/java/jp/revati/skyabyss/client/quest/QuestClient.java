@@ -87,6 +87,53 @@ public final class QuestClient {
             playSound(mc, kind, def != null && def.main());
             QuestHud.flash();
         });
+        if (def != null && def.main() && kind != QuestNetwork.Notice.FINISHED) {
+            // 段の書き出しの一言は、ログが届いてから (始まった知らせはログの同期より先に来る)
+            pendingLead.put(questId, LEAD_DELAY);
+        }
+    }
+
+    // ---------------------------------------------------------------- 段の書き出しの一言 (2026-10-22 の試遊: なぜ今これをするのか分からなかった)
+    // メインのクエストが始まった・次の段へ進んだとき、その段に「<段の鍵>.lead」の文があれば、字幕の列に一度だけ出す。
+    // 誰に頼まれ、何のためにするのかを短く言う (例: イサナ「鎖は素手では上れない。鉄を着ろ」)。先のことは言わない。
+    // 文がない段は何も出さない。同じ段は、この遊びの間に一度だけ
+    private static final int LEAD_DELAY = 12;
+    private static final Map<String, Integer> pendingLead = new LinkedHashMap<>();
+    private static final java.util.Set<String> leadShown = new java.util.HashSet<>();
+
+    // その段の書き出しの文の鍵 (文がなければ null)
+    @Nullable
+    public static String leadKey(QuestDef def, int stage) {
+        if (stage < 0 || stage >= def.stages().size()) {
+            return null;
+        }
+        String key = QuestDef.keyBase(def.id()) + "." + def.stages().get(stage).id() + ".lead";
+        return net.minecraft.locale.Language.getInstance().has(key) ? key : null;
+    }
+
+    private static void tickLeads(Minecraft mc) {
+        if (pendingLead.isEmpty()) {
+            return;
+        }
+        var it = pendingLead.entrySet().iterator();
+        while (it.hasNext()) {
+            var e = it.next();
+            if (e.getValue() > 0) {
+                e.setValue(e.getValue() - 1);
+                continue;
+            }
+            it.remove();
+            QuestDef def = catalog.get(e.getKey());
+            jp.revati.skyabyss.quest.QuestLog.Entry entry = jp.revati.skyabyss.quest.QuestLog.of(mc.player).entry(e.getKey());
+            if (def == null || entry == null || entry.done) {
+                continue;
+            }
+            String key = leadKey(def, entry.stage);
+            if (key != null && leadShown.add(key)) {
+                jp.revati.skyabyss.client.notice.NoticeClient.receive(new jp.revati.skyabyss.notice.NoticePayload(
+                        jp.revati.skyabyss.notice.Notice.Kind.NARRATE, jp.revati.skyabyss.ModText.lore(key), Component.empty()));
+            }
+        }
     }
 
     // 更新の音 (設定 questSound。メインは小さな鐘が二つ、サブはもっと柔らかいひとつ。終わったときは少し低く)
@@ -119,11 +166,14 @@ public final class QuestClient {
             }
         }
         QuestHud.tick();
+        tickLeads(mc);
     }
 
     @SubscribeEvent
     static void onLoggingOut(ClientPlayerNetworkEvent.LoggingOut event) {
         catalog = Map.of();
         ordered = List.of();
+        pendingLead.clear();
+        leadShown.clear();
     }
 }

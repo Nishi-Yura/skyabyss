@@ -13,17 +13,8 @@
       },
       {
         "type": "quest",
-        "quest": "main_tide",
-        "is": "started"
-      },
-      {
-        "type": "not",
-        "of": {
-          "type": "quest",
-          "quest": "main_tide",
-          "is": "active",
-          "stage": "rumor"
-        }
+        "quest": "ch2/salt_road",
+        "is": "done"
       }
     ]
   },

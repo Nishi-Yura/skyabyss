@@ -342,7 +342,16 @@ def quest(q, is_='active', stage=None):
 
 
 # 三本とも、三章 (段階 2) の人に、メイン「嵐を渡る翼」が始まったら出る (語り部の祖母の話のあと)
-START = {'type': 'all', 'of': [{'type': 'stage', 'min': 2, 'max': 2}, quest('main_thunder', 'started')]}
+# 支度の段は一本ずつ順に出る (2026-10-22 の試遊: メインが並ぶと迷う)。
+#   避雷の柱       三章 (段階 2) の人が、語り部に三つ目のことを尋ねたら (main_thunder の rumor のあと)
+#   焼けた見張り塔 避雷の柱を終えたら (語り部が職人を指す)
+#   空の石         焼けた見張り塔を終えたら (職人がイサナを指す)
+START = {'type': 'all', 'of': [{'type': 'stage', 'min': 2, 'max': 2}, quest('main_thunder', 'started'),
+                               {'type': 'not', 'of': quest('main_thunder', 'active', 'rumor')}]}
+
+
+def after(q):
+    return {'type': 'all', 'of': [{'type': 'stage', 'min': 2, 'max': 2}, quest(q, 'done')]}
 
 
 def quests():
@@ -358,7 +367,7 @@ def quests():
         'reward': {'xp': 100, 'items': [], 'affinity': {STORYTELLER: 3}},
     })
     write_json(os.path.join(q, 'scorched_watch.json'), {
-        'category': 'main', 'order': 32, 'giver': ARTISAN, 'chapter': CH, 'start_when': START,
+        'category': 'main', 'order': 32, 'giver': ARTISAN, 'chapter': CH, 'start_when': after('ch3/lightning_pillars'),
         'stages': [
             # 焼けた見張り塔を抜けると、頂の柱の根もとに焦げた頁 (ScorchedWatch が伝承 ch3/scorched_watch を記す。先に抜けた人もさかのぼって済む)
             {'id': 'clear', 'xp': 40, 'objectives': [{'id': 'page', 'type': 'lore', 'targets': ['ch3/scorched_watch']}]},
@@ -367,7 +376,7 @@ def quests():
         'reward': {'xp': 80, 'items': [], 'affinity': {ARTISAN: 3}},
     })
     write_json(os.path.join(q, 'sky_stone.json'), {
-        'category': 'main', 'order': 33, 'giver': ISANA, 'chapter': CH, 'start_when': START,
+        'category': 'main', 'order': 33, 'giver': ISANA, 'chapter': CH, 'start_when': after('ch3/scorched_watch'),
         'stages': [
             # ダイヤ 5、またはダイヤの胸当て・剣のどちらか (着ていても数える)
             {'id': 'dig', 'mode': 'any', 'objectives': [
@@ -389,38 +398,47 @@ def quests():
 
     b = 'quest.skyabyss.ch3.lightning_pillars.'
     put(b + 'title', '避雷の柱', 'The Lightning Pillars')
-    put(b + 'summary', '風の民の塔の跡に、銅の針を四本立てる。', 'Raise four copper rods at the ruin of the wind people\'s tower.')
+    put(b + 'summary', '嵐を渡る支度の一つめ。風の民の塔の跡に、銅の針を四本立てる。', 'The first step in getting ready for the storm. Raise four copper rods at the ruin of the wind people\'s tower.')
+    put(b + 'raise.lead', '語り部「嵐へ行くなら、雷を知っておくことだね。風の民は、銅の柱で雷を逃がしたそうだよ」',
+        'The storyteller: "If you mean to go into the storm, learn the lightning first. The wind people let it down with copper pillars."')
     put(b + 'raise.journal',
         '語り部が言っていた。「風の民は、銅の柱で雷を地へ逃がしたそうだよ。峰の塔の跡に、柱を立てる台が四つ残っているはずさ」\n銅の鉱石は、かまどで溶かせば銅になる。銅三つで、避雷針が一本できる。',
         'The storyteller said: "The wind people let the lightning down into the ground with copper pillars. There should be four stands left at the ruined tower on the peak."\nCopper ore smelts into copper in a furnace. Three copper make one lightning rod.')
-    put(b + 'raise.rods', '避雷針を作り、塔の跡の台に立てる', "Set rods on the ruin's stands")
+    put(b + 'raise.rods', '避雷針を作り、塔の跡の台に立てよう', "Set rods on the ruin's stands")
     put(b + 'vault.journal', '四本目の針に雷が落ちると、塔の銅の戸がずれた。中を見よう。',
         'When the fourth rod took the lightning, the tower\'s copper door slid aside. Look inside.')
-    put(b + 'vault.page', '開いた戸の奥を見る', 'Look past the open door')
-    put(b + 'done', '「四本、立ったかい。……祖母が言っていたとおりだね。雷は、立てた所にしか落ちないんだよ」',
-        '"Four, standing? ...Just as grandmother said. Lightning falls only where something is raised for it."')
+    put(b + 'vault.page', '開いた戸の奥を見に行こう', 'Look past the open door')
+    put(b + 'done', '「四本、立ったかい。……祖母が言っていたとおりだね。雷は、立てた所にしか落ちないんだよ」\n次は、雷の中を抜ける身のこなしだ。旅の職人が、焼けた塔の話をしていた。',
+        '"Four, standing? ...Just as grandmother said. Lightning falls only where something is raised for it."\nNext, learning to move through lightning. The traveling artisan spoke of a burnt tower.')
 
     b = 'quest.skyabyss.ch3.scorched_watch.'
     put(b + 'title', '焼けた見張り塔', 'The Scorched Watch')
-    put(b + 'summary', '峰の中腹の焼けた塔を抜け、頂の番を倒す。', 'Climb the scorched tower on the peak\'s slope and fell the warden at the top.')
+    put(b + 'summary', '嵐を渡る支度の二つめ。峰の中腹の焼けた塔を抜け、頂の番を倒す。', 'The second step in getting ready. Climb the scorched tower on the peak\'s slope and fell the warden at the top.')
+    put(b + 'clear.lead', '職人「峰の中腹に、焼けた塔がある。頂の番は、雷に斬らせるといい」',
+        'The artisan: "There is a burnt tower halfway up the peak. Let the lightning cut the warden on top."')
+    put(b + 'show.lead', '頂の柱の根もとに、焦げた頁が落ちていた。職人に見せよう。', 'A scorched page lay at the foot of the top pillar. Show it to the artisan.')
     put(b + 'clear.journal',
         '旅の職人が言っていた。「峰の中腹に、焼けた塔がある。頂の柱に雷が落ちるたび、番の羽守が焦げていく。……柱のそばに誘え。雷が、代わりに斬ってくれる」\n中の間の毛玉は、固まって立つと雷が渡る。離れて立て。',
         'The traveling artisan said: "There is a burnt tower halfway up the peak. Every time lightning hits the pillar on top, the warden there burns a little more. ...Lure it to the pillar. The lightning will cut for you."\nIn the middle room, lightning jumps between people who stand together. Spread out.')
-    put(b + 'clear.page', '焼けた見張り塔の頂の番を倒す', 'Fell the warden atop the Scorched Watch')
+    put(b + 'clear.page', '焼けた見張り塔の頂の番を倒そう', 'Fell the warden atop the Scorched Watch')
     put(b + 'show.journal', '頂の柱の根もとで、焦げた頁を拾った。旅の職人に見せよう。', 'At the foot of the top pillar you picked up a scorched page. Show it to the traveling artisan.')
-    put(b + 'show.talk', '焦げた頁を、旅の職人に見せる', 'Show the scorched page to the artisan')
-    put(b + 'done', '「雷に焼かれても、字は残るもんだな。……道具も、そういうものだ」', '"Burnt by lightning, and still the writing stays. ...Tools are like that too."')
+    put(b + 'show.talk', '焦げた頁を、旅の職人に見せよう', 'Show the scorched page to the artisan')
+    put(b + 'done', '「雷に焼かれても、字は残るもんだな。……道具も、そういうものだ」\n残るは、雷を通さない石だ。鯨追いが、峰の下の石の話をしていた。',
+        '"Burnt by lightning, and still the writing stays. ...Tools are like that too."\nAll that is left is the stone lightning cannot pass. The whale chaser spoke of it.')
 
     b = 'quest.skyabyss.ch3.sky_stone.'
     put(b + 'title', '空の石', 'Sky Stone')
-    put(b + 'summary', '峰の下の、雷を通さない石を掘る。', 'Dig the stone beneath the peaks that lightning cannot pass.')
+    put(b + 'summary', '嵐を渡る支度の三つめ。峰の下の、雷を通さない石を掘る。', 'The last step in getting ready. Dig the stone beneath the peaks that lightning cannot pass.')
+    put(b + 'dig.lead', 'イサナ「峰の下の石は、雷を通さない。前の旅人は、それを胸に着けていた」',
+        'Isana: "The stone under the peaks does not let lightning through. The traveller before you wore it on their chest."')
     put(b + 'dig.journal',
         'イサナが言っていた。「峰の下の石は、雷を通さない。前の旅人は、それを胸に着けていた」\nダイヤモンドは、深い所の岩の中にある。鉄のつるはしでなければ掘れない。五つあれば、胸当てか剣になる。',
         'Isana said: "The stone under the peaks does not let lightning through. The traveller before you wore it on their chest."\nDiamonds lie in the rock deep down, and only an iron pickaxe will dig them. Five make a chestplate or a sword.')
-    put(b + 'dig.diamonds', 'ダイヤモンドを集める', 'Gather diamonds')
-    put(b + 'dig.chest', 'ダイヤモンドの胸当てを持つ', 'Have a diamond chestplate')
-    put(b + 'dig.sword', 'ダイヤモンドの剣を持つ', 'Have a diamond sword')
-    put(b + 'done', '「深い所の石だな。……雷の鳥も、これは噛めないだろう」', '"Stone from deep down. ...Even the thunder bird cannot bite through that."')
+    put(b + 'dig.diamonds', '雷を通さない石、ダイヤモンドを集めよう', 'Gather diamonds, the stone lightning cannot pass')
+    put(b + 'dig.chest', 'ダイヤモンドの胸当てを持とう', 'Have a diamond chestplate')
+    put(b + 'dig.sword', 'ダイヤモンドの剣を持とう', 'Have a diamond sword')
+    put(b + 'done', '「深い所の石だな。……雷の鳥も、これは噛めないだろう」\nこれで、嵐を渡る支度がそろった。',
+        '"Stone from deep down. ...Even the thunder bird cannot bite through that."\nYou are ready to cross the storm.')
 
     b = 'quest.skyabyss.ch3.wind_flags.'
     put(b + 'title', '風の道の旗', 'Flags of the Wind Road')

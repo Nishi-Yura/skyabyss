@@ -104,7 +104,9 @@ def ch1():
         'npc': 'skyabyss:artisan', 'extends': True,
         'entries': [
             {'node': 'ch1t_blade_show', 'if': quest('ch1/trail_blade', 'active', 'show')},
-            {'node': 'ch1t_blade_tell', 'if': [quest('ch1/trail_blade', 'active', 'cave'), not_(flag('ch1t_blade_told')), flag('met')]},
+            # 支度の段「折れた剣」の最初の段 (イサナに言われて来た)。初めて会う人は、名乗りのあとに続けて話す
+            {'node': 'ch1a_first_blade', 'if': [quest('ch1/trail_blade', 'active', 'hear'), not_(flag('met'))]},
+            {'node': 'ch1t_blade_tell', 'if': quest('ch1/trail_blade', 'active', 'hear')},
             {'node': 'ch1t_ward_weave', 'if': [{'type': 'item', 'item': THREAD, 'count': 1}, not_(flag('ch1t_woven')),
                                                {'type': 'ward_ok', 'titan': 'stone_whale'}]},
             {'node': 'ch1a_ready', 'if': [{'type': 'prep', 'chapter': 1, 'min': 3}, not_(flag('ch1a_ready_told'))]},
@@ -115,6 +117,7 @@ def ch1():
         ],
         'nodes': {
             'ch1a_first': {'face': 'neutral', 'do': [{'type': 'give_notes', 'chapter': 1}, {'type': 'affinity', 'amount': 1}], 'next': 'a_menu'},
+            'ch1a_first_blade': {'face': 'neutral', 'do': [{'type': 'give_notes', 'chapter': 1}, {'type': 'affinity', 'amount': 1}], 'next': 'ch1t_blade_tell'},
             'ch1a_deja': {'face': 'grave', 'do': [{'type': 'give_notes', 'chapter': 1}], 'next': 'a_menu'},
             'ch1t_blade_show': {'face': 'grave', 'do': [{'type': 'unlock_recipes', 'chapter': 1}, flag('ch1p_taught'), {'type': 'affinity', 'amount': 2}],
                                 'next': 'a_menu'},
@@ -148,6 +151,9 @@ def ch1():
     put(CH1, B + 'ch1a_first',
         '……荷を見に来たのか。道具は覚えている。持ち主は、そうでもない。@@旅の職人、とでも呼んでくれ。名前は、荷のどこにも書いていなかった。@@旅装なら編める。刃も研ぐ。……ただ、頼まれたことは、そう長くは覚えていられない。急ぐなら、覚書に写しておけ。',
         '...Come to look at the pack? The tools remember. The owner, less so.@@Call me the traveling artisan. There was no name written anywhere in the pack.@@I can stitch road gear. I can hone a blade. ...But I do not keep what I am asked for very long. If it matters, copy it into your notes.')
+    put(CH1, B + 'ch1a_first_blade',
+        '……刃のことを聞きに来たのか。鯨追いに言われて。@@旅の職人、とでも呼んでくれ。名前は、荷のどこにも書いていなかった。道具は覚えている。持ち主は、そうでもない。',
+        '...Come to ask about blades? The whale chaser sent you.@@Call me the traveling artisan. There was no name written anywhere in the pack. The tools remember. The owner, less so.')
     put(CH1, B + 'ch1a_deja',
         'ああ、荷のそばにいた人か。……いや、違う。前にも会った気がするだけだ。@@道具は覚えている。持ち主は、そうでもない。覚書を渡しておく。写しておけ。',
         'Ah, you were by the pack. ...No. I only feel I have met you before.@@The tools remember. The owner, less so. Take these notes; copy what matters.')
@@ -155,8 +161,8 @@ def ch1():
         '折れた剣を見たのか。台座の。……柄の巻き方を、覚えているか。@@あれは、俺が教えた巻き方だ。……いや、教えた気がするだけだ。手が、そう言っている。@@鉄の剣なら、作業台で作れる。研ぐのは岩の砥石だ。岩殻片と骨片と火打ち石。作り方は、覚書に写しておいた。研がずに振るな。',
         'You saw the broken sword. On the plinth. ...Do you remember how the grip was wound?@@That is the way I teach it. ...No. I only feel I taught it. My hands say so.@@An iron sword you can make at a workbench. Hone it on a rock whetstone: shell scraps, a bone chip and flint. I copied the way into your notes. Do not swing it unhoned.')
     put(CH1, B + 'ch1t_blade_tell',
-        '折れた剣を見た。割れ殻の洞の奥だ。……いつ見たのかは、覚えていない。@@台座の上に、横たえてあった。誰かが、また取りに来ると思ったんだろう。見てくるといい。',
-        'I saw a broken sword. Deep in the Cleft Shell. ...When, I do not remember.@@It lay on a plinth. Someone meant to come back for it, I suppose. Go and look.')
+        '刃か。……折れた剣を見た。割れ殻の洞の奥だ。いつ見たのかは、覚えていない。@@台座の上に、横たえてあった。誰かが、また取りに来ると思ったんだろう。見てくるといい。刃の作り方は、それから教える。',
+        'A blade? ...I saw a broken sword. Deep in the Cleft Shell. When, I do not remember.@@It lay on a plinth. Someone meant to come back for it, I suppose. Go and look. I will teach you the making after.')
     put(CH1, B + 'ch1t_ward_weave',
         '殻の護り糸か。いい糸だ。鼓動に合わせて、ゆるむようにできている。@@編んでおこう。倒れかけた一度だけ、これが肩で受けてくれる。使えば、ほどけて消える。ほどけたら、また持っておいで。手間は、岩殻片でいい。',
         'Shell-ward thread. A good one. It is made to slacken in time with a beat.@@I will weave it. Once, when you would fall, it will take the blow on your shoulder. Used, it unravels and is gone. When it does, bring it back. Shell scraps will do for my trouble.')

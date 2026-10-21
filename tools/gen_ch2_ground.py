@@ -5,7 +5,7 @@
 
 書くもの:
   data/skyabyss/opening/ch2_salt_vault|ch2_salt_mark|ch2_tidal_pool|ch2_drift_raft|ch2_ebb_stakes.json   場所の部品 (gen_ch1_sites.py と同じ形式)
-  data/skyabyss/quest/ch2/salt_road|ebb_boat.json      支度の段 2 本 (メインの段。順不同。07 の 6.8)
+  data/skyabyss/quest/ch2/salt_road|ebb_boat.json      支度の段 2 本 (メインの段。塩の道 → 船と貝の順。07 の 6.8)
   data/skyabyss/quest/ch2/drift_trail|wader_gear.json  サブ (イサナ: 宿借りの行列と筏の跡 / 職人: 潮渡りの旅装。任意)
   data/skyabyss/quest/daily_pool_sweep.json             日替わり (板): 潮だまり貝 6 と小真珠の納品
   data/skyabyss/dialogue/ch2/storyteller_trail.json|whale_chaser_trail.json|artisan.json   語り部・イサナ・職人の二章の一言
@@ -385,7 +385,9 @@ def quest(q, is_='active', stage=None):
     return c
 
 
-# 二本とも、二章 (段階 1) の人が、イサナの「海の噂」(main_tide の rumor) を済ませたら出る。噂を飛ばして沖の島を見た人にも出る
+# 支度の段は一本ずつ順に出る (2026-10-22 の試遊: メインが並ぶと迷う)。
+#   塩の道   二章 (段階 1) の人が、イサナの「海の噂」(main_tide の rumor) を済ませたら。噂を飛ばして沖の島を見た人にも
+#   船と貝   塩の道を終えたら (語り部がイサナの船の話を指す)
 START = {
     'type': 'all',
     'of': [
@@ -412,7 +414,8 @@ def quests():
         'reward': {'xp': 80, 'items': [], 'affinity': {STORYTELLER: 3}},
     })
     write_json(os.path.join(q, 'ebb_boat.json'), {
-        'category': 'main', 'order': 22, 'giver': ISANA, 'chapter': 'titan_tide', 'start_when': START,
+        'category': 'main', 'order': 22, 'giver': ISANA, 'chapter': 'titan_tide',
+        'start_when': {'type': 'all', 'of': [{'type': 'stage', 'min': 1, 'max': 1}, quest('ch2/salt_road', 'done')]},
         'stages': [
             # 船を作る (どの木の船でもよい。バニラの船)
             {'id': 'boat', 'xp': 30, 'objectives': [{'id': 'boat', 'type': 'collect', 'target': '#minecraft:boats', 'count': 1, 'party': False}]},
@@ -455,31 +458,43 @@ def quests():
 
     b = 'quest.skyabyss.ch2.salt_road.'
     put(b + 'title', '塩の道', 'The Salt Road')
-    put(b + 'summary', '浜から内陸へ続く塩の柱を辿り、沈んだ塩の蔵へ。', 'Follow the salt pillars inland from the beach to the Sunken Salt Vault.')
+    put(b + 'summary', '島へ渡る支度の一つめ。浜から内陸へ続く塩の柱を辿り、沈んだ塩の蔵で潮の読み方を探す。',
+        'The first step in getting ready to cross. Follow the salt pillars inland from the beach to the Sunken Salt Vault, and look for a way to read the tide.')
+    put(b + 'road.lead', 'イサナ「潮を読めなきゃ、島へは渡れない。浜の古い道のことは、語り部が知っている」',
+        'Isana: "You cannot cross to the island if you cannot read the tide. The storyteller knows the old road on the beach."')
+    put(b + 'vault.lead', '塩の道は、浅瀬の下の蔵で終わっていた。潮の読み方は、この奥にあるはずだ。',
+        'The salt road ends at a vault beneath the shallows. The way to read the tide should be inside.')
     put(b + 'road.journal',
         '語り部が言っていた。「浜には、白い柱が並んでいるそうだよ。塩の道さ。昔は、あれを辿って塩を運んだ」\n柱には潮の刻みがあるという。五つ辿れば、塩の蔵に着く。',
         'The storyteller said: "There are white pillars along the beach, they say. The salt road. Long ago, salt was carried along it."\nThe pillars carry tide marks. Follow five and you reach the salt vault.')
-    put(b + 'road.marks', '塩の道の標を辿る', 'Follow the salt road markers')
+    put(b + 'road.marks', '浜の白い柱を辿り、塩の道を行こう', 'Follow the white pillars along the salt road')
     put(b + 'vault.journal',
         '浅瀬の下に、積んだ石の屋根が見えた。沈んだ塩の蔵だ。\n潮が引けば喉は乾いて歩ける。満ちていれば、息を止めて潜ればいい。奥には、蔵の番人がいる。',
         'Beneath the shallows, a roof of stacked stone. The Sunken Salt Vault.\nAt low tide its throat is dry to walk; at high tide, hold your breath and dive. Something guards the back of the vault.')
-    put(b + 'vault.wall', '蔵の奥の刻みを読む', 'Read the carving at the back of the vault')
-    put(b + 'vault.warden', '潮の番人を倒す', 'Defeat the Shore Warden')
-    put(b + 'done', '「潮は読める、か。……あんたの字みたいな刻みだったんだろう？　顔に書いてあるよ」', '"The tide can be read, was it. ...The carving looked like your own hand, didn\'t it? It\'s written on your face."')
+    put(b + 'vault.wall', '蔵の奥の刻みを読もう', 'Read the carving at the back of the vault')
+    put(b + 'vault.warden', '蔵を守る潮の番人を倒そう', 'Defeat the Shore Warden guarding the vault')
+    put(b + 'done', '「潮は読める、か。……あんたの字みたいな刻みだったんだろう？　顔に書いてあるよ」\nあとは、沖へ渡る足だ。イサナが、船のことを言っていた。',
+        '"The tide can be read, was it. ...The carving looked like your own hand, didn\'t it? It\'s written on your face."\nNow you need a way across the water. Isana spoke of a boat.')
 
     b = 'quest.skyabyss.ch2.ebb_boat.'
     put(b + 'title', '船と貝', 'Boat and Shell')
-    put(b + 'summary', '船を作って沖の難破船へ渡り、潮の民の頁と潮見の貝を手に入れる。', 'Build a boat, cross to the wreck offshore, and find the tide people\'s page and the tide-watching shell.')
+    put(b + 'summary', '島へ渡る支度の二つめ。船を作って沖の難破船へ渡り、潮の民の頁と潮見の貝を手に入れる。',
+        'The second step in getting ready. Build a boat, cross to the wreck offshore, and find the tide people\'s page and the tide-watching shell.')
+    put(b + 'boat.lead', '語り部「潮は読めるようになったね。あとは渡る足さ。イサナが、船のことを言っていたよ」',
+        'The storyteller: "You can read the tide now. Next you need a way across. Isana was talking about a boat."')
+    put(b + 'wreck.lead', 'イサナ「沖に、古い船が傾いている。潮の数え方を教える貝が、あそこにある」',
+        'Isana: "An old ship lists offshore. The shell that teaches you to count the tide is there."')
     put(b + 'boat.journal',
         'イサナが言っていた。「浜から沖へ渡るなら、船を作れ。……沖に、古い船が沈みかけている。貝はあそこにある」\n船は、木の板があれば作業台で作れる。',
         'Isana said: "If you mean to cross from the beach, build a boat. ...There is an old ship sinking offshore. The shell is there."\nA boat can be made at a workbench from planks.')
-    put(b + 'boat.boat', '船を作る', 'Build a boat')
+    put(b + 'boat.boat', '沖へ渡る船を作ろう', 'Build a boat to cross the water')
     put(b + 'wreck.journal',
         '難破船は、浜から見える浅い沖に傾いている。帆柱が水の上に出ている。\n船の箱に、潮の民の頁が残っているかもしれない。潮見の貝も。',
         'The wreck lists in the shallows, in sight of the beach, its mast above the water.\nThe tide people\'s page may still be in its chests. The tide-watching shell too.')
-    put(b + 'wreck.page', '難破船の箱で、潮の民の頁を探す', 'Find the tide people\'s page in the wreck')
-    put(b + 'wreck.conch', '潮見の貝を持つ', 'Carry the tide-watching shell')
-    put(b + 'done', '「その貝を耳に当てると、潮の数え方が分かる。……島は、待つ者のところへ寄るんだそうだ」', '"Hold that shell to your ear and you learn to count the tide. ...They say the island comes to those who wait."')
+    put(b + 'wreck.page', '難破船の箱で、潮の民の頁を探そう', 'Find the tide people\'s page in the wreck')
+    put(b + 'wreck.conch', '潮見の貝を手に入れよう', 'Get the tide-watching shell')
+    put(b + 'done', '「その貝を耳に当てると、潮の数え方が分かる。……島は、待つ者のところへ寄るんだそうだ」\nこれで、島へ渡る支度がそろった。',
+        '"Hold that shell to your ear and you learn to count the tide. ...They say the island comes to those who wait."\nYou are ready to cross to the island.')
 
     b = 'quest.skyabyss.ch2.drift_trail.'
     put(b + 'title', '宿借りの行列', 'The Hermit Procession')

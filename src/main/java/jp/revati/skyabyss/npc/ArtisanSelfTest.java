@@ -336,8 +336,10 @@ public final class ArtisanSelfTest {
         Quests.start(p, Ch1Prep.Q_BLADE);
         Set<String> menu = shown(d, "a_menu", c);
         check(f, menu.contains("teach") && menu.contains("notes"), "starting trail_blade should open the teach / notes options: " + menu);
-        check(f, entry(d, c).equals("ch1t_blade_tell"), "the cave stage should open ch1t_blade_tell, got " + entry(d, c));
+        // 最初の段 (イサナに言われて刃のことを聞きに来た): 初めて会う人は名乗りから続けて、会った人はすぐ「折れた剣を見た」
+        check(f, entry(d, c).equals("ch1t_blade_tell") || entry(d, c).equals("ch1a_first_blade"), "the hear stage should open ch1t_blade_tell, got " + entry(d, c));
         d.nodes().get("ch1t_blade_tell").actions().forEach(a -> a.run(c));
+        Quests.onTalk(p, ROLE, "ch1t_blade_tell");
         check(f, entry(d, c).equals("a_menu"), "the broken sword pointer came twice, got " + entry(d, c));
         // 洞の台座の頁 → 話す段: 作り方を教わる (レシピが解け、入口は段が進めば出ない)
         jp.revati.skyabyss.lore.Lore.unlock(p, Ch1Prep.PAGE_BLADE, false);

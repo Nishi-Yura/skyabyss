@@ -306,6 +306,8 @@ public final class Ch1SitesSelfTest {
             Lore.lock(a, Ch1Prep.PAGE_BLADE);
             Lore.lock(a, Ch1Prep.CLEFT_CAVE_LORE);
             Quests.start(a, Ch1Prep.Q_BLADE);
+            // 最初の段 (職人に刃のことを聞く) を済ませておく
+            Quests.onTalk(a, "skyabyss:artisan", "ch1t_blade_tell");
             SiteSpawner.tick(level, List.of(a, b), now);
             // a と b は別々のグループ (パーティなし)
             UUID ga = Groups.keyOf(a);
@@ -371,7 +373,7 @@ public final class Ch1SitesSelfTest {
             check(Lore.state(a).has(Ch1Prep.PAGE_BLADE) && Lore.state(a).has(Ch1Prep.CLEFT_CAVE_LORE), "clearing the cave did not record the broken sword page and the cave lore");
             check(!Lore.state(b).has(Ch1Prep.PAGE_BLADE), "the broken sword page leaked to the other group");
             QuestLog.Entry e = QuestLog.of(a).entry(Ch1Prep.Q_BLADE);
-            check(e != null && e.stage >= 1, "the broken sword page did not finish the cave stage of trail_blade");
+            check(e != null && e.stage >= 2, "the broken sword page did not finish the cave stage of trail_blade");
             check(SiteSpawner.liveCount(CleftCave.SITE, origin, gb) + SiteSpawner.pendingCount(CleftCave.SITE, origin, gb) > 0, "clearing group A changed group B's cave");
         } finally {
             SiteSpawner.clearAll(level);
@@ -519,16 +521,16 @@ public final class Ch1SitesSelfTest {
             }
             check(QuestManager.quest("ch1/prep_gear") == null && QuestManager.quest("ch1/prep_blade") == null && QuestManager.quest("ch1/prep_pulse") == null,
                     "the old prep quests should be absorbed");
-            // 開始: イサナの鯨の話 (印 c_whale_heard) のあと、三本とも出る。覚書も渡る
+            // 開始: イサナの鯨の話 (印 c_whale_heard) のあと、鉄の跡だけが出る (一本ずつ順に)。覚書も渡る
             Quests.poll(p, false);
             check(QuestLog.of(p).entry(Ch1Prep.Q_IRON) == null, "the trail steps appeared before Isana's whale talk");
             jp.revati.skyabyss.quest.StoryContext ctx = jp.revati.skyabyss.quest.StoryContext.of(p);
             jp.revati.skyabyss.quest.Action.parseList(com.google.gson.JsonParser.parseString(
                     "{\"type\":\"flag\",\"flag\":\"c_whale_heard\",\"npc\":\"skyabyss:whale_chaser\"}"), new ArrayList<>(), "t").get(0).run(ctx);
             Quests.poll(p, false);
-            for (String id : Ch1Prep.TRAILS) {
-                check(QuestLog.of(p).entry(id) != null, id + " did not start after Isana's whale talk");
-            }
+            check(QuestLog.of(p).entry(Ch1Prep.Q_IRON) != null, "the iron trail did not start after Isana's whale talk");
+            check(QuestLog.of(p).entry(Ch1Prep.Q_BLADE) == null && QuestLog.of(p).entry(Ch1Prep.Q_SHIELD) == null,
+                    "the blade and shield trails should wait for the iron trail");
             check(WayfarerNotes.has(p, 1), "starting the trail steps did not hand over the chapter-1 notes");
 
             // 鉄の跡: 骨の坑の荷 (人ごとに一度、鉄 2・松明 8・頁) → 鉄の防具 4 部位を着る
@@ -556,17 +558,25 @@ public final class Ch1SitesSelfTest {
             Quests.poll(p, true);
             check(QuestLog.of(p).entry(Ch1Prep.Q_IRON).done, "four worn iron pieces did not finish the iron trail");
             check(PrepQuests.done(p, 1) == 1 && !PrepQuests.ready(p, 1), "one trail step should count as one");
+            // 鉄の跡を終えると折れた剣が出る (盾と糧はまだ)
+            Quests.poll(p, false);
+            check(QuestLog.of(p).entry(Ch1Prep.Q_BLADE) != null && QuestLog.of(p).entry(Ch1Prep.Q_SHIELD) == null,
+                    "finishing the iron trail should start only the blade trail");
 
-            // 折れた剣: 洞の台座の頁 → 職人に話す → 鉄の剣と砥石
+            // 折れた剣: 職人に刃のことを聞く → 洞の台座の頁 → 職人に話す → 鉄の剣と砥石
+            Quests.onTalk(p, "skyabyss:artisan", "ch1t_blade_tell");
+            check(QuestLog.of(p).entry(Ch1Prep.Q_BLADE).stage == 1, "hearing the artisan did not move trail_blade to the cave stage");
             Lore.unlock(p, Ch1Prep.PAGE_BLADE, false);
             Quests.poll(p, true);
-            check(QuestLog.of(p).entry(Ch1Prep.Q_BLADE).stage == 1, "the broken sword page did not move trail_blade to the talk stage");
+            check(QuestLog.of(p).entry(Ch1Prep.Q_BLADE).stage == 2, "the broken sword page did not move trail_blade to the talk stage");
             Quests.onTalk(p, "skyabyss:artisan", "ch1t_blade_show");
-            check(QuestLog.of(p).entry(Ch1Prep.Q_BLADE).stage == 2, "talking to the artisan did not move trail_blade to the forge stage");
+            check(QuestLog.of(p).entry(Ch1Prep.Q_BLADE).stage == 3, "talking to the artisan did not move trail_blade to the forge stage");
             p.getInventory().add(new ItemStack(Items.IRON_SWORD));
             Quests.poll(p, true);
             Quests.signal(p, Ch1Prep.SIGNAL_WHETSTONE_USED);
             check(QuestLog.of(p).entry(Ch1Prep.Q_BLADE).done, "an iron sword and the whetstone did not finish trail_blade");
+            Quests.poll(p, false);
+            check(QuestLog.of(p).entry(Ch1Prep.Q_SHIELD) != null, "finishing the blade trail did not start the shield trail");
 
             // 盾と糧: 語り部の足音の晩の話 (伝承) → 盾と固焼き 8
             var st = jp.revati.skyabyss.npc.DialogueManager.dialogue(jp.revati.skyabyss.npc.NpcSetup.STORYTELLER_ID);

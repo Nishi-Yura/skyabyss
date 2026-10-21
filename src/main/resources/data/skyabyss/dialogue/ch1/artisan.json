@@ -12,26 +12,31 @@
       }
     },
     {
-      "node": "ch1t_blade_tell",
+      "node": "ch1a_first_blade",
       "if": [
         {
           "type": "quest",
           "quest": "ch1/trail_blade",
           "is": "active",
-          "stage": "cave"
+          "stage": "hear"
         },
         {
           "type": "not",
           "of": {
             "type": "flag",
-            "flag": "ch1t_blade_told"
+            "flag": "met"
           }
-        },
-        {
-          "type": "flag",
-          "flag": "met"
         }
       ]
+    },
+    {
+      "node": "ch1t_blade_tell",
+      "if": {
+        "type": "quest",
+        "quest": "ch1/trail_blade",
+        "is": "active",
+        "stage": "hear"
+      }
     },
     {
       "node": "ch1t_ward_weave",
@@ -145,6 +150,20 @@
         }
       ],
       "next": "a_menu"
+    },
+    "ch1a_first_blade": {
+      "face": "neutral",
+      "do": [
+        {
+          "type": "give_notes",
+          "chapter": 1
+        },
+        {
+          "type": "affinity",
+          "amount": 1
+        }
+      ],
+      "next": "ch1t_blade_tell"
     },
     "ch1a_deja": {
       "face": "grave",

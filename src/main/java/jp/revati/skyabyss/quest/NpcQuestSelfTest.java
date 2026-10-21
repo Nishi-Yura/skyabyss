@@ -623,7 +623,8 @@ public final class NpcQuestSelfTest {
         check(shown(a, WC, "whale_q") && !shown(a, WC, "whale"), "chaser menu should offer the quest topic", failures);
         pick(a, WC, "whale_q", failures);
         next(a);
-        check(stage(a, "main_song").equals("see_whale"), "talking to the chaser did not advance to see_whale: " + stage(a, "main_song"), failures);
+        // 鯨の話のあとは一章の支度 (34 の 4.2。三本そろうまで岩鯨は来ない)
+        check(stage(a, "main_song").equals("prepare"), "talking to the chaser did not advance to prepare: " + stage(a, "main_song"), failures);
         next(a);
         // 鉄を着ていた旅人の一言 (一章の支度の段の理由。34 の 4.2)
         check(node(a).equals("c_whale_iron"), "the chaser should mention the traveller who wore iron, got " + node(a), failures);
@@ -631,8 +632,9 @@ public final class NpcQuestSelfTest {
         pick(a, WC, "grab", failures);
         // 鯨の話のあと、一章の支度の段 3 本が出る。語り部の入口に割り込む一言 (職人を指す・足音の晩の話) は、ここで済ませておく
         Quests.poll(a, true);
-        check(QuestLog.of(a).entry("ch1/trail_iron") != null && QuestLog.of(a).entry("ch1/trail_blade") != null && QuestLog.of(a).entry("ch1/trail_shield") != null,
-                "the trail steps did not start after the chaser's whale talk", failures);
+        // 支度の段は一本ずつ順に (鉄の跡 → 折れた剣 → 盾と糧)。鯨の話のあとに出るのは鉄の跡だけ
+        check(QuestLog.of(a).entry("ch1/trail_iron") != null && QuestLog.of(a).entry("ch1/trail_blade") == null && QuestLog.of(a).entry("ch1/trail_shield") == null,
+                "only the iron trail should start after the chaser's whale talk", failures);
         NpcBonds.of(a).bond(ST).flags().add("ch1p_pointer_told");
         Quests.onTalk(a, ST, "ch1t_shield_tale");
 

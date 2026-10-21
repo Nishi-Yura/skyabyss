@@ -4,7 +4,7 @@
   python tools/gen_ch1_trails.py
 
 書くもの:
-  data/skyabyss/quest/ch1/trail_iron|trail_blade|trail_shield.json   支度の段 3 本 (メインの段。順不同。07 の 6.8)
+  data/skyabyss/quest/ch1/trail_iron|trail_blade|trail_shield.json   支度の段 3 本 (メインの段。鉄の跡 → 折れた剣 → 盾と糧の順。07 の 6.8)
   data/skyabyss/dialogue/ch1/storyteller_trail.json                  語り部: 足音の晩の盾の話 (trail_shield の最初の段)・支度のあとの一言
   data/skyabyss/dialogue/ch1/whale_chaser_trail.json                 イサナ: 頁を見たあと・鉄を着たあとの一言
   data/skyabyss/lore/entry/ch1/trail_iron|trail_blade|trail_shield|cold_door.json   前の私の頁 3 枚と冷えの戸の碑文
@@ -58,7 +58,11 @@ def quest(q, is_='active', stage=None):
     return c
 
 
-# 三本とも、一章 (段階 0) の人が、イサナの鯨の話 (c_whale1 で印 c_whale_heard) を聞いたら出る。話を聞かずに岩鯨を見た人にも出る
+# 支度の段は一本ずつ順に出る (2026-10-22 の試遊: 三本が一度に出て、どれをやるのか迷った)。
+#   鉄の跡   一章 (段階 0) の人が、イサナの鯨の話 (c_whale1 で印 c_whale_heard) を聞いたら。話を聞かずに岩鯨を見た人にも
+#   折れた剣 鉄の跡を終えたら (イサナが職人を指す)
+#   盾と糧   折れた剣を終えたら (職人が語り部を指す)
+# 三本そろうと岩鯨が初めて現れる (story.ch1.Ch1Trails.callReady)
 START = {
     'type': 'all',
     'of': [
@@ -66,6 +70,12 @@ START = {
         {'type': 'any', 'of': [flag('c_whale_heard', ISANA), {'type': 'lore', 'entry': 'chapter1/stone_whale'}]},
     ],
 }
+
+
+def after(q):
+    return {'type': 'all', 'of': [{'type': 'stage', 'max': 0}, quest(q, 'done')]}
+
+
 IRON_ARMOR = ['minecraft:iron_helmet', 'minecraft:iron_chestplate', 'minecraft:iron_leggings', 'minecraft:iron_boots']
 
 
@@ -87,8 +97,10 @@ def quests():
         'reward': {'xp': 70, 'items': [], 'affinity': {ISANA: 3}},
     })
     write_json(os.path.join(q, 'trail_blade.json'), {
-        'category': 'main', 'order': 12, 'giver': ARTISAN, 'chapter': 'titan_whale', 'start_when': START,
+        'category': 'main', 'order': 12, 'giver': ARTISAN, 'chapter': 'titan_whale', 'start_when': after('ch1/trail_iron'),
         'stages': [
+            # イサナに言われて職人のところへ (折れた剣の話を聞く)
+            {'id': 'hear', 'objectives': [{'id': 'talk', 'type': 'talk', 'target': ARTISAN, 'topic': 'ch1t_blade_tell'}]},
             # 割れ殻の洞を抜けると台座に折れた剣 (Ch1Trails が伝承 ch1/trail_blade を記す。先に抜けた人もさかのぼって済む)
             {'id': 'cave', 'xp': 30, 'objectives': [{'id': 'sword', 'type': 'lore', 'targets': ['ch1/trail_blade']}]},
             # 職人に話す (作り方を教わる = 結果 unlock_recipes)
@@ -101,7 +113,7 @@ def quests():
         'reward': {'xp': 70, 'items': [], 'affinity': {ARTISAN: 3}},
     })
     write_json(os.path.join(q, 'trail_shield.json'), {
-        'category': 'main', 'order': 13, 'giver': STORYTELLER, 'chapter': 'titan_whale', 'start_when': START,
+        'category': 'main', 'order': 13, 'giver': STORYTELLER, 'chapter': 'titan_whale', 'start_when': after('ch1/trail_blade'),
         'stages': [
             # 語り部の足音の晩の話 (会話の結果で伝承 ch1/trail_shield)
             {'id': 'tale', 'objectives': [{'id': 'talk', 'type': 'talk', 'target': STORYTELLER, 'topic': 'ch1t_shield_tale'}]},
@@ -116,45 +128,67 @@ def quests():
     # ---- 文
     b = 'quest.skyabyss.ch1.trail_iron.'
     put(b + 'title', '鉄の跡', 'The Iron Trail')
-    put(b + 'summary', '前にここへ来た旅人の道を辿り、骨の坑へ。鉄を着る。', 'Follow the road of the traveller who came before, down into the Bone Pit. Wear iron.')
+    put(b + 'summary', '鯨を迎える支度の一つめ。イサナの話の旅人の道を辿って骨の坑へ行き、鉄の防具を着る。',
+        'The first step in getting ready for the whale. Follow the road of the traveller Isana spoke of to the Bone Pit, and wear iron.')
     put(b + 'pit.journal',
-        'イサナが言っていた。「鎖は素手では上れない。前にここへ来た旅人は、鉄を着ていた」\n鯨道の石標を辿った先に、骨の坑という古い坑道があるらしい。その旅人の道は、そこへ続いている。',
-        'Isana said: "You cannot climb the chain bare-handed. The traveller who came here before wore iron."\nThe Whale Road cairns lead to an old mine called the Bone Pit. That traveller\'s road went there.')
-    put(b + 'pit.page', '骨の坑の奥で、前の旅人の荷を探す', 'Find the old pack in the Bone Pit')
+        'イサナが言っていた。「鎖は素手では上れない。前にここへ来た旅人は、鉄を着ていた」\n都の北門から丘を越える石標が、その旅人の道だという。行き着く先は、骨の坑という古い坑道。何か残っているかもしれない。',
+        'Isana said: "You cannot climb the chain bare-handed. The traveller who came here before wore iron."\nThe cairns from the north gate over the hills are that traveller\'s road. They end at an old mine called the Bone Pit. Something may be left there.')
+    put(b + 'pit.lead', 'イサナ「まずは鉄だ。前の旅人の道を辿れ。石標の先の、骨の坑だ」',
+        'Isana: "Iron first. Follow the road of the one before you. The cairns lead to the Bone Pit."')
+    put(b + 'pit.page', '石標を辿り、骨の坑の奥の荷を探そう', 'Follow the cairns to the pack in the Bone Pit')
     put(b + 'armor.journal',
         '荷の頁には、こうあった。「鉄を二十四。胸当てと脚当てを先に。背の風は骨まで冷える」\n鉄の鉱石は、かまどで溶かせば鉄になる。坑の壁にも、筋が走っていた。兜と胸当てと脚当てと靴を作って、身につけよう。',
         'The page in the pack read: "Twenty-four iron. Breastplate and leggings first. The wind on the back cuts to the bone."\nIron ore smelts into iron in a furnace; the pit walls were streaked with it. Make a helmet, chestplate, leggings and boots, and wear them.')
-    put(b + 'armor.wear', '鉄の防具を作って着よう', 'Make and wear iron armor')
-    put(b + 'done', '「鉄の匂いがするな。……あの旅人も、そうやって鎖の下に立っていたんだろう」', '"You smell of iron. ...That traveller must have stood under the chain like that."')
+    put(b + 'armor.lead', '頁の字は几帳面だった。「鉄を二十四。胸当てと脚当てを先に」',
+        'The page was written by a tidy hand: "Twenty-four iron. Breastplate and leggings first."')
+    put(b + 'armor.wear', '頁のとおり、鉄の防具を作って着よう', 'Make and wear iron armor, as the page says')
+    put(b + 'done', '「鉄の匂いがするな。……あの旅人も、そうやって鎖の下に立っていたんだろう」\n次は刃だ。旅の職人が、折れた剣を見たと言っていた。',
+        '"You smell of iron. ...That traveller must have stood under the chain like that."\nNext, a blade. The traveling artisan said they saw a broken sword.')
 
     b = 'quest.skyabyss.ch1.trail_blade.'
     put(b + 'title', '折れた剣', 'The Broken Sword')
-    put(b + 'summary', '割れ殻の洞の奥の折れた剣を見て、鉄の剣を作り、砥石で研ぐ。', 'See the broken sword deep in the Cleft Shell, then make an iron sword and hone it.')
+    put(b + 'summary', '鯨を迎える支度の二つめ。職人の見た折れた剣を割れ殻の洞の奥で確かめ、鉄の剣を作って砥石で研ぐ。',
+        'The second step in getting ready. Find the broken sword the artisan saw deep in the Cleft Shell, then make an iron sword and hone it.')
+    put(b + 'hear.journal', 'イサナが言っていた。「次は刃だ。旅の職人が、折れた剣を見たと言っていた」\n職人に、刃のことを聞いてみよう。',
+        'Isana said: "Next, a blade. The traveling artisan said they saw a broken sword."\nAsk the artisan about blades.')
+    put(b + 'hear.lead', 'イサナ「次は刃だ。旅の職人が、折れた剣を見たと言っていた」',
+        'Isana: "Next, a blade. The traveling artisan said they saw a broken sword."')
+    put(b + 'hear.talk', '旅の職人に、刃のことを聞こう', 'Ask the traveling artisan about blades')
     put(b + 'cave.journal',
-        '旅の職人が言っていた。「折れた剣を見た。割れ殻の洞の奥だ。……いつ見たのかは、覚えていない」\n丘の斜面の岩の割れ目から、湿った風が出ている。奥の主は、盾の前を嫌う相手ではない。背を取れ。',
-        'The traveling artisan said: "I saw a broken sword. Deep in the Cleft Shell. ...When, I do not remember."\nA damp wind comes from a crack in the hillside. Whatever waits at the bottom does not mind a shield in its face. Get behind it.')
-    put(b + 'cave.sword', '割れ殻の洞の奥で、折れた剣を探す', 'Find the broken sword in the Cleft Shell')
+        '旅の職人が言っていた。「折れた剣を見た。割れ殻の洞の奥だ。……いつ見たのかは、覚えていない」\n丘の斜面の岩の割れ目から、湿った風が出ている。奥の主は、盾を正面から受け止める。背を取れ。',
+        'The traveling artisan said: "I saw a broken sword. Deep in the Cleft Shell. ...When, I do not remember."\nA damp wind comes from a crack in the hillside. Whatever waits at the bottom takes a shield head-on. Get behind it.')
+    put(b + 'cave.lead', '職人「折れた剣を見た。割れ殻の洞の奥だ。見てくるといい」',
+        'The artisan: "I saw a broken sword. Deep in the Cleft Shell. Go and look."')
+    put(b + 'cave.sword', '割れ殻の洞の奥で、折れた剣を探そう', 'Find the broken sword in the Cleft Shell')
     put(b + 'show.journal', '台座の剣は、持ち上げると崩れた。柄の布の巻き方だけが、目に残っている。旅の職人に話そう。',
         'The sword on the plinth crumbled when lifted. Only the way its grip was wrapped stays in your eye. Tell the traveling artisan.')
-    put(b + 'show.talk', '折れた剣のことを、旅の職人に話す', 'Tell the artisan about the broken sword')
-    put(b + 'forge.journal', '「研がずに振った。だから折れた」と台座にあった。鉄の剣を作業台で作り、岩の砥石で研いでから振ろう。砥石の作り方は旅の覚書に。',
+    put(b + 'show.lead', '剣は崩れた。柄の巻き方だけが、目に残っている。', 'The sword crumbled. Only the way its grip was wound stays with you.')
+    put(b + 'show.talk', '折れた剣のことを、職人に話そう', 'Tell the artisan about the broken sword')
+    put(b + 'forge.journal', '「研がずに振った。だから折れた」と台座にあった。鉄の剣を作業台で作り、岩の砥石で研いでから振ろう。砥石の作り方は旅の覚書にある。',
         'The plinth said: "Swung it unhoned. So it broke." Make an iron sword at a workbench and hone it on a rock whetstone before you swing it. The whetstone is in your wayfarer\'s notes.')
-    put(b + 'forge.sword', '鉄の剣を作る', 'Make an iron sword')
-    put(b + 'forge.whet', '岩の砥石で刃を研ぐ', 'Hone your blade on a rock whetstone')
-    put(b + 'done', '「刃は、研いだぶんだけ軽くなる。……今度は、折るなよ」', '"A blade lightens as you hone it. ...Do not break this one."')
+    put(b + 'forge.lead', '職人「研がずに振るな。あの剣は、研がずに振って折れた」', 'The artisan: "Do not swing it unhoned. That sword broke because it was."')
+    put(b + 'forge.sword', '鉄の剣を作ろう', 'Make an iron sword')
+    put(b + 'forge.whet', '岩の砥石で刃を研ごう', 'Hone your blade on a rock whetstone')
+    put(b + 'done', '「刃は、研いだぶんだけ軽くなる。……今度は、折るなよ」\n盾のことなら、語り部が昔の旅人の話を知っている。',
+        '"A blade lightens as you hone it. ...Do not break this one."\nFor a shield, the storyteller knows a tale of the traveller long ago.')
 
     b = 'quest.skyabyss.ch1.trail_shield.'
     put(b + 'title', '盾と糧', 'Shield and Provisions')
-    put(b + 'summary', '足音の晩の話を聞き、盾と道の固焼きを用意する。', 'Hear the tale of the night of footsteps, then ready a shield and road hardtack.')
-    put(b + 'tale.journal', '語り部が、昔の旅人の話をしたがっている。「足音の晩のことだよ。聞いておいき」',
-        'The storyteller wants to tell you about a traveller long ago. "It is about the night of footsteps. Listen."')
-    put(b + 'tale.talk', '語り部に、足音の晩の話を聞く', 'Hear the tale of the night of footsteps')
+    put(b + 'summary', '鯨を迎える支度の三つめ。語り部から足音の晩の話を聞き、盾と道の固焼きを用意する。',
+        'The last step in getting ready. Hear the storyteller\'s tale of the night of footsteps, then ready a shield and road hardtack.')
+    put(b + 'tale.journal', '職人が言っていた。盾のことなら、語り部が昔の旅人の話を知っている、と。\n語り部は、その話をしたがっている。「足音の晩のことだよ。聞いておいき」',
+        'The artisan said the storyteller knows a tale about a shield and a traveller long ago.\nThe storyteller wants to tell it. "It is about the night of footsteps. Listen."')
+    put(b + 'tale.lead', '職人「刃はいい。盾のことなら、語り部が昔の旅人の話を知っている」',
+        'The artisan: "The blade will do. For a shield, the storyteller knows a tale of the one before."')
+    put(b + 'tale.talk', '語り部に、足音の晩の話を聞こう', 'Hear the tale of the night of footsteps')
     put(b + 'pack.journal',
         '足音の晩、前の旅人は盾を抱え、固焼きの包みを背負って戻ってきたという。盾の表には、大きな爪の痕が三本。\n盾は作業台で作れる。道の固焼きは旅の覚書に作り方がある。鼓動守は、旅の職人に護り糸を持っていけば編んでくれる (なくてもいい)。',
         'On the night of footsteps, the earlier traveller came back clutching a shield, a bundle of hardtack on their back. Three great claw marks crossed the shield.\nA shield can be made at a workbench; road hardtack is in your wayfarer\'s notes. If you bring ward thread to the artisan, they will weave a heartbeat ward too (not required).')
-    put(b + 'pack.shield', '盾を作る', 'Make a shield')
-    put(b + 'pack.hardtack', '道の固焼きを持つ', 'Carry road hardtack')
-    put(b + 'done', '「盾は、前を守るためだけのものじゃないよ。……帰り道のためにも、持っておいき」', '"A shield is not only for what is in front of you. ...Carry it for the way home, too."')
+    put(b + 'pack.lead', '語り部「盾を持っておいき。糧もね。帰ってくるつもりなら」', 'The storyteller: "Take a shield. Provisions too. If you mean to come back."')
+    put(b + 'pack.shield', '盾を作ろう', 'Make a shield')
+    put(b + 'pack.hardtack', '道の固焼きを持とう', 'Carry road hardtack')
+    put(b + 'done', '「盾は、前を守るためだけのものじゃないよ。……帰り道のためにも、持っておいき」\nこれで、鉄と刃と盾がそろった。',
+        '"A shield is not only for what is in front of you. ...Carry it for the way home, too."\nIron, blade and shield: you have them all now.')
 
 
 # ---------------------------------------------------------------- 会話
@@ -198,8 +232,8 @@ def dialogue():
         '坑の奥で頁を見つけたのか。……鉄を二十四、か。几帳面な奴だ。\n鉱石は、かまどで溶かせば鉄になる。燃やすものは、木炭でも石炭でもいい。……鎖は待ってはくれないが、急かしもしない。',
         'You found a page down the pit? ...Twenty-four iron. A tidy sort.\nOre smelts into iron in a furnace. Charcoal or coal, either burns. ...The chain will not wait, but it will not hurry you either.')
     put(d + 'ch1t_c_iron',
-        '鉄の匂いがする。……似合ってるよ。\nあの旅人も、そうやって鎖の下に立っていた気がする。……いや、話に聞いただけだ。見たはずがない。',
-        'You smell of iron. ...It suits you.\nI feel that traveller stood under the chain just like that. ...No. I only heard the story. I cannot have seen it.')
+        '鉄の匂いがする。……似合ってるよ。\nあの旅人も、そうやって鎖の下に立っていた気がする。……いや、話に聞いただけだ。見たはずがない。\n次は刃だ。旅の職人に聞いてみろ。折れた剣を見たと言っていた。',
+        'You smell of iron. ...It suits you.\nI feel that traveller stood under the chain just like that. ...No. I only heard the story. I cannot have seen it.\nNext, a blade. Ask the traveling artisan. They said they saw a broken sword.')
 
 
 # ---------------------------------------------------------------- 伝承 (前の私の頁 3 枚・冷えの戸の碑文)
@@ -243,6 +277,7 @@ def texts():
         'The iron takes the cold. The stone door grinds back.')
     put('message.skyabyss.ch1.cave.sword', '奥の台座に、折れた鉄の剣が横たえてある。', 'On the plinth at the back lies a broken iron sword.')
     put('message.skyabyss.ch1.trail.mark', '鯨追いの印を手に入れた', 'You received the Whale Chaser\'s Mark')
+    put('message.skyabyss.ch1.trail.call', '遠い空の底で、低い歌が鳴りはじめた。', 'Far off, at the bottom of the sky, a low song begins.')
     # 碑 (4 行。空の行は飛ばす)
     for key, lines_ja, lines_en in (
             ('sign.skyabyss.ch1_bone_pit', ['骨の坑', '鉄は ここに眠る', '下る者は 灯りを', '戻らぬ者は 数えない'],

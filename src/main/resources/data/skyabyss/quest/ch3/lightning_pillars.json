@@ -15,6 +15,15 @@
         "type": "quest",
         "quest": "main_thunder",
         "is": "started"
+      },
+      {
+        "type": "not",
+        "of": {
+          "type": "quest",
+          "quest": "main_thunder",
+          "is": "active",
+          "stage": "rumor"
+        }
       }
     ]
   },

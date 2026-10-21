@@ -382,11 +382,23 @@ public final class OpeningDirector {
         return readyPlayer(level) != null;
     }
 
+    // 岩鯨を迎えられる人: 影・歌・イサナを済ませ、一章の支度も済ませた人 (34 の 4.2。仲間が済ませていてもよい)
     @Nullable
     public static ServerPlayer readyPlayer(ServerLevel level) {
+        return pick(level, true);
+    }
+
+    // 支度だけを済ませた人 (5 日目の詰み止めのあとは、拍子を問わずこの人のもとへ)
+    @Nullable
+    public static ServerPlayer preparedPlayer(ServerLevel level) {
+        return pick(level, false);
+    }
+
+    @Nullable
+    private static ServerPlayer pick(ServerLevel level, boolean beats) {
         ServerPlayer any = null;
         for (ServerPlayer p : Players.snapshot(level.players())) {
-            if (p.isAlive() && !p.isSpectator() && OpeningLogic.whaleReady(state(p))) {
+            if (p.isAlive() && !p.isSpectator() && (!beats || OpeningLogic.whaleReady(state(p))) && jp.revati.skyabyss.story.ch1.Ch1Trails.callReady(p)) {
                 // まだ岩鯨を見ていない人を先に (最初の一人の近くにだけ出て、遅れて来た人が見損ねないように)
                 if (!Lore.state(p).has("chapter1/stone_whale")) {
                     return p;

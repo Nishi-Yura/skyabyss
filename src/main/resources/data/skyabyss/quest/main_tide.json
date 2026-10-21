@@ -48,6 +48,28 @@
       }
     },
     {
+      "id": "prepare",
+      "skip_if": {
+        "type": "any",
+        "of": [
+          {
+            "type": "lore",
+            "entry": "chapter1/tide_shell"
+          }
+        ]
+      },
+      "objectives": [
+        {
+          "id": "ready",
+          "type": "condition",
+          "if": {
+            "type": "prep",
+            "chapter": 2
+          }
+        }
+      ]
+    },
+    {
       "id": "see",
       "objectives": [
         {
