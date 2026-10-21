@@ -188,18 +188,6 @@ public final class TravelGear {
         return true;
     }
 
-    // 保険: 「身ごしらえ」が仕上げの段にいる人が、旅装を一式持っているのに合図を取りこぼしていたら (作ってから段が進んだ・拾った・預かりから戻した) 送る
-    @SubscribeEvent
-    static void onPlayerTick(PlayerTickEvent.Post event) {
-        if (!(event.getEntity() instanceof ServerPlayer player) || player.tickCount % 40 != 5) {
-            return;
-        }
-        QuestLog.Entry entry = QuestLog.of(player).entry(Ch1Prep.Q_GEAR);
-        if (entry != null && !entry.done && entry.stage >= 1) {
-            signalIfComplete(player);
-        }
-    }
-
     public static boolean isWhaleRoad(ItemStack stack) {
         return stack.is(HELMET.get()) || stack.is(CHESTPLATE.get()) || stack.is(LEGGINGS.get()) || stack.is(BOOTS.get());
     }

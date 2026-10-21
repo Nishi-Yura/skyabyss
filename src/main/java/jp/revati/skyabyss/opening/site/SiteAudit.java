@@ -29,7 +29,7 @@ public final class SiteAudit {
     }
 
     // 部品の名前の一覧 (開発の実行では資源のフォルダから、jar の中では下の表から)
-    private static final String[] KNOWN = {"cairn", "camp", "ch1_bone_cache", "ch1_cart_track", "ch1_cleft_shell_cave", "ch1_diary_spot", "ch1_lookout",
+    private static final String[] KNOWN = {"cairn", "camp", "ch1_bone_cache", "ch1_bone_pit", "ch1_cart_track", "ch1_cleft_shell_cave", "ch1_diary_spot", "ch1_lookout",
             "ch1_lost_cart", "ch1_road_cairn", "ch1_road_shrine", "ch1_song_chamber", "ch1_song_stone_1", "ch1_song_stone_2", "ch1_song_stone_3",
             "ch1_song_stone_4", "ch1_song_stone_5", "ch1_trace_altar", "ch1_trace_camp", "ch1_trace_cart", "ch1_trace_pack", "ch1_trace_well", "ch3_pack",
             "ch3_ruin", "ch3_tablet", "ch3_vane", "ember_ash_post", "ember_hearth_ruin", "ember_warm_ledge", "footprint", "footprint_end", "ribs", "shelter",

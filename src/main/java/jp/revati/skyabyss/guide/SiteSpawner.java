@@ -129,11 +129,18 @@ public final class SiteSpawner {
     // 今この実行で湧かせた個体 (保存されて戻ってきた個体と区別する)
     private static final Set<UUID> LIVE = ConcurrentHashMap.newKeySet();
     private static final Map<String, Instance> INSTANCES = new HashMap<>();
+    // クリアを聞く口 (場所の ID → 聞き手)。クリアの場にいた人ごとに、初回も周回も呼ぶ (first = その人の初回)。頁や伝承を記すのに使う
+    private static final Map<String, List<java.util.function.BiConsumer<ServerPlayer, Boolean>>> CLEAR_LISTENERS = new ConcurrentHashMap<>();
 
     private SiteSpawner() {
     }
 
     // ---------------------------------------------------------------- 登録
+    // クリアの聞き手を足す (同じ場所に何本でも)
+    public static void onCleared(String siteId, java.util.function.BiConsumer<ServerPlayer, Boolean> listener) {
+        CLEAR_LISTENERS.computeIfAbsent(siteId, k -> new java.util.concurrent.CopyOnWriteArrayList<>()).add(listener);
+    }
+
     public static void register(Def def) {
         for (Pad pad : def.pads()) {
             for (Spawn s : pad.spawns()) {
@@ -374,7 +381,12 @@ public final class SiteSpawner {
         MinecraftServer server = level.getServer();
         SiteProgressData data = SiteProgressData.get(server);
         Def def = inst.def;
+        List<java.util.function.BiConsumer<ServerPlayer, Boolean>> listeners = CLEAR_LISTENERS.getOrDefault(def.id(), List.of());
         for (ServerPlayer p : credit) {
+            boolean first = !data.cleared(p.getUUID(), def.id());
+            for (var l : listeners) {
+                l.accept(p, first);
+            }
             if (inst.repeat) {
                 // 周回の素材 (経験値なし)。受け取れるのは 1 日ぶん待った人だけ
                 if (data.cleared(p.getUUID(), def.id()) && repeatReady(data, p, def.id(), now)) {

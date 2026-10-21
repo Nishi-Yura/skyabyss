@@ -52,16 +52,16 @@ final class ChapterChecklist {
             int done = PrepQuests.done(p, n);
             List<Component> detail = new ArrayList<>();
             QuestLog log = QuestLog.of(p);
-            for (String kind : PrepQuests.KINDS) {
-                String id = PrepQuests.id(n, kind);
+            for (String id : PrepQuests.ids(n)) {
+                String kind = PrepQuests.kindOf(id);
                 QuestDef def = QuestManager.quest(id);
                 QuestLog.Entry e = log.entry(id);
                 String mark = e != null && e.done ? "✔" : e != null ? "…" : "・";
                 detail.add(Component.literal(mark + " ").append(def == null ? Component.literal(kind) : Component.translatable(def.titleKey())));
             }
             detail.add(RecordBuilder.t("d.check_prep"));
-            rows.add(RecordBuilder.value("check_prep", RecordBuilder.t("r.check_prep"), RecordBuilder.t("v.of", done, PrepQuests.KINDS.size()),
-                    done >= PrepQuests.KINDS.size() ? RecordSnapshot.MARK_SAFE : RecordSnapshot.MARK_NONE, detail));
+            rows.add(RecordBuilder.value("check_prep", RecordBuilder.t("r.check_prep"), RecordBuilder.t("v.of", done, PrepQuests.ids(n).size()),
+                    done >= PrepQuests.ids(n).size() ? RecordSnapshot.MARK_SAFE : RecordSnapshot.MARK_NONE, detail));
         }
         int total = 0;
         int found = 0;

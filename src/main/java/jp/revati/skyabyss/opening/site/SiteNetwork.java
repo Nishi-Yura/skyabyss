@@ -19,6 +19,8 @@ import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class SiteNetwork {
     private static final String PROTOCOL_VERSION = "opening-sites-1";
+    // 目的の帯の行き先として送る章の要素 (クライアントの SiteTargets.bindChapterTargets が段に結ぶ)
+    static final java.util.List<String> CHAPTER_TARGETS = java.util.List.of("ch1_bone_pit", "ch1_cleft_shell_cave");
 
     private SiteNetwork() {
     }
@@ -74,6 +76,15 @@ public final class SiteNetwork {
                 var marks = jp.revati.skyabyss.npc.ArtisanSpawner.marks(server.overworld(), spot);
                 if (!marks.isEmpty()) {
                     m.put(SiteTargets.NPC_PREFIX + "artisan", marks.get(0));
+                    break;
+                }
+            }
+        }
+        // 章の小さなダンジョン (一章の支度の段の行き先: 骨の坑・割れ殻の洞)。拠点が複数あれば、建て終わった最初の場所
+        for (String id : CHAPTER_TARGETS) {
+            for (ChapterSites.Site site : ChapterSites.sites(server, id)) {
+                if (site.built()) {
+                    m.put(id, site.pos());
                     break;
                 }
             }

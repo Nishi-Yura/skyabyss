@@ -7,7 +7,7 @@
       "if": [
         {
           "type": "quest",
-          "quest": "ch1/prep_gear",
+          "quest": "ch1/trail_blade",
           "is": "active"
         },
         {

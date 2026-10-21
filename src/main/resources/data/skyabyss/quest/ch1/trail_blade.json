@@ -1,0 +1,81 @@
+{
+  "category": "main",
+  "order": 12,
+  "giver": "skyabyss:artisan",
+  "chapter": "titan_whale",
+  "start_when": {
+    "type": "all",
+    "of": [
+      {
+        "type": "stage",
+        "max": 0
+      },
+      {
+        "type": "any",
+        "of": [
+          {
+            "type": "flag",
+            "flag": "c_whale_heard",
+            "npc": "skyabyss:whale_chaser"
+          },
+          {
+            "type": "lore",
+            "entry": "chapter1/stone_whale"
+          }
+        ]
+      }
+    ]
+  },
+  "stages": [
+    {
+      "id": "cave",
+      "xp": 30,
+      "objectives": [
+        {
+          "id": "sword",
+          "type": "lore",
+          "targets": [
+            "ch1/trail_blade"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "show",
+      "objectives": [
+        {
+          "id": "talk",
+          "type": "talk",
+          "target": "skyabyss:artisan",
+          "topic": "ch1t_blade_show"
+        }
+      ]
+    },
+    {
+      "id": "forge",
+      "mode": "all",
+      "objectives": [
+        {
+          "id": "sword",
+          "type": "collect",
+          "target": "minecraft:iron_sword",
+          "count": 1,
+          "party": false
+        },
+        {
+          "id": "whet",
+          "type": "signal",
+          "target": "ch1_whetstone_used",
+          "party": false
+        }
+      ]
+    }
+  ],
+  "reward": {
+    "xp": 70,
+    "items": [],
+    "affinity": {
+      "skyabyss:artisan": 3
+    }
+  }
+}

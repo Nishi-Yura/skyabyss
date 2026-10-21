@@ -258,7 +258,7 @@ public final class QuestHud {
         return Component.translatable(key).getString();
     }
 
-    // 一章の備えの頼みを終えた本数 (クエストの記録に 3 本とも無ければ -1)
+    // 一章の支度の段 (鉄の跡・折れた剣・盾と糧) を終えた本数 (クエストの記録に 3 本とも無ければ -1)
     static int prepDone() {
         Minecraft mc = Minecraft.getInstance();
         if (mc.player == null) {
@@ -267,8 +267,8 @@ public final class QuestHud {
         QuestLog log = QuestLog.of(mc.player);
         int done = 0;
         int known = 0;
-        for (String kind : jp.revati.skyabyss.guide.PrepQuests.KINDS) {
-            QuestLog.Entry e = log.entry(jp.revati.skyabyss.guide.PrepQuests.id(1, kind));
+        for (String id : jp.revati.skyabyss.guide.PrepQuests.ids(1)) {
+            QuestLog.Entry e = log.entry(id);
             if (e != null) {
                 known++;
                 if (e.done) {

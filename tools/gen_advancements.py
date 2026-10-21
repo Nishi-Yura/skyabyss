@@ -67,6 +67,11 @@ add("isana", "storyteller", "minecraft:spyglass", "task", beat("talk:skyabyss:wh
     ("鯨を追う人", "イサナと出会った。"), ("The Whale Chaser", "You met Isana."))
 add("bone_hill", "isana", "minecraft:bone_block", "task", beat("place:ribs"),
     ("骨の丘", "丘の下に、巨大な骨が埋まっている。"), ("Bone Hill", "Enormous bones lie buried beneath the hill."))
+# 一章の支度の段 (34 の 4.2)。骨の坑の荷で前の旅人の頁を見つける → 三本 (鉄・剣・盾と糧) をそろえる
+add("bone_pit", "isana", "minecraft:iron_ore", "task", beat("lore:ch1/trail_iron"),
+    ("骨の坑", "坑の奥に、誰かの荷が残っていた。"), ("The Bone Pit", "Deep in the pit, someone's pack was left behind."))
+add("whale_trail", "bone_pit", "skyabyss:whale_chaser_mark", "goal", beat("signal:ch1_ready"),
+    ("鯨追いの支度", "鉄を着て、剣を研ぎ、盾と糧を背負った。"), ("Ready to Chase the Whale", "Iron on, blade honed, shield and provisions on your back."))
 
 # ---------------------------------------------------------------- 巨神 (背に乗る → 試練 → 心臓)
 add("stone_whale_board", "bone_hill", "skyabyss:stone_whale_plating", "goal", dimension("titan_back"),
@@ -107,9 +112,9 @@ add("sky_key", "ember_heart", "skyabyss:sky_key", "challenge", beat("signal:sky_
 add("skill", "root", "minecraft:enchanted_book", "task", beat("skill:learned"),
     ("最初の技", "技を一つ覚えた。"), ("A First Skill", "You learned a skill."))
 add("tree_sword", "skill", "skyabyss:whalebone_greatsword", "goal", beat("skill:tree:sword"),
-    ("剣の道", "剣士の技を覚えた。"), ("Way of the Sword", "You learned a swordsman's skill."))
+    ("近接の道", "岩守り・風読み・灰の鍛え人のどれかの技を覚えた。"), ("The Melee Path", "Learned a skill of the Rockwarden, Windreader or Ashsmith."))
 add("tree_bow", "skill", "minecraft:bow", "goal", beat("skill:tree:bow"),
-    ("弓の道", "弓使いの技を覚えた。"), ("Way of the Bow", "You learned an archer's skill."))
+    ("弓の道", "骨の射手の技を覚えた。"), ("The Bow Path", "Learned a skill of the Boneshooter."))
 levels = [(5, "task", "minecraft:experience_bottle"), (10, "task", "minecraft:experience_bottle"), (20, "goal", "minecraft:experience_bottle"),
           (30, "goal", "minecraft:experience_bottle"), (40, "challenge", "minecraft:experience_bottle"), (50, "challenge", "minecraft:nether_star")]
 prev = "root"
@@ -130,7 +135,7 @@ add("forge_dismantle", "forge_enhance", "minecraft:grindstone", "task", beat("fo
 CHAPTER_OF = {}
 for _id in ("camp", "footprint", "sky_shadow", "bell_lodge", "storyteller", "lore_book"):
     CHAPTER_OF[_id] = "prologue"
-for _id in ("isana", "bone_hill", "stone_whale_board", "tablet", "stone_whale_trial", "stone_whale_heart", "voyage"):
+for _id in ("isana", "bone_hill", "bone_pit", "whale_trail", "stone_whale_board", "tablet", "stone_whale_trial", "stone_whale_heart", "voyage"):
     CHAPTER_OF[_id] = "titan_whale"
 for _id, _ch in (("tide_shell", "titan_tide"), ("thunder_wing", "titan_storm"), ("ember", "titan_ember")):
     for _suffix in ("board", "trial", "heart"):
@@ -189,16 +194,13 @@ def background():
 
 def main():
     ADV.mkdir(parents=True, exist_ok=True)
-    for old in ADV.glob("*.json"):
-        old.unlink()
+    # ほかの道具が書く進捗 (転生の rebirth_* など) は消さない。ここで持つ id だけを書き直す
     for id_, d in build().items():
         (ADV / f"{id_}.json").write_text(json.dumps(d, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     background()
     for code, idx in (("ja_jp", "ja"), ("en_us", "en")):
         p = LANG / f"{code}.json"
         lang = json.loads(p.read_text(encoding="utf-8"))
-        for k in [k for k in lang if k.startswith("advancement.skyabyss.")]:
-            del lang[k]
         for a in A:
             title, desc = chaptered(a, 0 if idx == "ja" else 1)
             lang[f"advancement.skyabyss.{a['id']}.title"] = title

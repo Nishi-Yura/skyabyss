@@ -237,6 +237,8 @@ public final class Quests {
             int value = switch (ob.type()) {
                 case "lore" -> (int) ob.targets().stream().filter(t -> Lore.state(player).has(t)).count();
                 case "collect" -> QuestItems.count(player, ob.targets().get(0), ob.token());
+                // 着ている (防具の枠にある) 品の種類の数。脱げば戻る
+                case "wear" -> QuestItems.worn(player, ob.targets());
                 case "herd" -> slow ? herded(player, entry, ob) : entry.progress(i);
                 case "visit" -> ob.targets().contains(player.level().dimension().location().toString()) ? ob.count() : entry.progress(i);
                 case "condition" -> ob.condition().test(StoryContext.of(player)) ? ob.count() : 0;

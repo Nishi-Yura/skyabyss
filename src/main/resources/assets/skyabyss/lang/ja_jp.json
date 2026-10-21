@@ -618,7 +618,7 @@
   "item.skyabyss.heartbeat_ward_thunder_wing": "雷翼の鼓動守",
   "item.skyabyss.heartbeat_ward_ember": "余燼の鼓動守",
   "item.skyabyss.heartbeat_ward.desc": "装飾の枠に付けると、心臓との戦いで一度だけ、倒れるはずの一撃を体力 1 で耐える。使うと光って消える",
-  "message.skyabyss.notes.given": "備えの頼みが増えた。手引きの旅の覚書（%s）が荷物に届いた",
+  "message.skyabyss.notes.given": "支度の段が始まった。手引きの旅の覚書（%s）が荷物に届いた",
   "message.skyabyss.notes.recipes": "覚書から、作り方を %s つ思い出した",
   "message.skyabyss.prep.ready": "%s の備えができた",
   "message.skyabyss.heartbeat_ward.used": "鼓動守が砕けて、あなたを引き止めた",
@@ -1389,5 +1389,9 @@
   "block.skyabyss.relic_bell": "遺物の鐘",
   "gui.skyabyss.card.advancement": "進捗",
   "gui.skyabyss.card.challenge": "挑戦",
-  "gui.skyabyss.card.lore": "伝承"
+  "gui.skyabyss.card.lore": "伝承",
+  "advancement.skyabyss.bone_pit.title": "骨の坑",
+  "advancement.skyabyss.bone_pit.description": "一章　岩鯨　坑の奥に、誰かの荷が残っていた。",
+  "advancement.skyabyss.whale_trail.title": "鯨追いの支度",
+  "advancement.skyabyss.whale_trail.description": "一章　岩鯨　鉄を着て、剣を研ぎ、盾と糧を背負った。"
 }

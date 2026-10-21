@@ -1,0 +1,66 @@
+{
+  "category": "main",
+  "order": 11,
+  "giver": "skyabyss:whale_chaser",
+  "chapter": "titan_whale",
+  "start_when": {
+    "type": "all",
+    "of": [
+      {
+        "type": "stage",
+        "max": 0
+      },
+      {
+        "type": "any",
+        "of": [
+          {
+            "type": "flag",
+            "flag": "c_whale_heard",
+            "npc": "skyabyss:whale_chaser"
+          },
+          {
+            "type": "lore",
+            "entry": "chapter1/stone_whale"
+          }
+        ]
+      }
+    ]
+  },
+  "stages": [
+    {
+      "id": "pit",
+      "xp": 30,
+      "objectives": [
+        {
+          "id": "page",
+          "type": "lore",
+          "targets": [
+            "ch1/trail_iron"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "armor",
+      "objectives": [
+        {
+          "id": "wear",
+          "type": "wear",
+          "targets": [
+            "minecraft:iron_helmet",
+            "minecraft:iron_chestplate",
+            "minecraft:iron_leggings",
+            "minecraft:iron_boots"
+          ]
+        }
+      ]
+    }
+  ],
+  "reward": {
+    "xp": 70,
+    "items": [],
+    "affinity": {
+      "skyabyss:whale_chaser": 3
+    }
+  }
+}

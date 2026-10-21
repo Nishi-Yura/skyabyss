@@ -471,6 +471,10 @@
     },
     "c_whale2": {
       "face": "grave",
+      "next": "c_whale_iron"
+    },
+    "c_whale_iron": {
+      "face": "neutral",
       "next": "c_whale3"
     },
     "c_whale3": {
@@ -620,6 +624,24 @@
     },
     "c_fragment2": {
       "face": "neutral",
+      "options": [
+        {
+          "id": "hand",
+          "if": {
+            "type": "lore",
+            "entry": "ch1/trail_iron"
+          },
+          "goto": "c_fragment_hand"
+        },
+        {
+          "id": "bye",
+          "kind": "leave",
+          "goto": "end"
+        }
+      ]
+    },
+    "c_fragment_hand": {
+      "face": "grave",
       "options": [
         {
           "id": "bye",
