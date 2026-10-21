@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "pattern": [
+    "FFF",
+    "WTW",
+    "FCF"
+  ],
+  "key": {
+    "F": {
+      "item": "skyabyss:scorched_feather"
+    },
+    "C": {
+      "item": "skyabyss:static_cotton"
+    },
+    "W": {
+      "item": "skyabyss:copper_wire"
+    },
+    "T": {
+      "item": "skyabyss:tide_shell_shard"
+    }
+  },
+  "result": {
+    "id": "skyabyss:peak_crossing_chestplate",
+    "count": 1
+  }
+}

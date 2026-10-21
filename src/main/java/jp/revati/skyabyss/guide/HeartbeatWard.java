@@ -59,7 +59,8 @@ public final class HeartbeatWard {
 
     public static final java.util.List<Weave> WEAVES = java.util.List.of(
             new Weave(1, "stone_whale", "skyabyss:rock_shell_thread", "skyabyss:rock_shell_scrap", 8, "ch1t_woven"),
-            new Weave(2, "tide_shell", "skyabyss:pearl_ward_thread", "skyabyss:salt_crystal", 8, "ch2t_woven"));
+            new Weave(2, "tide_shell", "skyabyss:pearl_ward_thread", "skyabyss:salt_crystal", 8, "ch2t_woven"),
+            new Weave(3, "thunder_wing", "skyabyss:thunder_ward_thread", "skyabyss:static_cotton", 8, "ch3t_woven"));
 
     // 章の編み方 (なければ null)
     public static Weave weave(int chapter) {

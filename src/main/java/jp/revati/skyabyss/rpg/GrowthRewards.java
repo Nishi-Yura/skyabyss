@@ -97,6 +97,11 @@ public final class GrowthRewards {
         MOD_ENEMIES.put(SkyAbyss.MODID + ":sand_burrower", new Source(5, TIDE_SHELL_LEVEL));
         MOD_ENEMIES.put(SkyAbyss.MODID + ":drift_hermit", new Source(2, TIDE_SHELL_LEVEL));
         MOD_ENEMIES.put(SkyAbyss.MODID + ":shore_warden", new Source(50, TIDE_SHELL_LEVEL));
+        // 三章の地上の敵 (21 の 5.1、P16。章の経験値の枠には数えない小さな分。推奨レベル 21): 帯電毛玉 5、峰の雛 6、雷拾い 2、焼けた羽守 60
+        MOD_ENEMIES.put(SkyAbyss.MODID + ":static_puff", new Source(5, 21));
+        MOD_ENEMIES.put(SkyAbyss.MODID + ":peak_fledgling", new Source(6, 21));
+        MOD_ENEMIES.put(SkyAbyss.MODID + ":lightning_gleaner", new Source(2, 21));
+        MOD_ENEMIES.put(SkyAbyss.MODID + ":scorched_warden", new Source(60, 21));
     }
 
 
