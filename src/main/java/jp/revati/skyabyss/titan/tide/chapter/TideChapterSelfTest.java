@@ -162,9 +162,9 @@ public final class TideChapterSelfTest {
 
     // ---------------------------------------------------------------- データが読める
     private static void data(List<String> f) {
-        // 小要素 3〜5 つ、部品が読める
+        // 小要素 3〜5 つ + 二章の地上 (34 の C2: 塩の蔵・塩の道の標・潮だまり・筏・杭) も同じ表に入るので、合わせて 3〜12。部品が読める
         List<ChapterSites.Element> els = ChapterSites.elements(Chapters.TIDE);
-        check(f, els.size() >= 3 && els.size() <= 5, "chapter 2 should have 3-5 small elements: " + els.size());
+        check(f, els.size() >= 3 && els.size() <= 12, "chapter 2 should have 3-12 chapter elements: " + els.size());
         for (String id : List.of(TideChapter.CAIRN_A, TideChapter.CAIRN_B, TideChapter.CARGO, TideChapter.STELE)) {
             check(f, els.stream().anyMatch(e -> e.id().equals(id)), "element not registered: " + id);
         }
