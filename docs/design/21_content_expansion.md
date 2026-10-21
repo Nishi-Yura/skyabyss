@@ -74,7 +74,7 @@
 - **塩の砥石**（`salt_whetstone`）: 「塩の刃」（`salt_whetted`。攻撃 +1.8、20 分）。**水の中でも切れる**: 打つ人か相手が水に浸かっている近接の一撃は +1、白い塩と泡が散る。岩の砥石の研ぎとは重ねない（使うと替わる）。備えの刃は砥石の種類のうち一番大きい上乗せだけを数える（`TravelGear.whetstoneBonus`）。レシピ: 塩結晶 2 + 貝の欠け 1 + 火打ち石 1 → 2 つ。使うと合図 `ch2_whetstone_used`、塩の刃が効いている間に倒すと `ch2_salt_blade_kill`、潮の番人なら `ch2_warden_salted`。
 - **潮の塩漬け**（水中呼吸 60 秒 + 満腹。糧の灯に 2 点）: 乾燥した昆布 3 + 塩結晶 1 → 3 つ。**真珠の粉薬**（即時に 3❤、浮遊と鈍足を治す。糧の灯に 6 点。`PearlPowderItem`）: 小真珠 + 塩結晶 + 砂糖 → 2 つ。
 - **潮の刻みの砂時計**（`tide_hourglass`。消耗しない）: 使うと、ワールドの潮（`TideOcean`）の次の干潮までと満潮（干潮の刻の終わり）までの秒数を画面の帯に一度出す。クールダウン 30 秒。使うと合図 `ch2_tide_read`。レシピ: `SGS/.P./SGS`（塩結晶 4・ガラス 2・小真珠 1）。報酬として渡してもよい。
-- 素材: 小真珠 `small_pearl`・塩結晶 `salt_crystal`・真珠の護り糸 `pearl_ward_thread`・貝の欠け `shell_chip`（4 つとも旅嚢の品）。
+- 素材: 小真珠 `small_pearl`・塩結晶 `salt_crystal`・真珠の護り糸 `pearl_ward_thread`・貝の欠け `shell_chip`（持ち物の品。旅嚢の画面の枠が埋まっているので旅嚢には入れていない）。
 - 鍵: 8 本とも旅の覚書（二章）か職人（`unlock_recipes` chapter 2）に教わるまで作れない（`Ch2Gear.RECIPES`）。
 - 備えの手段の名前は章ごと（`Readiness.registerRemedy(灯, 巨神, 名前)`。潮殻の備えでは潮渡りの旅装・塩の砥石・潮の塩漬け・真珠の粉薬を名指しし、一章の品は出さない）。
 - 小物の絵は 3 案ずつのドット絵（`tools/rough/lowpoly/ch2/icons_ch2.py`、シート `docs/review/ch2_roughs/items/icons_ch2.png`）から仮に選んだ（選ばなかった案は `tools/sources/<品>/`）。

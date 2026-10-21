@@ -329,9 +329,9 @@ public final class Ch2GearSelfTest {
             check(f, manager.byKey(r).isPresent(), "the recipe " + r + " is missing");
             check(f, RecipeLock.locked(r), r + " is not locked");
         }
-        // 旅嚢の素材 (作業台は旅嚢の中の分も使える)
+        // 二章の素材は旅嚢の品ではない (旅嚢の画面の枠が埋まっている。足すなら画面の並びから直す)。持ち物のまま
         for (Item mat : List.of(Ch2Gear.SMALL_PEARL.get(), Ch2Gear.SALT_CRYSTAL.get(), Ch2Gear.PEARL_WARD_THREAD.get(), Ch2Gear.SHELL_CHIP.get())) {
-            check(f, jp.revati.skyabyss.pouch.PouchEntries.entry(mat) != null, mat + " is not a pouch item");
+            check(f, jp.revati.skyabyss.pouch.PouchEntries.entry(mat) == null, mat + " became a pouch item (check the pouch layout first)");
         }
         // 鍵: 教わる前は完成品が空になる、覚書 (二章) を開くと作れる
         var helmet = manager.byKey(id("tide_wader_helmet"));
