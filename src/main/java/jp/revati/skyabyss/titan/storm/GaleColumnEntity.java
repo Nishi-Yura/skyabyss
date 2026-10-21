@@ -31,7 +31,12 @@ import net.minecraft.world.phys.Vec3;
 // 昇り風の柱 (12 の 2.4節)。止まり木の左の足もとから 8 ブロック左に立つ、見えない当たり判定。
 // 半径 2.5、地面から羽根の門 (底から 25) の高さまで。中に入った人を Updraft.lift で持ち上げ、頂で白い閃光と雷鳴のあと背中へ渡す。
 // 巨神が止まっているあいだだけ在る (飛び立てば消える)。保存しない (StormSetup で noSave)。
-public class GaleColumnEntity extends Entity {
+public class GaleColumnEntity extends Entity implements jp.revati.skyabyss.titan.TitanVisibility.Hidden {
+    @Override
+    public String visibilityTitan() {
+        return jp.revati.skyabyss.progress.Titans.THUNDER_WING;
+    }
+
     // 巨神の見え方 (docs/design/32 の 3.3): 章を終えた人 (とそのパーティでない人) には実体を送らない
     @Override
     public boolean broadcastToPlayer(net.minecraft.server.level.ServerPlayer player) {

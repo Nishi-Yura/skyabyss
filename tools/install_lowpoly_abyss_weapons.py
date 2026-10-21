@@ -33,6 +33,18 @@ LEVELS = ["", "_plus5", "_plus10"]
 ANALOG = {"abyss_greatsword": "whalebone_greatsword", "abyss_bell_staff": "thrall_poker", "abyss_storm_bow": "thunder_wing_bow",
           "abyss_ash_scythe": "ember_war_axe"}
 STAGES = {"abyss_storm_bow": 4}
+# 刃の向きを鯨骨の大剣にそろえる (y 軸まわりに 180 度: x → -x、z → -z)。底なしの大剣の B 案は背の肋が -x・刃が +x で、
+# 鯨骨の大剣 (背 +x・刃 -x) と前後が逆に持たれていた (2026-10-21 の試遊の声)
+TURN_Y180 = {"abyss_greatsword"}
+
+
+def turn_y180(mesh: dict) -> dict:
+    for bone in mesh["bones"].values():
+        bone["vertices"] = [[-v[0], v[1], -v[2]] for v in bone["vertices"]]
+        if "pivot" in bone:
+            px, py, pz = bone["pivot"]
+            bone["pivot"] = [-px, py, -pz]
+    return mesh
 
 
 def bake_glow(atlas: Path, mask: Path):
@@ -72,6 +84,8 @@ def install(item: str, opt: str):
         mesh["texture"] = f"items/{item}/{st}_atlas"
         mesh.pop("glowmask", None)
         mesh, _ = mesh_close.close_mesh(mesh)
+        if item in TURN_Y180:
+            mesh = turn_y180(mesh)
         (mesh_dir / f"{st}.json").write_text(json.dumps(mesh, separators=(",", ":")), encoding="utf-8")
         for lv in LEVELS:
             name = f"{st}{lv}_atlas"

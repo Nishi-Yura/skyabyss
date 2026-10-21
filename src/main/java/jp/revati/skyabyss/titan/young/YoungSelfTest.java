@@ -151,13 +151,24 @@ public final class YoungSelfTest {
                 return false;
             }
             case 0 -> {
-                // 眠っている巨神の笛は応えない・出会っていない人は呼べない
+                // 笛はいつでも応える: 巨神が眠っていても子は来る。出会っていない人は呼べない
                 for (int i = 0; i < 6; i++) {
                     TitanCalls.markMet(p[i], Titans.STONE_WHALE);
                 }
                 TitanDormancy.begin(server, Titans.STONE_WHALE, 0);
-                check(!YoungCarriers.whistle(p[0], Titans.STONE_WHALE), "a sleeping titan's call was answered");
-                check(YoungCarriers.of(p[0].getUUID()) == null, "a young one appeared for a sleeping titan");
+                check(YoungCarriers.whistle(p[0], Titans.STONE_WHALE), "a sleeping titan's call was refused");
+                YoungEntity sleepy = YoungCarriers.of(p[0].getUUID());
+                check(sleepy != null, "no young one appeared while the titan slept");
+                // 遠くに置いた (誰も乗っていない) 子は、もう一度吹くと足もとへ呼び直される
+                if (sleepy != null) {
+                    sleepy.setPos(sleepy.getX() + 200, sleepy.getY(), sleepy.getZ());
+                    check(YoungCarriers.whistle(p[0], Titans.STONE_WHALE), "a far young one was not called back");
+                    YoungEntity back = YoungCarriers.of(p[0].getUUID());
+                    check(back != null && back != sleepy && sleepy.isRemoved() && back.distanceTo(p[0]) < 30, "the far young one was not replaced near the caller");
+                    if (back != null) {
+                        back.discard();
+                    }
+                }
                 TitanDormancy.clear(server, Titans.STONE_WHALE);
                 check(!YoungCarriers.whistle(p[6], Titans.STONE_WHALE), "a player who had not met the titan could call it");
                 // パーティ: p0 が持ち主、p0〜p5
@@ -298,9 +309,8 @@ public final class YoungSelfTest {
                     return false;
                 }
                 check(YoungCarriers.of(p[0].getUUID()) == null, "the young one is still registered");
-                check(Voyages.cooldownLeft(p[0]) > 0, "no cooldown after the trip");
-                // 二度目: ログアウト・途中で溶ける
-                Voyages.state(p[0]).readyAt = 0;
+                check(Voyages.cooldownLeft(p[0]) == 0, "a wait was left after the trip (the call must answer any time)");
+                // 二度目: ログアウト・途中で溶ける (待ちなしですぐ吹ける)
                 for (int i = 0; i < 3; i++) {
                     p[i].setPos(platform.getX() + 0.5 + i, platform.getY() + 1, platform.getZ() + 0.5);
                 }

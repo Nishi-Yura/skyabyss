@@ -15,7 +15,7 @@ import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
 
 // 雷翼の装備の画面側:
-//  - 雷翼の弓の引き絵 (バニラの pull / pulling の印。バニラは Items.BOW にしか登録しない)
+//  - 雷翼の弓・深淵の雷弓の引き絵 (バニラの pull / pulling の印。バニラは Items.BOW にしか登録しない)
 //  - 空駆けのキー: 空中で跳躍のキーを押し直したら、手元ですぐ動かしてサーバーへ知らせる (サーバーが確かめて同じ向きに動かし、待ちを付ける)
 @EventBusSubscriber(modid = SkyAbyss.MODID, value = Dist.CLIENT)
 public final class StormGearClient {
@@ -28,14 +28,18 @@ public final class StormGearClient {
     @SubscribeEvent
     static void onClientSetup(FMLClientSetupEvent event) {
         event.enqueueWork(() -> {
-            ItemProperties.register(StormGearSetup.BOW.get(), ResourceLocation.withDefaultNamespace("pull"), (stack, level, entity, seed) -> {
-                if (entity == null || entity.getUseItem() != stack) {
-                    return 0f;
-                }
-                return (stack.getUseDuration(entity) - entity.getUseItemRemainingTicks()) / 20f;
-            });
-            ItemProperties.register(StormGearSetup.BOW.get(), ResourceLocation.withDefaultNamespace("pulling"),
-                    (stack, level, entity, seed) -> entity != null && entity.isUsingItem() && entity.getUseItem() == stack ? 1f : 0f);
+            // 深淵の雷弓 (雷淵の弓) も同じ印を持つ。登録がないと引いている間も持ち方 (display) が引き絵のものに切り替わらず、
+            // 弓が引く前の向きのまま引き絵のメッシュだけが描かれて、構えの向きが狂っていた (2026-10-21 の試遊の声)
+            for (net.minecraft.world.item.Item bow : java.util.List.of(StormGearSetup.BOW.get(), jp.revati.skyabyss.abyss.AbyssSetup.STORM_BOW_ITEM.get())) {
+                ItemProperties.register(bow, ResourceLocation.withDefaultNamespace("pull"), (stack, level, entity, seed) -> {
+                    if (entity == null || entity.getUseItem() != stack) {
+                        return 0f;
+                    }
+                    return (stack.getUseDuration(entity) - entity.getUseItemRemainingTicks()) / 20f;
+                });
+                ItemProperties.register(bow, ResourceLocation.withDefaultNamespace("pulling"),
+                        (stack, level, entity, seed) -> entity != null && entity.isUsingItem() && entity.getUseItem() == stack ? 1f : 0f);
+            }
         });
     }
 

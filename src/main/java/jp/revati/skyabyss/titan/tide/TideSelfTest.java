@@ -238,6 +238,7 @@ public final class TideSelfTest {
         if (Math.abs(first.getY() - (level.getSeaLevel() - TideShellEntity.REST_DRAFT)) > 1e-6) {
             failures.add("restHere is not at the rest height: " + first.getY());
         }
+        checkTouchBoard(level, first, failures);
         // 状態の引き継ぎ: 最後に休んだ場所と刻は残り、巡航から始める
         CompoundTag state = first.saveState();
         TideShellEntity second = TideKeeper.KEEPER.spawn(level, x + 64, z, state);
@@ -273,6 +274,40 @@ public final class TideSelfTest {
         // 光を測る所は海面より上 (水の底で真っ黒に描かれない)
         if (second.getLightProbePosition(1f).y < level.getSeaLevel()) {
             failures.add("the light probe is under the sea");
+        }
+    }
+
+    // 甲羅に触れて乗る (潮門と反対の右の縁、海面の高さ): 資格のある人は背中へ渡り、ない人は地上に残る (押し出される)
+    private static void checkTouchBoard(ServerLevel level, TideShellEntity shell, List<String> failures) {
+        jp.revati.skyabyss.progress.ProgressData progress = jp.revati.skyabyss.progress.ProgressData.get(level.getServer());
+        net.neoforged.neoforge.common.util.FakePlayer ok = new net.neoforged.neoforge.common.util.FakePlayer(level, new com.mojang.authlib.GameProfile(java.util.UUID.randomUUID(), "tide_touch_ok"));
+        net.neoforged.neoforge.common.util.FakePlayer no = new net.neoforged.neoforge.common.util.FakePlayer(level, new com.mojang.authlib.GameProfile(java.util.UUID.randomUUID(), "tide_touch_early"));
+        try {
+            progress.markPersonal(ok.getUUID(), jp.revati.skyabyss.progress.Titans.STONE_WHALE);
+            // 前の自己テスト (心臓の戦い) が潮殻を眠らせたままなら、起こしてから (眠っている巨神には乗れない)
+            jp.revati.skyabyss.titan.end.TitanDormancy.clear(level.getServer(), jp.revati.skyabyss.progress.Titans.TIDE_SHELL);
+            Vec3 local = new Vec3(-37, level.getSeaLevel() - shell.getY() + 0.5, -32);
+            Vec3 world = shell.position().add(TideShellEntity.offset(shell.getYRot(), local.x, local.y, local.z));
+            jp.revati.skyabyss.titan.solid.TitanVolume vol = jp.revati.skyabyss.titan.solid.TitanVolume.get(shell.volumeName());
+            if (vol == null || !jp.revati.skyabyss.titan.solid.TitanSolids.blocked(vol, shell.corridors(), local, false)) {
+                failures.add("the touch test point is not on the shell's keep-out: " + local);
+            }
+            no.moveTo(world.x, world.y - 0.9, world.z);
+            ok.moveTo(world.x, world.y - 0.9, world.z);
+            if (shell.boardOnTouch(no, local) || no.level().dimension() != Level.OVERWORLD) {
+                failures.add("a player who did not stop the whale crossed by touching the shell");
+            }
+            if (!shell.boardOnTouch(ok, local) || ok.level().dimension() != TideTravel.TIDE_BACK) {
+                failures.add("touching the resting shell did not take a qualified player to its back (now in " + ok.level().dimension().location() + ")");
+            }
+        } finally {
+            for (net.neoforged.neoforge.common.util.FakePlayer p : List.of(ok, no)) {
+                if (p.level() instanceof ServerLevel at) {
+                    at.removePlayerImmediately(p, Entity.RemovalReason.DISCARDED);
+                }
+                TideTravel.PASSAGE.forget(p.getUUID());
+                progress.clearPersonal(p.getUUID(), jp.revati.skyabyss.progress.Titans.STONE_WHALE);
+            }
         }
     }
 

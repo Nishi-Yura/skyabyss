@@ -1,0 +1,176 @@
+# 雷淵の弓・底なしの大剣の持ち方の確かめ (gen_weapon_hold_shots.py --tiers legend の 4 種。比べる正しい二つ: 雷翼の弓・鯨骨の大剣)
+world shots flat
+size 960 540
+timeout 3000
+render 6
+cmd time set noon
+cmd weather clear
+cmd gamemode creative
+camera 0 -60 8 180 0
+waitchunks
+hud on
+wait 350
+cmd skyabyss cinematic stop
+close
+wait 20
+swingpose off
+weapontier legend
+cmd item replace entity @s weapon.mainhand with skyabyss:thunder_wing_bow
+mainhand right
+perspective first
+bodyyaw 0
+hud on
+close
+wait 8
+chat clear
+shot hold_thunder_wing_bow_legend_fpR
+perspective front
+bodyyaw 0
+hud off
+close
+wait 8
+chat clear
+shot hold_thunder_wing_bow_legend_tpR
+perspective front
+bodyyaw 50
+hud off
+close
+wait 8
+chat clear
+shot hold_thunder_wing_bow_legend_tpSide
+perspective first
+hud on
+bodyyaw 0
+use
+wait 26
+chat clear
+shot hold_thunder_wing_bow_legend_fpDraw
+perspective front
+bodyyaw 0
+hud off
+wait 4
+shot hold_thunder_wing_bow_legend_tpDraw
+bodyyaw 50
+wait 4
+shot hold_thunder_wing_bow_legend_tpDrawSide
+stopuse
+wait 20
+cmd item replace entity @s weapon.mainhand with skyabyss:abyss_storm_bow
+mainhand right
+perspective first
+bodyyaw 0
+hud on
+close
+wait 8
+chat clear
+shot hold_abyss_storm_bow_legend_fpR
+perspective front
+bodyyaw 0
+hud off
+close
+wait 8
+chat clear
+shot hold_abyss_storm_bow_legend_tpR
+perspective front
+bodyyaw 50
+hud off
+close
+wait 8
+chat clear
+shot hold_abyss_storm_bow_legend_tpSide
+mainhand left
+perspective first
+bodyyaw 0
+hud on
+close
+wait 8
+chat clear
+shot hold_abyss_storm_bow_legend_fpL
+perspective front
+bodyyaw 0
+hud off
+close
+wait 8
+chat clear
+shot hold_abyss_storm_bow_legend_tpL
+mainhand right
+perspective first
+hud on
+bodyyaw 0
+use
+wait 26
+chat clear
+shot hold_abyss_storm_bow_legend_fpDraw
+perspective front
+bodyyaw 0
+hud off
+wait 4
+shot hold_abyss_storm_bow_legend_tpDraw
+bodyyaw 50
+wait 4
+shot hold_abyss_storm_bow_legend_tpDrawSide
+stopuse
+wait 20
+cmd item replace entity @s weapon.mainhand with skyabyss:whalebone_greatsword
+mainhand right
+perspective first
+bodyyaw 0
+hud on
+close
+wait 8
+chat clear
+shot hold_whalebone_greatsword_legend_fpR
+perspective front
+bodyyaw 0
+hud off
+close
+wait 8
+chat clear
+shot hold_whalebone_greatsword_legend_tpR
+perspective front
+bodyyaw 50
+hud off
+close
+wait 8
+chat clear
+shot hold_whalebone_greatsword_legend_tpSide
+cmd item replace entity @s weapon.mainhand with skyabyss:abyss_greatsword
+mainhand right
+perspective first
+bodyyaw 0
+hud on
+close
+wait 8
+chat clear
+shot hold_abyss_greatsword_legend_fpR
+perspective front
+bodyyaw 0
+hud off
+close
+wait 8
+chat clear
+shot hold_abyss_greatsword_legend_tpR
+perspective front
+bodyyaw 50
+hud off
+close
+wait 8
+chat clear
+shot hold_abyss_greatsword_legend_tpSide
+mainhand left
+perspective first
+bodyyaw 0
+hud on
+close
+wait 8
+chat clear
+shot hold_abyss_greatsword_legend_fpL
+perspective front
+bodyyaw 0
+hud off
+close
+wait 8
+chat clear
+shot hold_abyss_greatsword_legend_tpL
+mainhand right
+quit

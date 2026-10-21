@@ -177,6 +177,10 @@ public final class TitanSolids {
         if (!blocked(volume, corridors, local, false)) {
             return false;
         }
+        // 触れたら乗り込み口へ渡す巨神 (渡したら押し出さない)
+        if (solid.boardOnTouch(player, local)) {
+            return false;
+        }
         boolean hard = blocked(volume, corridors, local, true);
         // 行き先に立てるか (地面や壁の中へは押し込まない)
         Predicate<Vec3> canStand = p -> {

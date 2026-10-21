@@ -42,6 +42,7 @@
   "subtitles.skyabyss.tide_back_waves": "Waves lap",
   "message.skyabyss.tide.ebb": "The tide is going out. The island offshore is drifting toward the shallows...",
   "message.skyabyss.tide.gate_hint": "Walk through the glowing arch on the water to cross onto its back",
+  "message.skyabyss.tide.shore_hint": "Step into the ring of light on the shore to cross onto its back. Touching the shell works too",
   "message.skyabyss.tide.arrived": "Through the water, you stand on a great flipper. Before you, a vast shell slowly breathes.",
   "message.skyabyss.tide.leaving": "Beyond the tide gate, you hear the sea of the world below.",
   "message.skyabyss.tide.return_hint": "Wade down the farewell steps, or use the tide shell whistle again, to return to the surface",

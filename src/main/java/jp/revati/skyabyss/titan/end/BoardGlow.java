@@ -41,7 +41,12 @@ public final class BoardGlow {
 
     // 光の柱と枠の知らせ (巨神ごとの色)
     public static TitanEndNetwork.Beam beam(String titan, Shape s) {
-        return new TitanEndNetwork.Beam(titan, colour(titan), s.centre().x, s.centre().y, s.centre().z, s.hx(), s.hy(), s.hz(), s.yaw(),
+        return beam(titan, titan, s);
+    }
+
+    // key = 知らせの鍵 (同じ巨神の二つ目の標は「巨神#名札」。クライアントは鍵ごとに一つ描く)
+    public static TitanEndNetwork.Beam beam(String key, String titan, Shape s) {
+        return new TitanEndNetwork.Beam(key, colour(titan), s.centre().x, s.centre().y, s.centre().z, s.hx(), s.hy(), s.hz(), s.yaw(),
                 s.beamFrom(), s.beamTo(), s.beamRadius(), BEAM_TTL);
     }
 
@@ -84,6 +89,11 @@ public final class BoardGlow {
 
     // points に光を出す。EVERY tick ごとに呼んでよい (それ以外の tick は何もしない)。光を送った人の数を返す
     public static int emit(ServerLevel level, String titan, List<Vec3> points, Shape shape) {
+        return emit(level, titan, titan, points, shape);
+    }
+
+    // key = 光の柱と枠の知らせの鍵 (同じ巨神に標を二つ立てるとき、二つ目は「巨神#名札」)
+    public static int emit(ServerLevel level, String titan, String key, List<Vec3> points, Shape shape) {
         long t = level.getGameTime();
         if (points.isEmpty() || t % EVERY != 0 || TitanDormancy.isResting(level.getServer(), titan)) {
             return 0;
@@ -111,7 +121,7 @@ public final class BoardGlow {
             served++;
             if (t % BEAM_EVERY == 0 && player.distanceToSqr(shape.centre()) < (RANGE + 40) * (RANGE + 40)) {
                 // 光の柱と枠 (遠くからでも見える。乗れる人にだけ、巨神が眠る・去るとすぐ消える)
-                PacketDistributor.sendToPlayer(player, beam(titan, shape));
+                PacketDistributor.sendToPlayer(player, beam(key, titan, shape));
             }
             // 岩鯨は、鎖の下の地面の陣と鎖そのものが目印なので、鎖に沿った青い粒は出さない (ユーザーの声)
             if (Titans.STONE_WHALE.equals(titan)) {

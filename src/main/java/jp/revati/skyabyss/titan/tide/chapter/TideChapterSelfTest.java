@@ -330,7 +330,51 @@ public final class TideChapterSelfTest {
         if (third != null) {
             third.discard();
         }
+        shoreBoard(server, level, f);
         jp.revati.skyabyss.titan.tide.TideBeach.testOff = false;
+    }
+
+    // 浜の乗り場: 岸から 20 ブロック沖に乗り場の輪が来るように休んだ潮殻は、岸に光の輪を立てる。岸を歩いてその輪に入った人は背中へ渡る
+    private static void shoreBoard(MinecraftServer server, ServerLevel level, List<String> f) {
+        jp.revati.skyabyss.progress.ProgressData progress = jp.revati.skyabyss.progress.ProgressData.get(server);
+        // 左 (潮門) を西の岸へ向ける: 向き 180 で左は -x
+        TideShellEntity shell = TideKeeper.KEEPER.spawn(level, SHORE + (int) TideShellEntity.DOCK_SIDE + 20, Z + 64, null);
+        FakePlayer walker = new FakePlayer(level, new GameProfile(UUID.randomUUID(), "skyabyss_ch2_shore_walker"));
+        try {
+            if (shell == null) {
+                f.add("no tide shell for the shore dock test");
+                return;
+            }
+            shell.setYRot(180f);
+            shell.restHere();
+            shell.searchShoreDockNow();
+            Vec3 sd = shell.shoreDock();
+            Vec3 dock = shell.dockCenter();
+            check(f, sd != null, "a resting shell 20 blocks off the shore has no shore dock (dock " + dock + ")");
+            if (sd == null) {
+                return;
+            }
+            check(f, sd.x <= SHORE + 1 && Math.hypot(sd.x - dock.x, sd.z - dock.z) <= 32, "the shore dock is not on the shore near the dock ring: " + sd + " (dock " + dock + ")");
+            check(f, !level.getFluidState(BlockPos.containing(sd.x, sd.y - 1, sd.z)).is(net.minecraft.tags.FluidTags.WATER), "the shore dock stands in water: " + sd);
+            progress.markPersonal(walker.getUUID(), jp.revati.skyabyss.progress.Titans.STONE_WHALE);
+            // 前の自己テスト (心臓の戦い) が潮殻を眠らせたままなら、起こしてから (眠っている巨神には乗れない)
+            jp.revati.skyabyss.titan.end.TitanDormancy.clear(level.getServer(), jp.revati.skyabyss.progress.Titans.TIDE_SHELL);
+            // 岸を歩いてくる: 輪の 6 ブロック手前 (陸) では渡らず、輪の中で渡る
+            walker.moveTo(sd.x - 6, sd.y, sd.z);
+            check(f, !shell.tryShoreBoard(walker), "a player 6 blocks from the shore ring crossed");
+            walker.moveTo(sd.x + 0.5, sd.y, sd.z);
+            check(f, shell.tryShoreBoard(walker) && walker.level().dimension() == jp.revati.skyabyss.titan.tide.TideTravel.TIDE_BACK,
+                    "walking into the shore ring did not take the player to the tide back");
+        } finally {
+            if (walker.level() instanceof ServerLevel at) {
+                at.removePlayerImmediately(walker, net.minecraft.world.entity.Entity.RemovalReason.DISCARDED);
+            }
+            progress.clearPersonal(walker.getUUID(), jp.revati.skyabyss.progress.Titans.STONE_WHALE);
+            jp.revati.skyabyss.titan.tide.TideTravel.PASSAGE_FORGET.accept(walker.getUUID());
+            if (shell != null) {
+                shell.discard();
+            }
+        }
     }
 
     // ---------------------------------------------------------------- 大干潮

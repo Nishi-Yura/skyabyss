@@ -15,7 +15,12 @@ import net.minecraft.world.level.Level;
 
 // 岩鯨の背から地上へ垂れた鎖の、つかめる部分 (地面近くの数ブロック)。
 // 見た目は岩鯨の描画側で描き、これは右クリックを受け取るための見えない当たり判定。保存はしない
-public class WhaleChainEntity extends Entity {
+public class WhaleChainEntity extends Entity implements jp.revati.skyabyss.titan.TitanVisibility.Hidden {
+    @Override
+    public String visibilityTitan() {
+        return jp.revati.skyabyss.progress.Titans.STONE_WHALE;
+    }
+
     // 巨神の見え方 (docs/design/32 の 3.3): 章を終えた人 (とそのパーティでない人) には実体を送らない
     @Override
     public boolean broadcastToPlayer(net.minecraft.server.level.ServerPlayer player) {

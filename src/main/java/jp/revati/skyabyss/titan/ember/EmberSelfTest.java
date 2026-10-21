@@ -256,6 +256,13 @@ public final class EmberSelfTest {
             ok.moveTo(m.x, m.y, m.z);
             no.moveTo(m.x, m.y, m.z);
             expect(titan.inMouth(ok.getX(), ok.getY(), ok.getZ()), "a player standing on the tongue is not in the mouth", f);
+            // 入りやすい口: 舌の横 4・舌の 3 下・唇の先 (前 89) も口。口の前の通り道 (横 8) は押し返さない
+            Vec3 side = titan.position().add(EmberTitanEntity.offset(titan.getYRot(), 4.0, EmberTitanEntity.TONGUE_UP - 3.0, 89.0));
+            expect(titan.inMouth(side.x, side.y, side.z), "the widened mouth does not reach 4 to the side, 3 below the tongue, at the lips", f);
+            jp.revati.skyabyss.titan.solid.TitanVolume vol = jp.revati.skyabyss.titan.solid.TitanVolume.get(titan.volumeName());
+            expect(vol != null && !jp.revati.skyabyss.titan.solid.TitanSolids.blocked(vol, titan.corridors(), new Vec3(8.0, EmberTitanEntity.TONGUE_UP + 0.9, 80.0), false)
+                    && !jp.revati.skyabyss.titan.solid.TitanSolids.blocked(vol, titan.corridors(), new Vec3(0, -4.0, 95.0), false),
+                    "the way into the mouth is closed (8 to the side, or under a raised tongue)", f);
             EmberTravel.boardFromMouth(no, titan);
             expect(no.level().dimension() == Level.OVERWORLD && EmberTravel.PASSAGE.coolingDown(no), "a player who did not stop the thunder wing was let in", f);
             EmberTravel.boardFromMouth(ok, titan);

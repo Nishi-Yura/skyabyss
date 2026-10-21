@@ -42,6 +42,7 @@
   "subtitles.skyabyss.tide_back_waves": "波が寄せる",
   "message.skyabyss.tide.ebb": "潮が引いていく。沖の島が、浅瀬へ寄ってくる……",
   "message.skyabyss.tide.gate_hint": "水の上の光の門をくぐると、背中へ渡る",
+  "message.skyabyss.tide.shore_hint": "岸の光の輪に入ると、背中へ渡る。甲羅に触れても渡れる",
   "message.skyabyss.tide.arrived": "水をくぐると、巨きなひれの上にいた。目の前で、山のような甲羅がゆっくりと息をしている。",
   "message.skyabyss.tide.leaving": "潮門の向こうから、地上の海の音がする。",
   "message.skyabyss.tide.return_hint": "見送りの段を下りて海に入るか、潮殻の笛をもう一度使うと、地上へ戻る",

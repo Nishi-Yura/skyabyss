@@ -13,7 +13,6 @@ import jp.revati.skyabyss.ModText;
 import jp.revati.skyabyss.SkyAbyss;
 import jp.revati.skyabyss.notice.Notice;
 import jp.revati.skyabyss.progress.Progression;
-import jp.revati.skyabyss.titan.end.TitanDormancy;
 import jp.revati.skyabyss.titan.travel.LandingFinder;
 import jp.revati.skyabyss.titan.travel.TitanCalls;
 import jp.revati.skyabyss.titan.travel.TravelNetwork;
@@ -83,11 +82,6 @@ public final class YoungCarriers {
     public static final double JOIN_RANGE = 48;
     // 右クリックで乗れる距離
     public static final double BOARD_RANGE = 12;
-    // 笛を吹き直せるまで (倒れた・溶けた後)
-    private static final int COMBAT_HURT = 200;
-    private static final int COMBAT_ATTACK = 100;
-    private static final double COMBAT_RADIUS = 16;
-
     private YoungCarriers() {
     }
 
@@ -138,7 +132,10 @@ public final class YoungCarriers {
 
     // ---------------------------------------------------------------- 笛
 
-    // 笛を吹いた。受け付けたら true (断ったときは理由を見せて false)
+    // 笛を吹いた。受け付けたら true (断ったときは理由を見せて false)。
+    // 笛はいつでも子を呼ぶ (2026-10-21 の試遊の声)。待ち・戦闘中・水の中・眠っている巨神・ほかの乗り物では断らない。
+    // 断るのは、どうしても呼べないときだけ: オーバーワールドの外 (背の中は ReturnBeacons が先に受ける)、場面の最中、
+    // 出会っていない巨神、仲間を乗せて運んでいる自分の子がいるとき、潮殻の稚貝で近くに水がまったくないとき
     public static boolean whistle(ServerPlayer player, String titan) {
         YoungKind kind = YoungKind.ofTitan(titan);
         if (kind == null) {
@@ -149,8 +146,11 @@ public final class YoungCarriers {
             Notice.bar(player, ModText.deny("message.skyabyss.titan_call.wrong_dimension", name));
             return false;
         }
+        if (jp.revati.skyabyss.cinematic.Cinematics.active(player)) {
+            return false;
+        }
         ServerLevel level = player.serverLevel();
-        // もう子がいる: 乗っていれば海図を開き直す。近くなら乗る
+        // もう子がいる: 乗っていれば海図を開き直す。近くなら乗る。遠くて誰も乗っていなければ、足もとへ呼び直す
         YoungEntity mine = of(player.getUUID());
         if (mine != null) {
             YoungTrip trip = mine.trip();
@@ -160,20 +160,22 @@ public final class YoungCarriers {
                 }
                 return true;
             }
-            if (trip != null && mine.distanceTo(player) <= JOIN_RANGE + bondRange(player.server, player.getUUID()) && boardable(mine)) {
+            if (trip != null && mine.level() == level && mine.distanceTo(player) <= JOIN_RANGE + bondRange(player.server, player.getUUID()) && boardable(mine)) {
                 tryBoard(mine, player);
                 return true;
             }
-            Notice.bar(player, ModText.hint("message.skyabyss.young.have_one"));
-            return false;
-        }
-        if (player.isPassenger()) {
-            Notice.bar(player, ModText.deny("message.skyabyss.travel.refuse.riding"));
-            return false;
+            if (mine.riderCount() > 0) {
+                Notice.bar(player, ModText.hint("message.skyabyss.young.have_one"));
+                return false;
+            }
+            mine.discard();
         }
         // 仲間の子が近くにいる: 乗る
         YoungEntity mate = mateCarrier(player);
         if (mate != null) {
+            if (player.isPassenger()) {
+                player.stopRiding();
+            }
             tryBoard(mate, player);
             return true;
         }
@@ -181,28 +183,16 @@ public final class YoungCarriers {
             Notice.bar(player, ModText.deny("message.skyabyss.titan_call.not_met", name));
             return false;
         }
-        if (TitanDormancy.isResting(player.server, titan)) {
-            sleeping(player, titan, name);
-            return false;
-        }
-        long wait = Voyages.state(player).readyAt - level.getGameTime();
-        if (wait > 0) {
-            Notice.bar(player, ModText.deny("message.skyabyss.travel.refuse.cooldown", (wait + 19) / 20));
-            return false;
-        }
-        if (player.isUnderWater() && kind.gait != YoungKind.Gait.SEA) {
-            Notice.bar(player, ModText.deny("message.skyabyss.travel.refuse.underwater"));
-            return false;
-        }
-        if (inCombat(player)) {
-            Notice.bar(player, ModText.deny("message.skyabyss.travel.refuse.in_combat"));
-            return false;
-        }
         Vec3 spot = findSpot(level, player, kind);
         if (spot == null) {
             Notice.bar(player, ModText.deny(kind == YoungKind.TIDE ? "message.skyabyss.young.refuse.no_sea" : "message.skyabyss.young.refuse.no_room", name));
             return false;
         }
+        // ほかの乗り物 (馬・舟など) からは降ろしてから呼ぶ
+        if (player.isPassenger()) {
+            player.stopRiding();
+        }
+        Voyages.state(player).readyAt = 0;
         YoungEntity young = spawn(level, kind, player, spot);
         level.playSound(null, spot.x, spot.y, spot.z, callSound(kind), SoundSource.PLAYERS, 3f, 1.4f);
         Notice.narrate(player, kind.text("called"));
@@ -254,34 +244,15 @@ public final class YoungCarriers {
         return best;
     }
 
-    private static void sleeping(ServerPlayer player, String titan, Component name) {
-        TitanDormancy.Rest rest = TitanDormancy.rest(player.server, titan);
-        long now = player.server.overworld().getGameTime();
-        if (rest != null && rest.wakeAt != Long.MAX_VALUE && rest.wakeAt > now) {
-            long minutes = Math.max(1, (rest.wakeAt - now + 1199) / 1200);
-            Notice.bar(player, ModText.hint("message.skyabyss.titan_call.sleeping", name, minutes));
-        } else {
-            Notice.bar(player, ModText.deny("message.skyabyss.titan_end.sleeping_call", name));
-        }
-    }
-
-    static boolean inCombat(ServerPlayer player) {
-        if (player.getLastHurtByMob() != null && player.tickCount - player.getLastHurtByMobTimestamp() < COMBAT_HURT) {
-            return true;
-        }
-        if (player.getLastHurtMob() != null && player.tickCount - player.getLastHurtMobTimestamp() < COMBAT_ATTACK) {
-            return true;
-        }
-        List<Mob> mobs = player.level().getEntitiesOfClass(Mob.class, player.getBoundingBox().inflate(COMBAT_RADIUS),
-                mob -> mob instanceof Enemy && mob.isAlive() && mob.getTarget() == player);
-        return !mobs.isEmpty();
-    }
-
-    // 子が現れる所: 人の前 (向いている方) の、体が入る開けた地面。潮殻の稚貝は水の上 (24 ブロック以内の水際)
+    // 子が現れる所: 人の前 (向いている方) の、体が入る開けた地面。潮殻の稚貝は水の上 (24 ブロック以内の水際、なければ 64 まで)。
+    // 陸の子は、開けた地面がなければ段差の大きい所・人の足もと・頭の上の地表の順にゆるめる (笛はいつでも応える)
     @Nullable
     static Vec3 findSpot(ServerLevel level, ServerPlayer player, YoungKind kind) {
         if (kind.gait == YoungKind.Gait.SEA) {
             BlockPos water = YoungReach.waterNear(level, player.blockPosition(), 24);
+            if (water == null) {
+                water = YoungReach.waterNear(level, player.blockPosition(), 64);
+            }
             if (water == null) {
                 return null;
             }
@@ -312,7 +283,33 @@ public final class YoungCarriers {
                 }
             }
         }
-        return null;
+        return looseSpot(level, player, fx, fz);
+    }
+
+    // ゆるめた子の出る所: 段差 12 まで・水の上も可 → 人の足もと (狭くても) → 頭の上の地表
+    static Vec3 looseSpot(ServerLevel level, ServerPlayer player, double fx, double fz) {
+        for (int ring = 0; ring < 6; ring++) {
+            double r = 3.5 + ring * 2.0;
+            for (int k = 0; k < 8; k++) {
+                double a = (k % 2 == 0 ? 1 : -1) * (k / 2) * 0.8;
+                double dx = fx * Math.cos(a) - fz * Math.sin(a);
+                double dz = fz * Math.cos(a) + fx * Math.sin(a);
+                double x = player.getX() + dx * r;
+                double z = player.getZ() + dz * r;
+                double h = YoungMotion.height(level, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z);
+                if (Double.isNaN(h) || Math.abs(h - player.getY()) > 12) {
+                    continue;
+                }
+                if (level.noCollision(new AABB(x - 1.2, h + 0.05, z - 1.2, x + 1.2, h + 2.4, z + 1.2))) {
+                    return new Vec3(x, h, z);
+                }
+            }
+        }
+        if (level.noCollision(new AABB(player.getX() - 0.9, player.getY() + 0.05, player.getZ() - 0.9, player.getX() + 0.9, player.getY() + 2.0, player.getZ() + 0.9))) {
+            return player.position();
+        }
+        double h = YoungMotion.height(level, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, player.getX(), player.getZ());
+        return new Vec3(player.getX(), Double.isNaN(h) ? player.getY() : h, player.getZ());
     }
 
     // ---------------------------------------------------------------- 乗る

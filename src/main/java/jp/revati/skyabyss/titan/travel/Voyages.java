@@ -46,10 +46,9 @@ public final class Voyages {
         return r != null && r.clears > 0;
     }
 
-    // 残りの待ち (tick。笛を吹き直せるまで)
+    // 残りの待ち (tick)。笛に待ちはない (いつでも呼べる。28 の 3.2) ので、いつも 0
     public static long cooldownLeft(ServerPlayer player) {
-        long now = player.server.overworld().getGameTime();
-        return Math.max(0, state(player).readyAt - now);
+        return 0;
     }
 
     // ---------------------------------------------------------------- 記録
@@ -61,9 +60,8 @@ public final class Voyages {
         Quests.signal(player, "titan_voyage");
     }
 
+    // 旅のあとの待ちは置かない (笛はいつでも呼べる)。古い記録の readyAt は読み捨てる
     public static void setCooldown(ServerPlayer player, int ticks) {
-        TravelState s = state(player);
-        s.readyAt = Math.max(s.readyAt, player.server.overworld().getGameTime() + ticks);
     }
 
     // 世界にもうない碑を、プレイヤーの記録から外す。外した数を返す

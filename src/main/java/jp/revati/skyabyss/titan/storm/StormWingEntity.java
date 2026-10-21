@@ -41,7 +41,12 @@ import software.bernie.geckolib.util.GeckoLibUtil;
 // - 空の影が 640 ブロック以内を通るあいだは、近くの峰へ急いで降りてうずくまる (演出だけ)
 // 当たり判定は小さく、見た目は描画側で 8 倍にする (潮殻と同じ)。位置の y はモデルの底 (geo の y=0)
 // 地上の人には、この中心の周りを回る巨神として見える。地形は変えない (エンティティと粒だけ)
-public class StormWingEntity extends Entity implements GeoEntity, jp.revati.skyabyss.titan.end.DormantTitan, jp.revati.skyabyss.titan.solid.SolidTitan {
+public class StormWingEntity extends Entity implements GeoEntity, jp.revati.skyabyss.titan.end.DormantTitan, jp.revati.skyabyss.titan.solid.SolidTitan, jp.revati.skyabyss.titan.TitanVisibility.Hidden {
+    @Override
+    public String visibilityTitan() {
+        return jp.revati.skyabyss.progress.Titans.THUNDER_WING;
+    }
+
     // 巨神の見え方 (docs/design/32 の 3.3): 章を終えた人 (とそのパーティでない人) には実体を送らない
     @Override
     public boolean broadcastToPlayer(net.minecraft.server.level.ServerPlayer player) {
