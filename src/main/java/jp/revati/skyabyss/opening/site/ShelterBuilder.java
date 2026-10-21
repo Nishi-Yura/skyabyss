@@ -58,6 +58,21 @@ public final class ShelterBuilder {
         if (job.mark("altar") != null && job.mark("bell") != null) {
             jp.revati.skyabyss.quest.free.FreeQuestData.get(job.level.getServer().overworld()).markBoard(job.mark("bell").asLong());
         }
+        // 都の施設の係の人 (npc_<役>) と宿の寝台 (inn_bed*) の印を写し、係の人を立たせる (docs/design/35 の 6 章。印がなければ何もしない)
+        java.util.Map<String, BlockPos> facility = new java.util.LinkedHashMap<>();
+        for (String key : job.bp.marks.keySet()) {
+            if (jp.revati.skyabyss.facility.Attendants.ours(key)) {
+                BlockPos at = job.mark(key);
+                if (at != null) {
+                    job.entry.extra(key, at);
+                    facility.put(key, at);
+                }
+            }
+        }
+        if (!facility.isEmpty()) {
+            int placed = jp.revati.skyabyss.facility.Attendants.ensureAll(job.level, facility);
+            SkyAbyss.LOGGER.info("Opening capital: {} facility mark(s), {} attendant(s) placed", facility.size(), placed);
+        }
         int villagers = 0;
         for (int i = 1; i <= 10; i++) {
             BlockPos at = job.mark("villager_" + i);

@@ -191,7 +191,9 @@ public final class NpcMarkerClient {
             // 頭の上でゆっくり上下する (周期 2.5 秒ほど)。新しい・報告の印は、やわらかく脈打つ。遠いほど大きく (読める大きさを保つが、大きくなりすぎない)
             boolean urgent = marker != Marker.CHAT;
             double bob = Math.sin(time * 2.5 + e.getKey()) * (urgent ? 0.07 : 0.04);
-            Vec3 center = base.add(0, npc.getBbHeight() + 0.45 + bob, 0);
+            // 係の人は頭の上に施設の印があるので、その上に出す (FacilityIconClient)
+            double lift = npc instanceof jp.revati.skyabyss.facility.AttendantEntity ? jp.revati.skyabyss.client.facility.FacilityIconClient.QUEST_LIFT : 0;
+            Vec3 center = base.add(0, npc.getBbHeight() + 0.45 + lift + bob, 0);
             float scale = (float) Mth.clamp(dist / 10.0, 1.0, 2.4);
             float pulse = urgent ? 0.5f + 0.5f * (float) Math.sin(time * 3.2 + e.getKey()) : 0f;
             scale *= 1f + 0.06f * pulse;

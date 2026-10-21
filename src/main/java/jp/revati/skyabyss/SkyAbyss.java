@@ -56,6 +56,8 @@ public class SkyAbyss {
         jp.revati.skyabyss.rpg.skill.Skills.register(modEventBus);
         // NPC (語り部・鯨追い、好感度) とクエスト (記録)。登録は npc / quest パッケージにまとめてある
         jp.revati.skyabyss.npc.NpcSetup.register(modEventBus);
+        // 都の施設 (係の人・鐘銭・店・預かり所・宿・ギルド)。docs/design/35
+        jp.revati.skyabyss.facility.FacilitySetup.register(modEventBus);
         jp.revati.skyabyss.quest.QuestSetup.register(modEventBus);
         // 自由なモードのサブクエスト (言伝ての板)。docs/design/07 の 15 章
         jp.revati.skyabyss.quest.free.FreeQuestSetup.register(modEventBus);

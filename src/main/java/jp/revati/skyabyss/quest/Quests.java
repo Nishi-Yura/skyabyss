@@ -369,6 +369,8 @@ public final class Quests {
                 }
             }
             reward.affinity().forEach((role, amount) -> Affinity.add(player, role, amount));
+            // 言伝ての板の頼みは鐘銭も (docs/design/35 の 4 章)
+            jp.revati.skyabyss.facility.Coins.onQuestPaid(player, def);
         }
         StoryContext ctx = StoryContext.of(player);
         reward.actions().forEach(a -> a.run(ctx));
