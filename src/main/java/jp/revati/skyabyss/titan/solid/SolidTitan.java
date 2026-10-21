@@ -13,6 +13,12 @@ public interface SolidTitan {
     // 立入禁止の中でも入ってよい所 (鎖の下・潮門・昇り風・熱の口)。巨神の向きの局所 (横, 上, 前)
     List<Corridor> corridors();
 
+    // 体 (立入禁止) に触れた人を、乗り込み口へ渡すか (渡したら true。押し出さない)。local は人の体の真ん中の局所 (横, 上, 前)。
+    // 潮殻は甲羅のどこに触れても潮門へ、余燼は頭のまわりに触れれば口が開いているあいだ口へ (2026-10-21 の試遊の声: 当たりに押し返されて乗れない)
+    default boolean boardOnTouch(net.minecraft.server.level.ServerPlayer player, net.minecraft.world.phys.Vec3 local) {
+        return false;
+    }
+
     // いま体に入れないか。眠って沈んだ・消えかけの巨神は false
     default boolean solidActive() {
         return !((Entity) this).isRemoved();

@@ -27,10 +27,38 @@ import jp.revati.skyabyss.util.Players;
 // 巨神の見え方 (docs/design/32 の 3.3)。空・海・嵐・地を泳ぐ成体の巨神は、その章を遊んでいる人 (まだその心臓を止めていない人) と、
 // その人のパーティ (同じグループのオンラインの人) にしか見えない。章を終えた人には、本体・鎖・昇り風・口の実体を送らず
 // (各実体の broadcastToPlayer)、歌・地鳴りの音も届けない (playSound)。体の当たり (TitanSolids) と乗り込み口も働かない。
-// 物語の決まり (ゲームルール skyabyssStoryGate) を切っているときと、観戦者・クリエイティブには、いつも見える
+// 物語の決まり (ゲームルール skyabyssStoryGate) を切っているときと、観戦者・クリエイティブには、いつも見える。
+// 例外: 心臓を止めて運び出された人 (と運ばれた仲間) は、その眠り (TitanDormancy) が終わるまで眠る姿と去る姿を見る (眠りの場面のため)。
+// 送るかどうかは、巨神が動いて区画をまたいだときだけでなく 1 秒ごとに見直す (resync。止まって待つ巨神でも、止めた人から消える)
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class TitanVisibility {
     private TitanVisibility() {
+    }
+
+    // 見え方を受ける実体 (本体・鎖・昇り風・口)。broadcastToPlayer で sees を見るもの
+    public interface Hidden {
+        String visibilityTitan();
+    }
+
+    // 眠りを見届ける人 (巨神 → 人)。心臓を止めた戦いで運ばれた人。眠りが終われば消す (保存しない)
+    private static final Map<String, java.util.Set<UUID>> REST_WITNESS = new HashMap<>();
+
+    // 心臓が止まった (TitanEnd.onHeartStopped)。ids の人は、眠りが終わるまで巨神を見る
+    public static void witnessRest(String titan, java.util.Collection<UUID> ids) {
+        REST_WITNESS.computeIfAbsent(titan, k -> new java.util.HashSet<>()).addAll(ids);
+        CACHE.clear();
+    }
+
+    private static boolean restWitness(MinecraftServer server, UUID player, String titan) {
+        java.util.Set<UUID> w = REST_WITNESS.get(titan);
+        if (w == null) {
+            return false;
+        }
+        if (!jp.revati.skyabyss.titan.end.TitanDormancy.isResting(server, titan)) {
+            REST_WITNESS.remove(titan);
+            return false;
+        }
+        return w.contains(player);
     }
 
     // 判定の使い回し (人 + 巨神 → {判定, 時刻})。20 tick ごとに見直す
@@ -65,7 +93,7 @@ public final class TitanVisibility {
 
     static boolean compute(ServerPlayer sp, String titan) {
         MinecraftServer server = sp.server;
-        if (!stopped(server, sp.getUUID(), titan)) {
+        if (!stopped(server, sp.getUUID(), titan) || restWitness(server, sp.getUUID(), titan)) {
             return true;
         }
         UUID group = Groups.keyOf(sp);
@@ -96,9 +124,94 @@ public final class TitanVisibility {
         CACHE.clear();
     }
 
+    // ---------------------------------------------------------------- 送り直し
+    // バニラは、実体か人が区画をまたいだときにしか broadcastToPlayer を見直さない。止まって待つ巨神 (鎖を下ろした岩鯨・潮門を開けた潮殻など) は
+    // 区画をまたがないので、心臓を止めた・パーティを抜けた人にも送られたままになる。1 秒ごとに、見え方を受ける実体を全員について見直す
+    private static java.lang.reflect.Field entityMapField;
+    private static java.lang.reflect.Method updatePlayerMethod;
+    private static boolean reflectFailed;
+    // サーバーにいる、見え方を受ける実体 (巨神は種類ごとに一体なので、数は少ない)
+    private static final java.util.Set<net.minecraft.world.entity.Entity> HIDDEN = java.util.Collections.newSetFromMap(new java.util.WeakHashMap<>());
+
+    @SubscribeEvent
+    static void onJoin(net.neoforged.neoforge.event.entity.EntityJoinLevelEvent event) {
+        if (!event.getLevel().isClientSide() && event.getEntity() instanceof Hidden) {
+            HIDDEN.add(event.getEntity());
+        }
+    }
+
+    @SubscribeEvent
+    static void onLeave(net.neoforged.neoforge.event.entity.EntityLeaveLevelEvent event) {
+        if (!event.getLevel().isClientSide()) {
+            HIDDEN.remove(event.getEntity());
+        }
+    }
+
+    @SubscribeEvent
+    static void onLevelTick(net.neoforged.neoforge.event.tick.LevelTickEvent.Post event) {
+        if (event.getLevel() instanceof ServerLevel level && level.dimension() == Level.OVERWORLD && level.getGameTime() % CACHE_TICKS == 7) {
+            resync(level);
+        }
+    }
+
+    // 見え方を受ける実体の送り先を、今の判定に合わせる。見直した実体の数 (自己テスト)
+    public static int resync(ServerLevel level) {
+        if (reflectFailed || level.players().isEmpty()) {
+            return 0;
+        }
+        try {
+            if (entityMapField == null) {
+                entityMapField = net.minecraft.server.level.ChunkMap.class.getDeclaredField("entityMap");
+                entityMapField.setAccessible(true);
+            }
+            Map<?, ?> map = (Map<?, ?>) entityMapField.get(level.getChunkSource().chunkMap);
+            int n = 0;
+            for (net.minecraft.world.entity.Entity e : java.util.List.copyOf(HIDDEN)) {
+                Object tracked = e.level() == level && !e.isRemoved() ? map.get(e.getId()) : null;
+                if (tracked == null) {
+                    continue;
+                }
+                if (updatePlayerMethod == null) {
+                    updatePlayerMethod = tracked.getClass().getDeclaredMethod("updatePlayer", ServerPlayer.class);
+                    updatePlayerMethod.setAccessible(true);
+                }
+                for (ServerPlayer p : Players.snapshot(level.players())) {
+                    updatePlayerMethod.invoke(tracked, p);
+                }
+                n++;
+            }
+            return n;
+        } catch (ReflectiveOperationException | RuntimeException ex) {
+            reflectFailed = true;
+            SkyAbyss.LOGGER.warn("Titan visibility resync is off (could not reach the entity tracker): {}", ex.toString());
+            return 0;
+        }
+    }
+
+    // 自己テスト: その人に、その実体が送られているか
+    public static boolean sentTo(ServerLevel level, net.minecraft.world.entity.Entity e, ServerPlayer p) {
+        try {
+            if (entityMapField == null) {
+                entityMapField = net.minecraft.server.level.ChunkMap.class.getDeclaredField("entityMap");
+                entityMapField.setAccessible(true);
+            }
+            Object tracked = ((Map<?, ?>) entityMapField.get(level.getChunkSource().chunkMap)).get(e.getId());
+            if (tracked == null) {
+                return false;
+            }
+            java.lang.reflect.Field seen = tracked.getClass().getDeclaredField("seenBy");
+            seen.setAccessible(true);
+            return ((java.util.Set<?>) seen.get(tracked)).contains(p.connection);
+        } catch (ReflectiveOperationException | RuntimeException ex) {
+            return false;
+        }
+    }
+
     @SubscribeEvent
     static void onServerStopped(ServerStoppedEvent event) {
         CACHE.clear();
+        REST_WITNESS.clear();
+        HIDDEN.clear();
         STOPPED_OVERRIDE = null;
     }
 }

@@ -180,6 +180,8 @@ public final class Progression {
             }
             jp.revati.skyabyss.party.PartyNetwork.syncSoon(player);
         }
+        // 見え方の判定を捨てる (止めた人から、眠りのあとは巨神が消える。32 の 3.3)
+        jp.revati.skyabyss.titan.TitanVisibility.clearCache();
         // 参加者の進みを書き終えてから (同じ戦いの仲間も「止めた人」に数える)
         if (worldFirst != null) {
             announceWorld(server, worldFirst, titan);

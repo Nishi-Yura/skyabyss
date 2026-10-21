@@ -47,9 +47,9 @@ public final class EmberTravel {
     }
 
     // 熱の口に入った (眠っていて、口が開いているとき)。資格がなければ「吐き出した」と押し出す
-    static void boardFromMouth(ServerPlayer player, EmberTitanEntity titan) {
+    static boolean boardFromMouth(ServerPlayer player, EmberTitanEntity titan) {
         if (PASSAGE.coolingDown(player)) {
-            return;
+            return false;
         }
         if (!Progression.canBoard(player, Titans.EMBER)) {
             PASSAGE.checkBoard(player);
@@ -57,11 +57,9 @@ public final class EmberTravel {
             Vec3 out = EmberTitanEntity.offset(titan.getYRot(), 0, 0, 1);
             player.push(out.x * 1.2, 0.35, out.z * 1.2);
             player.hurtMarked = true;
-            return;
+            return false;
         }
-        if (PASSAGE.admit(player)) {
-            board(player);
-        }
+        return PASSAGE.admit(player) && board(player);
     }
 
     // 背中へ渡す (コマンド・熱の口から)。乗れるのは、自分で雷翼の心臓を止めた人だけ (10 の 3 章)

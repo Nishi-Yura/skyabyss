@@ -17,7 +17,12 @@ import net.minecraft.world.phys.AABB;
 // 熱の口 (13 の 2.4節): 眠る巨神の舌の上の、見えない入口の判定。巨神が眠っているあいだだけ巨神が出し、保存しない。
 // 吸うと止めるのあいだ (10 秒) だけ、入った人を背中へ渡す。右クリックは要らない。吐くあいだは入れない (巨神の息が外へ押す)。
 // 乗る資格・待ち・乗り物から降ろすは共通の TitanGate (EmberTravel.PASSAGE)。見た目は巨神の描画が受け持つ
-public class EmberMouthEntity extends Entity {
+public class EmberMouthEntity extends Entity implements jp.revati.skyabyss.titan.TitanVisibility.Hidden {
+    @Override
+    public String visibilityTitan() {
+        return jp.revati.skyabyss.progress.Titans.EMBER;
+    }
+
     // 巨神の見え方 (docs/design/32 の 3.3): 章を終えた人 (とそのパーティでない人) には実体を送らない
     @Override
     public boolean broadcastToPlayer(net.minecraft.server.level.ServerPlayer player) {
@@ -60,7 +65,7 @@ public class EmberMouthEntity extends Entity {
         if (tickCount % 2 != 0 || !titan.mouthOpen()) {
             return;
         }
-        AABB around = getBoundingBox().inflate(4.0);
+        AABB around = getBoundingBox().inflate(9.0);
         for (ServerPlayer player : level().getEntitiesOfClass(ServerPlayer.class, around)) {
             if (!player.isSpectator() && titan.inMouth(player.getX(), player.getY(), player.getZ())
                     && jp.revati.skyabyss.titan.TitanVisibility.sees(player, jp.revati.skyabyss.progress.Titans.EMBER)) {

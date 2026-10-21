@@ -42,7 +42,12 @@ import software.bernie.geckolib.util.GeckoLibUtil;
 // 位置の y はモデルの底 (geo の y=0)。geo の 1 単位は 0.5 ブロック
 // 巨神での移動 (09 の 16 章): TravelTitan を実装する。旅の間は自分の動き (巡航・干潮) を止め、動きは旅の操縦 (titan.travel.SeaVoyage) が決める。
 // 乗り場は潮門の前の水 (泡の柱)、座席は甲羅の頂
-public class TideShellEntity extends Entity implements GeoEntity, TravelTitan, jp.revati.skyabyss.titan.end.DormantTitan, jp.revati.skyabyss.titan.solid.SolidTitan {
+public class TideShellEntity extends Entity implements GeoEntity, TravelTitan, jp.revati.skyabyss.titan.end.DormantTitan, jp.revati.skyabyss.titan.solid.SolidTitan, jp.revati.skyabyss.titan.TitanVisibility.Hidden {
+    @Override
+    public String visibilityTitan() {
+        return jp.revati.skyabyss.progress.Titans.TIDE_SHELL;
+    }
+
     // 巨神の見え方 (docs/design/32 の 3.3): 章を終えた人 (とそのパーティでない人) には実体を送らない
     @Override
     public boolean broadcastToPlayer(net.minecraft.server.level.ServerPlayer player) {
@@ -150,6 +155,12 @@ public class TideShellEntity extends Entity implements GeoEntity, TravelTitan, j
 
     // ---- 巨神での移動 (TravelTitan)
     private boolean voyage;
+    // 浜の乗り場 (休んでいるとき、乗り場の輪にいちばん近い岸の立てる所。輪まで泳がなくても、岸から歩いて入れば背中へ渡る)。
+    // 休み始めに一度だけ探す (保存しない)
+    @Nullable
+    private Vec3 shoreDock;
+    private boolean shoreSearched;
+    public static final double SHORE_RADIUS = 2.5;
     // 乗り場の泡の柱 (0 = たたんだ、COLUMN_UP = 立ちきった)
     private int column;
     private boolean columnWanted;
@@ -256,6 +267,76 @@ public class TideShellEntity extends Entity implements GeoEntity, TravelTitan, j
     public Vec3 gateExit() {
         Vec3 p = position().add(offset(getYRot(), EXIT_SIDE, 0, -GATE_BACK));
         return new Vec3(p.x, level().getSeaLevel() - 0.4, p.z);
+    }
+
+    // 浜の乗り場の輪に入った人を背中へ渡す (渡したら true)。資格・待ち・備えの確認は潮門と同じ
+    public boolean tryShoreBoard(ServerPlayer player) {
+        return TitanKeeper.eligible(player) && inShoreDock(player) && jp.revati.skyabyss.titan.TitanVisibility.sees(player, jp.revati.skyabyss.progress.Titans.TIDE_SHELL)
+                && TideTravel.boardFromGate(player, this);
+    }
+
+    // 自己テスト用: 浜の乗り場を今すぐ探し直す (休み始めと同じ)
+    public void searchShoreDockNow() {
+        shoreDock = findShoreDock((ServerLevel) level());
+        shoreSearched = true;
+    }
+
+    // 浜の乗り場 (休んでいなければ null)
+    @Nullable
+    public Vec3 shoreDock() {
+        return isResting() ? shoreDock : null;
+    }
+
+    // 浜の乗り場の輪の中か (水平 SHORE_RADIUS、足もとが岸の 1 下〜4 上)
+    public boolean inShoreDock(Entity e) {
+        Vec3 sd = shoreDock;
+        if (sd == null) {
+            return false;
+        }
+        double dy = e.getY() - sd.y;
+        return Math.hypot(e.getX() - sd.x, e.getZ() - sd.z) <= SHORE_RADIUS && dy >= -1.0 && dy <= 4.0;
+    }
+
+    // 乗り場の輪にいちばん近い岸の立てる所。輪のすぐそば (泳がなくても届く) か、遠すぎる (96 より先)・体の立入禁止の中なら null
+    @Nullable
+    public Vec3 findShoreDock(ServerLevel level) {
+        Vec3 d = dockCenter();
+        Vec3 shore = TideOcean.standableShore(level, d.x, d.z);
+        if (shore == null) {
+            shore = jp.revati.skyabyss.titan.end.SafeSpot.find(level, d.x, d.z, 48, 96, jp.revati.skyabyss.titan.end.SafeSpot.Kind.SHORE, 24);
+        }
+        if (shore == null || Math.hypot(shore.x - d.x, shore.z - d.z) <= DOCK_RADIUS + 1.0) {
+            return null;
+        }
+        jp.revati.skyabyss.titan.solid.TitanVolume vol = jp.revati.skyabyss.titan.solid.TitanVolume.get(volumeName());
+        if (vol != null) {
+            Vec3 l = jp.revati.skyabyss.titan.solid.TitanSolids.toLocal(this, shore.add(0, 0.9, 0));
+            if (jp.revati.skyabyss.titan.solid.TitanSolids.blocked(vol, corridors(), l, false)) {
+                return null;
+            }
+        }
+        return shore;
+    }
+
+    // 体に触れた人 (titan/solid が押し出す前に聞く): 起きていて、旅の最中でなければ、甲羅のどこに触れても潮門へ渡す。
+    // 休んでいないとき (巡航・寄るあいだ) も渡す (時刻で乗り込みを閉じない)。乗る資格・待ち・備えの確認は門と同じ (TitanGate)
+    @Override
+    public boolean boardOnTouch(ServerPlayer player, Vec3 local) {
+        if (voyage || entityData.get(REST) >= 0 || !TitanKeeper.eligible(player)
+                || jp.revati.skyabyss.titan.end.TitanDormancy.isResting(player.server, jp.revati.skyabyss.progress.Titans.TIDE_SHELL)
+                || TideTravel.PASSAGE.coolingDown(player)) {
+            return false;
+        }
+        if (!TideTravel.boardFromGate(player, this)) {
+            return false;
+        }
+        if (mode != Mode.REST) {
+            // 休んでいない巨神から乗った: 戻るときは、乗った所のそばの岸へ (TideTravel.landing は最後に休んだ場所の岸を使う)
+            hasLastRest = true;
+            lastRestX = getX();
+            lastRestZ = getZ();
+        }
+        return true;
     }
 
     @Nullable
@@ -451,6 +532,8 @@ public class TideShellEntity extends Entity implements GeoEntity, TravelTitan, j
 
     private void startRest(ServerLevel level) {
         setMode(Mode.REST);
+        shoreDock = null;
+        shoreSearched = false;
         // 潮門を開けておく長さは、地上の干潮の刻ではなく 20 分 (TitanStay)。背の中の潮 (TideClock) は別の時計で、触らない
         forcedTicks = TitanStay.TICKS;
         hasLastRest = true;
@@ -494,6 +577,17 @@ public class TideShellEntity extends Entity implements GeoEntity, TravelTitan, j
                                 (float) (GATE_BACK_MAX - GATE_BACK_MIN) / 2f, getYRot(), g.y - 6, g.y + 46, 1.6f));
             }
         }
+        if (!shoreSearched) {
+            shoreSearched = true;
+            shoreDock = findShoreDock(level);
+        }
+        if (shoreDock != null) {
+            // 浜の乗り場の光 (岸に立つ標。乗れる人にだけ見える)
+            Vec3 sd = shoreDock;
+            jp.revati.skyabyss.titan.end.BoardGlow.emit(level, jp.revati.skyabyss.progress.Titans.TIDE_SHELL, jp.revati.skyabyss.progress.Titans.TIDE_SHELL + "#shore",
+                    List.of(sd.add(0, 1.2, 0), sd.add(0, 3.5, 0)),
+                    new jp.revati.skyabyss.titan.end.BoardGlow.Shape(sd.add(0, 1.0, 0), (float) SHORE_RADIUS, 1.2f, (float) SHORE_RADIUS, getYRot(), sd.y, sd.y + 30, 1.0f));
+        }
         if (tickCount % 4 == 0) {
             Vec3 d = dockCenter();
             AABB around = new AABB(d, d).inflate(DOCK_RADIUS + 14);
@@ -502,12 +596,19 @@ public class TideShellEntity extends Entity implements GeoEntity, TravelTitan, j
                     TideTravel.boardFromGate(player, this);
                 }
             }
+            if (shoreDock != null) {
+                for (ServerPlayer player : level.getEntitiesOfClass(ServerPlayer.class, new AABB(shoreDock, shoreDock).inflate(SHORE_RADIUS + 2, 6, SHORE_RADIUS + 2))) {
+                    tryShoreBoard(player);
+                }
+            }
         }
         if (tickCount % 40 == 0) {
             Vec3 dock = dockCenter();
             for (ServerPlayer player : Players.snapshot(level.players())) {
                 if (player.distanceToSqr(dock) < 20 * 20) {
                     Notice.bar(player, ModText.hint("message.skyabyss.tide.gate_hint"));
+                } else if (shoreDock != null && player.distanceToSqr(shoreDock) < 16 * 16) {
+                    Notice.bar(player, ModText.hint("message.skyabyss.tide.shore_hint"));
                 }
             }
         }

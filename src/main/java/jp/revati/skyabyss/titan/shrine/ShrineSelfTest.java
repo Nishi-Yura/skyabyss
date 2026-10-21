@@ -28,7 +28,7 @@ import jp.revati.skyabyss.titan.TitanVisibility;
 //  - 祠: 四体とも建ち (碑の巨神・輪の材質・炉・台座)、建て直しても同じ場所、輪の判定
 //  - 断り方: 心臓を止めていない人 (本人・輪の仲間)・歌片なし・順路が動いている。全部そろえば断らない
 //  - 歌片: 巨神ごとに別の品、大事な品 (投げ捨てられない)、旅嚢の固定枠
-//  - 見え方: 心臓を止めていない人には見え、止めた人には見えない (観戦者・クリエイティブはいつも見える)
+//  - 見え方: 心臓を止めていない人には見え、止めた人には見えない (観戦者・クリエイティブはいつも見える)。止めた人も眠りの間だけは見る
 public final class ShrineSelfTest {
     private ShrineSelfTest() {
     }
@@ -83,7 +83,15 @@ public final class ShrineSelfTest {
                 check(f, TitanVisibility.sees(a, titan), titan + ": a chapter player cannot see the titan");
                 stopped.add(a.getUUID());
                 TitanVisibility.clearCache();
-                check(f, !TitanVisibility.sees(a, titan) || !jp.revati.skyabyss.progress.Progression.gateOn(server), titan + ": a player who stilled the heart still sees the titan");
+                boolean gate = jp.revati.skyabyss.progress.Progression.gateOn(server);
+                check(f, !TitanVisibility.sees(a, titan) || !gate, titan + ": a player who stilled the heart still sees the titan");
+                // 眠りを見届ける人: 心臓を止めて運ばれた人は、眠りが終わるまで見る。目覚めたら見えない
+                jp.revati.skyabyss.titan.end.TitanDormancy.begin(server, titan, 0);
+                TitanVisibility.witnessRest(titan, List.of(a.getUUID()));
+                check(f, TitanVisibility.sees(a, titan), titan + ": the carried-out player cannot see the sleeping titan");
+                jp.revati.skyabyss.titan.end.TitanDormancy.clear(server, titan);
+                TitanVisibility.clearCache();
+                check(f, !TitanVisibility.sees(a, titan) || !gate, titan + ": the titan stayed visible to its stopper after the sleep");
             }
             check(f, ModItems.songShard(Titans.TIDE_SHELL) != ModItems.songShard(Titans.EMBER), "the song shards are not per titan");
         } catch (RuntimeException e) {

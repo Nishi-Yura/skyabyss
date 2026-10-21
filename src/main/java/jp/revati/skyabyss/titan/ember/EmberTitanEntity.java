@@ -49,7 +49,12 @@ import software.bernie.geckolib.util.GeckoLibUtil;
 // - 息 (18 秒): 吸う 8 秒・止める 2 秒・吐く 6 秒・間 2 秒。吸うと止めるのあいだだけ、熱の口 (EmberMouthEntity) から背中へ渡れる
 // 当たり判定は小さく、見た目は描画側で 8 倍にする (岩鯨・潮殻と同じ。巨大なモデルには当たり判定を付けない)。
 // 位置の y はモデルの底 (geo の y=0)。geo の 1 単位は 0.5 ブロック。頭は前 (geo の -Z)
-public class EmberTitanEntity extends Entity implements GeoEntity, jp.revati.skyabyss.titan.end.DormantTitan, jp.revati.skyabyss.titan.solid.SolidTitan {
+public class EmberTitanEntity extends Entity implements GeoEntity, jp.revati.skyabyss.titan.end.DormantTitan, jp.revati.skyabyss.titan.solid.SolidTitan, jp.revati.skyabyss.titan.TitanVisibility.Hidden {
+    @Override
+    public String visibilityTitan() {
+        return jp.revati.skyabyss.progress.Titans.EMBER;
+    }
+
     // 巨神の見え方 (docs/design/32 の 3.3): 章を終えた人 (とそのパーティでない人) には実体を送らない
     @Override
     public boolean broadcastToPlayer(net.minecraft.server.level.ServerPlayer player) {
@@ -252,11 +257,23 @@ public class EmberTitanEntity extends Entity implements GeoEntity, jp.revati.sky
         return position().add(offset(getYRot(), 0, TONGUE_UP, MOUTH_FORWARD));
     }
 
-    // 熱の口の判定の中か (横 ±2.5、前 81〜85、舌の上から 4)
+    // 熱の口の判定の中か (見える口は横 ±2.5、前 81〜85、舌の上から 4)。入りやすいように広げてある:
+    // 横 ±5、前 79〜90 (唇の先まで)、舌の 4 下〜舌の上 6 (舌が地面より高く浮いても、下から届く)
     public boolean inMouth(double x, double y, double z) {
         Vec3 l = local(x, y, z);
-        return Math.abs(l.x) <= MOUTH_WIDTH / 2 + 1.0 && l.z >= MOUTH_FORWARD - MOUTH_DEPTH / 2 - 1.0 && l.z <= MOUTH_FORWARD + MOUTH_DEPTH / 2 + 1.0
-                && l.y >= TONGUE_UP - 1.5 && l.y <= TONGUE_UP + MOUTH_HEIGHT + 1.0;
+        return Math.abs(l.x) <= MOUTH_WIDTH / 2 + 2.5 && l.z >= MOUTH_FORWARD - MOUTH_DEPTH / 2 - 2.0 && l.z <= MOUTH_FORWARD + 7.0
+                && l.y >= TONGUE_UP - 4.0 && l.y <= TONGUE_UP + MOUTH_HEIGHT + 2.0;
+    }
+
+    // 頭のまわり (立入禁止のうち、口の側の前 60 より先・横 ±28) に触れた人は、口が開いているあいだ口へ渡す (titan/solid が押し出す前に聞く)。
+    // 吐くあいだは渡さない (押し出される。息を読む遊びは残す)
+    @Override
+    public boolean boardOnTouch(ServerPlayer player, Vec3 local) {
+        if (mode != Mode.SLEEP || !mouthOpen() || local.z < 60.0 || Math.abs(local.x) > 28.0 || !TitanKeeper.eligible(player)
+                || jp.revati.skyabyss.titan.end.TitanDormancy.isResting(player.server, jp.revati.skyabyss.progress.Titans.EMBER)) {
+            return false;
+        }
+        return EmberTravel.boardFromMouth(player, this);
     }
 
     // 息の扇の中か (口の前 16 ブロック、幅 60 度。口の中の奥から)
@@ -1050,7 +1067,8 @@ public class EmberTitanEntity extends Entity implements GeoEntity, jp.revati.sky
 
     private static final java.util.List<jp.revati.skyabyss.titan.solid.SolidTitan.Corridor> CORRIDORS = java.util.List.of(
             // 熱の口 (前へ 83、舌の高さ 3) の中と、その前の外
-            new jp.revati.skyabyss.titan.solid.SolidTitan.Corridor(-6.5, 6.5, 0.0, 15.0, 76.0, 114.0));
+            // 舌が地面より浮いても下から入れるように、下は -8 まで。横は ±9 (斜めから歩いてきても押し返さない)
+            new jp.revati.skyabyss.titan.solid.SolidTitan.Corridor(-9.0, 9.0, -8.0, 16.0, 74.0, 116.0));
 
     @Override
     public AABB getBoundingBoxForCulling() {

@@ -42,6 +42,8 @@ public final class TideTravel {
     // 渡ってすぐに、また門に入って行き来しないように (tick)。背中の潮門の口に 0.5 秒いたら地上へ。
     // 待ち・資格・舟から降ろす・0.5 秒は共通の TitanGate (13 の 10.2節。待ちの記録の名前 skyabyss_tide_cooldown は前と同じ)
     static final jp.revati.skyabyss.titan.TitanGate PASSAGE = new jp.revati.skyabyss.titan.TitanGate("tide", TideKeeper.SLOT, 60, 10);
+    // 自己テスト用 (ほかの包みから): 門の待ちを忘れる
+    public static final java.util.function.Consumer<java.util.UUID> PASSAGE_FORGET = PASSAGE::forget;
     private static final int SWEPT_AFTER = 100;
     // 背の中心 (0, SHELL_CZ) からこれより遠くへ出た人は押し戻す。ひれの先端の台 (x ±179)・到着の段 (半径 172) が入る大きさ。
     // 旧い値 160 は版 20 の拡大の前のままで、到着の直後と貝の間・先端の宝のそばで押し戻され続けた
@@ -58,10 +60,8 @@ public final class TideTravel {
     }
 
     // 休んでいる巨神の潮門の口に入った (資格がなければ、舟から降ろす前に断る)
-    static void boardFromGate(ServerPlayer player, TideShellEntity titan) {
-        if (PASSAGE.admit(player)) {
-            board(player);
-        }
+    static boolean boardFromGate(ServerPlayer player, TideShellEntity titan) {
+        return PASSAGE.admit(player) && board(player);
     }
 
     // 背中へ渡す (コマンドからも)

@@ -64,7 +64,7 @@ public class TitanCallItem extends Item implements jp.revati.skyabyss.pouch.Pouc
         }
         boolean ok = jp.revati.skyabyss.titan.young.YoungCarriers.whistle(player, titanId);
         if (ok) {
-            player.getCooldowns().addCooldown(this, 40);
+            player.getCooldowns().addCooldown(this, 10);
             jp.revati.skyabyss.tutorial.TutorialHints.done(player, jp.revati.skyabyss.tutorial.TutorialHints.WHISTLE);
         }
         return ok;

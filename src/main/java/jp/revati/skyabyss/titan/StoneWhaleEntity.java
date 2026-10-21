@@ -36,7 +36,12 @@ import software.bernie.geckolib.util.GeckoLibUtil;
 // 第一の巨神「岩鯨」。背中に古代の遺跡を乗せ、雲の高さをゆっくり泳ぐ。
 // ときどきプレイヤーの近くまで降りてきて、背中の尾の側にある錨石から脇腹ごしに鎖を地上へ垂らす。
 // 鎖を右クリックすると、巻き上げられて背中へ引き上げられる。
-public class StoneWhaleEntity extends Entity implements GeoEntity, TravelTitan, jp.revati.skyabyss.titan.end.DormantTitan, jp.revati.skyabyss.titan.solid.SolidTitan {
+public class StoneWhaleEntity extends Entity implements GeoEntity, TravelTitan, jp.revati.skyabyss.titan.end.DormantTitan, jp.revati.skyabyss.titan.solid.SolidTitan, jp.revati.skyabyss.titan.TitanVisibility.Hidden {
+    @Override
+    public String visibilityTitan() {
+        return jp.revati.skyabyss.progress.Titans.STONE_WHALE;
+    }
+
     // 巨神の見え方 (docs/design/32 の 3.3): 章を終えた人 (とそのパーティでない人) には実体を送らない
     @Override
     public boolean broadcastToPlayer(net.minecraft.server.level.ServerPlayer player) {

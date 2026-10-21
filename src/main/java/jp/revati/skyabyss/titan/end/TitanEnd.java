@@ -129,9 +129,12 @@ public final class TitanEnd {
     private static void scheduleCarry(ServerLevel back, String titan, Set<UUID> fought) {
         MinecraftServer server = back.getServer();
         long until = server.overworld().getGameTime() + CARRY_AT + 60;
-        for (UUID id : targetIds(server, back, fought)) {
+        Set<UUID> carried = targetIds(server, back, fought);
+        for (UUID id : carried) {
             HOLDING.put(id, until);
         }
+        // 運ばれる人は、心臓を止めたあとも眠りが終わるまで巨神を見る (眠りの場面。32 の 3.3)
+        jp.revati.skyabyss.titan.TitanVisibility.witnessRest(titan, carried);
         Tasks.later(SILENCE_AT, () -> narrateBack(back, "message.skyabyss.titan_end.silence"));
         Tasks.later(TREMBLE_AT, () -> tremble(back, titan));
         Tasks.later(FADE_AT, () -> fadeOut(server, back, titan, fought));

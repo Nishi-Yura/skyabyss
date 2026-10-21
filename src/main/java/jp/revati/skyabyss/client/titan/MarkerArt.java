@@ -103,6 +103,13 @@ public final class MarkerArt {
 
     // ---------------------------------------------------------------- 描く
 
+    // 光の知らせの鍵から巨神の名前 (「巨神#名札」の形は同じ巨神の二つ目の標。潮殻の浜の乗り場など)
+    static String titanOf(TitanEndNetwork.Beam b) {
+        String k = b.key();
+        int i = k.indexOf('#');
+        return i < 0 ? k : k.substring(0, i);
+    }
+
     public static void draw(BufferBuilder buf, BufferBuilder alphaBuf, Matrix4f pose, Vec3 cam, TitanEndNetwork.Beam b, MarkerStyle style, float life, double time, String returnTitan) {
         boolean ret = isReturn(b);
         int rgb = b.rgb();
@@ -311,7 +318,7 @@ public final class MarkerArt {
         double r = (Math.max(b.hx(), b.hz()) * 1.35 + 1.0) * (1 + (e.boost() - 1) * 0.45);
         double spin = time * 0.012;
         float pulse = 0.75f + 0.25f * Mth.sin((float) (time / 50.0 * Mth.TWO_PI));
-        String titan = b.key();
+        String titan = titanOf(b);
         g.floorRing(b.cx(), ry, b.cz(), 0.0, r, 0.20f * pulse, 0.0f, 0.15f, 28);
         g.floorRing(b.cx(), ry, b.cz(), r - 0.18 * e.boost(), r, 0.65f * pulse, 0.65f * pulse, 0.3f, 48);
         g.floorRing(b.cx(), ry, b.cz(), r * 0.62 - 0.1 * e.boost(), r * 0.62, 0.40f * pulse, 0.40f * pulse, 0.2f, 40);
@@ -376,7 +383,7 @@ public final class MarkerArt {
             }
         }
         // 入口の足もとの小さな紋様 (欠片の輪の下)
-        String titan = b.key();
+        String titan = titanOf(b);
         g.floorLine(b.cx(), e.floor() + 0.05, b.cz(), motif(titan), ro * 0.9, time * 0.01, 0.1 * e.boost(), 0.45f, 0.4f, closed(titan));
     }
 
