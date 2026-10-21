@@ -43,9 +43,15 @@ import net.neoforged.neoforge.common.util.FakePlayerFactory;
 public final class TideChapterSelfTest {
     private static final int X = -6000;
     private static final int Z = 6000;
-    // 区画 (16 ブロック): 東西 8、南北 8
-    private static final int CX = 8;
-    private static final int CZ = 8;
+    // 区画 (16 ブロック): 東西 14、南北 12。潮殻の休む場所は体の輪郭 (横 ±67・前 87・後ろ 59) の縁まで読み込まれた開けた海が要るので、
+    // 岸から東へ 200 ブロック・南北 190 ブロックの海を作る (8 x 8 では体が収まらず、休む場所が世界の読み込みしだいで見つからなかった)
+    private static final int CX = 14;
+    private static final int CZ = 12;
+    // 人工の海を建てたか、建ててから空の光が届くのを待った回数
+    private static boolean built;
+    private static int lightWaits;
+    // 空の光を待つ上限 (load の呼び出しの回数)
+    private static final int LIGHT_WAIT_MAX = 600;
     private static final int SHORE = X + 16;
 
     private static boolean forced;
@@ -73,6 +79,23 @@ public final class TideChapterSelfTest {
                     return false;
                 }
             }
+        }
+        // 海は読み込んでから建て、空の光 (光のエンジンは別のスレッドで後から追いつく) が岸に届くまで待つ。
+        // 同じ tick で建てて調べると、元の丘の影が残って「空が見える」拍が世界の種しだいで落ちた
+        if (!built) {
+            if (!built) {
+                buildSea(level);
+            }
+            built = true;
+            lightWaits = 0;
+            return false;
+        }
+        BlockPos probe = new BlockPos(SHORE - 6, level.getSeaLevel() + 1, Z + 64);
+        if (!level.canSeeSky(probe) && ++lightWaits < LIGHT_WAIT_MAX) {
+            return false;
+        }
+        if (lightWaits >= LIGHT_WAIT_MAX) {
+            SkyAbyss.LOGGER.warn("SELFTEST ch2: the sky light did not reach the synthetic shore in time");
         }
         return true;
     }
@@ -117,6 +140,7 @@ public final class TideChapterSelfTest {
                 }
             }
             forced = false;
+            built = false;
         }
         if (f.isEmpty()) {
             SkyAbyss.LOGGER.info("SELFTEST ch2 PASSED (3 beats only in chapter 2 and once each, conch direction/tier/request, great ebb road/safe/restored/once per player/shared by neighbours, elements, lore, quests, dialogue, sky, xp)");
@@ -186,6 +210,12 @@ public final class TideChapterSelfTest {
                         s = y <= sea - 8 ? stone : y <= sea - 1 ? water : air;
                     }
                     level.setBlock(new BlockPos(x, y, z), s, 2 | 16);
+                }
+                // 海面 + 8 より上の地形 (丘・木) も消す。残すと、人工の海の上に浮いた丘が空と高さマップをふさぎ、
+                // 空の見える拍・休む場所の海・大干潮の道の探しが世界の種しだいで落ちる
+                int top = level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.WORLD_SURFACE, x, z);
+                for (int y = sea + 9; y < top; y++) {
+                    level.setBlock(new BlockPos(x, y, z), air, 2 | 16);
                 }
             }
         }

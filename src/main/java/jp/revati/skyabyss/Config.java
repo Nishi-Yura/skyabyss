@@ -171,8 +171,9 @@ public final class Config {
             .define("questArrow", true);
 
     public static final ModConfigSpec.EnumValue<TrailMode> QUEST_TRAIL = CLIENT_BUILDER
-            .comment("目的の場所へ向かう、地面の道しるべ。ON = いつも, NEAR = 目的が 64 ブロック以内のときだけ, OFF = 出さない (キーでも切り替えられる)")
-            .defineEnum("questTrail", TrailMode.ON);
+            .comment("目的の場所へ向かう、地面の道しるべ。ON = いつも, NEAR = 目的が 64 ブロック以内のときだけ, OFF = 出さない (キーでも切り替えられる)。"
+                    + "既定は OFF (2026-10-21 の試遊: 線はなくてよい。軽くなる)。名前を変えたので、前の設定の ON は引き継がない")
+            .defineEnum("questTrail2", TrailMode.OFF);
 
     // 場面の字幕の出し方 (client/cinematic/CinematicScreen, cinematic/VoiceTiming)
     public enum SubtitleReveal {

@@ -912,6 +912,17 @@ public final class EmberTrialSelfTest {
         FakePlayer fp = fake(level, "ember_trial_door");
         Forge.clearMemory();
         ForgeRoom.buildInner(level, Forge.PATTERNS[0]);
+        // 周回の長い鍛えの間 (R5): 鍵穴は二つ。一本目では開き始めず、二本目で開き始める
+        jp.revati.skyabyss.trial.RouteLength.force = true;
+        try {
+            fp.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(EmberTrialSetup.FIRE_KEY.get()));
+            expect(Forge.openDoor(level, fp, InteractionHand.MAIN_HAND) && Forge.doorState() == 0 && Forge.keysIn() == 1, "a long forge door should take a first key and wait");
+            fp.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(EmberTrialSetup.FIRE_KEY.get()));
+            expect(Forge.openDoor(level, fp, InteractionHand.MAIN_HAND) && Forge.doorState() == 1, "a long forge door should open on the second key");
+        } finally {
+            jp.revati.skyabyss.trial.RouteLength.force = null;
+        }
+        Forge.clearMemory();
         fp.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(EmberTrialSetup.FIRE_KEY_HOT.get()));
         expect(!Forge.openDoor(level, fp, InteractionHand.MAIN_HAND), "a hot key must not open the door");
         fp.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(EmberTrialSetup.FIRE_KEY.get()));
@@ -1002,6 +1013,22 @@ public final class EmberTrialSelfTest {
         expect(level.getBlockState(Hearth.HEARTH).getValue(HearthBlock.LEVEL) == 4, "hearth block level at 100");
         expect(level.getEntitiesOfClass(AshThrall.class, EmberBackLayout.SOUTH.aabb(), t -> true).isEmpty(), "carriers should vanish when the hearth is done");
         expect(!Hearth.feed(level, fp, new ItemStack(EmberTrialSetup.LIVE_COAL.get())), "a burning hearth takes no more coal");
+        Hearth.clearMemory();
+        // 周回の長い火守り (32 の 4 章、R5): 一度目の 100 で燃え上がって RELIGHT へ落ち、二度目の 100 で済む
+        jp.revati.skyabyss.trial.RouteLength.force = true;
+        try {
+            java.util.function.LongSupplier south = () -> EmberTrials.READY_CALLS.stream().filter(t -> t == EmberBackState.Trial.SOUTH).count();
+            long southBefore = south.getAsLong();
+            Hearth.setStrength(96f);
+            Hearth.feed(level, fp, new ItemStack(EmberTrialSetup.LIVE_COAL.get()));
+            expect(!Hearth.done() && Hearth.flares() == 1 && Hearth.strength() == Hearth.RELIGHT && south.getAsLong() == southBefore,
+                    "a long hearth should flare once and fall back: " + Hearth.strength());
+            Hearth.setStrength(96f);
+            Hearth.feed(level, fp, new ItemStack(EmberTrialSetup.LIVE_COAL.get()));
+            expect(Hearth.done() && south.getAsLong() == southBefore + 1, "a long hearth is done at the second 100");
+        } finally {
+            jp.revati.skyabyss.trial.RouteLength.force = null;
+        }
         Hearth.clearMemory();
         EmberTrials.clearMobs(level, EmberBackLayout.SOUTH);
         // 熾を持って谷を出ると消える

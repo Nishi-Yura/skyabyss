@@ -41,7 +41,7 @@ import net.minecraft.world.phys.Vec3;
 //   巨神            出会った巨神の今の場所 (読み込まれていなければ最後に見た場所)。眠った巨神・まだ姿を見せない巨神は出さない
 // すでに遊んでいた人 (OpeningState.legacy) には序盤の場所を全部「見た」で出す。新しい保存は足さない (記録はどれも既存のものを読む)。
 //
-// 32 の祠 (R3) ができたら、その場所はここへ足す (kind = SHRINE。置き場は ChapterGrounds.shrineSpot。見せる決まりは跡地の「見た」に合わせる)。
+// 32 の祠は kind = SHRINE (建っている祠を、その巨神の心臓を止めた人にだけ。extra = 巨神の名前)。
 // 言伝ての板の依頼の目印も同じ。画面の側は kind を知っていれば描ける (MapSprites)
 public final class MapMarks {
     // 印の種類 (画面の絵の番号と同じ順。MapSprites)
@@ -85,6 +85,7 @@ public final class MapMarks {
         chapterMarks(data, player.getUUID(), out);
         waymarkMarks(Voyages.state(player), TravelWorldData.get(player.server), out);
         titanMarks(player, over, out);
+        shrineMarks(player, out);
         if (jp.revati.skyabyss.facility.FacilityMarks.has(player, jp.revati.skyabyss.facility.FacilityMarks.MAP_COPY)) {
             archiveMarks(player.server, data.grounds(), Chapters.of(player), out);
         }
@@ -252,6 +253,23 @@ public final class MapMarks {
                 continue;
             }
             out.add(new Mark(Kind.TITAN, "t:" + titan, titan, "", (int) Math.floor(at.x), (int) Math.floor(at.z), false, TravelDest.titanColor(titan)));
+        }
+    }
+
+    // 巨神の祠 (32 の 3.1): 建っている祠のうち、その巨神の心臓を止めた人 (祠を使える人) にだけ、見たで出す。名前の材料は巨神の名前
+    static void shrineMarks(ServerPlayer player, List<Mark> out) {
+        shrineMarks(t -> jp.revati.skyabyss.titan.shrine.TitanShrine.posOf(player.server, t),
+                t -> jp.revati.skyabyss.titan.shrine.TitanShrine.STOPPED.test(player.server, player.getUUID(), t), out);
+    }
+
+    // 純粋な部分 (自己テスト向け): built = 巨神 → 祠の位置 (なければ null)、stopped = その巨神の心臓を止めたか
+    public static void shrineMarks(java.util.function.Function<String, BlockPos> built, java.util.function.Predicate<String> stopped, List<Mark> out) {
+        for (String titan : Titans.all()) {
+            BlockPos at = built.apply(titan);
+            if (at == null || !stopped.test(titan)) {
+                continue;
+            }
+            out.add(new Mark(Kind.SHRINE, "s:" + titan, "shrine", titan, at.getX(), at.getZ(), false, TravelDest.titanColor(titan)));
         }
     }
 

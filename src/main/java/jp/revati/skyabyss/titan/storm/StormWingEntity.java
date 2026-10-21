@@ -241,6 +241,19 @@ public class StormWingEntity extends Entity implements GeoEntity, jp.revati.skya
         return true;
     }
 
+    // 決まった峰 (StormPeak.perch) へ降りて止まる。風見鶏で、峰に限る世界のとき
+    public boolean comeRestAt(Peak p, int forced) {
+        if (p == null) {
+            return false;
+        }
+        perchX = p.x();
+        perchY = p.y();
+        perchZ = p.z();
+        hasPerch = true;
+        beginDescend(forced);
+        return true;
+    }
+
     // その場で止まる (地表の上)。テスト用
     public void restHere(int forced) {
         ServerLevel level = (ServerLevel) level();
@@ -512,16 +525,19 @@ public class StormWingEntity extends Entity implements GeoEntity, jp.revati.skya
         }
     }
 
-    // 640 ブロック以内のプレイヤーを一人選び、その近くの峰を止まり木にする
+    // 640 ブロック以内のプレイヤーを一人選び、その近くの峰を止まり木にする。
+    // 三章の跡地があれば、止まるのはその峰だけ (峰の近くに人がいるとき。docs/design/33 の 3.1。StormPeak)
     private boolean choosePerch(ServerLevel level) {
+        boolean peakOnly = StormPeak.restricted(level.getServer());
         List<ServerPlayer> near = level.players().stream()
-                .filter(p -> TitanKeeper.eligible(p) && Math.hypot(p.getX() - getX(), p.getZ() - getZ()) < PLAYER_RANGE)
+                .filter(p -> TitanKeeper.eligible(p) && Math.hypot(p.getX() - getX(), p.getZ() - getZ()) < PLAYER_RANGE
+                        && (!peakOnly || StormPeak.near(p)))
                 .toList();
         if (near.isEmpty()) {
             return false;
         }
         ServerPlayer p = near.get(level.random.nextInt(near.size()));
-        Peak peak = StormPerch.find(level, p.getX(), p.getZ(), 24, 96);
+        Peak peak = peakOnly ? StormPeak.perch(level) : StormPerch.find(level, p.getX(), p.getZ(), 24, 96);
         if (peak == null) {
             return false;
         }

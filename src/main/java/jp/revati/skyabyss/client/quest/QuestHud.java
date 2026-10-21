@@ -80,7 +80,7 @@ public final class QuestHud {
         if (def == null || entry == null || entry.done || entry.stage >= def.stages().size()) {
             return null;
         }
-        if (def.main() && ObjectiveStrip.active()) {
+        if (def.main() && ObjectiveStrip.showsQuest(def)) {
             return null;
         }
         List<Line> lines = lines(mc.font, def, entry, w() - 12);
