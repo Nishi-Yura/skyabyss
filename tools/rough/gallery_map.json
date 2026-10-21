@@ -1,0 +1,20 @@
+{
+  "title": "M キーの旅の地図（33 の W3）",
+  "intro": "M で開く旅の地図。地形やミニマップは持たず、町・野営地・見た場所・噂・巨神・仲間・目的の印だけ。巨神の子に乗ると、行き先の一覧が同じ画面に出る（前の海図の画面は統合）。今は A を仮に入れています。",
+  "done": [],
+  "subjects": [
+    {
+      "id": "map_style",
+      "short": "地図の見た目",
+      "kind": "3 案",
+      "title": "旅の地図の見た目",
+      "sheets": ["map_roughs/map_a_slate.png", "map_roughs/map_a_voyage.png", "map_roughs/map_b_parchment.png", "map_roughs/map_c_ink.png", "map_roughs/marks_preview.png"],
+      "extra": "一枚目と二枚目が A（二枚目は子に乗ったときの行き先つき）。噂の印は 16 方位・100 ブロック単位に丸めて出す（本当の位置は送らない）。合図「ここ」のキーは M から ' に移した（日本語の配列では : の位置）。",
+      "options": {
+        "a": {"name": "A 石板と海図（推奨・仮）", "desc": "mod の画面と同じ石板と骨の枠に、海図の雲の盤"},
+        "b": {"name": "B 羊皮紙", "desc": "伝承の書と同じ羊皮紙の地図"},
+        "c": {"name": "C 墨の夜図", "desc": "枠なしの墨の夜空の図（地の模様の繰り返しが少し見える）"}
+      }
+    }
+  ]
+}
