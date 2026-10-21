@@ -1069,11 +1069,12 @@ public final class StormBackSelfTest {
             StormStrike.Strike s = StormStrike.call(l, pa.position(), 1, 4f, null, GROUP_A);
             StormStrike.tick(l);
             check(s.landed() && !s.hit.contains(pb) && pb.getHealth() == hb, "group A's lightning hit group B", f);
-            // パーティが変わった人: 試練の中なら広間へ、休み場の記録は番号が違えば消える
+            // パーティが変わった人: 試練の中なら到着の台へ (広間は封じた。trial/RouteSeals.safeFeet)、休み場の記録は番号が違えば消える
             pa.moveTo(rest("w0").getX() + 0.5, rest("w0").getY(), rest("w0").getZ() + 0.5);
             StormBackTrials.writeCheckpoint(pa, "w0", a.epoch() + 100);
             jp.revati.skyabyss.titan.group.GroupEvents.membershipChanged(pa);
-            check(pa.position().distanceToSqr(net.minecraft.world.phys.Vec3.atBottomCenterOf(rest("hub"))) < 4, "a player whose party changed was not moved to the hall", f);
+            check(pa.position().distanceToSqr(net.minecraft.world.phys.Vec3.atBottomCenterOf(jp.revati.skyabyss.trial.RouteSeals.safeFeet(jp.revati.skyabyss.progress.Titans.THUNDER_WING))) < 4,
+                    "a player whose party changed was not moved to the arrival", f);
             check(StormBackTrials.validCheckpoint(StormBackTrials.persisted(pa), a.epoch()).isEmpty()
                     && !StormBackTrials.persisted(pa).contains("skyabyss_storm_checkpoint"), "the old rest point was kept after the party changed", f);
         } finally {

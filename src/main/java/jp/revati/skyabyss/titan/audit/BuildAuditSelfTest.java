@@ -86,7 +86,9 @@ public final class BuildAuditSelfTest {
         BUDGETS.add(new Budget("ember", "LIGHT_DARK", 14, "the far south end of the ash plain under the body's overhang (x 28-30, z 210-217, y 64) and a few corners of the crater ledge are dark by design (the plain is open ground, lit by the forge glow only near the hub); seen 0 to 13 depending on when the light engine finishes"));
         // 岩鯨の谷の飛び石は、宙に浮かぶ一つの石 (跳ぶ道の部品)。浮きの検査から外す
         for (BackReach.Box pit : new BackReach.Box[]{new BackReach.Box(-58, 100, -55, -36, 118, -18), new BackReach.Box(-56, 100, -91, -37, 118, -68),
-                new BackReach.Box(-36, 100, -86, -19, 118, -48)}) {
+                new BackReach.Box(-36, 100, -86, -19, 118, -48),
+                // 前の谷 WP (版 31。周回の前の道。光る飛び石が一つずつ浮かぶ)
+                new BackReach.Box(-40, 100, -10, -12, 118, 16)}) {
             ALLOW.add(new Allow("whale", "FLOAT_BLOCK", pit, "stepping stones in the west pits float by design (the readable jump line, 26 of 8.6)"));
         }
         // 岩鯨の鎖・くぼみ・浮いた灯りは版 18 で直した (0 件)

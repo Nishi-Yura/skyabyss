@@ -65,7 +65,7 @@ public final class RouteSeals {
         };
     }
 
-    // 封じた広間の中か (内側と、まわりの壁 1 枚)。titan は巨神の名 (Titans) か、灯りの表・建築の監査の短い名 (whale・tide・storm・ember)。
+    // 封じた広間の中か (内側だけ。壁の灯りは隣の部屋も照らすので残す)。titan は巨神の名 (Titans) か、灯りの表・建築の監査の短い名 (whale・tide・storm・ember)。
     // 誰も入らないので、灯り・飾りは置かない (2026-10-22「誰も見ない豪華な建築は省いて」)。建築の監査の暗さも数えない
     public static boolean inHall(String titan, BlockPos p) {
         String t = switch (titan) {
@@ -76,8 +76,7 @@ public final class RouteSeals {
             default -> titan;
         };
         for (Room r : junctions(t)) {
-            if (p.getX() >= r.x1() - 1 && p.getX() <= r.x2() + 1 && p.getY() >= r.y1() - 1 && p.getY() <= r.y2() + 1
-                    && p.getZ() >= r.z1() - 1 && p.getZ() <= r.z2() + 1) {
+            if (p.getX() >= r.x1() && p.getX() <= r.x2() && p.getY() >= r.y1() && p.getY() <= r.y2() && p.getZ() >= r.z1() && p.getZ() <= r.z2()) {
                 return true;
             }
         }

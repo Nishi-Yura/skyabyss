@@ -636,14 +636,15 @@ public final class EmberBackSelfTest {
         expect(EmberBackState.of(back, GROUP_B).epoch() == epochB, "group A's renewal touched group B");
         EmberBackState.of(back, GROUP_A).setEverDefeated(false);
         EmberBackTrials.resetGroup(back, GROUP_A, false, null, true);
-        // グループが変わった人 (パーティに入った): 試練の中なら広間へ。休み場の記録は番号が違えば消える
+        // グループが変わった人 (パーティに入った): 試練の中なら到着の台へ (広間は封じた)。休み場の記録は番号が違えば消える
         FakePlayer c = fake(back, GROUP_A, "ember_test_group_change");
         BlockPos w1 = rest("w1").floor().above();
         c.moveTo(w1.getX() + 0.5, w1.getY(), w1.getZ() + 0.5);
         EmberBackTrials.persisted(c).putString("skyabyss_ember_checkpoint", "w1");
         EmberBackTrials.persisted(c).putInt("skyabyss_ember_checkpoint_epoch", -5);
         EmberBackTrials.onGroupChanged(c);
-        expect(HUB.contains(c.blockPosition()), "a player whose group changed inside a trial was not moved to the hub (at " + c.blockPosition() + ")");
+        expect(c.blockPosition().distSqr(jp.revati.skyabyss.trial.RouteSeals.safeFeet(jp.revati.skyabyss.progress.Titans.EMBER)) < 4,
+                "a player whose group changed inside a trial was not moved to the arrival (at " + c.blockPosition() + ")");
         expect(EmberBackTrials.validCheckpoint(EmberBackTrials.persisted(c), EmberBackState.of(back, GROUP_A).epoch()).isEmpty()
                 && !EmberBackTrials.persisted(c).contains("skyabyss_ember_checkpoint"), "a stale checkpoint survived the group change");
         checkParty(back);

@@ -268,15 +268,15 @@ public final class TitanBackSelfTest {
             }
         }
         if (PENDING.isEmpty()) {
-            SkyAbyss.LOGGER.info("SELFTEST PASSED (guards ran for 5 seconds; peaceful sealed the shrine and put the trials to sleep)");
+            SkyAbyss.LOGGER.info("SELFTEST titan back PASSED (guards ran for 5 seconds; peaceful sealed the shrine and put the trials to sleep)");
         } else {
-            PENDING.forEach(f -> SkyAbyss.LOGGER.error("SELFTEST FAILED: {}", f));
-            SkyAbyss.LOGGER.error("SELFTEST FAILED: {} problems", PENDING.size());
+            PENDING.forEach(f -> SkyAbyss.LOGGER.error("SELFTEST titan back FAILED: {}", f));
+            SkyAbyss.LOGGER.error("SELFTEST titan back FAILED: {} problems", PENDING.size());
         }
         if (originalDifficulty != null) {
             server.setDifficulty(originalDifficulty, true);
         }
-        server.halt(false);
+        // サーバーは止めない (止めるのは自己テストの段がすべて終わったとき。SelfTestRunner。後ろの段が走らなかった)
     }
 
     private static void checkSurface(ServerLevel level, List<String> failures) {

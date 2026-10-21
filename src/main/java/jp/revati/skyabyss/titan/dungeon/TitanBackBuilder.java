@@ -513,7 +513,10 @@ public final class TitanBackBuilder {
         // 西・東の翼へ向かう通路
         kit.room(WEST_HALL);
         kit.room(EAST_HALL);
-        // 版 32: 鼓動の間は封じて誰も入らない (trial/RouteSeals)。肋・床の模様・台座・灯り・苔・鍾乳石は置かない (部屋の形だけ)
+        // 版 32: 鼓動の間は封じて誰も入らない (trial/RouteSeals)。肋・床の模様・台座・灯り・苔・鍾乳石は置かない (部屋の形だけ)。
+        // 西・東の翼へ向かう通路は、翼の前室 (W0・E0) から歩いて入れる行き止まりなので、壁の灯りを置く (鼓動の間の壁の灯りで照らしていた)
+        kit.wallLamps(WEST_HALL, 3, FLOOR + 4);
+        kit.wallLamps(EAST_HALL, 3, FLOOR + 4);
     }
 
     // ---------------------------------------------------------------- 北の封印 (心臓の回廊の入口)

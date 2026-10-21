@@ -39,6 +39,8 @@ public final class BackBuildJobs {
     private static final java.util.Map<ResourceKey<Level>, it.unimi.dsi.fastutil.longs.LongOpenHashSet> HELD = new java.util.HashMap<>();
 
     public static void hold(ServerLevel level, net.minecraft.world.level.ChunkPos cp) {
+        // 次の建設が始まったら、前の建設の外す予定は取り消す (外すのはその建設の終わりに)
+        RELEASE_AT.remove(level);
         if (HELD.computeIfAbsent(level.dimension(), k -> new it.unimi.dsi.fastutil.longs.LongOpenHashSet()).add(cp.toLong())) {
             level.getChunkSource().addRegionTicket(TICKET, cp, 0, cp);
         }
@@ -71,7 +73,28 @@ public final class BackBuildJobs {
         };
     }
 
+    // 建て終えてから外すまでの tick (明るさの計算が済むのを待つ。すぐ外すと、明るさが古いまま保存されて暗い所が残った)
+    static final int RELEASE_DELAY = 400;
+    private static final java.util.Map<ServerLevel, Integer> RELEASE_AT = new java.util.HashMap<>();
+
     static void releaseAll(ServerLevel level) {
+        RELEASE_AT.put(level, level.getServer().getTickCount() + RELEASE_DELAY);
+    }
+
+    private static void tickReleases(net.minecraft.server.MinecraftServer server) {
+        if (RELEASE_AT.isEmpty()) {
+            return;
+        }
+        int now = server.getTickCount();
+        for (var e : new java.util.ArrayList<>(RELEASE_AT.entrySet())) {
+            if (now >= e.getValue()) {
+                RELEASE_AT.remove(e.getKey());
+                releaseNow(e.getKey());
+            }
+        }
+    }
+
+    private static void releaseNow(ServerLevel level) {
         it.unimi.dsi.fastutil.longs.LongOpenHashSet held = HELD.remove(level.dimension());
         if (held == null) {
             return;
@@ -385,6 +408,7 @@ public final class BackBuildJobs {
 
     @SubscribeEvent
     static void onServerTick(ServerTickEvent.Post event) {
+        tickReleases(event.getServer());
         Task t;
         synchronized (BackBuildJobs.class) {
             t = QUEUE.peek();
@@ -428,6 +452,7 @@ public final class BackBuildJobs {
             QUEUE.clear();
         }
         HELD.clear();
+        RELEASE_AT.clear();
     }
 
     // 仕事が一つも無い所へ置く用の、何もしない仕事 (形の取り込みが無いとき)
