@@ -466,7 +466,6 @@ public final class TideGarden {
         kit.set(STONE_WEST.below(), Blocks.CHISELED_SANDSTONE.defaultBlockState());
         kit.set(STONE_WEST, (rung ? jp.revati.skyabyss.trial.TrialGoal.reached() : jp.revati.skyabyss.trial.TrialGoal.mark()));
         kit.set(STONE_WEST.above(), rung ? Blocks.PEARLESCENT_FROGLIGHT.defaultBlockState() : Blocks.AIR.defaultBlockState());
-        kit.set(RETURN_WEST, rung ? TideKit.LAMP : TideKit.DARK);
         for (Inscription i : LORE_SIGNS) {
             if (i.key().equals("sign.skyabyss.lore_tide_west")) {
                 kit.wallSign(i.pos(), i.facing(), i.key());

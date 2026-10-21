@@ -130,7 +130,7 @@ public final class TideBackTrials {
         });
     }
 
-    // 鳴らしたグループにだけ見せる: 潮鳴り石の光・広間の床の灯り・抜け道の床・西の祭壇の真珠の光
+    // 鳴らしたグループにだけ見せる: 潮鳴り石の光・広間の床の灯り・西の祭壇の真珠の光
     static void overlay(ServerLevel level, UUID group, java.util.function.BiConsumer<BlockPos, net.minecraft.world.level.block.state.BlockState> out) {
         if (level.dimension() != TideTravel.TIDE_BACK) {
             return;
@@ -146,7 +146,6 @@ public final class TideBackTrials {
             }
             out.accept(stonePos(t), jp.revati.skyabyss.trial.TrialGoal.reached());
             out.accept(lampPos(t), Blocks.SEA_LANTERN.defaultBlockState());
-            out.accept(padPos(t), TideKit.LAMP);
             if (t == TideBackState.Trial.WEST) {
                 out.accept(STONE_WEST.above(), Blocks.PEARLESCENT_FROGLIGHT.defaultBlockState());
             }
@@ -302,7 +301,6 @@ public final class TideBackTrials {
         TideFlats.tick(level, peaceful);
         if (level.getGameTime() % 5 == 0) {
             tickGates(level);
-            tickPads(level);
             tickPeaceful(level, peaceful);
             tickFrost(level);
             TideGuide.tick(level);
@@ -393,33 +391,6 @@ public final class TideBackTrials {
     // 潮の底の門の格子 (西の列の 3 マス) を、そのグループにだけ沈める
     static void openBottom(ServerLevel level, UUID group) {
         GroupGates.open(level, group, TideGates.bottom());
-    }
-
-    // 抜け道の床 (石が鳴ると光る。踏むと広間の近くへ)。踏んだ人のグループの石で決める
-    private static void tickPads(ServerLevel level) {
-        for (ServerPlayer p : List.copyOf(level.players())) {
-            if (!p.isAlive() || p.isSpectator()) {
-                continue;
-            }
-            BlockPos under = p.blockPosition().below();
-            TideBackState.Trial trial = under.equals(RETURN_WEST) ? TideBackState.Trial.WEST
-                    : under.equals(RETURN_EAST) ? TideBackState.Trial.EAST : under.equals(RETURN_FRONT) ? TideBackState.Trial.FRONT : null;
-            if (trial == null || !state(level, p).rung(trial)) {
-                continue;
-            }
-            BlockPos to = switch (trial) {
-                case WEST -> RETURN_WEST_TO;
-                case EAST -> RETURN_EAST_TO;
-                case FRONT -> RETURN_FRONT_TO;
-            };
-            if (TideGarden.holds(p)) {
-                continue;
-            }
-            p.fallDistance = 0;
-            p.teleportTo(level, to.getX() + 0.5, to.getY(), to.getZ() + 0.5, p.getYRot(), 0f);
-            level.playSound(null, to, jp.revati.skyabyss.titan.tide.TideSetup.GATE.get(), SoundSource.PLAYERS, 1f, 1.3f);
-            Notice.bar(p, ModText.hint("message.skyabyss.tide.return_path"));
-        }
     }
 
     // 氷渡りの氷は背中では溶かす (満潮の水の上を歩けないように。8 章)
@@ -542,15 +513,7 @@ public final class TideBackTrials {
         };
     }
 
-    static BlockPos padPos(TideBackState.Trial t) {
-        return switch (t) {
-            case WEST -> RETURN_WEST;
-            case EAST -> RETURN_EAST;
-            case FRONT -> RETURN_FRONT;
-        };
-    }
-
-    // 三つの石・広間の床の灯り・抜け道の床を、ワールドでは「まだ鳴っていない」形にする (鳴らしたグループには見かけの上書きで見せる)
+    // 三つの石・広間の床の灯りを、ワールドでは「まだ鳴っていない」形にする (鳴らしたグループには見かけの上書きで見せる)
     static void applyStones(ServerLevel level) {
         for (TideBackState.Trial t : TideBackState.Trial.values()) {
             net.minecraft.world.level.block.state.BlockState want = jp.revati.skyabyss.trial.TrialGoal.mark();
@@ -558,7 +521,6 @@ public final class TideBackTrials {
                 level.setBlock(stonePos(t), want, 3);
             }
             level.setBlock(lampPos(t), TideKit.DARK, 3);
-            level.setBlock(padPos(t), TideKit.DARK, 3);
         }
         level.setBlock(STONE_WEST.above(), Blocks.AIR.defaultBlockState(), 3);
     }

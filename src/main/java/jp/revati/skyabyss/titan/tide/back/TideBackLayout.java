@@ -257,13 +257,9 @@ public final class TideBackLayout {
     public static final BlockPos STONE_WEST = new BlockPos(ALTAR[0], ALTAR_TOP + 1, ALTAR[1] - 2);
     public static final BlockPos STONE_EAST = new BlockPos(83, LEDGE_FLOOR + 1, -38);
     public static final BlockPos STONE_FRONT = new BlockPos(0, ROCK_TOP + 1, -127);
-    // 抜け道の床 (石の近く) と、運ぶ先
-    public static final BlockPos RETURN_WEST = new BlockPos(ALTAR[0] + 2, ALTAR_TOP, ALTAR[1] + 1);
-    public static final BlockPos RETURN_EAST = new BlockPos(81, LEDGE_FLOOR, -36);
-    public static final BlockPos RETURN_FRONT = new BlockPos(1, ROCK_TOP, -125);
-    public static final BlockPos RETURN_WEST_TO = new BlockPos(-22, HUB_LEDGE + 1, 0);
-    public static final BlockPos RETURN_EAST_TO = new BlockPos(22, HUB_LEDGE + 1, -4);
-    public static final BlockPos RETURN_FRONT_TO = new BlockPos(2, 67, -56);
+    // 石の近くから広間へ運ぶ先 (庭・潮見の間の出口の床)
+    public static final BlockPos EJECT_GARDEN = new BlockPos(-22, HUB_LEDGE + 1, 0);
+    public static final BlockPos EJECT_WATCH = new BlockPos(22, HUB_LEDGE + 1, -4);
 
     // ---------------------------------------------------------------- 休み場 (焚き火のまわりに立つ)
     public record Rest(String id, Area area, BlockPos campfire, BlockPos spawn) {

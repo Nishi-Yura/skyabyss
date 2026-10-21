@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Set;
 
 import jp.revati.skyabyss.SkyAbyss;
-import jp.revati.skyabyss.forge.ResonanceForgeBlock;
 import jp.revati.skyabyss.registry.ModBlocks;
 import jp.revati.skyabyss.titan.tide.heart.TideHeartArena;
 import net.minecraft.core.BlockPos;
@@ -214,7 +213,6 @@ public final class TideIslandBuilder {
             }
         }
         // 浜の道具: 炉、焚き火と腰掛け、碑文の石柱 (看板は fixtures)、縁の灯り
-        kit.set(-20, 67, 76, ModBlocks.RESONANCE_FORGE.get().defaultBlockState().setValue(ResonanceForgeBlock.FACING, Direction.WEST));
         kit.set(-44, 67, 80, jp.revati.skyabyss.relic.RelicBlocks.hearth(jp.revati.skyabyss.relic.RelicStyle.TIDE, true));
         kit.stair(-46, 67, 80, Direction.WEST, Blocks.PRISMARINE_BRICK_STAIRS.defaultBlockState());
         kit.stair(-42, 67, 80, Direction.EAST, Blocks.PRISMARINE_BRICK_STAIRS.defaultBlockState());
@@ -856,10 +854,6 @@ public final class TideIslandBuilder {
             for (int y = HUB_FLOOR + 1; y <= HUB_FLOOR + 3; y++) {
                 kit.set(x, y, FLATS_GATE_Z, ModBlocks.SEALED_GATE.get().defaultBlockState());
             }
-        }
-        // 抜け道の床 (石が鳴るまでは暗い石。鳴ると光る)
-        for (BlockPos p : new BlockPos[] {RETURN_WEST, RETURN_EAST, RETURN_FRONT}) {
-            kit.set(p, TideKit.DARK);
         }
         // 各試練の入口の一言
         for (Inscription i : ENTRANCE_SIGNS) {

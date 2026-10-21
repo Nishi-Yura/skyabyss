@@ -965,7 +965,6 @@ public final class TideBackSelfTest {
         // 光るのは鳴らしたグループの見かけだけ。ワールドの石は「まだ鳴っていない」形のまま
         Map<BlockPos, BlockState> overlay = jp.revati.skyabyss.titan.group.GroupOverlays.compute(back, TEST);
         check(overlay.containsKey(STONE_WEST) && jp.revati.skyabyss.trial.TrialGoal.isReached(overlay.get(STONE_WEST)), "west stone not lit for the group", failures);
-        check(TideKit.LAMP.equals(overlay.get(RETURN_WEST)), "west return floor not lit for the group", failures);
         check(!jp.revati.skyabyss.trial.TrialGoal.isReached(back.getBlockState(STONE_WEST)), "the world's west stone was lit (it should stay unlit for other groups)", failures);
         // 前の石は潮招きを倒すまで黙る
         TideBackTrials.useStone(back, STONE_FRONT, fake, net.minecraft.world.item.ItemStack.EMPTY);

@@ -44,8 +44,8 @@ public final class TideRooms {
         return TideFlats.flatsBox();
     }
 
-    static final BlockPos GARDEN_EJECT = RETURN_WEST_TO;
-    static final BlockPos WATCH_EJECT = RETURN_EAST_TO;
+    static final BlockPos GARDEN_EJECT = EJECT_GARDEN;
+    static final BlockPos WATCH_EJECT = EJECT_WATCH;
     static final BlockPos FLATS_EJECT = RESTS.get(4).spawn();
 
     private static final RoomLocks.Listener GARDEN_LISTENER = new RoomLocks.Listener() {
