@@ -1,0 +1,91 @@
+# 二章の地上の敵 4 種 (P12。docs/design/21 の 4.1) の確認: 待機・予告・技の姿。平らな世界、モブは原点で南 (+z) を向く
+size 1280 720
+timeout 600
+cmd gamemode spectator
+cmd time set 6000
+cmd gamerule doDaylightCycle false
+hud off
+clouds off
+# --- 潮だまり貝 (閉じた姿 / 開いた予告 / 挟む)
+cmd kill @e[type=!minecraft:player,distance=..80]
+cmd summon skyabyss:tidepool_clam 0 -60 0 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b,Invulnerable:1b,Tags:["m"]}
+camera minecraft:overworld 1.35 -60.9 1.35 135 28
+waitchunks
+wait 60
+shot clam_rest
+cmd skyabyss dev anim @e[tag=m] open
+wait 22
+shot clam_open
+cmd skyabyss dev anim @e[tag=m] pinch
+wait 3
+shot clam_pinch
+camera minecraft:overworld 0.0 -60.6 2.1 180 30
+cmd skyabyss dev anim @e[tag=m] open
+wait 22
+shot clam_open_front
+# --- 砂潜り (出た姿 / 飛びかかりの構え / 跳ね)
+cmd kill @e[type=!minecraft:player,distance=..80]
+cmd summon skyabyss:sand_burrower 0 -60 0 {NoAI:1b,Buried:0b,Rotation:[0f,0f],PersistenceRequired:1b,Invulnerable:1b,Tags:["m"]}
+camera minecraft:overworld 1.4 -60.9 1.4 135 30
+wait 40
+shot burrower_rest
+camera minecraft:overworld 0.0 -60.4 1.6 180 55
+wait 10
+shot burrower_top
+camera minecraft:overworld 1.6 -61.0 0.4 100 18
+cmd skyabyss dev anim @e[tag=m] bite
+wait 15
+shot burrower_bite_crouch
+wait 3
+shot burrower_bite_leap
+cmd skyabyss dev anim @e[tag=m] leap
+wait 3
+shot burrower_emerge
+# --- 宿借り (歩く姿 / 潜った姿 / 吐く)
+cmd kill @e[type=!minecraft:player,distance=..80]
+cmd summon skyabyss:drift_hermit 0 -60 0 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b,Invulnerable:1b,Tags:["m"]}
+camera minecraft:overworld 1.1 -60.95 1.1 135 26
+wait 40
+shot hermit_rest
+cmd skyabyss dev anim @e[tag=m] spit
+wait 5
+shot hermit_spit
+cmd kill @e[tag=m]
+cmd summon skyabyss:drift_hermit 0 -60 0 {NoAI:1b,Hidden:1b,Rotation:[0f,0f],PersistenceRequired:1b,Invulnerable:1b,Tags:["m"]}
+wait 30
+shot hermit_hidden
+cmd summon skyabyss:drift_hermit 0.6 -60 -1.3 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b,Invulnerable:1b,Tags:["m"]}
+cmd summon skyabyss:drift_hermit 1.2 -60 -2.6 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b,Invulnerable:1b,Tags:["m"]}
+camera minecraft:overworld 3.4 -59.6 1.0 110 25
+wait 30
+shot hermit_line
+# --- 潮の番人 (待機 / 銛の構え / 突き / 満ち潮の輪を掲げる / 打ち下ろし / 後ろ)
+cmd kill @e[type=!minecraft:player,distance=..80]
+cmd summon skyabyss:shore_warden 0 -60 0 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b,Invulnerable:1b,Tags:["m"]}
+camera minecraft:overworld 3.3 -60.2 3.3 135 6
+wait 60
+shot warden_rest
+camera minecraft:overworld 4.4 -60.2 0.8 100 6
+cmd skyabyss dev anim @e[tag=m] thrust
+wait 16
+shot warden_stance
+wait 8
+shot warden_thrust
+camera minecraft:overworld 3.3 -59.8 3.3 135 10
+cmd skyabyss dev anim @e[tag=m] ring
+wait 18
+shot warden_ring_cast
+wait 9
+shot warden_ring_slam
+camera minecraft:overworld -3.0 -60.2 -3.0 315 6
+wait 50
+shot warden_back
+# --- 四体を並べて (大きさの比べ。左から 貝・砂潜り・宿借り・番人)
+cmd kill @e[type=!minecraft:player,distance=..80]
+cmd summon skyabyss:tidepool_clam -3 -60 0 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b,Invulnerable:1b}
+cmd summon skyabyss:sand_burrower -1.3 -60 0 {NoAI:1b,Buried:0b,Rotation:[0f,0f],PersistenceRequired:1b,Invulnerable:1b}
+cmd summon skyabyss:drift_hermit 0.2 -60 0 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b,Invulnerable:1b}
+cmd summon skyabyss:shore_warden 2 -60 0 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b,Invulnerable:1b}
+camera minecraft:overworld -0.5 -59.9 5.6 180 8
+wait 60
+shot lineup

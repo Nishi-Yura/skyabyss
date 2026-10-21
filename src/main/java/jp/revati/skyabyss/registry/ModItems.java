@@ -152,6 +152,15 @@ public final class ModItems {
             () -> new DeferredSpawnEggItem(ModEntities.BONE_HAULER, 0x5C7C3E, 0xD8CDB2, new Item.Properties()));
     public static final DeferredItem<Item> ELDER_SENTRY_EGG = ITEMS.register("elder_sentry_spawn_egg",
             () -> new DeferredSpawnEggItem(ModEntities.ELDER_SENTRY, 0xD8CDB2, 0x5C7C3E, new Item.Properties()));
+    // 二章の地上の敵 (P12)
+    public static final DeferredItem<Item> TIDEPOOL_CLAM_EGG = ITEMS.register("tidepool_clam_spawn_egg",
+            () -> new DeferredSpawnEggItem(ModEntities.TIDEPOOL_CLAM, 0xE48070, 0xE0DCE8, new Item.Properties()));
+    public static final DeferredItem<Item> SAND_BURROWER_EGG = ITEMS.register("sand_burrower_spawn_egg",
+            () -> new DeferredSpawnEggItem(ModEntities.SAND_BURROWER, 0xBCA478, 0x408E86, new Item.Properties()));
+    public static final DeferredItem<Item> DRIFT_HERMIT_EGG = ITEMS.register("drift_hermit_spawn_egg",
+            () -> new DeferredSpawnEggItem(ModEntities.DRIFT_HERMIT, 0x6C5C4C, 0xE48070, new Item.Properties()));
+    public static final DeferredItem<Item> SHORE_WARDEN_EGG = ITEMS.register("shore_warden_spawn_egg",
+            () -> new DeferredSpawnEggItem(ModEntities.SHORE_WARDEN, 0x3A6470, 0xF0F0EC, new Item.Properties()));
     public static final DeferredItem<Item> WATERWAY_MAW_EGG = ITEMS.register("waterway_maw_spawn_egg",
             () -> new DeferredSpawnEggItem(ModEntities.WATERWAY_MAW, 0x46565C, 0x7FD6D0, new Item.Properties()));
     public static final DeferredItem<Item> WHALEBONE_CAPTAIN_EGG = ITEMS.register("whalebone_captain_spawn_egg",
@@ -229,6 +238,10 @@ public final class ModItems {
                 output.accept(SPINE_HARE_EGG.get());
                 output.accept(BONE_HAULER_EGG.get());
                 output.accept(ELDER_SENTRY_EGG.get());
+                output.accept(TIDEPOOL_CLAM_EGG.get());
+                output.accept(SAND_BURROWER_EGG.get());
+                output.accept(DRIFT_HERMIT_EGG.get());
+                output.accept(SHORE_WARDEN_EGG.get());
                 output.accept(WATERWAY_MAW_EGG.get());
                 output.accept(WHALEBONE_CAPTAIN_EGG.get());
                 output.accept(STONE_WHALE_HEART_EGG.get());

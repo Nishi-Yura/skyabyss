@@ -87,6 +87,20 @@ public final class ModEntities {
             () -> EntityType.Builder.of(ElderSentry::new, MobCategory.MONSTER)
                     .sized(0.9f, 2.45f).clientTrackingRange(10).build(SkyAbyss.MODID + ":elder_sentry"));
 
+    // 二章の地上の敵 (docs/design/21 の 4.1、P12。tools/gen_ch2_ground_mobs.py)
+    public static final DeferredHolder<EntityType<?>, EntityType<jp.revati.skyabyss.entity.TidepoolClam>> TIDEPOOL_CLAM = ENTITIES.register("tidepool_clam",
+            () -> EntityType.Builder.of(jp.revati.skyabyss.entity.TidepoolClam::new, MobCategory.MONSTER)
+                    .sized(0.95f, 0.55f).eyeHeight(0.4f).clientTrackingRange(8).build(SkyAbyss.MODID + ":tidepool_clam"));
+    public static final DeferredHolder<EntityType<?>, EntityType<jp.revati.skyabyss.entity.SandBurrower>> SAND_BURROWER = ENTITIES.register("sand_burrower",
+            () -> EntityType.Builder.of(jp.revati.skyabyss.entity.SandBurrower::new, MobCategory.MONSTER)
+                    .sized(0.8f, 0.45f).eyeHeight(0.35f).clientTrackingRange(8).build(SkyAbyss.MODID + ":sand_burrower"));
+    public static final DeferredHolder<EntityType<?>, EntityType<jp.revati.skyabyss.entity.DriftHermit>> DRIFT_HERMIT = ENTITIES.register("drift_hermit",
+            () -> EntityType.Builder.of(jp.revati.skyabyss.entity.DriftHermit::new, MobCategory.MONSTER)
+                    .sized(0.6f, 0.6f).eyeHeight(0.4f).clientTrackingRange(8).build(SkyAbyss.MODID + ":drift_hermit"));
+    public static final DeferredHolder<EntityType<?>, EntityType<jp.revati.skyabyss.entity.ShoreWarden>> SHORE_WARDEN = ENTITIES.register("shore_warden",
+            () -> EntityType.Builder.of(jp.revati.skyabyss.entity.ShoreWarden::new, MobCategory.MONSTER)
+                    .sized(0.8f, 2.7f).eyeHeight(2.35f).clientTrackingRange(10).build(SkyAbyss.MODID + ":shore_warden"));
+
     private static <T extends net.minecraft.world.entity.Mob> DeferredHolder<EntityType<?>, EntityType<T>> monster(
             String name, EntityType.EntityFactory<T> factory, float width, float height) {
         return ENTITIES.register(name, () -> EntityType.Builder.of(factory, MobCategory.MONSTER)
@@ -105,6 +119,10 @@ public final class ModEntities {
         event.put(SPINE_HARE.get(), SpineHare.createAttributes().build());
         event.put(BONE_HAULER.get(), BoneHauler.createAttributes().build());
         event.put(ELDER_SENTRY.get(), ElderSentry.createAttributes().build());
+        event.put(TIDEPOOL_CLAM.get(), jp.revati.skyabyss.entity.TidepoolClam.createAttributes().build());
+        event.put(SAND_BURROWER.get(), jp.revati.skyabyss.entity.SandBurrower.createAttributes().build());
+        event.put(DRIFT_HERMIT.get(), jp.revati.skyabyss.entity.DriftHermit.createAttributes().build());
+        event.put(SHORE_WARDEN.get(), jp.revati.skyabyss.entity.ShoreWarden.createAttributes().build());
     }
 
     private ModEntities() {

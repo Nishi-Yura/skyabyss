@@ -66,6 +66,15 @@ public final class GuardRenderers {
         event.registerEntityRenderer(ModEntities.SPINE_HARE.get(), ctx -> noTilt(ctx, "spine_hare"));
         event.registerEntityRenderer(ModEntities.BONE_HAULER.get(), ctx -> noTilt(ctx, "bone_hauler"));
         event.registerEntityRenderer(ModEntities.ELDER_SENTRY.get(), ctx -> noTilt(ctx, "elder_sentry"));
+        // 二章の地上の敵 (P12)。潮の番人の銛は別メッシュ (受け口 socket_main)
+        event.registerEntityRenderer(ModEntities.TIDEPOOL_CLAM.get(), ctx -> noTilt(ctx, "tidepool_clam"));
+        event.registerEntityRenderer(ModEntities.SAND_BURROWER.get(), ctx -> noTilt(ctx, "sand_burrower"));
+        event.registerEntityRenderer(ModEntities.DRIFT_HERMIT.get(), ctx -> noTilt(ctx, "drift_hermit"));
+        event.registerEntityRenderer(ModEntities.SHORE_WARDEN.get(), ctx -> {
+            GeoEntityRenderer<jp.revati.skyabyss.entity.ShoreWarden> r = noTilt(ctx, "shore_warden");
+            r.addRenderLayer(GearLayer.lowPoly(r, "socket_main", "shore_harpoon"));
+            return r;
+        });
         event.registerEntityRenderer(ModEntities.STONE_WHALE_HEART.get(), StoneWhaleHeartRenderer::new);
         event.registerEntityRenderer(ModEntities.BONE_SPIKE.get(), ctx -> new ArrowRenderer<BoneSpike>(ctx) {
             @Override

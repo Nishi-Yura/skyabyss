@@ -92,6 +92,11 @@ public final class GrowthRewards {
         // 余燼の中ボス 灰の鍛え手 (13 の 6.6節。推奨レベル 30)。試練の鍛え手は参加者の一覧で配る (AshSmithLoot)。ここは試練の外で呼ばれたもの
         MOD_ENEMIES.put(SkyAbyss.MODID + ":ash_smith", new Source(220, 30));
         MOD_ENEMIES.put(SkyAbyss.MODID + ":thunder_wing_heart", new Source(480, THUNDER_WING_LEVEL)); // 雷翼の心臓 (12 の 6.6節。試練の外で倒したとき)
+        // 二章の地上の敵 (21 の 4.1。章の経験値の枠には数えない小さな分): 潮だまり貝 6、砂潜り 5、宿借り 2、潮の番人 50
+        MOD_ENEMIES.put(SkyAbyss.MODID + ":tidepool_clam", new Source(6, TIDE_SHELL_LEVEL));
+        MOD_ENEMIES.put(SkyAbyss.MODID + ":sand_burrower", new Source(5, TIDE_SHELL_LEVEL));
+        MOD_ENEMIES.put(SkyAbyss.MODID + ":drift_hermit", new Source(2, TIDE_SHELL_LEVEL));
+        MOD_ENEMIES.put(SkyAbyss.MODID + ":shore_warden", new Source(50, TIDE_SHELL_LEVEL));
     }
 
 
