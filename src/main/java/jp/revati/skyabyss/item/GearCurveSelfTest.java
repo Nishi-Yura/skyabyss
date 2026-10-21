@@ -64,6 +64,15 @@ public final class GearCurveSelfTest {
         // 二章の旅装 4 部位の一行は skyabyss_ch2gear の lang にある (guide/Ch2Gear)
         ja.putAll(lang("/assets/skyabyss_ch2gear/lang/ja_jp.json", f));
         en.putAll(lang("/assets/skyabyss_ch2gear/lang/en_us.json", f));
+        // 三章・四章の旅装の一行は、その章の lang にある (四章はまだ旅装がないとき、ファイルがなくてもよい)
+        ja.putAll(lang("/assets/skyabyss_ch3gear/lang/ja_jp.json", f));
+        en.putAll(lang("/assets/skyabyss_ch3gear/lang/en_us.json", f));
+        for (String ns : List.of("skyabyss_ch4gear", "skyabyss_ch4")) {
+            if (GearCurveSelfTest.class.getResource("/assets/" + ns + "/lang/ja_jp.json") != null) {
+                ja.putAll(lang("/assets/" + ns + "/lang/ja_jp.json", f));
+                en.putAll(lang("/assets/" + ns + "/lang/en_us.json", f));
+            }
+        }
         java.util.Set<String> seen = new java.util.HashSet<>();
         int gear = 0;
         for (Item item : net.minecraft.core.registries.BuiltInRegistries.ITEM) {
@@ -83,10 +92,11 @@ public final class GearCurveSelfTest {
             check(f, j.startsWith("「") && j.endsWith("」") && !j.contains("\n"), "gear story line should be one quoted line: " + key);
             check(f, seen.add(j), "gear story line repeated: " + key);
         }
-        check(f, gear == 56, "expected 56 mod gear items with a story line, found " + gear);
-        long jaStories = ja.keySet().stream().filter(k -> k.endsWith(".story")).count();
-        long enStories = en.keySet().stream().filter(k -> k.endsWith(".story")).count();
-        check(f, jaStories == 56 && enStories == 56, "story line tables should hold 56 lines each: " + jaStories + "/" + enStories);
+        // 装備は章ごとに増える (一〜二章と深淵で 56、三章の旅装で 60)。数は下限だけ見て、一行の表と装備の数がそろうことを見る
+        check(f, gear >= 60, "expected at least 60 mod gear items with a story line, found " + gear);
+        long jaStories = ja.keySet().stream().filter(k -> k.startsWith("item.skyabyss.") && k.endsWith(".story")).count();
+        long enStories = en.keySet().stream().filter(k -> k.startsWith("item.skyabyss.") && k.endsWith(".story")).count();
+        check(f, jaStories >= gear && enStories >= gear, "story line tables should hold a line for each of the " + gear + " gear items: " + jaStories + "/" + enStories);
     }
 
     private static java.util.Map<String, String> lang(String path, List<String> f) {

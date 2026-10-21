@@ -263,6 +263,11 @@ public final class GuideSelfTest {
         ServerLevel level = server.overworld();
         FakePlayer a = player(level, "notes_a");
         ResourceLocation recipe = ResourceLocation.withDefaultNamespace("stone_pickaxe");
+        // 二章・三章は本物の旅装のレシピを足している (guide/Ch2Gear・三章の旅装)。試すあいだだけ外し、終わったら戻す
+        List<ResourceLocation> real2 = List.copyOf(WayfarerNotes.recipes(2));
+        List<ResourceLocation> real3 = List.copyOf(WayfarerNotes.recipes(3));
+        WayfarerNotes.clearRecipes(2);
+        WayfarerNotes.clearRecipes(3);
         try {
             ItemStack notes = WayfarerNotes.make(2);
             check(f, WayfarerNotes.chapterOf(notes) == 2 && notes.is(GuideSetup.WAYFARER_NOTES.get()) && WayfarerNotes.chapterOf(WayfarerNotes.make(9)) == 4
@@ -301,6 +306,9 @@ public final class GuideSelfTest {
             f.add("crashed: " + e);
         } finally {
             WayfarerNotes.clearRecipes(2);
+            WayfarerNotes.clearRecipes(3);
+            WayfarerNotes.registerRecipes(2, real2.toArray(ResourceLocation[]::new));
+            WayfarerNotes.registerRecipes(3, real3.toArray(ResourceLocation[]::new));
             Growth.get(a).discoveries.clear();
         }
         report("wayfarer notes", f);

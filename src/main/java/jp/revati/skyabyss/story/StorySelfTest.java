@@ -131,7 +131,8 @@ public final class StorySelfTest {
         talk(p, wc, "ms_c_tide", f);
         check(stage(p, "main_tide").equals("rumor"), "isana topics: the rumor finished before the topic page", f);
         DialogueService.choose(p, "ms_c_tide", DialogueService.CONTINUE);
-        check(stage(p, "main_tide").equals("see"), "isana topics: hearing Isana's topic page did not finish main_tide's rumor: " + stage(p, "main_tide")
+        // 噂を聞くと、支度の段 (二章の支度がまだなら prepare) か、見る段へ進む
+        check(stage(p, "main_tide").equals("see") || stage(p, "main_tide").equals("prepare"), "isana topics: hearing Isana's topic page did not finish main_tide's rumor: " + stage(p, "main_tide")
                 + " (node " + node(p) + ", heard " + QuestLog.of(p).heard("main_tide", WC, "ms_c_tide2") + ", npc alive " + wc.isAlive() + ")", f);
         DialogueService.close(p);
 
@@ -147,7 +148,7 @@ public final class StorySelfTest {
                 .getOrThrow()).getOrThrow();
         check(after.heard("main_ember", WC, "ms_c_ember2") && after.heard("main_tide", WC, "ms_c_tide2"), "isana topics: heard topics were lost across save and load", f);
         p.setData(QuestSetup.LOG, after);
-        check(stage(p, "main_ember").equals("see") && stage(p, "main_tide").equals("see"), "isana topics: stages changed across relog", f);
+        check(stage(p, "main_ember").equals("see") && (stage(p, "main_tide").equals("see") || stage(p, "main_tide").equals("prepare")), "isana topics: stages changed across relog", f);
 
         // 記録のあるのに段が残った状態 (古いセーブ・先に聞いていた) は、見回りが一度走れば済む
         Quests.setStage(p, "main_ember", "rumor");
@@ -351,7 +352,9 @@ public final class StorySelfTest {
         // 潮殻: イサナの噂 → 見る → 渡る → 碑文 2 つ → 心臓 → 報告 (語り部)
         talk(p, wc, "ms_c_tide", f);
         next(p);
-        check(stage(p, "main_tide").equals("see"), "Isana's rumor did not advance main_tide: " + stage(p, "main_tide"), f);
+        check(stage(p, "main_tide").equals("prepare"), "Isana's rumor did not advance main_tide to the chapter-2 preparations: " + stage(p, "main_tide"), f);
+        finishPrep(p, "main_tide");
+        check(stage(p, "main_tide").equals("see"), "finishing the chapter-2 preparations did not advance main_tide: " + stage(p, "main_tide"), f);
         check(shown(p, WC, "count"), "the low-tide offer should show while sub_tide_watch is not taken", f);
         pick(p, WC, "go", f);
         Lore.unlock(p, "chapter1/tide_shell", false);
@@ -381,7 +384,9 @@ public final class StorySelfTest {
         check(stage(p, "main_thunder").equals("rumor"), "main_thunder did not start: " + stage(p, "main_thunder"), f);
         talk(p, st, "ms_thunder", f);
         next(p);
-        check(stage(p, "main_thunder").equals("see"), "the storyteller's tale did not advance main_thunder", f);
+        check(stage(p, "main_thunder").equals("prepare"), "the storyteller's tale did not advance main_thunder to the chapter-3 preparations: " + stage(p, "main_thunder"), f);
+        finishPrep(p, "main_thunder");
+        check(stage(p, "main_thunder").equals("see"), "finishing the chapter-3 preparations did not advance main_thunder: " + stage(p, "main_thunder"), f);
         pick(p, ST, "why", f);
         check(node(p).equals("ms_thunder_why"), "the 'why' branch did not open", f);
         DialogueService.close(p);
@@ -551,6 +556,16 @@ public final class StorySelfTest {
     private static String node(FakePlayer p) {
         String n = DialogueService.currentNode(p);
         return n == null ? "(closed)" : n;
+    }
+
+    // 支度の段 (prepare) を越える。支度のクエストそのものの流れは "prep chain" と各章の地上の自己テストが通すので、ここでは段だけ進める
+    // (本物の支度のクエストを終えると、その報告の会話が先に出て、ここで見たい会話の順が変わる)
+    private static void finishPrep(FakePlayer p, String quest) {
+        Quests.poll(p, true);
+        if (stage(p, quest).equals("prepare")) {
+            Quests.forceStage(p, quest);
+        }
+        Quests.poll(p, true);
     }
 
     private static void next(FakePlayer p) {

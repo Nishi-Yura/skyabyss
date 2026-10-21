@@ -335,7 +335,7 @@ def drift_raft():
     for z in range(-3, 4):
         bp.set(3, 0, z, 'minecraft:oak_fence[east=false,north=false,south=false,waterlogged=false,west=false]' if z != 0 else LOG_Z)
     bp.set(3, 1, 0, 'minecraft:white_carpet')
-    bp.set(2, 1, 1, 'minecraft:white_carpet')
+    bp.set(2, 1, 0, 'minecraft:white_carpet')  # 破れた帆は丸太の上 (前は z 1 で、下に何もなかった)
     # 縄と浮き (乾いた昆布)
     bp.set(-3, 0, 2, 'minecraft:dried_kelp_block')
     bp.set(0, 1, 0, 'minecraft:chain[axis=x,waterlogged=false]')

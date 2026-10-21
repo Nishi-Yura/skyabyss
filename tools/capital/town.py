@@ -1601,7 +1601,8 @@ class Town(Facilities):
         # 砦の本丸: 北の壁に控え柱
         self.buttresses(18, 37, -80, 'north', y, y + 12, step=5)
         # 鍛冶場: 北の壁 (炉の煙突の左右) と、東西の妻に控え柱
-        self.buttresses(8, 36, 8, 'north', 0, 7, step=6, skip=(22,))
+        # (前は x 8..36 のまま残っていて、鍛冶場を小さくしたあと、空き地に柱が立っていた)
+        self.buttresses(8, SMITHY_X1, 8, 'north', 0, 7, step=6, skip=((8 + SMITHY_X1) // 2,))
 
     # ---------------------------------------------------------------- 名所の作り込み (形を建てたあとに足す)
     def hall_extra(self):
