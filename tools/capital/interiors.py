@@ -239,7 +239,7 @@ class Interiors:
         ('perch_lodge', (-91, 9, -87, 13), 6, ['bed', 'map', 'chest', 'hay'], 'light_blue'),
         ('tavern', (-37, 39, -31, 43), 6, ['bed', 'crates', 'table', 'chest'], 'red'),
         ('black_market', (56, 43, 60, 47), 6, ['amethyst', 'crates', 'chest', 'amethyst'], 'purple'),
-        ('guild', (53, -31, 89, -13), 7, ['desk', 'desk', 'writing', 'map', 'table', 'table', 'books', 'vault', 'chest', 'plants', 'plants', 'desk'], 'red'),
+        ('guild', (53, -31, 75, -13), 7, ['desk', 'desk', 'writing', 'map', 'table', 'table', 'books', 'vault', 'chest', 'plants', 'plants', 'desk'], 'red'),
     ]
 
     def upper_rooms(self):

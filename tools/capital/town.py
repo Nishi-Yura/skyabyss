@@ -33,6 +33,9 @@ IN2 = 94         # 街区の外の縁 (壁ぎわに幅 3 の道を残す)
 TER = 4          # 北の段の上面
 TERZ = -42       # 北の段の前の縁 (z)
 TERX = 60        # 北の段の東西の縁 (|x|)
+GUILD_X1 = 78
+SMITHY_X1 = 30
+SMITHY_Z1 = 24
 GAP = 3          # 町家と町家のあいだ (路地。軒が 1 出るので、軒のあいだに 1 の空き)
 
 
@@ -911,7 +914,8 @@ class Town(Facilities):
     # ---------------------------------------------------------------- 鯨追いの組合
     def guild(self):
         st, v = self.st, self.v
-        x0, z0, x1, z1 = 50, -34, 92, -10
+        # 東の端は 78 (前は 92。大きすぎた。2026-10-21 の試遊)。東の空いた所は取引所 (facilities.trade_house)
+        x0, z0, x1, z1 = 50, -34, GUILD_X1, -10
         cz = (z0 + z1) // 2
         b = Body(v, st, x0, z0, x1, z1, 0, floors=2, fh=6, bay=4, door_side='west', door_at=12, door='iron',
                  sides=('west', 'north', 'south'), pots=0.2).build()
@@ -926,6 +930,7 @@ class Town(Facilities):
             v.set(x0 - 1, 0, zz, 'air')
             v.set(x0 - 1, -1, zz, st.trim.full)
         self.mark('open_guild', dx_, 0, dz_)
+        self.mark('label_guild', x0 - 4, 7, dz_)
         # 棟の上の鯨骨の肋 (三つ)
         for x in (x0 + 8, (x0 + x1) // 2, x1 - 8):
             for z in range(z0 - 2, z1 + 3):
@@ -999,7 +1004,7 @@ class Town(Facilities):
     # ---------------------------------------------------------------- 鍛冶場
     def smithy(self):
         st, v = self.st, self.v
-        x0, z0, x1, z1 = 8, 8, 36, 26
+        x0, z0, x1, z1 = 8, 8, SMITHY_X1, SMITHY_Z1   # 前は 36・26 (大きすぎた。2026-10-21 の試遊)
         cx = (x0 + x1) // 2
         b = Body(v, st, x0, z0, x1, z1, 0, floors=1, fh=7, bay=4, door_side='none', pots=0.0, interior=False,
                  infill=st.base.full).build()
@@ -1220,7 +1225,43 @@ class Town(Facilities):
             v.fill(x0 + 1, y0, z0 + 1, x0 + 1, y0 + 2, z0 + 1, st.fence)
 
     def lot(self, x0, z0, x1, z1, name):
-        """空き区画 (家を建ててよい所): 草、低い塀の角、碑"""
+        """空き区画のあった所は小さな庭 (2026-10-21 の試遊: 都に空き区画もギルドの家もいらない)。草と花壇と木、真ん中に水盤、
+        まわりに腰掛け。塀はなく、通りから歩いて入れる (詰まった町並みの息抜き)"""
+        self.garden(x0, z0, x1, z1)
+
+    def garden(self, x0, z0, x1, z1):
+        st, v = self.st, self.v
+        for x in range(x0, x1 + 1):
+            for z in range(z0, z1 + 1):
+                v.set(x, -1, z, 'grass_block[snowy=false]')
+                for yy in range(0, 12):
+                    if v.get(x, yy, z) is not None:
+                        v.b.pop((x, yy, z), None)
+        cx, cz = (x0 + x1) // 2, (z0 + z1) // 2
+        # 十字の小道 (砂利と石)
+        for x in range(x0, x1 + 1):
+            v.set(x, -1, cz, 'gravel' if (x + cz) % 3 else st.base.full)
+        for z in range(z0, z1 + 1):
+            v.set(cx, -1, z, 'gravel' if (cx + z) % 3 else st.base.full)
+        # 水盤
+        for dx in (-1, 0, 1):
+            for dz in (-1, 0, 1):
+                v.set(cx + dx, -1, cz + dz, st.base.full)
+                v.set(cx + dx, 0, cz + dz, st.base.slab('bottom') if (dx or dz) else 'water[level=0]')
+        v.set(cx, -1, cz, st.base.full)
+        v.set(cx, 0, cz, 'water[level=0]')
+        # 四隅の花壇と木
+        for (qx, qz) in ((x0 + 2, z0 + 2), (x1 - 2, z0 + 2), (x0 + 2, z1 - 2), (x1 - 2, z1 - 2)):
+            flowerbed(v, st, qx - 1, qz - 1, qx + 1, qz + 1, density=0.6)
+        for (qx, qz) in ((x0 + 3, z0 + 3), (x1 - 3, z1 - 3)):
+            tree(v, qx, 0, qz, st.trunk2, st.leaves2, h=5, r=2)
+        # 腰掛け (水盤のまわり、小道から外す)
+        for (bx, bz, f) in ((cx - 3, cz - 2, 'east'), (cx + 3, cz + 2, 'west'), (cx - 2, cz + 3, 'north'), (cx + 2, cz - 3, 'south')):
+            v.set(bx, 0, bz, '%s_stairs[facing=%s,half=bottom,shape=straight,waterlogged=false]' % (st.wood, f))
+        for (lx, lz) in ((x0, z0), (x1, z1)):
+            lamp_post(v, st, lx, 0, lz, h=3)
+
+    def _old_lot(self, x0, z0, x1, z1, name):
         st, v = self.st, self.v
         for x in range(x0, x1 + 1):
             for z in range(z0, z1 + 1):
@@ -1254,50 +1295,50 @@ class Town(Facilities):
         v.set(55, 0, -31, 'skyabyss:message_board[facing=south]')
         v.set(55, 0, -13, 'skyabyss:message_board[facing=north]')
         # 帰らなかった者の名簿 (帳場のそばの碑。読むと伝承に記される)
-        self.tablet(84, 0, -24, 'west', 'guild_roll')
+        self.tablet(70, 0, -24, 'west', 'guild_roll')
         for zt in (-26, -17):
-            for x in range(60, 81):
-                if (x - 60) % 5 == 0:
+            for x in range(58, 66):
+                if (x - 58) % 5 == 0:
                     v.set(x, 0, zt, '%s_fence' % w)
                 v.set(x, 1, zt, '%s_slab[type=bottom,waterlogged=false]' % w)
-                if (x - 60) % 5 != 0:
+                if (x - 58) % 5 != 0:
                     v.set(x, 0, zt - 1, '%s_stairs[facing=south,half=bottom,shape=straight,waterlogged=false]' % w)
                     v.set(x, 0, zt + 1, '%s_stairs[facing=north,half=bottom,shape=straight,waterlogged=false]' % w)
-            for x in range(62, 80, 6):
+            for x in range(60, 66, 4):
                 v.set(x, 2, zt, 'candle[candles=3,lit=true,waterlogged=false]')
         # 帳場 (東の端)
         for z in range(-28, -15):
-            v.set(85, 0, z, '%s_planks' % w)
-            v.set(85, 1, z, '%s_slab[type=bottom,waterlogged=false]' % w)
-            v.set(89, 0, z, 'barrel[facing=west,open=false]')
-            v.set(89, 1, z, 'barrel[facing=west,open=false]' if z % 2 else 'bookshelf')
-        v.set(85, 0, -22, 'air')
-        v.set(85, 1, -22, 'air')
-        v.set(86, 2, -24, 'lantern[hanging=false,waterlogged=false]')
+            v.set(71, 0, z, '%s_planks' % w)
+            v.set(71, 1, z, '%s_slab[type=bottom,waterlogged=false]' % w)
+            v.set(75, 0, z, 'barrel[facing=west,open=false]')
+            v.set(75, 1, z, 'barrel[facing=west,open=false]' if z % 2 else 'bookshelf')
+        v.set(71, 0, -22, 'air')
+        v.set(71, 1, -22, 'air')
+        v.set(72, 2, -24, 'lantern[hanging=false,waterlogged=false]')
         # 暖炉 (北の壁の真ん中)
-        for x in range(69, 72):
+        for x in range(63, 66):
             v.fill(x, 0, -32, x, 4, -32, 'bricks')
-        v.set(70, 0, -32, 'campfire[facing=south,lit=true,signal_fire=false,waterlogged=false]')
-        v.set(70, 1, -32, 'air')
+        v.set(64, 0, -32, 'campfire[facing=south,lit=true,signal_fire=false,waterlogged=false]')
+        v.set(64, 1, -32, 'air')
         v.set(58, 0, -29, 'cartography_table')
         v.set(58, 0, -15, 'lectern[facing=north,has_book=false,powered=false]')
         # 吊るした鯨の骨と灯り
-        for x in range(62, 82, 6):
+        for x in range(60, 70, 6):
             v.set(x, 5, -22, 'chain[axis=y,waterlogged=false]')
             v.set(x, 4, -22, 'bone_block[axis=x]')
             v.set(x - 1, 4, -22, 'bone_block[axis=x]')
             v.set(x + 1, 4, -22, 'bone_block[axis=x]')
             v.set(x, 5, -28, 'lantern[hanging=true,waterlogged=false]')
             v.set(x, 5, -16, 'lantern[hanging=true,waterlogged=false]')
-        for x in range(60, 84, 8):
+        for x in range(58, 76, 8):
             v.set(x, 3, -32, '%s_wall_banner[facing=south]' % st.banner_color)
             v.set(x, 3, -12, '%s_wall_banner[facing=north]' % st.banner_color)
         # 二階へ梯子、寝台 6
         # 二階へ梯子 (東の内の壁 x 91 に付ける。二階の床に穴)
         for yy in range(0, 7):
-            v.set(90, yy, -14, 'ladder[facing=west,waterlogged=false]')
-        v.set(89, 7, -14, 'air')
-        for x in range(56, 86, 5):
+            v.set(76, yy, -14, 'ladder[facing=west,waterlogged=false]')
+        v.set(75, 7, -14, 'air')
+        for x in range(56, 74, 5):
             v.set(x, 7, -32, 'red_bed[facing=north,part=head,occupied=false]')
             v.set(x, 7, -31, 'red_bed[facing=north,part=foot,occupied=false]')
             v.set(x + 1, 7, -32, 'chest[facing=south,type=single,waterlogged=false]')
@@ -1452,8 +1493,8 @@ class Town(Facilities):
         """入れる施設の部屋を豪華に (形と家具を置いたあとに)"""
         y = TER + 1
         # 組合 (一階: 床 y0=0、高さ 6。二階: 床 7、高さ 5)
-        self.room(52, -32, 90, -12, 0, 6)
-        self.room(52, -32, 90, -12, 7, 5, rug=False)
+        self.room(52, -32, GUILD_X1 - 2, -12, 0, 6)
+        self.room(52, -32, GUILD_X1 - 2, -12, 7, 5, rug=False)
         # 砦の本丸 (記録の間)
         self.room(20, -78, 35, -71, y, 6, rug=False)
         self.room(20, -78, 35, -71, y + 7, 5)
@@ -1463,7 +1504,7 @@ class Town(Facilities):
         # 語り部の家 (一階は家具があるので、梁と灯りと隅の鉢だけ)
         self.room(-20, -80, -14, -74, y, 4, rug=False, shelves=False)
         # 鍛冶場 (石の床、棚は奥の壁だけ)
-        self.room(10, 10, 34, 18, 0, 7, floor='stone', rug=False)
+        self.room(10, 10, SMITHY_X1 - 2, 18, 0, 7, floor="stone", rug=False)
         # 大鐘楼の一階 (台座の中)
         self.room(-34, -80, -26, -72, y, 4, floor='stone', rug=False, shelves=False)
 
@@ -1539,7 +1580,7 @@ class Town(Facilities):
     def guild_extra(self):
         """鯨追いの組合: 西の正面の柱廊、戸の上の鯨の頭骨、前庭の顎骨の門、銛の掛け台と綱の樽"""
         st, v = self.st, self.v
-        x0, z0, x1, z1 = 50, -34, 92, -10
+        x0, z0, x1, z1 = 50, -34, GUILD_X1, -10
         dzc = z0 + 12
         # 柱廊 (西の面の外、奥行き 2)
         for z in range(z0 + 1, z1):
@@ -1614,7 +1655,7 @@ class Town(Facilities):
     def smithy_extra(self):
         """鍛冶場: 太い煉瓦の煙突、前庭の水桶と金床、薪の山"""
         st, v = self.st, self.v
-        x0, z0, x1, z1 = 8, 8, 36, 26
+        x0, z0, x1, z1 = 8, 8, SMITHY_X1, SMITHY_Z1
         cx = (x0 + x1) // 2
         top = 7
         for x in range(cx - 2, cx + 3):
@@ -1768,6 +1809,7 @@ class Town(Facilities):
         """施設 (facilities.py)。街区のあとに建てる (街区は reserve で場所を空けている)"""
         self.tool_shop()
         self.storage()
+        self.trade_house()
         self.apothecary()
         self.guild_desk()
         self.smithy_front()

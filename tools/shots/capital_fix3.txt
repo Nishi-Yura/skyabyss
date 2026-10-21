@@ -1,0 +1,48 @@
+# 2026-10-21 の試遊のあとの都: 戸の上の施設の名・小さくした組合と鍛冶場・取引所・空き区画のあとの庭・鐘楼の前の煙
+world opening_capital_fix3 normal
+size 1280 720
+timeout 2400
+render 16
+clouds off
+
+wait 100
+cmd skyabyss cinematic stop
+wait 10
+cmd skyabyss cinematic stop
+cmd time set 5000
+cmd weather clear
+cmd gamerule doDaylightCycle false
+cmd gamemode spectator
+cmd skyabyss dev opening build
+hud off
+cmd skyabyss dev opening at shelter 0 0 150 60 180 62
+waitchunks
+cmd skyabyss facility place
+wait 200
+shot f3_over_top
+cmd skyabyss dev opening at shelter 0 66 8 6 180 18
+waitchunks
+wait 80
+shot f3_east_avenue_labels
+cmd skyabyss dev opening at shelter 0 88 6 0 180 12
+waitchunks
+wait 60
+shot f3_trade_front
+cmd skyabyss dev opening at shelter 0 88 2 -17 180 10
+waitchunks
+cmd skyabyss facility place
+wait 60
+shot f3_trade_inside
+cmd skyabyss dev opening at shelter 0 0 10 30 -60 14
+waitchunks
+wait 60
+shot f3_smithy
+cmd skyabyss dev opening at shelter 0 -72 12 -60 160 40
+waitchunks
+wait 60
+shot f3_garden_nw
+cmd skyabyss dev opening at shelter 0 -30 14 -55 180 20
+waitchunks
+wait 80
+shot f3_bell_smoke
+quit

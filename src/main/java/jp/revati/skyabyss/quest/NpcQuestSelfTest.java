@@ -87,6 +87,7 @@ public final class NpcQuestSelfTest {
     private static void run(MinecraftServer server, List<String> failures, List<String> notes) {
         loading(failures, notes);
         texts(failures, notes);
+        doneView(server, failures, notes);
         ServerLevel level = server.overworld();
         BlockPos spawn = level.getSharedSpawnPos();
         BlockPos at = new BlockPos(spawn.getX(), 300, spawn.getZ());
@@ -244,6 +245,72 @@ public final class NpcQuestSelfTest {
     }
 
     // ---------------------------------------------------------------- 文
+    // 終えたクエストの頁 (クエストログ。QuestDoneView): やったこと・書き付け・日・新しい UI の文。押すと中身が出る (以前は何も出なかった)
+    private static void doneView(MinecraftServer server, List<String> failures, List<String> notes) {
+        Map<String, String> ja;
+        Map<String, String> en;
+        try {
+            ja = jp.revati.skyabyss.LangSelfTest.table("ja_jp");
+            en = jp.revati.skyabyss.LangSelfTest.table("en_us");
+        } catch (java.io.IOException e) {
+            failures.add("done view: lang tables could not be read: " + e);
+            return;
+        }
+        for (String k : List.of("gui.skyabyss.quest.done_steps", "gui.skyabyss.quest.reward_got", "gui.skyabyss.quest.days", "gui.skyabyss.quest.day_done",
+                "gui.skyabyss.quest.finished", "gui.skyabyss.quest.or")) {
+            check(ja.containsKey(k) && en.containsKey(k), "done view: missing ja/en text " + k, failures);
+        }
+        int quests = 0;
+        for (QuestDef def : QuestManager.all()) {
+            List<QuestDoneView.Line> lines = QuestDoneView.lines(def);
+            int objectives = def.stages().stream().mapToInt(st -> st.objectives().size()).sum();
+            check(lines.size() == objectives, "done view: " + def.id() + " lists " + lines.size() + " of " + objectives + " objectives", failures);
+            check(objectives == 0 || !lines.isEmpty(), "done view: " + def.id() + " shows nothing when finished", failures);
+            for (QuestDoneView.Line l : lines) {
+                check(ja.containsKey(l.key()) && en.containsKey(l.key()), "done view: " + def.id() + " objective text missing " + l.key(), failures);
+            }
+            String journal = QuestDoneView.journalKey(def, k -> ja.containsKey(k) && en.containsKey(k));
+            check(ja.containsKey(journal) && en.containsKey(journal), "done view: " + def.id() + " has no closing text (" + journal + ")", failures);
+            quests++;
+        }
+        // どれか一つの段: 二つ目から「または」
+        QuestDef song = QuestManager.quest("main_song");
+        if (song != null) {
+            List<QuestDoneView.Line> lines = QuestDoneView.lines(song);
+            check(lines.size() >= 2 && lines.get(lines.size() - 1).alternative() && !lines.get(lines.size() - 2).alternative(),
+                    "done view: the last stage of main_song (either person) should read 'A / or B'", failures);
+        }
+        // 日 (1 日目から)
+        QuestLog.Entry e = new QuestLog.Entry(0, 30000L);
+        check(QuestDoneView.days(e) == null, "done view: an unfinished quest should have no days", failures);
+        e.done = true;
+        e.finished = 3 * 24000L + 10;
+        long[] d = QuestDoneView.days(e);
+        check(d != null && d[0] == 2 && d[1] == 4, "done view: days should be taken day 2 / finished day 4", failures);
+        // 本当に終えると、終えた時刻が残り、頁に日が出る
+        FakePlayer p = FakePlayerFactory.get(server.overworld(), new GameProfile(UUID.nameUUIDFromBytes("skyabyss_done_view".getBytes(StandardCharsets.UTF_8)), "skyabyss_done_view"));
+        String id = "sub_parcel";
+        try {
+            Quests.forgetAll(p);
+            if (QuestManager.quest(id) != null && Quests.start(p, id)) {
+                for (int i = 0; i < 8 && QuestLog.of(p).entry(id) != null && !QuestLog.of(p).entry(id).done; i++) {
+                    Quests.forceStage(p, id);
+                }
+                QuestLog.Entry real = QuestLog.of(p).entry(id);
+                check(real != null && real.done, "done view: " + id + " did not finish", failures);
+                long[] rd = real == null ? null : QuestDoneView.days(real);
+                check(rd != null && rd[1] == server.overworld().getGameTime() / 24000L + 1, "done view: a finished quest should record the day it was finished", failures);
+            } else {
+                failures.add("done view: " + id + " could not be started");
+            }
+        } finally {
+            Quests.forgetAll(p);
+            Growth.get(p).discoveries.clear();
+            p.getInventory().clearContent();
+        }
+        notes.add("done view: " + quests + " quests list their objectives and closing text");
+    }
+
     private static void texts(List<String> failures, List<String> notes) {
         List<String> keys = new ArrayList<>(List.of("entity.skyabyss.storyteller", "entity.skyabyss.whale_chaser",
                 "message.skyabyss.storyteller.struck", "message.skyabyss.whale_chaser.struck", "key.skyabyss.quest_log",

@@ -107,7 +107,9 @@ public class StoneWhaleEntity extends Entity implements GeoEntity, TravelTitan, 
     private double targetX;
     private double targetZ;
     private boolean hasTarget;
-    private int restCooldown = 2400;
+    // 現れてから最初に降りてよくなるまで (tick)。一章の人は、さらに「岩鯨を見た・場面の外」が要る (Ch1Descent)。以前は 2400 (2 分) で、初見のあとも待たされた
+    public static final int FIRST_DESCENT_WAIT = 200;
+    private int restCooldown = FIRST_DESCENT_WAIT;
     private int restTicks;
     private int approachTicks;
     private double approachAngle;
@@ -881,14 +883,14 @@ public class StoneWhaleEntity extends Entity implements GeoEntity, TravelTitan, 
     }
 
     // 呼び直した個体に、前の個体の状態を引き継ぐ。場所が変わるので、巡航から始め、鎖はたたむ。
-    // 降下までの待ち時間は残すが、長すぎても短すぎてもいけないので 30 秒〜2 分に収める
+    // 降下までの待ち時間は残すが、長すぎても短すぎてもいけないので 10 秒〜2 分に収める
     public void restoreState(CompoundTag tag) {
         readAdditionalSaveData(tag);
         mode = Mode.CRUISE;
         hasTarget = false;
         restTicks = 0;
         approachTicks = 0;
-        restCooldown = Mth.clamp(restCooldown, 600, 2400);
+        restCooldown = Mth.clamp(restCooldown, FIRST_DESCENT_WAIT, 2400);
         entityData.set(CHAIN, 0f);
     }
 

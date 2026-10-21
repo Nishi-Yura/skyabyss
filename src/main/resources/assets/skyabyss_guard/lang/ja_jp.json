@@ -1,3 +1,12 @@
 {
-  "message.skyabyss.guard.block": "ここは壊せない"
+  "message.skyabyss.guard.block": "ここは壊せない",
+  "label.skyabyss.facility.tool_shop": "道具屋",
+  "label.skyabyss.facility.storage": "預かり所",
+  "label.skyabyss.facility.trade": "取引所",
+  "label.skyabyss.facility.apothecary": "薬師の店",
+  "label.skyabyss.facility.inn": "宿「鐘の宿」",
+  "label.skyabyss.facility.perch": "子の止まり木",
+  "label.skyabyss.facility.tavern": "酒場「深い杯」",
+  "label.skyabyss.facility.smithy": "鍛冶場",
+  "label.skyabyss.facility.guild": "鯨追いの組合"
 }

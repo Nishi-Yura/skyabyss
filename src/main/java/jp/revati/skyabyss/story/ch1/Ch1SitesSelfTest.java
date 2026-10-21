@@ -42,7 +42,7 @@ import net.neoforged.neoforge.common.util.FakePlayerFactory;
 //            冷えの戸 (鉄なしでは開かない・鉄の兜で開く)、湧き台 (グループの分だけ湧く → 倒しきるとクリアの記録・経験値・粗鉄)
 //   trails   支度の段 3 本 (34 の 4.2): イサナの鯨の話のあとに三本とも出る・覚書が渡る・鉄の跡 (荷の頁 → 鉄の防具 4 部位を着る)・
 //            折れた剣 (洞の台座の頁 → 職人 → 鉄の剣 + 砥石)・盾と糧 (語り部の話 → 盾 + 固焼き 8)・三本で ch1_ready と鯨追いの印 (一度)
-//   descent  岩鯨の降下の条件 (日 4 の朝以降 + 支度 2 本、または日 6 以降。人ごと)、経験値の枠
+//   descent  岩鯨の降下の条件 (見たら降りる。場面の間は待つ。日・支度の本数は見ない。人ごと)、見つけてから鎖までの長さ、経験値の枠
 public final class Ch1SitesSelfTest {
     private static final List<String> F = new ArrayList<>();
 
@@ -608,12 +608,10 @@ public final class Ch1SitesSelfTest {
 
     // ---------------------------------------------------------------- descent・経験値の枠
     private static void descent(MinecraftServer server) {
-        // 式
-        check(!Ch1Descent.allows(2, 3), "day 3 should not lower the chain, whatever the prep");
-        check(!Ch1Descent.allows(3, 1), "day 4 morning with one trail step should not lower the chain");
-        check(Ch1Descent.allows(3, 2), "day 4 morning with two trail steps should lower the chain");
-        check(!Ch1Descent.allows(4, 0), "day 5 with no prep should not lower the chain");
-        check(Ch1Descent.allows(5, 0) && Ch1Descent.allows(9, 0), "day 6 on should lower the chain with no prep");
+        // 式: 見たら降りる (日・時刻・支度の本数は見ない)。場面の最中は降りない
+        check(!Ch1Descent.allows(false, false), "the chain should not come down before the whale is seen");
+        check(Ch1Descent.allows(true, false), "the chain should come down once the whale is seen");
+        check(!Ch1Descent.allows(true, true), "the chain should wait while the player watches a scene");
         // 降りる速さ (first_hour_log B-5): 遠いほど速く (上限 0.45)、近づくと 0.12。単調で、巡航 (0.2) の 2 倍強まで
         check(jp.revati.skyabyss.titan.StoneWhaleEntity.approachSpeed(700) == 0.45f && jp.revati.skyabyss.titan.StoneWhaleEntity.approachSpeed(20) == 0.12f, "approach speed bounds");
         float prevSpeed = 0f;
@@ -631,49 +629,65 @@ public final class Ch1SitesSelfTest {
         }
         check(ticks < 2400, "a 700 block approach would take " + (int) ticks + " ticks (over 2 minutes)");
         check(jp.revati.skyabyss.titan.StoneWhaleEntity.DESCENT_RANGE >= 640 && jp.revati.skyabyss.titan.StoneWhaleEntity.DESCENT_RECHECK <= 200, "the descent search range or recheck interval is too slow");
-        check(jp.revati.skyabyss.quest.ObjectiveRules.waitVariant(0).equals(".wait.prep") && jp.revati.skyabyss.quest.ObjectiveRules.waitVariant(1).equals(".wait.prep")
-                && jp.revati.skyabyss.quest.ObjectiveRules.waitVariant(2).equals(".wait.lamps") && jp.revati.skyabyss.quest.ObjectiveRules.waitVariant(3).equals(".wait.lamps"),
-                "the chain-wait band variant should switch at two prep quests");
+        // 見つけてから背まで (短くした流れ): 現れてから最初に降りてよくなるまで 10 秒以内。見たあとの調べ直しは 5 秒おき
+        check(jp.revati.skyabyss.titan.StoneWhaleEntity.FIRST_DESCENT_WAIT <= 200, "the first descent wait is longer than 10 seconds");
+        int worst = jp.revati.skyabyss.titan.StoneWhaleEntity.DESCENT_RECHECK + (int) ticks + 70 * 20 + 20 * 20;
+        check(worst <= 5 * 60 * 20, "from the first sight to the chain on the ground could take " + worst / 20 + " s (over 5 minutes)");
         check(jp.revati.skyabyss.quest.ObjectiveRules.distanceLabel(0.4, "S").isEmpty() && jp.revati.skyabyss.quest.ObjectiveRules.distanceLabel(4.9, "S").isEmpty()
                 && jp.revati.skyabyss.quest.ObjectiveRules.distanceLabel(5, "S").equals("10m S") && jp.revati.skyabyss.quest.ObjectiveRules.distanceLabel(227, "NE").equals("230m NE"),
                 "the distance label should hide under 5 m and round to 10 m");
-        // 人ごと (差し替えた章と日で)
+        // 鎖の待ちの帯は一本だけ (支度の本数・三灯の版は無い。降りるまでの間がごく短いので「追いかけよう」)
+        for (String lang : List.of("ja_jp", "en_us")) {
+            java.util.Map<String, String> table;
+            try {
+                table = jp.revati.skyabyss.LangSelfTest.table(lang);
+            } catch (java.io.IOException e) {
+                check(false, lang + ": lang table could not be read: " + e);
+                continue;
+            }
+            check(table.containsKey("quest.skyabyss.main_song.board.ride.wait"), lang + ": the chain-wait band text is missing");
+            String waitKey = "quest.skyabyss.main_song.board.ride.wait";
+            check(!table.containsKey(waitKey + ".prep") && !table.containsKey(waitKey + ".lamps"),
+                    lang + ": old chain-wait variants (prep count / lamps) are still in the lang");
+        }
+        // 人ごと (差し替えた章・伝承・場面で)
         ServerLevel level = server.overworld();
         FakePlayer a = fake(server, "descent_a");
         FakePlayer b = fake(server, "descent_b");
         var chapterBefore = Ch1Descent.chapterOf;
-        var dayBefore = Ch1Descent.dayOf;
-        long[] day = {2};
+        var seenBefore = Ch1Descent.seen;
+        var sceneBefore = Ch1Descent.inScene;
+        java.util.Set<java.util.UUID> seenSet = new java.util.HashSet<>();
+        java.util.Set<java.util.UUID> sceneSet = new java.util.HashSet<>();
         try {
             Ch1Descent.chapterOf = p -> Chapters.WHALE;
-            Ch1Descent.dayOf = s -> day[0];
+            Ch1Descent.seen = p -> seenSet.contains(p.getUUID());
+            Ch1Descent.inScene = p -> sceneSet.contains(p.getUUID());
             Quests.forgetAll(a);
             Quests.forgetAll(b);
             a.setPos(0, 200, 0);
             b.setPos(0, 200, 0);
-            // a は二本、b は 0 本
-            finish(a, 2);
-            day[0] = 2;
-            check(!Ch1Descent.qualifies(a) && !Ch1Descent.qualifies(b), "nobody qualifies on day 3");
-            day[0] = 3;
-            check(Ch1Descent.qualifies(a) && !Ch1Descent.qualifies(b), "on day 4 morning only the player with two prep quests qualifies");
-            day[0] = 5;
-            check(Ch1Descent.qualifies(a) && Ch1Descent.qualifies(b), "everybody qualifies from day 6");
-            // 章が違えば条件なし (一章を過ぎた人)
-            day[0] = 2;
+            check(!Ch1Descent.qualifies(a) && !Ch1Descent.qualifies(b), "nobody qualifies before seeing the whale");
+            // a だけ見た。支度は 0 本のまま (支度は鍵ではない)
+            seenSet.add(a.getUUID());
+            check(Ch1Descent.qualifies(a) && !Ch1Descent.qualifies(b), "only the player who saw the whale qualifies (with no prep)");
+            sceneSet.add(a.getUUID());
+            check(!Ch1Descent.qualifies(a), "a player inside the first-sight scene should not be picked");
+            sceneSet.clear();
+            // 章が違えば見たものとする (一章を過ぎた人)
             Ch1Descent.chapterOf = p -> Chapters.TIDE;
             check(Ch1Descent.qualifies(b), "a player past chapter 1 should not be gated");
             Ch1Descent.chapterOf = p -> Chapters.WHALE;
             // 岩鯨の近くで条件を満たす人を選ぶ
-            day[0] = 3;
             var picked = Ch1Descent.pick(level, 0, 0, 100);
-            check(picked == null || picked.getUUID().equals(a.getUUID()) || picked != b, "the whale picked a player who does not qualify");
-            day[0] = 2;
+            check(picked == null || !picked.getUUID().equals(b.getUUID()), "the whale picked a player who has not seen it");
+            seenSet.clear();
             check(Ch1Descent.pick(level, 0, 0, 100) == null || level.players().stream().noneMatch(p -> p.getUUID().equals(a.getUUID())),
-                    "the whale picked somebody on day 3");
+                    "the whale picked somebody before anyone saw it");
         } finally {
             Ch1Descent.chapterOf = chapterBefore;
-            Ch1Descent.dayOf = dayBefore;
+            Ch1Descent.seen = seenBefore;
+            Ch1Descent.inScene = sceneBefore;
             Quests.forgetAll(a);
             Quests.forgetAll(b);
             Growth.get(a).discoveries.clear();
