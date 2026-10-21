@@ -16,10 +16,10 @@ import net.minecraft.world.item.Items;
 import net.neoforged.neoforge.common.util.FakePlayer;
 
 // ギルド (docs/design/35 の 3.4) の自己テスト。段: "facility guild"。
-//   作る (名前・印の長さ・重なり)、申請と受ける / 断る、誰でも入れるギルド、30 人まで、抜けると長が移り、最後の人が抜けると解散、
+//   作る (名前・印の長さ・重なり)、申請と受ける / 断る、誰でも入れるギルド、30 人まで、長は抜けられない (譲る・解散)、
 //   名札の印 (人の写し)、保存と読み直し、名札の頭の文。いまあるギルドは試しの前に写して、終わったら戻す
 //   位と倉庫 (副長が申請を受ける・取り出せる位・預けられない品)、旗の作り直しと旗の品、週替わりの頼み (選び方・週替わり・納める・
-//   狩る・済むと報い・いない人の報い)、空き区画 (借りる・重ならない・手放す・中で建てられる人)
+//   狩る・済むと報い・いない人の報い)、旗の模様と名札の色 (はじめからの模様・功績で開く模様と色)、功績 (頼みの回数・納めた量・人の数)
 public final class GuildSelfTest {
     private GuildSelfTest() {
     }
@@ -47,7 +47,7 @@ public final class GuildSelfTest {
         }
         if (f.isEmpty()) {
             SkyAbyss.LOGGER.info("SELFTEST facility guild PASSED (create, apply/accept/deny, open join, 30 cap, leave/leader/disband, badge, save, "
-                    + "ranks, storage, emblem, banner, weekly request, lots)");
+                    + "ranks, storage, emblem, banner, weekly request, leader stays/hand over/disband, patterns, achievements)");
         } else {
             f.forEach(m -> SkyAbyss.LOGGER.error("SELFTEST facility guild FAILED: {}", m));
         }
@@ -99,13 +99,20 @@ public final class GuildSelfTest {
         // 外す・抜ける・長が移る
         check(f, Guilds.kick(b, c.getUUID()) == Guilds.Result.NOT_LEADER, "only the leader removes");
         check(f, Guilds.kick(a, c.getUUID()) == Guilds.Result.OK && !g.members.contains(c.getUUID()), "leader removes a member");
+        check(f, Guilds.leave(a) == Guilds.Result.LEADER_STAYS && g.members.contains(a.getUUID()), "the leader cannot leave");
+        check(f, Guilds.transfer(b, a.getUUID()) == Guilds.Result.NOT_LEADER, "only the leader hands over");
+        check(f, Guilds.transfer(a, UUID.randomUUID()) == Guilds.Result.NOT_MEMBER, "hand over only to a member");
+        check(f, Guilds.transfer(a, b.getUUID()) == Guilds.Result.NEW_LEADER && g.leader.equals(b.getUUID())
+                && g.rank(a.getUUID()) == GuildData.RANK_OFFICER, "hand over: new leader, old leader becomes officer");
         check(f, Guilds.leave(a) == Guilds.Result.OK && !a.getData(FacilitySetup.BADGE).present(), "leave clears the badge");
-        check(f, g.leader.equals(b.getUUID()), "the oldest member becomes leader");
         for (FakePlayer m : many) {
             Guilds.leave(m);
         }
-        check(f, Guilds.leave(b) == Guilds.Result.OK && data.byName("鐘の守り") == null, "last member leaving disbands");
-        check(f, Guilds.leave(b) == Guilds.Result.NOT_IN_GUILD, "leave twice");
+        check(f, Guilds.leave(b) == Guilds.Result.LEADER_STAYS, "the last member, the leader, still cannot leave");
+        check(f, Guilds.disband(many.get(0)) == Guilds.Result.NOT_IN_GUILD, "outsiders cannot disband");
+        check(f, Guilds.disband(b) == Guilds.Result.DISBANDED && data.byName("鐘の守り") == null && !b.getData(FacilitySetup.BADGE).present(),
+                "the leader disbands");
+        check(f, Guilds.leave(b) == Guilds.Result.NOT_IN_GUILD, "leave after disband");
         // 名札の頭の文
         GuildBadge badge = new GuildBadge("g1", "KANE", DyeColor.BLACK.getId(), DyeColor.YELLOW.getId());
         check(f, Guilds.prefix(badge).getString().equals("[KANE] "), "name plate prefix " + Guilds.prefix(badge).getString());
@@ -182,33 +189,41 @@ public final class GuildSelfTest {
         g.reqId = "hunt";
         GuildRequests.add(server, g, d.getUUID(), 3);
         check(f, g.reqProgress == 3 && g.contrib.get(d.getUUID()) == 3, "hunt counts kills");
-        // 空き区画
-        check(f, GuildLots.rent(c, "lot_1") == Guilds.Result.NOT_LEADER, "only the leader rents");
-        check(f, GuildLots.rent(a, "lot_1") == Guilds.Result.NO_COINS, "rent costs coins");
-        Coins.give(a, GuildLots.RENT_COINS);
-        check(f, GuildLots.rent(a, "lot_9") == Guilds.Result.NO_LOT, "unknown lot");
-        check(f, GuildLots.rent(a, "lot_1") == Guilds.Result.RENTED && g.lot.equals("lot_1") && Coins.count(a) == 0
-                && GuildLots.holder(server, "lot_1") == g, "rent a lot");
-        check(f, GuildLots.rent(a, "lot_2") == Guilds.Result.HAS_LOT, "one lot per guild");
-        FakePlayer e = fake(server, "guild_x_e");
-        Guilds.create(e, "隣の家", "TONA", 0, 0);
-        Coins.give(e, GuildLots.RENT_COINS);
-        check(f, GuildLots.rent(e, "lot_1") == Guilds.Result.LOT_TAKEN && Coins.count(e) == GuildLots.RENT_COINS, "one guild per lot");
-        GuildLots.Area area = GuildLots.areaOf(server, "lot_1");
-        if (area != null) {
-            check(f, GuildLots.mayBuild(server, c, area.center()) && !GuildLots.mayBuild(server, e, area.center()), "only members build in the lot");
-            check(f, GuildLots.mayBuild(server, e, area.center().offset(200, 0, 200)), "outside lots anyone builds");
-        }
-        // 保存と読み直し (位・倉庫・区画・頼み)
+        // 功績: 頼みを一度済ませた → 花の模様が開く。名札の金は 10 回から
+        check(f, g.reqCompleted == 1 && g.totalContrib == 51 && g.unlocked.contains("requests_1") && !g.unlocked.contains("requests_5"),
+                "a finished request counts toward achievements " + g.reqCompleted + " " + g.totalContrib + " " + g.unlocked);
+        check(f, GuildEmblems.available(java.util.Set.of()).size() >= 16, "many patterns from the start");
+        check(f, Guilds.setEmblem(a, "KR", DyeColor.BLACK.getId(), DyeColor.WHITE.getId(), "globe", "") == Guilds.Result.PATTERN_LOCKED,
+                "locked pattern refused");
+        check(f, Guilds.setEmblem(a, "KR", DyeColor.BLACK.getId(), DyeColor.WHITE.getId(), "flower", "") == Guilds.Result.OK
+                && g.pattern.equals("flower"), "unlocked pattern used");
+        var fl = Guilds.bannerItem(server, g).get(net.minecraft.core.component.DataComponents.BANNER_PATTERNS);
+        check(f, fl != null && fl.layers().size() == 1 && fl.layers().get(0).pattern().is(net.minecraft.world.level.block.entity.BannerPatterns.FLOWER),
+                "banner item follows the pattern");
+        check(f, Guilds.setEmblem(a, "KR", DyeColor.BLACK.getId(), DyeColor.WHITE.getId(), "cross", "") == Guilds.Result.OK, "free pattern used");
+        check(f, Guilds.setEmblem(a, "KR", DyeColor.BLACK.getId(), DyeColor.WHITE.getId(), "cross", "gold") == Guilds.Result.PLATE_LOCKED,
+                "locked plate colour refused");
+        g.reqCompleted = 10;
+        check(f, GuildAchievements.check(server, g) >= 2 && g.unlocked.contains("requests_10") && g.unlocked.contains("requests_5"), "achievements unlock");
+        check(f, Guilds.setEmblem(a, "KR", DyeColor.BLACK.getId(), DyeColor.WHITE.getId(), "flow", "gold") == Guilds.Result.OK
+                && a.getData(FacilitySetup.BADGE).plate().equals("gold") && a.getData(FacilitySetup.BADGE).textColor() == 0xF2C14E,
+                "plate colour shows on the badge");
+        g.totalContrib = 600;
+        GuildAchievements.check(server, g);
+        check(f, g.unlocked.contains("contrib_500") && GuildEmblems.usable("skull", g.unlocked) && !GuildEmblems.usable("globe", g.unlocked),
+                "contribution milestone");
+        check(f, GuildAchievements.value(g, GuildAchievements.Kind.MEMBERS) == 4 && !g.unlocked.contains("members_10"), "member milestone counts");
+        // 保存と読み直し (位・倉庫・頼み・旗・功績)
         GuildData copy = data.roundTrip(server.registryAccess());
         GuildData.Guild cg = copy.byName("倉の守り");
-        check(f, cg != null && cg.officers.contains(b.getUUID()) && cg.takeRank == 2 && cg.storage.get(3).getCount() == 7 && cg.lot.equals("lot_1")
+        check(f, cg != null && cg.officers.contains(b.getUUID()) && cg.takeRank == 2 && cg.storage.get(3).getCount() == 7 && cg.pattern.equals("flow")
+                && cg.plate.equals("gold") && cg.unlocked.contains("requests_10") && cg.reqCompleted == 10 && cg.totalContrib == 600
                 && cg.reqId.equals("hunt") && cg.contrib.get(d.getUUID()) == 3 && cg.rewardsDue.getOrDefault(c.getUUID(), 0) == 1,
-                "ranks, storage, lot and request survive save");
-        check(f, GuildLots.release(a) == Guilds.Result.RELEASED && GuildLots.holder(server, "lot_1") == null, "release the lot");
-        // 長が抜けると副長が長に
-        Guilds.leave(a);
-        check(f, g.leader.equals(b.getUUID()) && !g.officers.contains(b.getUUID()), "officer succeeds the leader");
+                "ranks, storage, banner, achievements and request survive save");
+        // 長を副長へ譲る
+        check(f, Guilds.leave(a) == Guilds.Result.LEADER_STAYS, "leader stays (extras)");
+        check(f, Guilds.transfer(a, b.getUUID()) == Guilds.Result.NEW_LEADER && g.leader.equals(b.getUUID()) && !g.officers.contains(b.getUUID())
+                && g.officers.contains(a.getUUID()), "officer takes over");
         c.getInventory().clearContent();
         b.getInventory().clearContent();
     }

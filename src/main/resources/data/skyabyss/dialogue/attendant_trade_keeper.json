@@ -1,0 +1,70 @@
+{
+  "npc": "skyabyss:attendant_trade_keeper",
+  "entries": [
+    {
+      "if": {
+        "type": "not",
+        "of": {
+          "type": "flag",
+          "flag": "intro"
+        }
+      },
+      "node": "intro"
+    },
+    {
+      "node": "menu"
+    }
+  ],
+  "nodes": {
+    "intro": {
+      "face": "smile",
+      "do": [
+        {
+          "type": "flag",
+          "flag": "intro"
+        }
+      ],
+      "next": "menu"
+    },
+    "again": {
+      "face": "neutral",
+      "next": "menu",
+      "text": "dialogue.skyabyss.attendant_trade_keeper.intro"
+    },
+    "rules": {
+      "face": "neutral",
+      "next": "menu"
+    },
+    "menu": {
+      "face": "neutral",
+      "options": [
+        {
+          "id": "trade",
+          "kind": "talk",
+          "do": [
+            {
+              "type": "facility",
+              "open": "trade"
+            }
+          ],
+          "goto": "end"
+        },
+        {
+          "id": "rules",
+          "kind": "talk",
+          "goto": "rules"
+        },
+        {
+          "id": "about",
+          "kind": "talk",
+          "goto": "again"
+        },
+        {
+          "id": "bye",
+          "kind": "leave",
+          "goto": "end"
+        }
+      ]
+    }
+  }
+}

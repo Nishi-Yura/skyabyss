@@ -31,7 +31,7 @@ import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 //   納める頼み: 組合の受付の書記のギルドの画面で「納める」を押すと、持ち物から足りない分だけ取る
 //   狩る頼み  : ギルドの人が敵 (Enemy) を倒すたびに 1 つ進む (どこで倒しても)
 //   人ごとの納めた量 (contrib) を数え、画面に多い順に出す。目標に届くと、一つでも納めた人みなに報い (REWARD_COINS と共鳴の欠片 1)。
-//   その場にいない人は、次に入ったときに受け取る (rewardsDue)
+//   その場にいない人は、次に入ったときに受け取る (rewardsDue)。済んだ回数と納めた量の合計はギルドの功績 (GuildAchievements) に数える
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class GuildRequests {
     private GuildRequests() {
@@ -148,14 +148,17 @@ public final class GuildRequests {
         int k = Math.min(n, r.target() - g.reqProgress);
         g.reqProgress += k;
         g.contrib.merge(who, k, Integer::sum);
+        g.totalContrib += k;
         GuildData.get(server).dirty();
         if (g.reqProgress >= r.target()) {
             complete(server, g);
         }
+        GuildAchievements.check(server, g);
     }
 
     static void complete(MinecraftServer server, GuildData.Guild g) {
         g.reqDone = true;
+        g.reqCompleted++;
         SkyAbyss.LOGGER.info("[guild] {} finished the weekly request {}", g.name, g.reqId);
         for (Map.Entry<UUID, Integer> e : g.contrib.entrySet()) {
             if (e.getValue() <= 0 || !g.members.contains(e.getKey())) {

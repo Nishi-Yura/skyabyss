@@ -1,0 +1,54 @@
+# 取引所 (docs/design/35 の 6.11) とギルドの旗・功績のつまみ。撮影用の出品は /skyabyss facility trade demo
+# ./gradlew runShots -Pscript=tools/shots/trade.txt -PshotsName=trade --no-daemon --offline  (絵は docs/review/trade/ へ写す)
+world shots flat
+size 1280 720
+timeout 600
+render 6
+clouds off
+wait 100
+cmd skyabyss cinematic stop
+wait 10
+cmd skyabyss cinematic stop
+cmd time set noon
+cmd weather clear
+cmd gamerule doDaylightCycle false
+cmd gamemode creative
+camera minecraft:overworld 0 -60 2 180 8
+waitchunks
+hud on
+chat clear
+cmd tp @s 0 -60 -2
+cmd skyabyss facility spawn trade_keeper
+cmd tp @s 0 -60 2
+wait 20
+shot keeper
+cmd give @s minecraft:iron_ingot 40
+cmd give @s minecraft:diamond 3
+cmd skyabyss facility coins 80
+cmd skyabyss facility trade demo
+cmd skyabyss facility trade
+wait 30
+shot trade_market
+cmd trade 1
+wait 30
+shot trade_sell
+cmd trade 2
+wait 30
+shot trade_mine
+cmd trade 3
+wait 30
+shot trade_applied
+cmd trade 4
+wait 30
+shot trade_mail
+close
+# ギルドの旗と功績
+cmd guild create "鐘の守り" KANE blue white
+cmd guild menu 2
+wait 30
+shot guild_banner
+cmd guild menu 3
+wait 30
+shot guild_achievements
+close
+cmd guild disband confirm

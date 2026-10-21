@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""都の施設の番人 (15 役) の対話画面の肖像 (128x128) を、役 x 3 表情 = 45 枚描く。
+"""都の施設の番人 (16 役) の対話画面の肖像 (128x128) を、役 x 3 表情 = 48 枚描く。
 
   python tools/gen_attendant_portraits.py   -> assets/skyabyss/textures/gui/npc/face/attendant_<役>_<表情>.png
                                                docs/review/npc_roughs/portraits.png (一覧)
@@ -44,6 +44,7 @@ R = {
     "gravekeeper":     dict(skin=(206, 180, 160), hair=(176, 174, 168), coat=(92, 92, 88), role=(74, 86, 70), acc=(150, 146, 132), head="brim", headc=(62, 62, 60), old=True, bg=(120, 140, 130)),
     "mapmaker":        dict(skin=(196, 150, 112), hair=(150, 96, 56), coat=(54, 104, 112), role=(196, 172, 122), acc=(186, 146, 70), head="beret", headc=(150, 70, 50), bg=(80, 160, 170)),
     "drunkard":        dict(skin=(206, 146, 116), hair=(96, 76, 58), coat=(110, 92, 70), role=(122, 62, 78), acc=(140, 120, 80), head="none", beard=True, drunk=True, bg=(200, 110, 90)),
+    "trade_keeper":    dict(skin=(196, 150, 112), hair=(70, 52, 40), coat=(44, 84, 82), role=(196, 160, 82), acc=(214, 184, 104), head="cap", headc=(44, 84, 82), specs=True, bg=(200, 170, 90)),
 }
 ROLES = list(R)
 

@@ -4,7 +4,7 @@
   python tools/gen_facility_content.py
 
 書くもの (毎回すべて書き直す。手で直さないこと):
-  data/skyabyss/dialogue/attendant_<役>.json      係の人 15 人の会話 (初めての一言 → できることの選択肢)
+  data/skyabyss/dialogue/attendant_<役>.json      係の人 16 人の会話 (初めての一言 → できることの選択肢)
   data/skyabyss/shop/{tool_shop,apothecary,black_market}.json   店の品ぞろえ (鐘銭と巨神の素材。エメラルドは使わない)
   assets/skyabyss/models/item/bell_coin.json      鐘銭の手に持つ形
   assets/skyabyss_fac/lang/{ja_jp,en_us}.json     文 (係の人の名前・会話・店とギルドの画面・知らせ・噂)
@@ -43,12 +43,12 @@ ROLES = {
     "guild_clerk": ("組合の受付の書記", "Guild Clerk",
                     ("鯨追いの組合へようこそ。ここではギルドを作るか、入る申請を出せます。言伝ての板の頼みも、ここで見られますよ。",
                      "Welcome to the Whale-Chasers' Hall. You can found a guild here, or apply to join one. The message board's errands are here too."),
-                    [("guild", "talk", [fac("guild")], None, "ギルドの窓口 (作る・入る・頼み・家と旗)", "Guild desk (found, join, requests, hall and banner)", None, None),
+                    [("guild", "talk", [fac("guild")], None, "ギルドの窓口 (作る・入る・頼み・旗・功績)", "Guild desk (found, join, requests, banner, deeds)", None, None),
                      ("storage", "talk", [fac("guild_storage")], None, "ギルドの倉庫を開く", "Open the guild storehouse", None, None),
                      ("board", "talk", [{"type": "open_board"}], None, "言伝ての板を見る", "Look at the message board", None, None),
                      ("what", "talk", None, "what", "ギルドとは", "What is a guild?",
-                      "ギルドは旅人が作る集まりです。旗の色を選んで名前を付ければ、三十人まで入れます。名札にギルドの印が出ますよ。倉庫を分け合い、週ごとの頼みを一緒に片づけ、都の空き区画を一つ借りて家を建てることもできます。",
-                      "A guild is a fellowship travellers make themselves. Pick banner colours and a name, and up to thirty may join. Its tag shows on your name plate. Members share a storehouse, take on a weekly request together, and may rent one of the capital's empty lots to build a hall.")]),
+                      "ギルドは旅人が作る集まりです。旗の色と模様を選んで名前を付ければ、三十人まで入れます。名札にギルドの印が出ますよ。倉庫を分け合い、週ごとの頼みを一緒に片づけてください。頼みを重ねると、特別な模様や名札の色が使えるようになります。長は抜けられません。抜けるなら、先に長を譲るか、解散を。",
+                      "A guild is a fellowship travellers make themselves. Pick banner colours, a pattern and a name, and up to thirty may join. Its tag shows on your name plate. Members share a storehouse and take on a weekly request together. Finish enough requests and special patterns and tag colours open up. The leader can't leave: hand over leadership or disband first.")]),
     "smith": ("鍛冶師", "Smith",
               ("鍛冶場だ。奥の共鳴の炉で強化と分解と鍛え直し、ここでは傷んだ品の修理を銭で請け負う。",
                "This is the smithy. The resonance forge in the back strengthens, breaks down and reforges. Here I mend worn gear for coin."),
@@ -154,6 +154,13 @@ ROLES = {
                  [("abyss", "talk", None, "abyss", "もう一つの空のこと", "The other sky?",
                    "淵だよ、淵。四つの心臓が止まったあと、底が口を開ける……って、親父が言ってた。ひっく。",
                    "The abyss, the abyss. After the four hearts stop, the bottom opens its mouth... my old man said so. Hic.")]),
+    "trade_keeper": ("取引所の番", "Trade Keeper",
+                     ("取引所だよ。旅人どうしで品を出し合う所さ。出す品はここで預かる。ほしい物を書いておけば、誰かが申請してくる。",
+                      "This is the exchange. Travellers trade with each other here. I hold what you put up, and if you write what you want, someone will apply."),
+                     [("trade", "talk", [fac("trade")], None, "取引所を開く (出す・申請する・受ける)", "Open the exchange (list, apply, accept)", None, None),
+                      ("rules", "talk", None, "rules", "取引の決まり", "The rules of trade",
+                       "出す品は出したときに預かる。ほしいものは品でも鐘銭でもいい。申請しても品は動かない。出した人が受けた瞬間に、両方の品が入れ替わる。そのとき申請した人が品を持っていて、持ち物に空きがあることだ。いない人の申請は受けられない。一人十品まで、七日で品は戻る。戻った品は受け取りに置いておく。断ったり受けたりした知らせは、いなければ次に来たときに伝えるよ。",
+                       "What you list, I hold from the moment you list it. Ask for goods or bell coins, as you like. Applying moves nothing. The moment the seller accepts, both sides swap at once, as long as the applicant still has the goods and room to carry. An absent applicant can't be accepted. Ten listings each; after seven days the goods come back to you, waiting in your mailbox. If you're away when someone answers, I'll tell you next time.")]),
 }
 
 # 周回の誓い (titan/vow/Vows の登録と同じ id。名前と説明は誓いの文 vow.skyabyss.<id>(.desc) をそのまま使う。
@@ -429,7 +436,8 @@ UI = [
     # ギルド: 位・倉庫・頼み・家と旗
     ("gui.skyabyss.guild.tab.members", "人", "Members"),
     ("gui.skyabyss.guild.tab.request", "頼み", "Request"),
-    ("gui.skyabyss.guild.tab.house", "家と旗", "Hall & banner"),
+    ("gui.skyabyss.guild.tab.banner", "旗", "Banner"),
+    ("gui.skyabyss.guild.tab.achievements", "功績", "Deeds"),
     ("gui.skyabyss.guild.rank.0", "人", "Member"),
     ("gui.skyabyss.guild.rank.1", "副長", "Officer"),
     ("gui.skyabyss.guild.rank.2", "長", "Leader"),
@@ -441,19 +449,21 @@ UI = [
     ("gui.skyabyss.guild.take_rank.1", "取り出せる: 副長から", "Withdraw: officers"),
     ("gui.skyabyss.guild.take_rank.2", "取り出せる: 長だけ", "Withdraw: leader only"),
     ("gui.skyabyss.guild.banner", "旗を受け取る (鐘銭 %s)", "Take a banner (%s coins)"),
-    ("gui.skyabyss.guild.emblem_head", "旗を作り直す (印と色)", "Remake the banner (tag, colours)"),
+    ("gui.skyabyss.guild.emblem_head", "旗を作り直す", "Remake the banner"),
     ("gui.skyabyss.guild.emblem", "作り直す", "Remake"),
     ("gui.skyabyss.guild.house_head", "倉庫と旗", "Storehouse & banner"),
-    ("gui.skyabyss.guild.lots_head", "空き区画 (借りる: 鐘銭 %s)", "Empty lots (rent: %s coins)"),
-    ("gui.skyabyss.guild.lot.lot_1", "北西", "NW"),
-    ("gui.skyabyss.guild.lot.lot_2", "北東", "NE"),
-    ("gui.skyabyss.guild.lot.lot_3", "南西", "SW"),
-    ("gui.skyabyss.guild.lot.lot_4", "南", "S"),
-    ("gui.skyabyss.guild.lot.lot_5", "南東", "SE"),
-    ("gui.skyabyss.guild.lot_free", "空き", "Free"),
-    ("gui.skyabyss.guild.lot_rent", "借りる", "Rent"),
-    ("gui.skyabyss.guild.lot_release", "手放す", "Release"),
-    ("gui.skyabyss.guild.lot_rule", "借りた区画の中で壊す・置くのは、そのギルドの人だけ。借りるのは長", "Only members may build or break inside a rented lot. The leader rents"),
+    ("gui.skyabyss.guild.pattern_head", "模様", "Pattern"),
+    ("gui.skyabyss.guild.plate_head", "名札の色 (特別な色は功績で)", "Tag colour (special ones from deeds)"),
+    ("gui.skyabyss.guild.locked_by", "功績「%s」で開く", "Opens with the deed \"%s\""),
+    ("gui.skyabyss.guild.special", "功績の模様", "A deed pattern"),
+    ("gui.skyabyss.guild.banner_rule", "特別な色は名札にだけ出る (旗は染料の色)", "Special colours show on name plates only"),
+    ("gui.skyabyss.guild.disband", "解散する", "Disband"),
+    ("gui.skyabyss.guild.disband_sure", "本当に解散？", "Really disband?"),
+    ("gui.skyabyss.guild.leader_hint", "長は抜けられない (★ で長を譲る・解散する)", "The leader can't leave (★ hands over, or disband)"),
+    ("gui.skyabyss.guild.transfer_sure", "もう一度 ★ を押すと長を譲る", "Press ★ again to hand over leadership"),
+    ("gui.skyabyss.guild.ach_head", "済ませた頼み %s ・ 納めた量 %s ・ 人 %s", "Requests %s · delivered %s · members %s"),
+    ("gui.skyabyss.guild.reward_pattern", "模様「%s」", "pattern \"%s\""),
+    ("gui.skyabyss.guild.reward_plate", "名札の色「%s」", "tag colour \"%s\""),
     ("gui.skyabyss.guild.req_head", "今週の頼み", "This week's request"),
     ("gui.skyabyss.guild.req.bones", "骨片を %s 納める", "Deliver %s bone chips"),
     ("gui.skyabyss.guild.req.iron", "鉄の延べ棒を %s 納める", "Deliver %s iron ingots"),
@@ -472,17 +482,21 @@ UI = [
     ("item.skyabyss.guild_banner", "%s の旗", "%s Banner"),
     ("message.skyabyss.guild.not_officer", "長か副長だけができる", "Only the leader or officers can do that"),
     ("message.skyabyss.guild.no_coins", "鐘銭が足りない", "Not enough bell coins"),
-    ("message.skyabyss.guild.lot_taken", "その区画はほかのギルドが借りている", "Another guild rents that lot"),
-    ("message.skyabyss.guild.has_lot", "もう区画を一つ借りている", "Your guild already rents a lot"),
-    ("message.skyabyss.guild.no_lot", "借りている区画はない", "No lot rented"),
     ("message.skyabyss.guild.req_done", "今週の頼みはもう済んだ", "This week's request is already done"),
     ("message.skyabyss.guild.nothing_to_give", "納められる品を持っていない", "You have nothing to deliver"),
     ("message.skyabyss.guild.banner", "ギルドの旗を受け取った", "Received the guild banner"),
-    ("message.skyabyss.guild.rented", "空き区画を借りた。ここがギルドの家になる", "Lot rented. This is your guild's hall now"),
-    ("message.skyabyss.guild.released", "区画を手放した", "Lot released"),
+    ("message.skyabyss.guild.leader_stays", "長は抜けられない。先に長を譲る (★ か /guild leader <人>) か、解散する (/guild disband confirm)",
+     "The leader can't leave. Hand over leadership first (★ or /guild leader <name>), or disband (/guild disband confirm)"),
+    ("message.skyabyss.guild.new_leader", "長を譲った。副長になった", "Leadership handed over. You are now an officer"),
+    ("message.skyabyss.guild.leader_changed", "「%s」の長が %s になった", "%2$s now leads \"%1$s\""),
+    ("message.skyabyss.guild.disbanded", "ギルドを解散した。倉庫の中身は受け取った", "Guild disbanded. You received the storehouse's contents"),
+    ("message.skyabyss.guild.disbanded_by", "「%s」は解散した", "\"%s\" was disbanded"),
+    ("message.skyabyss.guild.disband_confirm", "本当に解散するなら /guild disband confirm (倉庫の中身は長へ。もとに戻せない)", "To really disband, use /guild disband confirm (the storehouse goes to the leader; this can't be undone)"),
+    ("message.skyabyss.guild.pattern_locked", "その模様はまだ使えない (功績で開く)", "That pattern isn't open yet (earn it with a deed)"),
+    ("message.skyabyss.guild.plate_locked", "その名札の色はまだ使えない (功績で開く)", "That tag colour isn't open yet (earn it with a deed)"),
+    ("message.skyabyss.guild.achieved", "「%s」の功績「%s」: %s が使えるようになった", "\"%s\" earned the deed \"%s\": %s now available"),
     ("message.skyabyss.guild.delivered", "頼みの品を納めた", "Delivered for the request"),
     ("message.skyabyss.guild.storage_deposit_only", "この倉庫には預けるだけ (取り出すのは長が決めた位から)", "You can only deposit here (withdrawing is limited by rank)"),
-    ("message.skyabyss.guild.lot_guarded", "ここはほかのギルドが借りている区画だ", "This lot is rented by another guild"),
     ("message.skyabyss.guild.req_complete", "「%s」の今週の頼みが済んだ", "\"%s\" finished this week's request"),
     ("message.skyabyss.guild.req_reward", "頼みの報い: 鐘銭 %s・共鳴の欠片 %s", "Request reward: %s bell coins, %s resonance shard"),
     # 訓練場
@@ -519,6 +533,122 @@ UI = [
     ("gui.skyabyss.records.foot", "済んだ試練 %s ・ 称号 %s", "Trials cleared %s · titles %s"),
 ]
 
+# ギルドの旗の模様 (facility/guild/GuildEmblems.ALL と同じ ID。足りなければ自己テスト lang が落ちる)
+PATTERNS = {
+    "band": ("帯と縁", "Band and border"), "fess": ("横の帯", "Fess"), "pale": ("縦の帯", "Pale"), "cross": ("十字", "Cross"),
+    "saltire": ("斜め十字", "Saltire"), "chevron": ("山形", "Chevron"), "chief": ("上下の帯", "Chief and base"),
+    "per_pale": ("左右の二色", "Per pale"), "per_fess": ("上下の二色", "Per fess"), "per_bend": ("斜めの二色", "Per bend"),
+    "bend": ("斜めの帯", "Bend"), "corners": ("三つの角", "Three corners"), "lozenge": ("菱", "Lozenge"), "roundel": ("丸", "Roundel"),
+    "eye": ("見る目", "The eye"), "bordure": ("縁", "Bordure"), "indented": ("波の縁", "Indented border"), "dancetty": ("鋸の歯", "Dancetty"),
+    "paly": ("縦縞", "Paly"), "bricks": ("石積み", "Masonry"), "gradient": ("暮れ", "Dusk"),
+    "flower": ("花", "Flower"), "flow": ("渦", "Whirl"), "skull": ("頭骨", "Skull"), "globe": ("天球", "Globe"), "guster": ("風", "Gust"),
+    "tide": ("深い潮", "Deep tide"), "abyss_eye": ("淵の目", "Eye of the abyss"),
+}
+PLATES = {"gold": ("金", "Gold"), "teal": ("鐘の青緑", "Bell teal"), "silver": ("白銀", "Silver"), "abyss": ("淵の紫", "Abyss violet")}
+ACHIEVEMENTS = {
+    "requests_1": ("初めての頼み", "First request"), "requests_5": ("頼み 5 回", "5 requests"), "requests_10": ("頼み 10 回", "10 requests"),
+    "requests_15": ("頼み 15 回", "15 requests"), "requests_30": ("頼み 30 回", "30 requests"),
+    "contrib_500": ("納めた量 500", "500 delivered"), "contrib_1500": ("納めた量 1500", "1,500 delivered"),
+    "contrib_4000": ("納めた量 4000", "4,000 delivered"), "members_10": ("10 人そろう", "10 members"), "members_25": ("25 人そろう", "25 members"),
+}
+
+# 取引所 (35 の 6.11。facility/trade/)
+TRADE = [
+    ("gui.skyabyss.trade.title", "取引所", "Exchange"),
+    ("gui.skyabyss.trade.tab.market", "市", "Market"),
+    ("gui.skyabyss.trade.tab.sell", "出す", "List"),
+    ("gui.skyabyss.trade.tab.mine", "自分の品 %s/%s", "Mine %s/%s"),
+    ("gui.skyabyss.trade.tab.applied", "申請", "Applied"),
+    ("gui.skyabyss.trade.tab.mail", "受け取り", "Mailbox"),
+    ("gui.skyabyss.trade.tab.mail_n", "受け取り (%s)", "Mailbox (%s)"),
+    ("gui.skyabyss.trade.coins", "鐘銭", "Bell coins"),
+    ("gui.skyabyss.trade.search", "品の名前で探す", "Search by name"),
+    ("gui.skyabyss.trade.do_list", "出す", "List it"),
+    ("gui.skyabyss.trade.do_offer", "申し出る", "Offer"),
+    ("gui.skyabyss.trade.back", "戻る", "Back"),
+    ("gui.skyabyss.trade.cancel", "取り下げる", "Withdraw"),
+    ("gui.skyabyss.trade.cancel_sure", "本当に取り下げ？", "Really withdraw?"),
+    ("gui.skyabyss.trade.claim", "受け取る", "Collect"),
+    ("gui.skyabyss.trade.not_at_keeper", "出す・申請は取引所の番の前で (/trade では見る・受ける・断る・受け取るだけ)",
+     "Listing and applying only at the trade keeper (/trade lets you view, accept, decline and collect)"),
+    ("gui.skyabyss.trade.hint.market", "「申請」= ほしいもののまま、「別に」= 自分で選んだ品で申し出る。申請しても品は動かない",
+     "Apply = pay what they ask; Other = offer your own goods. Applying moves nothing"),
+    ("gui.skyabyss.trade.hint.sell", "持ち物を押すと出す品に (右で 1 つずつ)。出した品は取引所が預かり、7 日で戻る",
+     "Click your items to put them up (right-click for one). The exchange holds them; they return after 7 days"),
+    ("gui.skyabyss.trade.hint.sell_offer", "持ち物を押して申し出る品を選ぶ。受けられた瞬間に入れ替わる",
+     "Click your items to choose an offer. Goods swap the moment it's accepted"),
+    ("gui.skyabyss.trade.hint.mine", "✔ 受ける ・ ✘ 断る (相手がいて品がそろうとき)", "✔ accept · ✘ decline (while they're online with the goods)"),
+    ("gui.skyabyss.trade.hint.applied", "相手が受けた瞬間に入れ替わる。申し出の品は持っておくこと", "Goods swap the moment the seller accepts. Keep your offer on you"),
+    ("gui.skyabyss.trade.hint.mail", "取り下げ・期限切れで戻った品と、持ちきれなかった品", "Goods returned by withdrawal or expiry, and anything that didn't fit"),
+    ("gui.skyabyss.trade.days_left", "あと %s 日", "%s days left"),
+    ("gui.skyabyss.trade.hours_left", "あと %s 時間", "%s h left"),
+    ("gui.skyabyss.trade.market_empty", "出品はまだない", "Nothing listed yet"),
+    ("gui.skyabyss.trade.applied", "申請中", "Applied"),
+    ("gui.skyabyss.trade.apply", "申請", "Apply"),
+    ("gui.skyabyss.trade.counter", "別に", "Other"),
+    ("gui.skyabyss.trade.give_head", "出す品 (取引所が預かる)", "You give (held by the exchange)"),
+    ("gui.skyabyss.trade.offer_head", "申し出る品", "Your offer"),
+    ("gui.skyabyss.trade.inventory", "持ち物", "Inventory"),
+    ("gui.skyabyss.trade.coins_offer", "足す鐘銭", "Add bell coins"),
+    ("gui.skyabyss.trade.for", "%s の出品へ", "To %s's listing"),
+    ("gui.skyabyss.trade.they_give", "出す品", "They give"),
+    ("gui.skyabyss.trade.they_want", "ほしいもの", "They want"),
+    ("gui.skyabyss.trade.want_head", "ほしいもの (鐘銭と品)", "You want (coins and goods)"),
+    ("gui.skyabyss.trade.search_head", "ほしい品 (左 +1・右 -1・シフト 8)", "Wanted (left +1 · right -1 · shift 8)"),
+    ("gui.skyabyss.trade.search_tip", "名前を入れると品が出る", "Type a name to find goods"),
+    ("gui.skyabyss.trade.search_none", "見つからない", "Nothing found"),
+    ("gui.skyabyss.trade.mine_empty", "出品はない", "Nothing listed"),
+    ("gui.skyabyss.trade.apps_head", "申請 %s ・ %s", "Applications %s · %s"),
+    ("gui.skyabyss.trade.no_apps", "申請はまだない", "No applications yet"),
+    ("gui.skyabyss.trade.away", "(不在)", "(away)"),
+    ("gui.skyabyss.trade.ready", "そろっている", "ready"),
+    ("gui.skyabyss.trade.short", "足りない", "short"),
+    ("gui.skyabyss.trade.applied_empty", "出した申請はない", "No applications sent"),
+    ("gui.skyabyss.trade.withdraw", "取り下げ", "Withdraw"),
+    ("gui.skyabyss.trade.mail_empty", "受け取る品はない", "Nothing to collect"),
+    ("message.skyabyss.trade.listed", "出品した。品は取引所が預かる", "Listed. The exchange holds your goods"),
+    ("message.skyabyss.trade.applied", "申請した。品は受けられるまで手もとに", "Applied. Your goods stay with you until accepted"),
+    ("message.skyabyss.trade.accepted", "取引が済んだ", "Trade complete"),
+    ("message.skyabyss.trade.rejected", "申請を断った", "Application declined"),
+    ("message.skyabyss.trade.withdrawn", "申請を取り下げた", "Application withdrawn"),
+    ("message.skyabyss.trade.cancelled", "出品を取り下げた。品は戻した", "Listing withdrawn. Your goods are back"),
+    ("message.skyabyss.trade.claimed", "受け取った", "Collected"),
+    ("message.skyabyss.trade.claimed_part", "持ちきれない分は受け取りに残した", "What didn't fit stays in the mailbox"),
+    ("message.skyabyss.trade.not_at_keeper", "出す・申請は取引所の番の前で", "List and apply at the trade keeper"),
+    ("message.skyabyss.trade.too_many_listings", "出品は一人 10 まで", "Up to 10 listings each"),
+    ("message.skyabyss.trade.too_many_apps", "出せる申請は 10 まで", "Up to 10 applications each"),
+    ("message.skyabyss.trade.empty_give", "出す品を選んで", "Choose what to give"),
+    ("message.skyabyss.trade.empty_want", "ほしいもの (品か鐘銭) を決めて", "Set what you want (goods or coins)"),
+    ("message.skyabyss.trade.too_many_items", "品は 4 つまで", "Up to 4 kinds of goods"),
+    ("message.skyabyss.trade.not_allowed", "大事な品は取引に出せない", "Important items can't be traded"),
+    ("message.skyabyss.trade.bad_slot", "その枠は使えない", "That slot can't be used"),
+    ("message.skyabyss.trade.lack", "品が足りない", "You don't have the goods"),
+    ("message.skyabyss.trade.no_listing", "その出品はもうない", "That listing is gone"),
+    ("message.skyabyss.trade.own_listing", "自分の出品には申請できない", "You can't apply to your own listing"),
+    ("message.skyabyss.trade.already_applied", "もう申請している", "You've already applied"),
+    ("message.skyabyss.trade.listing_full", "その出品は申請でいっぱい", "That listing has too many applications"),
+    ("message.skyabyss.trade.not_seller", "出した人だけができる", "Only the seller can do that"),
+    ("message.skyabyss.trade.no_application", "その申請はもうない", "That application is gone"),
+    ("message.skyabyss.trade.applicant_away", "相手がいない。相手がいるときに受けて", "They're away. Accept while they're online"),
+    ("message.skyabyss.trade.applicant_lacks", "相手の品が足りない。何も動かしていない", "They're short of the goods. Nothing moved"),
+    ("message.skyabyss.trade.room_applicant", "相手の持ち物に空きがない。何も動かしていない", "They have no room. Nothing moved"),
+    ("message.skyabyss.trade.room_seller", "持ち物に空きがない。空けてから受けて", "No room in your inventory. Make space first"),
+    ("message.skyabyss.trade.nothing_to_claim", "受け取る品はない", "Nothing to collect"),
+    ("message.skyabyss.trade.empty_offer", "申し出る品か鐘銭を選んで", "Choose goods or coins to offer"),
+    ("message.skyabyss.trade.note_applied", "取引所: %s が出品 %s に申請した", "Exchange: %s applied to listing %s"),
+    ("message.skyabyss.trade.note_withdrawn", "取引所: %s が出品 %s への申請を取り下げた", "Exchange: %s withdrew from listing %s"),
+    ("message.skyabyss.trade.note_rejected", "取引所: %s が出品 %s への申請を断った", "Exchange: %s declined your application to listing %s"),
+    ("message.skyabyss.trade.note_cancelled", "取引所: %s が出品 %s を取り下げた", "Exchange: %s withdrew listing %s"),
+    ("message.skyabyss.trade.note_lacked", "取引所: %s が出品 %s で受けようとしたが、申し出の品が足りなかった", "Exchange: %s tried to accept you on listing %s, but you were short"),
+    ("message.skyabyss.trade.note_no_room", "取引所: %s が出品 %s で受けようとしたが、持ち物に空きがなかった", "Exchange: %s tried to accept you on listing %s, but you had no room"),
+    ("message.skyabyss.trade.note_sold", "取引所: %s との取引が済んだ (出品 %s)", "Exchange: trade with %s complete (listing %s)"),
+    ("message.skyabyss.trade.note_accepted", "取引所: %s が申請を受けた。品を受け取った (出品 %s)", "Exchange: %s accepted. Goods received (listing %s)"),
+    ("message.skyabyss.trade.note_taken", "取引所: %s の出品 %s は、ほかの人に決まった", "Exchange: %s's listing %s went to someone else"),
+    ("message.skyabyss.trade.note_expired", "取引所: 出品 %s の期限が切れた。品は受け取りにある", "Exchange: listing %s expired. Your goods wait in the mailbox"),
+    ("message.skyabyss.trade.note_closed", "取引所: %s の出品 %s は期限で閉じた", "Exchange: %s's listing %s closed"),
+    ("message.skyabyss.trade.mail_waiting", "取引所の受け取りに品がある (/trade 4)", "Goods wait in your exchange mailbox (/trade 4)"),
+]
+
 # 宿の噂 (章ごとに 3 つ。町のクエストが来たら FacilityActions.addRumorSource で上書きされる)
 RUMORS = {
     1: [("北の岩鯨は、鎖が鳴るたびに少しだけ目を開けるらしい。", "They say the stone whale in the north opens its eyes a little whenever the chains ring."),
@@ -549,8 +679,14 @@ def main():
             json.dump(shop, f, ensure_ascii=False, indent=2)
             f.write("\n")
         t("gui.skyabyss.shop." + sid, *SHOP_NAMES[sid])
-    for key, ja, en in UI:
+    for key, ja, en in UI + TRADE:
         t(key, ja, en)
+    for k, (ja, en) in PATTERNS.items():
+        t("gui.skyabyss.guild.pattern." + k, ja, en)
+    for k, (ja, en) in PLATES.items():
+        t("gui.skyabyss.guild.plate." + k, ja, en)
+    for k, (ja, en) in ACHIEVEMENTS.items():
+        t("gui.skyabyss.guild.ach." + k, ja, en)
     for ch, lines in RUMORS.items():
         for i, (ja, en) in enumerate(lines, 1):
             t("message.skyabyss.inn.rumor.ch%d.%d" % (ch, i), ja, en)

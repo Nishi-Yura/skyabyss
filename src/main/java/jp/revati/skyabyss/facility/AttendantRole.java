@@ -26,7 +26,9 @@ public enum AttendantRole {
     BLACK_MARKETEER("black_marketeer", "black_market", 3),
     GRAVEKEEPER("gravekeeper", null, 3),
     MAPMAKER("mapmaker", null, 3),
-    DRUNKARD("drunkard", null, 3);
+    DRUNKARD("drunkard", null, 3),
+    // 取引所 (プレイヤーどうしの売り買い。35 の 6.11)
+    TRADE_KEEPER("trade_keeper", null, 1);
 
     // 設計図の印の頭 (npc_<役>)
     public static final String MARK_PREFIX = "npc_";

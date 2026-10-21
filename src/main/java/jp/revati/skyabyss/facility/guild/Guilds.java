@@ -41,15 +41,15 @@ public final class Guilds {
         JOINED("joined"),
         NOT_OFFICER("not_officer"),
         NO_COINS("no_coins"),
-        LOT_TAKEN("lot_taken"),
-        HAS_LOT("has_lot"),
-        NO_LOT("no_lot"),
         REQ_DONE("req_done"),
         NOTHING_TO_GIVE("nothing_to_give"),
         BANNER("banner"),
-        RENTED("rented"),
-        RELEASED("released"),
-        DELIVERED("delivered");
+        DELIVERED("delivered"),
+        LEADER_STAYS("leader_stays"),
+        NEW_LEADER("new_leader"),
+        DISBANDED("disbanded"),
+        PATTERN_LOCKED("pattern_locked"),
+        PLATE_LOCKED("plate_locked");
 
         public final String key;
 
@@ -58,7 +58,7 @@ public final class Guilds {
         }
 
         public boolean ok() {
-            return this == OK || this == APPLIED || this == JOINED || this == BANNER || this == RENTED || this == RELEASED || this == DELIVERED;
+            return this == OK || this == APPLIED || this == JOINED || this == BANNER || this == DELIVERED || this == NEW_LEADER || this == DISBANDED;
         }
     }
 
@@ -195,14 +195,19 @@ public final class Guilds {
             }
         }
         refresh(server, g);
+        GuildAchievements.check(server, g);
     }
 
-    // ---------------------------------------------------------------- 抜ける・外す・解散
+    // ---------------------------------------------------------------- 抜ける・外す・譲る・解散
+    // 長は抜けられない (間違いよけ)。先に長を譲る (transfer) か、解散する (disband)
     public static Result leave(ServerPlayer player) {
         GuildData data = GuildData.get(player.server);
         GuildData.Guild g = data.of(player.getUUID());
         if (g == null) {
             return Result.NOT_IN_GUILD;
+        }
+        if (g.leader.equals(player.getUUID())) {
+            return Result.LEADER_STAYS;
         }
         removeMember(player.server, g, player.getUUID());
         setBadge(player, GuildBadge.NONE);
@@ -225,6 +230,61 @@ public final class Guilds {
         return Result.OK;
     }
 
+    // 長がほかの人に長を譲る (前の長は副長になる)
+    public static Result transfer(ServerPlayer leader, UUID member) {
+        GuildData data = GuildData.get(leader.server);
+        GuildData.Guild g = data.of(leader.getUUID());
+        if (g == null) {
+            return Result.NOT_IN_GUILD;
+        }
+        if (!g.leader.equals(leader.getUUID())) {
+            return Result.NOT_LEADER;
+        }
+        if (member.equals(leader.getUUID()) || !g.members.contains(member)) {
+            return Result.NOT_MEMBER;
+        }
+        g.leader = member;
+        g.officers.remove(member);
+        g.officers.add(leader.getUUID());
+        data.setDirty();
+        for (UUID m : g.members) {
+            ServerPlayer p = leader.server.getPlayerList().getPlayer(m);
+            if (p != null) {
+                Notice.hint(p, "message.skyabyss.guild.leader_changed", g.name, g.nameOf(member));
+            }
+        }
+        SkyAbyss.LOGGER.info("[guild] {} handed {} to {}", leader.getGameProfile().getName(), g.name, g.nameOf(member));
+        return Result.NEW_LEADER;
+    }
+
+    // 長が解散する。倉庫の中身は長へ (持ちきれない分は足もと)。ギルドの人みなの印を消して知らせる
+    public static Result disband(ServerPlayer leader) {
+        GuildData data = GuildData.get(leader.server);
+        GuildData.Guild g = data.of(leader.getUUID());
+        if (g == null) {
+            return Result.NOT_IN_GUILD;
+        }
+        if (!g.leader.equals(leader.getUUID())) {
+            return Result.NOT_LEADER;
+        }
+        for (net.minecraft.world.item.ItemStack s : g.storage) {
+            if (!s.isEmpty()) {
+                jp.revati.skyabyss.quest.Quests.give(leader, s.copy());
+            }
+        }
+        data.remove(g);
+        for (UUID m : g.members) {
+            ServerPlayer p = leader.server.getPlayerList().getPlayer(m);
+            if (p != null) {
+                setBadge(p, GuildBadge.NONE);
+                Notice.hint(p, "message.skyabyss.guild.disbanded_by", g.name);
+            }
+        }
+        setBadge(leader, GuildBadge.NONE);
+        SkyAbyss.LOGGER.info("[guild] {} disbanded {}", leader.getGameProfile().getName(), g.name);
+        return Result.DISBANDED;
+    }
+
     static void removeMember(MinecraftServer server, GuildData.Guild g, UUID who) {
         GuildData data = GuildData.get(server);
         g.members.remove(who);
@@ -236,7 +296,7 @@ public final class Guilds {
             Notice.hint(p, "message.skyabyss.guild.left", g.name);
         }
         if (g.members.isEmpty()) {
-            // 倉庫の中身は最後の人へ (いなければ消える)。借りていた区画は空く
+            // 倉庫の中身は最後の人へ (いなければ消える)
             if (p != null) {
                 for (net.minecraft.world.item.ItemStack s : g.storage) {
                     if (!s.isEmpty()) {
@@ -313,8 +373,14 @@ public final class Guilds {
         return Result.OK;
     }
 
-    // 長が旗 (印と色) を作り直す
+    // 長が旗 (印と色) を作り直す (模様と名札の色は今のまま)
     public static Result setEmblem(ServerPlayer leader, String rawTag, int color, int accent) {
+        GuildData.Guild g = of(leader);
+        return setEmblem(leader, rawTag, color, accent, g == null ? GuildEmblems.DEFAULT : g.pattern, g == null ? "" : g.plate);
+    }
+
+    // 長が旗 (印・色・模様・名札の色) を作り直す。模様と名札の色は、はじめからのものか功績で開いたものだけ
+    public static Result setEmblem(ServerPlayer leader, String rawTag, int color, int accent, String pattern, String plate) {
         GuildData data = GuildData.get(leader.server);
         GuildData.Guild g = data.of(leader.getUUID());
         if (g == null) {
@@ -327,9 +393,17 @@ public final class Guilds {
         if (tag.isEmpty() || tag.codePointCount(0, tag.length()) > GuildData.TAG_MAX) {
             return Result.TAG_LENGTH;
         }
+        if (!GuildEmblems.usable(pattern, g.unlocked)) {
+            return Result.PATTERN_LOCKED;
+        }
+        if (!GuildEmblems.plateUsable(plate, g.unlocked)) {
+            return Result.PLATE_LOCKED;
+        }
         g.tag = tag;
         g.color = clampDye(color);
         g.accent = clampDye(accent);
+        g.pattern = pattern;
+        g.plate = plate;
         data.setDirty();
         refresh(leader.server, g);
         setBadge(leader, g.badge());
@@ -339,18 +413,9 @@ public final class Guilds {
     // 旗の値段 (鐘銭)
     public static final int BANNER_COST = 3;
 
-    // ギルドの旗の品 (地の色に、模様の色の中の帯と縁。画面の旗と同じ形)
+    // ギルドの旗の品 (地の色に、模様の色でギルドの模様。画面の見本と同じ品)
     public static net.minecraft.world.item.ItemStack bannerItem(MinecraftServer server, GuildData.Guild g) {
-        net.minecraft.world.item.DyeColor base = net.minecraft.world.item.DyeColor.byId(g.color);
-        net.minecraft.world.item.DyeColor ac = net.minecraft.world.item.DyeColor.byId(g.accent);
-        net.minecraft.world.item.ItemStack stack = new net.minecraft.world.item.ItemStack(
-                net.minecraft.world.level.block.BannerBlock.byColor(base).asItem());
-        var patterns = server.registryAccess().lookupOrThrow(net.minecraft.core.registries.Registries.BANNER_PATTERN);
-        var layers = new net.minecraft.world.level.block.entity.BannerPatternLayers.Builder()
-                .add(patterns.getOrThrow(net.minecraft.world.level.block.entity.BannerPatterns.STRIPE_MIDDLE), ac)
-                .add(patterns.getOrThrow(net.minecraft.world.level.block.entity.BannerPatterns.BORDER), ac)
-                .build();
-        stack.set(net.minecraft.core.component.DataComponents.BANNER_PATTERNS, layers);
+        net.minecraft.world.item.ItemStack stack = GuildEmblems.banner(server.registryAccess(), g.pattern, g.color, g.accent);
         stack.set(net.minecraft.core.component.DataComponents.ITEM_NAME, Component.translatable("item.skyabyss.guild_banner", g.name));
         return stack;
     }

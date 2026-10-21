@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""都の施設の番人の頭の上の印 (16x24 のドット絵、役ごとに 1 つ) を書く。描き方は tools/gen_npc_marker_icons.py と同じ
+"""都の施設の番人の頭の上の印 (16x24 のドット絵、役ごとに 1 つ。16 役) を書く。描き方は tools/gen_npc_marker_icons.py と同じ
 (暗い縁取り、左上の明るい縁、右下の影)。色は淡い骨の色だけにして、話の印 (金の「!」・青緑の巻物) と見分ける。
 使い方: python tools/gen_facility_icons.py
 出力: src/main/resources/assets/skyabyss/textures/gui/npc_marker/fac_<役>.png (15 枚)
@@ -64,6 +64,10 @@ MUG = [".##.###.##...", "##########...", "#############", "##########..#", "####
        "##########..#", "##########..#", "#############", "##########...", "##########...", ".########...."]
 MUG_H = [(x, 1) for x in range(0, 10, 2)] + [(3, y) for y in range(3, 11)] + [(6, y) for y in range(3, 11)]
 
+# 取引所の番: 天秤
+SCALES = ["......##......", "##############", ".#....##....#.", ".#....##....#.", "#####.##.#####", ".###..##..###.",
+          "......##......", "......##......", "....######....", "...########..."]
+
 
 def target():
     """的 (同心の輪)。直径 13、輪と中心を縁取りの色で抜く。"""
@@ -86,6 +90,7 @@ ICONS = {
     "perch_keeper": (FEATHER, FEATHER_H), "shrine_priest": (TORII, []), "keep_veteran": (SHIELD, SHIELD_H),
     "archivist": (BOOK, BOOK_H), "training_master": target(), "black_marketeer": (MASK, MASK_H),
     "gravekeeper": (GRAVE, GRAVE_H), "mapmaker": (MAP, MAP_H), "drunkard": (MUG, MUG_H),
+    "trade_keeper": (SCALES, []),
 }
 
 

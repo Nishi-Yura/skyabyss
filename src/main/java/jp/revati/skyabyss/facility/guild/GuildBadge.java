@@ -9,15 +9,21 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.item.DyeColor;
 
 // 名札に出すギルドの印 (人ごとの写し。正本は GuildData)。guild が空ならギルドに入っていない。
-//   tag = 名札の短い印 (1〜4 字)、color = 旗の地の色、accent = 旗の模様の色 (どちらも DyeColor の番号)
-public record GuildBadge(String guild, String tag, int color, int accent) {
-    public static final GuildBadge NONE = new GuildBadge("", "", 0, 0);
+//   tag = 名札の短い印 (1〜4 字)、color = 旗の地の色、accent = 旗の模様の色 (どちらも DyeColor の番号)、
+//   plate = 名札の特別な色 (GuildEmblems.PLATES の ID。"" = 旗の地の色のまま)
+public record GuildBadge(String guild, String tag, int color, int accent, String plate) {
+    public static final GuildBadge NONE = new GuildBadge("", "", 0, 0, "");
+
+    public GuildBadge(String guild, String tag, int color, int accent) {
+        this(guild, tag, color, accent, "");
+    }
 
     public static final Codec<GuildBadge> CODEC = RecordCodecBuilder.create(i -> i.group(
             Codec.STRING.optionalFieldOf("guild", "").forGetter(GuildBadge::guild),
             Codec.STRING.optionalFieldOf("tag", "").forGetter(GuildBadge::tag),
             Codec.INT.optionalFieldOf("color", 0).forGetter(GuildBadge::color),
-            Codec.INT.optionalFieldOf("accent", 0).forGetter(GuildBadge::accent))
+            Codec.INT.optionalFieldOf("accent", 0).forGetter(GuildBadge::accent),
+            Codec.STRING.optionalFieldOf("plate", "").forGetter(GuildBadge::plate))
             .apply(i, GuildBadge::new));
 
     public static final StreamCodec<RegistryFriendlyByteBuf, GuildBadge> STREAM_CODEC = StreamCodec.composite(
@@ -25,6 +31,7 @@ public record GuildBadge(String guild, String tag, int color, int accent) {
             ByteBufCodecs.STRING_UTF8, GuildBadge::tag,
             ByteBufCodecs.VAR_INT, GuildBadge::color,
             ByteBufCodecs.VAR_INT, GuildBadge::accent,
+            ByteBufCodecs.STRING_UTF8, GuildBadge::plate,
             GuildBadge::new);
 
     public boolean present() {
@@ -33,6 +40,10 @@ public record GuildBadge(String guild, String tag, int color, int accent) {
 
     // 名札の文字の色 (旗の地の色を明るめに)
     public int textColor() {
+        GuildEmblems.Plate p = plate.isEmpty() ? null : GuildEmblems.plate(plate);
+        if (p != null) {
+            return p.rgb();
+        }
         return GuildData.textColor(color);
     }
 

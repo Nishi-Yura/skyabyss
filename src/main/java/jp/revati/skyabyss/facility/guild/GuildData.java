@@ -27,7 +27,9 @@ import net.minecraft.world.level.saveddata.SavedData;
 //   参加は申請 (長が受ける)。長が「誰でも入れる」にしたギルドは、申請でそのまま入る
 //   名前は 2〜16 字 (大文字小文字を区別せずに重ならない)。印 (tag) は 1〜4 字
 //   位 (rank): 長 2・副長 1・人 0。副長は申請を受けられる。倉庫から取り出せる位は長が決める (takeRank。既定は副長から)
-//   倉庫 (storage) 54 枠、週替わりの頼み (GuildRequests)、ギルドの家 = 空き区画を一つ借りる (lot。GuildLots)
+//   倉庫 (storage) 54 枠、週替わりの頼み (GuildRequests)、旗の模様 (pattern。GuildEmblems)、名札の特別な色 (plate)、
+//   功績 (GuildAchievements。済ませた頼みの数・納めた量の合計・そろった人の数、開いた功績)
+//   長は抜けられない (長を譲るか解散する。Guilds.leave)
 public final class GuildData extends SavedData {
     private static final String NAME = "skyabyss_guilds";
     private static final Factory<GuildData> FACTORY = new Factory<>(GuildData::new, GuildData::load);
@@ -61,8 +63,14 @@ public final class GuildData extends SavedData {
         // 倉庫から取り出せる位 (0 = 誰でも、1 = 副長から、2 = 長だけ)。預けるのは誰でも
         public int takeRank = RANK_OFFICER;
         public final NonNullList<ItemStack> storage = NonNullList.withSize(STORAGE_SIZE, ItemStack.EMPTY);
-        // 借りている空き区画 (lot_1..5。空 = 借りていない)
-        public String lot = "";
+        // 旗の模様 (GuildEmblems の ID) と名札の特別な色 ("" = なし)
+        public String pattern = GuildEmblems.DEFAULT;
+        public String plate = "";
+        // 功績の数: 済ませた週の頼み、納めた品と倒した敵の合計、一度にそろった人の数。開いた功績
+        public int reqCompleted;
+        public int totalContrib;
+        public int peakMembers;
+        public final Set<String> unlocked = new LinkedHashSet<>();
         // 週替わりの頼み: どの週の、どの頼みか、進み、人ごとの納めた量、済んだか
         public long reqWeek = -1;
         public String reqId = "";
@@ -77,7 +85,7 @@ public final class GuildData extends SavedData {
         }
 
         public GuildBadge badge() {
-            return new GuildBadge(id, tag, color, accent);
+            return new GuildBadge(id, tag, color, accent, plate);
         }
 
         public String nameOf(UUID u) {
@@ -223,7 +231,17 @@ public final class GuildData extends SavedData {
             }
             g.takeRank = t.contains("take") ? t.getInt("take") : RANK_OFFICER;
             ContainerHelper.loadAllItems(t.getCompound("storage"), g.storage, registries);
-            g.lot = t.getString("lot");
+            g.pattern = t.contains("pattern") ? t.getString("pattern") : GuildEmblems.DEFAULT;
+            if (GuildEmblems.byId(g.pattern) == null) {
+                g.pattern = GuildEmblems.DEFAULT;
+            }
+            g.plate = t.getString("plate");
+            g.reqCompleted = t.getInt("req_count");
+            g.totalContrib = t.getInt("contrib_total");
+            g.peakMembers = t.getInt("peak");
+            for (Tag o : t.getList("unlocked", Tag.TAG_STRING)) {
+                g.unlocked.add(o.getAsString());
+            }
             g.reqWeek = t.contains("req_week") ? t.getLong("req_week") : -1;
             g.reqId = t.getString("req_id");
             g.reqProgress = t.getInt("req_progress");
@@ -282,7 +300,16 @@ public final class GuildData extends SavedData {
             t.put("officers", os);
             t.putInt("take", g.takeRank);
             t.put("storage", ContainerHelper.saveAllItems(new CompoundTag(), g.storage, true, registries));
-            t.putString("lot", g.lot);
+            t.putString("pattern", g.pattern);
+            t.putString("plate", g.plate);
+            t.putInt("req_count", g.reqCompleted);
+            t.putInt("contrib_total", g.totalContrib);
+            t.putInt("peak", g.peakMembers);
+            ListTag un = new ListTag();
+            for (String u : g.unlocked) {
+                un.add(net.minecraft.nbt.StringTag.valueOf(u));
+            }
+            t.put("unlocked", un);
             t.putLong("req_week", g.reqWeek);
             t.putString("req_id", g.reqId);
             t.putInt("req_progress", g.reqProgress);
