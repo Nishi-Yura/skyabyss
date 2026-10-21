@@ -228,11 +228,14 @@ public final class ArtisanSelfTest {
             Lore.lock(p, "chapter1/whale_chaser");
         }
         // 表は章ごと (データ)。足して、引ける
+        // 二章の本物の立つ所 (筏の跡) は、確かめのあとに戻す
+        var realCh2 = ArtisanSpawner.spots().stream().filter(s -> s.chapter() == 2).findFirst();
         ArtisanSpawner.register(new ArtisanSpawner.Spot(2, "selftest_site", "artisan", pl -> true));
         check(f, ArtisanSpawner.spots().stream().anyMatch(s -> s.chapter() == 2 && s.siteId().equals("selftest_site")), "a chapter-2 spot was not added to the table");
         check(f, ArtisanSpawner.marks(level, ArtisanSpawner.spots().stream().filter(s -> s.chapter() == 2).findFirst().orElseThrow()).isEmpty(), "marks for an unbuilt site");
         ArtisanSpawner.unregister(2);
         check(f, ArtisanSpawner.spots().stream().noneMatch(s -> s.chapter() == 2), "unregister did not remove the spot");
+        realCh2.ifPresent(ArtisanSpawner::register);
 
         // 立たせる: 地面のある所で
         BlockPos spawn = level.getSharedSpawnPos();
@@ -429,7 +432,7 @@ public final class ArtisanSelfTest {
         }
         for (String lang : List.of("ja_jp", "en_us")) {
             Set<String> have = new HashSet<>();
-            for (String ns : List.of("skyabyss_npc", "skyabyss_ch1", "skyabyss_ch3")) {
+            for (String ns : List.of("skyabyss_npc", "skyabyss_ch1", "skyabyss_ch2", "skyabyss_ch3")) {
                 try (InputStream in = ArtisanSelfTest.class.getResourceAsStream("/assets/" + ns + "/lang/" + lang + ".json")) {
                     if (in != null) {
                         JsonParser.parseReader(new InputStreamReader(in, StandardCharsets.UTF_8)).getAsJsonObject().entrySet().forEach(e -> have.add(e.getKey()));

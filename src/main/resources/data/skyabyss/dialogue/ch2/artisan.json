@@ -1,0 +1,198 @@
+{
+  "npc": "skyabyss:artisan",
+  "extends": true,
+  "entries": [
+    {
+      "node": "ch2t_ward_weave",
+      "if": [
+        {
+          "type": "item",
+          "item": "skyabyss:pearl_ward_thread",
+          "count": 1,
+          "optional": true
+        },
+        {
+          "type": "not",
+          "of": {
+            "type": "flag",
+            "flag": "ch2t_woven"
+          }
+        },
+        {
+          "type": "ward_ok",
+          "titan": "tide_shell"
+        }
+      ]
+    },
+    {
+      "node": "ch2a_first",
+      "if": [
+        {
+          "type": "stage",
+          "min": 1,
+          "max": 1
+        },
+        {
+          "type": "not",
+          "of": {
+            "type": "flag",
+            "flag": "ch2a_met"
+          }
+        }
+      ]
+    }
+  ],
+  "nodes": {
+    "ch2a_first": {
+      "face": "neutral",
+      "do": [
+        {
+          "type": "flag",
+          "flag": "ch2a_met"
+        },
+        {
+          "type": "flag",
+          "flag": "met"
+        },
+        {
+          "type": "give_notes",
+          "chapter": 2
+        },
+        {
+          "type": "affinity",
+          "amount": 1
+        }
+      ],
+      "next": "a_menu"
+    },
+    "ch2p_teach": {
+      "face": "neutral",
+      "do": [
+        {
+          "type": "unlock_recipes",
+          "chapter": 2
+        },
+        {
+          "type": "flag",
+          "flag": "ch2p_taught"
+        }
+      ],
+      "next": "a_menu"
+    },
+    "ch2t_ward_weave": {
+      "face": "smile",
+      "do": [
+        {
+          "type": "take",
+          "item": "skyabyss:pearl_ward_thread",
+          "count": 1
+        },
+        {
+          "type": "give",
+          "item": "skyabyss:heartbeat_ward_tide_shell",
+          "count": 1
+        },
+        {
+          "type": "flag",
+          "flag": "ch2t_woven"
+        },
+        {
+          "type": "affinity",
+          "amount": 2
+        }
+      ],
+      "next": "a_menu"
+    },
+    "ch2a_ward": {
+      "face": "smile",
+      "do": [
+        {
+          "type": "take",
+          "item": "skyabyss:salt_crystal",
+          "count": 8
+        },
+        {
+          "type": "remake_ward",
+          "titan": "tide_shell"
+        },
+        {
+          "type": "affinity",
+          "amount": 1
+        }
+      ],
+      "next": "a_menu"
+    },
+    "ch2a_ward_ask": {
+      "face": "neutral",
+      "next": "a_menu"
+    }
+  },
+  "add_options": {
+    "a_menu": {
+      "before": "bye",
+      "options": [
+        {
+          "id": "teach2",
+          "kind": "quest",
+          "if": [
+            {
+              "type": "stage",
+              "min": 1,
+              "max": 1
+            },
+            {
+              "type": "flag",
+              "flag": "ch2a_met"
+            }
+          ],
+          "goto": "ch2p_teach"
+        },
+        {
+          "id": "ward2",
+          "kind": "give",
+          "if": [
+            {
+              "type": "flag",
+              "flag": "ch2t_woven"
+            },
+            {
+              "type": "ward_ok",
+              "titan": "tide_shell"
+            },
+            {
+              "type": "item",
+              "item": "skyabyss:salt_crystal",
+              "count": 8,
+              "optional": true
+            }
+          ],
+          "goto": "ch2a_ward"
+        },
+        {
+          "id": "ward_ask2",
+          "kind": "quest",
+          "if": [
+            {
+              "type": "flag",
+              "flag": "ch2t_woven"
+            },
+            {
+              "type": "ward_ok",
+              "titan": "tide_shell"
+            },
+            {
+              "type": "not",
+              "of": {
+                "type": "item",
+                "item": "skyabyss:salt_crystal",
+                "count": 8,
+                "optional": true
+              }
+            }
+          ],
+          "goto": "ch2a_ward_ask"
+        }
+      ]
+    }
+  }
+}

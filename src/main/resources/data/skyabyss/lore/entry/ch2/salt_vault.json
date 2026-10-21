@@ -1,0 +1,12 @@
+{
+  "chapter": "titan_tide",
+  "order": 31,
+  "unlock": [
+    {
+      "type": "sign",
+      "target": "sign.skyabyss.ch2_salt_wall"
+    }
+  ],
+  "related": [],
+  "inscription_sign": "sign.skyabyss.ch2_salt_wall"
+}

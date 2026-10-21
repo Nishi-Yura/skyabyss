@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "pattern": [
+    "SSS",
+    "PWP",
+    "SLS"
+  ],
+  "key": {
+    "P": {
+      "item": "skyabyss:small_pearl"
+    },
+    "S": {
+      "item": "skyabyss:salt_crystal"
+    },
+    "W": {
+      "item": "skyabyss:stone_whale_shard"
+    },
+    "L": {
+      "item": "minecraft:leather"
+    }
+  },
+  "result": {
+    "id": "skyabyss:tide_wader_chestplate",
+    "count": 1
+  }
+}

@@ -1,0 +1,47 @@
+{
+  "category": "sub",
+  "order": 65,
+  "repeat": "daily",
+  "board": true,
+  "min_stage": 1,
+  "stages": [
+    {
+      "id": "pools",
+      "objectives": [
+        {
+          "id": "kill",
+          "type": "kill",
+          "targets": [
+            "skyabyss:tidepool_clam"
+          ],
+          "count": 6
+        }
+      ]
+    },
+    {
+      "id": "pearls",
+      "objectives": [
+        {
+          "id": "pearl",
+          "type": "turn_in",
+          "target": "skyabyss:small_pearl",
+          "count": 4
+        }
+      ]
+    }
+  ],
+  "reward": {
+    "xp": 60,
+    "items": [
+      {
+        "item": "skyabyss:salt_crystal",
+        "count": 3
+      }
+    ]
+  },
+  "unlock": {
+    "type": "flag",
+    "flag": "met",
+    "npc": "skyabyss:whale_chaser"
+  }
+}

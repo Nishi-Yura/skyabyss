@@ -106,15 +106,20 @@ public final class TravelGear {
             () -> new MossSalveItem(new Item.Properties().stacksTo(16).food(new FoodProperties.Builder().nutrition(0).saturationModifier(0f).alwaysEdible()
                     .effect(() -> new MobEffectInstance(MobEffects.REGENERATION, SALVE_REGEN_TICKS, 0), 1.0f).build())));
 
+    // 砥石の種類ごとの上乗せ (効いているか持ち歩いているときの値)。備えの刃は一番大きい一つだけを数える。static の登録より前に置く
+    private static final List<java.util.function.ToDoubleFunction<Player>> WHETSTONE_KINDS = new java.util.concurrent.CopyOnWriteArrayList<>();
+
     static {
         // 備えの三灯へ (21 の 1.2): 砥石 = 効いているか、持ち歩いている (使えばすぐ効く) とき攻撃 +1.5。登録があると刃の手段が「砥石で鍛える」に替わる。
         // 旅装は防具の属性で自然に身の灯に入る。糧と薬は FoodProperties で自然に糧の灯に入る (固焼き = 吸収 II の 8 点、軟膏 = 再生 I の 3.2 点)
-        Readiness.registerWhetstone(player -> player.hasEffect(WHETTED) || carriesWhetstone(player) ? WHETSTONE_ATTACK : 0);
-        // 手段 (灯が赤・黄のときの一行に出る品の名前)
-        Readiness.registerRemedy(Readiness.Lamp.BODY, () -> Component.translatable("message.skyabyss.readiness.remedy.name.travel_gear"));
-        Readiness.registerRemedy(Readiness.Lamp.BLADE, () -> Component.translatable("message.skyabyss.readiness.remedy.name.whetstone"));
-        Readiness.registerRemedy(Readiness.Lamp.PROVISIONS, () -> Component.translatable("message.skyabyss.readiness.remedy.name.hardtack"));
-        Readiness.registerRemedy(Readiness.Lamp.PROVISIONS, () -> Component.translatable("message.skyabyss.readiness.remedy.name.salve"));
+        // 砥石の種類 (章ごと) は重ねない: 登録は一つだけで、種類ごとの上乗せの一番大きい値を数える (二章の塩の砥石は addWhetstoneKind で足す)
+        addWhetstoneKind(player -> player.hasEffect(WHETTED) || carries(player, ROCK_WHETSTONE.get()) ? WHETSTONE_ATTACK : 0);
+        Readiness.registerWhetstone(TravelGear::whetstoneBonus);
+        // 手段 (灯が赤・黄のときの一行に出る品の名前)。一章の品は岩鯨の備えのときだけ出す
+        Readiness.registerRemedy(Readiness.Lamp.BODY, "stone_whale", () -> Component.translatable("message.skyabyss.readiness.remedy.name.travel_gear"));
+        Readiness.registerRemedy(Readiness.Lamp.BLADE, "stone_whale", () -> Component.translatable("message.skyabyss.readiness.remedy.name.whetstone"));
+        Readiness.registerRemedy(Readiness.Lamp.PROVISIONS, "stone_whale", () -> Component.translatable("message.skyabyss.readiness.remedy.name.hardtack"));
+        Readiness.registerRemedy(Readiness.Lamp.PROVISIONS, "stone_whale", () -> Component.translatable("message.skyabyss.readiness.remedy.name.salve"));
     }
 
     private TravelGear() {
@@ -125,6 +130,8 @@ public final class TravelGear {
         MATERIALS.register(modEventBus);
         EFFECTS.register(modEventBus);
         modEventBus.addListener(TravelGear::onCreativeTab);
+        // 二章の分 (潮渡りの旅装・塩の砥石・糧と薬・砂時計・素材)
+        Ch2Gear.register(modEventBus);
     }
 
     private static void onCreativeTab(BuildCreativeModeTabContentsEvent event) {
@@ -139,15 +146,31 @@ public final class TravelGear {
         }
     }
 
-    // 持ち物に砥石があるか
+    // 持ち物に砥石 (一章) があるか
     public static boolean carriesWhetstone(Player player) {
+        return carries(player, ROCK_WHETSTONE.get());
+    }
+
+    public static boolean carries(Player player, Item item) {
         var inv = player.getInventory();
         for (int i = 0; i < inv.getContainerSize(); i++) {
-            if (inv.getItem(i).is(ROCK_WHETSTONE.get())) {
+            if (inv.getItem(i).is(item)) {
                 return true;
             }
         }
         return false;
+    }
+
+    public static void addWhetstoneKind(java.util.function.ToDoubleFunction<Player> bonus) {
+        WHETSTONE_KINDS.add(bonus);
+    }
+
+    public static double whetstoneBonus(Player player) {
+        double best = 0;
+        for (java.util.function.ToDoubleFunction<Player> k : WHETSTONE_KINDS) {
+            best = Math.max(best, k.applyAsDouble(player));
+        }
+        return best;
     }
 
     // 鯨道の旅装の 4 部位がそろっているか (着ているか持ち物にあるか。同じ部位は一つで数える)
@@ -200,6 +223,8 @@ public final class TravelGear {
 
     // 砥石を使った (RockWhetstoneItem)。効き目を 20 分。使えたら true
     public static boolean applyWhetstone(ServerPlayer player) {
+        // 研ぎは重ねない (塩の砥石の刃は岩の砥石で研ぎ直すと替わる)
+        player.removeEffect(Ch2Gear.SALT_WHETTED);
         player.addEffect(new MobEffectInstance(WHETTED, WHETSTONE_TICKS, 0, false, true, true));
         Notice.hint(player, "message.skyabyss.whetstone.used");
         // 備えの頼み「刃を研ぐ」の「砥石を使う」(TODO(P7): 老いた歩哨ができたら、研いだ刃で倒す、に締める)

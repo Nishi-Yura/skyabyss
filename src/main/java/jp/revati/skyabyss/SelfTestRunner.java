@@ -195,6 +195,8 @@ public final class SelfTestRunner {
         steps.addAll(jp.revati.skyabyss.story.ch1.Ch1SelfTest.steps());
         // 一章の地上の敵 (岩殻虫・棘うさぎ・骨負い・老いた歩哨。P7。21 の 3.1)。SKYABYSS_SELFTEST_ONLY="ch1 mobs"
         steps.addAll(jp.revati.skyabyss.story.ch1.Ch1MobsSelfTest.steps());
+        // 二章の地上の敵 (潮だまり貝・砂潜り・宿借り・潮の番人。P12。21 の 4.1)。SKYABYSS_SELFTEST_ONLY="ch2 mobs"
+        steps.addAll(jp.revati.skyabyss.entity.Ch2MobsSelfTest.steps());
         // チャンクを読み込んでから、エンティティが入るのを待って試すもの
         // 序盤の流れの保証 (最初の影・書・岩鯨の門・語り部の野営)。平らな草地を作るので、チャンクを読み込んでから
         steps.add(Step.once("opening beats (load)", jp.revati.skyabyss.opening.OpeningBeatsSelfTest::load));
@@ -257,6 +259,8 @@ public final class SelfTestRunner {
         steps.addAll(jp.revati.skyabyss.titan.tide.back.TideBackSelfTest.steps());
         // 二章「引く海」(予兆・潮見の貝・大干潮・小要素)。SKYABYSS_SELFTEST_ONLY=ch2
         steps.addAll(jp.revati.skyabyss.titan.tide.chapter.TideChapterSelfTest.steps());
+        // 二章の地上 (34 の C2: 塩の蔵・塩の道・難破船・支度の段 2 本)。SKYABYSS_SELFTEST_ONLY="ch2 ground"
+        steps.addAll(jp.revati.skyabyss.story.ch2.Ch2GroundSelfTest.steps());
         // 雷翼の中ボス 雷獣 (背中がまだ無ければ、オーバーワールドの仮の巣で)
         steps.add(Step.once("raiju (load)", jp.revati.skyabyss.titan.storm.raiju.RaijuSelfTest::load));
         steps.add(Step.once("raiju", 200, jp.revati.skyabyss.titan.storm.raiju.RaijuSelfTest::runSelfTest));

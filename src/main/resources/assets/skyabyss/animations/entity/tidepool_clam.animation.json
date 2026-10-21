@@ -1,0 +1,262 @@
+{
+  "format_version": "1.8.0",
+  "animations": {
+    "animation.tidepool_clam.idle": {
+      "loop": true,
+      "animation_length": 4.0,
+      "bones": {
+        "lid": {
+          "rotation": [
+            "-(math.sin(query.anim_time * 90 + 0) * 1.2 + 1.2)",
+            "0",
+            "0"
+          ]
+        }
+      }
+    },
+    "animation.tidepool_clam.walk": {
+      "loop": true,
+      "animation_length": 4.0,
+      "bones": {
+        "lid": {
+          "rotation": [
+            "-(math.sin(query.anim_time * 90 + 0) * 1.2 + 1.2)",
+            "0",
+            "0"
+          ]
+        }
+      }
+    },
+    "animation.tidepool_clam.open": {
+      "animation_length": 0.8,
+      "bones": {
+        "lid": {
+          "rotation": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "0.30": [
+              -10,
+              0,
+              0
+            ],
+            "0.60": [
+              -34,
+              0,
+              0
+            ],
+            "0.80": [
+              -58,
+              0,
+              0
+            ]
+          }
+        },
+        "body": {
+          "rotation": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "0.20": [
+              0,
+              0,
+              2
+            ],
+            "0.40": [
+              0,
+              0,
+              -2
+            ],
+            "0.60": [
+              0,
+              0,
+              2
+            ],
+            "0.80": [
+              0,
+              0,
+              0
+            ]
+          }
+        }
+      },
+      "loop": "hold_on_last_frame"
+    },
+    "animation.tidepool_clam.open_hold": {
+      "loop": true,
+      "animation_length": 3.0,
+      "bones": {
+        "lid": {
+          "rotation": [
+            "-(math.sin(query.anim_time * 120 + 0) * 2 + 58)",
+            "0",
+            "0"
+          ]
+        }
+      }
+    },
+    "animation.tidepool_clam.pinch": {
+      "animation_length": 0.9,
+      "bones": {
+        "lid": {
+          "rotation": {
+            "0.00": [
+              -58,
+              0,
+              0
+            ],
+            "0.12": [
+              2,
+              0,
+              0
+            ],
+            "0.20": [
+              0,
+              0,
+              0
+            ],
+            "0.50": [
+              0,
+              0,
+              0
+            ],
+            "0.90": [
+              -58,
+              0,
+              0
+            ]
+          }
+        },
+        "body": {
+          "position": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "0.12": [
+              0,
+              1.2,
+              0
+            ],
+            "0.30": [
+              0,
+              0,
+              0
+            ]
+          }
+        }
+      },
+      "loop": "hold_on_last_frame"
+    },
+    "animation.tidepool_clam.close": {
+      "animation_length": 0.4,
+      "bones": {
+        "lid": {
+          "rotation": {
+            "0.00": [
+              -58,
+              0,
+              0
+            ],
+            "0.40": [
+              0,
+              0,
+              0
+            ]
+          }
+        }
+      },
+      "loop": "hold_on_last_frame"
+    },
+    "animation.tidepool_clam.hurt": {
+      "animation_length": 0.3,
+      "bones": {
+        "body": {
+          "rotation": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "0.08": [
+              0,
+              0,
+              6
+            ],
+            "0.18": [
+              0,
+              0,
+              -4
+            ],
+            "0.30": [
+              0,
+              0,
+              0
+            ]
+          }
+        }
+      }
+    },
+    "animation.tidepool_clam.death": {
+      "animation_length": 1.0,
+      "bones": {
+        "lid": {
+          "rotation": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "0.50": [
+              -80,
+              0,
+              0
+            ],
+            "1.00": [
+              -74,
+              0,
+              0
+            ]
+          }
+        },
+        "body": {
+          "rotation": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "0.60": [
+              0,
+              0,
+              12
+            ],
+            "1.00": [
+              0,
+              0,
+              10
+            ]
+          },
+          "position": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "1.00": [
+              0,
+              -0.8,
+              0
+            ]
+          }
+        }
+      },
+      "loop": "hold_on_last_frame"
+    }
+  }
+}

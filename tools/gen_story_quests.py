@@ -238,9 +238,8 @@ S.node("ms_tide_back", "おや、潮の匂いがするね。……二つ目を�
        note="メイン「満ち引きの門」の報告")
 S.node("ms_tide_back2", "海の底にも、鼓動があったんだね。\n空にも、海にも。……世界のあちこちで、何かが脈を打っているんだね。",
        "So there was a heartbeat at the bottom of the sea, too.\nIn the sky, and in the sea. ...Things are beating all over the world, it seems.",
-       face="grave", options=[
-           opt("ok", "そうかもしれない。", "Perhaps they are.", do=[add_aff(2)]),
-       ], note="ここに入るとメイン「満ち引きの門」が終わる")
+       face="grave", next="ms_tide_memory",
+       note="ここに入るとメイン「満ち引きの門」が終わる。続きの村の記憶と数え歌のふたつめ (ms_tide_memory → ms_tide_verse) は dialogue/ch2/storyteller_trail.json (tools/gen_ch2_ground.py)")
 
 S.node("ms_thunder", "二つ目かい。……並べると、少し引き合っているように見えるね。\n三つ目のことなら、ひとつだけ心当たりがあるよ。",
        "The second one. ...Side by side, they almost seem to pull at each other.\nAbout the third, there's one thing I can think of.",

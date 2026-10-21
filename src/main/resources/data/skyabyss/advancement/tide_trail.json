@@ -1,0 +1,31 @@
+{
+  "parent": "skyabyss:salt_vault",
+  "display": {
+    "icon": {
+      "id": "skyabyss:tide_watching_shell"
+    },
+    "title": {
+      "translate": "advancement.skyabyss.tide_trail.title"
+    },
+    "description": {
+      "translate": "advancement.skyabyss.tide_trail.description"
+    },
+    "frame": "goal",
+    "show_toast": true,
+    "announce_to_chat": false,
+    "hidden": true
+  },
+  "criteria": {
+    "done": {
+      "trigger": "skyabyss:beat",
+      "conditions": {
+        "event": "signal:ch2_ready"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "done"
+    ]
+  ]
+}

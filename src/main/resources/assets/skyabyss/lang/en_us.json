@@ -1310,5 +1310,9 @@
   "advancement.skyabyss.scorched_watch.title": "The Scorched Watch",
   "advancement.skyabyss.scorched_watch.description": "Ch. III Thunder Wing: Lightning kept falling on the pillar atop the tower.",
   "advancement.skyabyss.storm_trail.title": "Ready for the Peaks",
-  "advancement.skyabyss.storm_trail.description": "Ch. III Thunder Wing: Rods raised, the tower climbed, sky stone in hand."
+  "advancement.skyabyss.storm_trail.description": "Ch. III Thunder Wing: Rods raised, the tower climbed, sky stone in hand.",
+  "advancement.skyabyss.salt_vault.title": "The Sunken Salt Vault",
+  "advancement.skyabyss.salt_vault.description": "Ch. II Tide Shell: On the vault's back wall, someone had carved words.",
+  "advancement.skyabyss.tide_trail.title": "Ready to Cross the Tide",
+  "advancement.skyabyss.tide_trail.description": "Ch. II Tide Shell: You walked the salt road and rowed to the wreck offshore."
 }

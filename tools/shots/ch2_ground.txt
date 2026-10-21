@@ -1,0 +1,150 @@
+# 二章の地上 (34 の C2・21 の 4.1): 沈んだ塩の蔵・塩の道の標・潮だまり・筏の跡・観測の杭・難破船と、支度の段の目的の帯を、平らな世界に置いて撮る。
+# ./gradlew runShots -Pscript=tools/shots/ch2_ground.txt -PshotsName=ch2_ground
+# 絵は run/shots/ch2_ground/shots/ch2_ground/*.png (開発コマンド skyabyss dev ch2 ... は部品をそのまま置く。本番の置き場は跡地の浜)
+world ch2ground flat
+size 1280 720
+timeout 1200
+render 12
+clouds off
+
+wait 100
+cmd skyabyss cinematic stop
+wait 10
+cmd skyabyss cinematic stop
+cmd time set noon
+cmd weather clear
+cmd gamerule doDaylightCycle false
+cmd gamerule doMobSpawning false
+cmd gamemode spectator
+hud off
+
+# ---- 台地 (石の塊の上に草。地面の上面 y=-30。蔵の床は -41) と、浅い海の箱 (水面 -35、深さ 5)
+cmd forceload add -20 -20 121 44
+wait 120
+cmd fill -20 -50 -20 -1 -31 44 stone
+cmd fill 0 -50 -20 19 -31 44 stone
+cmd fill 20 -50 -20 39 -31 44 stone
+cmd fill 40 -50 -20 60 -31 44 stone
+cmd fill -20 -30 -20 60 -30 44 grass_block
+cmd fill 79 -41 -11 121 -35 41 stone hollow
+cmd fill 80 -40 -10 120 -35 40 water
+cmd fill 80 -41 -10 120 -41 40 sand
+cmd skyabyss dev ch2 vault 0 -30 0
+cmd skyabyss dev ch2 tide dry
+cmd skyabyss dev ch2 place ch2_tidal_pool 10 -30 -14
+cmd skyabyss dev ch2 place ch2_drift_raft 28 -30 -14
+cmd skyabyss dev ch2 place ch2_ebb_stakes 44 -30 -14
+cmd skyabyss dev ch2 mark -12 -12
+cmd skyabyss dev ch2 wreck 100 -40 15
+cmd skyabyss cinematic stop
+
+# 蔵の口: 塩で白い積み石の屋根と坑口の碑
+camera 7.5 -25 -11 34 18
+waitchunks
+wait 20
+shot 01_mouth
+# 潮の喉 (干潮): 梯子で下りて、水の底の抜け道を歩く
+camera 0.5 -37.5 11.5 0 50
+waitchunks
+wait 20
+shot 02_throat_dry
+# 潮の喉 (満潮): 水の底。息を止めて潜る
+cmd skyabyss dev ch2 tide wet
+wait 20
+shot 03_throat_wet
+cmd skyabyss dev ch2 tide dry
+# 入口の間: 潮だまり、珊瑚の骸、海の灯り
+camera 0.5 -38.4 21.5 0 12
+waitchunks
+wait 20
+shot 04_hall
+# 塩樽の間: 濡れた南に塩樽 3、北に乾いた棚
+camera 12.5 -37.5 34.5 206 18
+waitchunks
+wait 20
+shot 05_barrels
+# 塩の戸 (白い石英の 3x3)
+camera 22.5 -39.4 28.5 270 4
+waitchunks
+wait 20
+shot 06_salt_door
+# 戸を開けた奥の間: 膝までの浅瀬と柱、北の壇の刻み
+cmd skyabyss dev ch2 door
+camera 27.5 -37.5 35.5 200 10
+waitchunks
+wait 20
+shot 07_deep_room
+camera 35.5 -38.6 18.5 180 15
+waitchunks
+wait 20
+shot 08_wall_carving
+# 出口の縦穴 (上から)
+camera 35.5 -26 14.5 180 75
+waitchunks
+wait 20
+shot 09_exit_shaft
+# 塩の道の標 (白い塩の柱と矢印)
+camera -8.5 -27 -5.5 135 20
+waitchunks
+wait 20
+shot 10_salt_mark
+# 潮だまりの浜
+camera 10.5 -24 -4.5 180 40
+waitchunks
+wait 20
+shot 11_tidal_pools
+# 漂着の筏の跡
+camera 28.5 -25 -5.5 180 35
+waitchunks
+wait 20
+shot 12_drift_raft
+# 引き潮の観測の杭
+camera 44.5 -27 -7.5 180 15
+waitchunks
+wait 20
+shot 13_ebb_stakes
+# 沖の難破船 (バニラの型。帆柱が水の上に出る)
+camera 72.5 -28 -6.5 309 12
+waitchunks
+wait 20
+shot 14_wreck
+
+# ---- 目的の帯 (支度の段 2 本)
+# 二章の人にする (岩鯨は止めた扱い。序章のメインが帯を取らないように、先にクエストを空にする)
+cmd skyabyss quest forget @s all
+cmd skyabyss playtest chapter 2 @s
+# 一章のメインを終わらせる (残っていると、帯が序盤の目的「岩鯨を待とう」を出す)
+cmd skyabyss quest next @s main_song
+cmd skyabyss quest next @s main_song
+cmd skyabyss quest next @s main_song
+cmd skyabyss quest next @s main_song
+cmd skyabyss quest next @s main_song
+cmd skyabyss quest next @s main_song
+cmd skyabyss quest next @s main_song
+cmd skyabyss quest next @s main_song
+cmd skyabyss quest next @s main_song
+cmd skyabyss quest next @s main_song
+cmd skyabyss quest next @s main_song
+cmd skyabyss quest next @s main_song
+cmd gamemode creative
+cmd kill @e[type=!player,distance=..200]
+# 二章の題字の札を出して (左上の章の札が「二章」に替わる)、引くまで待つ
+cmd skyabyss dev arc card titan_tide
+wait 300
+hud on
+cmd skyabyss quest start @s "ch2/salt_road"
+camera 0.5 -29 -9.5 0 15
+waitchunks
+wait 60
+shot 15_band_salt_road
+cmd skyabyss quest stage @s "ch2/salt_road" vault
+wait 60
+shot 16_band_salt_vault
+cmd skyabyss quest start @s "ch2/ebb_boat"
+cmd skyabyss quest stage @s "ch2/ebb_boat" wreck
+camera 76.5 -33 -8.5 309 8
+waitchunks
+wait 60
+shot 17_band_ebb_boat
+
+echo ch2_ground done

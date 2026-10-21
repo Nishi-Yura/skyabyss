@@ -1310,5 +1310,9 @@
   "advancement.skyabyss.scorched_watch.title": "焼けた見張り塔",
   "advancement.skyabyss.scorched_watch.description": "三章　雷翼　塔の頂の柱に、雷が落ち続けていた。",
   "advancement.skyabyss.storm_trail.title": "峰へ行く支度",
-  "advancement.skyabyss.storm_trail.description": "三章　雷翼　針を立て、塔を抜け、空の石を手にした。"
+  "advancement.skyabyss.storm_trail.description": "三章　雷翼　針を立て、塔を抜け、空の石を手にした。",
+  "advancement.skyabyss.salt_vault.title": "沈んだ塩の蔵",
+  "advancement.skyabyss.salt_vault.description": "二章　潮殻　蔵の奥の壁に、誰かの刻みがあった。",
+  "advancement.skyabyss.tide_trail.title": "潮渡りの支度",
+  "advancement.skyabyss.tide_trail.description": "二章　潮殻　塩の道を辿り、船で沖の難破船へ渡った。"
 }
