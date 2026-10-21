@@ -37,7 +37,6 @@ public final class EmberHeat {
     public enum Reason {
         LAVA_NEAR,      // 溶岩から 2 ブロック以内 (1 秒に +3)
         HOT_GROUND,     // マグマの継ぎ目・冷え殻の上 (1 秒に +1)
-        SHAFT,          // 火の井戸の縦穴 (1 秒に +1)
         VENT,           // 噴気の割れ目 (+25)
         MOTH,           // 火の粉蛾に触れた (+8)、蛾が散った火の粉 (+4)
         ROLLER_TRAIL,   // 燠虫の火の粉の帯 (+5)
@@ -124,7 +123,6 @@ public final class EmberHeat {
     // 1 秒あたりの量
     public static final float NEAR_LAVA = 3f;
     public static final float HOT_GROUND = 1f;
-    public static final float SHAFT = 1f;
     public static final float PASSIVE_COOL = 3f;
     public static final float ASH_COOL = 15f;
     public static final float WATER_COOL = 25f;
@@ -162,7 +160,7 @@ public final class EmberHeat {
 
     // いまいる所の熱の様子 (自己テスト・コマンドが見る)
     public enum Spot {
-        NEAR_LAVA, HOT_GROUND, SHAFT, ASH, WATER, REST, NONE
+        NEAR_LAVA, HOT_GROUND, ASH, WATER, REST, NONE
     }
 
     public static Spot spot(ServerPlayer player) {
@@ -198,11 +196,6 @@ public final class EmberHeat {
                 || EmberIds.id(EmberIds.COOLED_CRUST).equals(net.minecraft.core.registries.BuiltInRegistries.BLOCK.getKey(under.getBlock()))) {
             return Spot.HOT_GROUND;
         }
-        // 火の井戸の縦穴 (広間の天井の上から火口の床まで)
-        if (EmberBodyBuilder.wellDist(feet.getX(), feet.getZ()) <= EmberBackLayout.WELL_RADIUS + 0.5 && feet.getY() >= EmberBackLayout.WELL_BOTTOM - 1
-                && feet.getY() <= EmberBodyBuilder.crater()) {
-            return Spot.SHAFT;
-        }
         return Spot.NONE;
     }
 
@@ -215,7 +208,6 @@ public final class EmberHeat {
         switch (spot(player)) {
             case NEAR_LAVA -> add(player, NEAR_LAVA * dt, Reason.LAVA_NEAR);
             case HOT_GROUND -> add(player, HOT_GROUND * dt, Reason.HOT_GROUND);
-            case SHAFT -> add(player, SHAFT * dt, Reason.SHAFT);
             case ASH -> cool(player, ASH_COOL * dt);
             case WATER -> cool(player, WATER_COOL * dt);
             case REST -> {

@@ -24,7 +24,7 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 
-// 余燼の背の任意の翼の宝箱 (版 20。26 の 11 章): 尾根の広間の見張り台 2・灰の墓所・工房・灰降りの庭・背へ出る洞の脇の小部屋。
+// 余燼の背の任意の翼の宝箱 (版 20。26 の 11 章): 灰の墓所・工房・灰降りの庭。
 // どれも行き止まりの奥にあり、碑が一行そえてある。宝箱は見た目だけ (中身は無い)。右クリックすると、その人に一度だけ、小さな贈り物
 // (干し肉・余燼の燠石・火の粉の粉・経験値) が渡る。必須の道ではない (いつも開いている。状態の鍵なし)。取った印は PlayerPersisted に残る (死んでも消えない)
 @EventBusSubscriber(modid = SkyAbyss.MODID)

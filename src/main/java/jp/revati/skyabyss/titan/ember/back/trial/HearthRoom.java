@@ -9,7 +9,6 @@ import net.minecraft.world.level.block.Blocks;
 // 火守りの谷の部屋の中身 (13 の 5.4節、26 の 11 章。部屋の箱は EmberBackLayout.SOUTH: x -17..17、y 83..112、z -8..66、床 83)。
 // 流れは南へ一本: 入口 (z -7) → 灰降りの庭 (z -7..10。休み場 s0・灰の木・宝箱) → 灰運びの道と噴気の谷 (z 11..40。噴気の割れ目 16 本、
 //   灰溜まり 4 か所、燠虫 2 体) → 火床の壇 (z 44..48。火床は z 46) → 熾り石の岸 (z 56..65)。
-// 天井の中ほど (z 22..52) は背の亀裂 (CRACK) へ抜ける (背の上から灰が降りる所)。亀裂そのものは箱の外 (B)。
 // 規則を一つずつ: 庭の碑で「熾を火床へ」→ 谷の碑で「噴気は 16 秒で巡る」→ 灰運びを噴気の上へ誘う (ひねり)。
 public final class HearthRoom {
     // 灰溜まり (灰色の羊毛): 谷の 4 か所。立つと熱が冷える (B)
@@ -28,9 +27,6 @@ public final class HearthRoom {
         k.shell(true);
         k.fill(box.minX() + 1, floor, box.minZ() + 1, box.maxX() - 1, floor, box.maxZ() - 1, RoomKit.SMOOTH);
         k.drifts(box.minX() + 1, box.minZ() + 1, box.maxX() - 1, box.maxZ() - 1, 18);
-        // 背の亀裂の下: 天井を抜く
-        EmberBackLayout.Box crack = EmberBackLayout.CRACK;
-        k.air(crack.minX(), box.maxY(), crack.minZ(), crack.maxX(), box.maxY(), crack.maxZ());
         // 谷の両壁に熱い継ぎ目 (マグマ) と灯り (茂み)
         for (int z = 10; z <= 62; z += 6) {
             k.set(box.minX() + 1, floor + 2, z, RoomKit.MAGMA);
@@ -38,10 +34,9 @@ public final class HearthRoom {
             k.set(box.minX() + 1, floor + 7, z + 3, RoomKit.SHROOM);
             k.set(box.maxX() - 1, floor + 7, z + 3, RoomKit.SHROOM);
         }
-        // 洞の建築: 丸天井と肋 (亀裂の下は開ける)、壁の肋、熔脈
+        // 洞の建築: 丸天井と肋、壁の肋、熔脈
         k.relief(box.minZ() + 1, box.maxZ() - 1, 12, null);
-        k.vault(box.minX() + 1, box.maxX() - 1, box.minZ() + 1, box.maxZ() - 1, 16, 25,
-                (x, z) -> x >= crack.minX() - 1 && x <= crack.maxX() + 1 && z >= crack.minZ() - 1 && z <= crack.maxZ() + 1);
+        k.vault(box.minX() + 1, box.maxX() - 1, box.minZ() + 1, box.maxZ() - 1, 16, 25, (x, z) -> false);
         k.veins(box.minZ() + 3, box.maxZ() - 3, 9);
         k.veinsEnds(box.minX() + 3, box.maxX() - 3, 6);
         // 奥の岸の石の門 (熾り石の岸を囲む)

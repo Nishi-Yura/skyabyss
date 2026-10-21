@@ -167,7 +167,7 @@ final class RoomKit {
 
     // ---------------------------------------------------------------- 洞の建築 (版 20): 丸天井・壁の肋・熔脈・溶岩の中の岩の柱
     // 丸天井: x の範囲の真ん中が高く、端が低い (hEdge → hCenter。床の上の高さ)。z の範囲で、天井の下を壁の石で埋める。
-    // holes に当たる所 (背の亀裂の下) は埋めない。8 ブロックおきに肋 (黒石レンガ) が天井の下に 1 段張り出し、肋の真ん中と 1/4 に光る茂み
+    // holes に当たる所 は埋めない。8 ブロックおきに肋 (黒石レンガ) が天井の下に 1 段張り出し、肋の真ん中と 1/4 に光る茂み
     void vault(int xMin, int xMax, int zMin, int zMax, int hEdge, int hCenter, java.util.function.BiPredicate<Integer, Integer> hole) {
         double cx = (xMin + xMax) / 2.0;
         double half = (xMax - xMin) / 2.0;

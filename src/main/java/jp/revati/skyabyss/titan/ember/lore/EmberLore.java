@@ -54,7 +54,6 @@ public final class EmberLore {
             "west", WHISPER + "west",         // hint  灰の道の岸 (壺・殻・灰溜まり)
             "east", WHISPER + "east",         // hint  鍛えの間の前室 (色が合ったら打て)
             "south", WHISPER + "south",       // hint  火守りの谷の入口 (熾・噴気)
-            "well", WHISPER + "well",         // lore  火の井戸の底
             "heart", WHISPER + "heart");      // lore  熾の底の前室
     public static final List<String> HINT_WHISPERS = List.of("throat", "hub", "west", "east", "south");
 

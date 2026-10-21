@@ -144,11 +144,7 @@ public final class EmberBackSelfTest {
                 "the arrival on the tongue is not a floor with room to stand");
         expect(EmberBodyBuilder.BODY.minZ() > BODY.minZ() && EmberBodyBuilder.BODY.maxZ() < BODY.maxZ() && EmberBodyBuilder.BODY.maxY() < BODY.maxY()
                 && EmberBodyBuilder.BODY.minX() >= BODY.minX() && EmberBodyBuilder.BODY.maxX() <= BODY.maxX(), "body.bin does not fit in the BODY box");
-        // 体が火山の形 (火口が高い)・腹が灰の原の上
-        int crater = EmberBodyBuilder.crater();
-        expect(crater > 150, "the crater floor is at " + crater + ", expected the volcano");
-        NOTES.add("crater floor " + crater);
-        expect(crater == CRATER_Y, "EmberBackLayout.CRATER_Y is " + CRATER_Y + " but the body's crater floor is " + crater);
+        // 腹が灰の原の上
         expect(!back.getBlockState(new BlockPos(0, PLAIN_TOP + 1, 40)).isAir(), "the belly does not rest on the ash plain");
         // 体の外 (灰の原) は平らなまま
         expect(back.getBlockState(new BlockPos(0, PLAIN_TOP, -295)).is(Blocks.SMOOTH_BASALT) && back.getBlockState(new BlockPos(0, PLAIN_TOP + 1, -295)).isAir(),
@@ -217,17 +213,7 @@ public final class EmberBackSelfTest {
 
     // ---------------------------------------------------------------- 穴 (体の中の空気が、決めた口のほかで空へ抜けない)
     static boolean allowedOpening(int x, int y, int z) {
-        if (z <= EmberBodyBuilder.NECK_Z1) {
-            return true;
-        }
-        if (Math.abs(x) <= 4 && z >= CRACK.minZ() - 2 && z <= CRACK.maxZ() + 2 && y >= SOUTH.minY()) {
-            return true;
-        }
-        if (EmberBodyBuilder.wellDist(x, z) <= 18 && y >= EmberBodyBuilder.crater() - 2
-                || EmberBodyBuilder.wellDist(x, z) <= WELL_RADIUS + 0.5 && y >= WELL_BOTTOM - 1) {
-            return true;
-        }
-        return Math.abs(x) <= 5 && z >= HUB_CENTER.getZ() + 4 && z <= EmberBodyBuilder.backTubeEnd() + 2 && y >= BACK_EXIT_FLOOR;
+        return z <= EmberBodyBuilder.NECK_Z1;
     }
 
     private static boolean open(ServerLevel l, BlockPos p) {
@@ -280,9 +266,8 @@ public final class EmberBackSelfTest {
 
     // ---------------------------------------------------------------- 液体
     private static void checkFluids(ServerLevel back, String when) {
-        List<Box> regions = List.of(MOUTH, THROAT, BAY_WEST, BAY_EAST, HUB,
-                new Box(-48, 78, -58, 50, 96, -16), new Box(-4, 82, -27, 4, 96, -9), HEART_ANTE, GATE_SHAFT, BACK_TUBE,
-                new Box(-7, WELL_BOTTOM, HUB_CENTER.getZ() - 7, 7, EmberBodyBuilder.crater(), HUB_CENTER.getZ() + 7));
+        List<Box> regions = List.of(MOUTH, THROAT, HUB,
+                new Box(-48, 78, -58, 50, 96, -16), new Box(-4, 82, -27, 4, 96, -9), HEART_ANTE, GATE_SHAFT);
         int fluids = 0;
         String first = "";
         BlockPos.MutableBlockPos m = new BlockPos.MutableBlockPos();
@@ -442,9 +427,6 @@ public final class EmberBackSelfTest {
         goals.put("west stone", STONE_WEST.north());
         goals.put("east stone", STONE_EAST.north());
         goals.put("south stone", STONE_SOUTH.north());
-        goals.put("well top (crater)", new BlockPos(HUB_CENTER.getX() + 11, EmberBodyBuilder.crater() + 1, HUB_CENTER.getZ()));
-        goals.put("back top", new BlockPos(0, BACK_EXIT_FLOOR + 1, EmberBodyBuilder.backTubeEnd()));
-        goals.put("crack rail", new BlockPos(6, EmberBodyBuilder.BODY.top(6, 37) + 1, 37));
         for (Cache c : CACHES) {
             goals.put("cache " + c.id(), c.pos().relative(c.facing()));
         }
@@ -454,7 +436,7 @@ public final class EmberBackSelfTest {
         List<String> miss = new ArrayList<>();
         StringBuilder sb = new StringBuilder();
         for (Map.Entry<String, BlockPos> e : goals.entrySet()) {
-            int r = e.getKey().equals("back top") || e.getKey().equals("crack rail") ? 4 : e.getKey().contains("crater") ? 2 : 1;
+            int r = 1;
             int d = reached(dist, e.getValue(), r);
             if (d < 0) {
                 if (!mech && TRIAL_GATED.contains(e.getKey())) {
@@ -755,10 +737,6 @@ public final class EmberBackSelfTest {
         expect(EmberHeat.spot(p) == EmberHeat.Spot.HOT_GROUND && Math.abs(EmberHeat.get(p) - 10.5f) < 0.01f, "magma seams do not heat 1 a second: "
                 + EmberHeat.spot(p) + " " + EmberHeat.get(p));
         back.setBlock(hot, was, 3);
-        // 縦穴
-        BlockPos shaft = new BlockPos(HUB_CENTER.getX() + 5, WELL_BOTTOM + 1, HUB_CENTER.getZ());
-        p.moveTo(shaft.getX() + 0.5, shaft.getY(), shaft.getZ() + 0.5);
-        expect(EmberHeat.spot(p) == EmberHeat.Spot.SHAFT, "the fire well is not a shaft spot: " + EmberHeat.spot(p));
         // 火炎耐性で半分、角杯の口 (強いほうだけ)、重ねる口と下限 0.4
         EmberHeat.set(p, 0);
         p.addEffect(new MobEffectInstance(MobEffects.FIRE_RESISTANCE, 200));

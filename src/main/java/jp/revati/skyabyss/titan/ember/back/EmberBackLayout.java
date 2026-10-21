@@ -20,7 +20,7 @@ import net.minecraft.world.phys.Vec3;
 //   広間から三つの試練へ (冷えた溶岩洞で降りる): 西 灰の道 (灰降りの庭 → 試しの流れ → 第一の湖 → 中ノ岸 → 第二の湖 → 奥の岸)
 //                                                東 鍛えの間 (鍛えの回廊 → 前室 → 鞴・金床・大炉 → 鍛え手の扉 → 鍛え手の間)
 //                                                南 火守りの谷 (灰降りの庭 → 灰運びの道と噴気 → 火床 → 奥の岸)
-//   三つの石がそろうと広間の中央の炉が開き、螺旋で下の熾の底へ。広間の南東の壁の螺旋 → 火の井戸 → 火口の縁、井戸の途中から背へ出る洞。
+//   三つの石がそろうと広間の中央の炉が開き、螺旋で下の熾の底へ。広間の南東の壁の螺旋 → 床 119 の踊り場 (試練の階へ)。
 //
 // 座標: y は「床のブロックの y」(人が立つのは +1)。灰の原の地表 (いちばん上のブロック) は y 63 (PLAIN_TOP)。体の中心の左右は x 0。
 // 箱の中の座標は、できるだけ箱の角 (min) や中心からの相対で書くこと。
@@ -114,10 +114,6 @@ public final class EmberBackLayout {
     public static final Box THROAT = new Box(-12, 69, -237, 12, 98, -83);
     // 喉の坂の休み場の平らな所 (床 78。尾根の広間と坂のあいだ)
     public static final int THROAT_LANDING = 78;
-    // 尾根の広間の見張り台の張り出し (両側。広間の床の段にそろえる。見晴らしの碑と宝箱)
-    public static final int BAY_FLOOR = 73;
-    public static final Box BAY_WEST = new Box(-22, BAY_FLOOR, -175, -13, BAY_FLOOR + 9, -168);
-    public static final Box BAY_EAST = new Box(13, BAY_FLOOR, -175, 22, BAY_FLOOR + 9, -168);
 
     // ---------------------------------------------------------------- 広間 (炉心の広間。円 半径 27、天井まで 24。火口の真下)
     public static final int FLOOR_HUB = 92;
@@ -137,7 +133,7 @@ public final class EmberBackLayout {
     public static final BlockPos SMITH_CENTER = new BlockPos(44, 86, 73);
     public static final int SMITH_RADIUS = 13;
     public static final Box SMITH = new Box(31, 86, 60, 57, 100, 86);
-    // 火守りの谷 (幅 35・奥行き 75、天井まで 29)。上は背の亀裂 CRACK で、背の上まで抜けて空が見える → C3
+    // 火守りの谷 (幅 35・奥行き 75、天井まで 29)。天井は閉じた洞 → C3
     public static final int FLOOR_SOUTH = 83;
     public static final Box SOUTH = new Box(-17, 83, -8, 17, 112, 66);
     // 熾の底の前室 (9 × 7。螺旋の階段の下。大きさ据え置き) → B (碑文 lore_ember_heart と休み場 heart)
@@ -168,24 +164,14 @@ public final class EmberBackLayout {
     public static final int TUBE_HALF = 3;
     public static final int TUBE_Z = -54;
 
-    // ---------------------------------------------------------------- 熾の底の門・火の井戸・背の亀裂・背へ出る洞 (→ B)
+    // ---------------------------------------------------------------- 熾の底の門・火の井戸の踊り場 (→ B)
     // 広間の中央の大きな炉の底の格子 (3 × 3、広間の床の高さ)。三つの石がそろうと開き、下の螺旋の階段へ
     public static final Box HEART_GATE = new Box(-1, FLOOR_HUB, -55, 1, FLOOR_HUB, -53);
     // 門の下の螺旋の縦穴 (格子の真下の 3 × 3。中央の柱のまわりを 1 段ずつ下りる)。前室の床 (50) まで。底から南へ通路で前室へ
     public static final Box GATE_SHAFT = new Box(-1, FLOOR_HEART + 1, -55, 1, FLOOR_HUB - 1, -53);
-    // 火の井戸 (広間の天井の中央から火山の火口まで。半径 8.6 の縦穴、そのまわりに螺旋の段 (内側に手すり))。
-    // 広間の南東の壁の螺旋 (WELL_STAIR) で床 119 まで上り、短い通路で井戸の螺旋の下の端へ。井戸の螺旋の 2 周目から南へ背へ出る洞
-    public static final double WELL_RADIUS = 8.6;
+    // 火の井戸の踊り場: 壁の螺旋 WELL_STAIR で床 92 から上り、床 119 が試練の階 (EmberDeck) への踊り場。井戸の縦穴・火口・背へ出る洞は無い
     public static final int WELL_BOTTOM = 119;
     public static final BlockPos WELL_STAIR = new BlockPos(14, FLOOR_HUB, -31);
-    // 背へ出る洞の床 (井戸の螺旋の 2 周目の段にそろえる。井戸の南から、体の表が床より低くなるまで)
-    public static final int BACK_EXIT_FLOOR = 136;
-    // 火口の床 (井戸の外の平らな輪。体の表から読んだ高さと自己テストで合わせる)
-    public static final int CRATER_Y = 207;
-    // 背の亀裂 (火守りの谷の天井から背の上まで。上に格子の手すり)
-    public static final Box CRACK = new Box(-3, 113, 22, 3, 146, 52);
-    // 背へ出る洞の箱 (自己テスト・検査用。井戸の南の縁から出口まで)
-    public static final Box BACK_TUBE = new Box(-4, BACK_EXIT_FLOOR, -48, 4, BACK_EXIT_FLOOR + 6, 32);
 
     // ---------------------------------------------------------------- 熾り石・抜け道の光る床・碑文 (→ B が置く。担当の箱の中の reserved)
     // 熾り石 (ブロックの位置。床 +1)。西は奥の岸、東は鍛え手の間の奥、南は谷の奥 (火床の向こう)
@@ -223,7 +209,6 @@ public final class EmberBackLayout {
             // 喉・広間 (向きは、そこへ歩いてくる人に文が向く向き)
             new Inscription("throat_neck", new BlockPos(-3, 71, -229), Direction.NORTH),
             new Inscription("hub_stones", new BlockPos(-4, FLOOR_HUB + 2, -81), Direction.SOUTH),
-            new Inscription("hub_well", new BlockPos(10, FLOOR_HUB + 2, -29), Direction.NORTH),
             // 西 灰の道
             new Inscription("west_rule", new BlockPos(-47, FLOOR_WEST + 2, 11), Direction.NORTH),
             new Inscription("west_lake1", new BlockPos(-47, FLOOR_WEST + 2, 29), Direction.NORTH),
@@ -239,22 +224,16 @@ public final class EmberBackLayout {
             // 南 火守り
             new Inscription("south_rule", new BlockPos(-6, FLOOR_SOUTH + 2, 6), Direction.NORTH),
             new Inscription("south_lane", new BlockPos(7, FLOOR_SOUTH + 2, 8), Direction.NORTH),
-            new Inscription("south_hearth", new BlockPos(6, FLOOR_SOUTH + 2, 42), Direction.NORTH),
-            // 背へ出る洞
-            new Inscription("tube_rim", new BlockPos(10, BACK_EXIT_FLOOR + 2, -11), Direction.WEST));
+            new Inscription("south_hearth", new BlockPos(6, FLOOR_SOUTH + 2, 42), Direction.NORTH));
 
     // 任意の翼の宝箱 (右クリックで一度だけ小さな贈り物。EmberCaches)。id と置く位置 (台の上の宝箱)。碑は ember_cache_<id> を横に
     public record Cache(String id, BlockPos pos, Direction facing) {
     }
 
     public static final List<Cache> CACHES = List.of(
-            new Cache("bay_west", new BlockPos(-22, BAY_FLOOR + 1, -172), Direction.EAST),
-            new Cache("bay_east", new BlockPos(22, BAY_FLOOR + 1, -172), Direction.WEST),
             new Cache("tomb", new BlockPos(-61, FLOOR_WEST + 1, -3), Direction.EAST),
             new Cache("workshop", new BlockPos(63, FLOOR_EAST + 1, 6), Direction.WEST),
-            new Cache("garden", new BlockPos(-16, FLOOR_SOUTH + 1, 3), Direction.EAST),
-            new Cache("rim", new BlockPos(10, BACK_EXIT_FLOOR + 1, -14), Direction.WEST),
-            new Cache("crater", new BlockPos(0, CRATER_Y + 1, HUB_CENTER.getZ() + 12), Direction.NORTH));
+            new Cache("garden", new BlockPos(-16, FLOOR_SOUTH + 1, 3), Direction.EAST));
 
     // ---------------------------------------------------------------- 部屋の一覧
     // 部屋の名前 → 箱 (コマンドの go・自己テストの重なりの検査・リセットで中の人を広間へ移す範囲)
@@ -264,8 +243,6 @@ public final class EmberBackLayout {
         Map<String, Box> m = new LinkedHashMap<>();
         m.put("mouth", MOUTH);
         m.put("throat", THROAT);
-        m.put("bay_west", BAY_WEST);
-        m.put("bay_east", BAY_EAST);
         m.put("hub", HUB);
         m.put("west", WEST);
         m.put("east", EAST);
@@ -273,7 +250,6 @@ public final class EmberBackLayout {
         m.put("south", SOUTH);
         m.put("heart_ante", HEART_ANTE);
         m.put("heart", HEART);
-        m.put("back_tube", BACK_TUBE);
         for (String name : EmberDeck.NAMES) {
             m.put(name, EmberDeck.box(name));
         }
@@ -292,8 +268,6 @@ public final class EmberBackLayout {
             case "heart", "heart_ante" -> FLOOR_HEART;
             case "mouth" -> MOUTH_FLOOR;
             case "hub" -> FLOOR_HUB;
-            case "bay_west", "bay_east" -> BAY_FLOOR;
-            case "back_tube" -> BACK_EXIT_FLOOR;
             default -> ROOMS.get(room).minY();
         };
     }
@@ -358,8 +332,6 @@ public final class EmberBackLayout {
                 out.add(rest("s0").area());
                 // 谷の奥 (南の熾り石・光る床・碑文。火床は C3 がこれより北に置く)
                 out.add(new Box(-5, FLOOR_SOUTH, 56, 5, FLOOR_SOUTH + 5, 65));
-                // 背の亀裂の下 (谷の天井に抜ける縦の溝。C3 はここを空けておく)
-                out.add(new Box(CRACK.minX(), 100, CRACK.minZ(), CRACK.maxX(), SOUTH.maxY(), CRACK.maxZ()));
             }
             case "heart" -> out.add(new Box(-1, FLOOR_HEART, -21, 1, FLOOR_HEART + 4, -20));
             default -> {

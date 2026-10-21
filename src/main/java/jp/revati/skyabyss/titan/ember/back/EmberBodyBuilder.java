@@ -21,7 +21,7 @@ import net.minecraft.world.level.block.state.BlockState;
 // 余燼の背の体と広間を建てる (13 の 3 章、26 の 11 章)。サーバーの起動時に一度だけ (版が変わったら建て直す)。
 // 順番: 体 (body.bin。中は凝灰岩で詰まっている) → 口・見送りの段 → 喉 (首・尾根の広間・坂・見張り台) → 炉心の広間と大きな炉 →
 //       冷えた溶岩洞 (広間から三つの試練の入口) → 試練の箱 (中は空気、仮の床) と通り道 → 熾の底の門の下の螺旋・前室・熾の底の箱 → 背の亀裂 →
-//       火の井戸 (壁の螺旋・井戸の螺旋・背へ出る洞・火口の縁への段) → 掘った所の内壁を「肉と骨の壁」(洞は黒い玄武岩) に (skin) →
+//       火の井戸の踊り場 (壁の螺旋・床 119) → 掘った所の内壁を「肉と骨の壁」(洞は黒い玄武岩) に (skin) →
 //       各担当の部屋の中身 (EmberBackRooms) → 休み場・熾り石・光る床・碑文・掲示・宝箱・灰溜まり・飾り (取っておく場所。担当の中身より後)
 // 熾の底の門・石・光る床・ピースフルの封印の開け閉めは試練の側 (EmberBackTrials) が置く
 public final class EmberBodyBuilder {
@@ -34,9 +34,6 @@ public final class EmberBodyBuilder {
     // 壁の螺旋 (広間の床 → 井戸の底 119): 最初の段は並びの 3 番 (北の真ん中)。最後の段が角でなく辺の真ん中 (並びの 5 番) になるので、まっすぐ登って着地する
     public static final int WELL_STAIR_START = 3;
     public static final int WELL_STAIR_STEPS = WELL_BOTTOM - FLOOR_HUB;
-    // 井戸の螺旋: 一周で 16 上がる。下の端の角度 (x-z の角度。南東 60 度)
-    public static final double HELIX_RISE = 16.0;
-    public static final double HELIX_START = Math.toRadians(60);
     // 喉の幅 (半幅): 首 4、尾根の広間 12、坂 3
     public static final int NECK_HALF = 4;
     public static final int HALL_HALF = 12;
@@ -50,7 +47,6 @@ public final class EmberBodyBuilder {
     private final List<Box> carved = new ArrayList<>();
     // 黒い玄武岩の内壁にする洞 (skin が肉と骨の壁でなく玄武岩の壁にする所)
     private final List<Box> tubes = new ArrayList<>();
-    private int craterFloor;
 
     private EmberBodyBuilder(ServerLevel level) {
         this.kit = new EmberKit(level);
@@ -110,15 +106,12 @@ public final class EmberBodyBuilder {
         b.plugSlit();
         b.mouth();
         b.throat();
-        b.bays();
         b.hub();
         b.tubes();
         b.trialBoxes();
         b.gateShaft();
         b.ante();
-        b.crack();
-        b.fireWell();
-        b.backTube();
+        b.wallStair();
         b.deckRooms();
         b.skin();
         long tCarve = System.currentTimeMillis() - t0;
@@ -361,24 +354,6 @@ public final class EmberBodyBuilder {
         track(-RAMP_HALF, THROAT_LANDING - 1, RAMP_Z1, RAMP_HALF, FLOOR_HUB + 8, HUB_DOOR_NORTH.getZ());
     }
 
-    // 尾根の広間の両側の見張り台の張り出し (床 73。広間の端の床の段にそろえる)
-    private void bays() {
-        for (Box bay : List.of(BAY_WEST, BAY_EAST)) {
-            for (int x = bay.minX(); x <= bay.maxX(); x++) {
-                for (int z = bay.minZ(); z <= bay.maxZ(); z++) {
-                    kit.set(x, BAY_FLOOR - 1, z, EmberKit.FLESH);
-                    kit.set(x, BAY_FLOOR, z, EmberKit.ruinFloor(x, z));
-                    int edge = Math.max(Math.abs(x) - 18, 0);
-                    int h = 9 - edge;
-                    for (int y = BAY_FLOOR + 1; y <= BAY_FLOOR + h; y++) {
-                        kit.set(x, y, z, EmberKit.AIR);
-                    }
-                }
-            }
-            carved.add(bay);
-        }
-    }
-
     // ---------------------------------------------------------------- 炉心の広間 (円 半径 27、床 92、天井は丸く 116〜108)
     public static double hubDist(int x, int z) {
         double dx = x - HUB_CENTER.getX();
@@ -389,9 +364,6 @@ public final class EmberBodyBuilder {
     public static int hubCeiling(double d) {
         return 116 - (int) Math.round(8 * (d / HUB_RADIUS) * (d / HUB_RADIUS));
     }
-
-    // 天井の中央の口の半径 (火の井戸の底の格子まで)
-    public static final double HUB_OCULUS = 4.4;
 
     private void hub() {
         int cx = HUB_CENTER.getX();
@@ -408,13 +380,6 @@ public final class EmberBodyBuilder {
                 int top = hubCeiling(d);
                 for (int y = fy + 1; y <= top; y++) {
                     kit.set(x, y, z, EmberKit.AIR);
-                }
-                // 天井の中央の口 (火の井戸の底の格子まで)
-                if (d <= HUB_OCULUS) {
-                    for (int y = top + 1; y < WELL_BOTTOM - 1; y++) {
-                        kit.set(x, y, z, EmberKit.AIR);
-                    }
-                    kit.set(x, WELL_BOTTOM - 1, z, Blocks.IRON_BARS.defaultBlockState());
                 }
             }
         }
@@ -598,147 +563,9 @@ public final class EmberBodyBuilder {
         carved.add(HEART_ANTE);
     }
 
-    // ---------------------------------------------------------------- 背の亀裂 (火守りの谷の天井から背の上まで。上の縁に格子の手すり)
-    public static int crackHalfWidth(int z) {
-        if (z < CRACK.minZ() || z > CRACK.maxZ()) {
-            return -1;
-        }
-        return z >= CRACK.minZ() + 4 && z <= CRACK.maxZ() - 4 ? 3 : 2;
-    }
-
-    private void crack() {
-        for (int z = CRACK.minZ(); z <= CRACK.maxZ(); z++) {
-            int w = crackHalfWidth(z);
-            for (int x = -w; x <= w; x++) {
-                int top = BODY.top(x, z);
-                for (int y = CRACK.minY(); y <= Math.max(top, CRACK.minY()); y++) {
-                    kit.set(x, y, z, EmberKit.AIR);
-                }
-            }
-        }
-        track(CRACK.minX(), SOUTH.maxY(), CRACK.minZ(), CRACK.maxX(), CRACK.maxY(), CRACK.maxZ());
-        // 手すり (亀裂のまわりの 1 マスの背の上に、黒石の塀)
-        for (int z = CRACK.minZ() - 1; z <= CRACK.maxZ() + 1; z++) {
-            for (int x = -5; x <= 5; x++) {
-                if (inCrack(x, z) || !nearCrack(x, z)) {
-                    continue;
-                }
-                int top = BODY.top(x, z);
-                if (top != Integer.MIN_VALUE) {
-                    kit.set(x, top + 1, z, EmberKit.RAIL);
-                }
-            }
-        }
-    }
-
-    public static boolean inCrack(int x, int z) {
-        int w = crackHalfWidth(z);
-        return w >= 0 && Math.abs(x) <= w;
-    }
-
-    private static boolean nearCrack(int x, int z) {
-        for (int dx = -1; dx <= 1; dx++) {
-            for (int dz = -1; dz <= 1; dz++) {
-                if (inCrack(x + dx, z + dz)) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
-    // ---------------------------------------------------------------- 火の井戸
-    public static double wellDist(int x, int z) {
-        return hubDist(x, z);
-    }
-
-    // 井戸の螺旋の段の高さ (立つ面。0.5 刻み)。その柱に段がいくつ重なるかは loop で選ぶ
-    public static double helixSurface(int x, int z, int loop) {
-        double a = Math.atan2(z - HUB_CENTER.getZ(), x - HUB_CENTER.getX());
-        double phi = (((a - HELIX_START) % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI) + loop * 2 * Math.PI;
-        double s = (WELL_BOTTOM + 1) + phi * HELIX_RISE / (2 * Math.PI);
-        return Math.floor(s * 2) / 2.0;
-    }
-
-    // 火口の床 (井戸の外の平らな輪) の外の半径
-    public static final double CRATER_FLOOR_RADIUS = 12.5;
-
-    // 火口の床の高さ (井戸の螺旋の上の端。体の表から読む)
-    public int craterFloor() {
-        return craterFloor;
-    }
-
-    public static int craterFloorOf() {
-        int t = BODY.top(HUB_CENTER.getX() + 8, HUB_CENTER.getZ());
-        return t == Integer.MIN_VALUE ? 205 : t;
-    }
-
-    private void fireWell() {
-        int cx = HUB_CENTER.getX();
-        int cz = HUB_CENTER.getZ();
-        craterFloor = craterFloorOf();
-        int r = (int) Math.ceil(WELL_RADIUS);
-        int rim = craterFloor;
-        for (int x = cx - 17; x <= cx + 17; x++) {
-            for (int z = cz - 17; z <= cz + 17; z++) {
-                if (wellDist(x, z) <= 17) {
-                    rim = Math.max(rim, BODY.top(x, z));
-                }
-            }
-        }
-        // 縦穴 (半径 8.6) を火口の縁の上まで掘る (火口の床の上に残った体の欠片で宙に浮く石を作らない)
-        for (int x = cx - r; x <= cx + r; x++) {
-            for (int z = cz - r; z <= cz + r; z++) {
-                double d = wellDist(x, z);
-                if (d > WELL_RADIUS) {
-                    continue;
-                }
-                for (int y = WELL_BOTTOM; y <= rim + 2; y++) {
-                    kit.set(x, y, z, EmberKit.AIR);
-                }
-            }
-        }
-        track(cx - r - 1, WELL_BOTTOM - 1, cz - r - 1, cx + r + 1, craterFloor + 2, cz + r + 1);
-        // 火口の底を半径 12.5 まで広げる (井戸の螺旋の上の端から縁への段の足もと。壁の斜面を掘り下げ、床を張る)
-        for (int x = cx - 13; x <= cx + 13; x++) {
-            for (int z = cz - 13; z <= cz + 13; z++) {
-                double d = wellDist(x, z);
-                if (d <= WELL_RADIUS || d > CRATER_FLOOR_RADIUS) {
-                    continue;
-                }
-                kit.set(x, craterFloor - 1, z, EmberKit.RUIN);
-                kit.set(x, craterFloor, z, EmberKit.ruinFloor(x, z));
-                for (int y = craterFloor + 1; y <= rim + 2; y++) {
-                    kit.set(x, y, z, EmberKit.AIR);
-                }
-            }
-        }
-        // 螺旋の段 (4.5〜8.6。内側の 1 マスは段の上に手すり)
-        for (int x = cx - r; x <= cx + r; x++) {
-            for (int z = cz - r; z <= cz + r; z++) {
-                double d = wellDist(x, z);
-                if (d < 4.5 || d > WELL_RADIUS) {
-                    continue;
-                }
-                for (int loop = 0; loop < 12; loop++) {
-                    double s = helixSurface(x, z, loop);
-                    if (s > craterFloor + 1) {
-                        break;
-                    }
-                    int y;
-                    if (s == Math.floor(s)) {
-                        y = (int) s - 1;
-                        kit.set(x, y, z, EmberKit.RUIN);
-                    } else {
-                        y = (int) Math.floor(s);
-                        kit.set(x, y, z, EmberKit.SLAB);
-                    }
-                    if (d < 5.5) {
-                        kit.set(x, y + 1, z, EmberKit.RAIL);
-                    }
-                }
-            }
-        }
+    // ---------------------------------------------------------------- 火の井戸の踊り場 (壁の螺旋で床 92 → 119。試練の階 EmberDeck への踊り場)
+    // 井戸の縦穴・火口・背へ出る洞は無い。踊り場から南は EmberDeck の通路が受け持つ
+    private void wallStair() {
         // 壁の螺旋 (広間の南東の壁、3 × 3。床 92 → 119)
         int sx = WELL_STAIR.getX();
         int sz = WELL_STAIR.getZ();
@@ -765,131 +592,26 @@ public final class EmberBodyBuilder {
         }
         kit.set(sx + first[0] - 1, FLOOR_HUB, sz + first[1], EmberKit.RUIN);
         track(sx - 2, FLOOR_HUB - 1, sz - 2, sx + 2, WELL_BOTTOM + 5, sz + 2);
-        // 壁の螺旋の上 (床 119): 最後の段の高い側 (南) の 1 マスが着地。そこから東へ 3 (壁の螺旋の上に床を張らない)、北へ、
-        // 西へ (井戸の螺旋の下の端 = 60 度・半径 8 の 1 マス手前まで)。幅 3・高さ 4。井戸の縁に着いたら止める
+        // 踊り場 (床 119): 最後の段の高い側 (南) の 1 マスが着地。そこから東へ 3 (EmberDeck の踊り場 x 15〜18、z 幅 3)
         int[] next = RING[(WELL_STAIR_START + WELL_STAIR_STEPS) % 8];
         int lx = sx + next[0];
         int lz = sz + next[1];
         int ex = lx + 3;
-        int hx = cx + (int) Math.round(8.0 * Math.cos(HELIX_START));
-        int hz = cz + (int) Math.round(8.0 * Math.sin(HELIX_START)) + 1;
         for (int x = lx; x <= ex; x++) {
-            corridorCell(x, lz, true);
+            landingCell(x, lz);
         }
-        for (int z = lz - 1; z >= hz; z--) {
-            corridorCell(ex, z, false);
-        }
-        for (int x = ex - 1; x >= hx; x--) {
-            if (wellDist(x, hz) <= WELL_RADIUS) {
-                break;
-            }
-            corridorCell(x, hz, true);
-        }
-        track(Math.min(lx, hx) - 2, WELL_BOTTOM - 1, hz - 2, ex + 2, WELL_BOTTOM + 5, lz + 3);
-        // 火口の床から縁へ (北の内壁に沿って、1 段ずつ上る段。縁を切って外を見られる)
-        double a0 = Math.toRadians(-90);
-        int prevX = Integer.MIN_VALUE;
-        int prevZ = Integer.MIN_VALUE;
-        int step = 0;
-        for (double t = 0; step < 24 && t < Math.PI; t += 0.015) {
-            int ox = cx + (int) Math.round(15.5 * Math.cos(a0 + t));
-            int oz = cz + (int) Math.round(15.5 * Math.sin(a0 + t));
-            if (step > 2 && craterFloor + step > BODY.top(ox, oz) + 1) {
-                break;
-            }
-            int px = cx + (int) Math.round(12.0 * Math.cos(a0 + t));
-            int pz = cz + (int) Math.round(12.0 * Math.sin(a0 + t));
-            if (px == prevX && pz == prevZ) {
-                continue;
-            }
-            if (prevX != Integer.MIN_VALUE && Math.abs(px - prevX) + Math.abs(pz - prevZ) > 1) {
-                // 斜めに飛ぶときは角を埋める
-                int[] mid = {px, prevZ};
-                ledgeStep(mid[0], mid[1], craterFloor + step, prevX, prevZ);
-                prevX = mid[0];
-                prevZ = mid[1];
-                step++;
-            }
-            ledgeStep(px, pz, craterFloor + step, prevX, prevZ);
-            prevX = px;
-            prevZ = pz;
-            step++;
-        }
-        track(cx - 16, craterFloor - 1, cz - 16, cx + 16, craterFloor + 24, cz + 16);
+        track(lx - 2, WELL_BOTTOM - 1, lz - 2, ex + 2, WELL_BOTTOM + 5, lz + 3);
     }
 
-    // 井戸の上の通路の 1 マス (幅 3・高さ 4)。x の向きに進むときは z を 0〜+2 (南へ)、z の向きに進むときは x を -1〜+1
-    private void corridorCell(int x, int z, boolean alongX) {
-        for (int w = alongX ? 0 : -1; w <= (alongX ? 2 : 1); w++) {
-            int px = alongX ? x : x + w;
-            int pz = alongX ? z + w : z;
-            if (wellDist(px, pz) <= WELL_RADIUS) {
-                continue;
-            }
-            kit.set(px, WELL_BOTTOM, pz, EmberKit.ruinFloor(px, pz));
+    // 踊り場の 1 マス (幅 3・高さ 4。z は lz から南へ 0〜+2)
+    private void landingCell(int x, int z) {
+        for (int w = 0; w <= 2; w++) {
+            kit.set(x, WELL_BOTTOM, z + w, EmberKit.ruinFloor(x, z + w));
             for (int y = WELL_BOTTOM + 1; y <= WELL_BOTTOM + 4; y++) {
-                kit.set(px, y, pz, EmberKit.AIR);
+                kit.set(x, y, z + w, EmberKit.AIR);
             }
         }
     }
-
-    private void ledgeStep(int x, int z, int y, int px, int pz) {
-        // 最初の段の向きは、次の段 (弧は東回り) のほう。NORTH だと最初の段だけ背の高い側が逆を向く
-        Direction up = px == Integer.MIN_VALUE ? Direction.EAST : Direction.fromDelta(x - px, 0, z - pz);
-        kit.set(x, y - 1, z, EmberKit.RUIN);
-        kit.stair(x, y, z, up == null ? Direction.NORTH : up);
-        for (int yy = y + 1; yy <= y + 3; yy++) {
-            kit.set(x, yy, z, EmberKit.AIR);
-        }
-    }
-
-    // ---------------------------------------------------------------- 背へ出る洞 (井戸の螺旋の 1 周目から南へ。冷えた溶岩洞。体の表が床より低くなる所で外へ出る)
-    // 洞の天井は床の上 6。表が薄い所 (床の上 8 より低い) は天井を開けて外の空へつなぐ
-    public static int backTubeEnd() {
-        for (int z = HUB_CENTER.getZ() + 5; z <= HUB_CENTER.getZ() + 110; z++) {
-            if (BODY.top(0, z) <= BACK_EXIT_FLOOR) {
-                return z;
-            }
-        }
-        return HUB_CENTER.getZ() + 110;
-    }
-
-    private void backTube() {
-        int cz = HUB_CENTER.getZ();
-        int end = backTubeEnd();
-        for (int zz = cz + 5; zz <= end; zz++) {
-            for (int dx = -TUBE_HALF; dx <= TUBE_HALF; dx++) {
-                if (wellDist(dx, zz) <= WELL_RADIUS - 0.6) {
-                    continue;
-                }
-                int top = BODY.top(dx, zz);
-                boolean open = top != Integer.MIN_VALUE && top - BACK_EXIT_FLOOR < 9;
-                kit.set(dx, BACK_EXIT_FLOOR, zz, EmberZones.tubeFloor(dx, zz, dx));
-                kit.set(dx, BACK_EXIT_FLOOR - 1, zz, EmberKit.RUIN);
-                int h = tubeHeight(dx);
-                int ceil = open ? Math.max(BACK_EXIT_FLOOR + h, top + 1) : BACK_EXIT_FLOOR + h;
-                for (int y = BACK_EXIT_FLOOR + 1; y <= ceil; y++) {
-                    kit.set(dx, y, zz, EmberKit.AIR);
-                }
-            }
-        }
-        trackTube(-TUBE_HALF - 1, BACK_EXIT_FLOOR - 1, cz + 5, TUBE_HALF + 1, BACK_EXIT_FLOOR + 9, end);
-        // 洞の脇の小部屋 (宝箱の台と碑。東へ 5 × 7 の張り出し。表から十分深い所)
-        for (int x = TUBE_HALF + 1; x <= TUBE_HALF + 6; x++) {
-            for (int z = RIM_NICHE_Z1; z <= RIM_NICHE_Z2; z++) {
-                kit.set(x, BACK_EXIT_FLOOR, z, EmberKit.ruinFloor(x, z));
-                kit.set(x, BACK_EXIT_FLOOR - 1, z, EmberKit.RUIN);
-                for (int y = BACK_EXIT_FLOOR + 1; y <= BACK_EXIT_FLOOR + 5 - (x == TUBE_HALF + 6 ? 1 : 0); y++) {
-                    kit.set(x, y, z, EmberKit.AIR);
-                }
-            }
-        }
-        trackTube(TUBE_HALF + 1, BACK_EXIT_FLOOR - 1, RIM_NICHE_Z1, TUBE_HALF + 7, BACK_EXIT_FLOOR + 7, RIM_NICHE_Z2);
-    }
-
-    // 背へ出る洞の脇の小部屋の z の範囲 (宝箱 rim の置き場)
-    public static final int RIM_NICHE_Z1 = -16;
-    public static final int RIM_NICHE_Z2 = -10;
 
     // ---------------------------------------------------------------- 試練の階 (EmberDeck。docs/design/29)
     // 箱を掘り、床を張り、回廊とセルのあいだの戸口 (高さ 5) を開ける。中身は deckContent (休み場・碑文のあと)
@@ -1031,11 +753,6 @@ public final class EmberBodyBuilder {
                 }
             }
         }
-    }
-
-    // 火口の床の高さ (自己テスト・囁き)
-    public static int crater() {
-        return craterFloorOf();
     }
 
     // 体の中の芯か (自己テストの「穴」の検査で、体の外と中を分ける)
