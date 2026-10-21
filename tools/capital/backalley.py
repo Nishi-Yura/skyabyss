@@ -103,10 +103,10 @@ class BackAlley:
 
         def at(c, r):
             return MX0 + c, MZ0 + r
-        # 通路の灯り (魂の松明。壁に付ける)
-        for (c, r, f) in ((12, 10, 'south'), (10, 6, 'east'), (10, 12, 'west'), (8, 8, 'south'), (6, 10, 'east')):
+        # 通路の灯り (幅 1 の通路は壁の松明の向きが壁に当たるので、天井から下げた魂の灯り。頭より上)
+        for (c, r) in ((12, 10), (10, 6), (10, 12), (8, 8), (6, 10)):
             x, z = at(c, r)
-            v.set(x, y + 2, z, 'soul_wall_torch[facing=%s]' % f)
+            v.set(x, y + 2, z, 'soul_lantern[hanging=true,waterlogged=false]')
         # 骨の間 (行き止まり): 頭蓋・骨の塊・蜘蛛の巣・蝋燭
         x, z = at(8, 1)
         v.set(x, y, z, 'bone_block[axis=y]')
@@ -212,10 +212,10 @@ class BackAlley:
             v.set(wx, yy, wz, 'cracked_deepslate_bricks')
         self.mark('cellar_gap', wx, -5, wz)
         self.mark('cellar_passage', wx + 1, -5, wz)
-        # 灯り: 魂の松明 (天井の下の段、北の壁に付ける)
-        v.set(wx + 2, -3, wz, 'soul_wall_torch[facing=south]')
-        v.set(wx + 11, -7, wz, 'soul_wall_torch[facing=south]')
-        v.set(wx + 14, -7, wz, 'soul_wall_torch[facing=south]')
+        # 灯り: 天井から下げた魂の灯り (頭より上の段)
+        v.set(wx + 2, -3, wz, 'soul_lantern[hanging=true,waterlogged=false]')
+        v.set(wx + 11, -7, wz, 'soul_lantern[hanging=true,waterlogged=false]')
+        v.set(wx + 14, -7, wz, 'soul_lantern[hanging=true,waterlogged=false]')
         # 下の段: 蜘蛛の巣、頭蓋、深淵のほのめかし (スカルクの床)
         v.set(wx + 9, -7, wz, 'cobweb')
         v.set(wx + 13, -10, wz, 'sculk')

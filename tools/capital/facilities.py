@@ -193,7 +193,8 @@ class Facilities(Interiors, BackAlley):
                 'barrel[facing=west,open=false]', 'fletching_table', 'barrel[facing=west,open=false]', 'chest[facing=west,type=single,waterlogged=false]']
         for i, z in enumerate(range(az0, az1 + 1)):
             v.set(43, 0, z, back[i % len(back)])
-            v.set(43, 1, z, 'barrel[facing=west,open=false]' if i % 2 else 'bookshelf')
+            v.set(43, 1, z, 'decorated_pot[cracked=false,facing=west,waterlogged=false]' if 'chest' in back[i % len(back)]
+                  else 'barrel[facing=west,open=false]' if i % 2 else 'bookshelf')
             v.set(43, 2, z, ['lantern[hanging=false,waterlogged=false]', 'decorated_pot[cracked=false,facing=west,waterlogged=false]', 'potted_red_tulip', 'air'][i % 4])
         self.attendant('tool_merchant', 42, 0, dz + 1 if dz + 1 <= az1 else dz - 1)
         # 客の側: 北と南の壁の品 (干し糧・松明・矢・寝袋・縄)
@@ -237,9 +238,11 @@ class Facilities(Interiors, BackAlley):
             for z in (-13, -12):
                 v.set(x, 0, z, 'air')
                 v.set(x, 1, z, 'air')
-            v.set(x, 0, az0, 'chest[facing=south,type=single,waterlogged=false]' if x % 2 else 'barrel[facing=south,open=false]')
-            v.set(x, 1, az0, 'barrel[facing=south,open=false]' if x % 2 else 'chest[facing=south,type=single,waterlogged=false]')
-            v.set(x, 2, az0, 'chiseled_bookshelf[facing=south,slot_0_occupied=true,slot_1_occupied=true,slot_2_occupied=false,slot_3_occupied=true,slot_4_occupied=true,slot_5_occupied=false]' if x % 3 == 0 else 'barrel[facing=south,open=false]')
+            # 下は樽、中の段は箱と樽を交互、箱の上は灯りか壺 (箱の上に丸ごとのブロックを置かない)
+            v.set(x, 0, az0, 'barrel[facing=south,open=false]')
+            v.set(x, 1, az0, 'chest[facing=south,type=single,waterlogged=false]' if x % 2 else 'barrel[facing=south,open=false]')
+            v.set(x, 2, az0, ('lantern[hanging=false,waterlogged=false]' if x % 4 == 1 else 'decorated_pot[cracked=false,facing=south,waterlogged=false]') if x % 2
+                  else 'chiseled_bookshelf[facing=south,slot_0_occupied=true,slot_1_occupied=true,slot_2_occupied=false,slot_3_occupied=true,slot_4_occupied=true,slot_5_occupied=false]' if x % 3 == 0 else 'barrel[facing=south,open=false]')
         v.set(ax1, 0, -13, 'lectern[facing=west,has_book=false,powered=false]')
         self.attendant('storage_keeper', dx_ - 1, 0, -13)
         # 客の側: 両わきの鉢と腰掛け
@@ -1022,7 +1025,7 @@ class Facilities(Interiors, BackAlley):
             v.set(cx0, -4, z, 'barrel[facing=east,open=false]' if z % 2 else 'cave_air')
         for x in range(cx0 + 1, cx1 + 1):
             v.set(x, -5, cz0, 'barrel[facing=south,open=false]' if x % 3 else 'chest[facing=south,type=single,waterlogged=false]')
-            v.set(x, -4, cz0, 'barrel[facing=south,open=false]' if x % 2 == 0 else 'cave_air')
+            v.set(x, -4, cz0, 'barrel[facing=south,open=false]' if x % 2 == 0 and x % 3 else 'cave_air')
         for x in range(-34, -31):
             v.set(x, -5, 40, '%s_fence' % w)
             v.set(x, -4, 40, '%s_pressure_plate[powered=false]' % w)
