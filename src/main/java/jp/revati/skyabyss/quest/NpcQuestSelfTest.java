@@ -228,7 +228,7 @@ public final class NpcQuestSelfTest {
                 }
             }
             case "lore" -> o.targets().forEach(t -> check(LoreManager.catalog().entry(t) != null, w + ": unknown lore " + t, failures));
-            case "collect" -> check(Condition.item(o.targets().get(0)) != null, w + ": unknown item", failures);
+            case "collect" -> check(Condition.item(o.targets().get(0)) != null || (o.targets().get(0).startsWith("#") && jp.revati.skyabyss.quest.QuestItems.known(o.targets().get(0))), w + ": unknown item", failures);
             // 雷翼の敵と心臓は別の担当が登録する (StormLore.PENDING)。まだないうちは数えるだけで、失敗にしない
             case "kill", "near" -> o.targets().forEach(t -> check(BuiltInRegistries.ENTITY_TYPE.containsKey(ResourceLocation.parse(t))
                     || jp.revati.skyabyss.titan.storm.lore.StormLore.pending(t), w + ": unknown entity " + t, failures));

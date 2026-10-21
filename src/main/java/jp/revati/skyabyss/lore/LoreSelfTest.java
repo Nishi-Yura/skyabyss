@@ -200,7 +200,7 @@ public final class LoreSelfTest {
             }
             // 潮殻の背の看板の文は skyabyss_tide にある
             // 雷翼の背の看板の文は skyabyss_storm に、都の碑の文は skyabyss_opening にある
-            for (String ns : List.of("skyabyss_tide", "skyabyss_storm", "skyabyss_ember", "skyabyss_ch3", "skyabyss_opening", "skyabyss_ch1")) {
+            for (String ns : List.of("skyabyss_tide", "skyabyss_storm", "skyabyss_ember", "skyabyss_ch3", "skyabyss_opening", "skyabyss_ch1", "skyabyss_ch2")) {
                 JsonObject backSigns = json("/assets/" + ns + "/lang/" + lang + ".json", failures);
                 if (backSigns != null) {
                     backSigns.entrySet().forEach(e -> {

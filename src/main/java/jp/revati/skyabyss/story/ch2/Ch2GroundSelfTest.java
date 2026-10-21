@@ -82,6 +82,8 @@ public final class Ch2GroundSelfTest {
         ServerLevel level = server.overworld();
         try {
             vault = Ch2Dev.placeVault(level, VAULT_AT);
+            // 湧き台の「倒れた」の数え方は、エンティティが動くチャンクだけ (読み込みを保つ)
+            forceVault(level, true);
             // 浅い海の箱 (床 y 120、水 121..125 = 深さ 5)
             for (int x = -24; x <= 24; x++) {
                 for (int z = -24; z <= 24; z++) {
@@ -102,6 +104,14 @@ public final class Ch2GroundSelfTest {
         }
     }
 
+    static void forceVault(ServerLevel level, boolean on) {
+        for (int cx = (VAULT_AT.getX() - 16) >> 4; cx <= (VAULT_AT.getX() + 64) >> 4; cx++) {
+            for (int cz = (VAULT_AT.getZ() - 16) >> 4; cz <= (VAULT_AT.getZ() + 56) >> 4; cz++) {
+                level.setChunkForced(cx, cz, on);
+            }
+        }
+    }
+
     static void run(MinecraftServer server) {
         try {
             if (vault != null) {
@@ -119,6 +129,7 @@ public final class Ch2GroundSelfTest {
                 SaltVault.FORCE.remove(vault.pos().asLong());
             }
             SiteSpawner.clearAll(server.overworld());
+            forceVault(server.overworld(), false);
         }
         if (F.isEmpty()) {
             SkyAbyss.LOGGER.info("SELFTEST ch2 ground PASSED (salt vault rooms/throat/barrels/door/pads/clear, salt road marks, wreck chests/page/shell, "
