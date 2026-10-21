@@ -27,6 +27,8 @@ cmd skyabyss dev ch1 place ch3_wind_flag -25 -61 -9 0
 cmd skyabyss dev ch1 place ch3_gleaner_field 0 -61 40 0
 cmd skyabyss dev ch1 place ch3_wind_cliff 40 -61 40 0
 cmd skyabyss cinematic stop
+wait 300
+cmd skyabyss cinematic stop
 
 # ---- 避雷の塔の跡: 折れた塔の根と針 1 本、斜めの台 4、南の銅の戸、東の見本の柱
 camera 13.5 -50 15.5 139 26
@@ -87,7 +89,10 @@ shot 13_wind_cliff
 
 # ---- 目的の帯: 避雷の柱 (2/4)、空の石、焼けた見張り塔
 cmd gamemode creative
+cmd skyabyss progress grant @s stone_whale
+cmd skyabyss progress grant @s tide_shell
 cmd skyabyss quest forget @s all
+wait 60
 cmd skyabyss quest start @s "ch3/lightning_pillars"
 cmd skyabyss quest signal @s ch3_pillar
 cmd skyabyss quest signal @s ch3_pillar
@@ -96,11 +101,13 @@ camera 0.5 -55 16.5 180 12
 wait 80
 shot 14_band_pillars
 cmd skyabyss quest forget @s all
+wait 60
 cmd skyabyss quest start @s "ch3/sky_stone"
 cmd give @s diamond 3
 wait 80
 shot 15_band_sky_stone
 cmd skyabyss quest forget @s all
+wait 60
 cmd skyabyss quest start @s "ch3/scorched_watch"
 camera 52.5 -48 15.5 139 20
 wait 80
