@@ -366,7 +366,7 @@ for k, ja, en in [
     ("message.skyabyss.storm_heart.defeated", "雷翼の心臓が止まった。胸の奥の風が、はじめて止んだ", "The thunder wing's heart has stopped. The wind in its chest falls still for the first time"),
     ("message.skyabyss.storm_heart.pillar", "光の柱が、尾の間へ運んでくれた", "The pillar of light carried you to the tail chamber"),
     ("message.skyabyss.storm_heart.exit_hint", "光の柱に立つと、尾の間へ戻る", "Stand in the pillar of light to return to the tail chamber"),
-    ("message.skyabyss.storm_heart.reward", "雷翼の心臓が遺したものが、あなたの手に渡った", "What the thunder wing's heart left behind has passed into your hands"),
+    ("message.skyabyss.storm_heart.reward", "雷翼の心臓が遺したものが、手もとに渡った", "What the thunder wing's heart left behind has passed into your hands"),
     ("message.skyabyss.storm_heart.choice_later", "初めての撃破の贈り物 (専用伝説から一つ) は、品の形ができてから /titanmemory storm で選べる",
      "Your first-victory gift (one of the unique legendaries) can be chosen with /titanmemory storm once the items exist"),
     ("subtitles.skyabyss.storm_heart_beat", "竜骨の奥で、心臓が打つ", "A heart beats behind the keel"),

@@ -65,7 +65,7 @@ ROLES = {
                     "The apothecary's. Salves, antidotes, night-eye draughts. Until you learn to brew, stock up here."),
                    [("shop", "talk", [fac("shop")], None, "薬を見る", "Browse remedies", None, None),
                     ("brew", "talk", None, "brew", "醸造のこと", "About brewing",
-                     "火の章まで行ったら、醸造を教えましょう。それまでは、薬は買うのがいちばん早い。",
+                     "火の章まで行ったら、醸造を教えましょう。それまでは、薬は買うのがいちばん早いですよ。",
                      "Once you reach the chapter of fire, I'll teach you to brew. Until then, buying is quickest.",
                      {"if": {"type": "stage", "max": 2}}),
                     ("learn", "talk", None, None, "醸造を教わる", "Learn to brew", None, None,
@@ -159,7 +159,7 @@ ROLES = {
                       "This is the exchange. Travellers trade with each other here. I hold what you put up, and if you write what you want, someone will apply."),
                      [("trade", "talk", [fac("trade")], None, "取引所を開く (出す・申請する・受ける)", "Open the exchange (list, apply, accept)", None, None),
                       ("rules", "talk", None, "rules", "取引の決まり", "The rules of trade",
-                       "出す品は出したときに預かる。ほしいものは品でも鐘銭でもいい。申請しても品は動かない。出した人が受けた瞬間に、両方の品が入れ替わる。そのとき申請した人が品を持っていて、持ち物に空きがあることだ。いない人の申請は受けられない。一人十品まで、七日で品は戻る。戻った品は受け取りに置いておく。断ったり受けたりした知らせは、いなければ次に来たときに伝えるよ。",
+                       "出す品は、出したときに預かる。ほしいものは品でも鐘銭でもいい。申請しても、品はまだ動かない。出した人が受けた瞬間に、両方の品が入れ替わる。ただし、そのとき申請した人がここにいて、品を持っていて、持ち物に空きがあること。一人十品まで。七日たつと品は戻って、受け取りに置いておく。受けた・断ったの知らせは、いなければ次に来たときに伝えるよ。",
                        "What you list, I hold from the moment you list it. Ask for goods or bell coins, as you like. Applying moves nothing. The moment the seller accepts, both sides swap at once, as long as the applicant still has the goods and room to carry. An absent applicant can't be accepted. Ten listings each; after seven days the goods come back to you, waiting in your mailbox. If you're away when someone answers, I'll tell you next time.")]),
 }
 
@@ -186,17 +186,17 @@ NODES = {
                   "options": [(v, "vow_" + v, None, "vow.skyabyss." + v) for v in VOWS] + [("back", "menu", None, BACK)]})]
         + [("vow_" + v, {"text_key": "vow.skyabyss." + v + ".desc", "next": "vow"}) for v in VOWS]),
     "apothecary": {
-        "lesson": {"text": ("では、手ほどきを。醸造台にブレイズパウダーをくべ、水の瓶にネザーウォートで濁りの薬を作る。そこに火の章の素材を足せば、火を退ける薬になる。台と最初の一揃いは持っていきな。",
+        "lesson": {"text": ("では、手ほどきを。醸造台にブレイズパウダーをくべ、水の瓶にネザーウォートで奇妙な薬を作ります。そこに火の章の素材を足せば、火を退ける薬になります。台と最初の一揃いは、持っていってください。",
                             "Then a lesson. Feed blaze powder to the brewing stand, and brew nether wart into water bottles for an awkward potion. Add the right ingredient and it becomes a draught that turns fire aside. Take the stand and a first set with you."),
                    "do": [{"type": "flag", "flag": "brew_lesson"}, fac("brew_lesson")], "next": "menu"},
-        "lesson_review": {"text": ("醸造台に燃料のブレイズパウダー、瓶には水、まずネザーウォートで濁りの薬。そこからが本番だ。マグマクリームなら火除け、金のニンジンなら夜目になる。",
+        "lesson_review": {"text": ("醸造台に燃料のブレイズパウダー、瓶には水、まずネザーウォートで奇妙な薬。そこからが本番です。マグマクリームなら耐火、金のニンジンなら暗視の薬になります。",
                                    "Blaze powder fuels the stand, bottles hold water, and nether wart makes the awkward potion first. That's where it begins: magma cream for fire resistance, a golden carrot for night vision."),
                           "next": "menu"},
     },
 }
 
 COMMON = {
-    "about_again": ("ここは何をする所", "What is this place?"),
+    "about_again": ("ここは何をする所？", "What is this place?"),
     "bye": ("また来る", "I'll come again"),
 }
 
@@ -210,7 +210,7 @@ def dialogue(role, spec):
         "again": {"face": "neutral", "next": "menu", "text": base + ".intro"},
     }
     t(base + ".intro", intro_ja, intro_en)
-    t(base + ".menu", "何にするかい。" if role not in ("shrine_priest", "archivist", "apothecary", "storage_keeper", "guild_clerk") else "ご用件は。",
+    t(base + ".menu", "……何か用か。" if role not in ("shrine_priest", "archivist", "apothecary", "storage_keeper", "guild_clerk") else "ご用件は。",
       "What'll it be?" if role not in ("shrine_priest", "archivist", "apothecary", "storage_keeper", "guild_clerk") else "How may I help?")
     menu = []
     for spec_o in options:
@@ -389,7 +389,7 @@ UI = [
     ("message.skyabyss.inn.rumor_head", "噂: %s", "Rumour: %s"),
     ("message.skyabyss.perch.no_titan", "まだ巨神に出会っていない。子は呼べない", "You haven't met a titan yet. No young will answer"),
     ("message.skyabyss.smith.nothing_to_repair", "手に持った品に傷みはない", "The item in your hand isn't worn"),
-    ("message.skyabyss.smith.repair_cost", "修理には鐘銭が %s 枚いる", "Mending costs %s bell coins"),
+    ("message.skyabyss.smith.repair_cost", "修理には鐘銭が %s 枚要る", "Mending costs %s bell coins"),
     ("message.skyabyss.smith.repaired", "%s を直した (鐘銭 %s 枚)", "Mended %s (%s bell coins)"),
     # ギルド
     ("gui.skyabyss.guild.title", "ギルドの窓口", "Guild Desk"),
@@ -502,8 +502,8 @@ UI = [
     # 訓練場
     ("message.skyabyss.training.hit", "木偶へ %s ・ 5 秒で %s (毎秒 %s)", "Dummy: %s · %s in 5 s (%s/s)"),
     ("message.skyabyss.training.quote", "振り直しの代価: 技 結晶 %s (鐘銭 %s) ・ 力 結晶 %s (鐘銭 %s)", "Reset price: skills %s crystals (%s coins) · stats %s crystals (%s coins)"),
-    ("message.skyabyss.training.no_coins", "鐘銭が %s 枚いる", "You need %s bell coins"),
-    ("message.skyabyss.training.no_crystals", "共鳴の結晶が %s ついる", "You need %s resonance crystals"),
+    ("message.skyabyss.training.no_coins", "鐘銭が %s 枚要る", "You need %s bell coins"),
+    ("message.skyabyss.training.no_crystals", "共鳴の結晶が %s つ要る", "You need %s resonance crystals"),
     ("message.skyabyss.training.nothing_skills", "戻す技がない", "No skills to reset"),
     ("message.skyabyss.training.nothing_stats", "振った力がない", "No stat points to reset"),
     ("entity.skyabyss.training_dummy", "木偶", "Training Dummy"),

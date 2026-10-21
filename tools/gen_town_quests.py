@@ -507,7 +507,7 @@ c.node("town_child2", ("喪の家にいた？　……あそこの子は、三�
 Q = "town/ch3_weaver"
 quest("ch3_weaver", 3, "skyabyss:guest_weaver",
       ("機織りの針", "The Weaver's Needle"),
-      ("雷で溶けた織り機の針の代わりに、銅と避雷の針を届ける。", "Bring copper and a lightning rod to replace the loom needle melted by lightning."),
+      ("雷で溶けた織り機の針の代わりに、銅と避雷針を届ける。", "Bring copper and a lightning rod to replace the loom needle melted by lightning."),
       ("織り機はまた動きだした。雷の晩には、翼の模様が勝手に出るという。", "The loom runs again. On thunder nights, they say, a wing pattern weaves itself in."),
       ("西の機織りの家、雷で織り機の針が溶けたそうだ。銅なら雷を逃がすって言い張ってる。",
        "Lightning melted the needle in the weaver's loom, west avenue. She insists copper will let the lightning pass."),
@@ -641,10 +641,10 @@ g.entry(None, "idle")
 g.node("meet", ("おや、灰の匂いのする子だね。この婆はもう鍋をかき回す腕がない。代わりに、誰かが煮た薬を見せておくれ。",
                 "My, you smell of ash, child. These old arms can't stir a pot any more. Show me a potion someone has brewed."),
        nxt="meet2")
-g.node("meet2", ("煮方は薬師の店で教わるといい。台も瘤も、あそこで揃う。二本だ。色は何でもいい。",
+g.node("meet2", ("煮方は薬師の店で教わるといい。台もネザーウォートも、あそこで揃う。二本だ。色は何でもいい。",
                  "Learn the brewing at the apothecary. The stand and the wart, she can start you off. Two bottles. Any colour will do."),
        options=[OK])
-g.node("wait", ("瘤を水で煮て、まずは素の薬。そこへ足すもので、薬の向きが決まる。薬師はそう教えたろう？",
+g.node("wait", ("ネザーウォートを水の瓶で煮て、まずは素の薬。そこへ足すもので、薬の向きが決まる。薬師はそう教えたろう？",
                 "Boil the wart in water first: that's your base. What you add decides what it becomes. Didn't the apothecary tell you?"))
 g.node("hand_ask", ("薬は？", "The potions?"),
        options=[hand_option(("薬を二本見せる", "Show two potions"),
@@ -664,19 +664,19 @@ g.node("idle", ("草は、摘んだ時の天気を覚えてる。", "Herbs remem
 Q = "town/ch2_sailor"
 quest("ch2_sailor", 2, "skyabyss:guest_sailor",
       ("船乗りの羅針盤", "The Sailor's Compass"),
-      ("年寄りの船乗りに、羅針盤と白紙の地図を届ける。", "Bring the old sailor a compass and an empty map."),
+      ("年寄りの船乗りに、コンパスと白紙の地図を届ける。", "Bring the old sailor a compass and an empty map."),
       ("羅針盤は北を指した。船乗りは、潮の引く日を地図に書き込んだ。", "The compass pointed north. The sailor marked the low-tide days on the map."),
       ("年寄りの船乗りが、潮に羅針盤をさらわれたって嘆いてる。広場の北西の、船乗りの家だよ。",
        "The old sailor is grieving a compass the tide took. The sailor's house, northwest of the square."),
       [("meet", ("宿の女将の噂。年寄りの船乗りが、潮に羅針盤をさらわれたという。広場の北西の船乗りの家。",
                  "A rumour from the innkeeper: the old sailor lost his compass to the tide. The sailor's house, northwest of the square."),
         [talk("meet", "skyabyss:guest_sailor", "meet", "年寄りの船乗りに会う（船乗りの家）", "Meet the old sailor (the sailor's house)")], None),
-       ("make", ("羅針盤を一つと、白紙の地図を一枚。鉄とレッドストーン、紙と羅針盤で作れる。",
+       ("make", ("コンパスを一つと、白紙の地図を一枚。コンパスは鉄とレッドストーンで、地図は紙とコンパスで作れる。",
                  "One compass and one empty map. Iron and redstone, then paper and the compass."),
-        [collect("compass", "minecraft:compass", 1, "羅針盤を作る", "Craft a compass"),
+        [collect("compass", "minecraft:compass", 1, "コンパスを作る", "Craft a compass"),
          collect("map", "minecraft:map", 1, "白紙の地図を作る", "Craft an empty map")], None),
        ("hand", ("そろった。船乗りに渡そう。", "That's everything. Give them to the sailor."),
-        [sig("hand", "town_hand:guest_sailor", "船乗りに羅針盤と地図を渡す", "Give the compass and map to the sailor")], None)],
+        [sig("hand", "town_hand:guest_sailor", "船乗りにコンパスと地図を渡す", "Give the compass and map to the sailor")], None)],
       reward(60, 20, [{"item": "minecraft:spyglass", "count": 1}]), 223)
 
 g = guest("sailor", "年寄りの船乗り", "Old Sailor")
@@ -690,10 +690,10 @@ g.node("meet", ("あの晩、潮が足もとまで来た。島が寄ってきた
 g.node("meet2", ("新しいのを作ってくれんか。それと白紙の地図を一枚。潮の引く日を、死ぬ前に書き残しておきたい。",
                  "Would you make me a new one? And an empty map. I want to write down the low-tide days before I go."),
        options=[OK])
-g.node("wait", ("羅針盤は鉄四つとレッドストーン一つ。地図は紙を八枚、羅針盤を真ん中に。……いや、羅針盤は二つ要るな。",
+g.node("wait", ("コンパスは鉄四つとレッドストーン一つ。地図は紙を八枚、コンパスを真ん中に。……いや、コンパスは二つ要るな。",
                 "A compass is four iron and one redstone. A map is eight paper around a compass. ...So you'll need two compasses."))
 g.node("hand_ask", ("できたかい。", "Done, are they?"),
-       options=[hand_option(("羅針盤と地図を渡す", "Hand over the compass and map"),
+       options=[hand_option(("コンパスと地図を渡す", "Hand over the compass and map"),
                             all_(item("minecraft:compass", 1), item("minecraft:map", 1)),
                             [take("minecraft:compass", 1), take("minecraft:map", 1), signal("town_hand:guest_sailor")], "handed"), LATER])
 g.node("handed", ("北だ。……よし。満ちて、引いて、また満ちる。島はいつも、引いた日の夕方に寄る。これを持っておいき、遠くがよく見える。",
@@ -714,7 +714,7 @@ quest("ch3_lanterns", 3, "skyabyss:guest_mother",
       [("meet", ("宿の女将の噂。子だくさんの家の母が、嵐の夜の灯りに困っている。南の通りの家。",
                  "A rumour from the innkeeper: the mother of a big family needs lights for stormy nights. A house on the south road."),
         [talk("meet", "skyabyss:guest_mother", "meet", "子だくさんの家の母に会う", "Meet the mother of the big family")], None),
-       ("make", ("ランタンを三つ。鉄の塊と松明で作れる。", "Three lanterns. Iron nuggets and a torch make one."),
+       ("make", ("ランタンを三つ。鉄塊と松明で作れる。", "Three lanterns. Iron nuggets and a torch make one."),
         [collect("lantern", "minecraft:lantern", 3, "ランタンを三つ作る", "Craft three lanterns")], None),
        ("hand", ("そろった。母に渡そう。", "That's three. Give them to the mother."),
         [sig("hand", "town_hand:guest_mother", "母にランタンを渡す", "Give the lanterns to the mother")], None)],
@@ -731,7 +731,7 @@ g.node("meet", ("雷が鳴ると、うちの子たちは窓の外を数えるの
 g.node("meet2", ("蝋燭じゃ風で消えてしまう。ランタンを三つ、作ってもらえないかしら。部屋ごとに一つずつ。",
                  "Candles blow out in the wind. Could you make me three lanterns? One for each room."),
        options=[OK])
-g.node("wait", ("鉄の塊を八つ並べて、真ん中に松明。……あの子たち、あなたの話ばかりしてるわ。",
+g.node("wait", ("鉄塊を八つ並べて、真ん中に松明。……あの子たち、あなたの話ばかりしてるわ。",
                 "Eight iron nuggets around a torch. ...The children talk about nobody but you."))
 g.node("hand_ask", ("できた？", "Ready?"),
        options=[hand_option(("ランタンを三つ渡す", "Hand over three lanterns"),
@@ -944,7 +944,7 @@ def cellar_offer(n, chapter, prev, label):
 
 
 quest("cellar_1", 1, DK, ("もう一つの空", "Another Sky"),
-      ("酔いどれに甘い酒を渡して、とっておきの話を聞く。", "Bring the drunkard something sweet, and hear his best story."),
+      ("酔いどれに蜂蜜の瓶を渡して、とっておきの話を聞く。", "Give the drunkard a honey bottle and hear his best story."),
       ("空の下に、もう一つ空がある。酔いどれはそう言った。", "Beneath the sky there is another sky. So the drunkard said."),
       ("酒場の地下の酔いどれが、甘いものをくれたら、とっておきの話をするってさ。", "The drunk in the tavern cellar says he'll tell his best story for something sweet."),
       [("honey", ("酒場「深い杯」の地下の酔いどれが、甘いものを欲しがっている。蜂蜜入りの瓶を一つ。",
@@ -1034,7 +1034,7 @@ mm.node("town_draw", ("どれ、描き足してやろう。跡地なら、方角
 t("message.skyabyss.town.mapmaker.rumor", "地図屋: 「%1$s」は、都から%2$sへ、およそ %3$s ブロック。", "Mapmaker: \"%1$s\" lies %2$s of the capital, about %3$s blocks.")
 t("message.skyabyss.town.mapmaker.none", "地図屋: あんたの地図に、もう描き足すことはないね。", "Mapmaker: Nothing left to add to your map, I'm afraid.")
 t("message.skyabyss.town.mapmaker.nothing_to_draw", "描き足せる跡地はない。", "There is no ground left to draw in.")
-t("message.skyabyss.town.mapmaker.cost", "描き足すには鐘銭が %s 枚いる。", "Drawing it in costs %s bell coins.")
+t("message.skyabyss.town.mapmaker.cost", "描き足すには鐘銭が %s 枚要る。", "Drawing it in costs %s bell coins.")
 t("message.skyabyss.town.mapmaker.drawn", "地図に「%s」を描き足してもらった（M の地図）。", "\"%s\" has been drawn on your map (M).")
 for i, (ja, en) in enumerate([("北", "north"), ("北北東", "north-northeast"), ("北東", "northeast"), ("東北東", "east-northeast"),
                               ("東", "east"), ("東南東", "east-southeast"), ("南東", "southeast"), ("南南東", "south-southeast"),

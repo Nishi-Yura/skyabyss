@@ -31,10 +31,13 @@ import net.minecraft.server.level.ServerPlayer;
 //            章の担当が 34 の段の名前に替えるときは、下の CHAPTER_IDS に一行足す
 //   必須     chapter = その章の ID (一章なら titan_whale)、start_when (章の頭に自動で出る)、repeat と board は付けない。
 //            category は支度の段 (CHAPTER_IDS) なら main、既定の備えの頼みなら sub。守っていなければ読み込みの警告 (QuestManager.loadErrors。validate)。
-//   順番     ふさがない。どれから受けても終えてもよい (ログの並びは order)。
+//   順番     支度の段の章 (一〜三章) は、一本ずつ順に出る (前の段を終えると次が出る。start_when に前の段の done。2026-10-22 の試遊:
+//            メインが並ぶと迷う)。親のメイン (main_song・main_tide・main_thunder) には「支度」の段 prepare (目的 condition の prep) があり、
+//            目的の帯 (client/quest/ObjectiveStrip.current) は支度の段のほうを一つだけ出す。四章の既定の形はふさがない (ログの並びは order)。
 //   合図     三本が終わったとき (どの順でも)、その人に合図 `ch<n>_ready` (Quests.signal) を一度だけ送る。以降はいつでも `ready(player, n)` が真。
-//            クエストの条件では {"type":"prep","chapter":n,"min":k} (k 本以上。省くと全部) で読める。支度は勧めで、岩鯨の降下の条件には使わない
-//            (見たら降りる。21 の 3.2、story.ch1.Ch1Descent)。三本ぜんぶの定義がそろっていない章は、合図は出ない (まだ中身がない章)。
+//            クエストの条件では {"type":"prep","chapter":n,"min":k} (k 本以上。省くと全部) で読める。一章は、三本そろうまで岩鯨が初めて
+//            現れない (物語の運び。story.ch1.Ch1Trails.callReady・titan.TitanEvents)。見たあとの降下は今までどおり (21 の 3.2、Ch1Descent)。
+//            三本ぜんぶの定義がそろっていない章は、合図は出ない (まだ中身がない章)。
 //            章ごとの仕上げ (一章の記念品「鯨追いの印」) は onReady で足す (合図のあと、人ごとに一度)
 //   覚書     その章の 3 本のどれかを受けたとき、その章の旅の覚書 (WayfarerNotes) を人ごとに一度渡す。
 //   マルチ   ready / atLeast は人ごと。「グループの誰かが満たせば」は groupAtLeast (オンラインの仲間まで)。

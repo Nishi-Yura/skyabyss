@@ -42,6 +42,6 @@
   "legend.skyabyss.sky_fall.effect": "矢の止まった所へ、0.8 秒後に雷の柱が落ちる (半径 2.5・攻撃力の ×0.9)。",
   "legend.skyabyss.sky_fall.skill": "雲穿ち",
   "legend.skyabyss.creeping_ash": "這う灰",
-  "legend.skyabyss.creeping_ash.effect": "灰かぶりの敵のまわり 4 マスの敵へ、2 秒おきに灰が移る (3 度まで)。",
+  "legend.skyabyss.creeping_ash.effect": "灰かぶりの敵のまわり 4 ブロックの敵へ、2 秒おきに灰が移る (3 度まで)。",
   "legend.skyabyss.creeping_ash.skill": "灰散らし"
 }

@@ -441,9 +441,9 @@ data/<名前空間>/quest/<名前>.json
 - 手帳の中身: 文のキー `wayfarer_notes.ch<n>.line.<i>`（`i` = 1, 2, …。途切れるまで）が画面に 1 行ずつ並ぶ。中身がなければ「まだ、何も書かれていない。」。敵の見分け方・備えの一行は、章の担当が日英の lang に足す。
 - 渡す: `WayfarerNotes.give(player, 章)`（人ごとに一度。`Growth.discover` の鍵 `notes:ch<n>`）。
 
-**一章の支度の段（34 の 4.2、C1。実装済み）**: 一章だけは 3 本を**メインの段**にした（`PrepQuests` の章の表。`category` = `main`、順不同）。`quest/ch1/trail_iron`（鉄の跡。イサナ。100）・`trail_blade`（折れた剣。職人。100）・`trail_shield`（盾と糧。語り部。50）、生成は `tools/gen_ch1_trails.py`。旧い `ch1/prep_*` は吸収した（置くと読み込みの警告）。開始の条件は「一章（段階 0）で、イサナの鯨の話を聞いた（印 `c_whale_heard`）か岩鯨を見た」。三本のどれかを受けると覚書（一章）が渡る。
-  - **鉄の跡**: 段 `pit`（骨の坑の前の私の荷で頁 `ch1/trail_iron`。`story/ch1/BonePit.openPack`。経験値 30）→ 段 `armor`（目的 `wear`: 鉄の兜・胸当て・脚当て・靴のうち着ている種類の数。帯は「鉄の防具を作って着よう（2/4）」）。報酬 70、イサナの好感度 +3。理由はイサナの `c_whale_iron`（「鎖は、素手では上れない。……前にここへ来た旅人は、鉄を着ていた。丘を越えていく石標が、その人の道だ」）。頁のあとのイサナの一言 `ch1t_c_page`（かまどで溶かす）、着たあとの `ch1t_c_iron`（`dialogue/ch1/whale_chaser_trail.json`）。
-  - **折れた剣**: 段 `cave`（割れ殻の洞をクリアすると台座の頁 `ch1/trail_blade`。`story/ch1/Ch1Trails` が `SiteSpawner.onCleared` で記す。先に洞を抜けた人もさかのぼって済む。30）→ 段 `show`（職人の入口 `ch1t_blade_show`。作り方を教わる）→ 段 `forge`（`all`: 鉄の剣を持つ・岩の砥石を使う `ch1_whetstone_used`）。報酬 70、職人 +3。
+**一章の支度の段（34 の 4.2、C1。実装済み）**: 一章だけは 3 本を**メインの段**にした（`PrepQuests` の章の表。`category` = `main`。**鉄の跡 → 折れた剣 → 盾と糧の順に一本ずつ**出る）。`quest/ch1/trail_iron`（鉄の跡。イサナ。100）・`trail_blade`（折れた剣。職人。100）・`trail_shield`（盾と糧。語り部。50）、生成は `tools/gen_ch1_trails.py`。旧い `ch1/prep_*` は吸収した（置くと読み込みの警告）。開始の条件は、鉄の跡が「一章（段階 0）で、イサナの鯨の話を聞いた（印 `c_whale_heard`）か岩鯨を見た」、折れた剣が「鉄の跡を終えた」、盾と糧が「折れた剣を終えた」。最初の一本を受けると覚書（一章）が渡る。メイン「雲の下の歌」は鯨追いの話のあと段 `prepare`（目的 `condition`: 支度 3 本）で待ち、三本そろうと岩鯨が初めて現れる（17 の 2.8）。各段の書き出しの一言は `quest.skyabyss.ch1.trail_*.<段>.lead`。
+  - **鉄の跡**: 段 `pit`（骨の坑の前の私の荷で頁 `ch1/trail_iron`。`story/ch1/BonePit.openPack`。経験値 30）→ 段 `armor`（目的 `wear`: 鉄の兜・胸当て・脚当て・靴のうち着ている種類の数。帯は「鉄の防具を作って着よう（2/4）」）。報酬 70、イサナの好感度 +3。理由はイサナの `c_whale_iron`（「鎖は、素手では上れない。……前にここへ来た旅人は、鉄を着ていた。丘を越えていく石標が、その人の道だ」）と `c_whale3`（「鯨が降りてくる前に、支度をしておけ。まずは鉄だ」）。頁のあとのイサナの一言 `ch1t_c_page`（かまどで溶かす）、着たあとの `ch1t_c_iron`（次は刃。職人を指す。`dialogue/ch1/whale_chaser_trail.json`）。
+  - **折れた剣**: 段 `hear`（職人に刃のことを聞く。入口 `ch1t_blade_tell`。初めて会う人は名乗りの `ch1a_first_blade` から続けて）→ 段 `cave`（割れ殻の洞をクリアすると台座の頁 `ch1/trail_blade`。`story/ch1/Ch1Trails` が `SiteSpawner.onCleared` で記す。先に洞を抜けた人もさかのぼって済む。30）→ 段 `show`（職人の入口 `ch1t_blade_show`。作り方を教わる）→ 段 `forge`（`all`: 鉄の剣を持つ・岩の砥石を使う `ch1_whetstone_used`）。報酬 70、職人 +3。終わりの一言で語り部を指す。
   - **盾と糧**: 段 `tale`（語り部の入口 `ch1t_shield_tale`。足音の晩の話。結果で頁 `ch1/trail_shield`。`dialogue/ch1/storyteller_trail.json`）→ 段 `pack`（`all`: 盾 1・道の固焼き 8）。報酬 50、語り部 +3。鼓動守（護り糸を職人に）と鯨道の旅装は任意。
   - **三本そろう**: 合図 `ch1_ready`（進捗 `whale_trail`）と記念品「鯨追いの印」（`skyabyss:whale_chaser_mark`。説明つき。人ごとに一度。`PrepQuests.onReady`）。語り部の一言 `ch1t_s_ready`（「この字、どこかで見た気がするよ」）。報告ではイサナが `c_fragment_hand`（頁を見つけた人だけの選択肢。「鯨骨の船長の日誌と同じ字に見えた」）、語り部が `fragment_verse`（数え歌のひとつめ）を言う。
   - 目的の帯の行き先: `ch1/trail_iron/pit` → 骨の坑、`ch1/trail_blade/cave` → 割れ殻の洞（`SiteNetwork.CHAPTER_TARGETS`・`SiteTargets.bindChapterTargets`）。ほかの段は話す相手の居場所。一章の降下の条件の読み方は 02 の 2.3（支度の段を 2 本）。
@@ -594,8 +594,8 @@ data/<名前空間>/quest/<名前>.json
 | `shadow_first` | grave | ……その顔。見たんだね、昼の空を。<br>ここは、見た者が最初に寄る所なんだよ。……まあ、火にあたっておいき。<br>（序盤: 影を見てから宿りへ来た (初対面)） |  | ▼ `shadow2` |
 | `shadow_wait` | smile | まだ、見ていないんだね。<br>慌てなくていい。昼のうちは、空はどこへも行きやしないよ。<br>（序盤: 影を待つ間に話しかけた (一度だけ)） | 印 wait_told | ▼ `menu` |
 | `menu` | neutral | 何か聞きたいことでもあるのかい。<br>（話題を選ぶ節 (条件で出る話題が変わる)） |  | 「昼間、雲の上を何かが渡っていった。」→ `shadow1`（条件: 伝承 prologue/shadow、(メインが未着手 または メインが「ask_storyteller」)）<br>「空のことを聞かせてほしい。」→ `shadow1`（条件: not(伝承 prologue/shadow)、メインが未着手）<br>「旅の人は、どこに？」→ `chaser_hint`（条件: メインが「find_chaser」）<br>「この村に伝わる歌はある？」→ `song1`（条件: not(印 song_heard)）<br>「数え歌の続きが知りたい。」→ `sub_offer`（条件: 印 song_heard、数え歌が未着手、メインが始まっている、印 met）<br>「夜、遠くに誰かが立っていた。」→ `watcher`（条件: not(伝承 prologue/watcher)、見る者に気づいた）<br>「夜に気をつけることはある？」→ `watcher`（条件: not(伝承 prologue/watcher)、not(見る者に気づいた)、好感度 10 以上）<br>「この村の決まりごとを教えてほしい。」→ `calendar`（条件: not(伝承 prologue/seventh_night)、好感度 20 以上）<br>「古い帳面を見せる。」→ `book`（条件: 伝承 prologue/the_book、not(印 book_shown)）<br>「道すがら、気になるものを見た。」→ `seen_menu`（条件: (伝承 prologue/camp、not(印 camp_told) または 伝承 prologue/footprints、not(印 prints_told) または 伝承 prologue/footsteps、not(印 steps_told) または 伝承 prologue/bone_hill、not(印 bones_told) または 伝承 prologue/sky_song、not(印 song_told) または 伝承 chapter1/stone_whale、not(印 whale_told) または 伝承 chapter1/sky_ruins、not(印 back_told) または (伝承 prologue/capital_skywatch または 伝承 prologue/capital_guild_roll または 伝承 prologue/capital_graveyard または 伝承 prologue/capital_gates)、not(印 capital_told))）<br>「また来る。」→ `end` |
-| `capital1` | neutral | 閉じているだろう。ここは都だった。……そう呼ぶ人は、もう少ないけれどね。<br>昔は「空見」と呼ばれる一族がいて、国を預かっていた。影が通れば鐘を鳴らし、見たものを帳面に書く。それだけの一族さ。<br>（都の話 1 (空見の一族)） |  | ▼ `capital2` |
-| `capital2` | grave | その一族は絶えた。砦は塔だけが生きている。わたしは最後の鐘守だ。<br>家は空いている。好きなのを使えばいい。……戸の閉まっている所は、まだ開けられない。時が来れば開く。<br>（都の話 2 (最後の鐘守。閉じた施設)） | 印 capital_told、好感度+1 | ▼ `menu` |
+| `capital1` | neutral | 戸が閉じているだろう。ここは都だった。……そう呼ぶ人は、もう少ないけれどね。<br>昔は「空見」と呼ばれる一族がいて、国を預かっていた。影が通れば鐘を鳴らし、見たものを帳面に書く。それだけの一族さ。<br>（都の話 1 (空見の一族)） |  | ▼ `capital2` |
+| `capital2` | grave | その一族は絶えた。砦は、塔だけが生きている。あたしが最後の鐘守さ。<br>家は空いているよ。好きなのを使えばいい。……戸の閉まっている所は、まだ開けられない。時が来れば開くよ。<br>（都の話 2 (最後の鐘守。閉じた施設)） | 印 capital_told、好感度+1 | ▼ `menu` |
 | `repeat_note` | smile | （文は `skyabyss_vow` の lang）<br>（周回 (一度でも心臓を止めて戻った人に一度だけ。文は skyabyss_vow の lang)） | 印 repeat_told | ▼ `menu` |
 | `shadow1` | grave | 空のことかい。<br>……晴れた昼に、急に暗くなることがある。羊はうずくまり、鳥は黙る。雲の上を、何かが渡っていくんだよ。<br>（メインを始める (空のことを聞いた印。序盤の二段を飛ばす)） | 印 sky_asked、クエスト開始 main_song | ▼ `shadow2` |
 | `shadow2` | grave | あれが何なのかは、誰も知らない。見上げた者は、みんな口をつぐむ。<br>ただ、影が通った年には、決まって“歌”が聞こえるんだ。遠い空の向こうから、低く、長く。 |  | ▼ `shadow3` |
@@ -614,7 +614,7 @@ data/<名前空間>/quest/<名前>.json
 | `calendar` | grave | 決まりごとかい。……ひとつだけ、ある。<br>七日目の夜は、戸を閉めて外へ出ないこと。古い暦の余白に、同じことが七日おきに書いてある。<br>（好感度 20 から。伝承「暦の書き込み」を記す） | 伝承 prologue/seventh_night、印 calendar_told | ▼ `calendar2` |
 | `calendar2` | grave | なぜ七日目なのかは、誰も知らない。守らなかった家の話も、聞いたことがないね。<br>……守らなかった家が、残っていないだけかもしれないけど。 |  | ▼ `@entry` |
 | `book` | neutral | 古い帳面だね。見せておくれ。<br>“忘れないうちに書け”……か。<br>（伝承の書を持っているとき） | 印 book_shown、好感度+2 | ▼ `book2` |
-| `book2` | grave | この字、どこかで見た気がするよ。……いや、気のせいだろう。<br>大事にしておき。書いておけば、忘れても残る。 |  | ▼ `@entry` |
+| `book2` | grave | この字、どこかで見た気がするよ。……いや、気のせいだろう。<br>大事にしておおき。書いておけば、忘れても残る。 |  | ▼ `@entry` |
 | `whale` | grave | 岩の山が、空を泳いでいた？<br>……そうかい。歌の主を、見たんだね。 | 印 whale_told | ▼ `whale2` |
 | `whale2` | grave | 母さんが言っていたよ。あれが降りてくるのは、誰かを迎えに来るときだって。<br>誰を迎えに来るのかは、言わなかったけど。 |  | ▼ `@entry` |
 | `back` | neutral | 背中に、町が……。人が住んでいたのかい。空の上で、地面も持たずに。<br>……そこで生まれて、そこで死んだのなら。その人たちにとっては、鯨が世界のすべてだったんだね。 | 印 back_told、好感度+2 | ▼ `@entry` |
@@ -655,13 +655,13 @@ data/<名前空間>/quest/<名前>.json
 | `c_steps` | grave | ゆうべか。火のそばの湯が、三度、ゆっくり揺れていた。<br>……鯨じゃない。鯨は、歩かない。<br>（序盤: 夜の足音） | 印 steps_told、好感度+1 | ▼ `@entry` |
 | `c_bones` | grave | あの石板か。……俺じゃないぞ。字が、俺のじゃない。<br>歌が止まる、か。俺は長いこと歌を追ってきたが、止まったと思ったことは一度もない。<br>（序盤: 骨の丘） | 印 bones_told、好感度+1 | ▼ `@entry` |
 | `c_song` | grave | 聞いたか、ゆうべの歌。あれが、俺の追っている歌だ。<br>だが、いつもより近かった。……近すぎる、と思った。<br>（序盤: 空の歌） | 印 song_told、好感度+2 | ▼ `c_song2` |
-| `c_song2` | neutral | 鯨が降りてくるのは、たいてい歌のあとだ。……今夜か、明日か。<br>覚悟しておけ。俺も、してはいるんだ。 |  | ▼ `@entry` |
+| `c_song2` | neutral | 歌が近いのは、鯨が近いということだ。<br>支度ができたら、空をよく見ておけ。覚悟もな。俺も、してはいるんだ。 |  | ▼ `@entry` |
 | `c_whale1` | neutral | 俺は、もう何年も鯨を追っている。<br>影の年に、遠い空から聞こえる低い歌。あれの主が、岩の鯨だ。背中には町があると、昔、誰かに聞いた。 | 印 c_whale_heard | ▼ `c_whale2` |
 | `c_whale2` | grave | ときどき雲の下まで降りてきて、地面に届くほど長い鎖を垂らすんだ。<br>俺は……一度も、つかめたことがない。降りてくるのは、いつも遠くの誰かの上なんだ。<br>（ここに入るとメインの「鯨追いに話を聞く」が済む） |  | ▼ `c_whale_iron` |
 | `c_whale_iron` | neutral | 鎖は、素手では上れない。……前にここへ来た旅人は、鉄を着ていた。<br>都の北門から丘を越えていく石標が、その人の道だ。行き着く先は、骨の坑と呼ばれている。<br>（一章の支度の段「鉄の跡」(ch1/trail_iron) の理由。この話のあと、支度の段 3 本が出る (34 の 4.2)） |  | ▼ `c_whale3` |
-| `c_whale3` | neutral | あんたの上には、来るかもしれないな。<br>……もし鎖が届いたら、迷わずつかめ。 |  | 「つかんでみる。」→ `end`（好感度+2）<br>「怖くはないのか？」→ `c_afraid` |
+| `c_whale3` | neutral | 鯨が降りてくる前に、支度をしておけ。まずは鉄だ。石標を辿って、骨の坑へ行け。<br>刃のことは旅の職人が、盾のことは語り部が知っている。……支度ができたら、あんたの上に来るかもしれないな。 |  | 「支度をしてくる。」→ `end`（好感度+2）<br>「怖くはないのか？」→ `c_afraid` |
 | `c_afraid` | grave | 怖いさ。<br>……でも、あれを見上げていると、呼ばれている気がするんだ。行かなきゃならない場所があるみたいに。 |  | ▼ `@entry` |
-| `c_when` | neutral | 歌が聞こえたら、空を見ろ。鯨が歌うのは、降りてくる前だ。<br>それと……鯨は、人のいる所に降りてくる。まるで、誰かを迎えに来るみたいにな。 |  | ▼ `@entry` |
+| `c_when` | neutral | 歌が聞こえたら、空を見ろ。鯨が歌うのは、降りてくる前だ。<br>それまでに、支度を済ませておけ。……鯨は、人のいる所に降りてくる。まるで、誰かを迎えに来るみたいにな。 |  | ▼ `@entry` |
 | `c_peak` | grave | 北のほうで、峰の頂がなくなっているのを見た。<br>崩れたんじゃない。上から削ったみたいに平らで、切り口がまだ白かった。……あれは、鯨じゃない。もっと大きな何かだ。<br>（伝承「平らな峰」を記す） | 伝承 prologue/shaved_peak、印 c_peak_told | ▼ `@entry` |
 | `c_saw` | smile | 見たのか！<br>……そうか。うらやましいな。俺はいつも、あと少しのところで見失うんだ。 | 印 c_saw、好感度+3 | ▼ `@entry` |
 | `c_back` | smile | 乗ったのか……！<br>背中には、何があった？ | 印 c_back_told | 「町の跡があった。」→ `c_back_town`（好感度+3）<br>「骨の番兵がいた。」→ `c_back_guard`（好感度+2）<br>「……言わずにおく。」→ `c_back_secret`（好感度-1） |
@@ -689,8 +689,9 @@ data/<名前空間>/quest/<名前>.json
 | `watch_sky` | 鐘の宿りの語り部は、今日あたり空を見ていなさい、と言った。<br>鐘は朝から、風もないのに小さく鳴っているという。 | 晴れた昼に、空を見上げてみよう | lore prologue/shadow<br>skip_if: (伝承 prologue/shadow または 伝承 chapter1/stone_whale または 印 sky_asked) | 20 |
 | `ask_storyteller` | 晴れた昼に、空が暗くなった。雲の上を、何かが渡っていった。<br>語り部なら、何か知っているかもしれない。 | 語り部に、空のことを尋ねよう | talk storyteller の節 `shadow3`<br>skip_if: 伝承 chapter1/stone_whale | 30 |
 | `find_chaser` | 影が通った年には、決まって遠い空から“歌”が聞こえるという。<br>その歌を追う旅人が、少し離れた所で火を焚いている。煙が目印だ。 | 火を焚く鯨追いに、話を聞きに行こう | talk whale_chaser の節 `c_whale2`<br>skip_if: 伝承 chapter1/stone_whale | 30 |
-| `see_whale` | 歌の主は、空を泳ぐ岩の鯨だという。ときどき雲の下まで降りてきて、鎖を垂らす。<br>歌が聞こえたら、空を見ろ。 | 歌に耳をすまし、空を泳ぐ岩鯨を探そう | lore chapter1/stone_whale | 60 |
-| `board` | 岩鯨が、すぐそこにいる。鎖をつかめば背中へ上がれる、とイサナは言っていた。 | 鎖をのぼって、岩鯨の背中へ渡ろう | lore chapter1/sky_ruins | 60 |
+| `prepare` | イサナは言った。鎖は素手では上れない、と。前にここへ来た旅人は、鉄を着て、研いだ刃と盾を持っていたらしい。<br>鯨が降りてくる前に、同じ支度をしておこう。鉄はイサナ、刃は旅の職人、盾は語り部が知っている。 | 鉄と刃と盾で、鯨を迎える支度をしよう | condition <br>skip_if: 伝承 chapter1/stone_whale | 0 |
+| `see_whale` | 支度はととのった。鉄を着て、研いだ刃と盾を持っている。前の旅人と同じ身なりだ。<br>歌の主は、空を泳ぐ岩の鯨だという。ときどき雲の下まで降りてきて、鎖を垂らす。歌が聞こえたら空を見ろ、とイサナは言っていた。 | 歌に耳をすまし、空を泳ぐ岩鯨を探そう | lore chapter1/stone_whale | 60 |
+| `board` | 岩鯨が、すぐそこにいる。鎖をつかめば背中へ上がれる、とイサナは言っていた。<br>イサナが一度もたどり着けなかった場所だ。 | 鎖をのぼって、岩鯨の背中へ渡ろう | lore chapter1/sky_ruins | 60 |
 | `inscriptions` | 背中には、崩れた町があった。祠の階段を下りると、三つの道が奥へ続いている。<br>どの道の先にも、背中の民が碑文を残しているはずだ。 | 背中の碑文を三つ読んでみよう（3） | lore chapter1/inscription_west, chapter1/inscription_east, chapter1/inscription_below | 90 |
 | `heart` | 封印が解けた。奥の扉の向こうで、何かが脈を打っている。<br>鼓動のそばに、何かが納められているという。 | 体の奥で脈打つものを、確かめに行こう<br>鼓動のそばに納められたものを、手に取ろう | lore chapter1/heart_stilled<br>lore chapter1/sky_key | 0 |
 | `return` | 欠片は、ほのかに温かい。<br>村へ戻って、このことを話そう。 | どれか一つ: 語り部に、欠片を見せに行こう<br>イサナに、欠片を見せに行こう | talk storyteller の節 `fragment3`<br>talk whale_chaser の節 `c_fragment2` | 0 |
@@ -715,7 +716,7 @@ data/<名前空間>/quest/<名前>.json
 | 段階 | 書き付け | 目的 | 済ませ方 | 経験値 |
 | --- | --- | --- | --- | --- |
 | `gather` | イサナは、たどり着けなかった場所の手ざわりを知りたいという。<br>背中の番兵は、ときどき岩鯨の鱗片を落とす。 | 岩鯨の鱗片を集める（3） | collect skyabyss:stone_whale_shard | 0 |
-| `deliver` | 欠片が三つそろった。<br>イサナの火のところへ持っていこう。 | イサナに、欠片を三つ渡す | talk whale_chaser の節 `c_shards_thanks` | 0 |
+| `deliver` | 鱗片が三つそろった。<br>イサナの火のところへ持っていこう。 | イサナに、鱗片を三つ渡す | talk whale_chaser の節 `c_shards_thanks` | 0 |
 
 <!-- 生成ここまで -->
 

@@ -11,18 +11,9 @@
         "max": 0
       },
       {
-        "type": "any",
-        "of": [
-          {
-            "type": "flag",
-            "flag": "c_whale_heard",
-            "npc": "skyabyss:whale_chaser"
-          },
-          {
-            "type": "lore",
-            "entry": "chapter1/stone_whale"
-          }
-        ]
+        "type": "quest",
+        "quest": "ch1/trail_blade",
+        "is": "done"
       }
     ]
   },

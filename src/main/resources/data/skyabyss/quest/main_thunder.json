@@ -39,6 +39,32 @@
       }
     },
     {
+      "id": "prepare",
+      "skip_if": {
+        "type": "any",
+        "of": [
+          {
+            "type": "lore",
+            "entry": "chapter1/thunder_wing"
+          },
+          {
+            "type": "lore",
+            "entry": "chapter1/storm_wing"
+          }
+        ]
+      },
+      "objectives": [
+        {
+          "id": "ready",
+          "type": "condition",
+          "if": {
+            "type": "prep",
+            "chapter": 3
+          }
+        }
+      ]
+    },
+    {
       "id": "see",
       "objectives": [
         {

@@ -213,7 +213,7 @@ text("quest.skyabyss.ch3.sub_wind_marks.trace.journal",
 text("quest.skyabyss.ch3.sub_wind_marks.trace.vane", "風見の丘を見つける", "Find the vane on the hill")
 text("quest.skyabyss.ch3.sub_wind_marks.trace.ruin", "避雷の塔の跡を見つける", "Find the broken lightning tower")
 text("quest.skyabyss.ch3.sub_wind_marks.trace.pack", "雷に焼かれた荷を見つける", "Find the pack burnt by lightning")
-text("quest.skyabyss.ch3.sub_wind_marks.trace.tablets", "風の碑を見つける (3 枚)", "Find the wind tablets (3)")
+text("quest.skyabyss.ch3.sub_wind_marks.trace.tablets", "風の碑を見つける（3 枚）", "Find the wind tablets (3)")
 
 # イサナ: 夕立の刻に峰の足もとへ行く → 聞かせる。乗るのは自分だけ、とイサナが決める (追う人から見送る人へ)
 write(DATA / "quest/ch3/sub_isana_wait.json", {
@@ -270,7 +270,7 @@ write(DATA / "dialogue/ch3/whale_chaser_ch3.json", {
 })
 text(CHASER + "ch3_wait_offer", "風が、逆向きに吹いていただろう。……あれは、嵐が風に逆らって、こっちへ来ているんだ。\n鯨は空を渡り、潮殻は海に待った。次の奴は、嵐を着て飛ぶ。",
      "The wind blew backwards this morning. A storm is walking up against it, toward us.\nThe whale crossed the sky and the shell waited in the sea. The next one flies wearing a storm.")
-text(CHASER + "ch3_wait_offer2", "夕立の刻に、あいつは高い峰へ降りる。峰の足もとまで行って、風がどう動くか、見てきてくれ。\n……俺は行かない。昇るのは、お前だけでいい。",
+text(CHASER + "ch3_wait_offer2", "夕立の刻に、あいつは高い峰へ降りる。峰の足もとまで行って、風がどう動くか、見てきてくれ。\n……俺は行かない。昇るのは、あんただけでいい。",
      "In the afternoon storm hour it settles on a high peak. Go to the foot of the peak and see how the wind moves.\nI won't go. Only you need to climb.")
 text(CHASER + "ch3_wait_offer2.go", "見てくる。", "I'll go and see.")
 text(CHASER + "ch3_wait_done", "戻ったか。……風は、どうだった。", "You're back. How was the wind?")
@@ -278,9 +278,9 @@ text(CHASER + "ch3_wait_done.wind", "渦を巻いていた。", "It spiralled up
 text(CHASER + "ch3_wait_done.quiet", "黙って頷く。", "(Nod in silence.)")
 text(CHASER + "ch3_wait_done2", "俺はずっと、追いかけてきた。鯨も、潮殻もだ。追えばいつか追いつく、そう思ってな。",
      "I have always chased them. The whale, the shell. I thought if I chased long enough, I'd catch up.")
-text(CHASER + "ch3_wait_done3", "だが、あの鳥は追うものじゃない。……待つものだ。峰の下で、風に呼ばれた気がした。それが、お前の話で分かった。",
+text(CHASER + "ch3_wait_done3", "だが、あの鳥は追うものじゃない。……待つものだ。峰の下で、風に呼ばれた気がした。それが、あんたの話で分かった。",
      "But that bird isn't something you chase. It's something you wait for. Down at the peak I felt called by the wind, and your story told me why.")
-text(CHASER + "ch3_wait_done4", "昇るのは、お前だけだ。俺はこの火のそばで待っている。……戻ったら、風の話を聞かせろ。",
+text(CHASER + "ch3_wait_done4", "昇るのは、あんただけだ。俺はこの火のそばで待っている。……戻ったら、風の話を聞かせろ。",
      "Only you will climb. I'll wait here by the fire. When you come back, tell me about the wind.")
 text(CHASER + "ch3_wait_done4.ok", "ああ。", "I will.")
 
