@@ -342,7 +342,9 @@ public final class SiteFinder {
         double ux = dx / len;
         double uz = dz / len;
         int index = 0;
-        for (int k = 1; 40 * k <= len - 24; k++) {
+        // 都のときは、壁と門の外の道 (中心から 120) の手前で止める (積み石が都の中に立たない)
+        int stop = capital() ? CAPITAL_CAIRN_STOP : 24;
+        for (int k = 1; 40 * k <= len - stop; k++) {
             int side = (k % 2 == 0) ? 1 : -1;
             for (int shift = 0; shift <= 24; shift += 4) {
                 for (int s = 0; s < (shift == 0 ? 1 : 2); s++) {
@@ -376,6 +378,13 @@ public final class SiteFinder {
     // 足跡の中心から、道・宿り・野営地までの下限 (足跡の半分の大きさ + 余白)
     static final int FOOT_ROAD_MIN = 38;
     static final int FOOT_SITE_MIN = 62;
+    // 都 (鐘の宿り) は大きい (中心から壁まで約 100、墓地まで 140)。足跡は中心から 210 より外に置く。積み石は中心から 150 の手前で止める
+    static final int CAPITAL_FOOT_MIN = 210;
+    static final int CAPITAL_CAIRN_STOP = 150;
+
+    public static boolean capital() {
+        return System.getenv("SKYABYSS_SMALL_SHELTER") == null;
+    }
     // 段階: {高さの差の上限, 道からの下限, 上限, 本数, 向きを全部使うか, 乾いていてほしい範囲 (部品の大きさに対する %。小さい池は水の列を残して建てる)、群系を見るか}
     static final int[][] FOOT_STAGES = {{10, 38, 85, 4, 0, 100, 1}, {18, 38, 100, 4, 0, 100, 1}, {30, 38, 120, 4, 0, 100, 1}, {46, 36, 135, 4, 0, 100, 1},
             {70, 36, 140, 4, 0, 100, 1}, {30, 36, 120, 3, 0, 100, 1}, {70, 36, 140, 3, 0, 100, 1}, {60, 34, 140, 3, 1, 100, 1}, {60, 34, 150, 2, 1, 100, 1},
@@ -452,7 +461,7 @@ public final class SiteFinder {
                     if (dp < dpMin || dp > dpMax) {
                         continue;
                     }
-                    if (Math.hypot(x - camp.getX(), z - camp.getZ()) < FOOT_SITE_MIN || Math.hypot(x - shelter.getX(), z - shelter.getZ()) < FOOT_SITE_MIN) {
+                    if (Math.hypot(x - camp.getX(), z - camp.getZ()) < FOOT_SITE_MIN || Math.hypot(x - shelter.getX(), z - shelter.getZ()) < (capital() ? CAPITAL_FOOT_MIN : FOOT_SITE_MIN)) {
                         continue;
                     }
                     // 前の足跡と近すぎない (一歩の間隔の下限)

@@ -905,6 +905,9 @@ public class EmberTitanEntity extends Entity implements GeoEntity, jp.revati.sky
     }
 
     private void steer(double tx, double tz, float speed) {
+        double[] kept = jp.revati.skyabyss.titan.TitanAvoid.clamp(level(), tx, tz);
+        tx = kept[0];
+        tz = kept[1];
         double dx = tx - getX();
         double dz = tz - getZ();
         float desired = EmberGround.yawOf(dx, dz);

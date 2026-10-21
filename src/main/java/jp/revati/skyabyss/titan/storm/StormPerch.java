@@ -61,7 +61,7 @@ public final class StormPerch {
         for (int x = x0; x <= cx + r; x += STEP) {
             for (int z = z0; z <= cz + r; z += STEP) {
                 double d = Math.hypot(x + 0.5 - cx, z + 0.5 - cz);
-                if (d < rMin || d > rMax || !dry(level, x + 0.5, z + 0.5)) {
+                if (d < rMin || d > rMax || !dry(level, x + 0.5, z + 0.5) || jp.revati.skyabyss.titan.TitanAvoid.inside(level, x + 0.5, z + 0.5, 0)) {
                     continue;
                 }
                 candidates.add(new Peak(x + 0.5, surfaceAt(level, x + 0.5, z + 0.5), z + 0.5));

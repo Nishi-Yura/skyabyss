@@ -128,14 +128,15 @@ public final class SiteAudit {
     // 本物の (自然に建った) 序盤・章の構造物を調べる
     public static Report auditEntry(ServerLevel level, SiteData data, SiteData.Entry e) {
         Report rep = new Report();
-        String bpName = !e.blueprint.isEmpty() ? e.blueprint : e.kind.equals("footprint") ? FootprintBuilder.blueprintName(data, e) : e.kind;
+        String bpName = !e.blueprint.isEmpty() ? e.blueprint : e.kind.equals("footprint") ? FootprintBuilder.blueprintName(data, e)
+                : e.kind.equals("shelter") && SiteFinder.capital() ? "capital" : e.kind;
         Blueprint bp;
         try {
             bp = Blueprint.get(bpName);
         } catch (RuntimeException ex) {
             return rep;
         }
-        auditPlaced(level, bp, SiteFinder.rot(e.yaw), SiteFinder.mirror(e.yaw), e.pos.below(), "built:" + e.kind + e.index + "(" + bpName + ")", rep);
+        auditPlaced(level, bp, SiteFinder.rot(e.yaw), SiteFinder.mirror(e.yaw), e.pos.below(), "built:" + e.kind + e.index + "(" + bpName + ") o=" + e.pos.getX() + "," + (e.pos.getY() - 1) + "," + e.pos.getZ() + " r=" + SiteFinder.rot(e.yaw) + " m=" + SiteFinder.mirror(e.yaw), rep);
         return rep;
     }
 

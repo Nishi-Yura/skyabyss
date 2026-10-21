@@ -918,6 +918,10 @@ public final class SiteJob {
             }
             return true;
         }
+        if (shelter != null && !kind.equals("shelter") && SiteFinder.capital()
+                && Math.hypot(x - shelter.getX(), z - shelter.getZ()) < (kind.equals("footprint") ? SiteFinder.CAPITAL_FOOT_MIN : SiteFinder.CAPITAL_CAIRN_STOP)) {
+            return false;
+        }
         if (kind.equals("footprint") && shelter != null) {
             double dx = shelter.getX() - camp.getX();
             double dz = shelter.getZ() - camp.getZ();

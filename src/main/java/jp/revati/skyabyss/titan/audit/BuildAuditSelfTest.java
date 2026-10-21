@@ -55,7 +55,7 @@ public final class BuildAuditSelfTest {
         // 建てた避難所の監査の枠は部品の外へ 3 マス広い。近くに村 (自然生成) があると、その家のかまどの向きを拾う (この Mod の部品の向きは bp:shelter の監査が見る)
         ALLOW.add(new Allow("built:shelter", "ATTACH_FACING", null, "a furnace of a neighbouring vanilla village house inside the 3-block margin of the audit box; the blueprint itself has no furnace (bp:shelter is audited separately)"));
         // 都 (鐘の宿り) の階段は大半が飾り (蛇腹・窓台・屋根・持ち送り)。足場として見る規則は合わない。歩ける道と戸の前は tools/capital/audit.py が調べる
-        for (String kind : new String[] {"STAIR_BURIED", "STAIR_RUN", "STAIR_UPSIDE", "STAIR_GAP", "STAIR_REVERSED"}) {
+        for (String kind : System.getenv("SKYABYSS_AUDIT_STRICT") != null ? new String[0] : new String[] {"STAIR_BURIED", "STAIR_RUN", "STAIR_UPSIDE", "STAIR_GAP", "STAIR_REVERSED"}) {
             ALLOW.add(new Allow("built:shelter", kind, null, "capital trim stairs (cornices, sills, roofs); walk paths and doors are checked by tools/capital/audit.py"));
         }
         ALLOW.add(new Allow("built:ribs", "FLOAT_BLOCK", null, "terrain-following anchor site: a rib tip can end up one step above a dip in the ground; reported in docs/review/build_audit_report.md"));
@@ -189,7 +189,7 @@ public final class BuildAuditSelfTest {
         // 開発用: 環境変数 SKYABYSS_AUDIT_ONLY=<whale|tide|storm|ember> なら、その背の段だけ (開始・その背を建てる・調べる・まとめ)
         String only = System.getenv("SKYABYSS_AUDIT_ONLY");
         if (only != null && !only.isBlank()) {
-            steps.removeIf(st -> !(st.name().equals("build audit (start)") || st.name().equals("build audit (" + only + " build)") || st.name().equals("build audit (" + only + ")")
+            steps.removeIf(st -> !(st.name().equals("build audit (start)") || (only.equals("opening") && (st.name().equals("build audit (wait for opening sites)") || st.name().equals("build audit (opening)"))) || st.name().equals("build audit (" + only + " build)") || st.name().equals("build audit (" + only + ")")
                     || st.name().equals("build audit")));
         }
         return steps;

@@ -579,6 +579,9 @@ public class TideShellEntity extends Entity implements GeoEntity, TravelTitan, j
 
     // 目標へ向きを少しずつ変えながら進み、高さを合わせる。目標が横や後ろにあるときは、ゆっくり進みながら向きを変える
     private void steer(double tx, double tz, double ty, float speed, double rise) {
+        double[] kept = jp.revati.skyabyss.titan.TitanAvoid.clamp(level(), tx, tz);
+        tx = kept[0];
+        tz = kept[1];
         double dx = tx - getX();
         double dz = tz - getZ();
         float desired = (float) (Mth.atan2(dz, dx) * Mth.RAD_TO_DEG) - 90f;

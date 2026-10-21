@@ -727,6 +727,9 @@ public class StoneWhaleEntity extends Entity implements GeoEntity, TravelTitan, 
 
     // 目標へ向きを少しずつ変えながら進み、高さを合わせる
     private void steer(double tx, double tz, double ty, float speed) {
+        double[] kept = TitanAvoid.clamp(level(), tx, tz);
+        tx = kept[0];
+        tz = kept[1];
         double dx = tx - getX();
         double dz = tz - getZ();
         float desired = (float) (Mth.atan2(dz, dx) * Mth.RAD_TO_DEG) - 90f;

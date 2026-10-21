@@ -147,6 +147,36 @@ public final class NpcSpawner {
         return NpcWorldData.get(level.getServer().overworld()).chaserFire(bell);
     }
 
+    // 都 (鐘の宿り) の鐘なら、語り部の立つ所 = 鐘の 2 下 (一階の床) の、鐘から南へ 2。都でなければ null
+    @Nullable
+    public static BlockPos capitalStorytellerSpot(ServerLevel level, BlockPos bell) {
+        if (jp.revati.skyabyss.opening.OpeningSites.chaserCamp(level.getServer()).isEmpty()) {
+            return null;
+        }
+        BlockPos b = jp.revati.skyabyss.opening.OpeningSites.bell(level.getServer()).orElse(null);
+        if (b == null || !b.equals(bell)) {
+            return null;
+        }
+        return bell.offset(0, -2, 2);
+    }
+
+    // 都の語り部が決まった所から離れていたら (前の版で台座の縁に立った・押された)、戻す
+    public static void keepCapitalStoryteller(ServerLevel level, BlockPos bell) {
+        BlockPos spot = capitalStorytellerSpot(level, bell);
+        if (spot == null || !level.isLoaded(spot)) {
+            return;
+        }
+        NpcEntity npc = find(level, bell, NpcSetup.STORYTELLER.get());
+        if (npc == null) {
+            return;
+        }
+        if (Math.abs(npc.getY() - spot.getY()) > 1.5 || npc.distanceToSqr(spot.getX() + 0.5, spot.getY(), spot.getZ() + 0.5) > 16) {
+            npc.teleportTo(spot.getX() + 0.5, spot.getY(), spot.getZ() + 0.5);
+            npc.setHome(bell);
+            SkyAbyss.LOGGER.info("[npc] storyteller moved back to {}", spot);
+        }
+    }
+
     static boolean canRespawn(NpcWorldData data, BlockPos bell, String role, long now) {
         long at = data.spawnedAt(bell.asLong(), role);
         return at < 0 || now - at > RESPAWN_AFTER || now < at;
@@ -194,6 +224,11 @@ public final class NpcSpawner {
     // ---------------------------------------------------------------- 立たせる
     @Nullable
     public static NpcEntity spawnStoryteller(ServerLevel level, BlockPos bell) {
+        // 都の大鐘楼: 一階の鐘の足もと (外の台座の縁や上の段に立たないように、決まった所に)
+        BlockPos spot = capitalStorytellerSpot(level, bell);
+        if (spot != null) {
+            return place(level, NpcSetup.STORYTELLER.get(), spot, bell);
+        }
         RandomSource random = level.random;
         for (int i = 0; i < 40; i++) {
             double angle = random.nextDouble() * Math.PI * 2;

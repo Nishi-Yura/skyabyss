@@ -16,43 +16,35 @@ cmd gamerule doDaylightCycle false
 cmd gamemode spectator
 cmd skyabyss dev opening build
 hud off
-cmd skyabyss dev opening at shelter 0 0 2 3 180 -6
+cmd skyabyss dev opening at shelter 0 -60 22 40 135 30
 waitchunks
-wait 20
-shot d_market
-cmd skyabyss dev opening at shelter 0 9 2 -9 135 -4
+wait 30
+shot d_roof_rows
+cmd skyabyss dev opening at shelter 0 -40 16 40 180 20
 waitchunks
-wait 20
-shot d_market_close
-cmd skyabyss dev opening at shelter 0 0 2 86 0 -4
+wait 30
+shot d_roof_close
+cmd skyabyss dev opening at shelter 0 -70 12 30 90 10
 waitchunks
-wait 20
-shot d_gate_s_in
-cmd skyabyss dev opening at shelter 0 0 2 118 180 -8
+wait 30
+shot d_gable_z
+cmd skyabyss dev opening at shelter 0 -48 4 31 180 0
 waitchunks
-wait 20
-shot d_gate_s_out
-cmd skyabyss dev opening at shelter 0 -118 2 0 -90 -8
+wait 30
+shot d_facade
+cmd skyabyss dev opening at shelter 0 30 18 0 160 15
 waitchunks
-wait 20
-shot d_gate_w_out
-cmd skyabyss dev opening at shelter 0 0 6 -86 180 -6
+wait 30
+shot d_turret
+cmd skyabyss dev opening at shelter 0 -24 50 -66 135 30
 waitchunks
-wait 20
-shot d_gate_n_stair
-cmd skyabyss dev opening at shelter 0 -48 2 50 180 -5
+wait 30
+shot d_spire
+cmd skyabyss dev opening at shelter 0 -54 2 12 180 -2
 waitchunks
-wait 20
-shot d_row_a
-cmd skyabyss dev opening at shelter 0 -26 2 31 -90 -3
+wait 30
+shot d_alley
+cmd skyabyss dev opening at shelter 0 -30 6 -69 180 5
 waitchunks
-wait 20
-shot d_row_b
-cmd skyabyss dev opening at shelter 0 70 2 31 90 -3
-waitchunks
-wait 20
-shot d_row_c
-cmd skyabyss dev opening at shelter 0 50 2 70 180 -4
-waitchunks
-wait 20
-shot d_row_d
+wait 30
+shot d_storyteller

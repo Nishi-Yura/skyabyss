@@ -84,10 +84,28 @@ def main():
                     problems.append('door %s at %s: blocked %d in front (%s / %s / below %s)' % (
                         n, (x, y, z), d, name(b.get((px, y, pz))), name(b.get((px, y + 1, pz))), name(b.get((px, y - 1, pz)))))
                     break
+    # 戸 (本物も入れない家の戸も) の前は、足の高さと頭の高さが空いていること (前に物があると、戸の前を塞いで見える)
+    def front_clear(x, y, z, dx, dz):
+        for d in (1, 2) if False else (1,):
+            fx, fz = x + dx * d, z + dz * d
+            if not (passable(b.get((fx, y, fz))) and passable(b.get((fx, y + 1, fz)))):
+                return False
+        return b.get((x + dx, y - 1, z + dz)) not in (None, 'air')
+    for (x, y, z), s_ in list(b.items()):
+        n_ = name(s_)
+        if n_.endswith('_door') and 'trapdoor' not in n_ and 'half=lower' in s_:
+            f = s_.split('facing=')[1].split(',')[0].split(']')[0]
+            dx, dz = DX[OPP[f]]
+            # 本物の戸は外の面の一つ奥にある: 前の 1 (外の面の口) と 2 (通り) を見る
+            for d in (1, 2):
+                fx, fz = x + dx * d, z + dz * d
+                if not (passable(b.get((fx, y, fz))) and passable(b.get((fx, y + 1, fz)))):
+                    problems.append('door at %s: something in front (%d): %s / %s' % ((x, y, z), d, name(b.get((fx, y, fz))), name(b.get((fx, y + 1, fz)))))
+                    break
     for (x, y, z, out) in v.fake_doors:
         dx, dz = DX[out]
         px, pz = x + dx, z + dz
-        if not (stand_ok(b, px, y, pz) or stand_ok(b, px, y + 1, pz) or stand_ok(b, px, y - 1, pz)):
+        if not front_clear(x, y, z, dx, dz):
             problems.append('fake door at %s: blocked in front (%s / %s / below %s)' % ((x, y, z), name(b.get((px, y, pz))), name(b.get((px, y + 1, pz))), name(b.get((px, y - 1, pz)))))
     # 碑: 前が空いているか
     for nm, (x, y, z) in v.marks.items():
@@ -154,6 +172,17 @@ def main():
     bx, by, bz = v.marks['bell']
     if not reach(bx, by - 2, bz, 3):
         problems.append('bell: the storyteller spot cannot be reached on foot')
+    # 建物どうしの間: 足もと (軒を含む) が重なる・くっつく組み合わせ (同じ建物の部品と、北の段・街区の枠は除く)
+    parts = [p for p in t.parts if p[0] not in ('block', 'terrace', 'plaza', 'part')]
+    for i in range(len(parts)):
+        for j in range(i + 1, len(parts)):
+            a_, b_ = parts[i], parts[j]
+            if a_[0] == b_[0]:
+                continue
+            gx = max(a_[1], b_[1]) - min(a_[3], b_[3])
+            gz = max(a_[2], b_[2]) - min(a_[4], b_[4])
+            if gx <= 0 and gz <= 0:
+                problems.append('buildings touch: %s and %s (gap x %d, z %d)' % (a_[0], b_[0], gx - 1, gz - 1))
     print('walkable cells from the south gate: %d' % len(seen))
     print('checked %d doors, %d marks' % (doors, len(v.marks)))
     for p in problems:

@@ -33,7 +33,7 @@ public final class CardFeed {
     private CardFeed() {
     }
 
-    private record Entry(Component head, Component body, int accent, long at) {
+    private record Entry(Component head, Component body, int accent, long at, net.minecraft.world.item.ItemStack icon) {
     }
 
     private static final List<Entry> FEED = new ArrayList<>();
@@ -52,12 +52,17 @@ public final class CardFeed {
 
     // 札を出す。toast = 右上・右下で使う今までの札 (作り方)。head = 小さな見出し (「獲得」など)、body = 本文 (一行目)
     public static void show(Component head, Component body, int accent, Supplier<Toast> toast) {
+        show(head, body, accent, net.minecraft.world.item.ItemStack.EMPTY, toast);
+    }
+
+    // icon = 見出しの左の小さな絵 (品。空なら種類の印)
+    public static void show(Component head, Component body, int accent, net.minecraft.world.item.ItemStack icon, Supplier<Toast> toast) {
         Minecraft mc = Minecraft.getInstance();
         switch (place()) {
             case TOP_RIGHT, BOTTOM_RIGHT -> mc.getToasts().addToast(toast.get());
             case COMPACT, LEFT_FEED -> {
                 synchronized (FEED) {
-                    FEED.add(new Entry(head, body, accent, net.minecraft.Util.getMillis()));
+                    FEED.add(new Entry(head, body, accent, net.minecraft.Util.getMillis(), icon));
                     while (FEED.size() > FEED_MAX) {
                         FEED.remove(0);
                     }
@@ -67,12 +72,17 @@ public final class CardFeed {
     }
 
     // 進捗 (バニラ・mod の進捗の札の代わり)
-    public static void advancement(Component title, boolean challenge) {
+    public static void advancement(Component title, boolean challenge, net.minecraft.world.item.ItemStack icon) {
         int accent = challenge ? 0xB58AE0 : 0xF2C14E;
         Component head = Component.translatable(challenge ? "gui.skyabyss.card.challenge" : "gui.skyabyss.card.advancement");
-        // ほかの札と同じく、会話・場面の最中は溜めて閉じたあとに (NoticeGate)
-        NoticeClient.gate(jp.revati.skyabyss.notice.NoticeGate.P_CARD, NoticeClient.CARD_GAP,
-                () -> show(head, title, accent, () -> new NoticeToast(Minecraft.getInstance().font, head, title, accent)));
+        // ほかの札と同じく、会話・場面の最中は溜めて閉じたあとに (NoticeGate)。出るときに音 (挑戦はバニラの挑戦の音、ふつうは小さな鐘)
+        NoticeClient.gate(jp.revati.skyabyss.notice.NoticeGate.P_CARD, NoticeClient.CARD_GAP, () -> {
+            show(head, title, accent, icon, () -> new NoticeToast(Minecraft.getInstance().font, head, title, accent));
+            Minecraft mc = Minecraft.getInstance();
+            mc.getSoundManager().play(challenge
+                    ? net.minecraft.client.resources.sounds.SimpleSoundInstance.forUI(net.minecraft.sounds.SoundEvents.UI_TOAST_CHALLENGE_COMPLETE, 1.0f, 0.7f)
+                    : net.minecraft.client.resources.sounds.SimpleSoundInstance.forUI(net.minecraft.sounds.SoundEvents.AMETHYST_BLOCK_CHIME, 1.25f, 0.9f));
+        });
     }
 
     // ---------------------------------------------------------------- 左の一行の列
@@ -173,7 +183,7 @@ public final class CardFeed {
             synchronized (FEED) {
                 for (int i = 0; i < FEED.size(); i++) {
                     Entry e = FEED.get(i);
-                    FEED.set(i, new Entry(e.head, e.body, e.accent, e.at + dt));
+                    FEED.set(i, new Entry(e.head, e.body, e.accent, e.at + dt, e.icon));
                 }
             }
             return;
@@ -194,13 +204,30 @@ public final class CardFeed {
             // 出てくるときに左から少し滑る
             int slide = age < 180 ? (int) ((1f - age / 180f) * 8) : 0;
             String head = e.head.getString();
-            int hw = font.width(head);
+            int iw = 12;
+            int hw = font.width(head) + iw;
             int ew = y + 24 > capTop0 ? Math.min(rect.w(), capW0) : rect.w();
             List<FormattedCharSequence> lines = lines(font, e, ew);
             int hh = lines.size() * 10 + 1;
             g.fill(x - slide, y, x + ew - slide, y + hh, ((int) (alpha * 0.55f)) << 24 | 0x0A0C10);
             g.fill(x - slide, y, x + 1 - slide, y + hh, alpha << 24 | e.accent);
-            g.drawString(font, head, x + 4 - slide, y + 2, alpha << 24 | e.accent, true);
+            // 小さな絵 (品を 10 px に縮めて)。品が無ければ種類の色の菱形
+            if (!e.icon.isEmpty() && alpha > 160) {
+                g.pose().pushPose();
+                g.pose().translate(x + 3 - slide, y + 1 - 0.5f, 0);
+                g.pose().scale(0.625f, 0.625f, 1f);
+                g.renderItem(e.icon, 0, 0);
+                g.pose().popPose();
+            } else {
+                int cx = x + 7 - slide;
+                int cy = y + 5;
+                int col = alpha << 24 | e.accent;
+                g.fill(cx - 1, cy - 3, cx + 1, cy + 4, col);
+                g.fill(cx - 2, cy - 2, cx + 2, cy + 3, col);
+                g.fill(cx - 3, cy - 1, cx + 3, cy + 2, col);
+                g.fill(cx - 1, cy - 1, cx + 1, cy + 2, alpha << 24 | 0x0A0C10);
+            }
+            g.drawString(font, head, x + 4 + iw - slide, y + 2, alpha << 24 | e.accent, true);
             int ly = y + 2;
             for (FormattedCharSequence line : lines) {
                 g.drawString(font, line, x + 9 + hw - slide, ly, alpha << 24 | 0xE9E3D4, true);
@@ -212,7 +239,7 @@ public final class CardFeed {
 
     // 本文は見出しの右に一行 (長い文は終わりを「…」で切る。全文は N の知らせの記録)
     private static List<FormattedCharSequence> lines(Font font, Entry e, int w) {
-        int room = Math.max(40, w - font.width(e.head.getString()) - 14);
+        int room = Math.max(40, w - font.width(e.head.getString()) - 14 - 12);
         List<FormattedCharSequence> l = font.split(e.body, room);
         if (l.size() <= 2) {
             return l.isEmpty() ? List.of(FormattedCharSequence.EMPTY) : l;

@@ -82,6 +82,7 @@ public final class QuestClient {
         jp.revati.skyabyss.client.notice.NoticeClient.gate(jp.revati.skyabyss.notice.NoticeGate.P_CARD, jp.revati.skyabyss.client.notice.NoticeClient.CARD_GAP, () -> {
             boolean main = def != null && def.main();
             jp.revati.skyabyss.client.notice.CardFeed.show(Component.translatable(head), title, main ? 0xF2C14E : 0x7FD6D0,
+                    new net.minecraft.world.item.ItemStack(main ? net.minecraft.world.item.Items.WRITABLE_BOOK : net.minecraft.world.item.Items.PAPER),
                     () -> new QuestToast(Component.translatable(head), title, main));
             playSound(mc, kind, def != null && def.main());
             QuestHud.flash();

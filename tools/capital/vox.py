@@ -230,8 +230,51 @@ class Vox:
                 return s
         return weighted[-1][0]
 
+    # -- 階段の形 (バニラの StairBlock.getStairsShape と同じ決め方)。設計図は隣の更新なしで置かれるので、角の内・外をここで決める
+    def stair_shapes(self):
+        CCW = {'north': 'west', 'west': 'south', 'south': 'east', 'east': 'north'}
+
+        def parse(s):
+            if s is None or '_stairs[' not in s:
+                return None
+            props = dict(kv.split('=') for kv in s[s.index('[') + 1:-1].split(','))
+            return props
+
+        out = {}
+        for (x, y, z), s in self.b.items():
+            st = parse(s)
+            if st is None:
+                continue
+            f, half = st['facing'], st['half']
+            shape = 'straight'
+            dx, dz = DX[f]
+            fr = parse(self.b.get((x + dx, y, z + dz)))
+            done = False
+            if fr is not None and fr['half'] == half:
+                f1 = fr['facing']
+                if (f1 in ('north', 'south')) != (f in ('north', 'south')):
+                    ox, oz = DX[OPP[f1]]
+                    nb = parse(self.b.get((x + ox, y, z + oz)))
+                    if nb is None or nb['facing'] != f or nb['half'] != half:
+                        shape = 'outer_left' if f1 == CCW[f] else 'outer_right'
+                        done = True
+            if not done:
+                bk = parse(self.b.get((x - dx, y, z - dz)))
+                if bk is not None and bk['half'] == half:
+                    f2 = bk['facing']
+                    if (f2 in ('north', 'south')) != (f in ('north', 'south')):
+                        ox, oz = DX[f2]
+                        nb = parse(self.b.get((x + ox, y, z + oz)))
+                        if nb is None or nb['facing'] != f or nb['half'] != half:
+                            shape = 'inner_left' if f2 == CCW[f] else 'inner_right'
+            if st['shape'] != shape:
+                out[(x, y, z)] = s.replace('shape=' + st['shape'], 'shape=' + shape)
+        self.b.update(out)
+        return len(out)
+
     # -- つながり (フェンス・板ガラス・鉄格子・塀)
     def connect(self):
+        self.stair_shapes()
         def name(s):
             if s is None:
                 return 'air'
@@ -572,6 +615,7 @@ class Body:
         self.pots = pots
         self.infill = infill
         self.ornate = ornate
+        self.no_skirt = set()
         self.sealed = sealed  # 入れない家: 床も家具も作らず、戸は壁に貼った跳ね上げ戸 (あとで Vox.seal で中を埋める)
         self.doors = []
 
@@ -627,6 +671,8 @@ class Body:
             cells, out = _facade_cells(self.x0, self.z0, self.x1, self.z1, side)
             dx, dz = DX[out]
             for (cx, cz) in cells:
+                if half == 'bottom' and (cx + dx, cz + dz) in self.no_skirt:
+                    continue
                 v.set(cx + dx, y, cz + dz, mat.stairs(OPP[out], half), keep=(half == 'bottom'))
         for (cx, cz, a, b) in ((self.x0 - 1, self.z0 - 1, 'north', 'west'), (self.x1 + 1, self.z0 - 1, 'north', 'east'),
                                (self.x0 - 1, self.z1 + 1, 'south', 'west'), (self.x1 + 1, self.z1 + 1, 'south', 'east')):
@@ -829,13 +875,13 @@ class Body:
                 v.set(ox + dx, y + 2, oz + dz, 'lantern[hanging=false,waterlogged=false]', keep=True) if st.door_lamps else None
         v.set(cx, y - 1, cz, st.trim.full)
         v.set(cx + dx, y - 1, cz + dz, st.trim.full)
-        if not self.sealed:
-            # 戸の前の裾の段を外して平らに (つまずかない)
-            for j in (-1, 0, 1):
-                if 0 < i + j < len(cells) - 1:
-                    ox, oz = cells[i + j]
-                    v.set(ox + dx, y, oz + dz, 'air')
-                    v.set(ox + dx, y - 1, oz + dz, st.trim.full)
+        # 戸の前の裾の段を外して平らに (つまずかない・戸の前を塞がない)。裾は後で描くので、ここは描かない所として覚える
+        for j in (-1, 0, 1):
+            if 0 < i + j < len(cells) - 1:
+                ox, oz = cells[i + j]
+                v.set(ox + dx, y, oz + dz, 'air')
+                v.set(ox + dx, y - 1, oz + dz, st.trim.full)
+                self.no_skirt.add((ox + dx, oz + dz))
         self.doors.append((cx + ix, y, cz + iz, out))
 
     def _interior(self):

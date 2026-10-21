@@ -26,7 +26,7 @@ public abstract class ToastAddMixin {
             DisplayInfo d = ((AdvancementToastAccessor) adv).skyabyss$advancement().value().display().orElse(null);
             ci.cancel();
             if (d != null) {
-                CardFeed.advancement(d.getTitle(), d.getType() == AdvancementType.CHALLENGE);
+                CardFeed.advancement(d.getTitle(), d.getType() == AdvancementType.CHALLENGE, d.getIcon());
             }
             return;
         }

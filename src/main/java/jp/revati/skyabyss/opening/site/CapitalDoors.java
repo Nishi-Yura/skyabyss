@@ -73,6 +73,10 @@ public final class CapitalDoors {
         if (players.isEmpty()) {
             return;
         }
+        BlockPos bell = e.extra("bell");
+        if (bell != null) {
+            jp.revati.skyabyss.npc.NpcSpawner.keepCapitalStoryteller(level, bell);
+        }
         for (Facility f : ALL) {
             if (e.extra("opened_" + f.id()) != null) {
                 continue;
