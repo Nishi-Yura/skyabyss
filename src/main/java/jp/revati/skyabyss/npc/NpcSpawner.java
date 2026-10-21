@@ -57,7 +57,7 @@ public final class NpcSpawner {
         Optional<BlockPos> bell = level.getPoiManager().findClosest(h -> h.is(PoiTypes.MEETING), player.blockPosition(), VILLAGE_RADIUS,
                 PoiManager.Occupancy.ANY);
         if (bell.isPresent()) {
-            visitVillage(level, bell.get(), player);
+            visitVillage(level, capitalBell(level, bell.get()), player);
             return;
         }
         // 鐘のある村が近くに無い人のための野営 (StoryGuide が焚き火を置く)。村と同じように語り部が立ち、必要なら鯨追いも立つ
@@ -65,6 +65,16 @@ public final class NpcSpawner {
         if (camp != null) {
             visitVillage(level, camp, player);
         }
+    }
+
+    // 都の中の鐘は、どれも大鐘楼の鐘として扱う (都には宿の屋根の鐘楼などほかの鐘もあり、そこを村の鐘と見て語り部とイサナを
+    // もう一人ずつ立たせていた。2026-10-21 の試遊)
+    static BlockPos capitalBell(ServerLevel level, BlockPos bell) {
+        BlockPos main = jp.revati.skyabyss.opening.OpeningSites.bell(level.getServer()).orElse(null);
+        if (main == null || main.equals(bell)) {
+            return bell;
+        }
+        return jp.revati.skyabyss.opening.site.SiteGuard.inCapital(level, bell) ? main : bell;
     }
 
     // 位置 near から水平 radius 以内の、いちばん近い野営の焚き火 (なければ null)
@@ -182,11 +192,13 @@ public final class NpcSpawner {
         return at < 0 || now - at > RESPAWN_AFTER || now < at;
     }
 
-    // 鐘のまわり 3×3 チャンクの生き物が読み込まれているか (読み込み前に「いない」と見て二人目を立たせないため)
+    // 鐘のまわり (探す半径 SEARCH の届くチャンク) の生き物が読み込まれているか (読み込み前に「いない」と見て二人目を立たせないため。
+    // 都の鯨追いは鐘から 30 以上離れて立つので、3×3 では足りなかった)
     static boolean entitiesLoaded(ServerLevel level, BlockPos bell) {
         ChunkPos c = new ChunkPos(bell);
-        for (int dx = -1; dx <= 1; dx++) {
-            for (int dz = -1; dz <= 1; dz++) {
+        int r = (int) Math.ceil(SEARCH / 16.0);
+        for (int dx = -r; dx <= r; dx++) {
+            for (int dz = -r; dz <= r; dz++) {
                 if (!level.areEntitiesLoaded(ChunkPos.asLong(c.x + dx, c.z + dz))) {
                     return false;
                 }
@@ -198,6 +210,11 @@ public final class NpcSpawner {
     @Nullable
     static NpcEntity find(ServerLevel level, BlockPos bell, EntityType<NpcEntity> type) {
         List<NpcEntity> found = level.getEntities(type, new AABB(bell).inflate(SEARCH), NpcEntity::isAlive);
+        // 同じ村に同じ役が二人以上いたら (前の版の二重立ち)、一人を残して消す
+        for (int i = 1; i < found.size(); i++) {
+            SkyAbyss.LOGGER.info("[npc] removed a duplicate {} at {}", type.toShortString(), found.get(i).blockPosition());
+            found.get(i).discard();
+        }
         return found.isEmpty() ? null : found.get(0);
     }
 
