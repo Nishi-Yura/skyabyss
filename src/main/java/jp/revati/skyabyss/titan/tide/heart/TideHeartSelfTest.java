@@ -195,8 +195,8 @@ public final class TideHeartSelfTest {
         check(TideHeartArena.sealed(back), "entrance not sealed when the fight starts", failures);
         check(heart.getTags().contains(TitanBackTrials.HEART_TAG) && heart.isBound(), "heart not tagged / bound", failures);
         check(GROUP_A.equals(heart.groupId()) && GROUP_A.equals(TideHeartBattle.owner()), "the heart is not group A's / the shell bottom is not held by A", failures);
-        // 人数の倍率: パーティは 6 人まで (基本の硬さ 1.58 × (1 + 0.85 × 5))。一人で挑むと硬さ 1.58
-        check(Math.abs(TideHeart.scaleFor(jp.revati.skyabyss.party.Parties.MAX_MEMBERS) - 1.58f * 5.25f) < 1e-3
+        // 人数の倍率: パーティは 6 人まで (基本の硬さ BASE_RESIST × (1 + 0.85 × 5))。一人で挑むと硬さ BASE_RESIST
+        check(Math.abs(TideHeart.scaleFor(jp.revati.skyabyss.party.Parties.MAX_MEMBERS) - TideHeart.BASE_RESIST * 5.25f) < 1e-3
                 && Math.abs(TideHeart.scaleFor(1) - TideHeart.BASE_RESIST) < 1e-4, "heart scale for 6 is wrong", failures);
         // A の心臓は B には見えず、B を狙わない
         net.neoforged.neoforge.common.util.FakePlayer b = net.neoforged.neoforge.common.util.FakePlayerFactory.get(back,
@@ -213,7 +213,7 @@ public final class TideHeartSelfTest {
         check(TideHeart.phaseFor(1f) == 0 && TideHeart.phaseFor(0.67f) == 0 && TideHeart.phaseFor(0.65f) == 1
                 && TideHeart.phaseFor(0.34f) == 1 && TideHeart.phaseFor(0.32f) == 2, "phase thresholds are wrong", failures);
         check(Math.abs(TideHeart.takenFor(1, 10, 1) - 12f) < 1e-4 && Math.abs(TideHeart.takenFor(0, 10, 1) - 10f) < 1e-4
-                && Math.abs(TideHeart.takenFor(2, 1.58f * 1.85f * 10f, TideHeart.scaleFor(2)) - 10f) < 1e-3, "damage taken multipliers are wrong", failures);
+                && Math.abs(TideHeart.takenFor(2, TideHeart.BASE_RESIST * 1.85f * 10f, TideHeart.scaleFor(2)) - 10f) < 1e-3, "damage taken multipliers are wrong", failures);
         // 咆哮: 体力を 60% にすると、咆哮 (無敵) のあと段階 2
         heart.setHealth(heart.getMaxHealth() * 0.6f);
         tickHeart(heart, 3);

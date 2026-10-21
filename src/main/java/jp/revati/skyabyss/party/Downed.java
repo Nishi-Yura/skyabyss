@@ -58,9 +58,9 @@ import net.neoforged.neoforge.event.server.ServerStoppedEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
 
-// 仲間が起こせる仕組み (docs/design/10 の 10.12)。巨神の背中 (戦いの部屋を含む) で、仲間が残っている人の致命の傷は、
+// 仲間が起こせる仕組み (docs/design/10 の 10.12)。どこでも (巨神の背中・地上。2026-10-22 の二人の試遊で地上にも広げた)、同じ次元に起こせる仲間が残っている人の致命の傷は、
 // すぐには死なずに「倒れる」(DOWN_TICKS = 15 秒)。倒れた人は、その場で這い・何もできず・敵に狙われず・傷も受けない。
-// 仲間が REVIVE_TICKS (3 秒) 「使う」を押し続けて起こす (体力 3 割で戻り、短い守りが付く)。傷を受けた・離れたら中断。
+// 仲間が REVIVE_TICKS (1.5 秒。試遊で 3 秒は長かった) 「使う」を押し続けて起こす (体力 3 割で戻り、短い守りが付く)。傷を受けた・離れたら中断。
 // 誰も起こせないまま時間が来た・仲間が全員倒れた (残りの仲間がいない) ときは、そのまま死ぬ (再入場の決まり: GroupBossRoom / Reentry)。
 // 起こされた人は再入場の回数に数えない (死んでいないので)。一人用・仲間が背中にいない人は倒れずに普通に死ぬ。
 //   skyabyssRevive  既定 true。false だと倒れの状態を使わず、これまでどおり死ぬ
@@ -68,7 +68,7 @@ import net.neoforged.neoforge.network.PacketDistributor;
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class Downed {
     public static final int DOWN_TICKS = 300;
-    public static final int REVIVE_TICKS = 60;
+    public static final int REVIVE_TICKS = 30;
     // 「使う」を押している信号が途切れても続けてよい tick (通信の揺れ)
     public static final int HOLD_GRACE = 8;
     public static final double REACH = 3.5;
@@ -159,9 +159,9 @@ public final class Downed {
         return out;
     }
 
-    // 倒れてよい場面か: ルールが有効・背中の中・まだ倒れていない・起こせる仲間が残っている
+    // 倒れてよい場面か: ルールが有効・まだ倒れていない・同じ次元に起こせる仲間が残っている (背中でも地上でも)
     public static boolean mayDown(ServerPlayer player) {
-        return enabled(player.server) && TitanBacks.isBack(player.level().dimension()) && player.isAlive() && !player.isSpectator()
+        return enabled(player.server) && player.isAlive() && !player.isSpectator()
                 && !DOWNED.containsKey(player.getUUID()) && !rescuers(player).isEmpty();
     }
 

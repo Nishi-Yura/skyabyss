@@ -695,5 +695,9 @@
   "objective.skyabyss.route_step3": "Third trial: %s (%s)",
   "objective.skyabyss.route_mid": "Defeat %s",
   "objective.skyabyss.route_heart": "To the heart",
+  "trial.skyabyss.rarity.common": "Common",
+  "trial.skyabyss.rarity.rare": "Rare",
+  "trial.skyabyss.rarity.extreme": "Extreme",
+  "trial.skyabyss.rarity.abyss": "Abyss",
   "gui.skyabyss.party.route_step": "S%s "
 }

@@ -45,30 +45,47 @@ public final class StormBirdBuilder {
 
     // 鳥の体を置いたあと (部屋を掘る・中身を建てる)
     public static void buildRest(StormKit kit) {
-        long t0 = System.currentTimeMillis();
-        arrival(kit);
-        road(kit);
-        plaza(kit);
-        gate(kit);
-        tailHall(kit);
-        hub(kit);
-        StormWingBuilder.west(kit);
-        StormWingBuilder.east(kit);
-        StormHeadBuilder.front(kit);
-        keel(kit);
-        StormDeckBuilder.build(kit);
-        StormSilhouette.build(kit);
-        int skinned = kit.skin(StormBirdBuilder::styleAt);
-        int sealed = kit.seal(p -> openToSky(p.getX(), p.getY(), p.getZ()), StormBirdBuilder::styleAt);
-        int corners = kit.sealCorners(p -> openToSky(p.getX(), p.getY(), p.getZ()), StormBirdBuilder::styleAt);
-        StormRibShell.build(kit);
-        fixtures(kit);
-        // 鳥の背・翼の上の小さな縦穴 (落ちると出られない) を埋める (詰み監査)
-        if (BIRD.exists()) {
-            jp.revati.skyabyss.titan.WellFiller.fill(kit.level(), -330, 330, -190, 200, BIRD::top, 140);
+        jp.revati.skyabyss.titan.BackBuildJobs.Steps s = new jp.revati.skyabyss.titan.BackBuildJobs.Steps("storm back bird");
+        restSteps(s, kit);
+        while (!s.step(Long.MAX_VALUE)) {
+            // 最後まで
         }
-        SkyAbyss.LOGGER.info("Carved the storm bird: {} cells, {} wall blocks, {} sealed, {} corner gaps closed in {} ms", kit.carved().size(), skinned, sealed, corners,
-                System.currentTimeMillis() - t0);
+    }
+
+    // buildRest の手順 (順は同じ。tick に分けて進められる)
+    public static void restSteps(jp.revati.skyabyss.titan.BackBuildJobs.Steps s, StormKit kit) {
+        long[] t0 = new long[1];
+        int[] n = new int[3];
+        s.then("arrival", () -> {
+            t0[0] = System.currentTimeMillis();
+            arrival(kit);
+        });
+        s.then("road", () -> road(kit));
+        s.then("plaza", () -> plaza(kit));
+        s.then("gate", () -> gate(kit));
+        s.then("tail hall", () -> tailHall(kit));
+        s.then("hub", () -> hub(kit));
+        s.then("west", () -> StormWingBuilder.west(kit));
+        s.then("east", () -> StormWingBuilder.east(kit));
+        s.then("front", () -> StormHeadBuilder.front(kit));
+        s.then("keel", () -> keel(kit));
+        // 周回の風切りの骨の前の道 (版 31)。体を掘ったあと、壁の皮の前
+        s.then("long walk", () -> StormLongWalk.build(kit));
+        StormDeckBuilder.steps(s, kit);
+        s.then("silhouette", () -> StormSilhouette.build(kit));
+        s.then("skin", () -> n[0] = kit.skin(StormBirdBuilder::styleAt));
+        s.then("seal", () -> n[1] = kit.seal(p -> openToSky(p.getX(), p.getY(), p.getZ()), StormBirdBuilder::styleAt));
+        s.then("corners", () -> n[2] = kit.sealCorners(p -> openToSky(p.getX(), p.getY(), p.getZ()), StormBirdBuilder::styleAt));
+        s.then("rib shell", () -> StormRibShell.build(kit));
+        s.then("fixtures", () -> fixtures(kit));
+        // 鳥の背・翼の上の小さな縦穴 (落ちると出られない) を埋める (詰み監査)
+        s.then("wells", () -> {
+            if (BIRD.exists()) {
+                jp.revati.skyabyss.titan.WellFiller.fill(kit.level(), -330, 330, -190, 200, BIRD::top, 140);
+            }
+            SkyAbyss.LOGGER.info("Carved the storm bird: {} cells, {} wall blocks, {} sealed, {} corner gaps closed in {} ms", kit.carved().size(), n[0], n[1], n[2],
+                    System.currentTimeMillis() - t0[0]);
+        });
     }
 
     static Style styleAt(BlockPos p) {

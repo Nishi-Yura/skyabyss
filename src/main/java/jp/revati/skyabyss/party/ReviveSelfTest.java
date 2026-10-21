@@ -294,6 +294,26 @@ public final class ReviveSelfTest {
 
             // ---- 「ここ」の印
             pingTest(server, f, back, parties, a, b, c, solo, online);
+
+            // ---- 地上でも倒れる (同じ次元に仲間がいれば。2026-10-22)。地上に仲間のいない c は倒れない
+            check(f, !Downed.mayDown(c), "a player alone on the ground (mates on the back) may go down");
+            FakePlayer dd = player(over, "rv_d");
+            online.put(dd.getUUID(), dd);
+            PartyData.Party pc = parties.of(c.getUUID());
+            if (pc == null) {
+                pc = parties.create(c.getUUID(), "rv_c");
+            }
+            parties.add(pc, dd.getUUID(), "rv_d");
+            Downed.clearAll();
+            c.setHealth(c.getMaxHealth());
+            dmg[0] = 100f;
+            check(f, Downed.tryDown(c, 100f, over.damageSources().generic(), x -> dmg[0] = x) && Downed.isDowned(c), "a party player on the ground did not go down");
+            Downed.clearAll();
+            parties.remove(dd.getUUID());
+            online.remove(dd.getUUID());
+            check(f, Downed.REVIVE_TICKS <= 30, "reviving takes longer than 1.5 s: " + Downed.REVIVE_TICKS);
+
+
         } finally {
             parties.restore(snapshot, server.registryAccess());
             Downed.testLookup = null;

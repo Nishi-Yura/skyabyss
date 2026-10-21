@@ -112,16 +112,21 @@ public final class TelegraphRenderer {
         float areaA = hc ? 0.22f : 0.12f;
         float fillA = hc ? 0.50f : 0.34f;
         float curtain = hc ? 1.0f : 0.6f;
+        // 安全な場所の印は出さない (2026-10-22: 印は赤だけ)
+        if (style == Telegraph.Style.SAFE) {
+            return;
+        }
         float wm = style == Telegraph.Style.DANGER ? 0.1f : 0.3f;
-        // 縁の模様 (色だけに頼らない): 危険 = 実線、安全 = 破線、無害 = 点、特別な色 = 実線
+        // 縁の模様 (色だけに頼らない): 壁で止まる技 = 実線、壁を抜ける技 = 破線 (濃い赤)、押すだけ = 点
         Pattern pattern = switch (style) {
-            case SAFE -> Pattern.DASH;
+            case PIERCE -> Pattern.DASH;
             case HARMLESS -> Pattern.DOT;
             default -> Pattern.SOLID;
         };
         float prog = Math.min(1f, t / d.warn);
-        // 危険は橙から赤へ (当たる瞬間に白く光る)。ほかは色のまま
-        int rgb = style == Telegraph.Style.DANGER ? mix(0xFF9A2A, 0xFF2418, prog) : d.rgb;
+        // どれも赤。壁で止まる技は明るい赤から赤へ、壁を抜ける技は濃い赤のまま (当たる瞬間に白く光る)
+        int rgb = style == Telegraph.Style.PIERCE ? Telegraph.Style.PIERCE.rgb
+                : style == Telegraph.Style.HARMLESS ? Telegraph.Style.HARMLESS.rgb : mix(0xFF5A40, 0xFF1A10, prog);
         if (style == Telegraph.Style.HARMLESS) {
             areaA *= 0.7f;
             fillA *= 0.6f;
@@ -141,9 +146,6 @@ public final class TelegraphRenderer {
             }
             p.faces(g -> TelegraphGeometry.area(shape, g), rgb, areaA);
             p.faces(g -> TelegraphGeometry.fill(shape, prog, g), mix(rgb, 0xFFFFFF, wm * prog), fillA + 0.22f * prog + pulse);
-            if (shape.kind() == TelegraphShape.KIND_WAVE) {
-                lanes(p, shape, hc);
-            }
             p.lines(g -> TelegraphGeometry.outline(shape, g), mix(rgb, 0xFFFFFF, 0.55f), 0.95f, hc ? 0.2f : 0.12f, curtain * (0.55f + 0.45f * prog));
             p.pattern = Pattern.SOLID;
             p.lines(g -> TelegraphGeometry.front(shape, prog, g), mix(rgb, 0xFFFFFF, 0.85f), 1f, hc ? 0.3f : 0.2f, curtain * 0.6f);
@@ -162,9 +164,6 @@ public final class TelegraphRenderer {
             float q = after / d.active;
             TelegraphShape now = shape.at(q);
             p.faces(g -> TelegraphGeometry.area(shape, g), rgb, areaA * 0.7f);
-            if (shape.kind() == TelegraphShape.KIND_WAVE) {
-                lanes(p, shape, hc);
-            }
             p.faces(g -> TelegraphGeometry.swept(shape, q, g), rgb, fillA);
             p.faces(g -> TelegraphGeometry.area(now, g), mix(rgb, 0xFFFFFF, 0.5f), hc ? 0.85f : 0.65f);
             p.pattern = Pattern.SOLID;

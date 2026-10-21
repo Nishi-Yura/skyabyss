@@ -615,7 +615,7 @@ public final class TitanBackSelfTest {
             for (int x = pit.x1(); x <= pit.x2(); x++) {
                 for (int z = pit.z1(); z <= pit.z2(); z++) {
                     BlockState floor = level.getBlockState(new BlockPos(x, FLOOR, z));
-                    boolean ledge = (x == WA.x2() && z >= -38 && z <= -34) || isStep(courses, x, FLOOR, z) || isIslandColumn(x, z);
+                    boolean ledge = (x == WA.x2() && z >= -38 && z <= -34) || isStep(courses, x, FLOOR, z) || isIslandColumn(x, z) || isLedge(x, FLOOR, z);
                     if (!floor.isAir() && !ledge) {
                         failures.add("pit floor remains at " + x + "," + z + " (" + floor + ")");
                         return;
@@ -623,6 +623,20 @@ public final class TitanBackSelfTest {
                 }
             }
         }
+    }
+
+    // 谷の入口・出口の岩棚の石 (前の谷の岩棚は床と同じ高さ)
+    private static boolean isLedge(int x, int y, int z) {
+        for (CourseGenerator.Spec spec : ParkourCourses.ALL) {
+            for (List<int[]> cells : List.of(spec.start(), spec.end())) {
+                for (int[] c : cells) {
+                    if (c[0] == x && c[1] == y && c[2] == z) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
     }
 
     private static boolean isIslandColumn(int x, int z) {

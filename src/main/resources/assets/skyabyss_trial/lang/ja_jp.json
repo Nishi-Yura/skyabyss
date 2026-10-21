@@ -695,5 +695,9 @@
   "objective.skyabyss.route_step3": "第三の試練 %s（%s）",
   "objective.skyabyss.route_mid": "%sを倒そう",
   "objective.skyabyss.route_heart": "心臓へ",
+  "trial.skyabyss.rarity.common": "常",
+  "trial.skyabyss.rarity.rare": "稀",
+  "trial.skyabyss.rarity.extreme": "極",
+  "trial.skyabyss.rarity.abyss": "深淵",
   "gui.skyabyss.party.route_step": "段%s "
 }

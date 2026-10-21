@@ -49,7 +49,12 @@ public final class TrialRegions {
                     }
                 } else {
                     switch (key) {
-                        case "0" -> out.add(new AABB(-62, f - 3, -135, -22, f + 40, -16));
+                        case "0" -> {
+                            out.add(new AABB(-62, f - 3, -135, -22, f + 40, -16));
+                            // 前の谷 (周回の長い回廊。版 31): 休み場 WP0・谷 WP・通路 WPC
+                            out.add(new AABB(-42, f - 12, -11, -10, f + 20, 31));
+                            out.add(new AABB(-35, f - 3, -28, -27, f + 10, -10));
+                        }
                         case "1" -> out.add(new AABB(22, f - 3, -110, 62, f + 40, 82));
                         case "2" -> out.add(new AABB(-50, TitanBackLayout.MAZE_FLOOR - 4, -125, 50, f - 5, 8));
                         default -> {
@@ -87,7 +92,11 @@ public final class TrialRegions {
                     break;
                 }
                 switch (key) {
-                    case "west" -> out.add(new AABB(StormBackLayout.RIB_X1 - 20, y0, StormBackLayout.BONE_Z1 - 12, -23, 240, StormBackLayout.BONE_Z2 + 12));
+                    case "west" -> {
+                        out.add(new AABB(StormBackLayout.RIB_X1 - 20, y0, StormBackLayout.BONE_Z1 - 12, -23, 240, StormBackLayout.BONE_Z2 + 12));
+                        // 風の渡り (周回の前の道。版 31)
+                        out.add(new AABB(-110, StormBackLayout.BONE_FLOOR - 4, -106, -54, StormBackLayout.BONE_FLOOR + 12, StormBackLayout.BONE_Z1 - 1));
+                    }
                     case "east" -> out.add(new AABB(23, y0, StormBackLayout.BONE_Z1 - 12, StormBackLayout.RAIJU_NEST.getX() + 22, 240, StormBackLayout.BONE_Z2 + 12));
                     case "front" -> out.add(new AABB(-24, y0, -154, 24, 240, StormBackLayout.HUB.z1() - 1));
                     default -> {
@@ -104,7 +113,12 @@ public final class TrialRegions {
                     }
                 } else {
                     switch (key) {
-                        case "west" -> out.add(ember(EmberBackLayout.WEST));
+                        case "west" -> {
+                            out.add(ember(EmberBackLayout.WEST));
+                            // 前の湖 (周回の長い灰の道。版 31)
+                            out.add(ember(EmberBackLayout.WEST_PRE));
+                            out.add(ember(EmberBackLayout.WEST_PRE_PASS));
+                        }
                         case "east" -> {
                             out.add(ember(EmberBackLayout.EAST));
                             out.add(ember(EmberBackLayout.SMITH));

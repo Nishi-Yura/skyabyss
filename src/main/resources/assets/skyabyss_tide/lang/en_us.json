@@ -144,6 +144,7 @@
   "message.skyabyss.tide.campfire_hint": "Crouch and touch the campfire to give up the trial and return to the Tidegate Beach",
   "message.skyabyss.tide.pearl_taken": "The great clam opens and gives up the tide pearl. It is heavy. If your head goes under, the tide will come for it",
   "message.skyabyss.tide.clam_empty": "The great clam is closed",
+  "message.skyabyss.tide.second_pearl": "The tide stone swallowed the pearl. The tide reshapes the garden paths, and the great clam holds another pearl. Carry the second one along the new paths",
   "message.skyabyss.tide.pearl_full": "Your inventory is full; you cannot take the pearl",
   "message.skyabyss.tide.altar_hint": "Carry a tide pearl in hand, and reach the altar goal",
   "message.skyabyss.tide.pearl_pulled": "The tide pulled the pearl away (it is back in the clam)",

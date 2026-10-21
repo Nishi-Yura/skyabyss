@@ -280,7 +280,7 @@ public final class AshPath {
 
     // 灰溜まり (灰色の羊毛) に触れて満ちる。満ちたか
     public static boolean refillAt(ServerLevel level, ServerPlayer player, BlockPos pos) {
-        if (!EmberBackLayout.WEST.contains(pos) || !level.getBlockState(pos).is(Blocks.GRAY_WOOL)) {
+        if (!EmberBackLayout.inWestTrial(pos) || !level.getBlockState(pos).is(Blocks.GRAY_WOOL)) {
             return false;
         }
         boolean any = false;
@@ -305,7 +305,7 @@ public final class AshPath {
             return;
         }
         ServerLevel level = p.serverLevel();
-        if (!EmberBackLayout.WEST.contains(p.position())) {
+        if (!EmberBackLayout.inWestTrial(p.position())) {
             return;
         }
         if (level.getFluidState(p.blockPosition()).is(FluidTags.LAVA) || p.isInLava()) {
@@ -316,7 +316,8 @@ public final class AshPath {
     public static void engulf(ServerLevel level, ServerPlayer p) {
         BlockPos to = LAST_STAND.get(p.getUUID());
         if (to == null) {
-            to = EmberBackLayout.rest("w0").floor().above();
+            // 前の湖 (周回) なら、その北の岸の休み場
+            to = EmberBackLayout.rest(EmberBackLayout.WEST_PRE.contains(p.position()) ? "wp" : "w0").floor().above();
         }
         level.sendParticles(ParticleTypes.LAVA, p.getX(), p.getY() + 0.5, p.getZ(), 12, 0.3, 0.3, 0.3, 0.1);
         level.playSound(null, p.blockPosition(), EmberTrialSetup.ENGULF.get(), SoundSource.PLAYERS, 1f, 1f);
@@ -345,6 +346,10 @@ public final class AshPath {
         }
         if (now % 10 != 0) {
             return;
+        }
+        // 周回の前の湖: 最後に立った所だけを覚える (呑まれたらそこへ)
+        for (ServerPlayer p : EmberTrials.playersIn(Players.snapshot(level.players()), EmberBackLayout.WEST_PRE)) {
+            trackStand(level, p);
         }
         List<ServerPlayer> in = EmberTrials.playersIn(level, EmberBackLayout.WEST);
         for (ServerPlayer p : in) {

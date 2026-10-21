@@ -133,6 +133,8 @@ public final class TrialRuntime {
     // 順路 (docs/design/32 の 2 章): 今の段の試練の入口だけを、そのグループに開ける。越えた試練・これからの試練・引いていない試練は閉じて見える
     // (中ボスの段・心臓の段・順路の外では、どの試練の戸も閉じる。順路は入口の休み場へ運ぶので、戸から入ることはない)
     public static void syncGates(ServerLevel back, UUID group, String titan, TrialDraw.Draw draw) {
+        // 周回で長くなる歩の原型の、前の道の出口の戸 (LongWalk)
+        LongWalk.sync(back, group, titan, currentOf(back, group, draw));
         if (!TrialCatalog.deckPlaced(titan)) {
             return;
         }

@@ -618,7 +618,8 @@ public final class StormBackSelfTest {
         BlockState s = l.getBlockState(p);
         if (s.is(ModBlocks.SEALED_GATE.get())) {
             // 試練の入口の戸は順路の今の段だけに開く (docs/design/32)。順路は入口の休み場へ運ぶので、歩いて届くかはその戸を開いたものとして見る
-            return GroupGates.isOpen(l, walker, p) || jp.revati.skyabyss.trial.TrialRuntime.isTrialEntrance(p);
+            // 順路の部屋を分ける封じ (RouteSeals) は、背の形の検査では開いたものとして歩く (分かれているかは route rooms が見る)
+            return GroupGates.isOpen(l, walker, p) || jp.revati.skyabyss.trial.TrialRuntime.isTrialEntrance(p) || jp.revati.skyabyss.trial.RouteSeals.isSeal(l, p);
         }
         return s.getCollisionShape(l, p).isEmpty();
     }

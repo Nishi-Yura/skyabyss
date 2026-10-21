@@ -98,7 +98,9 @@ public final class StructureDump {
             // 雷翼の鳥は翼 x ±227・頭 z -124〜尾 132・y 110〜172 (StormBirdBuilder.BIRD)
             "storm_back", new Box(-232, 96, -136, 232, 176, 140),
             // 余燼の背は口から喉の坂の頭まで (体全体は大きいので口まわりだけ)
-            "ember_back", new Box(-45, 58, -185, 45, 100, -95));
+            "ember_back", new Box(-45, 58, -185, 45, 100, -95),
+            // 余燼の背の三つの試練と広間 (灰の道・鍛えの間・火守り。順路の調べ用)
+            "ember_trials", new Box(-130, 60, -140, 130, 150, 170));
     private static final int CHUNKS_PER_TICK = 6;
 
     private static final ArrayDeque<Job> JOBS = new ArrayDeque<>();
@@ -204,7 +206,7 @@ public final class StructureDump {
             job.point("east_stone", jp.revati.skyabyss.titan.storm.back.StormBackLayout.EAST_STONE.offset(-1, 0, 0));
             job.point("front_stone", jp.revati.skyabyss.titan.storm.back.StormBackLayout.FRONT_STONE.offset(1, 0, 0));
             job.point("eye_hall", jp.revati.skyabyss.titan.storm.back.StormBackLayout.EYE_HALL_CENTER.offset(1, 0, 6));
-        } else if (name.equals("ember_back")) {
+        } else if (name.startsWith("ember_")) {
             job.point("arrival", jp.revati.skyabyss.titan.ember.back.EmberBackLayout.ARRIVAL.above());
         } else {
             job.point("arrival", jp.revati.skyabyss.titan.tide.back.TideBackLayout.ARRIVAL);
@@ -229,7 +231,7 @@ public final class StructureDump {
             case "titan_back" -> TitanTravel.TITAN_BACK;
             case "tide_back" -> TideTravel.TIDE_BACK;
             case "storm_back" -> jp.revati.skyabyss.titan.storm.StormTravel.STORM_BACK;
-            case "ember_back" -> jp.revati.skyabyss.titan.ember.EmberIds.BACK;
+            case "ember_back", "ember_trials" -> jp.revati.skyabyss.titan.ember.EmberIds.BACK;
             default -> null;
         };
         ServerLevel level = dim == null ? null : server.getLevel(dim);
@@ -244,7 +246,7 @@ public final class StructureDump {
                 }
                 TitanBackBuilder.build(level, data);
             }
-        } else if (name.equals("ember_back")) {
+        } else if (name.startsWith("ember_")) {
             jp.revati.skyabyss.titan.ember.back.EmberBodyBuilder.ensureBuilt(level);
         } else if (name.equals("storm_back")) {
             jp.revati.skyabyss.titan.storm.back.StormBackBuilder.ensureBuilt(level);

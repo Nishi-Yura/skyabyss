@@ -196,6 +196,11 @@ public final class EmberTravel {
             leave(player);
             return;
         }
+        // 順路の区画の写し (背の次元の遠く。docs/design/32 の 5 章) の中は体の外ではない (R6 の通しで、写しのセルに着いた人が到着点へ戻されていた)
+        if (jp.revati.skyabyss.trial.TrialSlot.slotAt(player.getX(), player.getZ()) > 0) {
+            ON_PLAIN.remove(player.getUUID());
+            return;
+        }
         // 体の中心から 220 ブロックより外へ出ると、すぐ到着点へ
         if (player.tickCount % 20 == 0
                 && Math.hypot(player.getX() - EmberBackLayout.BODY_CX, player.getZ() - EmberBackLayout.BODY_CZ) > EmberBackLayout.FAR) {

@@ -572,6 +572,10 @@ public final class TideBackSelfTest {
     static boolean passable(ServerLevel l, BlockPos p) {
         BlockState s = l.getBlockState(p);
         if (s.is(ModBlocks.SEALED_GATE.get())) {
+            // 順路の部屋を分ける封じ (RouteSeals) は、背の形の検査では開いたものとして歩く (分かれているかは route rooms が見る)
+            if (jp.revati.skyabyss.trial.RouteSeals.isSeal(l, p)) {
+                return true;
+            }
             return walkGroup == null ? s.getValue(jp.revati.skyabyss.titan.dungeon.SealedGateBlock.OPEN)
                     : jp.revati.skyabyss.titan.group.GroupGates.isOpen(l, walkGroup, p);
         }

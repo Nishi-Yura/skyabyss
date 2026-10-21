@@ -65,7 +65,7 @@ import net.minecraft.world.phys.Vec3;
 //  憤怒だけの新しい技「炉打ち」(FORGE): 鎚が部屋を三度回って打ち (扇 90 度を 120 度ずつ)、最後に台の上 (中央の円) を打つ。
 // 段階 2・3 でも、技の組 (COMBO) が割り込む (二つ目の予告は 16〜30 tick 遅れて始まり、どの予告も 0.8 秒以上)。
 // 段階は同期データで全員の画面に届き、模型 (段階ごとの geo) とボスバーの見た目を決める。
-// 強さ: 最大体力 HeartBalance.MAX_HP (1000) × 基本の硬さ BASE_RESIST = 実質 2290 (02 の 5.6、13 の 8.2)。防御 9 / 靭性 7。想定は Lv 28〜30
+// 強さ: 最大体力 HeartBalance.MAX_HP (1000) × 基本の硬さ BASE_RESIST = 実質 1840 (02 の 5.6、13 の 8.2。2026-10-22 に 2290 から下げた)。防御 9 / 靭性 7。想定は Lv 28〜30
 public class EmberHeart extends HeartBoss {
     public static final int PHASE_COUNT = 3;
     public static final float PHASE_TWO_AT = 0.66f;
@@ -73,7 +73,7 @@ public class EmberHeart extends HeartBoss {
     public static final int ROAR_TICKS = 60;
     public static final float MAX_HEALTH = HeartBalance.MAX_HP;
     // 基本の硬さ: 受ける傷をこの値で割る (実質の体力 = 1000 × 2.29 = 2290。人数の分はさらに HeartBalance.partyScale を掛ける)
-    public static final float BASE_RESIST = 2.29f;
+    public static final float BASE_RESIST = 1.84f;   // 2026-10-22: 2.29 → 1.84 (帯の短い側へ)
     // 段階 2 (熔け落ちる殻) で受ける傷の倍率
     public static final float EXPOSED_TAKEN = 1.2f;
 
