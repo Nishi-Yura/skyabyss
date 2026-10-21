@@ -150,7 +150,20 @@ public final class SiteAudit {
             }
         }
         BackReach.Box box = new BackReach.Box(r[0] - 3, origin.getY() + bp.minY - 2, r[1] - 3, r[2] + 3, origin.getY() + bp.maxY + 5, r[3] + 3);
-        BuildAudit.scan(g, box, label, rep);
+        Report one = new Report();
+        BuildAudit.scan(g, box, label, one);
+        // 枠は部品の外へ 3 マス広い。範囲の外の戸・向きのある物 (近くの村の家の戸・かまど) は、この Mod の部品ではないので数えない
+        for (Finding f : one.findings) {
+            boolean foreign = (f.kind().startsWith("DOOR_") || f.kind().equals("ATTACH_FACING")) && f.pos() != null
+                    && (f.pos().getX() < r[0] || f.pos().getX() > r[2] || f.pos().getZ() < r[1] || f.pos().getZ() > r[3]);
+            if (foreign) {
+                rep.suppressed.add(f + " [outside the part: a neighbouring vanilla structure]");
+            } else {
+                rep.add(f);
+            }
+        }
+        rep.suppressed.addAll(one.suppressed);
+        rep.scanned += one.scanned;
         terrain(g, bp, rot, mirror, origin, label, rep);
     }
 
@@ -244,7 +257,7 @@ public final class SiteAudit {
             }
             if (total > 0 && raised * 10 >= total * 4) {
                 rep.add(new Finding(label, "SITE_RAISED", firstRaised, raised + " of " + total + " perimeter columns are lower than the floor (ground block "
-                        + origin.getY() + "), up to " + raisedMax));
+                        + origin.getY() + "), up to " + raisedMax + " (there: " + g.get(firstRaised) + " / above " + g.get(firstRaised.above()) + ")"));
             }
         }
         // 立つ場所の印 (部品の y は最初の段が 0)
@@ -259,11 +272,16 @@ public final class SiteAudit {
         }
     }
 
-    // その列の地面 (葉・木・草花を除いた、いちばん上の丸ごとのブロック) の y
+    // その列の地面 (葉・木・草花を除いた、いちばん上の丸ごとのブロック・土の道) の y。水面なら MIN_VALUE
     private static int groundTop(BuildAudit.Grid g, int x, int z, int from) {
         for (int y = from; y > from - 40; y--) {
             BlockState s = g.get(x, y, z);
-            if (BuildAudit.topOf(s) >= 1 && !s.is(BlockTags.LEAVES) && !s.is(BlockTags.LOGS)) {
+            // 水面の列は比べない (水の上の石の台は水面より 1 高い)。土の道・耕地・泥 (14〜15/16 の高さ) も地面
+            if (!s.getFluidState().isEmpty()) {
+                return Integer.MIN_VALUE;
+            }
+            if (BuildAudit.topOf(s) >= 0.85
+                    && !s.is(BlockTags.LEAVES) && !s.is(BlockTags.LOGS)) {
                 return y;
             }
         }

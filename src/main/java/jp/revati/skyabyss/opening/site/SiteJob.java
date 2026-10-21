@@ -837,6 +837,7 @@ public final class SiteJob {
         sealShoreWater();
         pruneOrphanVines();
         pruneStrayBlocks();
+        settle();
         post.finish(this);
         // 場所の高さを実際の地面に合わせる (立つ場所 = 上面 + 1)
         entry.pos = new BlockPos(origin.getX(), origin.getY() + 1, origin.getZ());
@@ -1052,6 +1053,312 @@ public final class SiteJob {
         entry.started = false;
         data.setDirty();
         phase = Phase.LOAD;
+    }
+
+    // ---------------------------------------------------------------- 仕上げ (すべての部品。build audit の地形の決まり)
+    // 地形の凹凸で残る浮き・くぼみ・漏れ・取り残しを、建て終わりにまとめて直す。部品ごとの仕上げ (Post) より前
+    private void settle() {
+        if (rect == null || origin == null) {
+            return;
+        }
+        int a = supportBase();
+        int b = fillDimples();
+        int c = clearFloatingPlants(origin, Math.max(rect[2] - rect[0], rect[3] - rect[1]) / 2 + 3);
+        int d = clearStand();
+        int e = sealFluids();
+        int f = pruneLoneNatural();
+        if (a + b + c + d + e + f > 0) {
+            SkyAbyss.LOGGER.info("Opening site {}: settle base {} dimples {} plants {} stand {} fluids {} lone {}", label, a, b, c, d, e, f);
+        }
+    }
+
+    // 部品の世界の列 (空気でないセルの列)
+    private LongOpenHashSet bpColumns() {
+        LongOpenHashSet cols = new LongOpenHashSet();
+        for (Blueprint.Cell c : bp.cells) {
+            if (!c.state().isAir()) {
+                BlockPos at = Blueprint.transform(c.x(), 0, c.z(), rot, mirror, origin);
+                cols.add(BlockPos.asLong(at.getX(), 0, at.getZ()));
+            }
+        }
+        return cols;
+    }
+
+    // 最下段 (部品の y <= 0) の下が空いている列を、下の地面まで埋める (build audit の SITE_FLOAT と同じ見方。地下の列・骨・足跡は除く)
+    private int supportBase() {
+        if (bp.anchor || !bp.relief.isEmpty()) {
+            return 0;
+        }
+        Map<Long, Integer> lowest = new HashMap<>();
+        for (Blueprint.Cell c : bp.cells) {
+            if (c.state().isAir() || c.y() > 0) {
+                continue;
+            }
+            BlockPos at = Blueprint.transform(c.x(), c.y() + 1, c.z(), rot, mirror, origin);
+            lowest.merge(BlockPos.asLong(at.getX(), 0, at.getZ()), at.getY(), Math::min);
+        }
+        LongOpenHashSet deep = new LongOpenHashSet();
+        for (long dc : bp.deepColumns) {
+            BlockPos at = Blueprint.transform(BlockPos.getX(dc), 0, BlockPos.getZ(dc), rot, mirror, origin);
+            deep.add(BlockPos.asLong(at.getX(), 0, at.getZ()));
+        }
+        if (bp.minY < -2 && deep.size() * 2 >= lowest.size()) {
+            return 0;
+        }
+        int n = 0;
+        BlockPos.MutableBlockPos p = new BlockPos.MutableBlockPos();
+        for (var en : lowest.entrySet()) {
+            long key = en.getKey();
+            if (deep.contains(key)) {
+                continue;
+            }
+            int x = BlockPos.getX(key);
+            int z = BlockPos.getZ(key);
+            for (int dy = 1; dy <= 8; dy++) {
+                p.set(x, en.getValue() - dy, z);
+                BlockState below = level.getBlockState(p);
+                if (!below.getFluidState().isEmpty() || !below.getCollisionShape(level, p).isEmpty()) {
+                    break;
+                }
+                level.setBlock(p, fillState, FLAGS);
+                n++;
+            }
+        }
+        return n;
+    }
+
+    // まわり 4 方向が同じ高さなのに、その 1 列だけ低いくぼみを埋める (build audit の FLOOR_DIMPLE)。
+    // 部品の列と足跡の地形は 1 段だけ (わざとの穴・縦穴を埋めない)、外の地面は 4 段まで。くぼみの上が空気でない列 (はしご・松明) は触らない
+    private int fillDimples() {
+        LongOpenHashSet cols = bpColumns();
+        int maxDeep = bp.relief.isEmpty() ? 4 : 1;
+        int n = fillLocalDimples();
+        for (int x = rect[0] - 3; x <= rect[2] + 3; x++) {
+            for (int z = rect[1] - 3; z <= rect[3] + 3; z++) {
+                int top = surfaceY(x, z);
+                if (top == Integer.MIN_VALUE) {
+                    continue;
+                }
+                int around = Integer.MIN_VALUE;
+                boolean even = true;
+                for (int[] d : new int[][] {{1, 0}, {-1, 0}, {0, 1}, {0, -1}}) {
+                    int t = surfaceY(x + d[0], z + d[1]);
+                    if (around == Integer.MIN_VALUE) {
+                        around = t;
+                    }
+                    if (t == Integer.MIN_VALUE || t != around) {
+                        even = false;
+                        break;
+                    }
+                }
+                int gap = around - top;
+                if (!even || gap < 1 || gap > (cols.contains(BlockPos.asLong(x, 0, z)) ? 1 : maxDeep)) {
+                    continue;
+                }
+                boolean clear = true;
+                for (int y = top + 1; y <= around + 2 && clear; y++) {
+                    BlockPos q = new BlockPos(x, y, z);
+                    BlockState o = level.getBlockState(q);
+                    clear = o.isAir() || (naturalAbove(o) && o.getFluidState().isEmpty() && o.getCollisionShape(level, q).isEmpty() && !o.is(Blocks.VINE));
+                }
+                if (!clear) {
+                    continue;
+                }
+                BlockState skin = level.getBlockState(new BlockPos(x + 1, around, z));
+                BlockState under = level.getBlockState(new BlockPos(x, top, z));
+                for (int y = top + 1; y <= around; y++) {
+                    level.setBlock(new BlockPos(x, y, z), y == around ? skin : under, FLAGS);
+                }
+                n++;
+            }
+        }
+        return n;
+    }
+
+    // どの高さでも (骨のあばらの下など、上に別の物がある列も): 丸ごとの床の 1 マスが、4 方向の 1 高い床に囲まれて 1 低いなら、その上を隣の床で埋める
+    private int fillLocalDimples() {
+        int n = 0;
+        int y0 = origin.getY() + Math.min(bp.minY, 0) - 6;
+        int y1 = origin.getY() + Math.max(bp.maxY, 3) + 2;
+        for (int x = rect[0] - 3; x <= rect[2] + 3; x++) {
+            for (int z = rect[1] - 3; z <= rect[3] + 3; z++) {
+                for (int y = y0; y <= y1; y++) {
+                    if (!fullAt(x, y, z) || !clearAt(x, y + 1, z) || !clearAt(x, y + 2, z)) {
+                        continue;
+                    }
+                    boolean ring = true;
+                    for (int[] d : new int[][] {{1, 0}, {-1, 0}, {0, 1}, {0, -1}}) {
+                        int nx = x + d[0];
+                        int nz = z + d[1];
+                        if (!fullAt(nx, y + 1, nz) || !clearAt(nx, y + 2, nz) || !clearAt(nx, y + 3, nz)) {
+                            ring = false;
+                            break;
+                        }
+                    }
+                    if (ring) {
+                        level.setBlock(new BlockPos(x, y + 1, z), level.getBlockState(new BlockPos(x + 1, y + 1, z)), FLAGS);
+                        n++;
+                    }
+                }
+            }
+        }
+        return n;
+    }
+
+    private boolean fullAt(int x, int y, int z) {
+        BlockPos q = new BlockPos(x, y, z);
+        BlockState s = level.getBlockState(q);
+        return s.getFluidState().isEmpty() && !s.is(BlockTags.LEAVES) && Block.isShapeFullBlock(s.getCollisionShape(level, q));
+    }
+
+    private boolean clearAt(int x, int y, int z) {
+        BlockPos q = new BlockPos(x, y, z);
+        BlockState s = level.getBlockState(q);
+        return s.getFluidState().isEmpty() && s.getCollisionShape(level, q).isEmpty() && !s.is(Blocks.LADDER) && !s.is(Blocks.VINE);
+    }
+
+    // 列の上面 (空気・草花・はしごなどを抜けた、いちばん上の丸ごとの固いブロック) の y。水・葉・木・丸ごとでないブロックが上面なら MIN_VALUE
+    private int surfaceY(int x, int z) {
+        BlockPos.MutableBlockPos p = new BlockPos.MutableBlockPos();
+        for (int y = origin.getY() + Math.max(bp.maxY, 3) + 4; y >= origin.getY() + Math.min(bp.minY, 0) - 8; y--) {
+            p.set(x, y, z);
+            BlockState s = level.getBlockState(p);
+            if (!s.getFluidState().isEmpty()) {
+                return Integer.MIN_VALUE;
+            }
+            if (s.getCollisionShape(level, p).isEmpty()) {
+                continue;
+            }
+            if (s.is(BlockTags.LEAVES) || s.is(BlockTags.LOGS) || !Block.isShapeFullBlock(s.getCollisionShape(level, p))) {
+                return Integer.MIN_VALUE;
+            }
+            return y;
+        }
+        return Integer.MIN_VALUE;
+    }
+
+    // 中心 c のまわり (水平 r・高さ -4〜部品の高さ +2) で、足もとの支えをなくした草花・作物を消す (build audit の ATTACH_SUPPORT)。消した数
+    public int clearFloatingPlants(BlockPos c, int r) {
+        int n = 0;
+        int top = Math.max(6, bp.maxY + 2);
+        for (BlockPos p : BlockPos.betweenClosed(c.offset(-r, -4, -r), c.offset(r, top, r))) {
+            BlockState st = level.getBlockState(p);
+            if (!(st.getBlock() instanceof net.minecraft.world.level.block.BushBlock) || !st.getFluidState().isEmpty()) {
+                continue;
+            }
+            BlockState below = level.getBlockState(p.below());
+            if (below.isAir() || below.getCollisionShape(level, p.below()).isEmpty() && below.getBlock() != st.getBlock()) {
+                level.setBlock(p.immutable(), Blocks.AIR.defaultBlockState(), FLAGS);
+                n++;
+            }
+        }
+        return n;
+    }
+
+    // 立つ場所の印 (stand) が自然の地面に埋まっていれば掘り、足もとが空なら埋める (build audit の SITE_STAND)
+    private int clearStand() {
+        BlockPos at = mark("stand");
+        if (at == null) {
+            return 0;
+        }
+        int n = 0;
+        for (BlockPos q : new BlockPos[] {at, at.above()}) {
+            BlockState s = level.getBlockState(q);
+            if (!s.isAir() && (naturalGround(s) || naturalAbove(s)) && s.getFluidState().isEmpty()) {
+                level.setBlock(q, Blocks.AIR.defaultBlockState(), FLAGS);
+                n++;
+            }
+        }
+        BlockState below = level.getBlockState(at.below());
+        if (below.getFluidState().isEmpty() && below.getCollisionShape(level, at.below()).isEmpty()) {
+            level.setBlock(at.below(), topState, FLAGS);
+            n++;
+        }
+        return n;
+    }
+
+    // 範囲のまわり (3 マス) の水・溶岩の源の横・下の空気を、その下のブロック (なければ土・石) で埋める (build audit の FLUID_LEAK)
+    private int sealFluids() {
+        int n = 0;
+        BlockPos.MutableBlockPos p = new BlockPos.MutableBlockPos();
+        BlockPos.MutableBlockPos q = new BlockPos.MutableBlockPos();
+        int y0 = origin.getY() + Math.min(bp.minY, 0) - 10;
+        int y1 = origin.getY() + Math.max(bp.maxY, 2) + 2;
+        net.minecraft.core.Direction[] dirs = {net.minecraft.core.Direction.DOWN, net.minecraft.core.Direction.NORTH, net.minecraft.core.Direction.EAST,
+                net.minecraft.core.Direction.SOUTH, net.minecraft.core.Direction.WEST};
+        for (int pass = 0; pass < 3; pass++) {
+            int before = n;
+            for (int x = rect[0] - 3; x <= rect[2] + 3; x++) {
+                for (int z = rect[1] - 3; z <= rect[3] + 3; z++) {
+                    for (int y = y1; y >= y0; y--) {
+                        p.set(x, y, z);
+                        BlockState s = level.getBlockState(p);
+                        if (!s.getFluidState().isSource() || !(s.is(Blocks.WATER) || s.is(Blocks.LAVA))) {
+                            continue;
+                        }
+                        for (net.minecraft.core.Direction d : dirs) {
+                            q.set(p).move(d);
+                            BlockState nb = level.getBlockState(q);
+                            if (nb.isAir() || (nb.getFluidState().isEmpty() && nb.canBeReplaced() && nb.getCollisionShape(level, q).isEmpty())) {
+                                BlockPos qb = q.below();
+                                BlockState under = level.getBlockState(qb);
+                                BlockState fill = under.isSolidRender(level, qb) && !under.getBlock().hasDynamicShape() && under.getFluidState().isEmpty() ? under
+                                        : s.is(Blocks.LAVA) ? Blocks.STONE.defaultBlockState() : Blocks.DIRT.defaultBlockState();
+                                level.setBlock(q, fill, FLAGS);
+                                n++;
+                            }
+                        }
+                    }
+                }
+            }
+            if (n == before) {
+                break;
+            }
+        }
+        return n;
+    }
+
+    // 範囲のまわり (3 マス) で、まわり 26 マスに固いブロックが無い自然のブロック (割れた氷・削り残しの土) を消す (build audit の FLOAT_BLOCK)。
+    // 氷は、下か横が水なら水に戻す
+    private int pruneLoneNatural() {
+        int n = 0;
+        BlockPos.MutableBlockPos p = new BlockPos.MutableBlockPos();
+        BlockPos.MutableBlockPos q = new BlockPos.MutableBlockPos();
+        int y0 = origin.getY() + Math.min(bp.minY, 0) - 4;
+        int y1 = origin.getY() + Math.max(bp.maxY, 2) + 4;
+        for (int x = rect[0] - 3; x <= rect[2] + 3; x++) {
+            for (int z = rect[1] - 3; z <= rect[3] + 3; z++) {
+                for (int y = y1; y >= y0; y--) {
+                    p.set(x, y, z);
+                    BlockState s = level.getBlockState(p);
+                    if (s.isAir() || s.getCollisionShape(level, p).isEmpty() || !naturalGround(s)) {
+                        continue;
+                    }
+                    boolean alone = true;
+                    boolean water = false;
+                    for (int dx = -1; dx <= 1 && alone; dx++) {
+                        for (int dy = -1; dy <= 1 && alone; dy++) {
+                            for (int dz = -1; dz <= 1; dz++) {
+                                if ((dx | dy | dz) == 0) {
+                                    continue;
+                                }
+                                BlockState o = level.getBlockState(q.set(x + dx, y + dy, z + dz));
+                                if (!o.getCollisionShape(level, q).isEmpty()) {
+                                    alone = false;
+                                    break;
+                                }
+                                water |= o.is(Blocks.WATER) && dy <= 0;
+                            }
+                        }
+                    }
+                    if (alone) {
+                        level.setBlock(p, s.is(BlockTags.ICE) && water ? Blocks.WATER.defaultBlockState() : Blocks.AIR.defaultBlockState(), FLAGS);
+                        n++;
+                    }
+                }
+            }
+        }
+        return n;
     }
 
     // ---------------------------------------------------------------- 道具

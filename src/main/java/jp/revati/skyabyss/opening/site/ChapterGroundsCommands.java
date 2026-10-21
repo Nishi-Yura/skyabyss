@@ -39,6 +39,7 @@ public final class ChapterGroundsCommands {
         event.getDispatcher().register(Commands.literal(SkyAbyss.MODID).requires(s -> s.hasPermission(2))
                 .then(Commands.literal("dev").then(Commands.literal("grounds")
                         .then(Commands.literal("info").executes(ChapterGroundsCommands::info))
+                        .then(Commands.literal("sites").executes(ChapterGroundsCommands::sites))
                         .then(Commands.literal("prepare").then(Commands.argument("chapter", StringArgumentType.word()).executes(ChapterGroundsCommands::prepare)))
                         .then(Commands.literal("shrine").then(Commands.argument("chapter", StringArgumentType.word()).executes(ChapterGroundsCommands::shrine)))
                         .then(Commands.literal("go").then(Commands.argument("chapter", StringArgumentType.word()).then(Commands.argument("what", StringArgumentType.word())
@@ -109,6 +110,45 @@ public final class ChapterGroundsCommands {
         return 1;
     }
 
+    // 建った場所の一覧 (種類・番号・部品・位置) をログへ。撮影の台本を書くとき用
+    private static int sites(CommandContext<CommandSourceStack> ctx) {
+        SiteData data = SiteData.get(ctx.getSource().getServer().overworld());
+        StringBuilder sb = new StringBuilder("built sites:");
+        for (SiteData.Entry e : data.allEntries()) {
+            if (e.built) {
+                sb.append("\n  ").append(e.kind).append(e.index).append(' ').append(e.siteId).append(" bp=").append(e.blueprint).append(' ').append(e.pos.toShortString());
+            }
+        }
+        String s = sb.toString();
+        SkyAbyss.LOGGER.info(s);
+        ctx.getSource().sendSuccess(() -> Component.literal(s), false);
+        return 1;
+    }
+
+    // 建った場所を、部品の名前か場所の ID で (名前.n で n 番目)。なければ null
+    private static BlockPos site(MinecraftServer server, String what) {
+        String name = what;
+        int nth = 0;
+        int dot = what.lastIndexOf('.');
+        if (dot > 0) {
+            try {
+                nth = Integer.parseInt(what.substring(dot + 1));
+                name = what.substring(0, dot);
+            } catch (NumberFormatException ex) {
+                // 名前に点がある
+            }
+        }
+        int seen = 0;
+        for (SiteData.Entry e : SiteData.get(server.overworld()).allEntries()) {
+            if (e.built && (name.equals(e.blueprint) || name.equals(e.siteId) || name.equals(e.kind))) {
+                if (seen++ == nth) {
+                    return e.pos;
+                }
+            }
+        }
+        return null;
+    }
+
     private static int go(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
         MinecraftServer server = ctx.getSource().getServer();
         Chapters ch = chapter(StringArgumentType.getString(ctx, "chapter"));
@@ -122,7 +162,8 @@ public final class ChapterGroundsCommands {
             case "shrine" -> g.shrine;
             case "sea" -> g.sea;
             case "road" -> g.road.isEmpty() ? null : g.road.get(g.road.size() / 2);
-            default -> g.center;
+            case "center" -> g.center;
+            default -> site(server, StringArgumentType.getString(ctx, "what"));
         };
         if (at == null) {
             ctx.getSource().sendFailure(Component.literal("that point is not set"));
