@@ -1,0 +1,55 @@
+{
+  "npc": "skyabyss:attendant_mapmaker",
+  "extends": true,
+  "add_options": {
+    "menu": {
+      "before": "about",
+      "options": [
+        {
+          "id": "town_rumor",
+          "goto": "town_rumor",
+          "kind": "talk"
+        },
+        {
+          "id": "town_draw",
+          "goto": "town_draw",
+          "kind": "talk"
+        }
+      ]
+    }
+  },
+  "nodes": {
+    "town_rumor": {
+      "face": "neutral",
+      "do": [
+        {
+          "type": "town",
+          "act": "mapmaker"
+        }
+      ],
+      "options": [
+        {
+          "id": "ok",
+          "goto": "end",
+          "kind": "talk"
+        }
+      ]
+    },
+    "town_draw": {
+      "face": "neutral",
+      "do": [
+        {
+          "type": "town",
+          "act": "mapmaker_draw"
+        }
+      ],
+      "options": [
+        {
+          "id": "ok",
+          "goto": "end",
+          "kind": "talk"
+        }
+      ]
+    }
+  }
+}

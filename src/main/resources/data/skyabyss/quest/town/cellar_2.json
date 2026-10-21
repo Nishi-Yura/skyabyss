@@ -1,0 +1,46 @@
+{
+  "category": "sub",
+  "order": 261,
+  "giver": "skyabyss:attendant_drunkard",
+  "chapter": "titan_storm",
+  "min_stage": 2,
+  "stages": [
+    {
+      "id": "listen",
+      "objectives": [
+        {
+          "id": "listen",
+          "type": "signal",
+          "target": "town_at:cellar_wall",
+          "party": false
+        }
+      ],
+      "do": [
+        {
+          "type": "lore",
+          "entry": "town/cellar_2"
+        }
+      ]
+    },
+    {
+      "id": "back",
+      "objectives": [
+        {
+          "id": "back",
+          "type": "talk",
+          "target": "skyabyss:attendant_drunkard",
+          "topic": "town_c2_back"
+        }
+      ]
+    }
+  ],
+  "reward": {
+    "xp": 40,
+    "items": [
+      {
+        "item": "skyabyss:bell_coin",
+        "count": 8
+      }
+    ]
+  }
+}

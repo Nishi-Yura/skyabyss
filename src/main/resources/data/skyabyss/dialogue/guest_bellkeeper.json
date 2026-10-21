@@ -1,0 +1,90 @@
+{
+  "npc": "skyabyss:guest_bellkeeper",
+  "entries": [
+    {
+      "node": "meet",
+      "if": {
+        "type": "quest",
+        "quest": "town/ch1_bell",
+        "is": "active",
+        "stage": "meet"
+      }
+    },
+    {
+      "node": "wait_ring",
+      "if": {
+        "type": "quest",
+        "quest": "town/ch1_bell",
+        "is": "active",
+        "stage": "ring"
+      }
+    },
+    {
+      "node": "back",
+      "if": {
+        "type": "quest",
+        "quest": "town/ch1_bell",
+        "is": "active",
+        "stage": "back"
+      }
+    },
+    {
+      "node": "idle"
+    }
+  ],
+  "nodes": {
+    "meet": {
+      "face": "neutral",
+      "next": "meet2"
+    },
+    "meet2": {
+      "face": "neutral",
+      "options": [
+        {
+          "id": "ok",
+          "goto": "end",
+          "kind": "talk"
+        },
+        {
+          "id": "why",
+          "goto": "why",
+          "kind": "talk"
+        }
+      ]
+    },
+    "why": {
+      "face": "neutral",
+      "options": [
+        {
+          "id": "ok",
+          "goto": "end",
+          "kind": "talk"
+        }
+      ]
+    },
+    "wait_ring": {
+      "face": "neutral"
+    },
+    "back": {
+      "face": "grave",
+      "next": "back2"
+    },
+    "back2": {
+      "face": "grave",
+      "next": "back3"
+    },
+    "back3": {
+      "face": "smile",
+      "options": [
+        {
+          "id": "ok",
+          "goto": "end",
+          "kind": "talk"
+        }
+      ]
+    },
+    "idle": {
+      "face": "neutral"
+    }
+  }
+}

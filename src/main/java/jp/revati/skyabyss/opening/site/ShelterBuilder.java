@@ -41,7 +41,7 @@ public final class ShelterBuilder {
         // 都: 門・閉じた施設・空き区画の碑と、市と住まいの村人 (docs/design/33 の 2.2)
         // 施設の碑 (docs/design/35 の 2.1): 道具屋・薬師・預かり所・宿・止まり木・訓練場・闇市・地図屋・酒場・古井戸
         for (String key : List.of("gate_n", "gate_e", "gate_s", "gate_w", "keep", "hall", "guild", "shrine", "smithy", "lot_1", "lot_2", "lot_3", "lot_4", "lot_5", "graveyard", "guild_roll",
-                "tool_shop", "apothecary", "storage", "inn", "perch", "training", "black_market", "mapmaker", "tavern", "well")) {
+                "tool_shop", "apothecary", "storage", "inn", "perch", "training", "black_market", "mapmaker", "tavern", "well", "well_song")) {
             BlockPos at = job.mark("sign_" + key);
             if (at != null && job.level.getBlockState(at).is(jp.revati.skyabyss.registry.ModBlocks.TABLET.get())) {
                 SiteKit.writeSign(job.level, at, "sign.skyabyss.capital." + (key.startsWith("lot_") ? "lot" : key));
@@ -51,8 +51,9 @@ public final class ShelterBuilder {
         for (String key : List.of("open_guild", "open_shrine", "open_keep", "open_keep2", "open_hall", "open_training",
                 "sign_guild", "sign_shrine", "sign_keep", "sign_hall", "sign_training", "chaser", "altar",
                 "stone_stone_whale", "stone_tide_shell", "stone_thunder_wing", "stone_ember",
-                // あとで町のクエスト・裏通りの仕組みが読む置き場 (35 の 3.3・3.5): 止まり木の台、古井戸の格子、酒場の地下の奥の壁
-                "perch", "old_well", "cellar_wall")) {
+                // あとで町のクエスト・裏通りの仕組みが読む置き場 (35 の 3.3・3.5・6.9): 止まり木の台、古井戸の格子と下の迷路、
+                // 酒場の地下の奥の壁と隠し通路 (cellar_gap の 2 マスを空気にすると開く)
+                "perch", "old_well", "well_down", "well_chest", "cellar_wall", "cellar_gap", "cellar_passage", "abyss_hint", "abyss_door")) {
             BlockPos at = job.mark(key);
             if (at != null) {
                 job.entry.extra(key, at);
@@ -85,6 +86,18 @@ public final class ShelterBuilder {
         if (!facility.isEmpty()) {
             int placed = jp.revati.skyabyss.facility.Attendants.ensureAll(job.level, facility);
             SkyAbyss.LOGGER.info("Opening capital: {} facility mark(s), {} attendant(s) placed", facility.size(), placed);
+        }
+        // 都の範囲に紛れ込んだバニラの村人・鉄の番人・行商人は外す (近くの村から来た者が地下や家に入り込まないように)。都の村人はこのあと置く
+        int[] r = job.bp.worldRect(job.rot, job.mirror, new BlockPos(job.origin.getX(), 0, job.origin.getZ()));
+        net.minecraft.world.phys.AABB box = new net.minecraft.world.phys.AABB(r[0] - 8, job.origin.getY() - 24, r[1] - 8, r[2] + 9, job.origin.getY() + 64, r[3] + 9);
+        int removed = 0;
+        for (net.minecraft.world.entity.Entity en : job.level.getEntitiesOfClass(net.minecraft.world.entity.Entity.class, box,
+                en -> en instanceof net.minecraft.world.entity.npc.AbstractVillager || en instanceof net.minecraft.world.entity.animal.IronGolem)) {
+            en.discard();
+            removed++;
+        }
+        if (removed > 0) {
+            SkyAbyss.LOGGER.info("Opening capital: removed {} vanilla villager(s) / golem(s) inside the capital", removed);
         }
         int villagers = 0;
         for (int i = 1; i <= 10; i++) {

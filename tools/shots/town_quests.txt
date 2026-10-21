@@ -1,0 +1,71 @@
+# 町のクエスト (docs/design/35 の 3.5) と裏通りの頼み (3.3): 限定の人の会話・目的の帯・墓守の頼みの選択肢
+# ./gradlew runShots -Pscript=tools/shots/town_quests.txt -PshotsName=town --no-daemon --offline  (絵は docs/review/town_quests/ へ写す)
+# 平らな世界で人を summon で立たせる (都がないので見回りは何もしない)
+world shots_town flat
+size 1280 720
+timeout 900
+render 8
+clouds off
+wait 100
+cmd skyabyss cinematic stop
+wait 10
+cmd skyabyss cinematic stop
+cmd time set noon
+cmd weather clear
+cmd gamerule doDaylightCycle false
+cmd gamerule doMobSpawning false
+cmd fill -16 -61 -10 16 -61 14 minecraft:polished_andesite destroy
+cmd kill @e[type=!minecraft:player,distance=..64]
+cmd summon skyabyss:town_guest -3 -60 0.5 {NoAI:1b,Guest:"apprentice",Rotation:[0f,0f]}
+cmd summon skyabyss:town_guest 0 -60 0.5 {NoAI:1b,Guest:"child",Rotation:[0f,0f]}
+cmd summon skyabyss:town_guest 3 -60 0.5 {NoAI:1b,Guest:"bellkeeper",Rotation:[0f,0f]}
+cmd summon skyabyss:attendant 7 -60 0.5 {NoAI:1b,Role:"gravekeeper",Rotation:[0f,0f],PersistenceRequired:1b}
+cmd gamemode spectator
+hud off
+camera minecraft:overworld 0 -58.4 6.5 180 8
+waitchunks
+wait 40
+shot guests_line
+cmd gamemode creative
+hud on
+cmd skyabyss town start town/ch1_apprentice
+camera minecraft:overworld -3 -60 3.0 180 0
+wait 10
+chat clear
+cmd skyabyss dev talk "skyabyss:guest_apprentice"
+wait 60
+shot dialogue_apprentice_meet
+cmd skyabyss dev talk say continue
+wait 60
+shot dialogue_apprentice_meet2
+cmd skyabyss dev talk say leave
+close
+wait 40
+shot band_clerk
+cmd skyabyss quest next @s "town/ch1_apprentice"
+wait 40
+shot band_hunt
+cmd skyabyss town start town/ch3_thunder
+camera minecraft:overworld 0 -60 2.5 180 0
+wait 10
+chat clear
+cmd skyabyss dev talk "skyabyss:guest_child"
+wait 60
+cmd skyabyss dev talk say continue
+wait 20
+cmd skyabyss dev talk say continue
+wait 60
+shot dialogue_child_find
+cmd skyabyss dev talk say leave
+close
+camera minecraft:overworld 7 -60 3.0 180 0
+wait 10
+chat clear
+cmd skyabyss dev talk "skyabyss:attendant_gravekeeper"
+wait 40
+cmd skyabyss dev talk say continue
+wait 60
+shot dialogue_gravekeeper_menu
+cmd skyabyss dev talk say leave
+close
+wait 20

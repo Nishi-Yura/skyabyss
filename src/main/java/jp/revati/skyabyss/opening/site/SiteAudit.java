@@ -164,12 +164,22 @@ public final class SiteAudit {
             BlockPos at = Blueprint.transform(c.x(), c.y() + 1, c.z(), rot, mirror, origin);
             lowest.merge(BlockPos.asLong(at.getX(), 0, at.getZ()), at.getY(), Math::min);
         }
-        boolean underground = bp.minY < -2;
+        // 地下のある列 (Blueprint.deepColumns。都の酒場の地下・井戸の下など) は浮きの検査から外す。
+        // 列ごとに外すので、地下を持つ部品でもほかの列は調べる。地下だけの部品 (列がすべて深い) は高さの検査も外す
+        java.util.Set<Long> deep = new java.util.HashSet<>();
+        for (long d : bp.deepColumns) {
+            BlockPos at = Blueprint.transform(BlockPos.getX(d), 0, BlockPos.getZ(d), rot, mirror, origin);
+            deep.add(BlockPos.asLong(at.getX(), 0, at.getZ()));
+        }
+        boolean underground = bp.minY < -2 && deep.size() * 2 >= lowest.size();
         if (!bp.anchor && bp.relief.isEmpty() && !underground) {
             int floating = 0;
             int maxGap = 0;
             BlockPos first = null;
             for (var en : lowest.entrySet()) {
+                if (deep.contains(en.getKey())) {
+                    continue;
+                }
                 int x = BlockPos.getX(en.getKey());
                 int z = BlockPos.getZ(en.getKey());
                 int y = en.getValue();
