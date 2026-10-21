@@ -87,7 +87,7 @@ public final class TitanShrine {
             case Titans.TIDE_SHELL -> new int[] {1, 0, 800};
             case Titans.THUNDER_WING -> new int[] {-1, 0, 1000};
             case Titans.EMBER -> new int[] {0, 1, 1200};
-            default -> new int[] {0, -1, 200};
+            default -> new int[] {0, -1, 250};
         };
     }
 
