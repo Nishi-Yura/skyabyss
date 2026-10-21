@@ -25,7 +25,7 @@ TMP = os.path.join(ROOT, "build", "tmp_artisan")
 def main():
     os.makedirs(TMP, exist_ok=True)
     mesh = json.load(open(os.path.join(SRC, "a", "artisan_colorways_a_mesh.json"), encoding="utf-8"))
-    mesh["bones"]["root"]["rotation"] = [0.0, 180.0, 0.0]
+    mesh["bones"]["root"]["rotation"] = [0.0, 0.0, 0.0]  # 回さない (2026-10-21: 180 度だとゲームの中で後ろ向き。頭の上下は NpcRenderer.ArtisanModel で符号を戻す)
     mesh_path = os.path.join(TMP, "artisan_mesh.json")
     with open(mesh_path, "w", encoding="utf-8") as f:
         json.dump(mesh, f, separators=(",", ":"))

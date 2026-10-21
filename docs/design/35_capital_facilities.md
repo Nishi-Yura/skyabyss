@@ -162,6 +162,7 @@
 | `npc_black_marketeer` `npc_gravekeeper` `npc_mapmaker` `npc_drunkard` | 裏通りの施設の中 | 同上 |
 | `inn_bed`（`inn_bed_2` …） | 宿の寝台（寝台の頭のブロックか、その横の床） | `FacilityActions.innBed` |
 
+- 今の都（建て直しの前）で置いている印: `npc_guild_clerk`（組合）・`npc_smith`（鍛冶場）・`npc_shrine_priest`（社）・`npc_keep_veteran`（砦）・`npc_archivist`（館）。`Town.attendants` が戸から 3 歩以上中へ、戸の筋を外して置く。ほかの役は建て直し（F1 の見取り図）で置く。
 - 印の座標は設計図のほかの印と同じ（部品の座標、y は地面の上の最初の段）。足もとの 2 マスは空けておく。
 - 試し: `/skyabyss facility mark <印>` で足もとを印として記し、`/skyabyss facility place` で立たせる。`spawn <役> [見た目 0..3]`・`shop <店>`・`stash`・`coins <枚>`・`look <0..3>` も（OP）。
 - 自己テスト: `SKYABYSS_SELFTEST=1 SKYABYSS_SELFTEST_ONLY=facility ./gradlew runServer`（`facility` と `facility guild`）。

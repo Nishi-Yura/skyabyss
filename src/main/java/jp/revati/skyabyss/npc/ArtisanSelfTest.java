@@ -144,7 +144,8 @@ public final class ArtisanSelfTest {
             String parent = m.has("parent") && !m.get("parent").isJsonNull() ? m.get("parent").getAsString() : null;
             check(f, (b.has("parent") ? b.get("parent").getAsString() : null) == null ? parent == null : b.get("parent").getAsString().equals(parent), "parent of " + name + " differs");
             if (name.equals("root")) {
-                check(f, b.has("rotation") && b.getAsJsonArray("rotation").get(1).getAsDouble() == 180.0, "the artisan root must be yawed 180 degrees like the other npcs");
+                // 2026-10-21: 180 度だとゲームの中で後ろ向きだった。root は回さず、頭の上下は NpcRenderer.ArtisanModel が符号を戻す (係の人と同じ)
+                check(f, !b.has("rotation") || b.getAsJsonArray("rotation").get(1).getAsDouble() == 0.0, "the artisan root must not be yawed (faces forward unrotated, like the attendants)");
             }
         }
         check(f, geoBones.equals(meshBones), "geo bones " + geoBones + " do not match mesh bones " + meshBones);

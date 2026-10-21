@@ -1624,12 +1624,45 @@ class Town:
         self.street_lamps()
         self.graveyard()
         self.mark('stand', 0, 0, 94)
+        self.attendants()
         n = 7
         for (x, z) in ((-30, 31), (30, 31), (-30, 65), (30, 65)):
             self.mark('villager_%d' % n, x, 0, z)
             n += 1
         self.v.connect()
         return self.v
+
+    # 係の人の印 (docs/design/35 の 6.6)。今ある施設の戸 (open_* の印や開いた正面) から中へ歩き、
+    # 戸から 3 歩以上入り、戸の筋から 2 横にずれた所で、足もと 2 マスが空き、下が床の最初の場所に置く。見つからない役は置かない (Attendants が飛ばす)
+    def attendants(self):
+        v = self.v
+        m = v.marks
+
+        def free(x, y, z):
+            return v.get(x, y, z) in (None, 'air') and v.get(x, y + 1, z) in (None, 'air')
+
+        def floor(x, y, z):
+            below = v.get(x, y - 1, z)
+            return (below not in (None, 'air') and 'slab[type=bottom' not in below and 'carpet' not in below) or (below is None and y == 0)
+
+        def put(name, start, step):
+            if start is None:
+                return
+            sx, sy, sz = start
+            dx, dz = step
+            for i in range(3, 12):
+                for side in (2, -2, 1, -1, 3, -3, 0):  # 戸の筋 (両開きの二枚目も) は空ける
+                    x = sx + dx * i + (1 if dx == 0 else 0) * side
+                    z = sz + dz * i + (1 if dz == 0 else 0) * side
+                    if free(x, sy, z) and floor(x, sy, z):
+                        self.mark(name, x, sy, z)
+                        return
+
+        put('npc_guild_clerk', m.get('open_guild'), (1, 0))
+        put('npc_shrine_priest', m.get('open_shrine'), (-1, 0))
+        put('npc_keep_veteran', m.get('open_keep'), (0, -1))
+        put('npc_archivist', m.get('open_hall'), (0, -1))
+        put('npc_smith', (22, 0, 26), (0, -1))
 
     def districts(self):
         # 段のふもとの通り (z -40..-36) の北は段。広場の東西の並び

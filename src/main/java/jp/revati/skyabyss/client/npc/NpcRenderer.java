@@ -51,6 +51,16 @@ public final class NpcRenderer {
             super("artisan");
         }
 
+        // 職人の geo は root を回していない (語り部は yaw 180。180 だと後ろ向きだった)。親が回っていない分、頭の上下の符号を戻す
+        @Override
+        public void setCustomAnimations(NpcEntity entity, long instanceId, software.bernie.geckolib.animation.AnimationState<NpcEntity> state) {
+            super.setCustomAnimations(entity, instanceId, state);
+            software.bernie.geckolib.cache.object.GeoBone head = getAnimationProcessor().getBone("head");
+            if (head != null) {
+                head.setRotX(-head.getRotX());
+            }
+        }
+
         // 職人には元の滑らかな版 (cube の geo) が無いので、LowPoly.enabled = false でも低ポリの骨と絵のまま (メッシュは描かれず、消えるだけで落ちない)
         @Override
         public ResourceLocation getModelResource(NpcEntity entity) {
