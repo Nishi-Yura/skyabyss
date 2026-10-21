@@ -326,8 +326,7 @@ public final class StormBirdBuilder {
         for (int lx : new int[] {-2, 2}) {
             kit.put(lx, a.floor(), 36, StormKit.LAMP);
         }
-        // 炉 (共鳴の炉) と飾りの焚き火、腰掛け
-        kit.put(10, a.floor() + 1, 43, ModBlocks.RESONANCE_FORGE.get().defaultBlockState());
+        // 飾りの焚き火と腰掛け (共鳴の炉は置かない。背の中には無い)
         kit.put(-10, a.floor() + 1, 43, jp.revati.skyabyss.relic.RelicBlocks.hearth(jp.revati.skyabyss.relic.RelicStyle.STORM, true));
         StormDeco.bench(kit, -12, -9, 30, 30, a.floor() + 1, Direction.SOUTH);
         // 羽軸の柱 (入口の左右)
