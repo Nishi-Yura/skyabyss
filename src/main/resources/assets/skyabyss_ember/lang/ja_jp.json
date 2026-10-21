@@ -588,5 +588,9 @@
   "checkpoint.skyabyss.ember_k_e08": "鋳型の間の入口",
   "checkpoint.skyabyss.ember_k_e11": "荷車の道の入口",
   "checkpoint.skyabyss.ember_k_e12": "大燠虫の巣の入口",
-  "checkpoint.skyabyss.ember_k_e04": "熾の道の入口"
+  "checkpoint.skyabyss.ember_k_e04": "熾の道の入口",
+  "sign.skyabyss.ember_board_hub_stones.1": "三つの石",
+  "sign.skyabyss.ember_board_hub_stones.2": "鳴らせば",
+  "sign.skyabyss.ember_board_hub_stones.3": "中央の炉が開く",
+  "sign.skyabyss.ember_board_hub_stones.4": "下の熾の底へ"
 }

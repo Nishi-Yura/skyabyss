@@ -294,12 +294,7 @@ public final class TideBackLayout {
             new Inscription("sign.skyabyss.lore_tide_west", new BlockPos(ALTAR[0] - 2, ALTAR_TOP + 2, ALTAR[1] - 4), Direction.SOUTH),
             new Inscription("sign.skyabyss.lore_tide_east", new BlockPos(85, LEDGE_FLOOR + 2, -39), Direction.SOUTH),
             new Inscription("sign.skyabyss.lore_tide_front", new BlockPos(-7, ROCK_TOP + 1, -119), Direction.UP),
-            new Inscription("sign.skyabyss.lore_tide_heart", new BlockPos(-4, 52, -8), Direction.EAST),
-            // 息の間: 展望の間の碑文 2 枚 (北の壁。窓の外)、縁の入口の泡の脇の立て札、舞台の再戦の台の脇の立て札
-            new Inscription("sign.skyabyss.lore_tide_breath_a", new BlockPos(-8, 208, -14), Direction.SOUTH),
-            new Inscription("sign.skyabyss.lore_tide_breath_b", new BlockPos(6, 208, -14), Direction.SOUTH),
-            new Inscription("sign.skyabyss.tide_breath_pad", new BlockPos(-13, 114, -2), Direction.UP),
-            new Inscription("sign.skyabyss.tide_breath_rematch", new BlockPos(-3, 161, -1), Direction.UP));
+            new Inscription("sign.skyabyss.lore_tide_heart", new BlockPos(-4, 52, -8), Direction.EAST));
 
     // ---------------------------------------------------------------- リセットで広間へ移す所 (試練の中)
     public static List<Area> trialAreas() {

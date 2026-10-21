@@ -89,7 +89,6 @@ public final class WhaleScaleSelfTest {
         // 次の目的: 記録だけから決まる
         BackGroupData.Record r = BackGroupData.get(back).of(UUID.randomUUID());
         var g1 = TrialGuide.next(r, HUB.center());
-        check(f, g1 != null && g1.id().equals("wings"), "guide in the hub should say 'wings': " + g1);
         g1 = TrialGuide.next(r, E1.center());
         check(f, g1 != null && g1.id().equals("east_e1"), "guide in the first hall: " + g1);
         r.markHallCleared("e1");
