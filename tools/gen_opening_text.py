@@ -311,4 +311,10 @@ def main() -> None:
 
 
 if __name__ == "__main__":
+    # 2026-10-21: 書き出したあとの手直し (ネタばれを抜いた文・目的の帯) がこの生成より新しい。走らせると上書きするので、
+    # 今の lang と json が正。直すときは json を直し、どうしても書き直すときだけ SKYABYSS_FORCE_GEN=1 で走らせる
+    import os, sys
+    if os.environ.get("SKYABYSS_FORCE_GEN") != "1":
+        print("gen_opening_text.py: 今の lang/json が正なので、何も書きません (書き直すなら SKYABYSS_FORCE_GEN=1)")
+        sys.exit(0)
     main()
