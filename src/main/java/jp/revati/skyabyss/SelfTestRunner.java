@@ -157,6 +157,8 @@ public final class SelfTestRunner {
         steps.addAll(jp.revati.skyabyss.npc.ArtisanSelfTest.steps());
         // 都の施設 (係の人・鐘銭・店・預かり所・宿・ギルド)。docs/design/35。SKYABYSS_SELFTEST_ONLY=facility
         steps.addAll(jp.revati.skyabyss.facility.FacilitySelfTest.steps());
+        // 町のクエスト (限定の人・噂・墓守・酔いどれ・地図屋・古井戸)。docs/design/35 の 3.3・3.5。SKYABYSS_SELFTEST_ONLY=town
+        steps.addAll(jp.revati.skyabyss.town.TownSelfTest.steps());
         // 倒れたときの決まりと墓 (docs/design/11 の 6 章)
         steps.add(Step.once("grave (load)", jp.revati.skyabyss.grave.GraveSelfTest::load));
         steps.add(Step.once("grave", 40, jp.revati.skyabyss.grave.GraveSelfTest::runSelfTest));

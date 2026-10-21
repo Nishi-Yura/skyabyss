@@ -1,0 +1,60 @@
+{
+  "category": "sub",
+  "order": 230,
+  "giver": "skyabyss:guest_child",
+  "chapter": "titan_storm",
+  "min_stage": 2,
+  "stages": [
+    {
+      "id": "find",
+      "objectives": [
+        {
+          "id": "find",
+          "type": "talk",
+          "target": "skyabyss:guest_child",
+          "topic": "find"
+        }
+      ]
+    },
+    {
+      "id": "escort",
+      "objectives": [
+        {
+          "id": "inn",
+          "type": "signal",
+          "target": "town_child_inn",
+          "party": false
+        }
+      ]
+    },
+    {
+      "id": "inn",
+      "objectives": [
+        {
+          "id": "ask",
+          "type": "talk",
+          "target": "skyabyss:attendant_innkeeper",
+          "topic": "town_child"
+        }
+      ]
+    }
+  ],
+  "reward": {
+    "xp": 70,
+    "items": [
+      {
+        "item": "skyabyss:bell_coin",
+        "count": 20
+      },
+      {
+        "item": "minecraft:paper",
+        "count": 1,
+        "token": "child_drawing",
+        "name": "item.skyabyss.town.child_drawing",
+        "lore": [
+          "item.skyabyss.town.child_drawing.lore"
+        ]
+      }
+    ]
+  }
+}

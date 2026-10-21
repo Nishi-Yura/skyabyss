@@ -1,0 +1,59 @@
+{
+  "npc": "skyabyss:attendant_innkeeper",
+  "extends": true,
+  "add_options": {
+    "menu": {
+      "before": "about",
+      "options": [
+        {
+          "id": "town_sea",
+          "goto": "town_sea",
+          "kind": "quest",
+          "if": {
+            "type": "quest",
+            "quest": "town/ch2_bard",
+            "is": "active",
+            "stage": "listen"
+          }
+        },
+        {
+          "id": "town_child",
+          "goto": "town_child",
+          "kind": "quest",
+          "if": {
+            "type": "quest",
+            "quest": "town/ch3_thunder",
+            "is": "active",
+            "stage": "inn"
+          }
+        }
+      ]
+    }
+  },
+  "nodes": {
+    "town_sea": {
+      "face": "grave",
+      "options": [
+        {
+          "id": "ok",
+          "goto": "end",
+          "kind": "talk"
+        }
+      ]
+    },
+    "town_child": {
+      "face": "smile",
+      "next": "town_child2"
+    },
+    "town_child2": {
+      "face": "grave",
+      "options": [
+        {
+          "id": "ok",
+          "goto": "end",
+          "kind": "talk"
+        }
+      ]
+    }
+  }
+}

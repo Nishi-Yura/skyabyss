@@ -1,0 +1,83 @@
+{
+  "category": "sub",
+  "order": 220,
+  "giver": "skyabyss:guest_fisher",
+  "chapter": "titan_tide",
+  "min_stage": 1,
+  "stages": [
+    {
+      "id": "meet",
+      "objectives": [
+        {
+          "id": "meet",
+          "type": "talk",
+          "target": "skyabyss:guest_fisher",
+          "topic": "meet"
+        }
+      ]
+    },
+    {
+      "id": "gather",
+      "objectives": [
+        {
+          "id": "string",
+          "type": "collect",
+          "target": "minecraft:string",
+          "count": 8
+        },
+        {
+          "id": "cod",
+          "type": "collect",
+          "target": "minecraft:cod",
+          "count": 3
+        }
+      ]
+    },
+    {
+      "id": "hand",
+      "objectives": [
+        {
+          "id": "hand",
+          "type": "signal",
+          "target": "town_hand:guest_fisher",
+          "party": false
+        }
+      ]
+    },
+    {
+      "id": "market",
+      "objectives": [
+        {
+          "id": "market",
+          "type": "talk",
+          "target": "skyabyss:attendant_tool_merchant",
+          "topic": "town_market"
+        }
+      ]
+    },
+    {
+      "id": "back",
+      "objectives": [
+        {
+          "id": "back",
+          "type": "talk",
+          "target": "skyabyss:guest_fisher",
+          "topic": "back"
+        }
+      ]
+    }
+  ],
+  "reward": {
+    "xp": 60,
+    "items": [
+      {
+        "item": "skyabyss:bell_coin",
+        "count": 20
+      },
+      {
+        "item": "minecraft:fishing_rod",
+        "count": 1
+      }
+    ]
+  }
+}

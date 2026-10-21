@@ -1,0 +1,9 @@
+{
+  "chapter": "titan_ember",
+  "order": 12,
+  "unlock": [
+    {
+      "type": "manual"
+    }
+  ]
+}

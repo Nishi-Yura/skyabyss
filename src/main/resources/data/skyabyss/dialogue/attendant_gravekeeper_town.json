@@ -1,0 +1,352 @@
+{
+  "npc": "skyabyss:attendant_gravekeeper",
+  "extends": true,
+  "add_options": {
+    "menu": {
+      "before": "about",
+      "options": [
+        {
+          "id": "town_grave1",
+          "goto": "town_g1_ask",
+          "kind": "quest",
+          "if": {
+            "type": "all",
+            "of": [
+              {
+                "type": "stage",
+                "min": 0
+              },
+              {
+                "type": "quest",
+                "quest": "town/grave_1",
+                "is": "none"
+              }
+            ]
+          },
+          "do": [
+            {
+              "type": "quest_start",
+              "quest": "town/grave_1"
+            }
+          ]
+        },
+        {
+          "id": "town_g1_hand",
+          "goto": "town_g1_done",
+          "kind": "give",
+          "if": {
+            "type": "all",
+            "of": [
+              {
+                "type": "quest",
+                "quest": "town/grave_1",
+                "is": "active",
+                "stage": "lay"
+              },
+              {
+                "type": "item",
+                "item": "#minecraft:small_flowers",
+                "count": 1
+              }
+            ]
+          },
+          "do": [
+            {
+              "type": "take",
+              "item": "#minecraft:small_flowers",
+              "count": 1
+            },
+            {
+              "type": "signal",
+              "signal": "town_hand:attendant_gravekeeper"
+            }
+          ]
+        },
+        {
+          "id": "town_grave2",
+          "goto": "town_g2_ask",
+          "kind": "quest",
+          "if": {
+            "type": "all",
+            "of": [
+              {
+                "type": "stage",
+                "min": 1
+              },
+              {
+                "type": "quest",
+                "quest": "town/grave_2",
+                "is": "none"
+              },
+              {
+                "type": "quest",
+                "quest": "town/grave_1",
+                "is": "done"
+              }
+            ]
+          },
+          "do": [
+            {
+              "type": "quest_start",
+              "quest": "town/grave_2"
+            }
+          ]
+        },
+        {
+          "id": "town_g2_hand",
+          "goto": "town_g2_done",
+          "kind": "give",
+          "if": {
+            "type": "all",
+            "of": [
+              {
+                "type": "quest",
+                "quest": "town/grave_2",
+                "is": "active",
+                "stage": "wash"
+              },
+              {
+                "type": "item",
+                "item": "minecraft:water_bucket",
+                "count": 1
+              }
+            ]
+          },
+          "do": [
+            {
+              "type": "take",
+              "item": "minecraft:water_bucket",
+              "count": 1
+            },
+            {
+              "type": "give",
+              "item": "minecraft:bucket",
+              "count": 1
+            },
+            {
+              "type": "signal",
+              "signal": "town_hand:attendant_gravekeeper"
+            }
+          ]
+        },
+        {
+          "id": "town_grave3",
+          "goto": "town_g3_ask",
+          "kind": "quest",
+          "if": {
+            "type": "all",
+            "of": [
+              {
+                "type": "stage",
+                "min": 2
+              },
+              {
+                "type": "quest",
+                "quest": "town/grave_3",
+                "is": "none"
+              },
+              {
+                "type": "quest",
+                "quest": "town/grave_2",
+                "is": "done"
+              }
+            ]
+          },
+          "do": [
+            {
+              "type": "quest_start",
+              "quest": "town/grave_3"
+            }
+          ]
+        },
+        {
+          "id": "town_g3_back",
+          "goto": "town_g3_back",
+          "kind": "quest",
+          "if": {
+            "type": "quest",
+            "quest": "town/grave_3",
+            "is": "active",
+            "stage": "back"
+          }
+        },
+        {
+          "id": "town_grave4",
+          "goto": "town_g4_ask",
+          "kind": "quest",
+          "if": {
+            "type": "all",
+            "of": [
+              {
+                "type": "stage",
+                "min": 3
+              },
+              {
+                "type": "quest",
+                "quest": "town/grave_4",
+                "is": "none"
+              },
+              {
+                "type": "quest",
+                "quest": "town/grave_3",
+                "is": "done"
+              }
+            ]
+          },
+          "do": [
+            {
+              "type": "quest_start",
+              "quest": "town/grave_4"
+            }
+          ]
+        },
+        {
+          "id": "town_g4_hand",
+          "goto": "town_g4_done",
+          "kind": "give",
+          "if": {
+            "type": "all",
+            "of": [
+              {
+                "type": "quest",
+                "quest": "town/grave_4",
+                "is": "active",
+                "stage": "light"
+              },
+              {
+                "type": "item",
+                "item": "minecraft:candle",
+                "count": 1
+              }
+            ]
+          },
+          "do": [
+            {
+              "type": "take",
+              "item": "minecraft:candle",
+              "count": 1
+            },
+            {
+              "type": "signal",
+              "signal": "town_hand:attendant_gravekeeper"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "nodes": {
+    "town_g1_ask": {
+      "face": "neutral",
+      "next": "town_g1_ask2"
+    },
+    "town_g1_ask2": {
+      "face": "neutral",
+      "options": [
+        {
+          "id": "ok",
+          "goto": "end",
+          "kind": "talk"
+        }
+      ]
+    },
+    "town_g1_done": {
+      "face": "neutral",
+      "next": "town_g1_done2"
+    },
+    "town_g1_done2": {
+      "face": "grave",
+      "options": [
+        {
+          "id": "ok",
+          "goto": "end",
+          "kind": "talk"
+        }
+      ]
+    },
+    "town_g2_ask": {
+      "face": "neutral",
+      "options": [
+        {
+          "id": "ok",
+          "goto": "end",
+          "kind": "talk"
+        }
+      ]
+    },
+    "town_g2_done": {
+      "face": "neutral",
+      "next": "town_g2_done2"
+    },
+    "town_g2_done2": {
+      "face": "grave",
+      "options": [
+        {
+          "id": "ok",
+          "goto": "end",
+          "kind": "talk"
+        }
+      ]
+    },
+    "town_g3_ask": {
+      "face": "grave",
+      "next": "town_g3_ask2"
+    },
+    "town_g3_ask2": {
+      "face": "grave",
+      "options": [
+        {
+          "id": "ok",
+          "goto": "end",
+          "kind": "talk"
+        }
+      ]
+    },
+    "town_g3_back": {
+      "face": "neutral",
+      "next": "town_g3_back2"
+    },
+    "town_g3_back2": {
+      "face": "grave",
+      "next": "town_g3_back3"
+    },
+    "town_g3_back3": {
+      "face": "neutral",
+      "options": [
+        {
+          "id": "ok",
+          "goto": "end",
+          "kind": "talk"
+        }
+      ]
+    },
+    "town_g4_ask": {
+      "face": "neutral",
+      "options": [
+        {
+          "id": "ok",
+          "goto": "end",
+          "kind": "talk"
+        }
+      ]
+    },
+    "town_g4_done": {
+      "face": "grave",
+      "next": "town_g4_done2"
+    },
+    "town_g4_done2": {
+      "face": "grave",
+      "next": "town_g4_done3"
+    },
+    "town_g4_done3": {
+      "face": "neutral",
+      "options": [
+        {
+          "id": "ok",
+          "goto": "end",
+          "kind": "talk"
+        }
+      ]
+    }
+  }
+}

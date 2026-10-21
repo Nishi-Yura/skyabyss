@@ -1,0 +1,148 @@
+{
+  "npc": "skyabyss:guest_fisher",
+  "entries": [
+    {
+      "node": "meet",
+      "if": {
+        "type": "quest",
+        "quest": "town/ch2_net",
+        "is": "active",
+        "stage": "meet"
+      }
+    },
+    {
+      "node": "wait_gather",
+      "if": {
+        "type": "quest",
+        "quest": "town/ch2_net",
+        "is": "active",
+        "stage": "gather"
+      }
+    },
+    {
+      "node": "hand_ask",
+      "if": {
+        "type": "quest",
+        "quest": "town/ch2_net",
+        "is": "active",
+        "stage": "hand"
+      }
+    },
+    {
+      "node": "wait_market",
+      "if": {
+        "type": "quest",
+        "quest": "town/ch2_net",
+        "is": "active",
+        "stage": "market"
+      }
+    },
+    {
+      "node": "back",
+      "if": {
+        "type": "quest",
+        "quest": "town/ch2_net",
+        "is": "active",
+        "stage": "back"
+      }
+    },
+    {
+      "node": "idle"
+    }
+  ],
+  "nodes": {
+    "meet": {
+      "face": "neutral",
+      "next": "meet2"
+    },
+    "meet2": {
+      "face": "neutral",
+      "options": [
+        {
+          "id": "ok",
+          "goto": "end",
+          "kind": "talk"
+        }
+      ]
+    },
+    "wait_gather": {
+      "face": "neutral"
+    },
+    "hand_ask": {
+      "face": "neutral",
+      "options": [
+        {
+          "id": "give",
+          "goto": "handed",
+          "kind": "give",
+          "if": {
+            "type": "all",
+            "of": [
+              {
+                "type": "item",
+                "item": "minecraft:string",
+                "count": 8
+              },
+              {
+                "type": "item",
+                "item": "minecraft:cod",
+                "count": 3
+              }
+            ]
+          },
+          "do": [
+            {
+              "type": "take",
+              "item": "minecraft:string",
+              "count": 8
+            },
+            {
+              "type": "take",
+              "item": "minecraft:cod",
+              "count": 3
+            },
+            {
+              "type": "signal",
+              "signal": "town_hand:guest_fisher"
+            }
+          ]
+        },
+        {
+          "id": "later",
+          "goto": "end",
+          "kind": "leave"
+        }
+      ]
+    },
+    "handed": {
+      "face": "smile",
+      "options": [
+        {
+          "id": "ok",
+          "goto": "end",
+          "kind": "talk"
+        }
+      ]
+    },
+    "wait_market": {
+      "face": "neutral"
+    },
+    "back": {
+      "face": "smile",
+      "next": "back2"
+    },
+    "back2": {
+      "face": "neutral",
+      "options": [
+        {
+          "id": "ok",
+          "goto": "end",
+          "kind": "talk"
+        }
+      ]
+    },
+    "idle": {
+      "face": "neutral"
+    }
+  }
+}

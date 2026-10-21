@@ -129,7 +129,12 @@ public final class NpcQuestSelfTest {
         List<Condition> conditions = new ArrayList<>();
         List<Action> actions = new ArrayList<>();
         for (Dialogue d : DialogueManager.all().values()) {
-            check(BuiltInRegistries.ENTITY_TYPE.containsKey(ResourceLocation.parse(d.role())), "dialogue for unknown entity " + d.role(), failures);
+            // 係の人 (attendant_<役>) と町のクエストの限定の人 (guest_<人>) は、エンティティの型一つに役を持つ
+            boolean known = BuiltInRegistries.ENTITY_TYPE.containsKey(ResourceLocation.parse(d.role()))
+                    || jp.revati.skyabyss.facility.AttendantRole.byDialogueRole(d.role()) != null
+                    || (d.role().startsWith(jp.revati.skyabyss.town.TownGuests.ROLE_PREFIX)
+                    && jp.revati.skyabyss.town.TownGuests.byId(d.role().substring(jp.revati.skyabyss.town.TownGuests.ROLE_PREFIX.length())) != null);
+            check(known, "dialogue for unknown entity " + d.role(), failures);
             d.entries().forEach(e -> conditions.add(e.condition()));
             for (Dialogue.Node n : d.nodes().values()) {
                 actions.addAll(n.actions());
@@ -161,7 +166,7 @@ public final class NpcQuestSelfTest {
             }
             // クエストを始める道がある (自動で始まるか、どこかの会話が始める)
             // 序章・一章の小要素 (story/ch1) の頼みは、章の小要素に着いたときにコードが始める (ChapterSites の onArrive)
-            boolean started = q.startWhen() != null || q.board() || q.id().startsWith("ch1/") || DialogueManager.all().values().stream().flatMap(d -> d.nodes().values().stream())
+            boolean started = q.startWhen() != null || q.board() || q.id().startsWith("ch1/") || rumorStarted(q.id()) || DialogueManager.all().values().stream().flatMap(d -> d.nodes().values().stream())
                     .anyMatch(n -> n.actions().stream().anyMatch(a -> a.type().equals("quest_start") && a.str("quest").equals(q.id()))
                             || n.options().stream().anyMatch(o -> o.actions().stream()
                             .anyMatch(a -> a.type().equals("quest_start") && a.str("quest").equals(q.id()))));
@@ -228,7 +233,8 @@ public final class NpcQuestSelfTest {
                 }
             }
             case "lore" -> o.targets().forEach(t -> check(LoreManager.catalog().entry(t) != null, w + ": unknown lore " + t, failures));
-            case "collect" -> check(Condition.item(o.targets().get(0)) != null, w + ": unknown item", failures);
+            case "collect" -> check(Condition.item(o.targets().get(0)) != null || (o.targets().get(0).startsWith("#") && QuestItems.known(o.targets().get(0))),
+                    w + ": unknown item", failures);
             // 雷翼の敵と心臓は別の担当が登録する (StormLore.PENDING)。まだないうちは数えるだけで、失敗にしない
             case "kill", "near" -> o.targets().forEach(t -> check(BuiltInRegistries.ENTITY_TYPE.containsKey(ResourceLocation.parse(t))
                     || jp.revati.skyabyss.titan.storm.lore.StormLore.pending(t), w + ": unknown entity " + t, failures));
@@ -277,7 +283,7 @@ public final class NpcQuestSelfTest {
             // 雷翼の背の周回のクエスト (*storm*) と風見鶏の文は skyabyss_storm にある (12 の 11.2 節、伝承の担当)
             // 語り部の墓の救いの文は skyabyss_grave にある (11 の 6 章)
             // 章ごとのクエスト・追加の会話の文は skyabyss_ch1〜ch4 にある
-            for (String ns : List.of("skyabyss_quest", "skyabyss_story", "skyabyss_storm", "skyabyss_grave", "skyabyss_ch1", "skyabyss_ch2", "skyabyss_ch3", "skyabyss_ch4", "skyabyss_vow")) {
+            for (String ns : List.of("skyabyss_quest", "skyabyss_story", "skyabyss_storm", "skyabyss_grave", "skyabyss_ch1", "skyabyss_ch2", "skyabyss_ch3", "skyabyss_ch4", "skyabyss_vow", "skyabyss_fac", "skyabyss_town")) {
                 JsonObject extra = json("/assets/" + ns + "/lang/" + code + ".json", failures);
                 if (extra != null) {
                     extra.entrySet().forEach(e -> {
@@ -738,5 +744,11 @@ public final class NpcQuestSelfTest {
             QuestManager.set(saved, List.of());
         }
         notes.add("kill credit: killer at any range, bystanders within the objective radius, wrong mobs ignored");
+    }
+
+    // 町のクエストの限定の人のクエストは、宿の女将の噂 (town.TownQuests.rumor) が始める
+    private static boolean rumorStarted(String id) {
+        jp.revati.skyabyss.town.TownQuests.TownQuest t = jp.revati.skyabyss.town.TownQuests.byId(id);
+        return t != null && t.kind() == jp.revati.skyabyss.town.TownQuests.Kind.GUEST;
     }
 }
