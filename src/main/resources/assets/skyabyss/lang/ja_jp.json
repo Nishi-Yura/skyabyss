@@ -695,6 +695,8 @@
   "message.skyabyss.lamp_needs": "灯の台だ（全部で %s つ）。光る海のイソギンチャクを持って触れよう",
   "message.skyabyss.lamp_bed_take": "光る海のイソギンチャクを摘んだ（手持ち %s / %s。灯は台の数と同じだけ）",
   "message.skyabyss.lamp_bed_full": "いまは摘めない（ともした灯と手持ちで %s つぶん。台の数と同じ）。ともせば、また育つ",
+  "message.skyabyss.lamp_one_at_a_time": "周回の水路は重い。灯は一度に二つまでしか持てない",
+  "message.skyabyss.lamp_bed_dormant": "この苗床は眠っている。灯は入口の苗床で摘もう",
   "message.skyabyss.lamp_tally": "数え石: 灯 %s / %s。全部の台にともせば、出口の戸が開く",
   "message.skyabyss.lamp_gate_open": "水路の奥で、重い戸が開いた。出口の泡の柱へ",
   "message.skyabyss.lamp_band": "灯 %s / %s　灯の台へ（手持ち %s）",

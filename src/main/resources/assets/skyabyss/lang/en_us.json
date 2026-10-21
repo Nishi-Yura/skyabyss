@@ -695,6 +695,8 @@
   "message.skyabyss.lamp_needs": "A lamp stand (%s in all). Touch it holding a glowing anemone",
   "message.skyabyss.lamp_bed_take": "You picked a glowing anemone (carrying %s / %s, as many as there are stands)",
   "message.skyabyss.lamp_bed_full": "Nothing to pick now (lit and carried already make %s, one per stand). Light one and it grows back",
+  "message.skyabyss.lamp_one_at_a_time": "The waterway weighs more on a replay. You can carry only two lights at a time",
+  "message.skyabyss.lamp_bed_dormant": "This bed is dormant. Pick lights at the beds by the entrance",
   "message.skyabyss.lamp_tally": "Tally stone: lamps %s / %s. Light every stand and the exit door opens",
   "message.skyabyss.lamp_gate_open": "Deep in the waterway, a heavy door opened. Make for the bubble column",
   "message.skyabyss.lamp_band": "Lamps %s / %s  Next stand (carrying %s)",

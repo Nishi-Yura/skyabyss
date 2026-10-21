@@ -137,6 +137,8 @@ public final class TitanBackTrials {
             new Checkpoint("w0", W0, W0.center().offset(2, 0, 2)),
             new Checkpoint("w1", W1, W1.center().offset(2, 0, 2)),
             new Checkpoint("w2", W2, W2.center().offset(2, 0, 2)),
+            // 前の谷の休み場 (周回の長い裂け目の回廊。版 31。trial/LongWalk)
+            new Checkpoint("wp", WP0, WP0.center().offset(2, 0, 2)),
             // 谷の中ほどの島は休み場にしない (版 25: コースの途中の休み場をなくした。落ちると、その谷の入口の休み場 w0・w1・w2 へ戻る)
             // 戦いの部屋の扉から離れた隅に置く (E0 は西の隅、CE1 は南東の隅。どちらも扉から 5 マス以上)。
             // 倒れて目覚めた所の目の前が戦場、にならないように
@@ -156,7 +158,7 @@ public final class TitanBackTrials {
     private static List<Checkpoint> checkpoints() {
         return WhaleDeck.placed() ? WITH_DECK_CHECKPOINTS : BASE_CHECKPOINTS;
     }
-    private static final List<String> WEST_CHECKPOINTS = List.of("w0", "w1", "w2");
+    private static final List<String> WEST_CHECKPOINTS = List.of("w0", "w1", "w2", "wp");
 
     private static List<Checkpoint> concatCheckpoints(List<Checkpoint> a, List<Checkpoint> b) {
         List<Checkpoint> out = new ArrayList<>(a);

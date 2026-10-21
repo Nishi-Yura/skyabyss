@@ -46,14 +46,20 @@ public final class ParkourCourses {
             ledge(-31, -27, W2.floorY(), WC.z1(), WC.z1()),
             ledge(-25, -21, WEST_LEDGE_Y, -54, -53),
             WC.x1() + 2, WC.x2() - 2, WC.z1(), WC.z2() - 2, WEST_LEDGE_Y - 1, W2.floorY());
-    // 谷ごとの指定 (谷 0 = 肋骨の谷、1 = 竪穴、2 = 崩れ橋)
-    public static final List<Spec> ALL = List.of(A, B, C);
+    // 前の谷 (版 31。周回だけが通る。trial/LongWalk): 休み場 WP0 の戸口 (谷の南の縁) から、通路 WPC の戸口 (谷の北の縁) まで
+    public static final Spec D = new Spec(
+            ledge(-22, -18, FLOOR, WP.z2(), WP.z2()),
+            ledge(-33, -29, FLOOR, WP.z1(), WP.z1()),
+            WP.x1() + 2, WP.x2() - 2, WP.z1(), WP.z2(), FLOOR, FLOOR + 2);
+    // 谷ごとの指定 (谷 0 = 肋骨の谷、1 = 竪穴、2 = 崩れ橋、3 = 前の谷)
+    public static final List<Spec> ALL = List.of(A, B, C, D);
 
     // コースの途中の足場の島 (休み場ではない) (谷ごと)
     public static final List<Island> ISLANDS_A = List.of(new Island("wa1", -49, FLOOR, -26), new Island("wa2", -49, FLOOR + 2, -40));
     public static final List<Island> ISLANDS_B = List.of(new Island("wb1", -52, W1.floorY() + 2, -81));
     public static final List<Island> ISLANDS_C = List.of(new Island("wc1", -29, W2.floorY(), -70));
-    public static final List<List<Island>> ISLANDS = List.of(ISLANDS_A, ISLANDS_B, ISLANDS_C);
+    public static final List<Island> ISLANDS_D = List.of(new Island("wd1", -37, FLOOR + 1, 10), new Island("wd2", -37, FLOOR + 2, -2));
+    public static final List<List<Island>> ISLANDS = List.of(ISLANDS_A, ISLANDS_B, ISLANDS_C, ISLANDS_D);
 
     private static List<List<int[]>> built;
 
@@ -142,6 +148,18 @@ public final class ParkourCourses {
         c.at(-29, W2.floorY(), -69);
         c.stone(-29, W2.floorY() - 1, -66).stone(-27, W2.floorY() - 2, -63).stone(-25, W2.floorY() - 3, -60).stone(-24, W2.floorY() - 4, -57);
         all.add(c.nodes);
+        // ---- 前の谷 (南の岩棚 z 16, y 103 → 北の岩棚 z -10, y 103。四つの脚が南東から北西へ折り返す。脚と脚は 6 マス以上離す (跳び移りの近道を作らない))
+        // 一 飛び石を西へ、骨の橋、溝を跳んで → 島 wd1 (-37, 104, 10)
+        Path d = new Path(-20, FLOOR, 16);
+        d.stone(-20, FLOOR, 13).stone(-23, FLOOR, 12).stone(-26, FLOOR, 13).bridge(-30, 13).bone(-33, FLOOR + 1, 13).bridge(-35, 13);
+        // 二 島から北へ骨の橋 (z 8〜6)、溝を跳んで (z 3〜2)、1 段上の島 wd2 (-37, 105, -2) へ跳ぶ
+        d.at(-37, FLOOR + 1, 9).bridge(-37, 6).bone(-37, FLOOR + 1, 3).bridge(-37, 2);
+        // 三 島から東へ長い骨の橋 (溝を二度跳び、1 段下がる)、東の端で飛び石を北へ
+        d.at(-36, FLOOR + 2, -2).bridge(-32, -2).bone(-29, FLOOR + 2, -2).bridge(-26, -2).bone(-23, FLOOR + 1, -2).bridge(-20, -2);
+        d.stone(-17, FLOOR + 1, -3).stone(-15, FLOOR + 1, -6);
+        // 四 西へ折り返す骨の橋 (z -8)、1 段下りて北の岩棚 (通路の戸口) へ
+        d.stone(-17, FLOOR + 1, -8).bone(-20, FLOOR + 1, -8).bridge(-23, -8).bone(-26, FLOOR, -8).bridge(-28, -8);
+        all.add(d.nodes);
         return all;
     }
 

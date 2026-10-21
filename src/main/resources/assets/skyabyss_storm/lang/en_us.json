@@ -313,6 +313,7 @@
   "message.skyabyss.storm.rib_enter": "Stand on a grate and the wind lifts you. One step in calm, high in a storm. Ledge corners shelter from wind",
   "message.skyabyss.storm.circuit_ok": "The circuit is complete. The bolt reached the door rod",
   "message.skyabyss.storm.circuit_decoy": "The bolt fled to a dead-end rod. Flip the levers so the orange line reaches the door rod",
+  "message.skyabyss.storm.circuit_rewired": "The bolt reached the door rod, but it did not fill. The circuit has rewired itself. Read the orange line again and strike once more",
   "message.skyabyss.storm.circuit_ground": "The bolt went to ground. Flip the grounding lever to connect the circuit",
   "message.skyabyss.storm.lever_reaches": "The orange line reaches the door rod. Stand on the gold floor to call the bolt",
   "message.skyabyss.storm.lever_not_yet": "The orange line does not reach the door rod yet (dead end or ground)",

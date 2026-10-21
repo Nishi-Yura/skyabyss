@@ -22,7 +22,7 @@ public final class EmberBackAudit {
         s.entrances.add(ARRIVAL.above());
         s.exits.add(ARRIVAL.above());
         s.exits.add(new BlockPos(0, PLAIN_TOP + 1, RETURN_STONE.minZ()));
-        s.walkableLava = p -> p.getY() == jp.revati.skyabyss.titan.ember.back.trial.AshPath.LAVA_Y && WEST.contains(p);
+        s.walkableLava = p -> p.getY() == jp.revati.skyabyss.titan.ember.back.trial.AshPath.LAVA_Y && (WEST.contains(p) || WEST_PRE.contains(p));
         // 穴・はしごを調べる範囲: 部屋と通路 (体の外の灰の原は広いので外す)
         for (Box b : ROOMS.values()) {
             s.scan.add(box(b, 2));

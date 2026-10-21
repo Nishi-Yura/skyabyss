@@ -69,7 +69,9 @@ public final class TitanBackLayout {
     // 28: 試練の流れ (石を無くしてゴールの印に・紫の抜け道の戸を壁に・今週の試練の入口。docs/design/26 の 8.8、29 の 4.6・4.7)。四体とも 28
     // 29: 闇の水路の中ほどの休み場の足場に、つながる通路の口から真ん中の穴までの水路 (幅 1・高さ 2) を抜いた (足場が口をふさぎ、泳いで通れず道が途切れていた)
     // 30: 任意の翼をなくした (骨の書庫・胸びれの道・尾の展望・宿・胸びれの先の宝箱)。来た道へ戻る抜け道の戸と、試練の入口の看板、台の共鳴の炉をなくした
-    public static final int LAYOUT_VERSION = 30;
+    // 31: 周回の前の谷 (32 の 4 章、R5): 西の前室 W0 の南に、前の道の休み場 wp (WP0)・前の谷 WP (崩れる骨と飛び石と島二つ)・W0 の南の壁へ上る通路 WPC と戸。
+    //     周回のグループだけが wp へ運ばれ、前の谷を越えて W0 へ入る (trial/LongWalk)
+    public static final int LAYOUT_VERSION = 31;
 
     // ---------------------------------------------------------------- 地表
     // 尾の付け根の背の広場 (到着) と、背の中ほどの祠。祠の階段は 1 段ごとに 1 下がり、入口の通路の南の端 (z 15) で床に着く
@@ -148,7 +150,13 @@ public final class TitanBackLayout {
     // 落ちたら直前の休み場へ戻される高さ (この高さより下に落ちたら)
     public static final int PIT_LAVA_Y = FLOOR - 9;
     public static final int FALL_LINE = FLOOR - 4;
-    public static final List<Box> PITS = List.of(WA, WB, WC);
+    // ---- 前の谷 (周回の長い裂け目の回廊。版 31。trial/LongWalk): 休み場 WP0 → 前の谷 WP (南東から北西へ四つの脚) → 通路 WPC → W0 の南の壁の戸
+    public static final Box WP0 = new Box(-24, -15, 18, 29, FLOOR, 8);
+    public static final Box WP = new Box(-40, -12, -10, 16, FLOOR, 15);
+    public static final Box WPC = new Box(-33, -29, -27, -11, FLOOR, 6);
+    // 前の道の出口の戸 (W0 の南の壁。周回のグループの今の段が W01 のときだけ開く)
+    public static final List<BlockPos> WP_GATE = wall(-33, -29, FLOOR + 1, FLOOR + 6, W0.z2() + 1, true);
+    public static final List<Box> PITS = List.of(WA, WB, WC, WP);
     public static final int WEST_LEDGE_Y = FLOOR + 5;
 
     // ---------------------------------------------------------------- 東の翼 (戦闘。版 18: 一本道。戻らずに先へ進む)
@@ -364,5 +372,11 @@ public final class TitanBackLayout {
         public int area() {
             return (x2 - x1 + 1) * (z2 - z1 + 1);
         }
+    }
+
+    // 周回で長くなる歩の原型の前の道 (trial/LongWalk。32 の 4 章、R5): 裂け目の回廊 W01 の前の谷
+    @org.jetbrains.annotations.Nullable
+    public static jp.revati.skyabyss.trial.LongWalk.Pre longWalk() {
+        return new jp.revati.skyabyss.trial.LongWalk.Pre(jp.revati.skyabyss.progress.Titans.STONE_WHALE, "W01", "wp", WP_GATE);
     }
 }

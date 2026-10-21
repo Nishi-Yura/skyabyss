@@ -437,6 +437,11 @@ public final class TideBackTrials {
                 if (!TideGarden.placePearl(level, player)) {
                     return;
                 }
+                // 周回: 一つ目の真珠では鳴らず、庭の道が組み替わって二つ目の真珠
+                if (state.gardenStage() + 1 < state.gardenStagesNeeded()) {
+                    TideGarden.secondPearl(level, player, state);
+                    return;
+                }
             }
             case FRONT -> {
                 if (!state.beckonerDefeated()) {

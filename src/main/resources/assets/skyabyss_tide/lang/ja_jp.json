@@ -144,6 +144,7 @@
   "message.skyabyss.tide.campfire_hint": "しゃがんで焚き火に触れると、試練をあきらめて潮門の浜へ戻れる",
   "message.skyabyss.tide.pearl_taken": "大貝が口を開け、潮の真珠を渡した。重い。頭まで水に入れば、潮が取り返しに来る",
   "message.skyabyss.tide.clam_empty": "大貝は口を閉じている",
+  "message.skyabyss.tide.second_pearl": "潮鳴り石が真珠を呑んだ。潮が庭の道を組み替え、大貝はもう一つ真珠を抱いた。新しい道で、二つ目を運べ",
   "message.skyabyss.tide.pearl_full": "持ち物がいっぱいで、真珠を受け取れない",
   "message.skyabyss.tide.altar_hint": "潮の真珠を手に持って、祭壇のゴールに着け",
   "message.skyabyss.tide.pearl_pulled": "真珠が潮に引かれていった (大貝へ戻った)",

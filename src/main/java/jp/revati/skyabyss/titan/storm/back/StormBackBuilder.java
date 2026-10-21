@@ -28,15 +28,17 @@ public final class StormBackBuilder {
         }
     }
 
-    // その場で最後まで建てる。起動時の予約 (schedule) が途中なら取り消す (置いた分は「変わるブロックだけ」なので飛ばせる)
+    // その場で最後まで建てる。起動時の予約 (schedule) が途中なら、その続きを最後まで進める (最初からやり直さない)
     public static void build(ServerLevel back, TitanBackData data) {
-        jp.revati.skyabyss.titan.BackBuildJobs.cancel(back.dimension());
+        if (jp.revati.skyabyss.titan.BackBuildJobs.finishNow(back.dimension()) && !data.needsBuild(LAYOUT_VERSION)) {
+            return;
+        }
         long start = System.currentTimeMillis();
         StormBirdBuilder.build(new StormKit(back));
         finish(back, data, start);
     }
 
-    // 起動時: 鳥の体を何 tick かに分けて置き、置き終えた tick に残りを建てる (BackBuildJobs。13 の 24.5節)
+    // 起動時: 鳥の体を何 tick かに分けて置き、そのあとの仕上げも手順ごとに tick に分けて建てる (BackBuildJobs。13 の 24.5節)
     public static void schedule(ServerLevel back) {
         TitanBackData data = TitanBackData.get(back);
         if (!data.needsBuild(LAYOUT_VERSION)) {
@@ -46,27 +48,43 @@ public final class StormBackBuilder {
             SkyAbyss.LOGGER.info("Rebuilding the storm back (layout {} -> {})", data.layoutVersion(), LAYOUT_VERSION);
         }
         StormKit kit = new StormKit(back);
-        jp.revati.skyabyss.titan.BackBuildJobs.schedule("storm back bird", back, StormBirdBuilder.job(kit), () -> {
-            long start = System.currentTimeMillis();
-            StormBirdBuilder.buildRest(kit);
-            finish(back, data, start);
+        long start = System.currentTimeMillis();
+        jp.revati.skyabyss.titan.BackBuildJobs.Steps s = new jp.revati.skyabyss.titan.BackBuildJobs.Steps("storm back bird");
+        s.thenJob("body", () -> StormBirdBuilder.job(kit));
+        StormBirdBuilder.restSteps(s, kit);
+        finishSteps(s, back, data, start);
+        jp.revati.skyabyss.titan.BackBuildJobs.schedule("storm back bird", back, s, () -> {
         });
     }
 
     private static void finish(ServerLevel back, TitanBackData data, long start) {
+        jp.revati.skyabyss.titan.BackBuildJobs.Steps s = new jp.revati.skyabyss.titan.BackBuildJobs.Steps("storm back bird");
+        finishSteps(s, back, data, start);
+        while (!s.step(Long.MAX_VALUE)) {
+            // 最後まで
+        }
+    }
+
+    private static void finishSteps(jp.revati.skyabyss.titan.BackBuildJobs.Steps s, ServerLevel back, TitanBackData data, long start) {
         // ボス部屋の大門 (竜骨の間の入口・雷獣の巣の口)。部屋と回廊を掘ったあと
-        StormBossGates.build(back);
-        data.markBuilt(LAYOUT_VERSION);
-        StormBackTrials.afterBuild(back);
-        jp.revati.skyabyss.titan.light.RouteLamps.place(back, "storm");
+        s.then("boss gates", () -> StormBossGates.build(back));
+        // 印を付けるのは修復のあと (印のあとに人が入ると、建てかけの背を見る)。afterBuild と灯りは印の前と同じ順
+        jp.revati.skyabyss.titan.audit.BackReach.RepairJob[] repair = new jp.revati.skyabyss.titan.audit.BackReach.RepairJob[1];
+        s.then("after build", () -> {
+            data.markBuilt(LAYOUT_VERSION);
+            StormBackTrials.afterBuild(back);
+            jp.revati.skyabyss.titan.light.RouteLamps.place(back, "storm");
+        });
         // 試練の仕掛け (昇り風の柱・戸・避雷の柱) を置いたあとで、鳥の背・翼の上の、落ちたら出られない小さな穴 (詰み監査) を埋める。
         // 部屋より上 (y 159 以上) だけ。部屋・通路の中は直さずに報告に残す
-        int repaired = jp.revati.skyabyss.titan.audit.BackReach.repair(back, () -> StormBackAudit.spec(back),
+        s.thenJob("repair", () -> repair[0] = new jp.revati.skyabyss.titan.audit.BackReach.RepairJob(back, () -> StormBackAudit.spec(back),
                 java.util.List.of(new jp.revati.skyabyss.titan.audit.BackReach.Box(-330, 160, -190, 330, 235, 200)), 8, 6,
-                StormKit.FEATHER);
-        if (repaired > 0) {
-            SkyAbyss.LOGGER.info("Storm back: filled {} blocks of dead-end pockets on the bird's surface", repaired);
-        }
-        SkyAbyss.LOGGER.info("Built the storm back bird (layout {}) in {} ms", LAYOUT_VERSION, System.currentTimeMillis() - start);
+                StormKit.FEATHER));
+        s.then("done", () -> {
+            if (repair[0] != null && repair[0].filled() > 0) {
+                SkyAbyss.LOGGER.info("Storm back: filled {} blocks of dead-end pockets on the bird's surface", repair[0].filled());
+            }
+            SkyAbyss.LOGGER.info("Built the storm back bird (layout {}) in {} ms", LAYOUT_VERSION, System.currentTimeMillis() - start);
+        });
     }
 }

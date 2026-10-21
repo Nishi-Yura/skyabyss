@@ -52,16 +52,18 @@ public final class TideBackBuilder {
         }
     }
 
-    // その場で最後まで建てる。起動時の予約 (schedule) が途中なら取り消す (置いた分は「変わるブロックだけ」なので飛ばせる)
+    // その場で最後まで建てる。起動時の予約 (schedule) が途中なら、その続きを最後まで進める (最初からやり直さない)
     public static void build(ServerLevel back, TitanBackData data) {
-        BackBuildJobs.cancel(back.dimension());
+        if (BackBuildJobs.finishNow(back.dimension()) && !data.needsBuild(LAYOUT_VERSION)) {
+            return;
+        }
         long start = System.currentTimeMillis();
         TideKit kit = new TideKit(back, RandomSource.create(20261017L));
         TideTurtle.place(kit);
         finish(back, data, kit, start);
     }
 
-    // 起動時: 亀の体を何 tick かに分けて置き、置き終えた tick に残りを建てる (BackBuildJobs。13 の 24.5節)
+    // 起動時: 亀の体を何 tick かに分けて置き、そのあとの仕上げも手順ごとに tick に分けて建てる (BackBuildJobs。13 の 24.5節)
     public static void schedule(ServerLevel back) {
         TitanBackData data = TitanBackData.get(back);
         if (!data.needsBuild(LAYOUT_VERSION)) {
@@ -72,11 +74,21 @@ public final class TideBackBuilder {
             TideBackTrials.resetAllRecords(back);
         }
         TideKit kit = new TideKit(back, RandomSource.create(20261017L));
-        BackBuildJobs.schedule("tide back island", back, TideTurtle.job(kit), () -> finish(back, data, kit, System.currentTimeMillis()));
+        long start = System.currentTimeMillis();
+        BackBuildJobs.Steps s = new BackBuildJobs.Steps("tide back island");
+        s.thenJob("body", () -> TideTurtle.job(kit));
+        TideIslandBuilder.restSteps(s, kit);
+        s.then("mark built", () -> markBuilt(back, data, start));
+        BackBuildJobs.schedule("tide back island", back, s, () -> {
+        });
     }
 
     private static void finish(ServerLevel back, TitanBackData data, TideKit kit, long start) {
         TideIslandBuilder.buildRest(kit);
+        markBuilt(back, data, start);
+    }
+
+    private static void markBuilt(ServerLevel back, TitanBackData data, long start) {
         data.markBuilt(LAYOUT_VERSION);
         TideBackTrials.afterBuild(back);
         jp.revati.skyabyss.titan.light.RouteLamps.place(back, "tide");

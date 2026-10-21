@@ -163,6 +163,8 @@ public final class EmberBackSelfTest {
             for (Box b : ROOMS.values()) {
                 in |= b.contains(r.floor());
             }
+            // 周回の前の湖の休み場 (版 31)
+            in |= WEST_PRE.contains(r.floor());
             if (!r.name().equals("throat")) {
                 expect(in, "rest " + r.name() + " is outside every room box");
             }
@@ -287,7 +289,7 @@ public final class EmberBackSelfTest {
 
     private static boolean lakeLava(ServerLevel l, BlockPos p) {
         return p.getY() == jp.revati.skyabyss.titan.ember.back.trial.AshPath.LAVA_Y && l.getFluidState(p).is(FluidTags.LAVA)
-                && EmberBackLayout.WEST.contains(p);
+                && (EmberBackLayout.WEST.contains(p) || EmberBackLayout.WEST_PRE.contains(p));
     }
 
     // 歩く人のグループ (扉の開け閉めをこのグループで見る。null なら扉の既定)
@@ -309,7 +311,8 @@ public final class EmberBackSelfTest {
     static boolean passable(ServerLevel l, BlockPos p) {
         BlockState s = l.getBlockState(p);
         if (s.is(ModBlocks.SEALED_GATE.get())) {
-            if (mechanisms && SMITH_DOOR.contains(p) || EmberDeck.isPoolGate(p) || isCellEntrance(p)) {
+            // 周回の前の湖の出口の戸 (版 31) は周回のグループに開く。歩いて届くかだけを見る (開け閉めは trial walk が調べる)
+            if (mechanisms && SMITH_DOOR.contains(p) || EmberDeck.isPoolGate(p) || isCellEntrance(p) || WEST_PRE_GATE.contains(p)) {
                 // 試練の階の戸は引き (試練のプール) で開く。歩いて届くかだけを見る (引きと戸は trial pool ember が調べる)
                 return true;
             }
@@ -389,7 +392,7 @@ public final class EmberBackSelfTest {
     }
 
     // 試練の向こう側にある所。仕掛け (冷え殻・火の鍵) を通らないと歩いて行けないのが仕様 (13 の 24.1節)
-    private static final Set<String> TRIAL_GATED = Set.of("rest w1", "west stone", "east stone");
+    private static final Set<String> TRIAL_GATED = Set.of("rest w1", "rest wp", "west stone", "east stone");
 
     // gateOpen: 門を開けたグループ A として歩く。閉じているときは、何も進んでいないグループ B として歩く
     private static void checkWalk(ServerLevel back, boolean gateOpen) {

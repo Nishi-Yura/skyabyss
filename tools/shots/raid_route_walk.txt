@@ -1,0 +1,347 @@
+# 巨神の順路を一人で最後まで通す撮影 (docs/design/32 の 8.2 の R6-lite)。四体とも、初回 (入口の箱 → 歩 → 智 → 闘 → 心臓) と、
+# 周回 (地上の祠から。歩の原型は前の道から → 智 → 闘 → 中ボス → 心臓) を撮る。段は /skyroute pass で越えたことにする (本物と同じ 4 秒のあと運ばれる)。
+# 帯は waitband で待ち、運ばれた先の絵を撮る。/skyroute tidyhud で序章を飛ばした手引きを消す。/skyroute replayable で周回のグループにする
+#   SKYABYSS_ROUTE_TRACE=1 ./gradlew runShots -Pscript=tools/shots/raid_route_walk.txt   絵は run/shots/raid_route_walk/shots/raid_route_walk/ → docs/review/raid_route/walk/
+world raid_route_walk normal
+size 1280 720
+timeout 5400
+render 12
+clouds off
+
+wait 100
+cmd skyabyss cinematic stop
+wait 10
+cmd skyabyss cinematic stop
+cmd skyabyss playtest skip opening
+cmd time set noon
+cmd weather clear
+cmd gamerule doDaylightCycle false
+cmd skyabyss playtest god on
+cmd skyroute tidyhud
+# 背が裏で建ち終わるまで待つ (tick ごとに少しずつ建てる。記録の "Built the ... in the background" に一番長い tick が出る)
+wait 4000
+
+# ---- whale: 初回
+cmd skyabyss playtest gear whale
+cmd skyabyss playtest board whale
+wait 400
+cmd skyabyss playtest goto whale hub
+wait 100
+waitchunks
+wait 20
+chat clear
+cmd skyroute tidyhud
+cmd skyroute enter
+wait 40
+waitchunks
+wait 10
+shot whale_a0_entry_box
+waitband 600 第一の試練
+waitchunks
+wait 30
+band
+shot whale_a1_walk
+cmd skyroute pass
+waitband 400 第二の試練
+waitchunks
+wait 30
+band
+shot whale_a2_wit
+cmd skyroute pass
+waitband 400 第三の試練
+waitchunks
+wait 30
+band
+shot whale_a3_fight
+cmd skyroute pass
+waitband 400 心臓へ
+waitchunks
+wait 30
+band
+shot whale_a4_heart
+cmd skyroute status
+cmd skyroute clear
+
+# ---- whale: 周回 (祠から)
+cmd skyroute replayable
+wait 5
+cmd skyroute useshrine stone_whale
+wait 60
+waitchunks
+waitband 600 第一の試練
+waitchunks
+wait 30
+band
+shot whale_b1_walk
+cmd skyroute status
+cmd skyroute pass
+waitband 400 第二の試練
+waitchunks
+wait 30
+band
+shot whale_b2_wit
+cmd skyroute pass
+waitband 400 第三の試練
+waitchunks
+wait 30
+band
+shot whale_b3_fight
+cmd skyroute pass
+wait 120
+waitchunks
+wait 20
+band
+shot whale_b4_after_fight
+cmd skyroute status
+cmd skyroute pass
+waitband 400 心臓へ
+waitchunks
+wait 30
+band
+shot whale_b5_heart
+cmd skyroute status
+cmd skyroute clear
+
+# ---- tide: 初回
+cmd skyabyss playtest gear tide
+cmd skyabyss playtest board tide
+wait 400
+cmd skyabyss playtest goto tide hub
+wait 100
+waitchunks
+wait 20
+chat clear
+cmd skyroute tidyhud
+cmd skyroute enter
+wait 40
+waitchunks
+wait 10
+shot tide_a0_entry_box
+waitband 600 第一の試練
+waitchunks
+wait 30
+band
+shot tide_a1_walk
+cmd skyroute pass
+waitband 400 第二の試練
+waitchunks
+wait 30
+band
+shot tide_a2_wit
+cmd skyroute pass
+waitband 400 第三の試練
+waitchunks
+wait 30
+band
+shot tide_a3_fight
+cmd skyroute pass
+waitband 400 心臓へ
+waitchunks
+wait 30
+band
+shot tide_a4_heart
+cmd skyroute status
+cmd skyroute clear
+
+# ---- tide: 周回 (祠から)
+cmd skyroute replayable
+wait 5
+cmd skyroute useshrine tide_shell
+wait 60
+waitchunks
+waitband 600 第一の試練
+waitchunks
+wait 30
+band
+shot tide_b1_walk
+cmd skyroute status
+cmd skyroute pass
+waitband 400 第二の試練
+waitchunks
+wait 30
+band
+shot tide_b2_wit
+cmd skyroute pass
+waitband 400 第三の試練
+waitchunks
+wait 30
+band
+shot tide_b3_fight
+cmd skyroute pass
+wait 120
+waitchunks
+wait 20
+band
+shot tide_b4_after_fight
+cmd skyroute status
+cmd skyroute pass
+waitband 400 心臓へ
+waitchunks
+wait 30
+band
+shot tide_b5_heart
+cmd skyroute status
+cmd skyroute clear
+
+# ---- storm: 初回
+cmd skyabyss playtest gear storm
+cmd skyabyss playtest board storm
+wait 400
+cmd skyabyss playtest goto storm hub
+wait 100
+waitchunks
+wait 20
+chat clear
+cmd skyroute tidyhud
+cmd skyroute enter
+wait 40
+waitchunks
+wait 10
+shot storm_a0_entry_box
+waitband 600 第一の試練
+waitchunks
+wait 30
+band
+shot storm_a1_walk
+cmd skyroute pass
+waitband 400 第二の試練
+waitchunks
+wait 30
+band
+shot storm_a2_wit
+cmd skyroute pass
+waitband 400 第三の試練
+waitchunks
+wait 30
+band
+shot storm_a3_fight
+cmd skyroute pass
+waitband 400 心臓へ
+waitchunks
+wait 30
+band
+shot storm_a4_heart
+cmd skyroute status
+cmd skyroute clear
+
+# ---- storm: 周回 (祠から)
+cmd skyroute replayable
+wait 5
+cmd skyroute useshrine thunder_wing
+wait 60
+waitchunks
+waitband 600 第一の試練
+waitchunks
+wait 30
+band
+shot storm_b1_walk
+cmd skyroute status
+cmd skyroute pass
+waitband 400 第二の試練
+waitchunks
+wait 30
+band
+shot storm_b2_wit
+cmd skyroute pass
+waitband 400 第三の試練
+waitchunks
+wait 30
+band
+shot storm_b3_fight
+cmd skyroute pass
+wait 120
+waitchunks
+wait 20
+band
+shot storm_b4_after_fight
+cmd skyroute status
+cmd skyroute pass
+waitband 400 心臓へ
+waitchunks
+wait 30
+band
+shot storm_b5_heart
+cmd skyroute status
+cmd skyroute clear
+
+# ---- ember: 初回
+cmd skyabyss playtest gear ember
+cmd skyabyss playtest board ember
+wait 400
+cmd skyabyss playtest goto ember hub
+wait 100
+waitchunks
+wait 20
+chat clear
+cmd skyroute tidyhud
+cmd skyroute enter
+wait 40
+waitchunks
+wait 10
+shot ember_a0_entry_box
+waitband 600 第一の試練
+waitchunks
+wait 30
+band
+shot ember_a1_walk
+cmd skyroute pass
+waitband 400 第二の試練
+waitchunks
+wait 30
+band
+shot ember_a2_wit
+cmd skyroute pass
+waitband 400 第三の試練
+waitchunks
+wait 30
+band
+shot ember_a3_fight
+cmd skyroute pass
+waitband 400 心臓へ
+waitchunks
+wait 30
+band
+shot ember_a4_heart
+cmd skyroute status
+cmd skyroute clear
+
+# ---- ember: 周回 (祠から)
+cmd skyroute replayable
+wait 5
+cmd skyroute useshrine ember
+wait 60
+waitchunks
+waitband 600 第一の試練
+waitchunks
+wait 30
+band
+shot ember_b1_walk
+cmd skyroute status
+cmd skyroute pass
+waitband 400 第二の試練
+waitchunks
+wait 30
+band
+shot ember_b2_wit
+cmd skyroute pass
+waitband 400 第三の試練
+waitchunks
+wait 30
+band
+shot ember_b3_fight
+cmd skyroute pass
+wait 120
+waitchunks
+wait 20
+band
+shot ember_b4_after_fight
+cmd skyroute status
+cmd skyroute pass
+waitband 400 心臓へ
+waitchunks
+wait 30
+band
+shot ember_b5_heart
+cmd skyroute status
+cmd skyroute clear
+

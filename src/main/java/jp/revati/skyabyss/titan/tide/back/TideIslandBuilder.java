@@ -36,25 +36,35 @@ public final class TideIslandBuilder {
 
     // 亀の体を置いたあと (部屋を掘る・中身を建てる)。起動時は体を何 tick かに分けて置いてから呼ぶ (BackBuildJobs)
     public static void buildRest(TideKit kit) {
-        fillTrenches(kit);
-        beach(kit);
-        gate(kit);
-        cave(kit);
-        hub(kit);
-        ramp(kit);
-        TideGardenBuilder.build(kit);
-        TideWatchBuilder.build(kit);
-        TideFlatsBuilder.neck(kit);
-        TideFlatsBuilder.flats(kit);
-        TideFlatsBuilder.mouthStairs(kit);
-        TideBossGates.flats(kit.level());
-        spiral(kit);
-        TideHeartArena.build(kit.level());
-        skin(kit);
+        jp.revati.skyabyss.titan.BackBuildJobs.Steps s = new jp.revati.skyabyss.titan.BackBuildJobs.Steps("tide back island");
+        restSteps(s, kit);
+        while (!s.step(Long.MAX_VALUE)) {
+            // 最後まで
+        }
+    }
+
+    // buildRest の手順 (順は同じ。tick に分けて進められる)
+    public static void restSteps(jp.revati.skyabyss.titan.BackBuildJobs.Steps s, TideKit kit) {
+        s.then("trenches", () -> fillTrenches(kit));
+        s.then("beach", () -> beach(kit));
+        s.then("gate", () -> gate(kit));
+        s.then("cave", () -> cave(kit));
+        s.then("hub", () -> hub(kit));
+        s.then("ramp", () -> ramp(kit));
+        s.then("garden", () -> TideGardenBuilder.build(kit));
+        s.then("watch", () -> TideWatchBuilder.build(kit));
+        s.then("neck", () -> TideFlatsBuilder.neck(kit));
+        s.then("flats", () -> TideFlatsBuilder.flats(kit));
+        s.then("mouth stairs", () -> TideFlatsBuilder.mouthStairs(kit));
+        s.then("flats gates", () -> TideBossGates.flats(kit.level()));
+        s.then("spiral", () -> spiral(kit));
+        s.then("heart arena", () -> TideHeartArena.build(kit.level()));
+        s.then("skin", () -> skin(kit));
         // 試練の階 (潮の広間の南の戸口から。docs/design/29)。休み場の焚き火は fixtures が RESTS から置く
-        TideDeckBuilder.build(kit);
-        fixtures(kit);
-        fillWells(kit);
+        s.then("deck", () -> TideDeckBuilder.build(kit));
+        s.then("fixtures", () -> fixtures(kit));
+        s.then("entry lights", () -> entryLights(kit));
+        s.then("wells", () -> fillWells(kit));
     }
 
     // 甲羅の台地の上の、幅 1 の溝 (両隣が 2 以上高い。模型の薄い壁の抜けたあと) を、深さ 1 になるまで埋める (落ちると戻れない穴を作らない)
@@ -837,6 +847,15 @@ public final class TideIslandBuilder {
             new Inscription("sign.skyabyss.tide_watch_color", new BlockPos(40, HUB_LEDGE + 2, -17), Direction.EAST),
             new Inscription("sign.skyabyss.tide_watch_reset", new BlockPos(46, HUB_LEDGE + 3, -6), Direction.NORTH));
 
+
+    // 順路の入口の箱 (潮門の内側の段。trial/TrialRoute.entryBox) の灯り: 段の床の四隅に海のランタンを埋める (歩く邪魔にならない)。版 31
+    private static void entryLights(TideKit kit) {
+        for (int x : new int[] {-107, -104}) {
+            for (int z : new int[] {83, 88}) {
+                kit.set(x, GATE_FLOOR, z, TideKit.LAMP);
+            }
+        }
+    }
 
     private static void fixtures(TideKit kit) {
         for (Rest r : RESTS) {

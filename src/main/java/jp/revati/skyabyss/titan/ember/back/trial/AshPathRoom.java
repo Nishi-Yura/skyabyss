@@ -71,6 +71,8 @@ public final class AshPathRoom {
             k.ashPool(p[0], p[1], 3, 2);
         }
         tomb(k);
+        // 周回の前の湖と、庭の北西の戸 (版 31。部屋を建て直すたびに一緒に建てる。戸は庭の北の壁にあるため)
+        AshPathPre.build(level, box);
     }
 
     static boolean lavaRow(int z) {

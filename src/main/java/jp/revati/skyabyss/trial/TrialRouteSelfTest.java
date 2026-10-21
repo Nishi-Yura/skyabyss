@@ -112,6 +112,23 @@ public final class TrialRouteSelfTest {
                 + jp.revati.skyabyss.titan.ember.back.trial.Hearth.MAX - jp.revati.skyabyss.titan.ember.back.trial.Hearth.RELIGHT)
                 / (jp.revati.skyabyss.titan.ember.back.trial.Hearth.MAX - jp.revati.skyabyss.titan.ember.back.trial.Hearth.START);
         check(f, hearth >= 1.5 && hearth <= 2.0, "E09: the long hearth should burn 1.5-2x the fire: " + hearth);
+        // W05 灯をたずさえる: 周回は灯を一つずつしか持てない。一人で歩く道のり (近道を通る) が 1.5〜2.2 倍
+        double sum = 0;
+        double lo = Double.MAX_VALUE;
+        double hi = 0;
+        int seeds = 24;
+        for (long seed = 1; seed <= seeds; seed++) {
+            int first = jp.revati.skyabyss.titan.dungeon.AnemoneLights.soloWalk(seed * 7919L, jp.revati.skyabyss.titan.dungeon.AnemoneLights.LIGHTS);
+            // 周回: 一度に二つまで、苗床は入口の二つだけ (中ほどは眠っている)
+            int replay = jp.revati.skyabyss.titan.dungeon.AnemoneLights.soloWalk(seed * 7919L, jp.revati.skyabyss.titan.dungeon.AnemoneLights.CARRY_LONG, 3, true);
+            double r = replay / (double) Math.max(1, first);
+            sum += r;
+            lo = Math.min(lo, r);
+            hi = Math.max(hi, r);
+        }
+        double mean = sum / seeds;
+        // S05 雷の回路: 周回は二度届かせる。組み変わった回路にも解があり、解は前と違う
+        check(f, jp.revati.skyabyss.titan.storm.back.StormProgress.longCircuitProblems().isEmpty(), "S05: " + jp.revati.skyabyss.titan.storm.back.StormProgress.longCircuitProblems());
         // 眼の間: 長い周は一つ目の配置を解くと次の配置に替わり、二つ目で嘴の戸が開く
         ServerLevel storm = server.getLevel(Titans.backOf(Titans.THUNDER_WING));
         if (storm != null) {
@@ -238,7 +255,7 @@ public final class TrialRouteSelfTest {
     }
 
     private static boolean near(ServerPlayer p, ServerLevel back, String titan, TrialDraw.Draw draw, int step, boolean mid) {
-        String rest = TrialRoute.restOf(titan, draw, step, mid);
+        String rest = TrialRoute.restFor(back, Groups.keyOf(p), titan, draw, step, mid);
         BlockPos at = rest == null ? null : TrialRoute.spawnOf(back, titan, rest);
         // 区画の写しで遊ぶ段は、写しの入口の休み場
         at = at == null ? null : TrialRoute.frameOfStep(back, Groups.keyOf(p), draw, step, mid).at(at);

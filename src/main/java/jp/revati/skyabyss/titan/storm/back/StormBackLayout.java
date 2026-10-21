@@ -26,7 +26,7 @@ public final class StormBackLayout {
     }
 
     // 版が上がったら建て直す
-    public static final int LAYOUT_VERSION = 30;   // 30: 任意の翼 (尾羽の庭・二つの塔・翼の外の廊・先の見張り台の宝箱と休み場)・羽の広場の西と東の宝箱・抜け道の床・雷翼の共鳴の炉を外す。試練の甲板への螺旋と広場の床は残す。 25: 遺物ブロック (宝の箱・休み火・レバー・碑・鐘を雷翼の様式 = 銅と羽・淡い金に)。 24: 第二の渡り場と五つの新作 (29 の P3。S04 羽根の吊り橋・S07 二枚の鏡の間・S08 気圧の弁・S11 避雷の護送・S12 羽守長の頂。第一の渡り場の南の橋から)。 22: 試練の甲板 (29 の P2。尾の上の渡り場と四つの試練 S02・S03・S09・S10。背の広場から橋)・広間の三つの出口の戸。 21: 任意の翼 (26 の 9.5。背の広場・風見の塔・避雷の塔・翼の外の廊・翼の先・尾羽の庭)・広間の屋根の肋と羽の壁・銅の筋・二つ目の鏡の間。 20: 26 の拡大 (水平 x1.6)。部屋ごとに作り直し、東の戸は 4 枚、嵐の冠・尾羽の広場・灯の道・目的の光の柱 (StormGuide)。 12: 歩く道の灯り (route_lamps)。 11: 肋の間の外を翼から生えた肋の尖塔に。 10: 西を縦の肋の登りに・東を雷の回路に・入口に拍の舵 (25 の 5章)。 9: ボス部屋の大門。 8: 建築の監査。 5: 詰み監査の修正。 4: 避雷の柱と戻しの鏡を専用のブロックに。 2: 風鳴り石・受け羽のブロックの名前を wind_stone・catch_feather に
+    public static final int LAYOUT_VERSION = 31;   // 31: 周回の風切りの骨の前の道「風の渡り」(翼の前の縁の外の空の羽の台・休み場 wp・翼の付け根の洞・肩の部屋の北の壁の戸。StormLongWalk。32 の 4 章、R5)。   // 30: 任意の翼 (尾羽の庭・二つの塔・翼の外の廊・先の見張り台の宝箱と休み場)・羽の広場の西と東の宝箱・抜け道の床・雷翼の共鳴の炉を外す。試練の甲板への螺旋と広場の床は残す。 25: 遺物ブロック (宝の箱・休み火・レバー・碑・鐘を雷翼の様式 = 銅と羽・淡い金に)。 24: 第二の渡り場と五つの新作 (29 の P3。S04 羽根の吊り橋・S07 二枚の鏡の間・S08 気圧の弁・S11 避雷の護送・S12 羽守長の頂。第一の渡り場の南の橋から)。 22: 試練の甲板 (29 の P2。尾の上の渡り場と四つの試練 S02・S03・S09・S10。背の広場から橋)・広間の三つの出口の戸。 21: 任意の翼 (26 の 9.5。背の広場・風見の塔・避雷の塔・翼の外の廊・翼の先・尾羽の庭)・広間の屋根の肋と羽の壁・銅の筋・二つ目の鏡の間。 20: 26 の拡大 (水平 x1.6)。部屋ごとに作り直し、東の戸は 4 枚、嵐の冠・尾羽の広場・灯の道・目的の光の柱 (StormGuide)。 12: 歩く道の灯り (route_lamps)。 11: 肋の間の外を翼から生えた肋の尖塔に。 10: 西を縦の肋の登りに・東を雷の回路に・入口に拍の舵 (25 の 5章)。 9: ボス部屋の大門。 8: 建築の監査。 5: 詰み監査の修正。 4: 避雷の柱と戻しの鏡を専用のブロックに。 2: 風鳴り石・受け羽のブロックの名前を wind_stone・catch_feather に
 
     // 箱の部屋 (内側の範囲。床のブロックは floor、空くのは floor+1〜floor+height)
     public record Area(int x1, int x2, int z1, int z2, int floor, int height) {
@@ -282,7 +282,9 @@ public final class StormBackLayout {
             new Rest("e0", new BlockPos(56, BONE_FLOOR + 1, BONE_Z2 - 1), new BlockPos(58, BONE_FLOOR + 1, BONE_Z2 - 1), E0),
             eastRest("e1", 0), eastRest("e2", 1), eastRest("e3", 2),
             new Rest("f0", new BlockPos(7, UPPER_GALLERY_Y + 1, -84), new BlockPos(5, UPPER_GALLERY_Y + 1, -84), F0),
-            new Rest("heart", new BlockPos(2, KEEL_ANTE.floor() + 1, -44), new BlockPos(0, KEEL_ANTE.floor() + 1, -43), KEEL_ANTE)),
+            new Rest("heart", new BlockPos(2, KEEL_ANTE.floor() + 1, -44), new BlockPos(0, KEEL_ANTE.floor() + 1, -43), KEEL_ANTE),
+            // 風の渡りの休み場 (周回の長い風切りの骨。版 31。StormLongWalk)
+            new Rest("wp", StormLongWalk.REST_FIRE, StormLongWalk.REST_SPAWN, StormLongWalk.REST_AREA)),
             concat(StormDeck.RESTS, StormDeck2.RESTS));
     public static final Map<String, BlockPos> REST;
     public static final List<String> REST_ORDER;
@@ -378,7 +380,7 @@ public final class StormBackLayout {
     }
 
     public static boolean inTrial(Vec3 p) {
-        return inWest(p) || inEast(p) || inFront(p) || pastKeel(p) || StormDeck.inCell(p) || StormDeck2.inCell(p);
+        return inWest(p) || inEast(p) || inFront(p) || pastKeel(p) || StormDeck.inCell(p) || StormDeck2.inCell(p) || StormLongWalk.inWalk(p.x, p.y, p.z);
     }
 
     // 体の中 (尾の間より奥。ピースフルのあいだは入れない)。腰の回廊の封印より北で、体の中の高さ
@@ -394,7 +396,7 @@ public final class StormBackLayout {
         if (x >= FEATHER_GATE.minX - 2 && x <= FEATHER_GATE.maxX + 2 && z >= FEATHER_GATE.minZ - 5 && z <= FEATHER_GATE.maxZ + 4) {
             return true;
         }
-        if (StormDeck.open(x, y, z) || StormDeck2.open(x, y, z)) {
+        if (StormDeck.open(x, y, z) || StormDeck2.open(x, y, z) || StormLongWalk.open(x, y, z)) {
             return true;
         }
         return y > HUB.floor() + HUB.height() && x * x + (z + 12) * (z + 12) <= (SKYLIGHT_R + 1) * (SKYLIGHT_R + 1);
@@ -408,5 +410,11 @@ public final class StormBackLayout {
     // 羽軸の道の床 (到着の台 → 羽根の門の 1 段ずつの坂。鳥の背の高さに沿う)。builder と同じ式
     public static int roadFloor(int z, int topAtCenter) {
         return topAtCenter + 1;
+    }
+
+    // 周回で長くなる歩の原型の前の道 (trial/LongWalk。32 の 4 章、R5)。まだ無ければ null
+    @org.jetbrains.annotations.Nullable
+    public static jp.revati.skyabyss.trial.LongWalk.Pre longWalk() {
+        return new jp.revati.skyabyss.trial.LongWalk.Pre(jp.revati.skyabyss.progress.Titans.THUNDER_WING, "S01", "wp", StormLongWalk.GATE);
     }
 }

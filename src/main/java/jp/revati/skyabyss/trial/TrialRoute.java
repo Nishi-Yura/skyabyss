@@ -222,6 +222,18 @@ public final class TrialRoute {
         return d == null ? null : entryRest(titan, d, draw);
     }
 
+    // そのグループが段 step で運ばれる休み場 (周回で長くなる歩の原型は、前の道の休み場。LongWalk)
+    @Nullable
+    public static String restFor(ServerLevel back, UUID group, String titan, TrialDraw.Draw draw, int step, boolean mid) {
+        if (!mid && step >= 1 && step < LAST_STEP) {
+            LongWalk.Pre pre = LongWalk.preOf(back, group, titan, defOf(draw, step));
+            if (pre != null) {
+                return pre.rest();
+            }
+        }
+        return restOf(titan, draw, step, mid);
+    }
+
     // ---------------------------------------------------------------- 記録
     public static int step(BackGroupData.Record r) {
         return Math.max(0, r.getInt(STEP));
@@ -288,6 +300,15 @@ public final class TrialRoute {
     // ---------------------------------------------------------------- 始める・進める・運ぶ
     // 順路を始める (入口に全員がそろった / 祠で品を使った)。party = 参加者。段 1 の入口へ運ぶ
     public static void start(ServerLevel back, UUID group, String titan, List<ServerPlayer> party) {
+        start(back, group, titan, party, false);
+    }
+
+    // 祠から始める周回: 区画の写しは tick ごとに少しずつ写し、段 1 の写しが済んでから運ぶ (祠の帳のあいだ。一 tick に止まらない)
+    public static void startSoon(ServerLevel back, UUID group, String titan, List<ServerPlayer> party) {
+        start(back, group, titan, party, true);
+    }
+
+    private static void start(ServerLevel back, UUID group, String titan, List<ServerPlayer> party, boolean soon) {
         finish(back, group);
         // 前の順路の石・休み場・戦いの進みを戻す (引いた三つ・修飾・周は keep.* なので残る)
         if (GroupProgress.of(back, group).hasProgress()) {
@@ -309,7 +330,11 @@ public final class TrialRoute {
         r.putString(PARTY, String.join(",", who));
         r.putLong(START, back.getGameTime());
         // 区画の番号を取り、引いた三つのうち写せるセルを区画へ写す (docs/design/32 の 5 章)
-        TrialSlot.build(back, TrialSlot.assign(back, r), draw);
+        if (soon) {
+            TrialSlot.buildSoon(back, TrialSlot.assign(back, r), draw);
+        } else {
+            TrialSlot.build(back, TrialSlot.assign(back, r), draw);
+        }
         r.changed();
         ENTRY_START.remove(group);
         for (ServerPlayer p : party) {
@@ -318,8 +343,27 @@ public final class TrialRoute {
         }
         SkyAbyss.LOGGER.info("Route of the {} started for group {} ({}, party {}, slot {})", titan, group, ids, party.size(), TrialSlot.of(r));
         TrialRuntime.syncGates(back, group, titan, draw);
-        carry(back, group, titan, 1, false);
+        if (soon) {
+            // 段 1 の写しが済むのを待って運ぶ (tick の PENDING)
+            PENDING.put(group, new Pending(group, titan, 1, false, back.getGameTime()));
+        } else {
+            carry(back, group, titan, 1, false);
+        }
     }
+
+    // 段 step の試練を区画の写しで遊ぶなら、その写しが済んでいるか
+    private static boolean copyReady(ServerLevel back, UUID group, int step, boolean mid) {
+        BackGroupData.Record r = BackGroupData.get(back).peek(group);
+        if (r == null || mid || step < 1 || step >= LAST_STEP) {
+            return true;
+        }
+        TrialDraw.Draw draw = TrialData.current(back, group);
+        Def d = defOf(draw, step);
+        return d == null || frameOfStep(back, group, draw, step, false).isZero() || TrialSlot.ready(back, TrialSlot.of(r), d.id());
+    }
+
+    // 写しを待ってよい長さ (これを過ぎたら、その場で写し終える)
+    static final int COPY_WAIT = 200;
 
     @Nullable
     private static String progressName(String titan) {
@@ -371,6 +415,57 @@ public final class TrialRoute {
         SkyAbyss.LOGGER.info("Route of the {}: group {} cleared step {} ({}), next {}{}", titan, group, step, key, next, mid ? " (mid-boss)" : "");
     }
 
+    // 開発・撮影・自己テスト: 引きの歩を原型に (周回の前の道を通る)、闘を中ボスの原型でないものに (中ボスの段を通る) 替えた引き。智はそのまま
+    public static TrialDraw.Draw walkOriginalDraw(String titan, TrialDraw.Draw d) {
+        String host = TrialMidBoss.hostOf(titan);
+        List<TrialDraw.Pick> picks = new ArrayList<>();
+        for (TrialDraw.Pick pk : d.picks()) {
+            Def def = pk.def();
+            if (def != null && def.slot() == Trial.Slot.WALK) {
+                Def walk = null;
+                for (Def o : TrialCatalog.originals(titan)) {
+                    if (o.slot() == Trial.Slot.WALK) {
+                        walk = o;
+                    }
+                }
+                picks.add(walk == null ? pk : new TrialDraw.Pick(walk.id(), Trial.Mods.PLAIN));
+            } else if (def != null && def.slot() == Trial.Slot.FIGHT && def.id().equals(host)) {
+                Def other = null;
+                for (Def o : TrialCatalog.inSlot(titan, Trial.Slot.FIGHT)) {
+                    if (!o.id().equals(host) && other == null) {
+                        other = o;
+                    }
+                }
+                picks.add(other == null ? pk : new TrialDraw.Pick(other.id(), Trial.Mods.PLAIN));
+            } else {
+                picks.add(pk);
+            }
+        }
+        return new TrialDraw.Draw(d.cycle(), picks);
+    }
+
+    // 開発・撮影: 今の段を越えたことにする (試練なら石が鳴ったのと同じ、中ボスなら倒したのと同じ)。何をしたかを返す
+    public static String devPass(ServerLevel back, UUID group, String titan, @Nullable ServerPlayer by) {
+        BackGroupData.Record r = BackGroupData.get(back).peek(group);
+        if (r == null || step(r) < 1) {
+            return "no route";
+        }
+        if (r.getInt(MID) > 0) {
+            onMidBossDefeated(back, group, titan);
+            return "mid-boss passed";
+        }
+        int step = step(r);
+        if (step >= LAST_STEP) {
+            return "at the heart (stop it to finish)";
+        }
+        String key = keyOf(titan, TrialData.current(back, group), step);
+        if (key == null) {
+            return "no key for step " + step;
+        }
+        onCleared(back, group, titan, key, by);
+        return "passed step " + step + " (" + key + ")";
+    }
+
     // 中ボスを倒した (TrialMidBoss の見張りから)。中ボスの段なら心臓の前室へ
     public static void onMidBossDefeated(ServerLevel back, UUID group, String titan) {
         BackGroupData.Record r = BackGroupData.get(back).peek(group);
@@ -387,19 +482,24 @@ public final class TrialRoute {
         SkyAbyss.LOGGER.info("Route of the {}: group {} beat the mid-boss", titan, group);
     }
 
+    // そのグループの今の段 (目的の帯・パーティの札へ送る中身)
+    public static TrialBoardNet.RouteState routeState(ServerLevel back, UUID group, String titan) {
+        BackGroupData.Record r = BackGroupData.get(back).peek(group);
+        int step = r == null ? 0 : step(r);
+        boolean mid = r != null && r.getInt(MID) > 0;
+        TrialDraw.Draw draw = step > 0 ? TrialData.current(back, group) : null;
+        Def d = draw == null || mid ? null : defOf(draw, step);
+        return new TrialBoardNet.RouteState(titan, step, mid, d == null ? "" : d.id(), d == null ? "" : d.slot().id,
+                draw == null ? 0 : draw.cycle());
+    }
+
     // グループのオンラインの人へ、順路の今の段を送る (目的の帯・パーティの札。docs/design/32 の 6 章)
     public static void sync(ServerLevel back, UUID group) {
         String titan = Titans.titanOfBack(back.dimension());
         if (titan == null) {
             return;
         }
-        BackGroupData.Record r = BackGroupData.get(back).peek(group);
-        int step = r == null ? 0 : step(r);
-        boolean mid = r != null && r.getInt(MID) > 0;
-        TrialDraw.Draw draw = step > 0 ? TrialData.current(back, group) : null;
-        Def d = draw == null || mid ? null : defOf(draw, step);
-        TrialBoardNet.RouteState state = new TrialBoardNet.RouteState(titan, step, mid, d == null ? "" : d.id(), d == null ? "" : d.slot().id,
-                draw == null ? 0 : draw.cycle());
+        TrialBoardNet.RouteState state = routeState(back, group, titan);
         for (ServerPlayer p : Players.snapshot(back.getServer().getPlayerList().getPlayers())) {
             if (Groups.isMember(p, group) && !(p instanceof net.neoforged.neoforge.common.util.FakePlayer)) {
                 net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(p, state);
@@ -448,22 +548,29 @@ public final class TrialRoute {
     // 段 step の入口の休み場へ、その背にいる参加者を運ぶ。運んだ人数
     public static int carry(ServerLevel back, UUID group, String titan, int step, boolean mid) {
         TrialDraw.Draw draw = TrialData.current(back, group);
-        String rest = restOf(titan, draw, step, mid);
+        String rest = restFor(back, group, titan, draw, step, mid);
         BlockPos at = rest == null ? null : spawnOf(back, titan, rest);
         if (at == null) {
             SkyAbyss.LOGGER.warn("Route of the {}: no rest for step {}{}", titan, step, mid ? " (mid)" : "");
             return 0;
         }
-        // 区画の写しで遊ぶ段は、写しの入口の休み場へ
-        at = frameOfStep(back, group, draw, step, mid).at(at);
+        // 区画の写しで遊ぶ段は、写しの入口の休み場へ (写しがまだなら、その場で写し終える)
+        TrialFrame frame = frameOfStep(back, group, draw, step, mid);
+        if (!frame.isZero() && !copyReady(back, group, step, mid)) {
+            BackGroupData.Record rr = BackGroupData.get(back).peek(group);
+            TrialSlot.finishNow(back, rr == null ? 0 : TrialSlot.of(rr));
+        }
+        at = frame.at(at);
         if (mid) {
             TrialMidBoss.prime(back, group, titan);
         }
         int n = 0;
+        // 運ばれた人は、休み場の中のいちばん見通しのきく向きを向く (壁や閉じた戸を向いて着かない。R6 の撮影で番兵の前室が戸を向いていた)
+        float yaw = facingAt(back, at);
         Component what = mid ? TrialMidBoss.name(titan) : step >= LAST_STEP ? Component.empty() : trialName(defOf(draw, step));
         String line = mid ? "message.skyabyss.route.mid" : step >= LAST_STEP ? "message.skyabyss.route.heart" : "message.skyabyss.route.step" + step;
         for (ServerPlayer p : members(back, group)) {
-            move(back, p, at);
+            move(back, p, at, yaw);
             n++;
             Notice.narrate(p, line, what);
             RouteCard.show(p, back, group, titan, draw, step, mid);
@@ -510,14 +617,49 @@ public final class TrialRoute {
     }
 
     static void move(ServerLevel back, ServerPlayer p, BlockPos at) {
+        move(back, p, at, p.getYRot());
+    }
+
+    static void move(ServerLevel back, ServerPlayer p, BlockPos at, float yaw) {
         p.stopRiding();
-        p.teleportTo(back, at.getX() + 0.5, at.getY(), at.getZ() + 0.5, p.getYRot(), p.getXRot());
+        p.teleportTo(back, at.getX() + 0.5, at.getY(), at.getZ() + 0.5, yaw, 0f);
         if (p instanceof net.neoforged.neoforge.common.util.FakePlayer) {
             // 試験の偽の人は通信がないので、位置だけ直接動かす
             p.setPos(at.getX() + 0.5, at.getY(), at.getZ() + 0.5);
         }
         p.setDeltaMovement(Vec3.ZERO);
         p.fallDistance = 0;
+    }
+
+    // 立つ位置 at から、目の高さで 16 の向きへ見通しを測り、いちばん遠くまで空いている向き (yaw) を返す。足と頭の高さが空いている間を数える
+    public static float facingAt(ServerLevel back, BlockPos at) {
+        int best = -1;
+        float bestYaw = 0f;
+        BlockPos.MutableBlockPos m = new BlockPos.MutableBlockPos();
+        for (int i = 0; i < 16; i++) {
+            float yaw = i * 22.5f;
+            double dx = -Math.sin(Math.toRadians(yaw));
+            double dz = Math.cos(Math.toRadians(yaw));
+            int d = 0;
+            for (int k = 1; k <= 32; k++) {
+                int x = (int) Math.floor(at.getX() + 0.5 + dx * k);
+                int z = (int) Math.floor(at.getZ() + 0.5 + dz * k);
+                m.set(x, at.getY() + 1, z);
+                if (!back.getBlockState(m).getCollisionShape(back, m).isEmpty()) {
+                    break;
+                }
+                m.set(x, at.getY(), z);
+                if (!back.getBlockState(m).getCollisionShape(back, m).isEmpty()) {
+                    break;
+                }
+                d = k;
+            }
+            if (d > best) {
+                best = d;
+                bestYaw = yaw;
+            }
+        }
+        return bestYaw;
     }
 
     // ---------------------------------------------------------------- tick
@@ -546,6 +688,9 @@ public final class TrialRoute {
     public static void tick(ServerLevel back, String titan, List<ServerPlayer> players, long now) {
         for (Pending p : new ArrayList<>(PENDING.values())) {
             if (now < p.due() || Titans.backOf(p.titan()) != back.dimension()) {
+                continue;
+            }
+            if (!copyReady(back, p.group(), p.step(), p.mid()) && now - p.due() < COPY_WAIT) {
                 continue;
             }
             PENDING.remove(p.group());

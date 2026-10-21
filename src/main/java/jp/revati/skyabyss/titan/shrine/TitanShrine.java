@@ -284,7 +284,7 @@ public final class TitanShrine {
         return out;
     }
 
-    static void activate(ServerPlayer by, String titan, BlockPos pos) {
+    public static void activate(ServerPlayer by, String titan, BlockPos pos) {
         MinecraftServer server = by.server;
         ServerLevel back = Titans.hasBack(titan) ? server.getLevel(Titans.backOf(titan)) : null;
         if (back == null) {
@@ -325,7 +325,8 @@ public final class TitanShrine {
             p.fallDistance = 0;
             jp.revati.skyabyss.lore.Lore.unlock(p, loreId(titan), true);
         }
-        TrialRoute.start(back, group, titan, ring);
+        // 区画の写しは帳のあいだに tick ごとに少しずつ (一 tick に止まらない)。段 1 の写しが済んだら運ばれる
+        TrialRoute.startSoon(back, group, titan, ring);
         SkyAbyss.LOGGER.info("{} used the shrine of the {} with {} in the ring", by.getGameProfile().getName(), titan, names);
     }
 
