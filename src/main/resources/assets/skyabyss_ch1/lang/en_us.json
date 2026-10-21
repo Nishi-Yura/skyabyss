@@ -163,6 +163,7 @@
   "message.skyabyss.ch1.pit.cold_shut": "The stone door is cold as ice. Your fingers stick to it.",
   "message.skyabyss.ch1.pit.pack": "At the bottom of the pack, a page wrapped in oilcloth. Iron and torches, neatly set out.",
   "message.skyabyss.ch1.pit.pack_empty": "The pack is empty now. Only a copy of the page is still tucked inside.",
+  "message.skyabyss.ch1.pit.pack_hint": "An old pack lies here. Try touching it",
   "message.skyabyss.ch1.pit.trail": "The cairns' arrows end here.",
   "message.skyabyss.ch1.plate.done": "The stone no longer rings.",
   "message.skyabyss.ch1.plate.hint": "Each stone rings as many times as it has candles.",

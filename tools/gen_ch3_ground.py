@@ -393,7 +393,7 @@ def quests():
     put(b + 'raise.journal',
         '語り部が言っていた。「風の民は、銅の柱で雷を地へ逃がしたそうだよ。峰の塔の跡に、柱を立てる台が四つ残っているはずさ」\n銅の鉱石は、かまどで溶かせば銅になる。銅三つで、避雷針が一本できる。',
         'The storyteller said: "The wind people let the lightning down into the ground with copper pillars. There should be four stands left at the ruined tower on the peak."\nCopper ore smelts into copper in a furnace. Three copper make one lightning rod.')
-    put(b + 'raise.rods', '避雷針を作り、塔の跡の台に立てる', 'Make lightning rods and raise them on the ruin\'s stands')
+    put(b + 'raise.rods', '避雷針を作り、塔の跡の台に立てる', "Set rods on the ruin's stands")
     put(b + 'vault.journal', '四本目の針に雷が落ちると、塔の銅の戸がずれた。中を見よう。',
         'When the fourth rod took the lightning, the tower\'s copper door slid aside. Look inside.')
     put(b + 'vault.page', '開いた戸の奥を見る', 'Look past the open door')

@@ -188,6 +188,7 @@ public final class SelfTestRunner {
         // 序盤の構造物 (野営地・鐘の宿り・巨大な足跡・巨神の骨)。docs/design/17 の 4 章
         steps.addAll(jp.revati.skyabyss.opening.site.SiteSelfTest.steps());
         steps.addAll(jp.revati.skyabyss.opening.site.CapitalDoorsSelfTest.steps());
+        steps.addAll(jp.revati.skyabyss.opening.site.SiteGuardSelfTest.steps());
         // 章の跡地 (方位と距離の帯・四つの形・道しるべ・祠の置き場・潮殻の浜)。docs/design/33 の 3 章 (W2)。SKYABYSS_SELFTEST_ONLY="chapter grounds"
         steps.addAll(jp.revati.skyabyss.opening.site.ChapterGroundsSelfTest.steps());
         steps.addAll(ChapterSkySelfTest.steps());

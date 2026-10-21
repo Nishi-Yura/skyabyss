@@ -66,6 +66,14 @@ public final class SiteGuard {
         }
     }
 
+    // 自己テストの世界では都が世界の出発点にあり、ほかの段が偽の人や敵をそこで動かすので、安全 (無敵・湧かない・見回り) は止める。
+    // 荒らしよけ (壊す・置く) は止めない。この仕組みの段 (SiteGuardSelfTest) だけ testing = true にして確かめる
+    public static volatile boolean testing;
+
+    private static boolean safetyOff() {
+        return jp.revati.skyabyss.SelfTestRunner.enabled() && !testing;
+    }
+
     private static Area capital;
     private static long capitalKey = Long.MIN_VALUE;
     // 小要素ごとの守るブロック (場所の鍵 → 世界の座標の long)
@@ -280,7 +288,7 @@ public final class SiteGuard {
     // ---------------------------------------------------------------- 都の中の安全
     @SubscribeEvent(priority = EventPriority.HIGH)
     static void onDamage(LivingIncomingDamageEvent event) {
-        if (!(event.getEntity() instanceof ServerPlayer p)) {
+        if (!(event.getEntity() instanceof ServerPlayer p) || p instanceof net.neoforged.neoforge.common.util.FakePlayer || safetyOff()) {
             return;
         }
         if (event.getSource().is(DamageTypeTags.BYPASSES_INVULNERABILITY) || event.getSource().is(DamageTypes.FELL_OUT_OF_WORLD)) {
@@ -294,6 +302,9 @@ public final class SiteGuard {
     @SubscribeEvent
     static void onSpawn(FinalizeSpawnEvent event) {
         Mob mob = event.getEntity();
+        if (safetyOff()) {
+            return;
+        }
         if (mob instanceof Enemy && mob.level() instanceof ServerLevel level && inCapital(level, BlockPos.containing(event.getX(), event.getY(), event.getZ()))) {
             event.setSpawnCancelled(true);
         }
@@ -303,7 +314,7 @@ public final class SiteGuard {
     @SubscribeEvent
     static void onTick(ServerTickEvent.Post event) {
         MinecraftServer server = event.getServer();
-        if (server.getTickCount() % 20 != 7) {
+        if (server.getTickCount() % 20 != 7 || safetyOff()) {
             return;
         }
         Area a = capital(server);

@@ -163,6 +163,7 @@
   "message.skyabyss.ch1.pit.cold_shut": "石の戸は、氷のように冷たい。触れた指が、張りついて離れない。",
   "message.skyabyss.ch1.pit.pack": "荷の底に、油紙で包んだ頁が一枚。鉄と松明も、きちんと揃えてある。",
   "message.skyabyss.ch1.pit.pack_empty": "荷は、もう空だ。頁の写しだけが、まだ挟まっている。",
+  "message.skyabyss.ch1.pit.pack_hint": "古い荷がある。触れてみよう",
   "message.skyabyss.ch1.pit.trail": "石標の矢印は、ここで途切れていた。",
   "message.skyabyss.ch1.plate.done": "石は、もう鳴らない。",
   "message.skyabyss.ch1.plate.hint": "ろうそくの数だけ、石は鳴る。",

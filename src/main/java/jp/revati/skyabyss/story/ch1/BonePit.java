@@ -70,7 +70,7 @@ public final class BonePit {
 
     // ---------------------------------------------------------------- 登録 (Sites.registerP6 から)
     static void register() {
-        ChapterSites.element(SITE, Chapters.WHALE, SITE).atGround().dist(70, 150).prefer(Prefer.HIGH).arriveRadius(14)
+        ChapterSites.element(SITE, Chapters.WHALE, SITE).atGround().dist(45, 110).prefer(Prefer.HIGH).arriveRadius(14)
                 .post(BonePit::finish)
                 .onArrive((p, s) -> {
                     Notice.narrate(p, "message.skyabyss.ch1.arrive." + SITE);
@@ -194,6 +194,40 @@ public final class BonePit {
             if (pit != null) {
                 event.setCanceled(true);
                 touchDoor(player, level, pit);
+            }
+        }
+    }
+
+    // 前の私の荷を目立たせる (2026-10-21 の試遊: 最後に受け取る所が分かりにくい)。10 tick ごとに、まだ荷を開けていない人が 16 以内にいる荷の上へ
+    // 光の粒を立てる。4 以内に来た人には一度だけ「荷に触れる」の一言
+    private static final java.util.Set<java.util.UUID> PACK_HINTED = java.util.concurrent.ConcurrentHashMap.newKeySet();
+
+    @SubscribeEvent
+    static void onTickPack(net.neoforged.neoforge.event.tick.ServerTickEvent.Post event) {
+        MinecraftServer server = event.getServer();
+        if (server.getTickCount() % 10 != 3) {
+            return;
+        }
+        ServerLevel level = server.overworld();
+        for (SiteData.Entry e : entries(server)) {
+            BlockPos pack = e.extra("pack");
+            if (pack == null || !level.isLoaded(pack)) {
+                continue;
+            }
+            boolean anyone = false;
+            for (ServerPlayer p : level.players()) {
+                double d2 = p.distanceToSqr(pack.getX() + 0.5, pack.getY() + 0.5, pack.getZ() + 0.5);
+                if (d2 > 16 * 16 || SiteTreasure.claimed(p, PACK)) {
+                    continue;
+                }
+                anyone = true;
+                if (d2 < 4 * 4 && PACK_HINTED.add(p.getUUID())) {
+                    Notice.hint(p, "message.skyabyss.ch1.pit.pack_hint");
+                }
+            }
+            if (anyone) {
+                level.sendParticles(net.minecraft.core.particles.ParticleTypes.END_ROD, pack.getX() + 0.5, pack.getY() + 1.4, pack.getZ() + 0.5, 3, 0.18, 0.35, 0.18, 0.01);
+                level.sendParticles(net.minecraft.core.particles.ParticleTypes.GLOW, pack.getX() + 0.5, pack.getY() + 1.0, pack.getZ() + 0.5, 2, 0.3, 0.2, 0.3, 0.0);
             }
         }
     }

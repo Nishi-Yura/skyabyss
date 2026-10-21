@@ -235,6 +235,7 @@ def texts():
     put('message.skyabyss.ch1.pit.trail', '石標の矢印は、ここで途切れていた。', 'The cairns\' arrows end here.')
     put('message.skyabyss.ch1.pit.pack', '荷の底に、油紙で包んだ頁が一枚。鉄と松明も、きちんと揃えてある。',
         'At the bottom of the pack, a page wrapped in oilcloth. Iron and torches, neatly set out.')
+    put('message.skyabyss.ch1.pit.pack_hint', '古い荷がある。触れてみよう', 'An old pack lies here. Try touching it')
     put('message.skyabyss.ch1.pit.pack_empty', '荷は、もう空だ。頁の写しだけが、まだ挟まっている。', 'The pack is empty now. Only a copy of the page is still tucked inside.')
     put('message.skyabyss.ch1.pit.cold_shut', '石の戸は、氷のように冷たい。触れた指が、張りついて離れない。',
         'The stone door is cold as ice. Your fingers stick to it.')
