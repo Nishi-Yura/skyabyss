@@ -49,7 +49,8 @@ public final class TrialBoardNet {
     }
 
     // abyssOpen = この人は深淵を選べる (転生 3 回以上)。abyssOn = このグループは深淵を選んでいる
-    public record Open(String titan, int cycle, List<Card> cards, String weeklyId, boolean weeklyDone, boolean weeklyNow, List<Row> codex,
+    // shards = 持っている歌片の数 (順路の鍵)。routeClears = この人がこの巨神の順路を越えた回数、routeBest = 最速 (tick。0 = まだ)
+    public record Open(String titan, int cycle, List<Card> cards, int shards, int routeClears, long routeBest, List<Row> codex,
             List<String> titles, boolean abyssOpen, boolean abyssOn) implements CustomPacketPayload {
         public static final Type<Open> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "trial_board_open"));
         public static final StreamCodec<RegistryFriendlyByteBuf, Open> STREAM_CODEC = StreamCodec.of(Open::encode, Open::decode);
@@ -72,9 +73,9 @@ public final class TrialBoardNet {
                 buf.writeBoolean(c.clearedNow);
                 buf.writeVarInt(c.state);
             }
-            buf.writeUtf(o.weeklyId, 16);
-            buf.writeBoolean(o.weeklyDone);
-            buf.writeBoolean(o.weeklyNow);
+            buf.writeVarInt(o.shards);
+            buf.writeVarInt(o.routeClears);
+            buf.writeVarLong(o.routeBest);
             buf.writeVarInt(o.codex.size());
             for (Row r : o.codex) {
                 buf.writeUtf(r.cellId, 16);
@@ -108,9 +109,9 @@ public final class TrialBoardNet {
                 }
                 cards.add(new Card(id, rarity, quiet, List.copyOf(chips), buf.readBoolean(), buf.readVarInt()));
             }
-            String weeklyId = buf.readUtf(16);
-            boolean weeklyDone = buf.readBoolean();
-            boolean weeklyNow = buf.readBoolean();
+            int shards = buf.readVarInt();
+            int routeClears = buf.readVarInt();
+            long routeBest = buf.readVarLong();
             int k = buf.readVarInt();
             List<Row> codex = new ArrayList<>();
             for (int i = 0; i < k; i++) {
@@ -121,7 +122,7 @@ public final class TrialBoardNet {
             for (int i = 0; i < t; i++) {
                 titles.add(buf.readUtf(48));
             }
-            return new Open(titan, cycle, List.copyOf(cards), weeklyId, weeklyDone, weeklyNow, List.copyOf(codex), List.copyOf(titles), buf.readBoolean(),
+            return new Open(titan, cycle, List.copyOf(cards), shards, routeClears, routeBest, List.copyOf(codex), List.copyOf(titles), buf.readBoolean(),
                     buf.readBoolean());
         }
 

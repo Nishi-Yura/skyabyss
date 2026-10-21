@@ -804,9 +804,8 @@ public final class EmberDeckSelfTest {
             if (c.ports().entrance().isEmpty()) {
                 continue;
             }
-            boolean weekly = c.def().equals(TrialData.weekly(EMBER, TrialData.worldSeed(back), TrialData.week()));
-            boolean wa = da.has(c.def().id()) || weekly;
-            boolean wb = db.has(c.def().id()) || weekly;
+            boolean wa = da.has(c.def().id());
+            boolean wb = db.has(c.def().id());
             check(GroupGates.isOpen(back, a, c.ports().entrance()) == wa, c.def().id() + " gate for group A: expected " + wa);
             check(GroupGates.isOpen(back, b, c.ports().entrance()) == wb, c.def().id() + " gate for group B: expected " + wb);
         }

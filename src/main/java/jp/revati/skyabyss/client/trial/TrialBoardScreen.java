@@ -344,16 +344,13 @@ public class TrialBoardScreen extends Screen implements jp.revati.skyabyss.clien
     private void renderFoot(GuiGraphics g, Font font, int px, int py) {
         int y = py + H - 40;
         g.fill(px + 10, y - 3, px + W - 10, y - 2, argb(0.5f, 0x3A4A58));
-        if (!data.weeklyId().isEmpty()) {
-            Trial.Def w = TrialCatalog.get(data.weeklyId());
-            if (w != null) {
-                MutableComponent line = Component.translatable("gui.skyabyss.trial.weekly", Component.translatable(w.nameKey()));
-                g.drawString(font, line, px + 14, y, argb(1f, TEAL), false);
-                Component state = Component.translatable(data.weeklyDone() ? "gui.skyabyss.trial.weekly_done" : data.weeklyNow() ? "gui.skyabyss.trial.weekly_drawn"
-                        : "gui.skyabyss.trial.weekly_open");
-                g.drawString(font, state, px + W - 14 - font.width(state), y, argb(1f, data.weeklyDone() ? GOOD : GOLD), false);
-            }
-        }
+        // 順路の記録と歌片 (docs/design/32 の 6 章)
+        long best = data.routeBest() / 20;
+        Component record = data.routeClears() <= 0 ? Component.translatable("gui.skyabyss.shrine.record_none")
+                : Component.translatable("gui.skyabyss.shrine.record", data.routeClears(), String.format("%d:%02d", best / 60, best % 60));
+        g.drawString(font, record, px + 14, y, argb(1f, TEAL), false);
+        Component shards = Component.translatable("gui.skyabyss.shrine.shards", data.shards());
+        g.drawString(font, shards, px + W - 14 - font.width(shards), y, argb(1f, data.shards() > 0 ? GOOD : GOLD), false);
         MutableComponent titles = Component.translatable("gui.skyabyss.trial.titles");
         if (data.titles().isEmpty()) {
             titles.append(Component.translatable("gui.skyabyss.trial.titles_none"));

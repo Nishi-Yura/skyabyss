@@ -15,9 +15,8 @@ import net.minecraft.world.entity.player.Player;
 
 // 試練の板まわりの、初めての説明 (版 25。ユーザーの試遊の声「鼓動の間の脇の部屋の石を押したら今週の… と出たが、先に説明がない」)。
 // 人ごとに一度ずつ (倒れても残る PlayerPersisted の印):
-//  - BOARD: 試練の板のそば (半径 6) に初めて来た: 「この石の板が試練の板。引いた三つと今週の試練が読める」
-//  - DECK: 試練の階の広間に初めて入った (岩鯨のみ): 「引いた三つと今週の試練の戸だけが開く」
-//  - WEEKLY: 今週の試練 (引いていない試練) のセルに初めて入った: 「ここは今週の試練。いつでも挑める。済ませると素材が倍」
+//  - BOARD: 試練の板のそば (半径 6) に初めて来た: 「この石の板が試練の板。引いた三つが読める」
+//  - DECK: 試練の階の広間に初めて入った (岩鯨のみ): 「引いた三つの戸だけが開く」
 // 説明は一行ずつの短い知らせで、チャットを流さない (Notice.hint)
 public final class TrialIntro {
     private TrialIntro() {
@@ -26,7 +25,6 @@ public final class TrialIntro {
     private static final String TAG = "skyabyss_trial_intro";
     public static final int BOARD = 1;
     public static final int DECK = 2;
-    public static final int WEEKLY = 4;
     public static final int BOARD_READ = 8;
     private static final double REACH = 6.0;
 
@@ -91,14 +89,6 @@ public final class TrialIntro {
         if (!seen(sp, BOARD_READ)) {
             mark(sp, BOARD_READ);
             Notice.hint(sp, "message.skyabyss.trial_intro.weekly");
-        }
-    }
-
-    // 今週の試練 (引いていない試練) のセルに入った: 初めてなら一度だけ
-    public static void onWeeklyEntered(ServerPlayer sp) {
-        if (!seen(sp, WEEKLY)) {
-            mark(sp, WEEKLY);
-            Notice.hint(sp, "message.skyabyss.trial_intro.weekly_cell");
         }
     }
 }

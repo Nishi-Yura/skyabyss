@@ -422,12 +422,11 @@ public final class StormTrialSelfTest {
             r.remove(TrialData.DRAW);
             TrialDraw.Draw d = TrialData.current(storm, r, g, TrialData.worldSeed(back));
             TrialRuntime.syncGates(back, g, storm, d);
-            Def weekly = TrialData.weekly(storm, TrialData.worldSeed(back), TrialData.week());
             for (TrialCell c : TrialCells.of(storm)) {
                 if (c.ports().entrance().isEmpty()) {
                     continue;
                 }
-                boolean want = d.has(c.def().id()) || weekly != null && weekly.id().equals(c.def().id());
+                boolean want = d.has(c.def().id());
                 boolean open = GroupGates.isOpen(back, g, c.ports().entrance());
                 if (open != want) {
                     FAIL.add("group " + i + " cycle " + (2 + i % 4) + ": gate of " + c.def().id() + " is " + (open ? "open" : "closed") + " but the draw is " + d.encode());

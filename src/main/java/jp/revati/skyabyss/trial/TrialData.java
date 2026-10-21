@@ -33,8 +33,6 @@ public final class TrialData {
 
     // 世界の種を使うところの上書き (自己テスト用)。Long.MIN_VALUE なら世界の種
     public static long seedOverride = Long.MIN_VALUE;
-    // 週の上書き (自己テスト用)。Long.MIN_VALUE なら実時間の週
-    public static long weekOverride = Long.MIN_VALUE;
 
     // いまの周 (1 から)。心臓を止めた数 + 1
     public static int cycle(BackGroupData.Record r) {
@@ -148,35 +146,5 @@ public final class TrialData {
         }
         r.putString(CLEARED, String.join(",", set));
         return true;
-    }
-
-    // ---------------------------------------------------------------- 今週の試練 (docs/design/29 の 4.4)
-    public static long week() {
-        if (weekOverride != Long.MIN_VALUE) {
-            return weekOverride;
-        }
-        return java.time.LocalDate.now(java.time.ZoneOffset.UTC).toEpochDay() / 7;
-    }
-
-    // 巨神ごとの今週の試練。作ってある試練から種 (世界の種 + 週 + 巨神) で一つ
-    @Nullable
-    public static Def weekly(String titan, long worldSeed, long week) {
-        List<Def> all = TrialCatalog.of(titan);
-        if (all.isEmpty()) {
-            return null;
-        }
-        long h = TrialDraw.seed(worldSeed, new UUID(week, 0x77EEC1), titan, 0);
-        return all.get(new Random(h).nextInt(all.size()));
-    }
-
-    public static List<Def> weeklyAll(long worldSeed, long week) {
-        List<Def> out = new ArrayList<>();
-        for (String t : TrialCatalog.titans()) {
-            Def d = weekly(t, worldSeed, week);
-            if (d != null) {
-                out.add(d);
-            }
-        }
-        return out;
     }
 }

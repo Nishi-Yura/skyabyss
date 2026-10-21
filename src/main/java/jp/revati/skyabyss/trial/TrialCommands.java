@@ -72,15 +72,6 @@ public final class TrialCommands {
                             HubTablets.refresh(here, group);
                             return 1;
                         })))
-                        .then(Commands.literal("weekly").executes(ctx -> {
-                            // 開発用: 今週の試練の入口の置き場 (パッド・立て札) を作り直して知らせる
-                            ServerLevel here = back(ctx.getSource());
-                            WeeklyGate.clearAll();
-                            WeeklyGate.install(here, titan(here));
-                            WeeklyGate.Site site = WeeklyGate.site(here, titan(here));
-                            ctx.getSource().sendSuccess(() -> Component.literal("weekly gate " + (site == null ? "-" : site.pad() + " sign " + site.sign())), false);
-                            return 1;
-                        }))
                         .then(Commands.literal("tp").then(Commands.argument("where", StringArgumentType.word())
                                 .executes(ctx -> tp(ctx.getSource(), StringArgumentType.getString(ctx, "where"))))))));
     }
@@ -114,8 +105,6 @@ public final class TrialCommands {
         for (TrialDraw.Pick p : draw.picks()) {
             src.sendSuccess(() -> Component.literal("  " + p.cellId() + " " + p.mods().encode() + " " + p.mods().rarity() + (p.mods().quiet() ? " quiet" : "")), false);
         }
-        Def w = TrialData.weekly(titan(back), TrialData.worldSeed(back), TrialData.week());
-        src.sendSuccess(() -> Component.literal("weekly " + (w == null ? "-" : w.id()) + " (week " + TrialData.week() + ")"), false);
         return 1;
     }
 

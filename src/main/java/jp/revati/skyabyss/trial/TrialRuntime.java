@@ -126,18 +126,17 @@ public final class TrialRuntime {
         }
     }
 
-    // 引いた試練 (と今週の試練) の入口だけを、そのグループに開ける。ほかには閉じて見える
+    // 引いた試練の入口だけを、そのグループに開ける。ほかには閉じて見える
     public static void syncGates(ServerLevel back, UUID group, String titan, TrialDraw.Draw draw) {
         if (!TrialCatalog.deckPlaced(titan)) {
             return;
         }
-        Def weekly = TrialData.weekly(titan, TrialData.worldSeed(back), TrialData.week());
         for (TrialCell cell : TrialCells.of(titan)) {
             TrialCell.Ports p = cell.ports();
             if (p.entrance().isEmpty()) {
                 continue;
             }
-            boolean want = draw.has(cell.def().id()) || weekly != null && weekly.id().equals(cell.def().id());
+            boolean want = draw.has(cell.def().id());
             String cellKey = draw.has(cell.def().id()) ? TrialRegions.keyOfDef(titan, cell.def(), draw) : null;
             if (want && cellKey != null && HubTablets.cleared(back, group, titan, cellKey)) {
                 // 越えた試練 (版 25): 入口は試練済みの封印で閉じたまま (見かけは TrialHub.sealOverlay)
@@ -212,16 +211,9 @@ public final class TrialRuntime {
                 }
                 TrialCell.Run run = armed(level, group, cell, draw, now);
                 run.lastPresent = now;
-                if (!draw.has(cell.def().id())) {
-                    // 引いていない試練 = 今週の試練 (版 25: 初めて入った人に一行)
-                    for (ServerPlayer p : inside) {
-                        TrialIntro.onWeeklyEntered(p);
-                    }
-                }
                 cell.tick(level, run, inside, now);
                 tickPad(level, run, inside);
                 autoRing(level, group, cell, run, draw, inside, now);
-                weeklyBack(level, titan, cell, run, draw, inside);
             }
         }
         // 誰もいなくなったセルを止める
@@ -232,18 +224,11 @@ public final class TrialRuntime {
         }
     }
 
-    // いまそのグループに動かしてよいセル: 引いた三つ + 今週の試練
+    // いまそのグループに動かしてよいセル: 引いた三つ
     private static List<TrialCell> liveCells(ServerLevel back, String titan, TrialDraw.Draw draw) {
         List<TrialCell> out = new ArrayList<>();
         for (TrialDraw.Pick p : draw.picks()) {
             TrialCell c = TrialCells.get(p.cellId());
-            if (c != null) {
-                out.add(c);
-            }
-        }
-        Def weekly = TrialData.weekly(titan, TrialData.worldSeed(back), TrialData.week());
-        if (weekly != null && !draw.has(weekly.id())) {
-            TrialCell c = TrialCells.get(weekly.id());
             if (c != null) {
                 out.add(c);
             }
@@ -253,16 +238,7 @@ public final class TrialRuntime {
 
     private static Mods modsFor(ServerLevel back, UUID group, String titan, Def def, TrialDraw.Draw draw) {
         TrialDraw.Pick pick = draw.pick(def.id());
-        if (pick != null) {
-            return pick.mods();
-        }
-        // 今週の試練 (引いていない): 全グループに同じ修飾 (種 = 世界の種 + 週 + 巨神)
-        long h = TrialDraw.seed(TrialData.worldSeed(back), new UUID(TrialData.week(), 0x7EEC), titan, 1);
-        Mods weekly = TrialDraw.rollMods(def, new Random(h ^ def.id().hashCode()));
-        if (jp.revati.skyabyss.abyss.Abyss.groupOn(back, group)) {
-            weekly = TrialDraw.abyssify(def, weekly, new Random(h ^ def.id().hashCode() ^ 0xABE55L));
-        }
-        return weekly;
+        return pick != null ? pick.mods() : Mods.PLAIN;
     }
 
     public static TrialCell.Run armed(ServerLevel back, UUID group, TrialCell cell, TrialDraw.Draw draw, long now) {
@@ -418,9 +394,7 @@ public final class TrialRuntime {
         UUID group = Groups.keyOf(sp);
         TrialDraw.Draw draw = TrialData.current(back, group);
         boolean drawn = draw.has(cell.def().id());
-        Def weekly = TrialData.weekly(titan, TrialData.worldSeed(back), TrialData.week());
-        boolean isWeekly = weekly != null && weekly.id().equals(cell.def().id());
-        if (!drawn && !isWeekly) {
+        if (!drawn) {
             Notice.bar(sp, ModText.deny("message.skyabyss.trial.stone_not_yours"));
             return InteractionResult.SUCCESS;
         }
@@ -473,24 +447,6 @@ public final class TrialRuntime {
         ringCell(back, group, cell, run, drawn, inside.get(0), stone, kind);
     }
 
-    // 今週の試練 (引いていない試練。個人のもの): 越えたら、中にいる人だけを鼓動の間 (真ん中) へ戻す。越えたあとに入ってきた人も同じ
-    // (ほかの試練にいる仲間は動かさない)。引いた試練の戻りは TrialHub (グループのゴールの合図) が行う
-    static int weeklyBack(ServerLevel back, String titan, TrialCell cell, TrialCell.Run run, TrialDraw.Draw draw, List<ServerPlayer> inside) {
-        TrialBacks.Back kind = TrialBacks.of(titan);
-        if (kind == null || draw.has(cell.def().id()) || !run.cleared || !kind.isRung(back, run.group, cell.def(), false)) {
-            return 0;
-        }
-        int moved = 0;
-        for (ServerPlayer p : inside) {
-            if (p.isCreative() || !TrialHub.sendToHub(back, p, titan, false, null)) {
-                continue;
-            }
-            Notice.bar(p, ModText.hint("message.skyabyss.trial_hub.weekly_back"));
-            moved++;
-        }
-        return moved;
-    }
-
     // ゴールの知らせの数え (TrialSteles.onRung) が、原型の石として数えないようにして動かす (新作の石は自分で数える)
     public static void withLegacySuppressed(Runnable action) {
         suppressLegacy = true;
@@ -520,9 +476,6 @@ public final class TrialRuntime {
         BackGroupData.Record r = GroupProgress.of(back, group);
         TrialData.markCleared(r, def.id());
         TrialCodex codex = TrialCodex.get(back.getServer());
-        long week = TrialData.week();
-        Def weeklyDef = TrialData.weekly(def.titan(), TrialData.worldSeed(back), week);
-        boolean isWeekly = weeklyDef != null && weeklyDef.id().equals(def.id());
         Set<String> modKeys = modKeys(def, mods);
         for (ServerPlayer p : Groups.online(back, group)) {
             if (p.isSpectator()) {
@@ -530,20 +483,14 @@ public final class TrialRuntime {
             }
             UUID id = p.getUUID();
             boolean first = codex.markCleared(id, def.id(), modKeys, goalDone);
-            int mats = TrialDraw.materialCount(def, mods, goalDone, false);
-            boolean weeklyBonus = isWeekly && codex.weeklyDone(id, def.titan()) != week;
-            ItemStack stack = new ItemStack(Vows.materialOf(def.titan()), mats + (weeklyBonus ? mats : 0));
+            int mats = TrialDraw.materialCount(def, mods, goalDone);
+            ItemStack stack = new ItemStack(Vows.materialOf(def.titan()), mats);
             jp.revati.skyabyss.pouch.PouchRouting.placeBack(p, stack);
             Component name = Component.translatable(def.nameKey());
             Notice.gain(p, ModText.progress("message.skyabyss.trial.cleared", name, stack.getCount()));
             int shards = 0;
             if (first) {
                 shards++;
-            }
-            if (weeklyBonus) {
-                shards++;
-                codex.setWeeklyDone(id, def.titan(), week);
-                Notice.hint(p, "message.skyabyss.trial.weekly_done");
             }
             if ((mods.rarity() == Rarity.EXTREME && back.random.nextFloat() < 0.08f)
                     || (mods.rarity() == Rarity.ABYSS && back.random.nextFloat() < jp.revati.skyabyss.abyss.Abyss.SHARD_CHANCE)) {

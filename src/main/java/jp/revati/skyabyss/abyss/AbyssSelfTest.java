@@ -190,10 +190,10 @@ public final class AbyssSelfTest {
                 check(TrialDraw.abyssify(def, ab, new Random(seed + 1)).encode().equals(ab.encode()), tag + ": abyssify is not idempotent");
                 // 報い: 極 (+2) より大きい (+3)。目標で +1
                 Mods ext = new Mods(ab.layout(), ab.numbers(), ab.enemy(), ab.hazards(), ab.goal(), ab.extreme(), false, Rarity.EXTREME);
-                int a0 = TrialDraw.materialCount(def, ab, false, false);
-                int e0 = TrialDraw.materialCount(def, ext, false, false);
+                int a0 = TrialDraw.materialCount(def, ab, false);
+                int e0 = TrialDraw.materialCount(def, ext, false);
                 check(a0 == e0 - 2 + Abyss.MATERIAL_BONUS && a0 > e0, tag + ": abyss materials " + a0 + " vs extreme " + e0);
-                check(TrialDraw.materialCount(def, ab, true, false) == a0 + 1 && TrialDraw.materialCount(def, ab, false, true) == a0 * 2, tag + ": goal/weekly math");
+                check(TrialDraw.materialCount(def, ab, true) == a0 + 1, tag + ": goal math");
             }
         }
         // 引き全体: つまみで重なり、戻せば元に戻る (保存しない)。同じ引きの配置・試練は変わらない

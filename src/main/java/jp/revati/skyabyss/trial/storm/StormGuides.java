@@ -117,10 +117,6 @@ public final class StormGuides {
             }
             TrialCell.Run run = TrialRuntime.runOf(group, id);
             Def d = unrung(back, group);
-            boolean weeklyOnly = d == null || !d.id().equals(id);
-            if (weeklyOnly && run != null && run.cleared) {
-                return stone(id);
-            }
             if (run != null && run.cleared) {
                 return stone(id);
             }

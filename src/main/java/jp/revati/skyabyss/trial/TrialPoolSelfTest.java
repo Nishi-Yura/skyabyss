@@ -260,26 +260,10 @@ public final class TrialPoolSelfTest {
         Def w10 = TrialCatalog.get("W10");
         Mods plain = new Mods(0, new int[] {1, 1}, 0, new int[0], -1, Extreme.NONE, false, Rarity.COMMON);
         Mods rare = new Mods(0, new int[] {1, 1}, 0, new int[] {0}, 0, Extreme.NONE, false, Rarity.RARE);
-        int base = TrialDraw.materialCount(w10, plain, false, false);
+        int base = TrialDraw.materialCount(w10, plain, false);
         check(base >= 1, "no materials for a plain trial");
-        check(TrialDraw.materialCount(w10, rare, false, false) > base, "a rare trial gives no more materials");
-        check(TrialDraw.materialCount(w10, rare, true, false) > TrialDraw.materialCount(w10, rare, false, false), "the optional goal gives no extra");
-        check(TrialDraw.materialCount(w10, plain, false, true) >= base * 2, "the weekly trial does not double");
-        // 今週の試練
-        for (long week : new long[] {2900, 2901, 2902}) {
-            List<Def> w = TrialData.weeklyAll(4242L, week);
-            check(w.size() == TrialCatalog.titans().size(), "weekly count");
-            check(TrialData.weeklyAll(4242L, week).equals(w), "weekly is not stable");
-        }
-        Set<String> distinct = new HashSet<>();
-        for (long week = 2800; week < 2860; week++) {
-            Def w = TrialData.weekly(whale, 4242L, week);
-            check(w != null && w.titan().equals(whale), "weekly is not of the titan");
-            if (w != null) {
-                distinct.add(w.id());
-            }
-        }
-        check(distinct.size() >= 3, "the weekly trial barely varies: " + distinct);
+        check(TrialDraw.materialCount(w10, rare, false) > base, "a rare trial gives no more materials");
+        check(TrialDraw.materialCount(w10, rare, true) > TrialDraw.materialCount(w10, rare, false), "the optional goal gives no extra");
     }
 
     private static TrialDraw.Memory copyMem(String titan, UUID g, int upTo) {
@@ -566,10 +550,8 @@ public final class TrialPoolSelfTest {
             if (c.ports().entrance().isEmpty()) {
                 continue;
             }
-            // 今週の試練は、引いていなくても入れる
-            boolean weekly = c.def().equals(TrialData.weekly(whale, TrialData.worldSeed(back), TrialData.week()));
-            boolean wa = da.has(c.def().id()) || weekly;
-            boolean wb = db.has(c.def().id()) || weekly;
+            boolean wa = da.has(c.def().id());
+            boolean wb = db.has(c.def().id());
             check(GroupGates.isOpen(back, a, c.ports().entrance()) == wa, c.def().id() + " gate for group A: expected " + wa);
             check(GroupGates.isOpen(back, b, c.ports().entrance()) == wb, c.def().id() + " gate for group B: expected " + wb);
         }

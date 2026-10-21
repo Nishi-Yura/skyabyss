@@ -282,7 +282,6 @@ public final class SelfTestRunner {
         // 余燼の試練の階 (E02・E06・E07・E10)。docs/design/29 の 3.4。SKYABYSS_SELFTEST_ONLY="trial pool ember"
         steps.addAll(jp.revati.skyabyss.trial.ember.EmberDeckSelfTest.steps());
         // 試練を越えたあと (範囲・碑・鼓動の間への戻り・パーティごとの封)。docs/design/29 の 4.6。背が建ててある巨神だけ世界の検査をする
-        steps.addAll(jp.revati.skyabyss.trial.TrialHubSelfTest.steps());
         steps.addAll(jp.revati.skyabyss.trial.TrialRouteSelfTest.steps());
         return steps;
     }

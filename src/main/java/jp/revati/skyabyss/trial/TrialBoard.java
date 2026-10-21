@@ -72,14 +72,12 @@ public final class TrialBoard {
         for (TrialDraw.Pick p : draw.picks()) {
             codex.markSeen(id, p.cellId());
         }
-        Def weekly = TrialData.weekly(titan, TrialData.worldSeed(back), TrialData.week());
         List<Row> rows = new ArrayList<>();
         for (Def d : TrialCatalog.of(titan)) {
             TrialCodex.Entry e = codex.peek(id, d.id());
             rows.add(new Row(d.id(), e.seen || e.cleared > 0, e.cleared, e.goals, e.mods.size(), TrialRuntime.modTotal(d)));
         }
-        boolean weeklyDone = codex.weeklyDone(id, titan) == TrialData.week();
-        return new TrialBoardNet.Open(titan, draw.cycle(), cards, weekly == null ? "" : weekly.id(), weeklyDone, weekly != null && draw.has(weekly.id()), rows,
+        return new TrialBoardNet.Open(titan, draw.cycle(), cards, 0, codex.routeClears(id, titan), codex.routeBest(id, titan), rows,
                 List.copyOf(codex.titles(id)), Abyss.open(sp), Abyss.on(r));
     }
 

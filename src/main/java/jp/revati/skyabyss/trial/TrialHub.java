@@ -225,10 +225,6 @@ public final class TrialHub {
             // 順位の石と飾り板 (転生。docs/design/31 の C11・C21)
             jp.revati.skyabyss.rebirth.RebirthBoards.install(level, titan);
         }
-        if (now % 200 == 0 && !players.isEmpty()) {
-            // 今週の試練の入口 (光る床・灯りの道・立て札)
-            WeeklyGate.install(level, titan);
-        }
         if (now % 200 == 0 && !players.isEmpty() && HubTablets.install(level, titan) > 0) {
             for (UUID g : groupsOf(players)) {
                 HubTablets.refresh(level, g);
@@ -239,7 +235,6 @@ public final class TrialHub {
         autoStones(level, titan, players, now);
         TrialIntro.tick(titan, players);
         tickPads(level, titan, players, now);
-        WeeklyGate.tick(level, titan, players, now);
     }
 
     // ---------------------------------------------------------------- 光る床 (鼓動の間 <-> 試練の階。岩鯨。版 25)
@@ -417,7 +412,6 @@ public final class TrialHub {
 
     public static void clearAll() {
         STONE_TRY.clear();
-        WeeklyGate.clearAll();
         PAD_USED.clear();
         PENDING.clear();
         BOUNCED.clear();
