@@ -613,7 +613,7 @@ class Town:
                 v.set(x, y + 4, z, '%s_planks' % st.wood)
         v.set(ix0, y + 4, iz1, 'air')
         for yy in range(y, y + 5):
-            v.set(ix0, yy, iz1, 'ladder[facing=north,waterlogged=false]')
+            v.set(ix0, yy, iz1, 'ladder[facing=east,waterlogged=false]')
         v.set(ix0 - 1 + 1, y, iz1 - 1 + 1, 'ladder[facing=north,waterlogged=false]') if False else None
         v.set(ix1, y + 5, iz0, 'red_bed[facing=north,part=head,occupied=false]')
         v.set(ix1, y + 5, iz0 + 1, 'red_bed[facing=north,part=foot,occupied=false]')
@@ -1251,9 +1251,10 @@ class Town:
             v.set(x, 3, -32, '%s_wall_banner[facing=south]' % st.banner_color)
             v.set(x, 3, -12, '%s_wall_banner[facing=north]' % st.banner_color)
         # 二階へ梯子、寝台 6
+        # 二階へ梯子 (東の内の壁 x 91 に付ける。二階の床に穴)
         for yy in range(0, 7):
-            v.set(90, yy, -13, 'ladder[facing=north,waterlogged=false]')
-        v.set(90, 6, -13, 'ladder[facing=north,waterlogged=false]')
+            v.set(90, yy, -14, 'ladder[facing=west,waterlogged=false]')
+        v.set(89, 7, -14, 'air')
         for x in range(56, 86, 5):
             v.set(x, 7, -32, 'red_bed[facing=north,part=head,occupied=false]')
             v.set(x, 7, -31, 'red_bed[facing=north,part=foot,occupied=false]')
@@ -1288,8 +1289,8 @@ class Town:
                 v.fill(x, y, z, x, y + 2, z, 'bookshelf')
         for x in range(-52, -46):
             v.set(x, y, -87, '%s_slab[type=top,waterlogged=false]' % st.wood)
-        v.set(-51, y, -86, '%s_stairs[facing=north,half=bottom,shape=straight,waterlogged=false]' % st.wood)
-        v.set(-48, y, -86, '%s_stairs[facing=north,half=bottom,shape=straight,waterlogged=false]' % st.wood)
+        v.set(-52, y, -86, '%s_stairs[facing=north,half=bottom,shape=straight,waterlogged=false]' % st.wood)
+        v.set(-50, y, -86, '%s_stairs[facing=north,half=bottom,shape=straight,waterlogged=false]' % st.wood)
         v.set(-50, y + 1, -87, 'candle[candles=2,lit=true,waterlogged=false]')
         for x in (-53, -45):
             v.set(x, y + 4, -90, 'lantern[hanging=true,waterlogged=false]')
@@ -1303,8 +1304,9 @@ class Town:
         w = st.wood
         doors = [(x, yy, z) for (x, yy, z), b in v.b.items() if '_door[' in b and 'half=lower' in b
                  and x0 - 2 <= x <= x1 + 2 and z0 - 2 <= z <= z1 + 2 and y - 1 <= yy <= y + 1]
+        ladders = [(x, z) for (x, yy, z), b in v.b.items() if b.startswith('ladder') and x0 - 1 <= x <= x1 + 1 and z0 - 1 <= z <= z1 + 1 and y - 8 <= yy <= y + h]
         def near_door(x, z):
-            return any(abs(x - dx) + abs(z - dz) <= 2 for (dx, _, dz) in doors)
+            return any(abs(x - dx) + abs(z - dz) <= 2 for (dx, _, dz) in doors) or any(abs(x - lx) <= 1 and abs(z - lz) <= 1 for (lx, lz) in ladders)
         def free(x, yy, z):
             b = v.get(x, yy, z)
             return b is None or b == 'air'

@@ -272,9 +272,56 @@ class Vox:
         self.b.update(out)
         return len(out)
 
+    # -- 支え: 置いた灯り・鎖が、ゲームでは支えが無くて落ちる所を直す (立つ灯りは下に、吊る灯りと鎖は上に支えが要る)
+    def supports(self):
+        def name(s):
+            return 'air' if s is None else s.split('[')[0].replace('minecraft:', '')
+
+        def holds_below(s):
+            # 立つ灯りの下: 丸ごとのブロック・上半分の半ブロック・上向きの階段・柵・塀・鎖・灯り
+            n = name(s)
+            if n == 'air' or any(t in n for t in ('carpet', 'pane', 'iron_bars', 'trapdoor', 'flower', 'potted', 'banner', 'sign', 'door', 'leaves', 'lantern', 'candle', 'pressure', 'tulip', 'grass', 'fern', 'rail', 'torch', 'water')):
+                return n.endswith('_fence') or n.endswith('_wall') or n == 'chain'
+            if n.endswith('_slab'):
+                return 'type=bottom' not in s
+            if n.endswith('_stairs'):
+                return 'half=top' in s
+            return True
+
+        def holds_above(s):
+            n = name(s)
+            if n == 'air' or any(t in n for t in ('carpet', 'flower', 'potted', 'tulip', 'grass', 'fern', 'candle', 'pressure', 'rail', 'torch', 'water', 'lantern')):
+                return False
+            if n.endswith('_slab'):
+                return 'type=top' not in s or True
+            return True
+
+        changed = 0
+        for _ in range(2):
+            out = {}
+            for (x, y, z), s in self.b.items():
+                n = name(s)
+                if n in ('lantern', 'soul_lantern'):
+                    hanging = 'hanging=true' in s
+                    below = self.b.get((x, y - 1, z))
+                    above = self.b.get((x, y + 1, z))
+                    if hanging and not (holds_above(above) or name(above) == 'chain'):
+                        out[(x, y, z)] = s.replace('hanging=true', 'hanging=false') if holds_below(below) else 'air'
+                    elif not hanging and not holds_below(below):
+                        out[(x, y, z)] = s.replace('hanging=false', 'hanging=true') if holds_above(above) else 'air'
+                elif n == 'chain' and 'axis=y' in s:
+                    above = self.b.get((x, y + 1, z))
+                    if not (holds_above(above) or name(above) == 'chain'):
+                        out[(x, y, z)] = 'air'
+            for k, s in out.items():
+                self.b[k] = s
+            changed += len(out)
+        return changed
+
     # -- つながり (フェンス・板ガラス・鉄格子・塀)
     def connect(self):
         self.stair_shapes()
+        self.supports()
         def name(s):
             if s is None:
                 return 'air'
