@@ -85,5 +85,12 @@
   "sign.skyabyss.capital.graveyard.1": "鯨追いの墓地",
   "sign.skyabyss.capital.graveyard.2": "上って",
   "sign.skyabyss.capital.graveyard.3": "帰らなかった者。",
-  "sign.skyabyss.capital.graveyard.4": "名のない墓が、一つ"
+  "sign.skyabyss.capital.graveyard.4": "名のない墓が、一つ",
+  "sign.skyabyss.capital.guild_roll.1": "帰らなかった",
+  "sign.skyabyss.capital.guild_roll.2": "者の名簿",
+  "sign.skyabyss.capital.guild_roll.3": "最後の頁は",
+  "sign.skyabyss.capital.guild_roll.4": "印がない",
+  "message.skyabyss.capital.stone.cold": "石は冷たい。この巨神の欠片は、まだあなたの手にない。",
+  "message.skyabyss.capital.stone.pull": "手の中の欠片が、石のほうへかすかに引かれた。",
+  "message.skyabyss.capital.stone.pair": "二つの欠片が、互いに引き合っている。……四つがそろえば、どこを指すのだろう。"
 }

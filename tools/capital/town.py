@@ -937,8 +937,9 @@ class Town:
                     pinnacle(v, st, x, 0, z, h=1)
         # 四つの巨神の石 (3×3、高さ 9、頂に灯り) と骨の梁
         titan = (st.base.full, 'prismarine_bricks', 'cut_copper', 'polished_blackstone_bricks')
-        for (dx, dz), tb in zip(((-9, -9), (9, -9), (-9, 9), (9, 9)), titan):
+        for (dx, dz), tb, tid in zip(((-9, -9), (9, -9), (-9, 9), (9, 9)), titan, ('stone_whale', 'tide_shell', 'thunder_wing', 'ember')):
             v.fill(cx + dx - 1, 0, cz + dz - 1, cx + dx + 1, 8, cz + dz + 1, tb)
+            self.mark('stone_' + tid, cx + dx, 0, cz + dz)  # 鍵の間: 石に触れると、その巨神の欠片が引かれる (CapitalShrine)
             for (ex, ez) in ((-2, 0), (2, 0), (0, -2), (0, 2)):
                 v.set(cx + dx + ex, 0, cz + dz + ez, st.trim.stairs({(-2, 0): 'east', (2, 0): 'west', (0, -2): 'south', (0, 2): 'north'}[(ex, ez)]))
             v.set(cx + dx, 9, cz + dz, st.trim.full)
@@ -1196,6 +1197,8 @@ class Town:
         w = st.wood
         v.set(55, 0, -31, 'skyabyss:message_board[facing=south]')
         v.set(55, 0, -13, 'skyabyss:message_board[facing=north]')
+        # 帰らなかった者の名簿 (帳場のそばの碑。読むと伝承に記される)
+        self.tablet(84, 0, -24, 'west', 'guild_roll')
         for zt in (-26, -17):
             for x in range(60, 81):
                 if (x - 60) % 5 == 0:

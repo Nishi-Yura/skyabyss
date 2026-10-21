@@ -90,6 +90,10 @@ public final class CapitalDoorsSelfTest {
         }
         BlockPos bell = e.extra("bell");
         check(f, bell != null && jp.revati.skyabyss.quest.free.FreeQuestEvents.boardSuppressed(level, bell), "a message board may still be placed by the capital bell");
+        // 鍵の間の四つの石の印、組合の名簿の碑
+        for (String t : CapitalShrine.TITANS) {
+            check(f, e.extra("stone_" + t) != null, "the shrine stone mark for " + t + " is missing");
+        }
         // 組合を開ける: 戸が消え、記録が残る
         if (!CapitalDoors.opened(server, "guild")) {
             BlockPos at = e.extra("open_guild");

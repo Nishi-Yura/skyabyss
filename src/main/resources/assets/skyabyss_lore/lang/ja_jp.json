@@ -122,5 +122,8 @@
   "lore.skyabyss.prologue.capital_graveyard.body": "西門の外の墓地の碑。\n石の墓標は、上って帰らなかった鯨追いたちのもの。空を見上げて立つ向きに並べてある。\n列の中ほどに、石のない新しい墓が一つある。土が盛られているだけで、名も、いつのものかも分からない。",
   "lore.skyabyss.prologue.capital_gates.title": "四つの門",
   "lore.skyabyss.prologue.capital_gates.inscription": "北へ。空を泳ぐものの丘",
-  "lore.skyabyss.prologue.capital_gates.body": "都の四つの門の碑。\n鯨門は北の丘へ、潮門は東の海へ、風門は西の峰へ、灰門は南の灰の地へ向く。\n国は四体の巨神に囲まれて生きてきた、と門の碑は言う。四体が空を支えている、とも。"
+  "lore.skyabyss.prologue.capital_gates.body": "都の四つの門の碑。\n鯨門は北の丘へ、潮門は東の海へ、風門は西の峰へ、灰門は南の灰の地へ向く。\n国は四体の巨神に囲まれて生きてきた、と門の碑は言う。四体が空を支えている、とも。",
+  "lore.skyabyss.chapter1.guild_roll.title": "名簿の最後の頁",
+  "lore.skyabyss.chapter1.guild_roll.inscription": "印のない名ばかり。最後の行は空いている",
+  "lore.skyabyss.chapter1.guild_roll.body": "組合の奥の名簿。上った者の名が年ごとに並ぶ。帰った者の名の横には小さな鐘の印がある。\n\n頁をめくるほど印は減り、最後の頁は印のない名ばかりになる。\n\nその下に一行だけ、名を書くための空きが残されていた。墨はまだ乾いていない。"
 }

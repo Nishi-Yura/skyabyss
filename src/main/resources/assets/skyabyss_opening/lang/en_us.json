@@ -85,5 +85,12 @@
   "sign.skyabyss.capital.graveyard.1": "Whale Chasers' Graves",
   "sign.skyabyss.capital.graveyard.2": "Those who went up",
   "sign.skyabyss.capital.graveyard.3": "and did not return.",
-  "sign.skyabyss.capital.graveyard.4": "One grave has no name"
+  "sign.skyabyss.capital.graveyard.4": "One grave has no name",
+  "sign.skyabyss.capital.guild_roll.1": "Roll of those",
+  "sign.skyabyss.capital.guild_roll.2": "who did not",
+  "sign.skyabyss.capital.guild_roll.3": "return. The last",
+  "sign.skyabyss.capital.guild_roll.4": "page is unmarked",
+  "message.skyabyss.capital.stone.cold": "The stone is cold. You do not yet hold this titan's fragment.",
+  "message.skyabyss.capital.stone.pull": "The fragment in your hand is drawn, faintly, toward the stone.",
+  "message.skyabyss.capital.stone.pair": "The two fragments pull at each other. ...Where will they point when all four are together?"
 }

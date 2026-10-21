@@ -39,7 +39,7 @@ public final class ShelterBuilder {
             job.entry.extra("door", door);
         }
         // 都: 門・閉じた施設・空き区画の碑と、市と住まいの村人 (docs/design/33 の 2.2)
-        for (String key : List.of("gate_n", "gate_e", "gate_s", "gate_w", "keep", "hall", "guild", "shrine", "smithy", "lot_1", "lot_2", "lot_3", "lot_4", "lot_5", "graveyard")) {
+        for (String key : List.of("gate_n", "gate_e", "gate_s", "gate_w", "keep", "hall", "guild", "shrine", "smithy", "lot_1", "lot_2", "lot_3", "lot_4", "lot_5", "graveyard", "guild_roll")) {
             BlockPos at = job.mark("sign_" + key);
             if (at != null && job.level.getBlockState(at).is(jp.revati.skyabyss.registry.ModBlocks.TABLET.get())) {
                 SiteKit.writeSign(job.level, at, "sign.skyabyss.capital." + (key.startsWith("lot_") ? "lot" : key));
@@ -47,7 +47,8 @@ public final class ShelterBuilder {
         }
         // 章で開く施設の戸の印と碑の印 (CapitalDoors が読む)
         for (String key : List.of("open_guild", "open_shrine", "open_keep", "open_keep2", "open_hall",
-                "sign_guild", "sign_shrine", "sign_keep", "sign_hall", "chaser", "altar")) {
+                "sign_guild", "sign_shrine", "sign_keep", "sign_hall", "chaser", "altar",
+                "stone_stone_whale", "stone_tide_shell", "stone_thunder_wing", "stone_ember")) {
             BlockPos at = job.mark(key);
             if (at != null) {
                 job.entry.extra(key, at);
