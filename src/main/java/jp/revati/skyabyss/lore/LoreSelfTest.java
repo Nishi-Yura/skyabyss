@@ -201,7 +201,7 @@ public final class LoreSelfTest {
             }
             // 潮殻の背の看板の文は skyabyss_tide にある
             // 雷翼の背の看板の文は skyabyss_storm に、都の碑の文は skyabyss_opening にある
-            for (String ns : List.of("skyabyss_tide", "skyabyss_storm", "skyabyss_ember", "skyabyss_ch3", "skyabyss_opening", "skyabyss_ch1", "skyabyss_ch2")) {
+            for (String ns : List.of("skyabyss_tide", "skyabyss_storm", "skyabyss_ember", "skyabyss_ch3", "skyabyss_ch4", "skyabyss_opening", "skyabyss_ch1", "skyabyss_ch2")) {
                 JsonObject backSigns = json("/assets/" + ns + "/lang/" + lang + ".json", failures);
                 if (backSigns != null) {
                     backSigns.entrySet().forEach(e -> {
@@ -411,7 +411,9 @@ public final class LoreSelfTest {
         JsonObject ch3 = json("/assets/skyabyss_ch3/lang/" + code + ".json", failures);
         // 都の町のクエストと裏通りの項目 (35 の 3.3・3.5) の文は skyabyss_town にある
         JsonObject town = json("/assets/skyabyss_town/lang/" + code + ".json", failures);
-        for (JsonObject extra : java.util.Arrays.asList(quest, tide, story, storm, ember, ch1, ch2, ch3, town)) {
+        // 四章の地上の項目 (灰の民の薬・炉跡の頁・返しに来たか・煤の窯の跡) の文は skyabyss_ch4 にある (34 の 4.5.1)
+        JsonObject ch4 = json("/assets/skyabyss_ch4/lang/" + code + ".json", failures);
+        for (JsonObject extra : java.util.Arrays.asList(quest, tide, story, storm, ember, ch1, ch2, ch3, ch4, town)) {
             if (lang != null && extra != null) {
                 extra.entrySet().forEach(e -> {
                     if (!lang.has(e.getKey())) {

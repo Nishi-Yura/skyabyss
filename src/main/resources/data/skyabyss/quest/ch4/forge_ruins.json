@@ -1,0 +1,54 @@
+{
+  "category": "main",
+  "order": 42,
+  "giver": "skyabyss:storyteller",
+  "chapter": "titan_ember",
+  "start_when": {
+    "type": "all",
+    "of": [
+      {
+        "type": "stage",
+        "min": 3,
+        "max": 3
+      },
+      {
+        "type": "quest",
+        "quest": "main_ember",
+        "is": "started"
+      }
+    ]
+  },
+  "stages": [
+    {
+      "id": "pit",
+      "xp": 60,
+      "objectives": [
+        {
+          "id": "page",
+          "type": "lore",
+          "targets": [
+            "ch4/forge_page"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tell",
+      "objectives": [
+        {
+          "id": "talk",
+          "type": "talk",
+          "target": "skyabyss:storyteller",
+          "topic": "ch4g_forge_read2"
+        }
+      ]
+    }
+  ],
+  "reward": {
+    "xp": 160,
+    "items": [],
+    "affinity": {
+      "skyabyss:storyteller": 3
+    }
+  }
+}

@@ -25,9 +25,10 @@ import net.minecraft.server.level.ServerPlayer;
 //            tools/gen_ch1_trails.py が書く。旧い備えの頼み ch1/prep_* は、この 3 本に吸収した (置くと読み込みの警告)
 //   二章     支度の段 2 本 (34 の 4.3): ch2/salt_road (塩の道)・ch2/ebb_boat (船と貝)。tools/gen_ch2_ground.py。旅装は任意のサブ ch2/wader_gear
 //   三章     支度の段: ch3/lightning_pillars (避雷の柱)・ch3/scorched_watch (焼けた見張り塔)・ch3/sky_stone (空の石)。tools/gen_ch3_ground.py
-//   四章     既定の形 (まだ中身なし): data/skyabyss/quest/ch<n>/prep_gear.json (身ごしらえ) / prep_blade.json (刃を研ぐ) / prep_pulse.json (鼓動を聞く)。
-//            ID は ch<n>/prep_<kind>、文のキーは quest.skyabyss.ch<n>.prep_<kind>.title など (QuestDef.keyBase)。章の担当が 34 の段の名前に
-//            替えるときは、下の CHAPTER_IDS に一行足す
+//   四章     支度の段 2 本 (34 の 4.5): ch4/fire_draught (火除けの薬)・ch4/forge_ruins (炉跡)。tools/gen_ch4_ground.py
+//   既定の形 (今はどの章も使っていない。仕組みと自己テストのために残す): data/skyabyss/quest/ch<n>/prep_gear.json (身ごしらえ) / prep_blade.json (刃を研ぐ) /
+//            prep_pulse.json (鼓動を聞く)。ID は ch<n>/prep_<kind>、文のキーは quest.skyabyss.ch<n>.prep_<kind>.title など (QuestDef.keyBase)。
+//            章の担当が 34 の段の名前に替えるときは、下の CHAPTER_IDS に一行足す
 //   必須     chapter = その章の ID (一章なら titan_whale)、start_when (章の頭に自動で出る)、repeat と board は付けない。
 //            category は支度の段 (CHAPTER_IDS) なら main、既定の備えの頼みなら sub。守っていなければ読み込みの警告 (QuestManager.loadErrors。validate)。
 //   順番     ふさがない。どれから受けても終えてもよい (ログの並びは order)。
@@ -41,16 +42,28 @@ public final class PrepQuests {
     public static final List<String> KINDS = List.of("gear", "blade", "pulse");
     private static final Pattern ID = Pattern.compile("ch([1-4])/prep_([a-z_]+)");
     // 既定の形 (ch<n>/prep_<kind>) でない章の 3 本 (章 → ID の並び。kind は ID の最後の「_」より後ろ)
-    private static final Map<Integer, List<String>> CHAPTER_IDS = Map.of(
+    private static final Map<Integer, List<String>> CHAPTER_IDS = new ConcurrentHashMap<>(Map.of(
             1, List.of("ch1/trail_iron", "ch1/trail_blade", "ch1/trail_shield"),
             // 二章は 2 本 (34 の 4.3。塩の道・船と貝。tools/gen_ch2_ground.py)
             2, List.of("ch2/salt_road", "ch2/ebb_boat"),
             // 三章の支度の段 (34 の 4.4。避雷の柱・焼けた見張り塔・空の石。tools/gen_ch3_ground.py)
-            3, List.of("ch3/lightning_pillars", "ch3/scorched_watch", "ch3/sky_stone"));
+            3, List.of("ch3/lightning_pillars", "ch3/scorched_watch", "ch3/sky_stone"),
+            // 四章の支度の段 (34 の 4.5。火除けの薬・炉跡。tools/gen_ch4_ground.py)
+            4, List.of("ch4/fire_draught", "ch4/forge_ruins")));
     // 三本そろったときの章ごとの仕上げ
     private static final Map<Integer, Consumer<ServerPlayer>> ON_READY = new ConcurrentHashMap<>();
 
     private PrepQuests() {
+    }
+
+    // 自己テスト用: その章を既定の形 (ch<n>/prep_*) に戻す。戻すための Runnable を返す (prep chain の既定の形の検査)
+    public static Runnable testDefaultForm(int chapter) {
+        List<String> was = CHAPTER_IDS.remove(chapter);
+        return () -> {
+            if (was != null) {
+                CHAPTER_IDS.put(chapter, was);
+            }
+        };
     }
 
     public static String id(int chapter, String kind) {

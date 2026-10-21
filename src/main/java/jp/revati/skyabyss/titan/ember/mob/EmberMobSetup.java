@@ -29,7 +29,7 @@ public final class EmberMobSetup {
 
     // ---------------------------------------------------------------- エンティティ
     public static final DeferredHolder<EntityType<?>, EntityType<AshThrall>> ASH_THRALL = ENTITIES.register(EmberIds.ASH_THRALL,
-            () -> EntityType.Builder.of(AshThrall::new, MobCategory.MONSTER).sized(0.8f, 2.3f).eyeHeight(2.0f).fireImmune()
+            () -> EntityType.Builder.<AshThrall>of(AshThrall::new, MobCategory.MONSTER).sized(0.8f, 2.3f).eyeHeight(2.0f).fireImmune()
                     .clientTrackingRange(8).build(SkyAbyss.MODID + ":" + EmberIds.ASH_THRALL));
     public static final DeferredHolder<EntityType<?>, EntityType<EmberMoth>> EMBER_MOTH = ENTITIES.register(EmberIds.EMBER_MOTH,
             () -> EntityType.Builder.of(EmberMoth::new, MobCategory.MONSTER).sized(0.7f, 0.6f).eyeHeight(0.5f).fireImmune()

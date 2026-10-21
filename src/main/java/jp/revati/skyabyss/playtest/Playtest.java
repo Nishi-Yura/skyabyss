@@ -554,6 +554,13 @@ public final class Playtest {
         if (Titans.titanOfBack(p.level().dimension()) != null) {
             toOverworld(p);
         }
+        // 四章の支度の段 (火除けの薬・炉跡) が残っていれば、先にそちらを一歩進める (story/ch4/Ch4Playtest)
+        if (idx == 3 && !next) {
+            String ch4 = jp.revati.skyabyss.story.ch4.Ch4Playtest.now(p, false);
+            if (ch4 != null) {
+                return ch4;
+            }
+        }
         summonRest(p, idx, pp -> {
         });
         return "commands.skyabyss.playtest.now.titan";

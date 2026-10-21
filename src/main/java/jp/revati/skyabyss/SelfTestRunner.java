@@ -255,6 +255,8 @@ public final class SelfTestRunner {
         steps.addAll(jp.revati.skyabyss.titan.storm.chapter.Ch3GroundSelfTest.steps());
         // 三章の地上の敵 (帯電毛玉・峰の雛・雷拾い・焼けた羽守。P16。21 の 5.1)。SKYABYSS_SELFTEST_ONLY="ch3 mobs"
         steps.addAll(jp.revati.skyabyss.titan.storm.chapter.mob.Ch3MobsSelfTest.steps());
+        // 四章の地上 (火除けの薬・炉跡・消えた炉の坑・灰の道の標・煤の窯の跡・敵 4 種・四章を心臓と天の鍵まで通す)。docs/design/34 の C4。SKYABYSS_SELFTEST_ONLY="ch4"
+        steps.addAll(jp.revati.skyabyss.story.ch4.Ch4GroundSelfTest.steps());
         steps.add(Step.once("storm mobs (load)", jp.revati.skyabyss.titan.storm.mob.StormMobSelfTest::load));
         steps.add(Step.until("storm mobs (wait)", jp.revati.skyabyss.titan.storm.mob.StormMobSelfTest::ready));
         steps.add(Step.once("storm mobs", 5, jp.revati.skyabyss.titan.storm.mob.StormMobSelfTest::runSelfTest));

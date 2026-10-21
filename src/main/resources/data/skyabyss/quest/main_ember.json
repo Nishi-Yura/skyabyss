@@ -48,6 +48,23 @@
       "xp": 80
     },
     {
+      "id": "board",
+      "objectives": [
+        {
+          "id": "board",
+          "type": "lore",
+          "targets": [
+            "chapter1/ember_ruins"
+          ]
+        }
+      ],
+      "xp": 60,
+      "skip_if": {
+        "type": "stilled",
+        "titan": "ember"
+      }
+    },
+    {
       "id": "heart",
       "objectives": [
         {

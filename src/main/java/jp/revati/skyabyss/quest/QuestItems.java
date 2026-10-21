@@ -8,6 +8,7 @@ import org.jetbrains.annotations.Nullable;
 import jp.revati.skyabyss.SkyAbyss;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -33,6 +34,11 @@ public final class QuestItems {
 
     // 読み込み時の確かめ: ID は登録にあるか、タグは書き方が正しいか (タグの中身は読み込みの順で、まだ決まっていないことがある)
     public static boolean known(String target) {
+        int at = target.indexOf('@');
+        if (at > 0) {
+            ResourceLocation effect = ResourceLocation.tryParse(target.substring(at + 1));
+            return Condition.item(target.substring(0, at)) != null && effect != null && BuiltInRegistries.MOB_EFFECT.containsKey(effect);
+        }
         if (target.startsWith("#")) {
             return ResourceLocation.tryParse(target.substring(1)) != null;
         }
@@ -44,6 +50,25 @@ public final class QuestItems {
             return false;
         }
         boolean kind;
+        int at = target.indexOf('@');
+        if (at > 0) {
+            // 「品@効き目」: 薬など、その効き目を持つ品だけ (例 minecraft:potion@minecraft:fire_resistance。延長版も数える)
+            Item item = Condition.item(target.substring(0, at));
+            ResourceLocation effect = ResourceLocation.tryParse(target.substring(at + 1));
+            if (item == null || effect == null || !stack.is(item)) {
+                return false;
+            }
+            net.minecraft.world.item.alchemy.PotionContents pc = stack.get(DataComponents.POTION_CONTENTS);
+            boolean has = false;
+            if (pc != null) {
+                for (net.minecraft.world.effect.MobEffectInstance e : pc.getAllEffects()) {
+                    if (e.getEffect().is(effect)) {
+                        has = true;
+                    }
+                }
+            }
+            return has && (token == null || token.equals(token(stack)));
+        }
         if (target.startsWith("#")) {
             ResourceLocation tag = ResourceLocation.tryParse(target.substring(1));
             kind = tag != null && stack.is(TagKey.create(Registries.ITEM, tag));

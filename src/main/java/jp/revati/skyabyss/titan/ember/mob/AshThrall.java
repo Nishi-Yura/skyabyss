@@ -77,8 +77,32 @@ public class AshThrall extends EmberMob {
     private UUID lastPlayer;
 
     public AshThrall(EntityType<? extends Monster> type, Level level) {
-        super(type, level, EmberIds.ASH_THRALL, "attack", "shell_break");
+        this(type, level, EmberIds.ASH_THRALL, new String[] {"attack", "shell_break"});
+    }
+
+    // 変種 (四章の地上の灰被りの屑・古い灰被り。story/ch4/mob) 用: アニメの名前の頭と動作を替える
+    protected AshThrall(EntityType<? extends Monster> type, Level level, String prefix, String[] actions) {
+        super(type, level, prefix, actions);
         this.xpReward = 10;
+    }
+
+    // 殻の最大 (変種が替える。defineSynchedData から呼ばれるので、定数を返すこと)
+    public float shellMax() {
+        return SHELL_MAX;
+    }
+
+    // 燃え上がったときの攻撃 (変種が替える)
+    protected float flaredDamage() {
+        return FLARED_DAMAGE;
+    }
+
+    // 燃え上がってから燃え尽きるまで (tick。0 なら燃え尽きない。名づきの古い灰被り)
+    protected int burnoutTicks() {
+        return BURNOUT_TICKS;
+    }
+
+    // 殻が割れて燃え上がった瞬間 (変種が熱の波などを足す)
+    protected void onIgnite() {
     }
 
     public static AttributeSupplier.Builder createAttributes() {
@@ -94,7 +118,7 @@ public class AshThrall extends EmberMob {
     @Override
     protected void defineSynchedData(SynchedEntityData.Builder builder) {
         super.defineSynchedData(builder);
-        builder.define(SHELL, SHELL_MAX);
+        builder.define(SHELL, shellMax());
         builder.define(FLARED, false);
     }
 
@@ -180,16 +204,17 @@ public class AshThrall extends EmberMob {
         }
         entityData.set(SHELL, 0f);
         entityData.set(FLARED, true);
-        burnLeft = BURNOUT_TICKS;
+        burnLeft = burnoutTicks();
         AttributeInstance speed = getAttribute(Attributes.MOVEMENT_SPEED);
         if (speed != null && !speed.hasModifier(FLARE_SPEED)) {
             speed.addPermanentModifier(new AttributeModifier(FLARE_SPEED, FLARED_SPEED - 1.0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
         }
         AttributeInstance dmg = getAttribute(Attributes.ATTACK_DAMAGE);
         if (dmg != null && !dmg.hasModifier(FLARE_DAMAGE)) {
-            dmg.addPermanentModifier(new AttributeModifier(FLARE_DAMAGE, FLARED_DAMAGE - DAMAGE, AttributeModifier.Operation.ADD_VALUE));
+            dmg.addPermanentModifier(new AttributeModifier(FLARE_DAMAGE, flaredDamage() - (float) dmg.getBaseValue(), AttributeModifier.Operation.ADD_VALUE));
         }
         playAction("shell_break");
+        onIgnite();
         if (level() instanceof ServerLevel server) {
             server.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.GRAY_CONCRETE_POWDER.defaultBlockState()),
                     getX(), getY() + 1.2, getZ(), 40, 0.4, 0.8, 0.4, 0.15);
@@ -256,7 +281,7 @@ public class AshThrall extends EmberMob {
         if (tag.getBoolean("Flared")) {
             entityData.set(FLARED, false);
             ignite();
-            burnLeft = Math.max(1, tag.getInt("BurnLeft"));
+            burnLeft = burnoutTicks() > 0 ? Math.max(1, tag.getInt("BurnLeft")) : 0;
         }
     }
 

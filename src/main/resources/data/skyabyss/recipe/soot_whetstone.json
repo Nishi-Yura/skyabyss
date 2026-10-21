@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "skyabyss:soot_iron"
+    },
+    {
+      "item": "skyabyss:soot_iron"
+    },
+    {
+      "item": "minecraft:flint"
+    }
+  ],
+  "result": {
+    "id": "skyabyss:soot_whetstone",
+    "count": 1
+  }
+}

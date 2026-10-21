@@ -432,7 +432,7 @@ public final class ArtisanSelfTest {
         }
         for (String lang : List.of("ja_jp", "en_us")) {
             Set<String> have = new HashSet<>();
-            for (String ns : List.of("skyabyss_npc", "skyabyss_ch1", "skyabyss_ch2", "skyabyss_ch3")) {
+            for (String ns : List.of("skyabyss_npc", "skyabyss_ch1", "skyabyss_ch2", "skyabyss_ch3", "skyabyss_ch3gear", "skyabyss_ch4")) {
                 try (InputStream in = ArtisanSelfTest.class.getResourceAsStream("/assets/" + ns + "/lang/" + lang + ".json")) {
                     if (in != null) {
                         JsonParser.parseReader(new InputStreamReader(in, StandardCharsets.UTF_8)).getAsJsonObject().entrySet().forEach(e -> have.add(e.getKey()));

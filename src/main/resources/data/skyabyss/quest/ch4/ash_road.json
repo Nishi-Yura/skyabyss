@@ -1,0 +1,29 @@
+{
+  "category": "sub",
+  "order": 47,
+  "giver": "skyabyss:storyteller",
+  "chapter": "titan_ember",
+  "min_stage": 3,
+  "start_when": {
+    "type": "stage",
+    "min": 3,
+    "max": 3
+  },
+  "stages": [
+    {
+      "id": "trace",
+      "objectives": [
+        {
+          "id": "marks",
+          "type": "signal",
+          "target": "ch4_ash_mark",
+          "count": 5,
+          "party": false
+        }
+      ]
+    }
+  ],
+  "reward": {
+    "xp": 160
+  }
+}

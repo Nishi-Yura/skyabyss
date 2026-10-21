@@ -1,0 +1,140 @@
+{
+  "npc": "skyabyss:storyteller",
+  "extends": true,
+  "entries": [
+    {
+      "node": "ch4g_forge_read",
+      "if": {
+        "type": "quest",
+        "quest": "ch4/forge_ruins",
+        "is": "active",
+        "stage": "tell"
+      }
+    },
+    {
+      "node": "ch4g_forge_tale",
+      "if": [
+        {
+          "type": "quest",
+          "quest": "ch4/forge_ruins",
+          "is": "active",
+          "stage": "pit"
+        },
+        {
+          "type": "not",
+          "of": {
+            "type": "flag",
+            "flag": "ch4g_forge_told"
+          }
+        },
+        {
+          "type": "not",
+          "of": {
+            "type": "quest",
+            "quest": "main_key",
+            "is": "active"
+          }
+        }
+      ]
+    },
+    {
+      "node": "ch4g_road_tale",
+      "if": [
+        {
+          "type": "quest",
+          "quest": "ch4/ash_road",
+          "is": "active"
+        },
+        {
+          "type": "not",
+          "of": {
+            "type": "flag",
+            "flag": "ch4g_road_told"
+          }
+        },
+        {
+          "type": "not",
+          "of": {
+            "type": "quest",
+            "quest": "main_key",
+            "is": "active"
+          }
+        }
+      ]
+    },
+    {
+      "node": "ch4g_s_kiln",
+      "if": [
+        {
+          "type": "flag",
+          "flag": "ch4g_kiln_seen"
+        },
+        {
+          "type": "not",
+          "of": {
+            "type": "flag",
+            "flag": "ch4g_kiln_told"
+          }
+        },
+        {
+          "type": "not",
+          "of": {
+            "type": "quest",
+            "quest": "main_key",
+            "is": "active"
+          }
+        }
+      ]
+    }
+  ],
+  "nodes": {
+    "ch4g_forge_tale": {
+      "face": "grave",
+      "do": [
+        {
+          "type": "flag",
+          "flag": "ch4g_forge_told"
+        }
+      ],
+      "next": "ch4g_forge_tale2"
+    },
+    "ch4g_forge_tale2": {
+      "face": "neutral",
+      "next": "menu"
+    },
+    "ch4g_forge_read": {
+      "face": "grave",
+      "next": "ch4g_forge_read2"
+    },
+    "ch4g_forge_read2": {
+      "face": "grave",
+      "do": [
+        {
+          "type": "affinity",
+          "amount": 1
+        }
+      ],
+      "next": "menu"
+    },
+    "ch4g_road_tale": {
+      "face": "neutral",
+      "do": [
+        {
+          "type": "flag",
+          "flag": "ch4g_road_told"
+        }
+      ],
+      "next": "menu"
+    },
+    "ch4g_s_kiln": {
+      "face": "smile",
+      "do": [
+        {
+          "type": "flag",
+          "flag": "ch4g_kiln_told"
+        }
+      ],
+      "next": "menu"
+    }
+  }
+}

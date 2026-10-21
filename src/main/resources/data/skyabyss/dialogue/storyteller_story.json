@@ -145,7 +145,7 @@
     },
     "ms_key2": {
       "face": "grave",
-      "next": "ms_key3"
+      "next": "ms_key_four"
     },
     "ms_key3": {
       "face": "neutral",
@@ -155,7 +155,7 @@
           "entry": "chapter1/fifth_verse"
         }
       ],
-      "next": "ms_key4"
+      "next": "ms_key_return"
     },
     "ms_key4": {
       "face": "grave",
@@ -219,6 +219,14 @@
           "goto": "end"
         }
       ]
+    },
+    "ms_key_four": {
+      "face": "grave",
+      "next": "ms_key3"
+    },
+    "ms_key_return": {
+      "face": "grave",
+      "next": "ms_key4"
     }
   }
 }

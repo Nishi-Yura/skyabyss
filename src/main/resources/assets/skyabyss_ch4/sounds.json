@@ -1,0 +1,90 @@
+{
+  "cinder_mite_ambient": {
+    "subtitle": "subtitles.skyabyss_ch4.cinder_mite_ambient",
+    "sounds": [
+      {
+        "name": "skyabyss:ember_moth_flutter",
+        "type": "event",
+        "pitch": 1.8,
+        "volume": 0.4
+      }
+    ]
+  },
+  "cinder_mite_death": {
+    "subtitle": "subtitles.skyabyss_ch4.cinder_mite_death",
+    "sounds": [
+      {
+        "name": "skyabyss:ember_moth_death",
+        "type": "event",
+        "pitch": 1.6,
+        "volume": 0.6
+      }
+    ]
+  },
+  "ash_dragger_curl": {
+    "subtitle": "subtitles.skyabyss_ch4.ash_dragger_curl",
+    "sounds": [
+      {
+        "name": "skyabyss:cinder_roller_curl",
+        "type": "event",
+        "pitch": 1.4,
+        "volume": 0.8
+      }
+    ]
+  },
+  "ash_dragger_roll": {
+    "subtitle": "subtitles.skyabyss_ch4.ash_dragger_roll",
+    "sounds": [
+      {
+        "name": "skyabyss:cinder_roller_roll",
+        "type": "event",
+        "pitch": 1.5,
+        "volume": 0.6
+      }
+    ]
+  },
+  "elder_thrall_crack": {
+    "subtitle": "subtitles.skyabyss_ch4.elder_thrall_crack",
+    "sounds": [
+      {
+        "name": "skyabyss:ember_crust_crack",
+        "type": "event",
+        "pitch": 0.7,
+        "volume": 1.4
+      }
+    ]
+  },
+  "elder_thrall_burst": {
+    "subtitle": "subtitles.skyabyss_ch4.elder_thrall_burst",
+    "sounds": [
+      {
+        "name": "skyabyss:ember_vent_burst",
+        "type": "event",
+        "pitch": 0.9,
+        "volume": 1.4
+      }
+    ]
+  },
+  "elder_thrall_wave": {
+    "subtitle": "subtitles.skyabyss_ch4.elder_thrall_wave",
+    "sounds": [
+      {
+        "name": "skyabyss:ember_heart_gale",
+        "type": "event",
+        "pitch": 1.2,
+        "volume": 1.2
+      }
+    ]
+  },
+  "elder_thrall_rake": {
+    "subtitle": "subtitles.skyabyss_ch4.elder_thrall_rake",
+    "sounds": [
+      {
+        "name": "skyabyss:ash_smith_inhale",
+        "type": "event",
+        "pitch": 1.3,
+        "volume": 1.0
+      }
+    ]
+  }
+}

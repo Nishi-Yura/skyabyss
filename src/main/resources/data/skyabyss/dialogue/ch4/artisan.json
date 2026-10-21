@@ -1,0 +1,195 @@
+{
+  "npc": "skyabyss:artisan",
+  "extends": true,
+  "entries": [
+    {
+      "node": "ch4g_draught_show",
+      "if": {
+        "type": "quest",
+        "quest": "ch4/fire_draught",
+        "is": "active",
+        "stage": "show"
+      }
+    },
+    {
+      "node": "ch4t_ward_weave",
+      "if": [
+        {
+          "type": "item",
+          "item": "skyabyss:ash_ward_thread",
+          "count": 1,
+          "optional": true
+        },
+        {
+          "type": "not",
+          "of": {
+            "type": "flag",
+            "flag": "ch4t_woven"
+          }
+        },
+        {
+          "type": "ward_ok",
+          "titan": "ember"
+        }
+      ]
+    },
+    {
+      "node": "ch4a_first",
+      "if": [
+        {
+          "type": "stage",
+          "min": 3,
+          "max": 3
+        },
+        {
+          "type": "not",
+          "of": {
+            "type": "flag",
+            "flag": "ch4a_met"
+          }
+        }
+      ]
+    },
+    {
+      "node": "ch4g_draught_tell",
+      "if": [
+        {
+          "type": "quest",
+          "quest": "ch4/fire_draught",
+          "is": "active",
+          "stage": "brew"
+        },
+        {
+          "type": "not",
+          "of": {
+            "type": "flag",
+            "flag": "ch4g_draught_told"
+          }
+        }
+      ]
+    },
+    {
+      "node": "ch4a_ward_offer",
+      "if": [
+        {
+          "type": "flag",
+          "flag": "ch4t_woven"
+        },
+        {
+          "type": "ward_ok",
+          "titan": "ember"
+        },
+        {
+          "type": "item",
+          "item": "skyabyss:soot_iron",
+          "count": 8,
+          "optional": true
+        }
+      ]
+    }
+  ],
+  "nodes": {
+    "ch4a_first": {
+      "face": "neutral",
+      "do": [
+        {
+          "type": "flag",
+          "flag": "ch4a_met"
+        },
+        {
+          "type": "flag",
+          "flag": "met"
+        },
+        {
+          "type": "give_notes",
+          "chapter": 4
+        },
+        {
+          "type": "affinity",
+          "amount": 1
+        }
+      ],
+      "next": "a_menu"
+    },
+    "ch4g_draught_tell": {
+      "face": "neutral",
+      "do": [
+        {
+          "type": "flag",
+          "flag": "ch4g_draught_told"
+        }
+      ],
+      "next": "a_menu"
+    },
+    "ch4g_draught_show": {
+      "face": "smile",
+      "do": [
+        {
+          "type": "lore",
+          "entry": "ch4/fire_draught"
+        },
+        {
+          "type": "affinity",
+          "amount": 1
+        }
+      ],
+      "next": "a_menu"
+    },
+    "ch4t_ward_weave": {
+      "face": "smile",
+      "do": [
+        {
+          "type": "take",
+          "item": "skyabyss:ash_ward_thread",
+          "count": 1
+        },
+        {
+          "type": "give",
+          "item": "skyabyss:heartbeat_ward_ember",
+          "count": 1
+        },
+        {
+          "type": "flag",
+          "flag": "ch4t_woven"
+        },
+        {
+          "type": "affinity",
+          "amount": 2
+        }
+      ],
+      "next": "a_menu"
+    },
+    "ch4a_ward_offer": {
+      "face": "neutral",
+      "options": [
+        {
+          "id": "yes",
+          "goto": "ch4a_ward"
+        },
+        {
+          "id": "no",
+          "goto": "a_menu"
+        }
+      ]
+    },
+    "ch4a_ward": {
+      "face": "smile",
+      "do": [
+        {
+          "type": "take",
+          "item": "skyabyss:soot_iron",
+          "count": 8
+        },
+        {
+          "type": "remake_ward",
+          "titan": "ember"
+        },
+        {
+          "type": "affinity",
+          "amount": 1
+        }
+      ],
+      "next": "a_menu"
+    }
+  }
+}
