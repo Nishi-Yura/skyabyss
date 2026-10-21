@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "skyabyss:small_pearl"
+    },
+    {
+      "item": "skyabyss:salt_crystal"
+    },
+    {
+      "item": "minecraft:sugar"
+    }
+  ],
+  "result": {
+    "id": "skyabyss:pearl_powder",
+    "count": 2
+  }
+}

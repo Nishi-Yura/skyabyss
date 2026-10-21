@@ -1019,6 +1019,7 @@ WorldLoop.advance(server);                          // M4: 月が落ちたとき
 | `OpeningStorySelfTest`（`SELFTEST opening story`） | 序盤の伝承 6 つ、開幕の一行と目的の帯、メインの通し（帳面 → `shadow0` → 影 → 語り部 → イサナ → `see_whale`）、影・岩鯨・空の質問を先にした人が序盤の二段を飛ばすこと、見聞が話すと消えること、イサナと会うまで板の頼みと語り部の頼みごとが閉じていること |
 | `SELFTEST story` | 1 章の続き（[14](14_beta.md) の 7.2 節） |
 | `TravelSelfTest`（`SELFTEST travel gear`）・`ArtisanSelfTest`（`SELFTEST artisan`） | 21 の P5・P4。旅装の値と `GearCurve.TRAVEL` の照合・砥石・固焼き・軟膏・レシピと鍵・合図、職人の絵と骨・立つ所・会話・文（3.6 節） |
+| `Ch2GearSelfTest`（`SELFTEST ch2 gear`） | 21 の 1.2「二章の分」。潮渡りの旅装の値と表・水中移動効率・塩の砥石 (重ねない・水の中の +1)・塩漬け・粉薬・章ごとの手段の名前・レシピ 8 本と鍵・砂時計の潮の計算・鼓動守 (潮殻) の編み方の表と編み直し・一式の合図 |
 | `GuideSelfTest`（`SELFTEST prep chain`・`wayfarer notes`・`heartbeat ward`・`site cave`・`xp budget`） | 備えの頼みの規則（置き場・種類・`start_when`・章・繰り返し・板を検査で弾く。一章の旧い `prep_*`・サブの支度の段も弾く。流れは仮の二章の 3 本で）と流れ（自動で出る、どの順でも 3 本で `ch<n>_ready` が一度、`prep` 条件の本数、覚書は人ごとに一度で渡し直しは持っていないときだけ）。覚書のレシピの解放。鼓動守（式・心臓の戦いの参加者だけ・1 回の戦いに一度・心臓以外と虚空は耐えない・糧の灯 +0.2）。場所の湧き台（17 の 3.9）と経験値の枠 |
 
 ### 13.2 ゲーム画面（runClientTest）

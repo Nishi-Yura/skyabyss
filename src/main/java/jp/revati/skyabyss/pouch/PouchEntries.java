@@ -153,6 +153,11 @@ public final class PouchEntries {
         // 序盤の小さな素材 (骨片・棘針)
         add(list, jp.revati.skyabyss.guide.GuideSetup.BONE_CHIP.get(), Category.SMALL, 999, false, false);
         add(list, jp.revati.skyabyss.guide.GuideSetup.HARE_QUILL.get(), Category.SMALL, 999, false, false);
+        // 二章の地上の素材 (小真珠・塩結晶・真珠の護り糸・貝の欠け。guide/Ch2Gear)。登録の末尾に足して既存の枠の位置を動かさない
+        add(list, jp.revati.skyabyss.guide.Ch2Gear.SALT_CRYSTAL.get(), Category.MATERIAL, 999, false, false);
+        add(list, jp.revati.skyabyss.guide.Ch2Gear.PEARL_WARD_THREAD.get(), Category.MATERIAL, 999, false, false);
+        add(list, jp.revati.skyabyss.guide.Ch2Gear.SMALL_PEARL.get(), Category.SMALL, 999, false, false);
+        add(list, jp.revati.skyabyss.guide.Ch2Gear.SHELL_CHIP.get(), Category.SMALL, 999, false, false);
         return list;
     }
 

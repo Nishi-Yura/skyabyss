@@ -61,6 +61,9 @@ public final class GearCurveSelfTest {
         // 深淵の専用武器 4 点の一行は skyabyss_abyss の lang にある
         ja.putAll(lang("/assets/skyabyss_abyss/lang/ja_jp.json", f));
         en.putAll(lang("/assets/skyabyss_abyss/lang/en_us.json", f));
+        // 二章の旅装 4 部位の一行は skyabyss_ch2gear の lang にある (guide/Ch2Gear)
+        ja.putAll(lang("/assets/skyabyss_ch2gear/lang/ja_jp.json", f));
+        en.putAll(lang("/assets/skyabyss_ch2gear/lang/en_us.json", f));
         java.util.Set<String> seen = new java.util.HashSet<>();
         int gear = 0;
         for (Item item : net.minecraft.core.registries.BuiltInRegistries.ITEM) {
@@ -80,10 +83,10 @@ public final class GearCurveSelfTest {
             check(f, j.startsWith("「") && j.endsWith("」") && !j.contains("\n"), "gear story line should be one quoted line: " + key);
             check(f, seen.add(j), "gear story line repeated: " + key);
         }
-        check(f, gear == 52, "expected 52 mod gear items with a story line, found " + gear);
+        check(f, gear == 56, "expected 56 mod gear items with a story line, found " + gear);
         long jaStories = ja.keySet().stream().filter(k -> k.endsWith(".story")).count();
         long enStories = en.keySet().stream().filter(k -> k.endsWith(".story")).count();
-        check(f, jaStories == 52 && enStories == 52, "story line tables should hold 52 lines each: " + jaStories + "/" + enStories);
+        check(f, jaStories == 56 && enStories == 56, "story line tables should hold 56 lines each: " + jaStories + "/" + enStories);
     }
 
     private static java.util.Map<String, String> lang(String path, List<String> f) {

@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "SGS",
+    " P ",
+    "SGS"
+  ],
+  "key": {
+    "S": {
+      "item": "skyabyss:salt_crystal"
+    },
+    "G": {
+      "item": "minecraft:glass"
+    },
+    "P": {
+      "item": "skyabyss:small_pearl"
+    }
+  },
+  "result": {
+    "id": "skyabyss:tide_hourglass",
+    "count": 1
+  }
+}

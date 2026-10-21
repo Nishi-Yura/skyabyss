@@ -50,6 +50,27 @@ public final class HeartbeatWard {
         return -1;
     }
 
+    // ---------------------------------------------------------------- 章ごとの編み方 (旅の職人の会話が使う品の ID と印。21 の 1.4)
+    // 最初の一つ: 護り糸 (thread) を 1 本渡すと職人が編む。人ごとに一度 (会話の印 wovenFlag)。会話は take thread → give ward → flag wovenFlag
+    //   (入口の条件は item thread・not flag wovenFlag・ward_ok titan)。
+    // 補充: その章の地上の素材 (refill) を refillCount 個 → remake_ward titan (持っていない人だけ、1 日 1 つ。条件 ward_ok と組)
+    public record Weave(int chapter, String titan, String thread, String refill, int refillCount, String wovenFlag) {
+    }
+
+    public static final java.util.List<Weave> WEAVES = java.util.List.of(
+            new Weave(1, "stone_whale", "skyabyss:rock_shell_thread", "skyabyss:rock_shell_scrap", 8, "ch1t_woven"),
+            new Weave(2, "tide_shell", "skyabyss:pearl_ward_thread", "skyabyss:salt_crystal", 8, "ch2t_woven"));
+
+    // 章の編み方 (なければ null)
+    public static Weave weave(int chapter) {
+        for (Weave w : WEAVES) {
+            if (w.chapter() == chapter) {
+                return w;
+            }
+        }
+        return null;
+    }
+
     // ---------------------------------------------------------------- 補充 (旅の職人。21 の 1.4・P4)
     // 使い切った人 (その巨神の鼓動守を持っていない) に、職人が編み直す。1 日に 1 つまで (素材の岩殻片などは会話の側で受け取る)。
     // 最初の一つは備えの頼み「鼓動を聞く」の報酬 (ここを通らない)
