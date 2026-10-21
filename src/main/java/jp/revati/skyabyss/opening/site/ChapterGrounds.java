@@ -24,7 +24,7 @@ import net.neoforged.neoforge.event.tick.ServerTickEvent;
 // 章の跡地 (docs/design/33 の 3 章。W2)。はじまりの都から決まった方位と距離の帯に、章ごとに世界で一つ。
 //   一章 岩鯨 = 北 300〜600 の丘、二章 潮殻 = 東 800〜1,400 の海辺、三章 雷翼 = 西 1,000〜1,800 の峰 (y 150 以上)、四章 余燼 = 南 1,200〜2,000 の乾いた低地。
 //   探し方: 方位の扇 (±25 度) の中で、帯の内側から外側へ 32 ブロック刻み (扇は 5 度刻み、まんなかから)。合う地形があればそこ。
-//     バニラの村・構造物の出るチャンクが 128 以内なら、その候補を飛ばす (= 少しずらす)。一章は野営地・足跡からも離す。
+//     バニラの村・構造物の出るチャンクが 192 以内なら、その候補を飛ばす (= 少しずらす。小要素の広がりのぶん 128 より広め。道しるべの点は 48)。一章は野営地・足跡からも離す。
 //     無ければ帯のまんなかのそばの、いちばん乾いて平らな所に「整える形」を作る (丘 96・入り江 160・峰 128 で +60 まで・灰の盆地 160。ShapeJob)。
 //   時機: 四つとも、都が決まったときに場所を決める (地形生成の高さだけを見る。別のスレッド)。一章の形は目覚めの前に、二章以降の形は章が開いたとき
 //     (その章の人が出たとき = 前の章の心臓を止めたとき。ChapterSites が prepare を呼ぶ) に建てる。
@@ -57,8 +57,9 @@ public final class ChapterGrounds {
     public static final int SECTOR = 25;
     static final int ANGLE_STEP = 5;
     static final int DIST_STEP = 32;
-    // バニラの構造物を避ける距離
-    static final int STRUCTURE_GAP = 128;
+    // バニラの構造物を避ける距離 (跡地の中心から。小要素は中心から 150 まで広がるので、33 の「128 以内」より広めに)、道しるべの点から
+    static final int STRUCTURE_GAP = 192;
+    static final int ROAD_STRUCTURE_GAP = 48;
     // 一章の跡地と野営地・足跡の間 (跡地の小要素は中心から 150 まで広がる)
     static final int CAMP_GAP = 190;
     static final int PRINT_GAP = 150;
@@ -493,6 +494,15 @@ public final class ChapterGrounds {
     // 都から跡地への道しるべ: 中心から ROAD_START で始め、ROAD_STEP ごと、跡地の手前 ROAD_END_GAP で止める。
     // atLeast > 0 なら、その数が入るように間を詰める (12 まで)。水の上・崖・海面の高さの平地の点は、まわり (前後 12・左右 20) に置けなければ飛ばす
     static List<BlockPos> road(Ground g, BlockPos capital, BlockPos center, int atLeast) {
+        // 足りなければ間を詰めて探し直す (置けない点を飛ばすと数が減るので)
+        List<BlockPos> out = roadOnce(g, capital, center, atLeast, ROAD_STEP);
+        for (double step = ROAD_STEP * 0.75; atLeast > 0 && out.size() < atLeast && step >= 12; step *= 0.75) {
+            out = roadOnce(g, capital, center, atLeast, step);
+        }
+        return out;
+    }
+
+    private static List<BlockPos> roadOnce(Ground g, BlockPos capital, BlockPos center, int atLeast, double baseStep) {
         double dx = center.getX() - capital.getX();
         double dz = center.getZ() - capital.getZ();
         double len = Math.hypot(dx, dz);
@@ -503,7 +513,7 @@ public final class ChapterGrounds {
         if (span <= 0) {
             return out;
         }
-        double step = ROAD_STEP;
+        double step = baseStep;
         if (atLeast > 0 && span / step + 1 < atLeast) {
             step = Math.max(12, span / (atLeast - 1));
         }
@@ -518,7 +528,7 @@ public final class ChapterGrounds {
                     int z = capital.getZ() + (int) Math.round(uz * (along + shift) + ux * side);
                     Area ar = SiteFinder.area(g, x, z, 1, 1, 4, false, false);
                     // 海面の高さの平地 (沼・浜・川べり) は水たまりが多いので避ける
-                    if (ar.ok() && ar.min() >= g.sea() + 1) {
+                    if (ar.ok() && ar.min() >= g.sea() + 1 && !g.structureNear(x, z, ROAD_STRUCTURE_GAP)) {
                         at = new BlockPos(x, ar.median() + 1, z);
                         break search;
                     }

@@ -133,8 +133,9 @@ public final class Ch1SitesSelfTest {
                 int n = Integer.parseInt(id.substring(id.lastIndexOf('_') + 1));
                 if (anchor == null && capital != null) {
                     double dc = Math.hypot(pos.getX() - capital.getX(), pos.getZ() - capital.getZ());
-                    check(dc > prev, id + " is " + (int) dc + " from the capital, not beyond the previous cairn (" + (int) prev + ")");
-                    prev = dc;
+                    // 建てるときに少し動くことがある (20 まで)
+                    check(dc > prev - 20, id + " is " + (int) dc + " from the capital, not beyond the previous cairn (" + (int) prev + ")");
+                    prev = Math.max(prev, dc);
                 } else {
                     check(anchor == null || d >= 24 + 18 * (n - 1) - 12, id + " is only " + (int) d + " from the base (outward order)");
                 }
