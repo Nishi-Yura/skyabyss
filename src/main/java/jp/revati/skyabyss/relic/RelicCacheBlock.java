@@ -20,7 +20,7 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 // 遺物の箱 (宝のキャッシュ)。見た目と当たり判定は箱 (14x14x14) と同じ。中身は持たない:
-// 右クリックは各キャッシュの処理 (FinCaches など) が横取りし、取った印は人ごとに持つ。
+// 右クリックは各キャッシュの処理が横取りし、取った印は人ごとに持つ。
 // OPEN = 蓋が上がった見た目 (誰かが開けたとき数秒だけ。pulse)
 public class RelicCacheBlock extends HorizontalDirectionalBlock {
     public static final MapCodec<RelicCacheBlock> CODEC = simpleCodec(RelicCacheBlock::new);

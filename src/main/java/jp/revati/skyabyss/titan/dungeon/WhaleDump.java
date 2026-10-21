@@ -104,11 +104,7 @@ final class WhaleDump {
         if (p.getX() >= -4 && p.getX() <= 4 && p.getZ() >= 15 && p.getZ() <= TitanBackLayout.SHRINE_Z) {
             return true;
         }
-        if (self == TitanBackLayout.LIBRARY && p.getY() >= TitanBackLayout.FLOOR + 2 && p.getY() <= TitanBackLayout.FLOOR + 4) {
-            return true;
-        }
-        // 胸びれのトンネル (z -64〜-60)
-        return p.getZ() >= -64 && p.getZ() <= -60 && (p.getX() == TitanBackLayout.W1.x1() - 1 || p.getX() == TitanBackLayout.CE1.x2() + 1);
+        return false;
     }
 
     // y の層の x1〜x2 × z1〜z2 (z が行、x が列)。体のあるのに空気の所は ' '、体のない所は '.'
@@ -174,8 +170,6 @@ final class WhaleDump {
             return;
         }
         StringBuilder out = new StringBuilder();
-        out.append("fin tips: left ").append(WingsBuilder.finTip(-1)).append(" cache ").append(WingsBuilder.cachePos(-1))
-                .append(" / right ").append(WingsBuilder.finTip(1)).append(" cache ").append(WingsBuilder.cachePos(1)).append((char) 10);
         try {
             for (String line : Files.readAllLines(Path.of(path + ".spec"))) {
                 String[] t = line.trim().split("\s+");

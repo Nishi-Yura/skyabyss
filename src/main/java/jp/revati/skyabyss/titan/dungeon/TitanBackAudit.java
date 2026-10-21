@@ -17,7 +17,7 @@ public final class TitanBackAudit {
     // 体の中の部屋すべて (穴・はしごを調べる範囲と、通れるかの目標に使う)
     public static final List<TitanBackLayout.Box> ROOMS = List.of(HUB, ENTRY, W0, WA, W1, WB, W2, WC, E0, E1, CE1, E3_CORRIDOR, E3,
             E2, CK, CK_PASS, MAZE_EXIT_ROOM, MAZE_ENTRY_ROOM, MAZE_ENTRY_ROOM2, HEART_REST, HEART, HEART_CORRIDOR, BELL, BELL_PASS, W2_CONN1,
-            W2_CONN2, LIBRARY, LIBRARY_PASS, WEST_HALL, EAST_HALL, EXIT_PASS);
+            W2_CONN2, WEST_HALL, EAST_HALL, EXIT_PASS);
 
     public static BackReach.Spec spec() {
         BackReach.Spec s = new BackReach.Spec("whale", new Box(-RX, 40, -RZ, RX, 205, RZ));
@@ -39,8 +39,6 @@ public final class TitanBackAudit {
         s.goals.put("plaza", plaza());
         s.goals.put("forge", forge().west());
         s.goals.put("shrine", new BlockPos(0, shrineY() + 1, SHRINE_Z));
-        s.goals.put("camp", new BlockPos(0, WingsBuilder.CAMP_Y + 1, WingsBuilder.CAMP_Z + 3));
-        s.goals.put("tail vista", new BlockPos(0, WingsBuilder.TAIL_Y + 1, WingsBuilder.TAIL_CZ - 6));
         s.goals.put("hub", HUB.center().offset(0, 0, 6));
         s.goals.put("entry", ENTRY.center());
         s.goals.put("seal corridor", HEART_CORRIDOR.center().offset(0, 0, 20));
@@ -62,15 +60,7 @@ public final class TitanBackAudit {
         s.goals.put("lower stone", GOAL_SPOTS.get(2).offset(-1, 0, 0));
         s.goals.put("rest heart", HEART_REST.center().offset(1, 0, 1));
         s.goals.put("heart arena", HEART.center());
-        s.goals.put("library", LIBRARY.center());
-        // 任意の翼 (背の外): 胸びれの道の先端・尾の展望・背の野営地
         s.goals.put("bell tower floor", new BlockPos(BELL.x1() + 3, FLOOR + 1, BELL.z1() + 6));
-        s.goals.put("fin left tip", WingsBuilder.finTip(-1));
-        s.goals.put("fin right tip", WingsBuilder.finTip(1));
-        s.goals.put("fin left cache", WingsBuilder.cachePos(-1).north());
-        s.goals.put("fin right cache", WingsBuilder.cachePos(1).north());
-        s.goals.put("tail vista", new BlockPos(0, WingsBuilder.TAIL_Y + 1, WingsBuilder.TAIL_CZ - 4));
-        s.goals.put("back camp", new BlockPos(0, WingsBuilder.CAMP_Y + 1, WingsBuilder.CAMP_Z - 3));
         if (WhaleDeck.placed()) {
             deckAllowances(s);
         }

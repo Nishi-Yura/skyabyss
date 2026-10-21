@@ -153,9 +153,6 @@ public final class TitanBackLayout {
     public static final int WEST_RETURN_X = -19;
     public static final int WEST_RETURN_Z = -52;
     public static final List<BlockPos> WEST_RETURN = wall(WEST_RETURN_Z - 1, WEST_RETURN_Z + 1, WEST_LEDGE_Y + 1, WEST_LEDGE_Y + 3, WEST_RETURN_X, false);
-    // 骨の書庫 (任意の翼。入口の通路の西)
-    public static final Box LIBRARY = new Box(-34, -12, -8, 18, FLOOR, 10);
-    public static final Box LIBRARY_PASS = new Box(-11, -4, 3, 9, FLOOR, 6);
 
     // ---------------------------------------------------------------- 東の翼 (戦闘。版 18: 一本道。戻らずに先へ進む)
     // 東の前室 E0 → 第一の広間 E1 → (北の戸) 控えの間 CE1 (休み場) → 射手の回廊 E2 (通路。戦わない。版 25) → 前室 CK_PASS (休み場) → 番兵の詰所 CK (老番兵)

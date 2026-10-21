@@ -62,7 +62,6 @@ public final class TitanBackBuilder {
         kit.wallLamps(ENTRY, 4, FLOOR + 4);
         WestWingBuilder.build(kit);
         EastWingBuilder.build(kit);
-        WingsBuilder.build(kit);
         // 建築の監査 (版 18): 四方が 1 高い床の中で 1 マスだけ低いくぼみを埋める (背の殻の模型の窪みと、ひれの道の縁)
         smoothDimples(kit, -27, -17, 138, 152, 93, 103);
         smoothDimples(kit, 54, 120, 70, 100, -75, -25);

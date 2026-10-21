@@ -78,16 +78,12 @@ public final class WhaleScaleSelfTest {
     private static void checkVersion18(ServerLevel back, List<String> f) {
         // 材質: ゾーンごとの壁が、少なくとも 8 種類はちがう
         java.util.Set<net.minecraft.world.level.block.Block> walls = new java.util.HashSet<>();
-        for (Box b : List.of(HUB, W0, WA, E0, E1, CE1, E2, CK_PASS, CK, E3, BELL, LIBRARY, HEART_REST)) {
+        for (Box b : List.of(HUB, W0, WA, E0, E1, CE1, E2, CK_PASS, CK, E3, BELL, HEART_REST)) {
             walls.add(back.getBlockState(new BlockPos(b.x1() - 1, b.floorY() + 2, (b.z1() + b.z2()) / 2)).getBlock());
         }
         check(f, walls.size() >= 8, "the zones do not read differently: only " + walls.size() + " wall materials " + walls);
         // 宝物庫の部屋はない: 封印のすぐ先が回廊
         check(f, back.getBlockState(new BlockPos(0, FLOOR + 1, GATE.get(0).getZ() - 1)).isAir(), "the seal does not open onto the heart corridor");
-        // 胸びれの先の宝箱
-        for (int side : new int[]{-1, 1}) {
-            check(f, back.getBlockState(WingsBuilder.cachePos(side)).is(jp.revati.skyabyss.registry.ModBlocks.RELIC_CACHE.get()), "fin cache chest missing for side " + side);
-        }
         // 東の翼は一本道 (戦いは 3 つ): 戸は北へ順に E1_EXIT → 射手の回廊 (戸なし) → 詰所の入口
         check(f, E1_EXIT.get(0).getZ() > E2_EXIT.get(0).getZ() && E2_EXIT.get(0).getZ() > CK_ENTRANCE.get(0).getZ(), "the east wing doors are not in a forward order");
         // 次の目的: 記録だけから決まる

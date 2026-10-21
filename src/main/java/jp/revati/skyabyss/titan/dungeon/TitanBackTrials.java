@@ -145,9 +145,6 @@ public final class TitanBackTrials {
             new Checkpoint("heart", HEART_REST, HEART_REST.center().offset(1, 0, 1)),
             // 第二の広間と詰所のあいだの休み場 (焚き火のまわりの腰掛けを避けて斜めに置く)
             new Checkpoint("ckr", CK_PASS, CK_PASS.center().offset(4, 0, 1)),
-            // 背の外の道の宿 (広場から祠への踏み跡の途中)
-            new Checkpoint("camp", new Box(-6, 6, WingsBuilder.CAMP_Z - 6, WingsBuilder.CAMP_Z + 6, WingsBuilder.CAMP_Y, 8),
-                    new BlockPos(-3, WingsBuilder.CAMP_Y + 1, WingsBuilder.CAMP_Z + 2)),
             // 闇の水路の 2 つめの入口の小部屋
             new Checkpoint("mz1", MAZE_ENTRY_ROOM2, new BlockPos(MAZE_ENTRY_ROOM2.x1(), MAZE_ENTRY_ROOM2.floorY() + 1, MAZE_ENTRY_ROOM2.z2())),
             // 闇の水路の入口: はしごを下りた先の乾いた小部屋。水の外・戦いの外。足元は部屋の床の一段上

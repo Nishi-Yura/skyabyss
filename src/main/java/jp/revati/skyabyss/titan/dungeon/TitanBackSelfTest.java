@@ -333,8 +333,6 @@ public final class TitanBackSelfTest {
                 int t = WhaleShape.bodyTop(x, z);
                 if (t == Integer.MIN_VALUE || (Math.abs(x) <= 9 && z >= SHRINE_Z - 17 && z <= SHRINE_Z + 17)
                         || (Math.abs(x) <= 13 && Math.abs(z - PLATFORM_Z) <= 16)
-                        || (Math.abs(x) <= 8 && Math.abs(z - WingsBuilder.CAMP_Z) <= 8)
-                        || (Math.abs(x) <= 14 && Math.abs(z - WingsBuilder.TAIL_CZ) <= 14)
                         // 登り口の階段は、背に近づくと殻を割って背へ出る (開いた階段)
                         || (x >= STAIR_X0 && x <= 0 && z >= STAIR_Z0 - 1 && z <= STAIR_Z1 + 1)) {
                     continue;
@@ -375,9 +373,6 @@ public final class TitanBackSelfTest {
                 // 部屋はどれも鯨の体の中を掘ったもの。鯨のブロックが無かった所へ出たら、外とつながっている
                 // (胸びれの道のトンネルだけは、わざと体の外へ抜ける)
                 if (WhaleShape.at(q.getX(), q.getY(), q.getZ()) == null) {
-                    if (inFinTunnel(q)) {
-                        continue;
-                    }
                     leak = q;
                     break;
                 }
@@ -425,13 +420,6 @@ public final class TitanBackSelfTest {
             failures.add("the walk from the arrival to the hub is too long (" + toHub + " steps)");
         }
         SkyAbyss.LOGGER.info("Titan back walk: arrival -> shrine {} steps, -> hub {} steps", toShrine, toHub);
-    }
-
-    // 胸びれの道のトンネル (体の外へ抜ける。WingsBuilder.finPath)
-    private static boolean inFinTunnel(BlockPos q) {
-        return q.getZ() >= -65 && q.getZ() <= -59
-                && ((q.getX() <= W1.x1() - 1 && q.getY() >= W1.floorY() && q.getY() <= W1.floorY() + 8)
-                || (q.getX() >= CE1.x2() + 1 && q.getY() >= FLOOR && q.getY() <= FLOOR + 8));
     }
 
     // 歩いて何歩で着くか (着かなければ -1)。足元が固く、足と頭が空いている所を、上り 1・下り 3 まで。目標から r 以内で着いたとみなす
@@ -573,9 +561,8 @@ public final class TitanBackSelfTest {
 
     // 看板: 背中に置かれた看板は、碑文と試練の入口の一言だけ (allSigns) で、どの行も看板の幅に収まること (日本語・英語)。
     // 囁き (看板の代わりの案内) の文が lang にあること
-    // 版 13 で足した碑 (鐘楼・歌の祠・書庫・胸びれの先・尾の展望・宿)。書庫は sign.skyabyss.library_1〜11
-    private static final Set<String> NEW_TABLETS = Set.of("sign.skyabyss.bell_hint", "sign.skyabyss.fin_left",
-            "sign.skyabyss.fin_right", "sign.skyabyss.tail_vista", "sign.skyabyss.camp_page", "sign.skyabyss.fin_left_lore", "sign.skyabyss.fin_right_lore");
+    // 版 13 で足した碑 (鐘楼) の残り。任意の翼 (書庫・胸びれ・尾の展望・宿) の碑は版 30 で消した
+    private static final Set<String> NEW_TABLETS = Set.of("sign.skyabyss.bell_hint");
 
     private static void checkSigns(ServerLevel level, List<String> failures) {
         Set<BlockPos> expected = new HashSet<>();
@@ -590,7 +577,7 @@ public final class TitanBackSelfTest {
                     }
                     if (expected.contains(be.getBlockPos())) {
                         count++;
-                    } else if (!(tablet.key().startsWith("sign.skyabyss.library_") || NEW_TABLETS.contains(tablet.key()))) {
+                    } else if (!NEW_TABLETS.contains(tablet.key())) {
                         failures.add("unexpected tablet at " + be.getBlockPos() + " (only inscriptions, trial entrances and the new wings keep tablets)");
                     }
                     keys.add(tablet.key());
