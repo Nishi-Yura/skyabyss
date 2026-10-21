@@ -113,6 +113,19 @@ shot 14_wreck
 # 二章の人にする (岩鯨は止めた扱い。序章のメインが帯を取らないように、先にクエストを空にする)
 cmd skyabyss quest forget @s all
 cmd skyabyss playtest chapter 2 @s
+# 一章のメインを終わらせる (残っていると、帯が序盤の目的「岩鯨を待とう」を出す)
+cmd skyabyss quest next @s main_song
+cmd skyabyss quest next @s main_song
+cmd skyabyss quest next @s main_song
+cmd skyabyss quest next @s main_song
+cmd skyabyss quest next @s main_song
+cmd skyabyss quest next @s main_song
+cmd skyabyss quest next @s main_song
+cmd skyabyss quest next @s main_song
+cmd skyabyss quest next @s main_song
+cmd skyabyss quest next @s main_song
+cmd skyabyss quest next @s main_song
+cmd skyabyss quest next @s main_song
 cmd gamemode creative
 cmd kill @e[type=!player,distance=..200]
 wait 40
