@@ -93,7 +93,10 @@ public final class ArcSetup {
                                 if (c == null) {
                                     return 0;
                                 }
-                                jp.revati.skyabyss.notice.Notice.chapter(ctx.getSource().getPlayerOrException(), c.label(), ChapterCards.titleLine(c));
+                                ServerPlayer p = ctx.getSource().getPlayerOrException();
+                                // 出した札は「出した」と記す (左上の章の札もこの章に替わる)
+                                ArcData.of(p).markTitle(c);
+                                jp.revati.skyabyss.notice.Notice.chapter(p, c.label(), ChapterCards.titleLine(c));
                                 return 1;
                             })))
                             .then(Commands.literal("aftermath").then(Commands.argument("chapter", StringArgumentType.word()).executes(ctx -> {

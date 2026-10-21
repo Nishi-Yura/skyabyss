@@ -128,7 +128,9 @@ cmd skyabyss quest next @s main_song
 cmd skyabyss quest next @s main_song
 cmd gamemode creative
 cmd kill @e[type=!player,distance=..200]
-wait 40
+# 二章の題字の札を出して (左上の章の札が「二章」に替わる)、引くまで待つ
+cmd skyabyss dev arc card titan_tide
+wait 300
 hud on
 cmd skyabyss quest start @s "ch2/salt_road"
 camera 0.5 -29 -9.5 0 15
