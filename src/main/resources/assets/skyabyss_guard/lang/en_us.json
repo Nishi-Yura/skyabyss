@@ -1,3 +1,12 @@
 {
-  "message.skyabyss.guard.block": "This cannot be broken"
+  "message.skyabyss.guard.block": "This cannot be broken",
+  "label.skyabyss.facility.tool_shop": "Tool Shop",
+  "label.skyabyss.facility.storage": "Storage",
+  "label.skyabyss.facility.trade": "Trading Post",
+  "label.skyabyss.facility.apothecary": "Apothecary",
+  "label.skyabyss.facility.inn": "Inn: The Bell",
+  "label.skyabyss.facility.perch": "Young Perch",
+  "label.skyabyss.facility.tavern": "Tavern: The Deep Cup",
+  "label.skyabyss.facility.smithy": "Smithy",
+  "label.skyabyss.facility.guild": "Whale-Chasers' Guild"
 }

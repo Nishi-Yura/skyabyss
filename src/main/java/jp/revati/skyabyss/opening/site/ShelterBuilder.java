@@ -19,6 +19,32 @@ public final class ShelterBuilder {
         return new SiteJob(level, data, entry, Blueprint.get(name), "shelter", ShelterBuilder::finish);
     }
 
+    static final java.util.Set<String> LABEL_HIDDEN = java.util.Set.of("black_market", "mapmaker");
+    public static final String LABEL_TAG = "skyabyss_facility_label";
+
+    // 文字の表示 (バニラの text_display) を一つ置く。前に置いた同じ所の表示は消してから
+    static boolean placeLabel(net.minecraft.server.level.ServerLevel level, BlockPos at, String name) {
+        net.minecraft.world.phys.AABB near = new net.minecraft.world.phys.AABB(at).inflate(1.5);
+        for (net.minecraft.world.entity.Entity old : level.getEntitiesOfClass(net.minecraft.world.entity.Display.TextDisplay.class, near, e -> e.getTags().contains(LABEL_TAG))) {
+            old.discard();
+        }
+        net.minecraft.nbt.CompoundTag tag = new net.minecraft.nbt.CompoundTag();
+        tag.putString("id", "minecraft:text_display");
+        tag.putString("text", "{\"translate\":\"label.skyabyss.facility." + name + "\",\"color\":\"#F2C14E\",\"bold\":true}");
+        tag.putString("billboard", "center");
+        tag.putInt("background", 0x6A0A0C10);
+        tag.putInt("line_width", 200);
+        tag.putFloat("view_range", 0.6f);
+        net.minecraft.nbt.ListTag tags = new net.minecraft.nbt.ListTag();
+        tags.add(net.minecraft.nbt.StringTag.valueOf(LABEL_TAG));
+        tag.put("Tags", tags);
+        net.minecraft.world.entity.Entity e = net.minecraft.world.entity.EntityType.loadEntityRecursive(tag, level, en -> {
+            en.moveTo(at.getX() + 0.5, at.getY() + 0.2, at.getZ() + 0.5, 0f, 0f);
+            return en;
+        });
+        return e != null && level.addFreshEntity(e);
+    }
+
     static void finish(SiteJob job) {
         BlockPos bell = job.mark("bell");
         if (bell == null || !job.level.getBlockState(bell).is(Blocks.BELL)) {
@@ -86,6 +112,20 @@ public final class ShelterBuilder {
         if (!facility.isEmpty()) {
             int placed = jp.revati.skyabyss.facility.Attendants.ensureAll(job.level, facility);
             SkyAbyss.LOGGER.info("Opening capital: {} facility mark(s), {} attendant(s) placed", facility.size(), placed);
+        }
+        // 入れる施設の戸の上に浮く名 (label_<施設>。建物のほかに、遠くからでも店と分かるように。2026-10-21 の試遊)。裏通りの闇市・地図屋は出さない
+        int labels = 0;
+        for (String key : job.bp.marks.keySet()) {
+            if (!key.startsWith("label_") || LABEL_HIDDEN.contains(key.substring(6))) {
+                continue;
+            }
+            BlockPos at = job.mark(key);
+            if (at != null && placeLabel(job.level, at, key.substring(6))) {
+                labels++;
+            }
+        }
+        if (labels > 0) {
+            SkyAbyss.LOGGER.info("Opening capital: {} facility label(s)", labels);
         }
         // 都の範囲に紛れ込んだバニラの村人・鉄の番人・行商人は外す (近くの村から来た者が地下や家に入り込まないように)。都の村人はこのあと置く
         int[] r = job.bp.worldRect(job.rot, job.mirror, new BlockPos(job.origin.getX(), 0, job.origin.getZ()));

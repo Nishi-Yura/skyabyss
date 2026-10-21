@@ -1,5 +1,5 @@
 {
-  "parent": "skyabyss:sky_shadow",
+  "parent": "skyabyss:camp",
   "display": {
     "icon": {
       "id": "minecraft:bell"

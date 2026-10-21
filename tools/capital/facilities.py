@@ -82,6 +82,9 @@ class Facilities(Interiors, BackAlley):
         ox, oz = ix + dx, iz + dz
         sx, sz = DX[CW[out]]
         hanging_sign(v, st, ox, y + 3, oz, out)
+        # 戸の上に浮く施設の名 (建物のほかに、遠くからでも入れる店と分かるように。ShelterBuilder が文字の表示を置く)
+        if sign:
+            self.mark('label_' + sign, ox, y + 5, oz)
         if sign:
             for s in (sign_side, -sign_side):
                 tx, tz = ox + 2 * sx * s + dx, oz + 2 * sz * s + dz
@@ -255,6 +258,37 @@ class Facilities(Interiors, BackAlley):
                 v.set(x, 0, -9, 'air') if v.get(x, 0, -9) and 'carpet' not in v.get(x, 0, -9) else None
         v.set((ax0 + ax1) // 2, 5, -12, 'lantern[hanging=true,waterlogged=false]')
 
+    # ---------------------------------------------------------------- 東の大通り: 取引所 (プレイヤーどうしの取引。組合の東)
+    def trade_house(self):
+        """取引所 (x 82..93 z -26..-13)。戸は南 (東の大通りへ)。中は帳場の机と取引所の番、両わきに品を並べる棚、出し物の掲示の板"""
+        st, v = self.st, self.v
+        x0, z0, x1, z1 = 82, -26, 93, -13
+        b, ridge = self.fac_body('trade', x0, z0, x1, z1, 'south', floors=2, fh=6, ground='shop', infill='polished_andesite', axis='z')
+        self.fac_front(b, 'trade')
+        dx_, _, dz_, _ = b.doors[0]
+        ax0, az0, ax1, az1 = x0 + 2, z0 + 2, x1 - 2, z1 - 2   # 84..91, -24..-15
+        self.room(ax0, az0, ax1, az1, 0, 6, floor='wood', rug=True)
+        self.room(ax0, az0, ax1, az1, 7, 5, rug=False)
+        # 帳場の机 (z -20) の向こうに番、奥の壁に掲示の板 (額縁) と棚
+        # 机の東の端は空けて、番の側へ回れるように
+        self.counter([(x, -20) for x in range(ax0, ax1)],
+                     tops=((ax0, -20, 'lantern[hanging=false,waterlogged=false]'), (ax1 - 1, -20, 'candle[candles=3,lit=true,waterlogged=false]')))
+        for x in range(ax0, ax1 + 1):
+            for z in (-22, -21):
+                v.set(x, 0, z, 'air')
+                v.set(x, 1, z, 'air')
+            v.set(x, 0, az0, 'barrel[facing=south,open=false]')
+            v.set(x, 1, az0, 'chiseled_bookshelf[facing=south,slot_0_occupied=true,slot_1_occupied=false,slot_2_occupied=true,slot_3_occupied=true,slot_4_occupied=false,slot_5_occupied=true]' if x % 2 else 'bookshelf')
+            v.set(x, 2, az0, 'decorated_pot[cracked=false,facing=south,waterlogged=false]' if x % 3 == 0 else 'air')
+        self.attendant('trade_keeper', dx_, 0, -22)
+        # 客の側: 両わきの品の台 (樽と半ブロック) と鉢
+        for z in (-18, -16):
+            v.set(ax0, 0, z, 'barrel[facing=east,open=false]')
+            v.set(ax1, 0, z, 'barrel[facing=west,open=false]')
+        v.set(ax0, 0, -17, 'potted_flowering_azalea_bush')
+        v.set(ax1, 0, -17, 'potted_flowering_azalea_bush')
+        v.set((ax0 + ax1) // 2, 5, -18, 'lantern[hanging=true,waterlogged=false]')
+
     # ---------------------------------------------------------------- 東の大通り: 薬師の店
     def apothecary(self):
         """薬師の店 (東の大通りの南、x 53..66 z 6..17)。戸は北。机の上に醸造台、奥に薬棚と大釜、吊るした薬草の鉢"""
@@ -315,11 +349,11 @@ class Facilities(Interiors, BackAlley):
         self.attendant('guild_clerk', 54, 0, -27)
         # 二階への梯子 (前の梯子は二階の床で切れていたので、窓のない東の壁ぎわに置き直す)
         for yy in range(0, 9):
-            if (v.get(90, yy, -14) or '').startswith('ladder'):
-                v.set(90, yy, -14, 'air')
-        v.set(89, 7, -14, 'air')
-        v.set(90, 6, -14, PLANK % st.wood)
-        lad = self.place_ladder(84, -16, 90, -12, 0, 6, door=(51, -22))
+            if (v.get(76, yy, -14) or '').startswith('ladder'):
+                v.set(76, yy, -14, 'air')
+        v.set(75, 7, -14, 'air')
+        v.set(76, 6, -14, PLANK % st.wood)
+        lad = self.place_ladder(70, -16, 76, -12, 0, 6, door=(51, -22))
         if lad:
             for (ddx, ddz) in ((1, 0), (-1, 0), (0, 1), (0, -1)):
                 for yy in (7, 8):
@@ -347,6 +381,7 @@ class Facilities(Interiors, BackAlley):
             v.fill(7, 0, z, 7, 3, z, st.pilaster)
             v.set(7, 4, z, st.trim.stairs('east', 'top'))
         hanging_sign(v, st, 8, 4, 17, 'west')
+        self.mark('label_smithy', 6, 6, 17)
         v.set(7, 2, 14, 'lantern[hanging=false,waterlogged=false]') if False else None
         self.openings.append((8, 17, 'west'))
         # 鍛冶師の机 (z 14、x 10..15) と横 (x 15)

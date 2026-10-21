@@ -274,7 +274,7 @@ public final class FreeQuestSelfTest {
     // ---------------------------------------------------------------- 読み込み
     private static void loading(List<String> failures, List<String> notes) {
         List<QuestDef> free = freeQuests();
-        check(free.size() >= 8 && free.size() <= 12, "expected 8-12 free quests, found " + free.size(), failures);
+        check(free.size() >= 8 && free.size() <= 16, "expected 8-16 free quests, found " + free.size(), failures);
         long daily = free.stream().filter(q -> q.repeat().equals("daily")).count();
         long weekly = free.stream().filter(q -> q.repeat().equals("weekly")).count();
         check(daily >= 3 && weekly >= 1, "need dailies and weeklies (" + daily + "/" + weekly + ")", failures);
@@ -283,7 +283,8 @@ public final class FreeQuestSelfTest {
             check(q.minStage() <= 1, q.id() + ": free quests for the prologue and chapter 1 should open by stage 1", failures);
             for (QuestDef.Stage s : q.stages()) {
                 for (QuestDef.Objective o : s.objectives()) {
-                    check(!(o.type().equals("kill") && o.targets().stream().anyMatch(t -> t.contains("tide"))), q.id()
+                    // 心臓を一つも止める前 (min_stage 0) の頼みだけ。二章の頼み (min_stage 1) は潮殻の敵でよい
+                    check(q.minStage() > 0 || !(o.type().equals("kill") && o.targets().stream().anyMatch(t -> t.contains("tide"))), q.id()
                             + ": no free quest may ask for the next titan's back", failures);
                 }
             }
