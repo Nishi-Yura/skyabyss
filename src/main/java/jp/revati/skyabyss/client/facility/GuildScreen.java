@@ -547,7 +547,7 @@ public class GuildScreen extends Screen {
             boolean done = view.unlocked().contains(a.id());
             int v = Math.min(a.target(), st.get(a.kind().ordinal()));
             g.drawString(font, done ? "✔" : "・", x + 3, ry, done ? FacilityUi.GOLD : FacilityUi.DIM, false);
-            g.drawString(font, font.plainSubstrByWidth(Component.translatable(a.nameKey()).getString(), 104), x + 13, ry,
+            g.drawString(font, font.plainSubstrByWidth(Component.translatable(a.nameKey()).getString(), 86), x + 13, ry,
                     done ? FacilityUi.TEXT : FacilityUi.DIM, false);
             StringBuilder rw = new StringBuilder();
             for (Component r : GuildAchievements.rewards(a.id())) {
@@ -556,7 +556,7 @@ public class GuildScreen extends Screen {
                 }
                 rw.append(r.getString());
             }
-            g.drawString(font, font.plainSubstrByWidth(rw.toString(), w - 170), x + 120, ry, done ? FacilityUi.GOLD : FacilityUi.DIM, false);
+            g.drawString(font, font.plainSubstrByWidth(rw.toString(), w - 146), x + 100, ry, done ? FacilityUi.GOLD : FacilityUi.DIM, false);
             String prog = v + "/" + a.target();
             g.drawString(font, prog, x + w - 4 - font.width(prog), ry, done ? FacilityUi.TEAL : FacilityUi.TEXT, false);
         }

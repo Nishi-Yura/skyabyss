@@ -234,6 +234,13 @@ public final class TradeService {
             TradeData.Listing l = data.create(UUID.nameUUIDFromBytes(("trade_demo_" + i).getBytes()), names[i], now, now + Trades.EXPIRE_MS - i * 30L * 3_600_000L);
             l.give.addAll(java.util.Arrays.asList(gives[i]));
             l.want.addAll(java.util.Arrays.asList(wants[i]));
+            if (i == 0) {
+                // 自分の申請 (ほしいもののまま)
+                TradeData.Application my = new TradeData.Application(p.getUUID());
+                my.name = p.getGameProfile().getName();
+                my.offer.add(Trades.coins(60));
+                l.apps.put(my.applicant, my);
+            }
         }
         TradeData.Listing mine = data.create(p.getUUID(), p.getGameProfile().getName(), now, now + Trades.EXPIRE_MS);
         mine.give.add(new ItemStack(net.minecraft.world.item.Items.IRON_INGOT, 16));

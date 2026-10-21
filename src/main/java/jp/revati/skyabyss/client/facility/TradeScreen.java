@@ -498,7 +498,7 @@ public class TradeScreen extends Screen {
             }
         }
         int rx = x0 + 186;
-        int rw = W - 12 - rx;
+        int rw = x0 + W - 12 - rx;
         if (target != null) {
             // 申し出: 相手の出品 (出す品・ほしいもの) と、足す鐘銭
             g.drawString(font, Component.translatable("gui.skyabyss.trade.coins_offer"), rx, y0 + 42, FacilityUi.TEAL, false);
@@ -628,7 +628,7 @@ public class TradeScreen extends Screen {
         scrollBar(g, lx, ly, lw, rows.size(), scroll[2]);
         // 右: 選んだ出品の申請
         int ax = x0 + 182;
-        int aw = W - 10 - ax;
+        int aw = x0 + W - 10 - ax;
         if (sel == null) {
             return;
         }
