@@ -238,10 +238,10 @@ class Facilities(Interiors, BackAlley):
             for z in (-13, -12):
                 v.set(x, 0, z, 'air')
                 v.set(x, 1, z, 'air')
-            # 下は樽、中の段は箱と樽を交互、箱の上は灯りか壺 (箱の上に丸ごとのブロックを置かない)
+            # 下は樽、中の段は箱と樽を交互、箱の上は壺 (箱の上に丸ごとのブロックを置かない)
             v.set(x, 0, az0, 'barrel[facing=south,open=false]')
             v.set(x, 1, az0, 'chest[facing=south,type=single,waterlogged=false]' if x % 2 else 'barrel[facing=south,open=false]')
-            v.set(x, 2, az0, ('lantern[hanging=false,waterlogged=false]' if x % 4 == 1 else 'decorated_pot[cracked=false,facing=south,waterlogged=false]') if x % 2
+            v.set(x, 2, az0, 'decorated_pot[cracked=false,facing=south,waterlogged=false]' if x % 2
                   else 'chiseled_bookshelf[facing=south,slot_0_occupied=true,slot_1_occupied=true,slot_2_occupied=false,slot_3_occupied=true,slot_4_occupied=true,slot_5_occupied=false]' if x % 3 == 0 else 'barrel[facing=south,open=false]')
         v.set(ax1, 0, -13, 'lectern[facing=west,has_book=false,powered=false]')
         self.attendant('storage_keeper', dx_ - 1, 0, -13)
@@ -652,7 +652,7 @@ class Facilities(Interiors, BackAlley):
 
     def inn_corridor(self, ax0, ax1, y2, north_doors, south_doors):
         """宿の二階の廊下 (z 15..18、x ax0..ax1)。長く暗く見えないように:
-        - 客室の仕切りの筋 (x -36・-29・-22・-15) に柱と梁のアーチを渡し、廊下を区切る。梁の間の天井は明るい白樺
+        - 客室の仕切りの筋 (x -36・-29・-22・-15) に梁を渡し、廊下を区切る (柱は立てない)。梁の間の天井は明るい白樺
         - 両端の壁に透明な窓 (2×2) と窓の腰掛け、灯りは鎖で下げて 4 ごと
         - 戸の前を空けて、壁ぎわに小卓 (鉢・蝋燭・灯り)・腰掛け・本棚
         - 階段の上の踊り場 (x -31..-23, z 20..22) に小さな談話の席"""
@@ -670,13 +670,10 @@ class Facilities(Interiors, BackAlley):
             for z in (15, 16, 17, 18):
                 if v.get(x, y2, z) in (None, 'air'):
                     v.set(x, y2, z, 'red_carpet' if z in (16, 17) else 'brown_carpet')
-        # アーチ: 柱 (縁の 2 列) と梁 (頭より上、y2 + 3)
+        # 区切りの梁: 廊下の幅いっぱいに渡す (頭より上、y2 + 3。柱は立てず、廊下を狭めない)。梁の上は板で天井まで
         for x in arches:
-            for z in (15, 18):
-                for yy in range(y2, y2 + 4):
-                    v.set(x, yy, z, '%s[axis=y]' % log)
-            for z in (16, 17):
-                v.set(x, y2 + 3, z, '%s[axis=z]' % log)
+            for z in (15, 16, 17, 18):
+                v.set(x, y2 + 3, z, 'stripped_%s[axis=z]' % log)
                 v.set(x, y2 + 4, z, PLANK % w)
         # 吊り灯り (梁のあいだ、鎖で 1 下げる)
         xs = sorted(set([ax0 + 2] + [a + d for a in arches for d in (-3, 3)] + [ax1 - 2]))
@@ -705,7 +702,7 @@ class Facilities(Interiors, BackAlley):
         for (z, back, doors) in ((15, 'north', north_doors), (18, 'south', south_doors)):
             i = 0
             for x in range(ax0 + 2, ax1 - 1):
-                if x in arches or any(abs(x - d) <= 1 for d in doors) or any(abs(x - a) == 0 for a in arches):
+                if any(abs(x - d) <= 1 for d in doors):
                     continue
                 if z == 18 and -31 <= x <= -23:
                     continue   # 踊り場への口
