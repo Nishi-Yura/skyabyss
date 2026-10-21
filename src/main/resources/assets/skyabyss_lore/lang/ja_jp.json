@@ -125,5 +125,13 @@
   "lore.skyabyss.prologue.capital_gates.body": "都の四つの門の碑。\n鯨門は北の丘へ、潮門は東の海へ、風門は西の峰へ、灰門は南の灰の地へ向く。\n国は四体の巨神に囲まれて生きてきた、と門の碑は言う。四体が空を支えている、とも。",
   "lore.skyabyss.chapter1.guild_roll.title": "名簿の最後の頁",
   "lore.skyabyss.chapter1.guild_roll.inscription": "印のない名ばかり。最後の行は空いている",
-  "lore.skyabyss.chapter1.guild_roll.body": "組合の奥の名簿。上った者の名が年ごとに並ぶ。帰った者の名の横には小さな鐘の印がある。\n\n頁をめくるほど印は減り、最後の頁は印のない名ばかりになる。\n\nその下に一行だけ、名を書くための空きが残されていた。墨はまだ乾いていない。"
+  "lore.skyabyss.chapter1.guild_roll.body": "組合の奥の名簿。上った者の名が年ごとに並ぶ。帰った者の名の横には小さな鐘の印がある。\n\n頁をめくるほど印は減り、最後の頁は印のない名ばかりになる。\n\nその下に一行だけ、名を書くための空きが残されていた。墨はまだ乾いていない。",
+  "lore.skyabyss.chapter1.shrine_whale.title": "岩鯨の祠",
+  "lore.skyabyss.chapter1.shrine_whale.body": "巨神は、自分を止めた者を覚えている。石の輪に立ち、歌のかけらを差し出すと、眠りの底から歌が返ってきて、背へ呼ばれた。もう一度あの背を渡れ、ということらしい。",
+  "lore.skyabyss.chapter1.shrine_tide.title": "潮殻の祠",
+  "lore.skyabyss.chapter1.shrine_tide.body": "巨神は、自分を止めた者を覚えている。石の輪に立ち、歌のかけらを差し出すと、眠りの底から歌が返ってきて、背へ呼ばれた。もう一度あの背を渡れ、ということらしい。",
+  "lore.skyabyss.chapter1.shrine_storm.title": "雷翼の祠",
+  "lore.skyabyss.chapter1.shrine_storm.body": "巨神は、自分を止めた者を覚えている。石の輪に立ち、歌のかけらを差し出すと、眠りの底から歌が返ってきて、背へ呼ばれた。もう一度あの背を渡れ、ということらしい。",
+  "lore.skyabyss.chapter1.shrine_ember.title": "余燼の祠",
+  "lore.skyabyss.chapter1.shrine_ember.body": "巨神は、自分を止めた者を覚えている。石の輪に立ち、歌のかけらを差し出すと、眠りの底から歌が返ってきて、背へ呼ばれた。もう一度あの背を渡れ、ということらしい。"
 }
