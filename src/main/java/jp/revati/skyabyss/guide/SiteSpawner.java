@@ -61,14 +61,15 @@ import net.neoforged.neoforge.event.tick.ServerTickEvent;
 //              初めての人には経験値 (Growth.discover の鍵) と宝 (SiteTreasure.claim) と合図 `site_clear:<id>` (クエストの signal の目的)
 //     再訪     クリアした人だけのグループには、前に素材を受け取ってから 24000 tick たつと、最後の部屋だけ敵が戻る。倒すと周回の素材 (repeatTreasure。
 //              経験値なし)。まだクリアしていない人が近くにいれば全部の部屋 (その人の初回)
-//     離れる   グループの人が基点から 96 ブロック以上離れて 30 秒たつと、敵を消す (進みは捨てる。戻れば湧き直す)
+//     離れる   グループの人が基点から 96 ブロック以上離れて 5 分たつと、敵を消す (進みは捨てる。戻れば湧き直す。倒れて起きて戻るまでは進みが残る)
 //   確かめ  SELFTEST site cave (guide/GuideSelfTest)
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class SiteSpawner {
     public static final String TAG = "skyabyss_site_mob";
     public static final double ACTIVATE = 48;
     public static final double CREDIT = 96;
-    public static final int IDLE_DESPAWN = 600;
+    // 離れてから消すまで: 5 分 (前は 30 秒。倒れて都で起きて戻るあいだに消えて、全部湧き直し「増えた」と見えた。2026-10-22 の二人の試遊)
+    public static final int IDLE_DESPAWN = 6000;
     public static final int MAX_MOBS = 12;
     public static final long REPEAT_TICKS = 24000L;
     public static final int EVERY = 20;

@@ -43,7 +43,8 @@ import net.neoforged.neoforge.event.tick.ServerTickEvent;
 // 荒らしよけと、都の中の安全 (2026-10-21 の試遊: 「町の建築壊せちゃう」「いろんなプレイヤーがいるので荒らし対策も」「町ではプレイヤーは無敵、mod の敵も湧かない・入れない」)。
 //   都 (設計図 capital の範囲): ブロックを壊す・置く・バケツ・火打ち石・TNT・爆発・敵の持ち去り・畑の踏み荒らしを止める (空き区画はない)
 //   (借りた区画はそのギルドの人だけ、借りていない区画は誰でも)。中の人は傷を受けない (/kill と奈落は別)。敵は湧かず、入ったら 1 秒ごとの見回りで消える。
-//   章の小要素 (割れ殻の洞・骨の坑など): 設計図で置いたブロックだけを守る (まわりの自然の地面は掘れる)。割れ殻の洞は地表の口 (門と低い壁) だけ壊せる。
+//   章の小要素 (割れ殻の洞・骨の坑など): 設計図で置いたブロックは壊せない (まわりの自然の地面は掘れる。割れ殻の洞は地表の口だけ壊せる)。
+//   小要素の箱の中にはブロックを置けない・バケツ・火も使えない (あとから来た人の道をふさがない。2026-10-22 の二人の試遊)。
 //   OP のクリエイティブは除く。docs/design/33 の 2 章 (保護と安全)
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class SiteGuard {
@@ -79,6 +80,8 @@ public final class SiteGuard {
     private static final Map<String, Set<Long>> SITE_CELLS = new HashMap<>();
     private static long sitesStamp = Long.MIN_VALUE;
     private static final List<Set<Long>> SITE_LIST = new ArrayList<>();
+    // 小要素の外接の箱 ({x0, y0, z0, x1, y1, z1})。中にブロックを置かない・液体を流さない (あとから来た人の道をふさがない)
+    private static final List<int[]> SITE_BOXES = new ArrayList<>();
 
     // ---------------------------------------------------------------- 範囲
     @Nullable
@@ -153,6 +156,7 @@ public final class SiteGuard {
             return;
         }
         SITE_LIST.clear();
+        SITE_BOXES.clear();
         for (SiteData.Entry e : data.entries()) {
             if (e.blueprint.isEmpty() || !e.built) {
                 continue;
@@ -161,6 +165,17 @@ public final class SiteGuard {
             Set<Long> cells = SITE_CELLS.computeIfAbsent(key, k -> cellsOf(e));
             if (!cells.isEmpty()) {
                 SITE_LIST.add(cells);
+                int[] box = {Integer.MAX_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE};
+                for (long k : cells) {
+                    int x = BlockPos.getX(k), y = BlockPos.getY(k), z = BlockPos.getZ(k);
+                    box[0] = Math.min(box[0], x);
+                    box[1] = Math.min(box[1], y);
+                    box[2] = Math.min(box[2], z);
+                    box[3] = Math.max(box[3], x);
+                    box[4] = Math.max(box[4], y);
+                    box[5] = Math.max(box[5], z);
+                }
+                SITE_BOXES.add(box);
             }
         }
         sitesStamp = stamp;
@@ -177,7 +192,8 @@ public final class SiteGuard {
         BlockPos origin = e.pos.below();
         boolean cave = e.blueprint.equals("ch1_cleft_shell_cave");
         for (Blueprint.Cell c : bp.cells) {
-            if (c.state().isAir()) {
+            // 鉱石 (骨の坑の鉄の筋など。掘ってよい) は守らない
+            if (c.state().isAir() || c.state().is(net.neoforged.neoforge.common.Tags.Blocks.ORES)) {
                 continue;
             }
             // 割れ殻の洞: 地表の口 (門の柱と楣・口の低い壁。部品の z -1..3、地面より上) は壊せる
@@ -187,6 +203,17 @@ public final class SiteGuard {
             out.add(Blueprint.transform(c.x(), c.y() + 1, c.z(), rot, mirror, origin).asLong());
         }
         return out;
+    }
+
+    // 小要素の箱の中か (建物の中のすき間・部屋も含む)
+    static boolean inSite(ServerLevel level, BlockPos p) {
+        refreshSites(level);
+        for (int[] b : SITE_BOXES) {
+            if (p.getX() >= b[0] && p.getX() <= b[3] && p.getY() >= b[1] && p.getY() <= b[4] && p.getZ() >= b[2] && p.getZ() <= b[5]) {
+                return true;
+            }
+        }
+        return false;
     }
 
     // ---------------------------------------------------------------- 壊す・置く
@@ -224,7 +251,8 @@ public final class SiteGuard {
             }
             return;
         }
-        if (capitalLocked(level, p, event.getPos())) {
+        if (capitalLocked(level, p, event.getPos())
+                || (!bypass(p) && level instanceof ServerLevel sl && level.dimension() == Level.OVERWORLD && inSite(sl, event.getPos()))) {
             event.setCanceled(true);
             Notice.hint(p, "message.skyabyss.guard.block");
         }
@@ -252,7 +280,8 @@ public final class SiteGuard {
             return;
         }
         BlockPos at = event.getPos().relative(event.getFace() == null ? net.minecraft.core.Direction.UP : event.getFace());
-        if (capitalLocked(level, event.getEntity(), event.getPos()) || capitalLocked(level, event.getEntity(), at)) {
+        boolean site = level instanceof ServerLevel sl && level.dimension() == Level.OVERWORLD && (inSite(sl, event.getPos()) || inSite(sl, at));
+        if (capitalLocked(level, event.getEntity(), event.getPos()) || capitalLocked(level, event.getEntity(), at) || site) {
             event.setCanceled(true);
             Notice.hint(event.getEntity(), "message.skyabyss.guard.block");
         }
@@ -354,6 +383,7 @@ public final class SiteGuard {
         capitalKey = Long.MIN_VALUE;
         SITE_CELLS.clear();
         SITE_LIST.clear();
+        SITE_BOXES.clear();
         sitesStamp = Long.MIN_VALUE;
     }
 
