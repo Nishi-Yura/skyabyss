@@ -10,7 +10,6 @@ import java.util.Set;
 import org.jetbrains.annotations.Nullable;
 
 import jp.revati.skyabyss.SkyAbyss;
-import jp.revati.skyabyss.facility.guild.GuildLots;
 import jp.revati.skyabyss.notice.Notice;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.MinecraftServer;
@@ -42,7 +41,7 @@ import net.neoforged.neoforge.event.level.ExplosionEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
 
 // 荒らしよけと、都の中の安全 (2026-10-21 の試遊: 「町の建築壊せちゃう」「いろんなプレイヤーがいるので荒らし対策も」「町ではプレイヤーは無敵、mod の敵も湧かない・入れない」)。
-//   都 (設計図 capital の範囲): ブロックを壊す・置く・バケツ・火打ち石・TNT・爆発・敵の持ち去り・畑の踏み荒らしを止める。空き区画は GuildLots の決まり
+//   都 (設計図 capital の範囲): ブロックを壊す・置く・バケツ・火打ち石・TNT・爆発・敵の持ち去り・畑の踏み荒らしを止める (空き区画はない)
 //   (借りた区画はそのギルドの人だけ、借りていない区画は誰でも)。中の人は傷を受けない (/kill と奈落は別)。敵は湧かず、入ったら 1 秒ごとの見回りで消える。
 //   章の小要素 (割れ殻の洞・骨の坑など): 設計図で置いたブロックだけを守る (まわりの自然の地面は掘れる)。割れ殻の洞は地表の口 (門と低い壁) だけ壊せる。
 //   OP のクリエイティブは除く。docs/design/33 の 2 章 (保護と安全)
@@ -98,7 +97,7 @@ public final class SiteGuard {
         }
         int rot = SiteFinder.rot(e.yaw);
         boolean mirror = SiteFinder.mirror(e.yaw);
-        BlockPos origin = GuildLots.origin(e, bp, rot, mirror);
+        BlockPos origin = originOf(e, bp, rot, mirror);
         if (origin == null) {
             origin = e.pos.below();
         }
@@ -106,6 +105,20 @@ public final class SiteGuard {
         capital = new Area(r[0], origin.getY() - 24, r[1], r[2], origin.getY() + 96, r[3]);
         capitalKey = key;
         return capital;
+    }
+
+    // 建てたときの設計図の原点 (SiteJob.mark は transform(x, y + 1, z, …, origin))。写した付属の点の一つから逆に求める
+    @Nullable
+    public static BlockPos originOf(SiteData.Entry e, Blueprint bp, int rot, boolean mirror) {
+        for (int i = 0; i < e.extraNames.size(); i++) {
+            int[] m = bp.marks.get(e.extraNames.get(i));
+            if (m == null) {
+                continue;
+            }
+            BlockPos rel = Blueprint.transform(m[0], m[1] + 1, m[2], rot, mirror, BlockPos.ZERO);
+            return e.extraPos.get(i).subtract(rel);
+        }
+        return null;
     }
 
     public static boolean inCapital(Level level, BlockPos pos) {
@@ -181,17 +194,9 @@ public final class SiteGuard {
         return p != null && p.isCreative() && p.hasPermissions(2);
     }
 
-    // 都の中で、この人がここのブロックを変えてはいけないか (空き区画は GuildLots が決める)
+    // 都の中で、この人がここのブロックを変えてはいけないか (都に空き区画はない。35 の 7 章)
     private static boolean capitalLocked(Level level, @Nullable Player p, BlockPos pos) {
-        if (bypass(p) || !inCapital(level, pos)) {
-            return false;
-        }
-        for (GuildLots.Area lot : GuildLots.areas(level.getServer())) {
-            if (lot.contains(pos)) {
-                return false;
-            }
-        }
-        return true;
+        return !bypass(p) && inCapital(level, pos);
     }
 
     @SubscribeEvent(priority = EventPriority.HIGH)
