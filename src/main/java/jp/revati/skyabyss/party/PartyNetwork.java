@@ -122,6 +122,10 @@ public final class PartyNetwork {
         }
         Parties.Invite inv = Parties.inviteFor(player);
         String next = Progression.nextTitan(player);
+        // まだ見ていない巨神の名は出さない (見るまでは「空の影」「まだ見ぬ巨神」。初めて見たときの伝承 chapter1/<巨神> で見分ける)
+        if (next != null && !jp.revati.skyabyss.lore.Lore.state(player).has("chapter1/" + next)) {
+            next = jp.revati.skyabyss.progress.Titans.STONE_WHALE.equals(next) ? "?shadow" : "?unseen";
+        }
         return new Sync(Progression.stage(player), Progression.levelCap(player), Progression.worldStage(server), next == null ? "" : next,
                 (int) Math.round(Parties.shareRate(server) * 100), members, inv == null ? "" : inv.fromName());
     }

@@ -114,6 +114,8 @@ public final class PartyScreen extends Screen implements jp.revati.skyabyss.clie
         g.drawCenteredString(font, title, width / 2, top - 2, GOLD);
         // 物語
         Component next = s.nextTitan().isEmpty() ? Component.translatable("gui.skyabyss.party.story_done")
+                : s.nextTitan().equals("?shadow") ? Component.translatable("gui.skyabyss.party.story_next_shadow")
+                : s.nextTitan().equals("?unseen") ? Component.translatable("gui.skyabyss.party.story_next_unseen")
                 : Component.translatable("gui.skyabyss.party.story_next", Component.translatable("progress.skyabyss.titan." + s.nextTitan()));
         g.drawString(font, Component.translatable("gui.skyabyss.party.story", s.stage(), 4, s.cap()), left, top + 14, TEXT, false);
         g.drawString(font, next, left, top + 26, SOFT, false);

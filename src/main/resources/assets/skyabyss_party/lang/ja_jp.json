@@ -44,6 +44,8 @@
   "gui.skyabyss.party.title": "物語と仲間",
   "gui.skyabyss.party.story": "止めた心臓 %s / %s　レベルの上限 Lv %s",
   "gui.skyabyss.party.story_next": "次: %sの背の奥へ",
+  "gui.skyabyss.party.story_next_shadow": "次: 空の影の行方を追う",
+  "gui.skyabyss.party.story_next_unseen": "次: まだ見ぬ巨神を探す",
   "gui.skyabyss.party.story_done": "四体の巨神の心臓を、すべて止めた",
   "gui.skyabyss.party.world": "ワールドで止まった心臓 %s / %s",
   "gui.skyabyss.party.invite_from": "%sから招待が届いている",
