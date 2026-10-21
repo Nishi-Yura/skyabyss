@@ -35,6 +35,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
@@ -135,7 +136,7 @@ public final class Ch4Ground {
     // (村の畑などの上に建つと、ならしで畑の土が消え、麦が浮くことがある。build audit の ATTACH_SUPPORT)。消した数
     public static int clearFloatingPlants(SiteJob job, int r) {
         int n = 0;
-        BlockPos c = job.entry.pos;
+        BlockPos c = job.origin;
         for (BlockPos p : BlockPos.betweenClosed(c.offset(-r, -4, -r), c.offset(r, 6, r))) {
             var st = job.level.getBlockState(p);
             if (!(st.getBlock() instanceof net.minecraft.world.level.block.BushBlock) || !st.getFluidState().isEmpty()) {
@@ -148,6 +149,57 @@ public final class Ch4Ground {
             }
         }
         return n;
+    }
+
+    // 建て終わりの仕上げ: 部品のまわり (水平 r) の地面で、まわり 4 方向が同じ高さなのに、その 1 列だけ 1〜4 低い穴を埋める
+    // (灰の地のならしで残るくぼみ。あとで落ちる砂利・灰が 1 低いくぼみになる。build audit の FLOOR_DIMPLE)。埋めた列の数
+    public static int fillDimples(SiteJob job, int r) {
+        int n = 0;
+        BlockPos c = job.origin;
+        for (int dx = -r; dx <= r; dx++) {
+            for (int dz = -r; dz <= r; dz++) {
+                int x = c.getX() + dx;
+                int z = c.getZ() + dz;
+                int top = topSolid(job, x, z, c.getY());
+                if (top == Integer.MIN_VALUE) {
+                    continue;
+                }
+                int around = Integer.MIN_VALUE;
+                boolean even = true;
+                for (var d : net.minecraft.core.Direction.Plane.HORIZONTAL) {
+                    int t = topSolid(job, x + d.getStepX(), z + d.getStepZ(), c.getY());
+                    if (around == Integer.MIN_VALUE) {
+                        around = t;
+                    }
+                    if (t == Integer.MIN_VALUE || t != around) {
+                        even = false;
+                        break;
+                    }
+                }
+                if (!even || around <= top || around - top > 4) {
+                    continue;
+                }
+                BlockState skin = job.level.getBlockState(new BlockPos(x + 1, around, z));
+                for (int y = top + 1; y <= around; y++) {
+                    job.set(new BlockPos(x, y, z), y == around ? skin : Blocks.TUFF.defaultBlockState());
+                }
+                n++;
+            }
+        }
+        return n;
+    }
+
+    // 列 (x, z) の y0 の上下 6 で、上が空気 (か草花) の一番上の固いブロックの y。なければ MIN_VALUE
+    private static int topSolid(SiteJob job, int x, int z, int y0) {
+        for (int y = y0 + 6; y >= y0 - 6; y--) {
+            BlockPos p = new BlockPos(x, y, z);
+            var st = job.level.getBlockState(p);
+            if (st.isAir() || st.getBlock() instanceof net.minecraft.world.level.block.BushBlock || !st.getFluidState().isEmpty()) {
+                continue;
+            }
+            return st.getCollisionShape(job.level, p).isEmpty() ? Integer.MIN_VALUE : y;
+        }
+        return Integer.MIN_VALUE;
     }
 
     static void keep(SiteJob job, String name) {
@@ -198,6 +250,7 @@ public final class Ch4Ground {
     // ---------------------------------------------------------------- 煤の窯の跡
     static void finishKiln(SiteJob job) {
         clearFloatingPlants(job, 7);
+        fillDimples(job, 9);
         keep(job, "cache");
         keep(job, "tablet");
         BlockPos tablet = job.mark("tablet");

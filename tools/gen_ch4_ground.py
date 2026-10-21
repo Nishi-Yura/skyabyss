@@ -325,6 +325,9 @@ def soot_kiln():
             d = x * x + z * z
             if d <= 10:
                 bp.set(x, -1, z, rng.choice([BS, PBB, COAL]))
+                # 基礎 (でこぼこの地で床の下が浮かない。build audit の SITE_FLOAT)
+                bp.set(x, -2, z, BS)
+                bp.set(x, -3, z, BS)
             if 5 <= d <= 10:
                 for y in range(0, 3):
                     bp.set(x, y, z, BRICK if rng.random() < 0.45 else rng.choice([BS, PBB, CPBB]))
@@ -347,8 +350,9 @@ def soot_kiln():
     bp.set(2, -1, 4, CHPB)
     for (x, z) in ((-4, 2), (-5, 1), (4, -2), (5, -3), (-3, -4), (3, 5)):
         bp.set(x, 0, z, ASHP)
-        bp.set(x, -1, z, ASHP)
+        bp.set(x, -1, z, COARSE)
     bp.set(-4, 0, -3, BARREL_SIDE)
+    bp.set(-4, -1, -3, BS)
     bp.mark('stand', 0, 0, 5)
     return save(bp, '四章 煤の窯の跡 (21 の 6.1)。tools/gen_ch4_ground.py が書く')
 

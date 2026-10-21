@@ -58,7 +58,7 @@ def write_blueprints() -> None:
             blocks.append((x, 0, z, CR if z == 0 else BS))
     blocks += [(0, 0, 0, FIRE), (1, 0, -1, ANVIL), (-1, 0, 1, BARREL), (-1, 0, -1, BA), (1, 0, 1, BA)]
     blocks += [(-2, 1, -2, WALL), (2, 1, -2, WALL), (-2, 1, 2, WALL), (-2, 2, -2, WALL), (2, 1, 0, WALL)]
-    blueprint("ember_hearth_ruin", pal, blocks, {"barrel": [-1, 0, 1], "stand": [0, 0, 2]}, [-2, -2, 2, 2], True)
+    blueprint("ember_hearth_ruin", pal, blocks, {"barrel": [-1, 0, 1], "stand": [0, 0, 3]}, [-2, -2, 2, 3], True)
 
     # 灰降り観測点: 一本の杭と、足もとの低い石
     SL, POST, TOP = "minecraft:polished_blackstone_slab[type=bottom]", "minecraft:polished_blackstone_brick_wall", "minecraft:blackstone_slab[type=bottom]"
