@@ -3,10 +3,8 @@
   "order": 175,
   "unlock": [
     {
-      "type": "sign",
-      "target": "sign.skyabyss.ch3_vault"
+      "type": "manual"
     }
   ],
-  "related": [],
-  "inscription_sign": "sign.skyabyss.ch3_vault"
+  "related": []
 }

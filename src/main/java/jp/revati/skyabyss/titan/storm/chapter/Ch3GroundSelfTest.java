@@ -67,6 +67,7 @@ public final class Ch3GroundSelfTest {
         steps.add(Step.once("ch3 ground", Ch3GroundSelfTest::run));
         steps.add(Step.once("ch3 ground (sites start)", Ch3GroundSelfTest::sitesStart));
         steps.add(Step.until("ch3 ground (sites wait)", Ch3GroundSelfTest::sitesBuilt));
+        steps.add(Step.until("ch3 ground (sites load)", Ch3GroundSelfTest::sitesLoaded));
         steps.add(Step.once("ch3 ground (sites)", Ch3GroundSelfTest::sitesCheck));
         steps.add(Step.until("ch3 ground (sites later)", Ch3GroundSelfTest::later));
         return steps;
@@ -297,6 +298,46 @@ public final class Ch3GroundSelfTest {
         return siteWait > 9000 || (siteWait > 100 && !sites.isEmpty() && sites.stream().allMatch(ChapterSites.Site::built));
     }
 
+    // 跡地は拠点から遠い (偽の人はチャンクを読まない)。三章の場所のまわりを読み込んで待つ
+    private static final java.util.Set<Long> FORCED = new java.util.HashSet<>();
+
+    private static boolean sitesLoaded(MinecraftServer server) {
+        ServerLevel level = server.overworld();
+        if (FORCED.isEmpty()) {
+            for (SiteData.Entry e : SiteData.get(level).allEntries()) {
+                if (!e.built || ChapterSites.element(e.siteId) == null || ChapterSites.element(e.siteId).chapter() != Chapters.STORM) {
+                    continue;
+                }
+                for (int dx = -1; dx <= 1; dx++) {
+                    for (int dz = -1; dz <= 1; dz++) {
+                        long key = net.minecraft.world.level.ChunkPos.asLong((e.pos.getX() >> 4) + dx, (e.pos.getZ() >> 4) + dz);
+                        if (FORCED.add(key)) {
+                            level.setChunkForced(net.minecraft.world.level.ChunkPos.getX(key), net.minecraft.world.level.ChunkPos.getZ(key), true);
+                        }
+                    }
+                }
+            }
+            loadWait = 0;
+        }
+        loadWait++;
+        boolean all = true;
+        for (long key : FORCED) {
+            if (!level.hasChunk(net.minecraft.world.level.ChunkPos.getX(key), net.minecraft.world.level.ChunkPos.getZ(key))) {
+                all = false;
+            }
+        }
+        return (all && loadWait > 40) || loadWait > 1200;
+    }
+
+    private static int loadWait;
+
+    private static void unforce(ServerLevel level) {
+        for (long key : FORCED) {
+            level.setChunkForced(net.minecraft.world.level.ChunkPos.getX(key), net.minecraft.world.level.ChunkPos.getZ(key), false);
+        }
+        FORCED.clear();
+    }
+
     private static boolean tabletSays(ServerLevel level, BlockPos at, String key) {
         return at != null && level.getBlockEntity(at) instanceof TabletBlockEntity t && t.key().equals(key);
     }
@@ -491,6 +532,7 @@ public final class Ch3GroundSelfTest {
     private static boolean later(MinecraftServer server) {
         laterWait++;
         if (watchPlayer == null) {
+            unforce(server.overworld());
             return true;
         }
         if (laterWait < 60) {
@@ -505,6 +547,7 @@ public final class Ch3GroundSelfTest {
         watchPlayer.getInventory().clearContent();
         SiteSpawner.clearAll(server.overworld());
         watchPlayer = null;
+        unforce(server.overworld());
         report("ch3 ground (sites later)", f, "the scorched page after the clear");
         return true;
     }

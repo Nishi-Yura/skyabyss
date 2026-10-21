@@ -13,7 +13,7 @@
   data/skyabyss/quest/ch3/wind_flags.json         サブ「風の道の旗」
   data/skyabyss/dialogue/ch3/{storyteller,whale_chaser,artisan}_ground.json   足し書き (節は ch3g_ で始める)
   data/skyabyss/lore/entry/ch3/*.json             伝承 4 (風の民の柱・留まる者は、また来た・遅れて映る影・焼けた見張り塔)
-  assets/skyabyss_ch3g/lang/{ja_jp,en_us}.json    上の文すべて (三章の地上の名前空間。キー順)
+  assets/skyabyss_ch3/lang/{ja_jp,en_us}.json     上の文すべて (三章の文に混ぜる。キー順)
 
 語りの決まり (34 の 2・7、01): 前の私の正体は言わない (三章は「前にもここへ来た者がいる」まで。字が似ている、影が遅れる)。
 目標はバニラの品と行為 (銅と避雷針・ダイヤ)。理由は物語。チャットに流さない (着いたときの一行と、出来事の一行だけ)。
@@ -520,8 +520,8 @@ def lore():
     for name, order, sign, tj, te, bj, be in entries:
         data = {'chapter': CH, 'order': order, 'unlock': [{'type': 'manual'}], 'related': []}
         if sign:
-            data['inscription_sign'] = sign
-            data['unlock'] = [{'type': 'sign', 'target': sign}]
+            # 碑は箱と同じ部屋にある。頁は箱で記す (碑を読むと文が出るだけ)
+            pass
         write_json(os.path.join(RES, 'data/skyabyss/lore/entry/ch3/%s.json' % name), data)
         put('lore.skyabyss.ch3.%s.title' % name, tj, te)
         put('lore.skyabyss.ch3.%s.body' % name, bj, be)
@@ -592,8 +592,13 @@ def main():
                     bad.append('%s (%s) %d px: %s' % (k, lang, width(t), t))
             if len(ja[k]) > 8:
                 bad.append('%s (ja) %d chars: %s' % (k, len(ja[k]), ja[k]))
+    # 三章の文の名前空間 skyabyss_ch3 に混ぜる (gen_ch3_content.py も、自分の持たないキーは残して書く)
     for code, table in (('ja_jp', ja), ('en_us', en)):
-        write_json(os.path.join(RES, 'assets/skyabyss_ch3g/lang/%s.json' % code), dict(sorted(table.items())))
+        path = os.path.join(RES, 'assets/skyabyss_ch3/lang/%s.json' % code)
+        with open(path, encoding='utf-8') as f:
+            merged = json.load(f)
+        merged.update(table)
+        write_json(path, dict(sorted(merged.items())))
     print('wrote ch3 ground: blocks %s, %d texts; sign problems: %s' % (counts, len(ja), bad or 'none'))
     if bad:
         sys.exit(1)

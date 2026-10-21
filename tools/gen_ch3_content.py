@@ -285,8 +285,11 @@ text(CHASER + "ch3_wait_done4", "昇るのは、お前だけだ。俺はこの�
 text(CHASER + "ch3_wait_done4.ok", "ああ。", "I will.")
 
 # ================================================================ lang を書く
-write(LANG / "ja_jp.json", dict(sorted(JA.items())))
-write(LANG / "en_us.json", dict(sorted(EN.items())))
+# 三章の地上 (tools/gen_ch3_ground.py) も同じ lang に書くので、ここが持たないキーは残す
+for _name, _table in (("ja_jp.json", JA), ("en_us.json", EN)):
+    _old = json.loads((LANG / _name).read_text(encoding="utf-8")) if (LANG / _name).exists() else {}
+    _old.update(_table)
+    write(LANG / _name, dict(sorted(_old.items())))
 
 # ================================================================ 看板の幅の検査 (SignFit と同じ表)
 ASCII_WIDTHS = "2466662444626266666666666225656766666666466666666666666666464663666665662653666666646666664247"
