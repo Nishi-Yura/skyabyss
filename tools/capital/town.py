@@ -261,6 +261,37 @@ class Town(Facilities):
             self.tablet(tx, 0, tz, facing, name)
 
     # ---------------------------------------------------------------- 北の段
+    def terrace_steps(self):
+        """北の段の前の縁の東と西に、段へ上がる掘り込みの階段 (幅 4。前の縁から北へ 5 段で段の上へ)。
+        真ん中の大階段だけでは、段の東西の端から遠かった (2026-10-21 の試遊: 「ここに階段がほしい」)"""
+        st, v = self.st, self.v
+        z1 = TERZ
+        for xa in (28, -32):
+            xs = range(xa, xa + 4)
+            for k in range(TER + 1):
+                z = z1 - k
+                for x in xs:
+                    for y in range(0, k):
+                        v.set(x, y, z, st.base.full)
+                    v.set(x, k, z, st.base.stairs('north', 'bottom'))
+                    for y in range(k + 1, TER + 4):
+                        v.set(x, y, z, 'air')
+            # 上がりきった所 (段の上面) と、前の縁の欄干・軒をあける
+            for x in xs:
+                for y in range(TER + 1, TER + 4):
+                    v.set(x, y, z1 - TER - 1, 'air')
+                v.set(x, TER, z1 + 1, 'air')
+            # 両わきの壁 (掘った土を見せない) と、段の上の欄干
+            for xe in (xa - 1, xa + 4):
+                for k in range(TER + 2):
+                    z = z1 - k
+                    for y in range(0, TER + 1):
+                        v.set(xe, y, z, st.base.full if y < TER else st.band)
+                    v.set(xe, TER + 1, z, st.railing if k <= TER else st.trim.full)
+                    for y in range(TER + 2, TER + 4):
+                        v.set(xe, y, z, 'air')
+                v.set(xe, TER + 2, z1, 'lantern[hanging=false,waterlogged=false]')
+
     def terrace(self):
         st, v = self.st, self.v
         x0, x1, z0, z1 = -TERX, TERX, -IN, TERZ
@@ -407,6 +438,8 @@ class Town(Facilities):
                 for y in range(y0, y0 + 4):
                     for z in (H, H + 1):
                         gv.set(u, y, z, 'air')
+                # 口の前の裾の段は置かない (入る手前の段がいらなかった。2026-10-21 の試遊)
+                gv.set(u, y0, H + 2, 'air')
             for z in (H, H + 1):
                 gv.set(-1, y0 + 3, z, st.trim.stairs('west', 'top'))
                 gv.set(1, y0 + 3, z, st.trim.stairs('east', 'top'))
@@ -547,11 +580,11 @@ class Town(Facilities):
         self.claim(cx - H - 1, cz - H - 1, cx + H + 1, cz + H + 1, 'bell_tower')
 
     def storyteller_house(self):
-        """語り部の家 (鐘楼の東、x -22..-12, z -82..-72。入れる)。一階は石、二階は濃い木の骨組みに白い漆喰。
+        """語り部の家 (鐘楼の東、x -19..-9, z -82..-72。入れる)。一階は石、二階は濃い木の骨組みに白い漆喰。
         南に屋根つきの玄関、柵で囲んだ前庭と花壇。中: 暖炉と煙突、本棚と書見台、机と椅子、敷物。二階に寝台 (梯子で上がる)"""
         st, v = self.st, self.v
         y = TER + 1
-        x0, z0, x1, z1 = -22, -82, -12, -72
+        x0, z0, x1, z1 = -19, -82, -9, -72   # 鐘楼から 3 離す (前は -22..-12 で詰まっていた。2026-10-21 の試遊)
         b = Body(v, st, x0, z0, x1, z1, y, floors=2, fh=5, bay=4, door_side='south', door_at=5,
                  infill='stone_bricks', pots=0.6).build()
         log = '%s_log' % st.wood
@@ -1502,7 +1535,7 @@ class Town(Facilities):
         self.room(-56, -94, -42, -86, y, 6, rug=True)
         self.room(-56, -94, -42, -86, y + 7, 5, rug=False)
         # 語り部の家 (一階は家具があるので、梁と灯りと隅の鉢だけ)
-        self.room(-20, -80, -14, -74, y, 4, rug=False, shelves=False)
+        self.room(-17, -80, -11, -74, y, 4, rug=False, shelves=False)
         # 鍛冶場 (石の床、棚は奥の壁だけ)
         self.room(10, 10, SMITHY_X1 - 2, 18, 0, 7, floor="stone", rug=False)
         # 大鐘楼の一階 (台座の中)
@@ -1704,6 +1737,7 @@ class Town(Facilities):
         self.districts()
         self.facilities()
         self.street_lamps()
+        self.terrace_steps()
         self.graveyard()
         self.gravekeeper_hut()
         self.mark('stand', 0, 0, 94)
