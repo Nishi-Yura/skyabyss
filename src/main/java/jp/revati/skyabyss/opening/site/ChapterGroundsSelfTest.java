@@ -329,7 +329,9 @@ public final class ChapterGroundsSelfTest {
                         }
                     }
                     int want = el.placement() == ChapterSites.Placement.ROAD_FILL ? Math.max(0, g.road.size() - roadNumbered(s.chapter())) : el.rules().count();
-                    check(n >= want - 1 && n <= want, el.id() + " exists " + n + " times (expected " + want + ")");
+                    // 道しるべは水たまりなどで建てられず諦める点がある (8 割あればよい)。番号つき・跡地の要素は一つずつ
+                    boolean fill = el.placement() == ChapterSites.Placement.ROAD_FILL;
+                    check(fill ? n >= want * 4 / 5 && n <= want : n == want, el.id() + " exists " + n + " times (expected " + want + ")");
                 }
             }
             // 一章の骨は北の丘の中

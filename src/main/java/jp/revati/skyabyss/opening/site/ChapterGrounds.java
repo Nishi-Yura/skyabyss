@@ -353,7 +353,7 @@ public final class ChapterGrounds {
         }
     }
 
-    // 合う地形がない: 帯のまんなかに近い候補のうち、いちばん乾いて平らな所に形を作る
+    // 合う地形がない: 帯の中の候補のうち、いちばん乾いて平らな所 (まんなかに近いほど少しよい) に形を作る
     static Found shapeAt(Ground g, BlockPos capital, Spec s, List<Obstacle> obs) {
         int mid = (s.min() + s.max()) / 2;
         int half = s.side() / 2;
@@ -363,7 +363,8 @@ public final class ChapterGrounds {
         int bd = mid;
         int boff = 0;
         int bBase = g.sea();
-        for (int d = Math.max(s.min(), mid - 2 * DIST_STEP); d <= Math.min(s.max(), mid + 2 * DIST_STEP); d += DIST_STEP) {
+        // 帯の全体を 64 刻みで (まんなかに近いほど少しよい)。形の中 (5×5) が乾いていて平らで、まわり 128 の輪 (小要素の広がる所) も乾いた陸の所
+        for (int d = s.min(); d <= s.max(); d += 2 * DIST_STEP) {
             for (int off : offsets()) {
                 double a = s.angle() + Math.toRadians(off);
                 int x = capital.getX() + (int) Math.round(Math.cos(a) * d);
@@ -382,9 +383,25 @@ public final class ChapterGrounds {
                         hs.add(h);
                     }
                 }
+                int outerWet = 0;
+                int low = 0;
+                for (int i = 0; i < 12; i++) {
+                    double b = Math.PI * 2 * i / 12;
+                    int h = g.topCoarse(x + (int) Math.round(Math.cos(b) * 128), z + (int) Math.round(Math.sin(b) * 128));
+                    if (h < g.sea()) {
+                        outerWet++;
+                    } else if (h <= g.sea() + 1) {
+                        low++;
+                    }
+                }
                 hs.sort(Integer::compare);
                 int range = hs.get(hs.size() - 1) - hs.get(0);
-                double score = -wet * 100.0 - range - Math.abs(d - mid) * 0.2 - Math.abs(off) * 0.5;
+                for (int h : hs) {
+                    if (h >= g.sea() && h <= g.sea() + 1) {
+                        low++;
+                    }
+                }
+                double score = -wet * 100.0 - outerWet * 40.0 - low * 10.0 - range - Math.abs(d - mid) * 0.05 - Math.abs(off) * 0.3;
                 if (score > bestScore && !g.structureNear(x, z, STRUCTURE_GAP)) {
                     bestScore = score;
                     bx = x;
@@ -459,11 +476,22 @@ public final class ChapterGrounds {
                 }
             }
         }
-        return base;
+        // 平らな所がない: 輪の内側の乾いた所 (台座は祠を建てる側が地面まで埋める)。それもなければ base から rMin + 4 の東
+        for (int r = rMin; r <= rMin + 56; r += 8) {
+            for (int i = 0; i < 12; i++) {
+                double a = Math.PI * 2 * i / 12;
+                int x = base.getX() + (int) Math.round(Math.cos(a) * r);
+                int z = base.getZ() + (int) Math.round(Math.sin(a) * r);
+                if (!blocked(x, z, avoid) && !g.wet(x, z)) {
+                    return new BlockPos(x, g.top(x, z) + 1, z);
+                }
+            }
+        }
+        return new BlockPos(base.getX() + rMin + 4, g.top(base.getX() + rMin + 4, base.getZ()) + 1, base.getZ());
     }
 
     // 都から跡地への道しるべ: 中心から ROAD_START で始め、ROAD_STEP ごと、跡地の手前 ROAD_END_GAP で止める。
-    // atLeast > 0 なら、その数が入るように間を詰める (12 まで)。水の上・崖の点は、まわり 12 まで探してなければ飛ばす
+    // atLeast > 0 なら、その数が入るように間を詰める (12 まで)。水の上・崖・海面の高さの平地の点は、まわり (前後 12・左右 20) に置けなければ飛ばす
     static List<BlockPos> road(Ground g, BlockPos capital, BlockPos center, int atLeast) {
         double dx = center.getX() - capital.getX();
         double dz = center.getZ() - capital.getZ();
@@ -485,11 +513,12 @@ public final class ChapterGrounds {
             BlockPos at = null;
             search:
             for (int shift : new int[] {0, 4, -4, 8, -8, 12, -12}) {
-                for (int side : new int[] {0, 4, -4, 8, -8}) {
+                for (int side : new int[] {0, 6, -6, 12, -12, 20, -20}) {
                     int x = capital.getX() + (int) Math.round(ux * (along + shift) - uz * side);
                     int z = capital.getZ() + (int) Math.round(uz * (along + shift) + ux * side);
                     Area ar = SiteFinder.area(g, x, z, 1, 1, 4, false, false);
-                    if (ar.ok()) {
+                    // 海面の高さの平地 (沼・浜・川べり) は水たまりが多いので避ける
+                    if (ar.ok() && ar.min() >= g.sea() + 1) {
                         at = new BlockPos(x, ar.median() + 1, z);
                         break search;
                     }

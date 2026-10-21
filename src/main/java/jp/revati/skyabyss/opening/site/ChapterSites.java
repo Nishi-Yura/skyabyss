@@ -281,11 +281,11 @@ public final class ChapterSites {
         if (el.placement() == Placement.GROUND) {
             return g.center;
         }
-        // 道の要素でも、点が足りずに跡地に置いたものは跡地から
+        // 道の要素でも、点が足りずに跡地に置いたもの (動かしてよい距離が跡地の分) は跡地から
         for (SiteData.ChapterPlan p : SiteData.get(server.overworld()).plans()) {
             if (p.anchor.equals(g.center)) {
                 for (SiteData.Entry e : p.sites) {
-                    if (e.siteId.equals(elementId) && horizontal(e.pos, g.center) <= ChapterPlanner.MAX_DIST + 2) {
+                    if (e.siteId.equals(elementId) && e.maxDist != ROAD_MAX_DIST) {
                         return g.center;
                     }
                 }

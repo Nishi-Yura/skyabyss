@@ -630,7 +630,11 @@ public final class Ch1SelfTest {
         }
         SiteData data = SiteData.get(server.overworld());
         boolean prologue = data.plans().stream().anyMatch(p -> p.chapter.equals(Chapters.PROLOGUE.id()) && p.players.contains(base.getUUID()) && !p.ahead && !p.sites.isEmpty());
-        boolean whale = data.plans().stream().anyMatch(p -> p.chapter.equals(Chapters.WHALE.id()) && p.players.contains(base.getUUID()) && !p.ahead && !p.sites.isEmpty());
+        // 一章は拠点の分 (旅の跡・荷車・日記) と跡地の分 (北の丘) の両方が置かれるまで
+        SiteData.Ground wg = data.ground(Chapters.WHALE.id());
+        boolean whale = data.plans().stream().anyMatch(p -> p.chapter.equals(Chapters.WHALE.id()) && p.players.contains(base.getUUID()) && !p.ahead && !p.sites.isEmpty()
+                && (wg == null || !p.anchor.equals(wg.center)))
+                && (wg == null || data.plans().stream().anyMatch(p -> p.anchor.equals(wg.center) && p.players.contains(base.getUUID()) && !p.sites.isEmpty()));
         return prologue && whale;
     }
 
