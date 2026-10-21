@@ -191,7 +191,7 @@ public final class Ch4GroundSelfTest {
                 "quest.skyabyss.main_key.show.isana", "message.skyabyss.ch4g.smith.return", "message.skyabyss.ch4g.pit.crack", "message.skyabyss.ch4g.ready",
                 "entity.skyabyss.elder_thrall", "entity.skyabyss.cinder_mite", "entity.skyabyss.ash_husk", "entity.skyabyss.ash_dragger",
                 "item.skyabyss.soot_iron", "item.skyabyss.ash_ward_thread.desc", "item.skyabyss.ash_cooler.desc", "wayfarer_notes.ch4.line.1",
-                "dialogue.skyabyss.storyteller.ms_key_return", "dialogue.skyabyss.whale_chaser.ms_c_key3", "dialogue.skyabyss.artisan.a_menu.ward4",
+                "dialogue.skyabyss.storyteller.ms_key_return", "dialogue.skyabyss.whale_chaser.ms_c_key3", "dialogue.skyabyss.artisan.ch4a_ward_offer",
                 "advancement.skyabyss.dead_forge_pit.title", "advancement.skyabyss.ember_trail.description", "subtitles.skyabyss_ch4.elder_thrall_crack"));
         for (String id : Ch4Ground.LORE) {
             keys.add("lore.skyabyss." + id.replace('/', '.') + ".title");

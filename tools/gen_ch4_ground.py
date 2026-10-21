@@ -574,6 +574,9 @@ def dialogue():
                                                {'type': 'ward_ok', 'titan': 'ember'}]},
             {'node': 'ch4a_first', 'if': [{'type': 'stage', 'min': 3, 'max': 3}, not_(flag('ch4a_met'))]},
             {'node': 'ch4g_draught_tell', 'if': [quest('ch4/fire_draught', 'active', 'brew'), not_(flag('ch4g_draught_told'))]},
+            # 編み直し: 主の選択肢は上限いっぱいなので、余燼の鼓動守をなくして煤鉄 8 を持っている人には、会話の入口で尋ねる (1 日に 1 つ)
+            {'node': 'ch4a_ward_offer', 'if': [flag('ch4t_woven'), {'type': 'ward_ok', 'titan': 'ember'},
+                                               {'type': 'item', 'item': 'skyabyss:soot_iron', 'count': 8, 'optional': True}]},
         ],
         'nodes': {
             'ch4a_first': {'face': 'neutral', 'do': [flag('ch4a_met'), flag('met'), {'type': 'give_notes', 'chapter': 4}, {'type': 'affinity', 'amount': 1}],
@@ -583,13 +586,11 @@ def dialogue():
             'ch4t_ward_weave': {'face': 'smile', 'do': [{'type': 'take', 'item': 'skyabyss:ash_ward_thread', 'count': 1},
                                                          {'type': 'give', 'item': 'skyabyss:heartbeat_ward_ember', 'count': 1}, flag('ch4t_woven'),
                                                          {'type': 'affinity', 'amount': 2}], 'next': 'a_menu'},
+            'ch4a_ward_offer': {'face': 'neutral', 'options': [{'id': 'yes', 'goto': 'ch4a_ward'}, {'id': 'no', 'goto': 'a_menu'}]},
             'ch4a_ward': {'face': 'smile', 'do': [{'type': 'take', 'item': 'skyabyss:soot_iron', 'count': 8}, {'type': 'remake_ward', 'titan': 'ember'},
                                                    {'type': 'affinity', 'amount': 1}], 'next': 'a_menu'},
         },
-        'add_options': {'a_menu': {'before': 'bye', 'options': [
-            {'id': 'ward4', 'kind': 'give', 'if': [flag('ch4t_woven'), {'type': 'ward_ok', 'titan': 'ember'},
-                                                  {'type': 'item', 'item': 'skyabyss:soot_iron', 'count': 8, 'optional': True}], 'goto': 'ch4a_ward'},
-        ]}},
+
     })
     a = 'dialogue.skyabyss.artisan.'
     put(a + 'ch4a_first',
@@ -605,7 +606,9 @@ def dialogue():
         '灰の護り糸か。古い灰被りの背の釜に、編みかけで入っていたんだろう。\n鼓動守に仕上げよう。熱の中で鼓動が速くなったら、握るといい。',
         'Ash ward thread. It must have been in the old thrall\'s pot, half woven.\nI will finish it into a heartbeat ward. When your heart races in the heat, hold it.')
     put(a + 'ch4a_ward', '煤鉄で編み直した。……今度は、溶かすなよ。', 'Rewoven with soot iron. ...Don\'t melt this one.')
-    put(a + 'a_menu.ward4', '余燼の鼓動守を編み直してほしい', 'Reweave my ember heartbeat ward')
+    put(a + 'ch4a_ward_offer', '余燼の鼓動守を、なくしたのか。煤鉄が八つあれば、編み直せるが。', 'Lost your ember heartbeat ward? With eight soot iron, I can weave another.')
+    put(a + 'ch4a_ward_offer.yes', '編み直してほしい', 'Please reweave it')
+    put(a + 'ch4a_ward_offer.no', '今はいい', 'Not now')
 
 
 # ================================================================ 伝承

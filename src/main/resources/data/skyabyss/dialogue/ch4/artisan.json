@@ -67,6 +67,25 @@
           }
         }
       ]
+    },
+    {
+      "node": "ch4a_ward_offer",
+      "if": [
+        {
+          "type": "flag",
+          "flag": "ch4t_woven"
+        },
+        {
+          "type": "ward_ok",
+          "titan": "ember"
+        },
+        {
+          "type": "item",
+          "item": "skyabyss:soot_iron",
+          "count": 8,
+          "optional": true
+        }
+      ]
     }
   ],
   "nodes": {
@@ -140,6 +159,19 @@
       ],
       "next": "a_menu"
     },
+    "ch4a_ward_offer": {
+      "face": "neutral",
+      "options": [
+        {
+          "id": "yes",
+          "goto": "ch4a_ward"
+        },
+        {
+          "id": "no",
+          "goto": "a_menu"
+        }
+      ]
+    },
     "ch4a_ward": {
       "face": "smile",
       "do": [
@@ -158,34 +190,6 @@
         }
       ],
       "next": "a_menu"
-    }
-  },
-  "add_options": {
-    "a_menu": {
-      "before": "bye",
-      "options": [
-        {
-          "id": "ward4",
-          "kind": "give",
-          "if": [
-            {
-              "type": "flag",
-              "flag": "ch4t_woven"
-            },
-            {
-              "type": "ward_ok",
-              "titan": "ember"
-            },
-            {
-              "type": "item",
-              "item": "skyabyss:soot_iron",
-              "count": 8,
-              "optional": true
-            }
-          ],
-          "goto": "ch4a_ward"
-        }
-      ]
     }
   }
 }
