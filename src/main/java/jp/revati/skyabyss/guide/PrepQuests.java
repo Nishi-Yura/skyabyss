@@ -30,8 +30,8 @@ import net.minecraft.server.level.ServerPlayer;
 //            category は支度の段 (CHAPTER_IDS) なら main、既定の備えの頼みなら sub。守っていなければ読み込みの警告 (QuestManager.loadErrors。validate)。
 //   順番     ふさがない。どれから受けても終えてもよい (ログの並びは order)。
 //   合図     三本が終わったとき (どの順でも)、その人に合図 `ch<n>_ready` (Quests.signal) を一度だけ送る。以降はいつでも `ready(player, n)` が真。
-//            クエストの条件では {"type":"prep","chapter":n,"min":k} (k 本以上。省くと全部) で読める。一章の岩鯨の降下の条件 (日 4 の朝以降で 2 本、
-//            または日 6 以降。21 の 3.2) は story.ch1.Ch1Descent が見る。三本ぜんぶの定義がそろっていない章は、合図は出ない (まだ中身がない章)。
+//            クエストの条件では {"type":"prep","chapter":n,"min":k} (k 本以上。省くと全部) で読める。支度は勧めで、岩鯨の降下の条件には使わない
+//            (見たら降りる。21 の 3.2、story.ch1.Ch1Descent)。三本ぜんぶの定義がそろっていない章は、合図は出ない (まだ中身がない章)。
 //            章ごとの仕上げ (一章の記念品「鯨追いの印」) は onReady で足す (合図のあと、人ごとに一度)
 //   覚書     その章の 3 本のどれかを受けたとき、その章の旅の覚書 (WayfarerNotes) を人ごとに一度渡す。
 //   マルチ   ready / atLeast は人ごと。「グループの誰かが満たせば」は groupAtLeast (オンラインの仲間まで)。

@@ -235,48 +235,16 @@ public final class QuestHud {
         jp.revati.skyabyss.client.opening.OpeningClient.Objective o = jp.revati.skyabyss.client.opening.OpeningClient.objective();
         // 序盤の帯が出ていない人 (以前から遊んでいた人など) は、歌の頁が記されたかで決める
         boolean waiting = o != null ? o.id().equals("wait_whale") : jp.revati.skyabyss.lore.client.LoreClient.has("prologue/sky_song");
-        // 岩鯨の「鎖を上る」段: 待ち版の文は、鎖が降りるまで (備えを進める。story.ch1.Ch1Descent の条件が整うまで降りてこない)。
+        // 岩鯨の「鎖を上る」段: 待ち版の文 (「空の岩鯨を、追いかけよう」) は、鎖が降りるまで (見たあと、岩鯨は人のもとへ降りてくる。story.ch1.Ch1Descent)。
         // 歌の頁を持つ人は上の式がいつも真になり、鎖が降りても「待ち」のままだった (first_hour.txt の通しで発見)。この段だけは鎖で決める
         if (def.id().equals("main_song") && stage.id().equals("board")) {
             waiting = !chainDown();
         }
         net.minecraft.locale.Language lang = net.minecraft.locale.Language.getInstance();
-        if (waiting && def.id().equals("main_song") && stage.id().equals("board")) {
-            // 鎖の待ちの帯 (first_hour_log B-4): 備えの頼みの本数と三灯を一行で言う。備えの頼みが 2 本済んでいれば三灯、まだなら本数。
-            // 備えの頼みの記録が無い (定義が無い・旧データ) ときは従来の一行
-            int done = prepDone();
-            if (done >= 0) {
-                String variant = jp.revati.skyabyss.quest.ObjectiveRules.waitVariant(done);
-                if (lang.has(key + variant)) {
-                    return Component.translatable(key + variant, Math.min(done, jp.revati.skyabyss.story.ch1.Ch1Descent.NEEDED_PREP)).getString();
-                }
-            }
-        }
         if (waiting && lang.has(key + ".wait")) {
             key = key + ".wait";
         }
         return Component.translatable(key).getString();
-    }
-
-    // 一章の支度の段 (鉄の跡・折れた剣・盾と糧) を終えた本数 (クエストの記録に 3 本とも無ければ -1)
-    static int prepDone() {
-        Minecraft mc = Minecraft.getInstance();
-        if (mc.player == null) {
-            return -1;
-        }
-        QuestLog log = QuestLog.of(mc.player);
-        int done = 0;
-        int known = 0;
-        for (String id : jp.revati.skyabyss.guide.PrepQuests.ids(1)) {
-            QuestLog.Entry e = log.entry(id);
-            if (e != null) {
-                known++;
-                if (e.done) {
-                    done++;
-                }
-            }
-        }
-        return known == 0 ? -1 : done;
     }
 
     // 帯に出す、今の目的の一行 (折り返さず全文。数は「（1/3）」を後ろに付ける。長ければ帯が切る)

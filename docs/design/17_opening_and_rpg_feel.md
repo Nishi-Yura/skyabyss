@@ -117,7 +117,7 @@
 | 骨の坑（34 の 4.2.1） | 一章の跡地の中心から 70〜150 の ChapterSites 要素（`atGround`。高台）。坑口の肋骨と碑、地下 13 の 3 部屋（坑口の間・水の底・荷の間）、冷えの戸の奥の氷の小部屋、出口の梯子。苔這い 5・岩殻虫 2、鉄鉱石 18、前の私の荷（人ごとに一度、鉄 2・松明 8・頁）、冷えの戸（鉄の防具で開く）。クリアで経験値 40・粗鉄 4 | `BonePit`、`opening/ch1_bone_pit.json` |
 | イサナの備えの一言 | 乗る前の分岐に、備えの度合いで言い回しだけ変える一言（数字は言わない）。3 本そろった（一度）・日 4 から 1〜2 本・日 4 から 0 本のとき、それぞれ先に一度ずつイサナのほうから語る | `dialogue/ch1/whale_chaser_prep.json` |
 | 旅の覚書（一章）と素材 | 覚書の行 `wayfarer_notes.ch1.line.1〜6`（骨の番兵の盾・射手・苔這い・予告・歌石と鳴り石の順・備えの確かめ）。解くレシピの ID を予約（`Ch1Prep.RECIPES`。P5 が作るまでは何も解かない）。素材 4 つ（岩殻片・骨片・棘針・岩殻の護り糸）の仮の登録は `guide/GuideSetup`（絵は仮 = `tools/gen_ch1_prep.py`） | `Ch1Prep`、`GuideSetup` |
-| 岩鯨の降下の条件 | 鎖が降りる（岩鯨が人の近くへ降りる）のは「日 4 の朝以降 + 支度の段を 2 本終えたとき」か「日 6 以降」。それまで岩鯨は雲の下を巡る（日 3 夕方の初見 B10 は変えない。2.8）。日は `Repeats.day`（0 始まり: 日 4 の朝 = 3、日 6 = 5）。人ごとに見る（その人が一章にいるときだけ。心臓を止めた人は条件なし）が、グループ（パーティ、または一人）のオンラインの誰かが満たせば降り（`PrepQuests.groupAtLeast`）、降りた鎖には満たさない人も乗れる（備えの灯が赤になるだけ）。支度の段が 3 本そろっていない世界は条件なし。降りる先の人は、条件を満たす最も近い人 | `Ch1Descent`、`StoneWhaleEntity.tickCruise` |
+| 岩鯨の降下の条件 | 鎖が降りる（岩鯨が人の近くへ降りる）のは「その人が岩鯨をもう見た（初見の伝承 `chapter1/stone_whale`）」とき。日数・時刻・天気・支度の段の本数では止めない（支度は勧めで鍵ではない。34 の 3 の 4）。場面（初見の場面など）を見ている人のところへは降りない。一章を過ぎた人は見たものとする。降りる先は、条件を満たす最も近い人。降りた鎖には、まだ見ていない人も乗れる（備えの灯が赤なら、乗る前に確かめを一度聞くだけ） | `Ch1Descent`、`StoneWhaleEntity.tickCruise` |
 
 - 経験値（一章の新しい分の枠 400 に収まる）: 支度の段 250（100 + 100 + 50）+ 洞のクリア 40 + 骨の坑のクリア 40 = 330。伝承の頁（石標の祠 10・歌の間 10）は「既存の小要素」側の小さな分で、合計 750（`ChapterXpBudget`）の内。`ch1/follow_hauler`（50）と日替わり `daily_shell_cull` は P7 の敵と一緒に足す。
 - 新しい敵の差し込み口は `Ch1Prep` の冒頭の TODO の一覧（P4 職人・P5 旅装と砥石は一章の分が済み、P7 地上の敵も入った。のこりは P8 岩鯨の背）。ひとり歩きの湧き（`ChapterMobSpawner`）には P7 で岩殻虫・棘うさぎが入った（薄く間引く。背中の敵は地上へ放たない）。
@@ -226,8 +226,19 @@
 | 拍子 | 4 日目までは、**影（B4）・歌（B9）・イサナ（B7）を済ませた人がいるときだけ**、その人の近くへ出す。誰もいなければ待つ（岩鯨はワールドに一体） |
 | 時刻 | 夕方（tick 11000〜12500）。夕焼けの空に遠くから現れる |
 | 詰み止め | 総 tick 4 日分（`WHALE_FALLBACK`、5 日目）を過ぎたら、時刻を問わず今までどおり出す。OP の `/skyabyss titan summon` は今のまま |
-| 降りる条件 | 初見（B10）のあとも、岩鯨が人の近くへ降りて鎖を垂らすのは「日 4 の朝以降 + 支度の段 2 本」か「日 6 以降」だけ（`story/ch1/Ch1Descent`。1.5 の P6）。それまでは雲の下を巡る |
+| 降りる条件 | 初見（B10）が済んだら、岩鯨はその人の近くへ降りて鎖を垂らす（`story/ch1/Ch1Descent`）。初見の場面の間は待ち、終われば 5 秒おきの見回りで降りはじめる |
 | 設定 | `horrorEventFrequency` 0 のときは門を開けておく（影を待つと永久に出ないため） |
+
+**見つけてから背に乗るまで**（2026-10-21 の試遊「巨神を見つけてから背までが長い」で短くした）
+
+| 順 | 起こること | 目安 |
+| --- | --- | --- |
+| 1 | 日 3 の夕方、岩鯨が雲の向こうから来る。近づくと初見の場面（スキップ可） | 約 20 秒 |
+| 2 | 場面が終わると、岩鯨はその人の約 14 ブロック横へ降りてくる（遠いほど速い。`StoneWhaleEntity.approachSpeed`）。目的の帯は「空の岩鯨を、追いかけよう」 | 5 秒 + 30〜90 秒 |
+| 3 | 初めての降下だけ、空の影が通り過ぎるまで岩鯨が黙る（`WhaleHush`。一章の中盤の拍子。変えない） | 約 65 秒 |
+| 4 | 鎖が地面へ伸びる。陣に立つ（か右クリック）と巻き上げられて背へ | 数秒 + 最長 8 秒 |
+
+合わせて約 2〜3 分。以前は「日 4 の朝以降 + 支度 2 本」か「日 6 以降」まで降りず、早くても日 4 の朝まで約 10 分、支度をしなければ約 50 分待った。支度の段 3 本は、イサナの鯨の話（日 2 の朝）から初見（日 3 の夕方）までの間に進める勧めのまま（34 の 4.2）。
 
 ### 2.9 実装メモ（拍子の担当まわり）
 
@@ -449,13 +460,13 @@
 | `opening.skyabyss.bone_near` | 風が止んだ。丘は、丘のかたちをしていない。 | The wind has stopped. The hill is not shaped like a hill. | 前触れ 4（70 ブロック） |
 | `objective.skyabyss.examine_camp` | 野営地の跡を調べてみよう | Search the abandoned camp | 目覚めてから帳面を拾うまで（メインはまだ始まっていない） |
 | `objective.skyabyss.follow_smoke` | 煙の立つ方へ向かってみよう | Head toward the rising smoke | 帳面を拾ってから語り部と話すまで（メインの段 `follow_smoke`） |
-| `objective.skyabyss.watch_sky` | 晴れた昼を待って、空を見上げよう | Wait for a clear midday; look up | 語り部と話してから最初の影を見るまで（段 `watch_sky`） |
+| `objective.skyabyss.watch_sky` | 晴れた昼に、空を見上げてみよう | Look up at the sky on a clear midday | 語り部と話してから最初の影を見るまで（段 `watch_sky`） |
 | `objective.skyabyss.read_page` | 破れた頁を拾って、読んでみよう | Take the torn page, and read it | 影が去ってから、落ちてきた破れた頁を読むまで（段は `watch_sky` のまま。`OpeningLogic.objective` が頁を落とす予定 `pageAt`・自動で読む予定 `pageReadAt` を見る）。帯が「空を見上げよう」のままで頁の存在を言わなかった穴を埋める |
 | `objective.skyabyss.ask_storyteller` | 宿りの語り部に話しかけよう | Talk to the lodge storyteller | 影を見てから語り部に尋ねるまで（段 `ask_storyteller`） |
 | `objective.skyabyss.find_isana` | 外れの焚き火の旅人に話しかけよう | Talk to the traveler at the fire | 語り部のあとイサナと話すまで（段 `find_chaser`） |
-| `objective.skyabyss.wait_steps` | 夜を待とう（明かりのそばで） | Wait for night (by a light) | 段 `see_whale` で、足音 (B6) をまだ聞いていない間。夜 1 に来るのは足音だけなので、歌とは言わない（`OpeningLogic.objective`） |
-| `objective.skyabyss.see_whale` | 次の夜、空の歌を待とう（明かりのそばで） | Wait for the sky song, next night | 段 `see_whale` で、足音を済ませたあと、歌 (B9) をまだ聞いていない間（歌は足音の次の夜以降） |
-| `objective.skyabyss.wait_whale` | 夕方、空を見上げて岩鯨を待とう | At dusk, look up for the stone whale | 段 `see_whale` で、歌を聞いたあと（イサナに会っていなければ `find_isana`）。岩鯨を見るまで。クエストログの同じ段は「夕方まで待って、岩鯨を探そう」（`…see_whale.see.wait`、`QuestHud.objectiveText`）になる |
+| `objective.skyabyss.wait_steps` | 夜は、明かりのそばで過ごそう | Spend the night near a light | 段 `see_whale` で、足音 (B6) をまだ聞いていない間。夜 1 に来るのは足音だけなので、歌とは言わない（`OpeningLogic.objective`） |
+| `objective.skyabyss.see_whale` | 夜の空に、耳をすませてみよう（明かりのそばで） | Listen to the night sky (near a light) | 段 `see_whale` で、足音を済ませたあと、歌 (B9) をまだ聞いていない間（歌は足音の次の夜以降） |
+| `objective.skyabyss.wait_whale` | 夕方の空に、岩鯨を探そう | Look for the stone whale in the dusk sky | 段 `see_whale` で、歌を聞いたあと（イサナに会っていなければ `find_isana`）。岩鯨を見るまで。クエストログの同じ段は「夕方の空に、岩鯨を探そう」（`…see_whale.see.wait`、`QuestHud.objectiveText`）になる |
 | `objective.skyabyss.bone_hill` | 白く霞む丘を確かめに行ってみよう | Check the hazy white hill | 日 2 の昼の任意の寄り道 |
 
 - 文は「〜してみよう」「〜に話しかけよう」「〜を探そう」と次の行動を言う（日本語は 20 字まで、英語は 52 字まで。自己テストが数え、文末・キー名・名前だけの文を弾く）。方角と距離は帯が右に足す（距離は 10 ブロック単位、方角は短い形 `gui.skyabyss.objective.dir.<0..7>`: 日本語は 北・北東…、英語は N・NE…。言語に合わせる）。幅は 230 px で、目印が付く目的は距離の札（約 52 px）の分を引いた幅に収める（自己テスト `lang objective band`、`tools/check_band_width.py`）。メインの各段の「やること」の文（クエストログ用）は別に `quest.skyabyss.main_song.<段>.<目的>` にある。
