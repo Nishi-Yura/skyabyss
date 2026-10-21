@@ -434,7 +434,7 @@ data/<名前空間>/quest/<名前>.json
 - 渡す: `WayfarerNotes.give(player, 章)`（人ごとに一度。`Growth.discover` の鍵 `notes:ch<n>`）。
 
 **一章の支度の段（34 の 4.2、C1。実装済み）**: 一章だけは 3 本を**メインの段**にした（`PrepQuests` の章の表。`category` = `main`、順不同）。`quest/ch1/trail_iron`（鉄の跡。イサナ。100）・`trail_blade`（折れた剣。職人。100）・`trail_shield`（盾と糧。語り部。50）、生成は `tools/gen_ch1_trails.py`。旧い `ch1/prep_*` は吸収した（置くと読み込みの警告）。開始の条件は「一章（段階 0）で、イサナの鯨の話を聞いた（印 `c_whale_heard`）か岩鯨を見た」。三本のどれかを受けると覚書（一章）が渡る。
-  - **鉄の跡**: 段 `pit`（骨の坑の前の私の荷で頁 `ch1/trail_iron`。`story/ch1/BonePit.openPack`。経験値 30）→ 段 `armor`（目的 `wear`: 鉄の兜・胸当て・脚当て・靴のうち着ている種類の数。帯は「鉄の防具を作って着よう（2/4）」）。報酬 70、イサナの好感度 +3。理由はイサナの `c_whale_iron`（「鎖は、素手では上れない。……前にここへ来た旅人は、鉄を着ていた。北の丘の石標が、その人の道だ」）。頁のあとのイサナの一言 `ch1t_c_page`（かまどで溶かす）、着たあとの `ch1t_c_iron`（`dialogue/ch1/whale_chaser_trail.json`）。
+  - **鉄の跡**: 段 `pit`（骨の坑の前の私の荷で頁 `ch1/trail_iron`。`story/ch1/BonePit.openPack`。経験値 30）→ 段 `armor`（目的 `wear`: 鉄の兜・胸当て・脚当て・靴のうち着ている種類の数。帯は「鉄の防具を作って着よう（2/4）」）。報酬 70、イサナの好感度 +3。理由はイサナの `c_whale_iron`（「鎖は、素手では上れない。……前にここへ来た旅人は、鉄を着ていた。丘を越えていく石標が、その人の道だ」）。頁のあとのイサナの一言 `ch1t_c_page`（かまどで溶かす）、着たあとの `ch1t_c_iron`（`dialogue/ch1/whale_chaser_trail.json`）。
   - **折れた剣**: 段 `cave`（割れ殻の洞をクリアすると台座の頁 `ch1/trail_blade`。`story/ch1/Ch1Trails` が `SiteSpawner.onCleared` で記す。先に洞を抜けた人もさかのぼって済む。30）→ 段 `show`（職人の入口 `ch1t_blade_show`。作り方を教わる）→ 段 `forge`（`all`: 鉄の剣を持つ・岩の砥石を使う `ch1_whetstone_used`）。報酬 70、職人 +3。
   - **盾と糧**: 段 `tale`（語り部の入口 `ch1t_shield_tale`。足音の晩の話。結果で頁 `ch1/trail_shield`。`dialogue/ch1/storyteller_trail.json`）→ 段 `pack`（`all`: 盾 1・道の固焼き 8）。報酬 50、語り部 +3。鼓動守（護り糸を職人に）と鯨道の旅装は任意。
   - **三本そろう**: 合図 `ch1_ready`（進捗 `whale_trail`）と記念品「鯨追いの印」（`skyabyss:whale_chaser_mark`。説明つき。人ごとに一度。`PrepQuests.onReady`）。語り部の一言 `ch1t_s_ready`（「この字、どこかで見た気がするよ」）。報告ではイサナが `c_fragment_hand`（頁を見つけた人だけの選択肢。「鯨骨の船長の日誌と同じ字に見えた」）、語り部が `fragment_verse`（数え歌のひとつめ）を言う。
@@ -649,7 +649,7 @@ data/<名前空間>/quest/<名前>.json
 | `c_song2` | neutral | 鯨が降りてくるのは、たいてい歌のあとだ。……今夜か、明日か。<br>覚悟しておけ。俺も、してはいるんだ。 |  | ▼ `@entry` |
 | `c_whale1` | neutral | 俺は、もう何年も鯨を追っている。<br>影の年に、遠い空から聞こえる低い歌。あれの主が、岩の鯨だ。背中には町があると、昔、誰かに聞いた。 | 印 c_whale_heard | ▼ `c_whale2` |
 | `c_whale2` | grave | ときどき雲の下まで降りてきて、地面に届くほど長い鎖を垂らすんだ。<br>俺は……一度も、つかめたことがない。降りてくるのは、いつも遠くの誰かの上なんだ。<br>（ここに入るとメインの「鯨追いに話を聞く」が済む） |  | ▼ `c_whale_iron` |
-| `c_whale_iron` | neutral | 鎖は、素手では上れない。……前にここへ来た旅人は、鉄を着ていた。<br>北の丘の石標が、その人の道だ。行き着く先は、骨の坑と呼ばれている。<br>（一章の支度の段「鉄の跡」(ch1/trail_iron) の理由。この話のあと、支度の段 3 本が出る (34 の 4.2)） |  | ▼ `c_whale3` |
+| `c_whale_iron` | neutral | 鎖は、素手では上れない。……前にここへ来た旅人は、鉄を着ていた。<br>丘を越えていく石標が、その人の道だ。行き着く先は、骨の坑と呼ばれている。<br>（一章の支度の段「鉄の跡」(ch1/trail_iron) の理由。この話のあと、支度の段 3 本が出る (34 の 4.2)） |  | ▼ `c_whale3` |
 | `c_whale3` | neutral | あんたの上には、来るかもしれないな。<br>……もし鎖が届いたら、迷わずつかめ。 |  | 「つかんでみる。」→ `end`（好感度+2）<br>「怖くはないのか？」→ `c_afraid` |
 | `c_afraid` | grave | 怖いさ。<br>……でも、あれを見上げていると、呼ばれている気がするんだ。行かなきゃならない場所があるみたいに。 |  | ▼ `@entry` |
 | `c_when` | neutral | 歌が聞こえたら、空を見ろ。鯨が歌うのは、降りてくる前だ。<br>それと……鯨は、人のいる所に降りてくる。まるで、誰かを迎えに来るみたいにな。 |  | ▼ `@entry` |
