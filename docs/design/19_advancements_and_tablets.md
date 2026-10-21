@@ -9,7 +9,7 @@
 ## 1. 方針
 
 - 試遊の指摘: 「このmod限定の進捗を足してもいい。本を見なくても直感的にいろいろ分かる」「看板に文字を書いていると世界観がこわれる」。
-- 進捗はバニラの進捗画面（L）で見える、物語の道しるべ。書や控え帳を開かなくても、今どこまで来たかが分かる。文は短く、先を明かさない。
+- 進捗はバニラの進捗画面（L）で見える、物語の道しるべ。書や控え帳を開かなくても、今どこまで来たかが分かる。文は短く、先を明かさない。バニラは、取った進捗の子と孫を題と文ごと見せるので、先に起きる出来事（足跡・空の影・骨の丘・心臓）は hidden にして、起きるまで出さない。
 - 看板は置かない。文字は石の碑に刻み、見る・触れると画面の字幕に出す。
 
 ---
@@ -21,8 +21,8 @@
 | 枝 | 進捗（id） |
 | --- | --- |
 | 根 | `root`（「天と淵のあいだ」。入った時点で付く。アイコンは天の鍵の欠片、背景は暗い石） |
-| 序盤 | `camp` 消えた火の跡 → `footprint` 巨大な足跡 → `sky_shadow` 空を渡る影 → `bell_lodge` 鐘の宿り → `storyteller` 語り部 → `lore_book` 伝承の書 / `isana` 鯨を追う人 → `bone_hill` 骨の丘 / `isana` → `bone_pit` 骨の坑（坑の頁 `lore:ch1/trail_iron`。アイコンは鉄鉱石）→ `whale_trail` 鯨追いの支度（支度の段 3 本 `signal:ch1_ready`。goal。アイコンは鯨追いの印） |
-| 岩鯨 | `stone_whale_board` 岩鯨の背（背に乗る）→ `tablet` 刻まれた言葉 / `stone_whale_trial` 最初の試練 → `stone_whale_heart` 岩鯨の心臓 → `voyage` 巨神の旅 |
+| 序盤 | `camp` 消えた火の跡 → `bell_lodge` 鐘の宿り → `storyteller` 語り部 → `lore_book` 伝承の書 / `isana` 鯨を追う人 → `bone_pit` 骨の坑（坑の頁 `lore:ch1/trail_iron`。アイコンは鉄鉱石）→ `whale_trail` 鯨追いの支度（支度の段 3 本 `signal:ch1_ready`。goal。アイコンは鯨追いの印）。寄り道と出来事は起きるまで伏せる（hidden）: `camp` → `footprint` 巨大な足跡、`camp` → `sky_shadow` 空を渡る影、`isana` → `bone_hill` 骨の丘 |
+| 岩鯨 | `isana` → `stone_whale_board` 岩鯨の背（背に乗る）→ `tablet` 刻まれた言葉 / `stone_whale_trial` 最初の試練 → `stone_whale_heart` 岩鯨の心臓（hidden。止めるまで見えない）→ `voyage` 巨神の旅 |
 | 潮殻・雷翼・余燼 | それぞれ `*_board`（背）→ `*_trial`（試練を一つ越える）→ `*_heart`（心臓を止める）。前の巨神の心臓を止めるまで見えない（hidden） |
 | 鍵 | `sky_key` 天の鍵（余燼の心臓のあと。hidden） |
 | 成長 | `skill` 最初の技 → `tree_sword` 剣の道 / `tree_bow` 弓の道。`level_5` → `level_10` → `level_20` → `level_30`（hidden）→ `level_40` → `level_50` |

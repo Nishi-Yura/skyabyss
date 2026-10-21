@@ -109,10 +109,10 @@ LORE = [
      '荷車の持ち主の日記', "The Cart Owner's Diary",
      '荷車の持ち主の日記は、途中から文字が細くなっていた。\n\n'
      '「東へ。鐘の鳴るほうへ。見上げるな、と歌う声が風に混じる。足跡を数えながら歩く。数が合わない。私の足跡は、私より一歩多い」\n\n'
-     '筆跡を見て、息が止まった。縦の線を長く引く癖も、はねの角度も、自分の字だった。\n\nこの日記を書いたのは、誰だったのだろう。',
+     '筆跡を見て、手が止まった。縦の線を長く引く癖も、はねの角度も、どこかで見た覚えがある。\n\nこの日記を書いたのは、誰だったのだろう。',
      "The cart owner's handwriting grew thinner as the diary went on.\n\n"
      '"East, toward the bell. A voice singing "don\'t look up" mixes with the wind. I walk counting my footprints. The count is wrong. There is always one more than my own."\n\n'
-     'My breath caught at the handwriting. The long downstrokes, the angle of the flicks. It was my own hand.\n\nWho wrote this diary?',
+     'I stopped at the handwriting. The long downstrokes, the angle of the flicks. I had seen this hand somewhere.\n\nWho wrote this diary?',
      ['prologue/the_book']),
     ('sentry', 'titan_whale', 6, manual,
      '夜を歩く骨', 'Bones That Walk at Night',

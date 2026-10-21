@@ -54,10 +54,10 @@ add("root", None, "skyabyss:sky_key_fragment", "task", {"trigger": "minecraft:ti
 add("camp", "root", "minecraft:campfire", "task", beat("place:camp"),
     ("消えた火の跡", "誰かの野営の跡。火はもう冷えている。"), ("Cold Embers", "Someone camped here. The fire has gone cold."))
 add("footprint", "camp", "minecraft:podzol", "task", beat("place:footprint"),
-    ("巨大な足跡", "人のものではない足跡が、地面に深く残っている。"), ("A Giant's Footprint", "A footprint pressed deep into the ground. Not a person's."))
-add("sky_shadow", "footprint", "minecraft:phantom_membrane", "task", beat("signal:sky_shadow_seen"),
-    ("空を渡る影", "空を、何か大きなものが横切った。"), ("The Shadow Overhead", "Something huge crossed the sky."))
-add("bell_lodge", "sky_shadow", "minecraft:bell", "task", beat("place:shelter"),
+    ("巨大な足跡", "人のものではない足跡が、地面に深く残っている。"), ("A Giant's Footprint", "A footprint pressed deep into the ground. Not a person's."), hidden=True)
+add("sky_shadow", "camp", "minecraft:phantom_membrane", "task", beat("signal:sky_shadow_seen"),
+    ("空を渡る影", "空を、何か大きなものが横切った。"), ("The Shadow Overhead", "Something huge crossed the sky."), hidden=True)
+add("bell_lodge", "camp", "minecraft:bell", "task", beat("place:shelter"),
     ("鐘の宿り", "小さく鳴る鐘をたどって、人のいる場所へ。"), ("Bell Lodge", "You followed a faint bell to where people live."))
 add("storyteller", "bell_lodge", "minecraft:written_book", "task", beat("talk:skyabyss:storyteller"),
     ("語り部", "宿りの語り部と言葉を交わした。"), ("The Storyteller", "You spoke with the lodge's storyteller."))
@@ -66,7 +66,7 @@ add("lore_book", "storyteller", "skyabyss:lore_book", "task", has("skyabyss:lore
 add("isana", "storyteller", "minecraft:spyglass", "task", beat("talk:skyabyss:whale_chaser"),
     ("鯨を追う人", "イサナと出会った。"), ("The Whale Chaser", "You met Isana."))
 add("bone_hill", "isana", "minecraft:bone_block", "task", beat("place:ribs"),
-    ("骨の丘", "丘の下に、巨大な骨が埋まっている。"), ("Bone Hill", "Enormous bones lie buried beneath the hill."))
+    ("骨の丘", "丘の下に、巨大な骨が埋まっている。"), ("Bone Hill", "Enormous bones lie buried beneath the hill."), hidden=True)
 # 一章の支度の段 (34 の 4.2)。骨の坑の荷で前の旅人の頁を見つける → 三本 (鉄・剣・盾と糧) をそろえる
 add("bone_pit", "isana", "minecraft:iron_ore", "task", beat("lore:ch1/trail_iron"),
     ("骨の坑", "坑の奥に、誰かの荷が残っていた。"), ("The Bone Pit", "Deep in the pit, someone's pack was left behind."))
@@ -74,14 +74,14 @@ add("whale_trail", "bone_pit", "skyabyss:whale_chaser_mark", "goal", beat("signa
     ("鯨追いの支度", "鉄を着て、剣を研ぎ、盾と糧を背負った。"), ("Ready to Chase the Whale", "Iron on, blade honed, shield and provisions on your back."))
 
 # ---------------------------------------------------------------- 巨神 (背に乗る → 試練 → 心臓)
-add("stone_whale_board", "bone_hill", "skyabyss:stone_whale_plating", "goal", dimension("titan_back"),
+add("stone_whale_board", "isana", "skyabyss:stone_whale_plating", "goal", dimension("titan_back"),
     ("岩鯨の背", "岩の鯨の背に乗った。"), ("On the Stone Whale", "You climbed onto the stone whale's back."))
 add("tablet", "stone_whale_board", "minecraft:chiseled_stone_bricks", "task", beat("tablet:read"),
     ("刻まれた言葉", "石の碑に目を向けると、昔の言葉が聞こえる。"), ("Carved Words", "Look at a stone tablet, and old words speak."))
 add("stone_whale_trial", "stone_whale_board", "skyabyss:resonance_crystal", "goal", beat("trial:stone_whale"),
     ("最初の試練", "岩鯨の背の試練を、一つ越えた。"), ("The First Trial", "You cleared a trial on the stone whale."))
 add("stone_whale_heart", "stone_whale_trial", "skyabyss:stone_whale_core", "challenge", beat("stopped:stone_whale"),
-    ("岩鯨の心臓", "岩鯨の心臓を止めた。"), ("Heart of the Stone Whale", "You stilled the stone whale's heart."))
+    ("岩鯨の心臓", "岩鯨の心臓を止めた。"), ("Heart of the Stone Whale", "You stilled the stone whale's heart."), hidden=True)
 add("voyage", "stone_whale_heart", "skyabyss:titan_waymark", "goal", beat("signal:titan_voyage"),
     ("巨神の旅", "巨神の背で、別の土地へ渡った。"), ("Voyage", "You crossed to another land on a titan's back."))
 
