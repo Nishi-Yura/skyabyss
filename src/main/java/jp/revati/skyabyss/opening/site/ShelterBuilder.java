@@ -40,6 +40,8 @@ public final class ShelterBuilder {
         tag.putString("id", "minecraft:text_display");
         tag.putString("text", "{\"translate\":\"label.skyabyss.facility." + name + "\",\"color\":\"#F2C14E\",\"bold\":true}");
         tag.putString("billboard", "center");
+        // 揃えを書かないと、バニラが読むたびに「Display entityNot a string」をログに出す
+        tag.putString("alignment", "center");
         tag.putInt("background", 0x6A0A0C10);
         tag.putInt("line_width", 200);
         tag.putFloat("view_range", 0.8f);

@@ -186,6 +186,8 @@ public final class TrainingYard {
         Component text = Component.literal(fmt(dealt)).withStyle(s -> s.withColor(TextColor.fromRgb(dealt >= 10 ? 0xF2C14E : 0xE2D9C2)).withBold(true));
         tag.put("text", StringTag.valueOf(Component.Serializer.toJson(text, level.registryAccess())));
         tag.putString("billboard", "center");
+        // 揃えを書かないと、バニラが読むたびに「Display entityNot a string」をログに出す
+        tag.putString("alignment", "center");
         tag.putInt("background", 0);
         tag.putBoolean("shadow", true);
         t.load(tag);
