@@ -532,8 +532,8 @@ wc.node("c_whale2",
         "Sometimes it comes down below the clouds and lets down a chain long enough to reach the ground.\nI've... never once caught it. It always comes down over someone far away.",
         face="grave", next="c_whale_iron", note="ここに入るとメインの「鯨追いに話を聞く」が済む")
 wc.node("c_whale_iron",
-        "鎖は、素手では上れない。……前にここへ来た旅人は、鉄を着ていた。\n丘を越えていく石標が、その人の道だ。行き着く先は、骨の坑と呼ばれている。",
-        "You cannot climb the chain bare-handed. ...The traveller who came here before wore iron.\nThe cairns over the hills are that one's road. Where they end is called the Bone Pit.",
+        "鎖は、素手では上れない。……前にここへ来た旅人は、鉄を着ていた。\n都の北門から丘を越えていく石標が、その人の道だ。行き着く先は、骨の坑と呼ばれている。",
+        "You cannot climb the chain bare-handed. ...The traveller who came here before wore iron.\nThe cairns from the north gate over the hills are that one's road. Where they end is called the Bone Pit.",
         next="c_whale3", note="一章の支度の段「鉄の跡」(ch1/trail_iron) の理由。この話のあと、支度の段 3 本が出る (34 の 4.2)")
 wc.node("c_whale3",
         "あんたの上には、来るかもしれないな。\n……もし鎖が届いたら、迷わずつかめ。",

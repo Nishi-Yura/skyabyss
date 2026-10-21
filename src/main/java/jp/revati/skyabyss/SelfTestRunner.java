@@ -184,6 +184,8 @@ public final class SelfTestRunner {
         // 序盤の構造物 (野営地・鐘の宿り・巨大な足跡・巨神の骨)。docs/design/17 の 4 章
         steps.addAll(jp.revati.skyabyss.opening.site.SiteSelfTest.steps());
         steps.addAll(jp.revati.skyabyss.opening.site.CapitalDoorsSelfTest.steps());
+        // 章の跡地 (方位と距離の帯・四つの形・道しるべ・祠の置き場・潮殻の浜)。docs/design/33 の 3 章 (W2)。SKYABYSS_SELFTEST_ONLY="chapter grounds"
+        steps.addAll(jp.revati.skyabyss.opening.site.ChapterGroundsSelfTest.steps());
         steps.addAll(ChapterSkySelfTest.steps());
         // 序章・一章の中身 (初日のお使い・旅の跡・歌石・見張りの丘・小さな異変・歩哨・岩鯨の影の出来事・予兆 3 拍)。docs/design/17 の 1.5。岩鯨を出す段より前に置く
         steps.addAll(jp.revati.skyabyss.story.ch1.Ch1SelfTest.steps());

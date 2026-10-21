@@ -114,7 +114,8 @@ public final class Ch1SitesSelfTest {
     // ---------------------------------------------------------------- sites
     private static void sites(MinecraftServer server, FakePlayer base) {
         ServerLevel level = server.overworld();
-        BlockPos anchor = Ch1SelfTest.baseAt();
+        BlockPos base0 = Ch1SelfTest.baseAt();
+        BlockPos capital = jp.revati.skyabyss.opening.OpeningSites.shelter(server).orElse(null);
         double prev = 0;
         for (String id : Sites.WHALE_P6) {
             var list = ChapterSites.sitesFor(server, base.getUUID(), id);
@@ -123,12 +124,20 @@ public final class Ch1SitesSelfTest {
                 continue;
             }
             BlockPos pos = list.get(0).pos();
+            // 跡地の要素は一章の跡地の中心から 150 以内。道の石標 (anchor = null) は都から跡地への道の上
+            BlockPos anchor = base0 == null ? null : ChapterSites.anchorFor(server, id, base0);
             double d = anchor == null ? 0 : Math.hypot(pos.getX() - anchor.getX(), pos.getZ() - anchor.getZ());
-            check(anchor == null || d <= 152, id + " is " + (int) d + " from the base");
+            check(anchor == null || d <= 152, id + " is " + (int) d + " from its anchor " + anchor);
             if (id.startsWith(Ch1Prep.CAIRN_PREFIX)) {
-                // 道すじ: 番号が大きいほど (おおむね) 遠い。n 番目は 24 + 18 (n-1) から。ずらしても 10 は手前にこない
+                // 道すじ: 番号が大きいほど都から遠い (北の丘へ向かう)。跡地がない世界では拠点から外へ (n 番目は 24 + 18 (n-1) から)
                 int n = Integer.parseInt(id.substring(id.lastIndexOf('_') + 1));
-                check(anchor == null || d >= 24 + 18 * (n - 1) - 12, id + " is only " + (int) d + " from the base (outward order)");
+                if (anchor == null && capital != null) {
+                    double dc = Math.hypot(pos.getX() - capital.getX(), pos.getZ() - capital.getZ());
+                    check(dc > prev, id + " is " + (int) dc + " from the capital, not beyond the previous cairn (" + (int) prev + ")");
+                    prev = dc;
+                } else {
+                    check(anchor == null || d >= 24 + 18 * (n - 1) - 12, id + " is only " + (int) d + " from the base (outward order)");
+                }
                 // 積み石の部品: 丸石の柱がある
                 check(near(level, pos, 3, Blocks.COBBLESTONE) || near(level, pos, 4, Blocks.STONE_BRICKS), id + ": no cairn/shrine blocks near " + pos);
             }

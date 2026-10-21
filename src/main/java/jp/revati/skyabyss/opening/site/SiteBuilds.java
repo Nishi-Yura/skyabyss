@@ -109,7 +109,7 @@ public final class SiteBuilds {
 
     // 場所を探している最中か (章の跡地の探しも数える)
     public static boolean planning() {
-        return pendingPlan != null || ChapterGrounds.planning();
+        return pendingPlan != null || ChapterGrounds.planning() || ChapterSites.pending();
     }
 
     // 場所を決める (まだなら)。野営地はその場で決めて (新しいワールドの最初の日ならスポーン地点を野営地へ動かす)、

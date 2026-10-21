@@ -224,10 +224,15 @@ public final class ChapterSites {
         ERASERS.remove(id);
     }
 
+    // その章の小要素 (道しるべの石標 ROAD_FILL は数えない。それは跡地の道の飾りで、章の要素の表に入らない)
     public static List<Element> elements(Chapters chapter) {
+        return elements(chapter, false);
+    }
+
+    static List<Element> elements(Chapters chapter, boolean withFill) {
         List<Element> out = new ArrayList<>();
         for (Element e : ELEMENTS.values()) {
-            if (e.chapter() == chapter) {
+            if (e.chapter() == chapter && (withFill || e.placement() != Placement.ROAD_FILL)) {
                 out.add(e);
             }
         }
@@ -249,7 +254,7 @@ public final class ChapterSites {
 
     static List<Element> groundElements(Chapters chapter) {
         List<Element> out = new ArrayList<>();
-        for (Element e : elements(chapter)) {
+        for (Element e : elements(chapter, true)) {
             if (e.atGround()) {
                 out.add(e);
             }
@@ -260,6 +265,33 @@ public final class ChapterSites {
     @Nullable
     public static Element element(String id) {
         return ELEMENTS.get(id);
+    }
+
+    // 小要素の拠点 (自己テストの距離の検査向け): 跡地に置く要素なら跡地の中心 (跡地がなければ base)、道に置く要素なら null (道の上)、ほかは base
+    @Nullable
+    public static BlockPos anchorFor(MinecraftServer server, String elementId, BlockPos base) {
+        Element el = ELEMENTS.get(elementId);
+        if (el == null || !el.atGround()) {
+            return base;
+        }
+        SiteData.Ground g = SiteData.get(server.overworld()).ground(el.chapter().id());
+        if (g == null) {
+            return base;
+        }
+        if (el.placement() == Placement.GROUND) {
+            return g.center;
+        }
+        // 道の要素でも、点が足りずに跡地に置いたものは跡地から
+        for (SiteData.ChapterPlan p : SiteData.get(server.overworld()).plans()) {
+            if (p.anchor.equals(g.center)) {
+                for (SiteData.Entry e : p.sites) {
+                    if (e.siteId.equals(elementId) && horizontal(e.pos, g.center) <= ChapterPlanner.MAX_DIST + 2) {
+                        return g.center;
+                    }
+                }
+            }
+        }
+        return null;
     }
 
     // その計画が章の跡地の分か
@@ -994,5 +1026,22 @@ public final class ChapterSites {
 
     static boolean pending() {
         return !TASKS.isEmpty();
+    }
+
+    // 開発コマンド用: 探している最中の分を待って反映し、後回しの頼みも順に流す (最後まで)
+    static void finishTasksNow(MinecraftServer server) {
+        for (int guard = 0; guard < 64 && (!TASKS.isEmpty() || !LATER.isEmpty()); guard++) {
+            for (Task t : new ArrayList<>(TASKS)) {
+                try {
+                    t.future().join();
+                } catch (RuntimeException e) {
+                    // applyTasks が記録する
+                }
+            }
+            applyTasks(server);
+            List<Runnable> run = new ArrayList<>(LATER);
+            LATER.clear();
+            run.forEach(Runnable::run);
+        }
     }
 }

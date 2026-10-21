@@ -158,6 +158,7 @@ public class TideConchItem extends Item implements jp.revati.skyabyss.pouch.Pouc
             case NOT_NOW -> Notice.bar(sp, Component.translatable("message.skyabyss.ch2.conch.not_now"));
             case TAKEN -> Notice.bar(sp, Component.translatable("message.skyabyss.ch2.conch.taken", titan.requesterNow()));
             case NO_SPOT -> Notice.bar(sp, Component.translatable("message.skyabyss.ch2.conch.no_spot"));
+            case FAR -> Notice.bar(sp, Component.translatable("message.skyabyss.ch2.conch.beach_only"));
         }
         return r;
     }
