@@ -92,7 +92,6 @@ public class SandBurrower extends GroundFoe {
 
     private void setBuried(boolean b) {
         entityData.set(BURIED, b);
-        setInvisible(b);
     }
 
     @Override
@@ -151,9 +150,6 @@ public class SandBurrower extends GroundFoe {
     @Override
     protected void customServerAiStep() {
         super.customServerAiStep();
-        if (isInvisible() != isBuried()) {
-            setInvisible(isBuried());
-        }
         if (cooldown > 0) {
             cooldown--;
         }
@@ -320,6 +316,12 @@ public class SandBurrower extends GroundFoe {
     @Override
     public boolean isInvulnerableTo(DamageSource source) {
         return (isBuried() && !source.is(DamageTypeTags.BYPASSES_INVULNERABILITY)) || super.isInvulnerableTo(source);
+    }
+
+    // 潜っている間は描かない (同期した BURIED から。湧いた最初の tick から見えない)
+    @Override
+    public boolean isInvisible() {
+        return isBuried() || super.isInvisible();
     }
 
     @Override
