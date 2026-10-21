@@ -53,6 +53,8 @@
 - 実装: `opening/OpeningState`（人ごとの拍子の状態）、`OpeningDirector`。OP コマンド `/skyabyss opening <拍子>`（進める）、`back <拍子>`（戻す）、`reset`、`status`。
 - 自己テスト `SELFTEST opening beats`（最初の影の時刻、書の保証、鯨の門、案内の順番、平らな草地での野営と語り部）、`SELFTEST opening`。
 
+- **一度見た人には、もう見せない**（2026-10-21）: 影の項目を記した人には、そのあとの世界の影を送らない（`SkyEvents` が送る相手を選ぶ。`LoreEvents.sawSkyShadow`）。開発の `/skyabyss pass` は起こした人には送る。
+
 ### 2.3 通過の形
 
 | 項目 | 値 |

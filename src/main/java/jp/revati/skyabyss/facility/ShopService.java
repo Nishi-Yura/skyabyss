@@ -169,6 +169,7 @@ public final class ShopService {
             ledger.add(shop.id(), g.id(), day, n);
         }
         player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.CHAIN_PLACE, SoundSource.PLAYERS, 0.5f, 1.4f);
+        jp.revati.skyabyss.advancement.Beats.fire(player, "shop:buy");
         return Result.OK;
     }
 

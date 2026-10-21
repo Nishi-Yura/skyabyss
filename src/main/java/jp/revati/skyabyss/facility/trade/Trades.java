@@ -30,7 +30,8 @@ import net.neoforged.neoforge.event.tick.ServerTickEvent;
 //   受ける: 出す人が申請を一つ選ぶ。その瞬間に、申請した人の持ち物に申し出の品が全部あるか、両方の持ち物に入りきるかを調べ、
 //           すべてそろえば一度に入れ替える (どれか欠ければ何も動かず、申請は残る)。申請した人がいない (オフライン) ときは受けられない
 //   断る・取り下げる: 相手に知らせる (いなければ次に入ったとき)
-//   品の合わせ方: 型と同じ品で、同じ部品 (付呪・名前・傷みなど) のものだけ (ItemStack.isSameItemSameComponents)。探して選んだ型は「まっさら」の品
+//   品の合わせ方: 探して選んだ型 (部品のない品) は、その品なら何でも合う (付呪・名前・傷みがあってもよい。00 の 238)。
+//                 持ち物から選んだ品 (部品のある品) は、同じ部品のものだけ (選んだ通りの品が渡る)
 //   大事な品 (旅嚢の取り出せない品・守る品・クエストの印の品) は出せないし、ほしいものにもできない
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class Trades {
@@ -119,11 +120,16 @@ public final class Trades {
         return p.getInventory().items;
     }
 
+    // 持ち物の品 s が型 t に合うか (型に部品がなければ品の種類だけ、あれば部品まで)
+    static boolean matches(ItemStack s, ItemStack t) {
+        return t.getComponentsPatch().isEmpty() ? ItemStack.isSameItem(s, t) : ItemStack.isSameItemSameComponents(s, t);
+    }
+
     public static int count(List<ItemStack> inv, ItemStack template) {
         int n = 0;
         for (int i = 0; i < Math.min(INV, inv.size()); i++) {
             ItemStack s = inv.get(i);
-            if (!s.isEmpty() && ItemStack.isSameItemSameComponents(s, template)) {
+            if (!s.isEmpty() && matches(s, template)) {
                 n += s.getCount();
             }
         }
@@ -150,7 +156,7 @@ public final class Trades {
             int left = t.getCount();
             for (int i = 0; i < sim.size() && left > 0; i++) {
                 ItemStack s = sim.get(i);
-                if (!s.isEmpty() && ItemStack.isSameItemSameComponents(s, t)) {
+                if (!s.isEmpty() && matches(s, t)) {
                     int k = Math.min(left, s.getCount());
                     s.shrink(k);
                     left -= k;
@@ -190,7 +196,7 @@ public final class Trades {
             int left = t.getCount();
             for (int i = 0; i < Math.min(INV, inv.size()) && left > 0; i++) {
                 ItemStack s = inv.get(i);
-                if (!s.isEmpty() && ItemStack.isSameItemSameComponents(s, t)) {
+                if (!s.isEmpty() && matches(s, t)) {
                     int k = Math.min(left, s.getCount());
                     taken.add(s.split(k));
                     left -= k;
@@ -470,6 +476,8 @@ public final class Trades {
         put(buyer, l.give);
         put(seller, combine(paid));
         data.dirty();
+        jp.revati.skyabyss.advancement.Beats.fire(seller, "trade:done");
+        jp.revati.skyabyss.advancement.Beats.fire(buyer, "trade:done");
         Notice.gain(seller, "message.skyabyss.trade.note_sold", a.name, "#" + l.id);
         Notice.gain(buyer, "message.skyabyss.trade.note_accepted", l.sellerName, "#" + l.id);
         TradeService.refresh(buyer);

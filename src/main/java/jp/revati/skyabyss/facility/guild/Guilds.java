@@ -105,6 +105,7 @@ public final class Guilds {
         refresh(player.server, g);
         setBadge(player, g.badge());
         SkyAbyss.LOGGER.info("[guild] {} created {} [{}]", player.getGameProfile().getName(), g.name, g.tag);
+        jp.revati.skyabyss.advancement.Beats.fire(player, "guild:join");
         return Result.OK;
     }
 
@@ -187,6 +188,10 @@ public final class Guilds {
         }
         g.members.add(who);
         data.setDirty();
+        ServerPlayer joined = server.getPlayerList().getPlayer(who);
+        if (joined != null) {
+            jp.revati.skyabyss.advancement.Beats.fire(joined, "guild:join");
+        }
         String name = g.nameOf(who);
         for (UUID m : g.members) {
             ServerPlayer p = server.getPlayerList().getPlayer(m);

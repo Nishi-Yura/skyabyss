@@ -40,6 +40,11 @@ public final class SiteGuardSelfTest {
         SiteGuard.testing = true;
         check(Math.abs(NoHunger.healOf(Foods.BREAD) - 8f) < 0.01f, "bread should heal 8 (" + NoHunger.healOf(Foods.BREAD) + ")");
         check(Math.abs(NoHunger.healOf(Foods.COOKED_BEEF) - 14.4f) < 0.01f, "cooked beef should heal 14.4 (" + NoHunger.healOf(Foods.COOKED_BEEF) + ")");
+        // 進捗・実績のつまみ: 実績の木と、報酬の鐘銭の関数が読める (tools/gen_advancements.py)
+        check(server.getAdvancements().get(net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "achievement/trade")) != null,
+                "the achievement tab (achievement/trade) is missing");
+        check(server.getFunctions().get(net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "reward/coins_10")).isPresent(),
+                "the reward function reward/coins_10 is missing");
         ServerLevel level = server.overworld();
         SiteGuard.reset();
         SiteData data = SiteData.get(level);
@@ -92,7 +97,7 @@ public final class SiteGuardSelfTest {
             zombie.discard();
         }
         if (FAILS.isEmpty()) {
-            SkyAbyss.LOGGER.info("SELFTEST site guard PASSED (capital area, sweep, site blocks, food heal)");
+            SkyAbyss.LOGGER.info("SELFTEST site guard PASSED (capital area, sweep, site blocks, food heal, achievement tab and rewards)");
         } else {
             for (String s : FAILS) {
                 SkyAbyss.LOGGER.error("SELFTEST site guard FAILED: {}", s);

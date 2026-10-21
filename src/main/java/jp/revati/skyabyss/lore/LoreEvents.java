@@ -404,6 +404,11 @@ public final class LoreEvents {
                 .build());
     }
 
+    // 空の影をもう見た人か (影の項目がすべて記されている)。見た人には、そのあとの影を見せない (2026-10-21 の試遊)
+    public static boolean sawSkyShadow(ServerPlayer player) {
+        return !anyLocked(Lore.state(player), "sky_shadow");
+    }
+
     // ---------------------------------------------------------------- 道具
     // まだ記されていない項目に、その種類の条件が一つでもあるか (見回りを省くため)
     static boolean anyLocked(LoreState state, String type) {

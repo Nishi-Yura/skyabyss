@@ -243,6 +243,7 @@ public final class Graves {
             grave.xp = 0;
         }
         int left = grave.items.size();
+        jp.revati.skyabyss.advancement.Beats.fire(player, "grave:open");
         if (grave.isEmpty()) {
             data.remove(grave.id);
             removeBlock(server, grave);

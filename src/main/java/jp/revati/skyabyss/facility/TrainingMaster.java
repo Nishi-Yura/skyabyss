@@ -48,6 +48,7 @@ public final class TrainingMaster {
         SkillManager.RespecResult r = stats ? Growth.respecStats(player, true, !coins) : SkillManager.respec(player, true, !coins);
         switch (r) {
             case OK -> {
+                jp.revati.skyabyss.advancement.Beats.fire(player, "facility:respec");
                 if (price > 0) {
                     Coins.take(player, price);
                 }

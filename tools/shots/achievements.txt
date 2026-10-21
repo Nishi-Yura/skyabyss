@@ -1,0 +1,24 @@
+# 進捗・実績の画面 (実績のつまみと、説明の報酬の行)
+world shots flat
+size 1280 720
+timeout 300
+render 6
+clouds off
+cmd time set noon
+cmd gamemode creative
+hud on
+waitchunks
+wait 20
+cmd skyabyss cinematic stop
+cmd skyabyss playtest skip opening
+wait 60
+cmd skyabyss cinematic stop
+cmd advancement grant @s only skyabyss:achievement/root
+cmd advancement grant @s only skyabyss:achievement/shop
+cmd advancement grant @s only skyabyss:achievement/quest
+wait 20
+key key.advancements
+wait 40
+shot adv_screen
+close
+quit

@@ -27,5 +27,8 @@
     [
       "done"
     ]
-  ]
+  ],
+  "rewards": {
+    "function": "skyabyss:reward/coins_25"
+  }
 }

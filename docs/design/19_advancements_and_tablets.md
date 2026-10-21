@@ -65,6 +65,12 @@
 
 ---
 
+### 2.x 進捗・実績のつまみと報酬（2026-10-21）
+
+- 画面の名は「進捗・実績」（バニラの `gui.advancements` を `assets/minecraft/lang` で上書き）。mod のつまみは二つ: 物語の進捗（根 `skyabyss:root`）と **実績**（根 `skyabyss:achievement/root`）。
+- 実績: はじめての買い物（店）・取引成立（取引所）・頼まれごと（クエストを終える）・言伝ての板・都の顔なじみ（町のクエスト）・旗の下に（ギルド）・鍛え直し（師範）・置いてきたもの（墓）。合図は `skyabyss:beat` の `shop:buy`・`trade:done`・`quest:done`・`quest:board`・`quest:town`・`guild:join`・`facility:respec`・`grave:open`。
+- **報酬**: mod の進捗と実績はどれも鐘銭を渡す（既定 task 3・goal 10・challenge 25。実績は 3〜10）。進捗の `rewards.function`（`data/skyabyss/function/reward/coins_<n>.mcfunction`）で渡し、説明の終わりに「報酬: 鐘銭 n」と書く。生成は `tools/gen_advancements.py`。
+
 ## 3. 碑（`skyabyss:tablet`）
 
 - ブロック: `tablet`（`tablet/TabletBlock`、持ち主のエンティティ `TabletBlockEntity` が文のキーを持つ）。壊せない（構造物の一部）、当たり判定なし（看板と同じ）、明るさ 5。壁掛け（`standing=false`、`facing` = 文の向き。板が反対側の壁にぴったり付く）と、台つきで立てる形（`standing=true`）がある。

@@ -166,7 +166,8 @@ public final class SkyEvents {
     // 途中でログインしたプレイヤーにも、進行中の通過を見せる
     @SubscribeEvent
     static void onPlayerLoggedIn(PlayerEvent.PlayerLoggedInEvent event) {
-        if (active != null && event.getEntity() instanceof ServerPlayer player && player.level().dimension() == Level.OVERWORLD) {
+        if (active != null && event.getEntity() instanceof ServerPlayer player && player.level().dimension() == Level.OVERWORLD
+                && !jp.revati.skyabyss.lore.LoreEvents.sawSkyShadow(player)) {
             PacketDistributor.sendToPlayer(player, new SkyPassPayload(active));
         }
     }
@@ -174,7 +175,8 @@ public final class SkyEvents {
     // ネザーなどからオーバーワールドへ戻ってきたプレイヤーにも見せる
     @SubscribeEvent
     static void onChangedDimension(PlayerEvent.PlayerChangedDimensionEvent event) {
-        if (active != null && event.getTo() == Level.OVERWORLD && event.getEntity() instanceof ServerPlayer player) {
+        if (active != null && event.getTo() == Level.OVERWORLD && event.getEntity() instanceof ServerPlayer player
+                && !jp.revati.skyabyss.lore.LoreEvents.sawSkyShadow(player)) {
             PacketDistributor.sendToPlayer(player, new SkyPassPayload(active));
         }
     }
@@ -209,7 +211,7 @@ public final class SkyEvents {
             ctx.getSource().sendFailure(Component.translatable("commands.skyabyss.pass.overworld_only"));
             return 0;
         }
-        start(level, player);
+        start(level, player, true);
         ctx.getSource().sendSuccess(() -> ModText.lore("commands.skyabyss.pass.started", player.getDisplayName()), true);
         return 1;
     }
@@ -229,9 +231,18 @@ public final class SkyEvents {
     }
 
     private static void start(ServerLevel level, ServerPlayer witness) {
+        start(level, witness, false);
+    }
+
+    private static void start(ServerLevel level, ServerPlayer witness, boolean force) {
         active = makePass(level, witness);
         SkyEventData.get(level).countPass(level.getGameTime());
-        PacketDistributor.sendToPlayersInDimension(level, new SkyPassPayload(active));
+        // 影をもう見た人には送らない (見た人には二度目以降の影を見せない。2026-10-21 の試遊)。開発の pass は起こした人には送る
+        for (ServerPlayer p : level.players()) {
+            if ((force && p == witness) || !jp.revati.skyabyss.lore.LoreEvents.sawSkyShadow(p)) {
+                PacketDistributor.sendToPlayer(p, new SkyPassPayload(active));
+            }
+        }
         SkyAbyss.LOGGER.debug("Sky pass started near {}", witness.getName().getString());
     }
 

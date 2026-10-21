@@ -44,8 +44,14 @@ def has(item):
 A = []
 
 
-def add(id_, parent, icon, frame, criterion, ja, en, hidden=False):
-    A.append(dict(id=id_, parent=parent, icon=icon, frame=frame, criterion=criterion, ja=ja, en=en, hidden=hidden))
+# 報酬の鐘銭 (進捗・実績のタブ。2026-10-21 の試遊: mod の実績と報酬も載せたい)。枠ごとの既定 (task 3・goal 10・challenge 25、根は 0)。
+# 報酬は進捗の rewards.function (data/skyabyss/function/reward/coins_<n>.mcfunction) で渡し、説明の終わりに「報酬: 鐘銭 n」を書く
+COINS = {"task": 3, "goal": 10, "challenge": 25}
+
+
+def add(id_, parent, icon, frame, criterion, ja, en, hidden=False, coins=None):
+    A.append(dict(id=id_, parent=parent, icon=icon, frame=frame, criterion=criterion, ja=ja, en=en, hidden=hidden,
+                  coins=(0 if parent is None else COINS[frame]) if coins is None else coins))
 
 
 # ---------------------------------------------------------------- 序盤 (17 の拍子の順)
@@ -118,6 +124,27 @@ add("ember_heart", "ember_trial", "skyabyss:ember_core", "challenge", beat("stop
 add("sky_key", "ember_heart", "skyabyss:sky_key", "challenge", beat("signal:sky_key_assembled"),
     ("天の鍵", "四つの欠片が、一つになった。"), ("The Sky Key", "Four fragments became one."), hidden=True)
 
+# ---------------------------------------------------------------- 実績 (二つ目のつまみ。都の暮らし・人との関わり・周回)
+add("achievement/root", None, "skyabyss:bell_coin", "task", {"trigger": "minecraft:tick"},
+    ("実績", "旅のあいだに成し遂げたこと。鐘銭が受け取れる。"), ("Achievements", "Things done along the way. Each pays bell coins."))
+add("achievement/shop", "achievement/root", "minecraft:emerald", "task", beat("shop:buy"),
+    ("はじめての買い物", "都の店で品を買った。"), ("First Purchase", "Bought something at a capital shop."), coins=5)
+add("achievement/trade", "achievement/shop", "minecraft:chest", "goal", beat("trade:done"),
+    ("取引成立", "取引所で、ほかの旅人と品を取り替えた。"), ("Deal Made", "Swapped goods with another traveller at the trading post."), coins=10)
+add("achievement/quest", "achievement/root", "minecraft:writable_book", "task", beat("quest:done"),
+    ("頼まれごと", "頼みを一つ、最後までやり遂げた。"), ("A Favour Done", "Saw a request through to the end."), coins=5)
+add("achievement/board", "achievement/quest", "skyabyss:message_board", "task", beat("quest:board"),
+    ("言伝ての板", "言伝ての板の頼みを果たした。"), ("The Message Board", "Finished a request from the message board."), coins=5)
+add("achievement/town", "achievement/quest", "minecraft:bell", "goal", beat("quest:town"),
+    ("都の顔なじみ", "都の人の頼みを果たした。"), ("A Familiar Face", "Helped someone in the capital."), coins=10)
+add("achievement/guild", "achievement/root", "minecraft:white_banner", "goal", beat("guild:join"),
+    ("旗の下に", "ギルドを作るか、ギルドに入った。"), ("Under One Banner", "Founded or joined a guild."), coins=10)
+add("achievement/respec", "achievement/root", "minecraft:target", "task", beat("facility:respec"),
+    ("鍛え直し", "訓練場の師範のもとで、技か力を振り直した。"), ("Back to Basics", "Reset your skills or stats with the training master."), coins=3)
+add("achievement/grave", "achievement/root", "minecraft:skeleton_skull", "task", beat("grave:open"),
+    ("置いてきたもの", "自分の墓から、品を取り戻した。"), ("What Was Left Behind", "Took your things back from your grave."), coins=3)
+
+
 # ---------------------------------------------------------------- 成長と鍛え
 add("skill", "root", "minecraft:enchanted_book", "task", beat("skill:learned"),
     ("最初の技", "技を一つ覚えた。"), ("A First Skill", "You learned a skill."))
@@ -176,18 +203,20 @@ def build():
             d["parent"] = f"skyabyss:{a['parent']}"
         display = {
             "icon": {"id": a["icon"]},
-            "title": {"translate": f"advancement.skyabyss.{a['id']}.title"},
-            "description": {"translate": f"advancement.skyabyss.{a['id']}.description"},
+            "title": {"translate": f"advancement.skyabyss.{a['id'].replace('/', '.')}.title"},
+            "description": {"translate": f"advancement.skyabyss.{a['id'].replace('/', '.')}.description"},
             "frame": a["frame"],
-            "show_toast": a["id"] != "root",
+            "show_toast": a["parent"] is not None,
             "announce_to_chat": False,
             "hidden": a["hidden"],
         }
-        if a["id"] == "root":
+        if a["parent"] is None:
             display["background"] = "skyabyss:textures/gui/advancements/backgrounds/skyabyss.png"
         d["display"] = display
         d["criteria"] = {"done": a["criterion"]}
         d["requirements"] = [["done"]]
+        if a["coins"] > 0:
+            d["rewards"] = {"function": f"skyabyss:reward/coins_{a['coins']}"}
         out[a["id"]] = d
     return out
 
@@ -210,15 +239,24 @@ def main():
     ADV.mkdir(parents=True, exist_ok=True)
     # ほかの道具が書く進捗 (転生の rebirth_* など) は消さない。ここで持つ id だけを書き直す
     for id_, d in build().items():
-        (ADV / f"{id_}.json").write_text(json.dumps(d, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+        f = ADV / f"{id_}.json"
+        f.parent.mkdir(parents=True, exist_ok=True)
+        f.write_text(json.dumps(d, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    fn = ROOT / "data/skyabyss/function/reward"
+    fn.mkdir(parents=True, exist_ok=True)
+    for n in sorted({a["coins"] for a in A if a["coins"] > 0}):
+        (fn / f"coins_{n}.mcfunction").write_text(f"# 進捗・実績の報酬 (tools/gen_advancements.py)\ngive @s skyabyss:bell_coin {n}\n", encoding="utf-8")
     background()
     for code, idx in (("ja_jp", "ja"), ("en_us", "en")):
         p = LANG / f"{code}.json"
         lang = json.loads(p.read_text(encoding="utf-8"))
         for a in A:
             title, desc = chaptered(a, 0 if idx == "ja" else 1)
-            lang[f"advancement.skyabyss.{a['id']}.title"] = title
-            lang[f"advancement.skyabyss.{a['id']}.description"] = desc
+            if a["coins"] > 0:
+                desc += f"\n報酬: 鐘銭 {a['coins']}" if idx == "ja" else f"\nReward: {a['coins']} bell coins"
+            key = a["id"].replace("/", ".")
+            lang[f"advancement.skyabyss.{key}.title"] = title
+            lang[f"advancement.skyabyss.{key}.description"] = desc
         p.write_text(json.dumps(lang, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     print(f"wrote {len(A)} advancements")
 

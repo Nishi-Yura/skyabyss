@@ -1,0 +1,28 @@
+{
+  "display": {
+    "icon": {
+      "id": "skyabyss:bell_coin"
+    },
+    "title": {
+      "translate": "advancement.skyabyss.achievement.root.title"
+    },
+    "description": {
+      "translate": "advancement.skyabyss.achievement.root.description"
+    },
+    "frame": "task",
+    "show_toast": false,
+    "announce_to_chat": false,
+    "hidden": false,
+    "background": "skyabyss:textures/gui/advancements/backgrounds/skyabyss.png"
+  },
+  "criteria": {
+    "done": {
+      "trigger": "minecraft:tick"
+    }
+  },
+  "requirements": [
+    [
+      "done"
+    ]
+  ]
+}

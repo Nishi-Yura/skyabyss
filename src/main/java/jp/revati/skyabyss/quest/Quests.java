@@ -350,6 +350,14 @@ public final class Quests {
 
     private static void finish(ServerPlayer player, QuestDef def, QuestLog.Entry entry) {
         entry.done = true;
+        // 実績 (進捗・実績のタブ): クエストを終えた・板の頼み・町のクエスト
+        jp.revati.skyabyss.advancement.Beats.fire(player, "quest:done");
+        if (def.board()) {
+            jp.revati.skyabyss.advancement.Beats.fire(player, "quest:board");
+        }
+        if (def.id().startsWith("town/")) {
+            jp.revati.skyabyss.advancement.Beats.fire(player, "quest:town");
+        }
         entry.progress = new int[0];
         entry.finished = player.server.overworld().getGameTime();
         QuestDef.Reward reward = def.reward();
