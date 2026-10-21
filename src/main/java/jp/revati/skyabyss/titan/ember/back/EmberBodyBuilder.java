@@ -712,7 +712,6 @@ public final class EmberBodyBuilder {
         for (Inscription in : BOARDS) {
             kit.board(in.pos(), in.facing(), "sign.skyabyss.ember_board_" + in.id(), DyeColor.WHITE);
         }
-        EmberCaches.place(kit);
     }
 
     // 休み場の 5 × 5 の台 (下は箱の底まで詰める)、南の端の真ん中に青い焚き火、北の端に灰溜まり

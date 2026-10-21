@@ -55,9 +55,6 @@ public final class EmberBackAudit {
         s.goals.put("deck e11 stone", EmberDeck.E11_STONE.north());
         s.goals.put("deck e12 stone", EmberDeck.E12_STONE.north());
         s.goals.put("deck e04 stone", EmberDeck.E04_STONE.north());
-        for (Cache c : CACHES) {
-            s.goals.put("cache " + c.id(), c.pos().relative(c.facing()));
-        }
         return s;
     }
 

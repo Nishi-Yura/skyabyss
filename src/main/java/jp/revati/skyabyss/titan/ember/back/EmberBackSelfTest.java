@@ -201,12 +201,6 @@ public final class EmberBackSelfTest {
             expect(bs.getBlock() instanceof TabletBlock && bs.getValue(HorizontalDirectionalBlock.FACING) == in.facing(), "board " + in.id() + " is missing at " + in.pos().toShortString());
             expect(back.getBlockState(in.pos().relative(in.facing().getOpposite())).isSolid(), "board " + in.id() + " has nothing behind it");
         }
-        for (Cache c : CACHES) {
-            more.add("sign.skyabyss.ember_cache_" + c.id());
-            expect(back.getBlockState(c.pos()).is(jp.revati.skyabyss.registry.ModBlocks.RELIC_CACHE.get()), "cache " + c.id() + " has no chest at " + c.pos().toShortString());
-            BlockState cs = back.getBlockState(c.pos().above());
-            expect(cs.getBlock() instanceof TabletBlock, "cache " + c.id() + " has no tablet above the chest");
-        }
         FAILURES.addAll(SignFit.check(more));
         expect(SignFit.allSignKeys().containsAll(more), "SignFit does not see the ember boards (skyabyss_ember lang)");
     }
@@ -427,9 +421,6 @@ public final class EmberBackSelfTest {
         goals.put("west stone", STONE_WEST.north());
         goals.put("east stone", STONE_EAST.north());
         goals.put("south stone", STONE_SOUTH.north());
-        for (Cache c : CACHES) {
-            goals.put("cache " + c.id(), c.pos().relative(c.facing()));
-        }
         if (gateOpen) {
             goals.put("heart door", HEART_DOOR.min());
         }

@@ -224,15 +224,6 @@ public final class EmberBackLayout {
             new Inscription("south_lane", new BlockPos(7, FLOOR_SOUTH + 2, 8), Direction.NORTH),
             new Inscription("south_hearth", new BlockPos(6, FLOOR_SOUTH + 2, 42), Direction.NORTH));
 
-    // 任意の翼の宝箱 (右クリックで一度だけ小さな贈り物。EmberCaches)。id と置く位置 (台の上の宝箱)。碑は ember_cache_<id> を横に
-    public record Cache(String id, BlockPos pos, Direction facing) {
-    }
-
-    public static final List<Cache> CACHES = List.of(
-            new Cache("tomb", new BlockPos(-61, FLOOR_WEST + 1, -3), Direction.EAST),
-            new Cache("workshop", new BlockPos(63, FLOOR_EAST + 1, 6), Direction.WEST),
-            new Cache("garden", new BlockPos(-16, FLOOR_SOUTH + 1, 3), Direction.EAST));
-
     // ---------------------------------------------------------------- 部屋の一覧
     // 部屋の名前 → 箱 (コマンドの go・自己テストの重なりの検査・リセットで中の人を広間へ移す範囲)
     public static final Map<String, Box> ROOMS = rooms();
