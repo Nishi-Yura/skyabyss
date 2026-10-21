@@ -62,7 +62,7 @@ public final class LampBandClient {
         Font font = mc.font;
         String full = text.getString();
         int want = jp.revati.skyabyss.client.quest.ObjectiveStrip.bandWidth(mc);
-        out.add(HudLayout.Request.of(HudLayout.Id.LAMP, HudLayout.Region.TOP_LEFT, (maxW, maxH) -> {
+        out.add(HudLayout.Request.of(HudLayout.Id.LAMP, HudLayout.Region.TOP_LEFT, HudLayout.Fit.keyed(List.of(full, want), (maxW, maxH) -> {
             int w = Math.min(want, maxW - 6);
             int n = Math.min(3, (maxH - 2) / 10);
             if (n < 1 || w < 60) {
@@ -70,7 +70,7 @@ public final class LampBandClient {
             }
             int lines = Math.min(n, jp.revati.skyabyss.lore.LoreWrap.wrap(full, w - 6, font::width).size());
             return new HudLayout.Size(w + 6, lines * 10 + 2);
-        }));
+        })));
     }
 
     public static void render(GuiGraphics g, DeltaTracker delta) {

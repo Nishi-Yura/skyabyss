@@ -181,6 +181,7 @@ public final class SelfTestRunner {
         steps.add(Step.once("prologue", PrologueSelfTest::runSelfTest));
         // 序盤の構造物 (野営地・鐘の宿り・巨大な足跡・巨神の骨)。docs/design/17 の 4 章
         steps.addAll(jp.revati.skyabyss.opening.site.SiteSelfTest.steps());
+        steps.addAll(jp.revati.skyabyss.opening.site.CapitalDoorsSelfTest.steps());
         steps.addAll(ChapterSkySelfTest.steps());
         // 序章・一章の中身 (初日のお使い・旅の跡・歌石・見張りの丘・小さな異変・歩哨・岩鯨の影の出来事・予兆 3 拍)。docs/design/17 の 1.5。岩鯨を出す段より前に置く
         steps.addAll(jp.revati.skyabyss.story.ch1.Ch1SelfTest.steps());

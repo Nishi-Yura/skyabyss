@@ -54,6 +54,10 @@ public final class BuildAuditSelfTest {
         // 骨のあばら (anchor の部品) は地形に沿って建つので、起伏のある所で肋骨の先の 1 個が地面から離れて見えることがある (自然の起伏との関係。調べて直すなら RibBuilder / ribs.json)
         // 建てた避難所の監査の枠は部品の外へ 3 マス広い。近くに村 (自然生成) があると、その家のかまどの向きを拾う (この Mod の部品の向きは bp:shelter の監査が見る)
         ALLOW.add(new Allow("built:shelter", "ATTACH_FACING", null, "a furnace of a neighbouring vanilla village house inside the 3-block margin of the audit box; the blueprint itself has no furnace (bp:shelter is audited separately)"));
+        // 都 (鐘の宿り) の階段は大半が飾り (蛇腹・窓台・屋根・持ち送り)。足場として見る規則は合わない。歩ける道と戸の前は tools/capital/audit.py が調べる
+        for (String kind : new String[] {"STAIR_BURIED", "STAIR_RUN", "STAIR_UPSIDE", "STAIR_GAP", "STAIR_REVERSED"}) {
+            ALLOW.add(new Allow("built:shelter", kind, null, "capital trim stairs (cornices, sills, roofs); walk paths and doors are checked by tools/capital/audit.py"));
+        }
         ALLOW.add(new Allow("built:ribs", "FLOAT_BLOCK", null, "terrain-following anchor site: a rib tip can end up one step above a dip in the ground; reported in docs/review/build_audit_report.md"));
         // 火口の縁の段の最後: 縁の高さで終わる見晴らしの段 (その先にしかけは無い。13 の火口の縁を切って外を見られる所)
         for (String kind : new String[] {"STAIR_REVERSED", "STAIR_DROP"}) {

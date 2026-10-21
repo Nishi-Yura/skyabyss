@@ -1,5 +1,6 @@
 # 最初の 1 時間の通し (rpg_brushup A10): 新しいプレイヤーが 序章 -> 岩鯨の初見 -> 鎖 を進む間の、目的の帯の文・画面・知らせを時刻つきで記録する。
 #   ./gradlew runShots -Pscript=tools/shots/first_hour.txt        (約 20 分。音は自動で 0。毎回、新しい世界で流す: run/shots/first_hour/saves/opening_first_hour を消す)
+#   NOTE: run with SKYABYSS_LANG=en_us (the waitband / waitnotice words below are the English band and notice texts; the shot client defaults to ja_jp)
 #   記録: run/shots/first_hour/shots/first_hour/shots.log の "[watch]" (watch on のあいだ、帯・画面・知らせが変わるたびに) と "[band]" "[gap]" "[waited]" "[dialogue]" の行。
 #         game= は総 tick (20 tick = 1 秒。ここが「何分目」)、day= / tod= はゲーム内の日と一日の時刻
 #   読み方と結果: docs/review/first_hour_log.md
@@ -88,7 +89,7 @@ band
 echo --- pick up the page (it falls 2 blocks ahead) and read it from the hotbar
 cmd tp @e[type=item,nbt={Item:{id:"skyabyss:lore_page"}},limit=1] @s
 wait 40
-key key.hotbar.2
+key key.hotbar.1
 wait 5
 use
 wait 10

@@ -139,7 +139,11 @@ public final class SiteFinder {
     }
 
     // biome = false なら群系を問わない (大きな構造物の最後の手段)
+    // 大きな範囲で許す水の割合 (標本の 1/この数)。都の最後の手段では 1/4
+    static int WET_FRACTION = 10;
+
     public static Area area(Ground p, int cx, int cz, int halfX, int halfZ, int maxRange, boolean fine, boolean biome) {
+        int wet = 0;
         List<Integer> hs = new ArrayList<>();
         int min = Integer.MAX_VALUE;
         int max = Integer.MIN_VALUE;
@@ -154,6 +158,10 @@ public final class SiteFinder {
                 int wz = cz + zz;
                 boolean coarse = halfX >= 16 || halfZ >= 16;
                 if (coarse ? p.wetCoarse(wx, wz) : p.wet(wx, wz)) {
+                    // 都のような大きな範囲は、池や川が少し (1 割まで) あってもよい (整地で埋める。fillWater)
+                    if (halfX >= 60 && ++wet <= nx * nz / WET_FRACTION) {
+                        continue;
+                    }
                     return new Area(false, 0, 0, 0, 0);
                 }
                 int t = coarse ? p.topCoarse(wx, wz) : p.top(wx, wz);
@@ -261,13 +269,14 @@ public final class SiteFinder {
     // ---------------------------------------------------------------- 宿り: 野営地から 140〜220 (東を優先)。庭の入口 (南向き) を野営地の方へ向ける
     @Nullable
     static Spot findShelter(Probe p, BlockPos camp) {
-        int[][] passes = {{140, 220, 4}, {140, 220, 7}, {100, 320, 8}};
+        // 都 (docs/design/33 の 2): 一辺 200 の範囲。野営地から 260〜340 (壁の縁が野営地から 150 以上)。段差は整地で吸収するので広めに許す
+        int[][] passes = {{260, 340, 20}, {260, 340, 32}, {240, 420, 48}, {240, 480, 80}};
         for (int[] pass : passes) {
             List<Integer> dists = new ArrayList<>();
             for (int d = pass[0]; d <= pass[1]; d += 10) {
                 dists.add(d);
             }
-            dists.sort(Comparator.comparingInt(d -> Math.abs(d - 180)));
+            dists.sort(Comparator.comparingInt(d -> Math.abs(d - 300)));
             for (int ai = 0; ai < 24; ai++) {
                 // 東から 0, +15, -15, +30, -30, ... 度
                 int deg = ((ai + 1) / 2) * 15 * (ai % 2 == 1 ? 1 : -1);
@@ -275,13 +284,40 @@ public final class SiteFinder {
                 for (int d : dists) {
                     int x = camp.getX() + (int) Math.round(Math.cos(a) * d);
                     int z = camp.getZ() + (int) Math.round(Math.sin(a) * d);
-                    Area ar = area(p, x, z, 11, 11, pass[2]);
+                    Area ar = area(p, x, z, 100, 100, pass[2], false, pass[2] < 48);
                     if (ar.ok()) {
                         BlockPos c = new BlockPos(x, ar.median() + 1, z);
                         return new Spot(c, rotToward(camp.getX() - x, camp.getZ() - z, true), false);
                     }
                 }
             }
+        }
+        // 最後の手段: 都は必ず建てる。群系を問わず、水は 1/4 まで許し、段差のいちばん小さい所を選ぶ (整地で吸収する)
+        WET_FRACTION = 4;
+        try {
+            Area best = null;
+            int bx = 0;
+            int bz = 0;
+            for (int ai = 0; ai < 24; ai++) {
+                int deg = ((ai + 1) / 2) * 15 * (ai % 2 == 1 ? 1 : -1);
+                double a = Math.toRadians(deg);
+                for (int d = 260; d <= 420; d += 40) {
+                    int x = camp.getX() + (int) Math.round(Math.cos(a) * d);
+                    int z = camp.getZ() + (int) Math.round(Math.sin(a) * d);
+                    Area ar = area(p, x, z, 100, 100, 512, false, false);
+                    if (ar.ok() && (best == null || ar.max() - ar.min() < best.max() - best.min())) {
+                        best = ar;
+                        bx = x;
+                        bz = z;
+                    }
+                }
+            }
+            if (best != null) {
+                SkyAbyss.LOGGER.warn("Opening sites: the capital takes rough ground near {} {} (height range {})", bx, bz, best.max() - best.min());
+                return new Spot(new BlockPos(bx, best.median() + 1, bz), rotToward(camp.getX() - bx, camp.getZ() - bz, true), false);
+            }
+        } finally {
+            WET_FRACTION = 10;
         }
         return null;
     }

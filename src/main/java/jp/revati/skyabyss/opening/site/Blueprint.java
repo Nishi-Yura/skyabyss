@@ -51,6 +51,8 @@ public final class Blueprint {
     public int clearNear;
     // 範囲に池・水たまりがあってもよい (足跡は池の縁にまたがってもよい、骨は浅い水に立ってもよい)。水の列は触らない。人の建物は今までどおり避ける
     public boolean wetOk;
+    // 範囲の中の水 (池・川) を土で埋めて建てる (都。wetOk と違い、水の列も整える)
+    public boolean fillWater;
 
     private Blueprint(String name) {
         this.name = name;
@@ -74,12 +76,57 @@ public final class Blueprint {
             }
             bp.minY = Integer.MAX_VALUE;
             bp.maxY = Integer.MIN_VALUE;
-            for (JsonElement e : json.getAsJsonArray("blocks")) {
+            // boxes (直方体の塗り。都のような大きな部品向け) → 一つずつのブロック。あとに書いたものが勝つ (同じ場所は上書き)
+            java.util.LinkedHashMap<Long, Cell> byPos = new java.util.LinkedHashMap<>();
+            if (json.has("boxes")) {
+                for (JsonElement e : json.getAsJsonArray("boxes")) {
+                    JsonArray a = e.getAsJsonArray();
+                    BlockState st = palette.get(a.get(6).getAsInt());
+                    for (int x = a.get(0).getAsInt(); x <= a.get(3).getAsInt(); x++) {
+                        for (int y = a.get(1).getAsInt(); y <= a.get(4).getAsInt(); y++) {
+                            for (int z = a.get(2).getAsInt(); z <= a.get(5).getAsInt(); z++) {
+                                byPos.put(net.minecraft.core.BlockPos.asLong(x, y, z), new Cell(x, y, z, st));
+                            }
+                        }
+                    }
+                }
+            }
+            // runs (x の向きに続く並び。作り込んだ都向け): [y, z, x0, 番号, 長さ, 番号, 長さ, …]。番号 -1 = 何も置かない
+            if (json.has("runs")) {
+                for (JsonElement e : json.getAsJsonArray("runs")) {
+                    JsonArray a = e.getAsJsonArray();
+                    int y = a.get(0).getAsInt();
+                    int z = a.get(1).getAsInt();
+                    int x = a.get(2).getAsInt();
+                    for (int i = 3; i + 1 < a.size(); i += 2) {
+                        int idx = a.get(i).getAsInt();
+                        int len = a.get(i + 1).getAsInt();
+                        if (idx >= 0) {
+                            BlockState st = palette.get(idx);
+                            for (int k = 0; k < len; k++) {
+                                byPos.put(net.minecraft.core.BlockPos.asLong(x + k, y, z), new Cell(x + k, y, z, st));
+                            }
+                        }
+                        x += len;
+                    }
+                }
+            }
+            for (JsonElement e : json.has("blocks") ? json.getAsJsonArray("blocks") : new JsonArray()) {
                 JsonArray a = e.getAsJsonArray();
                 int y = a.get(1).getAsInt();
-                bp.cells.add(new Cell(a.get(0).getAsInt(), y, a.get(2).getAsInt(), palette.get(a.get(3).getAsInt())));
-                bp.minY = Math.min(bp.minY, y);
-                bp.maxY = Math.max(bp.maxY, y);
+                Cell c = new Cell(a.get(0).getAsInt(), y, a.get(2).getAsInt(), palette.get(a.get(3).getAsInt()));
+                if (byPos.isEmpty() && !json.has("boxes") && !json.has("runs")) {
+                    bp.cells.add(c);
+                } else {
+                    byPos.put(net.minecraft.core.BlockPos.asLong(c.x(), y, c.z()), c);
+                }
+            }
+            if (!byPos.isEmpty()) {
+                bp.cells.addAll(byPos.values());
+            }
+            for (Cell c : bp.cells) {
+                bp.minY = Math.min(bp.minY, c.y());
+                bp.maxY = Math.max(bp.maxY, c.y());
             }
             if (bp.cells.isEmpty()) {
                 bp.minY = 0;
@@ -110,6 +157,7 @@ public final class Blueprint {
                 bp.maxY = Math.max(bp.maxY, meta.get("height").getAsInt());
             }
             bp.wetOk = meta.has("wetOk") && meta.get("wetOk").getAsBoolean();
+            bp.fillWater = meta.has("fillWater") && meta.get("fillWater").getAsBoolean();
             if (meta.has("clearNear")) {
                 bp.clearNear = meta.get("clearNear").getAsInt();
             }

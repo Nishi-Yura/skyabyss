@@ -57,7 +57,7 @@ public final class ChapterLabel {
             Font font = mc.font;
             String full = text(current()).getString();
             int want = ObjectiveStrip.bandWidth(mc);
-            out.add(jp.revati.skyabyss.hud.HudLayout.Request.of(jp.revati.skyabyss.hud.HudLayout.Id.CHAPTER, jp.revati.skyabyss.hud.HudLayout.Region.TOP_LEFT, (maxW, maxH) -> {
+            out.add(jp.revati.skyabyss.hud.HudLayout.Request.of(jp.revati.skyabyss.hud.HudLayout.Id.CHAPTER, jp.revati.skyabyss.hud.HudLayout.Region.TOP_LEFT, jp.revati.skyabyss.hud.HudLayout.Fit.keyed(java.util.List.of(full, want), (maxW, maxH) -> {
                 int w = Math.min(want, maxW - 6);
                 int n = Math.min(2, (maxH + 3) / ROWS);
                 if (n < 1 || w < 40) {
@@ -65,7 +65,7 @@ public final class ChapterLabel {
                 }
                 int lines = Math.min(n, jp.revati.skyabyss.lore.LoreWrap.wrap(full, w - 2, font::width).size());
                 return new jp.revati.skyabyss.hud.HudLayout.Size(w + 6, lines * ROWS - 3);
-            }));
+            })));
         }
     }
 

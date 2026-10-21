@@ -59,6 +59,8 @@
 
 ## 3. NPC
 
+> **都（33 の 2.2。採用・未実装）**: 語り部は「最後の鐘守」で、大鐘楼の足もとに住む。数行を足す（空見の一族のこと、「宿り」を「都」とも呼ぶ、閉じた施設の戸の前での一言）。イサナと組合（一章で開く）、職人と鍛冶場は 33 の表のとおり。拍子・メインの段は変えない。
+
 ### 3.1 人物
 
 | | 語り部（`skyabyss:storyteller`） | 鯨追い（`skyabyss:whale_chaser`） |
@@ -458,7 +460,7 @@ data/<名前空間>/quest/<名前>.json
 | 項目 | 決まり |
 | --- | --- |
 | 見た目 | 二本柱と小さな庇、紙が三枚、鯨骨の留め釘が一本。32px。3 案（`docs/review/board_roughs/compare.png`）から A を採用し、ゲームで見て地面すれすれが低い棚に見えたので y=6 まで上げて脚を見せた（当たり判定も 16 の高さ）。生成は `tools/gen_message_board.py --option A\|B\|C` |
-| 置かれ方 | 村の鐘（集会所）から 48 ブロック以内に人が来たとき、その村にまだ板がなければ、鐘から 3〜6 ブロックの所に鐘のほうを向けて一枚立てる。村ごとに一度だけ（壊されても立て直さない。記録は `skyabyss_free_quests`。NPC のいない所でも見つけられるため）。実装: `FreeQuestEvents.placeBoard` |
+| 置かれ方 | 都（鐘の宿り）では組合の中に設計図が 2 枚置き、鐘のそばには立てない（`FreeQuestData.markBoard`）。ほかの村では、村の鐘（集会所）から 48 ブロック以内に人が来たとき、その村にまだ板がなければ、鐘から 3〜6 ブロックの所に鐘のほうを向けて一枚立てる。村ごとに一度だけ（壊されても立て直さない。記録は `skyabyss_free_quests`。NPC のいない所でも見つけられるため）。実装: `FreeQuestEvents.placeBoard` |
 | 作る | 紙 3・板材 3・棒 2（どこにでも置ける。どの板も同じ頼みを映す） |
 | 右クリック | 今日の頼みごとの画面。品を納める頼みは、開いたときに手持ちから受け取る |
 | 画面 | 紙の札を並べる。題（週替わりは金の縁）、何をするか、状態（受ける / 受けている / 済んだ / 今日はもう受けられない / まだ）、仲間が受けている数。札に重ねると全文と報酬。上に「今日受けた頼み 1 / 3」と「次の張り替えまで、およそ N 分」。語り部の「頼みごと」からは、会話の画面と入れ替えて開く |
@@ -561,7 +563,8 @@ data/<名前空間>/quest/<名前>.json
 | 6 | メインが「ask_storyteller」、not(印 met) | `shadow_first` |
 | 7 | メインが「watch_sky」、not(印 wait_told) | `shadow_wait` |
 | 8 | not(印 met) | `first` |
-| 9 | — | `menu` |
+| 9 | repeat_run、not(印 repeat_told) | `repeat_note` |
+| 10 | — | `menu` |
 
 **語り部のセリフ**
 
@@ -575,7 +578,10 @@ data/<名前空間>/quest/<名前>.json
 | `shadow0_why` | grave | 膝が痛むのさ。それと、鐘がね。朝から、風もないのに小さく鳴っているんだよ。<br>……年寄りの気のせいなら、いいんだけどね。 |  | 「覚えておく。」→ `menu`（好感度+1） |
 | `shadow_first` | grave | ……その顔。見たんだね、昼の空を。<br>ここは、見た者が最初に寄る所なんだよ。……まあ、火にあたっておいき。<br>（序盤: 影を見てから宿りへ来た (初対面)） |  | ▼ `shadow2` |
 | `shadow_wait` | smile | まだ、見ていないんだね。<br>慌てなくていい。昼のうちは、空はどこへも行きやしないよ。<br>（序盤: 影を待つ間に話しかけた (一度だけ)） | 印 wait_told | ▼ `menu` |
-| `menu` | neutral | 何か聞きたいことでもあるのかい。<br>（話題を選ぶ節 (条件で出る話題が変わる)） |  | 「昼間、雲の上を何かが渡っていった。」→ `shadow1`（条件: 伝承 prologue/shadow、(メインが未着手 または メインが「ask_storyteller」)）<br>「空のことを聞かせてほしい。」→ `shadow1`（条件: not(伝承 prologue/shadow)、メインが未着手）<br>「旅の人は、どこに？」→ `chaser_hint`（条件: メインが「find_chaser」）<br>「この村に伝わる歌はある？」→ `song1`（条件: not(印 song_heard)）<br>「数え歌の続きが知りたい。」→ `sub_offer`（条件: 印 song_heard、数え歌が未着手、メインが始まっている、イサナと会った（印 met、イサナ））<br>「夜、遠くに誰かが立っていた。」→ `watcher`（条件: not(伝承 prologue/watcher)、見る者に気づいた）<br>「夜に気をつけることはある？」→ `watcher`（条件: not(伝承 prologue/watcher)、not(見る者に気づいた)、好感度 10 以上）<br>「この村の決まりごとを教えてほしい。」→ `calendar`（条件: not(伝承 prologue/seventh_night)、好感度 20 以上）<br>「古い帳面を見せる。」→ `book`（条件: 伝承 prologue/the_book、not(印 book_shown)）<br>「道すがら、気になるものを見た。」→ `seen_menu`（条件: (伝承 prologue/camp、not(印 camp_told) または 伝承 prologue/footprints、not(印 prints_told) または 伝承 prologue/footsteps、not(印 steps_told) または 伝承 prologue/bone_hill、not(印 bones_told) または 伝承 prologue/sky_song、not(印 song_told) または 伝承 chapter1/stone_whale、not(印 whale_told) または 伝承 chapter1/sky_ruins、not(印 back_told))）<br>「また来る。」→ `end` |
+| `menu` | neutral | 何か聞きたいことでもあるのかい。<br>（話題を選ぶ節 (条件で出る話題が変わる)） |  | 「昼間、雲の上を何かが渡っていった。」→ `shadow1`（条件: 伝承 prologue/shadow、(メインが未着手 または メインが「ask_storyteller」)）<br>「空のことを聞かせてほしい。」→ `shadow1`（条件: not(伝承 prologue/shadow)、メインが未着手）<br>「旅の人は、どこに？」→ `chaser_hint`（条件: メインが「find_chaser」）<br>「この村に伝わる歌はある？」→ `song1`（条件: not(印 song_heard)）<br>「数え歌の続きが知りたい。」→ `sub_offer`（条件: 印 song_heard、数え歌が未着手、メインが始まっている、印 met）<br>「夜、遠くに誰かが立っていた。」→ `watcher`（条件: not(伝承 prologue/watcher)、見る者に気づいた）<br>「夜に気をつけることはある？」→ `watcher`（条件: not(伝承 prologue/watcher)、not(見る者に気づいた)、好感度 10 以上）<br>「この村の決まりごとを教えてほしい。」→ `calendar`（条件: not(伝承 prologue/seventh_night)、好感度 20 以上）<br>「古い帳面を見せる。」→ `book`（条件: 伝承 prologue/the_book、not(印 book_shown)）<br>「道すがら、気になるものを見た。」→ `seen_menu`（条件: (伝承 prologue/camp、not(印 camp_told) または 伝承 prologue/footprints、not(印 prints_told) または 伝承 prologue/footsteps、not(印 steps_told) または 伝承 prologue/bone_hill、not(印 bones_told) または 伝承 prologue/sky_song、not(印 song_told) または 伝承 chapter1/stone_whale、not(印 whale_told) または 伝承 chapter1/sky_ruins、not(印 back_told) または (伝承 prologue/capital_skywatch または 伝承 prologue/capital_guild_roll または 伝承 prologue/capital_graveyard または 伝承 prologue/capital_gates)、not(印 capital_told))）<br>「また来る。」→ `end` |
+| `capital1` | neutral | 閉じているだろう。ここは都だった。……そう呼ぶ人は、もう少ないけれどね。<br>昔は「空見」と呼ばれる一族がいて、国を預かっていた。影が通れば鐘を鳴らし、見たものを帳面に書く。それだけの一族さ。<br>（都の話 1 (空見の一族)） |  | ▼ `capital2` |
+| `capital2` | grave | その一族は絶えた。砦は塔だけが生きている。わたしは最後の鐘守だ。<br>家は空いている。好きなのを使えばいい。……戸の閉まっている所は、まだ開けられない。時が来れば開く。<br>（都の話 2 (最後の鐘守。閉じた施設)） | 印 capital_told、好感度+1 | ▼ `menu` |
+| `repeat_note` | smile | （文は `skyabyss_vow` の lang）<br>（周回 (一度でも心臓を止めて戻った人に一度だけ。文は skyabyss_vow の lang)） | 印 repeat_told | ▼ `menu` |
 | `shadow1` | grave | 空のことかい。<br>……晴れた昼に、急に暗くなることがある。羊はうずくまり、鳥は黙る。雲の上を、何かが渡っていくんだよ。<br>（メインを始める (空のことを聞いた印。序盤の二段を飛ばす)） | 印 sky_asked、クエスト開始 main_song | ▼ `shadow2` |
 | `shadow2` | grave | あれが何なのかは、誰も知らない。見上げた者は、みんな口をつぐむ。<br>ただ、影が通った年には、決まって“歌”が聞こえるんだ。遠い空の向こうから、低く、長く。 |  | ▼ `shadow3` |
 | `shadow3` | neutral | その歌を追いかけている、物好きな旅の人がいてね。ゆうべから、村の外れで火を焚いている。<br>話を聞きたいなら、煙を目印にお行き。……あたしは、あまり勧めないけれど。<br>（ここに入るとメインの「語り部に尋ねる」が済む） |  | 「行ってみる。」→ `end`（好感度+1）<br>「どうして勧めない？」→ `shadow_why` |
@@ -597,7 +603,7 @@ data/<名前空間>/quest/<名前>.json
 | `whale` | grave | 岩の山が、空を泳いでいた？<br>……そうかい。歌の主を、見たんだね。 | 印 whale_told | ▼ `whale2` |
 | `whale2` | grave | 母さんが言っていたよ。あれが降りてくるのは、誰かを迎えに来るときだって。<br>誰を迎えに来るのかは、言わなかったけど。 |  | ▼ `@entry` |
 | `back` | neutral | 背中に、町が……。人が住んでいたのかい。空の上で、地面も持たずに。<br>……そこで生まれて、そこで死んだのなら。その人たちにとっては、鯨が世界のすべてだったんだね。 | 印 back_told、好感度+2 | ▼ `@entry` |
-| `seen_menu` | neutral | ほう。何を見たんだい。<br>（序盤: 見たものの話題 (見たものだけ並ぶ。岩鯨と背中の話もここ)） |  | 「野営地の跡を見た。」→ `camp0`（条件: 伝承 prologue/camp、not(印 camp_told)）<br>「地面に、大きなくぼみが並んでいた。」→ `prints0`（条件: 伝承 prologue/footprints、not(印 prints_told)）<br>「夜、地面が揺れた。」→ `steps0`（条件: 伝承 prologue/footsteps、not(印 steps_told)）<br>「丘に、巨大な骨が立っていた。」→ `bones0`（条件: 伝承 prologue/bone_hill、not(印 bones_told)）<br>「夜空から、歌が降ってきた。」→ `song0`（条件: 伝承 prologue/sky_song、not(印 song_told)）<br>「空を泳ぐ岩の山を見た。」→ `whale`（条件: 伝承 chapter1/stone_whale、not(印 whale_told)）<br>「鯨の背中に、町の跡があった。」→ `back`（条件: 伝承 chapter1/sky_ruins、not(印 back_told)）<br>「やっぱり、いい。」→ `menu` |
+| `seen_menu` | neutral | ほう。何を見たんだい。<br>（序盤: 見たものの話題 (見たものだけ並ぶ。岩鯨と背中の話、都の閉じた戸の話もここ)） |  | 「野営地の跡を見た。」→ `camp0`（条件: 伝承 prologue/camp、not(印 camp_told)）<br>「地面に、大きなくぼみが並んでいた。」→ `prints0`（条件: 伝承 prologue/footprints、not(印 prints_told)）<br>「夜、地面が揺れた。」→ `steps0`（条件: 伝承 prologue/footsteps、not(印 steps_told)）<br>「丘に、巨大な骨が立っていた。」→ `bones0`（条件: 伝承 prologue/bone_hill、not(印 bones_told)）<br>「夜空から、歌が降ってきた。」→ `song0`（条件: 伝承 prologue/sky_song、not(印 song_told)）<br>「空を泳ぐ岩の山を見た。」→ `whale`（条件: 伝承 chapter1/stone_whale、not(印 whale_told)）<br>「鯨の背中に、町の跡があった。」→ `back`（条件: 伝承 chapter1/sky_ruins、not(印 back_told)）<br>「この都は、どこも戸が閉じている。」→ `capital1`（条件: (伝承 prologue/capital_skywatch または 伝承 prologue/capital_guild_roll または 伝承 prologue/capital_graveyard または 伝承 prologue/capital_gates)、not(印 capital_told)）<br>「やっぱり、いい。」→ `menu` |
 | `camp0` | grave | あの野営地かい。……焚き火は、いつも冷えているだろう。<br>誰かが使った跡だけが、あそこにはあるんだ。使うところを見た者は、いないけれどね。<br>（序盤: 野営地の跡） | 印 camp_told、好感度+1 | ▼ `@entry` |
 | `prints0` | grave | 足跡……かい。<br>数えたかい。数えるのは、三つまでにしておおき。四つ目を探しに行った者は、帰ってこなかったそうだよ。<br>（序盤: 巨大な足跡） | 印 prints_told、好感度+1 | ▼ `@entry` |
 | `steps0` | grave | 揺れたのかい。……三度、だったろう？<br>そういう夜は、あたしは耳をふさいで数え歌を歌うことにしている。みっつまで歌うと、いつも静かになるんだよ。<br>（序盤: 夜の足音） | 印 steps_told、好感度+1 | ▼ `@entry` |
@@ -665,7 +671,7 @@ data/<名前空間>/quest/<名前>.json
 | `watch_sky` | 鐘の宿りの語り部は、今日あたり空を見ていなさい、と言った。<br>鐘は朝から、風もないのに小さく鳴っているという。 | 晴れた昼を待って、空を見上げよう | lore prologue/shadow<br>skip_if: (伝承 prologue/shadow または 伝承 chapter1/stone_whale または 印 sky_asked) | 20 |
 | `ask_storyteller` | 晴れた昼に、空が暗くなった。雲の上を、何かが渡っていった。<br>語り部なら、何か知っているかもしれない。 | 語り部に、空のことを尋ねよう | talk storyteller の節 `shadow3`<br>skip_if: 伝承 chapter1/stone_whale | 30 |
 | `find_chaser` | 影が通った年には、決まって遠い空から“歌”が聞こえるという。<br>その歌を追う旅人が、少し離れた所で火を焚いている。煙が目印だ。 | 火を焚く鯨追いに、話を聞きに行こう | talk whale_chaser の節 `c_whale2`<br>skip_if: 伝承 chapter1/stone_whale | 30 |
-| `see_whale` | 歌の主は、空を泳ぐ岩の鯨だという。ときどき雲の下まで降りてきて、鎖を垂らす。<br>歌が聞こえたら、空を見ろ。 | 歌に耳をすまし、空を泳ぐ岩鯨を探そう（歌のあとは「夕方まで待って、岩鯨を探そう」。`see_whale.see.wait`） | lore chapter1/stone_whale | 60 |
+| `see_whale` | 歌の主は、空を泳ぐ岩の鯨だという。ときどき雲の下まで降りてきて、鎖を垂らす。<br>歌が聞こえたら、空を見ろ。 | 歌に耳をすまし、空を泳ぐ岩鯨を探そう | lore chapter1/stone_whale | 60 |
 | `board` | 岩鯨が、すぐそこにいる。降りてきたら、地面に届いた鎖をつかめば、背中へ引き上げられるはずだ。 | 鎖をのぼって、岩鯨の背中へ渡ろう | lore chapter1/sky_ruins | 60 |
 | `inscriptions` | 背中には、崩れた町があった。祠の階段を下りると、三つの道が奥へ続いている。<br>どの道の先にも、背中の民が碑文を残しているはずだ。 | 背中の碑文を三つ読んでみよう（3） | lore chapter1/inscription_west, chapter1/inscription_east, chapter1/inscription_below | 90 |
 | `heart` | 封印が解けた。奥の扉の向こうで、何かが脈を打っている。<br>鍵は、鼓動のそばに納められているという。 | 体の奥で脈打つものを、止めに行こう<br>天の鍵の欠片を手に取ろう | lore chapter1/heart_stilled<br>lore chapter1/sky_key | 0 |

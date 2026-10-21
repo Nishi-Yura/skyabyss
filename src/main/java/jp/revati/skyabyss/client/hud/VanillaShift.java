@@ -92,6 +92,11 @@ public final class VanillaShift {
     public static void beginToasts(GuiGraphics g) {
         int dy = dy(Id.V_TOASTS);
         int dx = dx(Id.V_TOASTS);
+        // 札を右下 (ホットバーの右上) に置く設定: 2 枚分 (64) を体力の帯の上に
+        if (jp.revati.skyabyss.Config.CARD_PLACE.get() == jp.revati.skyabyss.Config.CardPlace.BOTTOM_RIGHT) {
+            dx = 0;
+            dy = g.guiHeight() - 64 - 2;
+        }
         toastPushed = dy != 0 || dx != 0;
         if (toastPushed) {
             g.pose().pushPose();

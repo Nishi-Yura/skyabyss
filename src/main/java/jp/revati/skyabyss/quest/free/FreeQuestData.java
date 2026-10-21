@@ -22,6 +22,13 @@ public class FreeQuestData extends SavedData {
     private static final Factory<FreeQuestData> FACTORY = new Factory<>(FreeQuestData::new, FreeQuestData::load);
 
     final Set<Long> boards = new HashSet<>();
+
+    // この鐘のそばには板を立てない (都では組合の中に設計図が板を置く)
+    public void markBoard(long bell) {
+        if (boards.add(bell)) {
+            setDirty();
+        }
+    }
     final Map<UUID, Long> lastPass = new HashMap<>();
     final Map<UUID, Long> lastTide = new HashMap<>();
 

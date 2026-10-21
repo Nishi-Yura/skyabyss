@@ -98,6 +98,16 @@ public final class BoardBeamClient {
         BEAMS.clear();
     }
 
+    // 通常合成の面の置き場 (毎フレーム 128KB を確保・解放していたので一つを使い回す。描いた MeshData を閉じると中身は捨てられる)
+    private static ByteBufferBuilder alphaStore;
+
+    private static ByteBufferBuilder alphaStore() {
+        if (alphaStore == null) {
+            alphaStore = new ByteBufferBuilder(1 << 17);
+        }
+        return alphaStore;
+    }
+
     @SubscribeEvent
     static void onRenderLevel(RenderLevelStageEvent event) {
         if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_TRANSLUCENT_BLOCKS || BEAMS.isEmpty()) {
@@ -113,7 +123,7 @@ public final class BoardBeamClient {
         double time = clientTick + partial;
         BufferBuilder buf = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
         // 通常合成の面 (A/B/C の筋の本体。昼空でも色が乗る)。Tesselator は 1 本しか使えないので別の置き場
-        ByteBufferBuilder alphaStore = new ByteBufferBuilder(1 << 17);
+        ByteBufferBuilder alphaStore = alphaStore();
         BufferBuilder alphaBuf = new BufferBuilder(alphaStore, VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
         for (Entry e : BEAMS.values()) {
             TitanEndNetwork.Beam b = e.beam();
@@ -132,7 +142,6 @@ public final class BoardBeamClient {
         MeshData mesh = buf.build();
         MeshData alphaMesh = alphaBuf.build();
         if (mesh == null && alphaMesh == null) {
-            alphaStore.close();
             return;
         }
         RenderSystem.enableBlend();
@@ -145,7 +154,6 @@ public final class BoardBeamClient {
         if (alphaMesh != null) {
             BufferUploader.drawWithShader(alphaMesh);
         }
-        alphaStore.close();
         RenderSystem.blendFunc(com.mojang.blaze3d.platform.GlStateManager.SourceFactor.SRC_ALPHA, com.mojang.blaze3d.platform.GlStateManager.DestFactor.ONE);
         if (mesh != null) {
             BufferUploader.drawWithShader(mesh);

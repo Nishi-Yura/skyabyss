@@ -83,7 +83,9 @@ def main():
     print("wrote", OUT / "index.html")
 
 
-TEMPLATE = r'''<title>{{TITLE}}</title>
+TEMPLATE = r'''<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{{TITLE}}</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DotGothic16&family=Zen+Kaku+Gothic+New:wght@400;700&display=swap">
 <style>

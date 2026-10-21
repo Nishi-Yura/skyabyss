@@ -56,9 +56,7 @@ public final class RaijuClient {
         }
         BossEvent boss = event.getBossEvent();
         String name = boss.getName().getString();
-        Raiju raiju = mc.level.getEntitiesOfClass(Raiju.class, mc.player.getBoundingBox().inflate(64),
-                        r -> r.isAlive() && r.getDisplayName().getString().equals(name))
-                .stream().min(Comparator.comparingDouble(r -> r.distanceToSqr(mc.player))).orElse(null);
+        Raiju raiju = jp.revati.skyabyss.client.BossOwners.find(mc, boss, Raiju.class, 64);
         if (raiju == null) {
             return;
         }

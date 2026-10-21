@@ -50,6 +50,10 @@ final class SkillPassives {
     static boolean campNear(Player player) {
         BlockPos center = player.blockPosition();
         int r = (int) SkillRules.CAMP_RANGE;
+        if (!jp.revati.skyabyss.util.SectionScan.mayContain(player.level(), center.offset(-r, -r, -r), center.offset(r, r, r),
+                s -> s.is(BlockTags.CAMPFIRES) || s.is(ModBlocks.RESONANCE_FORGE.get()))) {
+            return false;
+        }
         for (BlockPos p : BlockPos.betweenClosed(center.offset(-r, -r, -r), center.offset(r, r, r))) {
             BlockState s = player.level().getBlockState(p);
             if (s.is(BlockTags.CAMPFIRES) || s.is(ModBlocks.RESONANCE_FORGE.get())) {

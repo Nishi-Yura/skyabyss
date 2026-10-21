@@ -152,7 +152,7 @@ public final class ObjectiveStrip {
         int want = bandWidth(mc);
         boolean mazeBig = false;
         boolean far = hasFar(c) && jp.revati.skyabyss.client.titan.LampBandClient.waypoint() == null;
-        out.add(jp.revati.skyabyss.hud.HudLayout.Request.of(jp.revati.skyabyss.hud.HudLayout.Id.OBJECTIVE, jp.revati.skyabyss.hud.HudLayout.Region.TOP_LEFT, (maxW, maxH) -> {
+        out.add(jp.revati.skyabyss.hud.HudLayout.Request.of(jp.revati.skyabyss.hud.HudLayout.Id.OBJECTIVE, jp.revati.skyabyss.hud.HudLayout.Region.TOP_LEFT, jp.revati.skyabyss.hud.HudLayout.Fit.keyed(java.util.List.of(c.text, want, far, mazeBig), (maxW, maxH) -> {
             int w = Math.min(want, maxW - 6);
             if (w < 60) {
                 return null;
@@ -164,7 +164,7 @@ public final class ObjectiveStrip {
             }
             java.util.List<String> lines = wrap(font, c.text, w - 6, Math.min(maxLines, 6));
             return new jp.revati.skyabyss.hud.HudLayout.Size(w + 6, lines.size() * 10 + 2 + extra);
-        }));
+        })));
     }
 
     public static String direction(Vec3 from, BlockPos to) {

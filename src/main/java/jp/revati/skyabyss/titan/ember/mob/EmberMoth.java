@@ -222,6 +222,9 @@ public class EmberMoth extends EmberMob {
         }
         Block block = crust.get();
         BlockPos c = BlockPos.containing(here);
+        if (!jp.revati.skyabyss.util.SectionScan.mayContain(level, c.offset(-6, -4, -6), c.offset(6, 2, 6), s -> s.is(block))) {
+            return;
+        }
         BlockPos nearest = null;
         double nd = Double.MAX_VALUE;
         for (BlockPos p : BlockPos.betweenClosed(c.offset(-6, -4, -6), c.offset(6, 2, 6))) {

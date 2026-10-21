@@ -93,6 +93,26 @@ public final class Config {
         BOTH
     }
 
+    // 札 (獲得・進展・クエスト・伝承・進捗) の置き場 (client/notice/CardFeed。docs/design/18 の 3 章)
+    public enum CardPlace {
+        TOP_RIGHT,
+        BOTTOM_RIGHT,
+        LEFT_FEED,
+        COMPACT
+    }
+
+    public static final ModConfigSpec.EnumValue<CardPlace> CARD_PLACE = CLIENT_BUILDER
+            .comment("札の置き場。LEFT_FEED = 左の目的の帯の下に一行ずつ (既定・仮), BOTTOM_RIGHT = 右下に札を 2 枚まで, COMPACT = 右上に一行ずつの小さな列, TOP_RIGHT = 右上の札 (以前のまま)")
+            .defineEnum("cardPlace", CardPlace.LEFT_FEED);
+
+    public static final ModConfigSpec.BooleanValue HIDE_HELP_TOASTS = CLIENT_BUILDER
+            .comment("バニラのレシピ・操作説明の札を出さないか (true = 出さない。レシピは旅嚢の作り方の帯と本で見られる)")
+            .define("hideHelpToasts", true);
+
+    public static final ModConfigSpec.BooleanValue UI_SKIN_INSTALLED = CLIENT_BUILDER
+            .comment("画面の絵柄のパック (A 暗い板) をはじめての起動で選んだか (一度だけ。外したあとは選び直さない。リソースパックの画面で A/B/C を替えられる)")
+            .define("uiSkinInstalled", false);
+
     public static final ModConfigSpec.EnumValue<NotifyMode> NOTIFY_MODE = CLIENT_BUILDER
             .comment("知らせの出し先。TOAST = 画面の演出 (字幕・札・帯) だけ, CHAT = チャットだけ (今までどおり), BOTH = 両方。流れた知らせは N の「知らせの記録」で読み返せる")
             .defineEnum("notifyMode", NotifyMode.TOAST);

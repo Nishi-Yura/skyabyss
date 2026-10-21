@@ -1,0 +1,83 @@
+# 都の作風のラフ 3 案 (tools/capital/style_roughs.py) を平らな世界に並べて撮る。./gradlew runShots -Pscript=tools/shots/capital_style.txt
+# 一角は x 0..64 / z 0..47 (A は x 0、B は x 100、C は x 200)。絵は run/shots/capital_style/shots/capital_style/*.png
+world capitalstyle flat
+size 1280 720
+timeout 900
+render 12
+clouds off
+
+wait 100
+cmd skyabyss cinematic stop
+wait 10
+cmd skyabyss cinematic stop
+cmd time set 2500
+cmd weather clear
+cmd gamemode spectator
+cmd gamerule doDaylightCycle false
+hud off
+cmd forceload add -16 -16 280 64
+wait 120
+cmd skyabyss dev ch1 place capital_style_a 0 -61 0 0
+cmd skyabyss dev ch1 place capital_style_b 100 -61 0 0
+cmd skyabyss dev ch1 place capital_style_c 200 -61 0 0
+wait 60
+cmd tp @s 66 -34 58 135 30
+waitchunks
+wait 20
+shot style_a_aerial
+cmd tp @s 24 -58 23 180 -14
+waitchunks
+wait 20
+shot style_a_street
+cmd tp @s 44 -58 23 -147 -30
+waitchunks
+wait 20
+shot style_a_tower
+cmd tp @s 16 -58 15 0 -12
+waitchunks
+wait 20
+shot style_a_hall
+cmd tp @s -14 -37 -12 -50 26
+waitchunks
+wait 20
+shot style_a_roofs
+cmd tp @s 166 -34 58 135 30
+waitchunks
+wait 20
+shot style_b_aerial
+cmd tp @s 124 -58 23 180 -14
+waitchunks
+wait 20
+shot style_b_street
+cmd tp @s 144 -58 23 -147 -30
+waitchunks
+wait 20
+shot style_b_tower
+cmd tp @s 116 -58 15 0 -12
+waitchunks
+wait 20
+shot style_b_hall
+cmd tp @s 86 -37 -12 -50 26
+waitchunks
+wait 20
+shot style_b_roofs
+cmd tp @s 266 -34 58 135 30
+waitchunks
+wait 20
+shot style_c_aerial
+cmd tp @s 224 -58 23 180 -14
+waitchunks
+wait 20
+shot style_c_street
+cmd tp @s 244 -58 23 -147 -30
+waitchunks
+wait 20
+shot style_c_tower
+cmd tp @s 216 -58 15 0 -12
+waitchunks
+wait 20
+shot style_c_hall
+cmd tp @s 186 -37 -12 -50 26
+waitchunks
+wait 20
+shot style_c_roofs

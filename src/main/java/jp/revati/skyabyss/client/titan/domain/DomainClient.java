@@ -351,7 +351,7 @@ public final class DomainClient {
         }
         int h = r.ended == 0 ? PANEL_H : 16;
         out.add(jp.revati.skyabyss.hud.HudLayout.Request.of(jp.revati.skyabyss.hud.HudLayout.Id.BOSS_DOMAIN, jp.revati.skyabyss.hud.HudLayout.Region.TOP_RIGHT,
-                (maxW, maxH) -> h <= maxH && maxW >= 100 ? new jp.revati.skyabyss.hud.HudLayout.Size(Math.min(PANEL_W, maxW), h) : null));
+                jp.revati.skyabyss.hud.HudLayout.Fit.keyed(java.util.List.of("domain", h), (maxW, maxH) -> h <= maxH && maxW >= 100 ? new jp.revati.skyabyss.hud.HudLayout.Size(Math.min(PANEL_W, maxW), h) : null)));
     }
 
     private static final int FLASH_TICKS = 50;

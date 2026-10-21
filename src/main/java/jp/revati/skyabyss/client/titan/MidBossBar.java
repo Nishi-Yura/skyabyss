@@ -40,9 +40,8 @@ public final class MidBossBar {
     private MidBossBar() {
     }
 
-    private static <T extends LivingEntity> boolean near(Minecraft mc, Class<T> type, String name) {
-        return !mc.level.getEntitiesOfClass(type, mc.player.getBoundingBox().inflate(96), e -> e.isAlive() && e.getDisplayName().getString().equals(name))
-                .stream().min(Comparator.comparingDouble(e -> e.distanceToSqr(mc.player))).isEmpty();
+    private static <T extends LivingEntity> boolean near(Minecraft mc, Class<T> type, net.minecraft.world.BossEvent boss) {
+        return jp.revati.skyabyss.client.BossOwners.find(mc, boss, type, 96) != null;
     }
 
     @SubscribeEvent(priority = EventPriority.LOW)
@@ -53,8 +52,8 @@ public final class MidBossBar {
         }
         BossEvent boss = event.getBossEvent();
         String name = boss.getName().getString();
-        Look look = near(mc, WhaleboneCaptain.class, name) ? CAPTAIN : near(mc, ElderSentry.class, name) ? ELDER
-                : near(mc, PearlKeeper.class, name) ? PEARL : near(mc, TideBeckoner.class, name) ? BECKONER : null;
+        Look look = near(mc, WhaleboneCaptain.class, boss) ? CAPTAIN : near(mc, ElderSentry.class, boss) ? ELDER
+                : near(mc, PearlKeeper.class, boss) ? PEARL : near(mc, TideBeckoner.class, boss) ? BECKONER : null;
         if (look == null) {
             return;
         }

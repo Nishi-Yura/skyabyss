@@ -236,7 +236,7 @@ public final class SiteSelfTest {
         // 距離
         double ds = OpeningSites.horizontal(camp, shelter);
         double dr = OpeningSites.horizontal(camp, ribs);
-        check(f, ds >= 100 && ds <= 320, "shelter distance " + ds);
+        check(f, ds >= 100 && ds <= 480, "shelter distance " + ds);  // 都: 260〜340、見つからなければ 240〜480 (SiteFinder.findShelter)
         check(f, dr >= 200 && dr <= 380, "ribs distance " + dr);
         SkyAbyss.LOGGER.info("[opening] camp {} shelter {} ({} blocks) ribs {} ({} blocks) footprints {} cairns {}", camp, shelter, (int) ds, ribs, (int) dr, prints,
                 OpeningSites.cairns(server).size());
@@ -261,7 +261,7 @@ public final class SiteSelfTest {
         BlockPos campStand = site(server, Kind.CAMP, "stand", camp);
         check(f, solidBelow(level, campStand) && level.getBlockState(campStand).isAir(), "camp stand " + campStand + " is not on solid ground");
         BlockPos shelterStand = site(server, Kind.SHELTER, "stand", shelter);
-        check(f, solidBelow(level, shelterStand) && level.getBlockState(shelterStand).isAir(), "shelter stand " + shelterStand + " is not on solid ground");
+        check(f, solidBelow(level, shelterStand) && level.getBlockState(shelterStand).isAir(), "shelter stand " + shelterStand + " is not on solid ground (" + level.getBlockState(shelterStand) + " above " + level.getBlockState(shelterStand.below()) + ")");
         // 帳面と樽
         BlockPos nb = OpeningSites.notebook(server).orElse(null);
         check(f, nb != null && !level.getEntitiesOfClass(net.minecraft.world.entity.item.ItemEntity.class, new net.minecraft.world.phys.AABB(nb).inflate(2),

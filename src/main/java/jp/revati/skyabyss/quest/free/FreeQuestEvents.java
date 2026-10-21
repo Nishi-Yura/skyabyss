@@ -103,6 +103,11 @@ public final class FreeQuestEvents {
     }
 
     // ---------------------------------------------------------------- 板を立てる
+    // この鐘のそばには、もう板を立てない (立てた・立っていた・都で組合に置いた)
+    public static boolean boardSuppressed(ServerLevel level, BlockPos bell) {
+        return FreeQuestData.get(level.getServer().overworld()).boards.contains(bell.asLong());
+    }
+
     static void placeBoard(ServerLevel level, BlockPos bell) {
         FreeQuestData data = FreeQuestData.get(level);
         if (data.boards.contains(bell.asLong()) || !loaded(level, bell)) {

@@ -1,0 +1,13 @@
+{
+  "chapter": "prologue",
+  "order": 70,
+  "inscription_sign": "sign.skyabyss.capital.keep",
+  "unlock": [
+    {
+      "type": "manual"
+    }
+  ],
+  "related": [
+    "prologue/the_book"
+  ]
+}

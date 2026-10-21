@@ -1,0 +1,14 @@
+{
+  "chapter": "titan_whale",
+  "order": 5,
+  "inscription_sign": "sign.skyabyss.capital.guild_roll",
+  "unlock": [
+    {
+      "type": "manual"
+    }
+  ],
+  "related": [
+    "prologue/capital_guild_roll",
+    "prologue/capital_graveyard"
+  ]
+}

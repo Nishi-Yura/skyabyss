@@ -1,0 +1,86 @@
+# バニラの画面の絵柄 (tools/ui/gen_vanilla_skin.py の A/B/C) を撮る。SKYABYSS_UI_SKIN=a|b|c|none ./gradlew runShots -Pscript=tools/shots/ui_skin.txt -PshotsName=ui_skin_<案>
+world uiskin flat
+size 1280 720
+timeout 400
+render 6
+clouds off
+
+wait 100
+cmd skyabyss cinematic stop
+wait 10
+cmd skyabyss cinematic stop
+waitscreen 900 none
+wait 40
+cmd time set noon
+cmd weather clear
+cmd gamemode survival
+hud on
+chat clear
+cmd give @s minecraft:iron_sword
+cmd give @s minecraft:bread 12
+cmd give @s minecraft:oak_log 32
+cmd give @s minecraft:coal 8
+cmd give @s minecraft:iron_ore 6
+cmd tp @s 0 -60 0 0 40
+wait 20
+shot ui_hud
+cmd setblock 0 -60 2 minecraft:chest replace
+wait 10
+cmd tp @s 0 -60 0 0 40
+look 0 40
+use
+wait 6
+stopuse
+wait 20
+hover slot 0
+wait 6
+shot ui_chest
+close
+wait 10
+cmd setblock 0 -60 2 minecraft:furnace[facing=north] replace
+wait 10
+cmd tp @s 0 -60 0 0 40
+look 0 40
+use
+wait 6
+stopuse
+wait 20
+hover slot 0
+wait 6
+shot ui_furnace
+close
+wait 10
+cmd setblock 0 -60 2 minecraft:crafting_table replace
+wait 10
+cmd tp @s 0 -60 0 0 40
+look 0 40
+use
+wait 6
+stopuse
+wait 20
+hover slot 0
+wait 6
+shot ui_crafting
+close
+wait 10
+cmd setblock 0 -60 2 minecraft:anvil[facing=north] replace
+wait 10
+cmd tp @s 0 -60 0 0 40
+look 0 40
+use
+wait 6
+stopuse
+wait 20
+hover slot 0
+wait 6
+shot ui_anvil
+close
+wait 10
+key key.inventory
+wait 20
+hover slot 36
+wait 6
+shot ui_inventory
+close
+wait 10
+echo done

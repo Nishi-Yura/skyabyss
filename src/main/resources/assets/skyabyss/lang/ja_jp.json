@@ -1386,5 +1386,8 @@
   "block.skyabyss.relic_lever": "遺物のレバー",
   "block.skyabyss.relic_button": "遺物のボタン",
   "block.skyabyss.relic_plate": "遺物の感圧板",
-  "block.skyabyss.relic_bell": "遺物の鐘"
+  "block.skyabyss.relic_bell": "遺物の鐘",
+  "gui.skyabyss.card.advancement": "進捗",
+  "gui.skyabyss.card.challenge": "挑戦",
+  "gui.skyabyss.card.lore": "伝承"
 }

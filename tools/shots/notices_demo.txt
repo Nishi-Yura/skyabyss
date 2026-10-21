@@ -10,6 +10,10 @@ cmd time set noon
 cmd weather clear
 cmd gamemode creative
 hud on
+wait 100
+cmd skyabyss cinematic stop
+waitscreen 900 none
+wait 200
 waitchunks
 chat clear
 wait 20

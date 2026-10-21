@@ -95,6 +95,16 @@ public final class OpeningSites {
         return extra(server, Kind.SHELTER, "bell");
     }
 
+    // 都の社の祭壇 (転生の台座。社が開いたあと)
+    public static Optional<BlockPos> capitalAltar(MinecraftServer server) {
+        return extra(server, Kind.SHELTER, "altar");
+    }
+
+    // 都の中の鯨追いの野営の場所 (都は舗装で自然の地面がないので、設計図が庭に用意する)
+    public static Optional<BlockPos> chaserCamp(MinecraftServer server) {
+        return extra(server, Kind.SHELTER, "chaser");
+    }
+
     // 宿りの煙の出る焚き火 (遠くから見える目印。煙の柱の根もと)
     public static Optional<BlockPos> smoke(MinecraftServer server) {
         return extra(server, Kind.SHELTER, "smoke");

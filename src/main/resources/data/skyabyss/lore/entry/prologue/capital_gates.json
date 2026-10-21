@@ -1,0 +1,13 @@
+{
+  "chapter": "prologue",
+  "order": 73,
+  "inscription_sign": "sign.skyabyss.capital.gate_n",
+  "unlock": [
+    {
+      "type": "manual"
+    }
+  ],
+  "related": [
+    "prologue/shadow"
+  ]
+}

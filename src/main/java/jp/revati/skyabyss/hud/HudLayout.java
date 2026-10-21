@@ -65,7 +65,37 @@ public final class HudLayout {
         Size fit(int maxW, int maxH);
 
         static Fit fixed(int w, int h) {
-            return (maxW, maxH) -> w <= maxW && h <= maxH ? new Size(w, h) : null;
+            return new Fixed(w, h);
+        }
+
+        // 文などで寸法が決まる Fit を、その入力 (key) で比べられるように包む。key が同じなら同じ寸法を返すこと
+        // (HudManager は要求の並びが前の枠と同じなら計算を飛ばす。ラムダのままでは毎回別物になり、毎フレーム計算していた)
+        static Fit keyed(Object key, Fit inner) {
+            return new Keyed(key, inner);
+        }
+    }
+
+    public record Fixed(int w, int h) implements Fit {
+        @Override
+        public Size fit(int maxW, int maxH) {
+            return w <= maxW && h <= maxH ? new Size(w, h) : null;
+        }
+    }
+
+    public record Keyed(Object key, Fit inner) implements Fit {
+        @Override
+        public Size fit(int maxW, int maxH) {
+            return inner.fit(maxW, maxH);
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            return o instanceof Keyed k && java.util.Objects.equals(key, k.key);
+        }
+
+        @Override
+        public int hashCode() {
+            return java.util.Objects.hashCode(key);
         }
     }
 

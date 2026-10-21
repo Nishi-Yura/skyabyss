@@ -1,0 +1,19 @@
+# 大鐘楼 (案 A) を広場から見上げる。./gradlew runShots -Pscript=tools/shots/capital_bell.txt
+world opening_capital normal
+size 1280 720
+timeout 900
+render 12
+clouds off
+cmd time set noon
+cmd weather clear
+cmd gamemode spectator
+cmd skyabyss dev opening build
+hud off
+cmd skyabyss dev opening goto bell 18
+look 180 -20
+waitchunks
+shot capital_bell_up
+cmd skyabyss dev opening goto bell 40
+look 180 -8
+waitchunks
+shot capital_bell_far

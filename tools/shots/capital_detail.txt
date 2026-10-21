@@ -1,0 +1,58 @@
+# 都の作り込みの確かめ (一棟ずつ)。./gradlew runShots -Pscript=tools/shots/capital_detail.txt
+# 設計図を変えたら run/shots/capital_detail/saves を消す。at の座標と向きは設計図のもの (yaw 0 = 南、180 = 北、90 = 西、-90 = 東)
+world opening_capital_detail normal
+size 1280 720
+timeout 1200
+render 12
+clouds off
+
+wait 100
+cmd skyabyss cinematic stop
+wait 10
+cmd skyabyss cinematic stop
+cmd time set 2000
+cmd weather clear
+cmd gamerule doDaylightCycle false
+cmd gamemode spectator
+cmd skyabyss dev opening build
+hud off
+cmd skyabyss dev opening at shelter 0 0 2 3 180 -6
+waitchunks
+wait 20
+shot d_market
+cmd skyabyss dev opening at shelter 0 9 2 -9 135 -4
+waitchunks
+wait 20
+shot d_market_close
+cmd skyabyss dev opening at shelter 0 0 2 86 0 -4
+waitchunks
+wait 20
+shot d_gate_s_in
+cmd skyabyss dev opening at shelter 0 0 2 118 180 -8
+waitchunks
+wait 20
+shot d_gate_s_out
+cmd skyabyss dev opening at shelter 0 -118 2 0 -90 -8
+waitchunks
+wait 20
+shot d_gate_w_out
+cmd skyabyss dev opening at shelter 0 0 6 -86 180 -6
+waitchunks
+wait 20
+shot d_gate_n_stair
+cmd skyabyss dev opening at shelter 0 -48 2 50 180 -5
+waitchunks
+wait 20
+shot d_row_a
+cmd skyabyss dev opening at shelter 0 -26 2 31 -90 -3
+waitchunks
+wait 20
+shot d_row_b
+cmd skyabyss dev opening at shelter 0 70 2 31 90 -3
+waitchunks
+wait 20
+shot d_row_c
+cmd skyabyss dev opening at shelter 0 50 2 70 180 -4
+waitchunks
+wait 20
+shot d_row_d

@@ -51,7 +51,7 @@ public final class LoreClient {
         refreshScreen();
         // 会話・場面の最中は溜め、閉じたあとに一枚ずつ (first_hour_log B-2)
         jp.revati.skyabyss.client.notice.NoticeClient.gate(jp.revati.skyabyss.notice.NoticeGate.P_CARD, jp.revati.skyabyss.client.notice.NoticeClient.CARD_GAP, () -> {
-            mc.getToasts().addToast(new LoreToast(title));
+            jp.revati.skyabyss.client.notice.CardFeed.show(Component.translatable("gui.skyabyss.card.lore"), title, 0x9FC7E8, () -> new LoreToast(title));
             mc.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.BOOK_PAGE_TURN, 0.8f, 0.6f));
         });
     }

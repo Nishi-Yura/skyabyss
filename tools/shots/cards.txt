@@ -1,0 +1,32 @@
+# 札の置き場 (設定 cardPlace) を比べる。置き場ごとに -PshotsName=cards_<置き場> で撮り、
+# 前に run/shots/cards_<置き場>/config/skyabyss-client.toml に cardPlace を書く (tools/capital/../ui/cards_shots.sh)
+# 獲得・進展・クエスト・伝承・バニラの進捗・mod の進捗を一度に出す
+world cardsdemo flat
+size 1280 720
+timeout 300
+render 8
+clouds off
+
+wait 100
+cmd skyabyss cinematic stop
+wait 10
+cmd skyabyss cinematic stop
+cmd time set noon
+cmd weather clear
+cmd gamemode survival
+hud on
+waitchunks
+chat clear
+cmd skyabyss quest start @s main_song
+waitscreen 900 none
+wait 200
+cmd skyabyss dev notice gain message.skyabyss.boss_reward
+cmd skyabyss dev notice unlock message.skyabyss.fragment_received
+cmd skyabyss quest start @s sub_song
+cmd skyabyss lore unlock @s prologue/camp
+cmd advancement grant @s only minecraft:story/mine_stone
+cmd advancement grant @s only skyabyss:camp
+wait 40
+shot cards_burst
+wait 70
+shot cards_later

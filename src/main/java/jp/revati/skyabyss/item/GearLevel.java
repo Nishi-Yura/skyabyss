@@ -97,6 +97,10 @@ public final class GearLevel {
         if (previous.isEmpty() && !(hand.getItem() instanceof ModGear) && !(off.getItem() instanceof ModGear)) {
             return;
         }
+        // 前に何も打ち消しておらず、両手の品がどちらも使える (レベルが足りる) なら、作る物は何も無い
+        if (previous.isEmpty() && (!(hand.getItem() instanceof ModGear) || meets(player, hand)) && (!(off.getItem() instanceof ModGear) || meets(player, off))) {
+            return;
+        }
         List<Lock> next = new ArrayList<>();
         // 利き手の武器と、左手の盾 (珊瑚の盾など。特性は左手の修飾子になる)
         lock(player, hand, EquipmentSlot.MAINHAND, "gear_lock/", next);
@@ -114,6 +118,22 @@ public final class GearLevel {
         } else {
             LOCKS.put(player, next);
         }
+    }
+
+    // 打ち消しの修飾子の名前 (毎 tick 作らないよう、作ったものを覚えておく)
+    private static final java.util.Map<String, ResourceLocation[]> LOCK_IDS = new java.util.concurrent.ConcurrentHashMap<>();
+
+    private static ResourceLocation lockId(String prefix, int i) {
+        ResourceLocation[] ids = LOCK_IDS.computeIfAbsent(prefix, k -> new ResourceLocation[16]);
+        if (i >= ids.length) {
+            return ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, prefix + i);
+        }
+        ResourceLocation id = ids[i];
+        if (id == null) {
+            id = ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, prefix + i);
+            ids[i] = id;
+        }
+        return id;
     }
 
     private static void lock(ServerPlayer player, ItemStack stack, EquipmentSlot slot, String prefix, List<Lock> next) {
@@ -134,7 +154,7 @@ public final class GearLevel {
                 case ADD_VALUE, ADD_MULTIPLIED_BASE -> -m.amount();
                 case ADD_MULTIPLIED_TOTAL -> m.amount() > -1 ? 1 / (1 + m.amount()) - 1 : 0;
             };
-            ResourceLocation id = ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, prefix + i++);
+            ResourceLocation id = lockId(prefix, i++);
             AttributeModifier current = instance.getModifier(id);
             if (current == null || current.amount() != amount || current.operation() != m.operation()) {
                 instance.addOrUpdateTransientModifier(new AttributeModifier(id, amount, m.operation()));
