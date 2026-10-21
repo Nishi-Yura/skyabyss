@@ -235,11 +235,20 @@ public final class ChapterSitesSelfTest {
     }
 
     private static BlockPos dry(SiteFinder.Probe probe, double angle, int dFrom, int dTo, BlockPos from) {
+        return dry(probe, angle, dFrom, dTo, from, null);
+    }
+
+    // avoid: その点から AWAY_DIST + 150 (遠い人の拠点の小要素の広がり) より近い所は選ばない。西が海の世界で、向きを回して探すうちに
+    // 東の遠い人 (C) の拠点のそばを選び、「どの場所からも遠い」が世界の種しだいで落ちていた
+    private static BlockPos dry(SiteFinder.Probe probe, double angle, int dFrom, int dTo, BlockPos from, BlockPos avoid) {
         for (int d = dFrom; d <= dTo; d += 25) {
             for (int k = 0; k < 24; k++) {
                 double a = angle + (k % 2 == 0 ? 1 : -1) * Math.toRadians(15 * ((k + 1) / 2));
                 int x = from.getX() + (int) Math.round(Math.cos(a) * d);
                 int z = from.getZ() + (int) Math.round(Math.sin(a) * d);
+                if (avoid != null && Math.hypot(x - avoid.getX(), z - avoid.getZ()) < ChapterSites.AWAY_DIST + 150) {
+                    continue;
+                }
                 if (SiteFinder.area(probe, x, z, 3, 3, 3).ok()) {
                     return new BlockPos(x, probe.top(x, z) + 1, z);
                 }
@@ -256,7 +265,7 @@ public final class ChapterSitesSelfTest {
             baseA = OpeningSites.camp(server).orElse(level.getSharedSpawnPos());
             SiteFinder.Probe probe = new SiteFinder.Probe(level);
             baseC = dry(probe, 0, 700, 900, baseA);
-            farPos = dry(probe, Math.PI, 500, 650, baseA);
+            farPos = dry(probe, Math.PI, 500, 650, baseA, baseC);
             check(baseC != null && farPos != null, "no dry land for the distant tests");
             waited = 0;
             check(ChapterSites.request(server, A, CH, baseA), "the first request did not schedule anything");

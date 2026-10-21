@@ -242,6 +242,8 @@ public final class TideBackLayout {
     public static final int ROCK_TOP = 66;
     // 巣の候補地 (10 か所から、リセットの種で 5 つ)
     public static final int NEST_COUNT = 5;
+    // 周回の長い干潟 (32 の 4 章、R5): 10 か所から 8 つ
+    public static final int NEST_COUNT_LONG = 8;
     public static final int[][] NEST_SITES = {{-19, -97}, {19, -98}, {-32, -112}, {32, -112}, {-12, -113}, {14, -113}, {-27, -126}, {28, -125},
             {-3, -85}, {5, -122}};
     public static final BlockPos BECKONER_HOME = new BlockPos(0, 64, -108);

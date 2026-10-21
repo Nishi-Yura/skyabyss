@@ -34,6 +34,8 @@ import net.minecraft.world.phys.Vec3;
 // 溜めの戸は扉のブロック (SealedGateBlock) で、開け閉めはワールドの既定 (部屋には持ち主のグループしかいない)
 public final class TideWatch {
     public static final int RESET_COOLDOWN = 30 * 20;
+    // 周回の長い潮見の間 (32 の 4 章、R5): 上の溜めを空にする配置を二つ続けて解く。一つ目で T が空になると潮が満ち直し、次の配置で栓と取っ手が置き直される
+    public static final int STAGES_LONG = 2;
     public static final String WATCH_TAG = "skyabyss_watch_mob";
 
     // 取っ手を置く所 (段ごとに 3 つ)。台の石の上に取っ手、看板は石の段の内側の面。版 12 までの形を (WATCH_DX, WATCH_DZ) 動かした
@@ -300,6 +302,16 @@ public final class TideWatch {
         int[] before = levels.clone();
         System.arraycopy(next, 0, levels, 0, 3);
         apply(level, before);
+        if (levels[2] == 0 && state.eastStage() + 1 < state.eastStagesNeeded() && !state.rung(TideBackState.Trial.EAST)) {
+            // 長い周の一つ目を解いた: 潮が満ち直し、次の配置へ
+            state.nextEastStage();
+            reset(level, state);
+            level.playSound(null, BASIN_DOOR[2], TideBackSetup.PLUG_FLOW.get(), SoundSource.BLOCKS, 2f, 0.6f);
+            for (ServerPlayer p : near(level)) {
+                Notice.narrate(p, "message.skyabyss.tide.watch_refills");
+            }
+            return;
+        }
         // 管を流れる水の粒と音
         for (int k = 0; k < 3; k++) {
             if (next[k] < before[k]) {

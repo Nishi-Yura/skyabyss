@@ -80,6 +80,8 @@ public class TideBackState extends SavedData {
         private static final String EAST = "tide.east";
         private static final String NEST_SITES = "tide.nest_sites";
         private static final String NESTS_BROKEN = "tide.nests_broken";
+        // 周回の長い潮見の間 (32 の 4 章、R5): 解いた配置の数 (長い周は 2 つ目を解くと岩棚へ)
+        private static final String EAST_STAGE = "tide.east_stage";
         private static final String BECKONER = "tide.beckoner";
         private static final String BOTTOM = "tide.bottom";
         private static final String LAST_SLEEPING = "keep.tide.last_sleeping";
@@ -111,9 +113,10 @@ public class TideBackState extends SavedData {
             } else {
                 record.putInt(EAST, 1 + random.nextInt(3));
             }
-            // 10 か所から 5 つ
+            // 10 か所から 5 つ (周回は 8 つ。RouteLength)
+            int want = jp.revati.skyabyss.trial.RouteLength.extended(record) ? TideBackLayout.NEST_COUNT_LONG : TideBackLayout.NEST_COUNT;
             int sites = 0;
-            while (Integer.bitCount(sites) < TideBackLayout.NEST_COUNT) {
+            while (Integer.bitCount(sites) < want) {
                 sites |= 1 << random.nextInt(TideBackLayout.NEST_SITES.length);
             }
             record.putInt(NEST_SITES, sites);
@@ -154,6 +157,22 @@ public class TideBackState extends SavedData {
 
         public int gardenRoute() {
             return record.getInt(ROUTE);
+        }
+
+        public int eastStage() {
+            return record.getInt(EAST_STAGE);
+        }
+
+        // 一つ目の配置を解いた: 次の配置 (今と違う 1〜3) へ
+        public void nextEastStage() {
+            record.putInt(EAST_STAGE, eastStage() + 1);
+            int cur = eastConfig();
+            record.putInt(EAST, 1 + Math.floorMod(cur, TidePuzzle.CONFIGS.length - 1));
+        }
+
+        // 岩棚へ行くまでに解く配置の数 (周回のグループは 2)
+        public int eastStagesNeeded() {
+            return jp.revati.skyabyss.trial.RouteLength.extended(record) ? TideWatch.STAGES_LONG : 1;
         }
 
         public int eastConfig() {

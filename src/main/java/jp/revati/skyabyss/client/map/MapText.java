@@ -20,6 +20,8 @@ public final class MapText {
             case WAYMARK -> m.name().isEmpty() ? TravelDest.waymarkName(m.extra()) : Component.literal(m.name());
             case SITE -> siteName(m.name(), m.extra());
             case SPAWN -> Component.translatable("gui.skyabyss.travel.spawn");
+            case SHRINE -> m.extra().isEmpty() ? Component.translatable("map.skyabyss.mark.shrine")
+                    : Component.translatable("map.skyabyss.shrine_of", Component.translatable("progress.skyabyss.titan." + m.extra()));
             default -> Component.translatable("map.skyabyss.mark." + m.kind().name().toLowerCase(java.util.Locale.ROOT));
         };
     }

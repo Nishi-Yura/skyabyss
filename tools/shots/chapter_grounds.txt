@@ -1,5 +1,5 @@
 # 章の跡地 (docs/design/33 の 3 章。W2) を撮る。./gradlew runShots -Pscript=tools/shots/chapter_grounds.txt
-# ワールド名が opening で始まるので序盤の場所と跡地が建つ。四つの跡地を整えて (合う地形がなければ形を作る)、上と地面から撮る。
+# ワールド名が opening で始まるので序盤の場所と跡地が建つ。四つの跡地を整えて (合う地形がなければ形を作る)、四つの祠を置き場に建て、上と地面から撮る。
 # 地形は世界の種しだい。形 (丘・入り江・峰・灰の盆地) を見たいときは run/shots/chapter_grounds/saves を消して撮り直す。
 # 絵は run/shots/chapter_grounds/shots/chapter_grounds/*.png
 world opening_grounds normal
@@ -21,6 +21,10 @@ cmd skyabyss dev grounds prepare whale
 cmd skyabyss dev grounds prepare tide
 cmd skyabyss dev grounds prepare storm
 cmd skyabyss dev grounds prepare ember
+cmd skyabyss dev grounds shrine whale
+cmd skyabyss dev grounds shrine tide
+cmd skyabyss dev grounds shrine storm
+cmd skyabyss dev grounds shrine ember
 cmd skyabyss dev grounds info
 hud off
 
@@ -51,6 +55,10 @@ cmd skyabyss dev grounds go tide shape 200 90 270 30
 waitchunks
 wait 30
 shot 06_tide_shape
+cmd skyabyss dev grounds go tide shrine 22 8 270 18
+waitchunks
+wait 20
+shot 06b_tide_shrine
 
 # ---- 三章 西の峰 (風見の丘・避雷の塔の跡・焼けた荷・風の碑)
 cmd skyabyss dev grounds go storm center 170 40 90 16
@@ -61,6 +69,10 @@ cmd skyabyss dev grounds go storm shape 220 90 90 26
 waitchunks
 wait 30
 shot 08_storm_shape
+cmd skyabyss dev grounds go storm shrine 22 8 90 18
+waitchunks
+wait 20
+shot 08b_storm_shrine
 
 # ---- 四章 南の灰の地 (灰の民の炉跡・観測点・温石の炉)
 cmd skyabyss dev grounds go ember center 150 70 0 28
@@ -71,3 +83,7 @@ cmd skyabyss dev grounds go ember shape 30 4 0 6
 waitchunks
 wait 20
 shot 10_ember_ground
+cmd skyabyss dev grounds go ember shrine 22 8 0 18
+waitchunks
+wait 20
+shot 11_ember_shrine

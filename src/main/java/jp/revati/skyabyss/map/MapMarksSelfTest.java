@@ -153,6 +153,19 @@ public final class MapMarksSelfTest {
         } finally {
             buf.release();
         }
+        // 8b. 巨神の祠: 建っていて、その巨神の心臓を止めた人にだけ、見たで出る (名前の材料は巨神)
+        java.util.Map<String, BlockPos> built = java.util.Map.of(jp.revati.skyabyss.progress.Titans.STONE_WHALE, new BlockPos(40, 80, -420));
+        List<MapMarks.Mark> shrines = new ArrayList<>();
+        MapMarks.shrineMarks(built::get, t -> true, shrines);
+        if (shrines.size() != 1 || shrines.get(0).kind() != MapMarks.Kind.SHRINE || shrines.get(0).rumor() || shrines.get(0).x() != 40
+                || !shrines.get(0).extra().equals(jp.revati.skyabyss.progress.Titans.STONE_WHALE) || shrines.get(0).color() == 0) {
+            f.add("a built shrine should be seen by those who stopped the heart: " + shrines);
+        }
+        shrines.clear();
+        MapMarks.shrineMarks(built::get, t -> false, shrines);
+        if (!shrines.isEmpty()) {
+            f.add("the shrine should not show before its heart is stopped: " + shrines);
+        }
         // 8. キー: 地図は M、合図は別のキー
         if (KeyDefaults.MAP != 77 || KeyDefaults.PING == KeyDefaults.MAP) {
             f.add("the travel map should be on M and the ping elsewhere");

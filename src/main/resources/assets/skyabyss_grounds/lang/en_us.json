@@ -7,5 +7,8 @@
   "map.skyabyss.site.w2_road_titan_tide": "Waymark cairn",
   "map.skyabyss.site.w2_road_titan_storm": "Waymark cairn",
   "map.skyabyss.site.w2_road_titan_ember": "Waymark cairn",
-  "message.skyabyss.ch2.conch.beach_only": "No echo comes back here. The island only comes to the east shore beyond the capital."
+  "message.skyabyss.ch2.conch.beach_only": "No echo comes back here. The island only comes to the east shore beyond the capital.",
+  "message.skyabyss.weathercock.peak_only": "The weathercock will not turn. The thunder wing only comes down on the peak west of the capital.",
+  "message.skyabyss.ember.surface.stone.basin_only": "The warm stone stays cold. The ember only surfaces in the ash land south of the capital.",
+  "map.skyabyss.shrine_of": "Shrine of the %s"
 }

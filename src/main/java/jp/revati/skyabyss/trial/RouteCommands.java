@@ -28,6 +28,7 @@ public final class RouteCommands {
                 .then(Commands.literal("no").executes(ctx -> reply(ctx, false)))
                 .then(Commands.literal("status").requires(s -> s.hasPermission(2)).executes(RouteCommands::status))
                 .then(Commands.literal("start").requires(s -> s.hasPermission(2)).executes(RouteCommands::start))
+                .then(Commands.literal("enter").requires(s -> s.hasPermission(2)).executes(RouteCommands::enter))
                 .then(Commands.literal("clear").requires(s -> s.hasPermission(2)).executes(RouteCommands::clear))
                 .then(Commands.literal("shrine").requires(s -> s.hasPermission(2)).then(Commands.argument("titan", com.mojang.brigadier.arguments.StringArgumentType.word())
                         .suggests((c, b) -> net.minecraft.commands.SharedSuggestionProvider.suggest(Titans.all(), b))
@@ -53,6 +54,21 @@ public final class RouteCommands {
         java.util.UUID group = Groups.keyOf(p);
         ctx.getSource().sendSuccess(() -> Component.literal("route of the " + titan + ": " + TrialRoute.describe(back, group)
                 + " pending " + TrialRoute.pendingCount() + " abandon " + TrialRoute.abandonPending(group)), false);
+        return 1;
+    }
+
+    // 入口の箱のまんなかへ立つ (撮影と確かめ用。初回なら予告のあと段 1 へ運ばれる)
+    private static int enter(CommandContext<CommandSourceStack> ctx) throws com.mojang.brigadier.exceptions.CommandSyntaxException {
+        ServerPlayer p = ctx.getSource().getPlayerOrException();
+        String titan = Titans.titanOfBack(p.serverLevel().dimension());
+        net.minecraft.world.phys.AABB box = titan == null ? null : TrialRoute.entryBox(titan);
+        if (box == null) {
+            ctx.getSource().sendFailure(Component.literal("not on a titan back"));
+            return 0;
+        }
+        net.minecraft.world.phys.Vec3 c = box.getCenter();
+        p.teleportTo(p.serverLevel(), c.x, box.minY, c.z, p.getYRot(), p.getXRot());
+        ctx.getSource().sendSuccess(() -> Component.literal("entered the route box of the " + titan + " at " + net.minecraft.core.BlockPos.containing(c).toShortString()), false);
         return 1;
     }
 

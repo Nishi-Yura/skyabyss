@@ -172,6 +172,13 @@ public final class ChapterGroundsSelfTest {
             Found fp = ChapterGrounds.find(flat, cap, ChapterGrounds.spec(Chapters.STORM), List.of());
             int pt = ChapterGrounds.overlay(flat, List.of(fp)).top(fp.shapeCenter().getX(), fp.shapeCenter().getZ());
             check(pt >= 70 + ChapterGrounds.PEAK_RISE - 8 && pt <= 70 + ChapterGrounds.PEAK_RISE, "the peak should rise about 60: " + pt);
+            // 峰の縁は切り立った壁にならない: 元の地面が形の中心より 40 低い列でも、縁 (半径の 98%) の段差は小さい
+            SiteData.Ground pg = new SiteData.Ground("t", fp.center());
+            pg.shape = Shape.PEAK.name();
+            pg.shapeCenter = fp.shapeCenter();
+            pg.baseY = 110;
+            int edge = ChapterGrounds.shapeTop(pg, fp.shapeCenter().getX() + (int) (ChapterGrounds.PEAK_HALF * 0.98), fp.shapeCenter().getZ(), 70, 63);
+            check(edge != Integer.MIN_VALUE && edge - 70 <= 6, "the peak skirt should meet the lower ground without a wall: " + edge);
             Found fb = ChapterGrounds.find(flat, cap, ChapterGrounds.spec(Chapters.EMBER), List.of());
             // 盆地の底は 8 下 (ただし海面 + 1 より下へは掘らない)
             int floor = ChapterGrounds.overlay(flat, List.of(fb)).top(fb.shapeCenter().getX(), fb.shapeCenter().getZ());
@@ -207,7 +214,7 @@ public final class ChapterGroundsSelfTest {
                 check(lx * bx + lz * bz > 0, "the tide gate should face the beach");
             }
 
-            // 道しるべ: 40 ごと、跡地の手前で止まる。川 (水) の点は飛ばす
+            // 道しるべ: 40 ごと、跡地の手前で止まる。浅い川は石の台で渡し、深い水の点は飛ばす
             List<BlockPos> road = ChapterGrounds.road(flat, cap, new BlockPos(0, 70, -1000), 0);
             check(road.size() >= 19 && road.size() <= 21, "the road to 1000 should have about 20 waymarks: " + road.size());
             for (int i = 1; i < road.size(); i++) {
@@ -216,7 +223,16 @@ public final class ChapterGroundsSelfTest {
             }
             Synth river = new Synth((x, z) -> z <= -400 && z >= -440 ? 55 : 70);
             List<BlockPos> wet = ChapterGrounds.road(river, cap, new BlockPos(0, 70, -1000), 0);
-            check(wet.stream().noneMatch(p -> p.getZ() <= -400 && p.getZ() >= -440) && wet.size() < road.size(), "no waymark on the river");
+            // 浅い川 (深さ 8) の点は飛ばさず、線の上に石の台で渡す (海面 + 1)。深い湖 (深さ 30) の点だけ飛ばす
+            check(wet.size() == road.size(), "the shallow river should be bridged, not skipped: " + wet.size() + " of " + road.size());
+            check(wet.stream().filter(p -> p.getZ() <= -400 && p.getZ() >= -440).allMatch(p -> p.getX() == 0 && p.getY() == 64)
+                    && wet.stream().anyMatch(p -> p.getZ() <= -400 && p.getZ() >= -440), "the river waymark should stand on the line at the water");
+            Synth lake = new Synth((x, z) -> z <= -400 && z >= -440 ? 33 : 70);
+            List<BlockPos> deep = ChapterGrounds.road(lake, cap, new BlockPos(0, 70, -1000), 0);
+            check(deep.stream().noneMatch(p -> p.getZ() <= -400 && p.getZ() >= -440) && deep.size() < road.size(), "no waymark on the deep lake");
+            Synth swamp = new Synth((x, z) -> z <= -400 && z >= -440 ? 63 : 70);
+            List<BlockPos> low = ChapterGrounds.road(swamp, cap, new BlockPos(0, 70, -1000), 0);
+            check(low.size() == road.size(), "a sea-level flat should still get its waymark: " + low.size());
             List<BlockPos> whaleRoad = ChapterGrounds.road(flat, cap, new BlockPos(0, 70, -300), ChapterGrounds.WHALE_CAIRNS);
             check(whaleRoad.size() >= ChapterGrounds.WHALE_CAIRNS, "the whale road should fit the 7 cairns even on a short band: " + whaleRoad.size());
             // 祠は平らな所 (斜面のそばでも 9×9 が 3 以内)
@@ -351,6 +367,27 @@ public final class ChapterGroundsSelfTest {
                 if (tg.fixedRest) {
                     check(TideBeach.restSpot(level) != null, "a dug cove gives a rest spot");
                 }
+            }
+            // 雷翼の止まり木は西の峰、余燼の浮上は南の灰の地だけ (33 の 3.1)。遠い人は近いとみなさない。峰の頂は中心のそばで、乾いた高い所
+            FakePlayer far = fake(server);
+            far.setPos(cap.getX() + 0.5, 100, cap.getZ() + 0.5);
+            SiteData.Ground sg = data.ground(Chapters.STORM.id());
+            if (sg != null) {
+                check(jp.revati.skyabyss.titan.storm.StormPeak.restricted(server) && !jp.revati.skyabyss.titan.storm.StormPeak.near(far),
+                        "the thunder wing should perch only on the west peak");
+                for (int dx = -64; dx <= 64; dx += 16) {
+                    for (int dz = -64; dz <= 64; dz += 16) {
+                        level.getChunk((sg.center.getX() + dx) >> 4, (sg.center.getZ() + dz) >> 4);
+                    }
+                }
+                jp.revati.skyabyss.titan.storm.StormPerch.Peak perch = jp.revati.skyabyss.titan.storm.StormPeak.perch(level);
+                check(perch != null && Math.hypot(perch.x() - sg.center.getX(), perch.z() - sg.center.getZ()) <= jp.revati.skyabyss.titan.storm.StormPeak.SEARCH + 1,
+                        "the west peak should give a perch near its centre: " + perch);
+            }
+            SiteData.Ground eg = data.ground(Chapters.EMBER.id());
+            if (eg != null) {
+                check(jp.revati.skyabyss.titan.ember.EmberBasin.restricted(server) && !jp.revati.skyabyss.titan.ember.EmberBasin.near(far),
+                        "the ember should surface only in the south ash land");
             }
             // 地図: 二章の人に東の浜の噂
             FakePlayer p = fake(server);

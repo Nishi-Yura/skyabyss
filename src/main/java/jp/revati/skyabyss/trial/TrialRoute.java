@@ -177,9 +177,10 @@ public final class TrialRoute {
     @Nullable
     public static AABB entryBox(String titan) {
         return switch (titan) {
-            // 登り口の階段の最初の 5 段 (台の北寄りから東へ)
+            // 登り口の階段の最初の 5 段 (台の北寄りから東へ)。段の足の高さは台の床 (FLANK_FLOOR_Y) から。広場の高さ (platformY) で
+            // 箱を置くと、箱が階段の 50 ブロック上の宙に浮いて、初回の順路が始まらなかった (R6 の撮影で見つけた)
             case Titans.STONE_WHALE -> {
-                int y = TitanBackLayout.platformY() + 1;
+                int y = TitanBackLayout.FLANK_FLOOR_Y + 1;
                 yield new AABB(TitanBackLayout.STAIR_X0, y, TitanBackLayout.STAIR_Z0,
                         TitanBackLayout.STAIR_X0 + 5, y + TitanBackLayout.STAIR_HEIGHT + 2, TitanBackLayout.STAIR_Z1 + 1);
             }
@@ -566,6 +567,16 @@ public final class TrialRoute {
         return null;
     }
 
+    // 開発用: 環境変数 SKYABYSS_ROUTE_TRACE があると、入口の箱の判断 (待つ・断る・始める) が変わるたびに記録へ書く (R6 の撮影で、始まらない理由を見る)
+    private static final boolean TRACE = System.getenv("SKYABYSS_ROUTE_TRACE") != null;
+    private static final Map<UUID, String> TRACE_LAST = new HashMap<>();
+
+    private static void trace(UUID group, String titan, String what) {
+        if (TRACE && !what.equals(TRACE_LAST.put(group, what))) {
+            SkyAbyss.LOGGER.info("Route entry of the {} for group {}: {}", titan, group, what);
+        }
+    }
+
     private static void tickEntry(ServerLevel back, String titan, List<ServerPlayer> players, long now) {
         AABB box = entryBox(titan);
         if (box == null || players.isEmpty()) {
@@ -577,6 +588,13 @@ public final class TrialRoute {
                 groups.add(Groups.keyOf(p));
             }
         }
+        if (TRACE) {
+            for (ServerPlayer p : players) {
+                if (!groups.contains(Groups.keyOf(p))) {
+                    trace(Groups.keyOf(p), titan, "outside the box at " + p.blockPosition().toShortString() + " (box " + box + ")");
+                }
+            }
+        }
         ENTRY_START.keySet().removeIf(g -> !groups.contains(g));
         for (UUID group : groups) {
             List<ServerPlayer> inside = new ArrayList<>();
@@ -586,6 +604,7 @@ public final class TrialRoute {
                 }
             }
             if (active(back, group)) {
+                trace(group, titan, "already on the route");
                 // 途中からは入れない (2.2)
                 for (ServerPlayer p : inside) {
                     if (!isParticipant(back, group, p.getUUID())) {
@@ -595,6 +614,7 @@ public final class TrialRoute {
                 continue;
             }
             if (!FirstRun.isFirstRun(back, group)) {
+                trace(group, titan, "replay group: use the shrine");
                 // 周回は祠から (決定 204)
                 for (ServerPlayer p : inside) {
                     Notice.bar(p, ModText.hint("message.skyabyss.route.use_shrine"));
@@ -602,6 +622,7 @@ public final class TrialRoute {
                 continue;
             }
             if (otherFirstRun(back, group) != null) {
+                trace(group, titan, "the body is busy with " + otherFirstRun(back, group));
                 ENTRY_START.remove(group);
                 for (ServerPlayer p : inside) {
                     Notice.bar(p, ModText.hint("message.skyabyss.route.body_busy"));
@@ -610,6 +631,7 @@ public final class TrialRoute {
             }
             List<ServerPlayer> all = present(back, group);
             if (inside.size() < all.size()) {
+                trace(group, titan, "waiting " + inside.size() + " of " + all.size());
                 ENTRY_START.remove(group);
                 for (ServerPlayer p : inside) {
                     Notice.bar(p, ModText.progress("message.skyabyss.route.waiting", inside.size(), all.size()));
@@ -618,6 +640,7 @@ public final class TrialRoute {
             }
             long t0 = ENTRY_START.computeIfAbsent(group, g -> now);
             long left = ENTRY_WAIT - (now - t0);
+            trace(group, titan, left <= 0 ? "starting" : "counting down");
             if (left <= 0) {
                 start(back, group, titan, all);
                 continue;

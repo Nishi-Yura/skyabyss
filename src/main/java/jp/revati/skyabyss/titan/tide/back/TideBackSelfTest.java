@@ -975,7 +975,8 @@ public final class TideBackSelfTest {
     private static void checkFlats(ServerLevel back, List<String> failures) {
         TideBackState.Group state = TideBackState.of(back, TEST);
         TideRooms.claim(back, TideRooms.FLATS, TEST);
-        check(Integer.bitCount(state.nestSites()) == NEST_COUNT, "nest sites should be " + NEST_COUNT + " of " + NEST_SITES.length, failures);
+        int wantNests = jp.revati.skyabyss.trial.RouteLength.extended(back, TEST) ? TideBackLayout.NEST_COUNT_LONG : NEST_COUNT;
+        check(Integer.bitCount(state.nestSites()) == wantNests, "nest sites should be " + wantNests + " of " + NEST_SITES.length, failures);
         for (int s = 0; s < NEST_SITES.length; s++) {
             if ((state.nestSites() & (1 << s)) != 0) {
                 check(!back.getBlockState(TideFlats.nestPos(s)).isAir(), "nest mound missing at site " + s, failures);

@@ -115,6 +115,11 @@ public final class Forge {
     @Nullable
     private static int[] current;
     private static final List<Consumer<ServerLevel>> DOOR_LISTENERS = new ArrayList<>();
+    // 周回の長い鍛えの間 (32 の 4 章、R5): 鍛え手の扉の鍵穴は二つ。鍵を二本鍛えて一本ずつ差す (差した本数とグループ)
+    public static final int KEYS_LONG = 2;
+    private static int keysIn;
+    @Nullable
+    private static UUID keysGroup;
 
     private Forge() {
     }
@@ -133,6 +138,17 @@ public final class Forge {
         doorTimer = 0;
         doorGroup = null;
         glowZ = Integer.MIN_VALUE;
+        keysIn = 0;
+        keysGroup = null;
+    }
+
+    // 扉を開けるのに要る鍵の本数 (周回のグループは 2)
+    public static int keysNeeded(ServerLevel level, UUID group) {
+        return jp.revati.skyabyss.trial.RouteLength.extended(level, group) ? KEYS_LONG : 1;
+    }
+
+    public static int keysIn() {
+        return keysIn;
     }
 
     // 扉の開いていく灯り (グループの見かけ)。EmberTrialSetup から一度だけ登録する
@@ -418,6 +434,20 @@ public final class Forge {
             return false;
         }
         held.shrink(1);
+        if (!group.equals(keysGroup)) {
+            keysGroup = group;
+            keysIn = 0;
+        }
+        keysIn++;
+        int need = keysNeeded(level, group);
+        if (keysIn < need) {
+            // 一本目: 鍵穴の一つが灯る。もう一本鍛えて差す
+            level.playSound(null, player.blockPosition(), EmberTrialSetup.QUENCH.get(), SoundSource.BLOCKS, 0.8f, 1.4f);
+            Notice.narrate(player, EmberIds.LANG_EAST + "door_one_more", keysIn, need);
+            return true;
+        }
+        keysIn = 0;
+        keysGroup = null;
         startDoor(level, group);
         Notice.narrate(player, EmberIds.LANG_EAST + "door_kindled");
         return true;

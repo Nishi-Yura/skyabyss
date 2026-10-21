@@ -435,8 +435,13 @@ public class EmberTitanEntity extends Entity implements GeoEntity, jp.revati.sky
             players.remove(asked);
             players.add(0, asked);
         }
+        // 四章の跡地があれば、浮かぶのはその灰の地だけ (灰の地の近くに人がいるとき。docs/design/33 の 3.1。EmberBasin)
+        boolean basinOnly = EmberBasin.restricted(level.getServer());
         for (ServerPlayer player : players) {
-            EmberGround.Spot spot = EmberGround.findSleepSpot(level, player.getX(), player.getZ());
+            if (basinOnly && !EmberBasin.near(player)) {
+                continue;
+            }
+            EmberGround.Spot spot = basinOnly ? EmberBasin.sleepSpot(level) : EmberGround.findSleepSpot(level, player.getX(), player.getZ());
             if (spot != null) {
                 lastNight = night;
                 beginApproach(spot, 0);
@@ -840,7 +845,7 @@ public class EmberTitanEntity extends Entity implements GeoEntity, jp.revati.sky
 
     // ---------------------------------------------------------------- 温石
 
-    public enum RequestResult { OK, NOT_NOW, TAKEN, NO_SPOT }
+    public enum RequestResult { OK, NOT_NOW, TAKEN, NO_SPOT, FAR }
 
     // 温石を握った人の頼み: この夜は自分のそばで眠る。一つの夜に一人だけ (2.6節)
     public RequestResult request(ServerPlayer player) {
@@ -853,7 +858,11 @@ public class EmberTitanEntity extends Entity implements GeoEntity, jp.revati.sky
         if (requestNight == night && requester != null && !requester.equals(player.getUUID())) {
             return RequestResult.TAKEN;
         }
-        EmberGround.Spot spot = EmberGround.findSleepSpot(level, player.getX(), player.getZ());
+        boolean basinOnly = EmberBasin.restricted(level.getServer());
+        if (basinOnly && !EmberBasin.near(player)) {
+            return RequestResult.FAR;
+        }
+        EmberGround.Spot spot = basinOnly ? EmberBasin.sleepSpot(level) : EmberGround.findSleepSpot(level, player.getX(), player.getZ());
         if (spot == null) {
             return RequestResult.NO_SPOT;
         }

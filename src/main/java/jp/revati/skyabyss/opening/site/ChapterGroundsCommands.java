@@ -40,6 +40,7 @@ public final class ChapterGroundsCommands {
                 .then(Commands.literal("dev").then(Commands.literal("grounds")
                         .then(Commands.literal("info").executes(ChapterGroundsCommands::info))
                         .then(Commands.literal("prepare").then(Commands.argument("chapter", StringArgumentType.word()).executes(ChapterGroundsCommands::prepare)))
+                        .then(Commands.literal("shrine").then(Commands.argument("chapter", StringArgumentType.word()).executes(ChapterGroundsCommands::shrine)))
                         .then(Commands.literal("go").then(Commands.argument("chapter", StringArgumentType.word()).then(Commands.argument("what", StringArgumentType.word())
                                 .then(Commands.argument("dist", FloatArgumentType.floatArg(0, 600)).then(Commands.argument("up", FloatArgumentType.floatArg(-40, 200))
                                         .then(Commands.argument("yaw", FloatArgumentType.floatArg(-360, 720)).then(Commands.argument("pitch", FloatArgumentType.floatArg(-90, 90))
@@ -68,6 +69,19 @@ public final class ChapterGroundsCommands {
         String s = sb.toString();
         SkyAbyss.LOGGER.info(s);
         ctx.getSource().sendSuccess(() -> Component.literal(s), false);
+        return 1;
+    }
+
+    // その章の巨神の祠を跡地の置き場に建てる (心臓を止めたときと同じ。撮影と確かめ用。人は動かさない)
+    private static int shrine(CommandContext<CommandSourceStack> ctx) {
+        MinecraftServer server = ctx.getSource().getServer();
+        Chapters ch = chapter(StringArgumentType.getString(ctx, "chapter"));
+        if (ch == null || ch.titan() == null) {
+            ctx.getSource().sendFailure(Component.literal("no such chapter (whale|tide|storm|ember)"));
+            return 0;
+        }
+        BlockPos at = jp.revati.skyabyss.titan.shrine.TitanShrine.ensure(server, ch.titan());
+        ctx.getSource().sendSuccess(() -> Component.literal("shrine of " + ch.titan() + " at " + at.toShortString()), false);
         return 1;
     }
 

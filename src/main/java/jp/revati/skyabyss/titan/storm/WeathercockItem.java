@@ -82,7 +82,13 @@ public class WeathercockItem extends Item implements jp.revati.skyabyss.pouch.Po
             return false;
         }
         StormWingEntity titan = StormKeeper.KEEPER.current(sl);
-        if (titan == null || !titan.comeRest(sp, CALL_REST)) {
+        // 三章の跡地があれば、雷翼が止まるのはその峰だけ (docs/design/33 の 3.1)
+        boolean peakOnly = StormPeak.restricted(sl.getServer());
+        if (peakOnly && !StormPeak.near(sp)) {
+            Notice.bar(sp, ModText.hint("message.skyabyss.weathercock.peak_only"));
+            return false;
+        }
+        if (titan == null || !(peakOnly ? titan.comeRestAt(StormPeak.perch(sl), CALL_REST) : titan.comeRest(sp, CALL_REST))) {
             Notice.bar(sp, ModText.hint("message.skyabyss.weathercock.absent"));
             return false;
         }
