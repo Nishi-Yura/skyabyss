@@ -1,7 +1,9 @@
 package jp.revati.skyabyss.trial;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import com.mojang.authlib.GameProfile;
@@ -9,6 +11,7 @@ import com.mojang.authlib.GameProfile;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.common.util.FakePlayer;
@@ -17,15 +20,22 @@ import net.neoforged.neoforge.common.util.FakePlayerFactory;
 import jp.revati.skyabyss.SelfTestRunner.Step;
 import jp.revati.skyabyss.SkyAbyss;
 import jp.revati.skyabyss.progress.Titans;
+import jp.revati.skyabyss.titan.end.ReturnBeacons;
 import jp.revati.skyabyss.titan.group.BackGroupData;
+import jp.revati.skyabyss.titan.group.GroupGates;
 import jp.revati.skyabyss.titan.group.GroupProgress;
 import jp.revati.skyabyss.titan.group.Groups;
+import jp.revati.skyabyss.trial.Trial.Def;
+import jp.revati.skyabyss.trial.Trial.Mods;
 
-// 順路 (docs/design/32 の 2 章) の自己テスト。段の名前は "trial route"。
-//  - 形: 四体とも三つの鍵・四つの段の休み場があり、入口の箱がある
-//  - 流れ (背が建ててある巨神): 入口に一人で立つ → 予告のあと段 1 へ運ばれる → 越えるたびに次の段の入口へ → 三つ越えたら心臓の前室。
-//    別のグループの人は動かない。越えた順が前後しても段は戻らない
-//  - あきらめ: 一人のグループは提案した瞬間に成立し、記録が消える。グループのリセット・心臓を止めたときも記録が消える
+// 順路 (docs/design/32 の 2 章・5 章) の自己テスト。段の名前は "trial route"。
+//  - 形: 四体とも、周回 1 の引きが原型の三つ (歩・智・闘、鍵が違う)、全部の試練に入口の休み場、中ボスの原型と前室、入口の箱
+//  - 初回の流れ (背が建ててある巨神): 入口に立つ → 予告のあと段 1 へ → 越えるたびに次の段の入口へ → 三つで心臓の前室。
+//    別のグループの人は動かない。越えた順が前後しても段は戻らない。途中で入口に立っても始め直さない。ほかのグループの初回の順路が
+//    動いているあいだは、入口で待つ (決定 207)。周回のグループは入口では始まらない (祠から)
+//  - 周回の流れ: 引いた三つ (新作を含む) の入口の休み場へ運ばれ、今の段のセルの戸だけが開く。中ボスの原型を引いていない周は
+//    闘のあと中ボスの前室へ、倒すと心臓の前室へ。二つのグループは別の区画の番号で同時に進み、終えると番号が返る
+//  - あきらめ (一人は提案で成立)・参加者がいなくなったとき・心臓を止めたときに順路が終わる。心臓で順路の記録 (回数) が増える
 public final class TrialRouteSelfTest {
     private TrialRouteSelfTest() {
     }
@@ -45,24 +55,16 @@ public final class TrialRouteSelfTest {
         int worlds = 0;
         try {
             for (String titan : List.of(Titans.STONE_WHALE, Titans.TIDE_SHELL, Titans.THUNDER_WING, Titans.EMBER)) {
-                List<String> keys = TrialRoute.keysOf(titan);
-                check(f, keys.size() == 3, titan + ": expected three route keys, got " + keys);
-                check(f, keys.stream().distinct().count() == 3, titan + ": route keys repeat: " + keys);
-                check(f, TrialRegions.keys(titan).containsAll(keys), titan + ": route keys are not stele keys: " + keys + " vs " + TrialRegions.keys(titan));
-                for (int step = 1; step <= TrialRoute.LAST_STEP; step++) {
-                    check(f, TrialRoute.restOf(titan, step) != null, titan + ": no rest for step " + step);
-                }
-                check(f, "heart".equals(TrialRoute.restOf(titan, TrialRoute.LAST_STEP)), titan + ": the last step is not the heart rest");
-                check(f, TrialRoute.restOf(titan, 0) == null && TrialRoute.restOf(titan, 9) == "heart", titan + ": restOf bounds");
-                AABB entry = TrialRoute.entryBox(titan);
-                check(f, entry != null && entry.getXsize() >= 3 && entry.getYsize() >= 3 && entry.getZsize() >= 3, titan + ": entry box missing or tiny: " + entry);
+                shape(f, titan);
                 ServerLevel back = server.getLevel(Titans.backOf(titan));
                 if (back == null) {
                     f.add(titan + ": the back dimension is missing");
                     continue;
                 }
                 if (ready(back, titan)) {
-                    world(f, back, titan, keys);
+                    rests(f, back, titan);
+                    firstRun(f, back, titan);
+                    replay(f, back, titan);
                     worlds++;
                 } else {
                     SkyAbyss.LOGGER.info("SELFTEST trial route: {} back is not built here, checked the shape only", titan);
@@ -73,10 +75,11 @@ public final class TrialRouteSelfTest {
             f.add("crashed: " + e);
         } finally {
             TrialRoute.clearAll();
+            TrialSlot.clearAll();
             TrialRoute.PLAYERS = l -> jp.revati.skyabyss.util.Players.snapshot(l.players());
         }
         if (f.isEmpty()) {
-            SkyAbyss.LOGGER.info("SELFTEST trial route PASSED (keys, rests, entry boxes for four titans; walked the route in {} built back(s))", worlds);
+            SkyAbyss.LOGGER.info("SELFTEST trial route PASSED (shape for four titans; walked first runs and replays in {} built back(s))", worlds);
         } else {
             for (String s : f) {
                 SkyAbyss.LOGGER.error("SELFTEST trial route FAILED: {}", s);
@@ -84,9 +87,58 @@ public final class TrialRouteSelfTest {
         }
     }
 
+    private static TrialDraw.Draw firstDraw(String titan) {
+        List<TrialDraw.Pick> picks = new ArrayList<>();
+        for (Def d : TrialCatalog.originals(titan)) {
+            picks.add(new TrialDraw.Pick(d.id(), Mods.PLAIN));
+        }
+        return new TrialDraw.Draw(1, picks);
+    }
+
+    // ---------------------------------------------------------------- 形 (世界なし)
+    private static void shape(List<String> f, String titan) {
+        TrialDraw.Draw first = firstDraw(titan);
+        check(f, first.picks().size() == 3, titan + ": the first draw is not three originals: " + first.encode());
+        Set<String> keys = new HashSet<>();
+        for (int step = 1; step <= 3; step++) {
+            String key = TrialRoute.keyOf(titan, first, step);
+            check(f, key != null && TrialRegions.keys(titan).contains(key), titan + ": step " + step + " has no stele key (" + key + ")");
+            keys.add(key);
+            check(f, TrialRoute.restOf(titan, first, step, false) != null, titan + ": no rest for first-run step " + step);
+        }
+        check(f, keys.size() == 3, titan + ": the first route repeats a stele: " + keys);
+        check(f, TrialRoute.keysOf(titan).equals(java.util.Arrays.asList(TrialRoute.keyOf(titan, first, 1), TrialRoute.keyOf(titan, first, 2), TrialRoute.keyOf(titan, first, 3))),
+                titan + ": the first route order is not walk, wit, fight: " + keys);
+        check(f, TrialRoute.HEART_REST.equals(TrialRoute.restOf(titan, first, TrialRoute.LAST_STEP, false)), titan + ": the last step is not the heart rest");
+        check(f, TrialRoute.defOf(first, 0) == null && TrialRoute.defOf(first, 4) == null, titan + ": defOf bounds");
+        // 全部の試練に入口の休み場
+        for (Def d : TrialCatalog.of(titan)) {
+            TrialDraw.Draw one = new TrialDraw.Draw(2, List.of(new TrialDraw.Pick(d.id(), Mods.PLAIN)));
+            check(f, TrialRoute.entryRest(titan, d, one) != null, titan + ": " + d.id() + " has no entry rest");
+        }
+        // 中ボス: 原型の中にいる。周回 1 は要らない。中ボスの原型を引いていない周は要る
+        String host = TrialMidBoss.hostOf(titan);
+        Def hostDef = host == null ? null : TrialCatalog.get(host);
+        check(f, hostDef != null && hostDef.original(), titan + ": the mid-boss host is not an original trial: " + host);
+        check(f, TrialMidBoss.restOf(titan) != null, titan + ": no mid-boss antechamber");
+        check(f, !TrialMidBoss.needed(titan, first), titan + ": the first run asks for a separate mid-boss step");
+        List<TrialDraw.Pick> noHost = new ArrayList<>();
+        for (Trial.Slot s : Trial.Slot.values()) {
+            for (Def d : TrialCatalog.inSlot(titan, s)) {
+                if (!d.id().equals(host)) {
+                    noHost.add(new TrialDraw.Pick(d.id(), Mods.PLAIN));
+                    break;
+                }
+            }
+        }
+        check(f, TrialMidBoss.needed(titan, new TrialDraw.Draw(2, noHost)), titan + ": a draw without the mid-boss host has no mid-boss step");
+        AABB entry = TrialRoute.entryBox(titan);
+        check(f, entry != null && entry.getXsize() >= 3 && entry.getYsize() >= 3 && entry.getZsize() >= 3, titan + ": entry box missing or tiny: " + entry);
+    }
+
     // 段 1 の休み場の足もとが固い (背が建ててある) か
     private static boolean ready(ServerLevel back, String titan) {
-        String rest = TrialRoute.restOf(titan, 1);
+        String rest = TrialRoute.restOf(titan, firstDraw(titan), 1, false);
         BlockPos at = rest == null ? null : TrialRoute.spawnOf(back, titan, rest);
         if (at == null) {
             return false;
@@ -95,82 +147,207 @@ public final class TrialRouteSelfTest {
         return !back.getBlockState(at.below()).isAir() && back.getBlockState(at).isAir();
     }
 
-    private static void world(List<String> f, ServerLevel back, String titan, List<String> keys) {
+    // 全部の試練の入口の休み場と中ボスの前室が、到着の台の代わり (知らない名前) ではない
+    private static void rests(List<String> f, ServerLevel back, String titan) {
+        BlockPos arrival = ReturnBeacons.arrivalOf(titan);
+        List<String> ids = new ArrayList<>();
+        for (Def d : TrialCatalog.of(titan)) {
+            ids.add(TrialRoute.entryRest(titan, d, new TrialDraw.Draw(2, List.of(new TrialDraw.Pick(d.id(), Mods.PLAIN)))));
+        }
+        ids.add(TrialMidBoss.restOf(titan));
+        ids.add(TrialRoute.HEART_REST);
+        for (String id : ids) {
+            if (id == null) {
+                continue;
+            }
+            BlockPos at = TrialRoute.spawnOf(back, titan, id);
+            check(f, at != null && at.distSqr(arrival) > 36, titan + ": rest " + id + " resolves to the arrival (unknown rest?) " + at);
+        }
+    }
+
+    private static FakePlayer fake(ServerLevel back, String id, String name) {
+        FakePlayer p = FakePlayerFactory.get(back, new GameProfile(UUID.fromString(id), name));
+        p.setPos(0, 0, 0);
+        return p;
+    }
+
+    private static boolean near(ServerPlayer p, ServerLevel back, String titan, TrialDraw.Draw draw, int step, boolean mid) {
+        String rest = TrialRoute.restOf(titan, draw, step, mid);
+        BlockPos at = rest == null ? null : TrialRoute.spawnOf(back, titan, rest);
+        return at != null && p.position().distanceTo(Vec3.atBottomCenterOf(at)) < 2.5;
+    }
+
+    private static void clean(ServerLevel back, UUID... groups) {
+        for (UUID g : groups) {
+            TrialRoute.finish(back, g);
+            TrialRuntime.stopGroup(back, g);
+            GroupGates.reset(back, g);
+            BackGroupData.get(back).remove(g);
+        }
+    }
+
+    // ---------------------------------------------------------------- 初回
+    private static void firstRun(List<String> f, ServerLevel back, String titan) {
         TrialRoute.clearAll();
-        UUID ida = UUID.fromString("7a0b1d00-0000-4000-8000-00000000a001");
-        UUID idb = UUID.fromString("7a0b1d00-0000-4000-8000-00000000b002");
-        FakePlayer a = FakePlayerFactory.get(back, new GameProfile(ida, "route_a"));
-        FakePlayer b = FakePlayerFactory.get(back, new GameProfile(idb, "route_b"));
+        FakePlayer a = fake(back, "7a0b1d00-0000-4000-8000-00000000a001", "route_a");
+        FakePlayer b = fake(back, "7a0b1d00-0000-4000-8000-00000000b002", "route_b");
         UUID ga = Groups.keyOf(a);
         UUID gb = Groups.keyOf(b);
-        TrialRoute.finish(back, ga);
-        TrialRoute.finish(back, gb);
+        clean(back, ga, gb);
         long now = back.getGameTime();
         AABB entry = TrialRoute.entryBox(titan);
         Vec3 door = entry.getCenter();
         Vec3 bAt = new Vec3(door.x + 40, door.y, door.z + 40);
         a.setPos(door);
         b.setPos(bAt);
-        List<net.minecraft.server.level.ServerPlayer> players = List.of(a, b);
+        List<ServerPlayer> players = List.of(a, b);
         TrialRoute.PLAYERS = l -> players;
-        // 入口: 立っただけでは始まらず、予告のあと始まる
-        TrialRoute.tick(back, titan, players, now);
-        check(f, TrialRoute.step(back, ga) == 0, titan + ": the route started without the warning");
-        TrialRoute.tick(back, titan, players, now + TrialRoute.ENTRY_WAIT + 10);
-        check(f, TrialRoute.step(back, ga) == 1, titan + ": the route did not start after the warning (step " + TrialRoute.step(back, ga) + ")");
-        check(f, TrialRoute.step(back, gb) == 0, titan + ": another group's route started");
-        check(f, near(a, back, titan, 1), titan + ": the starter was not carried to the first rest: " + a.position());
-        check(f, b.position().distanceTo(bAt) < 0.5, titan + ": a player of another group was moved at the start");
-        // 越えるたびに次へ (4 秒後)。別のグループは動かない
-        for (int i = 0; i < 3; i++) {
-            // 運びの期限は本当のゲームの時刻 (now) から数える
-            long t = now + 1;
-            TrialRoute.onCleared(back, ga, titan, keys.get(i));
-            int expect = i + 2;
-            check(f, TrialRoute.step(back, ga) == expect, titan + ": after clearing " + keys.get(i) + " the step is " + TrialRoute.step(back, ga) + ", expected " + expect);
-            check(f, TrialRoute.pendingCount() == 1, titan + ": the carry was not queued");
-            TrialRoute.tick(back, titan, players, t);
-            check(f, TrialRoute.pendingCount() == 1, titan + ": the carry ran before its delay");
-            TrialRoute.tick(back, titan, players, t + TrialRoute.CARRY_DELAY);
-            check(f, TrialRoute.pendingCount() == 0, titan + ": the carry stayed queued");
-            check(f, near(a, back, titan, expect), titan + ": not carried to step " + expect + " rest " + TrialRoute.restOf(titan, expect) + ": " + a.position());
-            check(f, b.position().distanceTo(bAt) < 0.5, titan + ": a player of another group was carried");
-        }
-        check(f, TrialRoute.step(back, ga) == TrialRoute.LAST_STEP, titan + ": the route did not reach the heart");
-        // 越える順が前後しても段は戻らない
-        TrialRoute.onCleared(back, ga, titan, keys.get(0));
-        check(f, TrialRoute.step(back, ga) == TrialRoute.LAST_STEP, titan + ": clearing an earlier trial again moved the step back");
-        TrialRoute.clearAll();
-        // 順路の途中で入口に立っても始め直さない
-        a.setPos(door);
-        TrialRoute.tick(back, titan, players, now + 5000);
-        TrialRoute.tick(back, titan, players, now + 5000 + TrialRoute.ENTRY_WAIT + 10);
-        check(f, TrialRoute.step(back, ga) == TrialRoute.LAST_STEP, titan + ": standing at the entrance mid-route restarted the route");
-        // グループのリセットで消える
-        BackGroupData.Record r = GroupProgress.of(back, ga);
-        TrialRoute.reset(r);
-        check(f, TrialRoute.step(back, ga) == 0 && !r.has(TrialRoute.ROUTE), titan + ": reset left the route record");
-        // あきらめ: 一人のグループは提案で成立し、記録が消える (地上へ降ろすのは偽の人では確かめない)
-        TrialRoute.start(back, ga, titan);
-        check(f, TrialRoute.step(back, ga) == 1, titan + ": start did not set step 1");
         try {
-            TrialRoute.propose(a);
-        } catch (RuntimeException e) {
-            SkyAbyss.LOGGER.info("SELFTEST trial route: sendDown on a fake player threw ({}); checking the record only", e.toString());
+            // 入口: 立っただけでは始まらず、予告のあと始まる
+            TrialRoute.tick(back, titan, players, now);
+            check(f, TrialRoute.step(back, ga) == 0, titan + ": the route started without the warning");
+            TrialRoute.tick(back, titan, players, now + TrialRoute.ENTRY_WAIT + 10);
+            check(f, TrialRoute.step(back, ga) == 1, titan + ": the route did not start after the warning (step " + TrialRoute.step(back, ga) + ")");
+            check(f, TrialRoute.step(back, gb) == 0, titan + ": another group's route started");
+            TrialDraw.Draw draw = TrialData.current(back, ga);
+            check(f, draw.cycle() == 1, titan + ": a fresh group is not on cycle 1");
+            check(f, near(a, back, titan, draw, 1, false), titan + ": the starter was not carried to the first rest: " + a.position());
+            check(f, b.position().distanceTo(bAt) < 0.5, titan + ": a player of another group was moved at the start");
+            check(f, TrialRoute.isParticipant(back, ga, a.getUUID()) && !TrialRoute.isParticipant(back, ga, b.getUUID()), titan + ": the party record is wrong");
+            check(f, TrialSlot.of(GroupProgress.of(back, ga)) > 0, titan + ": the route has no slot number");
+            // ほかのグループの初回の順路が動いているあいだは、入口で始まらない (決定 207)
+            b.setPos(door);
+            TrialRoute.tick(back, titan, players, now + 1000);
+            TrialRoute.tick(back, titan, players, now + 1000 + TrialRoute.ENTRY_WAIT + 10);
+            check(f, TrialRoute.step(back, gb) == 0, titan + ": a second first-run group started while the body was in use");
+            b.setPos(bAt);
+            // 越えるたびに次へ (4 秒後)。別のグループは動かない
+            for (int i = 1; i <= 3; i++) {
+                String key = TrialRoute.keyOf(titan, draw, i);
+                TrialRoute.onCleared(back, ga, titan, key, null);
+                int expect = i + 1;
+                check(f, TrialRoute.step(back, ga) == expect, titan + ": after clearing " + key + " the step is " + TrialRoute.step(back, ga) + ", expected " + expect);
+                check(f, TrialRoute.pendingCount() == 1, titan + ": the carry was not queued");
+                TrialRoute.tick(back, titan, players, now + 1);
+                check(f, TrialRoute.pendingCount() == 1, titan + ": the carry ran before its delay");
+                TrialRoute.tick(back, titan, players, now + 1 + TrialRoute.CARRY_DELAY);
+                check(f, TrialRoute.pendingCount() == 0, titan + ": the carry stayed queued");
+                check(f, near(a, back, titan, draw, expect, false), titan + ": not carried to step " + expect + " rest " + TrialRoute.restOf(titan, draw, expect, false) + ": " + a.position());
+                check(f, b.position().distanceTo(bAt) < 0.5, titan + ": a player of another group was carried");
+            }
+            check(f, TrialRoute.step(back, ga) == TrialRoute.LAST_STEP && !TrialRoute.mid(back, ga), titan + ": the first route did not reach the heart directly");
+            // 越える順が前後しても段は戻らない
+            TrialRoute.onCleared(back, ga, titan, TrialRoute.keyOf(titan, draw, 1), null);
+            check(f, TrialRoute.step(back, ga) == TrialRoute.LAST_STEP, titan + ": clearing an earlier trial again moved the step back");
+            // 順路の途中で入口に立っても始め直さない
+            a.setPos(door);
+            TrialRoute.tick(back, titan, players, now + 5000);
+            TrialRoute.tick(back, titan, players, now + 5000 + TrialRoute.ENTRY_WAIT + 10);
+            check(f, TrialRoute.step(back, ga) == TrialRoute.LAST_STEP, titan + ": standing at the entrance mid-route restarted the route");
+            // 心臓を止めると順路が終わり、記録が増え、番号が返る
+            int clears = TrialCodex.get(back.getServer()).routeClears(a.getUUID(), titan);
+            BackGroupData.Record r = GroupProgress.of(back, ga);
+            TrialRoute.onHeartStopped(back, r);
+            TrialData.onHeartStopped(r);
+            check(f, TrialRoute.step(back, ga) == 0 && TrialSlot.of(r) == 0, titan + ": the heart stop did not end the route");
+            check(f, TrialCodex.get(back.getServer()).routeClears(a.getUUID(), titan) == clears + 1, titan + ": the heart stop did not count the route");
+            // 周回のグループは入口では始まらない (祠から)
+            r.markFirstCleared();
+            a.setPos(door);
+            TrialRoute.tick(back, titan, players, now + 9000);
+            TrialRoute.tick(back, titan, players, now + 9000 + TrialRoute.ENTRY_WAIT + 10);
+            check(f, TrialRoute.step(back, ga) == 0, titan + ": a replay group started the route from the entrance");
+            // あきらめ: 一人のグループは提案で成立し、記録が消える (外へ出すのは偽の人では確かめない)
+            TrialRoute.start(back, ga, titan, List.of(a));
+            check(f, TrialRoute.step(back, ga) == 1, titan + ": start did not set step 1");
+            try {
+                TrialRoute.propose(a);
+            } catch (RuntimeException e) {
+                SkyAbyss.LOGGER.info("SELFTEST trial route: sending out a fake player threw ({}); checking the record only", e.toString());
+            }
+            check(f, TrialRoute.step(back, ga) == 0, titan + ": abandoning alone did not end the route (step " + TrialRoute.step(back, ga) + ")");
+            check(f, !TrialRoute.abandonPending(ga), titan + ": an abandon proposal stayed after settling");
+            // 参加者が背にいなくなると、猶予のあと順路が終わる
+            TrialRoute.start(back, ga, titan, List.of(a));
+            List<ServerPlayer> none = List.of(b);
+            TrialRoute.PLAYERS = l -> none;
+            TrialRoute.flushPending();
+            TrialRoute.tick(back, titan, none, now + 20000);
+            check(f, TrialRoute.step(back, ga) == 1, titan + ": the route ended at once when the party left");
+            TrialRoute.tick(back, titan, none, now + 20000 + TrialRoute.EMPTY_GRACE + 1);
+            check(f, TrialRoute.step(back, ga) == 0, titan + ": the route stayed after the party left the back");
+        } finally {
+            clean(back, ga, gb);
+            TrialRoute.PLAYERS = l -> jp.revati.skyabyss.util.Players.snapshot(l.players());
         }
-        check(f, TrialRoute.step(back, ga) == 0, titan + ": abandoning alone did not end the route (step " + TrialRoute.step(back, ga) + ")");
-        check(f, !TrialRoute.abandonPending(ga), titan + ": an abandon proposal stayed after settling");
-        // 心臓を止めたときも消える
-        TrialRoute.start(back, ga, titan);
-        TrialData.onHeartStopped(GroupProgress.of(back, ga));
-        check(f, TrialRoute.step(back, ga) == 0, titan + ": the heart stop did not end the route");
-        TrialRoute.finish(back, ga);
-        TrialRoute.finish(back, gb);
     }
 
-    private static boolean near(FakePlayer p, ServerLevel back, String titan, int step) {
-        String rest = TrialRoute.restOf(titan, step);
-        BlockPos at = rest == null ? null : TrialRoute.spawnOf(back, titan, rest);
-        return at != null && p.position().distanceTo(Vec3.atBottomCenterOf(at)) < 2.5;
+    // ---------------------------------------------------------------- 周回 (引いた三つ・戸・中ボス・二つの区画)
+    private static void replay(List<String> f, ServerLevel back, String titan) {
+        TrialRoute.clearAll();
+        FakePlayer a = fake(back, "7a0b1d00-0000-4000-8000-00000000c003", "route_c");
+        FakePlayer b = fake(back, "7a0b1d00-0000-4000-8000-00000000d004", "route_d");
+        UUID ga = Groups.keyOf(a);
+        UUID gb = Groups.keyOf(b);
+        clean(back, ga, gb);
+        List<ServerPlayer> players = List.of(a, b);
+        TrialRoute.PLAYERS = l -> players;
+        long now = back.getGameTime();
+        int midSeen = 0;
+        try {
+            for (int cycle = 2; cycle <= 6; cycle++) {
+                for (UUID g : List.of(ga, gb)) {
+                    BackGroupData.Record r = GroupProgress.of(back, g);
+                    r.markFirstCleared();
+                    r.putInt(TrialData.DONE, cycle - 1);
+                    r.remove(TrialData.DRAW);
+                }
+                TrialRoute.start(back, ga, titan, List.of(a));
+                TrialRoute.start(back, gb, titan, List.of(b));
+                int sa = TrialSlot.of(GroupProgress.of(back, ga));
+                int sb = TrialSlot.of(GroupProgress.of(back, gb));
+                check(f, sa > 0 && sb > 0 && sa != sb, titan + " cycle " + cycle + ": two routes share a slot (" + sa + ", " + sb + ")");
+                TrialDraw.Draw draw = TrialData.current(back, ga);
+                check(f, draw.cycle() == cycle, titan + ": the replay draw is on cycle " + draw.cycle() + ", expected " + cycle);
+                for (int step = 1; step <= 3; step++) {
+                    Def cur = TrialRoute.defOf(draw, step);
+                    check(f, near(a, back, titan, draw, step, false), titan + " cycle " + cycle + ": not at step " + step + " (" + (cur == null ? "-" : cur.id()) + ") rest "
+                            + TrialRoute.restOf(titan, draw, step, false) + ": " + a.position());
+                    // 今の段のセルの戸だけが開いている
+                    TrialRuntime.syncGates(back, ga, titan, draw);
+                    for (TrialCell c : TrialCells.of(titan)) {
+                        if (c.ports().entrance().isEmpty() || !TrialCatalog.deckPlaced(titan)) {
+                            continue;
+                        }
+                        boolean open = GroupGates.isOpen(back, ga, c.ports().entrance());
+                        check(f, open == (cur != null && c.def().id().equals(cur.id())), titan + " cycle " + cycle + " step " + step + ": the gate of " + c.def().id() + " is "
+                                + (open ? "open" : "closed"));
+                    }
+                    TrialRoute.onCleared(back, ga, titan, TrialRoute.keyOf(titan, draw, step), null);
+                    TrialRoute.flushPending();
+                    TrialRoute.tick(back, titan, players, now + 1);
+                }
+                boolean mid = TrialMidBoss.needed(titan, draw);
+                if (mid) {
+                    midSeen++;
+                    check(f, TrialRoute.mid(back, ga) && TrialRoute.step(back, ga) == 3, titan + " cycle " + cycle + ": no mid-boss step after the fight");
+                    check(f, near(a, back, titan, draw, 3, true), titan + " cycle " + cycle + ": not at the mid-boss antechamber: " + a.position());
+                    // 戦いそのものは試練の自己テストが見る。ここでは倒したことにする
+                    TrialRoute.onMidBossDefeated(back, ga, titan);
+                    TrialRoute.flushPending();
+                    TrialRoute.tick(back, titan, players, now + 1);
+                }
+                check(f, TrialRoute.step(back, ga) == TrialRoute.LAST_STEP && !TrialRoute.mid(back, ga), titan + " cycle " + cycle + ": the replay did not reach the heart");
+                check(f, near(a, back, titan, draw, TrialRoute.LAST_STEP, false), titan + " cycle " + cycle + ": not at the heart rest: " + a.position());
+                check(f, TrialRoute.step(back, gb) == 1, titan + " cycle " + cycle + ": the other group's route moved");
+                TrialRoute.finish(back, ga);
+                TrialRoute.finish(back, gb);
+                check(f, TrialSlot.of(GroupProgress.of(back, ga)) == 0 && !TrialSlot.inUse(back).contains(sa), titan + ": the slot was not returned");
+            }
+            SkyAbyss.LOGGER.info("SELFTEST trial route {}: five replays walked, {} with a mid-boss step", titan, midSeen);
+        } finally {
+            clean(back, ga, gb);
+            TrialRoute.PLAYERS = l -> jp.revati.skyabyss.util.Players.snapshot(l.players());
+        }
     }
 }

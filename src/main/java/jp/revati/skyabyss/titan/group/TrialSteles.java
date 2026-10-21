@@ -107,8 +107,8 @@ public final class TrialSteles {
     public static void onRung(ServerLevel back, UUID group, String titan, String trial, @Nullable Component name, @Nullable ServerPlayer by) {
         // 試練のプール (docs/design/29): 原型の石は図鑑・報いに数える (新作の石は TrialRuntime が自分で数える)
         jp.revati.skyabyss.trial.TrialRuntime.onStoneRung(back, group, titan, trial, by);
-        // 試練を越えた: 中にいる仲間を鼓動の間へ戻し、碑を光らせ、その試練をこのグループには封じる (docs/design/29 の 4.6)
-        jp.revati.skyabyss.trial.TrialHub.onCleared(back, group, titan, trial, by);
+        // 試練を越えた: 順路の今の段なら、4 秒後に次の段の入口へ運ぶ (docs/design/32 の 2.3)
+        jp.revati.skyabyss.trial.TrialRoute.onCleared(back, group, titan, trial, by);
         if (by != null) {
             jp.revati.skyabyss.tutorial.TutorialHints.start(by, jp.revati.skyabyss.tutorial.TutorialHints.RECORD);
             SteleRingers.get(back.getServer()).put(group, signal(titan, trial), by.getUUID(), by.getGameProfile().getName());
@@ -120,9 +120,6 @@ public final class TrialSteles {
             if (p.level() != back) {
                 Notice.hint(p, "message.skyabyss.steles.party_rung",
                         name == null ? Component.translatable("trial.skyabyss." + titan + "_" + trial) : name);
-            } else if (!FirstRun.isFirstRun(back, group)) {
-                // 周回の言い回し (rpg_brushup B4): 石が鳴ったとき、背中の中の人に一行
-                Notice.hint(p, "message.skyabyss.steles.rung_repeat." + titan);
             }
             Quests.poll(p, false);
         }
@@ -169,9 +166,6 @@ public final class TrialSteles {
         jp.revati.skyabyss.tutorial.TutorialHints.start(player, jp.revati.skyabyss.tutorial.TutorialHints.RECORD);
         WhoRang w = who(player.server, Groups.keyOf(player), player.getUUID(), signal(titan, trial));
         Notice.bar(player, jp.revati.skyabyss.ModText.hint("message.skyabyss.steles.who", whoText(w)));
-        if (w.who() != Who.NONE && !FirstRun.isFirstRun(player)) {
-            Notice.hint(player, "message.skyabyss.steles.touch_repeat." + titan);
-        }
     }
 
     // 控え帳の頁用: 巨神 (進行の名前: stone_whale / tide_shell / thunder_wing / ember) の石の合図の一覧。石のない巨神は空

@@ -42,7 +42,7 @@ import jp.revati.skyabyss.trial.TrialCell;
 import jp.revati.skyabyss.trial.TrialCells;
 import jp.revati.skyabyss.trial.TrialData;
 import jp.revati.skyabyss.trial.TrialDraw;
-import jp.revati.skyabyss.trial.TrialHub;
+import jp.revati.skyabyss.trial.TrialRoute;
 import jp.revati.skyabyss.trial.TrialRegions;
 import jp.revati.skyabyss.trial.TrialRuntime;
 import net.minecraft.core.BlockPos;
@@ -61,7 +61,7 @@ import net.minecraft.world.phys.Vec3;
 //  - 戸: 引いた試練の戸だけがそのグループに開く (引いていない原型の戸は閉じる)
 //  - 全変種 (配置 × 数字 × 敵 × 障害 × 任意 × 静 + 深淵): arm → overlay (セルの箱の中) → tick → disarm
 //  - 遊びの決まり: 気嚢の周期・窓・予告・昇り風・落下・羽根 / 雷の橙の形・金の床・雷の速さ / 柱の三度で放電・波・戸 / 守りの数・風の穴・片付け
-//  - 石: 引いた枠の風鳴り石が鳴り、図鑑・済みの記録・広間の戻りの待ちが付く。今週の試練は枠を鳴らさない
+//  - 石: 引いた枠の風鳴り石が鳴り、図鑑・済みの記録・順路の運びが付く。引いていない試練は枠を鳴らさない
 public final class StormTrialSelfTest {
     private StormTrialSelfTest() {
     }
@@ -126,7 +126,7 @@ public final class StormTrialSelfTest {
         } finally {
             StormDeck.setPlaced(true);
             TrialRuntime.clearAll();
-            TrialHub.clearAll();
+            TrialRoute.clearAll();
             StormBackClock.force(null);
             S09Nest.clearOwner();
             if (back != null) {
@@ -210,7 +210,6 @@ public final class StormTrialSelfTest {
     // ---------------------------------------------------------------- 配置 (座標だけ)
     private static void layout(ServerLevel back) {
         // 広間 (StormBackLayout) と同じ数字
-        check(StormDeck.BOARD_HUB.getY() == StormBackLayout.HUB.floor() + 1 && StormDeck.BOARD_HUB.getZ() == StormBackLayout.HUB.z2(), "the hub board does not stand at the south wall of the hub");
         check(inBox(StormDeck.WEST_GATE, StormBackLayout.WEST_PASS.aabb()), "the west gate is outside the west pass");
         check(inBox(StormDeck.EAST_GATE, StormBackLayout.EAST_PASS.aabb()), "the east gate is outside the east pass");
         check(inBox(StormDeck.FRONT_GATE, StormBackLayout.NECK.aabb()), "the front gate is outside the neck");
@@ -352,9 +351,6 @@ public final class StormTrialSelfTest {
             check(back.getBlockEntity(i.pos()) instanceof jp.revati.skyabyss.tablet.TabletBlockEntity, "sign " + i.key() + " is missing at " + i.pos());
             check(!back.getBlockState(i.pos().below()).isAir(), "sign " + i.key() + " floats at " + i.pos());
         }
-        // 板: 広間と渡り場
-        check(back.getBlockState(StormDeck.BOARD_HUB).is(ModBlocks.TRIAL_BOARD.get()), "the hub board is missing");
-        check(back.getBlockState(StormDeck.BOARD_YARD).is(ModBlocks.TRIAL_BOARD.get()), "the yard board is missing");
         // 戸: 置いて、通路をふさぐこと
         TrialRuntime.installGates(back);
         for (List<BlockPos> g : List.of(StormDeck.S02_GATE, StormDeck.S03_GATE, StormDeck.S10_GATE, StormDeck.S09_GATE, StormDeck.S09_EXIT_GATE, StormDeck2.S04_GATE, StormDeck2.S08_GATE,
@@ -411,7 +407,7 @@ public final class StormTrialSelfTest {
         return true;
     }
 
-    // 戸: 引いた試練の戸だけがそのグループに開く
+    // 戸: 順路の今の段 (グループごとに 1〜3 を回す) の試練の戸だけがそのグループに開く
     private static void gates(ServerLevel back) {
         String storm = Titans.THUNDER_WING;
         int fails = 0;
@@ -421,12 +417,14 @@ public final class StormTrialSelfTest {
             r.putInt(TrialData.DONE, 1 + i % 4);
             r.remove(TrialData.DRAW);
             TrialDraw.Draw d = TrialData.current(storm, r, g, TrialData.worldSeed(back));
+            int step = 1 + i % 3;
+            r.putInt(TrialRoute.STEP, step);
             TrialRuntime.syncGates(back, g, storm, d);
             for (TrialCell c : TrialCells.of(storm)) {
                 if (c.ports().entrance().isEmpty()) {
                     continue;
                 }
-                boolean want = d.has(c.def().id());
+                boolean want = c.def().id().equals(TrialRoute.defOf(d, step).id());
                 boolean open = GroupGates.isOpen(back, g, c.ports().entrance());
                 if (open != want) {
                     FAIL.add("group " + i + " cycle " + (2 + i % 4) + ": gate of " + c.def().id() + " is " + (open ? "open" : "closed") + " but the draw is " + d.encode());
@@ -438,7 +436,7 @@ public final class StormTrialSelfTest {
         }
     }
 
-    // 石: 引いた枠の風鳴り石が鳴る・記録・今週の試練は枠を鳴らさない・範囲
+    // 石: 引いた枠の風鳴り石が鳴る・記録・引いていない試練は枠を鳴らさない・範囲
     private static void stones(ServerLevel back) {
         String storm = Titans.THUNDER_WING;
         if (back.getDifficulty() == Difficulty.PEACEFUL) {
@@ -487,7 +485,7 @@ public final class StormTrialSelfTest {
             } finally {
                 p.leave();
                 TrialRuntime.clearAll();
-                TrialHub.clearAll();
+                TrialRoute.clearAll();
                 BackGroupData.get(back).remove(g);
             }
         }

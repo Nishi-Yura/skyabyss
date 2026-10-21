@@ -277,11 +277,11 @@ public final class SelfTestRunner {
         // 領域の仕掛けが本物の心臓の間で壁の中でなく、歩いて届く所にあるか (docs/design/02 の 5.9)。SKYABYSS_SELFTEST_ONLY="domain room"
         steps.addAll(jp.revati.skyabyss.titan.domain.DomainRoomSelfTest.steps());
         steps.addAll(TitanBackSelfTest.trialSteps());
-        // 試練のプール (引き方・修飾・全変種・今週の試練・図鑑・戸・複数グループ)。docs/design/29。背を建て直すので最後。SKYABYSS_SELFTEST_ONLY="trial pool"
+        // 試練のプール (引き方・修飾・全変種・図鑑・戸・複数グループ)。docs/design/29。背を建て直すので最後。SKYABYSS_SELFTEST_ONLY="trial pool"
         steps.addAll(jp.revati.skyabyss.trial.TrialPoolSelfTest.steps());
         // 余燼の試練の階 (E02・E06・E07・E10)。docs/design/29 の 3.4。SKYABYSS_SELFTEST_ONLY="trial pool ember"
         steps.addAll(jp.revati.skyabyss.trial.ember.EmberDeckSelfTest.steps());
-        // 試練を越えたあと (範囲・碑・鼓動の間への戻り・パーティごとの封)。docs/design/29 の 4.6。背が建ててある巨神だけ世界の検査をする
+        // 巨神の順路 (入口・段の運び・中ボス・あきらめ・区画)。docs/design/32。背が建ててある巨神だけ世界の検査をする。SKYABYSS_SELFTEST_ONLY="trial route"
         steps.addAll(jp.revati.skyabyss.trial.TrialRouteSelfTest.steps());
         return steps;
     }

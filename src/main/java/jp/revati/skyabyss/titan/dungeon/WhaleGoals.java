@@ -30,7 +30,7 @@ public final class WhaleGoals {
     private WhaleGoals() {
     }
 
-    // ゴールに着いた (TrialHub.autoStones から)。index = 西 0 / 東 1 / 下 2。着けなかった理由は一行で言う
+    // ゴールに着いた (TrialStones.autoStones から)。index = 西 0 / 東 1 / 下 2。着けなかった理由は一行で言う
     public static InteractionResult arrive(ServerLevel server, ServerPlayer sp, BlockPos pos) {
         int index = TitanBackLayout.GOAL_SPOTS.indexOf(pos);
         if (server.dimension() != TitanTravel.TITAN_BACK || index < 0) {
@@ -56,7 +56,7 @@ public final class WhaleGoals {
                 server.sendParticles(member, ParticleTypes.END_ROD, false, pos.getX() + 0.5, pos.getY() + 1.2, pos.getZ() + 0.5, 30, 0.3, 0.6, 0.3, 0.05);
             }
         }
-        // 着いたら、中にいる仲間は少しして鼓動の間へ戻る (TrialHub)
+        // 着いたら、順路が少しして仲間を次の段の入口へ運ぶ (TrialRoute)
         Notice.bar(player, ModText.hint("message.skyabyss.return_opened"));
         // 背の外にいる仲間にも (クエストはグループの記録から数える)
         jp.revati.skyabyss.titan.group.TrialSteles.onRung(server, group, jp.revati.skyabyss.titan.group.TrialSteles.WHALE, String.valueOf(index),

@@ -62,8 +62,6 @@ public final class TideDeckBuilder {
         for (TideBackLayout.Inscription i : SIGNS2) {
             kit.wallSign(i.pos(), i.facing(), i.key());
         }
-        kit.set(BOARD_H, ModBlocks.TRIAL_BOARD.get().defaultBlockState().setValue(HorizontalDirectionalBlock.FACING, Direction.SOUTH));
-        kit.set(BOARD_H2, ModBlocks.TRIAL_BOARD.get().defaultBlockState().setValue(HorizontalDirectionalBlock.FACING, Direction.SOUTH));
         jp.revati.skyabyss.SkyAbyss.LOGGER.info("Built the tide trial deck in {} ms", System.currentTimeMillis() - t0);
     }
 

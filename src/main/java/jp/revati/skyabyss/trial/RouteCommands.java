@@ -44,9 +44,9 @@ public final class RouteCommands {
             ctx.getSource().sendFailure(Component.literal("not on a titan back"));
             return 0;
         }
-        int step = TrialRoute.step(back, Groups.keyOf(p));
-        ctx.getSource().sendSuccess(() -> Component.literal("route of the " + titan + ": step " + step + " rest " + TrialRoute.restOf(titan, step)
-                + " pending " + TrialRoute.pendingCount() + " abandon " + TrialRoute.abandonPending(Groups.keyOf(p))), false);
+        java.util.UUID group = Groups.keyOf(p);
+        ctx.getSource().sendSuccess(() -> Component.literal("route of the " + titan + ": " + TrialRoute.describe(back, group)
+                + " pending " + TrialRoute.pendingCount() + " abandon " + TrialRoute.abandonPending(group)), false);
         return 1;
     }
 
@@ -58,7 +58,7 @@ public final class RouteCommands {
             ctx.getSource().sendFailure(Component.literal("not on a titan back"));
             return 0;
         }
-        TrialRoute.start(back, Groups.keyOf(p), titan);
+        TrialRoute.start(back, Groups.keyOf(p), titan, TrialRoute.present(back, Groups.keyOf(p)));
         return 1;
     }
 

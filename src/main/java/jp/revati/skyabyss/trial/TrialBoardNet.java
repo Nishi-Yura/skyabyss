@@ -13,7 +13,7 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 
 // 試練の板の画面のパケット (docs/design/29 の 2.7・4.2)。決めるのは全部サーバー。クライアントは見せるだけ。
-//   Open (サーバー → 持ち主): 板の画面を開く。いまの三つ (名前・類・段・稀さ・修飾の札・済んだか)、今週の試練、図鑑の行、称号
+//   Open (サーバー → 持ち主): 祠の画面を開く。いまの三つ (名前・類・段・稀さ・修飾の札・済んだか)、歌片の数、順路の記録、図鑑の行、称号
 public final class TrialBoardNet {
     private static final String PROTOCOL_VERSION = "trial_board-2";
 

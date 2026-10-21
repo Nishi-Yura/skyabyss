@@ -29,7 +29,7 @@ import net.neoforged.neoforge.event.RegisterCommandsEvent;
 
 // 開発用の試練のコマンド (docs/design/29 の 2.6・5.3)。/skyabyss dev trial …
 //   board [titan]            板を開く (背中の外からでも)
-//   list                     いまの周・三つ・修飾・今週の試練・種
+//   list                     いまの周・三つ・修飾・種
 //   cycle <n>                そのグループの周を n にして、引き直す (履歴は消す)
 //   force <id> <id> <id>     引いた三つを決める (修飾は標準)
 //   mods <id> <符号>         引いた試練の修飾を、符号 (Mods.encode) で決める
@@ -64,14 +64,6 @@ public final class TrialCommands {
                                 .executes(ctx -> force(ctx.getSource(), StringArgumentType.getString(ctx, "ids")))))
                         .then(Commands.literal("mods").then(Commands.argument("id", StringArgumentType.word()).then(Commands.argument("code", StringArgumentType.word())
                                 .executes(ctx -> mods(ctx.getSource(), StringArgumentType.getString(ctx, "id"), StringArgumentType.getString(ctx, "code"))))))
-                        .then(Commands.literal("lit").then(Commands.argument("key", StringArgumentType.word()).executes(ctx -> {
-                            // 開発用 (撮影): 鼓動の間の碑を、その試練を越えたことにして光らせる (記録は触らない)
-                            ServerLevel here = back(ctx.getSource());
-                            UUID group = Groups.keyOf(ctx.getSource().getPlayerOrException());
-                            HubTablets.TEST_CLEARED.add(group + "|" + titan(here) + "|" + StringArgumentType.getString(ctx, "key"));
-                            HubTablets.refresh(here, group);
-                            return 1;
-                        })))
                         .then(Commands.literal("tp").then(Commands.argument("where", StringArgumentType.word())
                                 .executes(ctx -> tp(ctx.getSource(), StringArgumentType.getString(ctx, "where"))))))));
     }

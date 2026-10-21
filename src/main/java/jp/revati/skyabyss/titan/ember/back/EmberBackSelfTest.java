@@ -545,8 +545,8 @@ public final class EmberBackSelfTest {
         expect(EmberBackTrials.gateOpening(GROUP_A), "the forge does not start dimming after three stones");
         expect(!EmberBackTrials.gateOpening(GROUP_B), "group B's forge dims with group A's stones");
         expect(!state.gateOpen(), "the gate opened at once (no dimming)");
-        // 越えた試練の入口は、80 tick 後に試練済みの封印で閉じる (TrialHub)。歩きの検査は封印の前の姿で見るので、戻しの待ちは捨てる
-        jp.revati.skyabyss.trial.TrialHub.clearAll();
+        // 越えた試練の順路の運びの待ちは捨てる (歩きの検査は運ぶ前の姿で見る)
+        jp.revati.skyabyss.trial.TrialRoute.clearAll();
     }
 
     // 門を開けたグループ A は通れ、B は閉じたまま (当たり判定も)

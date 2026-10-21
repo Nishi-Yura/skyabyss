@@ -18,8 +18,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
-// 試練の「中」の範囲 (docs/design/29 の 4.6)。試練を越えたとき、その中にいる仲間だけを真ん中の鼓動の間へ戻し、
-// 越えた試練へは、そのグループは入り直せない (中へ入ると鼓動の間へ戻される) ために使う。
+// 試練の「中」の範囲。セルの中にいる人の数え (戦いの強さ・見かけ) と、石と休み場の対応の検査に使う。
 // 試練の名前 (key) は石の合図 (TrialSteles) と同じ: 岩鯨は 0 西 / 1 東 / 2 下、潮殻・雷翼は west / east / front、余燼は west / east / south。
 // 岩鯨・潮殻の新作のセル (試練の階) は、引いたセルの床の範囲 (TrialCell.Ports.area と休み場)。
 // 範囲は鼓動の間・入口・宝物庫・心臓へ続く道を含まない。背の作りを変えたら、自己テスト (trial pool の regions) が

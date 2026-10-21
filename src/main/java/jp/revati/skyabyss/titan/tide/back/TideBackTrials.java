@@ -485,7 +485,7 @@ public final class TideBackTrials {
         ring(level, state, trial, player);
     }
 
-    // 試練のプールの新作の石 (引いていない今週の試練): そのグループの人にだけ鳴らして光らせる
+    // 試練のプールの新作の石: そのグループの人にだけ鳴らして光らせる
     public static void notifyGroup(ServerLevel level, UUID group, BlockPos pos) {
         for (ServerPlayer p : Groups.online(level, group)) {
             if (p.distanceToSqr(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5) < 48 * 48) {

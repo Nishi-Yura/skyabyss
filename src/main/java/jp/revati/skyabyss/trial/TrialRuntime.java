@@ -50,7 +50,7 @@ import net.neoforged.neoforge.event.tick.LevelTickEvent;
 
 // 試練のプールを動かす (docs/design/29)。背中のディメンションで 5 tick ごとに:
 //   1. 動いているグループごとに、いまの周の引き (TrialData.current) を見て、入口の戸をグループにだけ開け閉めする (40 tick ごと)
-//   2. 引いた試練 (と今週の試練) のセルの中にグループの人がいれば、セルを動かす (arm → tick)。誰もいなくなって 5 秒で disarm
+//   2. 引いた試練のセルの中にグループの人がいれば、セルを動かす (arm → tick)。誰もいなくなって 5 秒で disarm
 //   3. セルの石の差し口 (useStone)・仕掛けの右クリック・戻りの光る床・倒れた回数 (任意の目標) を扱う
 // 原型の石は、TrialSteles.onRung から onStoneRung が呼ばれて、図鑑・報いに数える
 @EventBusSubscriber(modid = SkyAbyss.MODID)
@@ -67,8 +67,6 @@ public final class TrialRuntime {
 
     static {
         GroupOverlays.register(TrialRuntime::overlay);
-        // 鼓動の間の試練の碑 (越えた試練の碑がそのグループの画面で光る)
-        TrialHub.register();
         BackGroupData.IGNORED_OVERRIDE = TrialRuntime::isEntranceKey;
     }
 
@@ -126,28 +124,36 @@ public final class TrialRuntime {
         }
     }
 
-    // 引いた試練の入口だけを、そのグループに開ける。ほかには閉じて見える
+    // 順路 (docs/design/32 の 2 章): 今の段の試練の入口だけを、そのグループに開ける。越えた試練・これからの試練・引いていない試練は閉じて見える
+    // (中ボスの段・心臓の段・順路の外では、どの試練の戸も閉じる。順路は入口の休み場へ運ぶので、戸から入ることはない)
     public static void syncGates(ServerLevel back, UUID group, String titan, TrialDraw.Draw draw) {
         if (!TrialCatalog.deckPlaced(titan)) {
             return;
         }
+        Def current = currentOf(back, group, draw);
         for (TrialCell cell : TrialCells.of(titan)) {
             TrialCell.Ports p = cell.ports();
             if (p.entrance().isEmpty()) {
                 continue;
             }
-            boolean want = draw.has(cell.def().id());
-            String cellKey = draw.has(cell.def().id()) ? TrialRegions.keyOfDef(titan, cell.def(), draw) : null;
-            if (want && cellKey != null && HubTablets.cleared(back, group, titan, cellKey)) {
-                // 越えた試練 (版 25): 入口は試練済みの封印で閉じたまま (見かけは TrialHub.sealOverlay)
-                GroupGates.seal(back, group, p.entrance());
-            } else if (want) {
+            if (current != null && current.id().equals(cell.def().id())) {
                 GroupGates.open(back, group, p.entrance());
             } else {
                 GroupGates.seal(back, group, p.entrance());
             }
             // 出口の戸は、そのセルが「済んだ」とみなせるあいだだけ開く (セルが決める)
         }
+    }
+
+    // そのグループの順路の今の段の試練 (なければ null)
+    @Nullable
+    public static Def currentOf(ServerLevel back, UUID group, TrialDraw.Draw draw) {
+        BackGroupData.Record r = BackGroupData.get(back).peek(group);
+        if (r == null || r.getInt(TrialRoute.MID) > 0) {
+            return null;
+        }
+        int step = TrialRoute.step(r);
+        return step >= 1 && step < TrialRoute.LAST_STEP ? TrialRoute.defOf(draw, step) : null;
     }
 
     // ---------------------------------------------------------------- 毎 tick
@@ -423,7 +429,7 @@ public final class TrialRuntime {
     }
 
     // 版 25: 試練を終えたら、石を押さなくても越えたことになる。セルが「終えた」(run.cleared) と、少し (AUTO_RING_DELAY tick。終わりの演出を見せる) 待って石が鳴り、
-    // そのあとは石を押したときと同じ (TrialHub が 80 tick 後に、中にいる仲間を鼓動の間へ戻し、入口を試練済みの封印で閉じる)。石は押しても同じ (二重には数えない)
+    // そのあとは石を押したときと同じ (TrialRoute が 80 tick 後に、順路の参加者を次の段の入口へ運ぶ)。石は押しても同じ (二重には数えない)
     public static final int AUTO_RING_DELAY = 30;
 
     static void autoRing(ServerLevel back, UUID group, TrialCell cell, TrialCell.Run run, TrialDraw.Draw draw, List<ServerPlayer> inside, long now) {
@@ -590,6 +596,8 @@ public final class TrialRuntime {
             UUID group = Groups.keyOf(back.getServer(), player);
             BackGroupData.Record r = GroupProgress.of(back, group);
             if (heartCounted.add(group + "@" + r.epoch())) {
+                // 順路の記録 (越えた回数・最速) を控えてから、周を進める (順路の記録も消える)
+                TrialRoute.onHeartStopped(back, r);
                 TrialData.onHeartStopped(r);
             }
         }

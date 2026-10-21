@@ -160,9 +160,6 @@ public final class ModItems {
     public static final DeferredItem<BlockItem> ANEMONE_PEDESTAL = ITEMS.registerSimpleBlockItem(ModBlocks.ANEMONE_PEDESTAL);
     public static final DeferredItem<BlockItem> ANEMONE_BED = ITEMS.registerSimpleBlockItem(ModBlocks.ANEMONE_BED);
     public static final DeferredItem<BlockItem> ANEMONE_TALLY = ITEMS.registerSimpleBlockItem(ModBlocks.ANEMONE_TALLY);
-    public static final DeferredItem<BlockItem> TRIAL_BOARD = ITEMS.registerSimpleBlockItem(ModBlocks.TRIAL_BOARD);
-    public static final DeferredItem<BlockItem> TRIAL_TABLET = ITEMS.registerSimpleBlockItem(ModBlocks.TRIAL_TABLET);
-    public static final DeferredItem<BlockItem> TRIAL_SEAL = ITEMS.registerSimpleBlockItem(ModBlocks.TRIAL_SEAL);
 
     // 遺物ブロック (巨神ごとの様式は設置側が決める。持ち物のは鯨の様式)
     public static final DeferredItem<BlockItem> RELIC_CACHE = ITEMS.registerSimpleBlockItem(ModBlocks.RELIC_CACHE);

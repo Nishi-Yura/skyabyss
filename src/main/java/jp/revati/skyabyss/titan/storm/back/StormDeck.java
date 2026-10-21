@@ -53,11 +53,6 @@ public final class StormDeck {
     public static final Area YARD = new Area(-24, 24, 64, 82, Y, 12);
     public static final BlockPos YARD_FIRE = new BlockPos(0, Y + 1, 73);
     public static final BlockPos YARD_SPAWN = new BlockPos(2, Y + 1, 73);
-    // 試練の板 (渡り場の北の縁ぎわ。引いた三つが読める)
-    public static final BlockPos BOARD_YARD = new BlockPos(-6, Y + 1, 66);
-    // 風の広間 (鼓動の間) の板 (南の壁ぎわ。碑のそばで引きが読める)。数字は StormBackLayout (HUB.floor 134・HUB.z2 10) と同じ
-    // (StormBackLayout が StormDeck を読むので、ここからは読まない。クラスの初期化が循環しないように。StormTrialSelfTest が同じかを確かめる)
-    public static final BlockPos BOARD_HUB = new BlockPos(-10, 135, 10);
 
     // ---------------------------------------------------------------- 四つの戸 (封印の扉。高さ 5。渡り場の縁の手すりの列)
     public static final int G0 = Y + 1;

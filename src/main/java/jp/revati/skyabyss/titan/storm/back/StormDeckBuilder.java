@@ -194,8 +194,6 @@ final class StormDeckBuilder {
 
     // ---------------------------------------------------------------- 風の広間の板と、原型の三つの戸の枠
     static void hub(StormKit kit) {
-        kit.put(BOARD_HUB.getX(), BOARD_HUB.getY(), BOARD_HUB.getZ(),
-                ModBlocks.TRIAL_BOARD.get().defaultBlockState().setValue(HorizontalDirectionalBlock.FACING, Direction.NORTH));
     }
 
     // ---------------------------------------------------------------- 橋 (背の広場の南の縁 → 渡り場の北の縁)
@@ -325,8 +323,6 @@ final class StormDeckBuilder {
         StormDeco.strip(kit, Y, StormKit.COPPER, StormKit.COPPER, 99, 0, new int[] {19, 64}, new int[] {19, 70}, new int[] {5, 70});
         // 休み場・板・羽軸の柱
         fire(kit, REST_YARD);
-        kit.put(BOARD_YARD.getX(), BOARD_YARD.getY(), BOARD_YARD.getZ(),
-                ModBlocks.TRIAL_BOARD.get().defaultBlockState().setValue(HorizontalDirectionalBlock.FACING, Direction.SOUTH));
         StormDeco.featherPillar(kit, -12, 69, Y, 6);
         StormDeco.featherPillar(kit, 12, 69, Y, 6);
     }

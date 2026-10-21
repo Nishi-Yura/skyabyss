@@ -34,7 +34,7 @@ import net.minecraft.server.level.ServerLevel;
 //  - 引き方: 周回 1 は原型・周回 2 から枠ごとに一つ・履歴・尽きと戻し・直前を引かない・種の再現・グループごとの独立・段
 //  - 修飾: 禁止の組み合わせが出ない・数字の範囲・稀さの割合・符号の往復・極の中身
 //  - 全セルの全変種 (配置 × 数字 × 敵 × 障害 × 任意 × 極 × 静): arm → overlay (セルの箱の中) → tick → disarm
-//  - 今週の試練・図鑑・称号・板の表示データとその通信の往復・戸 (引いた三つだけ開く)・セルの audit
+//  - 図鑑・称号・祠の画面の表示データとその通信の往復・戸 (順路の今の段だけ開く)・セルの audit
 //  - 複数グループ: 二つのグループが同じ背で、別々の記録・別々の戸・別々の引きを持つ
 public final class TrialPoolSelfTest {
     private TrialPoolSelfTest() {
@@ -544,14 +544,16 @@ public final class TrialPoolSelfTest {
         TrialDraw.Draw da = TrialData.current(whale, ra, a, TrialData.worldSeed(back));
         TrialDraw.Draw db = TrialData.current(whale, rb, b, TrialData.worldSeed(back));
         check(da.picks().size() == 3 && db.picks().size() == 3, "a group did not draw three");
+        // 順路 (docs/design/32): 今の段のセルの戸だけが開く。A は段 1 (歩)、B は順路の外 (全部閉じる)
+        ra.putInt(TrialRoute.STEP, 1);
         TrialRuntime.syncGates(back, a, whale, da);
         TrialRuntime.syncGates(back, b, whale, db);
         for (TrialCell c : TrialCells.of(whale)) {
             if (c.ports().entrance().isEmpty()) {
                 continue;
             }
-            boolean wa = da.has(c.def().id());
-            boolean wb = db.has(c.def().id());
+            boolean wa = c.def().id().equals(TrialRoute.defOf(da, 1).id());
+            boolean wb = false;
             check(GroupGates.isOpen(back, a, c.ports().entrance()) == wa, c.def().id() + " gate for group A: expected " + wa);
             check(GroupGates.isOpen(back, b, c.ports().entrance()) == wb, c.def().id() + " gate for group B: expected " + wb);
         }

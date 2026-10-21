@@ -45,7 +45,6 @@ public final class StormDeck2 {
     public static final Area YARD = new Area(-24, 24, 172, 190, Y, 12);
     public static final BlockPos YARD_FIRE = new BlockPos(0, Y + 1, 181);
     public static final BlockPos YARD_SPAWN = new BlockPos(2, Y + 1, 181);
-    public static final BlockPos BOARD_YARD = new BlockPos(-6, Y + 1, 174);
 
     // ---------------------------------------------------------------- 五つの戸 (封印の扉。高さ 5)
     public static final List<BlockPos> S04_GATE = wallX(-25, 179, 183);

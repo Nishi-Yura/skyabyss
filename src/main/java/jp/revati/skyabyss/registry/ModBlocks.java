@@ -55,18 +55,6 @@ public final class ModBlocks {
             () -> new jp.revati.skyabyss.grave.GraveBlock(unbreakable(MapColor.COLOR_GREEN).sound(SoundType.MOSS).lightLevel(state -> 5)
                     .pushReaction(net.minecraft.world.level.material.PushReaction.BLOCK)));
 
-    // 試練の板: 引いた三つの試練と修飾の一覧・図鑑・称号の画面を開く。鼓動の間と試練の階の広間に立つ (docs/design/29 の 2.7)
-    public static final DeferredBlock<jp.revati.skyabyss.trial.TrialBoardBlock> TRIAL_BOARD = BLOCKS.register("trial_board",
-            () -> new jp.revati.skyabyss.trial.TrialBoardBlock(unbreakable(MapColor.COLOR_GRAY).noOcclusion().lightLevel(state -> 6)));
-
-    // 試練の碑: 鼓動の間に一つの試練につき一つ立つ。グループが越えた試練の碑は、そのグループの画面でだけ光る (HubTablets の見かけの上書き)
-    public static final DeferredBlock<jp.revati.skyabyss.trial.TrialTabletBlock> TRIAL_TABLET = BLOCKS.register("trial_tablet",
-            () -> new jp.revati.skyabyss.trial.TrialTabletBlock(unbreakable(MapColor.COLOR_GRAY).noOcclusion().lightLevel(state -> state.getValue(jp.revati.skyabyss.trial.TrialTabletBlock.LIT) ? 12 : 2)));
-
-    // 試練済みの封印: 越えた試練の入口に、そのグループの画面だけに立つ (TrialHub の見かけの上書き。docs/design/29 の 4.6)
-    public static final DeferredBlock<jp.revati.skyabyss.trial.TrialSealBlock> TRIAL_SEAL = BLOCKS.register("trial_seal",
-            () -> new jp.revati.skyabyss.trial.TrialSealBlock(unbreakable(MapColor.COLOR_BLACK).lightLevel(state -> 4)));
-
     // ---- 遺物ブロック (見た目だけ巨神ごと: titan = whale / tide / storm / ember。挙動はバニラの箱・焚き火・レバー等と同じ)
     // 遺物の箱 (宝のキャッシュ)。光る錠。OPEN で蓋が上がる
     public static final DeferredBlock<jp.revati.skyabyss.relic.RelicCacheBlock> RELIC_CACHE = BLOCKS.register("relic_cache",

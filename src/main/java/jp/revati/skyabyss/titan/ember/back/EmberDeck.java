@@ -165,9 +165,6 @@ public final class EmberDeck {
     public static final BlockPos E04_STONE = new BlockPos(31, Y + 1, 116);
     public static final BlockPos E04_PAD = new BlockPos(20, Y, 116);
 
-    // 試練の板 (炉心の広間の休み場のそば・試練の階の広間の北の壁ぎわ)
-    public static final BlockPos BOARD_HUB = new BlockPos(7, EmberBackLayout.FLOOR_HUB + 1, -72);
-    public static final BlockPos BOARD_D0 = new BlockPos(-6, Y + 1, 7);
 
     // ---------------------------------------------------------------- 休み場 (EmberBackLayout.RESTS の続き。5 × 5 の台、焚き火は南の端の真ん中)
     public static final List<EmberBackLayout.Rest> RESTS = List.of(
