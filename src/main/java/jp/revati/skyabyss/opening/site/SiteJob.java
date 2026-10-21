@@ -930,6 +930,11 @@ public final class SiteJob {
         String kind = entry.kind;
         // 一章の骨は一章の跡地 (docs/design/33 の 3 章) の中に置くので、野営地からの距離ではなく、跡地の中心から 150 以内で動かす
         SiteData.Ground whaleGround = kind.equals("ribs") ? data.ground(jp.revati.skyabyss.story.Chapters.WHALE.id()) : null;
+        // 一章の骨は、跡地が取っておいた岩鯨の祠の台座 (ChapterGrounds.shrineSpot) の上へ動かさない (祠は骨の脇。台座 9×9)
+        if (whaleGround != null && whaleGround.shrine != null) {
+            others.add(whaleGround.shrine);
+            radii.add(5);
+        }
         BlockPos campPos = campE == null || whaleGround != null ? null : campE.pos;
         BlockPos shelterPos = shelterE == null ? null : shelterE.pos;
         BlockPos anchor = whaleGround != null ? whaleGround.center : entry.anchor;
