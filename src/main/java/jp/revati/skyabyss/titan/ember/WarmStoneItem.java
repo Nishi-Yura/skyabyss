@@ -76,6 +76,7 @@ public class WarmStoneItem extends Item {
             case NOT_NOW -> Notice.bar(sp, ModText.hint(EmberIds.LANG_SURFACE + "stone.not_now"));
             case TAKEN -> Notice.bar(sp, ModText.hint(EmberIds.LANG_SURFACE + "stone.taken", titan.requesterTonight()));
             case NO_SPOT -> Notice.bar(sp, ModText.hint(EmberIds.LANG_SURFACE + "stone.no_spot"));
+            case FAR -> Notice.bar(sp, ModText.hint(EmberIds.LANG_SURFACE + "stone.basin_only"));
         }
         return InteractionResultHolder.consume(stack);
     }

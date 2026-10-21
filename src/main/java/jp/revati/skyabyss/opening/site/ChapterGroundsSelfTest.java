@@ -207,7 +207,7 @@ public final class ChapterGroundsSelfTest {
                 check(lx * bx + lz * bz > 0, "the tide gate should face the beach");
             }
 
-            // 道しるべ: 40 ごと、跡地の手前で止まる。川 (水) の点は飛ばす
+            // 道しるべ: 40 ごと、跡地の手前で止まる。浅い川は石の台で渡し、深い水の点は飛ばす
             List<BlockPos> road = ChapterGrounds.road(flat, cap, new BlockPos(0, 70, -1000), 0);
             check(road.size() >= 19 && road.size() <= 21, "the road to 1000 should have about 20 waymarks: " + road.size());
             for (int i = 1; i < road.size(); i++) {
@@ -216,7 +216,16 @@ public final class ChapterGroundsSelfTest {
             }
             Synth river = new Synth((x, z) -> z <= -400 && z >= -440 ? 55 : 70);
             List<BlockPos> wet = ChapterGrounds.road(river, cap, new BlockPos(0, 70, -1000), 0);
-            check(wet.stream().noneMatch(p -> p.getZ() <= -400 && p.getZ() >= -440) && wet.size() < road.size(), "no waymark on the river");
+            // 浅い川 (深さ 8) の点は飛ばさず、線の上に石の台で渡す (海面 + 1)。深い湖 (深さ 30) の点だけ飛ばす
+            check(wet.size() == road.size(), "the shallow river should be bridged, not skipped: " + wet.size() + " of " + road.size());
+            check(wet.stream().filter(p -> p.getZ() <= -400 && p.getZ() >= -440).allMatch(p -> p.getX() == 0 && p.getY() == 64)
+                    && wet.stream().anyMatch(p -> p.getZ() <= -400 && p.getZ() >= -440), "the river waymark should stand on the line at the water");
+            Synth lake = new Synth((x, z) -> z <= -400 && z >= -440 ? 33 : 70);
+            List<BlockPos> deep = ChapterGrounds.road(lake, cap, new BlockPos(0, 70, -1000), 0);
+            check(deep.stream().noneMatch(p -> p.getZ() <= -400 && p.getZ() >= -440) && deep.size() < road.size(), "no waymark on the deep lake");
+            Synth swamp = new Synth((x, z) -> z <= -400 && z >= -440 ? 63 : 70);
+            List<BlockPos> low = ChapterGrounds.road(swamp, cap, new BlockPos(0, 70, -1000), 0);
+            check(low.size() == road.size(), "a sea-level flat should still get its waymark: " + low.size());
             List<BlockPos> whaleRoad = ChapterGrounds.road(flat, cap, new BlockPos(0, 70, -300), ChapterGrounds.WHALE_CAIRNS);
             check(whaleRoad.size() >= ChapterGrounds.WHALE_CAIRNS, "the whale road should fit the 7 cairns even on a short band: " + whaleRoad.size());
             // 祠は平らな所 (斜面のそばでも 9×9 が 3 以内)

@@ -187,6 +187,12 @@ public final class TideChapterSelfTest {
                     }
                     level.setBlock(new BlockPos(x, y, z), s, 2 | 16);
                 }
+                // 海面 + 8 より上の地形 (丘・木) も消す。残すと、人工の海の上に浮いた丘が空と高さマップをふさぎ、
+                // 空の見える拍・休む場所の海・大干潮の道の探しが世界の種しだいで落ちる
+                int top = level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.WORLD_SURFACE, x, z);
+                for (int y = sea + 9; y < top; y++) {
+                    level.setBlock(new BlockPos(x, y, z), air, 2 | 16);
+                }
             }
         }
     }

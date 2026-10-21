@@ -80,6 +80,12 @@ public final class SiteJob {
     private LongOpenHashSet touched;
     // wetOk の部品で、水だった列 (触らない)
     private LongOpenHashSet wetCols;
+    // 石の台 (pillar): 水の上に建てる小さな部品 (道しるべの石標、動かし尽くした章の小要素)。範囲の内の水の列は水底から石を積み、
+    // 輪の水の列は触らない。台の上面は水面の一つ上
+    private boolean pillar;
+    private LongOpenHashSet pillarCols;
+    // 石の台にしてよい部品の大きさ (範囲の一辺)
+    static final int PILLAR_MAX_SIDE = 9;
     // ANALYZE を何 tick かに分ける
     private boolean anaInit;
     private int anaX;
@@ -191,6 +197,28 @@ public final class SiteJob {
         return top;
     }
 
+    // 水の列の、いちばん上の水のブロックの高さ
+    private int waterTop(int x, int z) {
+        BlockPos.MutableBlockPos p = new BlockPos.MutableBlockPos(x, 0, z);
+        for (int y = level.getHeight(Heightmap.Types.WORLD_SURFACE, x, z) - 1; y > level.getMinBuildHeight(); y--) {
+            p.setY(y);
+            if (!level.getBlockState(p).getFluidState().isEmpty()) {
+                return y;
+            }
+        }
+        return level.getSeaLevel() - 1;
+    }
+
+    // 水の上で動かさずに石の台を立てる部品か (道しるべの石標)
+    private boolean pillarFirst() {
+        return ChapterGrounds.ROAD_BLUEPRINT.equals(entry.blueprint) && smallEnough();
+    }
+
+    private boolean smallEnough() {
+        int[] r = bp.worldRect(rot, mirror, BlockPos.ZERO);
+        return r[2] - r[0] + 1 <= PILLAR_MAX_SIDE && r[3] - r[1] + 1 <= PILLAR_MAX_SIDE;
+    }
+
     public int ground(int x, int z) {
         BlockPos.MutableBlockPos p = new BlockPos.MutableBlockPos(x, 0, z);
         int y = level.getHeight(Heightmap.Types.WORLD_SURFACE, x, z) - 1;
@@ -255,6 +283,7 @@ public final class SiteJob {
         if (!anaInit) {
             groundCache = new int[w * d];
             wetCols = new LongOpenHashSet();
+            pillarCols = new LongOpenHashSet();
             anaHs = new ArrayList<>();
             anaX = x0;
             anaInit = true;
@@ -273,6 +302,23 @@ public final class SiteJob {
                 if (g == WET && bp.wetOk) {
                     wetCols.add(BlockPos.asLong(x, 0, z));
                     groundCache[(x - x0) + (z - z0) * w] = origin.getY() - 1;
+                    continue;
+                }
+                if (g == WET && !pillar && in && !skipCheck && pillarFirst()) {
+                    // 道しるべの石標は、水の上なら動かさずにその場へ石の台を立てる (道の線から外れないように)
+                    pillar = true;
+                    anaInit = false;
+                    anaHs = null;
+                    SkyAbyss.LOGGER.info("Opening site {}: water at {} {}; standing it on a stone pillar", label, x, z);
+                    return;
+                }
+                if (g == WET && pillar) {
+                    long key = BlockPos.asLong(x, 0, z);
+                    pillarCols.add(key);
+                    groundCache[(x - x0) + (z - z0) * w] = seabed(x, z);
+                    if (in) {
+                        anaHs.add(waterTop(x, z) + 1);
+                    }
                     continue;
                 }
                 if (g == WET && bp.fillWater) {
@@ -431,7 +477,15 @@ public final class SiteJob {
             boolean in = cols[i + 3] == 1;
             int g = cols[i + 4];
             colIndex++;
-            if (selective) {
+            if (pillar && pillarCols.contains(BlockPos.asLong(x, 0, z))) {
+                // 石の台: 内の列は水底から上面まで石 (上面は石レンガ)、輪の水の列は触らない
+                if (in) {
+                    for (int y = g + 1; y <= target; y++) {
+                        set(p.set(x, y, z), y == target ? Blocks.STONE_BRICKS.defaultBlockState() : Blocks.COBBLESTONE.defaultBlockState());
+                    }
+                    clearAbove(p, x, z, target + 1, clear, true);
+                }
+            } else if (selective) {
                 long key = BlockPos.asLong(x, 0, z);
                 int[] rel = reliefAt == null ? null : reliefAt.get(key);
                 if (wetCols != null && wetCols.contains(key)) {
@@ -824,6 +878,19 @@ public final class SiteJob {
             force = true;
             relocations = 0;
             SkyAbyss.LOGGER.warn("Opening site {} at {}: no free land after {} moves; building it in place anyway", label, home, maxRings);
+            entry.pos = home;
+            origin = home;
+            entry.started = false;
+            data.setDirty();
+            phase = Phase.LOAD;
+            return;
+        }
+        if (relocations > maxRings && !pillar && !entry.siteId.isEmpty() && smallEnough() && home != null) {
+            // 章の小要素で小さな物は、動かし尽くしたら元の場所に石の台を立てて建てる (沼・海ばかりの世界でも諦めない)
+            pillar = true;
+            force = true;
+            relocations = 0;
+            SkyAbyss.LOGGER.warn("Opening site {} at {}: no dry land after {} moves; standing it on a stone pillar in place", label, home, maxRings);
             entry.pos = home;
             origin = home;
             entry.started = false;

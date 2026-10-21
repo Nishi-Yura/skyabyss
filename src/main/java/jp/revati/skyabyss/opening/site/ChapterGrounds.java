@@ -492,7 +492,8 @@ public final class ChapterGrounds {
     }
 
     // 都から跡地への道しるべ: 中心から ROAD_START で始め、ROAD_STEP ごと、跡地の手前 ROAD_END_GAP で止める。
-    // atLeast > 0 なら、その数が入るように間を詰める (12 まで)。水の上・崖・海面の高さの平地の点は、まわり (前後 12・左右 20) に置けなければ飛ばす
+    // atLeast > 0 なら、その数が入るように間を詰める (12 まで)。水の上・崖・海面の高さの平地の点は、まわり (前後 12・左右 20) に置けなければ
+    // 最後の手段 (roadFallback: 低い平地、浅い水なら石の台) に回し、それもだめな点 (深い水・構造物のそば) だけ飛ばす
     static List<BlockPos> road(Ground g, BlockPos capital, BlockPos center, int atLeast) {
         // 足りなければ間を詰めて探し直す (置けない点を飛ばすと数が減るので)
         List<BlockPos> out = roadOnce(g, capital, center, atLeast, ROAD_STEP);
@@ -534,11 +535,41 @@ public final class ChapterGrounds {
                     }
                 }
             }
+            if (at == null) {
+                at = roadFallback(g, capital, ux, uz, along);
+            }
             if (at != null) {
                 out.add(at);
             }
         }
         return out;
+    }
+
+    // 道しるべの点の最後の手段 (乾いた平らな所が見つからない): まず海面の高さの低い平地 (沼・川べり) も許して探し、
+    // それもなければ線の上の浅い水 (深さ BRIDGE_DEPTH まで) に置く。水の上の点は、建てるときに石の台を水底から立てる (SiteJob の pillar)
+    public static final int BRIDGE_DEPTH = 10;
+
+    @Nullable
+    static BlockPos roadFallback(Ground g, BlockPos capital, double ux, double uz, double along) {
+        for (int shift : new int[] {0, 4, -4, 8, -8, 12, -12}) {
+            for (int side : new int[] {0, 6, -6, 12, -12}) {
+                int x = capital.getX() + (int) Math.round(ux * (along + shift) - uz * side);
+                int z = capital.getZ() + (int) Math.round(uz * (along + shift) + ux * side);
+                Area ar = SiteFinder.area(g, x, z, 1, 1, 4, false, false);
+                if (ar.ok() && !g.structureNear(x, z, ROAD_STRUCTURE_GAP)) {
+                    return new BlockPos(x, ar.median() + 1, z);
+                }
+            }
+        }
+        for (int shift : new int[] {0, 4, -4, 8, -8}) {
+            int x = capital.getX() + (int) Math.round(ux * (along + shift));
+            int z = capital.getZ() + (int) Math.round(uz * (along + shift));
+            int top = g.top(x, z);
+            if (g.wet(x, z) && g.sea() - top <= BRIDGE_DEPTH && !g.structureNear(x, z, ROAD_STRUCTURE_GAP)) {
+                return new BlockPos(x, g.sea() + 1, z);
+            }
+        }
+        return null;
     }
 
     // ---------------------------------------------------------------- 形を重ねた地形 (場所探しが、整えたあとの地形を見る)
