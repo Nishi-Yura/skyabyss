@@ -182,6 +182,11 @@ public final class TradeSelfTest {
         check(f, Trades.cancel(s, l3.id) == Trades.Result.CANCELLED && s.getInventory().countItem(Items.EMERALD) == 5 && data.byId(l3.id) == null,
                 "cancel returns the items");
         check(f, told(c.getUUID(), "note_cancelled"), "applicants told of the cancel");
+        for (int i = 0; i < 36; i++) {
+            if (s.getInventory().getItem(i).is(Items.EMERALD)) {
+                s.getInventory().setItem(i, ItemStack.EMPTY);
+            }
+        }
         s.getInventory().setItem(6, new ItemStack(Items.EMERALD, 5));
         Trades.list(s, slot(6, 5), List.of(Items.APPLE), List.of(1), 0);
         TradeData.Listing l4 = data.of(s.getUUID()).get(0);
@@ -194,7 +199,8 @@ public final class TradeSelfTest {
         }
         s.getInventory().offhand.set(0, new ItemStack(Items.DIRT, 64));
         check(f, Trades.cancel(s, l4.id) == Trades.Result.CANCELLED && s.getInventory().countItem(Items.EMERALD) == 0
-                && Trades.count(data.mail(s.getUUID()), new ItemStack(Items.EMERALD)) == 5, "full inventory: returned items wait in the mail");
+                && Trades.count(data.mail(s.getUUID()), new ItemStack(Items.EMERALD)) == 5, "full inventory: returned items wait in the mail (inv "
+                + s.getInventory().countItem(Items.EMERALD) + ", mail " + data.mail(s.getUUID()) + ", creative " + s.hasInfiniteMaterials() + ")");
         for (int i = 0; i < 36; i++) {
             s.getInventory().setItem(i, sKeep.get(i));
         }

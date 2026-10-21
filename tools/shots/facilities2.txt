@@ -1,4 +1,4 @@
-# 都の施設の続き (docs/design/35 の 3.2・6.5・6.7): 木偶の数字、ギルドの 3 つのつまみと倉庫、試練の記録、師範の振り直し・祭司の誓いの会話
+# 都の施設の続き (docs/design/35 の 3.2・6.5・6.7): 木偶の数字、ギルドの 4 つのつまみと倉庫、試練の記録、師範の振り直し・祭司の誓いの会話
 # ./gradlew runShots -Pscript=tools/shots/facilities2.txt -PshotsName=facilities2 --no-daemon --offline  (絵は docs/review/facilities2/ へ写す)
 world shots flat
 size 1280 720
@@ -38,7 +38,6 @@ cmd skyabyss facility coins 200
 cmd guild create "鐘の守り" KANE blue white
 cmd give @s minecraft:iron_ingot 30
 cmd guild deliver
-cmd guild rent lot_2
 chat clear
 cmd guild menu 0
 wait 30
@@ -48,15 +47,17 @@ wait 30
 shot guild_request
 cmd guild menu 2
 wait 30
-shot guild_house
+shot guild_banner
+cmd guild menu 3
+wait 30
+shot guild_achievements
 close
 cmd give @s minecraft:bread 16
 cmd guild storage
 wait 30
 shot guild_storage
 close
-cmd guild release
-cmd guild leave
+cmd guild disband confirm
 # 試練の記録
 cmd skyabyss facility records
 wait 30

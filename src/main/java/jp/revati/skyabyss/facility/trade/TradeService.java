@@ -17,6 +17,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.common.util.FakePlayer;
@@ -219,8 +220,37 @@ public final class TradeService {
                 })));
     }
 
-    // 自己テスト用
-    static void endSession(UUID who) {
-        SESSIONS.remove(who);
+    // 撮影・試し用 (/skyabyss facility trade demo): ほかの旅人の出品 3 つ、自分の出品 1 つとそれへの申請 2 つ (いない人)、受け取り箱の品
+    public static int demo(ServerPlayer p) {
+        TradeData data = TradeData.get(p.server);
+        long now = Trades.now();
+        String[] names = {"ミナト", "カイ", "シオン"};
+        ItemStack[][] gives = {{new ItemStack(net.minecraft.world.item.Items.DIAMOND, 3)},
+                {new ItemStack(net.minecraft.world.item.Items.ENCHANTED_GOLDEN_APPLE), new ItemStack(net.minecraft.world.item.Items.GOLDEN_CARROT, 16)},
+                {new ItemStack(net.minecraft.world.item.Items.NAME_TAG, 2)}};
+        ItemStack[][] wants = {{Trades.coins(60)}, {new ItemStack(net.minecraft.world.item.Items.IRON_INGOT, 32), Trades.coins(10)},
+                {new ItemStack(net.minecraft.world.item.Items.STRING, 24), new ItemStack(net.minecraft.world.item.Items.BONE, 12)}};
+        for (int i = 0; i < names.length; i++) {
+            TradeData.Listing l = data.create(UUID.nameUUIDFromBytes(("trade_demo_" + i).getBytes()), names[i], now, now + Trades.EXPIRE_MS - i * 30L * 3_600_000L);
+            l.give.addAll(java.util.Arrays.asList(gives[i]));
+            l.want.addAll(java.util.Arrays.asList(wants[i]));
+        }
+        TradeData.Listing mine = data.create(p.getUUID(), p.getGameProfile().getName(), now, now + Trades.EXPIRE_MS);
+        mine.give.add(new ItemStack(net.minecraft.world.item.Items.IRON_INGOT, 16));
+        mine.want.add(new ItemStack(net.minecraft.world.item.Items.DIAMOND, 2));
+        TradeData.Application a = new TradeData.Application(UUID.nameUUIDFromBytes("trade_demo_a".getBytes()));
+        a.name = "ミナト";
+        a.offer.add(new ItemStack(net.minecraft.world.item.Items.DIAMOND, 2));
+        mine.apps.put(a.applicant, a);
+        TradeData.Application b = new TradeData.Application(UUID.nameUUIDFromBytes("trade_demo_b".getBytes()));
+        b.name = "シオン";
+        b.offer.add(new ItemStack(net.minecraft.world.item.Items.EMERALD, 5));
+        b.offer.add(Trades.coins(20));
+        mine.apps.put(b.applicant, b);
+        data.addMail(p.getUUID(), new ItemStack(net.minecraft.world.item.Items.COAL, 8));
+        data.addMail(p.getUUID(), new ItemStack(net.minecraft.world.item.Items.OAK_LOG, 32));
+        data.dirty();
+        refresh(p);
+        return 4;
     }
 }

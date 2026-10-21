@@ -174,8 +174,13 @@ public final class FacilitySelfTest {
         // 出現地点のまわり (始めから読み込まれている) の空の上
         // 都 (世界の出発点にある) の本物の係の人と混ざらないよう、512 離れた所のチャンクを読み込んで使う
         BlockPos base = level.getSharedSpawnPos().offset(512, 0, 512);
-        level.setChunkForced(base.getX() >> 4, base.getZ() >> 4, true);
         BlockPos spot = new BlockPos(base.getX() + 3, level.getMaxBuildHeight() - 20, base.getZ() + 3);
+        // 立つ所と、離して戻す試し (+10) がまたぐチャンクもまとめて読み込む
+        for (int dx = -1; dx <= 1; dx++) {
+            for (int dz = -1; dz <= 1; dz++) {
+                level.setChunkForced((spot.getX() >> 4) + dx, (spot.getZ() >> 4) + dz, true);
+            }
+        }
         AttendantEntity a = Attendants.ensure(level, AttendantRole.SMITH, spot);
         if (a == null) {
             f.add("ensure did not place");
