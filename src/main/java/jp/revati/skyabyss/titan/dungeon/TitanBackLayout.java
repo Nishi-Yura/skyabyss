@@ -68,7 +68,8 @@ public final class TitanBackLayout {
     //     建て直しは、前の版の部屋や小部屋が残らないよう、体の範囲の外の鯨の外周も空にしてから建てる (TitanBackBuilder.clearStale)
     // 28: 試練の流れ (石を無くしてゴールの印に・紫の抜け道の戸を壁に・今週の試練の入口。docs/design/26 の 8.8、29 の 4.6・4.7)。四体とも 28
     // 29: 闇の水路の中ほどの休み場の足場に、つながる通路の口から真ん中の穴までの水路 (幅 1・高さ 2) を抜いた (足場が口をふさぎ、泳いで通れず道が途切れていた)
-    public static final int LAYOUT_VERSION = 29;
+    // 30: 任意の翼をなくした (骨の書庫・胸びれの道・尾の展望・宿・胸びれの先の宝箱)。来た道へ戻る抜け道の戸と、試練の入口の看板、台の共鳴の炉をなくした
+    public static final int LAYOUT_VERSION = 30;
 
     // ---------------------------------------------------------------- 地表
     // 尾の付け根の背の広場 (到着) と、背の中ほどの祠。祠の階段は 1 段ごとに 1 下がり、入口の通路の南の端 (z 15) で床に着く
@@ -148,11 +149,7 @@ public final class TitanBackLayout {
     public static final int PIT_LAVA_Y = FLOOR - 9;
     public static final int FALL_LINE = FLOOR - 4;
     public static final List<Box> PITS = List.of(WA, WB, WC);
-    // 西の石を鳴らすと開く、鼓動の間へ下りる抜け道 (戸は岩棚 y = FLOOR + 5 の上。はしごは鼓動の間の側)
     public static final int WEST_LEDGE_Y = FLOOR + 5;
-    public static final int WEST_RETURN_X = -19;
-    public static final int WEST_RETURN_Z = -52;
-    public static final List<BlockPos> WEST_RETURN = wall(WEST_RETURN_Z - 1, WEST_RETURN_Z + 1, WEST_LEDGE_Y + 1, WEST_LEDGE_Y + 3, WEST_RETURN_X, false);
 
     // ---------------------------------------------------------------- 東の翼 (戦闘。版 18: 一本道。戻らずに先へ進む)
     // 東の前室 E0 → 第一の広間 E1 → (北の戸) 控えの間 CE1 (休み場) → 射手の回廊 E2 (通路。戦わない。版 25) → 前室 CK_PASS (休み場) → 番兵の詰所 CK (老番兵)
@@ -177,8 +174,6 @@ public final class TitanBackLayout {
     public static final List<BlockPos> E3_ENTRANCE = wall(-105, -101, FLOOR + 1, FLOOR + 6, 33, false);
     // 番兵長の広間の前室 (扉が閉じるとき、ここにいる人も中へ入れる): 割符の戸から先の通路
     public static final AABB E3_ANTE = E3_CORRIDOR.aabb();
-    // 東の石を鳴らすと開く、鼓動の間へ戻る扉 (鼓動の間の東の壁 x=19。広間 E3 と壁を共有する所)
-    public static final List<BlockPos> EAST_RETURN = wall(-54, -52, FLOOR + 1, FLOOR + 3, 19, false);
     // 仕切りの候補 (版 18。**いまは建てず、使わない**。広さの扱いはユーザーの判断待ち: 設計書 26 の 8.7 の案 A〜C)。案 A を採るときは、
     // 少人数のグループだけに、広間の中へ立てる封印の壁 (GroupGates。そのグループにだけ見える)。外側は封じられ、湧きも戸口・出口・共鳴石のある側だけ。戦いが終われば開く。
     //   第一の広間 E1: 二人以下は南 (z -26〜-8) を、一人はさらに東 (x 48〜54) を封じる (21×47 → 21×27 → 13×27)
@@ -211,8 +206,6 @@ public final class TitanBackLayout {
     public static final Box MAZE_ENTRY_ROOM = new Box(-4, 16, -49, -36, MAZE_FLOOR + 4, 4);
     public static final Box MAZE_ENTRY_ROOM2 = new Box(mazeCellX(MAZE_START2_I) - 1, mazeCellX(MAZE_START2_I) + 5, mazeCellZ(MAZE_START2_J), mazeCellZ(MAZE_START2_J) + 6, MAZE_FLOOR + 4, 4);
     public static final Box MAZE_EXIT_ROOM = new Box(21, 27, -7, -3, MAZE_FLOOR + 4, 5);
-    // 出口の小部屋から入口の通路へ戻る抜け道 (下の石が歌うまで閉じている)。入口の通路の東の壁 (x 4)
-    public static final List<BlockPos> LOWER_RETURN = wall(-7, -3, FLOOR + 1, FLOOR + 4, 4, false);
     // 出口の小部屋から入口の通路へ上がる通路 (床 FLOOR。x 4〜21)
     public static final Box EXIT_PASS = new Box(4, 21, -7, -3, FLOOR, 6);
 
@@ -232,12 +225,6 @@ public final class TitanBackLayout {
             new Inscription("sign.skyabyss.lore_east", new BlockPos(30, FLOOR + 3, -52), net.minecraft.core.Direction.NORTH),
             new Inscription("sign.skyabyss.lore_below", new BlockPos(23, MAZE_FLOOR + 6, -3), net.minecraft.core.Direction.NORTH));
 
-    // ---------------------------------------------------------------- 試練の入口の一言 (看板)。背中に置く看板は、これと碑文だけ
-    // 案内 (錨石・炉・休み場・封印の扉・台座・抜け道) は看板にせず、形・光・音と、最初の一度だけの囁き (BackWhispers) で伝える
-    public static final List<Inscription> TRIAL_SIGNS = List.of(
-            new Inscription("sign.skyabyss.chasm", new BlockPos(-18, FLOOR + 4, -41), net.minecraft.core.Direction.EAST),
-            new Inscription("sign.skyabyss.arena", new BlockPos(18, FLOOR + 4, -41), net.minecraft.core.Direction.WEST),
-            new Inscription("sign.skyabyss.maze", new BlockPos(10, FLOOR + 4, -55), net.minecraft.core.Direction.SOUTH));
     // 道しるべの碑 (版 18。26 の 8.6): 東の翼の広間の入口・次の戸・詰所の割符の戸・鐘の戸のそばに、次に何があるか・なぜ閉じているかを書く
     public static final List<Inscription> GUIDE_SIGNS = List.of(
             new Inscription("sign.skyabyss.hall_e1", new BlockPos(34, FLOOR + 3, -40), net.minecraft.core.Direction.EAST),
@@ -254,7 +241,6 @@ public final class TitanBackLayout {
     // 背中に置く看板すべて (自己テストで、この数より多く置かれていないか・各行が看板の幅に収まるかを見る)
     public static List<Inscription> allSigns() {
         List<Inscription> all = new java.util.ArrayList<>(LORE_SIGNS);
-        all.addAll(TRIAL_SIGNS);
         all.addAll(GUIDE_SIGNS);
         all.add(HEART_GATE_SIGN);
         return List.copyOf(all);
@@ -286,11 +272,6 @@ public final class TitanBackLayout {
     // 尾の付け根の広場 (背の上)。台から階段を登った先。倒れたとき・あきらめたとき・光の柱の行き先 (記録がなければ)
     public static BlockPos plaza() {
         return new BlockPos(0, platformY() + 1, PLATFORM_Z - 3);
-    }
-
-    // 台に置かれた共鳴の炉 (着いてすぐ装備を鍛えられる)
-    public static BlockPos forge() {
-        return new BlockPos(-64, FLANK_FLOOR_Y + 1, 168);
     }
 
     // 錨石 (台の上、モデルの留め具の外の面に寄せた石の磁石)。右クリックすると地上へ降りる

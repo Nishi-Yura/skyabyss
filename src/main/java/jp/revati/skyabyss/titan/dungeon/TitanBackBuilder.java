@@ -4,7 +4,6 @@ import static jp.revati.skyabyss.titan.dungeon.TitanBackLayout.*;
 
 import jp.revati.skyabyss.SkyAbyss;
 import jp.revati.skyabyss.titan.BackBuildJobs;
-import jp.revati.skyabyss.forge.ResonanceForgeBlock;
 import jp.revati.skyabyss.registry.ModBlocks;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -270,7 +269,7 @@ public final class TitanBackBuilder {
     }
 
     // 左のわき腹の台 (到着): 錨石 (モデルの鉄の留め具) の外へ張り出した石の台。床は空だった所だけに置く (留め具と体はそのまま)。
-    // 北・南・西の縁に低い柵 (鎖の垂れる所は開ける)、四隅に灯り。錨石 (石の磁石) を留め具の外の面に、共鳴の炉を北に置く。
+    // 北・南・西の縁に低い柵 (鎖の垂れる所は開ける)、四隅に灯り。錨石 (石の磁石) を留め具の外の面にく。
     // 台の北の端 (z STAIR_Z0〜STAIR_Z1) から、東の体の面へ登りの階段が始まる (buildClimb)
     private static void buildFlankPlatform(BuildKit kit) {
         int fy = FLANK_FLOOR_Y;
@@ -314,7 +313,6 @@ public final class TitanBackBuilder {
         }
         // 錨石 (石の磁石) を留め具の外の面に。鎖の根元の下
         kit.set(anchor(), Blocks.LODESTONE.defaultBlockState());
-        kit.set(forge(), ModBlocks.RESONANCE_FORGE.get().defaultBlockState().setValue(ResonanceForgeBlock.FACING, Direction.EAST));
     }
 
     // 台から背の広場への登りの階段: 体の中を東へ、1 ブロックごとに 1 上がる (幅 3・高さ 4)。広場の石畳 (南西) へ出る。
@@ -522,17 +520,6 @@ public final class TitanBackBuilder {
         kit.moss(HUB, 0.04f);
         for (int[] s : new int[][]{{-14, -20}, {14, -50}, {-12, -50}, {14, -20}, {0, -51}, {0, -19}}) {
             kit.stalactite(s[0], HUB.ceilingY(), s[1], 3);
-        }
-        // 看板は試練の入口の一言だけ (西・東・下)。封印の扉のことは、鼓動の間に入った最初の一度だけ囁く (BackWhispers)
-        for (Inscription s : TRIAL_SIGNS) {
-            kit.wallSign(s.pos(), s.facing(), s.key());
-        }
-        // 版 28: 西・東の来た道へ戻る「抜け道の戸」(紫の封印のブロック。開かないまま残っていた) は無くした。壁を閉じる (ゴールに着けば広間へ戻される)
-        for (BlockPos p : WEST_RETURN) {
-            kit.set(p, kit.pal().wall());
-        }
-        for (BlockPos p : EAST_RETURN) {
-            kit.set(p, kit.pal().wall());
         }
     }
 

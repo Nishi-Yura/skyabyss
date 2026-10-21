@@ -37,7 +37,6 @@ public final class TitanBackAudit {
             s.allowHole.add(new Box(pit.x1() + 1, PIT_LAVA_Y - 4, pit.z1() + 1, pit.x2() - 1, pit.ceilingY(), pit.z2() - 1));
         }
         s.goals.put("plaza", plaza());
-        s.goals.put("forge", forge().west());
         s.goals.put("shrine", new BlockPos(0, shrineY() + 1, SHRINE_Z));
         s.goals.put("hub", HUB.center().offset(0, 0, 6));
         s.goals.put("entry", ENTRY.center());
