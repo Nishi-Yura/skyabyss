@@ -269,15 +269,12 @@ public final class StormTrialSelfTest {
                 }
             }
         }
-        // 背の広場・塔・翼の外廊・尾羽の庭の箱と重ならない
+        // 背の広場と螺旋の箱と重ならない
         AABB plaza = new AABB(-25, 150, 11, 26, 190, 36);
         AABB turret = new AABB(-14, 140, 36, -8, 175, 43);
-        // 任意の翼の尾羽の庭 (StormExtra。x ±5〜34、z 122〜164、床 147。西の見張りの台は床 160 まで・階段は x -34 から)。中央の隙間 x -4〜4 は橋が通る
-        AABB gardenW = new AABB(-36, 147, 121, -4.5, 172, 166);
-        AABB gardenE = new AABB(4.5, 147, 121, 36, 172, 166);
         for (int i = 1; i < boxes.size(); i++) {
             AABB b = boxes.get(i);
-            for (AABB z : List.of(plaza, turret, gardenW, gardenE)) {
+            for (AABB z : List.of(plaza, turret)) {
                 if (b.minX < z.maxX && z.minX < b.maxX && b.minZ < z.maxZ && z.minZ < b.maxZ && b.minY < z.maxY && z.minY < b.maxY) {
                     FAIL.add("deck part " + names.get(i) + " overlaps the plaza or the turret: " + b);
                 }

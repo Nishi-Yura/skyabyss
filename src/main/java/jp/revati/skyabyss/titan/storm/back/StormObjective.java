@@ -28,7 +28,7 @@ final class StormObjective {
 
     // 目的の id の一覧 (lang の objective.skyabyss.trial_<id> の確認用)
     static final List<String> IDS = List.of("storm_gate", "storm_hall", "storm_west", "storm_east", "storm_front_vent", "storm_front_tower", "storm_front_neck",
-            "storm_keel", "storm_extra_chest", "storm_west_gap", "storm_west_rib", "storm_west_stone", "storm_east_lever", "storm_east_pad", "storm_east_raiju", "storm_east_stone",
+            "storm_keel", "storm_west_gap", "storm_west_rib", "storm_west_stone", "storm_east_lever", "storm_east_pad", "storm_east_raiju", "storm_east_stone",
             "storm_front_mirror", "storm_front_stone", "storm_back_w", "storm_back_e", "storm_back_f", "storm_heart",
             "storm_deck_hall", "storm_deck_turret", "storm_deck_bridge", "storm_deck_gate", "storm_deck_s02", "storm_deck_s03", "storm_deck_s09", "storm_deck_s10_vent",
             "storm_deck_s10_guard", "storm_deck_stone", "storm_deck_bridge2", "storm_deck_s04", "storm_deck_s07_a", "storm_deck_s07_b", "storm_deck_s08",
@@ -78,7 +78,7 @@ final class StormObjective {
                     return goal(g.id(), g.at(), g.hx(), g.hy(), g.hz());
                 }
             } else if (jp.revati.skyabyss.trial.storm.StormGuides.unrung(level, jp.revati.skyabyss.titan.group.Groups.keyOf(player)) != null
-                    && StormExtra.PLAZA.aabb().inflate(1, 6, 1).contains(v)) {
+                    && StormDeck.PLAZA.aabb().inflate(1, 6, 1).contains(v)) {
                 return goal("storm_deck_bridge", new BlockPos((StormDeck.BRIDGE_X1 + StormDeck.BRIDGE_X2) / 2, StormDeck.Y + 1, StormDeck.BRIDGE_Z1 + 1), 3.5f, 2f, 0.7f);
             }
         }
@@ -91,13 +91,6 @@ final class StormObjective {
         if (StormBackLayout.inFront(v)) {
             return front(pr, v);
         }
-        // 任意の翼 (背の広場・塔・外廊・庭): まだ開けていない近くの宝箱。なければ本道 (広間) へ戻る道しるべ
-        if (StormExtra.inAnyZone(v)) {
-            BlockPos chest = nearestChest(player, v);
-            if (chest != null) {
-                return goal("storm_extra_chest", chest, 0.7f, 1f, 0.7f);
-            }
-        }
         // 広間とその上の回廊
         if (HUB.aabb().inflate(2, 8, 2).contains(v) || GALLERY.aabb().inflate(1, 2, 1).contains(v)) {
             return hub(level, player, pr, v);
@@ -106,7 +99,7 @@ final class StormObjective {
         if (v.z < GATE_Z1 && v.z > HUB.z2() && v.y > 128) {
             if (deckWanted(level, player, pr)) {
                 // 尾の間の北西の螺旋の塔 (背の広場へ上る)
-                return goal("storm_deck_turret", new BlockPos(StormExtra.TURRET_X, TAIL_HALL.floor() + 1, StormExtra.TURRET_Z), 2.5f, 2f, 2.5f);
+                return goal("storm_deck_turret", new BlockPos(StormDeck.TURRET_X, TAIL_HALL.floor() + 1, StormDeck.TURRET_Z), 2.5f, 2f, 2.5f);
             }
             return goal("storm_hall", new BlockPos(0, HUB.floor() + 1, HUB.z2()), 3f, 2f, 0.7f);
         }
@@ -115,24 +108,6 @@ final class StormObjective {
             return goal("storm_gate", new BlockPos(0, GATE_FLOOR + 1, GATE_Z1), 3.5f, 4f, 0.7f);
         }
         return null;
-    }
-
-    // 任意の翼の宝箱 (StormCaches の side 3〜7) のうち、その人がまだ開けていない、いちばん近いもの
-    @Nullable
-    private static BlockPos nearestChest(ServerPlayer player, Vec3 v) {
-        BlockPos best = null;
-        double bd = Double.MAX_VALUE;
-        for (var e : StormExtra.caches().entrySet()) {
-            if (StormCaches.taken(player, e.getKey())) {
-                continue;
-            }
-            double d = Vec3.atCenterOf(e.getValue()).distanceToSqr(v);
-            if (d < bd) {
-                bd = d;
-                best = e.getValue();
-            }
-        }
-        return best;
     }
 
     // 広間: いちばん近い、まだ鳴っていない試練の入口。三つ鳴っていれば竜骨の門

@@ -48,8 +48,6 @@ final class StormWest {
         for (int i = 0; i < RIB_LAYERS * RIB_HOPS; i++) {
             out.add(new Vent(ribLedge(i), -1));
         }
-        // 任意の翼の昇り風 (風見の塔の外の台・尾羽の庭の見本)
-        out.addAll(StormExtra.vents());
         return out;
     }
 

@@ -65,12 +65,9 @@ public final class StormBackLayout {
     // 地上へ戻る口: 到着の南の「下り風の輪」(床に光る輪、下へ吹く粒)。0.5 秒いると地上へ (StormTravel)
     public static final BlockPos DOWNDRAFT = new BlockPos(0, 148, 171);
     public static final AABB GATE_MOUTH = new AABB(-1, 147, 170, 2, 152, 173);
-    // 羽の広場 (道の途中の広い台。休み場 tail。左右の翼の見晴らしに碑と宝箱)
+    // 羽の広場 (道の途中の広い台。休み場 tail。左右の翼の見晴らしに碑)
     public static final Area TAIL_PLAZA = new Area(-21, 21, 104, 118, 146, 8);
     public static final BlockPos PLAZA_CENTER = new BlockPos(0, 147, 111);
-    // 見晴らしの宝箱 (西・東)。一人に一度、小さな贈り物 (StormCaches)
-    public static final BlockPos CACHE_WEST = new BlockPos(-19, 147, 106);
-    public static final BlockPos CACHE_EAST = new BlockPos(19, 147, 106);
     // 嵐の雲の天井。ここより下へ落ちると嵐に投げ返される
     public static final int CLOUD_Y = 100;
 
@@ -291,7 +288,7 @@ public final class StormBackLayout {
             eastRest("e1", 0), eastRest("e2", 1), eastRest("e3", 2),
             new Rest("f0", new BlockPos(7, UPPER_GALLERY_Y + 1, -84), new BlockPos(5, UPPER_GALLERY_Y + 1, -84), F0),
             new Rest("heart", new BlockPos(2, KEEL_ANTE.floor() + 1, -44), new BlockPos(0, KEEL_ANTE.floor() + 1, -43), KEEL_ANTE)),
-            concat(StormExtra.RESTS, concat(StormDeck.RESTS, StormDeck2.RESTS)));
+            concat(StormDeck.RESTS, StormDeck2.RESTS));
     public static final Map<String, BlockPos> REST;
     public static final List<String> REST_ORDER;
 
@@ -321,7 +318,7 @@ public final class StormBackLayout {
             new Inscription("sign.skyabyss.lore_storm_vault_w2", new BlockPos(-90, BONE_FLOOR + 2, -47), Direction.SOUTH),
             new Inscription("sign.skyabyss.lore_storm_vault_e1", new BlockPos(182, BONE_FLOOR + 2, -47), Direction.SOUTH),
             new Inscription("sign.skyabyss.lore_storm_vault_e2", new BlockPos(187, BONE_FLOOR + 2, -47), Direction.SOUTH)),
-            concat(StormExtra.SIGNS, concat(StormDeck.SIGNS, StormDeck2.SIGNS)));
+            concat(StormDeck.SIGNS, StormDeck2.SIGNS));
     public static final List<Inscription> ENTRANCE_SIGNS = List.of(
             new Inscription("sign.skyabyss.storm_west", new BlockPos(-23, 137, WZ - 5), Direction.EAST),
             new Inscription("sign.skyabyss.storm_east", new BlockPos(23, 137, WZ - 5), Direction.WEST),
@@ -402,7 +399,7 @@ public final class StormBackLayout {
         if (x >= FEATHER_GATE.minX - 2 && x <= FEATHER_GATE.maxX + 2 && z >= FEATHER_GATE.minZ - 5 && z <= FEATHER_GATE.maxZ + 4) {
             return true;
         }
-        if (StormExtra.open(x, y, z) || StormDeck.open(x, y, z) || StormDeck2.open(x, y, z)) {
+        if (StormDeck.open(x, y, z) || StormDeck2.open(x, y, z)) {
             return true;
         }
         return y > HUB.floor() + HUB.height() && x * x + (z + 12) * (z + 12) <= (SKYLIGHT_R + 1) * (SKYLIGHT_R + 1);

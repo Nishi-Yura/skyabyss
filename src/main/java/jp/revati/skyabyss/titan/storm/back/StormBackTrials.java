@@ -188,7 +188,6 @@ public final class StormBackTrials {
     // 背中そのもの (全員に同じ所) を置き直す。何度呼んでも同じ: 風切りの骨の道、竜骨の門の下の形、扉のブロック、
     // 風鳴り石・灯り・抜け道の床の既定の姿 (まだ鳴っていない)、持ち主のいない部屋
     static void applyWorld(ServerLevel level) {
-        StormExtraRules.registerRods(level);
         StormBirdBuilder.carveWestRoute(new StormKit(level), StormBackState.get(level).westRoute());
         StormBirdBuilder.carveKeel(level);
         placeGates(level);
@@ -292,7 +291,6 @@ public final class StormBackTrials {
         }
         boolean peaceful = level.getDifficulty() == Difficulty.PEACEFUL;
         StormWest.tick(level, peaceful);
-        StormExtraRules.tick(level, peaceful);
         StormRib.tick(level);
         StormEast.tick(level, RoomLocks.owner(EAST_ROOM), peaceful);
         if (gt % 4 == 0) {

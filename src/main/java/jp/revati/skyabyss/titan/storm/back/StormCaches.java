@@ -21,7 +21,7 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 
-// 羽の広場の見晴らしの宝 (26 の 3.3): 西と東の見晴らしに宝箱と碑。宝箱は見た目だけ (中身は無い)。右クリックすると、その人に一度だけ、
+// 骨の書庫と雷の炉の宝箱 (26 の 3.3)。宝箱は見た目だけ (中身は無い)。右クリックすると、その人に一度だけ、
 // 小さな贈り物 (食べ物・矢・経験値) が渡る。必須の道ではない (いつも開いている。拍や進みで閉じない)。取った印は PlayerPersisted に残る (死んでも消えない)
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class StormCaches {
@@ -30,17 +30,9 @@ public final class StormCaches {
     private StormCaches() {
     }
 
-    // side -1 = 広場の西、+1 = 広場の東、-2 = 骨の書庫、+2 = 雷の炉。3〜7 = 任意の翼 (StormExtra.caches)
+    // side -2 = 骨の書庫 (西)、+2 = 雷の炉 (東)
     static BlockPos cachePos(int side) {
-        if (side >= 3) {
-            return StormExtra.caches().get(side);
-        }
-        return switch (side) {
-            case -2 -> VAULT_CACHE_W;
-            case -1 -> CACHE_WEST;
-            case 1 -> CACHE_EAST;
-            default -> VAULT_CACHE_E;
-        };
+        return side == -2 ? VAULT_CACHE_W : VAULT_CACHE_E;
     }
 
     @SubscribeEvent
@@ -52,7 +44,7 @@ public final class StormCaches {
         if (!event.getLevel().getBlockState(event.getPos()).is(jp.revati.skyabyss.registry.ModBlocks.RELIC_CACHE.get())) {
             return;
         }
-        for (int side : new int[] {-2, -1, 1, 2, 3, 4, 5, 6, 7}) {
+        for (int side : new int[] {-2, 2}) {
             if (cachePos(side).equals(event.getPos())) {
                 event.setCanceled(true);
                 open(player, side);
@@ -73,47 +65,14 @@ public final class StormCaches {
         }
         tag.putBoolean(TAG + side, true);
         jp.revati.skyabyss.relic.RelicCacheBlock.pulse(player.level(), cachePos(side));
-        int jerky = switch (side) {
-            case -2 -> 5;
-            case -1 -> 4;
-            case 1 -> 6;
-            case 3, 4 -> 10;
-            case 5, 6 -> 8;
-            case 7 -> 6;
-            default -> 7;
-        };
-        int arrows = switch (side) {
-            case -2 -> 20;
-            case -1 -> 16;
-            case 1 -> 24;
-            case 3, 4 -> 40;
-            case 5, 6 -> 32;
-            case 7 -> 24;
-            default -> 28;
-        };
-        int xp = switch (side) {
-            case -2 -> 50;
-            case -1 -> 30;
-            case 1 -> 40;
-            case 3, 4 -> 90;
-            case 5, 6 -> 70;
-            case 7 -> 50;
-            default -> 60;
-        };
+        int jerky = side == -2 ? 5 : 7;
+        int arrows = side == -2 ? 20 : 28;
+        int xp = side == -2 ? 50 : 60;
         give(player, new ItemStack(ModItems.CLOUD_JERKY.get(), jerky));
         give(player, new ItemStack(Items.ARROW, arrows));
         player.level().addFreshEntity(new ExperienceOrb(player.level(), player.getX(), player.getY(), player.getZ(), xp));
         player.level().playSound(null, player.blockPosition(), SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.BLOCKS, 1.4f, 1.2f);
-        Notice.send(player, ModText.progress(switch (side) {
-            case -2 -> "message.skyabyss.storm_cache_vault_w";
-            case -1 -> "message.skyabyss.storm_cache_west";
-            case 1 -> "message.skyabyss.storm_cache_east";
-            case 3 -> "message.skyabyss.storm_cache_vane";
-            case 4 -> "message.skyabyss.storm_cache_rod";
-            case 5, 6 -> "message.skyabyss.storm_cache_tip";
-            case 7 -> "message.skyabyss.storm_cache_lookout";
-            default -> "message.skyabyss.storm_cache_vault_e";
-        }));
+        Notice.send(player, ModText.progress(side == -2 ? "message.skyabyss.storm_cache_vault_w" : "message.skyabyss.storm_cache_vault_e"));
     }
 
     private static void give(ServerPlayer player, ItemStack stack) {

@@ -79,7 +79,6 @@ public final class StormBackSelfTest {
             checkRods(back, FAILURES);
             checkWind(back, FAILURES);
             checkWalk(back, FAILURES, NOTES);
-            checkExtra(back, FAILURES, NOTES);
             // 詰み監査 (到達・戻れるか・はしご・床の穴)。戸は開いているものとして、嵐の昇り風も使える
             jp.revati.skyabyss.titan.audit.BackReach.Report reach = StormBackAudit.run(back);
             reach.notes.forEach(n -> SkyAbyss.LOGGER.info("SELFTEST {}", n));
@@ -751,8 +750,6 @@ public final class StormBackSelfTest {
         yes.put("gallery", new BlockPos(0, UPPER_GALLERY_Y + 1, GALLERY.z1() + 3));
         yes.put("rib floor", new BlockPos(RIB_X2 - 1, BONE_FLOOR + 1, WZ));
         yes.put("west vault cache spot", VAULT_CACHE_W.offset(0, 0, 3));
-        yes.put("west cache spot", CACHE_WEST.offset(0, 0, 2));
-        yes.put("east cache spot", CACHE_EAST.offset(0, 0, 2));
         yes.put("crown hall", new BlockPos(0, F0.floor() + 1, (F0.z1() + F0.z2()) / 2 + 3));
         for (String id : List.of("w2", "w3", "w4")) {
             yes.put("rest " + id, rest(id));
@@ -804,83 +801,6 @@ public final class StormBackSelfTest {
         fresh(l, GROUP_A);
         fresh(l, GROUP_B);
         walker = GROUP_A;
-    }
-
-    // ---------------------------------------------------------------- 任意の翼 (26 の 9.5)
-    private static void checkExtra(ServerLevel l, List<String> f, List<String> notes) {
-        fresh(l, GROUP_A);
-        int total = StormExtra.areaTotal();
-        int base = 13800;
-        notes.add("walkable boxes " + (base + total) + " m2 (extra " + total + ")");
-        check(base + total >= 29000, "the back should reach the 29,200 m2 target of doc 26 (now " + (base + total) + ")", f);
-        Map<Long, Integer> calm = walk(l, GROUP_A, ARRIVAL, false);
-        for (Map.Entry<String, BlockPos> e : StormExtra.goals().entrySet()) {
-            expect(calm, l, e.getKey() + " (calm)", e.getValue(), true, f);
-        }
-        // 嵐: 風見の塔の頂へは外の昇り風でずっと近い (凪は階段)
-        Map<Long, Integer> storm = walk(l, GROUP_A, ARRIVAL, true);
-        BlockPos top = StormExtra.goals().get("x vane top");
-        Integer c = calm.get(top.asLong());
-        Integer st = storm.get(top.asLong());
-        check(c != null && st != null && st + 15 < c, "storm updrafts should shorten the vane tower climb (calm " + c + ", storm " + st + ")", f);
-        // 凪は 4: 鐘の台へ。13: 見張りの台へ (どちらの拍でも階段・坂で行ける)
-        BlockPos bell = StormExtra.goals().get("x bell");
-        check(calm.containsKey(bell.asLong()) && storm.containsKey(bell.asLong()), "the bell pedestal should be reachable in both beats", f);
-        notes.add("vane top " + c + " steps in calm, " + st + " in storm");
-        // 柱が登録されている
-        for (BlockPos r : StormExtra.allRods()) {
-            check(StormRods.get(l, r) != null, "rod at " + r + " is not registered", f);
-            check(l.getBlockState(r.above()).is(StormBackSetup.ROD_BULB.get()), "rod at " + r + " has no bulb", f);
-        }
-        // 避雷の塔: 嵐のあいだ、柱のそばなら柱へ、離れていれば足もとへ。凪は輪が出ない。東の庭は凪でも見本の輪 (傷なし)
-        StormStrike.cancelAll(l);
-        StormExtraRules.clear();
-        StormBackClock.force(StormBackClock.Phase.STORM);
-        BlockPos rod = StormExtra.towerRods().get(0);
-        StormTestPlayer p = StormTestPlayer.join(l, GROUP_A, "[storm_x]", net.minecraft.world.phys.Vec3.atBottomCenterOf(rod.offset(2, 0, 0)));
-        StormExtraRules.tick(l, false);
-        List<StormStrike.Strike> pend = StormStrike.pending(l);
-        check(pend.size() == 1 && pend.get(0).rod != null && rod.equals(pend.get(0).rod), "a ring next to a tower rod should go to the rod (" + pend.size() + ")", f);
-        StormStrike.cancelAll(l);
-        StormExtraRules.clear();
-        p.moveTo(StormExtra.ROD.x(10) + 0.5, StormExtra.floorY(0) + 1, 23.5, 0f, 0f);
-        StormExtraRules.tick(l, false);
-        pend = StormStrike.pending(l);
-        check(pend.size() == 1 && pend.get(0).rod == null && pend.get(0).damage > 0, "a ring away from the rods should fall at the feet (" + pend.size() + ")", f);
-        StormStrike.cancelAll(l);
-        StormExtraRules.clear();
-        StormBackClock.force(StormBackClock.Phase.CALM);
-        StormExtraRules.tick(l, false);
-        check(StormStrike.pending(l).isEmpty(), "no ring in the rod tower during calm", f);
-        BlockPos gr = StormExtra.gardenRods().get(2);
-        p.moveTo(gr.getX() + 1.5, gr.getY(), gr.getZ() + 0.5, 0f, 0f);
-        StormExtraRules.clear();
-        StormExtraRules.tick(l, false);
-        pend = StormStrike.pending(l);
-        check(pend.size() == 1 && pend.get(0).damage == 0f && gr.equals(pend.get(0).rod), "the garden sample ring should be harmless and go to the rod", f);
-        StormStrike.cancelAll(l);
-        // 放電の線: 低い線は跳べば、高い線はしゃがめば当たらない
-        double fl = StormExtra.DECK_Y + 1;
-        check(StormExtraRules.hits(fl, 1.8, false) && !StormExtraRules.hits(fl + 0.8, 1.8, false), "outer low line: jumping should dodge", f);
-        check(StormExtraRules.hits(fl, 1.8, true) && !StormExtraRules.hits(fl, 1.5, true), "outer high line: crouching should dodge", f);
-        // 任意の翼の目的: 近くの、まだ開けていない宝箱。全部開ければ本道 (広間) へ。宝箱は一人に一度
-        p.getPersistentData().remove(net.minecraft.world.entity.player.Player.PERSISTED_NBT_TAG);
-        expectGoal(l, p, 0.5, StormExtra.DECK_Y + 1, 23.5, "storm_extra_chest", f);
-        for (int side = 3; side <= 7; side++) {
-            int before = p.getInventory().countItem(jp.revati.skyabyss.registry.ModItems.CLOUD_JERKY.get());
-            StormCaches.open(p, side);
-            int once = p.getInventory().countItem(jp.revati.skyabyss.registry.ModItems.CLOUD_JERKY.get());
-            StormCaches.open(p, side);
-            check(once > before && p.getInventory().countItem(jp.revati.skyabyss.registry.ModItems.CLOUD_JERKY.get()) == once && StormCaches.taken(p, side),
-                    "extra chest " + side + " should give once", f);
-            check(l.getBlockState(StormExtra.caches().get(side)).is(jp.revati.skyabyss.registry.ModBlocks.RELIC_CACHE.get()), "extra chest " + side + " is not a chest", f);
-        }
-        expectGoal(l, p, 0.5, StormExtra.DECK_Y + 1, 23.5, "storm_hall", f);
-        p.getPersistentData().remove(net.minecraft.world.entity.player.Player.PERSISTED_NBT_TAG);
-        p.leave();
-        StormExtraRules.clear();
-        StormBackClock.force(null);
-        fresh(l, GROUP_A);
     }
 
     // ---------------------------------------------------------------- リセットと眠る試練 (グループごと)
@@ -1053,19 +973,15 @@ public final class StormBackSelfTest {
         fresh(l, GROUP_A);
     }
 
-    // 羽の広場の宝箱: 一人に一度だけ、小さな贈り物 (食べ物・矢・経験値)
+    // 書庫と炉の宝箱: 一人に一度だけ、小さな贈り物 (食べ物・矢・経験値)
     private static void checkCaches(StormTestPlayer pa, List<String> f) {
         pa.getPersistentData().remove(net.minecraft.world.entity.player.Player.PERSISTED_NBT_TAG);
         int before = pa.getInventory().countItem(jp.revati.skyabyss.registry.ModItems.CLOUD_JERKY.get());
-        StormCaches.open(pa, -1);
-        int once = pa.getInventory().countItem(jp.revati.skyabyss.registry.ModItems.CLOUD_JERKY.get());
-        StormCaches.open(pa, -1);
-        int twice = pa.getInventory().countItem(jp.revati.skyabyss.registry.ModItems.CLOUD_JERKY.get());
-        check(once - before == 4 && twice == once, "the west lookout chest should give once (" + before + " -> " + once + " -> " + twice + ")", f);
-        check(StormCaches.taken(pa, -1) && !StormCaches.taken(pa, 1), "the cache record is wrong", f);
-        StormCaches.open(pa, 1);
-        check(StormCaches.taken(pa, 1) && pa.getInventory().countItem(jp.revati.skyabyss.registry.ModItems.CLOUD_JERKY.get()) - twice == 6, "the east lookout chest should give 6 jerky", f);
         StormCaches.open(pa, -2);
+        int once = pa.getInventory().countItem(jp.revati.skyabyss.registry.ModItems.CLOUD_JERKY.get());
+        StormCaches.open(pa, -2);
+        int twice = pa.getInventory().countItem(jp.revati.skyabyss.registry.ModItems.CLOUD_JERKY.get());
+        check(once - before == 5 && twice == once, "the west vault chest should give once (" + before + " -> " + once + " -> " + twice + ")", f);
         StormCaches.open(pa, 2);
         check(StormCaches.taken(pa, -2) && StormCaches.taken(pa, 2), "the vault chests should give once each", f);
         pa.getPersistentData().remove(net.minecraft.world.entity.player.Player.PERSISTED_NBT_TAG);

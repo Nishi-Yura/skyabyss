@@ -56,7 +56,6 @@ public final class StormBirdBuilder {
         StormWingBuilder.east(kit);
         StormHeadBuilder.front(kit);
         keel(kit);
-        StormExtraBuilder.build(kit);
         StormDeckBuilder.build(kit);
         StormSilhouette.build(kit);
         int skinned = kit.skin(StormBirdBuilder::styleAt);
@@ -201,7 +200,7 @@ public final class StormBirdBuilder {
         }
     }
 
-    // ---------------------------------------------------------------- 羽の広場 (道の途中の広い台。休み場 tail。西と東に見晴らしの碑と宝箱)
+    // ---------------------------------------------------------------- 羽の広場 (道の途中の広い台。休み場 tail。西と東に見晴らしの碑)
     private static void plaza(StormKit kit) {
         Area a = TAIL_PLAZA;
         int fy = a.floor();
@@ -251,14 +250,6 @@ public final class StormBirdBuilder {
         // 羽軸の柱 (広場の目印)。道のそば (x ±9) に 2 本
         for (int sx : new int[] {-10, 10}) {
             StormDeco.featherPillar(kit, sx, PLAZA_CENTER.getZ(), fy, 8);
-        }
-        // 見晴らしの宝箱 (西・東。見た目だけ。右クリックで StormCaches が贈り物を渡す)
-        for (BlockPos c : new BlockPos[] {CACHE_WEST, CACHE_EAST}) {
-            kit.put(c.getX(), c.getY(), c.getZ(), jp.revati.skyabyss.relic.RelicBlocks.cache(jp.revati.skyabyss.relic.RelicStyle.STORM, Direction.SOUTH));
-            kit.put(c.getX(), c.getY() - 1, c.getZ(), StormKit.COPPER);
-            // 宝箱の両脇の灯り
-            kit.put(c.getX() - 1, c.getY(), c.getZ(), StormKit.LAMP);
-            kit.put(c.getX() + 1, c.getY(), c.getZ(), StormKit.LAMP);
         }
         // 広場の四隅と南北の口の灯りの柱
         for (int sx : new int[] {a.x1(), a.x2()}) {
