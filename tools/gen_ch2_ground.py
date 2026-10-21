@@ -268,9 +268,9 @@ def salt_vault():
 def salt_mark():
     bp = BP('ch2_salt_mark', [-2, -2, 2, 2], ring=1)
     bp.set(0, 0, 0, CALCITE)
-    bp.set(0, 1, 0, 'minecraft:light_blue_terracotta')  # 朝の潮の目盛り
+    bp.set(0, 1, 0, 'minecraft:light_blue_concrete')  # 朝の潮の目盛り
     bp.set(0, 2, 0, CALCITE)
-    bp.set(0, 3, 0, 'minecraft:cyan_terracotta')  # 夕の潮の目盛り
+    bp.set(0, 3, 0, 'minecraft:cyan_concrete')  # 夕の潮の目盛り
     bp.set(0, 4, 0, 'minecraft:smooth_quartz_slab[type=bottom,waterlogged=false]')
     bp.set(1, 0, 0, 'minecraft:white_concrete_powder')
     bp.set(-1, 0, 1, 'minecraft:white_concrete_powder')
@@ -346,7 +346,7 @@ def ebb_stakes():
     for i, (x, h) in enumerate(((-2, 3), (0, 4), (2, 5))):
         for y in range(h):
             notch = (y == 1 and i == 0) or (y == 2 and i == 1) or (y == 3 and i == 2)
-            bp.set(x, y, 0, 'minecraft:light_blue_terracotta' if notch else LOG)
+            bp.set(x, y, 0, 'minecraft:light_blue_concrete' if notch else LOG)
         bp.set(x, h, 0, 'minecraft:dark_oak_slab[type=bottom,waterlogged=false]')
     bp.set(0, 0, 2, 'skyabyss:tablet[facing=south,standing=true]')
     bp.mark('tablet', 0, 0, 2)

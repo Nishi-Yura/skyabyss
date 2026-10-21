@@ -110,7 +110,12 @@ wait 20
 shot 14_wreck
 
 # ---- 目的の帯 (支度の段 2 本)
+# 二章の人にする (岩鯨は止めた扱い。序章のメインが帯を取らないように、先にクエストを空にする)
+cmd skyabyss quest forget @s all
+cmd skyabyss playtest chapter 2 @s
 cmd gamemode creative
+cmd kill @e[type=!player,distance=..200]
+wait 40
 hud on
 cmd skyabyss quest start @s "ch2/salt_road"
 camera 0.5 -29 -9.5 0 15

@@ -194,7 +194,7 @@ public final class Ch2Ground {
             return;
         }
         var state = level.getBlockState(event.getPos());
-        if (!state.is(Blocks.STRIPPED_DARK_OAK_LOG) && !state.is(Blocks.LIGHT_BLUE_TERRACOTTA)) {
+        if (!state.is(Blocks.STRIPPED_DARK_OAK_LOG) && !state.is(Blocks.LIGHT_BLUE_CONCRETE)) {
             return;
         }
         for (ChapterSites.Site s : ChapterSites.sites(level.getServer(), STAKES)) {
