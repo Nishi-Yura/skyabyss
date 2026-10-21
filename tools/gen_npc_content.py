@@ -261,11 +261,11 @@ st.node("menu", "何か聞きたいことでもあるのかい。", "Is there so
 
 # 都 (鐘の国。docs/design/33 の 2.2): 絶えかけの国の都。空見の一族と、最後の鐘守
 st.node("capital1",
-        "閉じているだろう。ここは都だった。……そう呼ぶ人は、もう少ないけれどね。\n昔は「空見」と呼ばれる一族がいて、国を預かっていた。影が通れば鐘を鳴らし、見たものを帳面に書く。それだけの一族さ。",
+        "戸が閉じているだろう。ここは都だった。……そう呼ぶ人は、もう少ないけれどね。\n昔は「空見」と呼ばれる一族がいて、国を預かっていた。影が通れば鐘を鳴らし、見たものを帳面に書く。それだけの一族さ。",
         "Shut, yes. This was a capital once. ...Not many call it that anymore.\nThere was a line here called the Skywatchers who kept the nation. When the shadow passed they rang the bell and wrote down what they saw. That was all they were.",
         face="neutral", next="capital2", note="都の話 1 (空見の一族)")
 st.node("capital2",
-        "その一族は絶えた。砦は塔だけが生きている。わたしは最後の鐘守だ。\n家は空いている。好きなのを使えばいい。……戸の閉まっている所は、まだ開けられない。時が来れば開く。",
+        "その一族は絶えた。砦は、塔だけが生きている。あたしが最後の鐘守さ。\n家は空いているよ。好きなのを使えばいい。……戸の閉まっている所は、まだ開けられない。時が来れば開くよ。",
         "That line is gone. Of the keep only the tower still lives. I am the last bell keeper.\nThe houses are empty. Use whichever you like. ...The doors that are shut cannot be opened yet. They will open when the time comes.",
         face="grave", next="menu", do=[set_flag("capital_told"), add_aff(1)], note="都の話 2 (最後の鐘守。閉じた施設)")
 
@@ -362,7 +362,7 @@ st.node("book",
         "An old notebook. Let me see.\n\"Write it down before you forget\"... is it.",
         next="book2", do=[set_flag("book_shown"), add_aff(2)], note="伝承の書を持っているとき")
 st.node("book2",
-        "この字、どこかで見た気がするよ。……いや、気のせいだろう。\n大事にしておき。書いておけば、忘れても残る。",
+        "この字、どこかで見た気がするよ。……いや、気のせいだろう。\n大事にしておおき。書いておけば、忘れても残る。",
         "I feel I've seen this hand somewhere. ...No, my imagination.\nKeep it safe. What's written stays, even when you forget.",
         face="grave", next="@entry")
 
@@ -683,7 +683,7 @@ quest(MAIN, "main", 10, ST,
            "skip_if": lore("chapter1/stone_whale"),
            "journal": ("影が通った年には、決まって遠い空から“歌”が聞こえるという。\nその歌を追う旅人が、少し離れた所で火を焚いている。煙が目印だ。",
                        "In the years the shadow passes, a \"song\" is always heard from the far sky.\nA traveler who chases that song keeps a fire a little way off. Follow the smoke."),
-           "lead": ("語り部の話: 空の歌を追う旅人が、村の外れで火を焚いているという。",
+           "lead": ("語り部によると、空の歌を追う旅人が、村の外れで火を焚いているという。",
                     "The storyteller says a traveler who chases the sky's song keeps a fire at the edge of the village."),
            "objectives": [{"id": "talk", "type": "talk", "target": WC, "topic": "c_whale2",
                            "ja": "火を焚く鯨追いに、話を聞きに行こう", "en": "Talk to the Whale Chaser by the fire"}]},
@@ -775,10 +775,10 @@ quest(SHARDS, "sub", 30, WC,
            "objectives": [{"id": "shards", "type": "collect", "target": "skyabyss:stone_whale_shard", "count": 3,
                            "ja": "岩鯨の鱗片を集める", "en": "Collect stone whale scales"}]},
           {"id": "deliver",
-           "journal": ("欠片が三つそろった。\nイサナの火のところへ持っていこう。",
-                       "You have three shards.\nTake them to Isana's fire."),
+           "journal": ("鱗片が三つそろった。\nイサナの火のところへ持っていこう。",
+                       "You have three scales.\nTake them to Isana's fire."),
            "objectives": [{"id": "give", "type": "talk", "target": WC, "topic": "c_shards_thanks",
-                           "ja": "イサナに、欠片を三つ渡す", "en": "Give Isana three shards"}]},
+                           "ja": "イサナに、鱗片を三つ渡す", "en": "Give Isana three scales"}]},
       ],
       {"xp": 120, "items": [{"item": "minecraft:spyglass", "count": 1}], "affinity": {WC: 10}})
 

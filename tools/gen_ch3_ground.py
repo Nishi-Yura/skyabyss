@@ -493,7 +493,7 @@ def dialogue():
         '峰の下の石は、雷を通さない。……祖父の口癖だ。\n前の旅人は、その石を胸に着けていた、と言う奴がいた。深い所の石だ。鉄のつるはしで掘れ。五つあれば足りる。',
         'The stone under the peaks does not let lightning through. ...My grandfather\'s saying.\nSomeone told me the traveller before you wore that stone on their chest. It lies deep. Dig with an iron pickaxe. Five will do.')
     put(c + 'ch3g_c_stay',
-        '三つ、そろったな。\n……決めたよ。俺は残る。誰かが覚えていなければ、お前が昇っていった空のことも、ここで待っていた火のことも、なかったことになる。',
+        '三つ、そろったな。\n……決めたよ。俺は残る。誰かが覚えていなければ、あんたが昇っていった空のことも、ここで待っていた火のことも、なかったことになる。',
         'Three of them now.\n...I have decided. I am staying. If no one remembers, the sky you climbed and the fire that waited here will be as if they never were.')
     put(c + 'ch3g_c_stay2',
         'これを持っていけ。温石だ。握ると、ずっと温かい。\n……灰の山の話を聞いたら、思い出してくれ。俺はここで、数えて待っている。',

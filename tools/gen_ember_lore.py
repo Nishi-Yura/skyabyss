@@ -300,7 +300,7 @@ for item, nja, nen, dja, den in GEAR:
     if dja:
         text(f"item.skyabyss.{item}.desc", dja, den)
 text("gear.skyabyss.origin.ember", "余燼の専用装備", "Ember titan gear")
-text("gui.skyabyss.forge.exchange_no_clear.ember", "余燼の心臓を倒すと、選べるようになる", "Defeat the ember heart to choose")
+text("gui.skyabyss.forge.exchange_no_clear.ember", "余燼の心臓を止めると、選べるようになる", "Defeat the ember heart to choose")
 text("gui.skyabyss.forge.exchange_all_owned.ember", "余燼の専用伝説は、すべて手にしている", "You already own every ember legendary")
 text("skyabyss_record.h.ember", "余燼", "Ember")
 text("tooltip.skyabyss.ember.horn_drunk", "体の芯が、ゆっくり温まった。しばらく熱がたまりにくい",

@@ -62,7 +62,7 @@ def dialogue():
         },
     })
     put('dialogue.skyabyss.storyteller.ch1p_artisan_pointer',
-        '道の脇の荷車のそばで、荷を広げている人を見たかい。旅の職人だよ。……あの荷の手は、私も覚えている。針の入れ方も。\n折れた剣の話なら、あの人に聞くといい。刃を研ぐのも、旅装を編むのも。持ち主のほうは、まだ思い出せないがね。',
+        '道の脇の荷車のそばで、荷を広げている人を見たかい。旅の職人だよ。……あの荷の手は、あたしも覚えている。針の入れ方も。\n折れた剣の話なら、あの人に聞くといい。刃を研ぐのも、旅装を編むのも。持ち主のほうは、まだ思い出せないけどね。',
         'Have you seen the one with a pack spread out by the cart track? A traveling artisan. ...My hands remember whose pack that was. The way the needle goes in, too.\nAbout the broken sword, ask them. Honing a blade, stitching road gear, too. The owner, I still cannot recall.')
 
     # イサナ (whale_chaser): 乗る前の備えの一言。数字は言わず、言い回しだけ
@@ -93,8 +93,8 @@ def dialogue():
         '荷が重そうだな。……いい重さだ。\n鎖が降りたら、迷うな。迷って落ちた奴は、何人も見た。あんたは、そうならない顔をしている。',
         'Your pack looks heavy. ...A good weight.\nWhen the chain comes down, do not hesitate. I have seen plenty fall by hesitating. You do not have that look.')
     put('dialogue.skyabyss.whale_chaser.ch1p_c_some',
-        '支度は半分ってところか。悪くない。\n鯨は、待ってはくれないが、急かしもしない。足りないものが、まだ道の脇にあるはずだ。',
-        'Half-ready, by the look. Not bad.\nThe whale will not wait, but it will not hurry you either. What you lack is probably still lying beside the road.')
+        '支度は半分ってところか。悪くない。\n焦るな。鯨は、まだ遠い。足りないものが、まだ道の脇にあるはずだ。',
+        'Half-ready, then. Not bad.\nNo rush. The whale is still far off. What you lack should still be by the road.')
     put('dialogue.skyabyss.whale_chaser.ch1p_c_none',
         '手ぶらで空を見上げてるのか。……鎖が降りたとき、困らないといいが。\n道の脇の荷車のあたりを、見てきたか。誰かの手が、まだ残っている。',
         'Standing there empty-handed, looking at the sky. ...I hope you will not regret it when the chain comes.\nHave you looked around the cart by the road? Someone\'s hands are still in it.')
@@ -162,7 +162,7 @@ def texts():
     # 旅の覚書 (一章): 背中の敵の予習の一行ずつ。数字は出さない
     put('wayfarer_notes.ch1.line.1', '骨の番兵の盾は、前からの傷をほとんど通さない。回り込んで背を取る。', 'A bone sentinel\'s shield turns almost every blow from the front. Circle round to its back.')
     put('wayfarer_notes.ch1.line.2', '骨の射手は、撃つ前に弦を引く。引いている間は動かない。柱の陰から出ず、撃ったあとに詰める。', 'A bone archer draws before it shoots, and does not move while drawing. Stay behind a pillar, close in after it fires.')
-    put('wayfarer_notes.ch1.line.3', '苔這いは低く、足もとへ寄ってくる。囲まれる前に、背を壁につけない。', 'Moss crawlers stay low and come at your feet. Do not put your back to a wall before you are surrounded.')
+    put('wayfarer_notes.ch1.line.3', '苔這いは低く、足もとへ寄ってくる。壁際に追いつめられないよう、広い所で戦う。', 'Moss crawlers stay low and come at your feet. Do not put your back to a wall before you are surrounded.')
     put('wayfarer_notes.ch1.line.4', '予告の線や輪が出たら、跳ぶか、走るか、物の陰に入れば避けられる。立ち止まらない。', 'When a line or ring is marked on the floor, jump, run or take cover. Do not stand still.')
     put('wayfarer_notes.ch1.line.5', '歌石は、積み石の低い順に叩く。洞の鳴り石も、ろうそくの数の少ない順に。', 'Strike the song stones from the lowest cairn up. In the cave, strike the ringing stones from the fewest candles up.')
     put('wayfarer_notes.ch1.line.6', '背の奥へ進む前に、身と刃と糧がそろっているか確かめる。足りなくても進める。ただ、重くなる。', 'Before going deep into the back, check your body, blade and provisions. You can go on without them. It will only be heavier.')

@@ -74,7 +74,7 @@
   "skyabyss_rebirth.gui.look": "見せ方 (自分の画面)",
   "skyabyss_rebirth.gui.no_title": "称号なし",
   "skyabyss_rebirth.gui.locked_how": "まだ: %s",
-  "skyabyss_rebirth.gui.fixed": "色の段と記号は固定です。",
+  "skyabyss_rebirth.gui.fixed": "色の段と記号は固定。",
   "skyabyss_rebirth.gui.toggle.nametag_effects": "名札の飾り: %s",
   "skyabyss_rebirth.gui.toggle.nametag_title": "名札の称号: %s",
   "skyabyss_rebirth.gui.toggle.back_self": "自分の背の飾り: %s",

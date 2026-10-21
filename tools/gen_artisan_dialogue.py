@@ -170,8 +170,8 @@ def ch1():
         'いい荷の持ち方だ。……身も、刃も、糧も、道の用意ができている。@@鎖が降りたら、迷うな。迷うと、荷が重くなる。',
         'You carry your pack well. ...Body, blade, provisions: you are ready for the road.@@When the chain comes down, do not hesitate. Hesitation makes a pack heavy.')
     put(CH1, B + 'ch1a_some',
-        '支度は、まだ半分といったところか。急がなくていい。鯨は、待ってはくれないが、急かしもしない。@@足りないものは、たいてい手の届くところにある。道の脇に、割れ殻の洞に、骨の山に。',
-        'Half-ready, by the look. No need to hurry. The whale will not wait, but it will not hurry you either.@@What you lack is usually within reach: beside the road, in the Cleft Shell, under the bones.')
+        '支度は、まだ途中といったところか。急がなくていい。鯨は、まだ遠い。@@足りないものは、たいてい手の届くところにある。道の脇に、割れ殻の洞に、骨の山に。',
+        'Partway ready, by the look. No need to hurry. The whale is still far off.@@What you lack is usually within reach: beside the road, in the Cleft Shell, under the bones.')
     put(CH1, B + 'ch1p_teach',
         '作り方か。……岩殻片は、骨片と合わせて砥石にもなる。固焼きも、軟膏もだ。覚書に書いてある。@@手が思い出すまで、作業台で何度でも広げろ。',
         'The way of it? ...Shell scraps, with bone chips, make whetstones too. Hardtack and salve as well. It is in your notes.@@Lay it out on a workbench as often as it takes for your hands to remember.')

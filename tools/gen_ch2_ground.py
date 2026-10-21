@@ -465,8 +465,8 @@ def quests():
     put(b + 'vault.lead', '塩の道は、浅瀬の下の蔵で終わっていた。潮の読み方は、この奥にあるはずだ。',
         'The salt road ends at a vault beneath the shallows. The way to read the tide should be inside.')
     put(b + 'road.journal',
-        '語り部が言っていた。「浜には、白い柱が並んでいるそうだよ。塩の道さ。昔は、あれを辿って塩を運んだ」\n柱には潮の刻みがあるという。五つ辿れば、塩の蔵に着く。',
-        'The storyteller said: "There are white pillars along the beach, they say. The salt road. Long ago, salt was carried along it."\nThe pillars carry tide marks. Follow five and you reach the salt vault.')
+        'イサナが言っていた。潮を読めなければ、島へは渡れない、と。\n浜には白い柱が並んでいて、塩の道と呼ばれている。柱には潮の刻みがあるという。五つ辿れば、塩の蔵に着く。その道の昔話は、語り部が知っているらしい。',
+        'Isana said you cannot cross to the island if you cannot read the tide.\nWhite pillars line the beach: the salt road. They carry tide marks. Follow five and you reach the salt vault. The storyteller is said to know the old tale of that road.')
     put(b + 'road.marks', '浜の白い柱を辿り、塩の道を行こう', 'Follow the white pillars along the salt road')
     put(b + 'vault.journal',
         '浅瀬の下に、積んだ石の屋根が見えた。沈んだ塩の蔵だ。\n潮が引けば喉は乾いて歩ける。満ちていれば、息を止めて潜ればいい。奥には、蔵の番人がいる。',
@@ -506,7 +506,7 @@ def quests():
 
     b = 'quest.skyabyss.ch2.wader_gear.'
     put(b + 'title', '潮渡りの旅装', 'Tide-Wader Garb')
-    put(b + 'summary', '旅の職人に潮渡りの旅装の作り方を教わり、一式そろえる (任意)。', 'Learn the tide-wader garb from the traveling artisan and make the full set (optional).')
+    put(b + 'summary', '旅の職人に潮渡りの旅装の作り方を教わり、一式そろえる（任意）。', 'Learn the tide-wader garb from the traveling artisan and make the full set (optional).')
     put(b + 'learn.journal', '職人の前掛けは塩で白い。「水の中で足が重いなら、それ用の旅装がある。教えようか」',
         'The artisan\'s apron is white with salt. "If water drags at your legs, there is garb for that. Shall I show you?"')
     put(b + 'learn.talk', '旅の職人に、潮渡りの旅装を教わる', 'Learn the tide-wader garb from the artisan')
@@ -651,7 +651,7 @@ def lore():
 def texts():
     m = 'message.skyabyss.ch2.'
     put(m + 'arrive.ch2_salt_vault', '浅瀬の下に、積んだ石の屋根が見える。塩で白い。', 'Beneath the shallows, a roof of stacked stone, white with salt.')
-    put(m + 'vault.dry', '潮が引いている。蔵の喉の水は干いた。', 'The tide is out. The vault\'s throat has drained.')
+    put(m + 'vault.dry', '潮が引いている。蔵の喉の水も引いた。', 'The tide is out. The vault\'s throat has drained.')
     put(m + 'vault.wet', '潮が満ちている。蔵の喉は水の底だ。息を止めれば、抜けられる。', 'The tide is in. The vault\'s throat is under water. Hold your breath and you can get through.')
     put(m + 'vault.lift', '塩樽を抱えた。重い。乾いた所へ運ぼう。', 'You lift a salt barrel. Heavy. Carry it somewhere dry.')
     put(m + 'vault.broke', '樽が割れて、塩が散った。……樽は、元の場所に戻っている。', 'The barrel splits and the salt spills. ...The barrel is back where it was.')

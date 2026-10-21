@@ -182,7 +182,7 @@ def quests():
         'The artisan: "The blade will do. For a shield, the storyteller knows a tale of the one before."')
     put(b + 'tale.talk', '語り部に、足音の晩の話を聞こう', 'Hear the tale of the night of footsteps')
     put(b + 'pack.journal',
-        '足音の晩、前の旅人は盾を抱え、固焼きの包みを背負って戻ってきたという。盾の表には、大きな爪の痕が三本。\n盾は作業台で作れる。道の固焼きは旅の覚書に作り方がある。鼓動守は、旅の職人に護り糸を持っていけば編んでくれる (なくてもいい)。',
+        '足音の晩、前の旅人は盾を抱え、固焼きの包みを背負って戻ってきたという。盾の表には、大きな爪の痕が三本。\n盾は作業台で作れる。道の固焼きは旅の覚書に作り方がある。鼓動守は、旅の職人に護り糸を持っていけば編んでくれる（なくてもいい）。',
         'On the night of footsteps, the earlier traveller came back clutching a shield, a bundle of hardtack on their back. Three great claw marks crossed the shield.\nA shield can be made at a workbench; road hardtack is in your wayfarer\'s notes. If you bring ward thread to the artisan, they will weave a heartbeat ward too (not required).')
     put(b + 'pack.lead', '語り部「盾を持っておいき。糧もね。帰ってくるつもりなら」', 'The storyteller: "Take a shield. Provisions too. If you mean to come back."')
     put(b + 'pack.shield', '盾を作ろう', 'Make a shield')
@@ -229,8 +229,8 @@ def dialogue():
     })
     d = 'dialogue.skyabyss.whale_chaser.'
     put(d + 'ch1t_c_page',
-        '坑の奥で頁を見つけたのか。……鉄を二十四、か。几帳面な奴だ。\n鉱石は、かまどで溶かせば鉄になる。燃やすものは、木炭でも石炭でもいい。……鎖は待ってはくれないが、急かしもしない。',
-        'You found a page down the pit? ...Twenty-four iron. A tidy sort.\nOre smelts into iron in a furnace. Charcoal or coal, either burns. ...The chain will not wait, but it will not hurry you either.')
+        '坑の奥で頁を見つけたのか。……鉄を二十四、か。几帳面な奴だ。\n鉱石は、かまどで溶かせば鉄になる。燃やすものは、木炭でも石炭でもいい。……焦るな。鯨は、まだ遠い。',
+        'You found a page down the pit? ...Twenty-four iron. A tidy sort.\nOre smelts into iron in a furnace. Charcoal or coal, either burns. ...No rush. The whale is still far off.')
     put(d + 'ch1t_c_iron',
         '鉄の匂いがする。……似合ってるよ。\nあの旅人も、そうやって鎖の下に立っていた気がする。……いや、話に聞いただけだ。見たはずがない。\n次は刃だ。旅の職人に聞いてみろ。折れた剣を見たと言っていた。',
         'You smell of iron. ...It suits you.\nI feel that traveller stood under the chain just like that. ...No. I only heard the story. I cannot have seen it.\nNext, a blade. Ask the traveling artisan. They said they saw a broken sword.')

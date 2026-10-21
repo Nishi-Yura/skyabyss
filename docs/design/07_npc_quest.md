@@ -594,8 +594,8 @@ data/<名前空間>/quest/<名前>.json
 | `shadow_first` | grave | ……その顔。見たんだね、昼の空を。<br>ここは、見た者が最初に寄る所なんだよ。……まあ、火にあたっておいき。<br>（序盤: 影を見てから宿りへ来た (初対面)） |  | ▼ `shadow2` |
 | `shadow_wait` | smile | まだ、見ていないんだね。<br>慌てなくていい。昼のうちは、空はどこへも行きやしないよ。<br>（序盤: 影を待つ間に話しかけた (一度だけ)） | 印 wait_told | ▼ `menu` |
 | `menu` | neutral | 何か聞きたいことでもあるのかい。<br>（話題を選ぶ節 (条件で出る話題が変わる)） |  | 「昼間、雲の上を何かが渡っていった。」→ `shadow1`（条件: 伝承 prologue/shadow、(メインが未着手 または メインが「ask_storyteller」)）<br>「空のことを聞かせてほしい。」→ `shadow1`（条件: not(伝承 prologue/shadow)、メインが未着手）<br>「旅の人は、どこに？」→ `chaser_hint`（条件: メインが「find_chaser」）<br>「この村に伝わる歌はある？」→ `song1`（条件: not(印 song_heard)）<br>「数え歌の続きが知りたい。」→ `sub_offer`（条件: 印 song_heard、数え歌が未着手、メインが始まっている、印 met）<br>「夜、遠くに誰かが立っていた。」→ `watcher`（条件: not(伝承 prologue/watcher)、見る者に気づいた）<br>「夜に気をつけることはある？」→ `watcher`（条件: not(伝承 prologue/watcher)、not(見る者に気づいた)、好感度 10 以上）<br>「この村の決まりごとを教えてほしい。」→ `calendar`（条件: not(伝承 prologue/seventh_night)、好感度 20 以上）<br>「古い帳面を見せる。」→ `book`（条件: 伝承 prologue/the_book、not(印 book_shown)）<br>「道すがら、気になるものを見た。」→ `seen_menu`（条件: (伝承 prologue/camp、not(印 camp_told) または 伝承 prologue/footprints、not(印 prints_told) または 伝承 prologue/footsteps、not(印 steps_told) または 伝承 prologue/bone_hill、not(印 bones_told) または 伝承 prologue/sky_song、not(印 song_told) または 伝承 chapter1/stone_whale、not(印 whale_told) または 伝承 chapter1/sky_ruins、not(印 back_told) または (伝承 prologue/capital_skywatch または 伝承 prologue/capital_guild_roll または 伝承 prologue/capital_graveyard または 伝承 prologue/capital_gates)、not(印 capital_told))）<br>「また来る。」→ `end` |
-| `capital1` | neutral | 閉じているだろう。ここは都だった。……そう呼ぶ人は、もう少ないけれどね。<br>昔は「空見」と呼ばれる一族がいて、国を預かっていた。影が通れば鐘を鳴らし、見たものを帳面に書く。それだけの一族さ。<br>（都の話 1 (空見の一族)） |  | ▼ `capital2` |
-| `capital2` | grave | その一族は絶えた。砦は塔だけが生きている。わたしは最後の鐘守だ。<br>家は空いている。好きなのを使えばいい。……戸の閉まっている所は、まだ開けられない。時が来れば開く。<br>（都の話 2 (最後の鐘守。閉じた施設)） | 印 capital_told、好感度+1 | ▼ `menu` |
+| `capital1` | neutral | 戸が閉じているだろう。ここは都だった。……そう呼ぶ人は、もう少ないけれどね。<br>昔は「空見」と呼ばれる一族がいて、国を預かっていた。影が通れば鐘を鳴らし、見たものを帳面に書く。それだけの一族さ。<br>（都の話 1 (空見の一族)） |  | ▼ `capital2` |
+| `capital2` | grave | その一族は絶えた。砦は、塔だけが生きている。あたしが最後の鐘守さ。<br>家は空いているよ。好きなのを使えばいい。……戸の閉まっている所は、まだ開けられない。時が来れば開くよ。<br>（都の話 2 (最後の鐘守。閉じた施設)） | 印 capital_told、好感度+1 | ▼ `menu` |
 | `repeat_note` | smile | （文は `skyabyss_vow` の lang）<br>（周回 (一度でも心臓を止めて戻った人に一度だけ。文は skyabyss_vow の lang)） | 印 repeat_told | ▼ `menu` |
 | `shadow1` | grave | 空のことかい。<br>……晴れた昼に、急に暗くなることがある。羊はうずくまり、鳥は黙る。雲の上を、何かが渡っていくんだよ。<br>（メインを始める (空のことを聞いた印。序盤の二段を飛ばす)） | 印 sky_asked、クエスト開始 main_song | ▼ `shadow2` |
 | `shadow2` | grave | あれが何なのかは、誰も知らない。見上げた者は、みんな口をつぐむ。<br>ただ、影が通った年には、決まって“歌”が聞こえるんだ。遠い空の向こうから、低く、長く。 |  | ▼ `shadow3` |
@@ -614,7 +614,7 @@ data/<名前空間>/quest/<名前>.json
 | `calendar` | grave | 決まりごとかい。……ひとつだけ、ある。<br>七日目の夜は、戸を閉めて外へ出ないこと。古い暦の余白に、同じことが七日おきに書いてある。<br>（好感度 20 から。伝承「暦の書き込み」を記す） | 伝承 prologue/seventh_night、印 calendar_told | ▼ `calendar2` |
 | `calendar2` | grave | なぜ七日目なのかは、誰も知らない。守らなかった家の話も、聞いたことがないね。<br>……守らなかった家が、残っていないだけかもしれないけど。 |  | ▼ `@entry` |
 | `book` | neutral | 古い帳面だね。見せておくれ。<br>“忘れないうちに書け”……か。<br>（伝承の書を持っているとき） | 印 book_shown、好感度+2 | ▼ `book2` |
-| `book2` | grave | この字、どこかで見た気がするよ。……いや、気のせいだろう。<br>大事にしておき。書いておけば、忘れても残る。 |  | ▼ `@entry` |
+| `book2` | grave | この字、どこかで見た気がするよ。……いや、気のせいだろう。<br>大事にしておおき。書いておけば、忘れても残る。 |  | ▼ `@entry` |
 | `whale` | grave | 岩の山が、空を泳いでいた？<br>……そうかい。歌の主を、見たんだね。 | 印 whale_told | ▼ `whale2` |
 | `whale2` | grave | 母さんが言っていたよ。あれが降りてくるのは、誰かを迎えに来るときだって。<br>誰を迎えに来るのかは、言わなかったけど。 |  | ▼ `@entry` |
 | `back` | neutral | 背中に、町が……。人が住んでいたのかい。空の上で、地面も持たずに。<br>……そこで生まれて、そこで死んだのなら。その人たちにとっては、鯨が世界のすべてだったんだね。 | 印 back_told、好感度+2 | ▼ `@entry` |
@@ -716,7 +716,7 @@ data/<名前空間>/quest/<名前>.json
 | 段階 | 書き付け | 目的 | 済ませ方 | 経験値 |
 | --- | --- | --- | --- | --- |
 | `gather` | イサナは、たどり着けなかった場所の手ざわりを知りたいという。<br>背中の番兵は、ときどき岩鯨の鱗片を落とす。 | 岩鯨の鱗片を集める（3） | collect skyabyss:stone_whale_shard | 0 |
-| `deliver` | 欠片が三つそろった。<br>イサナの火のところへ持っていこう。 | イサナに、欠片を三つ渡す | talk whale_chaser の節 `c_shards_thanks` | 0 |
+| `deliver` | 鱗片が三つそろった。<br>イサナの火のところへ持っていこう。 | イサナに、鱗片を三つ渡す | talk whale_chaser の節 `c_shards_thanks` | 0 |
 
 <!-- 生成ここまで -->
 
