@@ -42,7 +42,8 @@ public final class Ch4Renderers {
 
     @SubscribeEvent
     static void register(EntityRenderersEvent.RegisterRenderers event) {
-        event.registerEntityRenderer(Ch4Setup.CINDER_MITE.get(), ctx -> new Mob<>(ctx, "cinder_mite", 0.2f));
+        // 熾り蟲は小さいので 1.5 倍で描く (群れで床を這うのが暗がりでも見えるように)
+        event.registerEntityRenderer(Ch4Setup.CINDER_MITE.get(), ctx -> new Mob<>(ctx, new LowPolyGeoRenderer.Model<>("cinder_mite"), "cinder_mite", 1.5f, 0.3f));
         event.registerEntityRenderer(Ch4Setup.ASH_DRAGGER.get(), DraggerRenderer::new);
         event.registerEntityRenderer(Ch4Setup.ASH_HUSK.get(), ctx -> new ThrallVariant<>(ctx, "ash_husk", "ash_thrall", "ash_husk_poker", 0.85f, 0.4f));
         event.registerEntityRenderer(Ch4Setup.ELDER_THRALL.get(), ctx -> new ThrallVariant<>(ctx, "elder_thrall", "elder_thrall", "elder_rake", 1.15f, 0.6f));

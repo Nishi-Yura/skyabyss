@@ -18,7 +18,7 @@ import net.neoforged.neoforge.event.RegisterCommandsEvent;
 
 // 四章の地上の開発コマンド (撮影の台本 tools/shots/ch4_ground.txt。製品には入らない)
 //   /skyabyss dev ch4 warm <x> <y> <z>   その位置の台を温める (温石を置いた扱い。熾り蟲が寄る)
-//   /skyabyss dev ch4 crack              近く (24) の古い灰被りに、亀裂の技を今すぐ出させる (予告の円を撮る)
+//   /skyabyss dev ch4 crack              近く (24) の古い灰被りに、亀裂の技を今すぐ出させる (部屋の人の足もとと、コマンドの位置のまわり 3 つ。予告の円を撮る)
 //   /skyabyss dev ch4 wave               近く (24) の古い灰被りの殻を割る (熱の波と燃え上がった姿)
 //   /skyabyss dev ch4 curl               近く (24) の灰ひきずりを丸める
 @EventBusSubscriber(modid = SkyAbyss.MODID)
@@ -42,7 +42,17 @@ public final class Ch4Dev {
                                 })))))
                         .then(Commands.literal("crack").executes(c -> {
                             ElderThrall e = elder(c.getSource());
-                            return e == null ? 0 : Math.max(1, e.startCracks());
+                            if (e == null) {
+                                return 0;
+                            }
+                            // 撮影用: 部屋の人の足もと (観戦の姿は狙わない) に加えて、コマンドの位置のまわり 3 つ
+                            e.startCracks();
+                            var at = c.getSource().getPosition();
+                            for (int i = 0; i < 3; i++) {
+                                double a = i * Math.PI * 2 / 3;
+                                e.crackAt(c.getSource().getLevel(), at.x + Math.cos(a) * 3, e.getY(), at.z + Math.sin(a) * 3);
+                            }
+                            return 1;
                         }))
                         .then(Commands.literal("wave").executes(c -> {
                             ElderThrall e = elder(c.getSource());

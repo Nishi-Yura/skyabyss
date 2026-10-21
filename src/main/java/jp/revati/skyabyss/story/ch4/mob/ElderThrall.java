@@ -193,28 +193,30 @@ public class ElderThrall extends AshThrall {
         playAction("crack");
         server.playSound(null, getX(), getY(), getZ(), Ch4Setup.ELDER_CRACK.get(), SoundSource.HOSTILE, 1.4f, 0.8f);
         for (ServerPlayer p : roomPlayers()) {
-            double cx = p.getX();
-            double cz = p.getZ();
-            double y = p.getY();
             if (Growth.discover(p, "ch4_elder_crack")) {
                 Notice.narrate(p, "message.skyabyss.ch4g.pit.crack");
             }
-            Telegraph.in(server, TelegraphShape.circle(cx, cz, CRACK_RADIUS)).floor(y).warn(CRACK_WARN).color(CRACK_COLOR).owner(this)
-                    .victims(this::canHit)
-                    .onImpact(lvl -> {
-                        lvl.playSound(null, cx, y, cz, Ch4Setup.ELDER_BURST.get(), SoundSource.HOSTILE, 1.2f, 1.0f);
-                        lvl.sendParticles(ParticleTypes.LAVA, cx, y + 0.2, cz, 8, CRACK_RADIUS * 0.4, 0.1, CRACK_RADIUS * 0.4, 0.1);
-                        lvl.sendParticles(ParticleTypes.FLAME, cx, y + 0.3, cz, 24, CRACK_RADIUS * 0.4, 0.4, CRACK_RADIUS * 0.4, 0.05);
-                    })
-                    .onHit((lvl, player) -> {
-                        player.hurt(attackSource(), CRACK_DAMAGE);
-                        player.igniteForSeconds(2);
-                    })
-                    .start();
+            crackAt(server, p.getX(), p.getY(), p.getZ());
             n++;
         }
         cracks++;
         return n;
+    }
+
+    // 一つの亀裂 (円の予告 1.5 秒 → 噴く)。開発コマンドの撮影は、人のいない所にも出す
+    public void crackAt(ServerLevel server, double cx, double y, double cz) {
+        Telegraph.in(server, TelegraphShape.circle(cx, cz, CRACK_RADIUS)).floor(y).warn(CRACK_WARN).color(CRACK_COLOR).owner(this)
+                .victims(this::canHit)
+                .onImpact(lvl -> {
+                    lvl.playSound(null, cx, y, cz, Ch4Setup.ELDER_BURST.get(), SoundSource.HOSTILE, 1.2f, 1.0f);
+                    lvl.sendParticles(ParticleTypes.LAVA, cx, y + 0.2, cz, 8, CRACK_RADIUS * 0.4, 0.1, CRACK_RADIUS * 0.4, 0.1);
+                    lvl.sendParticles(ParticleTypes.FLAME, cx, y + 0.3, cz, 24, CRACK_RADIUS * 0.4, 0.4, CRACK_RADIUS * 0.4, 0.05);
+                })
+                .onHit((lvl, player) -> {
+                    player.hurt(attackSource(), CRACK_DAMAGE);
+                    player.igniteForSeconds(2);
+                })
+                .start();
     }
 
     // ---- 熱の波: 殻が割れた瞬間、まわりの輪 1.0 秒 → 押し返す ----

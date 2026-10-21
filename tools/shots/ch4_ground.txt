@@ -62,12 +62,10 @@ camera -14.5 -50.5 -5.5 180 8
 wait 20
 shot 05_pit_altar
 # 古い灰被りの技: 亀裂 (足もとの円) と、殻が割れた熱の波・燃え上がった姿
-cmd gamemode adventure
-cmd skyabyss playtest god on @s
-camera -10.5 -52 -0.5 120 55
+camera -10.5 -46 3.5 150 55
 wait 20
-cmd skyabyss dev ch4 crack
-wait 12
+cmd execute positioned -12.5 -52 -2.5 run skyabyss dev ch4 crack
+wait 14
 shot 06_elder_cracks
 camera -7.5 -49 2.5 135 18
 wait 40
@@ -76,7 +74,6 @@ wait 10
 shot 07_elder_wave
 wait 40
 shot 08_elder_flared
-cmd gamemode spectator
 cmd kill @e[type=skyabyss:elder_thrall]
 
 # ---- 灰の道の標・温かい岩の群れ・煤の窯の跡・灰降りの高台
@@ -98,10 +95,10 @@ wait 10
 shot 12_ash_watch
 
 # ---- 敵の並び (熾り蟲・灰被りの屑・灰ひきずり・古い灰被り) と、丸まった灰ひきずり
-cmd summon skyabyss:cinder_mite 100.5 -60 0.5 {NoAI:1b,Rotation:[180f,0f]}
-cmd summon skyabyss:ash_husk 102.5 -60 0.5 {NoAI:1b,Rotation:[180f,0f]}
-cmd summon skyabyss:ash_dragger 105.5 -60 0.5 {NoAI:1b,Rotation:[180f,0f]}
-cmd summon skyabyss:elder_thrall 108.5 -60 0.5 {NoAI:1b,Rotation:[180f,0f]}
+cmd summon skyabyss:cinder_mite 100.5 -60 0.5 {NoAI:1b,Rotation:[0f,0f]}
+cmd summon skyabyss:ash_husk 102.5 -60 0.5 {NoAI:1b,Rotation:[0f,0f]}
+cmd summon skyabyss:ash_dragger 105.5 -60 0.5 {NoAI:1b,Rotation:[0f,0f]}
+cmd summon skyabyss:elder_thrall 108.5 -60 0.5 {NoAI:1b,Rotation:[0f,0f]}
 camera 104.5 -58.2 7.5 180 8
 waitchunks
 wait 40
@@ -133,6 +130,11 @@ camera 130.5 -60 0.5 0 5
 waitchunks
 wait 40
 chat clear
+cmd skyabyss dev talk "skyabyss:artisan"
+wait 40
+cmd skyabyss dev talk say leave
+wait 20
+close
 cmd skyabyss dev talk "skyabyss:artisan"
 wait 60
 shot 15_talk_artisan_first

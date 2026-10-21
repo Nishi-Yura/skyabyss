@@ -43,7 +43,7 @@ public final class Ch4Setup {
 
     // ---------------------------------------------------------------- 敵
     public static final DeferredHolder<EntityType<?>, EntityType<CinderMite>> CINDER_MITE = ENTITIES.register("cinder_mite",
-            () -> EntityType.Builder.of(CinderMite::new, MobCategory.MONSTER).sized(0.45f, 0.3f).eyeHeight(0.2f).fireImmune()
+            () -> EntityType.Builder.of(CinderMite::new, MobCategory.MONSTER).sized(0.65f, 0.45f).eyeHeight(0.3f).fireImmune()
                     .clientTrackingRange(8).build(SkyAbyss.MODID + ":cinder_mite"));
     public static final DeferredHolder<EntityType<?>, EntityType<AshHusk>> ASH_HUSK = ENTITIES.register("ash_husk",
             () -> EntityType.Builder.of(AshHusk::new, MobCategory.MONSTER).sized(0.7f, 1.95f).eyeHeight(1.7f).fireImmune()
