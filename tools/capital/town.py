@@ -34,8 +34,8 @@ TER = 4          # 北の段の上面
 TERZ = -42       # 北の段の前の縁 (z)
 TERX = 60        # 北の段の東西の縁 (|x|)
 GUILD_X1 = 78
-SMITHY_X1 = 30
-SMITHY_Z1 = 24
+SMITHY_X1 = 26
+SMITHY_Z1 = 21
 GAP = 4          # 町家と町家のあいだ (路地。軒が 1 出るので、軒のあいだに 2 の空き。3 では詰まって見える所があった: 2026-10-21 の試遊)
 
 
@@ -986,6 +986,15 @@ class Town(Facilities):
     def shrine(self):
         st, v = self.st, self.v
         cx, cz, r = -64, -21, 14
+        # 社の堂 (2026-10-22 の二人の試遊: 転生の建物も都の作りに合わせる。上から入れてしまう)。石の輪をまるごと包む一階の高い堂と、
+        # 四角錐の屋根。戸は東 (大通り側) の鉄の戸 (章で開く。CapitalDoors の open_shrine)。中の輪・石・祭壇はこのあと置く
+        R2 = r + 1
+        hall = Body(v, st, cx - R2, cz - R2, cx + R2, cz + R2, 0, floors=1, fh=13, bay=5, door_side='east', door='iron',
+                    interior=False, sides=('north', 'south', 'east', 'west'), pots=0.0).build()
+        hip_spire(v, st, cx - R2, cz - R2, cx + R2, cz + R2, hall.top + 1, mat=st.roof, rise=1, flare=True)
+        for (lx, lz) in ((cx - 6, cz), (cx + 6, cz), (cx, cz - 6), (cx, cz + 6)):
+            v.set(lx, 12, lz, 'chain[axis=y,waterlogged=false]')
+            v.set(lx, 11, lz, 'lantern[hanging=true,waterlogged=false]')
         for x in range(cx - r, cx + r + 1):
             for z in range(cz - r, cz + r + 1):
                 v.set(x, -1, z, st.base.full)
@@ -1026,12 +1035,12 @@ class Town(Facilities):
             v.fill(cx + r, 0, z, cx + r, 3, z, st.pilaster)
             v.set(cx + r, 4, z, 'lantern[hanging=false,waterlogged=false]')
         v.fill(cx + r, 3, cz - 1, cx + r, 3, cz + 1, st.trim.full)
-        self.tablet(cx + r + 1, 0, cz + 3, 'east', 'shrine')
+        self.tablet(cx + r + 4, 0, cz + 3, 'east', 'shrine')
         self.mark('open_shrine', cx + r, 0, cz)
         # 輪のまわりの木 (北と南)
         for x in range(cx - r + 2, cx + r - 1, 6):
-            tree(v, x, 0, cz - r - 3, st.trunk2, st.leaves2, h=5, r=2)
-            tree(v, x, 0, cz + r + 3, st.trunk2, st.leaves2, h=5, r=2)
+            flowerbed(v, st, x - 1, cz - r - 4, x + 1, cz - r - 3, density=0.5)
+            flowerbed(v, st, x - 1, cz + r + 3, x + 1, cz + r + 4, density=0.5)
         self.claim(cx - r - 1, cz - r - 5, cx + r + 1, cz + r + 5, 'shrine')
 
     # ---------------------------------------------------------------- 鍛冶場
