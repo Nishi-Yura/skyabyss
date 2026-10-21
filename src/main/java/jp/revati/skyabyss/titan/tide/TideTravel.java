@@ -82,9 +82,15 @@ public final class TideTravel {
             from.playSound(null, player.getX(), player.getY(), player.getZ(), TideSetup.GATE.get(), SoundSource.PLAYERS, 1.5f, 1.0f);
             from.sendParticles(ParticleTypes.SPLASH, player.getX(), player.getY() + 0.5, player.getZ(), 40, 0.8, 0.6, 0.8, 0.2);
         }
-        PacketDistributor.sendToPlayer(player, new TideNetwork.Plunge(30));
         BlockPos arrival = TideBackBuilder.arrival();
         player.fallDistance = 0;
+        if (player instanceof net.neoforged.neoforge.common.util.FakePlayer) {
+            // 自己テストの偽プレイヤー: 接続が無く、パケットと changeDimension で落ちるので、世界だけ切り替える
+            player.setServerLevel(back);
+            player.moveTo(arrival.getX() + 0.5, arrival.getY(), arrival.getZ() + 0.5, jp.revati.skyabyss.titan.tide.back.TideBackLayout.ARRIVAL_YAW, 0f);
+            return true;
+        }
+        PacketDistributor.sendToPlayer(player, new TideNetwork.Plunge(30));
         player.teleportTo(back, arrival.getX() + 0.5, arrival.getY(), arrival.getZ() + 0.5, jp.revati.skyabyss.titan.tide.back.TideBackLayout.ARRIVAL_YAW, 0f);
         back.playSound(null, arrival, TideSetup.GATE.get(), SoundSource.PLAYERS, 1.2f, 1.2f);
         showTitle(player, "title.skyabyss.tide_back", "title.skyabyss.tide_back.sub");

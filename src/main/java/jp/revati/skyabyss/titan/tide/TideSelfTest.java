@@ -284,6 +284,8 @@ public final class TideSelfTest {
         net.neoforged.neoforge.common.util.FakePlayer no = new net.neoforged.neoforge.common.util.FakePlayer(level, new com.mojang.authlib.GameProfile(java.util.UUID.randomUUID(), "tide_touch_early"));
         try {
             progress.markPersonal(ok.getUUID(), jp.revati.skyabyss.progress.Titans.STONE_WHALE);
+            // 前の自己テスト (心臓の戦い) が潮殻を眠らせたままなら、起こしてから (眠っている巨神には乗れない)
+            jp.revati.skyabyss.titan.end.TitanDormancy.clear(level.getServer(), jp.revati.skyabyss.progress.Titans.TIDE_SHELL);
             Vec3 local = new Vec3(-37, level.getSeaLevel() - shell.getY() + 0.5, -32);
             Vec3 world = shell.position().add(TideShellEntity.offset(shell.getYRot(), local.x, local.y, local.z));
             jp.revati.skyabyss.titan.solid.TitanVolume vol = jp.revati.skyabyss.titan.solid.TitanVolume.get(shell.volumeName());

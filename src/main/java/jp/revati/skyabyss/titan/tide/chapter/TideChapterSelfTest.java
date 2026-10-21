@@ -357,6 +357,8 @@ public final class TideChapterSelfTest {
             check(f, sd.x <= SHORE + 1 && Math.hypot(sd.x - dock.x, sd.z - dock.z) <= 32, "the shore dock is not on the shore near the dock ring: " + sd + " (dock " + dock + ")");
             check(f, !level.getFluidState(BlockPos.containing(sd.x, sd.y - 1, sd.z)).is(net.minecraft.tags.FluidTags.WATER), "the shore dock stands in water: " + sd);
             progress.markPersonal(walker.getUUID(), jp.revati.skyabyss.progress.Titans.STONE_WHALE);
+            // 前の自己テスト (心臓の戦い) が潮殻を眠らせたままなら、起こしてから (眠っている巨神には乗れない)
+            jp.revati.skyabyss.titan.end.TitanDormancy.clear(level.getServer(), jp.revati.skyabyss.progress.Titans.TIDE_SHELL);
             // 岸を歩いてくる: 輪の 6 ブロック手前 (陸) では渡らず、輪の中で渡る
             walker.moveTo(sd.x - 6, sd.y, sd.z);
             check(f, !shell.tryShoreBoard(walker), "a player 6 blocks from the shore ring crossed");
