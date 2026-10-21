@@ -41,6 +41,19 @@ public final class FacilitySetup {
     public static final DeferredHolder<AttachmentType<?>, AttachmentType<StashData>> STASH = ATTACHMENTS.register("stash",
             () -> AttachmentType.serializable(StashData::new).copyOnDeath().build());
 
+    // 訓練場の木偶の見えない的 (TrainingYard が柱にかぶせる。描かない)
+    public static final DeferredHolder<EntityType<?>, EntityType<TrainingDummy>> TRAINING_DUMMY = ENTITIES.register("training_dummy",
+            () -> EntityType.Builder.<TrainingDummy>of(TrainingDummy::new, MobCategory.MISC)
+                    .sized(1.05f, 3.02f)
+                    .clientTrackingRange(8)
+                    .fireImmune()
+                    .noSummon()
+                    .build(SkyAbyss.MODID + ":training_dummy"));
+
+    // 施設で一度だけのことの印 (地図の写し・醸造の手ほどき。死んでも引き継ぐ)
+    public static final DeferredHolder<AttachmentType<?>, AttachmentType<FacilityMarks>> MARKS = ATTACHMENTS.register("facility_marks",
+            () -> AttachmentType.serializable(FacilityMarks::new).copyOnDeath().build());
+
     // 店の記録 (闇市の日ごとの買った数など。死んでも引き継ぐ)
     public static final DeferredHolder<AttachmentType<?>, AttachmentType<ShopLedger>> LEDGER = ATTACHMENTS.register("shop_ledger",
             () -> AttachmentType.serializable(ShopLedger::new).copyOnDeath().build());
@@ -66,6 +79,7 @@ public final class FacilitySetup {
 
     private static void onAttributes(EntityAttributeCreationEvent event) {
         event.put(ATTENDANT.get(), NpcEntity.attributes(0.18).build());
+        event.put(TRAINING_DUMMY.get(), TrainingDummy.attributes().build());
     }
 
     private static void onCreativeTab(BuildCreativeModeTabContentsEvent event) {

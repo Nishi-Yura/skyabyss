@@ -140,7 +140,7 @@ def main():
     sx, sy, sz = v.marks['stand']
     seen = {(sx, sy, sz)}
     q = deque([(sx, sy, sz)])
-    # 古井戸の下 (docs/design/35 の 6.8) は、縁の内のレバーで格子を開けて梯子で下りる。井戸の底 well_down からも歩く
+    # 古井戸の下 (docs/design/35 の 6.9) は、縁の内のレバーで格子を開けて梯子で下りる。井戸の底 well_down からも歩く
     if 'well_down' in v.marks:
         seen.add(tuple(v.marks['well_down']))
         q.append(tuple(v.marks['well_down']))

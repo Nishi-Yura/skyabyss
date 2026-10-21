@@ -177,19 +177,24 @@ public final class Growth {
     // ステータス画面の「振り直す」(00 の 3 = A): 技の振り直しと同じく、共鳴の炉のそばで共鳴の結晶を払う。
     // 費用も技と同じ表 (初回無料、以後 1〜5) だが、回数は技と別に数える。クリエイティブは炉も結晶も要らない
     public static jp.revati.skyabyss.rpg.skill.SkillManager.RespecResult respecStats(ServerPlayer player) {
+        return respecStats(player, false, true);
+    }
+
+    // atPlace = 炉のそばと同じに扱う (都の訓練場の師範)、crystals = 結晶で払う (false なら代わりの代価を呼ぶ側が取る)
+    public static jp.revati.skyabyss.rpg.skill.SkillManager.RespecResult respecStats(ServerPlayer player, boolean atPlace, boolean crystals) {
         GrowthData data = get(player);
         if (data.spentPoints() <= 0) {
             return jp.revati.skyabyss.rpg.skill.SkillManager.RespecResult.NOTHING;
         }
         boolean free = player.isCreative();
-        if (!free && !jp.revati.skyabyss.rpg.skill.SkillManager.nearForge(player)) {
+        if (!free && !atPlace && !jp.revati.skyabyss.rpg.skill.SkillManager.nearForge(player)) {
             return jp.revati.skyabyss.rpg.skill.SkillManager.RespecResult.NO_FORGE;
         }
         int cost = GrowthRules.statRespecCost(data.statRespecs);
-        if (!free && jp.revati.skyabyss.rpg.skill.SkillManager.countCrystals(player) < cost) {
+        if (!free && crystals && jp.revati.skyabyss.rpg.skill.SkillManager.countCrystals(player) < cost) {
             return jp.revati.skyabyss.rpg.skill.SkillManager.RespecResult.NO_CRYSTALS;
         }
-        if (!free) {
+        if (!free && crystals) {
             jp.revati.skyabyss.rpg.skill.SkillManager.removeCrystals(player, cost);
         }
         java.util.Arrays.fill(data.stats, 0);

@@ -1070,7 +1070,7 @@ class Facilities(Interiors, BackAlley):
     # ---------------------------------------------------------------- 入れる家 (町のクエストの家)
     def furnish_home(self, b):
         """大通りの 1 列目の入れる家: 一階は居間、梯子で二階の寝室。住み手ごとに中身が違う (interiors.HOME_THEMES、
-        docs/design/35 の 6.7)。印 quest_house_<n> は一階の空いた床"""
+        docs/design/35 の 6.8)。印 quest_house_<n> は一階の空いた床"""
         st, v = self.st, self.v
         self.quest_n += 1
         n = self.quest_n

@@ -83,7 +83,7 @@ public final class CapitalDoorsSelfTest {
             level.getChunk(training);
             check(f, ironNear(level, training) == 0, "training: the gate should be open from the start, found iron near " + training);
         }
-        // 裏通りの隠し (35 の 6.8): 古井戸の下と酒場の地下の奥の印。奥の壁は閉じたまま建つ
+        // 裏通りの隠し (35 の 6.9): 古井戸の下と酒場の地下の奥の印。奥の壁は閉じたまま建つ
         for (String m : List.of("well_down", "well_chest", "cellar_gap", "cellar_passage", "abyss_hint")) {
             check(f, e.extra(m) != null, "back alley: the mark " + m + " is missing");
         }

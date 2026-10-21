@@ -51,7 +51,7 @@ public final class ShelterBuilder {
         for (String key : List.of("open_guild", "open_shrine", "open_keep", "open_keep2", "open_hall", "open_training",
                 "sign_guild", "sign_shrine", "sign_keep", "sign_hall", "sign_training", "chaser", "altar",
                 "stone_stone_whale", "stone_tide_shell", "stone_thunder_wing", "stone_ember",
-                // あとで町のクエスト・裏通りの仕組みが読む置き場 (35 の 3.3・3.5・6.8): 止まり木の台、古井戸の格子と下の迷路、
+                // あとで町のクエスト・裏通りの仕組みが読む置き場 (35 の 3.3・3.5・6.9): 止まり木の台、古井戸の格子と下の迷路、
                 // 酒場の地下の奥の壁と隠し通路 (cellar_gap の 2 マスを空気にすると開く)
                 "perch", "old_well", "well_down", "well_chest", "cellar_wall", "cellar_gap", "cellar_passage", "abyss_hint", "abyss_door")) {
             BlockPos at = job.mark(key);

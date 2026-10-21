@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""裏通りの隠し (docs/design/35 の 6.8)。facilities.Facilities が継ぐ。
+"""裏通りの隠し (docs/design/35 の 6.9)。facilities.Facilities が継ぐ。
 
 - 古井戸の下の小さな迷路と宝 (well_maze): 井戸の縁の内の古い取っ手 (レバー) で格子 (鉄の跳ね上げ戸) の一枚が開き、
   梯子で井戸の底へ。底から西へ、分かれ道・行き止まりの骨の間・崩れた横穴・鉄の戸の間。鉄の戸は、

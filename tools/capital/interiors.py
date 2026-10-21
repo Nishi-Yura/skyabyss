@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""都の家の中身 (docs/design/35 の 6.7)。facilities.Facilities が継ぐ。
+"""都の家の中身 (docs/design/35 の 6.8)。facilities.Facilities が継ぐ。
 
 - 家具は「型」(スタンプ) で置く。型は北を背にして書き (背の列 dz=0、手前へ +dz)、部屋の中で回して空いた所に置く。
   wall=True の型は背を壁 (丸ごとのブロック) につける。型と型のあいだは 1 マス空ける (通り道)。
@@ -82,7 +82,7 @@ STAMPS = {
     'amethyst': (False, [(0, 0, BARREL, 'amethyst_cluster[facing=up,waterlogged=false]'), (1, 0, 'barrel[facing=north,open=false]', 'purple_candle[candles=2,lit=true,waterlogged=false]')]),
 }
 
-# 町のクエストの家 1..11 の住み手 (docs/design/35 の 6.7): (名前, 一階の型, 二階の型, 寝台の色)
+# 町のクエストの家 1..11 の住み手 (docs/design/35 の 6.8): (名前, 一階の型, 二階の型, 寝台の色)
 HOME_THEMES = {
     1: ('scribe', ['writing', 'books', 'desk', 'paper', 'chest', 'plants'], ['bed', 'books', 'desk', 'chest'], 'white'),
     2: ('old_sailor', ['fish', 'nets', 'chest'], ['bed', 'chest', 'nets'], 'blue'),
