@@ -5,7 +5,7 @@
 
 - 案ごとにメッシュは 1 つ (lowpoly/attendant_<案>.json)、絵だけ役ごと:
     textures/lowpoly/attendant_<案>_<役>.png (15 枚)。attendant_<案>.png = 組合の受付の書記と同じ (LowPoly の既定の名前)
-- 旅の職人と同じく、root に [0, 180, 0] を足してゲームの NPC と向きをそろえる (install_artisan.py と同じ「ピボットの修正」)
+- root は回さない (前 = -Z のメッシュはそのままで前を向く。2026-10-21 のゲームの中の絵で、180 度足すと後ろ向きになると分かった。頭の上下の符号は AttendantRenderer が直す)
 - 光る画素は無い (マスクを渡さない = 空のマスクは入れない)
 - アニメは旅の職人のものを写し、名前を animation.attendant.* に替える (animations/entity/attendant.animation.json: idle / walk / talk)
 """
@@ -30,7 +30,8 @@ DEFAULT = "guild_clerk"
 def install_look(k):
     d = os.path.join(SRC, k)
     mesh = json.load(open(os.path.join(d, "attendant_%s_mesh.json" % k), encoding="utf-8"))
-    mesh["bones"]["root"]["rotation"] = [0.0, 180.0, 0.0]
+    # root は回さない (ラフのメッシュは前 = -Z で、そのままゲームの前を向く。旅の職人のように 180 度足すと後ろ向きになる)
+    mesh["bones"]["root"]["rotation"] = [0.0, 0.0, 0.0]
     mesh_path = os.path.join(TMP, "attendant_%s_mesh.json" % k)
     with open(mesh_path, "w", encoding="utf-8") as f:
         json.dump(mesh, f, separators=(",", ":"))

@@ -5,6 +5,10 @@ size 1280 720
 timeout 900
 render 8
 clouds off
+wait 100
+cmd skyabyss cinematic stop
+wait 10
+cmd skyabyss cinematic stop
 cmd time set noon
 cmd weather clear
 cmd gamerule doDaylightCycle false
@@ -83,6 +87,7 @@ shot icons_near
 cmd gamemode creative
 camera minecraft:overworld -2.7 -60 3.0 180 0
 wait 10
+chat clear
 cmd skyabyss dev talk "skyabyss:attendant_tool_merchant"
 wait 60
 shot dialogue_intro
@@ -90,10 +95,10 @@ cmd skyabyss dev talk say continue
 wait 60
 shot dialogue_menu
 close
-cmd clear @s
 cmd skyabyss facility coins 40
 cmd give @s skyabyss:stone_whale_shard 2
 cmd give @s skyabyss:bone_chip 9
+chat clear
 cmd skyabyss facility shop tool_shop
 wait 30
 shot shop_tool

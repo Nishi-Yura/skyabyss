@@ -80,4 +80,17 @@ python tools/gen_facility_icons.py
 
 ## ゲームの中の絵
 
-(あとでゲームの中の絵を足す)
+台本 `tools/shots/attendants.txt`（`./gradlew runShots -Pscript=tools/shots/attendants.txt --no-daemon --offline`）。15 役を前 8・後ろ 7（一段上）に並べ、案ごとに `/skyabyss facility look <1..3>` で替えて撮る。
+
+| 絵 | 中身 |
+| --- | --- |
+| `ingame_look_a_all.png` / `_b_` / `_c_` | 3 案の 15 役の並び（前から） |
+| `ingame_look_*_near.png` `_near2.png` `_back.png` | 近く・斜め・後ろから |
+| `ingame_icons_all.png` `ingame_icons_near.png` | 頭の上の施設の印（初めて話す前なので、その上にクエストの吹き出しも出ている） |
+| `ingame_dialogue_intro.png` `ingame_dialogue_menu.png` | 道具屋との会話（肖像・選択肢） |
+| `ingame_shop_tool.png` `_apothecary` `_black_market` | 店の画面 |
+| `ingame_stash.png` | 預かり所（バニラの大きな箱・絵柄 A） |
+| `ingame_guild_none.png` `ingame_guild_mine.png` | ギルドの窓口（入っていない / 入っている長） |
+
+- 既定は **A**（`AttendantLook.DEFAULT`）。B・C は `NpcEntity.variant` 2・3 で残してある（選び直すなら DEFAULT の一字を替える）。
+- 向き: 旅の職人と同じく root に yaw 180 を足すと後ろ向きになったので、係の人は root を回さずに入れた（頭の上下の符号は `AttendantRenderer` が戻す）。**旅の職人（`skyabyss:artisan`）は今も後ろ向き**（`docs/review/npc_roughs/ingame_facing_check.png`）。
