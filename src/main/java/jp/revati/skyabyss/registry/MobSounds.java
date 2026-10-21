@@ -103,6 +103,34 @@ public final class MobSounds {
     public static final DeferredHolder<SoundEvent, SoundEvent> ELDER_SENTRY_CHARGE = register("elder_sentry_charge");
     public static final DeferredHolder<SoundEvent, SoundEvent> ELDER_SENTRY_HORN = register("elder_sentry_horn");
     public static final DeferredHolder<SoundEvent, SoundEvent> ELDER_SENTRY_STOMP = register("elder_sentry_stomp");
+    // 二章の地上の敵 (tools/gen_ch2_ground_mobs.py。既存の音の出来事に高さを付けた別名)
+    public static final DeferredHolder<SoundEvent, SoundEvent> TIDEPOOL_CLAM_AMBIENT = register("tidepool_clam_ambient");
+    public static final DeferredHolder<SoundEvent, SoundEvent> TIDEPOOL_CLAM_OPEN = register("tidepool_clam_open");
+    public static final DeferredHolder<SoundEvent, SoundEvent> TIDEPOOL_CLAM_SNAP = register("tidepool_clam_snap");
+    public static final DeferredHolder<SoundEvent, SoundEvent> TIDEPOOL_CLAM_CLOSE = register("tidepool_clam_close");
+    public static final DeferredHolder<SoundEvent, SoundEvent> TIDEPOOL_CLAM_HURT = register("tidepool_clam_hurt");
+    public static final DeferredHolder<SoundEvent, SoundEvent> TIDEPOOL_CLAM_DEATH = register("tidepool_clam_death");
+    public static final DeferredHolder<SoundEvent, SoundEvent> SAND_BURROWER_AMBIENT = register("sand_burrower_ambient");
+    public static final DeferredHolder<SoundEvent, SoundEvent> SAND_BURROWER_BULGE = register("sand_burrower_bulge");
+    public static final DeferredHolder<SoundEvent, SoundEvent> SAND_BURROWER_EMERGE = register("sand_burrower_emerge");
+    public static final DeferredHolder<SoundEvent, SoundEvent> SAND_BURROWER_BITE = register("sand_burrower_bite");
+    public static final DeferredHolder<SoundEvent, SoundEvent> SAND_BURROWER_HURT = register("sand_burrower_hurt");
+    public static final DeferredHolder<SoundEvent, SoundEvent> SAND_BURROWER_DEATH = register("sand_burrower_death");
+    public static final DeferredHolder<SoundEvent, SoundEvent> SAND_BURROWER_STEP = register("sand_burrower_step");
+    public static final DeferredHolder<SoundEvent, SoundEvent> DRIFT_HERMIT_AMBIENT = register("drift_hermit_ambient");
+    public static final DeferredHolder<SoundEvent, SoundEvent> DRIFT_HERMIT_HURT = register("drift_hermit_hurt");
+    public static final DeferredHolder<SoundEvent, SoundEvent> DRIFT_HERMIT_DEATH = register("drift_hermit_death");
+    public static final DeferredHolder<SoundEvent, SoundEvent> DRIFT_HERMIT_STEP = register("drift_hermit_step");
+    public static final DeferredHolder<SoundEvent, SoundEvent> DRIFT_HERMIT_HIDE = register("drift_hermit_hide");
+    public static final DeferredHolder<SoundEvent, SoundEvent> DRIFT_HERMIT_SPIT = register("drift_hermit_spit");
+    public static final DeferredHolder<SoundEvent, SoundEvent> SHORE_WARDEN_AMBIENT = register("shore_warden_ambient");
+    public static final DeferredHolder<SoundEvent, SoundEvent> SHORE_WARDEN_HURT = register("shore_warden_hurt");
+    public static final DeferredHolder<SoundEvent, SoundEvent> SHORE_WARDEN_DEATH = register("shore_warden_death");
+    public static final DeferredHolder<SoundEvent, SoundEvent> SHORE_WARDEN_STEP = register("shore_warden_step");
+    public static final DeferredHolder<SoundEvent, SoundEvent> SHORE_WARDEN_STANCE = register("shore_warden_stance");
+    public static final DeferredHolder<SoundEvent, SoundEvent> SHORE_WARDEN_THRUST = register("shore_warden_thrust");
+    public static final DeferredHolder<SoundEvent, SoundEvent> SHORE_WARDEN_RING = register("shore_warden_ring");
+    public static final DeferredHolder<SoundEvent, SoundEvent> SHORE_WARDEN_FLOOD = register("shore_warden_flood");
 
     private MobSounds() {
     }
