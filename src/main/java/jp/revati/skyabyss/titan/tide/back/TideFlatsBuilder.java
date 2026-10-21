@@ -201,8 +201,6 @@ final class TideFlatsBuilder {
                     }
                 }
             }
-            // 碑と宝箱
-            TideCaches.place(kit, n.id());
             // 窪みの灯りの柱
             int px = n.face() == Direction.EAST ? n.x1() + 1 : n.x2() - 1;
             kit.set(px, floor + 1, n.z1(), Blocks.BONE_BLOCK.defaultBlockState());

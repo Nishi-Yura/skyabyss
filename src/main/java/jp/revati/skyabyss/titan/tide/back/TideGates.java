@@ -112,7 +112,6 @@ public final class TideGates {
             ensure(level, door(k), false);
         }
         ensure(level, cave(), true);
-        TideFins.placeGates(level, false);
         ensure(level, jp.revati.skyabyss.titan.tide.heart.TideHeartArena.gate(), true);
     }
 

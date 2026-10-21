@@ -50,13 +50,7 @@ public final class TideBackCommands {
             Map.entry("f0", RESTS.get(4).spawn()),
             Map.entry("flats", new BlockPos(0, FLATS_FLOOR + 1, -100)),
             Map.entry("heart", RESTS.get(5).spawn()),
-            Map.entry("bottom", new BlockPos(0, HUB_FLOOR + 1, 3)),
-            // 息の間: 縁 (入口の泡の近く)・皿 7 (舞台の真下)・舞台・展望の間
-            Map.entry("breath", RESTS.get(6).spawn()),
-            Map.entry("vent", BlockPos.containing(BreathLayout.dishNode(BreathLayout.DISHES - 1).landX(), BreathLayout.dishNode(BreathLayout.DISHES - 1).landY(),
-                    BreathLayout.dishNode(BreathLayout.DISHES - 1).landZ())),
-            Map.entry("summit", BlockPos.containing(BreathLayout.arena().landX(), BreathLayout.arena().landY(), BreathLayout.arena().landZ())),
-            Map.entry("deck", RESTS.get(9).spawn()));
+            Map.entry("bottom", new BlockPos(0, HUB_FLOOR + 1, 3)));
 
     private TideBackCommands() {
     }

@@ -102,6 +102,8 @@ public final class TitanEnd {
         TitanDormancy.begin(server, titan, CARRY_AT);
         // このグループは初回を終えた (周回の道になる。docs/design/21 の 1.7)
         jp.revati.skyabyss.titan.group.FirstRun.onFirstCleared(back, fought);
+        // 追憶の宝 (任意の翼の品を、この巨神の初回の心臓の報いへ移した。人ごとに一度)
+        HeartKeepsakes.grant(back, titan, fought);
         // 試練のプール: 周を一つ進める (次の乗り込みで新しく三つを引く。docs/design/29 の 2.2)
         jp.revati.skyabyss.trial.TrialRuntime.onHeartStopped(back, fought);
         // 周回の誓いの報酬 (素材の上乗せ・共鳴の欠片・称号・最高の段の記録)。誓いはここで降ろす (docs/design/21 の 1.8)

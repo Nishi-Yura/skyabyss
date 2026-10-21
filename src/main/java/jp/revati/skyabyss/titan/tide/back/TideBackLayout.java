@@ -44,7 +44,8 @@ public final class TideBackLayout {
     // 21: 試練の階 (TideDeck。潮の広間の南の段の戸口から通路・試練の広間・潮の背渡り T02・満ち潮の円環 T10・貝の合唱 T06・二つの海 T07・試練の板。docs/design/29 の 3.2)
     // 24: 試練の階の下の階 (TideDeck。広間の西の階段から下る H2・くらげの回廊 T03・渦潮の滑り台 T04・大貝の護送 T11・珊瑚の標本棚 T08・真珠守りの試し T12。P3。
     //     docs/design/29 の 3.7)。他の背の版の最大 (余燼 23) の次
-    public static final int LAYOUT_VERSION = 28;
+    // 30: 任意の翼をなくした (息の間・ひれの道・殻の上の道・冠・光の井戸・宝箱・息の間の休み場 u0〜u3)。周回の既知の道もなくした
+    public static final int LAYOUT_VERSION = 30;
     // 生成の海 (水の最上段は y=62)
     public static final int SEA = 63;
     public static final int SEA_FLOOR = 41;
@@ -56,6 +57,8 @@ public final class TideBackLayout {
     public static final int SHELL_RZ = 136;
     public static final double SHELL_N = 2.6;
     // 甲羅の上 (外) の歩ける地面 = いちばん下の台地 (T1) の高さ。上の三つの台地は 130・146・159
+    // 広間の水の盆の底 (気室の底だった高さ。広間の水を掘る深さ)
+    public static final int POOL_FLOOR = 108;
     public static final int TOP_Y = 113;
     public static final int[] TERRACE_Y = {113, 130, 146, 159};
 
@@ -113,27 +116,9 @@ public final class TideBackLayout {
     public static final int GATE_Z = 85;
     public static final int GATE_Y0 = 63;
     public static final int GATE_Y1 = 66;
-    // 甲羅の上へ上る段 (浜の西の壁の外、x -66〜-62、z 68〜72 の四角い螺旋。浜の西の壁の口 (-53, 70) から通路で入る)。上は甲羅の地表の口
-    public static final int TOP_STAIR_X1 = -66;
-    public static final int TOP_STAIR_Z1 = 68;
-    // 頂の塔 (中心 (0, -5)、幅 20、頂の台地 159 の上に 160〜216。塔の中は詰まっていて、月の窓の縦穴だけが通る)
+    // 月の窓の縦穴 (広間の上。中心は (0, -5))
     public static final int TOWER_CZ = -5;
-    // 月の窓の縦穴の上端のガラス (塔の窓の高さ。ここから屋根の頂まで、半径 3.5 の柱がガラス)
-    public static final int TOWER_DECK = 206;
 
-    // 予約の間 1〜3 (08 の 3.8節)。上の三つの台地の中の部屋。息の間 (BreathLayout) が真ん中を円く掘り抜いて一つの気室にした。
-    // 部屋は気室を巻く輪の回廊 (外半径 31・27・23) になる (TideIslandBuilder.upper)。箱は輪の外接
-    public static final Area UPPER_1 = new Area(-31, 31, -36, 26, 113, 12);
-    public static final Area UPPER_2 = new Area(-27, 27, -32, 22, 130, 12);
-    public static final Area UPPER_3 = new Area(-23, 23, -28, 18, 146, 9);
-    public static final List<Area> UPPER_ROOMS = List.of(UPPER_1, UPPER_2, UPPER_3);
-    // 輪の外半径 (気室の中心から)
-    public static final int[] UPPER_RING_R = {31, 27, 23};
-    // 入口: 西の面 (T2 の崖、x -78) の戸口 (x -78、z -2〜2、y 114〜117。いつも開いている。潮・時間・天気で閉じない)。外は T1 の地面 (113)。
-    // 戸口の奥は廊下 (x -77〜-30) で UPPER_1 の輪へ
-    public static final int UPPER_GATE_X = -78;
-    public static final int UPPER_GATE_Z = 0;
-    public static final int UPPER_HALL_X2 = -31;
     // 縁の回廊 (浜から広間の南の段へ上る屋根のある坂。x -13〜-7)
     public static final int CAVE_X1 = -19;
     public static final int CAVE_X2 = -13;
@@ -290,13 +275,7 @@ public final class TideBackLayout {
             new Rest("g1", G1, new BlockPos(PLAT_C[0] - 2, PLATFORM_TOP + 1, PLAT_C[1] + 2), new BlockPos(PLAT_C[0] + 2, PLATFORM_TOP + 1, PLAT_C[1] - 2)),
             new Rest("s0", S0, new BlockPos(42, HUB_LEDGE + 1, -18), new BlockPos(45, HUB_LEDGE + 1, -13)),
             new Rest("f0", F0, new BlockPos(-6, TUNNEL_FLOOR + 1, -62), new BlockPos(0, TUNNEL_FLOOR + 1, -56)),
-            new Rest("heart", HEART_REST, new BlockPos(3, 51, -6), new BlockPos(-2, 51, -6)),
-            // 息の間 (BreathLayout)。u0 = 縁 (入口の泡の近く)、u1 = 予約の間 2 の床 (皿 2 の隣)、u2 = 予約の間 3 の床 (皿 5 の隣)、u3 = 展望の間。
-            // 位置は BreathLayout の式と同じ (ここでは数で書く: クラスの初期化が互いを待たないように。自己テストが合っているか見る)
-            new Rest("u0", new Area(-16, -6, -13, 4, 113, 8), new BlockPos(-13, 114, -6), new BlockPos(-12, 114, -9)),
-            new Rest("u1", new Area(5, 16, -26, -12, 130, 8), new BlockPos(11, 131, -20), new BlockPos(9, 131, -17)),
-            new Rest("u2", new Area(-10, 10, 10, 19, 146, 8), new BlockPos(-4, 147, 16), new BlockPos(3, 147, 16)),
-            new Rest("u3", new Area(-9, -2, -15, -4, 206, 3), new BlockPos(-6, 207, -10), new BlockPos(-5, 207, -9))),
+            new Rest("heart", HEART_REST, new BlockPos(3, 51, -6), new BlockPos(-2, 51, -6))),
             // 試練の階 (TideDeck。番号は 10 から。上の 10 個の並びは変えない: RESTS.get(n) で引く所がある)
             TideDeck.rests());
 

@@ -30,7 +30,6 @@ public final class TideWhispers {
             new Whisper("tide_landing", true, false, p -> LANDING.contains(p) || near(p, ARRIVAL, 8, 4)),
             new Whisper("tide_beach", false, false, BEACH::contains),
             new Whisper("tide_hub", true, false, HUB::contains),
-            new Whisper("tide_top", true, false, TideWhispers::onShellTop),
             new Whisper("tide_garden", false, true, G0::contains),
             new Whisper("tide_watch", false, true, S0::contains),
             new Whisper("tide_flats", false, true, F0::contains));
@@ -44,12 +43,6 @@ public final class TideWhispers {
 
     private static boolean near(BlockPos p, BlockPos c, int r, int dy) {
         return Math.abs(p.getX() - c.getX()) <= r && Math.abs(p.getZ() - c.getZ()) <= r && Math.abs(p.getY() - c.getY()) <= dy;
-    }
-
-    // 甲羅の上 (外) に立っている
-    static boolean onShellTop(BlockPos p) {
-        int top = shellTop(p.getX(), p.getZ());
-        return top != Integer.MIN_VALUE && p.getY() > top && p.getY() <= top + 6 && top >= TOP_Y - 1;
     }
 
     @SubscribeEvent

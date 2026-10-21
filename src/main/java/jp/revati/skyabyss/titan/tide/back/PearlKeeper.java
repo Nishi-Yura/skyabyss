@@ -227,11 +227,11 @@ public class PearlKeeper extends TideMob {
     }
 
     private double arenaX() {
-        return Double.isNaN(arenaCx) ? BreathLayout.WX : arenaCx;
+        return Double.isNaN(arenaCx) ? getX() : arenaCx;
     }
 
     private double arenaZ() {
-        return Double.isNaN(arenaCx) ? BreathLayout.WZ : arenaCz;
+        return Double.isNaN(arenaCx) ? getZ() : arenaCz;
     }
 
     public boolean idle() {
@@ -262,7 +262,7 @@ public class PearlKeeper extends TideMob {
 
     // ---------------------------------------------------------------- 狙える人
     private List<ServerPlayer> fighters(ServerLevel server) {
-        return devFighters != null ? devFighters : BreathSummit.fighters(server);
+        return devFighters != null ? devFighters : List.of();
     }
 
     private boolean isFighter(ServerPlayer p) {
@@ -560,7 +560,7 @@ public class PearlKeeper extends TideMob {
         double dx = p.x - arenaX();
         double dz = p.z - arenaZ();
         double d = Math.hypot(dx, dz);
-        double max = (Double.isNaN(arenaCx) ? BreathLayout.ARENA_R : arenaR) - 1.0;
+        double max = (Double.isNaN(arenaCx) ? 6.0 : arenaR) - 1.0;
         if (d <= max || d < 1e-6) {
             return p;
         }
@@ -712,8 +712,6 @@ public class PearlKeeper extends TideMob {
         setMode(MODE_NORMAL);
         if (defeatHook != null) {
             defeatHook.accept(this);
-        } else if (level() instanceof ServerLevel server) {
-            BreathSummit.onKeeperDefeated(server, this);
         }
     }
 
