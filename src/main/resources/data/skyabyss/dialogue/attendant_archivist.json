@@ -31,7 +31,7 @@
       "next": "menu",
       "text": "dialogue.skyabyss.attendant_archivist.intro"
     },
-    "lore": {
+    "desk": {
       "face": "neutral",
       "next": "menu"
     },
@@ -39,20 +39,31 @@
       "face": "neutral",
       "options": [
         {
-          "id": "map",
+          "id": "lore",
           "kind": "talk",
           "do": [
             {
               "type": "facility",
-              "open": "map"
+              "open": "lore_book"
             }
           ],
           "goto": "end"
         },
         {
-          "id": "lore",
+          "id": "map",
           "kind": "talk",
-          "goto": "lore"
+          "do": [
+            {
+              "type": "facility",
+              "open": "map_copy"
+            }
+          ],
+          "goto": "end"
+        },
+        {
+          "id": "desk",
+          "kind": "talk",
+          "goto": "desk"
         },
         {
           "id": "about",

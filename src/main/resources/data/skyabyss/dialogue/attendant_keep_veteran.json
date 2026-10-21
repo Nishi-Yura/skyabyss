@@ -35,13 +35,33 @@
       "face": "neutral",
       "next": "menu"
     },
+    "page": {
+      "face": "neutral",
+      "next": "menu"
+    },
     "menu": {
       "face": "neutral",
       "options": [
         {
+          "id": "codex",
+          "kind": "talk",
+          "do": [
+            {
+              "type": "facility",
+              "open": "records"
+            }
+          ],
+          "goto": "end"
+        },
+        {
           "id": "records",
           "kind": "talk",
           "goto": "records"
+        },
+        {
+          "id": "page",
+          "kind": "talk",
+          "goto": "page"
         },
         {
           "id": "about",

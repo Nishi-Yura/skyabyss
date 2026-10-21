@@ -9,6 +9,8 @@
   assets/skyabyss/models/item/bell_coin.json      鐘銭の手に持つ形
   assets/skyabyss_fac/lang/{ja_jp,en_us}.json     文 (係の人の名前・会話・店とギルドの画面・知らせ・噂)
 会話の結果 {"type": "facility", "open": ...} は facility.FacilityActions が受ける。
+選択肢の 9 番目に dict を書くと: "if" = 出す条件、"goto" = 自分で書いた節 (NODES) へ飛ぶ。
+NODES[役] = 節の名前 → {"text": (ja, en) か "text_key": 鍵, "do": [...], "next": 節, "options": [(id, 飛び先, do, (ja, en) か 鍵, if)]}
 """
 import json
 import os
@@ -41,11 +43,12 @@ ROLES = {
     "guild_clerk": ("組合の受付の書記", "Guild Clerk",
                     ("鯨追いの組合へようこそ。ここではギルドを作るか、入る申請を出せます。言伝ての板の頼みも、ここで見られますよ。",
                      "Welcome to the Whale-Chasers' Hall. You can found a guild here, or apply to join one. The message board's errands are here too."),
-                    [("guild", "talk", [fac("guild")], None, "ギルドの窓口 (作る・入る・抜ける)", "Guild desk (found, join, leave)", None, None),
+                    [("guild", "talk", [fac("guild")], None, "ギルドの窓口 (作る・入る・頼み・家と旗)", "Guild desk (found, join, requests, hall and banner)", None, None),
+                     ("storage", "talk", [fac("guild_storage")], None, "ギルドの倉庫を開く", "Open the guild storehouse", None, None),
                      ("board", "talk", [{"type": "open_board"}], None, "言伝ての板を見る", "Look at the message board", None, None),
                      ("what", "talk", None, "what", "ギルドとは", "What is a guild?",
-                      "ギルドは旅人が作る集まりです。旗の色を選んで名前を付ければ、三十人まで入れます。名札にギルドの印が出ますよ。",
-                      "A guild is a fellowship travellers make themselves. Pick banner colours and a name, and up to thirty may join. Its tag shows on your name plate.")]),
+                      "ギルドは旅人が作る集まりです。旗の色を選んで名前を付ければ、三十人まで入れます。名札にギルドの印が出ますよ。倉庫を分け合い、週ごとの頼みを一緒に片づけ、都の空き区画を一つ借りて家を建てることもできます。",
+                      "A guild is a fellowship travellers make themselves. Pick banner colours and a name, and up to thirty may join. Its tag shows on your name plate. Members share a storehouse, take on a weekly request together, and may rent one of the capital's empty lots to build a hall.")]),
     "smith": ("鍛冶師", "Smith",
               ("鍛冶場だ。奥の共鳴の炉で強化と分解と鍛え直し、ここでは傷んだ品の修理を銭で請け負う。",
                "This is the smithy. The resonance forge in the back strengthens, breaks down and reforges. Here I mend worn gear for coin."),
@@ -63,7 +66,13 @@ ROLES = {
                    [("shop", "talk", [fac("shop")], None, "薬を見る", "Browse remedies", None, None),
                     ("brew", "talk", None, "brew", "醸造のこと", "About brewing",
                      "火の章まで行ったら、醸造を教えましょう。それまでは、薬は買うのがいちばん早い。",
-                     "Once you reach the chapter of fire, I'll teach you to brew. Until then, buying is quickest.")]),
+                     "Once you reach the chapter of fire, I'll teach you to brew. Until then, buying is quickest.",
+                     {"if": {"type": "stage", "max": 2}}),
+                    ("learn", "talk", None, None, "醸造を教わる", "Learn to brew", None, None,
+                     {"if": {"type": "all", "of": [{"type": "stage", "min": 3}, {"type": "not", "of": {"type": "flag", "flag": "brew_lesson"}}]},
+                      "goto": "lesson"}),
+                    ("review", "talk", None, None, "醸造のおさらい", "Go over brewing again", None, None,
+                     {"if": {"type": "flag", "flag": "brew_lesson"}, "goto": "lesson_review"})]),
     "storage_keeper": ("預かり番", "Storage Keeper",
                        ("預かり所です。品を預ければ、どの町の預かり所からでも同じ中身を出せます。旅嚢の大事な品は、旅嚢のままに。",
                         "This is the storehouse. What you leave here can be taken out at any storehouse, in any town. Keep your satchel's precious things in the satchel."),
@@ -88,30 +97,40 @@ ROLES = {
                       ("四巨神の社です。転生の台座と、天の鍵の欠片を納める鍵の間があります。",
                        "This is the Shrine of the Four Titans. Here are the altar of rebirth, and the key chamber where sky-key fragments are laid."),
                       [("rebirth", "talk", None, "rebirth", "転生のこと", "About rebirth",
-                        "台座に触れれば、積み上げたものを手放して、もう一度歩き直せます。代わりに、魂に残るものがある。",
-                        "Touch the altar and you let go of what you built, to walk again. In return, something stays with your soul."),
-                       ("vow", "talk", None, "vow", "誓いのこと", "About vows",
-                        "誓いは周回の縛りです。重い誓いほど、手に入るものも重くなる。",
-                        "A vow binds your next round. The heavier the vow, the heavier the reward.")]),
+                        "奥の祭壇が転生の台座です。Lv 50 を越え、共鳴の結晶を五つ納めれば、台座に触れて積み上げたものを手放し、もう一度歩き直せます。代わりに、魂に残るものがある。",
+                        "The altar at the back is the altar of rebirth. Past level 50, with five resonance crystals to offer, touch it to let go of what you built and walk again. In return, something stays with your soul."),
+                       ("vow", "talk", None, None, "誓いのこと (周回の縛り)", "About vows (bindings for repeat runs)", None, None, {"goto": "vow"}),
+                       ("offer", "talk", [fac("key_offer")], None, "鍵の間に欠片を納める", "Lay fragments in the key chamber", None, None),
+                       ("return", "talk", [fac("key_return")], None, "納めた欠片を返してもらう", "Take back the laid fragments", None, None,
+                        {"if": {"type": "stage", "min": 1}}),
+                       ("keys", "talk", None, "keys", "鍵の間のこと", "About the key chamber",
+                        "四つの石は、四つの巨神の座です。心臓を止めた巨神の石に触れれば、天の鍵の欠片が一つ石に預けられる。四つそろえば、鍵はここで形になる。預けた欠片は失くさないし、いつでも返します。",
+                        "The four stones are the seats of the four titans. Touch the stone of a titan whose heart you stilled, and one sky-key fragment rests in it. When four rest here, the key takes shape. Laid fragments are never lost, and I'll return them any time.")]),
     "keep_veteran": ("砦の老兵", "Keep Veteran",
                      ("空見の砦だ。順位の石と記録の板がある。巨神の背での働きは、ここに刻まれる。",
                       "Skywatch Keep. Here stand the ranking stone and the record boards. What you do on the titans' backs is carved here."),
-                     [("records", "talk", None, "records", "記録の見方", "Reading the records",
-                       "石に触れれば今週の順位、板には各巨神の速さが出る。仲間と並んで名が残るのも悪くない。",
-                       "Touch the stone for this week's ranking; the boards show each titan's fastest runs. Not bad to have your name beside your friends'.")]),
+                     [("codex", "talk", [fac("records")], None, "試練の記録を見る (図鑑)", "See the trial records (codex)", None, None),
+                      ("records", "talk", None, "records", "記録の見方", "Reading the records",
+                       "石に触れれば今週の順位、板には各巨神の速さが出る。試練の図鑑の写しは、わしが預かっている。仲間と並んで名が残るのも悪くない。",
+                       "Touch the stone for this week's ranking; the boards show each titan's fastest runs. I keep a copy of the trial codex. Not bad to have your name beside your friends'."),
+                      ("page", "talk", None, "page", "本丸の奥の頁のこと", "The page deep in the keep",
+                       "本丸の奥に、前の空見が残した頁が一枚ある。……まだ見せられん。三章の話が進めば、そのときにな。",
+                       "Deep in the keep there's a page the last skywatcher left. ...I can't show it yet. When the third chapter's tale moves on, then.")]),
     "archivist": ("書庫番", "Archivist",
                   ("空見の館の書庫です。伝承の写しと、地図の写しを預かっています。",
                    "The Skywatch Hall library. We keep copies of the lore, and copies of maps."),
-                  [("map", "talk", [fac("map")], None, "地図の写しを見る", "See the map copies", None, None),
-                   ("lore", "talk", None, "lore", "伝承の読み返し", "Rereading the lore",
-                    "伝承の書に記したことは、いつでも読み返せます。閲覧の机は、まだ支度の途中です。",
-                    "What you've written in your lore book can always be reread. The reading desks are still being prepared.")]),
+                  [("lore", "talk", [fac("lore_book")], None, "伝承を読み返す", "Reread the lore", None, None),
+                   ("map", "talk", [fac("map_copy")], None, "地図の写しをもらう (祠と跡地を M の地図に)", "Get a map copy (shrines and sites on your map)", None, None),
+                   ("desk", "talk", None, "desk", "閲覧の机のこと", "About the reading desks",
+                    "伝承の書に記したことは、ここでも読み返せます。書をなくしても、書庫の写しは消えません。地図の写しには、祠と、開いた章の跡地のありかを描き足します。",
+                    "What you've written in your lore book can be reread here too. Even if you lose the book, the library's copy remains. A map copy adds the shrines, and the true places of the sites of the chapters you've opened.")]),
     "training_master": ("師範", "Training Master",
-                        ("訓練場だ。的を打てば、与えた量が出る。技の振り直しは、いずれここで引き受ける。",
-                         "The training yard. Strike the targets to see how much you deal. In time, I'll take on resetting your skills here."),
-                        [("respec", "talk", None, "respec", "技の振り直し", "Resetting skills",
-                          "振り直しには代価がいる。支度が整ったら声をかけよう。",
-                          "A reset has a price. I'll call on you when it's ready.")]),
+                        ("訓練場だ。木偶を打てば、与えた量が出る。技や力の振り直しも、ここで引き受ける。炉まで行かなくていい。",
+                         "The training yard. Strike the dummies to see how much you deal. I'll also reset your skills or stats here, no forge needed."),
+                        [("respec", "talk", None, None, "振り直し (技・力)", "Reset (skills, stats)", None, None, {"goto": "respec"}),
+                         ("dummy", "talk", None, "dummy", "木偶のこと", "About the dummies",
+                          "わらの木偶を打てば、頭の上に与えた量が浮かぶ。五秒の合計と、一秒あたりも教えてやる。技でも矢でもいい。",
+                          "Strike a straw dummy and the damage floats above its head. I'll tell you the five-second total and the rate per second too. Skills and arrows count.")]),
     "black_marketeer": ("顔を隠した商人", "Masked Trader",
                         ("……見るだけならただだ。品は日ごとに替わる。払いは銭と、巨神の欠片で。",
                          "...Looking is free. The goods change each day. Payment in coin, and in titan shards."),
@@ -137,6 +156,38 @@ ROLES = {
                    "The abyss, the abyss. After the four hearts stop, the bottom opens its mouth... my old man said so. Hic.")]),
 }
 
+# 周回の誓い (titan/vow/Vows の登録と同じ id。名前と説明は誓いの文 vow.skyabyss.<id>(.desc) をそのまま使う。
+# 足りない誓いがあれば自己テスト facility extras が落ちる)
+VOWS = ["hardy", "sharp", "thin", "bare", "hasty"]
+
+BACK = ("戻る", "Back")
+
+NODES = {
+    "training_master": {
+        "respec": {"text": ("振り直すと、覚えた技・刻印・鍵石 (技)、または振った力 (力) がすべて戻る。代価は共鳴の結晶。なければ鐘銭でもいい (結晶一つにつき三十枚)。Lv 15 までの技は、ただだ。",
+                            "A reset returns every learned skill, rune and keystone (skills), or every stat point (stats). The price is resonance crystals; bell coins will do instead (thirty a crystal). Skills are free until level 15."),
+                   "do": [fac("respec_quote")],
+                   "options": [("skills", "end", [fac("respec_skills")], ("技を振り直す (結晶)", "Reset skills (crystals)")),
+                               ("skills_coins", "end", [fac("respec_skills_coins")], ("技を振り直す (鐘銭)", "Reset skills (bell coins)")),
+                               ("stats", "end", [fac("respec_stats")], ("力を振り直す (結晶)", "Reset stats (crystals)")),
+                               ("stats_coins", "end", [fac("respec_stats_coins")], ("力を振り直す (鐘銭)", "Reset stats (bell coins)")),
+                               ("back", "menu", None, BACK)]},
+    },
+    "shrine_priest": dict(
+        [("vow", {"text": ("誓いは周回の縛りです。心臓を一度止めた巨神の祠のそばで、乗る前に三つまで立てられる。重い誓いほど、素材が増え、共鳴の欠片が出やすく、称号も付く。どの誓いを聞きますか。",
+                           "A vow is a binding for repeat runs. By the shrine of a titan whose heart you have stilled, before you ride, you may swear up to three. The heavier the vows, the more materials, the likelier resonance shards, and a title besides. Which vow would you hear of?"),
+                  "options": [(v, "vow_" + v, None, "vow.skyabyss." + v) for v in VOWS] + [("back", "menu", None, BACK)]})]
+        + [("vow_" + v, {"text_key": "vow.skyabyss." + v + ".desc", "next": "vow"}) for v in VOWS]),
+    "apothecary": {
+        "lesson": {"text": ("では、手ほどきを。醸造台にブレイズパウダーをくべ、水の瓶にネザーウォートで濁りの薬を作る。そこに火の章の素材を足せば、火を退ける薬になる。台と最初の一揃いは持っていきな。",
+                            "Then a lesson. Feed blaze powder to the brewing stand, and brew nether wart into water bottles for an awkward potion. Add the right ingredient and it becomes a draught that turns fire aside. Take the stand and a first set with you."),
+                   "do": [{"type": "flag", "flag": "brew_lesson"}, fac("brew_lesson")], "next": "menu"},
+        "lesson_review": {"text": ("醸造台に燃料のブレイズパウダー、瓶には水、まずネザーウォートで濁りの薬。そこからが本番だ。マグマクリームなら火除け、金のニンジンなら夜目になる。",
+                                   "Blaze powder fuels the stand, bottles hold water, and nether wart makes the awkward potion first. That's where it begins: magma cream for fire resistance, a golden carrot for night vision."),
+                          "next": "menu"},
+    },
+}
+
 COMMON = {
     "about_again": ("ここは何をする所", "What is this place?"),
     "bye": ("また来る", "I'll come again"),
@@ -155,17 +206,49 @@ def dialogue(role, spec):
     t(base + ".menu", "何にするかい。" if role not in ("shrine_priest", "archivist", "apothecary", "storage_keeper", "guild_clerk") else "ご用件は。",
       "What'll it be?" if role not in ("shrine_priest", "archivist", "apothecary", "storage_keeper", "guild_clerk") else "How may I help?")
     menu = []
-    for oid, kind, do, node, oja, oen, bja, ben in options:
+    for spec_o in options:
+        oid, kind, do, node, oja, oen, bja, ben = spec_o[:8]
+        extra = spec_o[8] if len(spec_o) > 8 else {}
         op = {"id": oid, "kind": kind}
+        if "if" in extra:
+            op["if"] = extra["if"]
         if do:
             op["do"] = do
             op["goto"] = "end"
+        elif "goto" in extra:
+            op["goto"] = extra["goto"]
         else:
             op["goto"] = node
             nodes[node] = {"face": "neutral", "next": "menu"}
             t(base + "." + node, bja, ben)
         menu.append(op)
         t(base + ".menu." + oid, oja, oen)
+    for nid, nd in NODES.get(role, {}).items():
+        n = {"face": nd.get("face", "neutral")}
+        if "text_key" in nd:
+            n["text"] = nd["text_key"]
+        else:
+            t(base + "." + nid, *nd["text"])
+        if "do" in nd:
+            n["do"] = nd["do"]
+        if "options" in nd:
+            ops = []
+            for o in nd["options"]:
+                oid2, goto, do2, text, cond = (list(o) + [None] * 5)[:5]
+                oo = {"id": oid2, "kind": "talk", "goto": goto}
+                if do2:
+                    oo["do"] = do2
+                if cond:
+                    oo["if"] = cond
+                if isinstance(text, str):
+                    oo["text"] = text
+                else:
+                    t(base + "." + nid + "." + oid2, *text)
+                ops.append(oo)
+            n["options"] = ops
+        else:
+            n["next"] = nd.get("next", "menu")
+        nodes[nid] = n
     menu.append({"id": "about", "kind": "talk", "goto": "again"})
     t(base + ".menu.about", *COMMON["about_again"])
     menu.append({"id": "bye", "kind": "leave", "goto": "end"})
@@ -343,6 +426,97 @@ UI = [
     ("message.skyabyss.guild.info", "%s  長: %s  %s/%s 人  %s", "%s  leader: %s  %s/%s  %s"),
     ("message.skyabyss.guild.list_row", "%s  %s/%s 人", "%s  %s/%s"),
     ("message.skyabyss.guild.none", "まだギルドはない", "No guilds yet"),
+    # ギルド: 位・倉庫・頼み・家と旗
+    ("gui.skyabyss.guild.tab.members", "人", "Members"),
+    ("gui.skyabyss.guild.tab.request", "頼み", "Request"),
+    ("gui.skyabyss.guild.tab.house", "家と旗", "Hall & banner"),
+    ("gui.skyabyss.guild.rank.0", "人", "Member"),
+    ("gui.skyabyss.guild.rank.1", "副長", "Officer"),
+    ("gui.skyabyss.guild.rank.2", "長", "Leader"),
+    ("gui.skyabyss.guild.promote", "副長に", "Promote"),
+    ("gui.skyabyss.guild.demote", "戻す", "Demote"),
+    ("gui.skyabyss.guild.storage", "倉庫を開く", "Open storehouse"),
+    ("gui.skyabyss.guild.storage_title", "%s の倉庫", "%s Storehouse"),
+    ("gui.skyabyss.guild.take_rank.0", "取り出せる: 誰でも", "Withdraw: anyone"),
+    ("gui.skyabyss.guild.take_rank.1", "取り出せる: 副長から", "Withdraw: officers"),
+    ("gui.skyabyss.guild.take_rank.2", "取り出せる: 長だけ", "Withdraw: leader only"),
+    ("gui.skyabyss.guild.banner", "旗を受け取る (鐘銭 %s)", "Take a banner (%s coins)"),
+    ("gui.skyabyss.guild.emblem_head", "旗を作り直す (印と色)", "Remake the banner (tag, colours)"),
+    ("gui.skyabyss.guild.emblem", "作り直す", "Remake"),
+    ("gui.skyabyss.guild.house_head", "倉庫と旗", "Storehouse & banner"),
+    ("gui.skyabyss.guild.lots_head", "空き区画 (借りる: 鐘銭 %s)", "Empty lots (rent: %s coins)"),
+    ("gui.skyabyss.guild.lot.lot_1", "北西", "NW"),
+    ("gui.skyabyss.guild.lot.lot_2", "北東", "NE"),
+    ("gui.skyabyss.guild.lot.lot_3", "南西", "SW"),
+    ("gui.skyabyss.guild.lot.lot_4", "南", "S"),
+    ("gui.skyabyss.guild.lot.lot_5", "南東", "SE"),
+    ("gui.skyabyss.guild.lot_free", "空き", "Free"),
+    ("gui.skyabyss.guild.lot_rent", "借りる", "Rent"),
+    ("gui.skyabyss.guild.lot_release", "手放す", "Release"),
+    ("gui.skyabyss.guild.lot_rule", "借りた区画の中で壊す・置くのは、そのギルドの人だけ。借りるのは長", "Only members may build or break inside a rented lot. The leader rents"),
+    ("gui.skyabyss.guild.req_head", "今週の頼み", "This week's request"),
+    ("gui.skyabyss.guild.req.bones", "骨片を %s 納める", "Deliver %s bone chips"),
+    ("gui.skyabyss.guild.req.iron", "鉄の延べ棒を %s 納める", "Deliver %s iron ingots"),
+    ("gui.skyabyss.guild.req.titan", "巨神の素材を %s 納める (どの巨神でも)", "Deliver %s titan materials (any titan)"),
+    ("gui.skyabyss.guild.req.bread", "パンを %s 納める", "Deliver %s bread"),
+    ("gui.skyabyss.guild.req.resonance", "共鳴の欠片を %s 納める", "Deliver %s resonance shards"),
+    ("gui.skyabyss.guild.req.hunt", "敵を %s 倒す", "Defeat %s foes"),
+    ("gui.skyabyss.guild.req_how_give", "持ち物から「納める」で", "Use Deliver to hand them in"),
+    ("gui.skyabyss.guild.req_how_kill", "ギルドの人が倒すと、どこでも数える", "Counts wherever a member defeats one"),
+    ("gui.skyabyss.guild.req_progress", "%s / %s", "%s / %s"),
+    ("gui.skyabyss.guild.req_done", "済んだ (%s / %s)", "Done (%s / %s)"),
+    ("gui.skyabyss.guild.req_mine", "自分の分 %s", "Yours: %s"),
+    ("gui.skyabyss.guild.req_top", "多く納めた人", "Top contributors"),
+    ("gui.skyabyss.guild.req_reward", "済むと、一つでも納めた人みなに 鐘銭 20・共鳴の欠片 1", "When done, everyone who helped gets 20 bell coins and 1 resonance shard"),
+    ("gui.skyabyss.guild.deliver", "納める", "Deliver"),
+    ("item.skyabyss.guild_banner", "%s の旗", "%s Banner"),
+    ("message.skyabyss.guild.not_officer", "長か副長だけができる", "Only the leader or officers can do that"),
+    ("message.skyabyss.guild.no_coins", "鐘銭が足りない", "Not enough bell coins"),
+    ("message.skyabyss.guild.lot_taken", "その区画はほかのギルドが借りている", "Another guild rents that lot"),
+    ("message.skyabyss.guild.has_lot", "もう区画を一つ借りている", "Your guild already rents a lot"),
+    ("message.skyabyss.guild.no_lot", "借りている区画はない", "No lot rented"),
+    ("message.skyabyss.guild.req_done", "今週の頼みはもう済んだ", "This week's request is already done"),
+    ("message.skyabyss.guild.nothing_to_give", "納められる品を持っていない", "You have nothing to deliver"),
+    ("message.skyabyss.guild.banner", "ギルドの旗を受け取った", "Received the guild banner"),
+    ("message.skyabyss.guild.rented", "空き区画を借りた。ここがギルドの家になる", "Lot rented. This is your guild's hall now"),
+    ("message.skyabyss.guild.released", "区画を手放した", "Lot released"),
+    ("message.skyabyss.guild.delivered", "頼みの品を納めた", "Delivered for the request"),
+    ("message.skyabyss.guild.storage_deposit_only", "この倉庫には預けるだけ (取り出すのは長が決めた位から)", "You can only deposit here (withdrawing is limited by rank)"),
+    ("message.skyabyss.guild.lot_guarded", "ここはほかのギルドが借りている区画だ", "This lot is rented by another guild"),
+    ("message.skyabyss.guild.req_complete", "「%s」の今週の頼みが済んだ", "\"%s\" finished this week's request"),
+    ("message.skyabyss.guild.req_reward", "頼みの報い: 鐘銭 %s・共鳴の欠片 %s", "Request reward: %s bell coins, %s resonance shard"),
+    # 訓練場
+    ("message.skyabyss.training.hit", "木偶へ %s ・ 5 秒で %s (毎秒 %s)", "Dummy: %s · %s in 5 s (%s/s)"),
+    ("message.skyabyss.training.quote", "振り直しの代価: 技 結晶 %s (鐘銭 %s) ・ 力 結晶 %s (鐘銭 %s)", "Reset price: skills %s crystals (%s coins) · stats %s crystals (%s coins)"),
+    ("message.skyabyss.training.no_coins", "鐘銭が %s 枚いる", "You need %s bell coins"),
+    ("message.skyabyss.training.no_crystals", "共鳴の結晶が %s ついる", "You need %s resonance crystals"),
+    ("message.skyabyss.training.nothing_skills", "戻す技がない", "No skills to reset"),
+    ("message.skyabyss.training.nothing_stats", "振った力がない", "No stat points to reset"),
+    ("entity.skyabyss.training_dummy", "木偶", "Training Dummy"),
+    # 書庫
+    ("message.skyabyss.archive.map_copied", "地図の写しをもらった。祠と跡地のありかが M の地図に載る", "You got a map copy. Shrines and sites now show on your map (M)"),
+    ("message.skyabyss.archive.map_again", "写しはもう渡してある。新しい印も描き足しておいた", "You already have the copy. New marks are drawn in"),
+    # 鍵の間
+    ("message.skyabyss.keyroom.offered", "%s の石に欠片を納めた (鍵の間に %s つ)", "Laid a fragment in the %s stone (%s in the chamber)"),
+    ("message.skyabyss.keyroom.all", "%s の石に欠片を納めた。四つの石が、同じ音で鳴っている", "Laid a fragment in the %s stone. The four stones ring as one"),
+    ("message.skyabyss.keyroom.offered_some", "欠片を %s つ納めた (鍵の間に %s つ)", "Laid %s fragments (%s in the chamber)"),
+    ("message.skyabyss.keyroom.all_at_once", "欠片を %s つ納めた。四つの石が、同じ音で鳴っている (%s)", "Laid %s fragments. The four stones ring as one (%s)"),
+    ("message.skyabyss.keyroom.already", "%s の石には、もう欠片が眠っている", "A fragment already rests in the %s stone"),
+    ("message.skyabyss.keyroom.no_fragment", "納める欠片を持っていない", "You have no fragment to lay"),
+    ("message.skyabyss.keyroom.nothing_to_offer", "止めた心臓の石には、みな欠片が納めてある", "Every stone of a stilled heart already holds its fragment"),
+    ("message.skyabyss.keyroom.empty", "鍵の間に納めた欠片はない", "No fragments rest in the chamber"),
+    ("message.skyabyss.keyroom.returned", "欠片を %s つ返してもらった", "Took back %s fragments"),
+    ("skyabyss_record.d.place_key_room", "・鍵の間 ×%s", "- Key chamber x%s"),
+    # 醸造
+    ("message.skyabyss.apothecary.not_yet", "醸造は火の章 (四章) で教える", "Brewing is taught in the chapter of fire (chapter 4)"),
+    ("message.skyabyss.apothecary.lesson_again", "手ほどきの品はもう渡した", "The starter set was already given"),
+    ("message.skyabyss.apothecary.lesson_kit", "醸造台・ブレイズパウダー・ネザーウォート 2・ガラス瓶 3 を受け取った", "Received a brewing stand, blaze powder, 2 nether wart and 3 glass bottles"),
+    # 砦の記録
+    ("gui.skyabyss.records.title", "試練の記録", "Trial Records"),
+    ("gui.skyabyss.records.route", "順路を越えた回数 %s ・ 最速 %s", "Route cleared %s times · best %s"),
+    ("gui.skyabyss.records.route_none", "順路はまだ越えていない", "Route not yet cleared"),
+    ("gui.skyabyss.records.unmet", "まだ出会っていない巨神だ", "A titan you have not met yet"),
+    ("gui.skyabyss.records.foot", "済んだ試練 %s ・ 称号 %s", "Trials cleared %s · titles %s"),
 ]
 
 # 宿の噂 (章ごとに 3 つ。町のクエストが来たら FacilityActions.addRumorSource で上書きされる)
