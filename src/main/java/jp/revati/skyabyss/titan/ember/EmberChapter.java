@@ -112,11 +112,11 @@ public final class EmberChapter {
     }
 
     private static void registerSites() {
-        ChapterSites.element(SITE_HEARTH, Chapters.EMBER, "ember_hearth_ruin").dist(50, 130).arriveRadius(14)
+        ChapterSites.element(SITE_HEARTH, Chapters.EMBER, "ember_hearth_ruin").atGround().dist(50, 130).arriveRadius(14)
                 .post(EmberChapter::finishHearth).onArrive((p, s) -> arrive(p, "hearth", SITE_XP, LINE_HEARTH, true)).register();
-        ChapterSites.element(SITE_POST, Chapters.EMBER, "ember_ash_post").dist(40, 120).arriveRadius(12)
+        ChapterSites.element(SITE_POST, Chapters.EMBER, "ember_ash_post").atGround().dist(40, 120).arriveRadius(12)
                 .onArrive((p, s) -> arrive(p, "post", POST_XP, LINE_POST, false)).register();
-        ChapterSites.element(SITE_LEDGE, Chapters.EMBER, "ember_warm_ledge").dist(60, 140).arriveRadius(12)
+        ChapterSites.element(SITE_LEDGE, Chapters.EMBER, "ember_warm_ledge").atGround().dist(60, 140).arriveRadius(12)
                 .post(EmberChapter::finishLedge).onArrive((p, s) -> arrive(p, "ledge", LEDGE_XP, LINE_LEDGE, false)).register();
     }
 

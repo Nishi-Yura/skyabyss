@@ -91,8 +91,40 @@ public final class SiteData extends SavedData {
         }
     }
 
+    // 章の跡地 (docs/design/33 の 3 章)。都から決まった方位と距離の帯に、章ごとに世界で一つ。ChapterGrounds が決めて整える
+    public static final class Ground {
+        public final String chapter;
+        // 跡地の中心 (立つ場所。地面の一つ上)。章の小要素はここを拠点にして置く
+        public BlockPos center;
+        // 整える形 (ChapterGrounds.Shape の名前。NONE = 合う地形があった)、その中心と、測った地面の高さ
+        public String shape = "NONE";
+        public BlockPos shapeCenter = BlockPos.ZERO;
+        public int baseY;
+        // 整え終わったか (NONE なら最初から true)
+        public boolean shaped;
+        // 祠 (32 の 3.1) の台座の中心 (立つ場所)。ChapterGrounds.shrineSpot が返す
+        @Nullable
+        public BlockPos shrine;
+        // 潮殻の休む場所 (二章だけ。掘った入り江なら決まった場所と向き = fixedRest)、海の向きの点
+        @Nullable
+        public BlockPos sea;
+        public float restYaw;
+        public boolean fixedRest;
+        // 都から跡地への道しるべの点 (都に近い順)
+        public final List<BlockPos> road = new ArrayList<>();
+        // 跡地を見た人 (地図の「見た」)
+        public final Set<UUID> seen = new LinkedHashSet<>();
+
+        Ground(String chapter, BlockPos center) {
+            this.chapter = chapter;
+            this.center = center;
+        }
+    }
+
     private final List<Entry> entries = new ArrayList<>();
     private final List<ChapterPlan> chapterPlans = new ArrayList<>();
+    private final List<Ground> grounds = new ArrayList<>();
+    private boolean groundsPlanned;
     // 場所を決めたか (決めたあとは、建てている途中でも読める)
     private boolean planned;
     // 最初に決めたときの、世界の初めのスポーン地点と、動かしたか (17-11)
@@ -114,6 +146,43 @@ public final class SiteData extends SavedData {
 
     public List<ChapterPlan> plans() {
         return chapterPlans;
+    }
+
+    public List<Ground> grounds() {
+        return grounds;
+    }
+
+    @Nullable
+    public Ground ground(String chapter) {
+        for (Ground g : grounds) {
+            if (g.chapter.equals(chapter)) {
+                return g;
+            }
+        }
+        return null;
+    }
+
+    public boolean groundsPlanned() {
+        return groundsPlanned;
+    }
+
+    // 跡地を書き込む (前の分は捨てる)
+    public void setGrounds(List<Ground> list) {
+        grounds.clear();
+        grounds.addAll(list);
+        groundsPlanned = true;
+        setDirty();
+    }
+
+    // 自己テスト・開発コマンド用: 跡地を捨てる (次の起動か ChapterGrounds.plan で決め直す)
+    public void clearGrounds() {
+        grounds.clear();
+        groundsPlanned = false;
+        setDirty();
+    }
+
+    static Ground newGround(String chapter, BlockPos center) {
+        return new Ground(chapter, center);
     }
 
     @Nullable
@@ -195,6 +264,8 @@ public final class SiteData extends SavedData {
     // 計画を捨てる (自己テストと開発コマンドの作り直し用)
     public void clear() {
         entries.clear();
+        grounds.clear();
+        groundsPlanned = false;
         planned = false;
         setDirty();
     }
@@ -258,6 +329,26 @@ public final class SiteData extends SavedData {
                 p.sites.add(e);
             }
             d.chapterPlans.add(p);
+        }
+        d.groundsPlanned = tag.getBoolean("groundsPlanned");
+        for (Tag t : tag.getList("grounds", Tag.TAG_COMPOUND)) {
+            CompoundTag c = (CompoundTag) t;
+            Ground g = new Ground(c.getString("chapter"), BlockPos.of(c.getLong("center")));
+            g.shape = c.getString("shape");
+            g.shapeCenter = BlockPos.of(c.getLong("shapeCenter"));
+            g.baseY = c.getInt("baseY");
+            g.shaped = c.getBoolean("shaped");
+            g.shrine = c.contains("shrine") ? BlockPos.of(c.getLong("shrine")) : null;
+            g.sea = c.contains("sea") ? BlockPos.of(c.getLong("sea")) : null;
+            g.restYaw = c.getFloat("restYaw");
+            g.fixedRest = c.getBoolean("fixedRest");
+            for (long l : c.getLongArray("road")) {
+                g.road.add(BlockPos.of(l));
+            }
+            for (Tag u : c.getList("seen", Tag.TAG_STRING)) {
+                g.seen.add(UUID.fromString(u.getAsString()));
+            }
+            d.grounds.add(g);
         }
         return d;
     }
@@ -324,6 +415,31 @@ public final class SiteData extends SavedData {
             plans.add(c);
         }
         tag.put("chapterPlans", plans);
+        tag.putBoolean("groundsPlanned", groundsPlanned);
+        ListTag gl = new ListTag();
+        for (Ground g : grounds) {
+            CompoundTag c = new CompoundTag();
+            c.putString("chapter", g.chapter);
+            c.putLong("center", g.center.asLong());
+            c.putString("shape", g.shape);
+            c.putLong("shapeCenter", g.shapeCenter.asLong());
+            c.putInt("baseY", g.baseY);
+            c.putBoolean("shaped", g.shaped);
+            if (g.shrine != null) {
+                c.putLong("shrine", g.shrine.asLong());
+            }
+            if (g.sea != null) {
+                c.putLong("sea", g.sea.asLong());
+            }
+            c.putFloat("restYaw", g.restYaw);
+            c.putBoolean("fixedRest", g.fixedRest);
+            c.putLongArray("road", g.road.stream().mapToLong(BlockPos::asLong).toArray());
+            ListTag sn = new ListTag();
+            g.seen.forEach(u -> sn.add(StringTag.valueOf(u.toString())));
+            c.put("seen", sn);
+            gl.add(c);
+        }
+        tag.put("grounds", gl);
         return tag;
     }
 }

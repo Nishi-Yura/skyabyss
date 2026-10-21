@@ -70,7 +70,7 @@ public final class BonePit {
 
     // ---------------------------------------------------------------- 登録 (Sites.registerP6 から)
     static void register() {
-        ChapterSites.element(SITE, Chapters.WHALE, SITE).dist(70, 150).prefer(Prefer.HIGH).arriveRadius(14)
+        ChapterSites.element(SITE, Chapters.WHALE, SITE).atGround().dist(70, 150).prefer(Prefer.HIGH).arriveRadius(14)
                 .post(BonePit::finish)
                 .onArrive((p, s) -> {
                     Notice.narrate(p, "message.skyabyss.ch1.arrive." + SITE);

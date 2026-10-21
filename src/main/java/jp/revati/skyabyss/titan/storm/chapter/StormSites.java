@@ -41,7 +41,7 @@ public final class StormSites {
             return;
         }
         registered = true;
-        ChapterSites.element(VANE, Chapters.STORM, "ch3_vane").dist(40, 140).prefer(Prefer.HIGH).arriveRadius(10)
+        ChapterSites.element(VANE, Chapters.STORM, "ch3_vane").atGround().dist(40, 140).prefer(Prefer.HIGH).arriveRadius(10)
                 .post(StormVane::finish)
                 .erase((level, e, mark) -> {
                     BlockPos top = mark.apply("top");
@@ -53,19 +53,19 @@ public final class StormSites {
                     Quests.signal(p, "ch3_vane");
                     Notice.narrate(p, "message.skyabyss.ch3.vane");
                 }).register();
-        ChapterSites.element(RUIN, Chapters.STORM, "ch3_ruin").dist(50, 140).arriveRadius(12)
+        ChapterSites.element(RUIN, Chapters.STORM, "ch3_ruin").atGround().dist(50, 140).arriveRadius(12)
                 .onArrive((p, s) -> {
                     Quests.signal(p, "ch3_ruin");
                     Notice.narrate(p, "message.skyabyss.ch3.ruin");
                 }).register();
-        ChapterSites.element(PACK, Chapters.STORM, "ch3_pack").dist(50, 140).arriveRadius(8)
+        ChapterSites.element(PACK, Chapters.STORM, "ch3_pack").atGround().dist(50, 140).arriveRadius(8)
                 .post(StormSites::finishPack)
                 .onArrive((p, s) -> {
                     Lore.unlock(p, StormChapter.LORE_BURNT_PACK, true);
                     Quests.signal(p, "ch3_pack");
                     Notice.narrate(p, "message.skyabyss.ch3.pack");
                 }).register();
-        ChapterSites.element(TABLET, Chapters.STORM, "ch3_tablet").dist(40, 145).count(TABLETS).arriveRadius(6)
+        ChapterSites.element(TABLET, Chapters.STORM, "ch3_tablet").atGround().dist(40, 145).count(TABLETS).arriveRadius(6)
                 .post(StormSites::finishTablet)
                 .onArrive((p, s) -> tabletArrive(p, s.index())).register();
     }

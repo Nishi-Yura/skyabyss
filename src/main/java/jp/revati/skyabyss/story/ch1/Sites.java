@@ -76,7 +76,7 @@ public final class Sites {
         // ---- 一章
         trace(TRACE_WELL, Chapters.WHALE, 50, 130);
         trace(TRACE_PACK, Chapters.WHALE, 45, 135);
-        ChapterSites.element(LOOKOUT, Chapters.WHALE, LOOKOUT).dist(60, 150).prefer(Prefer.HIGH).arriveRadius(12)
+        ChapterSites.element(LOOKOUT, Chapters.WHALE, LOOKOUT).atGround().dist(60, 150).prefer(Prefer.HIGH).arriveRadius(12)
                 .onArrive((p, s) -> arrive(p, s)).register();
         ChapterSites.element(LOST_CART, Chapters.WHALE, LOST_CART).dist(60, 140).arriveRadius(10)
                 .post(job -> {
@@ -93,7 +93,7 @@ public final class Sites {
                 .post(job -> fill(job, false, Ch1.PAGE_DIARY))
                 .onArrive((p, s) -> arrive(p, s)).register();
         for (int n = 1; n <= SongStones.COUNT; n++) {
-            ChapterSites.element(songStoneId(n), Chapters.WHALE, songStoneId(n)).dist(50, 150).arriveRadius(8)
+            ChapterSites.element(songStoneId(n), Chapters.WHALE, songStoneId(n)).atGround().dist(50, 150).arriveRadius(8)
                     .onArrive((p, s) -> arrive(p, s)).register();
         }
         registerP6();
@@ -105,7 +105,7 @@ public final class Sites {
         for (int n = 1; n <= Ch1Prep.CAIRNS; n++) {
             int min = 24 + 18 * (n - 1);
             int last = n;
-            ChapterSites.element(roadCairnId(n), Chapters.WHALE, last == Ch1Prep.CAIRNS ? "ch1_road_shrine" : "ch1_road_cairn").dist(min, Math.min(150, min + 16))
+            ChapterSites.element(roadCairnId(n), Chapters.WHALE, last == Ch1Prep.CAIRNS ? "ch1_road_shrine" : "ch1_road_cairn").atRoad().dist(min, Math.min(150, min + 16))
                     .arriveRadius(6).onArrive((p, s) -> {
                         arrive(p, s);
                         if (last == Ch1Prep.CAIRNS) {
@@ -117,7 +117,7 @@ public final class Sites {
         SiteTreasure.register(Ch1Prep.BONE_CACHE, SiteTreasure.Table.of(List.of(new SiteTreasure.Entry("skyabyss:rock_shell_scrap", 3),
                 new SiteTreasure.Entry("skyabyss:bone_chip", 3),
                 new SiteTreasure.Entry("skyabyss:road_hardtack", 3))));
-        ChapterSites.element(Ch1Prep.BONE_CACHE, Chapters.WHALE, Ch1Prep.BONE_CACHE).dist(60, 140).arriveRadius(8).onArrive((p, s) -> {
+        ChapterSites.element(Ch1Prep.BONE_CACHE, Chapters.WHALE, Ch1Prep.BONE_CACHE).atGround().dist(60, 140).arriveRadius(8).onArrive((p, s) -> {
             arrive(p, s);
             if (!SiteTreasure.claim(p, Ch1Prep.BONE_CACHE).isEmpty()) {
                 Tasks.later(40, () -> Notice.narrate(p, "message.skyabyss.ch1.cache.found"));

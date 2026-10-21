@@ -68,7 +68,7 @@ public final class CleftCave {
 
     // ---------------------------------------------------------------- 登録 (Sites.register から)
     static void register() {
-        ChapterSites.element(SITE, Chapters.WHALE, "ch1_cleft_shell_cave").dist(60, 150).arriveRadius(14)
+        ChapterSites.element(SITE, Chapters.WHALE, "ch1_cleft_shell_cave").atGround().dist(60, 150).arriveRadius(14)
                 .post(CleftCave::finish)
                 .onArrive((p, s) -> Notice.narrate(p, "message.skyabyss.ch1.arrive." + SITE)).register();
         SiteTreasure.register(TREASURE, SiteTreasure.Table.of(
