@@ -12,17 +12,22 @@ import java.util.UUID;
 import org.jetbrains.annotations.Nullable;
 
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.item.DyeColor;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.saveddata.SavedData;
 
 // プレイヤーが作るギルドの記録 (docs/design/35 の 3.4、00 の 222。オーバーワールドに保存)。
 //   一人は一つのギルドにだけ入る。最大 30 人。作った人が長 (長が抜けると、いちばん古い人が長になる。誰もいなくなると解散)
 //   参加は申請 (長が受ける)。長が「誰でも入れる」にしたギルドは、申請でそのまま入る
 //   名前は 2〜16 字 (大文字小文字を区別せずに重ならない)。印 (tag) は 1〜4 字
+//   位 (rank): 長 2・副長 1・人 0。副長は申請を受けられる。倉庫から取り出せる位は長が決める (takeRank。既定は副長から)
+//   倉庫 (storage) 54 枠、週替わりの頼み (GuildRequests)、ギルドの家 = 空き区画を一つ借りる (lot。GuildLots)
 public final class GuildData extends SavedData {
     private static final String NAME = "skyabyss_guilds";
     private static final Factory<GuildData> FACTORY = new Factory<>(GuildData::new, GuildData::load);
@@ -31,6 +36,11 @@ public final class GuildData extends SavedData {
     public static final int NAME_MIN = 2;
     public static final int NAME_MAX = 16;
     public static final int TAG_MAX = 4;
+    public static final int STORAGE_SIZE = 54;
+    // 位
+    public static final int RANK_MEMBER = 0;
+    public static final int RANK_OFFICER = 1;
+    public static final int RANK_LEADER = 2;
 
     public static final class Guild {
         public final String id;
@@ -46,7 +56,21 @@ public final class GuildData extends SavedData {
         public final Set<UUID> applicants = new LinkedHashSet<>();
         // 名前の写し (抜けている人も一覧に出せるように)
         public final Map<UUID, String> names = new LinkedHashMap<>();
-        // ギルドの倉庫・週替わりのギルドの頼みは、まだ (35 の 3.4 の TODO)
+        // 副長 (長は leader で持つ)
+        public final Set<UUID> officers = new LinkedHashSet<>();
+        // 倉庫から取り出せる位 (0 = 誰でも、1 = 副長から、2 = 長だけ)。預けるのは誰でも
+        public int takeRank = RANK_OFFICER;
+        public final NonNullList<ItemStack> storage = NonNullList.withSize(STORAGE_SIZE, ItemStack.EMPTY);
+        // 借りている空き区画 (lot_1..5。空 = 借りていない)
+        public String lot = "";
+        // 週替わりの頼み: どの週の、どの頼みか、進み、人ごとの納めた量、済んだか
+        public long reqWeek = -1;
+        public String reqId = "";
+        public int reqProgress;
+        public boolean reqDone;
+        public final Map<UUID, Integer> contrib = new LinkedHashMap<>();
+        // まだ受け取っていない頼みの報い (いなかった人。入ったときに渡す)
+        public final Map<UUID, Integer> rewardsDue = new LinkedHashMap<>();
 
         Guild(String id) {
             this.id = id;
@@ -58,6 +82,17 @@ public final class GuildData extends SavedData {
 
         public String nameOf(UUID u) {
             return names.getOrDefault(u, u.toString().substring(0, 8));
+        }
+
+        public int rank(UUID u) {
+            if (u.equals(leader)) {
+                return RANK_LEADER;
+            }
+            return officers.contains(u) ? RANK_OFFICER : RANK_MEMBER;
+        }
+
+        public boolean canTake(UUID u) {
+            return members.contains(u) && rank(u) >= takeRank;
         }
     }
 
@@ -124,6 +159,18 @@ public final class GuildData extends SavedData {
         setDirty();
     }
 
+    // 自己テスト用: 写し (roundTrip) の中身にそっくり戻す
+    void restoreFrom(GuildData other) {
+        guilds.clear();
+        guilds.putAll(other.guilds);
+        nextId = Math.max(nextId, other.nextId);
+        setDirty();
+    }
+
+    public void dirty() {
+        setDirty();
+    }
+
     // 旗の色 (DyeColor) を名札の文字の色に (暗い色は読めるよう明るく)
     public static int textColor(int dye) {
         int rgb = DyeColor.byId(dye).getTextureDiffuseColor() & 0xFFFFFF;
@@ -168,6 +215,29 @@ public final class GuildData extends SavedData {
                 g.applicants.add(u);
                 g.names.put(u, m.getString("n"));
             }
+            for (Tag o : t.getList("officers", Tag.TAG_INT_ARRAY)) {
+                UUID u = net.minecraft.nbt.NbtUtils.loadUUID(o);
+                if (g.members.contains(u)) {
+                    g.officers.add(u);
+                }
+            }
+            g.takeRank = t.contains("take") ? t.getInt("take") : RANK_OFFICER;
+            ContainerHelper.loadAllItems(t.getCompound("storage"), g.storage, registries);
+            g.lot = t.getString("lot");
+            g.reqWeek = t.contains("req_week") ? t.getLong("req_week") : -1;
+            g.reqId = t.getString("req_id");
+            g.reqProgress = t.getInt("req_progress");
+            g.reqDone = t.getBoolean("req_done");
+            ListTag cs = t.getList("contrib", Tag.TAG_COMPOUND);
+            for (int k = 0; k < cs.size(); k++) {
+                CompoundTag m = cs.getCompound(k);
+                g.contrib.put(m.getUUID("u"), m.getInt("n"));
+            }
+            ListTag rs = t.getList("due", Tag.TAG_COMPOUND);
+            for (int k = 0; k < rs.size(); k++) {
+                CompoundTag m = rs.getCompound(k);
+                g.rewardsDue.put(m.getUUID("u"), m.getInt("n"));
+            }
             if (!g.id.isEmpty() && !g.members.isEmpty()) {
                 d.guilds.put(g.id, g);
             }
@@ -205,6 +275,34 @@ public final class GuildData extends SavedData {
                 as.add(m);
             }
             t.put("applicants", as);
+            ListTag os = new ListTag();
+            for (UUID u : g.officers) {
+                os.add(net.minecraft.nbt.NbtUtils.createUUID(u));
+            }
+            t.put("officers", os);
+            t.putInt("take", g.takeRank);
+            t.put("storage", ContainerHelper.saveAllItems(new CompoundTag(), g.storage, true, registries));
+            t.putString("lot", g.lot);
+            t.putLong("req_week", g.reqWeek);
+            t.putString("req_id", g.reqId);
+            t.putInt("req_progress", g.reqProgress);
+            t.putBoolean("req_done", g.reqDone);
+            ListTag cs = new ListTag();
+            g.contrib.forEach((u, n) -> {
+                CompoundTag m = new CompoundTag();
+                m.putUUID("u", u);
+                m.putInt("n", n);
+                cs.add(m);
+            });
+            t.put("contrib", cs);
+            ListTag rs = new ListTag();
+            g.rewardsDue.forEach((u, n) -> {
+                CompoundTag m = new CompoundTag();
+                m.putUUID("u", u);
+                m.putInt("n", n);
+                rs.add(m);
+            });
+            t.put("due", rs);
             list.add(t);
         }
         tag.put("guilds", list);

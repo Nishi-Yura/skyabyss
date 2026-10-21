@@ -53,6 +53,10 @@ public final class CapitalShrine {
             return;
         }
         player.serverLevel().playSound(null, stone, SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.BLOCKS, 1.0f, 0.8f);
+        // 鍵の間: まだ納めていない巨神の石なら、欠片を一つ納める (docs/design/35 の 3.2。facility.KeyRoom)
+        if (!jp.revati.skyabyss.facility.KeyRoom.offered(player).contains(titan) && jp.revati.skyabyss.facility.KeyRoom.offer(player, titan, true)) {
+            return;
+        }
         int held = 0;
         for (String t : TITANS) {
             if (Progression.stopped(player.server, player.getUUID(), t)) {
