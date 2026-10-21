@@ -47,6 +47,7 @@ python tools/install_lowpoly.py bone_sentinel --gear docs/review/lowpoly_roughs/
 - 余燼の背の拡大 (`docs/design/26` の 11 章。版 20): 体は `python tools/gen_ember_back_body.py --cache --preview` (環境変数 `WH`・`WV`・`ZSHIFT`・`EMBER_OUT`。既定 x1.6・x1.3)。撮影は `tools/shots/ember_scale.txt` (口・尾根の広間・広間・洞・三つの試練・背へ出る洞。世界は `run/shots/ember_scale/saves` を消すと建て直す) → `python -I tools/ember_scale_sheet.py` で `docs/review/previews/ember_scale_sheet.png`。建てた形を絵なしで見るには、環境変数 `SKYABYSS_EMBER_DUMP=dump.txt` と `run/dump.txt.spec` (行 `plan y x1 x2 z1 z2`・`secx x y1 y2 z1 z2`・`secz z y1 y2 x1 x2`) を用意して `SKYABYSS_SELFTEST_ONLY="ember back (load)"` を流す。歩く道の灯りは、`route_lamps.json` を `[]` にして建て直し、専用サーバーで `python tools/rcon.py --port <rcon> "skyabyss dev routelight ember"` を流し、サーバーの `route_lamps_ember.json` を `data/skyabyss/ember_back/route_lamps.json` へ写す。自己テストは `SKYABYSS_SELFTEST=1 SKYABYSS_SELFTEST_ONLY="build audit,ember,ash smith,trial,lang" ./gradlew runServer`
 - 岩鯨の下の光海 (闇の水路。`docs/design/23_whale_underside_redesign.md` の 11 章): `tools/shots/whale_underside_fix.txt` (入口の休み場・掲示板・苗床・息継ぎのくぼみ・灯の台 (まだ / ともした / 遠くから)・水域の色・近道の戸・光の道・出口の戸・目的の帯。撮る位置は開発コマンド `skyabyss dev lamp tp|vista|pocket|zone|cut|path|exit|entry|light|all|clear|info` が迷路の種から決める) → `python -I tools/whale_underside_fix_sheet.py` で `docs/review/previews/whale_underside_fix_sheet.png`。計画 (台・くぼみ・近道・水域) の試し直しは自己テスト `SKYABYSS_SELFTEST=1 SKYABYSS_SELFTEST_ONLY="titan back" ./gradlew runServer` の `titan back (lights)` (300 種を数える)
 
+- 旅の地図 (M。`docs/design/33` の 4 章): `python tools/gen_travel_map_assets.py` が印・地・海図の盤 (`textures/gui/map/`) を書く。撮影は `tools/shots/travel_map.txt` (3 案 x 縮尺 2 段と子の海図、最後に本物の M) → 絵を `docs/review/map_roughs/` へ。自己テストは `SKYABYSS_SELFTEST=1 SKYABYSS_SELFTEST_ONLY="travel map" ./gradlew runServer`
 - 心臓の領域と技の名前 (`docs/design/02` の 5.6・5.7、`18` の 6.1): `python tools/gen_heart_domain_stings.py` が宣言の音 4 本 (`sounds/mobs/domain_*.ogg`)・`sounds.json`・字幕を書く。撮影は `tools/shots/heart_domains.txt` (四つの心臓を一体ずつ出し、技の名前・領域の題字と天の声・領域のあいだを撮る。`/skyabyss dev force <心臓> DOMAIN|LEAD|CUTOFF|CHASE`) → `python tools/heart_domains_sheet.py` で `docs/review/previews/heart_domains_sheet.png`。自己テストは `SKYABYSS_SELFTEST=1 SKYABYSS_SELFTEST_ONLY="heart bots" ./gradlew runServer` (回る人形は負け、予告を読む人形は生き残る、領域の流れ・砕く)
 
 ## 台本で撮るスクショ (`client/dev/ShotRunner`)
@@ -74,9 +75,10 @@ python tools/install_lowpoly.py bone_sentinel --gear docs/review/lowpoly_roughs/
 | `wait <tick>` | 待つ |
 | `hud on\|off` | HUD と手を出す/隠す |
 | `clouds on\|off`、`render <チャンク>`、`fov <度>`、`guiscale <n>` | 描き方の設定 |
-| `open <名前>` | mod の画面を開く: `lore` `quests` `growth` `skills` `party` `inventory` `grave`（語り部の墓の一覧の見本）、または引数なしで作れる画面のクラスの完全な名前 |
+| `open <名前>` | mod の画面を開く: `lore` `quests` `growth` `skills` `party` `inventory` `grave`（語り部の墓の一覧の見本）、`travel_map_demo` / `travel_map_voyage_demo`（旅の地図の見本の印。子の海図を重ねた姿）、または引数なしで作れる画面のクラスの完全な名前 |
 | `key <キーの名前>` | そのキーを押したことにする (KeyMapping。OS の入力ではない)。サーバーから中身を受け取る画面に使う。例 `key key.skyabyss_record.open` (控え帳) |
 | `close` | 画面を閉じる |
+| `mapstyle slate\|parchment\|ink`、`mapscale near\|far` | 旅の地図の見た目 (設定 `mapStyle`) と縮尺。開いている地図にもすぐ効く |
 | `chat clear` | チャット欄と右上の通知 (トースト) を消す |
 | `shot <名前>` | 次に描いた絵を `<名前>.png` に保存 |
 | `waitdump` | 構造の書き出し (`cmd skyabyss dev dump ...`) が終わるまで待つ |

@@ -32,6 +32,11 @@ public final class GraveMarkerHud {
     private GraveMarkerHud() {
     }
 
+    // 届いている自分の墓 (旅の地図が読む)
+    public static List<GraveMarkers.Mark> marks() {
+        return marks;
+    }
+
     @EventBusSubscriber(modid = SkyAbyss.MODID, value = Dist.CLIENT)
     public static final class Setup {
         private Setup() {

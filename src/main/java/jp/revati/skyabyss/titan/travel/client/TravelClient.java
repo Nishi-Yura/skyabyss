@@ -20,7 +20,7 @@ import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.RenderGuiEvent;
 import net.neoforged.neoforge.client.event.ViewportEvent;
 
-// 巨神での移動のクライアント側: 海図を開く、雲の帳 (画面が雲の白に包まれる)、乗っているあいだの風
+// 巨神での移動のクライアント側: 海図を開く (旅の地図の画面)、雲の帳 (画面が雲の白に包まれる)、乗っているあいだの風
 @EventBusSubscriber(modid = SkyAbyss.MODID, value = Dist.CLIENT)
 public final class TravelClient {
     // 雲の帳の濃さ (0〜1) と、目指す濃さ
@@ -35,13 +35,9 @@ public final class TravelClient {
     private TravelClient() {
     }
 
+    // 子の海図は旅の地図 (client/map/TravelMapScreen) に重ねて開く (docs/design/33 の 4.1)
     public static void openChart(TravelNetwork.Chart chart) {
-        Minecraft mc = Minecraft.getInstance();
-        if (mc.screen instanceof TravelChartScreen screen) {
-            screen.update(chart);
-        } else {
-            mc.setScreen(new TravelChartScreen(chart));
-        }
+        jp.revati.skyabyss.client.map.MapClient.openVoyage(chart);
     }
 
     // 帳の色: 0 = 雲の白 (岩鯨)、1 = 潮の深みの青 (潮殻)

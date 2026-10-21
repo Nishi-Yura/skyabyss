@@ -6,7 +6,7 @@ import java.util.Map;
 
 // この mod のキーの既定の割り当て (GLFW のキーコード。サーバーの自己テストからも読めるよう、LWJGL に依存しない数で持つ)。
 // クライアントの KeyMapping はこの値で作る。2 つの操作が同じ既定を持たないこと・バニラの既定と重ならないことは KeyDefaultsSelfTest が見る。
-//   H 護符 / ; 道しるべ / N 知らせの記録 / Y 旅嚢で使う / I 旅嚢 / U クエスト / B 控え帳 / O 仲間 / M 合図 / J 状態 / K 技
+//   H 護符 / ; 道しるべ / N 知らせの記録 / Y 旅嚢で使う / I 旅嚢 / U クエスト / B 控え帳 / O 仲間 / M 旅の地図 / ' 合図 / J 状態 / K 技
 //   . 構えの切り替え / R G V Z , 技の枠 1〜5
 public final class KeyDefaults {
     public static final int CHARM = 72; // H
@@ -17,7 +17,8 @@ public final class KeyDefaults {
     public static final int QUEST_LOG = 85; // U
     public static final int RECORD = 66; // B
     public static final int PARTY = 79; // O
-    public static final int PING = 77; // M
+    public static final int MAP = 77; // M 旅の地図 (docs/design/33 の 4 章)
+    public static final int PING = 39; // ' 合図 (「ここ」。日本語配列では : の位置)
     public static final int STATUS = 74; // J
     public static final int SKILLS = 75; // K
     public static final int STANCE = 46; // .
@@ -38,6 +39,7 @@ public final class KeyDefaults {
         m.put("quest_log", QUEST_LOG);
         m.put("record", RECORD);
         m.put("party", PARTY);
+        m.put("map", MAP);
         m.put("ping", PING);
         m.put("status", STATUS);
         m.put("skills", SKILLS);

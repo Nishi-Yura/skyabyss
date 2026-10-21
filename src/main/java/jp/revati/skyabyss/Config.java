@@ -105,6 +105,17 @@ public final class Config {
             .comment("札の置き場。LEFT_FEED = 左の目的の帯の下に一行ずつ (既定・仮), BOTTOM_RIGHT = 右下に札を 2 枚まで, COMPACT = 右上に一行ずつの小さな列, TOP_RIGHT = 右上の札 (以前のまま)")
             .defineEnum("cardPlace", CardPlace.LEFT_FEED);
 
+    // 旅の地図 (M) の見た目 (client/map/TravelMapScreen。docs/design/33 の 4 章、ラフは docs/review/map_roughs/)
+    public enum MapStyle {
+        SLATE,
+        PARCHMENT,
+        INK
+    }
+
+    public static final ModConfigSpec.EnumValue<MapStyle> MAP_STYLE = CLIENT_BUILDER
+            .comment("旅の地図の見た目。SLATE = 石板の枠に丸い海図 (既定。mod の画面と同じ), PARCHMENT = 骨の枠に羊皮紙, INK = 枠なしの墨の夜図 (景色の上に薄く)")
+            .defineEnum("mapStyle", MapStyle.SLATE);
+
     public static final ModConfigSpec.BooleanValue HIDE_HELP_TOASTS = CLIENT_BUILDER
             .comment("バニラのレシピ・操作説明の札を出さないか (true = 出さない。レシピは旅嚢の作り方の帯と本で見られる)")
             .define("hideHelpToasts", true);

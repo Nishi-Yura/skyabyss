@@ -7,7 +7,7 @@
 出力 (src/main/resources/assets/skyabyss/ 以下):
     - textures/item/stone_whale_call.png               岩鯨の呼び笛 (32x32)。案 A/B/C から ADOPTED_CALL
     - textures/block/titan_waymark_{front,side,base,cap}.png  巨神の碑 (32x32)。碑文は案 A/B/C から ADOPTED_MARK
-    - textures/gui/travel/chart.png                    空の海図の画面 (1024x512、2 倍密度)。配置は TravelChartScreen.java と同じ
+    - textures/gui/travel/chart.png                    空の海図の画面 (1024x512、2 倍密度)。いまは一覧の行・つまみ・小さな印だけを旅の地図 (client/map/TravelMapScreen) が使う
     - sounds/titan/travel/{call,depart,veil,waymark}.ogg  既存の音は使わず、ここで合成する
 
 色は共鳴の炉の画面 (gen_forge_assets.py) の石と骨、碑文の青緑は伝承の書と同じ。
@@ -353,7 +353,7 @@ def chart_texture():
             a = i / steps * 2 * math.pi
             panel.putpixel((int(cx + math.cos(a) * r), int(cy + math.sin(a) * r)), color)
 
-    # 距離の輪 (250・1000・4000 ブロック。TravelChartScreen と同じ対数の縮め方)
+    # 距離の輪 (250・1000・4000 ブロック。もとの海図の画面の対数の縮め方)
     for blocks in (250, 1000, 4000):
         r = R * math.log1p(blocks / 100) / math.log1p(6000 / 100)
         ring(r, TEAL_DIM, dash=4)
