@@ -1306,5 +1306,9 @@
   "advancement.skyabyss.bone_pit.title": "The Bone Pit",
   "advancement.skyabyss.bone_pit.description": "Ch. I Stone Whale: Deep in the pit, someone's pack was left behind.",
   "advancement.skyabyss.whale_trail.title": "Ready to Chase the Whale",
-  "advancement.skyabyss.whale_trail.description": "Ch. I Stone Whale: Iron on, blade honed, shield and provisions on your back."
+  "advancement.skyabyss.whale_trail.description": "Ch. I Stone Whale: Iron on, blade honed, shield and provisions on your back.",
+  "advancement.skyabyss.salt_vault.title": "The Sunken Salt Vault",
+  "advancement.skyabyss.salt_vault.description": "Ch. II Tide Shell: On the vault's back wall, someone had carved words.",
+  "advancement.skyabyss.tide_trail.title": "Ready to Cross the Tide",
+  "advancement.skyabyss.tide_trail.description": "Ch. II Tide Shell: You walked the salt road and rowed to the wreck offshore."
 }

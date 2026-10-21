@@ -1306,5 +1306,9 @@
   "advancement.skyabyss.bone_pit.title": "骨の坑",
   "advancement.skyabyss.bone_pit.description": "一章　岩鯨　坑の奥に、誰かの荷が残っていた。",
   "advancement.skyabyss.whale_trail.title": "鯨追いの支度",
-  "advancement.skyabyss.whale_trail.description": "一章　岩鯨　鉄を着て、剣を研ぎ、盾と糧を背負った。"
+  "advancement.skyabyss.whale_trail.description": "一章　岩鯨　鉄を着て、剣を研ぎ、盾と糧を背負った。",
+  "advancement.skyabyss.salt_vault.title": "沈んだ塩の蔵",
+  "advancement.skyabyss.salt_vault.description": "二章　潮殻　蔵の奥の壁に、誰かの刻みがあった。",
+  "advancement.skyabyss.tide_trail.title": "潮渡りの支度",
+  "advancement.skyabyss.tide_trail.description": "二章　潮殻　塩の道を辿り、船で沖の難破船へ渡った。"
 }

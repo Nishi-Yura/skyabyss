@@ -91,18 +91,7 @@
     },
     "ms_tide_back2": {
       "face": "grave",
-      "options": [
-        {
-          "id": "ok",
-          "goto": "end",
-          "do": [
-            {
-              "type": "affinity",
-              "amount": 2
-            }
-          ]
-        }
-      ]
+      "next": "ms_tide_memory"
     },
     "ms_thunder": {
       "face": "grave",

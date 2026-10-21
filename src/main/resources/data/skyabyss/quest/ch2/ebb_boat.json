@@ -1,0 +1,73 @@
+{
+  "category": "main",
+  "order": 22,
+  "giver": "skyabyss:whale_chaser",
+  "chapter": "titan_tide",
+  "start_when": {
+    "type": "all",
+    "of": [
+      {
+        "type": "stage",
+        "min": 1,
+        "max": 1
+      },
+      {
+        "type": "quest",
+        "quest": "main_tide",
+        "is": "started"
+      },
+      {
+        "type": "not",
+        "of": {
+          "type": "quest",
+          "quest": "main_tide",
+          "is": "active",
+          "stage": "rumor"
+        }
+      }
+    ]
+  },
+  "stages": [
+    {
+      "id": "boat",
+      "xp": 30,
+      "objectives": [
+        {
+          "id": "boat",
+          "type": "collect",
+          "target": "#minecraft:boats",
+          "count": 1,
+          "party": false
+        }
+      ]
+    },
+    {
+      "id": "wreck",
+      "xp": 60,
+      "mode": "all",
+      "objectives": [
+        {
+          "id": "page",
+          "type": "lore",
+          "targets": [
+            "ch2/wreck_page"
+          ]
+        },
+        {
+          "id": "conch",
+          "type": "collect",
+          "target": "skyabyss:tide_watching_shell",
+          "count": 1,
+          "party": false
+        }
+      ]
+    }
+  ],
+  "reward": {
+    "xp": 90,
+    "items": [],
+    "affinity": {
+      "skyabyss:whale_chaser": 3
+    }
+  }
+}

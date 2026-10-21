@@ -20,7 +20,9 @@ import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 public final class SiteNetwork {
     private static final String PROTOCOL_VERSION = "opening-sites-1";
     // 目的の帯の行き先として送る章の要素 (クライアントの SiteTargets.bindChapterTargets が段に結ぶ)
-    static final java.util.List<String> CHAPTER_TARGETS = java.util.List.of("ch1_bone_pit", "ch1_cleft_shell_cave");
+    static final java.util.List<String> CHAPTER_TARGETS = java.util.List.of("ch1_bone_pit", "ch1_cleft_shell_cave", "ch2_salt_vault", "ch2_drift_raft");
+    // 章の担当が足す行き先 (場所の表にないもの。二章の沖の難破船など)。名前 → 場所 (なければ null)
+    public static final java.util.Map<String, java.util.function.Function<MinecraftServer, BlockPos>> EXTRA_TARGETS = new java.util.concurrent.ConcurrentHashMap<>();
 
     private SiteNetwork() {
     }
@@ -89,6 +91,12 @@ public final class SiteNetwork {
                 }
             }
         }
+        EXTRA_TARGETS.forEach((name, f) -> {
+            BlockPos p = f.apply(server);
+            if (p != null) {
+                m.put(name, p);
+            }
+        });
         // 巨神の最後の位置 (章のクエストの帯の方角と距離。動くので、下の onTick が変わるたびに送り直す)
         net.minecraft.server.level.ServerLevel overworld = server.overworld();
         if (overworld != null) {

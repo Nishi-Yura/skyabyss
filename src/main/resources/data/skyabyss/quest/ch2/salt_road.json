@@ -1,0 +1,76 @@
+{
+  "category": "main",
+  "order": 21,
+  "giver": "skyabyss:storyteller",
+  "chapter": "titan_tide",
+  "start_when": {
+    "type": "all",
+    "of": [
+      {
+        "type": "stage",
+        "min": 1,
+        "max": 1
+      },
+      {
+        "type": "quest",
+        "quest": "main_tide",
+        "is": "started"
+      },
+      {
+        "type": "not",
+        "of": {
+          "type": "quest",
+          "quest": "main_tide",
+          "is": "active",
+          "stage": "rumor"
+        }
+      }
+    ]
+  },
+  "stages": [
+    {
+      "id": "road",
+      "xp": 40,
+      "objectives": [
+        {
+          "id": "marks",
+          "type": "signal",
+          "target": "ch2_salt_mark",
+          "count": 5,
+          "party": false
+        }
+      ],
+      "skip_if": {
+        "type": "lore",
+        "entry": "ch2/salt_vault"
+      }
+    },
+    {
+      "id": "vault",
+      "xp": 60,
+      "mode": "all",
+      "objectives": [
+        {
+          "id": "wall",
+          "type": "lore",
+          "targets": [
+            "ch2/salt_vault"
+          ]
+        },
+        {
+          "id": "warden",
+          "type": "signal",
+          "target": "site_clear:ch2_salt_vault",
+          "count": 1
+        }
+      ]
+    }
+  ],
+  "reward": {
+    "xp": 80,
+    "items": [],
+    "affinity": {
+      "skyabyss:storyteller": 3
+    }
+  }
+}

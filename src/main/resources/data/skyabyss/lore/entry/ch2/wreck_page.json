@@ -1,0 +1,10 @@
+{
+  "chapter": "titan_tide",
+  "order": 32,
+  "unlock": [
+    {
+      "type": "manual"
+    }
+  ],
+  "related": []
+}

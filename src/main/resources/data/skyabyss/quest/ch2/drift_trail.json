@@ -1,0 +1,43 @@
+{
+  "category": "sub",
+  "order": 47,
+  "giver": "skyabyss:whale_chaser",
+  "chapter": "titan_tide",
+  "start_when": {
+    "type": "all",
+    "of": [
+      {
+        "type": "stage",
+        "min": 1,
+        "max": 1
+      },
+      {
+        "type": "quest",
+        "quest": "ch2/ebb_boat",
+        "is": "started"
+      }
+    ]
+  },
+  "stages": [
+    {
+      "id": "raft",
+      "xp": 20,
+      "objectives": [
+        {
+          "id": "raft",
+          "type": "signal",
+          "target": "ch2_raft",
+          "count": 1,
+          "party": false
+        }
+      ]
+    }
+  ],
+  "reward": {
+    "xp": 40,
+    "items": [],
+    "affinity": {
+      "skyabyss:whale_chaser": 1
+    }
+  }
+}

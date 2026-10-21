@@ -1,0 +1,53 @@
+{
+  "category": "sub",
+  "order": 48,
+  "giver": "skyabyss:artisan",
+  "chapter": "titan_tide",
+  "start_when": {
+    "type": "all",
+    "of": [
+      {
+        "type": "stage",
+        "min": 1,
+        "max": 1
+      },
+      {
+        "type": "flag",
+        "flag": "ch2a_met",
+        "npc": "skyabyss:artisan"
+      }
+    ]
+  },
+  "stages": [
+    {
+      "id": "learn",
+      "objectives": [
+        {
+          "id": "talk",
+          "type": "talk",
+          "target": "skyabyss:artisan",
+          "topic": "ch2p_teach"
+        }
+      ]
+    },
+    {
+      "id": "make",
+      "objectives": [
+        {
+          "id": "made",
+          "type": "signal",
+          "target": "ch2_travel_gear_made",
+          "count": 1,
+          "party": false
+        }
+      ]
+    }
+  ],
+  "reward": {
+    "xp": 60,
+    "items": [],
+    "affinity": {
+      "skyabyss:artisan": 2
+    }
+  }
+}

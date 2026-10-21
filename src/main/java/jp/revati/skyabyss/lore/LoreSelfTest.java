@@ -97,6 +97,8 @@ public final class LoreSelfTest {
         signKeys.addAll(jp.revati.skyabyss.titan.ember.lore.EmberLore.inscriptionSigns());
         // 一章の地上: 骨の坑の冷えの戸の奥の碑 (34 の 4.2.1。BonePit.finish が刻む)
         signKeys.add(jp.revati.skyabyss.story.ch1.BonePit.COLD_SIGN);
+        // 二章の地上: 沈んだ塩の蔵の奥の刻み (SaltVault.decorate が刻む)
+        signKeys.add(jp.revati.skyabyss.story.ch2.SaltVault.WALL_SIGN);
         // 雷翼の巨神・雷獣・心臓・背中は別の担当が登録する。まだないうちは失敗にせず、待っているものとして書き出す
         Set<String> pending = new java.util.TreeSet<>();
         Set<String> usedSigns = new HashSet<>();

@@ -85,6 +85,11 @@ add("stone_whale_heart", "stone_whale_trial", "skyabyss:stone_whale_core", "chal
 add("voyage", "stone_whale_heart", "skyabyss:titan_waymark", "goal", beat("signal:titan_voyage"),
     ("巨神の旅", "巨神の背で、別の土地へ渡った。"), ("Voyage", "You crossed to another land on a titan's back."))
 
+# 二章の支度の段 (34 の 4.3)。沈んだ塩の蔵の奥の刻みを読む → 二本 (塩の道・船と貝) をそろえる
+add("salt_vault", "stone_whale_heart", "minecraft:calcite", "task", beat("lore:ch2/salt_vault"),
+    ("沈んだ塩の蔵", "蔵の奥の壁に、誰かの刻みがあった。"), ("The Sunken Salt Vault", "On the vault's back wall, someone had carved words."), hidden=True)
+add("tide_trail", "salt_vault", "skyabyss:tide_watching_shell", "goal", beat("signal:ch2_ready"),
+    ("潮渡りの支度", "塩の道を辿り、船で沖の難破船へ渡った。"), ("Ready to Cross the Tide", "You walked the salt road and rowed to the wreck offshore."), hidden=True)
 add("tide_shell_board", "stone_whale_heart", "skyabyss:tide_dried_shell", "goal", dimension("tide_back"),
     ("潮殻の背", "潮を抱く亀の背に乗った。"), ("On the Tide Shell", "You climbed onto the tide-bearing turtle."), hidden=True)
 add("tide_shell_trial", "tide_shell_board", "skyabyss:resonance_crystal", "goal", beat("trial:tide_shell"),
@@ -137,6 +142,8 @@ for _id in ("camp", "footprint", "sky_shadow", "bell_lodge", "storyteller", "lor
     CHAPTER_OF[_id] = "prologue"
 for _id in ("isana", "bone_hill", "bone_pit", "whale_trail", "stone_whale_board", "tablet", "stone_whale_trial", "stone_whale_heart", "voyage"):
     CHAPTER_OF[_id] = "titan_whale"
+for _id in ("salt_vault", "tide_trail"):
+    CHAPTER_OF[_id] = "titan_tide"
 for _id, _ch in (("tide_shell", "titan_tide"), ("thunder_wing", "titan_storm"), ("ember", "titan_ember")):
     for _suffix in ("board", "trial", "heart"):
         CHAPTER_OF[f"{_id}_{_suffix}"] = _ch

@@ -253,6 +253,8 @@ public final class SelfTestRunner {
         steps.addAll(jp.revati.skyabyss.titan.tide.back.TideBackSelfTest.steps());
         // 二章「引く海」(予兆・潮見の貝・大干潮・小要素)。SKYABYSS_SELFTEST_ONLY=ch2
         steps.addAll(jp.revati.skyabyss.titan.tide.chapter.TideChapterSelfTest.steps());
+        // 二章の地上 (34 の C2: 塩の蔵・塩の道・難破船・支度の段 2 本)。SKYABYSS_SELFTEST_ONLY="ch2 ground"
+        steps.addAll(jp.revati.skyabyss.story.ch2.Ch2GroundSelfTest.steps());
         // 雷翼の中ボス 雷獣 (背中がまだ無ければ、オーバーワールドの仮の巣で)
         steps.add(Step.once("raiju (load)", jp.revati.skyabyss.titan.storm.raiju.RaijuSelfTest::load));
         steps.add(Step.once("raiju", 200, jp.revati.skyabyss.titan.storm.raiju.RaijuSelfTest::runSelfTest));

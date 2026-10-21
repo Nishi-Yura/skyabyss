@@ -1,0 +1,92 @@
+{
+  "npc": "skyabyss:storyteller",
+  "extends": true,
+  "entries": [
+    {
+      "node": "ch2t_s_vault",
+      "if": [
+        {
+          "type": "quest",
+          "quest": "ch2/salt_road",
+          "is": "done"
+        },
+        {
+          "type": "not",
+          "of": {
+            "type": "flag",
+            "flag": "ch2t_s_vault_told"
+          }
+        }
+      ]
+    },
+    {
+      "node": "ch2t_salt_tell",
+      "if": [
+        {
+          "type": "quest",
+          "quest": "ch2/salt_road",
+          "is": "active",
+          "stage": "road"
+        },
+        {
+          "type": "not",
+          "of": {
+            "type": "flag",
+            "flag": "ch2t_salt_told"
+          }
+        }
+      ]
+    }
+  ],
+  "nodes": {
+    "ch2t_salt_tell": {
+      "face": "neutral",
+      "do": [
+        {
+          "type": "flag",
+          "flag": "ch2t_salt_told"
+        }
+      ],
+      "next": "menu"
+    },
+    "ch2t_s_vault": {
+      "face": "grave",
+      "do": [
+        {
+          "type": "flag",
+          "flag": "ch2t_s_vault_told"
+        },
+        {
+          "type": "affinity",
+          "amount": 1
+        }
+      ],
+      "next": "menu"
+    },
+    "ms_tide_memory": {
+      "face": "grave",
+      "do": [
+        {
+          "type": "lore",
+          "entry": "ch2/why_they_rode"
+        }
+      ],
+      "next": "ms_tide_verse"
+    },
+    "ms_tide_verse": {
+      "face": "grave",
+      "options": [
+        {
+          "id": "ok",
+          "goto": "end",
+          "do": [
+            {
+              "type": "affinity",
+              "amount": 2
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,67 @@
+{
+  "npc": "skyabyss:whale_chaser",
+  "extends": true,
+  "entries": [
+    {
+      "node": "ch2t_c_wreck",
+      "if": [
+        {
+          "type": "quest",
+          "quest": "ch2/ebb_boat",
+          "is": "done"
+        },
+        {
+          "type": "not",
+          "of": {
+            "type": "flag",
+            "flag": "ch2t_c_wreck_told"
+          }
+        }
+      ]
+    },
+    {
+      "node": "ch2t_c_boat",
+      "if": [
+        {
+          "type": "quest",
+          "quest": "ch2/ebb_boat",
+          "is": "active",
+          "stage": "boat"
+        },
+        {
+          "type": "not",
+          "of": {
+            "type": "flag",
+            "flag": "ch2t_c_boat_told"
+          }
+        }
+      ]
+    }
+  ],
+  "nodes": {
+    "ch2t_c_boat": {
+      "face": "neutral",
+      "do": [
+        {
+          "type": "flag",
+          "flag": "ch2t_c_boat_told"
+        }
+      ],
+      "next": "c_menu"
+    },
+    "ch2t_c_wreck": {
+      "face": "grave",
+      "do": [
+        {
+          "type": "flag",
+          "flag": "ch2t_c_wreck_told"
+        },
+        {
+          "type": "affinity",
+          "amount": 1
+        }
+      ],
+      "next": "c_menu"
+    }
+  }
+}
