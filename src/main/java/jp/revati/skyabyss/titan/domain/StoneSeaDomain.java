@@ -31,11 +31,11 @@ public final class StoneSeaDomain extends HeartDomain {
     public static final int WAVE_WARN = 28;
     public static final double WAVE_SPEED = 0.45;
     public static final double WAVE_START = 2.0;
-    public static final double WAVE_HALF_THICKNESS = 1.0;
+    public static final double WAVE_HALF_THICKNESS = 0.7;   // 2026-10-22 の二人の試遊で細く (1.0 → 0.7)
     public static final double GAP_HALF = Math.toRadians(24);
     public static final float WAVE_DAMAGE = 16f;
     public static final int SPIKE_WARN = 24;
-    public static final double SPIKE_RADIUS = 1.5;
+    public static final double SPIKE_RADIUS = 1.1;   // 2026-10-22: 1.5 → 1.1
     public static final float SPIKE_DAMAGE = 18f;
 
     private double gapBase;

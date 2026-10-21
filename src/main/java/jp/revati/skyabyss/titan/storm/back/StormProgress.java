@@ -29,6 +29,8 @@ public final class StormProgress {
     static final String RECEIVERS = "storm.receivers";
     // 周回の長い眼の間 (32 の 4 章、R5): 解いた配置の数 (0 = まだ。長い周は 2 つ解くと嘴の戸が開く)
     static final String MIRROR_STAGE = "storm.mirror_stage";
+    // 周回の長い雷の回路 (32 の 4 章、R5): 一度目の雷が戸の柱へ届いて組み変わった回路 (ビット。長い周は組み変わったあとの二度目で戸が開く)
+    static final String REWIRED = "storm.rewired";
     static final String RIB = "storm.rib";
     static final String RIB_RINGS = "storm.rib_rings";
     static final String EVER_DEFEATED = "keep.storm.ever_defeated";
@@ -154,6 +156,43 @@ public final class StormProgress {
         return Integer.bitCount(record.getInt(DOORS));
     }
 
+    // 回路 i が組み変わったか (長い周の一度目の雷が戸の柱へ届いた)
+    public boolean rewired(int i) {
+        return (record.getInt(REWIRED) & (1 << i)) != 0;
+    }
+
+    public void markRewired(int i) {
+        record.putInt(REWIRED, record.getInt(REWIRED) | (1 << i));
+    }
+
+    // 戸を開けるまでに戸の柱へ届かせる回数 (周回のグループは 2。二度目は組み変わった回路で)
+    public int circuitRoundsNeeded() {
+        return jp.revati.skyabyss.trial.RouteLength.extended(record) ? StormCircuit.ROUNDS_LONG : 1;
+    }
+
+    // 自己テスト用: 組み変わった回路にも解があり、解 (倒すレバーの組) が組み変わる前と違うか。問題の一覧
+    public static java.util.List<String> longCircuitProblems() {
+        java.util.List<String> out = new java.util.ArrayList<>();
+        for (StormCircuit.Circuit c : StormCircuit.CIRCUITS) {
+            try {
+                java.util.List<net.minecraft.core.BlockPos> a = StormCircuit.solution(c, false);
+                java.util.List<net.minecraft.core.BlockPos> b = StormCircuit.solution(c, true);
+                if (new java.util.HashSet<>(a).equals(new java.util.HashSet<>(b))) {
+                    out.add("circuit " + c.index() + " has the same levers after rewiring");
+                }
+                if (StormCircuit.trace(c, b::contains, true).outcome() != StormCircuit.Outcome.DOOR) {
+                    out.add("circuit " + c.index() + " rewired solution does not reach the door");
+                }
+                if (StormCircuit.trace(c, a::contains, true).outcome() == StormCircuit.Outcome.DOOR) {
+                    out.add("circuit " + c.index() + " first solution still reaches the door after rewiring");
+                }
+            } catch (IllegalStateException e) {
+                out.add(e.getMessage());
+            }
+        }
+        return out;
+    }
+
     // 東の戸がこのグループにとって開いているか (開けた戸、または東が眠っている周)
     public boolean eastDoorPassable(int i) {
         return eastDoorOpen(i) || sleeping() == Trial.EAST;
@@ -247,7 +286,7 @@ public final class StormProgress {
     // 戻す意味のある進みがあるか (眠っている試練の石と、リセットをまたいで残す欄だけなら無い)
     public boolean needsReset() {
         Trial s = sleeping();
-        return rungCount() > (s != null ? 1 : 0) || record.isHeartDefeated() || receivers() != 0 || raijuDefeated() || record.getInt(DOORS) != 0
+        return rungCount() > (s != null ? 1 : 0) || record.isHeartDefeated() || receivers() != 0 || raijuDefeated() || record.getInt(DOORS) != 0 || record.getInt(REWIRED) != 0
                 || keelOpen() || record.has(MIRROR_ROTS) || ribLayer() > 0 || record.getInt(RIB_RINGS) != 0;
     }
 

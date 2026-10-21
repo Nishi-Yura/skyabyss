@@ -116,7 +116,7 @@ public class StoneWhaleHeart extends HeartBoss {
     // 挑む人数による強さ。受ける傷をこの値で割る (1 人で 1.0、1 人増えるごとに +0.6)。
     // 体力の上限 (1024) を超えないよう、体力そのものではなく受ける傷で強くする (実質の体力は 450 × この値)
     // 基本の硬さ (最大体力 HeartBalance.MAX_HP に掛けた値が実質の体力。02 の 5.6)
-    public static final float BASE_RESIST = 1.28f;
+    public static final float BASE_RESIST = 1.03f;   // 2026-10-22 の二人の試遊で体力が多いと感じた: 1.28 → 1.03 (戦いの長さを帯 3〜5 分の短い側へ)
     private float toughness = BASE_RESIST;
     // 憤怒に入ったか (体力 HeartBalance.ENRAGE_AT 未満)。咆哮のあとに立つ。段階 (模型) は 3 のまま
     private boolean enraged;

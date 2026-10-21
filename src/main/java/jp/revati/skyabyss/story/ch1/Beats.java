@@ -97,7 +97,15 @@ public final class Beats {
         float[] strength = {0.08f, 0.18f, 0.28f, 0.35f, 0.35f, 0.25f, 0.12f, 0f};
         for (int i = 0; i < ramp.length; i++) {
             float s = strength[i];
-            Tasks.later(ramp[i], () -> tint(player, s));
+            // その時の本人を名前 (UUID) から引き直す (倒れて起き直すと別の人の物になり、最後の「戻す」が送られず暗いままだった。2026-10-22 の二人の試遊)
+            java.util.UUID id = player.getUUID();
+            net.minecraft.server.MinecraftServer server = player.server;
+            Tasks.later(ramp[i], () -> {
+                ServerPlayer cur = server.getPlayerList().getPlayer(id);
+                if (cur != null) {
+                    tint(cur, s);
+                }
+            });
         }
         for (int t = 0; t <= 100; t += 10) {
             Tasks.later(t, () -> {

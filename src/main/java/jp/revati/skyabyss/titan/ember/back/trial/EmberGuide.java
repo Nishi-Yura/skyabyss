@@ -43,7 +43,7 @@ public final class EmberGuide {
     public static Goal goalFor(ServerLevel level, ServerPlayer p) {
         BlockPos at = p.blockPosition();
         EmberBackState state = EmberBackState.of(level, p);
-        if (EmberBackLayout.WEST.contains(at)) {
+        if (EmberBackLayout.WEST.contains(at) || EmberBackLayout.WEST_PRE.contains(at)) {
             if (state.rung(EmberBackState.Trial.WEST)) {
                 return new Goal("west.done", 3, 3, 0, 0);
             }

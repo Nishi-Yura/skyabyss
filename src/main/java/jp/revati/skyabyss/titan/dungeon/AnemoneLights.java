@@ -58,6 +58,8 @@ import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 //    (音の列・光の流れ・題字。openingCue) 。出口までの床が光の道になり (trailOverlay)、目的の帯の矢印が出口を指す。初回を終えたグループには最初から開く
 //  - 灯の台のあいだの区間ごとに近道が一つ (MazePlan.cuts)。灯がその区間の数だけともると、そのグループにだけ開く (戻るときの近道)
 //  - 灯の苗床 (ANEMONE_BED): 入口の小部屋と中ほどの休み場。「ともした灯 + 持っている灯」が LIGHTS に満たなければ、一つ摘める (なくしても詰まない)
+//  - 周回 (32 の 4 章、R5。RouteLength): 灯は一人一度に二つまで (CARRY_LONG)、中ほどの苗床は眠っていて摘めない (入口の苗床だけ)。
+//    二つともしたら入口へ戻って三つ目を摘むので、道のりが 1.5〜2 倍になる (戻りに近道が効く)。初回は今のまま (三つまとめて持て、中ほどでも摘める)
 //  - 入口の小部屋の数え石 (ANEMONE_TALLY) と灯の掲示板 (赤石灯が 3 つ。ともした数だけ灯る)。入口の看板・囁き・目的の帯 (アクションバー) で目的を伝える
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class AnemoneLights {
@@ -65,6 +67,8 @@ public final class AnemoneLights {
     public static final int STANDS = 3;
     public static final int LIGHTS = 3;
     public static final int NEED = 3;
+    // 周回で一人が一度に持てる灯の数
+    public static final int CARRY_LONG = 2;
     // 灯のまわりで魚が襲わない半径 (ブロック)
     public static final double CALM_RADIUS = 6.5;
     public static final String FLAG = "lamp.";
@@ -406,11 +410,26 @@ public final class AnemoneLights {
         }
     }
 
+    // その人が一度に持てる灯の数 (周回は CARRY_LONG、初回は LIGHTS)
+    public static int carryLimit(ServerLevel level, UUID group) {
+        return jp.revati.skyabyss.trial.RouteLength.extended(level, group) ? CARRY_LONG : LIGHTS;
+    }
+
     // 苗床から灯を摘む
     public static void takeFromBed(ServerLevel level, ServerPlayer player, BlockPos pos) {
         UUID group = Groups.keyOf(player);
         if (growable(level, group) <= 0) {
             Notice.bar(player, ModText.deny("message.skyabyss.lamp_bed_full", LIGHTS));
+            return;
+        }
+        boolean entryBed = ENTRY_BEDS.contains(pos) || pos.equals(ENTRY_BED_POS2);
+        if (!entryBed && jp.revati.skyabyss.trial.RouteLength.extended(level, group)) {
+            Notice.bar(player, ModText.deny("message.skyabyss.lamp_bed_dormant"));
+            return;
+        }
+        int limit = carryLimit(level, group);
+        if (limit < LIGHTS && player.getInventory().countItem(ModItems.GLOW_ANEMONE.get()) >= limit) {
+            Notice.bar(player, ModText.deny("message.skyabyss.lamp_one_at_a_time"));
             return;
         }
         ItemStack lamp = new ItemStack(ModItems.GLOW_ANEMONE.get());
@@ -882,5 +901,97 @@ public final class AnemoneLights {
     // 自己テスト用: 動いている「戸が開く場面」の数
     static int openingsRunning() {
         return OPENINGS.size();
+    }
+
+    // ---------------------------------------------------------------- 道のりの見積もり (自己テスト。32 の 4 章の 1.5〜2 倍)
+    // 一人で、入口の苗床から灯を摘み、三つの台をともして出口へ歩く道のり (迷路のマスの数)。carry は一度に持てる灯の数。
+    // 灯が切れたら、いちばん得な苗床 (入口・二つめの入口・中ほど) へ寄ってから次の台へ。近道はともした数で開いたものを通る
+    public static int soloWalk(long mazeSeed, int carry) {
+        return soloWalk(mazeSeed, carry, 7, true);
+    }
+
+    // beds: 使う苗床のビット (1 = 入口、2 = 二つめの入口、4 = 中ほど)。cuts: 近道を通るか
+    public static int soloWalk(long mazeSeed, int carry, int bedMask, boolean useCuts) {
+        MazePlan plan = plan(mazeSeed);
+        FloodedMaze maze = plan.maze;
+        int[] start = {MAZE_START_I, MAZE_START_J};
+        int[] start2 = {MAZE_START2_I, MAZE_START2_J};
+        BlockPos midPos = MazeBuilder.midPocket(maze);
+        int[] mid = MazePlan.cellAt(midPos.getX(), midPos.getZ());
+        List<int[]> beds = new ArrayList<>();
+        if ((bedMask & 1) != 0) {
+            beds.add(start);
+        }
+        if ((bedMask & 2) != 0) {
+            beds.add(start2);
+        }
+        if ((bedMask & 4) != 0) {
+            beds.add(mid);
+        }
+        int lit0 = useCuts ? 0 : -100;
+        int[] pos = start;
+        int held = carry;
+        int total = 0;
+        for (int i = 0; i < STANDS; i++) {
+            int[] stand = plan.path.get(plan.standK[i]);
+            if (held == 0) {
+                int best = Integer.MAX_VALUE;
+                int[] via = null;
+                for (int[] b : beds) {
+                    int d = walkDist(plan, pos, b, lit0 + i) + walkDist(plan, b, stand, lit0 + i);
+                    if (d >= 0 && d < best) {
+                        best = d;
+                        via = b;
+                    }
+                }
+                total += walkDist(plan, pos, via, lit0 + i);
+                pos = via;
+                held = carry;
+            }
+            total += walkDist(plan, pos, stand, lit0 + i);
+            pos = stand;
+            held--;
+        }
+        return total + walkDist(plan, pos, new int[] {MAZE_EXIT_I, MAZE_EXIT_J}, lit0 + STANDS);
+    }
+
+    // 迷路の道のり。lit 本ともしたあとに開いている近道も通る
+    private static int walkDist(MazePlan plan, int[] from, int[] to, int lit) {
+        FloodedMaze maze = plan.maze;
+        int[][] d = new int[maze.width()][maze.height()];
+        for (int[] row : d) {
+            java.util.Arrays.fill(row, -1);
+        }
+        java.util.ArrayDeque<int[]> q = new java.util.ArrayDeque<>();
+        d[from[0]][from[1]] = 0;
+        q.add(from);
+        while (!q.isEmpty()) {
+            int[] c = q.poll();
+            if (c[0] == to[0] && c[1] == to[1]) {
+                return d[c[0]][c[1]];
+            }
+            List<int[]> next = new ArrayList<>();
+            for (int[] dir : FloodedMaze.DIRS) {
+                if (maze.linked(c[0], c[1], dir[0], dir[1])) {
+                    next.add(new int[] {c[0] + dir[0], c[1] + dir[1]});
+                }
+            }
+            for (MazePlan.Cut cut : plan.cuts) {
+                if (lit >= cut.lit()) {
+                    if (cut.a()[0] == c[0] && cut.a()[1] == c[1]) {
+                        next.add(cut.b());
+                    } else if (cut.b()[0] == c[0] && cut.b()[1] == c[1]) {
+                        next.add(cut.a());
+                    }
+                }
+            }
+            for (int[] n : next) {
+                if (d[n[0]][n[1]] < 0) {
+                    d[n[0]][n[1]] = d[c[0]][c[1]] + 1;
+                    q.add(n);
+                }
+            }
+        }
+        return -1;
     }
 }

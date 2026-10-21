@@ -43,8 +43,12 @@ import net.minecraft.world.phys.AABB;
 // - 庭には珊瑚憑き (5 体、人が一人増えるごとに +2。最大 6 人まで数える) と、水路の磯走りの群れ。満潮のあいだは台のまわりに泡吹き
 // 庭は占有する部屋 (TideRooms.GARDEN)。真珠・大貝・敵・道の形は、いまの持ち主のグループ (パーティ、または一人) のもの。
 // 真珠を取り上げる・戻すのは持ち主のグループの人だけ (ほかのグループの人の持ち物には触れない)。敵は持ち主のグループの印を持つ
+// 周回 (32 の 4 章、R5。RouteLength): 真珠を二つ据える。一つ目を据えると潮が庭の道を組み替え (次の道の形)、大貝がもう一つ真珠を抱く。
+//   二つ目を新しい道で運んで据えると西の石が鳴る (道のりは 2 倍近く。帰り道は真珠を持たないので速い)
 public final class TideGarden {
     public static final String GARDEN_TAG = "skyabyss_garden_mob";
+    // 周回で据える真珠の数
+    public static final int PEARLS_LONG = 2;
     public static final int DROPPED_RETURN = 15 * 20;
     public static final int HEAD_UNDER_TICKS = 10;
 
@@ -156,6 +160,27 @@ public final class TideGarden {
         BlockPos top = STONE_WEST.above();
         level.sendParticles(ParticleTypes.END_ROD, top.getX() + 0.5, top.getY() + 0.5, top.getZ() + 0.5, 40, 0.4, 0.6, 0.4, 0.05);
         return true;
+    }
+
+    // 周回の一つ目の真珠を据えた: 庭の道を次の形に組み替え、大貝にもう一つ真珠を抱かせる (西の石はまだ鳴らない)
+    static void secondPearl(ServerLevel level, ServerPlayer player, TideBackState.Group state) {
+        state.nextGardenStage();
+        TideKit kit = new TideKit(level, level.random);
+        TideIslandBuilder.carveGardenRoute(kit, state.gardenRoute(), false);
+        pearl = Pearl.CLAM;
+        missing = 0;
+        UNDER.clear();
+        BlockPos c = pearlBlock();
+        level.setBlock(c, Blocks.PEARLESCENT_FROGLIGHT.defaultBlockState(), 3);
+        level.playSound(null, c, TideBackSetup.PEARL_RETURN.get(), SoundSource.BLOCKS, 2f, 0.8f);
+        level.sendParticles(ParticleTypes.BUBBLE_POP, c.getX() + 0.5, c.getY() + 0.5, c.getZ() + 0.5, 30, 0.4, 0.4, 0.4, 0.05);
+        BlockPos top = STONE_WEST.above();
+        level.playSound(null, top, TideBackSetup.PEARL_TAKE.get(), SoundSource.BLOCKS, 1.6f, 0.7f);
+        for (ServerPlayer p : Groups.online(level, state.id)) {
+            if (inGarden(p)) {
+                Notice.narrate(p, "message.skyabyss.tide.second_pearl");
+            }
+        }
     }
 
     // 真珠を大貝へ戻す。取り上げるのは持ち主のグループの人の真珠だけ

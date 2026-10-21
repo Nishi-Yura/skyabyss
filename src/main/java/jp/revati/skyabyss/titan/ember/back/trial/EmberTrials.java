@@ -238,7 +238,7 @@ public final class EmberTrials {
             if (!p.isAlive()) {
                 continue;
             }
-            if (outside(p, EmberBackLayout.WEST) && strip(p, EmberTrialSetup.ASH_URN.get()) > 0) {
+            if (outside(p, EmberBackLayout.WEST, EmberBackLayout.WEST_PRE, EmberBackLayout.WEST_PRE_PASS) && strip(p, EmberTrialSetup.ASH_URN.get()) > 0) {
                 hint(p, EmberIds.LANG_WEST + "urn_returned");
             }
             if (outside(p, EmberBackLayout.EAST, EmberBackLayout.SMITH)
@@ -250,7 +250,7 @@ public final class EmberTrials {
             }
         }
         // 落とした壺と鍵は消える (一人一つ)
-        for (EmberBackLayout.Box b : List.of(EmberBackLayout.WEST, EmberBackLayout.EAST, EmberBackLayout.SMITH, EmberBackLayout.HUB)) {
+        for (EmberBackLayout.Box b : List.of(EmberBackLayout.WEST, EmberBackLayout.WEST_PRE, EmberBackLayout.EAST, EmberBackLayout.SMITH, EmberBackLayout.HUB)) {
             clearItems(level, b, EmberTrialSetup.ASH_URN.get(), EmberTrialSetup.FIRE_KEY_HOT.get(), EmberTrialSetup.FIRE_KEY.get());
         }
     }

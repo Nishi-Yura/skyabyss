@@ -34,7 +34,7 @@ public final class TrialStelesSelfTest {
     }
 
     private static final String QUEST = "main_thunder";
-    private static final int STAGE = 3; // trials (read, stone)
+    private static final int STAGE = 4; // trials (read, stone)。rumor・prepare (支度)・see・board のあと
 
     public static void runSelfTest(MinecraftServer server) {
         List<String> f = new ArrayList<>();

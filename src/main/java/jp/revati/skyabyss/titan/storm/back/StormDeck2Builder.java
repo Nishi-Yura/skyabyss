@@ -29,6 +29,22 @@ final class StormDeck2Builder {
     private StormDeck2Builder() {
     }
 
+    // build と同じ順の手順 (背を建てる仕事を tick に分けるとき用)
+    static void steps(jp.revati.skyabyss.titan.BackBuildJobs.Steps s, StormKit kit) {
+        s.then("deck2 bridge", () -> bridge(kit));
+        s.then("deck2 yard", () -> yard(kit));
+        s.then("deck2 s04", () -> s04(kit));
+        s.then("deck2 s08", () -> s08(kit));
+        s.then("deck2 s07", () -> s07(kit));
+        s.then("deck2 s12", () -> s12(kit));
+        s.then("deck2 s11", () -> s11(kit));
+        s.then("deck2 signs", () -> {
+            for (Inscription i : SIGNS) {
+                kit.standingTablet(i.pos(), i.key());
+            }
+        });
+    }
+
     static void build(StormKit kit) {
         bridge(kit);
         yard(kit);

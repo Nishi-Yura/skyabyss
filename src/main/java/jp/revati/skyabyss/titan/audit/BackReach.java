@@ -91,6 +91,28 @@ public final class BackReach {
             this.name = name;
             this.bounds = bounds;
         }
+
+        // 同じ決まり (落とし穴・戻し・昇り風・溶岩の足場 …) で、範囲と入口と目標だけを替えた写し
+        public Spec narrowed(String name, Box bounds, BlockPos entrance, Map<String, BlockPos> goals) {
+            Spec s = new Spec(name, bounds);
+            s.entrances.add(entrance);
+            s.exits.add(entrance);
+            s.goals.putAll(goals);
+            s.allowTrap.addAll(allowTrap);
+            s.allowHole.addAll(allowHole);
+            s.scan.addAll(scan);
+            s.voidY = voidY;
+            s.longFallIsExit = longFallIsExit;
+            s.walkableLava = walkableLava;
+            s.verbose = verbose;
+            s.minHoleDepth = minHoleDepth;
+            s.resets.addAll(resets);
+            s.exitNode = exitNode;
+            s.glide = glide;
+            s.solidGate = solidGate;
+            s.extra = extra;
+            return s;
+        }
     }
 
     // extra から呼ぶ道の出し先
@@ -130,6 +152,14 @@ public final class BackReach {
 
     private static final byte PASS = 1, SUPPORT = 2, CLIMB = 4, WATER = 8, LAVA = 16, GATE = 32, KNOWN = 64;
 
+    // 歩いて目標へ着くかだけを見る (戻れるか・穴・はしごは見ない)。順路の通しの自己テスト (各段の入口の休み場から石へ)
+    public static Report reachGoals(ServerLevel level, Spec spec) {
+        Audit a = new Audit(level, spec);
+        a.walk();
+        a.checkGoals();
+        return a.rep;
+    }
+
     public static Report run(ServerLevel level, Spec spec) {
         return new Audit(level, spec).run();
     }
@@ -139,56 +169,134 @@ public final class BackReach {
     // 部屋・通路の中は within に含めないこと (地表の飾りの凹みだけ)
     public static int repair(ServerLevel level, java.util.function.Supplier<Spec> spec, List<Box> within, int maxCells, int iterations,
             BlockState fallback) {
-        int filled = 0;
-        for (int it = 0; it < iterations; it++) {
-            Spec sp = spec.get();
-            Report r = new Audit(level, sp).runTrapsOnly();
-            int before = filled;
-            for (int ai = 0; ai < r.trapAreas.size(); ai++) {
-                List<BlockPos> area = r.trapAreas.get(ai);
-                int rim = r.trapRimY.get(ai);
-                if (area.size() > maxCells) {
-                    continue;
+        RepairJob job = new RepairJob(level, spec, within, maxCells, iterations, fallback);
+        while (!job.step(Long.MAX_VALUE)) {
+            // 一度に最後まで
+        }
+        return job.filled();
+    }
+
+    // repair を何 tick かに分けて進める形 (背を建てる仕事の最後に、BackBuildJobs が予算の中で少しずつ進める)。
+    // 歩く探索 (いちばん重い所) は予算が尽きたら次の tick へ続ける。中身は repair と同じ順で同じ結果になる
+    public static final class RepairJob implements jp.revati.skyabyss.titan.BackBuildJobs.Job {
+        private final ServerLevel level;
+        private final java.util.function.Supplier<Spec> spec;
+        private final List<Box> within;
+        private final int maxCells;
+        private final int iterations;
+        private final BlockState fallback;
+        private int it;
+        private int filled;
+        private Audit audit;
+        private java.util.concurrent.CompletableFuture<Void> returnCheck;
+        private boolean done;
+
+        public RepairJob(ServerLevel level, java.util.function.Supplier<Spec> spec, List<Box> within, int maxCells, int iterations, BlockState fallback) {
+            this.level = level;
+            this.spec = spec;
+            this.within = within;
+            this.maxCells = maxCells;
+            this.iterations = iterations;
+            this.fallback = fallback;
+        }
+
+        @Override
+        public boolean step(long deadlineNanos) {
+            while (!done) {
+                if (it >= iterations) {
+                    done = true;
+                    break;
                 }
-                boolean inside = true;
-                for (BlockPos p : area) {
-                    // 調べる範囲 (scan = 部屋・通路) にかかる行き止まりは、直さずに報告に残す
-                    for (Box b : sp.scan) {
-                        if (b.contains(p)) {
-                            inside = false;
-                        }
+                if (audit == null) {
+                    audit = new Audit(level, spec.get());
+                    audit.walkBegin();
+                }
+                if (!audit.walkStep(deadlineNanos)) {
+                    return false;
+                }
+                // 戻れるかの探索は世界を読まない (歩いた道の表だけ) ので、tick の中で回すときは別のスレッドで回して待つ
+                if (deadlineNanos != Long.MAX_VALUE) {
+                    if (returnCheck == null) {
+                        Audit a = audit;
+                        returnCheck = java.util.concurrent.CompletableFuture.runAsync(a::checkReturn, net.minecraft.Util.backgroundExecutor());
                     }
-                    boolean in = false;
-                    for (Box b : within) {
-                        if (b.contains(p)) {
-                            in = true;
-                            break;
-                        }
+                    if (!returnCheck.isDone()) {
+                        return false;
                     }
-                    if (!in) {
+                    returnCheck.join();
+                    returnCheck = null;
+                } else {
+                    audit.checkReturn();
+                }
+                int before = filled;
+                filled += fillTraps(level, audit.spec, audit.rep, within, maxCells, fallback);
+                audit = null;
+                it++;
+                if (filled == before) {
+                    done = true;
+                    break;
+                }
+                if (System.nanoTime() >= deadlineNanos) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        @Override
+        public int placed() {
+            return filled;
+        }
+
+        public int filled() {
+            return filled;
+        }
+    }
+
+    // 一回分の監査の行き止まりのかたまりを埋める。埋めたマスの数
+    private static int fillTraps(ServerLevel level, Spec sp, Report r, List<Box> within, int maxCells, BlockState fallback) {
+        int filled = 0;
+        for (int ai = 0; ai < r.trapAreas.size(); ai++) {
+            List<BlockPos> area = r.trapAreas.get(ai);
+            int rim = r.trapRimY.get(ai);
+            if (area.size() > maxCells) {
+                continue;
+            }
+            boolean inside = true;
+            for (BlockPos p : area) {
+                // 調べる範囲 (scan = 部屋・通路) にかかる行き止まりは、直さずに報告に残す
+                for (Box b : sp.scan) {
+                    if (b.contains(p)) {
                         inside = false;
+                    }
+                }
+                boolean in = false;
+                for (Box b : within) {
+                    if (b.contains(p)) {
+                        in = true;
                         break;
                     }
                 }
-                if (!inside) {
-                    continue;
-                }
-                // 入口の足の高さの 2 つ下まで (= 入口より 1 低い床になるまで) 柱ごと埋める
-                for (BlockPos p : area) {
-                    BlockState below = level.getBlockState(p.below());
-                    BlockState fill = below.isSolidRender(level, p.below()) ? below : fallback;
-                    int top = rim == Integer.MAX_VALUE ? p.getY() : Math.max(p.getY(), rim - 2);
-                    for (int y = p.getY(); y <= top; y++) {
-                        BlockPos q = new BlockPos(p.getX(), y, p.getZ());
-                        if (level.getBlockState(q).getCollisionShape(level, q).isEmpty()) {
-                            level.setBlock(q, fill, net.minecraft.world.level.block.Block.UPDATE_CLIENTS | net.minecraft.world.level.block.Block.UPDATE_KNOWN_SHAPE);
-                            filled++;
-                        }
-                    }
+                if (!in) {
+                    inside = false;
+                    break;
                 }
             }
-            if (filled == before) {
-                break;
+            if (!inside) {
+                continue;
+            }
+            // 入口の足の高さの 2 つ下まで (= 入口より 1 低い床になるまで) 柱ごと埋める
+            for (BlockPos p : area) {
+                BlockState below = level.getBlockState(p.below());
+                BlockState fill = below.isSolidRender(level, p.below()) ? below : fallback;
+                int top = rim == Integer.MAX_VALUE ? p.getY() : Math.max(p.getY(), rim - 2);
+                for (int y = p.getY(); y <= top; y++) {
+                    BlockPos q = new BlockPos(p.getX(), y, p.getZ());
+                    if (level.getBlockState(q).getCollisionShape(level, q).isEmpty()) {
+                        level.setBlock(q, fill, net.minecraft.world.level.block.Block.UPDATE_CLIENTS | net.minecraft.world.level.block.Block.UPDATE_KNOWN_SHAPE);
+                        filled++;
+                    }
+                }
             }
         }
         return filled;
@@ -528,6 +636,16 @@ public final class BackReach {
         }
 
         void walk() {
+            walkBegin();
+            walkStep(Long.MAX_VALUE);
+        }
+
+        private ArrayDeque<Long> walkQueue;
+        private final List<BlockPos> walkNext = new ArrayList<>();
+        private final List<BlockPos> walkRough = new ArrayList<>();
+        private boolean walkDone;
+
+        void walkBegin() {
             for (BlockPos e : spec.entrances) {
                 if (!valid(e)) {
                     rep.failures.add(spec.name + ": entrance " + e + " is not a standable cell");
@@ -535,14 +653,27 @@ public final class BackReach {
                 }
                 forward.add(e.asLong());
             }
-            ArrayDeque<Long> queue = new ArrayDeque<>();
-            forward.forEach(k -> queue.add(k));
-            List<BlockPos> next = new ArrayList<>();
-            List<BlockPos> roughNext = new ArrayList<>();
+            walkQueue = new ArrayDeque<>();
+            forward.forEach(k -> walkQueue.add(k));
+            walkDone = false;
+        }
+
+        // 歩く探索を deadline まで進める。終われば true (何 tick かに分けても、一度に回したのと同じ順にたどる)
+        boolean walkStep(long deadlineNanos) {
+            if (walkDone) {
+                return true;
+            }
+            ArrayDeque<Long> queue = walkQueue;
+            List<BlockPos> next = walkNext;
+            List<BlockPos> roughNext = walkRough;
+            int n = 0;
             while (!queue.isEmpty()) {
                 if (forward.size() > MAX_NODES) {
                     rep.failures.add(spec.name + ": walk graph exceeded " + MAX_NODES + " cells (leak outside the layout?)");
                     break;
+                }
+                if ((++n & 15) == 0 && System.nanoTime() >= deadlineNanos) {
+                    return false;
                 }
                 long k = queue.poll();
                 BlockPos p = BlockPos.of(k);
@@ -569,6 +700,8 @@ public final class BackReach {
             rep.nodes = forward.size();
             rep.edges = edgeFrom.size();
             rep.roughDrops = roughFrom.size();
+            walkDone = true;
+            return true;
         }
 
         // ---------------------------------------------------------------- 目標

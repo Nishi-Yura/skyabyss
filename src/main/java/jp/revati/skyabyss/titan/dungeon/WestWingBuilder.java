@@ -42,9 +42,20 @@ final class WestWingBuilder {
         }
 
         // 谷: 床を抜き、はるか下を溶岩にする
-        for (Box pit : PITS) {
+        for (Box pit : MAIN_PITS) {
             pit(kit, pit);
         }
+        // 前の谷 (版 31。周回だけ。trial/LongWalk): 休み場 WP0 → 前の谷 WP → 通路 WPC → W0 の南の壁の戸 (WP_GATE)。
+        // 別の乱数の道具で建てる (今までの部屋の壁や飾りの乱数の並びを変えない = 見かけを変えない)
+        BuildKit pre = preKit(kit);
+        pre.room(WPC);
+        pre.room(WP0);
+        pre.roomSolid(WP);
+        pre.doorway(-22, -18, WP.z2() + 1, WP.z2() + 1, FLOOR, 6);                    // 休み場 WP0 → 前の谷
+        pre.doorway(-33, -29, WP.z1() - 1, WP.z1() - 1, FLOOR, 6);                    // 前の谷 → 通路
+        pre.wallLamps(WPC, 4, FLOOR + 4);
+        pre.lantern(WPC.x1() + 1, FLOOR + 1, WPC.z2());
+        pit(pre, WP);
         // 谷の入口と出口の岩棚 (道の両端)
         for (CourseGenerator.Spec spec : ParkourCourses.ALL) {
             ledge(kit, spec.start());
@@ -55,6 +66,7 @@ final class WestWingBuilder {
 
         decorate(kit);
         ribWindows(kit);
+        preDecorate(pre);
         for (int i = 0; i < ParkourCourses.ISLANDS.size(); i++) {
             for (Island isl : ParkourCourses.ISLANDS.get(i)) {
                 island(kit, isl);
@@ -69,7 +81,44 @@ final class WestWingBuilder {
         for (BlockPos p : BELL_GATE) {
             kit.set(p, ModBlocks.SEALED_GATE.get().defaultBlockState());
         }
+        // 前の谷の出口の戸 (W0 の南の壁)。W0 の内側の柱・灯りが戸の前に立っていたら除く
+        for (BlockPos p : WP_GATE) {
+            kit.set(p.getX(), p.getY(), W0.z2(), BuildKit.AIR);
+            kit.set(p, ModBlocks.SEALED_GATE.get().defaultBlockState());
+        }
         kit.palette(ZonePalette.DEEP);
+    }
+
+    // 今までの三つの谷 (乱数を使う飾りはこの三つだけ。前の谷は preKit で)
+    private static final List<Box> MAIN_PITS = List.of(WA, WB, WC);
+
+    private static BuildKit preKit(BuildKit kit) {
+        BuildKit pre = new BuildKit(kit.level(), net.minecraft.util.RandomSource.create(20261031L));
+        pre.palette(ZonePalette.RIB);
+        return pre;
+    }
+
+    // 前の谷の休み場・谷の飾り・灯り (版 31)
+    private static void preDecorate(BuildKit kit) {
+        kit.ribs(WP, 6, false);
+        kit.pilasters(WP, 5);
+        for (int i = 0; i < 24; i++) {
+            boolean alongX = kit.random.nextBoolean();
+            int x = alongX ? WP.x1() + kit.random.nextInt(WP.x2() - WP.x1() + 1) : (kit.random.nextBoolean() ? WP.x1() : WP.x2());
+            int z = alongX ? (kit.random.nextBoolean() ? WP.z1() : WP.z2()) : WP.z1() + kit.random.nextInt(WP.z2() - WP.z1() + 1);
+            if (i % 3 == 0) {
+                kit.hangingLantern(x, z, WP.ceilingY(), 3);
+            } else {
+                kit.stalactite(x, WP.ceilingY(), z, 1 + kit.random.nextInt(3));
+            }
+        }
+        kit.wallLamps(WP, 5, FLOOR + 7);
+        kit.restPoint(WP0);
+        kit.wallLamps(WP0, 3, WP0.floorY() + 4);
+        kit.pilasters(WP0, 3);
+        kit.moss(WP0, 0.05f);
+        kit.lantern(-22, FLOOR + 1, WP.z2() + 1);
+        kit.lantern(-29, FLOOR + 1, WP.z1() - 1);
     }
 
     private static void pit(BuildKit kit, Box pit) {
@@ -104,7 +153,7 @@ final class WestWingBuilder {
 
     static void ribWindows(BuildKit kit) {
         BlockState rib = Blocks.BONE_BLOCK.defaultBlockState().setValue(net.minecraft.world.level.block.RotatedPillarBlock.AXIS, Direction.Axis.Y);
-        for (Box pit : PITS) {
+        for (Box pit : MAIN_PITS) {
             int wall = pit.x1() - 1;
             for (int z = pit.z1(); z <= pit.z2(); z++) {
                 for (int y = WINDOW_Y1; y <= WINDOW_Y2; y++) {
@@ -249,13 +298,13 @@ final class WestWingBuilder {
         kit.pilasters(W0, 3);
         kit.moss(W0, 0.06f);
         // 谷の天井に、肋骨の梁 (谷ごとに。足場の高さより十分上なので頭はぶつからない)
-        for (Box pit : PITS) {
+        for (Box pit : MAIN_PITS) {
             kit.ribs(pit, 6, true);
             kit.pilasters(pit, 5);
         }
         // 谷の天井から垂れる鍾乳石と鎖。壁ぎわ 1 マスだけに飾る (足場の上の柱は、足場を置くときに天井まで消える)
         java.util.Set<Long> used = new java.util.HashSet<>();
-        for (Box pit : PITS) {
+        for (Box pit : MAIN_PITS) {
             for (int i = 0; i < 30; i++) {
                 boolean alongX = kit.random.nextBoolean();
                 int x = alongX ? pit.x1() + kit.random.nextInt(pit.x2() - pit.x1() + 1) : (kit.random.nextBoolean() ? pit.x1() : pit.x2());

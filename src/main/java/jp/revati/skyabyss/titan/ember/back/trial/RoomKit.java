@@ -35,6 +35,14 @@ final class RoomKit {
         this.reserved = EmberBackLayout.reserved(room);
     }
 
+    // 部屋の表に無い箱 (周回の前の湖など)。取っておく場所なし
+    RoomKit(ServerLevel level, EmberBackLayout.Box box, int floorY) {
+        this.level = level;
+        this.box = box;
+        this.floorY = floorY;
+        this.reserved = List.of();
+    }
+
     boolean blocked(int x, int y, int z) {
         if (!box.contains(x, y, z)) {
             return true;

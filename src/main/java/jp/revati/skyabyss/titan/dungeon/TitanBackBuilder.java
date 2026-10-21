@@ -24,15 +24,20 @@ public final class TitanBackBuilder {
     private TitanBackBuilder() {
     }
 
-    // その場で最後まで建てる。起動時の予約 (schedule) が途中なら取り消す (置いた分は「変わるブロックだけ」なので飛ばせる)
+    // その場で最後まで建てる。起動時の予約 (schedule) が途中なら、その続きを最後まで進める (最初からやり直さない)
     public static void build(ServerLevel level, TitanBackData data) {
-        BackBuildJobs.cancel(level.dimension());
+        if (BackBuildJobs.finishNow(level.dimension()) && !data.needsBuild()) {
+            return;
+        }
         long start = System.currentTimeMillis();
         BuildKit kit = new BuildKit(level, RandomSource.create(20261015L));
         // アスレチックと迷路の形は、建てるたびに新しい種で決める
         data.reseed(level.getRandom());
         buildIsland(kit);
-        buildRest(level, data, kit, start);
+        BackBuildJobs.Steps rest = restSteps(level, data, kit, start, null);
+        while (!rest.step(Long.MAX_VALUE)) {
+            // 最後まで
+        }
     }
 
     // 開発・自己テスト: 試練の階を、いまの背へ後から置く (本番の建設では WhaleDeck.placed() が false のあいだ置かない)
@@ -42,66 +47,91 @@ public final class TitanBackBuilder {
         jp.revati.skyabyss.trial.TrialRuntime.installGates(level);
     }
 
-    // 起動時: 島の体を何 tick かに分けて置き、置き終えた tick に残りを建てる (BackBuildJobs。13 の 24.5節)
+    // 起動時: 島の体を何 tick かに分けて置き、そのあとの仕上げも手順ごとに tick に分けて建てる (BackBuildJobs。13 の 24.5節)
     public static void schedule(ServerLevel level, TitanBackData data) {
         BuildKit kit = new BuildKit(level, RandomSource.create(20261015L));
         data.reseed(level.getRandom());
-        BackBuildJobs.schedule("stone whale back", level, WhaleShape.jobWithClear(kit), () -> buildRest(level, data, kit, System.currentTimeMillis()));
+        long start = System.currentTimeMillis();
+        BackBuildJobs.schedule("stone whale back", level, restSteps(level, data, kit, start, () -> WhaleShape.jobWithClear(kit)), () -> {
+        });
     }
 
-    private static void buildRest(ServerLevel level, TitanBackData data, BuildKit kit, long start) {
-        buildSurface(kit);
-        buildHub(kit);
-        buildTreasury(kit);
+    // 体を置いたあとの仕上げ (部屋・中身・修復)。手順の順は前の一度に建てる形と同じ
+    private static BackBuildJobs.Steps restSteps(ServerLevel level, TitanBackData data, BuildKit kit, long start,
+            @org.jetbrains.annotations.Nullable java.util.function.Supplier<BackBuildJobs.Job> body) {
+        BackBuildJobs.Steps s = new BackBuildJobs.Steps("stone whale back");
+        if (body != null) {
+            s.thenJob("body", body);
+        }
+        s.then("surface", () -> buildSurface(kit));
+        s.then("hub", () -> buildHub(kit));
+        s.then("treasury", () -> buildTreasury(kit));
         // 北の封印の先: 心臓の回廊と、最終ボスの心臓の間
-        HeartArenaBuilder.build(kit);
+        s.then("heart arena", () -> HeartArenaBuilder.build(kit));
         // 鼓動の間の柱は、戸口・はしご・封印・碑文をすべて置いたあとに立てる (それらの前を避けるため)
-        kit.pilasters(HUB, 5);
-        kit.wallLamps(HUB, 5, FLOOR + 6);
-        kit.wallLamps(ENTRY, 4, FLOOR + 4);
-        WestWingBuilder.build(kit);
-        EastWingBuilder.build(kit);
+        s.then("hub pillars", () -> {
+            kit.pilasters(HUB, 5);
+            kit.wallLamps(HUB, 5, FLOOR + 6);
+            kit.wallLamps(ENTRY, 4, FLOOR + 4);
+        });
+        s.then("west wing", () -> WestWingBuilder.build(kit));
+        s.then("east wing", () -> EastWingBuilder.build(kit));
         // 建築の監査 (版 18): 四方が 1 高い床の中で 1 マスだけ低いくぼみを埋める (背の殻の模型の窪みと、ひれの道の縁)
-        smoothDimples(kit, -27, -17, 138, 152, 93, 103);
-        smoothDimples(kit, 54, 120, 70, 100, -75, -25);
-        smoothDimples(kit, -120, -54, 70, 112, -75, -25);
+        s.then("dimples", () -> {
+            smoothDimples(kit, -27, -17, 138, 152, 93, 103);
+            smoothDimples(kit, 54, 120, 70, 100, -75, -25);
+            smoothDimples(kit, -120, -54, 70, 112, -75, -25);
+        });
         // 試練の階 (階段・広間・四つの新しいセル。docs/design/29)。入口の通路・東の翼の天井の上の、体の中の空き
-        if (WhaleDeck.placed()) {
-            WhaleDeckBuilder.build(kit);
-        }
-        // ボス部屋の大門 (心臓の間・番兵長の広間)。部屋と通路を掘ったあと
-        BossGates.build(kit);
-        MazeBuilder.buildFixtures(kit);
-        MazeBuilder.buildMaze(new BuildKit(level, RandomSource.create(data.mazeSeed())), data.mazeSeed());
-        // 体内を掘ってから階段を通す (先に階段を作ると、通路の壁でふさがれる)
-        buildShrineAndStairs(kit);
-        for (BlockPos p : GOAL_SPOTS) {
-            kit.set(p, jp.revati.skyabyss.trial.TrialGoal.mark());
-        }
-        // 物語の断片の碑文 (部屋と柱をすべて置いたあとに掛ける)
-        for (Inscription lore : LORE_SIGNS) {
-            kit.wallSign(lore.pos(), lore.facing(), lore.key());
-        }
-        // 道しるべの碑 (版 18)
-        for (Inscription guide : GUIDE_SIGNS) {
-            kit.wallSign(guide.pos(), guide.facing(), guide.key());
-        }
-        // 歩く道の灯り (建築の監査 LIGHT_DARK。下の迷路は光の台の遊びなので暗いまま。場所は dev routelight whale が測った route_lamps.json)
-        jp.revati.skyabyss.titan.light.RouteLamps.place(level, "whale");
-        // 休み場の復活位置に苔の敷物が落ちていたら除く (立てる所を空けておく)
-        for (BlockPos spawn : TitanBackTrials.checkpointSpawns().values()) {
-            if (kit.get(spawn.getX(), spawn.getY(), spawn.getZ()).is(Blocks.MOSS_CARPET)) {
-                kit.set(spawn, BuildKit.AIR);
+        s.then("deck", () -> {
+            if (WhaleDeck.placed()) {
+                WhaleDeckBuilder.build(kit);
             }
-        }
-        // 背・ひれの上の、落ちたら出られない凹み (詰み監査で見つけて埋める。部屋・通路の中は直さずに報告に残す)
-        int repaired = jp.revati.skyabyss.titan.audit.BackReach.repair(level, TitanBackAudit::spec,
-                java.util.List.of(new jp.revati.skyabyss.titan.audit.BackReach.Box(-RX, FLOOR + 8, -RZ, RX, 205, RZ)), 200, 14, Blocks.DEEPSLATE_BRICKS.defaultBlockState());
-        if (repaired > 0) {
-            SkyAbyss.LOGGER.info("Whale back: filled {} blocks of dead-end pockets on the outside", repaired);
-        }
-        data.markBuilt();
-        SkyAbyss.LOGGER.info("Built the stone whale's back in {} ms", System.currentTimeMillis() - start);
+        });
+        // ボス部屋の大門 (心臓の間・番兵長の広間)。部屋と通路を掘ったあと
+        s.then("boss gates", () -> BossGates.build(kit));
+        s.then("maze fixtures", () -> MazeBuilder.buildFixtures(kit));
+        s.then("maze", () -> MazeBuilder.buildMaze(new BuildKit(level, RandomSource.create(data.mazeSeed())), data.mazeSeed()));
+        // 体内を掘ってから階段を通す (先に階段を作ると、通路の壁でふさがれる)
+        s.then("shrine and stairs", () -> buildShrineAndStairs(kit));
+        s.then("signs", () -> {
+            for (BlockPos p : GOAL_SPOTS) {
+                kit.set(p, jp.revati.skyabyss.trial.TrialGoal.mark());
+            }
+            // 物語の断片の碑文 (部屋と柱をすべて置いたあとに掛ける)
+            for (Inscription lore : LORE_SIGNS) {
+                kit.wallSign(lore.pos(), lore.facing(), lore.key());
+            }
+            // 道しるべの碑 (版 18)
+            for (Inscription guide : GUIDE_SIGNS) {
+                kit.wallSign(guide.pos(), guide.facing(), guide.key());
+            }
+        });
+        // 歩く道の灯り (建築の監査 LIGHT_DARK。下の迷路は光の台の遊びなので暗いまま。場所は dev routelight whale が測った route_lamps.json)
+        s.then("route lamps", () -> jp.revati.skyabyss.titan.light.RouteLamps.place(level, "whale"));
+        // 休み場の復活位置に苔の敷物が落ちていたら除く (立てる所を空けておく)
+        s.then("rest spots", () -> {
+            for (BlockPos spawn : TitanBackTrials.checkpointSpawns().values()) {
+                if (kit.get(spawn.getX(), spawn.getY(), spawn.getZ()).is(Blocks.MOSS_CARPET)) {
+                    kit.set(spawn, BuildKit.AIR);
+                }
+            }
+        });
+        // 順路の部屋を分ける封じ (入口の箱の先・鼓動の間・入口の通路。trial/RouteSeals。32 の 2.5)
+        s.then("route seals", () -> jp.revati.skyabyss.trial.RouteSeals.place(level, jp.revati.skyabyss.progress.Titans.STONE_WHALE));
+        // 背・ひれの上の、落ちたら出られない凹み (詰み監査で見つけて埋める。部屋・通路の中は直さずに報告に残す)。tick をまたいで進める
+        jp.revati.skyabyss.titan.audit.BackReach.RepairJob[] repair = new jp.revati.skyabyss.titan.audit.BackReach.RepairJob[1];
+        s.thenJob("repair", () -> repair[0] = new jp.revati.skyabyss.titan.audit.BackReach.RepairJob(level, TitanBackAudit::spec,
+                java.util.List.of(new jp.revati.skyabyss.titan.audit.BackReach.Box(-RX, FLOOR + 8, -RZ, RX, 205, RZ)), 200, 14, Blocks.DEEPSLATE_BRICKS.defaultBlockState()));
+        s.then("mark built", () -> {
+            int repaired = repair[0] == null ? 0 : repair[0].filled();
+            if (repaired > 0) {
+                SkyAbyss.LOGGER.info("Whale back: filled {} blocks of dead-end pockets on the outside", repaired);
+            }
+            data.markBuilt();
+            SkyAbyss.LOGGER.info("Built the stone whale's back in {} ms", System.currentTimeMillis() - start);
+        });
+        return s;
     }
 
     // 床 (上が 2 マス空いた固いブロック) で、四方の隣の 1 つ上の高さに固いブロックがあるものは、1 つ低く埋まったくぼみなので、1 つ上を同じブロックで埋める

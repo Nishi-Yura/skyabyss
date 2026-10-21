@@ -30,7 +30,8 @@ public final class EmberBackLayout {
     // 24: 試練の階の南の広間 (EmberDeck。docs/design/29 の 3.4 の P3): 北西の鎖橋の間 E03・北東の鋳型の間 E08・南の廊下 SP と三つの南の広間 (荷車 E11・巣 E12・熾の道 E04)。回廊は南へ延びた
     // 23: 試練の階 (EmberDeck。docs/design/29): 螺旋の踊り場から南の浅い所に、新作の試練 E02・E06・E07・E10 の四つのセルと広間・回廊・休み場 6 つ・試練の板。冷えた溶岩洞の口の戸 (原型の三つ)
     // 20: 体を x1.6・y1.3 に (26 の 11 章)。喉・広間・三つの試練・井戸を引き直し、冷えた溶岩洞・灰降りの庭・尾根の広間・任意の翼を足した
-    public static final int LAYOUT_VERSION = 30;
+    // 31: 順路の入口の箱 (喉の坂の休み場) の灯り。周回の灰の道の前の湖 (32 の 4 章、R5)
+    public static final int LAYOUT_VERSION = 31;
     // 灰の原のいちばん上のブロックの y (dimension/ember_back.json の層と合わせる)
     public static final int PLAIN_TOP = 63;
     // 体の中心 (遠くへ歩いたかを見る。体の長さ 621 の半分に余白)
@@ -127,6 +128,30 @@ public final class EmberBackLayout {
     //   → 中ノ岸 (休み場 w1) z 63〜76 → 第二の湖 z 77〜104 → 奥の岸 z 105〜112 → C1
     public static final int FLOOR_WEST = 80;
     public static final Box WEST = new Box(-62, 77, -14, -24, 106, 112);
+    // 周回の前の湖 (版 31。trial/LongWalk。trial/AshPathPre): 灰の道の部屋の北西の体の中。通り道を抜けて、灰の降る庭の北西の戸へ
+    public static final Box WEST_PRE = new Box(-66, 77, -100, -50, 96, -22);
+    public static final Box WEST_PRE_PASS = new Box(-59, FLOOR_WEST, -21, -55, FLOOR_WEST + 5, -15);
+    // 前の湖の出口の戸 (灰の道の部屋の北の壁。周回のグループの今の段が E01 のときだけ開く)
+    public static final List<BlockPos> WEST_PRE_GATE = preGate();
+
+    private static List<BlockPos> preGate() {
+        List<BlockPos> out = new ArrayList<>();
+        for (int y = FLOOR_WEST + 1; y <= FLOOR_WEST + 5; y++) {
+            for (int x = -59; x <= -55; x++) {
+                out.add(new BlockPos(x, y, -14));
+            }
+        }
+        return List.copyOf(out);
+    }
+
+    // 灰の道の決まりが働く所 (部屋と、周回の前の湖・通り道)
+    public static boolean inWestTrial(Vec3 v) {
+        return WEST.contains(v) || WEST_PRE.contains(v) || WEST_PRE_PASS.grow(1).contains(v);
+    }
+
+    public static boolean inWestTrial(BlockPos p) {
+        return WEST.contains(p) || WEST_PRE.contains(p) || WEST_PRE_PASS.grow(1).contains(p);
+    }
     // 鍛えの間 (幅 41・奥行き 71、天井まで 22)。鍛えの回廊 z -14〜19 → 前室 z 20〜33 → 柱の列 → 金床・槽 → 鞴・大炉 (z 20〜56 が版 12 の部屋の拡大前の形を移した所) → C2
     public static final int FLOOR_EAST = 86;
     public static final Box EAST = new Box(24, 86, -14, 64, 108, 56);
@@ -279,6 +304,8 @@ public final class EmberBackLayout {
             new Rest("hub", new BlockPos(0, FLOOR_HUB, -72), 0f),
             new Rest("w0", new BlockPos(TUBE_WEST_X, FLOOR_WEST, -6), 0f),
             new Rest("w1", new BlockPos(TUBE_WEST_X, FLOOR_WEST, 70), 0f),
+            // 前の湖の北の岸 (周回の長い灰の道。版 31)
+            new Rest("wp", new BlockPos(-58, FLOOR_WEST, -95), 0f),
             new Rest("e0", new BlockPos(TUBE_EAST_X - 5, FLOOR_EAST, 24), 0f),
             new Rest("s0", new BlockPos(0, FLOOR_SOUTH, 0), 0f),
             new Rest("heart", new BlockPos(0, FLOOR_HEART, -27), 0f)).stream(), EmberDeck.RESTS.stream()).toList();
@@ -330,5 +357,11 @@ public final class EmberBackLayout {
     }
 
     private EmberBackLayout() {
+    }
+
+    // 周回で長くなる歩の原型の前の道 (trial/LongWalk。32 の 4 章、R5)。まだ無ければ null
+    @org.jetbrains.annotations.Nullable
+    public static jp.revati.skyabyss.trial.LongWalk.Pre longWalk() {
+        return new jp.revati.skyabyss.trial.LongWalk.Pre(jp.revati.skyabyss.progress.Titans.EMBER, "E01", "wp", WEST_PRE_GATE);
     }
 }

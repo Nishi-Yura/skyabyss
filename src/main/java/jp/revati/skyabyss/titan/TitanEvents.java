@@ -52,19 +52,23 @@ public final class TitanEvents {
         if (data.spawned || level.getGameTime() / 24000L < FIRST_APPEARANCE_DAY) {
             return;
         }
-        if (!whaleMayAppear(SkyEventData.get(level), SkyEvents.activePass() != null, level.getGameTime(),
-                Config.HORROR_EVENT_FREQUENCY.get(), jp.revati.skyabyss.opening.OpeningBeats.anyoneMetStoryteller(level))) {
+        // 34 の 4.2 (2026-10-22): 岩鯨の初登場は一章の山場。支度の段 3 本 (鉄の跡・折れた剣・盾と糧) を済ませた人 (パーティの仲間でもよい) が
+        // いるときだけ出る (物語の運び。試練や乗り込みの鍵ではない。見たあと・一章を過ぎた人は Ch1Descent のとおり)。
+        // 支度を終えた人がいれば、夕方を待たずに、終えてから少しあとに (Ch1Trails.callReady) その人の近くへ。
+        // 影・歌・イサナ (17 の 3.9節) が済んでいない人は、5 日目の詰み止めまで待つ
+        ServerPlayer ready = jp.revati.skyabyss.opening.OpeningDirector.readyPlayer(level);
+        ServerPlayer prepared = ready != null ? ready : jp.revati.skyabyss.opening.OpeningDirector.preparedPlayer(level);
+        if (prepared == null) {
             return;
         }
-        // 17 の 3.9節: 4 日目までは、影・歌・イサナを済ませた人がいるときだけ (その人の近くへ)。5 日目の詰み止めは今のまま
-        ServerPlayer ready = jp.revati.skyabyss.opening.OpeningDirector.readyPlayer(level);
         if (!jp.revati.skyabyss.opening.OpeningLogic.whaleGateOpen(level.getGameTime(), ready != null)) {
             return;
         }
-        ServerPlayer player = ready != null ? ready : WhaleKeeper.randomEligible(level);
-        if (player == null) {
+        if (!whaleMayAppear(SkyEventData.get(level), SkyEvents.activePass() != null, level.getGameTime(),
+                Config.HORROR_EVENT_FREQUENCY.get(), jp.revati.skyabyss.opening.OpeningBeats.anyoneMetStoryteller(level), true)) {
             return;
         }
+        ServerPlayer player = prepared;
         double angle = level.random.nextDouble() * Math.PI * 2;
         WhaleKeeper.spawn(level, player.getX() + Math.cos(angle) * WhaleKeeper.SPAWN_DISTANCE,
                 player.getZ() + Math.sin(angle) * WhaleKeeper.SPAWN_DISTANCE, null);
@@ -76,6 +80,11 @@ public final class TitanEvents {
     // 17 の 3.9節に近い形: 最初の影から半日たち、だれかが語り部と話していて、夕方 (11000〜12500) に出す。
     // 詰み止め: 5 日目 (総 tick 4 日分) を過ぎたら、語り部と話していなくても、時刻を問わず出す
     public static boolean whaleMayAppear(SkyEventData sky, boolean passActive, long now, double frequency, boolean metStoryteller) {
+        return whaleMayAppear(sky, passActive, now, frequency, metStoryteller, false);
+    }
+
+    // prepared: 一章の支度を終えた人がいる (34 の 4.2)。そのときは夕方の窓を待たない (支度の山場のすぐあとに来る)
+    public static boolean whaleMayAppear(SkyEventData sky, boolean passActive, long now, double frequency, boolean metStoryteller, boolean prepared) {
         if (frequency <= 0) {
             return true;
         }
@@ -86,6 +95,9 @@ public final class TitanEvents {
             return false;
         }
         if (now >= 4 * 24000L) {
+            return true;
+        }
+        if (prepared) {
             return true;
         }
         long t = now % 24000L;

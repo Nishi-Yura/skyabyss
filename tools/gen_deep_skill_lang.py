@@ -27,7 +27,7 @@ SKILLS = [
      "Cinder Volley", "Fire the arrows in numbers, and the sky turns red.",
      "Loose %1$s fire bolts in a fan. Each hits up to 2 foes for %2$s%% attack (range %3$s blocks) and sets them alight for %4$s s."),
     ("stone_aim", "狙い石", "動かない者の矢は、石のように落ち着いている。",
-     "%2$s 秒 立ち止まると、骨のタグの技の力 +%1$s%%、防具 +%3$s。",
+     "%2$s 秒立ち止まると、骨のタグの技の力 +%1$s%%、防具 +%3$s。",
      "Stone Aim", "The arrow of one who stands still is as calm as a stone.",
      "After standing still for %2$s s: Bone-tag skills +%1$s%% power, armor +%3$s."),
     ("deep_pull", "淵の引き", "淵は覗く者を、少しだけ引く。",
@@ -95,7 +95,7 @@ MUTATIONS = [
      "Tide Dash", "Even with no target, dash 8 blocks forward like water, cutting everyone in your path."),
     ("hammer_meteor", "熾の墜落", "前 6 ブロックへ火の塊を落とす。0.5 秒後に槌と同じ傷、熾火の床を残す。",
      "Ember Meteor", "A ball of fire falls 6 blocks ahead; 0.5 s later it deals the hammer's damage and leaves an ember bed."),
-    ("trap_mine", "熾火の罠", "縛る罠の代わりに、見ている先へ火の地雷を埋める。踏まれると（6 秒で自爆）半径 3 を吹き飛ばして燃やす。",
+    ("trap_mine", "熾火の罠", "縛る罠の代わりに、見ている先へ火の地雷を埋める。踏まれると（踏まれなくても 6 秒で）半径 3 を吹き飛ばして燃やす。",
      "Ember Mine", "Instead of a binding trap, bury a fire mine where you look. When stepped on (or after 6 s) it blasts radius 3 and burns."),
 ]
 

@@ -33,6 +33,37 @@ final class StormDeckBuilder {
     private StormDeckBuilder() {
     }
 
+    // build と同じ順の手順 (背を建てる仕事を tick に分けるとき用)。階を置かない間は何もしない
+    static void steps(jp.revati.skyabyss.titan.BackBuildJobs.Steps s, StormKit kit) {
+        java.util.function.Consumer<Runnable> deck = r -> {
+            if (StormDeck.placed()) {
+                r.run();
+            }
+        };
+        s.then("deck access", () -> deck.accept(() -> access(kit)));
+        s.then("deck hub", () -> deck.accept(() -> hub(kit)));
+        s.then("deck bridge", () -> deck.accept(() -> bridge(kit)));
+        s.then("deck yard", () -> deck.accept(() -> yard(kit)));
+        s.then("deck s02", () -> deck.accept(() -> s02(kit)));
+        s.then("deck s03", () -> deck.accept(() -> s03(kit)));
+        s.then("deck s09", () -> deck.accept(() -> s09(kit)));
+        s.then("deck s10", () -> deck.accept(() -> s10(kit)));
+        jp.revati.skyabyss.titan.BackBuildJobs.Steps two = new jp.revati.skyabyss.titan.BackBuildJobs.Steps("storm deck 2");
+        StormDeck2Builder.steps(two, kit);
+        s.thenJob("deck 2", () -> new jp.revati.skyabyss.titan.BackBuildJobs.Job() {
+            @Override
+            public boolean step(long deadlineNanos) {
+                return !StormDeck.placed() || two.step(deadlineNanos);
+            }
+
+            @Override
+            public int placed() {
+                return 0;
+            }
+        });
+        s.then("deck signs", () -> deck.accept(() -> signs(kit)));
+    }
+
     static void build(StormKit kit) {
         if (!StormDeck.placed()) {
             return;

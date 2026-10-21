@@ -34,8 +34,8 @@ TER = 4          # 北の段の上面
 TERZ = -42       # 北の段の前の縁 (z)
 TERX = 60        # 北の段の東西の縁 (|x|)
 GUILD_X1 = 78
-SMITHY_X1 = 30
-SMITHY_Z1 = 24
+SMITHY_X1 = 26
+SMITHY_Z1 = 21
 GAP = 4          # 町家と町家のあいだ (路地。軒が 1 出るので、軒のあいだに 2 の空き。3 では詰まって見える所があった: 2026-10-21 の試遊)
 
 
@@ -199,7 +199,7 @@ class Town(Facilities):
         gable_roof(g, st, -5, -W - 2, 5, -W + 3, b.top + 1, axis='x', steep=True, finial=True)
         g.seal(-4, -W - 1, 4, -W + 2, 0)
         # 口を抜く (幅 7、高さ 6) とアーチ
-        g.clear(-3, 0, -W - 3, 3, 5, -W + 4)
+        g.clear(-3, 0, -W - 3, 3, 5, -W + (3 if side == 'north' else 4))  # 北は門の内がすぐ段の階段なので、一段目を残す
         for z in (-W - 2, -W + 3):
             g.set(-3, 5, z, st.trim.stairs('west', 'top'))
             g.set(3, 5, z, st.trim.stairs('east', 'top'))
@@ -317,13 +317,14 @@ class Town(Facilities):
                 v.set(xe, TER + 1, z, st.railing if z % 4 else st.trim.full)
                 dx = -1 if out == 'west' else 1
                 v.set(xe + dx, TER, z, st.trim.stairs(OPP[out], 'top'), keep=True)
-        # 真ん中の大階段 (z -42 → -36 で 4 → 0)。幅 12、両わきに塀と灯り
+        # 真ん中の大階段 (z -37 → -41 で 0 → 4 の 5 段、-42 の縁から段の上)。幅 12、両わきに塀と灯り
+        # (前は 4 段目のあとが丸ごとのブロックで、上りきる所で一度跳ぶ形だった)
         for i in range(TER + 1):
             z = z1 + 5 - i
             for x in range(-6, 6):
                 for y in range(0, TER + 1):
                     v.set(x, y, z, 'air' if y > i else st.base.full)
-                v.set(x, i, z, st.base.stairs('north', 'bottom') if i < TER else v.pick(st.pave))
+                v.set(x, i, z, st.base.stairs('north', 'bottom'))
             for x in (-7, 6):
                 for y in range(0, i + 1):
                     v.set(x, y, z, st.base.full)
@@ -336,12 +337,22 @@ class Town(Facilities):
             pinnacle(v, st, x, TER + 1, z1, h=2)
             v.set(x, 0, z1 + 6, st.base.full)
             v.set(x, 1, z1 + 6, 'lantern[hanging=false,waterlogged=false]')
-        # 北の門から段の上へ上がる階段 (門の口 z -97 は地面の高さ、z -96..-93 で 0 → 3 の段、-92 から段の上)
+        # 段の上の大通り
+        for z in range(z0, z1 + 1):
+            for x in (-4, 3):
+                v.set(x, TER, z, st.pave_trim)
+        self.claim(x0, z0, x1, z1, 'terrace')
+
+    def north_gate_steps(self):
+        """北の門の内から段の上へ上がる階段。門 (門楼の基壇・窓の板) を建てたあとに置く (先に置くと門が一段目を上書きする)"""
+        st, v = self.st, self.v
+        # 北の門から段の上へ上がる階段 (門の口 z -97 は地面の高さ、z -96..-92 で 0 → 4 の段、-91 から段の上。
+        # 段の上面の高さ TER まで 5 段。門の口を抜くのは z -97 まで (前は -96 の一段目を消し、四段で最後に一段跳ぶ形だった)
         for x in range(-3, 4):
             for yy in range(0, TER + 4):
                 v.set(x, yy, -97, 'air')
             v.set(x, -1, -97, st.pave_trim)
-            for i in range(4):
+            for i in range(TER + 1):
                 z = -96 + i
                 for yy in range(0, TER + 4):
                     v.set(x, yy, z, 'air')
@@ -353,11 +364,6 @@ class Town(Facilities):
                 for yy in range(0, TER + 1):
                     v.set(x, yy, z, st.base.full)
                 v.set(x, TER + 1, z, st.railing)
-        # 段の上の大通り
-        for z in range(z0, z1 + 1):
-            for x in (-4, 3):
-                v.set(x, TER, z, st.pave_trim)
-        self.claim(x0, z0, x1, z1, 'terrace')
 
     def terrace_gardens(self):
         """段の上のすきま: 庭と並木、小さな噴水、記録の離れ"""
@@ -966,9 +972,17 @@ class Town(Facilities):
         self.mark('label_guild', x0 - 4, 7, dz_)
         # 棟の上の鯨骨の肋 (三つ)
         for x in (x0 + 8, (x0 + x1) // 2, x1 - 8):
+            prev = None
             for z in range(z0 - 2, z1 + 3):
                 yy = b.top + 2 + int((ridge - b.top + 4) * (1 - ((z - cz) / ((z1 - z0) / 2 + 2)) ** 2))
                 v.set(x, yy, z, 'bone_block[axis=z]')
+                # 段が上がる所は縦に埋めて、肋を一続きにする (斜めだけでつながると、点線に見える)
+                if prev is not None and prev != yy:
+                    lo, hi = sorted((prev, yy))
+                    zz = z if yy < prev else z - 1
+                    for k in range(lo, hi + 1):
+                        v.set(x, k, zz, 'bone_block[axis=y]')
+                prev = yy
         # 西の前庭: 言伝ての板の枠と名簿の碑、灯り
         fx = x0 - 4
         for dz in (cz + 4, cz + 8):
@@ -986,6 +1000,15 @@ class Town(Facilities):
     def shrine(self):
         st, v = self.st, self.v
         cx, cz, r = -64, -21, 14
+        # 社の堂 (2026-10-22 の二人の試遊: 転生の建物も都の作りに合わせる。上から入れてしまう)。石の輪をまるごと包む一階の高い堂と、
+        # 四角錐の屋根。戸は東 (大通り側) の鉄の戸 (章で開く。CapitalDoors の open_shrine)。中の輪・石・祭壇はこのあと置く
+        R2 = r + 1
+        hall = Body(v, st, cx - R2, cz - R2, cx + R2, cz + R2, 0, floors=1, fh=13, bay=5, door_side='east', door='iron',
+                    interior=False, sides=('north', 'south', 'east', 'west'), pots=0.0).build()
+        hip_spire(v, st, cx - R2, cz - R2, cx + R2, cz + R2, hall.top + 1, mat=st.roof, rise=1, flare=True)
+        for (lx, lz) in ((cx - 6, cz), (cx + 6, cz), (cx, cz - 6), (cx, cz + 6)):
+            v.set(lx, 12, lz, 'chain[axis=y,waterlogged=false]')
+            v.set(lx, 11, lz, 'lantern[hanging=true,waterlogged=false]')
         for x in range(cx - r, cx + r + 1):
             for z in range(cz - r, cz + r + 1):
                 v.set(x, -1, z, st.base.full)
@@ -1014,6 +1037,11 @@ class Town(Facilities):
                 x = cx + dx - (dx // 9) * k
                 z = cz + dz - (dz // 9) * k
                 v.set(x, 8 + k // 3, z, 'bone_block[axis=y]')
+                # 斜めの一歩ごとに角を埋めて、肋を一続きにする
+                if k > 1:
+                    v.set(x + (dx // 9), 8 + k // 3, z, 'bone_block[axis=y]')
+                    if (k - 1) // 3 != k // 3:
+                        v.set(x + (dx // 9), 8 + (k - 1) // 3, z + (dz // 9), 'bone_block[axis=y]')
         v.fill(cx - 1, 11, cz - 1, cx + 1, 11, cz + 1, 'bone_block[axis=y]')
         v.set(cx, 10, cz, 'lantern[hanging=true,waterlogged=false]')
         v.fill(cx - 1, 0, cz - 1, cx + 1, 0, cz + 1, st.trim.full)
@@ -1026,12 +1054,12 @@ class Town(Facilities):
             v.fill(cx + r, 0, z, cx + r, 3, z, st.pilaster)
             v.set(cx + r, 4, z, 'lantern[hanging=false,waterlogged=false]')
         v.fill(cx + r, 3, cz - 1, cx + r, 3, cz + 1, st.trim.full)
-        self.tablet(cx + r + 1, 0, cz + 3, 'east', 'shrine')
+        self.tablet(cx + r + 4, 0, cz + 3, 'east', 'shrine')
         self.mark('open_shrine', cx + r, 0, cz)
         # 輪のまわりの木 (北と南)
         for x in range(cx - r + 2, cx + r - 1, 6):
-            tree(v, x, 0, cz - r - 3, st.trunk2, st.leaves2, h=5, r=2)
-            tree(v, x, 0, cz + r + 3, st.trunk2, st.leaves2, h=5, r=2)
+            flowerbed(v, st, x - 1, cz - r - 4, x + 1, cz - r - 3, density=0.5)
+            flowerbed(v, st, x - 1, cz + r + 3, x + 1, cz + r + 4, density=0.5)
         self.claim(cx - r - 1, cz - r - 5, cx + r + 1, cz + r + 5, 'shrine')
 
     # ---------------------------------------------------------------- 鍛冶場
@@ -1573,7 +1601,8 @@ class Town(Facilities):
         # 砦の本丸: 北の壁に控え柱
         self.buttresses(18, 37, -80, 'north', y, y + 12, step=5)
         # 鍛冶場: 北の壁 (炉の煙突の左右) と、東西の妻に控え柱
-        self.buttresses(8, 36, 8, 'north', 0, 7, step=6, skip=(22,))
+        # (前は x 8..36 のまま残っていて、鍛冶場を小さくしたあと、空き地に柱が立っていた)
+        self.buttresses(8, SMITHY_X1, 8, 'north', 0, 7, step=6, skip=((8 + SMITHY_X1) // 2,))
 
     # ---------------------------------------------------------------- 名所の作り込み (形を建てたあとに足す)
     def hall_extra(self):
@@ -1716,6 +1745,7 @@ class Town(Facilities):
         self.ground()
         self.terrace()
         self.walls()
+        self.north_gate_steps()
         self.bell_tower()
         self.storyteller_house()
         self.keep()
@@ -1747,8 +1777,27 @@ class Town(Facilities):
             self.mark('villager_%d' % n, x, 0, z)
             n += 1
         self.tidy_for_walkers()
+        self.drop_floaters()
         self.v.connect()
         return self.v
+
+    def drop_floaters(self):
+        """床に置く小物 (壺・鉢・ろうそく・置いた灯り・敷物) で、下が空いているものを消す。
+        棚や机をあとの手で消したとき、上の小物だけが宙に残る (audit_odd.py の「支えのない付き物」)"""
+        v = self.v
+        small = ('decorated_pot', 'potted_', 'candle', '_carpet', 'flower_pot')
+        for (x, y, z), s in list(v.b.items()):
+            n = s.split('[')[0]
+            hang = n.endswith('lantern') and 'hanging=true' in s
+            if any(t in n for t in small) or (n.endswith('lantern') and not hang):
+                below = v.b.get((x, y - 1, z))
+                if y > 0 and (below is None or below in ('air', 'cave_air')):
+                    v.set(x, y, z, 'air')
+            # 木の切れ端 (葉・幹がひとつだけ宙に残ったもの)
+            elif n.endswith('_leaves') or n.endswith('_log'):
+                nb = [v.b.get((x + dx, y + dy, z + dz)) for dx, dy, dz in ((1, 0, 0), (-1, 0, 0), (0, 1, 0), (0, -1, 0), (0, 0, 1), (0, 0, -1))]
+                if y > 0 and all(t is None or t in ('air', 'cave_air') for t in nb):
+                    v.set(x, y, z, 'air')
 
     # 係の人の印 (docs/design/35 の 6.6)。今ある施設の戸 (open_* の印や開いた正面) から中へ歩き、
     # 戸から 3 歩以上入り、戸の筋から 2 横にずれた所で、足もと 2 マスが空き、下が床の最初の場所に置く。見つからない役は置かない (Attendants が飛ばす)

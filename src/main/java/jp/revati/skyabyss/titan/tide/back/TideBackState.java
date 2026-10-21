@@ -82,6 +82,8 @@ public class TideBackState extends SavedData {
         private static final String NESTS_BROKEN = "tide.nests_broken";
         // 周回の長い潮見の間 (32 の 4 章、R5): 解いた配置の数 (長い周は 2 つ目を解くと岩棚へ)
         private static final String EAST_STAGE = "tide.east_stage";
+        // 周回の長い珊瑚の庭 (32 の 4 章、R5): 据えた真珠の数 (長い周は二つ据えると西の石が鳴る。二つ目は別の道の形)
+        private static final String GARDEN_STAGE = "tide.garden_stage";
         private static final String BECKONER = "tide.beckoner";
         private static final String BOTTOM = "tide.bottom";
         private static final String LAST_SLEEPING = "keep.tide.last_sleeping";
@@ -157,6 +159,21 @@ public class TideBackState extends SavedData {
 
         public int gardenRoute() {
             return record.getInt(ROUTE);
+        }
+
+        public int gardenStage() {
+            return record.getInt(GARDEN_STAGE);
+        }
+
+        // 一つ目の真珠を据えた: 庭の道の形を次の形 (今と違う) へ
+        public void nextGardenStage() {
+            record.putInt(GARDEN_STAGE, gardenStage() + 1);
+            record.putInt(ROUTE, Math.floorMod(gardenRoute() + 1, TideBackLayout.GARDEN_ROUTES.length));
+        }
+
+        // 西の石を鳴らすまでに据える真珠の数 (周回のグループは 2)
+        public int gardenStagesNeeded() {
+            return jp.revati.skyabyss.trial.RouteLength.extended(record) ? TideGarden.PEARLS_LONG : 1;
         }
 
         public int eastStage() {

@@ -199,7 +199,7 @@ public final class OpeningStorySelfTest {
                     }
                     for (String key : q.keySet()) {
                         if (key.matches("quest\\.skyabyss\\.main_[a-z]+\\.[a-z_]+\\.[a-z_]+") && !key.endsWith(".journal") && !key.endsWith(".title")
-                                && !key.endsWith(".summary") && !key.endsWith(".done")) {
+                                && !key.endsWith(".summary") && !key.endsWith(".done") && !key.endsWith(".lead")) {
                             String v = q.get(key).getAsString();
                             check(v.endsWith("う"), "ja_jp: main objective " + key + " does not tell the player what to do (" + v + ")", failures);
                         }
@@ -398,13 +398,14 @@ public final class OpeningStorySelfTest {
         }
         pick(a, WC, "whale_q", failures);
         next(a);
-        check(stage(a, "main_song").equals("see_whale"), "talking to Isana did not advance to see_whale: " + stage(a, "main_song"), failures);
+        // イサナの話のあとは一章の支度 (34 の 4.2。三本そろうまで岩鯨は来ない)
+        check(stage(a, "main_song").equals("prepare"), "talking to Isana did not advance to prepare: " + stage(a, "main_song"), failures);
         DialogueService.close(a);
         DialogueService.open(a, st);
         check(node(a).equals("menu") && shown(a, ST, "errands"), "errands should appear once Isana has been met", failures);
         DialogueService.close(a);
         shadowDuringTalk(level, st, failures, notes);
-        notes.add("main quest: notebook → follow_smoke → shadow0 → watch_sky → shadow → ask_storyteller → find_chaser → see_whale, errands closed until Isana");
+        notes.add("main quest: notebook → follow_smoke → shadow0 → watch_sky → shadow → ask_storyteller → find_chaser → prepare, errands closed until Isana");
 
         // ---- 道すがらの見聞: 伝承が記されたものだけ並び、話した話題は消える (語り部とイサナの両方)
         for (String role : List.of(ST, WC)) {

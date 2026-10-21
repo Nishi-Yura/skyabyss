@@ -42,6 +42,8 @@ import net.minecraft.world.phys.Vec3;
 // 役割: 誘い (金の床に立つ人)・切り替え (レバーを倒す人)。ひとりなら、レバーを先に倒してから金の床へ走る。橙の筋が戸の柱へ届いていれば当たり
 // 拍: 凪は輪が遅く (2 秒)、雷が柱から柱へ跳ぶのも遅い (読める)。嵐は輪が速く (1.2 秒)、雷も速く、放電の線 (StormEast) が走る。どちらでも戸は開く
 // グループ: 回廊は部屋の占有 (StormBackTrials.EAST_ROOM)。レバーの状態は世界のレバーのブロック、戸が開いた回路は記録 (StormProgress の戸のビット) から置き直す
+// 周回 (32 の 4 章、R5。RouteLength): 戸を開けるには、雷を戸の柱へ二度届かせる。一度目が届くと回路が「組み変わり」(偶数番目の切り替えの
+//   倒す・戻すの行き先が入れ替わる)、柱は 2 / 3 で止まる。橙の筋は組み変わった回路で先読みするので、読み直してレバーを倒し直す
 final class StormCircuit {
     enum Kind {
         INTAKE, RELAY, DECOY, DOOR
@@ -129,6 +131,8 @@ final class StormCircuit {
     static final BlockState B_PAD = Blocks.GOLD_BLOCK.defaultBlockState();
 
     static final List<Circuit> CIRCUITS = buildCircuits();
+    // 周回で戸の柱へ届かせる回数
+    static final int ROUNDS_LONG = 2;
 
     // 凪・嵐の輪の長さ (tick)・柱から柱へ跳ぶ間・金の床に立ってから輪が出るまで
     static final int WARN_CALM = 44;
@@ -260,6 +264,15 @@ final class StormCircuit {
 
     // ---------------------------------------------------------------- 雷の道すじ (純粋な論理。自己テストが見る)
     static Trace trace(Circuit c, Predicate<BlockPos> leverOn) {
+        return trace(c, leverOn, false);
+    }
+
+    // 組み変わった回路では、偶数番目 (0, 2, …) の切り替えの行き先が入れ替わる
+    static boolean swapped(Circuit c, Sw sw, boolean rewired) {
+        return rewired && c.switches().indexOf(sw) % 2 == 0;
+    }
+
+    static Trace trace(Circuit c, Predicate<BlockPos> leverOn, boolean rewired) {
         List<Edge> edges = new ArrayList<>();
         List<Node> nodes = new ArrayList<>();
         Node n = c.node(c.intake());
@@ -274,7 +287,8 @@ final class StormCircuit {
             Sw sw = c.switchOf(n.id());
             Edge e;
             if (sw != null) {
-                String id = leverOn.test(sw.lever()) ? sw.on() : sw.off();
+                boolean on = leverOn.test(sw.lever()) != swapped(c, sw, rewired);
+                String id = on ? sw.on() : sw.off();
                 e = id == null ? null : c.edge(id);
             } else {
                 e = c.soleOut(n.id());
@@ -291,6 +305,10 @@ final class StormCircuit {
 
     // 戸へ届くレバーの組み合わせ (倒すレバーの最小の組。レバーは 4 本以下)
     static List<BlockPos> solution(Circuit c) {
+        return solution(c, false);
+    }
+
+    static List<BlockPos> solution(Circuit c, boolean rewired) {
         List<BlockPos> levers = c.levers();
         List<BlockPos> best = null;
         for (int mask = 0; mask < (1 << levers.size()); mask++) {
@@ -300,7 +318,7 @@ final class StormCircuit {
                     on.add(levers.get(i));
                 }
             }
-            if (trace(c, on::contains).outcome() == Outcome.DOOR && (best == null || on.size() < best.size())) {
+            if (trace(c, on::contains, rewired).outcome() == Outcome.DOOR && (best == null || on.size() < best.size())) {
                 best = on;
             }
         }
@@ -311,8 +329,17 @@ final class StormCircuit {
     }
 
     static Trace solutionTrace(Circuit c) {
-        List<BlockPos> on = solution(c);
-        return trace(c, on::contains);
+        return solutionTrace(c, false);
+    }
+
+    static Trace solutionTrace(Circuit c, boolean rewired) {
+        List<BlockPos> on = solution(c, rewired);
+        return trace(c, on::contains, rewired);
+    }
+
+    // グループにとって、回路 c が組み変わっているか
+    static boolean rewired(@Nullable StormProgress progress, Circuit c) {
+        return progress != null && progress.rewired(c.index());
     }
 
     // ---------------------------------------------------------------- 建てる (StormBirdBuilder.east から)
@@ -350,7 +377,8 @@ final class StormCircuit {
         java.util.Arrays.fill(BUSY_UNTIL, 0);
         for (Circuit c : CIRCUITS) {
             boolean done = progress != null && done(progress, c);
-            List<BlockPos> sol = done ? solution(c) : List.of();
+            boolean rw = rewired(progress, c);
+            List<BlockPos> sol = done ? solution(c, rw) : List.of();
             for (BlockPos l : c.levers()) {
                 setLever(level, l, sol.contains(l));
                 LAST_LEVER.put(l, sol.contains(l));
@@ -359,9 +387,11 @@ final class StormCircuit {
                 StormRods.register(level, n.rod());
             }
             if (done) {
-                for (Node n : solutionTrace(c).nodes()) {
+                for (Node n : solutionTrace(c, rw).nodes()) {
                     StormRods.charge(level, n.rod(), StormRods.FULL);
                 }
+            } else if (rw) {
+                halfCharge(level, c);
             }
         }
         refreshVisuals(level, progress);
@@ -394,10 +424,11 @@ final class StormCircuit {
             }
             List<Edge> lit = new ArrayList<>();
             List<Edge> armed = new ArrayList<>();
+            boolean rw = rewired(progress, c);
             if (progress != null && done(progress, c)) {
-                lit.addAll(solutionTrace(c).edges());
+                lit.addAll(solutionTrace(c, rw).edges());
             } else {
-                armed.addAll(trace(c, p -> leverOn(level, p)).edges());
+                armed.addAll(trace(c, p -> leverOn(level, p), rw).edges());
                 List<Edge> flash = FLASH_EDGES.get(c.index());
                 if (flash != null && level.getGameTime() < FLASH_UNTIL.getOrDefault(c.index(), 0L)) {
                     lit.addAll(flash);
@@ -513,7 +544,8 @@ final class StormCircuit {
         Circuit c = CIRCUITS.get(idx);
         UUID owner = s.group;
         boolean storm = owner != null && StormHelm.phase(level, StormBackState.Trial.EAST, owner) == StormBackClock.Phase.STORM;
-        Trace t = trace(c, p -> leverOn(level, p));
+        StormProgress progress = owner == null ? null : StormProgress.of(level, owner);
+        Trace t = trace(c, p -> leverOn(level, p), rewired(progress, c));
         ANIMS.add(new Anim(level, c, t, owner, storm ? HOP_STORM : HOP_CALM));
         BUSY_UNTIL[c.index()] = level.getGameTime() + (long) (t.edges().size() + 1) * (storm ? HOP_STORM : HOP_CALM) + DECOY_FLASH;
     }
@@ -583,6 +615,26 @@ final class StormCircuit {
         Node last = t.nodes().get(t.nodes().size() - 1);
         switch (t.outcome()) {
             case DOOR -> {
+                StormProgress progress = a.group == null ? null : StormProgress.of(level, a.group);
+                if (progress != null && !progress.rewired(a.c.index()) && progress.circuitRoundsNeeded() >= ROUNDS_LONG) {
+                    // 周回の一度目: 柱は 2 / 3 で止まり、回路が組み変わる
+                    for (Node n : t.nodes()) {
+                        if (n.kind() != Kind.DOOR) {
+                            StormRods.charge(level, n.rod(), StormRods.FULL);
+                        }
+                    }
+                    progress.markRewired(a.c.index());
+                    halfCharge(level, a.c);
+                    FLASH_EDGES.put(a.c.index(), List.copyOf(t.edges()));
+                    FLASH_UNTIL.put(a.c.index(), level.getGameTime() + 30);
+                    Node door = t.nodes().get(t.nodes().size() - 1);
+                    Vec3 tip = new Vec3(door.rod().getX() + 0.5, door.rod().getY() + StormRods.HEIGHT, door.rod().getZ() + 0.5);
+                    StormFx.to(a.group, () -> StormFx.burst(level, ParticleTypes.ELECTRIC_SPARK, tip, 30, 0.8));
+                    level.playSound(null, door.rod(), SoundEvents.COPPER_BULB_TURN_ON, SoundSource.BLOCKS, 1.6f, 0.7f);
+                    level.playSound(null, door.rod(), SoundEvents.CHAIN_PLACE, SoundSource.BLOCKS, 1.4f, 0.6f);
+                    tellGroup(level, a.group, "message.skyabyss.storm.circuit_rewired");
+                    break;
+                }
                 for (Node n : t.nodes()) {
                     StormRods.charge(level, n.rod(), StormRods.FULL);
                 }
@@ -607,6 +659,13 @@ final class StormCircuit {
                 tellGroup(level, a.group, "message.skyabyss.storm.circuit_ground");
             }
         }
+    }
+
+    // 組み変わった回路の戸の柱を 2 / 3 にする (満ちていない)
+    static void halfCharge(ServerLevel level, Circuit c) {
+        BlockPos rod = c.doorRod();
+        StormRods.empty(level, rod);
+        StormRods.charge(level, rod, StormRods.FULL - 1);
     }
 
     // 行き止まりの光を消す (いつも呼ぶ)
@@ -651,7 +710,7 @@ final class StormCircuit {
                 if (was != null && was != now) {
                     ServerPlayer who = nearest(level, owner, l, 8);
                     if (who != null) {
-                        boolean reaches = trace(c, p -> leverOn(level, p)).outcome() == Outcome.DOOR;
+                        boolean reaches = trace(c, p -> leverOn(level, p), rewired(progress, c)).outcome() == Outcome.DOOR;
                         Notice.bar(who, ModText.hint(reaches ? "message.skyabyss.storm.lever_reaches" : "message.skyabyss.storm.lever_not_yet"));
                     }
                 }

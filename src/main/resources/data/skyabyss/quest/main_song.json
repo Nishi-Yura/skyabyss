@@ -115,6 +115,23 @@
       ]
     },
     {
+      "id": "prepare",
+      "skip_if": {
+        "type": "lore",
+        "entry": "chapter1/stone_whale"
+      },
+      "objectives": [
+        {
+          "id": "ready",
+          "type": "condition",
+          "if": {
+            "type": "prep",
+            "chapter": 1
+          }
+        }
+      ]
+    },
+    {
       "id": "see_whale",
       "xp": 60,
       "objectives": [

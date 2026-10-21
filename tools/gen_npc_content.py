@@ -261,11 +261,11 @@ st.node("menu", "何か聞きたいことでもあるのかい。", "Is there so
 
 # 都 (鐘の国。docs/design/33 の 2.2): 絶えかけの国の都。空見の一族と、最後の鐘守
 st.node("capital1",
-        "閉じているだろう。ここは都だった。……そう呼ぶ人は、もう少ないけれどね。\n昔は「空見」と呼ばれる一族がいて、国を預かっていた。影が通れば鐘を鳴らし、見たものを帳面に書く。それだけの一族さ。",
+        "戸が閉じているだろう。ここは都だった。……そう呼ぶ人は、もう少ないけれどね。\n昔は「空見」と呼ばれる一族がいて、国を預かっていた。影が通れば鐘を鳴らし、見たものを帳面に書く。それだけの一族さ。",
         "Shut, yes. This was a capital once. ...Not many call it that anymore.\nThere was a line here called the Skywatchers who kept the nation. When the shadow passed they rang the bell and wrote down what they saw. That was all they were.",
         face="neutral", next="capital2", note="都の話 1 (空見の一族)")
 st.node("capital2",
-        "その一族は絶えた。砦は塔だけが生きている。わたしは最後の鐘守だ。\n家は空いている。好きなのを使えばいい。……戸の閉まっている所は、まだ開けられない。時が来れば開く。",
+        "その一族は絶えた。砦は、塔だけが生きている。あたしが最後の鐘守さ。\n家は空いているよ。好きなのを使えばいい。……戸の閉まっている所は、まだ開けられない。時が来れば開くよ。",
         "That line is gone. Of the keep only the tower still lives. I am the last bell keeper.\nThe houses are empty. Use whichever you like. ...The doors that are shut cannot be opened yet. They will open when the time comes.",
         face="grave", next="menu", do=[set_flag("capital_told"), add_aff(1)], note="都の話 2 (最後の鐘守。閉じた施設)")
 
@@ -362,7 +362,7 @@ st.node("book",
         "An old notebook. Let me see.\n\"Write it down before you forget\"... is it.",
         next="book2", do=[set_flag("book_shown"), add_aff(2)], note="伝承の書を持っているとき")
 st.node("book2",
-        "この字、どこかで見た気がするよ。……いや、気のせいだろう。\n大事にしておき。書いておけば、忘れても残る。",
+        "この字、どこかで見た気がするよ。……いや、気のせいだろう。\n大事にしておおき。書いておけば、忘れても残る。",
         "I feel I've seen this hand somewhere. ...No, my imagination.\nKeep it safe. What's written stays, even when you forget.",
         face="grave", next="@entry")
 
@@ -519,8 +519,8 @@ wc.node("c_song",
         "You heard it, last night's song. That's the one I chase.\nBut it was closer than ever. ...Too close, I thought.",
         face="grave", next="c_song2", do=[set_flag("song_told"), add_aff(2)], note="序盤: 空の歌")
 wc.node("c_song2",
-        "鯨が降りてくるのは、たいてい歌のあとだ。……今夜か、明日か。\n覚悟しておけ。俺も、してはいるんだ。",
-        "The whale usually comes down after the song. ...Tonight, or tomorrow.\nBrace yourself. I'm trying to myself.",
+        "歌が近いのは、鯨が近いということだ。\n支度ができたら、空をよく見ておけ。覚悟もな。俺も、してはいるんだ。",
+        "A close song means a close whale.\nOnce you're ready, keep your eyes on the sky. Brace yourself, too. I'm trying to myself.",
         next="@entry")
 
 wc.node("c_whale1",
@@ -536,10 +536,10 @@ wc.node("c_whale_iron",
         "You cannot climb the chain bare-handed. ...The traveller who came here before wore iron.\nThe cairns from the north gate over the hills are that one's road. Where they end is called the Bone Pit.",
         next="c_whale3", note="一章の支度の段「鉄の跡」(ch1/trail_iron) の理由。この話のあと、支度の段 3 本が出る (34 の 4.2)")
 wc.node("c_whale3",
-        "あんたの上には、来るかもしれないな。\n……もし鎖が届いたら、迷わずつかめ。",
-        "Maybe it'll come over you.\n...If the chain reaches you, grab it without hesitating.",
+        "鯨が降りてくる前に、支度をしておけ。まずは鉄だ。石標を辿って、骨の坑へ行け。\n刃のことは旅の職人が、盾のことは語り部が知っている。……支度ができたら、あんたの上に来るかもしれないな。",
+        "Get ready before the whale comes down. Iron first. Follow the cairns to the Bone Pit.\nThe traveling artisan knows about blades, the storyteller about shields. ...Once you're ready, maybe it'll come over you.",
         options=[
-            ("grab", "つかんでみる。", "I'll grab it.", {"do": [add_aff(2)]}),
+            ("grab", "支度をしてくる。", "I'll go and get ready.", {"do": [add_aff(2)]}),
             ("afraid", "怖くはないのか？", "Aren't you afraid?", {"goto": "c_afraid"}),
         ])
 wc.node("c_afraid",
@@ -547,8 +547,8 @@ wc.node("c_afraid",
         "Of course I am.\n...But when I look up at it, it feels like I'm being called. As if there's somewhere I have to go.",
         face="grave", next="@entry")
 wc.node("c_when",
-        "歌が聞こえたら、空を見ろ。鯨が歌うのは、降りてくる前だ。\nそれと……鯨は、人のいる所に降りてくる。まるで、誰かを迎えに来るみたいにな。",
-        "When you hear the song, look at the sky. The whale sings before it comes down.\nAnd... it comes down where there are people. As if it's come to fetch someone.",
+        "歌が聞こえたら、空を見ろ。鯨が歌うのは、降りてくる前だ。\nそれまでに、支度を済ませておけ。……鯨は、人のいる所に降りてくる。まるで、誰かを迎えに来るみたいにな。",
+        "When you hear the song, look at the sky. The whale sings before it comes down.\nHave yourself ready by then. ...It comes down where there are people. As if it's come to fetch someone.",
         next="@entry")
 wc.node("c_peak",
         "北のほうで、峰の頂がなくなっているのを見た。\n崩れたんじゃない。上から削ったみたいに平らで、切り口がまだ白かった。……あれは、鯨じゃない。もっと大きな何かだ。",
@@ -638,6 +638,9 @@ def quest(qid, category, order, giver, title, summary, done, stages, reward, sta
             sj["xp"] = s["xp"]
         sj["objectives"] = []
         text(f"{base}.{s['id']}.journal", *s["journal"])
+        # lead: 段の書き出しの一言 (段に入ったとき字幕に一度。誰が頼み、何のためか。client/quest/QuestClient.leadKey)
+        if s.get("lead"):
+            text(f"{base}.{s['id']}.lead", *s["lead"])
         for o in s["objectives"]:
             oj = {k: v for k, v in o.items() if k not in ("ja", "en", "sub")}
             sj["objectives"].append(oj)
@@ -680,29 +683,49 @@ quest(MAIN, "main", 10, ST,
            "skip_if": lore("chapter1/stone_whale"),
            "journal": ("影が通った年には、決まって遠い空から“歌”が聞こえるという。\nその歌を追う旅人が、少し離れた所で火を焚いている。煙が目印だ。",
                        "In the years the shadow passes, a \"song\" is always heard from the far sky.\nA traveler who chases that song keeps a fire a little way off. Follow the smoke."),
+           "lead": ("語り部によると、空の歌を追う旅人が、村の外れで火を焚いているという。",
+                    "The storyteller says a traveler who chases the sky's song keeps a fire at the edge of the village."),
            "objectives": [{"id": "talk", "type": "talk", "target": WC, "topic": "c_whale2",
                            "ja": "火を焚く鯨追いに、話を聞きに行こう", "en": "Talk to the Whale Chaser by the fire"}]},
+          # 一章の支度 (34 の 4.2。2026-10-22): 鯨追いの話のあと、支度の段 3 本 (鉄の跡 → 折れた剣 → 盾と糧) を順に。
+          # 三本そろうまで岩鯨は現れない (titan.TitanEvents・story.ch1.Ch1Trails.callReady)。帯は支度の段のほうを出す (ObjectiveStrip.current)
+          {"id": "prepare",
+           "skip_if": lore("chapter1/stone_whale"),
+           "journal": ("イサナは言った。鎖は素手では上れない、と。前にここへ来た旅人は、鉄を着て、研いだ刃と盾を持っていたらしい。\n鯨が降りてくる前に、同じ支度をしておこう。鉄はイサナ、刃は旅の職人、盾は語り部が知っている。",
+                       "Isana said the chain cannot be climbed bare-handed. The traveller who came before wore iron, and carried a honed blade and a shield.\nGet ready the same way before the whale comes down. Isana knows about the iron, the artisan about the blade, the storyteller about the shield."),
+           "lead": ("イサナ「鯨が来る前に、支度をしておけ。鉄と、研いだ刃と、盾だ」",
+                    "Isana: \"Get ready before the whale comes. Iron, a honed blade, and a shield.\""),
+           "objectives": [{"id": "ready", "type": "condition", "if": {"type": "prep", "chapter": 1},
+                           "ja": "鉄と刃と盾で、鯨を迎える支度をしよう", "en": "Ready iron, blade and shield"}]},
           {"id": "see_whale", "xp": 60,
-           "journal": ("歌の主は、空を泳ぐ岩の鯨だという。ときどき雲の下まで降りてきて、鎖を垂らす。\n歌が聞こえたら、空を見ろ。",
-                       "The singer is said to be a whale of rock that swims in the sky. Sometimes it comes below the clouds and lets down a chain.\nWhen you hear the song, look at the sky."),
+           "journal": ("支度はととのった。鉄を着て、研いだ刃と盾を持っている。前の旅人と同じ身なりだ。\n歌の主は、空を泳ぐ岩の鯨だという。ときどき雲の下まで降りてきて、鎖を垂らす。歌が聞こえたら空を見ろ、とイサナは言っていた。",
+                       "You are ready: iron on your back, a honed blade, a shield. Dressed like the traveller who came before.\nThe singer is said to be a whale of rock that swims in the sky. Sometimes it comes below the clouds and lets down a chain. When you hear the song, look at the sky, Isana said."),
+           "lead": ("支度はととのった。あとは、イサナの言う岩鯨を待つだけだ。",
+                    "You are ready. All that is left is to wait for Isana's whale."),
            "objectives": [{"id": "see", "type": "lore", "targets": ["chapter1/stone_whale"],
                            "ja": "歌に耳をすまし、空を泳ぐ岩鯨を探そう", "en": "Listen for the song; look for the whale",
-                           "sub": {"wait": ("夕方の空に、岩鯨を探そう", "Look for the stone whale in the dusk sky")}}]},
+                           "sub": {"wait": ("空を見上げて、岩鯨を待とう", "Look up and wait for the stone whale")}}]},
           {"id": "board", "xp": 60,
-           "journal": ("岩鯨が、すぐそこにいる。鎖をつかめば背中へ上がれる、とイサナは言っていた。",
-                       "The stone whale is right there. Isana said the chain would take you up onto its back."),
+           "journal": ("岩鯨が、すぐそこにいる。鎖をつかめば背中へ上がれる、とイサナは言っていた。\nイサナが一度もたどり着けなかった場所だ。",
+                       "The stone whale is right there. Isana said the chain would take you up onto its back.\nIt is the place Isana never once reached."),
+           "lead": ("鎖が届けば、背中へ上がれる。イサナが一度もたどり着けなかった場所だ。",
+                    "If the chain reaches you, you can climb to its back. The place Isana never once reached."),
            "objectives": [{"id": "ride", "type": "lore", "targets": ["chapter1/sky_ruins"],
                            "ja": "鎖をのぼって、岩鯨の背中へ渡ろう", "en": "Climb the chain to its back",
                            "sub": {"wait": ("空の岩鯨を、追いかけよう", "Follow the stone whale")}}]},
           {"id": "inscriptions", "xp": 90,
            "journal": ("背中には、崩れた町があった。祠の階段を下りると、三つの道が奥へ続いている。\nどの道の先にも、背中の民が碑文を残しているはずだ。",
                        "On its back lay a ruined town. Below the shrine stairs, three paths lead deeper in.\nAt the end of each, the people of the back must have left an inscription."),
+           "lead": ("背中には、崩れた町があった。ここに誰がいたのか、碑文が語るかもしれない。",
+                    "A ruined town lies on its back. The inscriptions may tell who lived here."),
            "objectives": [{"id": "read", "type": "lore", "count": 3,
                            "targets": ["chapter1/inscription_west", "chapter1/inscription_east", "chapter1/inscription_below"],
                            "ja": "背中の碑文を三つ読んでみよう", "en": "Read the back's three inscriptions"}]},
           {"id": "heart",
            "journal": ("封印が解けた。奥の扉の向こうで、何かが脈を打っている。\n鼓動のそばに、何かが納められているという。",
                        "The seal is broken. Beyond the inner door, something is beating.\nSomething, they say, was laid to rest beside the heartbeat."),
+           "lead": ("封印が解けた。奥の扉の向こうで、何かが脈を打っている。",
+                    "The seal is broken. Beyond the inner door, something beats."),
            "objectives": [
                {"id": "still", "type": "lore", "targets": ["chapter1/heart_stilled"],
                 "ja": "体の奥で脈打つものを、確かめに行こう", "en": "Find what beats deep inside the body"},
@@ -711,6 +734,8 @@ quest(MAIN, "main", 10, ST,
           {"id": "return", "mode": "any",
            "journal": ("欠片は、ほのかに温かい。\n村へ戻って、このことを話そう。",
                        "The fragment is faintly warm.\nReturn to the village and tell them."),
+           "lead": ("手の中の欠片が、ほのかに温かい。語り部とイサナに知らせよう。",
+                    "The fragment in your hand is faintly warm. Tell the storyteller and Isana."),
            "objectives": [
                {"id": "storyteller", "type": "talk", "target": ST, "topic": "fragment3",
                 "ja": "語り部に、欠片を見せに行こう", "en": "Show the fragment to the storyteller"},
@@ -750,10 +775,10 @@ quest(SHARDS, "sub", 30, WC,
            "objectives": [{"id": "shards", "type": "collect", "target": "skyabyss:stone_whale_shard", "count": 3,
                            "ja": "岩鯨の鱗片を集める", "en": "Collect stone whale scales"}]},
           {"id": "deliver",
-           "journal": ("欠片が三つそろった。\nイサナの火のところへ持っていこう。",
-                       "You have three shards.\nTake them to Isana's fire."),
+           "journal": ("鱗片が三つそろった。\nイサナの火のところへ持っていこう。",
+                       "You have three scales.\nTake them to Isana's fire."),
            "objectives": [{"id": "give", "type": "talk", "target": WC, "topic": "c_shards_thanks",
-                           "ja": "イサナに、欠片を三つ渡す", "en": "Give Isana three shards"}]},
+                           "ja": "イサナに、鱗片を三つ渡す", "en": "Give Isana three scales"}]},
       ],
       {"xp": 120, "items": [{"item": "minecraft:spyglass", "count": 1}], "affinity": {WC: 10}})
 

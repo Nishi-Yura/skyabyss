@@ -61,7 +61,8 @@ public final class GuideSelfTest {
                 SelfTestRunner.Step.once("prep chain", GuideSelfTest::prepChain),
                 SelfTestRunner.Step.once("wayfarer notes", GuideSelfTest::wayfarerNotes),
                 SelfTestRunner.Step.once("heartbeat ward", GuideSelfTest::heartbeatWard),
-                SelfTestRunner.Step.once("site cave", GuideSelfTest::siteCave),
+                SelfTestRunner.Step.once("site cave (load)", GuideSelfTest::siteCaveLoad),
+                SelfTestRunner.Step.once("site cave", 60, GuideSelfTest::siteCave),
                 SelfTestRunner.Step.once("xp budget", GuideSelfTest::xpBudget));
     }
 
@@ -262,6 +263,11 @@ public final class GuideSelfTest {
         ServerLevel level = server.overworld();
         FakePlayer a = player(level, "notes_a");
         ResourceLocation recipe = ResourceLocation.withDefaultNamespace("stone_pickaxe");
+        // 二章・三章は本物の旅装のレシピを足している (guide/Ch2Gear・三章の旅装)。試すあいだだけ外し、終わったら戻す
+        List<ResourceLocation> real2 = List.copyOf(WayfarerNotes.recipes(2));
+        List<ResourceLocation> real3 = List.copyOf(WayfarerNotes.recipes(3));
+        WayfarerNotes.clearRecipes(2);
+        WayfarerNotes.clearRecipes(3);
         try {
             ItemStack notes = WayfarerNotes.make(2);
             check(f, WayfarerNotes.chapterOf(notes) == 2 && notes.is(GuideSetup.WAYFARER_NOTES.get()) && WayfarerNotes.chapterOf(WayfarerNotes.make(9)) == 4
@@ -300,6 +306,9 @@ public final class GuideSelfTest {
             f.add("crashed: " + e);
         } finally {
             WayfarerNotes.clearRecipes(2);
+            WayfarerNotes.clearRecipes(3);
+            WayfarerNotes.registerRecipes(2, real2.toArray(ResourceLocation[]::new));
+            WayfarerNotes.registerRecipes(3, real3.toArray(ResourceLocation[]::new));
             Growth.get(a).discoveries.clear();
         }
         report("wayfarer notes", f);
@@ -662,6 +671,7 @@ public final class GuideSelfTest {
             SiteSpawner.clearAll(level);
             SiteSpawner.unregister(SITE);
             SiteSpawner.unregister(CAP_SITE);
+            siteCaveUnload(level);
             ChapterMobSpawner.clearAll(level);
             SiteTreasure.unregister(TREASURE);
             SiteTreasure.unregister(REPEAT);
@@ -691,6 +701,27 @@ public final class GuideSelfTest {
         return list;
     }
 
+    // 偽の人は場所を読み込まないので、湧き台の場所 (出現地点から 24 ブロック先まで) を先に読み込んでおく。
+    // 読み込みは次の tick から効くので、"site cave" はこの段から 3 秒あとに流す。読み込みは "site cave" の終わりに外す
+    private static void siteCaveLoad(MinecraftServer server) {
+        ServerLevel level = server.overworld();
+        BlockPos spawn = level.getSharedSpawnPos();
+        for (int dx = -2; dx <= 4; dx++) {
+            for (int dz = -2; dz <= 4; dz++) {
+                level.setChunkForced((spawn.getX() >> 4) + dx, (spawn.getZ() >> 4) + dz, true);
+            }
+        }
+    }
+
+    private static void siteCaveUnload(ServerLevel level) {
+        BlockPos spawn = level.getSharedSpawnPos();
+        for (int dx = -2; dx <= 4; dx++) {
+            for (int dz = -2; dz <= 4; dz++) {
+                level.setChunkForced((spawn.getX() >> 4) + dx, (spawn.getZ() >> 4) + dz, false);
+            }
+        }
+    }
+
     private static void kill(ServerLevel level, List<UUID> ids) {
         for (Entity e : entities(level, ids)) {
             e.discard();
@@ -701,6 +732,11 @@ public final class GuideSelfTest {
         BlockPos spawn = level.getSharedSpawnPos();
         a.setPos(spawn.getX() + 0.5, level.getHeight(Heightmap.Types.MOTION_BLOCKING, spawn.getX(), spawn.getZ()), spawn.getZ() + 0.5);
         UUID ga = Groups.keyOf(a);
+        // 本物のひとり歩き (二章・三章の地上の敵) は、この段のあいだ外しておく (戻すのは finally)
+        List<ChapterMobSpawner.Wanderer> real = ChapterMobSpawner.registered();
+        for (ChapterMobSpawner.Wanderer w : real) {
+            ChapterMobSpawner.unregister(w.id());
+        }
         try {
             ChapterMobSpawner.register(new ChapterMobSpawner.Wanderer("selftest_wanderer", Chapters.WHALE, "skyabyss:moss_crawler", 5, ChapterMobSpawner.Time.ANY));
             ChapterMobSpawner.chapterOverride = p -> Chapters.WHALE;
@@ -744,6 +780,9 @@ public final class GuideSelfTest {
             check(f, ChapterMobSpawner.liveIds().isEmpty() && entities(level, live).stream().noneMatch(Entity::isAlive), "wanderers stayed after the group left");
         } finally {
             ChapterMobSpawner.unregister("selftest_wanderer");
+            for (ChapterMobSpawner.Wanderer w : real) {
+                ChapterMobSpawner.register(w);
+            }
             ChapterMobSpawner.chapterOverride = null;
             ChapterMobSpawner.anchorOverride = null;
             ChapterMobSpawner.clearAll(level);

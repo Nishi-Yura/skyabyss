@@ -30,7 +30,7 @@
   "item.skyabyss.moth_dust.desc": "雷蛾の翅の粉。作業台で矢に付けると、光の矢になる",
   "effect.skyabyss.static_ward": "静電避け",
   "message.skyabyss.storm_charm.armed": "腕に稲妻がまとわりつく（あと %s 回）",
-  "gui.skyabyss.forge.exchange_no_clear.thunder_wing": "雷翼の心臓を倒すと、選べるようになる",
+  "gui.skyabyss.forge.exchange_no_clear.thunder_wing": "雷翼の心臓を止めると、選べるようになる",
   "gui.skyabyss.forge.exchange_all_owned.thunder_wing": "雷翼の専用伝説は、すべて手にしている",
   "skyabyss_record.h.thunder_wing": "雷翼"
 }

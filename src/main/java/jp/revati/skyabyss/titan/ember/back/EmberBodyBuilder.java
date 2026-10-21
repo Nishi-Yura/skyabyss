@@ -74,11 +74,17 @@ public final class EmberBodyBuilder {
 
     // 建てる (かかった時間 ms を返す)。起動時の予約 (schedule) が途中なら取り消す (置いた分は「変わるブロックだけ」なので飛ばせる)
     public static long build(ServerLevel back, TitanBackData data) {
-        BackBuildJobs.cancel(back.dimension());
         long start = System.currentTimeMillis();
+        if (BackBuildJobs.finishNow(back.dimension()) && !data.needsBuild(buildVersion())) {
+            return System.currentTimeMillis() - start;
+        }
         long t0 = System.currentTimeMillis();
         int placed = BODY.place(back, EmberKit.FLAGS, y -> EmberKit.AIR);
-        return buildRest(back, data, start, placed, System.currentTimeMillis() - t0);
+        BackBuildJobs.Steps rest = restSteps(back, data, start, () -> placed, System.currentTimeMillis() - t0);
+        while (!rest.step(Long.MAX_VALUE)) {
+            // 最後まで
+        }
+        return lastBuildMs;
     }
 
     // 起動時: 体を何 tick かに分けて置き、置き終えた tick に残りを建てる (BackBuildJobs。13 の 24.5節)
@@ -96,42 +102,111 @@ public final class EmberBodyBuilder {
             SkyAbyss.LOGGER.info("Rebuilding the ember back (build {} -> {})", data.layoutVersion(), version);
         }
         BackBuildJobs.Job job = BODY.job(back, EmberKit.FLAGS, y -> EmberKit.AIR);
-        BackBuildJobs.schedule("ember back body", back, job, () -> buildRest(back, data, System.currentTimeMillis(), job.placed(), 0));
+        long start = System.currentTimeMillis();
+        BackBuildJobs.Steps steps = new BackBuildJobs.Steps("ember back body").thenJob("body", () -> job);
+        BackBuildJobs.Steps rest = restSteps(back, data, start, job::placed, 0);
+        BackBuildJobs.schedule("ember back body", back, new BackBuildJobs.Job() {
+            private boolean bodyDone;
+
+            @Override
+            public boolean step(long deadlineNanos) {
+                if (!bodyDone) {
+                    if (!steps.step(deadlineNanos)) {
+                        return false;
+                    }
+                    bodyDone = true;
+                    if (System.nanoTime() >= deadlineNanos) {
+                        return false;
+                    }
+                }
+                return rest.step(deadlineNanos);
+            }
+
+            @Override
+            public int placed() {
+                return job.placed();
+            }
+        }, () -> {
+        });
     }
 
-    private static long buildRest(ServerLevel back, TitanBackData data, long start, int placed, long tBody) {
-        EmberBodyBuilder b = new EmberBodyBuilder(back);
-        long t0 = System.currentTimeMillis();
-        b.restoreUnderground();
-        b.plugSlit();
-        b.mouth();
-        b.throat();
-        b.hub();
-        b.tubes();
-        b.trialBoxes();
-        b.gateShaft();
-        b.ante();
-        b.wallStair();
-        b.deckRooms();
-        b.skin();
-        long tCarve = System.currentTimeMillis() - t0;
-        t0 = System.currentTimeMillis();
-        EmberBackRooms.buildAll(back);
-        long tRooms = System.currentTimeMillis() - t0;
-        b.fixtures();
-        b.deckContent();
+    // 体を置いたあとの仕上げ。手順の順は前の一度に建てる形と同じ (一つずつ tick に分けて進められる)
+    private static BackBuildJobs.Steps restSteps(ServerLevel back, TitanBackData data, long start, java.util.function.IntSupplier placed, long tBody) {
+        BackBuildJobs.Steps s = new BackBuildJobs.Steps("ember back body");
+        EmberBodyBuilder[] holder = new EmberBodyBuilder[1];
+        long[] t = new long[4];
+        s.then("underground", () -> {
+            holder[0] = new EmberBodyBuilder(back);
+            t[0] = System.currentTimeMillis();
+            holder[0].restoreUnderground();
+        });
+        s.then("slit", () -> holder[0].plugSlit());
+        s.then("mouth", () -> holder[0].mouth());
+        s.then("throat", () -> holder[0].throat());
+        s.then("hub", () -> holder[0].hub());
+        s.then("tubes", () -> holder[0].tubes());
+        s.then("trial boxes", () -> holder[0].trialBoxes());
+        s.then("gate shaft", () -> holder[0].gateShaft());
+        s.then("ante", () -> holder[0].ante());
+        s.then("wall stair", () -> holder[0].wallStair());
+        s.then("deck rooms", () -> holder[0].deckRooms());
+        s.then("skin", () -> {
+            holder[0].skin();
+            t[1] = System.currentTimeMillis() - t[0];
+        });
+        s.then("throat lights", () -> holder[0].throatLights());
+        for (String room : EmberBackRooms.roomOrder()) {
+            s.then("room " + room, () -> {
+                long r0 = System.currentTimeMillis();
+                EmberBackRooms.buildOne(back, room);
+                t[2] += System.currentTimeMillis() - r0;
+            });
+        }
+        s.then("fixtures", () -> holder[0].fixtures());
+        s.then("deck content", () -> holder[0].deckContent());
         // ボス部屋の大門 (熾の底の入口・鍛え手の扉)。部屋・休み場・碑文を置いたあと
-        EmberBossGates.build(back);
-        b.repairPockets(back);
-        b.smoothDimples();
-        data.markBuilt(buildVersion());
-        EmberBackTrials.afterBuild(back);
-        jp.revati.skyabyss.titan.light.RouteLamps.place(back, "ember");
-        long ms = System.currentTimeMillis() - start;
-        lastBuildMs = ms;
-        SkyAbyss.LOGGER.info("Built the ember back (build {}): {} body blocks in {} ms, carving {} ms, rooms {} ms, total {} ms",
-                buildVersion(), placed, tBody, tCarve, tRooms, ms);
-        return ms;
+        s.then("boss gates", () -> EmberBossGates.build(back));
+        // 順路の部屋を分ける封じ (入口の箱の先・炉心の広間。trial/RouteSeals。32 の 2.5)
+        s.then("route seals", () -> jp.revati.skyabyss.trial.RouteSeals.place(back, jp.revati.skyabyss.progress.Titans.EMBER));
+        jp.revati.skyabyss.titan.audit.BackReach.RepairJob[] repair = new jp.revati.skyabyss.titan.audit.BackReach.RepairJob[1];
+        s.thenJob("repair", () -> repair[0] = holder[0].repairJob(back));
+        int[] dimples = new int[1];
+        s.then("repair report", () -> {
+            if (repair[0] != null && repair[0].filled() > 0) {
+                SkyAbyss.LOGGER.info("Ember back: filled {} blocks of dead-end pockets on the body's outside", repair[0].filled());
+            }
+        });
+        for (int pass = 0; pass < 2; pass++) {
+            for (Box b : DIMPLE_BOXES) {
+                s.then("dimples", () -> dimples[0] += holder[0].smoothDimples(b));
+            }
+        }
+        s.then("dimples report", () -> {
+            if (dimples[0] > 0) {
+                SkyAbyss.LOGGER.info("Ember back: smoothed {} one-block dimples", dimples[0]);
+            }
+        });
+        s.then("mark built", () -> {
+            data.markBuilt(buildVersion());
+            EmberBackTrials.afterBuild(back);
+            jp.revati.skyabyss.titan.light.RouteLamps.place(back, "ember");
+            long ms = System.currentTimeMillis() - start;
+            lastBuildMs = ms;
+            SkyAbyss.LOGGER.info("Built the ember back (build {}): {} body blocks in {} ms, carving {} ms, rooms {} ms, total {} ms",
+                    buildVersion(), placed.getAsInt(), tBody, t[1], t[2], ms);
+        });
+        return s;
+    }
+
+    // 体の外 (脚のあいだ・火口の縁など) の、落ちたら出られない凹みを、詰み監査で見つけて埋める (部屋・通路の中は触らない)。docs/design/13 の詰み監査
+    jp.revati.skyabyss.titan.audit.BackReach.RepairJob repairJob(ServerLevel back) {
+        List<jp.revati.skyabyss.titan.audit.BackReach.Box> within = List.of(
+                new jp.revati.skyabyss.titan.audit.BackReach.Box(-190, 63, 80, -40, 130, 240),
+                new jp.revati.skyabyss.titan.audit.BackReach.Box(40, 63, 80, 190, 130, 240),
+                new jp.revati.skyabyss.titan.audit.BackReach.Box(-72, 150, -130, 72, 232, 24),
+                new jp.revati.skyabyss.titan.audit.BackReach.Box(-110, 63, -245, 110, 128, -90));
+        return new jp.revati.skyabyss.titan.audit.BackReach.RepairJob(back, () -> EmberBackAudit.spec(back), within, 200, 14,
+                Blocks.BASALT.defaultBlockState());
     }
 
     // 体の外 (脚のあいだ・火口の縁など) の、落ちたら出られない凹みを、詰み監査で見つけて埋める (部屋・通路の中は触らない)。docs/design/13 の詰み監査
@@ -151,40 +226,48 @@ public final class EmberBodyBuilder {
     // 1 つだけ四方より 1 低い床のブロック (建築の監査 FLOOR_DIMPLE) を、同じブロックを重ねて平らにする。体の外 (repairPockets の範囲) と喉・尾根の広間の中。
     // 床 = 上が 2 つ空いた固いブロック。四方の隣も同じ高さの床 (上が空いている) より 1 高く並んでいる所
     void smoothDimples() {
-        List<Box> boxes = List.of(new Box(-190, 63, 80, -40, 130, 240), new Box(40, 63, 80, 190, 130, 240), new Box(-72, 150, -130, 72, 232, 24),
-                new Box(-110, 63, -245, 110, 128, -90));
         int filled = 0;
         for (int pass = 0; pass < 2; pass++) {
-            for (Box b : boxes) {
-                for (int x = b.minX(); x <= b.maxX(); x++) {
-                    for (int z = b.minZ(); z <= b.maxZ(); z++) {
-                        for (int y = b.minY(); y <= b.maxY(); y++) {
-                            BlockState s = kit.get(x, y, z);
-                            if (s.isAir() || !s.isCollisionShapeFullBlock(kit.level(), new BlockPos(x, y, z))
-                                    || !kit.get(x, y + 1, z).isAir() || !kit.get(x, y + 2, z).isAir()) {
-                                continue;
-                            }
-                            boolean pit = true;
-                            for (int[] d : new int[][] {{1, 0}, {-1, 0}, {0, 1}, {0, -1}}) {
-                                BlockState n = kit.get(x + d[0], y + 1, z + d[1]);
-                                if (n.isAir() || !n.isCollisionShapeFullBlock(kit.level(), new BlockPos(x + d[0], y + 1, z + d[1]))
-                                        || !kit.get(x + d[0], y + 2, z + d[1]).isAir()) {
-                                    pit = false;
-                                    break;
-                                }
-                            }
-                            if (pit) {
-                                kit.set(x, y + 1, z, s);
-                                filled++;
-                            }
-                        }
-                    }
-                }
+            for (Box b : DIMPLE_BOXES) {
+                filled += smoothDimples(b);
             }
         }
         if (filled > 0) {
             SkyAbyss.LOGGER.info("Ember back: smoothed {} one-block dimples", filled);
         }
+    }
+
+    static final List<Box> DIMPLE_BOXES = List.of(new Box(-190, 63, 80, -40, 130, 240), new Box(40, 63, 80, 190, 130, 240), new Box(-72, 150, -130, 72, 232, 24),
+            new Box(-110, 63, -245, 110, 128, -90));
+
+    // 箱一つ分 (smoothDimples の一回分。手順を tick に分けるとき用)
+    int smoothDimples(Box b) {
+        int filled = 0;
+        for (int x = b.minX(); x <= b.maxX(); x++) {
+            for (int z = b.minZ(); z <= b.maxZ(); z++) {
+                for (int y = b.minY(); y <= b.maxY(); y++) {
+                    BlockState s = kit.get(x, y, z);
+                    if (s.isAir() || !s.isCollisionShapeFullBlock(kit.level(), new BlockPos(x, y, z))
+                            || !kit.get(x, y + 1, z).isAir() || !kit.get(x, y + 2, z).isAir()) {
+                        continue;
+                    }
+                    boolean pit = true;
+                    for (int[] d : new int[][] {{1, 0}, {-1, 0}, {0, 1}, {0, -1}}) {
+                        BlockState n = kit.get(x + d[0], y + 1, z + d[1]);
+                        if (n.isAir() || !n.isCollisionShapeFullBlock(kit.level(), new BlockPos(x + d[0], y + 1, z + d[1]))
+                                || !kit.get(x + d[0], y + 2, z + d[1]).isAir()) {
+                            pit = false;
+                            break;
+                        }
+                    }
+                    if (pit) {
+                        kit.set(x, y + 1, z, s);
+                        filled++;
+                    }
+                }
+            }
+        }
+        return filled;
     }
 
     // 最後に建てたときの時間 (自己テストの報告用。建てていなければ -1)
@@ -352,6 +435,20 @@ public final class EmberBodyBuilder {
         track(-NECK_HALF, MOUTH_FLOOR - 1, NECK_Z1, NECK_HALF, MOUTH_FLOOR + 9, HALL_Z1 - 1);
         track(-HALL_HALF, MOUTH_FLOOR - 1, HALL_Z1, HALL_HALF, THROAT_LANDING + 14, HALL_Z2);
         track(-RAMP_HALF, THROAT_LANDING - 1, RAMP_Z1, RAMP_HALF, FLOOR_HUB + 8, HUB_DOOR_NORTH.getZ());
+    }
+
+    // 順路の入口の箱 (喉の坂の休み場の平ら。32 の 2.2) の灯り (版 31: 真っ暗で予告の文字しか見えなかった)。壁の皮 (skin) を張ったあとに置く
+    void throatLights() {
+        for (int z = -128; z <= -120; z += 4) {
+            for (int x : new int[] {-RAMP_HALF - 1, RAMP_HALF + 1}) {
+                kit.set(x, THROAT_LANDING + 2, z, EmberKit.GLOW);
+            }
+        }
+        for (int[] c : new int[][] {{-RAMP_HALF, -129}, {RAMP_HALF, -129}, {-RAMP_HALF, -121}, {RAMP_HALF, -121}}) {
+            if (throatFloor(c[1]) == THROAT_LANDING) {
+                kit.set(c[0], THROAT_LANDING + 1, c[1], Blocks.LANTERN.defaultBlockState());
+            }
+        }
     }
 
     // ---------------------------------------------------------------- 炉心の広間 (円 半径 27、床 92、天井は丸く 116〜108)

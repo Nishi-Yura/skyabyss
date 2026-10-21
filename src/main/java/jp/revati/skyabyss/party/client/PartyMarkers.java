@@ -246,9 +246,10 @@ public final class PartyMarkers {
     }
 
     // 体力の棒 (幅 14、長さ = 体力)
-    private static void drawBar(GuiGraphics g, int x, int y, int hp, int rgb) {
-        g.fill(x, y, x + 14, y + 2, 0x66000000);
-        g.fill(x, y, x + Math.round(14 * Mth.clamp(hp, 0, 100) / 100f), y + 2, 0xFF000000 | rgb);
+    // 体力の棒: 札の幅いっぱい、太さ 3 (前は 14 画素で短かった。2026-10-22 の二人の試遊)
+    private static void drawBar(GuiGraphics g, int x, int y, int w, int hp, int rgb) {
+        g.fill(x, y, x + w, y + 3, 0x88000000);
+        g.fill(x, y, x + Math.round(w * Mth.clamp(hp, 0, 100) / 100f), y + 3, 0xFF000000 | rgb);
     }
 
     // 頭の上の札: 記号 + 名前と距離 + 体力の棒 + 小さな三角。重なったら上へずらす
@@ -258,13 +259,13 @@ public final class PartyMarkers {
         g.fill(box[0], box[1], box[0] + box[2], box[1] + box[3], 0x58000000);
         drawSymbol(g, box[0] + 3, box[1] + 3, symbol, rgb);
         g.drawString(font, label, box[0] + 3 + ICON_W, box[1] + 2, TextStyle.alpha(0.88f) | TextStyle.BODY.color(), true);
-        int ty = box[1] + box[3] + 1;
+        int ty = box[1] + box[3] + (hp >= 0 ? 4 : 1);
         int color = TextStyle.alpha(0.8f) | rgb;
         g.fill(sx - 2, ty, sx + 3, ty + 1, color);
         g.fill(sx - 1, ty + 1, sx + 2, ty + 2, color);
         g.fill(sx, ty + 2, sx + 1, ty + 3, color);
         if (hp >= 0) {
-            drawBar(g, box[0] + 3 + ICON_W, box[1] + box[3] - 2, hp, rgb);
+            drawBar(g, box[0], box[1] + box[3], box[2], hp, rgb);
         }
     }
 
@@ -274,7 +275,7 @@ public final class PartyMarkers {
         drawSymbol(g, box[0] + 3, box[1] + 3, symbol, rgb);
         g.drawString(font, label, box[0] + 3 + ICON_W, box[1] + 2, TextStyle.alpha(0.88f) | TextStyle.CAPTION.color() | 0x202020, true);
         if (hp >= 0) {
-            drawBar(g, box[0] + 3 + ICON_W, box[1] + box[3] - 2, hp, rgb);
+            drawBar(g, box[0], box[1] + box[3], box[2], hp, rgb);
         }
     }
 

@@ -299,6 +299,11 @@ public final class SelfTestRunner {
         steps.addAll(jp.revati.skyabyss.trial.ember.EmberDeckSelfTest.steps());
         // 巨神の順路 (入口・段の運び・中ボス・あきらめ・区画)。docs/design/32。背が建ててある巨神だけ世界の検査をする。SKYABYSS_SELFTEST_ONLY="trial route"
         steps.addAll(jp.revati.skyabyss.trial.TrialRouteSelfTest.steps());
+        steps.addAll(jp.revati.skyabyss.trial.RouteWalkSelfTest.steps());
+        // 二人の試遊 (2026-10-22): 敵の無敵の間・背の耐久。SKYABYSS_SELFTEST_ONLY="combat rules"
+        steps.addAll(jp.revati.skyabyss.combat.CombatRulesSelfTest.steps());
+        // 順路の部屋が分かれている (封じを壁として歩く)。SKYABYSS_SELFTEST_ONLY="route rooms"
+        steps.addAll(jp.revati.skyabyss.trial.RouteRoomsSelfTest.steps());
         // 区画の写し (写せるセルを区画へ写して動かす)。docs/design/32 の 5 章。SKYABYSS_SELFTEST_ONLY="trial slot"
         steps.addAll(jp.revati.skyabyss.trial.TrialSlotSelfTest.steps());
         // 巨神の祠・歌片・巨神の見え方。docs/design/32 の 3 章。SKYABYSS_SELFTEST_ONLY="trial shrine"

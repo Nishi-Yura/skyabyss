@@ -357,14 +357,15 @@ public final class Ch2GroundSelfTest {
             check(QuestLog.of(p).entry(Ch2Ground.Q_SALT) == null, "the chapter-2 trail steps appeared before the tide quest");
             Quests.start(p, "main_tide");
             Quests.poll(p, false);
-            check(QuestLog.of(p).entry(Ch2Ground.Q_SALT) == null || "see".equals(stageId(p, "main_tide")), "the trail steps appeared during the rumor stage");
+            check(QuestLog.of(p).entry(Ch2Ground.Q_SALT) == null || !"rumor".equals(stageId(p, "main_tide")), "the trail steps appeared during the rumor stage");
             if ("rumor".equals(stageId(p, "main_tide"))) {
                 Quests.forceStage(p, "main_tide");
             }
             Quests.poll(p, false);
-            for (String id : Ch2Ground.TRAILS) {
-                check(QuestLog.of(p).entry(id) != null, id + " did not start after Isana's sea rumor");
-            }
+            // 支度の段は一本ずつ順に (34 の 4.3): 噂のあとは塩の道だけ。メインは「支度」の段で待つ
+            check(QuestLog.of(p).entry(Ch2Ground.Q_SALT) != null, Ch2Ground.Q_SALT + " did not start after Isana's sea rumor");
+            check(QuestLog.of(p).entry(Ch2Ground.Q_BOAT) == null, Ch2Ground.Q_BOAT + " should wait for the salt road");
+            check("prepare".equals(stageId(p, "main_tide")), "main_tide should wait on the prepare stage (" + stageId(p, "main_tide") + ")");
             // 塩の道: 標 5 (人ごとに一度ずつ) → 蔵の刻み + 番人
             check(SaltVault.atRoadStage(p), "salt_road should open on the road stage");
             for (int n = 1; n <= SaltVault.MARKS; n++) {
@@ -382,6 +383,8 @@ public final class Ch2GroundSelfTest {
             Quests.signal(p, SiteSpawner.signal(SaltVault.SITE));
             Quests.poll(p, true);
             check(QuestLog.of(p).entry(Ch2Ground.Q_SALT).done, "the carving and the warden did not finish salt_road");
+            Quests.poll(p, false);
+            check(QuestLog.of(p).entry(Ch2Ground.Q_BOAT) != null, Ch2Ground.Q_BOAT + " did not start after the salt road");
             // 船と貝: 船 → 難破船の頁 + 貝
             p.getInventory().add(new ItemStack(Items.OAK_BOAT));
             Quests.poll(p, true);

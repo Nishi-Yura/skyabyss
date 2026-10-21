@@ -21,7 +21,7 @@ public final class HeartBalance {
     public static final double PARTY_STEP = 0.85;
     public static final int MAX_PARTY = 6;
     // 一人のときの戦いの長さの狙い (秒) と、許す帯
-    public static final double TARGET_SECONDS = 240;
+    public static final double TARGET_SECONDS = 200;   // 2026-10-22: 帯の短い側へ (前は 240)
     public static final double BAND_MIN = 180;
     public static final double BAND_MAX = 300;
     // 最大体力 (属性の上限 1024 の下)。実質の体力はこれに基本の硬さ (resist) を掛けた値

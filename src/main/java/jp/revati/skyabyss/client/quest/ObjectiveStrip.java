@@ -43,19 +43,42 @@ public final class ObjectiveStrip {
     private ObjectiveStrip() {
     }
 
+    // 帯が出すメインの目的は、いつも一つだけ (2026-10-22 の試遊: メインが並んで「どれをやるのか」迷った)。
+    //   1. 章の支度の段 (guide.PrepQuests の章の表。一章なら鉄の跡・折れた剣・盾と糧) が進行中なら、その段を出す。
+    //      親のメイン (雲の下の歌の「支度」の段など) は、支度が終わるのを待っているだけなので出さない
+    //   2. 残りのうち、追跡中のものがあればそれ。なければ並び (order) の最初
     @Nullable
-    private static QuestDef current(Minecraft mc, QuestLog log) {
-        QuestDef best = null;
+    static QuestDef current(Minecraft mc, QuestLog log) {
+        QuestDef first = null;
+        QuestDef firstTrail = null;
+        QuestDef tracked = null;
+        QuestDef trackedTrail = null;
         for (QuestDef def : QuestClient.all()) {
             QuestLog.Entry e = log.entry(def.id());
-            if (def.main() && e != null && !e.done && e.stage < def.stages().size()) {
-                best = def;
-                if (def.id().equals(log.tracked())) {
-                    return def;
+            if (!def.main() || e == null || e.done || e.stage >= def.stages().size()) {
+                continue;
+            }
+            boolean trail = jp.revati.skyabyss.guide.PrepQuests.chapterOf(def.id()) > 0;
+            boolean isTracked = def.id().equals(log.tracked());
+            if (first == null) {
+                first = def;
+            }
+            if (isTracked) {
+                tracked = def;
+            }
+            if (trail) {
+                if (firstTrail == null) {
+                    firstTrail = def;
+                }
+                if (isTracked) {
+                    trackedTrail = def;
                 }
             }
         }
-        return best;
+        if (firstTrail != null) {
+            return trackedTrail != null ? trackedTrail : firstTrail;
+        }
+        return tracked != null ? tracked : first;
     }
 
     // 開発用: いま画面に出ている帯の文 (出ていなければ空)。台本の開発用ログ (client/dev/ShotRunner の watch) が読む

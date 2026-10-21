@@ -33,7 +33,7 @@ public final class RisingTideDomain extends HeartDomain {
     public static final int RING_WARN = 30;
     public static final int RING_ACTIVE = 30;
     public static final int RING_REPEAT = 12;
-    public static final double RING_WIDTH = 3.5;
+    public static final double RING_WIDTH = 2.5;   // 2026-10-22 の二人の試遊で細く (3.5 → 2.5)
     public static final int RINGS = 4;
     public static final int FIRST = 24;
     public static final int EBB_START = RING_STEP * 3 + 48;

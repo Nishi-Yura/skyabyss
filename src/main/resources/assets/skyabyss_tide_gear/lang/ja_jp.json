@@ -23,7 +23,7 @@
   "item.skyabyss.tide_shell_core.desc": "潮殻の心臓から取れた、潮の一片。いつか神器の材料になる",
   "gui.skyabyss.forge.exchange_titan": "%s ▸",
   "gui.skyabyss.forge.exchange_titan_hint": "押すと、交換する巨神を切り替える",
-  "gui.skyabyss.forge.exchange_no_clear.tide_shell": "潮殻の心臓を倒すと、選べるようになる",
+  "gui.skyabyss.forge.exchange_no_clear.tide_shell": "潮殻の心臓を止めると、選べるようになる",
   "gui.skyabyss.forge.exchange_all_owned.tide_shell": "潮殻の専用伝説は、すべて手にしている",
   "skyabyss_gear.tooltip.short.shield": "レベルが足りず、構えられない",
   "skyabyss_record.h.tide_shell": "潮殻"

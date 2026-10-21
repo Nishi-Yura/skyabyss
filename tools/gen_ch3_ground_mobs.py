@@ -12,7 +12,7 @@
   sounds.json の行 (既存の音の出来事 (type event) の別名。末尾の一つの塊)、字幕と名前は assets/skyabyss_ch3mob/lang/
   models/item/<id>_spawn_egg.json
 
-案は CHOICE で選ぶ (仮の選定: 毛玉 A・雛 C・雷拾い B・羽守 B。選び直すときはここを変えて流し直す)。
+案は CHOICE で選ぶ (選定: 毛玉 B・雛 B・雷拾い C・羽守 C。選び直すときはここを変えて流し直す)。
 回転の約束: 小さな三体はラフの姿勢表 = 数学の右手系 (前 -Z。x が + = 前が上がる) で書き、ファイルへは (-x, -y, z)。
 焼けた羽守は羽守と同じ骨 (root が Y 180 度) で、羽守の dive と同じ書き方 (ファイルへ (-x, y, -z))。
 """
@@ -24,7 +24,7 @@ import sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 A = os.path.join(ROOT, "src", "main", "resources", "assets", "skyabyss")
-CHOICE = {"static_puff": "a", "peak_fledgling": "c", "lightning_gleaner": "b", "scorched_warden": "b"}
+CHOICE = {"static_puff": "b", "peak_fledgling": "b", "lightning_gleaner": "c", "scorched_warden": "c"}  # 選定 第 2 期 (2026-10-22)
 
 
 def wjson(path, data, indent=2):

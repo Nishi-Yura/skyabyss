@@ -155,6 +155,16 @@ public final class ChapterSky {
     }
 
     @SubscribeEvent
+    static void onRespawn(PlayerEvent.PlayerRespawnEvent event) {
+        // 起き直したら、章の色味を送り直す (場面の暗い色味が残らないように)
+        if (event.getEntity() instanceof ServerPlayer player && !(player instanceof net.neoforged.neoforge.common.util.FakePlayer)) {
+            Stage st = stage(player);
+            SENT_TINT.put(player.getUUID(), new Stage(0f, st.tintRgb(), st.tintStrength()));
+            net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(player, new ChapterTintPayload(st.tintRgb(), st.tintStrength()));
+        }
+    }
+
+    @SubscribeEvent
     static void onChangedDimension(PlayerEvent.PlayerChangedDimensionEvent event) {
         if (event.getTo() == TitanTravel.TITAN_BACK && event.getEntity() instanceof ServerPlayer player) {
             markBoarded(player);

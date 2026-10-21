@@ -13,8 +13,8 @@
       },
       {
         "type": "quest",
-        "quest": "main_thunder",
-        "is": "started"
+        "quest": "ch3/lightning_pillars",
+        "is": "done"
       }
     ]
   },

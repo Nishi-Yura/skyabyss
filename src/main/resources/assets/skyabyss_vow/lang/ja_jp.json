@@ -2,7 +2,7 @@
   "vow.skyabyss.hardy": "硬き敵",
   "vow.skyabyss.hardy.desc": "背中の敵の体力が 3 割増える",
   "vow.skyabyss.sharp": "鋭き予兆",
-  "vow.skyabyss.sharp.desc": "技の予告が 25% 短くなる（最短 0.8 秒は割れない）",
+  "vow.skyabyss.sharp.desc": "技の予告が 25% 短くなる（0.8 秒より短くはならない）",
   "vow.skyabyss.thin": "薄き守り",
   "vow.skyabyss.thin.desc": "背中で受ける傷が 25% 増える",
   "vow.skyabyss.bare": "素手の旅",

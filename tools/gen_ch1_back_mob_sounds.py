@@ -205,9 +205,9 @@ SOUNDS = {
 
 # 事象 (sounds.json のキー) → (ファイル名の一覧, 字幕 ja, 字幕 en, 減衰距離 or None)
 EVENTS = {
-    "bone_mortar_ambient": (["ch1back_mortar_ambient"], "砲台がきしむ", "A mortar creaks", None),
-    "bone_mortar_hurt": (["ch1back_mortar_hurt_1", "ch1back_mortar_hurt_2"], "骨の砲台が欠ける", "Bone mortar chips", None),
-    "bone_mortar_death": (["ch1back_mortar_death"], "砲台が崩れる", "Mortar collapses", None),
+    "bone_mortar_ambient": (["ch1back_mortar_ambient"], "骨の砲手がきしむ", "A mortar creaks", None),
+    "bone_mortar_hurt": (["ch1back_mortar_hurt_1", "ch1back_mortar_hurt_2"], "骨の砲手が欠ける", "Bone mortar chips", None),
+    "bone_mortar_death": (["ch1back_mortar_death"], "骨の砲手が崩れる", "Mortar collapses", None),
     "bone_mortar_step": (["ch1back_mortar_step_1", "ch1back_mortar_step_2"], "重い足音", "Heavy steps", None),
     "bone_mortar_charge": (["ch1back_mortar_charge"], "砲身が上がる", "Barrel rises", 24),
     "bone_mortar_fire": (["ch1back_mortar_fire"], "骨の塊が撃ち出される", "Bone shell fires", 40),
@@ -221,7 +221,7 @@ EVENTS = {
     "elder_sentinel_hurt": (["ch1back_elder_hurt_1", "ch1back_elder_hurt_2"], "石板が割れる", "Stone plates crack", None),
     "elder_sentinel_death": (["ch1back_elder_death"], "老番兵が崩れ落ちる", "The elder sentinel collapses", 40),
     "elder_sentinel_step": (["ch1back_elder_step_1", "ch1back_elder_step_2"], "重い骨の足音", "Heavy bone steps", None),
-    "elder_sentinel_rush": (["ch1back_elder_rush"], "盾が突進する", "Shield rushes", 32),
+    "elder_sentinel_rush": (["ch1back_elder_rush"], "老番兵が盾ごと突進する", "Shield rushes", 32),
     "elder_sentinel_stomp": (["ch1back_elder_stomp"], "足が床を踏み鳴らす", "A stomp shakes the floor", 40),
     "elder_sentinel_flute": (["ch1back_elder_flute"], "骨笛が鳴る", "A bone flute sounds", 40),
 }

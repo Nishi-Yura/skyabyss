@@ -75,6 +75,26 @@ public final class EmberBackRooms {
         return BUILDERS.containsKey(room);
     }
 
+    // 部屋を建てる順 (buildAll と同じ。手順を tick に分けるとき用)
+    static List<String> roomOrder() {
+        return EmberBackLayout.TRIAL_ROOMS;
+    }
+
+    // 一つの部屋の中身を建てる (buildAll の一部屋分)
+    static void buildOne(ServerLevel level, String room) {
+        List<Builder> builders;
+        synchronized (EmberBackRooms.class) {
+            builders = BUILDERS.get(room) == null ? List.of() : new ArrayList<>(BUILDERS.get(room));
+        }
+        for (Builder b : builders) {
+            try {
+                b.build(level, EmberBackLayout.ROOMS.get(room));
+            } catch (RuntimeException ex) {
+                SkyAbyss.LOGGER.error("ember back: building room {} failed", room, ex);
+            }
+        }
+    }
+
     // B が呼ぶ: 部屋の中身を建てる。一つの部屋が落ちても、ほかの部屋は建てる
     static void buildAll(ServerLevel level) {
         List<Map.Entry<String, List<Builder>>> list;

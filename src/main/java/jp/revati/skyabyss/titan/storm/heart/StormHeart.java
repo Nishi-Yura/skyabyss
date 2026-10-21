@@ -74,7 +74,7 @@ public class StormHeart extends HeartBoss {
     public static final int ROAR_TICKS = 60;
     public static final float MAX_HEALTH = jp.revati.skyabyss.combat.HeartBalance.MAX_HP;
     // 基本の硬さ (受ける傷をこの値 × 人数の倍率で割る。最大体力に掛けた値が実質の体力 1860)
-    public static final float BASE_RESIST = 1.86f;
+    public static final float BASE_RESIST = 1.64f;   // 2026-10-22: 1.86 → 1.64 (帯の短い側へ。避けそこねの多い人が残りの備えだけで生き残らない所まで)
     // 段階 2 (開いた翼) と、翼が裂けているあいだに受ける傷の倍率
     public static final float OPEN_WINGS_TAKEN = 1.2f;
     public static final float SPLIT_TAKEN = 1.5f;

@@ -38,8 +38,11 @@ public final class SiteGuardSelfTest {
         FAILS.clear();
         zombie = null;
         SiteGuard.testing = true;
-        check(Math.abs(NoHunger.healOf(Foods.BREAD) - 8f) < 0.01f, "bread should heal 8 (" + NoHunger.healOf(Foods.BREAD) + ")");
-        check(Math.abs(NoHunger.healOf(Foods.COOKED_BEEF) - 14.4f) < 0.01f, "cooked beef should heal 14.4 (" + NoHunger.healOf(Foods.COOKED_BEEF) + ")");
+        check(Math.abs(NoHunger.healOf(Foods.BREAD) - 6.8f) < 0.01f, "bread should heal 6.8 in all (" + NoHunger.healOf(Foods.BREAD) + ")");
+        check(Math.abs(NoHunger.instantOf(Foods.BREAD) - 3.4f) < 0.01f, "bread should heal half at once (" + NoHunger.instantOf(Foods.BREAD) + ")");
+        check(Math.abs(NoHunger.healOf(Foods.COOKED_BEEF) - 11.84f) < 0.01f, "cooked beef should heal 11.84 in all (" + NoHunger.healOf(Foods.COOKED_BEEF) + ")");
+        check(NoHunger.spoiled(Foods.ROTTEN_FLESH) && NoHunger.healOf(Foods.ROTTEN_FLESH) < NoHunger.healOf(Foods.BREAD) * 0.5f,
+                "rotten flesh should be spoiled and heal little (" + NoHunger.healOf(Foods.ROTTEN_FLESH) + ")");
         // 進捗・実績のつまみ: 実績の木と、報酬の鐘銭の関数が読める (tools/gen_advancements.py)
         check(server.getAdvancements().get(net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "achievement/trade")) != null,
                 "the achievement tab (achievement/trade) is missing");

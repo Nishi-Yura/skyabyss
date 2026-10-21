@@ -393,6 +393,8 @@ public class TradeScreen extends Screen {
         int ly = y0 + 40;
         int lw = W - 20;
         FacilityUi.well(g, lx, ly, lw, ROWS * ROW_H);
+        g.drawString(font, Component.translatable("gui.skyabyss.trade.col_pay"), lx + 4, ly - 10, FacilityUi.DIM, false);
+        g.drawString(font, Component.translatable("gui.skyabyss.trade.col_get"), lx + 88, ly - 10, FacilityUi.DIM, false);
         List<TradeNetwork.Row> rows = view.market();
         clamp(0, rows.size());
         if (rows.isEmpty()) {
@@ -404,11 +406,12 @@ public class TradeScreen extends Screen {
             if ((i + scroll[0]) % 2 == 1) {
                 g.fill(lx, ry, lx + lw, ry + ROW_H, FacilityUi.ROW);
             }
-            int ex = stacks(g, r.give(), lx + 4, ry + 4, 18, 4, mx, my);
+            // 買う側から読む: 左 = 渡すもの (出品者のほしいもの)、右 = もらえる品 (出品の品)。2026-10-22 の試遊: 逆に読めた
+            FacilityUi.tag(g, lx + 2, ry + 2, Math.min(4, r.want().size()) * 18 + 4, ROW_H - 4);
+            int ex = stacks(g, r.want(), lx + 4, ry + 4, 18, 4, mx, my);
             g.drawString(font, "→", Math.max(ex, lx + 78), ry + 8, FacilityUi.TEAL, false);
             int wx = Math.max(ex, lx + 78) + 10;
-            FacilityUi.tag(g, wx - 2, ry + 2, Math.min(5, r.want().size()) * 18 + 4, ROW_H - 4);
-            stacks(g, r.want(), wx, ry + 4, 18, 5, mx, my);
+            stacks(g, r.give(), wx, ry + 4, 18, 5, mx, my);
             int nx = lx + 190;
             g.drawString(font, font.plainSubstrByWidth(r.seller(), 64), nx, ry + 3, FacilityUi.TEXT, false);
             g.drawString(font, left(r.left()), nx, ry + 13, FacilityUi.DIM, false);
@@ -683,10 +686,11 @@ public class TradeScreen extends Screen {
             if ((i + scroll[3]) % 2 == 1) {
                 g.fill(lx, ry, lx + lw, ry + ROW_H, FacilityUi.ROW);
             }
-            int ex = stacks(g, r.give(), lx + 4, ry + 4, 18, 4, mx, my);
-            g.drawString(font, "←", Math.max(ex, lx + 78), ry + 8, FacilityUi.TEAL, false);
+            // 自分の申請: 左 = 渡すもの (申し出の品)、右 = もらえる品 (出品の品)
+            int ex = stacks(g, r.want(), lx + 4, ry + 4, 18, 4, mx, my);
+            g.drawString(font, "→", Math.max(ex, lx + 78), ry + 8, FacilityUi.TEAL, false);
             int wx = Math.max(ex, lx + 78) + 10;
-            stacks(g, r.want(), wx, ry + 4, 18, 5, mx, my);
+            stacks(g, r.give(), wx, ry + 4, 18, 5, mx, my);
             int nx = lx + 190;
             g.drawString(font, font.plainSubstrByWidth(r.seller(), 64), nx, ry + 3, FacilityUi.TEXT, false);
             g.drawString(font, Component.translatable(r.canPay() ? "gui.skyabyss.trade.ready" : "gui.skyabyss.trade.short"), nx, ry + 13,

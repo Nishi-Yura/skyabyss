@@ -80,7 +80,9 @@ public final class QuestHud {
         if (def == null || entry == null || entry.done || entry.stage >= def.stages().size()) {
             return null;
         }
-        if (def.main() && ObjectiveStrip.showsQuest(def)) {
+        // メインの目的は帯 (ObjectiveStrip) だけが出す。帯が序盤の目的 (歌のあとの「空を見上げて、岩鯨を待とう」など) を出しているときも、
+        // 同じことを言うメインの札を下に重ねない (2026-10-22 の試遊: 同じメインの文が二つ出ていた)
+        if (def.main() && (ObjectiveStrip.active() || ObjectiveStrip.showsQuest(def))) {
             return null;
         }
         List<Line> lines = lines(mc.font, def, entry, w() - 12);

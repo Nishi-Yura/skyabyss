@@ -61,13 +61,18 @@ public final class Telegraph {
     // 1 tick に送る予告の粒の数 (粒 × 見る人) の上限
     static final int BUDGET = 700;
 
-    // 印の意味 (色に頼らない合図の違いもある: 危険 = 縁は実線・満ちると橙から赤から白、安全 = 青白の破線、無害 = 灰色の点)。
-    // CUSTOM は color() で選んだ色 (旧来の見え方)。新しい技は danger() / safe() / harmless() を使う
+    // 印の意味 (2026-10-22 の二人の試遊から: 技が重なると安全な所が読めないので、印は赤だけにした)。
+    //   DANGER   = 赤・縁は実線。壁やブロックで止まる技 (壁の陰にいれば当たらない)
+    //   PIERCE   = 濃い赤・縁は破線。壁を抜ける技 (piercing()。領域の決まり・咆哮など)
+    //   HARMLESS = 赤・縁は点 (押すだけ)
+    //   SAFE     = 安全な場所の印。もう出さない (呼ぶ側はそのまま残してよい)
+    // CUSTOM (color() で選んだ色) も赤の DANGER として出す
     public enum Style {
-        CUSTOM(0xFF5A5A),
-        DANGER(0xFF8A2A),
+        CUSTOM(0xFF3030),
+        DANGER(0xFF3030),
         SAFE(0x5CE8FF),
-        HARMLESS(0xB0B4BC);
+        HARMLESS(0xFF5050),
+        PIERCE(0xB0102A);
 
         public final int rgb;
 
@@ -106,6 +111,10 @@ public final class Telegraph {
     private final int repeat;
     private final int rgb;
     private final Style style;
+    // 壁を抜けるか (false なら、技の元から人までの間にブロックがあると当たらない)
+    private final boolean piercing;
+    // 印を出さない (安全な場所の印。2026-10-22 から出さない)
+    private final boolean hidden;
     @Nullable
     private final UUID target;
     @Nullable
@@ -134,14 +143,24 @@ public final class Telegraph {
         this.warn = Math.max(MIN_WARN_TICKS, jp.revati.skyabyss.titan.vow.Vows.telegraphWarn(b.owner, b.warn));
         this.active = Math.max(0, b.active);
         this.repeat = Math.max(0, b.repeat);
-        this.rgb = b.rgb;
-        this.style = b.style;
+        this.piercing = b.piercing;
+        this.hidden = b.style == Style.SAFE;
+        if (hidden) {
+            this.style = Style.SAFE;
+            this.rgb = Style.SAFE.rgb;
+        } else if (b.piercing) {
+            this.style = Style.PIERCE;
+            this.rgb = Style.PIERCE.rgb;
+        } else {
+            this.style = b.style == Style.HARMLESS ? Style.HARMLESS : Style.DANGER;
+            this.rgb = this.style.rgb;
+        }
         this.target = b.target;
         this.owner = b.owner;
         this.victims = b.victims;
         this.onImpact = b.onImpact;
         this.onHit = b.onHit;
-        this.decal = b.shape.kind() != TelegraphShape.KIND_NONE;
+        this.decal = !hidden && b.shape.kind() != TelegraphShape.KIND_NONE;
         if (b.onHit != null) {
             damagingCreated++;
             if (recorded != null) {
@@ -197,6 +216,7 @@ public final class Telegraph {
         private int repeat = 0;
         private int rgb = 0xFF5A5A;
         private Style style = Style.CUSTOM;
+        private boolean piercing;
         @Nullable
         private UUID target;
         @Nullable
@@ -257,7 +277,13 @@ public final class Telegraph {
             return this;
         }
 
-        // 当たると傷が出る範囲: 橙から赤へ満ち、当たる瞬間に白く光る。縁は実線
+        // 壁を抜ける技 (濃い赤・縁は破線)。既定は壁で止まる (技の元から人までの間にブロックがあると当たらない)
+        public Builder piercing() {
+            this.piercing = true;
+            return this;
+        }
+
+        // 当たると傷が出る範囲: 赤く満ち、当たる瞬間に白く光る。縁は実線
         public Builder danger() {
             this.style = Style.DANGER;
             this.rgb = Style.DANGER.rgb;
@@ -520,7 +546,7 @@ public final class Telegraph {
             hit.clear();
         }
         strike(now);
-        if (age % 2 == 0 && serverParticles()) {
+        if (age % 2 == 0 && !hidden && serverParticles()) {
             draw(now::outline, 1.6, 1.0, 0.0, 1.5f);
         }
         if (age - warn >= active) {
@@ -561,10 +587,43 @@ public final class Telegraph {
         double[] b = current.bounds();
         net.minecraft.world.phys.AABB box = new net.minecraft.world.phys.AABB(b[0] - 1, floor - 1.5, b[1] - 1, b[2] + 1, floor + reach + 1, b[3] + 1);
         for (ServerPlayer p : level.getEntitiesOfClass(ServerPlayer.class, box, victims)) {
-            if (inside(current, p) && hit.add(p.getUUID())) {
+            if (inside(current, p) && (piercing || !walled(level, current, floor, p)) && hit.add(p.getUUID())) {
                 onHit.hit(level, p);
             }
         }
+    }
+
+    public boolean piercing() {
+        return piercing;
+    }
+
+    public boolean hidden() {
+        return hidden;
+    }
+
+    public Style style() {
+        return style;
+    }
+
+    public int rgb() {
+        return rgb;
+    }
+
+    // 技の元 (形の最初の点: 円・輪・扇・波の中心、帯の根もと) から人までの間に、当たりのあるブロックがあるか (壁で止まる技の判定)。
+    // 床から 1.2 の高さで見る (床の段や半ブロックでは止まらない)
+    public static boolean walled(ServerLevel level, TelegraphShape shape, double floor, Entity e) {
+        double[] prm = shape.params();
+        if (prm.length < 2) {
+            return false;
+        }
+        Vec3 from = new Vec3(prm[0], floor + 1.2, prm[1]);
+        Vec3 to = new Vec3(e.getX(), Math.max(floor, e.getY()) + 1.2, e.getZ());
+        if (from.distanceToSqr(to) < 1.0) {
+            return false;
+        }
+        net.minecraft.world.phys.BlockHitResult r = level.clip(new net.minecraft.world.level.ClipContext(from, to,
+                net.minecraft.world.level.ClipContext.Block.COLLIDER, net.minecraft.world.level.ClipContext.Fluid.NONE, e));
+        return r.getType() == net.minecraft.world.phys.HitResult.Type.BLOCK && r.getLocation().distanceToSqr(from) < from.distanceToSqr(to) - 0.25;
     }
 
     // ---- 印を描く ----
@@ -604,7 +663,7 @@ public final class Telegraph {
     }
 
     private void drawWarning() {
-        if (!serverParticles()) {
+        if (hidden || !serverParticles()) {
             return;
         }
         double progress = (double) age / warn;
