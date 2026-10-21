@@ -45,7 +45,7 @@ import net.neoforged.neoforge.event.tick.ServerTickEvent;
 //   都 (設計図 capital の範囲): ブロックを壊す・置く・バケツ・火打ち石・TNT・爆発・敵の持ち去り・畑の踏み荒らしを止める。空き区画は GuildLots の決まり
 //   (借りた区画はそのギルドの人だけ、借りていない区画は誰でも)。中の人は傷を受けない (/kill と奈落は別)。敵は湧かず、入ったら 1 秒ごとの見回りで消える。
 //   章の小要素 (割れ殻の洞・骨の坑など): 設計図で置いたブロックだけを守る (まわりの自然の地面は掘れる)。割れ殻の洞は地表の口 (門と低い壁) だけ壊せる。
-//   OP のクリエイティブは除く。docs/design/33 の 2.4
+//   OP のクリエイティブは除く。docs/design/33 の 2 章 (保護と安全)
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class SiteGuard {
     private SiteGuard() {

@@ -373,6 +373,12 @@ public final class SiteJob {
         hs.sort(Comparator.naturalOrder());
         groundH = bp.anchor ? hs.get(hs.size() / 4) : hs.get(hs.size() / 2);
         origin = new BlockPos(origin.getX(), groundH, origin.getZ());
+        // 地下の部屋が地面の中に収まるか (斜面で横から顔を出さない)。収まらなければ次の場所へ
+        if (!bp.level && !force && !entry.siteId.isEmpty() && !bp.deepRoofs.isEmpty() && !roofsCovered()) {
+            SkyAbyss.LOGGER.info("Opening site {} at {}: underground rooms would break the surface; moving", label, origin);
+            conflictFound();
+            return;
+        }
         // ならしたあとの上面のブロック: 範囲の中央の地面 (草なら草、砂なら砂、雪や石ならそれ)
         BlockPos cp = new BlockPos(origin.getX(), 0, origin.getZ());
         int cg = ground(cp.getX(), cp.getZ());
@@ -390,6 +396,20 @@ public final class SiteJob {
         colIndex = 0;
         cellIndex = 0;
         phase = Phase.TERRAIN;
+    }
+
+    // どの列でも、自然の地面が地下の部屋の天井より 2 段以上上にあるか (水の列は不可)
+    private boolean roofsCovered() {
+        for (java.util.Map.Entry<Long, Integer> e : bp.deepRoofs.entrySet()) {
+            int lx = BlockPos.getX(e.getKey());
+            int lz = BlockPos.getZ(e.getKey());
+            BlockPos w = Blueprint.transform(lx, e.getValue() + 1, lz, rot, mirror, origin);
+            int g = ground(w.getX(), w.getZ());
+            if (g == WET || g < w.getY() + 2) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private void conflictFound() {
