@@ -231,7 +231,7 @@ public final class FacilityExtrasSelfTest {
         check(f, Keepsakes.take(p, ModItems.SKY_KEY_FRAGMENT.get(), s -> true, 1) == 1 && KeyRoom.offered(p).isEmpty(),
                 "forming the key takes from the key room");
         data.offered.put(p.getUUID(), new java.util.LinkedHashSet<>(Set.of(titan)));
-        check(f, KeyRoom.giveBack(p) == 1 && p.getInventory().countItem(ModItems.SKY_KEY_FRAGMENT.get()) == 1 && KeyRoom.offered(p).isEmpty(),
+        check(f, KeyRoom.giveBack(p) == 1 && KeyRoom.offered(p).isEmpty() && Keepsakes.locate(p, ModItems.SKY_KEY_FRAGMENT.get()).safe() == 1,
                 "laid fragments come back");
         check(f, KeyRoom.giveBack(p) == 0, "nothing to give back twice");
         // 保存と読み直し

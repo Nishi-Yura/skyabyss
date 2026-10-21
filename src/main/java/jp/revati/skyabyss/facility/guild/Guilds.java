@@ -332,6 +332,7 @@ public final class Guilds {
         g.accent = clampDye(accent);
         data.setDirty();
         refresh(leader.server, g);
+        setBadge(leader, g.badge());
         return Result.OK;
     }
 

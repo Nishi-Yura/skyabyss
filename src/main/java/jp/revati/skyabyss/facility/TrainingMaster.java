@@ -34,6 +34,11 @@ public final class TrainingMaster {
 
     // stats = 力の振り直し (false なら技)、coins = 鐘銭で払う
     public static SkillManager.RespecResult respec(ServerPlayer player, boolean stats, boolean coins) {
+        boolean nothing = stats ? Growth.get(player).spentPoints() <= 0 : SkillManager.get(player).ranks.isEmpty();
+        if (nothing) {
+            Notice.hint(player, stats ? "message.skyabyss.training.nothing_stats" : "message.skyabyss.training.nothing_skills");
+            return SkillManager.RespecResult.NOTHING;
+        }
         int crystals = stats ? statCrystals(player) : skillCrystals(player);
         int price = coins && !player.isCreative() ? crystals * COINS_PER_CRYSTAL : 0;
         if (price > 0 && Coins.count(player) < price) {
