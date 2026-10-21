@@ -107,6 +107,7 @@
   "message.skyabyss.fragment_received": "天の鍵の欠片を受け取った。ほのかに温かい",
   "message.skyabyss.fragment_already": "台座は静かだ。あなたの天の鍵の欠片は、もう受け取っている",
   "checkpoint.skyabyss.w0": "西の前室",
+  "checkpoint.skyabyss.wp": "前の谷の岩室",
   "checkpoint.skyabyss.w1": "谷の上の岩室",
   "checkpoint.skyabyss.w2": "竪穴の上の岩室",
   "checkpoint.skyabyss.e0": "東の前室",

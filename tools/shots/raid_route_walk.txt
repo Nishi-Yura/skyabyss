@@ -32,29 +32,33 @@ wait 20
 chat clear
 cmd skyroute tidyhud
 cmd skyroute enter
-wait 40
+wait 30
 waitchunks
-wait 10
+wait 30
 shot whale_a0_entry_box
 waitband 600 第一の試練
+wait 120
 waitchunks
 wait 30
 band
 shot whale_a1_walk
 cmd skyroute pass
 waitband 400 第二の試練
+wait 120
 waitchunks
 wait 30
 band
 shot whale_a2_wit
 cmd skyroute pass
 waitband 400 第三の試練
+wait 120
 waitchunks
 wait 30
 band
 shot whale_a3_fight
 cmd skyroute pass
 waitband 400 心臓へ
+wait 120
 waitchunks
 wait 30
 band
@@ -69,6 +73,7 @@ cmd skyroute useshrine stone_whale
 wait 60
 waitchunks
 waitband 600 第一の試練
+wait 120
 waitchunks
 wait 30
 band
@@ -76,12 +81,14 @@ shot whale_b1_walk
 cmd skyroute status
 cmd skyroute pass
 waitband 400 第二の試練
+wait 120
 waitchunks
 wait 30
 band
 shot whale_b2_wit
 cmd skyroute pass
 waitband 400 第三の試練
+wait 120
 waitchunks
 wait 30
 band
@@ -95,6 +102,7 @@ shot whale_b4_after_fight
 cmd skyroute status
 cmd skyroute pass
 waitband 400 心臓へ
+wait 120
 waitchunks
 wait 30
 band
@@ -113,29 +121,33 @@ wait 20
 chat clear
 cmd skyroute tidyhud
 cmd skyroute enter
-wait 40
+wait 30
 waitchunks
-wait 10
+wait 30
 shot tide_a0_entry_box
 waitband 600 第一の試練
+wait 120
 waitchunks
 wait 30
 band
 shot tide_a1_walk
 cmd skyroute pass
 waitband 400 第二の試練
+wait 120
 waitchunks
 wait 30
 band
 shot tide_a2_wit
 cmd skyroute pass
 waitband 400 第三の試練
+wait 120
 waitchunks
 wait 30
 band
 shot tide_a3_fight
 cmd skyroute pass
 waitband 400 心臓へ
+wait 120
 waitchunks
 wait 30
 band
@@ -150,6 +162,7 @@ cmd skyroute useshrine tide_shell
 wait 60
 waitchunks
 waitband 600 第一の試練
+wait 120
 waitchunks
 wait 30
 band
@@ -157,12 +170,14 @@ shot tide_b1_walk
 cmd skyroute status
 cmd skyroute pass
 waitband 400 第二の試練
+wait 120
 waitchunks
 wait 30
 band
 shot tide_b2_wit
 cmd skyroute pass
 waitband 400 第三の試練
+wait 120
 waitchunks
 wait 30
 band
@@ -176,6 +191,7 @@ shot tide_b4_after_fight
 cmd skyroute status
 cmd skyroute pass
 waitband 400 心臓へ
+wait 120
 waitchunks
 wait 30
 band
@@ -194,29 +210,33 @@ wait 20
 chat clear
 cmd skyroute tidyhud
 cmd skyroute enter
-wait 40
+wait 30
 waitchunks
-wait 10
+wait 30
 shot storm_a0_entry_box
 waitband 600 第一の試練
+wait 120
 waitchunks
 wait 30
 band
 shot storm_a1_walk
 cmd skyroute pass
 waitband 400 第二の試練
+wait 120
 waitchunks
 wait 30
 band
 shot storm_a2_wit
 cmd skyroute pass
 waitband 400 第三の試練
+wait 120
 waitchunks
 wait 30
 band
 shot storm_a3_fight
 cmd skyroute pass
 waitband 400 心臓へ
+wait 120
 waitchunks
 wait 30
 band
@@ -231,6 +251,7 @@ cmd skyroute useshrine thunder_wing
 wait 60
 waitchunks
 waitband 600 第一の試練
+wait 120
 waitchunks
 wait 30
 band
@@ -238,12 +259,14 @@ shot storm_b1_walk
 cmd skyroute status
 cmd skyroute pass
 waitband 400 第二の試練
+wait 120
 waitchunks
 wait 30
 band
 shot storm_b2_wit
 cmd skyroute pass
 waitband 400 第三の試練
+wait 120
 waitchunks
 wait 30
 band
@@ -257,6 +280,7 @@ shot storm_b4_after_fight
 cmd skyroute status
 cmd skyroute pass
 waitband 400 心臓へ
+wait 120
 waitchunks
 wait 30
 band
@@ -275,29 +299,33 @@ wait 20
 chat clear
 cmd skyroute tidyhud
 cmd skyroute enter
-wait 40
+wait 30
 waitchunks
-wait 10
+wait 30
 shot ember_a0_entry_box
 waitband 600 第一の試練
+wait 120
 waitchunks
 wait 30
 band
 shot ember_a1_walk
 cmd skyroute pass
 waitband 400 第二の試練
+wait 120
 waitchunks
 wait 30
 band
 shot ember_a2_wit
 cmd skyroute pass
 waitband 400 第三の試練
+wait 120
 waitchunks
 wait 30
 band
 shot ember_a3_fight
 cmd skyroute pass
 waitband 400 心臓へ
+wait 120
 waitchunks
 wait 30
 band
@@ -312,6 +340,7 @@ cmd skyroute useshrine ember
 wait 60
 waitchunks
 waitband 600 第一の試練
+wait 120
 waitchunks
 wait 30
 band
@@ -319,12 +348,14 @@ shot ember_b1_walk
 cmd skyroute status
 cmd skyroute pass
 waitband 400 第二の試練
+wait 120
 waitchunks
 wait 30
 band
 shot ember_b2_wit
 cmd skyroute pass
 waitband 400 第三の試練
+wait 120
 waitchunks
 wait 30
 band
@@ -338,6 +369,7 @@ shot ember_b4_after_fight
 cmd skyroute status
 cmd skyroute pass
 waitband 400 心臓へ
+wait 120
 waitchunks
 wait 30
 band

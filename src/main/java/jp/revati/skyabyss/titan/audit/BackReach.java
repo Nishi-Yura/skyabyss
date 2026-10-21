@@ -672,7 +672,7 @@ public final class BackReach {
                     rep.failures.add(spec.name + ": walk graph exceeded " + MAX_NODES + " cells (leak outside the layout?)");
                     break;
                 }
-                if ((++n & 255) == 0 && System.nanoTime() >= deadlineNanos) {
+                if ((++n & 15) == 0 && System.nanoTime() >= deadlineNanos) {
                     return false;
                 }
                 long k = queue.poll();

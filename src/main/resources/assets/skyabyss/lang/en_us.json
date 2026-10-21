@@ -107,6 +107,7 @@
   "message.skyabyss.fragment_received": "You received a Sky Key Fragment. It is faintly warm",
   "message.skyabyss.fragment_already": "The pedestal is quiet. You have already taken your Sky Key Fragment",
   "checkpoint.skyabyss.w0": "West Antechamber",
+  "checkpoint.skyabyss.wp": "Chamber before the chasm",
   "checkpoint.skyabyss.w1": "Chamber above the Ravine",
   "checkpoint.skyabyss.w2": "Chamber above the Shaft",
   "checkpoint.skyabyss.e0": "East Antechamber",

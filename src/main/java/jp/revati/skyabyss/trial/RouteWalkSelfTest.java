@@ -295,6 +295,10 @@ public final class RouteWalkSelfTest {
             check(f, d != null && d.id().equals(s.cellId()) && d.slot().id.equals(s.slot()), what + ": the band names " + s.cellId() + "/" + s.slot());
             check(f, ja.containsKey("objective.skyabyss.route_step" + step) && ja.containsKey("trial.skyabyss.cell." + s.cellId())
                     && ja.containsKey("trial.skyabyss.slot." + s.slot()), what + ": the band text is missing (cell " + s.cellId() + ", slot " + s.slot() + ")");
+            // 段の札の稀さ (常のほかは札に出る)
+            for (Trial.Rarity rr : Trial.Rarity.values()) {
+                check(f, ja.containsKey("trial.skyabyss.rarity." + rr.id()), what + ": no text for the rarity " + rr.id());
+            }
         }
     }
 

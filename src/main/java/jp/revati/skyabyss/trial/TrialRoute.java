@@ -566,7 +566,11 @@ public final class TrialRoute {
         }
         int n = 0;
         // 運ばれた人は、休み場の中のいちばん見通しのきく向きを向く (壁や閉じた戸を向いて着かない。R6 の撮影で番兵の前室が戸を向いていた)
-        float yaw = facingAt(back, at);
+        // 見通しが同じくらいなら、行く先 (前の道なら出口の戸、試練なら石) の向き
+        LongWalk.Pre pre = mid || step >= LAST_STEP ? null : LongWalk.preOf(back, group, titan, defOf(draw, step));
+        BlockPos toward = pre != null && !pre.gate().isEmpty() ? pre.gate().get(0)
+                : mid || step >= LAST_STEP ? null : TrialRegions.stoneOf(titan, keyOf(titan, draw, step));
+        float yaw = facingAt(back, at, toward == null ? null : frameOfStep(back, group, draw, step, mid).at(toward));
         Component what = mid ? TrialMidBoss.name(titan) : step >= LAST_STEP ? Component.empty() : trialName(defOf(draw, step));
         String line = mid ? "message.skyabyss.route.mid" : step >= LAST_STEP ? "message.skyabyss.route.heart" : "message.skyabyss.route.step" + step;
         for (ServerPlayer p : members(back, group)) {
@@ -633,6 +637,12 @@ public final class TrialRoute {
 
     // 立つ位置 at から、目の高さで 16 の向きへ見通しを測り、いちばん遠くまで空いている向き (yaw) を返す。足と頭の高さが空いている間を数える
     public static float facingAt(ServerLevel back, BlockPos at) {
+        return facingAt(back, at, null);
+    }
+
+    // toward があれば、見通しが最長の 3/4 以上の向きのうち toward に近い向き
+    public static float facingAt(ServerLevel back, BlockPos at, @Nullable BlockPos toward) {
+        int[] dist = new int[16];
         int best = -1;
         float bestYaw = 0f;
         BlockPos.MutableBlockPos m = new BlockPos.MutableBlockPos();
@@ -654,12 +664,29 @@ public final class TrialRoute {
                 }
                 d = k;
             }
+            dist[i] = d;
             if (d > best) {
                 best = d;
                 bestYaw = yaw;
             }
         }
-        return bestYaw;
+        if (toward == null || best <= 0) {
+            return bestYaw;
+        }
+        double want = Math.toDegrees(Math.atan2(-(toward.getX() + 0.5 - (at.getX() + 0.5)), toward.getZ() + 0.5 - (at.getZ() + 0.5)));
+        double bestDiff = Double.MAX_VALUE;
+        float chosen = bestYaw;
+        for (int i = 0; i < 16; i++) {
+            if (dist[i] * 4 < best * 3) {
+                continue;
+            }
+            double diff = Math.abs(net.minecraft.util.Mth.wrapDegrees(i * 22.5 - want));
+            if (diff < bestDiff) {
+                bestDiff = diff;
+                chosen = i * 22.5f;
+            }
+        }
+        return chosen;
     }
 
     // ---------------------------------------------------------------- tick

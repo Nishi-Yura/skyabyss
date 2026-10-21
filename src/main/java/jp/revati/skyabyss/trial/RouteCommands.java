@@ -84,7 +84,7 @@ public final class RouteCommands {
             return 0;
         }
         net.minecraft.world.phys.Vec3 c = box.getCenter();
-        p.teleportTo(p.serverLevel(), c.x, box.minY, c.z, p.getYRot(), p.getXRot());
+        p.teleportTo(p.serverLevel(), c.x, box.minY, c.z, TrialRoute.facingAt(p.serverLevel(), net.minecraft.core.BlockPos.containing(c.x, box.minY, c.z)), 0f);
         ctx.getSource().sendSuccess(() -> Component.literal("entered the route box of the " + titan + " at " + net.minecraft.core.BlockPos.containing(c).toShortString()), false);
         return 1;
     }

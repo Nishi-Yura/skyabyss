@@ -203,6 +203,11 @@ public final class TideTravel {
                 Notice.bar(player, ModText.hint("message.skyabyss.tide.return_hint"));
             }
         }
+        // 順路の区画の写し (背の次元の遠く。docs/design/32 の 5 章) の中は島の外ではない (R6 の通しで、写しのセルに着いた人が浜へ押し戻されていた)
+        if (jp.revati.skyabyss.trial.TrialSlot.slotAt(player.getX(), player.getZ()) > 0) {
+            ADRIFT.remove(player.getUUID());
+            return;
+        }
         if (farOut(player.getX(), player.getZ())) {
             sweepBack(player);
             return;
