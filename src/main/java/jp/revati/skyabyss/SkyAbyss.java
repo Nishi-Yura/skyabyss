@@ -58,6 +58,8 @@ public class SkyAbyss {
         jp.revati.skyabyss.npc.NpcSetup.register(modEventBus);
         // 都の施設 (係の人・鐘銭・店・預かり所・宿・ギルド)。docs/design/35
         jp.revati.skyabyss.facility.FacilitySetup.register(modEventBus);
+        // 町のクエストの限定の人と宿の噂 (docs/design/35 の F5・F6)
+        jp.revati.skyabyss.town.TownSetup.register(modEventBus);
         jp.revati.skyabyss.quest.QuestSetup.register(modEventBus);
         // 自由なモードのサブクエスト (言伝ての板)。docs/design/07 の 15 章
         jp.revati.skyabyss.quest.free.FreeQuestSetup.register(modEventBus);

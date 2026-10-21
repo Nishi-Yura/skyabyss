@@ -70,9 +70,10 @@ public final class LoreSelfTest {
         long unlockable = catalog.entries().stream().filter(LoreEntry::unlockable).count();
         long early = catalog.entries().stream().filter(e -> e.unlockable() && (e.chapter().equals("prologue") || e.chapter().startsWith("titan_"))).count();
         // 12〜20 に、自由なモードのサブクエストが記す 2 項目 (07 の 15 章) と、その先の余裕を足した
+        // 都の町のクエストと裏通りの頼み (35 の 3.3・3.5) の 9 項目も足した
         // 一〜四章 (旧 1 章) は巨神ごとに碑文と項目が増える (岩鯨・潮殻で 30 前後、雷翼の 11 を足して 50 前後。余燼の分も見込む)
-        if (early < 12 || early > 110) {
-            failures.add("prologue + chapters 1-4 should have 12-110 entries, found " + early);
+        if (early < 12 || early > 130) {
+            failures.add("prologue + chapters 1-4 should have 12-130 entries, found " + early);
         }
         if (unlockable != early) {
             failures.add("only the prologue and chapters 1-4 may be written yet (" + unlockable + " unlockable)");
@@ -406,7 +407,9 @@ public final class LoreSelfTest {
         JsonObject ch2 = json("/assets/skyabyss_ch2/lang/" + code + ".json", failures);
         // 三章の項目 (焼けた荷の頁・風の碑・影と翼) の文は skyabyss_ch3 にある (12 の 12 章)
         JsonObject ch3 = json("/assets/skyabyss_ch3/lang/" + code + ".json", failures);
-        for (JsonObject extra : java.util.Arrays.asList(quest, tide, story, storm, ember, ch1, ch2, ch3)) {
+        // 都の町のクエストと裏通りの項目 (35 の 3.3・3.5) の文は skyabyss_town にある
+        JsonObject town = json("/assets/skyabyss_town/lang/" + code + ".json", failures);
+        for (JsonObject extra : java.util.Arrays.asList(quest, tide, story, storm, ember, ch1, ch2, ch3, town)) {
             if (lang != null && extra != null) {
                 extra.entrySet().forEach(e -> {
                     if (!lang.has(e.getKey())) {

@@ -1,0 +1,81 @@
+{
+  "category": "sub",
+  "order": 210,
+  "giver": "skyabyss:guest_apprentice",
+  "chapter": "titan_whale",
+  "min_stage": 0,
+  "stages": [
+    {
+      "id": "meet",
+      "objectives": [
+        {
+          "id": "meet",
+          "type": "talk",
+          "target": "skyabyss:guest_apprentice",
+          "topic": "meet"
+        }
+      ]
+    },
+    {
+      "id": "clerk",
+      "objectives": [
+        {
+          "id": "clerk",
+          "type": "talk",
+          "target": "skyabyss:attendant_guild_clerk",
+          "topic": "town_test"
+        }
+      ]
+    },
+    {
+      "id": "hunt",
+      "objectives": [
+        {
+          "id": "beasts",
+          "type": "kill",
+          "targets": [
+            "minecraft:zombie",
+            "minecraft:husk",
+            "minecraft:skeleton",
+            "minecraft:stray",
+            "minecraft:spider",
+            "minecraft:cave_spider",
+            "minecraft:creeper",
+            "minecraft:drowned"
+          ],
+          "count": 4
+        },
+        {
+          "id": "bones",
+          "type": "collect",
+          "target": "minecraft:bone",
+          "count": 3
+        }
+      ]
+    },
+    {
+      "id": "hand",
+      "objectives": [
+        {
+          "id": "hand",
+          "type": "signal",
+          "target": "town_hand:guest_apprentice",
+          "party": false
+        }
+      ]
+    }
+  ],
+  "reward": {
+    "xp": 50,
+    "items": [
+      {
+        "item": "skyabyss:bell_coin",
+        "count": 12
+      },
+      {
+        "item": "minecraft:iron_ingot",
+        "count": 2
+      }
+    ]
+  }
+}

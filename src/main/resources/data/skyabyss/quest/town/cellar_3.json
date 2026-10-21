@@ -1,0 +1,57 @@
+{
+  "category": "sub",
+  "order": 262,
+  "giver": "skyabyss:attendant_drunkard",
+  "chapter": "titan_ember",
+  "min_stage": 3,
+  "stages": [
+    {
+      "id": "open",
+      "objectives": [
+        {
+          "id": "open",
+          "type": "signal",
+          "target": "town_cellar_open",
+          "party": false
+        }
+      ]
+    },
+    {
+      "id": "walk",
+      "objectives": [
+        {
+          "id": "walk",
+          "type": "signal",
+          "target": "town_at:abyss_hint",
+          "party": false
+        }
+      ],
+      "do": [
+        {
+          "type": "lore",
+          "entry": "town/cellar_3"
+        }
+      ]
+    },
+    {
+      "id": "back",
+      "objectives": [
+        {
+          "id": "back",
+          "type": "talk",
+          "target": "skyabyss:attendant_drunkard",
+          "topic": "town_c3_back"
+        }
+      ]
+    }
+  ],
+  "reward": {
+    "xp": 60,
+    "items": [
+      {
+        "item": "skyabyss:bell_coin",
+        "count": 10
+      }
+    ]
+  }
+}

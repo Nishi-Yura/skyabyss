@@ -1,0 +1,34 @@
+{
+  "npc": "skyabyss:attendant_tool_merchant",
+  "extends": true,
+  "add_options": {
+    "menu": {
+      "before": "about",
+      "options": [
+        {
+          "id": "town_market",
+          "goto": "town_market",
+          "kind": "quest",
+          "if": {
+            "type": "quest",
+            "quest": "town/ch2_net",
+            "is": "active",
+            "stage": "market"
+          }
+        }
+      ]
+    }
+  },
+  "nodes": {
+    "town_market": {
+      "face": "neutral",
+      "options": [
+        {
+          "id": "ok",
+          "goto": "end",
+          "kind": "talk"
+        }
+      ]
+    }
+  }
+}

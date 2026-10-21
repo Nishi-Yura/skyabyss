@@ -1,0 +1,74 @@
+{
+  "npc": "skyabyss:guest_child",
+  "entries": [
+    {
+      "node": "find",
+      "if": {
+        "type": "quest",
+        "quest": "town/ch3_thunder",
+        "is": "active",
+        "stage": "find"
+      }
+    },
+    {
+      "node": "escort",
+      "if": {
+        "type": "quest",
+        "quest": "town/ch3_thunder",
+        "is": "active",
+        "stage": "escort"
+      }
+    },
+    {
+      "node": "at_inn",
+      "if": {
+        "type": "quest",
+        "quest": "town/ch3_thunder",
+        "is": "active",
+        "stage": "inn"
+      }
+    },
+    {
+      "node": "idle"
+    }
+  ],
+  "nodes": {
+    "find": {
+      "face": "grave",
+      "next": "find2"
+    },
+    "find2": {
+      "face": "grave",
+      "next": "find3"
+    },
+    "find3": {
+      "face": "grave",
+      "options": [
+        {
+          "id": "go",
+          "goto": "find_go",
+          "kind": "talk"
+        }
+      ]
+    },
+    "find_go": {
+      "face": "smile",
+      "options": [
+        {
+          "id": "ok",
+          "goto": "end",
+          "kind": "talk"
+        }
+      ]
+    },
+    "escort": {
+      "face": "neutral"
+    },
+    "at_inn": {
+      "face": "grave"
+    },
+    "idle": {
+      "face": "neutral"
+    }
+  }
+}

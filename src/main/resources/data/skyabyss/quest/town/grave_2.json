@@ -1,0 +1,46 @@
+{
+  "category": "sub",
+  "order": 251,
+  "giver": "skyabyss:attendant_gravekeeper",
+  "chapter": "titan_tide",
+  "min_stage": 1,
+  "stages": [
+    {
+      "id": "water",
+      "objectives": [
+        {
+          "id": "water",
+          "type": "collect",
+          "target": "minecraft:water_bucket",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "id": "wash",
+      "objectives": [
+        {
+          "id": "wash",
+          "type": "signal",
+          "target": "town_hand:attendant_gravekeeper",
+          "party": false
+        }
+      ],
+      "do": [
+        {
+          "type": "lore",
+          "entry": "town/grave_2"
+        }
+      ]
+    }
+  ],
+  "reward": {
+    "xp": 30,
+    "items": [
+      {
+        "item": "skyabyss:bell_coin",
+        "count": 10
+      }
+    ]
+  }
+}

@@ -1777,6 +1777,7 @@ class Town(Facilities):
         self.black_market()
         self.mapmaker()
         self.tavern()
+        self.upper_rooms()
 
 
 def _rot(x, z, s, rot):

@@ -1,0 +1,46 @@
+{
+  "category": "sub",
+  "order": 253,
+  "giver": "skyabyss:attendant_gravekeeper",
+  "chapter": "titan_ember",
+  "min_stage": 3,
+  "stages": [
+    {
+      "id": "candle",
+      "objectives": [
+        {
+          "id": "candle",
+          "type": "collect",
+          "target": "minecraft:candle",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "id": "light",
+      "objectives": [
+        {
+          "id": "light",
+          "type": "signal",
+          "target": "town_hand:attendant_gravekeeper",
+          "party": false
+        }
+      ],
+      "do": [
+        {
+          "type": "lore",
+          "entry": "town/grave_4"
+        }
+      ]
+    }
+  ],
+  "reward": {
+    "xp": 50,
+    "items": [
+      {
+        "item": "skyabyss:bell_coin",
+        "count": 15
+      }
+    ]
+  }
+}
