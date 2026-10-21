@@ -233,3 +233,175 @@ class BackAlley:
         v.set(door_x + 1, -9, wz, 'deepslate_tiles')
         v.set(door_x + 1, -8, wz, 'deepslate_tiles')
         self.mark('abyss_door', door_x, -9, wz)
+        # 戸の向こうは五章の大坑道 (docs/design/34 の 4.7。戸は閉じたまま建てる。開けるのは abyss/AbyssEntrance)
+        self.abyss_shaft(door_x, wz)
+
+    def abyss_shaft(self, door_x, wz):
+        """封じた戸の向こうの大坑道 (五章の入口)。戸の東に短い通路、その先に大縦穴 (中心 cx、半径 6 の壁)。
+        壁ぞいに螺旋の段 (幅 2、角度が増える向きに下りる。1 歩で 1 段)。真ん中は底まで抜けた吹き抜けで、段の内の縁に低い壁。
+        踊り場 2 (灰の民の作業場・前の私の野営。壁の外に小部屋) と、底の境 (床と門の枠)。灯りは内の縁の魂の灯りを 8 歩ごとと、踊り場だけ。
+        印: abyss_landing_1・abyss_landing_2・abyss_gate (底の真ん中)"""
+        import math
+        v = self.v
+        top = -10                     # 一段目の高さ (通路の床 -10、立つ所 -9 から一段下りる)
+        depth = 90                    # 底の床の高さ = top - depth
+        cx, cz, R = door_x + 9, wz, 6
+        bottom = top - depth
+
+        def deep():
+            return self._rough('deep')
+
+        # 通路: 戸の裏 (door_x + 1) から縦穴の縁まで。立つ所 -9、高さ 3
+        for x in range(door_x + 1, cx - R + 1):
+            v.set(x, -10, wz, deep())
+            for yy in range(-9, -6):
+                v.set(x, yy, wz, 'cave_air')
+            v.set(x, -6, wz, 'deepslate_tiles')
+            for dz in (-1, 1):
+                for yy in range(-10, -5):
+                    v.set(x, yy, wz + dz, deep())
+        # 縦穴: 壁 (半径 R の輪) と中 (空気) を、底の下から天井まで
+        ceil = -5
+        for x in range(cx - R, cx + R + 1):
+            for z in range(cz - R, cz + R + 1):
+                d = math.hypot(x - cx, z - cz)
+                if d > R + 0.5:
+                    continue
+                for yy in range(bottom - 1, ceil + 1):
+                    if yy == ceil:
+                        v.set(x, yy, z, 'deepslate_tiles')
+                    elif yy == bottom - 1:
+                        v.set(x, yy, z, 'polished_deepslate')
+                    elif d > R - 0.5:
+                        v.set(x, yy, z, deep())
+                    else:
+                        v.set(x, yy, z, 'cave_air')
+        # 通路の口を壁に開ける
+        for yy in range(-9, -6):
+            v.set(cx - R, yy, wz, 'cave_air')
+        # 螺旋の段: 一歩 = 弧の長さ 1。最初は西 (通路の口) から
+        rmid = 4.6
+        landings = {30: 'abyss_landing_1', 60: 'abyss_landing_2'}  # 下りた段の数 → 踊り場 (8 歩ぶん平ら)
+        flat = 8
+        steps = []
+        s = 0.0
+        drop = 0
+        flat_left = 0
+        theta0 = math.pi
+        landing_at = {}
+        while drop <= depth:  # 最後の一歩は底の床の上 (底の床へ一段で下りる)
+            th = theta0 + s / rmid
+            steps.append((th, top - drop))
+            if flat_left > 0:
+                flat_left -= 1
+            else:
+                drop += 1
+                if drop in landings:
+                    flat_left = flat
+                    landing_at[landings[drop]] = (theta0 + (s + 1 + flat / 2) / rmid, top - drop)
+            s += 1.0
+
+        def cells_at(th):
+            out = []
+            for x in range(cx - R, cx + R + 1):
+                for z in range(cz - R, cz + R + 1):
+                    d = math.hypot(x - cx, z - cz)
+                    if not (3.4 <= d <= 5.5):
+                        continue
+                    a = math.atan2(z - cz, x - cx)
+                    diff = (a - th + math.pi) % (2 * math.pi) - math.pi
+                    if abs(diff) * d <= 0.55:
+                        out.append((x, z, d))
+            return out
+
+        placed = set()
+        for i, (th, y) in enumerate(steps):
+            nxt = steps[i + 1][1] if i + 1 < len(steps) else y
+            # 上る向き (角度が減る向き) = (sin θ, -cos θ)
+            ax, az = math.sin(th), -math.cos(th)
+            if abs(ax) >= abs(az):
+                facing = 'east' if ax > 0 else 'west'
+            else:
+                facing = 'south' if az > 0 else 'north'
+            is_step = nxt < y or i == len(steps) - 1  # 最後の一歩も段 (底の床から上がれる)
+            for (x, z, d) in cells_at(th):
+                if (x, z, y) in placed:
+                    continue
+                placed.add((x, z, y))
+                v.set(x, y - 1, z, deep())
+                if is_step:
+                    v.set(x, y, z, 'deepslate_brick_stairs[facing=%s,half=bottom,shape=straight,waterlogged=false]' % facing)
+                else:
+                    v.set(x, y, z, 'polished_deepslate')
+                for yy in range(y + 1, y + 4):
+                    if v.get(x, yy, z) in (None, 'cave_air'):
+                        v.set(x, yy, z, 'cave_air')
+                # 内の縁の低い壁 (吹き抜けへ落ちない)。8 歩ごとに壁の上へ魂の灯り
+                if d < 3.9:
+                    v.set(x, y + 1, z, 'deepslate_brick_wall')
+                    if i % 8 == 0:
+                        v.set(x, y + 2, z, 'soul_lantern[hanging=false,waterlogged=false]')
+        # 踊り場: 壁の外に小部屋 (7×7、高さ 4)。段から 3 マス幅で壁を抜く
+        for name, (th, y) in landing_at.items():
+            ox, oz = math.cos(th), math.sin(th)
+            mx = int(round(cx + ox * (R + 4)))
+            mz = int(round(cz + oz * (R + 4)))
+            for x in range(mx - 3, mx + 4):
+                for z in range(mz - 3, mz + 4):
+                    if math.hypot(x - cx, z - cz) <= R - 0.5:
+                        continue
+                    # 部屋の床は踊り場の段と同じ高さ (y に床、立つ所 y + 1)
+                    for yy in range(y - 1, y + 6):
+                        edge = x in (mx - 3, mx + 3) or z in (mz - 3, mz + 3) or yy <= y or yy == y + 5
+                        if edge:
+                            v.set(x, yy, z, 'deepslate_tiles' if yy == y + 5 else ('polished_deepslate' if yy == y else deep()))
+                        else:
+                            v.set(x, yy, z, 'cave_air')
+            for k in range(R - 1, R + 2):
+                for w in (-1, 0, 1):
+                    px = int(round(cx + ox * k - oz * w))
+                    pz = int(round(cz + oz * k + ox * w))
+                    if math.hypot(px - cx, pz - cz) < 3.4:
+                        continue
+                    v.set(px, y - 1, pz, deep())
+                    v.set(px, y, pz, 'polished_deepslate')
+                    for yy in range(y + 1, y + 4):
+                        v.set(px, yy, pz, 'cave_air')
+            if name == 'abyss_landing_1':
+                # 灰の民の作業場: 金床・樽・鍛冶台・魂の焚き火・吊った鎖・灰
+                v.set(mx - 2, y + 1, mz - 2, 'anvil[facing=north]')
+                v.set(mx + 2, y + 1, mz - 2, 'barrel[facing=up,open=false]')
+                v.set(mx + 2, y + 1, mz + 2, 'barrel[facing=up,open=false]')
+                v.set(mx - 2, y + 1, mz + 2, 'smithing_table')
+                v.set(mx, y + 1, mz, 'soul_campfire[facing=north,lit=true,signal_fire=false,waterlogged=false]')
+                for yy in (y + 3, y + 4):
+                    v.set(mx - 2, yy, mz, 'chain[axis=y,waterlogged=false]')
+                v.set(mx + 2, y + 1, mz, 'gray_concrete_powder')
+            else:
+                # 前の私の野営: 寝床・焚き火・帳面の台・荷
+                v.set(mx - 2, y + 1, mz - 1, 'white_wool')
+                v.set(mx - 2, y + 1, mz, 'white_carpet')
+                v.set(mx, y + 1, mz, 'campfire[facing=north,lit=true,signal_fire=false,waterlogged=false]')
+                v.set(mx + 2, y + 1, mz - 2, 'lectern[facing=west,has_book=true,powered=false]')
+                v.set(mx + 2, y + 1, mz + 2, 'barrel[facing=up,open=false]')
+                v.set(mx - 2 , y + 4, mz + 2, 'soul_lantern[hanging=true,waterlogged=false]')
+            v.set(mx + 2, y + 4, mz - 2, 'soul_lantern[hanging=true,waterlogged=false]')
+            self.mark(name, mx, y + 1, mz)
+        # 底の境: 床と門の枠 (強化深層岩の柱と泣く黒曜石の楣)。門の口は鉄格子で閉じたまま
+        for x in range(cx - R + 1, cx + R):
+            for z in range(cz - R + 1, cz + R):
+                if math.hypot(x - cx, z - cz) <= R - 0.5:
+                    v.set(x, bottom - 1, z, 'polished_deepslate')
+        # 門は真ん中の吹き抜けの下 (段の輪 3.4〜5.5 にかからない)。東西に柱、口は南北を向く
+        for dx in (-2, 2):
+            for yy in range(bottom, bottom + 5):
+                v.set(cx + dx, yy, cz, 'reinforced_deepslate')
+        for dx in range(-2, 3):
+            v.set(cx + dx, bottom + 5, cz, 'crying_obsidian')
+        for dx in (-1, 0, 1):
+            for yy in range(bottom, bottom + 5):
+                v.set(cx + dx, yy, cz, 'iron_bars')
+        for dz in (-2, 2):
+            v.set(cx, bottom, cz + dz, 'soul_lantern[hanging=false,waterlogged=false]')
+        v.set(cx, bottom - 1, cz + 1, 'sculk')
+        self.mark('abyss_gate', cx, bottom, cz + 1)

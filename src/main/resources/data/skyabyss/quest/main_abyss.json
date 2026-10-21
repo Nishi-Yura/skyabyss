@@ -1,0 +1,82 @@
+{
+  "category": "main",
+  "chapter": "chapter2",
+  "order": 60,
+  "giver": "skyabyss:storyteller",
+  "start_when": {
+    "type": "quest",
+    "quest": "main_key",
+    "is": "done"
+  },
+  "stages": [
+    {
+      "id": "rumor",
+      "xp": 60,
+      "objectives": [
+        {
+          "id": "talk",
+          "type": "talk",
+          "target": "skyabyss:storyteller",
+          "topic": "ch5_rumor"
+        }
+      ]
+    },
+    {
+      "id": "prepare",
+      "objectives": [
+        {
+          "id": "ready",
+          "type": "condition",
+          "if": {
+            "type": "quest",
+            "quest": "ch5/black_iron",
+            "is": "done"
+          }
+        }
+      ]
+    },
+    {
+      "id": "door",
+      "xp": 80,
+      "objectives": [
+        {
+          "id": "open",
+          "type": "signal",
+          "signals": [
+            "ch5_abyss_door"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "shaft",
+      "xp": 120,
+      "objectives": [
+        {
+          "id": "reach",
+          "type": "signal",
+          "signals": [
+            "ch5_threshold"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "report",
+      "objectives": [
+        {
+          "id": "talk",
+          "type": "talk",
+          "target": "skyabyss:storyteller",
+          "topic": "ch5_report"
+        }
+      ]
+    }
+  ],
+  "reward": {
+    "xp": 300,
+    "affinity": {
+      "skyabyss:storyteller": 5
+    }
+  }
+}

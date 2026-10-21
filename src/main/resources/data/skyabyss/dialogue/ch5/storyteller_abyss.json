@@ -1,0 +1,58 @@
+{
+  "npc": "skyabyss:storyteller",
+  "extends": true,
+  "entries": [
+    {
+      "node": "ch5_rumor",
+      "if": {
+        "type": "quest",
+        "quest": "main_abyss",
+        "is": "active",
+        "stage": "rumor"
+      }
+    },
+    {
+      "node": "ch5_report",
+      "if": {
+        "type": "quest",
+        "quest": "main_abyss",
+        "is": "active",
+        "stage": "report"
+      }
+    }
+  ],
+  "nodes": {
+    "ch5_rumor": {
+      "face": "grave",
+      "next": "ch5_rumor2"
+    },
+    "ch5_rumor2": {
+      "face": "neutral",
+      "next": "ch5_rumor3"
+    },
+    "ch5_rumor3": {
+      "face": "grave",
+      "options": [
+        {
+          "id": "ok",
+          "goto": "end",
+          "kind": "talk"
+        }
+      ]
+    },
+    "ch5_report": {
+      "face": "grave",
+      "next": "ch5_report2"
+    },
+    "ch5_report2": {
+      "face": "neutral",
+      "options": [
+        {
+          "id": "ok",
+          "goto": "end",
+          "kind": "talk"
+        }
+      ]
+    }
+  }
+}

@@ -90,3 +90,8 @@
 - 時間・天気・背の状態で試練を閉じない。状態は遊び方を変えるだけ。
 - READMEとサイトの絵は手作りのドット絵（ゲームのスクショと絵文字は使わない）。
 - セッションの終わりが近いときは、この文書を更新し、`m1-sky-pass` と `wip/*` を push して止める。
+
+## 7. 途中の作業（2026-10-22 朝、再起動の前）
+- **五章の入口（メインの作業。枝 `wip/ch5-entrance`、未テスト）**: 34 の 4.7。`tools/gen_ch5_entrance.py`（main_abyss・ch5/black_iron・会話・skyabyss_ch5 の文）と、都の設計図の大坑道（`tools/capital/backalley.py` の `abyss_shaft`。螺旋の段・踊り場 2・底の境。検査 `tools/capital/audit_shaft.py` は 0 件・跳ぶ所 0）。**まだ**: Java（封じた戸を天の鍵で開ける・踊り場と底の合図 `ch5_abyss_door`・`ch5_threshold`、ShelterBuilder の extras に印 `abyss_landing_1/2`・`abyss_gate`、SiteGuard の都の範囲を下へ 110 まで広げる）、自己テスト、撮影。
+- **深淵の中の形**: 選定ページの子ページ `abyss/`（問い `ab_*`）の答え待ち（00 の 245）。
+- **サブの作業（再起動で止まる）**: 巨神の背を軽くする（`mod-route`、枝 `wip/route5`）、地上の場所の検査の片付け（`mod-ch4`、枝 `wip/ch4`）。どちらも続きから頼み直す。

@@ -1,0 +1,49 @@
+{
+  "category": "main",
+  "chapter": "chapter2",
+  "order": 61,
+  "giver": "skyabyss:attendant_smith",
+  "start_when": {
+    "type": "quest",
+    "quest": "main_abyss",
+    "is": "started"
+  },
+  "stages": [
+    {
+      "id": "iron",
+      "xp": 150,
+      "objectives": [
+        {
+          "id": "ingot",
+          "type": "collect",
+          "target": "minecraft:netherite_ingot",
+          "count": 1,
+          "party": false
+        }
+      ]
+    },
+    {
+      "id": "show",
+      "objectives": [
+        {
+          "id": "talk",
+          "type": "talk",
+          "target": "skyabyss:attendant_smith",
+          "topic": "ch5_iron_show"
+        }
+      ]
+    }
+  ],
+  "reward": {
+    "xp": 200,
+    "items": [
+      {
+        "item": "minecraft:netherite_upgrade_smithing_template",
+        "count": 1
+      }
+    ],
+    "affinity": {
+      "skyabyss:attendant_smith": 3
+    }
+  }
+}

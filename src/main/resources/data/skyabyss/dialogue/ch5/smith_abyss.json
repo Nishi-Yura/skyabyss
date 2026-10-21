@@ -1,0 +1,63 @@
+{
+  "npc": "skyabyss:attendant_smith",
+  "extends": true,
+  "add_options": {
+    "menu": {
+      "before": "about",
+      "options": [
+        {
+          "id": "ch5_iron_tell",
+          "goto": "ch5_iron_tell",
+          "kind": "quest",
+          "if": {
+            "type": "quest",
+            "quest": "ch5/black_iron",
+            "is": "active",
+            "stage": "iron"
+          }
+        },
+        {
+          "id": "ch5_iron_show",
+          "goto": "ch5_iron_show",
+          "kind": "quest",
+          "if": {
+            "type": "quest",
+            "quest": "ch5/black_iron",
+            "is": "active",
+            "stage": "show"
+          }
+        }
+      ]
+    }
+  },
+  "nodes": {
+    "ch5_iron_tell": {
+      "face": "neutral",
+      "next": "ch5_iron_tell2"
+    },
+    "ch5_iron_tell2": {
+      "face": "neutral",
+      "options": [
+        {
+          "id": "ok",
+          "goto": "end",
+          "kind": "talk"
+        }
+      ]
+    },
+    "ch5_iron_show": {
+      "face": "smile",
+      "next": "ch5_iron_show2"
+    },
+    "ch5_iron_show2": {
+      "face": "neutral",
+      "options": [
+        {
+          "id": "ok",
+          "goto": "end",
+          "kind": "talk"
+        }
+      ]
+    }
+  }
+}
