@@ -185,17 +185,17 @@ public final class TideChapter {
     }
 
     private static void registerSites() {
-        ChapterSites.element(CAIRN_A, Chapters.TIDE, "tide_cairn_a").dist(30, 110).prefer(ChapterSites.Prefer.SHORE).arriveRadius(8)
+        ChapterSites.element(CAIRN_A, Chapters.TIDE, "tide_cairn_a").atGround().dist(30, 110).prefer(ChapterSites.Prefer.SHORE).arriveRadius(8)
                 .onArrive((p, s) -> {
                     Notice.hint(p, "message.skyabyss.ch2.cairn.tall");
                     Quests.signal(p, SIGNAL_CAIRN);
                 }).register();
-        ChapterSites.element(CAIRN_B, Chapters.TIDE, "tide_cairn_b").dist(40, 120).prefer(ChapterSites.Prefer.SHORE).arriveRadius(8)
+        ChapterSites.element(CAIRN_B, Chapters.TIDE, "tide_cairn_b").atGround().dist(40, 120).prefer(ChapterSites.Prefer.SHORE).arriveRadius(8)
                 .onArrive((p, s) -> {
                     Notice.hint(p, "message.skyabyss.ch2.cairn.low");
                     Quests.signal(p, SIGNAL_CAIRN);
                 }).register();
-        ChapterSites.element(CARGO, Chapters.TIDE, "tide_cargo").dist(50, 130).prefer(ChapterSites.Prefer.SHORE).arriveRadius(8)
+        ChapterSites.element(CARGO, Chapters.TIDE, "tide_cargo").atGround().dist(50, 130).prefer(ChapterSites.Prefer.SHORE).arriveRadius(8)
                 .post(TideChapter::fillCargo)
                 .onArrive((p, s) -> {
                     Lore.unlock(p, LORE_DRIFT, true);
@@ -206,7 +206,7 @@ public final class TideChapter {
                     }
                     Quests.signal(p, SIGNAL_CARGO);
                 }).register();
-        ChapterSites.element(STELE, Chapters.TIDE, "tide_stele").dist(60, 140).prefer(ChapterSites.Prefer.SHORE).arriveRadius(6)
+        ChapterSites.element(STELE, Chapters.TIDE, "tide_stele").atGround().dist(60, 140).prefer(ChapterSites.Prefer.SHORE).arriveRadius(6)
                 .onArrive((p, s) -> {
                     Lore.unlock(p, LORE_STELE, true);
                     Notice.hint(p, "message.skyabyss.ch2.stele");

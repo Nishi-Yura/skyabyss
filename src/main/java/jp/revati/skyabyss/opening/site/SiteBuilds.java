@@ -59,8 +59,14 @@ public final class SiteBuilds {
         return true;
     }
 
-    public static synchronized boolean busy() {
-        return !QUEUE.isEmpty();
+    // 建てている物があるか (章の跡地の整えも数える)
+    public static boolean busy() {
+        synchronized (SiteBuilds.class) {
+            if (!QUEUE.isEmpty()) {
+                return true;
+            }
+        }
+        return ChapterGrounds.busy();
     }
 
     public static synchronized int pending() {
@@ -71,10 +77,12 @@ public final class SiteBuilds {
     @SubscribeEvent
     static void onServerStarted(ServerStartedEvent event) {
         MinecraftServer server = event.getServer();
+        ChapterGrounds.registerRoads();
         if (!enabled(server)) {
             return;
         }
         plan(server);
+        ChapterGrounds.ensurePlanned(server);
         ChapterSites.dedupe(server);
         enqueueMissing(server);
         // 野営地は、プレイヤーが入る前に建て終える (チャンクはスポーン地点のまわりが読み込み済み)
@@ -97,10 +105,11 @@ public final class SiteBuilds {
     }
 
     // 重い探索 (宿り・足跡・骨) の結果待ち
-    private static volatile CompletableFuture<List<SiteFinder.Planned>> pendingPlan;
+    private static volatile CompletableFuture<SiteFinder.Rest> pendingPlan;
 
+    // 場所を探している最中か (章の跡地の探しも数える)
     public static boolean planning() {
-        return pendingPlan != null;
+        return pendingPlan != null || ChapterGrounds.planning() || ChapterSites.pending();
     }
 
     // 場所を決める (まだなら)。野営地はその場で決めて (新しいワールドの最初の日ならスポーン地点を野営地へ動かす)、
@@ -136,23 +145,25 @@ public final class SiteBuilds {
             SkyAbyss.LOGGER.info("Opening camp planned at {} in {} ms", camp, (System.nanoTime() - t0) / 1_000_000L);
         }
         BlockPos campFinal = camp;
-        pendingPlan = CompletableFuture.supplyAsync(() -> SiteFinder.planRest(probe, campFinal), Util.backgroundExecutor());
+        pendingPlan = CompletableFuture.supplyAsync(() -> SiteFinder.planRestAll(probe, campFinal), Util.backgroundExecutor());
         return true;
     }
 
     // 別のスレッドの探索ができていれば、結果を SiteData に書いて、建設を予約する (tick の中で)
     private static void applyPlan(MinecraftServer server) {
-        CompletableFuture<List<SiteFinder.Planned>> f = pendingPlan;
+        CompletableFuture<SiteFinder.Rest> f = pendingPlan;
         if (f == null || !f.isDone()) {
             return;
         }
         pendingPlan = null;
         SiteData data = SiteData.get(server.overworld());
         try {
-            for (SiteFinder.Planned p : f.join()) {
+            SiteFinder.Rest rest = f.join();
+            for (SiteFinder.Planned p : rest.planned()) {
                 data.add(p.kind(), p.index(), p.pos(), p.yaw());
             }
             data.setPlanned(true);
+            ChapterGrounds.accept(server, rest.grounds());
         } catch (RuntimeException e) {
             SkyAbyss.LOGGER.error("Opening sites: the search failed", e);
             return;
@@ -169,7 +180,8 @@ public final class SiteBuilds {
         QUEUE.forEach(j -> queued.add(j.entry));
         for (String kind : new String[] {Kind.CAMP.id, Kind.SHELTER.id, "cairn", Kind.FOOTPRINT.id, Kind.RIBS.id}) {
             for (SiteData.Entry e : data.entries(kind)) {
-                if (!e.built && !queued.contains(e)) {
+                // 跡地の中の物 (一章の骨) は、跡地を整え終わってから
+                if (!e.built && !queued.contains(e) && !waitsForGround(data, e.pos)) {
                     QUEUE.add(jobFor(level, data, e));
                 }
             }
@@ -178,7 +190,7 @@ public final class SiteBuilds {
         List<SiteJob> front = new java.util.ArrayList<>();
         for (SiteData.ChapterPlan plan : data.plans()) {
             for (SiteData.Entry e : new java.util.ArrayList<>(plan.sites)) {
-                if (!e.built && !queued.contains(e)) {
+                if (!e.built && !queued.contains(e) && !waitsForGround(data, plan.anchor)) {
                     SiteJob job = ChapterSites.jobFor(level, data, e);
                     if (job == null) {
                         continue;
@@ -197,6 +209,16 @@ public final class SiteBuilds {
         if (!QUEUE.isEmpty()) {
             SkyAbyss.LOGGER.info("Opening sites: {} to build", QUEUE.size());
         }
+    }
+
+    // pos が、まだ整え終わっていない跡地の中 (形の大きさ + 余白) か
+    static boolean waitsForGround(SiteData data, BlockPos pos) {
+        for (SiteData.Ground g : data.grounds()) {
+            if (!g.shaped && (ChapterSites.horizontal(g.center, pos) <= 200 || ChapterSites.horizontal(g.shapeCenter, pos) <= 200)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public static SiteJob jobFor(ServerLevel level, SiteData data, SiteData.Entry e) {
@@ -241,6 +263,8 @@ public final class SiteBuilds {
 
     // 自己テスト・開発コマンド用: 予約を最後まで、チャンクをその場で読みながら進める
     public static void buildAllNow(MinecraftServer server) {
+        ChapterGrounds.finishNow(server);
+        enqueueMissing(server);
         while (true) {
             SiteJob job;
             synchronized (SiteBuilds.class) {
@@ -323,7 +347,7 @@ public final class SiteBuilds {
     private static int build(CommandContext<CommandSourceStack> ctx) {
         MinecraftServer server = ctx.getSource().getServer();
         plan(server);
-        CompletableFuture<List<SiteFinder.Planned>> f = pendingPlan;
+        CompletableFuture<SiteFinder.Rest> f = pendingPlan;
         if (f != null) {
             f.join();
             applyPlan(server);

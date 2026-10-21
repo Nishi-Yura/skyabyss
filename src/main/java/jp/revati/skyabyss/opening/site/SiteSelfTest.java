@@ -237,13 +237,19 @@ public final class SiteSelfTest {
         double ds = OpeningSites.horizontal(camp, shelter);
         double dr = OpeningSites.horizontal(camp, ribs);
         check(f, ds >= 100 && ds <= 480, "shelter distance " + ds);  // 都: 260〜340、見つからなければ 240〜480 (SiteFinder.findShelter)
-        check(f, dr >= 200 && dr <= 380, "ribs distance " + dr);
+        // 骨: 一章の跡地 (北の丘。docs/design/33 の 3 章) があればその中、なければ野営地から 250〜350 (宿りと違う方角)
+        SiteData.Ground whale = SiteData.get(level).ground(jp.revati.skyabyss.story.Chapters.WHALE.id());
+        if (whale != null) {
+            check(f, OpeningSites.horizontal(whale.center, ribs) <= 152, "ribs are " + (int) OpeningSites.horizontal(whale.center, ribs) + " from the north hills");
+        } else {
+            check(f, dr >= 200 && dr <= 380, "ribs distance " + dr);
+        }
         SkyAbyss.LOGGER.info("[opening] camp {} shelter {} ({} blocks) ribs {} ({} blocks) footprints {} cairns {}", camp, shelter, (int) ds, ribs, (int) dr, prints,
                 OpeningSites.cairns(server).size());
         double ang = Math.abs(Math.toDegrees(Math.atan2(shelter.getZ() - camp.getZ(), shelter.getX() - camp.getX())
                 - Math.atan2(ribs.getZ() - camp.getZ(), ribs.getX() - camp.getX())));
         ang = ang > 180 ? 360 - ang : ang;
-        check(f, ang >= 80, "ribs and shelter are only " + (int) ang + " degrees apart");
+        check(f, whale != null || ang >= 80, "ribs and shelter are only " + (int) ang + " degrees apart");
         // 足跡: 道から 30〜60 (余裕を見て 24〜70)
         for (BlockPos p : prints) {
             double d = SiteFinder.distToPath(p.getX(), p.getZ(), camp, (shelter.getX() - camp.getX()) / ds, (shelter.getZ() - camp.getZ()) / ds, ds);

@@ -322,7 +322,9 @@ public final class Ch1SelfTest {
                 "prologue elements are not registered as expected");
         List<String> whaleIds = new ArrayList<>(Sites.WHALE);
         whaleIds.addAll(Sites.WHALE_P6);
-        check(ChapterSites.elements(Chapters.WHALE).stream().map(ChapterSites.Element::id).sorted().toList().equals(whaleIds.stream().sorted().toList()),
+        // 道しるべの石標 (跡地への道の残りの点。ChapterGrounds) は一章の要素の表に数えない
+        check(ChapterSites.elements(Chapters.WHALE).stream().map(ChapterSites.Element::id).filter(id -> !id.startsWith(jp.revati.skyabyss.opening.site.ChapterGrounds.ROAD_PREFIX))
+                .sorted().toList().equals(whaleIds.stream().sorted().toList()),
                 "chapter 1 elements are not registered as expected");
         for (String id : Sites.WHALE_P6) {
             var el = ChapterSites.elements(Chapters.WHALE).stream().filter(e -> e.id().equals(id)).findFirst().orElse(null);
@@ -628,7 +630,11 @@ public final class Ch1SelfTest {
         }
         SiteData data = SiteData.get(server.overworld());
         boolean prologue = data.plans().stream().anyMatch(p -> p.chapter.equals(Chapters.PROLOGUE.id()) && p.players.contains(base.getUUID()) && !p.ahead && !p.sites.isEmpty());
-        boolean whale = data.plans().stream().anyMatch(p -> p.chapter.equals(Chapters.WHALE.id()) && p.players.contains(base.getUUID()) && !p.ahead && !p.sites.isEmpty());
+        // 一章は拠点の分 (旅の跡・荷車・日記) と跡地の分 (北の丘) の両方が置かれるまで
+        SiteData.Ground wg = data.ground(Chapters.WHALE.id());
+        boolean whale = data.plans().stream().anyMatch(p -> p.chapter.equals(Chapters.WHALE.id()) && p.players.contains(base.getUUID()) && !p.ahead && !p.sites.isEmpty()
+                && (wg == null || !p.anchor.equals(wg.center)))
+                && (wg == null || data.plans().stream().anyMatch(p -> p.anchor.equals(wg.center) && p.players.contains(base.getUUID()) && !p.sites.isEmpty()));
         return prologue && whale;
     }
 
@@ -649,9 +655,11 @@ public final class Ch1SelfTest {
             for (String id : Sites.WHALE) {
                 var sites = ChapterSites.sitesFor(server, base.getUUID(), id);
                 check(sites.size() == 1 && sites.get(0).built(), id + ": should be placed and built exactly once (" + sites.size() + ")");
+                // 跡地に置く要素 (見張りの丘・歌石) は一章の跡地の中心から、ほかは拠点から
+                BlockPos anchor = ChapterSites.anchorFor(server, id, baseAt);
                 for (var s : sites) {
-                    double d = Math.hypot(s.pos().getX() - baseAt.getX(), s.pos().getZ() - baseAt.getZ());
-                    check(d <= 152, id + " is " + (int) d + " from the base");
+                    double d = anchor == null ? 0 : Math.hypot(s.pos().getX() - anchor.getX(), s.pos().getZ() - anchor.getZ());
+                    check(d <= 152, id + " is " + (int) d + " from its anchor " + anchor);
                 }
             }
             for (String id : Sites.PROLOGUE.stream().toList()) {

@@ -34,12 +34,14 @@ import net.minecraft.world.phys.Vec3;
 //   巨大な足跡      footprint。足跡の拍子 (FOOTPRINTS) のあと
 //   巨神の骨        ribs。骨の拍子 (BONES) のあと見た。イサナ (ISANA) のあとは町からの方角の噂
 //   積み石          cairn と一章の道の積み石。町を見たあと、道しるべの線 (点) として
-//   章の場所        ChapterSites の小要素。その人が使う拠点の分で、近くに着いた (arrived) ものだけ
+//   章の跡地        ChapterGrounds の四つの跡地 (33 の 3 章)。その章が開いた人に、都からの方角だけの「噂」。跡地の近く (96) に来たら「見た」
+//                   (SiteData.Ground.seen に残る)。その章を終えた人にはいつも「見た」
+//   章の場所        ChapterSites の小要素。その人が使う拠点 (跡地を含む) の分で、近くに着いた (arrived) ものだけ。都から跡地への道しるべは積み石の点
 //   碑              覚えた碑 (TravelState.waymarks)。壊された碑は出さない
 //   巨神            出会った巨神の今の場所 (読み込まれていなければ最後に見た場所)。眠った巨神・まだ姿を見せない巨神は出さない
 // すでに遊んでいた人 (OpeningState.legacy) には序盤の場所を全部「見た」で出す。新しい保存は足さない (記録はどれも既存のものを読む)。
 //
-// W2 (章の跡地を方位と距離で置く。33 の 3 章) と 32 の祠 (R3) ができたら、その場所はここへ足す (kind = SITE / SHRINE。噂と見たの二段は rumor で)。
+// 32 の祠 (R3) ができたら、その場所はここへ足す (kind = SHRINE。置き場は ChapterGrounds.shrineSpot。見せる決まりは跡地の「見た」に合わせる)。
 // 言伝ての板の依頼の目印も同じ。画面の側は kind を知っていれば描ける (MapSprites)
 public final class MapMarks {
     // 印の種類 (画面の絵の番号と同じ順。MapSprites)
@@ -79,6 +81,7 @@ public final class MapMarks {
             }
         }
         BlockPos town = openingMarks(spots, k, out);
+        groundMarks(data.grounds(), player.getUUID(), Chapters.of(player), here, town, out);
         chapterMarks(data, player.getUUID(), out);
         waymarkMarks(Voyages.state(player), TravelWorldData.get(player.server), out);
         titanMarks(player, over, out);
@@ -157,6 +160,31 @@ public final class MapMarks {
             }
         }
         return town;
+    }
+
+    // 章の跡地: その章が開いた人に噂 (都からの方角)、近くに来た人・その章を終えた人に見た
+    public static void groundMarks(List<SiteData.Ground> grounds, UUID player, Chapters now, @Nullable BlockPos here, @Nullable BlockPos town, List<Mark> out) {
+        for (SiteData.Ground g : grounds) {
+            Chapters ch = Chapters.byId(g.chapter);
+            if (ch == null || now.ordinal() < ch.ordinal()) {
+                continue;
+            }
+            int color = ch.titan() == null ? 0 : TravelDest.titanColor(ch.titan());
+            boolean seen = g.seen.contains(player) || now.ordinal() > ch.ordinal()
+                    || (here != null && horizontal(here, g.center) <= jp.revati.skyabyss.opening.site.ChapterGrounds.SEEN_NEAR);
+            String name = groundName(ch);
+            if (seen) {
+                out.add(new Mark(Kind.SITE, "ground:" + ch.id(), name, ch.id(), g.center.getX(), g.center.getZ(), false, color));
+            } else if (town != null) {
+                BlockPos r = rumor(town, g.center, name.hashCode());
+                out.add(new Mark(Kind.SITE, "ground:" + ch.id(), name, ch.id(), r.getX(), r.getZ(), true, color));
+            }
+        }
+    }
+
+    // 跡地の名前の材料 (map.skyabyss.site.ground_<章の ID>)
+    public static String groundName(Chapters ch) {
+        return "ground_" + ch.id();
     }
 
     // 章の小要素: その人の拠点の分で、着いたものだけ。一章の道の積み石は道しるべの点に

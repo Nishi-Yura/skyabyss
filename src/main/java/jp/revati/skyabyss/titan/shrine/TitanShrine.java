@@ -112,10 +112,19 @@ public final class TitanShrine {
             return have;
         }
         ServerLevel level = server.overworld();
-        int[] b = bearing(titan);
-        BlockPos t = town(server);
-        int x = t.getX() + b[0] * b[2];
-        int z = t.getZ() + b[1] * b[2];
+        // 跡地 (33 の 3.2、ChapterGrounds) が取っておいた台座の場所。跡地がまだ決まっていない世界だけ、方位と距離の帯の近い端
+        BlockPos spot = jp.revati.skyabyss.opening.site.ChapterGrounds.shrineSpot(server, titan).orElse(null);
+        int x;
+        int z;
+        if (spot != null) {
+            x = spot.getX();
+            z = spot.getZ();
+        } else {
+            int[] b = bearing(titan);
+            BlockPos t = town(server);
+            x = t.getX() + b[0] * b[2];
+            z = t.getZ() + b[1] * b[2];
+        }
         level.getChunk(x >> 4, z >> 4);
         int y = Math.max(level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z), level.getSeaLevel() + 1);
         BlockPos center = new BlockPos(x, y, z);

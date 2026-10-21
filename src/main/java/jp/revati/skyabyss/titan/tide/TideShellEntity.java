@@ -390,8 +390,13 @@ public class TideShellEntity extends Entity implements GeoEntity, TravelTitan, j
             }
         }
         java.util.Collections.shuffle(players, new java.util.Random(random.nextLong()));
+        // 二章の跡地があれば、寄るのはその浜だけ (浜の近くに人がいるとき。docs/design/33 の 3.1)
+        boolean beachOnly = TideBeach.restricted(level.getServer());
         for (ServerPlayer player : players) {
-            Vec3 spot = TideOcean.findRestSpot(level, player.getX(), player.getZ());
+            if (beachOnly && !TideBeach.near(player)) {
+                continue;
+            }
+            Vec3 spot = beachOnly ? TideBeach.restSpot(level) : TideOcean.findRestSpot(level, player.getX(), player.getZ());
             if (spot != null) {
                 lastWindow = TideOcean.windowId(day);
                 beginApproach(level, spot, 0);
@@ -687,7 +692,8 @@ public class TideShellEntity extends Entity implements GeoEntity, TravelTitan, j
         return Math.hypot(x - getX(), z - getZ());
     }
 
-    public enum RequestResult { OK, NOT_NOW, TAKEN, NO_SPOT }
+    // FAR = 浜から遠い (二章の跡地の浜にしか寄らない)
+    public enum RequestResult { OK, NOT_NOW, TAKEN, NO_SPOT, FAR }
 
     // 潮見の貝 (08 の 2.6節): 刻の 1 分前から刻の途中までに、自分のそばへ寄るよう頼む。一つの刻に一人 (すでに寄る場所を決めていれば NOT_NOW)
     public RequestResult request(ServerPlayer player) {
@@ -700,7 +706,11 @@ public class TideShellEntity extends Entity implements GeoEntity, TravelTitan, j
         if (voyage || mode != Mode.CRUISE || !TideOcean.isGathering(day) || lastWindow == window) {
             return RequestResult.NOT_NOW;
         }
-        Vec3 spot = TideOcean.findRestSpot(level, player.getX(), player.getZ());
+        boolean beachOnly = TideBeach.restricted(level.getServer());
+        if (beachOnly && !TideBeach.near(player)) {
+            return RequestResult.FAR;
+        }
+        Vec3 spot = beachOnly ? TideBeach.restSpot(level) : TideOcean.findRestSpot(level, player.getX(), player.getZ());
         if (spot == null) {
             return RequestResult.NO_SPOT;
         }

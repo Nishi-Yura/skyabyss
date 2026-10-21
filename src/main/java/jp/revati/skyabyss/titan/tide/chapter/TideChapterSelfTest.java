@@ -268,6 +268,11 @@ public final class TideChapterSelfTest {
         // 吹く: 刻の 1 分前から。巡航中なら頼みが通り、寄る場所を決めて向かう。一つの刻に一人
         level.setDayTime(10000);
         check(f, titan.saveState().getInt("Mode") == 0, "the titan should start cruising");
+        // 二章の跡地があれば、浜から遠い人の頼みは通らない (FAR。33 の 3.1)。この先の合成の海の検査は、浜に限らずに流す
+        if (jp.revati.skyabyss.titan.tide.TideBeach.restricted(server) && !jp.revati.skyabyss.titan.tide.TideBeach.near(p)) {
+            check(f, titan.request(p) == TideShellEntity.RequestResult.FAR, "far from the east beach the shell should not call the island");
+        }
+        jp.revati.skyabyss.titan.tide.TideBeach.testOff = true;
         TideShellEntity.RequestResult first = TideConchItem.blow(p, level);
         check(f, first == TideShellEntity.RequestResult.OK, "blowing the shell near the sea before the ebb should be accepted: " + first);
         check(f, titan.saveState().getInt("Mode") == 1 && titan.requesterNow().equals(p.getGameProfile().getName()), "the titan should approach the caller: " + titan.saveState());
@@ -295,6 +300,7 @@ public final class TideChapterSelfTest {
         if (third != null) {
             third.discard();
         }
+        jp.revati.skyabyss.titan.tide.TideBeach.testOff = false;
     }
 
     // ---------------------------------------------------------------- 大干潮

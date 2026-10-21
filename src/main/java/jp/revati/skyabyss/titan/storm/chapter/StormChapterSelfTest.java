@@ -588,7 +588,9 @@ public final class StormChapterSelfTest {
             check(f, sites.size() == want, "every element was placed for the storm-chapter player (" + sites.size() + " of " + want + ")");
             for (ChapterSites.Site s : sites) {
                 check(f, s.built(), s.id() + "#" + s.index() + " was built");
-                check(f, Math.hypot(s.pos().getX() - siteBase.getX(), s.pos().getZ() - siteBase.getZ()) <= 150.5, s.id() + " is within 150 blocks of the base");
+                // 三章の小要素は西の峰の跡地 (docs/design/33 の 3 章) の中心から、跡地のない世界では拠点から
+                BlockPos anchor = ChapterSites.anchorFor(server, s.id(), siteBase);
+                check(f, anchor == null || Math.hypot(s.pos().getX() - anchor.getX(), s.pos().getZ() - anchor.getZ()) <= 150.5, s.id() + " is within 150 blocks of its anchor " + anchor);
             }
             // 仕上げ: 風見の矢・樽の中身・碑の文
             int vanes = 0;

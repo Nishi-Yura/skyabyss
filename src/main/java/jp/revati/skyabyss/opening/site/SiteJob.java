@@ -230,7 +230,9 @@ public final class SiteJob {
                 || s.is(Blocks.GRAVEL) || s.is(Blocks.CLAY) || s.is(Blocks.MUD) || s.is(Blocks.PACKED_MUD) || s.is(Blocks.SANDSTONE)
                 || s.is(Blocks.RED_SANDSTONE) || s.is(Blocks.SNOW_BLOCK) || s.is(Blocks.POWDER_SNOW) || s.is(Blocks.MOSS_BLOCK) || s.is(Blocks.CALCITE)
                 || s.is(Blocks.TUFF) || s.is(Blocks.DRIPSTONE_BLOCK) || s.is(Blocks.ANDESITE) || s.is(Blocks.DIORITE) || s.is(Blocks.GRANITE)
-                || s.is(Blocks.MOSSY_COBBLESTONE) || s.is(Blocks.PODZOL) || s.is(Blocks.MYCELIUM) || s.is(Blocks.BEDROCK) || s.is(Blocks.SMOOTH_BASALT) || s.is(Blocks.DIRT_PATH);
+                || s.is(Blocks.MOSSY_COBBLESTONE) || s.is(Blocks.PODZOL) || s.is(Blocks.MYCELIUM) || s.is(Blocks.BEDROCK) || s.is(Blocks.SMOOTH_BASALT) || s.is(Blocks.DIRT_PATH)
+                // 章の跡地の灰の盆地の上面 (ShapeJob。灰のまだら)
+                || s.is(Blocks.GRAY_CONCRETE_POWDER) || s.is(Blocks.LIGHT_GRAY_CONCRETE_POWDER) || s.is(Blocks.BASALT);
     }
 
     // 地面の上に自然にある物か (空気・草花・雪・葉・木・つる・実)
@@ -857,11 +859,13 @@ public final class SiteJob {
         int k = relocations;
         SiteData.Entry campE = data.first("camp");
         SiteData.Entry shelterE = data.first("shelter");
-        BlockPos campPos = campE == null ? null : campE.pos;
-        BlockPos shelterPos = shelterE == null ? null : shelterE.pos;
         String kind = entry.kind;
-        BlockPos anchor = entry.anchor;
-        int maxDist = entry.maxDist;
+        // 一章の骨は一章の跡地 (docs/design/33 の 3 章) の中に置くので、野営地からの距離ではなく、跡地の中心から 150 以内で動かす
+        SiteData.Ground whaleGround = kind.equals("ribs") ? data.ground(jp.revati.skyabyss.story.Chapters.WHALE.id()) : null;
+        BlockPos campPos = campE == null || whaleGround != null ? null : campE.pos;
+        BlockPos shelterPos = shelterE == null ? null : shelterE.pos;
+        BlockPos anchor = whaleGround != null ? whaleGround.center : entry.anchor;
+        int maxDist = whaleGround != null ? ChapterPlanner.MAX_DIST : entry.maxDist;
         List<BlockPos> otherPrints = new ArrayList<>();
         if (kind.equals("footprint")) {
             for (SiteData.Entry o : data.entries("footprint")) {

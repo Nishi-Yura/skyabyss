@@ -45,6 +45,16 @@ public final class SiteFinder {
         boolean biomeOk(int x, int z);
 
         int sea();
+
+        // 乾いた群系か (荒野・サバンナ・砂漠・暗い森。四章の灰の地。docs/design/33 の 3 章)
+        default boolean dryBiome(int x, int z) {
+            return false;
+        }
+
+        // (x, z) から r ブロック以内に、バニラの村・構造物 (地上の大きなもの) が出るチャンクがあるか (跡地はそれを避ける)
+        default boolean structureNear(int x, int z, int r) {
+            return false;
+        }
     }
 
     // 「地形の高さ」を問い合わせる道具 (チャンクを作らない)
@@ -107,6 +117,59 @@ public final class SiteFinder {
 
         public Holder<Biome> biome(int x, int z) {
             return gen.getBiomeSource().getNoiseBiome(x >> 2, top(x, z) >> 2, z >> 2, sampler);
+        }
+
+        @Override
+        public boolean dryBiome(int x, int z) {
+            Holder<Biome> b = biome(x, z);
+            return b.is(BiomeTags.IS_BADLANDS) || b.is(BiomeTags.IS_SAVANNA) || b.is(Biomes.DESERT) || b.is(Biomes.DARK_FOREST);
+        }
+
+        // 調べる構造物の組 (地上の村・神殿・館・海底神殿など。難破船・遺跡は避けない = 二章の浜に要る)
+        private static final List<net.minecraft.resources.ResourceKey<net.minecraft.world.level.levelgen.structure.StructureSet>> AVOID_SETS = List.of(
+                net.minecraft.world.level.levelgen.structure.BuiltinStructureSets.VILLAGES,
+                net.minecraft.world.level.levelgen.structure.BuiltinStructureSets.DESERT_PYRAMIDS,
+                net.minecraft.world.level.levelgen.structure.BuiltinStructureSets.IGLOOS,
+                net.minecraft.world.level.levelgen.structure.BuiltinStructureSets.JUNGLE_TEMPLES,
+                net.minecraft.world.level.levelgen.structure.BuiltinStructureSets.SWAMP_HUTS,
+                net.minecraft.world.level.levelgen.structure.BuiltinStructureSets.PILLAGER_OUTPOSTS,
+                net.minecraft.world.level.levelgen.structure.BuiltinStructureSets.OCEAN_MONUMENTS,
+                net.minecraft.world.level.levelgen.structure.BuiltinStructureSets.WOODLAND_MANSIONS);
+        private List<net.minecraft.world.level.levelgen.structure.StructureSet> avoid;
+
+        // 構造物の置き場の候補のチャンクで、そのチャンクの群系 (海面の高さ) に構造物が出られるか。地形の高さは問い合わせないので軽い
+        @Override
+        public boolean structureNear(int x, int z, int r) {
+            if (avoid == null) {
+                List<net.minecraft.world.level.levelgen.structure.StructureSet> sets = new ArrayList<>();
+                var reg = level.registryAccess().registryOrThrow(net.minecraft.core.registries.Registries.STRUCTURE_SET);
+                for (var key : AVOID_SETS) {
+                    reg.getHolder(key).ifPresent(h -> sets.add(h.value()));
+                }
+                avoid = sets;
+            }
+            var state = level.getChunkSource().getGeneratorState();
+            int c = r >> 4;
+            int cx0 = x >> 4;
+            int cz0 = z >> 4;
+            for (var set : avoid) {
+                for (int dx = -c; dx <= c; dx++) {
+                    for (int dz = -c; dz <= c; dz++) {
+                        if (!set.placement().isStructureChunk(state, cx0 + dx, cz0 + dz)) {
+                            continue;
+                        }
+                        int bx = ((cx0 + dx) << 4) + 8;
+                        int bz = ((cz0 + dz) << 4) + 8;
+                        Holder<Biome> b = gen.getBiomeSource().getNoiseBiome(bx >> 2, seaLevel >> 2, bz >> 2, sampler);
+                        for (var entry : set.structures()) {
+                            if (entry.structure().value().biomes().contains(b)) {
+                                return true;
+                            }
+                        }
+                    }
+                }
+            }
+            return false;
         }
 
         @Override
@@ -191,10 +254,18 @@ public final class SiteFinder {
         return findCamp(p, spawn);
     }
 
-    // 野営地以外 (宿り・積み石・足跡・骨)。重い (地形生成の高さを何百回も問い合わせる) ので、別のスレッドで呼ぶ
+    // 野営地以外 (宿り・積み石・足跡・骨) と、章の跡地 (docs/design/33 の 3 章)。重い (地形生成の高さを何百回も問い合わせる) ので、別のスレッドで呼ぶ
+    public record Rest(List<Planned> planned, List<ChapterGrounds.Found> grounds) {
+    }
+
     public static List<Planned> planRest(Probe p, BlockPos camp) {
+        return planRestAll(p, camp).planned();
+    }
+
+    public static Rest planRestAll(Probe p, BlockPos camp) {
         long t0 = System.nanoTime();
         List<Planned> out = new ArrayList<>();
+        List<ChapterGrounds.Found> grounds = new ArrayList<>();
         Spot shelter = findShelter(p, camp);
         double pathYaw = 0;
         if (shelter != null) {
@@ -207,7 +278,33 @@ public final class SiteFinder {
             // 宿りがなくても足跡は要る (足跡の頁の目印): 野営地から東 180 ブロックの仮の宿りを道の向きに使う (first_hour_log B-6)
             planFootprints(p, out, camp, camp.offset(180, 0, 0));
         }
-        Spot ribs = findRibs(p, camp, shelter == null ? 0 : pathYaw);
+        // 章の跡地 (都から方位と距離で)。野営地と足跡は避ける
+        if (shelter != null) {
+            List<ChapterGrounds.Obstacle> avoid = new ArrayList<>();
+            avoid.add(new ChapterGrounds.Obstacle(camp, ChapterGrounds.CAMP_GAP));
+            for (Planned pl : out) {
+                if (pl.kind().equals(Kind.FOOTPRINT.id)) {
+                    avoid.add(new ChapterGrounds.Obstacle(pl.pos(), ChapterGrounds.PRINT_GAP));
+                }
+            }
+            grounds.addAll(ChapterGrounds.planAll(p, shelter.pos(), avoid));
+        }
+        ChapterGrounds.Found whale = grounds.stream().filter(f -> f.chapter() == jp.revati.skyabyss.story.Chapters.WHALE).findFirst().orElse(null);
+        Spot ribs = null;
+        if (whale != null) {
+            // 一章の骨は一章の跡地 (北の丘) の中。整える丘があれば、その形を重ねた地形で探す
+            Ground g = ChapterGrounds.overlay(p, List.of(whale));
+            ribs = findRibsNear(g, whale.center());
+            if (ribs != null) {
+                // 祠は骨の脇 (骨の半分の長さ + 余白より外)
+                BlockPos shrine = ChapterGrounds.shrineNear(g, ribs.pos(), RIB_HALF_LONG + 8, List.of(new ChapterGrounds.Obstacle(ribs.pos(), RIB_HALF_LONG + 6)));
+                grounds.set(grounds.indexOf(whale), new ChapterGrounds.Found(whale.chapter(), whale.center(), whale.shape(), whale.shapeCenter(), whale.baseY(),
+                        whale.sea(), whale.restYaw(), whale.fixedRest(), shrine, whale.road(), whale.dist(), whale.deg()));
+            }
+        }
+        if (ribs == null) {
+            ribs = findRibs(p, camp, shelter == null ? 0 : pathYaw);
+        }
         if (ribs != null) {
             out.add(new Planned(Kind.RIBS.id, 0, ribs.pos(), encode(ribs.rot(), ribs.mirror())));
         } else {
@@ -215,7 +312,45 @@ public final class SiteFinder {
         }
         SkyAbyss.LOGGER.info("Opening sites planned in {} ms ({} height queries, {} ms): camp {} shelter {} ribs {} ({} entries)", (System.nanoTime() - t0) / 1_000_000L,
                 p.queries, p.nanos / 1_000_000L, camp, shelter == null ? "-" : shelter.pos(), ribs == null ? "-" : ribs.pos(), out.size());
-        return out;
+        return new Rest(out, grounds);
+    }
+
+    // 一章の跡地の中の骨 (中心から 0〜96)。高い所・平らな所を選ぶ。段階は RIB_PASSES と同じ。見つからなければ null
+    @Nullable
+    static Spot findRibsNear(Ground p, BlockPos center) {
+        for (int pass = 0; pass < RIB_PASSES.length; pass++) {
+            Spot best = null;
+            double bestScore = -1e9;
+            for (int r = 0; r <= 96; r += 16) {
+                int n = r == 0 ? 1 : Math.max(6, (int) (Math.PI * 2 * r / 24));
+                for (int i = 0; i < n; i++) {
+                    double a = Math.PI * 2 * i / n;
+                    int x = center.getX() + (int) Math.round(Math.cos(a) * r);
+                    int z = center.getZ() + (int) Math.round(Math.sin(a) * r);
+                    for (int rot = 0; rot <= 1; rot++) {
+                        int hx = (rot == 1 ? RIB_HALF_SHORT : RIB_HALF_LONG) * RIB_PASSES[pass][1] / 100;
+                        int hz = (rot == 1 ? RIB_HALF_LONG : RIB_HALF_SHORT) * RIB_PASSES[pass][1] / 100;
+                        Area ar = area(p, x, z, hx, hz, RIB_PASSES[pass][0], false, RIB_PASSES[pass][2] == 1);
+                        if (!ar.ok()) {
+                            continue;
+                        }
+                        double score = ar.median() - p.sea() - ar.range() * 0.7 - r * 0.08;
+                        if (score > bestScore) {
+                            bestScore = score;
+                            best = new Spot(new BlockPos(x, ar.median() + 1, z), rot, false);
+                        }
+                    }
+                }
+            }
+            if (best != null) {
+                if (pass > 0) {
+                    SkyAbyss.LOGGER.info("Opening sites: the rib bones on the north hills need a height range of up to {} (dry core {}%)", RIB_PASSES[pass][0],
+                            RIB_PASSES[pass][1]);
+                }
+                return best;
+            }
+        }
+        return null;
     }
 
     public static int encode(int rot, boolean mirror) {
