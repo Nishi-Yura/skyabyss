@@ -619,45 +619,183 @@ c.node("town_forge2", ("あの灰で打った刃は、冷めても赤い線が�
 Q = "town/ch4_herbs"
 quest("ch4_herbs", 4, "skyabyss:guest_herbalist",
       ("老婆の薬鍋", "The Herbalist's Pot"),
-      ("薬草摘みの老婆に、醸造台とネザーウォートを見せて、醸造を教わる。", "Show the old herbalist a brewing stand and Nether wart, and learn to brew."),
-      ("薬の煮方を教わった。灰だけは、入れるなと言われた。", "You learned how to brew. Only the ash, she said, must never go in."),
-      ("薬草摘みの婆さまが、醸造台の使い方を誰かに教えたがってる。ただし、ネザーの瘤を持ってこいとさ。",
-       "The old herbalist wants to teach someone the brewing stand. But you have to bring her Nether wart first."),
-      [("meet", ("宿の女将の噂。薬草摘みの老婆が、醸造を教えたがっている。南の通りの薬草の家にいるという。",
-                 "A rumour from the innkeeper: the old herbalist wants to teach brewing. She lives in the herb house on the south road."),
+      ("薬草摘みの老婆に、自分で煮た薬を二本届ける。醸造は薬師の店で教わる。", "Bring the old herbalist two potions you brewed yourself. The apothecary teaches brewing."),
+      ("薬を届けた。灰だけは、入れるなと言われた。", "You brought the potions. Only the ash, she said, must never go in."),
+      ("薬草摘みの婆さまが、誰かの煮た薬を見たがってる。醸造なら薬師の店で教えてくれるよ。",
+       "The old herbalist wants to see a potion someone brewed. The apothecary can teach you to brew."),
+      [("meet", ("宿の女将の噂。薬草摘みの老婆が、誰かの煮た薬を見たがっている。南の通りの薬草の家にいるという。",
+                 "A rumour from the innkeeper: the old herbalist wants to see a potion someone brewed. She lives in the herb house on the south road."),
         [talk("meet", "skyabyss:guest_herbalist", "meet", "薬草摘みの老婆に会う（南の通りの薬草の家）", "Meet the old herbalist (herb house, south road)")], None),
-       ("gather", ("醸造台を自分で組み、ネザーウォートを三つ持ってくる。どれも、ネザーの砦の近くで手に入る。",
-                   "Build a brewing stand yourself and bring three Nether wart. Both come from near the Nether fortresses."),
-        [collect("stand", "minecraft:brewing_stand", 1, "醸造台を作る", "Craft a brewing stand"),
-         collect("wart", "minecraft:nether_wart", 3, "ネザーウォートを集める", "Gather Nether wart")], None),
-       ("hand", ("そろった。老婆に見せよう。", "That's everything. Show it to the herbalist."),
-        [sig("hand", "town_hand:guest_herbalist", "老婆に醸造台とネザーウォートを見せる", "Show the brewing stand and wart to the herbalist")], None)],
+       ("brew", ("薬を二本煮て持ってくる。醸造の手ほどきは、東の大通りの薬師の店で。",
+                 "Brew two potions and bring them. The apothecary on the east avenue teaches brewing."),
+        [collect("potion", "minecraft:potion", 2, "薬を二本煮る（薬師に醸造を教わる）", "Brew two potions (learn brewing from the apothecary)")], None),
+       ("hand", ("そろった。老婆に見せよう。", "That's two. Show them to the herbalist."),
+        [sig("hand", "town_hand:guest_herbalist", "老婆に薬を見せる", "Show the potions to the herbalist")], None)],
       reward(70, 25, [{"item": "minecraft:glass_bottle", "count": 3}]), 241)
 
 g = guest("herbalist", "薬草摘みの老婆", "Old Herbalist")
 g.entry(at(Q, "meet"), "meet")
-g.entry(at(Q, "gather"), "wait")
+g.entry(at(Q, "brew"), "wait")
 g.entry(at(Q, "hand"), "hand_ask")
 g.entry(None, "idle")
-g.node("meet", ("おや、灰の匂いのする子だね。薬師の店じゃ売ってない薬を、自分で煮たくはないかい。",
-                "My, you smell of ash, child. Wouldn't you like to brew the medicines the apothecary doesn't sell?"),
+g.node("meet", ("おや、灰の匂いのする子だね。この婆はもう鍋をかき回す腕がない。代わりに、誰かが煮た薬を見せておくれ。",
+                "My, you smell of ash, child. These old arms can't stir a pot any more. Show me a potion someone has brewed."),
        nxt="meet2")
-g.node("meet2", ("醸造台を一つ、自分で組んでおいで。それと、ネザーの瘤を三つ。あれがなけりゃ、どんな薬も水と同じさ。",
-                 "Build yourself a brewing stand. And bring three Nether wart. Without it, every potion is just water."),
+g.node("meet2", ("煮方は薬師の店で教わるといい。台も瘤も、あそこで揃う。二本だ。色は何でもいい。",
+                 "Learn the brewing at the apothecary. The stand and the wart, she can start you off. Two bottles. Any colour will do."),
        options=[OK])
-g.node("wait", ("瘤は、ネザーの砦の階段の脇の、魂の砂に生える。醸造台は、ブレイズロッドと丸石で組める。",
-                "The wart grows in soul sand beside the fortress stairs. A brewing stand takes a blaze rod and cobblestone."))
-g.node("hand_ask", ("台と瘤は？", "The stand and the wart?"),
-       options=[hand_option(("醸造台とネザーウォートを見せる", "Show the brewing stand and the wart"),
-                            all_(item("minecraft:brewing_stand", 1), item("minecraft:nether_wart", 3)),
-                            [take("minecraft:nether_wart", 3), signal("town_hand:guest_herbalist")], "handed"), LATER])
-g.node("handed", ("よし。瘤を水で煮て、まずは素の薬。そこへ足すもので、薬の向きが決まる。……さあ、台はあんたのだ。持ってお行き。",
-                  "Good. Boil the wart in water first: that's your base. What you add next decides what it becomes. ...There, the stand is yours. Take it with you."),
+g.node("wait", ("瘤を水で煮て、まずは素の薬。そこへ足すもので、薬の向きが決まる。薬師はそう教えたろう？",
+                "Boil the wart in water first: that's your base. What you add decides what it becomes. Didn't the apothecary tell you?"))
+g.node("hand_ask", ("薬は？", "The potions?"),
+       options=[hand_option(("薬を二本見せる", "Show two potions"),
+                            item("minecraft:potion", 2),
+                            [take("minecraft:potion", 2), signal("town_hand:guest_herbalist")], "handed"), LATER])
+g.node("handed", ("いい色だ。……これで、熱の出た子に一晩もつ。あんたの煮た薬だって、ちゃんと言っておくよ。",
+                  "A good colour. ...This will see a feverish child through the night. I'll tell them who brewed it."),
        face="smile", nxt="handed2")
 g.node("handed2", ("ひとつだけ。余燼の山の灰を、薬に入れるんじゃないよ。夢の中で、ずっと下へ落ちていく。戻ってきた者は、まだいない。",
                    "One thing. Never put the ember mountain's ash into a potion. You fall, down and down, in your dreams. No one has come back yet."),
        face="grave", options=[OK])
 g.node("idle", ("草は、摘んだ時の天気を覚えてる。", "Herbs remember the weather they were picked in."))
+
+# ######################################################################
+# 二章: 年寄りの船乗りの羅針盤 (家 2)
+# ######################################################################
+Q = "town/ch2_sailor"
+quest("ch2_sailor", 2, "skyabyss:guest_sailor",
+      ("船乗りの羅針盤", "The Sailor's Compass"),
+      ("年寄りの船乗りに、羅針盤と白紙の地図を届ける。", "Bring the old sailor a compass and an empty map."),
+      ("羅針盤は北を指した。船乗りは、潮の引く日を地図に書き込んだ。", "The compass pointed north. The sailor marked the low-tide days on the map."),
+      ("年寄りの船乗りが、潮に羅針盤をさらわれたって嘆いてる。広場の北西の、船乗りの家だよ。",
+       "The old sailor is grieving a compass the tide took. The sailor's house, northwest of the square."),
+      [("meet", ("宿の女将の噂。年寄りの船乗りが、潮に羅針盤をさらわれたという。広場の北西の船乗りの家。",
+                 "A rumour from the innkeeper: the old sailor lost his compass to the tide. The sailor's house, northwest of the square."),
+        [talk("meet", "skyabyss:guest_sailor", "meet", "年寄りの船乗りに会う（船乗りの家）", "Meet the old sailor (the sailor's house)")], None),
+       ("make", ("羅針盤を一つと、白紙の地図を一枚。鉄とレッドストーン、紙と羅針盤で作れる。",
+                 "One compass and one empty map. Iron and redstone, then paper and the compass."),
+        [collect("compass", "minecraft:compass", 1, "羅針盤を作る", "Craft a compass"),
+         collect("map", "minecraft:map", 1, "白紙の地図を作る", "Craft an empty map")], None),
+       ("hand", ("そろった。船乗りに渡そう。", "That's everything. Give them to the sailor."),
+        [sig("hand", "town_hand:guest_sailor", "船乗りに羅針盤と地図を渡す", "Give the compass and map to the sailor")], None)],
+      reward(60, 20, [{"item": "minecraft:spyglass", "count": 1}]), 223)
+
+g = guest("sailor", "年寄りの船乗り", "Old Sailor")
+g.entry(at(Q, "meet"), "meet")
+g.entry(at(Q, "make"), "wait")
+g.entry(at(Q, "hand"), "hand_ask")
+g.entry(None, "idle")
+g.node("meet", ("あの晩、潮が足もとまで来た。島が寄ってきたのさ。気づいたら、腰の羅針盤がなかった。",
+                "That night the tide came up to my feet. The island drew close. When I looked, the compass at my belt was gone."),
+       face="grave", nxt="meet2")
+g.node("meet2", ("新しいのを作ってくれんか。それと白紙の地図を一枚。潮の引く日を、死ぬ前に書き残しておきたい。",
+                 "Would you make me a new one? And an empty map. I want to write down the low-tide days before I go."),
+       options=[OK])
+g.node("wait", ("羅針盤は鉄四つとレッドストーン一つ。地図は紙を八枚、羅針盤を真ん中に。……いや、羅針盤は二つ要るな。",
+                "A compass is four iron and one redstone. A map is eight paper around a compass. ...So you'll need two compasses."))
+g.node("hand_ask", ("できたかい。", "Done, are they?"),
+       options=[hand_option(("羅針盤と地図を渡す", "Hand over the compass and map"),
+                            all_(item("minecraft:compass", 1), item("minecraft:map", 1)),
+                            [take("minecraft:compass", 1), take("minecraft:map", 1), signal("town_hand:guest_sailor")], "handed"), LATER])
+g.node("handed", ("北だ。……よし。満ちて、引いて、また満ちる。島はいつも、引いた日の夕方に寄る。これを持っておいき、遠くがよく見える。",
+                  "North. ...Good. It fills, it ebbs, it fills again. The island always comes in on the evening of an ebb. Take this; it sees far."),
+       face="smile", options=[OK])
+g.node("idle", ("潮の匂いは、陸に上がっても抜けないもんだ。", "The smell of the tide never leaves you, even on land."))
+
+# ######################################################################
+# 三章: 子だくさんの家の灯り (家 5)
+# ######################################################################
+Q = "town/ch3_lanterns"
+quest("ch3_lanterns", 3, "skyabyss:guest_mother",
+      ("嵐の夜の灯り", "Lanterns for a Stormy Night"),
+      ("子だくさんの母に、ランタンを三つ届ける。", "Bring three lanterns to the mother of the big family."),
+      ("灯りが三つともった。子どもたちは、雷の数を数えるのをやめて眠った。", "Three lanterns were lit. The children stopped counting the thunder and slept."),
+      ("子だくさんの家のおかみさんが、嵐の夜の灯りに困ってる。南の通りの、子どもの声がする家だよ。",
+       "The mother of the big family needs lights for the storm nights. The house on the south road full of children's voices."),
+      [("meet", ("宿の女将の噂。子だくさんの家の母が、嵐の夜の灯りに困っている。南の通りの家。",
+                 "A rumour from the innkeeper: the mother of a big family needs lights for stormy nights. A house on the south road."),
+        [talk("meet", "skyabyss:guest_mother", "meet", "子だくさんの家の母に会う", "Meet the mother of the big family")], None),
+       ("make", ("ランタンを三つ。鉄の塊と松明で作れる。", "Three lanterns. Iron nuggets and a torch make one."),
+        [collect("lantern", "minecraft:lantern", 3, "ランタンを三つ作る", "Craft three lanterns")], None),
+       ("hand", ("そろった。母に渡そう。", "That's three. Give them to the mother."),
+        [sig("hand", "town_hand:guest_mother", "母にランタンを渡す", "Give the lanterns to the mother")], None)],
+      reward(80, 22, [{"item": "minecraft:cake", "count": 1}]), 233)
+
+g = guest("mother", "子だくさんの母", "Mother of Many")
+g.entry(at(Q, "meet"), "meet")
+g.entry(at(Q, "make"), "wait")
+g.entry(at(Q, "hand"), "hand_ask")
+g.entry(None, "idle")
+g.node("meet", ("雷が鳴ると、うちの子たちは窓の外を数えるの。光ってから鳴るまで。……一番下の子が、羽の音がするって言うのよ。",
+                "When the thunder comes, my children count at the window. From the flash to the sound. ...The youngest says she hears wings."),
+       face="grave", nxt="meet2")
+g.node("meet2", ("蝋燭じゃ風で消えてしまう。ランタンを三つ、作ってもらえないかしら。部屋ごとに一つずつ。",
+                 "Candles blow out in the wind. Could you make me three lanterns? One for each room."),
+       options=[OK])
+g.node("wait", ("鉄の塊を八つ並べて、真ん中に松明。……あの子たち、あなたの話ばかりしてるわ。",
+                "Eight iron nuggets around a torch. ...The children talk about nobody but you."))
+g.node("hand_ask", ("できた？", "Ready?"),
+       options=[hand_option(("ランタンを三つ渡す", "Hand over three lanterns"),
+                            item("minecraft:lantern", 3),
+                            [take("minecraft:lantern", 3), signal("town_hand:guest_mother")], "handed"), LATER])
+g.node("handed", ("ありがとう。……ほら、もう誰も窓を見てない。これ、焼いたの。一番下の子が、あなたにって。",
+                  "Thank you. ...Look, nobody's at the window now. I baked this. The youngest wanted you to have it."),
+       face="smile", options=[OK])
+g.node("idle", ("子どもは、大人が見ないものを見るのよね。", "Children see what grown-ups don't look at."))
+
+# ######################################################################
+# 四章: パン焼きの窯 (家 6)
+# ######################################################################
+Q = "town/ch4_baker"
+quest("ch4_baker", 4, "skyabyss:guest_baker",
+      ("灰焼きのパン", "Ash-Baked Bread"),
+      ("パン焼きに、小麦と石炭を届けて、窯の火をつなぐ。", "Bring the baker wheat and coal to keep the oven burning."),
+      ("窯の火はつながった。灰焼きのパンは、少しだけ温かいまま冷めなかった。", "The oven fire held. The ash-baked bread stayed a little warm and never quite cooled."),
+      ("パン焼きの窯の火が、灰の降る日から弱いんだって。北東の通りの、いい匂いのする家だよ。",
+       "The baker's oven has been weak since the ash began to fall. The house on the northeast road that smells so good."),
+      [("meet", ("宿の女将の噂。パン焼きの窯の火が弱いという。北東の通りのパン焼きの家。",
+                 "A rumour from the innkeeper: the baker's oven fire is failing. The baker's house on the northeast road."),
+        [talk("meet", "skyabyss:guest_baker", "meet", "パン焼きに会う（パン焼きの家）", "Meet the baker (the baker's house)")], None),
+       ("gather", ("小麦を十六と、石炭を四つ。", "Sixteen wheat and four coal."),
+        [collect("wheat", "minecraft:wheat", 16, "小麦を集める", "Gather wheat"),
+         collect("coal", "minecraft:coal", 4, "石炭を集める", "Gather coal")], None),
+       ("hand", ("そろった。パン焼きに渡そう。", "That's everything. Give it to the baker."),
+        [sig("hand", "town_hand:guest_baker", "パン焼きに小麦と石炭を渡す", "Give the wheat and coal to the baker")], None)],
+      reward(90, 28, [{"item": "minecraft:bread", "count": 12}]), 243)
+
+g = guest("baker", "パン焼き", "Baker")
+g.entry(at(Q, "meet"), "meet")
+g.entry(at(Q, "gather"), "wait")
+g.entry(at(Q, "hand"), "hand_ask")
+g.entry(None, "idle")
+g.node("meet", ("灰が降るようになってから、窯の火が言うことを聞かない。薪を足しても、すぐ眠ったようになる。",
+                "Since the ash started falling, the oven won't behave. I add wood and it soon goes still, as if asleep."),
+       face="grave", nxt="meet2")
+g.node("meet2", ("石炭なら起きていてくれるかもしれない。小麦も足りないの。小麦を十六と、石炭を四つ、頼める？",
+                 "Coal might keep it awake. And I'm short of wheat. Could you bring sixteen wheat and four coal?"),
+       options=[OK])
+g.node("wait", ("石炭は、洞の壁の黒い粒。小麦は都の外の畑でも。……窯の奥で、何かがゆっくり脈を打ってる気がするの。",
+                "Coal is the black specks in cave walls. Wheat, from the fields outside. ...I feel something pulsing slowly at the back of the oven."))
+g.node("hand_ask", ("持ってきてくれた？", "Did you bring them?"),
+       options=[hand_option(("小麦と石炭を渡す", "Hand over the wheat and coal"),
+                            all_(item("minecraft:wheat", 16), item("minecraft:coal", 4)),
+                            [take("minecraft:wheat", 16), take("minecraft:coal", 4), signal("town_hand:guest_baker")], "handed"), LATER])
+g.node("handed", ("ほら、起きた。……焼けたわ、灰焼きのパン。持っていって。旅の途中で、少しだけ温かいはずよ。",
+                  "There, it's awake. ...Done: ash-baked bread. Take it. It should stay a little warm on the road."),
+       face="smile", options=[OK])
+g.node("idle", ("焼き立ての匂いがすると、みんな少しだけ黙るのよ。", "When fresh bread is in the air, everyone goes a little quiet."))
+
+# ######################################################################
+# 宿の噂を聞いたあと「引き受ける」を選ぶ (00 の q_rumor B)
+# ######################################################################
+c = ext("innkeeper")
+c.menu("town_accept", ("噂の頼みを引き受ける", "Take on the rumoured request"), "town_accepted",
+       {"type": "flag", "flag": "town_offer"}, do=[{"type": "town", "act": "accept_offer"}])
+c.node("town_accepted", ("ありがとう。相手には、あんたが来るって伝えておくよ。", "Thank you. I'll let them know you're coming."),
+       face="smile", options=[OK])
+c.menu("town_decline", ("噂の頼みは、今はやめておく", "Leave the rumoured request for now"), "town_declined",
+       {"type": "flag", "flag": "town_offer"}, kind="talk", do=[{"type": "town", "act": "decline_offer"}])
+c.node("town_declined", ("いいよ。気が向いたら、また噂を聞きにおいで。", "That's fine. Come and hear the rumours again whenever you like."),
+       options=[OK])
 
 # ######################################################################
 # 裏通り: 墓守の名のない墓 (一〜四章。六章まで続く)

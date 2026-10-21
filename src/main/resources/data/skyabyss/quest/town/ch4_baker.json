@@ -1,0 +1,61 @@
+{
+  "category": "sub",
+  "order": 243,
+  "giver": "skyabyss:guest_baker",
+  "chapter": "titan_ember",
+  "min_stage": 3,
+  "stages": [
+    {
+      "id": "meet",
+      "objectives": [
+        {
+          "id": "meet",
+          "type": "talk",
+          "target": "skyabyss:guest_baker",
+          "topic": "meet"
+        }
+      ]
+    },
+    {
+      "id": "gather",
+      "objectives": [
+        {
+          "id": "wheat",
+          "type": "collect",
+          "target": "minecraft:wheat",
+          "count": 16
+        },
+        {
+          "id": "coal",
+          "type": "collect",
+          "target": "minecraft:coal",
+          "count": 4
+        }
+      ]
+    },
+    {
+      "id": "hand",
+      "objectives": [
+        {
+          "id": "hand",
+          "type": "signal",
+          "target": "town_hand:guest_baker",
+          "party": false
+        }
+      ]
+    }
+  ],
+  "reward": {
+    "xp": 90,
+    "items": [
+      {
+        "item": "skyabyss:bell_coin",
+        "count": 28
+      },
+      {
+        "item": "minecraft:bread",
+        "count": 12
+      }
+    ]
+  }
+}
