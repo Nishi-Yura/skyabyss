@@ -221,15 +221,16 @@ public final class ChapterGroundsSelfTest {
                 double d = Math.hypot(road.get(i).getX() - road.get(i - 1).getX(), road.get(i).getZ() - road.get(i - 1).getZ());
                 check(d >= 30 && d <= 50, "waymarks " + (i - 1) + "-" + i + " are " + (int) d + " apart");
             }
-            Synth river = new Synth((x, z) -> z <= -400 && z >= -440 ? 55 : 70);
+            // 川と湖は z -480..-400 (道しるべの点 -440 が真ん中に来る。前後に 12 ずらしても水の上)
+            Synth river = new Synth((x, z) -> z <= -400 && z >= -480 ? 55 : 70);
             List<BlockPos> wet = ChapterGrounds.road(river, cap, new BlockPos(0, 70, -1000), 0);
             // 浅い川 (深さ 8) の点は飛ばさず、線の上に石の台で渡す (海面 + 1)。深い湖 (深さ 30) の点だけ飛ばす
             check(wet.size() == road.size(), "the shallow river should be bridged, not skipped: " + wet.size() + " of " + road.size());
-            check(wet.stream().filter(p -> p.getZ() <= -400 && p.getZ() >= -440).allMatch(p -> p.getX() == 0 && p.getY() == 64)
-                    && wet.stream().anyMatch(p -> p.getZ() <= -400 && p.getZ() >= -440), "the river waymark should stand on the line at the water");
-            Synth lake = new Synth((x, z) -> z <= -400 && z >= -440 ? 33 : 70);
+            check(wet.stream().filter(p -> p.getZ() <= -400 && p.getZ() >= -480).allMatch(p -> p.getX() == 0 && p.getY() == 64)
+                    && wet.stream().anyMatch(p -> p.getZ() <= -400 && p.getZ() >= -480), "the river waymark should stand on the line at the water");
+            Synth lake = new Synth((x, z) -> z <= -400 && z >= -480 ? 33 : 70);
             List<BlockPos> deep = ChapterGrounds.road(lake, cap, new BlockPos(0, 70, -1000), 0);
-            check(deep.stream().noneMatch(p -> p.getZ() <= -400 && p.getZ() >= -440) && deep.size() < road.size(), "no waymark on the deep lake");
+            check(deep.stream().noneMatch(p -> p.getZ() <= -400 && p.getZ() >= -480) && deep.size() < road.size(), "no waymark on the deep lake");
             Synth swamp = new Synth((x, z) -> z <= -400 && z >= -440 ? 63 : 70);
             List<BlockPos> low = ChapterGrounds.road(swamp, cap, new BlockPos(0, 70, -1000), 0);
             check(low.size() == road.size(), "a sea-level flat should still get its waymark: " + low.size());

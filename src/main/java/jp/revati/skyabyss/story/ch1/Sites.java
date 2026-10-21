@@ -105,7 +105,7 @@ public final class Sites {
         for (int n = 1; n <= Ch1Prep.CAIRNS; n++) {
             int min = 24 + 18 * (n - 1);
             int last = n;
-            ChapterSites.element(roadCairnId(n), Chapters.WHALE, last == Ch1Prep.CAIRNS ? "ch1_road_shrine" : "ch1_road_cairn").atRoad().dist(min, Math.min(110, min + 16))
+            ChapterSites.element(roadCairnId(n), Chapters.WHALE, last == Ch1Prep.CAIRNS ? "ch1_road_shrine" : "ch1_road_cairn").atRoad().dist(min, Math.min(150, min + 16))
                     .arriveRadius(6).onArrive((p, s) -> {
                         arrive(p, s);
                         if (last == Ch1Prep.CAIRNS) {
