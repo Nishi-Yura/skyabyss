@@ -14,7 +14,7 @@
   assets/skyabyss_ch4/sounds.json                        音の出来事 (skyabyss_ch4 の名前空間。既存の音の別名。字幕の文は tools/gen_ch4_ground.py)
   tools/sources/<品>/   選ばなかった案の絵
 
-案は CHOICE で選ぶ (仮の選定: 熾り蟲 A・灰被りの屑 B・灰ひきずり A・古い灰被り A、小物はすべて A。ユーザーの選定で変われば、ここを変えて流し直す)。
+案は CHOICE で選ぶ (2026-10-22 のユーザーの選定: 熾り蟲 A・灰被りの屑 C・灰ひきずり A・古い灰被り A、小物は煤鉄 A・灰麻 A・灰の護り糸 B・煤の砥石 C・灰の冷やし水 A)。
 回転の約束: 熾り蟲・灰ひきずりはラフの姿勢表 = 数学の右手系 (前 -Z。x が + = 前が上がる) で書き、ファイルへは (-x, -y, z)。
 """
 import copy
@@ -28,8 +28,8 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 A = os.path.join(ROOT, "src", "main", "resources", "assets", "skyabyss")
 A4 = os.path.join(ROOT, "src", "main", "resources", "assets", "skyabyss_ch4")
 R = "docs/review/ch4_roughs"
-CHOICE = {"cinder_mite": "a", "ash_husk": "b", "ash_dragger": "a", "elder_thrall": "a"}
-ITEM_CHOICE = {"soot_iron": "a", "ash_hemp": "a", "ash_ward_thread": "a", "soot_whetstone": "a", "ash_cooler": "a"}
+CHOICE = {"cinder_mite": "a", "ash_husk": "c", "ash_dragger": "a", "elder_thrall": "a"}
+ITEM_CHOICE = {"soot_iron": "a", "ash_hemp": "a", "ash_ward_thread": "b", "soot_whetstone": "c", "ash_cooler": "a"}
 THRALLS = ("ash_husk", "elder_thrall")
 
 

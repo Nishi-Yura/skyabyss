@@ -32,8 +32,6 @@ public final class Ch4Mobs {
     public static final String ASH_HUSK = "skyabyss:ash_husk";
     public static final String ASH_DRAGGER = "skyabyss:ash_dragger";
     public static final String ELDER_THRALL = "skyabyss:elder_thrall";
-    // 煤の砥石で研いだ刃が効いている時刻 (人の永続データ。灰の殻への傷 1.5 倍)
-    public static final String SOOT_WHETTED_KEY = "skyabyss_soot_whetted_until";
     public static final float SOOT_SHELL_MULT = 1.5f;
 
     public static final double MITE_THIN = 0.25;
@@ -68,7 +66,7 @@ public final class Ch4Mobs {
 
     // 煤の砥石の研ぎが効いているか
     public static boolean sootWhetted(ServerPlayer p) {
-        return p.getPersistentData().getLong(SOOT_WHETTED_KEY) > p.level().getGameTime();
+        return p.hasEffect(Ch4Gear.SOOT_WHETTED);
     }
 
     // 殻への傷の倍率 (煤の砥石で研いだ人の攻撃は 1.5 倍)

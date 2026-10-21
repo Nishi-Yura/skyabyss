@@ -440,7 +440,9 @@ def quests():
         'reward': {'xp': 120, 'affinity': {ISANA: 2}},
     })
     write_json(os.path.join(RES, 'data/skyabyss/quest/daily_mite_clear.json'), {
-        'category': 'sub', 'order': 66, 'repeat': 'daily', 'board': True, 'min_stage': 3,
+        # 板の頼みは段階 1 から読み込まれる決まり (FreeQuestSelfTest)。四章 (段階 3) とイサナに会ったあとに限るのは unlock で
+        'category': 'sub', 'order': 66, 'repeat': 'daily', 'board': True, 'min_stage': 1,
+        'unlock': {'type': 'all', 'of': [{'type': 'flag', 'flag': 'met', 'npc': ISANA}, {'type': 'stage', 'min': 3}]},
         'stages': [
             {'id': 'sweep', 'objectives': [{'id': 'kill', 'type': 'kill', 'target': 'skyabyss:cinder_mite', 'count': 10}]},
         ],
@@ -449,28 +451,28 @@ def quests():
 
     b = 'quest.skyabyss.ch4.fire_draught.'
     put(b + 'title', '火除けの薬', 'The Fire Draught')
-    put(b + 'summary', '醸造台で、耐火のポーションを二つ作る。', 'Brew two potions of fire resistance at a brewing stand.')
+    put(b + 'summary', '炉に入る支度に、醸造台で耐火のポーションを二つ作る。', 'Brew two potions of fire resistance at a brewing stand.')
     put(b + 'brew.journal',
         '旅の職人が言っていた。「灰の民は、火の薬を飲んでから炉に入った。二つ作っておけ。炉は一度じゃ済まない」\n'
-        '醸造台で、水の瓶にネザーウォートを入れると下地の薬になる。そこへマグマクリームを足せば耐火の薬だ。都の薬師の店で、醸造の手ほどきが受けられる。マグマクリームは、ネザーの跳ねる塊が落とす。',
+        '醸造台で、水の瓶にネザーウォートを入れると奇妙な薬になる。そこへマグマクリームを足せば、耐火のポーションになる。都の薬師の店で、醸造の手ほどきが受けられる。マグマクリームは、ネザーのマグマキューブが落とす。',
         'The traveling artisan said: "The ash people drank a fire draught before they went into the forge. Make two. One forge is never enough."\n'
-        'At a brewing stand, nether wart turns a water bottle into a base. Add magma cream and it becomes fire resistance. The apothecary in the capital teaches brewing. Magma cream drops from the bouncing cubes of the Nether.')
-    put(b + 'brew.potion', '耐火のポーションを作る', 'Brew fire resistance potions')
-    put(b + 'show.journal', '耐火の薬が二つ、そろった。旅の職人に見せよう。', 'Two fire draughts are ready. Show them to the traveling artisan.')
-    put(b + 'show.talk', '耐火の薬を、旅の職人に見せる', 'Show the draughts to the artisan')
+        'At a brewing stand, nether wart turns a water bottle into an awkward potion. Add magma cream and it becomes a potion of fire resistance. The apothecary in the capital teaches brewing. Magma cream drops from magma cubes in the Nether.')
+    put(b + 'brew.potion', '炉に入る前に、耐火のポーションを作ろう', 'Brew fire resistance for the forge')
+    put(b + 'show.journal', '耐火のポーションが二つ、そろった。旅の職人に見せよう。', 'Two fire draughts are ready. Show them to the traveling artisan.')
+    put(b + 'show.talk', '耐火のポーションを、旅の職人に見せよう', 'Show the potions to the artisan')
     put(b + 'done', '「火を飲んで、火の中へ。灰の民は、そうやって炉に入ったんだ」', '"Drink fire, walk into fire. That is how the ash people entered the forge."')
 
     b = 'quest.skyabyss.ch4.forge_ruins.'
     put(b + 'title', '炉跡', 'The Forge Ruins')
-    put(b + 'summary', '消えた炉の坑の奥で、灰の民の炉跡を見る。', 'See the ash people\'s forge at the bottom of the dead forge pit.')
+    put(b + 'summary', '語り部に聞いた灰の民の炉跡を、消えた炉の坑の奥に探す。', 'See the ash people\'s forge at the bottom of the dead forge pit.')
     put(b + 'pit.journal',
         '語り部が言っていた。「南の灰の地の丘の下に、灰の民の炉跡があるそうだよ。古い灰被りが、まだ火の番をしているって」\n'
         '坑の奥の古い灰被りを倒せば、炉跡を見られるだろう。灰の殻は熱で割れやすい。床の亀裂が赤く脈を打ったら、そこを離れること。',
         'The storyteller said: "Under the hills of the southern ash, there is a forge of the ash people. An old thrall still keeps its fire, they say."\n'
         'Fell the old thrall at the bottom of the pit and the forge will be yours to see. Ash shells crack under heat. When a crack in the floor starts to pulse red, step away.')
-    put(b + 'pit.page', '消えた炉の坑の奥の番を倒す', "Fell the pit's old keeper")
+    put(b + 'pit.page', '坑の奥の古い灰被りを倒そう', "Fell the pit's old keeper")
     put(b + 'tell.journal', '冷えた金床の上に、破れた頁があった。語り部に見せよう。', 'A torn page lay on the cold anvil. Show it to the storyteller.')
-    put(b + 'tell.talk', '炉跡の頁を、語り部に見せる', 'Show the forge page to the storyteller')
+    put(b + 'tell.talk', '炉跡の頁を、語り部に見せよう', 'Show the forge page to the storyteller')
     put(b + 'done', '「四つ返したら、下へ」。……返しに行くんだね。', '"Return four, then go down." ...You are going to give it back, then.')
 
     b = 'quest.skyabyss.ch4.ash_road.'
@@ -493,7 +495,7 @@ def quests():
     b = 'quest.skyabyss.daily_mite_clear.'
     put(b + 'title', '熾り蟲の掃除', 'Mite Sweep')
     put(b + 'summary', '灰の地の熾り蟲を十匹払う。', 'Clear ten cinder mites from the ash lands.')
-    put(b + 'sweep.journal', '板の紙 (煤で汚れた字):「熾り蟲が干し場の火に寄ってくる。十匹ほど払ってほしい。温石を持っていけば、向こうから来る」',
+    put(b + 'sweep.journal', '板の紙（煤で汚れた字）：「熾り蟲が干し場の火に寄ってくる。十匹ほど払ってほしい。温石を持っていけば、向こうから来る」',
         'A note on the board, smudged with soot: "Cinder mites keep creeping to the drying fires. Clear about ten. Carry a warm stone and they will come to you."')
     put(b + 'sweep.kill', '熾り蟲を払う', 'Clear cinder mites')
     put(b + 'done', 'しばらく、火のまわりは静かだろう。', 'The fires will be quiet for a while.')
@@ -707,9 +709,9 @@ def texts():
             ('ash_hemp', '灰麻', 'Ash Hemp', '灰の中でも枯れない麻。冷やし水に漬ける', 'Hemp that thrives even in ash. Steeped into coolers'),
             ('ash_ward_thread', '灰の護り糸', 'Ash Ward Thread', '古い灰被りの背の釜にあった編みかけの糸。旅の職人が鼓動守に編む',
              'A half-woven thread from the old thrall\'s pot. The artisan weaves it into a heartbeat ward'),
-            ('soot_whetstone', '煤の砥石', 'Soot Whetstone', '使うと刃を研ぐ (攻撃 +1.5、20 分)。灰の殻にもよく食い込む',
-             'Use to hone your blade (+1.5 attack for 20 minutes). Bites into ash shells'),
-            ('ash_cooler', '灰の冷やし水', 'Ash Cooler', '飲むと体の芯の熱が引き (余燼の背の熱 -40)、しばらく火に強くなる (耐火 30 秒)',
+            ('soot_whetstone', '煤の砥石', 'Soot Whetstone', '使うと刃を研ぐ（煤の刃: 攻撃 +2.6、20 分）。灰被りの殻へ 1.5 倍の傷',
+             'Use to hone your blade (Soot Blade: +2.6 attack for 20 minutes). Deals 1.5x to ash shells'),
+            ('ash_cooler', '灰の冷やし水', 'Ash Cooler', '飲むと体の芯の熱が引き、しばらく火に強くなる（余燼の背の熱 −40・耐火 30 秒）',
              'Drink to draw the heat from your core (-40 heat on the ember\'s back) and resist fire for a while (30 s)')):
         put('item.skyabyss.' + iid, nj, ne)
         put('item.skyabyss.%s.desc' % iid, dj, de)
@@ -721,12 +723,14 @@ def texts():
              'Ash husks: half damage until the shell breaks. Then they burn, speed up, and burn out.'),
             ('灰ひきずり: 敵意はない。追うと丸まって転がる。行き先は窯の跡。',
              'Ash draggers: harmless. Chase one and it rolls away, toward the old kiln.'),
-            ('古い灰被り: 床の亀裂が赤く脈を打ったら離れる (1.5 秒後に噴く)。殻が割れると熱の波。',
+            ('古い灰被り: 床の亀裂が赤く脈を打ったら離れる（1.5 秒後に噴く）。殻が割れると熱の波。',
              'Old thrall: when floor cracks pulse red, step away (they burst 1.5 s later). Breaking its shell sends out a heat wave.'),
-            ('耐火の薬: 醸造台・水の瓶・ネザーウォート・マグマクリーム。都の薬師が手ほどきをする。',
+            ('耐火のポーション: 醸造台・水の瓶・ネザーウォート・マグマクリーム。都の薬師が手ほどきをする。',
              'Fire draught: brewing stand, water bottle, nether wart, magma cream. The capital\'s apothecary teaches it.'),
-            ('煤の砥石 (煤鉄 2・火打ち石) と灰の冷やし水 (灰麻 2・ガラス瓶)。冷やし水は背中の熱を下げる。',
-             'Soot whetstone (2 soot iron, flint) and ash cooler (2 ash hemp, bottle). The cooler lowers the heat on the back.')), start=1):
+            ('煤の砥石（煤鉄 2・火打ち石）と灰の冷やし水（灰麻 2・ガラス瓶）。冷やし水は背の熱を下げる。',
+             'Soot whetstone (2 soot iron, flint) and ash cooler (2 ash hemp, bottle). The cooler lowers the heat on the back.'),
+            ('灰歩きの旅装（煤鉄・灰麻・雷翼の羽軸）は、背の熱がたまりにくい。灰焼きのパン（小麦 3・灰麻）は吸収と熱の引き。',
+             'Ash walking gear (soot iron, ash hemp, thunder wing shafts) slows the heat on the back. Ash-baked bread (3 wheat, ash hemp) gives absorption and cools.')), start=1):
         put('wayfarer_notes.ch4.line.%d' % i, lj, le)
 
 

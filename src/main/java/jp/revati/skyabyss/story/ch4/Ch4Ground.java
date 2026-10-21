@@ -106,10 +106,14 @@ public final class Ch4Ground {
         }
         registered = true;
         ChapterSites.element(MARK, Chapters.EMBER, MARK).atGround().dist(30, 140).count(MARKS).prefer(Prefer.HIGH).arriveRadius(6)
+                .post(job -> clearFloatingPlants(job, 3))
                 .onArrive(Ch4Ground::markArrive).register();
         DeadForgePit.register();
         ChapterSites.element(ROCKS, Chapters.EMBER, ROCKS).atGround().dist(40, 140).count(2).arriveRadius(8)
-                .post(job -> keep(job, "stone"))
+                .post(job -> {
+                    keep(job, "stone");
+                    clearFloatingPlants(job, 6);
+                })
                 .onArrive((p, s) -> Notice.narrate(p, "message.skyabyss.ch4g.arrive." + ROCKS)).register();
         ChapterSites.element(KILN, Chapters.EMBER, KILN).atGround().dist(50, 150).arriveRadius(10)
                 .post(Ch4Ground::finishKiln)
@@ -125,6 +129,25 @@ public final class Ch4Ground {
         SiteNetwork.EXTRA_TARGETS.put(PIT, server -> first(server, PIT, null));
         SiteNetwork.EXTRA_TARGETS.put(KILN, server -> first(server, KILN, null));
         SiteNetwork.EXTRA_TARGETS.put(MARK, server -> first(server, MARK, null));
+    }
+
+    // 建て終わりの仕上げ: 部品のまわり (水平 r・高さ -4〜+6) で、足もとの支えをなくした草花・作物を消す
+    // (村の畑などの上に建つと、ならしで畑の土が消え、麦が浮くことがある。build audit の ATTACH_SUPPORT)。消した数
+    public static int clearFloatingPlants(SiteJob job, int r) {
+        int n = 0;
+        BlockPos c = job.entry.pos;
+        for (BlockPos p : BlockPos.betweenClosed(c.offset(-r, -4, -r), c.offset(r, 6, r))) {
+            var st = job.level.getBlockState(p);
+            if (!(st.getBlock() instanceof net.minecraft.world.level.block.BushBlock) || !st.getFluidState().isEmpty()) {
+                continue;
+            }
+            var below = job.level.getBlockState(p.below());
+            if (below.isAir() || below.getCollisionShape(job.level, p.below()).isEmpty() && below.getBlock() != st.getBlock()) {
+                job.set(p.immutable(), Blocks.AIR.defaultBlockState());
+                n++;
+            }
+        }
+        return n;
     }
 
     static void keep(SiteJob job, String name) {
@@ -174,6 +197,7 @@ public final class Ch4Ground {
 
     // ---------------------------------------------------------------- 煤の窯の跡
     static void finishKiln(SiteJob job) {
+        clearFloatingPlants(job, 7);
         keep(job, "cache");
         keep(job, "tablet");
         BlockPos tablet = job.mark("tablet");
@@ -222,6 +246,7 @@ public final class Ch4Ground {
 
     // ---------------------------------------------------------------- 灰降りの高台
     static void finishWatch(SiteJob job) {
+        clearFloatingPlants(job, 5);
         keep(job, "tablet");
         BlockPos tablet = job.mark("tablet");
         if (tablet != null) {

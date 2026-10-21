@@ -227,20 +227,86 @@ def cooler_c():
     return finish(im, ASH[4])
 
 
+# ------------------------------------------------------------------ 灰焼きのパン
+CRUST = [(86, 54, 30), (122, 80, 44), (160, 110, 62), (196, 146, 88), (226, 186, 126)]
+
+
+def loaf(im, x0, y0, x1, y1):
+    ellipse(im, (x0, y0, x1, y1), CRUST[1])
+    ellipse(im, (x0 + 1, y0 + 1, x1 - 2, y1 - 3), CRUST[2])
+    ellipse(im, (x0 + 3, y0 + 2, x1 - 6, y1 - 7), CRUST[3])
+
+
+def bread_a():
+    """灰の上で焼いた丸い田舎パン。上に灰がうっすら、焼き目の割れ"""
+    im = canvas()
+    loaf(im, 4, 9, 28, 27)
+    for (x, y) in ((10, 12), (14, 11), (19, 12), (23, 15), (12, 16), (17, 15)):
+        px(im, x, y, ASH[3])
+    line(im, [(9, 18), (16, 14), (23, 18)], CRUST[0])
+    return finish(im, CRUST[4])
+
+
+def bread_b():
+    """細長いパン (斜めの太い棒の両端を丸く) に、灰麻の紐を二本巻いた旅のパン"""
+    im = canvas()
+    for k in range(9):
+        t = k / 8
+        cx, cy = 8 + 16 * t, 24 - 16 * t
+        ellipse(im, (cx - 5, cy - 5, cx + 5, cy + 5), CRUST[1])
+    for k in range(9):
+        t = k / 8
+        cx, cy = 7 + 16 * t, 23 - 16 * t
+        ellipse(im, (cx - 3, cy - 4, cx + 3, cy + 2), CRUST[2])
+    for k in range(3):
+        cx, cy = 10 + 6 * k, 19 - 6 * k
+        line(im, [(cx - 2, cy - 3), (cx + 2, cy + 1)], CRUST[0])
+    for t in (0.3, 0.7):
+        cx, cy = 8 + 16 * t, 24 - 16 * t
+        line(im, [(cx - 4, cy - 4), (cx + 4, cy + 4)], HEMP[3], 2)
+    for (x, y) in ((12, 15), (18, 11), (20, 14)):
+        px(im, x, y, ASH[3])
+    return finish(im, CRUST[4])
+
+
+def bread_c():
+    """平たい灰焼きの円盤に、炭の焦げの格子と熾の点"""
+    im = canvas()
+    ellipse(im, (3, 10, 29, 25), CRUST[1])
+    ellipse(im, (4, 11, 28, 22), CRUST[2])
+    for x in (9, 14, 19, 24):
+        line(im, [(x, 12), (x - 3, 21)], SOOT[2])
+    px(im, 16, 15, EMBER[2])
+    return finish(im, CRUST[4])
+
+
+# ------------------------------------------------------------------ 煤の刃の効き目 (18x18)
+def soot_whetted_icon():
+    im = canvas(18)
+    im, u, v, body = I2.whet_body(canvas(32), SOOT, SOOT[3])
+    im = im.resize((18, 18), Image.NEAREST)
+    a = np.array(im)
+    for (x, y) in ((8, 7), (9, 8), (10, 9)):
+        a[y, x] = c(EMBER[2])
+    return finish(Image.fromarray(a), SOOT[4])
+
+
 ITEMS = {
     "soot_iron": [soot_iron_a, soot_iron_b, soot_iron_c],
     "ash_hemp": [ash_hemp_a, ash_hemp_b, ash_hemp_c],
     "ash_ward_thread": [thread_a, thread_b, thread_c],
     "soot_whetstone": [whet_a, whet_b, whet_c],
     "ash_cooler": [cooler_a, cooler_b, cooler_c],
+    "ash_baked_bread": [bread_a, bread_b, bread_c],
 }
-NAMES_JP = {"soot_iron": "煤鉄", "ash_hemp": "灰麻", "ash_ward_thread": "灰の護り糸", "soot_whetstone": "煤の砥石", "ash_cooler": "灰の冷やし水"}
+NAMES_JP = {"soot_iron": "煤鉄", "ash_hemp": "灰麻", "ash_ward_thread": "灰の護り糸", "soot_whetstone": "煤の砥石", "ash_cooler": "灰の冷やし水", "ash_baked_bread": "灰焼きのパン"}
 NOTES_JP = {
     "soot_iron": ["煤けた延べ棒", "煤の塊", "二本重ね"],
     "ash_hemp": ["縛った茎の束", "繊維の玉", "葉の付いた茎"],
     "ash_ward_thread": ["かせに熾の玉", "護り結び", "煤鉄の糸巻き"],
     "soot_whetstone": ["黒い砥石", "煤鉄の帯", "割れ目に熾"],
     "ash_cooler": ["丸い瓶と灰の粒", "四角い瓶", "素焼きの小壺"],
+    "ash_baked_bread": ["灰をかぶった丸パン", "灰麻の紐の細長いパン", "焦げ格子の円盤"],
 }
 
 
@@ -280,6 +346,7 @@ def main():
             assert im.size == (32, 32), name
             im.save(ICON_DIR / f"{name}_{o}_32.png")
             icons[(name, o)] = im
+    soot_whetted_icon().save(ICON_DIR / "soot_whetted_18.png")
     sheet(icons)
     print("icons", len(icons))
 

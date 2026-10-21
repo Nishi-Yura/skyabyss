@@ -392,11 +392,6 @@
   "gui.skyabyss.forge.exchange_all_owned.ember": "余燼の専用伝説は、すべて手にしている",
   "skyabyss_record.h.ember": "余燼",
   "tooltip.skyabyss.ember.horn_drunk": "体の芯が、ゆっくり温まった。しばらく熱がたまりにくい",
-  "__ember.H": "四章の伝承 (lore.skyabyss.chapter1.ember_hearth、ember_prev_page。生成元 tools/gen_ch4_content.py)",
-  "lore.skyabyss.chapter1.ember_hearth.title": "灰の民の炉跡",
-  "lore.skyabyss.chapter1.ember_hearth.body": "地面に、焼き締めた石で小さな炉が組んである。灰は、手のかたちに掻き寄せられていた。\n\n炉の口は、いつも丘のほうを向いている。火を絶やさないためではなく、丘を起こさないために焚いていたのだろう。",
-  "lore.skyabyss.chapter1.ember_prev_page.title": "炉跡の頁",
-  "lore.skyabyss.chapter1.ember_prev_page.body": "破れた頁。見覚えのある字で、短い覚え書きが残っている。\n\n「足の下が温かい日は、丘を見ない。見ると、目が合う気がするから」\n\n……この字は、自分のものに似ている。",
   "block.skyabyss.cinder_lamp": "燠の灯",
   "message.skyabyss.ember.back.quiet_west": "今宵、西の灰の道は静かだ。火の粉の蛾も燠虫もいない。",
   "message.skyabyss.ember.back.quiet_east": "今宵、東の炉は静かだ。灰被りは来ず、鉄の色はやさしい順で並ぶ。鍛え手は炉の奥にいる。",
@@ -592,5 +587,10 @@
   "sign.skyabyss.ember_board_hub_stones.1": "三つの石",
   "sign.skyabyss.ember_board_hub_stones.2": "鳴らせば",
   "sign.skyabyss.ember_board_hub_stones.3": "中央の炉が開く",
-  "sign.skyabyss.ember_board_hub_stones.4": "下の熾の底へ"
+  "sign.skyabyss.ember_board_hub_stones.4": "下の熾の底へ",
+  "__ember.H": "四章の伝承 (lore.skyabyss.chapter1.ember_hearth、ember_prev_page。生成元 tools/gen_ch4_content.py)",
+  "lore.skyabyss.chapter1.ember_hearth.title": "灰の民の炉跡",
+  "lore.skyabyss.chapter1.ember_hearth.body": "地面に、焼き締めた石で小さな炉が組んである。灰は、手のかたちに掻き寄せられていた。\n\n炉の口は、いつも丘のほうを向いている。火を絶やさないためではなく、丘を起こさないために焚いていたのだろう。",
+  "lore.skyabyss.chapter1.ember_prev_page.title": "炉跡の頁",
+  "lore.skyabyss.chapter1.ember_prev_page.body": "破れた頁。見覚えのある字で、短い覚え書きが残っている。\n\n「足の下が温かい日は、丘を見ない。見ると、目が合う気がするから」\n\n……この字は、自分のものに似ている。"
 }
