@@ -67,6 +67,12 @@ public final class S09Nest extends StormCell {
     // 部屋の占有: 柱の雷は背に一つなので、一度に一つのグループだけ。持ち主
     private static UUID owner;
 
+    // 区画の写しで動かせる (柱の登録と数えは写しの座標。巣の持ち主の鍵は手本の巣だけ)
+    @Override
+    public boolean relocatable() {
+        return true;
+    }
+
     private static final List<BlockPos> RODS = StormDeck.s09Rods();
 
     public S09Nest() {
@@ -115,13 +121,17 @@ public final class S09Nest extends StormCell {
         run.put("wave", 0);
         run.put("started", false);
         run.put("blocked", false);
-        if (owner == null || owner.equals(run.group)) {
-            owner = run.group;
-        } else {
-            run.put("blocked", true);
+        // 背の中の手本の巣は柱の雷が一つなので一度に一グループ。区画の写し (run.frame) はグループごとの巣なので待たない
+        if (run.frame.isZero()) {
+            if (owner == null || owner.equals(run.group)) {
+                owner = run.group;
+            } else {
+                run.put("blocked", true);
+            }
         }
+        // 柱は、落ちる雷が探す登録簿に、その巣の座標 (写しなら写しの座標) で載せる
         for (BlockPos base : RODS) {
-            StormRods.register(back, base);
+            StormRods.register(back, run.frame.at(base));
         }
         if (run.cleared) {
             GroupGates.open(back, run.group, StormDeck.S09_EXIT_GATE);
@@ -134,8 +144,14 @@ public final class S09Nest extends StormCell {
         if (!run.cleared) {
             GroupGates.release(back, run.group, StormDeck.S09_EXIT_GATE);
         }
-        if (run.group.equals(owner)) {
+        if (run.frame.isZero() && run.group.equals(owner)) {
             owner = null;
+        }
+        if (!run.frame.isZero()) {
+            // 写しの柱は登録簿から外す (区画は空気に戻る)
+            for (BlockPos base : RODS) {
+                StormRods.unregister(back, run.frame.at(base));
+            }
         }
     }
 
@@ -148,7 +164,8 @@ public final class S09Nest extends StormCell {
         if (run == null || run.cleared) {
             return;
         }
-        int idx = RODS.indexOf(s.rod);
+        // 写しの巣の柱は、手本の座標に戻して数える
+        int idx = RODS.indexOf(run.frame.local(s.rod));
         if (idx < 0) {
             return;
         }

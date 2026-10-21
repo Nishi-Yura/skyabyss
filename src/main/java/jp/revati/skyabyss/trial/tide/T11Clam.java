@@ -44,6 +44,12 @@ import net.minecraft.world.level.block.state.BlockState;
 //   一人: 貝の丈夫さ・群れの数は入った人数で決まる。手を放した (誰も前にいない) 貝はその場に留まる (進みも傷みも止まる。刻限は止まらない)。
 // 修飾: 配置 3 (道の形)・数字 2 (襲撃の回数 2・3・4 / 刻限の長さ 長い・標準・短い)・敵の組 2 (磯の群れ / 泡吹きつき)・障害 (高波)・任意の目標 (貝を無傷で)
 public final class T11Clam implements TrialCell {
+    // 区画の写しで動かせる (決まりは arm・tick・onUse・disarm・overlay の中だけで座標を使う。docs/design/32 の 5 章)
+    @Override
+    public boolean relocatable() {
+        return true;
+    }
+
     public static final int Y = G;
     // 道 (x, z の折れ線)。どの配置も、始点 (44, 79) から終点 (44, 105) へ
     public static final int[][][] ROUTES = {
