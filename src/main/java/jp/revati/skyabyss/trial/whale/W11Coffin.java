@@ -41,6 +41,12 @@ import net.minecraft.world.level.block.state.BlockState;
 //   一人: 棺の傷みにくさ・群れの数は、入った人数で決まる。手を放した棺はその場に留まる (進みも傷みも止まる)。
 // 修飾: 配置 3 (道の形)・数字 2 (襲撃の回数 2・3・4 / 棺の速さ)・敵の組 2 (骨の群れ / 射手つき)・障害 (落石)・任意の目標 (棺を無傷で)
 public final class W11Coffin implements TrialCell {
+    // 区画の写しで動かせる (決まりは arm・tick・onUse・disarm・overlay の中だけで座標を使う。docs/design/32 の 5 章)
+    @Override
+    public boolean relocatable() {
+        return true;
+    }
+
     // 道 (x, z の折れ線)。どの配置も、始点 (2, 133) から終点 (2, 163) へ
     public static final int[][][] ROUTES = {
             {{2, 133}, {2, 141}, {-3, 141}, {-3, 152}, {7, 152}, {7, 158}, {2, 158}, {2, 163}},

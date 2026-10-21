@@ -38,6 +38,12 @@ import net.minecraft.world.phys.AABB;
 //   複数なら、踏み板ごとに一人。声をかけ合う。
 // 修飾: 配置 3 (どの踏み板を使うか・ひびの入った鞴)・数字 2 (炎の持ち 14・11・8 秒 / 保つ 2・3・4 秒)・障害 (灰降り: 踏み板が 5 秒、灰に埋まって効かない)・任意の目標 (炎を落とさずに)
 public final class E07Bellows implements TrialCell {
+    // 区画の写しで動かせる (決まりは arm・tick・onUse・disarm・overlay の中だけで座標を使う。docs/design/32 の 5 章)
+    @Override
+    public boolean relocatable() {
+        return true;
+    }
+
     public static final int[] PAD_X = {-30, -18, -30, -18};
     public static final int[] PAD_Z = {74, 74, 88, 88};
     public static final int[][] STAGE1 = {{0, 1}, {2, 3}, {0, 3}};

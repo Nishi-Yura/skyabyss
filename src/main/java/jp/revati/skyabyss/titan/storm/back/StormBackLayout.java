@@ -26,7 +26,7 @@ public final class StormBackLayout {
     }
 
     // 版が上がったら建て直す
-    public static final int LAYOUT_VERSION = 28;   // 25: 遺物ブロック (宝の箱・休み火・レバー・碑・鐘を雷翼の様式 = 銅と羽・淡い金に)。 24: 第二の渡り場と五つの新作 (29 の P3。S04 羽根の吊り橋・S07 二枚の鏡の間・S08 気圧の弁・S11 避雷の護送・S12 羽守長の頂。第一の渡り場の南の橋から)。 22: 試練の甲板 (29 の P2。尾の上の渡り場と四つの試練 S02・S03・S09・S10。背の広場から橋)・広間の三つの出口の戸。 21: 任意の翼 (26 の 9.5。背の広場・風見の塔・避雷の塔・翼の外の廊・翼の先・尾羽の庭)・広間の屋根の肋と羽の壁・銅の筋・二つ目の鏡の間。 20: 26 の拡大 (水平 x1.6)。部屋ごとに作り直し、東の戸は 4 枚、嵐の冠・尾羽の広場・灯の道・目的の光の柱 (StormGuide)。 12: 歩く道の灯り (route_lamps)。 11: 肋の間の外を翼から生えた肋の尖塔に。 10: 西を縦の肋の登りに・東を雷の回路に・入口に拍の舵 (25 の 5章)。 9: ボス部屋の大門。 8: 建築の監査。 5: 詰み監査の修正。 4: 避雷の柱と戻しの鏡を専用のブロックに。 2: 風鳴り石・受け羽のブロックの名前を wind_stone・catch_feather に
+    public static final int LAYOUT_VERSION = 30;   // 30: 任意の翼 (尾羽の庭・二つの塔・翼の外の廊・先の見張り台の宝箱と休み場)・羽の広場の西と東の宝箱・抜け道の床・雷翼の共鳴の炉を外す。試練の甲板への螺旋と広場の床は残す。 25: 遺物ブロック (宝の箱・休み火・レバー・碑・鐘を雷翼の様式 = 銅と羽・淡い金に)。 24: 第二の渡り場と五つの新作 (29 の P3。S04 羽根の吊り橋・S07 二枚の鏡の間・S08 気圧の弁・S11 避雷の護送・S12 羽守長の頂。第一の渡り場の南の橋から)。 22: 試練の甲板 (29 の P2。尾の上の渡り場と四つの試練 S02・S03・S09・S10。背の広場から橋)・広間の三つの出口の戸。 21: 任意の翼 (26 の 9.5。背の広場・風見の塔・避雷の塔・翼の外の廊・翼の先・尾羽の庭)・広間の屋根の肋と羽の壁・銅の筋・二つ目の鏡の間。 20: 26 の拡大 (水平 x1.6)。部屋ごとに作り直し、東の戸は 4 枚、嵐の冠・尾羽の広場・灯の道・目的の光の柱 (StormGuide)。 12: 歩く道の灯り (route_lamps)。 11: 肋の間の外を翼から生えた肋の尖塔に。 10: 西を縦の肋の登りに・東を雷の回路に・入口に拍の舵 (25 の 5章)。 9: ボス部屋の大門。 8: 建築の監査。 5: 詰み監査の修正。 4: 避雷の柱と戻しの鏡を専用のブロックに。 2: 風鳴り石・受け羽のブロックの名前を wind_stone・catch_feather に
 
     // 箱の部屋 (内側の範囲。床のブロックは floor、空くのは floor+1〜floor+height)
     public record Area(int x1, int x2, int z1, int z2, int floor, int height) {
@@ -65,12 +65,9 @@ public final class StormBackLayout {
     // 地上へ戻る口: 到着の南の「下り風の輪」(床に光る輪、下へ吹く粒)。0.5 秒いると地上へ (StormTravel)
     public static final BlockPos DOWNDRAFT = new BlockPos(0, 148, 171);
     public static final AABB GATE_MOUTH = new AABB(-1, 147, 170, 2, 152, 173);
-    // 羽の広場 (道の途中の広い台。休み場 tail。左右の翼の見晴らしに碑と宝箱)
+    // 羽の広場 (道の途中の広い台。休み場 tail。左右の翼の見晴らしに碑)
     public static final Area TAIL_PLAZA = new Area(-21, 21, 104, 118, 146, 8);
     public static final BlockPos PLAZA_CENTER = new BlockPos(0, 147, 111);
-    // 見晴らしの宝箱 (西・東)。一人に一度、小さな贈り物 (StormCaches)
-    public static final BlockPos CACHE_WEST = new BlockPos(-19, 147, 106);
-    public static final BlockPos CACHE_EAST = new BlockPos(19, 147, 106);
     // 嵐の雲の天井。ここより下へ落ちると嵐に投げ返される
     public static final int CLOUD_Y = 100;
 
@@ -267,12 +264,7 @@ public final class StormBackLayout {
     // 竜骨の間の入口 (入ると閉じる)。前室の北の口
     public static final AABB HEART_DOOR = new AABB(-1, KEEL_ANTE.floor() + 1, -40, 2, KEEL_ANTE.floor() + 4, -39);
 
-    // ---------------------------------------------------------------- 抜け道 (石が鳴ると光る床。踏むと広間の近くへ)
-    public static final BlockPos RETURN_WEST = RIB_TOP.offset(2, 0, 0);
-    public static final BlockPos RETURN_EAST = new BlockPos(RAIJU_NEST.getX(), BONE_FLOOR + 1, WZ + 6);
-    public static final BlockPos RETURN_FRONT = new BlockPos(2, 148, -142);
-    public static final Map<String, BlockPos> RETURN_TO = Map.of(
-            "west", new BlockPos(-52, BONE_FLOOR + 1, WZ), "east", new BlockPos(52, BONE_FLOOR + 1, WZ), "front", new BlockPos(0, UPPER_GALLERY_Y + 1, -92));
+    // ---------------------------------------------------------------- 広間の灯り (鳴った石の三つ)
     // 広間の床の三つの灯り (鳴った石)
     public static final BlockPos LAMP_WEST = new BlockPos(-5, 134, 7);
     public static final BlockPos LAMP_EAST = new BlockPos(5, 134, 7);
@@ -291,7 +283,7 @@ public final class StormBackLayout {
             eastRest("e1", 0), eastRest("e2", 1), eastRest("e3", 2),
             new Rest("f0", new BlockPos(7, UPPER_GALLERY_Y + 1, -84), new BlockPos(5, UPPER_GALLERY_Y + 1, -84), F0),
             new Rest("heart", new BlockPos(2, KEEL_ANTE.floor() + 1, -44), new BlockPos(0, KEEL_ANTE.floor() + 1, -43), KEEL_ANTE)),
-            concat(StormExtra.RESTS, concat(StormDeck.RESTS, StormDeck2.RESTS)));
+            concat(StormDeck.RESTS, StormDeck2.RESTS));
     public static final Map<String, BlockPos> REST;
     public static final List<String> REST_ORDER;
 
@@ -321,7 +313,7 @@ public final class StormBackLayout {
             new Inscription("sign.skyabyss.lore_storm_vault_w2", new BlockPos(-90, BONE_FLOOR + 2, -47), Direction.SOUTH),
             new Inscription("sign.skyabyss.lore_storm_vault_e1", new BlockPos(182, BONE_FLOOR + 2, -47), Direction.SOUTH),
             new Inscription("sign.skyabyss.lore_storm_vault_e2", new BlockPos(187, BONE_FLOOR + 2, -47), Direction.SOUTH)),
-            concat(StormExtra.SIGNS, concat(StormDeck.SIGNS, StormDeck2.SIGNS)));
+            concat(StormDeck.SIGNS, StormDeck2.SIGNS));
     public static final List<Inscription> ENTRANCE_SIGNS = List.of(
             new Inscription("sign.skyabyss.storm_west", new BlockPos(-23, 137, WZ - 5), Direction.EAST),
             new Inscription("sign.skyabyss.storm_east", new BlockPos(23, 137, WZ - 5), Direction.WEST),
@@ -402,7 +394,7 @@ public final class StormBackLayout {
         if (x >= FEATHER_GATE.minX - 2 && x <= FEATHER_GATE.maxX + 2 && z >= FEATHER_GATE.minZ - 5 && z <= FEATHER_GATE.maxZ + 4) {
             return true;
         }
-        if (StormExtra.open(x, y, z) || StormDeck.open(x, y, z) || StormDeck2.open(x, y, z)) {
+        if (StormDeck.open(x, y, z) || StormDeck2.open(x, y, z)) {
             return true;
         }
         return y > HUB.floor() + HUB.height() && x * x + (z + 12) * (z + 12) <= (SKYLIGHT_R + 1) * (SKYLIGHT_R + 1);

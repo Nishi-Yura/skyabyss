@@ -61,7 +61,9 @@ public final class GroupGates {
     }
 
     // そのグループにとって開いているか。扉のブロックがなければ (空気など) 開いているとみなす
-    public static boolean isOpen(ServerLevel level, UUID group, BlockPos pos) {
+    public static boolean isOpen(ServerLevel level, UUID group, BlockPos template) {
+        // 区画の写しのセルの決まりの中では、手本の座標を写しの座標にする (TrialFrame。外ではずれ 0)
+        BlockPos pos = jp.revati.skyabyss.trial.TrialFrame.shift(template);
         BlockState state = level.getBlockState(pos);
         if (!state.is(ModBlocks.SEALED_GATE.get())) {
             return true;
@@ -84,10 +86,11 @@ public final class GroupGates {
         return set(level, group, blocks, false);
     }
 
-    public static boolean set(ServerLevel level, UUID group, Collection<BlockPos> blocks, boolean open) {
-        if (blocks.isEmpty()) {
+    public static boolean set(ServerLevel level, UUID group, Collection<BlockPos> template, boolean open) {
+        if (template.isEmpty()) {
             return false;
         }
+        Collection<BlockPos> blocks = jp.revati.skyabyss.trial.TrialFrame.shift(template);
         BackGroupData data = BackGroupData.get(level);
         BackGroupData.Record record = data.of(group);
         boolean changed = false;
@@ -123,7 +126,8 @@ public final class GroupGates {
     }
 
     // そのグループへの上書きをやめて、ブロックの既定に戻す (既定が時間で変わる扉の「閉じていたのをやめる」はこちら)
-    public static boolean release(ServerLevel level, UUID group, Collection<BlockPos> blocks) {
+    public static boolean release(ServerLevel level, UUID group, Collection<BlockPos> template) {
+        Collection<BlockPos> blocks = jp.revati.skyabyss.trial.TrialFrame.shift(template);
         BackGroupData data = BackGroupData.get(level);
         BackGroupData.Record record = data.peek(group);
         if (record == null) {

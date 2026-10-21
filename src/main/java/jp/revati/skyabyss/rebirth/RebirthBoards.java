@@ -9,8 +9,6 @@ import javax.annotation.Nullable;
 
 import jp.revati.skyabyss.progress.Progression;
 import jp.revati.skyabyss.progress.Titans;
-import jp.revati.skyabyss.trial.HubTablets;
-import jp.revati.skyabyss.titan.end.ReturnBeacons;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.MinecraftServer;
@@ -19,8 +17,8 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.network.PacketDistributor;
 
-// 鼓動の間の順位の石 (C11) と飾り板 (C21): 立てる・光らせる・開く中身を作る (サーバー側)。
-// 置き場は試練の碑 (HubTablets) と重ならない開いた床から決まった手順で二つ選ぶ (背の作りが変わっても追う)。人がいるあいだ 10 秒に一度見て、無ければ立てる
+// 巨神の祠のまわりの順位の石 (C11) と飾り板 (C21): 立てる・光らせる・開く中身を作る (サーバー側。docs/design/32 の 3.1「祠のまわり」)。
+// 置き場は祠の輪の外の開いた床から決まった手順で二つ選ぶ。祠 (titan/shrine/TitanShrine) が人のいるあいだ 10 秒に一度呼び、無ければ立てる
 public final class RebirthBoards {
     // 記録が更新されてから光る長さ (tick)
     public static final long FRESH_TICKS = 12_000L;
@@ -78,14 +76,11 @@ public final class RebirthBoards {
     }
 
     // ---------------------------------------------------------------- 立てる・光らせる
-    // 人がいるあいだ呼ぶ (TrialHub から 10 秒に一度)。立てられたら true
-    public static boolean install(ServerLevel back, String titan) {
-        if (!HubTablets.enabled(titan)) {
-            return false;
-        }
+    // 人がいるあいだ呼ぶ (祠から 10 秒に一度)。center = 祠の中央 (足もとの高さ)。立てられたら true
+    public static boolean install(ServerLevel back, String titan, BlockPos center) {
         Spots spots = SPOTS.get(titan);
         if (spots == null) {
-            spots = find(back, titan);
+            spots = find(back, center);
             if (spots == null) {
                 return false;
             }
@@ -108,10 +103,9 @@ public final class RebirthBoards {
 
     // 記録が更新されたとき: 立っている板をすぐ光らせる
     public static void refresh(MinecraftServer server, String titan) {
-        var dim = Titans.backOf(titan);
-        ServerLevel back = dim == null ? null : server.getLevel(dim);
-        if (back != null) {
-            install(back, titan);
+        BlockPos center = jp.revati.skyabyss.titan.shrine.TitanShrine.posOf(server, titan);
+        if (center != null) {
+            install(server.overworld(), titan, center);
         }
     }
 
@@ -132,15 +126,10 @@ public final class RebirthBoards {
         return s == null ? null : s.board;
     }
 
-    // 休み場のまわり (半径 5〜9) を、碑の角度 (12 度おき 0 から) とずらした 6 度から 12 度おきに探し、碑・互いに 4 マス以上離れた二つ
+    // 祠のまわり (半径 5〜9。輪の半径 3 の外) を 6 度から 12 度おきに探し、互いに 4 マス以上離れた二つ
     @Nullable
-    private static Spots find(ServerLevel back, String titan) {
-        BlockPos hub = ReturnBeacons.hubOf(titan);
-        if (hub == null || !back.hasChunkAt(hub)) {
-            return null;
-        }
-        List<HubTablets.Spot> tablets = HubTablets.spots(back, titan);
-        if (tablets.isEmpty()) {
+    private static Spots find(ServerLevel back, BlockPos hub) {
+        if (!back.hasChunkAt(hub)) {
             return null;
         }
         int[] radii = {7, 6, 8, 5, 9};
@@ -149,7 +138,7 @@ public final class RebirthBoards {
             for (int r : radii) {
                 double rad = Math.toRadians(a);
                 BlockPos p = standing(back, hub.getX() + (int) Math.round(Math.cos(rad) * r), hub.getY(), hub.getZ() + (int) Math.round(Math.sin(rad) * r));
-                if (p == null || near(p, tablets, chosen)) {
+                if (p == null || near(p, chosen)) {
                     continue;
                 }
                 chosen.add(p);
@@ -162,12 +151,7 @@ public final class RebirthBoards {
         return new Spots(chosen.get(0), chosen.get(1), facing(chosen.get(0), hub), facing(chosen.get(1), hub));
     }
 
-    private static boolean near(BlockPos p, List<HubTablets.Spot> tablets, List<BlockPos> chosen) {
-        for (HubTablets.Spot t : tablets) {
-            if (t.pos().distSqr(p) < 16) {
-                return true;
-            }
-        }
+    private static boolean near(BlockPos p, List<BlockPos> chosen) {
         for (BlockPos c : chosen) {
             if (c.distSqr(p) < 16) {
                 return true;

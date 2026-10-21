@@ -42,6 +42,12 @@ import net.minecraft.world.phys.Vec3;
 // 人数: m が人数で増える (二人ごとに +1、最大 6)。広間は広く、部屋ごとに手分けできる
 // 修飾: 配置 3 (つながりの組)・数字 2 (最短の手数 3/3-4/4-5・光を保つ 2/3/4 秒)・障害 2 (雷蛾・空の雷)・任意の目標 (裏返しを少なく)
 public final class S07Mirrors extends StormCell {
+    // 区画の写しで動かせる (決まりは arm・tick・onUse・disarm・overlay の中だけで座標を使う。docs/design/32 の 5 章)
+    @Override
+    public boolean relocatable() {
+        return true;
+    }
+
     // 光の向き: 0 北 (-z)・1 東 (+x)・2 南 (+z)・3 西 (-x)
     static final int[] DX = {0, 1, 0, -1};
     static final int[] DZ = {-1, 0, 1, 0};

@@ -1,0 +1,36 @@
+{
+  "category": "sub",
+  "order": 83,
+  "repeat": "weekly",
+  "board": true,
+  "unlock": {
+    "type": "stilled",
+    "titan": "stone_whale"
+  },
+  "stages": [
+    {
+      "id": "route",
+      "objectives": [
+        {
+          "id": "route",
+          "type": "signal",
+          "target": "route_cleared",
+          "count": 1
+        }
+      ]
+    }
+  ],
+  "reward": {
+    "xp": 160,
+    "items": [
+      {
+        "item": "skyabyss:resonance_crystal",
+        "count": 2
+      },
+      {
+        "item": "skyabyss:song_shard_stone_whale",
+        "count": 1
+      }
+    ]
+  }
+}

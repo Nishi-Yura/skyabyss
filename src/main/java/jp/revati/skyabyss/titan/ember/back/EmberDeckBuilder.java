@@ -85,8 +85,6 @@ public final class EmberDeckBuilder {
             }
         }
         // 試練の板 (炉心の広間の休み場のそば・試練の階の広間)
-        kit.set(BOARD_HUB, ModBlocks.TRIAL_BOARD.get().defaultBlockState().setValue(HorizontalDirectionalBlock.FACING, Direction.WEST));
-        kit.set(BOARD_D0, ModBlocks.TRIAL_BOARD.get().defaultBlockState().setValue(HorizontalDirectionalBlock.FACING, Direction.SOUTH));
         for (EmberBackLayout.Inscription in : BOARDS) {
             kit.board(in.pos(), in.facing(), "sign.skyabyss.ember_board_" + in.id(), DyeColor.WHITE);
         }

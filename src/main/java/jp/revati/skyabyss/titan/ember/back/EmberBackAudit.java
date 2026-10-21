@@ -29,10 +29,7 @@ public final class EmberBackAudit {
         }
         s.scan.add(new BackReach.Box(-12, 66, -240, 12, 100, -82));
         s.scan.add(new BackReach.Box(-48, 78, -60, 50, 100, -8));
-        s.scan.add(new BackReach.Box(-10, 116, -64, 10, 210, -44));
-        s.scan.add(new BackReach.Box(-6, 134, -66, 14, 150, 34));
         s.scan.add(box(GATE_SHAFT, 2));
-        s.scan.add(box(CRACK, 1));
         // 灰の道の湖: 冷え殻を渡る仕掛け。落ちたら溶岩 (倒れて休み場へ戻る)
         s.allowHole.add(new BackReach.Box(WEST.minX(), 70, 14, WEST.maxX(), 84, 105));
         for (Rest r : RESTS) {
@@ -58,11 +55,6 @@ public final class EmberBackAudit {
         s.goals.put("deck e11 stone", EmberDeck.E11_STONE.north());
         s.goals.put("deck e12 stone", EmberDeck.E12_STONE.north());
         s.goals.put("deck e04 stone", EmberDeck.E04_STONE.north());
-        s.goals.put("well top (crater)", new BlockPos(HUB_CENTER.getX() + 11, EmberBodyBuilder.crater() + 1, HUB_CENTER.getZ()));
-        s.goals.put("back top", new BlockPos(0, BACK_EXIT_FLOOR + 1, EmberBodyBuilder.backTubeEnd()));
-        for (Cache c : CACHES) {
-            s.goals.put("cache " + c.id(), c.pos().relative(c.facing()));
-        }
         return s;
     }
 

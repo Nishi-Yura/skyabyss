@@ -261,5 +261,15 @@
   "skyabyss_record.v.fight_none": "まだ勝っていない",
   "skyabyss_record.v.fight_oath": "無傷の誓い",
   "skyabyss_record.v.fight_steady": "堅き歩み（%s 回）",
-  "skyabyss_record.v.fight_falls": "札なし（%s 回）"
+  "skyabyss_record.v.fight_falls": "札なし（%s 回）",
+  "skyabyss_record.r.route": "順路",
+  "skyabyss_record.v.route_idle": "まだ",
+  "skyabyss_record.v.route_step": "第 %s / %s の試練",
+  "skyabyss_record.v.route_mid": "中ボス",
+  "skyabyss_record.v.route_heart": "心臓へ",
+  "skyabyss_record.d.route": "歩 → 智 → 闘 → 中ボス → 心臓の順に一つずつ越える。周回 %s の三つ:",
+  "skyabyss_record.d.route_line": "%s. %s　%s",
+  "skyabyss_record.d.route_record": "越えた回数 %s・最速 %s",
+  "skyabyss_record.d.route_record_none": "まだ越えていない",
+  "skyabyss_record.d.route_none": "この巨神の背は、まだ遠い"
 }

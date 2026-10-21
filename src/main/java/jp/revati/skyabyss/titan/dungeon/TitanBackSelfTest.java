@@ -105,9 +105,6 @@ public final class TitanBackSelfTest {
                 SelfTestRunner.Step.once("titan back (maze settled)", MAZE_SETTLE_TICKS, server -> withBack(server, back -> checkPockets(back, PENDING))),
                 SelfTestRunner.Step.once("titan back (reset)", server -> withBack(server, back -> {
                     checkReset(back, PENDING);
-                    if (!back.getBlockState(TitanBackLayout.forge()).is(ModBlocks.RESONANCE_FORGE.get())) {
-                        PENDING.add("resonance forge missing at " + TitanBackLayout.forge());
-                    }
                     PENDING.addAll(jp.revati.skyabyss.loot.TitanLoot.selfTest());
                     String mapDir = System.getenv("SKYABYSS_SELFTEST_MAP");
                     if (mapDir != null) {
@@ -333,8 +330,6 @@ public final class TitanBackSelfTest {
                 int t = WhaleShape.bodyTop(x, z);
                 if (t == Integer.MIN_VALUE || (Math.abs(x) <= 9 && z >= SHRINE_Z - 17 && z <= SHRINE_Z + 17)
                         || (Math.abs(x) <= 13 && Math.abs(z - PLATFORM_Z) <= 16)
-                        || (Math.abs(x) <= 8 && Math.abs(z - WingsBuilder.CAMP_Z) <= 8)
-                        || (Math.abs(x) <= 14 && Math.abs(z - WingsBuilder.TAIL_CZ) <= 14)
                         // 登り口の階段は、背に近づくと殻を割って背へ出る (開いた階段)
                         || (x >= STAIR_X0 && x <= 0 && z >= STAIR_Z0 - 1 && z <= STAIR_Z1 + 1)) {
                     continue;
@@ -375,9 +370,6 @@ public final class TitanBackSelfTest {
                 // 部屋はどれも鯨の体の中を掘ったもの。鯨のブロックが無かった所へ出たら、外とつながっている
                 // (胸びれの道のトンネルだけは、わざと体の外へ抜ける)
                 if (WhaleShape.at(q.getX(), q.getY(), q.getZ()) == null) {
-                    if (inFinTunnel(q)) {
-                        continue;
-                    }
                     leak = q;
                     break;
                 }
@@ -398,22 +390,18 @@ public final class TitanBackSelfTest {
         }
         SkyAbyss.LOGGER.info("Titan back whale: {} air cells inside the body, back holes {}", seen.size(), holes);
         // 歩ける道: 到着から祠、祠の階段で鼓動の間
-        // 到着 (左のわき腹の台) から、錨石・炉・登り口の階段・背の広場へ歩けること
+        // 到着 (左のわき腹の台) から、錨石・登り口の階段・背の広場へ歩けること
         int toAnchor = walkSteps(level, arrival(), anchor().west(), 1);
-        int toForge = walkSteps(level, arrival(), forge().west(), 1);
         int toPlaza = walkSteps(level, arrival(), plaza(), 1);
         if (toAnchor < 0) {
             failures.add("cannot walk from the arrival to the anchor stone on the flank platform");
-        }
-        if (toForge < 0) {
-            failures.add("cannot walk from the arrival to the resonance forge on the flank platform");
         }
         if (toPlaza < 0) {
             failures.add("cannot walk from the arrival on the flank platform up the stair to the plaza on the back");
         } else if (toPlaza > 80) {
             failures.add("the climb from the flank platform to the plaza is too long (" + toPlaza + " steps)");
         }
-        SkyAbyss.LOGGER.info("Titan back flank: arrival -> anchor {} steps, -> forge {} steps, -> plaza {} steps", toAnchor, toForge, toPlaza);
+        SkyAbyss.LOGGER.info("Titan back flank: arrival -> anchor {} steps, -> plaza {} steps", toAnchor, toPlaza);
         int toShrine = walkSteps(level, arrival(), new BlockPos(0, shrineY() + 1, SHRINE_Z), 2);
         int toHub = walkSteps(level, arrival(), HUB.center(), 2);
         if (toShrine < 0) {
@@ -425,13 +413,6 @@ public final class TitanBackSelfTest {
             failures.add("the walk from the arrival to the hub is too long (" + toHub + " steps)");
         }
         SkyAbyss.LOGGER.info("Titan back walk: arrival -> shrine {} steps, -> hub {} steps", toShrine, toHub);
-    }
-
-    // 胸びれの道のトンネル (体の外へ抜ける。WingsBuilder.finPath)
-    private static boolean inFinTunnel(BlockPos q) {
-        return q.getZ() >= -65 && q.getZ() <= -59
-                && ((q.getX() <= W1.x1() - 1 && q.getY() >= W1.floorY() && q.getY() <= W1.floorY() + 8)
-                || (q.getX() >= CE1.x2() + 1 && q.getY() >= FLOOR && q.getY() <= FLOOR + 8));
     }
 
     // 歩いて何歩で着くか (着かなければ -1)。足元が固く、足と頭が空いている所を、上り 1・下り 3 まで。目標から r 以内で着いたとみなす
@@ -539,14 +520,6 @@ public final class TitanBackSelfTest {
             }
             air(level, p.above(), "above resonance stone", failures);
         }
-        // 版 28: 来た道へ戻る抜け道の戸 (紫の封印のブロック) は無い。壁が閉じていて、封印の扉が置かれていないこと
-        for (List<BlockPos> gone : List.of(WEST_RETURN, EAST_RETURN, LOWER_RETURN)) {
-            for (BlockPos p : gone) {
-                if (level.getBlockState(p).is(ModBlocks.SEALED_GATE.get()) || level.getBlockState(p).isAir()) {
-                    failures.add("the old return gate was not walled over: " + p);
-                }
-            }
-        }
         for (BlockPos start : List.of(mazeCell(MAZE_START_I, MAZE_START_J), mazeCell(MAZE_START2_I, MAZE_START2_J))) {
             if (!level.getBlockState(new BlockPos(start.getX() + MAZE_CELL / 2, FLOOR, start.getZ())).is(Blocks.LADDER)) {
                 failures.add("maze entrance ladder missing at the hub floor " + start);
@@ -573,9 +546,8 @@ public final class TitanBackSelfTest {
 
     // 看板: 背中に置かれた看板は、碑文と試練の入口の一言だけ (allSigns) で、どの行も看板の幅に収まること (日本語・英語)。
     // 囁き (看板の代わりの案内) の文が lang にあること
-    // 版 13 で足した碑 (鐘楼・歌の祠・書庫・胸びれの先・尾の展望・宿)。書庫は sign.skyabyss.library_1〜11
-    private static final Set<String> NEW_TABLETS = Set.of("sign.skyabyss.bell_hint", "sign.skyabyss.fin_left",
-            "sign.skyabyss.fin_right", "sign.skyabyss.tail_vista", "sign.skyabyss.camp_page", "sign.skyabyss.fin_left_lore", "sign.skyabyss.fin_right_lore");
+    // 版 13 で足した碑 (鐘楼) の残り。任意の翼 (書庫・胸びれ・尾の展望・宿) の碑は版 30 で消した
+    private static final Set<String> NEW_TABLETS = Set.of("sign.skyabyss.bell_hint");
 
     private static void checkSigns(ServerLevel level, List<String> failures) {
         Set<BlockPos> expected = new HashSet<>();
@@ -590,7 +562,7 @@ public final class TitanBackSelfTest {
                     }
                     if (expected.contains(be.getBlockPos())) {
                         count++;
-                    } else if (!(tablet.key().startsWith("sign.skyabyss.library_") || NEW_TABLETS.contains(tablet.key()))) {
+                    } else if (!NEW_TABLETS.contains(tablet.key())) {
                         failures.add("unexpected tablet at " + be.getBlockPos() + " (only inscriptions, trial entrances and the new wings keep tablets)");
                     }
                     keys.add(tablet.key());

@@ -342,7 +342,7 @@ public final class TrialDraw {
     }
 
     // 報いの素材の個数 (docs/design/29 の 2.3・2.5): 基本 2 × 段の倍率 + 稀 +1・極 +2 + 任意の目標 +1
-    public static int materialCount(Def def, Mods mods, boolean goalDone, boolean weekly) {
+    public static int materialCount(Def def, Mods mods, boolean goalDone) {
         double mult = def.tier() >= 3 ? 1.5 : def.tier() == 2 ? 1.2 : 1.0;
         int n = (int) Math.round(2 * mult);
         n += switch (mods.rarity()) {
@@ -354,6 +354,6 @@ public final class TrialDraw {
         if (goalDone) {
             n += 1;
         }
-        return weekly ? n * 2 : n;
+        return n;
     }
 }

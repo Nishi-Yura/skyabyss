@@ -33,6 +33,7 @@ import jp.revati.skyabyss.trial.Trial.Mods;
 import jp.revati.skyabyss.trial.Trial.Rarity;
 import jp.revati.skyabyss.util.Players;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
@@ -50,7 +51,7 @@ import net.neoforged.neoforge.event.tick.LevelTickEvent;
 
 // 試練のプールを動かす (docs/design/29)。背中のディメンションで 5 tick ごとに:
 //   1. 動いているグループごとに、いまの周の引き (TrialData.current) を見て、入口の戸をグループにだけ開け閉めする (40 tick ごと)
-//   2. 引いた試練 (と今週の試練) のセルの中にグループの人がいれば、セルを動かす (arm → tick)。誰もいなくなって 5 秒で disarm
+//   2. 引いた試練のセルの中にグループの人がいれば、セルを動かす (arm → tick)。誰もいなくなって 5 秒で disarm
 //   3. セルの石の差し口 (useStone)・仕掛けの右クリック・戻りの光る床・倒れた回数 (任意の目標) を扱う
 // 原型の石は、TrialSteles.onRung から onStoneRung が呼ばれて、図鑑・報いに数える
 @EventBusSubscriber(modid = SkyAbyss.MODID)
@@ -67,8 +68,6 @@ public final class TrialRuntime {
 
     static {
         GroupOverlays.register(TrialRuntime::overlay);
-        // 鼓動の間の試練の碑 (越えた試練の碑がそのグループの画面で光る)
-        TrialHub.register();
         BackGroupData.IGNORED_OVERRIDE = TrialRuntime::isEntranceKey;
     }
 
@@ -86,6 +85,11 @@ public final class TrialRuntime {
             entranceKeys = set;
         }
         return entranceKeys.contains(key);
+    }
+
+    // 試練の入口の戸のブロックか (自己テストの歩ける所の検査が、順路の戸を開いたものとして見るため)
+    public static boolean isTrialEntrance(BlockPos pos) {
+        return isEntranceKey(pos.asLong());
     }
 
     private static String key(UUID group, String id) {
@@ -126,29 +130,46 @@ public final class TrialRuntime {
         }
     }
 
-    // 引いた試練 (と今週の試練) の入口だけを、そのグループに開ける。ほかには閉じて見える
+    // 順路 (docs/design/32 の 2 章): 今の段の試練の入口だけを、そのグループに開ける。越えた試練・これからの試練・引いていない試練は閉じて見える
+    // (中ボスの段・心臓の段・順路の外では、どの試練の戸も閉じる。順路は入口の休み場へ運ぶので、戸から入ることはない)
     public static void syncGates(ServerLevel back, UUID group, String titan, TrialDraw.Draw draw) {
         if (!TrialCatalog.deckPlaced(titan)) {
             return;
         }
-        Def weekly = TrialData.weekly(titan, TrialData.worldSeed(back), TrialData.week());
+        Def current = currentOf(back, group, draw);
         for (TrialCell cell : TrialCells.of(titan)) {
             TrialCell.Ports p = cell.ports();
             if (p.entrance().isEmpty()) {
                 continue;
             }
-            boolean want = draw.has(cell.def().id()) || weekly != null && weekly.id().equals(cell.def().id());
-            String cellKey = draw.has(cell.def().id()) ? TrialRegions.keyOfDef(titan, cell.def(), draw) : null;
-            if (want && cellKey != null && HubTablets.cleared(back, group, titan, cellKey)) {
-                // 越えた試練 (版 25): 入口は試練済みの封印で閉じたまま (見かけは TrialHub.sealOverlay)
-                GroupGates.seal(back, group, p.entrance());
-            } else if (want) {
-                GroupGates.open(back, group, p.entrance());
+            if (current != null && current.id().equals(cell.def().id())) {
+                // 区画の写しで遊ぶセルは、写しの入口を開ける (手本の入口は閉じたまま)
+                TrialFrame f = TrialSlot.frameOf(back, group, cell);
+                GroupGates.open(back, group, f.at(p.entrance()));
+                if (!f.isZero()) {
+                    GroupGates.seal(back, group, p.entrance());
+                }
             } else {
                 GroupGates.seal(back, group, p.entrance());
+                // 越えた (またはこれからの) 写しのセルの戸も閉じる
+                TrialFrame f = TrialSlot.frameOf(back, group, cell);
+                if (!f.isZero()) {
+                    GroupGates.seal(back, group, f.at(p.entrance()));
+                }
             }
             // 出口の戸は、そのセルが「済んだ」とみなせるあいだだけ開く (セルが決める)
         }
+    }
+
+    // そのグループの順路の今の段の試練 (なければ null)
+    @Nullable
+    public static Def currentOf(ServerLevel back, UUID group, TrialDraw.Draw draw) {
+        BackGroupData.Record r = BackGroupData.get(back).peek(group);
+        if (r == null || r.getInt(TrialRoute.MID) > 0) {
+            return null;
+        }
+        int step = TrialRoute.step(r);
+        return step >= 1 && step < TrialRoute.LAST_STEP ? TrialRoute.defOf(draw, step) : null;
     }
 
     // ---------------------------------------------------------------- 毎 tick
@@ -201,9 +222,12 @@ public final class TrialRuntime {
                 if (!cell.runtime()) {
                     continue;
                 }
+                // 区画の写しで動かすセルは、写しの床の範囲で数える (docs/design/32 の 5 章)
+                TrialFrame frame = TrialSlot.frameOf(level, group, cell);
+                AABB area = frame.box(cell.ports().area());
                 List<ServerPlayer> inside = new ArrayList<>();
                 for (ServerPlayer p : members) {
-                    if (cell.ports().area().contains(p.position())) {
+                    if (area.contains(p.position())) {
                         inside.add(p);
                     }
                 }
@@ -212,16 +236,11 @@ public final class TrialRuntime {
                 }
                 TrialCell.Run run = armed(level, group, cell, draw, now);
                 run.lastPresent = now;
-                if (!draw.has(cell.def().id())) {
-                    // 引いていない試練 = 今週の試練 (版 25: 初めて入った人に一行)
-                    for (ServerPlayer p : inside) {
-                        TrialIntro.onWeeklyEntered(p);
-                    }
-                }
-                cell.tick(level, run, inside, now);
-                tickPad(level, run, inside);
-                autoRing(level, group, cell, run, draw, inside, now);
-                weeklyBack(level, titan, cell, run, draw, inside);
+                TrialWindow.run(level, group, cell, run.frame, () -> {
+                    cell.tick(level, run, inside, now);
+                    tickPad(level, run, inside);
+                    autoRing(level, group, cell, run, draw, inside, now);
+                });
             }
         }
         // 誰もいなくなったセルを止める
@@ -232,18 +251,11 @@ public final class TrialRuntime {
         }
     }
 
-    // いまそのグループに動かしてよいセル: 引いた三つ + 今週の試練
+    // いまそのグループに動かしてよいセル: 引いた三つ
     private static List<TrialCell> liveCells(ServerLevel back, String titan, TrialDraw.Draw draw) {
         List<TrialCell> out = new ArrayList<>();
         for (TrialDraw.Pick p : draw.picks()) {
             TrialCell c = TrialCells.get(p.cellId());
-            if (c != null) {
-                out.add(c);
-            }
-        }
-        Def weekly = TrialData.weekly(titan, TrialData.worldSeed(back), TrialData.week());
-        if (weekly != null && !draw.has(weekly.id())) {
-            TrialCell c = TrialCells.get(weekly.id());
             if (c != null) {
                 out.add(c);
             }
@@ -253,23 +265,19 @@ public final class TrialRuntime {
 
     private static Mods modsFor(ServerLevel back, UUID group, String titan, Def def, TrialDraw.Draw draw) {
         TrialDraw.Pick pick = draw.pick(def.id());
-        if (pick != null) {
-            return pick.mods();
-        }
-        // 今週の試練 (引いていない): 全グループに同じ修飾 (種 = 世界の種 + 週 + 巨神)
-        long h = TrialDraw.seed(TrialData.worldSeed(back), new UUID(TrialData.week(), 0x7EEC), titan, 1);
-        Mods weekly = TrialDraw.rollMods(def, new Random(h ^ def.id().hashCode()));
-        if (jp.revati.skyabyss.abyss.Abyss.groupOn(back, group)) {
-            weekly = TrialDraw.abyssify(def, weekly, new Random(h ^ def.id().hashCode() ^ 0xABE55L));
-        }
-        return weekly;
+        return pick != null ? pick.mods() : Mods.PLAIN;
     }
 
     public static TrialCell.Run armed(ServerLevel back, UUID group, TrialCell cell, TrialDraw.Draw draw, long now) {
         String k = key(group, cell.def().id());
         TrialCell.Run run = RUNS.get(k);
-        if (run != null) {
+        TrialFrame frame = TrialSlot.frameOf(back, group, cell);
+        if (run != null && run.frame.equals(frame)) {
             return run;
+        }
+        if (run != null) {
+            // 手本と写しを行き来した (順路が始まった・終わった): 一度止めて、新しい場所で組み直す
+            stop(back, run);
         }
         String titan = cell.def().titan();
         Mods mods = modsFor(back, group, titan, cell.def(), draw);
@@ -277,15 +285,17 @@ public final class TrialRuntime {
         long seed = TrialDraw.seed(TrialData.worldSeed(back), group, titan, TrialData.cycle(r)) ^ cell.def().id().hashCode() ^ now;
         run = new TrialCell.Run(group, cell, mods, seed, now);
         run.cleared = TrialData.isCleared(r, cell.def().id()) && TrialBacks.of(titan).isRung(back, group, cell.def(), draw.has(cell.def().id()));
+        run.frame = frame;
         RUNS.put(k, run);
-        cell.arm(back, run);
+        TrialCell.Run armedRun = run;
+        TrialWindow.run(back, group, cell, frame, () -> cell.arm(back, armedRun));
         GroupOverlays.refresh(back, group);
         return run;
     }
 
     private static void stop(ServerLevel back, TrialCell.Run run) {
         RUNS.remove(key(run.group, run.cell.def().id()));
-        run.cell.disarm(back, run);
+        TrialWindow.run(back, run.group, run.cell, run.frame, () -> run.cell.disarm(back, run));
         GroupOverlays.refresh(back, run.group);
     }
 
@@ -341,11 +351,13 @@ public final class TrialRuntime {
                 continue;
             }
             if (backKind.isRung(level, group, cell.def(), draw.has(cell.def().id()))) {
-                out.accept(stone, backKind.lit());
+                out.accept(TrialSlot.frameOf(level, group, cell).at(stone), backKind.lit());
             }
         }
         for (TrialCell.Run run : runsOf(group)) {
-            run.cell.overlay(level, run, out);
+            // 写しのセルは、手本の座標の見かけを写しの座標へずらして出す
+            TrialFrame f = run.frame;
+            TrialFrame.with(f, () -> run.cell.overlay(level, run, f.isZero() ? out : (p, s) -> out.accept(f.at(p), s)));
         }
     }
 
@@ -362,11 +374,15 @@ public final class TrialRuntime {
         }
         BlockPos pos = event.getPos();
         String backTitan = Titans.titanOfBack(back.dimension());
+        UUID clicker = Groups.keyOf(sp);
         for (TrialCell cell : TrialCells.of(backTitan)) {
-            if (!cell.runtime() || !cell.interactive().contains(pos)) {
+            // 写しのセルは、押された所を手本の座標に戻して比べる
+            TrialFrame f = cell.runtime() ? TrialSlot.frameOf(back, clicker, cell) : TrialFrame.ZERO;
+            BlockPos local = f.local(pos);
+            if (!cell.runtime() || !cell.interactive().contains(local)) {
                 continue;
             }
-            UUID group = Groups.keyOf(sp);
+            UUID group = clicker;
             TrialDraw.Draw draw = TrialData.current(back, group);
             if (!liveCells(back, backTitan, draw).contains(cell)) {
                 return;
@@ -374,7 +390,9 @@ public final class TrialRuntime {
             long now = back.getGameTime();
             TrialCell.Run run = armed(back, group, cell, draw, now);
             run.lastPresent = now;
-            if (cell.onUse(back, run, sp, pos, sp.isShiftKeyDown(), now)) {
+            boolean[] used = {false};
+            TrialWindow.run(back, group, cell, run.frame, () -> used[0] = cell.onUse(back, run, sp, local, sp.isShiftKeyDown(), now));
+            if (used[0]) {
                 event.setCanceled(true);
                 event.setCancellationResult(InteractionResult.SUCCESS);
             }
@@ -391,7 +409,9 @@ public final class TrialRuntime {
         }
         UUID group = Groups.keyOf(sp);
         for (TrialCell.Run run : runsOf(group)) {
-            if (run.cell.ports().area().contains(sp.position())) {
+            // 写しのセルの決まりの中で受けた傷は、手本の座標で起きる (TrialWindow)
+            AABB area = TrialFrame.current().equals(run.frame) ? run.cell.ports().area() : run.frame.box(run.cell.ports().area());
+            if (area.contains(sp.position())) {
                 run.put("hits", run.getInt("hits") + 1);
             }
         }
@@ -418,9 +438,7 @@ public final class TrialRuntime {
         UUID group = Groups.keyOf(sp);
         TrialDraw.Draw draw = TrialData.current(back, group);
         boolean drawn = draw.has(cell.def().id());
-        Def weekly = TrialData.weekly(titan, TrialData.worldSeed(back), TrialData.week());
-        boolean isWeekly = weekly != null && weekly.id().equals(cell.def().id());
-        if (!drawn && !isWeekly) {
+        if (!drawn) {
             Notice.bar(sp, ModText.deny("message.skyabyss.trial.stone_not_yours"));
             return InteractionResult.SUCCESS;
         }
@@ -449,7 +467,7 @@ public final class TrialRuntime {
     }
 
     // 版 25: 試練を終えたら、石を押さなくても越えたことになる。セルが「終えた」(run.cleared) と、少し (AUTO_RING_DELAY tick。終わりの演出を見せる) 待って石が鳴り、
-    // そのあとは石を押したときと同じ (TrialHub が 80 tick 後に、中にいる仲間を鼓動の間へ戻し、入口を試練済みの封印で閉じる)。石は押しても同じ (二重には数えない)
+    // そのあとは石を押したときと同じ (TrialRoute が 80 tick 後に、順路の参加者を次の段の入口へ運ぶ)。石は押しても同じ (二重には数えない)
     public static final int AUTO_RING_DELAY = 30;
 
     static void autoRing(ServerLevel back, UUID group, TrialCell cell, TrialCell.Run run, TrialDraw.Draw draw, List<ServerPlayer> inside, long now) {
@@ -470,25 +488,8 @@ public final class TrialRuntime {
         if (now - at < AUTO_RING_DELAY) {
             return;
         }
-        ringCell(back, group, cell, run, drawn, inside.get(0), stone, kind);
-    }
-
-    // 今週の試練 (引いていない試練。個人のもの): 越えたら、中にいる人だけを鼓動の間 (真ん中) へ戻す。越えたあとに入ってきた人も同じ
-    // (ほかの試練にいる仲間は動かさない)。引いた試練の戻りは TrialHub (グループのゴールの合図) が行う
-    static int weeklyBack(ServerLevel back, String titan, TrialCell cell, TrialCell.Run run, TrialDraw.Draw draw, List<ServerPlayer> inside) {
-        TrialBacks.Back kind = TrialBacks.of(titan);
-        if (kind == null || draw.has(cell.def().id()) || !run.cleared || !kind.isRung(back, run.group, cell.def(), false)) {
-            return 0;
-        }
-        int moved = 0;
-        for (ServerPlayer p : inside) {
-            if (p.isCreative() || !TrialHub.sendToHub(back, p, titan, false, null)) {
-                continue;
-            }
-            Notice.bar(p, ModText.hint("message.skyabyss.trial_hub.weekly_back"));
-            moved++;
-        }
-        return moved;
+        // 石の合図は背全体の仕組み (心臓の門など) を動かすので、区画のずれの外で鳴らす
+        TrialFrame.with(TrialFrame.ZERO, () -> ringCell(back, group, cell, run, drawn, inside.get(0), stone, kind));
     }
 
     // ゴールの知らせの数え (TrialSteles.onRung) が、原型の石として数えないようにして動かす (新作の石は自分で数える)
@@ -520,9 +521,6 @@ public final class TrialRuntime {
         BackGroupData.Record r = GroupProgress.of(back, group);
         TrialData.markCleared(r, def.id());
         TrialCodex codex = TrialCodex.get(back.getServer());
-        long week = TrialData.week();
-        Def weeklyDef = TrialData.weekly(def.titan(), TrialData.worldSeed(back), week);
-        boolean isWeekly = weeklyDef != null && weeklyDef.id().equals(def.id());
         Set<String> modKeys = modKeys(def, mods);
         for (ServerPlayer p : Groups.online(back, group)) {
             if (p.isSpectator()) {
@@ -530,20 +528,14 @@ public final class TrialRuntime {
             }
             UUID id = p.getUUID();
             boolean first = codex.markCleared(id, def.id(), modKeys, goalDone);
-            int mats = TrialDraw.materialCount(def, mods, goalDone, false);
-            boolean weeklyBonus = isWeekly && codex.weeklyDone(id, def.titan()) != week;
-            ItemStack stack = new ItemStack(Vows.materialOf(def.titan()), mats + (weeklyBonus ? mats : 0));
+            int mats = TrialDraw.materialCount(def, mods, goalDone);
+            ItemStack stack = new ItemStack(Vows.materialOf(def.titan()), mats);
             jp.revati.skyabyss.pouch.PouchRouting.placeBack(p, stack);
             Component name = Component.translatable(def.nameKey());
             Notice.gain(p, ModText.progress("message.skyabyss.trial.cleared", name, stack.getCount()));
             int shards = 0;
             if (first) {
                 shards++;
-            }
-            if (weeklyBonus) {
-                shards++;
-                codex.setWeeklyDone(id, def.titan(), week);
-                Notice.hint(p, "message.skyabyss.trial.weekly_done");
             }
             if ((mods.rarity() == Rarity.EXTREME && back.random.nextFloat() < 0.08f)
                     || (mods.rarity() == Rarity.ABYSS && back.random.nextFloat() < jp.revati.skyabyss.abyss.Abyss.SHARD_CHANCE)) {
@@ -642,11 +634,31 @@ public final class TrialRuntime {
         for (UUID player : fighters) {
             UUID group = Groups.keyOf(back.getServer(), player);
             BackGroupData.Record r = GroupProgress.of(back, group);
-            if (heartCounted.add(group + "@" + r.epoch())) {
+            String epoch = group + "@" + r.epoch();
+            // 歌片 (順路の鍵。docs/design/32 の 3.2): 心臓を止めるたびに、戦った人に一つ (次の周の分。初回も渡す)
+            if (shardGiven.add(player + "@" + epoch)) {
+                net.minecraft.server.level.ServerPlayer p = back.getServer().getPlayerList().getPlayer(player);
+                String titan = Titans.titanOfBack(back.dimension());
+                if (p != null && titan != null) {
+                    jp.revati.skyabyss.pouch.PouchRouting.placeBack(p, new ItemStack(jp.revati.skyabyss.registry.ModItems.songShard(titan)));
+                    Notice.gain(p, ModText.progress("message.skyabyss.shrine.shard_gained", jp.revati.skyabyss.registry.ModItems.songShard(titan).getDescription()));
+                }
+            }
+            if (heartCounted.add(epoch)) {
+                // 順路の記録 (越えた回数・最速) を控えてから、周を進める (順路の記録も消える)
+                TrialRoute.onHeartStopped(back, r);
                 TrialData.onHeartStopped(r);
+                // 巨神の祠を建てる (まだなら。周回の入口)
+                String titan = Titans.titanOfBack(back.dimension());
+                if (titan != null) {
+                    jp.revati.skyabyss.titan.shrine.TitanShrine.ensure(back.getServer(), titan);
+                }
             }
         }
     }
+
+    // 歌片を渡した (人@グループ@epoch)
+    private static final Set<String> shardGiven = new LinkedHashSet<>();
 
     // 同じ周の同じ心臓で二重に数えない (グループごとに epoch が同じうちは一度)
     private static final Set<String> heartCounted = new LinkedHashSet<>();
@@ -655,6 +667,7 @@ public final class TrialRuntime {
     public static void onGroupReset(ServerLevel back, UUID group) {
         heartCounted.removeIf(s -> s.startsWith(group + "@"));
         stopGroup(back, group);
+        TrialRoute.finish(back, group);
         // 戸の上書きが消えるので、引いた試練の戸を開け直す
         String titan = Titans.titanOfBack(back.dimension());
         if (titan != null && hasWork(titan)) {
@@ -666,5 +679,7 @@ public final class TrialRuntime {
     public static void clearAll() {
         RUNS.clear();
         heartCounted.clear();
+        shardGiven.clear();
+        TrialRoute.clearAll();
     }
 }

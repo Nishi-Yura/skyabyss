@@ -55,7 +55,7 @@ import net.neoforged.neoforge.common.util.FakePlayerFactory;
 // 余燼の試練の階 (E02 噴気の渡り・E06 煙突の風読み・E07 三つの鞴・E10 鞴持ちの炉。docs/design/29 の 3.4) の自己テスト。
 // 段の名前は "trial pool ember" (SKYABYSS_SELFTEST_ONLY="trial pool" の中に入る。背を建てるので数分かかる)。
 //  - 引き方: 余燼のプール (歩 2・智 3・闘 2)・周回 1 は原型・周回 2 から一つずつ・四つの新作が数周で全部出る・修飾の範囲と符号
-//  - 置き場: 試練の階の箱が体の中に 3 ブロック以上埋まっている・ほかの部屋と重ならない・背の亀裂から離れている
+//  - 置き場: 試練の階の箱が体の中に 3 ブロック以上埋まっている・ほかの部屋と重ならない
 //  - 全変種: 配置 × 数字 × 敵 × 障害 × 任意 × 静 で arm → 見かけがセルの中 → tick → disarm
 //  - 動き (偽の人): 噴気は光ってから噴いて一度だけ当たる・煙は抜け口へ傾く (逆風は逆)・間違いは熱とロック・踏み板は重りと炎の衰え・鞴持ちは熱を上げ、倒すと止まる
 //  - 世界: 戸 (原型の洞の口も) は引いた三つだけ開く・石と休み場がそのセルの範囲に入る・セルの audit・四つの石から広間へ戻れる
@@ -227,8 +227,6 @@ public final class EmberDeckSelfTest {
                 check(!b.grow(2).intersects(e.getValue()), "a deck room is within 2 blocks of " + e.getKey());
             }
         }
-        check(deck.stream().noneMatch(b -> b.grow(3).intersects(EmberBackLayout.CRACK)), "a deck room is within 3 blocks of the back crack");
-        check(deck.stream().noneMatch(b -> b.grow(3).intersects(EmberBackLayout.BACK_TUBE)), "a deck room is within 3 blocks of the back tube");
         // 体の中に埋まっている (体の表の 3 ブロック以上内側。元の体の表で見る)
         int outside = 0;
         BlockPos first = null;
@@ -263,8 +261,6 @@ public final class EmberDeckSelfTest {
         for (List<BlockPos> gate : EmberDeck.GATES) {
             check(gate.stream().allMatch(g -> deck.stream().anyMatch(b -> b.grow(1).contains(g))), "a gate is not next to a deck room: " + gate.get(0));
         }
-        check(EmberDeck.D0.contains(EmberDeck.BOARD_D0), "the deck board is outside the hall");
-        check(EmberBackLayout.HUB.contains(EmberDeck.BOARD_HUB), "the hub board is outside the hub");
     }
 
     // ---------------------------------------------------------------- 全変種
@@ -798,18 +794,20 @@ public final class EmberDeckSelfTest {
         TrialDraw.Draw da = TrialData.current(EMBER, ra, a, TrialData.worldSeed(back));
         TrialDraw.Draw db = TrialData.current(EMBER, rb, b, TrialData.worldSeed(back));
         check(da.picks().size() == 3 && db.picks().size() == 3, "an ember group did not draw three");
+        // 順路 (docs/design/32): 今の段のセルの戸だけが開く。A は段 2 (智)、B は順路の外 (全部閉じる)
+        ra.putInt(jp.revati.skyabyss.trial.TrialRoute.STEP, 2);
         TrialRuntime.syncGates(back, a, EMBER, da);
         TrialRuntime.syncGates(back, b, EMBER, db);
         for (TrialCell c : TrialCells.of(EMBER)) {
             if (c.ports().entrance().isEmpty()) {
                 continue;
             }
-            boolean weekly = c.def().equals(TrialData.weekly(EMBER, TrialData.worldSeed(back), TrialData.week()));
-            boolean wa = da.has(c.def().id()) || weekly;
-            boolean wb = db.has(c.def().id()) || weekly;
+            boolean wa = c.def().id().equals(jp.revati.skyabyss.trial.TrialRoute.defOf(da, 2).id());
+            boolean wb = false;
             check(GroupGates.isOpen(back, a, c.ports().entrance()) == wa, c.def().id() + " gate for group A: expected " + wa);
             check(GroupGates.isOpen(back, b, c.ports().entrance()) == wb, c.def().id() + " gate for group B: expected " + wb);
         }
+        ra.remove(jp.revati.skyabyss.trial.TrialRoute.STEP);
         // 戸のブロックが実際に置いてある (原型の洞の口は既定で開き、新作は閉じ)
         for (TrialCell c : TrialCells.of(EMBER)) {
             for (BlockPos p : c.ports().entrance()) {
@@ -880,7 +878,6 @@ public final class EmberDeckSelfTest {
             check(state.rung(trial), "ringing the new cell's stone did not ring the ember stone " + key);
             check(jp.revati.skyabyss.titan.group.TrialSteles.rung(back.getServer(), pg, jp.revati.skyabyss.titan.group.TrialSteles.signal("ember", key)),
                     "the stone signal for " + key + " is not rung");
-            check(jp.revati.skyabyss.trial.HubTablets.cleared(back, pg, EMBER, key), "the hub tablet does not see the cleared trial");
             // 二度目は何も起きない
             var again = TrialRuntime.useStone(back, p, cell.ports().stone());
             check(again != null, "the second click on the stone was not handled");
@@ -889,7 +886,7 @@ public final class EmberDeckSelfTest {
             FAIL.add("the cycle-2 draw had no new ember trial (seed-dependent but unexpected)");
         }
         // 後始末
-        jp.revati.skyabyss.trial.TrialHub.clearAll();
+        jp.revati.skyabyss.trial.TrialRoute.clearAll();
         for (UUID g : List.of(a, b, pg)) {
             GroupGates.reset(back, g);
             BackGroupData.get(back).remove(g);

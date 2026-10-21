@@ -72,7 +72,7 @@
 - 読み方: **右クリック**か、**4.5 ブロック以内で目を向ける**（0.25 秒ごとに見回す）と、刻まれた文が画面下中央の字幕（NARRATE、[18](18_notices.md)）に、看板だった時の行のまま出る。同じ碑は 30 秒たつまで読み直さない。読むと伝承の条件 `sign`（05）と進捗 `tablet:read` が進む。
 - 文: lang の `sign.skyabyss.<名前>.1〜4`（看板の時のキーのまま。空の行は飛ばす）。
 - 置き方: 各背のキット（`BuildKit` `TideKit` `StormKit` `EmberKit`）の `wallSign` と、立てる碑の `standingSign` / `standingTablet`。呼び出しは変えず、中身を碑に替えた。序盤の石板は blueprint `opening/slab.json`（`tools/rough/opening_sites.py` の `slab`）に碑を入れ、`RibBuilder` が文を刻む。
-- 置いてある所: 岩鯨の背 9（碑文 5・試練の入口 4）、潮殻 9、雷翼 9、余燼 9、序盤の骨の石板 1、骨の坑 2（坑口 `sign.skyabyss.ch1_bone_pit`・冷えの戸の奥 `sign.skyabyss.ch1_cold_door`。部品の碑に `BonePit.finish` が刻む）。
+- 置いてある所: 岩鯨の背 5（碑文）、潮殻 9、雷翼 9、余燼 9、序盤の骨の石板 1、骨の坑 2（坑口 `sign.skyabyss.ch1_bone_pit`・冷えの戸の奥 `sign.skyabyss.ch1_cold_door`。部品の碑に `BonePit.finish` が刻む）。 試練の入口の碑は置かない（順路の入口は [32](32_titan_raid_route.md) の 2.2）。
 - `dev/StructureDump` は碑を看板と同じ欄（`signs`）に 4 行のキーで書く（`tools/structure` の `## signs` で見える）。
 
 ### 3.1 自己テスト

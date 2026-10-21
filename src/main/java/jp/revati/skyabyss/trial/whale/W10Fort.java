@@ -29,6 +29,12 @@ import net.minecraft.world.entity.Mob;
 //   敵はそのグループのもの (ほかのグループには見えず、狙わない)。倒れて戻ったら休み場 (砦の入口の隅) から。全員いなくなって 5 秒で最初に戻る。
 // 修飾: 配置 3 (砲手の持ち場の順)・数字 2 (一波の砲手 2・3・4 / 波の数 1・2・3)・敵の組 2 (砲手だけ / 盾の番兵つき)・障害 (落石: 予告 1.2 秒)・任意の目標 (無傷で)
 public final class W10Fort implements TrialCell {
+    // 区画の写しで動かせる (決まりは arm・tick・onUse・disarm・overlay の中だけで座標を使う。docs/design/32 の 5 章)
+    @Override
+    public boolean relocatable() {
+        return true;
+    }
+
     // 高台 (3×3、高さ 1) の中心。砲手はこの上に立つ (南の辺から階段で上れる)
     public static final int[][] SLOTS = {{16, 108}, {22, 104}, {38, 104}, {44, 108}, {44, 96}, {16, 96}};
     // 配置ごとの砲手の持ち場の順

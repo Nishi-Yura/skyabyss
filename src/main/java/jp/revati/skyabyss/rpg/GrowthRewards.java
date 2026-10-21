@@ -311,45 +311,24 @@ public final class GrowthRewards {
         }
     }
 
-    // ---------------------------------------------------------------- 試練の踏破 (共鳴石が歌った)
-    // 石の状態を 1 秒ごとに見て、歌っていなかった石が歌ったら、近くにいた人に渡す
-    private static final Map<BlockPos, Boolean> STONES = new HashMap<>();
-
-    @SubscribeEvent
-    static void onLevelTick(LevelTickEvent.Post event) {
-        if (!(event.getLevel() instanceof ServerLevel level) || level.dimension() != TitanTravel.TITAN_BACK
-                || level.getGameTime() % 20 != 3 || level.players().isEmpty()) {
-            return;
+    // ---------------------------------------------------------------- 試練の踏破 (岩鯨。順路の段を越えたとき TrialRoute.onCleared から)
+    // 越えた試練の参加者に渡し、同じ背中にいない仲間にも分け前。潮殻・雷翼・余燼は各背の石の仕組みが渡す
+    public static void onWhaleTrialCleared(ServerLevel level, List<ServerPlayer> near) {
+        for (ServerPlayer player : near) {
+            int xp = (int) Math.round(TRIAL_XP * GrowthRules.levelFalloff(Growth.get(player).level, STONE_WHALE_LEVEL));
+            Growth.addXp(player, xp, "growth.skyabyss.reason.trial");
         }
-        for (BlockPos pos : TitanBackLayout.GOAL_SPOTS) {
-            if (!level.isLoaded(pos)) {
-                continue;
-            }
-            BlockState state = level.getBlockState(pos);
-            boolean active = false;
-            Boolean before = STONES.put(pos.immutable(), active);
-            if (before != null && !before && active) {
-                List<ServerPlayer> near = level.getEntitiesOfClass(ServerPlayer.class, new AABB(pos).inflate(TRIAL_RADIUS),
-                        p -> p.isAlive() && !p.isSpectator());
-                for (ServerPlayer player : near) {
-                    int xp = (int) Math.round(TRIAL_XP * GrowthRules.levelFalloff(Growth.get(player).level, STONE_WHALE_LEVEL));
-                    Growth.addXp(player, xp, "growth.skyabyss.reason.trial");
-                }
-                // 同じ背中にいる仲間にも分け前
-                double rate = jp.revati.skyabyss.party.Parties.shareRate(level.getServer());
-                for (ServerPlayer mate : jp.revati.skyabyss.party.Parties.absentMates(level, near)) {
-                    int xp = (int) Math.round(TRIAL_XP * rate * GrowthRules.levelFalloff(Growth.get(mate).level, STONE_WHALE_LEVEL));
-                    Growth.addXp(mate, xp, "growth.skyabyss.reason.party");
-                }
-                // サブクエストの「試練を踏破する」(居合わせた人と、同じ背中の仲間。quest/free)
-                jp.revati.skyabyss.quest.Quests.signalWithParty(level, near, jp.revati.skyabyss.quest.free.FreeQuestEvents.TRIAL_CLEARED);
-            }
+        double rate = jp.revati.skyabyss.party.Parties.shareRate(level.getServer());
+        for (ServerPlayer mate : jp.revati.skyabyss.party.Parties.absentMates(level, near)) {
+            int xp = (int) Math.round(TRIAL_XP * rate * GrowthRules.levelFalloff(Growth.get(mate).level, STONE_WHALE_LEVEL));
+            Growth.addXp(mate, xp, "growth.skyabyss.reason.party");
         }
+        // サブクエストの「試練を踏破する」(居合わせた人と、同じ背中の仲間。quest/free)
+        jp.revati.skyabyss.quest.Quests.signalWithParty(level, near, jp.revati.skyabyss.quest.free.FreeQuestEvents.TRIAL_CLEARED);
     }
 
     @SubscribeEvent
     static void onServerStopped(ServerStoppedEvent event) {
-        STONES.clear();
         HEALTH_AFTER_EQUIP.clear();
     }
 

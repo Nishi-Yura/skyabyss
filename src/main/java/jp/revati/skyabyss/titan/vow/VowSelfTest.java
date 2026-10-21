@@ -277,29 +277,6 @@ public final class VowSelfTest {
                 check(f, Pouch.countAll(a, shard) - s2 == Vows.bonusMaterials(2), "a broken timer was paid in full");
                 store.forgetVowBest(a.getUUID());
 
-                // ---- 周回の囁き: 最初の囁きを聞いた人にだけ、周回の言い回しを一度。初めての人は最初の囁き (c は初回のグループ、b は周回に入ったあとの初めての人)
-                check(f, FirstRun.isFirstRun(back, gc), "test setup: group C should be on a first run");
-                BackWhispers.hear(c, "w0", "message.skyabyss.whisper.w0", false, null, "x");
-                check(f, BackWhispers.heardAlready(c, "w0") && !BackWhispers.heardAlready(c, BackWhispers.REPEAT_PREFIX + "w0"), "first run: the original whisper was not used");
-                BackWhispers.hear(c, "w0", "message.skyabyss.whisper.w0", false, null, "x");
-                check(f, !BackWhispers.heardAlready(c, BackWhispers.REPEAT_PREFIX + "w0"), "first run: a whisper repeated");
-                FirstRun.onFirstCleared(back, List.of(gc));
-                BackWhispers.hear(c, "w0", "message.skyabyss.whisper.w0", false, null, "x");
-                check(f, BackWhispers.heardAlready(c, BackWhispers.REPEAT_PREFIX + "w0"), "repeat run: the repeat whisper did not switch on");
-                BackWhispers.hear(c, "hub", "message.skyabyss.whisper.hub", true, null, "x");
-                BackWhispers.hear(c, "hub", "message.skyabyss.whisper.hub", true, null, "x");
-                check(f, !BackWhispers.heardAlready(c, BackWhispers.REPEAT_PREFIX + "hub"), "a whisper without a repeat variant repeated");
-                check(f, !FirstRun.isFirstRun(back, Groups.keyOf(b)), "test setup: B left a cleared party and should be on the repeat path");
-                BackWhispers.hear(b, "w1", "message.skyabyss.whisper.w1", false, null, "x");
-                check(f, BackWhispers.heardAlready(b, "w1") && !BackWhispers.heardAlready(b, BackWhispers.REPEAT_PREFIX + "w1"),
-                        "a first-timer in a cleared group did not hear the original whisper");
-                for (String id : BackWhispers.REPEAT_IDS) {
-                    check(f, hasLang(BackWhispers.repeatKey(id)), "no ja/en text for repeat whisper " + id);
-                }
-                for (String t : List.of("whale", "tide", "storm", "ember")) {
-                    check(f, hasLang("message.skyabyss.steles.rung_repeat." + t) && hasLang("message.skyabyss.steles.touch_repeat." + t),
-                            "no ja/en stele repeat text for " + t);
-                }
                 // 語り部の周回の一言 (repeat_run 条件)
                 check(f, FirstRun.hasCleared(server, ga, WHALE) && !FirstRun.hasCleared(server, UUID.randomUUID(), null)
                         && FirstRun.hasCleared(server, gb, null) && !FirstRun.hasCleared(server, gb, Titans.EMBER), "FirstRun.hasCleared (repeat_run) is off");

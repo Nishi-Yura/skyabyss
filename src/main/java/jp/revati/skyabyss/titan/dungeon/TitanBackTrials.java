@@ -145,9 +145,6 @@ public final class TitanBackTrials {
             new Checkpoint("heart", HEART_REST, HEART_REST.center().offset(1, 0, 1)),
             // 第二の広間と詰所のあいだの休み場 (焚き火のまわりの腰掛けを避けて斜めに置く)
             new Checkpoint("ckr", CK_PASS, CK_PASS.center().offset(4, 0, 1)),
-            // 背の外の道の宿 (広場から祠への踏み跡の途中)
-            new Checkpoint("camp", new Box(-6, 6, WingsBuilder.CAMP_Z - 6, WingsBuilder.CAMP_Z + 6, WingsBuilder.CAMP_Y, 8),
-                    new BlockPos(-3, WingsBuilder.CAMP_Y + 1, WingsBuilder.CAMP_Z + 2)),
             // 闇の水路の 2 つめの入口の小部屋
             new Checkpoint("mz1", MAZE_ENTRY_ROOM2, new BlockPos(MAZE_ENTRY_ROOM2.x1(), MAZE_ENTRY_ROOM2.floorY() + 1, MAZE_ENTRY_ROOM2.z2())),
             // 闇の水路の入口: はしごを下りた先の乾いた小部屋。水の外・戦いの外。足元は部屋の床の一段上
@@ -195,13 +192,12 @@ public final class TitanBackTrials {
 
     // ---------------------------------------------------------------- 番兵の広間
     // ante は入口の手前の前室 (扉が閉じるとき、ここにいる人も中へ入れる)
-    // knownRoom: 初回だけ働く部屋の名前 (FirstRun)。既知の道のグループには、戦わずに制圧済みになる。
     // cuts: 動かせる仕切り (版 18。少人数のグループだけに、広間の中に立つ封印の壁。人数が maxPlayers 以下のとき張り、封じた側 (sealed) には湧かない)
     private record Cut(int maxPlayers, List<BlockPos> wall, java.util.function.Predicate<BlockPos> sealed) {
     }
 
     private record Hall(String id, Box box, AABB ante, List<BlockPos> entrance, List<BlockPos> exit, List<List<String>> waves,
-            @Nullable String knownRoom, List<Cut> cuts) {
+            List<Cut> cuts) {
         // その人数のとき封じている仕切りの壁の全部
         List<BlockPos> walls(int players) {
             List<BlockPos> out = new ArrayList<>();
@@ -249,17 +245,17 @@ public final class TitanBackTrials {
             // 第一の広間 (練兵場): 二人以下は南を封じ (z -26 より南)、一人はさらに東 (x 48 より東) を封じる
             new Hall("e1", E1, E0.aabb(), E1_ENTRANCE, E1_EXIT, List.of(
                     List.of("sentinel", "sentinel", "crawler", "crawler"),
-                    List.of("archer", "archer", "archer", "sentinel", "mortar")), null,
+                    List.of("archer", "archer", "archer", "sentinel", "mortar")),
                     NO_CUTS),
             // 版 25: 第二の広間 (射手の回廊) は戦わない通路にした。東の翼の戦いは 3 つ (第一の広間・詰所・番兵長の広間)
             // 番兵の詰所: 盾の壁の列 (骨の番兵 4) → 老番兵。倒すと番兵長の広間への戸 (割符の戸) が開く。初回だけ
             new Hall("ck", CK, CK_PASS.aabb(), CK_ENTRANCE, E3_LOCK, List.of(
                     List.of("sentinel", "sentinel", "sentinel", "sentinel"),
-                    List.of("elder")), "whale_ck", List.of()),
+                    List.of("elder")), List.of()),
             // 番兵長の広間: 二人以下は南 (共鳴石の側) を封じる。倒すと開く
             new Hall("e3", E3, E3_ANTE, E3_ENTRANCE, List.of(), List.of(
                     List.of("sentinel", "sentinel", "archer", "crawler", "crawler"),
-                    List.of("captain")), null, NO_CUTS));
+                    List.of("captain")), NO_CUTS));
 
     // ---------------------------------------------------------------- 状態 (グループごと)
     // 試練の進み (制圧した広間・宝物庫の封印・心臓の撃破・鳴らした石・扉の開け閉め) は、グループ (パーティ、または一人) の記録
@@ -472,7 +468,6 @@ public final class TitanBackTrials {
         if (!gatesInstalled) {
             gatesInstalled = true;
             installGates(level);
-            WhaleFirstRun.register();
         }
         if (!cleanedAfterLoad) {
             // 前回、戦いの途中でサーバーが止まっていたら、その名残を片付ける (戦いの間だけ閉じる入口を既定の開いた状態に戻す)
@@ -631,14 +626,6 @@ public final class TitanBackTrials {
 
     private static void tickHall(ServerLevel level, BackGroupData.Record record, UUID group, Hall hall) {
         String key = hallKey(group, hall.id());
-        // 既知の道 (周回): 初回だけの広間は戦わずに制圧済み。出口 (と、その先の戸) が開く
-        if (hall.knownRoom() != null && FirstRun.isKnownPath(level, group, hall.knownRoom())) {
-            if (!record.isHallCleared(hall.id())) {
-                record.markHallCleared(hall.id());
-                GroupGates.open(level, group, hall.exit());
-            }
-            return;
-        }
         HallState state = HALL_STATES.get(key);
         if (state == null || state.wave == 0) {
             List<ServerPlayer> inside = playersInside(level, hall, group);
@@ -956,13 +943,15 @@ public final class TitanBackTrials {
     // 粒を、グループの人にだけ送る (group が null なら近くの全員)
     private static void sendParticlesTo(ServerLevel level, @Nullable UUID group, net.minecraft.core.particles.ParticleOptions particle,
             double x, double y, double z, int count, double dx, double dy, double dz, double speed) {
+        // 区画の写しのセルの決まりの中 (TrialFrame) では、写しの座標に出す
+        net.minecraft.world.phys.Vec3 at = jp.revati.skyabyss.trial.TrialFrame.current().world(new net.minecraft.world.phys.Vec3(x, y, z));
         if (group == null) {
-            level.sendParticles(particle, x, y, z, count, dx, dy, dz, speed);
+            level.sendParticles(particle, at.x, at.y, at.z, count, dx, dy, dz, speed);
             return;
         }
         for (ServerPlayer player : Groups.online(level, group)) {
             if (player.distanceToSqr(x, y, z) < 64 * 64) {
-                level.sendParticles(player, particle, false, x, y, z, count, dx, dy, dz, speed);
+                level.sendParticles(player, particle, false, at.x, at.y, at.z, count, dx, dy, dz, speed);
             }
         }
     }
@@ -1625,6 +1614,11 @@ public final class TitanBackTrials {
         return plaza();
     }
 
+    // 休み場の立つ位置 (順路の運び先。trial/TrialRoute)。知らない id なら広場
+    public static BlockPos restSpawn(ServerLevel level, String id) {
+        return checkpointSpawn(level, id);
+    }
+
     // 立てる場所か: 足元と頭が空いていて (当たり判定も液体もない)、床が固い
     public static boolean isSafeStand(ServerLevel level, BlockPos feet) {
         BlockState f = level.getBlockState(feet);
@@ -1909,6 +1903,9 @@ public final class TitanBackTrials {
             event.setCanceled(true);
             if (event.getEntity() instanceof ServerPlayer player) {
                 if (player.isShiftKeyDown()) {
+                    if (jp.revati.skyabyss.trial.TrialRoute.propose(player)) {
+                        return;
+                    }
                     clearCheckpoint(player);
                     BlockPos a = plaza();
                     player.teleportTo(player.serverLevel(), a.getX() + 0.5, a.getY(), a.getZ() + 0.5, 180f, 0f);

@@ -41,6 +41,12 @@ import net.minecraft.world.level.block.state.BlockState;
 //   「隙間風」の障害は、ときどき灯の一つが一つずれる (灯がまたたいて予告)。
 // 修飾: 配置 3 (最後の幕の紋の山の数)・数字 2 (最後の幕の灯と柱の数 / 光の筋の見え方: 出しっぱなし・動かして 8 秒・4 秒)・障害 (隙間風)・任意の目標 (手数を少なく)
 public final class W08Shadows implements TrialCell {
+    // 区画の写しで動かせる (決まりは arm・tick・onUse・disarm・overlay の中だけで座標を使う。docs/design/32 の 5 章)
+    @Override
+    public boolean relocatable() {
+        return true;
+    }
+
     // 幕 (北の壁 z 97。x -47〜-33 の 15 マス)。z 98 が壁の内側の面
     public static final int CELLS = 15;
     public static final int SCREEN_X0 = -47;

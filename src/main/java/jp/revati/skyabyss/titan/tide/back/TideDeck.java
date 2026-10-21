@@ -61,8 +61,6 @@ public final class TideDeck {
     public static final int T02_BED = 70;
     public static final int T02_WATER_TOP = F;
 
-    // 試練の広間の板
-    public static final BlockPos BOARD_H = new BlockPos(4, F + 1, 38);
 
     // 碑 (四つの戸の脇と、広間の案内)。文は lang の sign.skyabyss.tide_* (assets/skyabyss_trial)
     public static final List<TideBackLayout.Inscription> SIGNS = List.of(
@@ -151,7 +149,6 @@ public final class TideDeck {
     public static final int T12_CX = 85;
     public static final int T12_CZ = 85;
 
-    public static final BlockPos BOARD_H2 = new BlockPos(6, G + 1, 65);
 
     public static final List<TideBackLayout.Inscription> SIGNS2 = List.of(
             new TideBackLayout.Inscription("sign.skyabyss.tide_t03", new BlockPos(4, G + 3, 72), net.minecraft.core.Direction.NORTH),

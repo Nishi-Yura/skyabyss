@@ -16,6 +16,12 @@ import net.minecraft.world.level.Level;
 // 岩鯨の背から地上へ垂れた鎖の、つかめる部分 (地面近くの数ブロック)。
 // 見た目は岩鯨の描画側で描き、これは右クリックを受け取るための見えない当たり判定。保存はしない
 public class WhaleChainEntity extends Entity {
+    // 巨神の見え方 (docs/design/32 の 3.3): 章を終えた人 (とそのパーティでない人) には実体を送らない
+    @Override
+    public boolean broadcastToPlayer(net.minecraft.server.level.ServerPlayer player) {
+        return super.broadcastToPlayer(player) && jp.revati.skyabyss.titan.TitanVisibility.sees(player, jp.revati.skyabyss.progress.Titans.STONE_WHALE);
+    }
+
     public WhaleChainEntity(EntityType<? extends WhaleChainEntity> type, Level level) {
         super(type, level);
         this.noPhysics = true;
@@ -36,7 +42,8 @@ public class WhaleChainEntity extends Entity {
         if (level().isClientSide) {
             return InteractionResult.SUCCESS;
         }
-        if (player instanceof ServerPlayer server && getVehicleWhale() instanceof StoneWhaleEntity whale) {
+        if (player instanceof ServerPlayer server && getVehicleWhale() instanceof StoneWhaleEntity whale
+                && jp.revati.skyabyss.titan.TitanVisibility.sees(server, jp.revati.skyabyss.progress.Titans.STONE_WHALE)) {
             TitanTravel.startLift(server, whale);
         } else {
             Notice.bar(player, ModText.deny("message.skyabyss.chain_slack"));

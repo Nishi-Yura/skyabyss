@@ -43,6 +43,12 @@ import net.minecraft.world.phys.Vec3;
 // 人数: 膨らんでいる窓が、人が増えるほど長い (一人 +0%・二人 +12%… 五人で +48%)。みなが同じ窓に乗れるように
 // 修飾: 配置 3・数字 2 (周期 200/160/130・窓 62%/48%/36%)・障害 2 (横風・雷蛾)・任意の目標 (一度も落ちずに)
 public final class S02Sacs extends StormCell implements StormCell.PerTick {
+    // 区画の写しで動かせる (決まりは arm・tick・onUse・disarm・overlay の中だけで座標を使う。docs/design/32 の 5 章)
+    @Override
+    public boolean relocatable() {
+        return true;
+    }
+
     static final int[] PERIOD = {200, 160, 130};
     static final double[] WINDOW = {0.62, 0.48, 0.36};
     // 膨らむ前の予告 (tick)
@@ -148,7 +154,7 @@ public final class S02Sacs extends StormCell implements StormCell.PerTick {
         for (ServerPlayer p : inside) {
             if (!GaleFeather.holds(p) && p.isAlive() && !p.isSpectator() && p.getInventory().add(new ItemStack(StormBackSetup.GALE_FEATHER.get()))) {
                 Notice.bar(p, ModText.hint("message.skyabyss.trial.s02.feather"));
-                back.playSound(null, p.blockPosition(), StormSetup.GALE.get(), SoundSource.PLAYERS, 0.8f, 1.4f);
+                jp.revati.skyabyss.trial.TrialFx.worldSound(back, p.blockPosition(), StormSetup.GALE.get(), SoundSource.PLAYERS, 0.8f, 1.4f);
             }
         }
         // 気嚢の状態。変わったら見かけ・音
@@ -158,9 +164,9 @@ public final class S02Sacs extends StormCell implements StormCell.PerTick {
             int now2 = stateOf(run.mods, i, t, n);
             if (now2 != s[i]) {
                 if (now2 == 2) {
-                    back.playSound(null, StormDeck.s02Spot(i), StormSetup.GALE.get(), SoundSource.BLOCKS, 0.9f, 1.3f);
+                    jp.revati.skyabyss.trial.TrialFx.worldSound(back, StormDeck.s02Spot(i), StormSetup.GALE.get(), SoundSource.BLOCKS, 0.9f, 1.3f);
                 } else if (now2 == 1) {
-                    back.playSound(null, StormDeck.s02Spot(i), SoundEvents.NOTE_BLOCK_CHIME.value(), SoundSource.BLOCKS, 0.6f, 1.5f);
+                    jp.revati.skyabyss.trial.TrialFx.worldSound(back, StormDeck.s02Spot(i), SoundEvents.NOTE_BLOCK_CHIME.value(), SoundSource.BLOCKS, 0.6f, 1.5f);
                 }
                 s[i] = now2;
                 visual = true;
@@ -254,7 +260,7 @@ public final class S02Sacs extends StormCell implements StormCell.PerTick {
                     puff(back, run.group, ParticleTypes.CLOUD, p.getX(), p.getY() + 1, p.getZ() - dir * 6, 4, 0.4, 0.8, 1.0, 0.0);
                 }
                 if (ph == 0) {
-                    back.playSound(null, p.blockPosition(), StormSetup.CROSSWIND.get(), SoundSource.AMBIENT, 1.2f, 1f);
+                    jp.revati.skyabyss.trial.TrialFx.worldSound(back, p.blockPosition(), StormSetup.CROSSWIND.get(), SoundSource.AMBIENT, 1.2f, 1f);
                 }
             } else if (ph < GUST_WARN + GUST_BLOW && GaleFeather.gliding(p)) {
                 Vec3 d = Updraft.actualMotion(p);

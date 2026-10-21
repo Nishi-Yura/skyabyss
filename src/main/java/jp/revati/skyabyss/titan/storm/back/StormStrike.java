@@ -101,11 +101,13 @@ public final class StormStrike {
     }
 
     // グループを決めて呼ぶ (試練が人を狙うとき: その人のグループ)
-    public static Strike call(ServerLevel level, Vec3 at, int warnTicks, float damage, @Nullable Entity owner, @Nullable UUID group) {
+    public static Strike call(ServerLevel level, Vec3 template, int warnTicks, float damage, @Nullable Entity owner, @Nullable UUID group) {
+        // 区画の写しのセルの決まりの中 (TrialFrame) で呼ばれたら、落ちる所を写しの座標にする (落ちるのは決まりの外の tick)
+        Vec3 at = jp.revati.skyabyss.trial.TrialFrame.current().world(template);
         Strike s = new Strike(level, at, Math.max(1, warnTicks), damage, owner, group);
         s.rod = StormRods.find(level, at, ROD_REACH);
         PENDING.add(s);
-        level.playSound(null, at.x, at.y, at.z, SoundEvents.BEACON_ACTIVATE, SoundSource.HOSTILE, 0.8f, 1.9f);
+        jp.revati.skyabyss.trial.TrialFx.worldSound(level, at.x, at.y, at.z, SoundEvents.BEACON_ACTIVATE, SoundSource.HOSTILE, 0.8f, 1.9f);
         return s;
     }
 
@@ -241,8 +243,8 @@ public final class StormStrike {
         }
         StormFx.burst(level, ParticleTypes.FLASH, to, 1, 0);
         StormFx.burst(level, ParticleTypes.ELECTRIC_SPARK, to, 24, 0.5);
-        level.playSound(null, to.x, to.y, to.z, SoundEvents.LIGHTNING_BOLT_IMPACT, SoundSource.WEATHER, 1.6f, 1.2f);
-        level.playSound(null, to.x, to.y, to.z, SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.WEATHER, 0.7f, 1.6f);
+        jp.revati.skyabyss.trial.TrialFx.worldSound(level, to.x, to.y, to.z, SoundEvents.LIGHTNING_BOLT_IMPACT, SoundSource.WEATHER, 1.6f, 1.2f);
+        jp.revati.skyabyss.trial.TrialFx.worldSound(level, to.x, to.y, to.z, SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.WEATHER, 0.7f, 1.6f);
     }
 
     @EventBusSubscriber(modid = SkyAbyss.MODID)

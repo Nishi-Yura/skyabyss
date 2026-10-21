@@ -497,10 +497,10 @@ quest(THUNDER, "main", 30, ("嵐を渡る翼", "Wings Across the Storm"),
                        "If I step into the column of wind at its feet, it may carry me up to its back."),
              [ob("board", "lore", "夕立の刻、昇り風に乗って背へ上がろう", "At the hour of the squall, ride the updraft onto its back",
                  targets=["chapter1/storm_ruins"])], xp=60, skip_if=stilled("thunder_wing")),
-       stage("trials", ("鳥の背の中に、風の民の字が残っている。\n三つの風鳴り石を鳴らせば、\n奥へ続く門が開くのだろう。",
-                        "The wind folk left writing inside the bird's back.\nIf I ring the three wind stones, the way deeper in should open."),
+       stage("trials", ("鳥の背の中に、風の民の字が残っている。\n三つのゴールに着けば、\n奥へ続く門が開くのだろう。",
+                        "The wind folk left writing inside the bird's back.\nIf I reach the goal, the way deeper in should open."),
              [ob("read", "lore", "背の中の碑文を読んでみよう", "Read the inscriptions inside its back", targets=STORM_INSCRIPTIONS, count=2),
-              ob("stone", "signal", "風鳴り石を一つ鳴らしてみよう", "Ring one of the wind stones", targets=[f"storm_trial_{t}" for t in ("west", "east", "front")],
+              ob("stone", "signal", "ゴールの光る印に一つ着いてみよう", "Reach one of the goal marks", targets=[f"storm_trial_{t}" for t in ("west", "east", "front")],
                  count=1, party=False)],
              xp=90, skip_if=stilled("thunder_wing")),
        stage("heart", ("竜骨の門の下で、雷のような鼓動が打っている。\n音は、上からではなく、下から昇ってくる。",
@@ -512,7 +512,7 @@ quest(THUNDER, "main", 30, ("嵐を渡る翼", "Wings Across the Storm"),
               ob("wc", "talk", "イサナに、嵐の上の話をしに行こう", "Tell Isana what lies above the storm", target=WC, topic="ms_c_thunder_back")],
              mode="any")],
       {"xp": 400, "affinity": {ST: 5, WC: 5}}, giver=ST, start_when=q(TIDE, "done"),
-      story="語り部の祖母は、雷の晩に雲の中を渡る鳥を見て、何かを数えるのをやめた。風に逆らう嵐を追い、夕立の刻に昇り風で背へ。碑文と風鳴り石、竜骨の奥の心臓。")
+      story="語り部の祖母は、雷の晩に雲の中を渡る鳥を見て、何かを数えるのをやめた。風に逆らう嵐を追い、夕立の刻に昇り風で背へ。碑文とゴールの印、竜骨の奥の心臓。")
 
 # ---- メイン 4: 灰の昇る山 (余燼。中身は 13 の担当が作る)
 quest(EMBER, "main", 40, ("灰の昇る山", "The Mountain Where Ash Rises"),

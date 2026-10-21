@@ -16,7 +16,6 @@ import jp.revati.skyabyss.rpg.GrowthRules;
 import jp.revati.skyabyss.rpg.Rpg;
 import jp.revati.skyabyss.rpg.skill.SkillCalling;
 import jp.revati.skyabyss.rpg.skill.SkillManager;
-import jp.revati.skyabyss.titan.end.ReturnBeacons;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.particles.ParticleTypes;
@@ -205,7 +204,7 @@ public final class Rebirth {
     }
 
     // ---------------------------------------------------------------- 台座
-    // 転生できる所 (背中の鼓動の間の台座のそば)。背中の外・台座から遠いところでは false
+    // 転生できる所 (都の社の祭壇と、巨神の祠のそば)。それ以外では false
     public static boolean nearAltar(Player player) {
         // 都の社の祭壇 (社が開いたあと。docs/design/33 の 2.2「以後: 転生の台座（社）」)
         if (player.level().dimension() == net.minecraft.world.level.Level.OVERWORLD && player.getServer() != null
@@ -219,17 +218,22 @@ public final class Rebirth {
                 }
             }
         }
-        String titan = Titans.titanOfBack(player.level().dimension());
-        if (titan == null) {
+        // 巨神の祠 (地上。docs/design/32 の 3.1。背の中の鼓動の間には台座を置かない)
+        if (player.level().dimension() != net.minecraft.world.level.Level.OVERWORLD || player.getServer() == null) {
             return false;
         }
-        BlockPos hub = ReturnBeacons.hubOf(titan);
-        if (hub == null) {
-            return false;
+        for (String titan : Titans.all()) {
+            BlockPos s = jp.revati.skyabyss.titan.shrine.TitanShrine.posOf(player.getServer(), titan);
+            if (s == null) {
+                continue;
+            }
+            double dx = player.getX() - (s.getX() + 0.5);
+            double dz = player.getZ() - (s.getZ() + 0.5);
+            if (dx * dx + dz * dz <= ALTAR_RANGE * ALTAR_RANGE && Math.abs(player.getY() - s.getY()) <= ALTAR_HEIGHT) {
+                return true;
+            }
         }
-        double dx = player.getX() - (hub.getX() + 0.5);
-        double dz = player.getZ() - (hub.getZ() + 0.5);
-        return dx * dx + dz * dz <= ALTAR_RANGE * ALTAR_RANGE && Math.abs(player.getY() - hub.getY()) <= ALTAR_HEIGHT;
+        return false;
     }
 
     // ---------------------------------------------------------------- 恩恵の候補 (B07)

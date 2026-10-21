@@ -126,13 +126,11 @@ public final class TideBackTrials {
     static void onCommonSetup(FMLCommonSetupEvent event) {
         event.enqueueWork(() -> {
             GroupOverlays.register(TideBackTrials::overlay);
-            GroupOverlays.register(Breath::overlay);
             GroupEvents.addMembershipHook(TideBackTrials::membershipChanged);
-            BreathGuide.register();
         });
     }
 
-    // 鳴らしたグループにだけ見せる: 潮鳴り石の光・広間の床の灯り・抜け道の床・西の祭壇の真珠の光
+    // 鳴らしたグループにだけ見せる: 潮鳴り石の光・広間の床の灯り・西の祭壇の真珠の光
     static void overlay(ServerLevel level, UUID group, java.util.function.BiConsumer<BlockPos, net.minecraft.world.level.block.state.BlockState> out) {
         if (level.dimension() != TideTravel.TIDE_BACK) {
             return;
@@ -148,7 +146,6 @@ public final class TideBackTrials {
             }
             out.accept(stonePos(t), jp.revati.skyabyss.trial.TrialGoal.reached());
             out.accept(lampPos(t), Blocks.SEA_LANTERN.defaultBlockState());
-            out.accept(padPos(t), TideKit.LAMP);
             if (t == TideBackState.Trial.WEST) {
                 out.accept(STONE_WEST.above(), Blocks.PEARLESCENT_FROGLIGHT.defaultBlockState());
             }
@@ -211,7 +208,6 @@ public final class TideBackTrials {
             GroupGates.place(level, TideGates.door(k), false);
         }
         GroupGates.place(level, TideGates.cave(), true);
-        TideFins.placeGates(level, true);
         // 試練の階の戸 (引いた三つだけ、そのグループに開く。docs/design/29)
         jp.revati.skyabyss.trial.TrialRuntime.installGates(level);
         level.setBlock(new BlockPos(0, HUB_FLOOR, 0), TideKit.LAMP, 3);
@@ -298,17 +294,13 @@ public final class TideBackTrials {
         if (level.getGameTime() % 10 == 0) {
             TideRooms.tick(level);
         }
-        TideFins.tick(level);
         TideGarden.tick(level, peaceful);
         if (!peaceful) {
             TideWatch.tick(level, false);
         }
         TideFlats.tick(level, peaceful);
-        Breath.tick(level, peaceful);
-        BreathSummit.tick(level, peaceful);
         if (level.getGameTime() % 5 == 0) {
             tickGates(level);
-            tickPads(level);
             tickPeaceful(level, peaceful);
             tickFrost(level);
             TideGuide.tick(level);
@@ -401,33 +393,6 @@ public final class TideBackTrials {
         GroupGates.open(level, group, TideGates.bottom());
     }
 
-    // 抜け道の床 (石が鳴ると光る。踏むと広間の近くへ)。踏んだ人のグループの石で決める
-    private static void tickPads(ServerLevel level) {
-        for (ServerPlayer p : List.copyOf(level.players())) {
-            if (!p.isAlive() || p.isSpectator()) {
-                continue;
-            }
-            BlockPos under = p.blockPosition().below();
-            TideBackState.Trial trial = under.equals(RETURN_WEST) ? TideBackState.Trial.WEST
-                    : under.equals(RETURN_EAST) ? TideBackState.Trial.EAST : under.equals(RETURN_FRONT) ? TideBackState.Trial.FRONT : null;
-            if (trial == null || !state(level, p).rung(trial)) {
-                continue;
-            }
-            BlockPos to = switch (trial) {
-                case WEST -> RETURN_WEST_TO;
-                case EAST -> RETURN_EAST_TO;
-                case FRONT -> RETURN_FRONT_TO;
-            };
-            if (TideGarden.holds(p)) {
-                continue;
-            }
-            p.fallDistance = 0;
-            p.teleportTo(level, to.getX() + 0.5, to.getY(), to.getZ() + 0.5, p.getYRot(), 0f);
-            level.playSound(null, to, jp.revati.skyabyss.titan.tide.TideSetup.GATE.get(), SoundSource.PLAYERS, 1f, 1.3f);
-            Notice.bar(p, ModText.hint("message.skyabyss.tide.return_path"));
-        }
-    }
-
     // 氷渡りの氷は背中では溶かす (満潮の水の上を歩けないように。8 章)
     private static void tickFrost(ServerLevel level) {
         for (ServerPlayer p : Players.snapshot(level.players())) {
@@ -485,7 +450,7 @@ public final class TideBackTrials {
         ring(level, state, trial, player);
     }
 
-    // 試練のプールの新作の石 (引いていない今週の試練): そのグループの人にだけ鳴らして光らせる
+    // 試練のプールの新作の石: そのグループの人にだけ鳴らして光らせる
     public static void notifyGroup(ServerLevel level, UUID group, BlockPos pos) {
         for (ServerPlayer p : Groups.online(level, group)) {
             if (p.distanceToSqr(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5) < 48 * 48) {
@@ -548,15 +513,7 @@ public final class TideBackTrials {
         };
     }
 
-    static BlockPos padPos(TideBackState.Trial t) {
-        return switch (t) {
-            case WEST -> RETURN_WEST;
-            case EAST -> RETURN_EAST;
-            case FRONT -> RETURN_FRONT;
-        };
-    }
-
-    // 三つの石・広間の床の灯り・抜け道の床を、ワールドでは「まだ鳴っていない」形にする (鳴らしたグループには見かけの上書きで見せる)
+    // 三つの石・広間の床の灯りを、ワールドでは「まだ鳴っていない」形にする (鳴らしたグループには見かけの上書きで見せる)
     static void applyStones(ServerLevel level) {
         for (TideBackState.Trial t : TideBackState.Trial.values()) {
             net.minecraft.world.level.block.state.BlockState want = jp.revati.skyabyss.trial.TrialGoal.mark();
@@ -564,7 +521,6 @@ public final class TideBackTrials {
                 level.setBlock(stonePos(t), want, 3);
             }
             level.setBlock(lampPos(t), TideKit.DARK, 3);
-            level.setBlock(padPos(t), TideKit.DARK, 3);
         }
         level.setBlock(STONE_WEST.above(), Blocks.AIR.defaultBlockState(), 3);
     }
@@ -685,11 +641,7 @@ public final class TideBackTrials {
                 boolean beachSide = BEACH.aabb().inflate(2, 4, 16).contains(p.position())
                         || (p.getZ() > CAVE_SEAL_Z && p.getX() > CAVE_X1 - 2 && p.getX() < CAVE_X2 + 2)
                         || new AABB(GATE_X - 3, SEA - 3, GATE_MOUTH_Z1 - 3, BEACH.x1(), GATE_FLOOR + 12, GATE_MOUTH_Z2 + 3).contains(p.position())
-                        || new AABB(TOP_STAIR_X1 - 1, BEACH.floor(), TOP_STAIR_Z1 - 1, BEACH.x1(), TOP_Y + 4, TOP_STAIR_Z1 + 6).contains(p.position())
-                        || UPPER_ROOMS.stream().anyMatch(a -> a.aabb().inflate(2, 2, 2).contains(p.position()))
-                        || new AABB(UPPER_GATE_X - 3, UPPER_1.floor(), UPPER_GATE_Z - 4, UPPER_HALL_X2 + 2, UPPER_1.floor() + 9, UPPER_GATE_Z + 5).contains(p.position())
-                        || Breath.activeBox().inflate(2).contains(p.position()) || BreathGuide.nearDoor(p.position())
-                        || p.position().distanceTo(ARRIVAL.getCenter()) < 14 || TideWhispers.onShellTop(p.blockPosition());
+                        || p.position().distanceTo(ARRIVAL.getCenter()) < 14;
                 if (!beachSide) {
                     toArrival(p);
                     Notice.narrate(p, "message.skyabyss.trials_peaceful");
@@ -892,13 +844,12 @@ public final class TideBackTrials {
             event.setCanceled(true);
             return;
         }
-        if (BreathSummit.useBlock(level, pos, player)) {
-            event.setCanceled(true);
-            return;
-        }
         if (level.getBlockState(pos).is(jp.revati.skyabyss.registry.ModBlocks.REST_HEARTH.get())) {
             event.setCanceled(true);
             if (player.isShiftKeyDown()) {
+                if (jp.revati.skyabyss.trial.TrialRoute.propose(player)) {
+                    return;
+                }
                 TideGarden.dropOut(level, player, TideRooms.owns(TideRooms.GARDEN, player));
                 clearCheckpoint(player);
                 toArrival(player);
@@ -932,8 +883,6 @@ public final class TideBackTrials {
         TideWatch.clear();
         TideGuide.clear();
         TideFlats.clear();
-        Breath.clear();
-        BreathSummit.clear();
         TideClock.force(null);
     }
 

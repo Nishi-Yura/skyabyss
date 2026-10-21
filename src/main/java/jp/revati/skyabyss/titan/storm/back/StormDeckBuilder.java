@@ -13,7 +13,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.HorizontalDirectionalBlock;
 import net.minecraft.world.level.block.state.BlockState;
 
-// 試練の甲板 (StormDeck) を建てる。鳥の体と背の広場・塔 (StormExtraBuilder) のあと、広間の影 (StormSilhouette) より前に StormBirdBuilder から呼ぶ。
+// 試練の甲板 (StormDeck) を建てる。鳥の体と背の広場・螺旋 (access) のあと、広間の影 (StormSilhouette) より前に StormBirdBuilder から呼ぶ。
 // 甲板はどれも「空に浮かぶ島」: 床の下は先細りの石 (気嚢は羊毛の袋、柱は銅の柱、巣は黒い石の錐、台は羽の逆さ錐) で、
 // 外へ開いた所なので kit.put で置く (掘った所として覚えない。覚えると seal が屋根をかけるため)。
 // 色の約束: 風 = 白と水色 (気嚢・見張り台)、雷 = 黒い石と銅と橙 (柱・巣)。戸の上の色の線が、渡り場の中で行き先を言う
@@ -37,6 +37,7 @@ final class StormDeckBuilder {
         if (!StormDeck.placed()) {
             return;
         }
+        access(kit);
         hub(kit);
         bridge(kit);
         yard(kit);
@@ -192,10 +193,131 @@ final class StormDeckBuilder {
         kit.put(alongZ ? fix : lampA, Y + 8, alongZ ? lampA : fix, StormKit.LAMP);
     }
 
+    // ---------------------------------------------------------------- 背の広場と螺旋 (尾の間から広場へ上る道。橋と甲板より前に置く)
+    static void access(StormKit kit) {
+        plaza(kit);
+        spiral(kit);
+    }
+
+    // 背の広場の床 (x -25〜25、z 11〜36)。内側は羽の床、縁は手すり。南の縁の螺旋の戸の口だけあける。灯り・腰掛けは置かない
+    private static void plaza(StormKit kit) {
+        for (int x = -25; x <= 25; x++) {
+            for (int z = 11; z <= 36; z++) {
+                boolean inside = x >= PLAZA.x1() && x <= PLAZA.x2() && z >= PLAZA.z1() && z <= PLAZA.z2();
+                if (inside) {
+                    support(kit, x, z, Y, StormKit.Style.FEATHER);
+                    kit.put(x, Y, z, plazaFloor(x, z));
+                    clearAbove(kit, x, z, Y, 12);
+                } else if (z == PLAZA.z2() + 1 && Math.abs(x - TURRET_X) <= 3) {
+                    continue; // 螺旋の戸の口 (spiral が開ける)
+                } else {
+                    rail(kit, x, z, Y, StormKit.Style.FEATHER);
+                }
+            }
+        }
+    }
+
+    // 広場の床: 羽の縞に、真ん中の風見の円盤 (銅と白の同心の四角) と十字
+    private static BlockState plazaFloor(int x, int z) {
+        int dx = Math.abs(x);
+        int dz = Math.abs(z - 23);
+        int r = Math.max(dx, dz);
+        boolean border = dx == 24 || z == 12 || z == 35;
+        if (border) {
+            return StormKit.COPPER;
+        }
+        if (r <= 8) {
+            return r == 8 || r == 4 ? StormKit.COPPER : r == 6 || r == 2 ? StormKit.FEATHER_WHITE : StormKit.QUARTZ;
+        }
+        if (dx <= 1 || dz <= 1) {
+            return StormKit.FEATHER_WHITE;
+        }
+        return StormKit.floor(StormKit.Style.FEATHER, x, z);
+    }
+
+    // (x, z) の柱を、鳥の背から床の 1 下まで石で埋める (支えのない所は 10 までで止める)
+    private static void support(StormKit kit, int x, int z, int floorY, StormKit.Style s) {
+        int from = Math.max(StormBirdBuilder.top(x, z) + 1, floorY - 10);
+        for (int y = from; y < floorY; y++) {
+            kit.put(x, y, z, StormKit.wall(s, x, y, z));
+        }
+    }
+
+    // 縁の手すり (床と同じ高さの石の上に低い壁)
+    private static void rail(StormKit kit, int x, int z, int floorY, StormKit.Style s) {
+        support(kit, x, z, floorY, s);
+        kit.put(x, floorY, z, StormKit.wall(s, x, floorY, z));
+        kit.put(x, floorY + 1, z, RAIL);
+    }
+
+    // 尾の間の北西の螺旋 (体の中)。箱を石で満たして階段を彫り、広場の南の戸を開ける (試練の甲板への道)
+    private static void spiral(StormKit kit) {
+        int cx = TURRET_X;
+        int cz = TURRET_Z;
+        int base = StormBackLayout.TAIL_HALL.floor();
+        int top = Y + 4;
+        // 箱を石で満たす (尾の間の空気も)。戸の穴は後で
+        for (int x = cx - 3; x <= cx + 3; x++) {
+            for (int z = cz - 3; z <= cz + 3; z++) {
+                for (int y = base + 1; y <= top; y++) {
+                    kit.put(x, y, z, StormKit.wall(StormKit.Style.FEATHER, x, y, z));
+                }
+                // 箱の下の床は尾の間のまま
+                support(kit, x, z, base, StormKit.Style.FEATHER);
+            }
+        }
+        java.util.List<int[]> ring = StormBirdBuilder.ring5(cx, cz);
+        int start = 2;
+        for (int k = 0; k < TURRET_STEPS; k++) {
+            int[] c = ring.get((start + k) % 16);
+            int y = base + 1 + k;
+            for (int yy = y + 1; yy <= y + 3; yy++) {
+                kit.air(c[0], yy, c[1]);
+            }
+            kit.put(c[0], y, c[1], StormKit.floor(StormKit.Style.FEATHER, c[0], c[1]));
+        }
+        // 戸: 下は尾の間の床 (北の壁 cz-3 の 3 マス、高さ 3)。上は広場の床の高さ
+        for (int dx = -1; dx <= 1; dx++) {
+            for (int dy = 1; dy <= 3; dy++) {
+                kit.air(cx + dx, base + dy, TURRET_DOOR_Z);
+                kit.air(cx + dx, Y + dy, TURRET_DOOR_Z);
+            }
+            kit.put(cx + dx, Y, TURRET_DOOR_Z, StormKit.floor(StormKit.Style.FEATHER, cx + dx, TURRET_DOOR_Z));
+            kit.put(cx + dx, base, TURRET_DOOR_Z, StormKit.floor(StormKit.Style.FEATHER, cx + dx, TURRET_DOOR_Z));
+        }
+        // 戸の枠 (銅) と、戸の上の灯り
+        for (int sx : new int[] {-2, 2}) {
+            for (int y = base + 1; y <= base + 3; y++) {
+                kit.put(cx + sx, y, TURRET_DOOR_Z, StormKit.COPPER);
+            }
+            for (int y = Y + 1; y <= Y + 3; y++) {
+                kit.put(cx + sx, y, TURRET_DOOR_Z, StormKit.COPPER);
+            }
+        }
+        kit.put(cx, base + 4, TURRET_DOOR_Z, StormKit.LAMP);
+        kit.put(cx, Y + 4, TURRET_DOOR_Z, StormKit.LAMP);
+        // 芯の灯り (3 段おき。その段の頭の高さに、芯の面が螺旋に面する所)
+        for (int k = 0; k < TURRET_STEPS; k += 3) {
+            int[] c = ring.get((start + k) % 16);
+            if (Math.abs(c[0] - cx) == 2 && Math.abs(c[1] - cz) == 2) {
+                continue;
+            }
+            int lx = Math.max(cx - 1, Math.min(cx + 1, c[0]));
+            int lz = Math.max(cz - 1, Math.min(cz + 1, c[1]));
+            kit.put(lx, base + 1 + k + 2, lz, StormKit.LAMP);
+        }
+        // 屋根の縁の銅の帯
+        for (int x = cx - 3; x <= cx + 3; x++) {
+            for (int z = cz - 3; z <= cz + 3; z++) {
+                if (Math.abs(x - cx) == 3 || Math.abs(z - cz) == 3) {
+                    kit.put(x, top, z, StormKit.COPPER);
+                }
+            }
+        }
+    }
+
     // ---------------------------------------------------------------- 風の広間の板と、原型の三つの戸の枠
     static void hub(StormKit kit) {
-        kit.put(BOARD_HUB.getX(), BOARD_HUB.getY(), BOARD_HUB.getZ(),
-                ModBlocks.TRIAL_BOARD.get().defaultBlockState().setValue(HorizontalDirectionalBlock.FACING, Direction.NORTH));
     }
 
     // ---------------------------------------------------------------- 橋 (背の広場の南の縁 → 渡り場の北の縁)
@@ -325,8 +447,6 @@ final class StormDeckBuilder {
         StormDeco.strip(kit, Y, StormKit.COPPER, StormKit.COPPER, 99, 0, new int[] {19, 64}, new int[] {19, 70}, new int[] {5, 70});
         // 休み場・板・羽軸の柱
         fire(kit, REST_YARD);
-        kit.put(BOARD_YARD.getX(), BOARD_YARD.getY(), BOARD_YARD.getZ(),
-                ModBlocks.TRIAL_BOARD.get().defaultBlockState().setValue(HorizontalDirectionalBlock.FACING, Direction.SOUTH));
         StormDeco.featherPillar(kit, -12, 69, Y, 6);
         StormDeco.featherPillar(kit, 12, 69, Y, 6);
     }

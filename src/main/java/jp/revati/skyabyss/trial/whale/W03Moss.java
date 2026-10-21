@@ -35,6 +35,12 @@ import net.minecraft.world.level.block.state.BlockState;
 //   一人: 流れが弱い。 三人から: 流れの入れ替わりが速く、「うねり」の障害の間が短い。
 // 修飾: 配置 3 (島の並び・流れの向き)・数字 2 (流れの強さ・入れ替わりの間)・障害 (うねり: 一本の流れが予告のあと一時だけ強くなる)・任意の目標 (一度も落ちずに)
 public final class W03Moss implements TrialCell {
+    // 区画の写しで動かせる (決まりは arm・tick・onUse・disarm・overlay の中だけで座標を使う。docs/design/32 の 5 章)
+    @Override
+    public boolean relocatable() {
+        return true;
+    }
+
     public static final int LANES = 5;
     public static final int[] LANE_Z = {132, 137, 142, 148, 153};
     public static final int LANE_LEN = 3;

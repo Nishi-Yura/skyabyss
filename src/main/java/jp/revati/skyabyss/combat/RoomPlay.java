@@ -605,7 +605,8 @@ public final class RoomPlay {
                 continue;
             }
             if (now % 20 < STEP) {
-                level.sendParticles(room.theme().spark, t.at.getX() + 0.5, t.at.getY() + 1.1, t.at.getZ() + 0.5, 2, 0.9, 0.05, 0.9, 0.01);
+                BlockPos sp = jp.revati.skyabyss.trial.TrialFrame.shift(t.at);
+                level.sendParticles(room.theme().spark, sp.getX() + 0.5, sp.getY() + 1.1, sp.getZ() + 0.5, 2, 0.9, 0.05, 0.9, 0.01);
             }
             if (anyoneOn(level, t, s, players, foes)) {
                 t.standing += STEP;
@@ -638,9 +639,11 @@ public final class RoomPlay {
     }
 
     private static void trigger(ServerLevel level, State s, Trap t, long now) {
-        double cx = t.at.getX() + 0.5;
-        double cz = t.at.getZ() + 0.5;
-        double floor = t.at.getY() + 1;
+        // 区画の写しの部屋 (TrialFrame。TrialWindow の中) では、予告と当たりを写しの座標に出す (予告は決まりの外の tick で動くので)
+        BlockPos at = jp.revati.skyabyss.trial.TrialFrame.shift(t.at);
+        double cx = at.getX() + 0.5;
+        double cz = at.getZ() + 0.5;
+        double floor = at.getY() + 1;
         // ほかの傷のある予告が、この円に重なって当たる前後 (当たる瞬間の 10 tick 前から 10 tick 後) は始めない (傷が重ならない公平さ)。
         // 始められなければ、次の走査で試す (板の上の人・敵はそのまま数え続ける)
         for (int ahead = WARN_TICKS - SPACING_TICKS; ahead <= WARN_TICKS + SPACING_TICKS; ahead++) {

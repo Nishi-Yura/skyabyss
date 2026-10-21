@@ -222,7 +222,6 @@ final class TideGardenBuilder {
         // g1 の焚き火と、台の灯りを置き直す (台を建て直したため)
         Rest g1 = RESTS.get(2);
         kit.campfire(g1.campfire());
-        TideCaches.place(kit, "fin_w_gate");
         grottos(kit);
         if (!full) {
             return;
@@ -385,8 +384,6 @@ final class TideGardenBuilder {
                     }
                 }
             }
-            // 碑と宝箱
-            TideCaches.place(kit, g.id());
             // 窪みのまん中の灯りの柱と、枯れた珊瑚
             int mx = (g.x1() + g.x2()) / 2;
             int mz = (g.z1() + g.z2()) / 2;

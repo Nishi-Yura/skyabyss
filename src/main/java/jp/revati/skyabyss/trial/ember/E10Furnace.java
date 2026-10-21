@@ -39,6 +39,12 @@ import net.minecraft.world.level.block.state.BlockState;
 //   敵はそのグループのもの。倒れて戻ったら休み場 (入口の脇) から。全員いなくなって 5 秒で最初に戻る。波を片付けると石の前の光る床が使える。
 // 修飾: 配置 3 (鞴持ちの湧く場所の順)・数字 2 (一波の鞴持ち 1・2・3 / 波の数 1・2・3)・敵の組 2 (鞴持ちだけ / 蛾つき)・障害 (噴気: 炉のまわりの 4 か所の割れ目)・任意の目標 (熱を焦げに上げずに)
 public final class E10Furnace implements TrialCell {
+    // 区画の写しで動かせる (決まりは arm・tick・onUse・disarm・overlay の中だけで座標を使う。docs/design/32 の 5 章)
+    @Override
+    public boolean relocatable() {
+        return true;
+    }
+
     // 炉 (3 × 3 × 3) の中心。土台は 5 × 5
     public static final int FURNACE_X = 24;
     public static final int FURNACE_Z = 88;

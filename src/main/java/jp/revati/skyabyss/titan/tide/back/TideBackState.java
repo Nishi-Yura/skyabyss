@@ -82,9 +82,6 @@ public class TideBackState extends SavedData {
         private static final String NESTS_BROKEN = "tide.nests_broken";
         private static final String BECKONER = "tide.beckoner";
         private static final String BOTTOM = "tide.bottom";
-        private static final String UP_BEST = "tide.up_best";
-        private static final String KEEPER = "tide.keeper";
-        private static final String KEEPER_EVER = "keep.tide.keeper_ever";
         private static final String LAST_SLEEPING = "keep.tide.last_sleeping";
         private static final String EVER_DEFEATED = "keep.tide.ever_defeated";
         private static final String EAST_FIRST_USED = "keep.tide.east_first_used";
@@ -203,29 +200,6 @@ public class TideBackState extends SavedData {
 
         public void markBottomOpen() {
             record.setFlag(BOTTOM, true);
-        }
-
-        // 息の間: これまでに着いた足もとの高さ (縁を 0 とした「息の目盛り」)。壁の輪が灯る
-        public int upBest() {
-            return record.getInt(UP_BEST);
-        }
-
-        public void setUpBest(int height) {
-            record.putInt(UP_BEST, height);
-        }
-
-        // 息の間の頂の真珠守りを、この周で倒したか。倒すと展望の間への風の柱が働く (周回のグループ・ピースフルは倒さなくても働く)
-        public boolean keeperDefeated() {
-            return record.flag(KEEPER);
-        }
-
-        public void markKeeperDefeated() {
-            record.setFlag(KEEPER, true);
-            record.setFlag(KEEPER_EVER, true);
-        }
-
-        public boolean keeperEver() {
-            return record.flag(KEEPER_EVER);
         }
 
         public int resets() {

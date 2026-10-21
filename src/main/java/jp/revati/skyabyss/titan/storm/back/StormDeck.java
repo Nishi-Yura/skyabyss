@@ -14,7 +14,7 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
 // 雷翼の背の「試練の甲板」(docs/design/29 の 3.3・5.4。P2 の新作 4 本: S02 気嚢の滑空・S03 雷柱の渡り・S09 雷乞いの巣・S10 羽守の見張り台)。
-// 背の広場 (StormExtra.PLAZA) の南の縁から、7 幅の橋が尾の上の空へ伸び、「渡り場」(YARD。休み場 yard) に着く。渡り場の四つの戸が四つの試練の入口:
+// 背の広場 (PLAZA。床は StormDeckBuilder.access が置く) の南の縁から、7 幅の橋が尾の上の空へ伸び、「渡り場」(YARD。休み場 yard) に着く。渡り場の四つの戸が四つの試練の入口:
 //   西の戸 → 気嚢の滑空 (風の渡り)   東の戸 → 雷柱の渡り (雷の渡り)   南西の戸 → 羽守の見張り台   南東の戸 → 雷乞いの巣
 // 引かれた試練の戸だけが、そのグループに開く (引いていない戸は閉じて見える)。どれも空に浮かぶ島 (下は尾羽の空。落ちたら休み場へ戻される)。
 // 座標はここだけ。建て方は StormDeckBuilder、動かし方は jp.revati.skyabyss.trial.storm の四つのセル。背の作りを変えたら、StormTrialSelfTest が
@@ -41,8 +41,15 @@ public final class StormDeck {
         placed = value;
     }
 
-    // 甲板の床のブロックの高さ (背の広場と同じ)。足は Y + 1
-    public static final int Y = StormExtra.DECK_Y;
+    // 甲板の床のブロックの高さ (背の稜線 161 のすぐ上。背の広場の床も同じ)。足は Y + 1
+    public static final int Y = 162;
+    // 背の広場 (屋根のない台。橋は南の縁から出る。x -24〜24、z 12〜35)
+    public static final Area PLAZA = new Area(-24, 24, 12, 35, Y, 12);
+    // 尾の間の北西の螺旋 (体の中。尾の間の床から広場の南の戸まで。試練の甲板への道)
+    public static final int TURRET_X = -11;
+    public static final int TURRET_Z = 39;
+    public static final int TURRET_STEPS = 17;
+    public static final int TURRET_DOOR_Z = TURRET_Z - 3;
 
     // ---------------------------------------------------------------- 橋と渡り場
     public static final int BRIDGE_X1 = 16;
@@ -53,11 +60,6 @@ public final class StormDeck {
     public static final Area YARD = new Area(-24, 24, 64, 82, Y, 12);
     public static final BlockPos YARD_FIRE = new BlockPos(0, Y + 1, 73);
     public static final BlockPos YARD_SPAWN = new BlockPos(2, Y + 1, 73);
-    // 試練の板 (渡り場の北の縁ぎわ。引いた三つが読める)
-    public static final BlockPos BOARD_YARD = new BlockPos(-6, Y + 1, 66);
-    // 風の広間 (鼓動の間) の板 (南の壁ぎわ。碑のそばで引きが読める)。数字は StormBackLayout (HUB.floor 134・HUB.z2 10) と同じ
-    // (StormBackLayout が StormDeck を読むので、ここからは読まない。クラスの初期化が循環しないように。StormTrialSelfTest が同じかを確かめる)
-    public static final BlockPos BOARD_HUB = new BlockPos(-10, 135, 10);
 
     // ---------------------------------------------------------------- 四つの戸 (封印の扉。高さ 5。渡り場の縁の手すりの列)
     public static final int G0 = Y + 1;
@@ -322,7 +324,17 @@ public final class StormDeck {
 
     // ---------------------------------------------------------------- 外へ開いていてよい所 (seal・小さな穴の検査から除く): 甲板の上すべて
     static boolean open(int x, int y, int z) {
-        return placed && y >= Y - 1 && z >= BRIDGE_Z1 - 1 && z <= 130 && x >= -160 && x <= 160;
+        if (!placed) {
+            return false;
+        }
+        // 背の広場 (橋の根元まで) と、広場の南の螺旋の戸の外
+        if (x >= -25 && x <= 25 && z >= 11 && z <= 37 && y >= Y) {
+            return true;
+        }
+        if (Math.abs(x - TURRET_X) <= 3 && z >= TURRET_DOOR_Z - 1 && z <= TURRET_DOOR_Z + 1 && y >= Y) {
+            return true;
+        }
+        return y >= Y - 1 && z >= BRIDGE_Z1 - 1 && z <= 130 && x >= -160 && x <= 160;
     }
 
     // ---------------------------------------------------------------- 面積 (m²。歩ける床。26 の数え方)

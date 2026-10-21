@@ -36,6 +36,12 @@ import net.minecraft.world.phys.Vec3;
 // 人数: 突風の周期が一人ごとに 6% 短くなる (四人分まで)。陰はいくらでも入れる。一人でも陰から陰へ渡れる (柱の間は 12)
 // 修飾: 配置 3 (後半の突風の向きの並び)・数字 2 (突風の間隔 200/160/130・吹く長さ 20/28/36)・障害 2 (雷蛾・空の雷)・任意の目標 (一度も落ちずに)
 public final class S04Bridge extends StormCell implements StormCell.PerTick {
+    // 区画の写しで動かせる (決まりは arm・tick・onUse・disarm・overlay の中だけで座標を使う。docs/design/32 の 5 章)
+    @Override
+    public boolean relocatable() {
+        return true;
+    }
+
     static final int[] GAP = {200, 160, 130};
     static final int[] BLOW = {20, 28, 36};
     static final int WARN_CALM = 56;
@@ -203,7 +209,7 @@ public final class S04Bridge extends StormCell implements StormCell.PerTick {
             // 予告の始め: 風の音
             if (ph == 1 && phase(t - 5, zone, period, warn, blow) == 0) {
                 BlockPos at = new BlockPos(pillarsOf(zone)[1], Y + 1, StormDeck2.S04_CENTER_Z);
-                back.playSound(null, at, StormSetup.CROSSWIND.get(), SoundSource.AMBIENT, 1.4f, 1f);
+                jp.revati.skyabyss.trial.TrialFx.worldSound(back, at, StormSetup.CROSSWIND.get(), SoundSource.AMBIENT, 1.4f, 1f);
                 if (ph == 1 && zone == 1 && !run.data.containsKey("twisted")) {
                     run.put("twisted", true);
                     bar(where(inside, p -> p.getX() < StormDeck2.S04_B_X2 + 12), ModText.hint("message.skyabyss.trial.s04.twist"));

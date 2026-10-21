@@ -14,8 +14,9 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.saveddata.SavedData;
 
-// 試練の図鑑・称号・今週の試練の記録 (人ごと。docs/design/29 の 4.2・4.4。共有しない)。オーバーワールドに保存する。
-// 札は初めて「引かれた」とき seen、「済ませた」とき cleared が増える。出会った修飾は "種類:内容" の文字で集める
+// 試練の図鑑・称号・順路の記録 (人ごと。docs/design/29 の 4.2、32 の 6 章。共有しない)。オーバーワールドに保存する。
+// 札は初めて「引かれた」とき seen、「済ませた」とき cleared が増える。出会った修飾は "種類:内容" の文字で集める。
+// 順路の記録は巨神ごとに、越えた回数と最速 (入口から心臓を止めるまでの tick)
 public final class TrialCodex extends SavedData {
     private static final String NAME = "skyabyss_trial_codex";
 
@@ -28,8 +29,8 @@ public final class TrialCodex extends SavedData {
 
     private final Map<UUID, Map<String, Entry>> entries = new HashMap<>();
     private final Map<UUID, Set<String>> titles = new HashMap<>();
-    // 今週の試練を済ませた週 (巨神ごと)
-    private final Map<UUID, Map<String, Long>> weekly = new HashMap<>();
+    // 順路: 人 → 巨神 → {越えた回数, 最速の tick}
+    private final Map<UUID, Map<String, long[]>> routes = new HashMap<>();
 
     public static TrialCodex get(MinecraftServer server) {
         return server.overworld().getDataStorage().computeIfAbsent(new SavedData.Factory<>(TrialCodex::new, TrialCodex::load), NAME);
@@ -107,21 +108,33 @@ public final class TrialCodex extends SavedData {
         return false;
     }
 
-    public long weeklyDone(UUID player, String titan) {
-        Map<String, Long> m = weekly.get(player);
-        Long w = m == null ? null : m.get(titan);
-        return w == null ? Long.MIN_VALUE : w;
+    public int routeClears(UUID player, String titan) {
+        long[] r = routes.getOrDefault(player, Map.of()).get(titan);
+        return r == null ? 0 : (int) r[0];
     }
 
-    public void setWeeklyDone(UUID player, String titan, long week) {
-        weekly.computeIfAbsent(player, k -> new HashMap<>()).put(titan, week);
+    // 最速 (tick)。まだなら 0
+    public long routeBest(UUID player, String titan) {
+        long[] r = routes.getOrDefault(player, Map.of()).get(titan);
+        return r == null ? 0 : r[1];
+    }
+
+    // 順路を越えた (心臓を止めた)。ticks = 入口から心臓までの長さ (分からなければ 0)。最速を更新したら true
+    public boolean addRoute(UUID player, String titan, long ticks) {
+        long[] r = routes.computeIfAbsent(player, k -> new HashMap<>()).computeIfAbsent(titan, k -> new long[2]);
+        r[0]++;
+        boolean best = ticks > 0 && (r[1] == 0 || ticks < r[1]);
+        if (best) {
+            r[1] = ticks;
+        }
         setDirty();
+        return best;
     }
 
     public void forget(UUID player) {
         boolean any = entries.remove(player) != null;
         any |= titles.remove(player) != null;
-        any |= weekly.remove(player) != null;
+        any |= routes.remove(player) != null;
         if (any) {
             setDirty();
         }
@@ -159,18 +172,19 @@ public final class TrialCodex extends SavedData {
             }
             data.titles.put(uuid, set);
         }
-        CompoundTag wk = tag.getCompound("weekly");
-        for (String pid : wk.getAllKeys()) {
+        CompoundTag rt = tag.getCompound("routes");
+        for (String pid : rt.getAllKeys()) {
             UUID uuid = parse(pid);
             if (uuid == null) {
                 continue;
             }
-            CompoundTag w = wk.getCompound(pid);
-            Map<String, Long> m = new HashMap<>();
-            for (String titan : w.getAllKeys()) {
-                m.put(titan, w.getLong(titan));
+            CompoundTag p = rt.getCompound(pid);
+            Map<String, long[]> m = new HashMap<>();
+            for (String titan : p.getAllKeys()) {
+                CompoundTag c = p.getCompound(titan);
+                m.put(titan, new long[] {c.getLong("clears"), c.getLong("best")});
             }
-            data.weekly.put(uuid, m);
+            data.routes.put(uuid, m);
         }
         return data;
     }
@@ -208,13 +222,18 @@ public final class TrialCodex extends SavedData {
             tl.put(uuid.toString(), l);
         });
         tag.put("titles", tl);
-        CompoundTag wk = new CompoundTag();
-        weekly.forEach((uuid, m) -> {
-            CompoundTag w = new CompoundTag();
-            m.forEach(w::putLong);
-            wk.put(uuid.toString(), w);
+        CompoundTag rt = new CompoundTag();
+        routes.forEach((uuid, m) -> {
+            CompoundTag p = new CompoundTag();
+            m.forEach((titan, r) -> {
+                CompoundTag c = new CompoundTag();
+                c.putLong("clears", r[0]);
+                c.putLong("best", r[1]);
+                p.put(titan, c);
+            });
+            rt.put(uuid.toString(), p);
         });
-        tag.put("weekly", wk);
+        tag.put("routes", rt);
         return tag;
     }
 }

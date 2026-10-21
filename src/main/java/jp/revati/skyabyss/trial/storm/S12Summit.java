@@ -45,6 +45,12 @@ import net.minecraft.world.phys.Vec3;
 // 人数: 羽守長の体力が人数で増える (一人あたり +25%)・羽の嵐の間隔が短くなる・取り巻きが増える。一人でも、芯と扇を使って戦える
 // 修飾: 配置 3 (扇の動きの順)・数字 2 (足場の入れ替えの間 5.5/4/2.8 秒・羽の嵐の間隔 14/11/8 秒)・敵の組 2 (羽守長と雷蛾 / 羽守長と羽守)・障害 2 (横風・空の雷)・任意の目標 (落ちずに)
 public final class S12Summit extends StormCell {
+    // 区画の写しで動かせる (決まりは arm・tick・onUse・disarm・overlay の中だけで座標を使う。docs/design/32 の 5 章)
+    @Override
+    public boolean relocatable() {
+        return true;
+    }
+
     static final int[] HOLD = {110, 80, 55};
     static final int[] STORM = {280, 220, 160};
     static final int FLICKER = 50;
@@ -381,7 +387,7 @@ public final class S12Summit extends StormCell {
             }
             run.put("stormW", cand.get(back.random.nextInt(cand.size())));
             run.put("stormAt", now + STORM_WARN);
-            back.playSound(null, StormDeck2.S12_ARENA.center(), SoundEvents.BEACON_POWER_SELECT, SoundSource.HOSTILE, 1.0f, 1.3f);
+            jp.revati.skyabyss.trial.TrialFx.worldSound(back, StormDeck2.S12_ARENA.center(), SoundEvents.BEACON_POWER_SELECT, SoundSource.HOSTILE, 1.0f, 1.3f);
             if (!run.data.containsKey("stormTold")) {
                 run.put("stormTold", true);
                 bar(inside, ModText.hint("message.skyabyss.trial.s12.storm"));

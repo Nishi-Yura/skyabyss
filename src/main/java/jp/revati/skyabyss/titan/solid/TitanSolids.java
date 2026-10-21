@@ -138,6 +138,10 @@ public final class TitanSolids {
                 if (titan.level() != player.level() || !(titan instanceof SolidTitan solid) || !solid.solidActive()) {
                     continue;
                 }
+                // 見えない巨神 (章を終えた人。docs/design/32 の 3.3) には当たらない
+                if (!titan.broadcastToPlayer(player)) {
+                    continue;
+                }
                 if (Math.abs(titan.getX() - player.getX()) > RANGE || Math.abs(titan.getZ() - player.getZ()) > RANGE) {
                     continue;
                 }

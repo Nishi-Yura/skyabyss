@@ -247,9 +247,6 @@ public final class SelfTestRunner {
         steps.add(Step.once("storm mobs", 5, jp.revati.skyabyss.titan.storm.mob.StormMobSelfTest::runSelfTest));
         // 潮殻の背の本番 (島・潮の溜め・三つの試練・リセット)。水を流してから数える段がある
         steps.addAll(jp.revati.skyabyss.titan.tide.back.TideBackSelfTest.steps());
-        steps.addAll(jp.revati.skyabyss.titan.tide.back.TideFinsSelfTest.steps());
-        steps.addAll(jp.revati.skyabyss.titan.tide.back.BreathSelfTest.steps());
-        steps.addAll(jp.revati.skyabyss.titan.tide.back.PearlKeeperSelfTest.steps());
         // 二章「引く海」(予兆・潮見の貝・大干潮・小要素)。SKYABYSS_SELFTEST_ONLY=ch2
         steps.addAll(jp.revati.skyabyss.titan.tide.chapter.TideChapterSelfTest.steps());
         // 雷翼の中ボス 雷獣 (背中がまだ無ければ、オーバーワールドの仮の巣で)
@@ -279,12 +276,16 @@ public final class SelfTestRunner {
         // 領域の仕掛けが本物の心臓の間で壁の中でなく、歩いて届く所にあるか (docs/design/02 の 5.9)。SKYABYSS_SELFTEST_ONLY="domain room"
         steps.addAll(jp.revati.skyabyss.titan.domain.DomainRoomSelfTest.steps());
         steps.addAll(TitanBackSelfTest.trialSteps());
-        // 試練のプール (引き方・修飾・全変種・今週の試練・図鑑・戸・複数グループ)。docs/design/29。背を建て直すので最後。SKYABYSS_SELFTEST_ONLY="trial pool"
+        // 試練のプール (引き方・修飾・全変種・図鑑・戸・複数グループ)。docs/design/29。背を建て直すので最後。SKYABYSS_SELFTEST_ONLY="trial pool"
         steps.addAll(jp.revati.skyabyss.trial.TrialPoolSelfTest.steps());
         // 余燼の試練の階 (E02・E06・E07・E10)。docs/design/29 の 3.4。SKYABYSS_SELFTEST_ONLY="trial pool ember"
         steps.addAll(jp.revati.skyabyss.trial.ember.EmberDeckSelfTest.steps());
-        // 試練を越えたあと (範囲・碑・鼓動の間への戻り・パーティごとの封)。docs/design/29 の 4.6。背が建ててある巨神だけ世界の検査をする
-        steps.addAll(jp.revati.skyabyss.trial.TrialHubSelfTest.steps());
+        // 巨神の順路 (入口・段の運び・中ボス・あきらめ・区画)。docs/design/32。背が建ててある巨神だけ世界の検査をする。SKYABYSS_SELFTEST_ONLY="trial route"
+        steps.addAll(jp.revati.skyabyss.trial.TrialRouteSelfTest.steps());
+        // 区画の写し (写せるセルを区画へ写して動かす)。docs/design/32 の 5 章。SKYABYSS_SELFTEST_ONLY="trial slot"
+        steps.addAll(jp.revati.skyabyss.trial.TrialSlotSelfTest.steps());
+        // 巨神の祠・歌片・巨神の見え方。docs/design/32 の 3 章。SKYABYSS_SELFTEST_ONLY="trial shrine"
+        steps.addAll(jp.revati.skyabyss.titan.shrine.ShrineSelfTest.steps());
         return steps;
     }
 

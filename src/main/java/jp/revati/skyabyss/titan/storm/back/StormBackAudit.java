@@ -31,9 +31,8 @@ public final class StormBackAudit {
         s.scan.add(new Box(RIB_X1 - 2, 168, BONE_Z1 - 2, RIB_X2 + 2, RIB_TOP_Y + 8, BONE_Z2 + 2));
         s.scan.add(new Box(-20, 144, -152, 20, 172, HUB.z1() - 1));
         s.scan.add(new Box(-36, 112, -54, 24, HUB.floor(), 8));
-        // 任意の翼 (26 の 9.5): 背の広場・二つの塔・尾羽の庭
-        s.scan.add(new Box(-48, StormExtra.DECK_Y, 9, 48, StormExtra.TOP_Y + 9, 37));
-        s.scan.add(new Box(-36, StormExtra.GARDEN_Y, StormExtra.GARDEN_Z1, 36, StormExtra.GARDEN_Y + 16, StormExtra.GARDEN_Z2));
+        // 背の広場 (橋の根元。螺旋の出口と甲板の床の下)
+        s.scan.add(new Box(-24, StormDeck.Y, 9, 24, StormDeck.Y + 9, 37));
         // 西の骨の割れた床 (WEST_GAPS): わざとの穴。落ちると雲の下へ出て嵐に投げ返される
         for (int[] g : WEST_GAPS) {
             s.allowHole.add(new Box(g[0] - 1, 130, BONE_Z1, g[1] + 1, 175, BONE_Z2 + 1));
@@ -93,8 +92,6 @@ public final class StormBackAudit {
         s.goals.put("elbow", WEST_ELBOW.offset(0, 1, 4));
         s.goals.put("west vault", VAULT_CACHE_W.offset(0, 0, 3));
         s.goals.put("east vault", VAULT_CACHE_E.offset(0, 0, 3));
-        s.goals.put("cache west", CACHE_WEST.offset(0, 0, 2));
-        s.goals.put("cache east", CACHE_EAST.offset(0, 0, 2));
         s.goals.put("west stone ledge", WEST_STONE.offset(1, 0, 0));
         s.goals.put("tail hall", TAIL_CENTER);
         s.goals.put("eye hall", EYE_HALL_CENTER.offset(1, 0, 6));
@@ -102,9 +99,6 @@ public final class StormBackAudit {
         s.goals.put("east perch", EAST_STONE.offset(-1, 0, 0));
         s.goals.put("beak room", FRONT_STONE.offset(1, 0, 0));
         s.goals.put("heart room", HEART_ROOM.offset(0, 2, 8));
-        for (var e : StormExtra.goals().entrySet()) {
-            s.goals.put(e.getKey(), e.getValue());
-        }
         if (StormDeck.placed()) {
             s.goals.putAll(StormDeck.goals());
             s.goals.putAll(StormDeck2.goals());

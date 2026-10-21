@@ -18,7 +18,7 @@ import net.minecraft.world.level.block.state.BlockState;
 // 雷翼の背の鳥を建てる (12 の 3.2〜3.3節・26 の 3.3)。サーバーの起動のときに一度だけ動く。
 // 順番: 鳥の形 (BackShape storm_back/bird.bin。中は詰まっている) → 尾羽の上の到着・羽軸の道・羽の広場 → 羽根の門と腰の回廊 → 尾の間 →
 //       風の広間 (昇り風・凪の塔・上の回廊・天窓・竜骨の門・羽軸の柱・行き先の線) → 西の骨・東の骨 (StormWingBuilder) → 首・冠の間・眼の間 (StormHeadBuilder) →
-//       竜骨の下の道と前室と竜骨の間 → 掘った所の内壁を風の民の石に (skin) → 休み場・碑文・石・抜け道の床
+//       竜骨の下の道と前室と竜骨の間 → 掘った所の内壁を風の民の石に (skin) → 休み場・碑文・石
 // 拍で動く所 (昇り風、横風、落雷、骨の戸の開け閉め、鏡の向き) は試練の側 (StormBackTrials ほか) が置く
 public final class StormBirdBuilder {
     public static final BackShape BIRD = new BackShape("/data/skyabyss/storm_back/bird.bin");
@@ -56,7 +56,6 @@ public final class StormBirdBuilder {
         StormWingBuilder.east(kit);
         StormHeadBuilder.front(kit);
         keel(kit);
-        StormExtraBuilder.build(kit);
         StormDeckBuilder.build(kit);
         StormSilhouette.build(kit);
         int skinned = kit.skin(StormBirdBuilder::styleAt);
@@ -201,7 +200,7 @@ public final class StormBirdBuilder {
         }
     }
 
-    // ---------------------------------------------------------------- 羽の広場 (道の途中の広い台。休み場 tail。西と東に見晴らしの碑と宝箱)
+    // ---------------------------------------------------------------- 羽の広場 (道の途中の広い台。休み場 tail。西と東に見晴らしの碑)
     private static void plaza(StormKit kit) {
         Area a = TAIL_PLAZA;
         int fy = a.floor();
@@ -251,14 +250,6 @@ public final class StormBirdBuilder {
         // 羽軸の柱 (広場の目印)。道のそば (x ±9) に 2 本
         for (int sx : new int[] {-10, 10}) {
             StormDeco.featherPillar(kit, sx, PLAZA_CENTER.getZ(), fy, 8);
-        }
-        // 見晴らしの宝箱 (西・東。見た目だけ。右クリックで StormCaches が贈り物を渡す)
-        for (BlockPos c : new BlockPos[] {CACHE_WEST, CACHE_EAST}) {
-            kit.put(c.getX(), c.getY(), c.getZ(), jp.revati.skyabyss.relic.RelicBlocks.cache(jp.revati.skyabyss.relic.RelicStyle.STORM, Direction.SOUTH));
-            kit.put(c.getX(), c.getY() - 1, c.getZ(), StormKit.COPPER);
-            // 宝箱の両脇の灯り
-            kit.put(c.getX() - 1, c.getY(), c.getZ(), StormKit.LAMP);
-            kit.put(c.getX() + 1, c.getY(), c.getZ(), StormKit.LAMP);
         }
         // 広場の四隅と南北の口の灯りの柱
         for (int sx : new int[] {a.x1(), a.x2()}) {
@@ -335,8 +326,7 @@ public final class StormBirdBuilder {
         for (int lx : new int[] {-2, 2}) {
             kit.put(lx, a.floor(), 36, StormKit.LAMP);
         }
-        // 炉 (共鳴の炉) と飾りの焚き火、腰掛け
-        kit.put(10, a.floor() + 1, 43, ModBlocks.RESONANCE_FORGE.get().defaultBlockState());
+        // 飾りの焚き火と腰掛け (共鳴の炉は置かない。背の中には無い)
         kit.put(-10, a.floor() + 1, 43, jp.revati.skyabyss.relic.RelicBlocks.hearth(jp.revati.skyabyss.relic.RelicStyle.STORM, true));
         StormDeco.bench(kit, -12, -9, 30, 30, a.floor() + 1, Direction.SOUTH);
         // 羽軸の柱 (入口の左右)
@@ -658,7 +648,7 @@ public final class StormBirdBuilder {
         }
     }
 
-    // ---------------------------------------------------------------- 休み場・碑文・石・抜け道の床・広間の灯り
+    // ---------------------------------------------------------------- 休み場・碑文・石・広間の灯り
     private static void fixtures(StormKit kit) {
         for (StormBackLayout.Rest r : RESTS) {
             kit.campfire(r.campfire());
@@ -672,9 +662,6 @@ public final class StormBirdBuilder {
         }
         for (Inscription i : ENTRANCE_SIGNS) {
             kit.wallSign(i.pos(), i.facing(), i.key());
-        }
-        for (BlockPos p : new BlockPos[] {RETURN_WEST, RETURN_EAST, RETURN_FRONT}) {
-            kit.put(p.getX(), p.getY(), p.getZ(), StormKit.SLATE);
         }
         for (BlockPos p : new BlockPos[] {LAMP_WEST, LAMP_EAST, LAMP_FRONT}) {
             kit.put(p.getX(), p.getY(), p.getZ(), StormKit.SLATE);

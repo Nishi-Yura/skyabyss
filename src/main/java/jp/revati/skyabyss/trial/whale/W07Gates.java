@@ -33,6 +33,18 @@ import net.minecraft.world.level.block.state.BlockState;
 //   複数: 取っ手ごとに一人が立つ。声をかけ合う。
 // 修飾: 配置 3 (どの三つが生きているか)・数字 2 (猶予 14・11・8 秒 / 保つ 1・2・3 秒)・障害 (水位: 一つの取っ手が 4 秒だけ水没して効かない)・任意の目標 (一度も猶予を切らさずに)
 public final class W07Gates implements TrialCell {
+    // 区画の写しで動かせる (決まりは arm・tick・onUse・disarm・overlay の中だけで座標を使う。docs/design/32 の 5 章)
+    @Override
+    public boolean relocatable() {
+        return true;
+    }
+
+    // 入口の休み場が戸の前の広間 S0なので、それも写す
+    @Override
+    public net.minecraft.world.phys.AABB buildBox() {
+        return TrialCell.super.buildBox().minmax(WhaleDeck.S0.aabb().inflate(1));
+    }
+
     public static final int[] PAD_X = {-16, 4, -16, 4};
     public static final int[] PAD_Z = {88, 88, 106, 106};
     public static final int[][] LIVE = {{0, 1, 2}, {1, 2, 3}, {0, 2, 3}};

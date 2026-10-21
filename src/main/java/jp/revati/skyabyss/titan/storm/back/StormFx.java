@@ -41,7 +41,9 @@ public final class StormFx {
                 continue;
             }
             if (pl.distanceToSqr(x, y, z) < RANGE * RANGE) {
-                level.sendParticles(pl, p, true, x, y, z, count, dx, dy, dz, speed);
+                // 区画の写しのセルの決まりの中 (TrialFrame) では、手本の座標で比べて写しの座標に出す
+                net.minecraft.world.phys.Vec3 at = jp.revati.skyabyss.trial.TrialFrame.current().world(new net.minecraft.world.phys.Vec3(x, y, z));
+                level.sendParticles(pl, p, true, at.x, at.y, at.z, count, dx, dy, dz, speed);
             }
         }
     }

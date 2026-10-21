@@ -19,6 +19,9 @@ public final class TravelDest {
         if (dest.kind() == 2) {
             return Component.translatable("progress.skyabyss.titan." + dest.name());
         }
+        if (dest.kind() == 3) {
+            return Component.translatable("gui.skyabyss.travel.shrine", Component.translatable("progress.skyabyss.titan." + dest.name()));
+        }
         if (!dest.name().isEmpty()) {
             return Component.literal(dest.name());
         }

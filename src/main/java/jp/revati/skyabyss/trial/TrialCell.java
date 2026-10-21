@@ -45,6 +45,8 @@ public interface TrialCell {
         public final long startTick;
         public boolean cleared;
         public boolean goalOk = true;
+        // 区画の写しで動かすときの、手本からのずれ (docs/design/32 の 5 章。ZERO = 手本の部屋)
+        public TrialFrame frame = TrialFrame.ZERO;
         public long clearedAt;
         public long lastPresent;
         public final Map<String, Object> data = new HashMap<>();
@@ -116,5 +118,33 @@ public interface TrialCell {
     // 動かす仕組みのあるセルか (false = 原型の包み。もとの仕組みが動かす)
     default boolean runtime() {
         return true;
+    }
+
+    // 区画に写して動かせるか (docs/design/32 の 5 章)。決まりがセルの呼び出し (arm・tick・onUse・disarm・overlay) の中だけで
+    // 座標を使うセルだけ true にする。false なら背の中の手本の部屋を、グループごとの上書きで共有する
+    default boolean relocatable() {
+        return false;
+    }
+
+    // 区画へ写す箱 (手本の座標)。既定は床の範囲・休み場・戸・ゴール・光る床を囲んで 3 ブロック広げたもの
+    default AABB buildBox() {
+        Ports p = ports();
+        AABB box = p.area();
+        for (Rest r : p.rests()) {
+            box = box.minmax(r.area().aabb());
+        }
+        for (BlockPos b : p.entrance()) {
+            box = box.minmax(new AABB(b));
+        }
+        for (BlockPos b : p.exitGate()) {
+            box = box.minmax(new AABB(b));
+        }
+        if (p.stone() != null) {
+            box = box.minmax(new AABB(p.stone()));
+        }
+        if (p.pad() != null) {
+            box = box.minmax(new AABB(p.pad()));
+        }
+        return box.inflate(3);
     }
 }

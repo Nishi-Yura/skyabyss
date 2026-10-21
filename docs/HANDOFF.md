@@ -1,4 +1,4 @@
-# 引き継ぎ (2026-10-20 時点)
+# 引き継ぎ (2026-10-21 時点)
 
 「天と淵のあいだ」(NeoForge 1.21.1)。今の仕様は `docs/design/README.md` の索引から読む（コードが正）。未決は `docs/design/00_decisions_needed.md` にだけある（エージェントは触らない。番号付けは親）。リポジトリは github.com/Nishi-Yura/skyabyss、作業の幹は `m1-sky-pass`、途中の枝は `wip/*`。
 
@@ -13,7 +13,7 @@
 | 世界の背骨と地図・章の筋 | **採用（2026-10-20）。W1（都）・W3（M の地図）と 34 の C1（一章）は実装済み、W2（方位の跡地と祠）・W4 と 34 の C2〜C5 は未実装**。33 = 世界はバニラのまま、町（約 200×200、ラグニ級。壁・門・空き区画）と跡地と祠だけ固定（方位 北東西南・距離の帯）、M の地図は印だけ。34 = 四章ぶんの物語の背骨と、支度の段でバニラの進み（鉄・船・銅と雷・ダイヤ・醸造）を通すメインクエスト。33 は W1（都。**「絶えかけの国の都」で決定**: 建物は 33 の 2.2、章ごとに施設が開く。見取り図は第 2 回の案 A「鐘の都」で決定。砦は見張りの砦・村人は少し・国の名は「鐘の国」。次は W1 の R0（17 の 3.3・01・05・07 の本文）→ 目覚めと都の場所の選び方 → 都を建てる（建物ごとにラフ 3 案））、34 は C1（一章の骨の坑と支度の段）から。32 の R1 とは独立 | 33・34 |
 | 旅の地図（33 の W3） | **できている**: M で開く印だけの地図（`client/map/TravelMapScreen`、北が上、町が中心、縮尺 600 / 2,400 をホイールで）。印の出どころはサーバーの `map/MapMarks` 一か所（町・野営地・足跡・骨・積み石は序盤の拍子から噂/見た、着いた章の場所、覚えた碑、出会った巨神）+ クライアントの自分・仲間・墓・目的。子の海図は同じ画面に重なる（旧 `TravelChartScreen` は消した）。見た目は設定 `mapStyle`（SLATE 既定 / PARCHMENT / INK。`docs/review/map_roughs/`）。合図「ここ」のキーは M から ' へ移した。自己テスト `travel map`。**まだ**: W2 の四つの跡地・32 の祠・言伝ての板の目印（`MapMarks` に足す）、4.2 の墨の洗い（W4） | 33 の 4 章 |
 | 一章の支度の段（34 の C1。2026-10-21） | **できている**: メインの段 `ch1/trail_iron`（鉄の跡。イサナ）・`trail_blade`（折れた剣。職人）・`trail_shield`（盾と糧。語り部）がイサナの鯨の話のあとに三本とも出る（旧い `ch1/prep_*` を吸収。`PrepQuests` の章の表）。新しいミニダンジョン**骨の坑**（`story/ch1/BonePit`。坑口の肋骨と碑・水没の坑道・前の私の荷・冷えの戸・出口の梯子。部品 `ch1_bone_pit`）、目的 `wear`（着ている防具の数）、頁 4、記念品「鯨追いの印」（`whale_chaser_mark`。案 B）、進捗 `bone_pit`・`whale_trail`、目的の帯の行き先（骨の坑・洞）。生成は `tools/gen_ch1_trails.py`・`gen_ch1_sites.py`・`gen_ch1_trail_assets.py`。自己テスト `ch1 p6`（骨の坑と三本の流れ）ほか。撮影 `tools/shots/ch1_bone_pit.txt`。**まだ**: 骨の坑は拠点のまわりの扇に置く（W2 の北の丘はまだ）、三本を済ませないまま二章へ進むと、三本は進行中のまま残る | 34 の 4.2.2・21 の 3.1・07 の 6.8 |
-| 巨神の順路（レイド化） | **設計だけ（2026-10-20 採用）**。歩 → 智 → 闘 → 中ボス → 心臓の順路。背は順路だけ（鼓動の間・板・誓い・炉・任意の翼・今週の試練は消す）。初回は入口に全員で入ると始まり、周回は祠から専用の品で。順路ごとの区画で待ちなし。巨神は章の当事者にだけ見える。実装の段は 32 の 8 章（R0 は済み、R1 から）。未決は 00 の 205〜208 | 32 |
+| 巨神の順路（レイド化） | **R1〜R4 実装済み（m1-sky-pass に合流済み）**。歩 → 智 → 闘 →（中ボス）→ 心臓の順路（`trial/TrialRoute`）。越えると 4 秒後に参加者を次の段の入口の休み場へ。初回は入口の箱に全員で入ると始まり、周回は地上の巨神の祠（`titan/shrine`）で歌片を一つ使う。今の段のセルの戸だけが開く。中ボスの原型を引いていない周は段 3.5。あきらめは全員の同意で背の外へ。区画（`TrialSlot`）に新作のセルを写して、グループごとに遊ぶ。巨神と乗り込み口は章の当事者とそのパーティにだけ見える（`titan/TitanVisibility`）。鼓動の間の板・碑・封印・今週の試練・任意の翼・既知の道・抜け道・背の炉は消した（版 30）。R5（セルを太らせる）・R6（実機）は未着手 | 32 |
 | 心臓・領域・遺物の選択 | 領域は三つの仕掛けを解くまで続く。心臓を止めると巨神は眠り、遺物は専用画面で選ぶ | 02・30・20 |
 | 巨神の子と旅 | 笛で子を呼び、パーティ全員で乗って海図から行き先を選ぶ。成体は動かない | 09・28 |
 | 成長・スキル | 5 つの木＋旅人の 36 技。天職は専門。タグ・セット・連鎖・構え・熟練・キーストーン・試着・型 4 つ。変異・橋・紋の盤・前世の技・淵の木 | 27 の 17〜18 |
@@ -42,10 +42,10 @@
 
 | 巨神 | 版 | 最近の変更 |
 | --- | --- | --- |
-| 岩鯨 `TitanBackLayout` | 21 | 版 18 で拡大の作り直し、試練の階と鼓動の間の碑 |
-| 潮殻 `TideBackLayout` | 21 | 版 20 で拡大、版 21 で試練の階 `TideDeck` |
-| 雷翼 `StormBackLayout` | 22 | 版 21 で任意の翼、版 22 で試練の甲板。`RaijuNest` は版 4 |
-| 余燼 `EmberBackLayout` | 23 | 版 20 で拡大、版 23 で試練の階 |
+| 岩鯨 `TitanBackLayout` | 30 | 版 30 で任意の翼・抜け道・鼓動の間の板と碑・背の炉を消した（32 の 7 章） |
+| 潮殻 `TideBackLayout` | 30 | 版 30 で息の間・ひれの道・殻の上の寄り道・抜け道・背の炉を消した |
+| 雷翼 `StormBackLayout` | 30 | 版 30 で任意の翼（塔・庭ほか）・抜け道・背の炉を消した。試練の甲板は残す。`RaijuNest` は版 4 |
+| 余燼 `EmberBackLayout` | 30 | 版 30 で脇の洞・抜け道を消した |
 
 版を上げるときは、ほかの背の最大を超えない番号で次に進め（慣習: 他の背の最大の次）、`docs/design/26` の該当章に書く。
 
@@ -61,11 +61,10 @@
 - **嵐の塔の頂の戦い**（雷翼の任意の翼）: 未仕上げ。仕様は 12 の 3.3、26 の 10.5。
 - **試練の P3**: 各巨神を十二にするまで、岩鯨 W08、潮殻 T03・T04・T08・T11・T12、雷翼と余燼の新作 5 つずつ（29 の 5.5）。
 - **モデルの検査（2026-10-20 の時点）**: `python tools/mesh_audit.py` は開いた辺 0・関節 NG 0。ブロックモデルの欠けた面 32 個（遺物のブロック）は `python tools/fix_block_faces.py` で塞いだ。低ポリの「裏面透け」の画素は残る（ash_smith・ash_thrall・bone_mortar・bubble_puffer・storyteller・pearl_keeper など）が、描画は `entityCutoutNoCull`（両面）で、アトラスに透明な画素もないので、ゲームで穴にはならない。**浮いた部品**（休めの姿勢で、ほかのどの部品の面からも 0.35 単位より離れた塊）は、面を 0.3 刻みで標本化して測ると 0（`docs/review/floating_parts.md`）。頂点どうしの距離だけで測ると防具の背の板・鍛え手の腕・番兵の脚の飾りなどが「浮く」と出るが、面では触れている。ゲームで浮いて見える所は、動いた姿勢か絵の見え方なので、場所を指して（スクショ）直す。
-- **順路（32）の実装**: R0（書類）は済み。**R1 の最初の切り口は `wip/raid-route`（worktree `../mod-raid`）にコミット済み**（`trial/TrialRoute`・`RouteCommands`・`TrialRouteSelfTest`。入口の全員判定 → 段 1、越えたら 4 秒後に次の入口へ、三つで心臓の前室、焚き火のあきらめは全員の同意。自己テスト `trial route`・`trial hub` 通過）。**まだ消していない**: 鼓動の間・碑・板・試練の階の回廊・戸の封じ・任意の翼・今週の試練・既知の道（32 の 7 章）。**まだ作っていない**: 段の札と目的の帯の順路の文、区画（R2）、祠と品（R3）、巨神の見え方（R3）。入口の箱（`TrialRoute.entryBox`）は仮の座標で、実機で未確認。worktree の run/ は新しい世界なので、地形依存の段（opening・site cave・chapter sites・ch1 p6・titan ground・ch2・heartbeat ward）は順路と無関係に落ちる（変更前でも同じ）。入口の手がかり:
-  - 越えた合図は `titan/group/TrialSteles.onRung` → `TrialRuntime.onStoneRung`（図鑑・報い）と `TrialHub.onCleared`（4 秒後に `tickPending` が中の人を `sendToHub` で鼓動の間へ）。**ここを「次の段の入口の休み場へ」に差し替える**のが R1 の芯。`TrialHub.sendToHub` の運びの作り（teleportTo・FakePlayer・音）をそのまま使う。
-  - 枠と石の対応: `Trial.Slot`（岩鯨 0 歩 / 1 闘 / 2 智）、潮殻・雷翼は `TrialRegions.drawnCell`（west 歩 / east 智 / front 闘）、余燼は同 190 行あたり（西 歩 / 東 智 / 南 闘）。原型の入口の休み場: 岩鯨 `w0`・`mz0`（`MAZE_ENTRY`）・`e0`（`TitanBackTrials` の Checkpoint 一覧 129〜157 行）、潮殻・雷翼・余燼は各 `*BackTrials`／`EmberTrials` の Checkpoint と `respawnCheckpoint`。
-  - 順路の記録はグループの記録 `BackGroupData.Record` の `keep.trial.*`（`TrialData` に定数。`keep.` はリセットで消えない）。グループの人は `Groups.online/inBox`。
-  - 消す対象（32 の 7 章）: `trial/TrialHub`（封・碑）、`trial/HubTablets`、`trial/TrialBoard*`、`trial/TrialTabletBlock`、`trial/TrialSealBlock`、`trial/WeeklyGate`、各 `*Deck*`（回廊・戸・案内。`TrialCell.build` は残す）、各背の任意の翼と広場・祠・踏み跡の建て方、`FirstRun` の既知の道。
+- **順路（32）の残り**: R1〜R4 は `wip/raid-route`（worktree `../mod-raid`）。自己テスト `trial route`（初回・五周 × 四体の周回・中ボスの段・あきらめ・区画）と `trial shrine`（祠・断り方・歌片・見え方）。**まだ**: R5（セルを太らせる）・R6（実機で四体を一人・二人で通す。入口の箱 `TrialRoute.entryBox` の座標は仮で未確認、中ボスの前室 `TrialMidBoss.restOf` と手前の仕掛けの済ませ方 `prime` も実機で未確認）。区画は新作 36 セルを背の次元の遠く（x 4096 + 番号 × 1024）へ写して動かす（`TrialSlot.build`・`TrialWindow`・`TrialFrame`。自己テスト `trial slot`）。祠の置き場は仮（都の鐘から跡地の方位・距離の帯の近い端。33 の W2 で差し替える）。歌片の絵は仮の 32×32（`tools` ではなく一度だけ書いた）。依頼 `weekly_route` の報いの歌片は岩鯨のものだけ。口の手がかり:
+  - 越えた合図: `TrialSteles.onRung` → `TrialRuntime.onStoneRung`（図鑑・報い）と `TrialRoute.onCleared`（今の段なら 4 秒後に `carry`）。原型の石は近づくだけ（`TrialStones`）。
+  - 段ごとの試練は `TrialRoute.defOf(draw, step)`、入口の休み場は `entryRest`、戸は `TrialRuntime.syncGates`（今の段だけ）。記録は `keep.trial.step/mid/route/party/start/slot`。
+  - 祠: `TitanShrine.ensure`（心臓を初めて止めたときに建つ）・`hold`/`activate`（長押し）・`refusal`。祠の画面は旧試練の板の画面（`TrialBoard`・`TrialBoardNet`・`client/trial/TrialBoardScreen`）。開発用 `/skyroute shrine <巨神>`・`/skyroute shard <巨神>`・`/skyroute status|start|clear`。
 - **一章の敵がフルスイートの負荷で不安定**: 自己テストの全体を回すと、一章の mob の段が時々落ちる。単独の `SKYABYSS_SELFTEST_ONLY` では通る。
 - **新しい世界で揺れる自己テスト（2026-10-21 に 3 回流して確認）**: `heartbeat ward`・`site cave`・`ch2`・`young`（着地）・`ch1 back mobs`（突進）・`build audit` の背の明るさと足跡・骨の丘の段は、世界ごとに通ったり落ちたりする（都の作り直しの前から。都の飾りの階段は監査で許可済み）。
 - **岩鯨の広間の広さ**（26 の 8.6）: 1〜2 人には広い。判断待ち。

@@ -40,7 +40,7 @@ public final class TrialBacks {
         // 石の合図の巨神の名前 (TrialSteles)
         String signal();
 
-        // 引いた枠の石が鳴っているか。drawn = そのセルを引いている (引いていない今週の試練は、セルごとの旗)
+        // 引いた枠の石が鳴っているか。drawn = そのセルを引いている (引いていない試練は、セルごとの旗。順路では使わない)
         boolean isRung(ServerLevel back, UUID group, Def def, boolean drawn);
 
         // 石を鳴らす (記録・光・音・知らせ。図鑑と報いは呼ぶ側)。drawn のとき、枠の石として数える

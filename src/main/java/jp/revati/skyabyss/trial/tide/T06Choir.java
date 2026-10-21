@@ -39,6 +39,12 @@ import net.minecraft.world.level.block.state.BlockState;
 //   一人: 壁画をしばらく見返せる (書見台。冷めるのが早い)。 三人から: 合唱が長い。 「うねり」の障害は、ときどき二つの貝が色を取り替える (予告つき)。
 // 修飾: 数字 2 (合唱の長さ 3・4・5 / 壁画の見え方: 出しっぱなし・25 秒・12 秒で消える)・障害 (うねり)・任意の目標 (一度も濁らせずに)
 public final class T06Choir implements TrialCell {
+    // 区画の写しで動かせる (決まりは arm・tick・onUse・disarm・overlay の中だけで座標を使う。docs/design/32 の 5 章)
+    @Override
+    public boolean relocatable() {
+        return true;
+    }
+
     public static final int PEDS = 7;
     public static final int PED_X0 = 56;
     public static final int PED_Z = 57;

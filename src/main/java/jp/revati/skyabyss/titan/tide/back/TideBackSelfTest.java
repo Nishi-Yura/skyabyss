@@ -215,8 +215,6 @@ public final class TideBackSelfTest {
             TideDeck.SIGNS.forEach(i -> expected.add(i.pos()));
             TideDeck.SIGNS2.forEach(i -> expected.add(i.pos()));
         }
-        TideCaches.CACHES.forEach(c -> expected.add(c.tablet()));
-        TideCaches.TABLETS.forEach(t -> expected.add(t.pos()));
         java.util.Set<String> keys = new java.util.TreeSet<>();
         int count = 0;
         for (int cx = TideTurtle.minX() >> 4; cx <= TideTurtle.maxX() >> 4; cx++) {
@@ -273,7 +271,7 @@ public final class TideBackSelfTest {
                     continue;
                 }
                 if (back.getBlockState(new BlockPos(x, top, z)).isAir() && back.getBlockState(new BlockPos(x, top - 1, z)).isAir()
-                        && back.getBlockState(new BlockPos(x, top - 2, z)).isAir() && !nearOpening(x, z)) {
+                        && back.getBlockState(new BlockPos(x, top - 2, z)).isAir()) {
                     holes++;
                     if (holes <= 5) {
                         failures.add("hole in the shell at " + x + "," + top + "," + z);
@@ -368,10 +366,6 @@ public final class TideBackSelfTest {
         }
         int[] box = {x0, x1, z0, z1, y0, y1};
         flood(start, open, enclosed, box, failures, notes, "rooms", true);
-        // 息の間 (予約の間 1〜3・気室・舞台・展望の間): 中から調べて、外へ抜ける口が戸口 (崖の穴) のほかに 0 であること
-        BlockPos up = new BlockPos(0, UPPER_1.floor() + 1, 18);
-        check(open.test(up) && enclosed.test(up), "reserved room 1 is not an enclosed room at " + up.toShortString(), failures);
-        flood(up, open, enclosed, box, failures, notes, "breath chamber rooms", true);
     }
 
     private static void flood(BlockPos start, java.util.function.Predicate<BlockPos> open, java.util.function.Predicate<BlockPos> enclosed,
@@ -422,33 +416,8 @@ public final class TideBackSelfTest {
         if (p.getX() <= GATE_MOUTH_X2 && p.getZ() >= GATE_MOUTH_Z1 - 12 && p.getY() <= GATE_FLOOR + 62) {
             return true;
         }
-        if (p.getX() <= UPPER_GATE_X + 1 && Math.abs(p.getZ() - UPPER_GATE_Z) <= 3 && p.getY() >= UPPER_1.floor() && p.getY() <= UPPER_1.floor() + 6) {
-            return true;
-        }
         if (Math.abs(p.getX()) >= 104 && p.getZ() >= -48 && p.getZ() <= -2 && p.getY() >= 60) {
             return true;
-        }
-        return p.getY() >= 95 && Math.abs(p.getX() - (TOP_STAIR_X1 + 2)) <= 3 && Math.abs(p.getZ() - (TOP_STAIR_Z1 + 2)) <= 3;
-    }
-
-    private static boolean nearOpening(int x, int z) {
-        int sx = TOP_STAIR_X1 + 2;
-        int sz = TOP_STAIR_Z1 + 2;
-        if (Math.abs(x - sx) <= 3 && Math.abs(z - sz) <= 3) {
-            return true;
-        }
-        if (Math.abs(x) <= 16 && Math.abs(z - TOWER_CZ) <= 20) {
-            return true;
-        }
-        if (Math.abs(x - UPPER_GATE_X) <= 3 && Math.abs(z - UPPER_GATE_Z) <= 3) {
-            return true;
-        }
-        for (int[][] wells : new int[][][] {TideIslandBuilder.GARDEN_WELLS, TideIslandBuilder.FLATS_WELLS, TideIslandBuilder.WATCH_WELLS, TideIslandBuilder.BEACH_WELLS}) {
-            for (int[] w : wells) {
-                if (Math.abs(x - w[0] - 0.5) <= 2 && Math.abs(z - w[1] - 0.5) <= 2) {
-                    return true;
-                }
-            }
         }
         return false;
     }
@@ -725,13 +694,11 @@ public final class TideBackSelfTest {
         Map<Long, Integer> dist = walk(back, ARRIVAL);
         Map<String, BlockPos> should = new java.util.LinkedHashMap<>();
         for (Rest r : RESTS) {
-            // 殻の底の前室は三つの石のあと、息の間の足場 (u1〜u3) は光る泡で昇る (歩いては行けない)
-            if (!r.id().equals("heart") && !r.id().equals("u1") && !r.id().equals("u2") && !r.id().equals("u3")) {
+            // 殻の底の前室は三つの石のあと
+            if (!r.id().equals("heart")) {
                 should.put("rest " + r.id(), r.spawn());
             }
         }
-        should.put("breath chamber (room 1 floor)", new BlockPos(0, UPPER_1.floor() + 1, 18));
-        should.put("breath entry bubble", TideBackAudit.landingBlock(BreathLayout.entry()));
         should.put("clam", new BlockPos(CLAM[0] + 2, GARDEN_FLOOR + 1, CLAM[1] - 2));
         should.put("altar", new BlockPos(ALTAR[0] + 1, ALTAR_TOP + 1, ALTAR[1] + 1));
         should.put("east gallery", new BlockPos(22, HUB_LEDGE + 1, -4));
@@ -740,10 +707,6 @@ public final class TideBackSelfTest {
         should.put("front stone", STONE_FRONT.offset(0, 0, 1));
         // 甲羅の上 (外) と頂の塔の柱の段へは、浜の西の壁の段と塔の螺旋で行ける (21 章)
         should.put("beach", new BlockPos(-30, BEACH.floor() + 1, 80));
-        should.put("shell top", new BlockPos(TOP_STAIR_X1 + 2, shellTop(TOP_STAIR_X1 + 2, TOP_STAIR_Z1 - 4) + 1, TOP_STAIR_Z1 - 4));
-        should.put("shell top (far)", new BlockPos(90, shellTop(90, -5) + 1, -5));
-        should.put("shell top (north)", new BlockPos(0, shellTop(0, -102) + 1, -102));
-        should.put("shell top (before the reserved gate)", new BlockPos(UPPER_GATE_X - 4, shellTop(UPPER_GATE_X - 4, UPPER_GATE_Z) + 1, UPPER_GATE_Z));
         for (Map.Entry<String, BlockPos> e : should.entrySet()) {
             BlockPos g = e.getValue();
             if (!dist.containsKey(g.asLong())) {
@@ -771,11 +734,6 @@ public final class TideBackSelfTest {
         shouldNot.put("east ledge", new BlockPos(83, LEDGE_FLOOR + 1, -37));
         shouldNot.put("heart rest", RESTS.get(5).spawn());
         // 息の間: 光る泡に乗らないと昇れない (皿・足場・舞台・展望の間へは歩いて行けない)
-        shouldNot.put("breath dish 0", TideBackAudit.landingBlock(BreathLayout.dishNode(0)));
-        shouldNot.put("breath ledge u1", RESTS.get(7).spawn());
-        shouldNot.put("breath ledge u2", RESTS.get(8).spawn());
-        shouldNot.put("breath summit", TideBackAudit.landingBlock(BreathLayout.arena()));
-        shouldNot.put("breath deck", RESTS.get(9).spawn());
         shouldNot.put("garden from above", new BlockPos(PLAT_C[0], PLATFORM_TOP + 1, PLAT_C[1]).above(30));
         shouldNot.put("garden wall top", new BlockPos(-50, GARDEN_WALL_TOP + 1, 20));
         for (Map.Entry<String, BlockPos> e : shouldNot.entrySet()) {
@@ -1007,7 +965,6 @@ public final class TideBackSelfTest {
         // 光るのは鳴らしたグループの見かけだけ。ワールドの石は「まだ鳴っていない」形のまま
         Map<BlockPos, BlockState> overlay = jp.revati.skyabyss.titan.group.GroupOverlays.compute(back, TEST);
         check(overlay.containsKey(STONE_WEST) && jp.revati.skyabyss.trial.TrialGoal.isReached(overlay.get(STONE_WEST)), "west stone not lit for the group", failures);
-        check(TideKit.LAMP.equals(overlay.get(RETURN_WEST)), "west return floor not lit for the group", failures);
         check(!jp.revati.skyabyss.trial.TrialGoal.isReached(back.getBlockState(STONE_WEST)), "the world's west stone was lit (it should stay unlit for other groups)", failures);
         // 前の石は潮招きを倒すまで黙る
         TideBackTrials.useStone(back, STONE_FRONT, fake, net.minecraft.world.item.ItemStack.EMPTY);

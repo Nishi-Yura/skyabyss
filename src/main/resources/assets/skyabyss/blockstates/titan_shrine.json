@@ -1,0 +1,64 @@
+{
+  "variants": {
+    "facing=north,titan=whale": {
+      "model": "skyabyss:block/titan_shrine_whale"
+    },
+    "facing=east,titan=whale": {
+      "model": "skyabyss:block/titan_shrine_whale",
+      "y": 90
+    },
+    "facing=south,titan=whale": {
+      "model": "skyabyss:block/titan_shrine_whale",
+      "y": 180
+    },
+    "facing=west,titan=whale": {
+      "model": "skyabyss:block/titan_shrine_whale",
+      "y": 270
+    },
+    "facing=north,titan=tide": {
+      "model": "skyabyss:block/titan_shrine_tide"
+    },
+    "facing=east,titan=tide": {
+      "model": "skyabyss:block/titan_shrine_tide",
+      "y": 90
+    },
+    "facing=south,titan=tide": {
+      "model": "skyabyss:block/titan_shrine_tide",
+      "y": 180
+    },
+    "facing=west,titan=tide": {
+      "model": "skyabyss:block/titan_shrine_tide",
+      "y": 270
+    },
+    "facing=north,titan=storm": {
+      "model": "skyabyss:block/titan_shrine_storm"
+    },
+    "facing=east,titan=storm": {
+      "model": "skyabyss:block/titan_shrine_storm",
+      "y": 90
+    },
+    "facing=south,titan=storm": {
+      "model": "skyabyss:block/titan_shrine_storm",
+      "y": 180
+    },
+    "facing=west,titan=storm": {
+      "model": "skyabyss:block/titan_shrine_storm",
+      "y": 270
+    },
+    "facing=north,titan=ember": {
+      "model": "skyabyss:block/titan_shrine_ember"
+    },
+    "facing=east,titan=ember": {
+      "model": "skyabyss:block/titan_shrine_ember",
+      "y": 90
+    },
+    "facing=south,titan=ember": {
+      "model": "skyabyss:block/titan_shrine_ember",
+      "y": 180
+    },
+    "facing=west,titan=ember": {
+      "model": "skyabyss:block/titan_shrine_ember",
+      "y": 270
+    }
+  }
+}

@@ -71,23 +71,9 @@ record ZonePalette(String name, BlockState wall, BlockState wallAlt, BlockState 
             b(Blocks.POLISHED_BLACKSTONE), b(Blocks.POLISHED_BLACKSTONE_BRICKS), b(Blocks.BLACKSTONE), b(Blocks.GILDED_BLACKSTONE), b(Blocks.GILDED_BLACKSTONE),
             b(Blocks.CHISELED_POLISHED_BLACKSTONE), b(Blocks.DARK_OAK_LOG), b(Blocks.SHROOMLIGHT), b(Blocks.SHROOMLIGHT), true);
 
-    // 骨の書庫: 黒樫の板と書棚
-    static final ZonePalette LIBRARY = new ZonePalette("library", b(Blocks.DARK_OAK_PLANKS), b(Blocks.STRIPPED_DARK_OAK_LOG), b(Blocks.SPRUCE_PLANKS),
-            b(Blocks.DARK_OAK_PLANKS), b(Blocks.DARK_OAK_PLANKS), b(Blocks.STRIPPED_DARK_OAK_LOG), b(Blocks.CHISELED_BOOKSHELF), b(Blocks.BOOKSHELF),
-            b(Blocks.DARK_OAK_LOG), b(Blocks.SHROOMLIGHT), b(Blocks.SHROOMLIGHT), true);
-
-    // 歌の祠: 滑らかな玄武岩・方解石・紫水晶
-    static final ZonePalette SONG = new ZonePalette("song", b(Blocks.SMOOTH_BASALT), b(Blocks.CALCITE), b(Blocks.CALCITE), b(Blocks.SMOOTH_BASALT),
-            b(Blocks.SMOOTH_BASALT), b(Blocks.CALCITE), b(Blocks.AMETHYST_BLOCK), b(Blocks.AMETHYST_BLOCK), b(Blocks.BONE_BLOCK),
-            b(Blocks.PEARLESCENT_FROGLIGHT), b(Blocks.PEARLESCENT_FROGLIGHT), false);
-
     // 封印の回廊 (心臓へ): 赤いネザーレンガと泣く黒曜石 (泣く黒曜石が灯りになる)
     static final ZonePalette HEARTWAY = new ZonePalette("heartway", b(Blocks.RED_NETHER_BRICKS), b(Blocks.CRACKED_NETHER_BRICKS), b(Blocks.POLISHED_BLACKSTONE),
             b(Blocks.NETHER_BRICKS), b(Blocks.NETHER_BRICKS), b(Blocks.CRYING_OBSIDIAN), b(Blocks.CRYING_OBSIDIAN), b(Blocks.CHISELED_NETHER_BRICKS),
             b(Blocks.BONE_BLOCK), b(Blocks.CRYING_OBSIDIAN), b(Blocks.SHROOMLIGHT), false);
 
-    // 胸びれの道: 方解石と骨 (外の風に晒された白い石)
-    static final ZonePalette FIN = new ZonePalette("fin", b(Blocks.CALCITE), b(Blocks.TUFF_BRICKS), b(Blocks.POLISHED_TUFF), b(Blocks.TUFF_BRICKS),
-            b(Blocks.TUFF_BRICKS), b(Blocks.BONE_BLOCK), b(Blocks.CHISELED_TUFF_BRICKS), b(Blocks.CHISELED_TUFF_BRICKS), b(Blocks.BONE_BLOCK),
-            b(Blocks.SEA_LANTERN), b(Blocks.SEA_LANTERN), false);
 }

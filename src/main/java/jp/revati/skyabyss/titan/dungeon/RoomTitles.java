@@ -23,12 +23,10 @@ import net.neoforged.neoforge.event.server.ServerStoppedEvent;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 
 // 岩鯨の背の「何の部屋か分からない」部屋に、入ったときの題と一行を出す (試遊の声: 入って左の部屋・アスレの途中の鐘の部屋は何)。
-//  骨の書庫 (入口の通路の西。任意): 十二の壁龕の碑を読み、奥の書棚 (12 番目) で追憶の宝がもらえる
 //  数え歌の鐘楼 (西の翼の途中。初回のみ働く): 五つの鐘を低い方から順に叩くと、崩れ橋への戸がほどける。周回は戸が最初から開いている
 // 入るたびに出すが、同じ部屋には 60 秒は出し直さない
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class RoomTitles {
-    public static final String LIBRARY = "library";
     public static final String BELL_ROOM = "bell";
     private static final int AGAIN = 1200;
 
@@ -41,9 +39,6 @@ public final class RoomTitles {
     // 位置から、いる部屋の名前 (なければ null)
     @Nullable
     public static String roomAt(BlockPos p) {
-        if (TitanBackLayout.LIBRARY.contains(p) || TitanBackLayout.LIBRARY_PASS.contains(p)) {
-            return LIBRARY;
-        }
         if (BELL.contains(p) || BELL_PASS.contains(p)) {
             return BELL_ROOM;
         }

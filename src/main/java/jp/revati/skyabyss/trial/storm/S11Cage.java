@@ -43,6 +43,12 @@ import net.minecraft.world.phys.Vec3;
 // 人数: 襲撃の敵が増え、籠が丈夫になる。一人でも、籠を連れて歩き、敵を雷へ誘って倒せる
 // 修飾: 配置 3 (道の形)・数字 2 (襲撃 2・3・4 回 / 籠の速さ)・敵の組 2 (雷蛾 / 羽守と雷蛾)・障害 2 (二連の雷・空の雷)・任意の目標 (籠を無傷で)
 public final class S11Cage extends StormCell {
+    // 区画の写しで動かせる (決まりは arm・tick・onUse・disarm・overlay の中だけで座標を使う。docs/design/32 の 5 章)
+    @Override
+    public boolean relocatable() {
+        return true;
+    }
+
     static final int[] RAIDS = {2, 3, 4};
     static final double[] SPEED = {0.9, 1.2, 1.6};
     static final double BASE_HP = 36;
@@ -316,7 +322,7 @@ public final class S11Cage extends StormCell {
             at = now + STRIKE_WARN;
             run.put("strikeAt", at);
             run.put("strikeTarget", cage);
-            back.playSound(null, BlockPos.containing(cage), SoundEvents.BEACON_POWER_SELECT, SoundSource.HOSTILE, 1.0f, 1.7f);
+            jp.revati.skyabyss.trial.TrialFx.worldSound(back, BlockPos.containing(cage), SoundEvents.BEACON_POWER_SELECT, SoundSource.HOSTILE, 1.0f, 1.7f);
             if (!run.data.containsKey("warned")) {
                 run.put("warned", true);
                 bar(inside, ModText.hint("message.skyabyss.trial.s11.rule"));

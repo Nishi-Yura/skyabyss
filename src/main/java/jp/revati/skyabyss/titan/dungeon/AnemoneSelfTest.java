@@ -30,7 +30,7 @@ import net.neoforged.neoforge.common.util.FakePlayer;
 
 // 光海 (闇の水路。docs/design/23。AnemoneLights・MazePlan) の自己テスト。段は "titan back (lights)" (SKYABYSS_SELFTEST_ONLY="titan back" で流れる)。
 // 数の決まり (台 3・灯 3・要る数 3)・置き場・苗床・ともす・上書き (台・天井・掲示板・光の道)・なだめる・近道と戸・開く場面・グループごと・リセット・
-// 手持ちをなくしても詰まない・持ち歩きの光・初回の既知の道。計画 (息継ぎのくぼみの間隔・台・近道) は、たくさんの種で確かめる
+// 手持ちをなくしても詰まない・持ち歩きの光・灯の戸 (初回も周回も同じ)。計画 (息継ぎのくぼみの間隔・台・近道) は、たくさんの種で確かめる
 public final class AnemoneSelfTest {
     private AnemoneSelfTest() {
     }
@@ -219,7 +219,6 @@ public final class AnemoneSelfTest {
             BlockPos midBed = MazeBuilder.midPocket(maze).offset(MAZE_CELL - 1, 2, 0);
             check(f, back.getBlockState(midBed).is(ModBlocks.ANEMONE_BED.get()), "anemone bed missing at the mid rest ledge " + midBed);
             check(f, back.getBlockState(MazeBuilder.restSpot(MazeBuilder.midPocket(maze))).isAir(), "the mid rest spot is blocked");
-            check(f, FirstRun.room(AnemoneLights.FIRST_ROOM) != null, "the first-run room for the waterway is not registered");
 
             // ---- 息継ぎのくぼみ: 床の真ん中は魂の砂と泡の柱、床の四隅と天井は水域の色の光
             for (int[] cell : plan.pockets) {
@@ -420,17 +419,11 @@ public final class AnemoneSelfTest {
                     "the carried light did not return the water");
             probeLight = null;
 
-            // ---- 初回を終えたグループは、灯なしで戸・近道が開く (既知の道) うえ、光の道が見える
+            // ---- 初回を終えたグループも、戸は灯で開く (周回は初回と同じ。既知の道はない)
             check(f, !GroupGates.isOpen(back, gc, gate), "test setup: gate open for a fresh group");
             FirstRun.onFirstCleared(back, List.of(gc));
-            check(f, GroupGates.isOpen(back, gc, gate), "a group that finished its first run still needs lamps for the exit gate");
-            for (int i = 0; i < cuts.size(); i++) {
-                check(f, GroupGates.isOpen(back, gc, cuts.get(i)), "a group that finished its first run still has shortcut " + i + " shut");
-            }
-            var known = GroupOverlays.compute(back, gc);
-            check(f, known.get(AnemoneLights.trail(back).get(0)) != null && known.get(AnemoneLights.trail(back).get(0)).is(Blocks.SEA_LANTERN),
-                    "a group that finished its first run does not see the light path");
-            check(f, !GroupGates.isOpen(back, gb, gate), "the known-path door opened for a first-run group");
+            check(f, !GroupGates.isOpen(back, gc, gate), "the exit gate opened for a group that finished its first run without lamps");
+            check(f, !GroupGates.isOpen(back, gb, gate), "the exit gate opened for a first-run group");
         } finally {
             AnemoneLights.extraMembers = List.of();
             if (probeLight != null) {

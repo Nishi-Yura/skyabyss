@@ -34,10 +34,6 @@ public final class EmberWhispers {
             new Whisper("west", false, true, p -> rest("w0").area().grow(1).contains(p)),
             new Whisper("east", false, true, p -> rest("e0").area().grow(1).contains(p)),
             new Whisper("south", false, true, p -> rest("s0").area().grow(1).contains(p)),
-            new Whisper("well", true, false, p -> EmberBodyBuilder.wellDist(p.getX(), p.getZ()) <= WELL_RADIUS && p.getY() > WELL_BOTTOM
-                    && p.getY() < WELL_BOTTOM + 14),
-            new Whisper("crater", true, false, p -> EmberBodyBuilder.wellDist(p.getX(), p.getZ()) <= 14 && p.getY() >= EmberBodyBuilder.crater()),
-            new Whisper("back", true, false, EmberWhispers::onBackTop),
             new Whisper("heart", true, true, p -> HEART_ANTE.grow(1).contains(p)));
 
     private EmberWhispers() {
@@ -51,14 +47,6 @@ public final class EmberWhispers {
         return Math.abs(p.getX() - c.getX()) <= r && Math.abs(p.getZ() - c.getZ()) <= r && Math.abs(p.getY() - c.getY()) <= dy + 1;
     }
 
-    // 背の上 (外) に立っている (火山より南、背骨のまわり)
-    static boolean onBackTop(BlockPos p) {
-        if (p.getZ() < 5 || p.getZ() > 270) {
-            return false;
-        }
-        int top = EmberBodyBuilder.BODY.shellTop(p.getX(), p.getZ());
-        return top != Integer.MIN_VALUE && p.getY() > top && p.getY() <= top + 4 && top > 100;
-    }
 
     @SubscribeEvent
     static void onPlayerTick(PlayerTickEvent.Post event) {

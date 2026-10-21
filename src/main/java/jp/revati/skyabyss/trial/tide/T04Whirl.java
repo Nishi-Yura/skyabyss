@@ -39,6 +39,12 @@ import net.minecraft.world.level.block.state.BlockState;
 //   一人: 周期が長く、栓が長く効く。 三人から: 周期が短く、栓が短い。 「渦」の障害は、道にいる人を横へ押す (予告の泡つき)。
 // 修飾: 配置 3 (拍の位相。どの分かれ道が逆か)・数字 2 (流れの速さ・入れ替わりの間)・障害 (渦)・任意の目標 (一度も押し戻されずに)
 public final class T04Whirl implements TrialCell {
+    // 区画の写しで動かせる (決まりは arm・tick・onUse・disarm・overlay の中だけで座標を使う。docs/design/32 の 5 章)
+    @Override
+    public boolean relocatable() {
+        return true;
+    }
+
     // 溝 (水路 x 22〜30。仕切り x 26)・分かれ道 3 つ (z の始まり)
     public static final int X1 = 22;
     public static final int X2 = 30;

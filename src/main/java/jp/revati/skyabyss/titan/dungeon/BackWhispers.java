@@ -26,18 +26,6 @@ import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class BackWhispers {
     private static final String TAG_HEARD = "skyabyss_back_heard";
-    // 周回の言い回し: 聞いた印の頭と、翻訳キーの尻
-    public static final String REPEAT_PREFIX = "r:";
-    // 周回の言い回しがある囁き (休み場・着いた所・心臓の前。四つの背中の id)。文は message.skyabyss.repeat.<id> (lang は skyabyss_vow)
-    public static final java.util.Set<String> REPEAT_IDS = java.util.Set.of(
-            "plaza", "w0", "w1", "w2", "e0", "ce1", "heart",
-            "tide_landing", "tide_garden", "tide_watch", "tide_flats",
-            "storm_landing", "storm_west", "storm_east", "storm_front", "storm_heart",
-            "ember_mouth", "ember_throat", "ember_west", "ember_east", "ember_south", "ember_heart");
-
-    public static String repeatKey(String id) {
-        return "message.skyabyss.repeat." + id;
-    }
 
     private record Whisper(String id, boolean lore, Predicate<BlockPos> where) {
         String key() {
@@ -97,22 +85,10 @@ public final class BackWhispers {
     // 囁きを一度だけ伝える (潮殻の背の TideWhispers も使う)。restFlag が null でなければ、その印で焚き火の一言も一度だけ添える
     public static void hear(ServerPlayer player, String id, String key, boolean lore, String restFlag, String campfireKey) {
         CompoundTag heard = heard(player);
-        // 周回 (そのグループがこの背中の first_cleared を持つ) で、すでに最初の囁きを聞いた人には、短い周回の言い回し (<key>_repeat) を一度だけ。
-        // 初めての人 (周回のパーティに入った人) は最初の囁きを聞く (案内が入っているので)
-        if (heard.getBoolean(id) && REPEAT_IDS.contains(id) && isRepeatRun(player)) {
-            String repeatId = REPEAT_PREFIX + id;
-            if (heard.getBoolean(repeatId)) {
-                return;
-            }
-            heard.putBoolean(repeatId, true);
-            key = repeatKey(id);
-            // 焚き火の一言は繰り返さない
-            restFlag = null;
-        } else if (heard.getBoolean(id)) {
+        if (heard.getBoolean(id)) {
             return;
-        } else {
-            heard.putBoolean(id, true);
         }
+        heard.putBoolean(id, true);
         if (lore) {
             Notice.narrate(player, key);
             player.playNotifySound(SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.AMBIENT, 0.6f, 0.7f);
@@ -124,12 +100,6 @@ public final class BackWhispers {
             heard.putBoolean(restFlag, true);
             Notice.hint(player, campfireKey);
         }
-    }
-
-    // 背中の中で、そのグループが周回か (心臓を一度止めている)
-    static boolean isRepeatRun(ServerPlayer player) {
-        return player.level() instanceof net.minecraft.server.level.ServerLevel level && jp.revati.skyabyss.titan.TitanBacks.isBack(level.dimension())
-                && !jp.revati.skyabyss.titan.group.FirstRun.isFirstRun(player);
     }
 
     // 聞いたか (自己テスト用)

@@ -25,7 +25,8 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.neoforge.network.PacketDistributor;
 
-// 試練の板の中身を作る (サーバー側。docs/design/29 の 2.7)。全部見える。ただし極のうち一つ (最初の一つ) は「？」(入ってから分かる)。
+// 祠の画面の中身を作る (サーバー側。docs/design/29 の 2.7・32 の 6 章)。全部見える。ただし極のうち一つ (最初の一つ) は「？」(入ってから分かる)。
+// 歌片を作る (craftShard) もここ (祠の東の縁の共鳴の炉の役目。素材 SHARD_MATERIALS と共鳴の欠片 SHARD_RESONANCE で一つ)
 public final class TrialBoard {
     private TrialBoard() {
     }
@@ -45,7 +46,6 @@ public final class TrialBoard {
             return;
         }
         PacketDistributor.sendToPlayer(sp, build(sp, back, t));
-        TrialIntro.onBoardOpened(sp);
     }
 
     public static TrialBoardNet.Open build(ServerPlayer sp, ServerLevel back, String titan) {
@@ -72,15 +72,41 @@ public final class TrialBoard {
         for (TrialDraw.Pick p : draw.picks()) {
             codex.markSeen(id, p.cellId());
         }
-        Def weekly = TrialData.weekly(titan, TrialData.worldSeed(back), TrialData.week());
         List<Row> rows = new ArrayList<>();
         for (Def d : TrialCatalog.of(titan)) {
             TrialCodex.Entry e = codex.peek(id, d.id());
             rows.add(new Row(d.id(), e.seen || e.cleared > 0, e.cleared, e.goals, e.mods.size(), TrialRuntime.modTotal(d)));
         }
-        boolean weeklyDone = codex.weeklyDone(id, titan) == TrialData.week();
-        return new TrialBoardNet.Open(titan, draw.cycle(), cards, weekly == null ? "" : weekly.id(), weeklyDone, weekly != null && draw.has(weekly.id()), rows,
+        int shards = jp.revati.skyabyss.pouch.Pouch.countAll(sp, jp.revati.skyabyss.registry.ModItems.songShard(titan));
+        return new TrialBoardNet.Open(titan, draw.cycle(), cards, shards, codex.routeClears(id, titan), codex.routeBest(id, titan), rows,
                 List.copyOf(codex.titles(id)), Abyss.open(sp), Abyss.on(r));
+    }
+
+    public static final int SHARD_MATERIALS = 24;
+    public static final int SHARD_RESONANCE = 6;
+
+    // 歌片を作る: その巨神の素材 SHARD_MATERIALS と共鳴の欠片 SHARD_RESONANCE。祠のそばで、その巨神の心臓を止めた人だけ
+    public static boolean craftShard(ServerPlayer sp, String titan) {
+        if (!Titans.hasBack(titan) || !jp.revati.skyabyss.titan.shrine.TitanShrine.near(sp, titan)
+                || !jp.revati.skyabyss.progress.Progression.stopped(sp.server, sp.getUUID(), titan)) {
+            Notice.bar(sp, ModText.deny("message.skyabyss.shrine.craft_far"));
+            return false;
+        }
+        net.minecraft.world.item.Item mat = jp.revati.skyabyss.titan.vow.Vows.materialOf(titan);
+        net.minecraft.world.item.Item res = jp.revati.skyabyss.registry.ModItems.resonanceShard(titan);
+        if (!sp.isCreative() && (jp.revati.skyabyss.pouch.Pouch.countAll(sp, mat) < SHARD_MATERIALS
+                || jp.revati.skyabyss.pouch.Pouch.countAll(sp, res) < SHARD_RESONANCE)) {
+            Notice.bar(sp, ModText.deny("message.skyabyss.shrine.craft_short", SHARD_MATERIALS, mat.getDescription(), SHARD_RESONANCE, res.getDescription()));
+            return false;
+        }
+        if (!sp.isCreative()) {
+            jp.revati.skyabyss.pouch.Pouch.take(sp, mat, SHARD_MATERIALS);
+            jp.revati.skyabyss.pouch.Pouch.take(sp, res, SHARD_RESONANCE);
+        }
+        jp.revati.skyabyss.pouch.PouchRouting.placeBack(sp, new net.minecraft.world.item.ItemStack(jp.revati.skyabyss.registry.ModItems.songShard(titan)));
+        Notice.gain(sp, ModText.progress("message.skyabyss.shrine.shard_gained", jp.revati.skyabyss.registry.ModItems.songShard(titan).getDescription()));
+        open(sp, titan);
+        return true;
     }
 
     public enum Toggle { CHANGED, SAME, LOCKED }

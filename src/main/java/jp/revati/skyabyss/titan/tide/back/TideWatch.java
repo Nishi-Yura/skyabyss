@@ -143,7 +143,6 @@ public final class TideWatch {
         spawned = false;
         level.setBlock(STONE_EAST.below(), Blocks.CHISELED_SANDSTONE.defaultBlockState(), 3);
         level.setBlock(STONE_EAST, jp.revati.skyabyss.trial.TrialGoal.mark(), 3);
-        level.setBlock(RETURN_EAST, TideKit.DARK, 3);
     }
 
     // 部屋を手放した: 敵を消し、取っ手を戻す (次の持ち主が入ったときに、その配置で作り直す)

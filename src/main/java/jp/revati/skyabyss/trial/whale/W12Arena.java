@@ -22,6 +22,12 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 // 仕組みは RingArenaCell (円い床・崩れる順・橋。少人数も円は全面 (26 の 8.7))。ここは敵 (剣と盾 / 射手つき。最後の波は番兵長の影つき) と、場所だけを決める。
 // 修飾: 配置 3 (崩れる順)・数字 2 (波の敵の数・崩れる前の予告)・敵の組 2 (剣と盾 / 射手つき)・障害 (落石)・任意の目標 (一度も落ちずに)
 public final class W12Arena extends RingArenaCell {
+    // 区画の写しで動かせる (決まりは arm・tick・onUse・disarm・overlay の中だけで座標を使う。docs/design/32 の 5 章)
+    @Override
+    public boolean relocatable() {
+        return true;
+    }
+
     private final Def def = TrialCatalog.get("W12");
     private final Ports ports = new Ports(WhaleDeck.W12_GATE, false, List.of(), WhaleDeck.W12_STONE, WhaleDeck.W12_PAD, WhaleDeck.REST_S1,
             WhaleDeck.W12.aabb(), WhaleDeck.rests().stream().filter(r -> r.id().equals(WhaleDeck.REST_W12)).toList());

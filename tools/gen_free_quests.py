@@ -576,16 +576,28 @@ quest("daily_bone_sentry", 63, ("骨の番兵の見回り", "Sentinel Rounds"),
 # ---- 言伝ての板 (週替わり)
 quest("weekly_back_trials", 80, ("背中の試練", "Trials of the Back"),
       ("岩鯨の背の試練を三つ越える。一緒にいた仲間も数える。", "Clear three trials on the stone whale's back. Party members with you count too."),
-      ("共鳴石が三度鳴った。", "The resonance stones rang three times."),
-      [stage("trials", ("板の紙：「鯨の背の試練を、三つ越えてきてほしい。共鳴石が鳴るのを聞いたら、それでいい。——鯨追い」",
-                        "A note on the board: \"Clear three of the trials on the whale's back. Once you hear the resonance stone ring, "
+      ("ゴールが三度鳴った。", "The goals rang three times."),
+      [stage("trials", ("板の紙：「鯨の背の試練を、三つ越えてきてほしい。光る印に着いたら、それでいい。——鯨追い」",
+                        "A note on the board: \"Clear three of the trials on the whale's back. Once you reach the glowing mark, "
                         "that's enough. —The whale chaser\""),
-             [ob("trial", "signal", "岩鯨の背の試練を越える（共鳴石が鳴る）", "Clear a trial on the stone whale's back (the resonance stone rings)",
+             [ob("trial", "signal", "岩鯨の背の試練を越える（ゴールの印に着く）", "Clear a trial on the stone whale's back (reach the goal mark)",
                  target="back_trial_cleared", count=3)])],
       {"xp": 100, "items": [{"item": "skyabyss:stone_whale_shard", "count": 3}, {"item": "skyabyss:resonance_shard_stone_whale", "count": 1}]},
       repeat="weekly", board=True, unlock_=lore("chapter1/sky_ruins"),
       unlock_hint=("岩鯨の背に渡ると、受けられる", "Available once you have reached the stone whale's back"),
       story="岩鯨の背は誰でも乗れる（10 の 3 章）。序章のうちから周回に触れる入口。")
+
+# 順路を越える (docs/design/32 の 3.1。祠から順路を心臓まで越える。どの巨神でもよい)
+quest("weekly_route", 83, ("順路を越える", "Cross a Route"),
+      ("巨神の祠から順路に挑み、心臓まで越える。どの巨神でもよい。", "Take a route from a titan shrine and cross it to the heart. Any titan will do."),
+      ("順路の果てで、心臓が止まった。", "The heart stilled at the end of the route."),
+      [stage("route", ("板の紙：「祠の歌に呼ばれて、もう一度背を渡ってきてほしい。——鯨追い」",
+                       "A note on the board: \"Answer a shrine's song and cross a back once more. — the Whale Chaser\""),
+             [ob("route", "signal", "順路を心臓まで越える", "Cross a route to the heart", target="route_cleared", count=1)])],
+      {"xp": 160, "items": [{"item": "skyabyss:resonance_crystal", "count": 2}, {"item": "skyabyss:song_shard_stone_whale", "count": 1}]},
+      repeat="weekly", board=True, unlock_={"type": "stilled", "titan": "stone_whale"},
+      unlock_hint=("巨神の心臓を一度止めると、受けられる", "Available once you have stilled a titan's heart"),
+      story="祠（32 の 3.1）から挑む周回の入口。報いの歌片は岩鯨のもの。")
 
 quest("weekly_heart_again", 81, ("心臓をもう一度", "The Heart, Once More"),
       ("岩鯨の心臓を、もう一度止める。戦いに加わった仲間も数える。", "Still the stone whale's heart once more. Party members in the fight count too."),

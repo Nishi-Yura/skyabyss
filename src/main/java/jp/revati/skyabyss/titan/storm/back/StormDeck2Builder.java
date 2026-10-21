@@ -202,8 +202,6 @@ final class StormDeck2Builder {
             kit.stair(YARD_FIRE.getX(), YARD_FIRE.getY(), YARD_FIRE.getZ() + dz, dz < 0 ? Direction.NORTH : Direction.SOUTH,
                     Blocks.POLISHED_DIORITE_STAIRS.defaultBlockState());
         }
-        kit.put(BOARD_YARD.getX(), BOARD_YARD.getY(), BOARD_YARD.getZ(),
-                ModBlocks.TRIAL_BOARD.get().defaultBlockState().setValue(HorizontalDirectionalBlock.FACING, Direction.SOUTH));
         StormDeco.featherPillar(kit, -12, 177, Y, 6);
         StormDeco.featherPillar(kit, 12, 177, Y, 6);
     }

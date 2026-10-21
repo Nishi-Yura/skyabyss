@@ -174,5 +174,11 @@
   "quest.skyabyss.daily_tide_rounds.unlock_hint": "Available once you have spoken to the traveler by the fire",
   "quest.skyabyss.weekly_heart_again.unlock_hint": "Available once you have spoken to the traveler by the fire",
   "quest.skyabyss.weekly_storm_heart.unlock_hint": "Available once you have spoken to the traveler by the fire",
-  "quest.skyabyss.weekly_tide_heart.unlock_hint": "Available once you have spoken to the traveler by the fire"
+  "quest.skyabyss.weekly_tide_heart.unlock_hint": "Available once you have spoken to the traveler by the fire",
+  "quest.skyabyss.weekly_route.title": "Cross a Route",
+  "quest.skyabyss.weekly_route.summary": "Take a route from a titan shrine and cross it to the heart. Any titan will do.",
+  "quest.skyabyss.weekly_route.done": "The heart stilled at the end of the route.",
+  "quest.skyabyss.weekly_route.route.journal": "A note on the board: \"Answer a shrine's song and cross a back once more. — the Whale Chaser\"",
+  "quest.skyabyss.weekly_route.route.route": "Cross a route to the heart",
+  "quest.skyabyss.weekly_route.unlock_hint": "Available once you have stilled a titan's heart"
 }

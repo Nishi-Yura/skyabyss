@@ -9,7 +9,7 @@ import net.minecraft.world.level.block.state.BlockState;
 // 余燼の背の「区」ごとの飾りと材質 (版 20。26 の 11 章)。体の中が一つの石の洞窟に見えないように、区ごとに材質・形・灯りの言葉を変える:
 //   喉の首 = 肉と骨の壁、尾根の広間 = 玄武の鱗の尾根 (段になった黒い岩の背と骨の肋)、坂 = 灯りの道、
 //   炉心の広間 = 火口の真下の円形の大聖堂 (三つの扉に色の柱: 西 灰・青白、東 橙、南 赤)、
-//   冷えた溶岩洞 = 黒い玄武岩の丸い洞 (熔脈 = マグマの筋、床の灯りの列)、背へ出る洞 = 同じ洞、井戸 = 壁の灯り。
+//   冷えた溶岩洞 = 黒い玄武岩の丸い洞 (熔脈 = マグマの筋、床の灯りの列)。
 // 歩く道は、床の灯りの列 (中央) と壁の灯り (5〜6 ブロックおき) で光度 4 以上にする (BuildAudit LIGHT_DARK)。
 // 灰色の羊毛は灰溜まり (熱が冷える目印) だけに使う。ここでは使わない。
 final class EmberZones {
@@ -101,11 +101,8 @@ final class EmberZones {
         neck(kit);
         ridgeHall(kit);
         ramp(kit);
-        bays(kit);
         hub(kit);
         tubeLamps(kit);
-        well(kit);
-        backTube(kit);
     }
 
     private static boolean solid(EmberKit kit, int x, int y, int z) {
@@ -150,7 +147,7 @@ final class EmberZones {
     }
 
     // 尾根の広間 (玄武の鱗の尾根): 道は幅 9 (x -4〜4)、その両側に黒い岩の段が壁へ向かって高くなる (縁石 1 → 壁ぎわ 4〜5)。
-    // 8 ブロックおきに骨の肋が天井を渡り、壁ぎわの肋の柱から段まで下りる。縁石に灯り。見張り台の張り出し (BAY_*) の口は段を切って開ける
+    // 8 ブロックおきに骨の肋が天井を渡り、壁ぎわの肋の柱から段まで下りる。縁石に灯り。
     static int ridgeHeight(int ax, int x, int z) {
         if (ax < 5) {
             return 0;
@@ -172,16 +169,12 @@ final class EmberZones {
         for (int z = EmberBodyBuilder.HALL_Z1; z <= EmberBodyBuilder.HALL_Z2; z++) {
             int f = EmberBodyBuilder.throatFloor(z);
             boolean riser = f > EmberBodyBuilder.throatFloor(z - 1);
-            boolean bay = z >= BAY_WEST.minZ() && z <= BAY_WEST.maxZ();
             int rib = Math.floorMod(z + 207, 8);
             for (int x = -EmberBodyBuilder.HALL_HALF; x <= EmberBodyBuilder.HALL_HALF; x++) {
                 int ax = Math.abs(x);
                 int top = f + EmberBodyBuilder.throatHeight(z, x);
                 if (ax >= 5) {
                     int h = ridgeHeight(ax, x, z);
-                    if (bay) {
-                        h = 0;
-                    }
                     for (int y = f + 1; y <= f + h; y++) {
                         kit.set(x, y, z, ridgeBlock(x, y, z));
                     }
@@ -191,7 +184,7 @@ final class EmberZones {
                 }
             }
             // 肋の柱 (壁ぎわ。見張り台の口は除く)
-            if (rib == 4 && !bay) {
+            if (rib == 4) {
                 for (int sx : new int[] {-11, 11}) {
                     int base = f + ridgeHeight(11, sx, z) + 1;
                     for (int y = base; y < f + EmberBodyBuilder.throatHeight(z, sx); y++) {
@@ -226,25 +219,6 @@ final class EmberZones {
             }
             if (!riser && Math.floorMod(z, 6) == 0) {
                 kit.set(0, f, z, EmberKit.EMBERLIGHT);
-            }
-        }
-    }
-
-    // 見張り台 (尾根の祠): 角に骨の柱、奥の壁と天井に灯り
-    private static void bays(EmberKit kit) {
-        for (int side : new int[] {-1, 1}) {
-            Box b = side < 0 ? BAY_WEST : BAY_EAST;
-            int far = side < 0 ? b.minX() : b.maxX();
-            for (int z : new int[] {b.minZ(), b.maxZ()}) {
-                for (int y = BAY_FLOOR + 1; y <= BAY_FLOOR + 6; y++) {
-                    kit.set(far, y, z, y == BAY_FLOOR + 6 ? EmberKit.GLOW : EmberKit.BONE);
-                }
-            }
-            lampIfSolid(kit, far + side, BAY_FLOOR + 5, (b.minZ() + b.maxZ()) / 2);
-            kit.set(far - side * 4, BAY_FLOOR + 8, (b.minZ() + b.maxZ()) / 2, EmberKit.GLOW);
-            // 床の中央に灯りの列 (広間から台へ)
-            for (int x = Math.min(side * 13, side * 21); x <= Math.max(side * 13, side * 21); x += 2) {
-                kit.set(x, BAY_FLOOR, (b.minZ() + b.maxZ()) / 2, EmberKit.EMBERLIGHT);
             }
         }
     }
@@ -317,27 +291,4 @@ final class EmberZones {
         }
     }
 
-    // 火の井戸の壁の灯り (螺旋の外の壁に、らせん状に 4 段おき。火口の床の下まで)
-    private static void well(EmberKit kit) {
-        int cx = HUB_CENTER.getX();
-        int cz = HUB_CENTER.getZ();
-        int crater = EmberBodyBuilder.craterFloorOf();
-        for (int y = WELL_BOTTOM + 3; y <= crater - 4; y += 4) {
-            double a = y * 0.9;
-            int x = cx + (int) Math.round((WELL_RADIUS + 0.9) * Math.cos(a));
-            int z = cz + (int) Math.round((WELL_RADIUS + 0.9) * Math.sin(a));
-            lampIfSolid(kit, x, y, z);
-        }
-    }
-
-    // 背へ出る洞: 壁の灯り (6 ブロックおき)、小部屋の灯り
-    private static void backTube(EmberKit kit) {
-        int end = EmberBodyBuilder.backTubeEnd();
-        for (int z = HUB_CENTER.getZ() + 8; z <= end - 4; z += 6) {
-            lampIfSolid(kit, -(TUBE_HALF + 1), BACK_EXIT_FLOOR + 3, z);
-            lampIfSolid(kit, TUBE_HALF + 1, BACK_EXIT_FLOOR + 3, z + 3);
-        }
-        lampIfSolid(kit, TUBE_HALF + 7, BACK_EXIT_FLOOR + 3, (EmberBodyBuilder.RIM_NICHE_Z1 + EmberBodyBuilder.RIM_NICHE_Z2) / 2);
-        kit.set(TUBE_HALF + 3, BACK_EXIT_FLOOR + 5, (EmberBodyBuilder.RIM_NICHE_Z1 + EmberBodyBuilder.RIM_NICHE_Z2) / 2, EmberKit.GLOW);
-    }
 }

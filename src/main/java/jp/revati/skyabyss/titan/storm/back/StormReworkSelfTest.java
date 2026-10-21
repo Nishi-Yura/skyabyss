@@ -31,7 +31,6 @@ final class StormReworkSelfTest {
         checkCircuitLogic(f);
         checkCircuitWorld(l, f);
         checkHelm(l, f);
-        checkFirstRun(l, f);
     }
 
     private static void check(boolean ok, String message, List<String> f) {
@@ -339,22 +338,5 @@ final class StormReworkSelfTest {
     private static int mothCount(ServerLevel l) {
         List<Entity> m = l.getEntities((Entity) null, StormBackTrials.eyeRoom(), e -> e.getTags().contains("skyabyss_helm_moth") && e.isAlive());
         return m.size();
-    }
-
-    // ---------------------------------------------------------------- 周回の既知の道
-    private static void checkFirstRun(ServerLevel l, List<String> f) {
-        StormBackTrials.registerFirstRun();
-        StormProgress a = fresh(l, GROUP_A);
-        check(FirstRun.room("storm.west.rib") != null && FirstRun.room("storm.east.circuit") != null, "first-run rooms are not registered", f);
-        check(!FirstRun.isKnownPath(l, GROUP_A, "storm.west.rib"), "a fresh group should be on its first run", f);
-        check(!GroupOverlays.compute(l, GROUP_A).containsKey(ribLedge(1)), "the rib guide shows on a first run", f);
-        a.record.markFirstCleared();
-        check(FirstRun.isKnownPath(l, GROUP_A, "storm.west.rib") && FirstRun.isKnownPath(l, GROUP_A, "storm.east.circuit"), "a cleared group should have the known path", f);
-        check(GroupOverlays.compute(l, GROUP_A).containsKey(ribLedge(1)), "the rib guide does not show on a repeat run", f);
-        List<BlockPos> sol = new ArrayList<>(StormCircuit.solutionCells());
-        check(!sol.isEmpty() && GroupOverlays.compute(l, GROUP_A).containsKey(sol.get(0)), "the circuit guide does not show on a repeat run", f);
-        check(!GroupOverlays.compute(l, GROUP_B).containsKey(ribLedge(1)), "group B sees A's known path", f);
-        fresh(l, GROUP_A);
-        jp.revati.skyabyss.titan.group.BackGroupData.get(l).remove(GROUP_A);
     }
 }

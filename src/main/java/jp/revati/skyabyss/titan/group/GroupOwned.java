@@ -53,7 +53,9 @@ public interface GroupOwned {
             return true;
         }
         Holder<SoundEvent> holder = BuiltInRegistries.SOUND_EVENT.wrapAsHolder(sound);
-        ClientboundSoundPacket packet = new ClientboundSoundPacket(holder, self.getSoundSource(), self.getX(), self.getY(), self.getZ(),
+        // 区画の写しのセルの決まりの中 (TrialFrame) では、手本の座標にいる自分の音を写しの座標で鳴らす
+        net.minecraft.world.phys.Vec3 at = jp.revati.skyabyss.trial.TrialFrame.current().world(self.position());
+        ClientboundSoundPacket packet = new ClientboundSoundPacket(holder, self.getSoundSource(), at.x, at.y, at.z,
                 volume, pitch, level.random.nextLong());
         for (ServerPlayer player : Players.snapshot(level.players())) {
             if (player.distanceToSqr(self) < 64 * 64 && (player.isSpectator() || owned.groupId().equals(Groups.keyOf(player)))) {

@@ -177,7 +177,7 @@ public final class Vows {
         OK, NO_BACK, NOT_REPEAT, STARTED, UNKNOWN, FULL, ALREADY, NOT_SET
     }
 
-    // いま誓いを選び直せるか。周回で、まだ試練を進めていない
+    // いま誓いを選び直せるか。周回で、順路がまだ動いていない (選ぶ場所は祠の画面。VowCommands が祠のそばかを見る。docs/design/32 の 3.1)
     public static Result canChange(MinecraftServer server, UUID group, String titan) {
         ServerLevel back = backLevel(server, titan);
         if (back == null) {
@@ -186,7 +186,17 @@ public final class Vows {
         if (FirstRun.isFirstRun(back, group)) {
             return Result.NOT_REPEAT;
         }
-        return BackGroupData.get(back).of(group).hasProgress() ? Result.STARTED : Result.OK;
+        return BackGroupData.get(back).of(group).hasProgress() || jp.revati.skyabyss.trial.TrialRoute.active(back, group) ? Result.STARTED : Result.OK;
+    }
+
+    // 順路が終わった (あきらめ・背を出た): 誓いを降ろす (心臓を止めたときは onHeartStopped が報いのあとに降ろす)
+    public static void lift(ServerLevel back, UUID group) {
+        BackGroupData.Record r = BackGroupData.get(back).peek(group);
+        if (r == null || !r.has(KEY_VOWS)) {
+            return;
+        }
+        store(back, group, List.of());
+        VowNetwork.syncGroup(back.getServer(), group);
     }
 
     public static Result add(MinecraftServer server, UUID group, String titan, String vowId) {

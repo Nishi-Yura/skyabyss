@@ -29,12 +29,12 @@ public final class EmberRooms {
         }
     }
 
-    public static final Room WEST = new Room("west", "ember.west", EmberBackLayout.WEST, EmberBackLayout.SHORTCUT_WEST_TO, List.of("west"), TRIAL_GRACE);
+    public static final Room WEST = new Room("west", "ember.west", EmberBackLayout.WEST, EmberBackLayout.EJECT_WEST, List.of("west"), TRIAL_GRACE);
     public static final Room EAST = new Room("east", "ember.east",
             new EmberBackLayout.Box(EmberBackLayout.EAST.minX(), EmberBackLayout.EAST.minY(), EmberBackLayout.EAST.minZ(), EmberBackLayout.SMITH.maxX(),
                     Math.max(EmberBackLayout.EAST.maxY(), EmberBackLayout.SMITH.maxY()), EmberBackLayout.SMITH.maxZ()),
-            EmberBackLayout.SHORTCUT_EAST_TO, List.of("east", "smith"), TRIAL_GRACE);
-    public static final Room SOUTH = new Room("south", "ember.south", EmberBackLayout.SOUTH, EmberBackLayout.SHORTCUT_SOUTH_TO, List.of("south"),
+            EmberBackLayout.EJECT_EAST, List.of("east", "smith"), TRIAL_GRACE);
+    public static final Room SOUTH = new Room("south", "ember.south", EmberBackLayout.SOUTH, EmberBackLayout.EJECT_SOUTH, List.of("south"),
             TRIAL_GRACE);
     public static final Room HEART = new Room("heart", "ember.heart", EmberBackLayout.HEART, EmberBackLayout.rest("heart").floor().above(),
             List.of("heart"), RoomLocks.DEFAULT_GRACE);

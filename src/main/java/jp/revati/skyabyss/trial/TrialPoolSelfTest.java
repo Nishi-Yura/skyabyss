@@ -34,7 +34,7 @@ import net.minecraft.server.level.ServerLevel;
 //  - 引き方: 周回 1 は原型・周回 2 から枠ごとに一つ・履歴・尽きと戻し・直前を引かない・種の再現・グループごとの独立・段
 //  - 修飾: 禁止の組み合わせが出ない・数字の範囲・稀さの割合・符号の往復・極の中身
 //  - 全セルの全変種 (配置 × 数字 × 敵 × 障害 × 任意 × 極 × 静): arm → overlay (セルの箱の中) → tick → disarm
-//  - 今週の試練・図鑑・称号・板の表示データとその通信の往復・戸 (引いた三つだけ開く)・セルの audit
+//  - 図鑑・称号・祠の画面の表示データとその通信の往復・戸 (順路の今の段だけ開く)・セルの audit
 //  - 複数グループ: 二つのグループが同じ背で、別々の記録・別々の戸・別々の引きを持つ
 public final class TrialPoolSelfTest {
     private TrialPoolSelfTest() {
@@ -260,26 +260,10 @@ public final class TrialPoolSelfTest {
         Def w10 = TrialCatalog.get("W10");
         Mods plain = new Mods(0, new int[] {1, 1}, 0, new int[0], -1, Extreme.NONE, false, Rarity.COMMON);
         Mods rare = new Mods(0, new int[] {1, 1}, 0, new int[] {0}, 0, Extreme.NONE, false, Rarity.RARE);
-        int base = TrialDraw.materialCount(w10, plain, false, false);
+        int base = TrialDraw.materialCount(w10, plain, false);
         check(base >= 1, "no materials for a plain trial");
-        check(TrialDraw.materialCount(w10, rare, false, false) > base, "a rare trial gives no more materials");
-        check(TrialDraw.materialCount(w10, rare, true, false) > TrialDraw.materialCount(w10, rare, false, false), "the optional goal gives no extra");
-        check(TrialDraw.materialCount(w10, plain, false, true) >= base * 2, "the weekly trial does not double");
-        // 今週の試練
-        for (long week : new long[] {2900, 2901, 2902}) {
-            List<Def> w = TrialData.weeklyAll(4242L, week);
-            check(w.size() == TrialCatalog.titans().size(), "weekly count");
-            check(TrialData.weeklyAll(4242L, week).equals(w), "weekly is not stable");
-        }
-        Set<String> distinct = new HashSet<>();
-        for (long week = 2800; week < 2860; week++) {
-            Def w = TrialData.weekly(whale, 4242L, week);
-            check(w != null && w.titan().equals(whale), "weekly is not of the titan");
-            if (w != null) {
-                distinct.add(w.id());
-            }
-        }
-        check(distinct.size() >= 3, "the weekly trial barely varies: " + distinct);
+        check(TrialDraw.materialCount(w10, rare, false) > base, "a rare trial gives no more materials");
+        check(TrialDraw.materialCount(w10, rare, true) > TrialDraw.materialCount(w10, rare, false), "the optional goal gives no extra");
     }
 
     private static TrialDraw.Memory copyMem(String titan, UUID g, int upTo) {
@@ -560,19 +544,20 @@ public final class TrialPoolSelfTest {
         TrialDraw.Draw da = TrialData.current(whale, ra, a, TrialData.worldSeed(back));
         TrialDraw.Draw db = TrialData.current(whale, rb, b, TrialData.worldSeed(back));
         check(da.picks().size() == 3 && db.picks().size() == 3, "a group did not draw three");
+        // 順路 (docs/design/32): 今の段のセルの戸だけが開く。A は段 1 (歩)、B は順路の外 (全部閉じる)
+        ra.putInt(TrialRoute.STEP, 1);
         TrialRuntime.syncGates(back, a, whale, da);
         TrialRuntime.syncGates(back, b, whale, db);
         for (TrialCell c : TrialCells.of(whale)) {
             if (c.ports().entrance().isEmpty()) {
                 continue;
             }
-            // 今週の試練は、引いていなくても入れる
-            boolean weekly = c.def().equals(TrialData.weekly(whale, TrialData.worldSeed(back), TrialData.week()));
-            boolean wa = da.has(c.def().id()) || weekly;
-            boolean wb = db.has(c.def().id()) || weekly;
+            boolean wa = c.def().id().equals(TrialRoute.defOf(da, 1).id());
+            boolean wb = false;
             check(GroupGates.isOpen(back, a, c.ports().entrance()) == wa, c.def().id() + " gate for group A: expected " + wa);
             check(GroupGates.isOpen(back, b, c.ports().entrance()) == wb, c.def().id() + " gate for group B: expected " + wb);
         }
+        ra.remove(TrialRoute.STEP);
         // 進みは別 (A が済ませても B は済んでいない)
         String fresh = TrialCatalog.of(whale).stream().filter(d -> !d.original()).findFirst().get().id();
         TrialData.markCleared(ra, fresh);

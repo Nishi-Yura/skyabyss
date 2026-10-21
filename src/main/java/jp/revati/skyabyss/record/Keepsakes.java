@@ -99,6 +99,10 @@ public final class Keepsakes {
         // 旅のない巨神 (雷翼・余燼) の呼び笛も大事な品 (出会いの印として渡る。titan.travel.TitanCalls)
         items.add(TravelSetup.THUNDER_WING_CALL.get());
         items.add(TravelSetup.EMBER_CALL.get());
+        // 歌片 (順路の鍵。docs/design/32 の 3.2): 投げ捨てられない・倒れても残る
+        for (String titan : jp.revati.skyabyss.progress.Titans.all()) {
+            items.add(jp.revati.skyabyss.registry.ModItems.songShard(titan));
+        }
         for (jp.revati.skyabyss.titan.travel.TitanKind kind : jp.revati.skyabyss.titan.travel.TitanKind.all()) {
             if (!items.contains(kind.callItem().get())) {
                 items.add(kind.callItem().get());
