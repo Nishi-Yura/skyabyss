@@ -321,9 +321,14 @@ public final class TrialRouteSelfTest {
                         if (c.ports().entrance().isEmpty() || !TrialCatalog.deckPlaced(titan)) {
                             continue;
                         }
-                        boolean open = GroupGates.isOpen(back, ga, c.ports().entrance());
-                        check(f, open == (cur != null && c.def().id().equals(cur.id())), titan + " cycle " + cycle + " step " + step + ": the gate of " + c.def().id() + " is "
-                                + (open ? "open" : "closed"));
+                        // 区画の写しで遊ぶセルは写しの戸が開き、手本の戸は閉じたまま
+                        boolean want = cur != null && c.def().id().equals(cur.id());
+                        TrialFrame cf = TrialSlot.frameOf(back, ga, c);
+                        boolean open = GroupGates.isOpen(back, ga, cf.at(c.ports().entrance()));
+                        check(f, open == want, titan + " cycle " + cycle + " step " + step + ": the gate of " + c.def().id() + " is " + (open ? "open" : "closed"));
+                        if (!cf.isZero()) {
+                            check(f, !GroupGates.isOpen(back, ga, c.ports().entrance()), titan + " cycle " + cycle + ": the template gate of " + c.def().id() + " opened");
+                        }
                     }
                     TrialRoute.onCleared(back, ga, titan, TrialRoute.keyOf(titan, draw, step), null);
                     TrialRoute.flushPending();

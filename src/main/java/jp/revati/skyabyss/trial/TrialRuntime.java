@@ -151,6 +151,11 @@ public final class TrialRuntime {
                 }
             } else {
                 GroupGates.seal(back, group, p.entrance());
+                // 越えた (またはこれからの) 写しのセルの戸も閉じる
+                TrialFrame f = TrialSlot.frameOf(back, group, cell);
+                if (!f.isZero()) {
+                    GroupGates.seal(back, group, f.at(p.entrance()));
+                }
             }
             // 出口の戸は、そのセルが「済んだ」とみなせるあいだだけ開く (セルが決める)
         }

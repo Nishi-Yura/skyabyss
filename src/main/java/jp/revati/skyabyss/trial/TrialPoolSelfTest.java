@@ -557,6 +557,7 @@ public final class TrialPoolSelfTest {
             check(GroupGates.isOpen(back, a, c.ports().entrance()) == wa, c.def().id() + " gate for group A: expected " + wa);
             check(GroupGates.isOpen(back, b, c.ports().entrance()) == wb, c.def().id() + " gate for group B: expected " + wb);
         }
+        ra.remove(TrialRoute.STEP);
         // 進みは別 (A が済ませても B は済んでいない)
         String fresh = TrialCatalog.of(whale).stream().filter(d -> !d.original()).findFirst().get().id();
         TrialData.markCleared(ra, fresh);

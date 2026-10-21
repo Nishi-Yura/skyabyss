@@ -807,6 +807,7 @@ public final class EmberDeckSelfTest {
             check(GroupGates.isOpen(back, a, c.ports().entrance()) == wa, c.def().id() + " gate for group A: expected " + wa);
             check(GroupGates.isOpen(back, b, c.ports().entrance()) == wb, c.def().id() + " gate for group B: expected " + wb);
         }
+        ra.remove(jp.revati.skyabyss.trial.TrialRoute.STEP);
         // 戸のブロックが実際に置いてある (原型の洞の口は既定で開き、新作は閉じ)
         for (TrialCell c : TrialCells.of(EMBER)) {
             for (BlockPos p : c.ports().entrance()) {
