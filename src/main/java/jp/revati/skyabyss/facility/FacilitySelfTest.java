@@ -170,7 +170,9 @@ public final class FacilitySelfTest {
         check(f, !Attendants.ours("npc_nobody") && !Attendants.ours("villager_1"), "ignores other marks");
         check(f, AttendantRole.byMark("npc_tool_merchant") == AttendantRole.TOOL_MERCHANT, "role by mark");
         // 出現地点のまわり (始めから読み込まれている) の空の上
-        BlockPos base = level.getSharedSpawnPos();
+        // 都 (世界の出発点にある) の本物の係の人と混ざらないよう、512 離れた所のチャンクを読み込んで使う
+        BlockPos base = level.getSharedSpawnPos().offset(512, 0, 512);
+        level.setChunkForced(base.getX() >> 4, base.getZ() >> 4, true);
         BlockPos spot = new BlockPos(base.getX() + 3, level.getMaxBuildHeight() - 20, base.getZ() + 3);
         AttendantEntity a = Attendants.ensure(level, AttendantRole.SMITH, spot);
         if (a == null) {
