@@ -403,6 +403,9 @@ public final class SiteFinder {
 
     // ---------------------------------------------------------------- 宿り: 野営地から 140〜220 (東を優先)。庭の入口 (南向き) を野営地の方へ向ける
     @Nullable
+    // 都の中心から、バニラの村・構造物の出るチャンクまでの最小の距離 (都の矩形の縁 140 + 村の広がり 40)
+    static final int CAPITAL_STRUCTURE_GAP = 176;
+
     static Spot findShelter(Probe p, BlockPos camp) {
         // 都 (docs/design/33 の 2): 一辺 200 の範囲。野営地から 260〜340 (壁の縁が野営地から 150 以上)。段差は整地で吸収するので広めに許す
         int[][] passes = {{260, 340, 20}, {260, 340, 32}, {240, 420, 48}, {240, 480, 80}};
@@ -420,7 +423,8 @@ public final class SiteFinder {
                     int x = camp.getX() + (int) Math.round(Math.cos(a) * d);
                     int z = camp.getZ() + (int) Math.round(Math.sin(a) * d);
                     Area ar = area(p, x, z, 100, 100, pass[2], false, pass[2] < 48);
-                    if (ar.ok()) {
+                    // バニラの村・構造物 (ChapterGrounds と同じ表) の上には建てない (都の縁 140 + 村の広がり)
+                    if (ar.ok() && !p.structureNear(x, z, CAPITAL_STRUCTURE_GAP)) {
                         BlockPos c = new BlockPos(x, ar.median() + 1, z);
                         return new Spot(c, rotToward(camp.getX() - x, camp.getZ() - z, true), false);
                     }
@@ -431,6 +435,7 @@ public final class SiteFinder {
         WET_FRACTION = 4;
         try {
             Area best = null;
+            boolean bestClear = false;
             int bx = 0;
             int bz = 0;
             for (int ai = 0; ai < 24; ai++) {
@@ -440,7 +445,13 @@ public final class SiteFinder {
                     int x = camp.getX() + (int) Math.round(Math.cos(a) * d);
                     int z = camp.getZ() + (int) Math.round(Math.sin(a) * d);
                     Area ar = area(p, x, z, 100, 100, 512, false, false);
-                    if (ar.ok() && (best == null || ar.max() - ar.min() < best.max() - best.min())) {
+                    if (!ar.ok()) {
+                        continue;
+                    }
+                    // 構造物から離れた所を先に (どこも近ければ段差だけで選ぶ)
+                    boolean clear = !p.structureNear(x, z, CAPITAL_STRUCTURE_GAP);
+                    if (best == null || (clear && !bestClear) || (clear == bestClear && ar.max() - ar.min() < best.max() - best.min())) {
+                        bestClear = clear;
                         best = ar;
                         bx = x;
                         bz = z;
