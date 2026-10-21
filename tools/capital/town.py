@@ -36,7 +36,7 @@ TERX = 60        # 北の段の東西の縁 (|x|)
 GUILD_X1 = 78
 SMITHY_X1 = 30
 SMITHY_Z1 = 24
-GAP = 3          # 町家と町家のあいだ (路地。軒が 1 出るので、軒のあいだに 1 の空き)
+GAP = 4          # 町家と町家のあいだ (路地。軒が 1 出るので、軒のあいだに 2 の空き。3 では詰まって見える所があった: 2026-10-21 の試遊)
 
 
 class Town(Facilities):
@@ -1529,10 +1529,10 @@ class Town(Facilities):
         """形を建てたあとの外の作り込み: 組合・鍛冶場・砦の本丸の長い壁に控え柱と灯り、屋根の棟飾り"""
         st, v = self.st, self.v
         y = TER + 1
-        # 組合: 北と南の長い壁 (x 50..92、高さ 12)
-        self.buttresses(50, 92, -34, 'north', 0, 12, step=7)
-        self.buttresses(50, 92, -10, 'south', 0, 12, step=7)
-        for x in range(53, 90, 7):
+        # 組合: 北と南の長い壁 (x 50..GUILD_X1、高さ 12)
+        self.buttresses(50, GUILD_X1, -34, 'north', 0, 12, step=7)
+        self.buttresses(50, GUILD_X1, -10, 'south', 0, 12, step=7)
+        for x in range(53, GUILD_X1 - 2, 7):
             for (z, f) in ((-11, 'south'), (-33, 'north')):
                 lz = z + (1 if f == 'south' else -1)
                 if v.get(x + 3, 3, lz) in (None, 'air'):

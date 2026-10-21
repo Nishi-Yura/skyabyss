@@ -1,0 +1,18 @@
+# 施設の名の表示が世界にあるか (数を記録に出す)
+world opening_capital_fix3 normal
+size 960 540
+timeout 900
+render 12
+clouds off
+wait 100
+cmd skyabyss cinematic stop
+cmd gamemode spectator
+hud off
+cmd skyabyss dev opening at shelter 0 88 4 -3 180 4
+waitchunks
+wait 160
+cmd execute if entity @e[type=minecraft:text_display]
+cmd execute if entity @e[type=minecraft:text_display,distance=..30]
+cmd execute if entity @e[tag=skyabyss_facility_label]
+shot lab_trade
+quit

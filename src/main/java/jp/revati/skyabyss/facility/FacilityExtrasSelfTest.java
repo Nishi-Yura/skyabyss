@@ -172,8 +172,7 @@ public final class FacilityExtrasSelfTest {
 
     // ---------------------------------------------------------------- 木偶
     private static void dummies(List<String> f, ServerLevel level, FakePlayer p) {
-        BlockPos foot = level.getSharedSpawnPos().atY(level.getMaxBuildHeight() - 14).offset(518, 0, 518);
-        level.setChunkForced(foot.getX() >> 4, foot.getZ() >> 4, true);
+        BlockPos foot = FacilitySelfTest.testBase(level).atY(level.getMaxBuildHeight() - 14).offset(6, 0, 6);
         BlockState[] old = {level.getBlockState(foot), level.getBlockState(foot.above()), level.getBlockState(foot.above(2))};
         level.setBlock(foot, Blocks.OAK_FENCE.defaultBlockState(), 3);
         level.setBlock(foot.above(), Blocks.HAY_BLOCK.defaultBlockState(), 3);

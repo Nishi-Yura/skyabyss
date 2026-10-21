@@ -314,6 +314,12 @@ public final class SiteGuard {
     @SubscribeEvent
     static void onTick(ServerTickEvent.Post event) {
         MinecraftServer server = event.getServer();
+        if (server.getTickCount() % 100 == 41) {
+            SiteData.Entry shelter = SiteData.get(server.overworld()).first("shelter");
+            if (shelter != null && shelter.built) {
+                ShelterBuilder.keepLabels(server.overworld(), shelter);
+            }
+        }
         if (server.getTickCount() % 20 != 7 || safetyOff()) {
             return;
         }
