@@ -445,7 +445,7 @@ public final class Ch3GroundSelfTest {
         if (base == null) {
             return;
         }
-        // 焼けた羽守: 頂の間の羽守に体力 190 と名前。柱の雷が 1/4 を削る
+        // 焼けた羽守 (体力 190): 頂の間で頂の主の印。柱の雷が 1/4 より多く削る (雷のあとは傷がよく通る)
         var type = BuiltInRegistries.ENTITY_TYPE.get(ResourceLocation.parse(ScorchedWatch.WARDEN));
         Entity e = type.create(level);
         if (e instanceof Mob mob) {
@@ -455,7 +455,7 @@ public final class Ch3GroundSelfTest {
             // 場所の印は入れたあとに付ける (印つきで入ってくる個体は、保存から戻ったものとして SiteSpawner が消す)
             mob.addTag(SiteSpawner.TAG);
             check(f, ScorchedWatch.crown(level, ScorchedWatch.topRoom(base)) >= 1 && Math.abs(mob.getMaxHealth() - ScorchedWatch.BOSS_HEALTH) < 0.1f
-                    && mob.hasCustomName(), "the top-room warden was not crowned as the scorched warden");
+                    && mob.getTags().contains(ScorchedWatch.BOSS_TAG), "the top-room scorched warden was not marked as the top's master");
             float before = mob.getHealth();
             mob.invulnerableTime = 0;
             int hit = ScorchedWatch.strike(level, w, base);

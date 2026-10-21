@@ -65,7 +65,8 @@ public final class LightningPillars {
     }
 
     static void register() {
-        SiteTreasure.register(VAULT_TREASURE, SiteTreasure.Table.of(List.of(new SiteTreasure.Entry("minecraft:copper_ingot", 4))));
+        SiteTreasure.register(VAULT_TREASURE, SiteTreasure.Table.of(List.of(new SiteTreasure.Entry("minecraft:copper_ingot", 4),
+                new SiteTreasure.Entry(Ch3Mobs.COPPER_WIRE, 4))));
     }
 
     // ---------------------------------------------------------------- 建て終わり (StormSites の RUIN の post)

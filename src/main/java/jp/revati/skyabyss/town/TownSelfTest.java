@@ -165,7 +165,10 @@ public final class TownSelfTest {
         check(f, first != null && first.kind() == TownQuests.Kind.GUEST && first.chapter() == 1, "first rumor is a chapter-1 guest quest");
         // 宿の噂で始まる (FakePlayer の章は 1)
         var text = TownQuests.rumor(p);
-        check(f, text != null && log.entry("town/ch1_apprentice") != null, "rumor starts the apprentice quest");
+        check(f, text != null && log.entry("town/ch1_apprentice") == null, "a rumor only offers the quest (it does not start yet)");
+        check(f, jp.revati.skyabyss.npc.NpcBonds.of(p).bond(TownQuests.INNKEEPER).flags().contains(TownQuests.OFFER_FLAG), "the innkeeper offers to take it on");
+        check(f, TownQuests.acceptOffer(p) && log.entry("town/ch1_apprentice") != null, "taking it on starts the apprentice quest");
+        check(f, !jp.revati.skyabyss.npc.NpcBonds.of(p).bond(TownQuests.INNKEEPER).flags().contains(TownQuests.OFFER_FLAG), "the offer is cleared after taking it on");
         check(f, "meet".equals(TownGuests.stageOf(p, "town/ch1_apprentice")), "apprentice starts at meet");
         Dialogue d = DialogueManager.dialogue("skyabyss:guest_apprentice");
         Dialogue.Node n = d == null ? null : d.entryNode(new StoryContext(p, "skyabyss:guest_apprentice", null));

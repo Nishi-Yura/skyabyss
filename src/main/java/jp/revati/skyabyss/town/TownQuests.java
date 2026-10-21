@@ -55,6 +55,10 @@ public final class TownQuests {
             new TownQuest("town/ch3_weaver", 3, Kind.GUEST, null),
             new TownQuest("town/ch4_ash", 4, Kind.GUEST, null),
             new TownQuest("town/ch4_herbs", 4, Kind.GUEST, null),
+            // 家 2・5・6 の頼み (選定 第 2 期 q_houses A)。章の中では後ろに
+            new TownQuest("town/ch2_sailor", 2, Kind.GUEST, null),
+            new TownQuest("town/ch3_lanterns", 3, Kind.GUEST, null),
+            new TownQuest("town/ch4_baker", 4, Kind.GUEST, null),
             // 墓守の名のない墓 (六章まで続く。ここは一〜四章の 4 段)
             new TownQuest("town/grave_1", 1, Kind.GRAVE, null),
             new TownQuest("town/grave_2", 2, Kind.GRAVE, "town/grave_1"),
@@ -124,7 +128,8 @@ public final class TownQuests {
         TownQuest q = nextRumor(Coins.chapter(player), QuestLog.of(player));
         if (q != null) {
             if (q.kind == Kind.GUEST) {
-                Quests.start(player, q.id);
+                // すぐには始めない: 女将の選択肢に「引き受ける / やめておく」を出す (選定 第 2 期 q_rumor B)
+                offer(player, true);
             }
             return Component.translatable(q.rumorKey());
         }
@@ -132,6 +137,37 @@ public final class TownQuests {
             return Component.translatable("message.skyabyss.town.rumor.well");
         }
         return null;
+    }
+
+    // ---------------------------------------------------------------- 噂の頼みを引き受ける・やめておく (TownActions の accept_offer / decline_offer)
+    public static final String INNKEEPER = "skyabyss:attendant_innkeeper";
+    public static final String OFFER_FLAG = "town_offer";
+
+    static void offer(ServerPlayer player, boolean on) {
+        var flags = jp.revati.skyabyss.npc.NpcBonds.of(player).bond(INNKEEPER).flags();
+        if (on) {
+            flags.add(OFFER_FLAG);
+        } else {
+            flags.remove(OFFER_FLAG);
+        }
+        if (!(player instanceof net.neoforged.neoforge.common.util.FakePlayer)) {
+            jp.revati.skyabyss.npc.NpcBonds.sync(player);
+        }
+    }
+
+    // 噂で聞いた頼み (今の噂の先頭の限定の人のクエスト) を始める。始めたら true
+    public static boolean acceptOffer(ServerPlayer player) {
+        offer(player, false);
+        TownQuest q = nextRumor(Coins.chapter(player), QuestLog.of(player));
+        if (q == null || q.kind != Kind.GUEST) {
+            return false;
+        }
+        Quests.start(player, q.id);
+        return true;
+    }
+
+    public static void declineOffer(ServerPlayer player) {
+        offer(player, false);
     }
 
     // ---------------------------------------------------------------- 印の近く (1 秒ごと。TownGuests の見回りから)

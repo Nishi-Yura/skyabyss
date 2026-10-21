@@ -26,6 +26,36 @@
             "is": "active",
             "stage": "inn"
           }
+        },
+        {
+          "id": "town_accept",
+          "goto": "town_accepted",
+          "kind": "quest",
+          "if": {
+            "type": "flag",
+            "flag": "town_offer"
+          },
+          "do": [
+            {
+              "type": "town",
+              "act": "accept_offer"
+            }
+          ]
+        },
+        {
+          "id": "town_decline",
+          "goto": "town_declined",
+          "kind": "talk",
+          "if": {
+            "type": "flag",
+            "flag": "town_offer"
+          },
+          "do": [
+            {
+              "type": "town",
+              "act": "decline_offer"
+            }
+          ]
         }
       ]
     }
@@ -47,6 +77,26 @@
     },
     "town_child2": {
       "face": "grave",
+      "options": [
+        {
+          "id": "ok",
+          "goto": "end",
+          "kind": "talk"
+        }
+      ]
+    },
+    "town_accepted": {
+      "face": "smile",
+      "options": [
+        {
+          "id": "ok",
+          "goto": "end",
+          "kind": "talk"
+        }
+      ]
+    },
+    "town_declined": {
+      "face": "neutral",
       "options": [
         {
           "id": "ok",

@@ -16,7 +16,7 @@
         "type": "quest",
         "quest": "town/ch4_herbs",
         "is": "active",
-        "stage": "gather"
+        "stage": "brew"
       }
     },
     {
@@ -58,25 +58,15 @@
           "goto": "handed",
           "kind": "give",
           "if": {
-            "type": "all",
-            "of": [
-              {
-                "type": "item",
-                "item": "minecraft:brewing_stand",
-                "count": 1
-              },
-              {
-                "type": "item",
-                "item": "minecraft:nether_wart",
-                "count": 3
-              }
-            ]
+            "type": "item",
+            "item": "minecraft:potion",
+            "count": 2
           },
           "do": [
             {
               "type": "take",
-              "item": "minecraft:nether_wart",
-              "count": 3
+              "item": "minecraft:potion",
+              "count": 2
             },
             {
               "type": "signal",

@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "FCF",
+    " W ",
+    " W "
+  ],
+  "key": {
+    "F": {
+      "item": "skyabyss:scorched_feather"
+    },
+    "C": {
+      "item": "skyabyss:static_cotton"
+    },
+    "W": {
+      "item": "skyabyss:copper_wire"
+    }
+  },
+  "result": {
+    "id": "skyabyss:wind_streamer",
+    "count": 1
+  }
+}

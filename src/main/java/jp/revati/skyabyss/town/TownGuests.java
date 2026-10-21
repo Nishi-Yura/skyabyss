@@ -69,7 +69,11 @@ public final class TownGuests {
             new Guest("weaver", "town/ch3_weaver", "quest_house_3"),
             // 四章: 灰を運ぶ鍛え手の弟子 (鍛冶場の弟子の下宿)・薬草摘みの老婆
             new Guest("ash_apprentice", "town/ch4_ash", "quest_house_7"),
-            new Guest("herbalist", "town/ch4_herbs", "quest_house_8"));
+            new Guest("herbalist", "town/ch4_herbs", "quest_house_8"),
+            // 選定 第 2 期 q_houses A: 使っていなかった家 2・5・6
+            new Guest("sailor", "town/ch2_sailor", "quest_house_2"),
+            new Guest("mother", "town/ch3_lanterns", "quest_house_5"),
+            new Guest("baker", "town/ch4_baker", "quest_house_6"));
 
     @Nullable
     public static Guest byId(String id) {
