@@ -1,0 +1,21 @@
+# 本物の世界 (都が建つ) で M の旅の地図を開く。./gradlew runShots -Pscript=tools/shots/travel_map_real.txt
+world opening_maprealtest normal
+size 1280 720
+timeout 900
+render 8
+clouds off
+wait 100
+cmd skyabyss cinematic stop
+wait 10
+cmd skyabyss cinematic stop
+waitscreen 900 none
+cmd time set noon
+cmd gamemode creative
+cmd skyabyss dev opening build
+cmd skyabyss dev opening at shelter 0 0 2 60 180 0
+waitchunks
+wait 100
+hud on
+key key.skyabyss.travel_map
+wait 60
+shot map_real
