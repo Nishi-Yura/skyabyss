@@ -140,6 +140,10 @@ def main():
     sx, sy, sz = v.marks['stand']
     seen = {(sx, sy, sz)}
     q = deque([(sx, sy, sz)])
+    # 古井戸の下 (docs/design/35 の 6.8) は、縁の内のレバーで格子を開けて梯子で下りる。井戸の底 well_down からも歩く
+    if 'well_down' in v.marks:
+        seen.add(tuple(v.marks['well_down']))
+        q.append(tuple(v.marks['well_down']))
     while q:
         x, y, z = q.popleft()
         for dx, dz in ((1, 0), (-1, 0), (0, 1), (0, -1)):
@@ -206,6 +210,8 @@ def main():
         lo, hi = min(ys), max(ys)
         if not reach(x, lo, z, 1):
             problems.append('ladder at %s: the bottom cannot be reached on foot' % ((x, lo, z),))
+        if 'trapdoor' in name(full.get((x, hi + 1, z))):
+            continue   # 上は跳ね上げ戸 (開けて出る。古井戸の格子)
         if not any(stand_ok(full, x + ddx, yy, z + ddz) for (ddx, ddz) in ((1, 0), (-1, 0), (0, 1), (0, -1)) for yy in (hi, hi + 1)):
             problems.append('ladder at %s: no floor to step off at the top' % ((x, hi, z),))
     bx, by, bz = v.marks['bell']

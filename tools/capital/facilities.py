@@ -14,12 +14,14 @@ from __future__ import annotations
 import math
 
 import vox
+from backalley import BackAlley
+from interiors import Interiors, HOME_THEMES
 from vox import Body, DX, OPP, CW, gable_roof, hanging_sign, lamp_post, tree, bench, flowerbed, turret, rosette, hip_spire
 
 PLANK = '%s_planks'
 
 
-class Facilities:
+class Facilities(Interiors, BackAlley):
     # ---------------------------------------------------------------- 小道具
     def _init_fac(self):
         self.openings = []   # (外の面の x, z, 外向き): 戸の前。通りの灯りを避ける
@@ -358,7 +360,7 @@ class Facilities:
 
     # ---------------------------------------------------------------- 南の大通り: 訓練場
     def training_yard(self):
-        """訓練場 (鍛冶場の南、x 7..45 z 35..61)。高さ 4 の塀に囲まれた庭。西の門は鉄格子 (章で開く。印 open_training)。
+        """訓練場 (鍛冶場の南、x 7..45 z 35..61)。高さ 4 の塀に囲まれた庭。西の門ははじめから開いている (印 open_training)。
         入ってすぐ北に師範の東屋と机、木偶の列、手合わせの輪、弓の的、武具の掛け台"""
         st, v, rng = self.st, self.v, self.rng
         x0, z0, x1, z1 = 7, 35, 45, 61
@@ -390,7 +392,7 @@ class Facilities:
                     v.set(cx, 4, cz, 'lantern[hanging=false,waterlogged=false]') if side != 'west' else None
         for (cx, cz) in ((x0, z0), (x1, z0), (x0, z1), (x1, z1)):
             turret(v, st, cx, cz, 0, 8, half=1, rise=3)
-        # 西の門: 柱・まぐさ・旗・鉄格子 (章で外れる)
+        # 西の門: 柱・まぐさ・旗 (はじめから開いている)
         for z in range(gz0, gz1 + 1):
             for yy in range(0, 5):
                 v.set(x0, yy, z, 'air')
@@ -411,10 +413,7 @@ class Facilities:
         mid = (gz0 + gz1) // 2
         v.set(x0, 6, mid, st.trim2)
         v.set(x0 - 1, 5, mid, '%s_wall_banner[facing=west]' % st.banner_color)
-        for z in range(gz0, gz1 + 1):
-            for yy in range(0, 5):
-                if v.get(x0, yy, z) in (None, 'air'):
-                    v.set(x0, yy, z, 'iron_bars')
+        # 門ははじめから開いている (鉄格子なし)。印 open_training は門の真ん中 (今は読む仕組みはない)
         self.mark('open_training', x0, 0, mid)
         self.tablet(x0 - 1, 0, gz0 - 3, 'west', 'training')
         v.set(x0 - 1, -1, gz0 - 3, st.trim.full)
@@ -614,14 +613,7 @@ class Facilities:
             wall(x, 20, x, 24)
         for x in (-32, -22):
             wall(x, 19, x, 24)
-        # 廊下の敷物と腰掛け、灯り
-        for x in range(ax0, ax1 + 1):
-            for z in (15, 16, 17, 18):
-                if v.get(x, y2, z) in (None, 'air'):
-                    v.set(x, y2, z, 'red_carpet' if z in (16, 17) else 'brown_carpet')
-        for x in range(-40, -10, 6):
-            v.set(x, y2 + 4, 16, 'lantern[hanging=true,waterlogged=false]')
-        bench(v, st, -20, y2, 18, 'south', 2) if False else None
+        self.inn_corridor(ax0, ax1, y2, north_doors=[(a + c) // 2 for (a, c) in north], south_doors=[(a + c) // 2 for (a, c) in south])
         # 客室の中: 寝台 (奥の壁ぎわ)、枕もとの樽と蝋燭、箱、敷物、灯り、鉢
         beds = 0
         colors = ['red', 'white', 'light_gray', 'brown', 'red', 'white', 'light_gray', 'brown', 'red']
@@ -654,6 +646,84 @@ class Facilities:
             lamp_post(v, st, dx_ + 4 * s, 0, z0 - 2, h=3)
             v.set(dx_ + 6 * s, 0, z0 - 1, st.trim.full)
             v.set(dx_ + 6 * s, 1, z0 - 1, '%s[persistent=true,distance=1,waterlogged=false]' % st.leaves)
+
+    def inn_corridor(self, ax0, ax1, y2, north_doors, south_doors):
+        """宿の二階の廊下 (z 15..18、x ax0..ax1)。長く暗く見えないように:
+        - 客室の仕切りの筋 (x -36・-29・-22・-15) に柱と梁のアーチを渡し、廊下を区切る。梁の間の天井は明るい白樺
+        - 両端の壁に透明な窓 (2×2) と窓の腰掛け、灯りは鎖で下げて 4 ごと
+        - 戸の前を空けて、壁ぎわに小卓 (鉢・蝋燭・灯り)・腰掛け・本棚
+        - 階段の上の踊り場 (x -31..-23, z 20..22) に小さな談話の席"""
+        st, v = self.st, self.v
+        w = st.wood
+        log = '%s_log' % w
+        arches = (-36, -29, -22, -15)
+        y_top = y2 + 4     # 壁の上の段 (天井の板は y2 + 5)
+        # 天井: 梁のあいだは白樺の板
+        for x in range(ax0, ax1 + 1):
+            for z in (15, 16, 17, 18):
+                v.set(x, y2 + 5, z, 'birch_planks')
+        # 床: 真ん中の 2 列は赤い敷物、縁は茶
+        for x in range(ax0, ax1 + 1):
+            for z in (15, 16, 17, 18):
+                if v.get(x, y2, z) in (None, 'air'):
+                    v.set(x, y2, z, 'red_carpet' if z in (16, 17) else 'brown_carpet')
+        # アーチ: 柱 (縁の 2 列) と梁 (頭より上、y2 + 3)
+        for x in arches:
+            for z in (15, 18):
+                for yy in range(y2, y2 + 4):
+                    v.set(x, yy, z, '%s[axis=y]' % log)
+            for z in (16, 17):
+                v.set(x, y2 + 3, z, '%s[axis=z]' % log)
+                v.set(x, y2 + 4, z, PLANK % w)
+        # 吊り灯り (梁のあいだ、鎖で 1 下げる)
+        xs = sorted(set([ax0 + 2] + [a + d for a in arches for d in (-3, 3)] + [ax1 - 2]))
+        for x in xs:
+            if ax0 <= x <= ax1 and x not in arches:
+                v.set(x, y_top, 16 if x % 2 else 17, 'chain[axis=y,waterlogged=false]')
+                v.set(x, y_top - 1, 16 if x % 2 else 17, 'lantern[hanging=true,waterlogged=false]')
+        # 両端の窓 (内の面を透明な硝子、外の面を空ける) と窓の腰掛け
+        for (xo, xi, xs_, face) in ((ax0 - 2, ax0 - 1, ax0, 'west'), (ax1 + 2, ax1 + 1, ax1, 'east')):
+            for z in (16, 17):
+                for yy in (y2 + 1, y2 + 2):
+                    v.set(xi, yy, z, 'glass')
+                    v.set(xo, yy, z, 'air')
+                v.set(xs_, y2, z, '%s_stairs[facing=%s,half=bottom,shape=straight,waterlogged=false]' % (w, face))
+            for z in (15, 18):
+                v.set(xs_, y2, z, 'potted_flowering_azalea_bush')
+        # 壁ぎわの飾り (戸の前と柱は空ける)
+        side_items = [
+            ('%s_slab[type=top,waterlogged=false]' % w, 'lantern[hanging=false,waterlogged=false]'),
+            ('%s_stairs[facing={back},half=bottom,shape=straight,waterlogged=false]' % w, None),
+            ('%s_slab[type=top,waterlogged=false]' % w, 'potted_red_tulip'),
+            ('bookshelf', 'candle[candles=3,lit=true,waterlogged=false]'),
+            (None, None),
+            ('%s_slab[type=top,waterlogged=false]' % w, 'potted_fern'),
+        ]
+        for (z, back, doors) in ((15, 'north', north_doors), (18, 'south', south_doors)):
+            i = 0
+            for x in range(ax0 + 2, ax1 - 1):
+                if x in arches or any(abs(x - d) <= 1 for d in doors) or any(abs(x - a) == 0 for a in arches):
+                    continue
+                if z == 18 and -31 <= x <= -23:
+                    continue   # 踊り場への口
+                blk, top = side_items[i % len(side_items)]
+                i += 1
+                if blk is None:
+                    continue
+                v.set(x, y2, z, blk.replace('{back}', back))
+                if top:
+                    v.set(x, y2 + 1, z, top)
+        # 踊り場の談話の席: 低い卓、肘掛け椅子 2、鉢、本棚
+        v.set(-28, y2, 20, '%s_slab[type=top,waterlogged=false]' % w)
+        v.set(-28, y2 + 1, 20, 'candle[candles=3,lit=true,waterlogged=false]')
+        v.set(-29, y2, 20, '%s_stairs[facing=west,half=bottom,shape=straight,waterlogged=false]' % w)
+        v.set(-27, y2, 20, '%s_stairs[facing=east,half=bottom,shape=straight,waterlogged=false]' % w)
+        for x in range(-31, -22):
+            if v.get(x, y2, 21) in (None, 'air') and v.get(x, y2, 22) in (None, 'air'):
+                v.set(x, y2, 21, 'light_gray_carpet' if x % 2 else 'white_carpet')
+        v.set(-31, y2, 20, 'potted_flowering_azalea_bush')
+        v.set(-23, y2, 20, 'bookshelf')
+        v.set(-23, y2 + 1, 20, 'lantern[hanging=false,waterlogged=false]')
 
     def inn_room(self, a, za, c, zb, back, beds, color):
         st, v = self.st, self.v
@@ -808,6 +878,8 @@ class Facilities:
         flowerbed(v, st, x0, z0 + 4, x0 + 2, z0 + 7, density=0.4)
         self.tablet(x1, 0, cz + 4, 'east', 'well')
         self.claim(cx - 4, cz - 4, cx + 4, cz + 4, 'old_well')
+        # 井戸の下の迷路と宝 (backalley.well_maze。縁の内のレバーで東の格子が開く)
+        self.well_maze(cx, cz)
 
     # ---------------------------------------------------------------- 裏通り: 闇市
     def black_market(self):
@@ -963,10 +1035,9 @@ class Facilities:
         v.set(-36, -2, 40, 'lantern[hanging=true,waterlogged=false]')
         v.set(cx1, -5, 41, 'cauldron')
         self.attendant('drunkard', -31, -5, 40)
-        # 奥 (東) の壁の割れ目: 風が抜ける (印は深淵の手がかりの置き場。今は飾り)
-        v.set(cx1 + 1, -4, 40, 'cracked_deepslate_bricks')
-        v.set(cx1 + 1, -3, 40, 'cracked_deepslate_bricks')
+        # 奥 (東) の壁の割れ目: 風が抜ける。壁の向こうに隠し通路 (backalley.cellar_passage。壁は閉じたまま)
         self.mark('cellar_wall', cx1, -5, 40)
+        self.cellar_passage(cx1 + 1, 40)
 
     # ---------------------------------------------------------------- 墓守の小屋
     def gravekeeper_hut(self):
@@ -998,119 +1069,46 @@ class Facilities:
 
     # ---------------------------------------------------------------- 入れる家 (町のクエストの家)
     def furnish_home(self, b):
-        """大通りの 1 列目の入れる家: 一階は居間 (机・台所・棚・敷物)、梯子で二階の寝室 (寝台・箱)。印 quest_house_<n>"""
-        st, v, rng = self.st, self.v, self.rng
-        w = st.wood
+        """大通りの 1 列目の入れる家: 一階は居間、梯子で二階の寝室。住み手ごとに中身が違う (interiors.HOME_THEMES、
+        docs/design/35 の 6.7)。印 quest_house_<n> は一階の空いた床"""
+        st, v = self.st, self.v
         self.quest_n += 1
         n = self.quest_n
+        theme, ground_names, upper_names, bedc = HOME_THEMES[n]
         y = b.y0
         ax0, az0, ax1, az1 = b.x0 + 2, b.z0 + 2, b.x1 - 2, b.z1 - 2
         ix, _, iz, out = b.doors[0]
         idx, idz = DX[OPP[out]]   # 中へ
-        entry = {(ix + idx * k + ddx, iz + idz * k + ddz) for k in (1, 2) for (ddx, ddz) in ((0, 0),)}
-
-        def near_entry(x, z, r=1):
-            return any(abs(x - ex) <= r and abs(z - ez) <= r for (ex, ez) in entry)
+        entry = {(ix + idx * k, iz + idz * k) for k in (1, 2)}
+        keep = {(ex + a, ez + c) for (ex, ez) in entry for a in (-1, 0, 1) for c in (-1, 0, 1)}
         # 梯子: 壁の裏が丸ごとのブロック (窓でない) の所。戸から遠い角を選ぶ
         ladder = self.place_ladder(ax0, az0, ax1, az1, y, y + 5, door=(ix, iz), keep_free=entry)
-        self.room(ax0, az0, ax1, az1, y, 5, rug=True)
-        self.room(ax0, az0, ax1, az1, y + 6, 4, rug=False, beams=False)
+        saved, self.rng = self.rng, self.frng()
+        self.room(ax0, az0, ax1, az1, y, 5, rug=False, shelves=False)
+        self.room(ax0, az0, ax1, az1, y + 6, 4, rug=False, beams=False, shelves=False, wall_props=False)
+        self.rng = saved
         self.relay_ladders()
-
-        def free(x, z, yy=y):
-            if ladder and abs(x - ladder[0]) <= 1 and abs(z - ladder[1]) <= 1:
-                return False
-            return not near_entry(x, z) and v.get(x, yy, z) in (None, 'air') or (v.get(x, yy, z) or '').endswith('carpet')
-
-        def put(x, z, s, yy=y, top=None):
-            if ax0 <= x <= ax1 and az0 <= z <= az1 and free(x, z, yy):
-                v.set(x, yy, z, s)
-                if top:
-                    v.set(x, yy + 1, z, top)
-                return True
-            return False
-        # 一階: 奥の壁の台所 (竈・樽・大釜) と真ん中の机、職ごとの小物
-        back_z = az1 if out == 'north' else az0 if out == 'south' else None
-        back_x = ax1 if out == 'west' else ax0 if out == 'east' else None
-        kind = n % 4
-        props = [
-            ['smoker[facing=%s,lit=true]' % out, 'barrel[facing=up,open=false]', 'water_cauldron[level=3]', 'crafting_table'],
-            ['lectern[facing=%s,has_book=false,powered=false]' % out, 'bookshelf', 'bookshelf', 'chiseled_bookshelf[facing=%s,slot_0_occupied=true,slot_1_occupied=false,slot_2_occupied=true,slot_3_occupied=true,slot_4_occupied=false,slot_5_occupied=true]' % out],
-            ['loom[facing=%s]' % out, 'white_wool', 'red_wool', 'barrel[facing=up,open=false]'],
-            ['barrel[facing=up,open=false]', 'dried_kelp_block', 'barrel[facing=up,open=false]', 'furnace[facing=%s,lit=false]' % out],
-        ][kind]
-        tops = ['potted_fern', 'candle[candles=2,lit=true,waterlogged=false]', 'lantern[hanging=false,waterlogged=false]', 'air']
-        if back_z is not None:
-            line = [(x, back_z) for x in range(ax0 + 1, ax1)]
-        else:
-            line = [(back_x, z) for z in range(az0 + 1, az1)]
-        for i, (x, z) in enumerate(line):
-            put(x, z, props[i % len(props)], top=tops[i % len(tops)] if 'cauldron' not in props[i % len(props)] else None)
-        cx, cz = (ax0 + ax1) // 2, (az0 + az1) // 2
-        if out in ('north', 'south'):
-            tz = cz + (1 if out == 'north' else -1)
-            if free(cx - 1, tz) and free(cx, tz) and free(cx + 1, tz):
-                for xx in (cx - 1, cx, cx + 1):
-                    v.set(xx, y, tz, '%s_fence' % w if xx != cx else '%s_fence' % w)
-                    v.set(xx, y + 1, tz, '%s_pressure_plate[powered=false]' % w)
-                v.set(cx, y + 1, tz, 'candle[candles=3,lit=true,waterlogged=false]')
-                for xx in (cx - 1, cx + 1):
-                    for (zz, f) in ((tz - 1, 'north'), (tz + 1, 'south')):
-                        put(xx, zz, '%s_stairs[facing=%s,half=bottom,shape=straight,waterlogged=false]' % (w, OPP[f]))
-        else:
-            tx = cx + (1 if out == 'west' else -1)
-            if free(tx, cz - 1) and free(tx, cz) and free(tx, cz + 1):
-                for zz in (cz - 1, cz, cz + 1):
-                    v.set(tx, y, zz, '%s_fence' % w)
-                    v.set(tx, y + 1, zz, '%s_pressure_plate[powered=false]' % w)
-                v.set(tx, y + 1, cz, 'candle[candles=3,lit=true,waterlogged=false]')
-                for zz in (cz - 1, cz + 1):
-                    for (xx, f) in ((tx - 1, 'west'), (tx + 1, 'east')):
-                        put(xx, zz, '%s_stairs[facing=%s,half=bottom,shape=straight,waterlogged=false]' % (w, OPP[f]))
+        if ladder:
+            keep |= {(ladder[0] + a, ladder[1] + c) for a in (-1, 0, 1) for c in (-1, 0, 1)}
+        rect = (ax0, az0, ax1, az1)
+        # 一階: 住み手の型、残りの床に敷物
+        self.place_stamps(rect, y, ground_names, color=bedc, keep=keep)
+        if theme == 'herbalist':
+            self.herb_bundles(rect, y + 4, n=5)
         # 印 (一階の空いた床。戸の筋と梯子のそばは避ける)
+        cx, cz = (ax0 + ax1) // 2, (az0 + az1) // 2
         spot = None
         for r in range(0, 6):
             for x in range(cx - r, cx + r + 1):
                 for z in range(cz - r, cz + r + 1):
-                    if spot is None and ax0 <= x <= ax1 and az0 <= z <= az1 and not near_entry(x, z, 0) \
-                            and (v.get(x, y, z) in (None, 'air') or 'carpet' in (v.get(x, y, z) or '')) and v.get(x, y + 1, z) in (None, 'air') \
-                            and not (ladder and (x, z) == ladder):
+                    if spot is None and ax0 <= x <= ax1 and az0 <= z <= az1 and (x, z) not in entry                             and v.get(x, y, z) in (None, 'air') and v.get(x, y + 1, z) in (None, 'air') and self.solid_at(x, y - 1, z)                             and not (ladder and (x, z) == ladder):
                         spot = (x, z)
         if spot:
             self.mark('quest_house_%d' % n, spot[0], y, spot[1])
-        # 二階: 寝台 (奥の壁ぎわ)、箱、枕もとの樽
+        self.rug(rect, y, 'brown' if theme != 'mourning' else 'light_gray')
+        # 二階: 寝台・箱・住み手の小物
         y2 = y + 6
-        bedc = rng.choice(['red', 'white', 'light_blue', 'brown', 'green', 'yellow'])
-        placed = False
-        if back_z is not None:
-            fz = back_z
-            inz = back_z + (-1 if back_z == az1 else 1)
-            f = 'south' if back_z == az1 else 'north'
-            for x in (list(range(ax0, ax1 + 1)) if not ladder or ladder[0] > cx else list(range(ax1, ax0 - 1, -1))):
-                if not placed and free(x, fz, y2) and free(x, inz, y2):
-                    v.set(x, y2, fz, '%s_bed[facing=%s,part=head,occupied=false]' % (bedc, f))
-                    v.set(x, y2, inz, '%s_bed[facing=%s,part=foot,occupied=false]' % (bedc, f))
-                    for xx in (x - 1, x + 1):
-                        if put(xx, fz, 'barrel[facing=up,open=false]', yy=y2, top='candle[candles=1,lit=true,waterlogged=false]'):
-                            break
-                    placed = True
-        else:
-            fx = back_x
-            inx = back_x + (-1 if back_x == ax1 else 1)
-            f = 'east' if back_x == ax1 else 'west'
-            for z in (list(range(az0, az1 + 1)) if not ladder or ladder[1] > cz else list(range(az1, az0 - 1, -1))):
-                if not placed and free(fx, z, y2) and free(inx, z, y2):
-                    v.set(fx, y2, z, '%s_bed[facing=%s,part=head,occupied=false]' % (bedc, f))
-                    v.set(inx, y2, z, '%s_bed[facing=%s,part=foot,occupied=false]' % (bedc, f))
-                    for zz in (z - 1, z + 1):
-                        if put(fx, zz, 'barrel[facing=up,open=false]', yy=y2, top='candle[candles=1,lit=true,waterlogged=false]'):
-                            break
-                    placed = True
-        for (x, z) in ((ax0, az0), (ax1, az0), (ax0, az1), (ax1, az1)):
-            if put(x, z, 'chest[facing=%s,type=single,waterlogged=false]' % ('south' if z == az0 else 'north'), yy=y2):
-                break
-        for x in range(ax0 + 1, ax1):
-            for z in range(az0 + 1, az1):
-                if free(x, z, y2) and v.get(x, y2, z) in (None, 'air'):
-                    v.set(x, y2, z, '%s_carpet' % bedc)
-        v.set(cx, y2 + 3, cz, 'lantern[hanging=true,waterlogged=false]') if not (ladder and (cx, cz) == ladder) else None
+        self.place_stamps(rect, y2, upper_names, color=bedc, keep=keep)
+        self.rug(rect, y2, bedc if bedc not in ('white', 'yellow') else 'light_gray')
+        if not (ladder and (cx, cz) == ladder) and v.get(cx, y2 + 3, cz) in (None, 'air') and self.solid_at(cx, y2 + 4, cz):
+            v.set(cx, y2 + 3, cz, 'lantern[hanging=true,waterlogged=false]')

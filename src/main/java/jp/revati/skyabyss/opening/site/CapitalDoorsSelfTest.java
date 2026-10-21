@@ -76,6 +76,25 @@ public final class CapitalDoorsSelfTest {
                 }
             }
         }
+        // 訓練場ははじめから開いている (門に鉄格子がない)
+        BlockPos training = e.extra("open_training");
+        check(f, training != null, "training: the gate mark open_training is missing");
+        if (training != null) {
+            level.getChunk(training);
+            check(f, ironNear(level, training) == 0, "training: the gate should be open from the start, found iron near " + training);
+        }
+        // 裏通りの隠し (35 の 6.8): 古井戸の下と酒場の地下の奥の印。奥の壁は閉じたまま建つ
+        for (String m : List.of("well_down", "well_chest", "cellar_gap", "cellar_passage", "abyss_hint")) {
+            check(f, e.extra(m) != null, "back alley: the mark " + m + " is missing");
+        }
+        BlockPos gap = e.extra("cellar_gap");
+        if (gap != null) {
+            check(f, !level.getBlockState(gap).isAir() && !level.getBlockState(gap.above()).isAir(), "back alley: the cellar wall is open at build (" + gap + ")");
+        }
+        BlockPos chest = e.extra("well_chest");
+        if (chest != null) {
+            check(f, level.getBlockState(chest).is(Blocks.CHEST), "back alley: no chest at well_chest " + chest + ": " + level.getBlockState(chest));
+        }
         // 社の祭壇 (転生の台座) の印、組合の中の言伝ての板 2 枚、都の鐘のそばに板を自動で立てない記録
         check(f, e.extra("altar") != null, "the shrine altar mark is missing");
         BlockPos guildDoor = e.extra("open_guild");
@@ -103,7 +122,7 @@ public final class CapitalDoorsSelfTest {
             check(f, !CapitalDoors.opened(server, "hall"), "the hall opened with the guild");
         }
         if (f.isEmpty()) {
-            SkyAbyss.LOGGER.info("SELFTEST capital doors PASSED (gated facilities have door and tablet marks; the guild opens on force and stays recorded)");
+            SkyAbyss.LOGGER.info("SELFTEST capital doors PASSED (gated facilities have door and tablet marks; the training yard is open; back-alley marks; the guild opens on force and stays recorded)");
         } else {
             for (String s : f) {
                 SkyAbyss.LOGGER.error("SELFTEST capital doors FAILED: {}", s);

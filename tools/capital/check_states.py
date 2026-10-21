@@ -13,7 +13,7 @@ import zipfile
 JARS = [os.path.expanduser('~/.gradle/caches/neoformruntime/artifacts/minecraft_1.21.1_client.jar')]
 # blockstates の json に出てこない (モデルを変えない) 状態
 SILENT = {'waterlogged', 'powered', 'distance', 'persistent', 'snowy', 'signal_fire', 'lit', 'open', 'level', 'up',
-          'north', 'south', 'east', 'west', 'hanging', 'half', 'shape', 'facing', 'type', 'axis', 'hinge', 'occupied', 'part', 'has_book', 'attachment', 'in_wall', 'moisture', 'age', 'face', 'stage', 'power', 'candles', 'cracked', 'slot_0_occupied', 'slot_1_occupied', 'slot_2_occupied', 'slot_3_occupied', 'slot_4_occupied', 'slot_5_occupied', 'bites', 'rotation', 'has_bottle_0', 'has_bottle_1', 'has_bottle_2'}
+          'north', 'south', 'east', 'west', 'hanging', 'half', 'shape', 'facing', 'type', 'axis', 'hinge', 'occupied', 'part', 'has_book', 'attachment', 'in_wall', 'moisture', 'age', 'face', 'stage', 'power', 'candles', 'cracked', 'slot_0_occupied', 'slot_1_occupied', 'slot_2_occupied', 'slot_3_occupied', 'slot_4_occupied', 'slot_5_occupied', 'bites', 'rotation', 'has_bottle_0', 'has_bottle_1', 'has_bottle_2', 'instrument', 'note', 'has_record'}
 
 
 def load():
