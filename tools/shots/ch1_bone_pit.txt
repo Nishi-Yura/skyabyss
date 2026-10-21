@@ -19,8 +19,10 @@ hud off
 # ---- 坑の台地 (石の塊の上に草。地面の上面 y=-30。坑の床は -43)
 cmd forceload add -42 -14 14 44
 wait 120
-cmd fill -42 -50 -14 -14 -31 44 stone
-cmd fill -13 -50 -14 14 -31 44 stone
+cmd fill -42 -50 -14 -28 -31 44 stone
+cmd fill -27 -50 -14 -14 -31 44 stone
+cmd fill -13 -50 -14 0 -31 44 stone
+cmd fill 1 -50 -14 14 -31 44 stone
 cmd fill -42 -30 -14 14 -30 44 grass_block
 cmd skyabyss dev ch1 place ch1_bone_pit 0 -30 0 0
 
@@ -77,16 +79,4 @@ waitchunks
 wait 20
 shot 10_exit_shaft
 
-# ---- 目的の帯: 支度の段 (鉄の跡の鎧の段 2/4)
-cmd gamemode survival
-cmd tp @s -18.5 -42 0.5 90 0
-hud on
-cmd skyabyss quest start @s "ch1/trail_iron"
-cmd skyabyss quest stage @s "ch1/trail_iron" armor
-cmd item replace entity @s armor.chest with iron_chestplate
-cmd item replace entity @s armor.legs with iron_leggings
-cmd effect give @s night_vision 60 0 true
-wait 80
-shot 11_band_iron
-band
-echo ch1_bone_pit done
+echo ch1_bone_pit done (目的の帯の文は自己テスト ch1 p6 と lang objective band が見る)
