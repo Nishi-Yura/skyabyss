@@ -261,7 +261,16 @@ def salt_vault():
     bp.mark('room1', 0, FL + 1, 27)
     bp.mark('room2', 18, FL + 1, 28)
     bp.mark('room3', 36, FL + 1, 27)
+    underpin(bp)
     return bp
+
+
+def underpin(bp):
+    """砂と砂利の下が空き (部品に何もない) なら砂岩で支える。地下の洞や空の上 (自己テスト) に置いても床が落ちない"""
+    loose = {bp.idx(s) for s in (SAND, 'minecraft:gravel')}
+    for (x, y, z), i in sorted(bp.cells.items()):
+        if i in loose and (x, y - 1, z) not in bp.cells:
+            bp.set(x, y - 1, z, 'minecraft:sandstone')
 
 
 # ---------------------------------------------------------------- 塩の道の標 (白く固まった塩の柱。北を向く矢印。SaltVault が次の標・蔵へ向けて回して置く)

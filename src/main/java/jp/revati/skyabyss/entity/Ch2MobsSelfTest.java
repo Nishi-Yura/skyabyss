@@ -659,8 +659,8 @@ public final class Ch2MobsSelfTest {
             clearItems(level);
             for (int i = 0; i < 100; i++) {
                 SandBurrower b = spawn(level, ModEntities.SAND_BURROWER.get(), SX + 0.5, SZ + 0.5, 0f);
-                b.setLastHurtByPlayer(killer);
-                b.hurt(level.damageSources().genericKill(), 1000f);
+                // 潜ったままでも通る傷を、倒した人つきで (setLastHurtByPlayer は湧いた直後だと tickCount = 0 で「人が倒した」にならない)
+                b.hurt(level.damageSources().source(net.minecraft.world.damagesource.DamageTypes.GENERIC_KILL, killer), 1000f);
             }
             int bs = count(level, salt);
             if (salt != null) {
