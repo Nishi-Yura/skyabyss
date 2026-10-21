@@ -93,7 +93,7 @@ public final class GuildLots {
 
     // 建てたときの設計図の原点 (SiteJob.mark は transform(x, y + 1, z, …, origin))。写した付属の点の一つから逆に求める
     @Nullable
-    static BlockPos origin(SiteData.Entry e, @Nullable Blueprint bp, int rot, boolean mirror) {
+    public static BlockPos origin(SiteData.Entry e, @Nullable Blueprint bp, int rot, boolean mirror) {
         if (bp == null) {
             return null;
         }

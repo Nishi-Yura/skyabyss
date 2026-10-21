@@ -220,8 +220,13 @@ public final class Graves {
             ItemStack s = it.next();
             ItemStack copy = s.copy();
             int before = copy.getCount();
-            // 留め袋に入る品は袋へ (22 の 4.2)
-            jp.revati.skyabyss.pouch.PouchRouting.give(player, copy);
+            // 留め袋に入る品は袋へ (22 の 4.2)。品ごとの知らせは出さない (最後に一行だけ)
+            jp.revati.skyabyss.pouch.Pouch.quiet = true;
+            try {
+                jp.revati.skyabyss.pouch.PouchRouting.give(player, copy);
+            } finally {
+                jp.revati.skyabyss.pouch.Pouch.quiet = false;
+            }
             int moved = before - copy.getCount();
             movedItems += moved;
             if (copy.isEmpty()) {

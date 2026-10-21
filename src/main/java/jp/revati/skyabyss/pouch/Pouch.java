@@ -22,6 +22,9 @@ import net.neoforged.neoforge.common.util.FakePlayer;
 // 袋に入るのは PouchEntries にある品で、部品のない (その品のままの) 品だけ。ほかの部品 (強化・名前・特性など) のある品は入れず、持ち物に残す。
 // 天の鍵の欠片・天の鍵は持ち主の印 (KeepsakeBonds) を外して数だけにし、出すときに今の代の印を付け直す
 public final class Pouch {
+    // 品ごとの「初めて入った」知らせを止める (墓から取り戻すときなど。サーバーの主の糸だけで使う)
+    public static boolean quiet;
+
     private Pouch() {
     }
 
@@ -115,7 +118,10 @@ public final class Pouch {
         }
         sync(player);
         if (first && !(player instanceof FakePlayer)) {
-            Notice.gain(player, "skyabyss_pouch.first", Component.translatable("skyabyss_pouch.name"), e.item().getDescription());
+            // 墓からまとめて取り戻すあいだは、品ごとの知らせを出さない (左に並びすぎた。2026-10-21 の試遊)
+            if (!quiet) {
+                Notice.gain(player, "skyabyss_pouch.first", Component.translatable("skyabyss_pouch.name"), e.item().getDescription());
+            }
             Beats.fire(player, "pouch:" + e.id().getPath());
         }
         if (n < want) {

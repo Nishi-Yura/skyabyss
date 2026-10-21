@@ -573,6 +573,7 @@ public class LoreBookScreen extends Screen implements jp.revati.skyabyss.client.
 
     @Override
     public int[] textBounds() {
-        return new int[] {left - 40, top - 4, BW + 80, BH + 8};
+        // 上のしおり (章の名) も文字の範囲に入れる (top - 4 で切っていて、章の名が読めなかった)
+        return new int[] {left - 40, top - 24, BW + 80, BH + 28};
     }
 }

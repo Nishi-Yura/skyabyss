@@ -117,6 +117,8 @@ public final class VitalsHud {
         }
     }
 
+    static final boolean NO_FOOD_BAR = true;
+
     private static void drawArmor(GuiGraphics g, Minecraft mc, Player p) {
         int armor = p.getArmorValue();
         Rect r = rect(Id.V_ARMOR);
@@ -128,7 +130,8 @@ public final class VitalsHud {
 
     private static void drawFood(GuiGraphics g, Minecraft mc, Player p) {
         Rect r = rect(Id.V_FOOD);
-        if (r == null) {
+        // おなかは空かない (rpg/NoHunger)。満腹度の帯は出さない
+        if (r == null || NO_FOOD_BAR) {
             return;
         }
         var fd = p.getFoodData();
