@@ -103,7 +103,7 @@ public final class CapitalDoorsSelfTest {
             check(f, !CapitalDoors.opened(server, "hall"), "the hall opened with the guild");
         }
         if (f.isEmpty()) {
-            SkyAbyss.LOGGER.info("SELFTEST capital doors PASSED (four facilities have door and tablet marks; the guild opens on force and stays recorded)");
+            SkyAbyss.LOGGER.info("SELFTEST capital doors PASSED (gated facilities have door and tablet marks; the guild opens on force and stays recorded)");
         } else {
             for (String s : f) {
                 SkyAbyss.LOGGER.error("SELFTEST capital doors FAILED: {}", s);
