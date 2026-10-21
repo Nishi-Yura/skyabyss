@@ -54,6 +54,11 @@ public final class PartyMarkers {
         entries = pos.entries();
     }
 
+    // 届いている仲間の位置 (旅の地図が読む)
+    public static List<PartyLocator.Entry> entries() {
+        return entries;
+    }
+
     public static void clear() {
         entries = List.of();
     }

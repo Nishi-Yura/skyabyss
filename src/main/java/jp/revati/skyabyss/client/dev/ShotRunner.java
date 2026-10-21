@@ -786,6 +786,15 @@ public final class ShotRunner {
                 mc.setScreen(screen);
                 return true;
             }
+            case "mapstyle" -> {
+                // mapstyle slate|parchment|ink : 旅の地図の見た目 (設定 mapStyle) を替える。開いている地図にもすぐ効く
+                jp.revati.skyabyss.Config.MapStyle st = jp.revati.skyabyss.Config.MapStyle.valueOf(line.arg(0).toUpperCase(Locale.ROOT));
+                jp.revati.skyabyss.Config.MAP_STYLE.set(st);
+                if (mc.screen instanceof jp.revati.skyabyss.client.map.TravelMapScreen map) {
+                    map.styleOverride(st);
+                }
+                return true;
+            }
             case "key" -> {
                 // key <キーの名前> : そのキーを押したことにする (mod のキーの KeyMapping。OS の入力ではない)。例 key key.skyabyss.record
                 press(mc, line.arg(0));
@@ -939,6 +948,8 @@ public final class ShotRunner {
     private static Screen screen(Minecraft mc, String name) {
         Supplier<Screen> s = switch (name.toLowerCase(Locale.ROOT)) {
             case "inventory" -> () -> new InventoryScreen(mc.player);
+            case "travel_map_demo" -> () -> jp.revati.skyabyss.client.map.TravelMapScreen.demo(false);
+            case "travel_map_voyage_demo" -> () -> jp.revati.skyabyss.client.map.TravelMapScreen.demo(true);
             case "lore", "lorebook" -> jp.revati.skyabyss.lore.client.LoreBookScreen::new;
             case "quests", "questlog" -> jp.revati.skyabyss.client.quest.QuestLogScreen::new;
             case "growth" -> jp.revati.skyabyss.rpg.client.GrowthScreen::new;

@@ -112,6 +112,8 @@ public final class SelfTestRunner {
         // 目的の道しるべ (矢印の角度・歩ける道の探索・予算・持ち主にだけ・パケット)。docs/design/18 の 8.3 節
         steps.add(Step.once("guide nav", jp.revati.skyabyss.guide.nav.GuideNavSelfTest::runSelfTest));
         steps.add(Step.once("party locator", jp.revati.skyabyss.party.PartyLocatorSelfTest::runSelfTest));
+        // 旅の地図の印 (序盤の記録から噂/見た、噂の位置の丸め、一人ぶんの集め・パケット)。docs/design/33 の 4 章。SKYABYSS_SELFTEST_ONLY="travel map"
+        steps.add(Step.once("travel map", jp.revati.skyabyss.map.MapMarksSelfTest::runSelfTest));
         // 仲間が起こせる仕組み・倒れた回数の札・「ここ」の印。docs/design/10 の 10.12〜10.14
         steps.add(Step.once("party revive", jp.revati.skyabyss.party.ReviveSelfTest::runSelfTest));
         steps.add(Step.once("growth", GrowthSelfTest::runSelfTest));
