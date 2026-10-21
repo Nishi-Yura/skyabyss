@@ -26,7 +26,7 @@ public final class StormMobSetup {
 
     // ---------------------------------------------------------------- エンティティ (大きさはモデルに合わせた)
     public static final DeferredHolder<EntityType<?>, EntityType<FeatherWarden>> FEATHER_WARDEN = ENTITIES.register("feather_warden",
-            () -> EntityType.Builder.of(FeatherWarden::new, MobCategory.MONSTER).sized(0.8f, 2.4f).eyeHeight(2.05f)
+            () -> EntityType.Builder.<FeatherWarden>of(FeatherWarden::new, MobCategory.MONSTER).sized(0.8f, 2.4f).eyeHeight(2.05f)
                     .clientTrackingRange(10).build(SkyAbyss.MODID + ":feather_warden"));
     public static final DeferredHolder<EntityType<?>, EntityType<StaticMoth>> STATIC_MOTH = ENTITIES.register("static_moth",
             () -> EntityType.Builder.of(StaticMoth::new, MobCategory.MONSTER).sized(0.9f, 0.6f).eyeHeight(0.4f)
@@ -74,6 +74,8 @@ public final class StormMobSetup {
         ENTITIES.register(modEventBus);
         ITEMS.register(modEventBus);
         SOUNDS.register(modEventBus);
+        // 三章の地上の敵 (帯電毛玉・峰の雛・雷拾い・焼けた羽守。21 の 5.1、P16)
+        jp.revati.skyabyss.titan.storm.chapter.Ch3Mobs.register(modEventBus);
         modEventBus.addListener(StormMobSetup::onAttributes);
         modEventBus.addListener(StormMobSetup::onCreativeTab);
     }

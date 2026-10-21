@@ -230,6 +230,7 @@ public final class Ch2Gear {
     // 塩の砥石を使った。岩の砥石の研ぎは塩の研ぎに替わる (重ねない)
     public static boolean applyWhetstone(ServerPlayer player) {
         player.removeEffect(TravelGear.WHETTED);
+        player.removeEffect(Ch3Gear.THUNDER_WHETTED);
         player.addEffect(new MobEffectInstance(SALT_WHETTED, WHETSTONE_TICKS, 0, false, true, true));
         Notice.hint(player, "message.skyabyss.salt_whetstone.used");
         Quests.signal(player, SIGNAL_WHETSTONE_USED);

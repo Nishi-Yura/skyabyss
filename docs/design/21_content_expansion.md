@@ -68,6 +68,17 @@
 - **道の固焼き**（吸収 II を 60 秒 + 満腹。糧の灯に 8 点）: 小麦 3 + 骨片 1 → 3 つ。骨の集め場・洞の宝のパンの代用を替えた。**苔の軟膏**（鈍足を治す + 再生 I を 8 秒。糧の灯に 3.2 点。`MossSalveItem`）: 苔ブロック + 骨片 + 粘土玉 → 2 つ。
 - アイコンは、ラフが無かった小物（砥石・固焼き・軟膏・「研いだ刃」の効き目の絵）をドット絵で描いた（`tools/gen_ch1_travel.py`）。差し替えたいときはこのスクリプトの関数だけ。
 
+**三章の分は実装済み**: 峰越えの旅装・雷の砥石・風干しの団子・避雷の油・風読みの小旗と素材 4 つ（`guide/Ch3Gear`。二章と同じ型）。
+- 峰越えの旅装（`peak_crossing_helmet/_chestplate/_leggings/_boots`。`PeakCrossingArmorItem`）: 防御 3/7/6/3 = **19**、強靭 2.75 × 4 = **11**、一式の効果「感電の傷 −25%」= 着ている部位ごとに −6.25%、アンコモン、炉で鍛えない、必要 Lv 19、修理は銅線。低ポリ（`peak_crossing` の組、仮に案 A 羽の肩。作りは `tools/rough/lowpoly/ch3/armor_ch3.py`、入れ方は `tools/install_ch3_gear_assets.py`）。
+- 感電の傷（`Ch3Gear.isShock`）: 雷（`lightning_bolt` の傷。頂の柱の雷・焼けた羽守の雷の輪も）と、雷を使う敵（雷蛾・帯電毛玉・雷乞い・雷獣・雷翼の心臓）の傷。
+- レシピ（`tools/gen_ch3_gear.py`。F = 焦げ羽、C = 帯電綿、W = 銅線、T = 潮殻の殻片）: 頭巾 `FCF/CTC`・上衣 `FFF/WTW/FCF`・裾 `FTF/W.W/C.C`・足袋 `FTF/WFW`。**4 部位の合計は焦げ羽 12・帯電綿 6・銅線 6・潮殻の殻片 4**。一式で合図 `ch3_travel_gear_made`。
+- **雷の砥石**: 「雷の刃」（`thunder_whetted`。攻撃 +2.2、20 分）。近接で当てると小さな火花（見た目と音だけ）。岩・塩の砥石とは重ねない（使うと替わる）。レシピ: 銅線 2 + 帯電綿 1 + 火打ち石 1 → 2 つ。合図 `ch3_whetstone_used`、雷の刃で倒すと `ch3_thunder_blade_kill`、焼けた羽守なら `ch3_warden_honed`。
+- **風干しの団子**（吸収 II 60 秒 + 落下速度低下 20 秒 + 満腹）: 小麦 3 + 砂糖 1 + 棒 1 → 3 つ。**避雷の油**（飲むと 90 秒「避雷」`grounded` = 感電と雷の傷が半分。糧の灯に 2 点）: ガラス瓶 2 + 帯電綿 1 + 銅線 1 → 2 つ。
+- **風読みの小旗**: `FCF/.W./.W.` → 1。**銅線**: 銅のインゴット 1 → 3。
+- 鍵: 9 本とも旅の覚書（三章）か職人（`unlock_recipes` chapter 3）に教わるまで作れない。職人の会話 `dialogue/ch3/artisan_gear.json`: 二つ目の巨神のあと初めて会うと覚書を渡す、選択肢「峰越えの旅装を教えてほしい」、護り糸で鼓動守を編む、帯電綿 8 で編み直す。
+- 小物の絵は 3 案ずつのドット絵（`tools/rough/lowpoly/ch3/icons_ch3.py`、シート `docs/review/ch3_roughs/items/icons_ch3.png`）から仮に選んだ。選定の一覧は `docs/review/ch3_roughs/choices.md`。
+- 自己テスト `ch3 gear`（`Ch3GearSelfTest`）。
+
 **二章の分は実装済み（P5 の二章）**: 潮渡りの旅装・塩の砥石・潮の塩漬け・真珠の粉薬・潮の刻みの砂時計と素材 4 つ（`guide/Ch2Gear`。一章と同じ型）。
 - 潮渡りの旅装（`tide_wader_helmet/_chestplate/_leggings/_boots`。`TideWaderArmorItem` は `WhaleRoadArmorItem` を継ぐ）: 防御 3/7/5/3 = **18**、強靭 2.25 × 4 = **9**、一式の効果「水中の移動速度の低下を軽くする」= 部位ごとの水中移動効率 +0.1（一式 0.4。水渡り III で 1.0）、アンコモン、炉で鍛えない、必要 Lv 13（`GearCurve.TRAVEL[1]`。由来 `tide_wader` =「潮渡りの旅装」）、修理は塩結晶。低ポリ（`tide_wader` の組、418 三角形、海硝子の留め金が光る。仮に案 A 真珠の肩。ラフ 3 案は `docs/review/ch2_roughs/items/armor_ch2.png`、作りは `tools/rough/lowpoly/ch2/armor_ch2.py`、入れ方は `tools/install_ch2_gear_assets.py`）。
 - レシピ（`tools/gen_ch2_gear.py`。P = 小真珠、S = 塩結晶、W = 岩鯨の鱗片 `stone_whale_shard`、L = 革）: 頭巾 `PSP/SWS`・上衣 `SSS/PWP/SLS`・裾 `PWP/S.S/LPL`・足袋 `SPS/PWP`。**4 部位の合計は小真珠 10・塩結晶 12・岩鯨の鱗片 4・革 3**（`ch2/prep_gear` の集める数と同じ）。一式で合図 `ch2_travel_gear_made`。
@@ -433,7 +444,7 @@
 
 目標 130〜150 分（必須で約 80 分）。主題: 見誤り・高い所。峰と嵐の通り道が舞台。
 
-- **実装の状態（34 の C3。4.4.1）**: 場所 5 種は西の峰の跡地に建つ（`titan/storm/chapter/Ch3Ground`・`ScorchedWatch`・`LightningPillars`、部品は `tools/gen_ch3_ground.py`）。避雷の見本は避雷の塔の跡の部品 `ch3_rod_tower` の中（東の隣）に置いた。焼けた見張り塔の嵐の拍は、頂の柱に 15 秒ごとの雷にした。**まだ**: 新しい敵 4（P16。塔は雷翼の背の敵で代え、雷拾いはいない）、新しい品（焦げ羽・帯電綿・銅線・旅装・雷の砥石・団子・油・護り糸・鼓動守・風読みの小旗）、備えの頼み `ch3/prep_*`（支度の段 3 本 `lightning_pillars`・`scorched_watch`・`sky_stone` が代わり）、`ch3/gleaner_trail`、日替わり `daily_puff_clear`。サブ `ch3/wind_flags` は実装済み（経験値 120）
+- **実装の状態（34 の C3。4.4.1）**: 場所 5 種は西の峰の跡地に建つ（`titan/storm/chapter/Ch3Ground`・`ScorchedWatch`・`LightningPillars`、部品は `tools/gen_ch3_ground.py`）。避雷の見本は避雷の塔の跡の部品 `ch3_rod_tower` の中（東の隣）に置いた。焼けた見張り塔の嵐の拍は、頂の柱に 15 秒ごとの雷にした。新しい敵 4（P16）と新しい品は実装済み（下の「新しい敵」「新しい品」）。**まだ**: 備えの頼み `ch3/prep_*`（支度の段 3 本 `lightning_pillars`・`scorched_watch`・`sky_stone` が代わり）、`ch3/gleaner_trail`、日替わり `daily_puff_clear`。サブ `ch3/wind_flags` は実装済み（経験値 120）
 
 **新しい場所（`titan/storm/chapter` に足す）**
 
@@ -454,7 +465,11 @@
 | 頂の間 | **焼けた羽守**（名づき。下）と柱。柱に誘って雷を落とす | 雷獣・避雷の柱 |
 | 報酬 | 焦げ羽、帯電綿、雷の護り糸（鼓動守の材料）、旅装の素材。初回は追憶の宝 | — |
 
-**新しい敵（地上）**
+**新しい敵（地上）**　**実装済み（P16）**: 4 種とも低ポリ（仮の選定: 毛玉 A 綿毛の玉・雛 C 焦げ羽の雛・雷拾い B 荷負い鳥・羽守 B 青い焦げ筋。ラフと選定の一覧は `docs/review/ch3_roughs/`（`choices.md`）、作り方は `tools/rough/lowpoly/ch3/`）。`titan/storm/chapter/mob/StaticPuff`・`PeakFledgling`・`LightningGleaner`・`ScorchedWarden`（羽守 `FeatherWarden` を継ぐ）。登録・ひとり歩き・音は `titan/storm/chapter/Ch3Mobs`（`StormMobSetup.register` から）。素材は `python -I tools/gen_ch3_ground_mobs.py` が入れる（メッシュ・アニメ・音の別名・文 `assets/skyabyss_ch3mob/lang`）。経験値は 毛玉 5・雛 6・雷拾い 2・羽守 60（章の枠には数えない）。自己テスト `ch3 mobs`、撮影 `tools/shots/ch3_extra.txt`（絵 `docs/review/ch3_extra/`）。
+- 帯電毛玉: 帯電 4 秒（毛が逆立つ）→ 4 ブロック以内の一番近い人へ 4、そこから 4 以内の別の人へ跳ぶ（最大 3 人、0.8 倍ずつ）。晴れた昼は自分から狙わない（叩けば怒る）。ひとり歩きは山の地形と風の丘。雨・雷雨のときは湧く割合が 0.2 から 0.55 に増える
+- 峰の雛: 3〜10 先の人へ、2.6 上がってから地面に帯（長さ 11・幅 1.4、0.8 秒）→ 帯の上の人に 5、帯の先まで突っ込む。誰にも当たらなければ 2 秒よろめき、傷 1.5 倍。ひとり歩きは峰（昼）
+- 雷拾い: 6 まで人が来ると羽ばたいて逃げ、一度だけ荷を落とす（銅線 1・焦げ羽 50%）。逃げる先は一番近い雷拾いの原（400 以内）。原には人が 48 以内にいる間、2 羽まで（保存しない）。ひとり歩きは草地と風の丘（昼）
+- 焼けた羽守: 羽守の技（薙ぎ・突撃）は嵐を待たない。雷の輪（足もと半径 3、1.2 秒 → 6。雷の傷）、外套の跳躍（4.5〜10 先の人の足もとに半径 2.4 の輪 1.2 秒 → 8）。ふだん傷 0.5 倍、頂の柱の雷を受けると 10 秒 1.25 倍。人数で体力が増える。落とす物は雷の護り糸 50%・銅線 2〜3
 
 | 名前（ID） | 役 | 振る舞い | 出る所 | 落とす物 |
 | --- | --- | --- | --- | --- |
@@ -463,7 +478,8 @@
 | 雷拾い（`lightning_gleaner`） | 追いかけっこ（敵意なし）。HP 12 | 銅の脚の長い鳥。焼けた荷の跡を拾って歩く。人が近づくと羽ばたいて逃げ、荷を落とす。追うと雷拾いの原へ導く | 高台、焼けた荷の跡 | 銅線、焦げ羽 |
 | 焼けた羽守（`scorched_warden`、名づき） | 塔の主。HP 190、鉤槍 10 | 羽守の変種（外套が焼け、兜に青い焦げ筋）。突撃・外套を広げて上へ跳ぶ・足もとの雷の輪（1.2 秒）。柱から雷を受けると傷が通る | 焼けた見張り塔の頂 | 雷の護り糸、銅線 |
 
-**新しい品**: 焦げ羽・帯電綿・銅線（素材）、峰越えの旅装（1.2）、雷の砥石、風干しの団子、避雷の油、雷の護り糸、雷翼の鼓動守、旅の覚書（三章）。新しい道具: **風読みの小旗**（`wind_streamer`、消耗品でない。置くと 30 秒、風の向きと次の嵐までの目安を細い光で見せる。背中の嵐の拍の予習）。
+**新しい品**（実装済み。数値とレシピは 1.2 の「三章の分」）: 焦げ羽 `scorched_feather`・帯電綿 `static_cotton`・銅線 `copper_wire`（素材）、峰越えの旅装 `peak_crossing_*`、雷の砥石 `thunder_whetstone`、風干しの団子 `wind_dumpling`、避雷の油 `lightning_oil`、雷の護り糸 `thunder_ward_thread`（素材）、雷翼の鼓動守（既存の `heartbeat_ward_thunder_wing`。職人が護り糸から最初の一つを編む。人ごとに一度、会話の印 `ch3t_woven`。補充は帯電綿 8 つで 1 日 1 つ）、旅の覚書（三章。レシピ 9 本と見分け方の 7 行）。新しい道具: **風読みの小旗**（`wind_streamer`、消耗品でない。立てると 30 秒、風下へ細い光の筋を立て、次の嵐（雷雨）までの目安を画面の帯に出す。クールダウン 30 秒）。
+- 落とし物と報酬: 焼けた見張り塔の初回の宝に焦げ羽 4・帯電綿 4・銅線 4・雷の護り糸 1（再訪は銅と三章の素材）、避雷の塔の跡の石の箱に銅線 4、雷拾いの原の箱に銅線 3・焦げ羽 2。
 
 **サブクエスト（新しい分。合計約 850〜900）**
 

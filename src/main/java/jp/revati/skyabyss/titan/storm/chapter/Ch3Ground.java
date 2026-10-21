@@ -39,7 +39,7 @@ import net.neoforged.neoforge.event.tick.ServerTickEvent;
 // ---------------------------------------------------------------- 場所 (StormSites の 4 種に足す)
 //   ch3_wind_flag      風の道の旗 5   稜線 (高台) に沿って。着くと合図 ch3_flag (サブ ch3/wind_flags)。五つ目で峰じゅうの旗が一斉に逆を向く (人ごとに一度)
 //   ch3_scorched_watch 焼けた見張り塔 小さなダンジョン (ScorchedWatch)。旅の職人の三章の立つ所 (印 artisan)
-//   ch3_gleaner_field  雷拾いの原     焼けた荷と、硝子のように固まった砂。拾い残しの箱 (人ごとに一度、粗銅 8)。雷拾い (P16) はまだいない
+//   ch3_gleaner_field  雷拾いの原     焼けた荷と、硝子のように固まった砂。拾い残しの箱 (人ごとに一度、粗銅 8・銅線 3・焦げ羽 2)。雷拾い (P16) が 2 羽まで荷をついばむ (Ch3Mobs)
 //   ch3_wind_cliff     風読みの崖     岩の舞台と碑 (sign.skyabyss.ch3_cliff)、樽に遠眼鏡 (世界に一つ)
 //   避雷の塔の跡 (StormSites.RUIN) は部品を ch3_rod_tower に替え、台 4・銅の戸・避雷の見本の柱を足した (LightningPillars)
 //
@@ -95,7 +95,8 @@ public final class Ch3Ground {
         ChapterSites.element(CLIFF, Chapters.STORM, CLIFF).atGround().dist(60, 150).prefer(Prefer.HIGH).arriveRadius(8)
                 .post(Ch3Ground::finishCliff)
                 .onArrive((p, s) -> Notice.narrate(p, "message.skyabyss.ch3g.arrive." + CLIFF)).register();
-        SiteTreasure.register(FIELD_CACHE, SiteTreasure.Table.of(List.of(new SiteTreasure.Entry("minecraft:raw_copper", 8))));
+        SiteTreasure.register(FIELD_CACHE, SiteTreasure.Table.of(List.of(new SiteTreasure.Entry("minecraft:raw_copper", 8),
+                new SiteTreasure.Entry(Ch3Mobs.COPPER_WIRE, 3), new SiteTreasure.Entry(Ch3Mobs.SCORCHED_FEATHER, 2))));
         LightningPillars.register();
         PrepQuests.onReady(3, p -> Notice.narrate(p, "message.skyabyss.ch3g.ready"));
         // 旅の職人の三章の立つ所: 焼けた見張り塔の南西の野営

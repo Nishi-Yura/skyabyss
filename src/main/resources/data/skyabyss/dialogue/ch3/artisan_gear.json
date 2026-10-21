@@ -1,0 +1,170 @@
+{
+  "npc": "skyabyss:artisan",
+  "extends": true,
+  "entries": [
+    {
+      "node": "ch3t_ward_weave",
+      "if": [
+        {
+          "type": "item",
+          "item": "skyabyss:thunder_ward_thread",
+          "count": 1,
+          "optional": true
+        },
+        {
+          "type": "not",
+          "of": {
+            "type": "flag",
+            "flag": "ch3t_woven"
+          }
+        },
+        {
+          "type": "ward_ok",
+          "titan": "thunder_wing"
+        }
+      ]
+    },
+    {
+      "node": "ch3a_first",
+      "if": [
+        {
+          "type": "stage",
+          "min": 2,
+          "max": 2
+        },
+        {
+          "type": "not",
+          "of": {
+            "type": "flag",
+            "flag": "ch3a_met"
+          }
+        }
+      ]
+    }
+  ],
+  "nodes": {
+    "ch3a_first": {
+      "face": "neutral",
+      "do": [
+        {
+          "type": "flag",
+          "flag": "ch3a_met"
+        },
+        {
+          "type": "flag",
+          "flag": "met"
+        },
+        {
+          "type": "give_notes",
+          "chapter": 3
+        },
+        {
+          "type": "affinity",
+          "amount": 1
+        }
+      ],
+      "next": "a_menu"
+    },
+    "ch3p_teach": {
+      "face": "neutral",
+      "do": [
+        {
+          "type": "unlock_recipes",
+          "chapter": 3
+        },
+        {
+          "type": "flag",
+          "flag": "ch3p_taught"
+        }
+      ],
+      "next": "a_menu"
+    },
+    "ch3t_ward_weave": {
+      "face": "smile",
+      "do": [
+        {
+          "type": "take",
+          "item": "skyabyss:thunder_ward_thread",
+          "count": 1
+        },
+        {
+          "type": "give",
+          "item": "skyabyss:heartbeat_ward_thunder_wing",
+          "count": 1
+        },
+        {
+          "type": "flag",
+          "flag": "ch3t_woven"
+        },
+        {
+          "type": "affinity",
+          "amount": 2
+        }
+      ],
+      "next": "a_menu"
+    },
+    "ch3a_ward": {
+      "face": "smile",
+      "do": [
+        {
+          "type": "take",
+          "item": "skyabyss:static_cotton",
+          "count": 8
+        },
+        {
+          "type": "remake_ward",
+          "titan": "thunder_wing"
+        },
+        {
+          "type": "affinity",
+          "amount": 1
+        }
+      ],
+      "next": "a_menu"
+    }
+  },
+  "add_options": {
+    "a_menu": {
+      "before": "bye",
+      "options": [
+        {
+          "id": "teach3",
+          "kind": "quest",
+          "if": [
+            {
+              "type": "stage",
+              "min": 2,
+              "max": 2
+            },
+            {
+              "type": "flag",
+              "flag": "ch3a_met"
+            }
+          ],
+          "goto": "ch3p_teach"
+        },
+        {
+          "id": "ward3",
+          "kind": "give",
+          "if": [
+            {
+              "type": "flag",
+              "flag": "ch3t_woven"
+            },
+            {
+              "type": "ward_ok",
+              "titan": "thunder_wing"
+            },
+            {
+              "type": "item",
+              "item": "skyabyss:static_cotton",
+              "count": 8,
+              "optional": true
+            }
+          ],
+          "goto": "ch3a_ward"
+        }
+      ]
+    }
+  }
+}

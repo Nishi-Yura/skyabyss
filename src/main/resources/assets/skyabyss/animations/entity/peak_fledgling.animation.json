@@ -1,0 +1,327 @@
+{
+  "format_version": "1.8.0",
+  "animations": {
+    "animation.peak_fledgling.idle": {
+      "loop": true,
+      "animation_length": 6.0,
+      "bones": {
+        "wing_l": {
+          "rotation": [
+            0,
+            -80,
+            10
+          ]
+        },
+        "wing_r": {
+          "rotation": [
+            0,
+            80,
+            -10
+          ]
+        },
+        "head": {
+          "rotation": [
+            "-(math.sin(query.anim_time * 120 + 0) * 6)",
+            "-(math.sin(query.anim_time * 60 + 90) * 10)",
+            "0"
+          ]
+        }
+      }
+    },
+    "animation.peak_fledgling.walk": {
+      "loop": true,
+      "animation_length": 0.5,
+      "bones": {
+        "wing_l": {
+          "rotation": [
+            0,
+            -80,
+            10
+          ]
+        },
+        "wing_r": {
+          "rotation": [
+            0,
+            80,
+            -10
+          ]
+        },
+        "body": {
+          "position": [
+            "0",
+            "math.abs(math.sin(query.anim_time * 720 + 0) * 0.4)",
+            "0"
+          ]
+        },
+        "leg_l": {
+          "rotation": [
+            "-(math.sin(query.anim_time * 720 + 0) * 25)",
+            "0",
+            "0"
+          ]
+        },
+        "leg_r": {
+          "rotation": [
+            "-(math.sin(query.anim_time * 720 + 180) * 25)",
+            "0",
+            "0"
+          ]
+        },
+        "head": {
+          "rotation": [
+            "-(math.sin(query.anim_time * 720 + 0) * 6)",
+            "0",
+            "0"
+          ]
+        }
+      }
+    },
+    "animation.peak_fledgling.fly": {
+      "loop": true,
+      "animation_length": 0.3333333333333333,
+      "bones": {
+        "wing_l": {
+          "rotation": [
+            "0",
+            "0",
+            "-(math.sin(query.anim_time * 1080 + 0) * 40 - 15)"
+          ]
+        },
+        "wing_r": {
+          "rotation": [
+            "0",
+            "0",
+            "math.sin(query.anim_time * 1080 + 0) * 40 - 15"
+          ]
+        },
+        "leg_l": {
+          "rotation": [
+            -40,
+            0,
+            0
+          ]
+        },
+        "leg_r": {
+          "rotation": [
+            -40,
+            0,
+            0
+          ]
+        },
+        "tail": {
+          "rotation": [
+            "-(math.sin(query.anim_time * 1080 + 0) * 8)",
+            "0",
+            "0"
+          ]
+        }
+      }
+    },
+    "animation.peak_fledgling.dive": {
+      "animation_length": 0.15,
+      "bones": {
+        "body": {
+          "rotation": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "0.15": [
+              40,
+              0,
+              0
+            ]
+          }
+        },
+        "head": {
+          "rotation": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "0.15": [
+              -20,
+              0,
+              0
+            ]
+          }
+        },
+        "wing_l": {
+          "rotation": {
+            "0.00": [
+              0,
+              0,
+              -30
+            ],
+            "0.15": [
+              0,
+              -50,
+              -10
+            ]
+          }
+        },
+        "wing_r": {
+          "rotation": {
+            "0.00": [
+              0,
+              0,
+              30
+            ],
+            "0.15": [
+              0,
+              50,
+              10
+            ]
+          }
+        },
+        "leg_l": {
+          "rotation": [
+            -50,
+            0,
+            0
+          ]
+        },
+        "leg_r": {
+          "rotation": [
+            -50,
+            0,
+            0
+          ]
+        },
+        "tail": {
+          "rotation": [
+            -14,
+            0,
+            0
+          ]
+        }
+      },
+      "loop": "hold_on_last_frame"
+    },
+    "animation.peak_fledgling.stagger": {
+      "loop": true,
+      "animation_length": 1.0,
+      "bones": {
+        "body": {
+          "rotation": [
+            "-(10)",
+            "0",
+            "math.sin(query.anim_time * 360 + 0) * 14"
+          ]
+        },
+        "head": {
+          "rotation": [
+            "-(-10)",
+            "-(math.sin(query.anim_time * 540 + 0) * 25)",
+            "math.sin(query.anim_time * 540 + 90) * 16"
+          ]
+        },
+        "wing_l": {
+          "rotation": [
+            0,
+            -40,
+            30
+          ]
+        },
+        "wing_r": {
+          "rotation": [
+            0,
+            40,
+            -30
+          ]
+        }
+      }
+    },
+    "animation.peak_fledgling.hurt": {
+      "animation_length": 0.3,
+      "bones": {
+        "body": {
+          "rotation": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "0.08": [
+              -12,
+              0,
+              6
+            ],
+            "0.30": [
+              0,
+              0,
+              0
+            ]
+          }
+        }
+      }
+    },
+    "animation.peak_fledgling.death": {
+      "animation_length": 1.0,
+      "bones": {
+        "body": {
+          "rotation": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "0.60": [
+              0,
+              0,
+              80
+            ],
+            "1.00": [
+              0,
+              0,
+              90
+            ]
+          },
+          "position": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "1.00": [
+              0,
+              -1.5,
+              0
+            ]
+          }
+        },
+        "wing_l": {
+          "rotation": {
+            "0.00": [
+              0,
+              -80,
+              10
+            ],
+            "0.60": [
+              0,
+              -20,
+              40
+            ]
+          }
+        },
+        "wing_r": {
+          "rotation": {
+            "0.00": [
+              0,
+              80,
+              -10
+            ],
+            "0.60": [
+              0,
+              20,
+              -40
+            ]
+          }
+        }
+      },
+      "loop": "hold_on_last_frame"
+    }
+  }
+}

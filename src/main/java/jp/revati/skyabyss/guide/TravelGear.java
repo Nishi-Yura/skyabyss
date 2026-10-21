@@ -132,6 +132,8 @@ public final class TravelGear {
         modEventBus.addListener(TravelGear::onCreativeTab);
         // 二章の分 (潮渡りの旅装・塩の砥石・糧と薬・砂時計・素材)
         Ch2Gear.register(modEventBus);
+        // 三章の分 (峰越えの旅装・雷の砥石・団子と油・風読みの小旗・素材)
+        Ch3Gear.register(modEventBus);
     }
 
     private static void onCreativeTab(BuildCreativeModeTabContentsEvent event) {
@@ -225,6 +227,7 @@ public final class TravelGear {
     public static boolean applyWhetstone(ServerPlayer player) {
         // 研ぎは重ねない (塩の砥石の刃は岩の砥石で研ぎ直すと替わる)
         player.removeEffect(Ch2Gear.SALT_WHETTED);
+        player.removeEffect(Ch3Gear.THUNDER_WHETTED);
         player.addEffect(new MobEffectInstance(WHETTED, WHETSTONE_TICKS, 0, false, true, true));
         Notice.hint(player, "message.skyabyss.whetstone.used");
         // 備えの頼み「刃を研ぐ」の「砥石を使う」(TODO(P7): 老いた歩哨ができたら、研いだ刃で倒す、に締める)

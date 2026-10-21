@@ -88,8 +88,23 @@ public class FeatherWarden extends StormMob {
     long diveStartedAt = -1;
 
     public FeatherWarden(EntityType<? extends Monster> type, Level level) {
-        super(type, level, "feather_warden", "attack");
+        this(type, level, "feather_warden", "attack");
+    }
+
+    // 変種 (三章の地上の焼けた羽守) が自分のアニメーションの名前で作る
+    protected FeatherWarden(EntityType<? extends Monster> type, Level level, String prefix, String... actions) {
+        super(type, level, prefix, actions);
         this.xpReward = 10;
+    }
+
+    // 突撃してよい時か (背中では嵐の拍のときだけ。変種は上書きする)
+    protected boolean diveAllowed() {
+        return MobStorm.phase(level()).stormy();
+    }
+
+    // 変種の技の最中 (薙ぎも突撃もしない)
+    protected boolean holding() {
+        return false;
     }
 
     public static AttributeSupplier.Builder createAttributes() {
@@ -398,7 +413,7 @@ public class FeatherWarden extends StormMob {
             if (cooldown > 0) {
                 cooldown--;
             }
-            if (mob.state3() != State.IDLE) {
+            if (mob.state3() != State.IDLE || mob.holding()) {
                 windup = -1;
                 return;
             }
@@ -422,7 +437,7 @@ public class FeatherWarden extends StormMob {
             mob.getLookControl().setLookAt(t, 30f, 30f);
             double flat = Math.sqrt(t.distanceToSqr(mob.getX(), t.getY(), mob.getZ()));
             double d = flat - mob.getBbWidth() / 2 - t.getBbWidth() / 2;
-            if (MobStorm.phase(mob.level()).stormy() && mob.canDive() && flat >= DIVE_MIN && flat <= DIVE_MAX
+            if (mob.diveAllowed() && mob.canDive() && flat >= DIVE_MIN && flat <= DIVE_MAX
                     && Math.abs(t.getY() - mob.getY()) < 3 && mob.hasLineOfSight(t)) {
                 mob.startCrouch();
                 return;
