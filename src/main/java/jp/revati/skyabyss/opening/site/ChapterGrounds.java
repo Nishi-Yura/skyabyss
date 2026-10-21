@@ -22,7 +22,7 @@ import net.neoforged.neoforge.event.server.ServerStoppedEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
 
 // 章の跡地 (docs/design/33 の 3 章。W2)。はじまりの都から決まった方位と距離の帯に、章ごとに世界で一つ。
-//   一章 岩鯨 = 北 250〜450 の丘 (2026-10-21 の試遊で近づけた。道しるべの入る間は残す)、二章 潮殻 = 東 800〜1,400 の海辺、三章 雷翼 = 西 1,000〜1,800 の峰 (y 150 以上)、四章 余燼 = 南 1,200〜2,000 の乾いた低地。
+//   一章 岩鯨 = 北 280〜460 の丘 (2026-10-21 の試遊で近づけた。道しるべの入る間は残す)、二章 潮殻 = 東 800〜1,400 の海辺、三章 雷翼 = 西 1,000〜1,800 の峰 (y 150 以上)、四章 余燼 = 南 1,200〜2,000 の乾いた低地。
 //   探し方: 方位の扇 (±25 度) の中で、帯の内側から外側へ 32 ブロック刻み (扇は 5 度刻み、まんなかから)。合う地形があればそこ。
 //     バニラの村・構造物の出るチャンクが 192 以内なら、その候補を飛ばす (= 少しずらす。小要素の広がりのぶん 128 より広め。道しるべの点は 48)。一章は野営地・足跡からも離す。
 //     無ければ帯のまんなかのそばの、いちばん乾いて平らな所に「整える形」を作る (丘 96・入り江 160・峰 128 で +60 まで・灰の盆地 160。ShapeJob)。
@@ -48,7 +48,7 @@ public final class ChapterGrounds {
     }
 
     public static final List<Spec> SPECS = List.of(
-            new Spec(Chapters.WHALE, 0, -1, 250, 450, Shape.HILL, 96),
+            new Spec(Chapters.WHALE, 0, -1, 280, 460, Shape.HILL, 96),
             new Spec(Chapters.TIDE, 1, 0, 800, 1400, Shape.COVE, 160),
             new Spec(Chapters.STORM, -1, 0, 1000, 1800, Shape.PEAK, 128),
             new Spec(Chapters.EMBER, 0, 1, 1200, 2000, Shape.BASIN, 160));
