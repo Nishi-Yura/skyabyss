@@ -23,7 +23,7 @@ import net.minecraft.world.level.block.state.BlockState;
 //  - BackScale の写し方 (倍率 1.0 は版 12 と同じ。1.6 / 1.3 の値)
 //  - 部屋の大きさ・通路の幅と高さ・壁が体の中にある (BackMetrics。倍率の下限を守る)
 //  - 幕 (VEIL) が広間の中の面で、人数の少ないグループにだけ張れる / 近い側に湧き場所が残る
-//  - 鐘の順 (BellTower.step)・初回だけの部屋の登録 (WhaleFirstRun) と既知の道で戸が開く
+//  - 鐘の順 (BellTower.step)・戸は初回も周回も戦いの前は閉じている
 //  - 版を上げる建て直しでも、初回を終えた記録 (keep.*) が残る
 //  - 休み場の復活位置が安全に立てる
 // 建ててある背 (titan back (build)) の後に流す
@@ -154,13 +154,8 @@ public final class WhaleScaleSelfTest {
                 BlockState st = back.getBlockState(BellTower.bellPos(n));
                 check(f, st.is(jp.revati.skyabyss.registry.ModBlocks.RELIC_BELL.get()), "bell " + n + " is missing at " + BellTower.bellPos(n));
             }
-            // 初回だけの部屋と、既知の道で開く戸
+            // 戸の初期状態 (初回も周回も、戦いの前は閉じている)
             TitanBackTrials.installGates(back);
-            WhaleFirstRun.register();
-            for (String id : List.of(BellTower.FIRST_ROOM, WhaleFirstRun.E2, WhaleFirstRun.CK)) {
-                check(f, FirstRun.room(id) != null && FirstRun.room(id).firstRunOnly, "first-run room is not registered: " + id);
-            }
-            check(f, FirstRun.room(WhaleFirstRun.LIBRARY_ROOM) != null && !FirstRun.room(WhaleFirstRun.LIBRARY_ROOM).firstRunOnly, "the library is not an optional wing");
             UUID group = UUID.randomUUID();
             BackGroupData data = BackGroupData.get(back);
             BackGroupData.Record record = data.of(group);
@@ -168,10 +163,6 @@ public final class WhaleScaleSelfTest {
             check(f, !jp.revati.skyabyss.titan.group.GroupGates.isOpen(back, group, E3_LOCK), "the guard-post door was open for a first run");
             record.markFirstCleared();
             record.setFlag(BellTower.FLAG, true);
-            FirstRun.syncDoors(back, group);
-            check(f, jp.revati.skyabyss.titan.group.GroupGates.isOpen(back, group, BELL_GATE), "the bell gate did not open on the known path");
-            check(f, jp.revati.skyabyss.titan.group.GroupGates.isOpen(back, group, E3_LOCK), "the guard-post door did not open on the known path");
-            check(f, jp.revati.skyabyss.titan.group.GroupGates.isOpen(back, group, E1_EXIT), "the way to the second hall did not open on the known path");
             // 版を上げる建て直し: 試練の進みは戻るが、keep.* (初回を終えた印) は残る
             record.setFlag("keep.selftest_seen", true);
             record.markHallCleared("e1");

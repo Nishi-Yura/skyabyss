@@ -448,17 +448,6 @@ final class StormCircuit {
         }
     }
 
-    // 見かけだけのグループごとの道しるべ (周回の既知の道): 解の導線を光る色で
-    static List<BlockPos> solutionCells() {
-        List<BlockPos> out = new ArrayList<>();
-        for (Circuit c : CIRCUITS) {
-            for (Edge e : solutionTrace(c).edges()) {
-                out.addAll(e.cells());
-            }
-        }
-        return out;
-    }
-
     // ---------------------------------------------------------------- 毎 tick (回廊の持ち主がいるとき)
     static void tick(ServerLevel level, UUID owner, StormProgress progress, boolean storm, boolean peaceful) {
         long gt = level.getGameTime();

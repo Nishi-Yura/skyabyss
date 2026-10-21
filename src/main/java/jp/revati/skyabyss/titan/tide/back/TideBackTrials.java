@@ -128,7 +128,6 @@ public final class TideBackTrials {
             GroupOverlays.register(TideBackTrials::overlay);
             GroupOverlays.register(Breath::overlay);
             GroupEvents.addMembershipHook(TideBackTrials::membershipChanged);
-            BreathGuide.register();
         });
     }
 

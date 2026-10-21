@@ -188,7 +188,6 @@ public final class StormBackTrials {
     // 背中そのもの (全員に同じ所) を置き直す。何度呼んでも同じ: 風切りの骨の道、竜骨の門の下の形、扉のブロック、
     // 風鳴り石・灯り・抜け道の床の既定の姿 (まだ鳴っていない)、持ち主のいない部屋
     static void applyWorld(ServerLevel level) {
-        registerFirstRun();
         StormExtraRules.registerRods(level);
         StormBirdBuilder.carveWestRoute(new StormKit(level), StormBackState.get(level).westRoute());
         StormBirdBuilder.carveKeel(level);
@@ -208,16 +207,6 @@ public final class StormBackTrials {
         } else {
             EyeMirrors.apply(level, StormProgress.of(level, eye));
         }
-    }
-
-    // 初回と周回 (21 の 1.7): 肋の間と雷の回路は、周回のグループには既知の道 (道しるべが光る。仕掛けはそのまま。敵は出さない)
-    static void registerFirstRun() {
-        jp.revati.skyabyss.titan.group.FirstRun.register(jp.revati.skyabyss.titan.group.FirstRun.Room
-                .firstRun("storm.west.rib", StormTravel.STORM_BACK, RIB_HALL.aabb())
-                .guide(StormRib.guideCells()).guideState(StormKit.LAMP));
-        jp.revati.skyabyss.titan.group.FirstRun.register(jp.revati.skyabyss.titan.group.FirstRun.Room
-                .firstRun("storm.east.circuit", StormTravel.STORM_BACK, StormEast.room())
-                .guide(StormCircuit.solutionCells()).guideState(StormCircuit.B_LIT));
     }
 
     // ---------------------------------------------------------------- 扉 (グループごと)

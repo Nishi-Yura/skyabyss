@@ -2,7 +2,6 @@ package jp.revati.skyabyss.titan.group;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 import com.mojang.authlib.GameProfile;
@@ -15,22 +14,16 @@ import jp.revati.skyabyss.cinematic.Shot;
 import jp.revati.skyabyss.party.PartyData;
 import jp.revati.skyabyss.registry.ModItems;
 import jp.revati.skyabyss.titan.TitanTravel;
-import net.minecraft.core.BlockPos;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.phys.AABB;
 import net.neoforged.neoforge.common.util.FakePlayer;
 
 // 初回と周回の共通部品 (FirstRun) の自己テスト。段の名前は "back first" (SKYABYSS_SELFTEST_ONLY="back first" でこれだけ流せる)。
-// first_cleared の前後・グループごと・パーティの組む入る抜ける・リセットで残る・戸と光る床と静かな通路・任意の翼・
+// first_cleared の前後・グループごと・パーティの組む入る抜ける・リセットで残る・
 // 場面が人ごとに一度・追憶の宝が人ごとに一度で装備は拒む・素材は繰り返す
 public final class FirstRunSelfTest {
-    private static final String ROOM = "selftest_first_room";
-    private static final String WING = "selftest_first_wing";
     private static final String SCENE = "selftest_first_scene";
     private static final String KEEPSAKE = "selftest_keepsake";
 
@@ -53,8 +46,6 @@ public final class FirstRunSelfTest {
         var snapshot = parties.snapshot(server.registryAccess());
         ServerLevel back = server.getLevel(TitanTravel.TITAN_BACK);
         List<UUID> groups = new ArrayList<>();
-        BlockPos door = new BlockPos(5000, 100, 5000);
-        BlockPos floor = new BlockPos(5001, 99, 5000);
         FakePlayer a = null;
         FakePlayer b = null;
         FakePlayer c = null;
@@ -63,50 +54,25 @@ public final class FirstRunSelfTest {
                 f.add("titan_back dimension is missing");
             } else {
                 parties.clearAll();
-                back.getChunk(door);
-                GroupGates.place(back, List.of(door), false);
                 a = player(back, "first_a");
                 b = player(back, "first_b");
                 c = player(back, "first_c");
                 UUID ga = a.getUUID();
                 UUID gb = b.getUUID();
                 groups.addAll(List.of(ga, gb, c.getUUID()));
-                FirstRun.register(FirstRun.Room.firstRun(ROOM, back.dimension(), new AABB(4990, 90, 4990, 5010, 110, 5010)).doors(List.of(door))
-                        .guide(List.of(floor)));
-                FirstRun.register(FirstRun.Room.optional(WING, back.dimension(), new AABB(4900, 90, 4900, 4950, 110, 4950)));
-                BlockPos inRoom = new BlockPos(5000, 100, 5000);
-                BlockPos inWing = new BlockPos(4910, 100, 4910);
 
-                // 初回 (first_cleared 前): 戸は閉じ、光る床なし、敵は出る
+                // 初回 (first_cleared 前): どのグループも初回
                 check(f, FirstRun.isFirstRun(back, ga) && FirstRun.isFirstRun(back, gb), "a fresh group was not on its first run");
-                check(f, !FirstRun.isKnownPath(back, ga, ROOM) && FirstRun.allowSpawn(back, ga, ROOM) && FirstRun.allowSpawnAt(back, ga, inRoom),
-                        "the first-run room was quiet before first_cleared");
-                check(f, !GroupGates.isOpen(back, ga, door), "the first-run door was open before first_cleared");
-                check(f, !GroupOverlays.compute(back, ga).containsKey(floor), "the guide floor showed before first_cleared");
 
                 // A のグループだけが心臓を止める
                 FirstRun.onFirstCleared(back, List.of(ga));
                 BackGroupData.Record ra = BackGroupData.get(back).of(ga);
                 check(f, ra.isFirstCleared() && ra.flag("keep.first_cleared"), "first_cleared was not recorded under keep.");
                 check(f, !FirstRun.isFirstRun(back, ga) && FirstRun.isFirstRun(back, gb), "first_cleared leaked to another group");
-                check(f, FirstRun.isKnownPath(back, ga, ROOM) && !FirstRun.isKnownPath(back, gb, ROOM), "the known path is not per group");
-                check(f, !FirstRun.allowSpawn(back, ga, ROOM) && !FirstRun.allowSpawnAt(back, ga, inRoom), "the known path still spawns enemies");
-                check(f, FirstRun.allowSpawn(back, gb, ROOM) && FirstRun.allowSpawnAt(back, gb, inRoom), "the other group's room went quiet");
-                check(f, GroupGates.isOpen(back, ga, door) && !GroupGates.isOpen(back, gb, door), "the known-path door is not open for exactly that group");
-                BlockState glow = GroupOverlays.compute(back, ga).get(floor);
-                check(f, glow != null && glow.is(Blocks.SEA_LANTERN) && !GroupOverlays.compute(back, gb).containsKey(floor),
-                        "the guide floor is not shown to exactly that group");
-                // 任意の翼は初回でも周回でも変わらない
-                check(f, !FirstRun.isKnownPath(back, ga, WING) && FirstRun.allowSpawn(back, ga, WING) && FirstRun.allowSpawnAt(back, ga, inWing),
-                        "an optional wing went quiet");
-                check(f, FirstRun.allowSpawnAt(back, ga, new BlockPos(0, 100, 0)), "a spot outside every room went quiet");
 
-                // 試練のリセットでは残る。戸の上書きは消えるが、すぐ開け直す
+                // 試練のリセットでは残る
                 GroupProgress.reset(back, ga);
                 check(f, BackGroupData.get(back).of(ga).isFirstCleared(), "the trial reset erased first_cleared");
-                check(f, !GroupGates.isOpen(back, ga, door), "the reset did not clear the door override (test setup)");
-                FirstRun.syncDoors(back, ga);
-                check(f, GroupGates.isOpen(back, ga, door), "the known-path door did not reopen after the reset");
 
                 // パーティ: A (周回) が組む → パーティは周回から始まる。B が入る → B もパーティの記録 (周回の道)
                 PartyData.Party party = parties.create(ga, "first_a");
@@ -168,8 +134,6 @@ public final class FirstRunSelfTest {
             f.add("crashed: " + e);
         } finally {
             parties.restore(snapshot, server.registryAccess());
-            FirstRun.unregister(ROOM);
-            FirstRun.unregister(WING);
             jp.revati.skyabyss.cinematic.Scenes.unregister(SCENE);
             for (FakePlayer p : java.util.Arrays.asList(a, b, c)) {
                 if (p != null) {
@@ -178,7 +142,6 @@ public final class FirstRunSelfTest {
                 }
             }
             if (back != null) {
-                back.setBlock(door, Blocks.AIR.defaultBlockState(), 2);
                 for (UUID g : groups) {
                     BackGroupData.get(back).remove(g);
                 }

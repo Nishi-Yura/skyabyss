@@ -190,7 +190,7 @@ public final class BreathSummit {
 
     // この周で挑めるか: 初回のグループ (周回の既知の道は静か)・まだ退けていない
     static boolean canStart(ServerLevel level, UUID group) {
-        return !TideBackState.of(level, group).keeperDefeated() && FirstRun.allowSpawn(level, group, FIRST_ROOM_ID);
+        return !TideBackState.of(level, group).keeperDefeated();
     }
 
     public static final String FIRST_ROOM_ID = "tide_breath";

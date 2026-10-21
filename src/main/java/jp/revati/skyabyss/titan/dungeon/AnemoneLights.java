@@ -68,7 +68,6 @@ public final class AnemoneLights {
     // 灯のまわりで魚が襲わない半径 (ブロック)
     public static final double CALM_RADIUS = 6.5;
     public static final String FLAG = "lamp.";
-    public static final String FIRST_ROOM = "whale_maze";
     // 入口の小部屋の中の、数え石・苗床・灯の掲示板 (迷路の天井の上。床 y 81 の上)
     public static final BlockPos TALLY_POS = new BlockPos(MAZE_ENTRY_ROOM.x2() - 2, MAZE_FLOOR + 5, MAZE_ENTRY_ROOM.z1());
     public static final List<BlockPos> ENTRY_BEDS = List.of(new BlockPos(MAZE_ENTRY_ROOM.x2() - 3, MAZE_FLOOR + 5, MAZE_ENTRY_ROOM.z2()),
@@ -249,7 +248,6 @@ public final class AnemoneLights {
         BlockPos mid = MazeBuilder.midPocket(maze);
         // 中ほどの休み場: 隅の足場の上 (空気の層の一段目)。復活位置 (北西の隅) と紫水晶 (南東の隅) の間の隅
         kit.set(mid.offset(MAZE_CELL - 1, 2, 0), ModBlocks.ANEMONE_BED.get().defaultBlockState());
-        registerRoom(maze);
     }
 
     // 入口の小部屋の数え石・苗床・掲示板 (島を建てるときに一度だけ)
@@ -265,19 +263,6 @@ public final class AnemoneLights {
             kit.set(p.above(), BuildKit.CHISELED);
             kit.set(p.below(), BuildKit.CHISELED);
         }
-    }
-
-    // 初回を終えたグループには、出口の戸・近道の戸が最初から開き、光の道が見える (既知の道。FirstRun が 1 秒ごとに開け直す)
-    private static void registerRoom(FloodedMaze maze) {
-        AABB box = new AABB(MAZE_X0, MAZE_FLOOR, MAZE_Z0, MAZE_X0 + MAZE_W * (MAZE_CELL + 1) + 1, MAZE_FLOOR + 6, MAZE_Z0 + MAZE_H * (MAZE_CELL + 1) + 1);
-        MazePlan plan = MazePlan.compute(maze);
-        List<BlockPos> doors = new ArrayList<>(computeGate(maze));
-        for (MazePlan.Cut cut : plan.cuts) {
-            doors.addAll(plan.cutBlocks(cut));
-        }
-        List<BlockPos> guide = new ArrayList<>(computeTrail(plan));
-        guide.addAll(exitRing());
-        FirstRun.register(FirstRun.Room.firstRun(FIRST_ROOM, TitanTravel.TITAN_BACK, box).doors(doors).guide(guide).guideState(Blocks.SEA_LANTERN.defaultBlockState()));
     }
 
     // 迷路が別の形に作り直される前に: 灯の記録と、古い戸の上書きを全グループから消す (台の番号と戸の場所が変わるため)
@@ -883,7 +868,6 @@ public final class AnemoneLights {
         OPENINGS.clear();
     }
 
-    // 初回の部屋の登録を、世界が読まれたあとにも (FirstRun の登録は保存されない)。1 秒ごと、背中に人がいるときに見る。
     // 出口の戸が開く場面は毎 tick 進める
     @SubscribeEvent
     static void onLevelTick(net.neoforged.neoforge.event.tick.LevelTickEvent.Post event) {
@@ -893,25 +877,6 @@ public final class AnemoneLights {
         if (!OPENINGS.isEmpty()) {
             tickOpenings(level);
         }
-        if (level.getGameTime() % 20 != 11 || level.players().isEmpty()) {
-            return;
-        }
-        if (FirstRun.room(FIRST_ROOM) == null || registeredSeed != TitanBackData.get(level).mazeSeed()) {
-            registeredSeed = TitanBackData.get(level).mazeSeed();
-            registerRoom(MazeBuilder.maze(registeredSeed));
-        }
-    }
-
-    private static long registeredSeed = Long.MIN_VALUE;
-
-    // 自己テスト用: いまの迷路で部屋を登録し直したことにする
-    static void markRegistered(long seed) {
-        registeredSeed = seed;
-    }
-
-    // 登録の記録を忘れる (建て直したあと)
-    static void forgetRegistered() {
-        registeredSeed = Long.MIN_VALUE;
     }
 
     // 自己テスト用: 動いている「戸が開く場面」の数

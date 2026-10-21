@@ -31,11 +31,10 @@ import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 // 数え歌の鐘楼 (21 の 3.3。西の翼の第二の休み場 W2 の北、縦の穴): 五つの鐘と、崩れ橋 (WC) へ行く通路の戸 (BELL_GATE)。
 // 鐘は積み石の高さが番号 (1〜5。地上の歌石と同じ数え方)。1 → 2 → 3 → 4 → 5 の順に叩くと、戸の封印がそのグループにだけほどける。
 // 間違えると鐘が低く鳴り、骨鳥が二羽降りる (ピースフルでは鳴るだけ)。初回に歌の間を見ていなくても、立て札の一行 (欠けた節) で解ける。
-// 初回だけ働く: 周回のグループには戸が最初から開き (FirstRun の既知の道)、鐘は鳴るだけで何も起きない
+// 鐘は鳴るだけで何も起きない (周回も初回も同じ。戸は鐘を鳴らしたあとに開く)
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class BellTower {
     public static final int COUNT = 5;
-    public static final String FIRST_ROOM = "whale_bell";
     public static final String FLAG = "bell";
     // 鐘の台 (台の高さ = 番号)。塔の北の壁ぎわに、西から東へ 1 → 5 と高くなって並ぶ (音階のように読める)
     public static final List<int[]> PILLARS = List.of(
@@ -159,7 +158,6 @@ public final class BellTower {
         for (int[] l : new int[][]{{-49, -123}, {-37, -123}, {-49, -113}, {-37, -113}, {-49, -118}, {-37, -118}}) {
             kit.hangingLantern(l[0], l[1], BELL.ceilingY(), 6);
         }
-        register();
     }
 
     // 天井から鎖で吊るした大きな鐘 (緑青の銅の塊。中に灯りの舌)。階段の上、頭の届かない高さ
@@ -189,12 +187,6 @@ public final class BellTower {
         }
         kit.set(GREAT_X, y0 - 2, GREAT_Z, Blocks.CHAIN.defaultBlockState());
         kit.set(GREAT_X, y0 - 3, GREAT_Z, kit.pal().hangingLantern());
-    }
-
-    // 初回だけ働く部屋として登録する (周回のグループには戸が最初から開く)。建てたあと・起動のあとに呼ぶ
-    public static void register() {
-        net.minecraft.world.phys.AABB box = BELL.aabb().minmax(BELL_PASS.aabb()).minmax(W2_CONN2.aabb());
-        FirstRun.register(FirstRun.Room.firstRun(FIRST_ROOM, TitanTravel.TITAN_BACK, box).doors(BELL_GATE));
     }
 
     // ---------------------------------------------------------------- 叩く

@@ -61,11 +61,6 @@ final class BreathGuide {
         return new ArrayList<>(cells);
     }
 
-    static void register() {
-        FirstRun.register(FirstRun.Room.firstRun(BreathSummit.FIRST_ROOM_ID, jp.revati.skyabyss.titan.tide.TideTravel.TIDE_BACK, Breath.activeBox())
-                .guide(guideCells()).guideState(TideKit.LAMP));
-    }
-
     // 5 tick ごと (TideGuide から)
     static void tick(ServerLevel level, int counter) {
         if (counter % 2 != 0) {

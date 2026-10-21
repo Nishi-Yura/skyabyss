@@ -116,15 +116,15 @@ public final class BackGroupData extends SavedData {
                     || hasRealOverride();
         }
 
-        // 試練の入口の戸 (引いた三つだけ開ける戸。人が背にいるだけで書かれる) と、既知の道の戸 (FirstRun。周回のグループに開く) 以外の上書きがあるか
+        // 試練の入口の戸 (引いた三つだけ開ける戸。人が背にいるだけで書かれる) 以外の上書きがあるか
         private boolean hasRealOverride() {
             for (long k : openOverride) {
-                if (!IGNORED_OVERRIDE.test(k) && !FirstRun.isDoorKey(k)) {
+                if (!IGNORED_OVERRIDE.test(k)) {
                     return true;
                 }
             }
             for (long k : closedOverride) {
-                if (!IGNORED_OVERRIDE.test(k) && !FirstRun.isDoorKey(k)) {
+                if (!IGNORED_OVERRIDE.test(k)) {
                     return true;
                 }
             }

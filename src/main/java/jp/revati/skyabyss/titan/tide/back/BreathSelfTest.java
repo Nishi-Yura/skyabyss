@@ -739,25 +739,6 @@ public final class BreathSelfTest {
                 check(jp.revati.skyabyss.SignFit.lang("ja_jp").containsKey("gui.skyabyss.tide_goal." + key) && jp.revati.skyabyss.SignFit.lang("en_us").containsKey("gui.skyabyss.tide_goal." + key),
                         "goal text missing: " + key);
             }
-            // 周回: 心臓を止めたグループは、真珠守りが出ず (既知の道)、風の柱は退けなくても働き、光る床の道すじがそのグループの画面に出る
-            UUID repeat = UUID.fromString("7e1de0c4-0000-4000-8000-0000000000b5");
-            TideBackState.Group rs = TideBackState.of(back, repeat);
-            check(BreathSummit.canStart(back, repeat), "a first-run group cannot meet the keeper");
-            rs.record.markFirstCleared();
-            check(!FirstRun.isFirstRun(back, repeat), "first_cleared did not stick");
-            check(!BreathSummit.canStart(back, repeat), "the keeper woke for a repeat-run group (known path must be quiet)");
-            TideBackSelfTest.TestPlayer rp = TideBackSelfTest.join(back, repeat, "[BreathRepeat]", new BlockPos(CX, ARENA_FLOOR + 1, CZ));
-            try {
-                check(Breath.deckOpen(back, rp, false), "the wind pillar sleeps for a repeat-run group");
-                var guide = GroupOverlays.compute(back, repeat);
-                long path = guide.values().stream().filter(s -> s.is(Blocks.SEA_LANTERN)).count();
-                var firstGuide = GroupOverlays.compute(back, UUID.fromString("7e1de0c4-0000-4000-8000-0000000000b6"));
-                long firstLit = firstGuide.values().stream().filter(s -> s.is(Blocks.SEA_LANTERN)).count();
-                check(path > firstLit + 10, "the known-path guide floor is not shown to the repeat-run group (" + path + " lit vs " + firstLit + ")");
-            } finally {
-                TideBackSelfTest.leave(back, rp);
-            }
-            data.remove(repeat);
             // ピースフル: 真珠守りは出ず、風の柱は働く
             BreathSummit.clear();
             check(!BreathSummit.busy(back), "keeper fight state is dirty");

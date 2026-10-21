@@ -25,7 +25,6 @@ import net.neoforged.neoforge.event.tick.LevelTickEvent;
 // 岩鯨の背の「開けた」場所 (西の翼の竪穴 WB・崩れ橋 WC。天井が高く、空が見える) に出る骨鳥 (21 の 3.3。鐘楼・胸びれの小物の先取り)。
 // 広間の波ではなく、グループごとの環境の敵: そのグループの人が場所に入ると 2 体 (近くの人が増えるごとに半数、最大 4)、倒しきると
 // 90 秒あとにまた出る。人が離れる・グループが戻る (resetGroup) と消える。MOB_TAG つきなので保存されない。
-// 初回だけの部屋 (FirstRun) として登録された場所では、既知の道のグループには出さない (allowSpawnAt)
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class BackAmbientMobs {
     public static final List<Box> GULL_ZONES = List.of(TitanBackLayout.WB, TitanBackLayout.WC);
@@ -68,9 +67,6 @@ public final class BackAmbientMobs {
                 }
             }
             for (UUID group : Groups.groupsIn(level, box)) {
-                if (!FirstRun.allowSpawnAt(level, group, zone.center())) {
-                    continue;
-                }
                 String key = group + "|" + zone.x1() + "," + zone.z1();
                 int alive = level.getEntitiesOfClass(BoneGull.class, box.inflate(24), g -> g.isAlive() && group.equals(g.groupId())).size();
                 long now = level.getGameTime();

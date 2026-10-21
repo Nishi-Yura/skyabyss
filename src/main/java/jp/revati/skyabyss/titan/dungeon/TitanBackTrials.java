@@ -195,13 +195,12 @@ public final class TitanBackTrials {
 
     // ---------------------------------------------------------------- 番兵の広間
     // ante は入口の手前の前室 (扉が閉じるとき、ここにいる人も中へ入れる)
-    // knownRoom: 初回だけ働く部屋の名前 (FirstRun)。既知の道のグループには、戦わずに制圧済みになる。
     // cuts: 動かせる仕切り (版 18。少人数のグループだけに、広間の中に立つ封印の壁。人数が maxPlayers 以下のとき張り、封じた側 (sealed) には湧かない)
     private record Cut(int maxPlayers, List<BlockPos> wall, java.util.function.Predicate<BlockPos> sealed) {
     }
 
     private record Hall(String id, Box box, AABB ante, List<BlockPos> entrance, List<BlockPos> exit, List<List<String>> waves,
-            @Nullable String knownRoom, List<Cut> cuts) {
+            List<Cut> cuts) {
         // その人数のとき封じている仕切りの壁の全部
         List<BlockPos> walls(int players) {
             List<BlockPos> out = new ArrayList<>();
@@ -249,17 +248,17 @@ public final class TitanBackTrials {
             // 第一の広間 (練兵場): 二人以下は南を封じ (z -26 より南)、一人はさらに東 (x 48 より東) を封じる
             new Hall("e1", E1, E0.aabb(), E1_ENTRANCE, E1_EXIT, List.of(
                     List.of("sentinel", "sentinel", "crawler", "crawler"),
-                    List.of("archer", "archer", "archer", "sentinel", "mortar")), null,
+                    List.of("archer", "archer", "archer", "sentinel", "mortar")),
                     NO_CUTS),
             // 版 25: 第二の広間 (射手の回廊) は戦わない通路にした。東の翼の戦いは 3 つ (第一の広間・詰所・番兵長の広間)
             // 番兵の詰所: 盾の壁の列 (骨の番兵 4) → 老番兵。倒すと番兵長の広間への戸 (割符の戸) が開く。初回だけ
             new Hall("ck", CK, CK_PASS.aabb(), CK_ENTRANCE, E3_LOCK, List.of(
                     List.of("sentinel", "sentinel", "sentinel", "sentinel"),
-                    List.of("elder")), "whale_ck", List.of()),
+                    List.of("elder")), List.of()),
             // 番兵長の広間: 二人以下は南 (共鳴石の側) を封じる。倒すと開く
             new Hall("e3", E3, E3_ANTE, E3_ENTRANCE, List.of(), List.of(
                     List.of("sentinel", "sentinel", "archer", "crawler", "crawler"),
-                    List.of("captain")), null, NO_CUTS));
+                    List.of("captain")), NO_CUTS));
 
     // ---------------------------------------------------------------- 状態 (グループごと)
     // 試練の進み (制圧した広間・宝物庫の封印・心臓の撃破・鳴らした石・扉の開け閉め) は、グループ (パーティ、または一人) の記録
@@ -472,7 +471,6 @@ public final class TitanBackTrials {
         if (!gatesInstalled) {
             gatesInstalled = true;
             installGates(level);
-            WhaleFirstRun.register();
         }
         if (!cleanedAfterLoad) {
             // 前回、戦いの途中でサーバーが止まっていたら、その名残を片付ける (戦いの間だけ閉じる入口を既定の開いた状態に戻す)
@@ -631,14 +629,6 @@ public final class TitanBackTrials {
 
     private static void tickHall(ServerLevel level, BackGroupData.Record record, UUID group, Hall hall) {
         String key = hallKey(group, hall.id());
-        // 既知の道 (周回): 初回だけの広間は戦わずに制圧済み。出口 (と、その先の戸) が開く
-        if (hall.knownRoom() != null && FirstRun.isKnownPath(level, group, hall.knownRoom())) {
-            if (!record.isHallCleared(hall.id())) {
-                record.markHallCleared(hall.id());
-                GroupGates.open(level, group, hall.exit());
-            }
-            return;
-        }
         HallState state = HALL_STATES.get(key);
         if (state == null || state.wave == 0) {
             List<ServerPlayer> inside = playersInside(level, hall, group);
