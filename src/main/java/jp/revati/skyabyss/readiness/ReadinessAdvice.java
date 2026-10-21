@@ -64,6 +64,6 @@ public final class ReadinessAdvice {
     // プレイヤーの今の持ち物から
     public static MutableComponent line(Player player, String titan, Readiness.Result r, Readiness.Lamp lamp) {
         double[] parts = lamp == Readiness.Lamp.BODY ? Readiness.bodyParts(player, titan) : new double[] {Readiness.CAP, Readiness.CAP};
-        return line(lamp, r.value(lamp), parts[0], parts[1], Readiness.remedies(lamp), Readiness.hasWhetstone());
+        return line(lamp, r.value(lamp), parts[0], parts[1], Readiness.remedies(lamp, titan), Readiness.hasWhetstone());
     }
 }

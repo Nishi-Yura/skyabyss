@@ -179,6 +179,25 @@ public final class Readiness {
         REMEDIES.computeIfAbsent(lamp, l -> new CopyOnWriteArrayList<>()).add(name);
     }
 
+    // 巨神 (章) を限った手段 (旅装・砥石・糧と薬は章ごとの品)。remedies(lamp, titan) はその巨神の分と、巨神を限らない分だけを出す
+    private static final java.util.Map<java.util.function.Supplier<net.minecraft.network.chat.Component>, String> REMEDY_TITAN = new java.util.concurrent.ConcurrentHashMap<>();
+
+    public static void registerRemedy(Lamp lamp, String titan, java.util.function.Supplier<net.minecraft.network.chat.Component> name) {
+        REMEDY_TITAN.put(name, titan);
+        registerRemedy(lamp, name);
+    }
+
+    public static List<net.minecraft.network.chat.Component> remedies(Lamp lamp, String titan) {
+        List<net.minecraft.network.chat.Component> out = new ArrayList<>();
+        for (java.util.function.Supplier<net.minecraft.network.chat.Component> s : REMEDIES.getOrDefault(lamp, List.of())) {
+            String only = REMEDY_TITAN.get(s);
+            if (only == null || only.equals(titan)) {
+                out.add(s.get());
+            }
+        }
+        return out;
+    }
+
     // 砥石が一つでも登録されているか (登録があれば、刃の手段に「砥石で鍛える」を出す。なければ今ある炉の強化を勧める)
     public static boolean hasWhetstone() {
         return !WHETSTONES.isEmpty();

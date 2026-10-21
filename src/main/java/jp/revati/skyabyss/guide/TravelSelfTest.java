@@ -54,7 +54,8 @@ public final class TravelSelfTest {
     }
 
     public static List<SelfTestRunner.Step> steps() {
-        return List.of(SelfTestRunner.Step.once("travel gear", TravelSelfTest::run));
+        // 二章の分 (Ch2Gear) は別の段 "ch2 gear"
+        return List.of(SelfTestRunner.Step.once("travel gear", TravelSelfTest::run), Ch2GearSelfTest.step());
     }
 
     private static void check(List<String> f, boolean ok, String what) {
