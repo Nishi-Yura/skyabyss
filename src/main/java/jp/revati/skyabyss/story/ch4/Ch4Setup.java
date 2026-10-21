@@ -89,7 +89,8 @@ public final class Ch4Setup {
     public static final int XP_ELDER = 80;
 
     // 旅の覚書 (四章) が解くレシピ
-    public static final List<String> RECIPES = List.of("soot_whetstone", "ash_cooler");
+    public static final List<String> RECIPES = List.of("ash_walking_helmet", "ash_walking_chestplate", "ash_walking_leggings", "ash_walking_boots",
+            "soot_whetstone", "ash_cooler", "ash_baked_bread");
 
     private Ch4Setup() {
     }
@@ -102,6 +103,7 @@ public final class Ch4Setup {
         ENTITIES.register(modEventBus);
         ITEMS.register(modEventBus);
         SOUNDS.register(modEventBus);
+        Ch4Gear.register(modEventBus);
         modEventBus.addListener(Ch4Setup::onAttributes);
         modEventBus.addListener(Ch4Setup::onCreativeTab);
         modEventBus.addListener(Ch4Setup::onCommonSetup);

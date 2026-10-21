@@ -393,11 +393,6 @@
   "gui.skyabyss.forge.exchange_all_owned.ember": "You already own every ember legendary",
   "skyabyss_record.h.ember": "Ember",
   "tooltip.skyabyss.ember.horn_drunk": "Warmth spreads slowly from your core. Heat will build more slowly for a while",
-  "__ember.H": "四章の伝承 (lore.skyabyss.chapter1.ember_hearth、ember_prev_page。生成元 tools/gen_ch4_content.py)",
-  "lore.skyabyss.chapter1.ember_hearth.title": "A Hearth of the Ash People",
-  "lore.skyabyss.chapter1.ember_hearth.body": "A small hearth of fired stone is set into the ground. The ash had been raked together in the shape of a hand.\n\nIts mouth always faces the hill. They kept it lit not so the fire would live, but so the hill would not wake.",
-  "lore.skyabyss.chapter1.ember_prev_page.title": "A Page from the Hearth",
-  "lore.skyabyss.chapter1.ember_prev_page.body": "A torn page. A short note remains in a hand that looks familiar.\n\n\"On days when the ground is warm, I do not look at the hill. I feel it would meet my eyes.\"\n\n... This handwriting resembles your own.",
   "block.skyabyss.cinder_lamp": "Cinder Lamp",
   "message.skyabyss.ember.back.quiet_west": "Tonight the western ash road is quiet. No ember moths, no cinder rollers.",
   "message.skyabyss.ember.back.quiet_east": "Tonight the eastern forge is quiet. No ash douser comes, and the iron colors come in the gentlest order. The smith waits beyond the furnace.",
@@ -593,5 +588,10 @@
   "sign.skyabyss.ember_board_hub_stones.1": "Ring three",
   "sign.skyabyss.ember_board_hub_stones.2": "the goal.",
   "sign.skyabyss.ember_board_hub_stones.3": "The great forge",
-  "sign.skyabyss.ember_board_hub_stones.4": "then opens."
+  "sign.skyabyss.ember_board_hub_stones.4": "then opens.",
+  "__ember.H": "四章の伝承 (lore.skyabyss.chapter1.ember_hearth、ember_prev_page。生成元 tools/gen_ch4_content.py)",
+  "lore.skyabyss.chapter1.ember_hearth.title": "A Hearth of the Ash People",
+  "lore.skyabyss.chapter1.ember_hearth.body": "A small hearth of fired stone is set into the ground. The ash had been raked together in the shape of a hand.\n\nIts mouth always faces the hill. They kept it lit not so the fire would live, but so the hill would not wake.",
+  "lore.skyabyss.chapter1.ember_prev_page.title": "A Page from the Hearth",
+  "lore.skyabyss.chapter1.ember_prev_page.body": "A torn page. A short note remains in a hand that looks familiar.\n\n\"On days when the ground is warm, I do not look at the hill. I feel it would meet my eyes.\"\n\n... This handwriting resembles your own."
 }

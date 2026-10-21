@@ -51,7 +51,44 @@ public final class ArtisanSelfTest {
     }
 
     public static List<SelfTestRunner.Step> steps() {
-        return List.of(SelfTestRunner.Step.once("artisan", ArtisanSelfTest::run));
+        return List.of(SelfTestRunner.Step.until("artisan (load)", ArtisanSelfTest::load), SelfTestRunner.Step.once("artisan", ArtisanSelfTest::run));
+    }
+
+    // 立たせる検査の前に、出現地点の脇のまわり (NpcSpawner.entitiesLoaded が見る 7x7 チャンク) を読み込んで、生き物の読み込みを待つ。
+    // 読み込みは非同期で、ほかの段の順番 (都の建設など) しだいで間に合わないことがあった (「ensure did not stand a chapter-3 artisan (null)」)
+    private static final java.util.Set<Long> FORCED = new java.util.HashSet<>();
+    private static int loadWait;
+
+    static BlockPos testMark(ServerLevel level) {
+        BlockPos spawn = level.getSharedSpawnPos();
+        return new BlockPos(spawn.getX() + 4, level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING, spawn.getX() + 4, spawn.getZ() + 4), spawn.getZ() + 4);
+    }
+
+    static boolean load(net.minecraft.server.MinecraftServer server) {
+        ServerLevel level = server.overworld();
+        BlockPos mark = testMark(level);
+        if (FORCED.isEmpty()) {
+            loadWait = 0;
+            net.minecraft.world.level.ChunkPos c = new net.minecraft.world.level.ChunkPos(mark);
+            for (int dx = -4; dx <= 4; dx++) {
+                for (int dz = -4; dz <= 4; dz++) {
+                    if (level.setChunkForced(c.x + dx, c.z + dz, true)) {
+                        FORCED.add(net.minecraft.world.level.ChunkPos.asLong(c.x + dx, c.z + dz));
+                    }
+                }
+            }
+            FORCED.add(Long.MIN_VALUE);
+        }
+        return NpcSpawner.entitiesLoaded(level, mark) || ++loadWait > 1200;
+    }
+
+    static void unforce(ServerLevel level) {
+        for (long key : FORCED) {
+            if (key != Long.MIN_VALUE) {
+                level.setChunkForced(net.minecraft.world.level.ChunkPos.getX(key), net.minecraft.world.level.ChunkPos.getZ(key), false);
+            }
+        }
+        FORCED.clear();
     }
 
     private static void check(List<String> f, boolean ok, String what) {
@@ -238,10 +275,10 @@ public final class ArtisanSelfTest {
         realCh2.ifPresent(ArtisanSpawner::register);
 
         // 立たせる: 地面のある所で
-        BlockPos spawn = level.getSharedSpawnPos();
-        BlockPos mark = new BlockPos(spawn.getX() + 4, level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING, spawn.getX() + 4, spawn.getZ() + 4), spawn.getZ() + 4);
+        BlockPos mark = testMark(level);
         NpcEntity first = null;
         try {
+            check(f, NpcSpawner.entitiesLoaded(level, mark), "the entities around the test mark did not load in time");
             first = ArtisanSpawner.ensure(level, mark, 3);
             check(f, first != null && first.variant() == 3 && first.getType() == NpcSetup.ARTISAN.get(), "ensure did not stand a chapter-3 artisan (" + first + ")");
             if (first != null) {
@@ -266,6 +303,7 @@ public final class ArtisanSelfTest {
             if (first != null) {
                 first.discard();
             }
+            unforce(level);
         }
         // 役: 殴られても傷つかない・名前の鍵
         NpcEntity npc = NpcSetup.ARTISAN.get().create(level);

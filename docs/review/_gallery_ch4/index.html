@@ -77,13 +77,13 @@ dialog img{display:block;max-width:96vw;max-height:94vh;width:auto;height:auto}
 <div class="wrap">
   <div class="top">
     <h1>四章の地上の敵と小物 ラフ 3 案 (熾り蟲・灰被りの屑・灰ひきずり・古い灰被り・煤鉄・灰麻・灰の護り糸・煤の砥石・灰の冷やし水)</h1>
-    <p class="intro">四章 (余燼) の地上の敵と品のラフです (設計書 21 の 6.1、P19・P20)。色の言葉は灰・炭・黒石・熾の橙。灰被りの屑と古い灰被りは、背中の灰被り (A 灰衣の火番) に部品を足し引きした変種です。実装は仮の選定 (熾り蟲 A・屑 B・灰ひきずり A・古い灰被り A、小物はすべて A) で入れてあります。別の案を選ぶときは tools/gen_ch4_ground_mobs.py の CHOICE / ITEM_CHOICE を変えて流し直します。</p>
+    <p class="intro">四章 (余燼) の地上の敵と品のラフです (設計書 21 の 6.1、P19・P20)。色の言葉は灰・炭・黒石・熾の橙。灰被りの屑と古い灰被りは、背中の灰被り (A 灰衣の火番) に部品を足し引きした変種です。敵と小物 5 つは選定済み (熾り蟲 A・屑 C・灰ひきずり A・古い灰被り A、小物は煤鉄 A・灰麻 A・護り糸 B・砥石 C・冷やし水 A)。灰歩きの旅装と灰焼きのパンは仮に A で入れてあります。別の案を選ぶときは tools/gen_ch4_ground_mobs.py の CHOICE / ITEM_CHOICE を変えて流し直します。</p>
     
     <div class="progress"><div class="bar" aria-hidden="true"><i id="pbar"></i></div>
-      <span id="pcount">0 / 9 選択済み</span><span class="save-state" id="savestate">読み込み中…</span></div>
+      <span id="pcount">0 / 11 選択済み</span><span class="save-state" id="savestate">読み込み中…</span></div>
   </div>
   <div class="layout">
-    <nav aria-label="対象"><a href="#ch4_cinder_mite" data-nav="ch4_cinder_mite">熾り蟲</a><a href="#ch4_ash_husk" data-nav="ch4_ash_husk">灰被りの屑</a><a href="#ch4_ash_dragger" data-nav="ch4_ash_dragger">灰ひきずり</a><a href="#ch4_elder_thrall" data-nav="ch4_elder_thrall">古い灰被り</a><a href="#ch4_soot_iron" data-nav="ch4_soot_iron">煤鉄</a><a href="#ch4_ash_hemp" data-nav="ch4_ash_hemp">灰麻</a><a href="#ch4_ash_ward_thread" data-nav="ch4_ash_ward_thread">灰の護り糸</a><a href="#ch4_soot_whetstone" data-nav="ch4_soot_whetstone">煤の砥石</a><a href="#ch4_ash_cooler" data-nav="ch4_ash_cooler">灰の冷やし水</a></nav>
+    <nav aria-label="対象"><a href="#ch4_cinder_mite" data-nav="ch4_cinder_mite">熾り蟲</a><a href="#ch4_ash_husk" data-nav="ch4_ash_husk">灰被りの屑</a><a href="#ch4_ash_dragger" data-nav="ch4_ash_dragger">灰ひきずり</a><a href="#ch4_elder_thrall" data-nav="ch4_elder_thrall">古い灰被り</a><a href="#ch4_soot_iron" data-nav="ch4_soot_iron">煤鉄</a><a href="#ch4_ash_hemp" data-nav="ch4_ash_hemp">灰麻</a><a href="#ch4_ash_ward_thread" data-nav="ch4_ash_ward_thread">灰の護り糸</a><a href="#ch4_soot_whetstone" data-nav="ch4_soot_whetstone">煤の砥石</a><a href="#ch4_ash_cooler" data-nav="ch4_ash_cooler">灰の冷やし水</a><a href="#ch4_ash_baked_bread" data-nav="ch4_ash_baked_bread">灰焼きのパン</a><a href="#ch4_ash_walking" data-nav="ch4_ash_walking">灰歩きの旅装</a></nav>
     <main>
 <section class="subject" id="ch4_cinder_mite" data-id="ch4_cinder_mite">
   <header class="shead">
@@ -192,6 +192,30 @@ dialog img{display:block;max-width:96vw;max-height:94vh;width:auto;height:auto}
   <fieldset class="opts"><legend>採用する案</legend><label class="opt" for="ch4_ash_cooler-a"><input type="radio" name="ch4_ash_cooler" id="ch4_ash_cooler-a" value="a"><span class="letter">A</span><span class="otext"><b>A 丸い瓶と灰の粒</b><span>丸い瓶と灰の粒</span></span></label><label class="opt" for="ch4_ash_cooler-b"><input type="radio" name="ch4_ash_cooler" id="ch4_ash_cooler-b" value="b"><span class="letter">B</span><span class="otext"><b>B 四角い瓶</b><span>四角い瓶</span></span></label><label class="opt" for="ch4_ash_cooler-c"><input type="radio" name="ch4_ash_cooler" id="ch4_ash_cooler-c" value="c"><span class="letter">C</span><span class="otext"><b>C 素焼きの小壺</b><span>素焼きの小壺</span></span></label></fieldset>
   <label class="note-l" for="ch4_ash_cooler-note">直してほしい点 (任意)</label>
   <textarea id="ch4_ash_cooler-note" class="note" rows="2" placeholder="例: Bの形でCの色、盾をもっと大きく"></textarea>
+</section>
+<section class="subject" id="ch4_ash_baked_bread" data-id="ch4_ash_baked_bread">
+  <header class="shead">
+    <p class="kind">小物 3案 (32x32)</p>
+    <h2>灰焼きのパン (ash_baked_bread) — 32x32 のドット絵 3 案</h2>
+    <span class="state" data-state="none">未選択</span>
+  </header>
+  <p class="extra">絵は docs/review/ch4_roughs/items/icons/ash_baked_bread_{a,b,c}_32.png (選ばなかった案は tools/sources/ash_baked_bread/)。生成: tools/rough/lowpoly/ch4/icons_ch4.py。</p>
+  <div class="sheets"><figure class="sheet"><button class="zoom" type="button" data-src="ch4_roughs_items_icons_ch4.jpg" aria-label="灰焼きのパン (ash_baked_bread) — 32x32 のドット絵 3 案 のシートを拡大"><img loading="lazy" src="ch4_roughs_items_icons_ch4.jpg" alt="灰焼きのパン (ash_baked_bread) — 32x32 のドット絵 3 案 の比較シート"></button></figure></div>
+  <fieldset class="opts"><legend>採用する案</legend><label class="opt" for="ch4_ash_baked_bread-a"><input type="radio" name="ch4_ash_baked_bread" id="ch4_ash_baked_bread-a" value="a"><span class="letter">A</span><span class="otext"><b>A 灰をかぶった丸パン</b><span>灰をかぶった丸パン</span></span></label><label class="opt" for="ch4_ash_baked_bread-b"><input type="radio" name="ch4_ash_baked_bread" id="ch4_ash_baked_bread-b" value="b"><span class="letter">B</span><span class="otext"><b>B 灰麻の紐の細長いパン</b><span>灰麻の紐の細長いパン</span></span></label><label class="opt" for="ch4_ash_baked_bread-c"><input type="radio" name="ch4_ash_baked_bread" id="ch4_ash_baked_bread-c" value="c"><span class="letter">C</span><span class="otext"><b>C 焦げ格子の円盤</b><span>焦げ格子の円盤</span></span></label></fieldset>
+  <label class="note-l" for="ch4_ash_baked_bread-note">直してほしい点 (任意)</label>
+  <textarea id="ch4_ash_baked_bread-note" class="note" rows="2" placeholder="例: Bの形でCの色、盾をもっと大きく"></textarea>
+</section>
+<section class="subject" id="ch4_ash_walking" data-id="ch4_ash_walking">
+  <header class="shead">
+    <p class="kind">旅装 3案 (4 部位)</p>
+    <h2>灰歩きの旅装 (ash_walking) — 低ポリの 4 部位 3 案</h2>
+    <span class="state" data-state="none">未選択</span>
+  </header>
+  <p class="extra">防具の低ポリ様式 C (箱・輪・板)。メッシュとアトラスは docs/review/ch4_roughs/items/armor_ch4/{a,b,c}/。生成: tools/rough/lowpoly/ch4/armor_ch4.py、入れ方は tools/gen_ch4_gear.py の CHOICE。</p>
+  <div class="sheets"><figure class="sheet"><button class="zoom" type="button" data-src="ch4_roughs_items_armor_ch4.jpg" aria-label="灰歩きの旅装 (ash_walking) — 低ポリの 4 部位 3 案 のシートを拡大"><img loading="lazy" src="ch4_roughs_items_armor_ch4.jpg" alt="灰歩きの旅装 (ash_walking) — 低ポリの 4 部位 3 案 の比較シート"></button></figure></div>
+  <fieldset class="opts"><legend>採用する案</legend><label class="opt" for="ch4_ash_walking-a"><input type="radio" name="ch4_ash_walking" id="ch4_ash_walking-a" value="a"><span class="letter">A</span><span class="otext"><b>A 煤の前掛け</b><span>黒石の肩 3 段・煤けた革の上着と鍛冶の前掛け・灰麻の襟巻き・兜に煤鉄の立て飾り</span></span></label><label class="opt" for="ch4_ash_walking-b"><input type="radio" name="ch4_ash_walking" id="ch4_ash_walking-b" value="b"><span class="letter">B</span><span class="otext"><b>B 灰麻の外套</b><span>灰色の長い外套・煤鉄の帯と縁・煤鉄のボタン 4 つ・後ろの裾</span></span></label><label class="opt" for="ch4_ash_walking-c"><input type="radio" name="ch4_ash_walking" id="ch4_ash_walking-c" value="c"><span class="letter">C</span><span class="otext"><b>C 灰の頭巾</b><span>灰麻の布・後ろへ長い頭巾の尾・革の腕当て・黒石の肩と背の板</span></span></label></fieldset>
+  <label class="note-l" for="ch4_ash_walking-note">直してほしい点 (任意)</label>
+  <textarea id="ch4_ash_walking-note" class="note" rows="2" placeholder="例: Bの形でCの色、盾をもっと大きく"></textarea>
 </section></main>
   </div>
 </div>
@@ -199,7 +223,7 @@ dialog img{display:block;max-width:96vw;max-height:94vh;width:auto;height:auto}
 
 <script>
 (() => {
-  const total = 9;
+  const total = 11;
   const sections = [...document.querySelectorAll('.subject')];
   const saveState = document.getElementById('savestate');
   let db = null;
