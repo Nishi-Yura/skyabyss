@@ -416,6 +416,8 @@
 
 目標 130〜150 分（必須で約 80 分）。主題: 見誤り・高い所。峰と嵐の通り道が舞台。
 
+- **実装の状態（34 の C3。4.4.1）**: 場所 5 種は西の峰の跡地に建つ（`titan/storm/chapter/Ch3Ground`・`ScorchedWatch`・`LightningPillars`、部品は `tools/gen_ch3_ground.py`）。避雷の見本は避雷の塔の跡の部品 `ch3_rod_tower` の中（東の隣）に置いた。焼けた見張り塔の嵐の拍は、頂の柱に 15 秒ごとの雷にした。**まだ**: 新しい敵 4（P16。塔は雷翼の背の敵で代え、雷拾いはいない）、新しい品（焦げ羽・帯電綿・銅線・旅装・雷の砥石・団子・油・護り糸・鼓動守・風読みの小旗）、備えの頼み `ch3/prep_*`（支度の段 3 本 `lightning_pillars`・`scorched_watch`・`sky_stone` が代わり）、`ch3/gleaner_trail`、日替わり `daily_puff_clear`。サブ `ch3/wind_flags` は実装済み（経験値 120）
+
 **新しい場所（`titan/storm/chapter` に足す）**
 
 | 場所（ID） | 置く数・方向 | 中身 | 着いたとき |

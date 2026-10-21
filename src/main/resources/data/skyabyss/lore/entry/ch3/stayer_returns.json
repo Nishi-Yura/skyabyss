@@ -1,0 +1,12 @@
+{
+  "chapter": "titan_storm",
+  "order": 175,
+  "unlock": [
+    {
+      "type": "sign",
+      "target": "sign.skyabyss.ch3_vault"
+    }
+  ],
+  "related": [],
+  "inscription_sign": "sign.skyabyss.ch3_vault"
+}

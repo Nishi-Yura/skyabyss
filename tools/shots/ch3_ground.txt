@@ -1,0 +1,109 @@
+# 三章の地上 (docs/design/34 の C3、21 の 5.1) の場所と、支度の段の目的の帯を、平らな世界に置いて撮る。
+# ./gradlew runShots -Pscript=tools/shots/ch3_ground.txt -PshotsName=ch3_ground   → run/shots/ch3_ground/shots/ch3_ground/*.png
+# 開発コマンド skyabyss dev ch1 place は部品をそのまま置く (碑の文・旗の向き・樽の中身は本番の建て方だけ)。地面の上面 y=-61
+world ch3ground flat
+size 1280 720
+timeout 900
+render 12
+clouds off
+
+wait 100
+cmd skyabyss cinematic stop
+wait 10
+cmd skyabyss cinematic stop
+cmd time set 6000
+cmd weather clear
+cmd gamerule doDaylightCycle false
+cmd gamerule doMobSpawning false
+cmd gamemode spectator
+hud off
+
+cmd forceload add -40 -20 60 60
+wait 60
+cmd skyabyss dev ch1 place ch3_rod_tower 0 -61 0 0
+cmd skyabyss dev ch1 place ch3_scorched_watch 40 -61 0 0
+cmd skyabyss dev ch1 place ch3_wind_flag -25 -61 0 0
+cmd skyabyss dev ch1 place ch3_wind_flag -25 -61 -9 0
+cmd skyabyss dev ch1 place ch3_gleaner_field 0 -61 40 0
+cmd skyabyss dev ch1 place ch3_wind_cliff 40 -61 40 0
+cmd skyabyss cinematic stop
+
+# ---- 避雷の塔の跡: 折れた塔の根と針 1 本、斜めの台 4、南の銅の戸、東の見本の柱
+camera 13.5 -50 15.5 139 26
+waitchunks
+wait 20
+shot 01_rod_tower
+camera 0.5 -58.4 10.5 180 8
+waitchunks
+wait 10
+shot 02_rod_tower_door
+# 台に避雷針を 4 本立て、戸を開けた姿
+cmd setblock -6 -58 -6 lightning_rod
+cmd setblock 6 -58 -6 lightning_rod
+cmd setblock 6 -58 6 lightning_rod
+cmd setblock -6 -58 6 lightning_rod
+cmd fill -1 -60 3 1 -58 3 air
+camera 9.5 -55 13.5 145 18
+wait 20
+shot 03_rods_raised
+camera 0.5 -58.6 2.5 180 22
+wait 10
+shot 04_vault
+camera 12.5 -57 4.5 115 10
+wait 10
+shot 05_rod_sample
+
+# ---- 焼けた見張り塔: 外 (青い筋は北の面)、入口の間、中の間、頂の柱、職人の野営
+camera 52.5 -48 15.5 139 20
+waitchunks
+wait 20
+shot 06_watch
+camera 48.5 -50 -12.5 35 18
+wait 10
+shot 07_watch_blue_streak
+camera 40.5 -59.4 2.5 180 12
+wait 10
+shot 08_watch_entry
+camera 40.5 -53.4 2.5 180 12
+wait 10
+shot 09_watch_middle
+camera 45.5 -45 5.5 135 30
+wait 10
+shot 10_watch_top
+
+# ---- 風の道の旗・雷拾いの原・風読みの崖
+camera -18.5 -57 6.5 135 14
+waitchunks
+wait 10
+shot 11_wind_flags
+camera 9.5 -54 50.5 135 30
+waitchunks
+wait 10
+shot 12_gleaner_field
+camera 46.5 -56 47.5 135 26
+waitchunks
+wait 10
+shot 13_wind_cliff
+
+# ---- 目的の帯: 避雷の柱 (2/4)、空の石、焼けた見張り塔
+cmd gamemode creative
+cmd skyabyss quest forget @s all
+cmd skyabyss quest start @s "ch3/lightning_pillars"
+cmd skyabyss quest signal @s ch3_pillar
+cmd skyabyss quest signal @s ch3_pillar
+hud on
+camera 0.5 -55 16.5 180 12
+wait 80
+shot 14_band_pillars
+cmd skyabyss quest forget @s all
+cmd skyabyss quest start @s "ch3/sky_stone"
+cmd give @s diamond 3
+wait 80
+shot 15_band_sky_stone
+cmd skyabyss quest forget @s all
+cmd skyabyss quest start @s "ch3/scorched_watch"
+camera 52.5 -48 15.5 139 20
+wait 80
+shot 16_band_watch
+
+echo ch3_ground done
