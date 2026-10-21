@@ -467,12 +467,12 @@ def quests():
     put(b + 'road.journal',
         'イサナが言っていた。潮を読めなければ、島へは渡れない、と。\n浜には白い柱が並んでいて、塩の道と呼ばれている。柱には潮の刻みがあるという。五つ辿れば、塩の蔵に着く。その道の昔話は、語り部が知っているらしい。',
         'Isana said you cannot cross to the island if you cannot read the tide.\nWhite pillars line the beach: the salt road. They carry tide marks. Follow five and you reach the salt vault. The storyteller is said to know the old tale of that road.')
-    put(b + 'road.marks', '浜の白い柱を辿り、塩の道を行こう', 'Follow the white pillars along the salt road')
+    put(b + 'road.marks', '浜の白い柱を辿り、塩の道を行こう', 'Follow the white salt pillars')
     put(b + 'vault.journal',
         '浅瀬の下に、積んだ石の屋根が見えた。沈んだ塩の蔵だ。\n潮が引けば喉は乾いて歩ける。満ちていれば、息を止めて潜ればいい。奥には、蔵の番人がいる。',
         'Beneath the shallows, a roof of stacked stone. The Sunken Salt Vault.\nAt low tide its throat is dry to walk; at high tide, hold your breath and dive. Something guards the back of the vault.')
     put(b + 'vault.wall', '蔵の奥の刻みを読もう', 'Read the carving at the back of the vault')
-    put(b + 'vault.warden', '蔵を守る潮の番人を倒そう', 'Defeat the Shore Warden guarding the vault')
+    put(b + 'vault.warden', '蔵を守る潮の番人を倒そう', "Defeat the vault's Shore Warden")
     put(b + 'done', '「潮は読める、か。……あんたの字みたいな刻みだったんだろう？　顔に書いてあるよ」\nあとは、沖へ渡る足だ。イサナが、船のことを言っていた。',
         '"The tide can be read, was it. ...The carving looked like your own hand, didn\'t it? It\'s written on your face."\nNow you need a way across the water. Isana spoke of a boat.')
 

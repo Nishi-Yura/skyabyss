@@ -156,7 +156,10 @@ public class QuestLogScreen extends Screen implements jp.revati.skyabyss.client.
                 rows.add(new Row(null, Component.literal("· ").append(ch.label()), SOFT, def.id()));
             }
             current = ch;
-            rows.add(new Row(def.id(), Component.translatable(def.titleKey()), color));
+            // 章の支度の段は、親のメイン (雲の下の歌など) の下の一歩として字下げで見せる (2026-10-22 の試遊: メインが並んで迷った)
+            Component title = jp.revati.skyabyss.guide.PrepQuests.chapterOf(def.id()) > 0
+                    ? Component.literal(" └ ").append(Component.translatable(def.titleKey())) : Component.translatable(def.titleKey());
+            rows.add(new Row(def.id(), title, color));
         }
     }
 

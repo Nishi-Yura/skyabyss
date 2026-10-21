@@ -130,8 +130,11 @@ public final class QuestClient {
             }
             String key = leadKey(def, entry.stage);
             if (key != null && leadShown.add(key)) {
-                jp.revati.skyabyss.client.notice.NoticeClient.receive(new jp.revati.skyabyss.notice.NoticePayload(
-                        jp.revati.skyabyss.notice.Notice.Kind.NARRATE, jp.revati.skyabyss.ModText.lore(key), Component.empty()));
+                // 会話・場面の最中は溜め、閉じたあと (札のあと) に出す。会話の画面の下に隠れないように
+                String k = key;
+                jp.revati.skyabyss.client.notice.NoticeClient.gate(jp.revati.skyabyss.notice.NoticeGate.P_HINT, 400,
+                        () -> jp.revati.skyabyss.client.notice.NoticeClient.receive(new jp.revati.skyabyss.notice.NoticePayload(
+                                jp.revati.skyabyss.notice.Notice.Kind.NARRATE, jp.revati.skyabyss.ModText.lore(k), Component.empty())));
             }
         }
     }

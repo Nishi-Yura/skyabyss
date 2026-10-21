@@ -135,13 +135,13 @@ def quests():
         'Isana said: "You cannot climb the chain bare-handed. The traveller who came here before wore iron."\nThe cairns from the north gate over the hills are that traveller\'s road. They end at an old mine called the Bone Pit. Something may be left there.')
     put(b + 'pit.lead', 'イサナ「まずは鉄だ。前の旅人の道を辿れ。石標の先の、骨の坑だ」',
         'Isana: "Iron first. Follow the road of the one before you. The cairns lead to the Bone Pit."')
-    put(b + 'pit.page', '石標を辿り、骨の坑の奥の荷を探そう', 'Follow the cairns to the pack in the Bone Pit')
+    put(b + 'pit.page', '石標を辿り、骨の坑の奥の荷を探そう', 'Find the pack in the Bone Pit')
     put(b + 'armor.journal',
         '荷の頁には、こうあった。「鉄を二十四。胸当てと脚当てを先に。背の風は骨まで冷える」\n鉄の鉱石は、かまどで溶かせば鉄になる。坑の壁にも、筋が走っていた。兜と胸当てと脚当てと靴を作って、身につけよう。',
         'The page in the pack read: "Twenty-four iron. Breastplate and leggings first. The wind on the back cuts to the bone."\nIron ore smelts into iron in a furnace; the pit walls were streaked with it. Make a helmet, chestplate, leggings and boots, and wear them.')
     put(b + 'armor.lead', '頁の字は几帳面だった。「鉄を二十四。胸当てと脚当てを先に」',
         'The page was written by a tidy hand: "Twenty-four iron. Breastplate and leggings first."')
-    put(b + 'armor.wear', '頁のとおり、鉄の防具を作って着よう', 'Make and wear iron armor, as the page says')
+    put(b + 'armor.wear', '頁のとおり、鉄の防具を作って着よう', 'Make and wear iron armor')
     put(b + 'done', '「鉄の匂いがするな。……あの旅人も、そうやって鎖の下に立っていたんだろう」\n次は刃だ。旅の職人が、折れた剣を見たと言っていた。',
         '"You smell of iron. ...That traveller must have stood under the chain like that."\nNext, a blade. The traveling artisan said they saw a broken sword.')
 

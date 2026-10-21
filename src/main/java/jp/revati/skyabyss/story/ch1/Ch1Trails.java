@@ -40,8 +40,14 @@ public final class Ch1Trails {
         if (!prepared.test(player)) {
             return false;
         }
-        Long at = CALL_AT.get(player.getUUID());
-        return at == null || player.level().getGameTime() >= at;
+        // 仲間のために呼ぶときも、最後に支度を終えた人の間を待つ (岩鯨はワールドに一体)
+        long now = player.level().getGameTime();
+        for (long at : CALL_AT.values()) {
+            if (now < at) {
+                return false;
+            }
+        }
+        return true;
     }
 
     static void onReady(ServerPlayer player) {

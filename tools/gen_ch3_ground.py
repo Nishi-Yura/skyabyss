@@ -434,7 +434,7 @@ def quests():
     put(b + 'dig.journal',
         'イサナが言っていた。「峰の下の石は、雷を通さない。前の旅人は、それを胸に着けていた」\nダイヤモンドは、深い所の岩の中にある。鉄のつるはしでなければ掘れない。五つあれば、胸当てか剣になる。',
         'Isana said: "The stone under the peaks does not let lightning through. The traveller before you wore it on their chest."\nDiamonds lie in the rock deep down, and only an iron pickaxe will dig them. Five make a chestplate or a sword.')
-    put(b + 'dig.diamonds', '雷を通さない石、ダイヤモンドを集めよう', 'Gather diamonds, the stone lightning cannot pass')
+    put(b + 'dig.diamonds', '雷を通さない石、ダイヤモンドを集めよう', 'Gather diamonds')
     put(b + 'dig.chest', 'ダイヤモンドの胸当てを持とう', 'Have a diamond chestplate')
     put(b + 'dig.sword', 'ダイヤモンドの剣を持とう', 'Have a diamond sword')
     put(b + 'done', '「深い所の石だな。……雷の鳥も、これは噛めないだろう」\nこれで、嵐を渡る支度がそろった。',
