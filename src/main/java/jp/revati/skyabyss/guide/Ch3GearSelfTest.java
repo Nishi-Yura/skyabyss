@@ -75,6 +75,14 @@ public final class Ch3GearSelfTest {
             }
         };
         Growth.get(a).level = 30;
+        // 新しい人は湧いた直後の 3 秒は傷を受けないので、それを消す (雷の傷を比べるため)
+        try {
+            java.lang.reflect.Field spawn = net.minecraft.server.level.ServerPlayer.class.getDeclaredField("spawnInvulnerableTime");
+            spawn.setAccessible(true);
+            spawn.setInt(a, 0);
+        } catch (ReflectiveOperationException e) {
+            SkyAbyss.LOGGER.warn("could not clear the spawn invulnerability of a fake player", e);
+        }
         try {
             armor(f, a);
             curve(f);
