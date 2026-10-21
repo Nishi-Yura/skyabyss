@@ -199,7 +199,7 @@ class Town(Facilities):
         gable_roof(g, st, -5, -W - 2, 5, -W + 3, b.top + 1, axis='x', steep=True, finial=True)
         g.seal(-4, -W - 1, 4, -W + 2, 0)
         # 口を抜く (幅 7、高さ 6) とアーチ
-        g.clear(-3, 0, -W - 3, 3, 5, -W + 4)
+        g.clear(-3, 0, -W - 3, 3, 5, -W + (3 if side == 'north' else 4))  # 北は門の内がすぐ段の階段なので、一段目を残す
         for z in (-W - 2, -W + 3):
             g.set(-3, 5, z, st.trim.stairs('west', 'top'))
             g.set(3, 5, z, st.trim.stairs('east', 'top'))
@@ -317,13 +317,14 @@ class Town(Facilities):
                 v.set(xe, TER + 1, z, st.railing if z % 4 else st.trim.full)
                 dx = -1 if out == 'west' else 1
                 v.set(xe + dx, TER, z, st.trim.stairs(OPP[out], 'top'), keep=True)
-        # 真ん中の大階段 (z -42 → -36 で 4 → 0)。幅 12、両わきに塀と灯り
+        # 真ん中の大階段 (z -37 → -41 で 0 → 4 の 5 段、-42 の縁から段の上)。幅 12、両わきに塀と灯り
+        # (前は 4 段目のあとが丸ごとのブロックで、上りきる所で一度跳ぶ形だった)
         for i in range(TER + 1):
             z = z1 + 5 - i
             for x in range(-6, 6):
                 for y in range(0, TER + 1):
                     v.set(x, y, z, 'air' if y > i else st.base.full)
-                v.set(x, i, z, st.base.stairs('north', 'bottom') if i < TER else v.pick(st.pave))
+                v.set(x, i, z, st.base.stairs('north', 'bottom'))
             for x in (-7, 6):
                 for y in range(0, i + 1):
                     v.set(x, y, z, st.base.full)
@@ -336,12 +337,22 @@ class Town(Facilities):
             pinnacle(v, st, x, TER + 1, z1, h=2)
             v.set(x, 0, z1 + 6, st.base.full)
             v.set(x, 1, z1 + 6, 'lantern[hanging=false,waterlogged=false]')
-        # 北の門から段の上へ上がる階段 (門の口 z -97 は地面の高さ、z -96..-93 で 0 → 3 の段、-92 から段の上)
+        # 段の上の大通り
+        for z in range(z0, z1 + 1):
+            for x in (-4, 3):
+                v.set(x, TER, z, st.pave_trim)
+        self.claim(x0, z0, x1, z1, 'terrace')
+
+    def north_gate_steps(self):
+        """北の門の内から段の上へ上がる階段。門 (門楼の基壇・窓の板) を建てたあとに置く (先に置くと門が一段目を上書きする)"""
+        st, v = self.st, self.v
+        # 北の門から段の上へ上がる階段 (門の口 z -97 は地面の高さ、z -96..-92 で 0 → 4 の段、-91 から段の上。
+        # 段の上面の高さ TER まで 5 段。門の口を抜くのは z -97 まで (前は -96 の一段目を消し、四段で最後に一段跳ぶ形だった)
         for x in range(-3, 4):
             for yy in range(0, TER + 4):
                 v.set(x, yy, -97, 'air')
             v.set(x, -1, -97, st.pave_trim)
-            for i in range(4):
+            for i in range(TER + 1):
                 z = -96 + i
                 for yy in range(0, TER + 4):
                     v.set(x, yy, z, 'air')
@@ -353,11 +364,6 @@ class Town(Facilities):
                 for yy in range(0, TER + 1):
                     v.set(x, yy, z, st.base.full)
                 v.set(x, TER + 1, z, st.railing)
-        # 段の上の大通り
-        for z in range(z0, z1 + 1):
-            for x in (-4, 3):
-                v.set(x, TER, z, st.pave_trim)
-        self.claim(x0, z0, x1, z1, 'terrace')
 
     def terrace_gardens(self):
         """段の上のすきま: 庭と並木、小さな噴水、記録の離れ"""
@@ -966,9 +972,17 @@ class Town(Facilities):
         self.mark('label_guild', x0 - 4, 7, dz_)
         # 棟の上の鯨骨の肋 (三つ)
         for x in (x0 + 8, (x0 + x1) // 2, x1 - 8):
+            prev = None
             for z in range(z0 - 2, z1 + 3):
                 yy = b.top + 2 + int((ridge - b.top + 4) * (1 - ((z - cz) / ((z1 - z0) / 2 + 2)) ** 2))
                 v.set(x, yy, z, 'bone_block[axis=z]')
+                # 段が上がる所は縦に埋めて、肋を一続きにする (斜めだけでつながると、点線に見える)
+                if prev is not None and prev != yy:
+                    lo, hi = sorted((prev, yy))
+                    zz = z if yy < prev else z - 1
+                    for k in range(lo, hi + 1):
+                        v.set(x, k, zz, 'bone_block[axis=y]')
+                prev = yy
         # 西の前庭: 言伝ての板の枠と名簿の碑、灯り
         fx = x0 - 4
         for dz in (cz + 4, cz + 8):
@@ -1023,6 +1037,11 @@ class Town(Facilities):
                 x = cx + dx - (dx // 9) * k
                 z = cz + dz - (dz // 9) * k
                 v.set(x, 8 + k // 3, z, 'bone_block[axis=y]')
+                # 斜めの一歩ごとに角を埋めて、肋を一続きにする
+                if k > 1:
+                    v.set(x + (dx // 9), 8 + k // 3, z, 'bone_block[axis=y]')
+                    if (k - 1) // 3 != k // 3:
+                        v.set(x + (dx // 9), 8 + (k - 1) // 3, z + (dz // 9), 'bone_block[axis=y]')
         v.fill(cx - 1, 11, cz - 1, cx + 1, 11, cz + 1, 'bone_block[axis=y]')
         v.set(cx, 10, cz, 'lantern[hanging=true,waterlogged=false]')
         v.fill(cx - 1, 0, cz - 1, cx + 1, 0, cz + 1, st.trim.full)
@@ -1725,6 +1744,7 @@ class Town(Facilities):
         self.ground()
         self.terrace()
         self.walls()
+        self.north_gate_steps()
         self.bell_tower()
         self.storyteller_house()
         self.keep()

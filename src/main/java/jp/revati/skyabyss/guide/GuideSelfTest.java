@@ -61,7 +61,8 @@ public final class GuideSelfTest {
                 SelfTestRunner.Step.once("prep chain", GuideSelfTest::prepChain),
                 SelfTestRunner.Step.once("wayfarer notes", GuideSelfTest::wayfarerNotes),
                 SelfTestRunner.Step.once("heartbeat ward", GuideSelfTest::heartbeatWard),
-                SelfTestRunner.Step.once("site cave", GuideSelfTest::siteCave),
+                SelfTestRunner.Step.once("site cave (load)", GuideSelfTest::siteCaveLoad),
+                SelfTestRunner.Step.once("site cave", 60, GuideSelfTest::siteCave),
                 SelfTestRunner.Step.once("xp budget", GuideSelfTest::xpBudget));
     }
 
@@ -662,6 +663,7 @@ public final class GuideSelfTest {
             SiteSpawner.clearAll(level);
             SiteSpawner.unregister(SITE);
             SiteSpawner.unregister(CAP_SITE);
+            siteCaveUnload(level);
             ChapterMobSpawner.clearAll(level);
             SiteTreasure.unregister(TREASURE);
             SiteTreasure.unregister(REPEAT);
@@ -689,6 +691,27 @@ public final class GuideSelfTest {
             }
         }
         return list;
+    }
+
+    // 偽の人は場所を読み込まないので、湧き台の場所 (出現地点から 24 ブロック先まで) を先に読み込んでおく。
+    // 読み込みは次の tick から効くので、"site cave" はこの段から 3 秒あとに流す。読み込みは "site cave" の終わりに外す
+    private static void siteCaveLoad(MinecraftServer server) {
+        ServerLevel level = server.overworld();
+        BlockPos spawn = level.getSharedSpawnPos();
+        for (int dx = -2; dx <= 4; dx++) {
+            for (int dz = -2; dz <= 4; dz++) {
+                level.setChunkForced((spawn.getX() >> 4) + dx, (spawn.getZ() >> 4) + dz, true);
+            }
+        }
+    }
+
+    private static void siteCaveUnload(ServerLevel level) {
+        BlockPos spawn = level.getSharedSpawnPos();
+        for (int dx = -2; dx <= 4; dx++) {
+            for (int dz = -2; dz <= 4; dz++) {
+                level.setChunkForced((spawn.getX() >> 4) + dx, (spawn.getZ() >> 4) + dz, false);
+            }
+        }
     }
 
     private static void kill(ServerLevel level, List<UUID> ids) {
