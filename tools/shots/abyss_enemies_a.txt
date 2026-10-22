@@ -1,0 +1,585 @@
+# 深淵の敵 A の 9 種 × 三段 (docs/design/36 の 4・4.2)。tools/gen_abyss_enemies_a_shots.py が書く。
+# 縦穴の真ん中の台の上で、種ごと・段ごとに一枚 (正面寄り・斜め)。段 1 は元の層、段 2・3 は一つ・二つ下の高さ。
+world abyss_enemies_a flat
+size 1280 720
+timeout 2400
+render 12
+clouds off
+
+wait 80
+cmd skyabyss cinematic stop
+cmd gamemode spectator
+hud off
+cmd skyabyss abyss enter
+wait 40
+cmd skyabyss abyss build
+wait 900
+
+# bone_picker 段 1 (層 0・y 200)
+cmd fill -16 199 -16 -8 199 -8 minecraft:polished_deepslate
+cmd setblock -15 200 -15 minecraft:sea_lantern
+cmd setblock -9 200 -9 minecraft:sea_lantern
+cmd setblock -13 203 -12 minecraft:sea_lantern
+cmd setblock -11 202 -14 minecraft:sea_lantern
+wait 10
+cmd tp @s -14 200 -12 270 4
+cmd skyabyss abyss mob bone_picker 1
+wait 10
+cmd data merge entity @e[type=skyabyss:bone_picker,limit=1,sort=nearest] {NoAI:1b}
+wait 30
+cmd tp @s -13 200 -12 270 4
+wait 10
+shot bone_picker_s1_front
+cmd tp @s -12 200 -10 180 4
+wait 10
+shot bone_picker_s1_side
+cmd kill @e[type=skyabyss:bone_picker,distance=..30]
+wait 10
+
+# bone_picker 段 2 (層 1・y 80)
+cmd fill -16 79 -16 -8 79 -8 minecraft:polished_deepslate
+cmd setblock -15 80 -15 minecraft:sea_lantern
+cmd setblock -9 80 -9 minecraft:sea_lantern
+cmd setblock -13 83 -12 minecraft:sea_lantern
+cmd setblock -11 82 -14 minecraft:sea_lantern
+wait 10
+cmd tp @s -14 80 -12 270 4
+cmd skyabyss abyss mob bone_picker 2
+wait 10
+cmd data merge entity @e[type=skyabyss:bone_picker,limit=1,sort=nearest] {NoAI:1b}
+wait 30
+cmd tp @s -13 80 -12 270 4
+wait 10
+shot bone_picker_s2_front
+cmd tp @s -12 80 -10 180 4
+wait 10
+shot bone_picker_s2_side
+cmd kill @e[type=skyabyss:bone_picker,distance=..30]
+wait 10
+
+# bone_picker 段 3 (層 2・y -40)
+cmd fill -16 -41 -16 -8 -41 -8 minecraft:polished_deepslate
+cmd setblock -15 -40 -15 minecraft:sea_lantern
+cmd setblock -9 -40 -9 minecraft:sea_lantern
+cmd setblock -13 -37 -12 minecraft:sea_lantern
+cmd setblock -11 -38 -14 minecraft:sea_lantern
+wait 10
+cmd tp @s -14 -40 -12 270 4
+cmd skyabyss abyss mob bone_picker 3
+wait 10
+cmd data merge entity @e[type=skyabyss:bone_picker,limit=1,sort=nearest] {NoAI:1b}
+wait 30
+cmd tp @s -13 -40 -12 270 4
+wait 10
+shot bone_picker_s3_front
+cmd tp @s -12 -40 -10 180 4
+wait 10
+shot bone_picker_s3_side
+cmd kill @e[type=skyabyss:bone_picker,distance=..30]
+wait 10
+
+# rib_guard 段 1 (層 0・y 200)
+cmd fill -4 199 -16 4 199 -8 minecraft:polished_deepslate
+cmd setblock -3 200 -15 minecraft:sea_lantern
+cmd setblock 3 200 -9 minecraft:sea_lantern
+cmd setblock -1 203 -12 minecraft:sea_lantern
+cmd setblock 1 202 -14 minecraft:sea_lantern
+wait 10
+cmd tp @s -2 200 -12 270 4
+cmd skyabyss abyss mob rib_guard 1
+wait 10
+cmd data merge entity @e[type=skyabyss:rib_guard,limit=1,sort=nearest] {NoAI:1b}
+wait 30
+cmd tp @s -1 200 -12 270 4
+wait 10
+shot rib_guard_s1_front
+cmd tp @s 0 200 -10 180 4
+wait 10
+shot rib_guard_s1_side
+cmd kill @e[type=skyabyss:rib_guard,distance=..30]
+wait 10
+
+# rib_guard 段 2 (層 1・y 80)
+cmd fill -4 79 -16 4 79 -8 minecraft:polished_deepslate
+cmd setblock -3 80 -15 minecraft:sea_lantern
+cmd setblock 3 80 -9 minecraft:sea_lantern
+cmd setblock -1 83 -12 minecraft:sea_lantern
+cmd setblock 1 82 -14 minecraft:sea_lantern
+wait 10
+cmd tp @s -2 80 -12 270 4
+cmd skyabyss abyss mob rib_guard 2
+wait 10
+cmd data merge entity @e[type=skyabyss:rib_guard,limit=1,sort=nearest] {NoAI:1b}
+wait 30
+cmd tp @s -1 80 -12 270 4
+wait 10
+shot rib_guard_s2_front
+cmd tp @s 0 80 -10 180 4
+wait 10
+shot rib_guard_s2_side
+cmd kill @e[type=skyabyss:rib_guard,distance=..30]
+wait 10
+
+# rib_guard 段 3 (層 2・y -40)
+cmd fill -4 -41 -16 4 -41 -8 minecraft:polished_deepslate
+cmd setblock -3 -40 -15 minecraft:sea_lantern
+cmd setblock 3 -40 -9 minecraft:sea_lantern
+cmd setblock -1 -37 -12 minecraft:sea_lantern
+cmd setblock 1 -38 -14 minecraft:sea_lantern
+wait 10
+cmd tp @s -2 -40 -12 270 4
+cmd skyabyss abyss mob rib_guard 3
+wait 10
+cmd data merge entity @e[type=skyabyss:rib_guard,limit=1,sort=nearest] {NoAI:1b}
+wait 30
+cmd tp @s -1 -40 -12 270 4
+wait 10
+shot rib_guard_s3_front
+cmd tp @s 0 -40 -10 180 4
+wait 10
+shot rib_guard_s3_side
+cmd kill @e[type=skyabyss:rib_guard,distance=..30]
+wait 10
+
+# bone_flute 段 1 (層 0・y 200)
+cmd fill 8 199 -16 16 199 -8 minecraft:polished_deepslate
+cmd setblock 9 200 -15 minecraft:sea_lantern
+cmd setblock 15 200 -9 minecraft:sea_lantern
+cmd setblock 11 203 -12 minecraft:sea_lantern
+cmd setblock 13 202 -14 minecraft:sea_lantern
+wait 10
+cmd tp @s 10 200 -12 270 4
+cmd skyabyss abyss mob bone_flute 1
+wait 10
+cmd data merge entity @e[type=skyabyss:bone_flute,limit=1,sort=nearest] {NoAI:1b}
+wait 30
+cmd tp @s 11 200 -12 270 4
+wait 10
+shot bone_flute_s1_front
+cmd tp @s 12 200 -10 180 4
+wait 10
+shot bone_flute_s1_side
+cmd kill @e[type=skyabyss:bone_flute,distance=..30]
+wait 10
+
+# bone_flute 段 2 (層 1・y 80)
+cmd fill 8 79 -16 16 79 -8 minecraft:polished_deepslate
+cmd setblock 9 80 -15 minecraft:sea_lantern
+cmd setblock 15 80 -9 minecraft:sea_lantern
+cmd setblock 11 83 -12 minecraft:sea_lantern
+cmd setblock 13 82 -14 minecraft:sea_lantern
+wait 10
+cmd tp @s 10 80 -12 270 4
+cmd skyabyss abyss mob bone_flute 2
+wait 10
+cmd data merge entity @e[type=skyabyss:bone_flute,limit=1,sort=nearest] {NoAI:1b}
+wait 30
+cmd tp @s 11 80 -12 270 4
+wait 10
+shot bone_flute_s2_front
+cmd tp @s 12 80 -10 180 4
+wait 10
+shot bone_flute_s2_side
+cmd kill @e[type=skyabyss:bone_flute,distance=..30]
+wait 10
+
+# bone_flute 段 3 (層 2・y -40)
+cmd fill 8 -41 -16 16 -41 -8 minecraft:polished_deepslate
+cmd setblock 9 -40 -15 minecraft:sea_lantern
+cmd setblock 15 -40 -9 minecraft:sea_lantern
+cmd setblock 11 -37 -12 minecraft:sea_lantern
+cmd setblock 13 -38 -14 minecraft:sea_lantern
+wait 10
+cmd tp @s 10 -40 -12 270 4
+cmd skyabyss abyss mob bone_flute 3
+wait 10
+cmd data merge entity @e[type=skyabyss:bone_flute,limit=1,sort=nearest] {NoAI:1b}
+wait 30
+cmd tp @s 11 -40 -12 270 4
+wait 10
+shot bone_flute_s3_front
+cmd tp @s 12 -40 -10 180 4
+wait 10
+shot bone_flute_s3_side
+cmd kill @e[type=skyabyss:bone_flute,distance=..30]
+wait 10
+
+# salt_husk 段 1 (層 1・y 80)
+cmd fill -16 79 -4 -8 79 4 minecraft:polished_deepslate
+cmd setblock -15 80 -3 minecraft:sea_lantern
+cmd setblock -9 80 3 minecraft:sea_lantern
+cmd setblock -13 83 0 minecraft:sea_lantern
+cmd setblock -11 82 -2 minecraft:sea_lantern
+wait 10
+cmd tp @s -14 80 0 270 4
+cmd skyabyss abyss mob salt_husk 1
+wait 10
+cmd data merge entity @e[type=skyabyss:salt_husk,limit=1,sort=nearest] {NoAI:1b}
+wait 30
+cmd tp @s -13 80 0 270 4
+wait 10
+shot salt_husk_s1_front
+cmd tp @s -12 80 2 180 4
+wait 10
+shot salt_husk_s1_side
+cmd kill @e[type=skyabyss:salt_husk,distance=..30]
+wait 10
+
+# salt_husk 段 2 (層 2・y -40)
+cmd fill -16 -41 -4 -8 -41 4 minecraft:polished_deepslate
+cmd setblock -15 -40 -3 minecraft:sea_lantern
+cmd setblock -9 -40 3 minecraft:sea_lantern
+cmd setblock -13 -37 0 minecraft:sea_lantern
+cmd setblock -11 -38 -2 minecraft:sea_lantern
+wait 10
+cmd tp @s -14 -40 0 270 4
+cmd skyabyss abyss mob salt_husk 2
+wait 10
+cmd data merge entity @e[type=skyabyss:salt_husk,limit=1,sort=nearest] {NoAI:1b}
+wait 30
+cmd tp @s -13 -40 0 270 4
+wait 10
+shot salt_husk_s2_front
+cmd tp @s -12 -40 2 180 4
+wait 10
+shot salt_husk_s2_side
+cmd kill @e[type=skyabyss:salt_husk,distance=..30]
+wait 10
+
+# salt_husk 段 3 (層 3・y -160)
+cmd fill -16 -161 -4 -8 -161 4 minecraft:polished_deepslate
+cmd setblock -15 -160 -3 minecraft:sea_lantern
+cmd setblock -9 -160 3 minecraft:sea_lantern
+cmd setblock -13 -157 0 minecraft:sea_lantern
+cmd setblock -11 -158 -2 minecraft:sea_lantern
+wait 10
+cmd tp @s -14 -160 0 270 4
+cmd skyabyss abyss mob salt_husk 3
+wait 10
+cmd data merge entity @e[type=skyabyss:salt_husk,limit=1,sort=nearest] {NoAI:1b}
+wait 30
+cmd tp @s -13 -160 0 270 4
+wait 10
+shot salt_husk_s3_front
+cmd tp @s -12 -160 2 180 4
+wait 10
+shot salt_husk_s3_side
+cmd kill @e[type=skyabyss:salt_husk,distance=..30]
+wait 10
+
+# tide_hands 段 1 (層 1・y 80)
+cmd fill -4 79 -4 4 79 4 minecraft:polished_deepslate
+cmd setblock -3 80 -3 minecraft:sea_lantern
+cmd setblock 3 80 3 minecraft:sea_lantern
+cmd setblock -1 83 0 minecraft:sea_lantern
+cmd setblock 1 82 -2 minecraft:sea_lantern
+wait 10
+cmd tp @s -2 80 0 270 4
+cmd skyabyss abyss mob tide_hands 1
+wait 10
+cmd data merge entity @e[type=skyabyss:tide_hands,limit=1,sort=nearest] {NoAI:1b}
+wait 30
+cmd tp @s -1 80 0 270 4
+wait 10
+shot tide_hands_s1_front
+cmd tp @s 0 80 2 180 4
+wait 10
+shot tide_hands_s1_side
+cmd kill @e[type=skyabyss:tide_hands,distance=..30]
+wait 10
+
+# tide_hands 段 2 (層 2・y -40)
+cmd fill -4 -41 -4 4 -41 4 minecraft:polished_deepslate
+cmd setblock -3 -40 -3 minecraft:sea_lantern
+cmd setblock 3 -40 3 minecraft:sea_lantern
+cmd setblock -1 -37 0 minecraft:sea_lantern
+cmd setblock 1 -38 -2 minecraft:sea_lantern
+wait 10
+cmd tp @s -2 -40 0 270 4
+cmd skyabyss abyss mob tide_hands 2
+wait 10
+cmd data merge entity @e[type=skyabyss:tide_hands,limit=1,sort=nearest] {NoAI:1b}
+wait 30
+cmd tp @s -1 -40 0 270 4
+wait 10
+shot tide_hands_s2_front
+cmd tp @s 0 -40 2 180 4
+wait 10
+shot tide_hands_s2_side
+cmd kill @e[type=skyabyss:tide_hands,distance=..30]
+wait 10
+
+# tide_hands 段 3 (層 3・y -160)
+cmd fill -4 -161 -4 4 -161 4 minecraft:polished_deepslate
+cmd setblock -3 -160 -3 minecraft:sea_lantern
+cmd setblock 3 -160 3 minecraft:sea_lantern
+cmd setblock -1 -157 0 minecraft:sea_lantern
+cmd setblock 1 -158 -2 minecraft:sea_lantern
+wait 10
+cmd tp @s -2 -160 0 270 4
+cmd skyabyss abyss mob tide_hands 3
+wait 10
+cmd data merge entity @e[type=skyabyss:tide_hands,limit=1,sort=nearest] {NoAI:1b}
+wait 30
+cmd tp @s -1 -160 0 270 4
+wait 10
+shot tide_hands_s3_front
+cmd tp @s 0 -160 2 180 4
+wait 10
+shot tide_hands_s3_side
+cmd kill @e[type=skyabyss:tide_hands,distance=..30]
+wait 10
+
+# white_shell_keeper 段 1 (層 1・y 80)
+cmd fill 8 79 -4 16 79 4 minecraft:polished_deepslate
+cmd setblock 9 80 -3 minecraft:sea_lantern
+cmd setblock 15 80 3 minecraft:sea_lantern
+cmd setblock 11 83 0 minecraft:sea_lantern
+cmd setblock 13 82 -2 minecraft:sea_lantern
+wait 10
+cmd tp @s 10 80 0 270 4
+cmd skyabyss abyss mob white_shell_keeper 1
+wait 10
+cmd data merge entity @e[type=skyabyss:white_shell_keeper,limit=1,sort=nearest] {NoAI:1b}
+wait 30
+cmd tp @s 11 80 0 270 4
+wait 10
+shot white_shell_keeper_s1_front
+cmd tp @s 12 80 2 180 4
+wait 10
+shot white_shell_keeper_s1_side
+cmd kill @e[type=skyabyss:white_shell_keeper,distance=..30]
+wait 10
+
+# white_shell_keeper 段 2 (層 2・y -40)
+cmd fill 8 -41 -4 16 -41 4 minecraft:polished_deepslate
+cmd setblock 9 -40 -3 minecraft:sea_lantern
+cmd setblock 15 -40 3 minecraft:sea_lantern
+cmd setblock 11 -37 0 minecraft:sea_lantern
+cmd setblock 13 -38 -2 minecraft:sea_lantern
+wait 10
+cmd tp @s 10 -40 0 270 4
+cmd skyabyss abyss mob white_shell_keeper 2
+wait 10
+cmd data merge entity @e[type=skyabyss:white_shell_keeper,limit=1,sort=nearest] {NoAI:1b}
+wait 30
+cmd tp @s 11 -40 0 270 4
+wait 10
+shot white_shell_keeper_s2_front
+cmd tp @s 12 -40 2 180 4
+wait 10
+shot white_shell_keeper_s2_side
+cmd kill @e[type=skyabyss:white_shell_keeper,distance=..30]
+wait 10
+
+# white_shell_keeper 段 3 (層 3・y -160)
+cmd fill 8 -161 -4 16 -161 4 minecraft:polished_deepslate
+cmd setblock 9 -160 -3 minecraft:sea_lantern
+cmd setblock 15 -160 3 minecraft:sea_lantern
+cmd setblock 11 -157 0 minecraft:sea_lantern
+cmd setblock 13 -158 -2 minecraft:sea_lantern
+wait 10
+cmd tp @s 10 -160 0 270 4
+cmd skyabyss abyss mob white_shell_keeper 3
+wait 10
+cmd data merge entity @e[type=skyabyss:white_shell_keeper,limit=1,sort=nearest] {NoAI:1b}
+wait 30
+cmd tp @s 11 -160 0 270 4
+wait 10
+shot white_shell_keeper_s3_front
+cmd tp @s 12 -160 2 180 4
+wait 10
+shot white_shell_keeper_s3_side
+cmd kill @e[type=skyabyss:white_shell_keeper,distance=..30]
+wait 10
+
+# charged_moth 段 1 (層 2・y -40)
+cmd fill -16 -41 8 -8 -41 16 minecraft:polished_deepslate
+cmd setblock -15 -40 9 minecraft:sea_lantern
+cmd setblock -9 -40 15 minecraft:sea_lantern
+cmd setblock -13 -37 12 minecraft:sea_lantern
+cmd setblock -11 -38 10 minecraft:sea_lantern
+wait 10
+cmd tp @s -14 -40 12 270 4
+cmd skyabyss abyss mob charged_moth 1
+wait 10
+cmd data merge entity @e[type=skyabyss:charged_moth,limit=1,sort=nearest] {NoAI:1b}
+wait 30
+cmd tp @s -13 -40 12 270 4
+wait 10
+shot charged_moth_s1_front
+cmd tp @s -12 -40 14 180 4
+wait 10
+shot charged_moth_s1_side
+cmd kill @e[type=skyabyss:charged_moth,distance=..30]
+wait 10
+
+# charged_moth 段 2 (層 3・y -160)
+cmd fill -16 -161 8 -8 -161 16 minecraft:polished_deepslate
+cmd setblock -15 -160 9 minecraft:sea_lantern
+cmd setblock -9 -160 15 minecraft:sea_lantern
+cmd setblock -13 -157 12 minecraft:sea_lantern
+cmd setblock -11 -158 10 minecraft:sea_lantern
+wait 10
+cmd tp @s -14 -160 12 270 4
+cmd skyabyss abyss mob charged_moth 2
+wait 10
+cmd data merge entity @e[type=skyabyss:charged_moth,limit=1,sort=nearest] {NoAI:1b}
+wait 30
+cmd tp @s -13 -160 12 270 4
+wait 10
+shot charged_moth_s2_front
+cmd tp @s -12 -160 14 180 4
+wait 10
+shot charged_moth_s2_side
+cmd kill @e[type=skyabyss:charged_moth,distance=..30]
+wait 10
+
+# charged_moth 段 3 (層 4・y -280)
+cmd fill -16 -281 8 -8 -281 16 minecraft:polished_deepslate
+cmd setblock -15 -280 9 minecraft:sea_lantern
+cmd setblock -9 -280 15 minecraft:sea_lantern
+cmd setblock -13 -277 12 minecraft:sea_lantern
+cmd setblock -11 -278 10 minecraft:sea_lantern
+wait 10
+cmd tp @s -14 -280 12 270 4
+cmd skyabyss abyss mob charged_moth 3
+wait 10
+cmd data merge entity @e[type=skyabyss:charged_moth,limit=1,sort=nearest] {NoAI:1b}
+wait 30
+cmd tp @s -13 -280 12 270 4
+wait 10
+shot charged_moth_s3_front
+cmd tp @s -12 -280 14 180 4
+wait 10
+shot charged_moth_s3_side
+cmd kill @e[type=skyabyss:charged_moth,distance=..30]
+wait 10
+
+# lightning_idol 段 1 (層 2・y -40)
+cmd fill -4 -41 8 4 -41 16 minecraft:polished_deepslate
+cmd setblock -3 -40 9 minecraft:sea_lantern
+cmd setblock 3 -40 15 minecraft:sea_lantern
+cmd setblock -1 -37 12 minecraft:sea_lantern
+cmd setblock 1 -38 10 minecraft:sea_lantern
+wait 10
+cmd tp @s -2 -40 12 270 4
+cmd skyabyss abyss mob lightning_idol 1
+wait 10
+cmd data merge entity @e[type=skyabyss:lightning_idol,limit=1,sort=nearest] {NoAI:1b}
+wait 30
+cmd tp @s -1 -40 12 270 4
+wait 10
+shot lightning_idol_s1_front
+cmd tp @s 0 -40 14 180 4
+wait 10
+shot lightning_idol_s1_side
+cmd kill @e[type=skyabyss:lightning_idol,distance=..30]
+wait 10
+
+# lightning_idol 段 2 (層 3・y -160)
+cmd fill -4 -161 8 4 -161 16 minecraft:polished_deepslate
+cmd setblock -3 -160 9 minecraft:sea_lantern
+cmd setblock 3 -160 15 minecraft:sea_lantern
+cmd setblock -1 -157 12 minecraft:sea_lantern
+cmd setblock 1 -158 10 minecraft:sea_lantern
+wait 10
+cmd tp @s -2 -160 12 270 4
+cmd skyabyss abyss mob lightning_idol 2
+wait 10
+cmd data merge entity @e[type=skyabyss:lightning_idol,limit=1,sort=nearest] {NoAI:1b}
+wait 30
+cmd tp @s -1 -160 12 270 4
+wait 10
+shot lightning_idol_s2_front
+cmd tp @s 0 -160 14 180 4
+wait 10
+shot lightning_idol_s2_side
+cmd kill @e[type=skyabyss:lightning_idol,distance=..30]
+wait 10
+
+# lightning_idol 段 3 (層 4・y -280)
+cmd fill -4 -281 8 4 -281 16 minecraft:polished_deepslate
+cmd setblock -3 -280 9 minecraft:sea_lantern
+cmd setblock 3 -280 15 minecraft:sea_lantern
+cmd setblock -1 -277 12 minecraft:sea_lantern
+cmd setblock 1 -278 10 minecraft:sea_lantern
+wait 10
+cmd tp @s -2 -280 12 270 4
+cmd skyabyss abyss mob lightning_idol 3
+wait 10
+cmd data merge entity @e[type=skyabyss:lightning_idol,limit=1,sort=nearest] {NoAI:1b}
+wait 30
+cmd tp @s -1 -280 12 270 4
+wait 10
+shot lightning_idol_s3_front
+cmd tp @s 0 -280 14 180 4
+wait 10
+shot lightning_idol_s3_side
+cmd kill @e[type=skyabyss:lightning_idol,distance=..30]
+wait 10
+
+# scorched_bird 段 1 (層 2・y -40)
+cmd fill 8 -41 8 16 -41 16 minecraft:polished_deepslate
+cmd setblock 9 -40 9 minecraft:sea_lantern
+cmd setblock 15 -40 15 minecraft:sea_lantern
+cmd setblock 11 -37 12 minecraft:sea_lantern
+cmd setblock 13 -38 10 minecraft:sea_lantern
+wait 10
+cmd tp @s 10 -40 12 270 4
+cmd skyabyss abyss mob scorched_bird 1
+wait 10
+cmd data merge entity @e[type=skyabyss:scorched_bird,limit=1,sort=nearest] {NoAI:1b}
+wait 30
+cmd tp @s 11 -40 12 270 4
+wait 10
+shot scorched_bird_s1_front
+cmd tp @s 12 -40 14 180 4
+wait 10
+shot scorched_bird_s1_side
+cmd kill @e[type=skyabyss:scorched_bird,distance=..30]
+wait 10
+
+# scorched_bird 段 2 (層 3・y -160)
+cmd fill 8 -161 8 16 -161 16 minecraft:polished_deepslate
+cmd setblock 9 -160 9 minecraft:sea_lantern
+cmd setblock 15 -160 15 minecraft:sea_lantern
+cmd setblock 11 -157 12 minecraft:sea_lantern
+cmd setblock 13 -158 10 minecraft:sea_lantern
+wait 10
+cmd tp @s 10 -160 12 270 4
+cmd skyabyss abyss mob scorched_bird 2
+wait 10
+cmd data merge entity @e[type=skyabyss:scorched_bird,limit=1,sort=nearest] {NoAI:1b}
+wait 30
+cmd tp @s 11 -160 12 270 4
+wait 10
+shot scorched_bird_s2_front
+cmd tp @s 12 -160 14 180 4
+wait 10
+shot scorched_bird_s2_side
+cmd kill @e[type=skyabyss:scorched_bird,distance=..30]
+wait 10
+
+# scorched_bird 段 3 (層 4・y -280)
+cmd fill 8 -281 8 16 -281 16 minecraft:polished_deepslate
+cmd setblock 9 -280 9 minecraft:sea_lantern
+cmd setblock 15 -280 15 minecraft:sea_lantern
+cmd setblock 11 -277 12 minecraft:sea_lantern
+cmd setblock 13 -278 10 minecraft:sea_lantern
+wait 10
+cmd tp @s 10 -280 12 270 4
+cmd skyabyss abyss mob scorched_bird 3
+wait 10
+cmd data merge entity @e[type=skyabyss:scorched_bird,limit=1,sort=nearest] {NoAI:1b}
+wait 30
+cmd tp @s 11 -280 12 270 4
+wait 10
+shot scorched_bird_s3_front
+cmd tp @s 12 -280 14 180 4
+wait 10
+shot scorched_bird_s3_side
+cmd kill @e[type=skyabyss:scorched_bird,distance=..30]
+wait 10
+
+wait 20
