@@ -44,5 +44,11 @@
   "message.skyabyss.ch5.threshold": "底の境。門は閉じている。向こうで、遠い鼓動が一つ鳴った。",
   "hud.skyabyss.abyss.depth": "深さ %s",
   "hud.skyabyss.abyss.weight": "体が重い %s%%",
-  "message.skyabyss.abyss.voice_full": "闇の中から、名前を呼ばれた気がする。……灯りを。"
+  "message.skyabyss.abyss.voice_full": "闇の中から、名前を呼ばれた気がする。……灯りを。",
+  "entity.skyabyss.heart_warden": "心臓の番人",
+  "message.skyabyss.warden.lighting": "灯籠に火を移している……そばを離れないで。",
+  "message.skyabyss.warden.wake": "闇の奥で、何かが目を開けた。灯籠を点けて、姿を照らそう。",
+  "message.skyabyss.warden.shades": "番人の影が分かれた。鼓動の音がするのは、本物だけ。",
+  "message.skyabyss.warden.wave": "心臓の台が三度鳴った。灯りが、全部消える。",
+  "message.skyabyss.warden.fall": "番人が闇に溶けていく。台の上で、何かが脈打っている。"
 }

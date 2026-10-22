@@ -149,6 +149,13 @@ TEXTS = [
     ('hud.skyabyss.abyss.depth', '深さ %s', 'Depth %s'),
     ('hud.skyabyss.abyss.weight', '体が重い %s%%', 'Heavy %s%%'),
     ('message.skyabyss.abyss.voice_full', '闇の中から、名前を呼ばれた気がする。……灯りを。', 'Something in the dark seemed to call your name. ...Light, now.'),
+    # 心臓の番人 (story/ch5/warden。36 の 6)
+    ('entity.skyabyss.heart_warden', '心臓の番人', 'Warden of the Heart'),
+    ('message.skyabyss.warden.lighting', '灯籠に火を移している……そばを離れないで。', 'Passing the flame to the lantern... stay close.'),
+    ('message.skyabyss.warden.wake', '闇の奥で、何かが目を開けた。灯籠を点けて、姿を照らそう。', 'Something opened its eyes in the dark. Light the lanterns and catch it in the glow.'),
+    ('message.skyabyss.warden.shades', '番人の影が分かれた。鼓動の音がするのは、本物だけ。', 'The warden\'s shadow splits. Only the real one has a heartbeat.'),
+    ('message.skyabyss.warden.wave', '心臓の台が三度鳴った。灯りが、全部消える。', 'The heart\'s altar tolls three times. Every light goes out.'),
+    ('message.skyabyss.warden.fall', '番人が闇に溶けていく。台の上で、何かが脈打っている。', 'The warden melts into the dark. Something pulses on the altar.'),
 ]
 
 

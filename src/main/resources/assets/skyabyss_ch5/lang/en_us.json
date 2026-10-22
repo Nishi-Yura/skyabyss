@@ -44,5 +44,11 @@
   "message.skyabyss.ch5.threshold": "The threshold. The gate is closed. Beyond it, one distant beat sounds.",
   "hud.skyabyss.abyss.depth": "Depth %s",
   "hud.skyabyss.abyss.weight": "Heavy %s%%",
-  "message.skyabyss.abyss.voice_full": "Something in the dark seemed to call your name. ...Light, now."
+  "message.skyabyss.abyss.voice_full": "Something in the dark seemed to call your name. ...Light, now.",
+  "entity.skyabyss.heart_warden": "Warden of the Heart",
+  "message.skyabyss.warden.lighting": "Passing the flame to the lantern... stay close.",
+  "message.skyabyss.warden.wake": "Something opened its eyes in the dark. Light the lanterns and catch it in the glow.",
+  "message.skyabyss.warden.shades": "The warden's shadow splits. Only the real one has a heartbeat.",
+  "message.skyabyss.warden.wave": "The heart's altar tolls three times. Every light goes out.",
+  "message.skyabyss.warden.fall": "The warden melts into the dark. Something pulses on the altar."
 }

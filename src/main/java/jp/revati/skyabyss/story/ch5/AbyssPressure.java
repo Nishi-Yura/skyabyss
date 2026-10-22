@@ -40,6 +40,8 @@ import net.neoforged.neoforge.network.PacketDistributor;
 public final class AbyssPressure {
     public static volatile ToDoubleFunction<ServerPlayer> weightRelief = p -> 0.0;
     public static volatile ToIntFunction<ServerPlayer> lightBonus = p -> 0;
+    // 闇のたまりの速さの倍 (心臓の間で灯籠が全部消えていると 2。warden.WardenArena が入れる)
+    public static volatile ToDoubleFunction<ServerPlayer> voiceScale = p -> 1.0;
 
     static final double WEIGHT_FREE = 6.0;
     static final double WEIGHT_SPAN = 40.0;
@@ -113,6 +115,9 @@ public final class AbyssPressure {
         BlockPos at = p.blockPosition();
         int light = Math.max(p.serverLevel().getMaxLocalRawBrightness(at), Mth.clamp(lightBonus.applyAsInt(p), 0, 15));
         float d = light <= 3 ? VOICE_DARK : light <= 7 ? VOICE_DIM : VOICE_LIGHT;
+        if (d > 0) {
+            d *= (float) voiceScale.applyAsDouble(p);
+        }
         s.voice = Mth.clamp(s.voice + d, 0f, 100f);
         if (s.voice >= 40 && p.getRandom().nextInt(5) == 0) {
             p.serverLevel().playSound(null, p.getX() + p.getRandom().nextGaussian() * 6, p.getY(), p.getZ() + p.getRandom().nextGaussian() * 6,
