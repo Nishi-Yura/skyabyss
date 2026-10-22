@@ -1,14 +1,16 @@
 #!/usr/bin/env python3
-"""生成スクリプトが、いまコミットされているデータを再現できるか (ドリフトの有無) を調べる。
+"""生成スクリプトが、いまコミットされているデータ (data/ と assets/*/lang) を再現できるか (ドリフトの有無) を調べる。
 
 使い方 (リポジトリ直下で):
-    PYTHONPATH=tools/lib python tools/audit/check_generators.py            # 既定の一覧を全部
-    PYTHONPATH=tools/lib python tools/audit/check_generators.py gen_story_quests gen_npc_content
-    ... --diff   差分の中身も出す (DIFF_LINES=行数)  /  --keep   一時コピーを消さない / --list  一覧だけ出す / --paths src/main/resources docs/design
+    PYTHONPATH=tools/lib python tools/audit/check_generators.py                 # 一覧 (GENERATORS) を順に走らせ、最後にコミット済みと違うファイルを出す
+    PYTHONPATH=tools/lib python tools/audit/check_generators.py --isolated      # 1 本ずつ別々に走らせて、本ごとに出す
+    PYTHONPATH=tools/lib python tools/audit/check_generators.py story_quests --diff   # 名前の一部で絞る / 差分の中身も出す (DIFF_LINES=行数)
+    ... --list 一覧だけ / --keep 一時コピーを消さない / --strict JSON のキー順・PNG のバイト列まで同じを要求
 
-仕組み: tools/ ・ src/main/resources ・ docs を一時フォルダへコピーして git で固め、
-生成スクリプトを 1 本ずつそのコピーの中で走らせ、書き換わったファイルを報告する (本物は触らない)。
-終了コード: ドリフトまたは失敗があれば 1。
+仕組み: tools/ ・ src/main/resources ・ docs/design を一時フォルダへコピーして git で固め、生成スクリプトをそのコピーの中で走らせて、
+書き換わったファイルを報告する (本物は触らない)。改行コードの違い (Windows の Python は CRLF で書く)・PNG の再圧縮・JSON のキー順は無視。
+同じファイルを何本かが書くので、既定は一覧の順に続けて走らせた最後の状態を比べる (順番は一覧のとおり)。
+終了コード: ドリフトまたは失敗があれば 1。説明は tools/README.md の「生成スクリプトとコミット済みデータの同期」。
 """
 import os, shutil, subprocess, sys, tempfile, time
 from pathlib import Path
