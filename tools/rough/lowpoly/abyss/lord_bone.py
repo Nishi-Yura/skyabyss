@@ -36,9 +36,9 @@ def build_a(k):
     F = []
     leg_pair(F)
     F += part("pelvis", ellipsoid("body", "bone", (0, 27.5, 0), (7.0, 3.0, 4.2), segs=8, rings=3))
-    F += part("spine", rod("body", "calc", (0, 28, 4.8), (0, 49, 4.2), 1.5, 5))
+    F += part("spine", rod("body", "calc", (0, 28, 5.8), (0, 49, 5.2), 1.7, 5))
     for i, (y, rx, rz) in enumerate(((31, 6.6, 5.4), (34.5, 8.0, 6.4), (38, 8.6, 6.8), (41.5, 8.2, 6.4), (45, 7.0, 5.6))):
-        F += part(f"rib{i}", loop("body", "bone", 0, y, -0.6, rx, rz, r=1.05, n=8))
+        F += part(f"rib{i}", loop("body", "bone", 0, y, -0.6, rx, rz, r=1.05, n=8, gap=4))
     F += part("sternum", rod("body", "calc", (0, 30.5, -6.0), (0, 46, -5.2), 0.9, 4))
     for i, (x, y) in enumerate(((-3.4, 38.0), (3.4, 38.0), (0.0, 34.0), (0.0, 42.0))):
         F += part(f"lampcord{i}", rod("body", "calc", (x, 46.5, 1.0), (x, y + 2.6, 0.2), 0.3, 4))
@@ -58,7 +58,7 @@ def build_a(k):
     F, e = skull(F)
     for i, x in enumerate((-3.4, 0.0, 3.4)):
         F += part(f"crown{i}", cone("head", "calc", (x, 56.0, -1.5), (x * 0.1, 1, 0.1), 4.0 + (2.0 if x == 0 else 0), 0.9, sides=4, rings=2))
-    F += part("neck", rod("body", "bone", (0, 46, 1.4), (0, 52.0, 0.0), 1.8, 5))
+    F += part("neck", rod("body", "bone", (0, 45.5, 1.8), (0, 48.5, 1.0), 1.8, 5))
     return F, e
 
 
@@ -76,12 +76,12 @@ def build_b(k):
         F += part("foot" + b, ellipsoid(b, "calc", (sx * 21.0, 0.8, 4.0 + sz * 12.0 - 1.2), (1.8, 0.9, 2.8), segs=6, rings=2))
     F += part("skull", ellipsoid("head", "bone", (0, 46.0, -9.0), (11.0, 9.5, 11.0), segs=10, rings=4))
     F += part("jaw", ellipsoid("jaw", "calc", (0, 38.0, -11.5), (8.0, 3.0, 8.8), segs=9, rings=3))
-    F += part("throat", ellipsoid("head", "hollow", (0, 41.0, -14.0), (5.6, 3.6, 2.0), segs=8, rings=3))
+    F += part("throat", ellipsoid("head", "hollow", (0, 41.0, -17.6), (5.6, 3.6, 2.0), segs=8, rings=3))
     for i, x in enumerate((-6, -3, 0, 3, 6)):
-        F += part(f"tooth{i}", cone("head", "calc", (x * 1.1, 41.4, -16.4), (0, -1, -0.2), 3.0, 0.9, sides=4, rings=2))
+        F += part(f"tooth{i}", cone("head", "calc", (x * 1.1, 41.4, -15.0 - (1.6 if x == 0 else 0)), (0, -1, -0.2), 3.0, 0.9, sides=4, rings=2))
     F += part("sock_l", ellipsoid("head", "hollow", (-4.6, 49.0, -18.4), (2.8, 2.8, 1.0), segs=6, rings=2))
     F += part("sock_r", ellipsoid("head", "hollow", (4.6, 49.0, -18.4), (2.8, 2.8, 1.0), segs=6, rings=2))
-    F += part("neckrib", rod("body", "bone", (0, 36, -2.0), (0, 42, -7.0), 3.4, 6, ))
+    F += part("neckrib", rod("body", "bone", (0, 36, -2.0), (0, 40, -5.0), 3.4, 6, ))
     for i, x in enumerate((-8.0, 8.0)):
         F += part(f"horn{i}", cone("head", "calc", (x * 0.9, 50.0, -7.0), (x * 0.07, 1, 0.1), 9.0, 1.6, sides=5, rings=3))
     return F, [eye_at(-4.6, 49.0, -19.0, 1.2), eye_at(4.6, 49.0, -19.0, 1.2)]

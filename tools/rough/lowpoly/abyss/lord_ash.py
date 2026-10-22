@@ -24,8 +24,8 @@ def build_a(k):
     for i in range(10):
         a = 2 * math.pi * i / 10
         x, y = 13.5 * math.cos(a), 13.5 * math.sin(a)
-        F += part(f"tooth{i}", cone("body", "bone", (x, 34 + y, -16.6), (-x * 0.04, -y * 0.04, -1), 6.0, 1.5, sides=4, rings=2))
-    for i, (x, z, l) in enumerate(((-12, -6, 20), (-4, 8, 28), (6, -10, 14), (13, 2, 24), (0, -2, 8))):
+        F += part(f"tooth{i}", cone("body", "bone", (x, 34 + y, -15.6), (-x * 0.04, -y * 0.04, -1), 6.0, 1.5, sides=4, rings=2))
+    for i, (x, z, l) in enumerate(((-12, -6, 20), (-4, 8, 28), (6, -10, 14), (13, 2, 24))):
         F += part(f"chain{i}", rod("body", "iron", (x, 16, z), (x, 14 - l * 0.3, z), 0.5, 4))
         F += part(f"lamp{i}", ell("body", "lamp", x, 12 - l * 0.3 - 2.2, z, 2.4, 3.2, 2.4, segs=6, rings=2))
         F += part(f"lampcap{i}", ell("body", "iron", x, 12 - l * 0.3 + 1.2, z, 1.6, 0.7, 1.6, segs=5, rings=1))

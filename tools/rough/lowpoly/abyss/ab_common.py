@@ -117,6 +117,28 @@ def mirror_x(f):
     return f
 
 
+# ---- 深さの歪み (比べシートの「周が進む」行)
+def warp_faces(faces, w, h=52.0):
+    """全頂点を位置だけで決まる関数でずらす (閉じた面のまま)。高さ方向に伸ばし、横へ傾け、うねらせる。"""
+    import copy
+    out = []
+    for f in faces:
+        g = copy.copy(f)
+        vs = []
+        for p in f.verts:
+            x, y, z = float(p[0]), float(p[1]), float(p[2])
+            t = y / h
+            y2 = y * (1 + 0.3 * w)
+            x2 = x * (1 + 0.22 * w * math.sin(y / 9.0)) + w * 12.0 * t * t
+            z2 = z + w * 5.0 * math.sin(y / 11.0 + 0.8)
+            vs.append(np.array([x2, y2, z2]))
+        g.verts = np.array(vs)
+        CA._ck._refresh(g, f)
+        out.append(g)
+    return out
+
+
+
 # ---- 比べシート
 def _wrap(d, text, font, width):
     lines, cur = [], ""
@@ -169,7 +191,9 @@ def sheet(spec, results, bones, rows, out_png):
         for i, r in enumerate(results):
             x = X0 + i * (PW + GAP)
             rr = dict(r)
-            if only is not None:
+            if isinstance(only, dict):
+                rr["faces"] = warp_faces(r["faces"], only["warp"], spec.get("king_h", 52.0))
+            elif only is not None:
                 rr["faces"] = [f for f in r["faces"] if getattr(f, "part", f.bone) in only]
             im = CA._ck.render_view(rr, r["atlas"], r["glow"], spec["poses"][pose], bones, yaw, pitch, (PW, ph), cen, sc)
             cv.paste(im, (x, y))
