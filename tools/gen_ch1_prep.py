@@ -62,7 +62,7 @@ def dialogue():
         },
     })
     put('dialogue.skyabyss.storyteller.ch1p_artisan_pointer',
-        '道の脇の荷車のそばで、荷を広げている人を見たかい。旅の職人だよ。……あの荷の手は、あたしも覚えている。針の入れ方も。\n折れた剣の話なら、あの人に聞くといい。刃を研ぐのも、旅装を編むのも。持ち主のほうは、まだ思い出せないけどね。',
+        '道の脇の荷車のそばで、荷を広げている人を見たかい。旅の職人だよ。……あの手つきは、あたしも覚えている。針の入れ方も。\n折れた剣の話なら、あの人に聞くといい。刃を研ぐのも、旅装を編むのも。持ち主のほうは、まだ思い出せないけどね。',
         'Have you seen the one with a pack spread out by the cart track? A traveling artisan. ...My hands remember whose pack that was. The way the needle goes in, too.\nAbout the broken sword, ask them. Honing a blade, stitching road gear, too. The owner, I still cannot recall.')
 
     # イサナ (whale_chaser): 乗る前の備えの一言。数字は言わず、言い回しだけ

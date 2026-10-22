@@ -85,7 +85,7 @@ def texts():
     put('item.skyabyss.moss_salve', '苔の軟膏', 'Moss Salve')
     put('item.skyabyss.moss_salve.desc', '鈍足を治し、少しのあいだ傷を癒やす', 'Cures slowness and mends wounds for a short while.')
     put('effect.skyabyss.whetted', '研いだ刃', 'Honed Blade')
-    put('message.skyabyss.whetstone.used', '刃を研いだ。二十分のあいだ、振りが利く', 'You honed your blade. It will bite for twenty minutes.')
+    put('message.skyabyss.whetstone.used', '刃を研いだ。二十分のあいだ、攻撃が強くなる', 'You honed your blade. It will bite for twenty minutes.')
     put('message.skyabyss.recipe.locked', 'まだ作り方を知らない。旅の覚書を開くか、旅の職人に教わろう', 'You do not know how to make this yet. Open your wayfarer\'s notes, or ask the traveling artisan.')
     put('message.skyabyss.readiness.remedy.name.travel_gear', '鯨道の旅装', 'the Whale Road gear')
     put('message.skyabyss.readiness.remedy.name.whetstone', '岩の砥石', 'a rock whetstone')

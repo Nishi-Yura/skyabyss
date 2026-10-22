@@ -417,7 +417,7 @@ st.node("song0",
         "...You heard it, then. The song from the sky.\nOn nights when it comes down, some of the stars go out. My mother said something was passing overhead.",
         face="grave", next="song0_b", do=[set_flag("song_told"), add_aff(2)], note="序盤: 空の歌")
 st.node("song0_b",
-        "みっつ、みあげちゃだめよ、と歌うのは、見えないものを見せないためだと思っていたんだ。\n今はね、見られないためかもしれないと思うよ。",
+        "みっつ、みあげちゃだめよ、と歌うのは、見えないものを見ないようにするためだと思っていたんだ。\n今はね、見られないためかもしれないと思うよ。",
         "I always thought we sang \"three, don't you look up\" so that children wouldn't see what can't be seen.\nNow I think it may be so that we aren't seen.",
         face="grave", options=[
             ("who", "何が、通ったんだ？", "What was passing?", {"goto": "song0_c"}),
@@ -579,7 +579,7 @@ wc.node("c_back_secret",
         "...I see. Maybe that's how it should be.\nSee it with my own eyes, you mean.",
         next="@entry")
 wc.node("c_shards_offer",
-        "頼みがある。……背中の石を、少し持ってきてくれないか。\n鯨の体のかけらでいい。三つあれば足りる。触れてみたいんだ。俺がたどり着けなかった場所の、手ざわりを。",
+        "頼みがある。……背中の鱗片を、少し持ってきてくれないか。\n鯨の体のかけらでいい。三つあれば足りる。触れてみたいんだ。俺がたどり着けなかった場所の、手ざわりを。",
         "I have a favor to ask. ...Could you bring me a few stones from its back?\nPieces of the whale's body. Three will do. I want to touch them. To feel the place I never reached.",
         options=[
             ("accept", "持ってくる。", "I'll bring them.", {"kind": "quest", "do": [start(SHARDS), add_aff(1)]}),

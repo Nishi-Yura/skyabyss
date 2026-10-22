@@ -536,7 +536,7 @@ quest("daily_lost_flock", 60, ("夜を越す羊", "Sheep Before Nightfall"),
       story="影の年は羊が落ち着かない。連れ戻すだけの短い頼み。")
 
 quest("daily_night_watch", 61, ("夜回り", "Night Watch"),
-      ("村のまわりで、夜にうろつくものを六体倒す。仲間も数える。", "Defeat six night prowlers around the village. Party members count too."),
+      ("村のまわりで、夜にうろつくものを六体倒す。仲間の分も数える。", "Defeat six night prowlers around the village. Party members count too."),
       ("今夜は、静かに眠れそうだ。", "Tonight, the village can sleep in peace."),
       [stage("watch", ("板の紙：「夜になると、村のまわりをうろつくものが増えた。七日目の夜は戸を閉めるが、ほかの夜は誰かが見張らないと」",
                        "A note on the board: \"More things prowl around the village at night. On the seventh night we bar the doors, "
@@ -562,7 +562,7 @@ quest("daily_firewood", 62, ("炉の薪", "Firewood for the Hearth"),
       story="七日目の夜に火を絶やさないための薪。暦の言い伝えを、日々の暮らしの側から見せる。")
 
 quest("daily_bone_sentry", 63, ("骨の番兵の見回り", "Sentinel Rounds"),
-      ("岩鯨の背で、骨の番兵を八体眠らせる。仲間も数える。", "Put eight bone sentinels to rest on the stone whale's back. Party members count too."),
+      ("岩鯨の背で、骨の番兵を八体眠らせる。仲間の分も数える。", "Put eight bone sentinels to rest on the stone whale's back. Party members count too."),
       ("番兵たちは、しばらく起きあがらない。", "The sentinels will stay down for a while."),
       [stage("rounds", ("板の紙（見慣れない、角ばった字）：「鯨の背の骨の番兵が、また起きあがっている。八つ、眠らせてきてほしい。——鯨追い」",
                         "A note on the board, in an angular, unfamiliar hand: \"The bone sentinels on the whale's back are rising again. "
@@ -575,7 +575,7 @@ quest("daily_bone_sentry", 63, ("骨の番兵の見回り", "Sentinel Rounds"),
 
 # ---- 言伝ての板 (週替わり)
 quest("weekly_back_trials", 80, ("背中の試練", "Trials of the Back"),
-      ("岩鯨の背の試練を三つ越える。一緒にいた仲間も数える。", "Clear three trials on the stone whale's back. Party members with you count too."),
+      ("岩鯨の背の試練を三つ越える。一緒にいた仲間の分も数える。", "Clear three trials on the stone whale's back. Party members with you count too."),
       ("ゴールが三度鳴った。", "The goals rang three times."),
       [stage("trials", ("板の紙：「鯨の背の試練を、三つ越えてきてほしい。光る印に着いたら、それでいい。——鯨追い」",
                         "A note on the board: \"Clear three of the trials on the whale's back. Once you reach the glowing mark, "
@@ -600,7 +600,7 @@ quest("weekly_route", 83, ("順路を越える", "Cross a Route"),
       story="祠（32 の 3.1）から挑む周回の入口。報いの歌片は岩鯨のもの。")
 
 quest("weekly_heart_again", 81, ("心臓をもう一度", "The Heart, Once More"),
-      ("岩鯨の心臓を、もう一度止める。戦いに加わった仲間も数える。", "Still the stone whale's heart once more. Party members in the fight count too."),
+      ("岩鯨の心臓を、もう一度止める。戦いに加わった仲間の分も数える。", "Still the stone whale's heart once more. Party members in the fight count too."),
       ("鼓動は止まった。けれど、また打ちはじめるのだろう。", "The beating has stopped. But it will start again, surely."),
       [stage("heart", ("板の隅の紙：「止めた鼓動は、また打ちはじめる。七日に一度は、確かめてきてほしい」\n誰が書いたのか、名前はない。",
                        "A note in the corner of the board: \"A stilled heartbeat starts again. Go and make sure of it, once every seven days.\"\n"

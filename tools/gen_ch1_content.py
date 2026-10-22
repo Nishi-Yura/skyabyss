@@ -168,7 +168,7 @@ put('quest.skyabyss.ch1.day1_cairns.summary', '道や旅の跡の積み石を、
 put('quest.skyabyss.ch1.day1_cairns.round.journal',
     '語り部の頼み：「道に積んである石が崩れていないか、見てきておくれ。二つも見れば足りるよ」\n積み石は、道の脇や、旅の跡のそばにある。',
     'The storyteller asked: "Go and see whether the stones piled along the road have fallen. Two will be enough."\nThe cairns stand beside the road and near the traces of travelers.')
-put('quest.skyabyss.ch1.day1_cairns.round.round', '積み石を見て回る', 'Look over the cairns')
+put('quest.skyabyss.ch1.day1_cairns.round.round', '道の積み石を二つ見に行く', 'Go look at two cairns along the road')
 put('quest.skyabyss.ch1.day1_cairns.done', '「崩れていなかったかい。……それなら、いいんだよ」', '"Not a one had fallen? ...Then that is all right."')
 
 put('quest.skyabyss.ch1.day1_firewood.title', '宿りの薪', 'Firewood for the Lodge')
@@ -177,7 +177,7 @@ put('quest.skyabyss.ch1.day1_firewood.wood.journal',
     '語り部の頼み：「夜に備えて、薪を束ねておくれ。原木が八本あれば足りる」\n原木を持って板を開けば、受け取ってもらえる。',
     'The storyteller asked: "Bundle some firewood against the night. Eight logs will do."\nOpen the board with logs in hand and they will be taken.')
 put('quest.skyabyss.ch1.day1_firewood.wood.wood', '原木を言伝ての板に納める', 'Hand logs in at the message board')
-put('quest.skyabyss.ch1.day1_firewood.done', '「ありがとうね。これで夜の火は、つなげられる」', '"Thank you. Now the fire can last through the night."')
+put('quest.skyabyss.ch1.day1_firewood.done', '「ありがとうね。これで夜の火が絶えずに済むよ」', '"Thank you. Now the fire can last through the night."')
 
 put('quest.skyabyss.ch1.lost_traveller.title', '荷車の持ち主', 'The Cart Owner')
 put('quest.skyabyss.ch1.lost_traveller.summary', '倒れた荷車の持ち主を探し、日記を見つける。', 'Look for the owner of the fallen cart and find the diary.')
@@ -337,7 +337,7 @@ put('chapter.skyabyss.aftermath.titan_whale', 'この鼓動は、地の底から
 put(M + 'aftermath.storyteller', '……歌が、一節だけ欠けて鳴ったね。預かったものは、いつか返さなきゃならない。誰にかは、聞かないでおくれ。',
     '...The song rang with a verse missing, didn\'t it. What is kept in trust must one day be returned. Don\'t ask me to whom.')
 # 宿りの炉端
-put(M + 'nook.bed', '宿りに、ベッドが置かれている。', 'A bed has been set out at the lodge.')
+put(M + 'nook.bed', '宿りに、寝台が置かれている。', 'A bed has been set out at the lodge.')
 
 # ブロック
 put('block.skyabyss.song_stone', '歌石', 'Song Stone')

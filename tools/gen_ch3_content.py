@@ -204,7 +204,7 @@ write(DATA / "quest/ch3/sub_wind_marks.json", {
     "reward": {"xp": 150},
 })
 text("quest.skyabyss.ch3.sub_wind_marks.title", "風の跡", "Marks of the Wind")
-text("quest.skyabyss.ch3.sub_wind_marks.summary", "風に逆らう嵐の、跡をたどる。", "Follow the marks of the storm that runs against the wind.")
+text("quest.skyabyss.ch3.sub_wind_marks.summary", "風に逆らって来る嵐の跡をたどる。", "Follow the marks of the storm that runs against the wind.")
 text("quest.skyabyss.ch3.sub_wind_marks.done", "風の民は、影を神と呼んだ。鳥のほうが、見誤られていたのかもしれない。",
      "The wind folk called the shadow a god. Perhaps it was the bird they misread.")
 text("quest.skyabyss.ch3.sub_wind_marks.trace.journal",

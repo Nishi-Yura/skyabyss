@@ -606,7 +606,7 @@ def dialogue():
     })
     d = 'dialogue.skyabyss.artisan.'
     put(d + 'ch2a_first',
-        'おや、旅の人。……どこかで会ったかな。いや、いい。浜は道具がすぐ錆びる。直すものがあれば言っておくれ。\nこれは浜の覚書だ。塩と真珠の扱いを書いておいた。',
+        'おや、旅の人。……どこかで会ったかな。いや、いい。浜は道具がすぐ錆びる。直すものがあれば言ってくれ。\nこれは浜の覚書だ。塩と真珠の扱いを書いておいた。',
         'Ah, a traveller. ...Have we met? No matter. Tools rust fast on the beach. Tell me if anything needs mending.\nHere, notes for the shore. How to work salt and pearl.')
     put(d + 'ch2p_teach',
         '潮渡りの旅装だ。小真珠を継いで、塩で締める。前の巨神の鱗を肩に。\n水の中でも、足が重くならない。……教えた手つきを、どこかで見た気がするって？　道具はみんな、そう言うよ。',
@@ -658,7 +658,7 @@ def texts():
     put(m + 'vault.shelf', '塩樽を乾いた棚に置いた。', 'You set the salt barrel on the dry shelf.')
     put(m + 'vault.wet_floor', '樽は、乾いた棚の上へ。', 'The barrel belongs on the dry shelf.')
     put(m + 'vault.door', '三つの樽が並ぶと、白い石の戸が、塩をこぼしながら退いていく。', 'With three barrels in a row, the white stone door slides back, shedding salt.')
-    put(m + 'vault.door_shut', '白い石の戸は動かない。棚が、三つの何かを待っている。', 'The white stone door will not move. The shelf seems to be waiting for three things.')
+    put(m + 'vault.door_shut', '白い石の戸は動かない。棚が、三つの樽を待っている。', 'The white stone door will not move. The shelf seems to be waiting for three things.')
     for n, (j, e) in enumerate((
             ('塩は、道を覚えている。', 'The salt remembers the road.'),
             ('柱の刻み。下の線が朝の潮、上の線が夕の潮の高さだ。', 'Marks on the pillar. The lower line is the morning tide, the upper the evening tide.'),

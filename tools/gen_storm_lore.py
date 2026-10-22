@@ -180,7 +180,7 @@ def quest(qid, order, title, summary, done, journal, objective, reward, repeat, 
 
 
 quest("daily_storm_rounds", 66, ("雷翼の背の見回り", "Rounds on the Thunder Wing"),
-      ("雷翼の背で、羽守・雷蛾・雷乞いを八体倒す。仲間も数える。",
+      ("雷翼の背で、羽守・雷蛾・雷乞いを八体倒す。仲間の分も数える。",
        "Defeat eight feather wardens, static moths or thunder supplicants on the thunder wing's back. Party members count too."),
       ("骨の回廊は、しばらく静かになるだろう。", "The hollow bones will be quiet for a while."),
       ("板の紙（雨に濡れて、字が少し流れている）：「鳥の背の骨の中で、銅の兜の番人と光る蛾が、また騒いでいる。八つ、静めてきてほしい」",
@@ -192,7 +192,7 @@ quest("daily_storm_rounds", 66, ("雷翼の背の見回り", "Rounds on the Thun
                             {"item": "skyabyss:resonance_shard_thunder_wing", "count": 1}]},
       "daily", "雷翼の背の周回の入口 (段階 3)。潮殻の「潮殻の背の見回り」と同じ形")
 quest("weekly_storm_heart", 84, ("嵐の鼓動をもう一度", "The Storm's Heart, Once More"),
-      ("雷翼の心臓を、もう一度止める。戦いに加わった仲間も数える。", "Still the thunder wing's heart once more. Party members in the fight count too."),
+      ("雷翼の心臓を、もう一度止める。戦いに加わった仲間の分も数える。", "Still the thunder wing's heart once more. Party members in the fight count too."),
       ("嵐は止んだ。けれど風は、また集まってくるのだろう。", "The storm has stopped. But the wind will gather again, surely."),
       ("板の隅の紙（同じ、名前のない字）：「嵐は七日で戻る。戻りきる前に、確かめてきてほしい」",
        "A note in the corner of the board, in the same unsigned hand: \"The storm comes back in seven days. Go and make sure, before it is back.\""),

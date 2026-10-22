@@ -166,7 +166,7 @@ def quests():
     put(b + 'show.talk', '折れた剣のことを、職人に話そう', 'Tell the artisan about the broken sword')
     put(b + 'forge.journal', '「研がずに振った。だから折れた」と台座にあった。鉄の剣を作業台で作り、岩の砥石で研いでから振ろう。砥石の作り方は旅の覚書にある。',
         'The plinth said: "Swung it unhoned. So it broke." Make an iron sword at a workbench and hone it on a rock whetstone before you swing it. The whetstone is in your wayfarer\'s notes.')
-    put(b + 'forge.lead', '職人「研がずに振るな。あの剣は、研がずに振って折れた」', 'The artisan: "Do not swing it unhoned. That sword broke because it was."')
+    put(b + 'forge.lead', '職人「研がずに振るな。あの剣は、それで折れた」', 'The artisan: "Do not swing it unhoned. That sword broke because it was."')
     put(b + 'forge.sword', '鉄の剣を作ろう', 'Make an iron sword')
     put(b + 'forge.whet', '岩の砥石で刃を研ごう', 'Hone your blade on a rock whetstone')
     put(b + 'done', '「刃は、研いだぶんだけ軽くなる。……今度は、折るなよ」\n盾のことなら、語り部が昔の旅人の話を知っている。',
@@ -232,7 +232,7 @@ def dialogue():
         '坑の奥で頁を見つけたのか。……鉄を二十四、か。几帳面な奴だ。\n鉱石は、かまどで溶かせば鉄になる。燃やすものは、木炭でも石炭でもいい。……焦るな。鯨は、まだ遠い。',
         'You found a page down the pit? ...Twenty-four iron. A tidy sort.\nOre smelts into iron in a furnace. Charcoal or coal, either burns. ...No rush. The whale is still far off.')
     put(d + 'ch1t_c_iron',
-        '鉄の匂いがする。……似合ってるよ。\nあの旅人も、そうやって鎖の下に立っていた気がする。……いや、話に聞いただけだ。見たはずがない。\n次は刃だ。旅の職人に聞いてみろ。折れた剣を見たと言っていた。',
+        '鉄の匂いがする。……似合ってるな。\nあの旅人も、そうやって鎖の下に立っていた気がする。……いや、話に聞いただけだ。見たはずがない。\n次は刃だ。旅の職人に聞いてみろ。折れた剣を見たと言っていた。',
         'You smell of iron. ...It suits you.\nI feel that traveller stood under the chain just like that. ...No. I only heard the story. I cannot have seen it.\nNext, a blade. Ask the traveling artisan. They said they saw a broken sword.')
 
 
@@ -264,7 +264,7 @@ def lore():
 
 # ---------------------------------------------------------------- 場所の文・碑・品
 def texts():
-    put('message.skyabyss.ch1.arrive.ch1_bone_pit', '地面から、巨きな肋骨が二本、門のように突き出している。下から、冷たい風。',
+    put('message.skyabyss.ch1.arrive.ch1_bone_pit', '地面から、大きな肋骨が二本、門のように突き出している。下から、冷たい風。',
         'Two enormous ribs jut from the ground like a gate. A cold wind rises from below.')
     put('message.skyabyss.ch1.pit.trail', '石標の矢印は、ここで途切れていた。', 'The cairns\' arrows end here.')
     put('message.skyabyss.ch1.pit.pack', '荷の底に、油紙で包んだ頁が一枚。鉄と松明も、きちんと揃えてある。',
@@ -273,7 +273,7 @@ def texts():
     put('message.skyabyss.ch1.pit.pack_empty', '荷は、もう空だ。頁の写しだけが、まだ挟まっている。', 'The pack is empty now. Only a copy of the page is still tucked inside.')
     put('message.skyabyss.ch1.pit.cold_shut', '石の戸は、氷のように冷たい。触れた指が、張りついて離れない。',
         'The stone door is cold as ice. Your fingers stick to it.')
-    put('message.skyabyss.ch1.pit.cold_open', '鉄が冷えを受け止めた。石の戸が、軋みながら退いていく。',
+    put('message.skyabyss.ch1.pit.cold_open', '鉄の防具が冷えを受け止めた。石の戸が、軋みながら退いていく。',
         'The iron takes the cold. The stone door grinds back.')
     put('message.skyabyss.ch1.cave.sword', '奥の台座に、折れた鉄の剣が横たえてある。', 'On the plinth at the back lies a broken iron sword.')
     put('message.skyabyss.ch1.trail.mark', '鯨追いの印を手に入れた', 'You received the Whale Chaser\'s Mark')

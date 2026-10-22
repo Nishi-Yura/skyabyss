@@ -540,7 +540,7 @@ def dialogue():
         '返す、と書いてある。奪うでも、壊すでもなく。\n……あたしの祖母も、預けたものは返しに行くものだと言っていた。あんたは、返しに行くんだね。',
         'It says "return". Not take, not break.\n...My grandmother said the same: what was left in trust is something you go to give back. You are going to give it back.')
     put(s + 'ch4g_road_tale',
-        '灰の民は、黒石の杭で灰の積もりを測っていたそうだよ。灰が濃くなるほうへ歩けば、灰の降る円の縁に着く。\n……縁から先へは、誰も行かなかったけどね。',
+        '灰の民は、黒石の杭で灰の積もりを測っていたそうだよ。灰が薄くなるほうへ歩けば、灰の降る円の縁に着く。\n……縁から先へは、誰も行かなかったけどね。',
         'The ash people measured the fallen ash with blackstone posts, they say. Walk where it lies deeper and you reach the rim of the falling ash.\n...No one ever went past the rim, though.')
     put(s + 'ch4g_s_kiln',
         '窯の跡を見つけたのかい。……丘が眠るあいだだけ焚く、か。\n火を借りて、返す。灰の民は、ずっとそうやって暮らしてきたんだね。',

@@ -158,7 +158,7 @@
   "message.skyabyss.ch2.vault.shelf": "You set the salt barrel on the dry shelf.",
   "message.skyabyss.ch2.vault.wet_floor": "The barrel belongs on the dry shelf.",
   "message.skyabyss.ch2.vault.door": "With three barrels in a row, the white stone door slides back, shedding salt.",
-  "message.skyabyss.ch2.vault.door_shut": "The white stone door will not move. The shelf seems to be waiting for three things.",
+  "message.skyabyss.ch2.vault.door_shut": "The white stone door will not move. The shelf seems to be waiting for three barrels.",
   "message.skyabyss.ch2.salt_mark.1": "The salt remembers the road.",
   "message.skyabyss.ch2.salt_mark.2": "Marks on the pillar. The lower line is the morning tide, the upper the evening tide.",
   "message.skyabyss.ch2.salt_mark.3": "Beside the marks, scratches from a nail: \"Count, and wait.\"",

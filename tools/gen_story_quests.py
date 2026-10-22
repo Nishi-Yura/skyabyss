@@ -318,7 +318,7 @@ C.node("ms_c_tide_back", "甲羅の山に乗ったのか。……どうだった
            opt("town", "中に、海の底の町があった。", "There was a town from the sea floor inside.", goto="ms_c_tide_back2"),
            opt("beat", "鼓動が、潮のように満ち引きしていた。", "Its heartbeat rose and fell like the tide.", goto="ms_c_tide_back2"),
        ], note="メイン「満ち引きの門」の報告")
-C.node("ms_c_tide_back2", "鯨は空で歌い、亀は海で刻を守る。\n……あいつらは、誰かに言いつけられたことを、ずっと続けているみたいだ。",
+C.node("ms_c_tide_back2", "鯨は空で歌い、潮殻は海で刻を守る。\n……あいつらは、誰かに言いつけられたことを、ずっと続けているみたいだ。",
        "The whale sings in the sky, the turtle keeps the hours in the sea.\n...As if they were both still doing what someone told them to, long ago.",
        face="grave", options=[
            opt("ok", "じゃあ、また。", "See you."),
@@ -579,10 +579,10 @@ quest(ASH, "sub", 46, ("冷めない炭", "The Coal That Will Not Cool"),
 
 # ---- 言伝ての板 (潮殻の背の周回)
 quest("daily_tide_rounds", "sub", 64, ("潮殻の背の見回り", "Rounds on the Tide Shell"),
-      ("潮殻の背で、珊瑚憑き・磯走り・泡吹きを八体倒す。仲間も数える。",
+      ("潮殻の背で、珊瑚憑き・磯走り・泡吹きを八体倒す。仲間の分も数える。",
        "Defeat eight coral thralls, reef scuttlers or bubble puffers on the tide shell's back. Party members count too."),
       ("甲羅の中は、しばらく静かになるだろう。", "It will be quiet inside the shell for a while."),
-      [stage("rounds", ("板の紙（潮で滲んだ字）：「亀の甲羅の中で、珊瑚に憑かれたものがまた動きはじめた。八つ、鎮めてきてほしい」",
+      [stage("rounds", ("板の紙（潮で滲んだ字）：「潮殻の甲羅の中で、珊瑚に憑かれたものがまた動きはじめた。八つ、鎮めてきてほしい」",
                         "A note on the board, the ink blurred by seawater: \"The coral-haunted things are stirring again inside the turtle's shell. "
                         "Put eight of them to rest.\""),
              [ob("kill", "kill", "潮殻の背で、珊瑚憑き・磯走り・泡吹きを倒す", "Defeat coral thralls, reef scuttlers and bubble puffers on the tide shell",
@@ -591,7 +591,7 @@ quest("daily_tide_rounds", "sub", 64, ("潮殻の背の見回り", "Rounds on th
       story="潮殻の背の周回の入口 (10 の 8.3 節: 段階 2)。")
 
 quest("weekly_tide_heart", "sub", 82, ("潮の鼓動をもう一度", "The Tide's Heart, Once More"),
-      ("潮殻の心臓を、もう一度止める。戦いに加わった仲間も数える。", "Still the tide shell's heart once more. Party members in the fight count too."),
+      ("潮殻の心臓を、もう一度止める。戦いに加わった仲間の分も数える。", "Still the tide shell's heart once more. Party members in the fight count too."),
       ("満ち引きは止まった。けれど、また満ちてくるのだろう。", "The ebb and flow has stopped. But the tide will come in again, surely."),
       [stage("heart", ("板の隅の紙（同じ、名前のない字）：「潮は七日で満ちる。満ちきる前に、確かめてきてほしい」",
                        "A note in the corner of the board, in the same unsigned hand: \"The tide fills in seven days. Go and make sure, before it is full.\""),
