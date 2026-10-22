@@ -57,7 +57,7 @@ MAIN = {
 
 IRON = {
     'category': 'main', 'chapter': CH, 'order': 61, 'giver': SMITH,
-    'start_when': {'type': 'quest', 'quest': 'main_abyss', 'is': 'started'},
+    'start_when': {'type': 'quest', 'quest': 'main_abyss', 'is': 'active', 'stage': 'prepare'},  # 噂を聞いて支度の段に入ってから (00 の見直し)
     'stages': [
         {'id': 'iron', 'xp': 150, 'objectives': [{'id': 'ingot', 'type': 'collect', 'target': 'minecraft:netherite_ingot', 'count': 1, 'party': False}]},
         {'id': 'show', 'objectives': [{'id': 'talk', 'type': 'talk', 'target': SMITH, 'topic': 'ch5_iron_show'}]},
@@ -146,7 +146,7 @@ TEXTS = [
     # 鍛冶師
     ('dialogue.skyabyss.attendant_smith.menu.ch5_iron_tell', '黒い鉄の器のこと', 'About the black iron cradle'),
     ('dialogue.skyabyss.attendant_smith.ch5_iron_tell', '鍵を収める器？　……黒い鉄でなきゃ持たん。火の国の底、溶岩の海の下に、古代の残骸が埋まってる。\n掘り出して炉で溶かし、金と合わせればインゴットになる。一つあれば器は打てる。', 'A cradle for the key? ...Only black iron will hold. At the bottom of the land of fire, under the lava sea, ancient debris lies buried.\nDig it out, smelt it, add gold, and you have an ingot. One is enough for the cradle.'),
-    ('dialogue.skyabyss.attendant_smith.ch5_iron_tell2', '残骸は硬い。ダイヤのつるはしで掘れ。……爆ぜるもので掘ると早いが、溶岩に気をつけろ。', 'The debris is hard. Use a diamond pickaxe. ...Blasting is faster, but mind the lava.'),
+    ('dialogue.skyabyss.attendant_smith.ch5_iron_tell2', '残骸は硬い。ダイヤのつるはしで掘れ。……ベッドや TNT で掘ると早いが、溶岩に気をつけろ。', 'The debris is hard. Use a diamond pickaxe. ...Blasting is faster, but mind the lava.'),
     ('dialogue.skyabyss.attendant_smith.ch5_iron_tell2.ok', 'わかった', 'Got it'),
     ('dialogue.skyabyss.attendant_smith.menu.ch5_iron_show', 'ネザライトのインゴットを見せる', 'Show the netherite ingot'),
     ('dialogue.skyabyss.attendant_smith.ch5_iron_show', '……本物だ。よく持って帰った。\n器は打っておいた。鍵をここに。……ほら、ぴったりだ。前にも、同じ形の器を打った気がする。', '...The real thing. Good work bringing it back.\nI\'ve forged the cradle. Put the key here. ...There, a perfect fit. I feel like I\'ve forged one this shape before.'),
