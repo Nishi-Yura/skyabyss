@@ -78,10 +78,15 @@ public final class AbyssSelfTest {
     }
 
     public static void load(MinecraftServer server) {
+        hold(server, true);
+    }
+
+    // 読み込みを固定したチャンクは、テストのあとに外す (外し忘れると、止めるときに保存が終わらないことがある)
+    private static void hold(MinecraftServer server, boolean on) {
         ServerLevel level = server.overworld();
         for (int cx = 123; cx <= 127; cx++) {
             for (int cz = 123; cz <= 127; cz++) {
-                level.setChunkForced(cx, cz, true);
+                level.setChunkForced(cx, cz, on);
             }
         }
     }
@@ -90,7 +95,8 @@ public final class AbyssSelfTest {
         return List.of(
                 Step.once("abyss load", AbyssSelfTest::load),
                 Step.once("abyss (sync)", 20, AbyssSelfTest::syncPart),
-                new Step("abyss (rewrites)", 0, AbyssSelfTest::rewrites));
+                new Step("abyss (rewrites)", 0, AbyssSelfTest::rewrites),
+                Step.once("abyss (unload)", server -> hold(server, false)));
     }
 
     // ---------------------------------------------------------------- 同期の部分
