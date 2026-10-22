@@ -137,7 +137,7 @@ public final class WeaponStrikes {
             return;
         }
         Entity target = p.level().getEntity(pe.target());
-        if (target == null || !target.isAlive() || !p.canInteractWithEntity(target.getBoundingBox(), pe.set().reach)) {
+        if (target == null || !target.isAlive() || !p.canInteractWithEntity(target.getBoundingBox().inflate(target.getPickRadius()), pe.set().reach)) {
             return;
         }
         int before = target instanceof LivingEntity le ? (int) (le.getHealth() * 10f) : 0;
