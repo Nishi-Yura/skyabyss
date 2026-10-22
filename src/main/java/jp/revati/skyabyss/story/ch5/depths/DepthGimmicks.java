@@ -87,6 +87,9 @@ public final class DepthGimmicks {
             }
             DepthLayout.Result g = DepthBuilder.geometry(server, sec);
             FRONT_START.putIfAbsent(sec, t);
+            if (g.section().kind() == DepthPlan.Kind.PULSE_CAVE) {
+                pulseVeins(level, g, t);
+            }
             if (g.section().has(Gimmick.LIGHTS_OUT)) {
                 lightsOut(level, g, t);
             }
@@ -124,6 +127,21 @@ public final class DepthGimmicks {
         var dm = p.getDeltaMovement();
         p.setDeltaMovement(dm.x, Math.max(HEAVY_MAX, dm.y - HEAVY), dm.z);
         p.hurtMarked = true;
+    }
+
+    // 脈の洞の脈: 壁の脈が下へ流れる拍 (二十四段に一つの帯が、十ティックに一段ずつ下る)。帯の所だけ赤く光る
+    static void pulseVeins(ServerLevel level, DepthLayout.Result g, long t) {
+        BlockState lit = g.palette().lamp();
+        BlockState dark = g.palette().accent();
+        for (BlockPos b : g.veins()) {
+            int ly = DepthPlan.lyOf(b.getY());
+            boolean on = Math.floorMod(ly + t / 2, 24L) < 5L;
+            BlockState want = on ? lit : dark;
+            BlockState cur = level.getBlockState(b);
+            if (cur != want && (cur.getBlock() == lit.getBlock() || cur.getBlock() == dark.getBlock())) {
+                level.setBlock(b, want, 3);
+            }
+        }
     }
 
     // 灯りが消える: 灯りの四つに一つずつ、二十秒ごとに消えて回る

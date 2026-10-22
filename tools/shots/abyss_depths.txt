@@ -1,86 +1,99 @@
 # 心臓の下の果てない深み (docs/design/36 の 9): 八つの区画の型を一つずつ。壁の内側から見下ろす眺め (top) と、下へ下がった所の眺め (mid)。
 # ./gradlew runShots -Pscript=tools/shots/abyss_depths.txt -PshotsName=abyss_depths
 # 区画は世界の種で決まるので、型で選ぶ (cmd skyabyss abyss depth kind <型>): その型の最初の区画の中へ、眺めの位置に置く
-# mid は今の位置から 96 ブロック下へ (相対座標)
+# mid は今の位置から 92 ブロック下へ (相対座標)。タイトル (序章の題) と HUD は、cinematic stop・title clear・hud off・huddemo off で消す
 world opening_abyss_depths normal
 size 1280 720
 timeout 2400
 render 10
 clouds off
 
-wait 100
+wait 120
 cmd gamemode spectator
 cmd time set 18000
 cmd gamerule doDaylightCycle false
+cmd skyabyss cinematic stop
+cmd title @a clear
 hud off
+huddemo off
+wait 120
+cmd title @a clear
 cmd skyabyss abyss depth kind inverted_forest
+cmd title @a clear
 waitchunks
-wait 80
+wait 100
 shot d_inverted_forest_top
-cmd tp @s ~ ~-96 ~ 45 10
+cmd tp @s ~ ~-92 ~ 0 12
 waitchunks
 wait 60
 shot d_inverted_forest_mid
 
 cmd skyabyss abyss depth kind floating_graves
+cmd title @a clear
 waitchunks
-wait 80
+wait 100
 shot d_floating_graves_top
-cmd tp @s ~ ~-96 ~ 45 10
+cmd tp @s ~ ~-92 ~ 0 12
 waitchunks
 wait 60
 shot d_floating_graves_mid
 
 cmd skyabyss abyss depth kind pulse_cave
+cmd title @a clear
 waitchunks
-wait 80
+wait 100
 shot d_pulse_cave_top
-cmd tp @s ~ ~-96 ~ 45 10
+cmd tp @s ~ ~-92 ~ 0 12
 waitchunks
 wait 60
 shot d_pulse_cave_mid
 
 cmd skyabyss abyss depth kind mirror_dark
+cmd title @a clear
 waitchunks
-wait 80
+wait 100
 shot d_mirror_dark_top
-cmd tp @s ~ ~-96 ~ 45 10
+cmd tp @s ~ ~-92 ~ 0 12
 waitchunks
 wait 60
 shot d_mirror_dark_mid
 
 cmd skyabyss abyss depth kind chain_net
+cmd title @a clear
 waitchunks
-wait 80
+wait 100
 shot d_chain_net_top
-cmd tp @s ~ ~-96 ~ 45 10
+cmd tp @s ~ ~-92 ~ 0 12
 waitchunks
 wait 60
 shot d_chain_net_mid
 
 cmd skyabyss abyss depth kind lamp_hall
+cmd title @a clear
 waitchunks
-wait 80
+wait 100
 shot d_lamp_hall_top
-cmd tp @s ~ ~-96 ~ 45 10
+cmd tp @s ~ ~-92 ~ 0 12
 waitchunks
 wait 60
 shot d_lamp_hall_mid
 
 cmd skyabyss abyss depth kind dry_well
+cmd title @a clear
 waitchunks
-wait 80
+wait 100
 shot d_dry_well_top
-cmd tp @s ~ ~-96 ~ 45 10
+cmd tp @s ~ ~-92 ~ 0 12
 waitchunks
 wait 60
 shot d_dry_well_mid
 
 cmd skyabyss abyss depth kind hollow_stars
+cmd title @a clear
 waitchunks
-wait 80
+wait 100
 shot d_hollow_stars_top
-cmd tp @s ~ ~-96 ~ 45 10
+cmd tp @s ~ ~-92 ~ 0 12
 waitchunks
 wait 60
 shot d_hollow_stars_mid

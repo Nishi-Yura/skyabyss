@@ -333,7 +333,7 @@ public final class DepthRun {
                                     }
                                     descend(p, n);
                                     // 撮る台本のために、区画の中の眺め (壁の内側から、部屋の上を見下ろす)
-                                    p.teleportTo(p.serverLevel(), n * DepthPlan.SLOT + 0.5, DepthPlan.TOP_Y - 3, -21.5, 0f, 22f);
+                                    p.teleportTo(p.serverLevel(), n * DepthPlan.SLOT + 0.5, DepthPlan.TOP_Y - 9, -17.5, 0f, 16f);
                                     return n;
                                 })))
                                 .then(Commands.literal("records").executes(c -> {
