@@ -212,7 +212,7 @@ public final class TitanGroundSelfTest {
             double mx = (sx + s.land().x) / 2;
             double mz = (sz + s.land().z) / 2;
             preload(level, mx, mz, PRELOAD + 4);
-            forceArea(level, mx, mz, PRELOAD + 4, true);
+            forceCorridor(level, sx, sz, s.land().x, s.land().z, true);
             TideShellEntity titan = TideSetup.TIDE_SHELL.get().create(level);
             if (titan == null) {
                 failures.add("the tide shell could not be created");
@@ -250,7 +250,7 @@ public final class TitanGroundSelfTest {
             notes.add("cruise from " + (int) sx + ", " + (int) sz + (found ? " (open water start)" : " (rough start)") + " toward the shore at " + (int) s.land().x + ", " + (int) s.land().z + ": worst overlap " + String.format("%.2f", worstOverlap) + ", min clearance "
                     + String.format("%.2f", minMargin) + ", max step " + String.format("%.2f", maxStep) + ", ended " + (int) endGap + " from the shore at y " + String.format("%.1f", titan.getY()));
             titan.discard();
-            forceArea(level, mx, mz, PRELOAD + 4, false);
+            forceCorridor(level, sx, sz, s.land().x, s.land().z, false);
         }
     }
 
@@ -467,13 +467,19 @@ public final class TitanGroundSelfTest {
     }
 
     // (x, z) のまわり radius チャンクを作る (同期)
-    // 区画を読み込みに固定する (on) / 外す (!on)。巡航の試しの前後で使う
-    private static void forceArea(ServerLevel level, double x, double z, int radius, boolean on) {
-        int cx = Mth.floor(x) >> 4;
-        int cz = Mth.floor(z) >> 4;
-        for (int dx = -radius; dx <= radius; dx++) {
-            for (int dz = -radius; dz <= radius; dz++) {
-                level.setChunkForced(cx + dx, cz + dz, on);
+    // 巡航の道筋 (出だしから岸まで) の区画を読み込みに固定する (on) / 外す (!on)。道筋の 8 ブロックおきに、まわり 2 区画。
+    // 四角く広く固定すると区画が多すぎて (千を超える)、メモリが足りなくなる
+    private static void forceCorridor(ServerLevel level, double ax, double az, double bx, double bz, boolean on) {
+        double len = Math.hypot(bx - ax, bz - az);
+        int steps = Math.max(1, (int) (len / 8));
+        for (int i = 0; i <= steps; i++) {
+            double t = (double) i / steps;
+            int cx = Mth.floor(ax + (bx - ax) * t) >> 4;
+            int cz = Mth.floor(az + (bz - az) * t) >> 4;
+            for (int dx = -2; dx <= 2; dx++) {
+                for (int dz = -2; dz <= 2; dz++) {
+                    level.setChunkForced(cx + dx, cz + dz, on);
+                }
             }
         }
     }
