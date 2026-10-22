@@ -191,7 +191,8 @@ public final class TrialRouteSelfTest {
         Def hostDef = host == null ? null : TrialCatalog.get(host);
         check(f, hostDef != null && hostDef.original(), titan + ": the mid-boss host is not an original trial: " + host);
         check(f, TrialMidBoss.restOf(titan) != null, titan + ": no mid-boss antechamber");
-        check(f, !TrialMidBoss.needed(titan, first), titan + ": the first run asks for a separate mid-boss step");
+        check(f, TrialMidBoss.needed(titan, first) == jp.revati.skyabyss.trial.raid.RaidRooms.active(titan),
+                titan + ": the first run's mid-boss step does not match the raid mode (raid routes always have a separate mid-boss step)");
         List<TrialDraw.Pick> noHost = new ArrayList<>();
         for (Trial.Slot s : Trial.Slot.values()) {
             for (Def d : TrialCatalog.inSlot(titan, s)) {
@@ -255,6 +256,11 @@ public final class TrialRouteSelfTest {
     }
 
     private static boolean near(ServerPlayer p, ServerLevel back, String titan, TrialDraw.Draw draw, int step, boolean mid) {
+        // レイドの部屋の段は、区画に建てた部屋の中 (docs/design/32 の 7 章)
+        if (!mid && jp.revati.skyabyss.trial.raid.RaidRun.isRaidStep(back, Groups.keyOf(p), step)) {
+            var run = jp.revati.skyabyss.trial.raid.RaidRun.of(Groups.keyOf(p));
+            return run != null && run.step == step && run.ctx.cell().bounds().contains(p.position());
+        }
         String rest = TrialRoute.restFor(back, Groups.keyOf(p), titan, draw, step, mid);
         BlockPos at = rest == null ? null : TrialRoute.spawnOf(back, titan, rest);
         // 区画の写しで遊ぶ段は、写しの入口の休み場
@@ -310,15 +316,22 @@ public final class TrialRouteSelfTest {
             for (int i = 1; i <= 3; i++) {
                 String key = TrialRoute.keyOf(titan, draw, i);
                 TrialRoute.onCleared(back, ga, titan, key, null);
-                int expect = i + 1;
-                check(f, TrialRoute.step(back, ga) == expect, titan + ": after clearing " + key + " the step is " + TrialRoute.step(back, ga) + ", expected " + expect);
+                boolean toMid = i == 3 && TrialMidBoss.needed(titan, draw);
+                int expect = toMid ? 3 : i + 1;
+                check(f, TrialRoute.step(back, ga) == expect && TrialRoute.mid(back, ga) == toMid, titan + ": after clearing " + key + " the step is " + TrialRoute.step(back, ga) + ", expected " + expect);
                 check(f, TrialRoute.pendingCount() == 1, titan + ": the carry was not queued");
                 TrialRoute.tick(back, titan, players, now + 1);
                 check(f, TrialRoute.pendingCount() == 1, titan + ": the carry ran before its delay");
                 TrialRoute.tick(back, titan, players, now + 1 + TrialRoute.CARRY_DELAY);
                 check(f, TrialRoute.pendingCount() == 0, titan + ": the carry stayed queued");
-                check(f, near(a, back, titan, draw, expect, false), titan + ": not carried to step " + expect + " rest " + TrialRoute.restOf(titan, draw, expect, false) + ": " + a.position());
+                check(f, near(a, back, titan, draw, expect, toMid), titan + ": not carried to step " + expect + " rest " + TrialRoute.restOf(titan, draw, expect, false) + ": " + a.position());
                 check(f, b.position().distanceTo(bAt) < 0.5, titan + ": a player of another group was carried");
+            }
+            if (TrialRoute.mid(back, ga)) {
+                // レイドの順路: 三つの部屋のあとに中ボスの段 (倒したことにして心臓の前室へ)
+                TrialRoute.onMidBossDefeated(back, ga, titan);
+                TrialRoute.flushPending();
+                TrialRoute.tick(back, titan, players, now + 1);
             }
             check(f, TrialRoute.step(back, ga) == TrialRoute.LAST_STEP && !TrialRoute.mid(back, ga), titan + ": the first route did not reach the heart directly");
             // 越える順が前後しても段は戻らない

@@ -14,6 +14,7 @@ package jp.revati.skyabyss.trial.raid;
 //  5. reset(ctx)   全員が倒れた (または ctx.fail() を呼んだ) とき、「部屋の入口に戻って最初から」のために、動くものを全部戻す:
 //                  敵 (ctx.clearMobs())・床に落ちた物・動かした仕掛け・進みの数。build 直後の姿へ。このあと start(ctx) がもう一度呼ばれる。
 //                  部屋全部を建て直さなくてよい
+//  5b. onUse(ctx, player, pos, attack)  (任意) 部屋のブロックを叩いた/使った。仕掛けの入力に使う (部屋の中のブロックは壊せない・置けない)
 //  6. end(ctx)     (任意) 順路が終わる・次の段へ運ばれて部屋を片付けるとき。ctx.clearMobs() は枠組みがやる
 //
 //  目的の帯 (HUD): objectiveKey()/objectiveArgs() = 「いまやること」の文 (lang キー。毎回呼ばれるので、いまの進みで返してよい)、
@@ -68,6 +69,11 @@ public abstract class RaidRoom {
     // 残り tick。負なら出さない
     public int timerTicks() {
         return -1;
+    }
+
+    // 部屋の中のブロックを叩いた・使った (任意。attack = 左クリック)。扱ったら true (元の動作を打ち消す)。部屋の中のブロックはどのみち壊せず置けない
+    public boolean onUse(RaidCtx ctx, net.minecraft.server.level.ServerPlayer player, net.minecraft.core.BlockPos pos, boolean attack) {
+        return false;
     }
 
     // 片付け (任意)
