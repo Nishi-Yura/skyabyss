@@ -6,7 +6,7 @@ python -I tools/abyss/gen_abyss_layers.py  →  src/main/resources/data/skyabyss
 形:
   - 縦穴: 中心 (0, 0)、内の半径 R_IN = 20、壁の厚み 2。上端 y 240 の縁から、心臓の間の天井 y -250 まで。真ん中は底まで抜けた吹き抜け (落ちると下の層へ。落ちる高さでは傷)
   - 螺旋の道: 壁の内側に沿って幅 4 (半径 16〜19)。角度が増える向きに下りる。弧の長さ 2 で 1 段 (半ブロックで刻む)。内の縁に低い壁
-  - 層: 骨 (240〜120)・塩 (120〜0)・雷 (0〜-120)・灰 (-120〜-240)。層ごとに壁の素材を替え、層の境に灯籠の休み場 (道を広げた踊り場。印 rest_<n>)
+  - 層: 骨 (240〜120)・塩 (120〜0)・雷 (0〜-120)・灰 (-120〜-240)。層ごとに壁の素材を替え、層の境に灯りの休み場 (道を広げた踊り場。印 rest_<n>)
   - 部屋: 層ごとに 3 つ、壁の外へ張り出す箱 (溜まりの間 pool_<層>・前の私の野営 camp_<層>・巣 den_<層>)。道から戸の口で入る
   - 心臓の間: 縦穴の底の下に丸い大部屋 (半径 30、y -300〜-252)。真ん中に印 heart。道の最後は大部屋の縁に下りる
   - 着く所: 上端の縁の踊り場 (印 arrival)
@@ -139,7 +139,7 @@ def main():
                     v.set(x, block_y + 1, z, wall_of(floor))
                     if i % LANTERN_EVERY == 0:
                         v.set(x, block_y + 2, z, 'soul_lantern[hanging=false,waterlogged=false]')
-    # ---- 休み場: 道の幅を内へ 4 広げ、灯籠と篝火
+    # ---- 休み場: 道の幅を内へ 4 広げ、灯りと篝火
     for name, (th, y) in rests.items():
         cx, cz = math.cos(th) * 14, math.sin(th) * 14
         for x in range(int(cx) - 5, int(cx) + 6):
@@ -178,7 +178,7 @@ def main():
                     v.set(x, y, z, rng.choice(HEART_WALL))
                 elif y == HEART_TOP and d > R_IN + 0.5:
                     v.set(x, y, z, rng.choice(HEART_WALL))
-    # 心臓の台と、まわりの灯籠 (番人の戦いで点ける灯り。点けた所だけ姿が見える)
+    # 心臓の台と、まわりの灯り (番人の戦いで点ける灯り。点けた所だけ姿が見える)
     for x in range(-4, 5):
         for z in range(-4, 5):
             if math.hypot(x, z) <= 4.5:

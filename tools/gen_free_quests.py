@@ -136,7 +136,7 @@ def reward_item(kid, count=1):
 
 
 PARCEL = keepsake("parcel", "minecraft:leather", "語り部の包み", "The Storyteller's Bundle",
-                  "干した肉と、古い肩掛け。鯨追いに届ける。", "Dried meat and an old shawl, for the whale chaser.", token="parcel")
+                  "干した肉と、古い肩掛け。イサナに届ける。", "Dried meat and an old shawl, for the whale chaser.", token="parcel")
 CLASP_RETURN = keepsake("clasp_return", "minecraft:bone", "肩掛けの隠しにあった留め具", "A Clasp from the Shawl's Pocket",
                         "鯨追いから語り部へ。", "From the whale chaser, for the storyteller.", token="clasp_return")
 CLASP = keepsake("whalebone_clasp", "minecraft:bone", "鯨骨の留め具", "Whalebone Clasp",
@@ -457,19 +457,19 @@ quest(SHADOW, 40, ("空の影の帳面", "The Shadow Tally"),
       story="語り部の母は影が通るたびに柱へ刻み目を入れた。刻み目はどれも峰のほうから斜めに入り、最後の一本だけ途中で止まっている。")
 
 quest(PARCEL_Q, 41, ("火のそばへ", "To the Fireside"),
-      ("語り部の包みを外れの鯨追いへ届け、預かりものを持ち帰る。", "Take the storyteller's bundle to the whale chaser, and bring back what he sends."),
+      ("語り部の包みを外れのイサナへ届け、預かりものを持ち帰る。", "Take the storyteller's bundle to the whale chaser, and bring back what he sends."),
       ("留め具は、小さな鯨の形をしていた。", "The clasp was carved in the shape of a small whale."),
-      [stage("deliver", ("語り部から、鯨追いへの包みを預かった。干した肉と、古い肩掛けが入っている。\n村の外れの火のところへ持っていこう。",
+      [stage("deliver", ("語り部から、イサナへの包みを預かった。干した肉と、古い肩掛けが入っている。\n村の外れの火のところへ持っていこう。",
                          "The storyteller gave me a bundle for the whale chaser: dried meat and an old shawl.\n"
                          "I'll take it to his fire at the edge of the village."),
-             [ob("give", "talk", "鯨追いに、包みを届ける", "Deliver the bundle to the whale chaser", target=WC, topic="fq_c_parcel2")]),
-       stage("return", ("肩掛けの隠しに、骨を削った留め具が入っていた。鯨追いは、自分のものではないという。\n語り部に返しに行こう。",
+             [ob("give", "talk", "イサナに、包みを届ける", "Deliver the bundle to the whale chaser", target=WC, topic="fq_c_parcel2")]),
+       stage("return", ("肩掛けの隠しに、骨を削った留め具が入っていた。イサナは、自分のものではないという。\n語り部に返しに行こう。",
                         "A bone clasp was tucked in the shawl's pocket. The whale chaser says it isn't his.\n"
                         "I'll return it to the storyteller."),
              [ob("give", "talk", "語り部に、留め具を返す", "Return the clasp to the storyteller", target=ST, topic="fq_parcel_back2")])],
       {"xp": 50, "items": [reward_item("whalebone_clasp"), {"item": "skyabyss:cloud_jerky", "count": 2}],
        "affinity": {ST: 5, WC: 5}}, giver=ST,
-      story="語り部が鯨追いに干し肉と母の肩掛けを送る。肩掛けの隠しから、母がなくした鯨骨の留め具が出てくる。語り部はそれをプレイヤーに託す。")
+      story="語り部がイサナに干し肉と母の肩掛けを送る。肩掛けの隠しから、母がなくした鯨骨の留め具が出てくる。語り部はそれをプレイヤーに託す。")
 
 quest(GAPS, 42, ("書の空白を埋める", "Filling the Blank Pages"),
       ("伝承の書の序章と一章を書き埋め、語り部に見せる。", "Fill in the prologue and chapter one of the Book of Lore, then show the storyteller."),
@@ -494,30 +494,30 @@ quest(GAPS, 42, ("書の空白を埋める", "Filling the Blank Pages"),
       story="数え歌のつづきのあと。書を埋めて見せると、語り部は字の癖が母の帳面に似ていると言い、母の栞を渡す（留まる者への伏線）。")
 
 quest(WAY, 43, ("雲間の道標", "Waymarks Among the Clouds"),
-      ("岩鯨に乗って二度旅をし、上から見た地上を鯨追いに話す。", "Travel twice on the stone whale and tell the whale chaser what the land looks like from above."),
-      ("鯨追いは、刻み目の石をくれた。もう要らないという。", "The whale chaser gave me his notched stone. He says he no longer needs it."),
-      [stage("ride", ("鯨追いは、鯨の上から見た地上の話を聞きたいという。\n呼び笛で岩鯨を呼び、空の海図の行き先へ二度旅をしよう。行き先は、巨神の碑で増やせる。",
+      ("岩鯨に乗って二度旅をし、上から見た地上をイサナに話す。", "Travel twice on the stone whale and tell the whale chaser what the land looks like from above."),
+      ("イサナは、刻み目の石をくれた。もう要らないという。", "The whale chaser gave me his notched stone. He says he no longer needs it."),
+      [stage("ride", ("イサナは、鯨の上から見た地上の話を聞きたいという。\n呼び笛で岩鯨を呼び、空の海図の行き先へ二度旅をしよう。行き先は、巨神の碑で増やせる。",
                       "The whale chaser wants to hear what the land looks like from the whale's back.\n"
                       "I'll call the stone whale with the whistle and travel to a destination on the sky chart, twice. "
                       "Titan waymarks add more destinations."),
              [ob("ride", "signal", "岩鯨に乗って、旅をする", "Travel on the stone whale", target="titan_voyage", count=2, party=False)]),
-       stage("tell", ("二度、鯨の上から地上を見た。\n鯨追いの火のところへ、話をしに行こう。", "I have seen the land from the whale's back twice.\n"
+       stage("tell", ("二度、鯨の上から地上を見た。\nイサナの火のところへ、話をしに行こう。", "I have seen the land from the whale's back twice.\n"
                       "I'll go and tell the whale chaser."),
-             [ob("talk", "talk", "鯨追いに、旅の話をする", "Tell the whale chaser about your travels", target=WC, topic="fq_c_way_done2")])],
+             [ob("talk", "talk", "イサナに、旅の話をする", "Tell the whale chaser about your travels", target=WC, topic="fq_c_way_done2")])],
       {"xp": 120, "items": [reward_item("notched_stone")], "affinity": {WC: 5}}, giver=WC, min_stage=1,
       unlock_=stilled("stone_whale"),
       story="鎖をつかめなかった鯨追いの代わりに、岩鯨で旅をして話を聞かせる。")
 
 quest(TIDE, 44, ("干潮を数える", "Counting the Low Tides"),
-      ("干潮の刻に岸へ寄るものを三度見て、鯨追いに話す。", "Watch what comes to the shore at low tide three times, then tell the whale chaser."),
+      ("干潮の刻に岸へ寄るものを三度見て、イサナに話す。", "Watch what comes to the shore at low tide three times, then tell the whale chaser."),
       ("朝と夕に一度ずつ、潮が引くころ。何かを待っているように。", "Once at dawn, once at dusk, as the tide ebbs. As if waiting for something."),
       [stage("watch", ("沖の島が、朝と夕の潮が引くころに、岸へ寄ってくるという。\n干潮の刻に海辺で待ち、寄ってきたものをそばで見よう。三度。",
                        "They say an island drifts to the shore at dawn and dusk, when the tide goes out.\n"
                        "I'll wait by the sea at low tide and watch it up close. Three times."),
              [ob("watch", "signal", "干潮の刻に、岸に寄ったものをそばで見る", "Watch what comes ashore at low tide, up close",
                  target="tide_low_watched", count=3, party=False)]),
-       stage("tell", ("三度とも、同じ刻に寄ってきた。\n鯨追いに話しに行こう。", "All three times, it came at the same hour.\nI'll tell the whale chaser."),
-             [ob("talk", "talk", "鯨追いに、干潮のことを話す", "Tell the whale chaser about the low tides", target=WC, topic="fq_c_tide_done2")])],
+       stage("tell", ("三度とも、同じ刻に寄ってきた。\nイサナに話しに行こう。", "All three times, it came at the same hour.\nI'll tell the whale chaser."),
+             [ob("talk", "talk", "イサナに、干潮のことを話す", "Tell the whale chaser about the low tides", target=WC, topic="fq_c_tide_done2")])],
       {"xp": 150, "affinity": {WC: 5}}, giver=WC, min_stage=1,
       story="潮殻の巨神が干潮の刻に岸へ寄ることを、自分の目で三度確かめる（08 の「自分で気づく」を壊さない程度の手がかり）。")
 
@@ -571,7 +571,7 @@ quest("daily_bone_sentry", 63, ("骨の番兵の見回り", "Sentinel Rounds"),
                  target="skyabyss:bone_sentinel", count=8)])],
       {"xp": 60, "items": [{"item": "skyabyss:stone_whale_shard", "count": 2}]},
       repeat="daily", board=True, min_stage=1,
-      story="鎖をつかめない鯨追いが、板に頼みを貼っている。")
+      story="鎖をつかめないイサナが、板に頼みを貼っている。")
 
 # ---- 言伝ての板 (週替わり)
 quest("weekly_back_trials", 80, ("背中の試練", "Trials of the Back"),

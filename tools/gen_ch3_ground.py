@@ -423,7 +423,7 @@ def quests():
     put(b + 'clear.page', '焼けた見張り塔の頂の番を倒そう', 'Fell the warden atop the Scorched Watch')
     put(b + 'show.journal', '頂の柱の根もとで、焦げた頁を拾った。旅の職人に見せよう。', 'At the foot of the top pillar you picked up a scorched page. Show it to the traveling artisan.')
     put(b + 'show.talk', '焦げた頁を、旅の職人に見せよう', 'Show the scorched page to the artisan')
-    put(b + 'done', '「雷に焼かれても、字は残るもんだな。……道具も、そういうものだ」\n残るは、雷を通さない石だ。鯨追いが、峰の下の石の話をしていた。',
+    put(b + 'done', '「雷に焼かれても、字は残るもんだな。……道具も、そういうものだ」\n残るは、雷を通さない石だ。イサナが、峰の下の石の話をしていた。',
         '"Burnt by lightning, and still the writing stays. ...Tools are like that too."\nAll that is left is the stone lightning cannot pass. The whale chaser spoke of it.')
 
     b = 'quest.skyabyss.ch3.sky_stone.'

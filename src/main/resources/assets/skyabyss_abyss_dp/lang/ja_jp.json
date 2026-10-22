@@ -1,7 +1,7 @@
 {
   "message.skyabyss.depths.climb": "鎖を登るには、しゃがんで右クリック。",
   "message.skyabyss.depths.descend": "深み %s へ落ちた。闇が濃い。",
-  "message.skyabyss.depths.fell": "深みの底を抜けた。覚えた灯籠で目を覚ます。",
+  "message.skyabyss.depths.fell": "深みの底を抜けた。覚えた灯りで目を覚ます。",
   "message.skyabyss.depths.gimmick.beat_ledges": "拍で消える岩棚",
   "message.skyabyss.depths.gimmick.chase_fall": "上からの追手",
   "message.skyabyss.depths.gimmick.copy_foes": "写しの敵",
@@ -34,7 +34,7 @@
   "message.skyabyss.depths.kind_note.lamp_hall": "灯りは多いのに、黒い口がその灯りを喰っていく広間。",
   "message.skyabyss.depths.kind_note.mirror_dark": "黒い鏡が帯になって壁を巡る、闇の中の広間。",
   "message.skyabyss.depths.kind_note.pulse_cave": "壁の脈が一定の拍で赤く息をする洞。",
-  "message.skyabyss.depths.lit": "灯籠に火が点いた (深み %s)。",
+  "message.skyabyss.depths.lit": "灯りに火が点いた (深み %s)。",
   "message.skyabyss.depths.milestone": "心臓の下 %s の節目を越えた。経験の段が上がる。",
   "message.skyabyss.depths.milestone_group": "組が心臓の下 %s の節目を越えた。",
   "message.skyabyss.depths.modifier.fierce": "傷が深い",

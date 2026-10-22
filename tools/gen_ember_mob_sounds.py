@@ -1,4 +1,4 @@
-"""余燼の背の敵 (灰被り・火の粉蛾・燠虫) の音を作る (独自合成。乱数の種は固定。13 の 5.1節、11.2節の担当 D)。
+"""余燼の背の敵 (灰の番人・火の粉蛾・燠虫) の音を作る (独自合成。乱数の種は固定。13 の 5.1節、11.2節の担当 D)。
 
 使い方: python tools/gen_ember_mob_sounds.py
 出力: src/main/resources/assets/skyabyss/sounds/ember_mobs/*.ogg  (sounds.json の行は手で足してある。名前は EmberIds の SOUND_*)
@@ -65,7 +65,7 @@ def roar(t, lo=80, hi=900):
     return lowpass(band_noise(len(t), lo, hi), hi)
 
 
-# ---------------------------------------------------------------- 灰被り
+# ---------------------------------------------------------------- 灰の番人
 
 def thrall_ambient():
     t = t_axis(2.4)

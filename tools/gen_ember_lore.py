@@ -272,7 +272,7 @@ GEAR = [
     ("smith_hammer", "鍛え手の大鎚", "Ash Smith's Sledge",
      "両手で振る大鎚。三度目ごとに床へ亀裂が走り、少し遅れて噴く",
      "A two-handed sledge. Every third blow sends a crack through the floor that erupts a moment later"),
-    ("thrall_poker", "灰被りの火掻き", "Thrall's Poker",
+    ("thrall_poker", "灰の番人の火掻き", "Thrall's Poker",
      "間合いが長い。打つたびに灰を積み、積もった灰が固まると、相手の足と守りが鈍る",
      "Long reach. Each blow heaps ash on the foe; when it sets, their legs and guard go dull"),
     ("ember_lantern", "余燼の灯", "Last Ember Lantern",

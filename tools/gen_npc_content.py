@@ -530,7 +530,7 @@ wc.node("c_whale1",
 wc.node("c_whale2",
         "ときどき雲の下まで降りてきて、地面に届くほど長い鎖を垂らすんだ。\n俺は……一度も、つかめたことがない。降りてくるのは、いつも遠くの誰かの上なんだ。",
         "Sometimes it comes down below the clouds and lets down a chain long enough to reach the ground.\nI've... never once caught it. It always comes down over someone far away.",
-        face="grave", next="c_whale_iron", note="ここに入るとメインの「鯨追いに話を聞く」が済む")
+        face="grave", next="c_whale_iron", note="ここに入るとメインの「イサナに話を聞く」が済む")
 wc.node("c_whale_iron",
         "鎖は、素手では上れない。……前にここへ来た旅人は、鉄を着ていた。\n都の北門から丘を越えていく石標が、その人の道だ。行き着く先は、骨の坑と呼ばれている。",
         "You cannot climb the chain bare-handed. ...The traveller who came here before wore iron.\nThe cairns from the north gate over the hills are that one's road. Where they end is called the Bone Pit.",
@@ -686,7 +686,7 @@ quest(MAIN, "main", 10, ST,
            "lead": ("語り部によると、空の歌を追う旅人が、村の外れで火を焚いているという。",
                     "The storyteller says a traveler who chases the sky's song keeps a fire at the edge of the village."),
            "objectives": [{"id": "talk", "type": "talk", "target": WC, "topic": "c_whale2",
-                           "ja": "火を焚く鯨追いに、話を聞きに行こう", "en": "Talk to the Whale Chaser by the fire"}]},
+                           "ja": "火を焚くイサナに、話を聞きに行こう", "en": "Talk to the Whale Chaser by the fire"}]},
           # 一章の支度 (34 の 4.2。2026-10-22): 鯨追いの話のあと、支度の段 3 本 (鉄の跡 → 折れた剣 → 盾と糧) を順に。
           # 三本そろうまで岩鯨は現れない (titan.TitanEvents・story.ch1.Ch1Trails.callReady)。帯は支度の段のほうを出す (ObjectiveStrip.current)
           {"id": "prepare",

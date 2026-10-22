@@ -137,7 +137,7 @@ def quests():
         'Isana: "Iron first. Follow the road of the one before you. The cairns lead to the Bone Pit."')
     put(b + 'pit.page', '石標を辿り、骨の坑の奥の荷を探そう', 'Find the pack in the Bone Pit')
     put(b + 'armor.journal',
-        '荷の頁には、こうあった。「鉄を二十四。胸当てと脚当てを先に。背の風は骨まで冷える」\n鉄の鉱石は、かまどで溶かせば鉄になる。坑の壁にも、筋が走っていた。兜と胸当てと脚当てと靴を作って、身につけよう。',
+        '荷の頁には、こうあった。「鉄を二十四。胸当てと脚当てを先に。背の風は骨まで冷える」\n鉄の鉱石は、かまどで溶かせば鉄になる。坑の壁にも、筋が走っていた。兜と胸当てと脚当てと靴を作って、身につけよう。坑の奥の冷えの戸も、鉄の防具を着ていれば開く。',
         'The page in the pack read: "Twenty-four iron. Breastplate and leggings first. The wind on the back cuts to the bone."\nIron ore smelts into iron in a furnace; the pit walls were streaked with it. Make a helmet, chestplate, leggings and boots, and wear them.')
     put(b + 'armor.lead', '頁の字は几帳面だった。「鉄を二十四。胸当てと脚当てを先に」',
         'The page was written by a tidy hand: "Twenty-four iron. Breastplate and leggings first."')

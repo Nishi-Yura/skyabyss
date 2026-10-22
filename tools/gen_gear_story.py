@@ -57,7 +57,7 @@ LINES = [
     ("ember_mantle", "「裏地には、まだ私の体温がある。」", "\"My warmth is still in the lining.\""),
     ("kindling_charm", "「吸った熱は、いつか誰かに返る。」", "\"The heat you take will come back to someone.\""),
     ("smith_hammer", "「鍛え手は、最後に自分を打った。」", "\"The smith struck himself last.\""),
-    ("thrall_poker", "「灰被りは、火掻きだけを手放さなかった。」", "\"The ash thralls let go of everything but the poker.\""),
+    ("thrall_poker", "「灰の番人は、火掻きだけを手放さなかった。」", "\"The ash thralls let go of everything but the poker.\""),
     ("ember_lantern", "「灯は、倒れる前に一度だけ吠える。」", "\"A lantern roars once, before it falls.\""),
     # ---- 鼓動守 (21 の 1.4。guide/HeartbeatWard)
     ("heartbeat_ward_stone_whale", "「鼓動はひとつ、おまえのために打ち残してある。」", "\"I kept one beat back, for you.\""),

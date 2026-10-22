@@ -1,15 +1,15 @@
-"""余燼の背の敵 3 種 (灰被り・火の粉蛾・燠虫) と灰被りの火掻き棒を、ゲームの素材として書き出す (13 の 5.1節、14 章)。
+"""余燼の背の敵 3 種 (灰の番人・火の粉蛾・燠虫) と灰の番人の火掻き棒を、ゲームの素材として書き出す (13 の 5.1節、14 章)。
 
 使い方: リポジトリ直下で  PYTHONIOENCODING=utf-8 python -B tools/install_ember_mobs.py [--option thrall=a,moth=a,roller=a]
 出力:
   src/main/resources/assets/skyabyss/geo/entity/{ash_thrall,ember_moth,cinder_roller}.geo.json
-  src/main/resources/assets/skyabyss/textures/entity/<名前>{,_glowmask}.png  (灰被りは燃え上がった姿の ash_thrall_flared{,_glowmask}.png も)
+  src/main/resources/assets/skyabyss/textures/entity/<名前>{,_glowmask}.png  (灰の番人は燃え上がった姿の ash_thrall_flared{,_glowmask}.png も)
   src/main/resources/assets/skyabyss/animations/entity/<名前>.animation.json
   src/main/resources/assets/skyabyss/{geo,textures,animations}/gear/ash_poker.*  (火掻き棒。受け口 socket_main に付く別モデル)
   docs/review/previews/ember_mobs/*.png  (確認用の絵。git には入れない)
 
 形の元は rough/ember_mobs_{thrall,moth,roller}.py の案 (14 章の推奨はすべて A。--option で B・C に差し替えられる。
-灰被りの武器は案ごとに違う: A 火掻き棒、B 鎚、C 火箸)。ここでは次を足す:
+灰の番人の武器は案ごとに違う: A 火掻き棒、B 鎚、C 火箸)。ここでは次を足す:
 - 燠虫: 玉の中心 (0, PY, 0) に骨 roll を足し、body をその子にした (転がるときは roll を回す。歩く姿では動かない)。
 - アニメーション (意図した角度で書き、GeckoLib の符号はこのスクリプトが直す。tools/README と install_tide_mobs.py と同じ)。
 - 検査: 立方体の重なり 0 (静止)、光る画素が 0 でない (状態ごと・武器も)、埋まった箱、アニメの姿勢ごとの重なり (分離軸)。
@@ -171,7 +171,7 @@ def posed_hits(view, spec, name, times, hide=(), weapon=None, socket="socket_mai
     return worst
 
 
-# ---------------------------------------------------------------- 灰被り
+# ---------------------------------------------------------------- 灰の番人
 
 THRALL_REST = {"socket_main": (0, 0, 8)}     # 火掻き棒を少し外へ傾けて立てて持つ (ラフの絵と同じ)
 
@@ -490,13 +490,13 @@ def previews(th, mo, ro):
     def add(img, text):
         tiles.append(E.label(img, text))
 
-    add(shot(th["view"], ct, cg, 205, 15, hide=th["flare"], weapon=wpn), "灰被り 殻")
-    add(shot(th["view"], ft, fg, 205, 15, hide=th["crust"], weapon=wpn), "灰被り 燃え上がり")
+    add(shot(th["view"], ct, cg, 205, 15, hide=th["flare"], weapon=wpn), "灰の番人 殻")
+    add(shot(th["view"], ft, fg, 205, 15, hide=th["crust"], weapon=wpn), "灰の番人 燃え上がり")
     for t, nm in ((0.45, "振りかぶり"), (0.55, "振り下ろし")):
         rot, pos = pose_at(ANIM_THRALL, "attack", t)
-        add(shot(th["view"], ct, cg, 250, 10, rot=rot, pos=pos, hide=th["flare"], weapon=wpn), f"灰被り {nm}")
+        add(shot(th["view"], ct, cg, 250, 10, rot=rot, pos=pos, hide=th["flare"], weapon=wpn), f"灰の番人 {nm}")
     rot, pos = pose_at(ANIM_THRALL, "death", 1.4)
-    add(shot(th["view"], ft, fg, 250, 15, rot=rot, pos=pos, hide=th["crust"], weapon=wpn), "灰被り 倒れる")
+    add(shot(th["view"], ft, fg, 250, 15, rot=rot, pos=pos, hide=th["crust"], weapon=wpn), "灰の番人 倒れる")
     for t, nm in ((0.06, "翅上げ"), (0.18, "翅下げ")):
         rot, pos = pose_at(ANIM_MOTH, "idle", t)
         add(shot(mo["view"], mo["tex"], mo["gl"], 205, 22, rot=rot, pos=pos), f"火の粉蛾 {nm}")
@@ -550,7 +550,7 @@ def main():
     for name in ("ash_thrall", "ember_moth", "cinder_roller"):
         hp.install_mob(name)
 
-    # アニメの姿勢ごとの重なり (別の骨の立方体どうし)。灰被りは武器を付け、殻のある姿で調べる (素の形での検査)
+    # アニメの姿勢ごとの重なり (別の骨の立方体どうし)。灰の番人は武器を付け、殻のある姿で調べる (素の形での検査)
     checks = {}
     th_times = [i * 0.1 for i in range(15)]
     for name in ("idle", "walk", "walk_flared", "attack", "hurt", "shell_break"):

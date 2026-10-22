@@ -4,7 +4,7 @@
 python -I tools/abyss/gen_abyss_nightmare_texts.py
 書くもの:
   assets/skyabyss_abyss_nm/lang/ja_jp.json・en_us.json (丸ごと書く。何度流しても同じ)
-段の数字 (体力・傷・灯籠・技) は story/ch5/warden/NightmareTier.java の表が正。ここの決まりの文は、その表と合わせて読むこと。
+段の数字 (体力・傷・灯り・技) は story/ch5/warden/NightmareTier.java の表が正。ここの決まりの文は、その表と合わせて読むこと。
 """
 from __future__ import annotations
 
@@ -17,13 +17,13 @@ P = 'message.skyabyss.abyss_nm.'
 
 # 段 n の (名前, 決まり)。決まりは前の段の決まりに足す (表と同じ順)
 TIERS = [
-    ('短い灯', '灯籠の持ちが四分の一短くなる（30 秒・22.5 秒・15 秒）。体力 +10%。',
+    ('短い灯', '灯りの持ちが四分の一短くなる（30 秒・22.5 秒・15 秒）。体力 +10%。',
      'The Short Light', 'Every lantern lasts a quarter less (30 s, 22.5 s, 15 s). Health +10%.'),
     ('二度の爪', '爪のあと、同じ扇がもう一度来る（一秒後・赤い予告つき）。体力 +20%。',
      'Two Claws', 'After a claw, the same fan comes again one second later (red warning). Health +20%.'),
     ('写しの牙', '影の写しが、本物の爪と踏み込みを使う。傷 +10%・体力 +30%。',
      'Fangs of the Shades', 'The shades use the real claw and lunge. Damage +10%, health +30%.'),
-    ('六つの灯', '灯籠は六つだけ。七つ目と八つ目は点かない。体力 +40%。',
+    ('六つの灯', '灯りは六つだけ。七つ目と八つ目は点かない。体力 +40%。',
      'Six Lanterns', 'Only six lanterns. The seventh and eighth do not light. Health +40%.'),
     ('二度の闇', '闇の波が二度来る。二度目は体力 12% のとき。傷 +20%・体力 +50%。',
      'Twice Dark', 'The dark wave comes twice; the second at 12% health. Damage +20%, health +50%.'),
@@ -53,7 +53,7 @@ def build(locale):
         d[P + 'locked'] = '番人を倒すまで、悪夢は開かない。'
         d[P + 'wake'] = '心臓の奥で、悪夢が目を開けた。段 %1$s：%2$s。%3$s'
         d[P + 'wave_again'] = '闇の波が、もう一度来る。'
-        d[P + 'lantern_dark'] = 'この段では、この灯籠は点かない。'
+        d[P + 'lantern_dark'] = 'この段では、この灯りは点かない。'
         d[P + 'cleared_first'] = '悪夢の段 %1$s を、初めて越えた。経験値 %2$s、深淵術の点 %3$s。'
         d[P + 'cleared_again'] = '悪夢の段 %1$s を、もう一度越えた。経験値 %2$s。'
         d[P + 'special_5'] = '段 5 を越えた。闇の声が、初めて名前で呼んだ。'

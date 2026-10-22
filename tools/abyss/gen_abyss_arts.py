@@ -42,7 +42,7 @@ def light_a(img):
 
 
 def light_b(img):
-    # 灯籠: 枠と炎
+    # 灯り: 枠と炎
     d = base(img)
     d.rectangle((11, 9, 21, 23), outline=GOLD, width=2)
     d.polygon([(16, 11), (19, 17), (16, 21), (13, 17)], fill=GLOW)

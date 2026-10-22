@@ -12,7 +12,7 @@
   data/skyabyss/quest/{daily_storm_rounds,weekly_storm_heart}.json                         雷翼の背の周回 (10 の 8.6 節の形)
   docs/design/12_thunder_wing.md の「伝承とクエスト 生成」印の間                               文の一覧
 
-雷翼のメイン「嵐を渡る翼」と、イサナの「鯨追いの古い地図」(風見鶏) は tools/gen_story_quests.py (skyabyss_story) にある。
+雷翼のメイン「嵐を渡る翼」と、イサナの「イサナの古い地図」(風見鶏) は tools/gen_story_quests.py (skyabyss_story) にある。
 
 実行 (リポジトリ直下):
     python tools/gen_storm_lore.py

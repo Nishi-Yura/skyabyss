@@ -3,7 +3,7 @@
 
 形:
   - 層の深さ 60% の所で、螺旋の道を角度 GAP (約 2 rad) ぶん抜く (崩れ)。抜けた両端を、縦穴の中を横切る肋の橋でつなぐ
-  - 橋: 二マス幅の方解石の道 (半段は多角形の石のハーフ)。下に肋のアーチ (骨ブロックの弧)、灯籠を下げる
+  - 橋: 二マス幅の方解石の道 (半段は多角形の石のハーフ)。下に肋のアーチ (骨ブロックの弧)、灯りを下げる
   - 橋の両端の印: bridge_bone_a (橋の手前) / bridge_bone_b (橋の向こう)。骨拾いの湧きは story/ch5/layers/BoneBridge
   - 橋の向こうの螺旋の先に巣 (den_bone)。肋の番の門は BoneBridge が、巣の戸の口 (半径 20〜22) を封じて作る
   - 近道の印 shortcut_bone = 巣の床の真ん中 (肋の番を倒すと鎖の近道。近道の作りは layer_common / main の仕事)
@@ -109,7 +109,7 @@ def lay_chord(v, rng, A, B, h_a, h_b):
             for dd in range(1, depth + 1):
                 if v.get(x, by - dd, z) in (None, 'air'):
                     v.set(x, by - dd, z, 'bone_block[axis=y]')
-        # 橋の下の灯籠 (次の層の灯りを見下ろす目印。骨の影を照らす)
+        # 橋の下の灯り (次の層の灯りを見下ろす目印。骨の影を照らす)
         if (k // 4) % 2 == 0:
             x, z = round(qx), round(qz)
             if math.hypot(x, z) <= R_RING and v.get(x, by - 2, z) in (None, 'air'):

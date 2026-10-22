@@ -269,7 +269,7 @@ S.node("ms_key2", "空の扉の鍵だと、言い伝えでは聞いていたけ�
 S.node("ms_key3", "……あ。\nいつつ　いきづく　つちのそこ\n……母さんは、いつつめをそう歌っていた。\nどうして今まで、思い出せなかったんだろう。",
        "...Oh.\nFive, five, a breath below the ground.\n...That's how my mother sang the fifth. Why couldn't I remember it until now?",
        do=[unlock("chapter1/fifth_verse")], next="ms_key4", note="伝承「数え歌のいつつ」を記す")
-S.node("ms_key4", "むっつから先は、まだ出てこない。\n……鍵というのは、開けたい扉のほうを向くものだよ。\nそれだけは、覚えておおき。",
+S.node("ms_key4", "いつつまでは、あたしも歌える。むっつから先は、まだ出てこない。\n……鍵というのは、開けたい扉のほうを向くものだよ。\nそれだけは、覚えておおき。",
        "Six and beyond still won't come.\n...A key always turns toward the door it wants to open. Remember that much.", face="grave", options=[
            opt("ok", "覚えておく。", "I'll remember.", do=[add_aff(3)]),
        ], note="ここに入るとメイン「天の鍵」が終わる (ベータの終わり)")
@@ -343,7 +343,7 @@ C.node("ms_c_key2", "俺はずっと、上ばかり見ていた。\n……足も
            opt("ok", "……そうだね。", "...Yeah."),
        ])
 
-# 鯨追いの古い地図 (段階 2)
+# イサナの古い地図 (段階 2)
 C.add_option("fq_c_menu", "back", opt("map", "次の巨神の手がかりは、ないか。", "Any clue about the next titan?", goto="ms_c_map_offer",
                                       kind="quest", if_=all_(stage_min(2), q(MAP, "none"))))
 C.node("ms_c_map_offer", "手がかりか。……これを見ろ。俺の古い地図だ。\n余白に一本だけ線を引いてある。嵐が来るたび、雲がこの線の上を走っていくんだ。",
@@ -353,15 +353,15 @@ C.node("ms_c_map_offer2", "雷の晩に、高い所で空を見てくれ。…�
        face="grave", options=[
            opt("accept", "見てくる。", "I'll go and watch.", kind="quest", do=[start(MAP), add_aff(1)]),
            opt("later", "また今度。", "Another time.", goto="@entry"),
-       ], note="サブ「鯨追いの古い地図」を始める")
+       ], note="サブ「イサナの古い地図」を始める")
 C.node("ms_c_map_done", "戻ったか。……光ったか？", "You're back. ...Did it flash?", face="smile", options=[
     opt("wing", "稲光の中に、翼の形が見えた気がした。", "I thought I saw the shape of wings in the lightning.", goto="ms_c_map_done2"),
     opt("count", "光ってから音が来るまで、ずいぶん長かった。", "The thunder came a long time after the flash.", goto="ms_c_map_done2"),
-], note="サブ「鯨追いの古い地図」の報告")
+], note="サブ「イサナの古い地図」の報告")
 C.node("ms_c_map_done2", "……そうか。やっぱり、あの線の上を何かが渡っている。\nこの切れ端をやる。線のところだけ、破いておいた。",
        "...I see. Something does cross along that line.\nTake this scrap. I tore off just the part with the line.", face="grave",
        do=[unlock("chapter1/storm_path")], next="ms_c_map_done3",
-       note="ここに入るとサブ「鯨追いの古い地図」が終わる (報酬で風見鶏も渡る)。伝承「嵐の通り道」を記す")
+       note="ここに入るとサブ「イサナの古い地図」が終わる (報酬で風見鶏も渡る)。伝承「嵐の通り道」を記す")
 C.node("ms_c_map_done3", "それと、これも持っていけ。じいさんの風見鶏だ。\n屋根から下ろしてから、こいつは風じゃなく、嵐のほうばかり向くようになった。",
        "And take this, too. My grandfather's weathercock.\nEver since he took it down from the roof, it points at storms instead of the wind.", next="ms_c_map_done4",
        note="風見鶏 (12 の 2.6 節) の話")
@@ -546,7 +546,7 @@ quest(KEY, "main", 50, ("天の鍵", "The Sky Key"),
       story="語り部は鍵を見て、数え歌のいつつめを思い出す。「鍵というのは、開けたい扉のほうを向くものだよ」。")
 
 # ---- サブ (一度きり)
-quest(MAP, "sub", 45, ("鯨追いの古い地図", "The Whale Chaser's Old Map"),
+quest(MAP, "sub", 45, ("イサナの古い地図", "The Whale Chaser's Old Map"),
       ("雷の晩に高い所で空を見て、嵐の通り道をイサナに話す。", "Watch the sky from somewhere high on a thunder night, and tell Isana about the path of the storms."),
       ("地図の切れ端には、嵐の通り道が一本だけ引いてある。風見鶏は、いつも嵐のほうを向いている。",
        "The scrap of map shows a single line: the path of the storms. The weathercock always points at a storm."),
@@ -610,7 +610,7 @@ LORE = [
       "Again and again the lightning struck the copper spikes of its crown. It did not so much as blink."),
      [{"type": "near_entity", "target": "skyabyss:thunder_wing", "radius": 96}, {"type": "manual"}]),
     ("chapter1/storm_path", 158, ["chapter1/thunder_wing"], ("嵐の通り道", "The Path of the Storms"),
-     ("鯨追いの古い地図の余白に、線が一本引いてある。嵐が来るたび、雲はこの線の上を走る。\n\n"
+     ("イサナの古い地図の余白に、線が一本引いてある。嵐が来るたび、雲はこの線の上を走る。\n\n"
       "雷の晩に高い所から見ると、稲光は線に沿って、同じ向きに続けて光った。何かが、決まった道を渡っている。",
       "A single line is drawn in the margin of the whale chaser's old map. Whenever a storm comes, the clouds run along it.\n\n"
       "From high ground on a thunder night, the lightning flashed along that line, one after another, always the same way. "

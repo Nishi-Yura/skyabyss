@@ -40,10 +40,10 @@ ENTRIES = {
     "trial.skyabyss.goal.one_pour": ("一度で注ぐ", "Pour right the first time"),
     "trial.skyabyss.goal.no_dent": ("荷車を無傷で", "Cart unscratched"),
     "trial.skyabyss.goal.no_vent": ("噴気を踏まずに", "Without touching a vent"),
-    "trial.skyabyss.enemy.E11.0": ("灰被りの群れ", "Ash pack"),
+    "trial.skyabyss.enemy.E11.0": ("灰の番人の群れ", "Ash pack"),
     "trial.skyabyss.enemy.E11.1": ("大燠虫つき", "With ember bugs"),
     "trial.skyabyss.enemy.E12.0": ("大燠虫だけ", "Bugs only"),
-    "trial.skyabyss.enemy.E12.1": ("灰被りつき", "With ash thralls"),
+    "trial.skyabyss.enemy.E12.1": ("灰の番人つき", "With ash thralls"),
     # ---- 一行の知らせ
     "message.skyabyss.trial.e03.start": ("段を西へ渡れ。立ち続けると段は赤くなり、赤い段で焼ける。坑へ落ちたら最後に立った段へ戻る",
                                          "Cross west. Standing still heats a plank red, and a red plank burns. A fall returns you to your last plank"),

@@ -152,7 +152,7 @@ def ch1():
         '……荷を見に来たのか。道具は覚えている。持ち主は、そうでもない。@@旅の職人、とでも呼んでくれ。名前は、荷のどこにも書いていなかった。@@旅装なら編める。刃も研ぐ。……ただ、頼まれたことは、そう長くは覚えていられない。急ぐなら、覚書に写しておけ。',
         '...Come to look at the pack? The tools remember. The owner, less so.@@Call me the traveling artisan. There was no name written anywhere in the pack.@@I can stitch road gear. I can hone a blade. ...But I do not keep what I am asked for very long. If it matters, copy it into your notes.')
     put(CH1, B + 'ch1a_first_blade',
-        '……刃のことを聞きに来たのか。鯨追いに言われて。@@旅の職人、とでも呼んでくれ。名前は、荷のどこにも書いていなかった。道具は覚えている。持ち主は、そうでもない。',
+        '……刃のことを聞きに来たのか。イサナに言われて。@@旅の職人、とでも呼んでくれ。名前は、荷のどこにも書いていなかった。道具は覚えている。持ち主は、そうでもない。',
         '...Come to ask about blades? The whale chaser sent you.@@Call me the traveling artisan. There was no name written anywhere in the pack. The tools remember. The owner, less so.')
     put(CH1, B + 'ch1a_deja',
         'ああ、荷のそばにいた人か。……いや、違う。前にも会った気がするだけだ。@@道具は覚えている。持ち主は、そうでもない。覚書を渡しておく。写しておけ。',
@@ -179,10 +179,10 @@ def ch1():
         'なくしたのか。……荷のどこかに、もう一冊挟んであったはずだ。ほら。@@道具は、なくなる。覚書も、なくなる。写しは、いくつあってもいい。',
         'Lost them? ...There should be another copy tucked in the pack somewhere. Here.@@Tools get lost. Notes get lost. There is no harm in more copies.')
     put(CH1, B + 'ch1a_ward',
-        '護りが、ほどけたか。……岩殻片が要る。持ってきたな。@@編み直しておいた。一日にひとつだけだ。糸の手が、そう言っている。',
+        '護りが、ほどけたか。……岩殻片が要る。持ってきたな。@@編み直しておいた。',
         'The ward came unwoven. ...I need shell scraps. You brought them.@@It is woven again. One a day, no more. The thread-hand says so.')
     put(CH1, B + 'ch1a_ward_ask',
-        '護りを編み直すなら、岩殻片が要る。手間の分だ。道の脇か、洞か、骨の山に落ちている。@@それと、一日にひとつまで。急ぐなら、先に糸を数えておけ。',
+        '護りを編み直すなら、岩殻片が要る。手間の分だ。道の脇か、洞か、骨の山に落ちている。@@',
         'To weave a ward again I need shell scraps, for the trouble. They lie beside the road, in the cave, under the bones.@@And one a day at most. If you are in a hurry, count your thread first.')
     put(CH1, B + 'a_menu.teach', '作り方を、もう一度教えてほしい。', 'Teach me how to make things again.')
     put(CH1, B + 'a_menu.notes', '旅の覚書を、なくした。', 'I lost my wayfarer\'s notes.')

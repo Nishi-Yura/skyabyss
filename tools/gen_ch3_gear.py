@@ -113,7 +113,7 @@ def dialogue():
         'You want the patterns. ...Scorched feathers are light. Pack charged cotton into the seams and the lightning stays off your skin. Wind copper wire round the hems.\nThe whetstone, the dumplings and the oil are in the notes. The streamer is for reading the wind.')
     put(d + 'ch3t_ward_weave', '雷の護り糸か。……指がしびれる。生きている糸だ。\n鼓動守に編もう。翼の中で鼓動が速くなったら、これを握れ。',
         'Thunder ward thread. ...It numbs the fingers. A living thread.\nI will weave it into a heartbeat ward. When the beat quickens inside the wing, hold it.')
-    put(d + 'ch3a_ward', '護りがほどけたか。帯電綿があるな。峰に浮く毛玉が落とすやつだ。……編み直しておいた。一日にひとつだけだ。',
+    put(d + 'ch3a_ward', '護りがほどけたか。帯電綿があるな。峰に浮く毛玉が落とすやつだ。……編み直しておいた。',
         'The ward came undone? You brought the charged cotton. ...There, rewoven. One a day, no more.')
     put(d + 'a_menu.teach3', '峰越えの旅装を教えてほしい', 'Teach me the Peak Crossing gear')
     put(d + 'a_menu.ward3', '雷翼の鼓動守を編み直してほしい（帯電綿 8 つ）', 'Reweave the Thunder Wing ward (8 charged cotton)')

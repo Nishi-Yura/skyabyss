@@ -166,8 +166,8 @@ STAND = FL + 1
 
 # 消えた炉の坑 (14〜18 分): 丘の斜面に、黒石の枠の坑口と崩れた煙突。階段で地下 13 へ。
 #   入口の間  x -4..4、z 12..24。熾り蟲 4。温石の台 (玄武岩の柱。mark warm_stand = 台の上の面のブロック)
-#   鍛えの跡  x -20..-11、z 12..24 (入口の間から西への回廊)。灰被りの屑 2、冷えた金床・水の釜・崩れた道具棚
-#   奥の間    x -22..-6、z -10..3 (鍛えの跡から南への回廊)。古い灰被り。北の壁ぎわに炉の壇: 碑 (mark forge_tablet)・前の私の荷 (樽。mark pack)・冷えた金床 (mark anvil)
+#   鍛えの跡  x -20..-11、z 12..24 (入口の間から西への回廊)。灰の屑 2、冷えた金床・水の釜・崩れた道具棚
+#   奥の間    x -22..-6、z -10..3 (鍛えの跡から南への回廊)。古い灰の番人。北の壁ぎわに炉の壇: 碑 (mark forge_tablet)・前の私の荷 (樽。mark pack)・冷えた金床 (mark anvil)
 #   出口      奥の間の東の壁の外 (x -5、z -2) に梯子の縦穴。地上の口は黒石の縁
 #   地上      坑口の碑 (mark tablet)、職人の野営 (mark artisan)。湧き台の立ち位置は DeadForgePit.pads と同じ
 def dead_forge_pit():
@@ -257,7 +257,7 @@ def dead_forge_pit():
     bp.set(-16, STAND + 4, 21, LANTERN)
     bp.set(-16, STAND + 2, 7, LANTERN)
 
-    # ---- 奥の間: 広い床、灰被りの背の釜の跡、北の壁ぎわに炉の壇 (碑・荷・冷えた金床・消えた炉)
+    # ---- 奥の間: 広い床、灰の番人の背の釜の跡、北の壁ぎわに炉の壇 (碑・荷・冷えた金床・消えた炉)
     for x in range(-22, -5):
         for z in range(-10, 4):
             r = c.rng.random()
@@ -419,7 +419,7 @@ def quests():
     write_json(os.path.join(q, 'forge_ruins.json'), {
         'category': 'main', 'order': 42, 'giver': STORYTELLER, 'chapter': CH, 'start_when': START,
         'stages': [
-            # 消えた炉の坑を抜けると (奥の間の古い灰被りを倒す)、冷えた金床の上の頁 (DeadForgePit が伝承 ch4/forge_page を記す)
+            # 消えた炉の坑を抜けると (奥の間の古い灰の番人を倒す)、冷えた金床の上の頁 (DeadForgePit が伝承 ch4/forge_page を記す)
             {'id': 'pit', 'xp': 60, 'objectives': [{'id': 'page', 'type': 'lore', 'targets': ['ch4/forge_page']}]},
             {'id': 'tell', 'objectives': [{'id': 'talk', 'type': 'talk', 'target': STORYTELLER, 'topic': 'ch4g_forge_read2'}]},
         ],
@@ -470,11 +470,11 @@ def quests():
     put(b + 'title', '炉跡', 'The Forge Ruins')
     put(b + 'summary', '語り部に聞いた灰の民の炉跡を、消えた炉の坑の奥に探す。', 'See the ash people\'s forge at the bottom of the dead forge pit.')
     put(b + 'pit.journal',
-        '語り部が言っていた。「南の灰の地の丘の下に、灰の民の炉跡があるそうだよ。古い灰被りが、まだ火の番をしているって」\n'
-        '坑の奥の古い灰被りを倒せば、炉跡を見られるだろう。灰の殻は熱で割れやすい。床の亀裂が赤く脈を打ったら、そこを離れること。',
+        '語り部が言っていた。「南の灰の地の丘の下に、灰の民の炉跡があるそうだよ。古い灰の番人が、まだ火の番をしているって」\n'
+        '坑の奥の古い灰の番人を倒せば、炉跡を見られるだろう。灰の殻は熱で割れやすい。床の亀裂が赤く脈を打ったら、そこを離れること。',
         'The storyteller said: "Under the hills of the southern ash, there is a forge of the ash people. An old thrall still keeps its fire, they say."\n'
         'Fell the old thrall at the bottom of the pit and the forge will be yours to see. Ash shells crack under heat. When a crack in the floor starts to pulse red, step away.')
-    put(b + 'pit.page', '坑の奥の古い灰被りを倒そう', "Fell the pit's old keeper")
+    put(b + 'pit.page', '坑の奥の古い灰の番人を倒そう', "Fell the pit's old keeper")
     put(b + 'tell.journal', '冷えた金床の上に、破れた頁があった。語り部に見せよう。', 'A torn page lay on the cold anvil. Show it to the storyteller.')
     put(b + 'tell.talk', '炉跡の頁を、語り部に見せよう', 'Show the forge page to the storyteller')
     put(b + 'done', '「四つ返したら、下へ」。……返しに行くんだね。', '"Return four, then go down." ...You are going to give it back, then.')
@@ -528,7 +528,7 @@ def dialogue():
     })
     s = 'dialogue.skyabyss.storyteller.'
     put(s + 'ch4g_forge_tale',
-        '灰の民の話をしようか。祖母の祖母の頃には、南の灰の地に、まだ炉の火が残っていたそうだよ。\n丘の下の坑に炉があってね。灰の民は火を焚くんじゃなく、火を預かっていたんだと。……今も、古い灰被りが火の番をしているって。',
+        '灰の民の話をしようか。祖母の祖母の頃には、南の灰の地に、まだ炉の火が残っていたそうだよ。\n丘の下の坑に炉があってね。灰の民は火を焚くんじゃなく、火を預かっていたんだと。……今も、古い灰の番人が火の番をしているって。',
         'Shall I tell you of the ash people? In my grandmother\'s grandmother\'s day, a forge fire still burned in the southern ash.\nThere was a forge in a pit under the hills. The ash people did not burn fire there. They kept it in trust. ...An old thrall still keeps its watch, they say.')
     put(s + 'ch4g_forge_tale2',
         '番をする者は、火が消えても番をやめないものさ。\n……行くなら、殻を熱で割るといい。冷たい刃は、灰に吸われるからね。',
@@ -609,7 +609,7 @@ def dialogue():
         '耐火の薬か。よく作ったな。\n道具は覚えている。持ち主は、そうでもない。……火の薬だけは、飲んだ者が覚えているもんだ。',
         'Fire draughts. Well brewed.\nTools remember. Their owners, less so. ...Only a fire draught is remembered by the one who drinks it.')
     put(a + 'ch4t_ward_weave',
-        '灰の護り糸か。古い灰被りの背の釜に、編みかけで入っていたんだろう。\n鼓動守に仕上げよう。熱の中で鼓動が速くなったら、握るといい。',
+        '灰の護り糸か。古い灰の番人の背の釜に、編みかけで入っていたんだろう。\n鼓動守に仕上げよう。熱の中で鼓動が速くなったら、握るといい。',
         'Ash ward thread. It must have been in the old thrall\'s pot, half woven.\nI will finish it into a heartbeat ward. When your heart races in the heat, hold it.')
     put(a + 'ch4a_ward', '煤鉄で編み直した。……今度は、溶かすなよ。', 'Rewoven with soot iron. ...Don\'t melt this one.')
     put(a + 'ch4a_ward_offer', '余燼の鼓動守を、なくしたのか。煤鉄が八つあれば、編み直せるが。', 'Lost your ember heartbeat ward? With eight soot iron, I can weave another.')
@@ -691,8 +691,8 @@ def texts():
         for i in range(4):
             put('%s.%d' % (key, i + 1), lines_ja[i], lines_en[i])
     # 敵 (名前・スポーンエッグ・音の字幕。音の出来事は skyabyss_ch4 の名前空間。tools/gen_ch4_ground_mobs.py)
-    for mid, nj, ne in (('cinder_mite', '熾り蟲', 'Cinder Mite'), ('ash_husk', '灰被りの屑', 'Ash Husk'), ('ash_dragger', '灰ひきずり', 'Ash Dragger'),
-                        ('elder_thrall', '古い灰被り', 'Elder Thrall')):
+    for mid, nj, ne in (('cinder_mite', '熾り蟲', 'Cinder Mite'), ('ash_husk', '灰の屑', 'Ash Husk'), ('ash_dragger', '灰ひきずり', 'Ash Dragger'),
+                        ('elder_thrall', '古い灰の番人', 'Elder Thrall')):
         put('entity.skyabyss.' + mid, nj, ne)
         put('item.skyabyss.%s_spawn_egg' % mid, nj + 'のスポーンエッグ', ne + ' Spawn Egg')
     for sid, sj, se in (('cinder_mite_ambient', '熾り蟲がはぜる', 'Mite crackles'), ('cinder_mite_death', '熾り蟲が消える', 'Mite fizzles out'),
@@ -702,8 +702,8 @@ def texts():
         put('subtitles.skyabyss_ch4.' + sid, sj, se)
     # 試遊のコマンド /skyabyss playtest now の四章の分 (story/ch4/Ch4Playtest)
     for k, j, e in (('ch4_draught', '耐火のポーションを 2 つ渡した。旅の職人に見せよう', 'Gave two fire resistance potions. Show them to the artisan'),
-                    ('ch4_draught_show', '耐火の薬を、旅の職人に見せた扱いにした', 'Counted the draughts as shown to the artisan'),
-                    ('ch4_pit', '消えた炉の坑の口へ運んだ。奥の古い灰被りを倒そう', 'Moved you to the dead forge pit. Fell the old thrall at the bottom'),
+                    ('ch4_draught_show', '耐火のポーションを、旅の職人に見せた扱いにした', 'Counted the draughts as shown to the artisan'),
+                    ('ch4_pit', '消えた炉の坑の口へ運んだ。奥の古い灰の番人を倒そう', 'Moved you to the dead forge pit. Fell the old thrall at the bottom'),
                     ('ch4_forge_page', '炉跡の頁を記した。語り部に見せよう', 'Recorded the forge page. Show it to the storyteller'),
                     ('ch4_forge_tell', '炉跡の頁を、語り部に見せた扱いにした', 'Counted the forge page as shown to the storyteller')):
         put('commands.skyabyss.playtest.now.' + k, j, e)
@@ -711,9 +711,9 @@ def texts():
     for iid, nj, ne, dj, de in (
             ('soot_iron', '煤鉄', 'Soot Iron', '灰の地の煤けた鉄。砥石と、鼓動守の編み直しに使う', 'Sooty iron from the ash lands. For whetstones and reweaving a heartbeat ward'),
             ('ash_hemp', '灰麻', 'Ash Hemp', '灰の中でも枯れない麻。冷やし水に漬ける', 'Hemp that thrives even in ash. Steeped into coolers'),
-            ('ash_ward_thread', '灰の護り糸', 'Ash Ward Thread', '古い灰被りの背の釜にあった編みかけの糸。旅の職人が鼓動守に編む',
+            ('ash_ward_thread', '灰の護り糸', 'Ash Ward Thread', '古い灰の番人の背の釜にあった編みかけの糸。旅の職人が鼓動守に編む',
              'A half-woven thread from the old thrall\'s pot. The artisan weaves it into a heartbeat ward'),
-            ('soot_whetstone', '煤の砥石', 'Soot Whetstone', '使うと刃を研ぐ（煤の刃: 攻撃 +2.6、20 分）。灰被りの殻へ 1.5 倍の傷',
+            ('soot_whetstone', '煤の砥石', 'Soot Whetstone', '使うと刃を研ぐ（煤の刃: 攻撃 +2.6、20 分）。灰の番人の殻へ 1.5 倍の傷',
              'Use to hone your blade (Soot Blade: +2.6 attack for 20 minutes). Deals 1.5x to ash shells'),
             ('ash_cooler', '灰の冷やし水', 'Ash Cooler', '飲むと体の芯の熱が引き、しばらく火に強くなる（余燼の背の熱 −40・耐火 30 秒）',
              'Drink to draw the heat from your core (-40 heat on the ember\'s back) and resist fire for a while (30 s)')):
@@ -723,11 +723,11 @@ def texts():
     for i, (lj, le) in enumerate((
             ('熾り蟲: 熱に寄る。温石を持っていると群れで来る。台に温石を置けば、群れは台へ。叩けば一撃。',
              'Cinder mites: drawn to heat. Carry a warm stone and they swarm you. Set it on a stand and they go there. One hit each.'),
-            ('灰被りの屑: 殻を割るまで傷は半分。割れると燃えて速くなり、やがて燃え尽きる。',
+            ('灰の屑: 殻を割るまで傷は半分。割れると燃えて速くなり、やがて燃え尽きる。',
              'Ash husks: half damage until the shell breaks. Then they burn, speed up, and burn out.'),
             ('灰ひきずり: 敵意はない。追うと丸まって転がる。行き先は窯の跡。',
              'Ash draggers: harmless. Chase one and it rolls away, toward the old kiln.'),
-            ('古い灰被り: 床の亀裂が赤く脈を打ったら離れる（1.5 秒後に噴く）。殻が割れると熱の波。',
+            ('古い灰の番人: 床の亀裂が赤く脈を打ったら離れる（1.5 秒後に噴く）。殻が割れると熱の波。',
              'Old thrall: when floor cracks pulse red, step away (they burst 1.5 s later). Breaking its shell sends out a heat wave.'),
             ('耐火のポーション: 醸造台・水の瓶・ネザーウォート・マグマクリーム。都の薬師が手ほどきをする。',
              'Fire draught: brewing stand, water bottle, nether wart, magma cream. The capital\'s apothecary teaches it.'),

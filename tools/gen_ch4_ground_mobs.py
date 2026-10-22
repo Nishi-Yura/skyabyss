@@ -1,20 +1,20 @@
 #!/usr/bin/env python3
-"""四章の地上の敵 4 種 (熾り蟲・灰被りの屑・灰ひきずり・古い灰被り) と小物 5 つを、選んだラフから入れる (docs/design/21 の 6.1、P19・P20)。
+"""四章の地上の敵 4 種 (熾り蟲・灰の屑・灰ひきずり・古い灰の番人) と小物 5 つを、選んだラフから入れる (docs/design/21 の 6.1、P19・P20)。
 
   PYTHONIOENCODING=utf-8 python -I tools/gen_ch4_ground_mobs.py
 
 入力: docs/review/ch4_roughs/<id>/<案>/<id>_<案>_{mesh.json,atlas.png,glowmask.png}   (ラフの作り方は tools/rough/lowpoly/ch4/)
-      灰被りの変種 (屑・古い灰被り) は燃え上がった姿のアトラス <id>_<案>_{atlas_flared,glowmask_flared}.png と道具 <id>_<案>_poker_*
+      灰の番人の変種 (屑・古い灰の番人) は燃え上がった姿のアトラス <id>_<案>_{atlas_flared,glowmask_flared}.png と道具 <id>_<案>_poker_*
       小物は docs/review/ch4_roughs/items/icons/<品>_<案>_32.png
 出力 (assets/skyabyss/ の下):
   lowpoly/<id>.json, textures/lowpoly/<id>(.png|_glowmask.png|_flared.png), geo/entity/<id>_lowpoly(_debug).geo.json   (tools/install_lowpoly.py)
   geo/entity/<id>.geo.json + textures/entity/<id>.png   LowPoly.enabled = false のときの箱の代用
-  animations/entity/<id>.animation.json                 熾り蟲・灰ひきずりはこのファイルで作る。古い灰被りは灰被りのアニメに「亀裂」「熱の波」を足す。屑は灰被りのアニメをそのまま使う
+  animations/entity/<id>.animation.json                 熾り蟲・灰ひきずりはこのファイルで作る。古い灰の番人は灰の番人のアニメに「亀裂」「熱の波」を足す。屑は灰の番人のアニメをそのまま使う
   textures/item/<品>.png・models/item/<品>.json・models/item/<id>_spawn_egg.json
   assets/skyabyss_ch4/sounds.json                        音の出来事 (skyabyss_ch4 の名前空間。既存の音の別名。字幕の文は tools/gen_ch4_ground.py)
   tools/sources/<品>/   選ばなかった案の絵
 
-案は CHOICE で選ぶ (2026-10-22 のユーザーの選定: 熾り蟲 A・灰被りの屑 C・灰ひきずり A・古い灰被り A、小物は煤鉄 A・灰麻 A・灰の護り糸 B・煤の砥石 C・灰の冷やし水 A)。
+案は CHOICE で選ぶ (2026-10-22 のユーザーの選定: 熾り蟲 A・灰の屑 C・灰ひきずり A・古い灰の番人 A、小物は煤鉄 A・灰麻 A・灰の護り糸 B・煤の砥石 C・灰の冷やし水 A)。
 回転の約束: 熾り蟲・灰ひきずりはラフの姿勢表 = 数学の右手系 (前 -Z。x が + = 前が上がる) で書き、ファイルへは (-x, -y, z)。
 """
 import copy
@@ -132,7 +132,7 @@ def dragger():
             p + "rolling": loop(0.5, rolling), p + "uncurl": once(0.4, uncurl), p + "hurt": once(0.3, hurt), p + "death": once(1.0, death, True)}
 
 
-# ---------------------------------------------------------------- 古い灰被り (灰被りのアニメ + 亀裂 = 火掻きを床へ打ちつける、熱の波 = 殻が割れる)
+# ---------------------------------------------------------------- 古い灰の番人 (灰の番人のアニメ + 亀裂 = 火掻きを床へ打ちつける、熱の波 = 殻が割れる)
 def elder():
     src = json.load(open(os.path.join(A, "animations", "entity", "ash_thrall.animation.json"), encoding="utf-8"))["animations"]
     out = {}
@@ -170,10 +170,10 @@ def install():
         cmd = [sys.executable, os.path.join(ROOT, "tools", "install_lowpoly.py"), mob, "--mesh", d + "mesh.json", "--atlas", d + "atlas.png",
                "--glow", d + "glowmask.png"]
         if mob in THRALLS:
-            # 骨は灰被りのもの (geo/entity/ash_thrall.geo.json)。道具は別メッシュ (受け口 socket_main)
+            # 骨は灰の番人のもの (geo/entity/ash_thrall.geo.json)。道具は別メッシュ (受け口 socket_main)
             gear = "ash_husk_poker" if mob == "ash_husk" else "elder_rake"
             cmd += ["--geo-name", "ash_thrall", "--gear", d + "poker_mesh.json:" + d + "poker_atlas.png:" + gear + ":socket_main"]
-        # --geo-name は灰被りの骨の geo (ash_thrall_lowpoly*.geo.json) を書き直すので、灰被りのものを元に戻す (骨は同じ。箱の代用の箱だけ違う)
+        # --geo-name は灰の番人の骨の geo (ash_thrall_lowpoly*.geo.json) を書き直すので、灰の番人のものを元に戻す (骨は同じ。箱の代用の箱だけ違う)
         keep = {}
         if mob in THRALLS:
             for n in ("ash_thrall_lowpoly.geo.json", "ash_thrall_lowpoly_debug.geo.json"):
@@ -183,7 +183,7 @@ def install():
             open(os.path.join(A, "geo", "entity", n), "wb").write(data)
         os.makedirs(os.path.join(A, "textures", "entity"), exist_ok=True)
         if mob in THRALLS:
-            # 燃え上がった姿 (同じ UV の別アトラス)。箱の代用は灰被りの geo と絵
+            # 燃え上がった姿 (同じ UV の別アトラス)。箱の代用は灰の番人の geo と絵
             shutil.copyfile(os.path.join(ROOT, d + "atlas_flared.png"), os.path.join(A, "textures", "lowpoly", mob + "_flared.png"))
             gf = os.path.join(ROOT, d + "glowmask_flared.png")
             if os.path.exists(gf):
