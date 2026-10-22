@@ -186,8 +186,8 @@ LORDS = {
     'bone': ('肋の主', 'Lord of Ribs',
              '肋の主を倒せ。灯台を灯し、光の中で斬れ', 'Defeat the Lord of Ribs. Light the lamps and strike inside the light',
              '間の奥で、積み上がった肋が立ち上がった。', 'At the back of the hall, a heap of ribs stands up.',
-             '灯台は右クリックで灯る。光の外では、刃が骨に弾かれる。……番人と同じだ。',
-             'The lamps light with a right-click. Outside the light, your blade glances off. ...Just like the warden.',
+             '灯台は右クリックで灯る。光の外では、刃が骨に弾かれる。……底の番人も、こうなのだろうか。',
+             'The lamps light with a right-click. Outside the light, your blade glances off. ...Is the warden below like this too?',
              '肋の主が崩れた。光の中なら、闇のものにも刃は届く。', 'The Lord of Ribs collapses. In the light, even things of the dark can be cut.',
              '光の外では、刃が通らない。', 'Your blade will not bite outside the light.'),
     'salt': ('白殻の主', 'Lord of White Shells',
@@ -236,7 +236,7 @@ t('objective.skyabyss.abyss_v2.warden_p3', '闇の波のあとは、光の術で
 # ---------------------------------------------------------------- 手記 (野営の帳面 0、道ごと 1〜3)
 JOURNALS = {
     'bone': [
-        ('探掘隊の帳面「都の井戸が、夜ごとに脈を打つ。ギルドの頼みで、六人で元を探しに下りる。隊長トウヤ」',
+        ('探掘隊の帳面「都の井戸が、夜ごとに脈を打つ。ギルドの頼みで、七人で元を探しに下りる。隊長トウヤ」',
          '帳面の続き「北の封じ石に穴が三つ。印をはめる穴らしい。三手に分かれて探す。灯りはミオの係」',
          'Party ledger: "The capital\'s wells pulse every night. At the guild\'s request, six of us go down to find the source. — Captain Touya"',
          'Ledger, continued: "Three hollows in the north seal, for marks it seems. We split three ways. Mio keeps the lights."'),
@@ -348,9 +348,9 @@ TALK = {
                   ('neutral', '光の術を覚えたなら、東の道の広間の壁を照らしてみて。……見つけたら、持ってきてくれる？', 'If you have the light art, shine it on the walls of the hall on the east path. ...Will you bring it back if you find it?')],
         'return': [('smile', 'それ……！　焼き印、隊のだ。ありがとう', 'That...! The brand is ours. Thank you.'),
                    ('neutral', 'これで、下りていった人たちにも灯りが届く気がする。持っていって。わたしには、この火があるから', 'Somehow I feel the light reaches the ones who went down now. Keep it. I have this fire.')],
-        'party': [('neutral', '隊は六人。隊長のトウヤ、測量士のハヤセ、薬師のシズ、荷運びのロク、ゴロウ、ナギ。それとわたし', 'Six of us. Captain Touya, Hayase the surveyor, Shizu the apothecary, Roku the porter, Gorou, Nagi. And me.'),
+        'party': [('neutral', '隊は七人。隊長のトウヤ、測量士のハヤセ、薬師のシズ、荷運びのロク、ゴロウ、ナギ。それとわたし', 'Seven of us. Captain Touya, Hayase the surveyor, Shizu the apothecary, Roku the porter, Gorou, Nagi. And me.'),
                   ('grave', '都の井戸が夜ごとに脈を打つから、その元を探しに来たの。……下へ行った人は、誰も上ってこない', 'The wells in the capital pulsed every night, so we came to find the source. ...No one who went down has come back up.')],
-        'after': [('neutral', '肋の主を倒したの？　あれは、光の外では斬れなかった。番人と同じだって、隊長が言ってた', 'You beat the Lord of Ribs? It couldn\'t be cut outside the light. The captain said the warden is the same.')],
+        'after': [('neutral', '肋の主を倒したの？　あれは、光の外では斬れなかった。底の番人もそうかもしれないって、隊長が言ってた', 'You beat the Lord of Ribs? It couldn\'t be cut outside the light. The captain said the warden below might be the same.')],
     },
     'salt': {
         'camp': [('grave', 'おお……上から来たか。わしはハヤセ。探掘隊の測量士だ。足をこっちへ。座ったままですまんな', 'Oh... from above, are you. I am Hayase, the party\'s surveyor. Come closer. Forgive me for not standing.'),
