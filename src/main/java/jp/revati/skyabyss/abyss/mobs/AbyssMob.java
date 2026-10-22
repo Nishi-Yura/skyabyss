@@ -86,6 +86,14 @@ public class AbyssMob extends GuardMob {
         this.xpReward = kind.xp;
     }
 
+    // 心臓の下の上乗せ (深みの区画で湧くとき。AbyssScaling.deepSteps)。体力と傷を、その段の数字にする
+    public void setDeep(double steps) {
+        double hp = AbyssScaling.hpDeep(kind.baseHp, spawnY, steps);
+        getAttribute(Attributes.MAX_HEALTH).setBaseValue(hp);
+        getAttribute(Attributes.ATTACK_DAMAGE).setBaseValue(AbyssScaling.dmgDeep(kind.baseDamage, spawnY, steps));
+        setHealth((float) hp);
+    }
+
     public static AttributeSupplier.Builder createAttributes(AbyssMobKind k) {
         return Monster.createMonsterAttributes()
                 .add(Attributes.MAX_HEALTH, k.baseHp)

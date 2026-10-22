@@ -275,6 +275,7 @@ public final class SelfTestRunner {
         steps.add(Step.once("abyss pressure", jp.revati.skyabyss.story.ch5.AbyssPressureSelfTest::run));
         steps.add(Step.once("abyss warden (load)", jp.revati.skyabyss.story.ch5.warden.WardenSelfTest::load));
         steps.add(Step.once("abyss warden", 60, jp.revati.skyabyss.story.ch5.warden.WardenSelfTest::run));
+        steps.add(Step.once("abyss depths", 20, jp.revati.skyabyss.story.ch5.depths.DepthSelfTest::run));
         steps.add(Step.once("abyss finds (load)", jp.revati.skyabyss.story.ch5.AbyssFindsSelfTest::load));
         steps.add(Step.once("abyss finds", 60, jp.revati.skyabyss.story.ch5.AbyssFindsSelfTest::run));
         steps.add(Step.once("storm mobs (load)", jp.revati.skyabyss.titan.storm.mob.StormMobSelfTest::load));

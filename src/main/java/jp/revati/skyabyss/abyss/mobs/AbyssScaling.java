@@ -17,6 +17,13 @@ public final class AbyssScaling {
 
     // 層の番号 0 骨 (y 120 より上)・1 塩 (0〜119)・2 雷 (-120〜-1)・3 灰 (-121〜-240)・4 深み (それより下。心臓の間を含む)
     public static final int LAYER_MAX = 4;
+    // 心臓の下 (果てない深み。docs/design/36 の 9) の上乗せ。心臓の下の深さ DEEP_STEP ごとに一段、上限 DEEP_CAP 段。
+    //   体力 +15% ×段、傷 +8% ×段 (上限で体力 2.2 倍・傷 1.64 倍)。縦穴の数字 (上の関数) の上に掛ける。縦穴の中では段 0 なので変わらない
+    public static final double DEEP_STEP = 150;
+    public static final int DEEP_CAP = 8;
+    public static final double DEEP_HP_PER_STEP = 0.15;
+    public static final double DEEP_DMG_PER_STEP = 0.08;
+
     // 段 1 元の姿・2 歪み・3 崩れ
     public static final int FORM_MAX = 3;
 
@@ -44,6 +51,19 @@ public final class AbyssScaling {
 
     public static double dmg(double base, double y) {
         return base * dmgMul(y);
+    }
+
+    // 心臓の下の深さ (心臓の間の底より下へ何ブロック) から上乗せの段 (0〜DEEP_CAP)
+    public static double deepSteps(double beyondHeart) {
+        return Math.max(0, Math.min(DEEP_CAP, beyondHeart / DEEP_STEP));
+    }
+
+    public static double hpDeep(double base, double y, double steps) {
+        return hp(base, y) * (1 + DEEP_HP_PER_STEP * steps);
+    }
+
+    public static double dmgDeep(double base, double y, double steps) {
+        return dmg(base, y) * (1 + DEEP_DMG_PER_STEP * steps);
     }
 
     // 立っている y から層の番号 (0〜4)
