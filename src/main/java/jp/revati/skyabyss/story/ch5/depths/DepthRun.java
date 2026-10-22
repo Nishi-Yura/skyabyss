@@ -475,6 +475,35 @@ public final class DepthRun {
                                     }
                                     return dev(p, n);
                                 })))
+                                // 撮る台本用: その部屋のある階 (shop house treasure rest) を探して、その部屋の中へ
+                                .then(Commands.literal("feature").then(Commands.argument("what", StringArgumentType.word()).executes(c -> {
+                                    ServerPlayer p = c.getSource().getPlayerOrException();
+                                    String what = StringArgumentType.getString(c, "what");
+                                    DepthFloor.RoomType want = switch (what) {
+                                        case "shop" -> DepthFloor.RoomType.SHOP;
+                                        case "house" -> DepthFloor.RoomType.HOUSE;
+                                        case "treasure" -> DepthFloor.RoomType.TREASURE;
+                                        default -> DepthFloor.RoomType.REST;
+                                    };
+                                    DepthData.Run r = runOf(p.server, Groups.keyOf(p));
+                                    int n = 2;
+                                    while (n < 200 && (DepthPlan.isBoss(n) || n % 5 == 1 && want == DepthFloor.RoomType.REST
+                                            || DepthFloor.generate(DepthPlan.floorSeed(DepthBuilder.seed(p.server), r.slot, n, r.salt + 1), n).first(want) == null)) {
+                                        n++;
+                                    }
+                                    dev(p, n);
+                                    return devAt(p, what);
+                                })))
+                                // 撮る台本用: 今の王の階で王を目覚めさせる (観客席から。観戦者は広間に踏み入っても起こさないため)
+                                .then(Commands.literal("kingstart").executes(c -> {
+                                    ServerPlayer p = c.getSource().getPlayerOrException();
+                                    DepthBuilder.Inst i = DepthBuilder.at(p.blockPosition());
+                                    if (i == null || !i.plan.boss()) {
+                                        return 0;
+                                    }
+                                    DepthBoss.start(p.serverLevel(), i, List.of());
+                                    return 1;
+                                }))
                                 .then(Commands.literal("at").then(Commands.argument("what", StringArgumentType.word()).executes(c -> {
                                     ServerPlayer p = c.getSource().getPlayerOrException();
                                     return devAt(p, StringArgumentType.getString(c, "what"));

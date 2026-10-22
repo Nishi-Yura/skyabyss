@@ -175,7 +175,7 @@ public final class DepthFloorBuild {
                     if (get(x, FLOOR_YI, z) != null) {
                         set(x, FLOOR_YI, z, Blocks.SCULK.defaultBlockState());
                     }
-                    if (Math.abs(dx) == 2 && Math.abs(dz) == 2) {
+                    if (Math.abs(dx) == 2 && Math.abs(dz) == 2 && get(x, FLOOR_YI + 1, z) == AIR) {
                         set(x, FLOOR_YI + 1, z, Blocks.SOUL_LANTERN.defaultBlockState());
                     }
                 }
@@ -213,8 +213,12 @@ public final class DepthFloorBuild {
                     }
                 }
             }
-            set(m.x() - 2, FLOOR_YI + 1, m.z() - 2, Blocks.LANTERN.defaultBlockState());
-            set(m.x() + 2, FLOOR_YI + 1, m.z() + 2, Blocks.LANTERN.defaultBlockState());
+            if (get(m.x() - 2, FLOOR_YI + 1, m.z() - 2) == AIR) {
+                set(m.x() - 2, FLOOR_YI + 1, m.z() - 2, Blocks.LANTERN.defaultBlockState());
+            }
+            if (get(m.x() + 2, FLOOR_YI + 1, m.z() + 2) == AIR) {
+                set(m.x() + 2, FLOOR_YI + 1, m.z() + 2, Blocks.LANTERN.defaultBlockState());
+            }
         }
         for (Chest c : plan.chests()) {
             mark(new Spot(c.x(), c.z()), 1);

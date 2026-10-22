@@ -344,7 +344,7 @@ public final class DepthFloor {
         Room entryT = typed.get(entry.id());
         Room stairsT = typed.get(far.id());
 
-        Spot entrySpot = near(path, entryT, entryT.cx(), entryT.cz(), 2);
+        Spot entrySpot = near(path, entryT, entryT.cx(), entryT.cz(), 2, List.of());
         Spot stairs = new Spot(stairsT.cx(), stairsT.cz());
         List<Spot> taken = new ArrayList<>(List.of(entrySpot, stairs));
 
@@ -354,12 +354,12 @@ public final class DepthFloor {
         Spot merchant = null;
         for (Room room : typed) {
             if (room.type() == RoomType.REST && lantern == null) {
-                lantern = near(path, room, room.cx(), room.cz(), 1);
+                lantern = near(path, room, room.cx(), room.cz(), 1, taken);
                 chain = new Spot(room.x0() + 1, room.z0() + 1);
                 taken.add(lantern);
             }
             if (room.type() == RoomType.SHOP && merchant == null) {
-                merchant = near(path, room, room.cx(), room.cz(), 1);
+                merchant = near(path, room, room.cx(), room.cz(), 1, taken);
                 taken.add(merchant);
             }
         }
@@ -490,12 +490,16 @@ public final class DepthFloor {
     }
 
     // 部屋の中の、通路の線 (path) に載らない床のうち (nx, nz) にいちばん近い所。なければ (nx, nz)
-    private static Spot near(boolean[][] path, Room room, int nx, int nz, int margin) {
+    private static Spot near(boolean[][] path, Room room, int nx, int nz, int margin, List<Spot> avoid) {
         Spot best = null;
         int bd = Integer.MAX_VALUE;
         for (int x = room.x0 + margin; x < room.x0 + room.w - margin; x++) {
             for (int z = room.z0 + margin; z < room.z0 + room.d - margin; z++) {
                 if (path[x][z]) {
+                    continue;
+                }
+                Spot c = new Spot(x, z);
+                if (avoid.stream().anyMatch(a -> a.dist(c) < 3)) {
                     continue;
                 }
                 int d = Math.abs(x - nx) + Math.abs(z - nz);

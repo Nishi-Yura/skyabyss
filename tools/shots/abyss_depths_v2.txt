@@ -1,0 +1,194 @@
+# 心臓の下の果てない深み・不思議のダンジョン型の階 (docs/design/36 の 9): 八つの型の入口の眺めと、部屋の種類 (下り口・休み場・行商・敵の巣・宝の間・王の広間)。
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/abyss_depths_v2.txt -PshotsName=depths_v2
+# 階は組ごとに作るので、型・部屋は開発用の命令で探す: cmd skyabyss abyss depth kind <型> / feature <shop|house|treasure|rest> / at <entry|stairs|...> / go <階> / kingstart
+# 見渡す向きは tp @s ~ ~ ~ <yaw> <pitch>。タイトル (序章の題) と HUD は、cinematic stop・title clear・hud off・huddemo off で消す
+world opening_depths_v2 normal
+size 1280 720
+timeout 2400
+render 10
+clouds off
+
+wait 120
+cmd gamemode spectator
+cmd time set 18000
+cmd gamerule doDaylightCycle false
+cmd skyabyss cinematic stop
+cmd title @a clear
+hud off
+huddemo off
+wait 120
+cmd title @a clear
+
+# ---- 八つの型 (入口の部屋。二方向)
+cmd skyabyss abyss depth kind inverted_forest
+cmd title @a clear
+waitchunks
+wait 100
+cmd tp @s ~ ~1 ~ 0 6
+wait 20
+shot v2_inverted_forest_a
+cmd tp @s ~ ~ ~ 180 6
+wait 20
+shot v2_inverted_forest_b
+
+cmd skyabyss abyss depth kind floating_graves
+cmd title @a clear
+waitchunks
+wait 100
+cmd tp @s ~ ~1 ~ 0 6
+wait 20
+shot v2_floating_graves_a
+cmd tp @s ~ ~ ~ 180 6
+wait 20
+shot v2_floating_graves_b
+
+cmd skyabyss abyss depth kind pulse_cave
+cmd title @a clear
+waitchunks
+wait 100
+cmd tp @s ~ ~1 ~ 0 6
+wait 20
+shot v2_pulse_cave_a
+cmd tp @s ~ ~ ~ 180 6
+wait 20
+shot v2_pulse_cave_b
+
+cmd skyabyss abyss depth kind mirror_dark
+cmd title @a clear
+waitchunks
+wait 100
+cmd tp @s ~ ~1 ~ 0 6
+wait 20
+shot v2_mirror_dark_a
+cmd tp @s ~ ~ ~ 180 6
+wait 20
+shot v2_mirror_dark_b
+
+cmd skyabyss abyss depth kind chain_net
+cmd title @a clear
+waitchunks
+wait 100
+cmd tp @s ~ ~1 ~ 0 6
+wait 20
+shot v2_chain_net_a
+cmd tp @s ~ ~ ~ 180 6
+wait 20
+shot v2_chain_net_b
+
+cmd skyabyss abyss depth kind lamp_hall
+cmd title @a clear
+waitchunks
+wait 100
+cmd tp @s ~ ~1 ~ 0 6
+wait 20
+shot v2_lamp_hall_a
+cmd tp @s ~ ~ ~ 180 6
+wait 20
+shot v2_lamp_hall_b
+
+cmd skyabyss abyss depth kind dry_well
+cmd title @a clear
+waitchunks
+wait 100
+cmd tp @s ~ ~1 ~ 0 6
+wait 20
+shot v2_dry_well_a
+cmd tp @s ~ ~ ~ 180 6
+wait 20
+shot v2_dry_well_b
+
+cmd skyabyss abyss depth kind hollow_stars
+cmd title @a clear
+waitchunks
+wait 100
+cmd tp @s ~ ~1 ~ 0 6
+wait 20
+shot v2_hollow_stars_a
+cmd tp @s ~ ~ ~ 180 6
+wait 20
+shot v2_hollow_stars_b
+
+# ---- 下り口 (最初の階の下り口の部屋)
+cmd skyabyss abyss depth go 2
+cmd title @a clear
+waitchunks
+wait 100
+cmd skyabyss abyss depth at stairs
+cmd tp @s ~ ~2 ~ -90 25
+waitchunks
+wait 60
+shot v2_stairs
+
+# ---- 休み場・行商・敵の巣・宝の間
+cmd skyabyss abyss depth feature rest
+cmd title @a clear
+waitchunks
+wait 100
+cmd tp @s ~ ~1 ~ 0 10
+wait 40
+shot v2_rest
+
+cmd skyabyss abyss depth feature shop
+cmd title @a clear
+waitchunks
+wait 100
+cmd tp @s ~ ~1 ~ -90 10
+wait 40
+shot v2_shop
+
+cmd skyabyss abyss depth feature house
+cmd title @a clear
+waitchunks
+wait 100
+cmd tp @s ~ ~2 ~ -90 20
+wait 40
+shot v2_house
+
+cmd skyabyss abyss depth feature treasure
+cmd title @a clear
+waitchunks
+wait 100
+cmd tp @s ~ ~1 ~ -90 10
+wait 40
+shot v2_treasure
+
+# ---- 王の階 (5 階): 広間と、目を覚ました王。王は広間の左にいる
+cmd skyabyss abyss depth go 5
+cmd title @a clear
+waitchunks
+wait 100
+cmd skyabyss abyss depth at entry
+wait 20
+shot v2_boss_entry
+cmd skyabyss abyss depth at king
+cmd tp @s ~ ~3 ~ -90 12
+waitchunks
+wait 60
+shot v2_boss_hall
+cmd skyabyss abyss depth kingstart
+wait 80
+shot v2_boss_king
+
+cmd skyabyss abyss depth go 10
+cmd title @a clear
+waitchunks
+wait 100
+cmd skyabyss abyss depth at king
+cmd tp @s ~ ~3 ~ -90 12
+waitchunks
+wait 40
+cmd skyabyss abyss depth kingstart
+wait 80
+shot v2_boss_king_10
+
+cmd skyabyss abyss depth go 15
+cmd title @a clear
+waitchunks
+wait 100
+cmd skyabyss abyss depth at king
+cmd tp @s ~ ~3 ~ -90 12
+waitchunks
+wait 40
+cmd skyabyss abyss depth kingstart
+wait 80
+shot v2_boss_king_15
