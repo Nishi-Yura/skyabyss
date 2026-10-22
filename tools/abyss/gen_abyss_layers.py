@@ -227,6 +227,7 @@ class Ctx:
         self.PATH_OUT = PATH_OUT
         self.TOP = TOP
         self.HEART_TOP = HEART_TOP
+        self.HEART_BOTTOM = HEART_BOTTOM
         self.LAYERS = LAYERS
         self.slab_of = slab_of
         self.wall_of = wall_of
