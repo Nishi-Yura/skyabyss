@@ -283,6 +283,7 @@ public final class SelfTestRunner {
         // 番人の悪夢 (段の表・入る条件・段の進み・報酬・保存・閉じたあとの後片付け)。docs/design/36 の 9。SKYABYSS_SELFTEST_ONLY="abyss nightmare"
         steps.add(Step.once("abyss nightmare (load)", jp.revati.skyabyss.story.ch5.warden.WardenSelfTest::load));
         steps.add(Step.once("abyss nightmare", 60, jp.revati.skyabyss.story.ch5.warden.NightmareSelfTest::run));
+        steps.add(Step.once("abyss relics", 60, jp.revati.skyabyss.story.ch5.AbyssRelicsSelfTest::run));
         steps.add(Step.once("storm mobs (load)", jp.revati.skyabyss.titan.storm.mob.StormMobSelfTest::load));
         steps.add(Step.until("storm mobs (wait)", jp.revati.skyabyss.titan.storm.mob.StormMobSelfTest::ready));
         steps.add(Step.once("storm mobs", 5, jp.revati.skyabyss.titan.storm.mob.StormMobSelfTest::runSelfTest));
