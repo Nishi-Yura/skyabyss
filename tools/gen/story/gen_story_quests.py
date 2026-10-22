@@ -527,7 +527,7 @@ quest(THUNDER, "main", 30, ("嵐を渡る翼", "Wings Across the Storm"),
        stage("board", (f"{TW_JA}は、近くでいちばん高い峰へ降りてくるらしい。午後の夕立の刻にはきまって降りるが、峰の上で待っていれば、ほかの刻でも気づいて来るという。\n足もとに立つ風の柱に入れば、背まで運ばれるかもしれない。",
                        f"{TW_EN} is said to come down onto the highest peak nearby. It always comes at the hour of the afternoon squall, but if I wait on the peak, it may notice me at any hour.\n"
                        "If I step into the column of wind at its feet, it may carry me up to its back."),
-             [ob("board", "lore", "峰で待ち、昇り風で背へ上がろう", "Wait on the peak; ride the updraft up",
+             [ob("board", "lore", "峰で待ち、昇り風で背へ上がろう", "Ride the updraft on the peak",
                  targets=["chapter1/storm_ruins"])], xp=60, skip_if=stilled("thunder_wing")),
        stage("trials", ("鳥の背の中は、三つの試練の間が一つずつ続いている。\n間の入口には、風の民の碑文がある。三つを越えれば、奥へ進めるはずだ。",
                         "Inside the bird's back, three trial rooms follow one after another.\nThe wind folk left inscriptions at their entrances. Cross all three and the way deeper should open."),
