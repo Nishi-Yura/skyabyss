@@ -66,7 +66,13 @@ def main():
             if below is None or below in ('air', 'cave_air'):
                 probs.append('%s at %s: falls (nothing under it)' % (n, (x, y, z)))
     for m, (mx, my, mz) in sorted(data['marks'].items()):
-        if m.startswith('beacon_'):
+        if m.startswith('beacon_') or m.startswith('tide_') or m.startswith('lake_'):
+            continue
+        if m.startswith('shelf_'):
+            # 高い棚は歩いて届かない (満ち潮の水面より 3 つ以上上。重さの術で浮いて上がる)。届かないのが正しい
+            high = data['marks'].get('tide_salt_high')
+            if high is None or my < high[1] + 3:
+                probs.append('%s at %s: not above the high tide line %s' % (m, (mx, my, mz), high))
             continue
         if not any((mx + a, my + c, mz + e) in seen for a in range(-3, 4) for e in range(-3, 4) for c in (-1, 0, 1)):
             probs.append('%s at %s: not reached on foot from the arrival' % (m, (mx, my, mz)))
