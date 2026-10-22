@@ -66,8 +66,9 @@ public final class PanZoomCanvas {
         return (my - y - panY) / zoom;
     }
 
+    // 窓の矩形は、今の変換 (UiFit など) の中の座標で与える。切りも変換を通す
     public void begin(GuiGraphics g) {
-        TextClip.clip(g, x, y, w, h);
+        TextClip.clipPosed(g, x, y, w, h);
         g.pose().pushPose();
         g.pose().translate((float) (x + panX), (float) (y + panY), 0f);
         g.pose().scale(zoom, zoom, 1f);

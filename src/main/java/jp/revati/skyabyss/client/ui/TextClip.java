@@ -23,6 +23,14 @@ public final class TextClip {
         g.enableScissor(x, y, x + Math.max(0, w), y + Math.max(0, h));
     }
 
+    // 今の変換 (pose) の中の矩形を切る。矩形は変換の前の座標 (例: UiFit の中で描く盤の単位)。変換を通して画面の座標に直す
+    public static void clipPosed(GuiGraphics g, int x, int y, int w, int h) {
+        org.joml.Matrix4f m = g.pose().last().pose();
+        org.joml.Vector3f a = m.transformPosition(new org.joml.Vector3f(x, y, 0f));
+        org.joml.Vector3f b = m.transformPosition(new org.joml.Vector3f(x + Math.max(0, w), y + Math.max(0, h), 0f));
+        g.enableScissor(Math.round(a.x), Math.round(a.y), Math.round(b.x), Math.round(b.y));
+    }
+
     public static void unclip(GuiGraphics g) {
         g.disableScissor();
     }

@@ -77,6 +77,7 @@ public class LoreBookScreen extends Screen implements jp.revati.skyabyss.client.
 
     private int left;
     private int top;
+    private final jp.revati.skyabyss.client.ui.UiFit fit = new jp.revati.skyabyss.client.ui.UiFit();
     private int chapterIndex;
     @Nullable
     private String selected;
@@ -95,8 +96,10 @@ public class LoreBookScreen extends Screen implements jp.revati.skyabyss.client.
 
     @Override
     protected void init() {
-        left = (width - BW) / 2;
-        top = (height - BH) / 2 + 8;
+        // 書は論理の (0, 24) に置き、窓に合わせた変換 (fit) で大きく描く。上の段 (しおり) の分を上に残す
+        left = 0;
+        top = 24;
+        fit.fit(width, height, BW, top + BH + 8, 2.5f);
         if (selected == null) {
             String start = LoreClient.newestUnread();
             if (start == null) {
@@ -277,8 +280,15 @@ public class LoreBookScreen extends Screen implements jp.revati.skyabyss.client.
 
     // ---------------------------------------------------------------- 描画
     @Override
-    public void render(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
-        super.render(g, mouseX, mouseY, partialTick);
+    public void render(GuiGraphics g, int screenX, int screenY, float partialTick) {
+        // 書は窓に合わせて一様に大きく描く (描くのと当たりは同じ変換: fit)。釦などの部品は書の上に
+        renderBackground(g, screenX, screenY, partialTick);
+        int mouseX = (int) Math.floor(fit.x(screenX));
+        int mouseY = (int) Math.floor(fit.y(screenY));
+        fit.begin(g);
+        for (net.minecraft.client.gui.components.Renderable r : renderables) {
+            r.render(g, mouseX, mouseY, partialTick);
+        }
         List<LoreChapter> chapters = LoreClient.catalog().chapters();
         // しおり (選んでいないもの) は書の後ろに
         for (int i = 0; i < chapters.size(); i++) {
@@ -288,7 +298,7 @@ public class LoreBookScreen extends Screen implements jp.revati.skyabyss.client.
         }
         g.blit(BOOK, left, top, BW, BH, 0, 0, BOOK_TEX_W, BOOK_TEX_H, BOOK_TEX_W, BOOK_TEX_H);
         // しおりの章の名は書の後に、書の上端より上だけに描く (書に下半分が隠れて読めなかった。2026-10-21 の試遊)
-        g.enableScissor(0, 0, width, top + 1);
+        jp.revati.skyabyss.client.ui.TextClip.clipPosed(g, 0, 0, 4000, top + 1);
         for (int i = 0; i < chapters.size(); i++) {
             if (i != chapterIndex) {
                 drawTabLabel(g, i, chapters.get(i), false, mouseX, mouseY);
@@ -301,7 +311,7 @@ public class LoreBookScreen extends Screen implements jp.revati.skyabyss.client.
             drawTabLabel(g, chapterIndex, chapter, true, mouseX, mouseY);
             // 右どなりのしおりは、選んだしおりの右端に載せ直す (選んだしおりが幅いっぱいに描かれ、となりの章の名を隠していた。2026-10-22)
             if (chapterIndex + 1 < chapters.size()) {
-                g.enableScissor(0, 0, width, top + 1);
+                jp.revati.skyabyss.client.ui.TextClip.clipPosed(g, 0, 0, 4000, top + 1);
                 drawTab(g, chapterIndex + 1, chapters.get(chapterIndex + 1), false, mouseX, mouseY);
                 // 載せ直したしおりが、その右の章の名にかかるので、選んでいない章の名はもう一度上に描く
                 for (int i = 0; i < chapters.size(); i++) {
@@ -316,6 +326,7 @@ public class LoreBookScreen extends Screen implements jp.revati.skyabyss.client.
             g.drawString(font, Component.translatable("gui.skyabyss.lore.empty"), left + LEFT_X, top + HEADER_Y, FADED, false);
         }
         drawRightPage(g, mouseX, mouseY);
+        fit.end(g);
     }
 
     @Override
@@ -488,7 +499,9 @@ public class LoreBookScreen extends Screen implements jp.revati.skyabyss.client.
 
     // ---------------------------------------------------------------- 操作
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+    public boolean mouseClicked(double screenX, double screenY, int button) {
+        double mouseX = fit.x(screenX);
+        double mouseY = fit.y(screenY);
         if (button == 0) {
             List<LoreChapter> chapters = LoreClient.catalog().chapters();
             for (int i = 0; i < chapters.size(); i++) {
@@ -553,7 +566,9 @@ public class LoreBookScreen extends Screen implements jp.revati.skyabyss.client.
     }
 
     @Override
-    public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
+    public boolean mouseScrolled(double screenX, double screenY, double scrollX, double scrollY) {
+        double mouseX = fit.x(screenX);
+        double mouseY = fit.y(screenY);
         int step = scrollY > 0 ? -1 : scrollY < 0 ? 1 : 0;
         if (mouseX < left + BW / 2.0) {
             listScroll = Math.max(0, Math.min(listScroll + step, Math.max(0, chapterEntries().size() - LIST_ROWS)));
@@ -596,6 +611,6 @@ public class LoreBookScreen extends Screen implements jp.revati.skyabyss.client.
     @Override
     public int[] textBounds() {
         // 上のしおり (章の名) も文字の範囲に入れる (top - 4 で切っていて、章の名が読めなかった)
-        return new int[] {left - 40, top - 24, BW + 80, BH + 28};
+        return fit.screenRect(left - 40, top - 24, BW + 80, BH + 28);
     }
 }

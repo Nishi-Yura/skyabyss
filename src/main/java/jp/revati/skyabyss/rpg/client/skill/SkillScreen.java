@@ -5,6 +5,7 @@ import java.util.List;
 
 import jp.revati.skyabyss.SkyAbyss;
 import jp.revati.skyabyss.client.ui.PanZoomCanvas;
+import jp.revati.skyabyss.client.ui.UiFit;
 import jp.revati.skyabyss.rpg.Growth;
 import jp.revati.skyabyss.rpg.skill.Mutation;
 import jp.revati.skyabyss.rpg.skill.Rune;
@@ -30,6 +31,7 @@ import jp.revati.skyabyss.rpg.skill.net.SkillRunePayload;
 import jp.revati.skyabyss.rpg.skill.net.SkillSlotPayload;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.Renderable;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
@@ -102,6 +104,8 @@ public class SkillScreen extends Screen implements jp.revati.skyabyss.client.ui.
     private int top;
     // 木の盤 (動かせて拡大できる。画面の中の窓は BOARD_V*)
     private final PanZoomCanvas canvas = new PanZoomCanvas();
+    // 板の大きさを窓に合わせる変換 (描くのも当たりも、この一つ)
+    private final UiFit fit = new UiFit();
     private Button learn;
     private Button respec;
     private Button calling;
@@ -137,8 +141,10 @@ public class SkillScreen extends Screen implements jp.revati.skyabyss.client.ui.
 
     @Override
     protected void init() {
-        left = (width - W) / 2;
-        top = (height - H) / 2;
+        // 板は論理の (0, 0) に置き、窓に合わせた変換 (fit) で大きく描く
+        left = 0;
+        top = 0;
+        fit.fit(width, height, W, H, 3f);
         canvas.setViewport(left + BOARD_VX, top + BOARD_VY, BOARD_VW, BOARD_VH);
         canvas.setContent(BOARD_W, BOARD_H);
         canvas.reset();
@@ -529,7 +535,9 @@ public class SkillScreen extends Screen implements jp.revati.skyabyss.client.ui.
 
     // ---------------------------------------------------------------- 入力
     @Override
-    public boolean mouseClicked(double mx, double my, int button) {
+    public boolean mouseClicked(double screenX, double screenY, int button) {
+        double mx = fit.x(screenX);
+        double my = fit.y(screenY);
         if (super.mouseClicked(mx, my, button)) {
             return true;
         }
@@ -692,12 +700,18 @@ public class SkillScreen extends Screen implements jp.revati.skyabyss.client.ui.
     }
 
     @Override
-    public boolean mouseDragged(double mx, double my, int button, double dx, double dy) {
+    public boolean mouseDragged(double screenX, double screenY, int button, double dx, double dy) {
+        double mx = fit.x(screenX);
+        double my = fit.y(screenY);
+        dx /= fit.scale();
+        dy /= fit.scale();
         return (page == 0 && canvas.mouseDragged(mx, my, button, dx, dy)) || super.mouseDragged(mx, my, button, dx, dy);
     }
 
     @Override
-    public boolean mouseReleased(double mx, double my, int button) {
+    public boolean mouseReleased(double screenX, double screenY, int button) {
+        double mx = fit.x(screenX);
+        double my = fit.y(screenY);
         return (page == 0 && canvas.mouseReleased(mx, my, button)) || super.mouseReleased(mx, my, button);
     }
 
@@ -707,7 +721,9 @@ public class SkillScreen extends Screen implements jp.revati.skyabyss.client.ui.
     }
 
     @Override
-    public boolean mouseScrolled(double mx, double my, double scrollX, double scrollY) {
+    public boolean mouseScrolled(double screenX, double screenY, double scrollX, double scrollY) {
+        double mx = fit.x(screenX);
+        double my = fit.y(screenY);
         if (page == 2 && ext.scroll(mx, my, scrollY, real(), left, top)) {
             return true;
         }
@@ -720,13 +736,21 @@ public class SkillScreen extends Screen implements jp.revati.skyabyss.client.ui.
     // ---------------------------------------------------------------- 描画
     @Override
     public void renderBackground(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
+        // 板は render の中で、窓に合わせた変換の中で描く (描くのと当たりを一つの変換にする)
         super.renderBackground(g, mouseX, mouseY, partialTick);
-        g.blit(PANEL, left, top, W, H, 0, 0, W * 2, H * 2, 1024, 512);
     }
 
     @Override
-    public void render(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
-        super.render(g, mouseX, mouseY, partialTick);
+    public void render(GuiGraphics g, int screenX, int screenY, float partialTick) {
+        renderBackground(g, screenX, screenY, partialTick);
+        int mouseX = (int) Math.floor(fit.x(screenX));
+        int mouseY = (int) Math.floor(fit.y(screenY));
+        fit.begin(g);
+        g.blit(PANEL, left, top, W, H, 0, 0, W * 2, H * 2, 1024, 512);
+        // 釦など (Screen の部品) は板の上に、いつもの順
+        for (Renderable r : renderables) {
+            r.render(g, mouseX, mouseY, partialTick);
+        }
         SkillData d = data();
         int level = level();
         g.drawCenteredString(font, title, left + W / 2, top + 8, TITLE);
@@ -769,6 +793,7 @@ public class SkillScreen extends Screen implements jp.revati.skyabyss.client.ui.
         }
         renderHover(g, d, mouseX, mouseY);
         renderLearnTooltip(g, d, mouseX, mouseY);
+        fit.end(g);
     }
 
     private void renderTreeTabs(GuiGraphics g, SkillData d) {
@@ -1613,6 +1638,7 @@ public class SkillScreen extends Screen implements jp.revati.skyabyss.client.ui.
 
     @Override
     public int[] textBounds() {
-        return new int[] {left - 2, top - 18, W + 4, H + 20};
+        // 文の範囲は画面の座標 (切りは画面の座標で掛かる)。板の外の上の段 (tabs) も含めて広げる
+        return fit.screenRect(left - 2, top - 18, W + 4, H + 20);
     }
 }
