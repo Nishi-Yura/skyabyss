@@ -225,11 +225,11 @@ public class GuildScreen extends Screen {
         int mouseX = (int) Math.floor(fit.x(screenX));
         int mouseY = (int) Math.floor(fit.y(screenY));
         fit.begin(g);
-        renderBoard(g, mouseX, mouseY);
+        renderBoard(g, mouseX, mouseY, partialTick);
         fit.end(g);
     }
 
-    private void renderBoard(GuiGraphics g, int mouseX, int mouseY) {
+    private void renderBoard(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
         FacilityUi.panel(g, x0, y0, W, H);
         Font font = this.font;
         FacilityUi.gem(g, x0 + 12, y0 + 13);
