@@ -28,13 +28,27 @@ def build(ctx):
         if not span:
             continue
         for k, f in enumerate(CAVE_AT):
-            th, h2 = span[int(len(span) * f)]
+            th, h2 = on_path(ctx, span, f)
             cave(ctx, L, name, k + 1, th, (h2 + 1) // 2, side=1 if k == 0 else -1)
         for k, f in enumerate(CARVE_AT):
             th, h2 = span[int(len(span) * f)]
             carve_on_wall(ctx, name, k + 3, th, (h2 + 1) // 2)
         camp_grave(ctx, name)
         shortcut(ctx, li, name)
+
+
+def on_path(ctx, span, f):
+    """道の割合 f の所。層の仕掛けで道が抜かれていれば (骨の層の崩れなど)、道の床が残っている所までずらす"""
+    n = len(span)
+    for d in range(0, n):
+        for i in (int(n * f) + d, int(n * f) - d):
+            if 0 <= i < n:
+                th, h2 = span[i]
+                y = (h2 + 1) // 2
+                x, z = int(round(math.cos(th) * 17.5)), int(round(math.sin(th) * 17.5))
+                if any(ctx.v.get(x, yy, z) not in (None, 'air', 'cave_air') for yy in (y - 1, y - 2)):
+                    return span[i]
+    return span[int(n * f)]
 
 
 def cave(ctx, L, name, k, th, y, side):

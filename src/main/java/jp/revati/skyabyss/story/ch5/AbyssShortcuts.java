@@ -34,6 +34,11 @@ import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 public final class AbyssShortcuts {
     static final int CHAIN = 6;
 
+    // 骨の層: 巣の番 (肋の番) を倒すと鎖が下りる (story/ch5/layers/BoneBridge)
+    static {
+        jp.revati.skyabyss.story.ch5.layers.BoneBridge.onDenCleared(level -> open(level.getServer(), "bone"));
+    }
+
     private AbyssShortcuts() {
     }
 

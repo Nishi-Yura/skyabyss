@@ -1,0 +1,51 @@
+# 深淵の骨の橋・巣の門・塩の湖 (docs/design/36 の 8 章・A9): 橋の上と下、巣の戸、引き潮と満ち潮の湖、高い棚
+# ./gradlew runShots -Pscript=tools/shots/abyss_layers_bone_salt.txt -PshotsName=abyss_layers_bone_salt
+world abyss_layers_bone_salt flat
+size 1280 720
+timeout 2400
+render 12
+clouds off
+
+wait 80
+cmd skyabyss cinematic stop
+cmd gamemode spectator
+hud off
+cmd skyabyss abyss enter
+wait 40
+cmd skyabyss abyss build
+wait 900
+
+# 骨の橋: 手前の端から向こうの端へ、それから橋の下から見上げる
+cmd tp @s -8 170 -10 -70 8
+wait 60
+shot b_bridge_start
+cmd tp @s 3 168 -8 -70 40
+wait 60
+shot b_bridge_down
+cmd tp @s 6 150 -6 -70 -6
+wait 60
+shot b_bridge_under
+
+# 巣の戸と肋の番 (戸は閉まる前の姿)
+cmd tp @s -18 146 -2 90 4
+wait 60
+shot b_den_door
+
+# 塩の湖: 引き潮 (時間 0)、満ち潮 (時間 1200)
+cmd time set 0
+wait 80
+cmd tp @s -16 52 12 -131 10
+wait 60
+shot s_lake_low
+cmd tp @s -4 52 -18 -20 20
+wait 60
+shot s_causeway_low
+cmd time set 1200
+wait 80
+cmd tp @s -16 52 12 -131 10
+wait 60
+shot s_lake_high
+cmd tp @s 6 67 -8 -60 10
+wait 60
+shot s_shelf_high
+quit

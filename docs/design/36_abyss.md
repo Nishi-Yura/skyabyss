@@ -282,6 +282,12 @@
 - 灰の迷路の遊び（`story/ch5/layers/AshMaze`）: 道は置いたブロックから BFS で求める（入口から番人の間まで）。道の跡は、光の術の灯り（AbyssLight）が 4 以上の所で粒として見える。足音は番人の間から遠いほど長く（`footstepGap`。AbyssHorror は今の版に無いので、足音の間はここに置いた）。見る者は見張りの印の近くで一度だけ立ち、近づくと消える（粒の輪郭。姿のモデルは仮）。番人（燠の番人）は番人の間に人が入ったとき一度湧き、倒すと `AbyssShortcuts.open(server, "ash")`。
 - 近道（`story/ch5/AbyssShortcuts`）: 開いた近道をワールドに一つ保存する。鎖のはしごの物理的な作りは、近道を作る層の仕事（今は記録だけ）。
 - 版: `AbyssBuild.VERSION` = 3。自己テスト "abyss layers storm ash"。文言は `tools/abyss/gen_abyss_layer_texts_b.py`（`skyabyss_abyss_lb`）。
+### 8.1 作ったもの（骨と塩。A9 の途中）
+
+- **骨（`tools/abyss/layer_bone.py`・`story/ch5/layers/BoneBridge`）**: 深さ 60% で螺旋を約 2 rad 抜き（崩れ）、両端を肋の橋（二マス幅・下に骨の弧と灯籠）でつなぐ。印 `bridge_bone_a`・`bridge_bone_b`。橋に乗ると両端から骨拾いが三体ずつ（45 秒ごと）。巣 `den_bone` へ入ると肋の番が出て、戸の口（半径 20〜22、三層）が barrier で封じられる。番が死ぬと戸が開き、`BoneBridge.onDenCleared(...)` の係へ知らせる。近道の印は `shortcut_bone`（巣の床）。近道そのものは作っていない。
+- **塩（`tools/abyss/layer_salt.py`・`story/ch5/layers/SaltTide`）**: 縦穴の真ん中に塩の器（半径 11 の湖。底は塩の柱で支える）。螺旋の θ0 から反対側へ、湖を横切る下の道（塩の橋）。水は設計図の「水」の所だけ。潮は `levelAt(時間)`（周期 2400 tick・余弦）で引き潮（`tide_salt_low`）と満ち潮（`tide_salt_high`）のあいだを上下し、一 tick に一列。湖の塊が全部読み込まれているときだけ動く。満ち潮で重さの術を使っている人は浮いて、高い棚 `shelf_salt`（満ち潮の水面より 2 つ上の器の縁）へ上がれる。満ち潮の湖では潮だまりの手が底から湧く。
+- **確かめ**: `tools/abyss/audit_layers.py` は 0 問題（棚は歩いて届かない印として、満ち潮より 3 つ以上上かを見る）。自己テスト `abyss layers bone salt`。文言は `tools/abyss/gen_abyss_layer_texts_a.py`（namespace `skyabyss_abyss_la`）。
+- **残り**: 灰の迷路・雷の道は別の人。脇の洞・刻み・足音と見る者は共通の係。近道の鎖。見た目の確かめ（shots）。
 
 ## 9. クリア後（2026-10-22 決定。00 の 256〜260）
 
