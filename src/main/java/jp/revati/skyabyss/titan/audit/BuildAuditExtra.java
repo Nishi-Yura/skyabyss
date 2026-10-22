@@ -98,7 +98,10 @@ public final class BuildAuditExtra {
                 || s.is(net.minecraft.world.level.block.Blocks.GRAVEL) || s.is(net.minecraft.world.level.block.Blocks.CLAY)
                 // 雪の斜面・荒野・凍った水の自然の地形 (雪のブロック・粉雪・テラコッタ・氷)
                 || s.is(net.minecraft.world.level.block.Blocks.SNOW_BLOCK) || s.is(net.minecraft.world.level.block.Blocks.POWDER_SNOW)
-                || s.is(net.minecraft.tags.BlockTags.TERRACOTTA) || s.is(net.minecraft.tags.BlockTags.ICE));
+                || s.is(net.minecraft.tags.BlockTags.TERRACOTTA) || s.is(net.minecraft.tags.BlockTags.ICE)
+                // 繁茂した洞窟の植物 (大きなドリップリーフは葉に当たり判定がある)
+                || s.is(net.minecraft.world.level.block.Blocks.BIG_DRIPLEAF) || s.is(net.minecraft.world.level.block.Blocks.BIG_DRIPLEAF_STEM)
+                || s.is(net.minecraft.world.level.block.Blocks.SMALL_DRIPLEAF));
     }
 
     // まわり 2 マスの空気でないブロックの名前 (最大 6 つ)。何のそばの浮きかを読むため

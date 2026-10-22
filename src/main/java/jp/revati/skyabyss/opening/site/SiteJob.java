@@ -1067,8 +1067,9 @@ public final class SiteJob {
         int d = clearStand();
         int e = sealFluids();
         int f = pruneLoneNatural();
-        if (a + b + c + d + e + f > 0) {
-            SkyAbyss.LOGGER.info("Opening site {}: settle base {} dimples {} plants {} stand {} fluids {} lone {}", label, a, b, c, d, e, f);
+        int g = dropUnsupported();
+        if (a + b + c + d + e + f + g > 0) {
+            SkyAbyss.LOGGER.info("Opening site {}: settle base {} dimples {} plants {} stand {} fluids {} lone {} unsupported {}", label, a, b, c, d, e, f, g);
         }
     }
 
@@ -1313,6 +1314,33 @@ public final class SiteJob {
             }
             if (n == before) {
                 break;
+            }
+        }
+        return n;
+    }
+
+    // 範囲のまわり (3 マス) で、ならしで支えを失った、この部品が置いていない物 (近くの村の松明・ボタン・草花など) を消す (build audit の ATTACH_SUPPORT)。
+    // 建てるときは隣の更新を止めているので、ふつうなら落ちる物が残る
+    private int dropUnsupported() {
+        LongOpenHashSet ours = new LongOpenHashSet();
+        for (BlockPos at : placed) {
+            ours.add(at.asLong());
+        }
+        int n = 0;
+        BlockPos.MutableBlockPos p = new BlockPos.MutableBlockPos();
+        int y0 = origin.getY() + Math.min(bp.minY, 0) - 4;
+        int y1 = origin.getY() + Math.max(bp.maxY, 2) + 6;
+        for (int x = rect[0] - 3; x <= rect[2] + 3; x++) {
+            for (int z = rect[1] - 3; z <= rect[3] + 3; z++) {
+                for (int y = y1; y >= y0; y--) {
+                    p.set(x, y, z);
+                    BlockState s = level.getBlockState(p);
+                    if (s.isAir() || !s.getFluidState().isEmpty() || ours.contains(p.asLong()) || s.canSurvive(level, p)) {
+                        continue;
+                    }
+                    level.setBlock(p, Blocks.AIR.defaultBlockState(), FLAGS);
+                    n++;
+                }
             }
         }
         return n;
