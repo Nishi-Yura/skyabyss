@@ -367,6 +367,7 @@
   "gui.skyabyss.skill.tab_status": "記録",
   "gui.skyabyss.skill.tab_skills": "技",
   "gui.skyabyss.skill.learn": "習得",
+  "gui.skyabyss.skill.board_hint": "ドラッグ・ホイール・右で戻す",
   "gui.skyabyss.skill.learn_up": "段を上げる",
   "gui.skyabyss.skill.learn_max": "極めた",
   "gui.skyabyss.skill.respec": "振り直す",

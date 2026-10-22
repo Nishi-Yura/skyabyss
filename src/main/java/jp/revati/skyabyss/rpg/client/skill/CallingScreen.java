@@ -3,6 +3,7 @@ package jp.revati.skyabyss.rpg.client.skill;
 import java.util.ArrayList;
 import java.util.List;
 
+import jp.revati.skyabyss.client.ui.ScrollPanel;
 import jp.revati.skyabyss.rpg.skill.SkillData;
 import jp.revati.skyabyss.rpg.skill.SkillManager;
 import jp.revati.skyabyss.rpg.skill.SkillTree;
@@ -19,14 +20,18 @@ import net.neoforged.neoforge.network.PacketDistributor;
 
 // 天職を選ぶ画面 (心臓の報酬のあと・K の画面から)。五つの木が左に並び、右に天性・役目・開くもの。
 // 「継ぐ」は二度押し。一つ目の天職は木が全部開く、二つ目は 3 行目まで (要と天性はなし)
+// 2026-10-22 の部屋の見直し: 窓は画面に合わせて広げ、右の説明は目盛りつきで送る (以前は長い説明が窓の下で切れた)
 public class CallingScreen extends Screen implements jp.revati.skyabyss.client.ui.TextBounded {
-    private static final int W = 300;
-    private static final int H = 168;
+    private static final int MAX_W = 340;
+    private static final int MAX_H = 200;
     private static final int ROW_Y = 30;
     private static final int ROW_H = 24;
     private static final int LIST_W = 98;
+    private static final int LINE_H = 11;
 
     private final int which;
+    private int w;
+    private int h;
     private int left;
     private int top;
     private SkillTree picked;
@@ -35,6 +40,7 @@ public class CallingScreen extends Screen implements jp.revati.skyabyss.client.u
     private Button inherit;
     private Button later;
     private final List<SkillTree> trees = new ArrayList<>();
+    private final ScrollPanel right = new ScrollPanel(LINE_H * 2);
 
     public CallingScreen(int which) {
         super(Component.translatable(which == 2 ? "gui.skyabyss.calling.title2" : "gui.skyabyss.calling.title"));
@@ -53,19 +59,26 @@ public class CallingScreen extends Screen implements jp.revati.skyabyss.client.u
     public void pick(SkillTree tree) {
         picked = tree;
         armed = false;
+        right.setScroll(0);
         if (inherit != null) {
             update();
         }
     }
 
+    private void layout() {
+        w = Math.min(MAX_W, width - 16);
+        h = Math.min(MAX_H, height - 16);
+        left = (width - w) / 2;
+        top = (height - h) / 2;
+    }
+
     @Override
     protected void init() {
-        left = (width - W) / 2;
-        top = (height - H) / 2;
+        layout();
         inherit = addRenderableWidget(Button.builder(Component.translatable("gui.skyabyss.calling.inherit"), b -> press())
-                .bounds(left + LIST_W + 16, top + H - 22, 70, 14).build());
+                .bounds(left + LIST_W + 16, top + h - 22, 70, 14).build());
         later = addRenderableWidget(Button.builder(Component.translatable("gui.skyabyss.calling.later"), b -> onClose())
-                .bounds(left + LIST_W + 90, top + H - 22, W - LIST_W - 98, 14).build());
+                .bounds(left + LIST_W + 90, top + h - 22, w - LIST_W - 98, 14).build());
         update();
     }
 
@@ -114,6 +127,9 @@ public class CallingScreen extends Screen implements jp.revati.skyabyss.client.u
 
     @Override
     public boolean mouseClicked(double mx, double my, int button) {
+        if (right.mouseClicked(mx, my, button)) {
+            return true;
+        }
         for (int i = 0; i < trees.size(); i++) {
             int x = left + 8;
             int y = top + ROW_Y + i * ROW_H;
@@ -129,6 +145,26 @@ public class CallingScreen extends Screen implements jp.revati.skyabyss.client.u
     }
 
     @Override
+    public boolean mouseDragged(double mx, double my, int button, double dx, double dy) {
+        return right.mouseDragged(mx, my, button, dx, dy) || super.mouseDragged(mx, my, button, dx, dy);
+    }
+
+    @Override
+    public boolean mouseReleased(double mx, double my, int button) {
+        return right.mouseReleased(mx, my, button) || super.mouseReleased(mx, my, button);
+    }
+
+    @Override
+    public boolean mouseScrolled(double mx, double my, double dx, double dy) {
+        return right.mouseScrolled(mx, my, dy) || super.mouseScrolled(mx, my, dx, dy);
+    }
+
+    @Override
+    public boolean keyPressed(int key, int scan, int mods) {
+        return right.keyPressed(key) || super.keyPressed(key, scan, mods);
+    }
+
+    @Override
     public boolean isPauseScreen() {
         return false;
     }
@@ -136,22 +172,23 @@ public class CallingScreen extends Screen implements jp.revati.skyabyss.client.u
     @Override
     public void renderBackground(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
         super.renderBackground(g, mouseX, mouseY, partialTick);
-        int x = (width - W) / 2;
-        int y = (height - H) / 2;
-        g.fill(x - 1, y - 1, x + W + 1, y + H + 1, 0xFF0B0E14);
-        g.fill(x, y, x + W, y + H, 0xF0141922);
-        g.fill(x, y, x + W, y + 1, 0xFF3E5A6B);
-        g.fill(x, y + H - 1, x + W, y + H, 0xFF3E5A6B);
-        g.fill(x, y, x + 1, y + H, 0xFF3E5A6B);
-        g.fill(x + W - 1, y, x + W, y + H, 0xFF3E5A6B);
+        layout();
+        int x = left;
+        int y = top;
+        g.fill(x - 1, y - 1, x + w + 1, y + h + 1, 0xFF0B0E14);
+        g.fill(x, y, x + w, y + h, 0xF0141922);
+        g.fill(x, y, x + w, y + 1, 0xFF3E5A6B);
+        g.fill(x, y + h - 1, x + w, y + h, 0xFF3E5A6B);
+        g.fill(x, y, x + 1, y + h, 0xFF3E5A6B);
+        g.fill(x + w - 1, y, x + w, y + h, 0xFF3E5A6B);
     }
 
     @Override
     public void render(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
         super.render(g, mouseX, mouseY, partialTick);
-        g.drawCenteredString(font, title, left + W / 2, top + 7, SkillScreen.TITLE);
+        g.drawCenteredString(font, title, left + w / 2, top + 7, SkillScreen.TITLE);
         g.drawCenteredString(font, Component.translatable(which == 2 ? "gui.skyabyss.calling.lead2" : "gui.skyabyss.calling.lead"),
-                left + W / 2, top + 18, SkillScreen.SOFT);
+                left + w / 2, top + 18, SkillScreen.SOFT);
         for (int i = 0; i < trees.size(); i++) {
             SkillTree t = trees.get(i);
             int x = left + 8;
@@ -170,34 +207,41 @@ public class CallingScreen extends Screen implements jp.revati.skyabyss.client.u
             }
         }
         int rx = left + LIST_W + 16;
-        int rw = W - LIST_W - 24;
+        int rw = w - LIST_W - 24;
+        right.setViewport(rx, top + ROW_Y, rw, h - ROW_Y - 28);
         if (picked == null) {
             return;
         }
-        int y = top + ROW_Y;
+        right.begin(g);
+        int y = right.top();
         g.drawString(font, Component.translatable("calling.skyabyss." + picked.id), rx, y, SkillScreen.GOLD, false);
         y += 13;
-        y = block(g, Component.translatable(picked.descKey()), rx, y, rw, SkillScreen.SOFT) + 4;
+        int tw = right.width();
+        y = block(g, Component.translatable(picked.descKey()), rx, y, tw, SkillScreen.SOFT) + 4;
         if (which == 1) {
-            y = block(g, Component.translatable("gui.skyabyss.calling.trait", Component.translatable("calling.skyabyss." + picked.id + ".trait")), rx, y, rw,
+            y = block(g, Component.translatable("gui.skyabyss.calling.trait", Component.translatable("calling.skyabyss." + picked.id + ".trait")), rx, y, tw,
                     SkillScreen.PALE);
-            y = block(g, Component.translatable("calling.skyabyss." + picked.id + ".trait.desc"), rx, y, rw, SkillScreen.TEXT) + 4;
+            y = block(g, Component.translatable("calling.skyabyss." + picked.id + ".trait.desc"), rx, y, tw, SkillScreen.TEXT) + 4;
         }
-        y = block(g, Component.translatable("gui.skyabyss.calling.role", Component.translatable("calling.skyabyss." + picked.id + ".role")), rx, y, rw,
+        y = block(g, Component.translatable("gui.skyabyss.calling.role", Component.translatable("calling.skyabyss." + picked.id + ".role")), rx, y, tw,
                 SkillScreen.LORE) + 4;
-        block(g, Component.translatable(which == 2 ? "gui.skyabyss.calling.deep2" : "gui.skyabyss.calling.deep"), rx, y, rw, SkillScreen.SOFT);
+        y = block(g, Component.translatable(which == 2 ? "gui.skyabyss.calling.deep2" : "gui.skyabyss.calling.deep"), rx, y, tw, SkillScreen.SOFT);
+        right.end(g);
+        right.setContentHeight(y - right.top());
+        right.drawBar(g, 0xFF10151D, 0xAA3E5A6B);
     }
 
-    private int block(GuiGraphics g, Component text, int x, int y, int w, int color) {
-        for (FormattedCharSequence line : TextWrap.split(font, text, w)) {
+    private int block(GuiGraphics g, Component text, int x, int y, int tw, int color) {
+        for (FormattedCharSequence line : TextWrap.split(font, text, tw)) {
             g.drawString(font, line, x, y, color, false);
-            y += 10;
+            y += LINE_H;
         }
         return y;
     }
 
     @Override
     public int[] textBounds() {
-        return new int[] {(width - W) / 2, (height - H) / 2, W, H};
+        layout();
+        return new int[] {left, top, w, h};
     }
 }

@@ -367,6 +367,7 @@
   "gui.skyabyss.skill.tab_status": "Record",
   "gui.skyabyss.skill.tab_skills": "Arts",
   "gui.skyabyss.skill.learn": "Learn",
+  "gui.skyabyss.skill.board_hint": "Drag, wheel, right-click resets",
   "gui.skyabyss.skill.learn_up": "Rank Up",
   "gui.skyabyss.skill.learn_max": "Mastered",
   "gui.skyabyss.skill.respec": "Reset",

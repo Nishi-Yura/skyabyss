@@ -110,8 +110,9 @@ public class TradeScreen extends Screen {
 
     @Override
     protected void init() {
-        x0 = (width - W) / 2;
-        y0 = (height - H) / 2;
+        fit.fit(width, height, W + 16, H + 16, 2.5f);
+        x0 = 8;
+        y0 = 8;
         coinsBox = null;
         search = null;
         int by = y0 + H - 26;
@@ -277,9 +278,20 @@ public class TradeScreen extends Screen {
         g.fillGradient(0, 0, width, height, 0x80101418, 0xA0101418);
     }
 
+    // 板は窓に合わせて一様に大きく描く (描くのと当たりは同じ変換: fit)。論理の (8, 8) に置く
+    private final jp.revati.skyabyss.client.ui.UiFit fit = new jp.revati.skyabyss.client.ui.UiFit();
+
     @Override
-    public void render(GuiGraphics g, int mx, int my, float partialTick) {
-        renderBackground(g, mx, my, partialTick);
+    public void render(GuiGraphics g, int screenX, int screenY, float partialTick) {
+        renderBackground(g, screenX, screenY, partialTick);
+        int mx = (int) Math.floor(fit.x(screenX));
+        int my = (int) Math.floor(fit.y(screenY));
+        fit.begin(g);
+        renderBoard(g, mx, my, partialTick);
+        fit.end(g);
+    }
+
+    private void renderBoard(GuiGraphics g, int mx, int my, float partialTick) {
         FacilityUi.panel(g, x0, y0, W, H);
         hits.clear();
         hitActions.clear();
@@ -723,7 +735,9 @@ public class TradeScreen extends Screen {
     }
 
     @Override
-    public boolean mouseClicked(double mx, double my, int button) {
+    public boolean mouseClicked(double screenX, double screenY, int button) {
+        double mx = fit.x(screenX);
+        double my = fit.y(screenY);
         if (super.mouseClicked(mx, my, button)) {
             return true;
         }

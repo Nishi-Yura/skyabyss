@@ -25,8 +25,11 @@ public final class RpgTabs {
 
     // 画面の init から呼ぶ。add には addRenderableWidget を渡す
     public static void add(Consumer<AbstractButton> add, int screenWidth, int screenHeight, int active) {
-        int cx = screenWidth / 2;
-        int top = (screenHeight - PANEL_H) / 2;
+        addAt(add, screenWidth / 2, (screenHeight - PANEL_H) / 2, active);
+    }
+
+    // 板の真ん中 cx と上端 top を直接渡す (板を窓に合わせて大きく描く画面は、論理の座標で渡す。client/ui/UiFit)
+    public static void addAt(Consumer<AbstractButton> add, int cx, int top, int active) {
         add.accept(new Tab(cx - 112, top - TAB_H + 2, STATUS, active == STATUS));
         add.accept(new Tab(cx - 112 + TAB_W + 2, top - TAB_H + 2, SKILLS, active == SKILLS));
         // 転生のつまみ: Lv 40 になるか、転生したあとから (序盤に見せない。docs/design/31)

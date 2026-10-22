@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import jp.revati.skyabyss.client.ui.ScrollPanel;
 import jp.revati.skyabyss.party.PartyNetwork;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -22,8 +23,13 @@ public final class PartyScreen extends Screen implements jp.revati.skyabyss.clie
     private static final int GOLD = 0xF2C14E;
     private static final int MAX_LIST = 8;
 
+    // 招待できる人の一覧の高さ (6 行ぶん)。下の「完了」の釦 (top + 206) にかからない
+    private static final int CAND_H = 104;
+
     private int left;
     private int top;
+    private final ScrollPanel candPanel = new ScrollPanel(16);
+    private final List<Button> inviteButtons = new ArrayList<>();
 
     public PartyScreen() {
         super(Component.translatable("gui.skyabyss.party.title"));
@@ -74,12 +80,11 @@ public final class PartyScreen extends Screen implements jp.revati.skyabyss.clie
                     .bounds(left, top + 96 + 16 * 4 + 6, 70, 18).build());
         }
         // 招待できる人 (右)
+        inviteButtons.clear();
         if (leader && s.members().size() < 4) {
-            y = top + 96;
             for (String name : candidates(s)) {
-                addRenderableWidget(Button.builder(Component.translatable("gui.skyabyss.party.invite"), b -> send(PartyNetwork.Action.INVITE, name))
-                        .bounds(left + 266, y - 2, 52, 14).build());
-                y += 16;
+                inviteButtons.add(addRenderableWidget(Button.builder(Component.translatable("gui.skyabyss.party.invite"),
+                        b -> send(PartyNetwork.Action.INVITE, name)).bounds(left + 262, top + 96, 50, 14).build()));
             }
         }
         addRenderableWidget(Button.builder(Component.translatable("gui.done"), b -> onClose()).bounds(width / 2 - 40, top + 206, 80, 18).build());
@@ -153,17 +158,50 @@ public final class PartyScreen extends Screen implements jp.revati.skyabyss.clie
             }
             y += 16;
         }
-        // 招待できる人
+        // 招待できる人 (目盛りつきの送り。招待の釦はその行に合わせて動かし、枠の外の釦は隠す)
         g.drawString(font, Component.translatable("gui.skyabyss.party.others"), left + 180, top + 82, GOLD, false);
-        y = top + 96;
         List<String> others = candidates(s);
+        candPanel.setViewport(left + 180, top + 96, 140, CAND_H);
+        candPanel.setContentHeight(others.size() * 16);
         if (others.isEmpty()) {
-            g.drawString(font, Component.translatable("gui.skyabyss.party.nobody"), left + 180, y, SOFT, false);
+            g.drawString(font, Component.translatable("gui.skyabyss.party.nobody"), left + 180, top + 96, SOFT, false);
         }
-        for (String name : others) {
-            g.drawString(font, font.plainSubstrByWidth(name, 82), left + 180, y, TEXT, false);
-            y += 16;
+        candPanel.begin(g);
+        for (int i = 0; i < others.size(); i++) {
+            int oy = candPanel.top() + i * 16;
+            if (oy + 16 < candPanel.y() || oy > candPanel.y() + CAND_H) {
+                continue;
+            }
+            g.drawString(font, font.plainSubstrByWidth(others.get(i), 82), left + 180, oy, TEXT, false);
         }
+        candPanel.end(g);
+        candPanel.drawBar(g, 0x30FFFFFF, 0x90F2C14E);
+        for (int i = 0; i < inviteButtons.size(); i++) {
+            Button b = inviteButtons.get(i);
+            int by = candPanel.top() + i * 16 - 2;
+            b.setY(by);
+            b.visible = by >= candPanel.y() && by + 14 <= candPanel.y() + CAND_H;
+        }
+    }
+
+    @Override
+    public boolean mouseScrolled(double mx, double my, double dx, double dy) {
+        return candPanel.mouseScrolled(mx, my, dy) || super.mouseScrolled(mx, my, dx, dy);
+    }
+
+    @Override
+    public boolean mouseClicked(double mx, double my, int button) {
+        return candPanel.mouseClicked(mx, my, button) || super.mouseClicked(mx, my, button);
+    }
+
+    @Override
+    public boolean mouseDragged(double mx, double my, int button, double dx, double dy) {
+        return candPanel.mouseDragged(mx, my, button, dx, dy) || super.mouseDragged(mx, my, button, dx, dy);
+    }
+
+    @Override
+    public boolean mouseReleased(double mx, double my, int button) {
+        return candPanel.mouseReleased(mx, my, button) || super.mouseReleased(mx, my, button);
     }
 
     @Override

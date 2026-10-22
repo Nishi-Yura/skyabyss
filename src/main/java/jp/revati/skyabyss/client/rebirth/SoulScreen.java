@@ -68,8 +68,9 @@ public class SoulScreen extends Screen implements jp.revati.skyabyss.client.ui.T
 
     @Override
     protected void init() {
-        left = (width - W) / 2;
-        top = (height - H) / 2;
+        fit.fit(width, height, W + 4, H + 24, 2.5f);
+        left = 2;
+        top = 20;
         arms.clear();
         boons.clear();
         SoulData d = Rebirth.data(minecraft.player);
@@ -93,7 +94,7 @@ public class SoulScreen extends Screen implements jp.revati.skyabyss.client.ui.T
         go = addRenderableWidget(Button.builder(Component.empty(), b -> press()).bounds(left + C1, top + 158, C1W, 16).build());
         shardButton = addRenderableWidget(Button.builder(Component.translatable("gui.skyabyss.rebirth.shard_btn"), b -> claimShard())
                 .bounds(left + C3, top + 160, 60, 14).build());
-        RpgTabs.add(this::addRenderableWidget, width, height, RpgTabs.REBIRTH);
+        RpgTabs.addAt(this::addRenderableWidget, left + W / 2, top, RpgTabs.REBIRTH);
         refresh();
     }
 
@@ -187,9 +188,49 @@ public class SoulScreen extends Screen implements jp.revati.skyabyss.client.ui.T
     }
 
     // ---------------------------------------------------------------- 描く
+    // 板は窓に合わせて一様に大きく描く (描くのと当たりは同じ変換: fit)。論理の (2, 20) に置く
+    private final jp.revati.skyabyss.client.ui.UiFit fit = new jp.revati.skyabyss.client.ui.UiFit();
+
     @Override
     public void renderBackground(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
         super.renderBackground(g, mouseX, mouseY, partialTick);
+    }
+
+    @Override
+    public void render(GuiGraphics g, int screenX, int screenY, float partialTick) {
+        renderBackground(g, screenX, screenY, partialTick);
+        int mouseX = (int) Math.floor(fit.x(screenX));
+        int mouseY = (int) Math.floor(fit.y(screenY));
+        fit.begin(g);
+        renderPanel(g);
+        for (net.minecraft.client.gui.components.Renderable r : renderables) {
+            r.render(g, mouseX, mouseY, partialTick);
+        }
+        renderBody(g, mouseX, mouseY, partialTick);
+        fit.end(g);
+    }
+
+    @Override
+    public boolean mouseClicked(double screenX, double screenY, int button) {
+        return super.mouseClicked(fit.x(screenX), fit.y(screenY), button);
+    }
+
+    @Override
+    public boolean mouseDragged(double screenX, double screenY, int button, double dx, double dy) {
+        return super.mouseDragged(fit.x(screenX), fit.y(screenY), button, dx / fit.scale(), dy / fit.scale());
+    }
+
+    @Override
+    public boolean mouseReleased(double screenX, double screenY, int button) {
+        return super.mouseReleased(fit.x(screenX), fit.y(screenY), button);
+    }
+
+    @Override
+    public boolean mouseScrolled(double screenX, double screenY, double dx, double dy) {
+        return super.mouseScrolled(fit.x(screenX), fit.y(screenY), dx, dy);
+    }
+
+    private void renderPanel(GuiGraphics g) {
         g.fill(left, top, left + W, top + H, PANEL);
         g.renderOutline(left, top, W, H, PANEL_EDGE);
         g.renderOutline(left + 2, top + 2, W - 4, H - 4, 0xFF222834);
@@ -204,9 +245,7 @@ public class SoulScreen extends Screen implements jp.revati.skyabyss.client.ui.T
         g.renderOutline(left + x, top + y, w, h, 0xFF2A3342);
     }
 
-    @Override
-    public void render(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
-        super.render(g, mouseX, mouseY, partialTick);
+    private void renderBody(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
         g.drawCenteredString(font, title, left + W / 2, top + 7, TITLE);
         GrowthData gd = growth();
         SoulData rd = Rebirth.data(minecraft.player);
@@ -467,6 +506,6 @@ public class SoulScreen extends Screen implements jp.revati.skyabyss.client.ui.T
 
     @Override
     public int[] textBounds() {
-        return new int[] {left - 1, top - 18, W + 2, H + 19};
+        return fit.screenRect(left - 1, top - 18, W + 2, H + 19);
     }
 }

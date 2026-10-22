@@ -54,10 +54,14 @@ public final class RebirthScreen extends Screen implements jp.revati.skyabyss.cl
             new Toggle("burst", RebirthConfig.BURST),
             new Toggle("prism_still", RebirthConfig.PRISM_STILL));
 
+    // 板は窓に合わせて一様に大きく描く (描くのと当たりは同じ変換: fit)。論理の (8, 8) に置く
+    private final jp.revati.skyabyss.client.ui.UiFit fit = new jp.revati.skyabyss.client.ui.UiFit();
+
     @Override
     protected void init() {
-        left = (width - W) / 2;
-        top = (height - H) / 2;
+        fit.fit(width, height, W + 16, H + 16, 2.5f);
+        left = 8;
+        top = 8;
         toggles.clear();
         int y = top + 56;
         for (Toggle t : TOGGLES) {
@@ -103,14 +107,25 @@ public final class RebirthScreen extends Screen implements jp.revati.skyabyss.cl
     @Override
     public void renderBackground(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
         super.renderBackground(g, mouseX, mouseY, partialTick);
-        g.fill(left - 6, top - 6, left + W + 6, top + H + 6, 0xC0101418);
-        g.fill(left - 5, top - 5, left + W + 5, top - 4, 0x60FFFFFF);
-        g.fill(left - 5, top + H + 4, left + W + 5, top + H + 5, 0x60FFFFFF);
     }
 
     @Override
-    public void render(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
-        super.render(g, mouseX, mouseY, partialTick);
+    public void render(GuiGraphics g, int screenX, int screenY, float partialTick) {
+        renderBackground(g, screenX, screenY, partialTick);
+        int mouseX = (int) Math.floor(fit.x(screenX));
+        int mouseY = (int) Math.floor(fit.y(screenY));
+        fit.begin(g);
+        g.fill(left - 6, top - 6, left + W + 6, top + H + 6, 0xC0101418);
+        g.fill(left - 5, top - 5, left + W + 5, top - 4, 0x60FFFFFF);
+        g.fill(left - 5, top + H + 4, left + W + 5, top + H + 5, 0x60FFFFFF);
+        for (net.minecraft.client.gui.components.Renderable r : renderables) {
+            r.render(g, mouseX, mouseY, partialTick);
+        }
+        renderBody(g, mouseX, mouseY);
+        fit.end(g);
+    }
+
+    private void renderBody(GuiGraphics g, int mouseX, int mouseY) {
         Minecraft mc = Minecraft.getInstance();
         if (mc.player == null) {
             return;
@@ -169,7 +184,9 @@ public final class RebirthScreen extends Screen implements jp.revati.skyabyss.cl
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+    public boolean mouseClicked(double screenX, double screenY, int button) {
+        double mouseX = fit.x(screenX);
+        double mouseY = fit.y(screenY);
         if (button == 0 && mouseX >= left && mouseX < left + 160) {
             int row = (int) ((mouseY - (top + 54)) / ROW);
             if (mouseY >= top + 54 && row >= 0 && row < ROWS) {
@@ -192,7 +209,9 @@ public final class RebirthScreen extends Screen implements jp.revati.skyabyss.cl
     }
 
     @Override
-    public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
+    public boolean mouseScrolled(double screenX, double screenY, double scrollX, double scrollY) {
+        double mouseX = fit.x(screenX);
+        double mouseY = fit.y(screenY);
         if (mouseX < left + 170) {
             scroll -= (int) Math.signum(scrollY);
             return true;
@@ -207,6 +226,6 @@ public final class RebirthScreen extends Screen implements jp.revati.skyabyss.cl
 
     @Override
     public int[] textBounds() {
-        return new int[] {left - 6, top - 6, W + 12, H + 12};
+        return fit.screenRect(left - 6, top - 6, W + 12, H + 12);
     }
 }

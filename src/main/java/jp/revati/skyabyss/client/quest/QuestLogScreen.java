@@ -6,6 +6,7 @@ import java.util.List;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
+import jp.revati.skyabyss.client.ui.ScrollPanel;
 import jp.revati.skyabyss.lore.LoreWrap;
 import jp.revati.skyabyss.quest.QuestDef;
 import jp.revati.skyabyss.quest.QuestLog;
@@ -26,15 +27,15 @@ import net.neoforged.neoforge.network.PacketDistributor;
 
 // クエストログ (U)。左に一覧 (メイン・サブ・終えたもの)、右に選んだクエストの今の書き付け、目的、報酬。
 // 「やること」を書く帳面で、「知ったこと」は伝承の書に分ける。下の釦で、左の小さな表示に出すクエストを選ぶ。
-// 一覧は長くなるとホイールで送る (以前は下が切れて、終えたものの章の見出しだけが見え、押しても何も出なかった)。
+// 一覧と右の頁は、どちらも目盛りつきの送り (ホイール・つまみ・キー)。窓は画面に合わせて広がる (2026-10-22 の部屋の見直し)。
 // 章の見出し (「· 一章　岩鯨」) を押すと、その下の最初のクエストを開く。
 // 終えたクエストの頁: 題・章・依頼主・受けた日と終えた日・終わりの書き付け・やったこと (段ごとの目的を ■ で)・受け取った報酬
 public class QuestLogScreen extends Screen implements jp.revati.skyabyss.client.ui.TextBounded {
-    private static final int W = 330;
-    private static final int H = 206;
+    private static final int MAX_W = 400;
+    private static final int MAX_H = 260;
     private static final int LIST_W = 112;
     private static final int ROW_H = 12;
-    private static final int LINE_H = 10;
+    private static final int LINE_H = 11;
     private static final int PANEL = 0xFA101318;
     private static final int EDGE = 0xFF2E5552;
     private static final int EDGE_IN = 0xFF17302F;
@@ -44,13 +45,15 @@ public class QuestLogScreen extends Screen implements jp.revati.skyabyss.client.
     private static final int SOFT = 0xFF8C8CA0;
     private static final int DIM = 0xFF5C5C6C;
 
+    private int w;
+    private int h;
     private int left;
     private int top;
     @Nullable
     private String selected;
-    private int bodyScroll;
-    // 一覧の送り (上から何行を飛ばすか)
-    private int listScroll;
+    // 一覧と右の頁 (どちらも目盛りつきで送る)
+    private final ScrollPanel listPanel = new ScrollPanel(ROW_H * 3);
+    private final ScrollPanel bodyPanel = new ScrollPanel(LINE_H * 3);
     private final List<Row> rows = new ArrayList<>();
     private final List<BodyLine> body = new ArrayList<>();
     private Button trackButton;
@@ -62,9 +65,6 @@ public class QuestLogScreen extends Screen implements jp.revati.skyabyss.client.
         }
     }
 
-    // 一覧に一度に見せる行の数
-    static final int LIST_ROWS = (H - 64) / ROW_H + 1;
-
     private record BodyLine(String text, int color, int indent) {
     }
 
@@ -72,12 +72,26 @@ public class QuestLogScreen extends Screen implements jp.revati.skyabyss.client.
         super(Component.translatable("gui.skyabyss.quest.log"));
     }
 
+    // 窓の大きさと場所、一覧と頁の見える所 (画面が変わったら、ここで決め直す)
+    private void layout() {
+        w = Math.min(MAX_W, width - 16);
+        h = Math.min(MAX_H, height - 16);
+        left = (width - w) / 2;
+        top = (height - h) / 2;
+        listPanel.setViewport(left + 8, top + 26, LIST_W - 2, h - 26 - 24);
+        int bx = left + LIST_W + 18;
+        bodyPanel.setViewport(bx, top + 40, left + w - 12 - bx, h - 40 - 24);
+    }
+
+    private int bodyLeft() {
+        return left + LIST_W + 18;
+    }
+
     @Override
     protected void init() {
-        left = (width - W) / 2;
-        top = (height - H) / 2;
+        layout();
         trackButton = addRenderableWidget(Button.builder(Component.empty(), b -> toggleTrack())
-                .bounds(left + W - 98, top + H - 24, 88, 16).build());
+                .bounds(left + w - 98, top + h - 24, 88, 16).build());
         rebuild();
         if (selected == null) {
             QuestLog log = log();
@@ -109,6 +123,7 @@ public class QuestLogScreen extends Screen implements jp.revati.skyabyss.client.
         rows.clear();
         QuestLog log = log();
         if (log == null) {
+            syncList();
             return;
         }
         List<QuestDef> main = new ArrayList<>();
@@ -138,6 +153,11 @@ public class QuestLogScreen extends Screen implements jp.revati.skyabyss.client.
                 rows.add(new Row(null, Component.translatable("gui.skyabyss.quest.hidden_row"), DIM));
             }
         }
+        syncList();
+    }
+
+    private void syncList() {
+        listPanel.setContentHeight(rows.size() * ROW_H);
     }
 
     private void section(String key, List<QuestDef> list, int color) {
@@ -166,13 +186,14 @@ public class QuestLogScreen extends Screen implements jp.revati.skyabyss.client.
     // 右の頁: 題、依頼主、書き付け、目的、報酬
     private void rebuildBody() {
         body.clear();
-        bodyScroll = 0;
+        bodyPanel.setScroll(0);
         Font font = Minecraft.getInstance().font;
-        int w = W - LIST_W - 30;
+        int bw = bodyPanel.width();
         QuestLog log = log();
         QuestDef def = selected == null ? null : QuestClient.quest(selected);
         QuestLog.Entry entry = log == null || selected == null ? null : log.entry(selected);
         updateTrackButton(def, entry, log);
+        bodySync();
         if (def == null || entry == null) {
             return;
         }
@@ -197,7 +218,7 @@ public class QuestLogScreen extends Screen implements jp.revati.skyabyss.client.
         body.add(new BodyLine("", TEXT, 0));
         String journal = entry.done ? doneText(def)
                 : Component.translatable(def.journalKey(def.stages().get(Math.min(entry.stage, def.stages().size() - 1)))).getString();
-        for (String l : LoreWrap.wrap(journal, w, font::width)) {
+        for (String l : LoreWrap.wrap(journal, bw, font::width)) {
             body.add(new BodyLine(l, TEXT, 0));
         }
         body.add(new BodyLine("", TEXT, 0));
@@ -214,7 +235,7 @@ public class QuestLogScreen extends Screen implements jp.revati.skyabyss.client.
                     have = Math.min(jp.revati.skyabyss.quest.QuestItems.count(Minecraft.getInstance().player, ob.targets().get(0), ob.token()), ob.count());
                 }
                 String text = QuestHud.objectiveText(def, stage, ob);
-                List<String> wrapped = QuestHud.wrapWithCount(text, ob.count() > 1 ? have + "/" + ob.count() : "", w - 12, font);
+                List<String> wrapped = QuestHud.wrapWithCount(text, ob.count() > 1 ? have + "/" + ob.count() : "", bw - 12, font);
                 for (int k = 0; k < wrapped.size(); k++) {
                     body.add(new BodyLine((k == 0 ? (ok ? "■ " : "□ ") : "") + wrapped.get(k), ok ? SOFT : TEXT, k == 0 ? 0 : 11));
                 }
@@ -226,7 +247,7 @@ public class QuestLogScreen extends Screen implements jp.revati.skyabyss.client.
             String or = Component.translatable("gui.skyabyss.quest.or").getString();
             for (jp.revati.skyabyss.quest.QuestDoneView.Line d : jp.revati.skyabyss.quest.QuestDoneView.lines(def)) {
                 String text = Component.translatable(d.key()).getString();
-                List<String> wrapped = QuestHud.wrapWithCount(d.alternative() ? or + " " + text : text, d.count(), w - 12, font);
+                List<String> wrapped = QuestHud.wrapWithCount(d.alternative() ? or + " " + text : text, d.count(), bw - 12, font);
                 for (int k = 0; k < wrapped.size(); k++) {
                     String head = k > 0 ? "" : d.alternative() ? "　" : "■ ";
                     body.add(new BodyLine(head + wrapped.get(k), SOFT, k == 0 ? 0 : 11));
@@ -238,10 +259,15 @@ public class QuestLogScreen extends Screen implements jp.revati.skyabyss.client.
         String reward = rewardText(def);
         if (!reward.isEmpty()) {
             String key = entry.done ? "gui.skyabyss.quest.reward_got" : "gui.skyabyss.quest.reward";
-            for (String l : LoreWrap.wrap(Component.translatable(key, reward).getString(), w, font::width)) {
+            for (String l : LoreWrap.wrap(Component.translatable(key, reward).getString(), bw, font::width)) {
                 body.add(new BodyLine(l, GOLD, 0));
             }
         }
+        bodySync();
+    }
+
+    private void bodySync() {
+        bodyPanel.setContentHeight(body.size() * LINE_H);
     }
 
     // 終えたクエストの書き付け (終わりの文。無ければ最後の段の書き付け。quest.QuestDoneView)
@@ -312,9 +338,9 @@ public class QuestLogScreen extends Screen implements jp.revati.skyabyss.client.
             if (hash != lastHash) {
                 lastHash = hash;
                 rebuild();
-                int scroll = bodyScroll;
+                int scroll = bodyPanel.scroll();
                 rebuildBody();
-                bodyScroll = scroll;
+                bodyPanel.setScroll(scroll);
             }
         }
     }
@@ -329,96 +355,118 @@ public class QuestLogScreen extends Screen implements jp.revati.skyabyss.client.
     @Override
     public void renderBackground(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
         // 枠と中身は背景として描き、その上に釦 (super.render の部品) が乗る
+        layout();
         g.fill(0, 0, width, height, 0x80000000);
         drawPanel(g, mouseX, mouseY);
     }
 
     private void drawPanel(GuiGraphics g, int mouseX, int mouseY) {
         Font font = Minecraft.getInstance().font;
-        g.fill(left, top, left + W, top + H, PANEL);
-        g.renderOutline(left, top, W, H, EDGE);
-        g.renderOutline(left + 2, top + 2, W - 4, H - 4, EDGE_IN);
+        g.fill(left, top, left + w, top + h, PANEL);
+        g.renderOutline(left, top, w, h, EDGE);
+        g.renderOutline(left + 2, top + 2, w - 4, h - 4, EDGE_IN);
         g.drawString(font, title, left + 10, top + 8, TEAL, false);
-        g.fill(left + 8, top + 19, left + W - 8, top + 20, EDGE_IN);
+        g.fill(left + 8, top + 19, left + w - 8, top + 20, EDGE_IN);
         // 縦の仕切りは下の一行 (伝承の書への案内) の上で止める。案内を左の列に押し込むと「伝承の書／に。」と切れるため
-        g.fill(left + LIST_W + 10, top + 24, left + LIST_W + 11, top + H - 26, EDGE_IN);
+        g.fill(left + LIST_W + 10, top + 24, left + LIST_W + 11, top + h - 26, EDGE_IN);
         if (rows.isEmpty()) {
-            g.drawCenteredString(font, Component.translatable("gui.skyabyss.quest.empty"), left + W / 2, top + H / 2 - 4, SOFT);
+            g.drawCenteredString(font, Component.translatable("gui.skyabyss.quest.empty"), left + w / 2, top + h / 2 - 4, SOFT);
             return;
         }
-        // 一覧 (送りの分を飛ばす)
-        listScroll = Mth.clamp(listScroll, 0, Math.max(0, rows.size() - LIST_ROWS));
-        int y = top + 26;
-        for (int ri = listScroll; ri < rows.size() && ri < listScroll + LIST_ROWS; ri++) {
+        // 一覧 (目盛りつき。見える行だけ描く)
+        listPanel.begin(g);
+        for (int ri = 0; ri < rows.size(); ri++) {
+            int y = listPanel.top() + ri * ROW_H;
+            if (y + ROW_H < listPanel.y() || y > listPanel.y() + listPanel.height()) {
+                continue;
+            }
             Row r = rows.get(ri);
             if (r.quest() == null) {
-                boolean hover = r.jump() != null && mouseX >= left + 8 && mouseX < left + LIST_W + 6 && mouseY >= y && mouseY < y + ROW_H;
-                g.drawString(font, font.plainSubstrByWidth(r.label().getString(), rows.size() > LIST_ROWS ? LIST_W - 10 : LIST_W), left + 10, y + 2, hover ? TEXT : r.color(), false);
+                boolean hover = r.jump() != null && inList(mouseX, mouseY) && mouseY >= y && mouseY < y + ROW_H;
+                g.drawString(font, font.plainSubstrByWidth(r.label().getString(), listTextW()), left + 10, y + 2, hover ? TEXT : r.color(), false);
             } else {
                 boolean sel = r.quest().equals(selected);
-                boolean hover = mouseX >= left + 8 && mouseX < left + LIST_W + 6 && mouseY >= y && mouseY < y + ROW_H;
+                boolean hover = inList(mouseX, mouseY) && mouseY >= y && mouseY < y + ROW_H;
                 if (sel || hover) {
                     g.fill(left + 8, y, left + LIST_W + 6, y + ROW_H, sel ? 0x502E8F88 : 0x281E5552);
                 }
-                // 送りの印 (▲▼) が右端に出るときは、そのぶん短く切る
-                String label = font.plainSubstrByWidth(r.label().getString(), rows.size() > LIST_ROWS ? LIST_W - 20 : LIST_W - 12);
+                String label = font.plainSubstrByWidth(r.label().getString(), listTextW() - 4);
                 g.drawString(font, label, left + 16, y + 2, r.color(), false);
                 QuestLog log = log();
                 if (log != null && r.quest().equals(log.tracked())) {
                     g.drawString(font, "▸", left + 9, y + 2, r.color(), false);
                 }
             }
-            y += ROW_H;
         }
-        if (rows.size() > LIST_ROWS) {
-            g.drawString(font, listScroll > 0 ? "▲" : " ", left + LIST_W + 1, top + 28, SOFT, false);
-            g.drawString(font, listScroll + LIST_ROWS < rows.size() ? "▼" : " ", left + LIST_W + 1, top + 28 + (LIST_ROWS - 1) * ROW_H, SOFT, false);
-        }
+        listPanel.end(g);
+        listPanel.drawBar(g, EDGE_IN, 0x887FD6D0);
         // 右の頁
         QuestDef def = selected == null ? null : QuestClient.quest(selected);
-        int bx = left + LIST_W + 18;
+        int bx = bodyLeft();
         if (def != null) {
             g.drawString(font, Component.translatable(def.titleKey()), bx, top + 26, def.main() ? GOLD : TEAL, false);
-            int by = top + 40;
-            int maxLines = (top + H - 30 - by) / LINE_H;
-            bodyScroll = Mth.clamp(bodyScroll, 0, Math.max(0, body.size() - maxLines));
-            for (int i = bodyScroll; i < body.size() && i < bodyScroll + maxLines; i++) {
+            bodyPanel.begin(g);
+            for (int i = 0; i < body.size(); i++) {
+                int y = bodyPanel.top() + i * LINE_H;
+                if (y + LINE_H < bodyPanel.y() || y > bodyPanel.y() + bodyPanel.height()) {
+                    continue;
+                }
                 BodyLine l = body.get(i);
-                g.drawString(font, l.text(), bx + l.indent(), by, l.color(), false);
-                by += LINE_H;
+                g.drawString(font, l.text(), bx + l.indent(), y, l.color(), false);
             }
-            if (body.size() > maxLines) {
-                g.drawString(font, bodyScroll > 0 ? "▲" : " ", left + W - 16, top + 40, SOFT, false);
-                g.drawString(font, bodyScroll + maxLines < body.size() ? "▼" : " ", left + W - 16, top + H - 40, SOFT, false);
-            }
+            bodyPanel.end(g);
+            bodyPanel.drawBar(g, EDGE_IN, 0x887FD6D0);
         }
-        g.drawString(font, Component.translatable("gui.skyabyss.quest.lore_hint"), left + 10, top + H - 19, DIM, false);
+        g.drawString(font, Component.translatable("gui.skyabyss.quest.lore_hint"), left + 10, top + h - 19, DIM, false);
+    }
+
+    // 一覧の字の幅 (送りの印が出るときは、その分だけ短く切る)
+    private int listTextW() {
+        return LIST_W - 12;
+    }
+
+    private boolean inList(double mx, double my) {
+        return listPanel.contains(mx, my);
     }
 
     @Override
     public boolean mouseClicked(double mx, double my, int button) {
-        int y = top + 26;
-        for (int ri = listScroll; ri < rows.size() && ri < listScroll + LIST_ROWS; ri++) {
-            Row r = rows.get(ri);
-            String target = r.quest() != null ? r.quest() : r.jump();
-            if (target != null && mx >= left + 8 && mx < left + LIST_W + 6 && my >= y && my < y + ROW_H) {
-                select(target);
-                return true;
+        if (inList(mx, my) && button == 0) {
+            int ri = (int) Math.floor((my - listPanel.top()) / ROW_H);
+            if (ri >= 0 && ri < rows.size()) {
+                Row r = rows.get(ri);
+                String target = r.quest() != null ? r.quest() : r.jump();
+                if (target != null) {
+                    select(target);
+                    return true;
+                }
             }
-            y += ROW_H;
         }
-        return super.mouseClicked(mx, my, button);
+        return listPanel.mouseClicked(mx, my, button) || bodyPanel.mouseClicked(mx, my, button) || super.mouseClicked(mx, my, button);
     }
 
-    // 選んだクエストの行が一覧の見える所に入るよう送る
+    @Override
+    public boolean mouseDragged(double mx, double my, int button, double dx, double dy) {
+        return listPanel.mouseDragged(mx, my, button, dx, dy) || bodyPanel.mouseDragged(mx, my, button, dx, dy)
+                || super.mouseDragged(mx, my, button, dx, dy);
+    }
+
+    @Override
+    public boolean mouseReleased(double mx, double my, int button) {
+        return listPanel.mouseReleased(mx, my, button) || bodyPanel.mouseReleased(mx, my, button) || super.mouseReleased(mx, my, button);
+    }
+
+    // 選んだクエストの行が一覧の見える所に入るよう送る (真上が章の見出しなら、見出しごと見せる)
     private void reveal(String quest) {
         for (int i = 0; i < rows.size(); i++) {
             if (quest.equals(rows.get(i).quest())) {
-                if (i < listScroll) {
-                    // 真上が章の見出しなら、見出しごと見せる
-                    listScroll = i > 0 && rows.get(i - 1).quest() == null ? i - 1 : i;
-                } else if (i >= listScroll + LIST_ROWS) {
-                    listScroll = i - LIST_ROWS + 1;
+                int at = i > 0 && rows.get(i - 1).quest() == null ? i - 1 : i;
+                int top = at * ROW_H;
+                int view = listPanel.height();
+                if (top < listPanel.scroll()) {
+                    listPanel.setScroll(top);
+                } else if (i * ROW_H + ROW_H > listPanel.scroll() + view) {
+                    listPanel.setScroll(i * ROW_H + ROW_H - view);
                 }
                 return;
             }
@@ -436,12 +484,7 @@ public class QuestLogScreen extends Screen implements jp.revati.skyabyss.client.
 
     @Override
     public boolean mouseScrolled(double mx, double my, double dx, double dy) {
-        if (mx > left + LIST_W + 10) {
-            bodyScroll -= (int) Math.signum(dy);
-            return true;
-        }
-        if (mx >= left && mx <= left + LIST_W + 10) {
-            listScroll -= (int) Math.signum(dy);
+        if (bodyPanel.mouseScrolled(mx, my, dy) || listPanel.mouseScrolled(mx, my, dy)) {
             return true;
         }
         return super.mouseScrolled(mx, my, dx, dy);
@@ -462,11 +505,15 @@ public class QuestLogScreen extends Screen implements jp.revati.skyabyss.client.
             }
             return true;
         }
+        if (key == GLFW.GLFW_KEY_PAGE_UP || key == GLFW.GLFW_KEY_PAGE_DOWN) {
+            return bodyPanel.keyPressed(key) || super.keyPressed(key, scan, mods);
+        }
         return super.keyPressed(key, scan, mods);
     }
 
     @Override
     public int[] textBounds() {
-        return new int[] {left, top, W, H};
+        layout();
+        return new int[] {left, top, w, h};
     }
 }

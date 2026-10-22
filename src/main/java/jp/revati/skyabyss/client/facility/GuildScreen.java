@@ -84,8 +84,9 @@ public class GuildScreen extends Screen {
 
     @Override
     protected void init() {
-        x0 = (width - W) / 2;
-        y0 = (height - H) / 2;
+        fit.fit(width, height, W + 16, H + 16, 2.5f);
+        x0 = 8;
+        y0 = 8;
         bottom = null;
         if (view.mine().isEmpty()) {
             String oldName = name == null ? "" : name.getValue();
@@ -215,9 +216,20 @@ public class GuildScreen extends Screen {
         g.fillGradient(0, 0, width, height, 0x80101418, 0xA0101418);
     }
 
+    // 板は窓に合わせて一様に大きく描く (描くのと当たりは同じ変換: fit)。論理の (8, 8) に置く
+    private final jp.revati.skyabyss.client.ui.UiFit fit = new jp.revati.skyabyss.client.ui.UiFit();
+
     @Override
-    public void render(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
-        renderBackground(g, mouseX, mouseY, partialTick);
+    public void render(GuiGraphics g, int screenX, int screenY, float partialTick) {
+        renderBackground(g, screenX, screenY, partialTick);
+        int mouseX = (int) Math.floor(fit.x(screenX));
+        int mouseY = (int) Math.floor(fit.y(screenY));
+        fit.begin(g);
+        renderBoard(g, mouseX, mouseY, partialTick);
+        fit.end(g);
+    }
+
+    private void renderBoard(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
         FacilityUi.panel(g, x0, y0, W, H);
         Font font = this.font;
         FacilityUi.gem(g, x0 + 12, y0 + 13);
@@ -585,7 +597,9 @@ public class GuildScreen extends Screen {
     }
 
     @Override
-    public boolean mouseClicked(double mx, double my, int button) {
+    public boolean mouseClicked(double screenX, double screenY, int button) {
+        double mx = fit.x(screenX);
+        double my = fit.y(screenY);
         if (super.mouseClicked(mx, my, button)) {
             return true;
         }

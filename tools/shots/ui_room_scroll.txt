@@ -1,0 +1,59 @@
+# UI room: 送りと動かしの確認 (ホイール・ドラッグ)。途中の絵を撮る (mid-scroll / mid-pan)。
+# GUI 3 (1280x720 の窓の中の GUI 幅 426 x 240)。座標は GUI の座標 (wheel/drag は GUI 座標で渡す)。
+# ./gradlew runShots --no-daemon --offline -Pscript=tools/shots/ui_room_scroll.txt -PshotsName=ui_room_scroll
+world ui_room_scroll flat
+size 1280 720
+timeout 1500
+render 8
+clouds off
+
+cmd time set noon
+cmd weather clear
+cmd gamemode survival
+hud on
+cmd skyabyss cinematic stop
+waitchunks
+chat clear
+cmd skyabyss quest start @s main_song
+cmd skyabyss lore unlock @s prologue/camp
+wait 80
+
+guiscale 3
+
+echo === skill tree: rest, zoom in (wheel up), pan (drag)
+open skills
+wait 20
+shot us_tree_rest
+wheel 123 121 1
+wheel 123 121 1
+wait 5
+shot us_tree_zoomed
+drag 123 121 96 104 10
+wait 5
+shot us_tree_panned
+close
+
+echo === quest log: wheel the body and the list
+open quests
+wait 20
+shot us_quest_rest
+wheel 250 130 -2
+wait 5
+shot us_quest_body_scrolled
+wheel 60 110 -3
+wait 5
+shot us_quest_list_scrolled
+close
+
+echo === lore book: wheel the long list and the page
+open lore
+wait 20
+shot us_lore_rest
+wheel 120 100 3
+wait 5
+shot us_lore_list_scrolled
+wheel 280 120 2
+wait 5
+shot us_lore_page_scrolled
+close
+quit

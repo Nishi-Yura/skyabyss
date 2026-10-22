@@ -44,6 +44,7 @@ public class TrialBoardScreen extends Screen implements jp.revati.skyabyss.clien
     private static final int ABYSS_W = 118;
     private static final int CRAFT_W = 86;
 
+    private final jp.revati.skyabyss.client.ui.UiFit fit = new jp.revati.skyabyss.client.ui.UiFit();
     private TrialBoardNet.Open data;
     private int tab;
     private int age;
@@ -90,9 +91,11 @@ public class TrialBoardScreen extends Screen implements jp.revati.skyabyss.clien
     }
 
     @Override
-    public boolean mouseClicked(double mx, double my, int button) {
-        int px = (width - W) / 2;
-        int py = (height - H) / 2;
+    public boolean mouseClicked(double screenX, double screenY, int button) {
+        double mx = fit.x(screenX);
+        double my = fit.y(screenY);
+        int px = 0;
+        int py = 0;
         if (button == 0 && my >= py + 34 && my < py + 50) {
             for (int t = 0; t < 2; t++) {
                 int tx = px + 12 + t * 110;
@@ -183,11 +186,16 @@ public class TrialBoardScreen extends Screen implements jp.revati.skyabyss.clien
     }
 
     @Override
-    public void render(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
+    public void render(GuiGraphics g, int screenX, int screenY, float partialTick) {
         Font font = Minecraft.getInstance().font;
         g.fill(0, 0, width, height, argb(0.80f, BG));
-        int px = (width - W) / 2;
-        int py = (height - H) / 2;
+        // 板は窓に合わせて一様に大きく描く (描くのと当たりは同じ変換)。論理の (0, 0) に置く
+        fit.fit(width, height, W, H, 2.5f);
+        int mouseX = (int) Math.floor(fit.x(screenX));
+        int mouseY = (int) Math.floor(fit.y(screenY));
+        fit.begin(g);
+        int px = 0;
+        int py = 0;
         frame(g, px, py, W, H, 0x3A4A58, PANEL);
         // 題字
         TextStyle.HEADING.drawLeft(g, font, Component.translatable("gui.skyabyss.trial.title"), px + 12, py + 9, 1f, GOLD);
@@ -212,6 +220,7 @@ public class TrialBoardScreen extends Screen implements jp.revati.skyabyss.clien
         }
         // 足: 順路の記録・歌片・称号
         renderFoot(g, font, px, py);
+        fit.end(g);
     }
 
     // 歌片を作るボタン (祠の東の縁の共鳴の炉)

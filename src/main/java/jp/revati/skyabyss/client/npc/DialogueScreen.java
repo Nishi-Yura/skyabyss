@@ -6,6 +6,7 @@ import java.util.List;
 import org.lwjgl.glfw.GLFW;
 
 import jp.revati.skyabyss.SkyAbyss;
+import jp.revati.skyabyss.client.ui.ScrollPanel;
 import jp.revati.skyabyss.lore.LoreWrap;
 import jp.revati.skyabyss.npc.Affinity;
 import jp.revati.skyabyss.npc.DialogueService;
@@ -110,10 +111,31 @@ public class DialogueScreen extends Screen {
             optionsH += Math.max(OPTION_H, ol.size() * LINE_H + 2);
         }
         int textH = lines.size() * LINE_H;
-        panelH = Math.max(face + 52, 10 + textH + 8 + optionsH + 10);
+        // 本文と選択肢は右の欄に収め、窓の高さを越えるときは目盛りつきで送る (2026-10-22 の部屋の見直し)
+        int natural = Math.max(face + 52, 10 + textH + 8 + optionsH + 10);
+        panelH = Math.min(natural, Math.max(face + 52, height - 20));
         panelX = (width - panelW) / 2;
         panelY = height - panelH - 10;
         selected = Mth.clamp(selected, 0, Math.max(0, optionLines.size() - 1));
+        body.setViewport(panelX + textX - 4, panelY + 10, panelW - textX - 4, panelH - 18);
+        body.setContentHeight(textH + 8 + optionsH);
+    }
+
+    // 本文と選択肢の欄 (右の欄。目盛りつきで送る)
+    private final ScrollPanel body = new ScrollPanel(LINE_H * 2);
+
+    // 選んだ選択肢が欄の中に見えるよう送る
+    private void revealOption(int i) {
+        int top = lines.size() * LINE_H + 8;
+        for (int k = 0; k < i && k < optionLines.size(); k++) {
+            top += Math.max(OPTION_H, optionLines.get(k).size() * LINE_H + 2);
+        }
+        int h = i < optionLines.size() ? Math.max(OPTION_H, optionLines.get(i).size() * LINE_H + 2) : OPTION_H;
+        if (top < body.scroll()) {
+            body.setScroll(top);
+        } else if (top + h > body.scroll() + body.height()) {
+            body.setScroll(top + h - body.height());
+        }
     }
 
     // 段落ごとに折り返す。最後の行が「れど。」のように短く残る (幅の 1/4 未満) ときは、行の数を変えずに
@@ -202,7 +224,9 @@ public class DialogueScreen extends Screen {
         drawMarks(g, fx + face / 2, fy + face + 29, tier);
         // 本文 (一字ずつ)
         int tx = x + textX;
-        int ty = y + 10;
+        // 本文と選択肢は目盛りつきの欄の中 (はみ出すぶんは送る)
+        body.begin(g);
+        int ty = body.top();
         int left = (int) revealed;
         for (String line : lines) {
             if (left <= 0) {
@@ -213,50 +237,51 @@ public class DialogueScreen extends Screen {
             left -= line.length();
             ty += LINE_H;
         }
-        ty = y + 10 + lines.size() * LINE_H + 8;
-        if (!fullyShown()) {
-            return;
+        ty = body.top() + lines.size() * LINE_H + 8;
+        boolean more = show.hasNext() && show.options().isEmpty();
+        if (fullyShown() && !more) {
+            // 選択肢
+            List<NpcNetwork.OptionView> opts = options();
+            int hover = optionAt(mouseX, mouseY);
+            if (hover >= 0) {
+                selected = hover;
+            }
+            for (int i = 0; i < opts.size(); i++) {
+                List<String> ol = optionLines.get(i);
+                int h = Math.max(OPTION_H, ol.size() * LINE_H + 2);
+                if (i == selected) {
+                    g.fill(tx - 4, ty - 2, x + panelW - 8, ty + h - 2, HOVER);
+                }
+                NpcNetwork.OptionView o = opts.get(i);
+                int color = switch (o.kind()) {
+                    case "quest" -> GOLD;
+                    case "give" -> NAME;
+                    case "leave" -> SOFT;
+                    default -> TEXT;
+                };
+                // 番号はいつも出す (数字キーで選べるのが分かるように)。クエストに関わるものは ◆、物を渡すものは ◇ を添える
+                String mark = (i + 1) + switch (o.kind()) {
+                    case "quest" -> "◆";
+                    case "give" -> "◇";
+                    default -> ".";
+                };
+                g.drawString(font, mark, tx, ty, i == selected ? color : (color & 0x00FFFFFF) | 0xB0000000, false);
+                int ly = ty;
+                for (String l : ol) {
+                    g.drawString(font, l, tx + MARK_W, ly, i == selected ? color : (color & 0x00FFFFFF) | 0xC8000000, false);
+                    ly += LINE_H;
+                }
+                ty += h;
+            }
         }
-        // 続き
-        if (show.hasNext() && show.options().isEmpty()) {
+        body.end(g);
+        body.drawBar(g, EDGE_IN, 0x887FD6D0);
+        // 続き (欄の外の右下に出す)
+        if (fullyShown() && more) {
             long t = Minecraft.getInstance().level == null ? 0 : Minecraft.getInstance().level.getGameTime();
             if ((t / 10) % 2 == 0) {
                 g.drawString(font, "▼", x + panelW - 16, y + panelH - 14, NAME, false);
             }
-            return;
-        }
-        // 選択肢
-        List<NpcNetwork.OptionView> opts = options();
-        int hover = optionAt(mouseX, mouseY);
-        if (hover >= 0) {
-            selected = hover;
-        }
-        for (int i = 0; i < opts.size(); i++) {
-            List<String> ol = optionLines.get(i);
-            int h = Math.max(OPTION_H, ol.size() * LINE_H + 2);
-            if (i == selected) {
-                g.fill(tx - 4, ty - 2, x + panelW - 8, ty + h - 2, HOVER);
-            }
-            NpcNetwork.OptionView o = opts.get(i);
-            int color = switch (o.kind()) {
-                case "quest" -> GOLD;
-                case "give" -> NAME;
-                case "leave" -> SOFT;
-                default -> TEXT;
-            };
-            // 番号はいつも出す (数字キーで選べるのが分かるように)。クエストに関わるものは ◆、物を渡すものは ◇ を添える
-            String mark = (i + 1) + switch (o.kind()) {
-                case "quest" -> "◆";
-                case "give" -> "◇";
-                default -> ".";
-            };
-            g.drawString(font, mark, tx, ty, i == selected ? color : (color & 0x00FFFFFF) | 0xB0000000, false);
-            int ly = ty;
-            for (String l : ol) {
-                g.drawString(font, l, tx + MARK_W, ly, i == selected ? color : (color & 0x00FFFFFF) | 0xC8000000, false);
-                ly += LINE_H;
-            }
-            ty += h;
         }
     }
 
@@ -283,7 +308,10 @@ public class DialogueScreen extends Screen {
         if (!fullyShown() || (show.hasNext() && show.options().isEmpty())) {
             return -1;
         }
-        int ty = panelY + 10 + lines.size() * LINE_H + 8;
+        if (!body.contains(mx, my)) {
+            return -1;
+        }
+        int ty = body.top() + lines.size() * LINE_H + 8;
         for (int i = 0; i < optionLines.size(); i++) {
             int h = Math.max(OPTION_H, optionLines.get(i).size() * LINE_H + 2);
             if (mx >= panelX + textX - 4 && mx < panelX + panelW - 8 && my >= ty - 2 && my < ty + h - 2) {
@@ -295,9 +323,27 @@ public class DialogueScreen extends Screen {
     }
 
     @Override
+    public boolean mouseScrolled(double mx, double my, double scrollX, double scrollY) {
+        return body.mouseScrolled(mx, my, scrollY) || super.mouseScrolled(mx, my, scrollX, scrollY);
+    }
+
+    @Override
+    public boolean mouseDragged(double mx, double my, int button, double dx, double dy) {
+        return body.mouseDragged(mx, my, button, dx, dy) || super.mouseDragged(mx, my, button, dx, dy);
+    }
+
+    @Override
+    public boolean mouseReleased(double mx, double my, int button) {
+        return body.mouseReleased(mx, my, button) || super.mouseReleased(mx, my, button);
+    }
+
+    @Override
     public boolean mouseClicked(double mx, double my, int button) {
         if (button != 0) {
             return super.mouseClicked(mx, my, button);
+        }
+        if (body.mouseClicked(mx, my, button)) {
+            return true;
         }
         if (!fullyShown()) {
             revealed = totalChars;
@@ -337,10 +383,12 @@ public class DialogueScreen extends Screen {
         int n = optionLines.size();
         if (key == GLFW.GLFW_KEY_UP || key == GLFW.GLFW_KEY_W) {
             selected = (selected + n - 1) % Math.max(1, n);
+            revealOption(selected);
             return true;
         }
         if (key == GLFW.GLFW_KEY_DOWN || key == GLFW.GLFW_KEY_S) {
             selected = (selected + 1) % Math.max(1, n);
+            revealOption(selected);
             return true;
         }
         if (confirm) {

@@ -747,6 +747,35 @@ public final class ShotRunner {
                 jp.revati.skyabyss.client.notice.NoticeClient.clear();
                 return true;
             }
+            case "wheel" -> {
+                // wheel <GUI 座標 x> <GUI 座標 y> <dy> : 開いている画面にホイールを回したことにする (正の数で上へ)。2026-10-22 の部屋の確認用
+                if (mc.screen != null) {
+                    mc.screen.mouseScrolled(line.doubleArg(0), line.doubleArg(1), 0, line.doubleArg(2));
+                }
+                return true;
+            }
+            case "drag" -> {
+                // drag <x0> <y0> <x1> <y1> [段] : 左のボタンを押して、(x0,y0) から (x1,y1) へ引く (段ごとに動かす。既定 8)。盤や一覧を動かす確認用
+                if (mc.screen != null) {
+                    double x0 = line.doubleArg(0);
+                    double y0 = line.doubleArg(1);
+                    double x1 = line.doubleArg(2);
+                    double y1 = line.doubleArg(3);
+                    int steps = line.args().length > 4 ? line.intArg(4) : 8;
+                    mc.screen.mouseClicked(x0, y0, 0);
+                    double px = x0;
+                    double py = y0;
+                    for (int i = 1; i <= steps; i++) {
+                        double nx = x0 + (x1 - x0) * i / steps;
+                        double ny = y0 + (y1 - y0) * i / steps;
+                        mc.screen.mouseDragged(nx, ny, 0, nx - px, ny - py);
+                        px = nx;
+                        py = ny;
+                    }
+                    mc.screen.mouseReleased(x1, y1, 0);
+                }
+                return true;
+            }
             case "hover" -> {
                 // hover slot <メニューの枠の番号> | hover <GUI 座標 x> <GUI 座標 y> : 画面の中のマウスの位置を決める (ツールチップの確認用。OS のカーソルは動かさない)
                 int gx;
