@@ -5,6 +5,7 @@
   "progress.skyabyss.titan.ember": "Ember Titan",
   "message.skyabyss.progress.capped": "You can grow no further (level cap %s). Still the heart of the %s to go beyond",
   "message.skyabyss.progress.capped_end": "You can grow no further (level cap %s). Await the rest of the story",
+  "message.skyabyss.progress.capped_abyss": "You can grow no further (level cap %s). Defeat the heart warden at the bottom of the abyss to go beyond",
   "message.skyabyss.progress.not_ready": "You cannot board the %s yet. Still the heart of the %s first",
   "message.skyabyss.progress.not_ready_hint": "The titans wake in order. Only those who stilled the heart of the %s with their own hands may board (see /story)",
   "message.skyabyss.progress.stage_up": "You stilled the heart of the %s. Level cap raised to %s",

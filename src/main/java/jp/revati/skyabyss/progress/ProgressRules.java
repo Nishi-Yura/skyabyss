@@ -12,8 +12,11 @@ public final class ProgressRules {
     // 巨神ごとの推奨レベル (00 の 1 番で決定: 12・18・24・30)
     public static final int[] TITAN_LEVEL = {12, 18, 24, 30};
     // 物語の段階 (止めた巨神の数 0〜4) ごとのレベル上限。次の巨神の推奨レベル +3 (経験値が減り始める所) に合わせる。
-    // 1 章を終えた後は 40 (2 章を作るときに 50 まで広げる)
+    // 巨神編を終えた後は 40。五章で心臓の番人を倒すと ABYSS_CAP (50。転生の Lv 50 に届く)
     public static final int[] LEVEL_CAP = {15, 21, 27, 33, 40};
+    public static final int ABYSS_CAP = 50;
+    // 番人を倒した記録の名前 (ProgressData の個人の進みに、巨神と並べて書く。TITAN_ORDER には入れない)
+    public static final String WARDEN = "heart_warden";
 
     private ProgressRules() {
     }
@@ -37,6 +40,11 @@ public final class ProgressRules {
 
     public static int levelCap(int stage) {
         return LEVEL_CAP[Mth.clamp(stage, 0, LEVEL_CAP.length - 1)];
+    }
+
+    // 四体を止め、心臓の番人も倒したら 50。番人だけ先に倒していても、四体がそろうまでは段階の上限のまま
+    public static int levelCap(int stage, boolean wardenFelled) {
+        return wardenFelled && stage >= TITAN_ORDER.size() ? ABYSS_CAP : levelCap(stage);
     }
 
     // 止めた巨神の集まりから、段階を数える (順番どおりに続いている所まで)。

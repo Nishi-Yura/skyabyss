@@ -219,6 +219,7 @@ for k, ja, en in [
     ("title.skyabyss.storm_back.sub", "嵐の上を飛ぶ、鳥の背", "A bird's back, flying above the storm"),
     ("message.skyabyss.storm.against_wind", "遠くの嵐が、風に逆らって動いていた", "A distant storm was moving against the wind"),
     ("message.skyabyss.storm.perching", "風が向きを変えた。嵐が、峰へ降りてくる……", "The wind has turned. The storm is coming down onto the peak..."),
+    ("message.skyabyss.storm.summit_noticed", "雷翼が、峰に立つ姿に気づいた。風が渦を巻いて降りてくる……", "The thunder wing has noticed you on the peak. The wind spirals down..."),
     ("message.skyabyss.storm.taking_off", "雷翼が翼を広げた。夕立の刻が終わる", "The thunder wing spreads its wings. The hour of the squall is over"),
     ("message.skyabyss.storm.column_hint", "昇り風に乗ると、背中へ運ばれる", "Step into the updraft to be carried onto its back"),
     ("message.skyabyss.storm.arrived", "風に運ばれて、鳥の尾羽の上にいた。足もとのずっと下で、嵐の雲が光っている。",

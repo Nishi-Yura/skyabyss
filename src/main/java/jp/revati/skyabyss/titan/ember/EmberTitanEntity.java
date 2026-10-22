@@ -137,6 +137,7 @@ public class EmberTitanEntity extends Entity implements GeoEntity, jp.revati.sky
     private double restGround;
     private int approachTicks;
     private int forcedTicks;
+    private final jp.revati.skyabyss.titan.FirstBoardWait mouthWait = new jp.revati.skyabyss.titan.FirstBoardWait();
     // 浮く・沈むの始まりの高さと経過
     private double moveFromY;
     private int moveTicks;
@@ -422,6 +423,28 @@ public class EmberTitanEntity extends Entity implements GeoEntity, jp.revati.sky
         burrowSigns(level);
         if (tickCount % 200 == 0) {
             tryGather(level);
+        }
+        if (tickCount % 20 == 0 && mode == Mode.SWIM) {
+            answerMouthWait(level);
+        }
+    }
+
+    // 初めて乗る人が灰の地の口 (跡地のない世界では潜る巨神の近く) で 30 秒待ったら、夜を待たずに浮かぶ
+    // (fun_review P3-1。FirstBoardWait)。夜の刻の間は、ふだんどおり tryGather に任せる
+    private void answerMouthWait(ServerLevel level) {
+        if (EmberGround.isGathering(level.getDayTime())) {
+            mouthWait.tick(level, jp.revati.skyabyss.progress.Titans.EMBER, null, 20);
+            return;
+        }
+        boolean basinOnly = EmberBasin.restricted(level.getServer());
+        net.minecraft.core.BlockPos centre = basinOnly ? EmberBasin.basin(level.getServer()) : net.minecraft.core.BlockPos.containing(getX(), getY(), getZ());
+        ServerPlayer p = mouthWait.tick(level, jp.revati.skyabyss.progress.Titans.EMBER, centre, 20);
+        if (p == null) {
+            return;
+        }
+        EmberGround.Spot spot = basinOnly ? EmberBasin.sleepSpot(level) : EmberGround.findCallSpot(level, p.getX(), p.getZ());
+        if (spot != null && callNear(p, spot)) {
+            Notice.bar(p, jp.revati.skyabyss.ModText.lore("message.skyabyss.ember.mouth_noticed"));
         }
     }
 

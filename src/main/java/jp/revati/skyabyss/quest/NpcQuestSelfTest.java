@@ -691,6 +691,30 @@ public final class NpcQuestSelfTest {
         Quests.poll(c, true);
         check(stage(c, "main_song").equals("board"), "a player who found the whale first should skip to board: " + stage(c, "main_song"), failures);
 
+        // レイドの順路だけを通った人 (碑文を一つも記さずに心臓を止めた): 段 inscriptions は飛び、一章が済み、二章が始まる (fun_review P1-1)
+        FakePlayer r = player(level, 12, at);
+        jp.revati.skyabyss.progress.ProgressData pd = jp.revati.skyabyss.progress.ProgressData.get(level.getServer());
+        try {
+            Lore.unlock(r, "chapter1/stone_whale", false);
+            Lore.unlock(r, "chapter1/sky_ruins", false);
+            Quests.poll(r, true);
+            check(stage(r, "main_song").equals("inscriptions"), "raid route: should wait at inscriptions before the heart: " + stage(r, "main_song"), failures);
+            pd.markPersonal(r.getUUID(), "stone_whale");
+            Lore.unlock(r, "chapter1/heart_stilled", false);
+            Lore.unlock(r, "chapter1/sky_key", false);
+            Quests.poll(r, true);
+            check(stage(r, "main_song").equals("return") && !Lore.state(r).has("chapter1/inscription_west"),
+                    "raid route: stilling the whale without inscriptions did not skip to return: " + stage(r, "main_song"), failures);
+            DialogueService.open(r, wc);
+            next(r);
+            check(stage(r, "main_song").equals("done"), "raid route: chapter 1 did not finish: " + stage(r, "main_song"), failures);
+            DialogueService.close(r);
+            Quests.poll(r, true);
+            check(QuestLog.of(r).entry("main_tide") != null, "raid route: chapter 2 (main_tide) did not start after chapter 1", failures);
+        } finally {
+            pd.clearPersonal(r.getUUID(), "stone_whale");
+        }
+
         // サブ「鯨のかけら」: 背中に乗った人に頼む → 3 つ集める → 渡す → 遠眼鏡
         DialogueService.open(a, wc);
         check(shown(a, WC, "help"), "the chaser should ask for help after the back was visited", failures);

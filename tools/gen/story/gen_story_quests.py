@@ -248,11 +248,11 @@ S.node("ms_tide_back2", "海の底にも、鼓動があったんだね。\n空�
 S.node("ms_thunder", "二つ目かい。……並べると、少し引き合っているように見えるね。\n三つ目のことなら、ひとつだけ心当たりがあるよ。",
        "The second one. ...Side by side, they almost seem to pull at each other.\nAbout the third, there's one thing I can think of.",
        face="grave", next="ms_thunder2", note="メイン「嵐を渡る翼」の始まり")
-S.node("ms_thunder2", "雷の晩に、雲の中を大きな鳥が渡る。あたしの祖母は、それを見た晩に、数えるのをやめたそうだ。\n"
+S.node("ms_thunder2", "雷の鳴る日には、雲の中を大きな鳥が渡る。あたしの祖母は、それを見た日に、数えるのをやめたそうだ。\n"
        "何を数えていたのかは、とうとう教えてくれなかったけどね。",
-       "On thunder nights, a great bird crosses inside the clouds. My grandmother said she stopped counting the night she saw it.\n"
+       "On days of thunder, a great bird crosses inside the clouds. My grandmother said she stopped counting the day she saw it.\n"
        "She never did tell me what she had been counting.", face="grave", options=[
-           opt("go", "嵐の晩に、空を見てみる。", "I'll watch the sky on a stormy night.", do=[add_aff(1)]),
+           opt("go", "高い峰に登って、空を見てみる。", "I'll climb a high peak and watch the sky.", do=[add_aff(1)]),
            opt("why", "何を数えていたんだろう。", "What was she counting, I wonder?", goto="ms_thunder_why"),
        ], note="ここに入るとメインの「語り部に尋ねる」が済む")
 S.node("ms_thunder_why", "さあね。……稲光から音が来るまでを、数えるだろう。あれかもしれないし、違うかもしれない。",
@@ -491,14 +491,14 @@ quest(THUNDER, "main", 30, ("嵐を渡る翼", "Wings Across the Storm"),
                        "I have two fragments now. Side by side, they pull at each other a little.\nI'll ask the storyteller about the third."),
              [ob("talk", "talk", "語り部に、三つ目のことを尋ねよう", "Ask the storyteller about the third", target=ST, topic="ms_thunder2")], xp=40,
              skip_if=any_(*[lore(x) for x in STORM_SIGHT])),
-       stage("see", ("雷の晩、雲の中を大きな鳥が渡るという。\n風に逆らって動く嵐を見かけたら、それかもしれない。",
-                     "On thunder nights, they say, a great bird crosses inside the clouds.\nIf I see a storm moving against the wind, that may be it."),
+       stage("see", ("雷の鳴る日には、雲の中を大きな鳥が渡るという。\n風に逆らって動く嵐を見かけたら、それかもしれない。",
+                     "On days of thunder, they say, a great bird crosses inside the clouds.\nIf I see a storm moving against the wind, that may be it."),
              [ob("see", "lore", "風に逆らって動く嵐を探そう", "Find the storm against the wind",
                  targets=STORM_SIGHT, count=1)], xp=80),
-       stage("board", (f"{TW_JA}は、午後の夕立の刻に、近くでいちばん高い峰へ降りてくるらしい。\n足もとに立つ風の柱に入れば、背まで運ばれるかもしれない。",
-                       f"At the hour of the afternoon squall, {TW_EN} is said to come down onto the highest peak nearby.\n"
+       stage("board", (f"{TW_JA}は、近くでいちばん高い峰へ降りてくるらしい。午後の夕立の刻にはきまって降りるが、峰の上で待っていれば、ほかの刻でも気づいて来るという。\n足もとに立つ風の柱に入れば、背まで運ばれるかもしれない。",
+                       f"{TW_EN} is said to come down onto the highest peak nearby. It always comes at the hour of the afternoon squall, but if I wait on the peak, it may notice me at any hour.\n"
                        "If I step into the column of wind at its feet, it may carry me up to its back."),
-             [ob("board", "lore", "夕立の刻、昇り風に乗って背へ上がろう", "At the hour of the squall, ride the updraft onto its back",
+             [ob("board", "lore", "峰の上で待ち、昇り風に乗って背へ上がろう", "Wait on the peak, then ride the updraft onto its back",
                  targets=["chapter1/storm_ruins"])], xp=60, skip_if=stilled("thunder_wing")),
        stage("trials", ("鳥の背の中に、風の民の字が残っている。\n三つのゴールに着けば、\n奥へ続く門が開くのだろう。",
                         "The wind folk left writing inside the bird's back.\nIf I reach the goal, the way deeper in should open."),

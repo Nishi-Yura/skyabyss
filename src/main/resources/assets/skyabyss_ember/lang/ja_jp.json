@@ -1,5 +1,6 @@
 {
   "__ember.0": "骨組み (熱・傷の種類)",
+  "message.skyabyss.ember.mouth_noticed": "足もとで、熱い息が動いた。余燼が、待つ者に気づいて浮かんでくる……",
   "death.attack.skyabyss.heat": "%1$sは焦げついた",
   "death.attack.skyabyss.heat.player": "%1$sは%2$sから逃れきれず、焦げついた",
   "death.attack.skyabyss.heat_burst": "%1$sは噴き上がる熱に焼かれた",

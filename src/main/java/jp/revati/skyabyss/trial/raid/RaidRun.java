@@ -276,7 +276,7 @@ public final class RaidRun {
         String key = TrialRoute.keyOf(ctx.titan(), draw, run.step);
         SkyAbyss.LOGGER.info("Raid: room {} cleared by group {} (wipes {})", ctx.roomId(), ctx.group(), run.wipes);
         if (key != null) {
-            TrialRoute.onCleared(ctx.level(), ctx.group(), ctx.titan(), key, null);
+            TrialRoute.onCleared(ctx.level(), ctx.group(), ctx.titan(), key, null, true);
         }
     }
 

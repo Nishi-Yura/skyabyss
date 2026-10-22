@@ -18,6 +18,7 @@ import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
@@ -100,6 +101,8 @@ public class StormWingEntity extends Entity implements GeoEntity, jp.revati.skya
     static final long WINDOW_START = 7000;
     static final long WINDOW_END = 10600;
     static final int DESCEND_TICKS = 900;
+    // 初めて乗る人のために刻の外で降りたとき、止まっている長さ (5 分。誰もいなければ早じまい)
+    static final int SUMMIT_REST = 6000;
     static final int TAKE_OFF_TICKS = 100;
     static final double TAKE_OFF_FORWARD = 0.5;
     // 空の影から隠れる速さと、影を見る距離
@@ -132,6 +135,7 @@ public class StormWingEntity extends Entity implements GeoEntity, jp.revati.skya
     private long descendDay = -1;
     // コマンドで止まらせた残り (0 なら刻で決まる)
     private int forcedTicks;
+    private final jp.revati.skyabyss.titan.FirstBoardWait summitWait = new jp.revati.skyabyss.titan.FirstBoardWait();
     // 降りるときの渦 (半径を縮めながら止まり木へ)
     private double descendR0;
     private double descendTheta;
@@ -441,6 +445,9 @@ public class StormWingEntity extends Entity implements GeoEntity, jp.revati.skya
         if (tickCount % 20 == 0) {
             keepCentreNearPlayers(level);
             scheduleDay(level);
+            if (mode == Mode.CRUISE) {
+                answerSummitWait(level);
+            }
         }
         driftCentre();
         theta += CRUISE_SPEED / radius;
@@ -528,6 +535,47 @@ public class StormWingEntity extends Entity implements GeoEntity, jp.revati.skya
             descendDay = day;
             beginDescend(0);
         }
+    }
+
+    // 初めて乗る人が峰で 30 秒待ったら、刻の外でも降りる (fun_review P3-1。FirstBoardWait)。
+    // 夕立の刻の段取りの間 (止まり木を選んでから刻の終わりまで) は、ふだんどおり刻に任せる
+    private void answerSummitWait(ServerLevel level) {
+        long t = Math.floorMod(level.getDayTime(), 24000L);
+        if (t >= PERCH_CHOOSE && t < WINDOW_END) {
+            summitWait.tick(level, jp.revati.skyabyss.progress.Titans.THUNDER_WING, null, 20);
+            return;
+        }
+        boolean peakOnly = StormPeak.restricted(level.getServer());
+        BlockPos centre = peakOnly ? StormPeak.peak(level.getServer()) : null;
+        ServerPlayer p;
+        if (peakOnly) {
+            p = summitWait.tick(level, jp.revati.skyabyss.progress.Titans.THUNDER_WING, centre, 20);
+        } else {
+            // 跡地のない世界: 空の見える高い所に立つ人のまわり
+            ServerPlayer high = null;
+            for (ServerPlayer q : Players.snapshot(level.players())) {
+                if (jp.revati.skyabyss.titan.FirstBoardWait.waiting(q, jp.revati.skyabyss.progress.Titans.THUNDER_WING)
+                        && level.canSeeSky(q.blockPosition().above()) && WeathercockItem.high(level, q.blockPosition())
+                        && Math.hypot(q.getX() - getX(), q.getZ() - getZ()) < PLAYER_RANGE) {
+                    high = q;
+                    break;
+                }
+            }
+            p = summitWait.tick(level, jp.revati.skyabyss.progress.Titans.THUNDER_WING, high == null ? null : high.blockPosition(), 20);
+        }
+        if (p == null) {
+            return;
+        }
+        Peak peak = peakOnly ? StormPeak.perch(level) : StormPerch.find(level, p.getX(), p.getZ(), 24, 96);
+        if (peak == null) {
+            return;
+        }
+        perchX = peak.x();
+        perchY = peak.y();
+        perchZ = peak.z();
+        hasPerch = true;
+        tell(level, "message.skyabyss.storm.summit_noticed");
+        beginDescend(SUMMIT_REST);
     }
 
     // 640 ブロック以内のプレイヤーを一人選び、その近くの峰を止まり木にする。
