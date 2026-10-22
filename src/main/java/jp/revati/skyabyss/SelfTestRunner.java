@@ -328,6 +328,9 @@ public final class SelfTestRunner {
         QUEUE.addAll(steps());
         // SKYABYSS_SELFTEST_ONLY=<名前の頭>[,<名前の頭>…] なら、その段だけ (例: "storm back"、"travel gear,artisan")。終わるとサーバーを止める
         String only = System.getenv("SKYABYSS_SELFTEST_ONLY");
+        // 全部を流したときも、終わればサーバーを止める (前は titan back の段が止めていた。2026-10-22 にその段が止めなくなり、
+        // サーバーが残って共有のロックが空かなかった)
+        haltWhenDone = true;
         if (only != null && !only.isBlank()) {
             // カンマ区切りで複数 ("travel gear,artisan")。どれかの頭に合う段を残す
             String[] prefixes = java.util.Arrays.stream(only.split(",")).map(String::trim).filter(x -> !x.isEmpty()).toArray(String[]::new);
