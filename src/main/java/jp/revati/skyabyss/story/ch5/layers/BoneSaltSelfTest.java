@@ -55,8 +55,10 @@ public final class BoneSaltSelfTest {
                 for (int i = 1; i < steps; i++) {
                     int x = (int) Math.round(a.getX() + (b.getX() - a.getX()) * i / (double) steps);
                     int z = (int) Math.round(a.getZ() + (b.getZ() - a.getZ()) * i / (double) steps);
+                    // 橋は端の高さから向こうの端へ下る: この所の高さに合わせて床を探す
+                    int want = (int) Math.round(a.getY() + (b.getY() - a.getY()) * i / (double) steps);
                     boolean deck = false;
-                    for (int y = a.getY() - 4; y <= a.getY() + 1 && !deck; y++) {
+                    for (int y = want - 4; y <= want + 1 && !deck; y++) {
                         deck = !level.getBlockState(new BlockPos(x, y, z)).isAir();
                     }
                     check(f, deck, "the bone bridge has no deck at " + x + "," + z);
