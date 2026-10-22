@@ -57,7 +57,9 @@ public final class EnemyHealthBars {
             }
         }
         float lag = LAG.getOrDefault(e.getId(), frac);
-        lag = lag < frac ? frac : lag - Math.max(0.004f, (lag - frac) * 0.08f);
+        // 減りの速さは 1 tick あたり (描く回数に左右されない)
+        float dt = Mth.clamp(mc.getTimer().getRealtimeDeltaTicks(), 0f, 2f);
+        lag = lag < frac ? frac : Math.max(frac, lag - Math.max(0.004f, (lag - frac) * 0.08f) * dt);
         LAG.put(e.getId(), Math.max(lag, frac));
 
         PoseStack pose = event.getPoseStack();

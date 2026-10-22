@@ -34,6 +34,19 @@ public final class AbyssHud {
         depth = d;
     }
 
+    // 深さの表示の置き場は HudLayout に頼む (右上の効き目の絵・誓いの板と重ならない)。高さは深さの行 + 帯 (+ 重みの行)
+    public static void requests(Minecraft mc, java.util.List<jp.revati.skyabyss.hud.HudLayout.Request> out) {
+        if (voice < 0 || mc.player == null || mc.options.hideGui) {
+            return;
+        }
+        int w = Math.max(60, mc.font.width(Component.translatable("hud.skyabyss.abyss.depth", depth)));
+        if (weight >= 10) {
+            w = Math.max(w, mc.font.width(Component.translatable("hud.skyabyss.abyss.weight", weight)));
+        }
+        out.add(jp.revati.skyabyss.hud.HudLayout.Request.of(jp.revati.skyabyss.hud.HudLayout.Id.ABYSS_DEPTH,
+                jp.revati.skyabyss.hud.HudLayout.Region.TOP_RIGHT, (w + 3 + 3) / 4 * 4, weight >= 10 ? 28 : 16));
+    }
+
     // 横に濃淡のつく四角 (左の色 → 右の色)
     private static void quad(VertexConsumer vc, Matrix4f m, int x0, int x1, int h, int left, int right) {
         vc.addVertex(m, x0, 0, 0).setColor(left);
@@ -69,17 +82,22 @@ public final class AbyssHud {
         }
         Font font = mc.font;
         Component dep = Component.translatable("hud.skyabyss.abyss.depth", depth);
-        int x = w - font.width(dep) - 8;
-        g.drawString(font, dep, x, 8, 0xFFC9D3E6, true);
+        jp.revati.skyabyss.hud.HudLayout.Rect r = jp.revati.skyabyss.client.hud.HudManager.rect(jp.revati.skyabyss.hud.HudLayout.Id.ABYSS_DEPTH);
+        if (r == null) {
+            return;
+        }
+        int right = r.right() - 2;
+        int top = r.y();
+        g.drawString(font, dep, right - font.width(dep), top, 0xFFC9D3E6, true);
         int bw = 60;
-        int bx = w - bw - 8;
-        g.fill(bx, 20, bx + bw, 23, 0x88000000);
+        int bx = right - bw;
+        g.fill(bx, top + 12, bx + bw, top + 15, 0x88000000);
         int fillW = Math.round(bw * voice / 100f);
         int c = voice < 40 ? 0xFF7A5FB0 : voice < 70 ? 0xFFB05F9A : 0xFFD0453F;
-        g.fill(bx, 20, bx + fillW, 23, c);
+        g.fill(bx, top + 12, bx + fillW, top + 15, c);
         if (weight >= 10) {
             Component wt = Component.translatable("hud.skyabyss.abyss.weight", weight);
-            g.drawString(font, wt, w - font.width(wt) - 8, 27, 0xFFB8A98A, true);
+            g.drawString(font, wt, right - font.width(wt), top + 19, 0xFFB8A98A, true);
         }
     }
 }

@@ -117,7 +117,7 @@ public final class HudLayout {
         // ---- 左上の帯 (上から下へ)
         STATUS_TL, SLOTS_TL, CHAPTER, OBJECTIVE, LAMP, QUEST, POPUPS_TL,
         // ---- 右上の板 (上から下へ)
-        VOW, BACK_GAUGE, PARTY_LIST,
+        ABYSS_DEPTH, VOW, BACK_GAUGE, PARTY_LIST, ABYSS_ARTS,
         // ---- 下中央 (下から上へ)
         DOWNED_SELF, HINTS,
         // ---- 上中央 (ボスバーの下へ)

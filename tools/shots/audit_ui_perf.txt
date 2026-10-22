@@ -1,0 +1,50 @@
+# 2026-10-23 夜の画面監査: 敵の体力帯・ボス戦・馬・倒れた状態 (GUI 3 と GUI 4)
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/audit_ui_perf.txt -PshotsName=audit_ui_perf
+world audit_ui_perf flat
+size 1280 720
+timeout 900
+render 6
+clouds off
+guiscale 3
+cmd time set noon
+cmd weather clear
+cmd gamemode survival Dev
+hud on
+waitchunks
+chat clear
+wait 480
+cmd skyabyss cinematic stop
+cmd summon minecraft:zombie 2 -60 6 {NoAI:1b,PersistenceRequired:1b,Rotation:[180f,0f]}
+cmd summon minecraft:skeleton -2 -60 7 {NoAI:1b,PersistenceRequired:1b,Rotation:[180f,0f],Health:8f}
+cmd effect give @e[type=!minecraft:player] minecraft:fire_resistance 1000 0 true
+cmd damage @e[type=minecraft:zombie,limit=1] 6
+cmd skyabyss quest start @s main_song
+wait 40
+chat clear
+echo === boss demo with enemies
+huddemo boss
+wait 75
+shot a_boss_g3
+guiscale 4
+wait 30
+shot a_boss_g4
+huddemo off
+guiscale 3
+chat clear
+cmd kill @e[type=!minecraft:player,distance=..80]
+cmd summon minecraft:horse ~ ~ ~ {Tame:1b,SaddleItem:{id:"minecraft:saddle",count:1}}
+wait 20
+cmd ride @s mount @e[type=minecraft:horse,limit=1,sort=nearest]
+wait 40
+shot b_horse_g3
+cmd ride @s dismount
+cmd kill @e[type=minecraft:horse]
+wait 20
+shot b_foot_g3
+cmd damage @s 1000 minecraft:generic
+wait 40
+shot c_downed_g3
+guiscale 4
+wait 20
+shot c_downed_g4
+quit
