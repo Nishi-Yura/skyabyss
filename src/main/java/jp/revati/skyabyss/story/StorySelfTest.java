@@ -502,6 +502,12 @@ public final class StorySelfTest {
 
         // 四章の語り部の話 (ch4/fragments) は、話しかけると先に始まる入口。ここは頼みごとの流れを見るので、あらかじめ済ませておく (13 の 17.5)
         jp.revati.skyabyss.quest.Quests.forget(p, "ch4/fragments");
+        // 五章の入口 (main_abyss。天の鍵のあと) の語り部の噂も、話しかけると先に出る。噂の段だけ越えておく (34 の 4.7。
+        // 外すと条件を満たしたまま始まり直すので、段を進める)
+        Quests.start(p, "main_abyss");
+        if ("rumor".equals(stage(p, "main_abyss"))) {
+            Quests.forceStage(p, "main_abyss");
+        }
         // 冷めない炭: ネザーへ行き、マグマクリーム 4 つ → 語り部
         DialogueService.open(p, st);
         pick(p, ST, "errands", f);

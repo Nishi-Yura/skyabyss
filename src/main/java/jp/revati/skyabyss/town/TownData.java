@@ -21,6 +21,8 @@ public final class TownData extends SavedData {
     private static final Factory<TownData> FACTORY = new Factory<>(TownData::new, TownData::load);
 
     public boolean cellarOpen;
+    // 五章の封じた戸を開けた (story/ch5/AbyssEntrance。開いたまま)
+    public boolean abyssOpen;
     public final Set<UUID> wellTaken = new LinkedHashSet<>();
 
     public static TownData get(MinecraftServer server) {
@@ -30,6 +32,7 @@ public final class TownData extends SavedData {
     private static TownData load(CompoundTag tag, HolderLookup.Provider registries) {
         TownData d = new TownData();
         d.cellarOpen = tag.getBoolean("CellarOpen");
+        d.abyssOpen = tag.getBoolean("AbyssOpen");
         for (Tag t : tag.getList("WellTaken", Tag.TAG_INT_ARRAY)) {
             d.wellTaken.add(NbtUtils.loadUUID(t));
         }
@@ -39,6 +42,7 @@ public final class TownData extends SavedData {
     @Override
     public CompoundTag save(CompoundTag tag, HolderLookup.Provider registries) {
         tag.putBoolean("CellarOpen", cellarOpen);
+        tag.putBoolean("AbyssOpen", abyssOpen);
         ListTag list = new ListTag();
         wellTaken.forEach(u -> list.add(NbtUtils.createUUID(u)));
         tag.put("WellTaken", list);

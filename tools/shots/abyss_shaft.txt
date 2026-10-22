@@ -1,0 +1,47 @@
+# 五章の大坑道 (docs/design/34 の 4.7): 封じた戸・縦穴の上から・螺旋の段・灰の民の作業場・前の私の野営・底の境の門
+# ./gradlew runShots -Pscript=tools/shots/abyss_shaft.txt -PshotsName=abyss_shaft  (設計図を変えたら run/shots/abyss_shaft/saves を消す)
+# at shelter 0 <x> <y> <z> <yaw> <pitch>: 設計図の座標と向き (yaw 0 = 南、180 = 北、90 = 西、-90 = 東)
+world opening_abyss_shaft normal
+size 1280 720
+timeout 2400
+render 10
+clouds off
+
+wait 100
+cmd skyabyss cinematic stop
+wait 10
+cmd skyabyss cinematic stop
+cmd time set 18000
+cmd gamerule doDaylightCycle false
+cmd gamemode spectator
+cmd skyabyss dev opening build
+hud off
+cmd skyabyss dev opening at shelter 0 -16 -8 40 -90 5
+waitchunks
+wait 200
+shot s_sealed_door
+cmd skyabyss dev opening at shelter 0 -9 -7 40 -90 55
+waitchunks
+wait 60
+shot s_shaft_top_down
+cmd skyabyss dev opening at shelter 0 -4 -30 35 0 10
+waitchunks
+wait 60
+shot s_spiral_mid
+cmd skyabyss dev opening at shelter 0 -8 -37 29 0 25
+waitchunks
+wait 60
+shot s_landing_workshop
+cmd skyabyss dev opening at shelter 0 3 -67 40 -100 15
+waitchunks
+wait 60
+shot s_landing_camp
+cmd skyabyss dev opening at shelter 0 -4 -96 46 180 20
+waitchunks
+wait 60
+shot s_threshold_gate
+cmd skyabyss dev opening at shelter 0 -4 -60 40 0 -88
+waitchunks
+wait 60
+shot s_shaft_look_up
+quit

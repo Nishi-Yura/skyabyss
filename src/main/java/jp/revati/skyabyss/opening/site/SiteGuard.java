@@ -105,7 +105,8 @@ public final class SiteGuard {
             origin = e.pos.below();
         }
         int[] r = bp.worldRect(rot, mirror, origin);
-        capital = new Area(r[0], origin.getY() - 24, r[1], r[2], origin.getY() + 96, r[3]);
+        // 下は五章の大坑道の底 (設計図の y -101) まで
+        capital = new Area(r[0], origin.getY() - 112, r[1], r[2], origin.getY() + 96, r[3]);
         capitalKey = key;
         return capital;
     }

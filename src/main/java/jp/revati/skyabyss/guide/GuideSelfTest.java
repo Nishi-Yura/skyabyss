@@ -60,7 +60,8 @@ public final class GuideSelfTest {
         return List.of(
                 SelfTestRunner.Step.once("prep chain", GuideSelfTest::prepChain),
                 SelfTestRunner.Step.once("wayfarer notes", GuideSelfTest::wayfarerNotes),
-                SelfTestRunner.Step.once("heartbeat ward", GuideSelfTest::heartbeatWard),
+                SelfTestRunner.Step.once("heartbeat ward (load)", GuideSelfTest::heartbeatWardLoad),
+                SelfTestRunner.Step.once("heartbeat ward", 60, GuideSelfTest::heartbeatWard),
                 SelfTestRunner.Step.once("site cave (load)", GuideSelfTest::siteCaveLoad),
                 SelfTestRunner.Step.once("site cave", 60, GuideSelfTest::siteCave),
                 SelfTestRunner.Step.once("xp budget", GuideSelfTest::xpBudget));
@@ -354,7 +355,8 @@ public final class GuideSelfTest {
         @Override
         public Mob spawnBoss(ServerLevel level, UUID group, List<ServerPlayer> challengers) {
             Mob boss = bossType.create(level);
-            boss.moveTo(0.5, 300, 0.5, 0f, 0f);
+            Vec3 h = home(level);
+            boss.moveTo(h.x, h.y, h.z, 0f, 0f);
             if (boss instanceof GroupOwned owned) {
                 owned.setGroupId(group);
             }
@@ -364,7 +366,16 @@ public final class GuideSelfTest {
 
         @Override
         public Vec3 home() {
-            return new Vec3(0.5, 300, 0.5);
+            return HOME;
+        }
+
+        // 的は出発点の真上の高い所 (出発点は都なので、(0, 0) は読み込まれていないことがある。"heartbeat ward (load)" が読み込む)
+        static Vec3 HOME = new Vec3(0.5, 300, 0.5);
+
+        static Vec3 home(ServerLevel level) {
+            BlockPos s = level.getSharedSpawnPos();
+            HOME = new Vec3(s.getX() + 0.5, 300, s.getZ() + 0.5);
+            return HOME;
         }
 
         @Override
@@ -394,9 +405,21 @@ public final class GuideSelfTest {
         Accessories.get(p).items.set(slot, new ItemStack(item));
     }
 
+    // 的の湧く出発点のまわりを読み込む (読み込みは次の tick から効くので、"heartbeat ward" は 3 秒あと)。外すのは "heartbeat ward" の終わり
+    static void heartbeatWardLoad(MinecraftServer server) {
+        ServerLevel level = server.overworld();
+        BlockPos s = level.getSharedSpawnPos();
+        for (int dx = -1; dx <= 1; dx++) {
+            for (int dz = -1; dz <= 1; dz++) {
+                level.setChunkForced((s.getX() >> 4) + dx, (s.getZ() >> 4) + dz, true);
+            }
+        }
+    }
+
     static void heartbeatWard(MinecraftServer server) {
         List<String> f = new ArrayList<>();
         ServerLevel level = server.overworld();
+        BossHost.home(level);
         FakePlayer a = player(level, "ward_a");
         FakePlayer b = player(level, "ward_b");
         GroupBossRoom heart = null;
@@ -493,6 +516,12 @@ public final class GuideSelfTest {
             SkyAbyss.LOGGER.error("SELFTEST heartbeat ward crashed", e);
             f.add("crashed: " + e);
         } finally {
+            BlockPos sp = level.getSharedSpawnPos();
+            for (int dx = -1; dx <= 1; dx++) {
+                for (int dz = -1; dz <= 1; dz++) {
+                    level.setChunkForced((sp.getX() >> 4) + dx, (sp.getZ() >> 4) + dz, false);
+                }
+            }
             if (heart != null) {
                 heart.reset(level, heartHost, false);
             }
