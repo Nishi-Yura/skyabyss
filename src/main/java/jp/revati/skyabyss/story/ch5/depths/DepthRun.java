@@ -211,7 +211,8 @@ public final class DepthRun {
         level.getChunk(at);
         p.teleportTo(level, at.getX() + 0.5, at.getY(), at.getZ() + 0.5, p.getYRot(), 0f);
         p.getPersistentData().putInt(SEC, next);
-        setResume(p, next, g.restFeet());
+        // 落ちた所 (区画の上) が、その区画での再開の所。灯籠はまだ先にある
+        setResume(p, next, g.entryFeet());
         Notice.narrate(p, "message.skyabyss.depths.descend", next);
     }
 
@@ -331,6 +332,8 @@ public final class DepthRun {
                                         DepthBuilder.finishNow(p.server, n);
                                     }
                                     descend(p, n);
+                                    // 撮る台本のために、区画の中の眺め (壁の内側から、部屋の上を見下ろす)
+                                    p.teleportTo(p.serverLevel(), n * DepthPlan.SLOT + 0.5, DepthPlan.TOP_Y - 3, -21.5, 0f, 22f);
                                     return n;
                                 })))
                                 .then(Commands.literal("records").executes(c -> {
