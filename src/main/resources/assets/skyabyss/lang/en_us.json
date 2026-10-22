@@ -1362,5 +1362,22 @@
   "raid.skyabyss.WR3.core": "Core",
   "message.skyabyss.raid.WR2.wrong": "Wrong note. Listen again",
   "message.skyabyss.raid.WR3.broken": "The whale core shattered. Back to the room entrance",
-  "message.skyabyss.raid.WR3.wave": "Wave %s"
+  "message.skyabyss.raid.WR3.wave": "Wave %s",
+  "trial.skyabyss.cell.ER1": "Carrying the Embers",
+  "trial.skyabyss.cell.ER1.desc": "Carry three embers from the vent to the cold forge before they cool. The carrier is slowly burned and the ember cools by the second. Sneak to hand it to a nearby ally. Vent bursts fire after a red mark.",
+  "trial.skyabyss.cell.ER2": "The Smithing Order",
+  "trial.skyabyss.cell.ER2.desc": "Use the four stations in the order shown by the murals (mold, fire, water, hammer). Several players can ready stations beforehand. A wrong order resets the stations; no damage.",
+  "trial.skyabyss.cell.ER3": "Defend the Forge",
+  "trial.skyabyss.cell.ER3.desc": "Defend the great forge from three waves. Ash foes try to douse it. Relighting the braziers slows them. If the forge goes out, the room restarts.",
+  "raid.skyabyss.ER1.fetch": "Take an ember from the vent (one per player)",
+  "raid.skyabyss.ER1.deliver": "Carry the ember to the cold forge before it cools (sneak to hand it over)",
+  "raid.skyabyss.ER1.cooled": "The ember went cold",
+  "raid.skyabyss.ER1.handed": "Ember handed over",
+  "raid.skyabyss.ER2.charge": "Stand on stations to ready them (they glow when ready); read the mural order",
+  "raid.skyabyss.ER2.use": "Sneak on ready stations in the mural's order",
+  "raid.skyabyss.ER2.wrong": "Wrong order. The stations cooled and reset",
+  "raid.skyabyss.ER3.defend": "Defend the great forge (waves)",
+  "raid.skyabyss.ER3.forge": "Forge",
+  "raid.skyabyss.ER3.wave": "Wave %s / %s",
+  "raid.skyabyss.ER3.lost": "The forge went out. Back to the room entrance"
 }

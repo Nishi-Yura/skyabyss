@@ -241,6 +241,8 @@ public final class SelfTestRunner {
         steps.addAll(jp.revati.skyabyss.combat.TelegraphSelfTest.steps());
         // 広さの使い方 (26 の 8.7 の B): 人数ごとの湧き場所・罠と柱の置き場所・予告の長さ・重ならない・柱の段。SKYABYSS_SELFTEST_ONLY="room play"
         steps.addAll(jp.revati.skyabyss.combat.RoomPlaySelfTest.steps());
+        // 余燼のレイドの三つの部屋 (熾火運び・鍛冶の手順・炉を守る)。SKYABYSS_SELFTEST_ONLY="ember raid"
+        steps.addAll(jp.revati.skyabyss.trial.raid.ember.EmberRaidSelfTest.steps());
         // 岩鯨の背の新しい敵 (骨の砲手・骨鳥・老番兵)。SKYABYSS_SELFTEST_ONLY="ch1 back mobs"。21 の 3.3
         steps.addAll(jp.revati.skyabyss.entity.Ch1BackMobsSelfTest.steps());
         // 巨神の眠りと運び出し (心臓を止めたあと。眠り方・運ぶ人・降ろす場所・初回の場面)。docs/design/01 の 4.3、20 の 3.4
