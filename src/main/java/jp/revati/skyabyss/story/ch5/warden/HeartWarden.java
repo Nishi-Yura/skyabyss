@@ -9,6 +9,13 @@ import jp.revati.skyabyss.combat.Telegraph;
 import jp.revati.skyabyss.combat.TelegraphShape;
 import jp.revati.skyabyss.notice.Notice;
 import jp.revati.skyabyss.story.ch5.AbyssBuild;
+import software.bernie.geckolib.animatable.GeoEntity;
+import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache;
+import software.bernie.geckolib.animation.AnimatableManager;
+import software.bernie.geckolib.animation.AnimationController;
+import software.bernie.geckolib.animation.PlayState;
+import software.bernie.geckolib.animation.RawAnimation;
+import software.bernie.geckolib.util.GeckoLibUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
@@ -36,8 +43,13 @@ import net.minecraft.world.phys.Vec3;
 //   段       体力 60% で二段目 (影の写し二つ・灯籠の持ち 30 秒)、30% で三段目 (一度だけ闇の波・灯籠の持ち 20 秒)
 //   技       爪 (前の扇 r4.5、予告 18)・踏み込み (直線 10×2、予告 22)・吹き消し (灯籠へ寄り 60 tick、輪の予告。傷 40 で止まる)。灯籠が全部消えると傷 ×1.25
 //   体力     人数で増える (1 人 600、1 人ごとに +60%)
-//   見た目   3 案から選ぶまで仮 (client/WardenClient: 光の中で煙と魂の粒の輪郭)
-public class HeartWarden extends Monster {
+//   見た目   案 B (肋の獣) の本番モデル (client/WardenRenderer)。動きは playAction で全員に流す (claw・lunge・snuff・phase・hurt・death)
+public class HeartWarden extends Monster implements GeoEntity {
+    static final String ANIM = "animation.heart_warden.";
+    static final String[] ACTIONS = {"claw", "lunge", "snuff", "phase", "hurt", "death"};
+    private static final RawAnimation IDLE = RawAnimation.begin().thenLoop(ANIM + "idle");
+    private static final RawAnimation WALK = RawAnimation.begin().thenLoop(ANIM + "walk");
+    private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
     static final EntityDataAccessor<Boolean> LIT = SynchedEntityData.defineId(HeartWarden.class, EntityDataSerializers.BOOLEAN);
     static final EntityDataAccessor<Boolean> DECOY = SynchedEntityData.defineId(HeartWarden.class, EntityDataSerializers.BOOLEAN);
     static final double BASE_HP = 600;
@@ -128,7 +140,11 @@ public class HeartWarden extends Monster {
         if (snuffing >= 0) {
             snuffDamage += a;
         }
-        return super.hurt(source, a);
+        boolean hit = super.hurt(source, a);
+        if (hit && isAlive() && !level().isClientSide) {
+            playAction("hurt");
+        }
+        return hit;
     }
 
     @Override
@@ -208,6 +224,7 @@ public class HeartWarden extends Monster {
         if (want > phase) {
             phase = want;
             AbyssBeacons.phase = phase;
+            playAction("phase");
             if (phase == 2) {
                 for (int k = 0; k < 2; k++) {
                     HeartWarden d = new HeartWarden(WardenSetup.HEART_WARDEN.get(), level);
@@ -279,6 +296,7 @@ public class HeartWarden extends Monster {
                 snuffing = i;
                 snuffTicks = 0;
                 snuffDamage = 0;
+                playAction("snuff");
                 getNavigation().moveTo(b.getX() + 0.5, b.getY(), b.getZ() + 0.5, 1.2);
                 Telegraph.in(level, TelegraphShape.circle(b.getX() + 0.5, b.getZ() + 0.5, 2.5)).floor(b.getY()).warn(SNUFF_TICKS).harmless().owner(this).start();
                 return;
@@ -293,6 +311,7 @@ public class HeartWarden extends Monster {
             // 爪: 前の扇
             Telegraph.in(level, TelegraphShape.cone(getX(), getZ(), ang, CLAW_RANGE, Math.toRadians(50))).floor(floor).warn(CLAW_WARN).danger().owner(this)
                     .onHit((lvl, p) -> p.hurt(damageSources().mobAttack(this), dmg)).start();
+            playAction("claw");
             cooldown = 40;
         } else {
             // 踏み込み: 直線。予告が終わると線の先へ跳ぶ
@@ -303,6 +322,7 @@ public class HeartWarden extends Monster {
             Telegraph.in(level, TelegraphShape.line(getX(), getZ(), ang, len, 1.0)).floor(floor).warn(LUNGE_WARN).danger().owner(this)
                     .onImpact(lvl -> teleportTo(end.x, end.y, end.z))
                     .onHit((lvl, p) -> p.hurt(damageSources().mobAttack(this), dmg * 1.2f)).start();
+            playAction("lunge");
             cooldown = 55;
         }
         cooldown = Math.max(20, cooldown - (phase - 1) * 8);
@@ -326,6 +346,7 @@ public class HeartWarden extends Monster {
     public void die(DamageSource source) {
         super.die(source);
         if (level() instanceof ServerLevel level && !decoy()) {
+            playAction("death");
             say(level, "message.skyabyss.warden.fall");
             WardenArena.fallen(level, this);
             bar.removeAllPlayers();
@@ -340,5 +361,27 @@ public class HeartWarden extends Monster {
     public void remove(RemovalReason reason) {
         bar.removeAllPlayers();
         super.remove(reason);
+    }
+
+    // 動き: 歩きと待機は自動で切り替え、技と被弾・死は playAction でサーバーから流す (全員の画面に同期される)
+    public void playAction(String name) {
+        triggerAnim("action", name);
+    }
+
+    @Override
+    public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
+        controllers.add(new AnimationController<>(this, "move", 4, state -> state.setAndContinue(state.isMoving() ? WALK : IDLE)));
+        AnimationController<HeartWarden> action = new AnimationController<>(this, "action", 0, state -> PlayState.STOP);
+        for (String name : ACTIONS) {
+            String id = ANIM + name;
+            // 死の姿は最後の姿で止める (消えるまで元に戻らない)
+            action.triggerableAnim(name, name.equals("death") ? RawAnimation.begin().thenPlayAndHold(id) : RawAnimation.begin().thenPlay(id));
+        }
+        controllers.add(action);
+    }
+
+    @Override
+    public AnimatableInstanceCache getAnimatableInstanceCache() {
+        return cache;
     }
 }
