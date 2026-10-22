@@ -71,7 +71,12 @@ public final class AbyssPressure {
         return STATES.computeIfAbsent(p.getUUID(), k -> new State());
     }
 
+    // 深さの数字。心臓の下の果てない深み (depths) の中は、心臓の間の底からの数字 (DepthRun.totalDepth)。縦穴の中は縁からの数字
     public static int depth(ServerPlayer p) {
+        int deep = jp.revati.skyabyss.story.ch5.depths.DepthRun.totalDepth(p);
+        if (deep >= 0) {
+            return deep;
+        }
         return Math.max(0, AbyssWorld.arrival().getY() - Mth.floor(p.getY()));
     }
 
@@ -140,6 +145,9 @@ public final class AbyssPressure {
     }
 
     static boolean nearRest(ServerPlayer p) {
+        if (jp.revati.skyabyss.story.ch5.depths.DepthRun.nearRest(p)) {
+            return true;
+        }
         for (int i = 1; i <= 4; i++) {
             BlockPos r = AbyssBuild.mark("rest_" + i);
             if (r != null && p.blockPosition().closerThan(r, 6)) {

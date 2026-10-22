@@ -21,6 +21,8 @@ import net.minecraft.world.level.Level;
 public abstract class AbyssMobB extends GuardMob {
     private static final EntityDataAccessor<Integer> STAGE = SynchedEntityData.defineId(AbyssMobB.class, EntityDataSerializers.INT);
     private double baseDmg;
+    private double baseHp;
+    private double deepSteps;
     private int tunedY;
 
     protected AbyssMobB(EntityType<? extends Monster> type, Level level, String prefix, String... actions) {
@@ -42,19 +44,28 @@ public abstract class AbyssMobB extends GuardMob {
     public void tune(int form, double hp, double dmg) {
         tunedY = blockPosition().getY();
         entityData.set(STAGE, Math.max(1, Math.min(AbyssScaling.FORM_MAX, form)));
+        baseHp = hp;
         double max = AbyssScaling.hp(hp, tunedY);
         getAttribute(Attributes.MAX_HEALTH).setBaseValue(max);
         setHealth((float) max);
         baseDmg = dmg;
     }
 
+    // 心臓の下の上乗せ (深みの区画で湧くとき。AbyssScaling.deepSteps)。tune のあとに呼ぶ
+    public void setDeep(double steps) {
+        deepSteps = steps;
+        double max = AbyssScaling.hpDeep(baseHp, tunedY, steps);
+        getAttribute(Attributes.MAX_HEALTH).setBaseValue(max);
+        setHealth((float) max);
+    }
+
     // 湧いた高さで効く傷 (傷を与える所で使う)
     protected float dmg() {
-        return (float) AbyssScaling.dmg(baseDmg, tunedY);
+        return (float) AbyssScaling.dmgDeep(baseDmg, tunedY, deepSteps);
     }
 
     protected float dmg(double factor) {
-        return (float) (AbyssScaling.dmg(baseDmg, tunedY) * factor);
+        return (float) (AbyssScaling.dmgDeep(baseDmg, tunedY, deepSteps) * factor);
     }
 
     @Override

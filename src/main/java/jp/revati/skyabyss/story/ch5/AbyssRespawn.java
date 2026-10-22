@@ -109,6 +109,10 @@ public final class AbyssRespawn {
             return;
         }
         t.remove(DIED);
+        // 果てない深みの中で倒れたら、覚えた灯籠 (docs/design/36 の 9) へ
+        if (jp.revati.skyabyss.story.ch5.depths.DepthRun.respawn(p)) {
+            return;
+        }
         ServerLevel abyss = p.server.getLevel(AbyssWorld.LEVEL);
         BlockPos at = spot(t.getInt(REST));
         if (abyss == null || at == null) {

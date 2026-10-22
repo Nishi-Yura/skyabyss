@@ -109,7 +109,9 @@ public final class AbyssMobSpawner {
             return;
         }
         for (ServerPlayer p : level.players()) {
-            if (!p.isAlive() || p.isCreative() || p.isSpectator() || RAND.nextInt(2) != 0) {
+            // 果てない深みの区画の中は、区画の湧き (depths.DepthMobs) だけ
+            if (!p.isAlive() || p.isCreative() || p.isSpectator() || RAND.nextInt(2) != 0
+                    || jp.revati.skyabyss.story.ch5.depths.DepthRun.sectionOf(p) > 0) {
                 continue;
             }
             BlockPos at = p.blockPosition();
