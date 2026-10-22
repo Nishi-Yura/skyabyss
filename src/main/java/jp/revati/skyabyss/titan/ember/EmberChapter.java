@@ -115,6 +115,7 @@ public final class EmberChapter {
         ChapterSites.element(SITE_HEARTH, Chapters.EMBER, "ember_hearth_ruin").atGround().dist(50, 130).arriveRadius(14)
                 .post(EmberChapter::finishHearth).onArrive((p, s) -> arrive(p, "hearth", SITE_XP, LINE_HEARTH, true)).register();
         ChapterSites.element(SITE_POST, Chapters.EMBER, "ember_ash_post").atGround().dist(40, 120).arriveRadius(12)
+                .post(job -> jp.revati.skyabyss.story.ch4.Ch4Ground.clearFloatingPlants(job, 4))
                 .onArrive((p, s) -> arrive(p, "post", POST_XP, LINE_POST, false)).register();
         ChapterSites.element(SITE_LEDGE, Chapters.EMBER, "ember_warm_ledge").atGround().dist(60, 140).arriveRadius(12)
                 .post(EmberChapter::finishLedge).onArrive((p, s) -> arrive(p, "ledge", LEDGE_XP, LINE_LEDGE, false)).register();
@@ -167,6 +168,7 @@ public final class EmberChapter {
 
     // ---------------------------------------------------------------- 小要素
     private static void finishHearth(SiteJob job) {
+        jp.revati.skyabyss.story.ch4.Ch4Ground.clearFloatingPlants(job, 5);
         BlockPos barrel = job.mark("barrel");
         if (barrel != null && job.level.getBlockEntity(barrel) instanceof BarrelBlockEntity be) {
             be.setItem(0, LorePageItem.of(PAGE_SOURCE));
@@ -176,6 +178,7 @@ public final class EmberChapter {
     }
 
     private static void finishLedge(SiteJob job) {
+        jp.revati.skyabyss.story.ch4.Ch4Ground.clearFloatingPlants(job, 4);
         BlockPos barrel = job.mark("barrel");
         if (barrel != null && job.level.getBlockEntity(barrel) instanceof BarrelBlockEntity be) {
             be.setItem(0, new ItemStack(EmberTitanSetup.WARM_STONE.get()));

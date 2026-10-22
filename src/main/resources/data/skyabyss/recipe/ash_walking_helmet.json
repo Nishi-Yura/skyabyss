@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "pattern": [
+    "IHI",
+    "H H",
+    " S "
+  ],
+  "key": {
+    "I": {
+      "item": "skyabyss:soot_iron"
+    },
+    "H": {
+      "item": "skyabyss:ash_hemp"
+    },
+    "S": {
+      "item": "skyabyss:thunder_wing_shard"
+    }
+  },
+  "result": {
+    "id": "skyabyss:ash_walking_helmet",
+    "count": 1
+  }
+}

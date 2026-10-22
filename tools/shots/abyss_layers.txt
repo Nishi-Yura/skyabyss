@@ -1,0 +1,44 @@
+# 深淵の層の大縦穴 (docs/design/36 の A2): 縁から見下ろす・骨の層・溜まりの間・休み場・塩の野営・雷の巣・灰の溜まり・心臓の間
+# ./gradlew runShots -Pscript=tools/shots/abyss_layers.txt -PshotsName=abyss_layers
+world abyss_layers flat
+size 1280 720
+timeout 2400
+render 12
+clouds off
+
+wait 80
+cmd skyabyss cinematic stop
+cmd gamemode spectator
+hud off
+cmd skyabyss abyss enter
+wait 40
+cmd skyabyss abyss build
+wait 900
+cmd tp @s 24 243 0 90 35
+wait 60
+shot a_rim_down
+cmd tp @s 0 200 0 0 20
+wait 60
+shot a_bone_layer
+cmd tp @s 17 219 -18 180 25
+wait 60
+shot a_pool_bone
+cmd tp @s -6 125 9 135 25
+wait 60
+shot a_rest_1
+cmd tp @s -18 66 -16 225 25
+wait 60
+shot a_camp_salt
+cmd tp @s 0 -40 0 90 15
+wait 60
+shot a_storm_layer
+cmd tp @s -14 -136 19 135 20
+wait 60
+shot a_pool_ash
+cmd tp @s 0 -270 22 180 30
+wait 60
+shot a_heart_room
+cmd tp @s 0 -100 0 0 89
+wait 60
+shot a_look_down_center
+quit

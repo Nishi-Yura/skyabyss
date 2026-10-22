@@ -102,6 +102,11 @@ public final class TownGuests {
     @Nullable
     static volatile BlockPos testCapital;
 
+    // ほかの包みの自己テスト (五章の入口など) が印を差し替える。null で元に戻す
+    public static void setTestMarks(@Nullable Map<String, BlockPos> marks) {
+        testMarks = marks;
+    }
+
     public static Map<String, BlockPos> marks(MinecraftServer server) {
         Map<String, BlockPos> t = testMarks;
         return t != null ? t : OpeningSites.shelterExtras(server, "");

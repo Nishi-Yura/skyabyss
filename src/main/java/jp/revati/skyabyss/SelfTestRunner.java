@@ -260,6 +260,8 @@ public final class SelfTestRunner {
         steps.addAll(jp.revati.skyabyss.titan.storm.chapter.mob.Ch3MobsSelfTest.steps());
         // 四章の地上 (火除けの薬・炉跡・消えた炉の坑・灰の道の標・煤の窯の跡・敵 4 種・四章を心臓と天の鍵まで通す)。docs/design/34 の C4。SKYABYSS_SELFTEST_ONLY="ch4"
         steps.addAll(jp.revati.skyabyss.story.ch4.Ch4GroundSelfTest.steps());
+        steps.add(Step.once("ch5 entrance (load)", jp.revati.skyabyss.story.ch5.AbyssEntranceSelfTest::load));
+        steps.add(Step.once("ch5 entrance", 60, jp.revati.skyabyss.story.ch5.AbyssEntranceSelfTest::run));
         steps.add(Step.once("storm mobs (load)", jp.revati.skyabyss.titan.storm.mob.StormMobSelfTest::load));
         steps.add(Step.until("storm mobs (wait)", jp.revati.skyabyss.titan.storm.mob.StormMobSelfTest::ready));
         steps.add(Step.once("storm mobs", 5, jp.revati.skyabyss.titan.storm.mob.StormMobSelfTest::runSelfTest));

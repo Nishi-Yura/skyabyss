@@ -58,14 +58,15 @@ def write_blueprints() -> None:
             blocks.append((x, 0, z, CR if z == 0 else BS))
     blocks += [(0, 0, 0, FIRE), (1, 0, -1, ANVIL), (-1, 0, 1, BARREL), (-1, 0, -1, BA), (1, 0, 1, BA)]
     blocks += [(-2, 1, -2, WALL), (2, 1, -2, WALL), (-2, 1, 2, WALL), (-2, 2, -2, WALL), (2, 1, 0, WALL)]
-    blueprint("ember_hearth_ruin", pal, blocks, {"barrel": [-1, 0, 1], "stand": [0, 0, 2]}, [-2, -2, 2, 2], True)
+    blueprint("ember_hearth_ruin", pal, blocks, {"barrel": [-1, 0, 1], "stand": [0, 0, 3]}, [-2, -2, 2, 3], True)
 
     # 灰降り観測点: 一本の杭と、足もとの低い石
     SL, POST, TOP = "minecraft:polished_blackstone_slab[type=bottom]", "minecraft:polished_blackstone_brick_wall", "minecraft:blackstone_slab[type=bottom]"
     pal = [SL, POST, TOP, BA]
     blocks = [(0, 0, 0, BA), (0, 1, 0, POST), (0, 2, 0, POST), (0, 3, 0, TOP),
-              (1, 0, 0, SL), (-1, 0, 0, SL), (0, 0, 1, SL), (0, 0, -1, SL)]
-    blueprint("ember_ash_post", pal, blocks, {"top": [0, 3, 0], "stand": [2, 1, 0]}, [-1, -1, 1, 1], False, 1)
+              (1, 0, 0, SL), (-1, 0, 0, SL), (0, 0, 1, SL), (0, 0, -1, SL), (2, -1, 0, BA)]
+    # 立つ所は杭の東 (足もとは玄武岩。ならさない部品なので、足もとを部品で置く)
+    blueprint("ember_ash_post", pal, blocks, {"top": [0, 3, 0], "stand": [2, 0, 0]}, [-1, -1, 1, 1], False, 1)
 
     # 温かい岩棚: 三かける三の玄武岩の台と、樽 (温石が一つ)
     BASALT = "minecraft:basalt[axis=y]"
@@ -73,10 +74,9 @@ def write_blueprints() -> None:
     blocks = []
     for x in range(-1, 2):
         for z in range(-1, 2):
-            if (x, z) != (0, 0):
-                blocks.append((x, 0, z, BASALT if (x + z) % 2 else BA))
-    blocks += [(0, 0, 0, BARREL), (-1, 1, -1, TOP), (1, 1, -1, TOP)]
-    # 樽の高さは台と同じ (y=0)。真ん中の石を樽に替えたので、床は 8 つ
+            blocks.append((x, -1, z, BASALT if (x + z) % 2 else BA))
+    blocks += [(0, 0, 0, BARREL), (-1, 0, -1, TOP), (1, 0, -1, TOP)]
+    # 台は地面の高さ (y=-1 で地面の一番上を置き換える。地面から浮いた台にしない)。樽はその上
     blueprint("ember_warm_ledge", pal, blocks, {"barrel": [0, 0, 0], "stand": [0, 0, 2]}, [-1, -1, 1, 1], True, 2)
 
 
@@ -102,7 +102,7 @@ def write_text() -> None:
     text(p + "rise", "丘が、持ち上がった。……山だと思っていたものが、息をしている。",
          "The hill lifted. ... What you took for a mountain is breathing.")
     # 余韻
-    text(p + "aftermath.teller", "……よく戻ったね。その鍵は、あんたが持っておいき。上ばかり見ていたのは、わたしたちのほうだったよ。",
+    text(p + "aftermath.teller", "……よく戻ったね。その鍵は、あんたが持っておいき。上ばかり見ていたのは、あたしたちのほうだったよ。",
          "... Welcome back. Keep that key. It was we who kept looking only upward.")
     text(p + "aftermath.end", "足の下の、ずっと深いところで、鍵と同じ拍が、ひとつ打った。",
          "Far beneath your feet, a beat the same as the key's sounded once.")
@@ -165,20 +165,18 @@ def write_lang() -> None:
         merged = json.loads(path4.read_text(encoding="utf-8")) if path4.exists() else {}
         merged.update({k: v for k, v in texts.items() if k not in only})
         dump(path4, dict(sorted(merged.items())))
-        # 余燼の lang に伝承の文を足す (「__ember.H」の区切りの下、ファイルの終わりに。実行のたびに H 以下を書き直す。ほかの行は文字のまま触らない)
+        # 余燼の lang の「__ember.H」の行と伝承の行だけを書き直す (ほかの行は文字のまま触らない。H のあとにほかの作業の行が続いてよい)
         path = RES / f"assets/skyabyss_ember/lang/{code}.json"
         lines = path.read_text(encoding="utf-8").rstrip().split(chr(10))
         assert lines[-1] == "}"
-        body = lines[:-1]
-        for n, line in enumerate(body):
-            if line.startswith('  "__ember.H"'):
-                body = body[:n]
-                break
-        body[-1] = body[-1].rstrip(",") + ","
         add = [("__ember.H", "四章の伝承 (lore.skyabyss.chapter1.ember_hearth、ember_prev_page。生成元 tools/gen_ch4_content.py)")] + list(only.items())
+        keys = {k for k, _ in add}
+        body = [l for l in lines[:-1] if not any(l.startswith("  %s:" % json.dumps(k, ensure_ascii=False)) for k in keys)]
+        body[-1] = body[-1].rstrip(",") + ","
         for n, (k, v) in enumerate(add):
             body.append("  %s: %s%s" % (json.dumps(k, ensure_ascii=False), json.dumps(v, ensure_ascii=False), "," if n < len(add) - 1 else ""))
         path.write_text(chr(10).join(body + ["}"]) + chr(10), encoding="utf-8")
+        json.loads(path.read_text(encoding="utf-8"))
 
 
 # ---------------------------------------------------------------- データ

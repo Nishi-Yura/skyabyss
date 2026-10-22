@@ -132,6 +132,7 @@ public final class DeadForgePit {
     }
 
     static void finish(SiteJob job) {
+        Ch4Ground.clearFloatingPlants(job, 9);
         for (String name : List.of("tablet", "forge_tablet", "pack", "anvil", "warm_stand", "artisan", "exit")) {
             BlockPos at = job.mark(name);
             if (at != null) {

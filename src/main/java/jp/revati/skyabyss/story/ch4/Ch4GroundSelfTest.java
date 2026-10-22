@@ -116,7 +116,7 @@ public final class Ch4GroundSelfTest {
         }
         SiteProgressData.get(p.server).forgetTreasure(p.getUUID(), DeadForgePit.PACK);
         SiteProgressData.get(p.server).forgetTreasure(p.getUUID(), Ch4Ground.KILN_CACHE);
-        p.getPersistentData().remove(Ch4Mobs.SOOT_WHETTED_KEY);
+        p.removeEffect(Ch4Gear.SOOT_WHETTED);
     }
 
     private static void report(String name, List<String> f, String passed) {
@@ -296,14 +296,28 @@ public final class Ch4GroundSelfTest {
         // 煤の砥石: 研いだ刃 + 灰の殻へ 1.5 倍。冷やし水: 耐火
         check(f, Ch4Mobs.shellBonus(level.damageSources().playerAttack(p)) == 1f, "an unwhetted blade got the soot bonus");
         Ch4Setup.SOOT_WHETSTONE.get().use(level, p, net.minecraft.world.InteractionHand.MAIN_HAND);
-        p.getPersistentData().putLong(Ch4Mobs.SOOT_WHETTED_KEY, level.getGameTime() + 100);
         check(f, Ch4Mobs.sootWhetted(p) && Ch4Mobs.shellBonus(level.damageSources().playerAttack(p)) == Ch4Mobs.SOOT_SHELL_MULT, "the soot whetstone did not give the shell bonus");
+        check(f, Math.abs(Ch4Gear.WHETSTONE_ATTACK - 2.6) < 1e-6, "the soot blade should be +2.6 (the chapter-4 travel row)");
         AshCoolerItem.drink(p);
         check(f, p.hasEffect(MobEffects.FIRE_RESISTANCE), "the ash cooler did not give fire resistance");
+        // 灰歩きの旅装: 防御 20・強靭 13 (GearCurve の四章の行)、熱のたまり 1 部位 2.5% (一式 10%)
+        int def = 0;
+        for (int d : Ch4Gear.ARMOR_DEFENSE) {
+            def += d;
+        }
+        check(f, def == Ch4Gear.ROW.armor() && Math.round(Ch4Gear.ARMOR_TOUGHNESS * 4) == Ch4Gear.ROW.toughness() && Ch4Gear.ROW.level() == 25,
+                "the ash walking set should match the chapter-4 travel row (" + def + ")");
+        check(f, Math.abs(Ch4Gear.heatFactor(4) - 0.9) < 1e-6 && Math.abs(Ch4Gear.heatFactor(0) - 1.0) < 1e-6, "the heat factor of the set should be 0.9");
+        p.setItemSlot(net.minecraft.world.entity.EquipmentSlot.CHEST, new ItemStack(Ch4Gear.CHESTPLATE.get()));
+        p.setItemSlot(net.minecraft.world.entity.EquipmentSlot.FEET, new ItemStack(Ch4Gear.BOOTS.get()));
+        check(f, Ch4Gear.worn(p) == 2, "two worn ash walking pieces should count 2");
+        p.setItemSlot(net.minecraft.world.entity.EquipmentSlot.CHEST, ItemStack.EMPTY);
+        p.setItemSlot(net.minecraft.world.entity.EquipmentSlot.FEET, ItemStack.EMPTY);
+        check(f, Ch4Gear.ASH_BAKED_BREAD.get().components().get(net.minecraft.core.component.DataComponents.FOOD) != null, "the ash-baked bread is not food");
         // レシピ (旅の覚書の四章)
         check(f, jp.revati.skyabyss.guide.WayfarerNotes.recipes(4).size() == Ch4Setup.RECIPES.size()
                 && server.getRecipeManager().byKey(net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "soot_whetstone")).isPresent()
-                && server.getRecipeManager().byKey(net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "ash_cooler")).isPresent(),
+                && Ch4Setup.RECIPES.stream().allMatch(r -> server.getRecipeManager().byKey(net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, r)).isPresent()),
                 "the chapter-4 recipes are missing or not on the notes");
     }
 
@@ -333,11 +347,11 @@ public final class Ch4GroundSelfTest {
             check(f, elder != null && Math.abs(elder.getMaxHealth() - ElderThrall.HEALTH) < 0.1f && Math.abs(elder.shell() - ElderThrall.SHELL) < 0.1f,
                     "the elder thrall should have 210 health and a shell of 40");
             if (elder != null) {
-                p.getPersistentData().putLong(Ch4Mobs.SOOT_WHETTED_KEY, level.getGameTime() + 100);
+                p.addEffect(new net.minecraft.world.effect.MobEffectInstance(Ch4Gear.SOOT_WHETTED, 100));
                 elder.invulnerableTime = 0;
                 elder.hurt(level.damageSources().playerAttack(p), 10f);
                 check(f, Math.abs(elder.shell() - (ElderThrall.SHELL - 7.5f)) < 0.6f, "a soot-whetted blow should take 1.5x from the elder's shell (" + elder.shell() + ")");
-                p.getPersistentData().remove(Ch4Mobs.SOOT_WHETTED_KEY);
+                p.removeEffect(Ch4Gear.SOOT_WHETTED);
                 elder.ignite();
                 check(f, elder.isFlared() && elder.waves == 1 && elder.burnLeft() == 0, "breaking the elder's shell should send one heat wave and never burn out");
                 check(f, ElderThrall.CRACK_WARN >= 20 && ElderThrall.RAKE_WARN >= 20 && ElderThrall.WAVE_WARN >= 20, "a named foe's telegraphs must be at least 1 s");
@@ -377,7 +391,7 @@ public final class Ch4GroundSelfTest {
             f.add("crashed: " + e);
         } finally {
             made.forEach(Entity::discard);
-            p.getPersistentData().remove(Ch4Mobs.SOOT_WHETTED_KEY);
+            p.removeEffect(Ch4Gear.SOOT_WHETTED);
         }
         report("ch4 mobs", f, "husk shell/flare/burnout, elder shell 40 with soot bonus, heat wave, no burnout, 1 s telegraphs, cracks, mite flock and warm stand, harmless dragger curls, xp, wanderers");
     }

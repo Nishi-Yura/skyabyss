@@ -299,6 +299,18 @@ public class LoreBookScreen extends Screen implements jp.revati.skyabyss.client.
         if (chapter != null) {
             drawTab(g, chapterIndex, chapter, true, mouseX, mouseY);
             drawTabLabel(g, chapterIndex, chapter, true, mouseX, mouseY);
+            // 右どなりのしおりは、選んだしおりの右端に載せ直す (選んだしおりが幅いっぱいに描かれ、となりの章の名を隠していた。2026-10-22)
+            if (chapterIndex + 1 < chapters.size()) {
+                g.enableScissor(0, 0, width, top + 1);
+                drawTab(g, chapterIndex + 1, chapters.get(chapterIndex + 1), false, mouseX, mouseY);
+                // 載せ直したしおりが、その右の章の名にかかるので、選んでいない章の名はもう一度上に描く
+                for (int i = 0; i < chapters.size(); i++) {
+                    if (i != chapterIndex) {
+                        drawTabLabel(g, i, chapters.get(i), false, mouseX, mouseY);
+                    }
+                }
+                g.disableScissor();
+            }
             drawLeftPage(g, chapter, mouseX, mouseY);
         } else {
             g.drawString(font, Component.translatable("gui.skyabyss.lore.empty"), left + LEFT_X, top + HEADER_Y, FADED, false);

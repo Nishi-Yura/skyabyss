@@ -3,7 +3,21 @@
   "order": 66,
   "repeat": "daily",
   "board": true,
-  "min_stage": 3,
+  "min_stage": 1,
+  "unlock": {
+    "type": "all",
+    "of": [
+      {
+        "type": "flag",
+        "flag": "met",
+        "npc": "skyabyss:whale_chaser"
+      },
+      {
+        "type": "stage",
+        "min": 3
+      }
+    ]
+  },
   "stages": [
     {
       "id": "sweep",

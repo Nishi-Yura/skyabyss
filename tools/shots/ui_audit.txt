@@ -1,0 +1,60 @@
+# 画面の見直し (2026-10-22 夜の定期の確認): 目的の帯 (メインは一つだけ)・クエストログ (支度の段の字下げ)・伝承・持ち物 (スキン A)・地図・知らせ・墓・パーティ
+# ./gradlew runShots -Pscript=tools/shots/ui_audit.txt -PshotsName=ui_audit
+world ui_audit flat
+size 1280 720
+timeout 900
+render 8
+clouds off
+guiscale 3
+
+cmd time set noon
+cmd weather clear
+cmd gamemode survival
+camera 0 -60 0 0 10
+hud on
+cmd skyabyss cinematic stop
+waitchunks
+chat clear
+wait 80
+shot hud_start
+cmd skyabyss quest start @s main_song
+wait 40
+shot hud_main_song
+cmd skyabyss quest start @s "ch1/trail_iron"
+wait 40
+shot hud_prep_step
+open quests
+wait 20
+shot questlog
+close
+open lore
+wait 20
+shot lorebook
+close
+open inventory
+wait 20
+shot inventory
+close
+open travel_map_demo
+wait 30
+shot travel_map
+close
+open notices
+wait 20
+shot notices
+close
+open grave
+wait 20
+shot grave
+close
+open party
+wait 20
+shot party
+close
+guiscale 2
+wait 10
+shot hud_g2
+guiscale 4
+wait 10
+shot hud_g4
+quit

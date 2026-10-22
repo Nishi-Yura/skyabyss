@@ -114,7 +114,9 @@ public final class ShelterBuilder {
                 "stone_stone_whale", "stone_tide_shell", "stone_thunder_wing", "stone_ember",
                 // あとで町のクエスト・裏通りの仕組みが読む置き場 (35 の 3.3・3.5・6.9): 止まり木の台、古井戸の格子と下の迷路、
                 // 酒場の地下の奥の壁と隠し通路 (cellar_gap の 2 マスを空気にすると開く)
-                "perch", "old_well", "well_down", "well_chest", "cellar_wall", "cellar_gap", "cellar_passage", "abyss_hint", "abyss_door")) {
+                "perch", "old_well", "well_down", "well_chest", "cellar_wall", "cellar_gap", "cellar_passage", "abyss_hint", "abyss_door",
+                // 五章の大坑道 (34 の 4.7。story/ch5/AbyssEntrance)
+                "abyss_landing_1", "abyss_landing_2", "abyss_gate")) {
             BlockPos at = job.mark(key);
             if (at != null) {
                 job.entry.extra(key, at);

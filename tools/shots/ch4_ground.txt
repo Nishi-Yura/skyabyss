@@ -109,6 +109,22 @@ camera 105.5 -59 7.5 180 25
 wait 30
 shot 14_dragger_curled
 
+# ---- 灰歩きの旅装 (前・後ろ・斜め)
+cmd summon armor_stand 150 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[0f,0f],ArmorItems:[{id:"skyabyss:ash_walking_boots",count:1},{id:"skyabyss:ash_walking_leggings",count:1},{id:"skyabyss:ash_walking_chestplate",count:1},{id:"skyabyss:ash_walking_helmet",count:1}]}
+camera minecraft:overworld 150 -60.6 3.7 180 0
+waitchunks
+wait 40
+shot 24_armor_front
+cmd kill @e[type=minecraft:armor_stand]
+cmd summon armor_stand 150 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[180f,0f],ArmorItems:[{id:"skyabyss:ash_walking_boots",count:1},{id:"skyabyss:ash_walking_leggings",count:1},{id:"skyabyss:ash_walking_chestplate",count:1},{id:"skyabyss:ash_walking_helmet",count:1}]}
+wait 30
+shot 25_armor_back
+cmd kill @e[type=minecraft:armor_stand]
+cmd summon armor_stand 150 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[40f,0f],ArmorItems:[{id:"skyabyss:ash_walking_boots",count:1},{id:"skyabyss:ash_walking_leggings",count:1},{id:"skyabyss:ash_walking_chestplate",count:1},{id:"skyabyss:ash_walking_helmet",count:1}]}
+wait 30
+shot 26_armor_q34
+cmd kill @e[type=minecraft:armor_stand]
+
 # ---- 会話: 旅の職人 (四章の初め・火除けの薬)、語り部 (炉跡)、イサナ (乗る)、天の鍵の二人の答え
 cmd gamemode creative
 cmd skyabyss playtest skip opening @s
@@ -220,5 +236,19 @@ cmd skyabyss quest signal @s ch4_ash_mark
 cmd skyabyss quest signal @s ch4_ash_mark
 wait 80
 shot 23_band_ash_road
+
+# ---- 持ち物の絵 (旅装 4・パン・素材・砥石・冷やし水)
+cmd clear @s
+cmd give @s skyabyss:ash_walking_helmet
+cmd give @s skyabyss:ash_walking_chestplate
+cmd give @s skyabyss:ash_walking_leggings
+cmd give @s skyabyss:ash_walking_boots
+cmd give @s skyabyss:ash_baked_bread 8
+cmd give @s skyabyss:soot_iron 12
+cmd give @s skyabyss:ash_hemp 9
+cmd give @s skyabyss:ash_ward_thread
+cmd give @s skyabyss:soot_whetstone 3
+wait 30
+shot 27_hotbar
 
 echo ch4_ground done
