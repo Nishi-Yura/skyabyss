@@ -1,0 +1,102 @@
+# 潮殻のレイドの部屋 (docs/design/08 の 13a): TR1 暗い広間と灯り・TR2 貝・TR3 苗と波。段は /skyroute pass、部屋の中へは tp (区画 1 の原点 5120/5216/5312, 4096)
+#   ./gradlew runShots -Pscript=tools/shots/raid_tide.txt -PshotsName=raid_tide   絵は run/shots/raid_tide/shots/raid_tide/ → docs/review/raid_tide/
+world raid_tide normal
+size 1280 720
+timeout 4200
+render 12
+clouds off
+
+wait 100
+cmd skyabyss cinematic stop
+wait 10
+cmd skyabyss cinematic stop
+cmd skyabyss playtest skip opening
+cmd time set noon
+cmd weather clear
+cmd gamerule doDaylightCycle false
+cmd skyabyss playtest god on
+cmd skyabyss playtest gear tide
+cmd skyabyss playtest board tide
+wait 400
+cmd skyabyss playtest goto tide hub
+wait 100
+waitchunks
+wait 20
+chat clear
+cmd skyroute tidyhud
+cmd skyroute enter
+wait 30
+waitchunks
+waitband 600 第一の試練
+wait 120
+waitchunks
+wait 30
+# ---- TR1 真珠の灯り運び
+cmd tp @s 5120.5 65 4106.5 180 6
+wait 40
+waitchunks
+shot tr1_a_dark
+cmd tp @s 5118.5 65 4097.5 180 8
+wait 4
+cmd tp @s 5118.5 65 4099.5 180 8
+wait 4
+cmd tp @s 5118.5 65 4101.5 180 8
+wait 4
+cmd tp @s 5118.5 65 4103.5 180 8
+wait 4
+cmd tp @s 5118.5 65 4105.5 180 8
+wait 4
+cmd tp @s 5120.5 65 4097.5 180 8
+wait 4
+cmd tp @s 5120.5 65 4099.5 180 8
+wait 4
+cmd tp @s 5120.5 65 4101.5 180 8
+wait 4
+cmd tp @s 5120.5 65 4103.5 180 8
+wait 4
+cmd tp @s 5120.5 65 4105.5 180 8
+wait 4
+cmd tp @s 5122.5 65 4097.5 180 8
+wait 4
+cmd tp @s 5122.5 65 4099.5 180 8
+wait 4
+cmd tp @s 5122.5 65 4101.5 180 8
+wait 4
+cmd tp @s 5122.5 65 4103.5 180 8
+wait 4
+cmd tp @s 5122.5 65 4105.5 180 8
+wait 4
+wait 20
+shot tr1_b_lit
+cmd tp @s 5121.5 65 4100.5 150 12
+wait 20
+shot tr1_c_carry
+# ---- TR2 貝の音合わせ
+cmd skyroute pass
+waitband 400 第二の試練
+wait 120
+waitchunks
+wait 30
+cmd tp @s 5216.5 65 4107.5 180 18
+wait 40
+waitchunks
+shot tr2_a_closed
+cmd skytideraid shells
+wait 12
+shot tr2_b_open
+# ---- TR3 珊瑚の苗を守る
+cmd skyroute pass
+waitband 400 第三の試練
+wait 120
+waitchunks
+wait 30
+cmd tp @s 5312.5 65 4103.5 180 14
+wait 50
+shot tr3_a_start
+wait 120
+shot tr3_b_wave
+cmd skytideraid hurt
+wait 12
+shot tr3_c_hurt
+cmd skyroute status
+cmd skyroute clear

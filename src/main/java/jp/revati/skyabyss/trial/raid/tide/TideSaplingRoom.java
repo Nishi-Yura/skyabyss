@@ -27,9 +27,9 @@ public final class TideSaplingRoom extends RaidRoom {
     static final int HZ = 14;
     static final int H = 9;
     static final int SAPLINGS = 3;
-    static final int SAPLING_HP = 30;
+    static final int SAPLING_HP = 40;
     static final int WAVES = 3;
-    static final int BITE_EVERY = 20;
+    static final int BITE_EVERY = 25;
     static final double BITE_R = 2.0;
     static final int GAP_TICKS = 100;
     static final int BATCH_TICKS = 50;
@@ -51,6 +51,12 @@ public final class TideSaplingRoom extends RaidRoom {
     public void build(RaidCtx ctx) {
         ServerLevel level = ctx.level();
         RaidKit.Cell c = RaidKit.buildCell(ctx, new RaidKit.Spec(HX, HZ, H, RaidKit.TIDE));
+        // 灯りを増やす: 天井の灯りの間にもう一組 (四ブロックおきに明るい広間)
+        for (int x = -HX + 7; x <= HX - 2; x += 8) {
+            for (int z = -HZ + 7; z <= HZ - 2; z += 8) {
+                RaidKit.set(level, c.origin().offset(x, H + 1, z), c.palette().light());
+            }
+        }
         for (int i = 0; i < SAPLINGS; i++) {
             // 苗床: 3×3 の台
             RaidKit.fill(level, c.origin().offset(AT[i][0] - 1, 1, AT[i][1] - 1), c.origin().offset(AT[i][0] + 1, 1, AT[i][1] + 1), Blocks.PRISMARINE_BRICKS.defaultBlockState());
@@ -218,7 +224,7 @@ public final class TideSaplingRoom extends RaidRoom {
         for (int k = 1; k <= 3; k++) {
             BlockPos p = ctx.origin().offset(AT[s][0], 1 + k, AT[s][1]);
             if (k <= h) {
-                RaidKit.set(level, p, k == 1 ? Blocks.PINK_TERRACOTTA.defaultBlockState() : Blocks.PINK_CONCRETE.defaultBlockState());
+                RaidKit.set(level, p, k == h ? Blocks.PEARLESCENT_FROGLIGHT.defaultBlockState() : Blocks.WARPED_WART_BLOCK.defaultBlockState());
             } else {
                 RaidKit.set(level, p, k == 1 && h == 0 ? Blocks.DEAD_BRAIN_CORAL_BLOCK.defaultBlockState() : Blocks.AIR.defaultBlockState());
             }

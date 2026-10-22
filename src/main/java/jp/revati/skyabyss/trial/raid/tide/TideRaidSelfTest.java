@@ -449,7 +449,7 @@ public final class TideRaidSelfTest {
             case 0 -> {
                 force(c);
                 check(RaidRunSlot.is(c, "TR3"), "step 3 is not TR3 (" + c.roomId() + ")");
-                check(r.secondaryMax() == 90 && r.secondary() == 90, "sapling HP should start at 90/90, got " + r.secondary() + "/" + r.secondaryMax());
+                check(r.secondaryMax() == 3 * TideSaplingRoom.SAPLING_HP && r.secondary() == r.secondaryMax(), "sapling HP should start full, got " + r.secondary() + "/" + r.secondaryMax());
                 // 人を遠くへ (敵は苗へ向かう)
                 put(a, c.cell().rest());
                 put(b, c.cell().rest());
