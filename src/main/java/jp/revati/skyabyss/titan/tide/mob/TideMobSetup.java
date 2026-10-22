@@ -41,7 +41,7 @@ public final class TideMobSetup {
                     .clientTrackingRange(6).updateInterval(2).noSave().build(SkyAbyss.MODID + ":bubble_shot"));
 
     // ---------------------------------------------------------------- 落とす素材 (08 の 6.1節)。
-    // 潮殻の殻片と潮干しの貝は、心臓の報酬 (別の担当) でも使う。絵は仮 (tools/gen_tide_mob_assets.py)
+    // 潮殻の殻片と潮干しの貝は、心臓の報酬 (別の担当) でも使う。絵は仮 (tools/gen/mobs/gen_tide_mob_assets.py)
     public static final DeferredItem<Item> TIDE_SHELL_SHARD = ITEMS.registerSimpleItem("tide_shell_shard");
     public static final DeferredItem<Item> TIDE_DRIED_SHELL = ITEMS.register("tide_dried_shell",
             () -> new Item(new Item.Properties().food(new FoodProperties.Builder().nutrition(5).saturationModifier(0.6f)

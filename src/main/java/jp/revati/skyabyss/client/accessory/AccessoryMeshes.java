@@ -25,7 +25,7 @@ import net.neoforged.neoforge.client.event.RegisterClientReloadListenersEvent;
 // メッシュ: lowpoly/items/<id>/<階級>.json (階級 = common / rare / legend。品の GearTier か、台本の固定)。
 // 装飾品は鍛えないので、絵は階級ごとに 1 枚 (+ 光る画素の画像)。
 public final class AccessoryMeshes {
-    // 低ポリにした品 (models/item/<id>.json が builtin/entity)。tools/install_lowpoly_accessories.py の ITEMS と同じ
+    // 低ポリにした品 (models/item/<id>.json が builtin/entity)。tools/install/install_lowpoly_accessories.py の ITEMS と同じ
     public static final Set<String> IDS = Set.of("storm_charm", "storm_anklet", "storm_eye_feather", "gale_feather",
             "kindling_charm", "ember_mantle", "ember_lantern", "ember_horn", "cinder_lamp",
             "resonance_charm", "moss_talisman", "stone_whale_plating",

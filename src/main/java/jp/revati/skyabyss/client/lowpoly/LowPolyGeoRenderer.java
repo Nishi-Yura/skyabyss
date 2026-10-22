@@ -23,7 +23,7 @@ import software.bernie.geckolib.renderer.GeoRenderer;
 import software.bernie.geckolib.renderer.layer.AutoGlowingGeoLayer;
 
 // GeckoLib の骨とアニメーションをそのまま使い、各骨の cube の代わりに低ポリメッシュを流す GeoEntityRenderer。
-// geo は cube の無い骨だけの版 (geo/entity/<name>_lowpoly.geo.json、tools/install_lowpoly.py が書く)。
+// geo は cube の無い骨だけの版 (geo/entity/<name>_lowpoly.geo.json、tools/install/install_lowpoly.py が書く)。
 // 骨のポーズは GeckoLib がかけ終えた poseStack をそのまま使うので、向き・アニメ・被弾の赤・死に方・明るさは cube のモデルと同じ。
 // LowPoly.enabled が false のときは元の geo / テクスチャに戻り、普通の GeckoLib の描画になる。
 public class LowPolyGeoRenderer<T extends Entity & GeoAnimatable> extends GeoEntityRenderer<T> {

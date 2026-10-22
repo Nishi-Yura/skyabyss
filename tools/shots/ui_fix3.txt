@@ -1,5 +1,5 @@
 # 画面の見直し 3 (道しるべの一本線・装飾/旅嚢のつまみの字・ツールチップの折り返しと収まり) の確認。
-# ./gradlew runShots --no-daemon -Pscript=tools/shots/ui_fix3.txt   →  python -I tools/ui_fix3_sheet.py で docs/review/previews/ui_fix3_sheet.png
+# ./gradlew runShots --no-daemon -Pscript=tools/shots/ui_fix3.txt   →  python -I tools/sheets/ui_fix3_sheet.py で docs/review/previews/ui_fix3_sheet.png
 world ui_fix3t flat
 size 1280 720
 timeout 600

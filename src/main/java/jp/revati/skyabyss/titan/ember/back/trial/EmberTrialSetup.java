@@ -75,7 +75,7 @@ public final class EmberTrialSetup {
     public static final DeferredItem<EmberItem> LIVE_COAL = ITEMS.register(EmberIds.LIVE_COAL,
             () -> new EmberItem(new Item.Properties().stacksTo(16)));
 
-    // ---------------------------------------------------------------- 音 (tools/gen_ember_trial_sounds.py。独自合成)
+    // ---------------------------------------------------------------- 音 (tools/gen/sound/gen_ember_trial_sounds.py。独自合成)
     public static final DeferredHolder<SoundEvent, SoundEvent> ASH_SCATTER = sound(EmberIds.SOUND_ASH_SCATTER);
     public static final DeferredHolder<SoundEvent, SoundEvent> CRUST_CRACK = sound(EmberIds.SOUND_CRUST_CRACK);
     public static final DeferredHolder<SoundEvent, SoundEvent> CRUST_SINK = sound(EmberIds.SOUND_CRUST_SINK);

@@ -93,7 +93,7 @@ public class StoneWhaleEntity extends Entity implements GeoEntity, TravelTitan, 
     private enum Mode { CRUISE, APPROACH, REST }
 
     // ---- 巨神での移動 (titan.travel) の乗り場。頭の上の平らな所 (geo の z -76〜-116 単位、高さ 64 単位前後)
-    // 座席 (横, 上, 前)。横は左が +。高さは低ポリ案 C のメッシュの頭の上面から測った (tools/titan_align_check.py。旧キューブより 0.2〜0.8 低い)。頭の付け根 (前 30 ブロック) から 12〜16 ブロック先なので、泳ぎの揺れは 1 ブロック未満
+    // 座席 (横, 上, 前)。横は左が +。高さは低ポリ案 C のメッシュの頭の上面から測った (tools/audit/titan_align_check.py。旧キューブより 0.2〜0.8 低い)。頭の付け根 (前 30 ブロック) から 12〜16 ブロック先なので、泳ぎの揺れは 1 ブロック未満
     private static final double[][] SEATS = {
             {-1.5, 32.0, 46.0}, {1.5, 32.0, 46.0}, {-1.5, 32.0, 42.0}, {1.5, 32.0, 42.0},
             {-4.5, 31.2, 46.0}, {4.5, 31.2, 46.0}, {-4.5, 31.2, 42.0}, {4.5, 31.2, 42.0}};
@@ -911,7 +911,7 @@ public class StoneWhaleEntity extends Entity implements GeoEntity, TravelTitan, 
     }
 
     // 見た目は当たり判定よりずっと大きいので、画面外判定を広げる
-    // 体に入れない (titan/solid)。体積は tools/gen_titan_volumes.py が近景のメッシュから焼く。入ってよいのは乗り場の通り道だけ
+    // 体に入れない (titan/solid)。体積は tools/gen/world/gen_titan_volumes.py が近景のメッシュから焼く。入ってよいのは乗り場の通り道だけ
     @Override
     public String volumeName() {
         return "stone_whale";

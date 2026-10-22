@@ -43,7 +43,7 @@ public final class StormMobSetup {
     public static final DeferredItem<Item> THUNDER_SUPPLICANT_EGG = ITEMS.register("thunder_supplicant_spawn_egg",
             () -> new DeferredSpawnEggItem(THUNDER_SUPPLICANT, 0x52486A, 0xFFE278, new Item.Properties()));
 
-    // ---------------------------------------------------------------- 音 (tools/gen_storm_mob_assets.py、独自合成)
+    // ---------------------------------------------------------------- 音 (tools/gen/mobs/gen_storm_mob_assets.py、独自合成)
     public static final DeferredHolder<SoundEvent, SoundEvent> WARDEN_AMBIENT = sound("feather_warden_ambient");
     public static final DeferredHolder<SoundEvent, SoundEvent> WARDEN_HURT = sound("feather_warden_hurt");
     public static final DeferredHolder<SoundEvent, SoundEvent> WARDEN_DEATH = sound("feather_warden_death");

@@ -1,4 +1,4 @@
-# 持ち方の見直し (tools/gen_weapon_d2_shots.py が作る)
+# 持ち方の見直し (tools/gen/shots/gen_weapon_d2_shots.py が作る)
 world shots flat
 size 960 540
 timeout 3000

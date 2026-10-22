@@ -3,7 +3,7 @@
 
 実行: python -I tools/rough/lowpoly/ch4/icons_ch4.py
 出力: docs/review/ch4_roughs/items/icons/<品>_{a,b,c}_32.png、docs/review/ch4_roughs/items/icons_ch4.png
-入れ方: tools/gen_ch4_ground_mobs.py (選んだ案を assets へ、選ばなかった案を tools/sources/<品>/ へ)
+入れ方: tools/gen/ch4/gen_ch4_ground_mobs.py (選んだ案を assets へ、選ばなかった案を tools/sources/<品>/ へ)
 """
 from __future__ import annotations
 

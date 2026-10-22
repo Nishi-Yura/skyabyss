@@ -24,7 +24,7 @@ import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
 // 深淵の敵 A の登録 (docs/design/36 の 4・4.1): 9 種の型・スポーンエッグ・素材 3 つ・経験値 (推奨の段は AbyssScaling.ABYSS_LEVEL)。
-// 素材の見た目は tools/gen_abyss_mobs_a.py。数字は AbyssScaling。音は既存の音の別名を使う (新しい音の素材は作っていない)。
+// 素材の見た目は tools/gen/abyss/gen_abyss_mobs_a.py。数字は AbyssScaling。音は既存の音の別名を使う (新しい音の素材は作っていない)。
 public final class AbyssMobsA {
     private static final DeferredRegister<EntityType<?>> ENTITIES = DeferredRegister.create(Registries.ENTITY_TYPE, SkyAbyss.MODID);
     private static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(SkyAbyss.MODID);

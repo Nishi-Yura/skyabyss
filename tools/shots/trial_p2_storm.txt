@@ -1,5 +1,5 @@
 # 雷翼の試練の甲板 (docs/design/29 の P2、版 22) の確かめ。./gradlew runShots --no-daemon -Pscript=tools/shots/trial_p2_storm.txt -PshotsName=trial_p2_storm
-# 出力: run/shots/trial_p2_storm/shots/trial_p2_storm/*.png → python tools/trial_p2_storm_sheet.py で docs/review/previews/trial_p2_storm_sheet.png
+# 出力: run/shots/trial_p2_storm/shots/trial_p2_storm/*.png → python tools/sheets/trial_p2_storm_sheet.py で docs/review/previews/trial_p2_storm_sheet.png
 world trial_p2_storm flat
 size 1280 720
 timeout 3600

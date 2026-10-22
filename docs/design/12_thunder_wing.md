@@ -170,9 +170,9 @@
 
 ### 3.2 鳥の形（巨神の形の背中）
 
-背中は**巨神本体のモデル（低ポリ案 A 嵐の大鷲）と同じ形・同じ色のブロックの鳥**。形と骨の番号はモデルの格子（部屋の座標が頼る）、材料（色・羽の縞・光る所）は低ポリ案 A の近景メッシュのアトラスから取る（`tools/lowpoly_thunder_voxel.py`。メッシュを 0.5 単位のセルにして、骨ごとに近いセルの色を写す）。`tools/gen_back_shape.py bird`（セルの多数決、テクスチャの色に近いバニラのブロック、乱数なし）がブロックの配置を作り、`data/skyabyss/storm_back/bird.bin` に書く。`StormBirdBuilder` が置く。外形の寸法は変わらない。
+背中は**巨神本体のモデル（低ポリ案 A 嵐の大鷲）と同じ形・同じ色のブロックの鳥**。形と骨の番号はモデルの格子（部屋の座標が頼る）、材料（色・羽の縞・光る所）は低ポリ案 A の近景メッシュのアトラスから取る（`tools/lib/lowpoly_thunder_voxel.py`。メッシュを 0.5 単位のセルにして、骨ごとに近いセルの色を写す）。`tools/gen/items/gen_back_shape.py bird`（セルの多数決、テクスチャの色に近いバニラのブロック、乱数なし）がブロックの配置を作り、`data/skyabyss/storm_back/bird.bin` に書く。`StormBirdBuilder` が置く。外形の寸法は変わらない。
 
-- 縮尺（26 の拡大）: 水平 1 単位 = 1.36 ブロック、垂直 1.105（×1.3）。頭は北（-Z）、左の翼は西（-X）。翼の芯の厚みを 1.9 倍にする処理が道具にある（骨の中に高さ 16 の回廊を通すため）。ブロック数 約 125 万。細い塔の先が離れて宙に浮く小さな塊（4 ブロック）は道具が消す。`python tools/gen_back_shape.py bird`（既定が 26 の倍率。`--hscale 1.6 --vscale 1.3 --wing 1.9 --out <ファイル>`）。
+- 縮尺（26 の拡大）: 水平 1 単位 = 1.36 ブロック、垂直 1.105（×1.3）。頭は北（-Z）、左の翼は西（-X）。翼の芯の厚みを 1.9 倍にする処理が道具にある（骨の中に高さ 16 の回廊を通すため）。ブロック数 約 125 万。細い塔の先が離れて宙に浮く小さな塊（4 ブロック）は道具が消す。`python tools/gen/items/gen_back_shape.py bird`（既定が 26 の倍率。`--hscale 1.6 --vscale 1.3 --wing 1.9 --out <ファイル>`）。
 - 色（案 A のアトラスから: 明るさで 濃紺の縞 → 灰のコンクリート・ブラックストーン、中間 → 深い石・凝灰岩、明るい縞 → 方解石・白のコンクリート。縞はメッシュの羽の線のまま）: 背と翼の上は灰青の羽（深い灰のテラコッタ・灰のコンクリート・銅の地の石）、腹と翼の下は白い羽に灰の横縞、翼の後縁は濃い灰、稲妻の筋は光るブロック（白いガラスの奥に光源）、銅は磨かれた銅（蝋引きで錆びない）。冠の避雷針（銅）は頭の上に 7 本、背の天窓と風の民の塔 2 本、腰の上の羽根の門はモデルのまま。
 - 体の中の深い所は凝灰岩（掘った部屋の壁は風の民の石）。
 - **建てる時間**: サーバーの起動のとき一度だけ。鳥を tick に分けて置き（`BackBuildJobs`。約 445 tick、1 tick 25 ms まで）、置き終えた tick に部屋を掘る（約 6〜7 秒）。
@@ -272,7 +272,7 @@
 - 竜骨の門の下（栓の下の 2 段、低い道の床、東から西へ下る 2 段の階段、穴の底の灯り）はいつも同じ形で、床の 5×5 の栓だけがグループごとに開く。
 
 - 実装: `SealedGateBlock`・`ResonanceStoneBlock`（見た目は「風鳴り石」）。
-- **避雷の柱と戻しの鏡は専用ブロック**（`StormBackSetup`、モデルと 32x32 の絵は `tools/gen_back_blocks.py`）。雷翼の言葉は磨いた銅・青白い光・白い羽。柱は下から `storm_rod`（銅の台。段の上に輪の印）、`storm_rod_bulb` ×3（銅の輪のあいだの玉。`lit` で青白く光って光 12。消えると暗い煙色）、`storm_rod_shaft`（軸。白青い羽の板が二枚）、`storm_rod_tip`（先の針。上へ向かって青白く光る）。柱を積むのは `StormBirdBuilder.rod`、段を光らせるのは `StormEast`・`RaijuNest`・`StormHeartArena`。満ちかけと雷の判定は `StormRods`（座標）のままで、ブロックの種類には依らない。戻しの鏡 `reset_mirror` は前室の台の上、(-3, 151, -54) に置く取っ手つきの銅の手鏡（`facing` は鏡面の向き。右クリックは座標で受ける）。接地の栓は今もバニラのレバー。建て直しのため、背と雷獣の巣の配置の版を上げてある（古いワールドは入りなおすと建て直る）。見た目の確認は台本 `tools/shots/back_blocks.txt`（`docs/review/previews/blocks_*.png`）。
+- **避雷の柱と戻しの鏡は専用ブロック**（`StormBackSetup`、モデルと 32x32 の絵は `tools/gen/items/gen_back_blocks.py`）。雷翼の言葉は磨いた銅・青白い光・白い羽。柱は下から `storm_rod`（銅の台。段の上に輪の印）、`storm_rod_bulb` ×3（銅の輪のあいだの玉。`lit` で青白く光って光 12。消えると暗い煙色）、`storm_rod_shaft`（軸。白青い羽の板が二枚）、`storm_rod_tip`（先の針。上へ向かって青白く光る）。柱を積むのは `StormBirdBuilder.rod`、段を光らせるのは `StormEast`・`RaijuNest`・`StormHeartArena`。満ちかけと雷の判定は `StormRods`（座標）のままで、ブロックの種類には依らない。戻しの鏡 `reset_mirror` は前室の台の上、(-3, 151, -54) に置く取っ手つきの銅の手鏡（`facing` は鏡面の向き。右クリックは座標で受ける）。接地の栓は今もバニラのレバー。建て直しのため、背と雷獣の巣の配置の版を上げてある（古いワールドは入りなおすと建て直る）。見た目の確認は台本 `tools/shots/back_blocks.txt`（`docs/review/previews/blocks_*.png`）。
 
 ### 3.6 竜骨の間（心臓の間）
 
@@ -395,7 +395,7 @@
 
 - **主題**: 柱の接地。線が出てから 1.0 秒のあいだに、行き先の柱の栓を引けば落とせる。雷獣は人に近い柱へ渡るので、一人でも「自分のそばの柱で待ち、線が向いたら栓を引く」で落とせる。マルチでは柱ごとに人が立つと速い。
 - 怒り（50% 以下）: 雷渡りの間隔 4〜6 秒、飛びかかりの溜め 0.6 秒。
-- 体力 430 ×（1 + 0.6 ×（参加者 − 1））（受ける傷を割る。上限なし。6 人で ×4.0）。段のない 10 段のバー（青白）、怒り・痺れの札（`client/RaijuClient`、`tools/gen_raiju_bar.py`）。
+- 体力 430 ×（1 + 0.6 ×（参加者 − 1））（受ける傷を割る。上限なし。6 人で ×4.0）。段のない 10 段のバー（青白）、怒り・痺れの札（`client/RaijuClient`、`tools/gen/ui/gen_raiju_bar.py`）。
 - 戦いは `GroupBossRoom`（5 秒の集合、封印、巣の外へ出たら戻す、誰もいなければ放棄、ピースフルで眠る）。巣は一度に一つのグループだけが入れる部屋（7.5）。雷獣と咆哮の雷蛾は戦っているグループのもので、ほかのグループには見えず、狙わず、傷も受けない。倒したグループは、そのグループのリセットまで巣に入っても戦いが始まらない。
 - 痺れて落ちているあいだが大きな攻め時。張り付いて殴り続けるだけでは、爪の連打と飛びかかりで負ける。
 - 音 10（独自合成）。字幕・文の鍵は `skyabyss_storm` に合わせた。
@@ -507,7 +507,7 @@
 | 咆哮 | 招雷の輪 6 つ | 半径 1.5 の円 6 つが 1.2 秒で満ちる。巣の柱の近くなら柱へ（傷なし） | 円が 12 個まで（2n） |
 
 - 自己テスト `storm_telegraph`（`StormTelegraphSelfTest`）: 心臓の 9 技で、予告 16 tick 以上、安全な床 25% 以上（人が部屋の端に立っても 15% 以上）、1 人と 6 人で傷のある範囲が増える。印と当たりの一致（招雷・鎖・羽根・閃光・刃のしゃがみ・網の跳び越え・帯電の空中）、傷は 16 tick より前に出ない。雷獣の爪・飛びかかり・咆哮（着地点が印の中心、跳ぶ途中は安全）、技の合計が巣の床の 4 割以下（雷獣が巣の端から出しても安全な床 15% 以上）。部屋: 使える床の半径 ≥ 最も遠い印の 0.8 倍、天井 12 以上。雷渡りの枝分かれは `raiju` が巣で数える。
-- 台本 `tools/shots/telegraph_storm.txt`、一覧の絵 `docs/review/previews/telegraph_storm_sheet.png`（`tools/telegraph_storm_sheet.py`）。雷獣の絵は、巣の外の平らな世界では撮りにくいので跳びかかりの一枚だけ。
+- 台本 `tools/shots/telegraph_storm.txt`、一覧の絵 `docs/review/previews/telegraph_storm_sheet.png`（`tools/sheets/telegraph_storm_sheet.py`）。雷獣の絵は、巣の外の平らな世界では撮りにくいので跳びかかりの一枚だけ。
 
 ---
 
@@ -703,7 +703,7 @@
 
 ## 9. 碑文と伝承
 
-05 の型で書く。答えは書かず、ほのめかしだけにする。碑文は 4 行、光る文字の看板。**1 行は日本語 8 字まで、英語は看板の 90 px に収まる長さ**（`SignFit` の自己テスト。`SignFit` は `skyabyss_storm` の lang も読む）。lang は `assets/skyabyss_storm/lang/{ja_jp,en_us}.json`。各担当の断片 `lang/parts/<名前>.json`（`{"鍵": "英文"}` か `{"鍵": {"en","ja"}}`）を `python tools/gen_storm_lore.py` がまとめる（日本語のない鍵と、使われていない鍵を一覧に出す）。実装: `titan/storm/lore/` の `StormLore`・`StormWhispers`・`StormLoreSelfTest`。
+05 の型で書く。答えは書かず、ほのめかしだけにする。碑文は 4 行、光る文字の看板。**1 行は日本語 8 字まで、英語は看板の 90 px に収まる長さ**（`SignFit` の自己テスト。`SignFit` は `skyabyss_storm` の lang も読む）。lang は `assets/skyabyss_storm/lang/{ja_jp,en_us}.json`。各担当の断片 `lang/parts/<名前>.json`（`{"鍵": "英文"}` か `{"鍵": {"en","ja"}}`）を `python tools/gen/story/gen_storm_lore.py` がまとめる（日本語のない鍵と、使われていない鍵を一覧に出す）。実装: `titan/storm/lore/` の `StormLore`・`StormWhispers`・`StormLoreSelfTest`。
 
 ### 9.1 風の民（設定。プレイヤーには直接見せない）
 
@@ -767,7 +767,7 @@ ID は `chapter1/*`。自動で記すものは条件が項目の JSON（`data/sk
 
 ### 9.5 クエスト
 
-実装: `tools/gen_story_quests.py`（名前は "the Thunder Wing Titan"）、`data/skyabyss/quest/`。
+実装: `tools/gen/story/gen_story_quests.py`（名前は "the Thunder Wing Titan"）、`data/skyabyss/quest/`。
 
 | クエスト | 中身 |
 |---|---|
@@ -808,7 +808,7 @@ ID は `chapter1/*`。自動で記すものは条件が項目の JSON（`data/sk
 | `titan/BackShape` | `TideTurtle` | 巨神の形の背中の bin を読み、置き、表面の高さを引く（`tide_back/turtle.bin`、`storm_back/bird.bin`） |
 | `titan/BackCycle` | `TideClock` | 段階の並びと長さ、10 秒前の知らせ、保存、`force`、リセットで始めに戻す。潮殻は (干潮 50, 満ちる 10, 満潮 50, 引く 10)、雷翼は (凪 40, 荒れる 5, 嵐 40, 静まる 5) |
 | `client/BackGaugeHud` | `TideGaugeHud` | 右上の目盛りの幅の合わせ方・効き目の絵の下へずらす・仲間の表示との並び。板の絵と文だけ巨神ごと |
-| `tools/gen_back_shape.py` | `gen_tide_back_turtle.py` | 格子からブロックの配置を作る共通の道具（`turtle` / `bird`） |
+| `tools/gen/items/gen_back_shape.py` | `tools/gen/mobs/gen_tide_back_turtle.py` | 格子からブロックの配置を作る共通の道具（`turtle` / `bird`） |
 
 ### 10.3 雷翼だけの部品
 
@@ -840,15 +840,15 @@ ID は `chapter1/*`。自動で記すものは条件が項目の JSON（`data/sk
 
 | もの | 採用 | 特徴 | 取り込み |
 |---|---|---|---|
-| 本体 | A 嵐の大鷲 | 幅の広い翼、指のように開いた初列風切 7 枚、翼の上の稲妻の筋、銅の避雷針の冠 7 本、扇の尾、握った爪。背に天窓と風の民の塔、腰に羽根の門。左の手首の瘤は白青（風）、右は金（雷）に光る。地上から見上げて猛禽と読める形が最優先 | `tools/install_thunder_wing.py`。3 段の LOD: 近景 2277 箱（胴・翼・首・頭・尾・脚は 4 単位の段、風切り 2 単位、冠 1 単位、門・遺跡 0.5 単位）、中景 468、遠景 238。骨 `wing_l/wing_r`・`hand_l/hand_r`・`gate` ほか。アニメ `fly`・`land`・`perch` |
-| 心臓 | C 翼の心臓 | 段階ごとの geo（860 / 1090 / 679 箱）: 包む翼 → 開いた翼と冠の翼 → 骨だけの翼と稲妻の網。光らない画素をガンマ 0.8 で持ち上げ、網の光は核より弱くして点滅 | `tools/install_storm_heart.py`（元 `tools/sources/storm_heart/`） |
-| 羽守 | B 銅の兜と鎧羽 | 骨 `body, head, cloak_l, cloak_r, arm_r, forearm_r, socket_main, arm_l, forearm_l, leg_r, leg_l` | `tools/install_storm_mobs.py` |
+| 本体 | A 嵐の大鷲 | 幅の広い翼、指のように開いた初列風切 7 枚、翼の上の稲妻の筋、銅の避雷針の冠 7 本、扇の尾、握った爪。背に天窓と風の民の塔、腰に羽根の門。左の手首の瘤は白青（風）、右は金（雷）に光る。地上から見上げて猛禽と読める形が最優先 | `tools/install/install_thunder_wing.py`。3 段の LOD: 近景 2277 箱（胴・翼・首・頭・尾・脚は 4 単位の段、風切り 2 単位、冠 1 単位、門・遺跡 0.5 単位）、中景 468、遠景 238。骨 `wing_l/wing_r`・`hand_l/hand_r`・`gate` ほか。アニメ `fly`・`land`・`perch` |
+| 心臓 | C 翼の心臓 | 段階ごとの geo（860 / 1090 / 679 箱）: 包む翼 → 開いた翼と冠の翼 → 骨だけの翼と稲妻の網。光らない画素をガンマ 0.8 で持ち上げ、網の光は核より弱くして点滅 | `tools/install/install_storm_heart.py`（元 `tools/sources/storm_heart/`） |
+| 羽守 | B 銅の兜と鎧羽 | 骨 `body, head, cloak_l, cloak_r, arm_r, forearm_r, socket_main, arm_l, forearm_l, leg_r, leg_l` | `tools/install/install_storm_mobs.py` |
 | 雷蛾 | B 透けた翅の雷光蛾 | 骨 `body, wing_l, wing_r, antennae` | 同上 |
 | 雷乞い | C 鳥籠の頭 | 骨 `body, head, robe, arm_r, forearm_r, socket_main, arm_l, forearm_l` | 同上 |
 | 鉤槍・杖 | 別モデル | 鉤槍 48 箱（骨の柄・銅の鉤・石突き、約 2.5 ブロック）、杖 21 箱 | `geo/gear/` |
-| 雷獣 | A 狼型 | 頭を 1.2 倍、脚は関節の段つき。骨 `root, body, chest, head, jaw, mane, tail, tail_2, tail_3, leg_fl, leg_fl_lo, leg_fr, leg_fr_lo, leg_bl, leg_bl_lo, leg_br, leg_br_lo`。アニメ 16（長さは Java の技の時間と同じ） | `tools/install_raiju.py`（元 `tools/rough/thunder_raiju.py`） |
+| 雷獣 | A 狼型 | 頭を 1.2 倍、脚は関節の段つき。骨 `root, body, chest, head, jaw, mane, tail, tail_2, tail_3, leg_fl, leg_fl_lo, leg_fr, leg_fr_lo, leg_bl, leg_bl_lo, leg_br, leg_br_lo`。アニメ 16（長さは Java の技の時間と同じ） | `tools/install/install_raiju.py`（元 `tools/rough/thunder_raiju.py`） |
 
-- 音: 巨神 9（`tools/gen_storm_sounds.py`）、敵 18（`tools/gen_storm_mob_assets.py`）、雷獣 10（`tools/gen_raiju_sounds.py`）、心臓 14（`tools/gen_storm_heart_sounds.py`）。バー `tools/gen_storm_heart_bar.py`。
+- 音: 巨神 9（`tools/gen/sound/gen_storm_sounds.py`）、敵 18（`tools/gen/mobs/gen_storm_mob_assets.py`）、雷獣 10（`tools/gen/sound/gen_raiju_sounds.py`）、心臓 14（`tools/gen/sound/gen_storm_heart_sounds.py`）。バー `tools/gen/world/gen_storm_heart_bar.py`。
 - 光る画素はどのモデルも 0 でない。
 
 ---
@@ -889,7 +889,7 @@ ID は `chapter1/*`。自動で記すものは条件が項目の JSON（`data/sk
 
 ## 12. 三章「風に逆らう嵐」の中身
 
-三章（段階 2。潮殻の心臓を止めてから雷翼の心臓を止めるまで）を遊んでいる人の、巨神の外の話。実装は `titan/storm/chapter/`、データは `tools/gen_ch3_content.py` が書く（青図 `data/skyabyss/opening/ch3_*.json`、伝承 3、クエスト `quest/ch3/`、会話 `dialogue/ch3/`、文 `assets/skyabyss_ch3/lang`）。共通の部品は [01 の 4.1](01_overview.md)（章・予兆・空の段）、[18 の 9 章](18_notices.md)（題字と余韻の札）、[17 の 3.8](17_opening_and_rpg_feel.md)（小要素の置き方）、[10 の 3.6](10_progression_multiplayer.md)（章の数え方）。
+三章（段階 2。潮殻の心臓を止めてから雷翼の心臓を止めるまで）を遊んでいる人の、巨神の外の話。実装は `titan/storm/chapter/`、データは `tools/gen/ch3/gen_ch3_content.py` が書く（青図 `data/skyabyss/opening/ch3_*.json`、伝承 3、クエスト `quest/ch3/`、会話 `dialogue/ch3/`、文 `assets/skyabyss_ch3/lang`）。共通の部品は [01 の 4.1](01_overview.md)（章・予兆・空の段）、[18 の 9 章](18_notices.md)（題字と余韻の札）、[17 の 3.8](17_opening_and_rpg_feel.md)（小要素の置き方）、[10 の 3.6](10_progression_multiplayer.md)（章の数え方）。
 
 主題は**見誤り**。「あれは空の影か」（1.2）。風の民は嵐の鳥を空の影と取り違え、影を神と呼んだ。軸は、物語が先・静かな心理ホラー・足し算より引き算・チャットに流さない・敵もダンジョンも足さない。新しい敵・モデルはない（既存の避雷針・碑・黒石・玄武岩・稲妻・音だけ）。
 
@@ -962,16 +962,16 @@ ID は `chapter1/*`。自動で記すものは条件が項目の JSON（`data/sk
 
 ベータで「巨神のモデルがスケスケで中が見える。重量感が無い。入口以外は近づけないで」と言われた直しの今の仕様。四体（岩鯨・潮殻・雷翼・余燼）で共通。
 
-- **透けない**: 休めの姿勢では四体とも骨ごとの面はほぼ閉じている（`tools/titan_mesh_holes.py`。外から撃った光線の最初の当たりが裏面なのは 1.5% 以下で、透ける絵素もゼロ）。透けていたのは、ひれ・顎・首・翼が動いて継ぎ目が開いたときに見える骨の開いた縁。読み込み時（`LowPolyMesh.capHoles`）に、骨の開いた縁の輪を内側へ 2 割引っ込めた頂点との扇で塞ぎ、蓋の面は元の絵の一点を取って暗く（0.3 倍）出す。元の面の絵・法線は変えない。描画型は今まで通り `entityCutoutNoCull`（半透明にしない）。LOD の三段（近・中・遠）とも同じ処理。
+- **透けない**: 休めの姿勢では四体とも骨ごとの面はほぼ閉じている（`tools/misc/titan_mesh_holes.py`。外から撃った光線の最初の当たりが裏面なのは 1.5% 以下で、透ける絵素もゼロ）。透けていたのは、ひれ・顎・首・翼が動いて継ぎ目が開いたときに見える骨の開いた縁。読み込み時（`LowPolyMesh.capHoles`）に、骨の開いた縁の輪を内側へ 2 割引っ込めた頂点との扇で塞ぎ、蓋の面は元の絵の一点を取って暗く（0.3 倍）出す。元の面の絵・法線は変えない。描画型は今まで通り `entityCutoutNoCull`（半透明にしない）。LOD の三段（近・中・遠）とも同じ処理。
 - **重い**: 同じ読み込みで、頂点ごとに明るさを焼く（`LowPolyMesh.weightShade`）。体の下ほど暗く（底 0.52 倍から 7 割の高さで 1.0）、面が下を向けばさらに 0.82 倍、横向きは 0.96 倍。光る層（発光マスク）には掛けない。体の真上から見た輪郭（`TitanVolume.shadow`）を 4 ブロックの升目で敷いた大きな柔らかい影を、地面・海面（水の上は水面）に落とす（`client/titan/TitanWeight`）。縁は升目の角ごとの濃さでぼかし、高いほど薄い（最大 0.5）。影が見えるよう、岩鯨・雷翼の描画の範囲（`getBoundingBoxForCulling`）は下へ 110 ブロック伸ばした。体の下の柱を 2 tick ごとに数か所選んで（`client/titan/TitanFx`）、雲の高さに体がかかれば雲のちぎれ、海面にかかれば波しぶきと泡、底が地面に近く動いていれば土ぼこりを出す（カメラから 110 ブロック以内、1 体 1 tick に最大 4 か所）。足音・うなりの音は、素材がまだ無いので付けていない。台本 `titanweight on|off` で、焼き込みの陰・蓋・影・粒をまとめて外せる（前後の比べ用）。
-- **動き**: 岩鯨の泳ぎは 8 秒 → 12 秒周期（頭・顎・尾・尾びれの波 6 秒、ひれ 3 秒、背骨ぞいの遅れを大きく）。雷翼の羽ばたきは 3 秒 → 4.5 秒、振れ幅 28° → 20°、第二の波を足して打ち下ろしを遅く、手は翼より 80° 遅れる。潮殻・余燼は元から 8〜10 秒の周期なので変えない。書き換えは `tools/titan_heavy_anim.py`。
-- **体に入れない**（サーバーが決める）: 巨神の名前の体積の表（`data/skyabyss/titan_volumes/<名前>.json`）を `tools/gen_titan_volumes.py` が近景のメッシュから焼く。局所（横 = 左が +、上、前）の 2 ブロック四方の柱ごとに「詰まった区間」の並び。メッシュを 3 ブロック膨らませた「立入禁止」（人が入れない）と、0.5 ブロックだけ膨らませた「体」（矢と弾が消える・人が入ったら一息に外へ出す）の二枚。動く部分は余分に膨らませる（雷翼の翼 12・手 18、ひれ 3、尾びれ 4 など）。
+- **動き**: 岩鯨の泳ぎは 8 秒 → 12 秒周期（頭・顎・尾・尾びれの波 6 秒、ひれ 3 秒、背骨ぞいの遅れを大きく）。雷翼の羽ばたきは 3 秒 → 4.5 秒、振れ幅 28° → 20°、第二の波を足して打ち下ろしを遅く、手は翼より 80° 遅れる。潮殻・余燼は元から 8〜10 秒の周期なので変えない。書き換えは `tools/misc/titan_heavy_anim.py`。
+- **体に入れない**（サーバーが決める）: 巨神の名前の体積の表（`data/skyabyss/titan_volumes/<名前>.json`）を `tools/gen/world/gen_titan_volumes.py` が近景のメッシュから焼く。局所（横 = 左が +、上、前）の 2 ブロック四方の柱ごとに「詰まった区間」の並び。メッシュを 3 ブロック膨らませた「立入禁止」（人が入れない）と、0.5 ブロックだけ膨らませた「体」（矢と弾が消える・人が入ったら一息に外へ出す）の二枚。動く部分は余分に膨らませる（雷翼の翼 12・手 18、ひれ 3、尾びれ 4 など）。
   - 人（`TitanSolids.onPlayerTick`）: 体の真ん中（足の 0.9 上）が立入禁止に入ったら、いちばん近い外へ向かう速さをもらう（縁で 0.2、深いほど強く最大 1.4 ブロック/tick。入ってきた向きの速さは消す）。行き先に立てない向き（地面や壁の中）は選ばない。体そのものに入った・40 tick 居続けた・深さ 7 ブロック超なら、外へ移す。観戦者・乗っている人・鎖の巻き上げ中・巨神での移動に加わっている人は対象外。エリトラや創造の飛行も同じ。
   - 矢・弾（`TitanSolids.onProjectileTick`）: 前の tick の位置から今の位置までを 1 ブロックごとに調べ、体に入ったら消す（細いひれを抜けない）。
   - カメラ（`TitanSolidClient`）: 三人称のカメラが体に当たったら手前へ引く。人が 3 ブロック外にいるので、一人称は体に入らない。
   - 通り道（`SolidTitan.corridors`。局所の箱。ここは立入禁止でも体でも入ってよい）: 昇り風の柱（左へ 14、前 -4。横 8〜20、前 -10〜2）の根もとから腰の門の上（高さ 30）まで。
 - **自己テスト**: `SKYABYSS_SELFTEST_ONLY="titan solid"`（`TitanSolidSelfTest`）。体積が読める・体の中の点は押し出されて立入禁止の外に出る・通り道は開き、その隣は閉じている・向きを回しても局所と世界が往復する・16 方向 × 3 つの高さ × 3 つの速さ（歩き・走り・創造の飛行）で近づいても体に入れない（通り道へ入った人は乗り込みとして数える）・毎 tick 0.3 ブロック進みながら 0.15 度ずつ回る巨神の前に立つ人は、体に入られる (一息に出される) のが 1 割以下・本物の人（FakePlayer）が体の中で押される/深ければ出される・通り道と観戦者は動かない・体の中の矢と速い矢は消え、遠い矢は残る。
-- **撮影**: `tools/shots/titan_solid.txt`（`tools/gen_titan_solid_shots.py` が書く）→ `docs/review/previews/titan_solid_sheet.png`。四体の近景・下から・横を、`titanweight off`（前）と `on`（後）で並べる。
+- **撮影**: `tools/shots/titan_solid.txt`（`tools/gen/shots/gen_titan_solid_shots.py` が書く）→ `docs/review/previews/titan_solid_sheet.png`。四体の近景・下から・横を、`titanweight off`（前）と `on`（後）で並べる。
 - **残り**: 巨神が速く回る雷翼（1 tick 3°）の翼の先は、押し出しが追いつかず体の中に入られることがある（そのときは外へ出される）。足音・うなりの音。ゲーム内の通しの手ざわり（マルチでの近づき方・カメラ）はユーザーの確認待ち。
 
 ## 未決

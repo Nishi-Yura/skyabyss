@@ -5,7 +5,7 @@
 実行: python -I tools/rough/lowpoly/ch4/armor_ch4.py
 出力: docs/review/ch4_roughs/items/armor_ch4/{a,b,c}/<部位>_{mesh.json,atlas.png,glowmask.png}、
       docs/review/ch4_roughs/items/armor_ch4/icons/{a,b,c}_<部位>_32.png、docs/review/ch4_roughs/items/armor_ch4.png (シート)
-入れ方: tools/gen_ch4_gear.py (選んだ案を assets へ)
+入れ方: tools/gen/ch4/gen_ch4_gear.py (選んだ案を assets へ)
 """
 from __future__ import annotations
 

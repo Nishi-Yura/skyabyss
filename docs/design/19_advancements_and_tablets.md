@@ -16,7 +16,7 @@
 
 ## 2. 進捗の木
 
-データは `data/skyabyss/advancement/*.json`、文は `assets/skyabyss/lang/{ja_jp,en_us}.json` の `advancement.skyabyss.*`。**生成は `tools/gen_advancements.py`**（直すときはここを直して再生成。背景の絵 `textures/gui/advancements/backgrounds/skyabyss.png` も作る。ほかの道具が書く進捗 = 転生の `rebirth_*` は消さない）。38 個。
+データは `data/skyabyss/advancement/*.json`、文は `assets/skyabyss/lang/{ja_jp,en_us}.json` の `advancement.skyabyss.*`。**生成は `tools/gen/story/gen_advancements.py`**（直すときはここを直して再生成。背景の絵 `textures/gui/advancements/backgrounds/skyabyss.png` も作る。ほかの道具が書く進捗 = 転生の `rebirth_*` は消さない）。38 個。
 
 | 枝 | 進捗（id） |
 | --- | --- |
@@ -28,7 +28,7 @@
 | 成長 | `skill` 最初の技 → `tree_sword` 剣の道 / `tree_bow` 弓の道。`level_5` → `level_10` → `level_20` → `level_30`（hidden）→ `level_40` → `level_50` |
 | 鍛え | `forge` 共鳴の炉 → `forge_enhance` 一打ち → `forge_dismantle` 砕いて、残す |
 
-- **章**（[05](05_lore_npc_quest.md) の 8 章、`story/Chapters`）: 進捗の id・親子・条件は変えず、**文（description）の頭に章の名前を付けて**枝を章ごとに読めるようにする（「一章　岩鯨　岩の鯨の背に乗った。」、英語は「Ch. I Stone Whale: …」）。序章 = `camp`〜`lore_book`（B0〜B6）、一章 = `isana`・`bone_hill`・`bone_pit`・`whale_trail`・岩鯨の枝・`voyage`、二章 = 潮殻の枝、三章 = 雷翼の枝、四章 = 余燼の枝と `sky_key`。根・成長・鍛えの枝は章に属さない。章の名は `tools/regroup_lore_chapters.py` の表を `gen_advancements.py` が読む（`CHAPTER_OF` が id → 章）。
+- **章**（[05](05_lore_npc_quest.md) の 8 章、`story/Chapters`）: 進捗の id・親子・条件は変えず、**文（description）の頭に章の名前を付けて**枝を章ごとに読めるようにする（「一章　岩鯨　岩の鯨の背に乗った。」、英語は「Ch. I Stone Whale: …」）。序章 = `camp`〜`lore_book`（B0〜B6）、一章 = `isana`・`bone_hill`・`bone_pit`・`whale_trail`・岩鯨の枝・`voyage`、二章 = 潮殻の枝、三章 = 雷翼の枝、四章 = 余燼の枝と `sky_key`。根・成長・鍛えの枝は章に属さない。章の名は `tools/lib/regroup_lore_chapters.py` の表を `tools/gen/story/gen_advancements.py` が読む（`CHAPTER_OF` が id → 章）。
 - 枠: 通常は `task`、巨神の背・最初の試練・技の木・巨神の旅は `goal`、心臓・天の鍵・高いレベルは `challenge`。
 - チャットには流さない（`announce_to_chat: false`）。画面の右上に札（トースト）だけ出す。
 - クラスを選ぶ画面はない（04 の 7 章）ので、「クラスの選択」は「その木の最初の技を覚えた」（`tree_*`）で代える。
@@ -57,7 +57,7 @@
 | `forge:enhance / dismantle / reforge` | `ResonanceForgeMenu` |
 | `tablet:read` | `Tablets.read`（碑を読んだ） |
 
-新しい区切りを足すときは、`tools/gen_advancements.py` に一行足して再生成し、必要なら `Beats.fire` を一行呼ぶ。
+新しい区切りを足すときは、`tools/gen/story/gen_advancements.py` に一行足して再生成し、必要なら `Beats.fire` を一行呼ぶ。
 
 ### 2.2 札の重なり
 
@@ -69,12 +69,12 @@
 
 - 画面の名は「進捗・実績」（バニラの `gui.advancements` を `assets/minecraft/lang` で上書き）。mod のつまみは二つ: 物語の進捗（根 `skyabyss:root`）と **実績**（根 `skyabyss:achievement/root`）。
 - 実績: はじめての買い物（店）・取引成立（取引所）・頼まれごと（クエストを終える）・言伝ての板・都の顔なじみ（町のクエスト）・旗の下に（ギルド）・鍛え直し（師範）・置いてきたもの（墓）。合図は `skyabyss:beat` の `shop:buy`・`trade:done`・`quest:done`・`quest:board`・`quest:town`・`guild:join`・`facility:respec`・`grave:open`。
-- **報酬**: mod の進捗と実績はどれも鐘銭を渡す（既定 task 3・goal 10・challenge 25。実績は 3〜10）。進捗の `rewards.function`（`data/skyabyss/function/reward/coins_<n>.mcfunction`）で渡し、説明の終わりに「報酬: 鐘銭 n」と書く。生成は `tools/gen_advancements.py`。
+- **報酬**: mod の進捗と実績はどれも鐘銭を渡す（既定 task 3・goal 10・challenge 25。実績は 3〜10）。進捗の `rewards.function`（`data/skyabyss/function/reward/coins_<n>.mcfunction`）で渡し、説明の終わりに「報酬: 鐘銭 n」と書く。生成は `tools/gen/story/gen_advancements.py`。
 
 ## 3. 碑（`skyabyss:tablet`）
 
 - ブロック: `tablet`（`tablet/TabletBlock`、持ち主のエンティティ `TabletBlockEntity` が文のキーを持つ）。壊せない（構造物の一部）、当たり判定なし（看板と同じ）、明るさ 5。壁掛け（`standing=false`、`facing` = 文の向き。板が反対側の壁にぴったり付く）と、台つきで立てる形（`standing=true`）がある。
-- 見た目: 青みの暗い石に、読めない古い印がかすかに青緑に光る。ときどき光の粒（`END_ROD`）が昇る。絵は `tools/gen_tablet_texture.py`（モデルとブロック状態もここで作る）。
+- 見た目: 青みの暗い石に、読めない古い印がかすかに青緑に光る。ときどき光の粒（`END_ROD`）が昇る。絵は `tools/gen/story/gen_tablet_texture.py`（モデルとブロック状態もここで作る）。
 - 読み方: **右クリック**か、**4.5 ブロック以内で目を向ける**（0.25 秒ごとに見回す）と、刻まれた文が画面下中央の字幕（NARRATE、[18](18_notices.md)）に、看板だった時の行のまま出る。同じ碑は 30 秒たつまで読み直さない。読むと伝承の条件 `sign`（05）と進捗 `tablet:read` が進む。
 - 文: lang の `sign.skyabyss.<名前>.1〜4`（看板の時のキーのまま。空の行は飛ばす）。
 - 置き方: 各背のキット（`BuildKit` `TideKit` `StormKit` `EmberKit`）の `wallSign` と、立てる碑の `standingSign` / `standingTablet`。呼び出しは変えず、中身を碑に替えた。序盤の石板は blueprint `opening/slab.json`（`tools/rough/opening_sites.py` の `slab`）に碑を入れ、`RibBuilder` が文を刻む。

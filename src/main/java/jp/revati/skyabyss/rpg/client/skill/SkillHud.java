@@ -24,7 +24,7 @@ import net.minecraft.world.entity.player.Player;
 // 技の小さな表示: 左上の成長の表示の下に細いマナのバー (月の青)、ホットバーの右に技の枠 4 つ。
 // 技を一つも覚えていない人には出さない (画面を散らかさない)。F1 と F3 の画面では出さない
 public final class SkillHud {
-    // gui/skill/skills.png (1024x512、2 倍の密度)。配置は tools/gen_skill_assets.py と同じ
+    // gui/skill/skills.png (1024x512、2 倍の密度)。配置は tools/gen/ui/gen_skill_assets.py と同じ
     static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "textures/gui/skill/skills.png");
     static final ResourceLocation ICONS = ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "textures/gui/skill/icons.png");
     static final int TEX_W = 1024;

@@ -16,7 +16,7 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 
 // 町のクエストの限定の人の描画 (docs/design/35 の 3.5)。形は係の人の案 A (lowpoly/attendant_a.json・geo attendant_a_lowpoly)、
-// 絵は人ごと (textures/lowpoly/guest_<id>.png。tools/gen_town_guests.py)。動きは animations/entity/town_guest.animation.json
+// 絵は人ごと (textures/lowpoly/guest_<id>.png。tools/gen/mobs/gen_town_guests.py)。動きは animations/entity/town_guest.animation.json
 // (係の人のものの写し)。子どもは TownGuests.Guest.scale で小さく描く
 @EventBusSubscriber(modid = SkyAbyss.MODID, value = Dist.CLIENT)
 public final class TownGuestRenderer {

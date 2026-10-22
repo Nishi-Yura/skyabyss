@@ -20,7 +20,7 @@ import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 @EventBusSubscriber(modid = SkyAbyss.MODID, value = Dist.CLIENT)
 public final class TideHeartClient {
     // 段階 1 閉じた殻: 青緑の帯 / 段階 2 開いた殻: 真珠の白 / 段階 3 月の潮: 月の銀青 (08 の 5.3節)。
-    // 14.2節の案 (heart/bars.png) の段階 2 は紅 (0xF68082)。差し替えるときは FILL[1] と tools/gen_tide_heart_bar.py の P2
+    // 14.2節の案 (heart/bars.png) の段階 2 は紅 (0xF68082)。差し替えるときは FILL[1] と tools/gen/world/gen_tide_heart_bar.py の P2
     public static final PhasedBossBar.Style BAR = new PhasedBossBar.Style("tide_heart",
             new int[] {0x60DCD2, 0xECE4EA, 0xAAC8FF},
             new int[] {0xA8F4EC, 0xFFFFFF, 0xDCE8FF},

@@ -1,5 +1,5 @@
 # 雷翼の背の磨き (肋の間の外の姿・拍の舵)。./gradlew runShots -Pscript=tools/shots/storm_polish.txt
-# 出力: run/shots/storm_polish/shots/storm_polish/*.png → tools/storm_polish_sheet.py で docs/review/previews/storm_polish_sheet.png
+# 出力: run/shots/storm_polish/shots/storm_polish/*.png → tools/sheets/storm_polish_sheet.py で docs/review/previews/storm_polish_sheet.png
 world storm_polish flat
 size 1280 720
 timeout 2400

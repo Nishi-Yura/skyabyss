@@ -224,7 +224,7 @@
 
 ### 3.8 音
 
-既存の音は使わず、`tools/gen_watcher_sounds.py` で合成した。音量はどちらも環境音（AMBIENT）の音量設定に従う。
+既存の音は使わず、`tools/gen/sound/gen_watcher_sounds.py` で合成した。音量はどちらも環境音（AMBIENT）の音量設定に従う。
 
 | 音 | 内容 | 大きさ |
 | --- | --- | --- |
@@ -270,7 +270,7 @@
 | `client/prologue/WatcherPresenceSound` | 耳鳴りのループ |
 | `client/prologue/CowerClient` | 影の下のうずくまり（2.5節） |
 | `tools/rough/watcher.py`、`watcher_v2.py` | ラフと採用案の書き出し（`--install`） |
-| `tools/gen_watcher_sounds.py` | 音の合成 |
+| `tools/gen/sound/gen_watcher_sounds.py` | 音の合成 |
 
 ### 3.12 数値の一覧（調整用）
 
@@ -429,7 +429,7 @@
 | `sky/ChapterSkySelfTest` | 自己テスト（5章） |
 | `client/sky/CloudEyeClient`、`CloudEyeRenderer`、`CloudEyeSound` | 雲の目の流れ・視線・引き算、描画、音 |
 | `tools/rough/sky_eye.py`、`sky_eye_v2.py` | 目のテクスチャ（sclera・iris、face・cloud・haze）と採用案の書き出し（`--install`）。ラフの比較シートは `docs/review/sky_eye_roughs/sky_eye_roughs.png` |
-| `tools/gen_chapter_sky_sounds.py` | 音の合成（`sounds/sky_ch1/`） |
+| `tools/gen/sound/gen_chapter_sky_sounds.py` | 音の合成（`sounds/sky_ch1/`） |
 
 ---
 

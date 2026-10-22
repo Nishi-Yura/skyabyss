@@ -1,7 +1,7 @@
 """雷翼の雛 (young_thunder_wing) 低ポリ ラフ 3 案の共通部分 (真珠守りの pk.py を写した)。
 
 座標: 1 単位 = 1/16 ブロック。作図は「前 = -Z」、作図の +x = 右 (wing_r)。書き出すとき (x, z) の符号を反転して geo の空間へ
-(geo の root は Y 軸 180 度回るので、最終の前は -Z のまま)。骨は 3 案で共通 (tools/gen_young_thunder_wing_assets.py)。
+(geo の root は Y 軸 180 度回るので、最終の前は -Z のまま)。骨は 3 案で共通 (tools/gen/world/gen_young_thunder_wing_assets.py)。
 鞍の上面は SEAT_Y (36 単位 = 2.25 ブロック) の平らな面で、|x| <= 25.6、|z| <= 51.2 を覆う。その範囲に出っ張りを置かない。
 すべての部品は閉じた面 (蓋つきの筒・楕円体・蓋つきの輪切り・輪環) で作り、継ぎ目は親へ沈める。
 
@@ -25,6 +25,7 @@ ROOT = HERE.parents[3]
 sys.path.insert(0, str(LP))
 sys.path.insert(0, str(ROOT / "tools/rough"))
 sys.path.insert(0, str(ROOT / "tools"))
+sys.path.insert(0, str(ROOT / "tools" / "gen/world"))
 from lpkit import *  # noqa
 from lpkit import _mk  # noqa
 import voxel  # noqa

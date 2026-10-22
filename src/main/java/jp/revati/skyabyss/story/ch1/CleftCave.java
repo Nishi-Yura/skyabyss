@@ -33,7 +33,7 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 
-// 割れ殻の洞 (docs/design/21 の 3.1。備えの頼み 2・3 の舞台。10〜18 分の小さなダンジョン)。部品は data/skyabyss/opening/ch1_cleft_shell_cave.json (tools/gen_ch1_sites.py)。
+// 割れ殻の洞 (docs/design/21 の 3.1。備えの頼み 2・3 の舞台。10〜18 分の小さなダンジョン)。部品は data/skyabyss/opening/ch1_cleft_shell_cave.json (tools/gen/ch1/gen_ch1_sites.py)。
 //
 //   場所   ChapterSites の要素 (拠点から 60〜150)。地表に石レンガの口、階段で地下 15 ブロックへ。地下 3 部屋 (入口の間・棘の間・奥の間)。
 //          部屋は石レンガの殻で包んでいるので、自然の洞や水とつながらない

@@ -1,5 +1,5 @@
 # スキルの自由度 (天職は専門・タグ・木のセット・構え・連鎖・鍵石・熟練・試着) の K 画面の確認。
-# ./gradlew runShots -Pscript=tools/shots/skill_freedom.txt  → python tools/skill_freedom_sheet.py で docs/review/previews/skill_freedom_sheet.png
+# ./gradlew runShots -Pscript=tools/shots/skill_freedom.txt  → python tools/sheets/skill_freedom_sheet.py で docs/review/previews/skill_freedom_sheet.png
 world shots flat
 size 1280 720
 timeout 400

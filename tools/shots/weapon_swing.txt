@@ -1,4 +1,4 @@
-# 武器の一振りを実際に振って tick ごとに撮る (tools/gen_weapon_swing_shots.py が作る)
+# 武器の一振りを実際に振って tick ごとに撮る (tools/gen/shots/gen_weapon_swing_shots.py が作る)
 world shots flat
 size 1280 720
 timeout 2400

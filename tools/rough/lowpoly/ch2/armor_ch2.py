@@ -6,7 +6,7 @@
 出力: docs/review/ch2_roughs/items/armor_ch2/{a,b,c}/<部位>_{mesh.json,atlas.png,glowmask.png}、
       docs/review/ch2_roughs/items/armor_ch2/icons/{a,b,c}_<部位>_32.png (インベントリの 32x32、4 部位 x 3 案)、
       docs/review/ch2_roughs/items/armor_ch2.png (シート。下の段にアイコンの 1x と 4x)
-入れ方: tools/install_ch2_gear_assets.py (選んだ案を assets へ)
+入れ方: tools/install/install_ch2_gear_assets.py (選んだ案を assets へ)
 """
 from __future__ import annotations
 

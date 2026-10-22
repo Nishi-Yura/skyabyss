@@ -4,7 +4,7 @@
 実行: python tools/rough/lowpoly/ch2/icons_ch2.py
 出力: docs/review/ch2_roughs/items/icons/<品>_{a,b,c}_32.png、salt_whetted_18.png
       docs/review/ch2_roughs/items/icons_ch2.png (1x と 4x を暗い背景・明るい背景・インベントリの枠で。既存の潮の真珠と並べる)
-入れ方: tools/install_ch2_gear_assets.py (選んだ案を assets へ、選ばなかった案を tools/sources/<品>/ へ)
+入れ方: tools/install/install_ch2_gear_assets.py (選んだ案を assets へ、選ばなかった案を tools/sources/<品>/ へ)
 """
 from __future__ import annotations
 

@@ -8,7 +8,7 @@ import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
-// モブの鳴き声・足音・攻撃音 (見た目と材質に合わせた音)。音源は tools/gen_mob_sounds.py で合成している
+// モブの鳴き声・足音・攻撃音 (見た目と材質に合わせた音)。音源は tools/gen/sound/gen_mob_sounds.py で合成している
 public final class MobSounds {
     private static final DeferredRegister<SoundEvent> SOUNDS = DeferredRegister.create(Registries.SOUND_EVENT, SkyAbyss.MODID);
 
@@ -41,9 +41,9 @@ public final class MobSounds {
     public static final DeferredHolder<SoundEvent, SoundEvent> EMBER_HEART_HURT = register("ember_heart_hurt");
     public static final DeferredHolder<SoundEvent, SoundEvent> STORM_HEART_HURT = register("storm_heart_hurt");
     public static final DeferredHolder<SoundEvent, SoundEvent> TIDE_HEART_HURT = register("tide_heart_hurt");
-    // 技の音 (tools/gen_boss_skill_sounds.py)。岩鯨の心臓と鯨骨の番兵長
+    // 技の音 (tools/gen/sound/gen_boss_skill_sounds.py)。岩鯨の心臓と鯨骨の番兵長
     public static final DeferredHolder<SoundEvent, SoundEvent> STONE_HEART_ROAR = register("stone_heart_roar");
-    // 心臓の領域の宣言の合図 (tools/gen_heart_domain_stings.py)
+    // 心臓の領域の宣言の合図 (tools/gen/sound/gen_heart_domain_stings.py)
     public static final DeferredHolder<SoundEvent, SoundEvent> DOMAIN_STONE_SEA = register("domain_stone_sea");
     public static final DeferredHolder<SoundEvent, SoundEvent> DOMAIN_RISING_TIDE = register("domain_rising_tide");
     public static final DeferredHolder<SoundEvent, SoundEvent> DOMAIN_THUNDER_CAGE = register("domain_thunder_cage");
@@ -78,7 +78,7 @@ public final class MobSounds {
     public static final DeferredHolder<SoundEvent, SoundEvent> CORAL_THRALL_STEP = register("coral_thrall_step");
     public static final DeferredHolder<SoundEvent, SoundEvent> FEATHER_WARDEN_STEP = register("feather_warden_step");
     public static final DeferredHolder<SoundEvent, SoundEvent> THUNDER_SUPPLICANT_STEP = register("thunder_supplicant_step");
-    // 一章の地上の敵 (tools/gen_ch1_ground_mobs.py。既存の音源に高さを付けた別名)
+    // 一章の地上の敵 (tools/gen/ch1/gen_ch1_ground_mobs.py。既存の音源に高さを付けた別名)
     public static final DeferredHolder<SoundEvent, SoundEvent> ROCK_SHELL_BEETLE_AMBIENT = register("rock_shell_beetle_ambient");
     public static final DeferredHolder<SoundEvent, SoundEvent> ROCK_SHELL_BEETLE_HURT = register("rock_shell_beetle_hurt");
     public static final DeferredHolder<SoundEvent, SoundEvent> ROCK_SHELL_BEETLE_DEATH = register("rock_shell_beetle_death");
@@ -103,7 +103,7 @@ public final class MobSounds {
     public static final DeferredHolder<SoundEvent, SoundEvent> ELDER_SENTRY_CHARGE = register("elder_sentry_charge");
     public static final DeferredHolder<SoundEvent, SoundEvent> ELDER_SENTRY_HORN = register("elder_sentry_horn");
     public static final DeferredHolder<SoundEvent, SoundEvent> ELDER_SENTRY_STOMP = register("elder_sentry_stomp");
-    // 二章の地上の敵 (tools/gen_ch2_ground_mobs.py。既存の音の出来事に高さを付けた別名)
+    // 二章の地上の敵 (tools/gen/ch2/gen_ch2_ground_mobs.py。既存の音の出来事に高さを付けた別名)
     public static final DeferredHolder<SoundEvent, SoundEvent> TIDEPOOL_CLAM_AMBIENT = register("tidepool_clam_ambient");
     public static final DeferredHolder<SoundEvent, SoundEvent> TIDEPOOL_CLAM_OPEN = register("tidepool_clam_open");
     public static final DeferredHolder<SoundEvent, SoundEvent> TIDEPOOL_CLAM_SNAP = register("tidepool_clam_snap");

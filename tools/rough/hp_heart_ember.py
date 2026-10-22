@@ -1,7 +1,7 @@
 """High-poly re-sculpt of the ember heart 余燼の心臓 (assignment 3, docs/design/15_high_poly.md).
 
 Reads tools/sources/ember_heart/phaseN.* (the baked 0.5-unit rough B 熔け殻, kept as the input), re-sculpts it at 0.25 units
-with tools/rough/hp_heart_kit.py and writes tools/sources/ember_heart_hp/phaseN.* (what tools/install_ember_heart.py installs).
+with tools/rough/hp_heart_kit.py and writes tools/sources/ember_heart_hp/phaseN.* (what tools/install/install_ember_heart.py installs).
 
 Budget note: a clean round shell of this size costs ~13000 faces at 0.25 steps, so the big shell is rebuilt as a radial height
 field at 0.5 steps (rebuild_shell: lumps gone, the sealed cavity of phase 1 is filled so no inner / hidden heart faces) and

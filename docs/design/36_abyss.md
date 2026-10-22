@@ -77,7 +77,7 @@
 
 - 本番に入れるときに、絵の模様を描き込む（ラフの模様は粗い）。下の層の「歪み」「崩れ」の姿は、この案から作る。
 
-### 4.2 数字・三段の姿・湧き（A3。A 組と B 組の共通の決まり。実装は `abyss/mobs/`、数字は `AbyssScaling`、湧きは `AbyssMobSpawner`、素材は `tools/gen_abyss_mobs_a.py`・`tools/gen_abyss_mobs_b.py`、絵は `tools/abyss/paint_abyss_b.py`）
+### 4.2 数字・三段の姿・湧き（A3。A 組と B 組の共通の決まり。実装は `abyss/mobs/`、数字は `AbyssScaling`、湧きは `AbyssMobSpawner`、素材は `tools/gen/abyss/gen_abyss_mobs_a.py`・`tools/gen/abyss/gen_abyss_mobs_b.py`、絵は `tools/abyss/paint_abyss_b.py`）
 
 対象は深淵の敵 18 種（A 組 9 種・B 組 9 種）。両組は同じ数字・同じ形・同じ湧きの決まりに従う。
 
@@ -243,7 +243,7 @@
 ### 6.7 作ったもの（2026-10-22）
 - story/ch5/warden: HeartWarden（番人）・AbyssBeacons（灯籠）・WardenArena（間に入ると目覚める、倒した印、合図 abyss_heart、間が 30 秒空くと戻る）・WardenSetup（登録）。
 - 闇のたまり 2 倍は AbyssPressure.voiceScale（間の中で灯籠が全部消えているとき）。
-- 見た目: 案 B の本番モデル（client/WardenRenderer、生成 tools/rough/lowpoly/abyss/warden_model.py・tools/gen_heart_warden.py）。光の中は全部、輪郭だけ（鼓動の術）は体を黒く沈めて光る縁、闇では胸の心臓だけ暗く。写しは暗い色で鼓動の光なし。動きは待ち・歩き・爪・踏み込み・吹き消し・段の変わり・被弾・死。魂の粒は添えだけ。
+- 見た目: 案 B の本番モデル（client/WardenRenderer、生成 tools/rough/lowpoly/abyss/warden_model.py・tools/gen/world/gen_heart_warden.py）。光の中は全部、輪郭だけ（鼓動の術）は体を黒く沈めて光る縁、闇では胸の心臓だけ暗く。写しは暗い色で鼓動の光なし。動きは待ち・歩き・爪・踏み込み・吹き消し・段の変わり・被弾・死。魂の粒は添えだけ。
 - 開発用: `/skyabyss abyss warden wake`・`/skyabyss abyss warden reset`。自己テスト "abyss warden"。
 - まだ: 絵の手描きの仕上げ（今は決まりで描いた絵）、肋の縁の淡い光、倒したあとの場面のカメラ、報酬、間の入口を闇で閉じること。
 

@@ -56,7 +56,7 @@ import net.neoforged.neoforge.server.ServerLifecycleHooks;
 //   峰の雛 (peak_fledgling)       ひとり歩き。峰 (尖った峰・岩の峰・雪の斜面)。昼。焼けた見張り塔の入口の間
 //   雷拾い (lightning_gleaner)    ひとり歩き。高台 (草地・風の丘)。昼。雷拾いの原には人が近くにいる間、2 羽まで (fieldTick。保存しない)
 //   焼けた羽守 (scorched_warden)  湧き台だけ。焼けた見張り塔の頂の間 (名づき)
-// 落とす素材は guide/Ch3Gear の品 (ID で引く。まだ無ければ落とさない)。絵・動き・音の別名・文は tools/gen_ch3_ground_mobs.py
+// 落とす素材は guide/Ch3Gear の品 (ID で引く。まだ無ければ落とさない)。絵・動き・音の別名・文は tools/gen/ch3/gen_ch3_ground_mobs.py
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class Ch3Mobs {
     public static final String STATIC_PUFF = "skyabyss:static_puff";
@@ -105,7 +105,7 @@ public final class Ch3Mobs {
     public static final DeferredItem<Item> SCORCHED_WARDEN_EGG = ITEMS.register("scorched_warden_spawn_egg",
             () -> new DeferredSpawnEggItem(SCORCHED_WARDEN_TYPE, 0x2C3040, 0x96D6FF, new Item.Properties()));
 
-    // ---------------------------------------------------------------- 音 (既存の音の出来事の別名。sounds.json は tools/gen_ch3_ground_mobs.py)
+    // ---------------------------------------------------------------- 音 (既存の音の出来事の別名。sounds.json は tools/gen/ch3/gen_ch3_ground_mobs.py)
     public static final DeferredHolder<SoundEvent, SoundEvent> PUFF_AMBIENT = sound("static_puff_ambient");
     public static final DeferredHolder<SoundEvent, SoundEvent> PUFF_CHARGE = sound("static_puff_charge");
     public static final DeferredHolder<SoundEvent, SoundEvent> PUFF_DISCHARGE = sound("static_puff_discharge");

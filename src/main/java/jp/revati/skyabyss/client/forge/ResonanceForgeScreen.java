@@ -24,7 +24,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
 // 共鳴の炉の画面。左の板に装備の枠・特性・持ち物、右の板に三つのつまみ (強化・再鍛造・交換)。
-// 背景は 2 倍密度のテクスチャ (textures/gui/forge/forge.png、tools/gen_forge_assets.py)。配置を変えたら生成元もそろえる
+// 背景は 2 倍密度のテクスチャ (textures/gui/forge/forge.png、tools/gen/items/gen_forge_assets.py)。配置を変えたら生成元もそろえる
 public class ResonanceForgeScreen extends AbstractContainerScreen<ResonanceForgeMenu> implements jp.revati.skyabyss.client.ui.TextBounded {
     private static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "textures/gui/forge/forge.png");
     private static final int TEX_W = 1024;

@@ -5,7 +5,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 
 // 潮殻の背の島そのもの: 巨神本体のモデル (採用案 B) と同じ形・同じ色の、ブロックでできた亀 (08 の 21 章)。
-// 形は tools/gen_tide_back_turtle.py がモデルの格子から作った data/skyabyss/tide_back/turtle.bin を読む
+// 形は tools/gen/mobs/gen_tide_back_turtle.py がモデルの格子から作った data/skyabyss/tide_back/turtle.bin を読む
 // (ゲームの巨神の 1.7 倍。頭は北 -Z、潮門は左後ろ = 南西)。試練の部屋は、置いたあとで TideIslandBuilder が中を掘る。
 // 読み書きは共通の TitanBodyBlocks (13 の 10.2節。余燼の体と同じ部品)。表の形式はそちらのコメント
 public final class TideTurtle {

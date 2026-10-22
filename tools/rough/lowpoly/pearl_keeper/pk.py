@@ -2,7 +2,7 @@
 
 座標: 1 単位 = 1/16 ブロック。作図は「前 = -Z」(潮招きと同じ)。書き出すとき (x, z) の符号を反転して geo の空間へ
 (geo の root は Y 軸 180 度回る。前は geo の +Z)。作図の +x が大きいはさみの側 (claw_r = ゲームの右)。
-骨は 3 案で共通 (名前・親・pivot)。ゲームの箱の geo (tools/gen_pearl_keeper_assets.py) も同じ骨を使う。
+骨は 3 案で共通 (名前・親・pivot)。ゲームの箱の geo (tools/gen/world/gen_pearl_keeper_assets.py) も同じ骨を使う。
 
 絵の具 (paint / eye_marks / export_mesh) は潮招きの common.py をそのまま借りる。
 """
@@ -39,6 +39,7 @@ rot_geo = tbc.rot_geo
 # ====================================================================== 骨 (作図空間 = 前が -Z)
 # 名前: (親, pivot)。geo へは flipxz して書く。
 sys.path.insert(0, str(ROOT / "tools"))
+sys.path.insert(0, str(ROOT / "tools" / "gen/world"))
 from gen_pearl_keeper_assets import SKELETON_DRAW  # noqa: E402  (骨はゲームの箱の geo と一つの定義)
 BONES = {k: (p, [float(x) + 0.0 for x in flipxz(v)]) for k, (p, v) in SKELETON_DRAW.items()}
 

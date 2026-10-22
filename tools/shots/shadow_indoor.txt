@@ -1,6 +1,6 @@
 # 空の影の通過中に、ブロックの下 (屋根の下・木の下・洞窟の入口) と、開けた所で見え方を比べる。
 # ./gradlew runShots -Pscript=tools/shots/shadow_indoor.txt -PshotsName=shadow_indoor_after   (絵は run/shots/<名前>/shots/shadow_indoor/*.png)
-# 組み立ては python tools/shadow_indoor_sheet.py <before のフォルダ> <after のフォルダ>
+# 組み立ては python tools/sheets/shadow_indoor_sheet.py <before のフォルダ> <after のフォルダ>
 world shadow_indoor flat
 size 960 540
 timeout 900

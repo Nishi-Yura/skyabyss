@@ -167,7 +167,7 @@ public class TideShellEntity extends Entity implements GeoEntity, TravelTitan, j
     static final int COLUMN_UP = 20;
     // 座席 (横, 上, 前)。低ポリ案 B の甲羅は段になった島 (外の段 34、中の段 41、上の段 47 ブロック) で、中心に塔 (高さ約 71) が立つ。
     // 塔は横 -6〜+6・前 -4〜+6 なので、その前の上の段 (高さ 47、平ら) の前へ 10 と 13 に 4 人ずつ (旧: 前へ 11 と 17 の高さ 34・36)。
-    // 高さは低ポリのメッシュ (lowpoly/tide_shell.json) の上面から測った (tools/titan_align_check.py)。座席は面の 0.4 上
+    // 高さは低ポリのメッシュ (lowpoly/tide_shell.json) の上面から測った (tools/audit/titan_align_check.py)。座席は面の 0.4 上
     static final double[][] SEATS = {
             {2.0, 47.4, 10.0}, {-2.0, 47.4, 10.0}, {6.0, 47.4, 10.0}, {-6.0, 47.4, 10.0},
             {2.0, 47.4, 13.0}, {-2.0, 47.4, 13.0}, {6.0, 47.4, 13.0}, {-6.0, 47.4, 13.0}};
@@ -1038,7 +1038,7 @@ public class TideShellEntity extends Entity implements GeoEntity, TravelTitan, j
 
     // 見た目は当たり判定よりずっと大きいので、画面外判定を広げる。
     // モデルは横 ±68、前 87.5〜後ろ 61.5 ブロック、底 (位置の y) から塔の上 73 ブロックまで (低ポリの寸法。塔が高くなったので余裕を持って 80)
-    // 体に入れない (titan/solid)。体積は tools/gen_titan_volumes.py が近景のメッシュから焼く。入ってよいのは乗り場の通り道だけ
+    // 体に入れない (titan/solid)。体積は tools/gen/world/gen_titan_volumes.py が近景のメッシュから焼く。入ってよいのは乗り場の通り道だけ
     @Override
     public String volumeName() {
         return "tide_shell";

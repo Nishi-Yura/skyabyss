@@ -162,7 +162,7 @@ assets/skyabyss_lore/lang/{ja_jp,en_us}.json   伝承の文 (題・本文・碑�
 | `finale` | 終章 | 雲海 | 雲海 | 枠 3 | 8.7（未着手） |
 
 - **項目の ID は変えていない**。旧「1 章」の 53 項目は ID が `chapter1/<名前>` のままで（人ごとの保存・クエスト・会話・経験値表が参照する）、`"chapter"` 欄だけが巨神の章を指す。内部名の `chapter1` は「巨神編（一〜四章）の項目のフォルダ」という意味だけが残る。元の `chapter2`・`chapter3` は五章・六章の ID として残した。
-- 振り分けは `tools/regroup_lore_chapters.py`（名前の型で決める。何度動かしても同じ。章の定義 JSON・章の文もここで作る）。新しい項目を足す生成スクリプト（`gen_story_quests.py`・`gen_storm_lore.py`・`gen_ember_lore.py`・`gen_free_quests.py`）は同じ写像を使う。
+- 振り分けは `tools/lib/regroup_lore_chapters.py`（名前の型で決める。何度動かしても同じ。章の定義 JSON・章の文もここで作る）。新しい項目を足す生成スクリプト（`tools/gen/story/gen_story_quests.py`・`tools/gen/story/gen_storm_lore.py`・`tools/gen/story/gen_ember_lore.py`・`tools/gen/story/gen_free_quests.py`）は同じ写像を使う。
 - 章の文: `lore.skyabyss.chapter.<章 ID>.tab`（一章）／`.name`（岩鯨）／`.title`（題字。章の札で使う。P2）。
 - 章 1 つの項目は 10〜15 個。`LoreSelfTest` の許容は序章と一〜四章で 12〜75。
 
@@ -190,7 +190,7 @@ assets/skyabyss_lore/lang/{ja_jp,en_us}.json   伝承の文 (題・本文・碑�
 
 - 順は `the_book` 10、`camp` 12、`the_book_margin` 14、`footprints` 15、`shadow` 20、`shadow_heading` 25、`footsteps` 27、`bone_hill` 28、`sky_song` 29。都の碑の 4 項目は 70〜73（村の 4 項目の後）。
 - 都の碑の 4 項目（33 の 2.2）は碑を見ると記される（碑文の写し = 碑の 4 行。文は `assets/skyabyss_opening/lang`）。国の物語の入口で、閉じた施設は章が進むと開く（17 の 3.3）。墓地の「名のない墓」は見る者のほのめかし（六章まで言わない）。
-- 序盤の項目（camp〜sky_song）は `data/skyabyss/lore/entry/prologue/` と lang、生成は `tools/gen_opening_text.py`（全文は [17](17_opening_and_rpg_feel.md) の 11 章）。きっかけは 17 の表。本文は 2〜3 段、説明せず、問いか物で終える。巨神・見る者・ループ・天の鍵の意味・ほかの巨神の名前は書かない（`OpeningStorySelfTest` が言葉で確かめる）。
+- 序盤の項目（camp〜sky_song）は `data/skyabyss/lore/entry/prologue/` と lang、生成は `tools/gen/story/gen_opening_text.py`（全文は [17](17_opening_and_rpg_feel.md) の 11 章）。きっかけは 17 の表。本文は 2〜3 段、説明せず、問いか物で終える。巨神・見る者・ループ・天の鍵の意味・ほかの巨神の名前は書かない（`OpeningStorySelfTest` が言葉で確かめる）。
 - 序章の村の 4 項目は、破れた頁と NPC の話の両方で記される（頁の運だけに頼らず、サブ「数え歌のつづき」を必ず終えられる。00 の 19 = A）。項目の JSON は変えていない（`Lore.unlock` は条件の種類を問わず記せる）。数え歌は語り部が歌う。
 - 石板の看板の文は `sign.skyabyss.lore_bone_slab.1〜4`（本体の lang。`SignFit` が幅を測る）。
 
@@ -417,7 +417,7 @@ assets/skyabyss_lore/lang/{ja_jp,en_us}.json   伝承の文 (題・本文・碑�
 
 次に会ったとき、あの人は覚えているだろうか。
 
-**一章の支度の段の頁**（`lore/entry/ch1/`。34 の 2・5 章。生成は `tools/gen_ch1_trails.py`。前の私の足跡 = 「誰かの跡」。正体は言わない）
+**一章の支度の段の頁**（`lore/entry/ch1/`。34 の 2・5 章。生成は `tools/gen/ch1/gen_ch1_trails.py`。前の私の足跡 = 「誰かの跡」。正体は言わない）
 
 | ID | 題 | 記される条件 | 中身の芯 |
 | --- | --- | --- | --- |
@@ -430,7 +430,7 @@ assets/skyabyss_lore/lang/{ja_jp,en_us}.json   伝承の文 (題・本文・碑�
 
 ### 8.3 巨神編の続き（ベータ。[14](14_beta.md)。章は 8.1 の表のとおり、岩鯨の分は一章、雷翼の分は三章、余燼・天の鍵の分は四章）
 
-文は `assets/skyabyss_story/lang`、生成は `tools/gen_story_quests.py`。どれも `manual`（会話・天の鍵・巨神の担当が記す）。
+文は `assets/skyabyss_story/lang`、生成は `tools/gen/story/gen_story_quests.py`。どれも `manual`（会話・天の鍵・巨神の担当が記す）。
 
 | 項目 | 題 | 記される時 | 本文の要点（言い切らない） |
 | --- | --- | --- | --- |
@@ -444,7 +444,7 @@ assets/skyabyss_lore/lang/{ja_jp,en_us}.json   伝承の文 (題・本文・碑�
 
 ### 8.4 雷翼
 
-文は `assets/skyabyss_storm/lang`、生成は `tools/gen_storm_lore.py`（全文は [12](12_thunder_wing.md) の 17.6.6 節）。
+文は `assets/skyabyss_storm/lang`、生成は `tools/gen/story/gen_storm_lore.py`（全文は [12](12_thunder_wing.md) の 17.6.6 節）。
 
 | 項目 | 題 | 記される時 | ほのめかし |
 | --- | --- | --- | --- |
@@ -466,7 +466,7 @@ assets/skyabyss_lore/lang/{ja_jp,en_us}.json   伝承の文 (題・本文・碑�
 | 巨神 | 項目 | 書類 |
 | --- | --- | --- |
 | 潮殻 | `tide_shell`（動く島）、`tide_ruins`、`tide_hours`、`beckoner`（潮招き）、`tide_heart_stilled`、碑文 `inscription_tide_{beach,hub,west,east,front,heart}` | [08](08_tide_shell.md)（碑文の文は 08 の看板の表） |
-| 余燼 | `ember_titan`、`ember_ruins`、`forge_ledger`（鍛えの帳。頁 `ember_back`）、`ash_smith`、`ember_stilled`、碑文 `inscription_ember_*`（6）。文は `assets/skyabyss_ember/lang`、生成 `tools/gen_ember_lore.py` | [13](13_ember.md) の 9 章 |
+| 余燼 | `ember_titan`、`ember_ruins`、`forge_ledger`（鍛えの帳。頁 `ember_back`）、`ash_smith`、`ember_stilled`、碑文 `inscription_ember_*`（6）。文は `assets/skyabyss_ember/lang`、生成 `tools/gen/story/gen_ember_lore.py` | [13](13_ember.md) の 9 章 |
 
 - `chapter1/ember`（14 の仮の項目）と `sky_key_whole` の本文は、13 の「天の鍵」の文と同じことを言う。
 
@@ -493,13 +493,13 @@ assets/skyabyss_lore/lang/{ja_jp,en_us}.json   伝承の文 (題・本文・碑�
 
 枠は `placeholder: true` の項目で、題も本文も持たない。章を作る担当は、枠のファイルを本物の項目に書き換えるか、消して新しい項目を足す。枠の数に意味はない（書に「まだ先がある」と見せるため）。
 
-**章と伝承の ID**: 伝承の ID（`chapter1/…`）は変えず、項目の `"chapter"` 欄で章に振り分ける（`tools/regroup_lore_chapters.py`）。`chapter1/…` の 53 項目は巨神ごとに `titan_whale`・`titan_tide`・`titan_storm`・`titan_ember`（一〜四章）へ、`chapter2`・`chapter3`・`finale` の枠は五章 深淵・六章 月・終章 雲海。章はプレイヤーの段階から `story/Chapters` が導く。
+**章と伝承の ID**: 伝承の ID（`chapter1/…`）は変えず、項目の `"chapter"` 欄で章に振り分ける（`tools/lib/regroup_lore_chapters.py`）。`chapter1/…` の 53 項目は巨神ごとに `titan_whale`・`titan_tide`・`titan_storm`・`titan_ember`（一〜四章）へ、`chapter2`・`chapter3`・`finale` の枠は五章 深淵・六章 月・終章 雲海。章はプレイヤーの段階から `story/Chapters` が導く。
 
 ---
 
 ## 9. テクスチャ
 
-- 生成: `tools/gen_lore_book.py`（Pillow、seed 付き）。3 案を `docs/review/lore_book_roughs/{a,b,c}/` に書き、`compare.png` を作る。`--install b` で採用案をゲームの場所へ写す。
+- 生成: `tools/gen/story/gen_lore_book.py`（Pillow、seed 付き）。3 案を `docs/review/lore_book_roughs/{a,b,c}/` に書き、`compare.png` を作る。`--install b` で採用案をゲームの場所へ写す。
 - 作るもの: 見開き `textures/gui/lore/book.png`（608×384）、部品 `textures/gui/lore/widgets.png`（512×256。しおり 2 種、菱形の印 3 種、矢印 2 種、選んだ行の青緑のにじみ、伏せ字の墨の帯、知らせの札）、アイテム `textures/item/lore_book.png` と `lore_page.png`（32×32）。部品の位置は `LoreBookScreen` の `Sprite` と合わせてある。
 - **採用: b 碑文の石板**。青灰の石の表紙、縁に青緑の光る刻線と菱形、少し冷たい羊皮紙の頁。背中の碑文（淡い青の光る字）と同じ色の縁取りで「碑文を写した書」に見え、羊皮紙との明暗差が大きく字が読みやすい（00 の 10）。本文の「表紙は石のように冷たく」も b に合わせた。
 - 書は紺の表紙に青緑の菱形、頁は羊皮紙に罫線。32px でつぶれず、手に持った姿も崩れない。

@@ -25,7 +25,7 @@ import net.neoforged.neoforge.registries.DeferredRegister;
 
 // 深淵の敵 B 組 (docs/design/36 の 4・A3): 登録。灰の層 3 種・深み 2 種・深淵だけ 4 種。
 // 敵と品の ID は skyabyss の名前空間。音の出来事だけ skyabyss_abyss_b (assets/skyabyss_abyss_b/sounds.json。ほかの作業の sounds.json と分ける)。
-// 素材と見た目は tools/gen_abyss_mobs_b.py (絵は tools/abyss/paint_abyss_b.py)。SkyAbyss のコンストラクタから register を呼ぶ
+// 素材と見た目は tools/gen/abyss/gen_abyss_mobs_b.py (絵は tools/abyss/paint_abyss_b.py)。SkyAbyss のコンストラクタから register を呼ぶ
 public final class AbyssMobsBSetup {
     public static final String SOUND_NS = "skyabyss_abyss_b";
 

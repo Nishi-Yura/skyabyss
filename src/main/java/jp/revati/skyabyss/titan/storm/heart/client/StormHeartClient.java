@@ -24,7 +24,7 @@ import net.neoforged.neoforge.client.event.RenderGuiEvent;
 @EventBusSubscriber(modid = SkyAbyss.MODID, value = Dist.CLIENT)
 public final class StormHeartClient {
     // 段階 1 畳んだ翼: 銅の橙 / 段階 2 開いた翼: 風の青白 / 段階 3 骨だけの翼: 稲妻の白金 (12 の 5.3節)。
-    // 14.2節の案 (heart/bars.png) は 青白・金・白金。差し替えるときは FILL と tools/gen_storm_heart_bar.py の STYLE・FILL
+    // 14.2節の案 (heart/bars.png) は 青白・金・白金。差し替えるときは FILL と tools/gen/world/gen_storm_heart_bar.py の STYLE・FILL
     public static final PhasedBossBar.Style BAR = new PhasedBossBar.Style("storm_heart",
             new int[] {0xD98A4E, 0xA8D8FF, 0xF6F0C8},
             new int[] {0xFFC090, 0xE8F6FF, 0xFFFFF0},

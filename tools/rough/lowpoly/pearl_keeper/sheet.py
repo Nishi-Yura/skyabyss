@@ -13,6 +13,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+sys.path.insert(0, str(Path(__file__).resolve().parents[3] / "gen" / "world"))
 from view import *  # noqa
 from PIL import ImageDraw  # noqa
 import gen_pearl_keeper_assets as G  # noqa  (view.pose_of が tools を path に入れる。ここでも入れる)
@@ -94,7 +95,7 @@ def main():
                  "骨 14 本は 3 案で共通で、アニメ 12 本 (idle・walk・hurt・death・emerge・updraft・downdraft・charge・volley・shell_in・shelled・shell_out) がどの案でも動く。"
                  "三角形 (全身): A %d / B %d / C %d (上限 約 1,500)。アトラス 512×512。光る画素は真珠 (弱点) が主。"
                  "メッシュは lowpoly_roughs/lp_pearl_keeper/{a,b,c}/pearl_keeper_{a,b,c}_mesh.json (+ atlas・glowmask)。"
-                 "生成: tools/rough/lowpoly/pearl_keeper/sheet.py。取り込み: python tools/install_lowpoly_pearl_keeper.py [a|b|c]。"
+                 "生成: tools/rough/lowpoly/pearl_keeper/sheet.py。取り込み: python tools/install/install_lowpoly_pearl_keeper.py [a|b|c]。"
                  % (tris["a"], tris["b"], tris["c"]),
         "options": {k: {"name": NAMES[k], "desc": DESC[k]} for k in "abc"},
     }

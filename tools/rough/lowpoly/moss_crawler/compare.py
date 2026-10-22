@@ -65,7 +65,7 @@ def anim_state(name, t):
 
 
 def intent_rot(r):
-    """ファイルの回転 -> ラフの向き (x, z の符号を反転する。docs/design/15 と tools/install_moss_crawler_b.py)"""
+    """ファイルの回転 -> ラフの向き (x, z の符号を反転する。docs/design/15 と tools/install/install_moss_crawler_b.py)"""
     return (-r[0], r[1], -r[2])
 
 

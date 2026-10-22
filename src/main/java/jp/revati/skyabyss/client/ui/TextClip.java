@@ -10,7 +10,7 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.util.FormattedCharSequence;
 
-// 文字を箱の中に収める道具。どの画面も、枠の外に字を描かないためにこれを使う (tools/check_text_fit.py と対)。
+// 文字を箱の中に収める道具。どの画面も、枠の外に字を描かないためにこれを使う (tools/audit/check_text_fit.py と対)。
 //   clip / unclip : 矩形 (画面の寸法) の外を切る scissor。パネルの描画を挟む。入れ子にできる
 //   fit           : 1 行を幅に収める。入らなければ「…」で切る (書式は残す)
 //   line          : 1 行を描く (fit して)

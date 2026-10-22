@@ -13,7 +13,7 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 
-// 深淵の敵 A の描画 (素材は tools/gen_abyss_mobs_a.py)。段ごとに別のメッシュ・アトラス・発光マスク (abyss_<id>_s<段>)。
+// 深淵の敵 A の描画 (素材は tools/gen/abyss/gen_abyss_mobs_a.py)。段ごとに別のメッシュ・アトラス・発光マスク (abyss_<id>_s<段>)。
 // 骨格は三段とも同じ (モデルの名前は段 1 のもの。段ごとのファイルはモデルの差し替えで選ぶ)。
 @EventBusSubscriber(modid = SkyAbyss.MODID, value = Dist.CLIENT)
 public final class AbyssMobRenderers {

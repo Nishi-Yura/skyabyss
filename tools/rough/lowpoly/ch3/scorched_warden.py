@@ -110,7 +110,7 @@ def build_option(k):
                 gsize=gsize, gatlas=gatlas, gglow=gglow, gdata=gdata, tris=tri_count(body), gtris=tri_count(gear))
 
 
-# 姿勢 (GeckoLib の値。羽守の動きと同じ書き方)。gen_ch3_ground_mobs.py の動きも同じ値を使う
+# 姿勢 (GeckoLib の値。羽守の動きと同じ書き方)。tools/gen/ch3/gen_ch3_ground_mobs.py の動きも同じ値を使う
 RING = {"body": (-12, 0, 0), "arm_r": (-40, 0, 30), "arm_l": (-40, 0, -30), "cloak_l": (0, 0, -40), "cloak_r": (0, 0, 40),
         "leg_r": (20, 0, -8), "leg_l": (20, 0, 8), "socket_main": (-60, 0, 0)}
 LEAP = {"body": (10, 0, 0), "cloak_l": (0, 0, -95), "cloak_r": (0, 0, 95), "arm_r": (-150, 0, 0), "arm_l": (-30, 0, -40),

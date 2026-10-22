@@ -1,5 +1,5 @@
 # 岩鯨の下の試練 (光海) の作り直しを撮る (docs/design/23 の 11 章)。
-# ./gradlew runShots -Pscript=tools/shots/whale_underside_fix.txt   → python tools/whale_underside_fix_sheet.py
+# ./gradlew runShots -Pscript=tools/shots/whale_underside_fix.txt   → python tools/sheets/whale_underside_fix_sheet.py
 # 出力: run/shots/whale_underside_fix/shots/whale_underside_fix/*.png。音は台本が自分で消す (TestMute)
 world underside_fix flat
 size 1280 720

@@ -1,5 +1,5 @@
 # 一章の地上の新しい場所 (21 の 3.1、P6) を平らな世界へ置いて撮る。./gradlew runShots -Pscript=tools/shots/ch1_sites.txt
-# 絵は run/shots/ch1_sites/shots/ch1_sites/*.png。python tools/ch1_sites_sheet.py で docs/review/previews/ch1_sites_sheet.png にまとめる
+# 絵は run/shots/ch1_sites/shots/ch1_sites/*.png。python tools/sheets/ch1_sites_sheet.py で docs/review/previews/ch1_sites_sheet.png にまとめる
 # (開発コマンド skyabyss dev ch1 place / chamber は story/ch1/Ch1Dev。音は台本が自分で消す)
 world ch1sites flat
 size 1280 720

@@ -1054,7 +1054,7 @@ public class EmberTitanEntity extends Entity implements GeoEntity, jp.revati.sky
     }
 
     // 見た目は当たり判定よりずっと大きい。モデルは横 ±54、前 103〜後ろ 124 ブロック、底から煙の上まで 92 ブロック (低ポリは頭の後ろの角まで 96 ブロック。余裕を持って 100)
-    // 体に入れない (titan/solid)。体積は tools/gen_titan_volumes.py が近景のメッシュから焼く。入ってよいのは乗り場の通り道だけ
+    // 体に入れない (titan/solid)。体積は tools/gen/world/gen_titan_volumes.py が近景のメッシュから焼く。入ってよいのは乗り場の通り道だけ
     @Override
     public String volumeName() {
         return "ember_titan";

@@ -7,9 +7,9 @@
 
 python tools/rough/hp_titans_storm_ember.py [thunder_wing|ember_titan]     -> docs/review/high_poly_roughs/<name>.png (+ assets/<name>_<A|B|C>/)
 python tools/rough/hp_titans_storm_ember.py --install <name> [A|B|C]        -> writes the near geo + atlas into src/main/resources/assets
-install_thunder_wing.py / install_ember_titan.py call install_titan() right after they wrote the raw model.
+tools/install/install_thunder_wing.py / tools/install/install_ember_titan.py call install_titan() right after they wrote the raw model.
 
-The back dimension bodies (gen_back_shape.py / gen_ember_back_body.py) read the *grid* of the install scripts (build_grid() /
+The back dimension bodies (tools/gen/items/gen_back_shape.py / tools/gen/items/gen_ember_back_body.py) read the *grid* of the install scripts (build_grid() /
 tools/rough/ember_titan.py build), never the near geo, so nothing here can change them.  The shape, the proportions and the
 colour layout are kept: chamfers are 0.5 unit (a quarter block) on free outer edges only, trims are small boxes.
 hpkit.py is not touched; the helpers live in hp_mobs_storm_ember.py (prune, bevel, box, frame, pose_holes) and here.

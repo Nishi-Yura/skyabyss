@@ -157,7 +157,7 @@
 - OP コマンド（確かめ・台本用）: `/skyabyss cinematic play <場面> [targets]`（岩鯨の場面は今いる岩鯨、いなければ前方を狙う）、`/skyabyss cinematic stop [targets]`、`/skyabyss cinematic reset [targets]`（見た記録を消す）。`targets` はセレクタ（`@a`・名前など）。省くと自分。場面は人ごとに独立。
 - 自己テスト `SELFTEST cinematic`（`cinematic/CinematicSelfTest`）: 台本（長さ・台詞が場面に収まる・重ならない・撮影がつながる・開幕が 40 秒以内で最後が本人の目）、日英の文（すべての鍵・長さ）、座標（前・右・向きの往復・カメラが飛ばない・範囲外は両端）、パケットの往復と記録の保存、巨神の初見の条件（四体それぞれ。一人目・二人目・同じ人に二度出ない・再入室のあとも・範囲の外・船の上・ほかの騎乗）、サーバーの流れ（始める・二重に始めない・名前違いの End は無視・スキップで効果が一度だけ・本人だけ無敵で終われば傷つく・見た場面は繰り返さない・サーバーの打ち切りでも効果・条件）。
 - ゲーム内の撮影: `./gradlew runShots -Pscript=tools/shots/cinematic_demo.txt -PshotsName=<新しい名前>`（開幕 → 岩鯨の初見。絵は `docs/review/previews/` に置く）。巨神の眠りは `tools/shots/titan_end_whale.txt`・`titan_end_tide.txt`・`titan_end_storm.txt`・`titan_end_ember.txt`（場面の見せ場の絵）と、乗り込み口の光の `titan_end_glow.txt`（絵は `docs/review/previews/titan_end_*.png`）。
-- マルチの確認（専用サーバー + 二人）: `tools/shots/mp_alice.txt`（一人目）と `mp_bob.txt`（二人目）を `./gradlew runShots -Pscript=... -PshotsUser=<名前>` で動かす（台本の `server localhost:25666` で専用サーバーへ入る）。二人目の開幕・岩鯨・心臓・眠りの絵が `docs/review/previews/mp_cinematic_*.png`。外からの合図は `waitfile`/`signal`、サーバーへの命令は `tools/rcon.py`。
+- マルチの確認（専用サーバー + 二人）: `tools/shots/mp_alice.txt`（一人目）と `mp_bob.txt`（二人目）を `./gradlew runShots -Pscript=... -PshotsUser=<名前>` で動かす（台本の `server localhost:25666` で専用サーバーへ入る）。二人目の開幕・岩鯨・心臓・眠りの絵が `docs/review/previews/mp_cinematic_*.png`。外からの合図は `waitfile`/`signal`、サーバーへの命令は `tools/dev/rcon.py`。
 - 試遊はまだ: スキップの長押し、字幕の折り返し、旧ワールド。
 
 ### 4.1 マルチ（人ごとに一度ずつ）
@@ -175,7 +175,7 @@
 
 | 部品 | 役目 |
 | --- | --- |
-| `tools/gen_cinematic_voice.py` | 全台詞の声を作る。本文（日本語）の拍の数と句読点の間が、声の拍と間になる（かな = 1 拍、漢字 = 約 2 拍、`、` `。` `……` = 間）。英語も同じクリップを使う。話す長さは台詞の表示時間の 5〜9 割（詰めすぎない。入りきらない尻は消える） |
+| `tools/gen/sound/gen_cinematic_voice.py` | 全台詞の声を作る。本文（日本語）の拍の数と句読点の間が、声の拍と間になる（かな = 1 拍、漢字 = 約 2 拍、`、` `。` `……` = 間）。英語も同じクリップを使う。話す長さは台詞の表示時間の 5〜9 割（詰めすぎない。入りきらない尻は消える） |
 | `skyabyss_cinematic/voice_manifest.json` | 台詞の一覧（台本 `Scenes` の全台詞: 場面・番号・時刻・長さ・話し手・本文の鍵）。生成の入力。自己テストが台本と合っているか確かめる |
 | `sounds/voice/<場面>/l<番号>.ogg` と `sounds.json` | 22.05 kHz mono ogg（全 41 本で約 0.7 MB）。音の名前は `skyabyss_cinematic:voice.<場面>.l<番号>`、字幕は話し手ごとの 1 つ（`subtitles.skyabyss_cinematic.voice.<話し手>`） |
 | `cinematic/VoiceClips` | 音の名前・ファイルの場所 |
@@ -183,7 +183,7 @@
 
 - 話し手ごとの音色（`SPEAKERS`）: 天の声 = 空気・重ね（オクターブ・五度・離調）・広い残響・遅い、主人公（`HERO`）= やわらかい中域、イサナ = 明るく高め、語り部 = 老いて低く息、見る者 = うつろ（櫛形の共鳴）・ささやき。今の場面の話し手は `HERO` と `HEAVEN` だけ。`NPC` の台詞は名札の鍵（`isana` `storyteller` `watcher` を含む）で音色が決まり、当てはまらなければ主人公の声。
 - 様式（`--style`）: **a** 音節のブリップ、**b** 息のささやき、**c** 歌うハミング、**a2** やわらかい語り、**a3** ハミング混じり、**a4** 遠い声（高域を削り、息が多く、残響が深い。いちばん小さい）。選定の見本は `docs/review/voice/index.html`・`voice2/index.html`。
-- **採用は l2**（架空の言語・子音の多い古い言葉。下の「架空の言語の様式」）。以前の採用 a4（遠い声）は比較用に残す: 台詞ごとに高さが少し違い（±1.3 半音）、拍ごとの強弱は交互の規則でなくゆっくり動く波、立ち上がり・母音の移りはなめらか。作り直しは `python tools/gen_cinematic_voice.py --install --style a4`（コードは変えない）。
+- **採用は l2**（架空の言語・子音の多い古い言葉。下の「架空の言語の様式」）。以前の採用 a4（遠い声）は比較用に残す: 台詞ごとに高さが少し違い（±1.3 半音）、拍ごとの強弱は交互の規則でなくゆっくり動く波、立ち上がり・母音の移りはなめらか。作り直しは `python tools/gen/sound/gen_cinematic_voice.py --install --style a4`（コードは変えない）。
 - 台詞を足す・変えるとき: 台本を直す → 自己テストを `SKYABYSS_DUMP_VOICE=<manifest のパス>` 付きで一度流して一覧を書き直す → `--install` → `--check`。自己テストは、一覧が台本とずれていたり、台詞に音の登録・.ogg がなかったりすると落ちる。`--check` は各クリップの長さが台詞の表示時間（`duration`）に収まり、その 4 割以上あるかを見る。
 - ジャンプスケア禁止（17 の 6 章）は声にも守る: 立ち上がりはなだらかで、音量はそろえてある。
 
@@ -194,7 +194,7 @@
 - 声の音量が 0 でも同じ速さで出る（音でなく時間で決める）。スキップを押している間・終わりの暗転は全文。声のない台詞（`VoiceTiming` に時刻がない）と NPC の会話画面（声がない）は今までどおり全文。
 - 設定 `subtitleReveal`（クライアント）: `SYNCED`（既定）/ `INSTANT`（最初から全文）。
 - 文字に合わせない様式（`--style m1|m2|m3`。選定は `docs/review/voice3/index.html`、不採用）: m1 = 行頭の短い合図（天=息の鈴・主人公=ため息・イサナ=軽いハミング・語り部=低いハム・見る者=うつろなささやき）、m2 = 話し手ごとの静かな持続音、m3 = 行頭の吸う息と終わりの吐く息だけ。`voice_timing.json` の項目に `span`（台詞の表示時間）が付き（`t` は空）、字幕は一定の速さで出る（`VoiceTiming.revealSteady`: 1 秒に `steadyRevealCps` 文字（クライアント設定、既定 8）、長い台詞は表示時間の 85% で全文が出る速さまで上がる。`span` に届けば全文）。`--install --style m1` で切り替わり、コードは変えない。
-- 架空の言語の様式（`--style l1|l2|l3`。選定は `docs/review/voice4/index.html`、**l2 を採用・導入済み**）: 日本語の母音・子音には従わず、`tools/conlang_voice.py` の言語（音素・音節の形・強勢・抑揚・語の区切り・よく出る語）で、台詞の id から決まる乱数で作る。本文から使うのは句の長さと句読点の間だけ。話し手ごとに訛り（母音のずれ・子音の置き換え・速さ・抑揚の幅）。l1 = やわらかく流れる、l2 = 子音の多い古い言葉、l3 = ささやきの詠唱。音色は a4 と同じ遠い声。字幕は一定の速さ（`span` つき）。
+- 架空の言語の様式（`--style l1|l2|l3`。選定は `docs/review/voice4/index.html`、**l2 を採用・導入済み**）: 日本語の母音・子音には従わず、`tools/lib/conlang_voice.py` の言語（音素・音節の形・強勢・抑揚・語の区切り・よく出る語）で、台詞の id から決まる乱数で作る。本文から使うのは句の長さと句読点の間だけ。話し手ごとに訛り（母音のずれ・子音の置き換え・速さ・抑揚の幅）。l1 = やわらかく流れる、l2 = 子音の多い古い言葉、l3 = ささやきの詠唱。音色は a4 と同じ遠い声。字幕は一定の速さ（`span` つき）。
 - 自己テスト `cinematic`: 全台詞に時刻があり、`dur` が .ogg の長さと合い、台詞の表示時間に収まること、`revealCount` の振る舞い。
 
 ### 3.5 夜の歌 `opening_song` の星の見せ方（版 25）

@@ -196,7 +196,7 @@
 ### 2.9 実装（地上）
 
 - `EmberTitanEntity`（地の中を泳ぐ火蜥蜴）、`EmberMouthEntity`（熱の口）、`EmberKeeper`、`EmberGround`（陸の点の探し方。出現・眠る場所・呼び直し）、`EmberTravel`（乗り降り）、`EmberCommands`、`EmberSelfTest`、`WarmStoneItem`、灰の降り、描画。登録は `EmberTitanSetup`。
-- モデル: `tools/install_ember_titan.py` が geo（近景・中景・遠景）・テクスチャ・光るマスク・アニメを書く。近景 2636 箱、重なり 0、光る画素あり。見た目の確認は台本 `tools/shots/ember_surface.txt`（`runShots`）。音は `tools/gen_ember_sounds.py`。
+- モデル: `tools/install/install_ember_titan.py` が geo（近景・中景・遠景）・テクスチャ・光るマスク・アニメを書く。近景 2636 箱、重なり 0、光る画素あり。見た目の確認は台本 `tools/shots/ember_surface.txt`（`runShots`）。音は `tools/gen/sound/gen_ember_sounds.py`。
 - 偽プレイヤーは接続が無く次元またぎで落ちるので、テストでは `EmberTravel.teleport` が世界だけ切り替える。
 - 伝承 `chapter1/ember` は見つけたときに記す。`Progression.worldAllows(server, Titans.EMBER)` を見て出す。
 
@@ -232,18 +232,18 @@
 
 ### 3.2 体の形（巨神の外見と同じ）
 
-**体は巨神本体のモデル（採用した低ポリ案 C「皮が岩になる火蜥蜴」）と同じ形・同じ色の、ブロックでできた火蜥蜴**。案 C の近景メッシュ（`docs/review/lowpoly_roughs/lp_ember_titan/c/near_*`）を `tools/lowpoly_ember_voxel.py` が 0.5 単位のセルにし（アトラスの色で材料を決める。胴・背・尾は断面の列ごとに埋めるので、開いた火口の鉢も殻の中身が詰まる）、`tools/gen_ember_back_body.py`（岩鯨の `gen_titan_back_whale.py` と同じ作り）がブロックの配置にして `data/skyabyss/ember_back/body.bin` に書く。
+**体は巨神本体のモデル（採用した低ポリ案 C「皮が岩になる火蜥蜴」）と同じ形・同じ色の、ブロックでできた火蜥蜴**。案 C の近景メッシュ（`docs/review/lowpoly_roughs/lp_ember_titan/c/near_*`）を `tools/lib/lowpoly_ember_voxel.py` が 0.5 単位のセルにし（アトラスの色で材料を決める。胴・背・尾は断面の列ごとに埋めるので、開いた火口の鉢も殻の中身が詰まる）、`tools/gen/items/gen_ember_back_body.py`（岩鯨の `tools/gen/items/gen_titan_back_whale.py` と同じ作り）がブロックの配置にして `data/skyabyss/ember_back/body.bin` に書く。
 
 | 項目 | 内容 |
 |---|---|
-| 縮尺 | ゲームの巨神の 1.7 倍に、水平 ×1.6・垂直 ×1.3 を掛けた体（版 20。26 の 11 章。`tools/gen_ember_back_body.py` の `WH`・`WV`・`ZSHIFT`）。1 単位 = 水平 1.36・垂直 1.105 ブロック。頭の先 z -273・尾の先 z 348（全長 621）、胴の幅 約 x -77〜76（脚を入れると -148〜147）、腹の下端 y 64、背の上 y 134〜148（平ら）、火山の縁 y 217。火口の鉢の中心 (0, -54) を広間の真上に置く（広間の中心 `HUB_CENTER`） |
+| 縮尺 | ゲームの巨神の 1.7 倍に、水平 ×1.6・垂直 ×1.3 を掛けた体（版 20。26 の 11 章。`tools/gen/items/gen_ember_back_body.py` の `WH`・`WV`・`ZSHIFT`）。1 単位 = 水平 1.36・垂直 1.105 ブロック。頭の先 z -273・尾の先 z 348（全長 621）、胴の幅 約 x -77〜76（脚を入れると -148〜147）、腹の下端 y 64、背の上 y 134〜148（平ら）、火山の縁 y 217。火口の鉢の中心 (0, -54) を広間の真上に置く（広間の中心 `HUB_CENTER`） |
 | 向き | 頭は北（-Z）。口は北の端で、顎は灰の原（y 63）に下りている。尾は -X へ曲がる（反転なし） |
 | 材料 | 案 C のアトラスの色に近いバニラ。黒い殻の板 = 黒石・玄武岩・磨かれた玄武岩・滑らかな玄武岩、灰茶の皮 = 凝灰岩・茶色のテラコッタ・深層岩、赤茶の皮 = 赤のテラコッタ、腹 = 磨かれた凝灰岩・凝灰岩レンガ、割れ目の溶岩 = マグマブロック（流れない。踏むと熱）とシュルームライト、さらに熱い所 = シュルームライトとオーカーのフロッグライト、冷めかけの赤・口の中 = 赤いネザーレンガ・ネザーウォートブロック、牙・角 = 骨ブロック。**溶岩（流体）は置かない**（部屋に流れ込まない）。煙は置かない（粒で出す） |
 | 体の中 | 外から 5 ブロックより深い所は凝灰岩で埋め、部屋の形に掘る。掘った壁は「肉と骨の壁」（赤いネザーレンガ・骨ブロック・マグマの血管） |
 | 腹の下 | 頭・顎・胴・尾の足あとの 3 ブロック内側を、灰の原の上（y 64〜69）まで埋める（首の下がくぼんでいても喉の坂の床の下が空かない） |
 | 歩ける外 | 殻の板の起伏は 1 ブロックの段に丸まる。隣が 2〜3 高い柱には同じ石を 1 段足し、背の上を歩けるようにする |
 
-- 殻の厚さ: 部屋の箱は体の中に入れてある（`python tools/gen_ember_back_body.py --cache` のあと、箱の周り 3 マスが体で埋まっているかを `tools/` の確認で見る）。丸い断面でも部屋の高さ（y 77〜116）では胴が x ±76 あり、灰の道・鍛えの間の天井の上に 7〜10、広間の上は火山で 40 以上。**部屋の箱は体の中で足りている**。
+- 殻の厚さ: 部屋の箱は体の中に入れてある（`python tools/gen/items/gen_ember_back_body.py --cache` のあと、箱の周り 3 マスが体で埋まっているかを `tools/` の確認で見る）。丸い断面でも部屋の高さ（y 77〜116）では胴が x ±76 あり、灰の道・鍛えの間の天井の上に 7〜10、広間の上は火山で 40 以上。**部屋の箱は体の中で足りている**。
 - 火口: 鉢の底は y 204〜207（`EmberBackLayout.CRATER_Y` = 207。自己テストが体と合わせる）で、縁は y 216〜217 の平らな輪。広間の真上は、鉢の底を半径 12.5 まで平らに広げて床を張る（縁への段の足もと。壁の斜面は縁の上まで掘る）。井戸の縦穴は抜かない（試練の階への踊り場は広間の壁の螺旋で上る）。
 
 - **試練はすべて体の中に埋める**。体の外（背の上）は景色だけ（3.7）。
@@ -349,7 +349,7 @@
 - **洞の建築**（西・東・南の部屋）: 丸天井（`RoomKit.vault`。縁より中心が高く、8 ブロックおきの肋と光る茂みの要石）、壁の肋（`relief`。幅 2・8 ブロックおき。溶岩の湖の行は壁に溶岩が触れないよう内側 2 マスを床の下 3 から上 3 まで必ず壁にする）、熔脈、奥の壁にも筋。灰の道の奥の岸と火守りの奥の岸に、ゴールの印（`TrialGoal`）を囲む石の門（二本の柱と梁）。溶岩の中には岩の柱（景色。島とその 4 ブロック・中央の通り道・湖の端 3 ブロックは避ける）。
 - **背の中に寄り道・宝箱はない**（32 の 0 章）。追憶の宝（21 の 1.7）は、余燼の初回の心臓の報いとして渡る（32 の 7 章）。
 - **灯り**: 歩く道は光度 4 以上（建築の監査 LIGHT_DARK が 0）。部屋と洞が自分で灯りを持つほか、`data/skyabyss/ember_back/route_lamps.json`（780 か所前後。`/skyabyss dev routelight ember` が測って書く）が壁・床の石を茂み光に置き換える。**部屋を作り直す（`EmberBackRooms.resetRoom`・熾の底・鍛え手の間の builder）たびに `RouteLamps.place` で置き直す**。体の形や部屋を変えたら、`route_lamps.json` を空にして建て直し、`routelight ember` を流して書き直す（流したあとはサーバーが止まりきるのを待ってから次を起動する。保存が長い）。
-- **確かめ**: `EmberDump`（環境変数 `SKYABYSS_EMBER_DUMP=<出力>` と `<出力>.spec` の行 `plan y x1 x2 z1 z2`・`secx x y1 y2 z1 z2`・`secz z y1 y2 x1 x2`。`ember back (load)` の段が文字の図に書く）、`tools/shots/ember_scale.txt` → `python -I tools/ember_scale_sheet.py` → `docs/review/previews/ember_scale_sheet.png`。
+- **確かめ**: `EmberDump`（環境変数 `SKYABYSS_EMBER_DUMP=<出力>` と `<出力>.spec` の行 `plan y x1 x2 z1 z2`・`secx x y1 y2 z1 z2`・`secz z y1 y2 x1 x2`。`ember back (load)` の段が文字の図に書く）、`tools/shots/ember_scale.txt` → `python -I tools/sheets/ember_scale_sheet.py` → `docs/review/previews/ember_scale_sheet.png`。
 
 ---
 
@@ -506,7 +506,7 @@
 ### 5.5 絵と音
 
 - ブロックの面と品の絵は 32px。ラフ 3 案（A 層の岩、B 柱状節理、C 灰まみれ）から A を採用（`docs/review/ember_trial_roughs/`。生成と書き出しは `tools/rough/ember_trial.py`、`--install` で src と `tools/sources/ember_trial/` へ。モデル・ブロック状態の JSON も同じスクリプト）。
-- 音 14 個は独自合成（`tools/gen_ember_trial_sounds.py`、`sounds/ember_trial/`）。lang は `skyabyss_ember` の `__ember.C1`・`C2`・`C3` の下。
+- 音 14 個は独自合成（`tools/gen/sound/gen_ember_trial_sounds.py`、`sounds/ember_trial/`）。lang は `skyabyss_ember` の `__ember.C1`・`C2`・`C3` の下。
 - 部屋は暗めで、溶岩・大炉・火床の光が目印。見え方は台本 `tools/shots/ember_trials.txt`。
 
 ### 5.6 自己テストで確かめた数（`SELFTEST ember trial`）
@@ -551,7 +551,7 @@
 - 強さ（03 の 5.5 節の段）: 武器 +0（一撃 17.5）で灰被りは 6 回（火照っていれば 5 回）、燠虫 3 回、蛾 1 回。防具 +0（防御 22 / 強靭 16、体力 20）の人は、灰被りの一撃に 7.4 回、燃え上がった灰被りに 5.5 回、燠虫の転がりに 8.3 回耐える。
 - NeoForge では `actuallyHurt` に渡した量が使われない（傷の入れ物の値が使われる）ので、殻の半分と 1.25 倍は `hurt` で量を変える。
 
-### 6.3 モデルとアニメ（`tools/install_ember_mobs.py`）
+### 6.3 モデルとアニメ（`tools/install/install_ember_mobs.py`）
 
 選んだ案は 15 章。ラフの B・C 案には `--option thrall=c` などで差し替えられる。
 
@@ -564,7 +564,7 @@
 
 - 灰被りの二つの姿は同じ geo で、テクスチャ（`ash_thrall` / `ash_thrall_flared`）と見せる骨（殻 `crust_*` / 炎 `flare_*`）を描画のたびに替える。殻の姿で埋まる箱が 3 つある（燃え上がると見える体の箱。残す）。
 - アニメ: 灰被り idle・walk・walk_flared・attack（0.45 秒で振りかぶり、0.55 秒で前の下へ振り下ろす）・hurt・shell_break・death。蛾 idle・walk（羽ばたき 0.24 秒）・attack・hurt・death。燠虫 idle・walk・curl→curled（0.8 秒震える）・rolling（0.25 秒で一回り）・uncurl・pop→dizzy・rightself・hurt・death。姿勢の重なりは別の骨の立方体の食い込みが 1 単位を超える組が 0（火掻き棒と握る拳は数えない）。
-- 描画は `mob/client/EmberMobRenderers.java`。台本 `tools/shots/ember_mobs.txt`。音 12 個は `tools/gen_ember_mob_sounds.py`（`sounds/ember_mobs/`）。
+- 描画は `mob/client/EmberMobRenderers.java`。台本 `tools/shots/ember_mobs.txt`。音 12 個は `tools/gen/sound/gen_ember_mob_sounds.py`（`sounds/ember_mobs/`）。
 
 ### 6.4 落とす物と経験値（`EmberMobLoot`）
 
@@ -576,7 +576,7 @@
 | 火の粉蛾 | 5%、1 | 1%、1 | — | 火の粉の粉 15%（火薬の代わりに花火に使える。作業台で） |
 | 燠虫 | 25%、1〜2 | 5%、1 | 3%、1 | 燠の殻 20%（作業台で「燠の灯」。6.4 の末尾） |
 
-- **燠の灯**（`cinder_lamp`。`EmberBackSetup`、`CinderLampBlock`）: 燠の殻から作業台で作る吊り灯。光 12。鎖で吊るし（`hanging`）、床にも置ける（バニラの角灯と同じ挙動）。形は鉄と黒石の籠の中に赤く熾る炭、上に鎖の輪。ときどき火の粉と灰がこぼれる（明るさは変えない）。レシピは `data/skyabyss/recipe/cinder_lamp.json`: 上段 鎖、中段 鉄の粒・燠の殻・鉄の粒、下段 石炭。壊すとつるはしで自分が落ちる。創造メニューにある。モデルと 32x32 の絵は `tools/gen_back_blocks.py`、確認の台本は `tools/shots/back_blocks.txt`。燠の背の中には置かない（拾った人が好きな所に置く）。
+- **燠の灯**（`cinder_lamp`。`EmberBackSetup`、`CinderLampBlock`）: 燠の殻から作業台で作る吊り灯。光 12。鎖で吊るし（`hanging`）、床にも置ける（バニラの角灯と同じ挙動）。形は鉄と黒石の籠の中に赤く熾る炭、上に鎖の輪。ときどき火の粉と灰がこぼれる（明るさは変えない）。レシピは `data/skyabyss/recipe/cinder_lamp.json`: 上段 鎖、中段 鉄の粒・燠の殻・鉄の粒、下段 石炭。壊すとつるはしで自分が落ちる。創造メニューにある。モデルと 32x32 の絵は `tools/gen/items/gen_back_blocks.py`、確認の台本は `tools/shots/back_blocks.txt`。燠の背の中には置かない（拾った人が好きな所に置く）。
 - 鎧の 1% は図鑑に記さない（記すなら `EmberLoot` の記録を `EmberMobLoot.onDrops` の鎧の行から呼ぶ）。
 - 経験値は 9.7。登録は `EmberMobSetup`（`Xp`、`CONTENT_LEVEL = 30`）、`GrowthRewards.MOD_ENEMIES` に一行。
 
@@ -658,11 +658,11 @@
 | `geo/gear/smith_hammer.*`、`smith_tongs.*` | 大鎚（27 箱）・火箸（18 箱）は別のモデル。`GearLayer` で `socket_main`・`socket_off` に付く。大鎚の静止の回転は GeckoLib の符号で (45, 0, 0)（意図は前へ 45 度。頭が床に載ると確認済み） |
 | `textures/gui/boss/ash_smith_{frame,notches,icon}.png` | 10 段のバー（橙の帯、鋲の縁、鉄の面の顔の印） |
 
-- 生成は `tools/install_ember_smith.py`（`--option b|c` で案 B・C に差し替え。選ばれなかった案は `docs/review/ember_roughs/ash_smith/`）。台本 `tools/shots/ember_smith.txt`。
+- 生成は `tools/install/install_ember_smith.py`（`--option b|c` で案 B・C に差し替え。選ばれなかった案は `docs/review/ember_roughs/ash_smith/`）。台本 `tools/shots/ember_smith.txt`。
 - **部屋の明るさで色が沈まない描き方**（08 の 5.4 節）: 基のテクスチャの暗い画素を持ち上げた（`lift`: c' = 255 × (c/255)^0.78 × 1.08 + 5）。光る画素は `AshSmithClient.GlowLayer`（`RenderType.eyes` で glowmask を足す。`AutoGlowingGeoLayer` は使わない）。ブロックの光は最低 13 で描く。
 - 鞴が白く光る間（吐いたあとの 3 秒）と怒りは `_glowmask_white` に替える。怒ったら前掛けの骨 `apron` を隠す。
 - アニメ: `idle`（鞴が息をする）`walk` `slam`（溜め 1.0 秒 → 1.05 秒で打つ）`slam_cold` `breath`（吸いきりが 1.45 秒）`quench` `sparks`（0.82 秒で叩く）`rage` `hurt` `death`。鞴は `scale` で膨らむ。時間はサーバーの時間と合わせてある。
-- 音（独自合成。`tools/gen_ember_smith_sounds.py`）: `ash_smith_slam`・`inhale`・`blast`・`sparks`・`rage`・`hurt`・`death`。焼き入れの水の音はバニラの `GENERIC_EXTINGUISH_FIRE` を重ねる。
+- 音（独自合成。`tools/gen/sound/gen_ember_smith_sounds.py`）: `ash_smith_slam`・`inhale`・`blast`・`sparks`・`rage`・`hurt`・`death`。焼き入れの水の音はバニラの `GENERIC_EXTINGUISH_FIRE` を重ねる。
 - 既知: 体を前へ倒す技（鎚打ち・焼き入れ・鞴の息）で、腹と前掛けの箱が脚の箱へ数単位食い込む（体が腰を支点に倒れ、脚は倒れないリグのため）。目に見えるほどではない。直すなら脚を体の子にする（未決 162）。
 
 ### 7.6 03 の目安との照合（`SELFTEST ash smith`）
@@ -775,13 +775,13 @@
 
 心臓がすることは二つだけ: ① `Progression.onTitanStopped(…, "ember")` を報酬より先に呼ぶ、② `ModItems.SKY_KEY_FRAGMENT` を一人一つ渡す（持ち物がいっぱいなら預かる）。四体を自分で止めて欠片が四つあれば、`story/SkyKey` が 1 秒ごとの見回りで一つの鍵にし、場面（四つの欠片が寄って白く光る、四行の文、足もとの遠い鼓動、終わりの札「ベータ版はここまでです」）を出す。心臓は場面のコードを持たない（12.4）。
 
-### 8.6 見た目（`tools/install_ember_heart.py`）
+### 8.6 見た目（`tools/install/install_ember_heart.py`）
 
 採用は B 熔け殻（`docs/review/ember_roughs/heart/b`）。三段階を `tools/sources/ember_heart/` に置き、岩鯨・潮殻と同じ変換で取り込む（箱は 783 / 700 / 707）。選ばれなかった A 炉・C 黒曜の棘は `docs/review/ember_roughs/heart/a`・`c` と `tools/rough/ember_heart.py` に残る（差し替えは `SRC` の 1 行）。
 
 - **色が沈まない描き方**: ラフの黒い玄武岩は明るさの中央が 34 / 255 と暗く、段階 3 の暗い部屋で黒く沈む。`recolor` で殻を段階ごとの色へ寄せ、明るさの幅を持ち上げる（段階 1 は平均 70、段階 2 は 84、段階 3 の灰の白は 156）。光る画素は基のテクスチャの上に `_glowmask` を目の光（陰なし・足し合わせ）で重ねる。光る色は段階 1 が熾の橙、段階 2 が白熱の黄、段階 3 が少ない画素のくすんだ赤。
 - アニメーションは 15 本（idle、咆哮 2、技 10 と冷え）。段階 3 は火の粉（`cinders`）が上下に漂う。光の粒はクライアントの `EmberHeart.tick` が足す（段階 1 は火の粉と垂れる溶岩、段階 2 は白熱の火花と滴、段階 3 は灰と少しの赤い火の粉）。
-- ボスバー: `tools/gen_ember_heart_bar.py`（`PhasedBossBar` の寸法のまま）。音: `tools/gen_ember_heart_sounds.py`（独自合成、乱数の種は固定。14 本: 鼓動・咆哮・各技・冷え・下から返る拍・死）。
+- ボスバー: `tools/gen/world/gen_ember_heart_bar.py`（`PhasedBossBar` の寸法のまま）。音: `tools/gen/sound/gen_ember_heart_sounds.py`（独自合成、乱数の種は固定。14 本: 鼓動・咆哮・各技・冷え・下から返る拍・死）。
 
 ### 8.7 実装のクラス（`titan/ember/heart`、描画は `.client`）
 
@@ -922,7 +922,7 @@
 | 余燼の燠石・心核 | 素材 | 強化、温石の作り直し、神器 |
 
 - 戦斧と大鎚の 1 秒あたりは、17.5 を目安に固有効果の上乗せ込みで 0.9〜1.1 倍に収める（`GearCurve` の自己テストで確かめる）。
-- 登録は `titan/ember/gear/EmberGearSetup`（鎧・戦斧・外套・護符・専用伝説 3・角杯・欠片・心核）、`EmberGear`（表・熱のたまり方）、`EmberGearLoot`（中ボス・道中の抽選）、`EmberGearEvents`。品の絵は 32px（`tools/gen_ember_items.py`）。
+- 登録は `titan/ember/gear/EmberGearSetup`（鎧・戦斧・外套・護符・専用伝説 3・角杯・欠片・心核）、`EmberGear`（表・熱のたまり方）、`EmberGearLoot`（中ボス・道中の抽選）、`EmberGearEvents`。品の絵は 32px（`tools/gen/items/gen_ember_items.py`）。
 - 余燼の燠石・熾火の角杯・火の粉の粉・燠の殻・鎧が登録されると、敵が落とし始める（6.4）。
 
 ### 9.7 成長の経験値（04 の 3.2節）
@@ -1106,7 +1106,7 @@
 
 ### 12.5 文の鍵の一覧（ほかの担当が使う）
 
-文はすべて `assets/skyabyss_ember/lang` の「__ember.G」の区切りの下にある。生成元は `tools/gen_ember_lore.py`（直すときはここを直して実行する。ほかの担当の行は触らない）。Java の鍵は `titan/ember/lore/EmberLore`。**ほかの担当は同じ文を自分で書かずに、この鍵を使う**（同じファイルで鍵が二重にならないように。未決 127）。
+文はすべて `assets/skyabyss_ember/lang` の「__ember.G」の区切りの下にある。生成元は `tools/gen/story/gen_ember_lore.py`（直すときはここを直して実行する。ほかの担当の行は触らない）。Java の鍵は `titan/ember/lore/EmberLore`。**ほかの担当は同じ文を自分で書かずに、この鍵を使う**（同じファイルで鍵が二重にならないように。未決 127）。
 
 | 使う場所 | 鍵（`EmberLore` の名前） | 文（日本語） |
 |---|---|---|
@@ -1125,7 +1125,7 @@
 | 破れた頁 | `LorePageItem.of(EmberLore.PAGE_SOURCE)`（`ember_back`） | 読むと「鍛えの帳」。頁の説明「余燼の背で拾った。煤けた字で、数がびっしり並んでいる」 |
 | 伝承 | `chapter1/ember_titan` は近づく・背中に入ると自動、`ash_smith`・`ember_stilled` は倒れると自動（`kill`）。どれも `manual` でも記せる | 12.3 |
 
-- 書き方: 雷翼の文（`gen_storm_lore.py`）と並べ、言い回しのかぶりと答えを言いすぎる所（前室の囁きは「少し遅れた拍」、灰の民の炉は「人の背丈ほどの灰」）を直した。声に出して読み、主語の抜け・語尾のそろい・看板の 8 字を確かめた。
+- 書き方: 雷翼の文（`tools/gen/story/gen_storm_lore.py`）と並べ、言い回しのかぶりと答えを言いすぎる所（前室の囁きは「少し遅れた拍」、灰の民の炉は「人の背丈ほどの灰」）を直した。声に出して読み、主語の抜け・語尾のそろい・看板の 8 字を確かめた。
 - 言いすぎない: 正体の名（見る者・留まる者・深淵）は出さない（自己テストで見る）。「なぜ分けたか」「下にいる者は何か」は書かない。ほのめかしの濃さは、前室の碑文（分けた者は まだ 下にいる）・南の碑文（眠るたびに下へ沈む）・鍛えの帳の最後の行（下へ）・前室の囁き（少し遅れた拍）・夜明けの寝返り、の順に積む。
 
 ### 12.6 実装（`titan/ember/lore`）
@@ -1133,7 +1133,7 @@
 | 作ったもの | ファイル |
 |---|---|
 | 伝承の項目 11（地を泳ぐもの、灰の民の炉、鍛えの帳、灰の鍛え手、消えた火、碑文 6） | `data/skyabyss/lore/entry/chapter1/{ember_titan,ember_ruins,forge_ledger,ash_smith,ember_stilled,inscription_ember_*}.json`。並びは 177〜179（story の「余燼の巨神」176 と「天の鍵」180 のあいだ） |
-| 文（伝承・碑文・入口・囁き・語り・品） | `assets/skyabyss_ember/lang/{ja_jp,en_us}.json` の「__ember.G」の下。生成元 `tools/gen_ember_lore.py` |
+| 文（伝承・碑文・入口・囁き・語り・品） | `assets/skyabyss_ember/lang/{ja_jp,en_us}.json` の「__ember.G」の下。生成元 `tools/gen/story/gen_ember_lore.py` |
 | 鍵の約束 | `EmberLore`（12.5） |
 | 夜明けの地鳴り（12.4） | `EmberFinale`・`client/EmberFinaleClient`。余燼の心臓を自分で止めた人が、地上へ出て 10 秒たったあとの最初の夜明け（日の時刻 22800〜1200）に一度だけ: 遠い地鳴り（地上の `ember_world_turn`、まだなければバニラの低い鼓動）と 3 秒のごく小さな揺れ（画面の揺れの設定を切っていれば出さない）、チャットに語りの色で一行。記録は持ち主の永続データ（死んでも消えない）。パケットの版 `ember-lore-1` |
 | 天の鍵の締め | 新しいクラスは作らない。`SignFit` に `skyabyss_ember` の lang を読ませ、`LoreSelfTest` に余燼の碑文・頁・待っている ID（`ember_titan`・`ash_smith`・`ember_heart`）と文の名前空間を足した |
@@ -1161,11 +1161,11 @@
 | 装飾の枠 | `Accessories` | 外套・灯（装飾）、護符（護符の枠） |
 | 試練の敵の印 | `GuardMob` | 余燼の敵の親クラス（`EmberMob`） |
 | 心臓の間 | `GroupBossRoom`・`GroupBossRooms` | 鍛え手の間と熾の底の両方（グループごとの戦い。部屋は `RoomLocks` で一度に一グループ） |
-| 段階のバー | `PhasedBossBar` | 枠の絵は `tools/gen_ember_heart_bar.py` |
+| 段階のバー | `PhasedBossBar` | 枠の絵は `tools/gen/world/gen_ember_heart_bar.py` |
 | 伝承・碑文 | `Lore*`、`SignFit` | `skyabyss_ember` の lang を `SignFit` に読ませる |
 | 囁き | `TideWhispers`（岩鯨は `BackWhispers`） | `EmberWhispers` |
 | 乗り込みの判定と画面の沈み | `TideGateEntity` の作り、`TideNetwork.Plunge` | `EmberMouthEntity`、沈みの色を橙に（`EmberSurfaceNetwork`） |
-| 巨神の形の体 | `gen_tide_back_turtle.py` | `gen_ember_back_body.py` |
+| 巨神の形の体 | `tools/gen/mobs/gen_tide_back_turtle.py` | `tools/gen/items/gen_ember_back_body.py` |
 | 起動時に建てる | `TideTravel.onServerStarted`、`BackBuildJobs` | 余燼の体も同じ時に建てる（3.9） |
 
 ### 13.2 共通化した部品
@@ -1228,7 +1228,7 @@
 |---|---|
 | 骨組み | `EmberIds`、`EmberSetup`、`EmberNetwork`・`client/EmberHeatClient`、`back/EmberHeat`、`EmberSkeletonSelfTest`、共通化 3 つ（13.2） |
 | 地上（A） | 2.9 |
-| 体と広間（B） | `back/EmberBackLayout`、`EmberBodyBuilder`、`EmberBackState`、`EmberBackTrials`、`EmberBackRooms`、`EmberWhispers`、`client/HeatHud`、`EmberBackSelfTest`、`tools/gen_ember_back_body.py` |
+| 体と広間（B） | `back/EmberBackLayout`、`EmberBodyBuilder`、`EmberBackState`、`EmberBackTrials`、`EmberBackRooms`、`EmberWhispers`、`client/HeatHud`、`EmberBackSelfTest`、`tools/gen/items/gen_ember_back_body.py` |
 | 試練（C1〜C3） | 5 章 |
 | 敵（D） | 6.5 |
 | 鍛え手（E） | 7.4 |
@@ -1355,7 +1355,7 @@
 - **前の私の頁**: 樽の頁を読むと伝承「炉跡の頁」（`chapter1/ember_prev_page`）が書に移る。「足の下が温かい日は、丘を見ない。見ると、目が合う気がするから」。筆跡は自分に似ている、で終える（語り部の「この字、どこかで見た気がする」と同じ方向）。
 - **灰降り観測点**の「灰の濃さの地図が控え帳に出る」案は入れていない（引き算。灰の降る範囲は 2.3 の灰の降りが、遠くから探す手がかりをすでに担っている）。
 - **暮らしの変化（足もとの温かさ）**: 段階 3 の人が寝床（復活地点）の 12 ブロック以内にいると、足もとに白い灰が舞う。初めてのときだけ一行「寝床のまわりだけ、地面が温かい。」建築は触らない。
-- 部品（ブロックの配置）は `data/skyabyss/opening/ember_{hearth_ruin,ash_post,warm_ledge}.json`。生成元は `tools/gen_ch4_content.py`。バニラのブロックだけで組み、新しいテクスチャは足していない。
+- 部品（ブロックの配置）は `data/skyabyss/opening/ember_{hearth_ruin,ash_post,warm_ledge}.json`。生成元は `tools/gen/ch4/gen_ch4_content.py`。バニラのブロックだけで組み、新しいテクスチャは足していない。
 
 ### 17.4 中盤の出来事「夜の浮上」
 
@@ -1457,7 +1457,7 @@
 
 ### 18.3 絵と確かめ方
 
-- 台本 `tools/shots/telegraph_ember_heart.txt`・`telegraph_ember_smith.txt`（平らな世界。`dev emberforce` で 6 人ぶんの技）。一覧は `python tools/telegraph_ember_sheet.py` が `docs/review/previews/telegraph_ember_sheet.png` に作る。
+- 台本 `tools/shots/telegraph_ember_heart.txt`・`telegraph_ember_smith.txt`（平らな世界。`dev emberforce` で 6 人ぶんの技）。一覧は `python tools/sheets/telegraph_ember_sheet.py` が `docs/review/previews/telegraph_ember_sheet.png` に作る。
 - 崩れる床の区画と残り火は熾の底の中でしか使えないので、台本には入れず、自己テストで確かめる。
 
 ---
@@ -1466,16 +1466,16 @@
 
 ベータで「巨神のモデルがスケスケで中が見える。重量感が無い。入口以外は近づけないで」と言われた直しの今の仕様。四体（岩鯨・潮殻・雷翼・余燼）で共通。
 
-- **透けない**: 休めの姿勢では四体とも骨ごとの面はほぼ閉じている（`tools/titan_mesh_holes.py`。外から撃った光線の最初の当たりが裏面なのは 1.5% 以下で、透ける絵素もゼロ）。透けていたのは、ひれ・顎・首・翼が動いて継ぎ目が開いたときに見える骨の開いた縁。読み込み時（`LowPolyMesh.capHoles`）に、骨の開いた縁の輪を内側へ 2 割引っ込めた頂点との扇で塞ぎ、蓋の面は元の絵の一点を取って暗く（0.3 倍）出す。元の面の絵・法線は変えない。描画型は今まで通り `entityCutoutNoCull`（半透明にしない）。LOD の三段（近・中・遠）とも同じ処理。
+- **透けない**: 休めの姿勢では四体とも骨ごとの面はほぼ閉じている（`tools/misc/titan_mesh_holes.py`。外から撃った光線の最初の当たりが裏面なのは 1.5% 以下で、透ける絵素もゼロ）。透けていたのは、ひれ・顎・首・翼が動いて継ぎ目が開いたときに見える骨の開いた縁。読み込み時（`LowPolyMesh.capHoles`）に、骨の開いた縁の輪を内側へ 2 割引っ込めた頂点との扇で塞ぎ、蓋の面は元の絵の一点を取って暗く（0.3 倍）出す。元の面の絵・法線は変えない。描画型は今まで通り `entityCutoutNoCull`（半透明にしない）。LOD の三段（近・中・遠）とも同じ処理。
 - **重い**: 同じ読み込みで、頂点ごとに明るさを焼く（`LowPolyMesh.weightShade`）。体の下ほど暗く（底 0.52 倍から 7 割の高さで 1.0）、面が下を向けばさらに 0.82 倍、横向きは 0.96 倍。光る層（発光マスク）には掛けない。体の真上から見た輪郭（`TitanVolume.shadow`）を 4 ブロックの升目で敷いた大きな柔らかい影を、地面・海面（水の上は水面）に落とす（`client/titan/TitanWeight`）。縁は升目の角ごとの濃さでぼかし、高いほど薄い（最大 0.5）。影が見えるよう、岩鯨・雷翼の描画の範囲（`getBoundingBoxForCulling`）は下へ 110 ブロック伸ばした。体の下の柱を 2 tick ごとに数か所選んで（`client/titan/TitanFx`）、雲の高さに体がかかれば雲のちぎれ、海面にかかれば波しぶきと泡、底が地面に近く動いていれば土ぼこりを出す（カメラから 110 ブロック以内、1 体 1 tick に最大 4 か所）。足音・うなりの音は、素材がまだ無いので付けていない。台本 `titanweight on|off` で、焼き込みの陰・蓋・影・粒をまとめて外せる（前後の比べ用）。
-- **動き**: 岩鯨の泳ぎは 8 秒 → 12 秒周期（頭・顎・尾・尾びれの波 6 秒、ひれ 3 秒、背骨ぞいの遅れを大きく）。雷翼の羽ばたきは 3 秒 → 4.5 秒、振れ幅 28° → 20°、第二の波を足して打ち下ろしを遅く、手は翼より 80° 遅れる。潮殻・余燼は元から 8〜10 秒の周期なので変えない。書き換えは `tools/titan_heavy_anim.py`。
-- **体に入れない**（サーバーが決める）: 巨神の名前の体積の表（`data/skyabyss/titan_volumes/<名前>.json`）を `tools/gen_titan_volumes.py` が近景のメッシュから焼く。局所（横 = 左が +、上、前）の 2 ブロック四方の柱ごとに「詰まった区間」の並び。メッシュを 3 ブロック膨らませた「立入禁止」（人が入れない）と、0.5 ブロックだけ膨らませた「体」（矢と弾が消える・人が入ったら一息に外へ出す）の二枚。動く部分は余分に膨らませる（雷翼の翼 12・手 18、ひれ 3、尾びれ 4 など）。
+- **動き**: 岩鯨の泳ぎは 8 秒 → 12 秒周期（頭・顎・尾・尾びれの波 6 秒、ひれ 3 秒、背骨ぞいの遅れを大きく）。雷翼の羽ばたきは 3 秒 → 4.5 秒、振れ幅 28° → 20°、第二の波を足して打ち下ろしを遅く、手は翼より 80° 遅れる。潮殻・余燼は元から 8〜10 秒の周期なので変えない。書き換えは `tools/misc/titan_heavy_anim.py`。
+- **体に入れない**（サーバーが決める）: 巨神の名前の体積の表（`data/skyabyss/titan_volumes/<名前>.json`）を `tools/gen/world/gen_titan_volumes.py` が近景のメッシュから焼く。局所（横 = 左が +、上、前）の 2 ブロック四方の柱ごとに「詰まった区間」の並び。メッシュを 3 ブロック膨らませた「立入禁止」（人が入れない）と、0.5 ブロックだけ膨らませた「体」（矢と弾が消える・人が入ったら一息に外へ出す）の二枚。動く部分は余分に膨らませる（雷翼の翼 12・手 18、ひれ 3、尾びれ 4 など）。
   - 人（`TitanSolids.onPlayerTick`）: 体の真ん中（足の 0.9 上）が立入禁止に入ったら、いちばん近い外へ向かう速さをもらう（縁で 0.2、深いほど強く最大 1.4 ブロック/tick。入ってきた向きの速さは消す）。行き先に立てない向き（地面や壁の中）は選ばない。体そのものに入った・40 tick 居続けた・深さ 7 ブロック超なら、外へ移す。観戦者・乗っている人・鎖の巻き上げ中・巨神での移動に加わっている人は対象外。エリトラや創造の飛行も同じ。
   - 矢・弾（`TitanSolids.onProjectileTick`）: 前の tick の位置から今の位置までを 1 ブロックごとに調べ、体に入ったら消す（細いひれを抜けない）。
   - カメラ（`TitanSolidClient`）: 三人称のカメラが体に当たったら手前へ引く。人が 3 ブロック外にいるので、一人称は体に入らない。
   - 通り道（`SolidTitan.corridors`。局所の箱。ここは立入禁止でも体でも入ってよい）: 熱の口（前へ 83、舌の高さ 3。横 ±6.5、前 76〜114、高さ 0〜15）の中と、その前の外。
 - **自己テスト**: `SKYABYSS_SELFTEST_ONLY="titan solid"`（`TitanSolidSelfTest`）。体積が読める・体の中の点は押し出されて立入禁止の外に出る・通り道は開き、その隣は閉じている・向きを回しても局所と世界が往復する・16 方向 × 3 つの高さ × 3 つの速さ（歩き・走り・創造の飛行）で近づいても体に入れない（通り道へ入った人は乗り込みとして数える）・毎 tick 0.3 ブロック進みながら 0.15 度ずつ回る巨神の前に立つ人は、体に入られる (一息に出される) のが 1 割以下・本物の人（FakePlayer）が体の中で押される/深ければ出される・通り道と観戦者は動かない・体の中の矢と速い矢は消え、遠い矢は残る。
-- **撮影**: `tools/shots/titan_solid.txt`（`tools/gen_titan_solid_shots.py` が書く）→ `docs/review/previews/titan_solid_sheet.png`。四体の近景・下から・横を、`titanweight off`（前）と `on`（後）で並べる。
+- **撮影**: `tools/shots/titan_solid.txt`（`tools/gen/shots/gen_titan_solid_shots.py` が書く）→ `docs/review/previews/titan_solid_sheet.png`。四体の近景・下から・横を、`titanweight off`（前）と `on`（後）で並べる。
 - **残り**: 巨神が速く回る雷翼（1 tick 3°）の翼の先は、押し出しが追いつかず体の中に入られることがある（そのときは外へ出される）。足音・うなりの音。ゲーム内の通しの手ざわり（マルチでの近づき方・カメラ）はユーザーの確認待ち。
 
 ## 未決

@@ -331,7 +331,7 @@ Diablo の深さの要素を、Minecraft の読みやすさに合わせて落と
 
 どの案も、技の棚（3 節）、刻印・型・木の印・伝説の書き換え（3・4 節）、点の式、振り直し（5 節）は同じ。違うのは**どの木がいつ誰に開くか**と、その入口の体験。
 
-図は `docs/review/builds/` に置いた（元は `tools/gen_builds_diagrams.py`）。
+図は `docs/review/builds/` に置いた（元は `tools/gen/ui/gen_builds_diagrams.py`）。
 
 | 図 | 内容 |
 |---|---|

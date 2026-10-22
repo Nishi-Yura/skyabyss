@@ -1,7 +1,7 @@
 # The four hearts' attack-name cue and signature domain (docs/design/02_stone_whale.md 5.7, 18_notices.md 6.1)
 # ./gradlew runShots -Pscript=tools/shots/heart_domains.txt   (mute: the shots runner sets the volume to 0; Japanese UI)
 # Per heart: cue_<h> (attack name under the boss bar), card_<h> (domain title card + heaven's line), active_<h> (domain running: tint, floor pattern, telegraphs, HUD)
-# Then: python tools/heart_domains_sheet.py -> docs/review/previews/heart_domains_sheet.png
+# Then: python tools/sheets/heart_domains_sheet.py -> docs/review/previews/heart_domains_sheet.png
 world shots flat
 size 1280 720
 timeout 900

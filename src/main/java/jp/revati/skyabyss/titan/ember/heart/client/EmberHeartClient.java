@@ -22,7 +22,7 @@ import net.neoforged.neoforge.client.event.ClientTickEvent;
 @EventBusSubscriber(modid = SkyAbyss.MODID, value = Dist.CLIENT)
 public final class EmberHeartClient {
     // 段階 1 熔岩の殻: 熾の橙 / 段階 2 熔け落ちる殻: 白熱の黄 / 段階 3 余燼: 灰の白とくすんだ赤 (13 の 5.3節。案は docs/review/ember_roughs/heart/bars.png)。
-    // 帯の色と、tools/gen_ember_heart_bar.py の枠の色をそろえる
+    // 帯の色と、tools/gen/world/gen_ember_heart_bar.py の枠の色をそろえる
     public static final PhasedBossBar.Style BAR = new PhasedBossBar.Style("ember_heart",
             new int[] {0xF67E28, 0xFFD660, 0x962A20},
             new int[] {0xFFC060, 0xFFF0B0, 0xD86A58},

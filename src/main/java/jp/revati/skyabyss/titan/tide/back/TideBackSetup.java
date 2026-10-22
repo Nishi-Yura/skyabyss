@@ -46,7 +46,7 @@ public final class TideBackSetup {
             () -> EntityType.Builder.of(PearlKeeper::new, MobCategory.MONSTER).sized(3.0f, 3.4f).eyeHeight(2.6f)
                     .clientTrackingRange(10).fireImmune().build(SkyAbyss.MODID + ":pearl_keeper"));
 
-    // ---------------------------------------------------------------- 音 (tools/gen_tide_back_assets.py、独自合成)
+    // ---------------------------------------------------------------- 音 (tools/gen/mobs/gen_tide_back_assets.py、独自合成)
     public static final DeferredHolder<SoundEvent, SoundEvent> HORN_LOW = sound("tide_horn_low");
     public static final DeferredHolder<SoundEvent, SoundEvent> HORN_HIGH = sound("tide_horn_high");
     public static final DeferredHolder<SoundEvent, SoundEvent> CHIME = sound("tide_chime");

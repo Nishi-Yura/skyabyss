@@ -4,7 +4,7 @@
 python -I tools/abyss/gen_abyss_layer_texts_b.py
 書くもの:
   assets/skyabyss_abyss_lb/lang/ja_jp.json・en_us.json
-文言の数は少なく、ゲームの中の一行（知らせ）だけ。語り口は tools/gen_ch5_entrance.py に合わせる。
+文言の数は少なく、ゲームの中の一行（知らせ）だけ。語り口は tools/gen/ch5/gen_ch5_entrance.py に合わせる。
 """
 from __future__ import annotations
 

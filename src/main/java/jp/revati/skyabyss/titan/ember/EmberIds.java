@@ -32,7 +32,7 @@ public final class EmberIds {
     public static final String BACK_NAME = "ember_back";
     public static final ResourceKey<Level> BACK = ResourceKey.create(Registries.DIMENSION, id(BACK_NAME));
     public static final ResourceKey<Biome> BACK_BIOME = ResourceKey.create(Registries.BIOME, id(BACK_NAME));
-    // 体の形の表 (tools/gen_ember_back_body.py が書く。読むのは TitanBodyBlocks。→ B)
+    // 体の形の表 (tools/gen/items/gen_ember_back_body.py が書く。読むのは TitanBodyBlocks。→ B)
     public static final String BODY_BIN = "/data/skyabyss/ember_back/body.bin";
 
     // ================================================================ 傷の種類 (data/skyabyss/damage_type。どれも #minecraft:is_fire に入れない。→ 0 骨組み)
@@ -106,7 +106,7 @@ public final class EmberIds {
     public static final List<String> FIRST_CLEAR_CHOICES = List.of(SMITH_HAMMER, THRALL_POKER, EMBER_LANTERN);
     // 天の鍵の欠片は共通の ModItems.SKY_KEY_FRAGMENT (四つ目)。天の鍵は story.SkyKey がそろえる (14 の 4章)
 
-    // ================================================================ 音 (SoundEvent の名前。assets/skyabyss/sounds.json の鍵も同じ。音の絵は tools/gen_ember_sounds.py → A)
+    // ================================================================ 音 (SoundEvent の名前。assets/skyabyss/sounds.json の鍵も同じ。音の絵は tools/gen/sound/gen_ember_sounds.py → A)
     // 0 骨組み (熱)
     public static final String SOUND_HEAT_WARN = "ember_heat_warn";         // 熱 85 を超えた (一度)
     public static final String SOUND_SCORCH = "ember_scorch";               // 焦げの傷

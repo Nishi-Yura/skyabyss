@@ -1,5 +1,5 @@
 # K の技の画面の見直し (ページの見出し・凡例・下の列) の確認。./gradlew runShots --no-daemon -Pscript=tools/shots/ui_fix2.txt
-# 絵は python tools/ui_fix2_sheet.py (撮った絵があれば使う) で docs/review/previews/ui_fix2_sheet.png にまとめる
+# 絵は python tools/sheets/ui_fix2_sheet.py (撮った絵があれば使う) で docs/review/previews/ui_fix2_sheet.png にまとめる
 world shots flat
 size 1280 720
 timeout 500

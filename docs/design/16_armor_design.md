@@ -9,7 +9,7 @@
 - 基盤は **重ね板（lamellae）の枠 + 巨神ごとの輪郭の飾り 1 つ + 素材の言葉**。傾けた板・扇・反った角を使い、肩・兜・背・腰の輪郭をプレイヤーの箱から外す。
 - 理由（ユーザーの指摘「防具がダサすぎる。ハイポリを活かせていない。基盤を変えないと変わらない。今後の装備モデルも注意」）: 最初の作りは、体の箱に同じ幅の箱をかぶせ、縁とリベットを足しただけで、輪郭はプレイヤーと同じ四角、部位は別々の箱、テクスチャは均一な粒、巨神らしさは色と小さな飾りだけだった。直し方は 2 章の決まりになっている。
 - 方向は 3 つ（A 重ね板の騎士 / B 生き物の外殻 / C 祭具と衣の重ね）を岩鯨で作り比べ、**A を採った**。A は、4 巨神の素材（岩・珊瑚・羽・割れた板）が全て「重なる板」で表せる、傾けた板で輪郭が箱から外れる、部品と面が最も少なく一式の関係を保ちやすい、が理由。B の「生き物の一点」は通常の飾りとして A の枠に足し、C の布・環はレア以上で足す（2.10）。B は離れた部品が浮いて散らかる、C は体の輪郭が箱のままで胴に布を垂らすと脚が貫く、が採らなかった理由。
-- 道具: `tools/rough/armor_kit.py`（傾けた板・扇・反り角・材質の描き込み・重なりの検査・姿勢の検査）、部品 `tools/rough/armor_v2_parts.py`（兜・胴・肩・脚・靴）、4 組の形 `tools/rough/armor_v2_sets.py`、書き込み `tools/install_armor_v2.py`（決定的。`geo/armor`・`textures/armor` の 4 組 x 3 ファイルとアイコン 16 枚を書く。重なり・光る画素・面の予算を検査して通らなければ書かない）。
+- 道具: `tools/rough/armor_kit.py`（傾けた板・扇・反り角・材質の描き込み・重なりの検査・姿勢の検査）、部品 `tools/rough/armor_v2_parts.py`（兜・胴・肩・脚・靴）、4 組の形 `tools/rough/armor_v2_sets.py`、書き込み `tools/install/install_armor_v2.py`（決定的。`geo/armor`・`textures/armor` の 4 組 x 3 ファイルとアイコン 16 枚を書く。重なり・光る画素・面の予算を検査して通らなければ書かない）。
 - 退役した最初の作り（`gen_armor_model.py`、`install_{tide,storm,ember}_armor.py` ほか）の中身は git の履歴にある。
 
 ## 2. 設計の決まり（全装備に使う）
@@ -179,7 +179,7 @@
 1. 巨神の素材の言葉と輪郭の飾りを 2.4 に 1 行足す（これが先）。
 2. `armor_v2_sets.py` に組を足す（材質 `Mat`、`armor_v2_parts` の部品、飾り 1 つ）。武器は `armor_kit.Armor` で gear の骨名を使う。
 3. `python tools/rough/armor_v2_sets.py <名前>` で比較シート（正面・横・背・3/4・腕上げ・歩き・振り）。3 方向以上で作る場合は並べて選ぶ。比較シートの道具は `tools/rough/armor_v3_compare.py`・`armor_v3_icons_compare.py`、画像は `docs/review/armor_v2_roughs/`。
-4. `python tools/install_armor_v2.py` で検査と書き込み（アイコンも）。
+4. `python tools/install/install_armor_v2.py` で検査と書き込み（アイコンも）。
 5. `./gradlew runShots -Pscript=tools/shots/armor_v2.txt -PshotsName=<名前>` で実機を撮る（防具立て 4 つ、正面・横・背・歩き・腕上げ・近景。OS の入力は使わない）。
 
 ## 6. 検査
