@@ -204,6 +204,7 @@ def main():
     for L in LAYERS:
         build_layer(L[0], ctx)
     build_layer('common', ctx)
+    support_falling(v)
     meta = {'name': 'abyss_layers', 'note': 'docs/design/36 A2。生成は tools/abyss/gen_abyss_layers.py', 'top': TOP, 'bottom': HEART_BOTTOM,
             'rect': [-ext, -ext, ext, ext]}
     data = v.runs(meta)
@@ -241,6 +242,20 @@ class Ctx:
         """その層の道の [(角度, y2)] (上から順)"""
         L = self.layer(name)
         return [p for p in self.path if L[2] < p[1] // 2 <= L[1]]
+
+
+# 落ちるブロック (砂利・砂・コンクリートの粉など) の下が空なら、支えを入れる (建てたあとに落ちて道に穴があく)
+FALLING = ('gravel', 'sand', 'red_sand', 'concrete_powder', 'suspicious_gravel', 'suspicious_sand')
+
+
+def support_falling(v):
+    for (x, y, z), st in list(v.b.items()):
+        name = st.split('[')[0]
+        if not any(name == f or name.endswith('_' + f) for f in FALLING):
+            continue
+        below = v.get(x, y - 1, z)
+        if below is None or below in ('air', 'cave_air'):
+            v.set(x, y - 1, z, 'tuff')
 
 
 def build_layer(name, ctx):

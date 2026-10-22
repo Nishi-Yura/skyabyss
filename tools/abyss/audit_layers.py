@@ -58,6 +58,13 @@ def main():
                         q.append((nx, ny, nz))
                     break
     probs = []
+    # 落ちるブロックの下が空 (建てると落ちて穴があく)
+    for (x, y, z), st in b.items():
+        n = st.split('[')[0]
+        if n in g.FALLING or any(n.endswith('_' + f) for f in g.FALLING):
+            below = b.get((x, y - 1, z))
+            if below is None or below in ('air', 'cave_air'):
+                probs.append('%s at %s: falls (nothing under it)' % (n, (x, y, z)))
     for m, (mx, my, mz) in sorted(data['marks'].items()):
         if m.startswith('beacon_'):
             continue

@@ -117,6 +117,8 @@ public final class AshMaze {
         }
         List<BlockPos> out = new ArrayList<>();
         if (!found) {
+            jp.revati.skyabyss.SkyAbyss.LOGGER.warn("[abyss] ash maze: no route from {} to {} (searched {} cells; from walkable {}, below {}, at {})",
+                    from, to, came.size(), walkable(level, from), level.getBlockState(from.below()), level.getBlockState(from));
             return out;
         }
         for (BlockPos p = to; ; p = came.get(p)) {
