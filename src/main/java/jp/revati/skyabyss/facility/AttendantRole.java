@@ -28,7 +28,9 @@ public enum AttendantRole {
     MAPMAKER("mapmaker", null, 3),
     DRUNKARD("drunkard", null, 3),
     // 取引所 (プレイヤーどうしの売り買い。35 の 6.11)
-    TRADE_KEEPER("trade_keeper", null, 1);
+    TRADE_KEEPER("trade_keeper", null, 1),
+    // 厩舎 (乗り物の店。docs/design/38)
+    STABLE_KEEPER("stable_keeper", null, 1);
 
     // 設計図の印の頭 (npc_<役>)
     public static final String MARK_PREFIX = "npc_";

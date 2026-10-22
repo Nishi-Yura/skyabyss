@@ -331,6 +331,43 @@ class Facilities(Interiors, BackAlley):
             v.set(x, 5, 10, 'chain[axis=y,waterlogged=false]')
             v.set(x, 4, 10, 'lantern[hanging=true,waterlogged=false]')
 
+    # ---------------------------------------------------------------- 東の大通り: 厩舎 (乗り物の店。薬師の店の東、docs/design/38)
+    def stable(self):
+        """厩舎 (東の大通りの南、x 82..93 z 6..17)。戸は北。机の向こうに厩舎の番、奥は馬房 (藁と柵)、わきに飼い葉と鞍掛け"""
+        st, v = self.st, self.v
+        x0, z0, x1, z1 = 82, 6, 93, 17
+        b, ridge = self.fac_body('stable', x0, z0, x1, z1, 'north', floors=2, fh=6, ground='shop', axis='x',
+                                 roof=vox.Mat('dark_oak_planks', 'dark_oak_stairs', 'dark_oak_slab'))
+        self.fac_front(b, 'stable')
+        dx_, _, dz_, _ = b.doors[0]
+        ax0, az0, ax1, az1 = x0 + 2, z0 + 2, x1 - 2, z1 - 2   # 84..91, 8..15
+        self.room(ax0, az0, ax1, az1, 0, 6, floor='wood', rug=False)
+        self.room(ax0, az0, ax1, az1, 7, 5, rug=False)
+        # 受付の机 (z 11)、東の端は空けて番の側へ回れるように
+        self.counter([(x, 11) for x in range(ax0, ax1)],
+                     tops=((ax0, 11, 'lantern[hanging=false,waterlogged=false]'), (dx_ + 2, 11, 'candle[candles=3,lit=true,waterlogged=false]')))
+        for x in range(ax0, ax1 + 1):
+            for z in (12, 13):
+                v.set(x, 0, z, 'air')
+                v.set(x, 1, z, 'air')
+        # 奥 (z 14..15): 馬房。藁の床と、仕切りの柵、飼い葉の桶
+        for x in range(ax0, ax1 + 1):
+            v.set(x, 0, 15, 'hay_block[axis=x]' if x % 3 != 0 else 'barrel[facing=north,open=false]')
+            v.set(x, 1, 15, 'air' if x % 3 != 0 else 'lantern[hanging=false,waterlogged=false]')
+            v.set(x, 0, 14, 'air')
+        for x in (ax0 + 2, ax0 + 5):
+            v.set(x, 0, 14, '%s_fence[east=false,north=false,south=false,waterlogged=false,west=false]' % st.wood)
+            v.set(x, 1, 14, '%s_fence[east=false,north=false,south=false,waterlogged=false,west=false]' % st.wood)
+        self.attendant('stable_keeper', dx_ + 1, 0, 13)
+        # 客の側: 両わきに鞍掛け (柵と樽)、飼い葉の山、鉢
+        for z in (8, 9):
+            v.set(ax0, 0, z, 'hay_block[axis=y]' if z == 8 else 'barrel[facing=east,open=false]')
+            v.set(ax1, 0, z, 'barrel[facing=west,open=false]' if z == 8 else 'hay_block[axis=y]')
+        v.set(ax0, 1, 9, 'potted_fern')
+        v.set(ax1, 1, 8, 'potted_fern')
+        v.set((ax0 + ax1) // 2, 5, 10, 'lantern[hanging=true,waterlogged=false]')
+        v.set(ax0 + 2, 5, 13, 'lantern[hanging=true,waterlogged=false]')
+
     # ---------------------------------------------------------------- 組合の受付
     def guild_desk(self):
         """鯨追いの組合の受付 (入ってすぐ北)。机の向こうに受付の書記。言伝ての板は机の外のまま"""

@@ -166,6 +166,7 @@ public final class FacilitySelfTest {
                 case GUILD_CLERK -> "guild";
                 case SMITH -> "repair";
                 case TRADE_KEEPER -> "trade";
+                case STABLE_KEEPER -> "mount_shop";
                 default -> null;
             };
             if (need != null && menu != null) {

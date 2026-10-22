@@ -1876,7 +1876,7 @@ class Town(Facilities):
         # 帯 0 (z 6..27): 止まり木 (x -94..-71)、入れる家と裏の並び、宿 (x -44..-8)、鍛冶場、狭い並び、薬師の店・入れる家・裏の並び
         self.block(-67, 6, -53, 27, ('north', 'east', 'south'), depth=10, usable=('north',))
         self.block(40, 6, 45, 27, ('east',), depth=6, courtyard=False)
-        self.block(70, 6, IN2, 16, ('north',), depth=11, courtyard=False, usable=('north',))
+        self.block(70, 6, IN2, 16, ('north',), depth=11, courtyard=False, usable=('north',), reserve=[(81, 5, 94, 18)])
         self.block(53, 21, IN2, 27, ('south',), depth=7, courtyard=False)
         # 帯 1 (z 35..61): 古井戸の小広場、酒場、訓練場、闇市
         self.block(-IN2, 35, -53, 61, ('north', 'east', 'west', 'south'), depth=11, reserve=[(-64, 43, -53, 53)])
@@ -1893,6 +1893,7 @@ class Town(Facilities):
         self.tool_shop()
         self.storage()
         self.trade_house()
+        self.stable()
         self.apothecary()
         self.guild_desk()
         self.smithy_front()

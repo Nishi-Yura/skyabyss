@@ -102,7 +102,7 @@ public final class ShelterBuilder {
         // 都: 門・閉じた施設・空き区画の碑と、市と住まいの村人 (docs/design/33 の 2.2)
         // 施設の碑 (docs/design/35 の 2.1): 道具屋・薬師・預かり所・宿・止まり木・訓練場・闇市・地図屋・酒場・古井戸
         for (String key : List.of("gate_n", "gate_e", "gate_s", "gate_w", "keep", "hall", "guild", "shrine", "smithy", "lot_1", "lot_2", "lot_3", "lot_4", "lot_5", "graveyard", "guild_roll",
-                "tool_shop", "apothecary", "storage", "inn", "perch", "training", "black_market", "mapmaker", "tavern", "well", "well_song")) {
+                "tool_shop", "apothecary", "stable", "storage", "inn", "perch", "training", "black_market", "mapmaker", "tavern", "well", "well_song")) {
             BlockPos at = job.mark("sign_" + key);
             if (at != null && job.level.getBlockState(at).is(jp.revati.skyabyss.registry.ModBlocks.TABLET.get())) {
                 SiteKit.writeSign(job.level, at, "sign.skyabyss.capital." + (key.startsWith("lot_") ? "lot" : key));
