@@ -269,6 +269,7 @@ public final class EmberRaidSelfTest {
         ticks(level, room, ctx, EmberCarry.SPAWN_EVERY * 2);
         check(f, "ER1 a new ember appeared and was taken", room.carrying() == 1);
         room.forceCool(a.getUUID(), 2);
+        at(a, room.sourcePos().offset(5, 0, 5));
         ticks(level, room, ctx, 3);
         check(f, "ER1 ember cools and vanishes", room.carrying() == 0 && room.counter() == 1);
         // 残りを運ぶ (一人で)

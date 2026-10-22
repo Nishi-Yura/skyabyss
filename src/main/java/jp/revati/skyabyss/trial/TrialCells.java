@@ -100,7 +100,7 @@ public final class TrialCells {
         register(new T11Clam());
         register(new T12Keeper());
         for (Def d : TrialCatalog.all()) {
-            if (!CELLS.containsKey(d.id())) {
+            if (!CELLS.containsKey(d.id()) && !jp.revati.skyabyss.trial.raid.RaidRooms.isRaid(d.id())) {
                 throw new IllegalStateException("trial " + d.id() + " has no cell");
             }
         }
