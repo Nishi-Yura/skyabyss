@@ -23,12 +23,9 @@ import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
-// 深淵の敵 A の登録 (docs/design/36 の 4・4.1): 9 種の型・スポーンエッグ・素材 3 つ・経験値。
-// 素材の見た目と数字は tools/gen_abyss_mobs_a.py と AbyssMobStats。音は既存の音の別名を使う (新しい音の素材は作っていない)。
+// 深淵の敵 A の登録 (docs/design/36 の 4・4.1): 9 種の型・スポーンエッグ・素材 3 つ・経験値 (推奨の段は AbyssScaling.ABYSS_LEVEL)。
+// 素材の見た目は tools/gen_abyss_mobs_a.py。数字は AbyssScaling。音は既存の音の別名を使う (新しい音の素材は作っていない)。
 public final class AbyssMobsA {
-    // 経験値は成長の枠 (深淵の内容の段の目安。34 の 4.5 の数字が決まるまでの仮)
-    public static final int CONTENT_LEVEL = 33;
-
     private static final DeferredRegister<EntityType<?>> ENTITIES = DeferredRegister.create(Registries.ENTITY_TYPE, SkyAbyss.MODID);
     private static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(SkyAbyss.MODID);
 
@@ -61,11 +58,11 @@ public final class AbyssMobsA {
         return EGGS.get(k).get();
     }
 
-    // 湧かせる (段と深度を決めてから。呼んだ側が addFreshEntity する)
-    public static AbyssMob create(AbyssMobKind k, ServerLevel level, int stage, int depth) {
+    // 湧かせる (段と湧いた高さを決めてから。呼んだ側が addFreshEntity する)
+    public static AbyssMob create(AbyssMobKind k, ServerLevel level, int form, double y) {
         AbyssMob m = TYPES.get(k).get().create(level);
         if (m != null) {
-            m.setStage(stage, depth);
+            m.setStage(form, y);
         }
         return m;
     }
@@ -107,7 +104,7 @@ public final class AbyssMobsA {
     private static void onCommonSetup(FMLCommonSetupEvent event) {
         event.enqueueWork(() -> {
             for (AbyssMobKind k : AbyssMobKind.values()) {
-                GrowthRewards.MOD_ENEMIES.put(SkyAbyss.MODID + ":" + k.id, new GrowthRewards.Source(k.xp, CONTENT_LEVEL));
+                GrowthRewards.MOD_ENEMIES.put(SkyAbyss.MODID + ":" + k.id, new GrowthRewards.Source(k.xp, AbyssScaling.ABYSS_LEVEL));
             }
         });
     }

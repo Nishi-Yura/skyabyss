@@ -16,7 +16,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.Vec3;
 
 // 深淵の敵 B 組の自己テスト。SKYABYSS_SELFTEST_ONLY="abyss enemies b"。
-//   登録 (型・卵) / 素材 (骨・アニメ・絵の三段・音・発光) / 段 (y と深さ) / 数値の上がり方 (なだらか) /
+//   登録 (型・卵) / 素材 (骨・アニメ・絵の三段・音・発光) / 形 (A 組と同じ決まり) / 数値 (AbyssScaling と同じ) /
 //   灰の這い跡 (光の中で見える・光がなければ見えない) / 天井歩き (見られている間は動かない・目を離すと判定) /
 //   灯喰い (灯りを消す・休み場の灯りは消さない) / 縄の人 (引く力は歩く速さより弱い・落ちる傷の上限) / 湧きの休み場の決まり
 public final class AbyssMobsBSelfTest {
@@ -61,7 +61,7 @@ public final class AbyssMobsBSelfTest {
     private static void registration() {
         for (String id : IDS) {
             check(BuiltInRegistries.ENTITY_TYPE.containsKey(ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, id)), "entity type " + id + " is not registered");
-            check(AbyssMobsBSpawn.typeOf(id) != null, "typeOf(" + id + ") is null");
+            check(AbyssMobSpawner.typeOf(id) != null, "typeOf(" + id + ") is null");
         }
         check(AbyssMobsBSetup.ASH_TRAIL_EGG.get() != null && AbyssMobsBSetup.ROPE_HANGER_EGG.get() != null, "spawn eggs are missing");
         check(AbyssMobsBSetup.LAMP_ASH.get() != null && AbyssMobsBSetup.PULSE_MEMBRANE.get() != null, "abyss materials are missing");
@@ -93,29 +93,20 @@ public final class AbyssMobsBSelfTest {
         return AbyssMobsBSelfTest.class.getClassLoader().getResource(path) != null;
     }
 
-    // 段: 灰の層は y で (-160 より上 0、-220 より上 1、それより下 2)、深みは 200 ごとに一段
+    // 形: 灰の層の種は灰で 1、深みで 2。深みの種は深みで 1。灰より上の種は 1 (A 組と同じ決まり)
     private static void stages() {
-        check(AbyssMobsBStage.stageAt(-100) == 0, "stage at -100 is not 0");
-        check(AbyssMobsBStage.stageAt(-200) == 1, "stage at -200 is not 1");
-        check(AbyssMobsBStage.stageAt(-250) == 2, "stage at -250 is not 2");
-        check(AbyssMobsBStage.depthStage(-300) == 0, "depth stage at -300 is not 0");
-        check(AbyssMobsBStage.depthStage(-500) == 1, "depth stage at -500 is not 1");
-        check(AbyssMobsBStage.depthStage(-700) == 2, "depth stage at -700 is not 2");
-        check(AbyssMobsBStage.depthStage(-1400) == 2, "deep stage is not capped at 2");
+        check(AbyssScaling.form(3, -100) == 1, "ash foe above the ash is not form 1");
+        check(AbyssScaling.form(3, -200) == 1, "ash foe in the ash is not form 1");
+        check(AbyssScaling.form(3, -300) == 2, "ash foe in the deep is not form 2");
+        check(AbyssScaling.form(4, -300) == 1, "deep foe at home is not form 1");
+        check(AbyssScaling.form(3, 100) == 1, "abyss-only foe high up is not form 1");
     }
 
-    // 数値は段ごとになだらか (段の一つ上がりで HP +15%・傷 +10% 以内、深さは 100 ブロックで HP +4%・傷 +2% 以内、上限あり)
+    // 数値: 湧いた高さだけで決まる (AbyssScaling)。B 組の基の数字 (表) で、心臓の間の底は体力 1.5 倍・傷 1.25 倍
     private static void statCurve() {
-        for (int s = 0; s < AbyssMobsBStage.MAX; s++) {
-            check(AbyssMobsBStage.hpMul(s + 1) / AbyssMobsBStage.hpMul(s) - 1 <= 0.2, "hp step " + s + " is too steep");
-            check(AbyssMobsBStage.dmgMul(s + 1) / AbyssMobsBStage.dmgMul(s) - 1 <= 0.15, "damage step " + s + " is too steep");
-        }
-        check(Math.abs(AbyssMobsBStage.depthHp(-300) - 1) < 1e-9, "depth hp is not 1 at the heart");
-        check(AbyssMobsBStage.depthHp(-400) - AbyssMobsBStage.depthHp(-300) <= 0.05 + 1e-9, "depth hp rises too fast per 100 blocks");
-        check(AbyssMobsBStage.depthDmg(-400) - AbyssMobsBStage.depthDmg(-300) <= 0.03 + 1e-9, "depth damage rises too fast per 100 blocks");
-        check(AbyssMobsBStage.depthHp(-5000) <= 1 + AbyssMobsBStage.DEPTH_HP_CAP + 1e-9, "depth hp is not capped");
-        // 段 2 の HP は段 0 の 1.3 倍まで (ラフの数値と合う)
-        check(Math.abs(AbyssMobsBStage.hp(40, 2, -250) - 40 * 1.3) < 1e-9, "stage 2 hp is not 1.3x");
+        check(Math.abs(AbyssScaling.hp(40, AbyssScaling.HEART_Y) - 60) < 1e-9, "base hp is not 1.5x at the heart");
+        check(Math.abs(AbyssScaling.dmg(6, AbyssScaling.HEART_Y) - 7.5) < 1e-9, "base damage is not 1.25x at the heart");
+        check(Math.abs(AbyssScaling.hp(60, AbyssScaling.TOP_Y) - 60) < 1e-9, "a foe at the top of the shaft is not its base");
     }
 
     // 灰の這い跡: 光の中で見える。光がなければ見えない (灯りを置くと見え、消すと消える)
@@ -137,7 +128,7 @@ public final class AbyssMobsBSelfTest {
             }
         }
         AbyssLight.clear();
-        var mob = AbyssMobsBSpawn.spawnAt(level, AshTrail.ID, at.getX() + 0.5, at.getY(), at.getZ() + 0.5, 0);
+        var mob = AbyssMobSpawner.spawnAt(level, AshTrail.ID, at.getX() + 0.5, at.getY(), at.getZ() + 0.5, 1);
         check(mob instanceof AshTrail, "the ash trail did not spawn");
         if (mob instanceof AshTrail trail) {
             check(!trail.lit(), "the ash trail is lit in a sealed dark box");
@@ -196,13 +187,13 @@ public final class AbyssMobsBSelfTest {
         check(RopeHanger.COOLDOWN_TICKS >= 120, "the rope pulls too often");
     }
 
-    // 湧き: 休み場と着く所の近くには湧かない (nearRest)。表は層の y で決まる (ash 層の段は 0〜2)
+    // 湧き: 休み場と着く所の近くには湧かない (nearRest)。表と湧きの本体は AbyssMobSpawner (湧きの決まりの自己テストは abyss enemies spawn)
     private static void spawnRules(MinecraftServer server) {
         BlockPos arrival = AbyssBuild.mark("arrival");
         if (arrival != null) {
-            check(AbyssMobsBSpawn.nearRest(arrival, AbyssMobsBSpawn.REST_KEEP), "the arrival is not kept clear of foes");
+            check(AbyssMobSpawner.nearRest(arrival, AbyssMobSpawner.REST_KEEP), "the arrival is not kept clear of foes");
         }
-        check(!AbyssMobsBSpawn.nearRest(new BlockPos(5000, 100, 5000), AbyssMobsBSpawn.REST_KEEP), "a far spot is kept clear");
-        check(AbyssMobsBSpawn.IDS.length == 9, "the spawner table does not list nine foes");
+        check(!AbyssMobSpawner.nearRest(new BlockPos(5000, 100, 5000), AbyssMobSpawner.REST_KEEP), "a far spot is kept clear");
+        check(AbyssMobSpawner.FOES.length == 9, "the spawner table does not list nine foes");
     }
 }

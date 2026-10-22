@@ -28,7 +28,7 @@ public class AshTrail extends AbyssMobB {
     public static final double DMG = 4;
     private static final EntityDataAccessor<Boolean> REVEALED = SynchedEntityData.defineId(AshTrail.class, EntityDataSerializers.BOOLEAN);
     private static final int HIT_SHOW_TICKS = 60;
-    private static final int SEE_LIGHT = 4;
+    static final int SEE_LIGHT = 4;   // 灯りがこれ以上なら見える (スポーンの暗さの上限にも使う)
     private int shownUntil;
 
     public AshTrail(EntityType<? extends Monster> type, Level level) {

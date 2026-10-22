@@ -28,8 +28,6 @@ import net.neoforged.neoforge.registries.DeferredRegister;
 // 素材と見た目は tools/gen_abyss_mobs_b.py (絵は tools/abyss/paint_abyss_b.py)。SkyAbyss のコンストラクタから register を呼ぶ
 public final class AbyssMobsBSetup {
     public static final String SOUND_NS = "skyabyss_abyss_b";
-    // 深淵の敵の成長の経験値の段 (docs/design/34 の 4.5 の深淵の段。仮の値。深淵の推奨レベルが決まったら直す)
-    public static final int ABYSS_LEVEL = 33;
 
     private static final DeferredRegister<EntityType<?>> ENTITIES = DeferredRegister.create(Registries.ENTITY_TYPE, SkyAbyss.MODID);
     private static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(SkyAbyss.MODID);
@@ -161,6 +159,6 @@ public final class AbyssMobsBSetup {
     }
 
     private static void put(String id, int xp) {
-        GrowthRewards.MOD_ENEMIES.put(SkyAbyss.MODID + ":" + id, new GrowthRewards.Source(xp, ABYSS_LEVEL));
+        GrowthRewards.MOD_ENEMIES.put(SkyAbyss.MODID + ":" + id, new GrowthRewards.Source(xp, AbyssScaling.ABYSS_LEVEL));
     }
 }

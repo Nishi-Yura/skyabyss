@@ -11,7 +11,7 @@ import net.minecraft.server.MinecraftServer;
 
 // 深淵の敵 A の自己テスト。SKYABYSS_SELFTEST_ONLY="abyss enemies a"。
 //   登録 (型・スポーンエッグ)・素材 (三段のメッシュ・アトラス・発光・動きの型)・段の変わり方 (メッシュが違う)
-//   湧かせ方の決まり (段・層・元の層・灰より下) ・数字の伸び (単調で緩やか) ・予告の長さ・塩の抜け殻の割れ・殻の窓・盾の正面
+//   段の決まり (層から段・元の層より上は段 1) ・数字の伸び (AbyssScaling。高さだけで決まり、なだらか) ・予告の長さ・塩の抜け殻の割れ・殻の窓・盾の正面
 public final class AbyssMobsASelfTest {
     private static final List<String> F = new ArrayList<>();
 
@@ -85,28 +85,25 @@ public final class AbyssMobsASelfTest {
         }
     }
 
+    // 数字 (AbyssScaling): 縦穴の上端で元の数字、心臓の間の底で体力 1.5 倍・傷 1.25 倍。高さに対して単調・なだらか
     private static void stats() {
+        check(Math.abs(AbyssScaling.hpMul(AbyssScaling.TOP_Y) - 1) < 1e-9, "hp is not the base at the top of the shaft");
+        check(Math.abs(AbyssScaling.dmgMul(AbyssScaling.TOP_Y) - 1) < 1e-9, "damage is not the base at the top of the shaft");
+        check(Math.abs(AbyssScaling.hpMul(AbyssScaling.HEART_Y) - AbyssScaling.HP_AT_HEART) < 1e-9, "hp at the heart is not 1.5");
+        check(Math.abs(AbyssScaling.dmgMul(AbyssScaling.HEART_Y) - AbyssScaling.DMG_AT_HEART) < 1e-9, "damage at the heart is not 1.25");
+        check(AbyssScaling.hpMul(AbyssScaling.HEART_Y - 200) == AbyssScaling.HP_AT_HEART, "hp goes on past the heart");
         for (AbyssMobKind k : AbyssMobKind.values()) {
-            double prevHp = 0;
-            for (int s = 1; s <= 3; s++) {
-                double prev = 0;
-                for (int d = 0; d <= AbyssMobStats.DEPTH_MAX; d++) {
-                    double hp = AbyssMobStats.hp(k, d, s);
-                    double dmg = AbyssMobStats.damage(k, d, s);
-                    check(hp >= prev, "hp not monotonic in depth: " + k.id + " s" + s + " d" + d);
-                    check(dmg >= 0, "damage negative: " + k.id);
-                    if (prev > 0) {
-                        check(hp / prev <= 1.25, "hp step too big: " + k.id + " s" + s + " d" + d);
-                    }
-                    prev = hp;
+            double prev = 0;
+            for (int y = AbyssScaling.TOP_Y; y >= AbyssScaling.HEART_Y; y -= 2) {
+                double hp = AbyssScaling.hp(k.baseHp, y);
+                double dmg = AbyssScaling.dmg(k.baseDamage, y);
+                check(hp >= prev, "hp not monotonic in height: " + k.id + " y" + y);
+                check(dmg >= 0, "damage negative: " + k.id);
+                if (prev > 0) {
+                    check(hp / prev - 1 <= 0.01, "hp step too big over 2 blocks: " + k.id + " y" + y);
                 }
-                check(prev >= prevHp, "hp not monotonic in stage: " + k.id + " s" + s);
-                prevHp = AbyssMobStats.hp(k, AbyssMobStats.DEPTH_MAX, s);
+                prev = hp;
             }
-            double base = AbyssMobStats.hp(k, 0, 1);
-            double top = AbyssMobStats.hp(k, AbyssMobStats.DEPTH_MAX, AbyssMobStats.STAGE_MAX);
-            check(top / base <= 1.8, "stat curve too steep: " + k.id + " " + (top / base));
-            check(AbyssMobStats.xp(k, 3) >= AbyssMobStats.xp(k, 1), "xp not monotonic: " + k.id);
         }
     }
 
@@ -139,25 +136,21 @@ public final class AbyssMobsASelfTest {
         check(AbyssMobStats.shieldKeep(1.0) == AbyssMobStats.SHIELD_KEEP, "shield front does not block");
         check(AbyssMobStats.shieldKeep(0.0) == 1.0, "shield side blocked");
         check(AbyssMobStats.shieldKeep(-1.0) == 1.0, "shield back blocked");
-        // 段と層
-        check(AbyssMobStats.stage(0, 0) == 1, "stage of native layer is not 1");
-        check(AbyssMobStats.stage(0, 1) == 2, "one layer deeper is not stage 2");
-        check(AbyssMobStats.stage(0, 2) == 3, "two layers deeper is not stage 3");
-        check(AbyssMobStats.stage(0, AbyssMobStats.DEPTH_MAX) == 3, "endless depth is not stage 3");
-        check(AbyssMobStats.stage(2, 1) == 1, "a higher layer is not stage 1");
-        check(AbyssMobStats.layerOf(120) == 0 && AbyssMobStats.layerOf(119) == 1, "bone/salt boundary");
-        check(AbyssMobStats.layerOf(0) == 1 && AbyssMobStats.layerOf(-1) == 2, "salt/storm boundary");
-        check(AbyssMobStats.layerOf(-120) == 2 && AbyssMobStats.layerOf(-121) == 3, "storm/ash boundary");
-        check(AbyssMobStats.layerOf(-240) == 3 && AbyssMobStats.layerOf(-241) == AbyssMobStats.DEPTH_MAX, "ash/deep boundary");
-        // 種の元の層の選び方 (AbyssMobSpawner.pickNative): 範囲の中・灰より下は三層から
-        java.util.concurrent.ThreadLocalRandom r = java.util.concurrent.ThreadLocalRandom.current();
-        for (int i = 0; i < 200; i++) {
-            int n0 = AbyssMobSpawner.pickNative(0, r);
-            int n2 = AbyssMobSpawner.pickNative(2, r);
-            int nd = AbyssMobSpawner.pickNative(AbyssMobStats.DEPTH_MAX, r);
-            check(n0 == 0, "bone layer picks another native");
-            check(n2 >= 0 && n2 <= 2, "storm layer picks out of range");
-            check(nd >= 0 && nd <= 2, "deep picks out of range");
+        // 層の境 (AbyssScaling)
+        check(AbyssScaling.layerOf(120) == 0 && AbyssScaling.layerOf(119) == 1, "bone/salt boundary");
+        check(AbyssScaling.layerOf(0) == 1 && AbyssScaling.layerOf(-1) == 2, "salt/storm boundary");
+        check(AbyssScaling.layerOf(-120) == 2 && AbyssScaling.layerOf(-121) == 3, "storm/ash boundary");
+        check(AbyssScaling.layerOf(-240) == 3 && AbyssScaling.layerOf(-241) == AbyssScaling.LAYER_MAX, "ash/deep boundary");
+        // 段 (形): 元の層で 1、一つ下で 2、二つ下以上で 3。元の層より上へは出ない (段 1)
+        check(AbyssScaling.form(0, 200) == 1, "native layer is not form 1");
+        check(AbyssScaling.form(0, 100) == 2, "one layer down is not form 2");
+        check(AbyssScaling.form(0, -50) == 3, "two layers down is not form 3");
+        check(AbyssScaling.form(0, -300) == 3, "deep is not form 3");
+        check(AbyssScaling.form(2, 200) == 1, "a higher layer is not form 1");
+        // 元の層の種が、その層で必ず段 1 になる (表の塩・雷の一つ上は段 2)
+        for (AbyssMobKind k : AbyssMobKind.values()) {
+            int y = k.native_ == 0 ? 200 : k.native_ == 1 ? 60 : -60;
+            check(AbyssScaling.form(k.native_, y) == 1, "a native kind is not form 1 at home: " + k.id);
         }
     }
 
