@@ -37,6 +37,16 @@ public class AttendantEntity extends NpcEntity {
         return entityData.get(ROLE);
     }
 
+    // 深淵の生き残りなど、施設の役でない人 (役の ID をそのまま。会話は skyabyss:attendant_<id>、絵は役の ID の絵)
+    public void setRoleId(String id) {
+        entityData.set(ROLE, id);
+        nameByRole();
+    }
+
+    public static boolean extraRole(String id) {
+        return id.startsWith("survivor_") || id.startsWith("abyss_");
+    }
+
     public void setRole(AttendantRole role) {
         entityData.set(ROLE, role.id);
         nameByRole();
@@ -64,6 +74,8 @@ public class AttendantEntity extends NpcEntity {
         AttendantRole r = AttendantRole.byId(tag.getString("Role"));
         if (r != null) {
             entityData.set(ROLE, r.id);
+        } else if (extraRole(tag.getString("Role"))) {
+            entityData.set(ROLE, tag.getString("Role"));
         }
     }
 }

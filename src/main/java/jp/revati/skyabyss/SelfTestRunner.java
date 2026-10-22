@@ -280,16 +280,13 @@ public final class SelfTestRunner {
         steps.add(Step.once("abyss depths", 20, jp.revati.skyabyss.story.ch5.depths.DepthSelfTest::run));
         steps.add(Step.once("abyss finds (load)", jp.revati.skyabyss.story.ch5.AbyssFindsSelfTest::load));
         steps.add(Step.once("abyss finds", 60, jp.revati.skyabyss.story.ch5.AbyssFindsSelfTest::run));
-        // 雷の層の吊り橋・雷の拍・避雷の像・灰の迷路・番人と近道 (36 の 8 章)。SKYABYSS_SELFTEST_ONLY="abyss layers storm ash"
-        steps.add(Step.once("abyss layers storm ash (load)", jp.revati.skyabyss.story.ch5.layers.AbyssLayersSelfTest::load));
-        steps.add(Step.once("abyss layers storm ash", 60, jp.revati.skyabyss.story.ch5.layers.AbyssLayersSelfTest::run));
+        // 深淵の層 (36 の 8 章。野営・三本の道・印・門・主の間・下り・心臓まで歩けるか、印と門、二人の段)。SKYABYSS_SELFTEST_ONLY="abyss layers v2"
+        steps.add(Step.once("abyss layers v2 (load)", jp.revati.skyabyss.story.ch5.layers.AbyssLayersV2SelfTest::load));
+        steps.add(Step.once("abyss layers v2", 60, jp.revati.skyabyss.story.ch5.layers.AbyssLayersV2SelfTest::run));
         // 番人の悪夢 (段の表・入る条件・段の進み・報酬・保存・閉じたあとの後片付け)。docs/design/36 の 9。SKYABYSS_SELFTEST_ONLY="abyss nightmare"
         steps.add(Step.once("abyss nightmare (load)", jp.revati.skyabyss.story.ch5.warden.WardenSelfTest::load));
         steps.add(Step.once("abyss nightmare", 60, jp.revati.skyabyss.story.ch5.warden.NightmareSelfTest::run));
         steps.add(Step.once("abyss relics", 60, jp.revati.skyabyss.story.ch5.AbyssRelicsSelfTest::run));
-        // 骨の橋・巣の門・塩の潮 (docs/design/36 の 8 章)。SKYABYSS_SELFTEST_ONLY="abyss layers bone salt"
-        steps.add(Step.once("abyss layers bone salt (load)", jp.revati.skyabyss.story.ch5.layers.BoneSaltSelfTest::load));
-        steps.add(Step.once("abyss layers bone salt", 60, jp.revati.skyabyss.story.ch5.layers.BoneSaltSelfTest::runSelfTest));
         steps.add(Step.once("storm mobs (load)", jp.revati.skyabyss.titan.storm.mob.StormMobSelfTest::load));
         steps.add(Step.until("storm mobs (wait)", jp.revati.skyabyss.titan.storm.mob.StormMobSelfTest::ready));
         steps.add(Step.once("storm mobs", 5, jp.revati.skyabyss.titan.storm.mob.StormMobSelfTest::runSelfTest));

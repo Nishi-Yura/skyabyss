@@ -95,7 +95,8 @@ public final class ObjectiveStrip {
         if (demo) {
             return true;
         }
-        return OpeningClient.objective() != null || current(mc, QuestLog.of(mc.player)) != null;
+        return OpeningClient.objective() != null || jp.revati.skyabyss.story.ch5.client.AbyssSectionClient.objective() != null
+                || current(mc, QuestLog.of(mc.player)) != null;
     }
 
     // 帯がいまこのクエストを出しているか (出していなければ、追跡の札の側が出す。序盤の目的を帯が出しているときなど)
@@ -123,6 +124,11 @@ public final class ObjectiveStrip {
         if (demo) {
             BlockPos at = mc.player.blockPosition().offset(96, 0, -70);
             return new Cur("岩鯨の背へ上る鎖を探す", new Resolved(at, false));
+        }
+        // 深淵の主・番人の戦いのあいだは、戦いの一言 (story/ch5/layers/AbyssSections)
+        String fight = jp.revati.skyabyss.story.ch5.client.AbyssSectionClient.objective();
+        if (fight != null) {
+            return new Cur(fight, Resolved.NONE);
         }
         OpeningClient.Objective opening = OpeningClient.objective();
         if (opening != null) {

@@ -38,6 +38,10 @@ public final class Scenes {
             add(heartAppears(titan));
             add(titanEnd(titan));
         }
+        // 深淵の区切り (五章の一〜四・終わり)。story/ch5/layers/AbyssSections
+        for (Scene s : jp.revati.skyabyss.story.ch5.layers.SectionScenes.all()) {
+            add(s);
+        }
     }
 
     private Scenes() {

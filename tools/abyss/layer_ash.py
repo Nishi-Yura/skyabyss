@@ -83,6 +83,7 @@ def build(ctx, routes):
     # 三つの台 (光・重さ・鼓動の印。戸の前)
     for k, b in enumerate((w - 4, w, w + 4)):
         r2.put(u + hu - 1, b, yy0, ['sea_lantern', 'lodestone', 'sculk_catalyst'][k])
+        r2.mark('seal_ped_%d' % k, u + hu - 1, b, yy0)
     r2.mark('puzzle_ash', u, w, yy0)
     # ---- 3: 縄張り
     u, w, yy0, hu, hw, h = rooms3['territory']
