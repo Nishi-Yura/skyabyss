@@ -67,7 +67,7 @@ public final class WardenArena {
 
     public static List<ServerPlayer> inside(ServerLevel level) {
         List<ServerPlayer> out = new ArrayList<>();
-        for (ServerPlayer p : level.players()) {
+        for (ServerPlayer p : java.util.List.copyOf(level.players())) {
             if (p.isAlive() && !p.isSpectator() && inRoom(p)) {
                 out.add(p);
             }
@@ -171,9 +171,7 @@ public final class WardenArena {
         Data d = Data.get(level.getServer());
         d.cleared = true;
         d.setDirty();
-        for (ServerPlayer p : inside(level)) {
-            Quests.signal(p, SIGNAL_HEART);
-        }
+        Quests.signalWithParty(level, inside(level), SIGNAL_HEART);
     }
 
     @SubscribeEvent

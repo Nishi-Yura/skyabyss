@@ -154,7 +154,7 @@ public final class AshMaze {
         }
         long t = level.getGameTime();
         List<ServerPlayer> here = new ArrayList<>();
-        for (ServerPlayer p : level.players()) {
+        for (ServerPlayer p : java.util.List.copyOf(level.players())) {
             if (p.blockPosition().distSqr(in) <= REACH * REACH && Math.hypot(p.getX(), p.getZ()) >= 23.5) {
                 here.add(p);
             }
@@ -290,7 +290,7 @@ public final class AshMaze {
         boolean opened = AbyssShortcuts.open(server, KEY);
         ServerLevel level = server.getLevel(AbyssWorld.LEVEL);
         if (level != null) {
-            for (ServerPlayer p : level.players()) {
+            for (ServerPlayer p : java.util.List.copyOf(level.players())) {
                 if (opened) {
                     Notice.bar(p, Component.translatable("message.skyabyss.abyss.ash.keeper_down"));
                 }

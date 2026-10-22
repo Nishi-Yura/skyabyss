@@ -15,7 +15,7 @@ final class LayerNotes {
         if (at == null) {
             return;
         }
-        for (ServerPlayer p : level.players()) {
+        for (ServerPlayer p : java.util.List.copyOf(level.players())) {
             double dx = p.getX() - at.getX(), dz = p.getZ() - at.getZ();
             if (p.isAlive() && dx * dx + dz * dz <= reach * reach) {
                 p.displayClientMessage(Component.translatable(key), true);

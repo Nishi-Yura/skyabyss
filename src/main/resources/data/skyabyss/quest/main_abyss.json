@@ -45,8 +45,7 @@
           "targets": [
             "ch5_abyss_door"
           ],
-          "count": 1,
-          "party": false
+          "count": 1
         }
       ]
     },
@@ -60,8 +59,7 @@
           "targets": [
             "ch5_threshold"
           ],
-          "count": 1,
-          "party": false
+          "count": 1
         }
       ]
     },
@@ -75,8 +73,7 @@
           "targets": [
             "ch5_abyss_enter"
           ],
-          "count": 1,
-          "party": false
+          "count": 1
         }
       ]
     },
@@ -90,8 +87,7 @@
           "targets": [
             "abyss_heart_room"
           ],
-          "count": 1,
-          "party": false
+          "count": 1
         }
       ]
     },
@@ -105,8 +101,7 @@
           "targets": [
             "abyss_heart"
           ],
-          "count": 1,
-          "party": false
+          "count": 1
         }
       ]
     },
@@ -119,8 +114,7 @@
           "targets": [
             "abyss_heart_touch"
           ],
-          "count": 1,
-          "party": false
+          "count": 1
         }
       ]
     },

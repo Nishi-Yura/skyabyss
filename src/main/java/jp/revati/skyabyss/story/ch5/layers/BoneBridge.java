@@ -184,7 +184,7 @@ public final class BoneBridge {
             return;
         }
         long now = level.getGameTime();
-        for (ServerPlayer p : level.players()) {
+        for (ServerPlayer p : java.util.List.copyOf(level.players())) {
             if (!p.isAlive() || p.isSpectator()) {
                 continue;
             }
@@ -210,7 +210,7 @@ public final class BoneBridge {
             return;
         }
         if (!d.spawned) {
-            for (ServerPlayer p : level.players()) {
+            for (ServerPlayer p : java.util.List.copyOf(level.players())) {
                 if (p.isAlive() && inDen(p.blockPosition(), den)) {
                     Entity g = AbyssMobSpawner.spawnAt(level, "rib_guard", den.getX() + 0.5, den.getY(), den.getZ() + 0.5, FORM);
                     if (g != null) {
