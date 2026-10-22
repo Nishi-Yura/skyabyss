@@ -1,0 +1,376 @@
+# 一〜三章の地上の場所 (章の小要素・序盤の構造物) の品質の確かめ (2026-10-22。build audit の片付けのあと)。
+# ./gradlew runShots -Pscript=tools/shots/ground_sites_qa.txt -PshotsName=ground_sites_qa  → run/shots/ground_sites_qa/shots/ground_sites_qa/*.png
+# ワールド名が opening で始まるので序盤の場所と跡地が建つ。場所ごとに、目の高さ (南東から) と、上から斜めに 1 枚ずつ。
+# 建っていない場所は grounds go が失敗する (ログの grounds sites で一覧)
+world opening_qa normal
+size 1280 720
+timeout 2700
+render 10
+clouds off
+
+wait 100
+cmd skyabyss cinematic stop
+wait 10
+cmd skyabyss cinematic stop
+cmd time set 4000
+cmd weather clear
+cmd gamerule doDaylightCycle false
+cmd gamerule doMobSpawning false
+cmd gamemode spectator
+cmd skyabyss dev opening build
+cmd skyabyss dev grounds prepare whale
+cmd skyabyss dev grounds prepare tide
+cmd skyabyss dev grounds prepare storm
+wait 1200
+cmd skyabyss dev grounds sites
+hud off
+
+# ---- whale
+cmd skyabyss dev grounds go whale ch1_lookout 8 4 135 22
+waitchunks
+wait 15
+shot 01_ch1_lookout_eye
+cmd skyabyss dev grounds go whale ch1_lookout 9 12 315 48
+waitchunks
+wait 10
+shot 01_ch1_lookout_top
+cmd skyabyss dev grounds go whale ch1_lost_cart 8 4 135 22
+waitchunks
+wait 15
+shot 02_ch1_lost_cart_eye
+cmd skyabyss dev grounds go whale ch1_lost_cart 9 12 315 48
+waitchunks
+wait 10
+shot 02_ch1_lost_cart_top
+cmd skyabyss dev grounds go whale ch1_diary_spot 8 4 135 22
+waitchunks
+wait 15
+shot 03_ch1_diary_spot_eye
+cmd skyabyss dev grounds go whale ch1_diary_spot 9 12 315 48
+waitchunks
+wait 10
+shot 03_ch1_diary_spot_top
+cmd skyabyss dev grounds go whale ch1_song_stone_1 8 4 135 22
+waitchunks
+wait 15
+shot 04_ch1_song_stone_1_eye
+cmd skyabyss dev grounds go whale ch1_song_stone_1 9 12 315 48
+waitchunks
+wait 10
+shot 04_ch1_song_stone_1_top
+cmd skyabyss dev grounds go whale ch1_song_stone_2 8 4 135 22
+waitchunks
+wait 15
+shot 05_ch1_song_stone_2_eye
+cmd skyabyss dev grounds go whale ch1_song_stone_2 9 12 315 48
+waitchunks
+wait 10
+shot 05_ch1_song_stone_2_top
+cmd skyabyss dev grounds go whale ch1_song_stone_3 8 4 135 22
+waitchunks
+wait 15
+shot 06_ch1_song_stone_3_eye
+cmd skyabyss dev grounds go whale ch1_song_stone_3 9 12 315 48
+waitchunks
+wait 10
+shot 06_ch1_song_stone_3_top
+cmd skyabyss dev grounds go whale ch1_song_stone_4 8 4 135 22
+waitchunks
+wait 15
+shot 07_ch1_song_stone_4_eye
+cmd skyabyss dev grounds go whale ch1_song_stone_4 9 12 315 48
+waitchunks
+wait 10
+shot 07_ch1_song_stone_4_top
+cmd skyabyss dev grounds go whale ch1_song_stone_5 8 4 135 22
+waitchunks
+wait 15
+shot 08_ch1_song_stone_5_eye
+cmd skyabyss dev grounds go whale ch1_song_stone_5 9 12 315 48
+waitchunks
+wait 10
+shot 08_ch1_song_stone_5_top
+cmd skyabyss dev grounds go whale ch1_road_cairn.0 8 4 135 22
+waitchunks
+wait 15
+shot 09_ch1_road_cairn_0_eye
+cmd skyabyss dev grounds go whale ch1_road_cairn.0 9 12 315 48
+waitchunks
+wait 10
+shot 09_ch1_road_cairn_0_top
+cmd skyabyss dev grounds go whale ch1_road_cairn.1 8 4 135 22
+waitchunks
+wait 15
+shot 10_ch1_road_cairn_1_eye
+cmd skyabyss dev grounds go whale ch1_road_cairn.1 9 12 315 48
+waitchunks
+wait 10
+shot 10_ch1_road_cairn_1_top
+cmd skyabyss dev grounds go whale ch1_road_shrine 8 4 135 22
+waitchunks
+wait 15
+shot 11_ch1_road_shrine_eye
+cmd skyabyss dev grounds go whale ch1_road_shrine 9 12 315 48
+waitchunks
+wait 10
+shot 11_ch1_road_shrine_top
+cmd skyabyss dev grounds go whale ch1_bone_cache 8 4 135 22
+waitchunks
+wait 15
+shot 12_ch1_bone_cache_eye
+cmd skyabyss dev grounds go whale ch1_bone_cache 9 12 315 48
+waitchunks
+wait 10
+shot 12_ch1_bone_cache_top
+cmd skyabyss dev grounds go whale ch1_bone_pit 8 4 135 22
+waitchunks
+wait 15
+shot 13_ch1_bone_pit_eye
+cmd skyabyss dev grounds go whale ch1_bone_pit 9 12 315 48
+waitchunks
+wait 10
+shot 13_ch1_bone_pit_top
+cmd skyabyss dev grounds go whale ch1_cleft_shell_cave 8 4 135 22
+waitchunks
+wait 15
+shot 14_ch1_cleft_shell_cave_eye
+cmd skyabyss dev grounds go whale ch1_cleft_shell_cave 9 12 315 48
+waitchunks
+wait 10
+shot 14_ch1_cleft_shell_cave_top
+cmd skyabyss dev grounds go whale ch1_trace_camp 8 4 135 22
+waitchunks
+wait 15
+shot 15_ch1_trace_camp_eye
+cmd skyabyss dev grounds go whale ch1_trace_camp 9 12 315 48
+waitchunks
+wait 10
+shot 15_ch1_trace_camp_top
+cmd skyabyss dev grounds go whale ch1_trace_pack 8 4 135 22
+waitchunks
+wait 15
+shot 16_ch1_trace_pack_eye
+cmd skyabyss dev grounds go whale ch1_trace_pack 9 12 315 48
+waitchunks
+wait 10
+shot 16_ch1_trace_pack_top
+cmd skyabyss dev grounds go whale ch1_trace_cart 8 4 135 22
+waitchunks
+wait 15
+shot 17_ch1_trace_cart_eye
+cmd skyabyss dev grounds go whale ch1_trace_cart 9 12 315 48
+waitchunks
+wait 10
+shot 17_ch1_trace_cart_top
+cmd skyabyss dev grounds go whale ch1_trace_altar 8 4 135 22
+waitchunks
+wait 15
+shot 18_ch1_trace_altar_eye
+cmd skyabyss dev grounds go whale ch1_trace_altar 9 12 315 48
+waitchunks
+wait 10
+shot 18_ch1_trace_altar_top
+cmd skyabyss dev grounds go whale ch1_trace_well 8 4 135 22
+waitchunks
+wait 15
+shot 19_ch1_trace_well_eye
+cmd skyabyss dev grounds go whale ch1_trace_well 9 12 315 48
+waitchunks
+wait 10
+shot 19_ch1_trace_well_top
+cmd skyabyss dev grounds go whale ribs 8 4 135 22
+waitchunks
+wait 15
+shot 20_ribs_eye
+cmd skyabyss dev grounds go whale ribs 9 12 315 48
+waitchunks
+wait 10
+shot 20_ribs_top
+cmd skyabyss dev grounds go whale footprint.0 8 4 135 22
+waitchunks
+wait 15
+shot 21_footprint_0_eye
+cmd skyabyss dev grounds go whale footprint.0 9 12 315 48
+waitchunks
+wait 10
+shot 21_footprint_0_top
+cmd skyabyss dev grounds go whale footprint.2 8 4 135 22
+waitchunks
+wait 15
+shot 22_footprint_2_eye
+cmd skyabyss dev grounds go whale footprint.2 9 12 315 48
+waitchunks
+wait 10
+shot 22_footprint_2_top
+cmd skyabyss dev grounds go whale camp 8 4 135 22
+waitchunks
+wait 15
+shot 23_camp_eye
+cmd skyabyss dev grounds go whale camp 9 12 315 48
+waitchunks
+wait 10
+shot 23_camp_top
+
+# ---- tide
+cmd skyabyss dev grounds go tide ch2_tidal_pool.0 8 4 135 22
+waitchunks
+wait 15
+shot 24_ch2_tidal_pool_0_eye
+cmd skyabyss dev grounds go tide ch2_tidal_pool.0 9 12 315 48
+waitchunks
+wait 10
+shot 24_ch2_tidal_pool_0_top
+cmd skyabyss dev grounds go tide ch2_tidal_pool.1 8 4 135 22
+waitchunks
+wait 15
+shot 25_ch2_tidal_pool_1_eye
+cmd skyabyss dev grounds go tide ch2_tidal_pool.1 9 12 315 48
+waitchunks
+wait 10
+shot 25_ch2_tidal_pool_1_top
+cmd skyabyss dev grounds go tide ch2_drift_raft 8 4 135 22
+waitchunks
+wait 15
+shot 26_ch2_drift_raft_eye
+cmd skyabyss dev grounds go tide ch2_drift_raft 9 12 315 48
+waitchunks
+wait 10
+shot 26_ch2_drift_raft_top
+cmd skyabyss dev grounds go tide ch2_ebb_stakes 8 4 135 22
+waitchunks
+wait 15
+shot 27_ch2_ebb_stakes_eye
+cmd skyabyss dev grounds go tide ch2_ebb_stakes 9 12 315 48
+waitchunks
+wait 10
+shot 27_ch2_ebb_stakes_top
+cmd skyabyss dev grounds go tide ch2_salt_vault 8 4 135 22
+waitchunks
+wait 15
+shot 28_ch2_salt_vault_eye
+cmd skyabyss dev grounds go tide ch2_salt_vault 9 12 315 48
+waitchunks
+wait 10
+shot 28_ch2_salt_vault_top
+cmd skyabyss dev grounds go tide ch2_salt_mark 8 4 135 22
+waitchunks
+wait 15
+shot 29_ch2_salt_mark_eye
+cmd skyabyss dev grounds go tide ch2_salt_mark 9 12 315 48
+waitchunks
+wait 10
+shot 29_ch2_salt_mark_top
+cmd skyabyss dev grounds go tide tide_cairn_a 8 4 135 22
+waitchunks
+wait 15
+shot 30_tide_cairn_a_eye
+cmd skyabyss dev grounds go tide tide_cairn_a 9 12 315 48
+waitchunks
+wait 10
+shot 30_tide_cairn_a_top
+cmd skyabyss dev grounds go tide tide_cairn_b 8 4 135 22
+waitchunks
+wait 15
+shot 31_tide_cairn_b_eye
+cmd skyabyss dev grounds go tide tide_cairn_b 9 12 315 48
+waitchunks
+wait 10
+shot 31_tide_cairn_b_top
+cmd skyabyss dev grounds go tide tide_cargo 8 4 135 22
+waitchunks
+wait 15
+shot 32_tide_cargo_eye
+cmd skyabyss dev grounds go tide tide_cargo 9 12 315 48
+waitchunks
+wait 10
+shot 32_tide_cargo_top
+cmd skyabyss dev grounds go tide tide_stele 8 4 135 22
+waitchunks
+wait 15
+shot 33_tide_stele_eye
+cmd skyabyss dev grounds go tide tide_stele 9 12 315 48
+waitchunks
+wait 10
+shot 33_tide_stele_top
+
+# ---- storm
+cmd skyabyss dev grounds go storm ch3_wind_flag.0 8 4 135 22
+waitchunks
+wait 15
+shot 34_ch3_wind_flag_0_eye
+cmd skyabyss dev grounds go storm ch3_wind_flag.0 9 12 315 48
+waitchunks
+wait 10
+shot 34_ch3_wind_flag_0_top
+cmd skyabyss dev grounds go storm ch3_wind_flag.1 8 4 135 22
+waitchunks
+wait 15
+shot 35_ch3_wind_flag_1_eye
+cmd skyabyss dev grounds go storm ch3_wind_flag.1 9 12 315 48
+waitchunks
+wait 10
+shot 35_ch3_wind_flag_1_top
+cmd skyabyss dev grounds go storm ch3_gleaner_field 8 4 135 22
+waitchunks
+wait 15
+shot 36_ch3_gleaner_field_eye
+cmd skyabyss dev grounds go storm ch3_gleaner_field 9 12 315 48
+waitchunks
+wait 10
+shot 36_ch3_gleaner_field_top
+cmd skyabyss dev grounds go storm ch3_wind_cliff 8 4 135 22
+waitchunks
+wait 15
+shot 37_ch3_wind_cliff_eye
+cmd skyabyss dev grounds go storm ch3_wind_cliff 9 12 315 48
+waitchunks
+wait 10
+shot 37_ch3_wind_cliff_top
+cmd skyabyss dev grounds go storm ch3_rod_tower 8 4 135 22
+waitchunks
+wait 15
+shot 38_ch3_rod_tower_eye
+cmd skyabyss dev grounds go storm ch3_rod_tower 9 12 315 48
+waitchunks
+wait 10
+shot 38_ch3_rod_tower_top
+cmd skyabyss dev grounds go storm ch3_scorched_watch 8 4 135 22
+waitchunks
+wait 15
+shot 39_ch3_scorched_watch_eye
+cmd skyabyss dev grounds go storm ch3_scorched_watch 9 12 315 48
+waitchunks
+wait 10
+shot 39_ch3_scorched_watch_top
+cmd skyabyss dev grounds go storm ch3_vane 8 4 135 22
+waitchunks
+wait 15
+shot 40_ch3_vane_eye
+cmd skyabyss dev grounds go storm ch3_vane 9 12 315 48
+waitchunks
+wait 10
+shot 40_ch3_vane_top
+cmd skyabyss dev grounds go storm ch3_pack 8 4 135 22
+waitchunks
+wait 15
+shot 41_ch3_pack_eye
+cmd skyabyss dev grounds go storm ch3_pack 9 12 315 48
+waitchunks
+wait 10
+shot 41_ch3_pack_top
+cmd skyabyss dev grounds go storm ch3_tablet.0 8 4 135 22
+waitchunks
+wait 15
+shot 42_ch3_tablet_0_eye
+cmd skyabyss dev grounds go storm ch3_tablet.0 9 12 315 48
+waitchunks
+wait 10
+shot 42_ch3_tablet_0_top
+cmd skyabyss dev grounds go storm ch3_tablet.1 8 4 135 22
+waitchunks
+wait 15
+shot 43_ch3_tablet_1_eye
+cmd skyabyss dev grounds go storm ch3_tablet.1 9 12 315 48
+waitchunks
+wait 10
+shot 43_ch3_tablet_1_top

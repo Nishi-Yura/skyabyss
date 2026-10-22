@@ -174,6 +174,12 @@ python tools/check_band_width.py    # 目的の帯の文が幅 230 px に入る�
 
 自己テストは `SKYABYSS_SELFTEST=1 SKYABYSS_SELFTEST_ONLY=lang ./gradlew runServer` (`lang` と `lang objective band` の二段)。
 
+## 地上の場所を新しい世界で確かめる
+
+- 監査: `run/server.properties` の `level-seed` を変え、`run/world` を消してから `SKYABYSS_SELFTEST=1 SKYABYSS_SELFTEST_ONLY="chapter grounds,build audit" ./gradlew runServer`。地形しだいで指摘が変わるので、2〜3 の種で流す（共有のロックを取る）
+- 撮影: `./gradlew runShots -Pscript=tools/shots/ground_sites_qa.txt -PshotsName=ground_sites_qa`（一〜三章の地上の場所を、目の高さと上から。拠点のまわりの場所＝旅の跡・荷車・日記は、この世界には建たない）
+- 地上の場所の浮き・くぼみ・漏れは、部品ごとに直す前に、建て終わりの仕上げ `SiteJob.settle()` で直せないかを見る
+
 ## 構造をデータで確かめる (`dev/StructureDump` と `tools/structure/`)
 
 ブロックを範囲ごとファイル (`.sbd`) に書き出し、Python で図と検査を出す。歩いて回らなくても、穴・行き止まり・水漏れ・看板が分かる。

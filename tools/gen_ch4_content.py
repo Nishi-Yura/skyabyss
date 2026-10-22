@@ -77,7 +77,7 @@ def write_blueprints() -> None:
             blocks.append((x, -1, z, BASALT if (x + z) % 2 else BA))
     blocks += [(0, 0, 0, BARREL), (-1, 0, -1, TOP), (1, 0, -1, TOP)]
     # 台は地面の高さ (y=-1 で地面の一番上を置き換える。地面から浮いた台にしない)。樽はその上
-    blueprint("ember_warm_ledge", pal, blocks, {"barrel": [0, 0, 0], "stand": [0, 0, 2]}, [-1, -1, 1, 1], True, 2)
+    blueprint("ember_warm_ledge", pal, blocks, {"barrel": [0, 0, 0], "stand": [0, 0, 2]}, [-2, -2, 2, 2], True, 2)
 
 
 # ---------------------------------------------------------------- 文
