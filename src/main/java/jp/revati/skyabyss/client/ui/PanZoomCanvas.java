@@ -46,9 +46,9 @@ public final class PanZoomCanvas {
         return zoom;
     }
 
-    // 最初の大きさと位置 (盤を枠の真ん中へ)
+    // 最初の大きさと位置: 盤が枠に入る大きさ (枠より小さい盤は 1 倍) で、真ん中へ
     public void reset() {
-        zoom = 1f;
+        zoom = Mth.clamp(Math.min((float) w / cw, (float) h / ch), MIN_ZOOM, 1f);
         panX = (w - cw) / 2.0;
         panY = (h - ch) / 2.0;
         clampPan();

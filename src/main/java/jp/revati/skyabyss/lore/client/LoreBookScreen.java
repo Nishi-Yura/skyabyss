@@ -443,6 +443,16 @@ public class LoreBookScreen extends Screen implements jp.revati.skyabyss.client.
         if (bodyScroll < maxBodyScroll()) {
             blitWidget(g, x + RIGHT_W + 1, top + BODY_BOTTOM - 8, W_ARROW_DOWN);
         }
+        // 送りの目盛り (細い帯。矢印の間に、いまの見える所を示す)
+        int max = maxBodyScroll();
+        if (max > 0) {
+            int track = BODY_BOTTOM - BODY_Y;
+            int shown = Math.max(1, lines.size() - max);
+            int thumb = Math.max(8, track * shown / Math.max(1, lines.size()));
+            int ty = top + BODY_Y + (track - thumb) * bodyScroll / max;
+            g.fill(x + RIGHT_W + 4, top + BODY_Y, x + RIGHT_W + 6, top + BODY_BOTTOM, 0x40000000);
+            g.fill(x + RIGHT_W + 4, ty, x + RIGHT_W + 6, ty + thumb, 0x90 << 24 | 0x1D6E69);
+        }
     }
 
     private void drawInkBar(GuiGraphics g, int x, int y, int width) {
