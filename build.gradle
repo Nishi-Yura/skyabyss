@@ -256,3 +256,37 @@ tasks.named('runServer') {
         }
     }
 }
+
+// jar を軽くする 2 つ (中身は変えない)。
+// (1) PNG の可逆圧縮: src の PNG を tools/dev/optimize_pngs.py で小さく書き直す。見た目 (デコードした RGBA) が元と一致したものだけ置き換える。
+//     素材を作り直したあとも、次のビルドでまた詰まる。Python が無いとビルドは止まる (tools/ の生成スクリプトと同じ前提)。
+def pngOptimize = tasks.register('optimizePngs', Exec) {
+    group = 'build'
+    description = 'PNG を見た目を変えずに可逆圧縮する (src/main/resources)'
+    inputs.files(fileTree('src/main/resources') { include '**/*.png' })
+    inputs.file('tools/dev/optimize_pngs.py')
+    def stamp = layout.buildDirectory.file('png-optimize.stamp')
+    outputs.file(stamp)
+    commandLine 'python', 'tools/dev/optimize_pngs.py', 'src/main/resources'
+    doLast {
+        stamp.get().asFile.text = 'done'
+    }
+}
+
+// (2) JSON の詰め込み: jar に入る (build/resources/main の) data/・assets の models・blockstates・lang・geo・animations の JSON を
+//     1 行に詰める。パースした中身は同じ。src 側は見やすい整形のまま。
+tasks.named('processResources') {
+    dependsOn pngOptimize
+    doLast {
+        def slurper = new groovy.json.JsonSlurper()
+        def root = destinationDir
+        // data/** と assets/*/{models,blockstates,lang,geo,animations}/** の JSON だけ
+        def pick = ~/(data\/.*|assets\/[^\/]+\/(models|blockstates|lang|geo|animations)\/.*)\.json/
+        root.eachFileRecurse(groovy.io.FileType.FILES) { f ->
+            def rel = root.toPath().relativize(f.toPath()).toString().replace('\\', '/')
+            if (rel ==~ pick) {
+                f.setText(groovy.json.JsonOutput.toJson(slurper.parseText(f.getText('UTF-8'))), 'UTF-8')
+            }
+        }
+    }
+}
