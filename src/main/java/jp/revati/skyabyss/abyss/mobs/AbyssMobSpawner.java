@@ -324,24 +324,41 @@ public final class AbyssMobSpawner {
         return new Plan(id, form, foot.getX() + 0.5, foot.getY(), foot.getZ() + 0.5, count);
     }
 
-    // 人のまわり 12〜22 ブロック (35% は印の近くを基点に)。床 (体が立つ空間が空いている所) を探す。なければ null
+    // 縦穴の道の輪 (半径 PATH_IN〜PATH_OUT。設計図 tools/abyss/gen_abyss_layers.py と同じ)
+    static final double PATH_IN = 15.5;
+    static final double PATH_OUT = 19.5;
+
+    // 人から 12〜22 ブロックの床を探す。35% は印 (溜まり・巣・野営の部屋) のまわり、残りは縦穴の螺旋の道の上
+    // (道は縦穴の中ほどが吹き抜けなので、人のまわりの円で探すと多くが宙か壁になる)。なければ null
     static BlockPos findSpot(ServerLevel level, BlockPos center, Random r) {
-        BlockPos from = center;
         if (r.nextDouble() < ANCHOR_CHANCE) {
             BlockPos m = nearMark(center, r);
             if (m != null) {
-                from = m;
+                double a = r.nextDouble() * Math.PI * 2;
+                double d = 2 + r.nextDouble() * 5;
+                BlockPos f = floorNear(level, m.getX() + (int) Math.round(Math.cos(a) * d), m.getY(), m.getZ() + (int) Math.round(Math.sin(a) * d), 4, 6);
+                if (f != null && f.distSqr(center) >= SPAWN_MIN * SPAWN_MIN) {
+                    return f;
+                }
             }
         }
-        double a = r.nextDouble() * Math.PI * 2;
-        double d = SPAWN_MIN + r.nextDouble() * (SPAWN_MAX - SPAWN_MIN);
-        int x = from.getX() + (int) Math.round(Math.cos(a) * d);
-        int z = from.getZ() + (int) Math.round(Math.sin(a) * d);
-        for (int dy = 4; dy >= -6; dy--) {
-            BlockPos b = new BlockPos(x, from.getY() + dy, z);
+        // 道の上: 人の角度から、弧の長さ 12〜22 だけ前か後ろ。道は回りながら下るので、上下は広めに見る
+        double rr = PATH_IN + 0.5 + r.nextDouble() * (PATH_OUT - PATH_IN - 1);
+        double arc = (SPAWN_MIN + r.nextDouble() * (SPAWN_MAX - SPAWN_MIN)) / rr * (r.nextBoolean() ? 1 : -1);
+        double a = Math.atan2(center.getZ() + 0.5, center.getX() + 0.5) + arc;
+        int x = (int) Math.floor(Math.cos(a) * rr);
+        int z = (int) Math.floor(Math.sin(a) * rr);
+        return floorNear(level, x, center.getY(), z, 10, 14);
+    }
+
+    // (x, z) の柱で、y の上 up から下 down までの間の床 (固い面の上に体の二段が空いている所)。上から順に。なければ null
+    static BlockPos floorNear(ServerLevel level, int x, int y, int z, int up, int down) {
+        BlockPos.MutableBlockPos b = new BlockPos.MutableBlockPos();
+        for (int dy = up; dy >= -down; dy--) {
+            b.set(x, y + dy, z);
             if (level.getBlockState(b).isFaceSturdy(level, b, Direction.UP) && level.getBlockState(b.above()).isAir()
                     && level.getBlockState(b.above(2)).isAir()) {
-                return b.above();
+                return b.above().immutable();
             }
         }
         return null;
