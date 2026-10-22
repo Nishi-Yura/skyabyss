@@ -68,17 +68,18 @@ public final class LoreSelfTest {
         // ---- 読み込み
         LoreManager.loadErrors().forEach(e -> failures.add("load: " + e));
         long unlockable = catalog.entries().stream().filter(LoreEntry::unlockable).count();
-        long early = catalog.entries().stream().filter(e -> e.unlockable() && (e.chapter().equals("prologue") || e.chapter().startsWith("titan_"))).count();
+        // 五章 (chapter2「深淵」) は 2026-10-22 に中身が入った (刻み・墓・遺品の項目)
+        long early = catalog.entries().stream().filter(e -> e.unlockable() && (e.chapter().equals("prologue") || e.chapter().startsWith("titan_") || e.chapter().equals("chapter2"))).count();
         // 12〜20 に、自由なモードのサブクエストが記す 2 項目 (07 の 15 章) と、その先の余裕を足した
         // 都の町のクエストと裏通りの頼み (35 の 3.3・3.5) の 9 項目も足した
         // 一〜四章 (旧 1 章) は巨神ごとに碑文と項目が増える (岩鯨・潮殻で 30 前後、雷翼の 11 を足して 50 前後。余燼の分も見込む)
-        if (early < 12 || early > 130) {
-            failures.add("prologue + chapters 1-4 should have 12-130 entries, found " + early);
+        if (early < 12 || early > 160) {
+            failures.add("prologue + chapters 1-5 should have 12-160 entries, found " + early);
         }
         if (unlockable != early) {
-            failures.add("only the prologue and chapters 1-4 may be written yet (" + unlockable + " unlockable)");
+            failures.add("only the prologue and chapters 1-5 may be written yet (" + unlockable + " unlockable)");
         }
-        for (String later : List.of("chapter2", "chapter3", "finale")) {
+        for (String later : List.of("chapter3", "finale")) {
             List<LoreEntry> list = catalog.inChapter(later);
             if (list.isEmpty() || list.stream().anyMatch(e -> !e.placeholder())) {
                 failures.add("chapter " + later + " should hold placeholders only (" + list.size() + ")");
@@ -413,7 +414,10 @@ public final class LoreSelfTest {
         JsonObject town = json("/assets/skyabyss_town/lang/" + code + ".json", failures);
         // 四章の地上の項目 (灰の民の薬・炉跡の頁・返しに来たか・煤の窯の跡) の文は skyabyss_ch4 にある (34 の 4.5.1)
         JsonObject ch4 = json("/assets/skyabyss_ch4/lang/" + code + ".json", failures);
-        for (JsonObject extra : java.util.Arrays.asList(quest, tide, story, storm, ember, ch1, ch2, ch3, ch4, town)) {
+        // 五章「深淵」の刻み・墓 (skyabyss_ch5) と遺品の項目 (skyabyss_abyss_rl)
+        JsonObject ch5 = json("/assets/skyabyss_ch5/lang/" + code + ".json", failures);
+        JsonObject relics = json("/assets/skyabyss_abyss_rl/lang/" + code + ".json", failures);
+        for (JsonObject extra : java.util.Arrays.asList(quest, tide, story, storm, ember, ch1, ch2, ch3, ch4, town, ch5, relics)) {
             if (lang != null && extra != null) {
                 extra.entrySet().forEach(e -> {
                     if (!lang.has(e.getKey())) {

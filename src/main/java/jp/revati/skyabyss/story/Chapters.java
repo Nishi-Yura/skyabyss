@@ -25,7 +25,7 @@ import net.minecraft.server.level.ServerPlayer;
 //                       stage()   その章を遊ぶ段階 (序章と一章 0、二章 1、三章 2、四章 3、五章 4。六章・終章は -1)
 //   レベル              levelFrom() 推奨レベルの始まり / levelTo() その章を終えるころ / levelCap() 着いたときの上限 (ProgressRules.LEVEL_CAP と同じ)
 //                       序章 1/4/15、一章 4/12/15、二章 12/18/21、三章 18/24/27、四章 24/30/33 (止めたあとは 40)、五章 40/50/50。六章・終章は -1 (未定)
-//   区分                reserved() 五章以降 (名前だけで中身は未着手) / titanChapter() 一〜四章 (巨神編。旧「1 章」) / written() 中身のある章
+//   区分                reserved() 六章以降 (名前だけで中身は未着手) / titanChapter() 一〜四章 (巨神編。旧「1 章」) / written() 中身のある章
 //   次の章              next()  最後は null
 //
 // 内部の ID (伝承 chapter1/…、クエスト、段階 0〜4、上限、背のディメンション) は変えていない。伝承の旧「chapter1」章は
@@ -84,8 +84,9 @@ public enum Chapters {
         return levelCap;
     }
 
+    // 中身が未着手の章 (六章・終章)。五章「深淵」は 2026-10-22 に中身が入った
     public boolean reserved() {
-        return ordinal() >= ABYSS.ordinal();
+        return ordinal() >= MOON.ordinal();
     }
 
     // 巨神編 (一〜四章。旧「1 章」、内部名 chapter1)

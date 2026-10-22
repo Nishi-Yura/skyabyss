@@ -434,10 +434,25 @@ public final class SelfTestRunner {
             SkyAbyss.LOGGER.info("SELFTEST runner: all steps done in {} s, slowest tick {} ms ({})", (System.nanoTime() - startedAt) / 1_000_000_000L,
                     slowestTick / 1_000_000, slowestStep);
             if (haltWhenDone) {
+                releaseForced(event.getServer());
                 event.getServer().halt(false);
             }
         } else {
             wait = QUEUE.peek().waitBefore();
+        }
+    }
+
+    // 止める前に、段が外し忘れた強制読み込みを全部外す (残っていると、止めるときの塊の片づけが終わらないことがあった。
+    // 2026-10-22 の全部の流しで「Saving worlds」のあと ChunkMap.scheduleUnload が回り続けた)。外した数を書く
+    static void releaseForced(net.minecraft.server.MinecraftServer server) {
+        for (net.minecraft.server.level.ServerLevel level : server.getAllLevels()) {
+            it.unimi.dsi.fastutil.longs.LongSet forced = new it.unimi.dsi.fastutil.longs.LongOpenHashSet(level.getForcedChunks());
+            if (forced.isEmpty()) {
+                continue;
+            }
+            SkyAbyss.LOGGER.warn("SELFTEST runner: {} forced chunk(s) left in {} (first {}), releasing", forced.size(), level.dimension().location(),
+                    new net.minecraft.world.level.ChunkPos(forced.iterator().nextLong()));
+            forced.forEach(c -> level.setChunkForced(net.minecraft.world.level.ChunkPos.getX(c), net.minecraft.world.level.ChunkPos.getZ(c), false));
         }
     }
 }
