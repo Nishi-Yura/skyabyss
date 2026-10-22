@@ -1,0 +1,24 @@
+{
+ "id": "abyss_lightning_idol",
+ "short": "避雷の像",
+ "kind": "雷の層の敵 3案 (A3)",
+ "title": "避雷の像 (lightning_idol) — 雷を集めて落とす像・予告つき・低ポリ + ドット絵 3 案",
+ "sheets": [
+  "abyss_roughs/lightning_idol.png"
+ ],
+ "extra": "雷の言葉 (凝灰岩・酸化した銅・白い雷の光)。骨 7 本 (root > body > head / arm_l arm_r / leg_l leg_r)。台は胴の子で根元に沈める。 三角形 (全身): A 588 / B 680 / C 608 (目安 人型像 400〜600)。埋まった部品の検査: A foot_l-pedestal:0.6, foot_r-pedestal:0.6 / B foot_l-pedestal:0.6, foot_r-pedestal:0.6 / C foot_l-pedestal:0.6, foot_r-pedestal:0.6 。メッシュ・アトラス・光る画素のマスクは docs/review/abyss_roughs/lightning_idol/{a,b,c}/。生成: tools/rough/lowpoly/abyss/lightning_idol.py。 歪み・崩れ (深いほど不気味な変わり果てた姿) の方向: 歪み = 針や棒が増え、光が濃くなる (予告の範囲が広がる)。崩れ = 像が割れて胴だけが残り、棒の先の光が落ち続ける。",
+ "options": {
+  "a": {
+   "name": "A 角柱の像 (588 三角形)",
+   "desc": "人型の像。胸に白い雷の筋、頭上に避雷の棒。棒の先の光が予告になり、像の形がそのまま雷の道になる。"
+  },
+  "b": {
+   "name": "B 翼の像 (680 三角形)",
+   "desc": "両腕が翼になり、掌に光の玉。集める動きが翼を広げる形で、予告が一番大きく見える。"
+  },
+  "c": {
+   "name": "C 針の冠の像 (608 三角形)",
+   "desc": "頭に三本の避雷の針。針の先が光り、どこから落ちるかが見える。胸の光の筋と揃って、動かない像らしさが出る。"
+  }
+ }
+}

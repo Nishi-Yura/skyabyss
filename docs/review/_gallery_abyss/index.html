@@ -1,0 +1,273 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>深淵の敵 9 体 ラフ 3 案 (骨・塩・雷の層の基本の姿)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DotGothic16&family=Zen+Kaku+Gothic+New:wght@400;700&display=swap">
+<style>
+/* 作業台: 左に対象の目次、右に対象ごとのシートと選択。暗い石の地に、共鳴の水色を一点だけ使う */
+:root{
+  --bg:#eceef0; --panel:#f8f9fa; --ink:#1b2129; --muted:#5b6672; --line:#c9d0d6;
+  --accent:#0a8fa6; --accent-ink:#ffffff; --ok:#2f8a4b;
+  --display:"DotGothic16","Zen Kaku Gothic New",system-ui,sans-serif;
+  --body:"Zen Kaku Gothic New","Hiragino Sans","Yu Gothic",system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#101318; --panel:#171b22; --ink:#e3e8ee; --muted:#93a0ad; --line:#2a313b;
+  --accent:#5fdcef; --accent-ink:#0b1216; --ok:#6fd18c; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#101318; --panel:#171b22; --ink:#e3e8ee; --muted:#93a0ad; --line:#2a313b;
+  --accent:#5fdcef; --accent-ink:#0b1216; --ok:#6fd18c; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.7;margin:0}
+.wrap{max-width:1180px;margin:0 auto;padding-inline:20px;padding-block:28px 80px}
+.top{display:grid;gap:10px;margin-bottom:22px}
+h1{font-family:var(--display);font-weight:400;font-size:clamp(26px,4vw,38px);margin:0;letter-spacing:.04em;text-wrap:balance}
+.intro{color:var(--muted);max-width:68ch;margin:0}
+.progress{display:flex;align-items:center;gap:12px;flex-wrap:wrap;font-variant-numeric:tabular-nums}
+.bar{flex:1 1 220px;height:8px;background:var(--line);border-radius:2px;overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:var(--accent);transition:width .3s}
+.save-state{color:var(--muted);font-size:13px}
+.layout{display:grid;grid-template-columns:180px minmax(0,1fr);gap:28px;align-items:start}
+nav{position:sticky;top:calc(env(safe-area-inset-top,0px) + 12px);display:grid;gap:2px}
+nav a{color:var(--muted);text-decoration:none;padding:5px 10px;border-left:2px solid var(--line);font-size:14px}
+nav a.done{color:var(--ink);border-left-color:var(--ok)}
+nav a:focus-visible,nav a:hover{color:var(--accent)}
+.subject{padding-block:26px;border-top:1px solid var(--line);display:grid;gap:14px}
+.shead{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.kind{margin:0;font-size:12px;letter-spacing:.12em;color:var(--muted)}
+h2{font-family:var(--display);font-weight:400;font-size:24px;margin:0;flex:1 1 auto}
+.state{font-size:13px;padding:2px 10px;border:1px solid var(--line);border-radius:999px;color:var(--muted)}
+.state[data-state="chosen"]{border-color:var(--ok);color:var(--ok)}
+.extra{margin:0;color:var(--muted);max-width:72ch}
+.sheets{display:grid;gap:12px}
+.sheet{margin:0}
+.zoom{all:unset;cursor:zoom-in;display:block;border:1px solid var(--line);background:#0e1015}
+.zoom:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.sheet img{display:block;width:100%;height:auto}
+.opts{border:0;padding:0;margin:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.opts legend{font-size:13px;color:var(--muted);margin-bottom:6px}
+.opt{display:flex;gap:10px;align-items:flex-start;padding:12px;background:var(--panel);border:1px solid var(--line);cursor:pointer;min-width:0}
+.opt input{position:absolute;opacity:0;pointer-events:none}
+.letter{font-family:var(--display);font-size:22px;line-height:1;width:34px;height:34px;display:grid;place-items:center;border:1px solid var(--line);flex:none}
+.otext{display:grid;gap:2px;min-width:0;font-size:13px;color:var(--muted)}
+.otext b{color:var(--ink);font-size:14px}
+.opt:has(input:checked){border-color:var(--accent)}
+.opt:has(input:checked) .letter{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.opt:has(input:focus-visible){outline:2px solid var(--accent);outline-offset:2px}
+.note-l{font-size:13px;color:var(--muted)}
+.note{width:100%;font:inherit;color:var(--ink);background:var(--panel);border:1px solid var(--line);padding:8px 10px;resize:vertical}
+.note:focus{outline:2px solid var(--accent);outline-offset:0}
+dialog{border:0;padding:0;background:transparent;max-width:96vw;max-height:94vh}
+dialog::backdrop{background:rgba(0,0,0,.82)}
+dialog img{display:block;max-width:96vw;max-height:94vh;width:auto;height:auto}
+.signed-out{display:none;color:var(--muted);font-size:13px}
+.done{color:var(--muted);font-size:14px;max-width:72ch}
+.done summary{cursor:pointer;color:var(--ink)}
+.done ul{margin:6px 0 0;padding-left:1.2em}
+@media (max-width:760px){
+  .layout{grid-template-columns:minmax(0,1fr)}
+  nav{position:static;display:flex;flex-wrap:wrap;gap:4px}
+  nav a{border-left:0;border-bottom:2px solid var(--line);padding:4px 8px}
+  nav a.done{border-bottom-color:var(--ok)}
+  .opts{grid-template-columns:minmax(0,1fr)}
+}
+@media (prefers-reduced-motion:reduce){.bar i{transition:none}}
+</style>
+
+<div class="wrap">
+  <div class="top">
+    <h1>深淵の敵 9 体 ラフ 3 案 (骨・塩・雷の層の基本の姿)</h1>
+    <p class="intro">五章「深淵」の敵のラフです (設計書 36 の 4、A3)。層ごとに 3 種ずつ: 骨 (骨拾い・肋の番・骨笛)、塩 (塩の抜け殻・潮だまりの手・白い貝守)、雷 (帯電の羽虫・避雷の像・焦げた鳥の影)。各案は基本の姿で、色の言葉は層ごと (骨は骨・方解石・灰、塩は白・塩の皮・海の緑、雷は凝灰岩・酸化した銅・白い雷)。「歪み」「崩れ」 (深いほど不気味な変わり果てた姿) は、各案の説明の末尾に一行ずつ書いてあります (今は決めるのは基本の案だけ)。メッシュは閉じた面 (開いた辺・向きの食い違い 0) で、光る材質は雷・鼓動の目印の所だけ。ラフなので登録・動きの実装はまだです。</p>
+    
+    <div class="progress"><div class="bar" aria-hidden="true"><i id="pbar"></i></div>
+      <span id="pcount">0 / 9 選択済み</span><span class="save-state" id="savestate">読み込み中…</span></div>
+  </div>
+  <div class="layout">
+    <nav aria-label="対象"><a href="#abyss_bone_picker" data-nav="abyss_bone_picker">骨拾い</a><a href="#abyss_rib_guard" data-nav="abyss_rib_guard">肋の番</a><a href="#abyss_bone_flute" data-nav="abyss_bone_flute">骨笛</a><a href="#abyss_salt_husk" data-nav="abyss_salt_husk">塩の抜け殻</a><a href="#abyss_tide_hands" data-nav="abyss_tide_hands">潮だまりの手</a><a href="#abyss_white_shell_keeper" data-nav="abyss_white_shell_keeper">白い貝守</a><a href="#abyss_charged_moth" data-nav="abyss_charged_moth">帯電の羽虫</a><a href="#abyss_lightning_idol" data-nav="abyss_lightning_idol">避雷の像</a><a href="#abyss_scorched_bird" data-nav="abyss_scorched_bird">焦げた鳥の影</a></nav>
+    <main>
+<section class="subject" id="abyss_bone_picker" data-id="abyss_bone_picker">
+  <header class="shead">
+    <p class="kind">骨の層の敵 3案 (A3)</p>
+    <h2>骨拾い (bone_picker) — 骨を拾って背負う小さな這うもの・低ポリ + ドット絵 3 案</h2>
+    <span class="state" data-state="none">未選択</span>
+  </header>
+  <p class="extra">骨の言葉 (骨・方解石・灰)。骨 7 本 (root &gt; body &gt; head / leg_l1 leg_l2 leg_r1 leg_r2)。群れなので一匹は小さい (幅 0.5 ブロック)。 三角形 (全身): A 340 / B 260 / C 336 (目安 群れの小物 200〜300 (一匹))。埋まった部品の検査: A なし / B なし / C なし 。メッシュ・アトラス・光る画素のマスクは docs/review/abyss_roughs/bone_picker/{a,b,c}/。生成: tools/rough/lowpoly/abyss/bone_picker.py。 歪み・崩れ (深いほど不気味な変わり果てた姿) の方向: 歪み = 背の骨が増え、骨の束が体を覆う (洞の目が大きく)。崩れ = 骨が抜けて体の殻が割れ、脚だけが残る。</p>
+  <div class="sheets"><figure class="sheet"><button class="zoom" type="button" data-src="abyss_roughs_bone_picker.jpg" aria-label="骨拾い (bone_picker) — 骨を拾って背負う小さな這うもの・低ポリ + ドット絵 3 案 のシートを拡大"><img loading="lazy" src="abyss_roughs_bone_picker.jpg" alt="骨拾い (bone_picker) — 骨を拾って背負う小さな這うもの・低ポリ + ドット絵 3 案 の比較シート"></button></figure></div>
+  <fieldset class="opts"><legend>採用する案</legend><label class="opt" for="abyss_bone_picker-a"><input type="radio" name="abyss_bone_picker" id="abyss_bone_picker-a" value="a"><span class="letter">A</span><span class="otext"><b>A 骨の山 (340 三角形)</b><span>丸い骨の体に拾った骨の束を三本背負う。歩くたびに束が揺れ、骨が鳴る。群れの中で一番「拾っている」姿が伝わる。</span></span></label><label class="opt" for="abyss_bone_picker-b"><input type="radio" name="abyss_bone_picker" id="abyss_bone_picker-b" value="b"><span class="letter">B</span><span class="otext"><b>B 頭蓋の甲 (260 三角形)</b><span>頭蓋の殻を被った形。甲の縁に骨の稜、洞の目。遠目には頭蓋が歩く形で、群れの見分けがつきやすい。</span></span></label><label class="opt" for="abyss_bone_picker-c"><input type="radio" name="abyss_bone_picker" id="abyss_bone_picker-c" value="c"><span class="letter">C</span><span class="otext"><b>C 肋の箱 (336 三角形)</b><span>方解石の体に小さな肋の箱を背負う。箱の中は空で、拾ったものを入れる形が見える。群れが一斉にさらう絵が描きやすい。</span></span></label></fieldset>
+  <label class="note-l" for="abyss_bone_picker-note">直してほしい点 (任意)</label>
+  <textarea id="abyss_bone_picker-note" class="note" rows="2" placeholder="例: Bの形でCの色、盾をもっと大きく"></textarea>
+</section>
+<section class="subject" id="abyss_rib_guard" data-id="abyss_rib_guard">
+  <header class="shead">
+    <p class="kind">骨の層の敵 3案 (A3)</p>
+    <h2>肋の番 (rib_guard) — 肋骨の檻を着た人型・盾つき・低ポリ + ドット絵 3 案</h2>
+    <span class="state" data-state="none">未選択</span>
+  </header>
+  <p class="extra">骨の言葉 (骨・方解石・灰・洞の黒)。骨 7 本 (root &gt; body &gt; head / arm_l arm_r / leg_l leg_r)。胴は輪の積み重ね、手足は太い筒。盾と手は arm_l の子。 三角形 (全身): A 800 / B 794 / C 748 (目安 人型 400〜600)。埋まった部品の検査: A chest_hollow-torso:0.51 / B chest_hollow-torso:0.56 / C なし 。メッシュ・アトラス・光る画素のマスクは docs/review/abyss_roughs/rib_guard/{a,b,c}/。生成: tools/rough/lowpoly/abyss/rib_guard.py。 歪み・崩れ (深いほど不気味な変わり果てた姿) の方向: 歪み = 肋が増えて檻が胴を越え、盾の骨が割れ目から糸を引く。崩れ = 檻が半分剥がれ、洞の中の骨が露出する。</p>
+  <div class="sheets"><figure class="sheet"><button class="zoom" type="button" data-src="abyss_roughs_rib_guard.jpg" aria-label="肋の番 (rib_guard) — 肋骨の檻を着た人型・盾つき・低ポリ + ドット絵 3 案 のシートを拡大"><img loading="lazy" src="abyss_roughs_rib_guard.jpg" alt="肋の番 (rib_guard) — 肋骨の檻を着た人型・盾つき・低ポリ + ドット絵 3 案 の比較シート"></button></figure></div>
+  <fieldset class="opts"><legend>採用する案</legend><label class="opt" for="abyss_rib_guard-a"><input type="radio" name="abyss_rib_guard" id="abyss_rib_guard-a" value="a"><span class="letter">A</span><span class="otext"><b>A 肋の檻 (800 三角形)</b><span>胴の前を回る肋の弧が四段。胸の中は黒い洞がのぞく。左腕の円い盾は、構えると肋の檻と並ぶ。肋の数で格を見せる一番素直な形。</span></span></label><label class="opt" for="abyss_rib_guard-b"><input type="radio" name="abyss_rib_guard" id="abyss_rib_guard-b" value="b"><span class="letter">B</span><span class="otext"><b>B 骨盤の鉢の盾 (794 三角形)</b><span>骨盤の大きな鉢を左腕の盾にする。縁が前へ張り、胸は細い肋だけ。正面は鉢で固く、遠くから見ても盾が一番大きく見える。</span></span></label><label class="opt" for="abyss_rib_guard-c"><input type="radio" name="abyss_rib_guard" id="abyss_rib_guard-c" value="c"><span class="letter">C</span><span class="otext"><b>C 板の肋鎧 (748 三角形)</b><span>胴に重ねた四枚の板の鎧。盾は小さいが、縁から前へ三本の棘が出る。突きの形が一番鋭い。</span></span></label></fieldset>
+  <label class="note-l" for="abyss_rib_guard-note">直してほしい点 (任意)</label>
+  <textarea id="abyss_rib_guard-note" class="note" rows="2" placeholder="例: Bの形でCの色、盾をもっと大きく"></textarea>
+</section>
+<section class="subject" id="abyss_bone_flute" data-id="abyss_bone_flute">
+  <header class="shead">
+    <p class="kind">骨の層の敵 3案 (A3)</p>
+    <h2>骨笛 (bone_flute) — 音で仲間を呼ぶ浮かぶ頭蓋・低ポリ + ドット絵 3 案</h2>
+    <span class="state" data-state="none">未選択</span>
+  </header>
+  <p class="extra">骨の言葉 (骨・方解石・洞の黒・笛の穴の熾)。骨 4 本 (root &gt; head &gt; jaw / tail)。頭蓋は浮かぶので地面に付かない。 三角形 (全身): A 282 / B 304 / C 416 (目安 浮く一体 300〜450)。埋まった部品の検査: A なし / B なし / C なし 。メッシュ・アトラス・光る画素のマスクは docs/review/abyss_roughs/bone_flute/{a,b,c}/。生成: tools/rough/lowpoly/abyss/bone_flute.py。 歪み・崩れ (深いほど不気味な変わり果てた姿) の方向: 歪み = 輪や角が増え、頭蓋の目が大きく穴になる。崩れ = 頭蓋が割れて笛だけが残り、音だけが鳴る (見えない)。</p>
+  <div class="sheets"><figure class="sheet"><button class="zoom" type="button" data-src="abyss_roughs_bone_flute.jpg" aria-label="骨笛 (bone_flute) — 音で仲間を呼ぶ浮かぶ頭蓋・低ポリ + ドット絵 3 案 のシートを拡大"><img loading="lazy" src="abyss_roughs_bone_flute.jpg" alt="骨笛 (bone_flute) — 音で仲間を呼ぶ浮かぶ頭蓋・低ポリ + ドット絵 3 案 の比較シート"></button></figure></div>
+  <fieldset class="opts"><legend>採用する案</legend><label class="opt" for="abyss_bone_flute-a"><input type="radio" name="abyss_bone_flute" id="abyss_bone_flute-a" value="a"><span class="letter">A</span><span class="otext"><b>A 笛の頭蓋 (282 三角形)</b><span>頭蓋の顎から骨の笛が一本出る。笛の穴に熾の粒が光り、鳴らすと粒が跳ねる。一番「楽器」として読める。</span></span></label><label class="opt" for="abyss_bone_flute-b"><input type="radio" name="abyss_bone_flute" id="abyss_bone_flute-b" value="b"><span class="letter">B</span><span class="otext"><b>B 角の頭蓋 (304 三角形)</b><span>頭蓋の両側に角の管が後ろへ曲がり、背から脊椎の尾が垂れる。浮かんで揺れる姿が大きく、遠くから見分けやすい。</span></span></label><label class="opt" for="abyss_bone_flute-c"><input type="radio" name="abyss_bone_flute" id="abyss_bone_flute-c" value="c"><span class="letter">C</span><span class="otext"><b>C 輪の頭蓋 (416 三角形)</b><span>脊椎の輪が頭蓋を三つ巻き、口は細い管。輪が鳴るように揺れる。一番丸く、他の骨の敵の中で埋もれない。</span></span></label></fieldset>
+  <label class="note-l" for="abyss_bone_flute-note">直してほしい点 (任意)</label>
+  <textarea id="abyss_bone_flute-note" class="note" rows="2" placeholder="例: Bの形でCの色、盾をもっと大きく"></textarea>
+</section>
+<section class="subject" id="abyss_salt_husk" data-id="abyss_salt_husk">
+  <header class="shead">
+    <p class="kind">塩の層の敵 3案 (A3)</p>
+    <h2>塩の抜け殻 (salt_husk) — 固まった人の形・近づくと割れて動く・低ポリ + ドット絵 3 案</h2>
+    <span class="state" data-state="none">未選択</span>
+  </header>
+  <p class="extra">塩の言葉 (白・塩の皮・海の緑・洞の黒)。骨 7 本 (root &gt; body &gt; head / arm_l arm_r / leg_l leg_r)。胴は輪の積み重ね、手足は太い筒。割れ目と棘は殻に沈めた管・棘。 三角形 (全身): A 543 / B 603 / C 628 (目安 人型 400〜600)。埋まった部品の検査: A なし / B なし / C なし 。メッシュ・アトラス・光る画素のマスクは docs/review/abyss_roughs/salt_husk/{a,b,c}/。生成: tools/rough/lowpoly/abyss/salt_husk.py。 歪み・崩れ (深いほど不気味な変わり果てた姿) の方向: 歪み = 割れ目が増え、洞が広がって殻が薄くなる (海の緑が中から透ける)。崩れ = 殻が大半抜けて、骨の影だけ残る (骨の層との接点)。</p>
+  <div class="sheets"><figure class="sheet"><button class="zoom" type="button" data-src="abyss_roughs_salt_husk.jpg" aria-label="塩の抜け殻 (salt_husk) — 固まった人の形・近づくと割れて動く・低ポリ + ドット絵 3 案 のシートを拡大"><img loading="lazy" src="abyss_roughs_salt_husk.jpg" alt="塩の抜け殻 (salt_husk) — 固まった人の形・近づくと割れて動く・低ポリ + ドット絵 3 案 の比較シート"></button></figure></div>
+  <fieldset class="opts"><legend>採用する案</legend><label class="opt" for="abyss_salt_husk-a"><input type="radio" name="abyss_salt_husk" id="abyss_salt_husk-a" value="a"><span class="letter">A</span><span class="otext"><b>A 割れた人形 (543 三角形)</b><span>胸と左腕に割れ目があり、奥は黒い洞。割れ目が見えると、殻の中が空だと分かる。ひびを一番素直に読ませる形。</span></span></label><label class="opt" for="abyss_salt_husk-b"><input type="radio" name="abyss_salt_husk" id="abyss_salt_husk-b" value="b"><span class="letter">B</span><span class="otext"><b>B 結晶の殻 (603 三角形)</b><span>肩と背に塩の結晶の棘が生え、頭に冠の棘。遠目には結晶の人形で、格が一番出る。動くと棘が鳴るように割れる。</span></span></label><label class="opt" for="abyss_salt_husk-c"><input type="radio" name="abyss_salt_husk" id="abyss_salt_husk-c" value="c"><span class="letter">C</span><span class="otext"><b>C 砂の立像 (628 三角形)</b><span>角の取れた立像で、裾が広い塩の皮になって垂れる。皮の流れが胸から裾へ続き、足元に海の緑の溜まり。待ち伏せの地味さが一番合う。</span></span></label></fieldset>
+  <label class="note-l" for="abyss_salt_husk-note">直してほしい点 (任意)</label>
+  <textarea id="abyss_salt_husk-note" class="note" rows="2" placeholder="例: Bの形でCの色、盾をもっと大きく"></textarea>
+</section>
+<section class="subject" id="abyss_tide_hands" data-id="abyss_tide_hands">
+  <header class="shead">
+    <p class="kind">塩の層の敵 3案 (A3)</p>
+    <h2>潮だまりの手 (tide_hands) — 床から伸びる手・足止め・低ポリ + ドット絵 3 案</h2>
+    <span class="state" data-state="none">未選択</span>
+  </header>
+  <p class="extra">塩の言葉 (白・塩の皮・海の緑・酸化した銅)。骨 5 本 (root &gt; pool / a1..a4)。腕は溜まり (床の楕円) に沈める。手と指は腕の子。 三角形 (全身): A 640 / B 720 / C 656 (目安 地上の中型 300〜450 (四本の腕))。埋まった部品の検査: A なし / B なし / C なし 。メッシュ・アトラス・光る画素のマスクは docs/review/abyss_roughs/tide_hands/{a,b,c}/。生成: tools/rough/lowpoly/abyss/tide_hands.py。 歪み・崩れ (深いほど不気味な変わり果てた姿) の方向: 歪み = 指が増えて関節が二つに曲がる・海藻が濃くなる。崩れ = 腕が抜けて溜まりだけが残り、溜まりの緑が濃く光る。</p>
+  <div class="sheets"><figure class="sheet"><button class="zoom" type="button" data-src="abyss_roughs_tide_hands.jpg" aria-label="潮だまりの手 (tide_hands) — 床から伸びる手・足止め・低ポリ + ドット絵 3 案 のシートを拡大"><img loading="lazy" src="abyss_roughs_tide_hands.jpg" alt="潮だまりの手 (tide_hands) — 床から伸びる手・足止め・低ポリ + ドット絵 3 案 の比較シート"></button></figure></div>
+  <fieldset class="opts"><legend>採用する案</legend><label class="opt" for="abyss_tide_hands-a"><input type="radio" name="abyss_tide_hands" id="abyss_tide_hands-a" value="a"><span class="letter">A</span><span class="otext"><b>A 五指の手 (640 三角形)</b><span>床の溜まりから四本の腕。先に五指の塩の手。指は長さをそろえた尖り。遠目にも手と分かり、掴む形が一番読める。</span></span></label><label class="opt" for="abyss_tide_hands-b"><input type="radio" name="abyss_tide_hands" id="abyss_tide_hands-b" value="b"><span class="letter">B</span><span class="otext"><b>B 貝殻の手 (720 三角形)</b><span>腕に貝の板の籠手。指は短く、手首まで貝に覆われる。掴むよりも押さえる形で、重い足止めに合う。</span></span></label><label class="opt" for="abyss_tide_hands-c"><input type="radio" name="abyss_tide_hands" id="abyss_tide_hands-c" value="c"><span class="letter">C</span><span class="otext"><b>C 海藻の手 (656 三角形)</b><span>細く長い指の手に海藻の紐が垂れる。溜まりの緑と揃い、水の中から伸びる感じが一番出る。ただし細く、群れにすると見えにくい。</span></span></label></fieldset>
+  <label class="note-l" for="abyss_tide_hands-note">直してほしい点 (任意)</label>
+  <textarea id="abyss_tide_hands-note" class="note" rows="2" placeholder="例: Bの形でCの色、盾をもっと大きく"></textarea>
+</section>
+<section class="subject" id="abyss_white_shell_keeper" data-id="abyss_white_shell_keeper">
+  <header class="shead">
+    <p class="kind">塩の層の敵 3案 (A3)</p>
+    <h2>白い貝守 (white_shell_keeper) — 殻にこもる塩の貝・硬い・低ポリ + ドット絵 3 案</h2>
+    <span class="state" data-state="none">未選択</span>
+  </header>
+  <p class="extra">塩の言葉 (白・塩の皮・海の緑・洞の黒)。骨 5 本 (root &gt; shell / body / claw_l claw_r)。殻の中に身を沈める。 三角形 (全身): A 276 / B 440 / C 270 (目安 硬い中型 300〜450)。埋まった部品の検査: A whorl-shell:0.68 / B なし / C なし 。メッシュ・アトラス・光る画素のマスクは docs/review/abyss_roughs/white_shell_keeper/{a,b,c}/。生成: tools/rough/lowpoly/abyss/white_shell_keeper.py。 歪み・崩れ (深いほど不気味な変わり果てた姿) の方向: 歪み = 殻の螺旋が欠け、中の身が見える (白が褪せて海の緑)。崩れ = 殻が割れて二枚になり、身が剥き出しで動く。</p>
+  <div class="sheets"><figure class="sheet"><button class="zoom" type="button" data-src="abyss_roughs_white_shell_keeper.jpg" aria-label="白い貝守 (white_shell_keeper) — 殻にこもる塩の貝・硬い・低ポリ + ドット絵 3 案 のシートを拡大"><img loading="lazy" src="abyss_roughs_white_shell_keeper.jpg" alt="白い貝守 (white_shell_keeper) — 殻にこもる塩の貝・硬い・低ポリ + ドット絵 3 案 の比較シート"></button></figure></div>
+  <fieldset class="opts"><legend>採用する案</legend><label class="opt" for="abyss_white_shell_keeper-a"><input type="radio" name="abyss_white_shell_keeper" id="abyss_white_shell_keeper-a" value="a"><span class="letter">A</span><span class="otext"><b>A 巻貝 (276 三角形)</b><span>円錐の殻を背負い、殻の口から鋏が二本出る。殻の帯が一番「貝」として読める。口が開くと鋏の根が見える。</span></span></label><label class="opt" for="abyss_white_shell_keeper-b"><input type="radio" name="abyss_white_shell_keeper" id="abyss_white_shell_keeper-b" value="b"><span class="letter">B</span><span class="otext"><b>B 二枚貝 (440 三角形)</b><span>二枚の殻を背の蝶番で開く。開いた口の中に身が見え、打てる所がはっきりする。閉じると岩の塊。</span></span></label><label class="opt" for="abyss_white_shell_keeper-c"><input type="radio" name="abyss_white_shell_keeper" id="abyss_white_shell_keeper-c" value="c"><span class="letter">C</span><span class="otext"><b>C 亀の甲 (270 三角形)</b><span>丸い甲の下から四本の脚と小さな頭。殻を閉じると甲だけになり、一番低く、転がっていそうな形。</span></span></label></fieldset>
+  <label class="note-l" for="abyss_white_shell_keeper-note">直してほしい点 (任意)</label>
+  <textarea id="abyss_white_shell_keeper-note" class="note" rows="2" placeholder="例: Bの形でCの色、盾をもっと大きく"></textarea>
+</section>
+<section class="subject" id="abyss_charged_moth" data-id="abyss_charged_moth">
+  <header class="shead">
+    <p class="kind">雷の層の敵 3案 (A3)</p>
+    <h2>帯電の羽虫 (charged_moth) — 光る群れの虫・低ポリ + ドット絵 3 案</h2>
+    <span class="state" data-state="none">未選択</span>
+  </header>
+  <p class="extra">雷の言葉 (凝灰岩・酸化した銅・白い雷の光・薄羽)。骨 6 本 (root &gt; body &gt; head / wing_l wing_r / abd)。群れなので一匹は小さい。 三角形 (全身): A 318 / B 186 / C 234 (目安 群れの小物 200〜300 (一匹))。埋まった部品の検査: A なし / B なし / C なし 。メッシュ・アトラス・光る画素のマスクは docs/review/abyss_roughs/charged_moth/{a,b,c}/。生成: tools/rough/lowpoly/abyss/charged_moth.py。 歪み・崩れ (深いほど不気味な変わり果てた姿) の方向: 歪み = 光の玉が二つに増え、羽の縁が焦げて黒い。崩れ = 羽が半分抜け、光だけが浮く (光は見えるが体が見えない)。</p>
+  <div class="sheets"><figure class="sheet"><button class="zoom" type="button" data-src="abyss_roughs_charged_moth.jpg" aria-label="帯電の羽虫 (charged_moth) — 光る群れの虫・低ポリ + ドット絵 3 案 のシートを拡大"><img loading="lazy" src="abyss_roughs_charged_moth.jpg" alt="帯電の羽虫 (charged_moth) — 光る群れの虫・低ポリ + ドット絵 3 案 の比較シート"></button></figure></div>
+  <fieldset class="opts"><legend>採用する案</legend><label class="opt" for="abyss_charged_moth-a"><input type="radio" name="abyss_charged_moth" id="abyss_charged_moth-a" value="a"><span class="letter">A</span><span class="otext"><b>A 細い羽虫 (318 三角形)</b><span>細い胴と薄い羽。腹の先の白い雷の玉が群れの目印になる。小さく、群れが一斉に寄る姿が一番出る。</span></span></label><label class="opt" for="abyss_charged_moth-b"><input type="radio" name="abyss_charged_moth" id="abyss_charged_moth-b" value="b"><span class="letter">B</span><span class="otext"><b>B 甲虫の羽虫 (186 三角形)</b><span>酸化した銅の硬い甲に白い雷の筋。羽は畳んで甲の下。打つと甲が鳴るので、触れて痺れる形がはっきり読める。</span></span></label><label class="opt" for="abyss_charged_moth-c"><input type="radio" name="abyss_charged_moth" id="abyss_charged_moth-c" value="c"><span class="letter">C</span><span class="otext"><b>C 蝶の羽虫 (234 三角形)</b><span>大きい薄羽で、縁が白い雷の線になる。羽ばたくと光の軌跡が残り、群れの動きが遠くから追える。ただし一番大きく、数が多いと重い。</span></span></label></fieldset>
+  <label class="note-l" for="abyss_charged_moth-note">直してほしい点 (任意)</label>
+  <textarea id="abyss_charged_moth-note" class="note" rows="2" placeholder="例: Bの形でCの色、盾をもっと大きく"></textarea>
+</section>
+<section class="subject" id="abyss_lightning_idol" data-id="abyss_lightning_idol">
+  <header class="shead">
+    <p class="kind">雷の層の敵 3案 (A3)</p>
+    <h2>避雷の像 (lightning_idol) — 雷を集めて落とす像・予告つき・低ポリ + ドット絵 3 案</h2>
+    <span class="state" data-state="none">未選択</span>
+  </header>
+  <p class="extra">雷の言葉 (凝灰岩・酸化した銅・白い雷の光)。骨 7 本 (root &gt; body &gt; head / arm_l arm_r / leg_l leg_r)。台は胴の子で根元に沈める。 三角形 (全身): A 588 / B 680 / C 608 (目安 人型像 400〜600)。埋まった部品の検査: A foot_l-pedestal:0.6, foot_r-pedestal:0.6 / B foot_l-pedestal:0.6, foot_r-pedestal:0.6 / C foot_l-pedestal:0.6, foot_r-pedestal:0.6 。メッシュ・アトラス・光る画素のマスクは docs/review/abyss_roughs/lightning_idol/{a,b,c}/。生成: tools/rough/lowpoly/abyss/lightning_idol.py。 歪み・崩れ (深いほど不気味な変わり果てた姿) の方向: 歪み = 針や棒が増え、光が濃くなる (予告の範囲が広がる)。崩れ = 像が割れて胴だけが残り、棒の先の光が落ち続ける。</p>
+  <div class="sheets"><figure class="sheet"><button class="zoom" type="button" data-src="abyss_roughs_lightning_idol.jpg" aria-label="避雷の像 (lightning_idol) — 雷を集めて落とす像・予告つき・低ポリ + ドット絵 3 案 のシートを拡大"><img loading="lazy" src="abyss_roughs_lightning_idol.jpg" alt="避雷の像 (lightning_idol) — 雷を集めて落とす像・予告つき・低ポリ + ドット絵 3 案 の比較シート"></button></figure></div>
+  <fieldset class="opts"><legend>採用する案</legend><label class="opt" for="abyss_lightning_idol-a"><input type="radio" name="abyss_lightning_idol" id="abyss_lightning_idol-a" value="a"><span class="letter">A</span><span class="otext"><b>A 角柱の像 (588 三角形)</b><span>人型の像。胸に白い雷の筋、頭上に避雷の棒。棒の先の光が予告になり、像の形がそのまま雷の道になる。</span></span></label><label class="opt" for="abyss_lightning_idol-b"><input type="radio" name="abyss_lightning_idol" id="abyss_lightning_idol-b" value="b"><span class="letter">B</span><span class="otext"><b>B 翼の像 (680 三角形)</b><span>両腕が翼になり、掌に光の玉。集める動きが翼を広げる形で、予告が一番大きく見える。</span></span></label><label class="opt" for="abyss_lightning_idol-c"><input type="radio" name="abyss_lightning_idol" id="abyss_lightning_idol-c" value="c"><span class="letter">C</span><span class="otext"><b>C 針の冠の像 (608 三角形)</b><span>頭に三本の避雷の針。針の先が光り、どこから落ちるかが見える。胸の光の筋と揃って、動かない像らしさが出る。</span></span></label></fieldset>
+  <label class="note-l" for="abyss_lightning_idol-note">直してほしい点 (任意)</label>
+  <textarea id="abyss_lightning_idol-note" class="note" rows="2" placeholder="例: Bの形でCの色、盾をもっと大きく"></textarea>
+</section>
+<section class="subject" id="abyss_scorched_bird" data-id="abyss_scorched_bird">
+  <header class="shead">
+    <p class="kind">雷の層の敵 3案 (A3)</p>
+    <h2>焦げた鳥の影 (scorched_bird) — 天井の闇から降りる空の敵・羽のある鳥・低ポリ + ドット絵 3 案</h2>
+    <span class="state" data-state="none">未選択</span>
+  </header>
+  <p class="extra">雷の言葉 (煤・羽の灰・凝灰岩・酸化した銅・白い雷の光)。骨 8 本 (root &gt; body &gt; head / wing_l wing_r / tail / leg_l leg_r)。羽は薄い筒の羽根、根は翼の骨か胴に沈める。 三角形 (全身): A 1172 / B 930 / C 728 (目安 空の中型 300〜450 (羽の数で増える))。埋まった部品の検査: A なし / B なし / C なし 。メッシュ・アトラス・光る画素のマスクは docs/review/abyss_roughs/scorched_bird/{a,b,c}/。生成: tools/rough/lowpoly/abyss/scorched_bird.py。 歪み・崩れ (深いほど不気味な変わり果てた姿) の方向: 歪み = 羽に穴が増え、尾の先の光が二つになる。崩れ = 翼が取れて胴だけが落ち、落ちた所で煤の跡が残る。</p>
+  <div class="sheets"><figure class="sheet"><button class="zoom" type="button" data-src="abyss_roughs_scorched_bird.jpg" aria-label="焦げた鳥の影 (scorched_bird) — 天井の闇から降りる空の敵・羽のある鳥・低ポリ + ドット絵 3 案 のシートを拡大"><img loading="lazy" src="abyss_roughs_scorched_bird.jpg" alt="焦げた鳥の影 (scorched_bird) — 天井の闇から降りる空の敵・羽のある鳥・低ポリ + ドット絵 3 案 の比較シート"></button></figure></div>
+  <fieldset class="opts"><legend>採用する案</legend><label class="opt" for="abyss_scorched_bird-a"><input type="radio" name="abyss_scorched_bird" id="abyss_scorched_bird-a" value="a"><span class="letter">A</span><span class="otext"><b>A 広げた翼 (1172 三角形)</b><span>両翼を広げて風切り羽を階段のように並べ、扇の尾。上から見た影が一番大きく、天井の闇に紛れて見つけにくい。</span></span></label><label class="opt" for="abyss_scorched_bird-b"><input type="radio" name="abyss_scorched_bird" id="abyss_scorched_bird-b" value="b"><span class="letter">B</span><span class="otext"><b>B 折れた翼 (930 三角形)</b><span>左翼が肘で折れて垂れ、羽が割れて下がる。割れた骨の先が一本のぞく。右翼は半分だけ。飛べない影に見え、動きの乱れで隙が分かる。</span></span></label><label class="opt" for="abyss_scorched_bird-c"><input type="radio" name="abyss_scorched_bird" id="abyss_scorched_bird-c" value="c"><span class="letter">C</span><span class="otext"><b>C 長い尾の鳥 (728 三角形)</b><span>翼は畳んで胴の横に寄せ、細い尾が長く伸びて先に白い雷の玉。尾で上から打つ形で、攻撃の距離が一番読める。</span></span></label></fieldset>
+  <label class="note-l" for="abyss_scorched_bird-note">直してほしい点 (任意)</label>
+  <textarea id="abyss_scorched_bird-note" class="note" rows="2" placeholder="例: Bの形でCの色、盾をもっと大きく"></textarea>
+</section></main>
+  </div>
+</div>
+<dialog id="viewer"><img id="viewer-img" alt="拡大したシート"></dialog>
+
+<script>
+(() => {
+  const total = 9;
+  const sections = [...document.querySelectorAll('.subject')];
+  const saveState = document.getElementById('savestate');
+  let db = null;
+  const timers = {};
+
+  function refresh() {
+    let n = 0;
+    for (const s of sections) {
+      const chosen = s.querySelector('input[type=radio]:checked');
+      const st = s.querySelector('.state');
+      if (chosen) { n++; st.dataset.state = 'chosen'; st.textContent = chosen.value.toUpperCase() + ' を採用'; }
+      else { st.dataset.state = 'none'; st.textContent = '未選択'; }
+      const nav = document.querySelector(`[data-nav="${s.dataset.id}"]`);
+      if (nav) nav.classList.toggle('done', !!chosen);
+    }
+    document.getElementById('pcount').textContent = `${n} / ${total} 選択済み`;
+    document.getElementById('pbar').style.width = (n / total * 100) + '%';
+  }
+
+  async function save(id) {
+    if (!db) return;
+    const s = document.getElementById(id);
+    const chosen = s.querySelector('input[type=radio]:checked');
+    const note = s.querySelector('.note').value;
+    saveState.textContent = '保存中…';
+    try {
+      await db.doc('choices/' + id).set({ option: chosen ? chosen.value : '', note, at: Date.now() });
+      saveState.textContent = '保存しました';
+    } catch (e) {
+      saveState.textContent = '保存できませんでした。もう一度選び直してください';
+    }
+  }
+
+  for (const s of sections) {
+    const id = s.dataset.id;
+    s.querySelectorAll('input[type=radio]').forEach(r => r.addEventListener('change', () => { refresh(); save(id); }));
+    s.querySelector('.note').addEventListener('input', () => {
+      clearTimeout(timers[id]); timers[id] = setTimeout(() => save(id), 800);
+    });
+  }
+
+  const viewer = document.getElementById('viewer');
+  const vimg = document.getElementById('viewer-img');
+  document.querySelectorAll('.zoom').forEach(b => b.addEventListener('click', () => {
+    vimg.src = b.dataset.src; viewer.showModal();
+  }));
+  viewer.addEventListener('click', () => viewer.close());
+
+  refresh();
+  (async () => {
+    const c = window.claude && window.claude.use ? window.claude : null;
+    db = c ? await c.use('db') : null;
+    if (!db) { saveState.textContent = 'この表示では選択を保存できません (サインインして開いてください)'; return; }
+    try {
+      const snap = await db.collection('choices').get();
+      const docs = snap.docs || snap;
+      for (const d of docs) {
+        const data = typeof d.data === 'function' ? d.data() : d.data;
+        const s = document.getElementById(d.id);
+        if (!s || !data) continue;
+        if (data.option) { const r = s.querySelector(`input[value="${data.option}"]`); if (r) r.checked = true; }
+        if (data.note) s.querySelector('.note').value = data.note;
+      }
+      saveState.textContent = '選ぶと自動で保存されます';
+    } catch (e) {
+      saveState.textContent = '前回の選択を読み込めませんでした';
+    }
+    refresh();
+  })();
+})();
+</script>
