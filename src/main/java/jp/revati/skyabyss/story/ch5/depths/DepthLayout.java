@@ -251,8 +251,8 @@ public final class DepthLayout {
     // 灯り: 壁の内側に、六段ごとに六方へ (LAMP_HALL は八方。SPARSE_LIGHT は半分)
     private List<BlockPos> lamps() {
         List<BlockPos> out = new ArrayList<>();
-        int every = 6;
-        int angles = s.kind() == Kind.LAMP_HALL ? 8 : 6;
+        int every = 4;
+        int angles = s.kind() == Kind.LAMP_HALL ? 8 : 8;
         if (s.has(Modifier.SPARSE_LIGHT)) {
             every *= 2;
         }
