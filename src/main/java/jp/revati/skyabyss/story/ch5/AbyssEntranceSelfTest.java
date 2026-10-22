@@ -24,9 +24,9 @@ import net.minecraft.world.level.levelgen.Heightmap;
 import net.neoforged.neoforge.common.util.FakePlayer;
 
 // SELFTEST ch5 entrance: 五章の入口 (docs/design/34 の 4.7)。
-//   データ: main_abyss の段 (rumor・prepare・door・shaft・gate・descend・warden・heart・report)、支度 ch5/black_iron (ネザライトのインゴット → 鍛冶師。報酬に鍛冶型)
+//   データ: main_abyss の段 (rumor・prepare・door・shaft・gate・層ごとの camp/marks/lord・descend・warden・heart・report)、支度 ch5/black_iron (ネザライトのインゴット → 鍛冶師。報酬に鍛冶型)
 //   流れ: 印を出発点のそばへ差し替え、戸の 2 マスを強化深層岩に。鍵なし・段の前は開かない → 段 door で鍵を持つと開く (記録・合図で段 shaft)
-//        → 底の境の印のそばで合図 (段 gate) → 鍵なしでは門は開かない → 鍵で格子が溶ける → 門の列で合図 (段 descend)。踊り場の一言は人ごとに一度
+//        → 底の境の印のそばで合図 (段 gate) → 鍵なしでは門は開かない → 鍵で格子が溶ける → 門の列で合図 (段 bone_camp)。踊り場の一言は人ごとに一度
 public final class AbyssEntranceSelfTest {
     private AbyssEntranceSelfTest() {
     }
@@ -125,7 +125,7 @@ public final class AbyssEntranceSelfTest {
             p.moveTo(gate.getX() + 0.5, gate.getY(), gate.getZ() - 0.5);
             AbyssGate.check(server, p, gate, false);
             Quests.poll(p, true);
-            check(f, "descend".equals(TownGuests.stageOf(p, AbyssEntrance.QUEST)), "passing the gate did not advance to descend: " + TownGuests.stageOf(p, AbyssEntrance.QUEST));
+            check(f, "bone_camp".equals(TownGuests.stageOf(p, AbyssEntrance.QUEST)), "passing the gate did not advance to bone_camp: " + TownGuests.stageOf(p, AbyssEntrance.QUEST));
             party(server, level, f);
         } catch (RuntimeException e) {
             SkyAbyss.LOGGER.error("SELFTEST ch5 entrance crashed", e);
@@ -166,7 +166,7 @@ public final class AbyssEntranceSelfTest {
             for (FakePlayer q : List.of(a, b)) {
                 Quests.forgetAll(q);
                 Quests.start(q, AbyssEntrance.QUEST);
-                for (int i = 0; i < 9 && !"warden".equals(TownGuests.stageOf(q, AbyssEntrance.QUEST)); i++) {
+                for (int i = 0; i < 24 && !"warden".equals(TownGuests.stageOf(q, AbyssEntrance.QUEST)); i++) {
                     Quests.forceStage(q, AbyssEntrance.QUEST);
                 }
             }
@@ -186,7 +186,9 @@ public final class AbyssEntranceSelfTest {
         check(f, main != null, "main_abyss is not loaded");
         if (main != null) {
             List<String> ids = main.stages().stream().map(QuestDef.Stage::id).toList();
-            check(f, ids.equals(List.of("rumor", "prepare", "door", "shaft", "gate", "descend", "warden", "heart", "report")), "main_abyss stages: " + ids);
+            List<String> want = new ArrayList<>(List.of("rumor", "prepare", "door", "shaft"));
+            want.addAll(jp.revati.skyabyss.story.ch5.layers.Layers.stagesForTest());
+            check(f, ids.equals(want), "main_abyss stages: " + ids);
             check(f, "main".equals(main.category()) && "chapter2".equals(main.chapter()), "main_abyss should be a chapter-5 main quest");
         }
         QuestDef iron = QuestManager.quest("ch5/black_iron");

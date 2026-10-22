@@ -68,7 +68,8 @@ public final class AbyssSections {
 
     @SubscribeEvent
     static void onTick(PlayerTickEvent.Post event) {
-        if (!(event.getEntity() instanceof ServerPlayer p) || p.connection == null || p.tickCount % 10 != 3) {
+        if (!(event.getEntity() instanceof ServerPlayer p) || p instanceof net.neoforged.neoforge.common.util.FakePlayer || p.connection == null
+                || p.tickCount % 10 != 3) {
             return;
         }
         if (!hooked) {

@@ -244,6 +244,9 @@ public final class AbyssMarks {
             return;
         }
         p.teleportTo(level, m.getX() + 0.5, m.getY(), m.getZ() + 0.5, 180f, 0f);
+        if (p instanceof net.neoforged.neoforge.common.util.FakePlayer) {
+            p.moveTo(m.getX() + 0.5, m.getY(), m.getZ() + 0.5, 180f, 0f);
+        }
         if (line != null) {
             Notice.bar(p, Component.translatable(line));
         }

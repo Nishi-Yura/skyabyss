@@ -137,7 +137,7 @@ public final class AbyssLayersV2SelfTest {
         }
         for (String m : must) {
             if (!reached(seen, AbyssBuild.mark(m))) {
-                f.add(m + " is not reached on foot from the arrival");
+                f.add(m + " is not reached on foot from the arrival (nearest walked " + nearest(seen, AbyssBuild.mark(m)) + ")");
             }
         }
         // 近道を開けると、印の部屋から野営へ歩いて帰れる
@@ -160,6 +160,23 @@ public final class AbyssLayersV2SelfTest {
                 }
             }
         }
+    }
+
+    static String nearest(Set<Long> seen, BlockPos m) {
+        if (m == null) {
+            return "-";
+        }
+        BlockPos best = null;
+        double bd = Double.MAX_VALUE;
+        for (long k : seen) {
+            BlockPos p = BlockPos.of(k);
+            double d = p.distSqr(m);
+            if (d < bd) {
+                bd = d;
+                best = p;
+            }
+        }
+        return best + " d=" + Math.round(Math.sqrt(bd));
     }
 
     static void box(Set<Long> out, String name) {
@@ -240,6 +257,10 @@ public final class AbyssLayersV2SelfTest {
             for (int[] d : dirs) {
                 int nx = c.getX() + d[0], nz = c.getZ() + d[1];
                 for (int ny : new int[] {c.getY(), c.getY() + 1, c.getY() - 1, c.getY() - 2, c.getY() - 3}) {
+                    // 上りの一段は 0.5 まで (平らな床から段の上へは 1.5 で上れない)
+                    if (ny == c.getY() + 1 && step(b, nx, ny, nz) && !step(b, c.getX(), c.getY(), c.getZ())) {
+                        continue;
+                    }
                     if (!stand(b, open, nx, ny, nz)) {
                         continue;
                     }
@@ -282,12 +303,12 @@ public final class AbyssLayersV2SelfTest {
             check(f, AbyssMarks.count(c, "bone") == 2, "the party mate does not share the marks: " + AbyssMarks.count(c, "bone"));
             BlockPos g = AbyssBuild.mark("gate_bone");
             BlockPos out = AbyssBuild.mark("gate_bone_out");
-            a.teleportTo(level, out.getX() + 0.5, out.getY(), out.getZ() + 0.5, 180f, 0f);
+            a.moveTo(out.getX() + 0.5, out.getY(), out.getZ() + 0.5, 180f, 0f);
             check(f, !AbyssMarks.gate(a, "bone"), "the gate opened with two marks");
             check(f, AbyssMarks.take(c, "bone", 3), "the mate could not take the third mark");
             check(f, AbyssMarks.count(a, "bone") == 3 && AbyssMarks.canPassGate(a, "bone"), "three marks do not open the gate");
             check(f, d.isOpen("scut_bone_3"), "taking a mark did not open its shortcut");
-            a.teleportTo(level, out.getX() + 0.5, out.getY(), out.getZ() + 0.5, 180f, 0f);
+            a.moveTo(out.getX() + 0.5, out.getY(), out.getZ() + 0.5, 180f, 0f);
             check(f, AbyssMarks.gate(a, "bone"), "the gate did not let a player with three marks through");
             BlockPos in = AbyssBuild.mark("gate_bone_in");
             check(f, a.blockPosition().closerThan(in, 2), "passing the gate did not move the player beyond it: " + a.blockPosition() + " gate " + g);

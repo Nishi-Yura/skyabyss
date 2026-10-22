@@ -218,29 +218,32 @@ class Route:
                 for yy in range(y, y + h):
                     self.cell(a, b, yy, owner)
 
-    def leg(self, a, b, y_from, y_to, axis, h=4, half=1, owner=None, lamps=7):
-        """まっすぐの廊下。axis 'u': w = b[1] 固定で u を a[0] → b[0]。'w': u 固定で w を動かす。
-        高さは y_from → y_to を階段で (一段に二マス以上)。立つ高さ y の列ごとに空気 y..y+h-1"""
-        if axis == 'u':
-            s0, s1, fixed = a, b, None
-        else:
-            s0, s1, fixed = a, b, None
+    def leg(self, s0, s1, y_from, y_to, free=None):
+        """まっすぐの廊下の列ごとの立つ高さ。y_from → y_to を一段に二マスで。段は部屋の外 (free が真の列) の一番長い並びの真ん中にまとめる
+        (部屋の床の上に段を置くと、床のない宙の列ができて上れない)"""
         n = abs(s1 - s0)
         step = 1 if s1 >= s0 else -1
         dy = y_to - y_from
-        if n < 2 * abs(dy):
-            raise SystemExit('leg too steep %s' % ((a, b, y_from, y_to),))
+        need = 2 * abs(dy)
+        lo, hi = 0, n
+        if dy and free is not None:
+            best, cur = (0, -1), None
+            for i in range(n + 1):
+                if free[i]:
+                    cur = i if cur is None else cur
+                    if i - cur > best[1] - best[0]:
+                        best = (cur, i)
+                else:
+                    cur = None
+            lo, hi = best
+        if hi - lo < need:
+            raise SystemExit('leg too steep %s' % ((s0, s1, y_from, y_to, lo, hi),))
+        start = lo + (hi - lo - need) // 2
         ys = []
         for i in range(n + 1):
-            # 段は廊下の真ん中寄りにまとめる
-            k = i - (n - 2 * abs(dy)) // 2
-            k = max(0, min(2 * abs(dy), k))
+            k = max(0, min(need, i - start))
             ys.append(y_from + (k // 2) * (1 if dy > 0 else -1) if dy else y_from)
-        cells = []
-        for i in range(n + 1):
-            s = s0 + i * step
-            cells.append((s, ys[i]))
-        return cells, step
+        return [(s0 + i * step, ys[i]) for i in range(n + 1)], step
 
     def corridor(self, path, h=4, half=1, owner=None, lamps=7):
         """折れ線の廊下: path = [(u, w, y), ...] (隣どうしは u か w のどちらかだけが変わる)。幅 2*half+1"""
@@ -251,7 +254,15 @@ class Route:
                 raise SystemExit('corridor must be axis aligned %s' % ((u0, w0, u1, w1),))
             axis = 'u' if u0 != u1 else 'w'
             s0, s1 = (u0, u1) if axis == 'u' else (w0, w1)
-            cells, step = self.leg(s0, s1, y0, y1, axis)
+            n = abs(s1 - s0)
+            sg = 1 if s1 >= s0 else -1
+            free = []
+            for i in range(n + 1):
+                cu, cw = (s0 + i * sg, w0) if axis == 'u' else (u0, s0 + i * sg)
+                x, z = self.f(cu, cw)
+                free.append((x, min(y0, y1), z) not in self.lay.air and (x, max(y0, y1), z) not in self.lay.air
+                            and (x, min(y0, y1) - 1, z) not in self.lay.air)
+            cells, step = self.leg(s0, s1, y0, y1, free)
             for i, (s, y) in enumerate(cells):
                 u, w = (s, w0) if axis == 'u' else (u0, s)
                 nxt = cells[i + 1][1] if i + 1 < len(cells) else y

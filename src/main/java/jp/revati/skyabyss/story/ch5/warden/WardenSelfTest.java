@@ -149,7 +149,7 @@ public final class WardenSelfTest {
             Quests.forgetAll(q);
             check(f, !AbyssGate.touch(q), "someone without the quest could touch the heart");
             Quests.start(q, AbyssEntrance.QUEST);
-            for (int i = 0; i < 8 && !"heart".equals(TownGuests.stageOf(q, AbyssEntrance.QUEST)); i++) {
+            for (int i = 0; i < 24 && !"heart".equals(TownGuests.stageOf(q, AbyssEntrance.QUEST)); i++) {
                 Quests.forceStage(q, AbyssEntrance.QUEST);
             }
             check(f, "heart".equals(TownGuests.stageOf(q, AbyssEntrance.QUEST)) && AbyssGate.touch(q), "the heart stage could not touch the heart");

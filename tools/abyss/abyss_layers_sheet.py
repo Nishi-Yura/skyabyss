@@ -27,7 +27,8 @@ def main():
     if not files:
         print('no png in', src)
         return 1
-    os.makedirs(OUT_DIR, exist_ok=True)
+    out_dir = os.path.join(ROOT, sys.argv[3]) if len(sys.argv) > 3 else OUT_DIR
+    os.makedirs(out_dir, exist_ok=True)
     cell_h = CELL_W * 9 // 16
     rows = (len(files) + COLS - 1) // COLS
     sheet = Image.new('RGB', (COLS * CELL_W, rows * (cell_h + LABEL_H)), (16, 16, 20))
@@ -38,7 +39,7 @@ def main():
         y = (i // COLS) * (cell_h + LABEL_H)
         sheet.paste(im, (x, y))
         draw.text((x + 6, y + cell_h + 4), os.path.splitext(os.path.basename(f))[0], fill=(230, 230, 230))
-    out = os.path.join(OUT_DIR, '%s_sheet.png' % tag)
+    out = os.path.join(out_dir, '%s_sheet.png' % tag)
     sheet.save(out)
     print('wrote', os.path.relpath(out, ROOT), len(files), 'shots')
     return 0

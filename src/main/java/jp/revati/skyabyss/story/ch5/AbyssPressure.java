@@ -148,7 +148,7 @@ public final class AbyssPressure {
         if (jp.revati.skyabyss.story.ch5.depths.DepthRun.nearRest(p)) {
             return true;
         }
-        for (int i = 1; i <= 4; i++) {
+        for (int i = 1; i <= 5; i++) {
             BlockPos r = AbyssBuild.mark("rest_" + i);
             if (r != null && p.blockPosition().closerThan(r, 6)) {
                 return true;

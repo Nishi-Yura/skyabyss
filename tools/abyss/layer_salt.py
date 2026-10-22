@@ -52,8 +52,8 @@ def build(ctx, routes):
     u, w, y, hu, hw, h = rooms2['cistern']
     r2.mark('frag_salt_2', u - hu + 1, w + hw - 1, y)
     r2.put(u - hu + 1, w + hw - 1, y, 'chest[facing=north,type=single,waterlogged=false]')
-    for a in range(u - 2, u + 3):
-        for b in range(w - 2, w + 3):
+    for a in range(u - 2, u + 2):
+        for b in range(w + 2, w + 4):
             r2.put(a, b, y - 1, 'water[level=0]')
             r2.put(a, b, y - 2, 'prismarine')
     # ---- 3: 縄張り

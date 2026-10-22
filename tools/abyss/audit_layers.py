@@ -5,7 +5,7 @@
   3. 歩いて届くか: 各層の野営から、三つの印・門・主の間・下りの鎖まで。戸・封・格子・門は開いたものとして、
      下りの鎖 → 次の層の着く所、井戸の底 → 上の口 (重さの術で浮く) はつながりとして数える
 
-python -I tools/abyss/audit_layers.py
+python -I tools/abyss/audit_layers.py   (設計図を作り直すが書き出さない。書くのは gen_abyss_layers.py)
 """
 from __future__ import annotations
 
@@ -18,7 +18,7 @@ sys.path.insert(0, HERE)
 sys.path.insert(0, os.path.join(HERE, '..', 'capital'))
 import gen_abyss_layers as g  # noqa: E402
 import vox  # noqa: E402
-from audit import name, passable, stand_ok  # noqa: E402
+from audit import name, passable, stand_ok, step_ok  # noqa: E402
 
 OPENABLE = ('door_bone', 'hid_bone', 'door_storm_0', 'door_storm_1', 'door_storm_2', 'seal_ash')
 
@@ -111,6 +111,9 @@ def main():
             for dx, dz in ((1, 0), (-1, 0), (0, 1), (0, -1)):
                 nx, nz = x + dx, z + dz
                 for ny in (y, y + 1, y - 1, y - 2, y - 3):
+                    # 上りの一段は 0.5 まで (平らな床から段の上へは 1.5 で上れない)
+                    if ny == y + 1 and step_ok(w.get((nx, ny, nz))) and not step_ok(w.get((x, y, z))):
+                        continue
                     if stand_ok(w, nx, ny, nz) and (ny <= y or passable(w.get((x, y + 2, z)))):
                         if ny < y - 1 and not all(passable(w.get((nx, yy, nz))) for yy in range(ny, y + 2)):
                             continue

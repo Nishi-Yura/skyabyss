@@ -101,6 +101,10 @@ public final class Layers {
     static final List<String> STAGES = List.of("gate", "bone_camp", "bone_marks", "bone_lord", "salt_camp", "salt_marks", "salt_lord",
             "storm_camp", "storm_marks", "storm_lord", "ash_camp", "ash_marks", "ash_lord", "descend", "warden", "heart", "report");
 
+    public static List<String> stagesForTest() {
+        return STAGES;
+    }
+
     public static int stageIndex(ServerPlayer p) {
         String s = stage(p);
         int i = STAGES.indexOf(s);
