@@ -307,4 +307,24 @@ public final class MountService {
         ACTIVE.clear();
         SESSIONS.clear();
     }
+
+    // 開発用 (OP): 前に全部の見た目を一列に並べる (撮影)。持ち主なし、2 秒で自然に消えない
+    public static int demo(ServerPlayer player) {
+        ServerLevel level = player.serverLevel();
+        MountLook[] all = MountLook.values();
+        Vec3 fwd = Vec3.directionFromRotation(0, player.getYRot()).normalize();
+        Vec3 side = new Vec3(-fwd.z, 0, fwd.x);
+        for (int i = 0; i < all.length; i++) {
+            MountEntity m = MountSetup.MOUNT.get().create(level);
+            if (m == null) {
+                continue;
+            }
+            m.setLook(all[i]);
+            Vec3 at = player.position().add(fwd.scale(9.0)).add(side.scale((i - (all.length - 1) / 2.0) * 2.6));
+            m.moveTo(at.x, at.y, at.z, player.getYRot() + 180f, 0f);
+            m.setPersistenceRequired();
+            level.addFreshEntity(m);
+        }
+        return all.length;
+    }
 }

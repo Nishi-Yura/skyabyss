@@ -99,6 +99,9 @@ public final class FacilityCommands {
                                 .then(Commands.literal("coins").executes(c -> TrainingMaster.respec(c.getSource().getPlayerOrException(),
                                         StringArgumentType.getString(c, "what").equals("stats"), true) == jp.revati.skyabyss.rpg.skill.SkillManager.RespecResult.OK ? 1 : 0))))
                         .then(Commands.literal("brew").executes(c -> FacilityActions.brewLesson(c.getSource().getPlayerOrException()) ? 1 : 0))
+                        .then(Commands.literal("mount")
+                                .executes(c -> jp.revati.skyabyss.mount.MountService.open(c.getSource().getPlayerOrException(), null) ? 1 : 0)
+                                .then(Commands.literal("demo").executes(c -> jp.revati.skyabyss.mount.MountService.demo(c.getSource().getPlayerOrException()))))
                         .then(Commands.literal("trade").executes(c -> {
                             jp.revati.skyabyss.facility.trade.TradeService.open(c.getSource().getPlayerOrException(), null);
                             return 1;

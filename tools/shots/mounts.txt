@@ -1,0 +1,34 @@
+# 乗り物 (docs/design/38)。全七つの見た目の並びと、厩舎の画面。
+# ./gradlew runShots --no-daemon -Pscript=tools/shots/mounts.txt -PshotsName=mounts  (絵は docs/review/mounts/ へ写す)
+world shots flat
+size 1280 720
+timeout 600
+render 6
+clouds off
+wait 100
+cmd skyabyss cinematic stop
+wait 10
+cmd skyabyss cinematic stop
+cmd time set noon
+cmd weather clear
+cmd gamerule doDaylightCycle false
+cmd gamemode creative
+camera minecraft:overworld 0 -60 2 180 8
+waitchunks
+hud on
+chat clear
+hud off
+cmd tp @s 0 -60 -2 0 0
+cmd skyabyss facility mount demo
+wait 40
+shot mounts_row
+cmd tp @s -7 -60 -2 -50 14
+wait 20
+shot mounts_side
+hud on
+cmd tp @s 0 -60 -2 0 0
+cmd skyabyss facility coins 400
+cmd skyabyss facility mount
+wait 30
+shot shop_screen
+close

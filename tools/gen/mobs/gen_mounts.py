@@ -548,6 +548,7 @@ def install():
         os.makedirs(os.path.join(ASSETS, sub), exist_ok=True)
     for look in LOOKS:
         m = BUILD[look](1)
+        m.pack()   # 絵を塗る前に箱の置き場を決める (後だと全部の箱が左上に重なって塗られる)
         tex = paint(m)
         with open(os.path.join(ASSETS, "geo", "entity", "mount_%s.geo.json" % look), "w", encoding="utf-8") as f:
             json.dump(m.geo(), f, indent=1)

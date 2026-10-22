@@ -22,7 +22,7 @@ import net.neoforged.neoforge.network.PacketDistributor;
 // 厩舎の画面 (docs/design/38 の 5 章)。左に見た目の一覧 (押すと買う・選ぶ)、右に今の見た目の姿 (一覧に触れるとその見た目)、
 // 速さ・跳び・体力の段 (押すと一段上げる)、笛をもらうボタン。決めるのはサーバー (MountService)。押すたびに新しい持ち物が届いて描き直す
 public class MountShopScreen extends Screen {
-    private static final int LOOK_H = 28;
+    private static final int LOOK_H = 24;
     private static final int STAT_H = 18;
 
     private MountNetwork.View view;
@@ -153,7 +153,7 @@ public class MountShopScreen extends Screen {
         boolean owned = view.owns(look);
         boolean locked = !owned && view.chapter() < look.chapter;
         int color = locked ? FacilityUi.DIM : FacilityUi.TEXT;
-        TextClip.line(g, font, Component.translatable(look.nameKey()), x + 6, y + 5, rw - 70, color, false);
+        TextClip.line(g, font, Component.translatable(look.nameKey()), x + 6, y + 3, rw - 70, color, false);
         Component sub;
         int subColor;
         if (chosen) {
@@ -169,14 +169,14 @@ public class MountShopScreen extends Screen {
             sub = Component.translatable("gui.skyabyss.mount.for_sale");
             subColor = FacilityUi.DIM;
         }
-        TextClip.line(g, font, sub, x + 6, y + 16, rw - 70, subColor, false);
+        TextClip.line(g, font, sub, x + 6, y + 13, rw - 70, subColor, false);
         if (!owned && !locked) {
             String s = Integer.toString(look.price);
             int tw = 6 + 18 + font.width(s) + 2;
             int tx = x + rw - 4 - tw;
-            FacilityUi.tag(g, tx, y + 5, tw, 18);
-            g.renderItem(new ItemStack(FacilitySetup.BELL_COIN.get()), tx + 2, y + 6);
-            g.drawString(font, s, tx + 20, y + 10, view.coins() >= look.price ? FacilityUi.GOLD : FacilityUi.LACK, false);
+            FacilityUi.tag(g, tx, y + 3, tw, 18);
+            g.renderItem(new ItemStack(FacilitySetup.BELL_COIN.get()), tx + 2, y + 4);
+            g.drawString(font, s, tx + 20, y + 8, view.coins() >= look.price ? FacilityUi.GOLD : FacilityUi.LACK, false);
         }
     }
 
