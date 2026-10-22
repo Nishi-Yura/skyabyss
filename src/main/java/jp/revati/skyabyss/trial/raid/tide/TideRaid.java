@@ -33,9 +33,9 @@ public final class TideRaid {
     }
 
     public static void register() {
-        RaidRooms.register(Titans.TIDE_SHELL, Slot.WALK, "TR1", PearlCarry::new);
-        RaidRooms.register(Titans.TIDE_SHELL, Slot.WIT, "TR2", ShellChime::new);
-        RaidRooms.register(Titans.TIDE_SHELL, Slot.FIGHT, "TR3", SaplingGuard::new);
+        RaidRooms.register(Titans.TIDE_SHELL, Slot.WALK, "TR1", TidePearlRoom::new);
+        RaidRooms.register(Titans.TIDE_SHELL, Slot.WIT, "TR2", TideShellRoom::new);
+        RaidRooms.register(Titans.TIDE_SHELL, Slot.FIGHT, "TR3", TideSaplingRoom::new);
     }
 
     // 部屋の敵を湧かせる (グループの敵・保存しない印つき・ctx に登録)
