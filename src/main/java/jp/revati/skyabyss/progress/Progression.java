@@ -83,13 +83,34 @@ public final class Progression {
         if (player instanceof FakePlayer || !capOn(player.server)) {
             return GrowthRules.MAX_LEVEL;
         }
-        return Math.min(GrowthRules.MAX_LEVEL, ProgressRules.levelCap(stage(player)));
+        return Math.min(GrowthRules.MAX_LEVEL, ProgressRules.levelCap(stage(player), wardenFelled(player)));
+    }
+
+    // 心臓の番人を倒したか (WardenArena.fallen が書く記録。古いセーブはメインの五章が段 warden を越えていれば)
+    public static boolean wardenFelled(ServerPlayer player) {
+        if (ProgressData.get(player.server).personalStopped(player.getUUID(), ProgressRules.WARDEN)) {
+            return true;
+        }
+        jp.revati.skyabyss.quest.QuestLog.Entry e = jp.revati.skyabyss.quest.QuestLog.of(player).entry("main_abyss");
+        jp.revati.skyabyss.quest.QuestDef def = jp.revati.skyabyss.quest.QuestManager.quest("main_abyss");
+        if (e == null || def == null) {
+            return false;
+        }
+        int warden = def.stages().indexOf(def.stage("warden"));
+        return e.done || (warden >= 0 && e.stage > warden);
+    }
+
+    // 番人が倒れた: 間にいた人の上限を 50 へ (報酬の経験値より先に書く。心臓と同じ順)
+    public static void markWardenFelled(ServerPlayer player) {
+        ProgressData.get(player.server).markPersonal(player.getUUID(), ProgressRules.WARDEN);
     }
 
     // 上限に届いたときの知らせ (Growth.addXp から)
     public static void tellCapped(ServerPlayer player, int cap) {
         String next = nextTitan(player);
-        if (next == null) {
+        if (next == null && cap < ProgressRules.ABYSS_CAP && !wardenFelled(player)) {
+            Notice.narrate(player, "message.skyabyss.progress.capped_abyss", cap);
+        } else if (next == null) {
             Notice.narrate(player, "message.skyabyss.progress.capped_end", cap);
         } else {
             Notice.narrate(player, "message.skyabyss.progress.capped", cap, titanName(next));

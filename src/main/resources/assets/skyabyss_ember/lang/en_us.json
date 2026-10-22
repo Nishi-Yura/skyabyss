@@ -1,5 +1,6 @@
 {
   "__ember.0": "skeleton (heat, damage types)",
+  "message.skyabyss.ember.mouth_noticed": "Hot breath stirs beneath your feet. The ember titan has noticed you waiting, and rises...",
   "death.attack.skyabyss.heat": "%1$s was scorched",
   "death.attack.skyabyss.heat.player": "%1$s was scorched while fleeing %2$s",
   "death.attack.skyabyss.heat_burst": "%1$s was burned by rising heat",

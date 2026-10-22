@@ -63,6 +63,7 @@
 
 - 「越えた → 4 秒 → 次の入口」は `TrialRoute`（石の合図 `TrialSteles.onRung` → `TrialRoute.onCleared`）。今の段の試練の石だけを数え、越えた順が前後しても段は戻らない。運ばれるのは**順路の参加者のうち、その背にいる人**。行き先は次の段の入口の休み場（原型は今までの入口の休み場、新作はセルの最初の休み場。`TrialRoute.entryRest`）。
 - 運ぶ前の 4 秒に、ゴールの演出・報い・「越えた。次は〇〇」の一行（帯）。運ばれた瞬間に段の札（6 章）と、ビーコンの音。試練を越えた人には紋が一つ（31 の A14）。
+- レイドの部屋を越えたとき（`RaidRun.complete` → `TrialRoute.onCleared(..., raid)`）は、四体とも同じ口（`GrowthRewards.onRouteTrialCleared`）で、試練の経験値（各背の `TRIAL_XP`。岩鯨 40・潮殻 50・雷翼 60・余燼 60、推奨レベルで減る）・依頼の合図 `back_trial_cleared`（進捗 `trial:<巨神>`）・巨神ごとの試練の合図（部屋 1〜3 の順に `storm_trial_west/east/front` など。`TrialSteles.signalsOf`）を渡す。原型の石は今までどおり各背の石の仕組みが渡す（二重にしない）。岩鯨の部屋 1〜3 を越えると、碑文 `inscription_west`・`inscription_east`・`inscription_below` を記す（一章のメインの段 inscriptions。心臓を止めればこの段は飛ぶ）。
 - 心臓の前室へ運ばれたあとは今の決まり（大門の 5 秒の予告・参加者の数え方・再入場。02 の 3.4・5.x）。
 
 ### 2.4 休み場・倒れたとき・あきらめ・終わり
