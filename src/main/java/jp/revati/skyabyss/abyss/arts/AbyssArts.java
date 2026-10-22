@@ -293,6 +293,7 @@ public final class AbyssArts {
             return;
         }
         for (ServerPlayer p : server.getPlayerList().getPlayers()) {
+            reconcile(p);
             if (!AbyssWorld.in(p) || p.isSpectator() || !p.isAlive()) {
                 continue;
             }
@@ -305,6 +306,35 @@ public final class AbyssArts {
                 openTree(p);
             }
         }
+    }
+
+    // 術のランクに使ったはずの点 (ランク r → r + 1 は r 点。ランク R までで R (R - 1) / 2)
+    static int spent(ArtData d) {
+        int sum = 0;
+        for (int r : d.ranks) {
+            if (r > 1) {
+                sum += r * (r - 1) / 2;
+            }
+        }
+        return sum;
+    }
+
+    // 技を振り直して点が戻ったら (SkillData.clearSkills が artPoints を 0 に)、術のランクを 1 へ戻す (覚えた術は残す)
+    public static boolean reconcile(ServerPlayer p) {
+        ArtData d = data(p);
+        SkillData sd = SkillManager.get(p);
+        if (sd.artPoints >= spent(d)) {
+            return false;
+        }
+        for (int i = 0; i < d.ranks.length; i++) {
+            if (d.ranks[i] > 1) {
+                d.ranks[i] = 1;
+            }
+        }
+        sd.artPoints = 0;
+        SkillManager.sync(p);
+        p.syncData(DATA.get());
+        return true;
     }
 
     @SubscribeEvent

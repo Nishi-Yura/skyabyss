@@ -120,6 +120,12 @@ public final class AbyssArtsSelfTest {
         check(AbyssArts.up(p, AbyssArt.LIGHT) == AbyssArts.Result.RANKED && d.rank(AbyssArt.LIGHT) == 3, "rank 2 to 3 failed");
         check(sd.artPoints == 3, "rank 3 should cost 2 more points (spent " + sd.artPoints + ")");
         check(AbyssArts.up(p, AbyssArt.LIGHT) == AbyssArts.Result.MAX_RANK, "ranked past 3");
+        // 技の振り直しで点が戻ると、術のランクは 1 へ (覚えたまま)
+        sd.clearSkills();
+        check(sd.artPoints == 0 && AbyssArts.reconcile(p) && d.rank(AbyssArt.LIGHT) == 1, "a skill respec did not bring the art back to rank 1");
+        check(!AbyssArts.reconcile(p), "reconcile changed a consistent record");
+        check(AbyssArts.up(p, AbyssArt.LIGHT) == AbyssArts.Result.RANKED && AbyssArts.up(p, AbyssArt.LIGHT) == AbyssArts.Result.RANKED && sd.artPoints == 3,
+                "ranking up again after the respec failed");
         sd.bonusPoints -= 10;
 
         SkillManager.settleMana(p);

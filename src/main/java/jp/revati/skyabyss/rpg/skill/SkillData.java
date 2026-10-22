@@ -614,6 +614,8 @@ public final class SkillData implements INBTSerializable<CompoundTag> {
     // 振り直し: 覚えた技と刻印と置き場を空にする (点は戻る)。マナとクールダウンと型の保存の枠の置き方はそのまま
     public void clearSkills() {
         ranks.clear();
+        // 深淵術のランクに使った点も戻す (術のランクは abyss/arts/AbyssArts.reconcile が 1 へ戻す)
+        artPoints = 0;
         runes.clear();
         keystones.clear();
         chainMask = 0;
