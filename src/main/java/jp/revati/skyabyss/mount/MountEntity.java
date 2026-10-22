@@ -148,12 +148,7 @@ public class MountEntity extends AbstractHorse implements GeoEntity {
     }
 
     @Override
-    public boolean isTamed() {
-        return true;
-    }
-
-    @Override
-    public boolean canMate() {
+    public boolean canParent() {
         return false;
     }
 
