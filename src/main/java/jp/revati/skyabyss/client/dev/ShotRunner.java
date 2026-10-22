@@ -1017,6 +1017,10 @@ public final class ShotRunner {
             case "party" -> jp.revati.skyabyss.party.client.PartyScreen::new;
             case "notices", "noticelog" -> jp.revati.skyabyss.client.notice.NoticeLogScreen::new;
             case "grave" -> jp.revati.skyabyss.client.grave.GraveScreen.Sample::new;
+            // 旅嚢の輪 (札 2 / 5 / 9 枚。窓の大きさで半径と札の大きさが変わるかを見る)
+            case "pouchwheel_2" -> () -> jp.revati.skyabyss.client.pouch.PouchWheelScreen.demo(2);
+            case "pouchwheel_5" -> () -> jp.revati.skyabyss.client.pouch.PouchWheelScreen.demo(5);
+            case "pouchwheel_9" -> () -> jp.revati.skyabyss.client.pouch.PouchWheelScreen.demo(9);
             default -> null;
         };
         if (s != null) {

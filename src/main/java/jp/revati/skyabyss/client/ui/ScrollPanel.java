@@ -89,8 +89,9 @@ public final class ScrollPanel {
         return mx >= x && mx < x + w && my >= y && my < y + h;
     }
 
+    // 窓の矩形は、今の変換 (UiFit など) の中の座標で与える。切りも変換を通す
     public void begin(GuiGraphics g) {
-        TextClip.clip(g, x, y, w, h);
+        TextClip.clipPosed(g, x, y, w, h);
     }
 
     public void end(GuiGraphics g) {

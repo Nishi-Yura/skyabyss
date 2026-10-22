@@ -9,6 +9,7 @@ import jp.revati.skyabyss.rpg.GrowthData;
 import jp.revati.skyabyss.rpg.GrowthRules;
 import jp.revati.skyabyss.rpg.GrowthRules.Stat;
 import jp.revati.skyabyss.rpg.Rpg;
+import jp.revati.skyabyss.client.ui.UiFit;
 import jp.revati.skyabyss.rpg.net.GrowthAllocatePayload;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractButton;
@@ -43,6 +44,8 @@ public class GrowthScreen extends Screen implements jp.revati.skyabyss.client.ui
     static final int LORE = 0x7FD6D0;
 
     private final int[] pending = new int[Stat.values().length];
+    // 画面は窓に合わせて一様に大きくする (描くのも、当たりも、この一つの変換を通す)。論理の原点は (left, top)
+    private final UiFit fit = new UiFit();
     private int left;
     private int top;
     private final List<SmallButton> plus = new ArrayList<>();
@@ -61,8 +64,9 @@ public class GrowthScreen extends Screen implements jp.revati.skyabyss.client.ui
 
     @Override
     protected void init() {
-        left = (width - W) / 2;
-        top = (height - H) / 2;
+        fit.fit(width, height, W + 4, H + 24, 2.5f);
+        left = 2;
+        top = 20;
         plus.clear();
         minus.clear();
         for (Stat stat : Stat.values()) {
@@ -78,7 +82,8 @@ public class GrowthScreen extends Screen implements jp.revati.skyabyss.client.ui
         respec = addRenderableWidget(Button.builder(Component.translatable("gui.skyabyss.growth.respec"), b -> pressRespec())
                 .bounds(left + 170, top + 45, 60, 12).build());
         // 技の画面へのつまみ (上の縁)
-        jp.revati.skyabyss.rpg.client.skill.RpgTabs.add(this::addRenderableWidget, width, height, jp.revati.skyabyss.rpg.client.skill.RpgTabs.STATUS);
+        jp.revati.skyabyss.rpg.client.skill.RpgTabs.addAt(this::addRenderableWidget, left + W / 2, top,
+                jp.revati.skyabyss.rpg.client.skill.RpgTabs.STATUS);
         refresh();
     }
 
@@ -195,13 +200,46 @@ public class GrowthScreen extends Screen implements jp.revati.skyabyss.client.ui
 
     @Override
     public void renderBackground(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
+        // 全面の暗い地だけ (板は render の中で、窓に合わせた変換の中で描く)
         super.renderBackground(g, mouseX, mouseY, partialTick);
-        g.blit(TEXTURE, left, top, W, H, 0, 0, W * 2, H * 2, TEX, TEX);
     }
 
     @Override
-    public void render(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
-        super.render(g, mouseX, mouseY, partialTick);
+    public void render(GuiGraphics g, int screenX, int screenY, float partialTick) {
+        renderBackground(g, screenX, screenY, partialTick);
+        int mouseX = (int) Math.floor(fit.x(screenX));
+        int mouseY = (int) Math.floor(fit.y(screenY));
+        fit.begin(g);
+        g.blit(TEXTURE, left, top, W, H, 0, 0, W * 2, H * 2, TEX, TEX);
+        for (net.minecraft.client.gui.components.Renderable r : renderables) {
+            r.render(g, mouseX, mouseY, partialTick);
+        }
+        renderBody(g, mouseX, mouseY);
+        fit.end(g);
+    }
+
+    @Override
+    public boolean mouseClicked(double screenX, double screenY, int button) {
+        return super.mouseClicked(fit.x(screenX), fit.y(screenY), button);
+    }
+
+    @Override
+    public boolean mouseDragged(double screenX, double screenY, int button, double dx, double dy) {
+        return super.mouseDragged(fit.x(screenX), fit.y(screenY), button, dx / fit.scale(), dy / fit.scale());
+    }
+
+    @Override
+    public boolean mouseReleased(double screenX, double screenY, int button) {
+        return super.mouseReleased(fit.x(screenX), fit.y(screenY), button);
+    }
+
+    @Override
+    public boolean mouseScrolled(double screenX, double screenY, double dx, double dy) {
+        return super.mouseScrolled(fit.x(screenX), fit.y(screenY), dx, dy);
+    }
+
+    // 板の中身 (釦は render の中で先に描いた)
+    private void renderBody(GuiGraphics g, int mouseX, int mouseY) {
         GrowthData d = data();
         g.drawCenteredString(font, title, left + W / 2, top + 8, TITLE);
 
@@ -339,6 +377,6 @@ public class GrowthScreen extends Screen implements jp.revati.skyabyss.client.ui
 
     @Override
     public int[] textBounds() {
-        return new int[] {left, top - 18, W, H + 18};
+        return fit.screenRect(left - 2, top - 18, W + 4, H + 20);
     }
 }
