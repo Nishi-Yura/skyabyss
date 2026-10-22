@@ -27,7 +27,7 @@ public final class DepthFloorBuild {
     static final int CEIL_YI = DepthPlan.BELOW + DepthPlan.ROOM_H + 1;
 
     // 型ごとの材料。floor 床・wall 壁・roof 天井・accent 飾り・lamp 灯り
-    public record Palette(BlockState floor, BlockState wall, BlockState roof, BlockState accent, BlockState lamp) {
+    public record Palette(BlockState floor, BlockState wall, BlockState roof, BlockState accent, BlockState lamp, BlockState trim) {
     }
 
     private final Plan plan;
@@ -60,21 +60,29 @@ public final class DepthFloorBuild {
     public static Palette palette(Kind k) {
         return switch (k) {
             case INVERTED_FOREST -> new Palette(Blocks.MOSS_BLOCK.defaultBlockState(), Blocks.DEEPSLATE_TILES.defaultBlockState(),
-                    Blocks.ROOTED_DIRT.defaultBlockState(), Blocks.MANGROVE_LOG.defaultBlockState(), Blocks.SHROOMLIGHT.defaultBlockState());
+                    Blocks.ROOTED_DIRT.defaultBlockState(), Blocks.MANGROVE_LOG.defaultBlockState(), Blocks.SHROOMLIGHT.defaultBlockState(),
+                    Blocks.STRIPPED_MANGROVE_LOG.defaultBlockState());
             case FLOATING_GRAVES -> new Palette(Blocks.POLISHED_BLACKSTONE_BRICKS.defaultBlockState(), Blocks.DEEPSLATE_BRICKS.defaultBlockState(),
-                    Blocks.DEEPSLATE_BRICKS.defaultBlockState(), Blocks.CHISELED_DEEPSLATE.defaultBlockState(), Blocks.SEA_LANTERN.defaultBlockState());
+                    Blocks.DEEPSLATE_BRICKS.defaultBlockState(), Blocks.CHISELED_DEEPSLATE.defaultBlockState(), Blocks.SEA_LANTERN.defaultBlockState(),
+                    Blocks.POLISHED_DEEPSLATE.defaultBlockState());
             case PULSE_CAVE -> new Palette(Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.RED_NETHER_BRICKS.defaultBlockState(),
-                    Blocks.NETHER_WART_BLOCK.defaultBlockState(), Blocks.NETHER_WART_BLOCK.defaultBlockState(), Blocks.SHROOMLIGHT.defaultBlockState());
+                    Blocks.NETHER_WART_BLOCK.defaultBlockState(), Blocks.NETHER_WART_BLOCK.defaultBlockState(), Blocks.SHROOMLIGHT.defaultBlockState(),
+                    Blocks.CRACKED_NETHER_BRICKS.defaultBlockState());
             case MIRROR_DARK -> new Palette(Blocks.POLISHED_BLACKSTONE_BRICKS.defaultBlockState(), Blocks.BLACKSTONE.defaultBlockState(),
-                    Blocks.BLACKSTONE.defaultBlockState(), Blocks.TINTED_GLASS.defaultBlockState(), Blocks.GLOWSTONE.defaultBlockState());
+                    Blocks.BLACKSTONE.defaultBlockState(), Blocks.TINTED_GLASS.defaultBlockState(), Blocks.GLOWSTONE.defaultBlockState(),
+                    Blocks.CHISELED_POLISHED_BLACKSTONE.defaultBlockState());
             case CHAIN_NET -> new Palette(Blocks.DEEPSLATE_TILES.defaultBlockState(), Blocks.DEEPSLATE.defaultBlockState(),
-                    Blocks.DEEPSLATE.defaultBlockState(), Blocks.CHAIN.defaultBlockState(), Blocks.SEA_LANTERN.defaultBlockState());
+                    Blocks.DEEPSLATE.defaultBlockState(), Blocks.CHAIN.defaultBlockState(), Blocks.SEA_LANTERN.defaultBlockState(),
+                    Blocks.POLISHED_DEEPSLATE.defaultBlockState());
             case LAMP_HALL -> new Palette(Blocks.POLISHED_DEEPSLATE.defaultBlockState(), Blocks.DEEPSLATE_BRICKS.defaultBlockState(),
-                    Blocks.SCULK.defaultBlockState(), Blocks.SCULK.defaultBlockState(), Blocks.SEA_LANTERN.defaultBlockState());
+                    Blocks.SCULK.defaultBlockState(), Blocks.SCULK.defaultBlockState(), Blocks.SEA_LANTERN.defaultBlockState(),
+                    Blocks.DEEPSLATE_TILES.defaultBlockState());
             case DRY_WELL -> new Palette(Blocks.PACKED_MUD.defaultBlockState(), Blocks.MUD_BRICKS.defaultBlockState(),
-                    Blocks.PACKED_MUD.defaultBlockState(), Blocks.DRIPSTONE_BLOCK.defaultBlockState(), Blocks.SHROOMLIGHT.defaultBlockState());
-            case HOLLOW_STARS -> new Palette(Blocks.END_STONE_BRICKS.defaultBlockState(), Blocks.BLACK_CONCRETE.defaultBlockState(),
-                    Blocks.BLACK_CONCRETE.defaultBlockState(), Blocks.AMETHYST_BLOCK.defaultBlockState(), Blocks.GLOWSTONE.defaultBlockState());
+                    Blocks.PACKED_MUD.defaultBlockState(), Blocks.DRIPSTONE_BLOCK.defaultBlockState(), Blocks.SHROOMLIGHT.defaultBlockState(),
+                    Blocks.MUD_BRICKS.defaultBlockState());
+            case HOLLOW_STARS -> new Palette(Blocks.END_STONE_BRICKS.defaultBlockState(), Blocks.POLISHED_BASALT.defaultBlockState(),
+                    Blocks.BLACKSTONE.defaultBlockState(), Blocks.AMETHYST_BLOCK.defaultBlockState(), Blocks.GLOWSTONE.defaultBlockState(),
+                    Blocks.PURPUR_PILLAR.defaultBlockState());
         };
     }
 
@@ -99,6 +107,7 @@ public final class DepthFloorBuild {
         shell();
         lamps();
         features();
+        dress();
         decorate();
     }
 
@@ -286,6 +295,39 @@ public final class DepthFloorBuild {
         }
     }
 
+    // ---------------------------------------------------------------- 部屋の作り (柱・梁・足もとの縁取り。通路の線・飾りの場所は避ける)
+    private void dress() {
+        for (Room room : plan.rooms()) {
+            for (int x = room.x0(); x < room.x0() + room.w(); x++) {
+                for (int z = room.z0(); z < room.z0() + room.d(); z++) {
+                    boolean edgeX = x == room.x0() || x == room.x0() + room.w() - 1;
+                    boolean edgeZ = z == room.z0() || z == room.z0() + room.d() - 1;
+                    // 天井の梁
+                    if ((x - room.x0()) % 5 == 2 && get(x, CEIL_YI, z) == pal.roof()) {
+                        set(x, CEIL_YI, z, pal.trim());
+                    }
+                    if (!(edgeX || edgeZ) || plan.path()[x][z] || spec[x][z]) {
+                        continue;
+                    }
+                    // 足もとの縁取り
+                    if (get(x, FLOOR_YI, z) == pal.floor()) {
+                        set(x, FLOOR_YI, z, pal.trim());
+                    }
+                    // 壁の柱 (四つおき。角は除く)
+                    int along = edgeX ? z - room.z0() : x - room.x0();
+                    boolean corner = edgeX && edgeZ;
+                    if (!corner && along % 4 == 2 && room.w() >= 8 && room.d() >= 8 && get(x, FLOOR_YI + 1, z) == AIR) {
+                        for (int yi = FLOOR_YI + 1; yi <= FLOOR_YI + DepthPlan.ROOM_H; yi++) {
+                            if (get(x, yi, z) == AIR) {
+                                set(x, yi, z, pal.trim());
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     // ---------------------------------------------------------------- 型の景色
     private boolean freeTile(int x, int z) {
         return plan.open()[x][z] && !plan.path()[x][z] && !spec[x][z] && get(x, FLOOR_YI + 1, z) == AIR && get(x, CEIL_YI, z) != pal.lamp();
@@ -302,7 +344,7 @@ public final class DepthFloorBuild {
                 int roll = r.nextInt(1000);
                 switch (k) {
                     case INVERTED_FOREST -> {
-                        if (freeTile(x, z)) {
+                        if (freeTile(x, z) && (plan.roomAt(x, z) == null || plan.roomAt(x, z).type() != RoomType.BOSS)) {
                             if (roll < 90) {
                                 hang(x, z, Blocks.MANGROVE_ROOTS.defaultBlockState(), 1 + r.nextInt(2));
                             } else if (roll < 105) {

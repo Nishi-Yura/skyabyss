@@ -222,8 +222,12 @@ public final class DepthBoss {
     }
 
     static void tick(MinecraftServer server, ServerLevel level, DepthBuilder.Inst i, Fight f) {
+        tick(server, level, i, f, party(level, i));
+    }
+
+    // party は階の中の生きている人 (自己テストは偽の人を渡す)
+    static void tick(MinecraftServer server, ServerLevel level, DepthBuilder.Inst i, Fight f, List<ServerPlayer> party) {
         Entity ke = level.getEntity(f.kingId);
-        List<ServerPlayer> party = party(level, i);
         if (!(ke instanceof LivingEntity king) || !king.isAlive()) {
             if (ke == null && f.empty < 400 && party.isEmpty()) {
                 f.empty++;

@@ -345,9 +345,35 @@ public final class DepthsV2SelfTest {
         check(f, k5.ready && k5.plan.boss(), "floor 5 is not a built boss floor");
         BlockPos s5 = k5.stairsFeet();
         check(f, level.getBlockState(s5.below()).getBlock() == Blocks.CRYING_OBSIDIAN && !k5.stairsOpen, "boss floor stairs are not sealed");
-        DepthBoss.start(level, k5, List.of());
+        net.neoforged.neoforge.common.util.FakePlayer fake = net.neoforged.neoforge.common.util.FakePlayerFactory.getMinecraft(level);
+        BlockPos kp = k5.feet(k5.plan.bossSpawn().x(), k5.plan.bossSpawn().z());
+        fake.setGameMode(net.minecraft.world.level.GameType.SURVIVAL);
+        fake.moveTo(kp.getX() + 2.5, kp.getY(), kp.getZ() + 0.5);
+        fake.setHealth(fake.getMaxHealth());
+        DepthBoss.start(level, k5, List.of(fake));
         check(f, k5.boss != null, "the king did not wake");
         if (k5.boss != null) {
+            // 戦い: 偽の人を相手に 600 tick。技が二種類以上出る・予告が出る・手下が呼ばれる・段が変わる・傷が入る
+            Set<DepthBoss.Move> seenMoves = EnumSet.noneOf(DepthBoss.Move.class);
+            boolean hurt = false;
+            for (int t = 0; t < 900 && k5.boss != null; t++) {
+                if (t == 450 && level.getEntity(k5.boss.kingId) instanceof LivingEntity le0) {
+                    le0.setHealth(le0.getMaxHealth() * 0.5f);
+                }
+                DepthBoss.tick(server, level, k5, k5.boss, List.of(fake));
+                if (k5.boss != null && k5.boss.active != null) {
+                    seenMoves.add(k5.boss.active);
+                }
+                if (fake.getHealth() < fake.getMaxHealth()) {
+                    hurt = true;
+                    fake.setHealth(fake.getMaxHealth());
+                }
+            }
+            check(f, k5.boss != null && k5.boss.phase >= 1, "king phase did not advance at half hp");
+            check(f, seenMoves.size() >= 2, "king used fewer than 2 distinct moves in 900 ticks: " + seenMoves);
+            check(f, hurt, "no king move ever hurt the player standing next to it");
+            int adds = level.getEntitiesOfClass(LivingEntity.class, k5.box(), e -> e.getTags().contains(DepthBoss.ADD_TAG)).size();
+            check(f, adds > 0 || !seenMoves.contains(DepthBoss.Move.SUMMON), "SUMMON made no adds");
             Entity king = level.getEntity(k5.boss.kingId);
             check(f, king instanceof LivingEntity le && le.isAlive() && le.getTags().contains(DepthBoss.KING_TAG), "king entity missing");
             if (king instanceof LivingEntity le) {

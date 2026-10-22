@@ -50,6 +50,20 @@ public class LowPolyGeoRenderer<T extends Entity & GeoAnimatable> extends GeoEnt
         return true;
     }
 
+    // 体の大きさの属性 (Attributes.SCALE。深みの王など) を、模型にもかける
+    @Override
+    public void render(T entity, float entityYaw, float partialTick, PoseStack poseStack, MultiBufferSource bufferSource, int packedLight) {
+        float s = entity instanceof net.minecraft.world.entity.LivingEntity le ? le.getScale() : 1f;
+        if (s == 1f) {
+            super.render(entity, entityYaw, partialTick, poseStack, bufferSource, packedLight);
+            return;
+        }
+        poseStack.pushPose();
+        poseStack.scale(s, s, s);
+        super.render(entity, entityYaw, partialTick, poseStack, bufferSource, packedLight);
+        poseStack.popPose();
+    }
+
     @Override
     public void preRender(PoseStack poseStack, T animatable, BakedGeoModel model, @Nullable MultiBufferSource bufferSource, @Nullable VertexConsumer buffer,
                           boolean isReRender, float partialTick, int packedLight, int packedOverlay, int colour) {
