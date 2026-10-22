@@ -123,18 +123,19 @@ public final class ArtClient {
         if (now != linesTick) {
             buildLines(mc, now);
         }
-        int x = 4;
+        // 右の真ん中に、右寄せで (左は目的の帯・頼みの板が使うので重なっていた。2026-10-23 の試遊)
+        int iconX = g.guiWidth() - 4 - 16;
         int y = g.guiHeight() / 2 - 24;
         for (AbyssArt a : AbyssArt.values()) {
             int row = y + a.ordinal() * 20;
             // 絵 (32px の絵を半分の大きさで出す)
             g.pose().pushPose();
             g.pose().scale(0.5f, 0.5f, 1f);
-            g.blit(ICONS[a.ordinal()], x * 2, row * 2, 0, 0, 32, 32, 32, 32);
+            g.blit(ICONS[a.ordinal()], iconX * 2, row * 2, 0, 0, 32, 32, 32, 32);
             g.pose().popPose();
             Component line = LINES[a.ordinal()];
             int color = COLORS[a.ordinal()];
-            g.drawString(font, line, x + 20, row + 4, color, true);
+            g.drawString(font, line, iconX - 4 - font.width(line), row + 4, color, true);
         }
     }
 }
