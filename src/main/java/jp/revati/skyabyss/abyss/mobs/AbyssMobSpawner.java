@@ -165,6 +165,7 @@ public final class AbyssMobSpawner {
                         return 0;
                     }
                     m.moveTo(p.getX() + 2.5, p.getY(), p.getZ(), p.getYRot() + 180f, 0f);
+                    m.addTag(jp.revati.skyabyss.entity.GuardMob.TEMP_TAG);
                     level.addFreshEntity(m);
                     src.sendSuccess(() -> Component.literal("spawned " + k.id + " stage " + stage), false);
                     return 1;
