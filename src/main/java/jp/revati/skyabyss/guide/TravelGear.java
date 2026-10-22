@@ -230,8 +230,14 @@ public final class TravelGear {
         player.removeEffect(Ch3Gear.THUNDER_WHETTED);
         player.addEffect(new MobEffectInstance(WHETTED, WHETSTONE_TICKS, 0, false, true, true));
         Notice.hint(player, "message.skyabyss.whetstone.used");
-        // 備えの頼み「刃を研ぐ」の「砥石を使う」(TODO(P7): 老いた歩哨ができたら、研いだ刃で倒す、に締める)
-        Quests.signal(player, Ch1Prep.SIGNAL_WHETSTONE_USED);
         return true;
+    }
+
+    // 備えの頼み「刃を研ぐ」の「岩の砥石を作る」(2026-10-23: 使うのではなく作るにした)
+    @SubscribeEvent
+    static void onCrafted(net.neoforged.neoforge.event.entity.player.PlayerEvent.ItemCraftedEvent event) {
+        if (event.getEntity() instanceof ServerPlayer player && event.getCrafting().is(ROCK_WHETSTONE.get())) {
+            Quests.signal(player, Ch1Prep.SIGNAL_WHETSTONE_USED);
+        }
     }
 }

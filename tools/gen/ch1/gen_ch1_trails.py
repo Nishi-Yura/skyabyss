@@ -105,7 +105,7 @@ def quests():
             {'id': 'cave', 'xp': 30, 'objectives': [{'id': 'sword', 'type': 'lore', 'targets': ['ch1/trail_blade']}]},
             # 職人に話す (作り方を教わる = 結果 unlock_recipes)
             {'id': 'show', 'objectives': [{'id': 'talk', 'type': 'talk', 'target': ARTISAN, 'topic': 'ch1t_blade_show'}]},
-            # 鉄の剣を持ち、岩の砥石で研ぐ (どちらが先でもよい)
+            # 鉄の剣を持ち、岩の砥石を作る (どちらが先でもよい。合図は作ったとき)
             {'id': 'forge', 'mode': 'all', 'objectives': [
                 {'id': 'sword', 'type': 'collect', 'target': 'minecraft:iron_sword', 'count': 1, 'party': False},
                 {'id': 'whet', 'type': 'signal', 'target': 'ch1_whetstone_used', 'party': False}]},
@@ -164,11 +164,11 @@ def quests():
         'The sword on the plinth crumbled when lifted. Only the way its grip was wrapped stays in your eye. Tell the traveling artisan.')
     put(b + 'show.lead', '剣は崩れた。柄の巻き方だけが、目に残っている。', 'The sword crumbled. Only the way its grip was wound stays with you.')
     put(b + 'show.talk', '折れた剣のことを、職人に話そう', 'Tell the artisan about the broken sword')
-    put(b + 'forge.journal', '「研がずに振った。だから折れた」と台座にあった。鉄の剣を作業台で作り、岩の砥石で研いでから振ろう。砥石の作り方は旅の覚書にある。',
-        'The plinth said: "Swung it unhoned. So it broke." Make an iron sword at a workbench and hone it on a rock whetstone before you swing it. The whetstone is in your wayfarer\'s notes.')
+    put(b + 'forge.journal', '「研がずに振った。だから折れた」と台座にあった。鉄の剣と岩の砥石を作業台で作ろう。砥石は持っているだけで刃を研いでくれる。作り方は旅の覚書にある。',
+        'The plinth said: "Swung it unhoned. So it broke." Make an iron sword and a rock whetstone at a workbench. Carrying the whetstone keeps the blade honed. The recipe is in your wayfarer\'s notes.')
     put(b + 'forge.lead', '職人「研がずに振るな。あの剣は、それで折れた」', 'The artisan: "Do not swing it unhoned. That sword broke because it was."')
     put(b + 'forge.sword', '鉄の剣を作ろう', 'Make an iron sword')
-    put(b + 'forge.whet', '岩の砥石で刃を研ごう', 'Hone your blade on a rock whetstone')
+    put(b + 'forge.whet', '岩の砥石を作ろう', 'Make a rock whetstone')
     put(b + 'done', '「刃は、研いだぶんだけ軽くなる。……今度は、折るなよ」\n盾のことなら、語り部が昔の旅人の話を知っている。',
         '"A blade lightens as you hone it. ...Do not break this one."\nFor a shield, the storyteller knows a tale of the traveller long ago.')
 

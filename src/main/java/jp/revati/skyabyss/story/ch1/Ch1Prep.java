@@ -15,7 +15,7 @@ import net.minecraft.resources.ResourceLocation;
 // イサナの「鯨の話」(印 c_whale_heard) のあと、一章の人に三本とも出る。旧い備えの頼み (prep_gear・prep_blade・prep_pulse) はこの三本に吸収した。
 //   trail_iron   (鉄の跡。イサナ。100)   骨の坑 (BonePit) の奥の前の私の荷で頁 ch1/trail_iron → 鉄の防具 4 部位を着る (目的 wear)
 //   trail_blade  (折れた剣。職人。100)  割れ殻の洞 (CleftCave) を抜けると台座に折れた剣 = 頁 ch1/trail_blade → 職人に話す (作り方を教わる) →
-//                                       鉄の剣を持つ + 岩の砥石を使う (合図 SIGNAL_WHETSTONE_USED)
+//                                       鉄の剣を持つ + 岩の砥石を作る (合図 SIGNAL_WHETSTONE_USED。名前は前のまま)
 //   trail_shield (盾と糧。語り部。50)   盾と道の固焼き 8 を持つ。報酬で頁 ch1/trail_shield。鼓動守 (護り糸を職人に編んでもらう) と鯨道の旅装は任意
 //   三本そろう   合図 ch1_ready (PrepQuests) と記念品「鯨追いの印」(WHALE_CHASER_MARK。見た目だけ)、進捗 whale_trail
 //
@@ -46,7 +46,7 @@ public final class Ch1Prep {
 
     // 合図
     public static final String SIGNAL_GEAR_MADE = "ch1_travel_gear_made";
-    // 岩の砥石を使った (TravelGear.applyWhetstone)。trail_blade の鍛えの段の「砥石を使う」
+    // 岩の砥石を作った (TravelGear.onCrafted)。trail_blade の鍛えの段の「砥石を作る」
     public static final String SIGNAL_WHETSTONE_USED = "ch1_whetstone_used";
 
     // 歌の間の壁画の順 (鐘楼 P8 が読む。柱の高さ 1〜5 を低い順。歌石と同じ)
