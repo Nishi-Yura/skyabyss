@@ -224,4 +224,9 @@ public class MountEntity extends AbstractHorse implements GeoEntity {
     public AnimatableInstanceCache getAnimatableInstanceCache() {
         return cache;
     }
+
+    // 自己テスト用: FakePlayer は startRiding できないので、席に直接座らせる
+    void seatForTest(Entity rider) {
+        addPassenger(rider);
+    }
 }

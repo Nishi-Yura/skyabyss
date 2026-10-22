@@ -23,7 +23,7 @@ from PIL import Image
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 ASSETS = os.path.join(ROOT, "src", "main", "resources", "assets", "skyabyss")
 REVIEW = os.path.join(ROOT, "docs", "review", "mount_roughs")
-LOOKS = ["horn_beast", "whale_calf", "shell_tortoise", "storm_chick", "ember_fox"]
+LOOKS = ["horn_beast", "ash_deer", "great_lizard", "whale_calf", "shell_tortoise", "storm_chick", "ember_fox"]
 
 
 # ---------------------------------------------------------------- 箱のモデル
@@ -218,6 +218,57 @@ def horn_beast(v):
     return m
 
 
+def ash_deer(v):
+    m = Model("ash_deer")
+    coat = [(142, 138, 130), (120, 124, 128), (160, 150, 136)][v - 1]
+    dark = (88, 86, 84)
+    cream = (224, 220, 208)
+    ant = (196, 184, 156)
+    m.bone("body", "root", [0, 18, 0])
+    m.cube("body", [-5.5, 17, -10], [11, 10, 20], coat, belly=cream)
+    m.cube("body", [-5, 25, -8], [10, 3, 9], dark)                       # 背の黒い筋
+    m.cube("body", [-6, 22, -3], [12, 6, 8], (110, 86, 64), rim=(200, 170, 90))  # 荷を載せる鞍布
+    legs(m, (-5, 1), (-9, 5), 4, 4, 18, 3, coat, (60, 54, 50))
+    m.bone("head", "body", [0, 26, -9])
+    m.cube("head", [-3, 26, -14], [6, 11, 6], coat)                      # 長い首
+    m.cube("head", [-3.5, 33, -19], [7, 6, 8], coat, eyes=("north", 1, 3, (24, 20, 20)), side_eye=(3, 3, (24, 20, 20)))
+    m.cube("head", [-2, 33, -22], [4, 4, 4], cream, nose=(46, 34, 30))
+    m.mirror("head", "head", [-5, 37, -16], [2, 4, 2], dark)             # 耳
+    for sgn in (-1, 1):
+        def mx(x, w):
+            return x if sgn < 0 else -x - w
+        m.cube("head", [mx(-4, 2), 38, -15], [2, 7, 2], ant)
+        m.cube("head", [mx(-7, 3), 43, -15], [3, 2, 2], ant)
+        m.cube("head", [mx(-7, 2), 45, -15], [2, 5, 2], ant)
+        if v != 3:
+            m.cube("head", [mx(-9, 3), 47, -15], [3, 2, 2], ant)
+    m.bone("tail", "body", [0, 26, 10])
+    m.cube("tail", [-2, 22, 9], [4, 6, 4], cream)
+    return m
+
+
+def great_lizard(v):
+    m = Model("great_lizard")
+    sk = [(86, 110, 72), (120, 100, 64), (70, 96, 104)][v - 1]
+    belly = (200, 190, 140)
+    dark = (52, 70, 46)
+    m.bone("body", "root", [0, 10, 0])
+    m.cube("body", [-7, 9, -12], [14, 9, 24], sk, belly=belly, stripe=dark, every=6)
+    m.cube("body", [-6, 17, -10], [12, 3, 20], dark)                     # 背びれのうね
+    m.cube("body", [-8, 15, -5], [16, 3, 9], (150, 70, 50), rim=(222, 190, 90))  # 荷を載せる敷布
+    legs(m, (-9, 5), (-10, 4), 4, 5, 10, 2, sk, dark, hip_in=2)
+    m.bone("head", "body", [0, 14, -11])
+    m.cube("head", [-4, 10, -20], [8, 7, 10], sk, eyes=("north", 1, 4, (232, 190, 60)), side_eye=(3, 4, (232, 190, 60)), mouth=("north", 2, (40, 52, 36)))
+    m.cube("head", [-3, 10, -23], [6, 4, 4], sk, nose=(30, 40, 28))
+    if v == 2:
+        m.cube("head", [-1, 16, -18], [2, 4, 6], (190, 70, 50))          # とさか
+    m.bone("tail", "body", [0, 13, 11])
+    m.cube("tail", [-4, 9, 10], [8, 6, 8], sk)
+    m.bone("tail_tip", "tail", [0, 12, 18])
+    m.cube("tail_tip", [-2.5, 9.5, 17], [5, 4, 9], sk, stripe=dark, every=4)
+    return m
+
+
 def whale_calf(v):
     m = Model("whale_calf")
     sk = [(96, 118, 140), (88, 112, 116), (122, 130, 150)][v - 1]
@@ -329,7 +380,7 @@ def ember_fox(v):
     return m
 
 
-BUILD = {"horn_beast": horn_beast, "whale_calf": whale_calf, "shell_tortoise": shell_tortoise, "storm_chick": storm_chick, "ember_fox": ember_fox}
+BUILD = {"horn_beast": horn_beast, "ash_deer": ash_deer, "great_lizard": great_lizard, "whale_calf": whale_calf, "shell_tortoise": shell_tortoise, "storm_chick": storm_chick, "ember_fox": ember_fox}
 
 
 # ---------------------------------------------------------------- アニメ

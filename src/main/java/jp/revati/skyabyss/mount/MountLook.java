@@ -11,6 +11,8 @@ import org.jetbrains.annotations.Nullable;
 //   width / height : 当たりの大きさ。seat = 乗る人の座る高さ (足もとからのブロック数)
 public enum MountLook {
     HORN_BEAST("horn_beast", 1, 0, 1.3f, 1.8f, 1.6),
+    ASH_DEER("ash_deer", 1, 60, 1.2f, 2.0f, 1.75),
+    GREAT_LIZARD("great_lizard", 1, 60, 1.5f, 1.2f, 1.2),
     WHALE_CALF("whale_calf", 2, 120, 1.4f, 1.6f, 1.45),
     SHELL_TORTOISE("shell_tortoise", 3, 200, 1.5f, 1.6f, 1.5),
     STORM_CHICK("storm_chick", 4, 280, 1.2f, 2.2f, 1.85),

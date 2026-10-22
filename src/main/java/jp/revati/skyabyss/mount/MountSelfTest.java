@@ -62,7 +62,7 @@ public final class MountSelfTest {
     private static void run(MinecraftServer server) {
         List<String> f = new ArrayList<>();
         ServerLevel level = server.overworld();
-        FakePlayer p = new FakePlayer(level, new GameProfile(UUID.randomUUID(), "mount_p"));
+        FakePlayer p = new RidingPlayer(level, new GameProfile(UUID.randomUUID(), "mount_p"));
         BlockPos b = base(level);
         p.setPos(b.getX() + 3.5, level.getMaxBuildHeight() - 20, b.getZ() + 3.5);
         try {
@@ -96,7 +96,7 @@ public final class MountSelfTest {
         check(f, resource(a + "textures/item/mount_whistle.png") && resource(a + "models/item/mount_whistle.json"), "whistle item");
         check(f, resource(a + "textures/gui/npc_marker/fac_stable_keeper.png"), "stable keeper icon");
         check(f, resource("/data/skyabyss/dialogue/attendant_stable_keeper.json"), "stable keeper dialogue");
-        check(f, MountLook.values().length == 5 && MountLook.HORN_BEAST.price == 0 && MountLook.HORN_BEAST.chapter == 1, "roster: starter is free from the start");
+        check(f, MountLook.values().length == 7 && MountLook.HORN_BEAST.price == 0 && MountLook.HORN_BEAST.chapter == 1, "roster: starter is free from the start");
         for (int k = 0; k < 3; k++) {
             for (int t = 2; t <= MountStats.TIERS; t++) {
                 check(f, MountStats.price(k, t) > MountStats.price(k, t - 1), "price rises per tier " + k + "/" + t);
@@ -148,6 +148,41 @@ public final class MountSelfTest {
         d.setTier(MountStats.SPEED, MountStats.TIERS);
     }
 
+    // FakePlayer.startRiding は常に false。乗り物の欄を直接書いて本物の人と同じに乗れるようにする
+    private static final class RidingPlayer extends FakePlayer {
+        private static final java.lang.reflect.Field VEHICLE;
+
+        static {
+            try {
+                VEHICLE = net.minecraft.world.entity.Entity.class.getDeclaredField("vehicle");
+                VEHICLE.setAccessible(true);
+            } catch (ReflectiveOperationException e) {
+                throw new ExceptionInInitializerError(e);
+            }
+        }
+
+        RidingPlayer(ServerLevel level, GameProfile profile) {
+            super(level, profile);
+        }
+
+        @Override
+        public boolean startRiding(net.minecraft.world.entity.Entity vehicle, boolean force) {
+            if (!(vehicle instanceof MountEntity mount) || vehicle == getVehicle()) {
+                return false;
+            }
+            try {
+                if (isPassenger()) {
+                    stopRiding();
+                }
+                VEHICLE.set(this, vehicle);
+                mount.seatForTest(this);
+                return true;
+            } catch (IllegalAccessException e) {
+                throw new IllegalStateException(e);
+            }
+        }
+    }
+
     private static void summon(List<String> f, ServerLevel level, FakePlayer p) {
         MountData d = MountService.data(p);
         d.choose(MountLook.WHALE_CALF);
@@ -171,7 +206,7 @@ public final class MountSelfTest {
         check(f, m.look() == MountLook.HORN_BEAST && Math.abs(m.getAttributeValue(Attributes.JUMP_STRENGTH) - MountStats.jump(0)) < 1e-6, "look and stats follow a change at once");
         d.setTier(MountStats.JUMP, MountStats.TIERS);
         // 乗る (持ち主だけ)
-        m.mobInteract(p, InteractionHand.MAIN_HAND);
+        net.minecraft.world.InteractionResult ir = m.mobInteract(p, InteractionHand.MAIN_HAND);
         check(f, p.getVehicle() == m && m.getControllingPassenger() == p, "owner rides and steers");
         p.stopRiding();
         // 一人一頭
