@@ -191,6 +191,12 @@ def main():
         v.mark('beacon_%d' % i, lx, HEART_BOTTOM + 3, lz)
     v.mark('heart', 0, HEART_BOTTOM + 2, 0)
     v.mark('arrival', R_IN + 4, TOP + 1, 0)
+    # 地上への鎖 (着く所の北。右クリックで都の底の境へ戻る。story/ch5/AbyssGate)
+    ex, ez = R_IN + 5, -4
+    v.set(ex, TOP + 1, ez, 'lodestone')
+    for y in range(TOP + 2, TOP + 15):
+        v.set(ex, y, ez, 'chain[axis=y,waterlogged=false]')
+    v.mark('exit', ex, TOP + 1, ez)
     ext = HEART_R + 2
     meta = {'name': 'abyss_layers', 'note': 'docs/design/36 A2。生成は tools/abyss/gen_abyss_layers.py', 'top': TOP, 'bottom': HEART_BOTTOM,
             'rect': [-ext, -ext, ext, ext]}

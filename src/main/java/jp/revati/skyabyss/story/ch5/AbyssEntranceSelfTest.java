@@ -24,9 +24,9 @@ import net.minecraft.world.level.levelgen.Heightmap;
 import net.neoforged.neoforge.common.util.FakePlayer;
 
 // SELFTEST ch5 entrance: 五章の入口 (docs/design/34 の 4.7)。
-//   データ: main_abyss の段 (rumor・prepare・door・shaft・report)、支度 ch5/black_iron (ネザライトのインゴット → 鍛冶師。報酬に鍛冶型)
+//   データ: main_abyss の段 (rumor・prepare・door・shaft・gate・descend・warden・heart・report)、支度 ch5/black_iron (ネザライトのインゴット → 鍛冶師。報酬に鍛冶型)
 //   流れ: 印を出発点のそばへ差し替え、戸の 2 マスを強化深層岩に。鍵なし・段の前は開かない → 段 door で鍵を持つと開く (記録・合図で段 shaft)
-//        → 底の境の印のそばで合図 (段 report) → 踊り場の一言は人ごとに一度
+//        → 底の境の印のそばで合図 (段 gate) → 鍵なしでは門は開かない → 鍵で格子が溶ける → 門の列で合図 (段 descend)。踊り場の一言は人ごとに一度
 public final class AbyssEntranceSelfTest {
     private AbyssEntranceSelfTest() {
     }
@@ -50,6 +50,7 @@ public final class AbyssEntranceSelfTest {
         ServerLevel level = server.overworld();
         TownData data = TownData.get(server);
         boolean wasOpen = data.abyssOpen;
+        boolean gateWas = data.abyssGateOpen;
         boolean cellarWas = data.cellarOpen;
         try {
             data(f);
@@ -66,6 +67,7 @@ public final class AbyssEntranceSelfTest {
             marks.put(AbyssEntrance.GATE, gate);
             TownGuests.setTestMarks(marks);
             data.abyssOpen = false;
+            data.abyssGateOpen = false;
             level.setBlock(door, Blocks.REINFORCED_DEEPSLATE.defaultBlockState(), 3);
             level.setBlock(door.above(), Blocks.REINFORCED_DEEPSLATE.defaultBlockState(), 3);
 
@@ -103,18 +105,39 @@ public final class AbyssEntranceSelfTest {
             p.moveTo(gate.getX() + 0.5, gate.getY(), gate.getZ() + 0.5);
             AbyssEntrance.check(server, p, "shaft", door);
             Quests.poll(p, true);
-            check(f, "report".equals(TownGuests.stageOf(p, AbyssEntrance.QUEST)), "reaching the threshold did not advance to report: " + TownGuests.stageOf(p, AbyssEntrance.QUEST));
+            check(f, "gate".equals(TownGuests.stageOf(p, AbyssEntrance.QUEST)), "reaching the threshold did not advance to gate: " + TownGuests.stageOf(p, AbyssEntrance.QUEST));
+            // 門 (格子の列は印の北 1)
+            for (int dx = -1; dx <= 1; dx++) {
+                for (int dy = 0; dy <= 4; dy++) {
+                    level.setBlock(AbyssGate.bar(gate, dx, dy), Blocks.IRON_BARS.defaultBlockState(), 3);
+                }
+            }
+            level.setBlock(gate.below(), Blocks.POLISHED_DEEPSLATE.defaultBlockState(), 3);
+            check(f, AbyssGate.inGate(gate.north(), gate) && AbyssGate.inGate(gate.north().east(), gate) && !AbyssGate.inGate(gate, gate) && !AbyssGate.inGate(gate.north().east(2), gate),
+                    "inGate does not match the bar row");
+            ItemStack key = p.getInventory().removeItem(p.getInventory().findSlotMatchingItem(new ItemStack(StorySetup.SKY_KEY.get())), 1);
+            AbyssGate.check(server, p, gate, false);
+            check(f, !AbyssGate.isOpen(server) && level.getBlockState(AbyssGate.bar(gate, 0, 1)).is(Blocks.IRON_BARS), "the gate opened without the key");
+            p.getInventory().add(key);
+            AbyssGate.check(server, p, gate, false);
+            check(f, AbyssGate.isOpen(server) && level.getBlockState(AbyssGate.bar(gate, 0, 1)).isAir() && level.getBlockState(AbyssGate.bar(gate, 1, 4)).isAir(),
+                    "the key did not melt the bars");
+            p.moveTo(gate.getX() + 0.5, gate.getY(), gate.getZ() - 0.5);
+            AbyssGate.check(server, p, gate, false);
+            Quests.poll(p, true);
+            check(f, "descend".equals(TownGuests.stageOf(p, AbyssEntrance.QUEST)), "passing the gate did not advance to descend: " + TownGuests.stageOf(p, AbyssEntrance.QUEST));
         } catch (RuntimeException e) {
             SkyAbyss.LOGGER.error("SELFTEST ch5 entrance crashed", e);
             f.add("crashed: " + e);
         } finally {
             TownGuests.setTestMarks(null);
             data.abyssOpen = wasOpen;
+            data.abyssGateOpen = gateWas;
             data.cellarOpen = cellarWas;
             force(level, false);
         }
         if (f.isEmpty()) {
-            SkyAbyss.LOGGER.info("SELFTEST ch5 entrance PASSED (quests, prep reward, door needs the stage and the key, carve and record, landing lines once, threshold signal)");
+            SkyAbyss.LOGGER.info("SELFTEST ch5 entrance PASSED (quests, prep reward, door needs the stage and the key, carve and record, landing lines once, threshold signal, gate needs the key, bars melt, gate row signal)");
         } else {
             f.forEach(m -> SkyAbyss.LOGGER.error("SELFTEST ch5 entrance FAILED: {}", m));
         }
@@ -125,7 +148,7 @@ public final class AbyssEntranceSelfTest {
         check(f, main != null, "main_abyss is not loaded");
         if (main != null) {
             List<String> ids = main.stages().stream().map(QuestDef.Stage::id).toList();
-            check(f, ids.equals(List.of("rumor", "prepare", "door", "shaft", "report")), "main_abyss stages: " + ids);
+            check(f, ids.equals(List.of("rumor", "prepare", "door", "shaft", "gate", "descend", "warden", "heart", "report")), "main_abyss stages: " + ids);
             check(f, "main".equals(main.category()) && "chapter2".equals(main.chapter()), "main_abyss should be a chapter-5 main quest");
         }
         QuestDef iron = QuestManager.quest("ch5/black_iron");

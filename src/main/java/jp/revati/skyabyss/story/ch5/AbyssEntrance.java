@@ -30,7 +30,7 @@ import net.neoforged.neoforge.event.tick.ServerTickEvent;
 //              戸が戻っていたら、人が近くに来たとき開け直す。開いた戸の前 3 に段 door の人が来ても合図 ch5_abyss_door
 //   酒場の壁   メインが始まったら、酒場の地下の奥の壁 (TownCellar) を開ける (酔いどれの頼みをしていない人も戸まで行けるように)
 //   踊り場     印 abyss_landing_1・abyss_landing_2 の 6 以内に来た人に一度ずつ一言 (人ごとの印 skyabyss_ch5_landing_<n>)
-//   底の境     印 abyss_gate の 6 以内で合図 ch5_threshold と一言 (段 shaft の人)。門はまだ開かない (深淵の中は 00 の 245)
+//   底の境     印 abyss_gate の 6 以内で合図 ch5_threshold と一言 (段 shaft の人)。門を開けて深淵へ入るのは AbyssGate
 //   確かめ     SELFTEST ch5 entrance (story/ch5/AbyssEntranceSelfTest)
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class AbyssEntrance {
@@ -72,7 +72,7 @@ public final class AbyssEntrance {
 
     // 段 door か、そのあと (戸を開けた人がもう一度来たとき)
     static boolean readyFor(@Nullable String stage) {
-        return "door".equals(stage) || "shaft".equals(stage) || "report".equals(stage);
+        return stage != null && !"rumor".equals(stage) && !"prepare".equals(stage);
     }
 
     public static boolean holdsKey(ServerPlayer p) {

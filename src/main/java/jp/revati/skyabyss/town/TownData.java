@@ -23,6 +23,8 @@ public final class TownData extends SavedData {
     public boolean cellarOpen;
     // 五章の封じた戸を開けた (story/ch5/AbyssEntrance。開いたまま)
     public boolean abyssOpen;
+    // 五章の底の境の門を開けた (story/ch5/AbyssGate。開いたまま)
+    public boolean abyssGateOpen;
     public final Set<UUID> wellTaken = new LinkedHashSet<>();
 
     public static TownData get(MinecraftServer server) {
@@ -33,6 +35,7 @@ public final class TownData extends SavedData {
         TownData d = new TownData();
         d.cellarOpen = tag.getBoolean("CellarOpen");
         d.abyssOpen = tag.getBoolean("AbyssOpen");
+        d.abyssGateOpen = tag.getBoolean("AbyssGateOpen");
         for (Tag t : tag.getList("WellTaken", Tag.TAG_INT_ARRAY)) {
             d.wellTaken.add(NbtUtils.loadUUID(t));
         }
@@ -43,6 +46,7 @@ public final class TownData extends SavedData {
     public CompoundTag save(CompoundTag tag, HolderLookup.Provider registries) {
         tag.putBoolean("CellarOpen", cellarOpen);
         tag.putBoolean("AbyssOpen", abyssOpen);
+        tag.putBoolean("AbyssGateOpen", abyssGateOpen);
         ListTag list = new ListTag();
         wellTaken.forEach(u -> list.add(NbtUtils.createUUID(u)));
         tag.put("WellTaken", list);

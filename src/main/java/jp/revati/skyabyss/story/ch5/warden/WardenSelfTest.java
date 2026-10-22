@@ -7,9 +7,13 @@ import java.util.UUID;
 import com.mojang.authlib.GameProfile;
 
 import jp.revati.skyabyss.SkyAbyss;
+import jp.revati.skyabyss.quest.Quests;
 import jp.revati.skyabyss.story.ch5.AbyssBuild;
+import jp.revati.skyabyss.story.ch5.AbyssEntrance;
+import jp.revati.skyabyss.story.ch5.AbyssGate;
 import jp.revati.skyabyss.story.ch5.AbyssPressure;
 import jp.revati.skyabyss.story.ch5.AbyssWorld;
+import jp.revati.skyabyss.town.TownGuests;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -123,6 +127,16 @@ public final class WardenSelfTest {
             int left = level.getEntitiesOfClass(HeartWarden.class, w.getBoundingBox().inflate(48), HeartWarden::decoy).size();
             check(f, left == 0, "shades stayed after the fall: " + left);
             w.discard();
+            // 心臓に触れる: 段 heart の人だけ
+            FakePlayer q = new FakePlayer(level, new GameProfile(UUID.randomUUID(), "warden_heart"));
+            Quests.forgetAll(q);
+            check(f, !AbyssGate.touch(q), "someone without the quest could touch the heart");
+            Quests.start(q, AbyssEntrance.QUEST);
+            for (int i = 0; i < 8 && !"heart".equals(TownGuests.stageOf(q, AbyssEntrance.QUEST)); i++) {
+                Quests.forceStage(q, AbyssEntrance.QUEST);
+            }
+            check(f, "heart".equals(TownGuests.stageOf(q, AbyssEntrance.QUEST)) && AbyssGate.touch(q), "the heart stage could not touch the heart");
+            Quests.forgetAll(q);
         } catch (RuntimeException e) {
             SkyAbyss.LOGGER.error("SELFTEST abyss warden crashed", e);
             f.add("crashed: " + e);
@@ -155,7 +169,7 @@ public final class WardenSelfTest {
 
     private static void report(List<String> f) {
         if (f.isEmpty()) {
-            SkyAbyss.LOGGER.info("SELFTEST abyss warden PASSED (marks, wake, 25/100 shares, lantern 40/30 s and sight, dark gathers x2, shades, dark wave, fall)");
+            SkyAbyss.LOGGER.info("SELFTEST abyss warden PASSED (marks, wake, 25/100 shares, lantern 40/30 s and sight, dark gathers x2, shades, dark wave, fall, heart touch by stage)");
         } else {
             f.forEach(m -> SkyAbyss.LOGGER.error("SELFTEST abyss warden FAILED: {}", m));
         }

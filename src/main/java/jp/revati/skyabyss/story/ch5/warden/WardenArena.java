@@ -10,8 +10,10 @@ import jp.revati.skyabyss.SkyAbyss;
 import jp.revati.skyabyss.notice.Notice;
 import jp.revati.skyabyss.quest.Quests;
 import jp.revati.skyabyss.story.ch5.AbyssBuild;
+import jp.revati.skyabyss.story.ch5.AbyssEntrance;
 import jp.revati.skyabyss.story.ch5.AbyssPressure;
 import jp.revati.skyabyss.story.ch5.AbyssWorld;
+import jp.revati.skyabyss.town.TownGuests;
 import net.minecraft.commands.Commands;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
@@ -28,9 +30,9 @@ import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
 
 // 心臓の間の戦いの始まりと終わり (36 の 6.1・6.5)。
-//   始まり   まだ倒していない間に、だれかが心臓の間 (印 heart から 26 以内・床の 2 下〜天井) に入ると、灯籠を全部消して番人を出す
+//   始まり   メインの段 warden の人が心臓の間 (印 heart から 26 以内・床の 2 下〜天井) に入ると、灯籠を全部消して番人を出す
 //            体力は、そのとき間にいる人数で合わせる
-//   終わり   倒すと、そのとき間にいる人に合図 abyss_heart。倒した印はワールドに一つ (再戦は A8 の悪夢)
+//   終わり   倒すと、そのとき間にいる人に合図 abyss_heart。倒した印はワールドに一つ (台の鼓動・再戦は A8 の悪夢)
 //   やり直し 間からだれもいなくなって 30 秒たつと、番人は闇へ戻る (次に入ると最初から)
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class WardenArena {
@@ -79,6 +81,17 @@ public final class WardenArena {
         return e instanceof HeartWarden w && w.isAlive() ? w : null;
     }
 
+    // 間の中に、まだ番人を倒していない人 (メインの段 warden) がいるか。戦いは組ごと (倒した人だけなら目覚めない)
+    static boolean needsFight(ServerLevel level) {
+        for (ServerPlayer p : inside(level)) {
+            if ("warden".equals(TownGuests.stageOf(p, AbyssEntrance.QUEST))) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // だれかが一度でも倒したか (A8 の悪夢と、台の鼓動)
     public static boolean cleared(MinecraftServer server) {
         return Data.get(server).cleared;
     }
@@ -136,7 +149,7 @@ public final class WardenArena {
         boolean someone = !inside(level).isEmpty();
         if (w == null) {
             warden = null;
-            if (someone && !Data.get(server).cleared) {
+            if (someone && needsFight(level)) {
                 wake(level);
             }
             return;
