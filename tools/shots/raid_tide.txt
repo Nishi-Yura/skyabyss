@@ -2,7 +2,7 @@
 #   ./gradlew runShots -Pscript=tools/shots/raid_tide.txt -PshotsName=raid_tide   絵は run/shots/raid_tide/shots/raid_tide/ → docs/review/raid_tide/
 world raid_tide normal
 size 1280 720
-timeout 4200
+timeout 6000
 render 12
 clouds off
 
@@ -17,7 +17,7 @@ cmd gamerule doDaylightCycle false
 cmd skyabyss playtest god on
 cmd skyabyss playtest gear tide
 cmd skyabyss playtest board tide
-wait 400
+wait 1000
 cmd skyabyss playtest goto tide hub
 wait 100
 waitchunks
