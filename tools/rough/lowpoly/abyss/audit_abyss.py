@@ -81,23 +81,33 @@ def floating_parts(V, T):
             hulls[r] = Delaunay(vsets[r])
         except Exception:
             hulls[r] = None
-    n_float = 0
+    # 部品どうしのつながり (触れている・中に入っている) を辺にして、塊 (グループ) を作る。
+    # 塊が一つだけなら浮いていない。二つ以上なら、一番大きい塊以外の部品の数を浮いた部品とする。
+    # (二つの部品が互いに触れていても、胴に付いていなければ浮いた塊として数える)
+    gp = {r: r for r in keys}
+
+    def gfind(x):
+        while gp[x] != x:
+            gp[x] = gp[gp[x]]
+            x = gp[x]
+        return x
     for r in keys:
-        attached = False
         for q in keys:
             if q == r:
                 continue
             d, _ = trees[q].query(samples[r])
-            if d.min() <= FLOAT_TOL:
-                attached = True
-                break
+            touch = d.min() <= FLOAT_TOL
             h = hulls[q]
-            if h is not None and (h.find_simplex(samples[r]) >= 0).any():
-                attached = True
-                break
-        if not attached:
-            n_float += 1
-    return n_float
+            inside = h is not None and (h.find_simplex(samples[r]) >= 0).any()
+            if touch or inside:
+                gp[gfind(r)] = gfind(q)
+    groups = {}
+    for r in keys:
+        groups.setdefault(gfind(r), []).append(r)
+    if len(groups) <= 1:
+        return 0
+    biggest = max(len(g) for g in groups.values())
+    return sum(len(g) for g in groups.values()) - biggest
 
 
 def main(argv):

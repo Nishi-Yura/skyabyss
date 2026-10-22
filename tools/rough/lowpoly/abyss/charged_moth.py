@@ -19,6 +19,15 @@ PAL = make_pal({
 }, glow=["light"])
 
 
+def wing_plane(F, bone, root, tip, chord, mat_="wing"):
+    """羽の一枚: 根から先へ伸びる薄い筒 (厚さ 0.14、幅は中ほどで広い)。円盤にしない。"""
+    root, tip = np.array(root, float), np.array(tip, float)
+    mid = root + (tip - root) * 0.45
+    F += part(bone + "_plane", tube(bone, mat_, [root, mid, tip], ra=[0.14, 0.14, 0.05], rb=[chord * 0.5, chord, chord * 0.3],
+                                    sides=6, hint=(0, 1, 0)))
+    return F
+
+
 def build_a(k):
     """A 細い羽虫: 細い胴と薄い羽。腹の先の白い雷の玉が群れの目印 (近いと光が強い)。"""
     F = []
@@ -27,7 +36,8 @@ def build_a(k):
     F += part("tip", ellipsoid("abd", "light", (0, 0.1, 3.8), (0.55, 0.55, 0.55), segs=6, rings=3))
     F += part("head", ellipsoid("head", "tuff", (0, 2.3, -2.5), (0.75, 0.6, 0.6), segs=7, rings=3))
     for s, nm in ((-1, "l"), (1, "r")):
-        F += part(f"wing_{nm}", ellipsoid(f"wing_{nm}", "wing", (s * 2.6, 2.8, -0.4), (2.6, 0.2, 1.4), segs=9, rings=3))
+        wing_plane(F, f"wing_{nm}", (s * 0.6, 2.8, -0.6), (s * 3.4, 3.0, -0.2), 1.6)
+        wing_plane(F, f"wing_{nm}", (s * 0.6, 2.8, 0.3), (s * 2.6, 2.8, 1.4), 1.2)
         F += part(f"antenna_{nm}", tube("head", "oxcu", [(s * 0.3, 0.3, -0.6), (s * 1.0, 1.6, -1.0)], ra=[0.14, 0.08], sides=4, hint=(0, 0, 1)))
     return F, [eye_at(-0.36, 2.4, -3.0, 0.26), eye_at(0.36, 2.4, -3.0, 0.26)]
 
@@ -41,7 +51,7 @@ def build_b(k):
     F += part("mand_l", spike("head", "tuff", (-0.4, 1.8, -3.3), (-0.2, -0.2, -1), 1.0, 0.2, sides=4, rings=2))
     F += part("mand_r", spike("head", "tuff", (0.4, 1.8, -3.3), (0.2, -0.2, -1), 1.0, 0.2, sides=4, rings=2))
     for s, nm in ((-1, "l"), (1, "r")):
-        F += part(f"wing_{nm}", ellipsoid(f"wing_{nm}", "wing", (s * 1.4, 2.8, -0.4), (1.4, 0.2, 1.4), segs=8, rings=3))
+        wing_plane(F, f"wing_{nm}", (s * 0.5, 2.9, -0.6), (s * 2.0, 2.9, 0.2), 1.0)
     return F, [eye_at(-0.4, 2.4, -3.2, 0.24), eye_at(0.4, 2.4, -3.2, 0.24)]
 
 
@@ -51,7 +61,8 @@ def build_c(k):
     F += part("body", ellipsoid("body", "tuff", (0, 2.2, 0.0), (0.8, 0.8, 1.8), segs=8, rings=4))
     F += part("head", ellipsoid("head", "tuff", (0, 2.3, -2.2), (0.7, 0.65, 0.7), segs=7, rings=3))
     for s, nm in ((-1, "l"), (1, "r")):
-        F += part(f"wing_{nm}", ellipsoid(f"wing_{nm}", "wing", (s * 2.8, 2.9, -0.4), (2.8, 0.2, 2.4), segs=10, rings=4))
+        wing_plane(F, f"wing_{nm}", (s * 0.6, 2.9, -1.2), (s * 3.2, 3.0, -1.0), 1.8)
+        wing_plane(F, f"wing_{nm}", (s * 0.6, 2.9, 0.8), (s * 3.0, 3.0, 1.8), 1.5)
         F += part(f"edge_{nm}", tube(f"wing_{nm}", "light", [(s * 0.6, 3.1, -2.4), (s * 3.6, 3.1, -1.2), (s * 4.2, 3.1, 1.6)], ra=0.2, sides=4, hint=(0, 1, 0)))
     return F, [eye_at(-0.3, 2.4, -2.6, 0.24), eye_at(0.3, 2.4, -2.6, 0.24)]
 

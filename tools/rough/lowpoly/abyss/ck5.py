@@ -77,6 +77,9 @@ def manifest_entry(spec, results, out_png_rel):
 _ck.manifest_entry = manifest_entry
 
 
+import pattern5  # noqa: E402,F401  (アトラスの表面の模様。_ck.paint を差し替える)
+
+
 def run(spec, build, pal, bones, poses, hint=128):
     OUT.mkdir(parents=True, exist_ok=True)
     results = []
