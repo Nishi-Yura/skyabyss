@@ -127,7 +127,7 @@ def titans_abyss():
         lead=T("四体の心臓を返したあとも、空は静かになりません。都の地下の戸の向こうに、底の見えない大きな縦穴が口を開けています。巨神の背とは別の、深淵という世界です。",
                "Even after the four hearts the sky does not settle. Past the door under the capital yawns a shaft with no visible bottom: the abyss, a world apart from any titan's back."),
         grid=_grid([
-            (T("縦穴を下りる", "Down the shaft"), T("一続きの旅として下ります。骨・塩・雷・灰の四つの層を渡り、層ごとに違う遊びがあります。層のあいだの灯籠で、再開できます。",
+            (T("縦穴を下りる", "Down the shaft"), T("一続きの旅として下ります。骨・塩・雷・灰の四つの層を渡り、層ごとに違う遊びがあります。層のあいだの灯りで、再開できます。",
                                              "One continuous descent through four layers (bone, salt, storm and ash), each with its own play. Lantern rests between the layers let you resume.")),
             (T("深淵の術", "Abyss arts"), T("層ごとの溜まりで、光・重さ・鼓動の三つの術を覚えます。覚えた術は、次の層の道を開きます。深淵術師の木で育てます。",
                                          "Learn three arts at the pools of each layer: light, weight and heartbeat. Each opens the way ahead. Grow them in the Abyss Caster tree.")),

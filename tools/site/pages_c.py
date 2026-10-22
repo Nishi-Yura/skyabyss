@@ -26,7 +26,7 @@ def story():
 """ % dict(
         h=T("物語", "Story"),
         h5=T("五章　深淵", "Chapter 5: The Abyss"),
-        plate5=pimg("img/scene_abyss.png", "縦穴の灯籠のドット絵", "Pixel art of a lantern in the abyss shaft", 256, 160, "plate px"),
+        plate5=pimg("img/scene_abyss.png", "縦穴の灯りのドット絵", "Pixel art of a lantern in the abyss shaft", 256, 160, "plate px"),
         q5a=T("四つを返した。それでも、まだ足りないのだという。", "Four were returned. Still, they say, it is not enough."),
         q5b=T("底へ降りるほど、あなたより前の誰かの声が近くなる。", "The deeper you go, the closer a voice from someone who came before you."),
         t5=T("都の地下に、閉じられた戸があります。その先は、地の底の深淵です。語り部は、そこへ降りた人のことを、多くは語りません。",

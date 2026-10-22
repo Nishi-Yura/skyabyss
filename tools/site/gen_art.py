@@ -296,7 +296,7 @@ def _ledges(d, top, bot, step, x0t, x1t, x0b, x1b, col, shade):
 
 
 def arch_abyss():
-    """五章の札: 縦穴を見下ろす、灯籠のあかり。170x168 (論理 85x84 を 2 倍)。"""
+    """五章の札: 縦穴を見下ろす、灯りのあかり。170x168 (論理 85x84 を 2 倍)。"""
     bg = hexc("#0b1230")
     L = Image.new("RGBA", (85, 84), hexc("#120c22"))
     bands(L, [hexc(c) for c in ("#0f0a1c", "#1a1230", "#2a1d3e", "#120c22")], 0, 84)
@@ -315,7 +315,7 @@ def arch_abyss():
     # 中央の鎖
     for y in range(0, 30, 3):
         d.point((42, y), fill=hexc("#8a8aa0"))
-    # 灯籠 (壁の段のそば。下の光だまり)
+    # 灯り (壁の段のそば。下の光だまり)
     for x, y in ((27, 26), (57, 44), (23, 58), (60, 68)):
         for dx, dy in ((2, 1), (-2, 1), (0, 2), (0, -2)):
             d.point((x + dx, y + dy), fill=hexc("#7a4a1a"))
@@ -336,7 +336,7 @@ def arch_abyss():
 
 
 def scene_abyss():
-    """五章の小さな場面 (64x40): 縦穴と灯籠ひとつ。"""
+    """五章の小さな場面 (64x40): 縦穴と灯りひとつ。"""
     im = Image.new("RGBA", (64, 40), (0, 0, 0, 255))
     bands(im, [hexc(c) for c in ("#0d0a18", "#1a1230", "#2a1d3e", "#120c22")], 0, 40)
     d = ImageDraw.Draw(im)

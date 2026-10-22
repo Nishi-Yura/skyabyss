@@ -307,20 +307,13 @@ public class LoreBookScreen extends Screen implements jp.revati.skyabyss.client.
         g.disableScissor();
         LoreChapter chapter = chapter();
         if (chapter != null) {
+            // 選んだしおりは、自分の幅 (しおりの間隔 + 両側 3) だけで切って一番前に描く。しおりの絵は間隔より広く、
+            // そのまま描くと右どなりの章の名を隠し、となりを上に描き直すと今度はとなりが前に出た (2026-10-23 の試遊)
+            int tx = left + TAB_X0 + chapterIndex * TAB_STEP;
+            jp.revati.skyabyss.client.ui.TextClip.clipPosed(g, tx - 3, 0, TAB_STEP + 6, top + 1);
             drawTab(g, chapterIndex, chapter, true, mouseX, mouseY);
+            g.disableScissor();
             drawTabLabel(g, chapterIndex, chapter, true, mouseX, mouseY);
-            // 右どなりのしおりは、選んだしおりの右端に載せ直す (選んだしおりが幅いっぱいに描かれ、となりの章の名を隠していた。2026-10-22)
-            if (chapterIndex + 1 < chapters.size()) {
-                jp.revati.skyabyss.client.ui.TextClip.clipPosed(g, 0, 0, 4000, top + 1);
-                drawTab(g, chapterIndex + 1, chapters.get(chapterIndex + 1), false, mouseX, mouseY);
-                // 載せ直したしおりが、その右の章の名にかかるので、選んでいない章の名はもう一度上に描く
-                for (int i = 0; i < chapters.size(); i++) {
-                    if (i != chapterIndex) {
-                        drawTabLabel(g, i, chapters.get(i), false, mouseX, mouseY);
-                    }
-                }
-                g.disableScissor();
-            }
             drawLeftPage(g, chapter, mouseX, mouseY);
         } else {
             g.drawString(font, Component.translatable("gui.skyabyss.lore.empty"), left + LEFT_X, top + HEADER_Y, FADED, false);
