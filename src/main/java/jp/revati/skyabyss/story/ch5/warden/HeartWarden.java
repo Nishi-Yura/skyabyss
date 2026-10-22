@@ -147,7 +147,7 @@ public class HeartWarden extends Monster implements GeoEntity {
         if (lit()) {
             return 1f;
         }
-        return hasEffect(MobEffects.GLOWING) ? OUTLINE_SHARE : tier.darkShare();
+        return hasEffect(MobEffects.GLOWING) ? OUTLINE_SHARE : (float) tier.darkShare();
     }
 
     // 爪・踏み込みの傷 (闇の中の怒り込み)。普通の戦いは今までと同じ数
