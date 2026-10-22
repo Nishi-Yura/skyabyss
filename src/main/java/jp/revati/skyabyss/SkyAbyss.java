@@ -106,6 +106,8 @@ public class SkyAbyss {
         jp.revati.skyabyss.titan.ember.mob.EmberMobSetup.register(modEventBus);
         // 四章の地上の敵・品・音 (docs/design/34 の C4。story/ch4)
         jp.revati.skyabyss.story.ch4.Ch4Setup.register(modEventBus);
+        // 深淵の敵 A (骨・塩・雷の層の 9 種、段ごとの型・素材・経験値)。docs/design/36 の 4 節。abyss/mobs
+        jp.revati.skyabyss.abyss.mobs.AbyssMobsA.register(modEventBus);
         // 余燼の中ボス 灰の鍛え手 (エンティティ・音・鍛え手の間の建て方)。13 の 11.2節の担当 E
         jp.revati.skyabyss.titan.ember.smith.EmberSmithSetup.register(modEventBus);
         // 雷翼の装備 (羽衣・弓・足環・護符・専用伝説) と素材 4 つ (欠片・心核・干し果・鱗粉)、図鑑の表。item.storm パッケージ

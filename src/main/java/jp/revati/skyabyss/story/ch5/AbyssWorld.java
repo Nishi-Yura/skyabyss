@@ -83,6 +83,7 @@ public final class AbyssWorld {
                         .then(Commands.literal("leave").executes(c -> {
                             leave(c.getSource().getPlayerOrException());
                             return 1;
-                        }))));
+                        }))
+                        .then(jp.revati.skyabyss.abyss.mobs.AbyssMobSpawner.command())));
     }
 }

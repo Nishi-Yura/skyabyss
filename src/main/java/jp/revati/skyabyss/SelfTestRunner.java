@@ -136,6 +136,8 @@ public final class SelfTestRunner {
         steps.addAll(jp.revati.skyabyss.abyss.AbyssSelfTest.steps());
         // 深淵術 (光・重さ・鼓動): 鍵・溜まり・灯り・覚える・木・上げる・使う・圧への接ぎ。docs/design/36 の 5 節。SKYABYSS_SELFTEST_ONLY="abyss arts"
         steps.add(Step.once("abyss arts", jp.revati.skyabyss.abyss.arts.AbyssArtsSelfTest::runSelfTest));
+        // 深淵の敵 A (9 種の型・三段の素材・湧かせ方・数字の伸び・予告・殻と盾・塩の抜け殻の割れ)。SKYABYSS_SELFTEST_ONLY="abyss enemies a"
+        steps.add(Step.once("abyss enemies a", jp.revati.skyabyss.abyss.mobs.AbyssMobsASelfTest::runSelfTest));
         steps.add(Step.once("gear curve", GearCurveSelfTest::runSelfTest));
         // 心臓四体の手ごたえ (戦いの長さ・一撃・避けそこね)
         steps.add(Step.once("heart balance", jp.revati.skyabyss.combat.HeartBalanceSelfTest::runSelfTest));
