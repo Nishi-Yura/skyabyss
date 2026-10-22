@@ -53,7 +53,26 @@ def main():
     v = vox.Vox(seed=5)
     rng = v.rng
 
-    def wall_block(y):
+    def wall_block(y, x=0, z=0):
+        """層ごとの柄 (まだらにしない)。骨: 縦の肋 (角度 10 度ごとに骨の柱、あいだは方解石、12 段ごとに玄武岩の帯)、
+        塩: 横の地層 (高さで方解石・白い陶・石英の帯)、雷: 凝灰岩の煉瓦に 10 段ごとの錆びた銅の帯、灰: 玄武岩の柱と黒石"""
+        name = layer_of(y)[0]
+        a = math.degrees(math.atan2(z, x)) % 360
+        if name == 'bone':
+            if y % 12 == 0:
+                return 'smooth_basalt'
+            return 'bone_block[axis=y]' if a % 10 < 2.2 else 'calcite'
+        if name == 'salt':
+            band = (y // 4) % 5
+            return ['calcite', 'white_terracotta', 'calcite', 'smooth_quartz', 'diorite'][band]
+        if name == 'storm':
+            if y % 10 == 0:
+                return 'oxidized_cut_copper'
+            return 'tuff_bricks' if (y // 2 + int(a // 8)) % 2 else 'polished_tuff'
+        if name == 'ash':
+            if a % 12 < 2.5:
+                return 'basalt[axis=y]'
+            return 'cracked_polished_blackstone_bricks' if rng.random() < 0.12 else 'polished_blackstone_bricks'
         return rng.choice(layer_of(y)[3])
 
     # ---- 縦穴の壁の筒
@@ -63,7 +82,7 @@ def main():
             d = math.hypot(x, z)
             if R_IN - 0.5 < d <= r_out + 0.5:
                 for y in range(HEART_TOP, TOP + 1):
-                    v.set(x, y, z, wall_block(y))
+                    v.set(x, y, z, wall_block(y, x, z))
     # 上端の縁 (着く所の踊り場をまわりに張り出す)
     for x in range(-r_out - 6, r_out + 7):
         for z in range(-r_out - 6, r_out + 7):
@@ -111,7 +130,7 @@ def main():
                 if abs(diff) * d > 1.05:
                     continue
                 floor = layer_of(y)[4]
-                v.set(x, block_y - 1, z, wall_block(y))
+                v.set(x, block_y - 1, z, wall_block(y, x, z))
                 v.set(x, block_y, z, slab_of(floor) if half else floor)
                 for yy in range(block_y + 1, block_y + 4):
                     if v.get(x, yy, z) is None:
