@@ -130,6 +130,9 @@ class Grow:
             return
         depth = meta.get('depth', 3)
         terrace = (kind == 'arena' and L == 'ash')
+        if not terrace:
+            self.side3d(sg, meta, cells, owner, group, seed, depth, top)
+            return
         if terrace:
             depth = 5
         dist = {c: 0 for c in cols}
@@ -177,6 +180,44 @@ class Grow:
                     top[c] = ct
                     nxt.append(c)
             frontier = nxt
+
+    def side3d(self, sg, meta, cells, owner, group, seed, depth, top):
+        """壁を高さごとにノイズで削る (窪み・張り出し・えぐれ)。床の高さの所は一段上げることもある"""
+        noise = self.ctx.noise
+        f0 = meta['floor']
+        by_y = {}
+        for (x, y, z) in cells:
+            by_y.setdefault(y, set()).add((x, z))
+        ys = sorted(by_y)
+        # 丸天井の分も、その高さの元の空気とみなして横に削る
+        for (x, z), t in top.items():
+            for y in range(max(ys) + 1, t + 1):
+                by_y.setdefault(y, set()).add((x, z))
+        for y in sorted(by_y):
+            base = by_y[y]
+            seen = set(base)
+            frontier = list(base)
+            for d in range(1, depth + 1):
+                nxt = []
+                for (x, z) in frontier:
+                    for dx, dz in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+                        c = (x + dx, z + dz)
+                        if c in seen:
+                            continue
+                        seen.add(c)
+                        cx, cz = c
+                        n = noise(cx, y * 0.7, cz, 4.0, seed) * 0.7 + noise(cx, y, cz, 1.7, seed + 1) * 0.3
+                        reach = depth * min(1.0, max(0.0, (n - 0.3) / 0.45))
+                        if d > reach + 0.5:
+                            continue
+                        if y == f0 and d >= 2 and noise(cx, 1, cz, 3.0, seed) > 0.6:
+                            continue          # 床が一段上がる所
+                        q = (cx, y, cz)
+                        if not self.can(q, group):
+                            continue
+                        self.add(q, sg, owner)
+                        nxt.append(c)
+                frontier = nxt
 
     # ------------------------------------------------------------ 見晴らし (門の奥の裂け目と岩の橋)
     def vista(self, layer):
@@ -323,6 +364,7 @@ def decorate(ctx):
                 yy += 1
     for L in ctx.ORDER:
         cells = d.layer_cells.get(L, [])
+        _bulges(ctx, d, L)
         _surfaces(ctx, d, L, cells)
         _vista(ctx, d, L)
         for sg, meta in lay.segs.items():
@@ -334,6 +376,48 @@ def decorate(ctx):
                 _arena(ctx, d, L, sg, meta)
             elif meta['kind'] == 'camp':
                 _camp(ctx, d, L, sg)
+
+
+def _bulges(ctx, d, L):
+    """元の部屋の平らな壁に、頭より上で岩の張り出しを足す (歩く所は変わらない: 床から 2 より上だけ)"""
+    lay, b = d.lay, d.b
+    noise = ctx.noise
+    room_segs = {sg for sg, m in lay.segs.items() if m.get('layer') == L and m['kind'] in ('room', 'mark', 'camp', 'arena')
+                 and m.get('name') != 'well'}
+
+    def guarded(p):
+        x, y, z = p
+        sg = lay.seg.get(p)
+        for dx in range(-2, 3):
+            for dy in range(-2, 3):
+                for dz in range(-2, 3):
+                    n = (x + dx, y + dy, z + dz)
+                    if n in lay.air and lay.seg.get(n) != sg:
+                        return True
+                    if abs(dx) <= 1 and abs(dy) <= 1 and abs(dz) <= 1 and n in lay.fixed:
+                        return True
+        return False
+
+    placed = set()
+    for rnd, (hmin, lim) in enumerate(((2, 0.5), (3, 0.62))):
+        todo = []
+        for p in d.layer_cells.get(L, []):
+            if lay.seg.get(p) not in room_segs or p in lay.organic or p in d.keep or not d.air(p):
+                continue
+            x, y, z = p
+            if y - d.floor[p] < hmin:
+                continue
+            nb = [(x + 1, y, z), (x - 1, y, z), (x, y, z + 1), (x, y, z - 1)]
+            if rnd == 0:
+                ok = any(d.shell(q) for q in nb)
+            else:
+                ok = any(q in placed for q in nb)
+            if not ok or noise(x, y, z, 3.0, 131 + rnd) < lim or guarded(p):
+                continue
+            todo.append(p)
+        for p in todo:
+            b[p] = ctx.wall_block(L, p[0], p[1], p[2], None)
+            placed.add(p)
 
 
 def _surfaces(ctx, d, L, cells):
@@ -498,7 +582,12 @@ def _arena(ctx, d, L, sg, meta):
     cells = [p for p in d.layer_cells.get(L, []) if d.lay.seg.get(p) == sg]
     R = ctx.ARENA_R
     if L == 'bone':
-        # 肋の籠: 間を東西にまたぐ大きな肋と、天井の背骨
+        # 肋の籠: 間を東西にまたぐ大きな肋と、天井の背骨。肋が浮くように壁は暗い鍾乳石
+        for p in cells:
+            x, y, z = p
+            for q in ((x + 1, y, z), (x - 1, y, z), (x, y, z + 1), (x, y, z - 1), (x, y + 1, z)):
+                if d.shell(q):
+                    d.b[q] = 'dripstone_block' if ctx.noise(q[0], q[1], q[2], 3.0, 77) < 0.6 else 'tuff'
         for off in range(-12, 13, 4):
             half = math.sqrt(max(0.0, (R + 2) ** 2 - off ** 2))
             pts = []
@@ -529,8 +618,10 @@ def _arena(ctx, d, L, sg, meta):
             for p in col[:hgt]:
                 d.b[p] = 'oxidized_copper' if (p[1] - col[0][1]) % 4 else 'oxidized_cut_copper'
                 last = p
-            if last and d.air((last[0], last[1] + 1, last[2])):
-                d.b[(last[0], last[1] + 1, last[2])] = 'lightning_rod[facing=up,powered=false,waterlogged=false]'
+            if last:
+                d.b[last] = 'waxed_copper_bulb[lit=true,powered=false]'
+                if d.air((last[0], last[1] + 1, last[2])):
+                    d.b[(last[0], last[1] + 1, last[2])] = 'lightning_rod[facing=up,powered=false,waterlogged=false]'
         for p in cells:
             x, y, z = p
             q = (x, y + 1, z)
@@ -569,10 +660,23 @@ def _vista(ctx, d, L):
         q = (x, y - 1, z)
         if d.shell(q):
             n = noise(x, 0, z, 3.0, 101)
-            if n > 0.62:
+            if n > 0.55:
                 d.b[q] = glow[0]
-            elif n > 0.45:
+            elif n > 0.4:
                 d.b[q] = glow[1]
+    # 探掘隊が裂け目に下ろした古い灯り (長い鎖で天井から)
+    for (lx, lz, drop) in ((-7, -19, 5), (8, -21, 9), (-9, -26, 12), (6, -27, 4)):
+        col = sorted((p for p in cells if p[0] == lx and p[2] == lz), key=lambda p: p[1])
+        if len(col) < 16:
+            continue
+        top = col[-1][1]
+        ly = max(col[0][1] + 4, (bridge.get(lz, top) - drop))
+        if not d.air((lx, ly, lz)):
+            continue
+        d.b[(lx, ly, lz)] = 'lantern[hanging=true,waterlogged=false]'
+        for yy in range(ly + 1, top + 1):
+            if d.air((lx, yy, lz)):
+                d.b[(lx, yy, lz)] = 'chain[axis=y,waterlogged=false]'
     if L == 'bone':
         # 裂け目をまたぐ肋 (橋の上、頭より高く)
         for zz in range(-29, -16, 3):

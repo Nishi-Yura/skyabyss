@@ -107,7 +107,7 @@ public final class AbyssEnemiesSpawnSelfTest {
             double m = formSum[layer] / found[layer];
             mean.append(String.format(" L%d %.2f (%d)", layer, m, found[layer]));
             if (found[layer] >= 10) {
-                check(m + 1e-9 >= prev, "form does not rise with depth at layer " + layer);
+                check(m + 1e-9 >= prev, "form does not rise with depth at layer " + layer + " (" + mean + ")");
                 prev = m;
             }
         }
