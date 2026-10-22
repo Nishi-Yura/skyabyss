@@ -39,12 +39,13 @@ def merged(path):
     return np.vstack(Vs), np.vstack(Ts), owner
 
 
-FLOAT_TOL = 0.6
+FLOAT_TOL = 0.75
 
 
 def floating_parts(V, T):
-    """連結成分ごとに、ほかの成分の頂点までの最短距離を出し、FLOAT_TOL より遠い成分の数を返す。"""
-    from scipy.spatial import cKDTree
+    """浮いた部品の数。連結成分 (頂点を共有しない部品) ごとに、標本点 (頂点・辺の中点・面の中心) が
+    ほかの成分の標本点から FLOAT_TOL 以内か、ほかの成分の凸包の中にあれば「くっついている」。どちらもなければ浮いている。"""
+    from scipy.spatial import cKDTree, Delaunay
     c = ma.weld_ids(V)
     tri = c[T]
     parent = {}
@@ -59,27 +60,42 @@ def floating_parts(V, T):
             ra, rb = find(u), find(v)
             if ra != rb:
                 parent[ra] = rb
-    comp_of_tri = np.array([find(t[0]) for t in tri])
-    labels = {}
-    for cid in comp_of_tri:
-        labels.setdefault(cid, len(labels))
-    comp_v = {}
-    for ti, cid in enumerate(comp_of_tri):
-        for vi in T[ti]:
-            comp_v.setdefault(labels[cid], set()).add(vi)
-    if len(comp_v) <= 1:
+    roots = np.array([find(t[0]) for t in tri])
+    comps = {}
+    for ti, r in enumerate(roots):
+        comps.setdefault(r, []).append(ti)
+    if len(comps) <= 1:
         return 0
-    trees = {k: cKDTree(V[sorted(v)]) for k, v in comp_v.items()}
+    samples, vsets = {}, {}
+    for r, tis in comps.items():
+        vi = np.unique(T[tis].ravel())
+        vsets[r] = V[vi]
+        tp = V[T[tis]]
+        mids = np.concatenate([(tp[:, 0] + tp[:, 1]) / 2, (tp[:, 1] + tp[:, 2]) / 2, (tp[:, 2] + tp[:, 0]) / 2, tp.mean(1)])
+        samples[r] = np.vstack([V[vi], mids])
+    keys = list(comps)
+    trees = {r: cKDTree(samples[r]) for r in keys}
+    hulls = {}
+    for r in keys:
+        try:
+            hulls[r] = Delaunay(vsets[r])
+        except Exception:
+            hulls[r] = None
     n_float = 0
-    for k, vs in comp_v.items():
-        pts = V[sorted(vs)]
-        best = np.inf
-        for k2, tr in trees.items():
-            if k2 == k:
+    for r in keys:
+        attached = False
+        for q in keys:
+            if q == r:
                 continue
-            d, _ = tr.query(pts)
-            best = min(best, float(d.min()))
-        if best > FLOAT_TOL:
+            d, _ = trees[q].query(samples[r])
+            if d.min() <= FLOAT_TOL:
+                attached = True
+                break
+            h = hulls[q]
+            if h is not None and (h.find_simplex(samples[r]) >= 0).any():
+                attached = True
+                break
+        if not attached:
             n_float += 1
     return n_float
 
