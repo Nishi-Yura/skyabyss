@@ -42,6 +42,9 @@ public class GuildScreen extends Screen {
     private final List<Runnable> hitActions = new ArrayList<>();
     // 入っているときのつまみ (0 人・1 頼み・2 旗・3 功績)
     private int tab;
+    // 一覧の送り (ホイール)。多いと下が切れていた (2026-10-23 の点検)
+    private int listScroll;
+    private int memberScroll;
     private EditBox emblemTag;
     private String pattern = "";
     private String plate = "";
@@ -294,8 +297,10 @@ public class GuildScreen extends Screen {
         if (view.guilds().isEmpty()) {
             g.drawString(font, Component.translatable("gui.skyabyss.guild.list_empty"), x + 4, ly + 4, FacilityUi.DIM, false);
         }
-        for (int i = 0; i < view.guilds().size() && i < 11; i++) {
-            FacilityNetwork.GuildRow r = view.guilds().get(i);
+        listScroll = Math.max(0, Math.min(listScroll, view.guilds().size() - 11));
+        moreMarks(g, font, x + w - 8, ly, 11, listScroll, view.guilds().size());
+        for (int i = 0; i + listScroll < view.guilds().size() && i < 11; i++) {
+            FacilityNetwork.GuildRow r = view.guilds().get(i + listScroll);
             int ry = ly + i * ROW_H;
             int bx = drawBadge(g, font, x + 3, ry + 3, r.tag(), r.color(), r.accent(), r.plate());
             g.drawString(font, font.plainSubstrByWidth(r.name(), w - (bx - x) - 64), bx + 2, ry + 3, FacilityUi.TEXT, false);
@@ -353,14 +358,37 @@ public class GuildScreen extends Screen {
         }
     }
 
+    // 上・下にまだあるときの小さな印
+    private void moreMarks(GuiGraphics g, Font font, int x, int ly, int rows, int scroll, int size) {
+        if (scroll > 0) {
+            g.drawString(font, "▲", x, ly + 1, FacilityUi.DIM, false);
+        }
+        if (scroll + rows < size) {
+            g.drawString(font, "▼", x, ly + rows * ROW_H - 9, FacilityUi.DIM, false);
+        }
+    }
+
+    @Override
+    public boolean mouseScrolled(double mouseX, double mouseY, double dx, double dy) {
+        int step = dy > 0 ? -1 : dy < 0 ? 1 : 0;
+        if (mouseX >= x0 + 160) {
+            listScroll = Math.max(0, listScroll + step);
+        } else {
+            memberScroll = Math.max(0, memberScroll + step);
+        }
+        return true;
+    }
+
     private void renderMembers(GuiGraphics g, Font font, int mx, int my) {
         int x = x0 + 16;
         int ly = y0 + 62;
         boolean officer = view.rank() >= 1;
         int lw = officer ? 176 : W - 32;
         FacilityUi.well(g, x, ly, lw, 8 * ROW_H);
-        for (int i = 0; i < view.members().size() && i < 8; i++) {
-            FacilityNetwork.MemberRow m = view.members().get(i);
+        memberScroll = Math.max(0, Math.min(memberScroll, view.members().size() - 8));
+        moreMarks(g, font, x + lw - 8, ly, 8, memberScroll, view.members().size());
+        for (int i = 0; i + memberScroll < view.members().size() && i < 8; i++) {
+            FacilityNetwork.MemberRow m = view.members().get(i + memberScroll);
             int ry = ly + i * ROW_H;
             g.fill(x + 3, ry + 5, x + 6, ry + 8, m.online() ? FacilityUi.TEAL : 0xFF3A3F48);
             String mark = m.rank() == 2 ? "★ " : m.rank() == 1 ? "☆ " : "";
