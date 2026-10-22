@@ -70,6 +70,23 @@ public final class StormBackBuilder {
         s.then("boss gates", () -> StormBossGates.build(back));
         // 順路の部屋を分ける封じ (入口の箱の先・風の広間・尾の間。trial/RouteSeals。32 の 2.5)
         s.then("route seals", () -> jp.revati.skyabyss.trial.RouteSeals.place(back, jp.revati.skyabyss.progress.Titans.THUNDER_WING));
+        // 入口の箱 (尾の広場の北の端。trial/TrialRoute.entryBox) の灯り: 箱の床の四隅に海のランタンを埋める (歩く邪魔にならない)。
+        // 潮殻の入口と同じ。明るさ 6 で自己テスト trial walk (light) が暗いと言った (版 33)
+        s.then("entry lights", () -> {
+            net.minecraft.world.phys.AABB box = jp.revati.skyabyss.trial.TrialRoute.entryBox(jp.revati.skyabyss.progress.Titans.THUNDER_WING);
+            if (box == null) {
+                return;
+            }
+            int floor = (int) Math.floor(box.minY);
+            for (int x : new int[] {(int) box.minX + 1, (int) box.maxX - 2}) {
+                for (int z : new int[] {(int) box.minZ + 1, (int) box.maxZ - 2}) {
+                    net.minecraft.core.BlockPos p = new net.minecraft.core.BlockPos(x, floor, z);
+                    if (back.getBlockState(p).isSolidRender(back, p)) {
+                        back.setBlock(p, net.minecraft.world.level.block.Blocks.SEA_LANTERN.defaultBlockState(), 3);
+                    }
+                }
+            }
+        });
         // 印を付けるのは修復のあと (印のあとに人が入ると、建てかけの背を見る)。afterBuild と灯りは印の前と同じ順
         jp.revati.skyabyss.titan.audit.BackReach.RepairJob[] repair = new jp.revati.skyabyss.titan.audit.BackReach.RepairJob[1];
         s.then("after build", () -> {
