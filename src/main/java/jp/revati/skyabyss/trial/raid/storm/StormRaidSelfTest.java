@@ -35,6 +35,30 @@ public final class StormRaidSelfTest {
     private StormRaidSelfTest() {
     }
 
+    private static final int[] XS = {-5000, -4800, -4600};
+    private static int waited;
+
+    // 三つの部屋の場所を強制読み込みし、敵・物を置けるようになる (エンティティが動く) まで待つ
+    public static void load(MinecraftServer server) {
+        waited = 0;
+        for (int x : XS) {
+            for (int cx = (x - 24) >> 4; cx <= (x + 24) >> 4; cx++) {
+                for (int cz = (5000 - 36) >> 4; cz <= (5000 + 36) >> 4; cz++) {
+                    server.overworld().setChunkForced(cx, cz, true);
+                }
+            }
+        }
+    }
+
+    public static boolean ready(MinecraftServer server) {
+        for (int x : XS) {
+            if (!server.overworld().isPositionEntityTicking(new BlockPos(x, Y, 5000))) {
+                return ++waited > 800;
+            }
+        }
+        return true;
+    }
+
     public static void runSelfTest(MinecraftServer server) {
         ServerLevel level = server.overworld();
         List<String> failures = new ArrayList<>();
@@ -49,6 +73,13 @@ public final class StormRaidSelfTest {
         } catch (Throwable e) {
             SkyAbyss.LOGGER.error("SELFTEST storm raid crashed", e);
             failures.add("crashed: " + e);
+        }
+        for (int x : XS) {
+            for (int cx = (x - 24) >> 4; cx <= (x + 24) >> 4; cx++) {
+                for (int cz = (5000 - 36) >> 4; cz <= (5000 + 36) >> 4; cz++) {
+                    level.setChunkForced(cx, cz, false);
+                }
+            }
         }
         notes.forEach(n -> SkyAbyss.LOGGER.info("SELFTEST storm raid note: {}", n));
         if (failures.isEmpty()) {
