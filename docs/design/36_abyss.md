@@ -242,9 +242,9 @@
 ### 6.7 作ったもの（2026-10-22）
 - story/ch5/warden: HeartWarden（番人）・AbyssBeacons（灯籠）・WardenArena（間に入ると目覚める、倒した印、合図 abyss_heart、間が 30 秒空くと戻る）・WardenSetup（登録）。
 - 闇のたまり 2 倍は AbyssPressure.voiceScale（間の中で灯籠が全部消えているとき）。
-- 仮の見た目: 体は描かず、光の中では煙と魂の粒で形が出る（輪郭だけのときは薄く）。
+- 見た目: 案 B の本番モデル（client/WardenRenderer、生成 tools/rough/lowpoly/abyss/warden_model.py・tools/gen_heart_warden.py）。光の中は全部、輪郭だけ（鼓動の術）は体を黒く沈めて光る縁、闇では胸の心臓だけ暗く。写しは暗い色で鼓動の光なし。動きは待ち・歩き・爪・踏み込み・吹き消し・段の変わり・被弾・死。魂の粒は添えだけ。
 - 開発用: `/skyabyss abyss warden wake`・`/skyabyss abyss warden reset`。自己テスト "abyss warden"。
-- まだ: 番人のモデル（3 案のラフ）、倒したあとの場面と心臓（A7 でクエストとつなぐ）、報酬、間の入口を闇で閉じること。
+- まだ: 絵の手描きの仕上げ（今は決まりで描いた絵）、肋の縁の淡い光、倒したあとの場面のカメラ、報酬、間の入口を闇で閉じること。
 
 
 ## 7. 五章のメインの深淵の中（A7。2026-10-22）
