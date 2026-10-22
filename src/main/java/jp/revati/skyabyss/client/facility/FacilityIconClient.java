@@ -78,8 +78,16 @@ public final class FacilityIconClient {
             }
             float alpha = (float) Mth.clamp((RANGE - dist) / 8.0, 0.0, 1.0) * 0.92f;
             float scale = (float) Mth.clamp(dist / 12.0, 1.0, 1.8);
+            // 深淵の生き残りは施設の人ではないので印を出さない (fac_survivor_* の絵はない)。荷運びのロクは品を取り替えるので道具屋の印
+            String role = npc.roleId();
+            if (AttendantEntity.extraRole(role)) {
+                if (!role.equals("abyss_porter")) {
+                    continue;
+                }
+                role = "tool_merchant";
+            }
             Vec3 center = base.add(0, npc.getBbHeight() + 0.32, 0);
-            quad(icon(npc.roleId()), pose, cam, left, up, center, ICON_W * scale, ICON_H * scale, alpha);
+            quad(icon(role), pose, cam, left, up, center, ICON_W * scale, ICON_H * scale, alpha);
         }
         RenderSystem.enableCull();
         RenderSystem.disableBlend();

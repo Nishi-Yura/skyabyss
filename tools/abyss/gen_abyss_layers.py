@@ -10,6 +10,7 @@ python -I tools/abyss/gen_abyss_layers.py  →  src/main/resources/data/skyabyss
   - 近道 (shortcut): 印の部屋から野営へまっすぐ戻る廊下。野営の側の格子 (scut_<層>_<i>) は、その印を誰かが取ると開く (ワールドで共有)
   - 門の奥: 下りの階段 → 層の主の間 (arena_<層>。丸い間、半径 14)。主を倒すと下りの鎖 (descend_<層>) で次の層の野営へ
   - 心臓の間: 前と同じ (中心 (0, -300, 0)、半径 30)。南に控えの間 (heart_in・rest_5) と、間へ続く廊下
+  - 自然の洞 (tools/abyss/layer_organic.py): 箱を組んだ後に、丸天井・壁の窪み・頭上の張り出し・門の奥の裂け目の橋 (見晴らし)・層の飾りを足す
   - 囲い: 空気のマスのまわり 2 マスを層の岩で埋める (外の何もない空間は見えない。継ぎ目もない)
   - 道ごとの持ち主の印 (camp・r1〜3・gate・arena) を付け、ちがう持ち主の空気が隣り合ったら止める (道どうしが壁を抜けてつながらない)
 
@@ -60,25 +61,87 @@ LAYERS = {
 }
 
 
+def _h3(x, y, z, s):
+    n = (x * 374761393 + y * 668265263 + z * 2147483647 + s * 1274126177) & 0xFFFFFFFF
+    n = ((n ^ (n >> 13)) * 1274126177) & 0xFFFFFFFF
+    return ((n ^ (n >> 16)) & 0xFFFF) / 65535.0
+
+
+def noise(x, y, z, scale, s=0):
+    """値のノイズ (0..1)。scale マスで一回りの、なめらかな塊"""
+    fx, fy, fz = x / scale, y / scale, z / scale
+    x0, y0, z0 = math.floor(fx), math.floor(fy), math.floor(fz)
+    tx, ty, tz = fx - x0, fy - y0, fz - z0
+    tx, ty, tz = tx * tx * (3 - 2 * tx), ty * ty * (3 - 2 * ty), tz * tz * (3 - 2 * tz)
+    out = 0.0
+    for dx in (0, 1):
+        for dy in (0, 1):
+            for dz in (0, 1):
+                wgt = (tx if dx else 1 - tx) * (ty if dy else 1 - ty) * (tz if dz else 1 - tz)
+                out += wgt * _h3(x0 + dx, y0 + dy, z0 + dz, s)
+    return out
+
+
 def wall_block(layer, x, y, z, rng):
-    """層ごとの壁の柄"""
-    a = math.degrees(math.atan2(z, x)) % 360
+    """層ごとの岩の柄 (自然の岩。ノイズの塊と筋)"""
+    n = noise(x, y, z, 6.0, 11)
+    m = noise(x, y, z, 2.5, 12)
     if layer == 'bone':
-        if y % 9 == 0:
-            return 'smooth_basalt'
-        return 'bone_block[axis=y]' if (x * 3 + z * 5) % 11 == 0 else ('calcite' if (x + z) % 5 else 'dripstone_block')
+        # 白い石灰に、骨の塊 (壁に埋まった巨きな骨) と鍾乳の筋
+        if noise(x, y * 0.5, z, 5.0, 13) > 0.72:
+            return 'bone_block[axis=y]'
+        if n < 0.22:
+            return 'dripstone_block'
+        if m > 0.8:
+            return 'tuff'
+        return 'calcite' if n < 0.62 else 'diorite'
     if layer == 'salt':
-        band = (y // 3) % 5
-        return ['calcite', 'white_terracotta', 'calcite', 'smooth_quartz', 'diorite'][band]
+        # 白い塩の殻 (雪の塊・白い陶土)、石英の脈
+        if m > 0.82:
+            return 'smooth_quartz'
+        if n > 0.66:
+            return 'snow_block'
+        if n < 0.24:
+            return 'diorite'
+        return 'calcite' if m < 0.55 else 'white_terracotta'
     if layer == 'storm':
-        if y % 8 == 0:
-            return 'oxidized_cut_copper'
-        return 'tuff_bricks' if (y // 2 + (x + z) // 4) % 2 else 'polished_tuff'
+        # 凝灰岩と深層岩に、銅の脈と緑青
+        v = noise(x, y, z, 3.5, 14)
+        if 0.47 < v < 0.53:
+            return 'deepslate_copper_ore' if n < 0.5 else 'copper_ore'
+        if n > 0.74:
+            return 'oxidized_copper' if m > 0.5 else 'weathered_copper'
+        if n < 0.3:
+            return 'deepslate'
+        return 'tuff' if m < 0.7 else 'cobbled_deepslate'
     if layer == 'ash':
-        if (x * 7 + z * 3) % 13 == 0:
+        # 玄武岩と黒石。燠の割れ目 (マグマ) が細く走る
+        v = noise(x, y, z, 4.0, 15)
+        if 0.485 < v < 0.515 and m > 0.4:
+            return 'magma_block'
+        if n > 0.6:
             return 'basalt[axis=y]'
-        return 'cracked_polished_blackstone_bricks' if rng.random() < 0.12 else 'polished_blackstone_bricks'
+        if n < 0.25:
+            return 'smooth_basalt'
+        return 'blackstone' if m < 0.75 else 'cobbled_deepslate'
     return 'deepslate_tiles'
+
+
+# 層の自然の床 (ノイズで混ぜる。骨は骨粉の白、塩は塩の殻、雷は緑青、灰は灰の吹き溜まり)
+FLOORS = {
+    'bone': [(0.25, 'bone_block[axis=y]'), (0.55, 'calcite'), (0.8, 'diorite'), (1.01, 'dripstone_block')],
+    'salt': [(0.3, 'snow_block'), (0.65, 'calcite'), (0.85, 'white_terracotta'), (1.01, 'diorite')],
+    'storm': [(0.2, 'oxidized_copper'), (0.6, 'tuff'), (0.85, 'deepslate'), (1.01, 'weathered_copper')],
+    'ash': [(0.22, 'light_gray_concrete_powder'), (0.35, 'gravel'), (0.7, 'blackstone'), (1.01, 'smooth_basalt')],
+}
+
+
+def floor_block(layer, x, y, z):
+    n = noise(x, y, z, 4.0, 21) * 0.75 + _h3(x, y, z, 22) * 0.25
+    for lim, st in FLOORS[layer]:
+        if n < lim:
+            return st
+    return FLOORS[layer][-1][1]
 
 
 HEART_WALL = ['deepslate_tiles', 'sculk', 'deepslate_tiles', 'crying_obsidian']
@@ -95,12 +158,23 @@ class Layout:
         self.fixed = {}        # 空気でも囲いでもない、置いたもの (飾り・灯り・仕掛け)
         self.allowed = set()   # 隣り合ってよい持ち主の組
         self.near = {}         # 決まった所の近くだけ隣り合ってよい組
+        self.seg = {}          # (x, y, z) -> 区切り (部屋・廊下ごと。自然の形に広げる所を決める: layer_organic)
+        self.cur = 'misc'
+        self.segs = {}         # 広げてよい区切り -> 説明 (layer_organic)
+        self.organic = set()   # 広げて足した空気 (飾りを置いてよい所)
+        self._n = 0
+
+    def fresh(self, kind):
+        self._n += 1
+        self.cur = '%s#%d' % (kind, self._n)
+        return self.cur
 
     def carve(self, x, y, z, owner):
         prev = self.air.get((x, y, z))
         if prev is not None and prev != owner and not self._ok(prev, owner, (x, y, z)):
             raise SystemExit('carve overlap at %s: %s vs %s' % ((x, y, z), prev, owner))
         self.air[(x, y, z)] = owner
+        self.seg.setdefault((x, y, z), self.cur)
 
     def box(self, x0, y0, z0, x1, y1, z1, owner):
         for x in range(min(x0, x1), max(x0, x1) + 1):
@@ -170,7 +244,7 @@ class Layout:
             m = LAYERS[L]
             fl = self.floor_of.get((x, z, y - 1))
             if fl is None:
-                fl = m['floor'] if (x * 31 + z * 17) % 7 else m['floor2']
+                fl = floor_block(L, x, y - 1, z)
             v.b[(x, y - 1, z)] = fl
         for p in self.air:
             v.b[p] = 'air'
@@ -211,8 +285,12 @@ class Route:
         x, z = self.f(u, w)
         self.lay.v.mark(name, x, y, z)
 
-    def room(self, u, w, y, hu, hw, h, owner=None):
+    def room(self, u, w, y, hu, hw, h, owner=None, seg=None):
         """局所の箱 (u±hu, w±hw)、立つ高さ y、高さ h"""
+        if seg:
+            self.lay.cur = seg
+        else:
+            self.lay.fresh('hook')
         for a in range(u - hu, u + hu + 1):
             for b in range(w - hw, w + hw + 1):
                 for yy in range(y, y + h):
@@ -248,6 +326,7 @@ class Route:
     def corridor(self, path, h=4, half=1, owner=None, lamps=7):
         """折れ線の廊下: path = [(u, w, y), ...] (隣どうしは u か w のどちらかだけが変わる)。幅 2*half+1"""
         owner = owner or self.owner
+        self.lay.fresh('corr')
         run = 0
         for (u0, w0, y0), (u1, w1, y1) in zip(path, path[1:]):
             if u0 != u1 and w0 != w1:
@@ -306,6 +385,11 @@ class Ctx:
         self.wall_block = wall_block
         self.stair_of = stair_of
         self.slab_of = slab_of
+        self.noise = noise
+        self.h3 = _h3
+        self.floor_block = floor_block
+        self.ARENA_R = ARENA_R
+        self.CAMP_HALF = CAMP_HALF
 
     def route(self, layer, i):
         d = ROUTE_DIRS[i - 1]
@@ -319,22 +403,23 @@ def build_camp(ctx, layer, n):
     m = LAYERS[layer]
     camp = '%s_camp' % layer
     lay.layer_of[camp] = layer
+    lay.cur = 'camp_%s' % layer
+    lay.segs[lay.cur] = dict(layer=layer, kind='camp', floor=Y, top=Y + CAMP_H + 1, depth=5, dome=0.7, room=None)
     lay.box(-CAMP_HALF, Y, -CAMP_HALF, CAMP_HALF, Y + CAMP_H - 1, CAMP_HALF, camp)
     # 天井を少し高く (真ん中)
     lay.box(-4, Y + CAMP_H, -4, 4, Y + CAMP_H + 1, 4, camp)
     # 床の模様: 縁を一回り、真ん中に焚き火の輪
     for x in range(-CAMP_HALF, CAMP_HALF + 1):
         for z in range(-CAMP_HALF, CAMP_HALF + 1):
-            if max(abs(x), abs(z)) == CAMP_HALF:
-                lay.floor_of[(x, z, Y - 1)] = m['trim']
-            elif max(abs(x), abs(z)) <= 2:
+            if max(abs(x), abs(z)) <= 2:
                 lay.floor_of[(x, z, Y - 1)] = 'polished_deepslate'
     # 柱 (四隅)
     for sx in (-1, 1):
         for sz in (-1, 1):
             for yy in range(Y, Y + CAMP_H):
-                lay.put(sx * (CAMP_HALF - 1), yy, sz * (CAMP_HALF - 1), m['pillar'])
-            lay.put(sx * (CAMP_HALF - 2), Y + CAMP_H - 1, sz * (CAMP_HALF - 1), m['lamp'] + '[hanging=true,waterlogged=false]')
+                # 探掘隊の支え木 (野営だけは人の手が入っている)
+                lay.put(sx * (CAMP_HALF - 1), yy, sz * (CAMP_HALF - 1), 'stripped_spruce_log[axis=y]')
+            lay.put(sx * (CAMP_HALF - 2), Y + CAMP_H - 1, sz * (CAMP_HALF - 1), 'lantern[hanging=true,waterlogged=false]')
             del_air(lay, sx * (CAMP_HALF - 1), Y, sz * (CAMP_HALF - 1), Y + CAMP_H - 1)
     # 焚き火 (休み場)。暖かい色の火
     lay.put(0, Y, 0, 'campfire[facing=north,lit=true,signal_fire=false,waterlogged=false]')
@@ -375,11 +460,15 @@ def build_camp(ctx, layer, n):
     r = Route(lay, layer, 'n', gate, Y)
     # 門の奥: 二マス平らに、それから下りの階段で主の間へ
     r.corridor([(CAMP_HALF + 3, 0, Y), (CAMP_HALF + 6, 0, Y), (ARENA_U - ARENA_R - 1, 0, Y - ARENA_DROP)], h=4, half=1, lamps=6)
+    lay.segs['gatecorr_%s' % layer] = dict(layer=layer, kind='gatecorr', seg=lay.cur, route=r)
     # 主の間 (丸い。高さ ARENA_H)
     arena = '%s_arena' % layer
     lay.layer_of[arena] = layer
     lay.allow(gate, arena)
     ay = Y - ARENA_DROP
+    lay.cur = 'arena_%s' % layer
+    lay.segs[lay.cur] = dict(layer=layer, kind='arena', floor=ay, top=ay + ARENA_H - 1, depth=4, dome=1.3, room=None,
+                             center=DIRS['n'](ARENA_U, 0))
     for a in range(-ARENA_R, ARENA_R + 1):
         for b in range(-ARENA_R, ARENA_R + 1):
             d = math.hypot(a, b)
@@ -389,8 +478,6 @@ def build_camp(ctx, layer, n):
             x, z = DIRS['n'](ARENA_U + a, b)
             for yy in range(ay, ay + top):
                 lay.carve(x, yy, z, arena)
-            if d > ARENA_R - 1.2:
-                lay.floor_of[(x, z, ay - 1)] = m['trim']
     ax, az = DIRS['n'](ARENA_U, 0)
     v.mark('arena_%s' % layer, ax, ay, az)
     v.mark('lord_%s' % layer, ax, ay, az - 4)
@@ -436,7 +523,10 @@ def build_route(ctx, layer, i, spec):
     nodes = spec['nodes']
     rooms = {}
     for (name, u, w, yo, hu, hw, h) in nodes:
-        r.room(u, w, Y + yo, hu, hw, h)
+        sg = '%s:%s' % (r.owner, name)
+        lay.segs[sg] = dict(layer=layer, kind='mark' if name == nodes[-1][0] else 'room', name=name, floor=Y + yo, top=Y + yo + h - 1,
+                            depth=4, dome=0.6, room=(u, w, Y + yo, hu, hw, h), route=r)
+        r.room(u, w, Y + yo, hu, hw, h, seg=sg)
         rooms[name] = (u, w, Y + yo, hu, hw, h)
         for k in range(spec.get('room_lamps', 2)):
             lu = u + (hu - 1 if k == 0 else -(hu - 1))
@@ -498,6 +588,7 @@ def build_heart(ctx):
     lay, v = ctx.lay, ctx.v
     rng = v.rng
     lay.layer_of['heart'] = 'heart'
+    lay.fresh('heart')
     for x in range(-HEART_R, HEART_R + 1):
         for z in range(-HEART_R, HEART_R + 1):
             d = math.hypot(x, z)
@@ -569,9 +660,12 @@ def main():
         routes = []
         for i, spec in enumerate(mod.ROUTES, start=1):
             routes.append(build_route(ctx, layer, i, spec))
+        lay.fresh('hook')
         mod.build(ctx, routes)
+        lay.fresh('hook')
         if common is not None:
             common.build(ctx, layer, routes)
+        lay.fresh('hook')
         # 上りの鎖 (骨は地上へ: 印 exit。ほかは前の層の野営へ: 印 ascend_<層>)。着く所 (arrive_<層>) は野営の南
         Y = CAMP_Y[layer]
         lay.put(-3, Y, 6, 'lodestone')
@@ -583,8 +677,11 @@ def main():
         if layer == 'bone':
             v.mark('arrival', 0, Y, 5)
     build_heart(ctx)
+    organic = layer_module('organic')
+    organic.expand(ctx)
     lay.check_neighbors()
     lay.finish()
+    organic.decorate(ctx)
     support_falling(v)
     ext = 0
     for (x, y, z) in v.b:

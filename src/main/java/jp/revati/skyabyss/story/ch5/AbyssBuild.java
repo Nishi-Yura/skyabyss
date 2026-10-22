@@ -24,7 +24,7 @@ import net.neoforged.neoforge.event.tick.ServerTickEvent;
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class AbyssBuild {
     public static final String BLUEPRINT = "abyss_layers";
-    public static final int VERSION = 8;
+    public static final int VERSION = 9;
     static final long BUDGET_MS = 20;
 
     @Nullable
