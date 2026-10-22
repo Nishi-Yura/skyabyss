@@ -160,6 +160,8 @@ TEXTS = [
     ('message.skyabyss.ch5.threshold', '底の境。格子の門の向こうで、遠い鼓動が一つ鳴った。', 'The threshold. Beyond the barred gate, one distant beat sounds.'),
     ('message.skyabyss.ch5.gate_locked', '門の格子は動かない。……天の鍵があれば。', 'The bars of the gate do not move. ...If only you had the sky key.'),
     ('message.skyabyss.ch5.gate_open', '鍵の脈に応えて、門の格子が音もなく溶けた。向こうは、底の見えない闇。', 'Answering the key\'s pulse, the bars melt away without a sound. Beyond lies a dark with no bottom.'),
+    ('message.skyabyss.abyss.rest', '灯籠の休み場。……ここで倒れても、灯りがまた呼び戻してくれる。', 'A lantern rest. ...Fall below, and the light will call you back here.'),
+    ('message.skyabyss.abyss.woke_at_rest', '灯籠の火のそばで目を覚ました。', "You wake beside the lantern's flame."),
     ('message.skyabyss.abyss.exit', '鎖をつかむと、上へ引かれた。', 'You grip the chain and are drawn upward.'),
     ('message.skyabyss.abyss.heart_1', '台の上の心臓に触れた。……冷たい。けれど、確かに打っている。', 'You touch the heart on the altar. ...Cold. Yet it is surely beating.'),
     ('message.skyabyss.abyss.heart_2', '鼓動が、足もとの世界ぜんぶへ根を張っているのが分かる。これは心臓で、錨だ。世界をここにつなぎとめる錨。', 'You can feel the beat rooting into the whole world underfoot. It is a heart, and an anchor. The anchor that holds the world in place.'),

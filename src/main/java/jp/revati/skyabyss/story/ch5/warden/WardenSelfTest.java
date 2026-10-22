@@ -12,6 +12,7 @@ import jp.revati.skyabyss.story.ch5.AbyssBuild;
 import jp.revati.skyabyss.story.ch5.AbyssEntrance;
 import jp.revati.skyabyss.story.ch5.AbyssGate;
 import jp.revati.skyabyss.story.ch5.AbyssPressure;
+import jp.revati.skyabyss.story.ch5.AbyssRespawn;
 import jp.revati.skyabyss.story.ch5.AbyssWorld;
 import jp.revati.skyabyss.town.TownGuests;
 import net.minecraft.core.BlockPos;
@@ -127,6 +128,22 @@ public final class WardenSelfTest {
             int left = level.getEntitiesOfClass(HeartWarden.class, w.getBoundingBox().inflate(48), HeartWarden::decoy).size();
             check(f, left == 0, "shades stayed after the fall: " + left);
             w.discard();
+            // 休み場: 立つ所に足場と頭の空き、近くに来ると覚える
+            for (int i = 0; i <= 3; i++) {
+                BlockPos at = AbyssRespawn.spot(i);
+                if (at == null) {
+                    f.add("no spot for rest " + i);
+                    continue;
+                }
+                level.getChunk(at);
+                check(f, !level.getBlockState(at.below()).isAir() && level.getBlockState(at).isAir() && level.getBlockState(at.above()).isAir(),
+                        "rest " + i + " spot is not standable: " + at + " " + level.getBlockState(at.below()) + "/" + level.getBlockState(at) + "/" + level.getBlockState(at.above()));
+            }
+            FakePlayer r = new FakePlayer(level, new GameProfile(UUID.randomUUID(), "abyss_rest"));
+            BlockPos s2 = AbyssRespawn.spot(2);
+            r.moveTo(s2.getX() + 0.5, s2.getY(), s2.getZ() + 0.5);
+            AbyssRespawn.touch(r);
+            check(f, AbyssRespawn.rest(r) == 2, "standing at rest 2 was not remembered: " + AbyssRespawn.rest(r));
             // 心臓に触れる: 段 heart の人だけ
             FakePlayer q = new FakePlayer(level, new GameProfile(UUID.randomUUID(), "warden_heart"));
             Quests.forgetAll(q);
@@ -169,7 +186,7 @@ public final class WardenSelfTest {
 
     private static void report(List<String> f) {
         if (f.isEmpty()) {
-            SkyAbyss.LOGGER.info("SELFTEST abyss warden PASSED (marks, wake, 25/100 shares, lantern 40/30 s and sight, dark gathers x2, shades, dark wave, fall, heart touch by stage)");
+            SkyAbyss.LOGGER.info("SELFTEST abyss warden PASSED (marks, wake, 25/100 shares, lantern 40/30 s and sight, dark gathers x2, shades, dark wave, fall, heart touch by stage, rest spots and memory)");
         } else {
             f.forEach(m -> SkyAbyss.LOGGER.error("SELFTEST abyss warden FAILED: {}", m));
         }

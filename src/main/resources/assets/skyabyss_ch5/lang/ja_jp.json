@@ -52,6 +52,8 @@
   "message.skyabyss.ch5.threshold": "底の境。格子の門の向こうで、遠い鼓動が一つ鳴った。",
   "message.skyabyss.ch5.gate_locked": "門の格子は動かない。……天の鍵があれば。",
   "message.skyabyss.ch5.gate_open": "鍵の脈に応えて、門の格子が音もなく溶けた。向こうは、底の見えない闇。",
+  "message.skyabyss.abyss.rest": "灯籠の休み場。……ここで倒れても、灯りがまた呼び戻してくれる。",
+  "message.skyabyss.abyss.woke_at_rest": "灯籠の火のそばで目を覚ました。",
   "message.skyabyss.abyss.exit": "鎖をつかむと、上へ引かれた。",
   "message.skyabyss.abyss.heart_1": "台の上の心臓に触れた。……冷たい。けれど、確かに打っている。",
   "message.skyabyss.abyss.heart_2": "鼓動が、足もとの世界ぜんぶへ根を張っているのが分かる。これは心臓で、錨だ。世界をここにつなぎとめる錨。",

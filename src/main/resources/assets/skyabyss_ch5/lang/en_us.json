@@ -52,6 +52,8 @@
   "message.skyabyss.ch5.threshold": "The threshold. Beyond the barred gate, one distant beat sounds.",
   "message.skyabyss.ch5.gate_locked": "The bars of the gate do not move. ...If only you had the sky key.",
   "message.skyabyss.ch5.gate_open": "Answering the key's pulse, the bars melt away without a sound. Beyond lies a dark with no bottom.",
+  "message.skyabyss.abyss.rest": "A lantern rest. ...Fall below, and the light will call you back here.",
+  "message.skyabyss.abyss.woke_at_rest": "You wake beside the lantern's flame.",
   "message.skyabyss.abyss.exit": "You grip the chain and are drawn upward.",
   "message.skyabyss.abyss.heart_1": "You touch the heart on the altar. ...Cold. Yet it is surely beating.",
   "message.skyabyss.abyss.heart_2": "You can feel the beat rooting into the whole world underfoot. It is a heart, and an anchor. The anchor that holds the world in place.",
