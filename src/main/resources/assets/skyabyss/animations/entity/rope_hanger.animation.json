@@ -1,0 +1,215 @@
+{
+  "format_version": "1.8.0",
+  "animations": {
+    "animation.rope_hanger.idle": {
+      "loop": true,
+      "animation_length": 3.0,
+      "bones": {
+        "figure": {
+          "rotation": [
+            "0",
+            "0",
+            "math.sin(query.anim_time * 90 + 0) * 3"
+          ]
+        },
+        "head": {
+          "rotation": [
+            "math.sin(query.anim_time * 90 + 60) * 6",
+            "0",
+            "0"
+          ]
+        },
+        "arm_l": {
+          "rotation": [
+            "math.sin(query.anim_time * 90 + 0) * 10",
+            "0",
+            "0"
+          ]
+        },
+        "arm_r": {
+          "rotation": [
+            "math.sin(query.anim_time * 90 + 180) * 10",
+            "0",
+            "0"
+          ]
+        },
+        "leg_l": {
+          "rotation": [
+            "math.sin(query.anim_time * 90 + 0) * 4",
+            "0",
+            "0"
+          ]
+        },
+        "leg_r": {
+          "rotation": [
+            "math.sin(query.anim_time * 90 + 180) * 4",
+            "0",
+            "0"
+          ]
+        }
+      }
+    },
+    "animation.rope_hanger.pull": {
+      "animation_length": 1.4,
+      "bones": {
+        "figure": {
+          "rotation": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "0.40": [
+              22,
+              0,
+              0
+            ],
+            "1.00": [
+              22,
+              0,
+              0
+            ],
+            "1.40": [
+              0,
+              0,
+              0
+            ]
+          }
+        },
+        "arm_l": {
+          "rotation": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "0.40": [
+              70,
+              0,
+              -30
+            ],
+            "1.00": [
+              70,
+              0,
+              -30
+            ],
+            "1.40": [
+              0,
+              0,
+              0
+            ]
+          }
+        },
+        "arm_r": {
+          "rotation": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "0.40": [
+              70,
+              0,
+              30
+            ],
+            "1.00": [
+              70,
+              0,
+              30
+            ],
+            "1.40": [
+              0,
+              0,
+              0
+            ]
+          }
+        },
+        "head": {
+          "rotation": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "0.40": [
+              16,
+              0,
+              0
+            ],
+            "1.40": [
+              0,
+              0,
+              0
+            ]
+          }
+        }
+      }
+    },
+    "animation.rope_hanger.hurt": {
+      "animation_length": 0.25,
+      "bones": {
+        "figure": {
+          "rotation": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "0.06": [
+              0,
+              0,
+              10
+            ],
+            "0.22": [
+              0,
+              0,
+              0
+            ]
+          }
+        }
+      }
+    },
+    "animation.rope_hanger.death": {
+      "animation_length": 1.2,
+      "bones": {
+        "figure": {
+          "rotation": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "0.50": [
+              0,
+              0,
+              120
+            ],
+            "1.00": [
+              0,
+              0,
+              130
+            ]
+          },
+          "position": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "0.50": [
+              0,
+              2.0,
+              0
+            ],
+            "1.00": [
+              0,
+              2.4,
+              0
+            ]
+          }
+        }
+      },
+      "loop": "hold_on_last_frame"
+    }
+  }
+}

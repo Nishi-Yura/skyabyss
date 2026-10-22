@@ -1,0 +1,189 @@
+# 深淵の敵 B 組 (灰の層 3・深み 2・深淵だけ 4。docs/design/36 の 4・4.2、A3): 各敵を段 0・1・2 で床の上に置いて撮る。
+# 灰の這い跡は光の前 (prints だけ) と光の後 (体が出る) を撮る。置き場は深淵の平らな床 (灰の層 y -181、深み y -401)。
+# 撮る前: /skyabyss abyss enter → build (層を建てる)。夜目は効果で補う (深淵は暗い)。
+# ./gradlew runShots -Pscript=tools/shots/abyss_enemies_b.txt -PshotsName=abyss_enemies_b
+world abyss_enemies_b flat
+size 1280 720
+timeout 3600
+render 12
+clouds off
+
+wait 80
+cmd skyabyss cinematic stop
+cmd gamemode spectator
+hud off
+cmd skyabyss abyss enter
+wait 40
+cmd skyabyss abyss build
+wait 900
+cmd effect give @s minecraft:night_vision 100000 0 true
+cmd forceload add 590 592 612 608
+wait 60
+cmd fill 590 -181 592 612 -181 608 minecraft:polished_blackstone
+cmd fill 590 -182 592 612 -182 608 minecraft:air
+cmd fill 590 -178 592 612 -178 608 minecraft:air
+cmd fill 590 -401 592 612 -401 608 minecraft:polished_deepslate
+cmd fill 590 -402 592 612 -402 608 minecraft:air
+wait 40
+
+# ---- 灰の層 (床 y -180。人は x 597、向きは +x。敵は三歩先に湧く)
+cmd tp @s 597 -180 600 270 5
+wait 40
+cmd skyabyss abyss foe ash_trail 0
+wait 20
+cmd setblock 600 -177 600 minecraft:air
+wait 20
+shot a_ash_trail_hidden_prints
+cmd setblock 600 -177 600 minecraft:lantern
+wait 30
+shot a_ash_trail_lit_by_lantern
+cmd setblock 600 -177 600 minecraft:air
+cmd kill @e[type=skyabyss:ash_trail]
+wait 20
+cmd skyabyss abyss foe ash_trail 1
+wait 30
+shot b_ash_trail_s1_lit
+cmd kill @e[type=skyabyss:ash_trail]
+wait 20
+cmd skyabyss abyss foe ash_trail 2
+wait 30
+shot c_ash_trail_s2_lit
+cmd kill @e[type=skyabyss:ash_trail]
+wait 20
+
+cmd skyabyss abyss foe ember_keeper 0
+wait 40
+shot d_ember_keeper_s0
+cmd kill @e[type=skyabyss:ember_keeper]
+wait 20
+cmd skyabyss abyss foe ember_keeper 1
+wait 40
+shot d_ember_keeper_s1
+cmd kill @e[type=skyabyss:ember_keeper]
+wait 20
+cmd skyabyss abyss foe ember_keeper 2
+wait 40
+shot d_ember_keeper_s2
+cmd kill @e[type=skyabyss:ember_keeper]
+wait 20
+
+cmd skyabyss abyss foe soot_child 0
+cmd skyabyss abyss foe soot_child 0
+cmd skyabyss abyss foe soot_child 0
+wait 40
+shot e_soot_child_s0_group
+cmd kill @e[type=skyabyss:soot_child]
+wait 20
+cmd skyabyss abyss foe soot_child 1
+cmd skyabyss abyss foe soot_child 1
+cmd skyabyss abyss foe soot_child 1
+wait 40
+shot e_soot_child_s1_group
+cmd kill @e[type=skyabyss:soot_child]
+wait 20
+cmd skyabyss abyss foe soot_child 2
+cmd skyabyss abyss foe soot_child 2
+cmd skyabyss abyss foe soot_child 2
+wait 40
+shot e_soot_child_s2_group
+cmd kill @e[type=skyabyss:soot_child]
+wait 20
+
+# ---- 深淵だけ (床 y -180。どの層にも出る)
+cmd skyabyss abyss foe lamp_eater 0
+wait 40
+shot f_lamp_eater_s0
+cmd kill @e[type=skyabyss:lamp_eater]
+wait 20
+cmd skyabyss abyss foe lamp_eater 1
+wait 40
+shot f_lamp_eater_s1
+cmd kill @e[type=skyabyss:lamp_eater]
+wait 20
+cmd skyabyss abyss foe lamp_eater 2
+wait 40
+shot f_lamp_eater_s2
+cmd kill @e[type=skyabyss:lamp_eater]
+wait 20
+
+# 天井歩き: 天井 y -178 (床 y -180 の二段上)
+cmd fill 592 -178 592 612 -178 608 minecraft:stone
+wait 20
+cmd skyabyss abyss foe ceiling_walker 0
+wait 40
+shot g_ceiling_walker_s0
+cmd kill @e[type=skyabyss:ceiling_walker]
+wait 20
+cmd skyabyss abyss foe ceiling_walker 1
+wait 40
+shot g_ceiling_walker_s1
+cmd kill @e[type=skyabyss:ceiling_walker]
+wait 20
+cmd skyabyss abyss foe ceiling_walker 2
+wait 40
+shot g_ceiling_walker_s2
+cmd kill @e[type=skyabyss:ceiling_walker]
+wait 20
+cmd fill 592 -178 592 612 -178 608 minecraft:air
+wait 20
+
+cmd skyabyss abyss foe heartbeat_mimic 0
+wait 40
+shot h_heartbeat_mimic_s0
+cmd kill @e[type=skyabyss:heartbeat_mimic]
+wait 20
+cmd skyabyss abyss foe heartbeat_mimic 1
+wait 40
+shot h_heartbeat_mimic_s1
+cmd kill @e[type=skyabyss:heartbeat_mimic]
+wait 20
+cmd skyabyss abyss foe heartbeat_mimic 2
+wait 40
+shot h_heartbeat_mimic_s2
+cmd kill @e[type=skyabyss:heartbeat_mimic]
+wait 20
+
+cmd skyabyss abyss foe rope_hanger 0
+wait 40
+shot i_rope_hanger_s0
+cmd kill @e[type=skyabyss:rope_hanger]
+wait 20
+cmd skyabyss abyss foe rope_hanger 2
+wait 40
+shot i_rope_hanger_s2
+cmd kill @e[type=skyabyss:rope_hanger]
+wait 20
+
+# ---- 深み (床 y -401。心臓の下。深さの段は y で決まるが、台本では段を直接指定する)
+cmd tp @s 597 -400 600 270 5
+wait 40
+cmd skyabyss abyss foe past_shadow 0
+wait 40
+shot j_past_shadow_s0
+cmd kill @e[type=skyabyss:past_shadow]
+wait 20
+cmd skyabyss abyss foe past_shadow 1
+wait 40
+shot j_past_shadow_s1
+cmd kill @e[type=skyabyss:past_shadow]
+wait 20
+cmd skyabyss abyss foe past_shadow 2
+wait 40
+shot j_past_shadow_s2
+cmd kill @e[type=skyabyss:past_shadow]
+wait 20
+cmd skyabyss abyss foe nameless_shape 0
+wait 40
+shot k_nameless_shape_s0
+cmd kill @e[type=skyabyss:nameless_shape]
+wait 20
+cmd skyabyss abyss foe nameless_shape 1
+wait 40
+shot k_nameless_shape_s1
+cmd kill @e[type=skyabyss:nameless_shape]
+wait 20
+cmd skyabyss abyss foe nameless_shape 2
+wait 40
+shot k_nameless_shape_s2
+cmd kill @e[type=skyabyss:nameless_shape]
+wait 20

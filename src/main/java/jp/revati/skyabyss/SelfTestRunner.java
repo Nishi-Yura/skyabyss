@@ -138,6 +138,8 @@ public final class SelfTestRunner {
         steps.add(Step.once("abyss arts", jp.revati.skyabyss.abyss.arts.AbyssArtsSelfTest::runSelfTest));
         // 深淵の敵 A (9 種の型・三段の素材・湧かせ方・数字の伸び・予告・殻と盾・塩の抜け殻の割れ)。SKYABYSS_SELFTEST_ONLY="abyss enemies a"
         steps.add(Step.once("abyss enemies a", jp.revati.skyabyss.abyss.mobs.AbyssMobsASelfTest::runSelfTest));
+        // 深淵の敵 B 組 (灰の層・深み・深淵だけ): 登録・素材・段・数値・灰の這い跡の光・天井歩き・灯喰い・縄の人・湧きの休み場。SKYABYSS_SELFTEST_ONLY="abyss enemies b"
+        steps.add(Step.once("abyss enemies b", jp.revati.skyabyss.abyss.mobs.AbyssMobsBSelfTest::runSelfTest));
         steps.add(Step.once("gear curve", GearCurveSelfTest::runSelfTest));
         // 心臓四体の手ごたえ (戦いの長さ・一撃・避けそこね)
         steps.add(Step.once("heart balance", jp.revati.skyabyss.combat.HeartBalanceSelfTest::runSelfTest));

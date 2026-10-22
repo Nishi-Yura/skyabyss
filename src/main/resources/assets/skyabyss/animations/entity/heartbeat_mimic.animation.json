@@ -1,0 +1,274 @@
+{
+  "format_version": "1.8.0",
+  "animations": {
+    "animation.heartbeat_mimic.idle": {
+      "loop": true,
+      "animation_length": 3.0,
+      "bones": {
+        "body": {
+          "rotation": [
+            "0",
+            "0",
+            "math.sin(query.anim_time * 120 + 0) * 2"
+          ],
+          "position": [
+            0,
+            "math.abs(math.sin(query.anim_time * 60 + 0) * 1)*0.5",
+            0
+          ]
+        },
+        "bulge_a": {
+          "rotation": [
+            "0",
+            "0",
+            "0"
+          ],
+          "position": [
+            0,
+            "math.abs(math.sin(query.anim_time * 60 + 0) * 1)*0.8",
+            0
+          ]
+        },
+        "bulge_b": {
+          "rotation": [
+            "0",
+            "0",
+            "0"
+          ],
+          "position": [
+            0,
+            "math.abs(math.sin(query.anim_time * 60 + 40) * 1)*0.6",
+            0
+          ]
+        },
+        "bulge_c": {
+          "rotation": [
+            "0",
+            "0",
+            "0"
+          ],
+          "position": [
+            0,
+            "math.abs(math.sin(query.anim_time * 60 + 80) * 1)*0.6",
+            0
+          ]
+        }
+      }
+    },
+    "animation.heartbeat_mimic.lure": {
+      "loop": true,
+      "animation_length": 1.0,
+      "bones": {
+        "body": {
+          "rotation": [
+            "0",
+            "0",
+            "math.sin(query.anim_time * 240 + 0) * 3"
+          ],
+          "position": [
+            0,
+            "math.abs(math.sin(query.anim_time * 240 + 0) * 1)*1.0",
+            0
+          ]
+        },
+        "bulge_a": {
+          "rotation": [
+            "0",
+            "0",
+            "0"
+          ],
+          "position": [
+            0,
+            "math.abs(math.sin(query.anim_time * 240 + 0) * 1)*1.2",
+            0
+          ]
+        }
+      }
+    },
+    "animation.heartbeat_mimic.bite": {
+      "animation_length": 0.3,
+      "bones": {
+        "jaw": {
+          "rotation": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "0.10": [
+              50,
+              0,
+              0
+            ],
+            "0.25": [
+              0,
+              0,
+              0
+            ]
+          }
+        },
+        "body": {
+          "rotation": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "0.10": [
+              10,
+              0,
+              0
+            ],
+            "0.25": [
+              0,
+              0,
+              0
+            ]
+          }
+        },
+        "rib0": {
+          "rotation": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "0.10": [
+              0,
+              0,
+              -14
+            ],
+            "0.25": [
+              0,
+              0,
+              0
+            ]
+          }
+        },
+        "rib1": {
+          "rotation": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "0.10": [
+              0,
+              0,
+              14
+            ],
+            "0.25": [
+              0,
+              0,
+              0
+            ]
+          }
+        },
+        "rib2": {
+          "rotation": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "0.10": [
+              0,
+              0,
+              -14
+            ],
+            "0.25": [
+              0,
+              0,
+              0
+            ]
+          }
+        },
+        "rib3": {
+          "rotation": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "0.10": [
+              0,
+              0,
+              14
+            ],
+            "0.25": [
+              0,
+              0,
+              0
+            ]
+          }
+        }
+      }
+    },
+    "animation.heartbeat_mimic.hurt": {
+      "animation_length": 0.25,
+      "bones": {
+        "body": {
+          "rotation": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "0.06": [
+              0,
+              0,
+              10
+            ],
+            "0.22": [
+              0,
+              0,
+              0
+            ]
+          }
+        }
+      }
+    },
+    "animation.heartbeat_mimic.death": {
+      "animation_length": 1.0,
+      "bones": {
+        "body": {
+          "rotation": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "0.50": [
+              0,
+              0,
+              90
+            ],
+            "1.00": [
+              0,
+              0,
+              100
+            ]
+          },
+          "position": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "0.50": [
+              0,
+              0.4,
+              0
+            ],
+            "1.00": [
+              0,
+              0.48,
+              0
+            ]
+          }
+        }
+      },
+      "loop": "hold_on_last_frame"
+    }
+  }
+}

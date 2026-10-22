@@ -1,8 +1,11 @@
 package jp.revati.skyabyss.abyss.arts;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
+
+import org.jetbrains.annotations.Nullable;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceKey;
@@ -64,6 +67,33 @@ public final class AbyssLight {
     // 期限が切れた灯りを消す (now は overworld の時刻)
     public static void tick(long now) {
         LAMPS.removeIf(l -> l.until <= now);
+    }
+
+    // 灯喰い (docs/design/36 の 4): at から r 以内の点の灯りを消す。消した数
+    public static int snuffNear(Level level, Vec3 at, double r) {
+        int n = 0;
+        for (Iterator<Lamp> it = LAMPS.iterator(); it.hasNext(); ) {
+            Lamp l = it.next();
+            if (l.dim.equals(level.dimension()) && l.at.distanceTo(at) <= r) {
+                it.remove();
+                n++;
+            }
+        }
+        return n;
+    }
+
+    // at から r 以内で一番近い点の灯りの位置 (なければ null)
+    @Nullable
+    public static Vec3 nearestLamp(Level level, Vec3 at, double r) {
+        Vec3 best = null;
+        double bestD = r;
+        for (Lamp l : LAMPS) {
+            if (l.dim.equals(level.dimension()) && l.at.distanceTo(at) < bestD) {
+                bestD = l.at.distanceTo(at);
+                best = l.at;
+            }
+        }
+        return best;
     }
 
     public static void clear() {
