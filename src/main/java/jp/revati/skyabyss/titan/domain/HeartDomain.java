@@ -51,7 +51,7 @@ import org.joml.Vector3f;
 //     手がかり (光る柱・音・一行) は出し続け、間違えても傷は受けない (決まりの傷は領域の決まりの予告だけ)
 //  3. 解いた: 予告は全部消え、領域は砕け、心臓は STUN_TICKS (5 秒) のあいだ傷を 1.5 倍受ける。
 //     人がいなくなれば心臓ごと最初に戻る。安全網として SAFETY_TICKS (6 分) で静かに終わる。
-// 領域は部屋ごとの subclass (StoneSeaDomain / RisingTideDomain / ThunderCageDomain / HearthCoreDomain) が rule() と仕掛けを書く。
+// 領域は部屋ごとの subclass (StoneSeaDomain / ShellMatchDomain / ThunderCageDomain / HearthCoreDomain) が rule() と仕掛けを書く。
 // 画面の側は client/titan/domain/DomainClient (題字・色・床の紋・仕掛けの進み)。
 public abstract class HeartDomain {
     public static final int DECLARE_TICKS = 80;
@@ -467,11 +467,43 @@ public abstract class HeartDomain {
         return cz;
     }
 
+    // 仕掛けの数 (既定 NODES。合わせ貝は床の貝の板をたくさん置く)
+    public int nodeCount() {
+        return NODES;
+    }
+
+    // 仕掛け一つの見える物の数 (既定は本体・玉・光の線の 3)
+    public int propsPerNode() {
+        return 3;
+    }
+
+    // 見える物を部屋ごとに描く (描いたら true。既定は false = 柱 + 玉 + 光の線)
+    protected boolean drawNode(ServerLevel level, Node n, int t) {
+        return false;
+    }
+
+    // 仕掛けの箱が全部片づいた (巡の合間・終わり・放棄)
+    protected void onNodesRemoved(ServerLevel level) {
+    }
+
+    // 仕掛けの上の粒の柱を立てるか
+    protected boolean nodeColumns() {
+        return true;
+    }
+
+    protected float boxWidth() {
+        return 1.4f;
+    }
+
+    protected float boxHeight() {
+        return 2.2f;
+    }
+
     private void spawnNodes(ServerLevel level) {
         removeNodes(level);
         nodes.clear();
         List<Vec3> spots = nodeSpots();
-        for (int i = 0; i < NODES && i < spots.size(); i++) {
+        for (int i = 0; i < nodeCount() && i < spots.size(); i++) {
             Node n = new Node(i, snap(level, spots.get(i)));
             nodes.add(n);
             n.entity = spawnBox(level, n.pos);
@@ -488,8 +520,8 @@ public abstract class HeartDomain {
             return null;
         }
         CompoundTag tag = box.saveWithoutId(new CompoundTag());
-        tag.putFloat("width", 1.4f);
-        tag.putFloat("height", 2.2f);
+        tag.putFloat("width", boxWidth());
+        tag.putFloat("height", boxHeight());
         tag.putBoolean("response", true);
         box.load(tag);
         box.setPos(pos.x, pos.y, pos.z);
@@ -508,7 +540,7 @@ public abstract class HeartDomain {
                 }
                 n.entity = spawnBox(level, n.pos);
             }
-            boolean missing = n.props.size() < 3;
+            boolean missing = n.props.size() < propsPerNode();
             for (UUID u : n.props) {
                 missing |= level.getEntity(u) == null;
             }
@@ -521,6 +553,7 @@ public abstract class HeartDomain {
     }
 
     private void removeNodes(ServerLevel level) {
+        onNodesRemoved(level);
         for (Node n : nodes) {
             removeProps(level, n);
             if (n.entity != null) {
@@ -713,6 +746,9 @@ public abstract class HeartDomain {
 
     private void updateProps(ServerLevel level, int t) {
         for (Node n : nodes) {
+            if (drawNode(level, n, t)) {
+                continue;
+            }
             int rgb = n.flash > 0 && n.flashRgb != 0 ? n.flashRgb : markColor(n, t);
             boolean lit = lit(n, t);
             String key = rgb + "/" + lit + "/" + n.done;
@@ -764,7 +800,7 @@ public abstract class HeartDomain {
         tag.putFloat("height", 0f);
     }
 
-    private UUID spawnDisplay(ServerLevel level, Vec3 pos, Block block, int rgb, float tx, float ty, float tz, float sx, float sy, float sz) {
+    protected UUID spawnDisplay(ServerLevel level, Vec3 pos, Block block, int rgb, float tx, float ty, float tz, float sx, float sy, float sz) {
         net.minecraft.world.entity.Display.BlockDisplay d = EntityType.BLOCK_DISPLAY.create(level);
         CompoundTag tag = d.saveWithoutId(new CompoundTag());
         fill(tag, block, rgb, tx, ty, tz, sx, sy, sz);
@@ -776,7 +812,7 @@ public abstract class HeartDomain {
         return d.getUUID();
     }
 
-    private void retarget(ServerLevel level, UUID id, Block block, int rgb, float tx, float ty, float tz, float sx, float sy, float sz) {
+    protected void retarget(ServerLevel level, UUID id, Block block, int rgb, float tx, float ty, float tz, float sx, float sy, float sz) {
         Entity e = level.getEntity(id);
         if (e instanceof net.minecraft.world.entity.Display.BlockDisplay d) {
             CompoundTag tag = d.saveWithoutId(new CompoundTag());
@@ -785,7 +821,7 @@ public abstract class HeartDomain {
         }
     }
 
-    private void removeProps(ServerLevel level, Node n) {
+    protected void removeProps(ServerLevel level, Node n) {
         for (UUID u : n.props) {
             Entity e = level.getEntity(u);
             if (e != null) {
@@ -810,6 +846,9 @@ public abstract class HeartDomain {
 
     // 仕掛けの印 (6 tick ごと): 済みは緑、まだは白。仕掛けごとに markColor で替える
     private void markNodes(ServerLevel level, int t) {
+        if (!nodeColumns()) {
+            return;
+        }
         for (Node n : nodes) {
             column(level, n, markColor(n, t), 1.0f, 3);
         }

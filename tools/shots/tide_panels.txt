@@ -1,0 +1,52 @@
+# Tide heart domain 合わせ貝 (shell panels)' attack-name cue and signature domain (docs/design/02_stone_whale.md 5.7, 18_notices.md 6.1)
+# ./gradlew runShots -Pscript=tools/shots/tide_panels.txt   (mute: the shots runner sets the volume to 0; Japanese UI)
+# Per heart: cue_<h> (attack name under the boss bar), card_<h> (domain title card + heaven's line), active_<h> (domain running: tint, floor pattern, telegraphs, HUD)
+# Then: python tools/sheets/heart_domains_sheet.py -> docs/review/previews/heart_domains_sheet.png
+world shots flat
+size 1280 720
+timeout 900
+render 8
+clouds off
+
+cmd time set noon
+cmd weather clear
+cmd gamemode survival Dev
+cmd effect give Dev minecraft:resistance 1000000 4 true
+cmd fill -30 -61 -30 30 -61 30 minecraft:smooth_basalt destroy
+cmd fill -4 -44 11 4 -44 17 minecraft:air
+cmd fill -4 -44 11 4 -44 17 minecraft:barrier
+cmd kill @e[type=!minecraft:player,distance=..80]
+hud on
+
+camera minecraft:overworld 0.5 -43 14.5 180 38
+waitchunks
+wait 20
+cmd skyabyss cinematic stop
+chat clear
+wait 300
+cmd weather clear
+cmd time set noon
+wait 40
+
+# ---- tide: domain 合わせ貝
+cmd summon skyabyss:tide_heart 0 -59 0 {PersistenceRequired:1b,Rotation:[0f,0f]}
+wait 10
+cmd skyabyss cinematic stop
+camera minecraft:overworld 0.5 -43 14.5 180 38
+wait 110
+cmd skyabyss dev force @e[type=skyabyss:tide_heart,limit=1] DOMAIN
+wait 130
+camera minecraft:overworld 0.5 -40 16 180 48
+wait 4
+shot panels_wide
+wait 60
+camera minecraft:overworld 7 -52 8 215 28
+wait 4
+shot panels_close
+wait 90
+camera minecraft:overworld 0.5 -40 16 180 48
+wait 4
+shot panels_pressure
+wait 20
+cmd kill @e[type=skyabyss:tide_heart]
+wait 60

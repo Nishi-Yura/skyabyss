@@ -45,10 +45,13 @@ public final class DomainClient {
     private record Theme(float[] fog, int accent, int floor) {
     }
 
+    // 合わせ貝の印の色 (ShellMatchDomain.RGB と同じ)
+    private static final int[] MATCH_RGB = {0x4DC3FF, 0xA070E0, 0xF2D23C, 0xF0F4F8};
+
     private static Theme theme(String id) {
         return switch (id) {
             case "stone_sea" -> new Theme(new float[] {0.30f, 0.36f, 0.33f}, 0xB7C9B0, 0xA8B8A0);
-            case "rising_tide" -> new Theme(new float[] {0.05f, 0.18f, 0.40f}, 0x6FA8FF, 0x3A6FD8);
+            case "shell_match" -> new Theme(new float[] {0.10f, 0.20f, 0.32f}, 0x9ADCF0, 0x4DC3FF);
             case "thunder_cage" -> new Theme(new float[] {0.14f, 0.12f, 0.30f}, 0xC8B8FF, 0xB8A4FF);
             default -> new Theme(new float[] {0.34f, 0.07f, 0.04f}, 0xFF8A4A, 0x8A2A18);
         };
@@ -389,11 +392,18 @@ public final class DomainClient {
         g.fill(x, y, x + 1, y + ph, ia | edge);
         g.fill(x + pw - 1, y, x + pw, y + ph, ia | edge);
         Component head = hudHead(r);
+        String count = r.remaining + " / " + jp.revati.skyabyss.titan.domain.HeartDomain.NODES;
+        if (r.ended == 0 && r.rounds > 1) {
+            // 題字・巡・数が一行に収まらないときは、題字から「領域」と括弧を外して名前だけにする
+            Component rd0 = Component.translatable("gui.skyabyss.domain.round", r.round, r.rounds);
+            if (mc.font.width(head) + mc.font.width(rd0) + mc.font.width(count) + 24 > pw) {
+                head = Component.translatable("gui.skyabyss.domain." + r.id + ".name");
+            }
+        }
         g.drawString(mc.font, head, x + 5, y + 4, ia | 0xFFFFFF, false);
         if (r.ended != 0) {
             return;
         }
-        String count = r.remaining + " / " + jp.revati.skyabyss.titan.domain.HeartDomain.NODES;
         g.drawString(mc.font, count, x + pw - 5 - mc.font.width(count), y + 4, ia | 0xC8CCD8, false);
         if (r.rounds > 1) {
             Component rd = Component.translatable("gui.skyabyss.domain.round", r.round, r.rounds);
@@ -464,12 +474,15 @@ public final class DomainClient {
                 }
                 f.disc(r.cx, r.cz, R, 0.04f);
             }
-            case "rising_tide" -> {
-                // 満ち潮: 外から内へ縮む輪と、うすい水面
-                f.disc(r.cx, r.cz, R, 0.07f + 0.02f * (float) Math.sin(sec * 1.4));
-                for (int k = 0; k < 4; k++) {
-                    double rr = R - ((sec * 1.9 + k * R / 4) % R);
-                    f.ring(r.cx, r.cz, rr - 0.3, rr + 0.3, (float) (0.20 * rr / R + 0.05));
+            case "shell_match" -> {
+                // 合わせ貝: いまの印の色のうすい円と、ゆっくり広がる輪 (印の色は手がかりの鍵 find.N の N)
+                int m = r.standKey.contains(".find.") ? r.standKey.charAt(r.standKey.length() - 1) - (int) 0x30 : -1;
+                int mc = m >= 0 ? MATCH_RGB[m] : r.theme.floor;
+                Floor mf = new Floor(buffer, pose, cam, r.floor + 0.045, mc, in);
+                mf.disc(r.cx, r.cz, R, 0.05f + 0.02f * (float) Math.sin(sec * 1.4));
+                for (int k = 0; k < 3; k++) {
+                    double rr = (sec * 1.6 + k * R / 3) % R;
+                    mf.ring(r.cx, r.cz, rr - 0.3, rr + 0.3, (float) (0.16 * (1 - rr / R) + 0.03));
                 }
             }
             case "thunder_cage" -> {

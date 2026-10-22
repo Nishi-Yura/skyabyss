@@ -531,7 +531,7 @@ public final class HeartBotSelfTest {
             check(f, d != null && d.phase() == HeartDomain.Phase.ACTIVE && active >= ACTIVE_WINDOW, name + ": the unsolved domain did not last (phase " + (d == null ? "-" : d.phase()) + ")");
             if (d != null) {
                 check(f, !d.solved() && !d.broken(), name + ": an unsolved domain reports solved");
-                check(f, d.nodes().size() == HeartDomain.NODES, name + ": the domain has " + d.nodes().size() + " nodes");
+                check(f, d.nodes().size() == d.nodeCount(), name + ": the domain has " + d.nodes().size() + " nodes (needs " + d.nodeCount() + ")");
                 for (HeartDomain.Node n : d.nodes()) {
                     check(f, n.entityId() != null && ((ServerLevel) rig.heart().level()).getEntity(n.entityId()) != null, name + ": node " + n.index + " has no hit box");
                     check(f, Math.hypot(n.pos.x - CX, n.pos.z - CZ) < 15, name + ": node " + n.index + " is outside the room at " + n.pos);
@@ -677,12 +677,13 @@ public final class HeartBotSelfTest {
                         at[0] = np;
                     }
                 }
-            } else if (d instanceof jp.revati.skyabyss.titan.domain.RisingTideDomain r) {
-                // 水門を順に叩く (開いたまま三つそろえる)
-                for (HeartDomain.Node n : r.nodes()) {
-                    if (!n.done && t - lastAct[0] >= legTicks(at[0], n.pos)) {
+            } else if (d instanceof jp.revati.skyabyss.titan.domain.ShellMatchDomain r) {
+                // いまの印の板を、近い順ではなく並びの順に叩く (叩きおえると印が配りなおされる)
+                for (int idx : r.pending()) {
+                    HeartDomain.Node n = r.nodes().get(idx);
+                    if (t - lastAct[0] >= legTicks(at[0], n.pos)) {
                         bot.moveTo(n.pos.x + 1, n.pos.y, n.pos.z);
-                        r.strikeNode(level, n.index, bot);
+                        r.strikeNode(level, idx, bot);
                         lastAct[0] = t;
                         at[0] = n.pos;
                         break;
@@ -753,7 +754,7 @@ public final class HeartBotSelfTest {
                 return;
             }
             // 見える仕掛け: 三つの仕掛けそれぞれに本体・玉・光の線 (Display) が立ち、手順の案内が出ている
-            check(f, HeartDomain.propCount(d, level) == 3 * HeartDomain.NODES, name + ": the gimmick objects are not visible entities (" + HeartDomain.propCount(d, level) + " of " + 3 * HeartDomain.NODES + ")");
+            check(f, HeartDomain.propCount(d, level) == d.propsPerNode() * d.nodeCount(), name + ": the gimmick objects are not visible entities (" + HeartDomain.propCount(d, level) + " of " + d.propsPerNode() * d.nodeCount() + ")");
             for (int t = 0; t < 12; t++) {
                 step(rig, bot, driver, level, t);
             }
@@ -776,17 +777,40 @@ public final class HeartBotSelfTest {
                     step(rig, bot, driver, level, t);
                 }
                 check(f, d.phase() == HeartDomain.Phase.ACTIVE, name + ": a wrong pattern ended the domain");
-            } else if (d instanceof jp.revati.skyabyss.titan.domain.RisingTideDomain r) {
-                r.strikeNode(level, 0, bot);
-                check(f, r.solvedCount() == 1, name + ": a struck valve did not open");
-                for (int t = 0; t < jp.revati.skyabyss.titan.domain.RisingTideDomain.OPEN_TICKS - 5; t++) {
+            } else if (d instanceof jp.revati.skyabyss.titan.domain.ShellMatchDomain r) {
+                int[] counts = new int[jp.revati.skyabyss.titan.domain.ShellMatchDomain.MARK_KINDS];
+                for (int i = 0; i < r.nodes().size(); i++) {
+                    counts[r.markOf(i)]++;
+                }
+                for (int c : counts) {
+                    check(f, c == jp.revati.skyabyss.titan.domain.ShellMatchDomain.PER_MARK, name + ": the marks are not dealt evenly");
+                }
+                check(f, r.currentMark() >= 0 && r.pending().size() == jp.revati.skyabyss.titan.domain.ShellMatchDomain.PER_MARK, name + ": no mark is asked for");
+                check(f, jp.revati.skyabyss.titan.domain.ShellMatchDomain.PANELS == 12 && r.iconId() != null && level.getEntity(r.iconId()) != null, name + ": the mark icon above the heart is missing");
+                int good = r.pending().get(0);
+                int bad = -1;
+                for (int i = 0; i < r.nodes().size(); i++) {
+                    if (r.markOf(i) != r.currentMark()) {
+                        bad = i;
+                        break;
+                    }
+                }
+                r.strikeNode(level, good, bot);
+                check(f, r.nodes().get(good).done && r.pending().size() == 2, name + ": a matching panel did not light");
+                float hp = bot.getHealth();
+                r.strikeNode(level, bad, bot);
+                check(f, r.nodes().stream().noneMatch(n -> n.done) && r.pending().size() == 3, name + ": a wrong panel did not put the lit ones out");
+                check(f, HeartDomain.lastTell().endsWith(".wrong") && bot.getHealth() == hp, name + ": a wrong panel gave no fail feedback or hurt");
+                int before = r.currentMark();
+                for (int idx : new java.util.ArrayList<>(r.pending())) {
+                    r.strikeNode(level, idx, bot);
+                }
+                check(f, r.marksDone() == 1 && r.shuffling(), name + ": three matching panels did not complete the mark (" + r.marksDone() + ")");
+                for (int t = 0; t < jp.revati.skyabyss.titan.domain.ShellMatchDomain.SHUFFLE_DELAY + 6; t++) {
                     step(rig, bot, driver, level, t);
                 }
-                check(f, r.solvedCount() == 1, name + ": the valve closed before its open time ran out");
-                for (int t = 0; t < 12; t++) {
-                    step(rig, bot, driver, level, t);
-                }
-                check(f, r.solvedCount() == 0 && d.phase() == HeartDomain.Phase.ACTIVE, name + ": the valve stayed open after its time (" + r.solvedCount() + ")");
+                check(f, !r.shuffling() && r.pending().size() == 3 && r.currentMark() != before && r.nodes().stream().noneMatch(n -> n.done)
+                        && d.phase() == HeartDomain.Phase.ACTIVE, name + ": the panels were not dealt again after a mark");
             } else if (d instanceof jp.revati.skyabyss.titan.domain.ThunderCageDomain c) {
                 int guard = 0;
                 while (c.charging() < 0 && guard++ < 300) {
