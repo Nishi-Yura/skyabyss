@@ -15,7 +15,7 @@ import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.level.Level;
 
 // 深淵の敵 B 組 (docs/design/36 の 4) の共通部分。GuardMob の決まり (番兵の型・動きの自動切り替え・playAction) を使う。
-//   段 (stage) は湧いたときに決めて同期する。数値は tune で入れる (AbyssMobsBStage)。
+//   段 (stage = 形。1 元の姿・2 歪み・3 崩れ) は湧いたときに決めて同期する。数値は tune で入れる (AbyssScaling。湧いた高さで決まる)。
 //   保存しない (深淵は湧き直すので、ディスクに残さない)。遠くへ離れたら消える (湧き場の見張りが数える)。
 //   予告つきの攻撃は Tell で作る: 攻撃の動作を先に見せ、予告のあいだに離れれば当たらない。
 public abstract class AbyssMobB extends GuardMob {
@@ -30,30 +30,31 @@ public abstract class AbyssMobB extends GuardMob {
     @Override
     protected void defineSynchedData(SynchedEntityData.Builder builder) {
         super.defineSynchedData(builder);
-        builder.define(STAGE, 0);
+        builder.define(STAGE, 1);
     }
 
+    // 形 (1 元の姿・2 歪み・3 崩れ。A 組と同じ番号)
     public int stage() {
         return entityData.get(STAGE);
     }
 
-    // 湧いたときに一度だけ。段と HP・傷の基の値 (段と深さの倍率はここで決める)
-    public void tune(int stage, double hp, double dmg) {
+    // 湧いたときに一度だけ。形と HP・傷の基の値 (湧いた高さの倍率はここで決める)
+    public void tune(int form, double hp, double dmg) {
         tunedY = blockPosition().getY();
-        entityData.set(STAGE, Math.max(0, Math.min(AbyssMobsBStage.MAX, stage)));
-        double max = AbyssMobsBStage.hp(hp, stage(), tunedY);
+        entityData.set(STAGE, Math.max(1, Math.min(AbyssScaling.FORM_MAX, form)));
+        double max = AbyssScaling.hp(hp, tunedY);
         getAttribute(Attributes.MAX_HEALTH).setBaseValue(max);
         setHealth((float) max);
         baseDmg = dmg;
     }
 
-    // 今の段と深さで効く傷 (傷を与える所で使う)
+    // 湧いた高さで効く傷 (傷を与える所で使う)
     protected float dmg() {
-        return (float) AbyssMobsBStage.dmg(baseDmg, stage(), tunedY);
+        return (float) AbyssScaling.dmg(baseDmg, tunedY);
     }
 
     protected float dmg(double factor) {
-        return (float) (AbyssMobsBStage.dmg(baseDmg, stage(), tunedY) * factor);
+        return (float) (AbyssScaling.dmg(baseDmg, tunedY) * factor);
     }
 
     @Override

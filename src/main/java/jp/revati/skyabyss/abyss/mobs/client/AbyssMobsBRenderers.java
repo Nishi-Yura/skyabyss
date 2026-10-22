@@ -20,7 +20,7 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import software.bernie.geckolib.cache.object.BakedGeoModel;
 
-// 深淵の敵 B 組の描画 (素材は tools/gen_abyss_mobs_b.py)。段 (stage) で絵を替える: 0 = <id>、1 = <id>_s1 (歪み)、2 = <id>_s2 (崩れ)。
+// 深淵の敵 B 組の描画 (素材は tools/gen_abyss_mobs_b.py)。形 (stage 1〜3) で絵を替える: 1 = <id>、2 = <id>_s1 (歪み)、3 = <id>_s2 (崩れ)。
 //   灰の這い跡: 光の中でだけ体を描く。光がなければ床の灰の跡 (prints の骨) だけ描く。
 //   天井歩き: 天井にいるときは逆さに描く (体の上が天井に付く)。
 @EventBusSubscriber(modid = SkyAbyss.MODID, value = Dist.CLIENT)
@@ -73,7 +73,7 @@ public final class AbyssMobsBRenderers {
                 if (LowPoly.debug) {
                     return DEBUG;
                 }
-                return id("textures/lowpoly/" + name + STAGE_SUFFIX[Math.max(0, Math.min(2, mob.stage()))] + ".png");
+                return id("textures/lowpoly/" + name + STAGE_SUFFIX[Math.max(0, Math.min(2, mob.stage() - 1))] + ".png");
             }
             return entityTexture;
         }

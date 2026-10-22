@@ -1,8 +1,8 @@
 package jp.revati.skyabyss.abyss.mobs;
 
 // 深淵の敵 A の 9 種 (docs/design/36 の 4・4.1)。骨の層 3・塩の層 3・雷の層 3。
-// 元の層 (native) は、その敵が「もとの姿」で出る層 (0 骨・1 塩・2 雷)。下の層へ行くと歪み・崩れの姿で出る (AbyssMobStats.stage)。
-// base* は元の姿 (段 1・深度 0) の数字。深度と段による伸びは AbyssMobStats。
+// 元の層 (native) は、その敵が「もとの姿」で出る層 (0 骨・1 塩・2 雷)。下の層へ行くと歪み・崩れの姿で出る (AbyssScaling.form)。
+// base* は縦穴の上端で湧いたときの数字。湧いた高さによる伸びは AbyssScaling (A と B で同じ決まり)。
 public enum AbyssMobKind {
     BONE_PICKER("bone_picker", "骨拾い", "Bone Picker", 0, 6, 3, 0.32, 2, 0.5f, 0.45f, Mode.SWARM),
     RIB_GUARD("rib_guard", "肋の番", "Rib Guard", 0, 30, 5, 0.2, 12, 0.7f, 1.95f, Mode.SHIELD),

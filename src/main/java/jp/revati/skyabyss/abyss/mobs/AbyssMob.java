@@ -33,7 +33,8 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
 // 深淵の敵 A の 9 種の本体 (docs/design/36 の 4・4.2)。種ごとの行動は AbyssMobKind.Mode で分ける。
-//   段 (STAGE) と深度 (DEPTH) は湧くときに決まり、数字は AbyssMobStats。見た目は段ごとのメッシュ・アトラス (クライアントの AbyssMobRenderers)。
+//   段 (STAGE: 1 元の姿・2 歪み・3 崩れ) と湧いた高さ (spawnY) は湧くときに決まる。体力と傷は AbyssScaling (高さだけで決まる)。
+//   段は見た目と仕組み (崩れからの突き抜け・落とし物) にだけ使う。見た目は段ごとのメッシュ・アトラス (クライアントの AbyssMobRenderers)。
 //   予告は赤い粒だけ (避雷の像・潮だまりの手・骨笛)。焦げた鳥の影は暗い粒 (影だけが見える)。
 public class AbyssMob extends GuardMob {
     public static final EntityDataAccessor<Integer> STAGE = SynchedEntityData.defineId(AbyssMob.class, EntityDataSerializers.INT);
@@ -43,7 +44,7 @@ public class AbyssMob extends GuardMob {
     private static final DustParticleOptions CHALK = new DustParticleOptions(new Vector3f(0.9f, 0.95f, 1f), 0.8f);
 
     private final AbyssMobKind kind;
-    private int depth;
+    private double spawnY;
     private int warn;
     private int cool;
     private boolean awake;
@@ -68,20 +69,21 @@ public class AbyssMob extends GuardMob {
         return entityData.get(STAGE);
     }
 
-    public int depth() {
-        return depth;
+    // 湧いた高さ (体力と傷はこの高さで決まる)
+    public double spawnY() {
+        return spawnY;
     }
 
-    // 湧くときに一度だけ決める (段と深度。体力・攻撃を数字どおりにする)
-    public void setStage(int stage, int spawnLayer) {
-        this.depth = spawnLayer;
-        entityData.set(STAGE, stage);
-        double hp = AbyssMobStats.hp(kind, spawnLayer, stage);
-        double dmg = AbyssMobStats.damage(kind, spawnLayer, stage);
+    // 湧くときに一度だけ決める (段と湧いた高さ。体力・攻撃を AbyssScaling の数字どおりにする)
+    public void setStage(int form, double y) {
+        this.spawnY = y;
+        entityData.set(STAGE, form);
+        double hp = AbyssScaling.hp(kind.baseHp, y);
+        double dmg = AbyssScaling.dmg(kind.baseDamage, y);
         getAttribute(Attributes.MAX_HEALTH).setBaseValue(hp);
         getAttribute(Attributes.ATTACK_DAMAGE).setBaseValue(dmg);
         setHealth((float) hp);
-        this.xpReward = AbyssMobStats.xp(kind, stage);
+        this.xpReward = kind.xp;
     }
 
     public static AttributeSupplier.Builder createAttributes(AbyssMobKind k) {
@@ -102,14 +104,14 @@ public class AbyssMob extends GuardMob {
     public void addAdditionalSaveData(CompoundTag tag) {
         super.addAdditionalSaveData(tag);
         tag.putInt("abyss_stage", stage());
-        tag.putInt("abyss_depth", depth);
+        tag.putDouble("abyss_y", spawnY);
     }
 
     @Override
     public void readAdditionalSaveData(CompoundTag tag) {
         super.readAdditionalSaveData(tag);
-        if (tag.contains("abyss_depth")) {
-            setStage(tag.getInt("abyss_stage"), tag.getInt("abyss_depth"));
+        if (tag.contains("abyss_y")) {
+            setStage(tag.getInt("abyss_stage"), tag.getDouble("abyss_y"));
         }
     }
 
@@ -210,7 +212,7 @@ public class AbyssMob extends GuardMob {
                 e -> e instanceof AbyssMob m && m.kind == AbyssMobKind.BONE_PICKER).size();
         int n = Math.max(0, Math.min(2, 6 - near));
         for (int i = 0; i < n; i++) {
-            AbyssMob m = AbyssMobsA.create(AbyssMobKind.BONE_PICKER, server, stage(), depth);
+            AbyssMob m = AbyssMobsA.create(AbyssMobKind.BONE_PICKER, server, stage(), spawnY);
             if (m != null) {
                 m.moveTo(getX() + (i == 0 ? -2.0 : 2.0), getY() - 2.5, getZ(), random.nextFloat() * 360f, 0f);
                 m.addTag(TEMP_TAG);
