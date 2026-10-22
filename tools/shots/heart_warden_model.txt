@@ -1,0 +1,66 @@
+# 心臓の番人 (案 B 肋の獣・本番モデル。docs/design/36 の 6.6): 光の中・光の外 (輪郭だけ)・闇・分身なし、攻撃の途中 (爪・踏み込み・吹き消し・段の変わり目)。
+# 撮る前: 深淵の心臓の間を建てる (abyss build)。番人は観客 (spectator) を狙わないので、技は dev anim で流す。
+# 光: `/skyabyss abyss dev lamp` で番人の立つ所に光の術の灯り、`dev dark` で消す (開発用。製品版では出ない)。
+# ./gradlew runShots -Pscript=tools/shots/heart_warden_model.txt -PshotsName=heart_warden_model
+world heart_warden_model flat
+size 1280 720
+timeout 3600
+render 12
+clouds off
+
+wait 80
+cmd skyabyss cinematic stop
+cmd gamemode spectator
+hud off
+cmd skyabyss abyss enter
+wait 40
+cmd skyabyss abyss build
+wait 900
+cmd effect give @s minecraft:night_vision 100000 0 true
+wait 60
+cmd skyabyss abyss warden wake
+wait 40
+cmd skyabyss abyss dev dark
+cmd execute as @e[type=skyabyss:heart_warden,limit=1] at @s run tp @a ~ ~2 ~7 facing entity @s eyes
+wait 30
+
+# ---- 光の外 (闇): 体は描かず、胸の心臓の骨だけがほのかに見える
+shot w_dark
+cmd effect give @e[type=skyabyss:heart_warden] minecraft:glowing 100000 0 true
+wait 10
+shot w_outline_only
+cmd effect clear @e[type=skyabyss:heart_warden] minecraft:glowing
+wait 10
+
+# ---- 光の中 (灯りの術): 体を全部描く。待機の姿
+cmd skyabyss abyss dev lamp
+wait 30
+shot w_lit_idle
+
+# ---- 技の途中 (光の中): 爪は 18 tick の予告の 8 tick 目、踏み込みは 22 tick の 14 tick 目、吹き消しは 60 tick の 30 tick 目
+cmd skyabyss dev anim @e[type=skyabyss:heart_warden,limit=1] claw
+wait 8
+shot w_lit_claw_mid
+wait 20
+cmd skyabyss dev anim @e[type=skyabyss:heart_warden,limit=1] lunge
+wait 14
+shot w_lit_lunge_mid
+wait 30
+cmd skyabyss dev anim @e[type=skyabyss:heart_warden,limit=1] snuff
+wait 30
+shot w_lit_snuff_mid
+wait 40
+cmd skyabyss dev anim @e[type=skyabyss:heart_warden,limit=1] phase
+wait 20
+shot w_lit_phase_mid
+wait 40
+
+# ---- 光の外で技 (輪郭だけ): 闇に戻して、爪の途中を撮る (輪郭の見え方)
+cmd skyabyss abyss dev dark
+cmd effect give @e[type=skyabyss:heart_warden] minecraft:glowing 100000 0 true
+wait 10
+cmd skyabyss dev anim @e[type=skyabyss:heart_warden,limit=1] claw
+wait 8
+shot w_outline_claw_mid
+cmd effect clear @e[type=skyabyss:heart_warden] minecraft:glowing
+wait 40

@@ -7,6 +7,7 @@ import java.util.UUID;
 import org.jetbrains.annotations.Nullable;
 
 import jp.revati.skyabyss.SkyAbyss;
+import jp.revati.skyabyss.abyss.arts.AbyssLight;
 import jp.revati.skyabyss.notice.Notice;
 import jp.revati.skyabyss.quest.Quests;
 import jp.revati.skyabyss.story.ch5.AbyssBuild;
@@ -26,6 +27,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
 
@@ -179,8 +181,24 @@ public final class WardenArena {
                                     d.setDirty();
                                     c.getSource().sendSuccess(() -> Component.literal("the warden can wake again"), false);
                                     return 1;
+                                })))
+                        // 開発用 (製品版では出ない): 番人の立つ所に光の術の灯りを置く / 消す。光の中の絵 (LIT) を撮るため
+                        .then(Commands.literal("dev").requires(s -> !FMLEnvironment.production)
+                                .then(Commands.literal("lamp").executes(c -> {
+                                    ServerLevel level = c.getSource().getServer().getLevel(AbyssWorld.LEVEL);
+                                    HeartWarden w = level == null ? null : current(level);
+                                    if (w != null) {
+                                        AbyssLight.add(level, w.blockPosition(), 9, level.getGameTime() + 12000, DEV_OWNER);
+                                    }
+                                    return w == null ? 0 : 1;
+                                }))
+                                .then(Commands.literal("dark").executes(c -> {
+                                    AbyssLight.clear();
+                                    return 1;
                                 })))));
     }
+
+    private static final UUID DEV_OWNER = new UUID(0L, 1L);
 
     // 倒した印 (ワールドに一つ)
     static final class Data extends SavedData {
