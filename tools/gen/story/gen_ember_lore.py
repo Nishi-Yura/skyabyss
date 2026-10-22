@@ -54,7 +54,13 @@ G_KEYS = {"gear.skyabyss.origin.ember", "gui.skyabyss.forge.exchange_no_clear.em
           "skyabyss_record.h.ember", "item.skyabyss.lore_page.desc.ember_back"}
 
 
+# 入口と試練の階の看板 (ember_entrance_*・ember_board_*) の文は、生成元のないまま lang に直接ある。消さずに残す
+KEEP_PREFIXES = ("sign.skyabyss.ember_entrance_", "sign.skyabyss.ember_board_")
+
+
 def owned(key: str) -> bool:
+    if key.startswith(KEEP_PREFIXES):
+        return False
     if key in G_KEYS or key.startswith(G_PREFIXES):
         return True
     for item in ITEMS:

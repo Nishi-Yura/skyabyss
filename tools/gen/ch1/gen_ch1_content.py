@@ -13,6 +13,10 @@
 """
 import json
 import os
+import sys
+
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', 'lib'))
+from langmerge import merged  # noqa: E402
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 RES = os.path.join(ROOT, 'src', 'main', 'resources')
@@ -343,7 +347,9 @@ put(M + 'nook.bed', '宿りに、寝台が置かれている。', 'A bed has bee
 put('block.skyabyss.song_stone', '歌石', 'Song Stone')
 
 # ---------------------------------------------------------------- 言語ファイル
+# 一章の lang はほかのスクリプト (prep・trails・travel・職人・敵の生成) も書く。持たないキーは残す (tools/lib/langmerge.py)
 for code, table in (('ja_jp', ja), ('en_us', en)):
-    write_json(os.path.join(RES, 'assets', 'skyabyss_ch1', 'lang', code + '.json'), dict(sorted(table.items())))
+    _p = os.path.join(RES, 'assets', 'skyabyss_ch1', 'lang', code + '.json')
+    write_json(_p, merged(_p, table))
 
 print('wrote %d lang keys, %d lore entries' % (len(ja), len(LORE)))
