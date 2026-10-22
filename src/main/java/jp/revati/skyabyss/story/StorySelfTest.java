@@ -124,6 +124,12 @@ public final class StorySelfTest {
         StoryData.get(server).clear(p.getUUID());
         ProgressRules.TITAN_ORDER.forEach(t -> ProgressData.get(server).clearPersonal(p.getUUID(), t));
         jp.revati.skyabyss.quest.Quests.forget(p, "ch4/fragments");
+        // 五章の入口 (main_abyss。天の鍵のあと) の語り部の噂も、話しかけると先に出る。噂の段だけ越えておく (34 の 4.7。
+        // 外すと条件を満たしたまま始まり直すので、段を進める)
+        Quests.start(p, "main_abyss");
+        if ("rumor".equals(stage(p, "main_abyss"))) {
+            Quests.forceStage(p, "main_abyss");
+        }
 
         // 潮殻: 話題の頁 (ms_c_tide2) に着いたとたんに済む
         Quests.setStage(p, "main_tide", "rumor");

@@ -239,7 +239,7 @@ class BackAlley:
     def abyss_shaft(self, door_x, wz):
         """封じた戸の向こうの大坑道 (五章の入口)。戸の東に短い通路、その先に大縦穴 (中心 cx、半径 6 の壁)。
         壁ぞいに螺旋の段 (幅 2、角度が増える向きに下りる。1 歩で 1 段)。真ん中は底まで抜けた吹き抜けで、段の内の縁に低い壁。
-        踊り場 2 (灰の民の作業場・前の私の野営。壁の外に小部屋) と、底の境 (床と門の枠)。灯りは内の縁の魂の灯りを 8 歩ごとと、踊り場だけ。
+        踊り場 2 (灰の民の作業場・前の私の野営。壁の外に小部屋) と、底の境 (床と門の枠)。灯りは内の縁の魂の灯りを 3 歩ごとと、踊り場だけ。
         印: abyss_landing_1・abyss_landing_2・abyss_gate (底の真ん中)"""
         import math
         v = self.v
@@ -336,10 +336,10 @@ class BackAlley:
                 for yy in range(y + 1, y + 4):
                     if v.get(x, yy, z) in (None, 'cave_air'):
                         v.set(x, yy, z, 'cave_air')
-                # 内の縁の低い壁 (吹き抜けへ落ちない)。8 歩ごとに壁の上へ魂の灯り
+                # 内の縁の低い壁 (吹き抜けへ落ちない)。3 歩ごとに壁の上へ魂の灯り
                 if d < 3.9:
                     v.set(x, y + 1, z, 'deepslate_brick_wall')
-                    if i % 8 == 0:
+                    if i % 3 == 0:
                         v.set(x, y + 2, z, 'soul_lantern[hanging=false,waterlogged=false]')
         # 踊り場: 壁の外に小部屋 (7×7、高さ 4)。段から 3 マス幅で壁を抜く
         for name, (th, y) in landing_at.items():
@@ -373,7 +373,7 @@ class BackAlley:
                 v.set(mx + 2, y + 1, mz - 2, 'barrel[facing=up,open=false]')
                 v.set(mx + 2, y + 1, mz + 2, 'barrel[facing=up,open=false]')
                 v.set(mx - 2, y + 1, mz + 2, 'smithing_table')
-                v.set(mx, y + 1, mz, 'soul_campfire[facing=north,lit=true,signal_fire=false,waterlogged=false]')
+                v.set(mx, y + 1, mz, 'soul_campfire[facing=north,lit=false,signal_fire=false,waterlogged=false]')  # 消えた炉 (煙が部屋にこもらない)
                 for yy in (y + 3, y + 4):
                     v.set(mx - 2, yy, mz, 'chain[axis=y,waterlogged=false]')
                 v.set(mx + 2, y + 1, mz, 'gray_concrete_powder')
@@ -381,7 +381,7 @@ class BackAlley:
                 # 前の私の野営: 寝床・焚き火・帳面の台・荷
                 v.set(mx - 2, y + 1, mz - 1, 'white_wool')
                 v.set(mx - 2, y + 1, mz, 'white_carpet')
-                v.set(mx, y + 1, mz, 'campfire[facing=north,lit=true,signal_fire=false,waterlogged=false]')
+                v.set(mx, y + 1, mz, 'campfire[facing=north,lit=false,signal_fire=false,waterlogged=false]')  # 消えた焚き火 (まだ温かい気がする)
                 v.set(mx + 2, y + 1, mz - 2, 'lectern[facing=west,has_book=true,powered=false]')
                 v.set(mx + 2, y + 1, mz + 2, 'barrel[facing=up,open=false]')
                 v.set(mx - 2 , y + 4, mz + 2, 'soul_lantern[hanging=true,waterlogged=false]')

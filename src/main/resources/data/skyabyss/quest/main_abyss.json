@@ -42,9 +42,11 @@
         {
           "id": "open",
           "type": "signal",
-          "signals": [
+          "targets": [
             "ch5_abyss_door"
-          ]
+          ],
+          "count": 1,
+          "party": false
         }
       ]
     },
@@ -55,9 +57,11 @@
         {
           "id": "reach",
           "type": "signal",
-          "signals": [
+          "targets": [
             "ch5_threshold"
-          ]
+          ],
+          "count": 1,
+          "party": false
         }
       ]
     },

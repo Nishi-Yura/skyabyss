@@ -167,7 +167,7 @@ public final class NpcMarkerSelfTest {
 
     // すべての名前空間の lang から、キーを探す
     private static boolean anyLang(String key, String lang) {
-        for (String ns : List.of("skyabyss", "skyabyss_opening", "skyabyss_npc", "skyabyss_story", "skyabyss_ch1", "skyabyss_ch2", "skyabyss_ch3", "skyabyss_ch4",
+        for (String ns : List.of("skyabyss", "skyabyss_opening", "skyabyss_npc", "skyabyss_story", "skyabyss_ch1", "skyabyss_ch2", "skyabyss_ch3", "skyabyss_ch4", "skyabyss_ch5",
                 "skyabyss_lore", "skyabyss_ember")) {
             if (resource("/assets/" + ns + "/lang/" + lang + ".json").contains("\"" + key + "\"")) {
                 return true;

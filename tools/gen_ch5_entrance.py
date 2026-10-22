@@ -43,8 +43,8 @@ MAIN = {
     'stages': [
         {'id': 'rumor', 'xp': 60, 'objectives': [{'id': 'talk', 'type': 'talk', 'target': ST, 'topic': 'ch5_rumor'}]},
         {'id': 'prepare', 'objectives': [{'id': 'ready', 'type': 'condition', 'if': {'type': 'quest', 'quest': 'ch5/black_iron', 'is': 'done'}}]},
-        {'id': 'door', 'xp': 80, 'objectives': [{'id': 'open', 'type': 'signal', 'signals': ['ch5_abyss_door']}]},
-        {'id': 'shaft', 'xp': 120, 'objectives': [{'id': 'reach', 'type': 'signal', 'signals': ['ch5_threshold']}]},
+        {'id': 'door', 'xp': 80, 'objectives': [{'id': 'open', 'type': 'signal', 'targets': ['ch5_abyss_door'], 'count': 1, 'party': False}]},
+        {'id': 'shaft', 'xp': 120, 'objectives': [{'id': 'reach', 'type': 'signal', 'targets': ['ch5_threshold'], 'count': 1, 'party': False}]},
         {'id': 'report', 'objectives': [{'id': 'talk', 'type': 'talk', 'target': ST, 'topic': 'ch5_report'}]},
     ],
     'reward': {'xp': 300, 'affinity': {ST: 5}},
@@ -62,6 +62,7 @@ IRON = {
 
 ST_DIALOGUE = {
     'npc': ST, 'extends': True,
+    # 噂も報告も、話しかけたときに先に出る入口 (メインの段。自己テストで頼みごとの流れを見るときは main_abyss を外す)
     'entries': [
         {'node': 'ch5_rumor', 'if': q_active('main_abyss', 'rumor')},
         {'node': 'ch5_report', 'if': q_active('main_abyss', 'report')},
@@ -106,12 +107,12 @@ TEXTS = [
     ('quest.skyabyss.main_abyss.prepare.journal', '語り部が言っていた。「前に来た人は、鍵を黒い鉄の器に収めていった」。鍛冶場で、黒い鉄のことを聞こう。', 'The storyteller said: "The one who came before set the key in a cradle of black iron." Ask at the smithy about the black iron.'),
     ('quest.skyabyss.main_abyss.prepare.ready', '黒い鉄の器を、鍛冶場で整えよう', 'Ready the black iron cradle at the smithy'),
     ('quest.skyabyss.main_abyss.door.journal', '鍵は器に収まった。酒場「深い杯」の地下の奥、封じた戸の前で、鍵が一番強く脈を打つ。', 'The key rests in its cradle. Deep in the Deep Cup tavern\'s cellar, before the sealed door, it pulses strongest.'),
-    ('quest.skyabyss.main_abyss.door.open', '天の鍵を持って、酒場の地下の封じた戸に触れよう', 'Touch the sealed door in the tavern cellar with the sky key'),
+    ('quest.skyabyss.main_abyss.door.open', '天の鍵を持って、酒場の地下の封じた戸に触れよう', "Open the cellar's sealed door with the key"),
     ('quest.skyabyss.main_abyss.door.lead', '封じた戸の向こうから、鍵と同じ拍子の音がする。', 'From behind the sealed door comes a beat in time with the key.'),
     ('quest.skyabyss.main_abyss.shaft.journal', '戸の向こうは、都の真下へ続く大坑道だった。灯りは踊り場にしかない。底まで降りよう。', 'Beyond the door, a great shaft runs straight down beneath the capital. Light only at the landings. Go down to the bottom.'),
-    ('quest.skyabyss.main_abyss.shaft.reach', '大坑道を、底の境まで降りよう', 'Descend the great shaft to the threshold at the bottom'),
+    ('quest.skyabyss.main_abyss.shaft.reach', '大坑道を、底の境まで降りよう', 'Descend the shaft to the threshold'),
     ('quest.skyabyss.main_abyss.report.journal', '底の境の門は、まだ開かなかった。鼓動が遠い。語り部に伝えよう。', 'The gate at the threshold did not open yet. The beat is far. Tell the storyteller.'),
-    ('quest.skyabyss.main_abyss.report.talk', '底の境で見たことを、語り部に話そう', 'Tell the storyteller what you saw at the threshold'),
+    ('quest.skyabyss.main_abyss.report.talk', '底の境で見たことを、語り部に話そう', 'Tell the storyteller about the gate'),
     # 支度
     ('quest.skyabyss.ch5.black_iron.title', '黒い鉄の器', 'A Cradle of Black Iron'),
     ('quest.skyabyss.ch5.black_iron.summary', '鍵を収める器のために、ネザーの底で黒い鉄を手に入れる。', 'Get black iron from the depths of the Nether for the key\'s cradle.'),
