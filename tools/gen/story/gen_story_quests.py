@@ -26,6 +26,7 @@ import json
 import re
 from pathlib import Path
 
+from langmerge import merged
 from regroup_lore_chapters import chapter_of as _chapter_of  # 伝承の章 (巨神ごと)。写像は tools/lib/regroup_lore_chapters.py
 
 ROOT = Path(__file__).resolve().parents[3]
@@ -389,7 +390,7 @@ QUESTS = []
 
 
 def quest(qid, category, order, title, summary, done, stages, reward, giver=None, start_when=None, repeat="", board=False,
-          min_stage=0, unlock_=None, unlock_hint=None, story=""):
+          min_stage=0, unlock_=None, unlock_hint=None, story="", chapter="", unlock_last=None):
     base = f"quest.skyabyss.{qid}"
     text(f"{base}.title", *title)
     text(f"{base}.summary", *summary)
@@ -399,16 +400,24 @@ def quest(qid, category, order, title, summary, done, stages, reward, giver=None
     st_json = []
     for s in stages:
         text(f"{base}.{s['id']}.journal", *s["journal"])
+        if s.get("lead"):  # 段の書き出しの一言 (段に入ったとき字幕に一度。client/quest/QuestClient.leadKey)
+            text(f"{base}.{s['id']}.lead", *s["lead"])
         obs = []
         for o in s["objectives"]:
             text(f"{base}.{s['id']}.{o['id']}", *o["text"])
             obs.append({k: v for k, v in o.items() if k != "text"})
-        sj = {"id": s["id"], "objectives": obs}
+        sj = {"id": s["id"]}
+        if s.get("prep"):  # 支度の段は skip_if が objectives の前 (コミット済みの並び)
+            sj["skip_if"] = s["skip_if"]
+        sj["objectives"] = obs
         for k in ("mode", "xp", "skip_if"):
             if s.get(k):
                 sj[k] = s[k]
         st_json.append(sj)
-    out = {"category": category, "order": order}
+    out = {"category": category}
+    if chapter:  # 章 (巨神ごと。titan_tide など。クエスト帳の章タブ)
+        out["chapter"] = chapter
+    out["order"] = order
     if giver:
         out["giver"] = giver
     if start_when:
@@ -423,6 +432,8 @@ def quest(qid, category, order, title, summary, done, stages, reward, giver=None
         out["unlock"] = unlock_
     out["stages"] = st_json
     out["reward"] = reward
+    if unlock_last:  # 後から足した解放条件は、書き付けの最後に置く (コミット済みの並び)
+        out["unlock"] = unlock_last
     QUESTS.append((qid, out, title, story))
 
 
@@ -432,8 +443,12 @@ def ob(oid, type_, ja, en, **kw):
     return o
 
 
-def stage(sid, journal, objectives, xp=0, mode=None, skip_if=None):
+def stage(sid, journal, objectives, xp=0, mode=None, skip_if=None, lead=None, prep=False):
     s = {"id": sid, "journal": journal, "objectives": objectives}
+    if prep:
+        s["prep"] = True
+    if lead:
+        s["lead"] = lead
     if xp:
         s["xp"] = xp
     if mode:
@@ -454,7 +469,14 @@ quest(TIDE, "main", 20, ("満ち引きの門", "The Gate of Ebb and Flow"),
       [stage("rumor", ("語り部は、鍵は四つに分かれていると言った。残りは、ほかの巨神が抱えているのだろうか。\nイサナなら、何か聞いているかもしれない。",
                        "The storyteller said the key was split in four. Do the other titans hold the rest?\nIsana might have heard something."),
              [ob("talk", "talk", "イサナに、話を聞きに行こう", "Ask Isana", target=WC, topic="ms_c_tide2")], xp=40,
-             skip_if=any_(lore("chapter1/tide_shell"), lore("chapter1/tide_hours"))),
+             skip_if=any_(lore("chapter1/tide_shell"), lore("chapter1/tide_hours"), stilled("tide_shell"))),
+       # 二章の支度 (潮の読み方と船。帯は支度の段のほうを出す)
+       stage("prepare", ("イサナは言った。沖の島へ渡るなら、潮を読めるようになれ、と。それと、海を渡る船だ。\n塩の道の先の蔵には、潮の読み方が刻まれているらしい。沖の難破船には、潮見の貝が。",
+                         "Isana said that to cross to the island offshore, you must learn to read the tide. And you need a boat.\nThe vault at the end of the salt road is said to hold a carving on reading the tide. The wreck offshore holds a tide-watching shell."),
+             [cond_ob("ready", "潮の読み方と船で、島へ渡る支度をしよう", "Learn the tide and build a boat", {"type": "prep", "chapter": 2})],
+             skip_if=any_(lore("chapter1/tide_shell")), prep=True,
+             lead=("イサナ「島へ渡るなら、まず潮を読めるようになれ。それと、船だ」",
+                   "Isana: \"If you mean to cross to the island, learn to read the tide first. And build a boat.\"")),
        stage("see", ("沖の島が、潮の引くころに岸へ寄ってくるという。\n……島ではないのかもしれない。",
                      "They say an island comes to the shore when the tide goes out.\n...Perhaps it isn't an island."),
              [ob("see", "lore", "海辺で、潮とともに寄る島を探そう", "Look for the tide's island", targets=["chapter1/tide_shell"])], xp=60),
@@ -476,7 +498,7 @@ quest(TIDE, "main", 20, ("満ち引きの門", "The Gate of Ebb and Flow"),
              [ob("st", "talk", "語り部に、欠片を見せに行こう", "Go and show the storyteller the fragment", target=ST, topic="ms_tide_back2"),
               ob("wc", "talk", "イサナに、甲羅の山の話をしに行こう", "Tell Isana about the shelled mountain", target=WC, topic="ms_c_tide_back2")],
              mode="any")],
-      {"xp": 300, "affinity": {ST: 5, WC: 5}}, giver=WC, start_when=all_(q("main_song", "done"), stilled("stone_whale")),
+      {"xp": 300, "affinity": {ST: 5, WC: 5}}, giver=WC, start_when=all_(q("main_song", "done"), stilled("stone_whale")), chapter="titan_tide",
       story="鍵は四つに分かれている。イサナは海の噂を話し、プレイヤーは潮殻の背へ渡って二つ目の欠片を手にする。")
 
 # ---- メイン 3: 嵐を渡る翼 (雷翼。12 の 9 章・11.1 節。見つける → 乗る → 碑文と風鳴り石 → 心臓)
@@ -490,7 +512,14 @@ quest(THUNDER, "main", 30, ("嵐を渡る翼", "Wings Across the Storm"),
       [stage("rumor", ("欠片が二つになった。並べると、少し引き合っている。\n語り部に、三つ目の心当たりを聞いてみよう。",
                        "I have two fragments now. Side by side, they pull at each other a little.\nI'll ask the storyteller about the third."),
              [ob("talk", "talk", "語り部に、三つ目のことを尋ねよう", "Ask the storyteller about the third", target=ST, topic="ms_thunder2")], xp=40,
-             skip_if=any_(*[lore(x) for x in STORM_SIGHT])),
+             skip_if=any_(*[lore(x) for x in STORM_SIGHT], stilled("thunder_wing"))),
+       # 三章の支度 (雷を知る)
+       stage("prepare", ("語り部は言った。嵐の鳥のところへ行くなら、雷を知っておくことだ、と。\n風の民の塔の跡、峰の中腹の焼けた塔、峰の下の雷を通さない石。前の旅人も、その道を辿ったらしい。",
+                         "The storyteller said that to go to the storm bird, you must first know the lightning.\nThe ruin of the wind people's tower, the burnt tower on the slope, the stone under the peaks that lightning cannot pass. The traveller before you seems to have walked that road."),
+             [cond_ob("ready", "雷を知り、嵐を渡る支度をしよう", "Learn the lightning for the storm", {"type": "prep", "chapter": 3})],
+             skip_if=any_(*[lore(x) for x in STORM_SIGHT]), prep=True,
+             lead=("語り部「嵐へ行くなら、雷を知っておくことだね。峰には、風の民の跡が残っているよ」",
+                   "The storyteller: \"If you mean to go into the storm, know the lightning first. The wind people left their marks on the peaks.\"")),
        stage("see", ("雷の鳴る日には、雲の中を大きな鳥が渡るという。\n風に逆らって動く嵐を見かけたら、それかもしれない。",
                      "On days of thunder, they say, a great bird crosses inside the clouds.\nIf I see a storm moving against the wind, that may be it."),
              [ob("see", "lore", "風に逆らって動く嵐を探そう", "Find the storm against the wind",
@@ -514,7 +543,7 @@ quest(THUNDER, "main", 30, ("嵐を渡る翼", "Wings Across the Storm"),
              [ob("st", "talk", "語り部に、欠片を見せに行こう", "Go and show the storyteller the fragment", target=ST, topic="ms_thunder_back2"),
               ob("wc", "talk", "イサナに、嵐の上の話をしに行こう", "Tell Isana what lies above the storm", target=WC, topic="ms_c_thunder_back")],
              mode="any")],
-      {"xp": 400, "affinity": {ST: 5, WC: 5}}, giver=ST, start_when=q(TIDE, "done"),
+      {"xp": 400, "affinity": {ST: 5, WC: 5}}, giver=ST, start_when=q(TIDE, "done"), chapter="titan_storm",
       story="語り部の祖母は、雷の晩に雲の中を渡る鳥を見て、何かを数えるのをやめた。風に逆らう嵐を追い、夕立の刻に昇り風で背へ。碑文とゴールの印、竜骨の奥の心臓。")
 
 # ---- メイン 4: 灰の昇る山 (余燼。中身は 13 の担当が作る)
@@ -524,10 +553,10 @@ quest(EMBER, "main", 40, ("灰の昇る山", "The Mountain Where Ash Rises"),
       [stage("rumor", ("残りは一つ。イサナは、旅の途中でいろいろなものを見ている。\n火のところへ、話を聞きに行こう。",
                        "Only one left. Isana has seen many things on his travels.\nI'll go to his fire and ask."),
              [ob("talk", "talk", "イサナに、四つ目のことを尋ねよう", "Ask Isana about the fourth", target=WC, topic="ms_c_ember2")], xp=40,
-             skip_if=lore("chapter1/ember")),
+             skip_if=any_(lore("chapter1/ember"), stilled("ember"))),
        stage("see", ("灰が空へ昇っていく山があるという。火の気のない晩でも、その山だけはうっすら赤い。",
                      "There is a mountain where the ash rises into the sky. Even on nights without fire, it glows faintly red."),
-             [ob("see", "lore", f"灰の昇る山へ向かい、{EM_JA}を探そう", f"Head for the mountain where ash rises and look for {EM_EN}",
+             [ob("see", "lore", f"灰の昇る山で、{EM_JA}を探そう", f"Find {EM_EN}'s mountain",
                  targets=["chapter1/ember"])], xp=80),
        stage("heart", ("山だと思っていたものが、ゆっくりと息をしている。\n口から入れば、三つの試練の間と鍛え手の先に、くすぶる鼓動がある。それを止めよう。",
                        "What I took for a mountain is slowly breathing.\nInside its mouth lie three trial rooms and the smith; beyond them, a smoldering heartbeat. I'll still it."),
@@ -535,7 +564,7 @@ quest(EMBER, "main", 40, ("灰の昇る山", "The Mountain Where Ash Rises"),
        stage("key", ("四つ目の欠片が手に入った。欠片どうしが、手の中で引き合っている。",
                      "I have the fourth fragment. The fragments pull at each other in my hands."),
              [ob("key", "lore", "四つの欠片を、手もとにそろえよう", "Hold all four fragments together", targets=["chapter1/sky_key_whole"])])],
-      {"xp": 400, "affinity": {WC: 5}}, giver=WC, start_when=q(THUNDER, "done"),
+      {"xp": 400, "affinity": {WC: 5}}, giver=WC, start_when=q(THUNDER, "done"), chapter="titan_ember",
       story="イサナは灰が空へ昇る山を見たことがある。四つ目の欠片を手にすると、欠片が一つの鍵になる。")
 
 # ---- メイン 5: 天の鍵 (ベータの終わり)
@@ -546,7 +575,7 @@ quest(KEY, "main", 50, ("天の鍵", "The Sky Key"),
                       "The key did not point above the clouds. It beats faintly, toward somewhere far beneath my feet.\n"
                       "I'll show it to the storyteller."),
              [ob("talk", "talk", "語り部に、鍵を見せに行こう", "Go and show the storyteller the key", target=ST, topic="ms_key4")])],
-      {"xp": 500, "affinity": {ST: 5, WC: 5}}, giver=ST, start_when=any_(q(EMBER, "done"), lore("chapter1/sky_key_whole")),
+      {"xp": 500, "affinity": {ST: 5, WC: 5}}, giver=ST, start_when=any_(q(EMBER, "done"), lore("chapter1/sky_key_whole")), chapter="titan_ember",
       story="語り部は鍵を見て、数え歌のいつつめを思い出す。「鍵というのは、開けたい扉のほうを向くものだよ」。")
 
 # ---- サブ (一度きり)
@@ -578,7 +607,7 @@ quest(ASH, "sub", 46, ("冷めない炭", "The Coal That Will Not Cool"),
        stage("tell", ("冷めない火のかけらが、四つそろった。\n語り部の炉へ持っていこう。", "I have four pieces of a fire that won't cool.\n"
                       "I'll take them to the storyteller's hearth."),
              [ob("talk", "talk", "語り部に、火のかけらを渡す", "Give the storyteller the pieces of fire", target=ST, topic="ms_coal_done2")])],
-      {"xp": 350, "items": [reward_item("warm_coal"), {"item": "minecraft:bread", "count": 3}], "affinity": {ST: 10}}, giver=ST, min_stage=3,
+      {"xp": 350, "items": [reward_item("warm_coal"), {"item": "minecraft:bread", "count": 3}], "affinity": {ST: 10}}, giver=ST, min_stage=3, chapter="titan_ember",
       story="七日目の夜まで火がもたない炉。地の底の火を入れると、灰の底で何かが応える (2 章の深淵へのほのめかし)。")
 
 # ---- 言伝ての板 (潮殻の背の周回)
@@ -587,11 +616,12 @@ quest("daily_tide_rounds", "sub", 64, ("潮殻の背の見回り", "Rounds on th
        "Defeat eight coral thralls, reef scuttlers or bubble puffers on the tide shell's back. Party members count too."),
       ("甲羅の中は、しばらく静かになるだろう。", "It will be quiet inside the shell for a while."),
       [stage("rounds", ("板の紙（潮で滲んだ字）：「潮殻の甲羅の中で、珊瑚に憑かれたものがまた動きはじめた。八つ、鎮めてきてほしい」",
-                        "A note on the board, the ink blurred by seawater: \"The coral-haunted things are stirring again inside the turtle's shell. "
+                        "A note on the board, the ink blurred by seawater: \"The coral-haunted things are stirring again inside the Tide Shell's carapace. "
                         "Put eight of them to rest.\""),
-             [ob("kill", "kill", "潮殻の背で、珊瑚憑き・磯走り・泡吹きを倒す", "Defeat coral thralls, reef scuttlers and bubble puffers on the tide shell",
+             [ob("kill", "kill", "潮殻の背で、珊瑚憑き・磯走り・泡吹きを倒す", "Defeat coral thralls, scuttlers and puffers on the tide shell",
                  targets=["skyabyss:coral_thrall", "skyabyss:reef_scuttler", "skyabyss:bubble_puffer"], count=8)])],
       {"xp": 90, "items": [{"item": "skyabyss:tide_shell_shard", "count": 2}]}, repeat="daily", board=True, min_stage=2,
+      unlock_last=flag("met", WC),
       story="潮殻の背の周回の入口 (10 の 8.3 節: 段階 2)。")
 
 quest("weekly_tide_heart", "sub", 82, ("潮の鼓動をもう一度", "The Tide's Heart, Once More"),
@@ -602,6 +632,7 @@ quest("weekly_tide_heart", "sub", 82, ("潮の鼓動をもう一度", "The Tide'
              [ob("heart", "kill", "潮殻の心臓を止める", "Still the tide shell's heart", target="skyabyss:tide_heart", count=1)])],
       {"xp": 220, "items": [{"item": "skyabyss:resonance_crystal", "count": 1}, {"item": "skyabyss:tide_shell_shard", "count": 3}]},
       repeat="weekly", board=True, min_stage=2,
+      unlock_last=flag("met", WC),
       story="「心臓をもう一度」と同じ名前のない紙。七日という数を、もう一度ほのめかす。")
 
 # ================================================================ 伝承の項目 (manual: 会話・天の鍵・巨神の担当が記す)
@@ -614,7 +645,7 @@ LORE = [
       "Again and again the lightning struck the copper spikes of its crown. It did not so much as blink."),
      [{"type": "near_entity", "target": "skyabyss:thunder_wing", "radius": 96}, {"type": "manual"}]),
     ("chapter1/storm_path", 158, ["chapter1/thunder_wing"], ("嵐の通り道", "The Path of the Storms"),
-     ("イサナの古い地図の余白に、線が一本引いてある。嵐が来るたび、雲はこの線の上を走る。\n\n"
+     ("鯨追いの古い地図の余白に、線が一本引いてある。嵐が来るたび、雲はこの線の上を走る。\n\n"
       "雷の晩に高い所から見ると、稲光は線に沿って、同じ向きに続けて光った。何かが、決まった道を渡っている。",
       "A single line is drawn in the margin of the whale chaser's old map. Whenever a storm comes, the clouds run along it.\n\n"
       "From high ground on a thunder night, the lightning flashed along that line, one after another, always the same way. "
@@ -651,7 +682,7 @@ text("scene.skyabyss.sky_key.line1", "四つの欠片が、手の中で触れ合
 text("scene.skyabyss.sky_key.line2", "継ぎ目が、ひとりでに消えていく。", "The seams fade away on their own.")
 text("scene.skyabyss.sky_key.line3", "鍵は、空を指さなかった。", "The key does not point to the sky.")
 text("scene.skyabyss.sky_key.line4", "足もとの、ずっと下。何かが、ゆっくりと打っている。", "Far beneath your feet, something is slowly beating.")
-text("scene.skyabyss.sky_key.end_title", "一章　天の鍵", "Chapter One: The Sky Key")
+text("scene.skyabyss.sky_key.end_title", "巨神編　天の鍵", "The Titan Arc: The Sky Key")
 text("scene.skyabyss.sky_key.end_sub", "ベータ版はここまでです", "This is the end of the beta")
 text("scene.skyabyss.sky_key.end_thanks", "遊んでくれて、ありがとう。", "Thank you for playing.")
 text("scene.skyabyss.sky_key.end_days", "この世界の %s 日目", "Day %s of this world")
@@ -810,8 +841,9 @@ def main():
     write_json(DATA / "dialogue" / "whale_chaser_story.json", C.json())
     for lid, order, related, _, _, unlock_ in LORE:
         write_json(DATA / "lore" / "entry" / f"{lid}.json", {"chapter": _chapter_of(lid.split("/")[-1]), "order": order, "unlock": unlock_, "related": related})
-    write_json(LANG / "ja_jp.json", dict(sorted(JA.items())))
-    write_json(LANG / "en_us.json", dict(sorted(EN.items())))
+    # 持たないキー (手で足した文・消えた節の残り) は残して書く (tools/lib/langmerge.py)
+    write_json(LANG / "ja_jp.json", merged(LANG / "ja_jp.json", JA))
+    write_json(LANG / "en_us.json", merged(LANG / "en_us.json", EN))
     doc = DOC.read_text(encoding="utf-8")
     if START_MARK in doc:
         doc = re.sub(re.escape(START_MARK) + ".*?" + re.escape(END_MARK), lambda m: START_MARK + "\n\n" + doc_tables() + "\n" + END_MARK,

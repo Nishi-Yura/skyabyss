@@ -24,6 +24,9 @@ import re
 import sys
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "lib"))
+from langmerge import merged  # noqa: E402
+
 ROOT = Path(__file__).resolve().parents[3]
 DATA = ROOT / "src/main/resources/data/skyabyss"
 LANG = ROOT / "src/main/resources/assets/skyabyss_storm/lang"
@@ -176,7 +179,8 @@ def quest(qid, order, title, summary, done, journal, objective, reward, repeat, 
     text(f"{base}.{sid}.journal", *journal)
     text(f"{base}.{sid}.{objective['id']}", *objective.pop("text"))
     QUESTS.append((qid, {"category": "sub", "order": order, "repeat": repeat, "board": True, "min_stage": 3,
-                         "stages": [{"id": sid, "objectives": [objective]}], "reward": reward}, title, story))
+                         "stages": [{"id": sid, "objectives": [objective]}], "reward": reward,
+                         "unlock": {"type": "flag", "flag": "met", "npc": "skyabyss:whale_chaser"}}, title, story))
 
 
 quest("daily_storm_rounds", 66, ("雷翼の背の見回り", "Rounds on the Thunder Wing"),
@@ -502,12 +506,56 @@ START_MARK = "<!-- 伝承とクエスト 生成ここから (tools/gen/story/gen
 END_MARK = "<!-- 伝承とクエスト 生成ここまで -->"
 
 
+# ================================================================ 手直しの取り込み
+# ゲーム内の言い回しの手直し (「風鳴り石」→「光る印」など) は lang を直接直してあり、parts と上の文には戻していない。
+# 書き出しの前にここで上書きし、コミット済みの lang と同じにする (tools/audit/check_generators.py で確かめる)。
+HAND_EDITS = [  # (鍵, 日本語, 英語)
+    ("growth.skyabyss.reason.storm_trial", "光る印", "Wind chime stone"),
+    ("lore.skyabyss.chapter1.inscription_storm_west.body", "終わりの床の岩棚の壁にあった。そこへは、嵐の風に乗らなければ上がれない。", "On the wall of the ledge by the goal. No one reaches it except on the storm's wind."),
+    ("message.skyabyss.raiju.east_stone_ready", "瘤の頂で、光る印が着くのを待っている。", "At the crown of the knuckle, a wind chime stone waits to ring."),
+    ("message.skyabyss.storm.all_rung", "三つの光る印に着いた。奥で、鼓動が待っている……", "All three glowing marks are reached. Deep inside, the heartbeat waits..."),
+    ("message.skyabyss.storm.party_changed", "仲間が変わり、試練の進みも変わった。風があなたを風の広間へ運んだ", "Your party changed, and the trials with it. The wind carries you back to the wind hall"),
+    ("message.skyabyss.storm.return_opened", "試練を越えた。まもなく次へ運ばれる", "Trial cleared. You will be carried on shortly"),
+    ("message.skyabyss.storm.stone_ringing", "光る印に着いた: %s（%s / %s）", "Reached the glowing mark: %s (%s / %s)"),
+    ("message.skyabyss.storm.stone_silent", "まだ光る印には着けない。巣の主が、まだ瘤の中にいる", "You cannot reach the glowing mark yet. The den's master is still inside the knuckle"),
+    ("message.skyabyss.storm.trials_renewed", "雷翼の心臓が、再び脈を打ち始めた。地の遠い底から、拍が戻ってくる。背中の試練が、元の形に戻った", "The thunder wing's heart beats again, a beat returning from deep beneath the ground. The trials on its back are as they were"),
+    ("message.skyabyss.whisper.storm_tail", "右上の風見の板が、凪と嵐の拍。広場の北の端の入口に一行がそろうと、順路の試練が始まる", "The wind vane at the top right shows the beat of calm and storm. When the whole party stands in the entrance at the north end of the plaza, the route of trials begins"),
+    ("message.skyabyss.whisper.storm_west", "風切りの羽根を持って、空中でしゃがむと滑空する。肋の間は格子の穴で上へ。凪は一段ずつ、嵐は高く昇って輪へ滑空。横風は岩棚の隅の陰で", "With the gale feather, crouch in midair to glide. In the rib hall, grates lift you: one step in calm, high in a storm, then glide to a ring. Shelter from crosswinds in a ledge corner"),
+    ("sign.skyabyss.storm_east.2", "回路で戸へ", "Wire the bolt"),
+    ("sign.skyabyss.storm_front.2", "鏡で光を三つへ", "Mirror the light"),
+    ("sign.skyabyss.storm_west.2", "縦に登る", "Climb the ribs"),
+    ("subtitles.skyabyss.storm_stone", "光る印に着く", "Glowing mark reached"),
+    ("message.skyabyss.storm_heart.defeated", "雷翼の心臓が止まった。胸の奥の風が、はじめて止んだ", "The thunder wing's heart has stopped. The wind in its chest falls still"),
+    ("quest.skyabyss.daily_storm_rounds.rounds.kill", "雷翼の背で、羽守・雷蛾・雷乞いを倒す", "Defeat feather wardens, moths and supplicants on the thunder wing"),
+]
+NOT_HERE = (  # 生成しない鍵 (コミット済みの lang にはない)
+    "block.skyabyss.wind_stone",
+    "item.skyabyss.cloudgap_fruit",
+    "item.skyabyss.cloudgap_fruit.desc",
+    "item.skyabyss.moth_dust",
+    "item.skyabyss.moth_dust.desc",
+    "item.skyabyss.raiju_claw",
+    "item.skyabyss.storm_anklet",
+    "item.skyabyss.storm_charm",
+    "item.skyabyss.storm_eye_feather",
+    "item.skyabyss.thunder_wing_boots",
+    "item.skyabyss.thunder_wing_bow",
+    "item.skyabyss.thunder_wing_chestplate",
+    "item.skyabyss.thunder_wing_core",
+    "item.skyabyss.thunder_wing_helmet",
+    "item.skyabyss.thunder_wing_leggings",
+    "item.skyabyss.thunder_wing_shard",
+)
+
+
 def main():
     bad = check_signs()
     if bad:
         print("\n".join(bad))
         sys.exit("signs do not fit")
     report = merge_parts()
+    for k, ja, en in HAND_EDITS:
+        JA[k], EN[k] = ja, en
     for lid, order, unlock_, related, title, body, sign in LORE:
         entry = {"chapter": "titan_storm", "order": order}
         if sign:
@@ -519,8 +567,9 @@ def main():
         write_json(DATA / "lore" / "entry" / "chapter1" / f"{lid}.json", entry)
     for qid, out, _, _ in QUESTS:
         write_json(DATA / "quest" / f"{qid}.json", out)
-    write_json(LANG / "ja_jp.json", dict(sorted(JA.items())))
-    write_json(LANG / "en_us.json", dict(sorted(EN.items())))
+    # 持たないキー (手で足した文) は残して書く (tools/lib/langmerge.py)
+    write_json(LANG / "ja_jp.json", merged(LANG / "ja_jp.json", {k: v for k, v in JA.items() if k not in NOT_HERE}))
+    write_json(LANG / "en_us.json", merged(LANG / "en_us.json", {k: v for k, v in EN.items() if k not in NOT_HERE}))
     doc = DOC.read_text(encoding="utf-8")
     if START_MARK in doc:
         doc = re.sub(re.escape(START_MARK) + ".*?" + re.escape(END_MARK), lambda m: START_MARK + "\n\n" + doc_tables() + "\n" + END_MARK, doc, flags=re.S)
