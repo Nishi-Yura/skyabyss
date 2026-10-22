@@ -44,7 +44,7 @@ cmd tp @s 6 150 -6 -70 -6
 waitchunks
 wait 60
 shot l_bone_bridge_under
-cmd tp @s -44 186 44 -40 10
+cmd tp @s -26 186 26 -40 10
 waitchunks
 wait 60
 shot l_bone_wide
@@ -52,7 +52,7 @@ cmd tp @s -18 146 -2 90 4
 waitchunks
 wait 60
 shot l_bone_den
-cmd tp @s 21 219 -10 0 10
+cmd tp @s 17 219 -20 -53 10
 waitchunks
 wait 60
 shot l_bone_pool
@@ -72,7 +72,7 @@ cmd tp @s -16 52 12 -131 10
 waitchunks
 wait 60
 shot l_salt_lake_low
-cmd tp @s -44 62 40 -40 10
+cmd tp @s -26 70 26 -40 10
 waitchunks
 wait 60
 shot l_salt_wide_low
@@ -82,7 +82,7 @@ cmd tp @s -16 52 12 -131 10
 waitchunks
 wait 60
 shot l_salt_lake_high
-cmd tp @s -44 66 40 -40 10
+cmd tp @s -26 72 26 -40 10
 waitchunks
 wait 60
 shot l_salt_wide_high
@@ -118,7 +118,7 @@ wait 20
 shot l_storm_bridge_deck_c
 wait 20
 shot l_storm_bridge_deck_d
-cmd tp @s -50 -20 40 -40 5
+cmd tp @s -26 -22 26 -40 5
 waitchunks
 wait 60
 shot l_storm_wide
