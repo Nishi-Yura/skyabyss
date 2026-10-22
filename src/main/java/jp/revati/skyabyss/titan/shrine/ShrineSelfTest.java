@@ -92,6 +92,18 @@ public final class ShrineSelfTest {
                 jp.revati.skyabyss.titan.end.TitanDormancy.clear(server, titan);
                 TitanVisibility.clearCache();
                 check(f, !TitanVisibility.sees(a, titan) || !gate, titan + ": the titan stayed visible to its stopper after the sleep");
+                if (titan.equals(Titans.STONE_WHALE) && gate) {
+                    // 倒した巨神の出現の知らせ (歌・文) は、止めた人に届かない。止めていない人には届く
+                    stopped.clear();
+                    stopped.add(a.getUUID());
+                    TitanVisibility.clearCache();
+                    a.setPos(0.5, 200, 0.5);
+                    b.setPos(0.5, 200, 0.5);
+                    java.util.List<net.minecraft.server.level.ServerPlayer> heard = jp.revati.skyabyss.titan.WhaleKeeper.appearAudience(List.of(a, b), 0.5, 0.5);
+                    check(f, !heard.contains(a) && heard.contains(b), "the whale's appearance was announced to a player who already stilled its heart");
+                    stopped.clear();
+                    TitanVisibility.clearCache();
+                }
             }
             check(f, ModItems.songShard(Titans.TIDE_SHELL) != ModItems.songShard(Titans.EMBER), "the song shards are not per titan");
         } catch (RuntimeException e) {

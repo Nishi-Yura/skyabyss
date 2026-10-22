@@ -210,7 +210,8 @@ public abstract class TitanKeeper<T extends Entity> {
                 missingSince = now;
             } else if (now - missingSince > RELOAD_GRACE && !busy()) {
                 // (巨神での移動の最中は、旅の操縦が巨神を持っているので呼び直さない。読み込まれれば見つかる)
-                ServerPlayer target = near != null ? near : pickTarget(level);
+                // 呼び直しの宛先は、この巨神が見える人だけ (止めた人のそばへは来ない)
+                ServerPlayer target = near != null && TitanVisibility.sees(near, slotId) ? near : pickTarget(level);
                 if (target != null) {
                     SkyAbyss.LOGGER.warn("The {} was not found at its last position; calling it again", logName);
                     if (!relocate(level, slot, null, target, now)) {

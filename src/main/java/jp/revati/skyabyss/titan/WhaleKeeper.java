@@ -75,11 +75,10 @@ public final class WhaleKeeper {
         protected void announce(ServerLevel level, StoneWhaleEntity whale) {
             double x = whale.getX();
             double z = whale.getZ();
-            level.playSound(null, x, 200, z, ModSounds.TITAN_SONG.get(), SoundSource.AMBIENT, 24f, 0.8f);
-            for (ServerPlayer player : Players.snapshot(level.players())) {
-                if (player.distanceToSqr(x, 200, z) < NEAR * NEAR) {
-                    Notice.narrate(player, "message.skyabyss.titan_appears");
-                }
+            // 歌も知らせも、この巨神が見える人にだけ (心臓を止めた人には、倒した巨神は現れない。TitanVisibility)
+            TitanVisibility.playSound(level, jp.revati.skyabyss.progress.Titans.STONE_WHALE, x, 200, z, ModSounds.TITAN_SONG.get(), SoundSource.AMBIENT, 24f, 0.8f);
+            for (ServerPlayer player : appearAudience(Players.snapshot(level.players()), x, z)) {
+                Notice.narrate(player, "message.skyabyss.titan_appears");
             }
         }
 
@@ -93,6 +92,17 @@ public final class WhaleKeeper {
             return false;
         }
     };
+
+    // 岩鯨が現れた・呼び直されたと知らされる人: 近くで、岩鯨が見える人だけ (心臓を止めた人には、倒した巨神は現れない)
+    public static java.util.List<ServerPlayer> appearAudience(Iterable<ServerPlayer> players, double x, double z) {
+        java.util.List<ServerPlayer> out = new java.util.ArrayList<>();
+        for (ServerPlayer player : players) {
+            if (player.distanceToSqr(x, 200, z) < NEAR * NEAR && TitanVisibility.sees(player, jp.revati.skyabyss.progress.Titans.STONE_WHALE)) {
+                out.add(player);
+            }
+        }
+        return out;
+    }
 
     private WhaleKeeper() {
     }

@@ -151,10 +151,17 @@ public final class HeartRewardSelfTest {
                 "another titan's item was claimable under the wrong titan");
         check(f, TitanMemoryData.get(server).record(a.getUUID(), whale).choicePending, "a refused claim spent the choice");
         TitanMemoryData.get(server).record(a.getUUID(), whale).owned.add(wo.get(0));
+        // 記録にあるだけで手もとにない遺物は、持っているとは出さない (持っていない遺物が持っていると出る不具合)
+        check(f, HeartReward.ownedMask(a, TitanMemoryData.get(server).record(a.getUUID(), whale), wo) == 0, "a relic only in the record was shown as owned");
+        a.getInventory().add(new net.minecraft.world.item.ItemStack(TitanGearSet.item(wo.get(0)).orElseThrow()));
+        check(f, HeartReward.ownedMask(a, TitanMemoryData.get(server).record(a.getUUID(), whale), wo) == 1, "a held relic was not shown as owned");
         check(f, HeartReward.claim(a, whale, wo.get(0)) == HeartReward.Result.OWNED, "an owned relic was claimable while others were left");
         check(f, TitanMemoryData.get(server).record(a.getUUID(), whale).choicePending, "an owned-relic refusal spent the choice");
         // 全部持っているときは、持っている品も選べる (選ぶ品がなくならない)
         TitanMemoryData.get(server).record(a.getUUID(), whale).owned.addAll(wo);
+        for (String id : wo) {
+            a.getInventory().add(new net.minecraft.world.item.ItemStack(TitanGearSet.item(id).orElseThrow()));
+        }
         check(f, HeartReward.claim(a, whale, wo.get(1)) == HeartReward.Result.OK, "with every relic owned, the choice was stuck");
         clear(a, server);
 

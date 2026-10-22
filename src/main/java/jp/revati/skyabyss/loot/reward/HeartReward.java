@@ -93,15 +93,37 @@ public final class HeartReward {
         return !pending(player.server, player.getUUID()).isEmpty();
     }
 
-    // 持っている印 (options の並びで 1 ビットずつ)
-    static int ownedMask(TitanMemoryData.Record r, List<String> options) {
+    // 持っている印 (options の並びで 1 ビットずつ)。記録 (一度手にした) だけでは持っているとしない: 手もと・預かり・地面に今あるものだけ。
+    // 記録だけの品を「持っている」と出すと、持っていない遺物が持っているように見え、選べなくなる
+    static int ownedMask(ServerPlayer player, TitanMemoryData.Record r, List<String> options) {
         int mask = 0;
         for (int i = 0; i < options.size(); i++) {
-            if (r.owned.contains(options.get(i))) {
+            if (holds(player, r, options.get(i))) {
                 mask |= 1 << i;
             }
         }
         return mask;
+    }
+
+    // いま実際に持っているか (記録にあり、かつ手もと・箱・預かり・地面・装身具のどこかにある)
+    static boolean holds(ServerPlayer player, TitanMemoryData.Record r, String itemId) {
+        if (!r.owned.contains(itemId)) {
+            return false;
+        }
+        Item item = TitanGearSet.item(itemId).orElse(null);
+        if (item == null) {
+            return false;
+        }
+        if (jp.revati.skyabyss.record.Keepsakes.locate(player, item).total() > 0) {
+            return true;
+        }
+        jp.revati.skyabyss.item.accessory.AccessoryData acc = jp.revati.skyabyss.item.accessory.Accessories.get(player);
+        for (ItemStack s : acc.items) {
+            if (s.is(item)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     // ---------------------------------------------------------------- 選ぶ (ここだけで決まる。コマンド・パケット・自己テストが呼ぶ)
@@ -120,7 +142,7 @@ public final class HeartReward {
             return Result.BAD_ITEM;
         }
         // すでに持っている品は、ほかに選べる品があるあいだは選べない (同じ品を二つもらっても意味がない)
-        if (r.owned.contains(itemId) && options.stream().anyMatch(o -> !r.owned.contains(o))) {
+        if (holds(player, r, itemId) && options.stream().anyMatch(o -> !holds(player, r, o))) {
             return Result.OWNED;
         }
         Item item = TitanGearSet.item(itemId).orElseThrow();
@@ -150,7 +172,7 @@ public final class HeartReward {
         LAST_OPEN.put(player.getUUID(), titan);
         if (!(player instanceof FakePlayer)) {
             HeartRewardNet.holdOnOpen(player);
-            PacketDistributor.sendToPlayer(player, new HeartRewardNet.Open(titan, options, ownedMask(r, options), auto));
+            PacketDistributor.sendToPlayer(player, new HeartRewardNet.Open(titan, options, ownedMask(player, r, options), auto));
         }
         return true;
     }
