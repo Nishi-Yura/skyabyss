@@ -289,6 +289,7 @@ public final class TrialRoute {
             TrialSlot.release(back, r);
             reset(r);
         }
+        jp.revati.skyabyss.trial.raid.RaidRun.onFinish(back, group);
         PENDING.remove(group);
         ABANDON.remove(group);
         ENTRY_START.remove(group);
@@ -548,6 +549,11 @@ public final class TrialRoute {
 
     // 段 step の入口の休み場へ、その背にいる参加者を運ぶ。運んだ人数
     public static int carry(ServerLevel back, UUID group, String titan, int step, boolean mid) {
+        // レイドの部屋の段は、区画に部屋を建てて入口の間へ (trial/raid/RaidRun)
+        if (!mid && jp.revati.skyabyss.trial.raid.RaidRun.enter(back, group, titan, step)) {
+            sync(back, group);
+            return members(back, group).size();
+        }
         TrialDraw.Draw draw = TrialData.current(back, group);
         String rest = restFor(back, group, titan, draw, step, mid);
         BlockPos at = rest == null ? null : spawnOf(back, titan, rest);
@@ -621,11 +627,11 @@ public final class TrialRoute {
         }
     }
 
-    static void move(ServerLevel back, ServerPlayer p, BlockPos at) {
+    public static void move(ServerLevel back, ServerPlayer p, BlockPos at) {
         move(back, p, at, p.getYRot());
     }
 
-    static void move(ServerLevel back, ServerPlayer p, BlockPos at, float yaw) {
+    public static void move(ServerLevel back, ServerPlayer p, BlockPos at, float yaw) {
         p.stopRiding();
         p.teleportTo(back, at.getX() + 0.5, at.getY(), at.getZ() + 0.5, yaw, 0f);
         if (p instanceof net.neoforged.neoforge.common.util.FakePlayer) {

@@ -230,16 +230,26 @@ public final class TrialCatalog {
         BY_ID.put(def.id(), def);
     }
 
+    // レイドの部屋の定義を足す (RaidRooms.register から。docs/design/32 の 7 章)
+    public static void addRaid(Def def) {
+        List<Def> list = BY_TITAN.computeIfAbsent(def.titan(), k -> new ArrayList<>());
+        list.removeIf(d -> d.id().equals(def.id()));
+        list.add(def);
+        BY_ID.put(def.id(), def);
+    }
+
     public static List<String> titans() {
         return List.copyOf(BY_TITAN.keySet());
     }
 
     public static List<Def> of(String titan) {
+        jp.revati.skyabyss.trial.raid.RaidRooms.ensureLoaded();
         return BY_TITAN.getOrDefault(titan, List.of());
     }
 
     @Nullable
     public static Def get(String id) {
+        jp.revati.skyabyss.trial.raid.RaidRooms.ensureLoaded();
         return BY_ID.get(id);
     }
 
@@ -250,6 +260,16 @@ public final class TrialCatalog {
     // 原型の三つ (初回の周に必ずこれ)。並びは 歩・智・闘 (雷翼は 歩・智・智)
     public static List<Def> originals(String titan) {
         List<Def> out = new ArrayList<>();
+        // レイドの巨神は、決まった三つの部屋が原型 (毎周同じ。docs/design/32 の 7 章)
+        if (jp.revati.skyabyss.trial.raid.RaidRooms.active(titan)) {
+            for (Slot s : Slot.values()) {
+                Def d = get(jp.revati.skyabyss.trial.raid.RaidRooms.idOf(titan, s));
+                if (d != null) {
+                    out.add(d);
+                }
+            }
+            return out;
+        }
         for (Slot s : Slot.values()) {
             for (Def d : of(titan)) {
                 if (d.original() && d.slot() == s) {
@@ -273,6 +293,9 @@ public final class TrialCatalog {
 
     // 引き方 (プール) を動かす巨神か。三つの枠すべてに、作ってある試練が二つ以上ある巨神だけ (そうでなければ周回しても原型のまま)
     public static boolean poolActive(String titan) {
+        if (jp.revati.skyabyss.trial.raid.RaidRooms.active(titan)) {
+            return false;
+        }
         if (!deckPlaced(titan)) {
             return false;
         }

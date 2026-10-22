@@ -1343,5 +1343,8 @@
   "item.skyabyss.scorched_bird_spawn_egg": "Scorched Bird Spawn Egg",
   "item.skyabyss.abyss_bone_chip": "Bone Chip",
   "item.skyabyss.abyss_salt_crystal": "Salt Crystal",
-  "item.skyabyss.abyss_storm_copper": "Storm Copper"
+  "item.skyabyss.abyss_storm_copper": "Storm Copper",
+  "message.skyabyss.raid.wipe": "Everyone is down. Back to the room entrance",
+  "raid.skyabyss.hud.ready": "Get ready",
+  "raid.skyabyss.hud.cleared": "Room cleared"
 }

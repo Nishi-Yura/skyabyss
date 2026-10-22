@@ -1343,5 +1343,8 @@
   "item.skyabyss.scorched_bird_spawn_egg": "焦げた鳥の影のスポーンエッグ",
   "item.skyabyss.abyss_bone_chip": "骨のかけら",
   "item.skyabyss.abyss_salt_crystal": "塩の結晶",
-  "item.skyabyss.abyss_storm_copper": "雷の銅片"
+  "item.skyabyss.abyss_storm_copper": "雷の銅片",
+  "message.skyabyss.raid.wipe": "全員が倒れた。部屋の入口へ戻る",
+  "raid.skyabyss.hud.ready": "準備せよ",
+  "raid.skyabyss.hud.cleared": "部屋を越えた"
 }

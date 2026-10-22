@@ -156,6 +156,12 @@ public final class ObjectiveStrip {
                 text = route == null ? next : route + "：" + next;
                 target = new Resolved(BlockPos.containing(trial.cx(), trial.cy() - 1.0, trial.cz()), false);
             }
+            // レイドの部屋の中: 部屋の名前・目的・数・残り時間 (docs/design/32 の 7 章)
+            String raid = jp.revati.skyabyss.client.trial.RaidHudClient.line(mc);
+            if (raid != null) {
+                text = raid;
+                target = Resolved.NONE;
+            }
         }
         return new Cur(text, target);
     }
