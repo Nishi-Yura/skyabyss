@@ -280,6 +280,9 @@ public final class SelfTestRunner {
         // 雷の層の吊り橋・雷の拍・避雷の像・灰の迷路・番人と近道 (36 の 8 章)。SKYABYSS_SELFTEST_ONLY="abyss layers storm ash"
         steps.add(Step.once("abyss layers storm ash (load)", jp.revati.skyabyss.story.ch5.layers.AbyssLayersSelfTest::load));
         steps.add(Step.once("abyss layers storm ash", 60, jp.revati.skyabyss.story.ch5.layers.AbyssLayersSelfTest::run));
+        // 番人の悪夢 (段の表・入る条件・段の進み・報酬・保存・閉じたあとの後片付け)。docs/design/36 の 9。SKYABYSS_SELFTEST_ONLY="abyss nightmare"
+        steps.add(Step.once("abyss nightmare (load)", jp.revati.skyabyss.story.ch5.warden.WardenSelfTest::load));
+        steps.add(Step.once("abyss nightmare", 60, jp.revati.skyabyss.story.ch5.warden.NightmareSelfTest::run));
         steps.add(Step.once("storm mobs (load)", jp.revati.skyabyss.titan.storm.mob.StormMobSelfTest::load));
         steps.add(Step.until("storm mobs (wait)", jp.revati.skyabyss.titan.storm.mob.StormMobSelfTest::ready));
         steps.add(Step.once("storm mobs", 5, jp.revati.skyabyss.titan.storm.mob.StormMobSelfTest::runSelfTest));
