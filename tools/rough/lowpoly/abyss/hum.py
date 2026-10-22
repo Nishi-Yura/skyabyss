@@ -79,7 +79,7 @@ class H:
         return self.head(F, m, jaw_m, s=hs, hollow=hollow)
 
 
-def king_rows(cen, sc, ph=360, ws=((0.5, "歪み 中 (10 階〜の周)"), (1.0, "歪み 深 (25 階〜の周)"))):
+def king_rows(cen, sc, ph=360, ws=((0.5, "周が進んだ姿 (中)"), (1.0, "周が進んだ姿 (深)"))):
     r = [("前", "idle", 180, 8, ph, cen, sc, None),
          ("3/4", "idle", 212, 14, ph, cen, sc, None),
          ("横", "idle", 270, 6, ph, cen, sc, None)]

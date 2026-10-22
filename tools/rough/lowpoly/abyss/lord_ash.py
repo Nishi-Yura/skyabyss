@@ -13,7 +13,7 @@ BONES = {"root": (None, (0, 0, 0)), "body": ("root", (0, 34, 0)), "jaw": ("body"
          "neck": ("body", (0, 40, -6)), "head": ("neck", (0, 70, -18)),
          "wing_l": ("body", (-6, 40, 4)), "wing_r": ("body", (6, 40, 4)),
          "leg_l": ("body", (-5, 30, 0)), "leg_r": ("body", (5, 30, 0))}
-PAL = PALX({"lamp": mat(CALC, 0.5, crack=0.0, noise=0.1), "iron": mat(BASALT, 0.55, crack=0.0, noise=0.1)}, glow=("teal",))
+PAL = PALX({"void": mat([(10, 12, 20), (24, 32, 46), (44, 56, 76), (70, 84, 108)], 0.55, crack=0.0, noise=0.14), "lamp": mat(CALC, 0.5, crack=0.0, noise=0.1), "iron": mat(BASALT, 0.55, crack=0.0, noise=0.1)}, glow=("teal",))
 
 
 def build_a(k):
