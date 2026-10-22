@@ -46,7 +46,7 @@ public final class TelegraphRenderer {
     }
 
     static void onRenderLevel0(RenderLevelStageEvent event) {
-        if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_TRANSLUCENT_BLOCKS) {
+        if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_PARTICLES) {
             return;
         }
         if (Config.TELEGRAPH_STYLE.get() == Config.TelegraphStyle.PARTICLES) {
@@ -109,9 +109,9 @@ public final class TelegraphRenderer {
     private static void drawDecal(Painter p, TelegraphClient.Decal d, float t, boolean hc) {
         TelegraphShape shape = d.shape;
         Telegraph.Style style = d.style;
-        float areaA = hc ? 0.22f : 0.12f;
-        float fillA = hc ? 0.50f : 0.34f;
-        float curtain = hc ? 1.0f : 0.6f;
+        float areaA = hc ? 0.32f : 0.22f;
+        float fillA = hc ? 0.58f : 0.44f;
+        float curtain = hc ? 1.7f : 1.1f;
         // 安全な場所の印は出さない (2026-10-22: 印は赤だけ)
         if (style == Telegraph.Style.SAFE) {
             return;
@@ -146,7 +146,10 @@ public final class TelegraphRenderer {
             }
             p.faces(g -> TelegraphGeometry.area(shape, g), rgb, areaA);
             p.faces(g -> TelegraphGeometry.fill(shape, prog, g), mix(rgb, 0xFFFFFF, wm * prog), fillA + 0.22f * prog + pulse);
-            p.lines(g -> TelegraphGeometry.outline(shape, g), mix(rgb, 0xFFFFFF, 0.55f), 0.95f, hc ? 0.2f : 0.12f, curtain * (0.55f + 0.45f * prog));
+            p.pattern = Pattern.SOLID;
+            p.lines(g -> TelegraphGeometry.outline(shape, g), rgb, 0.28f + 0.2f * prog, hc ? 0.75f : 0.55f, 0f);
+            p.pattern = pattern;
+            p.lines(g -> TelegraphGeometry.outline(shape, g), mix(rgb, 0xFFFFFF, 0.55f), 1f, hc ? 0.3f : 0.22f, curtain * (0.6f + 0.5f * prog));
             p.pattern = Pattern.SOLID;
             p.lines(g -> TelegraphGeometry.front(shape, prog, g), mix(rgb, 0xFFFFFF, 0.85f), 1f, hc ? 0.3f : 0.2f, curtain * 0.6f);
             p.pattern = pattern;
@@ -184,7 +187,8 @@ public final class TelegraphRenderer {
         float flash = style == Telegraph.Style.HARMLESS ? 0.5f : 0.85f;
         p.faces(g -> TelegraphGeometry.area(shape, g), mix(rgb, 0xFFFFFF, 0.75f), flash * f);
         p.pattern = Pattern.SOLID;
-        p.lines(g -> TelegraphGeometry.outline(shape, g), 0xFFFFFF, f, hc ? 0.3f : 0.2f, curtain * 1.3f * f);
+        p.lines(g -> TelegraphGeometry.outline(shape, g), 0xFFFFFF, f, hc ? 0.4f : 0.3f, curtain * 1.5f * f);
+        p.lines(g -> TelegraphGeometry.outline(shape, g), rgb, 0.5f * f, 1.2f + 1.2f * (1f - f), 0f);
     }
 
     // 狙われた本人にだけ: 帯 (突き・扇・振り回す帯) の根もとに輪と、向かう先を指す矢印
