@@ -111,7 +111,7 @@ public final class AbyssMobSpawner {
         for (ServerPlayer p : java.util.List.copyOf(level.players())) {
             // 果てない深みの区画の中は、区画の湧き (depths.DepthMobs) だけ
             if (!p.isAlive() || p.isCreative() || p.isSpectator() || RAND.nextInt(2) != 0
-                    || jp.revati.skyabyss.story.ch5.depths.DepthRun.sectionOf(p) > 0) {
+                    || jp.revati.skyabyss.story.ch5.depths.DepthRun.inDepths(p)) {
                 continue;
             }
             BlockPos at = p.blockPosition();

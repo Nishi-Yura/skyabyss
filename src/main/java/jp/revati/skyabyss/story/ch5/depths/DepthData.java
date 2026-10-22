@@ -10,7 +10,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.saveddata.SavedData;
 
 // 心臓の下の深み (docs/design/36 の 9) の、ワールドに一つの記録
-//   建てた版   区画の番号 → 建てた版 (版を上げると建て直す)
+//   潜り       組ごとの場所・今の階・潜りの通し番号・再開の階 (階そのものは種から作り直せるので、ブロックは持たない)
 //   裂け目     心臓の間の裂け目を開けたか (倒したあとに一度だけ)
 //   記録       組ごと・一人ごとの一番深い数字 (心臓の下の深さ。表示は DepthPlan.totalDepth)
 //   節目       記録の節目 (DepthRecords.MILESTONES) をどこまで受け取ったか (数。組ごと・一人ごと)
@@ -18,7 +18,16 @@ final class DepthData extends SavedData {
     private static final Factory<DepthData> FACTORY = new Factory<>(DepthData::new, DepthData::load);
     private static final String NAME = "skyabyss_depth";
 
-    final Map<Integer, Integer> built = new HashMap<>();
+    // 組ごとの潜り: 場所 (slot)・今の階・潜りの通し番号 (salt)・再開の階
+    static final class Run {
+        int slot;
+        int floor;
+        int salt;
+        int checkpoint = 1;
+    }
+
+    final Map<UUID, Run> runs = new HashMap<>();
+    int nextSlot;
     boolean rift;
     final Map<UUID, Integer> groupBest = new HashMap<>();
     final Map<UUID, Integer> playerBest = new HashMap<>();
@@ -31,9 +40,20 @@ final class DepthData extends SavedData {
 
     private static DepthData load(CompoundTag tag, HolderLookup.Provider registries) {
         DepthData d = new DepthData();
-        CompoundTag b = tag.getCompound("Built");
-        for (String k : b.getAllKeys()) {
-            d.built.put(Integer.parseInt(k), b.getInt(k));
+        d.nextSlot = tag.getInt("NextSlot");
+        CompoundTag rs = tag.getCompound("Runs");
+        for (String k : rs.getAllKeys()) {
+            try {
+                CompoundTag t = rs.getCompound(k);
+                Run run = new Run();
+                run.slot = t.getInt("Slot");
+                run.floor = t.getInt("Floor");
+                run.salt = t.getInt("Salt");
+                run.checkpoint = Math.max(1, t.getInt("Checkpoint"));
+                d.runs.put(UUID.fromString(k), run);
+            } catch (IllegalArgumentException ignored) {
+                // 壊れた鍵は捨てる
+            }
         }
         d.rift = tag.getBoolean("Rift");
         read(tag.getCompound("GroupBest"), d.groupBest);
@@ -45,11 +65,17 @@ final class DepthData extends SavedData {
 
     @Override
     public CompoundTag save(CompoundTag tag, HolderLookup.Provider registries) {
-        CompoundTag b = new CompoundTag();
-        for (Map.Entry<Integer, Integer> e : built.entrySet()) {
-            b.putInt(String.valueOf(e.getKey()), e.getValue());
+        CompoundTag rs = new CompoundTag();
+        for (Map.Entry<UUID, Run> e : runs.entrySet()) {
+            CompoundTag t = new CompoundTag();
+            t.putInt("Slot", e.getValue().slot);
+            t.putInt("Floor", e.getValue().floor);
+            t.putInt("Salt", e.getValue().salt);
+            t.putInt("Checkpoint", e.getValue().checkpoint);
+            rs.put(e.getKey().toString(), t);
         }
-        tag.put("Built", b);
+        tag.put("Runs", rs);
+        tag.putInt("NextSlot", nextSlot);
         tag.putBoolean("Rift", rift);
         tag.put("GroupBest", write(groupBest));
         tag.put("PlayerBest", write(playerBest));

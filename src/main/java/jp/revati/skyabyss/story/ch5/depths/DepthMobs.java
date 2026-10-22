@@ -10,45 +10,36 @@ import jp.revati.skyabyss.abyss.mobs.AbyssMobB;
 import jp.revati.skyabyss.abyss.mobs.AbyssMobKind;
 import jp.revati.skyabyss.abyss.mobs.AbyssMobSpawner;
 import jp.revati.skyabyss.abyss.mobs.AbyssMobsA;
-import jp.revati.skyabyss.abyss.mobs.AbyssScaling;
-import jp.revati.skyabyss.abyss.mobs.NamelessShape;
-import jp.revati.skyabyss.abyss.mobs.PastShadow;
 import jp.revati.skyabyss.story.ch5.AbyssWorld;
-import jp.revati.skyabyss.story.ch5.depths.DepthPlan.Gimmick;
-import jp.revati.skyabyss.story.ch5.depths.DepthPlan.Modifier;
-import jp.revati.skyabyss.story.ch5.depths.DepthPlan.Platform;
-import jp.revati.skyabyss.story.ch5.depths.DepthPlan.Section;
+import jp.revati.skyabyss.story.ch5.depths.DepthFloor.Room;
+import jp.revati.skyabyss.story.ch5.depths.DepthFloor.RoomType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.effect.MobEffectInstance;
-import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.phys.AABB;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.living.LivingDropsEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
 
-// 深みの敵 (docs/design/36 の 9・4)。区画に人がいる間、人ごとに EVERY tick に一回、半分の確率で一体。
-//   種     深淵の敵 18 種 (A 組 9 と B 組 9) から一様。写しの敵の仕掛けがあれば、前の私の影・名のない形に寄る
-//   形     崩れ (3) が六割、歪み (2) が四割
-//   数字   湧いた高さの数字 (AbyssScaling) に、心臓の下の深さの段 (AbyssScaling.deepSteps) を上乗せ。修飾の傷が深いは段を一つ足す
-//   数     区画の中に十体まで (敵が多いは十五体)。区画の外へは湧かない
-//   落とし 落とし物が多い修飾があれば、A 組の素材を一つ足す (確率は段が深いほど上がる)
-//   霧     霧が敵を隠す仕掛けは、灯りから六ブロック以上離れた敵の姿を消す (DepthGimmicks が DepthMobs.fog を呼ぶ)
+// 深みの敵 (docs/design/36 の 9・6)。階の中の湧き。
+//   種     深淵の敵 18 種 (A 組 9・B 組 9) から一様
+//   形     歪み (2) と崩れ (3)。階が深いほど崩れの割合が増える (DepthPlan.warpedChance)。深いほど歪んだ姿になる
+//   数字   AbyssScaling の深みの段 (DepthPlan.stepsOf)。1 階で 0.1 段。急な段差はない
+//   置き   階が整って最初の人が着いたとき、敵の巣・休み場・行商・入口の部屋を除く部屋に 1〜3 体 (DepthPlan.roomMobs)
+//   湧き直し  人のいる階に、EVERY tick ごと半分の確率で一体 (上限 DepthPlan.mobCap)。人から 14 マス以上離れた部屋に
+//   敵の巣  部屋の中心に踏み入ると、部屋を囲んで一度に湧く (DepthTraps)
+//   王の階は湧き直さない (王と、王の呼ぶ手下だけ)
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class DepthMobs {
     public static final String TAG = "skyabyss_depth_mob";
-    public static final String TAG_RICH = "skyabyss_depth_rich";
-    public static final int EVERY = 40;
-    static final int CAP = 10;
-    static final double FOG_LIGHT_R = 6;
+    public static final int EVERY = 100;
     static final Random RAND = new Random();
     static final String[] ALL;
 
@@ -57,30 +48,21 @@ public final class DepthMobs {
         for (AbyssMobKind k : AbyssMobKind.values()) {
             ids.add(k.id);
         }
-        for (String id : AbyssMobSpawner.FOES) {
-            ids.add(id);
-        }
+        ids.addAll(List.of(AbyssMobSpawner.FOES));
         ALL = ids.toArray(new String[0]);
     }
 
     private DepthMobs() {
     }
 
-    // 種を一つ選ぶ (写しの敵は、前の私の影・名のない形に寄せる)
-    static String pickId(Section s, Random r) {
-        if (s.has(Gimmick.COPY_FOES) && r.nextInt(2) == 0) {
-            return r.nextBoolean() ? PastShadow.ID : NamelessShape.ID;
-        }
+    static String pickId(Random r) {
         return ALL[r.nextInt(ALL.length)];
     }
 
-    // 区画の中の、この区画の敵の数
-    static int countIn(ServerLevel level, int sec) {
-        int cx = sec * DepthPlan.SLOT;
-        AABB box = new AABB(cx - DepthPlan.ROOM_R - 2, DepthPlan.TOP_Y - DepthPlan.HEIGHT - 2, -DepthPlan.ROOM_R - 2,
-                cx + DepthPlan.ROOM_R + 2, DepthPlan.TOP_Y + 2, DepthPlan.ROOM_R + 2);
+    // 階の中の、湧かせた敵の数
+    static int countIn(ServerLevel level, DepthBuilder.Inst i) {
         int n = 0;
-        for (Mob m : level.getEntitiesOfClass(Mob.class, box, e -> e.getTags().contains(TAG))) {
+        for (Mob m : level.getEntitiesOfClass(Mob.class, i.box(), e -> e.getTags().contains(TAG))) {
             if (m.isAlive()) {
                 n++;
             }
@@ -88,66 +70,14 @@ public final class DepthMobs {
         return n;
     }
 
-    @SubscribeEvent
-    static void onServerTick(ServerTickEvent.Post event) {
-        MinecraftServer server = event.getServer();
-        if (server.getTickCount() % EVERY != 0) {
-            return;
-        }
-        spawnTick(server);
+    // 一体湧かせる (階の数字を入れる)
+    public static Entity spawn(ServerLevel level, int floor, BlockPos feet, Random r) {
+        return spawnId(level, floor, feet, r, pickId(r));
     }
 
-    static void spawnTick(MinecraftServer server) {
-        ServerLevel level = server.getLevel(AbyssWorld.LEVEL);
-        if (level == null) {
-            return;
-        }
-        for (ServerPlayer p : java.util.List.copyOf(level.players())) {
-            int sec = DepthRun.sectionOf(p);
-            if (sec == 0 || !p.isAlive() || p.isCreative() || p.isSpectator() || RAND.nextBoolean()) {
-                continue;
-            }
-            if (!DepthBuilder.built(server, sec)) {
-                continue;
-            }
-            DepthLayout.Result g = DepthBuilder.geometry(server, sec);
-            Section s = g.section();
-            int cap = s.has(Modifier.MORE_FOES) ? CAP * 3 / 2 : CAP;
-            if (countIn(level, sec) >= cap) {
-                continue;
-            }
-            Platform spot = spotNear(g, p);
-            if (spot == null) {
-                continue;
-            }
-            BlockPos top = DepthGimmicks.ledgeTop(g, spot);
-            BlockPos feet = top.above();
-            spawn(level, s, feet, RAND);
-        }
-    }
-
-    // 人のまわりの道の足場 (水平 6〜14 、上下 12 以内) を一つ。なければ null
-    static Platform spotNear(DepthLayout.Result g, ServerPlayer p) {
-        int ly = DepthPlan.lyOf(p.blockPosition().getY());
-        int cx = g.section().centerX();
-        List<Platform> ok = new ArrayList<>();
-        for (Platform q : g.route()) {
-            double dx = p.getX() - (cx + q.dx());
-            double dz = p.getZ() - q.dz();
-            double h = Math.sqrt(dx * dx + dz * dz);
-            if (h >= 6 && h <= 14 && Math.abs(q.ly() - ly) <= 12 && !q.landing()) {
-                ok.add(q);
-            }
-        }
-        return ok.isEmpty() ? null : ok.get(RAND.nextInt(ok.size()));
-    }
-
-    // 一体湧かせる (数字と仕掛けの上乗せを入れる)
-    public static Entity spawn(ServerLevel level, Section s, BlockPos feet, Random r) {
-        String id = pickId(s, r);
-        int form = r.nextInt(10) < 6 ? 3 : 2;
-        int beyond = DepthPlan.beyond(s.index(), feet.getY());
-        double steps = Math.min(AbyssScaling.DEEP_CAP, AbyssScaling.deepSteps(beyond) + (s.has(Modifier.FIERCE) ? 1 : 0));
+    public static Entity spawnId(ServerLevel level, int floor, BlockPos feet, Random r, String id) {
+        int form = r.nextDouble() < DepthPlan.warpedChance(floor) ? 3 : 2;
+        double steps = DepthPlan.stepsOf(floor);
         Entity e = AbyssMobSpawner.spawnAt(level, id, feet.getX() + 0.5, feet.getY(), feet.getZ() + 0.5, form);
         if (e instanceof AbyssMob m) {
             m.setDeep(steps);
@@ -157,39 +87,130 @@ public final class DepthMobs {
             return e;
         }
         e.addTag(TAG);
-        if (s.has(Modifier.RICH_DROPS)) {
-            e.addTag(TAG_RICH);
-        }
         return e;
     }
 
-    // 霧が敵を隠す: 灯りから離れた深みの敵は、姿が消える (灯りの近くは見える)
-    static void fog(ServerLevel level, DepthLayout.Result g) {
-        int cx = g.section().centerX();
-        AABB box = new AABB(cx - DepthPlan.ROOM_R, DepthPlan.TOP_Y - DepthPlan.HEIGHT, -DepthPlan.ROOM_R,
-                cx + DepthPlan.ROOM_R, DepthPlan.TOP_Y, DepthPlan.ROOM_R);
-        for (LivingEntity l : level.getEntitiesOfClass(LivingEntity.class, box, e -> e.getTags().contains(TAG))) {
-            BlockPos at = l.blockPosition();
-            if (DepthGimmicks.nearLight(level, g, at, (int) FOG_LIGHT_R)) {
-                l.removeEffect(MobEffects.INVISIBILITY);
-            } else {
-                l.addEffect(new MobEffectInstance(MobEffects.INVISIBILITY, 60, 0, true, false, false));
+    // 部屋の中の、立てる床を一つ (飾りの置かれた床・罠は避ける)。なければ null
+    static BlockPos spotIn(ServerLevel level, DepthBuilder.Inst i, Room room, Random r, int margin) {
+        for (int t = 0; t < 30; t++) {
+            int tx = room.x0() + margin + r.nextInt(Math.max(1, room.w() - 2 * margin));
+            int tz = room.z0() + margin + r.nextInt(Math.max(1, room.d() - 2 * margin));
+            if (!i.plan.open()[tx][tz]) {
+                continue;
+            }
+            BlockPos feet = i.feet(tx, tz);
+            if (level.getBlockState(feet).isAir() && level.getBlockState(feet.above()).isAir() && level.getBlockState(feet.below()).canOcclude()
+                    && !isTrap(i, tx, tz)) {
+                return feet;
+            }
+        }
+        return null;
+    }
+
+    static boolean isTrap(DepthBuilder.Inst i, int tx, int tz) {
+        for (DepthFloor.Trap t : i.plan.traps()) {
+            if (t.x() == tx && t.z() == tz) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // 階が整って最初の人が着いたとき、一度だけ
+    static void populate(ServerLevel level, DepthBuilder.Inst i) {
+        if (i.populated || i.plan.boss()) {
+            i.populated = true;
+            return;
+        }
+        i.populated = true;
+        Random r = new Random(i.seed ^ 0x90B);
+        int per = DepthPlan.roomMobs(i.floor);
+        int total = 0;
+        for (Room room : i.plan.rooms()) {
+            if (room.entry() || room.type() == RoomType.REST || room.type() == RoomType.SHOP || room.type() == RoomType.HOUSE) {
+                continue;
+            }
+            int n = per - (r.nextInt(3) == 0 ? 1 : 0) + (room.type() == RoomType.TREASURE ? 1 : 0);
+            for (int k = 0; k < n; k++) {
+                BlockPos at = spotIn(level, i, room, r, 1);
+                if (at != null) {
+                    spawn(level, i.floor, at, r);
+                    total++;
+                }
+            }
+        }
+        SkyAbyss.LOGGER.info("[abyss depth] floor {}: {} foes placed", i.floor, total);
+    }
+
+    // 敵の巣: 部屋の周りに一度に湧く
+    static int spawnHouse(ServerLevel level, DepthBuilder.Inst i, Room room) {
+        int n = Math.min(14, 7 + i.floor / 6);
+        int made = 0;
+        for (int k = 0; k < n; k++) {
+            BlockPos at = spotIn(level, i, room, RAND, 1);
+            if (at != null) {
+                spawn(level, i.floor, at, RAND);
+                made++;
+            }
+        }
+        return made;
+    }
+
+    @SubscribeEvent
+    static void onServerTick(ServerTickEvent.Post event) {
+        MinecraftServer server = event.getServer();
+        if (server.getTickCount() % EVERY != 0) {
+            return;
+        }
+        ServerLevel level = server.getLevel(AbyssWorld.LEVEL);
+        if (level == null) {
+            return;
+        }
+        for (ServerPlayer p : List.copyOf(level.players())) {
+            DepthBuilder.Inst i = DepthBuilder.at(p.blockPosition());
+            if (i == null || !i.ready || !i.populated || i.plan.boss() || !p.isAlive() || p.isCreative() || p.isSpectator() || RAND.nextBoolean()) {
+                continue;
+            }
+            if (countIn(level, i) >= DepthPlan.mobCap(i.floor)) {
+                continue;
+            }
+            List<Room> rooms = new ArrayList<>();
+            for (Room room : i.plan.rooms()) {
+                if (room.entry() || room.type() == RoomType.REST || room.type() == RoomType.SHOP) {
+                    continue;
+                }
+                double dx = p.getX() - (i.ox + room.cx() + 0.5);
+                double dz = p.getZ() - (i.oz + room.cz() + 0.5);
+                if (Math.sqrt(dx * dx + dz * dz) >= 14) {
+                    rooms.add(room);
+                }
+            }
+            if (rooms.isEmpty()) {
+                continue;
+            }
+            BlockPos at = spotIn(level, i, rooms.get(RAND.nextInt(rooms.size())), RAND, 1);
+            if (at != null) {
+                spawn(level, i.floor, at, RAND);
             }
         }
     }
 
-    // 落とし物 (落とし物が多い修飾の深みの敵は、A 組の素材を一つ足す。段が深いほど確率が上がる)
+    // 王の呼ぶ手下の体力・傷を決める (DepthBoss が使う)。階の数字に、手下らしく控えめに
+    static void tuneAdd(LivingEntity e, double hpMul) {
+        double hp = e.getAttributeValue(Attributes.MAX_HEALTH) * hpMul;
+        e.getAttribute(Attributes.MAX_HEALTH).setBaseValue(hp);
+        e.setHealth((float) hp);
+    }
+
+    // 落とし物: 深みの敵は A 組の素材を落とすことがある (階が深いほど確率が少し上がる)
     @SubscribeEvent
     static void onDrops(LivingDropsEvent event) {
         LivingEntity e = event.getEntity();
-        if (!e.getTags().contains(TAG_RICH) || !(e.level() instanceof ServerLevel level)) {
+        if (!e.getTags().contains(TAG) || !(e.level() instanceof ServerLevel level) || !(e instanceof AbyssMob m)) {
             return;
         }
-        if (!(e instanceof AbyssMob m)) {
-            return;
-        }
-        int sec = DepthRun.sectionOf(e.blockPosition());
-        double chance = 0.3 + 0.1 * (sec == 0 ? 0 : DepthPlan.tierOf(sec));
+        DepthBuilder.Inst i = DepthBuilder.at(e.blockPosition());
+        double chance = 0.12 + 0.004 * (i == null ? 0 : Math.min(60, i.floor));
         if (RAND.nextDouble() < chance) {
             event.getDrops().add(new ItemEntity(level, e.getX(), e.getY() + 0.5, e.getZ(), new ItemStack(AbyssMobsA.materialOf(m.kind()))));
         }
