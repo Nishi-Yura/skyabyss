@@ -1,0 +1,32 @@
+# 2026-10-23 監査: 町の HUD (GUI 3 / 2、敵の体力帯つき)
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/audit_town.txt -PshotsName=audit_town
+world audit_town normal
+size 1280 720
+timeout 1200
+render 8
+clouds off
+guiscale 3
+wait 100
+cmd skyabyss cinematic stop
+wait 10
+cmd skyabyss cinematic stop
+cmd time set 2000
+cmd weather clear
+cmd gamerule doDaylightCycle false
+cmd skyabyss dev opening build
+cmd gamemode survival
+hud on
+cmd skyabyss dev opening at shelter 0 0 2 20 180 6
+waitchunks 1200
+wait 200
+cmd skyabyss cinematic stop
+chat clear
+shot t_town_g3
+guiscale 2
+wait 20
+shot t_town_g2
+cmd summon minecraft:zombie ~ ~ ~6 {NoAI:1b,PersistenceRequired:1b,Rotation:[180f,0f],Health:8f}
+cmd summon minecraft:skeleton ~3 ~ ~8 {NoAI:1b,PersistenceRequired:1b,Rotation:[180f,0f],Health:20f}
+wait 40
+shot t_enemy_g2
+quit

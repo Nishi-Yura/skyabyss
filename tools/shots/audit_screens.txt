@@ -1,0 +1,62 @@
+# 2026-10-23 監査: 画面 (クエストログ・伝承・スキル・成長・パーティ) GUI 3 と GUI 2
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/audit_screens.txt -PshotsName=audit_screens
+world audit_screens flat
+size 1280 720
+timeout 900
+render 6
+clouds off
+guiscale 3
+cmd time set noon
+cmd weather clear
+cmd gamemode survival
+camera 0 -60 0 0 10
+hud on
+cmd skyabyss cinematic stop
+waitchunks
+chat clear
+wait 80
+cmd skyabyss quest start @s main_song
+cmd skyabyss quest start @s "ch1/trail_iron"
+wait 40
+open quests
+wait 20
+shot s_quests_g3
+close
+open lore
+wait 20
+shot s_lore_g3
+close
+open growth
+wait 20
+shot s_growth_g3
+close
+open skills
+wait 20
+shot s_skills_g3
+close
+open skills_build
+wait 20
+shot s_skillbuild_g3
+close
+open skills_deep
+wait 20
+shot s_skilldeep_g3
+close
+open party
+wait 20
+shot s_party_g3
+close
+guiscale 2
+open quests
+wait 20
+shot s_quests_g2
+close
+open skills
+wait 20
+shot s_skills_g2
+close
+open growth
+wait 20
+shot s_growth_g2
+close
+quit
