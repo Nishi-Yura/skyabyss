@@ -384,11 +384,11 @@ public final class DepthLayout {
         boolean hasPrev = false;
         for (int i = 0; i < 5; i++) {
             double ang = i * 1.2566 + 0.5;
-            int ix = ox(ang, 18);
-            int iz = oz(ang, 18);
+            int ix = ox(ang, 17);
+            int iz = oz(ang, 17);
             int top = 24 + i * 38;
-            disk(ix, top, iz, 7, slab);
-            disk(ix, top + 1, iz, 7, cracked);
+            disk(ix, top, iz, 8, slab);
+            disk(ix, top + 1, iz, 8, cracked);
             disk(ix, top + 2, iz, 6, cracked);
             disk(ix, top + 3, iz, 4, cracked);
             disk(ix, top + 4, iz, 2, slab);
@@ -463,6 +463,7 @@ public final class DepthLayout {
     private void mirrorDark(List<Platform> route) {
         BlockState glass = Blocks.TINTED_GLASS.defaultBlockState();
         BlockState obsidian = Blocks.OBSIDIAN.defaultBlockState();
+        // 写しの道は鉄の板 (黒い壁の中で光を返す)
         for (int a = 0; a < 6; a++) {
             double ang = a * Math.PI / 3 + 0.4;
             int mx = ox(ang, 21);
@@ -481,7 +482,7 @@ public final class DepthLayout {
         for (Platform p : route) {
             int ly = DepthPlan.HEIGHT - 1 - p.ly();
             double ang = Math.atan2(p.dz(), p.dx()) + Math.PI;
-            disk(ox(ang, 16), ly, oz(ang, 16), 1.4, obsidian);
+            disk(ox(ang, 16), ly, oz(ang, 16), 1.6, Blocks.IRON_BLOCK.defaultBlockState());
         }
     }
 
@@ -489,7 +490,7 @@ public final class DepthLayout {
     //   外側には、鎖の帳 (二十四本) が天井から床まで垂れる
     private void chainNet() {
         BlockState chain = Blocks.CHAIN.defaultBlockState();
-        for (int ly = 4; ly < HEIGHT_LAST - 1; ly += 8) {
+        for (int ly = 4; ly < HEIGHT_LAST - 1; ly += 12) {
             for (int dx = -24; dx <= 24; dx++) {
                 for (int dz = -24; dz <= 24; dz++) {
                     int d2 = dx * dx + dz * dz;
