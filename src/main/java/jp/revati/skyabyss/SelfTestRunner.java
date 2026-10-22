@@ -293,6 +293,8 @@ public final class SelfTestRunner {
         steps.add(Step.once("storm mobs (load)", jp.revati.skyabyss.titan.storm.mob.StormMobSelfTest::load));
         steps.add(Step.until("storm mobs (wait)", jp.revati.skyabyss.titan.storm.mob.StormMobSelfTest::ready));
         steps.add(Step.once("storm mobs", 5, jp.revati.skyabyss.titan.storm.mob.StormMobSelfTest::runSelfTest));
+        // 雷翼のレイドの三つの部屋 (SR1 避雷の羽運び・SR2 銅の回路つなぎ・SR3 帯電の連鎖)。SKYABYSS_SELFTEST_ONLY="storm raid"
+        steps.add(Step.once("storm raid", 5, jp.revati.skyabyss.trial.raid.storm.StormRaidSelfTest::runSelfTest));
         // 潮殻の背の本番 (島・潮の溜め・三つの試練・リセット)。水を流してから数える段がある
         steps.addAll(jp.revati.skyabyss.titan.tide.back.TideBackSelfTest.steps());
         // 二章「引く海」(予兆・潮見の貝・大干潮・小要素)。SKYABYSS_SELFTEST_ONLY=ch2
