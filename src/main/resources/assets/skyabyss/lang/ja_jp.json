@@ -1362,5 +1362,22 @@
   "raid.skyabyss.WR3.core": "核",
   "message.skyabyss.raid.WR2.wrong": "音が違う。もう一度聴け",
   "message.skyabyss.raid.WR3.broken": "鯨の核が砕けた。部屋の入口へ戻る",
-  "message.skyabyss.raid.WR3.wave": "第 %s 波"
+  "message.skyabyss.raid.WR3.wave": "第 %s 波",
+  "trial.skyabyss.cell.ER1": "熾火運び",
+  "trial.skyabyss.cell.ER1.desc": "噴き口の熾を、冷める前に冷えた炉へ三つ運ぶ。運ぶ者は熱で少しずつ傷み、熾は刻々と冷める。しゃがむと近くの仲間へ渡せる。道の噴気は赤い印のあとに噴く。",
+  "trial.skyabyss.cell.ER2": "鍛冶の手順",
+  "trial.skyabyss.cell.ER2.desc": "壁画が示す順（型・火・水・槌）に、四つの台を使う。台は先に何人かで支度しておける。順を誤ると台は元に戻る。傷はない。",
+  "trial.skyabyss.cell.ER3": "炉を守る",
+  "trial.skyabyss.cell.ER3.desc": "大炉を、三つの波から守る。灰の敵は炉を消しに来る。火鉢を灯し直すと、敵の足が鈍る。炉が消えたら、部屋は最初からやり直しになる。",
+  "raid.skyabyss.ER1.fetch": "噴き口の熾を取れ（取れるのは一人一つ）",
+  "raid.skyabyss.ER1.deliver": "熾を冷えた炉へ運べ（冷めきる前に。しゃがむと仲間へ渡せる）",
+  "raid.skyabyss.ER1.cooled": "熾が冷めきった",
+  "raid.skyabyss.ER1.handed": "熾を渡した",
+  "raid.skyabyss.ER2.charge": "台の上に立って支度を整えろ（光れば支度済み。壁画の順を読め）",
+  "raid.skyabyss.ER2.use": "壁画の順に、支度済みの台の上でしゃがめ",
+  "raid.skyabyss.ER2.wrong": "順が違う。台が冷えて戻った",
+  "raid.skyabyss.ER3.defend": "大炉を守れ（波）",
+  "raid.skyabyss.ER3.forge": "大炉",
+  "raid.skyabyss.ER3.wave": "第 %s / %s 波",
+  "raid.skyabyss.ER3.lost": "大炉が消えた。部屋の入口へ戻る"
 }
