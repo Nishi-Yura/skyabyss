@@ -40,7 +40,8 @@ public final class StormBirdBuilder {
 
     // 起動時: 鳥の体を何 tick かに分けて置く仕事 (BackBuildJobs)。形が無ければ空の仕事
     public static jp.revati.skyabyss.titan.BackBuildJobs.Job job(StormKit kit) {
-        return BIRD.exists() ? BIRD.job(kit.level()) : jp.revati.skyabyss.titan.BackBuildJobs.empty();
+        return BIRD.exists() ? jp.revati.skyabyss.titan.BackBuildJobs.afterAsync(BIRD::preload, () -> BIRD.job(kit.level()))
+                : jp.revati.skyabyss.titan.BackBuildJobs.empty();
     }
 
     // 鳥の体を置いたあと (部屋を掘る・中身を建てる)
@@ -56,6 +57,8 @@ public final class StormBirdBuilder {
     public static void restSteps(jp.revati.skyabyss.titan.BackBuildJobs.Steps s, StormKit kit) {
         long[] t0 = new long[1];
         int[] n = new int[3];
+        // 仕上げが触る範囲 (背の監査の範囲) のチャンクを先に読み込む (読みに行くと、その場で tick が止まる。道・広場・甲板で 0.5〜0.9 秒)
+        s.thenJob("load area", () -> jp.revati.skyabyss.titan.BackBuildJobs.loadArea(kit.level(), -330, -190, 330, 270));
         s.then("arrival", () -> {
             t0[0] = System.currentTimeMillis();
             arrival(kit);
@@ -72,7 +75,9 @@ public final class StormBirdBuilder {
         // 周回の風切りの骨の前の道 (版 31)。体を掘ったあと、壁の皮の前
         s.then("long walk", () -> StormLongWalk.build(kit));
         StormDeckBuilder.steps(s, kit);
-        s.then("silhouette", () -> StormSilhouette.build(kit));
+        for (var part : StormSilhouette.parts()) {
+            s.then("silhouette", () -> part.accept(kit));
+        }
         s.then("skin", () -> n[0] = kit.skin(StormBirdBuilder::styleAt));
         s.then("seal", () -> n[1] = kit.seal(p -> openToSky(p.getX(), p.getY(), p.getZ()), StormBirdBuilder::styleAt));
         s.then("corners", () -> n[2] = kit.sealCorners(p -> openToSky(p.getX(), p.getY(), p.getZ()), StormBirdBuilder::styleAt));
@@ -334,22 +339,7 @@ public final class StormBirdBuilder {
                 kit.solid(x, a.floor() + a.height() + 3, z, StormKit.wall(Style.FEATHER, x, 0, z));
             }
         }
-        for (int lx = -8; lx <= 8; lx += 4) {
-            for (int lz : new int[] {34, 38, 42}) {
-                kit.solid(lx, a.floor() + a.height() + 3, lz, StormKit.LAMP);
-            }
-        }
-        // 床の灯り (真ん中の床に光る石。ここを渡る人の足もとを照らす)
-        for (int lx : new int[] {-2, 2}) {
-            kit.put(lx, a.floor(), 36, StormKit.LAMP);
-        }
-        // 飾りの焚き火と腰掛け (共鳴の炉は置かない。背の中には無い)
-        kit.put(-10, a.floor() + 1, 43, jp.revati.skyabyss.relic.RelicBlocks.hearth(jp.revati.skyabyss.relic.RelicStyle.STORM, true));
-        StormDeco.bench(kit, -12, -9, 30, 30, a.floor() + 1, Direction.SOUTH);
-        // 羽軸の柱 (入口の左右)
-        for (int sx : new int[] {-9, 9}) {
-            StormDeco.featherPillar(kit, sx, 34, a.floor(), 5);
-        }
+        // 版 32: 尾の間は封じて誰も入らない (trial/RouteSeals)。天井と床の灯り・飾りの焚き火と腰掛け・羽軸の柱は置かない
         // 尾の間 → 広間: 1 段ずつ下りる (封印の z は SEAL_Z)。幅 7・高さ 5
         for (int z = a.z1() - 1; z >= HUB.z2() + 1; z--) {
             int floor = Math.min(a.floor(), HUB.floor() + (z - HUB.z2()));
@@ -358,10 +348,6 @@ public final class StormBirdBuilder {
                 for (int x = -CORRIDOR_HALF; x <= CORRIDOR_HALF; x++) {
                     kit.stair(x, floor, z, Direction.SOUTH, Blocks.POLISHED_DIORITE_STAIRS.defaultBlockState());
                 }
-            }
-            if (z % 4 == 0) {
-                kit.solid(CORRIDOR_HALF + 1, floor + 3, z, StormKit.LAMP);
-                kit.solid(-CORRIDOR_HALF - 1, floor + 3, z, StormKit.LAMP);
             }
         }
     }
@@ -384,10 +370,8 @@ public final class StormBirdBuilder {
                 kit.put(x, t, z, StormKit.GLASS);
             }
         }
-        // 羽軸の柱 (広間の目印と灯り)
-        for (int[] p : HUB_PILLARS) {
-            StormDeco.featherPillar(kit, p[0], p[1], a.floor(), a.height() - 2);
-        }
+        // 版 32: 風の広間は封じて誰も入らない (trial/RouteSeals)。羽軸の柱・行き先の線・戸口の色の玉・灯りの柱は置かない。
+        // 天窓 (背の上から見える)・昇り風・上の回廊・凪の塔・竜骨の門 (心臓の間の天井) は形として残す
         // 中央の昇り風の穴 (銅の格子)
         for (int x = -1; x <= 1; x++) {
             for (int z = HUB_UPDRAFT.getZ() - 1; z <= HUB_UPDRAFT.getZ() + 1; z++) {
@@ -439,22 +423,6 @@ public final class StormBirdBuilder {
                     kit.put(x, a.floor(), z, StormKit.COPPER);
                 }
             }
-        }
-        // 行き先の線 (広間の真ん中から、西 = 水色、東 = 金、前 = 白。出口の戸の前まで)
-        int wz = WZ;
-        StormDeco.strip(kit, a.floor(), StormDeco.WEST_LINE, StormDeco.WEST_PIP, 4, 1, new int[] {-4, kz}, new int[] {-14, kz}, new int[] {-14, wz}, new int[] {-21, wz});
-        StormDeco.strip(kit, a.floor(), StormDeco.EAST_LINE, StormDeco.EAST_PIP, 4, 1, new int[] {4, kz}, new int[] {14, kz}, new int[] {14, wz}, new int[] {21, wz});
-        StormDeco.strip(kit, a.floor(), StormDeco.FRONT_LINE, StormDeco.FRONT_PIP, 4, 1, new int[] {0, kz - 4}, new int[] {0, HUB_UPDRAFT.getZ() + 3});
-        // 出口の上の色の飾り (戸口の上に光る玉)
-        kit.put(a.x1() - 1, a.floor() + 7, wz, Blocks.SEA_LANTERN.defaultBlockState());
-        kit.put(a.x2() + 1, a.floor() + 7, wz, Blocks.OCHRE_FROGLIGHT.defaultBlockState());
-        kit.put(0, NECK.floor() + NECK.height() + 1, NECK.z2(), Blocks.PEARLESCENT_FROGLIGHT.defaultBlockState());
-        // 広間の南の壁の灯りの柱 (尾の間からの入口の左右) と、北の壁ぎわの灯りの柱 (上の回廊と昇り風の下)
-        for (int sx : new int[] {-5, 5}) {
-            StormDeco.lampPost(kit, sx, a.floor(), a.z2());
-        }
-        for (int sx : new int[] {-15, -8, 8, 15}) {
-            StormDeco.lampPost(kit, sx, a.floor(), a.z1() + 2);
         }
     }
 

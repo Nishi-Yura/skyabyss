@@ -150,7 +150,8 @@ public final class ObjectiveStrip {
                 target = Resolved.NONE;
             }
             var trial = jp.revati.skyabyss.client.titan.BoardBeamClient.byPrefix("trial_obj:");
-            if (trial != null) {
+            // 運ばれるのを待つあいだは、越えた試練の目的を出さない
+            if (trial != null && !jp.revati.skyabyss.client.trial.TrialBoardClient.route().carrying()) {
                 String next = Component.translatable("objective.skyabyss.trial_" + trial.key().substring("trial_obj:".length())).getString();
                 text = route == null ? next : route + "：" + next;
                 target = new Resolved(BlockPos.containing(trial.cx(), trial.cy() - 1.0, trial.cz()), false);

@@ -33,6 +33,11 @@ public final class TitanBodyBlocks {
     private record Data(int x0, int y0, int z0, int nx, int ny, int nz, BlockState[] palette, short[] shell, short[][] runs) {
     }
 
+    // 形を読み込んでおく (別のスレッドから。BackBuildJobs.afterAsync)
+    public void preload() {
+        data();
+    }
+
     private synchronized Data data() {
         if (data == null) {
             data = load();

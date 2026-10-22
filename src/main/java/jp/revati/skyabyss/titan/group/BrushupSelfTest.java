@@ -167,7 +167,8 @@ public final class BrushupSelfTest {
             room.testGather(false);
             check(f, cp.equals(mapper.of(group, cp)), what + ": rest " + cp + " moved without a fight");
             room.testGather(true);
-            check(f, "hub".equals(mapper.of(group, cp)), what + ": a player who fell in the fight would wake at " + mapper.of(group, cp) + ", not the hub");
+            // 順路では広間を封じたので、戦いの最中でもその段の休み場 (前室) で目覚める (32 の 2.4)
+            check(f, cp.equals(mapper.of(group, cp)), what + ": a player who fell in the fight would wake at " + mapper.of(group, cp) + ", not the rest " + cp);
             check(f, cp.equals(mapper.of(other, cp)), what + ": another group's fight moved this group's rest point");
             for (String rest : unaffected) {
                 check(f, rest.equals(mapper.of(group, rest)), what + ": the fight moved the unrelated rest " + rest);

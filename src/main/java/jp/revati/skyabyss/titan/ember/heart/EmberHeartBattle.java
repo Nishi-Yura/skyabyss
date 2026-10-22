@@ -292,9 +292,10 @@ public final class EmberHeartBattle {
 
     // 炉心の広間へ戻る (休み場 hub の脇)
     public static void ascend(ServerLevel level, ServerPlayer player) {
-        EmberBackLayout.Rest hub = EmberBackLayout.rest("hub");
+        // 炉心の広間は封じた (trial/RouteSeals)。到着の台へ
+        BlockPos hub = jp.revati.skyabyss.trial.RouteSeals.safeFeet(jp.revati.skyabyss.progress.Titans.EMBER);
         player.fallDistance = 0;
-        player.teleportTo(level, hub.floor().getX() + 0.5, hub.floor().getY() + 1, hub.floor().getZ() + 3.5, hub.yaw(), 0f);
+        player.teleportTo(level, hub.getX() + 0.5, hub.getY(), hub.getZ() + 0.5, EmberBackLayout.ARRIVAL_YAW, 0f);
         player.playNotifySound(SoundEvents.BEACON_DEACTIVATE, net.minecraft.sounds.SoundSource.PLAYERS, 1.0f, 1.2f);
     }
 

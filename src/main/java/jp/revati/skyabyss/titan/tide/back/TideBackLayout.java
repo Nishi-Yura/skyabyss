@@ -46,7 +46,8 @@ public final class TideBackLayout {
     //     docs/design/29 の 3.7)。他の背の版の最大 (余燼 23) の次
     // 30: 任意の翼をなくした (息の間・ひれの道・殻の上の道・冠・光の井戸・宝箱・息の間の休み場 u0〜u3)。周回の既知の道もなくした
     // 31: 順路の入口の箱 (潮門の内側の段) の床の灯り (R6 の通しで真っ暗だった)
-    public static final int LAYOUT_VERSION = 31;
+    // 32: 封じた潮の広間の灯り・壁の柱を外した (trial/RouteSeals。2026-10-22)
+    public static final int LAYOUT_VERSION = 32;
     // 生成の海 (水の最上段は y=62)
     public static final int SEA = 63;
     public static final int SEA_FLOOR = 41;

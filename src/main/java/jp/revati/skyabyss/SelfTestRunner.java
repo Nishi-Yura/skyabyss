@@ -206,7 +206,10 @@ public final class SelfTestRunner {
         steps.add(Step.once("titan solid (load)", jp.revati.skyabyss.titan.solid.TitanSolidSelfTest::load));
         steps.add(Step.once("titan solid", 40, jp.revati.skyabyss.titan.solid.TitanSolidSelfTest::runSelfTest));
         steps.add(Step.once("whale (load)", WhaleKeeper::selfTestLoad));
-        steps.add(Step.once("whale", 40, WhaleKeeper::selfTestRun));
+        // 試す所のチャンクが敵の動く状態 (entity ticking) になるまで待つ (ほかの段のあとはサーバーが忙しく、40 tick では読み込みが済まず、
+        // 呼び直した岩鯨が見えないまま「登録されていない」と落ちていた)
+        steps.add(Step.until("whale (wait)", WhaleKeeper::selfTestReady));
+        steps.add(Step.once("whale", 20, WhaleKeeper::selfTestRun));
         // 巨神の子 (笛で現れる・パーティ全員 6 人が乗る・得意ごとの行き先・降りると歌に溶ける・眠りの断り・入り直し)。docs/design/28。SKYABYSS_SELFTEST_ONLY=young
         steps.addAll(jp.revati.skyabyss.titan.young.YoungSelfTest.steps());
         steps.add(Step.once("tide_heart (load)", TideHeartSelfTest::load));
@@ -306,6 +309,8 @@ public final class SelfTestRunner {
         steps.addAll(jp.revati.skyabyss.combat.CombatRulesSelfTest.steps());
         // 順路の部屋が分かれている (封じを壁として歩く)。SKYABYSS_SELFTEST_ONLY="route rooms"
         steps.addAll(jp.revati.skyabyss.trial.RouteRoomsSelfTest.steps());
+        steps.addAll(jp.revati.skyabyss.trial.RoutePartySelfTest.steps());
+        steps.addAll(jp.revati.skyabyss.titan.BackBuildsSelfTest.steps());
         // 区画の写し (写せるセルを区画へ写して動かす)。docs/design/32 の 5 章。SKYABYSS_SELFTEST_ONLY="trial slot"
         steps.addAll(jp.revati.skyabyss.trial.TrialSlotSelfTest.steps());
         // 巨神の祠・歌片・巨神の見え方。docs/design/32 の 3 章。SKYABYSS_SELFTEST_ONLY="trial shrine"

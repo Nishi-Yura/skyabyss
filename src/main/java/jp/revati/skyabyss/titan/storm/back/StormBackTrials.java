@@ -589,7 +589,7 @@ public final class StormBackTrials {
         syncGates(level, group);
         GroupOverlays.refresh(level, group);
         if (moveOut) {
-            BlockPos hub = rest("hub");
+            BlockPos hub = jp.revati.skyabyss.trial.RouteSeals.safeFeet(jp.revati.skyabyss.progress.Titans.THUNDER_WING);
             for (ServerPlayer pl : Groups.online(level, group)) {
                 if (!pl.isSpectator() && StormBackLayout.inTrial(pl.position())) {
                     pl.fallDistance = 0;
@@ -633,7 +633,7 @@ public final class StormBackTrials {
         }
         tag.putInt(TAG_SEEN_EPOCH, epoch);
         if (player.isAlive() && !player.isSpectator() && StormBackLayout.inTrial(player.position())) {
-            BlockPos hub = rest("hub");
+            BlockPos hub = jp.revati.skyabyss.trial.RouteSeals.safeFeet(jp.revati.skyabyss.progress.Titans.THUNDER_WING);
             player.fallDistance = 0;
             player.teleportTo(level, hub.getX() + 0.5, hub.getY(), hub.getZ() + 0.5, player.getYRot(), 0f);
             Notice.narrate(player, "message.skyabyss.storm.party_changed");
@@ -733,7 +733,8 @@ public final class StormBackTrials {
     // 倒れて目覚める休み場。その休み場が戦いの部屋の前室で、そのグループがいま戦っている最中なら、鼓動の間 (hub) にする
     // (岩鯨の背と同じ。戦場のすぐそばで目覚めないように。02 の 7.3、brushup P1-1)
     public static String respawnCheckpoint(java.util.UUID group, String cp) {
-        return isFightNear(group, cp) ? "hub" : cp;
+        // 順路では、広間 (hub) は封じて誰も入らない (trial/RouteSeals)。戦いの前室でも、その段の休み場で目覚める (32 の 2.4)
+        return cp;
     }
 
     static boolean isFightNear(java.util.UUID group, String cp) {

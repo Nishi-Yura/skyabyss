@@ -65,6 +65,6 @@ public final class TideTurtle {
     public static jp.revati.skyabyss.titan.BackBuildJobs.Job job(TideKit kit) {
         BlockState water = Blocks.WATER.defaultBlockState();
         BlockState air = Blocks.AIR.defaultBlockState();
-        return BODY.job(kit.level(), TideKit.FLAGS, y -> y < TideBackLayout.SEA ? water : air);
+        return jp.revati.skyabyss.titan.BackBuildJobs.afterAsync(BODY::preload, () -> BODY.job(kit.level(), TideKit.FLAGS, y -> y < TideBackLayout.SEA ? water : air));
     }
 }

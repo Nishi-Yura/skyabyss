@@ -168,7 +168,7 @@ public final class TideBackTrials {
         boolean differs = tag.getInt(TAG_SEEN_EPOCH) != epoch;
         if (inTrialBody(player.position()) && player.isAlive() && !player.isSpectator()) {
             clearCheckpoint(player);
-            BlockPos hub = RESTS.get(0).spawn();
+            BlockPos hub = jp.revati.skyabyss.trial.RouteSeals.safeFeet(jp.revati.skyabyss.progress.Titans.TIDE_SHELL);
             player.fallDistance = 0;
             player.teleportTo(level, hub.getX() + 0.5, hub.getY(), hub.getZ() + 0.5, player.getYRot(), 0f);
             Notice.narrate(player, "message.skyabyss.rest_point_lost");
@@ -599,7 +599,7 @@ public final class TideBackTrials {
             e.discard();
         }
         // 試練の中の、そのグループの人は、潮の広間へ移す
-        BlockPos hub = RESTS.get(0).spawn();
+        BlockPos hub = jp.revati.skyabyss.trial.RouteSeals.safeFeet(jp.revati.skyabyss.progress.Titans.TIDE_SHELL);
         for (ServerPlayer p : Groups.online(level, group)) {
             if (inTrialBody(p.position()) && !p.isSpectator()) {
                 p.fallDistance = 0;
@@ -726,7 +726,8 @@ public final class TideBackTrials {
     // 倒れて目覚める休み場。その休み場が戦いの部屋の前室で、そのグループがいま戦っている最中なら、鼓動の間 (hub) にする
     // (岩鯨の背と同じ。戦場のすぐそばで目覚めないように。02 の 7.3、brushup P1-1)
     public static String respawnCheckpoint(java.util.UUID group, String cp) {
-        return isFightNear(group, cp) ? "hub" : cp;
+        // 順路では、広間 (hub) は封じて誰も入らない (trial/RouteSeals)。戦いの前室でも、その段の休み場で目覚める (32 の 2.4)
+        return cp;
     }
 
     static boolean isFightNear(java.util.UUID group, String cp) {

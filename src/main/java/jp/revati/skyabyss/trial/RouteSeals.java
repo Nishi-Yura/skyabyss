@@ -65,6 +65,35 @@ public final class RouteSeals {
         };
     }
 
+    // 封じた広間の中か (内側だけ。壁の灯りは隣の部屋も照らすので残す)。titan は巨神の名 (Titans) か、灯りの表・建築の監査の短い名 (whale・tide・storm・ember)。
+    // 誰も入らないので、灯り・飾りは置かない (2026-10-22「誰も見ない豪華な建築は省いて」)。建築の監査の暗さも数えない
+    public static boolean inHall(String titan, BlockPos p) {
+        String t = switch (titan) {
+            case "whale" -> Titans.STONE_WHALE;
+            case "tide" -> Titans.TIDE_SHELL;
+            case "storm" -> Titans.THUNDER_WING;
+            case "ember" -> Titans.EMBER;
+            default -> titan;
+        };
+        for (Room r : junctions(t)) {
+            if (p.getX() >= r.x1() && p.getX() <= r.x2() && p.getY() >= r.y1() && p.getY() <= r.y2() && p.getZ() >= r.z1() && p.getZ() <= r.z2()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // 封じたあと、背の中で人を戻す所 (到着の台。入口の箱の手前で、広間・試練には歩いて入れない)。足の位置。
+    // 広間 (鼓動の間など) へ戻していた所 (グループが変わった・リセット・心臓のあとの光・笛の光・休み場の記録が無い) はここへ
+    public static BlockPos safeFeet(String titan) {
+        return switch (titan) {
+            case Titans.TIDE_SHELL -> jp.revati.skyabyss.titan.tide.back.TideBackLayout.ARRIVAL;
+            case Titans.THUNDER_WING -> jp.revati.skyabyss.titan.storm.back.StormBackLayout.ARRIVAL;
+            case Titans.EMBER -> jp.revati.skyabyss.titan.ember.back.EmberBackLayout.ARRIVAL.above();
+            default -> jp.revati.skyabyss.titan.dungeon.TitanBackLayout.arrival();
+        };
+    }
+
     // ---------------------------------------------------------------- 置く
     // 背を建てた最後に呼ぶ (何度呼んでも同じ)。置いた数
     public static int place(ServerLevel back, String titan) {

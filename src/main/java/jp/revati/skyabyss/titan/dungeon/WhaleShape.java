@@ -28,7 +28,12 @@ public final class WhaleShape {
     private record Data(int x0, int y0, int z0, int nx, int ny, int nz, BlockState[] palette, short[] body, short[][] runs) {
     }
 
-    private static Data data() {
+    // 形を読み込んでおく (別のスレッドから。BackBuildJobs.afterAsync)
+    static void preload() {
+        data();
+    }
+
+    private static synchronized Data data() {
         if (data == null) {
             data = load();
         }

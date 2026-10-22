@@ -33,11 +33,24 @@ public final class BackShape {
         this.path = path;
     }
 
+    // 一度だけ調べて覚える (毎回資源を開いていて、雷翼の道・甲板の手順が top を何千回も呼ぶと 0.5 秒かかっていた)
+    private Boolean exists;
+
     public synchronized boolean exists() {
-        try (InputStream raw = BackShape.class.getResourceAsStream(path)) {
-            return raw != null;
-        } catch (IOException e) {
-            return false;
+        if (exists == null) {
+            try (InputStream raw = BackShape.class.getResourceAsStream(path)) {
+                exists = raw != null;
+            } catch (IOException e) {
+                exists = false;
+            }
+        }
+        return exists;
+    }
+
+    // 形を読み込んでおく (別のスレッドから。BackBuildJobs.afterAsync)
+    public void preload() {
+        if (exists()) {
+            data();
         }
     }
 

@@ -38,7 +38,8 @@ public final class TrialBoardNet {
     }
 
     // 順路の今の段。titan = 巨神の名前、step 0〜4、mid = 中ボスの段、cellId = 今の段の試練 (なければ "")、slot = 枠 (walk/wit/fight)、cycle = 周
-    public record RouteState(String titan, int step, boolean mid, String cellId, String slot, int cycle) implements CustomPacketPayload {
+    // carrying: 段を越えて、次の段へ運ばれるのを待っているあいだ (帯は前の試練の目的を出さない)
+    public record RouteState(String titan, int step, boolean mid, String cellId, String slot, int cycle, boolean carrying) implements CustomPacketPayload {
         public static final Type<RouteState> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "route_state"));
         public static final StreamCodec<RegistryFriendlyByteBuf, RouteState> STREAM_CODEC = StreamCodec.of(
                 (buf, t) -> {
@@ -48,7 +49,8 @@ public final class TrialBoardNet {
                     buf.writeUtf(t.cellId, 16);
                     buf.writeUtf(t.slot, 16);
                     buf.writeVarInt(t.cycle);
-                }, buf -> new RouteState(buf.readUtf(32), buf.readVarInt(), buf.readBoolean(), buf.readUtf(16), buf.readUtf(16), buf.readVarInt()));
+                    buf.writeBoolean(t.carrying);
+                }, buf -> new RouteState(buf.readUtf(32), buf.readVarInt(), buf.readBoolean(), buf.readUtf(16), buf.readUtf(16), buf.readVarInt(), buf.readBoolean()));
 
         @Override
         public Type<? extends CustomPacketPayload> type() {

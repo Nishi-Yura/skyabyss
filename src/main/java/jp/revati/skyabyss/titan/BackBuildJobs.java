@@ -17,7 +17,7 @@ import net.neoforged.neoforge.event.tick.ServerTickEvent;
 // 巨神の背中 (岩鯨・潮殻・雷翼・余燼) の体を、起動時に一気に建てず、何 tick かに分けて建てる (13 の 24.5節)。
 // 建て方の時間のほぼ全部 (9 割以上) は「体のブロックを置く」ループなので、そこを 1 列 (16 x 16 の柱) ずつ進められる形にし、
 // 1 tick に使う時間 (予算) だけ進める。残り (部屋を掘る、中身を建てる、建てた印) は体を置き終えた tick に一度に済ませる (0.2〜0.5 秒)。
-//   - 予算: 誰もいなければ 25 ms、人がいれば 10 ms (予算のほかに、チャンクの読み込みと明るさの計算が 1 tick 20 ms ほどかかる)
+//   - 予算: 誰もいなければ 25 ms、人がいれば tick の余り次第で 10〜25 ms (budgetMs。予算のほかに、チャンクの読み込みと明るさの計算が 1 tick 20 ms ほどかかる)
 //   - 建てている途中でサーバーが止まっても、建てた印は最後に付くので、次の起動でもう一度始める (置くのは「変わるブロックだけ」なので、置いた分は飛ばせる)
 //   - 建てている途中で乗り込みなどが ensureBuilt / build を呼んだら、予定の続きをその場で最後まで進める (finishNow。最初からやり直さない)
 // 体を置いたあとの仕上げ (部屋を掘る・中身・詰みの修復) も、Steps で一つずつ予算の中で進める (32 の R6 の調整: 一 tick に 5〜36 秒止まっていた)。
@@ -33,7 +33,83 @@ public final class BackBuildJobs {
     // tick の中から進めているときだけ、読み込みを待って次の tick に回せる (自己テストの runAll・finishNow はその場で読む)
     private static boolean inTick;
     static final net.minecraft.server.level.TicketType<net.minecraft.world.level.ChunkPos> TICKET =
-            net.minecraft.server.level.TicketType.create("skyabyss_back_build", java.util.Comparator.comparingLong(net.minecraft.world.level.ChunkPos::toLong), 400);
+            net.minecraft.server.level.TicketType.create("skyabyss_back_build", java.util.Comparator.comparingLong(net.minecraft.world.level.ChunkPos::toLong));
+    // 建てているあいだ読み込んだままにするチャンク (体を置いたあとの仕上げが、消えたチャンクをその場で読み直して tick を止めていた。
+    // JFR で、雷翼の道・広場・外形の手順の 0.3〜0.9 秒はほとんど読み込みの待ちだった)。仕事が終わるとまとめて外す
+    private static final java.util.Map<ResourceKey<Level>, it.unimi.dsi.fastutil.longs.LongOpenHashSet> HELD = new java.util.HashMap<>();
+
+    public static void hold(ServerLevel level, net.minecraft.world.level.ChunkPos cp) {
+        // 次の建設が始まったら、前の建設の外す予定は取り消す (外すのはその建設の終わりに)
+        RELEASE_AT.remove(level);
+        if (HELD.computeIfAbsent(level.dimension(), k -> new it.unimi.dsi.fastutil.longs.LongOpenHashSet()).add(cp.toLong())) {
+            level.getChunkSource().addRegionTicket(TICKET, cp, 0, cp);
+        }
+    }
+
+    // 仕上げの手順が触る範囲 (x1..x2, z1..z2) のチャンクを先に読み込んで待つ仕事。tick の中でだけ待つ (その場で最後まで進めるときは何もしない)
+    // いま tick の中から進めているか (読み込みを待って次の tick に回してよいか)
+    public static boolean inTick() {
+        return inTick;
+    }
+
+    public static Job loadArea(ServerLevel level, int x1, int z1, int x2, int z2) {
+        return new Job() {
+            @Override
+            public boolean step(long deadlineNanos) {
+                if (!inTick) {
+                    return true;
+                }
+                boolean all = true;
+                for (int cx = x1 >> 4; cx <= x2 >> 4; cx++) {
+                    for (int cz = z1 >> 4; cz <= z2 >> 4; cz++) {
+                        if (level.getChunkSource().getChunkNow(cx, cz) == null) {
+                            hold(level, new net.minecraft.world.level.ChunkPos(cx, cz));
+                            all = false;
+                        }
+                    }
+                }
+                return all;
+            }
+
+            @Override
+            public int placed() {
+                return 0;
+            }
+        };
+    }
+
+    // 建て終えてから外すまでの tick (明るさの計算が済むのを待つ。すぐ外すと、明るさが古いまま保存されて暗い所が残った)
+    static final int RELEASE_DELAY = 400;
+    private static final java.util.Map<ServerLevel, Integer> RELEASE_AT = new java.util.HashMap<>();
+
+    static void releaseAll(ServerLevel level) {
+        RELEASE_AT.put(level, level.getServer().getTickCount() + RELEASE_DELAY);
+    }
+
+    private static void tickReleases(net.minecraft.server.MinecraftServer server) {
+        if (RELEASE_AT.isEmpty()) {
+            return;
+        }
+        int now = server.getTickCount();
+        for (var e : new java.util.ArrayList<>(RELEASE_AT.entrySet())) {
+            if (now >= e.getValue()) {
+                RELEASE_AT.remove(e.getKey());
+                releaseNow(e.getKey());
+            }
+        }
+    }
+
+    private static void releaseNow(ServerLevel level) {
+        it.unimi.dsi.fastutil.longs.LongOpenHashSet held = HELD.remove(level.dimension());
+        if (held == null) {
+            return;
+        }
+        it.unimi.dsi.fastutil.longs.LongIterator it = held.iterator();
+        while (it.hasNext()) {
+            net.minecraft.world.level.ChunkPos cp = new net.minecraft.world.level.ChunkPos(it.nextLong());
+            level.getChunkSource().removeRegionTicket(TICKET, cp, 0, cp);
+        }
+    }
 
     // 体を置く仕事。deadline (System.nanoTime) まで進める。終われば true
     public interface Job {
@@ -90,7 +166,7 @@ public final class BackBuildJobs {
             long last = Math.min((total >> 8) - 1, ci + PREFETCH);
             for (long c = Math.max(ci, requested + 1); c <= last; c++) {
                 net.minecraft.world.level.ChunkPos cp = chunkPos(c);
-                level.getChunkSource().addRegionTicket(TICKET, cp, 0, cp);
+                hold(level, cp);
                 requested = c;
             }
         }
@@ -258,6 +334,7 @@ public final class BackBuildJobs {
             // 最後まで
         }
         t.finish.run();
+        releaseAll(t.level);
         SkyAbyss.LOGGER.info("Finished the {} at once (it was still building in the background): {} ms", t.name, (System.nanoTime() - t0) / 1_000_000L);
         return true;
     }
@@ -315,13 +392,28 @@ public final class BackBuildJobs {
             if (t.job.step(deadline)) {
                 QUEUE.poll();
                 t.finish.run();
+                releaseAll(t.level);
             }
         }
         return new long[] {(System.nanoTime() - t0) / 1_000_000L, steps};
     }
 
+    // 人がいるときの予算は、サーバーの tick の余り次第 (2026-10-22: 背が建ち終わるまで数分かかっていた)。
+    // ほかの仕事 (平均の tick の長さから、この建設の平均を引いたもの) が軽ければ、tick が 35 ms を超えない分だけ使う (10〜25 ms)
+    static final long TICK_TARGET_MS = 35;
+    private static long workEma;
+
+    static long budgetMs(net.minecraft.server.MinecraftServer server) {
+        if (server.getPlayerCount() == 0) {
+            return BUDGET_IDLE_MS;
+        }
+        long others = Math.max(0, server.getAverageTickTimeNanos() - workEma) / 1_000_000L;
+        return Math.max(BUDGET_PLAYERS_MS, Math.min(BUDGET_IDLE_MS, TICK_TARGET_MS - others));
+    }
+
     @SubscribeEvent
     static void onServerTick(ServerTickEvent.Post event) {
+        tickReleases(event.getServer());
         Task t;
         synchronized (BackBuildJobs.class) {
             t = QUEUE.peek();
@@ -329,7 +421,7 @@ public final class BackBuildJobs {
         if (t == null) {
             return;
         }
-        long budget = event.getServer().getPlayerCount() > 0 ? BUDGET_PLAYERS_MS : BUDGET_IDLE_MS;
+        long budget = budgetMs(event.getServer());
         long start = System.nanoTime();
         inTick = true;
         boolean done;
@@ -339,8 +431,10 @@ public final class BackBuildJobs {
             inTick = false;
         }
         t.ticks++;
+        long work = System.nanoTime() - start;
+        workEma = workEma == 0 ? work : (workEma * 7 + work) / 8;
         if (!done) {
-            t.workNanos += System.nanoTime() - start;
+            t.workNanos += work;
             t.maxTickNanos = Math.max(t.maxTickNanos, System.nanoTime() - start);
             return;
         }
@@ -350,6 +444,7 @@ public final class BackBuildJobs {
         long placedMs = (t.workNanos + System.nanoTime() - start) / 1_000_000L;
         long f0 = System.nanoTime();
         t.finish.run();
+        releaseAll(t.level);
         t.maxTickNanos = Math.max(t.maxTickNanos, System.nanoTime() - start);
         SkyAbyss.LOGGER.info("Built the {} in the background: {} blocks placed in {} ticks ({} ms of work, budget {} ms, longest tick {} ms{}), finishing {} ms",
                 t.name, t.job.placed(), t.ticks, placedMs, budget, t.maxTickNanos / 1_000_000L,
@@ -361,9 +456,44 @@ public final class BackBuildJobs {
         synchronized (BackBuildJobs.class) {
             QUEUE.clear();
         }
+        HELD.clear();
+        RELEASE_AT.clear();
     }
 
     // 仕事が一つも無い所へ置く用の、何もしない仕事 (形の取り込みが無いとき)
+    // 形の読み込み (load) を別のスレッドで済ませてから、仕事 (make) を作って進める。tick の中では読み込みを待つあいだ止めない
+    // (岩鯨・雷翼・潮殻の形の読み込みで、体の最初の一切れが 0.3〜0.5 秒かかっていた)。その場で最後まで進めるときは、その場で読む
+    public static Job afterAsync(Runnable load, java.util.function.Supplier<Job> make) {
+        return new Job() {
+            private java.util.concurrent.CompletableFuture<Void> loading;
+            private Job job;
+
+            @Override
+            public boolean step(long deadlineNanos) {
+                if (job == null) {
+                    if (deadlineNanos != Long.MAX_VALUE) {
+                        if (loading == null) {
+                            loading = java.util.concurrent.CompletableFuture.runAsync(load, net.minecraft.Util.backgroundExecutor());
+                        }
+                        if (!loading.isDone()) {
+                            return false;
+                        }
+                        loading.join();
+                    } else {
+                        load.run();
+                    }
+                    job = make.get();
+                }
+                return job.step(deadlineNanos);
+            }
+
+            @Override
+            public int placed() {
+                return job == null ? 0 : job.placed();
+            }
+        };
+    }
+
     public static Job empty() {
         return new Job() {
             @Override

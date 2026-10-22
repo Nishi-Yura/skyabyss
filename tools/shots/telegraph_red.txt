@@ -1,0 +1,446 @@
+# 赤だけの予告の見え方 (2026-10-22): 四つの心臓の技の予告と、四つの領域。telegraph_heart / telegraph_tide_heart / telegraph_storm / telegraph_ember_heart / heart_domains をつないだもの
+# ./gradlew runShots -Pscript=tools/shots/telegraph_red.txt -PshotsName=telegraph_red
+world shots flat
+size 1280 720
+timeout 4800
+render 8
+clouds off
+
+# ---- telegraph_heart
+
+cmd time set noon
+cmd weather clear
+cmd gamemode survival Dev
+cmd effect give Dev minecraft:resistance 1000000 4 true
+cmd fill -30 -61 -30 30 -61 30 minecraft:smooth_basalt destroy
+cmd fill -4 -44 11 4 -44 17 minecraft:air
+cmd fill -4 -44 11 4 -44 17 minecraft:barrier
+cmd kill @e[type=!minecraft:player,distance=..80]
+hud off
+
+camera minecraft:overworld 0.5 -43 14.5 180 38
+waitchunks
+wait 20
+cmd skyabyss cinematic stop
+chat clear
+cmd summon skyabyss:stone_whale_heart 0 -59 0 {PersistenceRequired:1b,Rotation:[0f,0f]}
+wait 10
+cmd skyabyss cinematic stop
+camera minecraft:overworld 0.5 -43 14.5 180 38
+wait 100
+
+cmd skyabyss dev force @e[type=skyabyss:stone_whale_heart,limit=1] THRUST 6
+wait 12
+shot heart_thrust_a
+wait 50
+
+cmd skyabyss dev force @e[type=skyabyss:stone_whale_heart,limit=1] LEAP 6
+wait 14
+shot heart_leap_a
+wait 22
+shot heart_leap_b
+wait 60
+
+cmd skyabyss dev force @e[type=skyabyss:stone_whale_heart,limit=1] CHAIN 6
+wait 16
+shot heart_chain_a
+wait 22
+shot heart_chain_b
+wait 70
+
+cmd skyabyss dev force @e[type=skyabyss:stone_whale_heart,limit=1] BEAM 6
+wait 24
+shot heart_beam_a
+wait 26
+shot heart_beam_b
+wait 60
+
+cmd skyabyss dev force @e[type=skyabyss:stone_whale_heart,limit=1] SHELL_DROP 6
+wait 18
+shot heart_drop_a
+wait 60
+
+cmd skyabyss dev force @e[type=skyabyss:stone_whale_heart,limit=1] CRACK 6
+wait 18
+shot heart_crack_a
+wait 60
+
+cmd skyabyss dev force @e[type=skyabyss:stone_whale_heart,limit=1] VOLLEY 6
+wait 18
+shot heart_volley_a
+wait 60
+
+cmd skyabyss dev force @e[type=skyabyss:stone_whale_heart,limit=1] SWEEP 6
+wait 40
+shot heart_sweep_a
+wait 20
+shot heart_sweep_b
+cmd kill @e[type=skyabyss:stone_whale_heart]
+cmd kill @e[type=!minecraft:player,distance=..120]
+
+# ---- telegraph_tide_heart
+
+cmd time set noon
+cmd weather clear
+cmd gamemode survival Dev
+cmd effect give Dev minecraft:resistance 1000000 4 true
+cmd fill -30 -61 -30 30 -61 30 minecraft:smooth_basalt destroy
+cmd fill -4 -44 11 4 -44 17 minecraft:air
+cmd fill -4 -44 11 4 -44 17 minecraft:barrier
+cmd kill @e[type=!minecraft:player,distance=..80]
+hud off
+
+waitchunks
+wait 60
+camera minecraft:overworld 0.5 -43 14.5 180 38
+waitchunks
+wait 20
+cmd skyabyss cinematic stop
+chat clear
+cmd summon skyabyss:tide_heart 0 -58.5 0 {PersistenceRequired:1b,Rotation:[0f,0f]}
+wait 10
+cmd skyabyss cinematic stop
+camera minecraft:overworld 0.5 -43 14.5 180 38
+wait 110
+
+cmd skyabyss dev tideforce @e[type=skyabyss:tide_heart,limit=1] BREATH 6
+wait 14
+shot tide_heart_breath_a
+wait 50
+
+cmd skyabyss dev tideforce @e[type=skyabyss:tide_heart,limit=1] SHELL_STRIKE 6
+wait 14
+shot tide_heart_shell_a
+wait 18
+shot tide_heart_shell_b
+wait 70
+
+cmd skyabyss dev tideforce @e[type=skyabyss:tide_heart,limit=1] WHIRL 6
+wait 40
+shot tide_heart_whirl_a
+wait 70
+
+cmd skyabyss dev tideforce @e[type=skyabyss:tide_heart,limit=1] FLOOD 6
+wait 62
+shot tide_heart_flood_a
+wait 90
+
+cmd skyabyss dev tideforce @e[type=skyabyss:tide_heart,limit=1] BUBBLE 6
+wait 20
+shot tide_heart_bubble_a
+wait 40
+
+cmd skyabyss dev tideforce @e[type=skyabyss:tide_heart,limit=1] PEARL 6
+wait 60
+shot tide_heart_pearl_a
+wait 80
+shot tide_heart_pearl_b
+wait 60
+
+cmd skyabyss dev tideforce @e[type=skyabyss:tide_heart,limit=1] EBB 6
+wait 70
+shot tide_heart_ebb_a
+wait 40
+shot tide_heart_ebb_b
+wait 80
+
+cmd skyabyss dev tideforce @e[type=skyabyss:tide_heart,limit=1] MOON_WAVE 6
+wait 30
+shot tide_heart_moon_a
+wait 28
+shot tide_heart_moon_b
+wait 60
+
+cmd skyabyss dev tideforce @e[type=skyabyss:tide_heart,limit=1] PEARL_RAIN 6
+wait 20
+shot tide_heart_rain_a
+wait 50
+
+cmd kill @e[type=skyabyss:tide_heart]
+cmd kill @e[type=!minecraft:player,distance=..120]
+
+# ---- telegraph_storm
+
+cmd time set noon
+cmd weather clear
+cmd gamemode survival Dev
+cmd effect give Dev minecraft:resistance 1000000 4 true
+cmd fill -30 -61 -30 30 -61 30 minecraft:smooth_basalt destroy
+cmd fill -4 -44 11 4 -44 17 minecraft:air
+cmd fill -4 -44 11 4 -44 17 minecraft:barrier
+cmd kill @e[type=!minecraft:player,distance=..80]
+hud off
+
+camera minecraft:overworld 0.5 -43 14.5 180 38
+waitchunks
+wait 20
+cmd skyabyss cinematic stop
+chat clear
+cmd summon skyabyss:thunder_wing_heart 0 -58 0 {PersistenceRequired:1b,Rotation:[0f,0f]}
+wait 10
+cmd skyabyss cinematic stop
+camera minecraft:overworld 0.5 -43 14.5 180 38
+wait 120
+
+cmd skyabyss dev force @e[type=skyabyss:thunder_wing_heart,limit=1] SUMMON 6
+wait 16
+shot storm_summon_a
+wait 60
+
+cmd skyabyss dev force @e[type=skyabyss:thunder_wing_heart,limit=1] BLADE 6
+wait 16
+shot storm_blade_a
+wait 26
+shot storm_blade_b
+wait 60
+
+cmd skyabyss dev force @e[type=skyabyss:thunder_wing_heart,limit=1] CHAIN 6
+wait 14
+shot storm_chain_a
+wait 60
+
+cmd skyabyss dev force @e[type=skyabyss:thunder_wing_heart,limit=1] WINGBEAT 6
+wait 18
+shot storm_wingbeat_a
+wait 24
+shot storm_wingbeat_b
+wait 80
+
+cmd skyabyss dev force @e[type=skyabyss:thunder_wing_heart,limit=1] CHARGE 6
+wait 20
+shot storm_charge_a
+wait 40
+shot storm_charge_b
+wait 80
+
+cmd skyabyss dev force @e[type=skyabyss:thunder_wing_heart,limit=1] FEATHER 6
+wait 16
+shot storm_feather_a
+wait 60
+
+cmd skyabyss dev force @e[type=skyabyss:thunder_wing_heart,limit=1] FLASH 6
+wait 28
+shot storm_flash_a
+wait 60
+
+cmd skyabyss dev force @e[type=skyabyss:thunder_wing_heart,limit=1] WEB 6
+wait 22
+shot storm_web_a
+wait 40
+shot storm_web_b
+wait 100
+
+cmd skyabyss dev force @e[type=skyabyss:thunder_wing_heart,limit=1] BARRAGE 6
+wait 14
+shot storm_barrage_a
+wait 60
+cmd kill @e[type=skyabyss:thunder_wing_heart]
+wait 20
+
+cmd summon skyabyss:raiju 0 -60 0 {PersistenceRequired:1b,Rotation:[0f,0f]}
+wait 20
+cmd skyabyss dev force @e[type=skyabyss:raiju,limit=1] POUNCE 6
+wait 12
+shot storm_pounce_a
+wait 40
+shot storm_pounce_b
+wait 60
+
+cmd skyabyss dev force @e[type=skyabyss:raiju,limit=1] CLAW 6
+wait 12
+shot storm_claw_a
+wait 50
+
+cmd skyabyss dev force @e[type=skyabyss:raiju,limit=1] ROAR 6
+wait 44
+shot storm_roar_a
+wait 40
+cmd kill @e[type=skyabyss:raiju]
+cmd kill @e[type=skyabyss:static_moth]
+cmd kill @e[type=!minecraft:player,distance=..120]
+
+# ---- telegraph_ember_heart
+
+cmd time set noon
+cmd weather clear
+cmd gamemode survival Dev
+cmd effect give Dev minecraft:resistance 1000000 4 true
+cmd fill -30 -61 -30 30 -61 30 minecraft:smooth_basalt destroy
+cmd fill -4 -44 11 4 -44 17 minecraft:air
+cmd fill -4 -44 11 4 -44 17 minecraft:barrier
+cmd kill @e[type=!minecraft:player,distance=..80]
+hud off
+
+camera minecraft:overworld 0.5 -43 14.5 180 38
+waitchunks
+wait 20
+cmd skyabyss cinematic stop
+chat clear
+cmd summon skyabyss:ember_heart 0 -58 0 {PersistenceRequired:1b,Rotation:[0f,0f]}
+wait 10
+cmd skyabyss cinematic stop
+camera minecraft:overworld 0.5 -43 14.5 180 38
+wait 100
+
+camera minecraft:overworld 0.5 -43 14.5 180 38
+wait 5
+cmd skyabyss dev emberforce @e[type=skyabyss:ember_heart,limit=1] BREATH 6
+wait 12
+shot ember_heart_breath_a
+wait 20
+shot ember_heart_breath_hit
+wait 40
+
+camera minecraft:overworld 0.5 -43 14.5 180 38
+wait 5
+cmd skyabyss dev emberforce @e[type=skyabyss:ember_heart,limit=1] PULSE 6
+wait 12
+shot ember_heart_pulse_a
+wait 14
+shot ember_heart_pulse_b
+wait 60
+
+camera minecraft:overworld 0.5 -43 14.5 180 38
+wait 5
+cmd skyabyss dev emberforce @e[type=skyabyss:ember_heart,limit=1] ORB 6
+wait 14
+shot ember_heart_orb_a
+wait 22
+shot ember_heart_orb_hit
+wait 60
+
+camera minecraft:overworld 0.5 -43 14.5 180 38
+wait 5
+cmd skyabyss dev emberforce @e[type=skyabyss:ember_heart,limit=1] GALE 6
+wait 30
+shot ember_heart_gale_a
+wait 50
+shot ember_heart_gale_b
+wait 60
+
+camera minecraft:overworld 0.5 -43 14.5 180 38
+wait 5
+cmd skyabyss dev emberforce @e[type=skyabyss:ember_heart,limit=1] PELLET 6
+wait 30
+shot ember_heart_pellet_a
+wait 30
+shot ember_heart_pellet_b
+wait 60
+
+camera minecraft:overworld 0.5 -43 14.5 180 38
+wait 5
+cmd skyabyss dev emberforce @e[type=skyabyss:ember_heart,limit=1] FADING 6
+wait 24
+shot ember_heart_fading_a
+wait 30
+shot ember_heart_fading_b
+cmd kill @e[type=skyabyss:ember_heart]
+cmd kill @e[type=!minecraft:player,distance=..120]
+
+# ---- heart_domains
+
+cmd time set noon
+cmd weather clear
+cmd gamemode survival Dev
+cmd effect give Dev minecraft:resistance 1000000 4 true
+cmd fill -30 -61 -30 30 -61 30 minecraft:smooth_basalt destroy
+cmd fill -4 -44 11 4 -44 17 minecraft:air
+cmd fill -4 -44 11 4 -44 17 minecraft:barrier
+cmd kill @e[type=!minecraft:player,distance=..80]
+hud on
+
+camera minecraft:overworld 0.5 -43 14.5 180 38
+waitchunks
+wait 20
+cmd skyabyss cinematic stop
+chat clear
+wait 300
+cmd weather clear
+cmd time set noon
+wait 40
+
+cmd summon skyabyss:stone_whale_heart 0 -59 0 {PersistenceRequired:1b,Rotation:[0f,0f]}
+wait 10
+cmd skyabyss cinematic stop
+camera minecraft:overworld 0.5 -43 14.5 180 38
+wait 110
+cmd skyabyss dev force @e[type=skyabyss:stone_whale_heart,limit=1] THRUST
+wait 9
+shot heart_domains_cue_whale
+wait 80
+cmd skyabyss dev force @e[type=skyabyss:stone_whale_heart,limit=1] DOMAIN
+wait 56
+shot heart_domains_card_whale
+wait 62
+shot heart_domains_active_whale
+wait 30
+cmd kill @e[type=skyabyss:stone_whale_heart]
+wait 120
+cmd skyabyss cinematic stop
+chat clear
+
+cmd summon skyabyss:tide_heart 0 -59 0 {PersistenceRequired:1b,Rotation:[0f,0f]}
+wait 10
+cmd skyabyss cinematic stop
+camera minecraft:overworld 0.5 -43 14.5 180 38
+wait 110
+cmd skyabyss dev force @e[type=skyabyss:tide_heart,limit=1] SHELL_STRIKE
+wait 9
+shot heart_domains_cue_tide
+wait 80
+cmd skyabyss dev force @e[type=skyabyss:tide_heart,limit=1] DOMAIN
+wait 56
+shot heart_domains_card_tide
+wait 62
+shot heart_domains_active_tide
+wait 30
+cmd kill @e[type=skyabyss:tide_heart]
+wait 120
+cmd skyabyss cinematic stop
+chat clear
+
+cmd summon skyabyss:thunder_wing_heart 0 -58 0 {PersistenceRequired:1b,Rotation:[0f,0f]}
+wait 10
+cmd skyabyss cinematic stop
+camera minecraft:overworld 0.5 -43 14.5 180 38
+wait 110
+cmd skyabyss dev force @e[type=skyabyss:thunder_wing_heart,limit=1] SUMMON
+wait 9
+shot heart_domains_cue_storm
+wait 80
+cmd skyabyss dev force @e[type=skyabyss:thunder_wing_heart,limit=1] DOMAIN
+wait 56
+shot heart_domains_card_storm
+wait 62
+shot heart_domains_active_storm
+wait 30
+cmd kill @e[type=skyabyss:thunder_wing_heart]
+wait 120
+cmd skyabyss cinematic stop
+chat clear
+
+cmd summon skyabyss:ember_heart 0 -59 0 {PersistenceRequired:1b,Rotation:[0f,0f]}
+wait 10
+cmd skyabyss cinematic stop
+camera minecraft:overworld 0.5 -43 14.5 180 38
+wait 110
+cmd skyabyss dev force @e[type=skyabyss:ember_heart,limit=1] BREATH
+wait 9
+shot heart_domains_cue_ember
+wait 80
+cmd skyabyss dev force @e[type=skyabyss:ember_heart,limit=1] DOMAIN
+wait 56
+shot heart_domains_card_ember
+wait 62
+shot heart_domains_active_ember
+wait 30
+cmd kill @e[type=skyabyss:ember_heart]
+wait 120
+cmd skyabyss cinematic stop
+chat clear
+
+hud on
+echo done
+cmd kill @e[type=!minecraft:player,distance=..120]
+
+quit
