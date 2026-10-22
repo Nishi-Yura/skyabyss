@@ -1,0 +1,37 @@
+# 雷の層の吊り橋と灰の迷路 (docs/design/36 の 8 章。A9): 橋を横から・橋の上・避雷の像・迷路の入口・迷路の中（灯りの外と中）・番人の間
+# ./gradlew runShots -Pscript=tools/shots/abyss_storm_ash.txt -PshotsName=abyss_storm_ash
+world abyss_storm_ash flat
+size 1280 720
+timeout 2400
+render 12
+clouds off
+
+wait 80
+cmd skyabyss cinematic stop
+cmd gamemode spectator
+hud off
+cmd skyabyss abyss enter
+wait 40
+cmd skyabyss abyss build
+wait 900
+cmd tp @s 0 -20 -30 0 15
+wait 60
+shot s_bridge_side
+cmd tp @s -4 -35 -6 90 12
+wait 60
+shot s_bridge_deck
+cmd tp @s 10 -36 -4 0 12
+wait 60
+shot s_idol_section
+cmd tp @s 36 -110 0 270 22
+wait 60
+shot a_maze_outside
+cmd tp @s 25 -126 -1 270 10
+wait 60
+shot a_maze_entrance
+cmd tp @s 40 -126 4 270 14
+wait 60
+shot a_maze_dark
+cmd tp @s 52 -126 -12 270 14
+wait 60
+shot a_gate_room

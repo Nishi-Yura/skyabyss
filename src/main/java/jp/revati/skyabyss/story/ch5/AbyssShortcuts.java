@@ -41,15 +41,25 @@ public final class AbyssShortcuts {
         return Data.get(server).open.contains(layer);
     }
 
-    public static void open(MinecraftServer server, String layer) {
+    // 開く (初めて開いたなら true)
+    public static boolean open(MinecraftServer server, String layer) {
         Data d = Data.get(server);
-        if (d.open.add(layer)) {
+        boolean first = d.open.add(layer);
+        if (first) {
             d.setDirty();
         }
         ServerLevel level = server.getLevel(AbyssWorld.LEVEL);
         if (level != null) {
             hang(level, layer);
         }
+        return first;
+    }
+
+    // 全部閉じる (開発用・自己テスト用。掛けた鎖の飾りは残る)
+    public static void reset(MinecraftServer server) {
+        Data d = Data.get(server);
+        d.open.clear();
+        d.setDirty();
     }
 
     // 掛け金から下へ鎖 (読み込まれているときだけ)
