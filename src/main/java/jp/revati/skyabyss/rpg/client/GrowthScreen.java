@@ -207,6 +207,7 @@ public class GrowthScreen extends Screen implements jp.revati.skyabyss.client.ui
     @Override
     public void render(GuiGraphics g, int screenX, int screenY, float partialTick) {
         renderBackground(g, screenX, screenY, partialTick);
+        pendingTip = null;
         int mouseX = (int) Math.floor(fit.x(screenX));
         int mouseY = (int) Math.floor(fit.y(screenY));
         fit.begin(g);
@@ -216,6 +217,10 @@ public class GrowthScreen extends Screen implements jp.revati.skyabyss.client.ui
         }
         renderBody(g, mouseX, mouseY);
         fit.end(g);
+        if (pendingTip != null) {
+            g.renderTooltip(font, pendingTip, screenX, screenY);
+            pendingTip = null;
+        }
     }
 
     @Override
@@ -239,6 +244,13 @@ public class GrowthScreen extends Screen implements jp.revati.skyabyss.client.ui
     }
 
     // 板の中身 (釦は render の中で先に描いた)
+    // 囲み (ツールチップ) は変換の外で描く (変換の中では窓の端で切れる)。描く場所は画面の座標
+    private List<FormattedCharSequence> pendingTip;
+
+    private void tip(List<FormattedCharSequence> lines) {
+        pendingTip = lines;
+    }
+
     private void renderBody(GuiGraphics g, int mouseX, int mouseY) {
         GrowthData d = data();
         g.drawCenteredString(font, title, left + W / 2, top + 8, TITLE);
@@ -319,7 +331,7 @@ public class GrowthScreen extends Screen implements jp.revati.skyabyss.client.ui
             if (respecArmed > 0) {
                 lines.addAll(jp.revati.skyabyss.rpg.client.skill.TextWrap.split(font, Component.translatable("gui.skyabyss.growth.respec_again").withColor(0xD9779A), 200));
             }
-            g.renderTooltip(font, lines, mouseX, mouseY);
+            tip(lines);
             return;
         }
         for (Stat stat : Stat.values()) {
@@ -329,7 +341,7 @@ public class GrowthScreen extends Screen implements jp.revati.skyabyss.client.ui
                 lines.add(Component.translatable(stat.nameKey()).withColor(GOLD).getVisualOrderText());
                 lines.addAll(font.split(Component.translatable("gui.skyabyss.growth.desc." + stat.id), 200));
                 lines.addAll(font.split(Component.translatable("gui.skyabyss.growth.cap", GrowthRules.STAT_CAP).withColor(SOFT), 200));
-                g.renderTooltip(font, lines, mouseX, mouseY);
+                tip(lines);
                 return;
             }
         }
@@ -337,12 +349,12 @@ public class GrowthScreen extends Screen implements jp.revati.skyabyss.client.ui
             List<FormattedCharSequence> lines = new ArrayList<>(font.split(Component.translatable("gui.skyabyss.growth.fragments_desc"), 200));
             d.fragments.forEach((id, n) -> lines.add(Component.translatable(jp.revati.skyabyss.rpg.MemoryFragments.nameKey(id))
                     .append(" ×" + n).withColor(LORE).getVisualOrderText()));
-            g.renderTooltip(font, lines, mouseX, mouseY);
+            tip(lines);
             return;
         }
         if (mouseX >= left + BAR_X && mouseX < left + BAR_X + BAR_W && mouseY >= top + BAR_Y - 2 && mouseY < top + BAR_Y + 18) {
-            g.renderTooltip(font, Component.translatable("gui.skyabyss.growth.lifetime", d.lifetimeXp(),
-                    GrowthRules.totalXpFor(GrowthRules.MAX_LEVEL)), mouseX, mouseY);
+            tip(List.of(Component.translatable("gui.skyabyss.growth.lifetime", d.lifetimeXp(),
+                    GrowthRules.totalXpFor(GrowthRules.MAX_LEVEL)).getVisualOrderText()));
         }
     }
 

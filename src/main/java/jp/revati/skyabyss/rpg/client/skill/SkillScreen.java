@@ -753,9 +753,21 @@ public class SkillScreen extends Screen implements jp.revati.skyabyss.client.ui.
         super.renderBackground(g, mouseX, mouseY, partialTick);
     }
 
+    // 囲み (ツールチップ) は変換の外で、画面の座標へ描く (変換の中では窓の端で切れる)
+    private List<FormattedCharSequence> pendingTip;
+
+    private void tip(List<FormattedCharSequence> lines) {
+        pendingTip = lines;
+    }
+
+    private void tipC(List<Component> lines) {
+        pendingTip = lines.stream().map(Component::getVisualOrderText).toList();
+    }
+
     @Override
     public void render(GuiGraphics g, int screenX, int screenY, float partialTick) {
         renderBackground(g, screenX, screenY, partialTick);
+        pendingTip = null;
         int mouseX = (int) Math.floor(fit.x(screenX));
         int mouseY = (int) Math.floor(fit.y(screenY));
         fit.begin(g);
@@ -807,6 +819,10 @@ public class SkillScreen extends Screen implements jp.revati.skyabyss.client.ui.
         renderHover(g, d, mouseX, mouseY);
         renderLearnTooltip(g, d, mouseX, mouseY);
         fit.end(g);
+        if (pendingTip != null) {
+            g.renderTooltip(font, pendingTip, screenX, screenY);
+            pendingTip = null;
+        }
     }
 
     private void renderTreeTabs(GuiGraphics g, SkillData d) {
@@ -1291,7 +1307,7 @@ public class SkillScreen extends Screen implements jp.revati.skyabyss.client.ui.
                     SkillRules.fmtSeconds(SkillRules.cooldownTicks(selected, rank + 1))).withColor(0x9FB8FF), 200));
         }
         lines.add(Component.translatable("gui.skyabyss.skill.learn_cost").withColor(SOFT).getVisualOrderText());
-        g.renderTooltip(font, lines, mx, my);
+        tip(lines);
     }
 
     private boolean subTabHovered() {
@@ -1362,7 +1378,7 @@ public class SkillScreen extends Screen implements jp.revati.skyabyss.client.ui.
             } else if (!node.active && d.knows(node)) {
                 lines.add(Component.translatable("gui.skyabyss.skill.passive_hint").withColor(DIM));
             }
-            g.renderComponentTooltip(font, lines, mx, my);
+            tipC(lines);
             return;
         }
         int slot = slotAt(mx, my);
@@ -1371,7 +1387,7 @@ public class SkillScreen extends Screen implements jp.revati.skyabyss.client.ui.
             List<Component> lines = new ArrayList<>();
             if (slot >= d.slotCount()) {
                 lines.add(Component.translatable("gui.skyabyss.skill.slot_locked").withColor(SOFT));
-                g.renderComponentTooltip(font, lines, mx, my);
+                tipC(lines);
                 return;
             }
             lines.add(s == null ? Component.translatable("gui.skyabyss.skill.slot_empty").withColor(SOFT)
@@ -1381,7 +1397,7 @@ public class SkillScreen extends Screen implements jp.revati.skyabyss.client.ui.
                     : selected != null && selected.active && d.knows(selected)
                     ? "gui.skyabyss.skill.slot_put" : "gui.skyabyss.skill.slot_how", selected == null ? "" : Component.translatable(selected.nameKey()))
                     .withColor(DIM));
-            g.renderComponentTooltip(font, lines, mx, my);
+            tipC(lines);
             return;
         }
         SkillTree t = page == 0 ? treeTabAt(mx, my) : null;
@@ -1398,7 +1414,7 @@ public class SkillScreen extends Screen implements jp.revati.skyabyss.client.ui.
                             Component.translatable("skillset.skyabyss." + tabTag.id + "." + (i + 1))).withColor(i < tier ? GOLD : DIM));
                 }
             }
-            g.renderComponentTooltip(font, lines, mx, my);
+            tipC(lines);
             return;
         }
         for (int i = 0; i < SkillRules.LOADOUTS; i++) {
@@ -1406,7 +1422,7 @@ public class SkillScreen extends Screen implements jp.revati.skyabyss.client.ui.
                 SkillData rd = real();
                 List<FormattedCharSequence> lines = new ArrayList<>(TextWrap.split(font, Component.translatable(saveMode ? "gui.skyabyss.skill.loadout_save_tip" : "gui.skyabyss.skill.loadout_load_tip",
                         i + 1, rd.loadouts[i].saved ? Component.translatable("gui.skyabyss.skill.loadout_saved") : Component.translatable("gui.skyabyss.skill.loadout_empty")).withColor(TEXT), 190));
-                g.renderTooltip(font, lines, mx, my);
+                tip(lines);
                 return;
             }
         }
@@ -1414,7 +1430,7 @@ public class SkillScreen extends Screen implements jp.revati.skyabyss.client.ui.
             String key = saveToggle.isHovered() ? "gui.skyabyss.skill.loadout_mode_tip" : tryonBtn.isHovered() ? "gui.skyabyss.skill.tryon_tip"
                     : subTabHovered() ? "gui.skyabyss.skill.page_tip" : tryonOk.isHovered() ? "gui.skyabyss.skill.tryon_ok_tip"
                     : tryonUndo.isHovered() ? "gui.skyabyss.skill.tryon_undo_tip" : "gui.skyabyss.skill.tryon_cancel_tip";
-            g.renderTooltip(font, new ArrayList<>(TextWrap.split(font, Component.translatable(key, SkillRules.LOADOUTS).withColor(TEXT), 190)), mx, my);
+            tip(new ArrayList<>(TextWrap.split(font, Component.translatable(key, SkillRules.LOADOUTS).withColor(TEXT), 190)));
             return;
         }
         if (respec.isHovered()) {
@@ -1426,7 +1442,7 @@ public class SkillScreen extends Screen implements jp.revati.skyabyss.client.ui.
             if (respecArmed > 0) {
                 lines.addAll(TextWrap.split(font, Component.translatable("gui.skyabyss.skill.respec_again").withColor(DENY), 180));
             }
-            g.renderTooltip(font, lines, mx, my);
+            tip(lines);
         }
     }
 
@@ -1642,7 +1658,7 @@ public class SkillScreen extends Screen implements jp.revati.skyabyss.client.ui.
                             Component.translatable("tag.skyabyss." + t.id + ".cond")).withColor(n >= SkillRules.COND_MIN_TAGS ? PALE : DIM));
                 }
             }
-            g.renderComponentTooltip(font, lines, mx, my);
+            tipC(lines);
             return true;
         }
         return false;
