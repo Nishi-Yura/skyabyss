@@ -100,7 +100,8 @@ public final class TrialCells {
         register(new T11Clam());
         register(new T12Keeper());
         for (Def d : TrialCatalog.all()) {
-            if (!CELLS.containsKey(d.id())) {
+            // レイドの部屋は区画に建てる (trial/raid)。セルの写しはない
+            if (!CELLS.containsKey(d.id()) && !jp.revati.skyabyss.trial.raid.RaidRooms.isRaid(d.id())) {
                 throw new IllegalStateException("trial " + d.id() + " has no cell");
             }
         }

@@ -61,6 +61,9 @@ public final class ModItems {
             () -> new StoneWhaleArmorItem(ArmorItem.Type.LEGGINGS, new Item.Properties().rarity(Rarity.RARE)));
     public static final DeferredItem<Item> STONE_WHALE_BOOTS = ITEMS.register("stone_whale_boots",
             () -> new StoneWhaleArmorItem(ArmorItem.Type.BOOTS, new Item.Properties().rarity(Rarity.RARE)));
+    // レイドの部屋「骨玉運び」の骨玉 (docs/design/32 の 7 章)。部屋の中だけの物で、持つと遅くなり跳べない
+    public static final DeferredItem<Item> RAID_BONE_ORB = ITEMS.register("raid_bone_orb",
+            () -> new Item(new Item.Properties().stacksTo(1).rarity(Rarity.UNCOMMON)));
     public static final DeferredItem<Item> RESONANCE_CHARM = ITEMS.register("resonance_charm",
             () -> new ResonanceCharmItem(new Item.Properties().stacksTo(1).rarity(Rarity.EPIC)));
     public static final DeferredItem<Item> CLOUD_JERKY = ITEMS.register("cloud_jerky",

@@ -162,7 +162,14 @@ public final class Downed {
     // 倒れてよい場面か: ルールが有効・まだ倒れていない・同じ次元に起こせる仲間が残っている (背中でも地上でも)
     public static boolean mayDown(ServerPlayer player) {
         return enabled(player.server) && player.isAlive() && !player.isSpectator()
-                && !DOWNED.containsKey(player.getUUID()) && !rescuers(player).isEmpty();
+                && !DOWNED.containsKey(player.getUUID()) && (!rescuers(player).isEmpty() || jp.revati.skyabyss.trial.raid.RaidRun.inRoom(player));
+    }
+
+    // 倒れた状態を解く (レイドの部屋の全滅のやり直しから)。倒れていなければ何もしない
+    public static void reviveFull(ServerPlayer player) {
+        if (DOWNED.containsKey(player.getUUID())) {
+            clear(player.getUUID(), player);
+        }
     }
 
     // ---------------------------------------------------------------- 倒れる

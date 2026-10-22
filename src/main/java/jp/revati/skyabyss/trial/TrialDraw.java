@@ -117,7 +117,7 @@ public final class TrialDraw {
         long seed = seed(worldSeed, group, titan, cycle);
         List<Def> chosen = new ArrayList<>();
         if (cycle <= 1 || !TrialCatalog.poolActive(titan)) {
-            chosen.addAll(TrialCatalog.originals(titan));
+            chosen.addAll(jp.revati.skyabyss.trial.raid.RaidRooms.active(titan) ? TrialCatalog.raidDraw(titan, seed) : TrialCatalog.originals(titan));
             for (Def d : chosen) {
                 mem.seen(d.slot()).add(d.id());
                 mem.last.put(d.slot(), d.id());

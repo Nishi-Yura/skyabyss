@@ -332,6 +332,7 @@ public final class SelfTestRunner {
         steps.addAll(jp.revati.skyabyss.trial.ember.EmberDeckSelfTest.steps());
         // 巨神の順路 (入口・段の運び・中ボス・あきらめ・区画)。docs/design/32。背が建ててある巨神だけ世界の検査をする。SKYABYSS_SELFTEST_ONLY="trial route"
         steps.addAll(jp.revati.skyabyss.trial.TrialRouteSelfTest.steps());
+        steps.addAll(jp.revati.skyabyss.trial.raid.whale.WhaleRaidSelfTest.steps());
         steps.addAll(jp.revati.skyabyss.trial.RouteWalkSelfTest.steps());
         // 二人の試遊 (2026-10-22): 敵の無敵の間・背の耐久。SKYABYSS_SELFTEST_ONLY="combat rules"
         steps.addAll(jp.revati.skyabyss.combat.CombatRulesSelfTest.steps());
