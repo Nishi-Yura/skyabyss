@@ -202,13 +202,20 @@ public final class Quests {
     // slow = true のときは、近くの生き物も調べる (重いので 2 秒ごと)
     public static void poll(ServerPlayer player, boolean slow) {
         QuestLog log = QuestLog.of(player);
-        boolean changed = false;
         StoryContext ctx = StoryContext.of(player);
         for (QuestDef def : QuestManager.all()) {
             if (def.startWhen() != null && !log.quests.containsKey(def.id()) && def.startWhen().test(ctx)) {
                 start(player, def.id());
             }
         }
+        refresh(player, slow);
+    }
+
+    // 受けている頼みの数を今の状態に合わせ、済んだ段を進める (新しい頼みは始めない)。
+    // 会話を開く直前に呼ぶ: 段が進んだ直後でも、その人の今の段で話題が決まる。自動で始まる頼みは 1 秒おきの見回りに任せる
+    public static void refresh(ServerPlayer player, boolean slow) {
+        QuestLog log = QuestLog.of(player);
+        boolean changed = false;
         for (Map.Entry<String, QuestLog.Entry> e : List.copyOf(log.quests.entrySet())) {
             QuestLog.Entry entry = e.getValue();
             QuestDef def = QuestManager.quest(e.getKey());

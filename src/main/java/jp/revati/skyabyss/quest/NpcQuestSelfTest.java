@@ -133,6 +133,9 @@ public final class NpcQuestSelfTest {
             // 係の人 (attendant_<役>) と町のクエストの限定の人 (guest_<人>) は、エンティティの型一つに役を持つ
             boolean known = BuiltInRegistries.ENTITY_TYPE.containsKey(ResourceLocation.parse(d.role()))
                     || jp.revati.skyabyss.facility.AttendantRole.byDialogueRole(d.role()) != null
+                    // 深淵の生き残りなど、施設の役でない係の人の形 (AttendantEntity.setRoleId。story/ch5/layers/AbyssSurvivors)
+                    || (d.role().startsWith(jp.revati.skyabyss.facility.AttendantRole.DIALOGUE_PREFIX)
+                    && jp.revati.skyabyss.facility.AttendantEntity.extraRole(d.role().substring(jp.revati.skyabyss.facility.AttendantRole.DIALOGUE_PREFIX.length())))
                     || (d.role().startsWith(jp.revati.skyabyss.town.TownGuests.ROLE_PREFIX)
                     && jp.revati.skyabyss.town.TownGuests.byId(d.role().substring(jp.revati.skyabyss.town.TownGuests.ROLE_PREFIX.length())) != null);
             check(known, "dialogue for unknown entity " + d.role(), failures);
@@ -349,8 +352,9 @@ public final class NpcQuestSelfTest {
             // 1 章の続き (メイン 4 本・サブ 4 本) の文は skyabyss_story に置いた
             // 雷翼の背の周回のクエスト (*storm*) と風見鶏の文は skyabyss_storm にある (12 の 11.2 節、伝承の担当)
             // 語り部の墓の救いの文は skyabyss_grave にある (11 の 6 章)
+            // 深淵の層の生き残りの会話の文は skyabyss_abyss_v2 (tools/gen/ch5/gen_ch5_layers.py)
             // 章ごとのクエスト・追加の会話の文は skyabyss_ch1〜ch4 にある (三章の職人の覚書・鼓動守の会話は skyabyss_ch3gear)
-            for (String ns : List.of("skyabyss_quest", "skyabyss_story", "skyabyss_storm", "skyabyss_grave", "skyabyss_ch1", "skyabyss_ch2", "skyabyss_ch3", "skyabyss_ch3gear", "skyabyss_ch4", "skyabyss_ch5", "skyabyss_vow", "skyabyss_fac", "skyabyss_town")) {
+            for (String ns : List.of("skyabyss_quest", "skyabyss_story", "skyabyss_storm", "skyabyss_grave", "skyabyss_ch1", "skyabyss_ch2", "skyabyss_ch3", "skyabyss_ch3gear", "skyabyss_ch4", "skyabyss_ch5", "skyabyss_abyss_v2", "skyabyss_vow", "skyabyss_fac", "skyabyss_town")) {
                 JsonObject extra = json("/assets/" + ns + "/lang/" + code + ".json", failures);
                 if (extra != null) {
                     extra.entrySet().forEach(e -> {
