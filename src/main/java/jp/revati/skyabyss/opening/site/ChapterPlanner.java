@@ -125,6 +125,35 @@ final class ChapterPlanner {
                 return best;
             }
         }
+        // 最後: 距離の範囲を全体 (24〜150) に広げ、ほかの場所との余白を 2 にして、5 度・5 ブロックおきに細かく探す (水と障害物に囲まれた跡地で、要素が消えないように。
+        // 一章の見張りの丘・歌石が無いと話が進まない)
+        return lastResort(g, base, angle, r, obs);
+    }
+
+    @Nullable
+    static BlockPos lastResort(Ground g, BlockPos base, double angle, Req r, List<Obstacle> obs) {
+        int[] st = STAGES[STAGES.length - 1];
+        int mid = (Math.max(MIN_DIST, r.minDist()) + Math.min(MAX_DIST, r.maxDist())) / 2;
+        List<Integer> dists = new ArrayList<>();
+        for (int d = MIN_DIST; d <= MAX_DIST; d += 5) {
+            dists.add(d);
+        }
+        dists.sort(Comparator.comparingInt(d -> Math.abs(d - mid)));
+        for (int d : dists) {
+            for (int k = 0; k < 72; k++) {
+                int off = ((k + 1) / 2) * 5 * (k % 2 == 1 ? 1 : -1);
+                double a = angle + Math.toRadians(off);
+                int x = base.getX() + (int) Math.round(Math.cos(a) * d);
+                int z = base.getZ() + (int) Math.round(Math.sin(a) * d);
+                if (blocked(x, z, r.radius(), obs, 2)) {
+                    continue;
+                }
+                Area ar = SiteFinder.area(g, x, z, r.half(), r.half(), st[0], false, false);
+                if (ar.ok()) {
+                    return new BlockPos(x, ar.median() + 1, z);
+                }
+            }
+        }
         return null;
     }
 
@@ -141,8 +170,13 @@ final class ChapterPlanner {
     }
 
     private static boolean blocked(int x, int z, int radius, List<Obstacle> obs) {
+        return blocked(x, z, radius, obs, 8);
+    }
+
+    // margin = 半径どうしのあいだに空ける幅 (ふつう 8。最後の手段では 2)
+    private static boolean blocked(int x, int z, int radius, List<Obstacle> obs, int margin) {
         for (Obstacle o : obs) {
-            if (Math.hypot(x - o.pos().getX(), z - o.pos().getZ()) < radius + o.radius() + 8) {
+            if (Math.hypot(x - o.pos().getX(), z - o.pos().getZ()) < radius + o.radius() + margin) {
                 return true;
             }
         }

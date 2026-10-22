@@ -895,6 +895,17 @@ public final class ChapterSites {
             data.setDirty();
             changed = true;
             SkyAbyss.LOGGER.info("Chapter sites: {} placed {} sites ({} elements) for {} at {}", t.chapter(), placed.size(), t.ids().size(), t.players(), t.anchor());
+            // 置き場の見つからなかった要素 (その計画では二度と探さない。話に要る場所なら困るので、見えるように)
+            Set<String> got = new HashSet<>();
+            for (ChapterPlanner.Placed p : placed) {
+                got.add(p.id());
+            }
+            for (String id : t.ids()) {
+                Element el = ELEMENTS.get(id);
+                if (!got.contains(id) && (el == null || el.placement() != Placement.ROAD_FILL)) {
+                    SkyAbyss.LOGGER.warn("Chapter sites: no spot found for {} ({} at {})", id, t.chapter(), t.anchor());
+                }
+            }
         }
         if (changed) {
             SiteBuilds.enqueueMissing(server);

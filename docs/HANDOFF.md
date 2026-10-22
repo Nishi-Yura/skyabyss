@@ -41,7 +41,7 @@
 - **メモリ**: `gradle.properties` は `-Xmx1G`。重い python（レンダラ・メッシュ処理）は 1.5 GB 以内で、並列にしない。
 - **ユーザーが試遊中のチェックアウト（Desktop\mod）では絶対にビルド・編集しない**（`build/classes` が差し替わり ClassNotFoundException で落ちる）。確認は worktree でする。
 - 型検査: `./gradlew compileJava --offline --no-daemon`。
-- 自己テスト: `SKYABYSS_SELFTEST=1 ./gradlew runServer --no-daemon`（全体は約 10 分。`SKYABYSS_SELFTEST` があるときだけ build.gradle が `run/server.properties` の `max-tick-time` を -1 にしてウォッチドッグを切る。巨神の着地の段がチャンクの同期生成で 1 tick 200 秒かかるため。**自己テスト中は重い python を並列で流さない**。`build audit` の地上の場所の指摘（浮いた石塚・足跡の水漏れ）は run/ の地形しだいで出る。繰り返しは `SKYABYSS_SELFTEST_ONLY=<段の名前の頭>`、例 `abyss`・`gear freedom`・`whale scale`。全体は最後に 1 回）。
+- 自己テスト: `SKYABYSS_SELFTEST=1 ./gradlew runServer --no-daemon`（全体は約 10 分。`SKYABYSS_SELFTEST` があるときだけ build.gradle が `run/server.properties` の `max-tick-time` を -1 にしてウォッチドッグを切る。巨神の着地の段がチャンクの同期生成で 1 tick 200 秒かかるため。**自己テスト中は重い python を並列で流さない**。`build audit` の地上の場所の指摘は、2026-10-22 の仕上げ（`SiteJob.settle`）で 5 つの種とも 0。繰り返しは `SKYABYSS_SELFTEST_ONLY=<段の名前の頭>`、例 `abyss`・`gear freedom`・`whale scale`。全体は最後に 1 回）。
 - 絵の確認: 台本で撮る `./gradlew runShots -Pscript=tools/shots/<台本>.txt --no-daemon`。出力は `run/shots/<台本>/shots/<台本>/`、最後の行が `SHOTS OK` なら成功。台本の書き方は `tools/README.md`。**OS のキー送り・フォーカス操作はしない**。音は自動で 0、言語は日本語（`SKYABYSS_LANG` で変更）。
 - マルチ: 専用サーバー + 二人のクライアント。ポートは `server-port=25666`・`rcon.port=25766`（パスワード `test`、`online-mode=false`）。worktree が並ぶときは番号を変える。
 - 試遊用コマンド（OP 権限 2）: `docs/playtest_commands.md`（`/skyabyss playtest now|next|board|goto|trials|gear|chapter|fast|reset`、`skyabyss dev trial|rebirth|…`、`skyabyss skill …`、`skyabyss dev backmetrics`）。
@@ -76,6 +76,7 @@
   - 段ごとの試練は `TrialRoute.defOf(draw, step)`、入口の休み場は `entryRest`、戸は `TrialRuntime.syncGates`（今の段だけ）。記録は `keep.trial.step/mid/route/party/start/slot`。
   - 祠: `TitanShrine.ensure`（心臓を初めて止めたときに建つ）・`hold`/`activate`（長押し）・`refusal`。祠の画面は旧試練の板の画面（`TrialBoard`・`TrialBoardNet`・`client/trial/TrialBoardScreen`）。開発用 `/skyroute shrine <巨神>`・`/skyroute shard <巨神>`・`/skyroute status|start|clear`。
 - **一章の敵がフルスイートの負荷で不安定**: 自己テストの全体を回すと、一章の mob の段が時々落ちる。単独の `SKYABYSS_SELFTEST_ONLY` では通る。
+- **地上の場所の建築の監査（2026-10-22）**: 種 4242・777・31337・12345・2024 の新しい世界で、地上（背を除く）の指摘は 0。直し方は部品ごとではなく、建て終わりの仕上げ `SiteJob.settle()`（すべての部品。Post より前）: 最下段の下の空きを地面まで埋める・1 列だけのくぼみを埋める（部品の列は 1 段だけ）・支えのない草花を消す・立つ場所の印を空ける・水と溶岩の源の漏れを塞ぐ（範囲 +3）・取り残しの自然のブロック（割れた氷は水へ）を消す・ならしで支えを失った村の松明やボタンを消す。監査の側は、泥・土の道（14〜15/16 の高さ）を地面に数え、水面の列は比べず、雪のブロック・粉雪・テラコッタ・氷・ドリップリーフを自然とし、部品の範囲の外の戸と向きのある物（近くの村）を数えない（`SiteAudit`・`BuildAuditExtra`）。章の小要素の置き場探し（`ChapterPlanner`）は、段階をゆるめても見つからないとき、最後に 24〜150 の全体を 5 度・5 ブロックおき・余白 2 で探す（凍った海に囲まれた岩鯨の跡地で、一章の見張りの丘・歌石 3〜5 などが置かれずに消えていた）。見つからない要素はログに `Chapter sites: no spot found`。撮影 `tools/shots/ground_sites_qa.txt`（`skyabyss dev grounds go <章> <部品の名前[.n]> ...`・`grounds sites`。絵は `docs/review/ground_sites_qa/`）
 - **新しい世界で揺れる自己テスト（2026-10-21 に 3 回流して確認）**: `heartbeat ward`・`site cave`・`young`（着地）・`ch1 back mobs`（突進）・`build audit` の背の明るさと足跡・骨の丘の段は、世界ごとに通ったり落ちたりする（都の作り直しの前から。都の飾りの階段は監査で許可済み）。
 - **自己テスト `ch2` の小要素の数**: 「二章の小要素は 3〜5」の検査が 8 で落ちる（二章の地上の合流で小要素が増えた。`TideChapterSelfTest.data`）。数の決まりを直すか、検査の上限を上げるかは判断待ち。
 - **岩鯨の広間の広さ**（26 の 8.6）: 1〜2 人には広い。判断待ち。
