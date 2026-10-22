@@ -49,7 +49,17 @@ def skills_extra():
             [T("淵の木", "The Abyss tree"), T("6 本目の木。転生した人にだけ見えます。引き・鏡・残響・貢ぎ・顎・誓いの 6 つ。他の木を混ぜるほど効く作りです。", "A sixth tree visible only to reborn players: Pull, Mirror, Echo, Tribute, Maw and Oath. It rewards mixing other trees.")],
         ])
         + _note(T("最強の組み立てでも、心臓や番兵長を倒す速さには下限があり、戦いが崩れないように調整してあります。", "Even the strongest build keeps a floor on how fast the hearts and the Captain can be beaten, so fights never collapse.")), alt=True)
-    return free + deep
+    arts = _sec("abyss-arts", T("深淵術", "Abyss arts"),
+        '<p class="lead">%s</p>' % T("深淵の層の溜まりで覚える三つの術です。淵の木と同じ「深淵術師」の木に並び、マナを使い、待ちがあります。段は 3 つまで。",
+                                    "Three arts learned at the pools of the abyss layers. They sit in the Abyss Caster tree beside the Abyss tree, use mana and have cooldowns. Each has three ranks.")
+        + table([T("術", "Art"), T("鍵（既定）", "Key (default)"), T("覚える所", "Learned at"), T("働き", "Effect")], [
+            [T("光の術", "Light"), "<kbd>=</kbd>", T("骨の層の溜まり", "Bone layer pool"), T("灯りを一つ置く。中の敵の輪郭が見え、使った人は暗がりでも見やすい。段で範囲と続く時間が伸びる", "Places a light. Foes inside show their outline, and the caster sees better in the dark. Higher ranks extend range and duration")],
+            [T("重さの術", "Weight"), "<kbd>-</kbd>", T("塩の層の溜まり", "Salt layer pool"), T("上るときの重さを緩める。使った人だけ。段で緩みが大きく、続く時間が長くなる", "Eases the weight of the climb, for the caster only. Higher ranks ease more and last longer")],
+            [T("鼓動の術", "Heartbeat"), "<kbd>\\</kbd>", T("雷の層の溜まり", "Storm layer pool"), T("近くの敵の鼓動を聞き、その輪郭を一時見せる。近くの人（自分を含む）を癒す", "Hears nearby foes and reveals their outline briefly. Heals allies nearby, including yourself")],
+        ])
+        + _note(T("段を上げるには、灰の溜まりで深淵術師の木を開き、そのそばで術の鍵をしゃがみながら押します。鍵は操作の設定で変えられます。",
+                  "To raise a rank, open the Abyss Caster tree at the ash pool, then crouch and press the art's key beside it. Keys can be rebound in the controls settings.")))
+    return free + deep + arts
 
 
 # ------------------------------------------------------------ 装備のページへ
@@ -93,6 +103,46 @@ def titans_extra():
             (T("任意の翼", "Optional wings"), T("必須の道のほかに、寄り道の翼・塔・庭があり、宝や読み物が置かれています。", "Beyond the main path there are optional wings, towers and gardens with treasure and lore.")),
             (T("歩ける広さ", "Walkable space"), T("雷翼の歩ける床は約 29,300 m²。それでも歩きは 1 分未満で、時間は試練と戦いで使います。", "Thunder Wing has about 29,300 m² of walkable floor. Walking still takes under a minute; time goes to trials and fights.")),
         ]), alt=True)
+
+
+# ------------------------------------------------------------ 五章・深淵 (巨神のページへ)
+def titans_abyss():
+    pic = pimg("img/arch_abyss.png", "深淵の縦穴のドット絵", "Pixel art of the abyss shaft", 170, 168)
+    return """
+<section class="titan-sec" id="abyss" aria-labelledby="h-abyss">
+<div class="wrap">
+<div class="titan-hd"><div class="pic">%(pic)s</div>
+<div><h2 id="h-abyss" class="t-abyss">%(ch)s</h2>
+<p><span class="tag t-abyss">%(sub)s</span><span class="tag t-abyss">%(where)s</span></p>
+<p>%(lead)s</p></div></div>
+%(grid)s
+<p><strong>%(after_h)s</strong>　%(after)s</p>
+<p class="muted"><small>%(note)s</small></p>
+</div>
+</section>%(sep)s""" % dict(
+        pic=pic,
+        ch=T("五章　深淵", "Chapter 5: The Abyss"),
+        sub=T("地の底へ降りる", "Descend into the deep"),
+        where=T("地の底（都の地下から）", "Deep below (from under the capital)"),
+        lead=T("四体の心臓を返したあとも、空は静かになりません。都の地下の戸の向こうに、底の見えない大きな縦穴が口を開けています。巨神の背とは別の、深淵という世界です。",
+               "Even after the four hearts the sky does not settle. Past the door under the capital yawns a shaft with no visible bottom: the abyss, a world apart from any titan's back."),
+        grid=_grid([
+            (T("縦穴を下りる", "Down the shaft"), T("一続きの旅として下ります。骨・塩・雷・灰の四つの層を渡り、層ごとに違う遊びがあります。層のあいだの灯籠で、再開できます。",
+                                             "One continuous descent through four layers (bone, salt, storm and ash), each with its own play. Lantern rests between the layers let you resume.")),
+            (T("深淵の術", "Abyss arts"), T("層ごとの溜まりで、光・重さ・鼓動の三つの術を覚えます。覚えた術は、次の層の道を開きます。深淵術師の木で育てます。",
+                                         "Learn three arts at the pools of each layer: light, weight and heartbeat. Each opens the way ahead. Grow them in the Abyss Caster tree.")),
+            (T("重さと闇", "Weight and dark"), T("上るほど体が重くなり、光の届かない所に長くいると、淵の声がたまります。深く潜るほど、敵は強くなり、深度の数字が上がります。",
+                                              "The climb grows heavier, and long stays in the dark gather the voice of the deep. The deeper you go, the stronger the foes and the higher the depth number.")),
+            (T("底の番人", "The warden below"), T("底には、姿を見せない番人がいます。見えるのは、灯りの中だけです。",
+                                              "At the bottom waits a warden that does not show itself. It is seen only in lantern light.")),
+        ]),
+        after_h=T("クリアのあと", "After the clear"),
+        after=T("番人の悪夢（段 1〜10）、前の自分たちの遺品 12 種、そして果てのない深みが残っています。",
+                "The warden's nightmare (tiers 1 to 10), twelve past-self relics and endless depths remain."),
+        note=T("物語の答えと、番人の戦いの細かい決まりは書いていません。難度は<a href=\"rebirth.html#abyss\">転生のページ</a>、深淵術は<a href=\"skills.html#abyss-arts\">スキルのページ</a>へ。",
+               "The answers to the story and the warden's fight details are not written here. For Abyss difficulty see <a href=\"rebirth.html#abyss\">Rebirth</a>; for the abyss arts see <a href=\"skills.html#abyss-arts\">Skills</a>."),
+        sep=divider(),
+    )
 
 
 # ------------------------------------------------------------ 転生のページ
