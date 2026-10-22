@@ -23,7 +23,7 @@ import net.minecraft.world.level.block.state.BlockState;
 //  - BackScale の写し方 (倍率 1.0 は版 12 と同じ。1.6 / 1.3 の値)
 //  - 部屋の大きさ・通路の幅と高さ・壁が体の中にある (BackMetrics。倍率の下限を守る)
 //  - 幕 (VEIL) が広間の中の面で、人数の少ないグループにだけ張れる / 近い側に湧き場所が残る
-//  - 鐘の順 (BellTower.step)・戸は初回も周回も戦いの前は閉じている
+//  - 戸は初回も周回も戦いの前は閉じている
 //  - 版を上げる建て直しでも、初回を終えた記録 (keep.*) が残る
 //  - 休み場の復活位置が安全に立てる
 // 建ててある背 (titan back (build)) の後に流す
@@ -78,10 +78,10 @@ public final class WhaleScaleSelfTest {
     private static void checkVersion18(ServerLevel back, List<String> f) {
         // 材質: ゾーンごとの壁が、少なくとも 8 種類はちがう
         java.util.Set<net.minecraft.world.level.block.Block> walls = new java.util.HashSet<>();
-        for (Box b : List.of(HUB, W0, WA, E0, E1, CE1, E2, CK_PASS, CK, E3, BELL, HEART_REST)) {
+        for (Box b : List.of(HUB, W0, WA, E0, E1, CE1, E2, CK_PASS, CK, E3, HEART_REST)) {
             walls.add(back.getBlockState(new BlockPos(b.x1() - 1, b.floorY() + 2, (b.z1() + b.z2()) / 2)).getBlock());
         }
-        check(f, walls.size() >= 8, "the zones do not read differently: only " + walls.size() + " wall materials " + walls);
+        check(f, walls.size() >= 7, "the zones do not read differently: only " + walls.size() + " wall materials " + walls);
         // 宝物庫の部屋はない: 封印のすぐ先が回廊
         check(f, back.getBlockState(new BlockPos(0, FLOOR + 1, GATE.get(0).getZ() - 1)).isAir(), "the seal does not open onto the heart corridor");
         // 東の翼は一本道 (戦いは 3 つ): 戸は北へ順に E1_EXIT → 射手の回廊 (戸なし) → 詰所の入口
@@ -104,7 +104,7 @@ public final class WhaleScaleSelfTest {
         g1 = TrialGuide.next(r, E3.center());
         check(f, g1 == null, "guide after the east stone should be none (the party is returned to the hub automatically): " + g1);
         g1 = TrialGuide.next(BackGroupData.get(back).of(UUID.randomUUID()), W2.center());
-        check(f, g1 != null && g1.id().equals("bell"), "guide at the second west rest: " + g1);
+        check(f, g1 != null && g1.id().equals("west"), "guide at the second west rest: " + g1);
         var ja = jp.revati.skyabyss.SignFit.lang("ja_jp");
         var en = jp.revati.skyabyss.SignFit.lang("en_us");
         for (String id : TrialGuide.IDS) {
@@ -135,35 +135,22 @@ public final class WhaleScaleSelfTest {
                 }
             }
         }
-        // ---- 鐘
-        check(f, BellTower.step(0, 1) == BellTower.Result.ADVANCE && BellTower.step(1, 2) == BellTower.Result.ADVANCE
-                && BellTower.step(4, 5) == BellTower.Result.DONE && BellTower.step(2, 4) == BellTower.Result.WRONG
-                && BellTower.step(3, 1) == BellTower.Result.RESTART, "the bell order logic is wrong");
-        for (int n = 1; n <= BellTower.COUNT; n++) {
-            check(f, BellTower.numberAt(BellTower.bellPos(n)) == n, "bell number lookup is wrong for " + n);
-        }
         // ---- 世界
         ServerLevel back = server.getLevel(TitanTravel.TITAN_BACK);
         if (back != null && TitanBackData.get(back).isBuilt()) {
-            for (int n = 1; n <= BellTower.COUNT; n++) {
-                BlockState st = back.getBlockState(BellTower.bellPos(n));
-                check(f, st.is(jp.revati.skyabyss.registry.ModBlocks.RELIC_BELL.get()), "bell " + n + " is missing at " + BellTower.bellPos(n));
-            }
             // 戸の初期状態 (初回も周回も、戦いの前は閉じている)
             TitanBackTrials.installGates(back);
             UUID group = UUID.randomUUID();
             BackGroupData data = BackGroupData.get(back);
             BackGroupData.Record record = data.of(group);
-            check(f, !jp.revati.skyabyss.titan.group.GroupGates.isOpen(back, group, BELL_GATE), "the bell gate was open for a first run");
             check(f, !jp.revati.skyabyss.titan.group.GroupGates.isOpen(back, group, E3_LOCK), "the guard-post door was open for a first run");
             record.markFirstCleared();
-            record.setFlag(BellTower.FLAG, true);
             // 版を上げる建て直し: 試練の進みは戻るが、keep.* (初回を終えた印) は残る
             record.setFlag("keep.selftest_seen", true);
             record.markHallCleared("e1");
             record.resetProgress();
             check(f, record.isFirstCleared() && record.flag("keep.selftest_seen"), "a rebuild reset erased the keep.* records");
-            check(f, !record.isHallCleared("e1") && !record.flag(BellTower.FLAG), "a rebuild reset did not clear the trial progress");
+            check(f, !record.isHallCleared("e1"), "a rebuild reset did not clear the trial progress");
             record.remove("keep.selftest_seen");
             checkVersion18(back, f);
             // 休み場の復活位置

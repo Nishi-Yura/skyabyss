@@ -39,7 +39,7 @@ close
 wait 10
 shot w04
 fov 90
-cmd skyabyss dev trial force W02 W05 W11
+cmd skyabyss dev trial force W03 W05 W11
 camera skyabyss:titan_back 2.5 121.2 129.6 0 20
 waitchunks 900
 wait 100
@@ -47,7 +47,7 @@ close
 wait 10
 shot w11
 fov 90
-cmd skyabyss dev trial force W02 W05 W12
+cmd skyabyss dev trial force W03 W05 W12
 camera skyabyss:titan_back 24.5 121.2 130.6 0 16
 waitchunks 900
 wait 100

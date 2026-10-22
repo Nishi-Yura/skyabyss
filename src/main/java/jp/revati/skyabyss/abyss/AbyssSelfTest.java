@@ -36,7 +36,6 @@ import jp.revati.skyabyss.trial.TrialCatalog;
 import jp.revati.skyabyss.trial.TrialCell;
 import jp.revati.skyabyss.trial.TrialData;
 import jp.revati.skyabyss.trial.TrialDraw;
-import jp.revati.skyabyss.trial.whale.W02Bell;
 import jp.revati.skyabyss.trial.whale.W06Score;
 import jp.revati.skyabyss.trial.whale.W07Gates;
 import jp.revati.skyabyss.trial.whale.W10Fort;
@@ -223,10 +222,6 @@ public final class AbyssSelfTest {
         Mods deep = new Mods(0, new int[] {2, 2}, -1, new int[0], -1, Trial.Extreme.GAUNTLET, false, Rarity.ABYSS);
         TrialCell.Run runHard = new TrialCell.Run(UUID.randomUUID(), null, hard, 1L, 0L);
         TrialCell.Run runDeep = new TrialCell.Run(UUID.randomUUID(), null, deep, 1L, 0L);
-        check(W02Bell.period(deep) < W02Bell.period(hard) && W02Bell.period(deep) >= Abyss.FLOOR_TICKS, "bell period " + W02Bell.period(hard) + " -> " + W02Bell.period(deep));
-        check(W02Bell.window(deep) < W02Bell.window(hard) && W02Bell.window(deep) >= 0.35, "bell window " + W02Bell.window(hard) + " -> " + W02Bell.window(deep));
-        Mods deepHaz = new Mods(0, new int[] {2, 2}, -1, new int[] {1}, -1, Trial.Extreme.GAUNTLET, false, Rarity.ABYSS);
-        check(W02Bell.window(deepHaz) >= 0.35, "bell window with the hazard fell below the floor: " + W02Bell.window(deepHaz));
         check(W07Gates.graceOf(runDeep) < W07Gates.graceOf(runHard) && W07Gates.graceOf(runDeep) >= Abyss.FLOOR_TICKS, "gate grace " + W07Gates.graceOf(runHard) + " -> " + W07Gates.graceOf(runDeep));
         check(W06Score.length(runDeep) == W06Score.length(runHard) + 1, "score length did not grow by one");
         check(W10Fort.gunners(runDeep, 1) == W10Fort.gunners(runHard, 1) + 1, "fort gunners did not grow by one");

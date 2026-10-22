@@ -51,7 +51,6 @@ public final class BackMetrics {
         r.add(new Room("wb", "trial", TitanBackLayout.WB, 130));
         r.add(new Room("w2", "rest", TitanBackLayout.W2, 48));
         r.add(new Room("wc", "trial", TitanBackLayout.WC, 207));
-        r.add(new Room("bell tower", "wing", TitanBackLayout.BELL, 0));
         r.add(new Room("e0", "rest", TitanBackLayout.E0, 63));
         r.add(new Room("e1", "boss", TitanBackLayout.E1, 390));
         r.add(new Room("ce1", "rest", TitanBackLayout.CE1, 49));

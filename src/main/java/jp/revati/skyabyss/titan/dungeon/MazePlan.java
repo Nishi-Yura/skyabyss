@@ -325,13 +325,13 @@ public final class MazePlan {
         return mazeCell(c[0], c[1]).offset(MAZE_CELL / 2, 0, MAZE_CELL / 2);
     }
 
-    // a から b (隣のマス) へ向かう通路 (壁の切れ目) の 3×3 の戸の場所。y は水の三段
+    // a から b (隣のマス) へ向かう通路 (壁の切れ目) の 1×3 の戸の場所。y は水の三段
     public static List<BlockPos> passage(int[] a, int[] b) {
         BlockPos ca = mazeCell(a[0], a[1]);
         int dx = b[0] - a[0];
         int dz = b[1] - a[1];
         List<BlockPos> list = new ArrayList<>();
-        for (int t = 0; t < MAZE_CELL; t++) {
+        for (int t = MAZE_CELL / 2; t <= MAZE_CELL / 2; t++) {
             int x = dx != 0 ? ca.getX() + (dx > 0 ? MAZE_CELL : -1) : ca.getX() + t;
             int z = dz != 0 ? ca.getZ() + (dz > 0 ? MAZE_CELL : -1) : ca.getZ() + t;
             for (int y = ca.getY(); y <= ca.getY() + 2; y++) {

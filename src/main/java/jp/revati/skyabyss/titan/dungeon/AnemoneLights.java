@@ -85,7 +85,6 @@ public final class AnemoneLights {
     // 持ち歩きの光の強さ
     private static final int CARRY_LIGHT = 11;
     // 灯をともした台から、光の道が先へ伸びる長さ (正しい道のマスの数)
-    public static final int TRAIL_AHEAD = 6;
 
     private AnemoneLights() {
     }
@@ -97,7 +96,6 @@ public final class AnemoneLights {
     private static List<BlockPos> cachedStands = List.of();
     private static List<BlockPos> cachedGate = List.of();
     private static List<List<BlockPos>> cachedCuts = List.of();
-    private static List<BlockPos> cachedTrail = List.of();
 
     private static synchronized void ensureCache(long seed) {
         if (seed == cachedSeed) {
@@ -113,7 +111,6 @@ public final class AnemoneLights {
             cuts.add(List.copyOf(plan.cutBlocks(cut)));
         }
         cachedCuts = List.copyOf(cuts);
-        cachedTrail = List.copyOf(computeTrail(plan));
         cachedSeed = seed;
     }
 
@@ -138,12 +135,6 @@ public final class AnemoneLights {
         return cachedCuts;
     }
 
-    // 光の道の床 (正しい道の順。マスの真ん中・通路の真ん中・…)。息継ぎのくぼみと流れの通路は、床がもう別の物なので入れない
-    public static List<BlockPos> trail(long mazeSeed) {
-        ensureCache(mazeSeed);
-        return cachedTrail;
-    }
-
     public static MazePlan plan(ServerLevel level) {
         return plan(TitanBackData.get(level).mazeSeed());
     }
@@ -158,10 +149,6 @@ public final class AnemoneLights {
 
     public static List<List<BlockPos>> cutGates(ServerLevel level) {
         return cutGates(TitanBackData.get(level).mazeSeed());
-    }
-
-    public static List<BlockPos> trail(ServerLevel level) {
-        return trail(TitanBackData.get(level).mazeSeed());
     }
 
     // 灯の台の場所 (正しい道の上。道を 4 つに分けた 3 つの境。息継ぎのくぼみのマスと出口の手前は避ける)。マスの真ん中の、水の一段目
@@ -182,55 +169,6 @@ public final class AnemoneLights {
         List<int[]> path = maze.solution();
         int n = path.size();
         return MazePlan.passage(path.get(n - 2), path.get(n - 1));
-    }
-
-    // 光の道: 入口のマスから出口のマスまで、床の真ん中の石
-    public static List<BlockPos> computeTrail(MazePlan plan) {
-        List<BlockPos> list = new ArrayList<>();
-        for (int k = 0; k < plan.path.size(); k++) {
-            if (k > 0) {
-                BlockPos pf = MazePlan.passageFloor(plan.path.get(k - 1), plan.path.get(k));
-                if (!(plan.currents.contains(k - 1) || plan.isPocket(plan.path.get(k - 1)) || plan.isPocket(plan.path.get(k)))) {
-                    list.add(pf);
-                }
-            }
-            if (!plan.isPocket(plan.path.get(k))) {
-                BlockPos c = MazePlan.center(plan.path.get(k));
-                list.add(new BlockPos(c.getX(), MAZE_FLOOR, c.getZ()));
-            }
-        }
-        return list;
-    }
-
-    // 正しい道の添え字 k (範囲 lo〜hi) の光の道の床
-    private static List<BlockPos> trailBetween(MazePlan plan, int lo, int hi) {
-        List<BlockPos> list = new ArrayList<>();
-        for (int k = Math.max(0, lo); k <= Math.min(plan.path.size() - 1, hi); k++) {
-            if (k > lo) {
-                if (!(plan.currents.contains(k - 1) || plan.isPocket(plan.path.get(k - 1)) || plan.isPocket(plan.path.get(k)))) {
-                    list.add(MazePlan.passageFloor(plan.path.get(k - 1), plan.path.get(k)));
-                }
-            }
-            if (!plan.isPocket(plan.path.get(k))) {
-                BlockPos c = MazePlan.center(plan.path.get(k));
-                list.add(new BlockPos(c.getX(), MAZE_FLOOR, c.getZ()));
-            }
-        }
-        return list;
-    }
-
-    // 出口のマスの床の輪 (出口の泡の柱のまわり 8 つ)
-    private static List<BlockPos> exitRing() {
-        BlockPos c = MazeBuilder.exitBubble();
-        List<BlockPos> list = new ArrayList<>();
-        for (int dx = -1; dx <= 1; dx++) {
-            for (int dz = -1; dz <= 1; dz++) {
-                if (dx != 0 || dz != 0) {
-                    list.add(new BlockPos(c.getX() + dx, MAZE_FLOOR, c.getZ() + dz));
-                }
-            }
-        }
-        return list;
     }
 
     // 迷路を掘り直すとき (MazeBuilder.buildMaze の最後): 灯の台・戸・近道の戸・中ほどの苗床を置き、初回の部屋を登録する
@@ -501,8 +439,6 @@ public final class AnemoneLights {
     }
 
     private static final List<Opening> OPENINGS = new ArrayList<>();
-    // 光の流れが一歩進む間隔 (tick)
-    private static final int RIBBON_STEP = 2;
     // 戸の開く音の高さの列 (音階。一音ごとに 5 tick)
     private static final float[] CHIME_PITCHES = {0.84f, 1.0f, 1.26f, 1.5f, 1.68f, 2.0f};
 
@@ -510,15 +446,7 @@ public final class AnemoneLights {
     private static void startOpening(ServerLevel level, UUID group) {
         MazePlan plan = plan(level);
         int from = Math.min(plan.standK[Math.min(STANDS - 1, openingFrom.getOrDefault(group, STANDS - 1))], plan.path.size() - 1);
-        List<Vec3> route = new ArrayList<>();
-        for (int k = from; k < plan.path.size(); k++) {
-            BlockPos c = MazePlan.center(plan.path.get(k));
-            if (k > from) {
-                BlockPos pf = MazePlan.passageFloor(plan.path.get(k - 1), plan.path.get(k));
-                route.add(new Vec3(pf.getX() + 0.5, MAZE_FLOOR + 2.2, pf.getZ() + 0.5));
-            }
-            route.add(new Vec3(c.getX() + 0.5, MAZE_FLOOR + 2.2, c.getZ() + 0.5));
-        }
+        List<Vec3> route = List.of();
         OPENINGS.add(new Opening(group, level.getGameTime(), route));
         List<BlockPos> gate = exitGate(level);
         BlockPos at = gate.get(gate.size() / 2);
@@ -549,23 +477,9 @@ public final class AnemoneLights {
                     m.playNotifySound(SoundEvents.BEACON_ACTIVATE, SoundSource.BLOCKS, 0.8f, 1.3f);
                 }
             }
-            // 光の流れ: 道のりの順に、一歩ずつ
-            if (e >= 10 && (e - 10) % RIBBON_STEP == 0) {
-                int step = (int) ((e - 10) / RIBBON_STEP);
-                if (step < o.route.size()) {
-                    Vec3 p = o.route.get(step);
-                    for (ServerPlayer m : members) {
-                        if (m.distanceToSqr(p) < 80 * 80) {
-                            level.sendParticles(m, ParticleTypes.END_ROD, true, p.x, p.y, p.z, 8, 0.3, 0.3, 0.3, 0.02);
-                        }
-                    }
-                    if (step % 4 == 0) {
-                        Groups.sound(level, o.group, p.x, p.y, p.z, SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.BLOCKS, 1.0f, 0.8f + 0.04f * Math.min(step, 20));
-                    }
-                } else {
-                    it.remove();
-                    continue;
-                }
+            if (e > 60) {
+                it.remove();
+                continue;
             }
             if (members.isEmpty() && e > 200) {
                 it.remove();
@@ -605,24 +519,6 @@ public final class AnemoneLights {
 
     // ---------------------------------------------------------------- グループごとの見かけ (灯った台・数え石・掲示板・光の道)
 
-    // いまの光の道 (そのグループに見せる床の石の座標)。灯をともした台から先へ TRAIL_AHEAD マス、戸が開いたら入口から出口まで全部と出口の輪
-    public static List<BlockPos> trailShown(ServerLevel level, UUID group, BackGroupData.Record r) {
-        MazePlan plan = plan(level);
-        List<BlockPos> shown = new ArrayList<>();
-        if (GroupGates.isOpen(level, group, exitGate(level))) {
-            shown.addAll(trail(level));
-            shown.addAll(exitRing());
-            return shown;
-        }
-        for (int i = 0; i < STANDS; i++) {
-            if (isLit(r, i)) {
-                int k = plan.standK[i];
-                shown.addAll(trailBetween(plan, k, k + TRAIL_AHEAD));
-            }
-        }
-        return shown;
-    }
-
     @SubscribeEvent
     static void onCommonSetup(FMLCommonSetupEvent event) {
         GroupOverlays.register((level, group, out) -> {
@@ -649,9 +545,6 @@ public final class AnemoneLights {
                 out.accept(TALLY_POS, ModBlocks.ANEMONE_TALLY.get().defaultBlockState().setValue(AnemoneTallyBlock.COUNT, n));
                 for (int i = 0; i < n && i < BOARD.size(); i++) {
                     out.accept(BOARD.get(i), Blocks.REDSTONE_LAMP.defaultBlockState().setValue(RedstoneLampBlock.LIT, true));
-                }
-                for (BlockPos p : trailShown(level, group, r)) {
-                    out.accept(p, lantern);
                 }
             }
         });
@@ -701,43 +594,6 @@ public final class AnemoneLights {
 
     // ---- 目的の帯 (アクションバー。水路にいる間、1 秒ごと): 灯の数・いま何をすればよいか・向かう方向と道のり
 
-    private static final String[] ARROWS = {"↑", "↗", "→", "↘", "↓", "↙", "←", "↖"};
-
-    // 向かう先 (dx, dz) が、いまの体の向きに対してどちらか (↑ = 正面)
-    static String arrow(ServerPlayer player, double dx, double dz) {
-        float target = (float) Math.toDegrees(Math.atan2(-dx, dz));
-        float rel = Mth.wrapDegrees(target - player.getYRot());
-        int idx = Math.floorMod(Math.round(rel / 45f), 8);
-        return ARROWS[idx];
-    }
-
-    // bandText が最後に引いた道のり (band が床の線のために一緒に送る。サーバーは一つのスレッドなので static でよい)
-    private static List<Vec3> lastRoute = List.of();
-
-    // from のマスから to のマスへ、迷路の通路を通る道のり (マスの真ん中の列)。水の入口の小部屋にいるときは、水への入口 (はしごの穴) まで
-    private static List<Vec3> route(MazePlan plan, int[] from, int[] to, boolean inRoom) {
-        List<Vec3> out = new java.util.ArrayList<>();
-        if (inRoom) {
-            out.add(waypoint(plan, from, to, true));
-            return out;
-        }
-        int[] cell = from;
-        for (int i = 0; i < 300; i++) {
-            int[] next = plan.nextStep(cell, to);
-            if (next == null) {
-                break;
-            }
-            BlockPos c = MazePlan.center(next);
-            out.add(new Vec3(c.getX() + 0.5, MAZE_FLOOR + 1, c.getZ() + 0.5));
-            cell = next;
-        }
-        if (out.isEmpty()) {
-            BlockPos c = MazePlan.center(to);
-            out.add(new Vec3(c.getX() + 0.5, MAZE_FLOOR + 1, c.getZ() + 0.5));
-        }
-        return out;
-    }
-
     // いまの目的の帯の文 (自己テスト・撮影用に、送らずに作る)
     static Component bandText(ServerLevel level, ServerPlayer player, UUID group) {
         BackGroupData.Record r = BackGroupData.get(level).peek(group);
@@ -748,7 +604,6 @@ public final class AnemoneLights {
         int[] here = MazePlan.cellAt(player.getX(), player.getZ());
         int[] start = plan.path.get(0);
         if (GroupGates.isOpen(level, group, exitGate(level))) {
-            lastRoute = route(plan, here, plan.path.get(plan.path.size() - 1), inRoom);
             return ModText.objective("message.skyabyss.lamp_band_open", lit, STANDS);
         }
         if (held > 0 || lit >= NEED) {
@@ -765,7 +620,6 @@ public final class AnemoneLights {
                 }
             }
             if (best >= 0) {
-                lastRoute = route(plan, inRoom ? start : here, plan.path.get(plan.standK[best]), inRoom);
                 return ModText.objective("message.skyabyss.lamp_band", lit, STANDS, held);
             }
         }
@@ -774,33 +628,11 @@ public final class AnemoneLights {
         int[] midCell = MazePlan.cellAt(mid.getX(), mid.getZ());
         int dMid = inRoom ? Integer.MAX_VALUE : plan.distance(here, midCell);
         int dEntry = inRoom ? 0 : plan.distance(here, start);
-        if (inRoom) {
-            lastRoute = List.of(ENTRY_BED_POS.getCenter());
-        } else {
-            lastRoute = route(plan, here, inRoom || dEntry <= dMid || dMid < 0 ? start : midCell, false);
-        }
         return ModText.objective("message.skyabyss.lamp_band_bed", lit, STANDS);
     }
 
-    private static int meters(int cells) {
-        return Math.max(0, cells) * (MAZE_CELL + 1);
-    }
-
-    // from のマスから to のマスへ向かう次の中継点 (マスの真ん中)。入口の小部屋にいるときは、水への入口 (はしごの穴)
-    private static Vec3 waypoint(MazePlan plan, int[] from, int[] to, boolean inRoom) {
-        if (inRoom) {
-            BlockPos hatch = mazeCell(MAZE_START_I, MAZE_START_J).offset(MAZE_CELL / 2, 0, 0);
-            return new Vec3(hatch.getX() + 0.5, hatch.getY(), hatch.getZ() + 0.5);
-        }
-        int[] next = plan.nextStep(from, to);
-        BlockPos c = MazePlan.center(next == null ? to : next);
-        return new Vec3(c.getX() + 0.5, MAZE_FLOOR + 1, c.getZ() + 0.5);
-    }
-
     private static void band(ServerLevel level, ServerPlayer player, UUID group) {
-        lastRoute = List.of();
-        Component text = bandText(level, player, group);
-        LampBand.send(player, text, lastRoute);
+        LampBand.send(player, bandText(level, player, group));
     }
 
     // 灯の台の粒 (その人にだけ。近いものだけ): ともした台は白い光が昇り、まだの台は青い火がゆらぐ (遠くからも台の場所が分かる)

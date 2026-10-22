@@ -100,10 +100,6 @@ public final class TitanBackBuilder {
             for (Inscription lore : LORE_SIGNS) {
                 kit.wallSign(lore.pos(), lore.facing(), lore.key());
             }
-            // 道しるべの碑 (版 18)
-            for (Inscription guide : GUIDE_SIGNS) {
-                kit.wallSign(guide.pos(), guide.facing(), guide.key());
-            }
         });
         // 歩く道の灯り (建築の監査 LIGHT_DARK。下の迷路は光の台の遊びなので暗いまま。場所は dev routelight whale が測った route_lamps.json)
         s.then("route lamps", () -> jp.revati.skyabyss.titan.light.RouteLamps.place(level, "whale"));

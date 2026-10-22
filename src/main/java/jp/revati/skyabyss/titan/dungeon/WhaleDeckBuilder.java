@@ -4,7 +4,6 @@ import static jp.revati.skyabyss.titan.dungeon.TitanBackLayout.FLOOR;
 import static jp.revati.skyabyss.titan.dungeon.WhaleDeck.*;
 
 import jp.revati.skyabyss.registry.ModBlocks;
-import jp.revati.skyabyss.trial.whale.W02Bell;
 import jp.revati.skyabyss.trial.whale.W06Score;
 import jp.revati.skyabyss.trial.RingArenaCell;
 import jp.revati.skyabyss.trial.whale.W03Moss;
@@ -43,19 +42,17 @@ final class WhaleDeckBuilder {
 
     static void build(BuildKit kit) {
         long t0 = System.currentTimeMillis();
-        for (TitanBackLayout.Box b : new TitanBackLayout.Box[] {D0, C1, S0, W06, W07, W10, W02}) {
+        for (TitanBackLayout.Box b : new TitanBackLayout.Box[] {D0, C1, S0, W06, W07, W10}) {
             kit.room(b);
         }
         // 戸口 (D0 → C1 → S0 は開いた通路。ほかは戸 = 入口の封印を、あとで置く)
         kit.doorway(40, 44, 25, 25, Y, 5);
         kit.doorway(40, 44, 67, 67, Y, 5);
-        kit.doorway(21, 21, 20, 24, Y, 5);
         kit.doorway(39, 39, 32, 36, Y, 5);
         kit.doorway(-8, -4, 81, 82, Y, 5);
         kit.doorway(28, 32, 81, 82, Y, 5);
         buildStair(kit);
         buildD0(kit);
-        buildW02(kit);
         buildW06(kit);
         buildW07(kit);
         buildW10(kit);
@@ -68,14 +65,13 @@ final class WhaleDeckBuilder {
         kit.ribs(C1, 4, true);
         kit.wallLamps(C1, 3, Y + 3);
         // 石の差し口と戻りの光る床
-        kit.set(W02_STONE, jp.revati.skyabyss.trial.TrialGoal.mark());
         kit.set(W06_STONE, jp.revati.skyabyss.trial.TrialGoal.mark());
         kit.set(W07_STONE, jp.revati.skyabyss.trial.TrialGoal.mark());
         kit.set(W10_STONE, jp.revati.skyabyss.trial.TrialGoal.mark());
         for (BlockPos stone : new BlockPos[] {W03_STONE, W04_STONE, W11_STONE, W12_STONE, W08_STONE}) {
             kit.set(stone, jp.revati.skyabyss.trial.TrialGoal.mark());
         }
-        for (BlockPos pad : new BlockPos[] {W02_PAD, W06_PAD, W07_PAD, W10_PAD, W03_PAD, W04_PAD, W11_PAD, W12_PAD, W08_PAD}) {
+        for (BlockPos pad : new BlockPos[] {W06_PAD, W07_PAD, W10_PAD, W03_PAD, W04_PAD, W11_PAD, W12_PAD, W08_PAD}) {
             kit.set(pad, PAD);
         }
         jp.revati.skyabyss.SkyAbyss.LOGGER.info("Built the whale trial deck in {} ms", System.currentTimeMillis() - t0);
@@ -115,41 +111,6 @@ final class WhaleDeckBuilder {
         kit.pilasters(D0, 6);
         kit.ribs(D0, 5, true);
         kit.wallLamps(D0, 4, Y + 4);
-    }
-
-    // ---------------------------------------------------------------- W02 鐘楼の綱渡り
-    private static void buildW02(BuildKit kit) {
-        TitanBackLayout.Box w = W02;
-        // 穴の底の溶岩 (y 113)。足を踏み外した人は、溶岩に届く前に (y 117.5 より下で) 休み場へ戻される
-        kit.fill(w.x1(), w.floorY() + 1, w.z1(), w.x2(), w.floorY() + 1, w.z2(), LAVA);
-        // 岩棚 A (入口)・中ほどの台 M・向こうの岩棚 C: 底から Y まで石を積んだ島
-        for (TitanBackLayout.Box b : new TitanBackLayout.Box[] {W02_LEDGE_A, W02_MID, W02_LEDGE_C}) {
-            kit.fill(b.x1(), w.floorY() + 1, b.z1(), b.x2(), Y - 1, b.z2(), BuildKit.BRICKS);
-            for (int x = b.x1(); x <= b.x2(); x++) {
-                for (int z = b.z1(); z <= b.z2(); z++) {
-                    boolean edge = x == b.x1() || x == b.x2() || z == b.z1() || z == b.z2();
-                    kit.set(x, Y, z, edge ? BuildKit.TILES : BuildKit.POLISHED);
-                }
-            }
-        }
-        // 梁 (封印の扉のブロック。三つの配置すべての分。グループごとに止まる・振れる・消える)
-        BlockState gate = ModBlocks.SEALED_GATE.get().defaultBlockState();
-        for (BlockPos p : W02Bell.union()) {
-            kit.set(p, gate);
-        }
-        // 鐘: 入口の岩棚と中ほどの台
-        BlockState bell = jp.revati.skyabyss.relic.RelicBlocks.bell(jp.revati.skyabyss.relic.RelicStyle.WHALE, Direction.NORTH);
-        kit.set(W02Bell.BELL_A, bell);
-        kit.set(W02Bell.BELL_M, bell);
-        deckRest(kit, REST_W02_A);
-        deckRest(kit, REST_W02_M);
-        deckRest(kit, REST_W02_C);
-        // 飾り: 天井の肋骨・吊るした灯り・壁の灯り
-        kit.ribs(w, 6, true);
-        for (int z : new int[] {32, 46, 60}) {
-            kit.hangingLantern(13, z, w.ceilingY(), 5);
-        }
-        kit.wallLamps(w, 4, Y + 6);
     }
 
     // ---------------------------------------------------------------- W06 骨の楽譜

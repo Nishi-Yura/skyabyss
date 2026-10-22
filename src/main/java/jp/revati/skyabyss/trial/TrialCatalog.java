@@ -24,9 +24,6 @@ public final class TrialCatalog {
     private static final Map<String, Def> BY_ID = new LinkedHashMap<>();
 
     // 岩鯨の新作の修飾の口の名前 (lang の trial.skyabyss.mod.<試練>.<種類>.<名前>)
-    public static final List<String> W02_NUMBERS = List.of("period", "window");
-    public static final List<String> W02_HAZARDS = List.of("gust", "echo");
-    public static final List<String> W02_GOALS = List.of("no_fall");
     public static final List<String> W06_NUMBERS = List.of("length", "memory");
     public static final List<String> W06_GOALS = List.of("no_mistake");
     public static final List<String> W07_NUMBERS = List.of("grace", "hold");
@@ -146,10 +143,8 @@ public final class TrialCatalog {
         String tide = Titans.TIDE_SHELL;
         String storm = Titans.THUNDER_WING;
         String ember = Titans.EMBER;
-        // ---- 岩鯨 (歩 W01・W02 / 智 W05・W06・W07 / 闘 W09・W10)
+        // ---- 岩鯨 (歩 W01・W03・W04 / 智 W05・W06・W07 / 闘 W09・W10)
         add(new Def("W01", whale, Slot.WALK, Kind.CROSS, 1, true, true, Space.EMPTY));
-        add(new Def("W02", whale, Slot.WALK, Kind.BEAT, 2, false, false,
-                new Space(3, W02_NUMBERS, 0, W02_HAZARDS, W02_GOALS, List.of())));
         add(new Def("W03", whale, Slot.WALK, Kind.CROSS, 2, true, false,
                 new Space(3, W03_NUMBERS, 0, W03_HAZARDS, W03_GOALS, List.of())));
         add(new Def("W04", whale, Slot.WALK, Kind.BEAT, 3, true, false,

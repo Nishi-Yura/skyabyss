@@ -24,7 +24,6 @@ import jp.revati.skyabyss.trial.tide.T12Keeper;
 import jp.revati.skyabyss.trial.tide.T06Choir;
 import jp.revati.skyabyss.trial.tide.T07Seas;
 import jp.revati.skyabyss.trial.tide.T10Ring;
-import jp.revati.skyabyss.trial.whale.W02Bell;
 import jp.revati.skyabyss.trial.whale.W03Moss;
 import jp.revati.skyabyss.trial.whale.W04Vents;
 import jp.revati.skyabyss.trial.whale.W11Coffin;
@@ -64,7 +63,6 @@ public final class TrialCells {
             }
             register(new LegacyCell(d, legacyPorts(d)));
         }
-        register(new W02Bell());
         register(new W03Moss());
         register(new W04Vents());
         register(new W06Score());
