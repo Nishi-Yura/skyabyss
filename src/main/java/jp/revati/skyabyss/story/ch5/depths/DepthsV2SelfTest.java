@@ -343,6 +343,15 @@ public final class DepthsV2SelfTest {
         DepthBuilder.Inst k5 = DepthBuilder.request(server, groupA, ra.slot, 5, 1);
         DepthBuilder.finishNow(server);
         check(f, k5.ready && k5.plan.boss(), "floor 5 is not a built boss floor");
+        // 王の階の入口のそばに、前の私の手記 (碑。王の型の文) が立ち、文と王の正体の一行がある
+        String noteKey = "sign.skyabyss.depth_note_" + DepthBoss.kingOf(DepthPlan.bossNo(5)).id();
+        check(f, k5.noteAt != null && level.getBlockEntity(k5.noteAt) instanceof jp.revati.skyabyss.tablet.TabletBlockEntity tb && noteKey.equals(tb.key())
+                && k5.noteAt.distManhattan(k5.entryFeet()) <= 4, "boss floor has no past-self note near the entry (" + k5.noteAt + ")");
+        var jaLang = jp.revati.skyabyss.SignFit.lang("ja_jp");
+        for (DepthBoss.King kg : DepthBoss.KINGS) {
+            check(f, !jaLang.getOrDefault("sign.skyabyss.depth_note_" + kg.id() + ".1", "").isEmpty()
+                    && !jaLang.getOrDefault("message.skyabyss.depths.king.reveal." + kg.id(), "").isEmpty(), "king " + kg.id() + " lacks its note or reveal line");
+        }
         BlockPos s5 = k5.stairsFeet();
         check(f, level.getBlockState(s5.below()).getBlock() == Blocks.CRYING_OBSIDIAN && !k5.stairsOpen, "boss floor stairs are not sealed");
         net.neoforged.neoforge.common.util.FakePlayer fake = net.neoforged.neoforge.common.util.FakePlayerFactory.getMinecraft(level);

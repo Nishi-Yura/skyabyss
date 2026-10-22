@@ -131,6 +131,7 @@ public final class RaidRun {
         for (ServerPlayer p : TrialRoute.members(back, group)) {
             TrialRoute.move(back, p, ctx.cell().rest(), yaw);
             Notice.narrate(p, "message.skyabyss.route.step" + step, name);
+            RaidLore.voice(p, d.id());
             RouteCard.show(p, back, group, titan, draw, step, false);
         }
         sendHud(run, false);
@@ -274,6 +275,9 @@ public final class RaidRun {
         sendHud(run, true);
         TrialDraw.Draw draw = TrialData.current(ctx.level(), ctx.group());
         String key = TrialRoute.keyOf(ctx.titan(), draw, run.step);
+        for (ServerPlayer p : ctx.players()) {
+            RaidLore.onCleared(p, ctx.roomId());
+        }
         SkyAbyss.LOGGER.info("Raid: room {} cleared by group {} (wipes {})", ctx.roomId(), ctx.group(), run.wipes);
         if (key != null) {
             TrialRoute.onCleared(ctx.level(), ctx.group(), ctx.titan(), key, null, true);
