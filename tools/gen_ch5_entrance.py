@@ -145,6 +145,10 @@ TEXTS = [
     ('message.skyabyss.ch5.landing_workshop', '灰の民の作業場。……ここで鼓動を運んでいたのか。', 'The ash folk\'s workshop. ...So this is where they carried the beat.'),
     ('message.skyabyss.ch5.landing_camp', '野営の跡。焚き火はまだ温かい気がする。帳面の字が、自分の字に似ている。', 'A camp\'s remains. The fire almost feels warm. The writing in the notebook looks like yours.'),
     ('message.skyabyss.ch5.threshold', '底の境。門は閉じている。向こうで、遠い鼓動が一つ鳴った。', 'The threshold. The gate is closed. Beyond it, one distant beat sounds.'),
+    # 深淵の圧 (story/ch5/AbyssPressure・client/AbyssHud。36 の A4)
+    ('hud.skyabyss.abyss.depth', '深さ %s', 'Depth %s'),
+    ('hud.skyabyss.abyss.weight', '体が重い %s%%', 'Heavy %s%%'),
+    ('message.skyabyss.abyss.voice_full', '闇の中から、名前を呼ばれた気がする。……灯りを。', 'Something in the dark seemed to call your name. ...Light, now.'),
 ]
 
 
