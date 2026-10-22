@@ -279,13 +279,15 @@ tasks.named('processResources') {
     dependsOn pngOptimize
     doLast {
         def slurper = new groovy.json.JsonSlurper()
+        // 日本語をエスケープすると lang が膨らむので、そのまま書く
+        def gen = new groovy.json.JsonGenerator.Options().disableUnicodeEscaping().build()
         def root = destinationDir
         // data/** と assets/*/{models,blockstates,lang,geo,animations}/** の JSON だけ
         def pick = ~/(data\/.*|assets\/[^\/]+\/(models|blockstates|lang|geo|animations)\/.*)\.json/
         root.eachFileRecurse(groovy.io.FileType.FILES) { f ->
             def rel = root.toPath().relativize(f.toPath()).toString().replace('\\', '/')
             if (rel ==~ pick) {
-                f.setText(groovy.json.JsonOutput.toJson(slurper.parseText(f.getText('UTF-8'))), 'UTF-8')
+                f.setText(gen.toJson(slurper.parseText(f.getText('UTF-8'))), 'UTF-8')
             }
         }
     }
