@@ -1,0 +1,46 @@
+# 都と深淵の重さを測る (一人のクライアント、音なし。約 5 分)。E: 都の真ん中 (人と町の見回り) → F: 深淵の縦穴 (敵・圧・HUD)
+# SKYABYSS_PROF=1 ./gradlew runShots --no-daemon --offline -Pscript=tools/shots/perf_town_abyss.txt -PshotsName=perf_town_abyss
+# 1 回目は都と深淵を建てる (温め)。2 回目を読む。[prof] <場面> の行が logs/latest.log に出る
+world opening_perf normal
+size 1280 720
+timeout 2400
+render 12
+clouds off
+guiscale 2
+
+wait 100
+cmd skyabyss cinematic stop
+wait 10
+cmd skyabyss cinematic stop
+cmd time set 2000
+cmd weather clear
+cmd gamerule doDaylightCycle false
+cmd skyabyss dev opening build
+cmd gamemode survival
+cmd effect give @s minecraft:resistance infinite 4 true
+hud on
+
+# ---- E: 都の真ん中 (広場から北の鐘の方)
+cmd skyabyss dev opening at shelter 0 0 2 20 180 6
+waitchunks 1200
+wait 200
+prof discard
+wait 600
+prof E_capital
+
+# ---- F: 深淵の縦穴の上の層 (敵を何体か)
+cmd skyabyss abyss build
+cmd skyabyss abyss enter
+waitchunks 1200
+wait 600
+cmd skyabyss abyss mob bone_picker 1
+cmd skyabyss abyss mob bone_picker 1
+cmd skyabyss abyss mob rib_guard 1
+cmd skyabyss abyss mob bone_flute 1
+cmd skyabyss abyss mob charged_moth 2
+cmd skyabyss abyss foe soot_child 0
+wait 100
+prof discard
+wait 600
+prof F_abyss
+quit

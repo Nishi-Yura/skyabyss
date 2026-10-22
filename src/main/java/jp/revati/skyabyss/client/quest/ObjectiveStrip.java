@@ -165,7 +165,26 @@ public final class ObjectiveStrip {
     }
 
     // 文を幅に折り返した行 (先頭に「◆ 」)。行数は maxLines まで (超えたら最後を「…」で切る)
+    // 折り返しの結果を覚えておく (毎フレーム同じ文を折り返さない。帯の大きさ決めと描画で二か所から呼ばれるので二つ)
+    private static final java.util.Map<String, java.util.List<String>> WRAPPED = new java.util.LinkedHashMap<>(8, 0.75f, true) {
+        @Override
+        protected boolean removeEldestEntry(java.util.Map.Entry<String, java.util.List<String>> e) {
+            return size() > 6;
+        }
+    };
+
     static java.util.List<String> wrap(Font font, String text, int width, int maxLines) {
+        String key = width + "|" + maxLines + "|" + font.width(text) + "|" + text;
+        java.util.List<String> hit = WRAPPED.get(key);
+        if (hit != null) {
+            return hit;
+        }
+        java.util.List<String> made = wrap0(font, text, width, maxLines);
+        WRAPPED.put(key, java.util.List.copyOf(made));
+        return made;
+    }
+
+    private static java.util.List<String> wrap0(Font font, String text, int width, int maxLines) {
         java.util.List<String> lines = new java.util.ArrayList<>(jp.revati.skyabyss.lore.LoreWrap.wrap("◆ " + text, width, font::width));
         if (lines.size() > maxLines) {
             lines = new java.util.ArrayList<>(lines.subList(0, maxLines));

@@ -82,25 +82,17 @@ public final class ArtClient {
         event.registerAboveAll(ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "abyss_arts"), ArtClient::render);
     }
 
-    static void render(GuiGraphics g, DeltaTracker delta) {
-        Minecraft mc = Minecraft.getInstance();
-        if (mc.player == null || mc.level == null || mc.options.hideGui || mc.level.dimension() != AbyssWorld.LEVEL) {
-            return;
-        }
+    // 絵の場所と、行の文 (文は残り時間が tick ごとにしか変わらないので、tick ごとに一度だけ作る)
+    private static final ResourceLocation[] ICONS = java.util.Arrays.stream(AbyssArt.values())
+            .map(a -> ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "textures/gui/abyss_art/" + a.id + ".png")).toArray(ResourceLocation[]::new);
+    private static final Component[] LINES = new Component[AbyssArt.values().length];
+    private static final int[] COLORS = new int[AbyssArt.values().length];
+    private static long linesTick = Long.MIN_VALUE;
+
+    private static void buildLines(Minecraft mc, long now) {
         ArtData data = AbyssArts.data(mc.player);
-        Font font = mc.font;
-        long now = mc.level.getGameTime();
-        int x = 4;
-        int y = g.guiHeight() / 2 - 24;
         for (AbyssArt a : AbyssArt.values()) {
-            int row = y + a.ordinal() * 20;
             int rank = data.rank(a);
-            // 絵 (32px の絵を半分の大きさで出す)
-            g.pose().pushPose();
-            g.pose().scale(0.5f, 0.5f, 1f);
-            g.blit(ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "textures/gui/abyss_art/" + a.id + ".png"),
-                    x * 2, row * 2, 0, 0, 32, 32, 32, 32);
-            g.pose().popPose();
             String keyName = KEYS[a.ordinal()].getTranslatedKeyMessage().getString();
             Component name = Component.translatable(a.nameKey());
             Component line;
@@ -115,6 +107,33 @@ public final class ArtClient {
                         : Component.translatable("hud.skyabyss.art.ready", keyName, name, rank);
                 color = left > 0 ? 0xB8B8B8 : 0xE6F4FF;
             }
+            LINES[a.ordinal()] = line;
+            COLORS[a.ordinal()] = color;
+        }
+        linesTick = now;
+    }
+
+    static void render(GuiGraphics g, DeltaTracker delta) {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.player == null || mc.level == null || mc.options.hideGui || mc.level.dimension() != AbyssWorld.LEVEL) {
+            return;
+        }
+        Font font = mc.font;
+        long now = mc.level.getGameTime();
+        if (now != linesTick) {
+            buildLines(mc, now);
+        }
+        int x = 4;
+        int y = g.guiHeight() / 2 - 24;
+        for (AbyssArt a : AbyssArt.values()) {
+            int row = y + a.ordinal() * 20;
+            // 絵 (32px の絵を半分の大きさで出す)
+            g.pose().pushPose();
+            g.pose().scale(0.5f, 0.5f, 1f);
+            g.blit(ICONS[a.ordinal()], x * 2, row * 2, 0, 0, 32, 32, 32, 32);
+            g.pose().popPose();
+            Component line = LINES[a.ordinal()];
+            int color = COLORS[a.ordinal()];
             g.drawString(font, line, x + 20, row + 4, color, true);
         }
     }

@@ -1,9 +1,14 @@
 package jp.revati.skyabyss.story.ch5.client;
 
+import org.joml.Matrix4f;
+
+import com.mojang.blaze3d.vertex.VertexConsumer;
+
 import jp.revati.skyabyss.SkyAbyss;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.network.chat.Component;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -29,6 +34,14 @@ public final class AbyssHud {
         depth = d;
     }
 
+    // 横に濃淡のつく四角 (左の色 → 右の色)
+    private static void quad(VertexConsumer vc, Matrix4f m, int x0, int x1, int h, int left, int right) {
+        vc.addVertex(m, x0, 0, 0).setColor(left);
+        vc.addVertex(m, x0, h, 0).setColor(left);
+        vc.addVertex(m, x1, h, 0).setColor(right);
+        vc.addVertex(m, x1, 0, 0).setColor(right);
+    }
+
     @SubscribeEvent
     static void onRender(RenderGuiEvent.Post event) {
         Minecraft mc = Minecraft.getInstance();
@@ -48,11 +61,11 @@ public final class AbyssHud {
             int col = a << 24;
             g.fillGradient(0, 0, w, edge, col, 0);
             g.fillGradient(0, h - edge, w, h, 0, col);
-            for (int i = 0; i < edge; i += 2) {
-                int ai = (int) (a * (1f - i / (float) edge)) << 24;
-                g.fill(i, 0, i + 2, h, ai);
-                g.fill(w - i - 2, 0, w - i, h, ai);
-            }
+            // 左右は横向きの濃淡を四角一つずつで (細い帯を何十本も重ねない)
+            Matrix4f m = g.pose().last().pose();
+            VertexConsumer vc = g.bufferSource().getBuffer(RenderType.gui());
+            quad(vc, m, 0, edge, h, col, 0);
+            quad(vc, m, w - edge, w, h, 0, col);
         }
         Font font = mc.font;
         Component dep = Component.translatable("hud.skyabyss.abyss.depth", depth);

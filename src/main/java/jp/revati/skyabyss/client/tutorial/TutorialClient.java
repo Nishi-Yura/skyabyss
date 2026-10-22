@@ -53,6 +53,7 @@ public final class TutorialClient {
 
     public static void receive(TutorialHints.Sync sync) {
         active = List.copyOf(sync.active());
+        textsTick = Long.MIN_VALUE;
         for (String id : sync.done()) {
             DONE.add(id);
         }
@@ -65,6 +66,7 @@ public final class TutorialClient {
     @SubscribeEvent
     static void onLogout(ClientPlayerNetworkEvent.LoggingOut event) {
         active = List.of();
+        textsTick = Long.MIN_VALUE;
         DONE.clear();
         lastFrame = -1;
     }
@@ -142,16 +144,34 @@ public final class TutorialClient {
         for (String id : DONE.ids()) {
             lines.add(new Line(Component.translatable("tutorial.skyabyss.done"), DONE.alpha(id), true));
         }
-        for (String id : active) {
+        for (Component t : activeTexts(mc)) {
             if (lines.size() >= MAX_LINES) {
                 break;
             }
-            Component t = text(mc, id);
-            if (t != null) {
-                lines.add(new Line(t, 1f, false));
-            }
+            lines.add(new Line(t, 1f, false));
         }
         return lines;
+    }
+
+    // 手引きの文は tick ごとに一度だけ作る (持ち物を見て文を選ぶので、毎フレーム作らない。持ち物もキーも tick より速くは変わらない)
+    private static long textsTick = Long.MIN_VALUE;
+    private static List<Component> texts = List.of();
+
+    private static List<Component> activeTexts(Minecraft mc) {
+        long tick = mc.level == null ? -1 : mc.level.getGameTime();
+        if (tick != textsTick || tick < 0) {
+            List<Component> out = new ArrayList<>();
+            for (String id : active) {
+                Component t = text(mc, id);
+                if (t != null) {
+                    // 同じ文の部品を使い回す (訳は部品の中で一度だけ解かれ、毎フレーム訳し直さない)
+                    out.add(t);
+                }
+            }
+            texts = out;
+            textsTick = tick;
+        }
+        return texts;
     }
 
     // HUD の要求: 下中央の手がかりの列 (字幕の下、アクションバーの上)。一行 13 の板を MAX_LINES 行まで

@@ -30,19 +30,22 @@ public final class GuideArrow {
 
     // 中心 (cx, cy)、deg = 時計回りの角度 (0 = 真上)。alpha 0..1
     public static void draw(GuiGraphics g, float cx, float cy, float deg, float alpha) {
-        int a = (int) (255 * alpha);
-        g.pose().pushPose();
-        g.pose().translate(cx, cy, 0f);
-        g.pose().mulPose(Axis.ZP.rotationDegrees(deg));
-        int half = SIZE / 2;
-        // 縁取り (暗い影を 1 ドットずらして)
-        int shadow = ((int) (a * 0.75f)) << 24 | 0x05060A;
-        paint(g, -half, -half, 1, 1, shadow);
-        paint(g, -half, -half, -1, -1, shadow);
-        paint(g, -half, -half, 1, -1, shadow);
-        paint(g, -half, -half, -1, 1, shadow);
-        paint(g, -half, -half, 0, 0, a << 24 | GOLD);
-        g.pose().popPose();
+        // 塗りだけの描きを一度に送る (fill ごとに描き出さない。出る絵は同じ)
+        g.drawManaged(() -> {
+            int a = (int) (255 * alpha);
+            g.pose().pushPose();
+            g.pose().translate(cx, cy, 0f);
+            g.pose().mulPose(Axis.ZP.rotationDegrees(deg));
+            int half = SIZE / 2;
+            // 縁取り (暗い影を 1 ドットずらして)
+            int shadow = ((int) (a * 0.75f)) << 24 | 0x05060A;
+            paint(g, -half, -half, 1, 1, shadow);
+            paint(g, -half, -half, -1, -1, shadow);
+            paint(g, -half, -half, 1, -1, shadow);
+            paint(g, -half, -half, -1, 1, shadow);
+            paint(g, -half, -half, 0, 0, a << 24 | GOLD);
+            g.pose().popPose();
+        });
     }
 
     // SHAPE の '#' の横の連なり {行, 始まり, 終わり (含まない)}。一度だけ求め、1 回の paint は連なりごとの fill にする (一回の中では重ならないので出る絵は同じ)
@@ -79,19 +82,22 @@ public final class GuideArrow {
 
     // 上下の印 (小さな三角。5×3)。(cx, cy) が中心
     public static void drawVertical(GuiGraphics g, int cx, int cy, boolean up, float alpha) {
-        int a = (int) (255 * alpha);
-        int color = a << 24 | GOLD;
-        int shadow = ((int) (a * 0.75f)) << 24 | 0x05060A;
-        for (int r = 0; r < 3; r++) {
-            int width = up ? 1 + r * 2 : 5 - r * 2;
-            int y = cy - 1 + r;
-            int x = cx - width / 2;
-            g.fill(x - 1, y - 1, x + width + 1, y + 2, shadow);
-        }
-        for (int r = 0; r < 3; r++) {
-            int width = up ? 1 + r * 2 : 5 - r * 2;
-            int y = cy - 1 + r;
-            g.fill(cx - width / 2, y, cx - width / 2 + width, y + 1, color);
-        }
+        // 塗りだけの描きを一度に送る (fill ごとに描き出さない。出る絵は同じ)
+        g.drawManaged(() -> {
+            int a = (int) (255 * alpha);
+            int color = a << 24 | GOLD;
+            int shadow = ((int) (a * 0.75f)) << 24 | 0x05060A;
+            for (int r = 0; r < 3; r++) {
+                int width = up ? 1 + r * 2 : 5 - r * 2;
+                int y = cy - 1 + r;
+                int x = cx - width / 2;
+                g.fill(x - 1, y - 1, x + width + 1, y + 2, shadow);
+            }
+            for (int r = 0; r < 3; r++) {
+                int width = up ? 1 + r * 2 : 5 - r * 2;
+                int y = cy - 1 + r;
+                g.fill(cx - width / 2, y, cx - width / 2 + width, y + 1, color);
+            }
+        });
     }
 }

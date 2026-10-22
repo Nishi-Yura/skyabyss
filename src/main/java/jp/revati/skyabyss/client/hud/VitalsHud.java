@@ -165,18 +165,21 @@ public final class VitalsHud {
 
     // 帯の一本: 暗い石板 + 青緑の縁、左に小さな絵、中に割合の色、右に数字
     private static void bar(GuiGraphics g, Font font, Rect r, String[] icon, int iconColor, float frac, int color, String text, int textColor, boolean flash) {
-        g.fill(r.x(), r.y(), r.right(), r.bottom(), flash ? 0xFFE9E3D4 : EDGE);
-        g.fill(r.x() + 1, r.y() + 1, r.right() - 1, r.bottom() - 1, SLAB);
-        drawIcon(g, icon, r.x() + 3, r.y() + (r.h() - icon.length) / 2, iconColor);
-        int bx = r.x() + 12;
-        int bw = r.w() - 12 - 1;
-        g.fill(bx, r.y() + 1, bx + bw, r.bottom() - 1, TROUGH);
-        int fill = Mth.clamp(Math.round(bw * Mth.clamp(frac, 0f, 1f)), frac > 0f ? 1 : 0, bw);
-        if (fill > 0) {
-            g.fill(bx, r.y() + 1, bx + fill, r.bottom() - 1, color);
-            // 上辺に明るい一段 (石板に彫った段の感じ)
-            g.fill(bx, r.y() + 1, bx + fill, r.y() + 2, scale(color, 1.25f));
-        }
+        // 塗りだけ先に一度に送り、字はそのあと上に (fill ごとに描き出さない。出る絵は同じ)
+        g.drawManaged(() -> {
+            g.fill(r.x(), r.y(), r.right(), r.bottom(), flash ? 0xFFE9E3D4 : EDGE);
+            g.fill(r.x() + 1, r.y() + 1, r.right() - 1, r.bottom() - 1, SLAB);
+            drawIcon(g, icon, r.x() + 3, r.y() + (r.h() - icon.length) / 2, iconColor);
+            int bx = r.x() + 12;
+            int bw = r.w() - 12 - 1;
+            g.fill(bx, r.y() + 1, bx + bw, r.bottom() - 1, TROUGH);
+            int fill = Mth.clamp(Math.round(bw * Mth.clamp(frac, 0f, 1f)), frac > 0f ? 1 : 0, bw);
+            if (fill > 0) {
+                g.fill(bx, r.y() + 1, bx + fill, r.bottom() - 1, color);
+                // 上辺に明るい一段 (石板に彫った段の感じ)
+                g.fill(bx, r.y() + 1, bx + fill, r.y() + 2, scale(color, 1.25f));
+            }
+        });
         g.drawString(font, text, r.right() - 3 - font.width(text), r.y() + 1, textColor, true);
     }
 

@@ -215,29 +215,35 @@ public final class ObjectiveMarker {
 
     // サブのクエストも同じ場所にあることを示す小さな青緑の輪 (5 x 5)
     static void sideDot(GuiGraphics g, int cx, int cy) {
-        g.fill(cx - 2, cy - 2, cx + 3, cy + 3, DARK);
-        g.fill(cx - 1, cy - 1, cx + 2, cy + 2, 0xFF000000 | TEAL);
-        g.fill(cx, cy, cx + 1, cy + 1, DARK);
+        // 塗りだけの描きを一度に送る (fill ごとに描き出さない。出る絵は同じ)
+        g.drawManaged(() -> {
+            g.fill(cx - 2, cy - 2, cx + 3, cy + 3, DARK);
+            g.fill(cx - 1, cy - 1, cx + 2, cy + 2, 0xFF000000 | TEAL);
+            g.fill(cx, cy, cx + 1, cy + 1, DARK);
+        });
     }
 
     // ひし形: 暗い縁取り (1 画素ふくらませた同じ形) → 色 → 左上の明るい面
     static void diamond(GuiGraphics g, int cx, int cy, int rgb, float scale, float alpha) {
-        int a = Mth.clamp((int) (alpha * 255), 0, 255);
-        g.pose().pushPose();
-        g.pose().translate(cx, cy, 0f);
-        g.pose().scale(scale, scale, 1f);
-        int half = DIAMOND.length / 2;
-        int shadow = ((int) (a * 0.85f) << 24) | 0x05060A;
-        for (int dx = -1; dx <= 1; dx++) {
-            for (int dy = -1; dy <= 1; dy++) {
-                if (dx != 0 || dy != 0) {
-                    paint(g, DIAMOND, -half + dx, -half + dy, shadow);
+        // 塗りだけの描きを一度に送る (fill ごとに描き出さない。出る絵は同じ)
+        g.drawManaged(() -> {
+            int a = Mth.clamp((int) (alpha * 255), 0, 255);
+            g.pose().pushPose();
+            g.pose().translate(cx, cy, 0f);
+            g.pose().scale(scale, scale, 1f);
+            int half = DIAMOND.length / 2;
+            int shadow = ((int) (a * 0.85f) << 24) | 0x05060A;
+            for (int dx = -1; dx <= 1; dx++) {
+                for (int dy = -1; dy <= 1; dy++) {
+                    if (dx != 0 || dy != 0) {
+                        paint(g, DIAMOND, -half + dx, -half + dy, shadow);
+                    }
                 }
             }
-        }
-        paint(g, DIAMOND, -half, -half, (a << 24) | rgb);
-        paint(g, GLEAM, -half, -half, ((int) (a * 0.9f) << 24) | 0xFFF6D8);
-        g.pose().popPose();
+            paint(g, DIAMOND, -half, -half, (a << 24) | rgb);
+            paint(g, GLEAM, -half, -half, ((int) (a * 0.9f) << 24) | 0xFFF6D8);
+            g.pose().popPose();
+        });
     }
 
     // 形ごとの '#' の横の連なり {行, 始まり, 終わり (含まない)}。一度だけ求める (ひし形は縁取りで 9 回描くので、毎回文字列をなめない)
@@ -274,17 +280,20 @@ public final class ObjectiveMarker {
 
     // 向きを指す山形 (^ の形。rad = 時計回りの角度で 0 = 真上)
     private static void chevron(GuiGraphics g, int cx, int cy, float rad, int rgb) {
-        g.pose().pushPose();
-        g.pose().translate(cx, cy, 0f);
-        g.pose().mulPose(com.mojang.math.Axis.ZP.rotation(rad));
-        for (int i = 0; i < 4; i++) {
-            g.fill(-i - 1, i - 1, -i, i + 2, DARK);
-            g.fill(i, i - 1, i + 1, i + 2, DARK);
-        }
-        for (int i = 0; i < 4; i++) {
-            g.fill(-i, i, -i + 1, i + 1, 0xFF000000 | rgb);
-            g.fill(i, i, i + 1, i + 1, 0xFF000000 | rgb);
-        }
-        g.pose().popPose();
+        // 塗りだけの描きを一度に送る (fill ごとに描き出さない。出る絵は同じ)
+        g.drawManaged(() -> {
+            g.pose().pushPose();
+            g.pose().translate(cx, cy, 0f);
+            g.pose().mulPose(com.mojang.math.Axis.ZP.rotation(rad));
+            for (int i = 0; i < 4; i++) {
+                g.fill(-i - 1, i - 1, -i, i + 2, DARK);
+                g.fill(i, i - 1, i + 1, i + 2, DARK);
+            }
+            for (int i = 0; i < 4; i++) {
+                g.fill(-i, i, -i + 1, i + 1, 0xFF000000 | rgb);
+                g.fill(i, i, i + 1, i + 1, 0xFF000000 | rgb);
+            }
+            g.pose().popPose();
+        });
     }
 }
