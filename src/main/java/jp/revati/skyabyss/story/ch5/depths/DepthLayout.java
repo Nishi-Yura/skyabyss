@@ -376,39 +376,51 @@ public final class DepthLayout {
     // 浮かぶ墓場: 墓場の浮き島が五つ、高さを変えて並ぶ。島は直径十六の板 (下は細い)。墓標四つと棺、鎖で天井からつられる。
     //   島と島の間は鎖で結ばれ、その鎖が道の横の景色になる
     private void floatingGraves() {
-        BlockState slab = pal.wall();
-        BlockState cracked = pal.ledge();
+        // 島は白い石 (暗い壁の中で目立つ)。墓標は白い陶器の影、棺だけ黒い石
+        BlockState stone = Blocks.CALCITE.defaultBlockState();
+        BlockState pale = Blocks.WHITE_TERRACOTTA.defaultBlockState();
+        BlockState cap = Blocks.SMOOTH_QUARTZ.defaultBlockState();
+        BlockState glow = Blocks.SEA_LANTERN.defaultBlockState();
+        BlockState chain = Blocks.CHAIN.defaultBlockState();
         int px = 0;
         int pz = 0;
         int py = 0;
         boolean hasPrev = false;
         for (int i = 0; i < 5; i++) {
             double ang = i * 1.2566 + 0.5;
-            int ix = ox(ang, 17);
-            int iz = oz(ang, 17);
-            int top = 24 + i * 38;
-            disk(ix, top, iz, 8, slab);
-            disk(ix, top + 1, iz, 8, cracked);
-            disk(ix, top + 2, iz, 6, cracked);
-            disk(ix, top + 3, iz, 4, cracked);
-            disk(ix, top + 4, iz, 2, slab);
-            // 墓標 (四つ。高さ四と石の蓋)
+            int ix = ox(ang, 14);
+            int iz = oz(ang, 14);
+            int top = 24 + i * 34;
+            // 島 (直径二十の白い板。下へ細くなる)
+            disk(ix, top, iz, 10, stone);
+            disk(ix, top + 1, iz, 9, stone);
+            disk(ix, top + 2, iz, 7, pale);
+            disk(ix, top + 3, iz, 4, pale);
+            disk(ix, top + 4, iz, 2, stone);
+            // 島の下の光 (霧のような明かり。島の底から少し離れた所に、薄く広がる)
+            disk(ix, top + 6, iz, 3, glow);
+            // 墓標 (四つ。白い陶器の柱と、石の蓋で影になる)
             for (int k = 0; k < 4; k++) {
-                int gx = ix + (k % 2 == 0 ? -3 : 3);
-                int gz = iz + (k / 2 == 0 ? -3 : 3);
-                column(gx, gz, top - 4, top - 1, Blocks.CHISELED_DEEPSLATE.defaultBlockState());
-                put(gx, top - 5, gz, Blocks.POLISHED_DEEPSLATE.defaultBlockState());
+                int gx = ix + (k % 2 == 0 ? -4 : 4);
+                int gz = iz + (k / 2 == 0 ? -4 : 4);
+                column(gx, gz, top - 4, top - 1, pale);
+                put(gx, top - 5, gz, cap);
             }
-            // 棺 (中央に横たわる箱) と、その上の灯り
+            // 棺 (中央に横たわる黒い箱) と、その上の灯り
             put(ix, top - 1, iz, Blocks.POLISHED_BLACKSTONE.defaultBlockState());
             put(ix + 1, top - 1, iz, Blocks.POLISHED_BLACKSTONE.defaultBlockState());
             put(ix, top - 2, iz, Blocks.SOUL_LANTERN.defaultBlockState());
-            // 天井からの鎖 (島の両端へ)
-            column(ix - 6, iz, 1, top - 1, Blocks.CHAIN.defaultBlockState());
-            column(ix + 6, iz, 1, top - 1, Blocks.CHAIN.defaultBlockState());
+            // 島の上の蝋燭 (二本。点いている)
+            put(ix + 3, top - 1, iz + 2, Blocks.CANDLE.defaultBlockState().setValue(CandleBlock.LIT, true));
+            put(ix - 3, top - 1, iz - 2, Blocks.CANDLE.defaultBlockState().setValue(CandleBlock.LIT, true));
+            // 天井からの重い鎖 (島の両端へ。二本ずつ並べて太く見せる)
+            column(ix - 7, iz, 1, top - 1, chain);
+            column(ix + 7, iz, 1, top - 1, chain);
+            column(ix - 7, iz + 1, 1, top - 1, chain);
+            column(ix + 7, iz + 1, 1, top - 1, chain);
             // 前の島との間の鎖 (たるんだ線。島の上から上へ)
             if (hasPrev) {
-                line(px, py, pz, ix, top - 1, iz, Blocks.CHAIN.defaultBlockState());
+                line(px, py, pz, ix, top - 1, iz, chain);
             }
             px = ix;
             pz = iz;
@@ -462,34 +474,64 @@ public final class DepthLayout {
     // 鏡の闇: 色ガラスの柱が六本 (黒曜石の台)。道と同じ数の影が、道の反対側に上下逆に写る (黒曜石の板)
     private void mirrorDark(List<Platform> route) {
         BlockState glass = Blocks.TINTED_GLASS.defaultBlockState();
-        BlockState obsidian = Blocks.OBSIDIAN.defaultBlockState();
-        // 写しの道は鉄の板 (黒い壁の中で光を返す)
+        BlockState frame = Blocks.QUARTZ_BLOCK.defaultBlockState();
+        BlockState light = Blocks.SEA_LANTERN.defaultBlockState();
+        // 鏡の柱: 白い石の枠 (四角の縁) の中に、色ガラスの板。上と下は白い石で閉じ、中ほどに淡い光
         for (int a = 0; a < 6; a++) {
             double ang = a * Math.PI / 3 + 0.4;
-            int mx = ox(ang, 21);
-            int mz = oz(ang, 21);
-            for (int dx = 0; dx <= 1; dx++) {
-                for (int dz = 0; dz <= 1; dz++) {
-                    column(mx + dx, mz + dz, 1, HEIGHT_LAST - 4, glass);
-                    column(mx + dx, mz + dz, HEIGHT_LAST - 3, HEIGHT_LAST, obsidian);
+            int mx = ox(ang, 20);
+            int mz = oz(ang, 20);
+            for (int dx = -1; dx <= 2; dx++) {
+                for (int dz = -1; dz <= 2; dz++) {
+                    boolean edge = dx == -1 || dx == 2 || dz == -1 || dz == 2;
+                    column(mx + dx, mz + dz, 1, HEIGHT_LAST - 4, edge ? frame : glass);
+                    column(mx + dx, mz + dz, HEIGHT_LAST - 3, HEIGHT_LAST, frame);
                 }
             }
             for (int ly = 9; ly < HEIGHT_LAST - 4; ly += 18) {
-                put(mx, ly, mz, pal.lamp());
+                put(mx, ly, mz, light);
+                put(mx + 1, ly, mz + 1, light);
             }
         }
-        // 逆さの影: 道の一つ一つを、上下を逆にして反対側に写す
+        // 水平の鏡の面 (中ほどに、外の縁だけの白い輪。ガラスの帯が天井の代わりに光を返す)
+        int plane = HEIGHT_LAST / 2;
+        for (int dx = -23; dx <= 23; dx++) {
+            for (int dz = -23; dz <= 23; dz++) {
+                int d2 = dx * dx + dz * dz;
+                if (d2 >= 17 * 17 && d2 <= 21 * 21) {
+                    put(dx, plane, dz, Blocks.WHITE_STAINED_GLASS.defaultBlockState());
+                } else if (d2 >= 21 * 21 && d2 <= 22 * 22) {
+                    put(dx, plane, dz, frame);
+                }
+            }
+        }
+        // 逆さの影: 道の一つ一つを、上下を逆にして反対側に写す。写しの道は白い石の板で、隣どうしを白い線でつなぐ
+        int prevX = 0;
+        int prevZ = 0;
+        int prevY = -1;
         for (Platform p : route) {
             int ly = DepthPlan.HEIGHT - 1 - p.ly();
             double ang = Math.atan2(p.dz(), p.dx()) + Math.PI;
-            disk(ox(ang, 16), ly, oz(ang, 16), 1.6, Blocks.IRON_BLOCK.defaultBlockState());
+            int wx = ox(ang, 16);
+            int wz = oz(ang, 16);
+            disk(wx, ly, wz, 2.0, frame);
+            if (prevY >= 0) {
+                line(prevX, prevY, prevZ, wx, ly, wz, frame);
+            }
+            prevX = wx;
+            prevZ = wz;
+            prevY = ly;
         }
     }
 
     // 鎖の網: 八段ごとに、格子の鎖 (三ブロックごとの糸) を天井から床まで張る。道はその間を通る。
     //   外側には、鎖の帳 (二十四本) が天井から床まで垂れる
+    //   網の一段は、鉄の格子 (Z 方向の線) と鎖 (X 方向の線) が交わる。交点は鉄の塊の結び目で、その下に吊り灯籠。
     private void chainNet() {
         BlockState chain = Blocks.CHAIN.defaultBlockState();
+        BlockState bars = Blocks.IRON_BARS.defaultBlockState();
+        BlockState knot = Blocks.IRON_BLOCK.defaultBlockState();
+        BlockState lantern = Blocks.LANTERN.defaultBlockState().setValue(BlockStateProperties.HANGING, true);
         for (int ly = 4; ly < HEIGHT_LAST - 1; ly += 12) {
             for (int dx = -24; dx <= 24; dx++) {
                 for (int dz = -24; dz <= 24; dz++) {
@@ -497,14 +539,27 @@ public final class DepthLayout {
                     if (d2 < 81 || d2 > 24 * 24) {
                         continue;
                     }
-                    if (dx % 3 == 0) {
-                        put(dx, ly, dz, chain.setValue(BlockStateProperties.AXIS, Direction.Axis.Z));
-                    } else if (dz % 3 == 0) {
+                    boolean barLine = dx % 3 == 0;
+                    boolean chainLine = dz % 3 == 0;
+                    if (barLine && chainLine) {
+                        // 結び目: 三つに一つ (ずらして) を鉄の塊に、その下に吊り灯籠
+                        if (Math.floorMod(dx / 3 + dz / 3, 3) == 0) {
+                            put(dx, ly, dz, knot);
+                            put(dx, ly + 1, dz, lantern);
+                        } else {
+                            put(dx, ly, dz, bars.setValue(BlockStateProperties.NORTH, true).setValue(BlockStateProperties.SOUTH, true));
+                        }
+                    } else if (barLine) {
+                        // 鉄の格子の線 (前後がつながる)
+                        put(dx, ly, dz, bars.setValue(BlockStateProperties.NORTH, true).setValue(BlockStateProperties.SOUTH, true));
+                    } else if (chainLine) {
+                        // 鎖の線 (横に渡す)
                         put(dx, ly, dz, chain.setValue(BlockStateProperties.AXIS, Direction.Axis.X));
                     }
                 }
             }
         }
+        // 外側の鎖の帳 (二十四本。天井から床まで。網の縁をふちどる)
         for (int a = 0; a < 24; a++) {
             double ang = a * Math.PI / 12 + 0.1;
             column(ox(ang, 22), oz(ang, 22), 1, HEIGHT_LAST, chain);
