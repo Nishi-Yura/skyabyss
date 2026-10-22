@@ -84,6 +84,11 @@ public final class WhaleRaidSelfTest {
         return RaidRun.of(group);
     }
 
+    private static boolean hudLive(String id) {
+        RaidRun.Run r = run();
+        return r != null && r.lastHud != null && r.lastHud.cellId().equals(id) && !r.lastHud.objKey().equals("raid.skyabyss.hud.ready");
+    }
+
     private static boolean active(Class<? extends RaidRoom> type) {
         RaidRun.Run r = run();
         return r != null && type.isInstance(r.room) && r.phase == RaidRun.Phase.ACTIVE;
@@ -162,7 +167,10 @@ public final class WhaleRaidSelfTest {
         String[] ids = {WhaleRaid.WALK, WhaleRaid.WIT, WhaleRaid.FIGHT};
         for (int i = 1; i <= 3; i++) {
             Trial.Def d = TrialRoute.defOf(draw, i);
-            check(d != null && d.id().equals(ids[i - 1]), "step " + i + " is not the fixed room " + ids[i - 1] + ": " + (d == null ? null : d.id()));
+            Trial.Slot slot = Trial.Slot.values()[i - 1];
+            check(d != null && RaidRooms.idsOf(Titans.STONE_WHALE, slot).contains(d.id()), "step " + i + " is not one of the registered rooms: " + (d == null ? null : d.id()));
+            check(java.util.Objects.equals(RaidRooms.drawOf(Titans.STONE_WHALE, slot, 12345L), RaidRooms.drawOf(Titans.STONE_WHALE, slot, 12345L)), "the room draw is not deterministic");
+            check(ids[i - 1].equals(d == null ? null : d.id()) || RaidRooms.idsOf(Titans.STONE_WHALE, slot).size() > 1, "step " + i + " (one room per slot) is not " + ids[i - 1]);
         }
         if (!FAILS.isEmpty()) {
             finished = true;
@@ -175,6 +183,7 @@ public final class WhaleRaidSelfTest {
     private static void buildStages() {
         // ---- WR1 歩「骨玉運び」
         STAGES.add(() -> waitFor(() -> active(WhaleCarryRoom.class), 400, "WR1 active"));
+        STAGES.add(() -> waitFor(() -> hudLive("WR1"), 60, "WR1 objective strip"));
         STAGES.add(() -> {
             RaidRun.Run r = run();
             check(r.step == 1 && r.ctx.cell().bounds().contains(player.position()), "WR1: the player is not inside the room's cell");
@@ -198,6 +207,12 @@ public final class WhaleRaidSelfTest {
         });
         STAGES.add(() -> {
             BlockPos home = ((WhaleCarryRoom) run().room).home(0);
+            if (waited == 150) {
+                for (ItemEntity e : back.getEntitiesOfClass(ItemEntity.class, run().ctx.cell().bounds().inflate(4))) {
+                    SkyAbyss.LOGGER.info("SELFTEST raid whale debug: item {} at {} ground={} vel={} home={} phase={}", idxOf(e.getItem()), e.position(), e.onGround(),
+                            e.getDeltaMovement(), home, run().phase);
+                }
+            }
             return waitFor(() -> orbNear(home, 2.5, 0), WhaleCarryRoom.LINGER + 200, "dropped orb 0 returns home");
         });
         STAGES.add(() -> waitFor(() -> !player.getAttribute(Attributes.MOVEMENT_SPEED).hasModifier(WhaleCarryRoom.SLOW_ID), 60, "carry slow removed"));
@@ -231,6 +246,7 @@ public final class WhaleRaidSelfTest {
         // ---- WR2 智「共鳴の骨」
         STAGES.add(() -> waitFor(() -> run() != null && run().step == 2 && run().room instanceof WhaleBonesRoom, 400, "carried to WR2"));
         STAGES.add(() -> waitFor(() -> active(WhaleBonesRoom.class), 400, "WR2 active"));
+        STAGES.add(() -> waitFor(() -> hudLive("WR2"), 60, "WR2 objective strip"));
         STAGES.add(() -> waitFor(() -> !((WhaleBonesRoom) run().room).listening() && !run().room.isComplete(), 600, "WR2 input phase"));
         STAGES.add(() -> {
             RaidRun.Run r = run();
@@ -272,6 +288,7 @@ public final class WhaleRaidSelfTest {
         // ---- WR3 闘「鯨の核を守る」
         STAGES.add(() -> waitFor(() -> run() != null && run().step == 3 && run().room instanceof WhaleCoreRoom, 400, "carried to WR3"));
         STAGES.add(() -> waitFor(() -> active(WhaleCoreRoom.class), 400, "WR3 active"));
+        STAGES.add(() -> waitFor(() -> hudLive("WR3"), 60, "WR3 objective strip"));
         STAGES.add(() -> waitFor(() -> ((WhaleCoreRoom) run().room).wave() >= 1 && !run().ctx.aliveMobs().isEmpty(), 400, "WR3 wave 1"));
         STAGES.add(() -> {
             RaidRun.Run r = run();
