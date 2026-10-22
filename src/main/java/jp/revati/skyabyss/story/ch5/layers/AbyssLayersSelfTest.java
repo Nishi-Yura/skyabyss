@@ -45,6 +45,12 @@ public final class AbyssLayersSelfTest {
             checkStrikes(f, server);
             checkMaze(f, level);
             checkGate(f, server);
+            // 読み込みで固定した塊を外す (外し忘れると、止めるときの片づけが終わらないことがあった)
+            for (BlockPos p : marks()) {
+                if (p != null) {
+                    hold(level, p, false);
+                }
+            }
         }
         report(f);
     }
