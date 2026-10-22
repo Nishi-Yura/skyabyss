@@ -19,38 +19,49 @@ wait 900
 
 # ---- 着く所と縦穴の上から (縁は 24,241,0。中心は吹き抜け)
 cmd tp @s 24 243 0 90 35
+waitchunks
 wait 60
 shot l_rim_down
 cmd tp @s 0 236 0 0 60
+waitchunks
 wait 60
 shot l_shaft_top_down
 cmd tp @s 0 262 -6 0 40
+waitchunks
 wait 60
 shot l_shaft_vista
 
 # ---- 骨の層: 橋の上と下、崩れの広い絵、巣、溜まりの間、休み場
 cmd tp @s -8 170 -10 -70 8
+waitchunks
 wait 60
 shot l_bone_bridge_start
 cmd tp @s 3 168 -8 -70 30
+waitchunks
 wait 60
 shot l_bone_bridge_mid
 cmd tp @s 6 150 -6 -70 -6
+waitchunks
 wait 60
 shot l_bone_bridge_under
 cmd tp @s -44 186 44 -40 10
+waitchunks
 wait 60
 shot l_bone_wide
 cmd tp @s -18 146 -2 90 4
+waitchunks
 wait 60
 shot l_bone_den
 cmd tp @s 21 219 -10 0 10
+waitchunks
 wait 60
 shot l_bone_pool
 cmd tp @s -8 124 7 -60 8
+waitchunks
 wait 60
 shot l_bone_rest_1
 cmd tp @s -25 200 -16 135 12
+waitchunks
 wait 60
 shot l_bone_cave_1
 
@@ -58,37 +69,47 @@ shot l_bone_cave_1
 cmd time set 0
 wait 80
 cmd tp @s -16 52 12 -131 10
+waitchunks
 wait 60
 shot l_salt_lake_low
 cmd tp @s -44 62 40 -40 10
+waitchunks
 wait 60
 shot l_salt_wide_low
 cmd time set 1200
 wait 80
 cmd tp @s -16 52 12 -131 10
+waitchunks
 wait 60
 shot l_salt_lake_high
 cmd tp @s -44 66 40 -40 10
+waitchunks
 wait 60
 shot l_salt_wide_high
 cmd tp @s 6 67 -8 -60 10
+waitchunks
 wait 60
 shot l_salt_shelf
 cmd tp @s 11 2 -9 -90 5
+waitchunks
 wait 60
 shot l_rest_2
 cmd tp @s -18 65 -20 45 10
+waitchunks
 wait 60
 shot l_salt_camp
 cmd tp @s 30 84 5 -90 12
+waitchunks
 wait 60
 shot l_salt_cave_1
 
 # ---- 雷の層: 吊り橋の横・上・雷の拍 (80 tick ごとに四つ撮る)・避雷の像・溜まり・広い絵
 cmd tp @s -4 -35 -6 90 12
+waitchunks
 wait 60
 shot l_storm_bridge_side
 cmd tp @s 10 -36 -4 0 12
+waitchunks
 wait 60
 shot l_storm_bridge_deck_a
 wait 20
@@ -98,26 +119,33 @@ shot l_storm_bridge_deck_c
 wait 20
 shot l_storm_bridge_deck_d
 cmd tp @s -50 -20 40 -40 5
+waitchunks
 wait 60
 shot l_storm_wide
 cmd tp @s -6 -30 -14 40 10
+waitchunks
 wait 60
 shot l_storm_idol
 cmd tp @s 15 -16 -19 0 10
+waitchunks
 wait 60
 shot l_storm_pool
 cmd tp @s -29 -36 -11 90 12
+waitchunks
 wait 60
 shot l_storm_cave_1
 
 # ---- 灰の層: 迷路の外・入口・中 (灯りなし)・門の前・溜まり・休み場
 cmd tp @s 36 -110 0 270 22
+waitchunks
 wait 60
 shot l_ash_outside
 cmd tp @s 25 -126 -1 270 10
+waitchunks
 wait 60
 shot l_ash_entrance
 cmd tp @s 40 -126 4 270 14
+waitchunks
 wait 60
 shot l_ash_inside_dark
 cmd effect give @s minecraft:night_vision 600 0 true
@@ -125,23 +153,29 @@ wait 40
 shot l_ash_inside_nv
 cmd effect clear @s minecraft:night_vision
 cmd tp @s 50 -126 -14 90 10
+waitchunks
 wait 60
 shot l_ash_gate
 cmd tp @s -19 -137 16 0 8
+waitchunks
 wait 60
 shot l_ash_pool
 cmd tp @s -15 -117 2 0 5
+waitchunks
 wait 60
 shot l_rest_3
 cmd tp @s 23 -157 18 135 12
+waitchunks
 wait 60
 shot l_ash_cave_1
 
 # ---- 心臓の間: 縦穴の底から、大部屋の中
 cmd tp @s 0 -250 -22 0 40
+waitchunks
 wait 60
 shot l_heart_top
 cmd tp @s 0 -296 -20 0 10
+waitchunks
 wait 60
 shot l_heart_room
 quit
