@@ -49,6 +49,7 @@ public final class TelegraphClient {
         @Nullable
         final UUID target;
         final TelegraphGround ground;
+        boolean burst;
 
         Decal(int id, TelegraphShape shape, double floor, long localStart, int warn, int active, int rgb,
                 Telegraph.Style style, @Nullable UUID target) {
@@ -173,6 +174,10 @@ public final class TelegraphClient {
         for (Iterator<Decal> it = DECALS.values().iterator(); it.hasNext();) {
             Decal d = it.next();
             long t = now - d.localStart;
+            if (!d.burst && t >= d.warn) {
+                d.burst = true;
+                ImpactFx.burst(level, d);
+            }
             if (t > d.lifetime()) {
                 it.remove();
             } else if (particles && t < d.warn + Math.max(0, d.active) && t % 2 == 0) {
