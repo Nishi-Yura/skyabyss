@@ -184,23 +184,19 @@ public class HeartWarden extends Monster implements GeoEntity {
     }
 
     // 仮の見た目: 光の中では煙と魂の粒で体の形、輪郭だけ (鼓動の術) のときは薄く
+    // 添えの粒: 体はモデル (client/WardenRenderer) が描くので、光の中では体から立つ魂の粒が少し、輪郭だけのときはもっと少なく
     private void outline(ServerLevel level, boolean l) {
         boolean glow = hasEffect(MobEffects.GLOWING);
         if (!l && !glow) {
             return;
         }
-        int n = l ? 10 : 3;
-        double w = getBbWidth() * 0.5;
+        if (life % (l ? 6 : 12) != 0) {
+            return;
+        }
         double h = getBbHeight();
-        for (int k = 0; k < n; k++) {
-            double a = random.nextDouble() * Math.PI * 2;
-            double y = getY() + random.nextDouble() * h;
-            double r = w * (y - getY() > h * 0.75 ? 0.6 : 1.0);
-            level.sendParticles(k % 3 == 0 ? ParticleTypes.SOUL : ParticleTypes.LARGE_SMOKE, getX() + Math.cos(a) * r, y, getZ() + Math.sin(a) * r, 1, 0, 0.02, 0, 0);
-        }
-        if (l && life % 4 == 0) {
-            level.sendParticles(ParticleTypes.SOUL_FIRE_FLAME, getX() - Math.sin(Math.toRadians(getYRot())) * 0.4, getY() + h * 0.85, getZ() + Math.cos(Math.toRadians(getYRot())) * 0.4, 2, 0.15, 0.05, 0.15, 0);
-        }
+        double a = random.nextDouble() * Math.PI * 2;
+        double r = getBbWidth() * 0.45;
+        level.sendParticles(ParticleTypes.SOUL, getX() + Math.cos(a) * r, getY() + h * (0.35 + random.nextDouble() * 0.4), getZ() + Math.sin(a) * r, 1, 0, 0.03, 0, 0);
     }
 
     private void updateBar(ServerLevel level) {

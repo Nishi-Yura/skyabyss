@@ -21,7 +21,7 @@ wait 60
 cmd skyabyss abyss warden wake
 wait 40
 cmd skyabyss abyss dev dark
-cmd execute as @e[type=skyabyss:heart_warden,limit=1] at @s run tp @a ~ ~2 ~7 facing entity @s eyes
+cmd execute as @e[type=skyabyss:heart_warden,limit=1] at @s run tp @a ~ ~1 ~4.5 facing entity @s eyes
 wait 30
 
 # ---- 光の外 (闇): 体は描かず、胸の心臓の骨だけがほのかに見える
