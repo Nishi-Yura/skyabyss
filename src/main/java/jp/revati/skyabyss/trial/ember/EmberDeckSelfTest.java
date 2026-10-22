@@ -86,8 +86,18 @@ public final class EmberDeckSelfTest {
                     TitanBackData data = TitanBackData.get(back);
                     check(data.isBuilt(), "the ember back is not built");
                     EmberBackTrials.placeFixtures(back);
+                    hold(back, true);
                 }),
                 Step.once("trial pool ember", 20, EmberDeckSelfTest::run));
+    }
+
+    // 試練の階のまわりを読み込んだままにする (建てたあと試すまでに読み込みが外れると、湧かせた敵が見つからない。trial pool と同じ)
+    private static void hold(ServerLevel level, boolean on) {
+        for (int cx = -12; cx < 12; cx++) {
+            for (int cz = -16; cz < 16; cz++) {
+                level.setChunkForced(cx, cz, on);
+            }
+        }
     }
 
     private static void run(MinecraftServer server) {
@@ -110,6 +120,10 @@ public final class EmberDeckSelfTest {
         } finally {
             TrialRuntime.clearAll();
             EmberDeck.setPlaced(true);
+            ServerLevel b = server.getLevel(EmberIds.BACK);
+            if (b != null) {
+                hold(b, false);
+            }
         }
         if (FAIL.isEmpty()) {
             SkyAbyss.LOGGER.info("SELFTEST trial pool ember PASSED ({} ms)", System.currentTimeMillis() - t0);

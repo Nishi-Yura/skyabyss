@@ -67,6 +67,7 @@ public final class TrialPoolSelfTest {
                     TitanBackData data = TitanBackData.get(back);
                     TitanBackBuilder.build(back, data);
                     TitanBackBuilder.placeDeck(back);
+                    hold(back, true);
                 }),
                 Step.once("trial pool (build tide)", server -> {
                     tideBuilt = false;
@@ -78,11 +79,22 @@ public final class TrialPoolSelfTest {
                     TideDeck.setPlaced(true);
                     TideBackBuilder.build(tide, TitanBackData.get(tide));
                     tideBuilt = true;
+                    hold(tide, true);
                 }),
                 Step.once("trial pool", 20, TrialPoolSelfTest::run)));
         // 雷翼の試練の甲板 (P2。storm の背を建てて調べる)
         out.addAll(jp.revati.skyabyss.trial.storm.StormTrialSelfTest.steps());
         return out;
+    }
+
+    // 試練の階のまわりを読み込んだままにする (建てたあと、試すまでのあいだに読み込みが外れると、湧かせた敵やボスが見つからない。
+    // 順路の作業 R6 で、背の建設は建て終えて 400 tick で読み込みを外すようになった)。x -192〜191、z -192〜255
+    private static void hold(ServerLevel level, boolean on) {
+        for (int cx = -12; cx < 12; cx++) {
+            for (int cz = -12; cz < 16; cz++) {
+                level.setChunkForced(cx, cz, on);
+            }
+        }
     }
 
     private static void run(MinecraftServer server) {
@@ -98,6 +110,12 @@ public final class TrialPoolSelfTest {
         } finally {
             WhaleDeck.setPlaced(true);
             TideDeck.setPlaced(true);
+            for (var key : List.of(TitanTravel.TITAN_BACK, TideTravel.TIDE_BACK)) {
+                ServerLevel l = server.getLevel(key);
+                if (l != null) {
+                    hold(l, false);
+                }
+            }
         }
         if (FAIL.isEmpty()) {
             SkyAbyss.LOGGER.info("SELFTEST trial pool PASSED ({} ms)", System.currentTimeMillis() - t0);
