@@ -1,5 +1,5 @@
 # 岩鯨の試遊の声 2 回目 (版 25。docs/design/26 の 8.8) の確かめ。./gradlew runShots -Pscript=tools/shots/whale_fix2.txt
-# 出力: run/shots/whale_fix2/shots/whale_fix2/*.png → python -I tools/whale_fix2_sheet.py で docs/review/previews/whale_fix2_sheet.png
+# 出力: run/shots/whale_fix2/shots/whale_fix2/*.png → python -I tools/sheets/whale_fix2_sheet.py で docs/review/previews/whale_fix2_sheet.png
 world whale_fix2 flat
 size 1280 720
 timeout 3000

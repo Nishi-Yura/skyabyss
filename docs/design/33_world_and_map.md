@@ -173,7 +173,7 @@
 - **印の出どころは一か所** `map/MapMarks.collect(player)`（サーバー）。町・野営地・足跡・骨・積み石（`SiteData` の序盤の場所と、拍子 `OpeningState` から噂/見た）、章の場所（`SiteData` の章の計画、`arrived`）、碑（`TravelState.waymarks` のうち世界に残っているもの）、巨神（`YoungReach.adultPos`）。W2 の跡地は種類 `SITE`（名前 `ground_<章の ID>`）で入っている。32 の祠は種類 `SHRINE`（建っている祠を、その巨神の心臓を止めた人にだけ「見た」で。名前は「〇〇の祠」）。言伝ての板の目印はまだ。
 - 仲間（`PartyMarkers`。0.5 秒ごとに届く分）・自分の墓（`GraveMarkerHud`）・いまの目的（`ObjectiveStrip.resolve`）・自分は、クライアントがもともと持っているものを描く。
 - 通信は `map/MapNetwork`（版 `map-1`）: 開いたときと、開いている間 5 秒ごとにクライアントが頼み、サーバーが印を返す（一人 1 秒に一度まで。開くときは待たない）。画面はすぐ開き、前に届いた印で描いて、返事で差し替える。海図は今までどおり `TravelNetwork.Chart` で届き、同じ画面に重なる。
-- 絵は `python tools/gen_travel_map_assets.py`（`textures/gui/map/marks.png`・`paper.png`・`disc_a.png`）。一覧の行とつまみは海図の `chart.png`。撮影は `tools/shots/travel_map.txt`（見本 `open travel_map_demo` / `travel_map_voyage_demo`、台本の手順 `mapstyle slate|parchment|ink`・`mapscale near|far`）。自己テストは `SKYABYSS_SELFTEST_ONLY="travel map"`（`MapMarksSelfTest`）。
+- 絵は `python tools/gen/world/gen_travel_map_assets.py`（`textures/gui/map/marks.png`・`paper.png`・`disc_a.png`）。一覧の行とつまみは海図の `chart.png`。撮影は `tools/shots/travel_map.txt`（見本 `open travel_map_demo` / `travel_map_voyage_demo`、台本の手順 `mapstyle slate|parchment|ink`・`mapscale near|far`）。自己テストは `SKYABYSS_SELFTEST_ONLY="travel map"`（`MapMarksSelfTest`）。
 
 ---
 

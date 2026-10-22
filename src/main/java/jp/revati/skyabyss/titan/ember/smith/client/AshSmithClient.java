@@ -31,7 +31,7 @@ import software.bernie.geckolib.cache.object.BakedGeoModel;
 import software.bernie.geckolib.renderer.layer.GeoRenderLayer;
 
 // 灰の鍛え手のクライアント側: 描画の登録と、10 段のボスバー (段階なし、橙の帯。13 の 5.2節)。
-// 絵は tools/install_ember_smith.py: 顔の印 ash_smith_icon.png (16x16)、枠 ash_smith_frame.png (182x16。溝は x 3〜177、y 3〜8)、
+// 絵は tools/install/install_ember_smith.py: 顔の印 ash_smith_icon.png (16x16)、枠 ash_smith_frame.png (182x16。溝は x 3〜177、y 3〜8)、
 // 帯の上の 10 段の刻み ash_smith_notches.png。名前の横に、鞴が白く光る間は「鞴が開いた」、怒ったあとは「怒り」
 @EventBusSubscriber(modid = SkyAbyss.MODID, value = Dist.CLIENT)
 public final class AshSmithClient {
@@ -51,7 +51,7 @@ public final class AshSmithClient {
     private static final ResourceLocation NOTCH_TEX = tex("ash_smith_notches");
     private static final ResourceLocation GLOW = ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "textures/entity/ash_smith_glowmask.png");
     private static final ResourceLocation GLOW_WHITE = ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "textures/entity/ash_smith_glowmask_white.png");
-    // 低ポリ: アトラスの光る画素の色だけを載せた絵 (tools/install_lowpoly_ember_npc.py が焼く)
+    // 低ポリ: アトラスの光る画素の色だけを載せた絵 (tools/install/install_lowpoly_ember_npc.py が焼く)
     private static final ResourceLocation GLOW_LOW = ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "textures/lowpoly/ash_smith_glow.png");
     private static final ResourceLocation GLOW_LOW_WHITE = ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "textures/lowpoly/ash_smith_glow_white.png");
 

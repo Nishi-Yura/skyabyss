@@ -1,4 +1,4 @@
-# 武器を持った姿を、一人称と三人称で、構えと振りの途中 (進み 0.2 / 0.4 / 0.55 / 0.75) で撮る (tools/gen_weapon_pose_shots.py が作る)
+# 武器を持った姿を、一人称と三人称で、構えと振りの途中 (進み 0.2 / 0.4 / 0.55 / 0.75) で撮る (tools/gen/shots/gen_weapon_pose_shots.py が作る)
 world shots flat
 size 1280 720
 timeout 1200

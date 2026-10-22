@@ -14,7 +14,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.LevelChunk;
 
 // 岩鯨の背の島そのもの: 空を泳ぐ岩鯨のモデル (採用案 B) と同じ形・同じ色の、ブロックでできた鯨 (02 の「巨神の形の背中（作り直し）」)。
-// 形は tools/gen_titan_back_whale.py がモデルの格子から作った data/skyabyss/titan_back/whale.bin を読む
+// 形は tools/gen/items/gen_titan_back_whale.py がモデルの格子から作った data/skyabyss/titan_back/whale.bin を読む
 // (ゲームの岩鯨の 2.8 倍。頭は北 -Z、体の軸は x = -3、錨石は左のわき腹 = 西)。試練の部屋は、置いたあとで各 Builder が中を掘る。
 //
 // whale.bin の形式は潮殻の turtle.bin と同じ (gzip): "TBT1"、原点 x0 y0 z0、大きさ nx ny nz (int)、ブロックの名前の表、

@@ -44,7 +44,7 @@ import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.event.server.ServerStoppedEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
 
-// 四章の地上 (docs/design/34 の 4.5・C4、21 の 6.1)。都の南の灰の地 (四章の跡地。33 の 3 章) に、世界で一つずつ置く。部品とデータは tools/gen_ch4_ground.py。
+// 四章の地上 (docs/design/34 の 4.5・C4、21 の 6.1)。都の南の灰の地 (四章の跡地。33 の 3 章) に、世界で一つずつ置く。部品とデータは tools/gen/ch4/gen_ch4_ground.py。
 // 既存の四章の小要素 3 つ (灰の民の炉跡・灰降り観測点・温かい岩棚。EmberChapter) に足す。
 //
 // ---------------------------------------------------------------- 場所

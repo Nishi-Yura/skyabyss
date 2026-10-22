@@ -9,7 +9,7 @@ python tools/rough/hp_titan_body.py [name ...]        -> docs/review/high_poly_r
 python tools/rough/hp_titan_body.py --install name V  -> writes the chosen near geo / texture / glowmask into src/main/resources/assets/skyabyss
 python tools/rough/hp_titan_body.py --stats           -> quads / cubes of the installed near geo vs the limit
 
-The outline of the body is NOT changed: the back-dimension body (gen_titan_back_whale.py / gen_tide_back_turtle.py) is built from the voxel
+The outline of the body is NOT changed: the back-dimension body (tools/gen/items/gen_titan_back_whale.py / tools/gen/mobs/gen_tide_back_turtle.py) is built from the voxel
 grid of install_stone_whale.build() / install_tide_shell.build_grid(), not from the geo, so nothing here touches that input.
 Trim is laid on the real surface (hp_occ.Occ.surface), at most 0.75 units proud, flat colours (0.25 / 0.5 units), the texture only grows
 by a few swatch rows at the bottom. Buried faces of the original boxes are dropped first to pay for the trim (limit 12,000 quads).

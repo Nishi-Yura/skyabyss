@@ -14,7 +14,7 @@ import com.google.gson.JsonParser;
 
 import net.minecraft.world.phys.Vec3;
 
-// 巨神の立入禁止の体積 (docs/design/02 の「体に入れない」)。tools/gen_titan_volumes.py が近景のメッシュから焼いた柱の表を読む。
+// 巨神の立入禁止の体積 (docs/design/02 の「体に入れない」)。tools/gen/world/gen_titan_volumes.py が近景のメッシュから焼いた柱の表を読む。
 // 座標は巨神の向きの局所 (横 = 左が +, 上, 前)、単位はブロック、柱は 2 ブロック四方。各柱は「中が詰まった区間」の並び (半ブロックの整数)。
 //  - keepOut: メッシュを 3 ブロック膨らませた体積。人はここに入れない (やさしく押し出す。カメラも入れない)
 //  - core: 0.5 ブロックだけ膨らませた体。矢や弾はここで消え、人が入ったら一息に外へ出す

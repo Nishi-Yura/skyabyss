@@ -1,4 +1,4 @@
-# 岩鯨の武器の確認 (tools/gen_gear_whale_shots.py が作る)
+# 岩鯨の武器の確認 (tools/gen/shots/gen_gear_whale_shots.py が作る)
 world shots flat
 size 960 540
 timeout 3000

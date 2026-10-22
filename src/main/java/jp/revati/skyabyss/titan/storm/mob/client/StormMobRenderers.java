@@ -26,7 +26,7 @@ import software.bernie.geckolib.renderer.GeoRenderer;
 import software.bernie.geckolib.renderer.layer.AutoGlowingGeoLayer;
 import software.bernie.geckolib.renderer.layer.GeoRenderLayer;
 
-// 雷翼の背の敵の描画。GeckoLib のモデル (geo/entity/<名前>、tools/install_storm_mobs.py) と、目・稲妻を暗闇で光らせる層。
+// 雷翼の背の敵の描画。GeckoLib のモデル (geo/entity/<名前>、tools/install/install_storm_mobs.py) と、目・稲妻を暗闇で光らせる層。
 // 羽守の鉤槍 (gear/hooked_glaive) と雷乞いの杖 (gear/supplicant_staff) は別モデルで、受け口 socket_main に付ける。
 // 雷蛾は、帯電の割合だけ「帯電の光」(static_moth_charge.png) を足して描く (別のモデルは持たない。12 の 14.3節)。
 // 死ぬときはバニラの「横に倒れる」回転をせず、モデルの死のアニメーションで倒れる
@@ -72,7 +72,7 @@ public final class StormMobRenderers {
     // 雷蛾の帯電: 足す光を、帯電の割合の明るさで重ねる (RenderType.eyes は足し合わせるので、色の明るさがそのまま割合になる)
     static final class ChargeLayer extends GeoRenderLayer<StaticMoth> {
         private static final RenderType TYPE = RenderType.eyes(ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "textures/entity/static_moth_charge.png"));
-        // 低ポリのアトラスの翅の面を明るくした絵 (tools/install_lowpoly_storm.py)
+        // 低ポリのアトラスの翅の面を明るくした絵 (tools/install/install_lowpoly_storm.py)
         private static final RenderType TYPE_LOW = RenderType.eyes(ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "textures/lowpoly/static_moth_charge.png"));
 
         ChargeLayer(GeoRenderer<StaticMoth> renderer) {

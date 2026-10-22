@@ -237,7 +237,7 @@ public final class ArtisanSelfTest {
         return "[" + p.get(0).getAsDouble() + "," + p.get(1).getAsDouble() + "," + p.get(2).getAsDouble() + "]";
     }
 
-    // 右上のマゼンタの印 (tools/gen_guide_placeholders.py の仮の絵)
+    // 右上のマゼンタの印 (tools/gen/story/gen_guide_placeholders.py の仮の絵)
     private static boolean placeholderMark(String path) {
         try (InputStream in = ArtisanSelfTest.class.getResourceAsStream(path)) {
             var img = javax.imageio.ImageIO.read(in);

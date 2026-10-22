@@ -4,7 +4,7 @@
 - 範囲: プレイヤーが自分の大事な品・巨神の記録・成長・クエストと好感度を一か所で確かめる画面（控え帳）、管理者が他人の分を確かめるコマンド、大事な品を落とさない・消さない守り、倒れたときの持ち物の扱いと墓（6 章）
 - 関連: [01 全体設計](01_overview.md)、[02 岩鯨](02_stone_whale.md)（預かり）、[03 装備](03_gear_and_endgame.md)、[04 成長](04_growth_and_skills.md)、[05 伝承の書](05_lore_npc_quest.md)、[07 NPC とクエスト](07_npc_quest.md)、[09 巨神での移動](09_titan_travel.md)
 
-実装: `jp.revati.skyabyss.record`（サーバー）、`jp.revati.skyabyss.client.record`（画面）。文は `assets/skyabyss_record/lang`。絵は `tools/gen_record_screen.py` → `textures/gui/record/ledger.png`・`widgets.png`。
+実装: `jp.revati.skyabyss.record`（サーバー）、`jp.revati.skyabyss.client.record`（画面）。文は `assets/skyabyss_record/lang`。絵は `tools/gen/story/gen_record_screen.py` → `textures/gui/record/ledger.png`・`widgets.png`。
 
 ---
 
@@ -120,7 +120,7 @@ Keepsakes.registerHolder("accessory", (player, item) -> /* その枠にある it
 
 ## 6. 倒れたとき（墓）
 
-巨神の背中の外（地上・ネザー・エンドなど）で倒れたときの持ち物と経験値の扱い。背中の死は 02 の 7 章のまま（持ち物と経験値を預かり、休み場から再開。ここは何もしない）。ベータの感想「全ロスは萎える。取りに行くのも面倒で離脱されたくない」への答えで、選んだ案は「装備は残し、残りは消えない墓」（Core Keeper・Valheim 型。比較は `docs/review/death_penalty_options.md`）。実装は `jp.revati.skyabyss.grave`（`DeathRules`・`DeathEvents`・`Graves`・`GraveData`・`GraveBlock`・`GraveRescue`）。絵とモデルと会話は `tools/gen_grave_assets.py`。
+巨神の背中の外（地上・ネザー・エンドなど）で倒れたときの持ち物と経験値の扱い。背中の死は 02 の 7 章のまま（持ち物と経験値を預かり、休み場から再開。ここは何もしない）。ベータの感想「全ロスは萎える。取りに行くのも面倒で離脱されたくない」への答えで、選んだ案は「装備は残し、残りは消えない墓」（Core Keeper・Valheim 型。比較は `docs/review/death_penalty_options.md`）。実装は `jp.revati.skyabyss.grave`（`DeathRules`・`DeathEvents`・`Graves`・`GraveData`・`GraveBlock`・`GraveRescue`）。絵とモデルと会話は `tools/gen/world/gen_grave_assets.py`。
 
 ### 6.1 型とゲームルール
 

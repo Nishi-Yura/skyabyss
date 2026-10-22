@@ -186,7 +186,7 @@ def render_pose(r, pose, yaw, pitch, size, center, scale, pos=None, spear=True, 
     return render(faces, big, glow, yaw, pitch, size, center, scale)
 
 
-# 姿勢 (GeckoLib の値。珊瑚憑きの attack と同じ書き方)。gen_ch2_ground_mobs.py の動きも同じ値を使う
+# 姿勢 (GeckoLib の値。珊瑚憑きの attack と同じ書き方)。tools/gen/ch2/gen_ch2_ground_mobs.py の動きも同じ値を使う
 STANCE = {"arm_r": (-34.0, 0.0, 0.0), "forearm_r": (40.0, 0.0, 0.0), "body": (-10.0, -18.0, 0.0), "head": (8.0, 14.0, 0.0), "arm_l": (24.0, 0.0, 12.0),
           "leg_r": (14.0, 0.0, 0.0), "leg_l": (-12.0, 0.0, 0.0)}
 THRUST = {"arm_r": (52.0, 0.0, 0.0), "forearm_r": (-62.0, 0.0, 0.0), "body": (18.0, 12.0, 0.0), "head": (-10.0, -8.0, 0.0), "arm_l": (-24.0, 0.0, 10.0),

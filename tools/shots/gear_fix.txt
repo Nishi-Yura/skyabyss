@@ -1,4 +1,4 @@
-# 雷淵の弓・底なしの大剣の持ち方の確かめ (gen_weapon_hold_shots.py --tiers legend の 4 種。比べる正しい二つ: 雷翼の弓・鯨骨の大剣)
+# 雷淵の弓・底なしの大剣の持ち方の確かめ (tools/gen/shots/gen_weapon_hold_shots.py --tiers legend の 4 種。比べる正しい二つ: 雷翼の弓・鯨骨の大剣)
 world shots flat
 size 960 540
 timeout 3000

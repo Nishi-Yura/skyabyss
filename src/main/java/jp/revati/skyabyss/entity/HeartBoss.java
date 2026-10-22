@@ -26,7 +26,7 @@ import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 // 演出のカメラ: 別の仕組みが画面を決められるよう、次を出す。
 //   - HeartCinematicEvent (NeoForge.EVENT_BUS。サーバー側で 登場の始まり/終わり、倒れる始まり/終わり を知らせる)
 //   - cinematicStage() / cinematicTicks() / cinematicProgress() / focusPoint() (両側で読める。登場の最中は同期データで届く)
-// アニメーションは tools/install_heart_cinematics.py が書く (長さは INTRO_TICKS・DEATH_TICKS と合わせる)。
+// アニメーションは tools/install/install_heart_cinematics.py が書く (長さは INTRO_TICKS・DEATH_TICKS と合わせる)。
 @net.neoforged.fml.common.EventBusSubscriber(modid = SkyAbyss.MODID)
 public abstract class HeartBoss extends GuardMob {
     public static final int INTRO_TICKS = 80;

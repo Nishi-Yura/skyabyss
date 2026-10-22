@@ -37,14 +37,14 @@ import net.neoforged.neoforge.network.PacketDistributor;
 // 巨神の子に乗っているとき (chart != null) は、子の海図 (旧 TravelChartScreen) をこの画面に重ねる: 行ける行き先の印が光り、
 // 印か右の一覧で選んで「出発」。印の出どころはサーバーの MapMarks (一か所) と、クライアントが持つ自分・仲間・墓・目的の標。
 // 見た目は 3 案 (設定 mapStyle。SLATE = 石板の枠に丸い海図 (既定)、PARCHMENT = 骨の枠に羊皮紙、INK = 枠なしの墨の夜図)。
-// 絵は tools/gen_travel_map_assets.py (印 marks.png・地 paper.png・A の海図 disc_a.png)、一覧の行とつまみは海図の chart.png
+// 絵は tools/gen/world/gen_travel_map_assets.py (印 marks.png・地 paper.png・A の海図 disc_a.png)、一覧の行とつまみは海図の chart.png
 public class TravelMapScreen extends Screen {
     static final ResourceLocation MARKS = ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "textures/gui/map/marks.png");
     static final ResourceLocation PAPER = ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "textures/gui/map/paper.png");
     static final ResourceLocation DISC_A = ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "textures/gui/map/disc_a.png");
     static final ResourceLocation CHART = ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "textures/gui/travel/chart.png");
 
-    // 印の絵の番号 (marks.png の並び。gen_travel_map_assets.py の SPRITES と同じ)
+    // 印の絵の番号 (marks.png の並び。tools/gen/world/gen_travel_map_assets.py の SPRITES と同じ)
     static final int S_TOWN = 0, S_CAMP = 1, S_FOOTPRINT = 2, S_RIBS = 3, S_WAYMARK = 4, S_SITE = 5, S_TITAN = 6, S_GRAVE = 7,
             S_PARTY = 8, S_OBJECTIVE = 9, S_RUMOR = 10, S_SELF = 11, S_SPAWN = 12, S_SHRINE = 13, S_GLOW = 14, S_CAIRN = 15;
 

@@ -1,5 +1,5 @@
 # 雷翼の背の作り直し (docs/design/25 の 5章 A・B・C) の確かめ。./gradlew runShots -Pscript=tools/shots/storm_rework.txt
-# 出力: run/shots/storm_rework/shots/storm_rework/*.png  → tools/storm_rework_sheet.py で docs/review/previews/storm_rework_sheet.png に並べる
+# 出力: run/shots/storm_rework/shots/storm_rework/*.png  → tools/sheets/storm_rework_sheet.py で docs/review/previews/storm_rework_sheet.png に並べる
 world storm_rework flat
 size 1280 720
 timeout 1800

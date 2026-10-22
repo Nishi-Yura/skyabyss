@@ -16,7 +16,7 @@ import net.neoforged.neoforge.network.PacketDistributor;
 
 // 装飾の画面。真ん中に人形、左に護符の枠 (金の輪)、右に装飾の枠 2 つ、下に持ち物。
 // 画面の上に「持ち物」「装飾」「旅嚢」のつまみ (持ち物の画面にも同じ位置に出す)。
-// 背景は 2 倍密度のテクスチャ (textures/gui/accessory/accessory.png、tools/gen_accessory_assets.py の案 B)
+// 背景は 2 倍密度のテクスチャ (textures/gui/accessory/accessory.png、tools/gen/items/gen_accessory_assets.py の案 B)
 public class AccessoryScreen extends AbstractContainerScreen<AccessoryMenu> implements jp.revati.skyabyss.client.ui.TextBounded {
     static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "textures/gui/accessory/accessory.png");
     static final int TEX = 512;

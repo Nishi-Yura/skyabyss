@@ -1,4 +1,4 @@
-# 武器の持ち姿 (tools/gen_weapon_hold_shots.py が作る)
+# 武器の持ち姿 (tools/gen/shots/gen_weapon_hold_shots.py が作る)
 world shots flat
 size 960 540
 timeout 3000

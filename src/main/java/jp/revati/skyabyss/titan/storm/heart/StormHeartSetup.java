@@ -14,7 +14,7 @@ import net.neoforged.neoforge.registries.DeferredRegister;
 // 雷翼の心臓 (第三の巨神「雷翼の巨神」の最終ボス。12 の 5.3節) の登録: 心臓と音。SkyAbyss のコンストラクタから register を呼ぶ。
 // 共有の登録 (ModEntities、ModSounds、assets/skyabyss/sounds.json) には手を入れず、ここにまとめる。
 // 音の登録の名前は skyabyss:storm_heart_<名前>、音の場所は心臓だけの名前空間 skyabyss_storm_heart:<名前>
-// (assets/skyabyss_storm_heart/sounds.json。tools/gen_storm_heart_sounds.py が書く)。
+// (assets/skyabyss_storm_heart/sounds.json。tools/gen/sound/gen_storm_heart_sounds.py が書く)。
 // 経験値の入り口は GrowthRewards.MOD_ENEMIES に一行 (thunder_wing_heart: 480、推奨 Lv24)
 public final class StormHeartSetup {
     private static final DeferredRegister<EntityType<?>> ENTITIES = DeferredRegister.create(Registries.ENTITY_TYPE, SkyAbyss.MODID);

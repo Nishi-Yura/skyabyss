@@ -228,7 +228,7 @@
 | 再鍛造の途中 | 「鍛え直しの途中（候補 2/3）。共鳴の炉で選ぶ」 | 淡い紫 |
 | 強化 | 「共鳴の強化 +3 / +10」、+5 から「◆ 覚醒」 | — |
 
-- **物語の一行**: 説明のすぐ下に、巨神の声で短く（28 字まで）、「」でくくった一行（灰色の斜体）。装備 40 点（岩鯨・潮殻・雷翼・余燼 各 10。防具は部位ごと）。文は `assets/skyabyss_gear_story/lang/`（生成元 `tools/gen_gear_story.py`）の `item.skyabyss.<id>.story`。キーがない品には出さない。自己テスト `SELFTEST gear curve` が、登録された装備のすべてに日英であること、長さ、重複なしを確かめる。例: 鯨骨の大剣「重いのは、背負ったものの数だ。」／ 潮殻の三叉槍「突いた水は、同じ形に戻る。」／ 雷翼の弓「矢は、翼の骨から生まれた。」／ 余燼の戦斧「燃やすのではない。くすぶらせるのだ。」
+- **物語の一行**: 説明のすぐ下に、巨神の声で短く（28 字まで）、「」でくくった一行（灰色の斜体）。装備 40 点（岩鯨・潮殻・雷翼・余燼 各 10。防具は部位ごと）。文は `assets/skyabyss_gear_story/lang/`（生成元 `tools/gen/story/gen_gear_story.py`）の `item.skyabyss.<id>.story`。キーがない品には出さない。自己テスト `SELFTEST gear curve` が、登録された装備のすべてに日英であること、長さ、重複なしを確かめる。例: 鯨骨の大剣「重いのは、背負ったものの数だ。」／ 潮殻の三叉槍「突いた水は、同じ形に戻る。」／ 雷翼の弓「矢は、翼の骨から生まれた。」／ 余燼の戦斧「燃やすのではない。くすぶらせるのだ。」
 
 - 実装: `item/GearTier`、`ModGear`、`GearEvents`。
 
@@ -267,7 +267,7 @@
 - **落ち方**: 心臓（一人ずつ別々）は巨神の属性の欠片 55%（1〜2 個）、岩鯨は骨の欠片 25% も、ルーン 10%。試練は済ませるたびにルーン（初めて 12%、以後 4%、極の修飾は 2 倍）、初めてのときだけ欠片 35%。実装は `item/extra/GearFreedomLoot`。
 - **炉の画面**: つまみが 4 つ（強化・再鍛造・交換・**刻み**）。刻みの中は 抽出・刻印・穴 の 3 頁。左の板の装備の枠の左に「素材」の枠（欠片・ルーン・芯）。ツールチップに穴（◆/◇）・アスペクト・第 N 世代・形見の特性が出る。
 - **保存**: すべて装備のデータ。欠けたフィールドは既定で読める。炉の操作はサーバーが毎回検める。
-- 実装: `item/extra/`（`GearExtras`・`Gem`・`Element`・`RuneData`・`GearFreedom`・`GearFreedomItems`・`GearFreedomLoot`・`GearSkillModifier`）、`forge/ForgeRules`（刻みの費用）、`ResonanceForgeMenu`/`Screen`。画像の生成元 `tools/gen_gear_freedom_assets.py`。自己テスト `SELFTEST gear freedom`。
+- 実装: `item/extra/`（`GearExtras`・`Gem`・`Element`・`RuneData`・`GearFreedom`・`GearFreedomItems`・`GearFreedomLoot`・`GearSkillModifier`）、`forge/ForgeRules`（刻みの費用）、`ResonanceForgeMenu`/`Screen`。画像の生成元 `tools/gen/items/gen_gear_freedom_assets.py`。自己テスト `SELFTEST gear freedom`。
 
 ### 3.7 深淵の専用伝説（31 の B04。`abyss/AbyssSetup`・`AbyssLoot`）
 
@@ -281,7 +281,7 @@
 | 灰喰いの鎌（余燼） | 14・速さ 1.2 | 灰散らし | **這う灰**: 灰かぶりの敵のまわり 4 マスの敵へ、2 秒おきに灰が移る（3 度まで） |
 
 - **落とし表**（`AbyssLoot`）: 倒した人それぞれに、共鳴の欠片 ×2（その巨神の。必ず）と、専用伝説が 25%。**4 回続けて出なければ次で保証**（巨神ごと。記録は巨神の記憶に `abyss:<巨神>`。通常の天井とは別）。すでに持っていれば共鳴の欠片 ×10（伝説の分解と同じ量）に替わる。期待は 1 回の心臓で約 37%、4 点そろうまで約 11 回（巨神ごとに 3 回前後）。
-- **絵**: 低ポリの立体（手・地面・額縁）＋ 32×32 のアイコン（メッシュの写し）。深淵の紫黒の土台に、うっすら内側で光る筋と、風化した巨神の素材（岩鯨 = 骨の白紫、潮殻 = 青緑の真珠、雷翼 = 嵐の銅と黄白、余燼 = 玄武岩と熾の橙）。階級は伝説だけ。形は仮に各 A 案（選定ページ `docs/review/abyss_weapons/index.html`、生成 `tools/rough/lowpoly/weapons/abyss/`、取り込み `tools/install_lowpoly_abyss_weapons.py`）。平らな絵は `tools/gen_abyss_items.py --flat`。
+- **絵**: 低ポリの立体（手・地面・額縁）＋ 32×32 のアイコン（メッシュの写し）。深淵の紫黒の土台に、うっすら内側で光る筋と、風化した巨神の素材（岩鯨 = 骨の白紫、潮殻 = 青緑の真珠、雷翼 = 嵐の銅と黄白、余燼 = 玄武岩と熾の橙）。階級は伝説だけ。形は仮に各 A 案（選定ページ `docs/review/abyss_weapons/index.html`、生成 `tools/rough/lowpoly/weapons/abyss/`、取り込み `tools/install/install_lowpoly_abyss_weapons.py`）。平らな絵は `tools/gen/abyss/gen_abyss_items.py --flat`。
 
 ---
 
@@ -293,7 +293,7 @@
 
 - 炉はブロック設備。各巨神の祠の台座の東の縁に 1 基（32 の 3.1）。レシピでも作れる（骨ブロック、共鳴の結晶、岩鯨の鱗片、磨かれた深層岩）。
 - 炉は何も預からないので、何人でも同時に使える。再鍛造の候補は装備に付くので人ごとに別。
-- 画面（`client/forge/ResonanceForgeScreen`、メニュー `forge/ResonanceForgeMenu`）。テクスチャ `textures/gui/forge/forge.png`、生成元 `tools/gen_forge_assets.py`（2 倍密度。骨の枠と石板は成長・技の画面と同じ作り）。
+- 画面（`client/forge/ResonanceForgeScreen`、メニュー `forge/ResonanceForgeMenu`）。テクスチャ `textures/gui/forge/forge.png`、生成元 `tools/gen/items/gen_forge_assets.py`（2 倍密度。骨の枠と石板は成長・技の画面と同じ作り）。
 
 | 場所 | 中身 |
 |---|---|
@@ -591,7 +591,7 @@ Lv 12・体力 22・一人。「一撃の傷 / 耐える回数」。ダメージ
 
 - 持ち物の画面（サバイバル）の上の右に「持ち物」「装飾」「旅嚢」のつまみ（三つ目の「旅嚢」は [22](22_mod_pouch.md)。三つの画面が同じ `AccessoryScreen.addTabs` で足す）。「装飾」で装飾の画面、「持ち物」で戻る。つまみはレシピ本を開いて画面が右へ寄っても付いていく。
 - 装飾の画面（176×166）: 真ん中に人形（マウスを追う）、左に護符の枠（金の輪）と「[H] で使う」（キー設定に合わせて変わる）、右に装飾の枠 2 つと今の Lv、下に持ち物。シフトクリックで合う枠へ入る。採用した配置は「人形を囲む」案（重なりがなかった）。
-- テクスチャは 32px 密度、骨の枠と石板は共鳴の炉と同じ（`tools/gen_accessory_assets.py`、`textures/gui/accessory/accessory.png`）。空の枠には、護符は首飾り、装飾は輪の印を薄く描く。
+- テクスチャは 32px 密度、骨の枠と石板は共鳴の炉と同じ（`tools/gen/items/gen_accessory_assets.py`、`textures/gui/accessory/accessory.png`）。空の枠には、護符は首飾り、装飾は輪の印を薄く描く。
 - 護符を使うキーは **H**（バニラは使っていない。J・K・U・B（控え帳）・O（パーティ）・R・G・V・Z とも別）。設定の「天と淵のあいだ」の欄で変えられる。待ちの最中は「休んでいる（あと 42 秒）」、枠が空なら「護符の枠が空いている」と画面の下に出す。
 - 文字は名前空間 `assets/skyabyss_gear/lang/`（キー `skyabyss_gear.…`）。共有の lang には護符・補強板・護石の説明（「装飾の枠に付けると」）だけ手を入れた。
 - 実装: `item/accessory/`（`Accessories`、`AccessoryData`、`AccessoryMenu`、`AccessorySetup`、`Accessory`、`AccessoryKind`、`AccessorySelfTest`）、`client/accessory/`（`AccessoryScreen`、`AccessoryClient`）、`item/GearLevel`、`item/ResonanceCharmItem`、`GearItem`。
@@ -760,7 +760,7 @@ Lv 12・体力 22・一人。「一撃の傷 / 耐える回数」。ダメージ
 | 鎧 | B: 珊瑚の鎧（巨神の採用案 B の珊瑚礁の背と同じ 4 色。甲羅の段の兜・背・肩、胸の大板、枝の珊瑚、顔の開いた兜） |
 
 - 武器の長さは番兵長の鉾と同じ全長 22（大鋏・盾は 18）、柄は 1.5 単位。盾の持ち方はバニラの `shield.json`・`shield_blocking.json` の表示の値をそのまま使う（盾の要素がバニラの盾の立体とほぼ同じ所にあるため）。一人称は取っ手を握る向き（裏を見せる）が自然（00 の 106）。
-- 生成: `tools/rough/tide_gear.py`・`tide_armor.py`（ラフ）、`tools/install_tide_gear.py`・`install_tide_armor.py`（推奨を src へ。`--option`、`--from-sources` で `tools/sources/tide_gear/`・`tide_armor/` から入れ直す）。
+- 生成: `tools/rough/tide_gear.py`・`tide_armor.py`（ラフ）、`tools/install/install_tide_gear.py`・`install_tide_armor.py`（推奨を src へ。`--option`、`--from-sources` で `tools/sources/tide_gear/`・`tide_armor/` から入れ直す）。
 - 実装:
 
 | ファイル | 役割 |
@@ -837,8 +837,8 @@ Lv 12・体力 22・一人。「一撃の傷 / 耐える回数」。ダメージ
 | 嵐の護符・嵐纏の足環・嵐の目の羽根・雷翼の羽軸・心核・雲間の干し果・鱗粉 | B・C・A・A・A・A・C（護符は銅の縁の円盤に稲妻、足環は銀の輪、鱗粉は光る粉の山） |
 | 雷翼の羽衣 | A: 羽重ねの外套（灰青の羽の層・銅の冠毛・白羽の垂れ・稲妻の折れ線） |
 
-- 弓は 3D に引き絵 3 枚（バニラの pull / pulling。印は `StormGearClient` が登録）、持ち方はバニラの `item/bow.json` の値。静電避けの印（18x18）も `install_storm_gear.py` が書く。
-- 生成: `tools/rough/storm_items.py`・`storm_armor.py`、`tools/install_storm_gear.py`・`install_storm_armor.py`（`--option`・`--from-sources`）。比較画像は `docs/review/storm_gear_roughs/`。
+- 弓は 3D に引き絵 3 枚（バニラの pull / pulling。印は `StormGearClient` が登録）、持ち方はバニラの `item/bow.json` の値。静電避けの印（18x18）も `tools/install/install_storm_gear.py` が書く。
+- 生成: `tools/rough/storm_items.py`・`storm_armor.py`、`tools/install/install_storm_gear.py`・`install_storm_armor.py`（`--option`・`--from-sources`）。比較画像は `docs/review/storm_gear_roughs/`。
 - 実装: `item/storm/`（`StormGear` 表と数値、`StormGearSetup` 登録、`ThunderWingArmorItem`・`client/ThunderWingArmorRenderer`、`ThunderWingBowItem`、`StormWeaponItem`・`RaijuClawItem`・`WardenGlaiveItem`、`StormCharmItem`、`StormTrinketItem`、`StaticWardEffect`、`StormGearEvents`、`StormGearLoot`、`client/StormGearClient`、`StormGearSelfTest`）、文 `assets/skyabyss_storm_gear/lang/`。
 - 既知の問題: ゲームでの見た目（3D の持ち方・羽衣の着た姿・弓の引き絵）は確かめていない。
 
@@ -922,7 +922,7 @@ Lv 12・体力 22・一人。「一撃の傷 / 耐える回数」。ダメージ
 | 外套・護符・灯・角杯・心核・欠片・火の粉の粉・燠の殻 | 各 A。外套は袋に見えることがある。角杯の口が 32px で小さい。燠の殻は暗い |
 | 余燼の鎧 | A: 火山の背。兜の火口、肩の噴気孔、胸の枝分かれする溶岩の筋、背骨の板の段（後ろは背骨の板と継ぎ目の溶岩）。弱み: 肩と脛はまだ平ら、兜は頭より 1 単位大きい箱に近い、火口の光は遠いと小さい |
 
-- 生成: `tools/rough/ember_gear.py`・`ember_armor.py`、`tools/gen_ember_items.py`・`tools/install_ember_armor.py`（`--option`、`--from-sources` で `tools/sources/ember_gear/`・`ember_armor/`）。比較画像は `docs/review/ember_gear_roughs/`。
+- 生成: `tools/rough/ember_gear.py`・`ember_armor.py`、`tools/gen/items/gen_ember_items.py`・`tools/install_ember_armor.py`（`--option`、`--from-sources` で `tools/sources/ember_gear/`・`ember_armor/`）。比較画像は `docs/review/ember_gear_roughs/`。
 - 見た目の確認は台本で撮るスクショ（`tools/shots/ember_gear.txt`・`ember_gear_hands.txt`、OS の入力なし）。
 - 実装:
 
@@ -935,7 +935,7 @@ Lv 12・体力 22・一人。「一撃の傷 / 耐える回数」。ダメージ
 | `KindlingCharmItem`、`EmberTrinketItem`、`EmberHornItem` | 護符、外套と灯、角杯 |
 | `EmberGearEvents` | 一式・くすぶり・亀裂・灰・外套・灯 |
 | `EmberGearLoot`、`EmberGearSelfTest` | 灰被り・鍛え手の図鑑の品、自己テスト |
-| 名前と説明 | `assets/skyabyss_ember/lang` の「__ember.G」の下（生成元 `tools/gen_ember_lore.py`） |
+| 名前と説明 | `assets/skyabyss_ember/lang` の「__ember.G」の下（生成元 `tools/gen/story/gen_ember_lore.py`） |
 
 ---
 

@@ -1,7 +1,7 @@
 """32x32 item icons drawn from the 3D armor pieces (the rule: the item picture and the 3D model say the same thing).
 
 python tools/rough/armor_v2_icons.py [names] [--out dir]    -> a preview sheet + the 16 icons in <out>
-install(names) is called by tools/install_armor_v2.py and writes textures/item/<set>_{helmet,chestplate,leggings,boots}.png
+install(names) is called by tools/install/install_armor_v2.py and writes textures/item/<set>_{helmet,chestplate,leggings,boots}.png
 
 Method: render only the bones of one slot from a 3/4 view (the game's face shading, glow included), cut the
 silhouette, area-average it into a 28 px box, snap to a small palette, add a 1 px dark outline.

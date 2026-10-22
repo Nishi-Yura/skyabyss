@@ -60,18 +60,18 @@
 
 **一章の分は実装済み（P5）**: 鯨道の旅装（案 A 殻肩。`guide/TravelGear`・`WhaleRoadArmorItem`）。
 - 防御 2/7/5/3 = **17**、強靭 1.25 × 4 = **5**、ノックバック耐性 0.025 × 4 = 0.1（踏ん張り）、アンコモン、`enhanceable() = false`（炉で鍛えない・特性なし）、必要 Lv 7（`requiredLevel()`。由来 `whale_road` = ツールチップは「アンコモン · 鯨道の旅装」）、耐久は鉄とダイヤの間（係数 21）、修理は岩殻片。値の表は `GearCurve.TRAVEL`（四章分。二〜四章は同じ型で品を足す）。**自己テスト `travel gear`** が、表の防御が巨神の装備 +0 の 85〜92%・強靭は +0 を超えない・必要 Lv が推奨 Lv より下・段ごとに伸びる・備えの身の灯（目安の体力のとき赤にならず、体力が 1❤ 多ければ緑。巨神の一式 +0 には届かない）を照合する。注: 強靭が 5 / 8 (62%) なので、防御 + 強靭の和は 22 / 28 = 79%（素の体力で身 0.78 の黄。11 の 9 章の例）。
-- 低ポリの防具（`LowPolyArmorRenderer` に `whale_road`。メッシュ 600 三角形（閉じたメッシュ）、琥珀の留め金が光る）。インベントリのアイコンは案 A の 4 枚。入れ方は `tools/install_whale_road_assets.py`。
-- レシピ（`data/skyabyss/recipe/whale_road_*.json`。生成は `tools/gen_ch1_travel.py`）: 兜 `SSS/I.I`・胸 `S.S/SSS/ILI`・脚 `SIS/L.L/I.I`・靴 `S.S/B.B`（S = 岩殻片、I = 鉄、L = 革、B = 骨片）。**4 部位の合計は岩殻片 12・鉄 7・革 3・骨片 2**。旅装は**任意**（支度の段「鉄の跡」の目標はバニラの鉄の防具。34 の 3 章）。一式そろうと合図 `ch1_travel_gear_made`（今はどの段も読まない）。
+- 低ポリの防具（`LowPolyArmorRenderer` に `whale_road`。メッシュ 600 三角形（閉じたメッシュ）、琥珀の留め金が光る）。インベントリのアイコンは案 A の 4 枚。入れ方は `tools/install/install_whale_road_assets.py`。
+- レシピ（`data/skyabyss/recipe/whale_road_*.json`。生成は `tools/gen/ch1/gen_ch1_travel.py`）: 兜 `SSS/I.I`・胸 `S.S/SSS/ILI`・脚 `SIS/L.L/I.I`・靴 `S.S/B.B`（S = 岩殻片、I = 鉄、L = 革、B = 骨片）。**4 部位の合計は岩殻片 12・鉄 7・革 3・骨片 2**。旅装は**任意**（支度の段「鉄の跡」の目標はバニラの鉄の防具。34 の 3 章）。一式そろうと合図 `ch1_travel_gear_made`（今はどの段も読まない）。
 - **作れるのは教わってから**（`guide/RecipeLock`）: 旅の覚書を開く、または職人に作り方を教わる（会話の結果 `unlock_recipes`）と、レシピブックへ解ける。解くまで、作業台（と持ち物の 2x2）の完成品の枠は、鍵のかかったレシピの品が出ても毎 tick 空になり、「まだ作り方を知らない」と 5 秒に一度出る。ゲームルール `doLimitedCrafting` は世界ぜんぶのレシピを縛るので使わない。創造モードは問わない。
 - 旅装を一式（着ている分も数える）そろえると合図 `ch1_travel_gear_made`（作ったとき、と、仕上げの段にいる人へ 2 秒おきの保険）。
 - **岩の砥石**（`RockWhetstoneItem`）: 右クリックで一つ使い、「研いだ刃」（`WhettedEffect`。攻撃 +1.5、20 分）。備えの刃には、効いているとき**か、持ち歩いているとき**に +1.5 を数える（`registerWhetstone`。登録があると刃の手段の言い回しが「砥石で鍛えるか、…」に替わる）。レシピ: 岩殻片 2 + 骨片 1 + 火打ち石 1 → 2 つ。使うと合図 `ch1_whetstone_used`（支度の段「折れた剣」の鍛えの段）。
 - **道の固焼き**（吸収 II を 60 秒 + 満腹。糧の灯に 8 点）: 小麦 3 + 骨片 1 → 3 つ。骨の集め場・洞の宝のパンの代用を替えた。**苔の軟膏**（鈍足を治す + 再生 I を 8 秒。糧の灯に 3.2 点。`MossSalveItem`）: 苔ブロック + 骨片 + 粘土玉 → 2 つ。
-- アイコンは、ラフが無かった小物（砥石・固焼き・軟膏・「研いだ刃」の効き目の絵）をドット絵で描いた（`tools/gen_ch1_travel.py`）。差し替えたいときはこのスクリプトの関数だけ。
+- アイコンは、ラフが無かった小物（砥石・固焼き・軟膏・「研いだ刃」の効き目の絵）をドット絵で描いた（`tools/gen/ch1/gen_ch1_travel.py`）。差し替えたいときはこのスクリプトの関数だけ。
 
 **三章の分は実装済み**: 峰越えの旅装・雷の砥石・風干しの団子・避雷の油・風読みの小旗と素材 4 つ（`guide/Ch3Gear`。二章と同じ型）。
-- 峰越えの旅装（`peak_crossing_helmet/_chestplate/_leggings/_boots`。`PeakCrossingArmorItem`）: 防御 3/7/6/3 = **19**、強靭 2.75 × 4 = **11**、一式の効果「感電の傷 −25%」= 着ている部位ごとに −6.25%、アンコモン、炉で鍛えない、必要 Lv 19、修理は銅線。低ポリ（`peak_crossing` の組、仮に案 A 羽の肩。作りは `tools/rough/lowpoly/ch3/armor_ch3.py`、入れ方は `tools/install_ch3_gear_assets.py`）。
+- 峰越えの旅装（`peak_crossing_helmet/_chestplate/_leggings/_boots`。`PeakCrossingArmorItem`）: 防御 3/7/6/3 = **19**、強靭 2.75 × 4 = **11**、一式の効果「感電の傷 −25%」= 着ている部位ごとに −6.25%、アンコモン、炉で鍛えない、必要 Lv 19、修理は銅線。低ポリ（`peak_crossing` の組、仮に案 A 羽の肩。作りは `tools/rough/lowpoly/ch3/armor_ch3.py`、入れ方は `tools/install/install_ch3_gear_assets.py`）。
 - 感電の傷（`Ch3Gear.isShock`）: 雷（`lightning_bolt` の傷。頂の柱の雷・焼けた羽守の雷の輪も）と、雷を使う敵（雷蛾・帯電毛玉・雷乞い・雷獣・雷翼の心臓）の傷。
-- レシピ（`tools/gen_ch3_gear.py`。F = 焦げ羽、C = 帯電綿、W = 銅線、T = 潮殻の殻片）: 頭巾 `FCF/CTC`・上衣 `FFF/WTW/FCF`・裾 `FTF/W.W/C.C`・足袋 `FTF/WFW`。**4 部位の合計は焦げ羽 12・帯電綿 6・銅線 6・潮殻の殻片 4**。一式で合図 `ch3_travel_gear_made`。
+- レシピ（`tools/gen/ch3/gen_ch3_gear.py`。F = 焦げ羽、C = 帯電綿、W = 銅線、T = 潮殻の殻片）: 頭巾 `FCF/CTC`・上衣 `FFF/WTW/FCF`・裾 `FTF/W.W/C.C`・足袋 `FTF/WFW`。**4 部位の合計は焦げ羽 12・帯電綿 6・銅線 6・潮殻の殻片 4**。一式で合図 `ch3_travel_gear_made`。
 - **雷の砥石**: 「雷の刃」（`thunder_whetted`。攻撃 +2.2、20 分）。近接で当てると小さな火花（見た目と音だけ）。岩・塩の砥石とは重ねない（使うと替わる）。レシピ: 銅線 2 + 帯電綿 1 + 火打ち石 1 → 2 つ。合図 `ch3_whetstone_used`、雷の刃で倒すと `ch3_thunder_blade_kill`、焼けた羽守なら `ch3_warden_honed`。
 - **風干しの団子**（吸収 II 60 秒 + 落下速度低下 20 秒 + 満腹）: 小麦 3 + 砂糖 1 + 棒 1 → 3 つ。**避雷の油**（飲むと 90 秒「避雷」`grounded` = 感電と雷の傷が半分。糧の灯に 2 点）: ガラス瓶 2 + 帯電綿 1 + 銅線 1 → 2 つ。
 - **風読みの小旗**: `FCF/.W./.W.` → 1。**銅線**: 銅のインゴット 1 → 3。
@@ -80,8 +80,8 @@
 - 自己テスト `ch3 gear`（`Ch3GearSelfTest`）。
 
 **二章の分は実装済み（P5 の二章）**: 潮渡りの旅装・塩の砥石・潮の塩漬け・真珠の粉薬・潮の刻みの砂時計と素材 4 つ（`guide/Ch2Gear`。一章と同じ型）。
-- 潮渡りの旅装（`tide_wader_helmet/_chestplate/_leggings/_boots`。`TideWaderArmorItem` は `WhaleRoadArmorItem` を継ぐ）: 防御 3/7/5/3 = **18**、強靭 2.25 × 4 = **9**、一式の効果「水中の移動速度の低下を軽くする」= 部位ごとの水中移動効率 +0.1（一式 0.4。水渡り III で 1.0）、アンコモン、炉で鍛えない、必要 Lv 13（`GearCurve.TRAVEL[1]`。由来 `tide_wader` =「潮渡りの旅装」）、修理は塩結晶。低ポリ（`tide_wader` の組、418 三角形、海硝子の留め金が光る。仮に案 A 真珠の肩。ラフ 3 案は `docs/review/ch2_roughs/items/armor_ch2.png`、作りは `tools/rough/lowpoly/ch2/armor_ch2.py`、入れ方は `tools/install_ch2_gear_assets.py`）。
-- レシピ（`tools/gen_ch2_gear.py`。P = 小真珠、S = 塩結晶、W = 岩鯨の鱗片 `stone_whale_shard`、L = 革）: 頭巾 `PSP/SWS`・上衣 `SSS/PWP/SLS`・裾 `PWP/S.S/LPL`・足袋 `SPS/PWP`。**4 部位の合計は小真珠 10・塩結晶 12・岩鯨の鱗片 4・革 3**（`ch2/prep_gear` の集める数と同じ）。一式で合図 `ch2_travel_gear_made`。
+- 潮渡りの旅装（`tide_wader_helmet/_chestplate/_leggings/_boots`。`TideWaderArmorItem` は `WhaleRoadArmorItem` を継ぐ）: 防御 3/7/5/3 = **18**、強靭 2.25 × 4 = **9**、一式の効果「水中の移動速度の低下を軽くする」= 部位ごとの水中移動効率 +0.1（一式 0.4。水渡り III で 1.0）、アンコモン、炉で鍛えない、必要 Lv 13（`GearCurve.TRAVEL[1]`。由来 `tide_wader` =「潮渡りの旅装」）、修理は塩結晶。低ポリ（`tide_wader` の組、418 三角形、海硝子の留め金が光る。仮に案 A 真珠の肩。ラフ 3 案は `docs/review/ch2_roughs/items/armor_ch2.png`、作りは `tools/rough/lowpoly/ch2/armor_ch2.py`、入れ方は `tools/install/install_ch2_gear_assets.py`）。
+- レシピ（`tools/gen/ch2/gen_ch2_gear.py`。P = 小真珠、S = 塩結晶、W = 岩鯨の鱗片 `stone_whale_shard`、L = 革）: 頭巾 `PSP/SWS`・上衣 `SSS/PWP/SLS`・裾 `PWP/S.S/LPL`・足袋 `SPS/PWP`。**4 部位の合計は小真珠 10・塩結晶 12・岩鯨の鱗片 4・革 3**（`ch2/prep_gear` の集める数と同じ）。一式で合図 `ch2_travel_gear_made`。
 - **塩の砥石**（`salt_whetstone`）: 「塩の刃」（`salt_whetted`。攻撃 +1.8、20 分）。**水の中でも切れる**: 打つ人か相手が水に浸かっている近接の一撃は +1、白い塩と泡が散る。岩の砥石の研ぎとは重ねない（使うと替わる）。備えの刃は砥石の種類のうち一番大きい上乗せだけを数える（`TravelGear.whetstoneBonus`）。レシピ: 塩結晶 2 + 貝の欠け 1 + 火打ち石 1 → 2 つ。使うと合図 `ch2_whetstone_used`、塩の刃が効いている間に倒すと `ch2_salt_blade_kill`、潮の番人なら `ch2_warden_salted`。
 - **潮の塩漬け**（水中呼吸 60 秒 + 満腹。糧の灯に 2 点）: 乾燥した昆布 3 + 塩結晶 1 → 3 つ。**真珠の粉薬**（即時に 3❤、浮遊と鈍足を治す。糧の灯に 6 点。`PearlPowderItem`）: 小真珠 + 塩結晶 + 砂糖 → 2 つ。
 - **潮の刻みの砂時計**（`tide_hourglass`。消耗しない）: 使うと、ワールドの潮（`TideOcean`）の次の干潮までと満潮（干潮の刻の終わり）までの秒数を画面の帯に一度出す。クールダウン 30 秒。使うと合図 `ch2_tide_read`。レシピ: `SGS/.P./SGS`（塩結晶 4・ガラス 2・小真珠 1）。報酬として渡してもよい。
@@ -262,7 +262,7 @@
 | 奥の間 | **老いた歩哨**（名づき。下） | 番兵長の技の読み方 |
 | 報酬 | 岩殻の護り糸（鼓動守の材料）、道の固焼き、旅装の素材。初回は追憶の宝。クリアのたびに、その場の人へ頁 `ch1/trail_blade`（奥の台座の折れた鉄の剣）と伝承 `ch1/cleft_cave`（`story/ch1/Ch1Trails`） | — |
 
-**骨の坑**（C1。支度の段「鉄の跡」の舞台。8〜12 分。`story/ch1/BonePit`、部品 `ch1_bone_pit` = `tools/gen_ch1_sites.py`）
+**骨の坑**（C1。支度の段「鉄の跡」の舞台。8〜12 分。`story/ch1/BonePit`、部品 `ch1_bone_pit` = `tools/gen/ch1/gen_ch1_sites.py`）
 
 | 部屋 | 中身 | 予習すること |
 | --- | --- | --- |
@@ -274,7 +274,7 @@
 
 - 新しい敵・ブロックは足していない（苔這い・岩殻虫・鉄鉱石・バニラの石）。新しい絵は記念品「鯨追いの印」（32×32、案 B 骨の円盤）と、進捗 `bone_pit`・`whale_trail`（19）。
 
-**新しい敵（地上）**　**実装済み（P7）**: 4 種とも選ばれた A 案の低ポリ（岩甲虫・長耳・箱籠・苔の守り手）で、`entity/RockShellBeetle`・`SpineHare`・`BoneHauler`・`ElderSentry`（共通 `GroundFoe`）。素材は `python tools/gen_ch1_ground_mobs.py` が入れる（メッシュ・アニメ・音の別名・文・割符の絵）。技の予告は最短 0.8 秒（`Telegraph.MIN_WARN_TICKS`）なので、表の 0.6 秒・0.5 秒は 0.8 秒になった。経験値は 岩殻虫 7・棘うさぎ 5・骨負い 2・老いた歩哨 40（章の枠には数えない）。自己テスト `ch1 mobs`。
+**新しい敵（地上）**　**実装済み（P7）**: 4 種とも選ばれた A 案の低ポリ（岩甲虫・長耳・箱籠・苔の守り手）で、`entity/RockShellBeetle`・`SpineHare`・`BoneHauler`・`ElderSentry`（共通 `GroundFoe`）。素材は `python tools/gen/ch1/gen_ch1_ground_mobs.py` が入れる（メッシュ・アニメ・音の別名・文・割符の絵）。技の予告は最短 0.8 秒（`Telegraph.MIN_WARN_TICKS`）なので、表の 0.6 秒・0.5 秒は 0.8 秒になった。経験値は 岩殻虫 7・棘うさぎ 5・骨負い 2・老いた歩哨 40（章の枠には数えない）。自己テスト `ch1 mobs`。
 
 | 名前（ID） | 役 | 振る舞い | 出る所 | 落とす物 |
 | --- | --- | --- | --- | --- |
@@ -349,7 +349,7 @@
 | 老番兵（`elder_sentinel`、中ボスの小さな版） | 名づきの変種。HP 220（人数で増える。番兵長と同じ式 `1 + 0.6 × (人数 − 1)`）、突進 10・足踏み 8、防御 8 | 普通の殴りは持たない。三つの技はどれも予告つき: ①**盾の突進**: 目標へ向く線（幅 2.4、最長 12）が 1.2 秒（24 tick）かけて満ち、最後の 12 tick で線に沿って突っ込む（傷は走り終えた瞬間に線の中の人へ 10）。走ったあと 1.2 秒よろめく ②**足踏み**: 足もとの半径 3.5 の円（1.0 秒）、傷 8。近づかれると使う ③**骨笛**: 笛を口へ当てて鳴らす（1.2 秒）。傷のない灰色の円（半径 1）が射手の湧く足もとに出て、時間が来るとそこから骨棘の射手が出る（2 体 + 近くの人が増えるごとに 1 体、最大 4。生きている射手が 2 体以上のあいだは吹かない）。近くの味方は 12 秒速くなる。正面の傷は半分 | 第一の広間（E1）の第三波（骨の番兵 2 と一緒。人数で番兵が増え、老番兵は体力が増える）。P8 の番兵の詰所ができたら、そちらの奥へ移す |
 
 - 落とす物（`TitanLoot.rollNewGuard`）: 骨の砲手 = 岩鯨の鱗片 25%（1〜2）・骨片 40%（1〜2）・共鳴の欠片 4%・干し肉 3%。骨鳥 = 鱗片 8%・骨片 30%・共鳴の欠片 2%・干し肉 3%。老番兵 = 鱗片 2〜3 と骨片 2〜4 が必ず、岩殻片 60%（1〜2）、共鳴の欠片 15%、干し肉 10%、岩鯨の甲殻の一部位 8%。倒した本人だけが拾える。経験値は 14・4・60（`GrowthRewards.MOD_ENEMIES`）。歩哨の割符（P7 の落とし物）は P8 の詰所の戸と一緒に足す
-- 絵・動き: 低ポリのメッシュ 511・314・1,072 三角形（15 の 9.6 と同じ入れ方。`python tools/install_ch1_back_mobs.py`、動きは `python tools/gen_ch1_back_mob_anims.py`、音は `python tools/gen_ch1_back_mob_sounds.py`）。ラフの空の骨（案違いの `cannon_b` など）は落とした。骨の砲手の砲身 `cannon` の枢軸は台座の上、頭 `head` は盾の奥、骨鳥の翼は胴の側面、老番兵は骨の番兵と同じ骨の名前。骨の砲手は描画 1.5 倍・骨鳥は 1.6 倍。元のキューブのモデルは無い（`LowPoly.enabled = false` のときは体が描かれない）。骨鳥の目の光る画素は絵に無い（光るマスクなし）
+- 絵・動き: 低ポリのメッシュ 511・314・1,072 三角形（15 の 9.6 と同じ入れ方。`python tools/install/install_ch1_back_mobs.py`、動きは `python tools/gen/ch1/gen_ch1_back_mob_anims.py`、音は `python tools/gen/ch1/gen_ch1_back_mob_sounds.py`）。ラフの空の骨（案違いの `cannon_b` など）は落とした。骨の砲手の砲身 `cannon` の枢軸は台座の上、頭 `head` は盾の奥、骨鳥の翼は胴の側面、老番兵は骨の番兵と同じ骨の名前。骨の砲手は描画 1.5 倍・骨鳥は 1.6 倍。元のキューブのモデルは無い（`LowPoly.enabled = false` のときは体が描かれない）。骨鳥の目の光る画素は絵に無い（光るマスクなし）
 - 自己テスト `ch1 back mobs`（`entity/Ch1BackMobsSelfTest`。`SKYABYSS_SELFTEST_ONLY="ch1 back mobs"`）: 印の形 = 当たり（円・線・足踏みの円。内側は傷、外側は無傷）、予告が 16 tick 以上、傷は予告の後、骨鳥は 1 体ずつ、骨笛が傷のない円と人数で増える射手、第一の広間の波の数と砲手の位置と老番兵の体力、落とす物の確率、経験値、スポーンエッグ、いちばん広い範囲 ≤ 部屋の床の 4 割
 
 **初回の場面**: 背に初めて乗った人に、広場から鯨の背を見渡すカメラ（約 8 秒、スキップ可）。20 の枠に一つ足す（`titan_back_first_stone_whale`）。
@@ -362,7 +362,7 @@
 
 目標 130〜150 分（必須で約 80 分）。主題: 待つ・読む・拾う。海辺と浅瀬と塩の道が舞台。
 
-**実装済み（C2。34 の 4.3.1・4.3.2）**: 場所 5 種と沖の難破船、沈んだ塩の蔵、支度の段 `ch2/salt_road`・`ch2/ebb_boat`（34 の段。備えの頼み 2・3 の代わり）、サブ `ch2/drift_trail`・`ch2/wader_gear`、日替わり `daily_pool_sweep`、頁 4、語り部・イサナ・職人の一言。コードは `story/ch2/`（`Ch2Ground`・`SaltVault`・`Wreck`）、データは `tools/gen_ch2_ground.py`。下の表は今の仕様。
+**実装済み（C2。34 の 4.3.1・4.3.2）**: 場所 5 種と沖の難破船、沈んだ塩の蔵、支度の段 `ch2/salt_road`・`ch2/ebb_boat`（34 の段。備えの頼み 2・3 の代わり）、サブ `ch2/drift_trail`・`ch2/wader_gear`、日替わり `daily_pool_sweep`、頁 4、語り部・イサナ・職人の一言。コードは `story/ch2/`（`Ch2Ground`・`SaltVault`・`Wreck`）、データは `tools/gen/ch2/gen_ch2_ground.py`。下の表は今の仕様。
 
 **新しい場所（`story/ch2/Ch2Ground`・`SaltVault`。二章の跡地 = 都の東の浜に、世界で一つずつ）**
 
@@ -384,7 +384,7 @@
 | 奥の間 | **潮の番人**（名づき。下）。膝までの浅瀬と柱で、局所の満ち潮の輪が床に広がる。北の壇に前の私の刻み「潮は読める。待て」（伝承 `ch2/salt_vault`）、壇の裏に地上への梯子 | 潮招きの局所の満ち潮 |
 | 報酬 | 初回のクリア: 経験値 60・塩結晶 6・真珠の護り糸 1（鼓動守の材料）・小真珠 4。再訪は 1 日ごとに奥の間の番人が戻り、塩結晶・小真珠・貝の欠け | — |
 
-**新しい敵（地上）**　**実装済み（P12）**: 4 種とも低ポリ（仮の選定: 貝 A 縁飾りの帆立・砂潜り C 星見魚・宿借り B 流木の巻き殻・番人 A 塩の冠。ラフは `docs/review/ch2_roughs/`、作り方は `tools/rough/lowpoly/ch2/`）で、`entity/TidepoolClam`・`SandBurrower`・`DriftHermit`・`ShoreWarden`（水は `ShoreFlood`）。素材は `python -I tools/gen_ch2_ground_mobs.py` が入れる（メッシュ・アニメ・音の別名・文 `assets/skyabyss_ch2mob/lang`）。ひとり歩きの登録と ID は `story/ch2/Ch2Mobs`（自分で `FMLCommonSetupEvent` に登録する）。蔵の湧き台は ID の文字列で置く。技の予告は最短 0.8 秒（`Telegraph.MIN_WARN_TICKS`）なので砂潜りは 0.8 秒、名づきの番人の技は 1 秒以上。経験値は 貝 6・砂潜り 5・宿借り 2・番人 50（章の枠には数えない）。落とす素材（小真珠・塩結晶・貝の欠け・真珠の護り糸）は `guide/Ch2Gear` の品（ID で引く）。自己テスト `ch2 mobs`。
+**新しい敵（地上）**　**実装済み（P12）**: 4 種とも低ポリ（仮の選定: 貝 A 縁飾りの帆立・砂潜り C 星見魚・宿借り B 流木の巻き殻・番人 A 塩の冠。ラフは `docs/review/ch2_roughs/`、作り方は `tools/rough/lowpoly/ch2/`）で、`entity/TidepoolClam`・`SandBurrower`・`DriftHermit`・`ShoreWarden`（水は `ShoreFlood`）。素材は `python -I tools/gen/ch2/gen_ch2_ground_mobs.py` が入れる（メッシュ・アニメ・音の別名・文 `assets/skyabyss_ch2mob/lang`）。ひとり歩きの登録と ID は `story/ch2/Ch2Mobs`（自分で `FMLCommonSetupEvent` に登録する）。蔵の湧き台は ID の文字列で置く。技の予告は最短 0.8 秒（`Telegraph.MIN_WARN_TICKS`）なので砂潜りは 0.8 秒、名づきの番人の技は 1 秒以上。経験値は 貝 6・砂潜り 5・宿借り 2・番人 50（章の枠には数えない）。落とす素材（小真珠・塩結晶・貝の欠け・真珠の護り糸）は `guide/Ch2Gear` の品（ID で引く）。自己テスト `ch2 mobs`。
 
 | 名前（ID） | 役 | 振る舞い | 出る所 | 落とす物 |
 | --- | --- | --- | --- | --- |
@@ -444,7 +444,7 @@
 
 目標 130〜150 分（必須で約 80 分）。主題: 見誤り・高い所。峰と嵐の通り道が舞台。
 
-- **実装の状態（34 の C3。4.4.1）**: 場所 5 種は西の峰の跡地に建つ（`titan/storm/chapter/Ch3Ground`・`ScorchedWatch`・`LightningPillars`、部品は `tools/gen_ch3_ground.py`）。避雷の見本は避雷の塔の跡の部品 `ch3_rod_tower` の中（東の隣）に置いた。焼けた見張り塔の嵐の拍は、頂の柱に 15 秒ごとの雷にした。新しい敵 4（P16）と新しい品は実装済み（下の「新しい敵」「新しい品」）。**まだ**: 備えの頼み `ch3/prep_*`（支度の段 3 本 `lightning_pillars`・`scorched_watch`・`sky_stone` が代わり）、`ch3/gleaner_trail`、日替わり `daily_puff_clear`。サブ `ch3/wind_flags` は実装済み（経験値 120）
+- **実装の状態（34 の C3。4.4.1）**: 場所 5 種は西の峰の跡地に建つ（`titan/storm/chapter/Ch3Ground`・`ScorchedWatch`・`LightningPillars`、部品は `tools/gen/ch3/gen_ch3_ground.py`）。避雷の見本は避雷の塔の跡の部品 `ch3_rod_tower` の中（東の隣）に置いた。焼けた見張り塔の嵐の拍は、頂の柱に 15 秒ごとの雷にした。新しい敵 4（P16）と新しい品は実装済み（下の「新しい敵」「新しい品」）。**まだ**: 備えの頼み `ch3/prep_*`（支度の段 3 本 `lightning_pillars`・`scorched_watch`・`sky_stone` が代わり）、`ch3/gleaner_trail`、日替わり `daily_puff_clear`。サブ `ch3/wind_flags` は実装済み（経験値 120）
 
 **新しい場所（`titan/storm/chapter` に足す）**
 
@@ -465,7 +465,7 @@
 | 頂の間 | **焼けた羽守**（名づき。下）と柱。柱に誘って雷を落とす | 雷獣・避雷の柱 |
 | 報酬 | 焦げ羽、帯電綿、雷の護り糸（鼓動守の材料）、旅装の素材。初回は追憶の宝 | — |
 
-**新しい敵（地上）**　**実装済み（P16）**: 4 種とも低ポリ（仮の選定: 毛玉 A 綿毛の玉・雛 C 焦げ羽の雛・雷拾い B 荷負い鳥・羽守 B 青い焦げ筋。ラフと選定の一覧は `docs/review/ch3_roughs/`（`choices.md`）、作り方は `tools/rough/lowpoly/ch3/`）。`titan/storm/chapter/mob/StaticPuff`・`PeakFledgling`・`LightningGleaner`・`ScorchedWarden`（羽守 `FeatherWarden` を継ぐ）。登録・ひとり歩き・音は `titan/storm/chapter/Ch3Mobs`（`StormMobSetup.register` から）。素材は `python -I tools/gen_ch3_ground_mobs.py` が入れる（メッシュ・アニメ・音の別名・文 `assets/skyabyss_ch3mob/lang`）。経験値は 毛玉 5・雛 6・雷拾い 2・羽守 60（章の枠には数えない）。自己テスト `ch3 mobs`、撮影 `tools/shots/ch3_extra.txt`（絵 `docs/review/ch3_extra/`）。
+**新しい敵（地上）**　**実装済み（P16）**: 4 種とも低ポリ（仮の選定: 毛玉 A 綿毛の玉・雛 C 焦げ羽の雛・雷拾い B 荷負い鳥・羽守 B 青い焦げ筋。ラフと選定の一覧は `docs/review/ch3_roughs/`（`choices.md`）、作り方は `tools/rough/lowpoly/ch3/`）。`titan/storm/chapter/mob/StaticPuff`・`PeakFledgling`・`LightningGleaner`・`ScorchedWarden`（羽守 `FeatherWarden` を継ぐ）。登録・ひとり歩き・音は `titan/storm/chapter/Ch3Mobs`（`StormMobSetup.register` から）。素材は `python -I tools/gen/ch3/gen_ch3_ground_mobs.py` が入れる（メッシュ・アニメ・音の別名・文 `assets/skyabyss_ch3mob/lang`）。経験値は 毛玉 5・雛 6・雷拾い 2・羽守 60（章の枠には数えない）。自己テスト `ch3 mobs`、撮影 `tools/shots/ch3_extra.txt`（絵 `docs/review/ch3_extra/`）。
 - 帯電毛玉: 帯電 4 秒（毛が逆立つ）→ 4 ブロック以内の一番近い人へ 4、そこから 4 以内の別の人へ跳ぶ（最大 3 人、0.8 倍ずつ）。晴れた昼は自分から狙わない（叩けば怒る）。ひとり歩きは山の地形と風の丘。雨・雷雨のときは湧く割合が 0.2 から 0.55 に増える
 - 峰の雛: 3〜10 先の人へ、2.6 上がってから地面に帯（長さ 11・幅 1.4、0.8 秒）→ 帯の上の人に 5、帯の先まで突っ込む。誰にも当たらなければ 2 秒よろめき、傷 1.5 倍。ひとり歩きは峰（昼）
 - 雷拾い: 6 まで人が来ると羽ばたいて逃げ、一度だけ荷を落とす（銅線 1・焦げ羽 50%）。逃げる先は一番近い雷拾いの原（400 以内）。原には人が 48 以内にいる間、2 羽まで（保存しない）。ひとり歩きは草地と風の丘（昼）
@@ -528,7 +528,7 @@
 
 目標 150〜170 分（必須で約 90 分）。主題: 下。熱・灰・足もと。
 
-- **実装の状態（34 の C4。4.5.1）**: 場所 5 種は都の南の灰の地の跡地に建つ（`story/ch4/Ch4Ground`・`DeadForgePit`、部品とデータは `tools/gen_ch4_ground.py`）。支度の段 `ch4/fire_draught`・`ch4/forge_ruins`（備えの頼み 1〜3 の代わり）、サブ `ch4/ash_road`・`ch4/dragger_trail`、日替わり `daily_mite_clear`、新しい敵 4（P20。`story/ch4/mob`、素材は `tools/gen_ch4_ground_mobs.py`）、品 5（煤鉄・灰麻・灰の護り糸・煤の砥石・灰の冷やし水。`story/ch4/Ch4Setup`）、余燼の鼓動守の編み方（灰の護り糸。編み直しは煤鉄 8）、旅の覚書（四章。敵の見分け方 6 行とレシピ 2 本）。灰歩きの旅装と灰焼きのパンも入れた（`story/ch4/Ch4Gear`。備えの頼み `ch4/prep_gear` は作らず、旅の覚書のレシピで作る）。温石の台は新しいブロックにせず、坑の入口の間と温かい岩の群れの滑らかな玄武岩の台に温石を持って触れる形にした
+- **実装の状態（34 の C4。4.5.1）**: 場所 5 種は都の南の灰の地の跡地に建つ（`story/ch4/Ch4Ground`・`DeadForgePit`、部品とデータは `tools/gen/ch4/gen_ch4_ground.py`）。支度の段 `ch4/fire_draught`・`ch4/forge_ruins`（備えの頼み 1〜3 の代わり）、サブ `ch4/ash_road`・`ch4/dragger_trail`、日替わり `daily_mite_clear`、新しい敵 4（P20。`story/ch4/mob`、素材は `tools/gen/ch4/gen_ch4_ground_mobs.py`）、品 5（煤鉄・灰麻・灰の護り糸・煤の砥石・灰の冷やし水。`story/ch4/Ch4Setup`）、余燼の鼓動守の編み方（灰の護り糸。編み直しは煤鉄 8）、旅の覚書（四章。敵の見分け方 6 行とレシピ 2 本）。灰歩きの旅装と灰焼きのパンも入れた（`story/ch4/Ch4Gear`。備えの頼み `ch4/prep_gear` は作らず、旅の覚書のレシピで作る）。温石の台は新しいブロックにせず、坑の入口の間と温かい岩の群れの滑らかな玄武岩の台に温石を持って触れる形にした
 
 **新しい場所（`titan/ember` に足す）**
 
@@ -617,7 +617,7 @@
 | --- | --- | --- | --- | --- | --- |
 | P1（済） | 戦いの部屋の復帰の待ちと上限 | `GroupBossRoom`/`TitanBackTrials`（共通）に復帰の待ち・回数の上限・無敵の光。ゲームルール。四つの心臓と中ボスの自己テスト（`heart reentry`）。02 の 4.2・5.3 と 1.3 の反映 | なし | なし | Sonnet |
 | P2 | 備えの三灯（**済**。11 の 9 章） | `readiness/Readiness`（式）、控え帳 B の「備え」行、乗り込みの一言と二度押しの確認、前室の碑の囁き。四つの乗り込み口（`BoardGlow` の近く） | なし | なし | Sonnet |
-| P3（済） | 章の導きの基盤 | 備えの頼みの型（クエストの追加ファイルの規則）、旅の覚書の手帳（レシピ解放）、`ch<n>_ready` の合図、鼓動守の装飾（共通の型）、`SiteTreasure`（人ごとの一度きりの抽選）、`SiteSpawner`・`ChapterMobSpawner`・`GroupOwned` 流用 | P2 | 手帳・鼓動守のアイコン（アイテムは 2 案。**絵は仮**: `tools/gen_guide_placeholders.py` が作る仮の `textures/item/wayfarer_notes.png`・`heartbeat_ward.png`（右上にマゼンタの印）を、選んだ絵に置き換える。鼓動守の絵は 4 種共通で、巨神ごとに分けるなら `models/item/heartbeat_ward_<巨神>.json` の textures を替える） | Sonnet |
+| P3（済） | 章の導きの基盤 | 備えの頼みの型（クエストの追加ファイルの規則）、旅の覚書の手帳（レシピ解放）、`ch<n>_ready` の合図、鼓動守の装飾（共通の型）、`SiteTreasure`（人ごとの一度きりの抽選）、`SiteSpawner`・`ChapterMobSpawner`・`GroupOwned` 流用 | P2 | 手帳・鼓動守のアイコン（アイテムは 2 案。**絵は仮**: `tools/gen/story/gen_guide_placeholders.py` が作る仮の `textures/item/wayfarer_notes.png`・`heartbeat_ward.png`（右上にマゼンタの印）を、選んだ絵に置き換える。鼓動守の絵は 4 種共通で、巨神ごとに分けるなら `models/item/heartbeat_ward_<巨神>.json` の textures を替える） | Sonnet |
 | P4（一章 済） | 旅の職人 | NPC のモデル（低ポリ）・四章分の絵・会話・好感度・出し方（07 の 3.2・3.6）。`dialogue/artisan.json`（共通）+ `dialogue/ch1〜ch4/artisan.json`（章の足し書き。一章 済）、立つ所は `ArtisanSpawner.Spot`（二〜四章は印と Spot を足す）。選定済み（案 B + 4 色）。**一章の分**: モデル・4 色の絵・顔・動き・会話・好感度の手の話・覚書と作り方・鼓動守の編み直し・自己テスト `artisan` | P3 | 3 案（モデル）+ 4 通りの色 | Sonnet（会話の文は Haiku） |
 | P5（一章 済） | 旅装・砥石・糧・薬（四章分） | アイテムの登録、作業台のレシピ（データ）、lang、アイコン、`GearCurve` との照合の自己テスト。**一章の分**: 鯨道の旅装（案 A 殻肩）・岩の砥石・道の固焼き・苔の軟膏、レシピと鍵（`RecipeLock`）、備えの登録、`GearCurve.TRAVEL`、自己テスト `travel gear`。二〜四章は `TravelGear` に同じ型で足す | P3 | 防具 4 組の色（3 案）、小物の絵 2 案 | Haiku（レシピ・lang）、Sonnet（防具の見た目・自己テスト） |
 | P6（済） | 一章 地上（場所・洞・頼み） | `story/ch1/Sites` に石標・集め場・歌の間・荷車の傍ら・割れ殻の洞、ブロック部品（Blueprint）、クエスト・会話・伝承、経験値の枠 | P3・P4・P5 | なし（ブロックはバニラ） | Sonnet（洞の仕掛け）、Haiku（lang・データ） |

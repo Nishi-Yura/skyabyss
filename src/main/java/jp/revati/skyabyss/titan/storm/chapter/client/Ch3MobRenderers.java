@@ -13,7 +13,7 @@ import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import software.bernie.geckolib.animatable.GeoAnimatable;
 import software.bernie.geckolib.renderer.GeoEntityRenderer;
 
-// 三章の地上の敵の描画 (低ポリのメッシュ。tools/gen_ch3_ground_mobs.py)。焼けた羽守の鉤槍は別メッシュ (受け口 socket_main、名前 scorched_glaive)。
+// 三章の地上の敵の描画 (低ポリのメッシュ。tools/gen/ch3/gen_ch3_ground_mobs.py)。焼けた羽守の鉤槍は別メッシュ (受け口 socket_main、名前 scorched_glaive)。
 // 倒れるときはバニラの横倒しにせず、死のアニメーションで倒れる
 @EventBusSubscriber(modid = SkyAbyss.MODID, value = Dist.CLIENT)
 public final class Ch3MobRenderers {

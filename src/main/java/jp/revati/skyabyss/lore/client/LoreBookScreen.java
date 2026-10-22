@@ -21,7 +21,7 @@ import net.minecraft.util.FormattedCharSequence;
 
 // 伝承の書の画面。見開きの古い帳面で、上に章のしおり、左の頁に項目の一覧、右の頁に本文。
 // まだ記されていない項目は題を「？？？」、本文をにじんだ墨の帯で伏せ、手がかりを一行だけ添える。
-// テクスチャは 32px 密度 (GUI の 1 単位 = 2 画素) で描いてある (tools/gen_lore_book.py)
+// テクスチャは 32px 密度 (GUI の 1 単位 = 2 画素) で描いてある (tools/gen/story/gen_lore_book.py)
 public class LoreBookScreen extends Screen implements jp.revati.skyabyss.client.ui.TextBounded {
     static final ResourceLocation BOOK = ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "textures/gui/lore/book.png");
     static final ResourceLocation WIDGETS = ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "textures/gui/lore/widgets.png");

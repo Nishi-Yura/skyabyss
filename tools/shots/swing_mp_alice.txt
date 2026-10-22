@@ -1,4 +1,4 @@
-# 武器の振りのマルチ確認: 振る側 (tools/gen_weapon_swing_mp_shots.py が作る)
+# 武器の振りのマルチ確認: 振る側 (tools/gen/shots/gen_weapon_swing_mp_shots.py が作る)
 server localhost:25683
 timeout 900
 size 854 480

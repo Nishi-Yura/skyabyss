@@ -12,7 +12,7 @@ import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import net.neoforged.neoforge.registries.NeoForgeRegistries;
 
-// 序盤の拍子の登録 (プレイヤーごとの状態、音)。SkyAbyss のコンストラクタから register を呼ぶ。音は tools/gen_opening_sounds.py で合成している
+// 序盤の拍子の登録 (プレイヤーごとの状態、音)。SkyAbyss のコンストラクタから register を呼ぶ。音は tools/gen/sound/gen_opening_sounds.py で合成している
 public final class OpeningSetup {
     private static final DeferredRegister<AttachmentType<?>> ATTACHMENTS = DeferredRegister.create(NeoForgeRegistries.ATTACHMENT_TYPES, SkyAbyss.MODID);
     private static final DeferredRegister<SoundEvent> SOUNDS = DeferredRegister.create(Registries.SOUND_EVENT, SkyAbyss.MODID);

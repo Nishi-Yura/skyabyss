@@ -195,8 +195,8 @@
 ### 8.4 章の札・更新の音・NPC の頭の印（`quest/QuestUx`、`client/quest/ChapterLabel`）
 
 - **章の札**: 目的の帯のすぐ上に、今の章（「一章　空を泳ぐもの」。`Chapters` の `tab` + 全角空白 + `title`。序章は「序章　空の影」）を小さく出しっぱなしにする。章はサーバーが人ごとに `Chapters.of` で導き、変わったとき・入ったときだけその人に送る（パケット版 `questux-1`）。場面・F1・F3・目覚めの暗転では出さない。画面を開いている間は薄くする。設定 `chapterLabel`。札の高さ（11px）の分だけ、下の帯と追跡の表示が下へずれる（`QuestHud.y()`）。HUD の置き場を一括で持つ部品（`HudLayout`）ができたら、札はそこの「帯の上」の段に載せる。
-- **更新の音**: クエストの札（`QuestToast`）と同時に、メインの段の更新・始まり・終わりは小さな鐘が二つ（五度上がる、1.3 秒、最大音量 0.5。終わりは少し低く）、サブは柔らかいひとつ（0.7 秒、0.32）。合成は `tools/gen_quest_ux_sounds.py`（序盤の鐘と同じ部分音の組み方）、出力は `sounds/ui/quest_main.ogg`・`quest_side.ogg`、登録は `QuestUx`、鳴らすのは `QuestClient.playSound`。会話・場面の最中は札と同じく溜めて、閉じたあとに鳴る。設定 `questSound` で止める（以前の水晶の音は廃止）。
-- **NPC の頭の上の印**: 07 の 8.5 節。見本の絵は `docs/review/previews/quest_ux_sheet.png`（`tools/shots/quest_ux.txt` → `tools/quest_ux_sheet.py`）。
+- **更新の音**: クエストの札（`QuestToast`）と同時に、メインの段の更新・始まり・終わりは小さな鐘が二つ（五度上がる、1.3 秒、最大音量 0.5。終わりは少し低く）、サブは柔らかいひとつ（0.7 秒、0.32）。合成は `tools/gen/sound/gen_quest_ux_sounds.py`（序盤の鐘と同じ部分音の組み方）、出力は `sounds/ui/quest_main.ogg`・`quest_side.ogg`、登録は `QuestUx`、鳴らすのは `QuestClient.playSound`。会話・場面の最中は札と同じく溜めて、閉じたあとに鳴る。設定 `questSound` で止める（以前の水晶の音は廃止）。
+- **NPC の頭の上の印**: 07 の 8.5 節。見本の絵は `docs/review/previews/quest_ux_sheet.png`（`tools/shots/quest_ux.txt` → `tools/sheets/quest_ux_sheet.py`）。
 - **旅嚢の "NEW"**: 新しく袋に入って、まだ画面で見ていない品の枠・輪の札・ホットバー脇の札に小さな赤い "NEW"（持ち主ごとに保存。カーソルを重ねると外れる）。22 の 9.4 節。
 
 ## 9. 章の題字と余韻（`story/arc/ChapterCards`）
@@ -305,7 +305,7 @@
 
 **14.5 見本と確かめ**
 - 開発用の見本: `/skyabyss_hud demo [all|opening|back|boss|off]`（表示だけにデータを入れる。サーバーには触れない）、`/skyabyss_hud layout`（いまの長方形と出さなかった部品をチャットへ）。台本では `huddemo <all|opening|back|boss|off>`。
-- 台本 `tools/shots/hud_layout.txt`（一番混む三つの場面 × GUI 倍率 2・3・4）。バニラの部品を重ねた版は `tools/shots/hud_vanilla2.txt`（1920x1080 の GUI 2・3・4。`python tools/hud_vanilla2_sheet.py` で `docs/review/previews/hud_vanilla2_sheet.png`）。整理の前後の比べは `docs/review/previews/hud_layout_sheet.png`。
+- 台本 `tools/shots/hud_layout.txt`（一番混む三つの場面 × GUI 倍率 2・3・4）。バニラの部品を重ねた版は `tools/shots/hud_vanilla2.txt`（1920x1080 の GUI 2・3・4。`python tools/sheets/hud_vanilla2_sheet.py` で `docs/review/previews/hud_vanilla2_sheet.png`）。整理の前後の比べは `docs/review/previews/hud_layout_sheet.png`。
 - 自己テスト `SELFTEST hud layout`（`hud/HudLayoutSelfTest`。「混んだ場面」`crowded`: `tools/shots/hud_vanilla2.txt` の boss・opening・back と同じ組み合わせ × GUI 倍率 2〜4（1920x1080・1280x720・1600x900・2560x1440）× ボスバー・効き目・札・チャット・アクションバー・横板・字幕を振って、バニラが mod の部品のどれにも重ならないこと（動かせないまま残るのも不可）。倍率 1〜4 × 16 種の窓で、置いた長方形が画面に収まる・mod の部品どうし、バニラの部品と重ならない・普通の大きさでは字幕と手がかりと目的が出る、をランダムな部品の組み合わせでも確かめる）。ゲームを開かずに main でも回せる。
 - 絵柄（板・文字・キーの表示）の 3 案は `docs/review/hud/index.html`（選びは db の `choices/hud_style`）。置き場の整理は絵柄に依らない。
 
@@ -318,7 +318,7 @@
 ### 14.7 ボスバーの印
 
 - 技の名前（`BossAttackCue`）は画面の中心（ボスバーの真ん中）の真下に置く（左右の帯に押されて右へずれていた）。
-- ボスバーの名前の左に 16px のドット絵の印: 四つの心臓・雷獣・灰の鍛冶は専用のバー（`textures/gui/boss/*_icon*.png`）、鯨骨の隊長・古い見張り・真珠の番人・潮呼びは `client/titan/MidBossBar`（`captain / elder_sentry / pearl_keeper / tide_beckoner _icon.png`。`tools/gen_boss_icons.py`）。名前と同じ体が近くにいるときだけ描き換える。
+- ボスバーの名前の左に 16px のドット絵の印: 四つの心臓・雷獣・灰の鍛冶は専用のバー（`textures/gui/boss/*_icon*.png`）、鯨骨の隊長・古い見張り・真珠の番人・潮呼びは `client/titan/MidBossBar`（`captain / elder_sentry / pearl_keeper / tide_beckoner _icon.png`。`tools/gen/ui/gen_boss_icons.py`）。名前と同じ体が近くにいるときだけ描き換える。
 
 ## 15. 会話の画面の肖像
 

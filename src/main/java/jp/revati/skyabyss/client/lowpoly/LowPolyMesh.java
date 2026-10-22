@@ -15,7 +15,7 @@ import net.minecraft.resources.ResourceLocation;
 public final class LowPolyMesh {
     public final String name;
     public final ResourceLocation texture;
-    public final ResourceLocation glowMask; // 光る画素だけに元の色を置いた画像 (<name>_glow.png、install_lowpoly.py が --gear のときに焼く)。無ければ null
+    public final ResourceLocation glowMask; // 光る画素だけに元の色を置いた画像 (<name>_glow.png、tools/install/install_lowpoly.py が --gear のときに焼く)。無ければ null
     // true: 頂点は受け口の骨の原点が基準 (武器・盾)。false: モデル全体の絶対座標 (GeckoLib の geo の cube と同じ)
     public final boolean socket;
     public final Map<String, Bone> bones = new LinkedHashMap<>();
@@ -117,7 +117,7 @@ public final class LowPolyMesh {
                 }
             }
             int origVerts = v.length;
-            // tools/mesh_close.py が書いた蓋: 元の頂点は cap_vertex_start までで、あとは塞ぎの面 (巨神では暗く出す)。読み込み時に塞ぐ必要は無い
+            // tools/lib/mesh_close.py が書いた蓋: 元の頂点は cap_vertex_start までで、あとは塞ぎの面 (巨神では暗く出す)。読み込み時に塞ぐ必要は無い
             boolean preClosed = b.has("cap_vertex_start");
             if (preClosed) {
                 origVerts = b.get("cap_vertex_start").getAsInt();

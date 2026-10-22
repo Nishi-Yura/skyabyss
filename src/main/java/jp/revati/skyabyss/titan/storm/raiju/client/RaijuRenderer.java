@@ -17,7 +17,7 @@ import software.bernie.geckolib.model.DefaultedEntityGeoModel;
 import software.bernie.geckolib.renderer.GeoEntityRenderer;
 import software.bernie.geckolib.renderer.layer.GeoRenderLayer;
 
-// 雷獣の描画 (模型は tools/install_raiju.py が書く。ラフ A 狼型)。
+// 雷獣の描画 (模型は tools/install/install_raiju.py が書く。ラフ A 狼型)。
 // 背の鬣の棘・瞳・耳の先・爪・尾の芯を光らせる (GlowLayer: 基のテクスチャの上に _glowmask の色を目の光で足す。
 // 潮殻の心臓と同じ描き方。GeckoLib の AutoGlowingGeoLayer は光る画素を基から抜いて面の陰を受けるため、暗い巣で沈む)。
 // 死ぬときはバニラの「横に倒れる」回転をせず、模型の死のアニメで倒れる

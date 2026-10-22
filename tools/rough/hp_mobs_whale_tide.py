@@ -8,7 +8,7 @@
   python tools/rough/hp_mobs_whale_tide.py --install name=A ...  write the picked option into assets/skyabyss/{geo,textures}/entity
 
 The starting point of every build is tools/sources/hp_base/entity/<name>.* (the geo / textures before this pass), so a build
-can always be repeated.  install_tide_mobs.py calls `apply()` after it has drawn its own boxes.
+can always be repeated.  tools/install/install_tide_mobs.py calls `apply()` after it has drawn its own boxes.
 Own helper in this file: cull_hidden (drops faces covered by a box of the same bone).  hpkit.py is not touched.
 """
 import sys
@@ -263,7 +263,7 @@ def install(name, variant):
 
 
 def install_picks(names=None):
-    """The picked options (PICKS) into assets/. install_tide_mobs.py calls this after it has drawn its own boxes."""
+    """The picked options (PICKS) into assets/. tools/install/install_tide_mobs.py calls this after it has drawn its own boxes."""
     for n in names or NAMES:
         install(n, PICKS[n])
 

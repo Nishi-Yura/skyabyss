@@ -1,7 +1,7 @@
 # 空の影 (上から落ちる影) の見え方: 開けた所・木の下・屋根の下・戸口・屋根の縁を外から。
 # 影は動かない空の影をこのクライアントにだけ置き (skypass。サーバーなし。本体は遠くへ置く)、形は決まった円にする (skycircle)。overheadshadow on = 画素ごとの影 (今)、off = 昔の地面の板 (before)。
 # ./gradlew runShots -Pscript=tools/shots/overhead_shadow_pass.txt -PshotsName=<名前>   絵は run/shots/<名前>/shots/overhead_shadow_pass/*.png
-# 台本 overhead_shadow_pass_off.txt は off の版 (同じ世界を使い回す。世界は初回に作るので、2 回目から速い)。組み立て: python tools/overhead_shadow_sheet.py
+# 台本 overhead_shadow_pass_off.txt は off の版 (同じ世界を使い回す。世界は初回に作るので、2 回目から速い)。組み立て: python tools/sheets/overhead_shadow_sheet.py
 world overhead_shadow_pass flat
 overheadshadow off
 size 960 540

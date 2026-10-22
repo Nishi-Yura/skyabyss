@@ -288,7 +288,7 @@ public final class EmberSelfTest {
         }
     }
 
-    // ---- モデルのデータ (tools/install_ember_titan.py が書いたもの)
+    // ---- モデルのデータ (tools/install/install_ember_titan.py が書いたもの)
     private static final List<String> BONES = List.of("body", "ridge", "head", "jaw", "leg_fl", "leg_fr", "leg_rl", "leg_rr", "tail",
             "smoke_0", "smoke_1", "smoke_2", "smoke_3");
     private static final List<String> ANIMS = List.of("swim", "sleep", "breath_in", "breath_out", "smoke");

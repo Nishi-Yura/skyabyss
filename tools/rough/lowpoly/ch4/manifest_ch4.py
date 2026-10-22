@@ -29,7 +29,7 @@ for iid, (name, notes) in items.items():
                      "options": {k: {"name": f"{k.upper()} {n}", "desc": n} for k, n in zip("abc", notes)}})
 subjects.append({"id": "ch4_ash_walking", "short": "灰歩きの旅装", "kind": "旅装 3案 (4 部位)", "title": "灰歩きの旅装 (ash_walking) — 低ポリの 4 部位 3 案",
                  "sheets": ["ch4_roughs/items/armor_ch4.png"],
-                 "extra": "防具の低ポリ様式 C (箱・輪・板)。メッシュとアトラスは docs/review/ch4_roughs/items/armor_ch4/{a,b,c}/。生成: tools/rough/lowpoly/ch4/armor_ch4.py、入れ方は tools/gen_ch4_gear.py の CHOICE。",
+                 "extra": "防具の低ポリ様式 C (箱・輪・板)。メッシュとアトラスは docs/review/ch4_roughs/items/armor_ch4/{a,b,c}/。生成: tools/rough/lowpoly/ch4/armor_ch4.py、入れ方は tools/gen/ch4/gen_ch4_gear.py の CHOICE。",
                  "options": {"a": {"name": "A 煤の前掛け", "desc": "黒石の肩 3 段・煤けた革の上着と鍛冶の前掛け・灰麻の襟巻き・兜に煤鉄の立て飾り"},
                              "b": {"name": "B 灰麻の外套", "desc": "灰色の長い外套・煤鉄の帯と縁・煤鉄のボタン 4 つ・後ろの裾"},
                              "c": {"name": "C 灰の頭巾", "desc": "灰麻の布・後ろへ長い頭巾の尾・革の腕当て・黒石の肩と背の板"}}})
@@ -38,7 +38,7 @@ manifest = {
     "intro": "四章 (余燼) の地上の敵と品のラフです (設計書 21 の 6.1、P19・P20)。色の言葉は灰・炭・黒石・熾の橙。"
              "灰被りの屑と古い灰被りは、背中の灰被り (A 灰衣の火番) に部品を足し引きした変種です。"
              "敵と小物 5 つは選定済み (熾り蟲 A・屑 C・灰ひきずり A・古い灰被り A、小物は煤鉄 A・灰麻 A・護り糸 B・砥石 C・冷やし水 A)。灰歩きの旅装と灰焼きのパンは仮に A で入れてあります。"
-             "別の案を選ぶときは tools/gen_ch4_ground_mobs.py の CHOICE / ITEM_CHOICE を変えて流し直します。",
+             "別の案を選ぶときは tools/gen/ch4/gen_ch4_ground_mobs.py の CHOICE / ITEM_CHOICE を変えて流し直します。",
     "done": [],
     "subjects": subjects,
 }

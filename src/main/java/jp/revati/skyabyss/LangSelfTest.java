@@ -28,11 +28,11 @@ import net.neoforged.fml.ModList;
 //  (3) 同じキーの %s / %d の数が ja と en で一致する (位置指定 %1$s も一つに数える。%% は数えない)
 //      と、Java の MessageFormat 形式の {0} が残っていない (Minecraft は %s。{0} は文字のまま画面に出る。first_hour.txt の通しで 2 件見つかった)
 //  (4) コード (src/main/java) と データ (src/main/resources/data) の文字列リテラルにある翻訳キーが、ja・en の両方にある
-//      (開発環境で、ソースが見えるときだけ。tools/check_lang_keys.py と同じ規則)。
+//      (開発環境で、ソースが見えるときだけ。tools/audit/check_lang_keys.py と同じ規則)。
 //      クエストの題・要約・完了・各段の日誌・各目的のキーも (これは jar だけでも見える)
 public final class LangSelfTest {
     private static final Pattern SPEC = Pattern.compile("%(?:\\d+\\$)?[sd]");
-    // (4) の許可リスト (偽陽性)。tools/check_lang_keys.py の ALLOW と同じにする
+    // (4) の許可リスト (偽陽性)。tools/audit/check_lang_keys.py の ALLOW と同じにする
     private static final java.util.Set<String> ALLOW = java.util.Set.of(
             // StormChapterSelfTest: startsWith の頭 (StormSites.tabletKey(index) が実キーを作る。実キーは lang にある)
             "sign.skyabyss.ch3_wind_",

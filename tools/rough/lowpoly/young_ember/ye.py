@@ -2,7 +2,7 @@
 
 座標: 1 単位 = 1/16 ブロック。作図は「前 = -Z」。書き出すとき (x, z) の符号を反転して geo の空間へ
 (geo の root は Y 軸 180 度回る。最後の前は -Z)。作図の +x = r (leg_fr・leg_br の側)。
-骨は 3 案で共通 (名前・親・pivot)。ゲームの箱の geo (tools/gen_young_ember_assets.py) も同じ骨を使う。
+骨は 3 案で共通 (名前・親・pivot)。ゲームの箱の geo (tools/gen/world/gen_young_ember_assets.py) も同じ骨を使う。
 すべての部品は閉じた形 (筒は両端を塞ぎ、棘は根元を塞ぐ)。部品は親へ沈めてつなぐ。
 
 絵の具 (paint / export_mesh) は潮招きの common.py をそのまま借り、燠のひび (光る) を extra で足す。
@@ -26,6 +26,7 @@ ROOT = HERE.parents[3]
 sys.path.insert(0, str(LP))
 sys.path.insert(0, str(ROOT / "tools/rough"))
 sys.path.insert(0, str(ROOT / "tools"))
+sys.path.insert(0, str(ROOT / "tools" / "gen/world"))
 from lpkit import *  # noqa
 import voxel  # noqa
 

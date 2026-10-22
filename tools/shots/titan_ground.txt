@@ -1,4 +1,4 @@
-# 巨神が地形にめり込まない・潮殻の乗り場の輪: 直す前後の絵 (tools/gen_titan_ground_shots.py が書く)
+# 巨神が地形にめり込まない・潮殻の乗り場の輪: 直す前後の絵 (tools/gen/shots/gen_titan_ground_shots.py が書く)
 # SKYABYSS_SHOTS_SEED=4242 ./gradlew runShots -Pscript=tools/shots/titan_ground.txt
 world titan_ground normal
 size 1280 720

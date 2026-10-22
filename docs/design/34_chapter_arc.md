@@ -97,9 +97,9 @@ B0〜B6（17）。初日のお使い 2 本。帳面・煙・語り部・影・�
 
 | もの | 中身 | 置き場 |
 | --- | --- | --- |
-| 支度の段 3 本 | `ch1/trail_iron`（イサナ。段 `pit` 坑の頁 → `armor` 鉄の防具 4 部位を着る = 目的 `wear`。100）・`ch1/trail_blade`（職人。`hear` 職人に刃のことを聞く（`ch1t_blade_tell`。初めて会う人は名乗りの `ch1a_first_blade` から続く）→ `cave` 台座の折れた剣の頁 → `show` 職人に話す（作り方を教わる）→ `forge` 鉄の剣 + 岩の砥石。100）・`ch1/trail_shield`（語り部。`tale` 足音の晩の話 → `pack` 盾 + 道の固焼き 8。50）。どれも `category` = `main`。順に一本ずつ: 鉄の跡はイサナの鯨の話（`c_whale1` の印 `c_whale_heard`）か岩鯨を見たあと、折れた剣は鉄の跡のあと、盾と糧は折れた剣のあと。旧い `ch1/prep_*` 3 本は吸収した（旅装・鼓動守は任意） | `tools/gen_ch1_trails.py`、`guide/PrepQuests`（章の表）、07 の 6.8 |
+| 支度の段 3 本 | `ch1/trail_iron`（イサナ。段 `pit` 坑の頁 → `armor` 鉄の防具 4 部位を着る = 目的 `wear`。100）・`ch1/trail_blade`（職人。`hear` 職人に刃のことを聞く（`ch1t_blade_tell`。初めて会う人は名乗りの `ch1a_first_blade` から続く）→ `cave` 台座の折れた剣の頁 → `show` 職人に話す（作り方を教わる）→ `forge` 鉄の剣 + 岩の砥石。100）・`ch1/trail_shield`（語り部。`tale` 足音の晩の話 → `pack` 盾 + 道の固焼き 8。50）。どれも `category` = `main`。順に一本ずつ: 鉄の跡はイサナの鯨の話（`c_whale1` の印 `c_whale_heard`）か岩鯨を見たあと、折れた剣は鉄の跡のあと、盾と糧は折れた剣のあと。旧い `ch1/prep_*` 3 本は吸収した（旅装・鼓動守は任意） | `tools/gen/ch1/gen_ch1_trails.py`、`guide/PrepQuests`（章の表）、07 の 6.8 |
 | 三本そろう | 合図 `ch1_ready`、記念品「鯨追いの印」（`skyabyss:whale_chaser_mark`。見た目だけ。説明つき）、進捗 `whale_trail`、10 秒後に語り「遠い空の底で、低い歌が鳴りはじめた。」、30 秒後から岩鯨の初登場を呼べる（`Ch1Trails.callReady`・`TitanEvents`） | `story/ch1/Ch1Trails`、19 |
-| 骨の坑 | 4.2.1 の 3 部屋 + 坑口の碑 + 冷えの戸の奥の氷の小部屋 + 出口の梯子の縦穴。苔這い 5・岩殻虫 2、鉄鉱石 18、荷（鉄 2・松明 8・頁）、初回のクリアで経験値 40・粗鉄 4 | `story/ch1/BonePit`、部品 `ch1_bone_pit`（`tools/gen_ch1_sites.py`）、21 の 3.1 |
+| 骨の坑 | 4.2.1 の 3 部屋 + 坑口の碑 + 冷えの戸の奥の氷の小部屋 + 出口の梯子の縦穴。苔這い 5・岩殻虫 2、鉄鉱石 18、荷（鉄 2・松明 8・頁）、初回のクリアで経験値 40・粗鉄 4 | `story/ch1/BonePit`、部品 `ch1_bone_pit`（`tools/gen/ch1/gen_ch1_sites.py`）、21 の 3.1 |
 | 頁 4 | `ch1/trail_iron`（坑の頁）・`ch1/trail_blade`（折れた剣。洞のクリアで）・`ch1/trail_shield`（足音の晩の盾。語り部の話で）・`ch1/cold_door`（冷えの戸の碑文） | 05 の 8.2 |
 | NPC の一言 | イサナ: `c_whale_iron`（鉄を着ていた旅人・都の北門から丘を越えていく石標）、`ch1t_c_page`、`ch1t_c_iron`、報告の `c_fragment_hand`（鯨骨の船長の日誌と同じ字）。職人: `ch1t_blade_tell`・`ch1t_blade_show`・`ch1t_ward_weave`（護り糸 → 最初の鼓動守）。語り部: `ch1t_shield_tale`、`ch1t_s_ready`（この字、どこかで）、報告の `fragment_verse`（数え歌のひとつめ） | 07 の 3.6・6.8 |
 | 目的の帯 | 一つずつ: 「石標を辿り、骨の坑の奥の荷を探そう」（骨の坑の距離と方角）→「頁のとおり、鉄の防具を作って着よう（2/4）」→「旅の職人に、刃のことを聞こう」→「割れ殻の洞の奥で、折れた剣を探そう」（洞の距離と方角）→「折れた剣のことを、職人に話そう」→「鉄の剣を作ろう」「岩の砥石で刃を研ごう」→「語り部に、足音の晩の話を聞こう」→「盾を作ろう」「道の固焼きを持とう（n/8）」→「空を見上げて、岩鯨を待とう」。鎖が降りるまでは「空の岩鯨を、追いかけよう」（初見のあと岩鯨はすぐ降りてくる。17 の 2.8）。各段の書き出しに一言（`.lead`。例: 職人「研がずに振るな。あの剣は、研がずに振って折れた」） | `SiteTargets.bindChapterTargets` |
@@ -138,7 +138,7 @@ B0〜B6（17）。初日のお使い 2 本。帳面・煙・語り部・影・�
 
 | もの | 中身 | 置き場 |
 | --- | --- | --- |
-| 支度の段 2 本 | `ch2/salt_road`（語り部。段 `road` 塩の道の標 5 = 合図 `ch2_salt_mark`。蔵の刻みを先に読んだ人は飛ばす → `vault` 蔵の刻み（伝承 `ch2/salt_vault`）+ 蔵のクリア（合図 `site_clear:ch2_salt_vault`）。180）・`ch2/ebb_boat`（イサナ。`boat` 船（`#minecraft:boats`）→ `wreck` 難破船の頁（`ch2/wreck_page`）+ 潮見の貝を持つ。180）。どちらも `category` = `main`。塩の道は二章（段階 1）で、メイン「満ち引きの門」の噂の段のあと。船と貝は塩の道のあと | `tools/gen_ch2_ground.py`、`guide/PrepQuests`（章の表）、`story/ch2/Ch2Ground` |
+| 支度の段 2 本 | `ch2/salt_road`（語り部。段 `road` 塩の道の標 5 = 合図 `ch2_salt_mark`。蔵の刻みを先に読んだ人は飛ばす → `vault` 蔵の刻み（伝承 `ch2/salt_vault`）+ 蔵のクリア（合図 `site_clear:ch2_salt_vault`）。180）・`ch2/ebb_boat`（イサナ。`boat` 船（`#minecraft:boats`）→ `wreck` 難破船の頁（`ch2/wreck_page`）+ 潮見の貝を持つ。180）。どちらも `category` = `main`。塩の道は二章（段階 1）で、メイン「満ち引きの門」の噂の段のあと。船と貝は塩の道のあと | `tools/gen/ch2/gen_ch2_ground.py`、`guide/PrepQuests`（章の表）、`story/ch2/Ch2Ground` |
 | サブ・日替わり | `ch2/drift_trail`（イサナ。宿借りの行列を追い、筏の跡に着く = 合図 `ch2_raft`。60）、`ch2/wader_gear`（職人。潮渡りの旅装を教わる → 一式 = 合図 `ch2_travel_gear_made`。任意。60）、`daily_pool_sweep`（板。潮だまり貝 6 と小真珠 4） | 同上 |
 | 場所 | 沈んだ塩の蔵（4.3.1。`story/ch2/SaltVault`、部品 `ch2_salt_vault`）、塩の道の標 5（部品 `ch2_salt_mark`。チャンクが読み込まれたときに建つ）、潮だまりの浜 2（潮だまり貝 2 の湧き台。クリアで小真珠）、漂着の筏の跡（人ごとに一度の抽選と頁 `ch2/drift_raft`。旅の職人の二章の立つ所）、引き潮の観測の杭（触れると次の引き潮・満ち潮までの分と、大干潮は夜の前半という一行）、沖の難破船（`story/ch2/Wreck`） | 二章の跡地（33 の W2） |
 | 蔵のクリア | 湧かせた敵（潮だまり貝 3・砂潜り 2・潮の番人 1）がすべて倒れる → 初めての人に経験値 60・塩結晶 6・真珠の護り糸 1・小真珠 4。再訪は 1 日ごとに奥の間の番人が戻る | `SiteSpawner` |
@@ -169,7 +169,7 @@ B0〜B6（17）。初日のお使い 2 本。帳面・煙・語り部・影・�
 
 | もの | 中身 | 置き場 |
 | --- | --- | --- |
-| 支度の段 3 本 | `ch3/lightning_pillars`（語り部。段 `raise` 台に避雷針 4 本 = 合図 `ch3_pillar` ×4 → `vault` 戸の奥の書。150）・`ch3/scorched_watch`（職人。`clear` 塔の頂の頁 → `show` 職人に見せる。120）・`ch3/sky_stone`（イサナ。`dig` ダイヤ 5、またはダイヤの胸当てか剣。120）。どれも `category` = `main`。順に一本ずつ: 避雷の柱は三章でメイン「嵐を渡る翼」の噂（`rumor`）のあと、焼けた見張り塔は避雷の柱のあと、空の石は焼けた見張り塔のあと。サブ `ch3/wind_flags`（語り部。旗 5。120） | `tools/gen_ch3_ground.py`、`guide/PrepQuests`（章の表） |
+| 支度の段 3 本 | `ch3/lightning_pillars`（語り部。段 `raise` 台に避雷針 4 本 = 合図 `ch3_pillar` ×4 → `vault` 戸の奥の書。150）・`ch3/scorched_watch`（職人。`clear` 塔の頂の頁 → `show` 職人に見せる。120）・`ch3/sky_stone`（イサナ。`dig` ダイヤ 5、またはダイヤの胸当てか剣。120）。どれも `category` = `main`。順に一本ずつ: 避雷の柱は三章でメイン「嵐を渡る翼」の噂（`rumor`）のあと、焼けた見張り塔は避雷の柱のあと、空の石は焼けた見張り塔のあと。サブ `ch3/wind_flags`（語り部。旗 5。120） | `tools/gen/ch3/gen_ch3_ground.py`、`guide/PrepQuests`（章の表） |
 | 三本そろう | 合図 `ch3_ready`、進捗 `storm_trail`。記念品はない | `titan/storm/chapter/Ch3Ground`、19 |
 | 避雷の塔の跡 | 部品を `ch3_rod_tower` に替えた（旧い `ch3_ruin` で建った跡は残る）。折れた塔の根と針 1 本、斜めの台 4、南の銅の戸 3x3、奥の石の箱と碑、東に避雷の見本の柱。台に針が立つと演出の雷が落ち、四本で戸が開く（世界に一つ）。箱は人ごとに一度、銅 4。見本の柱は、人が近くにいる間 60 秒に一度雷を受けて光る。旧い跡では、まわりの避雷針 4 本で書と銅をじかに渡す | `LightningPillars` |
 | 焼けた見張り塔 | 21 の 5.1 の三階の塔。敵は三章の地上の敵（P16。入口 峰の雛 2、中 帯電毛玉 3、頂 焼けた羽守）。頂の柱に 15 秒ごとに雷（2 秒前に予告）。柱から 3.5 以内の敵は最大体力の 1/4 を受け、焼けた羽守はそのあと 10 秒傷がよく通る。初回のクリアで経験値 60・銅 6・焦げ羽 4・帯電綿 4・銅線 4・雷の護り糸 1・頁。南西に職人の野営（三章の立つ所） | `ScorchedWatch` |
@@ -201,9 +201,9 @@ B0〜B6（17）。初日のお使い 2 本。帳面・煙・語り部・影・�
 
 | もの | 中身 | 置き場 |
 | --- | --- | --- |
-| 支度の段 2 本 | `ch4/fire_draught`（職人。段 `brew` 耐火のポーション 2 = 目的 `collect` の `minecraft:potion@minecraft:fire_resistance`（延長版も数える）→ `show` 職人に見せる（伝承 `ch4/fire_draught`）。180）・`ch4/forge_ruins`（語り部。`pit` 消えた炉の坑の頁（伝承 `ch4/forge_page`）→ `tell` 語り部に見せる。220）。どちらも `category` = `main`・順不同。四章（段階 3）でメイン「灰の昇る山」が始まると二本とも出る | `tools/gen_ch4_ground.py`、`guide/PrepQuests`（章の表）、`story/ch4/Ch4Ground` |
+| 支度の段 2 本 | `ch4/fire_draught`（職人。段 `brew` 耐火のポーション 2 = 目的 `collect` の `minecraft:potion@minecraft:fire_resistance`（延長版も数える）→ `show` 職人に見せる（伝承 `ch4/fire_draught`）。180）・`ch4/forge_ruins`（語り部。`pit` 消えた炉の坑の頁（伝承 `ch4/forge_page`）→ `tell` 語り部に見せる。220）。どちらも `category` = `main`・順不同。四章（段階 3）でメイン「灰の昇る山」が始まると二本とも出る | `tools/gen/ch4/gen_ch4_ground.py`、`guide/PrepQuests`（章の表）、`story/ch4/Ch4Ground` |
 | 二本そろう | 合図 `ch4_ready`、進捗 `ember_trail`（その前に `dead_forge_pit`）。記念品はない | `PrepQuests.onReady(4)`、19 |
-| 乗る | メイン「灰の昇る山」に段 `board`（伝承 `chapter1/ember_ruins` = 背に入る。心臓を先に止めれば飛ばす。60）。帯は余燼の方角と距離。イサナの一言 `ch4g_c_board`（吸うときに口が開く） | `quest/main_ember.json`（`gen_ch4_ground.py` の `story_patch` が足す） |
+| 乗る | メイン「灰の昇る山」に段 `board`（伝承 `chapter1/ember_ruins` = 背に入る。心臓を先に止めれば飛ばす。60）。帯は余燼の方角と距離。イサナの一言 `ch4g_c_board`（吸うときに口が開く） | `quest/main_ember.json`（`tools/gen/ch4/gen_ch4_ground.py` の `story_patch` が足す） |
 | 消えた炉の坑 | 21 の 6.1 の三部屋（地下 13）+ 地上の坑口と崩れた煙突・坑口の碑・職人の野営 + 出口の梯子の縦穴。入口の間 熾り蟲 4 と温石の台（温石を持って触れると 30 秒温まり、熾り蟲は人より台へ寄る）、鍛えの跡 灰被りの屑 2、奥の間 古い灰被り（名づき）と炉の壇（碑「四つ 返したら 下へ 今度こそ」・前の私の荷 = 人ごとに一度ブレイズパウダー 1・松明 8）。初回のクリアで経験値 80・煤鉄 4・灰麻 4・石炭 4、頁 `ch4/forge_page`。再訪は 1 日ごとに奥の間の主が戻る | `story/ch4/DeadForgePit`、部品 `ch4_dead_forge_pit` |
 | ほかの場所 | 灰の道の標 5（合図 `ch4_ash_mark`。五つ目で一行）・温かい岩の群れ 2（温石を持って台に触れると岩が熱を返す）・煤の窯の跡（人ごとに一度、煤鉄 4・灰麻 3、碑と伝承 `ch4/soot_kiln`、合図 `ch4_kiln`、灰ひきずりの巣）・灰降りの高台（碑。夜に着くと灰の地の眠る場所の上に赤い粒） | `Ch4Ground` |
 | 鍛え手の一言 | 灰の鍛え手（背中の中ボス）が現れたとき、まわりの人に一度「……返しに来たか」と伝承 `ch4/return_the_beat`（鍛え手のコードは触らず、現れたことを聞いて出す） | `Ch4Ground.onSmithJoin` |

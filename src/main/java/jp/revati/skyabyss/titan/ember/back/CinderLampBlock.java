@@ -9,7 +9,7 @@ import net.minecraft.world.level.block.state.BlockState;
 
 // 燠の灯 (13 の 6.1 / 00 の 126): 鎖で吊るす (床にも置ける) 灯り。燠の殻から作業台で作る。光 12。
 // 黒石と鉄の籠の中で熾が赤く息をして、ときどき火の粉と灰がこぼれる。吊るす・置く・水に浸かる挙動はバニラの角灯と同じ。
-// 形は tools/gen_back_blocks.py (models/block/cinder_lamp{,_hanging}.json)
+// 形は tools/gen/items/gen_back_blocks.py (models/block/cinder_lamp{,_hanging}.json)
 public class CinderLampBlock extends LanternBlock {
     public static final int LIGHT = 12;
 

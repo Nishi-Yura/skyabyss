@@ -10,7 +10,7 @@
   message.skyabyss.abyss.relic.got             受け取ったとき (AbyssRelics.onGrave)
   message.skyabyss.abyss.relic.all             十二の墓をすべて弔ったとき (六章の手がかりの前ふり)
   lore.skyabyss.ch5.graves_all.title / body    伝承の頁 (data/skyabyss/lore/entry/ch5/graves_all.json)
-文の調子は tools/gen_ch5_entrance.py の墓の文に合わせる。六章の月は名指しせず「欠けた丸いもの」で示す。
+文の調子は tools/gen/ch5/gen_ch5_entrance.py の墓の文に合わせる。六章の月は名指しせず「欠けた丸いもの」で示す。
 """
 import json
 import os

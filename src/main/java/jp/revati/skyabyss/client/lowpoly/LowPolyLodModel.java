@@ -8,7 +8,7 @@ import software.bernie.geckolib.model.DefaultedEntityGeoModel;
 // 近・中・遠の 3 段の LOD を持つ巨神の GeoModel (岩鯨・潮殻・雷翼・余燼)。
 // 段 (0 近 / 1 中 / 2 遠) は派生の lod() が決める。名前は <name> / <name>_mid / <name>_far。
 // 低ポリのとき: geo/entity/<名前>_lowpoly(.debug).geo.json + textures/lowpoly/<名前>.png と、lowpoly/<名前>.json のメッシュ
-// (tools/install_lowpoly_titans.py が 3 段ぶん入れる)。LowPoly.enabled = false のときは元のキューブの geo と textures/entity/<name>.png
+// (tools/install/install_lowpoly_titans.py が 3 段ぶん入れる)。LowPoly.enabled = false のときは元のキューブの geo と textures/entity/<name>.png
 public abstract class LowPolyLodModel<T extends GeoAnimatable> extends DefaultedEntityGeoModel<T> {
     private static final String[] SUFFIX = {"", "_mid", "_far"};
     private static final ResourceLocation DEBUG_TEXTURE = ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "textures/lowpoly/debug.png");

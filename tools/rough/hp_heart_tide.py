@@ -1,7 +1,7 @@
 """High-poly re-sculpt of the tide-shell heart (assignment 3, docs/design/15_high_poly.md).
 
 Reads tools/sources/tide_heart/phaseN.* (the baked 0.5-unit rough, kept as the input), re-sculpts it at 0.25 units with
-tools/rough/hp_heart_kit.py and writes tools/sources/tide_heart_hp/phaseN.* (what tools/install_tide_heart.py installs).
+tools/rough/hp_heart_kit.py and writes tools/sources/tide_heart_hp/phaseN.* (what tools/install/install_tide_heart.py installs).
 
 Variants (compared on phase 1):
   A  smooth pearl : the heart organ rounded at 0.25, soft nacre light/dark, ambient occlusion. Nothing new is added.

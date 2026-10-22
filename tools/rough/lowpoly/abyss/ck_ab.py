@@ -8,7 +8,7 @@
 ROWS は (見出し, 姿勢名, yaw, pitch, パネルの高さ, 中心, 縮尺, 見せる部品の名前の集合 or None) の列。
 見せる部品を指定すると、その部品だけを描く (「見えていない時の痕」などに使う)。
 座標: 1 単位 = 1/16 ブロック、y が上、前 = -Z。
-mesh 検査は tools/mesh_audit.py の analyze (骨ごとに開いた辺・向きの食い違い・裏返り) を使う。
+mesh 検査は tools/audit/mesh_audit.py の analyze (骨ごとに開いた辺・向きの食い違い・裏返り) を使う。
 """
 from __future__ import annotations
 
@@ -24,6 +24,7 @@ LOW = AB.parent
 ROOT = AB.parents[3]
 sys.path.insert(0, str(LOW / "ch4"))
 sys.path.insert(0, str(ROOT / "tools"))
+sys.path.insert(0, str(ROOT / "tools" / "audit"))
 import ck4 as _c4  # noqa: E402,F401  (ch1 の ck と ck4 の色・パッチを読み込む)
 from ck4 import *  # noqa: E402,F401
 import ck as _ck  # noqa: E402

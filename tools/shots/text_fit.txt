@@ -1,4 +1,4 @@
-# 文字のはみ出し点検: 忙しい画面を GUI 2・3・4 で撮る (ja_jp)。 ./gradlew runShots -Pscript=tools/shots/text_fit.txt → python tools/text_fit_sheet.py
+# 文字のはみ出し点検: 忙しい画面を GUI 2・3・4 で撮る (ja_jp)。 ./gradlew runShots -Pscript=tools/shots/text_fit.txt → python tools/sheets/text_fit_sheet.py
 world shots flat
 size 1920 1080
 timeout 600

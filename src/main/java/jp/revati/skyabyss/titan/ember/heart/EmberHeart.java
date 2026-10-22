@@ -1837,7 +1837,7 @@ public class EmberHeart extends HeartBoss {
     }
 
     // ---- 登場: 灰の塊が鼓動のたびに熱を帯び、最後に殻を割って熱を吐く (animation.ember_heart.intro)
-    // 鼓動は 0.6・1.2・1.7・2.1・2.4 秒 (tools/install_heart_cinematics.py の EM_THUMPS)
+    // 鼓動は 0.6・1.2・1.7・2.1・2.4 秒 (tools/install/install_heart_cinematics.py の EM_THUMPS)
     @Override
     protected void introEffects(ServerLevel server, int tick) {
         double cy = coreY();

@@ -13,7 +13,7 @@ import com.google.gson.JsonParser;
 import jp.revati.skyabyss.SkyAbyss;
 
 // 武器ごとの動きの読み込み口。assets/skyabyss/weapon_moves/<品の id>.json を jar (クラスパス) から読むので、
-// クライアントも専用サーバーも同じ内容を見る (サーバーは当たる tick、クライアントは絵)。tools/gen_weapon_moves.py が JSON を作る
+// クライアントも専用サーバーも同じ内容を見る (サーバーは当たる tick、クライアントは絵)。tools/gen/items/gen_weapon_moves.py が JSON を作る
 public final class MoveSets {
     // 動きを持つ品 (剣型の武器 14 点 + 弓 2 点 + 盾)
     public static final List<String> ITEMS = List.of("whalebone_greatsword", "captain_pike", "tide_shell_trident", "coral_harpoon", "warden_glaive",

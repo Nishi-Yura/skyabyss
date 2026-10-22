@@ -1,5 +1,5 @@
 # 岩鯨の背の作り直し (版 18。docs/design/26 の 8.5) の確かめ。./gradlew runShots -Pscript=tools/shots/whale_fix.txt
-# 出力: run/shots/whale_fix/shots/whale_fix/*.png → python -I tools/whale_fix_sheet.py で docs/review/previews/whale_fix_sheet.png
+# 出力: run/shots/whale_fix/shots/whale_fix/*.png → python -I tools/sheets/whale_fix_sheet.py で docs/review/previews/whale_fix_sheet.png
 world whale_fix flat
 size 1280 720
 timeout 3000

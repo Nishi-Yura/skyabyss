@@ -1,5 +1,5 @@
 # ビルド (天職・刻印・木の印・伝説の書き換え) の確認。./gradlew runShots -Pscript=tools/shots/builds.txt
-# 絵は python tools/builds_sheet.py で docs/review/previews/builds_sheet.png にまとめる (音はランナーが消す)
+# 絵は python tools/sheets/builds_sheet.py で docs/review/previews/builds_sheet.png にまとめる (音はランナーが消す)
 world shots flat
 size 1280 720
 timeout 400

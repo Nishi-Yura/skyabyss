@@ -29,6 +29,7 @@ def get_option(key):
 def pose_of(spec):
     """'pose:<anim>@<秒>' → 姿勢 (アニメのファイルの値)"""
     sys.path.insert(0, str(ROOT / "tools"))
+    sys.path.insert(0, str(ROOT / "tools" / "gen/world"))
     import gen_pearl_keeper_assets as g
     name, t = spec.split(":", 1)[1].split("@")
     return g.pose_at(name, float(t))

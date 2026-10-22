@@ -48,7 +48,7 @@
 
 ### 2.2 序盤の語り（序 1・序 2 と見聞）
 
-序盤の拍子（野営地・足跡・足音・骨の丘・空の歌）の全文と順番は [17](17_opening_and_rpg_feel.md) の 11 章。ここには仕組みだけ。生成は `tools/gen_npc_content.py`（会話・メイン）と `tools/gen_opening_text.py`（伝承・17-10 の閉じ方）。
+序盤の拍子（野営地・足跡・足音・骨の丘・空の歌）の全文と順番は [17](17_opening_and_rpg_feel.md) の 11 章。ここには仕組みだけ。生成は `tools/gen/mobs/gen_npc_content.py`（会話・メイン）と `tools/gen/story/gen_opening_text.py`（伝承・17-10 の閉じ方）。
 
 - **語り部の入口**: `shadow0`（メインが `follow_smoke`）、`shadow_first`（影のあとの初対面。`shadow2`→`shadow3` へ続く）、`shadow_wait`（影を待つ間、一度だけ。印 `wait_told`）。ループの「覚えているような」入口（`deja_vu*`）のあと、`first` の前。
 - **道すがらの見聞**: 語り部の話題に「道すがら、気になるものを見た。」（`seen_menu`）、イサナに「道中で、妙なものを見た。」（`c_seen_menu`）。伝承が記されていて、まだ話していないものだけ並ぶ（印 `<話題>_told`）。語り部の話題の節は枠の高さの上限（210）のため、もとの「岩鯨を見た」「背中に町の跡」の話題も `seen_menu` に置く。
@@ -105,7 +105,7 @@
 
 ### 3.4 見た目
 
-素材: `docs/review/npc_roughs/`（比較シートと選定の表 `README.md`）。今のモデルは低ポリのメッシュ（15 の 9.6。語り部 A・イサナ A。`tools/install_lowpoly_ember_npc.py` が入れ、`LowPoly.enabled = false` で滑らかなボクセル版（15 の 4.5。語り部 B 頭巾・イサナ A つば広帽）に戻る）。語り部は頭巾の縁と白い髪の房、結んだ前掛け、イサナは広いつばの帽子とボタンの外套、背負い袋が、近くで見ても面の張りで読める。下の表は役の見た目の方針。生成: `tools/rough/npc.py`（画面の見本は `tools/rough/npc_ui_mock.py`）。
+素材: `docs/review/npc_roughs/`（比較シートと選定の表 `README.md`）。今のモデルは低ポリのメッシュ（15 の 9.6。語り部 A・イサナ A。`tools/install/install_lowpoly_ember_npc.py` が入れ、`LowPoly.enabled = false` で滑らかなボクセル版（15 の 4.5。語り部 B 頭巾・イサナ A つば広帽）に戻る）。語り部は頭巾の縁と白い髪の房、結んだ前掛け、イサナは広いつばの帽子とボタンの外套、背負い袋が、近くで見ても面の張りで読める。下の表は役の見た目の方針。生成: `tools/rough/npc.py`（画面の見本は `tools/rough/npc_ui_mock.py`）。
 
 | | 選んだ案 | 特徴 |
 | --- | --- | --- |
@@ -115,7 +115,7 @@
 - 立方体は 0.5 単位、重なりなし（`check_overlaps` が空）。テクスチャは 1 単位 = 2 画素（32px 密度）、面ごとの uv。光る所はないので発光層は付けない。
 - 前かがみは骨の回転を使わず段のずらしで作った。GeckoLib はファイルの回転の X を反転して読むので、回転だとゲームで後ろへ反るおそれがあるため。
 - 頭はコードで話し相手へ向ける（`NpcRenderer`）。上下は符号を反転して入れる（`PITCH_SIGN = -1`、ゲームで確認済み。左右の `YAW_SIGN` は体ごと向き直るため見分けられていない）。
-- 肖像は 128×128 のドット絵（胸から上、光は左上の手前）。いまの低ポリの姿に合わせて一枚ずつ描き起こした（会話画面の肖像の仕様は 4.1、生成は `tools/gen_portraits.py`）。表情 3 種（ふつう・笑み・沈む）。
+- 肖像は 128×128 のドット絵（胸から上、光は左上の手前）。いまの低ポリの姿に合わせて一枚ずつ描き起こした（会話画面の肖像の仕様は 4.1、生成は `tools/gen/mobs/gen_portraits.py`）。表情 3 種（ふつう・笑み・沈む）。
 - 話すとき右手が少し前へ出る（イサナ 26°、語り部 14°。`raise_r`）。
 
 ### 3.5 重要人物の名前
@@ -137,12 +137,12 @@
 | 人物 | 荷車の傍らの道に荷を広げている旅の職人。役名だけで固有の名前は付けない（名前は重要人物だけ。3.5）。同じ顔・同じ口調で**前のことを覚えていない**（イサナの「どこかで会ったか？」と同じ方向）。「道具は覚えている。持ち主は、そうでもない」 |
 | 役目 | 一章の支度の段「折れた剣」（`ch1/trail_blade`）の依頼主（会話の置き場）、護り糸から最初の鼓動守を編む、旅の覚書の渡し直し、旅装・砥石・糧のレシピを教える（会話の結果 `unlock_recipes`）、鼓動守の編み直し、好感度で開く「手の話」（道具の来歴。巨神の話ではなく手の話）。**売り買いと修理はしない**（21 の 1.4 に書いた「縫い直し」の修理は未実装） |
 | 口調 | 短く、淡々と。「〜だ」「〜しろ」、道具のたとえ。数字は言わない。心臓・深淵・巨神の眠りの理由は語らない |
-| 見た目 | 低ポリ 約 1000 三角形（閉じたメッシュ。自己テストは 740〜1200）（案 B 槌と砥石の荷人。肩の広い荷人、前掛けと道具の巻き、腰の砥石と槌、額へ押し上げた眼鏡）。**章ごとの装い**は 1 つのモデルに 4 つの絵: 一章 岩殻の石の縁・二章 塩の白・三章 銅の針金の襟・四章 煤の黒と火の糸（`textures/lowpoly/artisan_ch<n>.png`）。骨は root / body / head / armL / armR / legL / legR。ラフのメッシュは root の回転が無いので、入れるとき root に yaw 180 度を足して語り部・イサナと同じ向きにそろえた（`tools/install_artisan.py`）。動き `idle`（息・右手が柄を直す）・`walk`・`talk`（右手の身ぶり）、頭は `NpcRenderer` が相手へ向ける。肖像は 128×128 のドット絵（ふつう・笑み・沈む。額の眼鏡と石の襟。`tools/gen_portraits.py`。章ごとの装いは肖像には出さない） |
+| 見た目 | 低ポリ 約 1000 三角形（閉じたメッシュ。自己テストは 740〜1200）（案 B 槌と砥石の荷人。肩の広い荷人、前掛けと道具の巻き、腰の砥石と槌、額へ押し上げた眼鏡）。**章ごとの装い**は 1 つのモデルに 4 つの絵: 一章 岩殻の石の縁・二章 塩の白・三章 銅の針金の襟・四章 煤の黒と火の糸（`textures/lowpoly/artisan_ch<n>.png`）。骨は root / body / head / armL / armR / legL / legR。ラフのメッシュは root の回転が無いので、入れるとき root に yaw 180 度を足して語り部・イサナと同じ向きにそろえた（`tools/install/install_artisan.py`）。動き `idle`（息・右手が柄を直す）・`walk`・`talk`（右手の身ぶり）、頭は `NpcRenderer` が相手へ向ける。肖像は 128×128 のドット絵（ふつう・笑み・沈む。額の眼鏡と石の襟。`tools/gen/mobs/gen_portraits.py`。章ごとの装いは肖像には出さない） |
 | 当たり判定 | 0.6 × 1.95 |
 | 出し方 | `npc/ArtisanSpawner`。**章ごとの「立つ所」の表**（`Spot(章, 場所の ID, 印, 条件)`）で決める。一章 = 失せ物の荷車（`ch1_lost_cart`）の傍らの道の印 `artisan`、条件はイサナと会ったあと（伝承 `chapter1/whale_chaser`。「日 2 の朝、イサナの話のあとに職人の荷が見つかる」）。その場所の 48 ブロック以内に条件を満たす人が来て、5 秒おきの見回りで、まだいなければ立たせる（家 = その印、まわり 3 ブロックを歩く）。いなくなったら 1 日で立て直す。マルチでは場所は拠点ごと、近くの人が同じ職人に会う。二〜四章の担当（P11・P15・P19）は、地上の部品に印を付けて場所の記録の `extra` に残し、`ArtisanSpawner.register(new Spot(…))` を足すだけ（装い = `NpcEntity.variant` = 章） |
 | 保存 | `NpcEntity` の `Variant`（章の装い）。好感度・印は人ごと（`NpcBonds`、役 `skyabyss:artisan`） |
 
-**会話**（`dialogue/artisan.json` = 全章の共通 + `dialogue/ch1/artisan.json` = 一章の足し書き。生成は `tools/gen_artisan_dialogue.py`。二〜四章は `ch<n>/artisan.json` を同じ形で足す。足し書きの入口は共通の最後の入口 `a_menu` の手前に入る）:
+**会話**（`dialogue/artisan.json` = 全章の共通 + `dialogue/ch1/artisan.json` = 一章の足し書き。生成は `tools/gen/items/gen_artisan_dialogue.py`。二〜四章は `ch<n>/artisan.json` を同じ形で足す。足し書きの入口は共通の最後の入口 `a_menu` の手前に入る）:
 
 | 入口（上から） | 条件 | 中身 |
 | --- | --- | --- |
@@ -190,7 +190,7 @@
 | イサナ | つば広帽（革の帯と白い羽根）、日焼けした顔の無精ひげ、長い髪、青緑の黒目、赤い編みの襟巻、背負い紐 | 笑み: 口角が上がり歯が見える / 沈む: 眉間に縦じわ、まぶたが重い |
 | 旅の職人 | 額へ押し上げた眼鏡（真鍮の縁・水色のレンズ）、灰褐の短い髪、無精ひげ、石の縁の襟、革の前掛けと肩紐 | 笑み: 歯が見える / 沈む: 眉が八の字、眉間のしわ |
 
-- 3 案を描いた（A 粒子のにじむ絵画調 / B 太い輪郭の JRPG 調 / C くすんだ木版調）。選定ページ `docs/review/portraits/index.html`（選択は `choices/portrait_style`）。**ゲームには A を入れてある**（仮）。入れ替えは `python tools/gen_portraits.py --install <a|b|c>`。
+- 3 案を描いた（A 粒子のにじむ絵画調 / B 太い輪郭の JRPG 調 / C くすんだ木版調）。選定ページ `docs/review/portraits/index.html`（選択は `choices/portrait_style`）。**ゲームには A を入れてある**（仮）。入れ替えは `python tools/gen/mobs/gen_portraits.py --install <a|b|c>`。
 - 描き方: 形はマスクの重ね（4 倍で塗って縮め、閾値で切るので縁は画素のまま）、陰影はマスクをぼかした高さの法線と左上手前の光の内積を少数の色の段に切って付ける。案の差は段の数（5 / 3 / 4）、ディザ・縁取り・背景・逆光だけで、形は同じ。
 - 見る者（watcher）は話さないので肖像は無い。表情は 3 種のまま（節の `face` の語彙は足していない。既存の節の割り当ては変えていない）。
 - 自己テスト `artisan` は職人の肖像が 128×128 であることを確かめる。
@@ -241,8 +241,8 @@ assets/skyabyss_npc/lang/{ja_jp,en_us}.json   会話・クエスト・画面の�
 | 選択肢の `if` / `do` / `goto` / `kind` | 出す条件、選んだときの結果、行き先、印（talk / quest / give / leave） |
 | `text` | 文のキーを上書き（省略すると `dialogue.<名前空間>.<役>.<節>`、選択肢は `.<節>.<選択肢>`） |
 
-- 文と構造の正本は `tools/gen_npc_content.py`。会話の JSON、クエストの JSON、lang（日本語・英語）、この書類の 9 章の表を一度に書き出す（キーの書き間違いと、片方の言語だけ直し忘れるのを防ぐ）。文は別の名前空間 `skyabyss_npc` に置く（本体の lang と並行作業でぶつからないため。ゲームで読まれることは確かめた）。
-- **足し書き**: 元のファイルに手を入れず、`"extends": true` のファイルで混ぜる。`DialogueManager` が読み込むときに、節を足し、入口を元の最後の入口（条件なし）の手前に足し、元の節の選択肢を指定の選択肢の手前に足す（`add_options`）。自由なモードの文は `assets/skyabyss_quest/lang`、1 章の続きは `assets/skyabyss_story/lang`。生成元は `tools/gen_free_quests.py`、`tools/gen_story_quests.py`。**この 2 つは書き出したあとの手直しと食い違っているので、再実行しない**（17-10 の閉じ方は `gen_opening_text.py` がデータを直接直す）。
+- 文と構造の正本は `tools/gen/mobs/gen_npc_content.py`。会話の JSON、クエストの JSON、lang（日本語・英語）、この書類の 9 章の表を一度に書き出す（キーの書き間違いと、片方の言語だけ直し忘れるのを防ぐ）。文は別の名前空間 `skyabyss_npc` に置く（本体の lang と並行作業でぶつからないため。ゲームで読まれることは確かめた）。
+- **足し書き**: 元のファイルに手を入れず、`"extends": true` のファイルで混ぜる。`DialogueManager` が読み込むときに、節を足し、入口を元の最後の入口（条件なし）の手前に足し、元の節の選択肢を指定の選択肢の手前に足す（`add_options`）。自由なモードの文は `assets/skyabyss_quest/lang`、1 章の続きは `assets/skyabyss_story/lang`。生成元は `tools/gen/story/gen_free_quests.py`、`tools/gen/story/gen_story_quests.py`。**この 2 つは書き出したあとの手直しと食い違っているので、再実行しない**（17-10 の閉じ方は `tools/gen/story/gen_opening_text.py` がデータを直接直す）。
 - **章ごとの追加ファイル**: `dialogue/` の下ならどのファイル名・サブフォルダでも、`"npc"` と `"extends": true` を書けば同じ役に混ざる（`storyteller.json` のような大きな元には足さない）。例: `data/skyabyss/dialogue/ch2/storyteller.json`。複数の足し書きは場所の名前順に混ぜる。元（`extends` なし）の会話がないと「足し書きの元がない」と警告し、節の名前が元と重なっても警告して足さない。節の名前は `ch2_` のように章の頭を付けて重ならないようにする。自己テスト `SELFTEST arc` が合成した元と足し書きで、節・入口・`add_options` の混ざり方を確かめる。
 - 話題の節の選択肢は、枠の高さ上限（210）を越えないよう、足すときは一つだけにして残りは別の節に分ける。
 
@@ -441,7 +441,7 @@ data/<名前空間>/quest/<名前>.json
 - 手帳の中身: 文のキー `wayfarer_notes.ch<n>.line.<i>`（`i` = 1, 2, …。途切れるまで）が画面に 1 行ずつ並ぶ。中身がなければ「まだ、何も書かれていない。」。敵の見分け方・備えの一行は、章の担当が日英の lang に足す。
 - 渡す: `WayfarerNotes.give(player, 章)`（人ごとに一度。`Growth.discover` の鍵 `notes:ch<n>`）。
 
-**一章の支度の段（34 の 4.2、C1。実装済み）**: 一章だけは 3 本を**メインの段**にした（`PrepQuests` の章の表。`category` = `main`。**鉄の跡 → 折れた剣 → 盾と糧の順に一本ずつ**出る）。`quest/ch1/trail_iron`（鉄の跡。イサナ。100）・`trail_blade`（折れた剣。職人。100）・`trail_shield`（盾と糧。語り部。50）、生成は `tools/gen_ch1_trails.py`。旧い `ch1/prep_*` は吸収した（置くと読み込みの警告）。開始の条件は、鉄の跡が「一章（段階 0）で、イサナの鯨の話を聞いた（印 `c_whale_heard`）か岩鯨を見た」、折れた剣が「鉄の跡を終えた」、盾と糧が「折れた剣を終えた」。最初の一本を受けると覚書（一章）が渡る。メイン「雲の下の歌」は鯨追いの話のあと段 `prepare`（目的 `condition`: 支度 3 本）で待ち、三本そろうと岩鯨が初めて現れる（17 の 2.8）。各段の書き出しの一言は `quest.skyabyss.ch1.trail_*.<段>.lead`。
+**一章の支度の段（34 の 4.2、C1。実装済み）**: 一章だけは 3 本を**メインの段**にした（`PrepQuests` の章の表。`category` = `main`。**鉄の跡 → 折れた剣 → 盾と糧の順に一本ずつ**出る）。`quest/ch1/trail_iron`（鉄の跡。イサナ。100）・`trail_blade`（折れた剣。職人。100）・`trail_shield`（盾と糧。語り部。50）、生成は `tools/gen/ch1/gen_ch1_trails.py`。旧い `ch1/prep_*` は吸収した（置くと読み込みの警告）。開始の条件は、鉄の跡が「一章（段階 0）で、イサナの鯨の話を聞いた（印 `c_whale_heard`）か岩鯨を見た」、折れた剣が「鉄の跡を終えた」、盾と糧が「折れた剣を終えた」。最初の一本を受けると覚書（一章）が渡る。メイン「雲の下の歌」は鯨追いの話のあと段 `prepare`（目的 `condition`: 支度 3 本）で待ち、三本そろうと岩鯨が初めて現れる（17 の 2.8）。各段の書き出しの一言は `quest.skyabyss.ch1.trail_*.<段>.lead`。
   - **鉄の跡**: 段 `pit`（骨の坑の前の私の荷で頁 `ch1/trail_iron`。`story/ch1/BonePit.openPack`。経験値 30）→ 段 `armor`（目的 `wear`: 鉄の兜・胸当て・脚当て・靴のうち着ている種類の数。帯は「鉄の防具を作って着よう（2/4）」）。報酬 70、イサナの好感度 +3。理由はイサナの `c_whale_iron`（「鎖は、素手では上れない。……前にここへ来た旅人は、鉄を着ていた。丘を越えていく石標が、その人の道だ」）と `c_whale3`（「鯨が降りてくる前に、支度をしておけ。まずは鉄だ」）。頁のあとのイサナの一言 `ch1t_c_page`（かまどで溶かす）、着たあとの `ch1t_c_iron`（次は刃。職人を指す。`dialogue/ch1/whale_chaser_trail.json`）。
   - **折れた剣**: 段 `hear`（職人に刃のことを聞く。入口 `ch1t_blade_tell`。初めて会う人は名乗りの `ch1a_first_blade` から続けて）→ 段 `cave`（割れ殻の洞をクリアすると台座の頁 `ch1/trail_blade`。`story/ch1/Ch1Trails` が `SiteSpawner.onCleared` で記す。先に洞を抜けた人もさかのぼって済む。30）→ 段 `show`（職人の入口 `ch1t_blade_show`。作り方を教わる）→ 段 `forge`（`all`: 鉄の剣を持つ・岩の砥石を使う `ch1_whetstone_used`）。報酬 70、職人 +3。終わりの一言で語り部を指す。
   - **盾と糧**: 段 `tale`（語り部の入口 `ch1t_shield_tale`。足音の晩の話。結果で頁 `ch1/trail_shield`。`dialogue/ch1/storyteller_trail.json`）→ 段 `pack`（`all`: 盾 1・道の固焼き 8）。報酬 50、語り部 +3。鼓動守（護り糸を職人に）と鯨道の旅装は任意。
@@ -473,7 +473,7 @@ data/<名前空間>/quest/<名前>.json
 
 | 項目 | 決まり |
 | --- | --- |
-| 見た目 | 二本柱と小さな庇、紙が三枚、鯨骨の留め釘が一本。32px。3 案（`docs/review/board_roughs/compare.png`）から A を採用し、ゲームで見て地面すれすれが低い棚に見えたので y=6 まで上げて脚を見せた（当たり判定も 16 の高さ）。生成は `tools/gen_message_board.py --option A\|B\|C` |
+| 見た目 | 二本柱と小さな庇、紙が三枚、鯨骨の留め釘が一本。32px。3 案（`docs/review/board_roughs/compare.png`）から A を採用し、ゲームで見て地面すれすれが低い棚に見えたので y=6 まで上げて脚を見せた（当たり判定も 16 の高さ）。生成は `tools/gen/story/gen_message_board.py --option A\|B\|C` |
 | 置かれ方 | 都（鐘の宿り）では組合の中に設計図が 2 枚置き、鐘のそばには立てない（`FreeQuestData.markBoard`）。ほかの村では、村の鐘（集会所）から 48 ブロック以内に人が来たとき、その村にまだ板がなければ、鐘から 3〜6 ブロックの所に鐘のほうを向けて一枚立てる。村ごとに一度だけ（壊されても立て直さない。記録は `skyabyss_free_quests`。NPC のいない所でも見つけられるため）。実装: `FreeQuestEvents.placeBoard` |
 | 作る | 紙 3・板材 3・棒 2（どこにでも置ける。どの板も同じ頼みを映す） |
 | 右クリック | 今日の頼みごとの画面。品を納める頼みは、開いたときに手持ちから受け取る |
@@ -513,7 +513,7 @@ data/<名前空間>/quest/<名前>.json
 
 ### 8.3 自由なモードの一度きり・日替わり・週替わり
 
-全クエストの表は 9.4 節。板の日替わり・週替わりには、ほかに雷翼の背の周回（`daily_storm_rounds`、`weekly_storm_heart`）があり、文は 12 の担当（`tools/gen_storm_lore.py`、文は `skyabyss_storm` など）。
+全クエストの表は 9.4 節。板の日替わり・週替わりには、ほかに雷翼の背の周回（`daily_storm_rounds`、`weekly_storm_heart`）があり、文は 12 の担当（`tools/gen/story/gen_storm_lore.py`、文は `skyabyss_storm` など）。
 
 ### 8.4 1 章の続き（メイン 4 本、サブ 4 本）
 
@@ -527,7 +527,7 @@ data/<名前空間>/quest/<名前>.json
 | 天の鍵 `main_key` | 語り部 | 灰の昇る山を終えた（か、天の鍵がそろった） | 鍵は下を向いて打つ。語り部が数え歌のいつつめを思い出す。ベータの終わり |
 
 - **順番を外しても詰まらない。** 目的は伝承（見た・渡った・碑文）と、物語の段階（`stilled`）で数える。噂の段は、もう巨神を見ていれば飛ばす（`skip_if`）。碑文・背・試練の段は、心臓を先に止めていれば飛ばす。
-- 雷翼・余燼を「見た」は伝承 `chapter1/thunder_wing`・`chapter1/ember`。名前は `tools/gen_story_quests.py` の `NAMES`。
+- 雷翼・余燼を「見た」は伝承 `chapter1/thunder_wing`・`chapter1/ember`。名前は `tools/gen/story/gen_story_quests.py` の `NAMES`。
 - 語り部とイサナが交互に導く（語り部 = 地上に残る人の言い伝え、イサナ = 空へ惹かれる人の旅の話）。報告はどちらか一人でよい（潮殻・雷翼）。天の鍵がそろったあと、イサナは一度だけ「下を向いているな」と言う（入口、印 `c_key_seen`）。
 
 | サブ | 依頼 | 段階 | 中身 | ほのめかし |
@@ -547,7 +547,7 @@ data/<名前空間>/quest/<名前>.json
 | `NEW_MAIN` / `NEW_SIDE` | 「!」 金 / 巻物（青緑。サブは「!」を使わない） | 進行中のクエストの**次の段**が、この人に話すこと（まだ聞いていない話題）。または、会話の入口の節にこの人からの新しい頼み・渡す品がある（ハブの金の印と同じ判定。メインの依頼主なら金、そうでなければ青緑）。「新しい頼み」と数えるのは、先をたどると実際にクエストを始める・品を渡す・品を納める・板を開く結果があるものだけ（`DialogueService.offers`）。頼みに見えて何も起きない選択肢は、金の印にも「!」にもしない。言伝ての板を開く選択肢は話題の印 |
 | `CHAT` | 吹き出し（淡い色） | 入口が定型のあいさつでなく、その人がまだその節を開いたことがない（`NpcBonds` の `seen`。開くと消える。月のループで戻る） |
 
-見た目: 16×24 のドット絵（メインの「!」「?」・サブの巻物とチェックの巻物・吹き出し。暗い縁取り・明るい縁と影。`tools/gen_npc_marker_icons.py` が `textures/gui/npc_marker/` に書く）と、色つきのやわらかい光。近くでは高さ約 0.65 ブロック。遠いほど大きくするが 2.4 倍まで（距離 ÷ 10、下限 1）。ゆっくり上下し（周期約 2.5 秒）、新しい・報告の印は光と大きさがやさしく脈打つ。メインは金の「!」「?」、サブは青緑の巻物。
+見た目: 16×24 のドット絵（メインの「!」「?」・サブの巻物とチェックの巻物・吹き出し。暗い縁取り・明るい縁と影。`tools/gen/mobs/gen_npc_marker_icons.py` が `textures/gui/npc_marker/` に書く）と、色つきのやわらかい光。近くでは高さ約 0.65 ブロック。遠いほど大きくするが 2.4 倍まで（距離 ÷ 10、下限 1）。ゆっくり上下し（周期約 2.5 秒）、新しい・報告の印は光と大きさがやさしく脈打つ。メインは金の「!」「?」、サブは青緑の巻物。
 
 - メインは金、サブは青緑（クエストの札と同じ色）。「?」はゆっくり脈打つ。印のない NPC には何も出さない。
 - 見え方: 遠いほど大きく描き、64 ブロックで消える。16 ブロックまでは壁越しでも見える。それより遠くは、頭が見通せるときだけ（クライアントが 5 tick ごとに視線を調べる）。場面・画面（会話を含む）・F1・目覚めの暗転では描かない。設定 `npcMarkers`（既定 ON）で消せる。
@@ -560,11 +560,11 @@ data/<名前空間>/quest/<名前>.json
 
 ## 9. 全セリフとクエストの表
 
-下の表は生成物（印の間は手で直さない）。`tools/gen_npc_content.py`（9.1〜9.3）、`tools/gen_free_quests.py`（9.4）、`tools/gen_story_quests.py`（9.5）が書く。
+下の表は生成物（印の間は手で直さない）。`tools/gen/mobs/gen_npc_content.py`（9.1〜9.3）、`tools/gen/story/gen_free_quests.py`（9.4）、`tools/gen/story/gen_story_quests.py`（9.5）が書く。
 
 ### 9.1 語り部
 
-<!-- 生成ここから (tools/gen_npc_content.py が書き換える。手で直さない) -->
+<!-- 生成ここから (tools/gen/mobs/gen_npc_content.py が書き換える。手で直さない) -->
 
 **語り部（`skyabyss:storyteller`）の入口**
 
@@ -722,7 +722,7 @@ data/<名前空間>/quest/<名前>.json
 
 ### 9.4 自由なモード
 
-<!-- 自由なモード 生成ここから (tools/gen_free_quests.py が書き換える。手で直さない) -->
+<!-- 自由なモード 生成ここから (tools/gen/story/gen_free_quests.py が書き換える。手で直さない) -->
 
 **クエストの一覧（生成）**
 
@@ -822,7 +822,7 @@ data/<名前空間>/quest/<名前>.json
 
 ### 9.5 1 章の続き
 
-<!-- 1 章の続き 生成ここから (tools/gen_story_quests.py が書き換える。手で直さない) -->
+<!-- 1 章の続き 生成ここから (tools/gen/story/gen_story_quests.py が書き換える。手で直さない) -->
 
 **クエストの一覧（生成）**
 
@@ -982,11 +982,11 @@ data/<名前空間>/quest/<名前>.json
 | `npc/NpcMarkers`、`client/npc/NpcMarkerClient` | 頭の上の印（8.5 節。版 `npcmark-1`） |
 | `client/npc/DialogueScreen`、`NpcClient`、`NpcRenderer` | 会話の画面、受け口、描画 |
 | `client/quest/QuestLogScreen`、`QuestHud`、`QuestToast`、`QuestClient` | ログ、追跡表示、札、キー（U） |
-| `tools/gen_npc_content.py` | 会話・クエスト・文・この書類の表 |
+| `tools/gen/mobs/gen_npc_content.py` | 会話・クエスト・文・この書類の表 |
 | `tools/rough/npc.py`、`npc_ui_mock.py` | モデルのラフと書き出し、画面の見本 |
 
 - 共有ファイルへの変更は最小: `SkyAbyss.java` のコンストラクタに登録 2 行（`NpcSetup`、`QuestSetup`）。本体の lang、`sounds.json`、`ModEntities`、`Config`、伝承の JSON には触れていない。
-- 自由なモード: `quest/free/`（7.2 節）、`tools/gen_free_quests.py`、`tools/gen_message_board.py`。1 章の続き: `story/`（`StoryData`、`StorySelfTest` ほか）、`tools/gen_story_quests.py`。序盤: `opening/`、`story/OpeningStorySelfTest`。
+- 自由なモード: `quest/free/`（7.2 節）、`tools/gen/story/gen_free_quests.py`、`tools/gen/story/gen_message_board.py`。1 章の続き: `story/`（`StoryData`、`StorySelfTest` ほか）、`tools/gen/story/gen_story_quests.py`。序盤: `opening/`、`story/OpeningStorySelfTest`。
 
 **ほかの担当が使う入口**
 
@@ -998,7 +998,7 @@ Affinity.add(player, "skyabyss:storyteller", 5);     // 好感度
 WorldLoop.advance(server);                          // M4: 月が落ちたとき (会話の印が記憶へ移る)
 ```
 
-新しい NPC を足すときは、`NpcSetup` にエンティティ、`client/npc/NpcRenderer` に描画、`data/skyabyss/dialogue/<役>.json` に会話、`textures/gui/npc/face/<役>_<表情>.png`（128×128、3 枚）に肖像を置く（`tools/gen_portraits.py` の `DRAW` に人を足す）。
+新しい NPC を足すときは、`NpcSetup` にエンティティ、`client/npc/NpcRenderer` に描画、`data/skyabyss/dialogue/<役>.json` に会話、`textures/gui/npc/face/<役>_<表情>.png`（128×128、3 枚）に肖像を置く（`tools/gen/mobs/gen_portraits.py` の `DRAW` に人を足す）。
 
 ---
 

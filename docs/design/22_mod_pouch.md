@@ -3,7 +3,7 @@
 - 文書番号: 22
 - 範囲: この Mod の「集める品・鍵・笛」だけを入れる専用の持ち物（名前は **旅嚢**）。品ごとの決まった枠、拾うと勝手に入る仕組み、倒れても失わない決まり、保存と同期と既存セーブの移し替え、画面（つまみ）、使う品の入力（長押しの輪）、作業パッケージ
 - 関連: [03 装備](03_gear_and_endgame.md)（装飾の枠。作りの手本）、[09 巨神での移動](09_titan_travel.md)（呼び笛・呼び貝）、[11 控え帳](11_record_screen.md)（大事な品の守り・墓）、[13 余燼](13_ember.md)、[18 画面の知らせ](18_notices.md)、[14 ベータ](14_beta.md)（天の鍵）
-- 状態: **P1〜P10 すべて実装済み**（15・16 章）。作業台で旅嚢の材料を使う仕組みは 17 章。ゲームルール `skyabyssPouch` は既定で入、`skyabyssPouchWithdraw` は既定で 0（取り出し不可）。画面ラフ: `docs/review/_gallery_pouch/`（`tools/gen_pouch_mockups.py`）、本番の画面の素材は `tools/gen_pouch_assets.py`
+- 状態: **P1〜P10 すべて実装済み**（15・16 章）。作業台で旅嚢の材料を使う仕組みは 17 章。ゲームルール `skyabyssPouch` は既定で入、`skyabyssPouchWithdraw` は既定で 0（取り出し不可）。画面ラフ: `docs/review/_gallery_pouch/`（`tools/gen/items/gen_pouch_mockups.py`）、本番の画面の素材は `tools/gen/items/gen_pouch_assets.py`
 
 ---
 
@@ -246,7 +246,7 @@ mod は Mixin を使っていない（03 の 6.4）。そこで、入口を次�
 | P2 | 拾う入口（`ItemEntityPickupEvent.Pre`）、掃除（1 秒・画面を閉じたとき）、取り出し済みの印（`skyabyss:pouch_loan`）、報酬・渡し・墓・預かりの呼び出しを `PouchRouting.give` へ置き換え（`TitanLoot.give` ほか約 15 か所。機械的な置き換えは Haiku に分けられる） | Sonnet（置き換えは Haiku） | P1 |
 | P3 | 倒れたとき（`copyOnDeath`、`DeathEvents` の守る品との重ならない取り扱い）、`Keepsakes.registerHolder("pouch", …)`・`take`、`KeepsakeBonds` の袋の巡回、天の鍵がそろう数え方 | Sonnet | P1 |
 | P4 | メニューと画面（`PouchMenu`・`PouchScreen`・つまみを `RpgTabs` へ足す・キー I）。レシピ本の追従、シフトクリックの扱い（9 章） | Sonnet | P1 |
-| P5 | 画面の絵（枠・名札・空の輪郭・？の枠。`tools/gen_pouch_assets.py`、装飾の `gen_accessory_assets.py` と同じ作り）。品の絵は既存を縮めて使う（輪郭は元の絵から自動で作る） | Haiku | 3 案の選択 |
+| P5 | 画面の絵（枠・名札・空の輪郭・？の枠。`tools/gen/items/gen_pouch_assets.py`、装飾の `tools/gen/items/gen_accessory_assets.py` と同じ作り）。品の絵は既存を縮めて使う（輪郭は元の絵から自動で作る） | Haiku | 3 案の選択 |
 | P6 | 使う入力（キー、`PouchUse` パケット、輪の描画、短押し・長押し、取りやめ、`PouchUsable` の切り出し） | Sonnet | P1、案の選択 |
 | P7 | 既存セーブの移し替え（ログイン時・袋の版・札の一行・履歴） | Sonnet | P1、P2 |
 | P8 | 袋を読む側（共鳴の炉・扉と仕掛け・クエスト条件・控え帳・進捗） | Sonnet | P1 |
@@ -357,7 +357,7 @@ mod は Mixin を使っていない（03 の 6.4）。そこで、入口を次�
 
 ### 16.5 絵（P5）
 
-- `tools/gen_pouch_assets.py` が `textures/gui/pouch/pouch.png`（512×512、2 倍密度）を作る。画面の枠（骨の枠・石板・題の下と説明の上の線・説明のくぼみ）、枠（空・青緑・金）、「？」、ボタン（押せる・重ねた・押せない）、輪の札と中心。つまみは装飾の画面の素材（`accessory.png`）をそのまま使う。見本は `--preview`（`docs/review/_gallery_pouch/pouch_screen_preview.png`）。品の絵は既存のアイコンを 16×16 で描く（輪郭だけにはしない。暗い影は半透明の面で作る）。配置は `PouchLayout.java` と `PouchScreen.java` の値と同じ。
+- `tools/gen/items/gen_pouch_assets.py` が `textures/gui/pouch/pouch.png`（512×512、2 倍密度）を作る。画面の枠（骨の枠・石板・題の下と説明の上の線・説明のくぼみ）、枠（空・青緑・金）、「？」、ボタン（押せる・重ねた・押せない）、輪の札と中心。つまみは装飾の画面の素材（`accessory.png`）をそのまま使う。見本は `--preview`（`docs/review/_gallery_pouch/pouch_screen_preview.png`）。品の絵は既存のアイコンを 16×16 で描く（輪郭だけにはしない。暗い影は半透明の面で作る）。配置は `PouchLayout.java` と `PouchScreen.java` の値と同じ。
 
 ### 16.6 自己テスト（P10）
 

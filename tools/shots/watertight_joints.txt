@@ -1,4 +1,4 @@
-# 関節をアニメの途中で止めて撮る (tools/mesh_close.py の前後の比べ用。docs/review/previews/watertight_sheet.png)。
+# 関節をアニメの途中で止めて撮る (tools/lib/mesh_close.py の前後の比べ用。docs/review/previews/watertight_sheet.png)。
 # ./gradlew runShots -Pscript=tools/shots/watertight_joints.txt -PshotsName=wt_after   (run/shots/<名前>/options.txt に soundCategory_master:0.0 を置くと無音)
 world shots flat
 size 960 720

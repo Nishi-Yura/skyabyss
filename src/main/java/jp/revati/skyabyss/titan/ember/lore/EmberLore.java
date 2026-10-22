@@ -7,9 +7,9 @@ import java.util.Map;
 import jp.revati.skyabyss.titan.ember.EmberIds;
 
 // 余燼の伝承・碑文・囁き・語りの文の約束 (docs/design/13_ember.md の 9 章、11.2節の担当 G)。
-// 文はすべて assets/skyabyss_ember/lang の「__ember.G」の区切りの下にある (生成元は tools/gen_ember_lore.py)。
+// 文はすべて assets/skyabyss_ember/lang の「__ember.G」の区切りの下にある (生成元は tools/gen/story/gen_ember_lore.py)。
 // ほかの担当 (A 地上・B 体と広間・C 試練・D 敵・E 鍛え手・F 心臓) は、ここの鍵で文を出す。自分で同じ文を書かない
-// (同じ lang のファイルで鍵が二重になるのを避けるため。文を直したいときは gen_ember_lore.py を直して実行する)。
+// (同じ lang のファイルで鍵が二重になるのを避けるため。文を直したいときは tools/gen/story/gen_ember_lore.py を直して実行する)。
 // クラスへの依存はない (どの担当のコードが先に入っても組み上がるように)
 public final class EmberLore {
     private EmberLore() {

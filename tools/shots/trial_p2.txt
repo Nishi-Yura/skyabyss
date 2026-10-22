@@ -1,6 +1,6 @@
 # 試練のプール P2 (docs/design/29 の 3.6) の確かめ: 岩鯨の新作 W03・W04・W11・W12 と、潮殻の新作 T02 (引き潮・満ち潮)・T06・T07・T10。
 # ./gradlew runShots -Pscript=tools/shots/trial_p2.txt
-# 出力: run/shots/trial_p2/shots/trial_p2/*.png → python -I tools/trial_p2_sheet.py で docs/review/previews/trial_p2_sheet.png
+# 出力: run/shots/trial_p2/shots/trial_p2/*.png → python -I tools/sheets/trial_p2_sheet.py で docs/review/previews/trial_p2_sheet.png
 # 人はクリエイティブ (観戦者はセルが動かないので、見かけの上書きが出ない)。引きを force して、その試練の中へ置いて撮る。
 world trial_p2 flat
 size 1280 720

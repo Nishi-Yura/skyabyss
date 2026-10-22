@@ -1,6 +1,6 @@
 """岩鯨・雷翼の伝説 (C) だけを作り直す (style_c.LEAN)。レア以下は触らない。
 実行: python build_legend_lean.py  -> docs/review/lowpoly_roughs/armor/c/<set>/*_legend*  を書き換える。
-そのあと python tools/install_armor_lowpoly.py。"""
+そのあと python tools/install/install_armor_lowpoly.py。"""
 from __future__ import annotations
 
 import aview

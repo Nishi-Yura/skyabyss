@@ -36,7 +36,7 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 
-// 骨の坑 (docs/design/34 の 4.2.1。一章の支度「鉄の跡」の舞台。8〜12 分の小さなダンジョン)。部品は data/skyabyss/opening/ch1_bone_pit.json (tools/gen_ch1_sites.py)。
+// 骨の坑 (docs/design/34 の 4.2.1。一章の支度「鉄の跡」の舞台。8〜12 分の小さなダンジョン)。部品は data/skyabyss/opening/ch1_bone_pit.json (tools/gen/ch1/gen_ch1_sites.py)。
 //
 //   場所   ChapterSites の要素 (拠点から 70〜150、高台を選ぶ = 北の丘のつもり。33 の跡地 W2 ができたら一章の跡地の中へ)。地表に骨の肋骨の弧と坑口の碑
 //          (sign.skyabyss.ch1_bone_pit)、木の枠の坑口から階段で地下 13 ブロックへ。部屋は石レンガの殻で包む (自然の洞や水とつながらない)

@@ -8,7 +8,7 @@ import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
-// 岩鯨の背の新しい敵 (骨の砲手・骨鳥・老番兵。docs/design/21 の 3.3) の音。音源は tools/gen_ch1_back_mob_sounds.py、行は sounds.json の同じ名前
+// 岩鯨の背の新しい敵 (骨の砲手・骨鳥・老番兵。docs/design/21 の 3.3) の音。音源は tools/gen/ch1/gen_ch1_back_mob_sounds.py、行は sounds.json の同じ名前
 public final class Ch1BackSounds {
     private static final DeferredRegister<SoundEvent> SOUNDS = DeferredRegister.create(Registries.SOUND_EVENT, SkyAbyss.MODID);
 

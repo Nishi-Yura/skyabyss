@@ -1,5 +1,5 @@
 # 避雷の柱・戻しの鏡・燠の灯の見た目を撮る。./gradlew runShots -Pscript=tools/shots/back_blocks.txt
-# 撮った絵は run/shots/back_blocks/shots/back_blocks/*.png。docs/review/previews/blocks_*.png は tools/back_blocks_sheet.py が組む
+# 撮った絵は run/shots/back_blocks/shots/back_blocks/*.png。docs/review/previews/blocks_*.png は tools/sheets/back_blocks_sheet.py が組む
 world blocks_preview flat
 size 1280 720
 timeout 420

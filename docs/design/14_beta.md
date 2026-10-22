@@ -104,7 +104,7 @@
 
 ### 3.2 品の絵
 
-32px。下を指す柄のある鍵（案 C。`docs/review/sky_key_roughs/compare.png`、生成 `tools/gen_story_assets.py --option C`）。欠片と同じ石の円盤に、下へ一本の柄が伸びる。円盤が欠片の続きに見え、柄が**下を指す**ので、物語（鍵は足もとを指す）と合う。四つの象嵌の色は巨神ごと（岩鯨の青、潮殻の青緑、雷翼の淡い黄、余燼の熾火）。
+32px。下を指す柄のある鍵（案 C。`docs/review/sky_key_roughs/compare.png`、生成 `tools/gen/story/gen_story_assets.py --option C`）。欠片と同じ石の円盤に、下へ一本の柄が伸びる。円盤が欠片の続きに見え、柄が**下を指す**ので、物語（鍵は足もとを指す）と合う。四つの象嵌の色は巨神ごと（岩鯨の青、潮殻の青緑、雷翼の淡い黄、余燼の熾火）。
 
 ### 3.3 場面（`client/story/SkyKeyScene`）
 
@@ -125,7 +125,7 @@
 3. 鍵は、空を指さなかった。
 4. 足もとの、ずっと下。何かが、ゆっくりと打っている。
 
-- 音は合成（`tools/gen_story_assets.py`。01 の「既存の音を使わない」）。`assets/skyabyss_story/sounds.json` に置き、画面だけで鳴らすので登録しない。
+- 音は合成（`tools/gen/story/gen_story_assets.py`。01 の「既存の音を使わない」）。`assets/skyabyss_story/sounds.json` に置き、画面だけで鳴らすので登録しない。
 - 場面のあと、天の鍵を手に持っていると、14 秒ほどに一度、足もとのずっと下で小さく打つ（オーバーワールドだけ）。鍵から光の粒が一つ、下へ落ちる（`StoryClient`）。
 - 01 の「言い伝えでは雲の上へ続く扉の鍵」と食い違わせない。鍵は「上の扉」を否定せず、「先に下を向いている」だけを見せる。語り部の「鍵というのは、開けたい扉のほうを向くものだよ」が五章（深淵へ潜る）への引き。
 
@@ -173,8 +173,8 @@
 | `quest/free/Board.DRAW` | 板に出す日替わりは 5 本 |
 | `record/Keepsakes` | 天の鍵を守る品・捨てられない品に |
 | `progress/ProgressCommands` | `/story` に天の鍵の行 |
-| データ | メイン 4 本・サブ 4 本・会話の足し書き 2 つ・伝承 5 項目。`tools/gen_story_quests.py` が書く（07 の 2.1・8.4・9.5 節）。固有名は同ファイルの `NAMES`、伝承の本文は `LORE` |
-| 文・絵・音 | `assets/skyabyss_story/lang`、`textures/item/sky_key.png`、`sounds/{key_form,deep_beat}.ogg`（`tools/gen_story_assets.py`） |
+| データ | メイン 4 本・サブ 4 本・会話の足し書き 2 つ・伝承 5 項目。`tools/gen/story/gen_story_quests.py` が書く（07 の 2.1・8.4・9.5 節）。固有名は同ファイルの `NAMES`、伝承の本文は `LORE` |
+| 文・絵・音 | `assets/skyabyss_story/lang`、`textures/item/sky_key.png`、`sounds/{key_form,deep_beat}.ogg`（`tools/gen/story/gen_story_assets.py`） |
 
 ### 3.7 自己テスト（`SELFTEST story`）
 
@@ -203,7 +203,7 @@
 | 5 | 欠片を一人一つ | `TitanMemoryData` の `record.fragment` で一人一回、`ModItems.SKY_KEY_FRAGMENT` を 1 つ。四つ目で天の鍵は自動でそろう |
 | 6 | 巨神を見つけたら、伝承を記す | `Lore.unlock(player, "chapter1/thunder_wing", true)`（余燼は `"chapter1/ember"`）。メインクエストはこの項目で「見つけた」を数える |
 | 7 | 心臓の伝承（「〜の鼓動が止まった」） | 各担当が自分の項目を足してよい（`chapter1/thunder_heart_stilled` など）。メインは `stilled` の条件で数えるので項目名は自由 |
-| 8 | 自分の背中の周回のサブクエスト | 07 の 7 章の型。`tools/gen_story_quests.py` の「言伝ての板」の節に足す。`min_stage` は 3（雷翼）・4（余燼） |
+| 8 | 自分の背中の周回のサブクエスト | 07 の 7 章の型。`tools/gen/story/gen_story_quests.py` の「言伝ての板」の節に足す。`min_stage` は 3（雷翼）・4（余燼） |
 
 ### 4.2 共有ファイルの触り方
 

@@ -73,7 +73,7 @@ public final class ModEntities {
                     .sized(0.5f, 0.5f).clientTrackingRange(4).updateInterval(20)
                     .build(SkyAbyss.MODID + ":bone_spike"));
 
-    // 一章の地上の敵 (docs/design/21 の 3.1。tools/gen_ch1_ground_mobs.py)
+    // 一章の地上の敵 (docs/design/21 の 3.1。tools/gen/ch1/gen_ch1_ground_mobs.py)
     public static final DeferredHolder<EntityType<?>, EntityType<RockShellBeetle>> ROCK_SHELL_BEETLE = ENTITIES.register("rock_shell_beetle",
             () -> EntityType.Builder.of(RockShellBeetle::new, MobCategory.MONSTER)
                     .sized(1.3f, 1.0f).eyeHeight(0.6f).clientTrackingRange(8).build(SkyAbyss.MODID + ":rock_shell_beetle"));
@@ -87,7 +87,7 @@ public final class ModEntities {
             () -> EntityType.Builder.of(ElderSentry::new, MobCategory.MONSTER)
                     .sized(0.9f, 2.45f).clientTrackingRange(10).build(SkyAbyss.MODID + ":elder_sentry"));
 
-    // 二章の地上の敵 (docs/design/21 の 4.1、P12。tools/gen_ch2_ground_mobs.py)
+    // 二章の地上の敵 (docs/design/21 の 4.1、P12。tools/gen/ch2/gen_ch2_ground_mobs.py)
     public static final DeferredHolder<EntityType<?>, EntityType<jp.revati.skyabyss.entity.TidepoolClam>> TIDEPOOL_CLAM = ENTITIES.register("tidepool_clam",
             () -> EntityType.Builder.of(jp.revati.skyabyss.entity.TidepoolClam::new, MobCategory.MONSTER)
                     .sized(0.95f, 0.55f).eyeHeight(0.4f).clientTrackingRange(8).build(SkyAbyss.MODID + ":tidepool_clam"));

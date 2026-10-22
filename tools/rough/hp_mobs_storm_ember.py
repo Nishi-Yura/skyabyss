@@ -12,7 +12,7 @@ does not help.  The recipe is therefore (all in this file, hpkit.py is untouched
   carve   holes (eye sockets, mouths)
 
 python tools/rough/hp_mobs_storm_ember.py [name ...]      -> docs/review/high_poly_roughs/<name>.png (+ assets/<name>_<A|B|C>/)
-The install scripts (install_storm_mobs.py, install_ember_mobs.py) call install_mob() after writing the raw model.
+The install scripts (tools/install/install_storm_mobs.py, tools/install/install_ember_mobs.py) call install_mob() after writing the raw model.
 """
 from __future__ import annotations
 

@@ -1,4 +1,4 @@
-# 横から見て、モデルが透けて中が見えないかを確かめる (tools/fix_geo_face_sides.py の前後の比べ用)。
+# 横から見て、モデルが透けて中が見えないかを確かめる (tools/lib/fix_geo_face_sides.py の前後の比べ用)。
 # ./gradlew runShots -Pscript=tools/shots/geo_sides.txt [-PshotsName=geo_sides_before]
 # 出力: run/shots/<name>/shots/geo_sides/*.png と shots.log。AI なしの敵を玄武岩の床に離して並べ、東西の横から近づいて撮る
 world shots flat

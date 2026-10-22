@@ -1,5 +1,5 @@
 """手に持った姿の模型 (一人称・三人称)。プレイヤーは平色の箱。向きと大きさは display の値の目安
-(weapon_display.py の値そのものではない)。"""
+(tools/lib/weapon_display.py の値そのものではない)。"""
 from __future__ import annotations
 
 import copy

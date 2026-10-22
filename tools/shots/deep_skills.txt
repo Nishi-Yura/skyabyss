@@ -1,5 +1,5 @@
 # 橋・変異・紋の盤・前世の技・淵 (docs/design/31 の A08・A09・A14・B08・B09) の K 画面と変異の見た目の確認。
-# ./gradlew runShots -Pscript=tools/shots/deep_skills.txt  → python tools/deep_skills_sheet.py で docs/review/previews/deep_skills_sheet.png
+# ./gradlew runShots -Pscript=tools/shots/deep_skills.txt  → python tools/sheets/deep_skills_sheet.py で docs/review/previews/deep_skills_sheet.png
 world shots flat
 size 1280 720
 timeout 400

@@ -7,9 +7,9 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 
 // プレイヤーが持つ mod 武器の「型」(三人称の腕の構えの登録名 SKYABYSS_*)。
-// 動きそのもの (構え・振り・連撃・当たる瞬間・ヒットストップ) は、品ごとに weapon/MoveSet (assets の weapon_moves/<id>.json。tools/gen_weapon_moves.py が作る) が持つ。
+// 動きそのもの (構え・振り・連撃・当たる瞬間・ヒットストップ) は、品ごとに weapon/MoveSet (assets の weapon_moves/<id>.json。tools/gen/items/gen_weapon_moves.py が作る) が持つ。
 // 弓 (雷翼の弓・深淵の雷弓) と盾 (珊瑚の盾) は、バニラの引き・構えの動きに MoveSet の一人称の動きを足す (WeaponClient)。
-// 槍・長柄・火かき棒は、穂先が腕の向きに前へ伸びる持ち方 (tools/weapon_display.py の forward) で、構えも腕を前へ出す
+// 槍・長柄・火かき棒は、穂先が腕の向きに前へ伸びる持ち方 (tools/lib/weapon_display.py の forward) で、構えも腕を前へ出す
 public enum WeaponKind {
     GREATSWORD,
     PIKE,

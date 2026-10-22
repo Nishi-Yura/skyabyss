@@ -26,7 +26,7 @@ public final class RaijuSetup {
                     .fireImmune()
                     .build(SkyAbyss.MODID + ":raiju"));
 
-    // 技ごとに別の音 (tools/gen_raiju_sounds.py の独自合成)
+    // 技ごとに別の音 (tools/gen/sound/gen_raiju_sounds.py の独自合成)
     public static final DeferredHolder<SoundEvent, SoundEvent> AMBIENT = sound("raiju_ambient");
     public static final DeferredHolder<SoundEvent, SoundEvent> HURT = sound("raiju_hurt");
     public static final DeferredHolder<SoundEvent, SoundEvent> DEATH = sound("raiju_death");

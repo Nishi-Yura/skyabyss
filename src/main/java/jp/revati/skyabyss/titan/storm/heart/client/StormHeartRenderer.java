@@ -20,7 +20,7 @@ import software.bernie.geckolib.renderer.GeoEntityRenderer;
 import software.bernie.geckolib.renderer.layer.GeoRenderLayer;
 
 // 雷翼の心臓の描画。段階ごとの geo とテクスチャ (包む翼 → 開いた翼と冠の翼 → 骨だけの翼と稲妻の網) を切り替え、
-// 核・稲妻・網を光らせる (GlowLayer)。模型は tools/install_storm_heart.py が書く。
+// 核・稲妻・網を光らせる (GlowLayer)。模型は tools/install/install_storm_heart.py が書く。
 // 色が部屋の明かりで沈まないように、潮殻の心臓の直し方 (08 の 19.8節) を最初から使う:
 //  - 心臓の光はブロックの光 15 で描く (部屋の弱い明かりは暖色に寄り、灰青と白銀の翼が茶色く濁るため)。面の陰は残る
 //  - 光る画素は、基のテクスチャの上に _glowmask の色を目の光 (eyes: 陰なし・足し合わせ) で重ねる。
@@ -70,7 +70,7 @@ public class StormHeartRenderer extends LowPolyGeoRenderer<StormHeart> {
             if (heart.isInvisible()) {
                 return;
             }
-            // 低ポリ: アトラスの光る画素の色だけを載せた絵 (tools/install_lowpoly_storm.py が焼く)
+            // 低ポリ: アトラスの光る画素の色だけを載せた絵 (tools/install/install_lowpoly_storm.py が焼く)
             RenderType glow = RenderType.eyes(Model.path(LowPoly.enabled
                     ? "textures/lowpoly/storm_heart_p" + Model.phase(heart) + "_glow.png"
                     : "textures/entity/storm_heart_p" + Model.phase(heart) + "_glowmask.png"));

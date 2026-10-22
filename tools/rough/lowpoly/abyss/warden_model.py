@@ -7,7 +7,7 @@ docs/design/36 の 6・6.6。3 案のラフ (warden.py) から形を借り、次
 
 出力: docs/review/warden_model/ (heart_warden_mesh.json・heart_warden_atlas.png・heart_warden_glowmask.png・heart_warden_views.png)
 生成: python tools/rough/lowpoly/abyss/warden_model.py   (numpy / PIL / scipy)
-入れる: python tools/gen_heart_warden.py   (install_lowpoly と animations を書く)
+入れる: python tools/gen/world/gen_heart_warden.py   (install_lowpoly と animations を書く)
 """
 import json
 import sys

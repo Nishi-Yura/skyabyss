@@ -54,7 +54,7 @@ public final class GearCurveSelfTest {
         return String.format(Locale.ROOT, "%.2f", v);
     }
 
-    // 装備のツールチップの物語の一行 (assets/skyabyss_gear_story/lang。生成元 tools/gen_gear_story.py): 登録された装備のすべてに日英であり、短く、重複がない
+    // 装備のツールチップの物語の一行 (assets/skyabyss_gear_story/lang。生成元 tools/gen/story/gen_gear_story.py): 登録された装備のすべてに日英であり、短く、重複がない
     static void story(List<String> f) {
         java.util.Map<String, String> ja = lang("/assets/skyabyss_gear_story/lang/ja_jp.json", f);
         java.util.Map<String, String> en = lang("/assets/skyabyss_gear_story/lang/en_us.json", f);

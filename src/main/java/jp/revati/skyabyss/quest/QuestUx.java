@@ -28,7 +28,7 @@ import net.neoforged.neoforge.registries.DeferredRegister;
 
 // クエストの見え方 (docs/design/18 の 3.5 節): 今の章の札 (左上の目的の帯の上)、クエストの更新の音。
 // NPC の頭の印は npc/NpcMarkers。章はサーバーが人ごとに導き (Chapters.of)、変わったときだけその人に送る。
-//   音: tools/gen_quest_ux_sounds.py で合成。メインの更新 = 小さな鐘が二つ (五度上がる)、サブ = ひとつだけもっと柔らかい
+//   音: tools/gen/sound/gen_quest_ux_sounds.py で合成。メインの更新 = 小さな鐘が二つ (五度上がる)、サブ = ひとつだけもっと柔らかい
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class QuestUx {
     private static final String PROTOCOL_VERSION = "questux-1";

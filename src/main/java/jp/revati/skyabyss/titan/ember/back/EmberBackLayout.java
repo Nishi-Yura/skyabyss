@@ -12,7 +12,7 @@ import net.minecraft.world.phys.Vec3;
 
 // 余燼の背 (ember_back) の配置図: 部屋の箱と休み場 (docs/design/13_ember.md の 3.3節、26 の 11 章「余燼の拡大」)。
 //
-// 版 20 で水平 x1.6・垂直 x1.3 の体 (body.bin。tools/gen_ember_back_body.py の既定) に合わせて引き直した。
+// 版 20 で水平 x1.6・垂直 x1.3 の体 (body.bin。tools/gen/items/gen_ember_back_body.py の既定) に合わせて引き直した。
 // 戦いの部屋 (鍛え手の間 半径 13・熾の底 半径 16 とその前室) の大きさは変えない (縮めるかどうかは判断待ち)。位置だけ体に合わせた。
 //
 // 体の流れ (北 = 頭 -Z から南 = 尾 +Z へ。西 -X が巨神の左):
