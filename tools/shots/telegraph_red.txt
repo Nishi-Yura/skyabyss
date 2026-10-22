@@ -76,7 +76,6 @@ shot heart_sweep_a
 wait 20
 shot heart_sweep_b
 cmd kill @e[type=skyabyss:stone_whale_heart]
-quit
 cmd kill @e[type=!minecraft:player,distance=..120]
 
 # ---- telegraph_tide_heart
@@ -158,7 +157,6 @@ shot tide_heart_rain_a
 wait 50
 
 cmd kill @e[type=skyabyss:tide_heart]
-quit
 cmd kill @e[type=!minecraft:player,distance=..120]
 
 # ---- telegraph_storm
@@ -259,7 +257,6 @@ shot storm_roar_a
 wait 40
 cmd kill @e[type=skyabyss:raiju]
 cmd kill @e[type=skyabyss:static_moth]
-quit
 cmd kill @e[type=!minecraft:player,distance=..120]
 
 # ---- telegraph_ember_heart
@@ -338,7 +335,6 @@ shot ember_heart_fading_a
 wait 30
 shot ember_heart_fading_b
 cmd kill @e[type=skyabyss:ember_heart]
-quit
 cmd kill @e[type=!minecraft:player,distance=..120]
 
 # ---- heart_domains
@@ -446,3 +442,5 @@ chat clear
 hud on
 echo done
 cmd kill @e[type=!minecraft:player,distance=..120]
+
+quit

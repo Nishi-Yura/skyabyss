@@ -210,7 +210,8 @@ public final class BackReach {
                 if (audit == null) {
                     Spec sp = spec.get();
                     // tick の中で回すときは、歩く範囲のチャンクを先に読み込んで待つ (読みに行くとその場で tick が止まる。余燼の灰の野で 2 秒を超えていた)
-                    if (deadlineNanos != Long.MAX_VALUE && !loaded(sp.bounds)) {
+                    // (自己テストの runAll のように tick の外で回すときは待たない。待つと読み込みが進まず止まる)
+                    if (jp.revati.skyabyss.titan.BackBuildJobs.inTick() && !loaded(sp.bounds)) {
                         return false;
                     }
                     audit = new Audit(level, sp);

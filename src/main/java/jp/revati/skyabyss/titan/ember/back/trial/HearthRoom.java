@@ -86,6 +86,15 @@ public final class HearthRoom {
                 k.set(x, floor + 5, z, RoomKit.SHROOM);
             }
         }
+        // 灰運びの道の両脇の床に埋めた灯り (谷の中ほどの人の通り道が光度 0〜3 だった。建築の監査 LIGHT_DARK、版 32)。噴気・灰溜まりの所は避ける
+        for (int z = 20; z <= 54; z += 5) {
+            for (int x : new int[] {-6, 6, -10, 10}) {
+                BlockPos at = new BlockPos(x, floor, z);
+                if (!HearthVents.VENTS.contains(at)) {
+                    k.set(x, floor, z, RoomKit.SHROOM);
+                }
+            }
+        }
         // 噴気の割れ目 (床のブロックを置き替える)
         for (BlockPos v : HearthVents.VENTS) {
             k.set(v, EmberTrialSetup.HEAT_VENT.get().defaultBlockState());

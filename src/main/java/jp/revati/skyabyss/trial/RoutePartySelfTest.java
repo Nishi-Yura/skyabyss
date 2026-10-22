@@ -133,9 +133,18 @@ public final class RoutePartySelfTest {
             }
             check(f, TrialRoute.step(back, group) == 0 && !TrialRoute.abandonPending(group), "a yes from everyone did not end the route (step " + TrialRoute.step(back, group) + ")");
 
-            // ---- 祠から (周回): 二人とも、写しの休み場へ
+            // ---- 祠から (周回): 二人とも、写しの休み場へ。あきらめで外へ出された二人は別の次元にいるので、新しい二人組で
             clean(back, group);
             TrialRoute.clearAll();
+            parties.clearAll();
+            a = fake(back, "7a0b1d00-0000-4000-8000-0000000002d4", "party_d");
+            b = fake(back, "7a0b1d00-0000-4000-8000-0000000002e5", "party_e");
+            PartyData.Party replayParty = parties.create(a.getUUID(), "party_d");
+            parties.add(replayParty, b.getUUID(), "party_e");
+            group = Groups.keyOf(a);
+            List<ServerPlayer> pair = List.of(a, b, c);
+            TrialRoute.PLAYERS = l -> pair;
+            clean(back, group);
             GroupProgress.of(back, group).markFirstCleared();
             a.setPos(door);
             b.setPos(door);
@@ -144,7 +153,7 @@ public final class RoutePartySelfTest {
             check(f, TrialRoute.pending(group), "the shrine start did not wait for the copy");
             TrialDraw.Draw replay = TrialData.current(back, group);
             long due = back.getGameTime();
-            TrialRoute.tick(back, titan, players, due + TrialRoute.COPY_WAIT + 1);
+            TrialRoute.tick(back, titan, pair, due + TrialRoute.COPY_WAIT + 1);
             check(f, !TrialRoute.pending(group), "the shrine carry stayed queued");
             check(f, near(a, back, titan, replay, 1) && near(b, back, titan, replay, 1), "the shrine did not carry both to the first rest of the copy: " + a.position() + " / " + b.position());
             check(f, TrialSlot.of(GroupProgress.of(back, group)) > 0, "the replay has no slot");

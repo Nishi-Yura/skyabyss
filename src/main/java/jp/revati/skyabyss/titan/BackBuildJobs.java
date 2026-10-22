@@ -47,6 +47,11 @@ public final class BackBuildJobs {
     }
 
     // 仕上げの手順が触る範囲 (x1..x2, z1..z2) のチャンクを先に読み込んで待つ仕事。tick の中でだけ待つ (その場で最後まで進めるときは何もしない)
+    // いま tick の中から進めているか (読み込みを待って次の tick に回してよいか)
+    public static boolean inTick() {
+        return inTick;
+    }
+
     public static Job loadArea(ServerLevel level, int x1, int z1, int x2, int z2) {
         return new Job() {
             @Override
