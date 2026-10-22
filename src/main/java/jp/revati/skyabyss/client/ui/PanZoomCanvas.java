@@ -24,6 +24,8 @@ public final class PanZoomCanvas {
     private int cw;
     private int ch;
     private float zoom = 1f;
+    // 最初の大きさの下限 (盤が大きいときに、字と節が小さくなりすぎないように)
+    private float startMin = MIN_ZOOM;
     private double panX;
     private double panY;
     private boolean dragging;
@@ -46,11 +48,18 @@ public final class PanZoomCanvas {
         return zoom;
     }
 
-    // 最初の大きさと位置: 盤が枠に入る大きさ (枠より小さい盤は 1 倍) で、真ん中へ
+    // 最初の大きさの下限を決める (既定は MIN_ZOOM)。盤が枠に入らないときは、下限まで拡げて上から見せる
+    public void setStartMin(float z) {
+        startMin = Mth.clamp(z, MIN_ZOOM, 1f);
+    }
+
+    // 最初の大きさと位置: 盤が枠に入る大きさ (枠より小さい盤は 1 倍。下限まで) で、横は真ん中、縦は盤が枠より長ければ上から
     public void reset() {
-        zoom = Mth.clamp(Math.min((float) w / cw, (float) h / ch), MIN_ZOOM, 1f);
-        panX = (w - cw) / 2.0;
-        panY = (h - ch) / 2.0;
+        zoom = Mth.clamp(Math.min((float) w / cw, (float) h / ch), startMin, 1f);
+        double sw = cw * zoom;
+        double sh = ch * zoom;
+        panX = (w - sw) / 2.0;
+        panY = sh <= h ? (h - sh) / 2.0 : 0;
         clampPan();
     }
 

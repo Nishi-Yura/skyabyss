@@ -1,0 +1,82 @@
+# UI room 2: 技の画面 (説明の送り・大きい盤)、ステータスの画面 (窓に合わせて拡大)、旅嚢の輪 (札 2 / 5 / 9 枚 × GUI 2 / 3 / 4)。
+# ./gradlew runShots --no-daemon --offline -Pscript=tools/shots/ui_room_2.txt -PshotsName=ui_room_2
+world ui_room flat
+size 1280 720
+timeout 1500
+render 8
+clouds off
+
+cmd time set noon
+cmd weather clear
+cmd gamemode survival
+hud on
+cmd skyabyss cinematic stop
+waitchunks
+chat clear
+cmd skyabyss quest start @s main_song
+cmd skyabyss lore unlock @s prologue/camp
+wait 80
+
+echo === GUI 3: skill screen (tree, selected skill with a long description, scrolled)
+guiscale 3
+open skills
+wait 20
+shot u2_skills_g3
+close
+open skills_rockcall
+wait 20
+shot u2_skills_sel_g3
+wheel 300 120 -3
+wait 5
+shot u2_skills_sel_scrolled_g3
+close
+
+echo === GUI 3: growth screen
+open growth
+wait 20
+shot u2_growth_g3
+close
+
+echo === GUI 2 / 4: skill, growth, pouch wheel
+guiscale 2
+open skills_rockcall
+wait 20
+shot u2_skills_sel_g2
+close
+open growth
+wait 20
+shot u2_growth_g2
+close
+open pouchwheel_5
+wait 10
+shot u2_pouch5_g2
+close
+open pouchwheel_9
+wait 10
+shot u2_pouch9_g2
+close
+
+guiscale 4
+open growth
+wait 20
+shot u2_growth_g4
+close
+open pouchwheel_2
+wait 10
+shot u2_pouch2_g4
+close
+open pouchwheel_5
+wait 10
+shot u2_pouch5_g4
+close
+open pouchwheel_9
+wait 10
+shot u2_pouch9_g4
+close
+
+guiscale 3
+open pouchwheel_9
+wait 10
+shot u2_pouch9_g3
+close
+quit

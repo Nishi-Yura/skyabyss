@@ -21,7 +21,10 @@ public class PouchWheelScreen extends Screen {
     static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "textures/gui/pouch/pouch.png");
     static final int TEX = 512;
     private static final int RADIUS = 52;
+    // 窓が小さいとき (GUI 4 など) はこれまで縮める
+    private static final int RADIUS_MIN = 28;
     private static final int PLATE = 28;
+    private static final int PLATE_MIN = 18;
     // 中心のこの半径の中は「選ばない」
     private static final int DEAD = 16;
     private static final int GOLD = 0xFFF2C14E;
@@ -31,10 +34,39 @@ public class PouchWheelScreen extends Screen {
     private final List<PouchEntries.Entry> items;
     private int selected = -1;
     private boolean finished;
+    // 撮影用: キーを押していなくても閉じない (取りこぼし判定を止める)
+    private final boolean preview;
 
     public PouchWheelScreen(List<PouchEntries.Entry> items) {
+        this(items, false);
+    }
+
+    private PouchWheelScreen(List<PouchEntries.Entry> items, boolean preview) {
         super(Component.translatable("skyabyss_pouch.name"));
         this.items = items;
+        this.preview = preview;
+    }
+
+    // 撮影用 (ShotRunner の pouchwheel): 先頭から n 個の札を、閉じないで開く
+    public static PouchWheelScreen demo(int n) {
+        List<PouchEntries.Entry> all = PouchEntries.enabled();
+        return new PouchWheelScreen(all.subList(0, Math.min(n, all.size())), true);
+    }
+
+    // 輪の半径: 窓が小さければ縮め、札と上下の字が画面の外へ出ないように
+    private int radius() {
+        int room = Math.min(width, height) / 2 - PLATE / 2 - 20;
+        return Math.max(RADIUS_MIN, Math.min(RADIUS, room));
+    }
+
+    // 札の大きさ: 隣の札と重ならない大きさ (札の数が多いと小さくする)
+    private int plate() {
+        int n = items.size();
+        if (n < 2) {
+            return PLATE;
+        }
+        int chord = (int) (2 * radius() * Math.sin(Math.PI / n));
+        return Math.max(PLATE_MIN, Math.min(PLATE, chord - 4));
     }
 
     @Override
@@ -50,12 +82,12 @@ public class PouchWheelScreen extends Screen {
     // 札の中心 (画面の座標)
     private int plateX(int i) {
         double a = -Math.PI / 2 + 2 * Math.PI * i / items.size();
-        return width / 2 + (int) Math.round(Math.cos(a) * RADIUS);
+        return width / 2 + (int) Math.round(Math.cos(a) * radius());
     }
 
     private int plateY(int i) {
         double a = -Math.PI / 2 + 2 * Math.PI * i / items.size();
-        return height / 2 + (int) Math.round(Math.sin(a) * RADIUS);
+        return height / 2 + (int) Math.round(Math.sin(a) * radius());
     }
 
     // マウスの向きで選ぶ。中心に近ければ -1 (取りやめ)
@@ -75,7 +107,7 @@ public class PouchWheelScreen extends Screen {
     public void tick() {
         super.tick();
         // キーを離した瞬間を取りこぼさない (画面が開く前に離していた場合も)
-        if (!finished && !isUseKeyDown()) {
+        if (!preview && !finished && !isUseKeyDown()) {
             finish(true);
         }
     }
@@ -142,12 +174,16 @@ public class PouchWheelScreen extends Screen {
         g.fill(0, 0, width, height, 0x66000000);
         int cx = width / 2;
         int cy = height / 2;
-        g.blit(TEXTURE, cx - 20, cy - 20, 40, 40, 360f, 220f, 80, 80, TEX, TEX);
+        int r = radius();
+        int p = plate();
+        // 中心の印は札の内側に収まる大きさ (札と重ならない)
+        int hub = Math.min(40, (r - p / 2 - 2) * 2);
+        g.blit(TEXTURE, cx - hub / 2, cy - hub / 2, hub, hub, 360f, 220f, 80, 80, TEX, TEX);
         for (int i = 0; i < items.size(); i++) {
             boolean on = i == selected;
             int px = plateX(i);
             int py = plateY(i);
-            g.blit(TEXTURE, px - PLATE / 2, py - PLATE / 2, PLATE, PLATE, on ? 420f : 360f, 150f, 56, 56, TEX, TEX);
+            g.blit(TEXTURE, px - p / 2, py - p / 2, p, p, on ? 420f : 360f, 150f, 56, 56, TEX, TEX);
             g.renderItem(new ItemStack(items.get(i).item()), px - 8, py - 8);
             if (PouchNew.isNew(items.get(i).id())) {
                 PouchNew.badge(g, font, px - 8, py - 8);
@@ -163,8 +199,8 @@ public class PouchWheelScreen extends Screen {
             name = Component.translatable("skyabyss_pouch.wheel.cancel");
             color = DIM;
         }
-        g.drawCenteredString(font, name, cx, cy - RADIUS - PLATE / 2 - 14, color);
-        g.drawCenteredString(font, Component.translatable("skyabyss_pouch.wheel.hint"), cx, cy + RADIUS + PLATE / 2 + 6, TEXT);
+        g.drawCenteredString(font, name, cx, cy - r - p / 2 - 14, color);
+        g.drawCenteredString(font, Component.translatable("skyabyss_pouch.wheel.hint"), cx, cy + r + p / 2 + 6, TEXT);
         if (selected >= 0 && items.get(selected).id().equals(PouchClient.last())) {
             g.drawCenteredString(font, "*", cx, cy - 4, GOLD);
         }
