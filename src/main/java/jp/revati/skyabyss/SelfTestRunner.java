@@ -275,6 +275,9 @@ public final class SelfTestRunner {
         steps.add(Step.once("abyss pressure", jp.revati.skyabyss.story.ch5.AbyssPressureSelfTest::run));
         steps.add(Step.once("abyss warden (load)", jp.revati.skyabyss.story.ch5.warden.WardenSelfTest::load));
         steps.add(Step.once("abyss warden", 60, jp.revati.skyabyss.story.ch5.warden.WardenSelfTest::run));
+        // 雷の層の吊り橋・雷の拍・避雷の像・灰の迷路・番人と近道 (36 の 8 章)。SKYABYSS_SELFTEST_ONLY="abyss layers storm ash"
+        steps.add(Step.once("abyss layers storm ash (load)", jp.revati.skyabyss.story.ch5.layers.AbyssLayersSelfTest::load));
+        steps.add(Step.once("abyss layers storm ash", 60, jp.revati.skyabyss.story.ch5.layers.AbyssLayersSelfTest::run));
         steps.add(Step.once("storm mobs (load)", jp.revati.skyabyss.titan.storm.mob.StormMobSelfTest::load));
         steps.add(Step.until("storm mobs (wait)", jp.revati.skyabyss.titan.storm.mob.StormMobSelfTest::ready));
         steps.add(Step.once("storm mobs", 5, jp.revati.skyabyss.titan.storm.mob.StormMobSelfTest::runSelfTest));
