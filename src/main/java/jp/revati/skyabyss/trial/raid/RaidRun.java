@@ -62,6 +62,7 @@ public final class RaidRun {
         public long until;
         public int wipes;
         public RaidHudNet.Hud lastHud;
+        public boolean hudOff;
 
         Run(RaidRoom room, RaidCtx ctx, int step) {
             this.room = room;
@@ -207,9 +208,17 @@ public final class RaidRun {
                 }
             }
             case COMPLETE -> {
+                // 越えたあと数秒で帯から消す (次の段へ運ばれる)
+                if (!run.hudOff && now >= run.until) {
+                    run.hudOff = true;
+                    run.lastHud = RaidHudNet.Hud.OFF;
+                    for (ServerPlayer p : ctx.players()) {
+                        sendTo(p, RaidHudNet.Hud.OFF);
+                    }
+                }
             }
         }
-        if (now % HUD_EVERY == 0) {
+        if (now % HUD_EVERY == 0 && !run.hudOff) {
             sendHud(run, false);
         }
     }
@@ -259,6 +268,7 @@ public final class RaidRun {
     private static void complete(Run run) {
         RaidCtx ctx = run.ctx;
         run.phase = Phase.COMPLETE;
+        run.until = ctx.now() + 100;
         ctx.clearMobs();
         RaidKit.setGate(ctx, ctx.cell().exitGate(), true);
         sendHud(run, true);
