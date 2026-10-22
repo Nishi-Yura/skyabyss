@@ -38,7 +38,7 @@ import net.neoforged.neoforge.event.tick.LevelTickEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
 
 // 序章の演出「見る者」のサーバー側。
-// 夜、屋外に一人でいるプレイヤーに、数日おきに一度だけ、遠くに立ってこちらを見ている人影を見せる。
+// 夜、屋外にいるプレイヤーに (まわりに仲間がいてもよい。見えるのは本人だけ)、数日おきに一度だけ、遠くに立ってこちらを見ている人影を見せる。
 // サーバーは「いつ・誰に・どこに」を決めるだけで、人影そのものは本人のクライアントの中にしか置かない
 // (他のプレイヤーには見えない)。消え方はクライアントが決めて知らせてくる。
 // 人影が立っている間、本人の近くの動物はそちらを向いて動きを止める (気づくための手がかり)。
@@ -60,8 +60,6 @@ public final class WatcherEvents {
     // 夜の範囲 (一日の時刻)。日没直後の明るさが残るうちと、夜明け前は避ける
     static final int NIGHT_START = 13000;
     static final int NIGHT_END = 22800;
-    // この距離にほかのプレイヤーがいたら「一人」ではない
-    static final double ALONE_RADIUS = 96.0;
     // 人影が立ってから何 tick 後に、近くの動物がそちらを向くか。どの範囲の動物か
     static final int ANIMALS_NOTICE_AFTER = 60;
     static final double ANIMAL_RADIUS = 20.0;
@@ -155,11 +153,7 @@ public final class WatcherEvents {
         if (player.isUnderWater() || !level.canSeeSky(player.blockPosition().above())) {
             return "not outdoors";
         }
-        for (ServerPlayer other : Players.snapshot(level.players())) {
-            if (other != player && !other.isSpectator() && other.distanceToSqr(player) < ALONE_RADIUS * ALONE_RADIUS) {
-                return "not alone";
-            }
-        }
+        // 「一人」の条件はない (この mod はマルチが前提。2026-10-22: 二人で遊ぶとほとんど出なかった)。見えるのは本人だけ
         return null;
     }
 
@@ -280,7 +274,7 @@ public final class WatcherEvents {
         register(event.getDispatcher());
     }
 
-    // /skyabyss watcher show [player]  : 今すぐ見る者を立たせる (夜・一人・屋外の条件を問わない。テスト用)
+    // /skyabyss watcher show [player]  : 今すぐ見る者を立たせる (夜・屋外の条件を問わない。テスト用)
     // /skyabyss watcher next [player]  : 次に現れうるまでの時間と、これまでに気づいた回数
     // /skyabyss watcher reset [player] : 記録を消す (次の条件がそろった夜から現れうる)
     private static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
