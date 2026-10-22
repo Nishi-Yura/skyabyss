@@ -204,6 +204,7 @@ def main():
     for L in LAYERS:
         build_layer(L[0], ctx)
     build_layer('common', ctx)
+    build_layer('decor', ctx)
     support_falling(v)
     meta = {'name': 'abyss_layers', 'note': 'docs/design/36 A2。生成は tools/abyss/gen_abyss_layers.py', 'top': TOP, 'bottom': HEART_BOTTOM,
             'rect': [-ext, -ext, ext, ext]}
