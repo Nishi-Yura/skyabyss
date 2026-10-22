@@ -262,7 +262,7 @@ def main():
         p = d / (code + ".json")
         cur = json.loads(p.read_text(encoding="utf-8")) if p.exists() else {}
         cur.update(data)
-        p.write_text(json.dumps(cur, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+        p.write_text(json.dumps(cur, ensure_ascii=False, indent=2), encoding="utf-8")  # この lang は末尾の改行なし (コミット済みのまま)
 
 
 if __name__ == "__main__":

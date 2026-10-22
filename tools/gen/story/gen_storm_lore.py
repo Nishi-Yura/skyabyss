@@ -179,8 +179,8 @@ def quest(qid, order, title, summary, done, journal, objective, reward, repeat, 
     text(f"{base}.{sid}.journal", *journal)
     text(f"{base}.{sid}.{objective['id']}", *objective.pop("text"))
     QUESTS.append((qid, {"category": "sub", "order": order, "repeat": repeat, "board": True, "min_stage": 3,
-                         "unlock": {"type": "flag", "flag": "met", "npc": "skyabyss:whale_chaser"},
-                         "stages": [{"id": sid, "objectives": [objective]}], "reward": reward}, title, story))
+                         "stages": [{"id": sid, "objectives": [objective]}], "reward": reward,
+                         "unlock": {"type": "flag", "flag": "met", "npc": "skyabyss:whale_chaser"}}, title, story))
 
 
 quest("daily_storm_rounds", 66, ("雷翼の背の見回り", "Rounds on the Thunder Wing"),

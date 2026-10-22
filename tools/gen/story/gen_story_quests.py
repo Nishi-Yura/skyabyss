@@ -390,7 +390,7 @@ QUESTS = []
 
 
 def quest(qid, category, order, title, summary, done, stages, reward, giver=None, start_when=None, repeat="", board=False,
-          min_stage=0, unlock_=None, unlock_hint=None, story="", chapter=""):
+          min_stage=0, unlock_=None, unlock_hint=None, story="", chapter="", unlock_last=None):
     base = f"quest.skyabyss.{qid}"
     text(f"{base}.title", *title)
     text(f"{base}.summary", *summary)
@@ -406,7 +406,10 @@ def quest(qid, category, order, title, summary, done, stages, reward, giver=None
         for o in s["objectives"]:
             text(f"{base}.{s['id']}.{o['id']}", *o["text"])
             obs.append({k: v for k, v in o.items() if k != "text"})
-        sj = {"id": s["id"], "objectives": obs}
+        sj = {"id": s["id"]}
+        if s.get("prep"):  # 支度の段は skip_if が objectives の前 (コミット済みの並び)
+            sj["skip_if"] = s["skip_if"]
+        sj["objectives"] = obs
         for k in ("mode", "xp", "skip_if"):
             if s.get(k):
                 sj[k] = s[k]
@@ -429,6 +432,8 @@ def quest(qid, category, order, title, summary, done, stages, reward, giver=None
         out["unlock"] = unlock_
     out["stages"] = st_json
     out["reward"] = reward
+    if unlock_last:  # 後から足した解放条件は、書き付けの最後に置く (コミット済みの並び)
+        out["unlock"] = unlock_last
     QUESTS.append((qid, out, title, story))
 
 
@@ -438,8 +443,10 @@ def ob(oid, type_, ja, en, **kw):
     return o
 
 
-def stage(sid, journal, objectives, xp=0, mode=None, skip_if=None, lead=None):
+def stage(sid, journal, objectives, xp=0, mode=None, skip_if=None, lead=None, prep=False):
     s = {"id": sid, "journal": journal, "objectives": objectives}
+    if prep:
+        s["prep"] = True
     if lead:
         s["lead"] = lead
     if xp:
@@ -467,7 +474,7 @@ quest(TIDE, "main", 20, ("満ち引きの門", "The Gate of Ebb and Flow"),
        stage("prepare", ("イサナは言った。沖の島へ渡るなら、潮を読めるようになれ、と。それと、海を渡る船だ。\n塩の道の先の蔵には、潮の読み方が刻まれているらしい。沖の難破船には、潮見の貝が。",
                          "Isana said that to cross to the island offshore, you must learn to read the tide. And you need a boat.\nThe vault at the end of the salt road is said to hold a carving on reading the tide. The wreck offshore holds a tide-watching shell."),
              [cond_ob("ready", "潮の読み方と船で、島へ渡る支度をしよう", "Learn the tide and build a boat", {"type": "prep", "chapter": 2})],
-             skip_if=any_(lore("chapter1/tide_shell")),
+             skip_if=any_(lore("chapter1/tide_shell")), prep=True,
              lead=("イサナ「島へ渡るなら、まず潮を読めるようになれ。それと、船だ」",
                    "Isana: \"If you mean to cross to the island, learn to read the tide first. And build a boat.\"")),
        stage("see", ("沖の島が、潮の引くころに岸へ寄ってくるという。\n……島ではないのかもしれない。",
@@ -510,7 +517,7 @@ quest(THUNDER, "main", 30, ("嵐を渡る翼", "Wings Across the Storm"),
        stage("prepare", ("語り部は言った。嵐の鳥のところへ行くなら、雷を知っておくことだ、と。\n風の民の塔の跡、峰の中腹の焼けた塔、峰の下の雷を通さない石。前の旅人も、その道を辿ったらしい。",
                          "The storyteller said that to go to the storm bird, you must first know the lightning.\nThe ruin of the wind people's tower, the burnt tower on the slope, the stone under the peaks that lightning cannot pass. The traveller before you seems to have walked that road."),
              [cond_ob("ready", "雷を知り、嵐を渡る支度をしよう", "Learn the lightning for the storm", {"type": "prep", "chapter": 3})],
-             skip_if=any_(*[lore(x) for x in STORM_SIGHT]),
+             skip_if=any_(*[lore(x) for x in STORM_SIGHT]), prep=True,
              lead=("語り部「嵐へ行くなら、雷を知っておくことだね。峰には、風の民の跡が残っているよ」",
                    "The storyteller: \"If you mean to go into the storm, know the lightning first. The wind people left their marks on the peaks.\"")),
        stage("see", ("雷の晩、雲の中を大きな鳥が渡るという。\n風に逆らって動く嵐を見かけたら、それかもしれない。",
@@ -614,7 +621,7 @@ quest("daily_tide_rounds", "sub", 64, ("潮殻の背の見回り", "Rounds on th
              [ob("kill", "kill", "潮殻の背で、珊瑚憑き・磯走り・泡吹きを倒す", "Defeat coral thralls, scuttlers and puffers on the tide shell",
                  targets=["skyabyss:coral_thrall", "skyabyss:reef_scuttler", "skyabyss:bubble_puffer"], count=8)])],
       {"xp": 90, "items": [{"item": "skyabyss:tide_shell_shard", "count": 2}]}, repeat="daily", board=True, min_stage=2,
-      unlock_=flag("met", WC),
+      unlock_last=flag("met", WC),
       story="潮殻の背の周回の入口 (10 の 8.3 節: 段階 2)。")
 
 quest("weekly_tide_heart", "sub", 82, ("潮の鼓動をもう一度", "The Tide's Heart, Once More"),
@@ -625,7 +632,7 @@ quest("weekly_tide_heart", "sub", 82, ("潮の鼓動をもう一度", "The Tide'
              [ob("heart", "kill", "潮殻の心臓を止める", "Still the tide shell's heart", target="skyabyss:tide_heart", count=1)])],
       {"xp": 220, "items": [{"item": "skyabyss:resonance_crystal", "count": 1}, {"item": "skyabyss:tide_shell_shard", "count": 3}]},
       repeat="weekly", board=True, min_stage=2,
-      unlock_=flag("met", WC),
+      unlock_last=flag("met", WC),
       story="「心臓をもう一度」と同じ名前のない紙。七日という数を、もう一度ほのめかす。")
 
 # ================================================================ 伝承の項目 (manual: 会話・天の鍵・巨神の担当が記す)

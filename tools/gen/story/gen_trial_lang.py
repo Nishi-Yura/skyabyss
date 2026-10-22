@@ -25,5 +25,6 @@ for name, d in (('ja_jp', ja), ('en_us', en)):
     os.makedirs(os.path.dirname(p), exist_ok=True)
     # 持たないキー (手で足した文) は残して書く (tools/lib/langmerge.py)
     d = merged(p, {k: v for k, v in d.items() if k not in not_here})
-    json.dump(d, open(p, 'w', encoding='utf-8'), ensure_ascii=False, indent=2)
+    with open(p, 'w', encoding='utf-8') as f:
+        f.write(json.dumps(d, ensure_ascii=False, indent=2) + '\n')
 print(len(ja), 'keys')

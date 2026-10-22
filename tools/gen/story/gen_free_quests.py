@@ -17,7 +17,11 @@ from __future__ import annotations
 
 import json
 import re
+import sys
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "lib"))
+from langmerge import merged  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[3]
 DATA = ROOT / "src/main/resources/data/skyabyss"
@@ -389,7 +393,7 @@ QUESTS = []
 
 
 def quest(qid, order, title, summary, done, stages, reward, giver=None, repeat="", board=False, min_stage=0, unlock_=None,
-          unlock_hint=None, story="", chapter=""):
+          unlock_hint=None, story="", chapter="", unlock_last=None):
     base = f"quest.skyabyss.{qid}"
     text(f"{base}.title", *title)
     text(f"{base}.summary", *summary)
@@ -426,6 +430,8 @@ def quest(qid, order, title, summary, done, stages, reward, giver=None, repeat="
         out["unlock"] = unlock_
     out["stages"] = st_json
     out["reward"] = reward
+    if unlock_last:  # 後から足した解放条件は、書き付けの最後に置く (コミット済みの並び)
+        out["unlock"] = unlock_last
     QUESTS.append((qid, out, title, story))
 
 
@@ -536,7 +542,7 @@ quest("daily_lost_flock", 60, ("夜を越す羊", "Sheep Before Nightfall"),
                  target="minecraft:sheep", count=3, radius=10)])],
       {"xp": 30, "items": [{"item": "minecraft:bread", "count": 3}, {"item": "minecraft:white_wool", "count": 2}]},
       repeat="daily", board=True,
-      unlock_=flag("met", WC), unlock_hint=("イサナと話すと、受けられる", "Talk to Isana to take this on"),
+      unlock_last=flag("met", WC), unlock_hint=("イサナと話すと、受けられる", "Talk to Isana to take this on"),
       story="影の年は羊が落ち着かない。連れ戻すだけの短い頼み。")
 
 quest("daily_night_watch", 61, ("夜回り", "Night Watch"),
@@ -551,7 +557,7 @@ quest("daily_night_watch", 61, ("夜回り", "Night Watch"),
                           "minecraft:stray", "minecraft:drowned", "minecraft:zombie_villager", "minecraft:witch"], count=6)])],
       {"xp": 40, "items": [{"item": "minecraft:torch", "count": 8}, {"item": "minecraft:bread", "count": 2}]},
       repeat="daily", board=True,
-      unlock_=flag("met", WC), unlock_hint=("イサナと話すと、受けられる", "Talk to Isana to take this on"),
+      unlock_last=flag("met", WC), unlock_hint=("イサナと話すと、受けられる", "Talk to Isana to take this on"),
       story="七日目の夜の決まりの裏で、ほかの夜を見張る人がいる。")
 
 quest("daily_firewood", 62, ("炉の薪", "Firewood for the Hearth"),
@@ -564,7 +570,7 @@ quest("daily_firewood", 62, ("炉の薪", "Firewood for the Hearth"),
              [ob("wood", "turn_in", "原木を言伝ての板に納める", "Hand in logs at the message board", target="#minecraft:logs", count=16)])],
       {"xp": 30, "items": [{"item": "minecraft:emerald", "count": 1}, {"item": "minecraft:bread", "count": 2}]},
       repeat="daily", board=True,
-      unlock_=flag("met", WC), unlock_hint=("イサナと話すと、受けられる", "Talk to Isana to take this on"),
+      unlock_last=flag("met", WC), unlock_hint=("イサナと話すと、受けられる", "Talk to Isana to take this on"),
       story="七日目の夜に火を絶やさないための薪。暦の言い伝えを、日々の暮らしの側から見せる。")
 
 quest("daily_bone_sentry", 63, ("骨の番兵の見回り", "Sentinel Rounds"),
@@ -577,7 +583,7 @@ quest("daily_bone_sentry", 63, ("骨の番兵の見回り", "Sentinel Rounds"),
                  target="skyabyss:bone_sentinel", count=8)])],
       {"xp": 60, "items": [{"item": "skyabyss:stone_whale_shard", "count": 2}]},
       repeat="daily", board=True, min_stage=1,
-      unlock_=flag("met", WC), unlock_hint=("イサナと話すと、受けられる", "Talk to Isana to take this on"),
+      unlock_last=flag("met", WC), unlock_hint=("イサナと話すと、受けられる", "Talk to Isana to take this on"),
       story="鎖をつかめないイサナが、板に頼みを貼っている。")
 
 # ---- 言伝ての板 (週替わり)
@@ -615,7 +621,7 @@ quest("weekly_heart_again", 81, ("心臓をもう一度", "The Heart, Once More"
              [ob("heart", "kill", "岩鯨の心臓を止める", "Still the stone whale's heart", target="skyabyss:stone_whale_heart", count=1)])],
       {"xp": 150, "items": [{"item": "skyabyss:resonance_crystal", "count": 1}, {"item": "skyabyss:resonance_shard_stone_whale", "count": 2}]},
       repeat="weekly", board=True, min_stage=1,
-      unlock_=flag("met", WC), unlock_hint=("イサナと話すと、受けられる", "Talk to Isana to take this on"),
+      unlock_last=flag("met", WC), unlock_hint=("イサナと話すと、受けられる", "Talk to Isana to take this on"),
       story="名前のない紙。七日という数が、月のループ（01）と七日目の夜をほのめかす。")
 
 # ================================================================ 伝承の項目 (2 つ。manual: 会話でだけ記される)
@@ -820,8 +826,9 @@ def main():
     for lid, ch, order, related, _, _ in LORE:
         write_json(DATA / "lore" / "entry" / f"{lid}.json",
                    {"chapter": ch, "order": order, "unlock": [{"type": "manual"}], "related": related})
-    write_json(LANG / "ja_jp.json", dict(sorted(JA.items())))
-    write_json(LANG / "en_us.json", dict(sorted(EN.items())))
+    # 持たないキーと並びは、いまの lang のまま (tools/lib/langmerge.py)
+    write_json(LANG / "ja_jp.json", merged(LANG / "ja_jp.json", JA))
+    write_json(LANG / "en_us.json", merged(LANG / "en_us.json", EN))
     doc = DOC.read_text(encoding="utf-8")
     start_mark = "<!-- 自由なモード 生成ここから (tools/gen/story/gen_free_quests.py が書き換える。手で直さない) -->"
     end_mark = "<!-- 自由なモード 生成ここまで -->"
