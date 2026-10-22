@@ -399,6 +399,8 @@ public final class DepthLayout {
             disk(ix, top + 4, iz, 2, stone);
             // 島の下の光 (霧のような明かり。島の底から少し離れた所に、薄く広がる)
             disk(ix, top + 6, iz, 3, glow);
+            disk(ix, top + 8, iz, 6, pale);
+            disk(ix, top + 8, iz, 4, glow);
             // 墓標 (四つ。白い陶器の柱と、石の蓋で影になる)
             for (int k = 0; k < 4; k++) {
                 int gx = ix + (k % 2 == 0 ? -4 : 4);
