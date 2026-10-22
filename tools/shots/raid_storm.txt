@@ -1,0 +1,67 @@
+# 雷翼のレイドの三つの部屋 (SR1 避雷の羽運び・SR2 銅の回路つなぎ・SR3 帯電の連鎖) の撮影。docs/design/12 のレイドの節
+#   ./gradlew runShots -Pscript=tools/shots/raid_storm.txt   絵は run/shots/raid_storm/ → docs/review/raid_storm/ (台紙は tools/shots/raid_storm_sheet.py)
+world raid_storm normal
+size 1280 720
+timeout 5400
+render 12
+clouds off
+
+wait 100
+cmd skyabyss cinematic stop
+wait 10
+cmd skyabyss cinematic stop
+cmd skyabyss playtest skip opening
+cmd time set noon
+cmd weather clear
+cmd gamerule doDaylightCycle false
+cmd skyabyss playtest god on
+cmd skyroute tidyhud
+# 天職を選ぶ画面が割り込まないように、先に選んでおく
+cmd skyabyss skill calling @p rock
+wait 4000
+
+cmd skyabyss playtest gear storm
+cmd skyabyss playtest board storm
+wait 400
+cmd skyabyss playtest goto storm hub
+wait 100
+waitchunks
+wait 20
+chat clear
+cmd skyroute tidyhud
+cmd skyroute enter
+wait 30
+waitchunks
+wait 250
+waitchunks
+# 入口の戸が開いたあと、広間の南の端へ入って、北を見る
+cmd tp @s ~ ~ ~-9 180 14
+wait 60
+waitchunks
+wait 40
+shot sr1_a_deck
+cmd tp @s ~ ~ ~-8 -90 12
+wait 60
+shot sr1_b_perches
+cmd skyroute pass
+wait 300
+waitchunks
+cmd tp @s ~ ~ ~-5 180 32
+wait 60
+waitchunks
+wait 40
+shot sr2_a_grid
+cmd tp @s ~ ~ ~-4 90 28
+wait 40
+shot sr2_b_floor
+cmd skyroute pass
+wait 300
+waitchunks
+cmd skyroute status
+cmd tp @s ~ ~ ~-9 180 14
+wait 300
+shot sr3_a_charging
+wait 200
+shot sr3_b_glow
+cmd skyroute status
+cmd skyroute clear

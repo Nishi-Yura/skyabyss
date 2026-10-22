@@ -41,6 +41,10 @@ public final class StormStones {
     // 試練の id と、そのグループの引き → 枠の名前
     public static String keyOf(TrialDraw.Draw draw, Def def) {
         return switch (def.id()) {
+            // レイドの部屋 (trial/raid/storm): 歩 = 西・智 = 東・闘 = 前 (順路の段ごとに別の枠にする)
+            case "SR1" -> "west";
+            case "SR2" -> "east";
+            case "SR3" -> "front";
             case "S01", "S02", "S03", "S04" -> "west";
             case "S05", "S07", "S08" -> "east";
             case "S06" -> "front";

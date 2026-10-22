@@ -107,6 +107,14 @@ public final class StormRaidSelfTest {
         check(failures, "SR1".equals(RaidRooms.idOf(Titans.THUNDER_WING, Trial.Slot.WALK)), "WALK slot = SR1");
         check(failures, "SR2".equals(RaidRooms.idOf(Titans.THUNDER_WING, Trial.Slot.WIT)), "WIT slot = SR2");
         check(failures, "SR3".equals(RaidRooms.idOf(Titans.THUNDER_WING, Trial.Slot.FIGHT)), "FIGHT slot = SR3");
+        // 順路の段の枠 (石の key) が三つとも違う (同じだと二つ目の段の「越えた」が無視される)
+        java.util.Set<String> keys = new java.util.HashSet<>();
+        for (jp.revati.skyabyss.trial.Trial.Def d : jp.revati.skyabyss.trial.TrialCatalog.of(Titans.THUNDER_WING)) {
+            if (d.id().startsWith("SR")) {
+                keys.add(jp.revati.skyabyss.trial.TrialRegions.keyOfDef(Titans.THUNDER_WING, d, null));
+            }
+        }
+        check(failures, keys.size() == 3, "SR1..SR3 map to three different stone keys " + keys);
         for (String id : new String[] {"SR1", "SR2", "SR3"}) {
             check(failures, RaidRooms.create(id) != null, id + " has a factory");
         }
