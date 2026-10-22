@@ -116,9 +116,9 @@ def leg(name, m, hip, knee, ankle, toe, r0, r1, r2, foot_m=None, foot=(3.4, 1.6,
     F = []
     F += part(name + "_up", T(m, [hip, knee], [r0, r1], sides=6))
     F += part(name + "_kn", Bl(m, knee, r1 * 1.12, segs=7, rings=2))
-    F += part(name + "_lo", T(m, [knee, ankle, (toe[0], foot[1] * 0.9, toe[2])], [r1, r2, r2 * 0.95], sides=6))
+    F += part(name + "_lo", T(m, [knee, ankle, (ankle[0], foot[1] * 0.9, ankle[2])], [r1, r2, r2 * 0.95], sides=6))
     fx, fy, fz = foot
-    F += part(name + "_ft", E(foot_m or m, (toe[0], fy * 0.85, toe[2]), (fx, fy, fz), segs=7, rings=2))
+    F += part(name + "_ft", E(foot_m or m, (toe[0], fy * 0.85, (toe[2] + ankle[2]) * 0.5), (fx, fy, fz), segs=7, rings=2))
     return F
 
 
@@ -255,3 +255,17 @@ def gq(cy, rx, ry, rz, cz, zz, k=0.97):
     """腹帯の輪の寸法: 楕円体 (中心 cy、半径 rx, ry, rz、中心の z = cz) の z = zz での輪切りに沿わせる。"""
     q = max(0.05, 1 - ((zz - cz) / rz) ** 2) ** 0.5
     return (cy, rx * q * k, ry * q * k, zz)
+
+
+def coral(name, m, x, y, z, h, tip_m=None, lean=(0.0, 0.0), n=3, r=1.6):
+    """枝珊瑚: 太い幹と n 本の枝。先に小さな玉。根元 (x, y, z) は殻に沈める。"""
+    F = []
+    lx, lz = lean
+    top = (x + lx, y + h * 0.55, z + lz)
+    F += part(name + "_t", T(m, [(x, y - 1.0, z), top], [r * 1.3, r], sides=5))
+    for i in range(n):
+        a_ = math.radians(i * 360.0 / n + 25)
+        tip = (x + lx + math.sin(a_) * h * 0.38, y + h, z + lz + math.cos(a_) * h * 0.38)
+        F += part(f"{name}_b{i}", Ar4(m, [top, (top[0] + (tip[0] - top[0]) * 0.5, top[1] + h * 0.18, top[2] + (tip[2] - top[2]) * 0.5), tip], (r, r * 0.7), sides=5))
+        F += part(f"{name}_k{i}", Bl(tip_m or m, tip, r * 1.05, segs=6, rings=2))
+    return F

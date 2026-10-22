@@ -72,13 +72,13 @@ def c(k):
         F += part(f"nostril{s}", E("lizb", (s * 2.4, 11.6, -33), (1.4, 1.2, 1.4), segs=6, rings=2))
         F += part(f"brow{s}", E("barn", (s * 3.8, 13, -26), (2.0, 1.6, 2.6), segs=6, rings=2))
         for j in range(3):
-            F += part(f"tooth{s}{j}", C("barn", (s * 3.6, 7.6, -23.0 - j * 3.4), (0, 1, 0), 2.6, 0.7, sides=4, rings=1))
+            F += part(f"tooth{s}{j}", C("barn", (s * 3.6, 7.6, -23.0 - j * 3.4), (0, 1, 0), 2.6, 0.7, sides=4, rings=2))
     for r_i, x in enumerate((-5.4, 0, 5.4)):
         for i in range(6):
             z = -10 + i * 4.8
             if r_i == 1 and -6 < z < 12:
                 continue
-            F += part(f"stud{r_i}_{i}", E("barn", (x * (1.0 if r_i != 1 else 1.0), 15.2 - (0.6 if r_i != 1 else 0.0), z), (2.0, 1.5, 2.0), segs=6, rings=2))
+            F += part(f"stud{r_i}_{i}", E("barn", (x, 10 + 5.6 * max(0.0, 1 - (x / 10) ** 2 - (z / 15) ** 2) ** 0.5 - 0.2, z), (2.0, 1.5, 2.0), segs=6, rings=2))
     F += part("tail", Ar4("liz", [(0, 9.8, 13), (0, 8.4, 24), (4, 6, 34), (0, 3, 42)], (6.0, 0.3), sides=6))
     for i in range(4):
         F += part(f"tstud{i}", E("barn", (0, 13.6 - i * 2.3, 17 + i * 6.2), (1.5, 1.4, 1.7), segs=6, rings=2))
