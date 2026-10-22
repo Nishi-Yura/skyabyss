@@ -15,11 +15,11 @@ import net.neoforged.neoforge.network.PacketDistributor;
 
 // 語り部に頼む墓の一覧の画面。古い順に、場所・品の数・経験値・経った時間を一行ずつ並べ、「呼び戻す」で一つ選ぶ。
 // 中身はサーバーが決めて送る (GraveNetwork.Open)。選ぶとサーバーが確かめて救い、残りの一覧を送り返す (空なら閉じる)。
-// 行が多いときはホイールで送る
+// 2026-10-22 の部屋の見直し: 窓は画面に合わせて広がり、行の数も画面の高さに合わせる。入りきらない分は目盛りつきの送り (ホイール・キー)
 public class GraveScreen extends Screen implements jp.revati.skyabyss.client.ui.TextBounded {
-    private static final int W = 316;
+    private static final int MAX_W = 380;
     private static final int ROW_H = 28;
-    private static final int MAX_ROWS = 6;
+    private static final int MAX_ROWS = 10;
     private static final int PANEL = 0xFA15120E;
     private static final int EDGE = 0xFF6B5534;
     private static final int EDGE_IN = 0xFF3A2E1C;
@@ -33,9 +33,11 @@ public class GraveScreen extends Screen implements jp.revati.skyabyss.client.ui.
 
     private GraveNetwork.Open data;
     private int scroll;
+    private int w;
     private int left;
     private int top;
     private int panelH;
+    private int shown;
 
     public GraveScreen(GraveNetwork.Open data) {
         super(Component.translatable("gui.skyabyss.grave.title"));
@@ -50,7 +52,7 @@ public class GraveScreen extends Screen implements jp.revati.skyabyss.client.ui.
                 return;
             }
             s.data = payload;
-            s.scroll = Math.min(s.scroll, Math.max(0, payload.entries().size() - MAX_ROWS));
+            s.scroll = Math.min(s.scroll, Math.max(0, payload.entries().size() - s.maxRows()));
             s.rebuildWidgets();
         } else if (!payload.entries().isEmpty() && (mc.screen == null || mc.screen instanceof jp.revati.skyabyss.client.npc.DialogueScreen)) {
             // 語り部の会話の画面と入れ替える
@@ -59,22 +61,29 @@ public class GraveScreen extends Screen implements jp.revati.skyabyss.client.ui.
         }
     }
 
+    // 画面の高さに入る行の数 (上の題と下の注の分を除く)
+    private int maxRows() {
+        return Math.max(2, Math.min(MAX_ROWS, (height - 130) / ROW_H));
+    }
+
     private int rows() {
-        return Math.min(MAX_ROWS, Math.max(1, data.entries().size() - scroll));
+        return Math.min(maxRows(), Math.max(1, data.entries().size() - scroll));
     }
 
     @Override
     protected void init() {
-        panelH = 54 + rows() * ROW_H + 20;
-        left = (width - W) / 2;
+        w = Math.min(MAX_W, width - 16);
+        shown = rows();
+        panelH = 54 + shown * ROW_H + 20;
+        left = (width - w) / 2;
         top = Math.max(4, (height - panelH) / 2);
-        for (int i = 0; i < rows() && scroll + i < data.entries().size(); i++) {
+        for (int i = 0; i < shown && scroll + i < data.entries().size(); i++) {
             GraveNetwork.Entry e = data.entries().get(scroll + i);
             int y = top + 46 + i * ROW_H;
             addRenderableWidget(Button.builder(Component.translatable("gui.skyabyss.grave.pick"), b -> {
                 b.active = false;
                 PacketDistributor.sendToServer(new GraveNetwork.Pick(e.id()));
-            }).bounds(left + W - 66, y + 5, 56, 16).build());
+            }).bounds(left + w - 66, y + 5, 56, 16).build());
         }
     }
 
@@ -84,14 +93,29 @@ public class GraveScreen extends Screen implements jp.revati.skyabyss.client.ui.
     }
 
     @Override
-    public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
-        int max = Math.max(0, data.entries().size() - MAX_ROWS);
-        int next = Math.max(0, Math.min(max, scroll - (int) Math.signum(scrollY)));
+    public boolean keyPressed(int key, int scan, int mods) {
+        // 送りのキー (上下・PageUp/PageDown) は墓の一覧を送る
+        int dir = key == org.lwjgl.glfw.GLFW.GLFW_KEY_UP || key == org.lwjgl.glfw.GLFW.GLFW_KEY_PAGE_UP ? -1
+                : key == org.lwjgl.glfw.GLFW.GLFW_KEY_DOWN || key == org.lwjgl.glfw.GLFW.GLFW_KEY_PAGE_DOWN ? 1 : 0;
+        if (dir != 0) {
+            return shift(dir);
+        }
+        return super.keyPressed(key, scan, mods);
+    }
+
+    private boolean shift(int dir) {
+        int max = Math.max(0, data.entries().size() - maxRows());
+        int next = Math.max(0, Math.min(max, scroll + dir));
         if (next != scroll) {
             scroll = next;
             rebuildWidgets();
         }
         return true;
+    }
+
+    @Override
+    public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
+        return shift(-(int) Math.signum(scrollY));
     }
 
     @Override
@@ -101,35 +125,43 @@ public class GraveScreen extends Screen implements jp.revati.skyabyss.client.ui.
     }
 
     private void draw(GuiGraphics g, Font font, int mouseX, int mouseY) {
-        g.fill(left, top, left + W, top + panelH, PANEL);
-        g.renderOutline(left, top, W, panelH, EDGE);
-        g.renderOutline(left + 2, top + 2, W - 4, panelH - 4, EDGE_IN);
+        g.fill(left, top, left + w, top + panelH, PANEL);
+        g.renderOutline(left, top, w, panelH, EDGE);
+        g.renderOutline(left + 2, top + 2, w - 4, panelH - 4, EDGE_IN);
         g.drawString(font, title, left + 10, top + 8, GOLD, false);
         Component count = Component.translatable("gui.skyabyss.grave.count", data.entries().size());
-        g.drawString(font, count, left + W - 10 - font.width(count), top + 8, TEAL, false);
+        g.drawString(font, count, left + w - 10 - font.width(count), top + 8, TEAL, false);
         g.drawString(font, Component.translatable("gui.skyabyss.grave.share", data.percent()), left + 10, top + 22, SOFT, false);
-        g.fill(left + 8, top + 36, left + W - 8, top + 37, EDGE_IN);
-        for (int i = 0; i < rows() && scroll + i < data.entries().size(); i++) {
+        g.fill(left + 8, top + 36, left + w - 8, top + 37, EDGE_IN);
+        for (int i = 0; i < shown && scroll + i < data.entries().size(); i++) {
             drawRow(g, font, data.entries().get(scroll + i), top + 46 + i * ROW_H, mouseX, mouseY);
         }
-        if (data.entries().size() > MAX_ROWS) {
-            String page = (scroll + 1) + "-" + Math.min(data.entries().size(), scroll + MAX_ROWS) + " / " + data.entries().size();
-            g.drawString(font, page, left + W - 10 - font.width(page), top + panelH - 15, DIM, false);
+        if (data.entries().size() > shown) {
+            // 送りの目盛り (行の数に対する、見えている所)
+            int track = shown * ROW_H;
+            int total = data.entries().size();
+            int thumb = Math.max(8, track * shown / total);
+            int max = Math.max(1, total - shown);
+            int ty = top + 46 + (track - thumb) * scroll / max;
+            g.fill(left + w - 5, top + 46, left + w - 3, top + 46 + track, 0x40000000);
+            g.fill(left + w - 5, ty, left + w - 3, ty + thumb, 0x90F2C14E);
+            String page = (scroll + 1) + "-" + Math.min(data.entries().size(), scroll + shown) + " / " + data.entries().size();
+            g.drawString(font, page, left + w - 10 - font.width(page), top + panelH - 15, DIM, false);
         }
         g.drawString(font, Component.translatable("gui.skyabyss.grave.footer"), left + 10, top + panelH - 15, DIM, false);
     }
 
     private void drawRow(GuiGraphics g, Font font, GraveNetwork.Entry e, int y, int mouseX, int mouseY) {
-        boolean hover = mouseX >= left + 8 && mouseX < left + W - 8 && mouseY >= y && mouseY < y + ROW_H - 3;
-        g.fill(left + 8, y, left + W - 8, y + ROW_H - 3, hover ? PAPER_HOVER : PAPER);
+        boolean hover = mouseX >= left + 8 && mouseX < left + w - 8 && mouseY >= y && mouseY < y + ROW_H - 3;
+        g.fill(left + 8, y, left + w - 8, y + ROW_H - 3, hover ? PAPER_HOVER : PAPER);
         g.fill(left + 8, y, left + 10, y + ROW_H - 3, TEAL);
         // 一行目: 場所。二行目: 品の数・経験値・経った時間
         String place = Component.translatable("gui.skyabyss.grave.place", dimensionName(e.dimension()), e.x(), e.y(), e.z()).getString();
-        g.drawString(font, font.plainSubstrByWidth(place, W - 96), left + 14, y + 4, TEXT, false);
+        g.drawString(font, font.plainSubstrByWidth(place, w - 96), left + 14, y + 4, TEXT, false);
         String contents = Component.translatable("gui.skyabyss.grave.contents", e.items(), e.xp()).getString();
         g.drawString(font, contents, left + 14, y + 15, SOFT, false);
         String age = age(e.age());
-        g.drawString(font, age, left + W - 74 - font.width(age), y + 15, SOFT, false);
+        g.drawString(font, age, left + w - 74 - font.width(age), y + 15, SOFT, false);
     }
 
     // 経った時間 (墓のできた tick からの差。20 tick = 1 秒)
@@ -169,6 +201,6 @@ public class GraveScreen extends Screen implements jp.revati.skyabyss.client.ui.
 
     @Override
     public int[] textBounds() {
-        return new int[] {left, top, W, panelH};
+        return new int[] {left, top, w, panelH};
     }
 }
