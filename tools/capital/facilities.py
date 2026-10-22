@@ -337,7 +337,7 @@ class Facilities(Interiors, BackAlley):
         st, v = self.st, self.v
         x0, z0, x1, z1 = 82, 6, 93, 17
         b, ridge = self.fac_body('stable', x0, z0, x1, z1, 'north', floors=2, fh=6, ground='shop', axis='x',
-                                 roof=vox.Mat('dark_oak_planks', 'dark_oak_stairs', 'dark_oak_slab'))
+                                 roof=vox.Mat('dark_oak_planks', 'dark_oak'))
         self.fac_front(b, 'stable')
         dx_, _, dz_, _ = b.doors[0]
         ax0, az0, ax1, az1 = x0 + 2, z0 + 2, x1 - 2, z1 - 2   # 84..91, 8..15
