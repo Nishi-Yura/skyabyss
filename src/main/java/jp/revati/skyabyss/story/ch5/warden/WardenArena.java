@@ -25,6 +25,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.saveddata.SavedData;
+import net.minecraft.world.phys.AABB;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.loading.FMLEnvironment;
@@ -98,19 +99,24 @@ public final class WardenArena {
         return Data.get(server).cleared;
     }
 
-    // 番人を出す (間に入ったとき・開発用のコマンド・自己テスト)
+    // 番人を出す (間に入ったとき・開発用のコマンド・自己テスト)。普通の戦い
     @Nullable
     public static HeartWarden wake(ServerLevel level) {
+        return wake(level, NightmareTier.NORMAL);
+    }
+
+    // 番人を段つきで出す (普通の戦いは NORMAL。悪夢は Nightmare が段を決めて呼ぶ)。
+    // 出す前に、前の番人・写し・灯籠・悪夢の一回分を片づける
+    @Nullable
+    public static HeartWarden wake(ServerLevel level, NightmareTier tier) {
         BlockPos heart = AbyssBuild.mark("heart");
         if (heart == null) {
             return null;
         }
-        HeartWarden old = current(level);
-        if (old != null) {
-            old.discard();
-        }
-        AbyssBeacons.reset(level);
+        Nightmare.abort(level);
+        clearRoom(level);
         HeartWarden w = new HeartWarden(WardenSetup.HEART_WARDEN.get(), level);
+        w.setTier(tier);
         w.moveTo(heart.getX() + 0.5, heart.getY() + 1, heart.getZ() + 8.5, 180f, 0f);
         List<ServerPlayer> in = inside(level);
         w.scaleFor(Math.max(1, in.size()));
@@ -118,9 +124,37 @@ public final class WardenArena {
         warden = w.getUUID();
         empty = 0;
         for (ServerPlayer p : in) {
-            Notice.narrate(p, "message.skyabyss.warden.wake");
+            if (tier.nightmare()) {
+                Notice.narrate(p, "message.skyabyss.abyss_nm.wake", tier.n(), Component.translatable(Nightmare.nameKey(tier.n())), Component.translatable(Nightmare.ruleKey(tier.n())));
+            } else {
+                Notice.narrate(p, "message.skyabyss.warden.wake");
+            }
         }
         return w;
+    }
+
+    // 間を空にする: 番人と写しを消し、灯籠を消して置き直す (番人の bar は番人が消えるときに外れる)。
+    // 悪夢の後片付けもここ (終わり・空の間・建て直し)。番人の籍 (warden) も外す
+    static void clearRoom(ServerLevel level) {
+        BlockPos heart = AbyssBuild.mark("heart");
+        if (heart != null) {
+            for (HeartWarden h : level.getEntitiesOfClass(HeartWarden.class, new AABB(heart).inflate(64), e -> true)) {
+                h.discard();
+            }
+        }
+        warden = null;
+        AbyssBeacons.reset(level);
+    }
+
+    // 番人がいないのに間に生きている番人が残っているとき (読み込み直し・途中の消えた番) を片づける
+    static void orphans(ServerLevel level) {
+        BlockPos heart = AbyssBuild.mark("heart");
+        if (heart == null) {
+            return;
+        }
+        for (HeartWarden h : level.getEntitiesOfClass(HeartWarden.class, new AABB(heart).inflate(64), HeartWarden::isAlive)) {
+            h.discard();
+        }
     }
 
     // 番人が倒れたとき (HeartWarden.die から)
@@ -129,6 +163,11 @@ public final class WardenArena {
             return;
         }
         warden = null;
+        // 悪夢の段は、段の記録と報酬だけ (五章の本戦の合図・倒した印は普通の戦いのもの)
+        if (Nightmare.active()) {
+            Nightmare.won(level);
+            return;
+        }
         Data d = Data.get(level.getServer());
         d.cleared = true;
         d.setDirty();
@@ -151,16 +190,18 @@ public final class WardenArena {
         boolean someone = !inside(level).isEmpty();
         if (w == null) {
             warden = null;
-            if (someone && needsFight(level)) {
+            orphans(level);
+            // 悪夢の最中は、普通の戦いを出さない (間にいる別の組が段 warden でも)
+            if (someone && needsFight(level) && !Nightmare.active()) {
                 wake(level);
             }
             return;
         }
         empty = someone ? 0 : empty + 10;
         if (empty >= EMPTY_RESET) {
-            w.discard();
-            warden = null;
-            AbyssBeacons.reset(level);
+            // 間が空いた (倒れた・離れた) ので、悪夢も普通の戦いも闇へ戻す。悪夢は記録せず、次は同じ段から
+            Nightmare.abort(level);
+            clearRoom(level);
         }
     }
 

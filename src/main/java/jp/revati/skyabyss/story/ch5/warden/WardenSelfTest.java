@@ -174,7 +174,7 @@ public final class WardenSelfTest {
         report(f);
     }
 
-    private static void hold(ServerLevel level, BlockPos heart, boolean on) {
+    static void hold(ServerLevel level, BlockPos heart, boolean on) {
         int cx = heart.getX() >> 4;
         int cz = heart.getZ() >> 4;
         for (int x = cx - 3; x <= cx + 3; x++) {

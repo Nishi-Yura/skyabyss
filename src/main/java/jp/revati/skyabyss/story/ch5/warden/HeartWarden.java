@@ -62,6 +62,13 @@ public class HeartWarden extends Monster implements GeoEntity {
     static final int LUNGE_WARN = 22;
     static final int SNUFF_TICKS = 60;
     static final float SNUFF_BREAK = 40;
+    // 悪夢の決まり (NightmareTier): 爪の二度目・踏み込みの二度目の間、闇の回復の待ち、心臓の輪
+    static final int CLAW_AGAIN_TICKS = 20;
+    static final int LUNGE_AGAIN_TICKS = 16;
+    static final int REGEN_QUIET_TICKS = 120;
+    static final double RING_RADIUS = 5;
+    static final int RING_WARN = 40;
+    static final int RING_EVERY = 240;
 
     private final ServerBossEvent bar = new ServerBossEvent(Component.translatable("entity.skyabyss.heart_warden"), BossEvent.BossBarColor.PURPLE, BossEvent.BossBarOverlay.NOTCHED_10);
     private int phase = 1;
@@ -70,7 +77,13 @@ public class HeartWarden extends Monster implements GeoEntity {
     private int snuffTicks;
     private float snuffDamage;
     private boolean waveDone;
+    private boolean waveTwoDone;
     private int life;
+    // 悪夢の段 (普通の戦いは NORMAL)。数字と技の決まりはここから読む
+    private NightmareTier tier = NightmareTier.NORMAL;
+    private int clawAgain;
+    private int lungeAgain;
+    private int lastHitAt;
 
     public HeartWarden(EntityType<? extends Monster> type, Level level) {
         super(type, level);
@@ -109,9 +122,18 @@ public class HeartWarden extends Monster implements GeoEntity {
         setHealth(1);
     }
 
-    // 人数で体力を合わせる (出たときに一度)
+    public NightmareTier tier() {
+        return tier;
+    }
+
+    // 段は出す前に決める (WardenArena.wake)
+    public void setTier(NightmareTier t) {
+        tier = t;
+    }
+
+    // 人数で体力を合わせる (出たときに一度)。段の体力の倍率を先にかける (普通の戦いは 1 倍)
     public void scaleFor(int players) {
-        double hp = BASE_HP * (1 + 0.6 * Math.max(0, players - 1));
+        double hp = BASE_HP * tier.hp() * (1 + 0.6 * Math.max(0, players - 1));
         getAttribute(Attributes.MAX_HEALTH).setBaseValue(hp);
         setHealth((float) hp);
     }
@@ -125,7 +147,12 @@ public class HeartWarden extends Monster implements GeoEntity {
         if (lit()) {
             return 1f;
         }
-        return hasEffect(MobEffects.GLOWING) ? OUTLINE_SHARE : DARK_SHARE;
+        return hasEffect(MobEffects.GLOWING) ? OUTLINE_SHARE : tier.darkShare();
+    }
+
+    // 爪・踏み込みの傷 (闇の中の怒り込み)。普通の戦いは今までと同じ数
+    private float dmg() {
+        return (float) (getAttributeValue(Attributes.ATTACK_DAMAGE) * fury() * tier.dmg());
     }
 
     @Override
@@ -137,6 +164,7 @@ public class HeartWarden extends Monster implements GeoEntity {
             return true;
         }
         float a = amount * share();
+        lastHitAt = life;
         if (snuffing >= 0) {
             snuffDamage += a;
         }
@@ -165,6 +193,15 @@ public class HeartWarden extends Monster implements GeoEntity {
                 discard();
             }
             chase(level);
+            // 段 6 以降 (影の写しが本物の技を使う): 技は本物と同じ爪・踏み込み。吹き消しはしない
+            if (tier.shadesStrike() && --cooldown <= 0) {
+                ServerPlayer t = target(level);
+                if (t != null) {
+                    strike(level, t);
+                } else {
+                    cooldown = 40;
+                }
+            }
             return;
         }
         // 鼓動の音 (位置が分かる)
@@ -173,13 +210,54 @@ public class HeartWarden extends Monster implements GeoEntity {
         }
         updateBar(level);
         updatePhase(level);
+        tickRegen();
+        tickRing(level);
         if (snuffing >= 0) {
             tickSnuff(level);
             return;
         }
         chase(level);
+        tickFollow(level);
         if (--cooldown <= 0) {
             act(level);
+        }
+    }
+
+    // 闇の中で、六秒攻撃を受けないと毎秒 0.5% 戻る (段 6 以降)
+    private void tickRegen() {
+        if (!tier.darkRegen() || lit() || life % 20 != 0 || life - lastHitAt < REGEN_QUIET_TICKS) {
+            return;
+        }
+        heal((float) (getMaxHealth() * 0.005));
+    }
+
+    // 心臓の輪 (段 10): 台のまわりに赤い輪を予告してから当てる。台の上に立つ人は、輪から出る
+    private void tickRing(ServerLevel level) {
+        if (!tier.heartRing() || life % RING_EVERY != RING_EVERY / 2) {
+            return;
+        }
+        BlockPos heart = AbyssBuild.mark("heart");
+        if (heart == null) {
+            return;
+        }
+        double d = dmg();
+        Telegraph.in(level, TelegraphShape.circle(heart.getX() + 0.5, heart.getZ() + 0.5, RING_RADIUS)).floor(heart.getY()).warn(RING_WARN).danger().owner(this)
+                .onHit((lvl, p) -> p.hurt(damageSources().mobAttack(this), (float) d)).start();
+    }
+
+    // 爪・踏み込みの二度目 (段 2 と 7)。待ちの数えは tick ごと。二度目は、そのときの相手に向けて出す
+    private void tickFollow(ServerLevel level) {
+        if (clawAgain > 0 && --clawAgain == 0) {
+            ServerPlayer t = target(level);
+            if (t != null) {
+                claw(level, t);
+            }
+        }
+        if (lungeAgain > 0 && --lungeAgain == 0) {
+            ServerPlayer t = target(level);
+            if (t != null) {
+                lunge(level, t);
+            }
         }
     }
 
@@ -233,15 +311,25 @@ public class HeartWarden extends Monster implements GeoEntity {
             }
             if (phase == 3 && !waveDone) {
                 waveDone = true;
-                say(level, "message.skyabyss.warden.wave");
-                BlockPos heart = AbyssBuild.mark("heart");
-                for (int k = 0; k < 3; k++) {
-                    level.playSound(null, heart == null ? blockPosition() : heart, SoundEvents.BELL_BLOCK, SoundSource.HOSTILE, 3f, 0.4f);
-                }
-                AbyssBeacons.allOut(level);
-                AbyssLight.clear();
+                wave(level, "message.skyabyss.warden.wave");
             }
         }
+        // 段 5 以降: 闇の波がもう一度 (体力 12% で)
+        if (phase == 3 && tier.waves() >= 2 && !waveTwoDone && getHealth() / getMaxHealth() <= 0.12f) {
+            waveTwoDone = true;
+            wave(level, "message.skyabyss.abyss_nm.wave_again");
+        }
+    }
+
+    // 闇の波: 全部の灯籠と光の術の灯りが消える (鐘の音つき)
+    private void wave(ServerLevel level, String key) {
+        say(level, key);
+        BlockPos heart = AbyssBuild.mark("heart");
+        for (int k = 0; k < 3; k++) {
+            level.playSound(null, heart == null ? blockPosition() : heart, SoundEvents.BELL_BLOCK, SoundSource.HOSTILE, 3f, 0.4f);
+        }
+        AbyssBeacons.allOut(level);
+        AbyssLight.clear();
     }
 
     private void say(ServerLevel level, String key) {
@@ -294,34 +382,58 @@ public class HeartWarden extends Monster implements GeoEntity {
                 snuffDamage = 0;
                 playAction("snuff");
                 getNavigation().moveTo(b.getX() + 0.5, b.getY(), b.getZ() + 0.5, 1.2);
-                Telegraph.in(level, TelegraphShape.circle(b.getX() + 0.5, b.getZ() + 0.5, 2.5)).floor(b.getY()).warn(SNUFF_TICKS).harmless().owner(this).start();
+                Telegraph.in(level, TelegraphShape.circle(b.getX() + 0.5, b.getZ() + 0.5, 2.5)).floor(b.getY()).warn(tier.snuffTicks()).harmless().owner(this).start();
                 return;
             }
         }
-        double floor = getY();
-        float dmg = (float) getAttributeValue(Attributes.ATTACK_DAMAGE) * fury();
+        strike(level, t);
+    }
+
+    // 爪か踏み込みを一つ出す (本物も写しも同じ)。近ければ爪、遠ければ踏み込み
+    private void strike(ServerLevel level, ServerPlayer t) {
         double dx = t.getX() - getX();
         double dz = t.getZ() - getZ();
-        double ang = Telegraph.angleOf(dx, dz);
         if (dx * dx + dz * dz < 6 * 6) {
-            // 爪: 前の扇
-            Telegraph.in(level, TelegraphShape.cone(getX(), getZ(), ang, CLAW_RANGE, Math.toRadians(50))).floor(floor).warn(CLAW_WARN).danger().owner(this)
-                    .onHit((lvl, p) -> p.hurt(damageSources().mobAttack(this), dmg)).start();
-            playAction("claw");
+            claw(level, t);
+            // 段 2 以降: 爪のあと、同じ扇がもう一度 (本物だけ)
+            if (!decoy() && tier.clawTwice()) {
+                clawAgain = CLAW_AGAIN_TICKS;
+            }
             cooldown = 40;
         } else {
-            // 踏み込み: 直線。予告が終わると線の先へ跳ぶ
-            double len = Math.min(LUNGE_LENGTH, Math.sqrt(dx * dx + dz * dz) + 2);
-            double ux = dx / Math.sqrt(dx * dx + dz * dz);
-            double uz = dz / Math.sqrt(dx * dx + dz * dz);
-            Vec3 end = new Vec3(getX() + ux * (len - 1), getY(), getZ() + uz * (len - 1));
-            Telegraph.in(level, TelegraphShape.line(getX(), getZ(), ang, len, 1.0)).floor(floor).warn(LUNGE_WARN).danger().owner(this)
-                    .onImpact(lvl -> teleportTo(end.x, end.y, end.z))
-                    .onHit((lvl, p) -> p.hurt(damageSources().mobAttack(this), dmg * 1.2f)).start();
-            playAction("lunge");
+            lunge(level, t);
+            // 段 7 以降: 踏み込みのあと、少し間を置いて二度目 (本物だけ)
+            if (!decoy() && tier.lungeFollow()) {
+                lungeAgain = LUNGE_AGAIN_TICKS;
+            }
             cooldown = 55;
         }
         cooldown = Math.max(20, cooldown - (phase - 1) * 8);
+    }
+
+    // 爪: 前の扇
+    private void claw(ServerLevel level, ServerPlayer t) {
+        double ang = Telegraph.angleOf(t.getX() - getX(), t.getZ() - getZ());
+        double dmg = dmg();
+        Telegraph.in(level, TelegraphShape.cone(getX(), getZ(), ang, CLAW_RANGE, Math.toRadians(50))).floor(getY()).warn(CLAW_WARN).danger().owner(this)
+                .onHit((lvl, p) -> p.hurt(damageSources().mobAttack(this), (float) dmg)).start();
+        playAction("claw");
+    }
+
+    // 踏み込み: 直線。予告が終わると線の先へ跳ぶ
+    private void lunge(ServerLevel level, ServerPlayer t) {
+        double dx = t.getX() - getX();
+        double dz = t.getZ() - getZ();
+        double ang = Telegraph.angleOf(dx, dz);
+        double dmg = dmg();
+        double len = Math.min(LUNGE_LENGTH, Math.sqrt(dx * dx + dz * dz) + 2);
+        double ux = dx / Math.sqrt(dx * dx + dz * dz);
+        double uz = dz / Math.sqrt(dx * dx + dz * dz);
+        Vec3 end = new Vec3(getX() + ux * (len - 1), getY(), getZ() + uz * (len - 1));
+        Telegraph.in(level, TelegraphShape.line(getX(), getZ(), ang, len, 1.0)).floor(getY()).warn(LUNGE_WARN).danger().owner(this)
+                .onImpact(lvl -> teleportTo(end.x, end.y, end.z))
+                .onHit((lvl, p) -> p.hurt(damageSources().mobAttack(this), (float) (dmg * 1.2))).start();
+        playAction("lunge");
     }
 
     private void tickSnuff(ServerLevel level) {
@@ -331,7 +443,7 @@ public class HeartWarden extends Monster implements GeoEntity {
             cooldown = 50;
             return;
         }
-        if (snuffTicks >= SNUFF_TICKS) {
+        if (snuffTicks >= tier.snuffTicks()) {
             AbyssBeacons.snuff(level, snuffing);
             snuffing = -1;
             cooldown = 30;

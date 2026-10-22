@@ -51,6 +51,11 @@ public final class AbyssBeacons {
         return m;
     }
 
+    // その段で点けられる灯籠か (悪夢の段 4 以降は番号 6 と 7 が点かない)
+    public static boolean usable(int i) {
+        return i < Nightmare.tier().lanterns();
+    }
+
     public static boolean lit(int i) {
         return LIT.containsKey(i);
     }
@@ -89,7 +94,9 @@ public final class AbyssBeacons {
     }
 
     public static void light(ServerLevel level, int i, long now) {
-        LIT.put(i, now + LAST_TICKS[Math.max(0, Math.min(2, phase - 1))]);
+        // 悪夢の段の灯籠の持ち (普通の戦いは倍率 1)
+        long life = Math.round(LAST_TICKS[Math.max(0, Math.min(2, phase - 1))] * Nightmare.tier().lanternLife());
+        LIT.put(i, now + life);
         show(level, i, true);
         BlockPos p = pos(i);
         if (p != null) {
@@ -153,6 +160,11 @@ public final class AbyssBeacons {
             return;
         }
         event.setCanceled(true);
+        // 悪夢の段の灯籠の数 (段 4 以降は六つ。残りは点かない)
+        if (!usable(i)) {
+            Notice.hint(p, "message.skyabyss.abyss_nm.lantern_dark");
+            return;
+        }
         if (lit(i) || LIGHTING.containsKey(p.getUUID())) {
             return;
         }
