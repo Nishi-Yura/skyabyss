@@ -102,7 +102,7 @@ public final class DepthMobs {
         if (level == null) {
             return;
         }
-        for (ServerPlayer p : level.players()) {
+        for (ServerPlayer p : java.util.List.copyOf(level.players())) {
             int sec = DepthRun.sectionOf(p);
             if (sec == 0 || !p.isAlive() || p.isCreative() || p.isSpectator() || RAND.nextBoolean()) {
                 continue;

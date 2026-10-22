@@ -131,7 +131,8 @@ public final class AbyssGate {
         ServerLevel level = server.overworld();
         BlockPos gate = null;
         boolean looked = false;
-        for (ServerPlayer p : level.players()) {
+        // くぐった人は別の次元へ移って一覧から抜けるので、写しを回す (0.5.0 で深淵に入ると落ちた)
+        for (ServerPlayer p : List.copyOf(level.players())) {
             if (!looked) {
                 gate = TownGuests.mark(server, AbyssEntrance.GATE);
                 looked = true;

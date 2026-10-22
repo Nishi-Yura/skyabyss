@@ -119,7 +119,7 @@ public class RopeHanger extends AbyssMobB {
     // 縁にいる人 (引かれる人): 真ん中から PULL_MIN〜PULL_MAX、高さが近い、生きている、しゃがんでいない
     private List<ServerPlayer> candidates(ServerLevel sl) {
         List<ServerPlayer> out = new ArrayList<>();
-        for (ServerPlayer p : sl.players()) {
+        for (ServerPlayer p : java.util.List.copyOf(sl.players())) {
             if (!p.isAlive() || p.isCreative() || p.isSpectator() || p.isShiftKeyDown()) {
                 continue;
             }

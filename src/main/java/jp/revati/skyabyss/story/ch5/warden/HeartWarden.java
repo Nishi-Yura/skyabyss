@@ -342,7 +342,7 @@ public class HeartWarden extends Monster implements GeoEntity {
     private ServerPlayer target(ServerLevel level) {
         ServerPlayer best = null;
         double bd = 40 * 40;
-        for (ServerPlayer p : level.players()) {
+        for (ServerPlayer p : java.util.List.copyOf(level.players())) {
             if (p.isSpectator() || p.isCreative() || !p.isAlive()) {
                 continue;
             }

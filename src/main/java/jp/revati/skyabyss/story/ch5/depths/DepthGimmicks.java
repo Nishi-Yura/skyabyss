@@ -73,7 +73,7 @@ public final class DepthGimmicks {
             return;
         }
         Map<Integer, List<ServerPlayer>> by = new HashMap<>();
-        for (ServerPlayer p : level.players()) {
+        for (ServerPlayer p : java.util.List.copyOf(level.players())) {
             int sec = DepthRun.sectionOf(p);
             if (sec > 0 && p.isAlive() && !p.isSpectator()) {
                 by.computeIfAbsent(sec, k -> new ArrayList<>()).add(p);

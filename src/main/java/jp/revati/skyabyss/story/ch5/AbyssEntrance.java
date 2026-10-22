@@ -130,7 +130,7 @@ public final class AbyssEntrance {
         ServerLevel level = server.overworld();
         BlockPos door = null;
         boolean looked = false;
-        for (ServerPlayer p : level.players()) {
+        for (ServerPlayer p : java.util.List.copyOf(level.players())) {
             String stage = TownGuests.stageOf(p, QUEST);
             if (stage == null) {
                 continue;
