@@ -264,7 +264,7 @@ public final class AbyssArts {
             p.playNotifySound(SoundEvents.WARDEN_HEARTBEAT, SoundSource.PLAYERS, vol, 1f);
         }
         int healed = 0;
-        for (ServerPlayer ally : level.players()) {
+        for (ServerPlayer ally : java.util.List.copyOf(level.players())) {
             if (ally.isAlive() && ally.distanceTo(p) <= AbyssArt.HEAL_RADIUS) {
                 ally.heal(AbyssArt.HEAL[r]);
                 healed++;

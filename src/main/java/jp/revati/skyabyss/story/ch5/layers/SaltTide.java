@@ -160,7 +160,7 @@ public final class SaltTide {
             }
         }
         boolean high = highTide(shown);
-        for (ServerPlayer p : level.players()) {
+        for (ServerPlayer p : java.util.List.copyOf(level.players())) {
             if (!p.isAlive() || p.isSpectator() || !inLake(p)) {
                 continue;
             }

@@ -150,7 +150,7 @@ public class EmberKeeper extends AbyssMobB {
             mob.playAction("heat");
             mob.playSound(AbyssMobsBSetup.EMBER_KEEPER_HEAT.get(), 1.0f, 1.0f);
             level.sendParticles(ParticleTypes.LAVA, mob.getX(), mob.getY() + 0.5, mob.getZ(), 10, HEAT_RADIUS / 2, 0.3, HEAT_RADIUS / 2, 0.0);
-            for (ServerPlayer p : level.players()) {
+            for (ServerPlayer p : java.util.List.copyOf(level.players())) {
                 if (!p.isAlive() || p.isCreative() || p.isSpectator()) {
                     continue;
                 }

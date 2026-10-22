@@ -608,6 +608,15 @@ public final class NpcQuestSelfTest {
         check(stage(a, "main_song").equals("find_chaser"), "player b's choice changed player a's quest", failures);
         DialogueService.close(a);
         DialogueService.close(b);
+        // 同じ語り部に二人が同時に話しかけ、片方が閉じても、もう片方は続く。それぞれの記録で話題が決まる
+        DialogueService.open(a, st);
+        DialogueService.open(b, st);
+        check(node(a) != null && node(b) != null && !node(a).equals("(closed)") && !node(b).equals("(closed)"), "simultaneous open failed", failures);
+        check(shown(a, ST, "chaser_where") && !shown(a, ST, "shadow_ask") && shown(b, ST, "shadow_seen"),
+                "each simultaneous talker should see own topics", failures);
+        DialogueService.close(a);
+        check(node(b).equals("menu") && !node(b).equals("(closed)"), "closing one talker ended the other's conversation", failures);
+        DialogueService.close(b);
 
         // 離れたら選べない
         DialogueService.open(b, st);
