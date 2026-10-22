@@ -69,7 +69,7 @@ public final class ChaptersSelfTest {
             check(all[i].number() == i, all[i] + " number", failures);
             check(Chapters.byId(all[i].id()) == all[i], all[i] + " byId", failures);
             check((i + 1 < all.length ? all[i + 1] : null) == all[i].next(), all[i] + " next", failures);
-            check(all[i].reserved() == (i >= 5), all[i] + " reserved", failures);
+            check(all[i].reserved() == (i >= 6), all[i] + " reserved (六章から)", failures);
         }
         check(Chapters.PROLOGUE.id().equals("prologue") && Chapters.ABYSS.id().equals("chapter2") && Chapters.MOON.id().equals("chapter3")
                 && Chapters.FINALE.id().equals("finale"), "ids of the prologue and the later chapters", failures);
