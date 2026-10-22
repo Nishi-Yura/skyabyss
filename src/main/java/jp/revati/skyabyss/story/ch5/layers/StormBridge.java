@@ -130,7 +130,7 @@ public final class StormBridge {
             return;
         }
         List<ServerPlayer> near = new ArrayList<>();
-        for (ServerPlayer p : level.players()) {
+        for (ServerPlayer p : java.util.List.copyOf(level.players())) {
             if (Math.hypot(p.getX() - c.x, p.getZ() - c.z) < RANGE && Math.abs(p.getY() - c.y) < 40) {
                 near.add(p);
             }

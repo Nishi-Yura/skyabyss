@@ -1,0 +1,24 @@
+# 深淵に入ったときの画面 (HUD の重なりの確かめ)。サバイバルで、五章の本筋を進めた状態
+world abyss_hud flat
+size 1280 720
+timeout 2400
+render 8
+clouds off
+
+wait 80
+cmd skyabyss cinematic stop
+cmd skyabyss play chapter 5
+wait 40
+cmd skyabyss cinematic stop
+cmd gamemode survival Dev
+cmd skyabyss abyss enter
+wait 40
+cmd skyabyss abyss build
+wait 900
+cmd skyabyss play goto abyss-rest_1
+wait 80
+chat clear
+shot hud_rest1
+cmd tp @s 0 200 0 0 20
+wait 60
+shot hud_bone

@@ -104,7 +104,7 @@ public final class AbyssGate {
 
     // くぐった人を深淵へ (move が偽なら合図だけ。自己テスト用)
     static void passThrough(ServerPlayer p, boolean move) {
-        Quests.signal(p, SIGNAL_ENTER);
+        Quests.signalWithParty(p.serverLevel(), List.of(p), SIGNAL_ENTER);
         if (move) {
             AbyssWorld.enter(p);
         }
@@ -131,7 +131,8 @@ public final class AbyssGate {
         ServerLevel level = server.overworld();
         BlockPos gate = null;
         boolean looked = false;
-        for (ServerPlayer p : level.players()) {
+        // くぐった人は別の次元へ移って一覧から抜けるので、写しを回す (0.5.0 で深淵に入ると落ちた)
+        for (ServerPlayer p : List.copyOf(level.players())) {
             if (!looked) {
                 gate = TownGuests.mark(server, AbyssEntrance.GATE);
                 looked = true;
@@ -170,7 +171,7 @@ public final class AbyssGate {
         }
         for (ServerPlayer p : WardenArena.inside(abyss)) {
             if ("descend".equals(TownGuests.stageOf(p, AbyssEntrance.QUEST))) {
-                Quests.signal(p, SIGNAL_HEART_ROOM);
+                Quests.signalWithParty(p.serverLevel(), List.of(p), SIGNAL_HEART_ROOM);
             }
         }
         BlockPos heart = AbyssBuild.mark("heart");
@@ -213,7 +214,7 @@ public final class AbyssGate {
         later(server, HEART_LINE_GAP, () -> Notice.narrate(p, "message.skyabyss.abyss.heart_2"));
         later(server, HEART_LINE_GAP * 2, () -> {
             Notice.narrate(p, "message.skyabyss.abyss.heart_3");
-            Quests.signal(p, SIGNAL_HEART_TOUCH);
+            Quests.signalWithParty(p.serverLevel(), List.of(p), SIGNAL_HEART_TOUCH);
             TOUCHING.remove(p.getUUID());
         });
         return true;
