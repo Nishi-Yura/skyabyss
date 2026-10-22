@@ -172,7 +172,9 @@ def main():
         v.mark('beacon_%d' % i, lx, HEART_BOTTOM + 3, lz)
     v.mark('heart', 0, HEART_BOTTOM + 2, 0)
     v.mark('arrival', R_IN + 4, TOP + 1, 0)
-    meta = {'name': 'abyss_layers', 'note': 'docs/design/36 A2。生成は tools/abyss/gen_abyss_layers.py', 'top': TOP, 'bottom': HEART_BOTTOM}
+    ext = HEART_R + 2
+    meta = {'name': 'abyss_layers', 'note': 'docs/design/36 A2。生成は tools/abyss/gen_abyss_layers.py', 'top': TOP, 'bottom': HEART_BOTTOM,
+            'rect': [-ext, -ext, ext, ext]}
     data = v.runs(meta)
     vox.save(OUT, data)
     n = len(v.b)
