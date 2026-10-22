@@ -227,9 +227,12 @@ public final class TrialPoolSelfTest {
         WhaleDeck.setPlaced(true);
         TideDeck.setPlaced(true);
         UUID g = new UUID(1, 2);
-        check(TrialCatalog.poolActive(Titans.EMBER), "the ember pool is not active with its deck placed (EmberDeckSelfTest checks the rest)");
-        TrialDraw.Draw ember = TrialDraw.draw(Titans.EMBER, 1, 4242L, g, new TrialDraw.Memory());
-        check(ember.picks().stream().map(TrialDraw.Pick::cellId).toList().equals(List.of("E01", "E05", "E09")), "the ember cycle-1 draw is not the originals");
+        // レイドの巨神 (固定の部屋) は引きのプールを使わない。raid の自己テストが見る
+        if (!jp.revati.skyabyss.trial.raid.RaidRooms.active(Titans.EMBER)) {
+            check(TrialCatalog.poolActive(Titans.EMBER), "the ember pool is not active with its deck placed (EmberDeckSelfTest checks the rest)");
+            TrialDraw.Draw ember = TrialDraw.draw(Titans.EMBER, 1, 4242L, g, new TrialDraw.Memory());
+            check(ember.picks().stream().map(TrialDraw.Pick::cellId).toList().equals(List.of("E01", "E05", "E09")), "the ember cycle-1 draw is not the originals");
+        }
         // ---- 修飾
         Random rng = new Random(12345);
         for (Def d : TrialCatalog.all()) {

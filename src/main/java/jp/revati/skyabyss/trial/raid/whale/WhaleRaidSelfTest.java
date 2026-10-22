@@ -202,6 +202,8 @@ public final class WhaleRaidSelfTest {
             BlockPos far = r.ctx.cell().floor(8, 8);
             ItemEntity e = new ItemEntity(back, far.getX() + 0.5, far.getY() + 1, far.getZ() + 0.5, orb);
             e.setUnlimitedLifetime();
+            // 試しの人が近くにいても拾い直さないように (前の自己テストのあとだと立ち位置が近いことがある)
+            e.setPickUpDelay(WhaleCarryRoom.LINGER + 400);
             back.addFreshEntity(e);
             return true;
         });

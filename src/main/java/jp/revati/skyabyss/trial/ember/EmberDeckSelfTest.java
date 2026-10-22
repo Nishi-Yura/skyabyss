@@ -102,6 +102,11 @@ public final class EmberDeckSelfTest {
 
     private static void run(MinecraftServer server) {
         long t0 = System.currentTimeMillis();
+        // 余燼がレイドの部屋 (固定) になったので、引きの周回と古い甲板の試練は見ない (ember raid の自己テストが見る)
+        if (jp.revati.skyabyss.trial.raid.RaidRooms.active(EMBER)) {
+            SkyAbyss.LOGGER.info("SELFTEST trial pool ember PASSED (skipped: ember runs raid rooms)");
+            return;
+        }
         try {
             ServerLevel back = server.getLevel(EmberIds.BACK);
             TrialRuntime.clearAll();
@@ -134,6 +139,10 @@ public final class EmberDeckSelfTest {
 
     // ---------------------------------------------------------------- 引き方・修飾
     private static void pure() {
+        // 余燼がレイドの部屋 (固定) になったら、引きのプールの数え方は見ない (ember raid の自己テストが見る)
+        if (jp.revati.skyabyss.trial.raid.RaidRooms.active(EMBER)) {
+            return;
+        }
         EmberDeck.setPlaced(true);
         check(TrialCatalog.poolActive(EMBER), "the ember pool is not active with the deck placed");
         check(TrialCatalog.originals(EMBER).stream().map(Def::id).toList().equals(List.of("E01", "E05", "E09")), "ember originals are not E01 E05 E09");

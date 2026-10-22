@@ -164,7 +164,8 @@ public final class WhaleCarryRoom extends RaidRoom {
             located[idx] = true;
             e.setNoGravity(false);
             boolean atHome = e.distanceToSqr(home[idx].getX() + 0.5, home[idx].getY() + 0.2, home[idx].getZ() + 0.5) < 2.5 * 2.5;
-            if (!atHome && (e.onGround() || e.getDeltaMovement().lengthSqr() < 1.0E-4) && ++lingering[idx] >= LINGER) {
+            // 止まるのを待たない (壁に押し出されて浮いたまま動き続けることがある)
+            if (!atHome && ++lingering[idx] >= LINGER) {
                 e.discard();
                 located[idx] = false;
                 returned(ctx, idx);
