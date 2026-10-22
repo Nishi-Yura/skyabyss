@@ -1,0 +1,26 @@
+# 敵の頭の上の体力の帯 (client/hud/EnemyHealthBars)。無傷は薄く、傷を受けると濃い赤 + 遅れの白
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/enemy_hp.txt -PshotsName=enemy_hp
+world shots flat
+size 1280 720
+timeout 300
+render 6
+clouds off
+
+cmd time set noon
+cmd weather clear
+cmd gamemode creative Dev
+camera minecraft:overworld 0.5 -58.4 -1 0 8
+waitchunks
+wait 20
+cmd skyabyss cinematic stop
+wait 40
+cmd kill @e[type=!minecraft:player,distance=..80]
+cmd summon minecraft:zombie 0 -60 6 {NoAI:1b,PersistenceRequired:1b,Rotation:[180f,0f]}
+cmd summon minecraft:skeleton 2 -60 7 {NoAI:1b,PersistenceRequired:1b,Rotation:[180f,0f],Health:8f}
+cmd summon minecraft:spider -2.5 -60 7 {NoAI:1b,PersistenceRequired:1b,Rotation:[180f,0f],Health:4f}
+cmd summon skyabyss:whalebone_captain 5 -60 11 {NoAI:1b,PersistenceRequired:1b,Rotation:[180f,0f]}
+cmd effect give @e[type=!minecraft:player] minecraft:fire_resistance 1000 0 true
+cmd damage @e[type=minecraft:zombie,limit=1] 6
+wait 40
+chat clear
+shot enemy_hp_a

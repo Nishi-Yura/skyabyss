@@ -44,4 +44,19 @@ public final class BossOwners {
         CACHE.put(key, new Hit(tick, levelId, name, found));
         return found;
     }
+
+    // この体が、いま画面上のボスの帯の持ち主か (直前の数 tick に見つかった持ち主。頭の上の帯と二重に出さないため)
+    public static boolean owns(LivingEntity e) {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.level == null) {
+            return false;
+        }
+        long tick = mc.level.getGameTime();
+        for (Hit hit : CACHE.values()) {
+            if (hit.owner == e && tick - hit.tick <= 5) {
+                return true;
+            }
+        }
+        return false;
+    }
 }

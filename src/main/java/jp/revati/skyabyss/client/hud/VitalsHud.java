@@ -70,7 +70,9 @@ public final class VitalsHud {
             drawArmor(g, mc, p);
         } else if (food) {
             // 体力のある乗り物に乗っている間は、バニラが乗り物の体力をここへ描く (満腹は出ない)
-            if (!(p.getVehicle() instanceof LivingEntity v && v.showVehicleHealth())) {
+            if (manaInFoodSlot()) {
+                drawMana(g, mc, p);
+            } else if (!(p.getVehicle() instanceof LivingEntity v && v.showVehicleHealth())) {
                 drawFood(g, mc, p);
             } else {
                 event.setCanceled(false);
@@ -118,6 +120,27 @@ public final class VitalsHud {
     }
 
     static final boolean NO_FOOD_BAR = true;
+
+    // おなかは空かないので、満腹度の場所 (体力の右) にマナの帯を置く (2026-10-23 の試遊)。
+    // 体力のある乗り物に乗っている間はバニラが乗り物の体力をここへ描くので、マナは技の枠の上 (SkillHud) に戻す
+    public static boolean manaInFoodSlot() {
+        Minecraft mc = Minecraft.getInstance();
+        return NO_FOOD_BAR && styled() && rect(Id.V_FOOD) != null
+                && !(mc.player.getVehicle() instanceof LivingEntity v && v.showVehicleHealth());
+    }
+
+    private static void drawMana(GuiGraphics g, Minecraft mc, Player p) {
+        Rect r = rect(Id.V_FOOD);
+        var d = jp.revati.skyabyss.rpg.skill.SkillManager.get(p);
+        double max = jp.revati.skyabyss.rpg.skill.SkillManager.maxMana(p);
+        if (r == null || max <= 0) {
+            return;
+        }
+        double mana = Mth.clamp(Math.max(0, d.mana), 0, max);
+        // 足りずに撃てなかった直後は帯が光る (SkillClient.manaFlash)
+        boolean flash = jp.revati.skyabyss.rpg.client.skill.SkillClient.manaFlash > 0;
+        bar(g, mc.font, r, DROP, 0xFF7FC8F0, (float) (mana / max), 0xFF3C82D2, (int) Math.floor(mana) + "/" + (int) Math.ceil(max), 0xFFEAF4FC, flash);
+    }
 
     private static void drawArmor(GuiGraphics g, Minecraft mc, Player p) {
         int armor = p.getArmorValue();
@@ -225,5 +248,6 @@ public final class VitalsHud {
     private static final String[] HEART = {".##.##.", "#######", "#######", ".#####.", "..###..", "...#..."};
     private static final String[] SHIELD = {"#######", "#######", "#######", ".#####.", "..###..", "...#..."};
     private static final String[] APPLE = {"...#...", ".#####.", "#######", "#######", ".#####.", "..#.#.."};
+    private static final String[] DROP = {"...#...", "..###..", ".#####.", "#######", "#######", ".#####."};
     private static final String[] BUBBLE = {".###.", "#...#", "#...#", "#...#", ".###."};
 }

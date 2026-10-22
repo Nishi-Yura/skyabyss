@@ -25,7 +25,7 @@ public final class SkillClient {
     // 枠ごとの光る残り時間 (正 = 使えた、負 = 使えなかった)
     static final int[] slotFlash = new int[SkillRules.SLOTS];
     // マナのバーが赤紫に光る残り時間 (マナが足りなかった)
-    static int manaFlash;
+    public static int manaFlash;
     // 同じ枠の連打で何度も頼まない (サーバーの返事を待つ間)
     private static final int[] pending = new int[SkillRules.SLOTS];
 

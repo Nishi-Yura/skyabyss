@@ -81,7 +81,7 @@ public final class SkillHud {
             return;
         }
         SkillData d = SkillManager.get(mc.player);
-        if (showMana(mc.player, d)) {
+        if (showMana(mc.player, d) && !jp.revati.skyabyss.client.hud.VitalsHud.manaInFoodSlot()) {
             renderMana(g, mc, d);
         }
         if (anySlot(d)) {
