@@ -1,0 +1,24 @@
+{
+ "id": "abyss_white_shell_keeper",
+ "short": "白い貝守",
+ "kind": "塩の層の敵 3案 (A3)",
+ "title": "白い貝守 (white_shell_keeper) — 殻にこもる塩の貝・硬い・低ポリ + ドット絵 3 案",
+ "sheets": [
+  "abyss_roughs/white_shell_keeper.png"
+ ],
+ "extra": "塩の言葉 (白・塩の皮・海の緑・洞の黒)。骨 5 本 (root > shell / body / claw_l claw_r)。殻の中に身を沈める。 三角形 (全身): A 142 / B 164 / C 156 (目安 硬い中型 400〜600 (殻の輪は少なめ))。埋まった部品の検査: A whorl-shell:0.65 / B なし / C body-shell:0.46 。メッシュ・アトラス・光る画素のマスクは docs/review/abyss_roughs/white_shell_keeper/{a,b,c}/。生成: tools/rough/lowpoly/abyss/white_shell_keeper.py。 歪み・崩れ (深いほど不気味な変わり果てた姿) の方向: 歪み = 殻の螺旋が欠け、中の身が見える (白が褪せて海の緑)。崩れ = 殻が割れて二枚になり、身が剥き出しで動く。",
+ "options": {
+  "a": {
+   "name": "A 巻貝 (142 三角形)",
+   "desc": "螺旋の殻を背負い、殻の口から鋏が二本出る。殻の螺旋が一番「貝」として読める。口が開くと鋏の根が見える。"
+  },
+  "b": {
+   "name": "B 二枚貝 (164 三角形)",
+   "desc": "二枚の殻を背の蝶番で開く。開いた口の中に身が一つ見え、打てる所がはっきりする。閉じると岩の塊。"
+  },
+  "c": {
+   "name": "C 亀の甲 (156 三角形)",
+   "desc": "丸い甲の下から四本の脚と小さな頭。殻を閉じると甲だけになり、一番低く、転がっていそうな形。"
+  }
+ }
+}
