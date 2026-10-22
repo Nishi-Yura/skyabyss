@@ -438,7 +438,11 @@ public final class DepthBoss {
     }
 
     // ---------------------------------------------------------------- 当たり
+    // 当たった回数 (自己テストが見る。偽の人は傷を受けないので)
+    static int hits;
+
     static void hurt(ServerLevel level, LivingEntity king, ServerPlayer p, double dmg) {
+        hits++;
         p.hurt(level.damageSources().mobAttack(king), (float) dmg);
     }
 

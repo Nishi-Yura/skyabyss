@@ -355,7 +355,7 @@ public final class DepthsV2SelfTest {
         if (k5.boss != null) {
             // 戦い: 偽の人を相手に 600 tick。技が二種類以上出る・予告が出る・手下が呼ばれる・段が変わる・傷が入る
             Set<DepthBoss.Move> seenMoves = EnumSet.noneOf(DepthBoss.Move.class);
-            boolean hurt = false;
+            int hits0 = DepthBoss.hits;
             for (int t = 0; t < 900 && k5.boss != null; t++) {
                 if (t == 450 && level.getEntity(k5.boss.kingId) instanceof LivingEntity le0) {
                     le0.setHealth(le0.getMaxHealth() * 0.5f);
@@ -364,14 +364,10 @@ public final class DepthsV2SelfTest {
                 if (k5.boss != null && k5.boss.active != null) {
                     seenMoves.add(k5.boss.active);
                 }
-                if (fake.getHealth() < fake.getMaxHealth()) {
-                    hurt = true;
-                    fake.setHealth(fake.getMaxHealth());
-                }
             }
             check(f, k5.boss != null && k5.boss.phase >= 1, "king phase did not advance at half hp");
             check(f, seenMoves.size() >= 2, "king used fewer than 2 distinct moves in 900 ticks: " + seenMoves);
-            check(f, hurt, "no king move ever hurt the player standing next to it");
+            check(f, DepthBoss.hits > hits0, "no king move ever hurt the player standing next to it");
             int adds = level.getEntitiesOfClass(LivingEntity.class, k5.box(), e -> e.getTags().contains(DepthBoss.ADD_TAG)).size();
             check(f, adds > 0 || !seenMoves.contains(DepthBoss.Move.SUMMON), "SUMMON made no adds");
             Entity king = level.getEntity(k5.boss.kingId);
