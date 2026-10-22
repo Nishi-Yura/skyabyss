@@ -49,6 +49,9 @@ public final class AbyssFinds {
         String id = kind + "_" + layer + "_" + n;
         CompoundTag f = finds(p);
         Notice.narrate(p, "message.skyabyss.abyss." + kind + "." + layer + "_" + n);
+        if (kind.equals("grave")) {
+            AbyssRelics.onGrave(p, layer, n); // 遺品を一度だけ渡す・十二の墓が揃えば六章の手がかり (前に弔った墓も、次に弔ったとき受け取る)
+        }
         if (f.getBoolean(id)) {
             return false;
         }
