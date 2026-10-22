@@ -101,7 +101,14 @@ public final class HudLayoutSelfTest {
         return q;
     }
 
+    // 深淵の板 (深さ・技の一覧) は深淵でしか出ない (誓い・背中の板とは同時に出ない) ので、最悪の場面の「全部」には入れない
     static List<Request> everything(Scene s, boolean rightHandedCard) {
+        List<Request> q = everythingWithAbyss(s, rightHandedCard);
+        q.removeIf(r -> r.id() == Id.ABYSS_DEPTH || r.id() == Id.ABYSS_ARTS);
+        return q;
+    }
+
+    static List<Request> everythingWithAbyss(Scene s, boolean rightHandedCard) {
         List<Request> q = new ArrayList<>();
         int w = s.w();
         int h = s.h();
@@ -117,9 +124,11 @@ public final class HudLayoutSelfTest {
         q.add(Request.of(Id.QUEST, Region.TOP_LEFT, 156, 62));
         // 右上 (領域の手順の板は一番上。高さ固定)
         q.add(Request.of(Id.BOSS_DOMAIN, Region.TOP_RIGHT, clipped(196, 52)));
+        q.add(Request.of(Id.ABYSS_DEPTH, Region.TOP_RIGHT, 64, 28));
         q.add(Request.of(Id.VOW, Region.TOP_RIGHT, clipped(250, 22)));
         q.add(Request.of(Id.BACK_GAUGE, Region.TOP_RIGHT, clipped(150, 62)));
         q.add(Request.of(Id.PARTY_LIST, Region.TOP_RIGHT, 88, 3 * 19 + 10).minTop(h / 3));
+        q.add(Request.of(Id.ABYSS_ARTS, Region.TOP_RIGHT, clipped(170, 60)).minTop(h / 2 - 24));
         // 下中央
         q.add(Request.of(Id.DOWNED_SELF, Region.BOTTOM_CENTER, 120, 42));
         q.add(Request.of(Id.HINTS, Region.BOTTOM_CENTER, wrapped(300, 3, 13, 0, 3)));
@@ -271,10 +280,11 @@ public final class HudLayoutSelfTest {
     static final int[][] CROWD_WINDOWS = {{1920, 1080}, {1280, 720}, {1600, 900}, {2560, 1440}};
 
     static List<Request> crowdScene(Scene s, String name) {
-        List<Request> all = everything(s, true);
+        List<Request> all = everythingWithAbyss(s, true);
         EnumSet<Id> keep = switch (name) {
             case "boss" -> EnumSet.of(Id.PARTY_LIST, Id.HINTS, Id.CAPTION, Id.OBJECTIVE, Id.VOW, Id.BACK_GAUGE, Id.SKILL_SLOTS, Id.QUICK_CARD, Id.BOSS_CUE,
                     Id.GROWTH_BAR, Id.BANNER);
+            case "abyss" -> EnumSet.of(Id.ABYSS_DEPTH, Id.ABYSS_ARTS, Id.PARTY_LIST, Id.HINTS, Id.CAPTION, Id.OBJECTIVE, Id.QUEST, Id.GROWTH_BAR, Id.SKILL_SLOTS, Id.QUICK_CARD);
             case "opening" -> EnumSet.of(Id.HINTS, Id.CAPTION, Id.OBJECTIVE, Id.GROWTH_BAR, Id.QUICK_CARD, Id.SKILL_SLOTS);
             default -> EnumSet.of(Id.BACK_GAUGE, Id.VOW, Id.PARTY_LIST, Id.OBJECTIVE, Id.QUEST, Id.GROWTH_BAR, Id.HINTS, Id.SKILL_SLOTS, Id.QUICK_CARD);
         };
@@ -295,7 +305,7 @@ public final class HudLayoutSelfTest {
             for (int scale = 2; scale <= Math.min(4, HudLayout.maxScale(win[0], win[1])); scale++) {
                 int gw = HudLayout.guiSize(win[0], scale);
                 int gh = HudLayout.guiSize(win[1], scale);
-                for (String name : new String[] {"boss", "opening", "back"}) {
+                for (String name : new String[] {"boss", "opening", "back", "abyss"}) {
                     for (int bars : new int[] {0, 3}) {
                         for (int[] eff : new int[][] {{0, 0}, {2, 1}, {4, 2}}) {
                             for (int toast : new int[] {0, 32, 96}) {

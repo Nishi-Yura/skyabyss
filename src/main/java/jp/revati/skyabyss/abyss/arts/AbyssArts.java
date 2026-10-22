@@ -292,7 +292,7 @@ public final class AbyssArts {
         if (server.getTickCount() % CHECK_EVERY != 0) {
             return;
         }
-        for (ServerPlayer p : server.getPlayerList().getPlayers()) {
+        for (ServerPlayer p : java.util.List.copyOf(server.getPlayerList().getPlayers())) {
             reconcile(p);
             if (!AbyssWorld.in(p) || p.isSpectator() || !p.isAlive()) {
                 continue;

@@ -1,0 +1,40 @@
+# 監査 2026-10-23: 深淵の技の一覧 (右) と帯・目的・仲間の板の重なり
+world audit_abyss flat
+size 1280 720
+timeout 2400
+render 8
+clouds off
+guiscale 3
+
+wait 80
+cmd skyabyss cinematic stop
+cmd skyabyss play chapter 5
+wait 40
+cmd skyabyss cinematic stop
+cmd gamemode survival Dev
+cmd skyabyss abyss enter
+wait 40
+cmd skyabyss abyss build
+wait 900
+cmd skyabyss play goto abyss-rest_1
+wait 80
+chat clear
+cmd skyabyss abyss art learn light
+cmd skyabyss abyss art learn weight
+cmd skyabyss abyss art learn heartbeat
+cmd skyabyss abyss art up weight
+cmd summon minecraft:zombie ~2 ~ ~5 {NoAI:1b,PersistenceRequired:1b,Rotation:[180f,0f],Health:6f}
+wait 40
+shot arts_plain_g3
+huddemo back
+wait 75
+shot arts_back_g3
+guiscale 2
+wait 20
+shot arts_back_g2
+huddemo off
+guiscale 3
+cmd tp @s 0 200 0 0 20
+wait 40
+shot arts_depth_g3
+quit

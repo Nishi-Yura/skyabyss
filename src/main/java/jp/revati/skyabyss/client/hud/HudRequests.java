@@ -35,9 +35,11 @@ final class HudRequests {
         // ホットバーの左右
         QuickCard.requests(mc, out);
         // 右上の板 (上から): 誓い → 背中の目盛りと目的の板 → 仲間の一覧
+        jp.revati.skyabyss.story.ch5.client.AbyssHud.requests(mc, out);
         VowHud.requests(mc, out);
         BackGaugeHud.requests(mc, out);
         PartyClient.requests(mc, w, h, out);
+        jp.revati.skyabyss.abyss.arts.client.ArtClient.requests(mc, w, h, out);
         // 下中央: 倒れた表示 → 手がかり → 字幕。中央: 起こす輪
         DownedClient.requests(mc, out);
         TutorialClient.requests(mc, out);

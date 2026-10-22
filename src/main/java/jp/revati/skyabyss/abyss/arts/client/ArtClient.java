@@ -86,6 +86,8 @@ public final class ArtClient {
     private static final ResourceLocation[] ICONS = java.util.Arrays.stream(AbyssArt.values())
             .map(a -> ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "textures/gui/abyss_art/" + a.id + ".png")).toArray(ResourceLocation[]::new);
     private static final Component[] LINES = new Component[AbyssArt.values().length];
+    // 右の欄が狭いときの短い行 (名前なし。絵で分かる)
+    private static final Component[] SHORT = new Component[AbyssArt.values().length];
     private static final int[] COLORS = new int[AbyssArt.values().length];
     private static long linesTick = Long.MIN_VALUE;
 
@@ -96,26 +98,62 @@ public final class ArtClient {
             String keyName = KEYS[a.ordinal()].getTranslatedKeyMessage().getString();
             Component name = Component.translatable(a.nameKey());
             Component line;
+            Component shortLine;
             int color;
             if (rank == 0) {
                 line = Component.translatable("hud.skyabyss.art.none", keyName, name);
+                shortLine = Component.translatable("hud.skyabyss.art.short_none", keyName);
                 color = 0x808080;
             } else {
                 long left = Math.max(0, UNTIL[a.ordinal()] - now);
+                String secs = String.format("%.1f", left / 20.0);
                 line = left > 0
-                        ? Component.translatable("hud.skyabyss.art.wait", keyName, name, rank, String.format("%.1f", left / 20.0))
+                        ? Component.translatable("hud.skyabyss.art.wait", keyName, name, rank, secs)
                         : Component.translatable("hud.skyabyss.art.ready", keyName, name, rank);
+                shortLine = left > 0
+                        ? Component.translatable("hud.skyabyss.art.short_wait", keyName, rank, secs)
+                        : Component.translatable("hud.skyabyss.art.short_ready", keyName, rank);
                 color = left > 0 ? 0xB8B8B8 : 0xE6F4FF;
             }
             LINES[a.ordinal()] = line;
+            SHORT[a.ordinal()] = shortLine;
             COLORS[a.ordinal()] = color;
         }
         linesTick = now;
     }
 
+    private static final int ROW = 20;
+    private static final int SHORT_W = 80;
+    private static int fullW;
+
+    // 右の真ん中あたりに、右寄せで。右上の板 (誓い・背中の目盛り・仲間) とスコアボードを避けるので、置き場は HudLayout に頼む
+    public static void requests(Minecraft mc, int guiW, int guiH, java.util.List<jp.revati.skyabyss.hud.HudLayout.Request> out) {
+        if (mc.player == null || mc.level == null || mc.options.hideGui || mc.level.dimension() != AbyssWorld.LEVEL) {
+            return;
+        }
+        long now = mc.level.getGameTime();
+        if (now != linesTick) {
+            buildLines(mc, now);
+        }
+        int w = 0;
+        for (Component c : LINES) {
+            w = Math.max(w, mc.font.width(c));
+        }
+        // 幅は 16 刻みに丸める (待ちの秒で文字の幅が変わるたびに置き場の計算をやり直さない)。右の欄に入らないなら、入る幅まで縮める (短い行になる)
+        fullW = (w + 4 + 16 + 4 + 4 + 15) / 16 * 16;
+        int fw = fullW;
+        int h = ROW * LINES.length;
+        out.add(jp.revati.skyabyss.hud.HudLayout.Request.of(jp.revati.skyabyss.hud.HudLayout.Id.ABYSS_ARTS,
+                jp.revati.skyabyss.hud.HudLayout.Region.TOP_RIGHT,
+                jp.revati.skyabyss.hud.HudLayout.Fit.keyed("abyss_arts:" + fw + ":" + h,
+                        (maxW, maxH) -> maxW >= SHORT_W && maxH >= h ? new jp.revati.skyabyss.hud.HudLayout.Size(Math.min(fw, maxW), h) : null))
+                .minTop(guiH / 2 - 24));
+    }
+
     static void render(GuiGraphics g, DeltaTracker delta) {
         Minecraft mc = Minecraft.getInstance();
-        if (mc.player == null || mc.level == null || mc.options.hideGui || mc.level.dimension() != AbyssWorld.LEVEL) {
+        jp.revati.skyabyss.hud.HudLayout.Rect r = jp.revati.skyabyss.client.hud.HudManager.rect(jp.revati.skyabyss.hud.HudLayout.Id.ABYSS_ARTS);
+        if (mc.player == null || mc.level == null || mc.options.hideGui || mc.level.dimension() != AbyssWorld.LEVEL || r == null) {
             return;
         }
         Font font = mc.font;
@@ -123,17 +161,16 @@ public final class ArtClient {
         if (now != linesTick) {
             buildLines(mc, now);
         }
-        // 右の真ん中に、右寄せで (左は目的の帯・頼みの板が使うので重なっていた。2026-10-23 の試遊)
-        int iconX = g.guiWidth() - 4 - 16;
-        int y = g.guiHeight() / 2 - 24;
+        int iconX = r.right() - 4 - 16;
+        int y = r.y();
         for (AbyssArt a : AbyssArt.values()) {
-            int row = y + a.ordinal() * 20;
+            int row = y + a.ordinal() * ROW;
             // 絵 (32px の絵を半分の大きさで出す)
             g.pose().pushPose();
             g.pose().scale(0.5f, 0.5f, 1f);
             g.blit(ICONS[a.ordinal()], iconX * 2, row * 2, 0, 0, 32, 32, 32, 32);
             g.pose().popPose();
-            Component line = LINES[a.ordinal()];
+            Component line = r.w() >= fullW ? LINES[a.ordinal()] : SHORT[a.ordinal()];
             int color = COLORS[a.ordinal()];
             g.drawString(font, line, iconX - 4 - font.width(line), row + 4, color, true);
         }
