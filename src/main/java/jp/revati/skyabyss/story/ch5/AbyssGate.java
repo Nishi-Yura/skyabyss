@@ -104,7 +104,7 @@ public final class AbyssGate {
 
     // くぐった人を深淵へ (move が偽なら合図だけ。自己テスト用)
     static void passThrough(ServerPlayer p, boolean move) {
-        Quests.signal(p, SIGNAL_ENTER);
+        Quests.signalWithParty(p.serverLevel(), List.of(p), SIGNAL_ENTER);
         if (move) {
             AbyssWorld.enter(p);
         }
@@ -170,7 +170,7 @@ public final class AbyssGate {
         }
         for (ServerPlayer p : WardenArena.inside(abyss)) {
             if ("descend".equals(TownGuests.stageOf(p, AbyssEntrance.QUEST))) {
-                Quests.signal(p, SIGNAL_HEART_ROOM);
+                Quests.signalWithParty(p.serverLevel(), List.of(p), SIGNAL_HEART_ROOM);
             }
         }
         BlockPos heart = AbyssBuild.mark("heart");
@@ -213,7 +213,7 @@ public final class AbyssGate {
         later(server, HEART_LINE_GAP, () -> Notice.narrate(p, "message.skyabyss.abyss.heart_2"));
         later(server, HEART_LINE_GAP * 2, () -> {
             Notice.narrate(p, "message.skyabyss.abyss.heart_3");
-            Quests.signal(p, SIGNAL_HEART_TOUCH);
+            Quests.signalWithParty(p.serverLevel(), List.of(p), SIGNAL_HEART_TOUCH);
             TOUCHING.remove(p.getUUID());
         });
         return true;

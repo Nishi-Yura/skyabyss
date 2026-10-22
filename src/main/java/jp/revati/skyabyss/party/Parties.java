@@ -125,9 +125,9 @@ public final class Parties {
                 if (top - Growth.get(m).level > LEVEL_GAP) {
                     continue;
                 }
-                // 背中 (ダンジョン) の中では距離を問わないが、放置の仲間には渡さない (10 の 6.2):
+                // 背中・深淵 (ダンジョン) の中では距離を問わないが、放置の仲間には渡さない (10 の 6.2):
                 // 直近 60 秒に動いた・戦った人か、居合わせた仲間から 128 ブロック以内の人だけ
-                boolean sameBack = TitanBacks.isBack(level.dimension())
+                boolean sameBack = (TitanBacks.isBack(level.dimension()) || level.dimension() == jp.revati.skyabyss.story.ch5.AbyssWorld.LEVEL)
                         && (Activity.active(m, Activity.SHARE_TICKS) || near(m, here, BACK_SHARE_RANGE));
                 if (sameBack || near(m, here, SHARE_RANGE)) {
                     out.add(m);

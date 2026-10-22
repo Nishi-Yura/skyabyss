@@ -171,9 +171,7 @@ public final class WardenArena {
         Data d = Data.get(level.getServer());
         d.cleared = true;
         d.setDirty();
-        for (ServerPlayer p : inside(level)) {
-            Quests.signal(p, SIGNAL_HEART);
-        }
+        Quests.signalWithParty(level, inside(level), SIGNAL_HEART);
     }
 
     @SubscribeEvent

@@ -34,7 +34,7 @@ public final class DialogueService {
     record Session(int npcId, String role, String node, List<Integer> shown, List<String> kinds) {
     }
 
-    private static final Map<UUID, Session> SESSIONS = new HashMap<>();
+    private static final Map<UUID, Session> SESSIONS = new java.util.concurrent.ConcurrentHashMap<>();
 
     private DialogueService() {
     }
@@ -47,6 +47,8 @@ public final class DialogueService {
             SkyAbyss.LOGGER.warn("[dialogue] no dialogue for {}", role);
             return;
         }
+        // 見回りは 1 秒おき。段が進んだ直後に話しかけても、その人の今の記録で話題を決める (他の人の見回りには依らない)
+        Quests.poll(player, false);
         StoryContext ctx = new StoryContext(player, role, npc);
         Dialogue.Node node = dialogue.entryNode(ctx);
         if (node == null) {

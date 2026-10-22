@@ -126,6 +126,7 @@ public final class AbyssEntranceSelfTest {
             AbyssGate.check(server, p, gate, false);
             Quests.poll(p, true);
             check(f, "descend".equals(TownGuests.stageOf(p, AbyssEntrance.QUEST)), "passing the gate did not advance to descend: " + TownGuests.stageOf(p, AbyssEntrance.QUEST));
+            party(server, level, f);
         } catch (RuntimeException e) {
             SkyAbyss.LOGGER.error("SELFTEST ch5 entrance crashed", e);
             f.add("crashed: " + e);
@@ -140,6 +141,43 @@ public final class AbyssEntranceSelfTest {
             SkyAbyss.LOGGER.info("SELFTEST ch5 entrance PASSED (quests, prep reward, door needs the stage and the key, carve and record, landing lines once, threshold signal, gate needs the key, bars melt, gate row signal)");
         } else {
             f.forEach(m -> SkyAbyss.LOGGER.error("SELFTEST ch5 entrance FAILED: {}", m));
+        }
+    }
+
+    // パーティ: 居合わせた一人の合図で、離れた仲間の同じ段も進む (五章のメインの合図は全部 party)
+    private static void party(MinecraftServer server, ServerLevel level, List<String> f) {
+        QuestDef main = QuestManager.quest(AbyssEntrance.QUEST);
+        if (main != null) {
+            for (QuestDef.Stage st : main.stages()) {
+                for (QuestDef.Objective ob : st.objectives()) {
+                    if (ob.type().equals("signal")) {
+                        check(f, ob.party(), "main_abyss " + st.id() + "/" + ob.id() + " is not a party objective");
+                    }
+                }
+            }
+        }
+        FakePlayer a = new FakePlayer(level, new GameProfile(UUID.randomUUID(), "ch5_party_a"));
+        FakePlayer b = new FakePlayer(level, new GameProfile(UUID.randomUUID(), "ch5_party_b"));
+        jp.revati.skyabyss.party.PartyData pd = jp.revati.skyabyss.party.PartyData.get(server);
+        jp.revati.skyabyss.party.PartyData.Party party = pd.create(a.getUUID(), "a");
+        pd.add(party, b.getUUID(), "b");
+        try {
+            Map<UUID, net.minecraft.server.level.ServerPlayer> online = Map.of(a.getUUID(), a, b.getUUID(), b);
+            for (FakePlayer q : List.of(a, b)) {
+                Quests.forgetAll(q);
+                Quests.start(q, AbyssEntrance.QUEST);
+                for (int i = 0; i < 9 && !"warden".equals(TownGuests.stageOf(q, AbyssEntrance.QUEST)); i++) {
+                    Quests.forceStage(q, AbyssEntrance.QUEST);
+                }
+            }
+            b.moveTo(a.getX() + 50, a.getY(), a.getZ());
+            Quests.signalWithParty(level, List.of(a), "abyss_heart", online::get);
+            Quests.poll(a, true);
+            Quests.poll(b, true);
+            check(f, "heart".equals(TownGuests.stageOf(a, AbyssEntrance.QUEST)), "the actor did not finish the warden stage");
+            check(f, "heart".equals(TownGuests.stageOf(b, AbyssEntrance.QUEST)), "a party mate 50 blocks away did not finish the warden stage: " + TownGuests.stageOf(b, AbyssEntrance.QUEST));
+        } finally {
+            pd.disband(party);
         }
     }
 
