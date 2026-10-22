@@ -1,5 +1,7 @@
 package jp.revati.skyabyss.story.ch5;
 
+import java.util.List;
+
 import org.jetbrains.annotations.Nullable;
 
 import jp.revati.skyabyss.SkyAbyss;
@@ -95,7 +97,7 @@ public final class AbyssEntrance {
             if (first) {
                 Notice.narrate(by, "message.skyabyss.ch5.door_open");
             }
-            Quests.signal(by, SIGNAL_DOOR);
+            Quests.signalWithParty(by.serverLevel(), List.of(by), SIGNAL_DOOR);
         }
     }
 
@@ -128,7 +130,7 @@ public final class AbyssEntrance {
         ServerLevel level = server.overworld();
         BlockPos door = null;
         boolean looked = false;
-        for (ServerPlayer p : level.players()) {
+        for (ServerPlayer p : java.util.List.copyOf(level.players())) {
             String stage = TownGuests.stageOf(p, QUEST);
             if (stage == null) {
                 continue;
@@ -157,7 +159,7 @@ public final class AbyssEntrance {
 
     static void check(MinecraftServer server, ServerPlayer p, String stage, BlockPos door) {
         if ("door".equals(stage) && isOpen(server) && p.blockPosition().closerThan(door, 3.5) && holdsKey(p)) {
-            Quests.signal(p, SIGNAL_DOOR);
+            Quests.signalWithParty(p.serverLevel(), List.of(p), SIGNAL_DOOR);
         }
         for (int i = 0; i < LANDINGS.length; i++) {
             BlockPos at = TownGuests.mark(server, LANDINGS[i]);
@@ -168,7 +170,7 @@ public final class AbyssEntrance {
         BlockPos gate = TownGuests.mark(server, GATE);
         if (gate != null && p.blockPosition().closerThan(gate, NEAR)) {
             if ("shaft".equals(stage)) {
-                Quests.signal(p, SIGNAL_THRESHOLD);
+                Quests.signalWithParty(p.serverLevel(), List.of(p), SIGNAL_THRESHOLD);
             }
             if (once(p, "skyabyss_ch5_threshold")) {
                 Notice.narrate(p, "message.skyabyss.ch5.threshold");
