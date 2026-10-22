@@ -23,7 +23,9 @@ import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 import net.minecraft.world.level.storage.loot.LootTable;
 
 // 区画の形 (docs/design/36 の 9)。区画の番号と決まり (DepthPlan.plan) から、置く block を順に並べる。
-//   置く順 = 壁 → 天井 → 型の目印 (足場より先。足場を切らない) → 足場の道 → 脇の岩棚 → 灯り → 足場の縁の光 → 珍しい部屋 → 灯籠・鎖・裂け目。
+//   置く順 = 壁 → 天井 → 型の景色 (大きな目印。足場より先) → 足場の道 → 脇の岩棚 → 灯り → 足場の縁の光 → 珍しい部屋 → 灯籠・鎖・裂け目。
+//   景色は型ごとに一つの「場所」になる: 区画の半径 (ROOM_R) いっぱいに、数十ブロックの大きな目印を置く。
+//   道は区画の中心から半径 10 の螺旋 (DepthPlan.route)。景色は道より外 (半径 11 以上) に置くので、道は景色の中を通る。
 //   同じ区画なら、いつも同じ並び (自己テストが見る)。ワールドには触らない (DepthBuilder が置く)。
 //   座標: Put の x・z は世界の値、y も世界の値 (区画の上 = DepthPlan.TOP_Y)。
 //   光の言葉: 型ごとに灯りの種類を変える (暖かい・青白い・赤い・白い)。足場の縁には、どの型も小さな光の棒を一本ずつ立てて道を読めるようにする。
@@ -52,6 +54,8 @@ public final class DepthLayout {
     private final int cx;
     private final List<Put> puts = new ArrayList<>();
     private final List<BlockPos> veins = new ArrayList<>();
+    // 景色の中の灯り (灯りが消える仕掛けの対象にもなる)
+    private final List<BlockPos> extraLamps = new ArrayList<>();
     private final Palette pal;
     private final Random r;
 
@@ -102,7 +106,7 @@ public final class DepthLayout {
         List<Platform> ledges = DepthPlan.ledges(s, route);
         walls();
         roof();
-        // 型の目印は足場より先に置く (足場の板を目印で切らないため。足場は後から上書きする)
+        // 型の景色は足場より先に置く (足場の板を景色で切らないため。足場は後から上書きする)
         decorate(route);
         for (Platform p : route) {
             platform(p, pal.route());
@@ -112,6 +116,7 @@ public final class DepthLayout {
         }
         edgeLights(route);
         List<BlockPos> lamps = lamps();
+        lamps.addAll(extraLamps);
         Platform mid = route.get(route.size() / 2);
         BlockPos room = rare(mid);
         // 裂け目 (最後の広い足場の真ん中を抜く。縁は灯りで囲み、下に穴があることを見せる)
@@ -175,9 +180,9 @@ public final class DepthLayout {
         }
     }
 
-    // 壁の材料 (型ごとの模様: 鏡の闇は帯の鏡、脈の洞は縦の脈、星の空洞は星)
+    // 壁の材料 (型ごとの模様: 鏡の闇は三段の鏡の帯、脈の洞は縦の脈、星の空洞は星)
     private BlockState wallBlock(int dx, int dz, int ly) {
-        if (s.kind() == Kind.MIRROR_DARK && ly % 20 == 10) {
+        if (s.kind() == Kind.MIRROR_DARK && ly % 24 >= 10 && ly % 24 <= 12) {
             return pal.accent();
         }
         if (s.kind() == Kind.HOLLOW_STARS && r.nextInt(60) == 0) {
@@ -243,11 +248,11 @@ public final class DepthLayout {
         }
     }
 
-    // 灯り: 壁の内側に、八段ごとに四方へ (SPARSE_LIGHT は半分。LAMP_HALL は八方)
+    // 灯り: 壁の内側に、六段ごとに六方へ (LAMP_HALL は八方。SPARSE_LIGHT は半分)
     private List<BlockPos> lamps() {
         List<BlockPos> out = new ArrayList<>();
-        int every = 8;
-        int angles = s.kind() == Kind.LAMP_HALL ? 8 : 4;
+        int every = 6;
+        int angles = s.kind() == Kind.LAMP_HALL ? 8 : 6;
         if (s.has(Modifier.SPARSE_LIGHT)) {
             every *= 2;
         }
@@ -284,13 +289,43 @@ public final class DepthLayout {
         }
     }
 
-    // 型の目印 (足場より先に置く)
+    // 円盤 (ly の段に、中心 rx・rz から半径 rad の丸い板。景色の島や台に使う)
+    private void disk(int rx, int ly, int rz, double rad, BlockState st) {
+        int r2 = (int) Math.ceil(rad);
+        for (int i = -r2; i <= r2; i++) {
+            for (int j = -r2; j <= r2; j++) {
+                if (i * i + j * j <= rad * rad + 1e-9) {
+                    put(rx + i, ly, rz + j, st);
+                }
+            }
+        }
+    }
+
+    // 線 (二つの点の間を、一ブロックずつ並べる。座標は区画の中の (x, ly, z))
+    private void line(int ax, int ay, int az, int bx, int by, int bz, BlockState st) {
+        int n = Math.max(Math.abs(bx - ax), Math.max(Math.abs(by - ay), Math.abs(bz - az)));
+        for (int i = 0; i <= n; i++) {
+            double t = n == 0 ? 0 : (double) i / n;
+            put((int) Math.round(ax + (bx - ax) * t), (int) Math.round(ay + (by - ay) * t), (int) Math.round(az + (bz - az) * t), st);
+        }
+    }
+
+    // 角と半径から、区画の中の水平の位置
+    private static int ox(double ang, double rad) {
+        return (int) Math.round(Math.cos(ang) * rad);
+    }
+
+    private static int oz(double ang, double rad) {
+        return (int) Math.round(Math.sin(ang) * rad);
+    }
+
+    // 型の景色 (足場より先に置く。景色は半径 11 より外。道は景色の中を通る)
     private void decorate(List<Platform> route) {
         switch (s.kind()) {
             case INVERTED_FOREST -> invertedForest();
             case FLOATING_GRAVES -> floatingGraves();
             case PULSE_CAVE -> pulseCave();
-            case MIRROR_DARK -> mirrorDark();
+            case MIRROR_DARK -> mirrorDark(route);
             case CHAIN_NET -> chainNet();
             case LAMP_HALL -> lampHall();
             case DRY_WELL -> dryWell();
@@ -298,126 +333,245 @@ public final class DepthLayout {
         }
     }
 
-    // 逆さの森: 天井から逆さに生えた木 (幹は天井から、冠は下)。冠の下から根が垂れる
+    // 逆さの森: 天井から逆さに垂れる大木の林。大きな木は幹が三ブロック幅で 36〜58 段、冠は下端に半径 7。
+    //   小さな木が天井の間を埋め、冠の縁から根が垂れる。幹の途中から横の枝の板が道の方へ出る (道はその間を跳ぶ)
     private void invertedForest() {
         BlockState leaves = Blocks.MANGROVE_LEAVES.defaultBlockState().setValue(LeavesBlock.PERSISTENT, true);
-        for (int a = 0; a < 6; a++) {
-            double ang = a * Math.PI / 3 + 0.3;
-            int tx = (int) Math.round(Math.cos(ang) * 17);
-            int tz = (int) Math.round(Math.sin(ang) * 17);
-            int len = 26 + (a * 11) % 22;
-            column(tx, tz, 1, len, Blocks.MANGROVE_LOG.defaultBlockState());
-            blob(tx, len, tz, 4, leaves);
-            for (int i = 0; i < 4; i++) {
-                int ox = i % 2 == 0 ? -2 : 2;
-                int oz = (i / 2 == 0 ? -2 : 2);
-                column(tx + ox, tz + oz, len + 3, len + 7 + (i + a) % 3, Blocks.MANGROVE_ROOTS.defaultBlockState());
+        BlockState log = Blocks.MANGROVE_LOG.defaultBlockState();
+        BlockState root = Blocks.MANGROVE_ROOTS.defaultBlockState();
+        BlockState wood = Blocks.MANGROVE_PLANKS.defaultBlockState();
+        for (int a = 0; a < 12; a++) {
+            boolean big = a % 2 == 0;
+            double ang = a * Math.PI / 6 + 0.3 + (big ? 0.0 : 0.25);
+            double rad = big ? 18 : 20;
+            int tx = ox(ang, rad);
+            int tz = oz(ang, rad);
+            int len = big ? 36 + (a * 7) % 23 : 16 + (a * 5) % 10;
+            int crown = big ? 7 : 5;
+            for (int dx = -1; dx <= 1; dx++) {
+                for (int dz = -1; dz <= 1; dz++) {
+                    column(tx + dx, tz + dz, 1, len, log);
+                }
+            }
+            blob(tx, len, tz, crown, leaves);
+            put(tx, len + crown + 1, tz, pal.lamp());
+            int roots = big ? 8 : 4;
+            for (int i = 0; i < roots; i++) {
+                double b = i * Math.PI * 2 / roots + a * 0.2;
+                int rx = tx + ox(b, crown - 1.5);
+                int rz = tz + oz(b, crown - 1.5);
+                column(rx, rz, len + 2, len + crown + 2 + (i * 5 + a) % 12, root);
+            }
+            if (big) {
+                // 幹の途中の横の枝 (二段の板。道の方へ十四ブロック)
+                int by = len / 2;
+                int bx = ox(ang + Math.PI, 14);
+                int bz = oz(ang + Math.PI, 14);
+                line(tx, by, tz, bx, by, bz, wood);
+                line(tx, by + 1, tz, bx, by + 1, bz, wood);
             }
         }
     }
 
-    // 浮かぶ墓場: 足場の外の浮き島に墓標。鎖で天井からつられる
+    // 浮かぶ墓場: 墓場の浮き島が五つ、高さを変えて並ぶ。島は直径十六の板 (下は細い)。墓標四つと棺、鎖で天井からつられる。
+    //   島と島の間は鎖で結ばれ、その鎖が道の横の景色になる
     private void floatingGraves() {
+        BlockState slab = pal.wall();
+        BlockState cracked = pal.ledge();
+        int px = 0;
+        int pz = 0;
+        int py = 0;
+        boolean hasPrev = false;
         for (int i = 0; i < 5; i++) {
             double ang = i * 1.2566 + 0.5;
-            int ix = (int) Math.round(Math.cos(ang) * 17);
-            int iz = (int) Math.round(Math.sin(ang) * 17);
-            int top = 26 + i * 36;
-            for (int dx = -3; dx <= 3; dx++) {
-                for (int dz = -3; dz <= 3; dz++) {
+            int ix = ox(ang, 18);
+            int iz = oz(ang, 18);
+            int top = 24 + i * 38;
+            disk(ix, top, iz, 7, slab);
+            disk(ix, top + 1, iz, 7, cracked);
+            disk(ix, top + 2, iz, 6, cracked);
+            disk(ix, top + 3, iz, 4, cracked);
+            disk(ix, top + 4, iz, 2, slab);
+            // 墓標 (四つ。高さ四と石の蓋)
+            for (int k = 0; k < 4; k++) {
+                int gx = ix + (k % 2 == 0 ? -3 : 3);
+                int gz = iz + (k / 2 == 0 ? -3 : 3);
+                column(gx, gz, top - 4, top - 1, Blocks.CHISELED_DEEPSLATE.defaultBlockState());
+                put(gx, top - 5, gz, Blocks.POLISHED_DEEPSLATE.defaultBlockState());
+            }
+            // 棺 (中央に横たわる箱) と、その上の灯り
+            put(ix, top - 1, iz, Blocks.POLISHED_BLACKSTONE.defaultBlockState());
+            put(ix + 1, top - 1, iz, Blocks.POLISHED_BLACKSTONE.defaultBlockState());
+            put(ix, top - 2, iz, Blocks.SOUL_LANTERN.defaultBlockState());
+            // 天井からの鎖 (島の両端へ)
+            column(ix - 6, iz, 1, top - 1, Blocks.CHAIN.defaultBlockState());
+            column(ix + 6, iz, 1, top - 1, Blocks.CHAIN.defaultBlockState());
+            // 前の島との間の鎖 (たるんだ線。島の上から上へ)
+            if (hasPrev) {
+                line(px, py, pz, ix, top - 1, iz, Blocks.CHAIN.defaultBlockState());
+            }
+            px = ix;
+            pz = iz;
+            py = top - 1;
+            hasPrev = true;
+        }
+    }
+
+    // 心臓の脈の洞: 壁の脈 (縦の帯) が拍を打つ。肋の輪が六段あり、底の近くに大きな心臓の塊と、そこから天井へ伸びる太い脈
+    private void pulseCave() {
+        BlockState bone = Blocks.BONE_BLOCK.defaultBlockState();
+        for (int k = 0; k < 6; k++) {
+            int ly0 = 26 + k * 28;
+            // 肋の輪 (半径 18〜19 の輪と、縦の骨の棒)
+            for (int a = 0; a < 24; a++) {
+                double ang = a * Math.PI / 12;
+                int rx = ox(ang, 19);
+                int rz = oz(ang, 19);
+                column(rx, rz, ly0, ly0 + 9, bone);
+            }
+            for (int a = 0; a < 48; a++) {
+                double ang = a * Math.PI / 24;
+                put(ox(ang, 18.5), ly0, oz(ang, 18.5), bone);
+            }
+        }
+        // 心臓の塊 (底の近く、壁の側に一つ。二つの房と、下へ尖る先)
+        double hang = 0.9;
+        int hx = ox(hang, 15);
+        int hz = oz(hang, 15);
+        int hy = 172;
+        int pxh = (int) Math.round(-Math.sin(hang) * 4);
+        int pzh = (int) Math.round(Math.cos(hang) * 4);
+        blob(hx + pxh, hy, hz + pzh, 5, pal.accent());
+        blob(hx - pxh, hy, hz - pzh, 5, pal.accent());
+        blob(hx, hy + 6, hz, 4, pal.accent());
+        blob(hx, hy + 11, hz, 2, pal.accent());
+        // 太い脈 (心臓から天井へ三本)
+        for (int i = -1; i <= 1; i++) {
+            line(hx + i * 2, 1, hz, hx + i * 2, hy - 4, hz, pal.accent());
+        }
+        // 底の脈だまり (心臓の下に、赤い灯り)
+        for (int dx = -3; dx <= 3; dx++) {
+            for (int dz = -3; dz <= 3; dz++) {
+                if (dx * dx + dz * dz <= 9) {
+                    put(hx + dx, HEIGHT_LAST, hz + dz, pal.lamp());
+                }
+            }
+        }
+    }
+
+    // 鏡の闇: 色ガラスの柱が六本 (黒曜石の台)。道と同じ数の影が、道の反対側に上下逆に写る (黒曜石の板)
+    private void mirrorDark(List<Platform> route) {
+        BlockState glass = Blocks.TINTED_GLASS.defaultBlockState();
+        BlockState obsidian = Blocks.OBSIDIAN.defaultBlockState();
+        for (int a = 0; a < 6; a++) {
+            double ang = a * Math.PI / 3 + 0.4;
+            int mx = ox(ang, 21);
+            int mz = oz(ang, 21);
+            for (int dx = 0; dx <= 1; dx++) {
+                for (int dz = 0; dz <= 1; dz++) {
+                    column(mx + dx, mz + dz, 1, HEIGHT_LAST - 4, glass);
+                    column(mx + dx, mz + dz, HEIGHT_LAST - 3, HEIGHT_LAST, obsidian);
+                }
+            }
+            for (int ly = 9; ly < HEIGHT_LAST - 4; ly += 18) {
+                put(mx, ly, mz, pal.lamp());
+            }
+        }
+        // 逆さの影: 道の一つ一つを、上下を逆にして反対側に写す
+        for (Platform p : route) {
+            int ly = DepthPlan.HEIGHT - 1 - p.ly();
+            double ang = Math.atan2(p.dz(), p.dx()) + Math.PI;
+            disk(ox(ang, 16), ly, oz(ang, 16), 1.4, obsidian);
+        }
+    }
+
+    // 鎖の網: 八段ごとに、格子の鎖 (三ブロックごとの糸) を天井から床まで張る。道はその間を通る。
+    //   外側には、鎖の帳 (二十四本) が天井から床まで垂れる
+    private void chainNet() {
+        BlockState chain = Blocks.CHAIN.defaultBlockState();
+        for (int ly = 4; ly < HEIGHT_LAST - 1; ly += 8) {
+            for (int dx = -24; dx <= 24; dx++) {
+                for (int dz = -24; dz <= 24; dz++) {
                     int d2 = dx * dx + dz * dz;
-                    if (d2 <= 9) {
-                        put(ix + dx, top, iz + dz, d2 >= 5 ? pal.ledge() : pal.wall());
+                    if (d2 < 81 || d2 > 24 * 24) {
+                        continue;
+                    }
+                    if (dx % 3 == 0) {
+                        put(dx, ly, dz, chain.setValue(BlockStateProperties.AXIS, Direction.Axis.Z));
+                    } else if (dz % 3 == 0) {
+                        put(dx, ly, dz, chain.setValue(BlockStateProperties.AXIS, Direction.Axis.X));
                     }
                 }
             }
-            put(ix, top - 1, iz, Blocks.CHISELED_DEEPSLATE.defaultBlockState());
-            put(ix, top - 2, iz, Blocks.CHISELED_DEEPSLATE.defaultBlockState());
-            put(ix + 1, top - 1, iz - 1, Blocks.POLISHED_DEEPSLATE.defaultBlockState());
-            put(ix - 1, top - 1, iz + 1, Blocks.SOUL_LANTERN.defaultBlockState());
-            column(ix - 2, iz, 1, top - 1, Blocks.CHAIN.defaultBlockState());
-            column(ix + 2, iz, 1, top - 1, Blocks.CHAIN.defaultBlockState());
+        }
+        for (int a = 0; a < 24; a++) {
+            double ang = a * Math.PI / 12 + 0.1;
+            column(ox(ang, 22), oz(ang, 22), 1, HEIGHT_LAST, chain);
         }
     }
 
-    // 心臓の脈の洞: 壁から赤い瘤が出る (脈は壁の縦の帯。脈動は DepthGimmicks.pulseVeins)
-    private void pulseCave() {
-        for (int k = 0; k < 6; k++) {
-            double ang = k * 1.047 + 0.2;
-            int ly = 24 + k * 30;
-            blob((int) Math.round(Math.cos(ang) * 22), ly, (int) Math.round(Math.sin(ang) * 22), 3, pal.accent());
-        }
-    }
-
-    // 鏡の闇: 足場の外の柱の上に黒い鏡 (色ガラス) と、その光。岩棚の上に立つ
-    private void mirrorDark() {
-        for (Platform p : ledges()) {
-            if (p.k() % 6 == 3) {
-                int mx = (int) Math.round(p.dx());
-                int mz = (int) Math.round(p.dz());
-                put(mx, p.ly() - 1, mz, pal.accent());
-                put(mx, p.ly() - 2, mz, pal.accent());
-                put(mx, p.ly() - 3, mz, pal.lamp());
-            }
-        }
-    }
-
-    // 岩棚は道の横の板 (鏡の柱の台)。道と同じ並びから出す
-    private List<Platform> ledges() {
-        return DepthPlan.ledges(s, DepthPlan.route(s));
-    }
-
-    // 鎖の網: 天井から垂れる鎖の帳 (カーテン) と、段ごとに張られた横糸の輪
-    private void chainNet() {
-        for (int a = 0; a < 16; a++) {
-            double ang = a * Math.PI / 8 + 0.1;
-            int rx = (int) Math.round(Math.cos(ang) * 20);
-            int rz = (int) Math.round(Math.sin(ang) * 20);
-            column(rx, rz, 1, 40 + (a * 37) % 100, Blocks.CHAIN.defaultBlockState());
-        }
-        for (int lv : new int[] {30, 80, 130, 175}) {
-            for (int rad : new int[] {7, 15}) {
-                for (int a = 0; a < 24; a++) {
-                    double ang = a * Math.PI / 12;
-                    int rx = (int) Math.round(Math.cos(ang) * rad);
-                    int rz = (int) Math.round(Math.sin(ang) * rad);
-                    Direction.Axis axis = Math.abs(Math.sin(ang)) > Math.abs(Math.cos(ang)) ? Direction.Axis.X : Direction.Axis.Z;
-                    put(rx, lv, rz, Blocks.CHAIN.defaultBlockState().setValue(BlockStateProperties.AXIS, axis));
-                }
-            }
-        }
-    }
-
-    // 灯りを喰う広間: 八本の柱に灯りと黒い口 (スカルク)。灯りは柱の中に埋まる
+    // 灯りを喰う広間: 八本の大きな柱 (三ブロック角。十六段ごとに縁の帯)。柱の内側の面に灯り、その横に黒い口 (黒いコンクリートの塊と、スカルクの縁)
     private void lampHall() {
+        BlockState brick = Blocks.DEEPSLATE_BRICKS.defaultBlockState();
+        BlockState band = Blocks.POLISHED_DEEPSLATE.defaultBlockState();
         for (int a = 0; a < 8; a++) {
             double ang = a * Math.PI / 4 + 0.2;
-            int px = (int) Math.round(Math.cos(ang) * 17);
-            int pz = (int) Math.round(Math.sin(ang) * 17);
-            column(px, pz, 0, DepthPlan.HEIGHT - 1, Blocks.DEEPSLATE_BRICKS.defaultBlockState());
-            for (int ly = 12; ly < DepthPlan.HEIGHT; ly += 24) {
-                put(px, ly, pz, Blocks.SEA_LANTERN.defaultBlockState());
-                if (ly + 12 < DepthPlan.HEIGHT) {
-                    put(px, ly + 12, pz, Blocks.SCULK.defaultBlockState());
+            int px = ox(ang, 18);
+            int pz = oz(ang, 18);
+            for (int dx = -1; dx <= 1; dx++) {
+                for (int dz = -1; dz <= 1; dz++) {
+                    column(px + dx, pz + dz, 0, HEIGHT_LAST, brick);
                 }
             }
+            for (int ly = 8; ly < HEIGHT_LAST; ly += 16) {
+                for (int dx = -2; dx <= 2; dx++) {
+                    for (int dz = -2; dz <= 2; dz++) {
+                        if (Math.max(Math.abs(dx), Math.abs(dz)) == 2) {
+                            put(px + dx, ly, pz + dz, band);
+                        }
+                    }
+                }
+            }
+            // 灯り (柱の内側の面。十六段ごと。灯りの仕掛けの対象)
+            int fx = ox(ang, 15);
+            int fz = oz(ang, 15);
+            for (int ly = 16; ly < HEIGHT_LAST - 8; ly += 16) {
+                put(fx, ly, fz, pal.lamp());
+                extraLamps.add(new BlockPos(cx + fx, DepthPlan.TOP_Y - ly, fz));
+            }
+            // 黒い口 (柱の内側の面に埋まる黒い塊。縁はスカルク)
+            int my = 150 + (a * 11) % 30;
+            blob(fx, my, fz, 2, Blocks.BLACK_CONCRETE.defaultBlockState());
+            blob(fx, my, fz, 3, Blocks.SCULK.defaultBlockState());
+            put(fx, my, fz, Blocks.BLACK_CONCRETE.defaultBlockState());
         }
     }
 
-    // 静かな井戸: 中心に泥煉瓦の井戸の筒。天井に口が開き、底に静かな水がたまる
+    // 静かな井戸: 中心に泥煉瓦の井戸の筒 (内側の半径 4、壁の厚さ二)。十六段ごとに縁の輪 (半径 7〜9) が張り出し、
+    //   井戸の縄 (鎖) が天井から底まで。底に静かな水がたまる。天井に口が開き、上から光が落ちる
     private void dryWell() {
+        BlockState mud = pal.wall();
+        BlockState packed = pal.route();
         for (int ly = 0; ly < DepthPlan.HEIGHT; ly++) {
-            for (int dx = -5; dx <= 5; dx++) {
-                for (int dz = -5; dz <= 5; dz++) {
+            for (int dx = -7; dx <= 7; dx++) {
+                for (int dz = -7; dz <= 7; dz++) {
                     int d2 = dx * dx + dz * dz;
-                    if (d2 >= 16 && d2 <= 25) {
-                        put(dx, ly, dz, pal.wall());
+                    if (d2 >= 25 && d2 <= 49) {
+                        put(dx, ly, dz, mud);
+                    }
+                    if (ly % 16 == 8 && d2 >= 49 && d2 <= 81) {
+                        put(dx, ly, dz, packed);
                     }
                 }
             }
             if (ly % 30 == 15) {
-                put(4, ly, 0, pal.lamp());
-                put(-4, ly, 0, pal.lamp());
+                put(3, ly, 0, pal.lamp());
+                put(-3, ly, 0, pal.lamp());
+            }
+            if (ly % 48 == 7) {
+                // 縁の上の桶 (大釜)
+                put(8, ly - 1, 0, Blocks.CAULDRON.defaultBlockState());
+                put(-8, ly - 1, 0, Blocks.CAULDRON.defaultBlockState());
             }
         }
         // 天井の口 (上から光が落ちる)
@@ -428,11 +582,13 @@ public final class DepthLayout {
                 }
             }
         }
-        // 底の水 (底の板の上に、静かな水が八ブロック)
+        // 縄 (井戸の中を天井から底の水まで)
+        column(-2, 0, 1, 184, Blocks.CHAIN.defaultBlockState());
+        // 底の水 (底の板の上に、静かな水が九ブロック)
         for (int dx = -3; dx <= 3; dx++) {
             for (int dz = -3; dz <= 3; dz++) {
                 if (dx * dx + dz * dz <= 9) {
-                    put(dx, 195, dz, Blocks.PACKED_MUD.defaultBlockState());
+                    put(dx, 195, dz, packed);
                     for (int ly = 186; ly <= 194; ly++) {
                         put(dx, ly, dz, Blocks.WATER.defaultBlockState());
                     }
@@ -441,24 +597,43 @@ public final class DepthLayout {
         }
     }
 
-    // 星のない空洞: 空に浮く小さな水晶の島。まばらな光 (星)
+    // 星のない空洞: 空に浮く大きな水晶の星 (三十六)。五つの星座は、星と星を光の線で結ぶ (線は道の目印にもなる)
     private void hollowStars() {
-        for (int i = 0; i < 10; i++) {
+        BlockState amethyst = Blocks.AMETHYST_BLOCK.defaultBlockState();
+        BlockState rod = Blocks.END_ROD.defaultBlockState();
+        for (int i = 0; i < 36; i++) {
             double ang = r.nextDouble() * Math.PI * 2;
-            double rr = 14 + r.nextDouble() * 7;
-            int ix = (int) Math.round(Math.cos(ang) * rr);
-            int iz = (int) Math.round(Math.sin(ang) * rr);
-            int top = 12 + r.nextInt(170);
-            for (int dx = -2; dx <= 2; dx++) {
-                for (int dz = -2; dz <= 2; dz++) {
-                    if (dx * dx + dz * dz <= 4) {
-                        put(ix + dx, top, iz + dz, Blocks.AMETHYST_BLOCK.defaultBlockState());
-                    }
-                }
-            }
-            put(ix, top, iz, Blocks.GLOWSTONE.defaultBlockState());
-            put(ix, top - 1, iz, Blocks.AMETHYST_CLUSTER.defaultBlockState());
+            double rr = 12 + r.nextDouble() * 8;
+            int top = 8 + r.nextInt(180);
+            star(ox(ang, rr), top, oz(ang, rr), 2 + r.nextInt(2), amethyst);
         }
+        for (int c = 0; c < 5; c++) {
+            double ang = c * 1.2566 + 0.7;
+            int prevX = 0;
+            int prevY = 0;
+            int prevZ = 0;
+            for (int k = 0; k < 4; k++) {
+                int sx = ox(ang + k * 0.45, 17);
+                int sy = 24 + c * 34 + k * 9 + r.nextInt(3);
+                int sz = oz(ang + k * 0.45, 17);
+                star(sx, sy, sz, 2, amethyst);
+                if (k > 0) {
+                    line(prevX, prevY, prevZ, sx, sy, sz, rod);
+                }
+                prevX = sx;
+                prevY = sy;
+                prevZ = sz;
+            }
+        }
+    }
+
+    // 星 (一つの大きな水晶の塊。芯に光、上に水晶の群れ)
+    private void star(int rx, int ly, int rz, int rad, BlockState crystal) {
+        blob(rx, ly, rz, rad, crystal);
+        put(rx, ly, rz, Blocks.GLOWSTONE.defaultBlockState());
+        put(rx, ly - rad - 1, rz, Blocks.AMETHYST_CLUSTER.defaultBlockState());
+        put(rx + rad + 1, ly, rz, Blocks.AMETHYST_CLUSTER.defaultBlockState());
+        put(rx - rad - 1, ly, rz, Blocks.AMETHYST_CLUSTER.defaultBlockState());
     }
 
     // 珍しい部屋 (道の真ん中から外へ、一本の橋)。部屋の中心の座標を返す (なければ道の中心)
@@ -516,4 +691,7 @@ public final class DepthLayout {
         }
         return center;
     }
+
+    // 区画の一番下の段 (ly。HEIGHT - 1)
+    private static final int HEIGHT_LAST = DepthPlan.HEIGHT - 1;
 }
