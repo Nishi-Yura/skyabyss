@@ -139,6 +139,10 @@ public final class DepthSelfTest {
             int cx = e.getValue().centerX();
             for (Platform p : g.route()) {
                 BlockPos c = new BlockPos(cx + (int) Math.round(p.dx()), DepthPlan.TOP_Y - p.ly(), (int) Math.round(p.dz()));
+                // 最後の広い足場の真ん中は裂け目の穴 (空気)。縁の一つを見る
+                if (p.k() == g.route().size() - 1) {
+                    c = c.offset(2, 0, 0);
+                }
                 BlockState st = grid.get(c);
                 check(f, st != null && !st.isAir(), k + ": the route platform " + p.k() + " has no block");
             }
