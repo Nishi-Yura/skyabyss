@@ -1,0 +1,222 @@
+{
+  "ash_trail_step": {
+    "subtitle": "subtitles.skyabyss_abyss_b.ash_trail_step",
+    "sounds": [
+      {
+        "name": "minecraft:block.gravel.step",
+        "type": "event",
+        "pitch": 0.7,
+        "volume": 0.35
+      }
+    ]
+  },
+  "ash_trail_reveal": {
+    "subtitle": "subtitles.skyabyss_abyss_b.ash_trail_reveal",
+    "sounds": [
+      {
+        "name": "minecraft:entity.warden.nearby_close",
+        "type": "event",
+        "pitch": 1.6,
+        "volume": 0.7
+      }
+    ]
+  },
+  "ash_trail_attack": {
+    "subtitle": "subtitles.skyabyss_abyss_b.ash_trail_attack",
+    "sounds": [
+      {
+        "name": "minecraft:block.sand.break",
+        "type": "event",
+        "pitch": 0.6,
+        "volume": 0.9
+      }
+    ]
+  },
+  "ember_keeper_idle": {
+    "subtitle": "subtitles.skyabyss_abyss_b.ember_keeper_idle",
+    "sounds": [
+      {
+        "name": "minecraft:block.fire.ambient",
+        "type": "event",
+        "pitch": 0.7,
+        "volume": 0.5
+      }
+    ]
+  },
+  "ember_keeper_telegraph": {
+    "subtitle": "subtitles.skyabyss_abyss_b.ember_keeper_telegraph",
+    "sounds": [
+      {
+        "name": "minecraft:block.fire.extinguish",
+        "type": "event",
+        "pitch": 0.6,
+        "volume": 0.9
+      }
+    ]
+  },
+  "ember_keeper_heat": {
+    "subtitle": "subtitles.skyabyss_abyss_b.ember_keeper_heat",
+    "sounds": [
+      {
+        "name": "minecraft:entity.blaze.shoot",
+        "type": "event",
+        "pitch": 0.6,
+        "volume": 1.1
+      }
+    ]
+  },
+  "soot_child_idle": {
+    "subtitle": "subtitles.skyabyss_abyss_b.soot_child_idle",
+    "sounds": [
+      {
+        "name": "minecraft:entity.silverfish.ambient",
+        "type": "event",
+        "pitch": 0.6,
+        "volume": 0.5
+      }
+    ]
+  },
+  "soot_child_bite": {
+    "subtitle": "subtitles.skyabyss_abyss_b.soot_child_bite",
+    "sounds": [
+      {
+        "name": "minecraft:entity.silverfish.hurt",
+        "type": "event",
+        "pitch": 1.2,
+        "volume": 0.6
+      }
+    ]
+  },
+  "past_shadow_echo": {
+    "subtitle": "subtitles.skyabyss_abyss_b.past_shadow_echo",
+    "sounds": [
+      {
+        "name": "minecraft:entity.phantom.ambient",
+        "type": "event",
+        "pitch": 0.8,
+        "volume": 0.9
+      }
+    ]
+  },
+  "past_shadow_mirror": {
+    "subtitle": "subtitles.skyabyss_abyss_b.past_shadow_mirror",
+    "sounds": [
+      {
+        "name": "minecraft:entity.enderman.stare",
+        "type": "event",
+        "pitch": 0.8,
+        "volume": 0.8
+      }
+    ]
+  },
+  "nameless_shape_hum": {
+    "subtitle": "subtitles.skyabyss_abyss_b.nameless_shape_hum",
+    "sounds": [
+      {
+        "name": "minecraft:block.beacon.ambient",
+        "type": "event",
+        "pitch": 0.6,
+        "volume": 0.6
+      }
+    ]
+  },
+  "nameless_shape_shoot": {
+    "subtitle": "subtitles.skyabyss_abyss_b.nameless_shape_shoot",
+    "sounds": [
+      {
+        "name": "minecraft:block.amethyst_block.chime",
+        "type": "event",
+        "pitch": 0.6,
+        "volume": 0.9
+      }
+    ]
+  },
+  "lamp_eater_snuff": {
+    "subtitle": "subtitles.skyabyss_abyss_b.lamp_eater_snuff",
+    "sounds": [
+      {
+        "name": "minecraft:block.candle.extinguish",
+        "type": "event",
+        "pitch": 0.8,
+        "volume": 1.0
+      }
+    ]
+  },
+  "lamp_eater_hiss": {
+    "subtitle": "subtitles.skyabyss_abyss_b.lamp_eater_hiss",
+    "sounds": [
+      {
+        "name": "minecraft:entity.silverfish.hurt",
+        "type": "event",
+        "pitch": 0.7,
+        "volume": 0.8
+      }
+    ]
+  },
+  "ceiling_creak": {
+    "subtitle": "subtitles.skyabyss_abyss_b.ceiling_creak",
+    "sounds": [
+      {
+        "name": "minecraft:block.chain.step",
+        "type": "event",
+        "pitch": 0.6,
+        "volume": 1.0
+      }
+    ]
+  },
+  "ceiling_drop": {
+    "subtitle": "subtitles.skyabyss_abyss_b.ceiling_drop",
+    "sounds": [
+      {
+        "name": "minecraft:entity.zombie.attack_wooden_door",
+        "type": "event",
+        "pitch": 1.4,
+        "volume": 1.0
+      }
+    ]
+  },
+  "heartbeat_lure": {
+    "subtitle": "subtitles.skyabyss_abyss_b.heartbeat_lure",
+    "sounds": [
+      {
+        "name": "minecraft:entity.warden.heartbeat",
+        "type": "event",
+        "pitch": 1.0,
+        "volume": 1.0
+      }
+    ]
+  },
+  "heartbeat_bite": {
+    "subtitle": "subtitles.skyabyss_abyss_b.heartbeat_bite",
+    "sounds": [
+      {
+        "name": "minecraft:entity.zombie.attack_iron_door",
+        "type": "event",
+        "pitch": 0.8,
+        "volume": 1.0
+      }
+    ]
+  },
+  "rope_creak": {
+    "subtitle": "subtitles.skyabyss_abyss_b.rope_creak",
+    "sounds": [
+      {
+        "name": "minecraft:block.chain.place",
+        "type": "event",
+        "pitch": 0.5,
+        "volume": 1.0
+      }
+    ]
+  },
+  "rope_pull": {
+    "subtitle": "subtitles.skyabyss_abyss_b.rope_pull",
+    "sounds": [
+      {
+        "name": "minecraft:entity.lead_knot.place",
+        "type": "event",
+        "pitch": 0.6,
+        "volume": 1.0
+      }
+    ]
+  }
+}

@@ -1,0 +1,207 @@
+{
+  "format_version": "1.8.0",
+  "animations": {
+    "animation.nameless_shape.idle": {
+      "loop": true,
+      "animation_length": 3.0,
+      "bones": {
+        "ring": {
+          "rotation": [
+            "0",
+            "query.anim_time * 90",
+            "0"
+          ]
+        },
+        "core": {
+          "rotation": [
+            "0",
+            "0",
+            "math.sin(query.anim_time * 90 + 0) * 4"
+          ],
+          "position": [
+            0,
+            "math.sin(query.anim_time * 90 + 0) * 0.35",
+            0
+          ]
+        },
+        "cloth": {
+          "rotation": [
+            "math.sin(query.anim_time * 120 + 0) * 4",
+            "0",
+            "0"
+          ]
+        },
+        "hem": {
+          "rotation": [
+            "math.sin(query.anim_time * 120 + 90) * 3",
+            "0",
+            "0"
+          ]
+        }
+      }
+    },
+    "animation.nameless_shape.walk": {
+      "loop": true,
+      "animation_length": 1.0,
+      "bones": {
+        "ring": {
+          "rotation": [
+            "0",
+            "query.anim_time * 180",
+            "0"
+          ]
+        },
+        "core": {
+          "rotation": [
+            "0",
+            "0",
+            "math.sin(query.anim_time * 180 + 0) * 6"
+          ]
+        },
+        "cloth": {
+          "rotation": [
+            "math.sin(query.anim_time * 180 + 0) * 8",
+            "0",
+            "0"
+          ]
+        }
+      }
+    },
+    "animation.nameless_shape.shoot": {
+      "animation_length": 0.9,
+      "bones": {
+        "shard": {
+          "rotation": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "0.30": [
+              0,
+              0,
+              0
+            ],
+            "0.50": [
+              70,
+              0,
+              0
+            ],
+            "0.90": [
+              0,
+              0,
+              0
+            ]
+          },
+          "position": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "0.30": [
+              0,
+              0,
+              0
+            ],
+            "0.50": [
+              0,
+              0,
+              0
+            ],
+            "0.90": [
+              0,
+              0,
+              0
+            ]
+          }
+        },
+        "core": {
+          "rotation": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "0.25": [
+              -12,
+              0,
+              0
+            ],
+            "0.50": [
+              0,
+              0,
+              0
+            ]
+          }
+        }
+      }
+    },
+    "animation.nameless_shape.hurt": {
+      "animation_length": 0.25,
+      "bones": {
+        "core": {
+          "rotation": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "0.06": [
+              0,
+              0,
+              10
+            ],
+            "0.22": [
+              0,
+              0,
+              0
+            ]
+          }
+        }
+      }
+    },
+    "animation.nameless_shape.death": {
+      "animation_length": 1.5,
+      "bones": {
+        "core": {
+          "rotation": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "0.50": [
+              0,
+              0,
+              60
+            ],
+            "1.00": [
+              0,
+              0,
+              70
+            ]
+          },
+          "position": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "0.50": [
+              0,
+              1.0,
+              0
+            ],
+            "1.00": [
+              0,
+              1.2,
+              0
+            ]
+          }
+        }
+      },
+      "loop": "hold_on_last_frame"
+    }
+  }
+}
