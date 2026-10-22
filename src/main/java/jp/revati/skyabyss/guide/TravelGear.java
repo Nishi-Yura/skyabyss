@@ -235,7 +235,7 @@ public final class TravelGear {
 
     // 備えの頼み「刃を研ぐ」の「岩の砥石を作る」(2026-10-23: 使うのではなく作るにした)
     @SubscribeEvent
-    static void onCrafted(net.neoforged.neoforge.event.entity.player.PlayerEvent.ItemCraftedEvent event) {
+    static void onWhetstoneCrafted(net.neoforged.neoforge.event.entity.player.PlayerEvent.ItemCraftedEvent event) {
         if (event.getEntity() instanceof ServerPlayer player && event.getCrafting().is(ROCK_WHETSTONE.get())) {
             Quests.signal(player, Ch1Prep.SIGNAL_WHETSTONE_USED);
         }
