@@ -45,6 +45,9 @@ public final class KeyDefaults {
         m.put("skills", SKILLS);
         m.put("stance", STANCE);
         m.put("weapon_inspect", WEAPON_INSPECT);
+        for (jp.revati.skyabyss.abyss.arts.AbyssArt art : jp.revati.skyabyss.abyss.arts.AbyssArt.values()) {
+            m.put("abyss_art_" + art.id, art.key);
+        }
         for (int i = 0; i < SLOTS.length; i++) {
             m.put("slot_" + (i + 1), SLOTS[i]);
         }

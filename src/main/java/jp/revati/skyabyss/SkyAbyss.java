@@ -54,6 +54,7 @@ public class SkyAbyss {
         jp.revati.skyabyss.lore.LoreSetup.register(modEventBus);
         // 技 (スキル・マナ・技の枠)。登録は rpg.skill パッケージにまとめてある
         jp.revati.skyabyss.rpg.skill.Skills.register(modEventBus);
+        jp.revati.skyabyss.abyss.arts.AbyssArts.register(modEventBus);
         // NPC (語り部・鯨追い、好感度) とクエスト (記録)。登録は npc / quest パッケージにまとめてある
         jp.revati.skyabyss.npc.NpcSetup.register(modEventBus);
         // 都の施設 (係の人・鐘銭・店・預かり所・宿・ギルド)。docs/design/35

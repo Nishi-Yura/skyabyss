@@ -85,6 +85,8 @@ public final class SkillData implements INBTSerializable<CompoundTag> {
     public int version = VERSION;
     // レベル以外から得た技の点 (クエストや記憶の断片の報酬に使う予定。今は 0)
     public int bonusPoints;
+    // 深淵術のランク上げに使った点 (docs/design/36 の 5.2)。技の点と同じ数え方で、合計から引く
+    public int artPoints;
     // これまでに振り直した回数 (費用が上がる)
     public int respecs;
     // これまでに刻印を付け替えた回数 (初回は無料)
@@ -299,6 +301,7 @@ public final class SkillData implements INBTSerializable<CompoundTag> {
                 sum += e.getValue();
             }
         }
+        sum += artPoints;
         for (String id : runes.keySet()) {
             if (Skill.byId(id) != null) {
                 sum += 1;
@@ -450,6 +453,7 @@ public final class SkillData implements INBTSerializable<CompoundTag> {
         c.calling = calling;
         c.calling2 = calling2;
         c.bonusPoints = bonusPoints;
+        c.artPoints = artPoints;
         c.rebirth = rebirth;
         c.mana = mana;
         System.arraycopy(slots, 0, c.slots, 0, slots.length);
@@ -671,6 +675,7 @@ public final class SkillData implements INBTSerializable<CompoundTag> {
             tag.putBoolean("barUsed" + b, barUsed[b]);
         }
         tag.putInt("bonusPoints", bonusPoints);
+        tag.putInt("artPoints", artPoints);
         tag.putInt("respecs", respecs);
         tag.putInt("runeSwaps", runeSwaps);
         tag.putString("calling", calling);
@@ -764,6 +769,7 @@ public final class SkillData implements INBTSerializable<CompoundTag> {
             barUsed[b] = tag.getBoolean("barUsed" + b);
         }
         bonusPoints = tag.getInt("bonusPoints");
+        artPoints = tag.getInt("artPoints");
         respecs = tag.getInt("respecs");
         runeSwaps = tag.getInt("runeSwaps");
         calling = tag.getString("calling");
@@ -849,6 +855,7 @@ public final class SkillData implements INBTSerializable<CompoundTag> {
                     }
                 }
                 buf.writeVarInt(d.bonusPoints);
+                buf.writeVarInt(d.artPoints);
                 buf.writeVarInt(d.respecs);
                 buf.writeVarInt(d.runeSwaps);
                 buf.writeUtf(d.calling, 32);
@@ -921,6 +928,7 @@ public final class SkillData implements INBTSerializable<CompoundTag> {
                     }
                 }
                 d.bonusPoints = buf.readVarInt();
+                d.artPoints = buf.readVarInt();
                 d.respecs = buf.readVarInt();
                 d.runeSwaps = buf.readVarInt();
                 d.calling = buf.readUtf(32);
