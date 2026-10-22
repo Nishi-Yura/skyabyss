@@ -44,7 +44,7 @@ public final class AbyssRespawn {
 
     // 近くの休み場の番号 (無ければ -1)
     static int restNear(BlockPos at) {
-        for (int i = 1; i <= 4; i++) {
+        for (int i = 1; i <= 5; i++) {
             BlockPos r = AbyssBuild.mark("rest_" + i);
             if (r != null && at.closerThan(r, NEAR)) {
                 return i;
@@ -63,9 +63,8 @@ public final class AbyssRespawn {
         if (m == null) {
             return AbyssWorld.arrival();
         }
-        double r = Math.hypot(m.getX(), m.getZ());
-        double k = r < 1e-6 ? 1 : (r - 1.5) / r;
-        return BlockPos.containing(m.getX() * k + 0.5, m.getY(), m.getZ() * k + 0.5);
+        // 休み場の印は立つ所 (野営の焚き火の南・心臓の控えの間)
+        return m;
     }
 
     // 休み場に来た (見回りと自己テスト)

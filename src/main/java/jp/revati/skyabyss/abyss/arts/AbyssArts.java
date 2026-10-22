@@ -53,6 +53,8 @@ public final class AbyssArts {
     static final int CHECK_EVERY = 10;
     // 木の名前 (SkillTree.ABYSS の id)
     public static final String TREE_ID = SkillTree.ABYSS.id;
+    // 術を使えたときに呼ぶ係 (層の仕掛けが「近くで鼓動の術を使った」などを知る。story/ch5/layers/LayerPuzzles)
+    public static final java.util.List<java.util.function.BiConsumer<ServerPlayer, AbyssArt>> ON_CAST = new java.util.concurrent.CopyOnWriteArrayList<>();
 
     private static final DeferredRegister<AttachmentType<?>> ATTACHMENTS = DeferredRegister.create(NeoForgeRegistries.Keys.ATTACHMENT_TYPES, SkyAbyss.MODID);
 
@@ -203,6 +205,9 @@ public final class AbyssArts {
         sd.mana = (float) Math.max(0, sd.mana - a.mana);
         SkillManager.sendMana(p, true);
         setCooldown(p, a, now + a.cooldownTicks);
+        for (java.util.function.BiConsumer<ServerPlayer, AbyssArt> l : ON_CAST) {
+            l.accept(p, a);
+        }
         return Result.OK;
     }
 

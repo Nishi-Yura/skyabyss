@@ -162,7 +162,7 @@ public class LampEater extends AbyssMobB {
         if (arrival != null && arrival.distSqr(p) < PROTECT_RADIUS * PROTECT_RADIUS) {
             return true;
         }
-        for (int i = 1; i <= 3; i++) {
+        for (int i = 1; i <= 5; i++) {
             BlockPos rest = AbyssBuild.mark("rest_" + i);
             if (rest != null && rest.distSqr(p) < PROTECT_RADIUS * PROTECT_RADIUS) {
                 return true;

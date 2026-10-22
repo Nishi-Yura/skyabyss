@@ -11,8 +11,14 @@ python -I tools/gen/ch5/gen_ch5_entrance.py
 """
 from __future__ import annotations
 
+import importlib.util
 import json
 import os
+
+_spec = importlib.util.spec_from_file_location('gen_ch5_layers', os.path.join(os.path.dirname(os.path.abspath(__file__)), 'gen_ch5_layers.py'))
+_layers = importlib.util.module_from_spec(_spec)
+_spec.loader.exec_module(_layers)
+SECTION_STAGES = _layers.SECTION_STAGES  # 深淵の中の四つの区切り (骨・塩・雷・灰の 野営 → 印 → 主)。36 の 8 章
 
 ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', '..')
 RES = os.path.join(ROOT, 'src', 'main', 'resources')
@@ -45,8 +51,9 @@ MAIN = {
         {'id': 'prepare', 'objectives': [{'id': 'ready', 'type': 'condition', 'if': {'type': 'quest', 'quest': 'ch5/black_iron', 'is': 'done'}}]},
         {'id': 'door', 'xp': 80, 'objectives': [{'id': 'open', 'type': 'signal', 'targets': ['ch5_abyss_door'], 'count': 1}]},
         {'id': 'shaft', 'xp': 120, 'objectives': [{'id': 'reach', 'type': 'signal', 'targets': ['ch5_threshold'], 'count': 1}]},
-        # 深淵の中 (36 の A7)。門をくぐる → 底の心臓の間 → 番人 (段は人ごと。倒れた時に間にいた人に合図) → 心臓に触れる
+        # 深淵の中 (36 の 8 章)。門をくぐる → 四つの層 (野営で生き残りと話す → 印を三つ → 層の主) → 心臓の間 → 番人 → 心臓に触れる
         {'id': 'gate', 'xp': 100, 'objectives': [{'id': 'enter', 'type': 'signal', 'targets': ['ch5_abyss_enter'], 'count': 1}]},
+    ] + SECTION_STAGES + [
         {'id': 'descend', 'xp': 300, 'objectives': [{'id': 'reach', 'type': 'signal', 'targets': ['abyss_heart_room'], 'count': 1}]},
         {'id': 'warden', 'xp': 500, 'objectives': [{'id': 'defeat', 'type': 'signal', 'targets': ['abyss_heart'], 'count': 1}]},
         {'id': 'heart', 'objectives': [{'id': 'touch', 'type': 'signal', 'targets': ['abyss_heart_touch'], 'count': 1}]},
@@ -120,8 +127,8 @@ TEXTS = [
     ('quest.skyabyss.main_abyss.report.talk', '深淵の底で知ったことを、語り部に話そう', 'Tell the storyteller'),
     ('quest.skyabyss.main_abyss.gate.journal', '底の境の門の向こうで、鼓動が鳴った。天の鍵がそれに応えて脈を打ち、門の格子が溶けた。門をくぐって、深淵へ降りよう。', 'Beyond the gate at the threshold, a heartbeat sounded. The sky key pulsed in answer and the bars melted away. Pass through the gate into the abyss.'),
     ('quest.skyabyss.main_abyss.gate.enter', '開いた門をくぐって、深淵へ入ろう', 'Pass through the open gate'),
-    ('quest.skyabyss.main_abyss.descend.journal', '深淵は、底の見えない大きな縦穴だった。上るほど体が重く、闇に長くいると淵の声がたまる。灯りの休み場で息を整えながら、底の心臓の間まで降りよう。\n壁のあちこちに、自分と同じ字の刻みがある。前の私たちも、ここを降りた。', 'The abyss is a vast shaft with no bottom in sight. Climbing back weighs on you, and the voice of the deep gathers when you stay in the dark. Catch your breath at the lantern rests and descend to the heart room at the bottom.\nHere and there the walls bear carvings in your own hand. The ones before us came down here too.'),
-    ('quest.skyabyss.main_abyss.descend.reach', '深淵の底、心臓の間まで降りよう', 'Reach the heart room below'),
+    ('quest.skyabyss.main_abyss.descend.journal', '四つの層を越えた。灰の層の主の間の鎖の先に、心臓の控えの間がある。番人は、層の主たちが教えた灯り・重さ・鼓動・闇を全部使ってくる。', 'Four layers behind you. Past the chain in the hall of the ash lord lies the antechamber of the heart. The warden will use everything the layer lords taught: light, weight, the beat and the dark.'),
+    ('quest.skyabyss.main_abyss.descend.reach', '心臓の間へ入る', 'Enter the heart chamber'),
     ('quest.skyabyss.main_abyss.warden.journal', '心臓の間は真っ暗だった。闇の中に、姿の見えない番人がいる。\n輪に並んだ灯りに火を移せば、その光の中でだけ番人の姿が見える。闇の中の番人には、攻撃がほとんど効かない。', 'The heart room is pitch dark. Somewhere in it is a warden you cannot see.\nPass the flame to the ring of lanterns: only in their light does the warden take shape. In the dark, your blows barely reach it.'),
     ('quest.skyabyss.main_abyss.warden.defeat', '灯りを点けて、心臓の番人を倒そう', 'Defeat the heart warden'),
     ('quest.skyabyss.main_abyss.heart.journal', '番人は闇に溶けた。真ん中の台の上で、何かが脈打っている。', 'The warden melted into the dark. On the altar in the middle, something pulses.'),

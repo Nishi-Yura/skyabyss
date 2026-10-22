@@ -1,136 +1,60 @@
 # -*- coding: utf-8 -*-
-"""雷の層 (y 0〜-120) の遊び: 拍子で落ちる雷の道 (docs/design/36 の 8 章。A9)。gen_abyss_layers.py が build(ctx) を呼ぶ。
+"""五章の三「雷の層」(docs/design/36 の 8 章)。
 
-形:
-  - 層の上から 35% の所の螺旋の道 (角度 th_a) から、縦穴の真ん中を横切る銅の吊り橋を架ける。向こう側 (th_a + π) に着く張り出しの足場。
-    橋は三区間 (section 0〜2)。区間の真ん中に避雷の像 (印 idol_0〜2) が立つ。像を壊すとその区間の雷が止まる。
-  - 橋の向こうの足場から、半回り下の螺旋の道へ鎖のはしご (梯子) で下りる。橋は螺旋を半周ぶん飛ばす近道になる（螺旋の本道は残る）。
-  - 橋の両側に避雷針の柱と、ほつれた鎖（吊り索）。銅は酸化の帯 (oxidized) と若い銅を交互に。
-  - 印: storm_bridge_a (橋の手前・螺旋の上)、storm_bridge_b (橋の向こうの足場)、idol_0〜2 (区間の真ん中)。
-  - 雷の拍と予告は story/ch5/layers/StormBridge (世界の時間から決まる)。ここは置くだけ。
+三本の道:
+  1 東「鼓動の戸」: 控え → 三つの戸の間 (戸の奥で鼓動が鳴るのは一つだけ。鼓動の術で聞き分ける。違う戸は待ち伏せと、前の私の影) → 印の部屋
+  2 南「雷の回廊」: 長い回廊 (三つの区間に拍子で雷。床に赤い予告。鼓動の術を使った人には拍の前に心臓の音) → 印の部屋
+  3 西「羽虫の巣」: 銅の巻き線の間 → 巣 (帯電の羽虫と避雷の像の波) → 印の部屋
 """
-import math
-import random
+from __future__ import annotations
 
-BRIDGE_FRAC = 0.35   # 層の上から何割の所で橋を架けるか
-R_IN = 15.5          # 螺旋の内の縁 (橋はここから)
-PATH_OUT = 19.5      # 螺旋の外の縁
-LAND_IN = 12.5       # 向こうの足場の内の縁
-LAND_HALF = 2        # 向こうの足場の半幅
-SECTIONS = 3
+DOOR_TRUE = 2   # 三つの戸のうち、奥へ続くもの (0..2)
 
-
-def block_of(h2):
-    """半段の高さ h2 から、床ブロックの高さ（gen_abyss_layers の道と同じ決まり）"""
-    return h2 // 2 if h2 % 2 == 1 else h2 // 2 - 1
+ROUTES = [
+    {'nodes': [('vestibule', 16, 4, 0, 3, 3, 5), ('doors', 26, 10, 0, 4, 6, 6), ('mark', 46, 6, 0, 4, 4, 6)],
+     'link': ['uw', 'uw', {'from': (32, 14, 0), 'via': [(40, 14, 0), (40, 6, 0)]}]},
+    {'nodes': [('hall', 30, 5, 0, 14, 3, 7), ('mark', 52, 6, 0, 3, 3, 6)]},
+    {'nodes': [('coil', 18, 4, 2, 3, 3, 5), ('nest', 32, 10, 2, 7, 6, 8), ('mark', 48, 6, 2, 4, 4, 6)]},
+]
 
 
-def build(ctx):
+def build(ctx, routes):
     v = ctx.v
-    rng = random.Random(53)
-    span = ctx.span('storm')
-    ia = int(len(span) * BRIDGE_FRAC)
-    th_a, h2 = span[ia]
-    D = block_of(h2)                      # 橋の床の高さ (螺旋の床と同じ)
-    th_b = th_a + math.pi
-    ua = (math.cos(th_a), math.sin(th_a))
-    ub = (math.cos(th_b), math.sin(th_b))
-    pa = (-ua[1], ua[0])                  # 橋の横向き
-
-    # ---- 橋の床: 中心を通る直線 (近い縁 R_IN から遠い縁 -R_IN)。幅 3 (中・両側)
-    deck = []
-    for k in range(-int(R_IN * 2) - 1, int(R_IN * 2) + 2):
-        t = k * 0.5
-        if abs(t) > R_IN:
-            continue
-        for o in (-1, 0, 1):
-            x = round(ua[0] * t + pa[0] * o)
-            z = round(ua[1] * t + pa[1] * o)
-            if (x, z) not in deck:
-                deck.append((x, z))
-    # 橋の長さの順 (近い縁から遠い縁へ) に並べ直す: 螺旋の近い縁が 0
-    deck.sort(key=lambda c: -(c[0] * ua[0] + c[1] * ua[1]))
-    n = len(deck)
-    for i, (x, z) in enumerate(deck):
-        for y in range(D + 1, D + 4):
-            v.set(x, y, z, 'air')
-        mat = _deck_block(i, n, rng)
-        v.set(x, D, z, mat)
-        # 両側の柱 (避雷針と吊り鎖)
-        if i % 4 == 0 and n > 4:
-            for o in (-2, 2):
-                px = round(x + pa[0] * o)
-                pz = round(z + pa[1] * o)
-                if (px, pz) in deck:
-                    continue
-                v.set(px, D, pz, 'oxidized_cut_copper')
-                v.set(px, D + 1, pz, 'lightning_rod[facing=up,powered=false,waterlogged=false]')
-                for y in range(D + 2, D + 4):
-                    v.set(px, y, pz, 'chain[axis=y,waterlogged=false]')
-
-    # ---- 向こうの足場 (螺旋の外の縁の内側。床 D、支え D-1、頭の上を空ける)
-    for x in range(-22, 23):
-        for z in range(-22, 23):
-            along = x * ub[0] + z * ub[1]
-            side = abs(x * pa[0] + z * pa[1])
-            d = math.hypot(x, z)
-            if not (LAND_IN <= along <= PATH_OUT and side <= LAND_HALF + 0.5 and d <= PATH_OUT + 0.5):
-                continue
-            v.set(x, D, z, 'stone_bricks' if rng.random() < 0.7 else 'cracked_stone_bricks')
-            for y in range(D + 1, D + 4):
-                v.set(x, y, z, 'air')
-            v.set(x, D - 1, z, 'deepslate_bricks')
-
-    # ---- 足場からはしご: 螺旋の外の縁の壁に沿って、半回り下の螺旋の床まで
-    low = _lower_pass(span, th_b, h2)
-    if low is not None:
-        low_stand = block_of(low) + 1
-        cx = round(ub[0] * 19)
-        cz = round(ub[1] * 19)
-        face = _facing_inward(cx, cz)
-        back = (cx + _back(face)[0], cz + _back(face)[1])
-        if v.get(back[0], D, back[1]) not in (None, 'air'):
-            for y in range(low_stand, D + 2):
-                v.set(cx, y, cz, 'ladder[facing=%s,waterlogged=false]' % face)
-
-    # ---- 印
-    sx, sz = round(ua[0] * (R_IN - 0.5)), round(ua[1] * (R_IN - 0.5))
-    v.mark('storm_bridge_a', sx, D + 1, sz)
-    v.mark('storm_bridge_b', round(ub[0] * 16), D + 1, round(ub[1] * 16))
-    for s in range(SECTIONS):
-        tc = R_IN - (2 * R_IN) * (s + 0.5) / SECTIONS
-        ix, iz = round(ua[0] * tc), round(ua[1] * tc)
-        v.set(ix, D + 1, iz, 'air')
-        v.mark('idol_%d' % s, ix, D + 1, iz)
-
-
-def _deck_block(i, n, rng):
-    """橋の床: 酸化の帯 (oxidized) と、ところどころ若い銅。三区間ごとに帯を変える"""
-    band = (i * 3) // max(1, n)
-    if i % 5 == 0:
-        return 'oxidized_cut_copper'
-    if band == 1 and i % 2 == 0:
-        return 'weathered_cut_copper'
-    return 'cut_copper' if rng.random() < 0.8 else 'exposed_cut_copper'
-
-
-def _lower_pass(span, th, h2):
-    """角度 th にいちばん近い、一回り手前 (半段で 20 以上) の螺旋の高さ (半段)。無ければ None"""
-    best = None
-    for (t, hh) in span:
-        d = abs((t - th + math.pi) % (2 * math.pi) - math.pi)
-        if hh < h2 - 20 and d < 0.25:
-            if best is None or hh > best:
-                best = hh
-    return best
-
-
-def _facing_inward(cx, cz):
-    """壁の内側へ向く向き (梯子の表)。壁は外側にある"""
-    if abs(cx) >= abs(cz):
-        return 'west' if cx > 0 else 'east'
-    return 'north' if cz > 0 else 'south'
-
-
-def _back(face):
-    return {'west': (1, 0), 'east': (-1, 0), 'north': (0, 1), 'south': (0, -1)}[face]
+    rng = v.rng
+    (r1, rooms1), (r2, rooms2), (r3, rooms3) = routes
+    # ---- 1: 三つの戸 (戸の間の +u の壁、w = 6, 10, 14)。違う二つの奥は小部屋
+    u, w, y, hu, hw, h = rooms1['doors']
+    du = u + hu + 1
+    for k, dw in enumerate((w - 4, w, w + 4)):
+        for b in (dw - 1, dw, dw + 1):
+            for yy in range(y, y + 3):
+                r1.cell(du, b, yy)
+                r1.put(du, b, yy, 'chiseled_copper' if yy == y + 1 else 'waxed_weathered_cut_copper')
+        r1.mark('door_storm_%d' % k, du, dw, y + 1)
+        a0 = r1.xz(du, dw - 1)
+        a1 = r1.xz(du, dw + 1)
+        v.mark('door_storm_%d_a' % k, min(a0[0], a1[0]), y, min(a0[1], a1[1]))
+        v.mark('door_storm_%d_b' % k, max(a0[0], a1[0]), y + 2, max(a0[1], a1[1]))
+        if k != DOOR_TRUE:
+            r1.room(du + 2, dw, y, 1, 1, 3)
+            r1.mark('closet_storm_%d' % k, du + 2, dw, y)
+    r1.mark('puzzle_storm', u, w, y)
+    # ---- 2: 雷の回廊。三つの区間 (両端と真ん中に避雷針)
+    u, w, y, hu, hw, h = rooms2['hall']
+    r2.mark('bolt_storm_a', u - hu + 3, w, y)
+    r2.mark('bolt_storm_b', u + hu - 3, w, y)
+    for k in range(3):
+        cu = u - hu + 3 + k * (2 * hu - 6) // 2
+        for b in (w - hw, w + hw):
+            r2.put(cu, b, y, 'polished_tuff')
+            r2.put(cu, b, y + 1, 'lightning_rod[facing=up,powered=false,waterlogged=false]')
+    for a in range(u - hu, u + hu + 1, 4):
+        r2.put(a, w, y + h, 'copper_bulb[lit=true,powered=false]')
+    # ---- 3: 巣
+    u, w, y, hu, hw, h = rooms3['nest']
+    r3.mark('nest_storm', u, w, y)
+    for _ in range(8):
+        a, b = u + rng.randint(-hu + 1, hu - 1), w + rng.randint(-hw + 1, hw - 1)
+        if abs(a - u) + abs(b - w) > 2:
+            r3.put(a, b, y, 'exposed_copper')
+            r3.put(a, b, y + 1, 'lightning_rod[facing=up,powered=false,waterlogged=false]')

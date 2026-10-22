@@ -1,18 +1,24 @@
 # -*- coding: utf-8 -*-
-"""深淵の層の大縦穴 (docs/design/36 の 2・3 の A2)。何もない空間 (ディメンション skyabyss:abyss) に、壁の筒・螺旋の道・層ごとの部屋だけを置く。
+"""深淵の四つの層と心臓の間 (docs/design/36 の 2・8 章。2026-10-23 の作り直し: 層ごとに探す場所)。
 
-python -I tools/abyss/gen_abyss_layers.py  →  src/main/resources/data/skyabyss/opening/abyss_layers.json (runs 形式。原点 = 縦穴の中心、y はそのまま)
+python -I tools/abyss/gen_abyss_layers.py  →  src/main/resources/data/skyabyss/opening/abyss_layers.json (runs 形式。空気も書く)
 
-形:
-  - 縦穴: 中心 (0, 0)、内の半径 R_IN = 20、壁の厚み 2。上端 y 240 の縁から、心臓の間の天井 y -250 まで。真ん中は底まで抜けた吹き抜け (落ちると下の層へ。落ちる高さでは傷)
-  - 螺旋の道: 壁の内側に沿って幅 4 (半径 16〜19)。角度が増える向きに下りる。弧の長さ 2 で 1 段 (半ブロックで刻む)。内の縁に低い壁
-  - 層: 骨 (240〜120)・塩 (120〜0)・雷 (0〜-120)・灰 (-120〜-240)。層ごとに壁の素材を替え、層の境に灯りの休み場 (道を広げた踊り場。印 rest_<n>)
-  - 部屋: 層ごとに 3 つ、壁の外へ張り出す箱 (溜まりの間 pool_<層>・前の私の野営 camp_<層>・巣 den_<層>)。道から戸の口で入る
-  - 心臓の間: 縦穴の底の下に丸い大部屋 (半径 30、y -300〜-252)。真ん中に印 heart。道の最後は大部屋の縁に下りる
-  - 着く所: 上端の縁の踊り場 (印 arrival)
+形 (層ごとに同じ骨組み。中身は tools/abyss/layer_<層>.py):
+  - 野営 (camp): 層の入口の部屋。中心 (0, Y, 0)、内のりの半分 8、高さ 7。焚き火 (休み場 rest_<n>)・生き残り (survivor_<層>)・帳面・溜まり (pool_<層>)。
+    東・南・西の壁に道の口 (三本の道)、同じ壁の脇に近道の口 (格子で閉じている)。北の壁に門 (gate_<層>。印が三つそろうと通れる)
+  - 道 (route): 野営から東・南・西へ一本ずつ。部屋と廊下の並び (layer_<層>.ROUTES)。道の終わりの部屋に印の台 (mark_<層>_<1..3>)
+  - 近道 (shortcut): 印の部屋から野営へまっすぐ戻る廊下。野営の側の格子 (scut_<層>_<i>) は、その印を誰かが取ると開く (ワールドで共有)
+  - 門の奥: 下りの階段 → 層の主の間 (arena_<層>。丸い間、半径 14)。主を倒すと下りの鎖 (descend_<層>) で次の層の野営へ
+  - 心臓の間: 前と同じ (中心 (0, -300, 0)、半径 30)。南に控えの間 (heart_in・rest_5) と、間へ続く廊下
+  - 囲い: 空気のマスのまわり 2 マスを層の岩で埋める (外の何もない空間は見えない。継ぎ目もない)
+  - 道ごとの持ち主の印 (camp・r1〜3・gate・arena) を付け、ちがう持ち主の空気が隣り合ったら止める (道どうしが壁を抜けてつながらない)
+
+局所の座標: 道の向き (u = 野営から外へ、w = 横)。東 (x, z) = (u, w)、南 = (-w, u)、西 = (-u, -w)。北 (門) = (w, -u)。
+  道は w ≥ 0 の側、近道は w = -6 の線を通る。くさび |w| < u の中に収める (隣の道とは重ならない)
 """
 from __future__ import annotations
 
+import importlib.util
 import math
 import os
 import sys
@@ -20,232 +26,577 @@ import sys
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'capital'))
 import vox  # noqa: E402
 
-ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..')
+HERE = os.path.dirname(os.path.abspath(__file__))
+ROOT = os.path.join(HERE, '..', '..')
 OUT = os.path.join(ROOT, 'src', 'main', 'resources', 'data', 'skyabyss', 'opening', 'abyss_layers.json')
 
-R_IN = 20          # 縦穴の内の面
-WALL = 2           # 壁の厚み
-PATH_IN = 15.5     # 道の内の縁
-PATH_OUT = R_IN - 0.5
-TOP = 240
+ORDER = ['bone', 'salt', 'storm', 'ash']
+CAMP_Y = {'bone': 180, 'salt': 60, 'storm': -60, 'ash': -180}
+CAMP_HALF = 8
+CAMP_H = 7
+SHELL = 2
+DIRS = {'e': lambda u, w: (u, w), 's': lambda u, w: (-w, u), 'w': lambda u, w: (-u, -w), 'n': lambda u, w: (w, -u)}
+ROUTE_DIRS = ['e', 's', 'w']
+ROUTE_W = 3          # 道の口の横の位置
+SCUT_W = -6          # 近道の線
+ARENA_R = 14
+ARENA_DROP = 6       # 主の間の床は野営より 6 下
+ARENA_U = 48         # 主の間の中心 (北へ)
+ARENA_H = 11
 HEART_TOP = -252
 HEART_BOTTOM = -300
 HEART_R = 30
-LAYERS = [  # (名前, 上, 下, 壁, 床, 飾り)
-    ('bone', 240, 120, ['bone_block[axis=y]', 'calcite', 'calcite', 'smooth_basalt'], 'polished_diorite', 'bone_block[axis=y]'),
-    ('salt', 120, 0, ['calcite', 'white_terracotta', 'smooth_quartz', 'diorite'], 'smooth_quartz', 'prismarine_bricks'),
-    ('storm', 0, -120, ['tuff', 'tuff_bricks', 'oxidized_cut_copper', 'polished_tuff'], 'polished_tuff', 'lightning_rod[facing=up,powered=false,waterlogged=false]'),
-    ('ash', -120, -240, ['blackstone', 'basalt[axis=y]', 'polished_blackstone_bricks', 'cracked_polished_blackstone_bricks'], 'polished_blackstone', 'magma_block'),
-]
+
+# 層の素材: 壁 (柄)・床・床の縁・柱・灯り
+LAYERS = {
+    'bone': dict(floor='polished_diorite', floor2='bone_block[axis=x]', trim='smooth_basalt', pillar='bone_block[axis=y]', lamp='soul_lantern',
+                 seal='chiseled_polished_blackstone', accent='bone_block[axis=y]'),
+    'salt': dict(floor='smooth_quartz', floor2='diorite', trim='white_terracotta', pillar='quartz_pillar[axis=y]', lamp='soul_lantern',
+                 seal='chiseled_quartz_block', accent='prismarine_bricks'),
+    'storm': dict(floor='polished_tuff', floor2='tuff_bricks', trim='oxidized_cut_copper', pillar='weathered_copper', lamp='soul_lantern',
+                  seal='chiseled_tuff_bricks', accent='oxidized_copper'),
+    'ash': dict(floor='polished_blackstone', floor2='blackstone', trim='polished_basalt[axis=y]', pillar='basalt[axis=y]', lamp='soul_lantern',
+                seal='gilded_blackstone', accent='magma_block'),
+}
+
+
+def wall_block(layer, x, y, z, rng):
+    """層ごとの壁の柄"""
+    a = math.degrees(math.atan2(z, x)) % 360
+    if layer == 'bone':
+        if y % 9 == 0:
+            return 'smooth_basalt'
+        return 'bone_block[axis=y]' if (x * 3 + z * 5) % 11 == 0 else ('calcite' if (x + z) % 5 else 'dripstone_block')
+    if layer == 'salt':
+        band = (y // 3) % 5
+        return ['calcite', 'white_terracotta', 'calcite', 'smooth_quartz', 'diorite'][band]
+    if layer == 'storm':
+        if y % 8 == 0:
+            return 'oxidized_cut_copper'
+        return 'tuff_bricks' if (y // 2 + (x + z) // 4) % 2 else 'polished_tuff'
+    if layer == 'ash':
+        if (x * 7 + z * 3) % 13 == 0:
+            return 'basalt[axis=y]'
+        return 'cracked_polished_blackstone_bricks' if rng.random() < 0.12 else 'polished_blackstone_bricks'
+    return 'deepslate_tiles'
+
+
 HEART_WALL = ['deepslate_tiles', 'sculk', 'deepslate_tiles', 'crying_obsidian']
-STEP_ARC = 2.0     # 弧の長さ 2 で半段 (0.5) 下りる → 1 周 (約 110) で 27 段ほど
-LANTERN_EVERY = 6  # 道の内の縁の灯り (歩数)
 
 
-def layer_of(y):
-    for L in LAYERS:
-        if L[2] < y <= L[1]:
-            return L
-    return LAYERS[-1]
+class Layout:
+    """空気のマス (持ち主つき) を集め、最後に囲い・床を付ける"""
+
+    def __init__(self, v):
+        self.v = v
+        self.air = {}          # (x, y, z) -> 持ち主
+        self.layer_of = {}     # 持ち主 -> 層 (囲いの柄)
+        self.floor_of = {}     # (x, z, y) 床にする所 -> 素材 (空気の下)
+        self.fixed = {}        # 空気でも囲いでもない、置いたもの (飾り・灯り・仕掛け)
+        self.allowed = set()   # 隣り合ってよい持ち主の組
+        self.near = {}         # 決まった所の近くだけ隣り合ってよい組
+
+    def carve(self, x, y, z, owner):
+        prev = self.air.get((x, y, z))
+        if prev is not None and prev != owner and not self._ok(prev, owner, (x, y, z)):
+            raise SystemExit('carve overlap at %s: %s vs %s' % ((x, y, z), prev, owner))
+        self.air[(x, y, z)] = owner
+
+    def box(self, x0, y0, z0, x1, y1, z1, owner):
+        for x in range(min(x0, x1), max(x0, x1) + 1):
+            for z in range(min(z0, z1), max(z0, z1) + 1):
+                for y in range(min(y0, y1), max(y0, y1) + 1):
+                    self.carve(x, y, z, owner)
+
+    def put(self, x, y, z, s):
+        self.fixed[(x, y, z)] = s
+
+    def allow(self, a, b):
+        self.allowed.add(frozenset((a, b)))
+
+    def allow_near(self, a, b, at, r):
+        """a と b の空気が隣り合ってよいのは at から r の内だけ"""
+        self.near.setdefault(frozenset((a, b)), []).append((at, r))
+
+    def _ok(self, o, o2, p):
+        k = frozenset((o, o2))
+        if k in self.allowed:
+            return True
+        for (at, r) in self.near.get(k, ()):
+            if max(abs(p[0] - at[0]), abs(p[1] - at[1]), abs(p[2] - at[2])) <= r:
+                return True
+        return False
+
+    def check_neighbors(self):
+        bad = []
+        for (x, y, z), o in self.air.items():
+            for dx in (-1, 0, 1):
+                for dy in (-1, 0, 1):
+                    for dz in (-1, 0, 1):
+                        o2 = self.air.get((x + dx, y + dy, z + dz))
+                        if o2 is not None and o2 != o and not self._ok(o, o2, (x, y, z)):
+                            bad.append(((x, y, z), o, o2))
+        if bad:
+            for b in bad[:10]:
+                print('touch', b)
+            raise SystemExit('%d cells of different owners touch' % len(bad))
+
+    def finish(self):
+        v = self.v
+        rng = v.rng
+        layer_by_cell = {}
+        for p, o in self.air.items():
+            layer_by_cell[p] = self.layer_of.get(o, 'heart')
+        # 囲い (空気のまわり SHELL マス。空気でも置いたものでもない所)
+        for (x, y, z), o in self.air.items():
+            L = layer_by_cell[(x, y, z)]
+            for dx in range(-SHELL, SHELL + 1):
+                for dy in range(-SHELL, SHELL + 1):
+                    for dz in range(-SHELL, SHELL + 1):
+                        q = (x + dx, y + dy, z + dz)
+                        if q in self.air or q in v.b:
+                            continue
+                        if L == 'heart':
+                            v.b[q] = rng.choice(HEART_WALL)
+                        else:
+                            v.b[q] = wall_block(L, q[0], q[1], q[2], rng)
+        # 床 (空気の真下の囲い)
+        for (x, y, z), o in self.air.items():
+            if (x, y - 1, z) in self.air:
+                continue
+            L = layer_by_cell[(x, y, z)]
+            if L == 'heart':
+                continue
+            m = LAYERS[L]
+            fl = self.floor_of.get((x, z, y - 1))
+            if fl is None:
+                fl = m['floor'] if (x * 31 + z * 17) % 7 else m['floor2']
+            v.b[(x, y - 1, z)] = fl
+        for p in self.air:
+            v.b[p] = 'air'
+        for p, s in self.fixed.items():
+            v.b[p] = s
+
+
+class Route:
+    """一本の道の局所の座標の書き手"""
+
+    def __init__(self, lay, layer, d, owner, y0):
+        self.lay = lay
+        self.layer = layer
+        self.d = d
+        self.f = DIRS[d]
+        self.owner = owner
+        self.y0 = y0
+
+    def xz(self, u, w):
+        return self.f(u, w)
+
+    def facing(self, du, dw):
+        """局所の向き (du, dw) の世界の向き (north/south/east/west)"""
+        x0, z0 = self.f(0, 0)
+        x1, z1 = self.f(du, dw)
+        dx, dz = x1 - x0, z1 - z0
+        return {(1, 0): 'east', (-1, 0): 'west', (0, 1): 'south', (0, -1): 'north'}[(dx, dz)]
+
+    def cell(self, u, w, y, owner=None):
+        x, z = self.f(u, w)
+        self.lay.carve(x, y, z, owner or self.owner)
+
+    def put(self, u, w, y, s):
+        x, z = self.f(u, w)
+        self.lay.put(x, y, z, s)
+
+    def mark(self, name, u, w, y):
+        x, z = self.f(u, w)
+        self.lay.v.mark(name, x, y, z)
+
+    def room(self, u, w, y, hu, hw, h, owner=None):
+        """局所の箱 (u±hu, w±hw)、立つ高さ y、高さ h"""
+        for a in range(u - hu, u + hu + 1):
+            for b in range(w - hw, w + hw + 1):
+                for yy in range(y, y + h):
+                    self.cell(a, b, yy, owner)
+
+    def leg(self, s0, s1, y_from, y_to, free=None):
+        """まっすぐの廊下の列ごとの立つ高さ。y_from → y_to を一段に二マスで。段は部屋の外 (free が真の列) の一番長い並びの真ん中にまとめる
+        (部屋の床の上に段を置くと、床のない宙の列ができて上れない)"""
+        n = abs(s1 - s0)
+        step = 1 if s1 >= s0 else -1
+        dy = y_to - y_from
+        need = 2 * abs(dy)
+        lo, hi = 0, n
+        if dy and free is not None:
+            best, cur = (0, -1), None
+            for i in range(n + 1):
+                if free[i]:
+                    cur = i if cur is None else cur
+                    if i - cur > best[1] - best[0]:
+                        best = (cur, i)
+                else:
+                    cur = None
+            lo, hi = best
+        if hi - lo < need:
+            raise SystemExit('leg too steep %s' % ((s0, s1, y_from, y_to, lo, hi),))
+        start = lo + (hi - lo - need) // 2
+        ys = []
+        for i in range(n + 1):
+            k = max(0, min(need, i - start))
+            ys.append(y_from + (k // 2) * (1 if dy > 0 else -1) if dy else y_from)
+        return [(s0 + i * step, ys[i]) for i in range(n + 1)], step
+
+    def corridor(self, path, h=4, half=1, owner=None, lamps=7):
+        """折れ線の廊下: path = [(u, w, y), ...] (隣どうしは u か w のどちらかだけが変わる)。幅 2*half+1"""
+        owner = owner or self.owner
+        run = 0
+        for (u0, w0, y0), (u1, w1, y1) in zip(path, path[1:]):
+            if u0 != u1 and w0 != w1:
+                raise SystemExit('corridor must be axis aligned %s' % ((u0, w0, u1, w1),))
+            axis = 'u' if u0 != u1 else 'w'
+            s0, s1 = (u0, u1) if axis == 'u' else (w0, w1)
+            n = abs(s1 - s0)
+            sg = 1 if s1 >= s0 else -1
+            free = []
+            for i in range(n + 1):
+                cu, cw = (s0 + i * sg, w0) if axis == 'u' else (u0, s0 + i * sg)
+                x, z = self.f(cu, cw)
+                free.append((x, min(y0, y1), z) not in self.lay.air and (x, max(y0, y1), z) not in self.lay.air
+                            and (x, min(y0, y1) - 1, z) not in self.lay.air)
+            cells, step = self.leg(s0, s1, y0, y1, free)
+            for i, (s, y) in enumerate(cells):
+                u, w = (s, w0) if axis == 'u' else (u0, s)
+                nxt = cells[i + 1][1] if i + 1 < len(cells) else y
+                for k in range(-half, half + 1):
+                    cu, cw = (u, w + k) if axis == 'u' else (u + k, w)
+                    for yy in range(min(y, nxt), max(y, nxt) + h):
+                        self.cell(cu, cw, yy, owner)
+                    if nxt > y:
+                        # 上りの段: この列の足もとに階段 (上る向き)
+                        du, dw = (step, 0) if axis == 'u' else (0, step)
+                        self.put(cu, cw, y, '%s[facing=%s,half=bottom,shape=straight,waterlogged=false]' % (stair_of(self.layer), self.facing(du, dw)))
+                    elif nxt < y:
+                        # 下りの段: 次の列の足もとに階段 (戻る向きが上り)
+                        du, dw = (-step, 0) if axis == 'u' else (0, -step)
+                        nu, nw = (cu + step, cw) if axis == 'u' else (cu, cw + step)
+                        self.put(nu, nw, nxt, '%s[facing=%s,half=bottom,shape=straight,waterlogged=false]' % (stair_of(self.layer), self.facing(du, dw)))
+                run += 1
+                if lamps and run % lamps == 0:
+                    self.put(u, w, y + h, LAYERS[self.layer]['lamp'] + '[hanging=true,waterlogged=false]')
+
+
+def stair_of(layer):
+    return {'bone': 'polished_diorite_stairs', 'salt': 'smooth_quartz_stairs', 'storm': 'polished_tuff_stairs',
+            'ash': 'polished_blackstone_stairs'}[layer]
+
+
+def slab_of(layer):
+    return {'bone': 'polished_diorite_slab', 'salt': 'smooth_quartz_slab', 'storm': 'polished_tuff_slab',
+            'ash': 'polished_blackstone_slab'}[layer] + '[type=bottom,waterlogged=false]'
+
+
+class Ctx:
+    """層の組み立て (layer_<層>.py) に渡すもの"""
+
+    def __init__(self, v, lay):
+        self.v = v
+        self.lay = lay
+        self.LAYERS = LAYERS
+        self.CAMP_Y = CAMP_Y
+        self.ORDER = ORDER
+        self.wall_block = wall_block
+        self.stair_of = stair_of
+        self.slab_of = slab_of
+
+    def route(self, layer, i):
+        d = ROUTE_DIRS[i - 1]
+        return Route(self.lay, layer, d, '%s_r%d' % (layer, i), CAMP_Y[layer])
+
+
+def build_camp(ctx, layer, n):
+    """野営の部屋と門・主の間・下りの鎖"""
+    lay, v = ctx.lay, ctx.v
+    Y = CAMP_Y[layer]
+    m = LAYERS[layer]
+    camp = '%s_camp' % layer
+    lay.layer_of[camp] = layer
+    lay.box(-CAMP_HALF, Y, -CAMP_HALF, CAMP_HALF, Y + CAMP_H - 1, CAMP_HALF, camp)
+    # 天井を少し高く (真ん中)
+    lay.box(-4, Y + CAMP_H, -4, 4, Y + CAMP_H + 1, 4, camp)
+    # 床の模様: 縁を一回り、真ん中に焚き火の輪
+    for x in range(-CAMP_HALF, CAMP_HALF + 1):
+        for z in range(-CAMP_HALF, CAMP_HALF + 1):
+            if max(abs(x), abs(z)) == CAMP_HALF:
+                lay.floor_of[(x, z, Y - 1)] = m['trim']
+            elif max(abs(x), abs(z)) <= 2:
+                lay.floor_of[(x, z, Y - 1)] = 'polished_deepslate'
+    # 柱 (四隅)
+    for sx in (-1, 1):
+        for sz in (-1, 1):
+            for yy in range(Y, Y + CAMP_H):
+                lay.put(sx * (CAMP_HALF - 1), yy, sz * (CAMP_HALF - 1), m['pillar'])
+            lay.put(sx * (CAMP_HALF - 2), Y + CAMP_H - 1, sz * (CAMP_HALF - 1), m['lamp'] + '[hanging=true,waterlogged=false]')
+            del_air(lay, sx * (CAMP_HALF - 1), Y, sz * (CAMP_HALF - 1), Y + CAMP_H - 1)
+    # 焚き火 (休み場)。暖かい色の火
+    lay.put(0, Y, 0, 'campfire[facing=north,lit=true,signal_fire=false,waterlogged=false]')
+    v.mark('rest_%d' % n, 0, Y, 2)
+    v.mark('camp_%s' % layer, 0, Y, 0)
+    for (x, z) in ((2, 0), (-2, 0), (0, -2)):
+        lay.put(x, Y, z, 'cobbled_deepslate_slab[type=bottom,waterlogged=false]')
+    # 寝床と荷 (南西の隅)、帳面 (南東)
+    lay.put(-5, Y, 5, 'brown_wool')
+    lay.put(-5, Y, 4, 'brown_carpet')
+    lay.put(-6, Y, 5, 'barrel[facing=up,open=false]')
+    lay.put(5, Y, 5, 'lectern[facing=north,has_book=true,powered=false]')
+    v.mark('journal_%s_0' % layer, 5, Y, 5)
+    # 生き残りの立つ所 (焚き火の東)
+    v.mark('survivor_%s' % layer, 3, Y, 1)
+    # 溜まり (返った鼓動の池。北西の隅寄り)。ここで術を覚える
+    for x in range(-6, -3):
+        for z in range(-6, -3):
+            lay.floor_of[(x, z, Y - 1)] = 'sculk'
+    lay.put(-5, Y, -5, 'sculk_shrieker[can_summon=false,shrieking=false,waterlogged=false]')
+    lay.put(-5, Y + CAMP_H - 1, -5, 'soul_lantern[hanging=true,waterlogged=false]')
+    v.mark('pool_%s' % layer, -5, Y, -5)
+    # 門 (北の壁の外、二枚の厚み)。印が三つの人だけが通れる
+    gate = '%s_gate' % layer
+    lay.layer_of[gate] = layer
+    lay.allow(camp, gate)
+    for z in (-CAMP_HALF - 1, -CAMP_HALF - 2):
+        for x in range(-1, 2):
+            for yy in range(Y, Y + 3):
+                lay.put(x, yy, z, m['seal'])
+    v.mark('gate_%s' % layer, 0, Y, -CAMP_HALF - 1)
+    v.mark('gate_%s_out' % layer, 0, Y, -CAMP_HALF + 1)
+    v.mark('gate_%s_in' % layer, 0, Y, -CAMP_HALF - 4)
+    # 門の上の三つの穴 (印の台座。持つ印の数だけ光る: story/ch5/layers/AbyssMarks)
+    for k, x in enumerate((-2, 0, 2)):
+        lay.put(x, Y + 4, -CAMP_HALF - 1, 'chiseled_deepslate')
+        v.mark('socket_%s_%d' % (layer, k + 1), x, Y + 4, -CAMP_HALF)
+    r = Route(lay, layer, 'n', gate, Y)
+    # 門の奥: 二マス平らに、それから下りの階段で主の間へ
+    r.corridor([(CAMP_HALF + 3, 0, Y), (CAMP_HALF + 6, 0, Y), (ARENA_U - ARENA_R - 1, 0, Y - ARENA_DROP)], h=4, half=1, lamps=6)
+    # 主の間 (丸い。高さ ARENA_H)
+    arena = '%s_arena' % layer
+    lay.layer_of[arena] = layer
+    lay.allow(gate, arena)
+    ay = Y - ARENA_DROP
+    for a in range(-ARENA_R, ARENA_R + 1):
+        for b in range(-ARENA_R, ARENA_R + 1):
+            d = math.hypot(a, b)
+            if d > ARENA_R + 0.4:
+                continue
+            top = ARENA_H if d < ARENA_R - 3 else ARENA_H - 2
+            x, z = DIRS['n'](ARENA_U + a, b)
+            for yy in range(ay, ay + top):
+                lay.carve(x, yy, z, arena)
+            if d > ARENA_R - 1.2:
+                lay.floor_of[(x, z, ay - 1)] = m['trim']
+    ax, az = DIRS['n'](ARENA_U, 0)
+    v.mark('arena_%s' % layer, ax, ay, az)
+    v.mark('lord_%s' % layer, ax, ay, az - 4)
+    # 柱の灯台 (四つ。骨の層では主の戦いの灯り: 点けた灯りの中だけ刃が通る)
+    for k in range(4):
+        ang = math.pi / 4 + k * math.pi / 2
+        lx, lz = ax + int(round(math.cos(ang) * 9)), az + int(round(math.sin(ang) * 9))
+        lay.put(lx, ay, lz, 'polished_deepslate')
+        lay.put(lx, ay + 1, lz, 'polished_deepslate_wall')
+        lay.put(lx, ay + 2, lz, 'soul_campfire[facing=north,lit=false,signal_fire=false,waterlogged=false]')
+        v.mark('lamp_%s_%d' % (layer, k), lx, ay + 2, lz)
+    # 天井の灯り (薄く)
+    for k in range(6):
+        ang = k * math.pi / 3
+        lay.put(ax + int(round(math.cos(ang) * 12)), ay + ARENA_H - 3, az + int(round(math.sin(ang) * 12)),
+                'soul_lantern[hanging=true,waterlogged=false]')
+    # 下りの鎖 (間の奥。主を倒した人だけが使える)
+    dx_, dz_ = DIRS['n'](ARENA_U + ARENA_R - 2, 0)
+    lay.put(dx_, ay, dz_, 'lodestone')
+    for yy in range(ay + 1, ay + ARENA_H - 2):
+        lay.put(dx_, yy, dz_, 'chain[axis=y,waterlogged=false]')
+    v.mark('descend_%s' % layer, dx_, ay, dz_)
+    return camp
+
+
+def del_air(lay, x, y0, z, y1):
+    for y in range(y0, y1 + 1):
+        lay.air.pop((x, y, z), None)
+
+
+def build_route(ctx, layer, i, spec):
+    """道の部屋と廊下と近道。spec = layer_<層>.ROUTES[i-1]:
+         nodes: [(名前, u, w, y_off, hu, hw, h)]  部屋 (最後が印の部屋)
+         link:  部屋ごとのつなぎ方。'uw' (u を先に動かす) | 'wu' | {'from': (u, w, y_off), 'via': [(u, w, y_off), ...]}
+                (from を省くと前の部屋の真ん中から。最初の部屋の前は野営の口 (u = CAMP_HALF + 1, w = ROUTE_W))
+         近道は印の部屋の w の小さい側の縁から w = SCUT_W へ、そこから野営へまっすぐ"""
+    lay, v = ctx.lay, ctx.v
+    camp = '%s_camp' % layer
+    r = ctx.route(layer, i)
+    lay.layer_of[r.owner] = layer
+    lay.allow(camp, r.owner)
+    Y = CAMP_Y[layer]
+    nodes = spec['nodes']
+    rooms = {}
+    for (name, u, w, yo, hu, hw, h) in nodes:
+        r.room(u, w, Y + yo, hu, hw, h)
+        rooms[name] = (u, w, Y + yo, hu, hw, h)
+        for k in range(spec.get('room_lamps', 2)):
+            lu = u + (hu - 1 if k == 0 else -(hu - 1))
+            r.put(lu, w, Y + yo + h, LAYERS[layer]['lamp'] + '[hanging=true,waterlogged=false]')
+    prev = (CAMP_HALF + 1, ROUTE_W, Y)
+    links = spec.get('link') or ['uw'] * len(nodes)
+    for (name, u, w, yo, hu, hw, h), how in zip(nodes, links):
+        to = (u, w, Y + yo)
+        if isinstance(how, dict):
+            start = how.get('from')
+            start = prev if start is None else (start[0], start[1], Y + start[2])
+            path = [start] + [(a, b, Y + c) for (a, b, c) in how.get('via', [])] + [to]
+        elif how == 'uw':
+            if prev[1] == w:
+                path = [prev, to]
+            elif abs(u - prev[0]) >= abs(w - prev[1]):
+                path = [prev, (u, prev[1], to[2]), to]
+            else:
+                path = [prev, (u, prev[1], prev[2]), to]
+        else:
+            if prev[0] == u:
+                path = [prev, to]
+            elif abs(w - prev[1]) >= abs(u - prev[0]):
+                path = [prev, (prev[0], w, to[2]), to]
+            else:
+                path = [prev, (prev[0], w, prev[2]), to]
+        if path[0] != path[-1]:
+            r.corridor(path, lamps=spec.get('lamps', 7))
+        prev = to
+    # 近道
+    name, u, w, yo, hu, hw, h = nodes[-1]
+    so = '%s_s%d' % (layer, i)
+    lay.layer_of[so] = layer
+    lay.allow(so, camp)
+    sy = Y + yo
+    r2 = Route(lay, layer, ROUTE_DIRS[i - 1], so, Y)
+    r2.corridor([(u, w - hw - 1, sy), (u, SCUT_W, sy), (CAMP_HALF + 1, SCUT_W, Y)], lamps=9)
+    jx, jz = r2.xz(u, w - hw - 1)
+    lay.allow_near(so, r.owner, (jx, sy, jz), 6)
+    for uu in (CAMP_HALF + 1, CAMP_HALF + 2):
+        for k in (-1, 0, 1):
+            for yy in range(Y, Y + 4):
+                r2.put(uu, SCUT_W + k, yy, 'iron_bars[east=true,north=true,south=true,waterlogged=false,west=true]')
+    a = r2.xz(CAMP_HALF + 1, SCUT_W - 1)
+    b = r2.xz(CAMP_HALF + 2, SCUT_W + 1)
+    v.mark('scut_%s_%d_a' % (layer, i), min(a[0], b[0]), Y, min(a[1], b[1]))
+    v.mark('scut_%s_%d_b' % (layer, i), max(a[0], b[0]), Y + 3, max(a[1], b[1]))
+    # 印の台 (印の部屋の奥)
+    mu = u + hu - 1
+    r.put(mu, w, sy, 'polished_deepslate')
+    r.put(mu, w, sy + 1, 'respawn_anchor[charges=0]')
+    r.mark('mark_%s_%d' % (layer, i), mu, w, sy + 1)
+    r.mark('markroom_%s_%d' % (layer, i), u, w, sy)
+    return r, rooms
+
+
+def build_heart(ctx):
+    """心臓の間 (前の形のまま) と、南の控えの間"""
+    lay, v = ctx.lay, ctx.v
+    rng = v.rng
+    lay.layer_of['heart'] = 'heart'
+    for x in range(-HEART_R, HEART_R + 1):
+        for z in range(-HEART_R, HEART_R + 1):
+            d = math.hypot(x, z)
+            if d > HEART_R - 0.5:
+                continue
+            # 丸天井: 端ほど低い
+            top = HEART_TOP - int(round((d / HEART_R) ** 2 * 18))
+            for y in range(HEART_BOTTOM + 1, top):
+                lay.carve(x, y, z, 'heart')
+    for x in range(-4, 5):
+        for z in range(-4, 5):
+            if math.hypot(x, z) <= 4.5:
+                lay.put(x, HEART_BOTTOM + 1, z, 'sculk_catalyst' if (x, z) == (0, 0) else 'reinforced_deepslate')
+                lay.air.pop((x, HEART_BOTTOM + 1, z), None)
+    for i in range(8):
+        a = i * math.pi / 4
+        lx, lz = int(round(math.cos(a) * 18)), int(round(math.sin(a) * 18))
+        lay.put(lx, HEART_BOTTOM + 1, lz, 'polished_deepslate')
+        lay.put(lx, HEART_BOTTOM + 2, lz, 'polished_deepslate_wall')
+        v.mark('beacon_%d' % i, lx, HEART_BOTTOM + 3, lz)
+    v.mark('heart', 0, HEART_BOTTOM + 2, 0)
+    # 控えの間 (南。半径の外) と廊下
+    lay.layer_of['heart_ante'] = 'heart'
+    lay.allow('heart', 'heart_ante')
+    fy = HEART_BOTTOM + 1
+    lay.box(-5, fy, HEART_R + 6, 5, fy + 5, HEART_R + 16, 'heart_ante')
+    lay.box(-1, fy, HEART_R - 2, 1, fy + 3, HEART_R + 5, 'heart_ante')
+    for x in range(-5, 6):
+        for z in range(HEART_R + 6, HEART_R + 17):
+            v.set(x, fy - 1, z, 'polished_deepslate' if (x + z) % 2 else 'deepslate_tiles')
+    for z in range(HEART_R - 2, HEART_R + 6):
+        for x in (-1, 0, 1):
+            v.set(x, fy - 1, z, 'deepslate_tiles')
+    lay.put(0, fy, HEART_R + 12, 'soul_campfire[facing=north,lit=true,signal_fire=false,waterlogged=false]')
+    lay.put(-4, fy + 5, HEART_R + 8, 'soul_lantern[hanging=true,waterlogged=false]')
+    lay.put(4, fy + 5, HEART_R + 14, 'soul_lantern[hanging=true,waterlogged=false]')
+    v.mark('rest_5', 0, fy, HEART_R + 10)
+    v.mark('heart_in', 0, fy, HEART_R + 14)
+    # 上りの鎖 (灰の野営へ戻る)
+    lay.put(3, fy, HEART_R + 15, 'lodestone')
+    for yy in range(fy + 1, fy + 6):
+        lay.put(3, yy, HEART_R + 15, 'chain[axis=y,waterlogged=false]')
+    v.mark('ascend_heart', 3, fy, HEART_R + 15)
+    # 間の床
+    for x in range(-HEART_R, HEART_R + 1):
+        for z in range(-HEART_R, HEART_R + 1):
+            if math.hypot(x, z) <= HEART_R - 0.5 and (x, HEART_BOTTOM, z) not in v.b:
+                v.set(x, HEART_BOTTOM, z, rng.choice(HEART_WALL))
+
+
+def layer_module(name):
+    f = os.path.join(HERE, 'layer_%s.py' % name)
+    if not os.path.exists(f):
+        return None
+    spec = importlib.util.spec_from_file_location('layer_%s' % name, f)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
 
 
 def main():
     v = vox.Vox(seed=5)
-    rng = v.rng
-
-    def wall_block(y, x=0, z=0):
-        """層ごとの柄 (まだらにしない)。骨: 縦の肋 (角度 10 度ごとに骨の柱、あいだは方解石、12 段ごとに玄武岩の帯)、
-        塩: 横の地層 (高さで方解石・白い陶・石英の帯)、雷: 凝灰岩の煉瓦に 10 段ごとの錆びた銅の帯、灰: 玄武岩の柱と黒石"""
-        name = layer_of(y)[0]
-        a = math.degrees(math.atan2(z, x)) % 360
-        if name == 'bone':
-            if y % 12 == 0:
-                return 'smooth_basalt'
-            return 'bone_block[axis=y]' if a % 10 < 2.2 else 'calcite'
-        if name == 'salt':
-            band = (y // 4) % 5
-            return ['calcite', 'white_terracotta', 'calcite', 'smooth_quartz', 'diorite'][band]
-        if name == 'storm':
-            if y % 10 == 0:
-                return 'oxidized_cut_copper'
-            return 'tuff_bricks' if (y // 2 + int(a // 8)) % 2 else 'polished_tuff'
-        if name == 'ash':
-            if a % 12 < 2.5:
-                return 'basalt[axis=y]'
-            return 'cracked_polished_blackstone_bricks' if rng.random() < 0.12 else 'polished_blackstone_bricks'
-        return rng.choice(layer_of(y)[3])
-
-    # ---- 縦穴の壁の筒
-    r_out = R_IN + WALL
-    for x in range(-r_out - 1, r_out + 2):
-        for z in range(-r_out - 1, r_out + 2):
-            d = math.hypot(x, z)
-            if R_IN - 0.5 < d <= r_out + 0.5:
-                for y in range(HEART_TOP, TOP + 1):
-                    v.set(x, y, z, wall_block(y, x, z))
-    # 上端の縁 (着く所の踊り場をまわりに張り出す)
-    for x in range(-r_out - 6, r_out + 7):
-        for z in range(-r_out - 6, r_out + 7):
-            d = math.hypot(x, z)
-            if R_IN - 0.5 < d <= r_out + 6.5:
-                v.set(x, TOP, z, 'polished_deepslate')
-                if d > r_out + 5.5:
-                    v.set(x, TOP + 1, z, 'deepslate_brick_wall')
-    # ---- 螺旋の道 (半ブロックの段)。角度 0 (東) から
-    s = 0.0
-    y2 = (TOP + 1) * 2      # 半段の単位 (y2 / 2 = 歩く面の高さ)。最初は縁の上面 (TOP + 1) と同じ
-    rests = {}
-    layer_index = 0
-    flat_left = 0
-    step_i = 0
-    path = []               # (θ, y2)
-    while y2 > (HEART_BOTTOM + 1) * 2:  # 心臓の間の中も同じ螺旋で床まで下りる
-        th = s / ((PATH_IN + PATH_OUT) / 2)
-        path.append((th, y2))
-        y = y2 // 2
-        # 層の境で休み場 (10 歩平ら)
-        if layer_index < len(LAYERS) - 1 and y <= LAYERS[layer_index][2] and flat_left == 0 and ('rest_%d' % (layer_index + 1)) not in rests:
-            flat_left = 10
-            rests['rest_%d' % (layer_index + 1)] = (th, (y2 + 1) // 2)
-            layer_index += 1
-        if flat_left > 0:
-            flat_left -= 1
-        else:
-            y2 -= 1
-        s += STEP_ARC
-        step_i += 1
-    # 道のマス: 角度ごとに、半径 PATH_IN〜PATH_OUT のマスへ (半段 = 下の半ブロック、整数 = 丸ごと)
-    for i, (th, h2) in enumerate(path):
-        # 歩く面の高さ = h2 / 2。偶数なら丸ごとのブロック (上面 = h2/2)、奇数なら下の半ブロック (上面 = h2/2)
-        half = h2 % 2 == 1
-        block_y = h2 // 2 if half else h2 // 2 - 1
-        y = block_y + 1          # 立つ高さ
-        for x in range(-R_IN, R_IN + 1):
-            for z in range(-R_IN, R_IN + 1):
-                d = math.hypot(x, z)
-                if not (PATH_IN <= d <= PATH_OUT):
-                    continue
-                a = math.atan2(z, x)
-                diff = (a - th + math.pi) % (2 * math.pi) - math.pi
-                if abs(diff) * d > 1.05:
-                    continue
-                floor = layer_of(y)[4]
-                v.set(x, block_y - 1, z, wall_block(y, x, z))
-                v.set(x, block_y, z, slab_of(floor) if half else floor)
-                for yy in range(block_y + 1, block_y + 4):
-                    if v.get(x, yy, z) is None:
-                        v.set(x, yy, z, 'air')
-                if d < PATH_IN + 0.9:
-                    v.set(x, block_y + 1, z, wall_of(floor))
-                    if i % LANTERN_EVERY == 0:
-                        v.set(x, block_y + 2, z, 'soul_lantern[hanging=false,waterlogged=false]')
-    # ---- 休み場: 道の幅を内へ 4 広げ、灯りと篝火
-    for name, (th, y) in rests.items():
-        cx, cz = math.cos(th) * 14, math.sin(th) * 14
-        for x in range(int(cx) - 5, int(cx) + 6):
-            for z in range(int(cz) - 5, int(cz) + 6):
-                d = math.hypot(x, z)
-                if 11.5 <= d <= PATH_OUT and math.hypot(x - cx, z - cz) <= 5.5:
-                    # y = 立つ高さ。床は一つ下
-                    v.set(x, y - 1, z, 'polished_deepslate')
-                    v.set(x, y - 2, z, 'deepslate_tiles')
-                    for yy in range(y, y + 3):
-                        if v.get(x, yy, z) not in (None, 'air') and 'lantern' not in v.get(x, yy, z) and 'wall' not in v.get(x, yy, z):
-                            v.set(x, yy, z, 'air')
-                    if d < 12.4:
-                        v.set(x, y, z, 'deepslate_brick_wall')
-        lx, lz = int(round(math.cos(th) * 15)), int(round(math.sin(th) * 15))
-        v.set(lx, y, lz, 'soul_campfire[facing=north,lit=true,signal_fire=false,waterlogged=false]')
-        v.mark(name, lx, y, lz)
-    # ---- 層ごとの部屋 (壁の外へ張り出す箱)。角度は層の中ほどの道の上
-    for li, L in enumerate(LAYERS):
-        name, top, bottom = L[0], L[1], L[2]
-        span = [p for p in path if bottom < p[1] // 2 <= top]
-        if not span:
-            continue
-        for k, kind in enumerate(('pool', 'camp', 'den')):
-            th, h2 = span[int(len(span) * (0.2 + 0.3 * k))]
-            room(v, name, kind, th, (h2 + 1) // 2, L)
-    # ---- 心臓の間 (縦穴の底の下の丸い大部屋)
-    for x in range(-HEART_R - 1, HEART_R + 2):
-        for z in range(-HEART_R - 1, HEART_R + 2):
-            d = math.hypot(x, z)
-            if d > HEART_R + 0.5:
-                continue
-            for y in range(HEART_BOTTOM, HEART_TOP + 1):
-                dome = HEART_TOP - (HEART_TOP - HEART_BOTTOM) * 0.0
-                if y == HEART_BOTTOM or d > HEART_R - 0.5:
-                    v.set(x, y, z, rng.choice(HEART_WALL))
-                elif y == HEART_TOP and d > R_IN + 0.5:
-                    v.set(x, y, z, rng.choice(HEART_WALL))
-    # 心臓の台と、まわりの灯り (番人の戦いで点ける灯り。点けた所だけ姿が見える)
-    for x in range(-4, 5):
-        for z in range(-4, 5):
-            if math.hypot(x, z) <= 4.5:
-                v.set(x, HEART_BOTTOM + 1, z, 'sculk_catalyst' if (x, z) == (0, 0) else 'reinforced_deepslate')
-    for i in range(8):
-        a = i * math.pi / 4
-        lx, lz = int(round(math.cos(a) * 18)), int(round(math.sin(a) * 18))
-        v.set(lx, HEART_BOTTOM + 1, lz, 'polished_deepslate')
-        v.set(lx, HEART_BOTTOM + 2, lz, 'polished_deepslate_wall')
-        v.mark('beacon_%d' % i, lx, HEART_BOTTOM + 3, lz)
-    v.mark('heart', 0, HEART_BOTTOM + 2, 0)
-    v.mark('arrival', R_IN + 4, TOP + 1, 0)
-    # 地上への鎖 (着く所の北。右クリックで都の底の境へ戻る。story/ch5/AbyssGate)
-    ex, ez = R_IN + 5, -4
-    v.set(ex, TOP + 1, ez, 'lodestone')
-    for y in range(TOP + 2, TOP + 15):
-        v.set(ex, y, ez, 'chain[axis=y,waterlogged=false]')
-    v.mark('exit', ex, TOP + 1, ez)
-    ext = HEART_R + 2
-    # ---- 層ごとの遊び (36 の 8 章)。層ごとの組み立ては tools/abyss/layer_<層>.py の build(ctx)、全部の層に共通の寄り道は layer_common.py
-    #      (別の人が並べて作れるように、ここは呼ぶだけ。ファイルが無い層は飛ばす)
-    ctx = Ctx(v, path, rests, wall_block)
-    for L in LAYERS:
-        build_layer(L[0], ctx)
-    build_layer('common', ctx)
-    build_layer('decor', ctx)
+    lay = Layout(v)
+    ctx = Ctx(v, lay)
+    common = layer_module('common')
+    for n, layer in enumerate(ORDER, start=1):
+        build_camp(ctx, layer, n)
+        mod = layer_module(layer)
+        routes = []
+        for i, spec in enumerate(mod.ROUTES, start=1):
+            routes.append(build_route(ctx, layer, i, spec))
+        mod.build(ctx, routes)
+        if common is not None:
+            common.build(ctx, layer, routes)
+        # 上りの鎖 (骨は地上へ: 印 exit。ほかは前の層の野営へ: 印 ascend_<層>)。着く所 (arrive_<層>) は野営の南
+        Y = CAMP_Y[layer]
+        lay.put(-3, Y, 6, 'lodestone')
+        for yy in range(Y + 1, Y + CAMP_H):
+            lay.put(-3, yy, 6, 'chain[axis=y,waterlogged=false]')
+        del_air(lay, -3, Y, 6, Y + CAMP_H - 1)
+        v.mark('exit' if layer == 'bone' else 'ascend_%s' % layer, -3, Y, 6)
+        v.mark('arrive_%s' % layer, 0, Y, 5)
+        if layer == 'bone':
+            v.mark('arrival', 0, Y, 5)
+    build_heart(ctx)
+    lay.check_neighbors()
+    lay.finish()
     support_falling(v)
-    meta = {'name': 'abyss_layers', 'note': 'docs/design/36 A2。生成は tools/abyss/gen_abyss_layers.py', 'top': TOP, 'bottom': HEART_BOTTOM,
-            'rect': [-ext, -ext, ext, ext]}
-    data = v.runs(meta)
+    ext = 0
+    for (x, y, z) in v.b:
+        ext = max(ext, abs(x), abs(z))
+    meta = {'name': 'abyss_layers', 'note': 'docs/design/36 の 2・8 章 (層ごとに探す場所)。生成は tools/abyss/gen_abyss_layers.py',
+            'top': max(y for (_, y, _) in v.b), 'bottom': HEART_BOTTOM, 'rect': [-ext, -ext, ext, ext]}
+    data = v.runs(meta, keep_air=True)
     vox.save(OUT, data)
-    n = len(v.b)
-    print('wrote', os.path.relpath(OUT, ROOT), n, 'blocks', len(data['palette']), 'states', 'marks', sorted(v.marks))
+    print('wrote', os.path.relpath(OUT, ROOT), len(v.b), 'blocks', len(data['palette']), 'states', len(v.marks), 'marks')
+    return data
 
 
-class Ctx:
-    """層ごとの組み立てに渡すもの。v: 置き場 (vox.Vox)、path: 螺旋の道 [(角度, 半段の高さ y2)]、rests: 休み場 {名前: (角度, 立つ高さ)}、
-    wall_block(y, x, z): 層の壁の柄。ほかの決まり (半径・層の表・部屋の作り) はこのファイルの定数と関数をそのまま使う"""
-
-    def __init__(self, v, path, rests, wall_block):
-        self.v = v
-        self.path = path
-        self.rests = rests
-        self.wall_block = wall_block
-        self.R_IN = R_IN
-        self.WALL = WALL
-        self.PATH_IN = PATH_IN
-        self.PATH_OUT = PATH_OUT
-        self.TOP = TOP
-        self.HEART_TOP = HEART_TOP
-        self.HEART_BOTTOM = HEART_BOTTOM
-        self.LAYERS = LAYERS
-        self.slab_of = slab_of
-        self.wall_of = wall_of
-        self.layer_of = layer_of
-
-    def layer(self, name):
-        """(名前, 上, 下, 壁, 床, 飾り)"""
-        return next(L for L in LAYERS if L[0] == name)
-
-    def span(self, name):
-        """その層の道の [(角度, y2)] (上から順)"""
-        L = self.layer(name)
-        return [p for p in self.path if L[2] < p[1] // 2 <= L[1]]
-
-
-# 落ちるブロック (砂利・砂・コンクリートの粉など) の下が空なら、支えを入れる (建てたあとに落ちて道に穴があく)
 FALLING = ('gravel', 'sand', 'red_sand', 'concrete_powder', 'suspicious_gravel', 'suspicious_sand')
 
 
@@ -257,80 +608,6 @@ def support_falling(v):
         below = v.get(x, y - 1, z)
         if below is None or below in ('air', 'cave_air'):
             v.set(x, y - 1, z, 'tuff')
-
-
-def build_layer(name, ctx):
-    import importlib.util
-    f = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'layer_%s.py' % name)
-    if not os.path.exists(f):
-        return
-    spec = importlib.util.spec_from_file_location('layer_%s' % name, f)
-    mod = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(mod)
-    mod.build(ctx)
-
-
-def slab_of(floor):
-    stem = floor.split('[')[0]
-    table = {'polished_diorite': 'polished_diorite_slab', 'smooth_quartz': 'smooth_quartz_slab', 'polished_tuff': 'polished_tuff_slab',
-             'polished_blackstone': 'polished_blackstone_slab'}
-    return table.get(stem, 'polished_deepslate_slab') + '[type=bottom,waterlogged=false]'
-
-
-def wall_of(floor):
-    stem = floor.split('[')[0]
-    table = {'polished_diorite': 'diorite_wall', 'smooth_quartz': 'diorite_wall', 'polished_tuff': 'polished_tuff_wall',
-             'polished_blackstone': 'polished_blackstone_wall'}
-    return table.get(stem, 'deepslate_brick_wall')
-
-
-def room(v, layer, kind, th, y, L):
-    """壁の外へ張り出す箱の部屋 (幅 9、奥行き 9、高さ 6)。道の外の縁から戸の口 (幅 3、高さ 3)"""
-    rng = v.rng
-    ox, oz = math.cos(th), math.sin(th)
-    cx, cz = ox * (R_IN + WALL + 5), oz * (R_IN + WALL + 5)
-    icx, icz = int(round(cx)), int(round(cz))
-    for x in range(icx - 5, icx + 6):
-        for z in range(icz - 5, icz + 6):
-            if math.hypot(x, z) <= R_IN + WALL - 0.5:
-                continue
-            for yy in range(y - 1, y + 6):
-                edge = x in (icx - 5, icx + 5) or z in (icz - 5, icz + 5) or yy in (y - 1, y + 5)
-                v.set(x, yy, z, rng.choice(L[3]) if edge else 'air')
-            v.set(x, y - 1, z, L[4])
-    # 戸の口: 道の外の縁から部屋まで
-    for k in range(int(PATH_OUT) - 1, R_IN + WALL + 2):
-        for w in (-1, 0, 1):
-            px = int(round(ox * k - oz * w))
-            pz = int(round(oz * k + ox * w))
-            if math.hypot(px, pz) < PATH_IN + 1:
-                continue
-            v.set(px, y - 1, pz, L[4])
-            for yy in range(y, y + 3):
-                v.set(px, yy, pz, 'air')
-    # 中身
-    if kind == 'pool':
-        # 溜まりの間: 返った鼓動が溜まる池 (真ん中に光る台)。深淵術を覚える所
-        for x in range(icx - 2, icx + 3):
-            for z in range(icz - 2, icz + 3):
-                v.set(x, y - 1, z, 'sculk')
-        v.set(icx, y, icz, 'sculk_shrieker')
-        v.set(icx, y + 4, icz, 'soul_lantern[hanging=true,waterlogged=false]')
-        v.set(icx, y + 4 + 1, icz, L[3][0])
-    elif kind == 'camp':
-        # 前の私の野営: 寝床・消えた焚き火・帳面・荷
-        v.set(icx - 3, y, icz - 3, 'white_wool')
-        v.set(icx - 3, y, icz - 2, 'white_carpet')
-        v.set(icx, y, icz, 'campfire[facing=north,lit=false,signal_fire=false,waterlogged=false]')
-        v.set(icx + 3, y, icz - 3, 'lectern[facing=west,has_book=true,powered=false]')
-        v.set(icx + 3, y, icz + 3, 'barrel[facing=up,open=false]')
-        v.set(icx - 3, y + 4, icz + 3, 'soul_lantern[hanging=true,waterlogged=false]')
-    else:
-        # 巣: 骨や殻の山、暗い (灯りなし)
-        for _ in range(10):
-            v.set(icx + rng.randint(-3, 3), y, icz + rng.randint(-3, 3), L[5] if '[' in L[5] or L[5] else 'cobweb')
-        v.set(icx, y, icz, 'cobweb')
-    v.mark('%s_%s' % (kind, layer), icx, y, icz)
 
 
 if __name__ == '__main__':

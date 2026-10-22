@@ -1,0 +1,45 @@
+{
+  "category": "sub",
+  "chapter": "chapter2",
+  "order": 72,
+  "giver": "skyabyss:attendant_survivor_storm",
+  "stages": [
+    {
+      "id": "find",
+      "xp": 80,
+      "objectives": [
+        {
+          "id": "rest",
+          "type": "signal",
+          "targets": [
+            "abyss_shadow_storm"
+          ],
+          "count": 1
+        }
+      ]
+    },
+    {
+      "id": "return",
+      "objectives": [
+        {
+          "id": "talk",
+          "type": "talk",
+          "target": "skyabyss:attendant_survivor_storm",
+          "topic": "side_return"
+        }
+      ]
+    }
+  ],
+  "reward": {
+    "xp": 300,
+    "items": [
+      {
+        "item": "minecraft:golden_apple",
+        "count": 2
+      }
+    ],
+    "affinity": {
+      "skyabyss:attendant_survivor_storm": 3
+    }
+  }
+}

@@ -1,136 +1,72 @@
 # -*- coding: utf-8 -*-
-"""塩の層 (y 120〜0) の遊び: 満ち引きの塩の湖 (docs/design/36 の 8 章。A9)。gen_abyss_layers.py が build(ctx) を呼ぶ。
+"""五章の二「塩の層」(docs/design/36 の 8 章)。
 
-形:
-  - 縦穴の真ん中に、塩の湖の器 (半径 11 の内。外の縁は半径 12.5)。底は塩の板、器の下は塩の柱で支える
-  - 下の道 (湖の橋): 螺旋の途中の周り (θ0) から、真ん中を横切って反対側 (θ0 + π) へ。二マス幅、塩の床。
-    形は橋と同じ（半段の高さが θ0 の高さから反対側の高さへ直線で下る）。橋の柱は器の中で湖を二つに仕切る
-  - 潮: 水の高さが S_low (引き潮) と S_high (満ち潮) のあいだを、深淵の潮の周期で上下する (story/ch5/layers/SaltTide)
-    引き潮では橋が水の上に出て歩ける。満ち潮では橋は水の下 (泳いで渡る)
-  - 高い棚 shelf_salt: 器の縁の上 (満ち潮の水面より 2 つ上)。螺旋からは離れていて、重さの術で浮いて上がるしかない
-  - 印: tide_salt_low / tide_salt_high (潮の高さ。y を読む)、lake_salt (湖の底の真ん中)、shelf_salt (棚の上)、
-    光: 湖の底の海灯 (水の中から照らす)、塩の柱・結晶・滴る塩 (つらら)
-  - 水は設計図に「水」として置く (器の中で、塩と柱のない所)。潮の係が水の高さを変える
+三本の道:
+  1 東「塩の殻の床」: 控え → 脆い床の間 (塩の殻の床の下は浅い穴。重さの術なしで乗ると割れる。術の中なら渡れる) → 印の部屋
+  2 南「塩風の井戸」: 貯め池 → 乾いた井戸 (高さ 14。重さの術を使って井戸の底に立つと、塩の風で上の口まで浮く) → 上の印の部屋
+  3 西「白い貝守の縄張り」: 潮だまり → 縄張り (白い貝守の大きいもの。倒すと印) → 印の部屋
+測量士の地図の切れ端 (frag_salt_1..3) を三本の道に一枚ずつ。
 """
-import math
-import random
+from __future__ import annotations
 
-R_LAKE = 11          # 湖の内の半径
-R_RIM = 12.5         # 器の外の縁
-R_RING = 15.5        # 螺旋の内の縁 (橋の端は内側)
-HALF_W = 1.1         # 橋の半幅 (二マス)
-PILLAR_R = 4.5       # 柱の太さ (底の下で細くなる)
-
-
-def stand_of(h2):
-    return h2 // 2 if h2 % 2 == 0 else h2 // 2 + 1
+ROUTES = [
+    {'nodes': [('ante', 16, 3, 0, 3, 2, 4), ('brittle', 30, 8, 0, 8, 4, 6), ('mark', 46, 6, 0, 4, 4, 6)]},
+    {'nodes': [('cistern', 18, 6, 0, 4, 4, 5), ('well', 30, 6, 0, 2, 2, 15), ('mark', 44, 6, 11, 4, 4, 6)],
+     'link': ['uw', 'uw', {'from': (33, 6, 11)}]},
+    {'nodes': [('pool', 18, 4, -2, 4, 3, 5), ('territory', 34, 10, -2, 8, 7, 8), ('mark', 50, 6, -2, 4, 4, 6)]},
+]
 
 
-def block_of(h2):
-    return h2 // 2 if h2 % 2 == 1 else h2 // 2 - 1
-
-
-def build(ctx):
+def build(ctx, routes):
     v = ctx.v
-    rng = random.Random(43)
-    span = ctx.span('salt')
-    i0 = min(range(len(span)), key=lambda j: abs(stand_of(span[j][1]) - 60))
-    th0, h0 = span[i0][0], span[i0][1]
-    ie = next(j for j in range(i0, len(span)) if span[j][0] - th0 >= math.pi)
-    the, he = span[ie][0], span[ie][1]
-    sH, sE = stand_of(h0), stand_of(he)
-    S_LOW = sE - 3          # 引き潮の水面 (橋は水の上)
-    S_HIGH = sH + 2         # 満ち潮の水面 (橋は水の下。高い棚は届かない)
-    F = S_LOW - 6           # 器の底
-    RIM = S_HIGH + 2        # 器の縁の上面 (満ち潮の水面より 2 つ上 = 浮かないと届かない)
-
-    # ---- 器: 底、外の壁、塩の柱 (底の下)
-    for x in range(-14, 15):
-        for z in range(-14, 15):
-            d = math.hypot(x, z)
-            if d <= R_RIM:
-                v.set(x, F, z, rng.choice(['smooth_quartz', 'smooth_quartz', 'calcite']))
-            if R_LAKE < d <= R_RIM:
-                for y in range(F + 1, RIM + 1):
-                    v.set(x, y, z, rng.choice(['calcite', 'calcite', 'white_terracotta', 'smooth_quartz']))
-            if d <= PILLAR_R:
-                for y in range(F - 18, F):
-                    r = PILLAR_R - (F - 1 - y) / 7.0
-                    if d <= max(1.5, r):
-                        v.set(x, y, z, rng.choice(['calcite', 'smooth_quartz', 'calcite']))
-
-    # ---- 下の道 (湖の橋): 螺旋の θ0 の高さから、θe の高さへ、真ん中を横切る
-    A = (R_RING * math.cos(th0), R_RING * math.sin(th0))
-    B = (R_RING * math.cos(the), R_RING * math.sin(the))
-    lay_chord(v, rng, A, B, h0, he, F)
-    v.mark('bridge_salt_a', round(A[0]), sH, round(A[1]))
-    v.mark('bridge_salt_b', round(B[0]), sE, round(B[1]))
-
-    # ---- 湖: 海灯 (底の光。橋の下からも照らす)、水 (満ち潮まで)、塩の結晶と滴る塩
-    for (x, z) in ((-6, 4), (5, -5), (-3, -7), (6, 6), (0, 7)):
-        if v.get(x, F + 1, z) in (None, 'air'):
-            v.set(x, F + 1, z, 'sea_lantern')
-    for x in range(-R_LAKE, R_LAKE + 1):
-        for z in range(-R_LAKE, R_LAKE + 1):
-            if math.hypot(x, z) >= R_LAKE:
-                continue
-            for y in range(F + 1, S_HIGH + 1):
-                if v.get(x, y, z) in (None, 'air'):
-                    v.set(x, y, z, 'water')
-    for k in range(9):
-        a = k * 2 * math.pi / 9 + 0.2
-        x, z = round(math.cos(a) * 13.2), round(math.sin(a) * 13.2)
-        for y in range(F + 1, F + 2 + rng.randint(2, 5)):
-            if v.get(x, y, z) in (None, 'air', 'water'):
-                v.set(x, y, z, 'calcite' if (y - F) < 3 else 'pointed_dripstone[vertical_direction=up,thickness=middle,waterlogged=false]')
-    for x in range(-R_LAKE, R_LAKE + 1):
-        for z in range(-R_LAKE, R_LAKE + 1):
-            if R_LAKE <= math.hypot(x, z) < R_RIM - 0.4 and rng.random() < 0.3:
-                v.set(x, RIM + 1, z, 'pointed_dripstone[vertical_direction=up,thickness=tip,waterlogged=false]')
-
-    # ---- 高い棚 (器の縁。螺旋とは離れている)。θ0 の直角の向き
-    sa = th0 + math.pi / 2
-    sx, sz = round(math.cos(sa) * 11.5), round(math.sin(sa) * 11.5)
-    v.mark('shelf_salt', sx, RIM + 1, sz)
-    v.mark('tide_salt_low', 0, S_LOW, 0)
-    v.mark('tide_salt_high', 0, S_HIGH, 0)
-    v.mark('lake_salt', 0, F + 1, 0)
-
-
-def lay_chord(v, rng, A, B, h_a, h_b, floor_y):
-    """A から B へ、二マス幅の塩の橋 (半段の高さは h_a → h_b に直線で変わる)。湖の中では下の柱で支える"""
-    ax, az = A
-    bx, bz = B
-    dx, dz = bx - ax, bz - az
-    L2 = dx * dx + dz * dz
-    L = math.sqrt(L2)
-    cells = {}
-    for x in range(int(min(ax, bx)) - 3, int(max(ax, bx)) + 4):
-        for z in range(int(min(az, bz)) - 3, int(max(az, bz)) + 4):
-            t = ((x - ax) * dx + (z - az) * dz) / L2
-            if t < -0.05 or t > 1.05:
-                continue
-            t = min(1.0, max(0.0, t))
-            if math.hypot(x - (ax + t * dx), z - (az + t * dz)) > HALF_W:
-                continue
-            if math.hypot(x, z) > R_RING:
-                continue
-            cells[(x, z)] = (round(h_a + (h_b - h_a) * t), t)
-    for (x, z), (h2, t) in cells.items():
-        by = block_of(h2)
-        for y in range(by + 1, by + 4):
-            v.set(x, y, z, 'air')
-        k = int(t * L)
-        if h2 % 2 == 1:
-            v.set(x, by, z, 'smooth_quartz_slab[type=bottom,waterlogged=false]')
-        elif k % 5 == 0:
-            v.set(x, by, z, 'calcite')
-        else:
-            v.set(x, by, z, 'smooth_quartz')
-        # 湖の中は、橋の下を底まで柱で支える (橋が水の上に出る)
-        if math.hypot(x, z) < R_LAKE:
-            for y in range(floor_y + 1, by):
-                v.set(x, y, z, 'calcite' if (x + z + y) % 3 else 'smooth_quartz')
-        elif k % 4 == 1 and rng.random() < 0.5 and v.get(x, by - 1, z) in (None, 'air'):
-            # 橋の下から滴る塩 (つらら)
-            v.set(x, by - 1, z, 'pointed_dripstone[vertical_direction=down,thickness=tip,waterlogged=false]')
+    rng = v.rng
+    (r1, rooms1), (r2, rooms2), (r3, rooms3) = routes
+    # ---- 1: 脆い床。真ん中の u-5..u+5 を三つ下げ、上に塩の殻 (白い漆喰)。手前の穴の壁に梯子
+    u, w, y, hu, hw, h = rooms1['brittle']
+    for a in range(u - hu + 3, u + hu - 2):
+        for b in range(w - hw, w + hw + 1):
+            for yy in range(y - 3, y):
+                r1.cell(a, b, yy)
+            r1.put(a, b, y - 1, 'white_concrete')
+        # 穴の底は塩の結晶 (光る)
+        if (a + w) % 3 == 0:
+            r1.put(a, w, y - 3, 'sea_lantern')
+    for yy in range(y - 3, y - 1):
+        r1.put(u - hu + 3, w - hw, yy, 'ladder[facing=%s,waterlogged=false]' % r1.facing(1, 0))
+    a0, b0 = r1.xz(u - hu + 3, w - hw)
+    a1, b1 = r1.xz(u + hu - 3, w + hw)
+    v.mark('brittle_salt_a', min(a0, a1), y - 1, min(b0, b1))
+    v.mark('brittle_salt_b', max(a0, a1), y - 1, max(b0, b1))
+    r1.mark('puzzle_salt', u, w, y)
+    r1.mark('frag_salt_1', u + hu - 1, w + hw - 1, y)
+    r1.put(u + hu - 1, w + hw - 1, y, 'chest[facing=north,type=single,waterlogged=false]')
+    # ---- 2: 乾いた井戸。壁に塩の筋、底に印 (浮く所)
+    u, w, y, hu, hw, h = rooms2['well']
+    for yy in range(y, y + h, 3):
+        r2.put(u - hu - 1, w, yy, 'prismarine_bricks')
+    r2.mark('well_salt', u, w, y)
+    r2.mark('well_salt_top', u + hu, w, y + 11)
+    # 井戸の上の口の縁 (立てる床。印の部屋へ続く廊下の床と同じ高さ)
+    for b in range(w - hw, w + hw + 1):
+        r2.put(u + hu, b, y + 10, ctx.LAYERS['salt']['floor'])
+    u, w, y, hu, hw, h = rooms2['cistern']
+    r2.mark('frag_salt_2', u - hu + 1, w + hw - 1, y)
+    r2.put(u - hu + 1, w + hw - 1, y, 'chest[facing=north,type=single,waterlogged=false]')
+    for a in range(u - 2, u + 2):
+        for b in range(w + 2, w + 4):
+            r2.put(a, b, y - 1, 'water[level=0]')
+            r2.put(a, b, y - 2, 'prismarine')
+    # ---- 3: 縄張り
+    u, w, y, hu, hw, h = rooms3['territory']
+    r3.mark('terr_salt', u, w, y)
+    for _ in range(10):
+        a, b = u + rng.randint(-hu + 2, hu - 2), w + rng.randint(-hw + 2, hw - 2)
+        if abs(a - u) + abs(b - w) > 3:
+            top = rng.randint(1, 3)
+            for yy in range(y, y + top):
+                r3.put(a, b, yy, 'calcite' if yy < y + top - 1 else 'white_terracotta')
+    u, w, y, hu, hw, h = rooms3['pool']
+    r3.mark('frag_salt_3', u + hu - 1, w - hw + 1, y)
+    r3.put(u + hu - 1, w - hw + 1, y, 'chest[facing=north,type=single,waterlogged=false]')
+    # 塩売り (野営の東の隅。前の探掘隊の荷運びの残り)
+    v.mark('trader_salt', 5, ctx.CAMP_Y['salt'], -3)

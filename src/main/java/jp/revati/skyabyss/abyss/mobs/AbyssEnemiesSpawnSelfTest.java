@@ -22,8 +22,8 @@ import net.minecraft.world.entity.LivingEntity;
 public final class AbyssEnemiesSpawnSelfTest {
     private static final List<String> F = new ArrayList<>();
     private static final int TRIES = 60;
-    private static final String[] MARKS = {"arrival", "rest_1", "rest_2", "rest_3", "heart", "den_bone", "pool_bone", "camp_bone",
-            "den_salt", "pool_salt", "camp_salt", "den_storm", "pool_storm", "camp_storm", "den_ash", "pool_ash", "camp_ash"};
+    private static final String[] MARKS = {"arrival", "rest_1", "rest_2", "rest_3", "heart", "nest_bone", "puzzle_bone", "markroom_bone_1",
+            "terr_salt", "puzzle_salt", "markroom_salt_2", "nest_storm", "puzzle_storm", "markroom_storm_3", "terr_ash", "puzzle_ash", "markroom_ash_1"};
     private static String summary = "";
 
     private AbyssEnemiesSpawnSelfTest() {

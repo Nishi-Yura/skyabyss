@@ -41,6 +41,11 @@ public final class ChapterLabel {
     }
 
     static Component text(Chapters c) {
+        // 深淵の中は、いる区切り (五章の一「骨の層」…) を出す
+        Component abyss = jp.revati.skyabyss.story.ch5.client.AbyssSectionClient.label();
+        if (abyss != null) {
+            return abyss;
+        }
         return Component.translatable(c.tabKey()).append("　").append(Component.translatable(c.titleKey()));
     }
 

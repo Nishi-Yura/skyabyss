@@ -1,116 +1,88 @@
 # -*- coding: utf-8 -*-
-"""骨の層 (y 240〜120) の遊び: 崩れた螺旋と肋の橋 (docs/design/36 の 8 章。A9)。gen_abyss_layers.py が build(ctx) を呼ぶ。
+"""五章の一「骨の層」(docs/design/36 の 8 章)。gen_abyss_layers.py が ROUTES で道を作り、build(ctx, routes) で中身を置く。
 
-形:
-  - 層の深さ 60% の所で、螺旋の道を角度 GAP (約 2 rad) ぶん抜く (崩れ)。抜けた両端を、縦穴の中を横切る肋の橋でつなぐ
-  - 橋: 二マス幅の方解石の道 (半段は多角形の石のハーフ)。下に肋のアーチ (骨ブロックの弧)、灯りを下げる
-  - 橋の両端の印: bridge_bone_a (橋の手前) / bridge_bone_b (橋の向こう)。骨拾いの湧きは story/ch5/layers/BoneBridge
-  - 橋の向こうの螺旋の先に巣 (den_bone)。肋の番の門は BoneBridge が、巣の戸の口 (半径 20〜22) を封じて作る
-  - 近道の印 shortcut_bone = 巣の床の真ん中 (肋の番を倒すと鎖の近道。近道の作りは layer_common / main の仕事)
+三本の道 (局所の座標 u = 野営から外、w = 横。gen_abyss_layers の説明):
+  1 東「肋の回廊」: 骨の広間 (待ち伏せ) → 灯皿の間 (光の術で三つの灯皿を同時に灯すと奥の骨の戸が開く) → 印の部屋。広間の横に、光の中でだけ崩れる壁と隠し部屋
+  2 南「骨笛の巣」: 細い首 → 巣 (入ると三つの波。払うと印が取れる) → 印の部屋
+  3 西「崩れた肋の橋」: 墓の回廊 → 裂け目 (一マス幅の肋の橋。橋の上で骨拾いが両端から) → 印の部屋
+印は story/ch5/layers/AbyssMarks、仕掛けは story/ch5/layers/LayerPuzzles が読む。
 """
-import math
-import random
+from __future__ import annotations
 
-GAP = 2.0           # 抜く角度 (rad)。橋の長さ約 25
-GAP_FRAC = 0.67     # 層の上から何割の所で崩れるか (脇の洞 0.65 の先、巣 0.8 の手前)
-HALF_W = 1.1        # 橋の半幅 (二マス幅)
-R_RING = 15.5       # 螺旋の内の縁。橋はこの内側だけ (螺旋の道に当たらない)
-STAND_LAG = 1
-
-
-def stand_of(h2):
-    """半段の高さ h2 (= 歩く面 × 2) から、立つ高さ (y)"""
-    return h2 // 2 if h2 % 2 == 0 else h2 // 2 + 1
+ROUTES = [
+    {'nodes': [('hall', 18, 4, 0, 5, 3, 5), ('braziers', 28, 14, 2, 5, 5, 6), ('mark', 46, 6, 2, 4, 4, 6)],
+     'link': ['uw', 'uw', {'from': (36, 14, 2), 'via': [(46, 14, 2)]}]},
+    {'nodes': [('neck', 19, 3, -3, 3, 2, 4), ('nest', 30, 8, -3, 7, 6, 7), ('mark', 46, 6, -3, 4, 4, 6)]},
+    {'nodes': [('gallery', 22, 8, 1, 4, 4, 5), ('chasm', 34, 10, 1, 6, 5, 6), ('mark', 48, 4, 1, 4, 4, 6)],
+     'link': ['uw', 'uw', 'uw']},
+]
 
 
-def block_of(h2):
-    """半段の高さから、床ブロックの高さ (奇数は半ブロック、偶数は丸ごと)"""
-    return h2 // 2 if h2 % 2 == 1 else h2 // 2 - 1
-
-
-def build(ctx):
+def build(ctx, routes):
     v = ctx.v
-    rng = random.Random(41)
-    span = ctx.span('bone')
-    ia = int(len(span) * GAP_FRAC)
-    th_a = span[ia][0]
-    ib = next(j for j in range(ia, len(span)) if span[j][0] - th_a >= GAP)
-    th_b, h_a, h_b = span[ib][0], span[ia][1], span[ib][1]
+    (r1, rooms1), (r2, rooms2), (r3, rooms3) = routes
+    # ---- 1: 灯皿の間。三つの灯皿 (消えた魂の焚き火) と、奥の骨の戸 (u = 34..35 の廊下をふさぐ)
+    u, w, y, hu, hw, h = rooms1['braziers']
+    for k, (bu, bw) in enumerate(((u - 3, w - 3), (u + 3, w - 3), (u, w + 3))):
+        r1.put(bu, bw, y, 'bone_block[axis=y]')
+        r1.put(bu, bw, y + 1, 'soul_campfire[facing=north,lit=false,signal_fire=false,waterlogged=false]')
+        r1.mark('brazier_bone_%d' % k, bu, bw, y + 1)
+    # 灯皿の間の奥の口 (u = u+hu+1 .. +2) を骨でふさぐ。開くのは三つが灯ったとき
+    for du in (1, 2):
+        for k in (-1, 0, 1):
+            for yy in range(y, y + 4):
+                r1.cell(u + hu + du, w + k, yy)
+                r1.put(u + hu + du, w + k, yy, 'bone_block[axis=y]')
+    v.mark('door_bone_a', *_corner(r1, u + hu + 1, w - 1, y, u + hu + 2, w + 1, y + 3, 0))
+    v.mark('door_bone_b', *_corner(r1, u + hu + 1, w - 1, y, u + hu + 2, w + 1, y + 3, 1))
+    r1.mark('puzzle_bone', u, w, y)
+    # 骨の広間: 待ち伏せ (広間に入ると壁の窪みから骨拾い)。窪みは飾り
+    u, w, y, hu, hw, h = rooms1['hall']
+    r1.mark('ambush_bone', u, w, y)
+    for du in range(-hu + 1, hu, 3):
+        r1.put(u + du, w - hw, y + h - 1, 'bone_block[axis=x]')
+    # 光の中でだけ崩れる壁 (広間の +w の壁) と隠し部屋
+    for k in (-1, 0, 1):
+        for yy in range(y, y + 3):
+            r1.cell(u + k, w + hw + 1, yy)
+            r1.put(u + k, w + hw + 1, yy, 'cracked_deepslate_bricks')
+    r1.room(u, w + hw + 3, y, 1, 1, 3)
+    r1.put(u, w + hw + 4, y, 'chest[facing=north,type=single,waterlogged=false]')
+    r1.mark('hidden_bone', u, w + hw + 3, y)
+    v.mark('hid_bone_a', *_corner(r1, u - 1, w + hw + 1, y, u + 1, w + hw + 1, y + 2, 0))
+    v.mark('hid_bone_b', *_corner(r1, u - 1, w + hw + 1, y, u + 1, w + hw + 1, y + 2, 1))
+    # ---- 2: 巣
+    u, w, y, hu, hw, h = rooms2['nest']
+    r2.mark('nest_bone', u, w, y)
+    rng = v.rng
+    for _ in range(14):
+        a, b = u + rng.randint(-hu + 1, hu - 1), w + rng.randint(-hw + 1, hw - 1)
+        if abs(a - u) + abs(b - w) > 2:
+            r2.put(a, b, y, rng.choice(['bone_block[axis=y]', 'bone_block[axis=x]', 'cobweb']))
+    # ---- 3: 裂け目と肋の橋 (床を六つ下げ、一マス幅の橋)。下に落ちたら梯子で手前へ戻る
+    u, w, y, hu, hw, h = rooms3['chasm']
+    for a in range(u - hu + 2, u + hu - 1):
+        for b in range(w - hw, w + hw + 1):
+            for yy in range(y - 6, y):
+                r3.cell(a, b, yy)
+    for a in range(u - hu + 2, u + hu - 1):
+        r3.put(a, w, y - 1, 'bone_block[axis=x]' if r3.d in ('e', 'w') else 'bone_block[axis=z]')
+        # 橋の下の肋の弧
+        if (a - u) % 3 == 0:
+            for b in range(w - 3, w + 4):
+                yy = y - 2 - abs(b - w) // 2
+                r3.put(a, b, yy, 'bone_block[axis=y]')
+    for yy in range(y - 6, y):
+        r3.put(u - hu + 2, w - 3, yy, 'ladder[facing=%s,waterlogged=false]' % r3.facing(1, 0))
+    r3.mark('bridge_bone_a', u - hu + 2, w, y)
+    r3.mark('bridge_bone_b', u + hu - 2, w, y)
+    r3.mark('pit_bone', u, w, y - 6)
 
-    # ---- 崩れ: 螺旋の道のうち、角度 (th_a, th_b) の間で、その層の高さの窓だけを抜く (次の周回は 27 段下なので当たらない)
-    lo = stand_of(h_b) - 4
-    hi = stand_of(h_a) + 4
-    for x in range(-21, 22):
-        for z in range(-21, 22):
-            d = math.hypot(x, z)
-            if not (ctx.PATH_IN - 1.5 <= d <= ctx.PATH_OUT):
-                continue
-            rel = (math.atan2(z, x) - th_a) % (2 * math.pi)
-            if not (0.12 < rel < GAP - 0.12):
-                continue
-            for y in range(lo, hi + 1):
-                v.set(x, y, z, 'air')
 
-    # ---- 肋の橋 (縦穴を横切る。両端は螺旋の内の縁の内側)
-    A = (R_RING * math.cos(th_a), R_RING * math.sin(th_a))
-    B = (R_RING * math.cos(th_b), R_RING * math.sin(th_b))
-    lay_chord(v, rng, A, B, h_a, h_b)
-    v.mark('bridge_bone_a', round(A[0]), stand_of(h_a), round(A[1]))
-    v.mark('bridge_bone_b', round(B[0]), stand_of(h_b), round(B[1]))
-
-    # ---- 巣の床 (肋の番の部屋) と近道の印
-    den = v.marks.get('den_bone')
-    if den:
-        v.mark('shortcut_bone', den[0], den[1], den[2])
-
-
-def lay_chord(v, rng, A, B, h_a, h_b):
-    """A から B へ、二マス幅の橋を架ける (半段の高さは h_a → h_b に直線で変わる)。橋の下に肋のアーチ"""
-    ax, az = A
-    bx, bz = B
-    dx, dz = bx - ax, bz - az
-    L2 = dx * dx + dz * dz
-    L = math.sqrt(L2)
-    px, pz = -dz / L, dx / L          # 橋に直角な向き
-    cells = {}
-    for x in range(int(min(ax, bx)) - 3, int(max(ax, bx)) + 4):
-        for z in range(int(min(az, bz)) - 3, int(max(az, bz)) + 4):
-            t = ((x - ax) * dx + (z - az) * dz) / L2
-            if t < -0.05 or t > 1.05:
-                continue
-            t = min(1.0, max(0.0, t))
-            if math.hypot(x - (ax + t * dx), z - (az + t * dz)) > HALF_W:
-                continue
-            if math.hypot(x, z) > R_RING:
-                continue
-            cells[(x, z)] = (round(h_a + (h_b - h_a) * t), t)
-    for (x, z), (h2, t) in cells.items():
-        by = block_of(h2)
-        for y in range(by + 1, by + 4):
-            v.set(x, y, z, 'air')
-        k = int(t * L)
-        if h2 % 2 == 1:
-            v.set(x, by, z, 'polished_diorite_slab[type=bottom,waterlogged=false]')
-        elif k % 6 == 0:
-            v.set(x, by, z, 'bone_block[axis=y]')
-        else:
-            v.set(x, by, z, 'calcite')
-        v.set(x, by - 1, z, 'calcite')
-    # 肋: 四マスごとに、橋の下へ弧を描く骨 (幅 9、深さは中央ほど深い)
-    for k in range(0, int(L) + 1, 4):
-        t = k / L
-        qx, qz = ax + t * dx, az + t * dz
-        by = block_of(round(h_a + (h_b - h_a) * t))
-        for u in range(-4, 5):
-            depth = round(5 * math.sqrt(max(0.0, 1 - (u / 4.5) ** 2)))
-            x, z = round(qx + px * u), round(qz + pz * u)
-            if math.hypot(x, z) > R_RING:
-                continue
-            for dd in range(1, depth + 1):
-                if v.get(x, by - dd, z) in (None, 'air'):
-                    v.set(x, by - dd, z, 'bone_block[axis=y]')
-        # 橋の下の灯り (次の層の灯りを見下ろす目印。骨の影を照らす)
-        if (k // 4) % 2 == 0:
-            x, z = round(qx), round(qz)
-            if math.hypot(x, z) <= R_RING and v.get(x, by - 2, z) in (None, 'air'):
-                v.set(x, by - 2, z, 'soul_lantern[hanging=true,waterlogged=false]')
+def _corner(r, u0, w0, y0, u1, w1, y1, which):
+    """局所の箱の、世界の座標の小さい角 (which=0) と大きい角 (1)"""
+    x0, z0 = r.xz(u0, w0)
+    x1, z1 = r.xz(u1, w1)
+    if which == 0:
+        return min(x0, x1), min(y0, y1), min(z0, z1)
+    return max(x0, x1), max(y0, y1), max(z0, z1)

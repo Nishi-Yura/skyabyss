@@ -72,7 +72,7 @@ public final class NightmareSelfTest {
             Quests.forgetAll(p);
             Quests.start(p, AbyssEntrance.QUEST);
             check(f, Nightmare.check(p) == Nightmare.Result.NOT_READY, "the nightmare opened before the heart talk");
-            for (int i = 0; i < 10 && !"report".equals(TownGuests.stageOf(p, AbyssEntrance.QUEST)); i++) {
+            for (int i = 0; i < 24 && !"report".equals(TownGuests.stageOf(p, AbyssEntrance.QUEST)); i++) {
                 Quests.forceStage(p, AbyssEntrance.QUEST);
             }
             check(f, Nightmare.passedHeart(p), "the report stage should count as past the heart");

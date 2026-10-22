@@ -83,7 +83,8 @@ public final class AbyssMobSpawner {
     static final int[] DEEP_W = {32, 18};
     static final String[] ONLY = {LampEater.ID, CeilingWalker.ID, HeartbeatMimic.ID};
     static final String[] LAYER_NAMES = {"bone", "salt", "storm", "ash"};
-    static final String[] ROOM_KINDS = {"den", "pool", "camp"};
+    // 湧きの目印 (層ごと。tools/abyss/layer_<層>.py の印)。野営は休み場なので入れない
+    static final String[] ROOM_KINDS = {"nest", "terr", "puzzle", "markroom"};
 
     // 開発用とテストが見る、深淵の敵の全部の ID (A 組 9 + B 組 9)
     public static final String[] FOES = {AshTrail.ID, EmberKeeper.ID, SootChild.ID, PastShadow.ID, NamelessShape.ID, LampEater.ID,
@@ -326,12 +327,7 @@ public final class AbyssMobSpawner {
         return new Plan(id, form, foot.getX() + 0.5, foot.getY(), foot.getZ() + 0.5, count);
     }
 
-    // 縦穴の道の輪 (半径 PATH_IN〜PATH_OUT。設計図 tools/abyss/gen_abyss_layers.py と同じ)
-    static final double PATH_IN = 15.5;
-    static final double PATH_OUT = 19.5;
-
-    // 人から 12〜22 ブロックの床を探す。35% は印 (溜まり・巣・野営の部屋) のまわり、残りは縦穴の螺旋の道の上
-    // (道は縦穴の中ほどが吹き抜けなので、人のまわりの円で探すと多くが宙か壁になる)。なければ null
+    // 人から 12〜22 ブロックの床を探す。35% は印 (巣・縄張り・仕掛けの部屋・印の部屋) のまわり、残りは人のまわりの廊下と部屋。なければ null
     static BlockPos findSpot(ServerLevel level, BlockPos center, Random r) {
         if (r.nextDouble() < ANCHOR_CHANCE) {
             BlockPos m = nearMark(center, r);
@@ -344,13 +340,16 @@ public final class AbyssMobSpawner {
                 }
             }
         }
-        // 道の上: 人の角度から、弧の長さ 12〜22 だけ前か後ろ。道は回りながら下るので、上下は広めに見る
-        double rr = PATH_IN + 0.5 + r.nextDouble() * (PATH_OUT - PATH_IN - 1);
-        double arc = (SPAWN_MIN + r.nextDouble() * (SPAWN_MAX - SPAWN_MIN)) / rr * (r.nextBoolean() ? 1 : -1);
-        double a = Math.atan2(center.getZ() + 0.5, center.getX() + 0.5) + arc;
-        int x = (int) Math.floor(Math.cos(a) * rr);
-        int z = (int) Math.floor(Math.sin(a) * rr);
-        return floorNear(level, x, center.getY(), z, 10, 14);
+        // 人のまわり 12〜22 ブロックの廊下・部屋の床 (層は囲われた道と部屋なので、何度か試して床のある所)
+        for (int tries = 0; tries < 8; tries++) {
+            double a = r.nextDouble() * Math.PI * 2;
+            double d = SPAWN_MIN + r.nextDouble() * (SPAWN_MAX - SPAWN_MIN);
+            BlockPos f = floorNear(level, center.getX() + (int) Math.round(Math.cos(a) * d), center.getY(), center.getZ() + (int) Math.round(Math.sin(a) * d), 5, 6);
+            if (f != null) {
+                return f;
+            }
+        }
+        return null;
     }
 
     // (x, z) の柱で、y の上 up から下 down までの間の床 (固い面の上に体の二段が空いている所)。上から順に。なければ null
@@ -386,9 +385,12 @@ public final class AbyssMobSpawner {
         List<BlockPos> near = new ArrayList<>();
         for (String layer : LAYER_NAMES) {
             for (String kind : ROOM_KINDS) {
-                BlockPos m = AbyssBuild.mark(kind + "_" + layer);
-                if (m != null && m.distSqr(center) < ANCHOR_RANGE * ANCHOR_RANGE) {
-                    near.add(m);
+                for (String name : kind.equals("markroom") ? new String[] {kind + "_" + layer + "_1", kind + "_" + layer + "_2", kind + "_" + layer + "_3"}
+                        : new String[] {kind + "_" + layer}) {
+                    BlockPos m = AbyssBuild.mark(name);
+                    if (m != null && m.distSqr(center) < ANCHOR_RANGE * ANCHOR_RANGE) {
+                        near.add(m);
+                    }
                 }
             }
         }
