@@ -45,6 +45,7 @@ R = {
     "mapmaker":        dict(skin=(196, 150, 112), hair=(150, 96, 56), coat=(54, 104, 112), role=(196, 172, 122), acc=(186, 146, 70), head="beret", headc=(150, 70, 50), bg=(80, 160, 170)),
     "drunkard":        dict(skin=(206, 146, 116), hair=(96, 76, 58), coat=(110, 92, 70), role=(122, 62, 78), acc=(140, 120, 80), head="none", beard=True, drunk=True, bg=(200, 110, 90)),
     "trade_keeper":    dict(skin=(196, 150, 112), hair=(70, 52, 40), coat=(44, 84, 82), role=(196, 160, 82), acc=(214, 184, 104), head="cap", headc=(44, 84, 82), specs=True, bg=(200, 170, 90)),
+    "stable_keeper":   dict(skin=(190, 140, 104), hair=(104, 76, 52), coat=(116, 84, 56), role=(92, 120, 76), acc=(204, 172, 104), head="brim", headc=(124, 92, 60), beard=True, bg=(170, 130, 80)),
 }
 ROLES = list(R)
 

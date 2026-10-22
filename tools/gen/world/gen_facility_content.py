@@ -161,6 +161,13 @@ ROLES = {
                       ("rules", "talk", None, "rules", "取引の決まり", "The rules of trade",
                        "出す品は、出したときに預かる。ほしいものは品でも鐘銭でもいい。申請しても、品はまだ動かない。出した人が受けた瞬間に、両方の品が入れ替わる。ただし、そのとき申請した人がここにいて、品を持っていて、持ち物に空きがあること。一人十品まで。七日たつと品は戻って、受け取りに置いておく。受けた・断ったの知らせは、いなければ次に来たときに伝えるよ。",
                        "What you list, I hold from the moment you list it. Ask for goods or bell coins, as you like. Applying moves nothing. The moment the seller accepts, both sides swap at once, as long as the applicant still has the goods and room to carry. An absent applicant can't be accepted. Ten listings each; after seven days the goods come back to you, waiting in your mailbox. If you're away when someone answers, I'll tell you next time.")]),
+    "stable_keeper": ("厩舎の番", "Stable Keeper",
+                      ("うちは厩舎だ。町から町へ、荷も人も運ぶ獣を預かってる。笛を一本持っていきな、吹けばどこにでも来る。",
+                       "This is the stable. We keep beasts that carry load and rider alike. Take a whistle; blow it and your mount comes, wherever you are."),
+                      [("mount", "talk", [fac("mount_shop")], None, "乗り物を見る・買う (見た目と性能)", "Browse mounts (looks and stats)", None, None),
+                       ("rules", "talk", None, "rules", "呼び笛の決まり", "How the whistle works",
+                        "笛を吹けば目の前に来る。もう一度吹けば帰る。巨神の背と淵の底、心臓の間には連れていけない。主が遠くへ行ったり、眠りについたりしても帰っちまう。見た目は章を越えるごとに増える。性能は鐘銭で磨くんだ。",
+                        "Blow once and it comes; blow again and it goes home. It can't follow you onto a titan's back, down into the abyss, or into a heart chamber. It also leaves if you wander far or log off. New looks arrive as you clear chapters; stats you polish with bell coins.")]),
 }
 
 # 周回の誓い (titan/vow/Vows の登録と同じ id。名前と説明は誓いの文 vow.skyabyss.<id>(.desc) をそのまま使う。
