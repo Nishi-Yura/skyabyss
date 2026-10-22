@@ -136,7 +136,7 @@ def reward_item(kid, count=1):
 
 
 PARCEL = keepsake("parcel", "minecraft:leather", "語り部の包み", "The Storyteller's Bundle",
-                  "干した肉と、古い肩掛け。イサナに届ける。", "Dried meat and an old shawl, for the whale chaser.", token="parcel")
+                  "干した肉と、古い肩掛け。鯨追いに届ける。", "Dried meat and an old shawl, for the whale chaser.", token="parcel")
 CLASP_RETURN = keepsake("clasp_return", "minecraft:bone", "肩掛けの隠しにあった留め具", "A Clasp from the Shawl's Pocket",
                         "鯨追いから語り部へ。", "From the whale chaser, for the storyteller.", token="clasp_return")
 CLASP = keepsake("whalebone_clasp", "minecraft:bone", "鯨骨の留め具", "Whalebone Clasp",
@@ -231,10 +231,10 @@ S.entry("fq_shadow_done", q(SHADOW, stage="tell"))
 S.entry("fq_parcel_back", all_(q(PARCEL_Q, stage="return"), item(CLASP_RETURN["item"], 1, "clasp_return")))
 S.entry("fq_gaps_done", q(GAPS, stage="tell"))
 
-S.add_option("menu", "bye", opt("errands", "ほかに、頼みごとはある？", "Is there anything I can help with?", goto="fq_menu", kind="quest"))
+S.add_option("menu", "bye", opt("errands", "ほかに、頼みごとはある？", "Is there anything I can help with?", goto="fq_menu", kind="quest", if_=flag("met", WC)))
 S.node("fq_menu", "頼みごとかい。……そうだね。\n村の人の頼みなら、鐘のそばの言伝ての板に貼ってあるよ。", "Help, is it? ...Let me think.\n"
        "The village's requests are pinned to the message board by the bell.", options=[
-    opt("board", "村の頼みごとを見せて。", "Show me the village's requests.", kind="quest", do=[{"type": "open_board"}]),
+    opt("board", "村の頼みごとを見せて。", "Show me the village's requests.", kind="talk", do=[{"type": "open_board"}]),
     opt("shadow", "影のことを、もっと知りたい。", "I want to know more about the shadow.", goto="fq_shadow_offer", kind="quest",
         if_=all_(lore("prologue/shadow"), q("main_song", "started"), q(SHADOW, "none"))),
     opt("parcel", "外れの旅の人に、何か届けようか。", "Shall I take something to the traveler at the edge of the village?",
@@ -389,7 +389,7 @@ QUESTS = []
 
 
 def quest(qid, order, title, summary, done, stages, reward, giver=None, repeat="", board=False, min_stage=0, unlock_=None,
-          unlock_hint=None, story=""):
+          unlock_hint=None, story="", chapter=""):
     base = f"quest.skyabyss.{qid}"
     text(f"{base}.title", *title)
     text(f"{base}.summary", *summary)
@@ -410,7 +410,10 @@ def quest(qid, order, title, summary, done, stages, reward, giver=None, repeat="
         if s.get("xp"):
             sj["xp"] = s["xp"]
         st_json.append(sj)
-    out = {"category": "sub", "order": order}
+    out = {"category": "sub"}
+    if chapter:  # 章 (巨神ごと)
+        out["chapter"] = chapter
+    out["order"] = order
     if giver:
         out["giver"] = giver
     if repeat:
@@ -496,10 +499,10 @@ quest(GAPS, 42, ("書の空白を埋める", "Filling the Blank Pages"),
 quest(WAY, 43, ("雲間の道標", "Waymarks Among the Clouds"),
       ("岩鯨に乗って二度旅をし、上から見た地上をイサナに話す。", "Travel twice on the stone whale and tell the whale chaser what the land looks like from above."),
       ("イサナは、刻み目の石をくれた。もう要らないという。", "The whale chaser gave me his notched stone. He says he no longer needs it."),
-      [stage("ride", ("イサナは、鯨の上から見た地上の話を聞きたいという。\n呼び笛で岩鯨を呼び、空の海図の行き先へ二度旅をしよう。行き先は、巨神の碑で増やせる。",
-                      "The whale chaser wants to hear what the land looks like from the whale's back.\n"
-                      "I'll call the stone whale with the whistle and travel to a destination on the sky chart, twice. "
-                      "Titan waymarks add more destinations."),
+      [stage("ride", ("イサナは、鯨の上から見た地上の話を聞きたいという。\n呼び笛を吹くと、岩鯨の子が迎えに来る。空の海図の行き先へ、二度旅をしよう。行き先は、巨神の碑で増やせる。（笛の旅は地上から地上へ。背の迷宮には入らない）",
+                      "The whale chaser wants to hear about the land seen from above.\n"
+                      "Blow the call whistle and the stone whale's young will come for you. Travel to two destinations on the sky chart. "
+                      "Titan waymarks add more. (Whistle travel goes from ground to ground; it never enters the maze on the back.)"),
              [ob("ride", "signal", "岩鯨に乗って、旅をする", "Travel on the stone whale", target="titan_voyage", count=2, party=False)]),
        stage("tell", ("二度、鯨の上から地上を見た。\nイサナの火のところへ、話をしに行こう。", "I have seen the land from the whale's back twice.\n"
                       "I'll go and tell the whale chaser."),
@@ -518,7 +521,7 @@ quest(TIDE, 44, ("干潮を数える", "Counting the Low Tides"),
                  target="tide_low_watched", count=3, party=False)]),
        stage("tell", ("三度とも、同じ刻に寄ってきた。\nイサナに話しに行こう。", "All three times, it came at the same hour.\nI'll tell the whale chaser."),
              [ob("talk", "talk", "イサナに、干潮のことを話す", "Tell the whale chaser about the low tides", target=WC, topic="fq_c_tide_done2")])],
-      {"xp": 150, "affinity": {WC: 5}}, giver=WC, min_stage=1,
+      {"xp": 150, "affinity": {WC: 5}}, giver=WC, min_stage=1, chapter="titan_tide",
       story="潮殻の巨神が干潮の刻に岸へ寄ることを、自分の目で三度確かめる（08 の「自分で気づく」を壊さない程度の手がかり）。")
 
 # ---- 言伝ての板 (日替わり)
@@ -529,10 +532,11 @@ quest("daily_lost_flock", 60, ("夜を越す羊", "Sheep Before Nightfall"),
                       "小麦を持っていけば、ついてくるはずだ。",
                       "A note on the board: \"Three sheep got over the fence. Please bring them back to this board before dark. "
                       "In a shadow year the sheep are restless.\"\nIf I carry wheat, they should follow."),
-             [ob("herd", "herd", "羊を、言伝ての板のそば（10 ブロック）まで連れてくる", "Lead sheep to within 10 blocks of the message board",
+             [ob("herd", "herd", "羊を、板のそば（10 ブロック）へ連れてくる", "Lead sheep to within 10 blocks of the message board",
                  target="minecraft:sheep", count=3, radius=10)])],
       {"xp": 30, "items": [{"item": "minecraft:bread", "count": 3}, {"item": "minecraft:white_wool", "count": 2}]},
       repeat="daily", board=True,
+      unlock_=flag("met", WC), unlock_hint=("イサナと話すと、受けられる", "Talk to Isana to take this on"),
       story="影の年は羊が落ち着かない。連れ戻すだけの短い頼み。")
 
 quest("daily_night_watch", 61, ("夜回り", "Night Watch"),
@@ -541,12 +545,13 @@ quest("daily_night_watch", 61, ("夜回り", "Night Watch"),
       [stage("watch", ("板の紙：「夜になると、村のまわりをうろつくものが増えた。七日目の夜は戸を閉めるが、ほかの夜は誰かが見張らないと」",
                        "A note on the board: \"More things prowl around the village at night. On the seventh night we bar the doors, "
                        "but on other nights someone must keep watch.\""),
-             [ob("kill", "kill", "夜にうろつくものを倒す（ゾンビ、スケルトン、クモ、クリーパーなど）",
-                 "Defeat night prowlers (zombies, skeletons, spiders, creepers...)",
+             [ob("kill", "kill", "夜にうろつくものを倒す（ゾンビ・スケルトン・クモなど）",
+                 "Defeat night prowlers (zombies, skeletons, spiders...)",
                  targets=["minecraft:zombie", "minecraft:skeleton", "minecraft:spider", "minecraft:creeper", "minecraft:husk",
                           "minecraft:stray", "minecraft:drowned", "minecraft:zombie_villager", "minecraft:witch"], count=6)])],
       {"xp": 40, "items": [{"item": "minecraft:torch", "count": 8}, {"item": "minecraft:bread", "count": 2}]},
       repeat="daily", board=True,
+      unlock_=flag("met", WC), unlock_hint=("イサナと話すと、受けられる", "Talk to Isana to take this on"),
       story="七日目の夜の決まりの裏で、ほかの夜を見張る人がいる。")
 
 quest("daily_firewood", 62, ("炉の薪", "Firewood for the Hearth"),
@@ -559,6 +564,7 @@ quest("daily_firewood", 62, ("炉の薪", "Firewood for the Hearth"),
              [ob("wood", "turn_in", "原木を言伝ての板に納める", "Hand in logs at the message board", target="#minecraft:logs", count=16)])],
       {"xp": 30, "items": [{"item": "minecraft:emerald", "count": 1}, {"item": "minecraft:bread", "count": 2}]},
       repeat="daily", board=True,
+      unlock_=flag("met", WC), unlock_hint=("イサナと話すと、受けられる", "Talk to Isana to take this on"),
       story="七日目の夜に火を絶やさないための薪。暦の言い伝えを、日々の暮らしの側から見せる。")
 
 quest("daily_bone_sentry", 63, ("骨の番兵の見回り", "Sentinel Rounds"),
@@ -571,19 +577,20 @@ quest("daily_bone_sentry", 63, ("骨の番兵の見回り", "Sentinel Rounds"),
                  target="skyabyss:bone_sentinel", count=8)])],
       {"xp": 60, "items": [{"item": "skyabyss:stone_whale_shard", "count": 2}]},
       repeat="daily", board=True, min_stage=1,
+      unlock_=flag("met", WC), unlock_hint=("イサナと話すと、受けられる", "Talk to Isana to take this on"),
       story="鎖をつかめないイサナが、板に頼みを貼っている。")
 
 # ---- 言伝ての板 (週替わり)
 quest("weekly_back_trials", 80, ("背中の試練", "Trials of the Back"),
       ("岩鯨の背の試練を三つ越える。一緒にいた仲間の分も数える。", "Clear three trials on the stone whale's back. Party members with you count too."),
-      ("ゴールが三度鳴った。", "The goals rang three times."),
-      [stage("trials", ("板の紙：「鯨の背の試練を、三つ越えてきてほしい。光る印に着いたら、それでいい。——鯨追い」",
-                        "A note on the board: \"Clear three of the trials on the whale's back. Once you reach the glowing mark, "
+      ("三つの試練を越えた。", "Three trials passed."),
+      [stage("trials", ("板の紙：「鯨の背の試練を、三つ越えてきてほしい。光る印に着いたと聞いたら、それでいい。——鯨追い」",
+                        "A note on the board: \"Clear three of the trials on the whale's back. Once I hear you reached the glowing marks, "
                         "that's enough. —The whale chaser\""),
-             [ob("trial", "signal", "岩鯨の背の試練を越える（ゴールの印に着く）", "Clear a trial on the stone whale's back (reach the goal mark)",
+             [ob("trial", "signal", "岩鯨の背の試練を越える（光る印に着く）", "Clear a trial on the stone whale's back (reach the glowing mark)",
                  target="back_trial_cleared", count=3)])],
       {"xp": 100, "items": [{"item": "skyabyss:stone_whale_shard", "count": 3}, {"item": "skyabyss:resonance_shard_stone_whale", "count": 1}]},
-      repeat="weekly", board=True, unlock_=lore("chapter1/sky_ruins"),
+      repeat="weekly", board=True, unlock_=all_(lore("chapter1/sky_ruins"), flag("met", WC)),
       unlock_hint=("岩鯨の背に渡ると、受けられる", "Available once you have reached the stone whale's back"),
       story="岩鯨の背は誰でも乗れる（10 の 3 章）。序章のうちから周回に触れる入口。")
 
@@ -608,6 +615,7 @@ quest("weekly_heart_again", 81, ("心臓をもう一度", "The Heart, Once More"
              [ob("heart", "kill", "岩鯨の心臓を止める", "Still the stone whale's heart", target="skyabyss:stone_whale_heart", count=1)])],
       {"xp": 150, "items": [{"item": "skyabyss:resonance_crystal", "count": 1}, {"item": "skyabyss:resonance_shard_stone_whale", "count": 2}]},
       repeat="weekly", board=True, min_stage=1,
+      unlock_=flag("met", WC), unlock_hint=("イサナと話すと、受けられる", "Talk to Isana to take this on"),
       story="名前のない紙。七日という数が、月のループ（01）と七日目の夜をほのめかす。")
 
 # ================================================================ 伝承の項目 (2 つ。manual: 会話でだけ記される)
@@ -634,11 +642,11 @@ for lid, ch, order, related, title, body in LORE:
 # ================================================================ 画面の文
 text("block.skyabyss.message_board", "言伝ての板", "Message Board")
 text("gui.skyabyss.board.title", "言伝ての板", "Message Board")
-text("gui.skyabyss.board.title_npc", "村の頼みごと（語り部が預かっている分）", "Village Requests (kept by the storyteller)")
+text("gui.skyabyss.board.title_npc", "村の頼みごと（語り部が預かっている分）", "Village Requests (storyteller)")
 text("gui.skyabyss.board.quota", "今日受けた頼み %s / %s", "Taken today %s / %s")
 text("gui.skyabyss.board.next", "次の張り替えまで、およそ %s 分", "Next posting in about %s min")
 text("gui.skyabyss.board.empty", "今日は、頼みごとが貼られていない。", "No requests are posted today.")
-text("gui.skyabyss.board.footer", "品を納める頼みは、品を持って板を開けば渡せる。", "For delivery requests, open the board with the items in hand.")
+text("gui.skyabyss.board.footer", "品を納める頼みは、品を持って板を開けば渡せる。", "To hand in goods, open the board holding them.")
 text("gui.skyabyss.board.accept", "受ける", "Accept")
 text("gui.skyabyss.board.hidden", "？？？", "???")
 text("gui.skyabyss.board.state.active", "受けている", "In progress")
@@ -655,10 +663,14 @@ text("gui.skyabyss.quest.repeat_note.weekly", "週替わりの頼み（七日ご
 text("gui.skyabyss.quest.from_board", "依頼: 言伝ての板", "From: the message board")
 text("gui.skyabyss.quest.hidden_row", "？？？", "???")
 text("gui.skyabyss.quest.locked.0", "", "")
-text("gui.skyabyss.quest.locked.1", "岩鯨の心臓を止めると", "After stilling the stone whale's heart")
-text("gui.skyabyss.quest.locked.2", "潮殻の心臓を止めると", "After stilling the tide shell's heart")
-text("gui.skyabyss.quest.locked.3", "雷翼の心臓を止めると", "After stilling the thunder wing's heart")
-text("gui.skyabyss.quest.locked.4", "余燼の心臓を止めると", "After stilling the ember titan's heart")
+text("gui.skyabyss.quest.locked.1", "一章のあと", "After chapter I")
+text("gui.skyabyss.quest.locked.2", "二章のあと", "After chapter II")
+text("gui.skyabyss.quest.locked.3", "三章のあと", "After chapter III")
+text("gui.skyabyss.quest.locked.4", "四章のあと", "After chapter IV")
+# ほかの生成スクリプトが作る板のクエスト (daily_tide_rounds・weekly_tide_heart は gen_story_quests.py、
+# daily_storm_rounds・weekly_storm_heart は gen_storm_lore.py) にも、同じ「鯨追いと会ってから」の案内文を付ける
+for _qid in ("daily_tide_rounds", "weekly_tide_heart", "daily_storm_rounds", "weekly_storm_heart"):
+    text(f"quest.skyabyss.{_qid}.unlock_hint", "イサナと話すと、受けられる", "Talk to Isana to take this on")
 
 
 # ================================================================ 書き出し

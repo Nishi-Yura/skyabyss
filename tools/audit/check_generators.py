@@ -45,15 +45,12 @@ tools/gen/ch3/gen_ch3_ground.py
 tools/gen/ch3/gen_ch3_gear.py
 tools/gen/ch4/gen_ch4_content.py
 tools/gen/ch4/gen_ch4_ground.py
-tools/gen/ch4/gen_ch4_gear.py
 tools/gen/ch5/gen_ch5_entrance.py
 tools/gen/ch5/gen_ch5_layers.py
 tools/gen/ui/gen_deep_skill_lang.py
 tools/gen/world/gen_facility_content.py
 tools/gen/world/gen_grave_assets.py
-tools/gen/world/gen_titan_volumes.py
 tools/gen/items/gen_back_blocks.py
-tools/gen/items/gen_relic_blocks.py
 tools/gen/sound/gen_boss_skill_sounds.py
 tools/gen/sound/gen_heart_domain_stings.py
 tools/abyss/gen_abyss_layers.py
