@@ -141,10 +141,10 @@ public class SkillScreen extends Screen implements jp.revati.skyabyss.client.ui.
 
     @Override
     protected void init() {
-        // 板は論理の (0, 0) に置き、窓に合わせた変換 (fit) で大きく描く
+        // 板は論理の (0, 18) に置き (上の 18 は記録・技のつまみの段)、窓に合わせた変換 (fit) で大きく描く
         left = 0;
-        top = 0;
-        fit.fit(width, height, W, H, 3f);
+        top = 18;
+        fit.fit(width, height, W, H + 18, 3f);
         canvas.setViewport(left + BOARD_VX, top + BOARD_VY, BOARD_VW, BOARD_VH);
         canvas.setContent(BOARD_W, BOARD_H);
         canvas.reset();
@@ -175,7 +175,7 @@ public class SkillScreen extends Screen implements jp.revati.skyabyss.client.ui.
                 .bounds(left + BTN_X + 52, top + BTN_ROW2, 50, 12).build());
         tryonCancel = addRenderableWidget(Button.builder(Component.translatable("gui.skyabyss.skill.tryon_cancel"), b -> tryonCancel())
                 .bounds(left + BTN_X + 104, top + BTN_ROW2, 54, 12).build());
-        RpgTabs.add(this::addRenderableWidget, width, height, RpgTabs.SKILLS);
+        RpgTabs.addAt(this::addRenderableWidget, left + W / 2, top, RpgTabs.SKILLS);
         if (!demoTry.isEmpty() && tryon == null) {
             tryon = real().copyOf();
             for (Skill s : demoTry) {

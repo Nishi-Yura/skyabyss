@@ -94,7 +94,7 @@ public class SoulScreen extends Screen implements jp.revati.skyabyss.client.ui.T
         go = addRenderableWidget(Button.builder(Component.empty(), b -> press()).bounds(left + C1, top + 158, C1W, 16).build());
         shardButton = addRenderableWidget(Button.builder(Component.translatable("gui.skyabyss.rebirth.shard_btn"), b -> claimShard())
                 .bounds(left + C3, top + 160, 60, 14).build());
-        RpgTabs.add(this::addRenderableWidget, width, height, RpgTabs.REBIRTH);
+        RpgTabs.addAt(this::addRenderableWidget, left + W / 2, top, RpgTabs.REBIRTH);
         refresh();
     }
 
