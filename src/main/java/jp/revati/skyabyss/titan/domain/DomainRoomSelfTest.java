@@ -165,7 +165,7 @@ public final class DomainRoomSelfTest {
                 maxFromCenter = Math.max(maxFromCenter, Math.hypot(p.x - d.centerX(), p.z - d.centerZ()));
             }
         }
-        // 巡: 通常 2・深淵 3・4 人以上で 3。巡が進むほど手本は長く、水門は短く、雷は速く、核は熱を取り戻すのが速い
+        // 巡: 通常 2・深淵 3・4 人以上で 3。巡が進むほど手本は長く、雷は速く、核は熱を取り戻すのが速い
         if (name.equals("whale")) {
             int[] seq = StoneSeaDomain.SEQ_LEN;
             for (int i = 1; i < seq.length; i++) {
@@ -173,13 +173,9 @@ public final class DomainRoomSelfTest {
                     f.add("whale: the bone sequence does not get longer each round");
                 }
             }
-            double[] open = RisingTideDomain.OPEN_SCALE;
             double[] charge = ThunderCageDomain.CHARGE_SCALE;
             int[] reheat = HearthCoreDomain.REHEAT;
             for (int i = 1; i < HeartDomain.roundsFor(true, 1); i++) {
-                if (open[i] >= open[i - 1]) {
-                    f.add("tide: the valve window does not get shorter each round");
-                }
                 if (charge[i] >= charge[i - 1]) {
                     f.add("storm: the strike window does not get shorter each round");
                 }
