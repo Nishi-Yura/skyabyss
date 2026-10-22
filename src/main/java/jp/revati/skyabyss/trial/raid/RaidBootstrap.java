@@ -10,5 +10,7 @@ final class RaidBootstrap {
         jp.revati.skyabyss.trial.raid.ember.EmberRaid.register();
         jp.revati.skyabyss.trial.raid.storm.StormRaid.register();
         // 潮殻・雷翼・余燼は、それぞれの部屋ができたらここへ一行足す (trial/raid/tide|storm|ember の register())
+        jp.revati.skyabyss.trial.raid.tide.TideRaid.register();
+        // 雷翼・余燼は、それぞれの部屋ができたらここへ一行足す (trial/raid/storm|ember の register())
     }
 }
