@@ -567,15 +567,15 @@ for L in LAYERS:
 # 目的の帯の一言は lang を直接直してあり、上の文には戻していない。書き出しの前にここで上書きし、
 # コミット済みの lang と同じにする (tools/audit/check_generators.py で確かめる)。
 HAND_EDITS = [  # (鍵, 日本語, 英語)
-    ("objective.skyabyss.abyss_v2.lord_ash", "灯り喰いの主。闇の波のあとは光の術で照らせ", "Lord of Eaten Light: after the dark, cast light"),
-    ("objective.skyabyss.abyss_v2.warden_p1", "灯りを点け、光の中の番人を斬れ", "Light the lamps; strike the warden in the light"),
+    ("objective.skyabyss.abyss_v2.lord_ash", "灯り喰いの主。闇の波のあとは光の術で照らせ", "Light-eater lord: cast light after dark"),
+    ("objective.skyabyss.abyss_v2.warden_p1", "灯りを点け、光の中の番人を斬れ", "Light lamps; hit the warden in the light"),
     ("objective.skyabyss.abyss_v2.warden_snuff", "灯りを守れ。番人が吹き消しに来る", "Guard the light. It comes to snuff a lamp"),
-    ("objective.skyabyss.abyss_v2.lord_bone", "肋の主を倒せ。灯台を灯し、光の中で斬れ", "Lord of Ribs: light the lamps, strike in the light"),
+    ("objective.skyabyss.abyss_v2.lord_bone", "肋の主を倒せ。灯台を灯し、光の中で斬れ", "Ribs lord: light lamps, fight in light"),
     ("objective.skyabyss.abyss_v2.lord_salt", "白殻の主を倒せ。足もとの赤い輪から出ろ", "Lord of White Shells: leave the red rings"),
-    ("objective.skyabyss.abyss_v2.lord_storm", "鼓動まねの主を倒せ。鼓動の聞こえる方が本物", "Lord of Mimicked Beats: the heartbeat is real"),
+    ("objective.skyabyss.abyss_v2.lord_storm", "鼓動まねの主を倒せ。鼓動の聞こえる方が本物", "Beat-mimic lord: hit the one with a pulse"),
     ("objective.skyabyss.abyss_v2.flash_weight", "赤い輪から出ろ。重さの術なら耐えられる", "Leave the red rings, or endure with weight"),
     ("objective.skyabyss.abyss_v2.flash_dark", "闇の中では刃が届かない。光の術で照らせ", "Blades miss in the dark. Cast light"),
-    ("objective.skyabyss.abyss_v2.warden_crush", "赤い輪は重い。外へ出るか、重さの術で耐えろ", "Red rings crush. Leave, or endure with weight"),
+    ("objective.skyabyss.abyss_v2.warden_crush", "赤い輪は重い。外へ出るか、重さの術で耐えろ", "Red rings crush: leave, or bear weight"),
     ("objective.skyabyss.abyss_v2.warden_p3", "闇の波のあとは、光の術で照らせ", "After the dark wave, cast light"),
 ]
 

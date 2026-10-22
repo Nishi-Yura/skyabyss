@@ -511,7 +511,7 @@ END_MARK = "<!-- 伝承とクエスト 生成ここまで -->"
 # 書き出しの前にここで上書きし、コミット済みの lang と同じにする (tools/audit/check_generators.py で確かめる)。
 HAND_EDITS = [  # (鍵, 日本語, 英語)
     ("growth.skyabyss.reason.storm_trial", "光る印", "Wind chime stone"),
-    ("lore.skyabyss.chapter1.inscription_storm_west.body", "終わりの床の岩棚の壁にあった。そこへは、嵐の風に乗らなければ上がれない。", "On the wall of the ledge by the goal. No one reaches it except on the storm's wind."),
+    ("lore.skyabyss.chapter1.inscription_storm_west.body", "雷羽運びの甲板の入口、休み場の壁にあった。字の溝を、骨の中を通る風が細く鳴らしている。", "On the wall at the entrance to the deck where the thunder feathers are carried. The wind running through the bones whistles thinly in the grooves of the letters."),
     ("message.skyabyss.raiju.east_stone_ready", "瘤の頂で、光る印が着くのを待っている。", "At the crown of the knuckle, a wind chime stone waits to ring."),
     ("message.skyabyss.storm.all_rung", "三つの光る印に着いた。奥で、鼓動が待っている……", "All three glowing marks are reached. Deep inside, the heartbeat waits..."),
     ("message.skyabyss.storm.party_changed", "仲間が変わり、試練の進みも変わった。風があなたを風の広間へ運んだ", "Your party changed, and the trials with it. The wind carries you back to the wind hall"),

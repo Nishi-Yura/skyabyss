@@ -686,7 +686,7 @@ quest(MAIN, "main", 10, ST,
            "lead": ("語り部によると、空の歌を追う旅人が、村の外れで火を焚いているという。",
                     "The storyteller says a traveler who chases the sky's song keeps a fire at the edge of the village."),
            "objectives": [{"id": "talk", "type": "talk", "target": WC, "topic": "c_whale2",
-                           "ja": "火を焚く鯨追いに、話を聞きに行こう", "en": "Talk to the Whale Chaser by the fire"}]},
+                           "ja": "火を焚くイサナに、話を聞きに行こう", "en": "Talk to the Whale Chaser by the fire"}]},
           # 一章の支度 (34 の 4.2。2026-10-22): 鯨追いの話のあと、支度の段 3 本 (鉄の跡 → 折れた剣 → 盾と糧) を順に。
           # 三本そろうまで岩鯨は現れない (titan.TitanEvents・story.ch1.Ch1Trails.callReady)。帯は支度の段のほうを出す (ObjectiveStrip.current)
           {"id": "prepare",
