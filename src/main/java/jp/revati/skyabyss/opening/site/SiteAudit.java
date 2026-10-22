@@ -81,10 +81,13 @@ public final class SiteAudit {
 
     // ---------------------------------------------------------------- 世界に建てて調べる
     // 部品を level の at (x, z) に、向き yaw で、本物の SiteJob で (その場で最後まで) 建てて調べる。野営地などの実際の建て方と同じ ANALYZE/TERRAIN/PLACE
+    // 建てる場所の試し数 (水や人の建物で諦められても、次の場所で建て直す)
+    static final int TRIES = 16;
+
     public static Report placeAndAudit(ServerLevel level, String name, int x, int z, int yaw) {
         Report rep = new Report();
-        // 乾いた陸に建てる。水・人の建物で建てられなかった (SiteJob が諦めて消した) ら、東へずらして最大 8 回やり直す
-        for (int attempt = 0; attempt < 8; attempt++) {
+        // 乾いた陸に建てる。水・人の建物で建てられなかった (SiteJob が諦めて消した) ら、東へずらして最大 TRIES 回やり直す
+        for (int attempt = 0; attempt < TRIES; attempt++) {
             for (int tries = 0; tries < 10 && !dry(level, x, z); tries++) {
                 x += 40;
             }
@@ -107,7 +110,7 @@ public final class SiteAudit {
             auditPlaced(level, Blueprint.get(name), job.rot, job.mirror, job.origin, "site:" + name + " yaw" + yaw, rep);
             return rep;
         }
-        rep.add(new Finding("site:" + name, "SITE_UNBUILT", new BlockPos(x, 64, z), "could not be placed on land in 8 tries (test spot problem, or the job gives up)"));
+        rep.add(new Finding("site:" + name, "SITE_UNBUILT", new BlockPos(x, 64, z), "could not be placed on land in " + TRIES + " tries (test spot problem, or the job gives up)"));
         return rep;
     }
 

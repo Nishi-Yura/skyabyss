@@ -441,8 +441,13 @@ public final class Ch1MobsSelfTest {
             ps.add(close);
             tick(level, h, 2);
             h.setTarget(close);
-            tick(level, h, 25);
-            check(h.distanceTo(close) > 3.5, "hare should back away from a close player (" + h.distanceTo(close) + ")", f);
+            // 離れる途中で 3 ブロックの線 (棘を立てる距離) に届くと、そこで立ち止まって棘を立てる。だから最後の距離ではなく、25 tick のあいだの一番遠い距離を見る
+            double farthest = h.distanceTo(close);
+            for (int i = 0; i < 25; i++) {
+                tick(level, h, 1);
+                farthest = Math.max(farthest, h.distanceTo(close));
+            }
+            check(farthest >= 3.0, "hare should back away from a close player (farthest " + farthest + ")", f);
             drop(ps);
             h.discard();
 

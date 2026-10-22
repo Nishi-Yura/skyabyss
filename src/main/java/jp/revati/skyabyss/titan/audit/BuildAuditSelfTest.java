@@ -170,8 +170,15 @@ public final class BuildAuditSelfTest {
                 TitanBackBuilder.build(level, data);
             }
         })));
-        steps.add(Step.once("build audit (tide build)", server -> build(server, TideTravel.TIDE_BACK, TideBackBuilder::ensureBuilt)));
-        steps.add(Step.once("build audit (storm build)", server -> build(server, StormTravel.STORM_BACK, StormBackBuilder::ensureBuilt)));
+        // 潮と嵐の背も、建てたあと区画を読み込んだままにする (読み込みの外れた区画は、灯りの計算が済まず暗く数えられる。余燼と同じ)
+        steps.add(Step.once("build audit (tide build)", server -> {
+            build(server, TideTravel.TIDE_BACK, TideBackBuilder::ensureBuilt);
+            forceBox(server, TideTravel.TIDE_BACK, TIDE_BOX, true);
+        }));
+        steps.add(Step.once("build audit (storm build)", server -> {
+            build(server, StormTravel.STORM_BACK, StormBackBuilder::ensureBuilt);
+            forceBox(server, StormTravel.STORM_BACK, STORM_BOX, true);
+        }));
         // 余燼は体が大きく (x1.6)、歩く所の端は読み込みの外れた区画になる。光の計算が済むまで区画を読み込んだままにして (調べたあとで外す)、400 tick 待つ (負荷が高いと 100 tick では光が足りず、体の南の端で暗い所が 5〜13 件出た)
         steps.add(Step.once("build audit (ember build)", server -> {
             build(server, EmberIds.BACK, EmberBodyBuilder::ensureBuilt);
@@ -179,10 +186,17 @@ public final class BuildAuditSelfTest {
         }));
         steps.add(Step.once("build audit (whale)", 200, server -> back(server, TitanTravel.TITAN_BACK, "whale", WHALE_BOX,
                 level -> jp.revati.skyabyss.titan.dungeon.TitanBackAudit.run(level))));
-        steps.add(Step.once("build audit (tide)", server -> back(server, TideTravel.TIDE_BACK, "tide", TIDE_BOX,
-                level -> BackReach.run(level, jp.revati.skyabyss.titan.tide.back.TideBackAudit.spec()))));
-        steps.add(Step.once("build audit (storm)", server -> back(server, StormTravel.STORM_BACK, "storm", STORM_BOX,
-                level -> jp.revati.skyabyss.titan.storm.back.StormBackAudit.run(level))));
+        // 建てた直後は明かりの計算が終わっていない (灯りが光らず、暗さの数が 95 まで増える)。区画を読み込んだまま 400 tick おいてから調べ、外す
+        steps.add(Step.once("build audit (tide)", 400, server -> {
+            back(server, TideTravel.TIDE_BACK, "tide", TIDE_BOX,
+                    level -> BackReach.run(level, jp.revati.skyabyss.titan.tide.back.TideBackAudit.spec()));
+            forceBox(server, TideTravel.TIDE_BACK, TIDE_BOX, false);
+        }));
+        steps.add(Step.once("build audit (storm)", 400, server -> {
+            back(server, StormTravel.STORM_BACK, "storm", STORM_BOX,
+                    level -> jp.revati.skyabyss.titan.storm.back.StormBackAudit.run(level));
+            forceBox(server, StormTravel.STORM_BACK, STORM_BOX, false);
+        }));
         steps.add(Step.once("build audit (ember)", 400, server -> {
             back(server, EmberIds.BACK, "ember", EMBER_BOX, level -> jp.revati.skyabyss.titan.ember.back.EmberBackAudit.run(level));
             forceBox(server, EmberIds.BACK, EMBER_BOX, false);

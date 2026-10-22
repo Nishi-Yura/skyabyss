@@ -244,6 +244,13 @@ tasks.named('runServer') {
                 return l
             }
             if (!found) lines << 'max-tick-time=-1'
+            // 種を空のままにすると毎回ちがう地形になり、地面や暗さの指摘がゆらぐ。空なら固定の種 4242 (docs/HANDOFF.md) を入れる。種を書いてあれば、それを使う
+            def seedLine = lines.find { it.startsWith('level-seed=') }
+            if (seedLine == null) {
+                lines << 'level-seed=4242'
+            } else if (seedLine.trim() == 'level-seed=') {
+                lines = lines.collect { it.trim() == 'level-seed=' ? 'level-seed=4242' : it }
+            }
             f.parentFile.mkdirs()
             f.write(lines.join(System.lineSeparator()) + System.lineSeparator(), 'UTF-8')
         }

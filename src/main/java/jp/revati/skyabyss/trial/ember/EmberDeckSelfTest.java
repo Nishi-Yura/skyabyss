@@ -567,7 +567,8 @@ public final class EmberDeckSelfTest {
         TrialCell.Run ash = new TrialCell.Run(group, cell, mods(0, 1, 1, -1, new int[] {0}, -1), 33L, 0);
         try {
             cell.arm(back, ash);
-            long now = 5000;
+            // 灰降りの最初の時刻は arm が世界の時刻 (getGameTime) から決める。固定の時刻だと、世界の時刻がずれて 900 tick の中に来ないので、同じ時計で数える
+            long now = back.getGameTime();
             stand(a, E07Bellows.PAD_X[0] + 0.5, E07Bellows.PAD_Z[0] + 0.5);
             stand(b, E07Bellows.PAD_X[1] + 0.5, E07Bellows.PAD_Z[1] + 0.5);
             long[] ashUntil = ash.get("ashUntil", () -> new long[4]);
