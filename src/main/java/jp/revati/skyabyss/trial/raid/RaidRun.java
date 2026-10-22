@@ -62,6 +62,7 @@ public final class RaidRun {
         public long until;
         public int wipes;
         public RaidHudNet.Hud lastHud;
+        public boolean hudOff;
 
         Run(RaidRoom room, RaidCtx ctx, int step) {
             this.room = room;
@@ -207,9 +208,17 @@ public final class RaidRun {
                 }
             }
             case COMPLETE -> {
+                // 越えたあと数秒で帯から消す (次の段へ運ばれる)
+                if (!run.hudOff && now >= run.until) {
+                    run.hudOff = true;
+                    run.lastHud = RaidHudNet.Hud.OFF;
+                    for (ServerPlayer p : ctx.players()) {
+                        sendTo(p, RaidHudNet.Hud.OFF);
+                    }
+                }
             }
         }
-        if (now % HUD_EVERY == 0) {
+        if (now % HUD_EVERY == 0 && !run.hudOff) {
             sendHud(run, false);
         }
     }
@@ -259,6 +268,7 @@ public final class RaidRun {
     private static void complete(Run run) {
         RaidCtx ctx = run.ctx;
         run.phase = Phase.COMPLETE;
+        run.until = ctx.now() + 100;
         ctx.clearMobs();
         RaidKit.setGate(ctx, ctx.cell().exitGate(), true);
         sendHud(run, true);
@@ -304,6 +314,66 @@ public final class RaidRun {
         }
         Run run = RUNS.get(Groups.keyOf(sp));
         return run != null && run.phase != Phase.COMPLETE && run.ctx.level() == sp.level() && run.ctx.cell().bounds().contains(sp.position());
+    }
+
+    // ---------------------------------------------------------------- 入力と保護
+    @Nullable
+    public static Run runAt(Player player, BlockPos pos) {
+        if (RUNS.isEmpty() || !(player instanceof ServerPlayer sp)) {
+            return null;
+        }
+        Run run = RUNS.get(Groups.keyOf(sp));
+        return run != null && run.ctx.level() == sp.level() && run.ctx.cell().bounds().contains(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5) ? run : null;
+    }
+
+    private static final Map<UUID, Long> LAST_USE = new HashMap<>();
+
+    private static void handleUse(Player player, BlockPos pos, boolean attack, Runnable cancel) {
+        if (!(player instanceof ServerPlayer sp)) {
+            return;
+        }
+        Run run = runAt(sp, pos);
+        if (run == null) {
+            return;
+        }
+        // 部屋のブロックは壊せない
+        if (attack) {
+            cancel.run();
+        }
+        long now = sp.level().getGameTime();
+        Long last = LAST_USE.get(sp.getUUID());
+        if (last != null && last == now && !attack) {
+            cancel.run();
+            return;
+        }
+        if (run.phase == Phase.ACTIVE && run.room.onUse(run.ctx, sp, pos, attack)) {
+            LAST_USE.put(sp.getUUID(), now);
+            cancel.run();
+        }
+    }
+
+    @SubscribeEvent
+    static void onLeftClick(net.neoforged.neoforge.event.entity.player.PlayerInteractEvent.LeftClickBlock event) {
+        handleUse(event.getEntity(), event.getPos(), true, () -> event.setCanceled(true));
+    }
+
+    @SubscribeEvent
+    static void onRightClick(net.neoforged.neoforge.event.entity.player.PlayerInteractEvent.RightClickBlock event) {
+        handleUse(event.getEntity(), event.getPos(), false, () -> event.setCanceled(true));
+    }
+
+    @SubscribeEvent
+    static void onBreak(net.neoforged.neoforge.event.level.BlockEvent.BreakEvent event) {
+        if (runAt(event.getPlayer(), event.getPos()) != null) {
+            event.setCanceled(true);
+        }
+    }
+
+    @SubscribeEvent
+    static void onPlace(net.neoforged.neoforge.event.level.BlockEvent.EntityPlaceEvent event) {
+        if (event.getEntity() instanceof Player p && runAt(p, event.getPos()) != null) {
+            event.setCanceled(true);
+        }
     }
 
     // ---------------------------------------------------------------- 目的の帯
