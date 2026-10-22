@@ -380,6 +380,7 @@ class BackAlley:
                 v.set(mx, y + 1, mz, 'soul_campfire[facing=north,lit=false,signal_fire=false,waterlogged=false]')  # 消えた炉 (煙が部屋にこもらない)
                 for yy in (y + 3, y + 4):
                     v.set(mx - 2, yy, mz, 'chain[axis=y,waterlogged=false]')
+                v.set(mx - 2, y + 5, mz, deep())  # 鎖を吊る天井 (坑道の吹き抜けと重なって空いていた)
                 v.set(mx + 2, y + 1, mz, 'gray_concrete_powder')
             else:
                 # 前の私の野営: 寝床・焚き火・帳面の台・荷
