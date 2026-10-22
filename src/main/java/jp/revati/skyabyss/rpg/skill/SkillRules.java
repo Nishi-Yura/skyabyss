@@ -157,17 +157,17 @@ public final class SkillRules {
             case ROCK_CALL -> 12;
             case WHALE_SWEEP -> 16;
             case LUNGE -> 6;
-            case BACKSTEP -> 5;
+            case BACKSTEP -> 4;
             case WIND_REND -> 8;
-            case WARD_SONG -> 14;
+            case WARD_SONG -> 12;
             case EBB_TIDE -> 12;
             case CYCLE_SONG -> 16;
             case TEMPER -> 12;
             case EMBER_HAMMER -> 14;
             case ASH_SCATTER -> 10;
             case CLOUD_PIERCE -> 10;
-            case BONE_TRAP -> 8;
-            case SKY_RAIN -> 18;
+            case BONE_TRAP -> 6;
+            case SKY_RAIN -> 16;
             case DUST_CHARGE -> 12;
             case STEAM_BELL -> 14;
             case CINDER_VOLLEY -> 12;
@@ -188,18 +188,18 @@ public final class SkillRules {
             case TITAN_CLEAVE -> 8 * SECOND;
             case ROCK_CALL -> 14 * SECOND;
             case WHALE_SWEEP -> (r >= 2 ? 11 : 14) * SECOND;
-            case LUNGE -> (r >= 2 ? 5 : 7) * SECOND;
-            case BACKSTEP -> (r >= 2 ? 4 : 6) * SECOND;
-            case WIND_REND -> (r >= 2 ? 7 : 9) * SECOND;
-            case WARD_SONG -> 18 * SECOND;
-            case EBB_TIDE -> 12 * SECOND;
-            case CYCLE_SONG -> 20 * SECOND;
-            case TEMPER -> 16 * SECOND;
-            case EMBER_HAMMER -> 12 * SECOND;
-            case ASH_SCATTER -> 14 * SECOND;
-            case CLOUD_PIERCE -> 8 * SECOND;
-            case BONE_TRAP -> 12 * SECOND;
-            case SKY_RAIN -> (r >= 2 ? 14 : 18) * SECOND;
+            case LUNGE -> (r >= 2 ? 4 : 6) * SECOND;
+            case BACKSTEP -> (r >= 2 ? 3 : 5) * SECOND;
+            case WIND_REND -> (r >= 2 ? 6 : 8) * SECOND;
+            case WARD_SONG -> 15 * SECOND;
+            case EBB_TIDE -> 10 * SECOND;
+            case CYCLE_SONG -> 16 * SECOND;
+            case TEMPER -> 13 * SECOND;
+            case EMBER_HAMMER -> 10 * SECOND;
+            case ASH_SCATTER -> 12 * SECOND;
+            case CLOUD_PIERCE -> 6 * SECOND;
+            case BONE_TRAP -> 9 * SECOND;
+            case SKY_RAIN -> (r >= 2 ? 11 : 15) * SECOND;
             case SIGNAL -> 6 * SECOND;
             case DUST_CHARGE -> 10 * SECOND;
             case STEAM_BELL -> 12 * SECOND;
@@ -332,7 +332,7 @@ public final class SkillRules {
     // 踏み込み: 8 ブロック以内の敵の手前まで一気に詰め、攻撃力 × 0.8 で斬る。足場のない所へは踏み出さない。長で +1
     public static final double LUNGE_RANGE = 8.0;
     public static final double LUNGE_STOP = 1.4;
-    public static final double LUNGE_MULTIPLIER = 0.8;
+    public static final double LUNGE_MULTIPLIER = 1.3;
     // 突き通し: 通り道の全員に ×0.6
     public static final double PIERCE_THROUGH_MULTIPLIER = 0.6;
     // 伝説の書き換え (docs/design/27 の 4.2)
@@ -403,7 +403,7 @@ public final class SkillRules {
     }
 
     public static double rendFront(int rank) {
-        return rank >= 2 ? 0.9 : 0.8;
+        return rank >= 2 ? 1.4 : 1.2;
     }
 
     // 刻印: 背取り (背後は正面の 1.8 倍、正面は 0.75 倍)、出血 (3 秒の継続傷)、連れ風 (近くの仲間の移動 +10%、4 秒)
@@ -418,14 +418,14 @@ public final class SkillRules {
     // ---------------------------------------------------------------- 潮歌い
     // 守りの唄: 8 ブロックの仲間 (自分を含む) に 8 秒の吸収 2 / 3 / 4 点 (黄ハート 1〜2❤)。重ねがけで増えない。上限 4
     public static final double WARD_SONG_RADIUS = 8;
-    public static final int WARD_SONG_TICKS = 8 * SECOND;
-    public static final float ABSORB_CAP = 4f;
+    public static final int WARD_SONG_TICKS = 10 * SECOND;
+    public static final float ABSORB_CAP = 6f;
     // 刻印: 厚い歌 (吸収 +1、4 秒)、広い歌 (半径 12、吸収 −1)、巡る歌 (吸収が切れたとき近くの 1 人へ半分)
     public static final int THICK_SONG_TICKS = 4 * SECOND;
     public static final double WIDE_SONG_RADIUS = 12;
 
     public static float wardAbsorb(int rank) {
-        return 1 + rank;
+        return 2 + rank;
     }
 
     // 凪の心得: 自分と近くの仲間のマナ回復 +10 / 20 / 30% (高いほう。重ならない)
@@ -438,11 +438,11 @@ public final class SkillRules {
     public static final double WHIRL_SLOW = 0.45;
 
     public static double ebbRange(int rank) {
-        return rank >= 2 ? 7 : 6;
+        return rank >= 2 ? 9 : 8;
     }
 
     public static int ebbSlowTicks(int rank) {
-        return (rank >= 2 ? 3 : 2) * SECOND;
+        return (rank >= 2 ? 4 : 3) * SECOND;
     }
 
     // 波紋: 自分の技が当たった敵の移動 −10 / 15 / 20% (2 秒)。大きな相手には半分
@@ -463,19 +463,19 @@ public final class SkillRules {
     public static final double CYCLE_SONG_SELF = 0.25;
 
     public static int cycleSongTicks(int rank) {
-        return (rank >= 2 ? 12 : 10) * SECOND;
+        return (rank >= 2 ? 15 : 12) * SECOND;
     }
 
     // ---------------------------------------------------------------- 灰の鍛え人
     // 焼き入れ: 手の武器を 10 秒「熾」にする。攻撃に炎の傷 (攻撃力 × 0.15 / 0.20 / 0.25。重で +0.05)、敵を 2 秒燃やす。
     // 自分か、見ている仲間 1 人へ
-    public static final int TEMPER_TICKS = 10 * SECOND;
+    public static final int TEMPER_TICKS = 14 * SECOND;
     public static final int TEMPER_BURN_TICKS = 2 * SECOND;
     public static final double TEMPER_RANGE = 6;
     public static final double TEMPER_HEAVY_BONUS = 0.05;
 
     public static double temperMultiplier(int rank) {
-        return 0.10 + 0.05 * rank;
+        return 0.20 + 0.08 * rank;
     }
 
     // 熾の心得: 火の傷を受ける量 −15 / 25 / 35%
@@ -489,7 +489,7 @@ public final class SkillRules {
     }
 
     // 熾火の槌: 叩きつけ (前方 2 ブロックを中心に半径 3) に ×1.4 / 1.6、地に 4 秒の熾火 (敵だけ燃やす)。重で半径 +0.5
-    public static final double HAMMER_RADIUS = 3.0;
+    public static final double HAMMER_RADIUS = 3.5;
     public static final double HAMMER_REACH = 2.0;
     public static final int EMBER_TICKS = 4 * SECOND;
     public static final double HAMMER_HEAVY_RADIUS = 0.5;
@@ -502,19 +502,19 @@ public final class SkillRules {
     public static final double FIRE_PILLAR_CENTER = 1.8;
 
     public static double hammerMultiplier(int rank) {
-        return rank >= 2 ? 1.6 : 1.4;
+        return rank >= 2 ? 2.2 : 1.9;
     }
 
     // 炉の記憶: 技を使うたびに熾が 1 つ溜まる (段 = 最大の数)。次の近接の攻撃 +8% を 1 つにつき (使うと全部消える)
     public static final double FORGE_MEMORY_BONUS = 0.08;
 
     // 灰散らし: 周り 4 ブロックの敵に 3 / 4 秒の「灰かぶり」(攻撃力 −10%、飛び道具の速さ −20%)
-    public static final double ASH_SCATTER_RADIUS = 4;
-    public static final double ASH_ATTACK = 0.10;
-    public static final double ASH_PROJECTILE = 0.20;
+    public static final double ASH_SCATTER_RADIUS = 5;
+    public static final double ASH_ATTACK = 0.15;
+    public static final double ASH_PROJECTILE = 0.30;
 
     public static int ashScatterTicks(int rank) {
-        return (rank >= 2 ? 4 : 3) * SECOND;
+        return (rank >= 2 ? 6 : 5) * SECOND;
     }
 
     // ---------------------------------------------------------------- 骨の射手
@@ -530,11 +530,11 @@ public final class SkillRules {
     public static final double LIGHTNING_RANGE = 4;
 
     public static double pierceBaseDamage(int rank) {
-        return 1.8 + 0.4 * rank;
+        return 2.4 + 0.6 * rank;
     }
 
     public static int piercePierce(int rank) {
-        return 1 + rank;
+        return 2 + rank;
     }
 
     // 矢の威力 (バニラと同じく 速さ × 基礎威力 の切り上げ)。会心はない
@@ -552,17 +552,17 @@ public final class SkillRules {
     }
 
     // 骨の罠: 足もとに骨の罠 (最大 2)。踏んだ敵を 2 / 3 秒縛り、傷 ×0.8 / 1.0。大きな相手は縛られず ×1.2 だけ
-    public static final int TRAP_MAX = 2;
+    public static final int TRAP_MAX = 3;
     public static final int TRAP_LIFETIME = 45 * SECOND;
-    public static final double TRAP_TRIGGER = 1.4;
-    public static final double TRAP_LARGE_MULTIPLIER = 1.2;
+    public static final double TRAP_TRIGGER = 2.0;
+    public static final double TRAP_LARGE_MULTIPLIER = 1.5;
 
     public static int trapBindTicks(int rank) {
-        return (rank >= 2 ? 3 : 2) * SECOND;
+        return (rank >= 2 ? 4 : 3) * SECOND;
     }
 
     public static double trapMultiplier(int rank) {
-        return rank >= 2 ? 1.0 : 0.8;
+        return rank >= 2 ? 1.6 : 1.3;
     }
 
     // 鷹の目: 自分の矢が当たった敵に 5 秒の印。印の敵は、誰の攻撃でも 5% / 8% / 12% 多く傷つく (重ならない。高いほうを使う)。遠で +2%
@@ -580,12 +580,12 @@ public final class SkillRules {
 
     // 天の驟雨: 見ている先 (24 ブロック以内) の半径 3 に、0.5 秒ごとに 6 回、敵だけを射る。1 回 2.0 / 3.0 (敏捷の射撃の補正も掛かる)
     public static final double RAIN_REACH = 24;
-    public static final double RAIN_RADIUS = 3;
-    public static final int RAIN_PULSES = 6;
+    public static final double RAIN_RADIUS = 4;
+    public static final int RAIN_PULSES = 8;
     public static final int RAIN_INTERVAL = 10;
 
     public static double rainDamage(int rank) {
-        return rank >= 2 ? 3.0 : 2.0;
+        return rank >= 2 ? 4.5 : 3.0;
     }
 
     // ---------------------------------------------------------------- 旅人

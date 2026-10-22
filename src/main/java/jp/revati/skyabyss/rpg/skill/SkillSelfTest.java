@@ -203,7 +203,7 @@ public final class SkillSelfTest {
                 && SkillRules.respecCost(40) == SkillRules.RESPEC_MAX_COST, "respec cost is wrong");
         check(f, SkillRules.farShotBonus(3, 4) == 0 && Math.abs(SkillRules.farShotBonus(3, 16) - 0.09) < 1e-9
                 && Math.abs(SkillRules.farShotBonus(3, 60) - 0.18) < 1e-9, "far shot falloff is wrong");
-        check(f, SkillRules.pierceDamage(1) == 8 && SkillRules.pierceDamage(3) == 11, "cloud pierce damage is " + SkillRules.pierceDamage(1)
+        check(f, SkillRules.pierceDamage(1) == 11 && SkillRules.pierceDamage(3) == 16, "cloud pierce damage is " + SkillRules.pierceDamage(1)
                 + "/" + SkillRules.pierceDamage(3));
         check(f, SkillRules.isLarge(1.4f, 2.7f, 100) && !SkillRules.isLarge(0.6f, 1.95f, 20) && SkillRules.isLarge(0.6f, 1.95f, 450),
                 "large target rule is wrong");
@@ -356,7 +356,7 @@ public final class SkillSelfTest {
         pd.globalCooldown = 0;
         int rains = SkillActions.pendingRains();
         r = SkillManager.cast(p, 2);
-        check(f, r == SkillManager.CastResult.OK && SkillActions.pendingRains() == rains + 1 && Math.abs(pd.mana - 2) < 1e-4,
+        check(f, r == SkillManager.CastResult.OK && SkillActions.pendingRains() == rains + 1 && Math.abs(pd.mana - 4) < 1e-4,
                 "sky rain was not scheduled (" + r + ", mana " + pd.mana + ")");
         SkillActions.clear();
 

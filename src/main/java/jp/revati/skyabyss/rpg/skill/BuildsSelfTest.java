@@ -574,8 +574,8 @@ final class BuildsSelfTest {
         }
         double skillDps = regen * best;
         double bonus = skillDps / basic;
-        // 精神 20 でマナを全部技へ回しても、ふつうの攻撃の +10〜45% (04 の 7.7。章 1 のころは 15〜20% の増加、章 2 以降で本数が増える)
-        check(f, bonus >= 0.10 && bonus <= 0.45, "skill rotation bonus is out of range: " + bonus);
+        // 精神 20 でマナを全部技へ回しても、ふつうの攻撃の +10〜65% (04 の 7.7。章 1 のころは 15〜20% の増加、章 2 以降で本数が増える)
+        check(f, bonus >= 0.10 && bonus <= 0.65, "skill rotation bonus is out of range: " + bonus);
         // 心臓 (体力 450)・番兵長 (体力 150 とみなす) を、攻撃力 8 の一人が倒す時間 (秒)
         double heart = 450 / (8 * (basic + skillDps));
         double captain = 150 / (8 * (basic + skillDps));
@@ -715,7 +715,7 @@ final class BuildsSelfTest {
             check(f, r == SkillManager.CastResult.OK, s.id + " cast returned " + r);
             switch (s) {
                 case ROCK_CALL -> check(f, SkillEffects.tauntedBy(zombie, p) && zombie.getTarget() == p && d.tauntUntil > level.getGameTime(), "rock call did not draw the zombie's aim");
-                case WARD_SONG -> check(f, Math.abs(p.getAbsorptionAmount() - 4f) < 1e-4, "ward song absorption was " + p.getAbsorptionAmount());
+                case WARD_SONG -> check(f, Math.abs(p.getAbsorptionAmount() - 5f) < 1e-4, "ward song absorption was " + p.getAbsorptionAmount());
                 case TEMPER -> check(f, d.temperUntil > level.getGameTime() && d.temperMult > 0, "temper did not light the weapon");
                 case EBB_TIDE -> check(f, SkillEffects.slowed(zombie), "ebb tide did not slow the zombie");
                 case ASH_SCATTER -> check(f, SkillEffects.ashed(zombie), "ash scatter did not cover the zombie");
