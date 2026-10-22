@@ -23,7 +23,7 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 // 遺物の鐘。門の枠に吊った鐘で、当たり判定は鐘 (床置き) と同じ。叩くと鳴る。
-// 鳴らす処理 (数え歌の鐘楼など) は位置で横取りする。RING = 鳴っている間の音の輪の見た目 (pulse)
+// 鳴らす処理は位置で横取りする。RING = 鳴っている間の音の輪の見た目 (pulse)
 public class RelicBellBlock extends HorizontalDirectionalBlock {
     public static final MapCodec<RelicBellBlock> CODEC = simpleCodec(RelicBellBlock::new);
     public static final BooleanProperty RING = BooleanProperty.create("ring");

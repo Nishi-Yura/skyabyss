@@ -28,7 +28,7 @@ public final class TrialGuide {
     }
 
     // 目的の id の一覧 (lang の確認用)
-    public static final List<String> IDS = List.of("west", "bell", "east_e1", "east_ck", "east_e3", "east_stone", "maze", "heart");
+    public static final List<String> IDS = List.of("west", "east_e1", "east_ck", "east_e3", "east_stone", "heart");
 
     static void tick(ServerPlayer player) {
         if (player.tickCount % 40 != 7 || player.isSpectator() || !player.isAlive() || !TitanBackTrials.isBelowSurface(player)) {
@@ -77,18 +77,11 @@ public final class TrialGuide {
             if (west) {
                 return null;
             }
-            if (BELL.contains(pos) || BELL_PASS.contains(pos) || (W2.contains(pos) && !record.flag(BellTower.FLAG))) {
-                if (!record.flag(BellTower.FLAG) && pos.getY() > FLOOR) {
-                    return new Goal("bell", BellTower.bellPos(1), 1f, 1f, 1f);
-                }
-            }
             return new Goal("west", GOAL_SPOTS.get(0), 1f, 1.5f, 1f);
         }
         if (pos.getY() < FLOOR - 10) {
-            if (lower) {
-                return null;
-            }
-            return new Goal("maze", GOAL_SPOTS.get(2), 1f, 1.5f, 1f);
+            // 闇の水路は道しるべを出さない (迷って探す試練)
+            return null;
         }
         // 鼓動の間・入口の通路ほか: 次の試練へは順路が運ぶので、ここでは何も示さない
         return null;

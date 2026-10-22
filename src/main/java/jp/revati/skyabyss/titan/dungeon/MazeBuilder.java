@@ -17,7 +17,7 @@ import net.minecraft.world.level.block.SeaPickleBlock;
 import net.minecraft.world.level.block.entity.SpawnerBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 
-// 闇の水路 (光海): 鼓動の間の床の穴 (2 つ) から下りる、水没した迷路。通路は 5×5 の水で、明かりはほとんどない。
+// 闇の水路 (光海): 鼓動の間の床の穴 (2 つ) から下りる、水没した迷路。通路は幅 1 の細い水路 (息継ぎのくぼみだけ 5×5) で、明かりはほとんどない。
 // 試練が元に戻るたびに、新しい種で迷路を掘り直す。入口のマスから、すぐに道が分かれる。
 // 息継ぎのくぼみ (天井がくぼみ、泡の柱が空気へ押し上げる光る場所) は、どのマスからも 3 マス以内にある (MazePlan)。
 // 水域は正しい道が灯の台を越えるたびに色が変わる (床・壁の石・くぼみの光)。
@@ -104,15 +104,18 @@ public final class MazeBuilder {
             for (int j = 0; j < MAZE_H; j++) {
                 BlockPos c = mazeCell(i, j);
                 BlockState floor = ZONE_FLOOR[plan.zoneOf(i, j)];
-                kit.fill(c.getX(), c.getY(), c.getZ(), c.getX() + MAZE_CELL - 1, c.getY() + 2, c.getZ() + MAZE_CELL - 1, water);
+                // 水路は幅 1 の細い道 (マスの真ん中の十字。腕は四方の継ぎ目へ伸びる)。幅 5 の息継ぎのくぼみだけが広い
+                int m = MAZE_CELL / 2;
+                kit.fill(c.getX() + m, c.getY(), c.getZ(), c.getX() + m, c.getY() + 2, c.getZ() + MAZE_CELL - 1, water);
+                kit.fill(c.getX(), c.getY(), c.getZ() + m, c.getX() + MAZE_CELL - 1, c.getY() + 2, c.getZ() + m, water);
                 kit.fill(c.getX(), MAZE_FLOOR, c.getZ(), c.getX() + MAZE_CELL - 1, MAZE_FLOOR, c.getZ() + MAZE_CELL - 1, floor);
                 if (maze.linked(i, j, 1, 0)) {
-                    kit.fill(c.getX() + MAZE_CELL, c.getY(), c.getZ(), c.getX() + MAZE_CELL, c.getY() + 2, c.getZ() + MAZE_CELL - 1, water);
-                    kit.fill(c.getX() + MAZE_CELL, MAZE_FLOOR, c.getZ(), c.getX() + MAZE_CELL, MAZE_FLOOR, c.getZ() + MAZE_CELL - 1, floor);
+                    kit.fill(c.getX() + MAZE_CELL, c.getY(), c.getZ() + m, c.getX() + MAZE_CELL, c.getY() + 2, c.getZ() + m, water);
+                    kit.set(c.getX() + MAZE_CELL, MAZE_FLOOR, c.getZ() + m, floor);
                 }
                 if (maze.linked(i, j, 0, 1)) {
-                    kit.fill(c.getX(), c.getY(), c.getZ() + MAZE_CELL, c.getX() + MAZE_CELL - 1, c.getY() + 2, c.getZ() + MAZE_CELL, water);
-                    kit.fill(c.getX(), MAZE_FLOOR, c.getZ() + MAZE_CELL, c.getX() + MAZE_CELL - 1, MAZE_FLOOR, c.getZ() + MAZE_CELL, floor);
+                    kit.fill(c.getX() + m, c.getY(), c.getZ() + MAZE_CELL, c.getX() + m, c.getY() + 2, c.getZ() + MAZE_CELL, water);
+                    kit.set(c.getX() + m, MAZE_FLOOR, c.getZ() + MAZE_CELL, floor);
                 }
             }
         }
@@ -126,6 +129,7 @@ public final class MazeBuilder {
             // 下の二段は水源のまま。真ん中は魂の砂から湧く泡の柱で、乗ると空気の層まで押し上げられる (遠くからも泡で分かる)
             BlockPos p = mazeCell(c[0], c[1]);
             BlockState light = ZONE_LIGHT[plan.zoneOf(c[0], c[1])];
+            kit.fill(p.getX(), p.getY(), p.getZ(), p.getX() + MAZE_CELL - 1, p.getY() + 2, p.getZ() + MAZE_CELL - 1, water);
             sealPocketMouths(kit, maze, c, wall);
             int hi = MAZE_CELL - 1;
             int mid = MAZE_CELL / 2;
@@ -367,7 +371,7 @@ public final class MazeBuilder {
         BlockPos ca = mazeCell(a[0], a[1]);
         int dx = b[0] - a[0];
         int dz = b[1] - a[1];
-        for (int t = 0; t < MAZE_CELL; t++) {
+        for (int t = MAZE_CELL / 2; t <= MAZE_CELL / 2; t++) {
             int x = dx != 0 ? ca.getX() + (dx > 0 ? MAZE_CELL : -1) : ca.getX() + t;
             int z = dz != 0 ? ca.getZ() + (dz > 0 ? MAZE_CELL : -1) : ca.getZ() + t;
             kit.set(x, MAZE_FLOOR, z, Blocks.MAGMA_BLOCK.defaultBlockState());

@@ -336,7 +336,7 @@ public final class TitanBackTrials {
 
     // 扉: 建てたときに閉じているもの (進みで開く) と、開いているもの (戦いの間だけ閉じる)
     private static final List<List<BlockPos>> CLOSED_GATES = List.of(GATE, E1_EXIT,
-            E3_LOCK, BELL_GATE);
+            E3_LOCK);
     private static final List<List<BlockPos>> OPEN_GATES = List.of(E1_ENTRANCE, E3_ENTRANCE, HEART_GATE, CK_ENTRANCE);
 
     private TitanBackTrials() {
@@ -638,7 +638,7 @@ public final class TitanBackTrials {
     // 心臓の回廊 (宝物庫の奥の扉から心臓の間の入口まで)
     // リセットで作り直したり封じたりしない場所 (鼓動の間とその周り)。リセットのとき、ここにいる人は動かさない
     private static final List<Box> SAFE_ON_RESET = List.of(HUB, ENTRY, W0, E0, WEST_HALL, EAST_HALL, WhaleDeck.STAIR, WhaleDeck.D0, WhaleDeck.C1, WhaleDeck.S0,
-            WhaleDeck.W02, WhaleDeck.W06, WhaleDeck.W07, WhaleDeck.W10, WhaleDeck.C2, WhaleDeck.S1, WhaleDeck.W03, WhaleDeck.W04, WhaleDeck.W04_STONE_ROOM,
+            WhaleDeck.W06, WhaleDeck.W07, WhaleDeck.W10, WhaleDeck.C2, WhaleDeck.S1, WhaleDeck.W03, WhaleDeck.W04, WhaleDeck.W04_STONE_ROOM,
             WhaleDeck.W11, WhaleDeck.W11_STONE_ROOM, WhaleDeck.W12,
             // 台から背の広場へ登る階段 (到着の道。リセットで動かさない)
             new Box(STAIR_X0, STAIR_X0 + 64, STAIR_Z0, STAIR_Z1, FLANK_FLOOR_Y, 64));

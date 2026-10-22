@@ -26,7 +26,7 @@ import net.minecraft.resources.ResourceLocation;
 //   [P5 旅装など 済] 鯨道の旅装 (guide/TravelGear)・岩の砥石・道の固焼き・苔の軟膏のレシピは RECIPES の名前で WayfarerNotes に登録済みで、
 //              覚書を開く・職人に教わる (Action unlock_recipes) までは作れない (guide/RecipeLock)。旅装は任意 (一式で合図 SIGNAL_GEAR_MADE。今はどの段も読まない)
 //   [P7 地上の敵] 入った (Ch1Mobs)。割れ殻の洞: 入口の間 岩殻虫 3、棘の間 棘うさぎ 3、奥の間 老いた歩哨 1。骨の坑: 坑口の間 苔這い 3、巣の間 苔這い 2、荷の間 岩殻虫 2
-//   [P8 岩鯨の背] 歌の間の壁画の順 (BELL_ORDER) は数え歌の鐘楼が同じ並びを読む。歩哨の割符 (SENTRY_TALLY) は老いた歩哨の落とし物。
+//   [P8 岩鯨の背] 歌の間の壁画の順 (BELL_ORDER)。歩哨の割符 (SENTRY_TALLY) は老いた歩哨の落とし物。
 public final class Ch1Prep {
     // 支度の段 (PrepQuests.ids(1) と同じ並び)
     public static final String Q_IRON = "ch1/trail_iron";

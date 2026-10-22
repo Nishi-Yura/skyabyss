@@ -140,13 +140,9 @@ public final class TitanBackLayout {
     public static final Box WC = new Box(-35, -20, -85, -49, FLOOR, 15);
     // 鼓動の間 → 西の前室 / 西の前室 → 肋骨の谷 (つなぎの通路は壁の厚さの分を含む)
     public static final Box WEST_HALL = new Box(-25, -19, -38, -34, FLOOR, 6);
-    // 数え歌の鐘楼 (W2 の北。縦の穴。床 y 103、入口の岩棚は y 112)。W2 の北の戸口 BELL_PASS から入る
-    public static final Box BELL = new Box(-52, -34, -128, -106, FLOOR, 22);
-    public static final Box BELL_PASS = new Box(-44, -40, -105, -102, FLOOR + 9, 6);
-    // W2 → 崩れ橋 (WC) の入口の岩棚をつなぐ通路 (L 字)。鐘楼の鐘が鳴りやむまで途中の戸が閉じている (初回)
+    // W2 → 崩れ橋 (WC) の入口の岩棚をつなぐ通路 (L 字。戸は無い)
     public static final Box W2_CONN1 = new Box(-35, -31, -99, -95, FLOOR + 9, 6);
     public static final Box W2_CONN2 = new Box(-33, -29, -94, -86, FLOOR + 9, 6);
-    public static final List<BlockPos> BELL_GATE = wall(-33, -29, FLOOR + 10, FLOOR + 15, -90, true);
     // 足場の並びは試練が元に戻るたびに作り直される (ParkourCourses)
     // 落ちたら直前の休み場へ戻される高さ (この高さより下に落ちたら)
     public static final int PIT_LAVA_Y = FLOOR - 9;
@@ -234,15 +230,6 @@ public final class TitanBackLayout {
             new Inscription("sign.skyabyss.lore_east", new BlockPos(30, FLOOR + 3, -52), net.minecraft.core.Direction.NORTH),
             new Inscription("sign.skyabyss.lore_below", new BlockPos(23, MAZE_FLOOR + 6, -3), net.minecraft.core.Direction.NORTH));
 
-    // 道しるべの碑 (版 18。26 の 8.6): 東の翼の広間の入口・次の戸・詰所の割符の戸・鐘の戸のそばに、次に何があるか・なぜ閉じているかを書く
-    public static final List<Inscription> GUIDE_SIGNS = List.of(
-            new Inscription("sign.skyabyss.hall_e1", new BlockPos(34, FLOOR + 3, -40), net.minecraft.core.Direction.EAST),
-            new Inscription("sign.skyabyss.door_next", new BlockPos(39, FLOOR + 3, -54), net.minecraft.core.Direction.SOUTH),
-            new Inscription("sign.skyabyss.hall_e2", new BlockPos(44, FLOOR + 3, -68), net.minecraft.core.Direction.SOUTH),
-            new Inscription("sign.skyabyss.hall_ck", new BlockPos(51, FLOOR + 3, -99), net.minecraft.core.Direction.SOUTH),
-            new Inscription("sign.skyabyss.door_tally", new BlockPos(41, FLOOR + 3, -107), net.minecraft.core.Direction.EAST),
-            new Inscription("sign.skyabyss.hall_e3", new BlockPos(32, FLOOR + 3, -96), net.minecraft.core.Direction.WEST),
-            new Inscription("sign.skyabyss.door_bell", new BlockPos(-33, FLOOR + 12, -92), net.minecraft.core.Direction.EAST));
     // 心臓の間の入口 (最後の試練)
     public static final Inscription HEART_GATE_SIGN =
             new Inscription("sign.skyabyss.heart_gate", new BlockPos(4, FLOOR + 3, -107), net.minecraft.core.Direction.WEST);
@@ -250,7 +237,6 @@ public final class TitanBackLayout {
     // 背中に置く看板すべて (自己テストで、この数より多く置かれていないか・各行が看板の幅に収まるかを見る)
     public static List<Inscription> allSigns() {
         List<Inscription> all = new java.util.ArrayList<>(LORE_SIGNS);
-        all.addAll(GUIDE_SIGNS);
         all.add(HEART_GATE_SIGN);
         return List.copyOf(all);
     }

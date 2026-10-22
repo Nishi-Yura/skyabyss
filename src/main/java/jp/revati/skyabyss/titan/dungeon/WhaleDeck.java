@@ -12,7 +12,7 @@ import net.minecraft.core.BlockPos;
 // 岩鯨の背の「試練の階」(docs/design/29 の 2.4、26 の体の空き)。鼓動の間の入口の通路の東の壁から、階段で 16 段上がった体の中の階 (床 y 119)。
 // 下の東の翼 (第二の広間・詰所) の天井 (y 116) の上、祠の階段の東にある「詰まった石」の空きに、セル (試練の部屋) を並べる。
 //
-//   入口の通路 ── 階段 (x 5〜21、z 8〜12。16 段) ── 試練の階の広間 D0 (休み場・板) ── 西の戸 → 鐘楼の綱渡り W02 (縦の穴)
+//   入口の通路 ── 階段 (x 5〜21、z 8〜12。16 段) ── 試練の階の広間 D0 (休み場)
 //                                                         └ 南の通路 C1 (戸 → 骨の楽譜 W06) ── 南の広間 S0 (休み場)
 //                                                                                         ├ 戸 → 三つの水門 W07
 //                                                                                         ├ 戸 → 骨の砲手の砦 W10
@@ -60,8 +60,6 @@ public final class WhaleDeck {
     public static final int STAIR_DOOR_X = 4;
 
     public static final Box D0 = new Box(22, 44, 4, 24, Y, 9);
-    // 鐘楼の綱渡り: 縦の穴。床 y 112、足場 (岩棚・梁) の高さは Y
-    public static final Box W02 = new Box(7, 20, 20, 66, Y - 7, 21);
     // 広間 D0 の南の戸口から S0 へ下る通路
     public static final Box C1 = new Box(40, 44, 26, 66, Y, 6);
     public static final Box W06 = new Box(24, 38, 27, 42, Y, 8);
@@ -98,15 +96,13 @@ public final class WhaleDeck {
     public static final Box W08_STONE_ROOM = new Box(-29, -25, 104, 110, Y, 6);
     public static final Box W08_REST = new Box(-48, -32, 112, 115, Y, 9);
 
-    public static final List<Box> ROOMS = List.of(STAIR, D0, W02, C1, W06, S0, W07, W10, C2, S1, W03, W04, W04_STONE_ROOM, W11, W11_STONE_ROOM, W12, W08, W08_STONE_ROOM);
+    public static final List<Box> ROOMS = List.of(STAIR, D0, C1, W06, S0, W07, W10, C2, S1, W03, W04, W04_STONE_ROOM, W11, W11_STONE_ROOM, W12, W08, W08_STONE_ROOM);
 
     // ---------------------------------------------------------------- 戸 (封印の扉。グループごとに開け閉め)
     // 戸の高さは 5 (足の高さ Y + 1 〜 Y + 5)
     private static final int G0 = Y + 1;
     private static final int G1 = Y + 5;
 
-    // 鐘楼 W02 の入口: D0 の西の壁 (x 21、z 20〜24)
-    public static final List<BlockPos> W02_GATE = TitanBackLayout.wall(20, 24, G0, G1, 21, false);
     // 骨の楽譜 W06 の入口: C1 の西の壁 (x 39、z 32〜36)。出口 (石の前の戸): 部屋の南西の小部屋 (x 28、z 38〜42)
     public static final List<BlockPos> W06_GATE = TitanBackLayout.wall(32, 36, G0, G1, 39, false);
     public static final List<BlockPos> W06_EXIT = TitanBackLayout.wall(38, 42, G0, G1, 28, false);
@@ -143,8 +139,6 @@ public final class WhaleDeck {
     }
 
     // ---------------------------------------------------------------- 石の差し口・戻りの光る床
-    public static final BlockPos W02_STONE = new BlockPos(13, Y + 1, 65);
-    public static final BlockPos W02_PAD = new BlockPos(17, Y, 65);
     public static final BlockPos W06_STONE = new BlockPos(25, Y + 1, 40);
     public static final BlockPos W06_PAD = new BlockPos(27, Y, 40);
     public static final BlockPos W07_STONE = new BlockPos(-6, Y + 1, 110);
@@ -167,9 +161,6 @@ public final class WhaleDeck {
     // ---------------------------------------------------------------- 休み場
     public static final String REST_D0 = "d0";
     public static final String REST_S0 = "s0";
-    public static final String REST_W02_A = "w02a";
-    public static final String REST_W02_M = "w02m";
-    public static final String REST_W02_C = "w02c";
     public static final String REST_W10 = "w10a";
     public static final String REST_S1 = "s1";
     public static final String REST_W03_A = "w03a";
@@ -179,10 +170,6 @@ public final class WhaleDeck {
     public static final String REST_W12 = "w12a";
     public static final String REST_W08 = "w08a";
 
-    // 鐘楼の足場 (岩棚 A・中ほどの台 M・向こうの岩棚 C)
-    public static final Box W02_LEDGE_A = new Box(7, 20, 20, 26, Y, 8);
-    public static final Box W02_MID = new Box(11, 15, 42, 46, Y, 6);
-    public static final Box W02_LEDGE_C = new Box(7, 20, 62, 66, Y, 8);
     public static final Box W10_REST = new Box(15, 21, 84, 90, Y, 8);
     // 新しい四つのセルの休み場
     public static final Box W03_REST_A = new Box(W03_X1, W03_X2, 129, 131, Y, 9);
@@ -194,9 +181,6 @@ public final class WhaleDeck {
         return List.of(
                 new Rest(REST_D0, D0, D0.center().offset(2, 0, 2)),
                 new Rest(REST_S0, S0, S0.center().offset(2, 0, 2)),
-                new Rest(REST_W02_A, W02_LEDGE_A, new BlockPos(16, Y + 1, 24)),
-                new Rest(REST_W02_M, W02_MID, new BlockPos(14, Y + 1, 45)),
-                new Rest(REST_W02_C, W02_LEDGE_C, new BlockPos(16, Y + 1, 63)),
                 new Rest(REST_W10, W10_REST, new BlockPos(20, Y + 1, 89)),
                 new Rest(REST_S1, S1, S1.center().offset(2, 0, 2)),
                 new Rest(REST_W03_A, W03_REST_A, new BlockPos(-38, Y + 1, 131)),
@@ -212,9 +196,6 @@ public final class WhaleDeck {
         return switch (id) {
             case REST_D0 -> D0.center();
             case REST_S0 -> S0.center();
-            case REST_W02_A -> new BlockPos(13, Y + 1, 23);
-            case REST_W02_M -> W02_MID.center();
-            case REST_W02_C -> new BlockPos(11, Y + 1, 64);
             case REST_W10 -> W10_REST.center();
             case REST_S1 -> S1.center();
             case REST_W03_A -> new BlockPos(-40, Y + 1, 130);
@@ -229,7 +210,7 @@ public final class WhaleDeck {
 
     // 全部の戸 (原型の入口の戸は別。新作の入口と出口)
     public static List<List<BlockPos>> closedGates() {
-        return List.of(W02_GATE, W06_GATE, W06_EXIT, W07_GATE, W07_EXIT, W10_GATE, W10_EXIT, W03_GATE, W04_GATE, W04_EXIT, W11_GATE, W11_EXIT, W12_GATE, W08_GATE, W08_EXIT);
+        return List.of(W06_GATE, W06_EXIT, W07_GATE, W07_EXIT, W10_GATE, W10_EXIT, W03_GATE, W04_GATE, W04_EXIT, W11_GATE, W11_EXIT, W12_GATE, W08_GATE, W08_EXIT);
     }
 
     public static List<List<BlockPos>> legacyGates() {

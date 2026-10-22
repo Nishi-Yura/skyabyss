@@ -12,10 +12,9 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 
 // 西の翼「裂け目の回廊」(版 18 で作り直し): 谷を渡る長いアスレチック。
-//   西の前室 (休み場) → 肋骨の谷 → 第一の休み場 → 竪穴 → 第二の休み場 (→ 数え歌の鐘楼) → 崩れ橋 → 共鳴石の岩棚
+//   西の前室 (休み場) → 肋骨の谷 → 第一の休み場 → 竪穴 → 第二の休み場 → 崩れ橋 → 共鳴石の岩棚
 // 谷はどれも床が抜け落ち、はるか下に溶岩が光る。足場は筋の通った一本の道 (ParkourCourses): 飛び石 → 島 (休み場を兼ねる) → 骨の橋。
 // 落ちると直前の休み場 (島を含む) へ戻される (TitanBackTrials)。最後の岩棚から、鼓動の間へ下りる抜け道が開く。
-// 第二の休み場から崩れ橋へ行く通路は、初回は鐘楼の鐘が鳴りやむまで閉じている (BELL_GATE。鐘楼は BellTower)。
 // 材質は「肋骨」(ZonePalette.RIB): 熱で黒ずんだ磨き黒石・骨・玄武岩。谷の天井には肋骨の梁が渡る
 final class WestWingBuilder {
     private WestWingBuilder() {
@@ -75,12 +74,6 @@ final class WestWingBuilder {
         placeCourses(kit, ParkourCourses.forSeed(0));
         pathLights(kit);
 
-        // 数え歌の鐘楼 (第二の休み場の北) と、そこへ行く通路。鐘が鳴りやむまで崩れ橋への通路が閉じる
-        BellTower.build(kit);
-        kit.palette(ZonePalette.RIB);
-        for (BlockPos p : BELL_GATE) {
-            kit.set(p, ModBlocks.SEALED_GATE.get().defaultBlockState());
-        }
         // 前の谷の出口の戸 (W0 の南の壁)。W0 の内側の柱・灯りが戸の前に立っていたら除く
         for (BlockPos p : WP_GATE) {
             kit.set(p.getX(), p.getY(), W0.z2(), BuildKit.AIR);

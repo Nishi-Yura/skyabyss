@@ -183,7 +183,7 @@ public final class AnemoneSelfTest {
                 check(f, onPath, "stand " + i + " is not on the correct path (or sits in a breathing pocket) at " + s);
                 check(f, back.getBlockState(s.above()).getFluidState().isSource() && back.getBlockState(s.below()).isSolid(), "stand " + i + " floats or is walled in at " + s);
             }
-            check(f, gate.size() == MAZE_CELL * 3, "the exit gate is not a full passage (" + gate.size() + ")");
+            check(f, gate.size() == 3, "the exit gate is not a full passage (" + gate.size() + ")");
             for (BlockPos g : gate) {
                 BlockState st = back.getBlockState(g);
                 check(f, st.is(ModBlocks.SEALED_GATE.get()) && !st.getValue(SealedGateBlock.OPEN), "exit gate block at " + g + " is not a closed sealed gate (" + st + ")");
@@ -280,15 +280,6 @@ public final class AnemoneSelfTest {
             BlockPos ceiling = new BlockPos(stands.get(0).getX(), MAZE_FLOOR + 4, stands.get(0).getZ());
             check(f, overlayA.get(ceiling) != null && overlayA.get(ceiling).is(Blocks.SEA_LANTERN), "the lit stand has no lantern on the ceiling above it");
             check(f, back.getBlockState(ceiling).isSolid(), "the ceiling above a stand is not solid (" + ceiling + ")");
-            int ahead = 0;
-            for (BlockPos t : AnemoneLights.trail(back)) {
-                BlockState st = overlayA.get(t);
-                if (st != null && st.is(Blocks.SEA_LANTERN)) {
-                    ahead++;
-                    check(f, back.getBlockState(t).isSolid(), "a trail floor block is not solid at " + t);
-                }
-            }
-            check(f, ahead >= 3, "a lit stand does not beam a light path toward the goal (" + ahead + " floor blocks)");
             check(f, !overlayB.containsKey(stands.get(0)) && !overlayB.containsKey(AnemoneLights.TALLY_POS) && !overlayB.containsKey(AnemoneLights.BOARD.get(0)),
                     "a lit stand leaked into another group's overlay");
             check(f, !AnemoneLights.calmedAt(back, gb, Vec3.atCenterOf(stands.get(0))), "the lamp calms another group");
@@ -338,26 +329,6 @@ public final class AnemoneSelfTest {
             for (BlockPos p : AnemoneLights.BOARD) {
                 check(f, open3.get(p) != null && open3.get(p).getValue(RedstoneLampBlock.LIT), "board lamp at " + p + " is not lit with all lamps");
             }
-            int full = 0;
-            for (BlockPos t : AnemoneLights.trail(back)) {
-                if (open3.get(t) != null && open3.get(t).is(Blocks.SEA_LANTERN)) {
-                    full++;
-                }
-            }
-            // 光の道は息継ぎのくぼみのマスと流れの通路を飛ばす (AnemoneLights.computeTrail) ので、道のマスの数ではなく、くぼみでないマスの数以上を見る
-            int floorCells = 0;
-            for (int[] cell : plan.path) {
-                if (!plan.isPocket(cell)) {
-                    floorCells++;
-                }
-            }
-            check(f, full == AnemoneLights.trail(back).size() && full >= floorCells, "the light path does not run the whole way to the exit once the gate is open (" + full + " / " + AnemoneLights.trail(back).size() + ")");
-            BlockPos ringAt = MazeBuilder.exitBubble().offset(1, -1, 1);
-            check(f, open3.get(ringAt) != null && open3.get(ringAt).is(Blocks.SEA_LANTERN), "the exit cell is not ringed with light once the gate is open");
-            check(f, !GroupOverlays.compute(back, gb).containsKey(AnemoneLights.trail(back).get(0)), "the light path leaked into another group's overlay");
-            // 目的の帯の矢印: 体の向きに対する方角
-            check(f, "↑".equals(AnemoneLights.arrow(a, 0, 5)) && "→".equals(AnemoneLights.arrow(a, -5, 0)) && "↓".equals(AnemoneLights.arrow(a, 0, -5))
-                    && "←".equals(AnemoneLights.arrow(a, 5, 0)), "the band arrow does not follow the facing");
             // 目的の帯の文は、どの状態でも作れる (水の中・入口の小部屋で)
             a.setPos(stands.get(0).getX() + 0.5, stands.get(0).getY() + 1, stands.get(0).getZ() + 0.5);
             check(f, AnemoneLights.bandText(back, a, ga).getString().length() > 0, "the objective band text is empty in the water");
@@ -394,7 +365,7 @@ public final class AnemoneSelfTest {
             }
             var afterReset = GroupOverlays.compute(back, ga);
             check(f, !afterReset.containsKey(stands.get(0)) && !afterReset.containsKey(AnemoneLights.TALLY_POS) && !afterReset.containsKey(AnemoneLights.BOARD.get(0))
-                    && !afterReset.containsKey(AnemoneLights.trail(back).get(0)), "the reset left lit stands / the board / the light path in the overlay");
+                    , "the reset left lit stands / the board in the overlay");
             check(f, AnemoneLights.isLit(BackGroupData.get(back).of(gb), 1), "resetting group a cleared group b's lamp");
             check(f, AnemoneLights.growable(back, ga) == 3, "after the reset a can regrow only " + AnemoneLights.growable(back, ga));
 

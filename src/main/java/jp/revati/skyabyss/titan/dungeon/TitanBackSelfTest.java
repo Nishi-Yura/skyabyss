@@ -458,7 +458,7 @@ public final class TitanBackSelfTest {
     private static void checkRooms(ServerLevel level, List<String> failures) {
         for (Box room : TitanBackAudit.ROOMS) {
             // 通路の天井は、大門 (BossGates) の高い空間で開く。迷路の入口の小部屋の天井ははしごの縦穴
-            if (room == E3_CORRIDOR || room == HEART_CORRIDOR || room == MAZE_ENTRY_ROOM || room == MAZE_ENTRY_ROOM2 || room == BELL) {
+            if (room == E3_CORRIDOR || room == HEART_CORRIDOR || room == MAZE_ENTRY_ROOM || room == MAZE_ENTRY_ROOM2) {
                 continue;
             }
             int holes = 0;
@@ -498,7 +498,7 @@ public final class TitanBackSelfTest {
         int[][] open = {
                 {0, FLOOR + 1, -13}, {0, FLOOR + 1, 10}, {-22, FLOOR + 1, -36}, {22, FLOOR + 1, -36},
                 {WA.x2() + 1, FLOOR + 1, -36}, {-50, W1.floorY() + 1, WA.z1() - 1}, {-47, W1.floorY() + 1, WB.z2() + 1},
-                {-44, W2.floorY() + 1, WB.z1() - 1}, {-42, W2.floorY() + 1, BELL.z2() + 3}, {-33, W2.floorY() + 1, -97},
+                {-44, W2.floorY() + 1, WB.z1() - 1}, {-33, W2.floorY() + 1, -97},
                 {E1.x1() - 1, FLOOR + 1, -36}, {36, FLOOR + 1, -103}, {E3.x2() + 1, FLOOR + 1, -103}, {47, FLOOR + 1, -69}, {47, FLOOR + 1, -100}, {10, FLOOR + 1, -5}, {21, FLOOR + 1, -5},
                 // 心臓の回廊と心臓の間の入口 (戦いの前は開いている)
                 {0, FLOOR + 1, -76}, {0, FLOOR + 1, HEART_GATE_Z + 1}, {0, FLOOR + 1, HEART_GATE_Z}, {0, FLOOR + 1, HEART_GATE_Z - 1}};
@@ -507,7 +507,7 @@ public final class TitanBackSelfTest {
             air(level, p, "doorway", failures);
             air(level, p.above(), "doorway head", failures);
         }
-        for (List<BlockPos> sealed : List.of(GATE, E1_EXIT, E3_LOCK, BELL_GATE)) {
+        for (List<BlockPos> sealed : List.of(GATE, E1_EXIT, E3_LOCK)) {
             for (BlockPos p : sealed) {
                 if (!level.getBlockState(p).is(ModBlocks.SEALED_GATE.get())) {
                     failures.add("should start sealed: " + p);
@@ -546,8 +546,6 @@ public final class TitanBackSelfTest {
 
     // 看板: 背中に置かれた看板は、碑文と試練の入口の一言だけ (allSigns) で、どの行も看板の幅に収まること (日本語・英語)。
     // 囁き (看板の代わりの案内) の文が lang にあること
-    // 版 13 で足した碑 (鐘楼) の残り。任意の翼 (書庫・胸びれ・尾の展望・宿) の碑は版 30 で消した
-    private static final Set<String> NEW_TABLETS = Set.of("sign.skyabyss.bell_hint");
 
     private static void checkSigns(ServerLevel level, List<String> failures) {
         Set<BlockPos> expected = new HashSet<>();
@@ -562,7 +560,7 @@ public final class TitanBackSelfTest {
                     }
                     if (expected.contains(be.getBlockPos())) {
                         count++;
-                    } else if (!NEW_TABLETS.contains(tablet.key())) {
+                    } else {
                         failures.add("unexpected tablet at " + be.getBlockPos() + " (only inscriptions, trial entrances and the new wings keep tablets)");
                     }
                     keys.add(tablet.key());

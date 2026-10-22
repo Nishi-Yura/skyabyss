@@ -46,11 +46,6 @@ record ZonePalette(String name, BlockState wall, BlockState wallAlt, BlockState 
             b(Blocks.POLISHED_BLACKSTONE), b(Blocks.POLISHED_BASALT), b(Blocks.BLACKSTONE), b(Blocks.BONE_BLOCK), b(Blocks.CHISELED_POLISHED_BLACKSTONE),
             b(Blocks.CHISELED_POLISHED_BLACKSTONE), b(Blocks.BONE_BLOCK), b(Blocks.SEA_LANTERN), b(Blocks.PEARLESCENT_FROGLIGHT), false);
 
-    // 数え歌の鐘楼: 凝灰岩と青銅 (緑青の銅)。暖かい灯り
-    static final ZonePalette BELL = new ZonePalette("bell", b(Blocks.TUFF_BRICKS), b(Blocks.CHISELED_TUFF_BRICKS), b(Blocks.POLISHED_TUFF), b(Blocks.TUFF_BRICKS),
-            b(Blocks.TUFF_BRICKS), b(Blocks.WAXED_OXIDIZED_CUT_COPPER), b(Blocks.WAXED_CHISELED_COPPER), b(Blocks.WAXED_CHISELED_COPPER),
-            b(Blocks.STRIPPED_DARK_OAK_LOG), b(Blocks.OCHRE_FROGLIGHT), b(Blocks.OCHRE_FROGLIGHT), true);
-
     // 東の第一の広間 (番兵の練兵場): 石レンガと苔、黒樫の梁。暖かい灯り
     static final ZonePalette DRILL = new ZonePalette("drill", b(Blocks.STONE_BRICKS), b(Blocks.MOSSY_STONE_BRICKS), b(Blocks.POLISHED_ANDESITE),
             b(Blocks.STONE_BRICKS), b(Blocks.DARK_OAK_PLANKS), b(Blocks.POLISHED_ANDESITE), b(Blocks.CHISELED_STONE_BRICKS), b(Blocks.CHISELED_STONE_BRICKS),
