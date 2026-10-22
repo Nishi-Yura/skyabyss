@@ -159,8 +159,9 @@ public class RecordScreen extends Screen implements jp.revati.skyabyss.client.ui
 
     @Override
     protected void init() {
-        left = (width - BW) / 2;
-        top = (height - BH) / 2 + 10;
+        fit.fit(width, height, BW, 26 + BH + 8, 2.5f);
+        left = 0;
+        top = 26;
         rebuildBody(false);
     }
 
@@ -354,9 +355,29 @@ public class RecordScreen extends Screen implements jp.revati.skyabyss.client.ui
     }
 
     // ---------------------------------------------------------------- 描く
+    // 書は窓に合わせて一様に大きく描く (描くのと当たりは同じ変換: fit)。論理の (0, 26) に置く
+    private final jp.revati.skyabyss.client.ui.UiFit fit = new jp.revati.skyabyss.client.ui.UiFit();
+
     @Override
     public void renderBackground(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
         super.renderBackground(g, mouseX, mouseY, partialTick);
+    }
+
+    @Override
+    public void render(GuiGraphics g, int screenX, int screenY, float partialTick) {
+        renderBackground(g, screenX, screenY, partialTick);
+        int mouseX = (int) Math.floor(fit.x(screenX));
+        int mouseY = (int) Math.floor(fit.y(screenY));
+        fit.begin(g);
+        renderBook(g);
+        for (net.minecraft.client.gui.components.Renderable r : renderables) {
+            r.render(g, mouseX, mouseY, partialTick);
+        }
+        renderBody(g, mouseX, mouseY, partialTick);
+        fit.end(g);
+    }
+
+    private void renderBook(GuiGraphics g) {
         // 選んでいないつまみは書の後ろに
         for (int i = 0; i < RecordSnapshot.TAB_IDS.size(); i++) {
             if (!RecordSnapshot.TAB_IDS.get(i).equals(tab)) {
@@ -366,9 +387,7 @@ public class RecordScreen extends Screen implements jp.revati.skyabyss.client.ui
         g.blit(LEDGER, left, top, BW, BH, 0, 0, LEDGER_W, LEDGER_H, LEDGER_W, LEDGER_H);
     }
 
-    @Override
-    public void render(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
-        super.render(g, mouseX, mouseY, partialTick);
+    private void renderBody(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
         renderTabs(g, mouseX, mouseY);
         renderHeader(g);
         renderRebirthLink(g, mouseX, mouseY);
@@ -497,7 +516,7 @@ public class RecordScreen extends Screen implements jp.revati.skyabyss.client.ui
         int listTop = listTop();
         int y = top + listTop - scroll();
         ItemHover hover = null;
-        g.enableScissor(left + 6, top + listTop, left + 151, top + LIST_BOTTOM);
+        jp.revati.skyabyss.client.ui.TextClip.clipPosed(g, left + 6, top + listTop, 145, LIST_BOTTOM - listTop);
         for (Row r : t.rows()) {
             int h = rowHeight(r);
             if (y + h >= top + LIST_TOP && y < top + LIST_BOTTOM) {
@@ -598,7 +617,7 @@ public class RecordScreen extends Screen implements jp.revati.skyabyss.client.ui
         int bt = top + bodyTop(row);
         int bb = top + bodyBottom(row);
         bodyScroll = Mth.clamp(bodyScroll, 0, maxBodyScroll(row));
-        g.enableScissor(x - 2, bt, x + RW + 4, bb);
+        jp.revati.skyabyss.client.ui.TextClip.clipPosed(g, x - 2, bt, RW + 6, bb - bt);
         int y = bt - bodyScroll;
         for (BodyLine l : body) {
             if (y + l.height() > bt && y < bb) {
@@ -637,7 +656,9 @@ public class RecordScreen extends Screen implements jp.revati.skyabyss.client.ui
 
     // ---------------------------------------------------------------- 操作
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+    public boolean mouseClicked(double screenX, double screenY, int button) {
+        double mouseX = fit.x(screenX);
+        double mouseY = fit.y(screenY);
         if (button == 0 && snapshot.self() && mouseX >= linkX() - 2 && mouseX < linkX() + font.width(Component.translatable("skyabyss_rebirth.gui.open")) + 2
                 && mouseY >= top + 7 && mouseY < top + 18) {
             click();
@@ -712,7 +733,9 @@ public class RecordScreen extends Screen implements jp.revati.skyabyss.client.ui
     }
 
     @Override
-    public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
+    public boolean mouseScrolled(double screenX, double screenY, double scrollX, double scrollY) {
+        double mouseX = fit.x(screenX);
+        double mouseY = fit.y(screenY);
         int step = (int) Math.signum(scrollY) * -12;
         if (mouseX < left + 154) {
             listScroll.put(page(), Mth.clamp(scroll() + step, 0, maxListScroll()));
@@ -795,6 +818,6 @@ public class RecordScreen extends Screen implements jp.revati.skyabyss.client.ui
     @Override
     public int[] textBounds() {
         // 上のつまみ (top - 21 から) も文字の範囲に入れる (書の上端で切っていて、つまみの名が出なかった)
-        return new int[] {left, top - 24, BW, BH + 24};
+        return fit.screenRect(left, top - 24, BW, BH + 24);
     }
 }

@@ -20,9 +20,10 @@ import net.neoforged.neoforge.network.PacketDistributor;
 //   売る: 行を押すと一口、シフトで手持ちの全部
 // 決めるのはサーバー (ShopService)。押すたびに、新しい並びが届いて描き直す
 public class ShopScreen extends Screen {
-    private static final int W = 300;
+    // 窓の幅と見せる行の数は、画面に合わせて init で決める (2026-10-22 の部屋の見直し)
+    private int W = 300;
     private static final int ROW_H = 22;
-    private static final int ROWS = 7;
+    private int ROWS = 7;
 
     private FacilityNetwork.ShopView view;
     private boolean selling;
@@ -54,6 +55,9 @@ public class ShopScreen extends Screen {
 
     @Override
     protected void init() {
+        W = Math.min(380, width - 16);
+        ROWS = Math.max(5, Math.min(16, (height - 120) / ROW_H));
+        clampScroll();
         h = 46 + ROWS * ROW_H + 22;
         x0 = (width - W) / 2;
         y0 = (height - h) / 2;

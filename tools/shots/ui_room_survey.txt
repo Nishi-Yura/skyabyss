@@ -1,0 +1,89 @@
+# UI room survey / before-after: each screen at GUI 2 and GUI 3 (window 1280x720).
+# ./gradlew runShots --no-daemon --offline -Pscript=tools/shots/ui_room_survey.txt -PshotsName=ui_room_survey
+world ui_room flat
+size 1280 720
+timeout 1500
+render 8
+clouds off
+
+cmd time set noon
+cmd weather clear
+cmd gamemode survival
+hud on
+cmd skyabyss cinematic stop
+waitchunks
+chat clear
+cmd skyabyss quest start @s main_song
+cmd skyabyss lore unlock @s prologue/camp
+cmd skyabyss dev notice gain message.skyabyss.boss_reward
+cmd skyabyss dev notice unlock message.skyabyss.fragment_received
+wait 80
+
+guiscale 3
+open quests
+wait 20
+shot ur_quests_g3
+close
+open lore
+wait 20
+shot ur_lore_g3
+close
+open notices
+wait 20
+shot ur_notices_g3
+close
+open growth
+wait 20
+shot ur_growth_g3
+close
+open skills
+wait 20
+shot ur_skills_g3
+close
+open calling
+wait 20
+shot ur_calling_g3
+close
+open party
+wait 20
+shot ur_party_g3
+close
+open grave
+wait 20
+shot ur_grave_g3
+close
+open travel_map_demo
+wait 30
+shot ur_travelmap_g3
+close
+
+guiscale 2
+open quests
+wait 20
+shot ur_quests_g2
+close
+open lore
+wait 20
+shot ur_lore_g2
+close
+open notices
+wait 20
+shot ur_notices_g2
+close
+open growth
+wait 20
+shot ur_growth_g2
+close
+open skills
+wait 20
+shot ur_skills_g2
+close
+open calling
+wait 20
+shot ur_calling_g2
+close
+open party
+wait 20
+shot ur_party_g2
+close
+quit
