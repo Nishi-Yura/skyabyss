@@ -116,7 +116,7 @@ public final class AbyssPressure {
         int light = Math.max(p.serverLevel().getMaxLocalRawBrightness(at), Mth.clamp(lightBonus.applyAsInt(p), 0, 15));
         float d = light <= 3 ? VOICE_DARK : light <= 7 ? VOICE_DIM : VOICE_LIGHT;
         if (d > 0) {
-            d *= (float) voiceScale.applyAsDouble(p);
+            d *= (float) (voiceScale.applyAsDouble(p) * AbyssRelics.voiceFactor(p));
         }
         s.voice = Mth.clamp(s.voice + d, 0f, 100f);
         if (s.voice >= 40 && p.getRandom().nextInt(5) == 0) {

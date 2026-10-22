@@ -156,6 +156,11 @@ public final class AbyssRelics {
         return setCount(p) >= b.needed;
     }
 
+    // 声がたまる速さの倍率 (AbyssPressure が掛ける)。夜目 (二つ) のあいだは遅くなる。効いていなければ 1
+    public static double voiceFactor(Player p) {
+        return bonus(p, Bonus.SIGHT) ? 0.75 : 1.0;
+    }
+
     // 深淵の中で、効果の数に応じて効かせる (20 tick ごと。効果は 260 tick 持つので切れ目は出ない)
     @SubscribeEvent
     static void onTick(PlayerTickEvent.Post event) {
@@ -166,10 +171,10 @@ public final class AbyssRelics {
             p.addEffect(new MobEffectInstance(MobEffects.NIGHT_VISION, 260, 0, true, false, false));
         }
         if (bonus(p, Bonus.LIGHT_STEP)) {
-            p.addEffect(new MobEffectInstance(MobEffects.JUMP_BOOST, 260, 0, true, false, false));
+            p.addEffect(new MobEffectInstance(MobEffects.JUMP, 260, 0, true, false, false));
         }
         if (bonus(p, Bonus.FOOTSTEPS) && !p.serverLevel().getEntitiesOfClass(AbyssMob.class, p.getBoundingBox().inflate(10)).isEmpty()) {
-            p.serverLevel().playSound(null, p.getX(), p.getY(), p.getZ(), SoundEvents.NOTE_BLOCK_CHIME.value(), SoundSource.PLAYERS, 0.5f, 1.4f);
+            p.serverLevel().playSound(null, p.getX(), p.getY(), p.getZ(), SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, 0.5f, 1.4f);
         }
     }
 }

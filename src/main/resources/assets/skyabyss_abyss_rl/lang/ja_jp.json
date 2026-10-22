@@ -24,7 +24,7 @@
   "item.skyabyss.abyss_relic_ash_3": "心臓の形の石",
   "item.skyabyss.abyss_relic_ash_3.desc": "墓の石の裏に彫られていた、心臓の形の石片。打っているように見える。",
   "item.skyabyss.abyss_relic.set_hint": "二つ・四つ・六つ、違う遺品を持っていると効く（持っているあいだ）",
-  "item.skyabyss.abyss_relic.bonus.2": "夜目。深淵の中で、灯りの先まで見える。",
+  "item.skyabyss.abyss_relic.bonus.2": "夜目。深淵の中で、灯りの先まで見える。声がたまるのも遅くなる。",
   "item.skyabyss.abyss_relic.bonus.4": "足音の警告。近くの深淵の敵が来ると、足もとで鈴が鳴る。",
   "item.skyabyss.abyss_relic.bonus.6": "軽い足。深淵の中で、跳ぶと少し高く跳べる。",
   "message.skyabyss.abyss.relic.got": "前の私の落とし物を受け取った: %s",

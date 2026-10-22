@@ -48,7 +48,7 @@ RELICS = [
 
 # 組で効く段 (AbyssRelics.Bonus と揃える)
 BONUS = {
-    "2": ("夜目。深淵の中で、灯りの先まで見える。", "Night sight. In the abyss you see past the light."),
+    "2": ("夜目。深淵の中で、灯りの先まで見える。声がたまるのも遅くなる。", "Night sight. In the abyss you see past the light, and your voice gathers more slowly."),
     "4": ("足音の警告。近くの深淵の敵が来ると、足もとで鈴が鳴る。", "Footsteps warn. A bell sounds underfoot when an abyss foe comes near."),
     "6": ("軽い足。深淵の中で、跳ぶと少し高く跳べる。", "Light step. In the abyss you jump a little higher."),
 }

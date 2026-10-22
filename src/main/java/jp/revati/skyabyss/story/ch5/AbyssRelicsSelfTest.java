@@ -76,6 +76,7 @@ public final class AbyssRelicsSelfTest {
                 check(f, AbyssRelics.bonus(q, AbyssRelics.Bonus.SIGHT) == (count >= 2), "sight is wrong at " + count);
                 check(f, AbyssRelics.bonus(q, AbyssRelics.Bonus.FOOTSTEPS) == (count >= 4), "footsteps is wrong at " + count);
                 check(f, AbyssRelics.bonus(q, AbyssRelics.Bonus.LIGHT_STEP) == (count >= 6), "light step is wrong at " + count);
+                check(f, AbyssRelics.voiceFactor(q) == (count >= 2 ? 0.75 : 1.0), "voice factor is wrong at " + count);
             }
 
             // 十二の墓で伝承。十一まではまだ

@@ -24,7 +24,7 @@
   "item.skyabyss.abyss_relic_ash_3": "Heart-Shaped Stone",
   "item.skyabyss.abyss_relic_ash_3.desc": "A stone chip carved with a heart from the back of a grave. It almost seems to beat.",
   "item.skyabyss.abyss_relic.set_hint": "Works while carried: two, four or six different belongings.",
-  "item.skyabyss.abyss_relic.bonus.2": "Night sight. In the abyss you see past the light.",
+  "item.skyabyss.abyss_relic.bonus.2": "Night sight. In the abyss you see past the light, and your voice gathers more slowly.",
   "item.skyabyss.abyss_relic.bonus.4": "Footsteps warn. A bell sounds underfoot when an abyss foe comes near.",
   "item.skyabyss.abyss_relic.bonus.6": "Light step. In the abyss you jump a little higher.",
   "message.skyabyss.abyss.relic.got": "A belonging of one before: %s",
