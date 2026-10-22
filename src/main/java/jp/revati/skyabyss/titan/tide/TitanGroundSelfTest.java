@@ -208,7 +208,11 @@ public final class TitanGroundSelfTest {
             sz = s.water().z + out.z * 90;
         }
         for (int r = 0; r < 1; r++) {
-            preload(level, (sx + s.land().x) / 2, (sz + s.land().z) / 2, PRELOAD + 4);
+            // 巡航のあいだ、通る区画を読み込んだままにする (読み込みの外れた区画は、戻ると地形が変わって潮殻がとびはねる)
+            double mx = (sx + s.land().x) / 2;
+            double mz = (sz + s.land().z) / 2;
+            preload(level, mx, mz, PRELOAD + 4);
+            forceArea(level, mx, mz, PRELOAD + 4, true);
             TideShellEntity titan = TideSetup.TIDE_SHELL.get().create(level);
             if (titan == null) {
                 failures.add("the tide shell could not be created");
@@ -246,6 +250,7 @@ public final class TitanGroundSelfTest {
             notes.add("cruise from " + (int) sx + ", " + (int) sz + (found ? " (open water start)" : " (rough start)") + " toward the shore at " + (int) s.land().x + ", " + (int) s.land().z + ": worst overlap " + String.format("%.2f", worstOverlap) + ", min clearance "
                     + String.format("%.2f", minMargin) + ", max step " + String.format("%.2f", maxStep) + ", ended " + (int) endGap + " from the shore at y " + String.format("%.1f", titan.getY()));
             titan.discard();
+            forceArea(level, mx, mz, PRELOAD + 4, false);
         }
     }
 
@@ -462,6 +467,17 @@ public final class TitanGroundSelfTest {
     }
 
     // (x, z) のまわり radius チャンクを作る (同期)
+    // 区画を読み込みに固定する (on) / 外す (!on)。巡航の試しの前後で使う
+    private static void forceArea(ServerLevel level, double x, double z, int radius, boolean on) {
+        int cx = Mth.floor(x) >> 4;
+        int cz = Mth.floor(z) >> 4;
+        for (int dx = -radius; dx <= radius; dx++) {
+            for (int dz = -radius; dz <= radius; dz++) {
+                level.setChunkForced(cx + dx, cz + dz, on);
+            }
+        }
+    }
+
     private static void preload(ServerLevel level, double x, double z, int radius) {
         int cx = Mth.floor(x) >> 4;
         int cz = Mth.floor(z) >> 4;
