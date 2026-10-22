@@ -1,0 +1,187 @@
+{
+  "npc": "skyabyss:attendant_survivor_storm",
+  "entries": [
+    {
+      "node": "ch5_storm_camp",
+      "if": {
+        "type": "quest",
+        "quest": "main_abyss",
+        "is": "active",
+        "stage": "storm_camp"
+      }
+    },
+    {
+      "node": "side_return",
+      "if": {
+        "type": "quest",
+        "quest": "ch5/shadow_rest",
+        "is": "active",
+        "stage": "return"
+      }
+    },
+    {
+      "node": "menu"
+    }
+  ],
+  "nodes": {
+    "ch5_storm_camp": {
+      "face": "grave",
+      "next": "ch5_storm_camp2"
+    },
+    "ch5_storm_camp2": {
+      "face": "neutral",
+      "next": "ch5_storm_camp3"
+    },
+    "ch5_storm_camp3": {
+      "face": "grave",
+      "options": [
+        {
+          "id": "ok",
+          "goto": "end",
+          "kind": "talk"
+        }
+      ]
+    },
+    "side_offer": {
+      "face": "grave",
+      "next": "side_offer2"
+    },
+    "side_offer2": {
+      "face": "neutral",
+      "options": [
+        {
+          "id": "go",
+          "goto": "end",
+          "kind": "quest",
+          "do": [
+            {
+              "type": "quest_start",
+              "quest": "ch5/shadow_rest"
+            }
+          ]
+        },
+        {
+          "id": "no",
+          "goto": "menu",
+          "kind": "talk"
+        }
+      ]
+    },
+    "side_return": {
+      "face": "neutral",
+      "next": "side_return2"
+    },
+    "side_return2": {
+      "face": "smile",
+      "options": [
+        {
+          "id": "ok",
+          "goto": "end",
+          "kind": "talk"
+        }
+      ]
+    },
+    "party": {
+      "face": "grave",
+      "options": [
+        {
+          "id": "ok",
+          "goto": "menu",
+          "kind": "talk"
+        }
+      ]
+    },
+    "after": {
+      "face": "neutral",
+      "options": [
+        {
+          "id": "ok",
+          "goto": "menu",
+          "kind": "talk"
+        }
+      ]
+    },
+    "menu": {
+      "face": "neutral",
+      "options": [
+        {
+          "id": "side",
+          "goto": "side_offer",
+          "kind": "quest",
+          "if": {
+            "type": "quest",
+            "quest": "ch5/shadow_rest",
+            "is": "none"
+          }
+        },
+        {
+          "id": "party",
+          "goto": "party",
+          "kind": "talk"
+        },
+        {
+          "id": "after",
+          "goto": "after",
+          "kind": "talk",
+          "if": {
+            "type": "any",
+            "of": [
+              {
+                "type": "quest",
+                "quest": "main_abyss",
+                "is": "done"
+              },
+              {
+                "type": "quest",
+                "quest": "main_abyss",
+                "is": "active",
+                "stage": "ash_camp"
+              },
+              {
+                "type": "quest",
+                "quest": "main_abyss",
+                "is": "active",
+                "stage": "ash_marks"
+              },
+              {
+                "type": "quest",
+                "quest": "main_abyss",
+                "is": "active",
+                "stage": "ash_lord"
+              },
+              {
+                "type": "quest",
+                "quest": "main_abyss",
+                "is": "active",
+                "stage": "descend"
+              },
+              {
+                "type": "quest",
+                "quest": "main_abyss",
+                "is": "active",
+                "stage": "warden"
+              },
+              {
+                "type": "quest",
+                "quest": "main_abyss",
+                "is": "active",
+                "stage": "heart"
+              },
+              {
+                "type": "quest",
+                "quest": "main_abyss",
+                "is": "active",
+                "stage": "report"
+              }
+            ]
+          }
+        },
+        {
+          "id": "bye",
+          "goto": "end",
+          "kind": "leave"
+        }
+      ]
+    }
+  }
+}

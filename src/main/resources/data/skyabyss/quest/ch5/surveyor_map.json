@@ -1,0 +1,61 @@
+{
+  "category": "sub",
+  "chapter": "chapter2",
+  "order": 71,
+  "giver": "skyabyss:attendant_survivor_salt",
+  "stages": [
+    {
+      "id": "find",
+      "xp": 80,
+      "objectives": [
+        {
+          "id": "f1",
+          "type": "signal",
+          "targets": [
+            "abyss_frag_salt_1"
+          ],
+          "count": 1
+        },
+        {
+          "id": "f2",
+          "type": "signal",
+          "targets": [
+            "abyss_frag_salt_2"
+          ],
+          "count": 1
+        },
+        {
+          "id": "f3",
+          "type": "signal",
+          "targets": [
+            "abyss_frag_salt_3"
+          ],
+          "count": 1
+        }
+      ]
+    },
+    {
+      "id": "return",
+      "objectives": [
+        {
+          "id": "talk",
+          "type": "talk",
+          "target": "skyabyss:attendant_survivor_salt",
+          "topic": "side_return"
+        }
+      ]
+    }
+  ],
+  "reward": {
+    "xp": 300,
+    "items": [
+      {
+        "item": "minecraft:recovery_compass",
+        "count": 1
+      }
+    ],
+    "affinity": {
+      "skyabyss:attendant_survivor_salt": 3
+    }
+  }
+}

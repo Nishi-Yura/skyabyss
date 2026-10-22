@@ -1,0 +1,118 @@
+{
+  "npc": "skyabyss:attendant_abyss_porter",
+  "entries": [
+    {
+      "if": {
+        "type": "not",
+        "of": {
+          "type": "flag",
+          "flag": "abyss_porter_intro"
+        }
+      },
+      "node": "intro"
+    },
+    {
+      "node": "menu"
+    }
+  ],
+  "nodes": {
+    "intro": {
+      "face": "smile",
+      "do": [
+        {
+          "type": "flag",
+          "flag": "abyss_porter_intro"
+        }
+      ],
+      "next": "intro2"
+    },
+    "intro2": {
+      "face": "neutral",
+      "next": "menu"
+    },
+    "trade_done": {
+      "face": "smile",
+      "next": "menu"
+    },
+    "trade_none": {
+      "face": "neutral",
+      "next": "menu"
+    },
+    "menu": {
+      "face": "neutral",
+      "options": [
+        {
+          "id": "chips",
+          "goto": "trade_done",
+          "kind": "give",
+          "if": {
+            "type": "item",
+            "item": "skyabyss:abyss_bone_chip",
+            "count": 6
+          },
+          "do": [
+            {
+              "type": "take",
+              "item": "skyabyss:abyss_bone_chip",
+              "count": 6
+            },
+            {
+              "type": "give",
+              "item": "minecraft:cooked_beef",
+              "count": 4
+            }
+          ]
+        },
+        {
+          "id": "salt",
+          "goto": "trade_done",
+          "kind": "give",
+          "if": {
+            "type": "item",
+            "item": "skyabyss:abyss_salt_crystal",
+            "count": 6
+          },
+          "do": [
+            {
+              "type": "take",
+              "item": "skyabyss:abyss_salt_crystal",
+              "count": 6
+            },
+            {
+              "type": "give",
+              "item": "minecraft:golden_carrot",
+              "count": 3
+            }
+          ]
+        },
+        {
+          "id": "copper",
+          "goto": "trade_done",
+          "kind": "give",
+          "if": {
+            "type": "item",
+            "item": "skyabyss:abyss_storm_copper",
+            "count": 4
+          },
+          "do": [
+            {
+              "type": "take",
+              "item": "skyabyss:abyss_storm_copper",
+              "count": 4
+            },
+            {
+              "type": "give",
+              "item": "minecraft:lantern",
+              "count": 4
+            }
+          ]
+        },
+        {
+          "id": "bye",
+          "goto": "end",
+          "kind": "leave"
+        }
+      ]
+    }
+  }
+}

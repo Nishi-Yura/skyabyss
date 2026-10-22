@@ -1,0 +1,61 @@
+{
+  "category": "sub",
+  "chapter": "chapter2",
+  "order": 73,
+  "giver": "skyabyss:attendant_survivor_ash",
+  "stages": [
+    {
+      "id": "find",
+      "xp": 80,
+      "objectives": [
+        {
+          "id": "j1",
+          "type": "signal",
+          "targets": [
+            "abyss_journal_ash_1"
+          ],
+          "count": 1
+        },
+        {
+          "id": "j2",
+          "type": "signal",
+          "targets": [
+            "abyss_journal_ash_2"
+          ],
+          "count": 1
+        },
+        {
+          "id": "j3",
+          "type": "signal",
+          "targets": [
+            "abyss_journal_ash_3"
+          ],
+          "count": 1
+        }
+      ]
+    },
+    {
+      "id": "return",
+      "objectives": [
+        {
+          "id": "talk",
+          "type": "talk",
+          "target": "skyabyss:attendant_survivor_ash",
+          "topic": "side_return"
+        }
+      ]
+    }
+  ],
+  "reward": {
+    "xp": 300,
+    "items": [
+      {
+        "item": "minecraft:golden_carrot",
+        "count": 8
+      }
+    ],
+    "affinity": {
+      "skyabyss:attendant_survivor_ash": 3
+    }
+  }
+}

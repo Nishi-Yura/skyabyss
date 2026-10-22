@@ -210,8 +210,14 @@ public class HeartWarden extends Monster implements GeoEntity {
         }
         updateBar(level);
         updatePhase(level);
+        objectives(level);
         tickRegen();
         tickRing(level);
+        // 段二から: 重さの落ちる所 (塩の層の主と同じ。一人ずつの足もとに赤い輪。重さの術の中なら軽い)
+        if (phase >= 2 && snuffing < 0 && life % 240 == 120) {
+            jp.revati.skyabyss.story.ch5.layers.AbyssLords.crush(level, java.util.List.copyOf(bar.getPlayers()), this, 7f);
+            crushUntil = life + 70;
+        }
         if (snuffing >= 0) {
             tickSnuff(level);
             return;
@@ -324,12 +330,36 @@ public class HeartWarden extends Monster implements GeoEntity {
     // 闇の波: 全部の灯籠と光の術の灯りが消える (鐘の音つき)
     private void wave(ServerLevel level, String key) {
         say(level, key);
+        waveAt = life;
         BlockPos heart = AbyssBuild.mark("heart");
         for (int k = 0; k < 3; k++) {
             level.playSound(null, heart == null ? blockPosition() : heart, SoundEvents.BELL_BLOCK, SoundSource.HOSTILE, 3f, 0.4f);
         }
         AbyssBeacons.allOut(level);
         AbyssLight.clear();
+    }
+
+    // 目的の帯の一言 (層の主たちが教えた決まりを、いま使う所で。story/ch5/layers/AbyssSections)
+    private int waveAt = -100000;
+    private int crushUntil;
+
+    private void objectives(ServerLevel level) {
+        if (life % 10 != 0) {
+            return;
+        }
+        String key;
+        if (snuffing >= 0) {
+            key = "warden_snuff";
+        } else if (life - waveAt < 300) {
+            key = "warden_p3";
+        } else if (crushUntil > life) {
+            key = "warden_crush";
+        } else {
+            key = phase == 1 ? "warden_p1" : phase == 2 ? "warden_p2" : "warden_p3";
+        }
+        for (ServerPlayer p : bar.getPlayers()) {
+            jp.revati.skyabyss.story.ch5.layers.AbyssSections.objective(p, "objective.skyabyss.abyss_v2." + key, 40);
+        }
     }
 
     private void say(ServerLevel level, String key) {

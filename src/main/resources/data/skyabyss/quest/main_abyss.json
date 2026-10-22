@@ -78,6 +78,230 @@
       ]
     },
     {
+      "id": "bone_camp",
+      "xp": 60,
+      "objectives": [
+        {
+          "id": "talk",
+          "type": "talk",
+          "target": "skyabyss:attendant_survivor_bone",
+          "topic": "ch5_bone_camp"
+        }
+      ]
+    },
+    {
+      "id": "bone_marks",
+      "xp": 160,
+      "objectives": [
+        {
+          "id": "m1",
+          "type": "signal",
+          "targets": [
+            "abyss_mark_bone_1"
+          ],
+          "count": 1
+        },
+        {
+          "id": "m2",
+          "type": "signal",
+          "targets": [
+            "abyss_mark_bone_2"
+          ],
+          "count": 1
+        },
+        {
+          "id": "m3",
+          "type": "signal",
+          "targets": [
+            "abyss_mark_bone_3"
+          ],
+          "count": 1
+        }
+      ]
+    },
+    {
+      "id": "bone_lord",
+      "xp": 260,
+      "objectives": [
+        {
+          "id": "defeat",
+          "type": "signal",
+          "targets": [
+            "abyss_lord_bone"
+          ],
+          "count": 1
+        }
+      ]
+    },
+    {
+      "id": "salt_camp",
+      "xp": 60,
+      "objectives": [
+        {
+          "id": "talk",
+          "type": "talk",
+          "target": "skyabyss:attendant_survivor_salt",
+          "topic": "ch5_salt_camp"
+        }
+      ]
+    },
+    {
+      "id": "salt_marks",
+      "xp": 160,
+      "objectives": [
+        {
+          "id": "m1",
+          "type": "signal",
+          "targets": [
+            "abyss_mark_salt_1"
+          ],
+          "count": 1
+        },
+        {
+          "id": "m2",
+          "type": "signal",
+          "targets": [
+            "abyss_mark_salt_2"
+          ],
+          "count": 1
+        },
+        {
+          "id": "m3",
+          "type": "signal",
+          "targets": [
+            "abyss_mark_salt_3"
+          ],
+          "count": 1
+        }
+      ]
+    },
+    {
+      "id": "salt_lord",
+      "xp": 260,
+      "objectives": [
+        {
+          "id": "defeat",
+          "type": "signal",
+          "targets": [
+            "abyss_lord_salt"
+          ],
+          "count": 1
+        }
+      ]
+    },
+    {
+      "id": "storm_camp",
+      "xp": 60,
+      "objectives": [
+        {
+          "id": "talk",
+          "type": "talk",
+          "target": "skyabyss:attendant_survivor_storm",
+          "topic": "ch5_storm_camp"
+        }
+      ]
+    },
+    {
+      "id": "storm_marks",
+      "xp": 160,
+      "objectives": [
+        {
+          "id": "m1",
+          "type": "signal",
+          "targets": [
+            "abyss_mark_storm_1"
+          ],
+          "count": 1
+        },
+        {
+          "id": "m2",
+          "type": "signal",
+          "targets": [
+            "abyss_mark_storm_2"
+          ],
+          "count": 1
+        },
+        {
+          "id": "m3",
+          "type": "signal",
+          "targets": [
+            "abyss_mark_storm_3"
+          ],
+          "count": 1
+        }
+      ]
+    },
+    {
+      "id": "storm_lord",
+      "xp": 260,
+      "objectives": [
+        {
+          "id": "defeat",
+          "type": "signal",
+          "targets": [
+            "abyss_lord_storm"
+          ],
+          "count": 1
+        }
+      ]
+    },
+    {
+      "id": "ash_camp",
+      "xp": 60,
+      "objectives": [
+        {
+          "id": "talk",
+          "type": "talk",
+          "target": "skyabyss:attendant_survivor_ash",
+          "topic": "ch5_ash_camp"
+        }
+      ]
+    },
+    {
+      "id": "ash_marks",
+      "xp": 160,
+      "objectives": [
+        {
+          "id": "m1",
+          "type": "signal",
+          "targets": [
+            "abyss_mark_ash_1"
+          ],
+          "count": 1
+        },
+        {
+          "id": "m2",
+          "type": "signal",
+          "targets": [
+            "abyss_mark_ash_2"
+          ],
+          "count": 1
+        },
+        {
+          "id": "m3",
+          "type": "signal",
+          "targets": [
+            "abyss_mark_ash_3"
+          ],
+          "count": 1
+        }
+      ]
+    },
+    {
+      "id": "ash_lord",
+      "xp": 260,
+      "objectives": [
+        {
+          "id": "defeat",
+          "type": "signal",
+          "targets": [
+            "abyss_lord_ash"
+          ],
+          "count": 1
+        }
+      ]
+    },
+    {
       "id": "descend",
       "xp": 300,
       "objectives": [
