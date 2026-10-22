@@ -59,7 +59,7 @@ public final class TideSaplingRoom extends RaidRoom {
         // 巣穴: 灰色の珊瑚のこぶ (2×2、低い)
         for (int[] d : DEN) {
             RaidKit.fill(level, c.origin().offset(d[0], 1, d[1]), c.origin().offset(d[0] + 1, 1, d[1] + 1), Blocks.DEAD_BRAIN_CORAL_BLOCK.defaultBlockState());
-            RaidKit.set(level, c.origin().offset(d[0], 2, d[1]), Blocks.DEAD_TUBE_CORAL_BLOCK.defaultBlockState());
+            RaidKit.set(level, c.origin().offset(d[0], 2, d[1]), Blocks.AIR.defaultBlockState());
         }
         resetSaplings(ctx);
     }
@@ -288,6 +288,15 @@ public final class TideSaplingRoom extends RaidRoom {
     @Override
     public int secondaryMax() {
         return SAPLINGS * SAPLING_HP;
+    }
+
+    // 試験用: 湧いた敵の様子 (詰まったときの調べ)
+    public String debug(RaidCtx ctx) {
+        StringBuilder sb = new StringBuilder("wave " + wave + " between=" + betweenWaves + " spawned=" + spawnedInWave + "/" + toSpawn + " mobs=" + ctx.aliveMobs().size());
+        for (Mob m : ctx.aliveMobs()) {
+            sb.append(" [" + m.getType().getDescriptionId() + " " + m.blockPosition().toShortString() + " nav=" + !m.getNavigation().isDone() + " tick=" + m.tickCount + " ground=" + m.onGround() + " y=" + m.getY() + " ai=" + !m.isNoAi() + " target=" + m.getTarget() + "]");
+        }
+        return sb.toString();
     }
 
     // 試験用

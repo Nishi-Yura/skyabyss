@@ -110,6 +110,7 @@ public final class TideRaidSelfTest {
 
     private static void end(MinecraftServer server) {
         try {
+            unforce();
             if (back != null && group != null) {
                 clean();
             }
@@ -146,6 +147,34 @@ public final class TideRaidSelfTest {
         return type.cast(run.room);
     }
 
+    // その部屋が越えられて、枠組みが「越えた」にしたあとか
+    private static boolean cleared(Class<?> type) {
+        RaidRun.Run run = group == null ? null : RaidRun.of(group);
+        return run != null && type.isInstance(run.room) && run.phase == RaidRun.Phase.COMPLETE;
+    }
+
+    // 人は偽物なので、部屋の塊は「人の近く」にならず敵が動かない。試験のあいだだけ塊を強制で読み込む (本物の人がいれば要らない)
+    private static final List<long[]> FORCED = new ArrayList<>();
+
+    private static void force(RaidCtx c) {
+        net.minecraft.world.phys.AABB box = c.cell().bounds();
+        for (int cx = ((int) Math.floor(box.minX)) >> 4; cx <= ((int) Math.ceil(box.maxX)) >> 4; cx++) {
+            for (int cz = ((int) Math.floor(box.minZ)) >> 4; cz <= ((int) Math.ceil(box.maxZ)) >> 4; cz++) {
+                back.setChunkForced(cx, cz, true);
+                FORCED.add(new long[] {cx, cz});
+            }
+        }
+    }
+
+    private static void unforce() {
+        if (back != null) {
+            for (long[] p : FORCED) {
+                back.setChunkForced((int) p[0], (int) p[1], false);
+            }
+        }
+        FORCED.clear();
+    }
+
     private static RaidCtx ctx() {
         return RaidRun.of(group).ctx;
     }
@@ -177,6 +206,13 @@ public final class TideRaidSelfTest {
         if (failed() || tr1Done) {
             return true;
         }
+        if (cleared(TidePearlRoom.class)) {
+            check(phase >= 7, "TR1 was cleared before the script delivered the pearls (phase " + phase + ")");
+            tr1Done = true;
+            ticks = 0;
+            phase = 0;
+            return true;
+        }
         TidePearlRoom r = room(TidePearlRoom.class);
         if (r == null) {
             return timedOut("TR1 (waiting for the room)");
@@ -185,6 +221,7 @@ public final class TideRaidSelfTest {
         BlockPos o = c.origin();
         switch (phase) {
             case 0 -> {
+                force(c);
                 check(RaidRunSlot.is(c, "TR1"), "step 1 is not TR1 (" + c.roomId() + ")");
                 check(r.pearlCount() == 2, "two players should get 2 pearls, got " + r.pearlCount());
                 // 暗い: 祭壇の近くの床は、灯りを持つ人がいなければ暗い
@@ -198,7 +235,7 @@ public final class TideRaidSelfTest {
                 // 持つと灯る
                 put(a, r.pearlHome(0));
                 put(b, o.offset(-12, 1, -10));
-                if (r.carrierOf(0) != null && r.carrierOf(0).equals(a.getUUID()) && r.lit(a.getUUID())) {
+                if (r.carrierOf(0) != null && r.carrierOf(0).equals(a.getUUID()) && r.lit(a.getUUID()) && ticks >= 6) {
                     int near = back.getBrightness(LightLayer.BLOCK, a.blockPosition().above());
                     check(near >= 10, "the carrier does not light the hall: block light " + near);
                     int far = back.getBrightness(LightLayer.BLOCK, o.offset(-12, 2, -10));
@@ -396,6 +433,13 @@ public final class TideRaidSelfTest {
         if (failed() || tr3Done) {
             return true;
         }
+        if (cleared(TideSaplingRoom.class)) {
+            check(phase >= 4, "TR3 was cleared before the waves were fought (phase " + phase + ")");
+            tr3Done = true;
+            ticks = 0;
+            phase = 0;
+            return true;
+        }
         TideSaplingRoom r = room(TideSaplingRoom.class);
         if (r == null) {
             return timedOut("TR3 (waiting for the room)");
@@ -403,6 +447,7 @@ public final class TideRaidSelfTest {
         RaidCtx c = ctx();
         switch (phase) {
             case 0 -> {
+                force(c);
                 check(RaidRunSlot.is(c, "TR3"), "step 3 is not TR3 (" + c.roomId() + ")");
                 check(r.secondaryMax() == 90 && r.secondary() == 90, "sapling HP should start at 90/90, got " + r.secondary() + "/" + r.secondaryMax());
                 // 人を遠くへ (敵は苗へ向かう)
@@ -417,6 +462,9 @@ public final class TideRaidSelfTest {
                 if (r.secondary() < r.secondaryMax()) {
                     check(!c.aliveMobs().isEmpty(), "saplings were bitten but no foe is alive");
                     next();
+                } else if (ticks % 200 == 199) {
+                    SkyAbyss.LOGGER.info("SELFTEST tide raid TR3 waiting for a bite: {}", r.debug(c));
+                    ticks++;
                 } else if (timedOut("TR3 bite")) {
                     return true;
                 }
