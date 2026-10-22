@@ -370,7 +370,7 @@ public class WhaleboneCaptain extends GuardMob {
         }
     }
 
-    // 咆哮: 半径 5 の円の印 (1 秒)。時間が来ると円の中を吹き飛ばし、骨の番兵を二体呼び、怒りで速くなる (一度だけ)
+    // 咆哮: 半径 5 の円の印 (1 秒)。時間が来ると円の中を吹き飛ばし、骨の番兵を一体呼び、怒りで速くなる (一度だけ)
     private void tickRoar() {
         if (actionTicks == 1) {
             roared = true;
@@ -380,7 +380,7 @@ public class WhaleboneCaptain extends GuardMob {
                     .victims(this::canHit)
                     .onImpact(server -> {
                         shockwave(server, ROAR_RADIUS);
-                        for (int i = 0; i < 2; i++) {
+                        for (int i = 0; i < 1; i++) {
                             double angle = random.nextDouble() * Math.PI * 2;
                             BlockPos at = BlockPos.containing(getX() + Math.cos(angle) * 3, getY(), getZ() + Math.sin(angle) * 3);
                             TitanBackTrials.spawnSummon(server, "sentinel", at, groupId(), this);

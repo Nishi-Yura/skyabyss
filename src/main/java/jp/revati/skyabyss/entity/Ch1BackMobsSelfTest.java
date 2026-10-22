@@ -483,7 +483,7 @@ public final class Ch1BackMobsSelfTest {
             e.discard();
         }
         // 骨笛: 傷のない円が人数に応じて (1 人 2 つ、3 人 4 つ)、時間が来ると射手が出る。普通の殴りは持たない
-        check(ElderSentinel.summonCount(1) == 2 && ElderSentinel.summonCount(3) == 4 && ElderSentinel.summonCount(6) == ElderSentinel.MAX_SUMMONS, "the flute summon counts are off", f);
+        check(ElderSentinel.summonCount(1) == 1 && ElderSentinel.summonCount(3) == 3 && ElderSentinel.summonCount(6) == ElderSentinel.MAX_SUMMONS, "the flute summon counts are off", f);
         for (int players : new int[] {1, 3}) {
             e = spawnElder(level, 0f);
             try {

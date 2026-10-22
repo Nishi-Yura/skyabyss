@@ -128,6 +128,19 @@ public final class DownedClient {
         }
     }
 
+    // 倒れている間はその場から動けない (這い進みも跳びも止める。2026-10-23 の試遊で動けてしまっていた)
+    @SubscribeEvent
+    static void onMovementInput(net.neoforged.neoforge.client.event.MovementInputUpdateEvent event) {
+        if (selfDowned()) {
+            net.minecraft.client.player.Input in = event.getInput();
+            in.forwardImpulse = 0;
+            in.leftImpulse = 0;
+            in.up = in.down = in.left = in.right = false;
+            in.jumping = false;
+            in.shiftKeyDown = false;
+        }
+    }
+
     // ---------------------------------------------------------------- 描く
     // HUD の要求: 自分が倒れているときの表示は下中央 (手がかりの下)。仲間を起こす輪と文は中央 (照準のまわり。ほかの部品はそこを避ける)
     public static void requests(Minecraft mc, java.util.List<jp.revati.skyabyss.hud.HudLayout.Request> out) {

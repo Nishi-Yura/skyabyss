@@ -840,7 +840,7 @@ public class Raiju extends GuardMob {
             }
             roarStrike(server, at);
         }
-        spawnMoths(server, 2);
+        spawnMoths(server, 1);   // 2026-10-23: 呼ぶ技は重く (2 → 1)
         finish();
     }
 

@@ -59,13 +59,13 @@ public class ElderSentinel extends GuardMob {
     public static final float STOMP_DAMAGE = 8f;
     public static final int FLUTE_WARN = 24;
     public static final double FLUTE_SPOT_RADIUS = 1.0;
-    public static final int MAX_SUMMONS = 4;
+    public static final int MAX_SUMMONS = 3;   // 2026-10-23: 呼ぶ技は重く (4 → 3)
 
     private Action action = Action.NONE;
     private int actionTicks;
     private int rushCooldown = 80;
     private int stompCooldown = 40;
-    private int fluteCooldown = 120;
+    private int fluteCooldown = 300;
     private float lockedYaw;
     private Vec3 dashDir = Vec3.ZERO;
     private Vec3 dashEnd = Vec3.ZERO;
@@ -151,7 +151,7 @@ public class ElderSentinel extends GuardMob {
                 begin(Action.STOMP);
             } else if (rushCooldown == 0 && dist > 5 && dist < 14 && hasLineOfSight(target)) {
                 begin(Action.RUSH);
-            } else if (fluteCooldown == 0 && dist < 22 && summonsAlive(server) < 2) {
+            } else if (fluteCooldown == 0 && dist < 22 && summonsAlive(server) == 0) {
                 begin(Action.FLUTE);
             } else {
                 getNavigation().moveTo(target, dist > 5 ? 1.1 : 0.8);
@@ -290,9 +290,9 @@ public class ElderSentinel extends GuardMob {
     }
 
     // ---- 骨笛 ----
-    // 射手の数: 2 体 + 近くの人が増えるごとに 1 体 (最大 MAX_SUMMONS)
+    // 射手の数: 1 体 + 近くの人が増えるごとに 1 体 (最大 MAX_SUMMONS)
     public static int summonCount(int nearbyPlayers) {
-        return Math.min(MAX_SUMMONS, 2 + Math.max(0, nearbyPlayers - 1));
+        return Math.min(MAX_SUMMONS, 1 + Math.max(0, nearbyPlayers - 1));
     }
 
     private void tickFlute(ServerLevel server) {
@@ -332,7 +332,7 @@ public class ElderSentinel extends GuardMob {
             }
         }
         if (actionTicks >= FLUTE_WARN + 12) {
-            fluteCooldown = 360;
+            fluteCooldown = 720;
             finish();
         }
     }

@@ -442,7 +442,8 @@ public final class SkillManager {
 
     // 枠の技を使う。正しければマナを払い、クールダウンを始め、同期する
     public static CastResult cast(ServerPlayer player, int slot) {
-        if (!player.isAlive() || player.isSpectator()) {
+        // 倒れている間は技も使えない (2026-10-23 の試遊)
+        if (!player.isAlive() || player.isSpectator() || jp.revati.skyabyss.party.Downed.isDowned(player)) {
             return CastResult.FAILED;
         }
         SkillData d = get(player);

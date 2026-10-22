@@ -105,7 +105,7 @@ public final class WardenSelfTest {
             w.updatePhase(level);
             check(f, w.phase() == 2 && AbyssBeacons.phase == 2, "half health should be phase 2");
             int decoys = level.getEntitiesOfClass(HeartWarden.class, w.getBoundingBox().inflate(48), HeartWarden::decoy).size();
-            check(f, decoys == 2, "phase 2 should bring two shades: " + decoys);
+            check(f, decoys == 1, "phase 2 should bring one shade: " + decoys);
             AbyssBeacons.light(level, 2, now);
             AbyssBeacons.tickAt(level, now + 30 * 20);
             check(f, !AbyssBeacons.lit(2), "in phase 2 a lantern should last 30 s");

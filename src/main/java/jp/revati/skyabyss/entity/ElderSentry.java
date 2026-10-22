@@ -63,7 +63,7 @@ public class ElderSentry extends GroundFoe {
     public static final float RUSH_DAMAGE = 9f;
     public static final int HORN_WARN = 16;
     public static final double HORN_MARK_RADIUS = 1.1;
-    public static final int MAX_SUMMONS = 2;
+    public static final int MAX_SUMMONS = 1;   // 2026-10-23: 呼ぶ技は重く (2 → 1)
     public static final int STOMP_WARN = 24;
     public static final double STOMP_RADIUS = 3.4;
     public static final float STOMP_DAMAGE = 8f;
@@ -78,7 +78,7 @@ public class ElderSentry extends GroundFoe {
     private Kind kind = Kind.NONE;
     private int rushCd = 60;
     private int stompCd = 80;
-    private int hornCd = 200;
+    private int hornCd = 400;
     private boolean scaled;
     // 試験用: 自分では技を選ばない (forceAction で出させる)
     private boolean holdAttacks;
@@ -302,7 +302,7 @@ public class ElderSentry extends GroundFoe {
             for (Vec3 p : hornSpots) {
                 summonArcher(p);
             }
-            hornCd = 360;
+            hornCd = 720;
         }
         if (act >= HORN_END) {
             finish(30);

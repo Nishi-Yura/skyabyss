@@ -82,6 +82,11 @@ public final class SkillClient {
     }
 
     private static void request(Minecraft mc, int slot) {
+        if (jp.revati.skyabyss.party.client.DownedClient.selfDowned()) {
+            // 倒れている間は送らない
+            slotFlash[slot] = -4;
+            return;
+        }
         SkillData d = SkillManager.get(mc.player);
         Skill s = d.slot(slot);
         if (s == null) {

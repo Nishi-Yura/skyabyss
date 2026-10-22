@@ -300,7 +300,7 @@ public class HeartWarden extends Monster implements GeoEntity {
             AbyssBeacons.phase = phase;
             playAction("phase");
             if (phase == 2) {
-                for (int k = 0; k < 2; k++) {
+                for (int k = 0; k < 1; k++) {
                     HeartWarden d = new HeartWarden(WardenSetup.HEART_WARDEN.get(), level);
                     d.makeDecoy();
                     Vec3 off = new Vec3(random.nextGaussian() * 6, 0, random.nextGaussian() * 6);
