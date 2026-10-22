@@ -315,6 +315,7 @@ class BackAlley:
             return out
 
         placed = set()
+        last_y = {}   # (x, z) → 最後に置いた段の高さ (角度の近い二歩が同じマスを取り合うと、段が一つずれて重なる)
         for i, (th, y) in enumerate(steps):
             nxt = steps[i + 1][1] if i + 1 < len(steps) else y
             # 上る向き (角度が減る向き) = (sin θ, -cos θ)
@@ -325,10 +326,18 @@ class BackAlley:
                 facing = 'south' if az > 0 else 'north'
             is_step = nxt < y or i == len(steps) - 1  # 最後の一歩も段 (底の床から上がれる)
             for (x, z, d) in cells_at(th):
-                if (x, z, y) in placed:
+                if (x, z, y) in placed or ((x, z) in last_y and abs(last_y[(x, z)] - y) < 4):
                     continue
                 placed.add((x, z, y))
+                last_y[(x, z)] = y
                 v.set(x, y - 1, z, deep())
+                if d < 3.9:
+                    # 内の縁は段にせず、石の上に低い壁 (手すり)。階段の上に壁を載せると頭がつかえる
+                    v.set(x, y, z, deep())
+                    v.set(x, y + 1, z, 'deepslate_brick_wall')
+                    if i % 3 == 0:
+                        v.set(x, y + 2, z, 'soul_lantern[hanging=false,waterlogged=false]')
+                    continue
                 if is_step:
                     v.set(x, y, z, 'deepslate_brick_stairs[facing=%s,half=bottom,shape=straight,waterlogged=false]' % facing)
                 else:
@@ -336,11 +345,6 @@ class BackAlley:
                 for yy in range(y + 1, y + 4):
                     if v.get(x, yy, z) in (None, 'cave_air'):
                         v.set(x, yy, z, 'cave_air')
-                # 内の縁の低い壁 (吹き抜けへ落ちない)。3 歩ごとに壁の上へ魂の灯り
-                if d < 3.9:
-                    v.set(x, y + 1, z, 'deepslate_brick_wall')
-                    if i % 3 == 0:
-                        v.set(x, y + 2, z, 'soul_lantern[hanging=false,waterlogged=false]')
         # 踊り場: 壁の外に小部屋 (7×7、高さ 4)。段から 3 マス幅で壁を抜く
         for name, (th, y) in landing_at.items():
             ox, oz = math.cos(th), math.sin(th)
