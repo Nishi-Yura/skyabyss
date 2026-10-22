@@ -198,12 +198,59 @@ def main():
         v.set(ex, y, ez, 'chain[axis=y,waterlogged=false]')
     v.mark('exit', ex, TOP + 1, ez)
     ext = HEART_R + 2
+    # ---- 層ごとの遊び (36 の 8 章)。層ごとの組み立ては tools/abyss/layer_<層>.py の build(ctx)、全部の層に共通の寄り道は layer_common.py
+    #      (別の人が並べて作れるように、ここは呼ぶだけ。ファイルが無い層は飛ばす)
+    ctx = Ctx(v, path, rests, wall_block)
+    for L in LAYERS:
+        build_layer(L[0], ctx)
+    build_layer('common', ctx)
     meta = {'name': 'abyss_layers', 'note': 'docs/design/36 A2。生成は tools/abyss/gen_abyss_layers.py', 'top': TOP, 'bottom': HEART_BOTTOM,
             'rect': [-ext, -ext, ext, ext]}
     data = v.runs(meta)
     vox.save(OUT, data)
     n = len(v.b)
     print('wrote', os.path.relpath(OUT, ROOT), n, 'blocks', len(data['palette']), 'states', 'marks', sorted(v.marks))
+
+
+class Ctx:
+    """層ごとの組み立てに渡すもの。v: 置き場 (vox.Vox)、path: 螺旋の道 [(角度, 半段の高さ y2)]、rests: 休み場 {名前: (角度, 立つ高さ)}、
+    wall_block(y, x, z): 層の壁の柄。ほかの決まり (半径・層の表・部屋の作り) はこのファイルの定数と関数をそのまま使う"""
+
+    def __init__(self, v, path, rests, wall_block):
+        self.v = v
+        self.path = path
+        self.rests = rests
+        self.wall_block = wall_block
+        self.R_IN = R_IN
+        self.WALL = WALL
+        self.PATH_IN = PATH_IN
+        self.PATH_OUT = PATH_OUT
+        self.TOP = TOP
+        self.HEART_TOP = HEART_TOP
+        self.LAYERS = LAYERS
+        self.slab_of = slab_of
+        self.wall_of = wall_of
+        self.layer_of = layer_of
+
+    def layer(self, name):
+        """(名前, 上, 下, 壁, 床, 飾り)"""
+        return next(L for L in LAYERS if L[0] == name)
+
+    def span(self, name):
+        """その層の道の [(角度, y2)] (上から順)"""
+        L = self.layer(name)
+        return [p for p in self.path if L[2] < p[1] // 2 <= L[1]]
+
+
+def build_layer(name, ctx):
+    import importlib.util
+    f = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'layer_%s.py' % name)
+    if not os.path.exists(f):
+        return
+    spec = importlib.util.spec_from_file_location('layer_%s' % name, f)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    mod.build(ctx)
 
 
 def slab_of(floor):
