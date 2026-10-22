@@ -123,7 +123,7 @@ public final class CinematicSelfTest {
     }
 
     // ---------------------------------------------------------------- 台詞の声 (docs/design/20 の 6 章)
-    // 台本の全台詞 (場面, 番号) に、声の一覧 (voice_manifest.json。tools/gen_cinematic_voice.py の入力) の行・sounds.json の音・jar の中の .ogg があること。
+    // 台本の全台詞 (場面, 番号) に、声の一覧 (voice_manifest.json。tools/gen/sound/gen_cinematic_voice.py の入力) の行・sounds.json の音・jar の中の .ogg があること。
     // 一覧が台本とずれていたら落ちる。SKYABYSS_DUMP_VOICE=<パス> を付けると、台本から一覧を書き出す (台本を変えたあとに一度流して、tools の README の手順で作り直す)
     private static void voice(List<String> f) {
         StringBuilder out = new StringBuilder("{\"lines\":[\n");

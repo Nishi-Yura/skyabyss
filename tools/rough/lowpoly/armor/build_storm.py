@@ -1,4 +1,4 @@
-"""雷翼の羽衣 (最終) を作り、docs/review/lowpoly_roughs/armor/c/thunder_wing/ に出す (install_armor_lowpoly.py の入力)。
+"""雷翼の羽衣 (最終) を作り、docs/review/lowpoly_roughs/armor/c/thunder_wing/ に出す (tools/install/install_armor_lowpoly.py の入力)。
 実行: python build_storm.py [preview]   (build_tide.py と同じ形。build_ember.py は STYLE と BASE を変えたもの)"""
 from __future__ import annotations
 

@@ -1,5 +1,5 @@
 # クエストの見え方 (docs/design/18 の 3.5 節): NPC の頭の上の印 (その人にだけ) と、左上の章の札。
-# ./gradlew runShots -Pscript=tools/shots/quest_ux.txt   (音はランナーが消す) → python tools/quest_ux_sheet.py
+# ./gradlew runShots -Pscript=tools/shots/quest_ux.txt   (音はランナーが消す) → python tools/sheets/quest_ux_sheet.py
 # 印は本番と同じ経路 (サーバーが人ごとに計算 → 1 秒ごとに送る) なので、クエストの段を /skyabyss quest stage で決めて待つ
 world shots flat
 size 1280 720

@@ -9,7 +9,7 @@ import net.minecraft.client.particle.TextureSheetParticle;
 import net.minecraft.core.particles.SimpleParticleType;
 
 // 技の光の粒。どちらも自分で光り (暗がりでも見える)、小さく、すぐ消える (控えめに)。
-// 絵は textures/particle/{rune_spark,sky_mote}_*.png (tools/gen_skill_assets.py)
+// 絵は textures/particle/{rune_spark,sky_mote}_*.png (tools/gen/ui/gen_skill_assets.py)
 public final class SkillParticles {
     private SkillParticles() {
     }

@@ -1,4 +1,4 @@
-# 遺物ブロックの全様式 (自動生成: tools/gen_relic_shots.py)
+# 遺物ブロックの全様式 (自動生成: tools/gen/shots/gen_relic_shots.py)
 world relic_show flat
 size 1280 720
 timeout 600

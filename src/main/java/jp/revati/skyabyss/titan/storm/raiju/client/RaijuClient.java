@@ -17,7 +17,7 @@ import net.neoforged.neoforge.client.event.CustomizeGuiOverlayEvent;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 
 // 雷獣のクライアント側: 描画の登録と、10 段のボスバー (段階なし、青白い帯。12 の 5.2節)。
-// 絵は tools/gen_raiju_bar.py (Pillow): 顔の印 raiju_icon.png (16x16)、枠 raiju_frame.png (182x16。溝は x 3〜177、y 3〜8)、
+// 絵は tools/gen/ui/gen_raiju_bar.py (Pillow): 顔の印 raiju_icon.png (16x16)、枠 raiju_frame.png (182x16。溝は x 3〜177、y 3〜8)、
 // 帯の上に重ねる 10 段の刻み raiju_notches.png。名前の横に、痺れている間は「痺れ」(帯も黄色)、怒ったあとは「怒り」
 @EventBusSubscriber(modid = SkyAbyss.MODID, value = Dist.CLIENT)
 public final class RaijuClient {

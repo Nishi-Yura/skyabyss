@@ -1,5 +1,5 @@
 # 岩鯨の乗り込み口 (鎖の下の地面の陣) を撮る。./gradlew runShots -Pscript=tools/shots/whale_board.txt
-# 出力: run/shots/whale_board/shots/whale_board/*.png → python tools/whale_scale_sheet.py (音は自動で 0)
+# 出力: run/shots/whale_board/shots/whale_board/*.png → python tools/sheets/whale_scale_sheet.py (音は自動で 0)
 # 陣は観戦者には見えない (乗れる人にだけ送るため) ので、クリエイティブで鎖の外から見る。陣の中に立つと乗ってしまうので、陣から 5 ブロック以上離れる
 world whale_board flat
 size 1280 720

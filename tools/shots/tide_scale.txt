@@ -1,5 +1,5 @@
 # 潮殻の背の拡大 (docs/design/26 の 9 章) の確かめ。./gradlew runShots -Pscript=tools/shots/tide_scale.txt
-# 出力: run/shots/tide_scale/shots/tide_scale/*.png → python tools/tide_scale_sheet.py で docs/review/previews/tide_scale_sheet.png
+# 出力: run/shots/tide_scale/shots/tide_scale/*.png → python tools/sheets/tide_scale_sheet.py で docs/review/previews/tide_scale_sheet.png
 world tide_scale flat
 size 1280 720
 timeout 3600

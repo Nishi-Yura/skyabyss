@@ -1,4 +1,4 @@
-"""岩鯨の甲殻 (最終) を作り、docs/review/lowpoly_roughs/armor/c/stone_whale/ に出す (install_armor_lowpoly.py の入力)。
+"""岩鯨の甲殻 (最終) を作り、docs/review/lowpoly_roughs/armor/c/stone_whale/ に出す (tools/install/install_armor_lowpoly.py の入力)。
 実行: python build_whale.py [preview]   preview を付けると tools/_scratch に 3 階級 x 3 方向の絵も出す。"""
 from __future__ import annotations
 

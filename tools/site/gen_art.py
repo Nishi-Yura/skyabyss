@@ -277,6 +277,82 @@ def divider(night):
     return im.resize((640, 56), Image.NEAREST)
 
 
+# ---------------------------------------------------------------- abyss (五章)
+def _shaft_edges(y, top, bot, x0t, x1t, x0b, x1b):
+    """縦穴の壁の位置 (上が狭く、下が広い)。y の所の左右の x を返す。"""
+    t = (y - top) / max(1, bot - top)
+    return x0t + (x0b - x0t) * t, x1t + (x1b - x1t) * t
+
+
+def _ledges(d, top, bot, step, x0t, x1t, x0b, x1b, col, shade):
+    """螺旋の段。左右交互に、片側だけ張り出して見せる。"""
+    for i, y in enumerate(range(top + 6, bot, step)):
+        l, r = _shaft_edges(y, top, bot, x0t, x1t, x0b, x1b)
+        if i % 2 == 0:
+            d.line([l + 1, y, r * 0.55 + l * 0.45, y], fill=col)
+        else:
+            d.line([l * 0.45 + r * 0.55, y, r - 1, y], fill=col)
+        d.line([l + 1, y + 1, r - 1, y + 1], fill=shade)
+
+
+def arch_abyss():
+    """五章の札: 縦穴を見下ろす、灯りのあかり。170x168 (論理 85x84 を 2 倍)。"""
+    bg = hexc("#0b1230")
+    L = Image.new("RGBA", (85, 84), hexc("#120c22"))
+    bands(L, [hexc(c) for c in ("#0f0a1c", "#1a1230", "#2a1d3e", "#120c22")], 0, 84)
+    px = L.load()
+    for y in range(42):
+        for x in range(85):
+            if (x - 42) ** 2 + (y - 42) ** 2 > 41 * 41:
+                px[x, y] = bg  # アーチの外
+    d = ImageDraw.Draw(L)
+    # 縦穴の壁 (上が狭い。底は闇)
+    d.polygon([(33, 10), (51, 10), (66, 74), (18, 74)], fill=hexc("#2b2140"))
+    d.polygon([(33, 10), (37, 10), (28, 74), (18, 74)], fill=hexc("#463a5e"))
+    d.polygon([(51, 10), (47, 10), (56, 74), (66, 74)], fill=hexc("#1a1330"))
+    d.rectangle([18, 74, 66, 84], fill=hexc("#07050d"))
+    _ledges(d, 10, 74, 9, 33, 51, 18, 66, hexc("#6d5b86"), hexc("#241b38"))
+    # 中央の鎖
+    for y in range(0, 30, 3):
+        d.point((42, y), fill=hexc("#8a8aa0"))
+    # 灯り (壁の段のそば。下の光だまり)
+    for x, y in ((27, 26), (57, 44), (23, 58), (60, 68)):
+        for dx, dy in ((2, 1), (-2, 1), (0, 2), (0, -2)):
+            d.point((x + dx, y + dy), fill=hexc("#7a4a1a"))
+        d.rectangle([x - 1, y - 1, x + 1, y + 1], fill=hexc("#ffb040"))
+        d.point((x, y), fill=hexc("#fff2a8"))
+        d.rectangle([x - 4, y + 4, x + 4, y + 5], fill=hexc("#4a2a12"))
+    # 底の奥に、かすかな光
+    d.point((42, 70), fill=hexc("#5a3a7a"))
+    d.point((41, 72), fill=hexc("#5a3a7a"))
+    # 骨の白い粒
+    for x, y in ((30, 48), (50, 56), (36, 64)):
+        d.point((x, y), fill=hexc("#d8d0c0"))
+    # アーチの縁
+    d.arc([1, 1, 83, 83], 180, 360, fill=hexc("#8a7aa8"), width=2)
+    d.line([1, 42, 1, 83], fill=hexc("#8a7aa8"))
+    d.line([83, 42, 83, 83], fill=hexc("#8a7aa8"))
+    return L.resize((170, 168), Image.NEAREST)
+
+
+def scene_abyss():
+    """五章の小さな場面 (64x40): 縦穴と灯りひとつ。"""
+    im = Image.new("RGBA", (64, 40), (0, 0, 0, 255))
+    bands(im, [hexc(c) for c in ("#0d0a18", "#1a1230", "#2a1d3e", "#120c22")], 0, 40)
+    d = ImageDraw.Draw(im)
+    d.polygon([(26, 0), (38, 0), (56, 36), (8, 36)], fill=hexc("#2b2140"))
+    d.polygon([(26, 0), (29, 0), (16, 36), (8, 36)], fill=hexc("#463a5e"))
+    d.rectangle([0, 36, 63, 39], fill=hexc("#07050d"))
+    _ledges(d, 0, 36, 6, 26, 38, 8, 56, hexc("#6d5b86"), hexc("#241b38"))
+    for y in range(0, 14, 2):
+        d.point((32, y), fill=hexc("#8a8aa0"))
+    d.ellipse([28, 16, 36, 24], fill=hexc("#5a3a18"))
+    d.rectangle([30, 18, 34, 22], fill=hexc("#ffb040"))
+    d.point((32, 20), fill=hexc("#fff2a8"))
+    d.rectangle([22, 27, 42, 28], fill=hexc("#4a2a12"))
+    return im
+
+
 # ---------------------------------------------------------------- copy assets
 ITEMS = """whalebone_greatsword captain_pike waterway_fang tide_shell_trident coral_shield tidecaller_claw coral_harpoon
 thunder_wing_bow raiju_claw warden_glaive ember_war_axe smith_hammer thrall_poker
@@ -338,6 +414,8 @@ def main():
         save(f(), "scene_%s.png" % n)
     save(divider(True), "divider_night.png")
     save(divider(False), "divider_day.png")
+    save(arch_abyss(), "arch_abyss.png")
+    save(scene_abyss(), "scene_abyss.png")
     copy_assets()
     print("done", OUT)
 

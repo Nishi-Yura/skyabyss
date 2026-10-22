@@ -12,7 +12,7 @@ public class StoneWhaleHeartModel extends GeoModel<StoneWhaleHeart> {
 
     @Override
     public ResourceLocation getModelResource(StoneWhaleHeart heart) {
-        // 低ポリ: 段階ごとの骨だけの geo (tools/install_lowpoly.py が stone_whale_heart_pN として書く)
+        // 低ポリ: 段階ごとの骨だけの geo (tools/install/install_lowpoly.py が stone_whale_heart_pN として書く)
         if (LowPoly.enabled) {
             return path("geo/entity/" + meshName(heart) + "_lowpoly" + (LowPoly.debug ? "_debug" : "") + ".geo.json");
         }

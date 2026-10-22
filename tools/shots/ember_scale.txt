@@ -1,5 +1,5 @@
 # 余燼の背の拡大 (版 20。docs/design/26 の 11 章) の確かめ。./gradlew runShots -Pscript=tools/shots/ember_scale.txt
-# 出力: run/shots/ember_scale/shots/ember_scale/*.png → python -I tools/ember_scale_sheet.py で docs/review/previews/ember_scale_sheet.png
+# 出力: run/shots/ember_scale/shots/ember_scale/*.png → python -I tools/sheets/ember_scale_sheet.py で docs/review/previews/ember_scale_sheet.png
 # 向き: yaw 0 = 南 (z の正、尾の方)、180 = 北 (口の方)、90 = 西、270 = 東
 world ember_scale flat
 size 1280 720

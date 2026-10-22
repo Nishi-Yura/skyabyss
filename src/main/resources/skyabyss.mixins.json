@@ -4,6 +4,7 @@
   "package": "jp.revati.skyabyss.mixin",
   "compatibilityLevel": "JAVA_21",
   "mixins": [
+    "EnemyPickMixin",
     "InventoryMixin",
     "ItemStackDurabilityMixin",
     "ServerPlaceRecipeMixin"

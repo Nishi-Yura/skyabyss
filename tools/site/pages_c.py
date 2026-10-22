@@ -14,8 +14,23 @@ def story():
 <div class="note">%(note)s</div>
 </div>
 </section>
+
+<section class="alt" aria-labelledby="story5">
+<div class="wrap">
+<h2 id="story5">%(h5)s</h2>
+%(plate5)s
+<p class="quote"><span>%(q5a)s</span><span>%(q5b)s</span></p>
+<p>%(t5)s</p>
+</div>
+</section>
 """ % dict(
         h=T("物語", "Story"),
+        h5=T("五章　深淵", "Chapter 5: The Abyss"),
+        plate5=pimg("img/scene_abyss.png", "縦穴の灯りのドット絵", "Pixel art of a lantern in the abyss shaft", 256, 160, "plate px"),
+        q5a=T("四つを返した。それでも、まだ足りないのだという。", "Four were returned. Still, they say, it is not enough."),
+        q5b=T("底へ降りるほど、あなたより前の誰かの声が近くなる。", "The deeper you go, the closer a voice from someone who came before you."),
+        t5=T("都の地下に、閉じられた戸があります。その先は、地の底の深淵です。語り部は、そこへ降りた人のことを、多くは語りません。",
+             "Beneath the capital is a sealed door. Beyond it lies the abyss, deep under the earth. The storyteller says little about those who went down."),
         plate=pimg("img/plate_end.png", "空と地の底のあいだで、あなたを待っているものがあります。", "Between the sky and the bottom of the earth, something is waiting for you.", 840, 336, "plate px"),
         q1a=T("空を、何かが通った。", "Something passed through the sky."),
         q1b=T("山より大きな影が、雲の上を、音もなく。", "A shadow larger than a mountain, above the clouds, without a sound."),
@@ -73,7 +88,7 @@ def faq():
         ("序盤の演出・予兆・仕掛けの濃さは、通しで確かめていません。", "The density of early-game staging, omens and small set pieces has not been playtested end to end."),
         ("余燼の背中は、人が通しで遊んでいません。", "Ember's back has not been played through by a person."),
         ("風見鶏と潮の真珠の絵は仮のものです。", "The art for the weathercock and the tide pearl is placeholder."),
-        ("五章以降は、まだ枠だけです。", "Chapter 5 onward is only a framework so far."),
+        ("五章「深淵」は、まだ人の手で通しに遊ばれていません（特に番人の戦いと、クリア後の深みを）。", "Chapter 5, the abyss, has not yet been played through end to end by people (especially the warden's fight and the depths after the clear)."),
     ]
     lim = "".join("<li>%s</li>" % T(a, b) for a, b in limits)
     body = page_head("導入・FAQ", "Install and FAQ", "必要なもの、入れ方、サーバーの管理、よくある質問、既知の制限。",
@@ -106,6 +121,8 @@ def faq():
 <h3>%(h_cmd)s</h3>
 %(cmds)s
 <p>%(cfg)s <a href="https://github.com/Nishi-Yura/skyabyss/blob/main/docs/playtest_commands.md">docs/playtest_commands.md</a></p>
+<h3>%(h_tst)s</h3>
+<p>%(tst)s <a href="https://github.com/Nishi-Yura/skyabyss/blob/main/docs/design/37_playtest_commands.md">docs/design/37_playtest_commands.md</a></p>
 </div>
 </section>
 
@@ -139,6 +156,9 @@ def faq():
         srv=T("<code>/gamerule</code> で決まりを変えられます。巨神の背中は専用のディメンションなので、ワールドのバックアップは通常どおりで構いません。", "Rules can be changed with <code>/gamerule</code>. Titan backs live in dedicated dimensions, so normal world backups work as usual."),
         h_gr=T("ゲームルール", "Game rules"), gr=gr, h_cmd=T("OP 用のコマンド（抜粋）", "Operator commands (excerpt)"), cmds=cmds,
         cfg=T("設定ファイルで、不穏な出来事の頻度（<code>horrorEventFrequency</code> など）や知らせの見せ方を変えられます。試遊用コマンドの全部は", "The config file adjusts omen frequency (<code>horrorEventFrequency</code> and others) and notice display. All playtest commands are in"),
+        h_tst=T("試遊する人へ", "For testers"),
+        tst=T("試遊の人は、OP で <code>/skyabyss play help</code> と打つと、章・場所・道具・ボスを移す一覧が出ます（例: <code>/skyabyss play chapter 5</code> で深淵の章の始めへ）。",
+              "Testers with op can type <code>/skyabyss play help</code> for the list of chapter, place, kit and boss commands (e.g. <code>/skyabyss play chapter 5</code> starts the abyss chapter)."),
         h_faq=T("よくある質問", "FAQ"), qa=qa_html,
         h_lim=T("既知の制限", "Known limits"),
         lim_lead=T("これはベータ版です。作ったばかりで、人が通しで遊んでいない所があります。", "This is a beta. Some parts are brand new and have not been played through by people."),
@@ -154,6 +174,16 @@ def faq():
 
 def changelog():
     ver = [
+        ("0.5.0", "2026-10-23", [
+            ("五章「深淵」を追加。都の地下の戸から大坑道を下り、骨・塩・雷・灰の四つの層を渡って、心臓の番人に挑みます。", "Added chapter 5, the abyss: down the great shaft under the capital, through four layers (bone, salt, storm, ash), to the warden of the heart."),
+            ("深淵術（光・重さ・鼓動）と、深淵術師の木を追加。", "Added the three abyss arts (light, weight, heartbeat) and the Abyss Caster tree."),
+            ("クリアのあとに、番人の悪夢（段 1〜10）、前の自分たちの遺品 12 種（セットの効果つき）、心臓の下の果てない深み（区画 8 種・仕掛け 8 種）を追加。", "After the clear: the warden's nightmare (tiers 1 to 10), twelve past-self relics with set bonuses, and endless depths below the heart (8 section kinds, 8 gimmicks)."),
+            ("深淵の敵 18 種を追加。深く潜るほど、同じ敵の変わり果てた姿が出ます。", "Added 18 abyss enemies. The deeper you go, the more twisted forms of the same foes appear."),
+            ("画面にゆとり。巻物のパネル、技の木のドラッグとズーム、画面の大きさに合わせた表示。", "Roomier screens: scroll panels, drag and zoom on the skill tree, and layouts scaled to the window."),
+            ("HUD の描画を軽くしました。", "Lighter HUD drawing."),
+            ("1〜5 章の文章を見直し、用語をそろえました（灯りは「灯り」、灰被りは「灰の番人」、目的にイサナの名）。", "Reviewed the text of chapters 1 to 5 and made the terms consistent (灯り for lights, 灰の番人 for the ash warden, Isana named in the objectives)."),
+            ("試遊用のコマンド <code>/skyabyss play</code>（OP 用）を追加。", "Added the <code>/skyabyss play</code> tester commands (op only)."),
+        ]),
         (T("0.2.2 以降（開発中・リリース前）", "After 0.2.2 (in development, unreleased)"), "2026-10-20", [
             ("転生（Lv 50+n）を追加。魂盤・3 択の恩恵・祖の力・色と記号・称号 24・順位の石・飾りがあります。深淵の難度と、巨神ごとの専用伝説 4 つも加わりました。", "Added rebirth (Lv 50+n) with the soul board, three-choice boons, ancestral power, colors and symbols, 24 titles, a rank stone and cosmetics. Abyss difficulty and four dedicated abyss legendaries arrive with it."),
             ("スキルの自由度を追加: 木は全部最初から開き、天職は専門に。タグ・セット・連鎖・構え・熟練・キーストーン・試着・型 4 つ。変異・橋・紋の盤・前世の技・淵の木も。", "Added skill freedom: every tree open from the start, callings as specialties, tags, sets, chains, stances, mastery, keystones, try-on and four loadouts, plus mutations, bridges, the glyph board, past-life skills and the Abyss tree."),
@@ -191,5 +221,5 @@ def changelog():
 </div>
 </section>
 """ % (T("更新履歴", "Changelog"), items, T("細かい変更の一覧は", "The full list of changes is on"), REPO)
-    page("changelog.html", "更新履歴 — 天と淵のあいだ", "Changelog — Between the Sky and the Abyss", "ベータ版 0.2.0 から 0.2.2 までの主な変更。", "Main changes from beta 0.2.0 to 0.2.2.", body)
+    page("changelog.html", "更新履歴 — 天と淵のあいだ", "Changelog — Between the Sky and the Abyss", "ベータ版の主な変更。最新は 0.5.0。", "Main changes in the beta. Latest: 0.5.0.", body)
 

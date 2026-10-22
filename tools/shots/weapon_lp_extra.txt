@@ -1,4 +1,4 @@
-# 低ポリ武器の左利き・輝き・他の生き物の弓の引き (tools/gen_weapon_extra_shots.py が作る)
+# 低ポリ武器の左利き・輝き・他の生き物の弓の引き (tools/gen/shots/gen_weapon_extra_shots.py が作る)
 world shots flat
 size 1280 720
 timeout 2400

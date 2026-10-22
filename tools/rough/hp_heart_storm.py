@@ -1,7 +1,7 @@
 """High-poly re-sculpt of the storm / thunder-wing heart (雷翼の心臓, assignment 3, docs/design/15_high_poly.md).
 
 Reads tools/sources/storm_heart/phaseN.* (the baked 0.5-unit rough, kept as the input), re-sculpts it at 0.25 units with
-tools/rough/hp_heart_kit.py and writes tools/sources/storm_heart_hp/phaseN.* (what tools/install_storm_heart.py installs).
+tools/rough/hp_heart_kit.py and writes tools/sources/storm_heart_hp/phaseN.* (what tools/install/install_storm_heart.py installs).
 Every bone, the bone tree and the pivots stay; the lightning web (phase 3) is never smoothed (thin, jagged on purpose).
 
 Variants (compared on phase 1):

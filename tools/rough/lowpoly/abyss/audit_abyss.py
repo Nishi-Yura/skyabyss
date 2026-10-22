@@ -2,8 +2,8 @@
 
   PYTHONIOENCODING=utf-8 python -I tools/rough/lowpoly/abyss/audit_abyss.py [--no-close]
 
-1. tools/mesh_close.py の close_mesh_file で、開いた辺・付け根の隙間を塞ぐ (--no-close で省く)。
-2. tools/mesh_audit.py の analyze で、全部の骨をつないだ一つのメッシュとして
+1. tools/lib/mesh_close.py の close_mesh_file で、開いた辺・付け根の隙間を塞ぐ (--no-close で省く)。
+2. tools/audit/mesh_audit.py の analyze で、全部の骨をつないだ一つのメッシュとして
    open (開いた辺) / nonman (多様体でない辺) / wind (向きの食い違い) / degen (つぶれた三角形) / inv (内向き) を数える。
 3. 浮いた部品: 骨ごとではなく部品 (面の part 名。ここではメッシュの連結成分) の頂点が、ほかのどの成分の頂点からも
    FLOAT_TOL (0.6 単位 = 0.04 ブロック) より離れていれば「浮いた部品」。部品の根元は親に沈めるので、接していれば浮かない。
@@ -18,6 +18,8 @@ import numpy as np
 
 ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(ROOT / "tools"))
+sys.path.insert(0, str(ROOT / "tools" / "audit"))
+sys.path.insert(0, str(ROOT / "tools" / "lib"))
 import mesh_audit as ma  # noqa: E402
 import mesh_close as mc  # noqa: E402
 

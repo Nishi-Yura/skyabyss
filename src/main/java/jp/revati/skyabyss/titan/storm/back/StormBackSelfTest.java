@@ -458,7 +458,7 @@ public final class StormBackSelfTest {
         }
     }
 
-    // この担当と地上の担当が使う文の鍵 (lang/parts/{back,ground}.json。tools/gen_storm_lore.py が ja_jp・en_us にまとめる)
+    // この担当と地上の担当が使う文の鍵 (lang/parts/{back,ground}.json。tools/gen/story/gen_storm_lore.py が ja_jp・en_us にまとめる)
     static List<String> partKeys() {
         List<String> out = new ArrayList<>();
         for (String part : List.of("back", "ground")) {
@@ -479,7 +479,7 @@ public final class StormBackSelfTest {
         check(keys.size() > 60, "the storm lang parts are missing", f);
         for (String lang : SignFit.LANGUAGES) {
             for (String k : keys) {
-                check(SignFit.lang(lang).containsKey(k), "text " + k + " is missing in " + lang + " (run tools/gen_storm_lore.py)", f);
+                check(SignFit.lang(lang).containsKey(k), "text " + k + " is missing in " + lang + " (run tools/gen/story/gen_storm_lore.py)", f);
             }
         }
     }

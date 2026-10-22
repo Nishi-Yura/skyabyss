@@ -7,7 +7,7 @@ import jp.revati.skyabyss.pouch.PouchConfig.Category;
 import jp.revati.skyabyss.pouch.PouchEntries.Entry;
 
 // 旅嚢の画面の枠の並び (サーバーのメニューとクライアントの画面で同じ値を使う)。区分ごとに名札つきで、九列の升目に流し込む。
-// 小さな区分 (書など) は、前の区分の行に空きがあれば同じ行に置く (間に一列あける)。絵は tools/gen_pouch_assets.py
+// 小さな区分 (書など) は、前の区分の行に空きがあれば同じ行に置く (間に一列あける)。絵は tools/gen/items/gen_pouch_assets.py
 public final class PouchLayout {
     public static final int W = 176;
     public static final int H = 200;

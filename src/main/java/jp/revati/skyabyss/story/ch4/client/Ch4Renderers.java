@@ -26,7 +26,7 @@ import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import software.bernie.geckolib.cache.object.BakedGeoModel;
 
-// 四章の地上の敵の描画 (素材は tools/gen_ch4_ground_mobs.py) と、目的の帯の行き先 (SiteTargets.bind)。
+// 四章の地上の敵の描画 (素材は tools/gen/ch4/gen_ch4_ground_mobs.py) と、目的の帯の行き先 (SiteTargets.bind)。
 //   熾り蟲・灰ひきずり: 低ポリ (GeckoLib の骨とアニメ + 骨ごとのメッシュ)。灰ひきずりは丸まっている間、脚を隠す (燠虫と同じ)
 //   灰被りの屑・古い灰被り: 骨は灰被りのもの (geo/entity/ash_thrall_lowpoly)、メッシュとアトラスは自分のもの (lowpoly/<id>)。
 //     殻のある姿と燃え上がった姿で、アトラス (<id> / <id>_flared) と見せる骨 (crust_* / flare_*) を替える (灰被りと同じ)。

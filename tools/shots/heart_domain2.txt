@@ -1,6 +1,6 @@
 # 岩鯨の心臓の領域「石の海」の仕掛け (共鳴する骨) を、本物の心臓の間 (titan_back) で撮る。手本・手順の板・正解/失敗・ボスバーと技の名前の印。
 # ./gradlew runShots -Pscript=tools/shots/heart_domain2.txt   (音は 0。日本語の画面)
-# 出力: run/shots/heart_domain2/shots/heart_domain2/*.png -> python tools/heart_domain2_sheet.py で docs/review/previews/heart_domain2_sheet.png
+# 出力: run/shots/heart_domain2/shots/heart_domain2/*.png -> python tools/sheets/heart_domain2_sheet.py で docs/review/previews/heart_domain2_sheet.png
 world shots flat
 size 1280 720
 timeout 3000

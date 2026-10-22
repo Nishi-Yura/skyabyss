@@ -46,7 +46,7 @@ public final class NpcMarkerClient {
     static final int GOLD = 0xF2C14E;
     static final int CYAN = 0x7FD6D0;
     static final int PALE = 0xE9E3D4;
-    // 絵は 16 x 24 のドット絵 (tools/gen_npc_marker_icons.py)。暗い縁取り・明るい縁と影つき。光はやわらかい丸
+    // 絵は 16 x 24 のドット絵 (tools/gen/mobs/gen_npc_marker_icons.py)。暗い縁取り・明るい縁と影つき。光はやわらかい丸
     private static final String DIR = "textures/gui/npc_marker/";
     private static final ResourceLocation GLOW = tex("glow");
     private static final ResourceLocation BANG_GOLD = tex("bang_gold");

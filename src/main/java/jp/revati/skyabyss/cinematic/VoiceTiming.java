@@ -12,7 +12,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
-// 台詞の声に合わせて字幕を出す時刻 (docs/design/20_cinematics.md の 5 章)。tools/gen_cinematic_voice.py が声と一緒に
+// 台詞の声に合わせて字幕を出す時刻 (docs/design/20_cinematics.md の 5 章)。tools/gen/sound/gen_cinematic_voice.py が声と一緒に
 // assets/skyabyss_cinematic/voice_timing.json へ書く: 台詞 (音の名前) ごとに、日本語の本文の各文字が出る秒 (starts)・声の長さ (dur)。
 // 英語など別の本文は、文字の位置の割合で同じ流れに対応させる (句読点の間も、割合で近くなる)
 // span > 0 は、声が文字に合わせて鳴らない様式 (m1 動機 / m2 環境音 / m3 息だけ) の台詞: 字幕は一定の速さで出し、span は台詞の表示時間 (秒)

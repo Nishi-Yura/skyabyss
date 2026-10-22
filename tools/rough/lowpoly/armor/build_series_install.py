@@ -1,4 +1,4 @@
-"""選んだ巨神シリーズ (S2 祭) を 4 巨神 x 3 階級 (+5 / +10 の光) で docs/review/lowpoly_roughs/armor/c/<set>/ に出す (install_armor_lowpoly.py の入力)。
+"""選んだ巨神シリーズ (S2 祭) を 4 巨神 x 3 階級 (+5 / +10 の光) で docs/review/lowpoly_roughs/armor/c/<set>/ に出す (tools/install/install_armor_lowpoly.py の入力)。
 実行: python build_series_install.py [S2]"""
 from __future__ import annotations
 

@@ -15,7 +15,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.LevelChunk;
 
 // 巨神の形の背中 (ブロックでできた巨神) の読み書き (12 の 10.2節。潮殻の TideTurtle を巨神の種類によらない形にしたもの)。
-// 形は tools/gen_back_shape.py がモデルの格子から作った bin を読む。雷翼は data/skyabyss/storm_back/bird.bin。
+// 形は tools/gen/items/gen_back_shape.py がモデルの格子から作った bin を読む。雷翼は data/skyabyss/storm_back/bird.bin。
 // (潮殻は今のところ TideTurtle のまま。中身は同じ形式なので、潮殻の担当が移すときはこの部品に置き換えられる)
 //
 // bin (gzip): "TBT1"、原点 x0 y0 z0、大きさ nx ny nz (int)、ブロックの名前の表 (short 個数 + UTF)、

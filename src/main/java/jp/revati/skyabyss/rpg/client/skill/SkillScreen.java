@@ -44,7 +44,7 @@ import net.neoforged.neoforge.network.PacketDistributor;
 // 技の画面 (K キー)。左に木のつまみ (岩守り・風読み・潮歌い・灰の鍛え人・骨の射手・旅人)、真ん中に木 (4 行。線は前提)、
 // 右に選んだ技の説明と「習得」・刻印の選び、下に技の点・マナ・技の枠 (4〜5)・型の保存 (2)・振り直し。
 // 技を選んでから枠を押すと置ける (右クリックで空ける)。天職を選ぶまでは、木の 1 行目だけが開いている (SkillRules.CALLINGS)。
-// 背景は tools/gen_builds_assets.py で作る 2 倍密度のテクスチャ (760x368 を 380x184 で描く)
+// 背景は tools/gen/ui/gen_builds_assets.py で作る 2 倍密度のテクスチャ (760x368 を 380x184 で描く)
 public class SkillScreen extends Screen implements jp.revati.skyabyss.client.ui.TextBounded {
     static final ResourceLocation PANEL = ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "textures/gui/skill/builds_panel.png");
     static final int W = 380;

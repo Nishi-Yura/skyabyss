@@ -19,7 +19,7 @@ import software.bernie.geckolib.model.GeoModel;
 import software.bernie.geckolib.renderer.layer.GeoRenderLayer;
 
 // 余燼の心臓の描画。段階ごとの geo とテクスチャ (熔岩の殻 → 熔け落ちる殻と白熱の心臓 → 灰の殻と暗い残り火) を切り替え、
-// 割れ目・核・熾・火の粉を光らせる (GlowLayer)。模型は tools/install_ember_heart.py が書く。
+// 割れ目・核・熾・火の粉を光らせる (GlowLayer)。模型は tools/install/install_ember_heart.py が書く。
 // 色が沈まない描き方は潮殻の心臓 (08 の 19.8節) と同じ: ブロックの光を最大にして殻を白い光で描き、
 // 光る画素は基のテクスチャの上に _glowmask の色を目の光 (陰なし・足し合わせ) で重ねる
 public class EmberHeartRenderer extends LowPolyGeoRenderer<EmberHeart> {
@@ -57,7 +57,7 @@ public class EmberHeartRenderer extends LowPolyGeoRenderer<EmberHeart> {
         return OverlayTexture.pack(OverlayTexture.u(u), OverlayTexture.v(heart.hurtTime > 0));
     }
 
-    // 目の光 (RenderType.eyes: 陰なし・足し合わせ) で重ねる。発光の絵の色 = 足す光の強さ (tools/install_ember_heart.py の GLOW)
+    // 目の光 (RenderType.eyes: 陰なし・足し合わせ) で重ねる。発光の絵の色 = 足す光の強さ (tools/install/install_ember_heart.py の GLOW)
     static final class GlowLayer extends GeoRenderLayer<EmberHeart> {
         GlowLayer(EmberHeartRenderer renderer) {
             super(renderer);
@@ -69,7 +69,7 @@ public class EmberHeartRenderer extends LowPolyGeoRenderer<EmberHeart> {
             if (heart.isInvisible()) {
                 return;
             }
-            // 低ポリ: アトラスの光る画素の色だけを載せた絵 (tools/install_lowpoly_ember_npc.py が焼く)
+            // 低ポリ: アトラスの光る画素の色だけを載せた絵 (tools/install/install_lowpoly_ember_npc.py が焼く)
             RenderType glow = RenderType.eyes(Model.path(LowPoly.enabled
                     ? "textures/lowpoly/ember_heart_p" + Model.phase(heart) + "_glow.png"
                     : "textures/entity/ember_heart_p" + Model.phase(heart) + "_glowmask.png"));

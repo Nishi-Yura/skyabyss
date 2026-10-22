@@ -1,4 +1,4 @@
-# 乗り込み口の目印・戻る光の選定用の絵 (tools/gen_marker_shots.py が書く)
+# 乗り込み口の目印・戻る光の選定用の絵 (tools/gen/shots/gen_marker_shots.py が書く)
 # ./gradlew runShots -Pscript=tools/shots/markers.txt  絵は run/shots/markers/shots/markers/
 world markers flat
 size 1280 720

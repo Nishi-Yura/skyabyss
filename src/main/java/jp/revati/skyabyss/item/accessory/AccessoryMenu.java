@@ -8,7 +8,7 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 
 // 装飾の画面のメニュー: 護符 1・装飾 2 の枠と、持ち物。枠の中身はプレイヤーの記録 (AccessoryData) を直接読み書きする。
-// 配置は client/accessory/AccessoryScreen と tools/gen_accessory_assets.py (案 B) と同じ
+// 配置は client/accessory/AccessoryScreen と tools/gen/items/gen_accessory_assets.py (案 B) と同じ
 public class AccessoryMenu extends AbstractContainerMenu {
     public static final int[][] SLOT_POS = {{30, 36}, {130, 26}, {130, 50}};
     public static final int INV_Y = 84;

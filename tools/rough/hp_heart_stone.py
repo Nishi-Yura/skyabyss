@@ -1,7 +1,7 @@
 """High-poly re-sculpt of the stone whale heart (岩鯨の心臓, final boss; docs/design/15_high_poly.md).
 
 Reads tools/sources/heart/phaseN.* (the baked 0.5-unit boss_v4 option A, kept untouched as the input), re-sculpts it at
-0.25 units with tools/rough/hp_heart_kit.py and writes tools/sources/heart_hp/phaseN.* (what tools/install_heart_v4.py installs).
+0.25 units with tools/rough/hp_heart_kit.py and writes tools/sources/heart_hp/phaseN.* (what tools/install/install_heart_v4.py installs).
 
 The shell is 8 plates + 8 glowing seams, each its own Y-rotated bone (bone-local grids). Plates are only ever trimmed or
 re-filled inside their own original volume, so rotated neighbours can never collide. Unrotated bones share the world grid;

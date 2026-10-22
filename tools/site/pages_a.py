@@ -23,7 +23,11 @@ def index():
         '<p class="muted">%s</p></div></a>' % (
             t["k"], pimg("img/arch_%s.png" % t["k"], "%s のドット絵" % t["ja"], "Pixel art of %s" % t["en"], 170, 168),
             t["cls"], T(t["ch_ja"] + "　" + t["ja"], t["ch_en"] + ": " + t["en"]), T(t["sub_ja"], t["sub_en"]))
-        for t in TITANS)
+        for t in TITANS) + (
+        '<a class="panel titan-card" href="titans.html#abyss"><div class="pic">%s</div><div class="body"><h3 class="t-abyss">%s</h3>'
+        '<p class="muted">%s</p></div></a>' % (
+            pimg("img/arch_abyss.png", "深淵の縦穴のドット絵", "Pixel art of the abyss shaft", 170, 168),
+            T("五章　深淵", "Chapter 5: The Abyss"), T("地の底へ降りる", "Descend into the deep")))
 
     def feat(img, name_ja, name_en, ja, en, href):
         return ('<a class="panel feature" href="%s">%s<div><h3>%s</h3><p>%s</p></div></a>' % (
@@ -133,9 +137,9 @@ def index():
         s1=T("巨神", "titans"), s2=T("背中の試練（3 × 4）", "back trials (3 x 4)"), s3=T("技", "skills"), s4=T("人まで", "players max"),
         h_feat=T("できること", "What you can do"),
         feats=feats,
-        h_chap=T("四つの章", "Four chapters"),
-        chap_lead=T("巨神 1 体につき 1 章。前の巨神の心臓を自分で止めた人だけが、次の巨神に乗れます。",
-                    "One chapter per titan. Only a player who stopped the previous heart can board the next titan."),
+        h_chap=T("五つの章", "Five chapters"),
+        chap_lead=T("巨神 1 体につき 1 章。前の巨神の心臓を自分で止めた人だけが、次の巨神に乗れます。四体の心臓を返したあとは、地の底の深淵へ降ります。",
+                    "One chapter per titan. Only a player who stopped the previous heart can board the next titan. After the fourth heart, the way leads down into the abyss."),
         arches=arches,
         h_go=T("はじめる", "Get started"),
         g1h=T("導入", "Install"), g1=T("NeoForge %s と GeckoLib が要ります。jar を mods フォルダへ入れるだけです。" % MC,
@@ -473,10 +477,10 @@ def titans():
         t=table([T("巨神", "Titan"), T("推奨 Lv", "Rec. Lv"), T("どこにいる", "Where"), T("乗り方", "Boarding"), T("心臓を止めたあとの上限 Lv", "Level cap after its heart")], rows),
         n=T("推奨より 3 レベルを超えて上だと、倒したときの経験値が減ります。物語の進みで上限が決まります（最初は 15）。", "More than 3 levels above the recommendation reduces XP. Story progress sets the level cap (15 at the start)."),
         sep=divider())
-    body = page_head("巨神と背中", "Titans and their backs", "四体の巨神の姿、乗り方、背中の三つの試練、心臓、領域。仕組みだけを書いています。",
-                     "Four titans: how to board, the three trials on each back, the hearts and domains. Mechanics only.") + overview + "".join(cards) + common + pool + pages_d.titans_extra() + travel + after
+    body = page_head("巨神と背中", "Titans and their backs", "四体の巨神の姿、乗り方、背中の三つの試練、心臓、領域。五章の深淵の入口も。仕組みだけを書いています。",
+                     "Four titans and the fifth chapter, the abyss: how to board, the three trials on each back, the hearts and domains. Mechanics only.") + overview + "".join(cards) + common + pool + pages_d.titans_extra() + travel + after + pages_d.titans_abyss()
     page("titans.html", "巨神と背中 — 天と淵のあいだ", "Titans and their backs — Between the Sky and the Abyss",
-         "岩鯨・潮殻・雷翼・余燼。乗り方、三つの試練、心臓、領域、装備。", "Stone Whale, Tide Shell, Thunder Wing and Ember: boarding, trials, hearts, domains and gear.", body)
+         "岩鯨・潮殻・雷翼・余燼。乗り方、三つの試練、心臓、領域、装備。五章の深淵。", "Stone Whale, Tide Shell, Thunder Wing and Ember: boarding, trials, hearts, domains and gear. Chapter 5, the abyss.", body)
 
 
 HEARTS = {

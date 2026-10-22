@@ -25,7 +25,7 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import software.bernie.geckolib.cache.object.BakedGeoModel;
 
-// 余燼の背の敵の描画 (素材は tools/install_ember_mobs.py)。GeckoLib のモデルと、熾・割れ目・目を暗闇で光らせる層。
+// 余燼の背の敵の描画 (素材は tools/install/install_ember_mobs.py)。GeckoLib のモデルと、熾・割れ目・目を暗闇で光らせる層。
 // 灰被り: 殻のある姿と燃え上がった姿で、テクスチャ (ash_thrall / ash_thrall_flared) と見せる骨 (crust_* / flare_*) を替える。
 //         火掻き棒は別のモデル (geo/gear/ash_poker) を受け口 socket_main に付ける。
 // 燠虫: 丸まっている間は脚・触角・尾肢・節の間の膜を隠す (玉の内側にしまう)。

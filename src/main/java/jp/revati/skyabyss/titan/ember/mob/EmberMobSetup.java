@@ -46,7 +46,7 @@ public final class EmberMobSetup {
     public static final DeferredItem<Item> CINDER_ROLLER_EGG = ITEMS.register(EmberIds.CINDER_ROLLER_EGG,
             () -> new DeferredSpawnEggItem(CINDER_ROLLER, 0x34303B, 0xF58A2A, new Item.Properties()));
 
-    // ---------------------------------------------------------------- 音 (tools/gen_ember_mob_sounds.py。独自合成)
+    // ---------------------------------------------------------------- 音 (tools/gen/sound/gen_ember_mob_sounds.py。独自合成)
     public static final DeferredHolder<SoundEvent, SoundEvent> THRALL_AMBIENT = sound(EmberIds.SOUND_THRALL_AMBIENT);
     public static final DeferredHolder<SoundEvent, SoundEvent> THRALL_HURT = sound(EmberIds.SOUND_THRALL_HURT);
     public static final DeferredHolder<SoundEvent, SoundEvent> THRALL_DEATH = sound(EmberIds.SOUND_THRALL_DEATH);

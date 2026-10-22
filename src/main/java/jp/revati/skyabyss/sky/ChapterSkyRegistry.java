@@ -12,7 +12,7 @@ import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import net.neoforged.neoforge.registries.NeoForgeRegistries;
 
-// 1章の空の演出の音 (共有の ModSounds は触らない)。音は tools/gen_chapter_sky_sounds.py で合成した
+// 1章の空の演出の音 (共有の ModSounds は触らない)。音は tools/gen/sound/gen_chapter_sky_sounds.py で合成した
 public final class ChapterSkyRegistry {
     private static final DeferredRegister<SoundEvent> SOUNDS = DeferredRegister.create(Registries.SOUND_EVENT, SkyAbyss.MODID);
 

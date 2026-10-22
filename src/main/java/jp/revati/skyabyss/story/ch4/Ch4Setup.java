@@ -31,7 +31,7 @@ import net.neoforged.neoforge.registries.DeferredRegister;
 
 // 四章の地上 (docs/design/34 の C4、21 の 6.1) の登録: 敵 4 種 (熾り蟲・灰被りの屑・灰ひきずり・古い灰被り)・スポーンエッグ・品 5 つ・音。
 // 敵と品の ID は skyabyss の名前空間。音の出来事だけは skyabyss_ch4 の名前空間 (assets/skyabyss_ch4/sounds.json。ほかの作業の sounds.json と分ける)。
-// 素材と見た目は tools/gen_ch4_ground_mobs.py、文は tools/gen_ch4_ground.py。SkyAbyss のコンストラクタから register を呼ぶ
+// 素材と見た目は tools/gen/ch4/gen_ch4_ground_mobs.py、文は tools/gen/ch4/gen_ch4_ground.py。SkyAbyss のコンストラクタから register を呼ぶ
 public final class Ch4Setup {
     public static final String SOUND_NS = "skyabyss_ch4";
     private static final DeferredRegister<EntityType<?>> ENTITIES = DeferredRegister.create(Registries.ENTITY_TYPE, SkyAbyss.MODID);

@@ -17,7 +17,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.entity.BarrelBlockEntity;
 
 // 三章の小要素 4 種 (docs/design/12 の 12.3、01 の 4.2)。章が開いた人 (段階 2) の拠点のまわり 24〜150 ブロックに置く (置き方は 17 の 3.8)。
-// 部品は data/skyabyss/opening/ch3_*.json (tools/gen_ch3_content.py)。着いたときの一度きりの知らせ・伝承・クエストの合図は onArrive。
+// 部品は data/skyabyss/opening/ch3_*.json (tools/gen/ch3/gen_ch3_content.py)。着いたときの一度きりの知らせ・伝承・クエストの合図は onArrive。
 //   storm_vane   風見の丘     高い所。石の台と銅の針の柱。矢が巨神の方角 (いなければ風の逆) を指す (StormVane)        着いたら 合図 ch3_vane
 //   storm_ruin   避雷の塔の跡  折れた塔の根と針が 1 本、針を立てる台 4・銅の戸・避雷の見本 (LightningPillars。部品 ch3_rod_tower)   着いたら 合図 ch3_ruin
 //   storm_pack   焼けた荷     焦げた台地に割れた荷車と樽 (パン・松明・避雷針)。伝承「焼けた荷の頁」(筆跡が自分に似る。N1)   着いたら 伝承 + 合図 ch3_pack

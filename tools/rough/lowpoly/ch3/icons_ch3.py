@@ -4,7 +4,7 @@
 実行: python -I tools/rough/lowpoly/ch3/icons_ch3.py
 出力: docs/review/ch3_roughs/items/icons/<品>_{a,b,c}_32.png、thunder_whetted_18.png・grounded_18.png
       docs/review/ch3_roughs/items/icons_ch3.png (4x と 1x を暗い枠・明るい背景で)
-入れ方: tools/install_ch3_gear_assets.py (選んだ案を assets へ、選ばなかった案を tools/sources/<品>/ へ)
+入れ方: tools/install/install_ch3_gear_assets.py (選んだ案を assets へ、選ばなかった案を tools/sources/<品>/ へ)
 """
 from __future__ import annotations
 

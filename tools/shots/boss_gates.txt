@@ -1,5 +1,5 @@
 # 四つの背のボス部屋の大門 8 か所 を撮る。./gradlew runShots -Pscript=tools/shots/boss_gates.txt
-# 出力: run/shots/boss_gates/shots/boss_gates/*.png → python tools/boss_gates_sheet.py で docs/review/previews/boss_gates_sheet.png
+# 出力: run/shots/boss_gates/shots/boss_gates/*.png → python tools/sheets/boss_gates_sheet.py で docs/review/previews/boss_gates_sheet.png
 world shots flat
 size 1280 720
 timeout 2400

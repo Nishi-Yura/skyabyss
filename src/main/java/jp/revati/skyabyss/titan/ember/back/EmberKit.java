@@ -41,7 +41,7 @@ public final class EmberKit {
     public static final BlockState VEIN = Blocks.MAGMA_BLOCK.defaultBlockState();
     public static final BlockState GLOW = Blocks.SHROOMLIGHT.defaultBlockState();
     public static final BlockState EMBERLIGHT = Blocks.OCHRE_FROGLIGHT.defaultBlockState();
-    // 体の芯 (gen_ember_back_body.py の DEEP) と、仮の床
+    // 体の芯 (tools/gen/items/gen_ember_back_body.py の DEEP) と、仮の床
     public static final BlockState CORE = Blocks.TUFF.defaultBlockState();
     public static final BlockState TEMP_FLOOR = Blocks.TUFF_BRICKS.defaultBlockState();
 

@@ -798,7 +798,7 @@ public class StormWingEntity extends Entity implements GeoEntity, jp.revati.skya
     }
 
     // 見た目は当たり判定よりずっと大きいので、画面外判定を広げる (翼の幅 ±112、体の長さ ±60、塔の高さ 30)
-    // 体に入れない (titan/solid)。体積は tools/gen_titan_volumes.py が近景のメッシュから焼く。入ってよいのは乗り場の通り道だけ
+    // 体に入れない (titan/solid)。体積は tools/gen/world/gen_titan_volumes.py が近景のメッシュから焼く。入ってよいのは乗り場の通り道だけ
     @Override
     public String volumeName() {
         return "thunder_wing";

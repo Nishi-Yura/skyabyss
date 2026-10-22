@@ -48,7 +48,7 @@ public class WatcherRenderer extends LowPolyGeoRenderer<WatcherEntity> {
     private static final ResourceLocation GLOWMASK = path("textures/entity/watcher_glowmask.png");
     private static final ResourceLocation ANIMATION = path("animations/entity/watcher.animation.json");
     // 低ポリ (client/lowpoly): 単層のメッシュ (geo/entity/watcher_lowpoly.geo.json、textures/lowpoly/watcher.png)。
-    // 半透明の描画 (entityTranslucent) はそのまま。目の光は、アトラスの光る画素の色だけを載せた絵 (tools/install_lowpoly_ember_npc.py が焼く)
+    // 半透明の描画 (entityTranslucent) はそのまま。目の光は、アトラスの光る画素の色だけを載せた絵 (tools/install/install_lowpoly_ember_npc.py が焼く)
     private static final ResourceLocation GEO_LOW = path("geo/entity/watcher_lowpoly.geo.json");
     private static final ResourceLocation GEO_LOW_DEBUG = path("geo/entity/watcher_lowpoly_debug.geo.json");
     private static final ResourceLocation TEXTURE_LOW = path("textures/lowpoly/watcher.png");

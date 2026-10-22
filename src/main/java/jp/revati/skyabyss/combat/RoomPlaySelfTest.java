@@ -200,7 +200,7 @@ public final class RoomPlaySelfTest {
         dump();
     }
 
-    // 確認シート (tools/room_size_b_sheet.py) の元: 環境変数 SKYABYSS_ROOMPLAY_DUMP にファイルの名前があれば、置き場所と人数ごとの湧きを書く
+    // 確認シート (tools/sheets/room_size_b_sheet.py) の元: 環境変数 SKYABYSS_ROOMPLAY_DUMP にファイルの名前があれば、置き場所と人数ごとの湧きを書く
     private static void dump() {
         String path = System.getenv("SKYABYSS_ROOMPLAY_DUMP");
         if (path == null || path.isBlank()) {

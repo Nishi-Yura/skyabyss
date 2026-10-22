@@ -1,6 +1,6 @@
 # 雷翼の背の拡大 (docs/design/26 の 9 章、版 20) の確かめ。./gradlew runShots -Pscript=tools/shots/storm_scale.txt
-# 出力: run/shots/storm_scale/shots/storm_scale/*.png → python tools/storm_scale_sheet.py で docs/review/previews/storm_scale_sheet.png (音は自動で 0)
-# この台本は python tools/gen_storm_scale_shots.py が書く (場所の表はそちら)
+# 出力: run/shots/storm_scale/shots/storm_scale/*.png → python tools/sheets/storm_scale_sheet.py で docs/review/previews/storm_scale_sheet.png (音は自動で 0)
+# この台本は python tools/gen/shots/gen_storm_scale_shots.py が書く (場所の表はそちら)
 world storm_scale flat
 size 1280 720
 timeout 3600

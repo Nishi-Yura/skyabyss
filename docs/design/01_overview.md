@@ -34,7 +34,7 @@
 | モデル・アニメ | GeckoLib（`.geo.json`・`.animation.json`） | 高密度のモデルと立体防具を動かせる |
 | 保存 | Data Attachments（プレイヤーごと）／SavedData（ワールド） | レベル・進み・ループ状態 |
 | 巨神の背中 | 巨神ごとの専用ディメンション。島はワールドの起動時に一度だけ建てる | 動くブロックの地形は重く壊れやすい。乗り込みの途中で止まらないため |
-| 効果音 | 既存の音を使わず独自に合成（`tools/gen_sky_sounds.py` など） | 奇妙で記憶に残る音にするため |
+| 効果音 | 既存の音を使わず独自に合成（`tools/gen/sound/gen_sky_sounds.py` など） | 奇妙で記憶に残る音にするため |
 | パッケージ | `jp.revati.skyabyss` | — |
 
 **シェーダー**: Java 1.21.1 に Vibrant Visuals はないので、Iris＋シェーダーパック（基準は Complementary Shaders）で狙う。テクスチャには LabPBR の `_n`・`_s` を添える。**シェーダーなしでも成り立つこと**が必須。影や空の演出はエンティティとパーティクルで作る。

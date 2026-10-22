@@ -1,5 +1,5 @@
 # 亀・余燼・雷翼の試遊後の直しの確かめ。./gradlew runShots -Pscript=tools/shots/titans_fix.txt
-# 出力: run/shots/titans_fix/shots/titans_fix/*.png。python -I tools/titans_fix_sheet.py で一枚に組む
+# 出力: run/shots/titans_fix/shots/titans_fix/*.png。python -I tools/sheets/titans_fix_sheet.py で一枚に組む
 world titans_fix flat
 size 1280 720
 timeout 1800

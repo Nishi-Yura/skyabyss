@@ -178,9 +178,10 @@ public final class PartyScreen extends Screen implements jp.revati.skyabyss.clie
         candPanel.drawBar(g, 0x30FFFFFF, 0x90F2C14E);
         for (int i = 0; i < inviteButtons.size(); i++) {
             Button b = inviteButtons.get(i);
-            int by = candPanel.top() + i * 16 - 2;
-            b.setY(by);
-            b.visible = by >= candPanel.y() && by + 14 <= candPanel.y() + CAND_H;
+            // 行の上端で見せるか決める (釦は行より 1 上に置くので、釦の上端で決めると一行目がいつも枠の外になって消えていた)
+            int oy = candPanel.top() + i * 16;
+            b.setY(oy - 1);
+            b.visible = oy >= candPanel.y() && oy + 12 <= candPanel.y() + CAND_H;
         }
     }
 

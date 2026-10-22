@@ -1,4 +1,4 @@
-# 深淵の敵 A の 9 種 × 三段 (docs/design/36 の 4・4.2)。tools/gen_abyss_enemies_a_shots.py が書く。
+# 深淵の敵 A の 9 種 × 三段 (docs/design/36 の 4・4.2)。tools/gen/shots/gen_abyss_enemies_a_shots.py が書く。
 # 縦穴の真ん中の台の上で、種ごと・段ごとに一枚 (正面寄り・斜め)。段 1 は元の層、段 2・3 は一つ・二つ下の高さ。
 world abyss_enemies_a flat
 size 1280 720

@@ -5,7 +5,7 @@
 実行: python -I tools/rough/lowpoly/ch3/armor_ch3.py
 出力: docs/review/ch3_roughs/items/armor_ch3/{a,b,c}/<部位>_{mesh.json,atlas.png,glowmask.png}、
       docs/review/ch3_roughs/items/armor_ch3/icons/{a,b,c}_<部位>_32.png、docs/review/ch3_roughs/items/armor_ch3.png (シート)
-入れ方: tools/install_ch3_gear_assets.py (選んだ案を assets へ)
+入れ方: tools/install/install_ch3_gear_assets.py (選んだ案を assets へ)
 """
 from __future__ import annotations
 

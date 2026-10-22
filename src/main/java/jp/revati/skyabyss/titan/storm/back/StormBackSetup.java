@@ -26,7 +26,7 @@ public final class StormBackSetup {
             () -> new StormBlocks.Receiver(BlockBehaviour.Properties.of().mapColor(MapColor.SNOW).strength(-1.0f, 3600000.0f)
                     .noLootTable().sound(SoundType.WOOL).lightLevel(s -> s.getValue(StormBlocks.Receiver.LIT) ? 15 : 2)));
 
-    // 避雷の柱 (台・段の電球・軸・先の針) と戻しの鏡。壊せない。見た目は tools/gen_back_blocks.py の専用モデル
+    // 避雷の柱 (台・段の電球・軸・先の針) と戻しの鏡。壊せない。見た目は tools/gen/items/gen_back_blocks.py の専用モデル
     private static BlockBehaviour.Properties fixed(MapColor color, SoundType sound) {
         return BlockBehaviour.Properties.of().mapColor(color).strength(-1.0f, 3600000.0f).noLootTable().sound(sound).noOcclusion();
     }

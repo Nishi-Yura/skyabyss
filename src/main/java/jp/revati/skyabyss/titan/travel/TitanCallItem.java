@@ -21,7 +21,7 @@ import net.minecraft.world.entity.player.Player;
 // 巨神の呼び笛 (docs/design/28)。出会った巨神の笛は、その巨神の「子」を足もとへ呼ぶ: 子が現れ、乗ると行き先を決める海図が開く。
 // パーティ全員 (最大 6 人) が乗れる。成体の巨神は動かない。眠っている巨神の笛は応えない。
 // 笛を持った人のそばに仲間の子がいれば、吹くとその子に乗る。乗っている間に吹くと、海図を開き直す。
-// 巨神の背 (ダンジョン) の中で吹くと、地上へ下りる (ReturnBeacons)。吹く仕草はヤギの角笛と同じ。音は tools/gen_titan_travel_assets.py で合成した独自の音
+// 巨神の背 (ダンジョン) の中で吹くと、地上へ下りる (ReturnBeacons)。吹く仕草はヤギの角笛と同じ。音は tools/gen/world/gen_titan_travel_assets.py で合成した独自の音
 public class TitanCallItem extends Item implements jp.revati.skyabyss.pouch.PouchUsable {
     private final String titanId;
     // 旅のできる巨神 (岩鯨・潮殻) の型 (記録・旅嚢の表示用)。雷翼・余燼は null

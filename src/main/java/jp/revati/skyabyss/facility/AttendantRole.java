@@ -10,7 +10,7 @@ import jp.revati.skyabyss.SkyAbyss;
 //   id     : 役の名前。都の設計図の印 npc_<id> で立つ所を決め、会話は data/skyabyss/dialogue/attendant_<id>.json
 //   shop   : 店を開く役の、店の ID (data/skyabyss/shop/<shop>.json)。店でなければ null
 //   street : 1 = 大通りの 1 列目 (よく使う)、2 = 章で開く、3 = 裏通り
-// 頭の上の印は textures/gui/npc_marker/fac_<id>.png (tools/gen_facility_icons.py)
+// 頭の上の印は textures/gui/npc_marker/fac_<id>.png (tools/gen/ui/gen_facility_icons.py)
 public enum AttendantRole {
     GUILD_CLERK("guild_clerk", null, 1),
     SMITH("smith", null, 1),

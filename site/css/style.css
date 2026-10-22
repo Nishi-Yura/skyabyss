@@ -18,6 +18,7 @@
   --shell: #b5502f;
   --wing: #8a6a00;
   --ember: #b8431a;
+  --abyss: #6a3fb0;
   --hero: url("../img/hero_day.png");
   --divider: url("../img/divider_day.png");
   --code-bg: #e3eefb;
@@ -44,6 +45,7 @@
     --shell: #f0a58f;
     --wing: #f0c24b;
     --ember: #f08a4e;
+    --abyss: #c3a6ff;
     --hero: url("../img/hero_night.png");
     --divider: url("../img/divider_night.png");
     --code-bg: #0c1530;
@@ -167,7 +169,7 @@ a.panel:hover { border-color: var(--accent); }
 .titan-card .body { padding: 12px 16px 16px; }
 .titan-card h3 { margin-bottom: .1em; }
 .tag { display: inline-block; font-size: .78rem; padding: 0 .55rem; border: 2px solid currentColor; border-radius: 3px; margin: 0 4px 4px 0; }
-.t-whale { color: var(--whale); } .t-shell { color: var(--shell); } .t-wing { color: var(--wing); } .t-ember { color: var(--ember); }
+.t-whale { color: var(--whale); } .t-shell { color: var(--shell); } .t-wing { color: var(--wing); } .t-ember { color: var(--ember); } .t-abyss { color: var(--abyss); }
 .titan-sec { scroll-margin-top: 80px; }
 .titan-hd { display: grid; grid-template-columns: minmax(0, 340px) 1fr; gap: 20px; align-items: start; margin-bottom: 18px; }
 .titan-hd .pic { background: #0b1230; border: 3px solid var(--border); }

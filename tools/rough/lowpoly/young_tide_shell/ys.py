@@ -2,7 +2,7 @@
 
 座標: 1 単位 = 1/16 ブロック。作図は「前 = -Z」。書き出すとき (x, z) の符号を反転して geo の空間へ
 (geo の root は Y 軸 180 度回る。最後の前は -Z)。作図の +x = ゲームの右 (fin_fr)。
-骨は 3 案で共通 (名前・親・pivot)。ゲームの箱の geo (tools/gen_young_tide_shell_assets.py) と一つの定義。
+骨は 3 案で共通 (名前・親・pivot)。ゲームの箱の geo (tools/gen/world/gen_young_tide_shell_assets.py) と一つの定義。
 
 閉じた形だけを使う (水密): 筒は両端を塞ぐか先を尖らせる。棘は cone() (根元も塞ぐ)。
 鞍 (骨 saddle) の上面は y = SEAT の平らな板。座る範囲 (x ±25.6、z ±51.2) には何も載せない。
@@ -25,6 +25,7 @@ ROOT = HERE.parents[3]
 sys.path.insert(0, str(LP))
 sys.path.insert(0, str(ROOT / "tools/rough"))
 sys.path.insert(0, str(ROOT / "tools"))
+sys.path.insert(0, str(ROOT / "tools" / "gen/world"))
 from lpkit import *  # noqa
 from lpkit import _mk  # noqa
 import voxel  # noqa

@@ -34,7 +34,7 @@ public final class EmberSmithSetup {
                     .fireImmune()
                     .build(SkyAbyss.MODID + ":" + EmberIds.ASH_SMITH));
 
-    // 技ごとに別の音 (tools/gen_ember_smith_sounds.py の独自合成)
+    // 技ごとに別の音 (tools/gen/sound/gen_ember_smith_sounds.py の独自合成)
     public static final DeferredHolder<SoundEvent, SoundEvent> SLAM = sound(EmberIds.SOUND_SMITH_SLAM);
     public static final DeferredHolder<SoundEvent, SoundEvent> INHALE = sound(EmberIds.SOUND_SMITH_INHALE);
     public static final DeferredHolder<SoundEvent, SoundEvent> BLAST = sound(EmberIds.SOUND_SMITH_BLAST);

@@ -20,7 +20,7 @@ public final class BossCueClient {
         BossAttackCue.show(icon(p.boss(), p.attack()), Component.translatable("gui.skyabyss.attack." + p.boss() + "." + p.attack()), p.ticks());
     }
 
-    // 技ごとの 16px の印 (textures/gui/attack/<ボス>_<技>.png。tools/gen_attack_icons.py)。無ければ印なし
+    // 技ごとの 16px の印 (textures/gui/attack/<ボス>_<技>.png。tools/gen/ui/gen_attack_icons.py)。無ければ印なし
     private static final java.util.Map<String, ResourceLocation> ICONS = new java.util.HashMap<>();
 
     private static ResourceLocation icon(String boss, String attack) {

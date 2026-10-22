@@ -1,4 +1,4 @@
-# 低ポリの装飾品 (手・地面・額縁・体に付けた姿) を階級ごとに撮る (tools/gen_accessory_lp_shots.py が作る)
+# 低ポリの装飾品 (手・地面・額縁・体に付けた姿) を階級ごとに撮る (tools/gen/shots/gen_accessory_lp_shots.py が作る)
 world shots flat
 size 1280 720
 timeout 2400

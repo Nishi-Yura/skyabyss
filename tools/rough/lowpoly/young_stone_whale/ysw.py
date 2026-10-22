@@ -2,7 +2,7 @@
 
 座標: 1 単位 = 1/16 ブロック。作図は「前 = -Z」。書き出すとき (x, z) の符号を反転して geo の空間へ
 (geo の root は Y 軸 180 度回る。最後の姿の前は -Z)。作図の +x = ゲームの右 (fin_r)。
-骨は 3 案で共通 (名前・親・pivot)。ゲームの箱の geo (tools/gen_young_stone_whale_assets.py) と一つの定義。
+骨は 3 案で共通 (名前・親・pivot)。ゲームの箱の geo (tools/gen/world/gen_young_stone_whale_assets.py) と一つの定義。
 鞍の上面は 3 案とも SEAT_Y = 58 単位で、x ±25.6・z ±51.2 の範囲は平ら (座席 6 つ)。
 
 絵の具 (paint / eye_marks / export_mesh) は潮招きの common.py をそのまま借りる (真珠守りと同じ)。
@@ -25,6 +25,7 @@ ROOT = HERE.parents[3]
 sys.path.insert(0, str(LP))
 sys.path.insert(0, str(ROOT / "tools/rough"))
 sys.path.insert(0, str(ROOT / "tools"))
+sys.path.insert(0, str(ROOT / "tools" / "gen/world"))
 from lpkit import *  # noqa
 from lpkit import _mk  # noqa
 import voxel  # noqa
