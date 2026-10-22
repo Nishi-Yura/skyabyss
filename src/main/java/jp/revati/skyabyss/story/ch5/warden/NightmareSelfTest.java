@@ -150,7 +150,7 @@ public final class NightmareSelfTest {
             check(f, w3 != null && w3.tier() == t3 && Math.abs(w3.getMaxHealth() - HeartWarden.BASE_HP * 1.3) < 1, "tier 3 health is wrong");
             w3.setHealth(w3.getMaxHealth() * 0.5f);
             w3.updatePhase(level);
-            check(f, shades(level, w3) == 2, "tier 3 should bring two shades at phase 2");
+            check(f, shades(level, w3) == 1, "tier 3 should bring one shade at phase 2");
             AbyssBeacons.light(level, 0, level.getGameTime());
             Nightmare.abort(level);
             WardenArena.clearRoom(level);

@@ -38,6 +38,11 @@ public final class RaidCtx {
     private final List<Mob> mobs = new ArrayList<>();
     private String failKey;
 
+    // 部屋の自己テスト用: 部屋の箱を建てる前の文脈 (build に渡す)。人は順路の参加者から (TrialRoute.PLAYERS を差し替えて渡す)
+    public static RaidCtx forTest(ServerLevel back, UUID group, String titan, String roomId, int slot, int step, long seed) {
+        return new RaidCtx(back, group, titan, roomId, slot, step, RaidRun.originOf(slot, step), seed);
+    }
+
     RaidCtx(ServerLevel back, UUID group, String titan, String roomId, int slot, int step, BlockPos origin, long seed) {
         this.back = back;
         this.group = group;

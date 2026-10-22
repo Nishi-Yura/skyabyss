@@ -118,7 +118,7 @@ public final class WhaleCoreRoom extends RaidRoom {
                 level.sendParticles(ParticleTypes.CRIT, core.x, core.y + 1.5, core.z, 8, 0.8, 0.8, 0.8, 0.1);
                 level.playSound(null, BlockPos.containing(core), SoundEvents.STONE_BREAK, SoundSource.HOSTILE, 1.2f, 0.6f);
             }
-        } else if (hp < CORE_MAX && waveOut) {
+        } else if (hp > 0 && hp < CORE_MAX && waveOut) {
             hp = Math.min(CORE_MAX, hp + REGEN_DPS / 20.0);
         }
         setStage(ctx);

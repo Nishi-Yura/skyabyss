@@ -138,7 +138,7 @@ public final class TownGuests {
     // 都にいる人 (オーバーワールド・観戦でない)
     static List<ServerPlayer> inTown(ServerLevel level, BlockPos capital) {
         List<ServerPlayer> out = new ArrayList<>();
-        for (ServerPlayer p : level.players()) {
+        for (ServerPlayer p : java.util.List.copyOf(level.players())) {
             if (!p.isSpectator() && p.blockPosition().distSqr(capital) <= (double) KEEP_RADIUS * KEEP_RADIUS) {
                 out.add(p);
             }

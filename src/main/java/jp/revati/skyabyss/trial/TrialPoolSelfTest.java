@@ -141,6 +141,9 @@ public final class TrialPoolSelfTest {
 
     // 引き方 (巨神ごと。試練の階を置いた巨神)
     private static void pureDraw(String whale, List<String> originals) {
+        if (jp.revati.skyabyss.trial.raid.RaidRooms.active(whale)) {
+            return; // レイドの巨神は引きのプールを使わない (固定の部屋。raid の自己テスト)
+        }
         setPlaced(whale, true);
         check(TrialCatalog.originals(whale).stream().map(Def::id).toList().equals(originals), whale + " originals are not " + originals);
         check(TrialCatalog.poolActive(whale), "the " + whale + " pool is not active with the deck placed");

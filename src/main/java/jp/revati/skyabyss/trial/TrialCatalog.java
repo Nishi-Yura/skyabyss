@@ -280,6 +280,18 @@ public final class TrialCatalog {
         return out;
     }
 
+    // レイドの巨神の周の三つ (枠ごとに登録した部屋から seed で引く。歩・智・闘の並び)
+    public static List<Def> raidDraw(String titan, long seed) {
+        List<Def> out = new ArrayList<>();
+        for (Slot s : Slot.values()) {
+            Def d = get(jp.revati.skyabyss.trial.raid.RaidRooms.drawOf(titan, s, seed));
+            if (d != null) {
+                out.add(d);
+            }
+        }
+        return out;
+    }
+
     // 枠に作ってある試練
     public static List<Def> inSlot(String titan, Slot slot) {
         List<Def> out = new ArrayList<>();
