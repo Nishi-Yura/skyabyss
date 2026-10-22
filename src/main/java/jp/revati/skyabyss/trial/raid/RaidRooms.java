@@ -1,7 +1,9 @@
 package jp.revati.skyabyss.trial.raid;
 
 import java.util.EnumMap;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.Supplier;
@@ -25,7 +27,7 @@ public final class RaidRooms {
     private record Entry(String id, Supplier<RaidRoom> factory) {
     }
 
-    private static final Map<String, Map<Slot, Entry>> BY_TITAN = new LinkedHashMap<>();
+    private static final Map<String, Map<Slot, List<Entry>>> BY_TITAN = new LinkedHashMap<>();
     private static final Map<String, Entry> BY_ID = new HashMap<>();
     private static boolean booted;
 
@@ -36,10 +38,12 @@ public final class RaidRooms {
         }
     }
 
-    // 登録する。同じ巨神・枠は上書き。試練の定義 (TrialCatalog) にも原型として入る
+    // 登録する。同じ巨神・枠に複数登録すると、周ごとに一つ引く (drawOf。枠ごと 2 案)。同じ id は上書き。試練の定義 (TrialCatalog) にも原型として入る
     public static void register(String titan, Slot slot, String id, Supplier<RaidRoom> factory) {
         Entry e = new Entry(id, factory);
-        BY_TITAN.computeIfAbsent(titan, k -> new EnumMap<>(Slot.class)).put(slot, e);
+        List<Entry> list = BY_TITAN.computeIfAbsent(titan, k -> new EnumMap<>(Slot.class)).computeIfAbsent(slot, k -> new ArrayList<>());
+        list.removeIf(x -> x.id().equals(id));
+        list.add(e);
         BY_ID.put(id, e);
         TrialCatalog.addRaid(new Trial.Def(id, titan, slot, switch (slot) {
             case WALK -> Trial.Kind.CARRY;
@@ -51,7 +55,7 @@ public final class RaidRooms {
     // 三つそろった巨神か (レイドの順路で動かす)
     public static boolean active(String titan) {
         ensure();
-        Map<Slot, Entry> m = BY_TITAN.get(titan);
+        Map<Slot, List<Entry>> m = BY_TITAN.get(titan);
         return m != null && m.size() == Slot.values().length;
     }
 
@@ -59,9 +63,37 @@ public final class RaidRooms {
     @Nullable
     public static String idOf(String titan, Slot slot) {
         ensure();
-        Map<Slot, Entry> m = BY_TITAN.get(titan);
-        Entry e = m == null ? null : m.get(slot);
-        return e == null ? null : e.id();
+        Map<Slot, List<Entry>> m = BY_TITAN.get(titan);
+        List<Entry> l = m == null ? null : m.get(slot);
+        return l == null || l.isEmpty() ? null : l.get(0).id();
+    }
+
+    // 枠に登録した部屋の id (登録順。一つか二つ)
+    public static List<String> idsOf(String titan, Slot slot) {
+        ensure();
+        Map<Slot, List<Entry>> m = BY_TITAN.get(titan);
+        List<Entry> l = m == null ? null : m.get(slot);
+        List<String> out = new ArrayList<>();
+        if (l != null) {
+            for (Entry e : l) {
+                out.add(e.id());
+            }
+        }
+        return out;
+    }
+
+    // 一回の挑戦 (周) の部屋を枠ごとに一つ引く。seed は周ごとに決まった値 (同じ周なら同じ部屋。やり直し・再開でも変わらない。引きは記録される)
+    @Nullable
+    public static String drawOf(String titan, Slot slot, long seed) {
+        List<String> ids = idsOf(titan, slot);
+        if (ids.isEmpty()) {
+            return null;
+        }
+        long z = seed ^ (slot.ordinal() * 0x9E3779B97F4A7C15L);
+        z = (z ^ (z >>> 30)) * 0xBF58476D1CE4E5B9L;
+        z = (z ^ (z >>> 27)) * 0x94D049BB133111EBL;
+        z ^= z >>> 31;
+        return ids.get((int) Math.floorMod(z, (long) ids.size()));
     }
 
     public static boolean isRaid(String id) {

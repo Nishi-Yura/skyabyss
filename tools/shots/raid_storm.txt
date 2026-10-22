@@ -32,36 +32,48 @@ cmd skyroute tidyhud
 cmd skyroute enter
 wait 30
 waitchunks
-wait 250
+# 入口の箱に立って少しすると順路が始まり、部屋の帯が出る
+waitband 1200 避雷の羽運び
+wait 140
 waitchunks
-# 入口の戸が開いたあと、広間の南の端へ入って、北を見る
-cmd tp @s ~ ~ ~-9 180 14
-wait 60
-waitchunks
+# 部屋の原点 (背の区画 1): SR1 = (5120, 64, 4096)、SR2 = (5216, 64, 4096)、SR3 = (5312, 64, 4096)。観戦の姿で広間の上から撮る
+fov 95
+cmd gamemode spectator
+camera 5120.5 70.5 4108.5 180 32
 wait 40
 shot sr1_a_deck
-cmd tp @s ~ ~ ~-8 -90 12
-wait 60
+camera 5106.5 69 4096.5 -90 14
+wait 30
 shot sr1_b_perches
+cmd gamemode survival
 cmd skyroute pass
-wait 300
+waitband 600 銅の回路つなぎ
+wait 140
 waitchunks
-cmd tp @s ~ ~ ~-5 180 32
-wait 60
-waitchunks
+cmd gamemode spectator
+camera 5216.5 71.5 4105.5 180 52
 wait 40
 shot sr2_a_grid
-cmd tp @s ~ ~ ~-4 90 28
-wait 40
+camera 5207.5 70 4105.5 -135 38
+wait 30
 shot sr2_b_floor
+cmd gamemode survival
 cmd skyroute pass
-wait 300
+waitband 600 帯電の連鎖
+wait 140
 waitchunks
-cmd skyroute status
-cmd tp @s ~ ~ ~-9 180 14
-wait 300
+# 観戦の姿のままだと「背に参加者がいない」と順路が終わるので、撮るあいだだけ観戦にする
+wait 40
+cmd gamemode spectator
+camera 5312.5 72 4109.5 180 34
+wait 40
 shot sr3_a_charging
-wait 200
+cmd gamemode survival
+wait 240
+cmd gamemode spectator
+camera 5312.5 72 4109.5 180 34
+wait 40
 shot sr3_b_glow
+cmd gamemode survival
 cmd skyroute status
 cmd skyroute clear

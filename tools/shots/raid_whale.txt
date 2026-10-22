@@ -1,0 +1,58 @@
+# 岩鯨のレイドの三つの部屋 (docs/design/32 の 9 章): WR1 骨玉運び・WR2 共鳴の骨・WR3 鯨の核を守る。入口の休み場と中の様子、目的の帯
+# ./gradlew runShots -Pscript=tools/shots/raid_whale.txt  絵は run/shots/raid_whale/ → docs/review/raid_whale/ (音は消す・日本語)
+# skyroute enter が入口の箱へ立たせる → 予告のあと段 1 の部屋へ。skyroute pass で今の段を越えたことにして次の部屋へ運ばせる
+world raid_whale normal
+size 1280 720
+timeout 3000
+render 12
+clouds off
+
+wait 100
+cmd skyabyss cinematic stop
+wait 10
+cmd skyabyss cinematic stop
+cmd skyabyss playtest skip opening
+cmd time set noon
+cmd weather clear
+cmd gamerule doDaylightCycle false
+cmd skyabyss playtest god on
+cmd skyabyss playtest gear whale
+cmd skyabyss playtest board whale
+wait 400
+cmd skyabyss playtest goto whale hub
+wait 100
+waitchunks
+wait 40
+cmd skyroute enter
+wait 460
+waitchunks
+chat clear
+shot wr1_01_entrance
+wait 200
+shot wr1_02_active
+cmd tp @s ~ ~ ~ 180 25
+wait 20
+shot wr1_03_room
+
+cmd skyroute pass
+wait 300
+waitchunks
+chat clear
+shot wr2_01_entrance
+wait 200
+shot wr2_02_ringing
+cmd tp @s ~ ~ ~ 180 25
+wait 20
+shot wr2_03_room
+
+cmd skyroute pass
+wait 300
+waitchunks
+chat clear
+shot wr3_01_entrance
+wait 300
+shot wr3_02_wave1
+cmd tp @s ~ ~ ~ 180 25
+wait 20
+shot wr3_03_room
+cmd skyroute clear
