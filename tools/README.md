@@ -23,7 +23,8 @@
 | `once/` | 一度だけ走らせた移行スクリプト (`add_*_lang`・`fix_*`)。履歴として残す。もう走らせない |
 | `misc/` | 単発の調査・プローブ |
 | `dev/` | 開発用 (`rcon.py`、`mc_run.sh`、`quick_check.sh`、`world_template.sh`)。使い方は下の「開発の速い回し方」 |
-| `abyss/` `capital/` `rough/` `readme/` `structure/` `ui/` `trial_lang/` `sources/` `shots/` | 既存の作業フォルダ (ラフ・都・構造の検査・台本・入力の素材など) |
+| `shots/` | 撮影の台本 (`*.txt`) だけ。台本を書くスクリプトは `gen/shots/`、撮った絵を並べる台紙のスクリプトは `sheets/` に置く |
+| `abyss/` `capital/` `rough/` `readme/` `structure/` `ui/` `trial_lang/` `sources/` | 既存の作業フォルダ (ラフ・都・構造の検査・入力の素材など) |
 | `site/` | サイト用 (別作業) |
 
 フォルダの移動にともなう `sys.path` は、各スクリプトの先頭で他グループを足して解決する。

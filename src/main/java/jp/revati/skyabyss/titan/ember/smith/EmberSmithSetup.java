@@ -65,10 +65,7 @@ public final class EmberSmithSetup {
     }
 
     private static void commonSetup(FMLCommonSetupEvent event) {
-        // 体を建てるとき (B) と試練のリセットで呼ばれる (13 の 19.2節)
-        event.enqueueWork(() -> {
-            EmberBackRooms.register("smith", AshSmithArena::build);
-            EmberBackRooms.onReset("smith", (level, sleeping) -> AshSmithBattle.reset(level));
-        });
+        // 部屋の中身の版 (EmberBackRooms.contentVersion) に入る。外すと版が変わり、余燼の背が建て直しになるので残す
+        event.enqueueWork(() -> EmberBackRooms.register("smith", AshSmithArena::build));
     }
 }

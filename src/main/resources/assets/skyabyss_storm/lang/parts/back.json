@@ -19,30 +19,6 @@
     "en": "the Eye Hall",
     "ja": "眼の間"
   },
-  "checkpoint.skyabyss.storm_hub": {
-    "en": "Wind Hall",
-    "ja": "風の広間"
-  },
-  "checkpoint.skyabyss.storm_w0": {
-    "en": "Left shoulder",
-    "ja": "左の肩"
-  },
-  "checkpoint.skyabyss.storm_w1": {
-    "en": "Left elbow",
-    "ja": "左の肘"
-  },
-  "checkpoint.skyabyss.storm_e0": {
-    "en": "Right shoulder",
-    "ja": "右の肩"
-  },
-  "checkpoint.skyabyss.storm_e1": {
-    "en": "Right elbow",
-    "ja": "右の肘"
-  },
-  "checkpoint.skyabyss.storm_f0": {
-    "en": "Neck",
-    "ja": "首の前室"
-  },
   "checkpoint.skyabyss.storm_heart": {
     "en": "Keel antechamber",
     "ja": "竜骨の前室"
@@ -122,17 +98,4 @@
   "block.skyabyss.storm_rod_tip": {
     "en": "Lightning Pillar Needle",
     "ja": "避雷の柱の針"
-  },
-  "checkpoint.skyabyss.storm_w2": {
-    "en": "Rib Hall, First Ledge",
-    "ja": "肋の間 第一層"
-  },
-  "checkpoint.skyabyss.storm_w3": {
-    "en": "Rib Hall, Second Ledge",
-    "ja": "肋の間 第二層"
-  },
-  "checkpoint.skyabyss.storm_w4": {
-    "en": "Rib Hall, Summit",
-    "ja": "肋の間 頂"
-  }
-}
+  }}

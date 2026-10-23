@@ -1,6 +1,6 @@
 # 潮殻のレイドの部屋の建築 (docs/design/39 の 4.2)。TR1・TR3〜TR7 と中ボスの間 TRM を、順路を通さず /skytideraid room <id> で建てて撮る。
 #   SKYABYSS_MUTE=1 ./gradlew --no-daemon runShots -Pscript=tools/shots/raid_build_tide.txt -PshotsName=raid_build_tide
-#   絵は run/shots/raid_build_tide/shots/raid_build_tide/ → docs/review/raid_build_tide/{before,after}/。台紙は tools/shots/raid_build_tide_sheet.py
+#   絵は run/shots/raid_build_tide/shots/raid_build_tide/ → docs/review/raid_build_tide/{before,after}/。台紙は tools/sheets/raid_build_tide_sheet.py
 #   一部屋に三枚: a = 入口の休み場から北 (戸ごしの目印)、b = 広間の南から北、c = 北東の隅から南西 (壁と天井)。
 #   TR1 は d = 暗視で広間・e = 三つの真珠を届けた姿 (扇が灯る)、TR5 は d = 光を水晶へ導いた姿 (光の輪が灯る)
 world raid_build_tide normal

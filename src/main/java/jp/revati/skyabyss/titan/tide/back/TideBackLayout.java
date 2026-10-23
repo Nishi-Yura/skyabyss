@@ -1,6 +1,5 @@
 package jp.revati.skyabyss.titan.tide.back;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import net.minecraft.core.BlockPos;
@@ -189,20 +188,9 @@ public final class TideBackLayout {
     public record Rest(String id, Area area, BlockPos campfire, BlockPos spawn) {
     }
 
-    public static final List<Rest> RESTS = concat(List.of(
-            new Rest("hub", HUB, new BlockPos(-7, HUB_LEDGE + 1, 23), new BlockPos(-5, HUB_LEDGE + 1, 21)),
-            new Rest("g0", G0, new BlockPos(-37, PLATFORM_TOP + 1, 4), new BlockPos(-35, PLATFORM_TOP + 1, 0)),
-            new Rest("g1", G1, new BlockPos(PLAT_C[0] - 2, PLATFORM_TOP + 1, PLAT_C[1] + 2), new BlockPos(PLAT_C[0] + 2, PLATFORM_TOP + 1, PLAT_C[1] - 2)),
-            new Rest("s0", S0, new BlockPos(42, HUB_LEDGE + 1, -18), new BlockPos(45, HUB_LEDGE + 1, -13)),
-            new Rest("f0", F0, new BlockPos(-6, TUNNEL_FLOOR + 1, -62), new BlockPos(0, TUNNEL_FLOOR + 1, -56)),
-            new Rest("heart", HEART_REST, new BlockPos(3 + HEART_DX, 51, -6 + HEART_DZ), new BlockPos(-2 + HEART_DX, 51, -6 + HEART_DZ))),
-            List.of());
-
-    private static List<Rest> concat(List<Rest> a, List<Rest> b) {
-        List<Rest> out = new ArrayList<>(a);
-        out.addAll(b);
-        return List.copyOf(out);
-    }
+    // 背は外見だけ (体の中は建てない) なので、休み場は心臓の間の前室 (区画の封じた部屋の南) だけ
+    public static final Rest HEART_REST_SPOT = new Rest("heart", HEART_REST, new BlockPos(3 + HEART_DX, 51, -6 + HEART_DZ), new BlockPos(-2 + HEART_DX, 51, -6 + HEART_DZ));
+    public static final List<Rest> RESTS = List.of(HEART_REST_SPOT);
 
     // 看板の位置と、文が向く向き (試練の入口の一言。TideIslandBuilder)
     public record Inscription(String key, BlockPos pos, Direction facing) {

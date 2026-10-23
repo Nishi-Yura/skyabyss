@@ -1,5 +1,5 @@
 # 雷翼のレイドの部屋の建築の前と後の台紙 (tools/shots/raid_build_storm.txt を前 / 後の名前で二度撮ったもの)。
-#   python -I tools/shots/raid_build_storm_sheet.py [前のフォルダ] [後のフォルダ]
+#   python -I tools/sheets/raid_build_storm_sheet.py [前のフォルダ] [後のフォルダ]
 #   既定: run/shots/raid_build_storm_before/shots/raid_build_storm と run/shots/raid_build_storm_after/shots/raid_build_storm
 #   出力: docs/review/raid_build_storm/<部屋>.jpg (左 = 前、右 = 後。行ごとに一つの視点)
 import os

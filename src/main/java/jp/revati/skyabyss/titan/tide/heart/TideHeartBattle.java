@@ -81,7 +81,7 @@ public final class TideHeartBattle {
     }
 
     static BlockPos eject() {
-        return TideBackLayout.RESTS.get(5).spawn();
+        return TideBackLayout.HEART_REST_SPOT.spawn();
     }
 
     static final RoomLocks.Listener LOCK = new RoomLocks.Listener() {

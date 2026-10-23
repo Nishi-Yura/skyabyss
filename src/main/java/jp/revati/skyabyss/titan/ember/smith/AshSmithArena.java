@@ -3,10 +3,7 @@ package jp.revati.skyabyss.titan.ember.smith;
 import java.util.ArrayList;
 import java.util.List;
 
-import java.util.UUID;
 
-import jp.revati.skyabyss.titan.ember.back.EmberBackTrials;
-import jp.revati.skyabyss.titan.group.GroupGates;
 import jp.revati.skyabyss.titan.ember.back.EmberBackLayout;
 import jp.revati.skyabyss.titan.ember.back.EmberBackLayout.Box;
 import net.minecraft.core.BlockPos;
@@ -18,7 +15,7 @@ import net.minecraft.world.phys.Vec3;
 
 // 鍛え手の間 (13 の 5.2節、11.2節の担当 E)。部屋の箱は EmberBackLayout.SMITH (27 x 27、床 80、天井まで 14)。箱の中だけに置く。
 // 中身: 床の模様、四隅の壁 (円形の部屋にする)、焼き入れの槽 2 つ (水。縁の石 5 x 5)、灰溜まり 4 つ (灰色の羊毛 3 x 3)、柱 4 本、
-// 奥の炉の扉 (怒りで開く。灰被りが 2 体出る)。入口 (鍛えの間からの扉 SMITH_DOOR) は戦いのあいだ、戦うグループにだけ封じる (GroupBossRoom・GroupGates)。
+// 奥の炉の扉 (怒りで開く。灰被りが 2 体出る)。戦いは中ボスの間 (trial/raid/mid/EmberMidRoom) が、この中身を部屋の中心へずらして建てて行う。
 // 取っておく場所 (EmberBackLayout.reserved("smith")) には置かない。何度呼ばれても同じ物になる (build は箱の中を全部置き直す)
 public final class AshSmithArena {
     public static final Box BOX = EmberBackLayout.SMITH;
@@ -28,11 +25,6 @@ public final class AshSmithArena {
     public static final int CZ = EmberBackLayout.SMITH_CENTER.getZ();
     public static final int RADIUS = EmberBackLayout.SMITH_RADIUS;
     public static final Vec3 HOME = new Vec3(CX + 0.5, FLOOR + 1, CZ + 0.5);
-    // 入口の内側 (人を通す所)。向きは南 (部屋の奥)
-    public static final Vec3 ENTRANCE_INSIDE = new Vec3(CX + 0.5, FLOOR + 1, BOX.minZ() + 2.5);
-    // 鍛えの間の奥 (扉の前)。集合のあいだ、ここの人も中へ入れる
-    public static final Box ANTE = new Box(CX - 6, FLOOR, 20, CX + 6, FLOOR + 14, 28);
-    public static final Box DOOR = EmberBackLayout.SMITH_DOOR;
 
     // 焼き入れの槽 (中心。水の 3 x 3 と縁の 5 x 5)
     public static final List<BlockPos> TROUGHS = List.of(new BlockPos(CX - 8, FLOOR, CZ), new BlockPos(CX + 8, FLOOR, CZ));
@@ -284,28 +276,5 @@ public final class AshSmithArena {
         } finally {
             SHIFT = BlockPos.ZERO;
         }
-    }
-
-    // ---------------------------------------------------------------- 入口 (鍛えの間からの扉)
-    // 入口はいつも置いてある扉 (閉じた既定。火の鍵で開けたグループにだけ開いている)。戦いのあいだは戦うグループにも閉じ、終われば開け直す
-    public static void seal(ServerLevel level, UUID group) {
-        List<BlockPos> door = EmberBackTrials.boxBlocks(DOOR);
-        GroupGates.place(level, door, false);
-        GroupGates.seal(level, group, door);
-    }
-
-    public static void open(ServerLevel level, UUID group) {
-        GroupGates.open(level, group, EmberBackTrials.boxBlocks(DOOR));
-    }
-
-    // そのグループにとって入口が閉じているか
-    public static boolean sealed(ServerLevel level, UUID group) {
-        return !GroupGates.isOpen(level, group, new BlockPos((DOOR.minX() + DOOR.maxX()) / 2, DOOR.minY() + 1, DOOR.minZ()));
-    }
-
-    // 最後に戦ったグループにとって (コマンドと自己テスト)
-    public static boolean sealed(ServerLevel level) {
-        UUID g = AshSmithBattle.lastGroup();
-        return g != null && sealed(level, g);
     }
 }

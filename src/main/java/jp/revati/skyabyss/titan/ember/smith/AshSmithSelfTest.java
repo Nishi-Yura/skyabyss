@@ -20,7 +20,6 @@ import jp.revati.skyabyss.titan.dungeon.TitanBackTrials;
 import jp.revati.skyabyss.titan.ember.EmberIds;
 import jp.revati.skyabyss.titan.ember.back.EmberBackLayout;
 import jp.revati.skyabyss.titan.ember.back.EmberHeat;
-import jp.revati.skyabyss.titan.ember.back.EmberBackState;
 import jp.revati.skyabyss.titan.ember.mob.AshThrall;
 import jp.revati.skyabyss.titan.ember.mob.EmberMob;
 import net.minecraft.core.BlockPos;
@@ -34,12 +33,12 @@ import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.common.util.FakePlayer;
 
 // 灰の鍛え手の自己テスト (SKYABYSS_SELFTEST。ログに SELFTEST ash smith PASSED / FAILED)。
-// 素材 (模型・テクスチャ・発光・白の発光・アニメ・バーの絵・音・武器の模型)、強さ (13 の 5.2節)、部屋の形 (槽・灰溜まり・炉の扉・入口・取っておく場所)、
-// 戦いの始まりと封印・保存されない・人数の倍率、技の時間と傷 (鎚打ち 16・噴気 10 と熱・冷えた鎚 24 と輪 12 と噴気なし・鞴の息 8 と熱 35 と弱み 1.5 倍・
-// 火花 6 つ 10・怒りの炉の扉と灰被り 2 体・焼き入れの湯気)、放棄、報酬の表 (確率・数・作られていない品は出さない・いない人の分は預かる)、経験値の表、
-// 03 の目安で一人で倒せる数値 (倒すのにかかる秒・一撃に耐える回数)、撃破の記録と東の熾り石。
-// 余燼の背 (ember_back) の鍛え手の間 (EmberBackLayout.SMITH) に建てて試す。**撃破の記録 (東の石が鳴らせる) を残すので、余燼の背の
-// 試練の自己テストよりあとに置く** (13 の 22章)
+// 素材 (模型・テクスチャ・発光・白の発光・アニメ・バーの絵・音・武器の模型)、強さ (13 の 5.2節)、部屋の形 (槽・灰溜まり・炉の扉・取っておく場所)、
+// グループの持ち物・保存されない・人数の倍率、技の時間と傷 (鎚打ち 16・噴気 10 と熱・冷えた鎚 24 と輪 12 と噴気なし・鞴の息 8 と熱 35 と弱み 1.5 倍・
+// 火花 6 つ 10・怒りの炉の扉と灰被り 2 体・焼き入れの湯気)、報酬の表 (確率・数・作られていない品は出さない・いない人の分は預かる)、経験値の表、
+// 03 の目安で一人で倒せる数値 (倒すのにかかる秒・一撃に耐える回数)、撃破の知らせ。
+// 余燼の背 (ember_back) の元の鍛え手の間の座標 (EmberBackLayout.SMITH) に中身を建て、鍛え手を直に出して試す (ずれ 0)。
+// 部屋の流れ (運ばれる・封じる・倒すと越える) は SELFTEST raid mid が見る
 public final class AshSmithSelfTest {
     private static final int CHUNKS = 2;
 
@@ -88,7 +87,7 @@ public final class AshSmithSelfTest {
             AshSmith.testGapBase = null;
             dropFakes();
             if (back != null) {
-                AshSmithBattle.abandon(server);
+                clearFight(back);
                 force(back, false);
                 // 自己テストが使ったグループの記録と部屋の占有を消す
                 var data = jp.revati.skyabyss.titan.group.BackGroupData.get(back);
@@ -101,12 +100,7 @@ public final class AshSmithSelfTest {
                     data.remove(testParty.id);
                     testParty = null;
                 }
-                data.remove(AshSmithBattle.TEST_GROUP);
                 data.remove(OTHER_GROUP);
-                if (AshSmithBattle.lastGroup() != null) {
-                    data.remove(AshSmithBattle.lastGroup());
-                }
-                jp.revati.skyabyss.titan.group.RoomLocks.release(jp.revati.skyabyss.titan.ember.back.EmberRooms.EAST.lock());
             }
         }
         if (failures.isEmpty()) {
@@ -130,10 +124,9 @@ public final class AshSmithSelfTest {
         checkStrength(f, notes);
         checkGeometry(f);
         checkArena(back, f);
-        checkBattle(server, back, f);
+        checkFight(server, back, f);
         checkMoves(server, back, f, notes);
         checkRage(server, back, f);
-        checkAbandon(server, back, f);
         checkLoot(server, f, notes);
         checkDefeat(server, back, f);
     }
@@ -198,10 +191,8 @@ public final class AshSmithSelfTest {
         }
     }
 
-    static final String[] LANG_KEYS = {"entity.skyabyss.ash_smith", "message.skyabyss.ember.smith.begin", "message.skyabyss.ember.smith.hint_back",
-            "message.skyabyss.ember.smith.asleep", "message.skyabyss.ember.smith.breath", "message.skyabyss.ember.smith.quench",
-            "message.skyabyss.ember.smith.rage", "message.skyabyss.ember.smith.defeated", "message.skyabyss.ember.smith.after",
-            "message.skyabyss.ember.smith.east_stone_ready", "gui.skyabyss.boss.ash_smith.weak", "gui.skyabyss.boss.ash_smith.enraged",
+    static final String[] LANG_KEYS = {"entity.skyabyss.ash_smith", "message.skyabyss.ember.smith.breath", "message.skyabyss.ember.smith.quench",
+            "message.skyabyss.ember.smith.rage", "message.skyabyss.ember.smith.defeated", "gui.skyabyss.boss.ash_smith.weak", "gui.skyabyss.boss.ash_smith.enraged",
             "subtitles.skyabyss.ash_smith_slam", "subtitles.skyabyss.ash_smith_inhale", "subtitles.skyabyss.ash_smith_blast",
             "subtitles.skyabyss.ash_smith_sparks", "subtitles.skyabyss.ash_smith_rage", "subtitles.skyabyss.ash_smith_hurt",
             "subtitles.skyabyss.ash_smith_death"};
@@ -298,9 +289,7 @@ public final class AshSmithSelfTest {
     private static void checkGeometry(List<String> f) {
         EmberBackLayout.Box box = EmberBackLayout.SMITH;
         check(AshSmithArena.BOX.equals(box), "the arena box should be EmberBackLayout.SMITH", f);
-        check(box.contains(AshSmithArena.HOME) && box.contains(AshSmithArena.ENTRANCE_INSIDE), "home / entrance outside the box", f);
-        check(AshSmithArena.DOOR.equals(EmberBackLayout.SMITH_DOOR), "door", f);
-        check(AshSmithArena.ANTE.maxZ() < box.minZ() && !AshSmithArena.ANTE.intersects(box), "ante overlaps the arena", f);
+        check(box.contains(AshSmithArena.HOME), "home outside the box", f);
         for (BlockPos t : AshSmithArena.TROUGHS) {
             check(box.contains(t.offset(-2, 1, -2)) && box.contains(t.offset(2, 1, 2)), "trough outside the box at " + t, f);
             check(AshSmithArena.inside(Vec3.atCenterOf(t)), "trough centre not inside", f);
@@ -337,7 +326,7 @@ public final class AshSmithSelfTest {
     }
 
     private static void checkArena(ServerLevel level, List<String> f) {
-        AshSmithBattle.abandon(level.getServer());
+        clearFight(level);
         AshSmithArena.build(level, AshSmithArena.BOX);
         check(AshSmithArena.isBuilt(level), "arena not recognised as built", f);
         for (BlockPos t : AshSmithArena.TROUGHS) {
@@ -356,51 +345,70 @@ public final class AshSmithSelfTest {
         // 中は空き (柱と槽を除く床の上 3 ブロック)、床は全面にある
         check(level.getBlockState(BlockPos.containing(AshSmithArena.HOME)).isAir() && level.getBlockState(BlockPos.containing(AshSmithArena.HOME).above(3)).isAir(),
                 "centre is not open", f);
-        check(!level.getBlockState(BlockPos.containing(AshSmithArena.ENTRANCE_INSIDE).below()).isAir(), "no floor at the entrance", f);
-        check(level.getBlockState(BlockPos.containing(AshSmithArena.ENTRANCE_INSIDE)).isAir(), "entrance is blocked", f);
         // (取っておく場所 EmberBackLayout.reserved("smith") は体の中の鍛え手の間の前と奥。体の中は建てなくなった (2026-10-23。
         // 鍛え手の間は区画の中ボスの間 EmberMidRoom) ので見ない。部屋の流れは SELFTEST raid mid)
-        // 入口: 既定は閉じた扉 (火の鍵で開けたグループにだけ開く)。開ける・封じるはそのグループにだけで、扉のブロックはワールドに残る
-        UUID g = AshSmithBattle.TEST_GROUP;
-        jp.revati.skyabyss.titan.group.GroupGates.place(level, jp.revati.skyabyss.titan.ember.back.EmberBackTrials.boxBlocks(AshSmithArena.DOOR), false);
-        check(AshSmithArena.sealed(level, g) && AshSmithArena.sealed(level, OTHER_GROUP), "the smith door is open before any key", f);
-        AshSmithArena.open(level, g);
-        check(!AshSmithArena.sealed(level, g) && AshSmithArena.sealed(level, OTHER_GROUP)
-                && level.getBlockState(AshSmithArena.DOOR.center()).is(jp.revati.skyabyss.registry.ModBlocks.SEALED_GATE.get()),
-                "opening the door for one group opened it for another (or removed the door block)", f);
-        AshSmithArena.seal(level, g);
-        check(AshSmithArena.sealed(level, g), "seal did not close the door", f);
-        AshSmithArena.open(level, g);
-        check(!AshSmithArena.sealed(level, g), "open did not reopen the door", f);
         // 建て直しても同じ物になる
         AshSmithArena.build(level, AshSmithArena.BOX);
         check(level.getBlockState(AshSmithArena.TROUGHS.get(0).above()).is(Blocks.WATER) && AshSmithArena.isBuilt(level), "rebuild changed the arena", f);
     }
 
     // ---------------------------------------------------------------- 戦い
+    // 鍛え手を間の中に出す (中ボスの間 EmberMidRoom.spawnBoss と同じ置き方。ずれは 0 = 元の間)
     private static AshSmith start(MinecraftServer server, List<String> f) {
-        AshSmithBattle.reawaken(server);
-        ServerLevel back = AshSmithBattle.level(server);
-        check(testParty != null && back != null ? AshSmithBattle.startNow(back, testParty.id) : AshSmithBattle.startNow(server), "battle did not start", f);
-        AshSmith s = AshSmithBattle.current(server);
-        if (s == null) {
-            f.add("no ash smith after starting (boss id " + AshSmithBattle.room().bossId() + ")");
+        ServerLevel back = server.getLevel(EmberIds.BACK);
+        if (back == null) {
+            f.add("no ember_back level");
+            return null;
         }
+        // 背は外見だけで体の中の間は建たないので、先に中身を建てる (何度呼んでも同じ形)
+        if (!AshSmithArena.isBuilt(back)) {
+            AshSmithArena.build(back, AshSmithArena.BOX);
+        }
+        clearFight(back);
+        AshSmith s = EmberSmithSetup.ASH_SMITH.get().create(back);
+        if (s == null) {
+            f.add("the ash smith could not be created");
+            return null;
+        }
+        Vec3 at = AshSmithArena.HOME.add(0, 0, 4);
+        s.moveTo(at.x, at.y, at.z, 180f, 0f);
+        s.bind(1);
+        if (testParty != null) {
+            s.setGroupId(testParty.id);
+        }
+        s.bindRoom(BlockPos.ZERO, d -> DEFEATED.add(d.getUUID()));
+        check(back.addFreshEntity(s), "the ash smith could not be added", f);
         return s;
     }
 
-    private static void checkBattle(MinecraftServer server, ServerLevel level, List<String> f) {
+    // 倒れた鍛え手 (知らせ先 bindRoom が呼ばれた)
+    private static final java.util.Set<UUID> DEFEATED = new java.util.HashSet<>();
+
+    // 戦いを片付ける: 鍛え手と呼んだ灰被りを消し、炉の扉を閉じる (中ボスの間の resetFixtures と同じ)
+    private static void clearFight(@org.jetbrains.annotations.Nullable ServerLevel level) {
+        if (level == null) {
+            return;
+        }
+        for (net.minecraft.world.entity.Entity e : level.getEntitiesOfClass(net.minecraft.world.entity.Entity.class, AshSmithArena.BOX.aabb().inflate(6),
+                e -> e.getTags().contains(AshSmith.SMITH_TAG))) {
+            e.discard();
+        }
+        if (AshSmithArena.isBuilt(level)) {
+            AshSmithArena.buildFurnace(level, false);
+        }
+    }
+
+    private static void checkFight(MinecraftServer server, ServerLevel level, List<String> f) {
         AshSmith s = start(server, f);
         if (s == null) {
             return;
         }
-        check(AshSmithArena.sealed(level), "door not sealed when the fight starts", f);
         check(s.getTags().contains(TitanBackTrials.HEART_TAG) && s.getTags().contains(AshSmith.SMITH_TAG) && s.getTags().contains(EmberMob.TRIAL_TAG),
                 "smith not tagged", f);
         check(!s.shouldBeSaved(), "smith would be saved to disk", f);
         // 鍛え手は戦うグループのもの: ほかのグループの人には見えず、狙わず、その傷を受けない
         FakePlayer other = new FakePlayer(level, new GameProfile(OTHER_GROUP, "smith_other"));
-        check(AshSmithBattle.lastGroup() != null && AshSmithBattle.lastGroup().equals(s.groupId()), "the smith has no group", f);
+        check(testParty == null || testParty.id.equals(s.groupId()), "the smith has no group", f);
         check(!jp.revati.skyabyss.titan.group.GroupOwned.visibleTo(s, other) && !s.canAttack(other), "another group can see or is targeted by the smith", f);
         float hp = s.getHealth();
         s.invulnerableTime = 0;
@@ -408,19 +416,8 @@ public final class AshSmithSelfTest {
         check(s.getHealth() == hp, "another group hurt the smith", f);
         check(Math.abs(s.getMaxHealth() - AshSmith.HEALTH) < 0.01, "max health " + s.getMaxHealth(), f);
         check(AshSmithArena.inside(s.position()), "smith spawned outside the room at " + s.position(), f);
-        // 部屋の外へ出たら戻される (BossRoom)
-        // 戻す距離 (leash 17) を少し超えるだけ動かし、動かした先のチャンクを先に読んでおく。遠く (+40) の外側のチャンクは、
-        // 新しいワールドでは強制読み込みがまだ終わっていないことがあり、そこへ動かした鍛え手が level.getEntity で見つからず
-        // BossRoom.tick が「消えた」として戦いを捨て、戻されずにまれに落ちていた
-        double outX = AshSmithArena.HOME.x + 22;
-        level.getChunk(((int) Math.floor(outX)) >> 4, ((int) Math.floor(AshSmithArena.HOME.z)) >> 4);
-        s.moveTo(outX, AshSmithArena.FLOOR + 1, AshSmithArena.HOME.z, 0f, 0f);
-        AshSmithBattle.room().tick(level, AshSmithBattle.host());
-        check(s.distanceToSqr(AshSmithArena.HOME) < 1, "the smith outside the room was not brought back (alive " + s.isAlive() + ", found "
-                + (level.getEntity(s.getUUID()) != null) + ", at " + s.position() + ")", f);
-        AshSmithBattle.abandon(server);
+        clearFight(level);
     }
-
 
     // 鍛え手と戦わない、もう一つのグループ
     static final UUID OTHER_GROUP = UUID.nameUUIDFromBytes("skyabyss ash smith other group".getBytes(java.nio.charset.StandardCharsets.UTF_8));
@@ -634,7 +631,7 @@ public final class AshSmithSelfTest {
         AshSmith.testFighters = null;
         AshSmith.testGapBase = null;
         dropFakes();
-        AshSmithBattle.abandon(server);
+        clearFight(level);
     }
 
     // 後ろ (rear=true)・前から、傷 10 を入れたときに減る体力 (人数 1 人の倍率 1)
@@ -687,23 +684,11 @@ public final class AshSmithSelfTest {
         check(s.currentAction() != AshSmith.Action.RAGE, "the rage came twice", f);
         AshSmith.testFighters = null;
         dropFakes();
-        AshSmithBattle.abandon(server);
+        clearFight(level);
         check(level.getEntitiesOfClass(AshThrall.class, AshSmithArena.BOX.aabb().inflate(6), t -> t.getTags().contains(AshSmith.SMITH_TAG)).stream()
                 .noneMatch(AshThrall::isAlive) || level.getEntitiesOfClass(AshThrall.class, AshSmithArena.BOX.aabb().inflate(6),
                         t -> t.getTags().contains(AshSmith.SMITH_TAG) && t.isAlive()).isEmpty(), "called thralls stayed after the abandon", f);
-        check(!AshSmithArena.furnaceOpen(level) && !AshSmithArena.sealed(level), "the furnace or door was not restored", f);
-    }
-
-    // 誰もいなければ 3 秒で放棄
-    private static void checkAbandon(MinecraftServer server, ServerLevel level, List<String> f) {
-        AshSmith s = start(server, f);
-        if (s == null) {
-            return;
-        }
-        for (int i = 0; i < 8; i++) {
-            AshSmithBattle.room().tick(level, AshSmithBattle.host());
-        }
-        check(!AshSmithBattle.room().active() && !s.isAlive() && !AshSmithArena.sealed(level), "the empty room was not abandoned", f);
+        check(!AshSmithArena.furnaceOpen(level), "the furnace was not restored", f);
     }
 
     // ---------------------------------------------------------------- 予告 (Telegraph) の自己テスト
@@ -734,7 +719,7 @@ public final class AshSmithSelfTest {
             AshSmith.testGapBase = null;
             dropFakes();
             if (back != null) {
-                AshSmithBattle.abandon(server);
+                clearFight(back);
                 var data = jp.revati.skyabyss.titan.group.BackGroupData.get(back);
                 if (testParty != null) {
                     var parties = jp.revati.skyabyss.party.PartyData.get(server);
@@ -745,11 +730,6 @@ public final class AshSmithSelfTest {
                     data.remove(testParty.id);
                     testParty = null;
                 }
-                data.remove(AshSmithBattle.TEST_GROUP);
-                if (AshSmithBattle.lastGroup() != null) {
-                    data.remove(AshSmithBattle.lastGroup());
-                }
-                jp.revati.skyabyss.titan.group.RoomLocks.release(jp.revati.skyabyss.titan.ember.back.EmberRooms.EAST.lock());
             }
         }
         notes.forEach(n -> SkyAbyss.LOGGER.info("SELFTEST ash smith telegraph note: {}", n));
@@ -883,7 +863,7 @@ public final class AshSmithSelfTest {
                     AshSmith.testFighters = null;
                     AshSmith.testLog = null;
                     dropFakes();
-                    AshSmithBattle.abandon(server);
+                    clearFight(back);
                     for (int i = 0; i < 3; i++) {
                         Telegraph.tickNow(back);
                     }
@@ -959,7 +939,7 @@ public final class AshSmithSelfTest {
         check(held.xp == AshSmithLoot.VANILLA_XP, "held xp should be " + AshSmithLoot.VANILLA_XP + " (" + held.xp + ")", f);
     }
 
-    // 撃破: 記録 (東の熾り石が鳴らせる)・入口が開く・呼んだ灰被りが消える
+    // 撃破: 知らせ先 (中ボスの間) へ届く・呼んだ灰被りが消える
     private static void checkDefeat(MinecraftServer server, ServerLevel level, List<String> f) {
         AshSmith s = start(server, f);
         if (s == null) {
@@ -969,17 +949,13 @@ public final class AshSmithSelfTest {
         helper.moveTo(AshSmithArena.HOME.x + 3, AshSmithArena.FLOOR + 1, AshSmithArena.HOME.z, 0f, 0f);
         helper.addTag(AshSmith.SMITH_TAG);
         level.addFreshEntity(helper);
+        DEFEATED.clear();
         s.setHealth(1f);
         s.invulnerableTime = 0;
         s.hurt(s.damageSources().genericKill(), 1000f);
         check(!s.isAlive(), "the smith did not die", f);
-        UUID group = AshSmithBattle.lastGroup();
-        check(group != null && AshSmithBattle.done(level) && EmberBackState.of(level, group).ready(EmberBackState.Trial.EAST),
-                "the defeat did not make the east stone ready", f);
-        check(!EmberBackState.of(level, OTHER_GROUP).ready(EmberBackState.Trial.EAST), "the defeat made another group's east stone ready", f);
-        check(!AshSmithBattle.room().active() && !AshSmithArena.sealed(level), "the door did not reopen after the defeat", f);
+        check(DEFEATED.contains(s.getUUID()), "the defeat did not reach the room (bindRoom)", f);
+        clearFight(level);
         check(!helper.isAlive(), "the called thrall stayed after the defeat", f);
-        // 倒した周は、部屋に入っても戦いは始まらない (BossRoom は動かない)
-        check(AshSmithBattle.done(level), "done() should hold after the defeat", f);
     }
 }

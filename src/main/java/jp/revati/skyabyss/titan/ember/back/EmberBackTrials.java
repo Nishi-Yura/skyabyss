@@ -10,16 +10,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import java.util.function.BiConsumer;
 
 import javax.annotation.Nullable;
 
 import jp.revati.skyabyss.ModText;
 import jp.revati.skyabyss.SkyAbyss;
 import jp.revati.skyabyss.registry.ModBlocks;
-import jp.revati.skyabyss.rpg.Growth;
-import jp.revati.skyabyss.rpg.GrowthRules;
-import jp.revati.skyabyss.titan.dungeon.SealedGateBlock;
 import jp.revati.skyabyss.titan.dungeon.TitanBackData;
 import jp.revati.skyabyss.titan.dungeon.TitanBackTrials;
 import jp.revati.skyabyss.titan.ember.EmberIds;
@@ -32,7 +28,6 @@ import jp.revati.skyabyss.titan.group.Groups;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.particles.ParticleOptions;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -42,11 +37,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.world.Difficulty;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.CampfireBlock;
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.bus.api.EventPriority;
@@ -65,7 +56,7 @@ import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 //  - 休み場の記録 (着くと記録、倒れるとそこで目を覚ます)。焚き火にしゃがんで触れると順路のあきらめ
 //  - 倒れても持ち物と経験値は預かる (岩鯨と同じ部品 TitanBackTrials.keepBelongings)
 //  - グループの人にだけ送る音と粒 (soundTo・particlesTo)、熾の底の入口の扉
-// ほかの担当が呼ぶ API: markReady (鍛え手を倒した)、resetGroup、restSpawn、respawnCheckpoint
+// ほかの担当が呼ぶ API: resetGroup、restSpawn
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class EmberBackTrials {
     public static final int RESET_AFTER_IDLE = GroupProgress.IDLE_TICKS;
@@ -176,15 +167,6 @@ public final class EmberBackTrials {
         GroupGates.place(level, boxBlocks(HEART_DOOR), true);
     }
 
-    // ---------------------------------------------------------------- API
-    public static void markReady(ServerLevel level, UUID group, EmberBackState.Trial trial) {
-        EmberBackState state = EmberBackState.of(level, group);
-        if (state.ready(trial)) {
-            return;
-        }
-        state.markReady(trial);
-    }
-
     // 熾の底の門より奥 (門の下の螺旋・前室・熾の底)
     public static boolean pastGate(Vec3 pos) {
         return HEART_ANTE.aabb().inflate(1, 0, 1).contains(pos) || HEART.aabb().contains(pos)
@@ -256,11 +238,6 @@ public final class EmberBackTrials {
         CompoundTag tag = persisted(player);
         tag.remove(TAG_CHECKPOINT);
         tag.remove(TAG_CHECKPOINT_EPOCH);
-    }
-
-    // 倒れて目覚める休み場。順路では、その段の休み場で目覚める (32 の 2.4)
-    public static String respawnCheckpoint(java.util.UUID group, String cp) {
-        return cp;
     }
 
     // 休み場の復活位置 (焚き火の前の台の上。立てる場所を探す)
@@ -375,7 +352,7 @@ public final class EmberBackTrials {
         }
         int epoch = EmberBackState.of(back, player).epoch();
         String cp = validCheckpoint(tag, epoch);
-        BlockPos spawn = cp.isEmpty() ? ARRIVAL.above() : restSpawn(back, respawnCheckpoint(Groups.keyOf(player), cp));
+        BlockPos spawn = cp.isEmpty() ? ARRIVAL.above() : restSpawn(back, cp);
         REVIVING.add(player.getUUID());
         try {
             player.teleportTo(back, spawn.getX() + 0.5, spawn.getY(), spawn.getZ() + 0.5, player.getYRot(), 0f);
