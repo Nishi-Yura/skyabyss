@@ -17,6 +17,7 @@ import jp.revati.skyabyss.trial.TrialRoute;
 import jp.revati.skyabyss.trial.TrialRuntime;
 import jp.revati.skyabyss.trial.TrialSlot;
 import jp.revati.skyabyss.trial.raid.RaidCtx;
+import jp.revati.skyabyss.trial.raid.RaidRoom;
 import jp.revati.skyabyss.trial.raid.RaidRun;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -28,7 +29,7 @@ import net.minecraft.world.level.LightLayer;
 import net.neoforged.neoforge.common.util.FakePlayer;
 import net.neoforged.neoforge.common.util.FakePlayerFactory;
 
-// 潮殻のレイドの部屋 (TR1 真珠の灯り運び・TR2 貝の音合わせ・TR3 珊瑚の苗を守る) の自己テスト。SKYABYSS_SELFTEST_ONLY="tide raid"
+// 潮殻のレイドの順路 (歩 TR1・智は引かれた TR5/TR6・闘 TR3) の自己テスト。SKYABYSS_SELFTEST_ONLY="tide raid"
 // 二人組で順路を始め (部屋が三つ順に建つ)、各部屋を台本で解く。途中で全滅 (RaidRun.wipe) させて、部屋が最初の姿に戻ることも確かめる
 public final class TideRaidSelfTest {
     private TideRaidSelfTest() {
@@ -51,7 +52,7 @@ public final class TideRaidSelfTest {
 
     public static List<Step> steps() {
         return List.of(Step.once("tide raid (setup)", TideRaidSelfTest::setup), Step.until("tide raid TR1", s -> tr1(s)),
-                Step.until("tide raid TR2", s -> tr2(s)), Step.until("tide raid TR3", s -> tr3(s)), Step.once("tide raid (end)", TideRaidSelfTest::end));
+                Step.until("tide raid wit", s -> tr2(s)), Step.until("tide raid TR3", s -> tr3(s)), Step.once("tide raid (end)", TideRaidSelfTest::end));
     }
 
     private static void check(boolean ok, String what) {
@@ -85,7 +86,17 @@ public final class TideRaidSelfTest {
             parties.clearAll();
             a = fake("7a0b1d00-0000-4000-8000-0000000007a1", "tide_a");
             b = fake("7a0b1d00-0000-4000-8000-0000000007b2", "tide_b");
-            PartyData.Party party = parties.create(a.getUUID(), "tide_a");
+            // 引きは群れの id で決まる: 歩 TR1・闘 TR3 が引かれる群れを探す (智は TR5 か TR6)
+            PartyData.Party party = null;
+            for (int k = 0; k < 600; k++) {
+                parties.clearAll();
+                party = parties.create(a.getUUID(), "tide_a");
+                var d = jp.revati.skyabyss.trial.TrialCatalog.raidDraw(Titans.TIDE_SHELL,
+                        jp.revati.skyabyss.trial.TrialDraw.seed(jp.revati.skyabyss.trial.TrialData.worldSeed(back), party.id, Titans.TIDE_SHELL, 1));
+                if (d.size() == 3 && d.get(0).id().equals("TR1") && d.get(2).id().equals("TR3")) {
+                    break;
+                }
+            }
             parties.add(party, b.getUUID(), "tide_b");
             group = Groups.keyOf(a);
             clean();
@@ -126,13 +137,13 @@ public final class TideRaidSelfTest {
             F.add("TR1 was never solved");
         }
         if (!tr2Done) {
-            F.add("TR2 was never solved");
+            F.add("the wit room (TR5/TR6) was never solved");
         }
         if (!tr3Done) {
             F.add("TR3 was never solved");
         }
         if (F.isEmpty()) {
-            SkyAbyss.LOGGER.info("SELFTEST tide raid PASSED (TR1 dark hall, pearl carry, hand-over, wipe reset; TR2 shell pairs, wrong pair no damage, wipe reset; TR3 sapling bites, loss resets, three waves)");
+            SkyAbyss.LOGGER.info("SELFTEST tide raid PASSED (route TR1 / drawn wit room (TR5 or TR6) / TR3: TR1 dark hall, pearl carry, hand-over, wipe reset; wit room turn, wipe reset, solve; TR3 sapling bites, loss resets, three waves)");
         } else {
             F.forEach(s -> SkyAbyss.LOGGER.error("SELFTEST tide raid FAILED: {}", s));
         }
@@ -310,96 +321,85 @@ public final class TideRaidSelfTest {
         return false;
     }
 
-    // ---------------------------------------------------------------- TR2
+    // ---------------------------------------------------------------- 智 (TR5 か TR6。引かれたほう)
     private static boolean tr2(MinecraftServer server) {
         if (failed() || tr2Done) {
             return true;
         }
-        TideShellRoom r = room(TideShellRoom.class);
+        if (cleared(TideLightRoom.class) || cleared(TideMoonRoom.class)) {
+            check(phase >= 3, "the wit room was cleared before the script solved it (phase " + phase + ")");
+            tr2Done = true;
+            ticks = 0;
+            phase = 0;
+            return true;
+        }
+        RaidRoom r = room(TideLightRoom.class);
         if (r == null) {
-            return timedOut("TR2 (waiting for the room)");
+            r = room(TideMoonRoom.class);
+        }
+        if (r == null) {
+            return timedOut("wit room (waiting for the room)");
         }
         RaidCtx c = ctx();
+        boolean light = r instanceof TideLightRoom;
         switch (phase) {
             case 0 -> {
-                check(RaidRunSlot.is(c, "TR2"), "step 2 is not TR2 (" + c.roomId() + ")");
-                check(r.pairs() == 4 && r.shells() == 8, "two players should get 4 pairs, got " + r.pairs());
-                int[] seen = new int[5];
-                for (int i = 0; i < r.shells(); i++) {
-                    seen[r.toneOf(i)]++;
+                force(c);
+                check(c.roomId().equals(light ? "TR5" : "TR6"), "step 2 is not the expected wit room (" + c.roomId() + ")");
+                // 一つ動かして、全滅 → 動かしたものが戻る
+                if (light) {
+                    TideLightRoom l = (TideLightRoom) r;
+                    int[] n = l.pathNodes().get(0);
+                    wasBefore = l.facing(n[0], n[1]);
+                    l.onUse(c, a, l.mirrorPos(n[0], n[1]), false);
+                    check(l.facing(n[0], n[1]) != wasBefore, "TR5 click did not turn the mirror");
+                } else {
+                    TideMoonRoom m = (TideMoonRoom) r;
+                    wasBefore = m.phaseOf(0);
+                    m.onUse(c, a, m.dialPos(0), false);
+                    check(m.phaseOf(0) != wasBefore, "TR6 click did not turn the dial");
                 }
-                for (int t = 0; t < r.pairs(); t++) {
-                    check(seen[t] == 2, "tone " + t + " has " + seen[t] + " shells, not 2");
-                }
-                // 違う音の二つを、実際の入口 (onUse) から開ける。傷はなく、閉じる
-                int i = 0;
-                int j = 1;
-                while (r.toneOf(j) == r.toneOf(i)) {
-                    j++;
-                }
-                float hp = a.getHealth();
-                check(r.onUse(c, a, r.shellPos(c, i), false), "onUse did not take a shell click");
-                check(!r.onUse(c, a, c.origin().offset(-HX_EDGE, 1, 0), true), "onUse took a click on the wall");
-                r.open(c, j);
-                check(r.mistakes() == 1, "a wrong pair was not counted");
-                check(r.isOpen(i) && r.isOpen(j), "a wrong pair did not stay open to be seen");
-                r.open(c, firstOther(r, i, j));
-                check(!r.isOpen(firstOther(r, i, j)), "a third shell opened while the wrong pair was showing");
-                check(a.getHealth() >= hp, "a wrong pair hurt the player");
+                wipesBefore = RaidRun.of(group).wipes;
+                RaidRun.wipe(RaidRun.of(group), null);
                 next();
             }
             case 1 -> {
-                if (noneOpen(r)) {
-                    // 一組だけ揃えて、全滅 → 全部閉じる
-                    int i = 0;
-                    int j = -1;
-                    for (int k = 1; k < r.shells(); k++) {
-                        if (r.toneOf(k) == r.toneOf(i)) {
-                            j = k;
-                        }
+                if (RaidRun.of(group).phase == RaidRun.Phase.ACTIVE && RaidRun.of(group).wipes > wipesBefore) {
+                    if (light) {
+                        TideLightRoom l = (TideLightRoom) r;
+                        int[] n = l.pathNodes().get(0);
+                        check(l.facing(n[0], n[1]) == wasBefore, "the wipe left a mirror turned");
+                    } else {
+                        check(((TideMoonRoom) r).phaseOf(0) == wasBefore, "the wipe left a dial turned");
                     }
-                    r.open(c, i);
-                    r.open(c, j);
-                    check(r.counter() == 1 && r.isMatched(i) && r.isMatched(j), "a matching pair did not stay open");
-                    wipesBefore = RaidRun.of(group).wipes;
-                    RaidRun.wipe(RaidRun.of(group), null);
                     next();
-                } else if (timedOut("TR2 wrong pair closing")) {
+                } else if (timedOut("wit room wipe")) {
                     return true;
                 }
             }
             case 2 -> {
-                if (RaidRun.of(group).phase == RaidRun.Phase.ACTIVE && RaidRun.of(group).wipes > wipesBefore) {
-                    boolean any = false;
-                    for (int k = 0; k < r.shells(); k++) {
-                        any |= r.isOpen(k);
+                // 解く: 合わせて、枠組みが越えたと見るまで待つ
+                if (light) {
+                    TideLightRoom l = (TideLightRoom) r;
+                    for (int[] n : l.pathNodes()) {
+                        for (int k = 0; k < 4 && l.facing(n[0], n[1]) != l.correctFacing(n[0], n[1]); k++) {
+                            l.onUse(c, a, l.mirrorPos(n[0], n[1]), false);
+                        }
                     }
-                    check(!any && r.counter() == 0, "the wipe left shells open");
-                    next();
-                } else if (timedOut("TR2 wipe")) {
-                    return true;
-                }
-            }
-            case 3 -> {
-                // 解く: 音ごとに二つ
-                for (int t = 0; t < r.pairs(); t++) {
-                    int first = -1;
-                    for (int k = 0; k < r.shells(); k++) {
-                        if (r.toneOf(k) == t) {
-                            if (first < 0) {
-                                first = k;
-                                r.open(c, k);
-                            } else {
-                                r.open(c, k);
-                            }
+                } else {
+                    TideMoonRoom m = (TideMoonRoom) r;
+                    for (int d = 0; d < TideMoonRoom.DIALS; d++) {
+                        for (int k = 0; k < TideMoonRoom.PHASES && m.phaseOf(d) != m.correctOf(d); k++) {
+                            m.onUse(c, a, m.dialPos(d), false);
                         }
                     }
                 }
-                check(r.isComplete(), "all pairs opened but the room is not complete");
-                tr2Done = true;
-                ticks = 0;
-                phase = 0;
-                return true;
+                next();
+            }
+            case 3 -> {
+                if (timedOut("wit room clear")) {
+                    return true;
+                }
             }
             default -> {
                 return true;
@@ -408,25 +408,7 @@ public final class TideRaidSelfTest {
         return false;
     }
 
-    private static boolean noneOpen(TideShellRoom r) {
-        for (int k = 0; k < r.shells(); k++) {
-            if (r.isOpen(k)) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    private static final int HX_EDGE = TideShellRoom.HX;
-
-    private static int firstOther(TideShellRoom r, int i, int j) {
-        for (int k = 0; k < r.shells(); k++) {
-            if (k != i && k != j) {
-                return k;
-            }
-        }
-        return i;
-    }
+    private static int wasBefore;
 
     // ---------------------------------------------------------------- TR3
     private static boolean tr3(MinecraftServer server) {
