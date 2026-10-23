@@ -142,9 +142,6 @@ public final class ShrineSelfTest {
                 check(f, reachable(level, c), titan + ": the stele cannot be walked to from the approach path");
                 String dark = unlit(level, c);
                 check(f, dark == null, titan + ": a walkable floor has no light nearby (mobs can spawn): " + dark);
-                if (System.getenv("SKYABYSS_SHRINE_DUMP") != null) {
-                    jp.revati.skyabyss.dev.StructureDump.queueRange(level, "shrine_" + titan, c.offset(-13, -3, -14), c.offset(13, 26, 46), java.util.Map.of());
-                }
                 check(f, TitanShrine.ensure(server, titan).equals(c) && c.equals(TitanShrine.posOf(server, titan)), titan + ": the shrine moved when ensured again");
                 a.setPos(c.getX() + 0.5, c.getY(), c.getZ() + 2.5);
                 b.setPos(c.getX() + 0.5, c.getY(), c.getZ() + 9.5);

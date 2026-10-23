@@ -425,6 +425,7 @@ final class ShrineArchitect {
             for (int sx : new int[] {-3, 3}) {
                 b.set(sx, h, z, t.trim());
                 b.set(sx, h - 1, z, t.foundation());
+                b.floors.add(new int[] {sx, h, z});
             }
         }
         // 段: z-1 の床が z より高いとき、z-1 のマスの床を階段 (北向き) にする
