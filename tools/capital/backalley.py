@@ -369,6 +369,22 @@ class BackAlley:
                 for yy in range(y + 1, y + 4):
                     if v.get(x, yy, z) in (None, 'cave_air'):
                         v.set(x, yy, z, 'cave_air')
+        # 壁の魂の松明: 18 度ごと・7 段ごと (段の上の空いた所だけ)。間の暗がりの中に、点々と青い灯り
+        for k in range(20):
+            ang = k * math.pi / 10 + (math.pi / 20 if k % 2 else 0)
+            ox_, oz_ = math.cos(ang), math.sin(ang)
+            if abs(ox_) >= abs(oz_):
+                outward = 'east' if ox_ > 0 else 'west'
+            else:
+                outward = 'south' if oz_ > 0 else 'north'
+            facing = {'east': 'west', 'west': 'east', 'south': 'north', 'north': 'south'}[outward]
+            tx = int(round(cx + ox_ * (R - 1)))
+            tz = int(round(cz + oz_ * (R - 1)))
+            wx_ = tx + {'east': 1, 'west': -1}.get(outward, 0)
+            wz_ = tz + {'south': 1, 'north': -1}.get(outward, 0)
+            for yy in range(top - 3 - (k % 3) * 2, bottom + 2, -7):
+                if v.get(tx, yy, tz) == 'cave_air' and v.get(tx, yy - 1, tz) == 'cave_air' and v.get(wx_, yy, wz_) not in (None, 'cave_air'):
+                    v.set(tx, yy, tz, 'soul_wall_torch[facing=%s]' % facing)
         # 踊り場: 壁の外に小部屋 (9×9、高さ 5)。段から 3 マス幅で壁を抜く
         for name, (th, y) in landing_at.items():
             ox, oz = math.cos(th), math.sin(th)
@@ -429,6 +445,7 @@ class BackAlley:
                 v.set(mx - 3, y + 1, mz + 2, 'skeleton_skull[rotation=6]')
                 v.set(mx - 2, y + 5, mz + 2, 'soul_lantern[hanging=true,waterlogged=false]')
             v.set(mx + 2, y + 5, mz - 2, 'soul_lantern[hanging=true,waterlogged=false]')
+            v.set(mx, y + 5, mz, 'lantern[hanging=true,waterlogged=false]')   # 人のいた所だけ温かい灯り
             self.mark(name, mx, y + 1, mz)
         # ---------------------------------------------------------------- 底の境
         # 縦穴の底の床: 輪の象嵌 (半径 3 と 6.5) と、四つの灯りの台
@@ -487,6 +504,9 @@ class BackAlley:
                 v.set(cx + sx, bottom + 7, z, 'deepslate_tiles')
             v.set(cx, bottom + 8, z, 'chain[axis=y,waterlogged=false]')
             v.set(cx, bottom + 7, z, 'soul_lantern[hanging=true,waterlogged=false]')
+            # 柱の内向きの面に魂の松明 (大広間の真ん中を照らす)
+            v.set(cx - 3, bottom + 3, z, 'soul_wall_torch[facing=east]')
+            v.set(cx + 3, bottom + 3, z, 'soul_wall_torch[facing=west]')
         # 壁の龕 (x = cx ± 6 に 1 マスの窪み、高さ 2): 骨・頭蓋・蝋燭・蜘蛛の巣。龕の上に黒い旗
         for k, z in enumerate(range(cz + R + 3, gz - 1, 4)):
             for sx, facing, rot in ((-6, 'east', 4), (6, 'west', 12)):
