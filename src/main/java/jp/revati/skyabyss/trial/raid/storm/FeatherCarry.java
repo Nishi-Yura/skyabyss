@@ -607,4 +607,50 @@ public final class FeatherCarry extends RaidRoom {
     public AABB perchBox(RaidCtx ctx) {
         return new AABB(ctx.origin()).inflate(HX, 4, HZ);
     }
+
+    // 行き先の印: 運んでいる間は空いている止まり木 (運び手にいちばん近い台)、誰も運んでいなければ、まだ届けていない羽の場所
+    @Override
+    @Nullable
+    public BlockPos guideTarget(RaidCtx ctx) {
+        if (isComplete()) {
+            return null;
+        }
+        if (carried) {
+            ServerPlayer carrier = null;
+            for (ServerPlayer p : ctx.standing()) {
+                if (hasFeather(p)) {
+                    carrier = p;
+                    break;
+                }
+            }
+            int best = -1;
+            double bd = Double.MAX_VALUE;
+            for (int k = 0; k < PERCH_Z.length; k++) {
+                if (perchTaken[k]) {
+                    continue;
+                }
+                double d = carrier == null ? k : Math.hypot(carrier.getX() - (ctx.origin().getX() + PERCH_X + 0.5), carrier.getZ() - (ctx.origin().getZ() + PERCH_Z[k] + 0.5));
+                if (d < bd) {
+                    bd = d;
+                    best = k;
+                }
+            }
+            return best < 0 ? null : ctx.origin().offset(PERCH_X, 2, PERCH_Z[best]);
+        }
+        for (int i = 0; i < FEATHERS; i++) {
+            if (!delivered[i]) {
+                return home[i].above();
+            }
+        }
+        return null;
+    }
+
+    // 一人の台本用: 雷の予告が出ているか (赤い輪が見えている)
+    public boolean strikePending() {
+        return pending;
+    }
+
+    public boolean delivered(int i) {
+        return delivered[i];
+    }
 }

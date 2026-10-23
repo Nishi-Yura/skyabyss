@@ -306,4 +306,10 @@ public final class EmberChainPath extends EmberRoom {
     BlockPos exitStep(RaidCtx ctx) {
         return ctx.local(0, 3, -24);
     }
+
+    // 行き先の印: 奥の下り段 (戸の前)
+    @Override
+    public BlockPos guideTarget(RaidCtx ctx) {
+        return done ? null : ctx.local(0, 2, -25);
+    }
 }
