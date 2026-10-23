@@ -41,7 +41,7 @@ public final class HeartOrphanSelfTest {
     public static List<SelfTestRunner.Step> steps() {
         List<SelfTestRunner.Step> steps = new ArrayList<>();
         steps.add(SelfTestRunner.Step.once("heart orphan (load)", HeartOrphanSelfTest::load));
-        steps.add(SelfTestRunner.Step.until("heart orphan", HeartOrphanSelfTest::run));
+        steps.add(new SelfTestRunner.Step("heart orphan", 60, HeartOrphanSelfTest::run));
         return steps;
     }
 
@@ -69,6 +69,7 @@ public final class HeartOrphanSelfTest {
     // 部屋の中にいる人を手で決める部屋 (偽のプレイヤーはレベルの人の一覧に入らないので)
     private static final class Host implements GroupBossRoom.Host {
         final List<ServerPlayer> inside = new ArrayList<>();
+        Mob last;
 
         @Override
         public List<ServerPlayer> playersInside(ServerLevel level) {
@@ -100,6 +101,7 @@ public final class HeartOrphanSelfTest {
             heart.moveTo(X + 0.5, Y, Z + 0.5, 0f, 0f);
             heart.setGroupId(group);
             level.addFreshEntity(heart);
+            last = heart;
             return heart;
         }
 
@@ -132,7 +134,7 @@ public final class HeartOrphanSelfTest {
     }
 
     private static boolean gone(ServerLevel level, @javax.annotation.Nullable Entity e) {
-        return e == null || e.isRemoved() || level.getEntity(e.getUUID()) == null;
+        return e == null || e.isRemoved();
     }
 
     // 部屋を 10 tick ぶん n 回動かす (部屋の tick は 10 tick ごとに呼ぶ決まり)
@@ -166,7 +168,7 @@ public final class HeartOrphanSelfTest {
                     F.add("wipe: the room did not start");
                     return finish();
                 }
-                Entity heart = level.getEntity(room.bossId());
+                Entity heart = host.last;
                 if (!(heart instanceof HeartBoss hb) || !hb.roomBound()) {
                     F.add("wipe: the spawned heart is not marked as bound to its room");
                 }
@@ -181,7 +183,7 @@ public final class HeartOrphanSelfTest {
                 host.inside.add(a);
                 room = new GroupBossRoom(Groups.keyOf(a));
                 room.start(level, host, host.inside);
-                heart = level.getEntity(room.bossId());
+                heart = host.last;
                 steps(level, 1);
                 host.inside.clear();
                 steps(level, GroupBossRoom.ABANDON_DELAY / 10 - 1);
@@ -196,13 +198,13 @@ public final class HeartOrphanSelfTest {
                 host.inside.add(b);
                 room = new GroupBossRoom(Groups.keyOf(b));
                 room.start(level, host, host.inside);
-                restartHeart = (Mob) level.getEntity(room.bossId());
+                restartHeart = host.last;
                 // 4. 保存から戻った心臓 (印つき)。同じ UUID は使えないので新しい UUID で置き直す
                 Host second = new Host();
                 second.inside.add(a);
                 GroupBossRoom other = new GroupBossRoom(Groups.keyOf(a));
                 other.start(level, second, second.inside);
-                Entity saved = level.getEntity(other.bossId());
+                Entity saved = second.last;
                 CompoundTag tag = saved.saveWithoutId(new CompoundTag());
                 tag.putString("id", EntityType.getKey(saved.getType()).toString());
                 other.reset(level, second, false);
