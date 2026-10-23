@@ -1,6 +1,6 @@
 # 引き継ぎ
 
-「天と淵のあいだ」(NeoForge 1.21.1)。今の仕様は `docs/design/README.md` の索引から読む（コードが正）。未決は `docs/design/00_decisions_needed.md` にだけある。リポジトリは github.com/Nishi-Yura/skyabyss、作業の幹は `m1-sky-pass`、途中の枝は `wip/*`。版は `gradle.properties` の `mod_version`（今 0.5.2）。
+「天と淵のあいだ」(NeoForge 1.21.1)。今の仕様は `docs/design/README.md` の索引から読む（コードが正）。未決は `docs/design/00_decisions_needed.md` にだけある。リポジトリは github.com/Nishi-Yura/skyabyss、作業の幹は `m1-sky-pass`、途中の枝は `wip/*`。版は `gradle.properties` の `mod_version`（今 0.5.3）。
 
 ## 1. 各システムの状態
 
@@ -49,7 +49,7 @@
 
 ## 5. 残っている課題
 
-- **0.5.3**: 版を上げて jar を作り、`docs/review/playtest_0.5.3.md` の順で試遊してもらう。声を受けて直す。
+- **0.5.3**: 版は上げてある。jar を作り、`docs/review/playtest_0.5.3.md` の順で試遊してもらう。声を受けて直す。
 - **答え待ち**（10-23 に挙げたもののうち、答えを確かめていないもの）: レイドの部屋の 12 問（各ふたつ）、町の施設を見つけやすくする 3 案。
 - **作り込み**: レイドの部屋の明るさ（全体に暗め）、文の総点検（10-23 以降に足した碑・心の声・生き残り・手引き）。
 - **部屋の報い**: 部屋を越えると経験値・紋・碑文。素材・共鳴の欠片・称号（29 の旧い報い）は出ない。足すかは判断待ち。
