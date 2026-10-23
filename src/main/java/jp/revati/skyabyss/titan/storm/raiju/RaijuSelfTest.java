@@ -124,9 +124,9 @@ public final class RaijuSelfTest {
 
     private static void checkAssets(List<String> failures) {
         List<String> paths = new ArrayList<>(List.of(
-                "/assets/skyabyss/geo/entity/raiju.geo.json",
-                "/assets/skyabyss/textures/entity/raiju.png",
-                "/assets/skyabyss/textures/entity/raiju_glowmask.png",
+                "/assets/skyabyss/geo/entity/raiju_lowpoly.geo.json",
+                "/assets/skyabyss/textures/lowpoly/raiju.png",
+                "/assets/skyabyss/textures/lowpoly/raiju_glowmask.png",
                 "/assets/skyabyss/animations/entity/raiju.animation.json",
                 "/assets/skyabyss/textures/gui/boss/raiju_frame.png",
                 "/assets/skyabyss/textures/gui/boss/raiju_notches.png",

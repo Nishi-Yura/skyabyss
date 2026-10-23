@@ -149,12 +149,12 @@ public class LowPolyGeoRenderer<T extends Entity & GeoAnimatable> extends GeoEnt
 
         @Override
         public ResourceLocation getModelResource(T animatable) {
-            return LowPoly.enabled ? (LowPoly.debug ? debugGeo : lowGeo) : super.getModelResource(animatable);
+            return LowPoly.enabled ? (LowPoly.debug ? debugGeo : lowGeo) : LowPoly.cubeOr(super.getModelResource(animatable), lowGeo);
         }
 
         @Override
         public ResourceLocation getTextureResource(T animatable) {
-            return LowPoly.enabled ? (LowPoly.debug ? DEBUG_TEXTURE : atlas) : super.getTextureResource(animatable);
+            return LowPoly.enabled ? (LowPoly.debug ? DEBUG_TEXTURE : atlas) : LowPoly.cubeOr(super.getTextureResource(animatable), atlas);
         }
     }
 

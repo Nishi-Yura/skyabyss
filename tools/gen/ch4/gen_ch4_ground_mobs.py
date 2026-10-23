@@ -188,7 +188,7 @@ def install():
             gf = os.path.join(ROOT, d + "glowmask_flared.png")
             if os.path.exists(gf):
                 shutil.copyfile(gf, os.path.join(A, "textures", "lowpoly", mob + "_flared_glowmask.png"))
-            g = json.load(open(os.path.join(A, "geo", "entity", "ash_thrall.geo.json"), encoding="utf-8"))
+            g = json.load(open(os.path.join(ROOT, "tools", "sources", "geo_cube", "geo", "entity", "ash_thrall.geo.json"), encoding="utf-8"))
             g["minecraft:geometry"][0]["description"]["identifier"] = "geometry." + mob
             wjson(os.path.join(A, "geo", "entity", mob + ".geo.json"), g, indent=None)
             for suffix in ("", "_glowmask", "_flared", "_flared_glowmask"):
