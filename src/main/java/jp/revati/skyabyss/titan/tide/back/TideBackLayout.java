@@ -48,7 +48,8 @@ public final class TideBackLayout {
     // 31: 順路の入口の箱 (潮門の内側の段) の床の灯り (R6 の通しで真っ暗だった)
     // 32: 封じた潮の広間の灯り・壁の柱を外した (trial/RouteSeals。2026-10-22)
     // 33: 心臓の間 (殻の底) と休み場 heart を体の外 (trial/raid/InstanceArenas) へ移した
-    public static final int LAYOUT_VERSION = 33;
+    // 34: 巨神の中は建てない (外見だけ。体・甲羅の溝の手直し・潮門の到着の段と、体の外の心臓の間)。2026-10-23
+    public static final int LAYOUT_VERSION = 34;
     // 生成の海 (水の最上段は y=62)
     public static final int SEA = 63;
     public static final int SEA_FLOOR = 41;

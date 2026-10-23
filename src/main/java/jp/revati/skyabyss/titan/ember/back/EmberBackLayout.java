@@ -33,7 +33,8 @@ public final class EmberBackLayout {
     // 31: 順路の入口の箱 (喉の坂の休み場) の灯り。周回の灰の道の前の湖 (32 の 4 章、R5)
     // 32: 封じた炉心の広間に歩く道の灯りを置かない (RouteLamps。trial/RouteSeals)
     // 33: 熾の底と前室を体の外 (trial/raid/InstanceArenas) へ移した
-    public static final int LAYOUT_VERSION = 33;
+    // 34: 巨神の中は建てない (外見だけ。体・地の下・皮の割れ目の栓・口と、体の外の熾の底)。2026-10-23
+    public static final int LAYOUT_VERSION = 34;
     // 灰の原のいちばん上のブロックの y (dimension/ember_back.json の層と合わせる)
     public static final int PLAIN_TOP = 63;
     // 体の中心 (遠くへ歩いたかを見る。体の長さ 621 の半分に余白)

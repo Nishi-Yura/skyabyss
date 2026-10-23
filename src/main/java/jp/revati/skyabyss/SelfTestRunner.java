@@ -79,8 +79,6 @@ public final class SelfTestRunner {
         List<Step> steps = new ArrayList<>();
         // 岩鯨の背: 建てる・調べる (番兵を動かす段は最後。サーバーを止めるので)
         steps.addAll(TitanBackSelfTest.buildSteps());
-        // 岩鯨の背の拡大 (BackScale・部屋の大きさ・幕・鐘・初回だけの部屋・建て直しで keep.* が残る)。docs/design/26。SKYABYSS_SELFTEST_ONLY="whale scale"
-        steps.add(Step.once("whale scale", jp.revati.skyabyss.titan.dungeon.WhaleScaleSelfTest::runSelfTest));
         // グループ (パーティ・一人) の共通部分: 部屋の占有・戦いの参加者・個人の影・乗っている人の数え方・放置の分け前。docs/design/10 の 10 章
         steps.add(Step.once("group", jp.revati.skyabyss.titan.group.GroupSelfTest::runSelfTest));
         // 倒れた参加者の再入場 (20 秒の待ち・回数・全滅でやり直し・ゲームルール)。docs/design/02 の 4.2、10 の 10.4
@@ -273,8 +271,6 @@ public final class SelfTestRunner {
         // 雷翼の巨神 (窓・止まり木・昇り風・一体だけ・記録・戻る先・背中の結びつけ)
         steps.add(Step.once("storm (load)", jp.revati.skyabyss.titan.storm.StormSelfTest::load));
         steps.add(Step.once("storm", 50, jp.revati.skyabyss.titan.storm.StormSelfTest::runSelfTest));
-        // 雷翼の背 (鳥の形・看板・拍・鏡・柱・歩ける所・リセット)。建てたあと 100 tick 待ってから数える
-        steps.addAll(jp.revati.skyabyss.titan.storm.back.StormBackSelfTest.steps());
         // 三章「風に逆らう嵐」(予兆 3 拍・小要素・風見の向き・影と巨神の見せ場・余韻)。docs/design/12 の 12 章
         steps.add(Step.once("storm chapter (load)", jp.revati.skyabyss.titan.storm.chapter.StormChapterSelfTest::load));
         steps.add(Step.until("storm chapter (wait)", jp.revati.skyabyss.titan.storm.chapter.StormChapterSelfTest::ready));
@@ -311,8 +307,6 @@ public final class SelfTestRunner {
         steps.add(Step.once("storm raid (load)", jp.revati.skyabyss.trial.raid.storm.StormRaidSelfTest::load));
         steps.add(Step.until("storm raid (wait)", jp.revati.skyabyss.trial.raid.storm.StormRaidSelfTest::ready));
         steps.add(Step.once("storm raid", 5, jp.revati.skyabyss.trial.raid.storm.StormRaidSelfTest::runSelfTest));
-        // 潮殻の背の本番 (島・潮の溜め・三つの試練・リセット)。水を流してから数える段がある
-        steps.addAll(jp.revati.skyabyss.titan.tide.back.TideBackSelfTest.steps());
         // 二章「引く海」(予兆・潮見の貝・大干潮・小要素)。SKYABYSS_SELFTEST_ONLY=ch2
         steps.addAll(jp.revati.skyabyss.titan.tide.chapter.TideChapterSelfTest.steps());
         // 二章の地上 (34 の C2: 塩の蔵・塩の道・難破船・支度の段 2 本)。SKYABYSS_SELFTEST_ONLY="ch2 ground"
@@ -324,8 +318,6 @@ public final class SelfTestRunner {
         steps.addAll(jp.revati.skyabyss.titan.storm.StormTelegraphSelfTest.steps());
         // 余燼の骨組み (ディメンション・熱の API・部屋の箱・ID)。docs/design/13_ember.md の 11章
         steps.addAll(jp.revati.skyabyss.titan.ember.EmberSkeletonSelfTest.steps());
-        // 余燼の背の体と広間 (体の穴・歩いて行ける所・液体・看板・石と門・リセット・熱)。13 の 18章
-        steps.addAll(jp.revati.skyabyss.titan.ember.back.EmberBackSelfTest.steps());
         // 余燼の地上 (巨神・熱の口・戻る先・温石・モデルのデータ)。13 の 2章
         steps.addAll(jp.revati.skyabyss.titan.ember.EmberSelfTest.steps());
         // 四章 (余燼) の予兆・小要素・夜の浮上・余韻 (P4d)。13 の 17 章
@@ -335,8 +327,6 @@ public final class SelfTestRunner {
         // 余燼の心臓 (熾の底・区画・冷え・10 の技・凍え・報酬・天の鍵の四つ目・撃破)。13 の 5.3節
         steps.addAll(jp.revati.skyabyss.titan.ember.heart.EmberHeartSelfTest.steps());
         steps.add(Step.once("titan end (reset after ember heart)", jp.revati.skyabyss.titan.end.TitanEndSelfTest::resetAll));
-        // 余燼の三つの試練 (灰の道・鍛えの間・火守り)。13 の 4 章。建てたあと 100 tick 待ってから検査する
-        steps.addAll(jp.revati.skyabyss.titan.ember.back.trial.EmberTrialSelfTest.steps());
         // 余燼の中ボス 灰の鍛え手 (技の時間と傷・怒り・報酬・一人で倒せる数値)。東の石の記録を残すので、余燼の背の試練の検査のあとに置く
         steps.addAll(jp.revati.skyabyss.titan.ember.smith.AshSmithSelfTest.steps());
         // 建築の監査 (階段の向き・段差・埋まり・戸・はしご・地形との関係。docs/design/08)。SKYABYSS_SELFTEST_ONLY="build audit" でこれだけ流せる
@@ -355,15 +345,12 @@ public final class SelfTestRunner {
         steps.addAll(jp.revati.skyabyss.trial.raid.RaidSoloSelfTest.steps());
         // レイドの部屋の碑と心の声と伝承 (十二の部屋)。SKYABYSS_SELFTEST_ONLY="raid lore"
         steps.add(Step.once("raid lore", jp.revati.skyabyss.trial.raid.RaidLoreSelfTest::run));
-        steps.addAll(jp.revati.skyabyss.trial.RouteWalkSelfTest.steps());
         // 二人の試遊 (2026-10-22): 敵の無敵の間・背の耐久。SKYABYSS_SELFTEST_ONLY="combat rules"
         steps.addAll(jp.revati.skyabyss.combat.CombatRulesSelfTest.steps());
         // 順路の部屋が分かれている (封じを壁として歩く)。SKYABYSS_SELFTEST_ONLY="route rooms"
         steps.addAll(jp.revati.skyabyss.trial.RouteRoomsSelfTest.steps());
         steps.addAll(jp.revati.skyabyss.trial.RoutePartySelfTest.steps());
         steps.addAll(jp.revati.skyabyss.titan.BackBuildsSelfTest.steps());
-        // 区画の写し (写せるセルを区画へ写して動かす)。docs/design/32 の 5 章。SKYABYSS_SELFTEST_ONLY="trial slot"
-        steps.addAll(jp.revati.skyabyss.trial.TrialSlotSelfTest.steps());
         // 巨神の祠・歌片・巨神の見え方。docs/design/32 の 3 章。SKYABYSS_SELFTEST_ONLY="trial shrine"
         steps.addAll(jp.revati.skyabyss.titan.shrine.ShrineSelfTest.steps());
         return steps;

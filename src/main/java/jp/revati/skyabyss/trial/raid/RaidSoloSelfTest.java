@@ -28,7 +28,7 @@ import net.neoforged.neoforge.common.util.FakePlayer;
 // 偽の人一人ずつで同時に建てて動かし、台本 (RaidSolo) で最後まで越えるのを見る。SKYABYSS_SELFTEST_ONLY="raid solo"
 //  - 部屋は各巨神の背の次元の、区画の枠の外 (33 番目の枠) に横へ並べて建てる。人はそれぞれ別のグループ (一人)
 //  - 毎 tick: 台本 → 部屋の tick。体力は毎 tick 戻す。倒れた・部屋が失敗を宣言したら、やり直し (reset → start) を数える (3 回まで)
-//  - 越えたか・かかった秒・やり直しの数を記録に出す。目的の帯の一行目 (始まった直後の objectiveKey) が lang にあるか、行き先の印も見る
+//  - 建てた部屋が閉じているか (休み場から空気を辿って箱の外へ抜けない)。越えたか・かかった秒・やり直しの数を記録に出す。目的の帯の一行目 (始まった直後の objectiveKey) が lang にあるか、行き先の印も見る
 public final class RaidSoloSelfTest {
     private RaidSoloSelfTest() {
     }
@@ -126,6 +126,11 @@ public final class RaidSoloSelfTest {
             if (ctx.cell() == null) {
                 FAILS.add(id + ": no cell was built");
                 continue;
+            }
+            // 部屋の監査: 休み場から空気を辿って、部屋の箱の外へ抜けない (閉じた一室)
+            String leak = jp.revati.skyabyss.titan.dungeon.TitanBackSelfTest.leak(back, ctx.cell().rest(), ctx.cell().bounds().inflate(1));
+            if (leak != null) {
+                FAILS.add(id + ": the room is not sealed, air reaches " + leak);
             }
             RaidSolo.Script script = RaidSolo.of(id);
             if (script == null) {

@@ -73,7 +73,8 @@ public final class TitanBackLayout {
     //     周回のグループだけが wp へ運ばれ、前の谷を越えて W0 へ入る (trial/LongWalk)
     // 32: 封じた鼓動の間・入口の通路・体内への階段の飾りと灯りを外した (trial/RouteSeals。2026-10-22「誰も見ない豪華な建築は省いて」)
     // 33: 心臓の間を体の外 (区画 0 番の枠の封じた部屋。trial/raid/InstanceArenas) へ移した
-    public static final int LAYOUT_VERSION = 33;
+    // 34: 巨神の中は建てない (外見だけ。体・背の上の飾り・到着の台と、体の外の心臓の間)。2026-10-23
+    public static final int LAYOUT_VERSION = 34;
 
     // ---------------------------------------------------------------- 地表
     // 尾の付け根の背の広場 (到着) と、背の中ほどの祠。祠の階段は 1 段ごとに 1 下がり、入口の通路の南の端 (z 15) で床に着く

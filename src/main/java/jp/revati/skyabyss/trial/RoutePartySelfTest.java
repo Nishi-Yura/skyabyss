@@ -25,8 +25,8 @@ import net.neoforged.neoforge.common.util.FakePlayer;
 import net.neoforged.neoforge.common.util.FakePlayerFactory;
 
 // 二人以上の一行の順路 (docs/design/32 の 2.2〜2.4) の自己テスト。段の名前は "route party"。偽の人の二人組 (同じパーティ) で、岩鯨の背で:
-//  - 入口の箱: 一行の全員が箱に入るまで始まらない (一人だけでは待つ)。そろうと予告のあと始まり、二人とも段 1 の休み場へ運ばれる
-//  - 途中参加: 順路が動いてからパーティに入った人は、箱に立っても加われず、越えたあとの運びにも乗らない
+//  - 入口の箱 (乗り込むと着く到着の台): 一行の全員が箱に入るまで始まらない (一人だけでは待つ)。そろうと予告のあと始まり、二人とも段 1 の休み場へ運ばれる
+//  - 途中参加: 順路が動いてからパーティに入って到着の台に着いた人は、今の部屋へ運ばれて参加者になり、次の運びにも乗る
 //  - あきらめ: 一人の提案では成立しない。もう一人が「いいえ」なら取りやめ、30 秒の返事がなければ流れる、全員が「はい」で終わる
 //  - 祠から (周回): 輪の二人を、段 1 の写しの写しが済むのを待ってから、二人とも区画の写しの休み場へ運ぶ
 // 祠の輪の数え方 (サーバーの人の一覧) は偽の人では確かめられないので、輪の中の人を渡す TrialRoute.startSoon から確かめる
@@ -94,21 +94,19 @@ public final class RoutePartySelfTest {
             check(f, near(a, back, titan, draw, 1) && near(b, back, titan, draw, 1), "the two were not both carried to the first rest: " + a.position() + " / " + b.position());
             check(f, TrialRoute.isParticipant(back, group, a.getUUID()) && TrialRoute.isParticipant(back, group, b.getUUID()), "the party record misses one of the two");
 
-            // ---- 途中参加: 始まったあとに入った人は加われない
+            // ---- 途中参加: 始まったあとに乗り込んで到着の台に着いた仲間は、今の部屋へそのまま運ばれ、参加者になる (docs/design/32 の 2.2)
             parties.add(party, c.getUUID(), "party_c");
             check(f, Groups.keyOf(c).equals(group), "the late member did not join the party");
             c.setPos(door);
             TrialRoute.tick(back, titan, players, t1 + 2000);
-            TrialRoute.tick(back, titan, players, t1 + 2000 + TrialRoute.ENTRY_WAIT + 10);
-            check(f, !TrialRoute.isParticipant(back, group, c.getUUID()), "a member who joined after the start became a participant");
-            check(f, TrialRoute.step(back, group) == 1, "a late member standing in the box changed the route (step " + TrialRoute.step(back, group) + ")");
-            Vec3 cAt = c.position();
+            check(f, TrialRoute.isParticipant(back, group, c.getUUID()), "a member who boarded after the start did not become a participant");
+            check(f, near(c, back, titan, draw, 1), "the late member was not carried into the current room: " + c.position());
+            check(f, TrialRoute.step(back, group) == 1, "a late member changed the route (step " + TrialRoute.step(back, group) + ")");
             TrialRoute.onCleared(back, group, titan, TrialRoute.keyOf(titan, draw, 1), null);
             TrialRoute.flushPending();
             TrialRoute.tick(back, titan, players, t1 + 4000);
             check(f, TrialRoute.step(back, group) == 2, "clearing the first trial did not move the party on (step " + TrialRoute.step(back, group) + ")");
-            check(f, near(a, back, titan, draw, 2) && near(b, back, titan, draw, 2), "the two were not both carried to the second rest");
-            check(f, c.position().distanceTo(cAt) < 0.5, "the late member was carried along: " + c.position());
+            check(f, near(a, back, titan, draw, 2) && near(b, back, titan, draw, 2) && near(c, back, titan, draw, 2), "the three were not all carried to the second room");
             parties.remove(c.getUUID());
             c.setPos(cAway);
 
@@ -169,7 +167,7 @@ public final class RoutePartySelfTest {
             parties.restore(snapshot, server.registryAccess());
         }
         if (f.isEmpty()) {
-            SkyAbyss.LOGGER.info("SELFTEST route party PASSED (entry box waits for the whole party, late joiners stay out, abandon needs every yes and expires, the shrine carries the ring together)");
+            SkyAbyss.LOGGER.info("SELFTEST route party PASSED (arrival pad waits for the whole party and carries it into room 1, late boarders rejoin the current room, abandon needs every yes and expires, the shrine carries the ring together)");
         } else {
             for (String s : f) {
                 SkyAbyss.LOGGER.error("SELFTEST route party FAILED: {}", s);

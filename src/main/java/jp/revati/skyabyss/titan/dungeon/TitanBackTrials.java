@@ -342,7 +342,7 @@ public final class TitanBackTrials {
     private TitanBackTrials() {
     }
 
-    // 戸口の位置の一覧 (閉じている戸・開いている戸の全部。壁の穴の検査 (WhaleScaleSelfTest) が使う)
+    // 戸口の位置の一覧 (閉じている戸・開いている戸の全部)
     static List<List<BlockPos>> allDoorLists() {
         List<List<BlockPos>> all = new ArrayList<>(CLOSED_GATES);
         all.addAll(OPEN_GATES);

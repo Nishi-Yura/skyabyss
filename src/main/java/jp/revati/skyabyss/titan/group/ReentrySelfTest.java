@@ -37,7 +37,6 @@ public final class ReentrySelfTest {
                 rule(server, f);
                 pure(f);
                 heartRoom(server, server.overworld(), f);
-                hall(server, back, f);
             }
         } catch (RuntimeException e) {
             SkyAbyss.LOGGER.error("SELFTEST heart reentry crashed", e);
@@ -263,9 +262,4 @@ public final class ReentrySelfTest {
         }
     }
 
-    // 岩鯨の中ボスの広間 (TitanBackTrials の広間)。パッケージの外から触れないので TitanBackSelfTest 側で調べる
-    private static void hall(MinecraftServer server, ServerLevel back, List<String> f) {
-        setLimit(server, 2);
-        jp.revati.skyabyss.titan.dungeon.TitanBackSelfTest.checkHallReentry(back, f);
-    }
 }

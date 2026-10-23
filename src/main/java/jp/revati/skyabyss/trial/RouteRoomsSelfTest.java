@@ -1,23 +1,32 @@
 package jp.revati.skyabyss.trial;
 
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.UUID;
+
+import com.mojang.authlib.GameProfile;
 
 import jp.revati.skyabyss.SelfTestRunner.Step;
 import jp.revati.skyabyss.SkyAbyss;
 import jp.revati.skyabyss.progress.Titans;
-import jp.revati.skyabyss.titan.audit.BackReach;
-import jp.revati.skyabyss.trial.Trial.Def;
+import jp.revati.skyabyss.titan.dungeon.TitanBackSelfTest;
+import jp.revati.skyabyss.titan.group.BackGroupData;
+import jp.revati.skyabyss.titan.group.Groups;
+import jp.revati.skyabyss.trial.raid.InstanceArenas;
+import jp.revati.skyabyss.trial.raid.RaidRun;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
+import net.neoforged.neoforge.common.util.FakePlayer;
+import net.neoforged.neoforge.common.util.FakePlayerFactory;
 
-// 順路の部屋が分かれているかの自己テスト (docs/design/32 の 2.5。段の名前は "route rooms")。四体の背で、封じ (RouteSeals) を壁として歩く:
-//  - 到着の台から、どの試練の入口の休み場・中ボスの前室・心臓の前室にも歩いて着かない (入口の箱から先へ歩けない)
-//  - 原型の試練の入口の休み場から、ほかの試練の休み場・心臓の前室・到着の台に歩いて着かない (中ボスの前室はその原型の中のものだけ着いてよい)
-// 歩き方は背の監査と同じ (BackReach)。封じでない戸は開いたものとして歩く (仕掛けの戸は越えられるものとして、それでも分かれていること)
+// 順路の部屋の自己テスト (docs/design/32 の 2.2・2.5。段の名前は "route rooms")。四体の背で、一人の偽の人が:
+//  - 乗り込んで到着の台に着くと、歩かずに (予告のあと) 区画のレイドの部屋 1 の中へ運ばれる
+//  - 部屋 1〜3 を越えるたびに次の部屋の中へ、三つ目のあとは中ボスの間の中へ、中ボスを倒すと体の外の心臓の間の中へ (前室を歩かない)
+//  - 運ばれた先のどの部屋も封じてある (休み場から空気を辿って、部屋の箱の外へ抜けない)
 public final class RouteRoomsSelfTest {
     private RouteRoomsSelfTest() {
     }
@@ -28,121 +37,95 @@ public final class RouteRoomsSelfTest {
 
     private static void run(MinecraftServer server) {
         List<String> f = new ArrayList<>();
-        int checked = 0;
-        int seals = 0;
-        try {
-            for (String titan : List.of(Titans.STONE_WHALE, Titans.TIDE_SHELL, Titans.THUNDER_WING, Titans.EMBER)) {
-                jp.revati.skyabyss.dev.StructureDump.ensureBack(server, switch (titan) {
-                    case Titans.STONE_WHALE -> "titan_back";
-                    case Titans.TIDE_SHELL -> "tide_back";
-                    case Titans.THUNDER_WING -> "storm_back";
-                    default -> "ember_back";
-                });
-                ServerLevel back = server.getLevel(Titans.backOf(titan));
-                if (back == null) {
-                    continue;
-                }
-                int n = RouteSeals.count(back);
-                seals += n;
-                if (n == 0) {
-                    f.add(titan + ": no route seals were placed");
-                    continue;
-                }
-                // 部屋の一覧: 原型の入口の休み場 (試練ごと)、中ボスの前室 (その原型の中)、心臓の前室
-                Map<String, BlockPos> rooms = new LinkedHashMap<>();
-                Map<String, String> owner = new LinkedHashMap<>();
-                boolean raid = jp.revati.skyabyss.trial.raid.RaidRooms.active(titan);
-                for (Def d : TrialCatalog.originals(titan)) {
-                    if (jp.revati.skyabyss.trial.raid.RaidRooms.isRaid(d.id())) {
-                        continue; // レイドの部屋は背の上ではなく区画の写しに建つ (運ばれて入る。背の上の休み場は使わない)
-                    }
-                    String rest = TrialRoute.entryRest(titan, d, null);
-                    BlockPos at = rest == null ? null : TrialRoute.spawnOf(back, titan, rest);
-                    if (at != null) {
-                        rooms.put(d.id(), at);
-                        owner.put(d.id(), d.id());
-                    }
-                }
-                String midRest = TrialMidBoss.restOf(titan);
-                BlockPos mid = midRest == null ? null : TrialRoute.spawnOf(back, titan, midRest);
-                if (mid != null) {
-                    rooms.put("mid", mid);
-                    owner.put("mid", TrialMidBoss.hostOf(titan));
-                }
-                BlockPos heart = TrialRoute.spawnOf(back, titan, TrialRoute.HEART_REST);
-                if (heart != null) {
-                    rooms.put("heart", heart);
-                    owner.put("heart", "heart");
-                }
-                BlockPos arrival = jp.revati.skyabyss.titan.end.ReturnBeacons.arrivalOf(titan).above();
-                // 到着の台から
-                checked += reachNone(f, back, titan, "arrival", arrival, rooms, null);
-                // レイドの順路: 中ボスの前室から心臓の前室へは歩けない (倒すと運ばれる)
-                if (raid && mid != null && heart != null) {
-                    checked += reachNone(f, back, titan, "mid", mid, Map.of("heart", heart), null);
-                }
-                // 原型の入口から
-                for (Map.Entry<String, BlockPos> e : rooms.entrySet()) {
-                    if (e.getKey().equals("mid") || e.getKey().equals("heart")) {
-                        continue;
-                    }
-                    Map<String, BlockPos> others = new LinkedHashMap<>();
-                    for (Map.Entry<String, BlockPos> o : rooms.entrySet()) {
-                        if (!o.getKey().equals(e.getKey()) && !e.getKey().equals(owner.get(o.getKey()))) {
-                            others.put(o.getKey(), o.getValue());
-                        }
-                    }
-                    others.put("arrival", arrival);
-                    checked += reachNone(f, back, titan, e.getKey(), e.getValue(), others, null);
-                }
+        int rooms = 0;
+        for (String titan : List.of(Titans.STONE_WHALE, Titans.TIDE_SHELL, Titans.THUNDER_WING, Titans.EMBER)) {
+            ServerLevel back = server.getLevel(Titans.backOf(titan));
+            if (back == null) {
+                f.add(titan + ": the back dimension is missing");
+                continue;
             }
-        } catch (RuntimeException e) {
-            SkyAbyss.LOGGER.error("SELFTEST route rooms crashed", e);
-            f.add("crashed: " + e);
+            UUID group = null;
+            try {
+                InstanceArenas.ensureHeart(back, titan);
+                FakePlayer p = FakePlayerFactory.get(back, new GameProfile(UUID.nameUUIDFromBytes(("route rooms " + titan).getBytes(java.nio.charset.StandardCharsets.UTF_8)),
+                        "route_" + titan.substring(0, Math.min(8, titan.length()))));
+                group = Groups.keyOf(p);
+                clean(back, group);
+                List<ServerPlayer> players = List.of(p);
+                TrialRoute.PLAYERS = l -> l == back ? players : List.of();
+                // 乗り込み: 到着の台に着く
+                Vec3 pad = Vec3.atBottomCenterOf(jp.revati.skyabyss.trial.RouteSeals.safeFeet(titan));
+                p.setPos(pad.x, pad.y, pad.z);
+                long now = back.getGameTime();
+                TrialRoute.tick(back, titan, players, now);
+                TrialRoute.tick(back, titan, players, now + TrialRoute.ENTRY_WAIT + 1);
+                if (TrialRoute.step(back, group) != 1) {
+                    f.add(titan + ": standing on the arrival pad did not start the route (step " + TrialRoute.step(back, group) + ")");
+                    continue;
+                }
+                for (int step = 1; step <= 3; step++) {
+                    RaidRun.Run run = RaidRun.of(group);
+                    if (run == null || run.mid || run.step != step) {
+                        f.add(titan + ": no raid room for step " + step);
+                        break;
+                    }
+                    if (!run.ctx.cell().inner().contains(p.position())) {
+                        f.add(titan + ": step " + step + " did not carry the player into room " + run.ctx.roomId() + ": " + p.position());
+                    }
+                    sealed(f, back, titan + " " + run.ctx.roomId(), run.ctx.cell().rest(), run.ctx.cell().bounds());
+                    rooms++;
+                    TrialRoute.devPass(back, group, titan, p);
+                    TrialRoute.flushPending();
+                    TrialRoute.tick(back, titan, players, now + 1000L * step);
+                }
+                RaidRun.Run mid = RaidRun.of(group);
+                if (!TrialRoute.mid(back, group) || mid == null || !mid.mid) {
+                    f.add(titan + ": after the third room the route is not at the mid-boss");
+                } else {
+                    if (!mid.ctx.cell().inner().contains(p.position())) {
+                        f.add(titan + ": the player was not carried into the mid-boss arena: " + p.position());
+                    }
+                    sealed(f, back, titan + " " + mid.ctx.roomId(), mid.ctx.cell().rest(), mid.ctx.cell().bounds());
+                    rooms++;
+                }
+                TrialRoute.devPass(back, group, titan, p);
+                TrialRoute.flushPending();
+                TrialRoute.tick(back, titan, players, now + 5000);
+                AABB heart = InstanceArenas.heartArena(titan);
+                if (TrialRoute.step(back, group) != TrialRoute.LAST_STEP || heart == null || !heart.contains(p.position())) {
+                    f.add(titan + ": after the mid-boss the player is not inside the heart arena (step " + TrialRoute.step(back, group) + ", at " + p.position() + ")");
+                } else {
+                    sealed(f, back, titan + " heart", InstanceArenas.heartEntry(titan), heart);
+                    rooms++;
+                }
+            } catch (RuntimeException e) {
+                SkyAbyss.LOGGER.error("SELFTEST route rooms crashed ({})", titan, e);
+                f.add(titan + ": crashed: " + e);
+            } finally {
+                if (group != null) {
+                    clean(back, group);
+                }
+                TrialRoute.clearAll();
+                TrialRoute.PLAYERS = l -> jp.revati.skyabyss.util.Players.snapshot(l.players());
+            }
         }
         if (f.isEmpty()) {
-            SkyAbyss.LOGGER.info("SELFTEST route rooms PASSED ({} walks: the trials, the mid-boss and heart rooms and the arrival do not connect on foot; {} seal blocks)", checked, seals);
+            SkyAbyss.LOGGER.info("SELFTEST route rooms PASSED (four titans: the arrival pad carries one player straight into room 1, then rooms 2-3, "
+                    + "the mid-boss arena and the heart arena; {} rooms, all sealed)", rooms);
         } else {
-            for (String s : f) {
-                SkyAbyss.LOGGER.error("SELFTEST route rooms FAILED: {}", s);
-            }
+            f.forEach(s -> SkyAbyss.LOGGER.error("SELFTEST route rooms FAILED: {}", s));
         }
     }
 
-    // from から歩いて、goals のどれにも着かないこと。歩いた数 (1)
-    private static int reachNone(List<String> f, ServerLevel back, String titan, String name, BlockPos from, Map<String, BlockPos> goals, Object unused) {
-        BackReach.Spec base = specOf(back, titan);
-        if (base == null) {
-            return 0;
+    private static void sealed(List<String> f, ServerLevel back, String what, BlockPos from, AABB box) {
+        String leak = TitanBackSelfTest.leak(back, from, box.inflate(1));
+        if (leak != null) {
+            f.add(what + ": the room is not sealed, air reaches " + leak);
         }
-        BackReach.Spec spec = base.narrowed(titan + " from " + name, base.bounds, from, goals);
-        spec.solidGate = p -> RouteSeals.isSeal(back, p);
-        BackReach.Report rep = BackReach.reachGoals(back, spec);
-        List<String> missed = new ArrayList<>();
-        for (String s : rep.failures) {
-            missed.add(s);
-        }
-        for (String g : goals.keySet()) {
-            boolean unreached = false;
-            for (String s : missed) {
-                if (s.contains("'" + g + "'")) {
-                    unreached = true;
-                }
-            }
-            if (!unreached) {
-                f.add(titan + ": from " + name + " " + from.toShortString() + " you can walk to " + g + " " + goals.get(g).toShortString());
-            }
-        }
-        return 1;
     }
 
-    private static BackReach.Spec specOf(ServerLevel back, String titan) {
-        return switch (titan) {
-            case Titans.STONE_WHALE -> jp.revati.skyabyss.titan.dungeon.TitanBackAudit.spec();
-            case Titans.TIDE_SHELL -> jp.revati.skyabyss.titan.tide.back.TideBackAudit.spec();
-            case Titans.THUNDER_WING -> jp.revati.skyabyss.titan.storm.back.StormBackAudit.spec(back);
-            case Titans.EMBER -> jp.revati.skyabyss.titan.ember.back.EmberBackAudit.spec(back);
-            default -> null;
-        };
+    private static void clean(ServerLevel back, UUID g) {
+        TrialRoute.finish(back, g);
+        BackGroupData.get(back).remove(g);
     }
 }
