@@ -1,0 +1,15 @@
+{
+  "chapter": "titan_whale",
+  "order": 32,
+  "inscription_sign": "sign.skyabyss.lore_floor",
+  "unlock": [
+    {
+      "type": "sign",
+      "target": "sign.skyabyss.lore_floor"
+    }
+  ],
+  "related": [
+    "chapter1/carried_people",
+    "chapter1/inscription_west"
+  ]
+}

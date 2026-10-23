@@ -1,0 +1,15 @@
+{
+  "chapter": "titan_whale",
+  "order": 31,
+  "inscription_sign": "sign.skyabyss.lore_stomach",
+  "unlock": [
+    {
+      "type": "sign",
+      "target": "sign.skyabyss.lore_stomach"
+    }
+  ],
+  "related": [
+    "chapter1/carried_people",
+    "chapter1/inscription_west"
+  ]
+}

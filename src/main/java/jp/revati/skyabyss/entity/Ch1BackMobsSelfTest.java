@@ -323,6 +323,7 @@ public final class Ch1BackMobsSelfTest {
         front.moveTo(mob.getX(), mob.getY(), mob.getZ() + 3);
         ArmorStand back = new ArmorStand(net.minecraft.world.entity.EntityType.ARMOR_STAND, level);
         back.moveTo(mob.getX(), mob.getY(), mob.getZ() - 3);
+        jp.revati.skyabyss.combat.MobTuning.untune(mob);
         mob.getAttribute(Attributes.MAX_HEALTH).setBaseValue(500);
         mob.setHealth(500);
         mob.invulnerableTime = 0;
