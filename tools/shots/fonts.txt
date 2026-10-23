@@ -18,6 +18,8 @@ waitchunks
 chat clear
 wait 20
 
+cmd summon text_display ~ ~1.8 ~4 {billboard:"center",text:'"鯨追いの組合 Guild"',see_through:0b}
+cmd summon text_display ~1.6 ~1.4 ~4 {billboard:"center",shadow:1b,text:'"宿屋 Inn 12/30"'}
 guiscale 2
 cmd skyabyss dev notice narrate message.skyabyss.raid_lore.WR1.1
 cmd skyabyss dev notice hint message.skyabyss.whisper.plaza

@@ -209,7 +209,7 @@ ESCORT = {
                 'Touya: "Close in. When we\'re together, we run. Reach the bars before the dark takes us. Light art pushes it back."'),
         'run': ('トウヤ「走れ！　灯りを背に！」', 'Touya: "Run! Keep the light behind you!"'),
         'lead': ('トウヤ「遅れるな！　闇が来る！」', 'Touya: "Don\'t fall behind! The dark is coming!"'),
-        'caught': ('闇に包まれた。息が焼ける。光の術を、でなければ前へ！', 'The dark closes in. Your breath burns. Cast light, or run!'),
+        'caught': ('闇に包まれた。息が焼ける。光の術を使え。でなければ前へ！', 'The dark closes in. Your breath burns. Cast light, or run!'),
         'escape_fail': ('闇に呑まれた。……燠の縄張りで目が覚めた。トウヤ「もう一度。光を絶やすな」',
                         'The dark swallowed you. ...You wake in the ember ground. Touya: "Again. Keep the light alive."'),
         'done_1': ('トウヤ「着いた。……俺の案内は、ここまでだ」', 'Touya: "Here. ...My guiding ends here."'),
@@ -291,28 +291,28 @@ t('message.skyabyss.abyss_v2.shadow_gone', '影がほどけて、静かになっ
 # ---------------------------------------------------------------- 層の主
 LORDS = {
     'bone': ('肋の主', 'Lord of Ribs',
-             '肋の主を倒せ。灯台を灯し、光の中で斬れ', 'Ribs lord: light lamps, fight in light',
+             '肋の主を倒そう。灯台を灯して、光の中で斬ろう', 'Ribs lord: light lamps, fight in light',
              '間の奥で、積み上がった肋が立ち上がった。', 'At the back of the hall, a heap of ribs stands up.',
              '灯台は右クリックで灯る。光の外では、刃が骨に弾かれる。……底の番人も、こうなのだろうか。',
              'The lamps light with a right-click. Outside the light, your blade glances off. ...Is the warden below like this too?',
              '肋の主が崩れた。光の中なら、闇のものにも刃は届く。', 'The Lord of Ribs collapses. In the light, even things of the dark can be cut.',
              '光の外では、刃が通らない。', 'Your blade will not bite outside the light.'),
     'salt': ('白殻の主', 'Lord of White Shells',
-             '白殻の主を倒せ。足もとの赤い輪から出ろ', 'Lord of White Shells: leave the red rings',
+             '白殻の主を倒そう。赤い輪からは離れよう', 'Lord of White Shells: leave the red rings',
              '天井から、白い殻の塊が落ちてきた。', 'A mass of white shell drops from the ceiling.',
              '赤い輪には重さが落ちる。重さの術の中なら、押しつぶされずに済む。',
              'Weight falls inside the red rings. Under the weight art, it will not crush you.',
              '白殻の主が割れた。重さは、避けるか、軽くなって受け流せる。', 'The Lord of White Shells cracks open. Weight can be dodged, or shrugged off if you are light.',
              '', ''),
     'storm': ('鼓動まねの主', 'Lord of Mimicked Beats',
-              '鼓動まねの主を倒せ。鼓動の聞こえる方が本物', 'Beat-mimic lord: hit the one with a pulse',
+              '鼓動まねの主を倒そう。鼓動の聞こえる方が本物', 'Beat-mimic lord: hit the one with a pulse',
               '銅の壁が一斉に鳴り、間に鼓動が満ちた。', 'The copper walls ring together and the hall fills with a heartbeat.',
               '主は写しに分かれる。鼓動を立てるのは本物だけ。鼓動の術を使えば、本物の輪郭が見える。',
               'It splits into copies. Only the real one beats. The heartbeat art will outline the true one.',
               '鼓動まねの主が黙った。本物の鼓動は、いつもひとつ。', 'The Lord of Mimicked Beats falls silent. There is only ever one true heartbeat.',
               '', ''),
     'ash': ('灯り喰いの主', 'Lord of Eaten Light',
-            '灯り喰いの主。闇の波のあとは光の術で照らせ', 'Light-eater lord: cast light after dark',
+            '灯り喰いを倒そう。闇のあとは光の術で照らそう', 'Light-eater lord: cast light after dark',
             '灯りが一つずつ消え、闇の奥で口が開いた。', 'The lights go out one by one, and a mouth opens in the dark.',
             '闇の波が来ると、灯りが全部消える。闇の中の主には刃が届かない。光の術で主を照らせ。',
             'When the dark wave comes, every light dies, and the lord cannot be cut in the dark. Light it with your art.',
@@ -327,18 +327,18 @@ for L, v in LORDS.items():
     t('message.skyabyss.abyss_v2.lord_fall.%s' % L, v[8], v[9])
     if v[10]:
         t('message.skyabyss.abyss_v2.lord_dim.%s' % L, v[10], v[11])
-t('objective.skyabyss.abyss_v2.flash_light_lamps', '灯台を灯せ（右クリック）', 'Light the lamps (right-click)')
-t('objective.skyabyss.abyss_v2.flash_guard_lamp', '灯りを守れ。赤い輪の中に立て', 'Guard the light. Stand inside the red ring')
+t('objective.skyabyss.abyss_v2.flash_light_lamps', '灯台を灯そう（右クリック）', 'Light the lamps (right-click)')
+t('objective.skyabyss.abyss_v2.flash_guard_lamp', '灯りを守ろう。赤い輪の中に立とう', 'Guard the light. Stand inside the red ring')
 t('objective.skyabyss.abyss_v2.flash_weight', '赤い輪から出ろ。重さの術なら耐えられる', 'Leave the red rings, or endure with weight')
 t('objective.skyabyss.abyss_v2.flash_beat', '鼓動の聞こえる方が本物', 'The one with the heartbeat is real')
-t('objective.skyabyss.abyss_v2.flash_dark', '闇の中では刃が届かない。光の術で照らせ', 'Blades miss in the dark. Cast light')
+t('objective.skyabyss.abyss_v2.flash_dark', '闇の中では刃が届かない。光の術で照らそう', 'Blades miss in the dark. Cast light')
 t('message.skyabyss.abyss_v2.dark_coming', '主が三度吠えた。闇の波が来る。', 'The lord howls three times. The dark wave is coming.')
 # 番人の戦いの帯 (story/ch5/warden/HeartWarden)
-t('objective.skyabyss.abyss_v2.warden_p1', '灯りを点け、光の中の番人を斬れ', 'Light lamps; hit the warden in the light')
-t('objective.skyabyss.abyss_v2.warden_snuff', '灯りを守れ。番人が吹き消しに来る', 'Guard the light. It comes to snuff a lamp')
+t('objective.skyabyss.abyss_v2.warden_p1', '灯りを点けて、光の中の番人を斬ろう', 'Light lamps; hit the warden in the light')
+t('objective.skyabyss.abyss_v2.warden_snuff', '灯りを守ろう。番人が吹き消しに来る', 'Guard the light. It comes to snuff a lamp')
 t('objective.skyabyss.abyss_v2.warden_p2', '鼓動の聞こえる方が本物', 'The one with the heartbeat is real')
 t('objective.skyabyss.abyss_v2.warden_crush', '赤い輪は重い。外へ出るか、重さの術で耐えろ', 'Red rings crush: leave, or bear weight')
-t('objective.skyabyss.abyss_v2.warden_p3', '闇の波のあとは、光の術で照らせ', 'After the dark wave, cast light')
+t('objective.skyabyss.abyss_v2.warden_p3', '闇の波のあとは、光の術で照らそう', 'After the dark wave, cast light')
 
 # ---------------------------------------------------------------- 手記 (野営の帳面 0、道ごと 1〜3)
 JOURNALS = {
@@ -683,16 +683,16 @@ for L in LAYERS:
 # 目的の帯の一言は lang を直接直してあり、上の文には戻していない。書き出しの前にここで上書きし、
 # コミット済みの lang と同じにする (tools/audit/check_generators.py で確かめる)。
 HAND_EDITS = [  # (鍵, 日本語, 英語)
-    ("objective.skyabyss.abyss_v2.lord_ash", "灯り喰いの主。闇の波のあとは光の術で照らせ", "Light-eater lord: cast light after dark"),
-    ("objective.skyabyss.abyss_v2.warden_p1", "灯りを点け、光の中の番人を斬れ", "Light lamps; hit the warden in the light"),
-    ("objective.skyabyss.abyss_v2.warden_snuff", "灯りを守れ。番人が吹き消しに来る", "Guard the light. It comes to snuff a lamp"),
-    ("objective.skyabyss.abyss_v2.lord_bone", "肋の主を倒せ。灯台を灯し、光の中で斬れ", "Ribs lord: light lamps, fight in light"),
-    ("objective.skyabyss.abyss_v2.lord_salt", "白殻の主を倒せ。足もとの赤い輪から出ろ", "Lord of White Shells: leave the red rings"),
-    ("objective.skyabyss.abyss_v2.lord_storm", "鼓動まねの主を倒せ。鼓動の聞こえる方が本物", "Beat-mimic lord: hit the one with a pulse"),
+    ("objective.skyabyss.abyss_v2.lord_ash", "灯り喰いを倒そう。闇のあとは光の術で照らそう", "Light-eater lord: cast light after dark"),
+    ("objective.skyabyss.abyss_v2.warden_p1", "灯りを点けて、光の中の番人を斬ろう", "Light lamps; hit the warden in the light"),
+    ("objective.skyabyss.abyss_v2.warden_snuff", "灯りを守ろう。番人が吹き消しに来る", "Guard the light. It comes to snuff a lamp"),
+    ("objective.skyabyss.abyss_v2.lord_bone", "肋の主を倒そう。灯台を灯して、光の中で斬ろう", "Ribs lord: light lamps, fight in light"),
+    ("objective.skyabyss.abyss_v2.lord_salt", "白殻の主を倒そう。赤い輪からは離れよう", "Lord of White Shells: leave the red rings"),
+    ("objective.skyabyss.abyss_v2.lord_storm", "鼓動まねの主を倒そう。鼓動の聞こえる方が本物", "Beat-mimic lord: hit the one with a pulse"),
     ("objective.skyabyss.abyss_v2.flash_weight", "赤い輪から出ろ。重さの術なら耐えられる", "Leave the red rings, or endure with weight"),
-    ("objective.skyabyss.abyss_v2.flash_dark", "闇の中では刃が届かない。光の術で照らせ", "Blades miss in the dark. Cast light"),
+    ("objective.skyabyss.abyss_v2.flash_dark", "闇の中では刃が届かない。光の術で照らそう", "Blades miss in the dark. Cast light"),
     ("objective.skyabyss.abyss_v2.warden_crush", "赤い輪は重い。外へ出るか、重さの術で耐えろ", "Red rings crush: leave, or bear weight"),
-    ("objective.skyabyss.abyss_v2.warden_p3", "闇の波のあとは、光の術で照らせ", "After the dark wave, cast light"),
+    ("objective.skyabyss.abyss_v2.warden_p3", "闇の波のあとは、光の術で照らそう", "After the dark wave, cast light"),
 ]
 
 
