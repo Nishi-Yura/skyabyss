@@ -352,6 +352,8 @@ public final class SelfTestRunner {
         steps.addAll(jp.revati.skyabyss.trial.raid.RaidSoloSelfTest.steps());
         // レイドの部屋の碑と心の声と伝承 (十二の部屋)。SKYABYSS_SELFTEST_ONLY="raid lore"
         steps.add(Step.once("raid lore", jp.revati.skyabyss.trial.raid.RaidLoreSelfTest::run));
+        // 岩鯨のレイドの部屋の飾り (仕掛けを上書きしない・閉じている・費用の上限・床の明るさ)。docs/design/39。SKYABYSS_SELFTEST_ONLY="raid decor whale"
+        steps.addAll(jp.revati.skyabyss.trial.raid.WhaleDecorSelfTest.steps());
         // 二人の試遊 (2026-10-22): 敵の無敵の間・背の耐久。SKYABYSS_SELFTEST_ONLY="combat rules"
         steps.addAll(jp.revati.skyabyss.combat.CombatRulesSelfTest.steps());
         // 順路の部屋が分かれている (封じを壁として歩く)。SKYABYSS_SELFTEST_ONLY="route rooms"

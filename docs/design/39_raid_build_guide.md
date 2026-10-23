@@ -406,6 +406,14 @@ for (各壁の列 (u = 壁に沿う座標, y = 高さ)) {
 
 ## 7. 道具の提案（RaidKit に足すもの。実装は別の作業）
 
+**岩鯨の部屋（WR1〜WR6・中ボスの間 WRM）は実装済み**: `trial/raid/whale/WhaleDecor`（岩鯨だけの道具。`RaidKit` は変えない）。部屋の `build` の終わりに `WhaleDecor.wr1`〜`wr6`・`wrm` を呼ぶ。
+
+- `Kit` が部屋ごとの道具: `keep`（仕掛け・道・予告の床・運ぶ道。決して書かない）、`reserve`（戦う床・眺め。肉付けと小道具だけが避ける）、`put`（広間の空気にだけ置く）、`paint`（殻・床・天井のパレットのままのブロックを、不透明な満ちたブロックに塗り替える。殻は一枚残る）
+- 道具: `organicWall`（深さの上限は場所ごと）・`floor`（凝灰岩と背骨の筋）・`fossil`・`ceiling`（格子の灯りを見えない灯りに）・`lightGrid`・`ribArch`・`spine`・`frameArch`・`vein`・`niche`（遠景の窪み。殻が一枚なので肉付けの深さ 3 の中に作る）・`bonePile`・`prayer`・`singerSeat`・`wallSkull`・`exitFrame`（鯨ひげの簾と、越えると灯る燭台 `exitLamps`）・`antechambers`（前室の煉瓦と倒れた番人の場面、出口の間のアメジスト）
+- 床の下の層・天井の明かり窓は、殻が一枚（部屋の箱の外へ書けない）なので使っていない。代わりに天井の真ん中を目的の物の灯り（海のランタンとアメジスト）に塗る
+- 動く飾り: WR1 は届けた骨玉ごとに椀の縁の燭台が一つ灯る。どの部屋も越えると出口の燭台が灯り、やり直しで消える
+- 確かめ: 自己テスト `raid decor whale`（飾りなしと飾りありを建て比べ、仕掛けのブロックが同じ・閉じている・費用の上限・床の明るさ）。見比べの絵は `tools/shots/raid_build_whale.txt`（`/skywhaleraid show <部屋>` で順路なしに建てる）→ `docs/review/raid_build_whale/`
+
 - **`Palette` を広げる**: いまの六つ（床・帯・壁・天井・灯り・戸）に、`wallBands`（下から上への 4〜5 段、各段 主と混ぜ）・`accent`（差し色）・`objective`（目的の物の灯り）・`hidden`（見えない灯りの明るさ）を足す。4 章の表をそのまま入れる。
 - **`organicWall(ctx, depthMax, uScale, yScale, seed)`**: 3.2 節。壁と天井の際の肉付け。戸と碑の前は避ける。
 - **`gradient(pal, y, noise)`**: 3.3 節の段を引く。

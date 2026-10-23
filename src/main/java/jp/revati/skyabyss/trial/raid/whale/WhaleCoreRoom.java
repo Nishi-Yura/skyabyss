@@ -65,6 +65,8 @@ public final class WhaleCoreRoom extends RaidRoom {
             RaidKit.fill(level, c.origin().offset(x, 1, z), c.origin().offset(x, 2, z), bone);
         }
         angleOffset = ctx.rng().nextDouble() * Math.PI / 4;
+        // 飾り (docs/design/39 の 4.1): 核を肋骨の籠の晶洞に (核のまわり半径 3 は空ける)
+        WhaleDecor.wr3(ctx);
     }
 
     @Override
@@ -89,6 +91,7 @@ public final class WhaleCoreRoom extends RaidRoom {
             waveOut = false;
             if (wave >= WAVES) {
                 cleared = true;
+                WhaleDecor.exitLamps(ctx, true);
                 return;
             }
             nextWave = now + WAVE_GAP;
@@ -188,6 +191,7 @@ public final class WhaleCoreRoom extends RaidRoom {
 
     @Override
     public void reset(RaidCtx ctx) {
+        WhaleDecor.exitLamps(ctx, false);
         hp = CORE_MAX;
         wave = 0;
         waveOut = false;

@@ -88,6 +88,8 @@ public final class WhaleBonesRoom extends RaidRoom {
             }
             prev = a;
         }
+        // 飾り (docs/design/39 の 4.1): 四隅の骨をパイプオルガンに、床に歌の輪
+        WhaleDecor.wr2(ctx, CORNER);
     }
 
     @Override
@@ -175,6 +177,7 @@ public final class WhaleBonesRoom extends RaidRoom {
             progress++;
             if (progress >= LENGTH) {
                 mode = Mode.DONE;
+                WhaleDecor.exitLamps(ctx, true);
                 for (int i = 0; i < BONES; i++) {
                     setTop(ctx, i, true);
                     litUntil[i] = 0;
@@ -208,6 +211,7 @@ public final class WhaleBonesRoom extends RaidRoom {
         int x = CORNER[bone][0];
         int z = CORNER[bone][1];
         RaidKit.fill(ctx.level(), ctx.origin().offset(x, 5, z), ctx.origin().offset(x + 1, 5, z + 1), st);
+        WhaleDecor.organGlow(ctx, CORNER[bone], lit);
     }
 
     private int boneAt(RaidCtx ctx, BlockPos pos) {
@@ -234,6 +238,7 @@ public final class WhaleBonesRoom extends RaidRoom {
     public void reset(RaidCtx ctx) {
         beginListen(ctx, LISTEN_DELAY);
         mode = Mode.LISTEN;
+        WhaleDecor.exitLamps(ctx, false);
     }
 
     @Override

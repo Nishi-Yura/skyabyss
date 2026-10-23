@@ -84,6 +84,8 @@ public final class WhaleRingRoom extends RaidRoom {
             RaidKit.fill(level, c.origin().offset(-HX, H - 3, z), c.origin().offset(-HX, H, z), bone);
             RaidKit.fill(level, c.origin().offset(HX, H - 3, z), c.origin().offset(HX, H, z), bone);
         }
+        // 飾り (docs/design/39 の 4.1)。床の印も「元の姿」に入るよう、床を覚える前に
+        WhaleDecor.wr6(ctx);
         // 床の元の姿を覚える (遠い順)
         for (int x = -HX; x <= HX; x++) {
             for (int z = -HZ; z <= HZ; z++) {
@@ -167,6 +169,7 @@ public final class WhaleRingRoom extends RaidRoom {
             waveOut = false;
             if (wave >= WAVES) {
                 cleared = true;
+                WhaleDecor.exitLamps(ctx, true);
                 return;
             }
             nextWave = now + WAVE_GAP;
@@ -234,6 +237,7 @@ public final class WhaleRingRoom extends RaidRoom {
 
     @Override
     public void reset(RaidCtx ctx) {
+        WhaleDecor.exitLamps(ctx, false);
         ServerLevel level = ctx.level();
         for (int i = 0; i < bandN; i++) {
             Cell c = cells.get(i);

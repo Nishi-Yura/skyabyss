@@ -1,0 +1,170 @@
+# 岩鯨のレイドの部屋 WR1〜WR6 と中ボスの間 WRM の建築の見比べ (docs/design/39)。/skywhaleraid show で順路なしに建て (入口の戸は開けておく)、観戦で撮る
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/raid_build_whale.txt -PshotsName=raid_build_whale_<before|after>  → docs/review/raid_build_whale/
+# 絵: a = 入口の休み場から北 (戸ごしの目印)、b = 広間の南東の高みから、c = 北から南 (WR5 は見張り台から)、d = 西の壁ぎわから東、e = 入口の間の碑と場面
+world raid_build_whale flat
+size 1280 720
+timeout 1500
+render 8
+clouds off
+wait 100
+cmd skyabyss cinematic stop
+cmd skyabyss playtest skip opening
+cmd time set noon
+cmd gamerule doDaylightCycle false
+cmd gamemode spectator
+fov 90
+hud off
+cmd title @a clear
+wait 200
+cmd title @a clear
+cmd skywhaleraid show WR1
+wait 20
+camera 6000.5 181 6020.5 180 4
+waitchunks 200
+wait 30
+shot wr1_a_rest
+camera 6008.5 187 6014.5 160 24
+waitchunks 200
+wait 30
+shot wr1_b_over
+camera 6000.5 181 5987.5 0 6
+waitchunks 200
+wait 30
+shot wr1_c_north
+camera 5988.5 182 6000.5 270 6
+waitchunks 200
+wait 30
+shot wr1_d_side
+camera 6001.5 181 6020.5 90 8
+waitchunks 200
+wait 30
+shot wr1_e_entry
+cmd skywhaleraid show WR2
+wait 20
+camera 6128.5 181 6017.5 180 4
+waitchunks 200
+wait 30
+shot wr2_a_rest
+camera 6134.5 186 6011.5 160 24
+waitchunks 200
+wait 30
+shot wr2_b_over
+camera 6128.5 181 5990.5 0 6
+waitchunks 200
+wait 30
+shot wr2_c_north
+camera 6119.5 182 6000.5 270 6
+waitchunks 200
+wait 30
+shot wr2_d_side
+camera 6129.5 181 6017.5 90 8
+waitchunks 200
+wait 30
+shot wr2_e_entry
+cmd skywhaleraid show WR3
+wait 20
+camera 6256.5 181 6020.5 180 4
+waitchunks 200
+wait 30
+shot wr3_a_rest
+camera 6264.5 188 6014.5 160 24
+waitchunks 200
+wait 30
+shot wr3_b_over
+camera 6256.5 181 5987.5 0 6
+waitchunks 200
+wait 30
+shot wr3_c_north
+camera 6244.5 182 6000.5 270 6
+waitchunks 200
+wait 30
+shot wr3_d_side
+camera 6257.5 181 6020.5 90 8
+waitchunks 200
+wait 30
+shot wr3_e_entry
+cmd skywhaleraid show WR4
+wait 20
+camera 6384.5 181 6011.5 180 4
+waitchunks 200
+wait 30
+shot wr4_a_rest
+camera 6384.5 181 6000.5 180 -72
+waitchunks 200
+wait 30
+shot wr4_b_up
+camera 6384.5 204 6000.5 180 60
+waitchunks 200
+wait 30
+shot wr4_c_down
+camera 6387.5 192 6003.5 135 10
+waitchunks 200
+wait 30
+shot wr4_d_side
+camera 6385.5 181 6011.5 90 8
+waitchunks 200
+wait 30
+shot wr4_e_entry
+cmd skywhaleraid show WR5
+wait 20
+camera 6512.5 181 6015.5 180 4
+waitchunks 200
+wait 30
+shot wr5_a_rest
+camera 6517.5 199 6009.5 160 24
+waitchunks 200
+wait 30
+shot wr5_b_over
+camera 6512.5 185 6010.5 180 14
+waitchunks 200
+wait 30
+shot wr5_c_balcony
+camera 6505.5 182 6000.5 270 6
+waitchunks 200
+wait 30
+shot wr5_d_side
+camera 6513.5 181 6015.5 90 8
+waitchunks 200
+wait 30
+shot wr5_e_entry
+cmd skywhaleraid show WR6
+wait 20
+camera 6640.5 181 6019.5 180 4
+waitchunks 200
+wait 30
+shot wr6_a_rest
+camera 6647.5 188 6013.5 160 24
+waitchunks 200
+wait 30
+shot wr6_b_over
+camera 6640.5 181 5988.5 0 6
+waitchunks 200
+wait 30
+shot wr6_c_north
+camera 6629.5 182 6000.5 270 6
+waitchunks 200
+wait 30
+shot wr6_d_side
+camera 6641.5 181 6019.5 90 8
+waitchunks 200
+wait 30
+shot wr6_e_entry
+cmd skywhaleraid show WRM
+wait 20
+camera 6768.5 181 6013.5 180 4
+waitchunks 200
+wait 30
+shot wrm_a_rest
+camera 6771.5 188 6013.5 160 24
+waitchunks 200
+wait 30
+shot wrm_b_over
+camera 6768.5 181 5988.5 0 6
+waitchunks 200
+wait 30
+shot wrm_c_north
+camera 6765.5 182 6000.5 270 6
+waitchunks 200
+wait 30
+shot wrm_d_side
+quit
