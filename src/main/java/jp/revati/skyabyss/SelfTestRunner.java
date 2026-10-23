@@ -294,6 +294,9 @@ public final class SelfTestRunner {
         // 深淵の層 (36 の 8 章。野営・三本の道・印・門・主の間・下り・心臓まで歩けるか、印と門、二人の段)。SKYABYSS_SELFTEST_ONLY="abyss layers v2"
         steps.add(Step.once("abyss layers v2 (load)", jp.revati.skyabyss.story.ch5.layers.AbyssLayersV2SelfTest::load));
         steps.add(Step.once("abyss layers v2", 60, jp.revati.skyabyss.story.ch5.layers.AbyssLayersV2SelfTest::run));
+        // 深淵 v3 (2026-10-23 の試遊の直し: 帰りの祠・道案内・主の技と段とボスバー・縄張りの主)。SKYABYSS_SELFTEST_ONLY="abyss v3"
+        steps.add(Step.once("abyss v3 (load)", jp.revati.skyabyss.story.ch5.layers.AbyssV3SelfTest::load));
+        steps.add(Step.once("abyss v3", 60, jp.revati.skyabyss.story.ch5.layers.AbyssV3SelfTest::run));
         // 番人の悪夢 (段の表・入る条件・段の進み・報酬・保存・閉じたあとの後片付け)。docs/design/36 の 9。SKYABYSS_SELFTEST_ONLY="abyss nightmare"
         steps.add(Step.once("abyss nightmare (load)", jp.revati.skyabyss.story.ch5.warden.WardenSelfTest::load));
         steps.add(Step.once("abyss nightmare", 60, jp.revati.skyabyss.story.ch5.warden.NightmareSelfTest::run));

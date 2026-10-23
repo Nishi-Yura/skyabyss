@@ -36,7 +36,7 @@ import net.neoforged.neoforge.event.tick.ServerTickEvent;
 //   いつ: 深淵に人がいる間、人ごとに 40 tick に一回、半分の確率で一体。
 //   どこ: 人のまわり 12〜22 ブロックの床。35% は溜まり・巣・野営の印の近くを基点にする。
 //   数:   人のまわり 40 ブロックに、A と B を合わせて 8 体まで (CAP_NEAR)。
-//   湧かない所: 休み場 (rest_1〜6)・着く所 (arrival) から 24 ブロック以内、心臓の間 (大部屋) の中。
+//   湧かない所: 休み場 (rest_1〜6)・着く所 (arrival) から 24 ブロック以内、心臓の間 (大部屋) と層の主の間の中。
 //   種:   湧いた高さの層 (AbyssScaling.layerOf) ごとの表 (TABLE)。元の層の種が多く、一つ上の層の種が段 2 で混ざる。
 //   暗さ: 種ごとに灯りの上限 (maxLight)。上限以上の明るい所は 60% で見送る。
 //   数字: 湧いた高さで決まる (AbyssScaling)。段 (形) は見た目と、崩れからの突き抜け・落とし物。
@@ -129,7 +129,7 @@ public final class AbyssMobSpawner {
             return null;
         }
         BlockPos foot = findSpot(level, center, r);
-        if (foot == null || nearRest(foot, REST_KEEP) || inHeartRoom(foot)) {
+        if (foot == null || nearRest(foot, REST_KEEP) || inHeartRoom(foot) || inLordHall(foot)) {
             return null;
         }
         int layer = AbyssScaling.layerOf(foot.getY());
@@ -145,7 +145,7 @@ public final class AbyssMobSpawner {
             return null;
         }
         BlockPos at = BlockPos.containing(out.x(), out.y(), out.z());
-        if (nearRest(at, REST_KEEP) || inHeartRoom(at)) {
+        if (nearRest(at, REST_KEEP) || inHeartRoom(at) || inLordHall(at)) {
             return null;
         }
         // 形は湧く実際の高さで決める (縄の人と天井歩きは床と違う高さに立つことがある)
@@ -406,6 +406,16 @@ public final class AbyssMobSpawner {
         for (int i = 1; i <= 6; i++) {
             BlockPos rest = AbyssBuild.mark("rest_" + i);
             if (rest != null && rest.distSqr(p) < r * r) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // 層の主の間の中 (主の戦いに自然の湧きが混ざらない。2026-10-23 の作り込み)
+    public static boolean inLordHall(BlockPos p) {
+        for (String layer : jp.revati.skyabyss.story.ch5.layers.Layers.ORDER) {
+            if (jp.revati.skyabyss.story.ch5.layers.Layers.inArena(layer, p)) {
                 return true;
             }
         }

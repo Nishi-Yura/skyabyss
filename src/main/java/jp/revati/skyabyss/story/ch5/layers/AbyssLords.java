@@ -54,6 +54,9 @@ import net.neoforged.neoforge.event.tick.ServerTickEvent;
 // 主の間に、まだ倒していない人が入ると目覚める (戦いは間にいる人で。体力は人数で増える)。だれもいなくなって 30 秒で眠る (体力は戻る)
 // 倒れると間にいた人とそのパーティに "lord:<層>" と合図 abyss_lord_<層>。奥の下りの鎖が使えるようになる
 // 予告は赤だけ (巨神の決まり)。戦いのあいだ、目的の帯に戦いの一言 (AbyssSections.objective)
+// 2026-10-23 の作り込み: 仕掛けのほかに段で増える技 (LordMoves)、三段のボスバー (AbyssBossBars → client/AbyssBossBarClient)、
+//   名乗り (目覚めて 3 秒は咆哮。名の札と二つ名、主は動かず刃も通らない)、段の変わり目の咆哮 (2 秒。赤い輪の衝撃、層の色の粒、一言。一度の当たりで段を越えない)、
+//   倒れる時 (層の色の大きな粒・音・「〜を倒した」の札・下りの鎖の光の柱 10 秒)
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class AbyssLords {
     public static final String TAG = "skyabyss_lord";
@@ -80,6 +83,14 @@ public final class AbyssLords {
         final long[] lampUntil = new long[4];
         String flash = "";
         long flashUntil;
+        // 技 (LordMoves) と段
+        int phase;
+        long nextMove;
+        long windupUntil;
+        long roarUntil;
+        String lastMove = "";
+        int moves;
+        final java.util.Random rng = new java.util.Random();
 
         Fight(String layer) {
             this.layer = layer;
@@ -103,6 +114,12 @@ public final class AbyssLords {
             return null;
         }
         return level.getEntity(f.lord) instanceof LivingEntity le && le.isAlive() ? le : null;
+    }
+
+    // 自己テスト用: 今の戦い
+    @Nullable
+    static Fight fight(String layer) {
+        return FIGHTS.get(layer);
     }
 
     public static boolean active(String layer) {
@@ -158,8 +175,11 @@ public final class AbyssLords {
             }
             return;
         }
-        // 眠る (だれもいない 30 秒)
+        // 眠る (だれもいない 30 秒)。出て行った人のボスバーはすぐ外す
         if (in.isEmpty()) {
+            if (!f.bar.getPlayers().isEmpty()) {
+                f.bar.removeAllPlayers();
+            }
             if (f.emptySince < 0) {
                 f.emptySince = now;
             }
@@ -183,9 +203,14 @@ public final class AbyssLords {
             lord.teleportTo(c.getX() + 0.5, c.getY(), c.getZ() + 0.5);
         }
         f.bar.setProgress(Math.max(0f, Math.min(1f, lord.getHealth() / lord.getMaxHealth())));
-        // 見た目だけの段 (体力が半分を切ると一度吠える。戦いの決まりは変わらない)
-        if (lord.getHealth() <= lord.getMaxHealth() * 0.5f) {
-            BossLook.setPhase(lord, 1);
+        int want = phaseFor(lord.getHealth() / lord.getMaxHealth());
+        if (want > f.phase) {
+            phaseShift(level, f, lord, in, want, now);
+        }
+        jp.revati.skyabyss.story.ch5.AbyssBossBars.phase(f.bar, f.phase);
+        jp.revati.skyabyss.story.ch5.AbyssBossBars.roar(f.bar, f.roarUntil > now);
+        if (f.roarUntil > now) {
+            LordMoves.hold(lord);
         }
         for (ServerPlayer p : in) {
             f.bar.addPlayer(p);
@@ -196,17 +221,59 @@ public final class AbyssLords {
             }
         }
         lamps(level, f, now);
+        LordMoves.tick(level, f, lord, in, now);
+        if (f.roarUntil > now || f.windupUntil > now) {
+            // 名乗り・咆哮・技の溜めの間は、仕掛けを出さない (重ならない)
+            f.nextMech = Math.max(f.nextMech, now + 20);
+        }
+        long mechBefore = f.nextMech;
         switch (f.li) {
             case 0 -> bone(level, f, lord, in, now);
             case 1 -> salt(level, f, lord, in, now);
             case 2 -> storm(level, f, lord, in, now);
             default -> ash(level, f, lord, in, now);
         }
+        if (f.nextMech != mechBefore) {
+            // 仕掛けが出た: 技はしばらく待つ
+            f.nextMove = Math.max(f.nextMove, now + 50);
+        }
         // 帯の一言 (仕掛けの一言が出ている間はそちら)
         String line = f.flashUntil > now ? f.flash : "objective.skyabyss.abyss_v2.lord_" + layer;
         for (ServerPlayer p : in) {
             AbyssSections.objective(p, line, OBJ_TICKS);
         }
+    }
+
+    // 段 (0 = 66% 超、1 = 33% 超、2 = それ以下)
+    static int phaseFor(float ratio) {
+        return ratio > 0.66f ? 0 : ratio > 0.33f ? 1 : 2;
+    }
+
+    // 段の変わり目: 2 秒の咆哮 (刃は通らない)。足もとの赤い輪 (r 7) の衝撃、層の色の粒、一言、技の間隔が詰まる
+    static void phaseShift(ServerLevel level, Fight f, LivingEntity lord, List<ServerPlayer> in, int phase, long now) {
+        f.phase = phase;
+        f.roarUntil = now + 40;
+        f.windupUntil = 0;
+        f.nextMove = now + 60;
+        f.nextMech = Math.max(f.nextMech, now + 70);
+        LordAnim.phase(lord, phase);
+        level.playSound(null, lord.blockPosition(), SoundEvents.WARDEN_ROAR, SoundSource.HOSTILE, 1.8f, 0.6f + 0.15f * phase);
+        LordMoves.element(level, f.li, lord.getX(), lord.getY() + 1, lord.getZ(), 60, 2.5);
+        double y = LordMoves.floorY(f, lord);
+        double lx = lord.getX(), lz = lord.getZ();
+        Telegraph.in(level, TelegraphShape.circle(lx, lz, 7)).floor(y).warn(30).danger().owner(lord)
+                .onImpact(lvl -> LordMoves.element(lvl, f.li, lx, y + 0.3, lz, 80, 4))
+                .onHit((lvl, p) -> {
+                    p.hurt(lvl.damageSources().mobAttack(lord), 6f);
+                    double dx = p.getX() - lx, dz = p.getZ() - lz;
+                    double len = Math.max(0.1, Math.hypot(dx, dz));
+                    p.knockback(1.4, -dx / len, -dz / len);
+                    p.hurtMarked = true;
+                }).start();
+        for (ServerPlayer p : in) {
+            Notice.alert(p, "message.skyabyss.abyss_v3.lord." + f.layer + ".phase" + (phase + 1));
+        }
+        flash(f, "objective.skyabyss.abyss_v3.lord_roar", now, 40);
     }
 
     static void flash(Fight f, String key, long now, int ticks) {
@@ -231,6 +298,8 @@ public final class AbyssLords {
         le.addTag(LayerFights.TAG);
         double want = HP[li] * (1 + PER_MATE * Math.max(0, in.size() - 1));
         var hp = le.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.MAX_HEALTH);
+        // 湧いた時の雑魚の下げ (MobTuning。体力を決める前の小さな体で付く) を外す。主の体力は表のまま
+        jp.revati.skyabyss.combat.MobTuning.untune(le);
         if (hp != null) {
             hp.setBaseValue(want);
             le.setHealth(le.getMaxHealth());
@@ -246,10 +315,16 @@ public final class AbyssLords {
         }
         f.lord = le.getUUID();
         f.started = now;
+        // 名乗り (3 秒): 咆哮のバー、名の札。そのあと技、仕掛けは 6 秒後から
+        f.roarUntil = now + 60;
+        f.nextMove = now + 70;
         f.nextMech = now + 120;
+        LordAnim.phase(le, 0);
         FIGHTS.put(layer, f);
         level.playSound(null, at, SoundEvents.WARDEN_EMERGE, SoundSource.HOSTILE, 1.6f, 0.8f);
+        LordMoves.element(level, li, at.getX() + 0.5, at.getY() + 1, at.getZ() + 0.5, 80, 2);
         for (ServerPlayer p : in) {
+            Notice.place(p, Component.translatable("abyss_v2.skyabyss.lord." + layer), Component.translatable("message.skyabyss.abyss_v3.lord." + layer + ".epithet"));
             Notice.alert(p, "message.skyabyss.abyss_v2.lord_wake." + layer);
             LayerFights.later(level.getServer(), 60, () -> Notice.narrate(p, "message.skyabyss.abyss_v2.lord_teach." + layer));
         }
@@ -293,6 +368,24 @@ public final class AbyssLords {
     // 倒れた: 間にいた人とパーティに記録と合図。写しを消し、下りの鎖を見せる
     public static void defeat(ServerLevel level, Fight f) {
         List<ServerPlayer> in = inArena(level, f.layer);
+        Entity body = f.lord == null ? null : level.getEntity(f.lord);
+        if (body instanceof LivingEntity le) {
+            LordAnim.death(le);
+            LordMoves.element(level, f.li, le.getX(), le.getY() + 1, le.getZ(), 120, 2.5);
+            level.playSound(null, le.blockPosition(), SoundEvents.WARDEN_DEATH, SoundSource.HOSTILE, 2f, 0.7f);
+            level.playSound(null, le.blockPosition(), SoundEvents.UI_TOAST_CHALLENGE_COMPLETE, SoundSource.PLAYERS, 0.8f, 0.9f);
+        }
+        for (ServerPlayer p : in) {
+            Notice.place(p, Component.translatable("message.skyabyss.abyss_v3.lord.fell", Component.translatable("abyss_v2.skyabyss.lord." + f.layer)),
+                    Component.translatable("message.skyabyss.abyss_v3.lord.fell_sub"));
+        }
+        BlockPos chain = AbyssBuild.mark("descend_" + f.layer);
+        if (chain != null) {
+            for (int k = 0; k < 10; k++) {
+                LayerFights.later(level.getServer(), k * 20, () -> level.sendParticles(ParticleTypes.END_ROD, chain.getX() + 0.5, chain.getY() + 1.5, chain.getZ() + 0.5,
+                        24, 0.25, 4, 0.25, 0.01));
+            }
+        }
         LayerData d = LayerData.get(level.getServer());
         for (ServerPlayer p : in) {
             for (UUID who : AbyssMarks.withParty(p)) {
@@ -362,6 +455,18 @@ public final class AbyssLords {
                 continue;
             }
             long now = level.getGameTime();
+            if (f.roarUntil > now) {
+                // 名乗り・咆哮の間は刃が通らない
+                event.setCanceled(true);
+                level.sendParticles(ParticleTypes.CRIT, e.getX(), e.getY() + e.getBbHeight() * 0.6, e.getZ(), 6, 0.4, 0.4, 0.4, 0.1);
+                return;
+            }
+            // 一度の当たりで段を越えない (段の境で止める。咆哮を飛ばさない)
+            float after = e.getHealth() - event.getAmount();
+            float border = f.phase == 0 ? e.getMaxHealth() * 0.66f : f.phase == 1 ? e.getMaxHealth() * 0.33f : -1f;
+            if (border > 0 && e.getHealth() > border && after < border - 1) {
+                event.setAmount(Math.max(0f, e.getHealth() - border + 0.5f));
+            }
             boolean dim = false;
             if (f.li == 0) {
                 dim = !litAround(level, f, e.position(), now) && AbyssLight.lampAt(level, e.blockPosition()) < 4;
@@ -460,7 +565,7 @@ public final class AbyssLords {
         Vec3 c = Vec3.atBottomCenterOf(m.below(2));
         flash(f, "objective.skyabyss.abyss_v2.flash_guard_lamp", now, 80);
         level.playSound(null, m, SoundEvents.WARDEN_SNIFF, SoundSource.HOSTILE, 1.4f, 0.8f);
-        BossLook.windup(lord, BossLook.SNUFF, 50);
+        LordAnim.windup(lord, "attack_snuff", 50);
         Telegraph.in(level, TelegraphShape.circle(c.x, c.z, 2.6)).floor(c.y).warn(50).danger().owner(lord)
                 .onImpact(lvl -> {
                     BossLook.strike(lord, BossLook.SNUFF);
@@ -486,8 +591,7 @@ public final class AbyssLords {
         }
         f.nextMech = now + 170;
         flash(f, "objective.skyabyss.abyss_v2.flash_weight", now, 70);
-        BossLook.windup(lord, BossLook.CRUSH, 32);
-        LayerFights.later(level.getServer(), 32, () -> BossLook.strike(lord, BossLook.CRUSH));
+        LordAnim.windup(lord, "attack_crush", 32);
         crush(level, in, lord, 9f);
         level.playSound(null, lord.blockPosition(), SoundEvents.ANVIL_LAND, SoundSource.HOSTILE, 1.2f, 0.5f);
     }
@@ -537,6 +641,7 @@ public final class AbyssLords {
         }
         flash(f, "objective.skyabyss.abyss_v2.flash_beat", now, 200);
         level.playSound(null, lord.blockPosition(), SoundEvents.ILLUSIONER_MIRROR_MOVE, SoundSource.HOSTILE, 1.6f, 0.7f);
+        LordAnim.strike(lord, "attack_split");
         // 四つの所に本物と写しを散らす
         BossLook.strike(lord, BossLook.SPLIT);
         int real = level.random.nextInt(4);
@@ -588,7 +693,7 @@ public final class AbyssLords {
             Notice.bar(p, Component.translatable("message.skyabyss.abyss_v2.dark_coming"));
         }
         level.playSound(null, lord.blockPosition(), SoundEvents.WARDEN_ROAR, SoundSource.HOSTILE, 1.4f, 0.7f);
-        BossLook.windup(lord, BossLook.ROAR, 45);
+        LordAnim.windup(lord, "attack_roar", 45);
         Telegraph.in(level, TelegraphShape.ring(c.getX() + 0.5, c.getZ() + 0.5, Layers.ARENA_R - 2.5, Layers.ARENA_R)).floor(c.getY()).warn(45).danger().owner(lord)
                 .onImpact(lvl -> {
                     BossLook.strike(lord, BossLook.ROAR);

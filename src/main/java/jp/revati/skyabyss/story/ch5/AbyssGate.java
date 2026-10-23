@@ -15,6 +15,7 @@ import jp.revati.skyabyss.story.ch5.warden.WardenArena;
 import jp.revati.skyabyss.town.TownData;
 import jp.revati.skyabyss.town.TownGuests;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -31,7 +32,7 @@ import net.neoforged.neoforge.event.tick.ServerTickEvent;
 //   門       都の大坑道の底の格子 (印 abyss_gate の北 1 の列、東西 3・高さ 5)。段 gate 以降の人が鍵を持って 3 以内に来ると格子が溶ける
 //            (TownData.abyssGateOpen。開いたまま。都を建て直して格子が戻っていたら、人が近くに来たとき溶かし直す)
 //   くぐる   開いた門の列に入ると深淵の着く所へ。合図 ch5_abyss_enter。だれでも何度でも (調べるために潜る)
-//   戻る     深淵の着く所の北の鎖 (印 exit の磁石石か鎖) を右クリックすると、底の境の門の南へ戻る
+//   戻る     骨の野営の祠の白い磁石石 (印 exit の磁石石か鎖) を右クリックすると、光の中で底の境の門の前へ戻る (AbyssReturn)
 //   底       段 descend の人が心臓の間に入ると合図 abyss_heart_room
 //   心臓     番人が倒れたあと、段 heart の人が台 (印 heart のまわり 2) を右クリックすると、三つの言葉 (錨の真実) と合図 abyss_heart_touch
 //   確かめ   SELFTEST ch5 entrance (門の開き・列・合図) と abyss warden
@@ -46,14 +47,88 @@ public final class AbyssGate {
     private AbyssGate() {
     }
 
-    // 格子の場所 (dx -1..1、dy 0..4)
-    static BlockPos bar(BlockPos gate, int dx, int dy) {
-        return gate.offset(dx, dy, -1);
+    // 格子の列の真ん中の印 (新しい都の設計図だけが持つ。古い都は枠の柱から向きを求める)
+    static final String BARS = "abyss_gate_bars";
+    // 格子の列の半分の幅・高さの上限 (溶かすときに見る範囲。都は回して建つので、列の向きは都ごとに違う)
+    static final int MAX_HALF = 4;
+    static final int MAX_H = 8;
+
+    // 門の向き: 門の印 (立つ所) から格子の列への向きと、列の半分の幅。2026-10-23 の試遊「鉄格子全部消えなかった」:
+    // 前は列を印の北 1 と決め打ちしていたので、都が回って建つと 3 列のうち 1 列しか溶けなかった
+    record Facing(Direction toward, int half) {
+        BlockPos row(BlockPos gate) {
+            return gate.relative(toward);
+        }
+    }
+
+    private static BlockPos facingFor;
+    private static Facing facingCache;
+
+    static Facing facing(MinecraftServer server, ServerLevel level, BlockPos gate) {
+        if (gate.equals(facingFor) && facingCache != null) {
+            return facingCache;
+        }
+        Facing f = detect(TownGuests.mark(server, BARS), level, gate);
+        if (f != null) {
+            facingFor = gate;
+            facingCache = f;
+            return f;
+        }
+        return new Facing(Direction.NORTH, 1);
+    }
+
+    // 印か枠の柱 (強化深層岩) か格子から向きを決める。決まらなければ null (読み込まれていない)
+    @Nullable
+    static Facing detect(@Nullable BlockPos barsMark, ServerLevel level, BlockPos gate) {
+        Direction byMark = null;
+        if (barsMark != null) {
+            for (Direction d : Direction.Plane.HORIZONTAL) {
+                if (gate.relative(d).getX() == barsMark.getX() && gate.relative(d).getZ() == barsMark.getZ()) {
+                    byMark = d;
+                }
+            }
+        }
+        if (!level.isLoaded(gate)) {
+            return null;
+        }
+        for (Direction d : Direction.Plane.HORIZONTAL) {
+            if (byMark != null && d != byMark) {
+                continue;
+            }
+            BlockPos row = gate.relative(d);
+            Direction side = d.getClockWise();
+            for (int k = 2; k <= MAX_HALF + 1; k++) {
+                if (level.getBlockState(row.relative(side, k)).is(Blocks.REINFORCED_DEEPSLATE)
+                        && level.getBlockState(row.relative(side.getOpposite(), k)).is(Blocks.REINFORCED_DEEPSLATE)) {
+                    return new Facing(d, k - 1);
+                }
+            }
+        }
+        if (byMark != null) {
+            return new Facing(byMark, 1);
+        }
+        for (Direction d : Direction.Plane.HORIZONTAL) {
+            if (level.getBlockState(gate.relative(d).above()).is(Blocks.IRON_BARS)) {
+                return new Facing(d, 1);
+            }
+        }
+        return null;
+    }
+
+    // 格子の場所 (along = 列の横の位置、dy = 高さ)
+    static BlockPos bar(BlockPos gate, Facing f, int along, int dy) {
+        return f.row(gate).relative(f.toward().getClockWise(), along).above(dy);
     }
 
     // 開いた門の列の中か (足の位置)
-    static boolean inGate(BlockPos at, BlockPos gate) {
-        return at.getZ() == gate.getZ() - 1 && Math.abs(at.getX() - gate.getX()) <= 1 && at.getY() >= gate.getY() && at.getY() <= gate.getY() + 2;
+    static boolean inGate(BlockPos at, BlockPos gate, Facing f) {
+        BlockPos row = f.row(gate);
+        Direction side = f.toward().getClockWise();
+        int dx = at.getX() - row.getX();
+        int dz = at.getZ() - row.getZ();
+        int depth = dx * f.toward().getStepX() + dz * f.toward().getStepZ();
+        int along = dx * side.getStepX() + dz * side.getStepZ();
+        return depth == 0 && Math.abs(along) <= f.half() && at.getY() >= gate.getY() && at.getY() <= gate.getY() + 2;
     }
 
     static boolean readyFor(@Nullable String stage) {
@@ -85,13 +160,16 @@ public final class AbyssGate {
         if (!level.isLoaded(gate)) {
             return;
         }
-        for (int dx = -1; dx <= 1; dx++) {
-            for (int dy = 0; dy <= 4; dy++) {
-                BlockPos b = bar(gate, dx, dy);
-                if (level.getBlockState(b).is(Blocks.IRON_BARS)) {
+        Facing f = facing(level.getServer(), level, gate);
+        // 列の横の幅いっぱい・高さいっぱいを見る (古い都の 3×5 も、新しい都の 5×6 も、回った都も)
+        for (int a = -MAX_HALF; a <= MAX_HALF; a++) {
+            for (int dy = 0; dy <= MAX_H; dy++) {
+                BlockPos b = bar(gate, f, a, dy);
+                if (level.isLoaded(b) && level.getBlockState(b).is(Blocks.IRON_BARS)) {
                     level.setBlock(b, Blocks.CAVE_AIR.defaultBlockState(), 3);
                     if (loud) {
-                        level.sendParticles(ParticleTypes.SCULK_SOUL, b.getX() + 0.5, b.getY() + 0.5, b.getZ() + 0.5, 2, 0.2, 0.2, 0.2, 0.01);
+                        level.sendParticles(ParticleTypes.SCULK_SOUL, b.getX() + 0.5, b.getY() + 0.5, b.getZ() + 0.5, 3, 0.2, 0.2, 0.2, 0.01);
+                        level.sendParticles(ParticleTypes.SOUL_FIRE_FLAME, b.getX() + 0.5, b.getY() + 0.5, b.getZ() + 0.5, 2, 0.15, 0.15, 0.15, 0.02);
                     }
                 }
             }
@@ -99,7 +177,27 @@ public final class AbyssGate {
         if (loud) {
             level.playSound(null, gate, SoundEvents.WARDEN_HEARTBEAT, SoundSource.AMBIENT, 2.5f, 0.5f);
             level.playSound(null, gate, SoundEvents.SCULK_SHRIEKER_SHRIEK, SoundSource.AMBIENT, 1f, 0.5f);
+            level.playSound(null, gate, SoundEvents.IRON_DOOR_OPEN, SoundSource.BLOCKS, 1.5f, 0.5f);
         }
+    }
+
+    // 残った格子の数 (自己テスト・開発用)
+    static int barsLeft(ServerLevel level, BlockPos gate) {
+        Facing f = facing(level.getServer(), level, gate);
+        int n = 0;
+        for (int a = -MAX_HALF; a <= MAX_HALF; a++) {
+            for (int dy = 0; dy <= MAX_H; dy++) {
+                if (level.getBlockState(bar(gate, f, a, dy)).is(Blocks.IRON_BARS)) {
+                    n++;
+                }
+            }
+        }
+        return n;
+    }
+
+    static void forgetFacing() {
+        facingFor = null;
+        facingCache = null;
     }
 
     // くぐった人を深淵へ (move が偽なら合図だけ。自己テスト用)
@@ -118,7 +216,11 @@ public final class AbyssGate {
             return;
         }
         Notice.hint(p, "message.skyabyss.abyss.exit");
-        p.teleportTo(p.server.overworld(), gate.getX() + 0.5, gate.getY(), gate.getZ() + 1.5, 0f, 0f);
+        ServerLevel ow = p.server.overworld();
+        Facing f = facing(p.server, ow, gate);
+        // 格子の列から離れる向きに一歩 (都が回っていても、門を背にして大広間の側へ)
+        BlockPos at = gate.relative(f.toward().getOpposite());
+        p.teleportTo(ow, at.getX() + 0.5, at.getY(), at.getZ() + 0.5, f.toward().getOpposite().toYRot(), 0f);
     }
 
     // ---------------------------------------------------------------- 見回り (都の底の境。0.25 秒ごと)
@@ -158,7 +260,7 @@ public final class AbyssGate {
                 open = true;
             }
         }
-        if (open && inGate(p.blockPosition(), gate)) {
+        if (open && inGate(p.blockPosition(), gate, facing(server, server.overworld(), gate))) {
             passThrough(p, move);
         }
     }
@@ -191,7 +293,7 @@ public final class AbyssGate {
         BlockPos exit = AbyssBuild.mark("exit");
         if (exit != null && at.getX() == exit.getX() && at.getZ() == exit.getZ() && at.getY() >= exit.getY() && at.getY() <= exit.getY() + 14) {
             event.setCanceled(true);
-            up(p);
+            AbyssReturn.begin(p, true);
             return;
         }
         BlockPos heart = AbyssBuild.mark("heart");
