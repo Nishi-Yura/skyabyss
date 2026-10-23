@@ -35,7 +35,19 @@ public final class EmberMidRoom extends MidRoom {
     public void build(RaidCtx ctx) {
         RaidKit.buildCell(ctx, new RaidKit.Spec(R, R, HEIGHT, RaidKit.EMBER));
         AshSmithArena.build(ctx.level(), shiftOf(ctx));
+        exitLamps = jp.revati.skyabyss.trial.raid.ember.EmberRaidDecor.decorateSmithHall(ctx);
         RaidKit.restInArena(ctx, 0, -R + 3);
+    }
+
+    // 飾りの出口の灯り (倒すと点く)
+    private java.util.List<BlockPos> exitLamps = java.util.List.of();
+
+    @Override
+    protected void onBossDeath(RaidCtx ctx, Mob dead) {
+        super.onBossDeath(ctx, dead);
+        if (defeated) {
+            jp.revati.skyabyss.trial.raid.ember.EmberRaidDecor.exitLampsPublic(ctx, exitLamps, true);
+        }
     }
 
     @Override
@@ -68,6 +80,7 @@ public final class EmberMidRoom extends MidRoom {
     @Override
     protected void resetFixtures(RaidCtx ctx) {
         AshSmithArena.buildFurnace(ctx.level(), false, shiftOf(ctx));
+        jp.revati.skyabyss.trial.raid.ember.EmberRaidDecor.exitLampsPublic(ctx, exitLamps, false);
     }
 
     @Override

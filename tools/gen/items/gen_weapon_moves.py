@@ -504,6 +504,110 @@ W["coral_shield"] = weapon(
     fixed=9,
 )
 
+# ------------------------------------------------------------------ 五章「深淵」の装備 (abyss/gear、v2 のメッシュ)
+# 灯り番の剣: 片手の直剣。灯 (角灯) を揺らさないよう肩から小さく振る。袈裟に斬り下ろし → 返して横薙ぎ → 灯を前へ出して突く
+W["abyss_lamp_sword"] = weapon(
+    "abyss_lamp_sword", "灯り番の剣: 袈裟に斬り下ろし、返して薙ぎ、灯を掲げて突く", "GREATSWORD", 0.45, 0.5, 12,
+    {"mx": -0.6, "my": -0.1, "ox": -0.35, "oy": 0.25, "sway": 0.03, "hz": 0.36},
+    [
+        step("袈裟斬り", 2, 0.45, [
+            k(0.0, "smooth", MX=-0.6, MY=-0.1, OX=-0.35, OY=0.25, TRAIL=0, GLOW=0, LEAN=0),
+            k(0.12, "out", MX=-0.8, MY=0.1, OX=-0.4, OY=0.3, BY=0.12, LEAN=2, TY=-0.04, TZ=0.04, RX=6, RZ=-4),
+            k(0.3, "in_out", MX=-2.3, MY=0.55, MZ=0.3, OX=-0.6, OY=0.5, BY=0.42, LEAN=-5, TX=0.14, TY=0.34, TZ=0.04, RX=8, RZ=-16, TRAIL=0, GLOW=0.2),
+            k(0.38, "linear", MX=-2.38, MY=0.58, MZ=0.32, OX=-0.62, OY=0.52, BY=0.45, LEAN=-6, TX=0.15, TY=0.36, TZ=0.05, RX=9, RZ=-17, GLOW=0.3),
+            k(0.45, "in_cubic", hit=True, MX=-0.55, MY=-0.75, MZ=-0.2, OX=-0.3, OY=0.6, BY=-0.45, LEAN=10, TX=-0.22, TY=-0.12, TZ=-0.4, RX=-52, RY=22, RZ=30, TRAIL=1, GLOW=0.9),
+            k(0.56, "out", MX=-0.35, MY=-0.85, MZ=-0.15, OX=-0.25, OY=0.6, BY=-0.38, LEAN=8, TX=-0.28, TY=-0.16, TZ=-0.42, RX=-60, RY=26, RZ=33, TRAIL=0.45, GLOW=0.5),
+            k(0.76, "smooth", MX=-0.5, MY=-0.35, OX=-0.32, OY=0.35, BY=-0.12, LEAN=3, TX=-0.08, TY=-0.04, TZ=-0.12, RX=-18, RY=8, RZ=10, TRAIL=0, GLOW=0.15),
+            k(1.0, "out", MX=-0.6, MY=-0.1, MZ=0, OX=-0.35, OY=0.25, BY=0, LEAN=0, TX=0, TY=0, TZ=0, RX=0, RY=0, RZ=0, GLOW=0),
+        ], 0.08, 0.2),
+        step("返し薙ぎ", 2, 0.4, [
+            k(0.0, "smooth", MX=-0.6, MY=-0.1, OX=-0.35, OY=0.25, TRAIL=0, GLOW=0, LEAN=0),
+            k(0.26, "in_out", MX=-1.05, MY=-0.95, MZ=0.15, OX=-0.5, OY=0.1, BY=-0.5, LEAN=-2, TX=-0.2, TY=0.02, TZ=0.05, RX=2, RY=20, RZ=-18, TRAIL=0, GLOW=0.2),
+            k(0.36, "linear", MX=-1.08, MY=-1.02, MZ=0.15, OX=-0.52, OY=0.08, BY=-0.54, LEAN=-2, TX=-0.22, TY=0.02, TZ=0.06, RX=2, RY=22, RZ=-19, GLOW=0.3),
+            k(0.45, "in_cubic", hit=True, MX=-1.2, MY=0.95, MZ=-0.05, OX=-0.45, OY=0.55, BY=0.55, LEAN=7, TX=0.3, TY=0.0, TZ=-0.4, RX=-16, RY=-38, RZ=24, TRAIL=1, GLOW=0.9),
+            k(0.58, "out", MX=-1.22, MY=1.15, OX=-0.45, OY=0.6, BY=0.62, LEAN=5, TX=0.36, TZ=-0.38, RX=-14, RY=-46, RZ=26, TRAIL=0.45, GLOW=0.45),
+            k(0.78, "smooth", MX=-0.85, MY=0.4, OX=-0.4, OY=0.4, BY=0.2, LEAN=2, TX=0.1, TZ=-0.12, RY=-14, RZ=8, TRAIL=0, GLOW=0.1),
+            k(1.0, "out", MX=-0.6, MY=-0.1, OX=-0.35, OY=0.25, BY=0, LEAN=0, TX=0, TY=0, TZ=0, RX=0, RY=0, RZ=0, GLOW=0),
+        ], 0.08, 0.2),
+        step("灯の突き", 2, 0.45, [
+            k(0.0, "smooth", MX=-0.6, MY=-0.1, OX=-0.35, OY=0.25, TRAIL=0, GLOW=0, PZ=0, LEAN=0),
+            k(0.26, "in_out", MX=-1.1, MY=0.3, OX=-0.5, OY=0.5, PZ=2.6, BY=0.38, LEAN=-4, TX=0.08, TY=0.08, TZ=0.22, RX=6, RZ=-8, TRAIL=0, GLOW=0.3),
+            k(0.36, "linear", MX=-1.12, MY=0.32, OX=-0.52, OY=0.52, PZ=2.9, BY=0.42, LEAN=-4, TX=0.08, TY=0.09, TZ=0.25, RX=7, RZ=-9, GLOW=0.4),
+            k(0.45, "snap", hit=True, MX=-1.5, MY=-0.1, OX=-0.3, OY=0.6, PZ=-4.2, BY=-0.38, LEAN=7, TX=-0.02, TY=0.02, TZ=-0.62, RX=-6, RZ=4, TRAIL=0.9, GLOW=1),
+            k(0.56, "out", MX=-1.45, MY=-0.08, OX=-0.3, OY=0.6, PZ=-4.4, BY=-0.34, LEAN=7, TZ=-0.65, RX=-6, TRAIL=0.25, GLOW=0.6),
+            k(0.8, "smooth", MX=-0.9, MY=-0.1, OX=-0.33, OY=0.35, PZ=-1.2, BY=-0.1, LEAN=2, TZ=-0.18, RX=-2, TRAIL=0, GLOW=0.15),
+            k(1.0, "out", MX=-0.6, MY=-0.1, OX=-0.35, OY=0.25, PZ=0, BY=0, LEAN=0, TX=0, TY=0, TZ=0, RX=0, RZ=0, GLOW=0),
+        ], 0.08, 0.2),
+    ],
+    inspect("灯をかざす", 0.22, -0.1, -8.0, "RY", 1.0, -1.05, side=-0.05),
+)
+
+# 沈め錨: 両手の重い錨。頭上へ担ぎ上げて真下へ沈める (床に錨を打つ) → 横から鉤をかけて引き寄せる
+W["abyss_sinking_anchor"] = weapon(
+    "abyss_sinking_anchor", "沈め錨: 担ぎ上げて真下へ沈め、横から鉤をかけて引き寄せる", "HAMMER", 0.55, 0.55, 16,
+    {"mx": -0.6, "my": -0.12, "ox": -0.5, "oy": 0.32, "sway": 0.04, "hz": 0.22},
+    [
+        step("錨打ち", 3, 1.0, [
+            k(0.0, "smooth", MX=-0.6, MY=-0.12, OX=-0.5, OY=0.32, TRAIL=0, GLOW=0),
+            k(0.16, "in", MX=0.2, MY=0.12, OX=0.15, OY=0.3, BY=0.2, LEAN=8, TX=0.04, TY=-0.24, TZ=-0.04, RX=22, TRAIL=0, GLOW=0.3),
+            k(0.38, "in_out", MX=-3.05, MY=0.12, MZ=0.3, OX=-2.85, OY=-0.2, OZ=-0.3, BY=0.3, LEAN=-11, TY=0.46, TZ=0.02, RX=6, RZ=4, TRAIL=0, GLOW=0.7),
+            k(0.47, "linear", MX=-3.12, MY=0.12, MZ=0.3, OX=-2.9, OY=-0.2, OZ=-0.3, BY=0.31, LEAN=-12, TY=0.49, RX=6, RZ=4, GLOW=0.85),
+            k(0.55, "in_cubic", hit=True, MX=0.0, MY=-0.32, MZ=-0.05, OX=-0.1, OY=0.5, OZ=0, BY=-0.25, LEAN=22, TY=-0.16, TZ=-0.52, RX=-70, TRAIL=1, GLOW=1),
+            k(0.68, "linear", MX=0.05, MY=-0.3, OX=-0.08, OY=0.5, BY=-0.14, LEAN=20, TY=-0.14, TZ=-0.48, RX=-58, TRAIL=0.35, GLOW=0.85),
+            k(0.85, "smooth", MX=-0.3, MY=-0.16, OX=-0.3, OY=0.4, BY=-0.05, LEAN=7, TY=-0.05, TZ=-0.16, RX=-20, TRAIL=0, GLOW=0.25),
+            k(1.0, "out", MX=-0.6, MY=-0.12, MZ=0, OX=-0.5, OY=0.32, OZ=0, BY=0, LEAN=0, TX=0, TY=0, TZ=0, RX=0, RZ=0, GLOW=0),
+        ], 0.1, 0.22),
+        step("鉤引き", 2, 0.7, [
+            k(0.0, "smooth", MX=-0.6, MY=-0.12, OX=-0.5, OY=0.32, TRAIL=0, GLOW=0, PZ=0),
+            k(0.3, "in_out", MX=-1.3, MY=1.05, MZ=0.2, OX=-1.2, OY=1.3, BY=0.65, LEAN=-4, TX=0.3, TY=0.06, TZ=0.08, RX=4, RY=-24, RZ=-10, TRAIL=0, GLOW=0.5),
+            k(0.44, "linear", MX=-1.34, MY=1.1, MZ=0.2, OX=-1.24, OY=1.34, BY=0.7, LEAN=-5, TX=0.32, TY=0.06, TZ=0.09, RX=4, RY=-26, RZ=-11, GLOW=0.7),
+            k(0.55, "in_cubic", hit=True, MX=-1.2, MY=-0.95, MZ=-0.1, OX=-1.1, OY=-0.4, BY=-0.7, LEAN=9, TX=-0.34, TY=-0.02, TZ=-0.4, RX=-22, RY=34, RZ=16, TRAIL=1, GLOW=1),
+            k(0.7, "in_out", MX=-0.9, MY=-0.7, OX=-0.85, OY=-0.1, PZ=2.8, BY=-0.45, LEAN=-3, TX=-0.22, TY=-0.04, TZ=0.12, RX=-8, RY=22, RZ=10, TRAIL=0.3, GLOW=0.6),
+            k(0.86, "smooth", MX=-0.7, MY=-0.3, OX=-0.6, OY=0.15, PZ=1.0, BY=-0.15, LEAN=1, TX=-0.06, TZ=0.03, RY=6, RZ=3, TRAIL=0, GLOW=0.2),
+            k(1.0, "out", MX=-0.6, MY=-0.12, OX=-0.5, OY=0.32, PZ=0, BY=0, LEAN=0, TX=0, TY=0, TZ=0, RX=0, RY=0, RZ=0, GLOW=0),
+        ], 0.1, 0.24),
+    ],
+    inspect("錨の重さを量る", 0.16, -0.1, 4.0, "RY", 1.0, -1.0),
+)
+
+# 鼓動の短剣: 速い 3 連。刺す → 逆に裂き上げる → 鼓動に合わせて二度押し込む (光が脈打つ)
+W["abyss_pulse_dagger"] = weapon(
+    "abyss_pulse_dagger", "鼓動の短剣: 刺し、裂き上げ、鼓動に合わせて押し込む", "FANG", 0.4, 0.5, 8,
+    {"mx": -0.55, "my": -0.12, "sway": 0.035, "hz": 0.55},
+    [
+        step("刺し", 1, 0.2, [
+            k(0.0, "smooth", MX=-0.55, MY=-0.12, TRAIL=0, GLOW=0, PZ=0, LEAN=0),
+            k(0.18, "out", MX=-0.7, MY=0.25, PZ=1.6, BY=0.28, LEAN=-2, TX=0.06, TY=0.03, TZ=0.12, RX=4, RZ=-8, TRAIL=0, GLOW=0.2),
+            k(0.3, "linear", MX=-0.72, MY=0.27, PZ=1.8, BY=0.3, LEAN=-2, TX=0.06, TY=0.03, TZ=0.14, RX=4, RZ=-9, GLOW=0.3),
+            k(0.4, "snap", hit=True, MX=-1.4, MY=-0.15, PZ=-3.4, BY=-0.32, LEAN=5, TX=-0.03, TY=0.01, TZ=-0.52, RX=-8, RZ=5, TRAIL=0.9, GLOW=1),
+            k(0.52, "out", MX=-1.3, MY=-0.12, PZ=-3.5, BY=-0.28, LEAN=4, TZ=-0.54, RX=-8, TRAIL=0.3, GLOW=0.5),
+            k(0.74, "smooth", MX=-0.85, MY=-0.12, PZ=-1.0, BY=-0.08, LEAN=1, TZ=-0.14, RX=-2, TRAIL=0, GLOW=0.15),
+            k(1.0, "out", MX=-0.55, MY=-0.12, PZ=0, BY=0, LEAN=0, TX=0, TY=0, TZ=0, RX=0, RZ=0, GLOW=0),
+        ], 0.06, 0.15),
+        step("裂き上げ", 1, 0.25, [
+            k(0.0, "smooth", MX=-0.55, MY=-0.12, TRAIL=0, GLOW=0, LEAN=0),
+            k(0.2, "out", MX=-0.2, MY=-0.6, MZ=-0.2, BY=-0.3, LEAN=3, TX=-0.12, TY=-0.2, TZ=0.06, RX=18, RZ=16, TRAIL=0, GLOW=0.2),
+            k(0.3, "linear", MX=-0.16, MY=-0.64, MZ=-0.22, BY=-0.33, LEAN=3, TX=-0.13, TY=-0.22, TZ=0.06, RX=20, RZ=17, GLOW=0.3),
+            k(0.4, "snap", hit=True, MX=-1.75, MY=0.55, MZ=0.25, BY=0.4, LEAN=-2, TX=0.2, TY=0.2, TZ=-0.34, RX=-40, RY=-20, RZ=-26, TRAIL=1, GLOW=0.9),
+            k(0.54, "out", MX=-1.85, MY=0.62, MZ=0.25, BY=0.44, LEAN=-3, TX=0.24, TY=0.24, TZ=-0.32, RX=-44, RY=-22, RZ=-28, TRAIL=0.35, GLOW=0.45),
+            k(0.76, "smooth", MX=-1.0, MY=0.2, BY=0.12, LEAN=-1, TX=0.07, TY=0.06, TZ=-0.1, RX=-14, RY=-6, RZ=-8, TRAIL=0, GLOW=0.1),
+            k(1.0, "out", MX=-0.55, MY=-0.12, MZ=0, BY=0, LEAN=0, TX=0, TY=0, TZ=0, RX=0, RY=0, RZ=0, GLOW=0),
+        ], 0.06, 0.15),
+        step("鼓動の押し込み", 2, 0.35, [
+            k(0.0, "smooth", MX=-0.55, MY=-0.12, TRAIL=0, GLOW=0, PZ=0, LEAN=0),
+            k(0.16, "out", MX=-0.9, MY=0.1, PZ=1.2, BY=0.2, LEAN=-2, TZ=0.1, RX=4, TRAIL=0, GLOW=0.6),
+            k(0.24, "in_out", MX=-1.0, MY=0.12, PZ=1.4, BY=0.24, LEAN=-2, TZ=0.12, RX=5, GLOW=0.1),
+            k(0.3, "linear", MX=-1.02, MY=0.14, PZ=1.6, BY=0.26, LEAN=-3, TZ=0.14, RX=5, GLOW=0.7),
+            k(0.4, "snap", hit=True, MX=-1.45, MY=-0.12, PZ=-3.8, BY=-0.34, LEAN=6, TX=-0.02, TZ=-0.56, RX=-6, RZ=4, TRAIL=0.9, GLOW=1),
+            k(0.5, "out", MX=-1.4, MY=-0.1, PZ=-3.2, BY=-0.3, LEAN=5, TZ=-0.48, RX=-5, TRAIL=0.3, GLOW=0.3),
+            k(0.6, "out", MX=-1.48, MY=-0.12, PZ=-4.0, BY=-0.34, LEAN=6, TZ=-0.58, RX=-6, TRAIL=0.2, GLOW=0.9),
+            k(0.8, "smooth", MX=-0.9, MY=-0.12, PZ=-1.0, BY=-0.08, LEAN=2, TZ=-0.15, RX=-2, TRAIL=0, GLOW=0.15),
+            k(1.0, "out", MX=-0.55, MY=-0.12, PZ=0, BY=0, LEAN=0, TX=0, TY=0, TZ=0, RX=0, RZ=0, GLOW=0),
+        ], 0.06, 0.18),
+    ],
+    inspect("短剣の鼓動を聞く", 0.22, -0.1, -18.0, "RZ", 1.0, -0.9, side=-0.05),
+)
+
 # 盾・弓は strike = 0 (サーバーは何も預けない)。盾は盾殴りの hit の key だけ持つ
 
 

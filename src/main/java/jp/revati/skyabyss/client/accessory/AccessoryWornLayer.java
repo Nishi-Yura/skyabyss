@@ -50,9 +50,9 @@ public final class AccessoryWornLayer extends RenderLayer<AbstractClientPlayer, 
             "moss_talisman", new Mount(Part.BODY, -3.4f, 10.0f, -2.9f, 0, 0, 0, 0.5f, 0, 5.8f, 0),
             "stone_whale_plating", new Mount(Part.BODY, 0f, 6.0f, 3.0f, 0, 180, 0, 0.6f, 0, 0, 0),
             "moontide_pearl", new Mount(Part.BODY, 0f, 1.2f, -2.7f, 0, 0, 0, 0.5f, 0, 5.2f, 0),
-            // 深淵 (abyss/gear): 聴き筒は胸の左、錘は腰の右の後ろに吊る
-            "abyss_pulse_listener", new Mount(Part.BODY, -2.2f, 4.4f, -2.8f, 0, 0, 0, 0.42f, 0, 6.4f, 0),
-            "abyss_surveyor_plumb", new Mount(Part.BODY, 3.6f, 10.4f, 2.4f, 0, 0, 0, 0.45f, 0, 7.6f, 0));
+            // 深淵 (abyss/gear、v2 のメッシュ): 聴き筒は胸の帯に掛ける (喇叭の背 z = 1.27 を胸の面へ)、錘は腰の右の後ろに紐巻きの横木 (y 8.6) で吊る
+            "abyss_pulse_listener", new Mount(Part.BODY, -2.2f, 4.6f, -2.1f, 0, 0, 0, 0.36f, 0, 0.0f, 1.27f),
+            "abyss_surveyor_plumb", new Mount(Part.BODY, 3.6f, 10.6f, 3.1f, 0, 0, 0, 0.4f, 0, 8.6f, 0));
 
     public AccessoryWornLayer(RenderLayerParent<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>> parent) {
         super(parent);

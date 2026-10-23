@@ -1102,7 +1102,7 @@ Lv 12・体力 22・一人。「一撃の傷 / 耐える回数」。ダメージ
 
 **見た目と実装**
 
-- 絵は 3 案のラフから A 案を仮に入れた（`docs/review/roughs_gear_gaps/`。選定は後で）。武器・装飾品は低ポリの立体（手・地面・額縁）、鎧は低ポリの立体（様式 C の箱と板）、アイコンはどれもメッシュを写した 32x32。色は深淵の紫黒の土台に錨鉄（青灰の鉄と鋲）、縁は形の段の色（レア・エピック = 青い鋼、ヒロイック = 紫銀）、光は品ごと（灯り = 琥珀、錨・錘 = 淵の紫、鼓動 = 赤）。共鳴の欠片と心核の絵は余燼の同じ品の色を紫に替えたもの。
+- 絵: 武器 3 点・装飾品 3 点は選ばれた A 案を作り直した v2（`docs/review/abyss_gear_v2/`、生成 `tools/rough/lowpoly/weapons/abyss_v2/`、取り込み `tools/install/install_abyss_gear.py`）。武器は持ち方の表（`tools/lib/weapon_display.py`）と品ごとの連撃（`weapon_moves/`）を持ち、強化 +5 / +10 で光が増える。鎧は前の A 案（様式 C の箱と板）を仮に入れたまま、新しい 3 案（`docs/review/roughs_gear_gaps/abyss_diver_armor_v2/`）から選ぶ。アイコンはどれもメッシュを写した 32x32。色は深淵の紫黒の土台に錨鉄（青灰の鉄と鋲）、縁は形の段の色（レア・エピック = 青い鋼、ヒロイック = 紫銀）、光は品ごと（灯り = 琥珀、錨・錘 = 淵の紫、鼓動 = 赤）。共鳴の欠片と心核の絵は余燼の同じ品の色を紫に替えたもの。
 - 持ち方は既存の武器のモデルを借りた（剣 = 鯨骨の大剣、錨 = 鍛え手の大鎚、短剣 = 水路の顎牙。`client/weapon/WeaponKind` も同じ型）。装飾の付けた姿は聴き筒が胸の左、錘が腰の右の後ろ（`AccessoryWornLayer`）。
 - 生成: `tools/rough/lowpoly/weapons/gear_gaps/`（`d_gaps.py` 形・`paint_gaps.py` 絵・`build_gaps.py` 武器・`acc_gaps.py` 装飾品と錨鉄）、`tools/rough/lowpoly/gear_gaps/armor_abyss.py`（鎧）、取り込み `tools/install/install_abyss_gear.py`（`--option <id>=b`）。文は `tools/gen/abyss_gear/gen_abyss_gear.py` → `assets/skyabyss_abyss_gear/lang/`。
 - 実装: `AbyssGear`（表と数値）、`AbyssGearSetup`（登録）、`AbyssDiverArmorItem`・`client/AbyssDiverArmorRenderer`、`AbyssGearWeaponItem`・`LampSwordItem`・`SinkingAnchorItem`・`PulseDaggerItem`、`AbyssTrinketItem`、`LanternCharmItem`、`AbyssGearEvents`（一式・剣・聴き筒・錘・圧の倍率）、`AbyssGearLoot`、`AbyssGearSelfTest`（段 `abyss gear`）。

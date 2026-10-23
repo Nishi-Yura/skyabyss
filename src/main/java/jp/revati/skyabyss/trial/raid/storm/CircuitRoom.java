@@ -271,6 +271,13 @@ public final class CircuitRoom extends RaidRoom {
             }
         }
         refresh(ctx, true);
+        // 建築 (docs/design/39 の 4.3): 電源の上の吊りの尖塔・灯の後ろの配線の電球・南の上の見渡し台・羽の段の壁・雲の天井
+        List<int[]> lamps = new ArrayList<>();
+        for (int i = 0; i < LAMPS; i++) {
+            lamps.add(new int[] {(layout.lampX[i] - N / 2) * T, (layout.lampZ[i] - N / 2) * T});
+        }
+        StormRoomDeco.dressSR2(ctx, new int[] {(layout.srcX - N / 2) * T, (layout.srcZ - N / 2) * T}, lamps);
+        refresh(ctx, true);
     }
 
     // 天井の灯り (x・z = -7, 1) の下は雲を置かない
@@ -386,7 +393,9 @@ public final class CircuitRoom extends RaidRoom {
                 level.sendParticles(ParticleTypes.ELECTRIC_SPARK, at.getX() + 0.5, at.getY() + 2.2, at.getZ() + 0.5, 24, 0.3, 0.5, 0.3, 0.1);
             }
             lampOn[i] = on;
+            StormRoomDeco.lampLit(ctx, (layout.lampX[i] - N / 2) * T, (layout.lampZ[i] - N / 2) * T, on);
         }
+        StormRoomDeco.exitLit(ctx, lampsLit >= LAMPS);
     }
 
     private static final BlockState LIT_WIRE = Blocks.OCHRE_FROGLIGHT.defaultBlockState();

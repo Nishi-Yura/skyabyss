@@ -24,7 +24,10 @@ public final class EmberValves extends EmberRoom {
     public static final int MARKS = 7;
     private static final int[] VX = {-7, -3, 3, 7};
     private static final int VALVE_Z = -HZ + 5;
-    private static final Block[] WHEEL = {Blocks.COPPER_BLOCK, Blocks.EXPOSED_COPPER, Blocks.WEATHERED_COPPER, Blocks.OXIDIZED_COPPER};
+    // 蝋を引いた銅 (引いていない銅は時間で錆びが進み、部屋の見た目が変わる。docs/design/39 の 6.3)
+    private static final Block[] WHEEL = {Blocks.WAXED_COPPER_BLOCK, Blocks.WAXED_EXPOSED_COPPER, Blocks.WAXED_WEATHERED_COPPER, Blocks.WAXED_OXIDIZED_COPPER};
+    // 七つの炉 (碑「炉は 七つで 息をする」): 東西の壁ぎわに三つずつと入口の戸の上に一つ。そろった針の数だけ大釜が熾で満ちる
+    private static final int[][] HEARTHS = {{-HX, -3}, {HX, -3}, {-HX, 2}, {HX, 2}, {-HX, 7}, {HX, 7}, {0, HZ}};
 
     private final int[] needle = new int[4];
     private final int[] turns = new int[4];
@@ -36,6 +39,9 @@ public final class EmberValves extends EmberRoom {
     public void build(RaidCtx ctx) {
         RaidKit.buildCell(ctx, new RaidKit.Spec(HX, HZ, 8, RaidKit.EMBER));
         var lv = ctx.level();
+        EmberRaidDecor deco = EmberRaidDecor.of(ctx);
+        deco.shell(true);
+        deco.goldLine(0, -11, 11);
         // 北の壁の盤: 四つの圧力計の枠と、高さの印 (全部の目盛りの高さに横の印)
         RaidKit.fill(lv, ctx.local(-HX, 1, -HZ), ctx.local(HX, MARKS + 1, -HZ), b(Blocks.POLISHED_BLACKSTONE_BRICKS));
         RaidKit.fill(lv, ctx.local(-1, 1, -HZ), ctx.local(1, 3, -HZ), AIR);
@@ -64,8 +70,53 @@ public final class EmberValves extends EmberRoom {
             RaidKit.fill(lv, ctx.local(d[0], 1, d[1]), ctx.local(d[0], 5, d[1]), b(Blocks.BASALT));
             set(ctx, ctx.local(d[0], 6, d[1]), b(Blocks.SHROOMLIGHT));
         }
+        decorate(ctx, deco);
         shuffle(ctx);
         draw(ctx);
+    }
+
+    // 飾り (docs/design/39 の 4.4 の「解く (圧合わせ)」): 七つの炉 (台・熾の大釜・間・覆い)、弁から圧力計への床の配管、
+    // 壁は玄武岩の柱と熾の溝、天井の鎖。北の盤とその前 (弁の台まで) は空ける
+    private void decorate(RaidCtx ctx, EmberRaidDecor d) {
+        d.keep(-HX, 0, -HZ, HX, 8, VALVE_Z + 2);
+        for (int[] hth : HEARTHS) {
+            boolean south = hth[1] == HZ;
+            int base = south ? 5 : 1;
+            d.put(hth[0], base, hth[1], EmberRaidDecor.BRICKS);
+            d.put(hth[0], base + 1, hth[1], b(Blocks.CAULDRON));
+            d.put(hth[0], base + 3, hth[1], EmberRaidDecor.BRICKS);
+            if (base + 4 <= 8) {
+                d.put(hth[0], base + 4, hth[1], EmberRaidDecor.CHISELED);
+            }
+            d.keepAround(hth[0], hth[1], 1, 8);
+        }
+        // 弁の台から盤の脚へ、床に埋めた配管 (磨いた玄武岩を横に)
+        for (int v : VX) {
+            for (int z = -HZ + 2; z <= VALVE_Z - 2; z++) {
+                d.repaint(v, 0, z, EmberRaidDecor.axis(EmberRaidDecor.P_BASALT, net.minecraft.core.Direction.Axis.Z));
+            }
+        }
+        d.exitFrame();
+        d.relief();
+        d.veins(2);
+        d.chains(5, 4, 2, 0, 0, 0);
+        d.entry(EmberRaidDecor.Scene.BELLOWS);
+        d.exitRoom();
+        d.lights(3, 5, 10);
+        // 出口の灯り: 盤の真ん中の切れ目 (戸) の両肩
+        finishDecor(ctx, d, java.util.List.of(ctx.local(-1, 4, -HZ), ctx.local(1, 4, -HZ)));
+    }
+
+    // 七つの炉の大釜: そろっている針の数 (counter) に合わせて満ちる (越えたら全部)
+    private void hearths(RaidCtx ctx) {
+        int full = done ? HEARTHS.length : counter() * HEARTHS.length / 4;
+        for (int i = 0; i < HEARTHS.length; i++) {
+            int base = HEARTHS[i][1] == HZ ? 5 : 1;
+            BlockPos p = ctx.local(HEARTHS[i][0], base + 1, HEARTHS[i][1]);
+            if (ctx.level().getBlockState(p).getBlock() instanceof net.minecraft.world.level.block.AbstractCauldronBlock) {
+                ctx.level().setBlock(p, i < full ? b(Blocks.LAVA_CAULDRON) : b(Blocks.CAULDRON), 2);
+            }
+        }
     }
 
     private void turn(int i, int dir) {
@@ -102,6 +153,7 @@ public final class EmberValves extends EmberRoom {
             }
             set(ctx, ctx.local(VX[i], 3, VALVE_Z), b(WHEEL[Math.floorMod(turns[i], 4)]));
         }
+        hearths(ctx);
     }
 
     @Override
@@ -119,6 +171,7 @@ public final class EmberValves extends EmberRoom {
     @Override
     public void reset(RaidCtx ctx) {
         generation++;
+        closed(ctx);
         failRequested = false;
         done = false;
         moves = 0;
@@ -166,6 +219,7 @@ public final class EmberValves extends EmberRoom {
         particles(ctx, ParticleTypes.SMOKE, w.getX() + 0.5, w.getY() + 1, w.getZ() + 0.5, 6, 0.3, 0.02);
         if (equal()) {
             done = true;
+            opened(ctx);
             for (int k = 0; k < 4; k++) {
                 particles(ctx, ParticleTypes.LAVA, ctx.origin().getX() + VX[k] + 0.5, ctx.origin().getY() + needle[k] + 1.5, ctx.origin().getZ() - HZ + 1.5, 8, 0.4, 0.1);
             }
