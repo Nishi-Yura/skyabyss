@@ -344,7 +344,7 @@ final class EmberRaid2SelfTest {
         for (int k = 0; k < 200 && room.current() == null; k++) {
             EmberRaidSelfTest.ticks(level, room, ctx, 1);
         }
-        check(f, "ER6 health scales with the party", room.current() != null && room.current().getMaxHealth() > 60f * 0.7f * 1.5f);
+        check(f, "ER6 health scales with the party", room.current() != null && room.current().getMaxHealth() > 60f * 0.7f * 1.5f * (1 + (float) jp.revati.skyabyss.combat.MobTuning.HEALTH));
         ctx.clearMobs();
         check(f, "ER6 HUD key", !room.objectiveKey().isEmpty());
     }

@@ -35,7 +35,7 @@ public final class StormRaidSelfTest {
     private StormRaidSelfTest() {
     }
 
-    private static final int[] XS = {-5000, -4800, -4600};
+    private static final int[] XS = {-5000, -4800, -4600, -4400, -4200, -4000};
     private static int waited;
 
     // 三つの部屋の場所を強制読み込みし、敵・物を置けるようになる (エンティティが動く) まで待つ
@@ -70,6 +70,10 @@ public final class StormRaidSelfTest {
             checkCircuit(level, failures);
             checkFeathers(level, failures);
             checkChain(level, failures, notes);
+            checkColumn(level, failures);
+            checkBeat(level, failures);
+            checkEye(level, failures);
+            checkDraw(failures);
         } catch (Throwable e) {
             SkyAbyss.LOGGER.error("SELFTEST storm raid crashed", e);
             failures.add("crashed: " + e);
@@ -83,7 +87,7 @@ public final class StormRaidSelfTest {
         }
         notes.forEach(n -> SkyAbyss.LOGGER.info("SELFTEST storm raid note: {}", n));
         if (failures.isEmpty()) {
-            SkyAbyss.LOGGER.info("SELFTEST storm raid PASSED (registered, sealed cells, strike outcomes, feather haul + reset, 300 solvable circuits + solve + reset, charge chain + waves + elite + reset)");
+            SkyAbyss.LOGGER.info("SELFTEST storm raid PASSED (registered, sealed cells, strike outcomes, feather haul + reset, 300 solvable circuits + solve + reset, charge chain + waves + elite + reset, pillar chase + beat tiles + eye advance + draw)");
         } else {
             failures.forEach(f -> SkyAbyss.LOGGER.error("SELFTEST storm raid FAILED: {}", f));
         }
@@ -114,8 +118,8 @@ public final class StormRaidSelfTest {
                 keys.add(jp.revati.skyabyss.trial.TrialRegions.keyOfDef(Titans.THUNDER_WING, d, null));
             }
         }
-        check(failures, keys.size() == 3, "SR1..SR3 map to three different stone keys " + keys);
-        for (String id : new String[] {"SR1", "SR2", "SR3"}) {
+        check(failures, keys.size() == 3, "SR1..SR6 map to three different stone keys " + keys);
+        for (String id : new String[] {"SR1", "SR2", "SR3", "SR4", "SR5", "SR6"}) {
             check(failures, RaidRooms.create(id) != null, id + " has a factory");
         }
     }
@@ -360,5 +364,229 @@ public final class StormRaidSelfTest {
         check(failures, room.wave() == 1 && !ctx.aliveMobs().isEmpty(), "SR3 wave 1 spawns again after the wipe");
         ctx.clearMobs();
         room.end(ctx);
+    }
+
+    // ---- SR4 雷柱から逃げて鍵集め
+    private static void checkColumn(ServerLevel level, List<String> failures) throws Exception {
+        RaidCtx ctx = ctx(level, "SR4", -4400, 31);
+        ColumnChase room = new ColumnChase();
+        room.build(ctx);
+        check(failures, ctx.cell() != null, "SR4 built a cell");
+        check(failures, sealed(level, ctx.cell(), 400000), "SR4 cell is sealed");
+        check(failures, room.pillars().size() >= 3, "SR4 has covering pillars (" + room.pillars().size() + ")");
+        check(failures, ColumnChase.SPEED + ColumnChase.SPEED_PER_KEY * ColumnChase.KEYS < 0.2, "SR4 the pillar stays slower than a walking player");
+        for (int i = 0; i < ColumnChase.KEYS; i++) {
+            check(failures, ctx.cell().inArena(room.keyX(ctx, i), room.keyZ(ctx, i)), "SR4 key " + i + " is inside the hall");
+            for (int j = i + 1; j < ColumnChase.KEYS; j++) {
+                check(failures, Math.hypot(room.keyX(ctx, i) - room.keyX(ctx, j), room.keyZ(ctx, i) - room.keyZ(ctx, j)) >= 7, "SR4 keys " + i + " and " + j + " are far apart");
+            }
+        }
+        room.start(ctx);
+        // 柱は最も近い人へ歩き、立ち止まって赤い帯を引く (人は広間の南寄りの仮の目標。鍵から離す)
+        double tx = ctx.origin().getX() + 0.5;
+        double tz = ctx.origin().getZ() + 8.5;
+        List<double[]> target = List.of(new double[] {tx, tz});
+        double d0 = Math.hypot(room.colX() - tx, room.colZ() - tz);
+        for (int i = 0; i < ColumnChase.GRACE - 2; i++) {
+            room.update(ctx, target);
+        }
+        check(failures, room.phase() == ColumnChase.Phase.GRACE && Math.abs(room.colX() - (ctx.origin().getX() + 0.5)) < 1e-9, "SR4 the pillar waits during the grace");
+        int before = jp.revati.skyabyss.combat.Telegraph.activeCount(level);
+        boolean beam = false;
+        for (int i = 0; i < ColumnChase.GRACE + ColumnChase.ROAM + 4 && !beam; i++) {
+            room.update(ctx, target);
+            beam = room.phase() == ColumnChase.Phase.CHARGE;
+        }
+        double d1 = Math.hypot(room.colX() - tx, room.colZ() - tz);
+        check(failures, d1 < d0 - 5, "SR4 the pillar walked toward the nearest player (" + d0 + " -> " + d1 + ")");
+        check(failures, beam && jp.revati.skyabyss.combat.Telegraph.activeCount(level) > before, "SR4 the pillar stops and shows a red beam");
+        // 鍵: 位置に立てば取れる。三つで完了
+        int[] order = {1, 2, 0};
+        for (int k = 0; k < 3; k++) {
+            room.update(ctx, List.of(new double[] {room.keyX(ctx, order[k]), room.keyZ(ctx, order[k])}));
+            check(failures, room.counter() == k + 1, "SR4 key " + (k + 1) + " collected (" + room.counter() + ")");
+        }
+        check(failures, room.isComplete(), "SR4 three keys: complete");
+        check(failures, !level.getBlockState(ctx.origin().offset(room.keyOffset(0)[0], 1, room.keyOffset(0)[1])).is(Blocks.VERDANT_FROGLIGHT), "SR4 a taken key's lamp goes dark");
+        room.reset(ctx);
+        check(failures, !room.isComplete() && room.counter() == 0 && room.phase() == ColumnChase.Phase.GRACE, "SR4 wipe: keys and pillar back to the start");
+        check(failures, Math.abs(room.colX() - (ctx.origin().getX() + 0.5)) < 1e-9 && Math.abs(room.colZ() - (ctx.origin().getZ() - ColumnChase.HZ + 3.5)) < 1e-9, "SR4 wipe: the pillar is back at its post");
+        check(failures, level.getBlockState(ctx.origin().offset(room.keyOffset(0)[0], 1, room.keyOffset(0)[1])).is(Blocks.VERDANT_FROGLIGHT), "SR4 wipe: the key lamp is lit again");
+        room.start(ctx);
+        for (int i = 0; i < 3; i++) {
+            room.update(ctx, List.of(new double[] {room.keyX(ctx, i), room.keyZ(ctx, i)}));
+        }
+        check(failures, room.isComplete(), "SR4 solvable again after the wipe");
+        check(failures, sealed(level, ctx.cell(), 400000), "SR4 cell still sealed");
+        room.end(ctx);
+    }
+
+    // ---- SR5 雷の拍子覚え
+    private static void checkBeat(ServerLevel level, List<String> failures) throws Exception {
+        for (long seed = 0; seed < 300; seed++) {
+            int[] s = BeatTiles.generate(RandomSource.create(seed));
+            boolean ok = s.length == BeatTiles.MAXLEN;
+            for (int i = 1; i < s.length && ok; i++) {
+                int dx = Math.abs(s[i] % BeatTiles.N - s[i - 1] % BeatTiles.N);
+                int dz = Math.abs(s[i] / BeatTiles.N - s[i - 1] / BeatTiles.N);
+                ok = s[i] != s[i - 1] && dx <= 1 && dz <= 1;
+            }
+            if (!ok) {
+                failures.add("SR5 sequence for seed " + seed + " is not walkable (adjacent tiles, no repeats)");
+                return;
+            }
+        }
+        RaidCtx ctx = ctx(level, "SR5", -4200, 47);
+        BeatTiles room = new BeatTiles();
+        room.build(ctx);
+        check(failures, ctx.cell() != null, "SR5 built a cell");
+        check(failures, sealed(level, ctx.cell(), 400000), "SR5 cell is sealed");
+        check(failures, BeatTiles.tileAt(ctx.origin(), ctx.origin().getX() + 5.5, ctx.origin().getZ() - 4.5) == 2, "SR5 tile lookup (east-north tile is 2)");
+        check(failures, BeatTiles.tileAt(ctx.origin(), ctx.origin().getX() + 2.5, ctx.origin().getZ() + 0.5) == -1, "SR5 the lanes between tiles are not tiles");
+        int[] first = room.seq().clone();
+        room.start(ctx);
+        check(failures, room.phase() == BeatTiles.Phase.PREP && !room.isComplete(), "SR5 starts with the preparation");
+        boolean[] none = new boolean[BeatTiles.N * BeatTiles.N];
+        // 見せている間の踏み込みは数えない
+        for (int i = 0; i < BeatTiles.PREP + 5; i++) {
+            room.advance(ctx, none);
+        }
+        room.enterTile(ctx, (room.seq()[0] + 1) % 9);
+        check(failures, room.phase() == BeatTiles.Phase.SHOW, "SR5 stepping while the sequence plays is ignored");
+        check(failures, solveBeat(ctx, room, failures), "SR5 solved by script on the beat");
+        check(failures, room.isComplete() && room.counter() == BeatTiles.ROUNDS, "SR5 four rounds: complete (" + room.counter() + ")");
+        check(failures, room.tileState(ctx, room.seq()[0]).is(Blocks.VERDANT_FROGLIGHT), "SR5 solved tiles glow green");
+        // 失敗: 順にない板 / 拍に遅れる / 早く乗っても数えない
+        room.reset(ctx);
+        check(failures, !room.isComplete() && room.round() == 0 && room.phase() == BeatTiles.Phase.IDLE && java.util.Arrays.equals(first, room.seq()), "SR5 wipe: round 0, same sequence");
+        room.start(ctx);
+        toInput(ctx, room);
+        boolean[] early = new boolean[9];
+        early[room.seq()[1]] = true;
+        room.advance(ctx, early);
+        check(failures, room.next() == 0 && room.phase() == BeatTiles.Phase.INPUT, "SR5 waiting on a later tile does not count");
+        room.enterTile(ctx, (room.seq()[0] + 4) % 9 == room.seq()[0] ? 0 : (room.seq()[0] + 4) % 9);
+        check(failures, room.phase() == BeatTiles.Phase.FAIL, "SR5 a wrong tile fails the round");
+        int roundBefore = room.round();
+        for (int i = 0; i < BeatTiles.PAUSE + 2; i++) {
+            room.advance(ctx, none);
+        }
+        check(failures, room.phase() == BeatTiles.Phase.SHOW && room.round() == roundBefore, "SR5 after a miss the same round is shown again");
+        toInput(ctx, room);
+        for (int i = 0; i < BeatTiles.BEAT + BeatTiles.GRACE + 3; i++) {
+            room.advance(ctx, none);
+        }
+        check(failures, room.phase() == BeatTiles.Phase.FAIL, "SR5 missing the beat fails the round");
+        // 立って待っていた板は拍で数える (手分け)
+        for (int i = 0; i < BeatTiles.PAUSE + 2; i++) {
+            room.advance(ctx, none);
+        }
+        toInput(ctx, room);
+        boolean[] ready = new boolean[9];
+        ready[room.seq()[0]] = true;
+        room.advance(ctx, ready);
+        check(failures, room.next() == 1, "SR5 a tile waited on counts when its beat comes");
+        room.reset(ctx);
+        room.start(ctx);
+        check(failures, solveBeat(ctx, room, failures) && room.isComplete(), "SR5 solvable again after the wipe");
+        room.end(ctx);
+    }
+
+    // 入力の入り口まで進める
+    private static void toInput(RaidCtx ctx, BeatTiles room) {
+        boolean[] none = new boolean[9];
+        for (int i = 0; i < 4000 && room.phase() != BeatTiles.Phase.INPUT; i++) {
+            room.advance(ctx, none);
+        }
+    }
+
+    // 台本の人: 次の板が拍に入ってから 2 tick 後に乗る
+    private static boolean solveBeat(RaidCtx ctx, BeatTiles room, List<String> failures) {
+        boolean[] occ = new boolean[9];
+        for (int i = 0; i < 20000 && !room.isComplete(); i++) {
+            java.util.Arrays.fill(occ, false);
+            if (room.phase() == BeatTiles.Phase.INPUT && room.next() < room.length() && room.phaseAge() >= room.next() * BeatTiles.BEAT + 2) {
+                occ[room.seq()[room.next()]] = true;
+            }
+            room.advance(ctx, occ);
+            if (room.phase() == BeatTiles.Phase.FAIL) {
+                failures.add("SR5 the scripted player failed a round at round " + room.round());
+                return false;
+            }
+        }
+        return room.isComplete();
+    }
+
+    // ---- SR6 嵐の目へ
+    private static void checkEye(ServerLevel level, List<String> failures) throws Exception {
+        RaidCtx ctx = ctx(level, "SR6", -4000, 63);
+        EyeAdvance room = new EyeAdvance();
+        room.build(ctx);
+        check(failures, ctx.cell() != null, "SR6 built a cell");
+        check(failures, sealed(level, ctx.cell(), 600000), "SR6 cell is sealed");
+        check(failures, room.pillars().size() >= 8, "SR6 has pillars to shelter behind (" + room.pillars().size() + ")");
+        // 突風の周期: 始まる前は吹かず、予告のあとに吹き、また凪になる
+        long first = EyeAdvance.FIRST_GUST;
+        check(failures, !EyeAdvance.blowing(first + EyeAdvance.WARN - 1) && EyeAdvance.blowing(first + EyeAdvance.WARN), "SR6 a gust begins after its warning");
+        check(failures, EyeAdvance.blowing(first + EyeAdvance.WARN + EyeAdvance.GUST - 1) && !EyeAdvance.blowing(first + EyeAdvance.WARN + EyeAdvance.GUST), "SR6 a gust ends");
+        check(failures, EyeAdvance.blowing(first + EyeAdvance.GUST_PERIOD + EyeAdvance.WARN + 3), "SR6 gusts repeat");
+        check(failures, EyeAdvance.untilGust(first + EyeAdvance.WARN + EyeAdvance.GUST + 5) == EyeAdvance.GUST_PERIOD - EyeAdvance.GUST - 5, "SR6 the countdown to the next gust");
+        double[] push = EyeAdvance.pushOf(0, 0, 3, 4, 0.13);
+        check(failures, Math.abs(push[0] - 0.078) < 1e-9 && Math.abs(push[1] - 0.104) < 1e-9, "SR6 the push points away from the centre");
+        // 柱の陰は押されない
+        int[] pil = room.pillars().get(0);
+        double px = ctx.origin().getX() + pil[0] + 1.0;
+        double pz = ctx.origin().getZ() + pil[1] + 1.0;
+        double cx = ctx.origin().getX() + 0.5;
+        double cz = ctx.origin().getZ() + 0.5;
+        double len = Math.hypot(px - cx, pz - cz);
+        double bx = px + (px - cx) / len * 2.5;
+        double bz = pz + (pz - cz) / len * 2.5;
+        double y = ctx.origin().getY() + 1;
+        check(failures, room.sheltered(ctx, bx, y, bz), "SR6 behind a pillar is sheltered");
+        check(failures, !room.sheltered(ctx, cx, y, ctx.origin().getZ() + 11.5), "SR6 the open lane to the door is not sheltered");
+        // 始まり: 守り手が中央に
+        room.start(ctx);
+        check(failures, room.keeper() != null && room.keeper().isAlive() && ctx.aliveMobs().contains(room.keeper()), "SR6 the keeper stands in the eye");
+        check(failures, room.secondaryMax() > 0 && room.secondary() >= room.secondaryMax() - 1, "SR6 keeper health shows on the HUD");
+        // 突風の予告で、押しの印と雷蛾
+        int tele = jp.revati.skyabyss.combat.Telegraph.activeCount(level);
+        room.setAge(EyeAdvance.FIRST_GUST - 1);
+        room.tick(ctx);
+        check(failures, jp.revati.skyabyss.combat.Telegraph.activeCount(level) > tele, "SR6 the gust shows a warning mark");
+        int moths = 0;
+        for (Mob m : ctx.aliveMobs()) {
+            if (m.getType() == StormMobSetup.STATIC_MOTH.get()) {
+                moths++;
+            }
+        }
+        check(failures, moths == 2, "SR6 a gust brings two moths (" + moths + ")");
+        check(failures, room.timerTicks() == EyeAdvance.WARN, "SR6 the HUD counts down to the gust");
+        check(failures, !room.isComplete(), "SR6 not complete while the keeper lives");
+        room.keeper().kill();
+        room.tick(ctx);
+        check(failures, room.isComplete(), "SR6 defeating the keeper completes");
+        // 全滅
+        ctx.clearMobs();
+        room.reset(ctx);
+        check(failures, !room.isComplete() && room.keeper() == null && room.age() == 0 && ctx.aliveMobs().isEmpty(), "SR6 wipe: back to the start with no foes");
+        room.start(ctx);
+        check(failures, room.keeper() != null && room.keeper().isAlive(), "SR6 the keeper is back after the wipe");
+        check(failures, sealed(level, ctx.cell(), 600000), "SR6 cell still sealed");
+        ctx.clearMobs();
+        room.end(ctx);
+    }
+
+    // 枠ごとに二つの部屋があり、周ごとにどちらも引かれる
+    private static void checkDraw(List<String> failures) {
+        for (Trial.Slot slot : Trial.Slot.values()) {
+            List<String> ids = RaidRooms.idsOf(Titans.THUNDER_WING, slot);
+            check(failures, ids.size() == 2, slot + " has two storm rooms " + ids);
+            Set<String> seen = new HashSet<>();
+            for (long seed = 1; seed <= 200; seed++) {
+                seen.add(RaidRooms.drawOf(Titans.THUNDER_WING, slot, seed * 7919L));
+            }
+            check(failures, seen.containsAll(ids) && seen.size() == 2, slot + " draw picks either room across runs " + seen);
+        }
     }
 }
