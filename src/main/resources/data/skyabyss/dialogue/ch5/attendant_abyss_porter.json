@@ -104,6 +104,72 @@
           ]
         },
         {
+          "id": "anchor",
+          "goto": "trade_done",
+          "kind": "give",
+          "if": {
+            "type": "item",
+            "item": "skyabyss:abyss_bone_chip",
+            "count": 8
+          },
+          "do": [
+            {
+              "type": "take",
+              "item": "skyabyss:abyss_bone_chip",
+              "count": 8
+            },
+            {
+              "type": "give",
+              "item": "skyabyss:abyss_anchor_iron",
+              "count": 2
+            }
+          ]
+        },
+        {
+          "id": "lamp_sword",
+          "goto": "trade_done",
+          "kind": "give",
+          "if": {
+            "type": "item",
+            "item": "skyabyss:abyss_anchor_iron",
+            "count": 20
+          },
+          "do": [
+            {
+              "type": "take",
+              "item": "skyabyss:abyss_anchor_iron",
+              "count": 20
+            },
+            {
+              "type": "give",
+              "item": "skyabyss:abyss_lamp_sword",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "listener",
+          "goto": "trade_done",
+          "kind": "give",
+          "if": {
+            "type": "item",
+            "item": "skyabyss:abyss_anchor_iron",
+            "count": 16
+          },
+          "do": [
+            {
+              "type": "take",
+              "item": "skyabyss:abyss_anchor_iron",
+              "count": 16
+            },
+            {
+              "type": "give",
+              "item": "skyabyss:abyss_pulse_listener",
+              "count": 1
+            }
+          ]
+        },
+        {
           "id": "bye",
           "goto": "end",
           "kind": "leave"
