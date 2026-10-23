@@ -452,9 +452,15 @@ public final class StormRoomDeco {
                         continue;
                     }
                     if (y <= 3) {
+                        // 角 (両側が壁) の段は置かない。段の低い側 (部屋の側) が壁だと、上る向きが食い違う
+                        Direction room = toWall.getOpposite();
+                        if (!d.get(x + room.getStepX(), y, z + room.getStepZ()).isAir()) {
+                            continue;
+                        }
                         if (skirt && y == 1 && !d.locked(x, z)) {
-                            d.put(x, y, z, Blocks.WAXED_CUT_COPPER_STAIRS.defaultBlockState().setValue(StairBlock.FACING, toWall)
-                                    .setValue(StairBlock.HALF, Half.BOTTOM));
+                            // 壁ぎわの縁: 一段の高さの幅木 (半ブロック)。上る筋がないので向きを持たせない (向きが壁に当たる段を作らない)
+                            d.put(x, y, z, Blocks.WAXED_CUT_COPPER_SLAB.defaultBlockState().setValue(net.minecraft.world.level.block.SlabBlock.TYPE,
+                                    net.minecraft.world.level.block.state.properties.SlabType.BOTTOM));
                         }
                         continue;
                     }
@@ -1150,7 +1156,8 @@ public final class StormRoomDeco {
             d.put(x, 5, z, QUARTZ);
         }
         if (!d.get(0, 6, z).is(Blocks.WAXED_COPPER_BULB) && d.h >= 6) {
-            d.put(0, 6, z, Blocks.QUARTZ_STAIRS.defaultBlockState().setValue(StairBlock.FACING, Direction.NORTH).setValue(StairBlock.HALF, Half.BOTTOM));
+            // 壁と壁の間に挟まる段は、どちら向きにも上り下りの筋が通らないので、半ブロックの縁にする (向きを持たない)
+            d.put(0, 6, z, Blocks.SMOOTH_QUARTZ_SLAB.defaultBlockState().setValue(net.minecraft.world.level.block.SlabBlock.TYPE, net.minecraft.world.level.block.state.properties.SlabType.BOTTOM));
         }
         if (protrude && !d.nearGame(2, -d.hz, 1) && !d.nearGame(-2, -d.hz, 1)) {
             for (int s = -1; s <= 1; s += 2) {

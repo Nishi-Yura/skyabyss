@@ -36,6 +36,7 @@ public final class EmberMidRoom extends MidRoom {
         RaidKit.buildCell(ctx, new RaidKit.Spec(R, R, HEIGHT, RaidKit.EMBER));
         AshSmithArena.build(ctx.level(), shiftOf(ctx));
         exitLamps = jp.revati.skyabyss.trial.raid.ember.EmberRaidDecor.decorateSmithHall(ctx);
+        RaidKit.brightenFloor(ctx, 2);
         RaidKit.restInArena(ctx, 0, -R + 3);
     }
 

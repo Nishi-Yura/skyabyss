@@ -90,6 +90,7 @@ public final class WhaleBonesRoom extends RaidRoom {
         }
         // 飾り (docs/design/39 の 4.1): 四隅の骨をパイプオルガンに、床に歌の輪
         WhaleDecor.wr2(ctx, CORNER);
+        RaidKit.brightenFloor(ctx, 2);
     }
 
     @Override

@@ -181,7 +181,11 @@ public final class WhaleTilesRoom extends RaidRoom {
                 RaidKit.set(level, cell.origin().offset(x, BALCONY_Y + 1, 9), Blocks.ANDESITE_WALL.defaultBlockState());
             }
         }
+        // 見張り台への階段 (西から東へ上る)。段の下は床まで埋める (空中に浮いた段にしない)。段の向きは低い側 = 西
         for (int i = 1; i <= BALCONY_Y; i++) {
+            for (int y = 1; y < i; y++) {
+                RaidKit.set(level, cell.origin().offset(HX - 5 + i, y, 8), Blocks.SMOOTH_QUARTZ.defaultBlockState());
+            }
             RaidKit.set(level, cell.origin().offset(HX - 5 + i, i, 8), Blocks.SMOOTH_QUARTZ_STAIRS.defaultBlockState().setValue(StairBlock.FACING, Direction.WEST));
         }
         // 見張り台の下の柱と灯り
@@ -198,6 +202,12 @@ public final class WhaleTilesRoom extends RaidRoom {
         }
         // 飾り (docs/design/39 の 4.1): 見本を化石の鯨の額に。床の石板・見本・見張り台からの眺めは空ける
         WhaleDecor.wr5(ctx);
+        RaidKit.brightenFloor(ctx, 3);
+    }
+
+    // 石板の地の色: 市松 (隣り合う板が必ず違う色)。床の石のまま (灰) だと板の境が消え、板が見えない
+    static BlockState ground(int c, int r) {
+        return (c + r) % 2 == 0 ? Blocks.DEEPSLATE_TILES.defaultBlockState() : Blocks.SMOOTH_STONE.defaultBlockState();
     }
 
     private void drawTile(RaidCtx ctx, int c, int r) {
@@ -205,7 +215,7 @@ public final class WhaleTilesRoom extends RaidRoom {
         BlockPos center = tileCenter(ctx, c, r);
         for (int sz = 0; sz < 3; sz++) {
             for (int sx = 0; sx < 3; sx++) {
-                BlockState st = arm(mask, sx, sz) ? Blocks.BONE_BLOCK.defaultBlockState() : Blocks.DEEPSLATE_TILES.defaultBlockState();
+                BlockState st = arm(mask, sx, sz) ? Blocks.BONE_BLOCK.defaultBlockState() : ground(c, r);
                 RaidKit.set(ctx.level(), center.offset(sx - 1, 0, sz - 1), st);
             }
         }
