@@ -84,6 +84,8 @@ public final class AbyssWorld {
                             leave(c.getSource().getPlayerOrException());
                             return 1;
                         }))
-                        .then(jp.revati.skyabyss.abyss.mobs.AbyssMobSpawner.command())));
+                        .then(jp.revati.skyabyss.abyss.mobs.AbyssMobSpawner.command())
+                        .then(jp.revati.skyabyss.abyss.boss.BossDev.command())
+                        .then(jp.revati.skyabyss.abyss.boss.BossDev.doCommand())));
     }
 }

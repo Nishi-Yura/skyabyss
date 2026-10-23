@@ -5,6 +5,7 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
 
 import jp.revati.skyabyss.SkyAbyss;
+import jp.revati.skyabyss.abyss.boss.client.BossRender;
 import jp.revati.skyabyss.abyss.mobs.AbyssMobB;
 import jp.revati.skyabyss.abyss.mobs.AbyssMobsBSetup;
 import jp.revati.skyabyss.abyss.mobs.AshTrail;
@@ -64,11 +65,23 @@ public final class AbyssMobsBRenderers {
 
         @Override
         public ResourceLocation getAnimationResource(T animatable) {
-            return anim;
+            int look = BossRender.look(animatable);
+            return look != 0 ? BossRender.animation(look) : anim;
+        }
+
+        // 層の主・歪んだ王 (BossLook) は専用の骨だけの geo
+        @Override
+        public ResourceLocation getModelResource(T mob) {
+            int look = BossRender.look(mob);
+            return look != 0 ? BossRender.geo(look) : super.getModelResource(mob);
         }
 
         @Override
         public ResourceLocation getTextureResource(T mob) {
+            int look = BossRender.look(mob);
+            if (look != 0) {
+                return LowPoly.debug ? DEBUG : BossRender.texture(look);
+            }
             if (LowPoly.enabled) {
                 if (LowPoly.debug) {
                     return DEBUG;
@@ -81,8 +94,21 @@ public final class AbyssMobsBRenderers {
 
     static final class Foe<T extends AbyssMobB> extends LowPolyGeoRenderer<T> {
         Foe(EntityRendererProvider.Context ctx, String name, float shadow) {
-            super(ctx, new Model<>(name), e -> name, 1.0f);
+            // 名前の Model は継いだ LowPolyGeoRenderer.Model を指してしまうので、この係の Model を明示する (段の絵・主と王の姿)
+            super(ctx, new AbyssMobsBRenderers.Model<>(name), e -> BossRender.look(e) != 0 ? BossRender.mesh(BossRender.look(e)) : name, 1.0f);
             this.shadowRadius = shadow;
+        }
+
+        @Override
+        public void render(T e, float yaw, float pt, PoseStack pose, MultiBufferSource buf, int light) {
+            if (BossRender.look(e) == 0) {
+                super.render(e, yaw, pt, pose, buf, light);
+                return;
+            }
+            pose.pushPose();
+            BossRender.undoAuthorScale(pose, e);
+            super.render(e, yaw, pt, pose, buf, light);
+            pose.popPose();
         }
 
         @Override
