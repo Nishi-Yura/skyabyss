@@ -1874,7 +1874,7 @@ class Town(Facilities):
 
     def house_lights(self):
         """通りに面した家と店の灯り (暖かい色だけ):
-        - 通りに面した窓 (ガラスの板) の、家の中の一マスを発光する石 (glowstone)。外が空気・中が空気のときだけ
+        - 通りに面した窓 (ガラスの板) の、家の中の一マスに見えない光 (light)。窓と壁には触れない (外が空気・家の中の両わきが空気のときだけ)
         - 戸口の上に、腕 (フェンス) と吊りランタンの店の灯り (戸の一段上・一マス外)。外が空気のときだけ"""
         v = self.v
         b = v.b
@@ -1888,10 +1888,16 @@ class Town(Facilities):
             for dx, dz in ((1, 0), (-1, 0), (0, 1), (0, -1)):
                 outside = b.get((x + dx, y, z + dz))
                 inside = (x - dx, y, z - dz)
-                if outside in air and b.get(inside) in air:
-                    b[inside] = 'glowstone'
-                    n_win += 1
-                    break
+                if outside not in air or b.get(inside) not in air:
+                    continue
+                # 家の中の一列目だけ (壁の列の隙間ではない): 窓の両わきが、家の中の空き (壁でない)
+                px, pz = dz, dx
+                if any(b.get((inside[0] + k * px, y, inside[2] + k * pz)) not in air for k in (1, -1)):
+                    continue
+                # 見えない光 (light) を家の中に置く。窓・壁・外には触れない
+                b[inside] = 'light[level=12,waterlogged=false]'
+                n_win += 1
+                break
         for (x, y, z), s in list(b.items()):
             if y != 0 or '_door[' not in s or 'half=lower' not in s or 'trapdoor' in s:
                 continue
