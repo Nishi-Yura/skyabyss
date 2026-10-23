@@ -137,7 +137,7 @@ for layer, (ep_ja, ep_en, p2_ja, p2_en, p3_ja, p3_en) in LORD.items():
     t(M + 'lord.%s.phase3' % layer, p3_ja, p3_en)
 t(M + 'lord.fell', '%sを倒した', '%s has fallen')
 t(M + 'lord.fell_sub', '主の間の奥で、下りの鎖が光っている', 'At the back of the hall, the descending chain glows')
-t('objective.skyabyss.abyss_v3.lord_roar', '主が吠えている。刃は通らない。離れて構えろ', 'The lord roars. Blades will not bite. Back off and get ready')
+t('objective.skyabyss.abyss_v3.lord_roar', '主が吠えている。刃は通らない。離れて構えろ', 'It roars: blades won't bite. Back off')
 
 # ---------------------------------------------------------------- ボスバーの段の名前
 t('gui.skyabyss.boss.abyss.phase.1', '一の段', 'Phase I')
