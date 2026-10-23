@@ -7,16 +7,16 @@
    "bones": {
     "wing_l": {
      "rotation": [
-      "4 * math.sin(327.273 * query.anim_time + 90)",
+      "3 * math.sin(327.273 * query.anim_time + 90)",
       "0",
-      "-4 + -26 * math.sin(327.273 * query.anim_time + 0)"
+      "-5 * math.sin(654.545 * query.anim_time + 30)"
      ]
     },
     "wing_r": {
      "rotation": [
       "4 * math.sin(327.273 * query.anim_time + 90)",
       "0",
-      "4 + 26 * math.sin(327.273 * query.anim_time + 0)"
+      "4 + 28 * math.sin(327.273 * query.anim_time + 0)"
      ]
     },
     "body": {
@@ -67,16 +67,16 @@
    "bones": {
     "wing_l": {
      "rotation": [
-      "4 * math.sin(327.273 * query.anim_time + 90)",
+      "3 * math.sin(327.273 * query.anim_time + 90)",
       "0",
-      "-4 + -26 * math.sin(327.273 * query.anim_time + 0)"
+      "-5 * math.sin(654.545 * query.anim_time + 30)"
      ]
     },
     "wing_r": {
      "rotation": [
       "4 * math.sin(327.273 * query.anim_time + 90)",
       "0",
-      "4 + 26 * math.sin(327.273 * query.anim_time + 0)"
+      "4 + 28 * math.sin(327.273 * query.anim_time + 0)"
      ]
     },
     "body": {
@@ -138,28 +138,28 @@
        "vector": [
         0,
         0,
-        -50
+        -14
        ]
       },
       "0.8": {
        "vector": [
         0,
         0,
-        -44
+        -10
        ]
       },
       "1.2": {
        "vector": [
         0,
         0,
-        -56
+        -16
        ]
       },
       "1.3": {
        "vector": [
         0,
         0,
-        -40
+        -12
        ]
       }
      }

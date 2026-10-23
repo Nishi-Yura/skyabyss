@@ -105,11 +105,12 @@ def human_hurt():
 def human_death(length=1.4):
     """膝から崩れ、前へ倒れる (胴は前へ = x の -)。"""
     return once(length, {
-        "body": rp({0: Z, 0.25: [8, 0, -4], 0.55: [-20, 0, -6], 1.0: [-80, 0, -8], length: [-86, 0, -8]},
-                   {0: Z, 0.25: [0, -1.5, 0], 0.55: [0, -5, -1], 1.0: [0, -10.5, -3], length: [0, -11, -3]}),
+        "body": rp({0: Z, 0.25: [8, 0, -4], 0.55: [-20, 0, -6], 1.0: [-82, 0, -8], length: [-86, 0, -8]},
+                   {0: Z, 0.25: [0, -1.5, 0], 0.55: [0, -3.5, 0], 1.0: [0, -9.5, 0], length: [0, -10, 0]}),
         "head": rp({0: Z, 0.25: [18, 0, 6], 0.55: [-10, 0, 10], length: [-14, 12, 14]}),
-        "leg_l": rp({0: Z, 0.25: [-20, 0, 0], 0.55: [-70, 0, -4], 1.0: [80, 0, -4], length: [84, 0, -4]}),
-        "leg_r": rp({0: Z, 0.25: [-10, 0, 0], 0.55: [-80, 0, 4], 1.0: [78, 0, 4], length: [82, 0, 4]}),
+        # 膝が抜けて (脚が胴より遅れて) 前へ倒れる。最後は脚も胴とそろって伸びる
+        "leg_l": rp({0: Z, 0.25: [-14, 0, 0], 0.55: [14, 0, -4], 1.0: [10, 0, -4], length: [6, 0, -4]}),
+        "leg_r": rp({0: Z, 0.25: [-6, 0, 0], 0.55: [24, 0, 4], 1.0: [16, 0, 4], length: [10, 0, 4]}),
         "arm_l": rp({0: Z, 0.25: [-20, 0, -14], 0.55: [30, 0, -18], 1.0: [150, 0, -20], length: [160, 0, -20]}),
         "arm_r": rp({0: Z, 0.25: [-20, 0, 14], 0.55: [40, 0, 16], 1.0: [150, 0, 22], length: [158, 0, 22]}),
     }, hold=True)
@@ -177,8 +178,8 @@ def salt_husk():
         "death": once(1.4, {
             "body": rp({0: Z, 0.3: [-10, 0, 6], 0.8: [-40, 0, 10], 1.4: [-62, 0, 12]}, {0: Z, 0.3: [0, -2, 0], 0.8: [0, -7, 0], 1.4: [0, -10, -1]}),
             "head": rp({0: Z, 0.3: [-20, 0, 0], 1.4: [-30, 14, 18]}),
-            "leg_l": rp({0: Z, 0.3: [-30, 0, -6], 0.8: [-80, 0, -10], 1.4: [-88, 0, -12]}),
-            "leg_r": rp({0: Z, 0.3: [-40, 0, 6], 0.8: [-86, 0, 10], 1.4: [-90, 0, 12]}),
+            "leg_l": rp({0: Z, 0.3: [14, 0, -6], 0.8: [40, 0, -10], 1.4: [56, 0, -12]}),
+            "leg_r": rp({0: Z, 0.3: [6, 0, 6], 0.8: [34, 0, 10], 1.4: [50, 0, 12]}),
             "arm_l": rp({0: Z, 0.3: [20, 0, -10], 1.4: [70, 0, -30]}),
             "arm_r": rp({0: Z, 0.3: [20, 0, 10], 1.4: [64, 0, 34]}),
         }, hold=True),
@@ -217,12 +218,12 @@ def lightning_idol():
         # 割れて前へ倒れる (膝は曲がらない像の倒れ方)
         "death": once(1.6, {
             "body": rp({0: Z, 0.3: [2, 0, 3], 0.5: [-4, 0, 2], 1.2: [-84, 0, 4], 1.35: [-80, 0, 4], 1.6: [-88, 0, 4]},
-                       {0: Z, 0.5: [0, 0, 0], 1.2: [0, -10, -2], 1.6: [0, -11, -2]}),
+                       {0: Z, 0.5: [0, 0, 0], 1.2: [0, -9.5, 0], 1.6: [0, -10, 0]}),
             "head": rp({0: Z, 1.2: [-6, 0, 0], 1.35: [10, 10, 16], 1.6: [6, 14, 18]}),
             "arm_l": rp({0: Z, 1.2: [10, 0, -8], 1.35: [40, 0, -30], 1.6: [44, 0, -34]}),
             "arm_r": rp({0: Z, 1.2: [10, 0, 8], 1.35: [36, 0, 26], 1.6: [40, 0, 30]}),
-            "leg_l": rp({0: Z, 1.2: [84, 0, 0], 1.6: [88, 0, 0]}),
-            "leg_r": rp({0: Z, 1.2: [84, 0, 0], 1.6: [88, 0, 0]}),
+            "leg_l": rp({0: Z, 1.6: Z}),
+            "leg_r": rp({0: Z, 1.6: Z}),
         }, hold=True),
     }
 
@@ -342,9 +343,11 @@ def tide_hands():
 
 # ---------------------------------------------------------------- 白い貝守: 殻にこもる貝。開いている間だけ身と鋏が出る
 def white_shell_keeper():
-    shut = {"body": rp({0: [0, 0, 0], 1.0: [0, 0, 0]}, {0: [0, -2.2, 1.0], 1.0: [0, -2.2, 1.0]}),
-            "claw_l": rp({0: [-30, 40, 0], 1.0: [-30, 40, 0]}, {0: [0.8, 0, 2.0], 1.0: [0.8, 0, 2.0]}),
-            "claw_r": rp({0: [-30, -40, 0], 1.0: [-30, -40, 0]}, {0: [-0.8, 0, 2.0], 1.0: [-0.8, 0, 2.0]})}
+    # 閉じる: 殻が地面まで下りて身にかぶさる (殻を下げ、子の身は同じだけ上げて元の高さに残す)。鋏は殻の下へたたむ
+    shut = {"shell": rp({0: [0, 0, 0], 1.0: [0, 0, 0]}, {0: [0, -2.0, 0], 1.0: [0, -2.0, 0]}),
+            "body": rp({0: [0, 0, 0], 1.0: [0, 0, 0]}, {0: [0, 1.6, 0.6], 1.0: [0, 1.6, 0.6]}),
+            "claw_l": rp({0: [0, 50, 0], 1.0: [0, 50, 0]}, {0: [0.6, 0, 2.4], 1.0: [0.6, 0, 2.4]}),
+            "claw_r": rp({0: [0, -50, 0], 1.0: [0, -50, 0]}, {0: [-0.6, 0, 2.4], 1.0: [-0.6, 0, 2.4]})}
     opened = {"body": {"rotation": [sin(3, 1.6), sin(5, 3.2), "0"], "position": ["0", sin(0.25, 1.6, 0, 0.3), "0"]},
               "claw_l": rot(x=sin(10, 0.8, 0, -8), y=sin(8, 1.6, 0, -6), z=sin(4, 0.8)),
               "claw_r": rot(x=sin(10, 0.8, 180, -8), y=sin(8, 1.6, 180, 6), z=sin(-4, 0.8))}
@@ -393,7 +396,8 @@ def charged_moth():
 # ---------------------------------------------------------------- 焦げた鳥の影: ゆっくり羽ばたいて上で待つ。影を落とし (1.2 秒)、翼をたたんで急降下して掴む
 def scorched_bird():
     P = 1.1
-    glide = {"wing_l": rot(z=sin(-26, P, 0, -4), x=sin(4, P, 90)), "wing_r": rot(z=sin(26, P, 0, 4), x=sin(4, P, 90)),
+    # 左の翼は肘で折れて垂れている (メッシュの形)。羽ばたくのは右だけで、左は引きつるように小さく動く
+    glide = {"wing_l": rot(z=sin(-5, P / 2, 30), x=sin(3, P, 90)), "wing_r": rot(z=sin(28, P, 0, 4), x=sin(4, P, 90)),
              "body": {"rotation": [sin(3, P, 180), "0", sin(4, P * 2)], "position": ["0", sin(0.7, P, 180), "0"]},
              "head": rot(x=sin(-5, P, 200), y=sin(14, P * 3)), "tail": rot(x=sin(6, P, 60), y=sin(8, P * 2)),
              "leg_l": rot(x="30"), "leg_r": rot(x="30")}
@@ -402,7 +406,7 @@ def scorched_bird():
         "walk": loop(P * 6, glide),
         # 影を落とす予告 (1.2 秒 = WARN_SHADOW 24): 翼を高く広げて首を下へ、獲物を見下ろす
         "shadow": once(1.3, {
-            "wing_l": rp({0: Z, 0.4: [0, 0, -50], 0.8: [0, 0, -44], 1.2: [0, 0, -56], 1.3: [0, 0, -40]}),
+            "wing_l": rp({0: Z, 0.4: [0, 0, -14], 0.8: [0, 0, -10], 1.2: [0, 0, -16], 1.3: [0, 0, -12]}),
             "wing_r": rp({0: Z, 0.4: [0, 0, 50], 0.8: [0, 0, 44], 1.2: [0, 0, 56], 1.3: [0, 0, 40]}),
             "head": rp({0: Z, 0.4: [-40, 0, 0], 0.7: [-36, 12, 0], 1.0: [-36, -12, 0], 1.2: [-44, 0, 0], 1.3: [-40, 0, 0]}),
             "body": rp({0: Z, 0.4: [-14, 0, 0], 1.2: [-20, 0, 0], 1.3: [-24, 0, 0]}, {0: Z, 0.4: [0, 0.6, 0], 1.3: [0, 0.8, 0]}),
@@ -437,6 +441,49 @@ def scorched_bird():
     }
 
 
+def _interp(keys, t):
+    """{"秒": {"vector": [...]}} の線形補間 (x だけ)。"""
+    ts = sorted((float(k), v["vector"][0]) for k, v in keys.items())
+    if t <= ts[0][0]:
+        return ts[0][1]
+    for (t0, v0), (t1, v1) in zip(ts, ts[1:]):
+        if t0 <= t <= t1:
+            return v0 + (v1 - v0) * (t - t0) / ((t1 - t0) or 1)
+    return ts[-1][1]
+
+
+def counter_legs(anims, skip=("death",)):
+    """脚は胴の子なので、胴を前後に傾けると脚も一緒に倒れて、像ごと板のように傾く。
+    倒れる動き以外は、脚の x 回転から胴の x 回転を引いて、脚が地面に立ったままになるようにする。"""
+    for name, a in anims.items():
+        if name in skip:
+            continue
+        bones = a["bones"]
+        body = bones.get("body", {}).get("rotation")
+        if body is None:
+            continue
+        for leg in ("leg_l", "leg_r"):
+            lr = bones.setdefault(leg, {}).get("rotation")
+            if isinstance(body, list):
+                bx = body[0]
+                lx = lr[0] if isinstance(lr, list) else "0"
+                rest = lr[1:] if isinstance(lr, list) else ["0", "0"]
+                bones[leg]["rotation"] = ["(%s) - (%s)" % (lx, bx)] + list(rest)
+            else:
+                times = sorted(set(float(k) for k in body) | (set(float(k) for k in lr) if isinstance(lr, dict) else set()))
+                out = {}
+                for t in times:
+                    lv = [0, 0, 0]
+                    if isinstance(lr, dict):
+                        lv = [_interp(lr, t), 0, 0]
+                        # y, z は元の近いキーのまま
+                        near = min(lr, key=lambda k: abs(float(k) - t))
+                        lv[1], lv[2] = lr[near]["vector"][1], lr[near]["vector"][2]
+                    out[t] = [lv[0] - _interp(body, t), lv[1], lv[2]]
+                bones[leg]["rotation"] = kf(out)
+    return anims
+
+
 KINDS = {
     "bone_picker": bone_picker, "rib_guard": rib_guard, "bone_flute": bone_flute,
     "salt_husk": salt_husk, "tide_hands": tide_hands, "white_shell_keeper": white_shell_keeper,
@@ -444,10 +491,16 @@ KINDS = {
 }
 
 
+HUMANS = ("rib_guard", "salt_husk", "lightning_idol")
+
+
 def write_all():
     os.makedirs(OUT, exist_ok=True)
     for kind, fn in KINDS.items():
-        anims = {"animation.%s.%s" % (kind, k): v for k, v in fn().items()}
+        made = fn()
+        if kind in HUMANS:
+            counter_legs(made)
+        anims = {"animation.%s.%s" % (kind, k): v for k, v in made.items()}
         doc = {"format_version": "1.8.0", "animations": anims}
         p = os.path.join(OUT, "abyss_%s_s1.animation.json" % kind)
         with open(p, "w", encoding="utf-8", newline="\n") as f:
