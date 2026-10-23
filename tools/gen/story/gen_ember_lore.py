@@ -289,8 +289,8 @@ GEAR = [
      "余燼の巨神から欠けた、まだ温かい殻。余燼の装備を鍛える",
      "A still-warm flake of the ember titan's shell. Used to temper ember gear"),
     ("ember_core", "余燼の心核", "Ember Core",
-     "余燼の心臓から取れた、消えない熾。いつか神器の材料になる",
-     "An ember from the ember heart that will not go out. One day it will become part of a relic"),
+     "余燼の心臓から取れた、消えない熾。いつかアーティファクトの材料になる",
+     "An ember from the ember heart that will not go out. One day it will become part of an artifact"),
     ("spark_dust", "火の粉の粉", "Spark Dust",
      "火の粉蛾の翅から落ちた粉。火薬の代わりに花火に使える",
      "Powder shed from an ember moth's wings. Works in fireworks in place of gunpowder"),
@@ -305,7 +305,7 @@ for item, nja, nen, dja, den in GEAR:
         text(f"item.skyabyss.{item}.desc", dja, den)
 text("gear.skyabyss.origin.ember", "余燼の専用装備", "Ember titan gear")
 text("gui.skyabyss.forge.exchange_no_clear.ember", "余燼の心臓を止めると、選べるようになる", "Defeat the ember heart to choose")
-text("gui.skyabyss.forge.exchange_all_owned.ember", "余燼の専用伝説は、すべて手にしている", "You already own every ember legendary")
+text("gui.skyabyss.forge.exchange_all_owned.ember", "余燼の専用の逸品は、すべて手にしている", "You already own every ember exclusive")
 text("skyabyss_record.h.ember", "余燼", "Ember")
 text("tooltip.skyabyss.ember.horn_drunk", "体の芯が、ゆっくり温まった。しばらく熱がたまりにくい",
      "Warmth spreads slowly from your core. Heat will build more slowly for a while")

@@ -20,11 +20,11 @@
   "item.skyabyss.moontide_pearl": "月潮の真珠",
   "item.skyabyss.moontide_pearl.desc": "装飾の枠に付けていると、傷が深くなったとき泡の盾が身を包む（一度包むと90秒は眠る）",
   "item.skyabyss.tide_shell_core": "潮殻の心核",
-  "item.skyabyss.tide_shell_core.desc": "潮殻の心臓から取れた、潮の一片。いつか神器の材料になる",
+  "item.skyabyss.tide_shell_core.desc": "潮殻の心臓から取れた、潮の一片。いつかアーティファクトの材料になる",
   "gui.skyabyss.forge.exchange_titan": "%s ▸",
   "gui.skyabyss.forge.exchange_titan_hint": "押すと、交換する巨神を切り替える",
   "gui.skyabyss.forge.exchange_no_clear.tide_shell": "潮殻の心臓を止めると、選べるようになる",
-  "gui.skyabyss.forge.exchange_all_owned.tide_shell": "潮殻の専用伝説は、すべて手にしている",
+  "gui.skyabyss.forge.exchange_all_owned.tide_shell": "潮殻の専用の逸品は、すべて手にしている",
   "skyabyss_gear.tooltip.short.shield": "レベルが足りず、構えられない",
   "skyabyss_record.h.tide_shell": "潮殻"
 }

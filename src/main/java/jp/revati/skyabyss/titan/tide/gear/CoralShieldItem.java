@@ -50,7 +50,7 @@ public class CoralShieldItem extends ShieldItem implements ModGear {
 
     @Override
     public GearTier tier() {
-        return GearTier.RARE;
+        return GearTier.EPIC;
     }
 
     @Override

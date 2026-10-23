@@ -33,7 +33,7 @@ public enum WeaponKind {
             Map.entry("ember_war_axe", AXE),
             Map.entry("smith_hammer", HAMMER),
             Map.entry("thrall_poker", POKER),
-            // 深淵の専用伝説 (剣型の 3 点。弓は WeaponClient が BowExtension で登録する)
+            // 深淵のアーティファクト (剣型の 3 点。弓は WeaponClient が BowExtension で登録する)
             Map.entry("abyss_greatsword", GREATSWORD),
             Map.entry("abyss_bell_staff", POKER),
             // 五章「深淵」の装備 (abyss/gear)

@@ -17,7 +17,7 @@ import net.minecraft.world.item.ItemStack;
 // 記憶 (天井のカウンタ) は進めない。初めての品なら 0 に戻す (TitanGearSet.record)。
 //  - 灰被り (道中、D の EmberMobLoot から 1 行): 余燼の鎧のどれか一部位 1%
 //  - 灰の鍛え手 (中ボス、E から参加者ごとに 1 行): 鍛え手の大鎚 5%
-// 心臓の表は F の EmberLoot が EmberGear.SET (確率・図鑑・専用伝説) を読む
+// 心臓の表は F の EmberLoot が EmberGear.SET (確率・図鑑・専用の逸品) を読む
 public final class EmberGearLoot {
     private EmberGearLoot() {
     }

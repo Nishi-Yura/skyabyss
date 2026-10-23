@@ -67,7 +67,7 @@ public final class TideGearSetup {
     public static final DeferredItem<Item> HARPOON = ITEMS.register("coral_harpoon",
             () -> new CoralHarpoonItem(new Item.Properties().rarity(Rarity.EPIC).fireResistant()));
     public static final DeferredItem<Item> PEARL = ITEMS.register("moontide_pearl",
-            () -> new TideTrinketItem(new Item.Properties().stacksTo(1).rarity(Rarity.EPIC).fireResistant(), GearTier.LEGENDARY,
+            () -> new TideTrinketItem(new Item.Properties().stacksTo(1).rarity(Rarity.EPIC).fireResistant(), GearTier.HEROIC,
                     "item.skyabyss.moontide_pearl.desc", true));
     public static final DeferredItem<Item> CORE = ITEMS.register("tide_shell_core",
             () -> new MaterialItem(new Item.Properties().stacksTo(16).rarity(Rarity.EPIC).fireResistant(), 0xF08A9C,

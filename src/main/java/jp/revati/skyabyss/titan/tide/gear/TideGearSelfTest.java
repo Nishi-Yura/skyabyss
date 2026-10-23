@@ -43,7 +43,7 @@ import net.neoforged.neoforge.common.util.FakePlayer;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 
 // 潮殻の装備の自己テスト (SKYABYSS_SELFTEST=1、SELFTEST tide gear PASSED / FAILED)。03 の 11.8節の表と同じ検査:
-//  - 品の登録、図鑑の表 (10 品、確率)、必要 Lv (レア 14・伝説 16)、品の数値 (攻撃力・速さ・間合い・防御・強靭)
+//  - 品の登録、図鑑の表 (10 品、確率)、必要 Lv (エピック以下 14・ヒロイック以上 16)、品の数値 (攻撃力・速さ・間合い・防御・強靭)
 //  - 強さの曲線: +0 / +10 の 1 秒あたりが 03 の 9.8節の段に入るか、潮殻の心臓・雷翼・余燼の目安のボスとの手ごたえ、守り
 //  - 一式の効果、盾、護符、真珠、必要 Lv の打ち消し (左手の盾)
 //  - 報酬: 心臓の抽選 (作られた品だけ・特性つき)、道中と潮招きの確率、図鑑に記す、天井、模擬の撃破数
@@ -223,7 +223,7 @@ public final class TideGearSelfTest {
         double strength = GearCurve.strengthMultiplier(lv);
         double hit0 = tideHit(tide.bossHit(), 0, 0, false);
         double loadFresh = GearCurve.load(dpsOn(dps(TideGear.TRIDENT, 0), attack(TideGear.TRIDENT, 0), strength), tide.bossHp(), 0.6, 2.5, hp, hit0);
-        // いちばん楽な形: +10、最良の特性 (伝説の鋭さ 10%・迅さ 12.5%、防具の頑健 1.0 ×4・守り 10%)、筋力に全部 (Lv 18 で 51 点 → ×1.3)
+        // いちばん楽な形: +10、最良の特性 (ヒロイックの鋭さ 10%・迅さ 12.5%、防具の頑健 1.0 ×4・守り 10%)、筋力に全部 (Lv 18 で 51 点 → ×1.3)
         double best = 1.10 * 1.125;
         double strFull = 1 + 0.006 * Math.min(50, 3 * (lv - 1));
         double hitBest = tideHit(tide.bossHit(), 10, 0.10, true);
@@ -417,7 +417,7 @@ public final class TideGearSelfTest {
         check(f, GearExchange.state(TideGear.SET, r) == ForgeRules.ExchangeState.NO_CLEAR, "exchange before a tide heart clear");
         r.clears = 1;
         check(f, GearExchange.state(TideGear.SET, r) == ForgeRules.ExchangeState.READY, "exchange should be ready after a clear");
-        // 共鳴の欠片は巨神ごと: 岩鯨の欠片 30 では潮殻の専用伝説は買えない (払われもしない)
+        // 共鳴の欠片は巨神ごと: 岩鯨の欠片 30 では潮殻の専用の逸品は買えない (払われもしない)
         p.getInventory().add(new ItemStack(ModItems.RESONANCE_SHARD_STONE_WHALE.get(), 30));
         check(f, !GearExchange.exchange(p, TideGear.SET, TideGear.PEARL) && ForgeRules.count(p.getInventory(), ModItems.RESONANCE_SHARD_STONE_WHALE.get()) == 30
                 && !r.owned.contains(TideGear.PEARL), "stone whale resonance fragments paid for a tide exclusive");

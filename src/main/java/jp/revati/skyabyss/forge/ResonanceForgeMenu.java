@@ -28,7 +28,7 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 
 // 共鳴の炉の画面: 装備を置く枠が一つと、持ち物。ボタンで強化・分解・再鍛造・交換する (費用は持ち物から払う)
-// 交換に要る「持っている専用伝説」と「交換できるか」はサーバーの記録にしかないので、数の枠 (DataSlot) で送る
+// 交換に要る「持っている専用の逸品」と「交換できるか」はサーバーの記録にしかないので、数の枠 (DataSlot) で送る
 public class ResonanceForgeMenu extends AbstractContainerMenu {
     public static final int BUTTON_ENHANCE = 0;
     public static final int BUTTON_DISMANTLE = 1;
@@ -36,9 +36,9 @@ public class ResonanceForgeMenu extends AbstractContainerMenu {
     // 確定: 今のまま (3)、候補 0〜2 (4〜6)
     public static final int BUTTON_KEEP = 3;
     public static final int BUTTON_PICK = 4;
-    // 交換: 専用伝説 0〜2 (10〜12)
+    // 交換: 専用の逸品 0〜2 (10〜12)
     public static final int BUTTON_EXCHANGE = 10;
-    // 交換のボタン: BUTTON_EXCHANGE + 巨神の番号 (TitanGearSets の並び) × EXCHANGE_STRIDE + 専用伝説の番号
+    // 交換のボタン: BUTTON_EXCHANGE + 巨神の番号 (TitanGearSets の並び) × EXCHANGE_STRIDE + 専用の逸品の番号
     public static final int EXCHANGE_STRIDE = 8;
     // 刻み (アスペクト・ソケット・ルーン): 100 以上。交換の番号とぶつからない
     public static final int BUTTON_EXTRACT_DESTROY = 100;
@@ -69,7 +69,7 @@ public class ResonanceForgeMenu extends AbstractContainerMenu {
         }
     };
     private final ContainerLevelAccess access;
-    // 巨神ごとに二つ (TitanGearSets の並び): [2t] 持っている専用伝説の印、[2t+1] 交換の状態 (ForgeRules.ExchangeState の順番)
+    // 巨神ごとに二つ (TitanGearSets の並び): [2t] 持っている専用の逸品の印、[2t+1] 交換の状態 (ForgeRules.ExchangeState の順番)
     private final ContainerData exchange;
 
     public ResonanceForgeMenu(int id, Inventory inventory) {

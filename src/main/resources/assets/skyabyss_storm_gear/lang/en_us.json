@@ -23,7 +23,7 @@
   "item.skyabyss.thunder_wing_shard": "Thunder Wing Quill",
   "item.skyabyss.thunder_wing_shard.desc": "A sliver of a Thunder Wing quill. Used to enhance Thunder Wing gear at the Resonance Forge",
   "item.skyabyss.thunder_wing_core": "Thunder Wing Core",
-  "item.skyabyss.thunder_wing_core.desc": "A fragment of lightning from the Thunder Wing's heart. Someday, material for a relic",
+  "item.skyabyss.thunder_wing_core.desc": "A fragment of lightning from the Thunder Wing's heart. Someday, material for an artifact",
   "item.skyabyss.cloudgap_fruit": "Cloudgap Dried Fruit",
   "item.skyabyss.cloudgap_fruit.desc": "Fruit dried in a gap of the clouds. For 30 seconds after eating, you hold no static (moth discharges will not leap to you)",
   "item.skyabyss.moth_dust": "Moth Dust",
@@ -31,6 +31,6 @@
   "effect.skyabyss.static_ward": "Static Ward",
   "message.skyabyss.storm_charm.armed": "Lightning coils around your arm (%s left)",
   "gui.skyabyss.forge.exchange_no_clear.thunder_wing": "Defeat the Thunder Wing heart to choose",
-  "gui.skyabyss.forge.exchange_all_owned.thunder_wing": "You hold every Thunder Wing exclusive legendary",
+  "gui.skyabyss.forge.exchange_all_owned.thunder_wing": "You hold every Thunder Wing exclusive",
   "skyabyss_record.h.thunder_wing": "Thunder Wing"
 }

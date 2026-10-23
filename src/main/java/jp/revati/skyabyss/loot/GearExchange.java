@@ -17,7 +17,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
 // 共鳴の欠片での交換 (03 の 2.4節・8.1節) を巨神ごとに。決まりは岩鯨と同じ:
-//  その巨神の共鳴の欠片 30 で、その巨神の専用伝説のうち持っていない品を一つ。その巨神の心臓を倒すごとに一度。天井は戻さない。
+//  その巨神の共鳴の欠片 30 で、その巨神の専用の逸品のうち持っていない品を一つ。その巨神の心臓を倒すごとに一度。天井は戻さない。
 // 記録はその巨神の巨神の記憶 (TitanMemoryData の set.titan)。共鳴の欠片は巨神ごと (古い共通の欠片はどの巨神にも使える)
 public final class GearExchange {
     private GearExchange() {
@@ -37,7 +37,7 @@ public final class GearExchange {
         return r.lastExchangeClears >= r.clears ? ForgeRules.ExchangeState.USED : ForgeRules.ExchangeState.READY;
     }
 
-    // 炉の画面に見せる: 持っている専用伝説の印 (1 ビットずつ、set.exclusives() の順)
+    // 炉の画面に見せる: 持っている専用の逸品の印 (1 ビットずつ、set.exclusives() の順)
     public static int ownedMask(TitanGearSet set, @Nullable TitanMemoryData.Record r) {
         int mask = 0;
         List<String> all = set.exclusives();

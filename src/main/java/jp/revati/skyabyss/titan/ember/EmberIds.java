@@ -88,13 +88,13 @@ public final class EmberIds {
     public static final String EMBER_WAR_AXE = "ember_war_axe";     // → G 余燼の戦斧
     public static final String EMBER_MANTLE = "ember_mantle";       // → G 熾火の外套 (装飾の枠)
     public static final String KINDLING_CHARM = "kindling_charm";   // → G 熾りの護符 (護符の枠)
-    public static final String SMITH_HAMMER = "smith_hammer";       // → G 鍛え手の大鎚 (専用伝説。E のモデルと同じ形)
-    public static final String THRALL_POKER = "thrall_poker";       // → G 灰被りの火掻き (専用伝説。D のモデルと同じ形)
-    public static final String EMBER_LANTERN = "ember_lantern";     // → G 余燼の灯 (専用伝説、装飾の枠)
+    public static final String SMITH_HAMMER = "smith_hammer";       // → G 鍛え手の大鎚 (専用の逸品。E のモデルと同じ形)
+    public static final String THRALL_POKER = "thrall_poker";       // → G 灰被りの火掻き (専用の逸品。D のモデルと同じ形)
+    public static final String EMBER_LANTERN = "ember_lantern";     // → G 余燼の灯 (専用の逸品、装飾の枠)
     // 図鑑の並び (EmberLoot・記録の画面・自己テストが使う。順は 6.3節の表)
     public static final List<String> CODEX = List.of(EMBER_HELMET, EMBER_CHESTPLATE, EMBER_LEGGINGS, EMBER_BOOTS, EMBER_WAR_AXE, EMBER_MANTLE,
             KINDLING_CHARM, SMITH_HAMMER, THRALL_POKER, EMBER_LANTERN);
-    // 初回の選択の専用伝説三つ
+    // 初回の選択の専用の逸品三つ
     public static final List<String> FIRST_CLEAR_CHOICES = List.of(SMITH_HAMMER, THRALL_POKER, EMBER_LANTERN);
     // 天の鍵の欠片は共通の ModItems.SKY_KEY_FRAGMENT (四つ目)。天の鍵は story.SkyKey がそろえる (14 の 4章)
 

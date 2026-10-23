@@ -20,7 +20,7 @@ import net.minecraft.world.item.SwordItem;
 public class LampSwordItem extends AbyssGearWeaponItem {
     public LampSwordItem(Properties properties) {
         // 攻撃力 11 = 1 + 5 + 5、攻撃速度 1.6 = 4 − 2.4
-        super(properties.attributes(SwordItem.createAttributes(TIER, 5, -2.4f)), GearTier.RARE, "item.skyabyss.abyss_lamp_sword.desc");
+        super(properties.attributes(SwordItem.createAttributes(TIER, 5, -2.4f)), GearTier.EPIC, "item.skyabyss.abyss_lamp_sword.desc");
     }
 
     @Override

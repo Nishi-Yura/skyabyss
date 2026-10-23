@@ -148,6 +148,8 @@ public final class SelfTestRunner {
         // 建てた深淵での湧き (層ごとの種・形・床・休み場・心臓の間・人数の上限・数字・暗さ)。SKYABYSS_SELFTEST_ONLY="abyss enemies spawn"
         steps.add(Step.once("abyss enemies spawn", jp.revati.skyabyss.abyss.mobs.AbyssEnemiesSpawnSelfTest::run));
         steps.add(Step.once("gear curve", GearCurveSelfTest::runSelfTest));
+        // 装備の階級 (6 段): 全装備の表・決まりの単調さ・段の中の逆転なし・落とし表・名前とツールチップ。03 の 1.2・1.4節。SKYABYSS_SELFTEST_ONLY="gear tiers"
+        steps.add(Step.once("gear tiers", jp.revati.skyabyss.item.GearTierSelfTest::runSelfTest));
         // 心臓四体の手ごたえ (戦いの長さ・一撃・避けそこね)
         steps.add(Step.once("heart balance", jp.revati.skyabyss.combat.HeartBalanceSelfTest::runSelfTest));
         steps.add(Step.once("affix", AffixSelfTest::runSelfTest));

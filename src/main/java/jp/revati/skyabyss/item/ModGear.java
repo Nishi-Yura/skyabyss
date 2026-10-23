@@ -71,7 +71,7 @@ public interface ModGear {
 
     // ツールチップ: 階級と由来、説明、物語の一行、強化の段階
     static void tooltip(ItemStack stack, List<Component> tooltip, GearTier tier, String descKey, boolean enhanceable) {
-        tooltip.add(Component.translatable("gear.skyabyss.tier." + tier.key).withStyle(s -> s.withColor(tier.color))
+        tooltip.add(Component.translatable(tier.translationKey()).withStyle(s -> s.withColor(tier.color))
                 .append(Component.literal(" · ").withStyle(ChatFormatting.DARK_GRAY))
                 .append(Component.translatable(originKey(stack)).withStyle(ChatFormatting.GRAY)));
         tooltip.add(Component.translatable(descKey).withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC));

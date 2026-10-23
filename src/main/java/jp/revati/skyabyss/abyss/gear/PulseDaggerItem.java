@@ -16,7 +16,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.SwordItem;
 
-// 鼓動の短剣 (伝説): 心臓の番人の肋から削った、脈を打つ短剣。攻撃力 9、速さ 2.0。
+// 鼓動の短剣 (ヒロイック): 心臓の番人の肋から削った、脈を打つ短剣。攻撃力 9、速さ 2.0。
 // 同じ敵を 1.5 秒の内に打ち続けると拍が数えられ、4 度目ごとに (+5 から 3 度目ごとに) 「拍」: 攻撃力の 50% の追い打ちと、自分の体力 1 回復。
 // 鼓動の術と同じく、敵の鼓動を聞いて合わせる形
 public class PulseDaggerItem extends AbyssGearWeaponItem {
@@ -24,7 +24,7 @@ public class PulseDaggerItem extends AbyssGearWeaponItem {
 
     public PulseDaggerItem(Properties properties) {
         // 攻撃力 9 = 1 + 5 + 3、攻撃速度 2.0 = 4 − 2.0
-        super(properties.attributes(SwordItem.createAttributes(TIER, 3, -2.0f)), GearTier.LEGENDARY, "item.skyabyss.abyss_pulse_dagger.desc");
+        super(properties.attributes(SwordItem.createAttributes(TIER, 3, -2.0f)), GearTier.HEROIC, "item.skyabyss.abyss_pulse_dagger.desc");
     }
 
     public static int every(ItemStack stack) {
