@@ -69,7 +69,9 @@ public final class BossDev {
         Vec3 fwd = p.getLookAngle().multiply(1, 0, 1).normalize();
         double x = p.getX() + fwd.x * dist;
         double z = p.getZ() + fwd.z * dist;
-        Entity e = AbyssMobSpawner.spawnAt(p.serverLevel(), body, x, p.getY(), z, 3);
+        // 床の上に置く (動かない一体は落ちないので、人の高さに置くと浮く)
+        double y = p.serverLevel().getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING, net.minecraft.util.Mth.floor(x), net.minecraft.util.Mth.floor(z));
+        Entity e = AbyssMobSpawner.spawnAt(p.serverLevel(), body, x, y, z, 3);
         if (!(e instanceof LivingEntity le)) {
             src.sendFailure(Component.literal("body " + body + " did not spawn"));
             return 0;
