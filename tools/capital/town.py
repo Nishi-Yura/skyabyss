@@ -1782,6 +1782,7 @@ class Town(Facilities):
         self.drop_floaters()
         self.polish_final()
         self.fix_stairs()
+        self.street_light()
         self.fix_gates()
         self.drop_unsupported()
         self.v.connect()
@@ -1846,6 +1847,13 @@ class Town(Facilities):
         seeds = check_stairs.seeds_of({'marks': v.marks, 'meta': {'rect': [-140, -120, 120, 120], 'level': True}}, v.b)
         done, left = check_stairs.fix(v.b, seeds)
         self.stairs_fixed, self.stairs_left = done, left
+
+    def street_light(self):
+        """夜に暗い街路・広場・階段 (明るさ 0 の所) の近くの壁に、魂の松明を足す (tools/audit/check_light.py)。
+        松明は当たりが無く、壁の上に付けるので道はふさがない。灯りは街の所々だけ (全体を明るくはしない)"""
+        sys.path.insert(0, os.path.join(ROOT, 'tools', 'audit'))
+        import check_light  # noqa: E402
+        self.torches = check_light.plan_wall_torches(self.v.b, target=check_light.DARK, log=None)
 
     def drop_floaters(self):
         """床に置く小物 (壺・鉢・ろうそく・置いた灯り・敷物) で、下が空いているものを消す。
