@@ -37,4 +37,6 @@
 ## 絵
 
 - `<id>_views.png` (前・横・後ろ・3/4) と武器の `<id>_hold.png` (三人称・一人称の模式・地面・強化 +0/+5/+10)、`icons.png` (3D | 旧 | 新のアイコン)
-- `game/` ゲーム内の撮影 (`tools/shots/abyss_gear_v2.txt`)
+- `game/` ゲーム内の撮影 (`tools/shots/abyss_gear_v2.txt`。品ごとに一人称の構え・連撃の止め絵・点検、三人称の構え・横・振り、持ち物の画面)
+- `game/fp_size_after_fix.png`: 一人称の大きさを直したあと (`tools/shots/abyss_gear_v2_check.txt`。上段: 灯り番の剣・鼓動の短剣・沈め錨・灯籠の三人称、下段: 灯籠の後ろ・基準の水路の牙・鯨骨の大剣)。最初の撮影では一人称が大きすぎたので、倍率を 0.46 / 0.42 / 0.5 に下げた。灯籠の護符は三人称で吊り環を手に、本体が垂れる向きにした
+- `game/trinkets_worn_zoom.png`: 身につけた聴き筒 (胸) と錘 (腰の右の後ろ)。撮影の bodyyaw が効かず正面だけ

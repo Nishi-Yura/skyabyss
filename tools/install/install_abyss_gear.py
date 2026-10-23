@@ -54,6 +54,11 @@ DISPLAY = {
 }
 
 
+HANG = {"abyss_lantern_charm": {
+    "thirdperson_righthand": {"rotation": [-90, 0, 0], "translation": [0, -1.5, 3.5], "scale": [0.75, 0.75, 0.75]},
+    "thirdperson_lefthand": {"rotation": [-90, 0, 0], "translation": [0, -1.5, 3.5], "scale": [0.75, 0.75, 0.75]}}}
+
+
 def bake_glow(atlas: Path, mask: Path):
     a = np.array(Image.open(atlas).convert("RGBA"))
     m = np.array(Image.open(mask).convert("RGBA"))[..., 3] > 0
@@ -113,10 +118,17 @@ def install_weapon(item: str, opt: str):
 def install_accessory(item: str, opt: str):
     tier = ACCESSORIES[item]
     install_mesh_item(item, opt, tier, [""])
+    display = json.loads(json.dumps(DISPLAY))
+    if item in HANG:
+        # 吊るして持つ品 (灯籠): 三人称は吊り環を手に、本体が下へ垂れる向き
+        for k, v in HANG[item].items():
+            display[k] = v
     model = {"loader": "neoforge:separate_transforms",
-             "base": {"parent": "builtin/entity", "gui_light": "front", "display": DISPLAY, "textures": {"particle": f"skyabyss:item/{item}"}},
+             "base": {"parent": "builtin/entity", "gui_light": "front", "display": display, "textures": {"particle": f"skyabyss:item/{item}"}},
              "perspectives": {"gui": {"parent": "minecraft:item/generated", "textures": {"layer0": f"skyabyss:item/{item}"}}}}
     write_json(ASSETS / "models/item" / f"{item}.json", model)
+    # 平絵の戻り先 (LowPoly.accessoryMeshes = false のとき AccessoryItemRenderer が描く)
+    write_json(ASSETS / "models/item_flat" / f"{item}.json", {"parent": "minecraft:item/generated", "textures": {"layer0": f"skyabyss:item/{item}"}})
     print(item, "option", opt, "installed")
 
 
