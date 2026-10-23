@@ -124,6 +124,16 @@ def cbox(bone, m, c, size, R=None, taper=0.78, cut=0.45):
     return RK.cbox(bone, m, c, size, R=R, taper=taper, cut=cut)
 
 
+def xf(obj, R, about):
+    """点・点の列・輪の列を about のまわりに R で回す。"""
+    about = np.asarray(about, float)
+    if isinstance(obj, np.ndarray) and obj.ndim == 1:
+        return R @ (obj - about) + about
+    if isinstance(obj, (list, tuple)) and len(obj) and isinstance(obj[0], (int, float, np.floating)):
+        return R @ (np.asarray(obj, float) - about) + about
+    return [xf(o, R, about) for o in obj]
+
+
 def oct_ring(c, w, h, cut=0.3, R=None, axis="z"):
     """中心 c、幅 w・高さ h の面取りした八角形の輪 (断面は x-y 平面。R で回す)。"""
     R = np.eye(3) if R is None else R
@@ -230,6 +240,58 @@ def spiral(bone, m, base, axis_dir, out_dir, turns, R0, R1, n, r0, r1, rise=0.0,
         pts.append(np.asarray(base, float) + u * R * (1 - math.cos(a)) + w * R * math.sin(a) + ax * rise * t)
     ra = [r0 + (r1 - r0) * (i / n) for i in range(n + 1)]
     return tube(bone, m, pts, ra, None, sides=sides, hint=tuple(ax), phase=180.0 / sides, caps=(True, True))
+
+
+# ====================================================================== 四つ足の脚 (上の骨 leg_<k>、下の骨 leg_<k>_lo)
+
+def quad_bones(m, spec):
+    """spec = {k: (hip, knee)}。k = fl / fr / bl / br。上の骨の pivot = hip、下の骨の pivot = knee。"""
+    for k, (hip, knee) in spec.items():
+        m.bone("leg_" + k, "body", hip)
+        m.bone("leg_" + k + "_lo", "leg_" + k, knee)
+
+
+def hoof_leg(m, k, mid, ankle, w, d, mat="fur", lo_mat=None, hoof_mat="hoof", hoof=(3.0, 2.2, 3.6), top_up=4.0, cloven=False,
+             foot="hoof", n=8, feather=None, foot_z=-0.6):
+    """脚一本。mid = 上の骨の途中の点 (後ろ脚の膝の前への曲がり)、ankle = 足首 (球節)。
+    w, d = (付け根, 膝, 足首) の幅と奥行き。foot = "hoof" (蹄) / "paw" (肉球の足) / "none"。"""
+    up, lo = "leg_" + k, "leg_" + k + "_lo"
+    hip, knee = m.pv(up), m.pv(lo)
+    lo_mat = lo_mat or mat
+    top = hip + np.array([0, top_up, 0])
+    path = [top, hip] + ([np.asarray(mid, float)] if mid is not None else []) + [knee]
+    ws = [w[0], w[0] * 0.96] + ([lerp(w[0], w[1], 0.6)] if mid is not None else []) + [w[1]]
+    ds = [d[0], d[0] * 0.98] + ([lerp(d[0], d[1], 0.55)] if mid is not None else []) + [d[1]]
+    m.add(f"{k}_up", limb(up, mat, path, ws, ds, n=n))
+    m.add(f"{k}_knee", ell(lo, lo_mat, knee, (w[1] * 0.56, d[1] * 0.62, d[1] * 0.6), segs=7, rings=2))
+    ank = np.asarray(ankle, float)
+    m.add(f"{k}_lo", limb(lo, lo_mat, [knee + np.array([0, 0.8, 0]), lerp(knee, ank, 0.5), ank], [w[1] * 0.86, w[2] * 1.02, w[2]],
+                          [d[1] * 0.86, d[2] * 1.05, d[2]], n=n))
+    if feather:
+        fm, fl = feather
+        for j in range(4):
+            a = math.radians(180 + (j - 1.5) * 50)
+            p = ank + np.array([math.sin(a) * w[2] * 0.45, 0.8, math.cos(a) * d[2] * 0.45])
+            m.add(f"{k}_fea{j}", cone(lo, fm, p, (math.sin(a) * 0.5, -1.0, math.cos(a) * 0.5), fl, 1.3, sides=3, rings=1))
+    if foot == "hoof":
+        hx, hy, hz = hoof
+        c = np.array([ank[0], hy / 2, ank[2] + foot_z])
+        m.add(f"{k}_pastern", limb(lo, lo_mat, [ank + np.array([0, 0.6, 0]), c + np.array([0, hy * 0.4, -0.3])], [w[2] * 0.95, hx * 1.6],
+                                   [d[2] * 0.95, hz * 1.4], n=8))
+        if cloven:
+            for s in (-1, 1):
+                cc = c + np.array([s * hx * 0.27, 0, -0.2])
+                m.add(f"{k}_hoof{s}", box(lo, hoof_mat, cc, (hx * 0.5, hy, hz), taper=(0.8, 0.82), cut=0.5, shift=(0, 0.3)))
+        else:
+            m.add(f"{k}_hoof", box(lo, hoof_mat, c, (hx, hy, hz), taper=(0.82, 0.8), cut=0.45, shift=(0, 0.3)))
+    elif foot == "paw":
+        hx, hy, hz = hoof
+        c = np.array([ank[0], hy * 0.5, ank[2] + foot_z - hz * 0.25])
+        m.add(f"{k}_paw", ell(lo, lo_mat, c, (hx * 0.5, hy * 0.6, hz * 0.55), segs=8, rings=2))
+        m.add(f"{k}_pawlink", limb(lo, lo_mat, [ank + np.array([0, 0.6, 0]), c + np.array([0, 0.3, 0.6])], [w[2], hx * 0.8], [d[2], hz * 0.6], n=8))
+        for j in range(3):
+            x = (j - 1) * hx * 0.3
+            m.add(f"{k}_claw{j}", cone(lo, hoof_mat, c + np.array([x, -hy * 0.05, -hz * 0.42]), (0, -0.35, -1), 1.6, 0.55, sides=3, rings=1))
 
 
 # ====================================================================== 光線 (体の表面を拾う: 鞍・帯を体に沿わせる)
@@ -344,12 +406,12 @@ def saddle(m, seat_z=0.0, cy=None, length=9.0, half_angle=58.0, blanket=1.0, sea
     # ---- 座 (革): 布の上の厚い板。前の山 (pommel)・後ろの山 (cantle)
     top_c = top_y(tris, 0, seat_z)
     seat_rows = []
-    zz = np.linspace(seat_z - seat_len, seat_z + seat_len, 6)
+    zz = np.linspace(seat_z - seat_len, seat_z + seat_len, 5)
     for i, z in enumerate(zz):
         t = i / (len(zz) - 1)
         rise = pommel * max(0.0, 1 - t * 4) ** 1.5 + cantle * max(0.0, t * 4 - 3) ** 1.3
         ha = seat_half * (0.62 + 0.38 * math.sin(math.pi * t) ** 0.6)
-        row = surface_arc(tris, z, cy, -ha, ha, 7, off=blanket + 1.0)
+        row = surface_arc(tris, z, cy, -ha, ha, 6, off=blanket + 1.0)
         row = [p + np.array([0, rise * max(0.0, 1 - abs(p[0]) / 6.0) + 0.9 * math.sin(math.pi * t), 0]) for p in row]
         seat_rows.append(row)
     srings = slab_rows(seat_rows, 2.0, cy)
@@ -554,7 +616,7 @@ def eye_paint(c, col, glow, eyes, pal):
         dark = np.array(e.get("pupil", (12, 10, 12)), float)
         k = np.clip(0.75 + 0.35 * (du / e["b"]), 0.5, 1.1)
         col = np.where(sock[..., None], iris * k[..., None], col)
-        pr = np.sqrt((dr / (e["a"] * 0.55)) ** 2 + (du / (e["b"] * 0.62)) ** 2)
+        pr = np.sqrt((dr / (e["a"] * e.get("pa", 0.55))) ** 2 + (du / (e["b"] * e.get("pb", 0.62))) ** 2)
         pup = sock & (pr < 1.0)
         col = np.where(pup[..., None], dark, col)
         hl = sock & (np.sqrt(((dr + e["a"] * 0.3 * np.sign(cen[0] + 1e-9)) / (e["a"] * 0.28)) ** 2 + ((du - e["b"] * 0.38) / (e["b"] * 0.28)) ** 2) < 1.0)
@@ -988,6 +1050,74 @@ WALK_PH = (90.0, 270.0, 0.0, 180.0)      # 横の順の歩き: 左後 → 左前
 TROT_PH = (0.0, 180.0, 180.0, 0.0)       # 対角の速歩
 GALLOP_PH = (0.0, 30.0, 200.0, 230.0)    # 回る襲歩: 前の二本が続けて、後ろの二本が続けて
 BOUND_PH = (0.0, 12.0, 180.0, 192.0)     # 跳ね: 前・後ろがほぼそろう
+
+
+LEGS4 = [("leg_fl", "leg_fl_lo"), ("leg_fr", "leg_fr_lo"), ("leg_bl", "leg_bl_lo"), ("leg_br", "leg_br_lo")]
+
+
+def quad_gaits(walk=(1.4, 20, 28, 18, 30), run=(3.0, 34, 50, 30, 44), run_ph=GALLOP_PH, neck="neck", head="head", tails=("tail",),
+               ears=(), bob=(0.5, 1.4), pitch=(1.2, 4.0), idle_period=5.0, run_base=(-4.0, 6.0), hind_lo_sign=1.0):
+    """四つ足の待機・歩き・駆け (+ 跳びは別)。walk/run = (一歩のブロック, 前の振り, 前の膝, 後ろの振り, 後ろの膝)。"""
+    idle = Gait("idle", period=idle_period)
+    idle.pos("body", y=W(0).s(0.3, 1, 0, "t"))
+    idle.rot("body", x=W(0).s(0.6, 1, 90, "t"))
+    if neck:
+        idle.rot(neck, x=W(0).s(1.6, 1, 30, "t"))
+    if head:
+        idle.rot(head, x=W(0).s(2.2, 1, 60, "t").s(0.8, 4, 0, "t"), y=W(0).s(6.0, 1, 100, "t"))
+    for i, t in enumerate(tails):
+        idle.rot(t, x=W(0).s(3.0, 1, 40 * i, "t"), y=W(0).s(6.0, 2, 60 * i, "t"))
+    for i, e in enumerate(ears):
+        s = 1 if i % 2 == 0 else -1
+        idle.rot(e, x=W(0).s(4, 1, 30 + 90 * i, "t"), z=W(0).s(s * 5, 2, 70 * i, "t").s(s * 3, 5, 0, "t"))
+    wk = Gait("walk", period=4.0, stride=walk[0])
+    quad(wk, LEGS4, walk[1], walk[2], WALK_PH, Ah=walk[3], Bh=walk[4] * hind_lo_sign)
+    wk.pos("body", y=W(0.1).s(bob[0] * 0.6, 2, 0))
+    wk.rot("body", z=W(0).s(1.4, 1, 0), x=W(0).s(pitch[0], 2, 90))
+    if neck:
+        wk.rot(neck, x=W(0).s(3.0, 2, 200))
+    if head:
+        wk.rot(head, x=W(0).s(-2.0, 2, 200), y=W(0).s(2.0, 1, 0))
+    for i, t in enumerate(tails):
+        wk.rot(t, x=W(0).s(4.0, 2, 30 * i), y=W(0).s(8.0, 1, 60 + 30 * i))
+    for i, e in enumerate(ears):
+        wk.rot(e, x=W(0).s(5, 2, 40))
+    rn = Gait("run", period=4.0, stride=run[0])
+    quad(rn, LEGS4, run[1], run[2], run_ph, Ah=run[3], Bh=run[4] * hind_lo_sign, base=run_base)
+    rn.pos("body", y=W(0.4).s(bob[1], 1, 60))
+    rn.rot("body", x=W(0).s(pitch[1], 1, -20))
+    if neck:
+        rn.rot(neck, x=W(-6).s(7.0, 1, 150))
+    if head:
+        rn.rot(head, x=W(4).s(-4.0, 1, 150))
+    for i, t in enumerate(tails):
+        rn.rot(t, x=W(-14).s(10.0, 1, 100 + 30 * i), y=W(0).s(5.0, 1, 30 * i))
+    for i, e in enumerate(ears):
+        rn.rot(e, x=W(-18).s(6, 1, 60))
+    return idle, wk, rn
+
+
+def quad_jump(neck="neck", head="head", tails=("tail",), extra=None):
+    spec = {
+        "body": {"rot": {0.0: (0, 0, 0), 0.12: (5, 0, 0), 0.3: (-14, 0, 0), 0.7: (-5, 0, 0)}},
+        "leg_fl": {"rot": {0.0: (0, 0, 0), 0.3: (-46, 0, 0), 0.7: (-28, 0, 0)}},
+        "leg_fr": {"rot": {0.0: (0, 0, 0), 0.3: (-46, 0, 0), 0.7: (-28, 0, 0)}},
+        "leg_fl_lo": {"rot": {0.0: (0, 0, 0), 0.3: (70, 0, 0), 0.7: (40, 0, 0)}},
+        "leg_fr_lo": {"rot": {0.0: (0, 0, 0), 0.3: (70, 0, 0), 0.7: (40, 0, 0)}},
+        "leg_bl": {"rot": {0.0: (0, 0, 0), 0.12: (-12, 0, 0), 0.3: (44, 0, 0), 0.7: (20, 0, 0)}},
+        "leg_br": {"rot": {0.0: (0, 0, 0), 0.12: (-12, 0, 0), 0.3: (44, 0, 0), 0.7: (20, 0, 0)}},
+        "leg_bl_lo": {"rot": {0.0: (0, 0, 0), 0.3: (-16, 0, 0), 0.7: (10, 0, 0)}},
+        "leg_br_lo": {"rot": {0.0: (0, 0, 0), 0.3: (-16, 0, 0), 0.7: (10, 0, 0)}},
+    }
+    if neck:
+        spec[neck] = {"rot": {0.0: (0, 0, 0), 0.3: (-10, 0, 0), 0.7: (2, 0, 0)}}
+    if head:
+        spec[head] = {"rot": {0.0: (0, 0, 0), 0.3: (6, 0, 0), 0.7: (0, 0, 0)}}
+    for t in tails:
+        spec[t] = {"rot": {0.0: (0, 0, 0), 0.3: (-20, 0, 0), 0.7: (6, 0, 0)}}
+    if extra:
+        spec.update(extra)
+    return jump_keys(spec)
 
 
 def jump_keys(spec):

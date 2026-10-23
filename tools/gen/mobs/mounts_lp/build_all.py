@@ -46,8 +46,8 @@ def build_one(mid, install=True, sheet=True):
         add_stirrups(m, foot, kw.get("cy", 20.0), 0.0, kw.get("seat_half", 34.0), kw.get("blanket", 1.0), kw.get("mats"))
     core = [f for f in m.F if f.part in m.core]
     cv = np.vstack([f.verts for f in core])
-    width = float(np.clip(2 * np.abs(cv[:, 0]).max() / 16.0, 0.9, 1.6))
-    height = float(np.clip(cv[:, 1].max() / 16.0, 1.0, 2.4))
+    width = float(np.clip(2 * np.abs(cv[:, 0]).max() / 16.0, 1.0, 1.6))
+    height = float(np.clip(seat + 0.15, 1.2, 2.4))
     size, atlas, glow = paint_mount(m, m.pal, m.detail, m.hint)
     out = WORK / mid
     data, has_glow = export(m, size, atlas, glow, out, {"seat_y": seat_top, "rider_seat_blocks": seat,
