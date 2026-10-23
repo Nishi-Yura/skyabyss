@@ -36,6 +36,7 @@ TERX = 60        # 北の段の東西の縁 (|x|)
 GUILD_X1 = 78
 SMITHY_X1 = 26
 SMITHY_Z1 = 21
+FURNITURE = ('barrel', 'chest', 'bookshelf', 'smithing_table', 'crafting_table', 'hay_block', 'cauldron', 'composter', 'lectern', 'loom', 'cartography_table', 'fletching_table', 'grindstone', 'anvil', 'brewing_stand', 'decorated_pot')
 GAP = 4          # 町家と町家のあいだ (路地。軒が 1 出るので、軒のあいだに 2 の空き。3 では詰まって見える所があった: 2026-10-21 の試遊)
 
 
@@ -1781,8 +1782,60 @@ class Town(Facilities):
         self.drop_floaters()
         self.polish_final()
         self.fix_stairs()
+        self.fix_gates()
+        self.drop_unsupported()
         self.v.connect()
         return self.v
+
+    def drop_unsupported(self):
+        """最後の手で支えの無くなった壁の松明・置いた灯り (あとから抜いた縦穴の壁など) を消す (audit_odd.py の「支えのない付き物」)"""
+        v = self.v
+        air = (None, 'air', 'cave_air')
+        for (x, y, z), s in list(v.b.items()):
+            n = s.split('[')[0]
+            if n in ('wall_torch', 'soul_wall_torch'):
+                f = s.split('facing=')[1].split(',')[0].split(']')[0]
+                bx, bz = DX[OPP[f]]
+                if v.b.get((x + bx, y, z + bz)) in air:
+                    v.b[(x, y, z)] = 'cave_air' if y < -1 else 'air'
+            elif n in ('lantern', 'soul_lantern'):
+                need = (x, y + 1, z) if 'hanging=true' in s else (x, y - 1, z)
+                if v.b.get(need) in air:
+                    v.b[(x, y, z)] = 'cave_air' if y < -1 else 'air'
+
+    def fix_gates(self):
+        """柵の戸の向き: ゲームでは facing が通る向き (戸の板はそれに垂直)。通る向きの片側が塞がり、
+        垂直の向きの両側が空いている戸 (受付の机の跳ね上げ・馬房の戸を 90 度違えて置いたもの) は回す"""
+        v = self.v
+
+        def blocked(p):
+            s = v.b.get(p)
+            n = (s or 'air').split('[')[0]
+            return s is not None and n not in ('air', 'cave_air') and not n.endswith(('_carpet', '_pressure_plate', 'torch', '_fence_gate')) \
+                and 'flower' not in n and 'lantern' not in n and 'candle' not in n
+
+        turn = {'north': 'east', 'south': 'east', 'east': 'north', 'west': 'north'}
+        for (x, y, z), s in list(v.b.items()):
+            if not s.split('[')[0].endswith('_fence_gate'):
+                continue
+            f = s.split('facing=')[1].split(',')[0].split(']')[0]
+            dx, dz = DX[f]
+            px, pz = DX[turn[f]]
+            if (blocked((x + dx, y, z + dz)) or blocked((x - dx, y, z - dz))) and not blocked((x + px, y, z + pz)) and not blocked((x - px, y, z - pz)):
+                v.b[(x, y, z)] = s.replace('facing=' + f, 'facing=' + turn[f])
+                continue
+            # 通る向きの前後 (足と頭の高さ) に当たりのある小物・家具 (樽・棚・柵・敷物・灯り) があると戸が通れない: どける
+            # (ゲームの監査 BuildAuditExtra.gate と同じく、当たりが少しでもあれば塞がりとみる)
+            for sg in (1, -1):
+                for yy in (y, y + 1):
+                    q = (x + dx * sg, yy, z + dz * sg)
+                    n = (v.b.get(q) or 'air').split('[')[0]
+                    if any(t in n for t in FURNITURE + ('lantern', 'candle', 'potted_', 'flower_pot', '_carpet')) or                             (n.endswith('_fence') and 'nether' not in n) or (yy == y + 1 and n.endswith(('_stairs', '_slab'))):
+                        v.b[q] = 'air'
+                        above = (q[0], yy + 1, q[2])
+                        m = (v.b.get(above) or 'air').split('[')[0]
+                        if any(t in m for t in ('lantern', 'candle', 'potted_', 'flower_pot', '_carpet', 'decorated_pot')) and 'hanging=true' not in (v.b.get(above) or ''):
+                            v.b[above] = 'air'
 
     def fix_stairs(self):
         """階段の検査 (tools/audit/check_stairs.py) で、形から直せる指摘を直す: 部品どうしが重なって埋まった段・逆向きの段・

@@ -7,7 +7,7 @@
     ... -v 指摘を全部出す (既定は種類ごとに 8 件まで) / --json 機械向け
 
 規則 (ゲームの BuildAudit の階段の規則を、設計図の上で同じように見る。都の飾りの階段も、歩ける所にある物は対象):
-  STAIR_UPSIDE    床の高さにある逆さ (上付き) の階段 (足場になるのに段になっていない → 下付きに)
+  STAIR_UPSIDE    床の高さにある逆さ (上付き) の階段 (丸ごとのブロックの上で足場になるのに段になっていない → 下付きに。柵の上の鞍掛けなどは除く)
   STAIR_REVERSED  段の低い側が壁で、高い側が空いている (向きが逆)
   STAIR_RUN       上り下りの並びと向きが合わない / 同じ列で隣が逆向き
   STAIR_RISE      段の前後で 1 段より高い (跳ばないと上がれない・最初の段が高い)
@@ -266,7 +266,7 @@ def check(g, label, seeds=None):
         else:
             near_floor = any(standable(g, x + dx, y, z + dz) or standable(g, x + dx, y + 1, z + dz) for dx, dz in DX.values())
         if half == 'top':
-            if g.top(x, y - 1, z) >= 1 and head and any(((x, y + 1, z) in walk or (x + dx, y, z + dz) in walk) if walk is not None else standable(g, x + dx, y, z + dz)
+            if full_cube(g.get(x, y - 1, z)) and head and any(((x, y + 1, z) in walk or (x + dx, y, z + dz) in walk) if walk is not None else standable(g, x + dx, y, z + dz)
                                                         for dx, dz in DX.values()):
                 flag('STAIR_UPSIDE', (x, y, z), 'upside-down stair at floor level (stood on like a step) facing %s: %s' % (f, name(s)))
             continue
