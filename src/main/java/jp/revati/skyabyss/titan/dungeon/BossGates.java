@@ -28,15 +28,18 @@ final class BossGates {
     private BossGates() {
     }
 
-    static void build(BuildKit kit) {
-        // 心臓の間: 回廊の終わり (z HEART_GATE_Z) の大門。回廊の先を広い前庭にする (休み場の北の壁 z -101 の手前まで)
-        BossGate.build(kit.level(), new BossGate.Spec(new BlockPos(0, FLOOR, HEART_GATE_Z), Direction.NORTH).half(3).height(6)
+    // 心臓の間の大門 (体の外の封じた心臓の間。HeartArenaBuilder.buildInstance から)。回廊の終わり (z HEART_GATE_Z)。回廊の先を広い前庭にする (休み場の北の壁の手前まで)
+    static void buildHeart(BuildKit kit) {
+        BossGate.build(kit.level(), new BossGate.Spec(new BlockPos(HEART_CX, FLOOR, HEART_GATE_Z), Direction.NORTH).half(3).height(6)
                 .court(7, 8, 20).vault(7, 4), PALETTE);
+        // 心臓の間の入口の一言は、右の柱の内側の面に掛ける
+        kit.wallSign(HEART_GATE_SIGN.pos(), HEART_GATE_SIGN.facing(), HEART_GATE_SIGN.key());
+    }
+
+    static void build(BuildKit kit) {
         // 番兵長の広間: 控えの間からの通路の終わり (x 33) の大門。通路を広い前室にする
         int z = (E3_ENTRANCE.get(0).getZ() + E3_ENTRANCE.get(E3_ENTRANCE.size() - 1).getZ()) / 2;
         BossGate.build(kit.level(), new BossGate.Spec(new BlockPos(E3_ENTRANCE.get(0).getX(), FLOOR, z), Direction.WEST).half(2).height(6)
                 .court(5, 4, 20), PALETTE);
-        // 心臓の間の入口の一言は、右の柱の内側の面に掛ける
-        kit.wallSign(HEART_GATE_SIGN.pos(), HEART_GATE_SIGN.facing(), HEART_GATE_SIGN.key());
     }
 }

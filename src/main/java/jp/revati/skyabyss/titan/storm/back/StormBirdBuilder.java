@@ -568,13 +568,7 @@ public final class StormBirdBuilder {
                 kit.air(c[0], yy, c[1]);
             }
         }
-        int[] bottom = ring.get(Math.floorMod(start - steps, 16));
-        // 床 118 の道: 螺旋の下から北へ、そして東へ前室まで
-        int bx = bottom[0];
-        int bz = bottom[1];
-        kit.room(bx - 1, bx + 1, KEEL_ANTE.z1() - 1 + 3, bz, KEEL_ANTE.floor(), 3, Style.KEEL, 5);
-        kit.room(bx - 1, KEEL_ANTE.x1() - 1, KEEL_ANTE.z1() + 1, KEEL_ANTE.z1() + 3, KEEL_ANTE.floor(), 3, Style.KEEL, 5);
-        kit.room(KEEL_ANTE, Style.KEEL, 3);
+        // 版 34: 螺旋の下の床 118 の道・前室・竜骨の間は体の外へ移した (buildHeartInstance)。螺旋は下で行き止まり
         // 床 118 の道を掘ると、螺旋のいちばん下の手前の段が削られて 2 段の落差になり、上れなくなる (詰み監査)。下の数段を置き直す
         for (int k = Math.max(0, steps - 3); k <= steps; k++) {
             int[] c = ring.get(Math.floorMod(start - k, 16));
@@ -584,8 +578,24 @@ public final class StormBirdBuilder {
                 kit.air(c[0], yy, c[1]);
             }
         }
+    }
+
+    // 体の外の封じた竜骨の間 (trial/raid/InstanceArenas。版 34): 竜骨の材質で詰めた箱 → 前室 (休み場 heart) → 入口 → 竜骨の間 → 柱・風穴・灯り →
+    // 心臓の担当の形 (StormHeartArena.buildShape) → 大門 → 焚き火と碑文
+    public static void buildHeartInstance(net.minecraft.server.level.ServerLevel level) {
+        StormKit kit = new StormKit(level);
+        int r0 = HEART_ROOM_RADIUS + 4;
+        for (int x = HEART_ROOM.getX() - r0; x <= HEART_ROOM.getX() + r0; x++) {
+            for (int z = KEEL_ANTE.z1() - 4; z <= HEART_ROOM.getZ() + r0; z++) {
+                for (int y = HEART_ROOM.getY() - 4; y <= HEART_ROOM_CEILING + 3; y++) {
+                    kit.put(x, y, z, StormKit.wall(Style.KEEL, x, y, z));
+                }
+            }
+        }
+        kit.room(KEEL_ANTE, Style.KEEL, 3);
+        int hx = HEART_ROOM.getX();
         // 竜骨の間の入口 (前室の南の口)
-        for (int x = -1; x <= 1; x++) {
+        for (int x = hx - 1; x <= hx + 1; x++) {
             for (int y = KEEL_ANTE.floor() + 1; y <= KEEL_ANTE.floor() + 3; y++) {
                 kit.air(x, y, KEEL_ANTE.z2() + 1);
             }
@@ -616,7 +626,7 @@ public final class StormBirdBuilder {
             }
         }
         // 前室の床 (118) と竜骨の間の外の床 (118) をつなぐ: 入口の下
-        for (int x = -1; x <= 1; x++) {
+        for (int x = hx - 1; x <= hx + 1; x++) {
             kit.put(x, KEEL_ANTE.floor(), KEEL_ANTE.z2() + 1, StormKit.floor(Style.KEEL, x, 0));
         }
         for (BlockPos p : HEART_RODS) {
@@ -630,6 +640,18 @@ public final class StormBirdBuilder {
             double a = Math.PI * 2 * i / 12;
             kit.solid(HEART_ROOM.getX() + (int) Math.round(Math.cos(a) * (r + 1)), HEART_ROOM.getY() + 4,
                     HEART_ROOM.getZ() + (int) Math.round(Math.sin(a) * (r + 1)), StormKit.LAMP);
+        }
+        jp.revati.skyabyss.titan.storm.heart.StormHeartArena.buildShape(level);
+        StormBossGates.heart(level);
+        for (StormBackLayout.Rest rest : RESTS) {
+            if (rest.id().equals("heart")) {
+                kit.campfire(rest.campfire());
+            }
+        }
+        for (Inscription i : LORE_SIGNS) {
+            if (i.key().equals("sign.skyabyss.lore_storm_heart")) {
+                kit.wallSign(i.pos(), i.facing(), i.key());
+            }
         }
     }
 

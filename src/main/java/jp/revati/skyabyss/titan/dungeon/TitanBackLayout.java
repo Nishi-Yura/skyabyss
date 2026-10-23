@@ -72,7 +72,8 @@ public final class TitanBackLayout {
     // 31: 周回の前の谷 (32 の 4 章、R5): 西の前室 W0 の南に、前の道の休み場 wp (WP0)・前の谷 WP (崩れる骨と飛び石と島二つ)・W0 の南の壁へ上る通路 WPC と戸。
     //     周回のグループだけが wp へ運ばれ、前の谷を越えて W0 へ入る (trial/LongWalk)
     // 32: 封じた鼓動の間・入口の通路・体内への階段の飾りと灯りを外した (trial/RouteSeals。2026-10-22「誰も見ない豪華な建築は省いて」)
-    public static final int LAYOUT_VERSION = 32;
+    // 33: 心臓の間を体の外 (区画 0 番の枠の封じた部屋。trial/raid/InstanceArenas) へ移した
+    public static final int LAYOUT_VERSION = 33;
 
     // ---------------------------------------------------------------- 地表
     // 尾の付け根の背の広場 (到着) と、背の中ほどの祠。祠の階段は 1 段ごとに 1 下がり、入口の通路の南の端 (z 15) で床に着く
@@ -116,17 +117,22 @@ public final class TitanBackLayout {
     public static final int HUB_CX = 0;
     public static final int HUB_CZ = -35;
 
-    // ---------------------------------------------------------------- 心臓の回廊と心臓の間 (最終ボス)
-    // 封印から北へ伸びる回廊 (x -3〜3、z -57〜-108)。途中に休み場 heart がある
-    public static final Box HEART_CORRIDOR = new Box(-3, 3, -108, -57, FLOOR, 6);
-    public static final Box HEART_REST = new Box(-6, 6, -100, -88, FLOOR, 7);
-    // 心臓の間: 中心 (0, 104, -136)、床 y=103、天井 y=120 (体の表面の内側に収まる)。内側の半径 25、壁の外側 27 (入口の壁 z=-109 が円の南の端)
-    public static final int HEART_CX = 0;
-    public static final int HEART_CZ = -136;
-    public static final Box HEART = new Box(-27, 27, -163, -109, FLOOR, 16);
+    // ---------------------------------------------------------------- 心臓の間 (最終ボス。体の外の封じた部屋)
+    // 2026-10-23: 心臓の間は体の中から、背の次元の区画 0 番の枠 (trial/raid/InstanceArenas) の封じた一室へ移した。形と戦いは元のまま、
+    // 元の座標 (中心 (0, 104, -136)) を HEART_DX / HEART_DZ だけずらす。順路の段 4 では、運ばれた人は部屋の中へ直に着く。
+    // 部屋の南に、倒れた人が目を覚ます小さな前室 (休み場 heart) と大門が付く (戦いの途中に扉から戻る。再入場)
+    public static final int HEART_DX = jp.revati.skyabyss.trial.raid.InstanceArenas.HEART_X;
+    public static final int HEART_DZ = jp.revati.skyabyss.trial.raid.InstanceArenas.HEART_Z + 136;
+    // 大門から休み場までの短い通路 (x -3〜3)
+    public static final Box HEART_CORRIDOR = new Box(-3 + HEART_DX, 3 + HEART_DX, -108 + HEART_DZ, -88 + HEART_DZ, FLOOR, 6);
+    public static final Box HEART_REST = new Box(-6 + HEART_DX, 6 + HEART_DX, -100 + HEART_DZ, -88 + HEART_DZ, FLOOR, 7);
+    // 心臓の間: 床 y=103、天井 y=120。内側の半径 25、壁の外側 27 (入口の壁が円の南の端)
+    public static final int HEART_CX = HEART_DX;
+    public static final int HEART_CZ = -136 + HEART_DZ;
+    public static final Box HEART = new Box(-27 + HEART_DX, 27 + HEART_DX, -163 + HEART_DZ, -109 + HEART_DZ, FLOOR, 16);
     // 心臓の間の入口 (戦いが始まると閉じる)。z=HEART_GATE_Z の壁
-    public static final int HEART_GATE_Z = -109;
-    public static final List<BlockPos> HEART_GATE = wall(-3, 3, FLOOR + 1, FLOOR + 6, HEART_GATE_Z, true);
+    public static final int HEART_GATE_Z = -109 + HEART_DZ;
+    public static final List<BlockPos> HEART_GATE = wall(-3 + HEART_DX, 3 + HEART_DX, FLOOR + 1, FLOOR + 6, HEART_GATE_Z, true);
     // 心臓を倒すと現れる光の柱。上に立つと尾の台へ戻される
     public static final BlockPos HEART_PILLAR = new BlockPos(HEART_CX, FLOOR + 1, HEART_CZ);
     // 版 24: 歌の祠 (休み場 heart の西の小部屋。看板だけで用がなかった) はなくした
@@ -224,7 +230,7 @@ public final class TitanBackLayout {
     }
 
     public static final List<Inscription> LORE_SIGNS = List.of(
-            new Inscription("sign.skyabyss.lore_heart", new BlockPos(6, FLOOR + 3, -90), net.minecraft.core.Direction.WEST),
+            new Inscription("sign.skyabyss.lore_heart", new BlockPos(6 + HEART_DX, FLOOR + 3, -90 + HEART_DZ), net.minecraft.core.Direction.WEST),
             new Inscription("sign.skyabyss.lore_vault", new BlockPos(-3, FLOOR + 3, -64), net.minecraft.core.Direction.EAST),
             new Inscription("sign.skyabyss.lore_west", new BlockPos(-24, WEST_LEDGE_Y + 2, -49), net.minecraft.core.Direction.NORTH),
             new Inscription("sign.skyabyss.lore_east", new BlockPos(30, FLOOR + 3, -52), net.minecraft.core.Direction.NORTH),
@@ -232,7 +238,7 @@ public final class TitanBackLayout {
 
     // 心臓の間の入口 (最後の試練)
     public static final Inscription HEART_GATE_SIGN =
-            new Inscription("sign.skyabyss.heart_gate", new BlockPos(4, FLOOR + 3, -107), net.minecraft.core.Direction.WEST);
+            new Inscription("sign.skyabyss.heart_gate", new BlockPos(4 + HEART_DX, FLOOR + 3, -107 + HEART_DZ), net.minecraft.core.Direction.WEST);
 
     // 背中に置く看板すべて (自己テストで、この数より多く置かれていないか・各行が看板の幅に収まるかを見る)
     public static List<Inscription> allSigns() {

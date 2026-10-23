@@ -211,15 +211,20 @@ public final class StormHeartArena {
 
     public static void ensureBuilt(ServerLevel back) {
         if (!isBuilt(back)) {
-            build(back);
+            jp.revati.skyabyss.titan.storm.back.StormBirdBuilder.buildHeartInstance(back);
         } else {
             placeGate(back);
         }
     }
 
     public static void build(ServerLevel back) {
-        // 部屋は鳥の中にある。鳥がまだ建っていなければ先に建てる (前室・入口の床・天井の上の道は背中の担当のもの)
+        // 背がまだ建っていなければ先に建てる (部屋の殻・前室・入口の床は背の建設の InstanceArenas が建てる)
         StormBackBuilder.ensureBuilt(back);
+        jp.revati.skyabyss.titan.storm.back.StormBirdBuilder.buildHeartInstance(back);
+    }
+
+    // 部屋の中の形だけ (殻は StormBirdBuilder.buildHeartInstance が先に建てる)
+    public static void buildShape(ServerLevel back) {
         int flags = 2 | 16;
         BlockState air = Blocks.AIR.defaultBlockState();
         BlockState wall = Blocks.POLISHED_DIORITE.defaultBlockState();

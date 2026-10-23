@@ -62,7 +62,7 @@ final class StormObjective {
                 return null;
             }
             // 螺旋と道を抜けて前室、前室から竜骨の間の戸
-            return goal("storm_heart", new BlockPos(0, KEEL_ANTE.floor() + 1, (int) HEART_DOOR.minZ), 3f, 3f, 0.7f);
+            return goal("storm_heart", new BlockPos(HEART_ROOM.getX(), KEEL_ANTE.floor() + 1, (int) HEART_DOOR.minZ), 3f, 3f, 0.7f);
         }
         // 試練の甲板 (29 の P2): 島の中・橋・渡り場・背の広場から橋へ
         if (StormDeck.placed()) {

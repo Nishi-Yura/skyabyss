@@ -1252,7 +1252,7 @@ public final class TitanBackTrials {
     }
 
     // 心臓の間の前室: 心臓の前室 (休み場) から入口までの回廊
-    private static final AABB HEART_ANTE = new AABB(-7, FLOOR + 1, HEART_GATE_Z + 1, 8, FLOOR + 8, HEART_REST.z2() + 1);
+    private static final AABB HEART_ANTE = new AABB(HEART_CX - 7, FLOOR + 1, HEART_GATE_Z + 1, HEART_CX + 8, FLOOR + 8, HEART_REST.z2() + 1);
 
     private static final GroupBossRoom.Host HEART_HOST = new GroupBossRoom.Host() {
         @Override

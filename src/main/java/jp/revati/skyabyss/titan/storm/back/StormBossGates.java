@@ -29,10 +29,14 @@ public final class StormBossGates {
     private StormBossGates() {
     }
 
-    public static void build(ServerLevel level) {
-        // 竜骨の間: 前室の南の端 (z -40)。南へ進む。開口は x -1〜1、前室の床の上 3 段。前室の天井の上、竜骨の間の天井 130 まで掘り上げる
-        BossGate.build(level, new BossGate.Spec(new BlockPos(0, KEEL_ANTE.floor(), (int) HEART_DOOR.minZ), Direction.SOUTH)
+    // 竜骨の間: 前室の南の端。南へ進む。開口は前室の床の上 3 段。前室の天井の上、竜骨の間の天井 130 まで掘り上げる
+    // (体の外の封じた竜骨の間。StormBirdBuilder.buildHeartInstance から)
+    public static void heart(ServerLevel level) {
+        BossGate.build(level, new BossGate.Spec(new BlockPos(HEART_ROOM.getX(), KEEL_ANTE.floor(), (int) HEART_DOOR.minZ), Direction.SOUTH)
                 .height(3).court(2, 3, 12).vault(5, 3).limit(12), PALETTE);
+    }
+
+    public static void build(ServerLevel level) {
         // 雷獣の巣: 雷の骨の回廊の突き当たり (最後の戸と前室のあと)。東へ進む。回廊 (幅 23・高さ 13) を狭めて、幅 7 の開口にする
         int gateX = (int) RAIJU_NEST_MOUTH.minX;
         BossGate.build(level, new BossGate.Spec(new BlockPos(gateX - 1, BONE_FLOOR, WZ), Direction.EAST)

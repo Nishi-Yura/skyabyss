@@ -32,7 +32,8 @@ public final class EmberBackLayout {
     // 20: 体を x1.6・y1.3 に (26 の 11 章)。喉・広間・三つの試練・井戸を引き直し、冷えた溶岩洞・灰降りの庭・尾根の広間・任意の翼を足した
     // 31: 順路の入口の箱 (喉の坂の休み場) の灯り。周回の灰の道の前の湖 (32 の 4 章、R5)
     // 32: 封じた炉心の広間に歩く道の灯りを置かない (RouteLamps。trial/RouteSeals)
-    public static final int LAYOUT_VERSION = 32;
+    // 33: 熾の底と前室を体の外 (trial/raid/InstanceArenas) へ移した
+    public static final int LAYOUT_VERSION = 33;
     // 灰の原のいちばん上のブロックの y (dimension/ember_back.json の層と合わせる)
     public static final int PLAIN_TOP = 63;
     // 体の中心 (遠くへ歩いたかを見る。体の長さ 621 の半分に余白)
@@ -165,11 +166,17 @@ public final class EmberBackLayout {
     public static final Box SOUTH = new Box(-17, 83, -8, 17, 112, 66);
     // 熾の底の前室 (9 × 7。螺旋の階段の下。大きさ据え置き) → B (碑文 lore_ember_heart と休み場 heart)
     public static final int FLOOR_HEART = 50;
-    public static final Box HEART_ANTE = new Box(-4, FLOOR_HEART, -29, 4, 56, -23);
+    // 熾の底 (心臓の間) と前室は体の外の封じた部屋 (区画 0 番の枠。trial/raid/InstanceArenas) へ移した (2026-10-23。版 33)。
+    // 元の座標 (中心 (0, 50, -4)) を HEART_DX / HEART_DZ だけずらす。高さは元のまま。螺旋の縦穴 (GATE_SHAFT) とはつながらない
+    public static final int HEART_DX = jp.revati.skyabyss.trial.raid.InstanceArenas.HEART_X;
+    public static final int HEART_DZ = jp.revati.skyabyss.trial.raid.InstanceArenas.HEART_Z + 4;
+    public static final Box HEART_ANTE = new Box(-4 + HEART_DX, FLOOR_HEART, -29 + HEART_DZ, 4 + HEART_DX, 56, -23 + HEART_DZ);
     // 熾の底 (円 半径 16、天井まで 14。床の輪: 台 0〜4、区画 4〜15、溝 15〜16。区画の下に深さ 3 の溶岩の溜め。戦いの部屋は大きさ据え置き) → F
-    public static final BlockPos HEART_CENTER = new BlockPos(0, FLOOR_HEART, -4);
+    public static final BlockPos HEART_CENTER = new BlockPos(HEART_DX, FLOOR_HEART, -4 + HEART_DZ);
     public static final int HEART_RADIUS = 16;
-    public static final Box HEART = new Box(-17, 46, -21, 17, 64, 13);
+    public static final Box HEART = new Box(-17 + HEART_DX, 46, -21 + HEART_DZ, 17 + HEART_DX, 64, 13 + HEART_DZ);
+    // 体の中にあったころの熾の底・前室・螺旋の下の範囲 (建て直しで灰の原に戻す所)
+    public static final Box OLD_UNDERGROUND = new Box(-19, 44, -57, 19, PLAIN_TOP, 15);
 
     // ---------------------------------------------------------------- 通り道 (B が壁を抜く。中身の担当は、箱の中の続きを空けておく)
     // 試練の入口 (広間からの冷えた溶岩洞が箱に入る所。箱の外の 1 枚の壁。幅 7 × 高さ 6)
@@ -179,7 +186,7 @@ public final class EmberBackLayout {
     // 鍛えの間の奥 → 鍛え手の間 (EAST と SMITH のあいだの 3 枚の壁)。扉 (SealedGateBlock) を置くのは C2、戦いの間に閉じるのは E (BossRoom)
     public static final Box SMITH_DOOR = new Box(43, FLOOR_EAST + 1, 57, 45, FLOOR_EAST + 4, 59);
     // 前室 → 熾の底 (1 枚の壁)。封印を置いて開け閉めするのは F (BossRoom)
-    public static final Box HEART_DOOR = new Box(-1, FLOOR_HEART + 1, -22, 1, FLOOR_HEART + 4, -22);
+    public static final Box HEART_DOOR = new Box(-1 + HEART_DX, FLOOR_HEART + 1, -22 + HEART_DZ, 1 + HEART_DX, FLOOR_HEART + 4, -22 + HEART_DZ);
     // 広間の扉 (円の縁の外の 1 枚の壁の真ん中のブロック。ここから通路・洞)
     public static final BlockPos HUB_DOOR_NORTH = new BlockPos(0, FLOOR_HUB + 1, -82);
     public static final BlockPos HUB_DOOR_WEST = new BlockPos(-28, FLOOR_HUB + 1, -54);
@@ -220,7 +227,7 @@ public final class EmberBackLayout {
             new Inscription("lore_ember_west", new BlockPos(TUBE_WEST_X - 3, FLOOR_WEST + 1, 111), Direction.NORTH),
             new Inscription("lore_ember_east", new BlockPos(TUBE_EAST_X - 3, FLOOR_EAST + 1, 85), Direction.NORTH),
             new Inscription("lore_ember_south", new BlockPos(3, FLOOR_SOUTH + 1, 65), Direction.NORTH),
-            new Inscription("lore_ember_heart", new BlockPos(3, FLOOR_HEART + 1, -28), Direction.SOUTH));
+            new Inscription("lore_ember_heart", new BlockPos(3 + HEART_DX, FLOOR_HEART + 1, -28 + HEART_DZ), Direction.SOUTH));
 
     // 試練の入口の一言の看板 (広間の扉の内側の脇。3 枚)。扉の色の道 (西 = 灰・青の灯、東 = 橙の灯、南 = 赤の灯) の脇に立てる
     public static final List<Inscription> ENTRANCE_SIGNS = List.of(
@@ -309,7 +316,7 @@ public final class EmberBackLayout {
             new Rest("wp", new BlockPos(-58, FLOOR_WEST, -95), 0f),
             new Rest("e0", new BlockPos(TUBE_EAST_X - 5, FLOOR_EAST, 24), 0f),
             new Rest("s0", new BlockPos(0, FLOOR_SOUTH, 0), 0f),
-            new Rest("heart", new BlockPos(0, FLOOR_HEART, -27), 0f)).stream(), EmberDeck.RESTS.stream()).toList();
+            new Rest("heart", new BlockPos(HEART_DX, FLOOR_HEART, -27 + HEART_DZ), 0f)).stream(), EmberDeck.RESTS.stream()).toList();
 
     public static Rest rest(String name) {
         for (Rest r : RESTS) {
@@ -350,7 +357,7 @@ public final class EmberBackLayout {
                 // 谷の奥 (南の熾り石・光る床・碑文。火床は C3 がこれより北に置く)
                 out.add(new Box(-5, FLOOR_SOUTH, 56, 5, FLOOR_SOUTH + 5, 65));
             }
-            case "heart" -> out.add(new Box(-1, FLOOR_HEART, -21, 1, FLOOR_HEART + 4, -20));
+            case "heart" -> out.add(new Box(-1 + HEART_DX, FLOOR_HEART, -21 + HEART_DZ, 1 + HEART_DX, FLOOR_HEART + 4, -20 + HEART_DZ));
             default -> {
             }
         }

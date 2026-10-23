@@ -94,7 +94,7 @@ public final class TideHeartCommands {
                 .then(op("rebuild").executes(ctx -> {
                     ServerLevel back = back(ctx);
                     TideHeartBattle.releaseAll(back);
-                    TideHeartArena.build(back);
+                    TideHeartArena.buildInstance(back);
                     ctx.getSource().sendSuccess(() -> Component.literal("tide heart: chamber rebuilt"), true);
                     return 1;
                 }))

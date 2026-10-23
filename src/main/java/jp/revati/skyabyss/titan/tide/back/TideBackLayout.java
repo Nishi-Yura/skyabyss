@@ -47,7 +47,8 @@ public final class TideBackLayout {
     // 30: 任意の翼をなくした (息の間・ひれの道・殻の上の道・冠・光の井戸・宝箱・息の間の休み場 u0〜u3)。周回の既知の道もなくした
     // 31: 順路の入口の箱 (潮門の内側の段) の床の灯り (R6 の通しで真っ暗だった)
     // 32: 封じた潮の広間の灯り・壁の柱を外した (trial/RouteSeals。2026-10-22)
-    public static final int LAYOUT_VERSION = 32;
+    // 33: 心臓の間 (殻の底) と休み場 heart を体の外 (trial/raid/InstanceArenas) へ移した
+    public static final int LAYOUT_VERSION = 33;
     // 生成の海 (水の最上段は y=62)
     public static final int SEA = 63;
     public static final int SEA_FLOOR = 41;
@@ -254,8 +255,12 @@ public final class TideBackLayout {
     public static final int SPIRAL_TOP = 69;
     public static final int SPIRAL_BOTTOM = 51;
     public static final Area SPIRAL = new Area(-2, 2, -2, 2, 50, 20);
-    public static final Area HEART_HALL = new Area(-1, 1, -9, -3, 50, 4);
-    public static final Area HEART_REST = new Area(-4, 4, -9, -3, 50, 4);
+    // 心臓の間 (殻の底) は体の外の封じた部屋 (区画 0 番の枠。trial/raid/InstanceArenas) へ移した (2026-10-23)。元の座標 (中心 (0, 51, -30)) を
+    // HEART_DX / HEART_DZ だけずらす。前室の南の休み場 heart も一緒に動く (螺旋の階段とはつながらない)
+    public static final int HEART_DX = jp.revati.skyabyss.trial.raid.InstanceArenas.HEART_X;
+    public static final int HEART_DZ = jp.revati.skyabyss.trial.raid.InstanceArenas.HEART_Z + 30;
+    public static final Area HEART_HALL = new Area(-1 + HEART_DX, 1 + HEART_DX, -9 + HEART_DZ, -3 + HEART_DZ, 50, 4);
+    public static final Area HEART_REST = new Area(-4 + HEART_DX, 4 + HEART_DX, -9 + HEART_DZ, -3 + HEART_DZ, 50, 4);
 
     // ---------------------------------------------------------------- 潮鳴り石と、抜け道 (石が鳴ると光る床。踏むと戻れる)
     public static final BlockPos STONE_WEST = new BlockPos(ALTAR[0], ALTAR_TOP + 1, ALTAR[1] - 2);
@@ -275,7 +280,7 @@ public final class TideBackLayout {
             new Rest("g1", G1, new BlockPos(PLAT_C[0] - 2, PLATFORM_TOP + 1, PLAT_C[1] + 2), new BlockPos(PLAT_C[0] + 2, PLATFORM_TOP + 1, PLAT_C[1] - 2)),
             new Rest("s0", S0, new BlockPos(42, HUB_LEDGE + 1, -18), new BlockPos(45, HUB_LEDGE + 1, -13)),
             new Rest("f0", F0, new BlockPos(-6, TUNNEL_FLOOR + 1, -62), new BlockPos(0, TUNNEL_FLOOR + 1, -56)),
-            new Rest("heart", HEART_REST, new BlockPos(3, 51, -6), new BlockPos(-2, 51, -6))),
+            new Rest("heart", HEART_REST, new BlockPos(3 + HEART_DX, 51, -6 + HEART_DZ), new BlockPos(-2 + HEART_DX, 51, -6 + HEART_DZ))),
             // 試練の階 (TideDeck。番号は 10 から。上の 10 個の並びは変えない: RESTS.get(n) で引く所がある)
             TideDeck.rests());
 
@@ -295,7 +300,7 @@ public final class TideBackLayout {
             new Inscription("sign.skyabyss.lore_tide_west", new BlockPos(ALTAR[0] - 2, ALTAR_TOP + 2, ALTAR[1] - 4), Direction.SOUTH),
             new Inscription("sign.skyabyss.lore_tide_east", new BlockPos(85, LEDGE_FLOOR + 2, -39), Direction.SOUTH),
             new Inscription("sign.skyabyss.lore_tide_front", new BlockPos(-7, ROCK_TOP + 1, -119), Direction.UP),
-            new Inscription("sign.skyabyss.lore_tide_heart", new BlockPos(-4, 52, -8), Direction.EAST));
+            new Inscription("sign.skyabyss.lore_tide_heart", new BlockPos(-4 + HEART_DX, 52, -8 + HEART_DZ), Direction.EAST));
 
     // ---------------------------------------------------------------- リセットで広間へ移す所 (試練の中)
     public static List<Area> trialAreas() {

@@ -68,6 +68,8 @@ public final class StormBackBuilder {
     private static void finishSteps(jp.revati.skyabyss.titan.BackBuildJobs.Steps s, ServerLevel back, TitanBackData data, long start) {
         // ボス部屋の大門 (竜骨の間の入口・雷獣の巣の口)。部屋と回廊を掘ったあと
         s.then("boss gates", () -> StormBossGates.build(back));
+        // 竜骨の間 (心臓の間) と前室は体の外の封じた部屋 (trial/raid/InstanceArenas)
+        jp.revati.skyabyss.trial.raid.InstanceArenas.addHeartSteps(s, back, jp.revati.skyabyss.progress.Titans.THUNDER_WING);
         // 順路の部屋を分ける封じ (入口の箱の先・風の広間・尾の間。trial/RouteSeals。32 の 2.5)
         s.then("route seals", () -> jp.revati.skyabyss.trial.RouteSeals.place(back, jp.revati.skyabyss.progress.Titans.THUNDER_WING));
         // 入口の箱 (尾の広場の北の端。trial/TrialRoute.entryBox) の灯り: 箱の床の四隅に海のランタンを埋める (歩く邪魔にならない)。

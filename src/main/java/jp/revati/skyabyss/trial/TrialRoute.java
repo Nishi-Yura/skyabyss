@@ -573,6 +573,13 @@ public final class TrialRoute {
             return members(back, group).size();
         }
         TrialDraw.Draw draw = TrialData.current(back, group);
+        // 心臓の段は、体の外の封じた心臓の間 (trial/raid/InstanceArenas) の中へ直に運ぶ (前室を歩かない。中に入ると集合の 5 秒のあと封じる)
+        if (!mid && step >= LAST_STEP) {
+            BlockPos in = jp.revati.skyabyss.trial.raid.InstanceArenas.heartEntry(titan);
+            if (in != null) {
+                return carryIntoHeart(back, group, titan, draw, in);
+            }
+        }
         String rest = restFor(back, group, titan, draw, step, mid);
         BlockPos at = rest == null ? null : spawnOf(back, titan, rest);
         if (at == null) {
@@ -607,6 +614,21 @@ public final class TrialRoute {
         back.playSound(null, at.getX() + 0.5, at.getY(), at.getZ() + 0.5, SoundEvents.BEACON_ACTIVATE, SoundSource.PLAYERS, 0.8f, 1.6f);
         sync(back, group);
         SkyAbyss.LOGGER.info("Route of the {}: group {} carried to step {}{} ({}) x{}", titan, group, step, mid ? " (mid)" : "", rest, n);
+        return n;
+    }
+
+    private static int carryIntoHeart(ServerLevel back, UUID group, String titan, TrialDraw.Draw draw, BlockPos at) {
+        float yaw = jp.revati.skyabyss.trial.raid.InstanceArenas.heartEntryYaw(titan);
+        int n = 0;
+        for (ServerPlayer p : members(back, group)) {
+            move(back, p, at, yaw);
+            n++;
+            Notice.narrate(p, "message.skyabyss.route.heart", Component.empty());
+            RouteCard.show(p, back, group, titan, draw, LAST_STEP, false);
+        }
+        back.playSound(null, at.getX() + 0.5, at.getY(), at.getZ() + 0.5, SoundEvents.BEACON_ACTIVATE, SoundSource.PLAYERS, 0.8f, 1.6f);
+        sync(back, group);
+        SkyAbyss.LOGGER.info("Route of the {}: group {} carried into the heart arena at {} x{}", titan, group, at.toShortString(), n);
         return n;
     }
 

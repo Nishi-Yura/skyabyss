@@ -16,7 +16,7 @@ public final class TitanBackAudit {
 
     // 体の中の部屋すべて (穴・はしごを調べる範囲と、通れるかの目標に使う)
     public static final List<TitanBackLayout.Box> ROOMS = List.of(HUB, ENTRY, W0, WA, W1, WB, W2, WC, E0, E1, CE1, E3_CORRIDOR, E3,
-            E2, CK, CK_PASS, MAZE_EXIT_ROOM, MAZE_ENTRY_ROOM, MAZE_ENTRY_ROOM2, HEART_REST, HEART, HEART_CORRIDOR, W2_CONN1,
+            E2, CK, CK_PASS, MAZE_EXIT_ROOM, MAZE_ENTRY_ROOM, MAZE_ENTRY_ROOM2, W2_CONN1,
             W2_CONN2, WEST_HALL, EAST_HALL, EXIT_PASS);
 
     public static BackReach.Spec spec() {
@@ -40,7 +40,6 @@ public final class TitanBackAudit {
         s.goals.put("shrine", new BlockPos(0, shrineY() + 1, SHRINE_Z));
         s.goals.put("hub", HUB.center().offset(0, 0, 6));
         s.goals.put("entry", ENTRY.center());
-        s.goals.put("seal corridor", HEART_CORRIDOR.center().offset(0, 0, 20));
         s.goals.put("rest w0", W0.center().offset(2, 0, 2));
         s.goals.put("rest w1", W1.center().offset(2, 0, 2));
         s.goals.put("rest w2", W2.center().offset(2, 0, 2));
@@ -55,8 +54,6 @@ public final class TitanBackAudit {
         s.goals.put("east stone", GOAL_SPOTS.get(1).offset(-1, 0, 0));
         s.goals.put("maze exit room", MAZE_EXIT_ROOM.center());
         s.goals.put("lower stone", GOAL_SPOTS.get(2).offset(-1, 0, 0));
-        s.goals.put("rest heart", HEART_REST.center().offset(1, 0, 1));
-        s.goals.put("heart arena", HEART.center());
         if (WhaleDeck.placed()) {
             deckAllowances(s);
         }

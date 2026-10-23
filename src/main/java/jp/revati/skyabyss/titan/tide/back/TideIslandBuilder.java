@@ -9,7 +9,6 @@ import java.util.Set;
 
 import jp.revati.skyabyss.SkyAbyss;
 import jp.revati.skyabyss.registry.ModBlocks;
-import jp.revati.skyabyss.titan.tide.heart.TideHeartArena;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.Blocks;
@@ -60,7 +59,6 @@ public final class TideIslandBuilder {
         s.then("mouth stairs", () -> TideFlatsBuilder.mouthStairs(kit));
         s.then("flats gates", () -> TideBossGates.flats(kit.level()));
         s.then("spiral", () -> spiral(kit));
-        s.then("heart arena", () -> TideHeartArena.build(kit.level()));
         // 皮は x の帯ごとに一つの手順にする (一度に置くと一 tick に 0.6〜0.8 秒かかっていた)。置くのは固い所を別の固い所に替えるだけなので、順は結果を変えない
         for (int x0 = -SHELL_RX - 14; x0 <= SHELL_RX + 14; x0 += SKIN_BAND) {
             int a = x0;
@@ -71,6 +69,8 @@ public final class TideIslandBuilder {
         s.then("fixtures", () -> fixtures(kit));
         s.then("entry lights", () -> entryLights(kit));
         s.then("wells", () -> fillWells(kit));
+        // 心臓の間 (殻の底) と休み場 heart は体の外の封じた部屋 (trial/raid/InstanceArenas)
+        jp.revati.skyabyss.trial.raid.InstanceArenas.addHeartSteps(s, kit.level(), jp.revati.skyabyss.progress.Titans.TIDE_SHELL);
     }
 
     // 甲羅の台地の上の、幅 1 の溝 (両隣が 2 以上高い。模型の薄い壁の抜けたあと) を、深さ 1 になるまで埋める (落ちると戻れない穴を作らない)

@@ -149,7 +149,6 @@ public final class EmberBodyBuilder {
         s.then("tubes", () -> holder[0].tubes());
         s.then("trial boxes", () -> holder[0].trialBoxes());
         s.then("gate shaft", () -> holder[0].gateShaft());
-        s.then("ante", () -> holder[0].ante());
         s.then("wall stair", () -> holder[0].wallStair());
         s.then("deck rooms", () -> holder[0].deckRooms());
         s.then("skin", () -> {
@@ -158,6 +157,10 @@ public final class EmberBodyBuilder {
         });
         s.then("throat lights", () -> holder[0].throatLights());
         for (String room : EmberBackRooms.roomOrder()) {
+            if (room.equals("heart")) {
+                // 熾の底は体の外 (InstanceArenas)
+                continue;
+            }
             s.then("room " + room, () -> {
                 long r0 = System.currentTimeMillis();
                 EmberBackRooms.buildOne(back, room);
@@ -166,8 +169,10 @@ public final class EmberBodyBuilder {
         }
         s.then("fixtures", () -> holder[0].fixtures());
         s.then("deck content", () -> holder[0].deckContent());
-        // ボス部屋の大門 (熾の底の入口・鍛え手の扉)。部屋・休み場・碑文を置いたあと
+        // ボス部屋の大門 (鍛え手の扉)。部屋・休み場・碑文を置いたあと
         s.then("boss gates", () -> EmberBossGates.build(back));
+        // 熾の底 (心臓の間) と前室は体の外の封じた部屋 (trial/raid/InstanceArenas)
+        jp.revati.skyabyss.trial.raid.InstanceArenas.addHeartSteps(s, back, jp.revati.skyabyss.progress.Titans.EMBER);
         // 順路の部屋を分ける封じ (入口の箱の先・炉心の広間。trial/RouteSeals。32 の 2.5)
         s.then("route seals", () -> jp.revati.skyabyss.trial.RouteSeals.place(back, jp.revati.skyabyss.progress.Titans.EMBER));
         jp.revati.skyabyss.titan.audit.BackReach.RepairJob[] repair = new jp.revati.skyabyss.titan.audit.BackReach.RepairJob[1];
@@ -294,9 +299,10 @@ public final class EmberBodyBuilder {
 
     // 建て直しのとき、灰の原より下に掘った所 (熾の底・前室・螺旋の下) を灰の原に戻す。口の先の見送りの石の床も
     private void restoreUnderground() {
-        for (int x = HEART.minX() - 2; x <= HEART.maxX() + 2; x++) {
-            for (int z = GATE_SHAFT.minZ() - 2; z <= HEART.maxZ() + 2; z++) {
-                for (int y = HEART.minY() - 2; y <= PLAIN_TOP; y++) {
+        Box old = OLD_UNDERGROUND;
+        for (int x = old.minX(); x <= old.maxX(); x++) {
+            for (int z = old.minZ(); z <= old.maxZ(); z++) {
+                for (int y = old.minY(); y <= old.maxY(); y++) {
                     kit.set(x, y, z, plain(y));
                 }
             }
@@ -594,6 +600,10 @@ public final class EmberBodyBuilder {
     // ---------------------------------------------------------------- 試練の箱 (中は空気、仮の床は FLOOR_* の高さまで) と通り道
     private void trialBoxes() {
         for (String room : TRIAL_ROOMS) {
+            if (room.equals("heart")) {
+                // 熾の底は体の外 (buildHeartInstance)
+                continue;
+            }
             Box b = ROOMS.get(room);
             carve(b);
             int f = floorOf(room);
@@ -605,7 +615,7 @@ public final class EmberBodyBuilder {
                 }
             }
         }
-        for (Box door : List.of(WEST_DOOR, EAST_DOOR, SOUTH_DOOR, SMITH_DOOR, HEART_DOOR)) {
+        for (Box door : List.of(WEST_DOOR, EAST_DOOR, SOUTH_DOOR, SMITH_DOOR)) {
             carve(door);
             for (int x = door.minX(); x <= door.maxX(); x++) {
                 for (int z = door.minZ(); z <= door.maxZ(); z++) {
@@ -635,20 +645,60 @@ public final class EmberBodyBuilder {
             kit.stair(cx + c[0], FLOOR_HUB - 1 - i, cz + c[1], up == null ? Direction.NORTH : up);
         }
         track(cx - 1, FLOOR_HEART, cz - 1, cx + 1, FLOOR_HUB, cz + 1);
-        // 底から南へ前室 (z -52〜-30)。壁に灯りを埋める
+        // 底から南の短い通路 (版 33: 前室は体の外へ移したので、元の前室の手前 z -30 で行き止まり)。壁に灯りを埋める
+        int anteZ = -29;
         for (int x = -1; x <= 1; x++) {
-            for (int z = cz + 2; z < HEART_ANTE.minZ(); z++) {
+            for (int z = cz + 2; z < anteZ; z++) {
                 kit.set(x, FLOOR_HEART, z, EmberKit.RUIN);
                 for (int y = FLOOR_HEART + 1; y <= FLOOR_HEART + 3; y++) {
                     kit.set(x, y, z, EmberKit.AIR);
                 }
             }
         }
-        for (int z = cz + 6; z < HEART_ANTE.minZ() - 2; z += 6) {
+        for (int z = cz + 6; z < anteZ - 2; z += 6) {
             kit.set(-2, FLOOR_HEART + 2, z, EmberKit.GLOW);
             kit.set(2, FLOOR_HEART + 2, z, EmberKit.GLOW);
         }
-        track(-1, FLOOR_HEART, cz + 2, 1, FLOOR_HEART + 3, HEART_ANTE.minZ() - 1);
+        track(-1, FLOOR_HEART, cz + 2, 1, FLOOR_HEART + 3, anteZ - 1);
+    }
+
+    // ---------------------------------------------------------------- 体の外の封じた熾の底 (trial/raid/InstanceArenas。版 33)
+    // 体の芯の石で詰めた箱 → 熾の底の箱 (仮の床) → 入口 → 前室 → 休み場 heart → 入口の通り道の床 → 碑文 → 心臓の担当の部屋 (EmberBackRooms) → 大門
+    public static void buildHeartInstance(ServerLevel level) {
+        EmberBodyBuilder b = new EmberBodyBuilder(level);
+        Box h = HEART;
+        for (int x = h.minX() - 3; x <= h.maxX() + 3; x++) {
+            for (int z = HEART_ANTE.minZ() - 3; z <= h.maxZ() + 3; z++) {
+                for (int y = h.minY() - 3; y <= h.maxY() + 8; y++) {
+                    b.kit.set(x, y, z, EmberKit.CORE);
+                }
+            }
+        }
+        b.carve(h);
+        int f = floorOf("heart");
+        for (int x = h.minX(); x <= h.maxX(); x++) {
+            for (int z = h.minZ(); z <= h.maxZ(); z++) {
+                for (int y = h.minY(); y <= f; y++) {
+                    b.kit.set(x, y, z, y == f ? EmberKit.TEMP_FLOOR : EmberKit.CORE);
+                }
+            }
+        }
+        b.carve(HEART_DOOR);
+        for (int x = HEART_DOOR.minX(); x <= HEART_DOOR.maxX(); x++) {
+            for (int z = HEART_DOOR.minZ(); z <= HEART_DOOR.maxZ(); z++) {
+                b.kit.set(x, HEART_DOOR.minY() - 1, z, EmberKit.RUIN);
+            }
+        }
+        b.ante();
+        b.rest(EmberBackLayout.rest("heart"));
+        b.farFloor(new Box(-1 + HEART_DX, FLOOR_HEART, -21 + HEART_DZ, 1 + HEART_DX, FLOOR_HEART + 4, -20 + HEART_DZ), h.minY());
+        for (Inscription in : INSCRIPTIONS) {
+            if (in.id().equals("lore_ember_heart")) {
+                b.kit.wallSign(in.pos(), in.facing(), "sign.skyabyss." + in.id(), DyeColor.ORANGE);
+            }
+        }
+        EmberBackRooms.buildOne(level, "heart");
+        EmberBossGates.heart(level);
     }
 
     // ---------------------------------------------------------------- 熾の底の前室 (床 50)
@@ -787,6 +837,9 @@ public final class EmberBodyBuilder {
         EmberZones.dress(kit);
         List<Box> restAreas = new ArrayList<>();
         for (Rest r : RESTS) {
+            if (r.name().equals("heart")) {
+                continue;
+            }
             rest(r);
             restAreas.add(r.area());
         }
@@ -801,8 +854,10 @@ public final class EmberBodyBuilder {
                 farFloor(res, rb.minY());
             }
         }
-        farFloor(new Box(-1, FLOOR_HEART, -21, 1, FLOOR_HEART + 4, -20), HEART.minY());
         for (Inscription in : INSCRIPTIONS) {
+            if (in.id().equals("lore_ember_heart")) {
+                continue;
+            }
             kit.wallSign(in.pos(), in.facing(), "sign.skyabyss." + in.id(), DyeColor.ORANGE);
         }
         for (Inscription in : ENTRANCE_SIGNS) {

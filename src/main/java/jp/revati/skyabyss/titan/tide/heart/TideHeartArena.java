@@ -25,8 +25,9 @@ import net.minecraft.world.phys.Vec3;
 // 満ち潮: 床の高さの一段 (FLOOR) に水を置き、6 秒で引く。島の上 (FLOOR + 2) は濡れない
 public final class TideHeartArena {
     // 部屋の中心 (床の上の空気の段の y)
-    public static final int CX = 0;
-    public static final int CZ = -30;
+    // 2026-10-23: 体の外の封じた部屋 (区画 0 番の枠。trial/raid/InstanceArenas)。元の中心 (0, -30) を TideBackLayout.HEART_DX / HEART_DZ だけずらした
+    public static final int CX = jp.revati.skyabyss.titan.tide.back.TideBackLayout.HEART_DX;
+    public static final int CZ = -30 + jp.revati.skyabyss.titan.tide.back.TideBackLayout.HEART_DZ;
     public static final int FLOOR = 51;
     public static final int RADIUS = 14;
     // 天井の高さ: 床の上の空気が 12 段 (床 51 〜 62)。広い技 (大波・輪) と心臓 (高さ 6.3) が収まる。ボス部屋は 12 以上
@@ -124,7 +125,7 @@ public final class TideHeartArena {
 
     public static void ensureBuilt(ServerLevel back) {
         if (!isBuilt(back)) {
-            build(back);
+            buildInstance(back);
         }
         ensureGate(back);
     }
@@ -267,8 +268,47 @@ public final class TideHeartArena {
         fillTicks = holdTicks = drainTicks = 0;
         GroupGates.place(back, gate(), true);
         // 入口の大門 (前室を広い前庭にし、心臓のレリーフの枠を立てる。扉のブロックは変えない)
-        jp.revati.skyabyss.titan.tide.back.TideBossGates.heart(back, FLOOR, CZ + GATE_Z);
+        jp.revati.skyabyss.titan.tide.back.TideBossGates.heart(back, CX, FLOOR, CZ + GATE_Z);
         SkyAbyss.LOGGER.info("Built the tide heart chamber (shell bottom)");
+    }
+
+    // 体の外の封じた心臓の間 (InstanceArenas): 海の石で詰めた箱 → 元の部屋と前室 → 前室の南の休み場 heart (焚き火と碑文)
+    public static void buildInstance(ServerLevel back) {
+        int flags = 2 | 16;
+        BlockState wall = Blocks.PRISMARINE_BRICKS.defaultBlockState();
+        BlockPos.MutableBlockPos p = new BlockPos.MutableBlockPos();
+        var rest = jp.revati.skyabyss.titan.tide.back.TideBackLayout.HEART_REST;
+        int zTop = Math.max(rest.z2(), CZ + ANTE_Z1 + 1) + 3;
+        for (int x = CX - RADIUS - 5; x <= CX + RADIUS + 5; x++) {
+            for (int z = CZ - RADIUS - 5; z <= zTop; z++) {
+                for (int y = FLOOR - 3; y <= FLOOR + 18; y++) {
+                    back.setBlock(p.set(x, y, z), wall, flags);
+                }
+            }
+        }
+        build(back);
+        BlockState air = Blocks.AIR.defaultBlockState();
+        for (int x = rest.x1(); x <= rest.x2(); x++) {
+            for (int z = rest.z1(); z <= rest.z2(); z++) {
+                back.setBlock(p.set(x, rest.floor(), z), jp.revati.skyabyss.titan.tide.back.TideKit.FLOOR, flags);
+                for (int y = rest.floor() + 1; y <= rest.floor() + rest.height(); y++) {
+                    back.setBlock(p.set(x, y, z), air, flags);
+                }
+            }
+        }
+        back.setBlock(new BlockPos(rest.x1(), rest.floor() + 3, rest.z2()), Blocks.SEA_LANTERN.defaultBlockState(), flags);
+        back.setBlock(new BlockPos(rest.x2(), rest.floor() + 3, rest.z1()), Blocks.SEA_LANTERN.defaultBlockState(), flags);
+        jp.revati.skyabyss.titan.tide.back.TideKit kit = new jp.revati.skyabyss.titan.tide.back.TideKit(back, net.minecraft.util.RandomSource.create(20261023L));
+        for (var r : jp.revati.skyabyss.titan.tide.back.TideBackLayout.RESTS) {
+            if (r.id().equals("heart")) {
+                kit.campfire(r.campfire());
+            }
+        }
+        for (var i : jp.revati.skyabyss.titan.tide.back.TideBackLayout.LORE_SIGNS) {
+            if (i.key().equals("sign.skyabyss.lore_tide_heart")) {
+                kit.wallSign(i.pos(), i.facing(), i.key());
+            }
+        }
     }
 
     private static void floorLamp(ServerLevel back, int dx, int dz, BlockState lamp, int flags) {

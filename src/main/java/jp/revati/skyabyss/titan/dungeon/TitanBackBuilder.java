@@ -69,8 +69,6 @@ public final class TitanBackBuilder {
         s.then("surface", () -> buildSurface(kit));
         s.then("hub", () -> buildHub(kit));
         s.then("treasury", () -> buildTreasury(kit));
-        // 北の封印の先: 心臓の回廊と、最終ボスの心臓の間
-        s.then("heart arena", () -> HeartArenaBuilder.build(kit));
         // 鼓動の間と入口の通路は封じて誰も入らない (trial/RouteSeals)。柱・壁の灯りは置かない (版 32)
         s.then("west wing", () -> WestWingBuilder.build(kit));
         s.then("east wing", () -> EastWingBuilder.build(kit));
@@ -98,6 +96,10 @@ public final class TitanBackBuilder {
             }
             // 物語の断片の碑文 (部屋と柱をすべて置いたあとに掛ける)
             for (Inscription lore : LORE_SIGNS) {
+                if (lore.key().equals("sign.skyabyss.lore_heart")) {
+                    // 心臓の休み場の碑文は、体の外の心臓の間と一緒に建てる (InstanceArenas)
+                    continue;
+                }
                 kit.wallSign(lore.pos(), lore.facing(), lore.key());
             }
         });
@@ -117,6 +119,8 @@ public final class TitanBackBuilder {
         jp.revati.skyabyss.titan.audit.BackReach.RepairJob[] repair = new jp.revati.skyabyss.titan.audit.BackReach.RepairJob[1];
         s.thenJob("repair", () -> repair[0] = new jp.revati.skyabyss.titan.audit.BackReach.RepairJob(level, TitanBackAudit::spec,
                 java.util.List.of(new jp.revati.skyabyss.titan.audit.BackReach.Box(-RX, FLOOR + 8, -RZ, RX, 205, RZ)), 200, 14, Blocks.DEEPSLATE_BRICKS.defaultBlockState()));
+        // 心臓の間 (体の外の封じた部屋。trial/raid/InstanceArenas)
+        jp.revati.skyabyss.trial.raid.InstanceArenas.addHeartSteps(s, level, jp.revati.skyabyss.progress.Titans.STONE_WHALE);
         s.then("mark built", () -> {
             int repaired = repair[0] == null ? 0 : repair[0].filled();
             if (repaired > 0) {

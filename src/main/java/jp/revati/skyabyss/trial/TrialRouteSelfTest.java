@@ -65,6 +65,7 @@ public final class TrialRouteSelfTest {
                     rests(f, back, titan);
                     firstRun(f, back, titan);
                     replay(f, back, titan);
+                    heartCarry(f, server, back, titan);
                     worlds++;
                 } else {
                     SkyAbyss.LOGGER.info("SELFTEST trial route: {} back is not built here, checked the shape only", titan);
@@ -256,6 +257,12 @@ public final class TrialRouteSelfTest {
     }
 
     private static boolean near(ServerPlayer p, ServerLevel back, String titan, TrialDraw.Draw draw, int step, boolean mid) {
+        // 心臓の段は、体の外の封じた心臓の間の中 (trial/raid/InstanceArenas)
+        if (!mid && step >= TrialRoute.LAST_STEP) {
+            BlockPos in = jp.revati.skyabyss.trial.raid.InstanceArenas.heartEntry(titan);
+            return in != null && jp.revati.skyabyss.trial.raid.InstanceArenas.heartArena(titan).contains(p.position())
+                    && p.position().distanceTo(Vec3.atBottomCenterOf(in)) < 2.5;
+        }
         // レイドの部屋の段は、区画に建てた部屋の中 (docs/design/32 の 7 章)
         if (!mid && jp.revati.skyabyss.trial.raid.RaidRun.isRaidStep(back, Groups.keyOf(p), step)) {
             var run = jp.revati.skyabyss.trial.raid.RaidRun.of(Groups.keyOf(p));
@@ -274,6 +281,56 @@ public final class TrialRouteSelfTest {
             TrialRuntime.stopGroup(back, g);
             GroupGates.reset(back, g);
             BackGroupData.get(back).remove(g);
+        }
+    }
+
+    // ---------------------------------------------------------------- 心臓の段: パーティ全員が、体の外の封じた心臓の間の中へ直に運ばれる
+    // (立てる床の上・頭まで空き・戦いの箱の中・入口の封印より奥。前室を歩かない)。心臓の間が背の体の外 (区画 0 番の枠) にある
+    private static void heartCarry(List<String> f, MinecraftServer server, ServerLevel back, String titan) {
+        TrialRoute.clearAll();
+        jp.revati.skyabyss.party.PartyData parties = jp.revati.skyabyss.party.PartyData.get(server);
+        net.minecraft.nbt.CompoundTag snapshot = parties.snapshot(server.registryAccess());
+        FakePlayer a = fake(back, "7a0b1d00-0000-4000-8000-00000000e005", "route_e");
+        FakePlayer b = fake(back, "7a0b1d00-0000-4000-8000-00000000f006", "route_f");
+        UUID g = null;
+        try {
+            parties.clearAll();
+            jp.revati.skyabyss.party.PartyData.Party party = parties.create(a.getUUID(), "route_e");
+            parties.add(party, b.getUUID(), "route_f");
+            g = Groups.keyOf(a);
+            clean(back, g);
+            List<ServerPlayer> both = List.of(a, b);
+            TrialRoute.PLAYERS = l -> both;
+            Vec3 entry = TrialRoute.entryBox(titan).getCenter();
+            a.setPos(entry);
+            b.setPos(entry.add(1, 0, 0));
+            TrialRoute.start(back, g, titan, both);
+            BackGroupData.Record r = GroupProgress.of(back, g);
+            r.remove(TrialRoute.MID);
+            r.putInt(TrialRoute.STEP, TrialRoute.LAST_STEP);
+            r.changed();
+            int n = TrialRoute.carry(back, g, titan, TrialRoute.LAST_STEP, false);
+            check(f, n == 2, titan + ": the heart carry moved " + n + " of 2");
+            AABB arena = jp.revati.skyabyss.trial.raid.InstanceArenas.heartArena(titan);
+            check(f, arena.minX >= jp.revati.skyabyss.trial.TrialSlot.ORIGIN_X - 512 && arena.maxX < jp.revati.skyabyss.trial.TrialSlot.ORIGIN_X + jp.revati.skyabyss.trial.TrialSlot.STRIDE,
+                    titan + ": the heart arena is not in the slot-0 instance frame: " + arena);
+            for (ServerPlayer p : both) {
+                BlockPos feet = p.blockPosition();
+                check(f, arena.contains(p.position()), titan + ": " + p.getGameProfile().getName() + " was not carried inside the heart arena: " + p.position() + " (arena " + arena + ")");
+                check(f, back.getBlockState(feet).getCollisionShape(back, feet).isEmpty() && back.getBlockState(feet.above()).getCollisionShape(back, feet.above()).isEmpty()
+                        && !back.getBlockState(feet.below()).getCollisionShape(back, feet.below()).isEmpty(),
+                        titan + ": the heart arrival is not a standing spot at " + feet.toShortString());
+            }
+            SkyAbyss.LOGGER.info("SELFTEST trial route {}: the party was carried into the heart arena at {}", titan, a.blockPosition().toShortString());
+        } catch (RuntimeException e) {
+            SkyAbyss.LOGGER.error("SELFTEST trial route heart carry crashed", e);
+            f.add(titan + ": heart carry crashed: " + e);
+        } finally {
+            if (g != null) {
+                clean(back, g);
+            }
+            parties.restore(snapshot, server.registryAccess());
+            TrialRoute.PLAYERS = l -> jp.revati.skyabyss.util.Players.snapshot(l.players());
         }
     }
 

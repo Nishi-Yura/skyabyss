@@ -16,7 +16,9 @@ import net.minecraft.world.level.block.state.BlockState;
 //  - 骨の肋骨が壁から天井へ反り上がる。中ほどに柱があり、身を隠せる
 //  - 床の溝に、わずかにマグマを置く
 // 入口 (HEART_GATE) は、戦いが始まると TitanBackTrials が封じる。ここでは開けたまま作る
-final class HeartArenaBuilder {
+// 2026-10-23: 体の外 (区画 0 番の枠。trial/raid/InstanceArenas) の封じた部屋として建てる (buildInstance)。まわりを肉の材質で詰めた箱にしてから、
+// 元の掘り方をそのまま当てる。回廊は大門から休み場 heart までの短いものだけ (休み場の南は詰めたまま)
+public final class HeartArenaBuilder {
     // 円の内側と、壁の外側の二乗距離 (19^2 と 21^2 を整数で)。自己テストも使う
     static final int INNER_R2 = 625;
     static final int OUTER_R2 = 729;
@@ -26,6 +28,27 @@ final class HeartArenaBuilder {
     private HeartArenaBuilder() {
     }
 
+    // 体の外の封じた心臓の間 (詰めた箱 → 元の部屋 → 大門 → 碑文)
+    public static void buildInstance(net.minecraft.server.level.ServerLevel level) {
+        BuildKit kit = new BuildKit(level, RandomSource.create(20261015L));
+        RandomSource r = kit.random;
+        int y2 = Math.max(ARENA_TOP, FLOOR + 22) + 1;
+        for (int x = HEART_CX - EXTENT - 1; x <= HEART_CX + EXTENT + 1; x++) {
+            for (int z = HEART.z1() - 2; z <= HEART_REST.z2() + 2; z++) {
+                for (int y = FLOOR - 1; y <= y2; y++) {
+                    kit.set(x, y, z, flesh(r));
+                }
+            }
+        }
+        build(kit);
+        BossGates.buildHeart(kit);
+        for (Inscription lore : LORE_SIGNS) {
+            if (lore.key().equals("sign.skyabyss.lore_heart")) {
+                kit.wallSign(lore.pos(), lore.facing(), lore.key());
+            }
+        }
+    }
+
     static void build(BuildKit kit) {
         corridor(kit);
         heartRest(kit);
@@ -33,7 +56,7 @@ final class HeartArenaBuilder {
         ribs(kit);
         pillars(kit);
         // 入口の通路 (壁の厚さの分をくり抜く)。封印は TitanBackTrials が戦いのたびに出し入れする
-        for (int x = -3; x <= 3; x++) {
+        for (int x = HEART_CX - 3; x <= HEART_CX + 3; x++) {
             for (int y = FLOOR + 1; y <= FLOOR + 6; y++) {
                 for (int z = HEART_GATE_Z - 1; z <= HEART_GATE_Z + 1; z++) {
                     kit.set(x, y, z, BuildKit.AIR);
@@ -47,23 +70,23 @@ final class HeartArenaBuilder {
     private static void corridor(BuildKit kit) {
         RandomSource r = kit.random;
         for (int z = HEART_GATE_Z + 1; z <= HEART_CORRIDOR.z2(); z++) {
-            for (int x = -4; x <= 4; x++) {
+            for (int x = HEART_CX - 4; x <= HEART_CX + 4; x++) {
                 for (int y = FLOOR; y <= FLOOR + 7; y++) {
-                    boolean inside = Math.abs(x) <= 3 && y >= FLOOR + 1 && y <= FLOOR + 6;
+                    boolean inside = Math.abs(x - HEART_CX) <= 3 && y >= FLOOR + 1 && y <= FLOOR + 6;
                     kit.set(x, y, z, inside ? BuildKit.AIR : flesh(r));
                 }
             }
             // 天井の骨の梁
             if ((z & 3) == 0) {
-                for (int x = -4; x <= 4; x++) {
+                for (int x = HEART_CX - 4; x <= HEART_CX + 4; x++) {
                     kit.set(x, FLOOR + 7, z, Blocks.BONE_BLOCK.defaultBlockState());
                 }
             }
         }
         // 側壁の脈の光
         for (int z = HEART_CORRIDOR.z2() - 3; z > HEART_GATE_Z + 3; z -= 6) {
-            kit.set(-4, FLOOR + 3, z, Blocks.SEA_LANTERN.defaultBlockState());
-            kit.set(4, FLOOR + 3, z, Blocks.SEA_LANTERN.defaultBlockState());
+            kit.set(HEART_CX - 4, FLOOR + 3, z, Blocks.SEA_LANTERN.defaultBlockState());
+            kit.set(HEART_CX + 4, FLOOR + 3, z, Blocks.SEA_LANTERN.defaultBlockState());
         }
     }
 
@@ -73,10 +96,10 @@ final class HeartArenaBuilder {
         for (int x = HEART_REST.x1() - 1; x <= HEART_REST.x2() + 1; x++) {
             for (int z = HEART_REST.z1(); z <= HEART_REST.z2(); z++) {
                 for (int y = FLOOR; y <= HEART_REST.ceilingY(); y++) {
-                    boolean inside = Math.abs(x) <= HEART_REST.x2() && y > FLOOR && y < HEART_REST.ceilingY();
+                    boolean inside = x >= HEART_REST.x1() && x <= HEART_REST.x2() && y > FLOOR && y < HEART_REST.ceilingY();
                     if (inside) {
                         kit.set(x, y, z, BuildKit.AIR);
-                    } else if (Math.abs(x) == HEART_REST.x2() + 1 || y == FLOOR || y == HEART_REST.ceilingY()) {
+                    } else if (x == HEART_REST.x1() - 1 || x == HEART_REST.x2() + 1 || y == FLOOR || y == HEART_REST.ceilingY()) {
                         kit.set(x, y, z, flesh(r));
                     }
                 }

@@ -500,8 +500,8 @@ public final class TitanBackSelfTest {
                 {WA.x2() + 1, FLOOR + 1, -36}, {-50, W1.floorY() + 1, WA.z1() - 1}, {-47, W1.floorY() + 1, WB.z2() + 1},
                 {-44, W2.floorY() + 1, WB.z1() - 1}, {-33, W2.floorY() + 1, -97},
                 {E1.x1() - 1, FLOOR + 1, -36}, {36, FLOOR + 1, -103}, {E3.x2() + 1, FLOOR + 1, -103}, {47, FLOOR + 1, -69}, {47, FLOOR + 1, -100}, {10, FLOOR + 1, -5}, {21, FLOOR + 1, -5},
-                // 心臓の回廊と心臓の間の入口 (戦いの前は開いている)
-                {0, FLOOR + 1, -76}, {0, FLOOR + 1, HEART_GATE_Z + 1}, {0, FLOOR + 1, HEART_GATE_Z}, {0, FLOOR + 1, HEART_GATE_Z - 1}};
+                // 心臓の間 (体の外の封じた部屋) の入口 (戦いの前は開いている)
+                {HEART_CX, FLOOR + 1, HEART_GATE_Z + 1}, {HEART_CX, FLOOR + 1, HEART_GATE_Z}, {HEART_CX, FLOOR + 1, HEART_GATE_Z - 1}};
         for (int[] d : open) {
             BlockPos p = new BlockPos(d[0], d[1], d[2]);
             air(level, p, "doorway", failures);
@@ -924,12 +924,6 @@ public final class TitanBackSelfTest {
                 if (level.getBlockState(new BlockPos(x, FLOOR + 1, z)).is(Blocks.LODESTONE)) {
                     failures.add("the old pedestal should be gone at " + x + "," + z);
                 }
-            }
-        }
-        for (BlockPos p : GATE) {
-            BlockPos beyond = p.north();
-            if (!level.getBlockState(beyond).isAir()) {
-                failures.add("the seal opens onto a wall at " + beyond);
             }
         }
     }

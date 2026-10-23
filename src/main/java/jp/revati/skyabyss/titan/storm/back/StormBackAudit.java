@@ -98,7 +98,6 @@ public final class StormBackAudit {
         s.goals.put("raiju nest", RAIJU_NEST.offset(-6, 1, 0));
         s.goals.put("east perch", EAST_STONE.offset(-1, 0, 0));
         s.goals.put("beak room", FRONT_STONE.offset(1, 0, 0));
-        s.goals.put("heart room", HEART_ROOM.offset(0, 2, 8));
         if (StormDeck.placed()) {
             s.goals.putAll(StormDeck.goals());
             s.goals.putAll(StormDeck2.goals());

@@ -116,7 +116,7 @@ public final class EmberHeartArena {
 
     // 前室に着いたときの位置 (休み場 heart の南)
     public static Vec3 anteSpawn() {
-        return new Vec3(0.5, SURFACE, EmberBackLayout.HEART_ANTE.minZ() + 3.5);
+        return new Vec3(CX + 0.5, SURFACE, EmberBackLayout.HEART_ANTE.minZ() + 3.5);
     }
 
     // 部屋に入った人の置き場 (入口の橋の奥)

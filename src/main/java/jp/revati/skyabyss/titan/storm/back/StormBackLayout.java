@@ -26,7 +26,7 @@ public final class StormBackLayout {
     }
 
     // 版が上がったら建て直す
-    public static final int LAYOUT_VERSION = 33;   // 33: 入口の箱の床の四隅に海のランタン (StormBackBuilder の entry lights)。 32: 封じた風の広間・尾の間の飾りと灯り・丸天井と肋と羽の壁を外す (trial/RouteSeals)。 31: 周回の風切りの骨の前の道「風の渡り」(翼の前の縁の外の空の羽の台・休み場 wp・翼の付け根の洞・肩の部屋の北の壁の戸。StormLongWalk。32 の 4 章、R5)。   // 30: 任意の翼 (尾羽の庭・二つの塔・翼の外の廊・先の見張り台の宝箱と休み場)・羽の広場の西と東の宝箱・抜け道の床・雷翼の共鳴の炉を外す。試練の甲板への螺旋と広場の床は残す。 25: 遺物ブロック (宝の箱・休み火・レバー・碑・鐘を雷翼の様式 = 銅と羽・淡い金に)。 24: 第二の渡り場と五つの新作 (29 の P3。S04 羽根の吊り橋・S07 二枚の鏡の間・S08 気圧の弁・S11 避雷の護送・S12 羽守長の頂。第一の渡り場の南の橋から)。 22: 試練の甲板 (29 の P2。尾の上の渡り場と四つの試練 S02・S03・S09・S10。背の広場から橋)・広間の三つの出口の戸。 21: 任意の翼 (26 の 9.5。背の広場・風見の塔・避雷の塔・翼の外の廊・翼の先・尾羽の庭)・広間の屋根の肋と羽の壁・銅の筋・二つ目の鏡の間。 20: 26 の拡大 (水平 x1.6)。部屋ごとに作り直し、東の戸は 4 枚、嵐の冠・尾羽の広場・灯の道・目的の光の柱 (StormGuide)。 12: 歩く道の灯り (route_lamps)。 11: 肋の間の外を翼から生えた肋の尖塔に。 10: 西を縦の肋の登りに・東を雷の回路に・入口に拍の舵 (25 の 5章)。 9: ボス部屋の大門。 8: 建築の監査。 5: 詰み監査の修正。 4: 避雷の柱と戻しの鏡を専用のブロックに。 2: 風鳴り石・受け羽のブロックの名前を wind_stone・catch_feather に
+    public static final int LAYOUT_VERSION = 34;   // 34: 竜骨の間と前室を体の外 (trial/raid/InstanceArenas) へ移した。 33: 入口の箱の床の四隅に海のランタン (StormBackBuilder の entry lights)。 32: 封じた風の広間・尾の間の飾りと灯り・丸天井と肋と羽の壁を外す (trial/RouteSeals)。 31: 周回の風切りの骨の前の道「風の渡り」(翼の前の縁の外の空の羽の台・休み場 wp・翼の付け根の洞・肩の部屋の北の壁の戸。StormLongWalk。32 の 4 章、R5)。   // 30: 任意の翼 (尾羽の庭・二つの塔・翼の外の廊・先の見張り台の宝箱と休み場)・羽の広場の西と東の宝箱・抜け道の床・雷翼の共鳴の炉を外す。試練の甲板への螺旋と広場の床は残す。 25: 遺物ブロック (宝の箱・休み火・レバー・碑・鐘を雷翼の様式 = 銅と羽・淡い金に)。 24: 第二の渡り場と五つの新作 (29 の P3。S04 羽根の吊り橋・S07 二枚の鏡の間・S08 気圧の弁・S11 避雷の護送・S12 羽守長の頂。第一の渡り場の南の橋から)。 22: 試練の甲板 (29 の P2。尾の上の渡り場と四つの試練 S02・S03・S09・S10。背の広場から橋)・広間の三つの出口の戸。 21: 任意の翼 (26 の 9.5。背の広場・風見の塔・避雷の塔・翼の外の廊・翼の先・尾羽の庭)・広間の屋根の肋と羽の壁・銅の筋・二つ目の鏡の間。 20: 26 の拡大 (水平 x1.6)。部屋ごとに作り直し、東の戸は 4 枚、嵐の冠・尾羽の広場・灯の道・目的の光の柱 (StormGuide)。 12: 歩く道の灯り (route_lamps)。 11: 肋の間の外を翼から生えた肋の尖塔に。 10: 西を縦の肋の登りに・東を雷の回路に・入口に拍の舵 (25 の 5章)。 9: ボス部屋の大門。 8: 建築の監査。 5: 詰み監査の修正。 4: 避雷の柱と戻しの鏡を専用のブロックに。 2: 風鳴り石・受け羽のブロックの名前を wind_stone・catch_feather に
 
     // 箱の部屋 (内側の範囲。床のブロックは floor、空くのは floor+1〜floor+height)
     public record Area(int x1, int x2, int z1, int z2, int floor, int height) {
@@ -249,9 +249,13 @@ public final class StormBackLayout {
     public static final int KEEL_TUNNEL_FLOOR = 131;
     public static final int KEEL_TUNNEL_X1 = -22;
     public static final BlockPos KEEL_SPIRAL = new BlockPos(-25, 118, -12);
-    public static final Area KEEL_ANTE = new Area(-4, 4, -47, -41, 118, 5);
-    public static final BlockPos HEART_ROOM = new BlockPos(0, 117, -24);
-    public static final Vec3 HEART_POS = new Vec3(0.5, 118, -23.5);
+    // 竜骨の間 (心臓の間) と前室 (休み場 heart) は体の外の封じた部屋 (区画 0 番の枠。trial/raid/InstanceArenas) へ移した (2026-10-23)。
+    // 元の座標 (中心 (0, 117, -24)) を HEART_DX / HEART_DZ だけずらす。前室は螺旋の階段とはつながらない
+    public static final int HEART_DX = jp.revati.skyabyss.trial.raid.InstanceArenas.HEART_X;
+    public static final int HEART_DZ = jp.revati.skyabyss.trial.raid.InstanceArenas.HEART_Z + 24;
+    public static final Area KEEL_ANTE = new Area(-4 + HEART_DX, 4 + HEART_DX, -47 + HEART_DZ, -41 + HEART_DZ, 118, 5);
+    public static final BlockPos HEART_ROOM = new BlockPos(HEART_DX, 117, -24 + HEART_DZ);
+    public static final Vec3 HEART_POS = new Vec3(0.5 + HEART_DX, 118, -23.5 + HEART_DZ);
     public static final int HEART_ROOM_RADIUS = 15;
     // 竜骨の間の空気のいちばん上 (天井のブロックは 131。その上は竜骨の門からの低い道の床なので、131 は埋めたままにする)
     public static final int HEART_ROOM_CEILING = 130;
@@ -262,7 +266,7 @@ public final class StormBackLayout {
     public static final List<BlockPos> HEART_VENTS = List.of(
             HEART_ROOM.offset(0, 0, -9), HEART_ROOM.offset(0, 0, 9), HEART_ROOM.offset(9, 0, 0), HEART_ROOM.offset(-9, 0, 0));
     // 竜骨の間の入口 (入ると閉じる)。前室の北の口
-    public static final AABB HEART_DOOR = new AABB(-1, KEEL_ANTE.floor() + 1, -40, 2, KEEL_ANTE.floor() + 4, -39);
+    public static final AABB HEART_DOOR = new AABB(-1 + HEART_DX, KEEL_ANTE.floor() + 1, -40 + HEART_DZ, 2 + HEART_DX, KEEL_ANTE.floor() + 4, -39 + HEART_DZ);
 
     // ---------------------------------------------------------------- 広間の灯り (鳴った石の三つ)
     // 広間の床の三つの灯り (鳴った石)
@@ -282,7 +286,7 @@ public final class StormBackLayout {
             new Rest("e0", new BlockPos(56, BONE_FLOOR + 1, BONE_Z2 - 1), new BlockPos(58, BONE_FLOOR + 1, BONE_Z2 - 1), E0),
             eastRest("e1", 0), eastRest("e2", 1), eastRest("e3", 2),
             new Rest("f0", new BlockPos(7, UPPER_GALLERY_Y + 1, -84), new BlockPos(5, UPPER_GALLERY_Y + 1, -84), F0),
-            new Rest("heart", new BlockPos(2, KEEL_ANTE.floor() + 1, -44), new BlockPos(0, KEEL_ANTE.floor() + 1, -43), KEEL_ANTE),
+            new Rest("heart", new BlockPos(2 + HEART_DX, KEEL_ANTE.floor() + 1, -44 + HEART_DZ), new BlockPos(HEART_DX, KEEL_ANTE.floor() + 1, -43 + HEART_DZ), KEEL_ANTE),
             // 風の渡りの休み場 (周回の長い風切りの骨。版 31。StormLongWalk)
             new Rest("wp", StormLongWalk.REST_FIRE, StormLongWalk.REST_SPAWN, StormLongWalk.REST_AREA)),
             concat(StormDeck.RESTS, StormDeck2.RESTS));
@@ -307,7 +311,7 @@ public final class StormBackLayout {
             new Inscription("sign.skyabyss.lore_storm_west", new BlockPos(-60, BONE_FLOOR + 2, BONE_Z2), Direction.NORTH),
             new Inscription("sign.skyabyss.lore_storm_east", new BlockPos(60, BONE_FLOOR + 2, BONE_Z2), Direction.NORTH),
             new Inscription("sign.skyabyss.lore_storm_eye", new BlockPos(6, 150, -114), Direction.NORTH),
-            new Inscription("sign.skyabyss.lore_storm_heart", new BlockPos(-3, KEEL_ANTE.floor() + 2, -48), Direction.SOUTH),
+            new Inscription("sign.skyabyss.lore_storm_heart", new BlockPos(-3 + HEART_DX, KEEL_ANTE.floor() + 2, -48 + HEART_DZ), Direction.SOUTH),
             new Inscription("sign.skyabyss.lore_storm_vane_w", new BlockPos(-19, 148, 104), Direction.SOUTH),
             new Inscription("sign.skyabyss.lore_storm_vane_e", new BlockPos(19, 148, 104), Direction.SOUTH),
             new Inscription("sign.skyabyss.lore_storm_crown", new BlockPos(6, UPPER_GALLERY_Y + 2, -98), Direction.SOUTH),

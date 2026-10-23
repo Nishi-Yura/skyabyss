@@ -354,8 +354,8 @@ public final class ReadinessSelfTest {
         }
         check(f, ReadinessWhisper.antechamber(Titans.STONE_WHALE).test(jp.revati.skyabyss.titan.dungeon.TitanBackLayout.HEART_REST.center()),
                 "whale antechamber contains its centre");
-        check(f, ReadinessWhisper.antechamber(Titans.TIDE_SHELL).test(new BlockPos(0, 51, -6)), "tide antechamber contains (0, 51, -6)");
-        check(f, ReadinessWhisper.antechamber(Titans.THUNDER_WING).test(new BlockPos(0, jp.revati.skyabyss.titan.storm.back.StormBackLayout.KEEL_ANTE.floor() + 2, -44)), "storm antechamber contains the antechamber centre");
+        check(f, ReadinessWhisper.antechamber(Titans.TIDE_SHELL).test(jp.revati.skyabyss.titan.tide.back.TideBackLayout.HEART_REST.center()), "tide antechamber contains its centre");
+        check(f, ReadinessWhisper.antechamber(Titans.THUNDER_WING).test(new BlockPos(jp.revati.skyabyss.titan.storm.back.StormBackLayout.HEART_DX, jp.revati.skyabyss.titan.storm.back.StormBackLayout.KEEL_ANTE.floor() + 2, -44 + jp.revati.skyabyss.titan.storm.back.StormBackLayout.HEART_DZ)), "storm antechamber contains the antechamber centre");
         var ante = jp.revati.skyabyss.titan.ember.back.EmberBackLayout.HEART_ANTE;
         check(f, ReadinessWhisper.antechamber(Titans.EMBER).test(new BlockPos((ante.minX() + ante.maxX()) / 2, ante.minY() + 1, (ante.minZ() + ante.maxZ()) / 2)),
                 "ember antechamber contains its centre");
