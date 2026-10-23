@@ -263,35 +263,13 @@ public final class StormBackTrials {
             applyWorld(level);
             ready = true;
         }
+        // 体の中は建てない (外見だけ。docs/design/32 の 2.5): 西・肋・東・眼・舵・道しるべ・嵐の角笛と計器は動かさない。
+        // 竜骨 (心臓の段) とピースフルの見張り、嵐の時計だけ
         long gt = level.getGameTime();
-        if (gt % 10 == 0) {
-            tickRooms(level);
-        }
-        StormBackClock.Phase warn = StormBackClock.advance(level);
-        if (warn != null) {
-            horn(level, warn);
-        }
-        boolean peaceful = level.getDifficulty() == Difficulty.PEACEFUL;
-        StormWest.tick(level, peaceful);
-        StormRib.tick(level);
-        StormEast.tick(level, RoomLocks.owner(EAST_ROOM), peaceful);
-        if (gt % 4 == 0) {
-            UUID eye = RoomLocks.owner(EYE_ROOM);
-            if (eye != null) {
-                EyeMirrors.tick(level, StormProgress.of(level, eye));
-            }
-        }
+        StormBackClock.advance(level);
         if (gt % 5 == 0) {
             tickKeel(level);
-            tickPeaceful(level, peaceful);
-            tickGateFace(level);
-            StormHelm.tick(level);
-            StormGuide.tick(level);
-        }
-        StormBackClock.Phase phase = StormBackClock.phase(level);
-        if (phase != lastPhase || gt % 20 == 0) {
-            lastPhase = phase;
-            sendGauge(level);
+            tickPeaceful(level, level.getDifficulty() == Difficulty.PEACEFUL);
         }
     }
 

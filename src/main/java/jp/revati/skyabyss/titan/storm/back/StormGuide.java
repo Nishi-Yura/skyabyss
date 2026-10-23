@@ -170,13 +170,6 @@ final class StormGuide {
         if (counter % 2 == 0) {
             StormRoomTitles.tick(level);
         }
-        if (counter % 8 == 3) {
-            for (ServerPlayer p : level.players()) {
-                if (!p.isSpectator() && p.isAlive()) {
-                    StormObjective.send(level, p);
-                }
-            }
-        }
         tickWest(level);
         tickDoorHints(level);
         for (ServerPlayer p : level.players()) {

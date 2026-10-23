@@ -11,31 +11,10 @@ import jp.revati.skyabyss.titan.dungeon.TitanBackLayout;
 import jp.revati.skyabyss.titan.dungeon.WhaleDeck;
 import jp.revati.skyabyss.trial.Trial.Def;
 import jp.revati.skyabyss.trial.TrialCell.Ports;
-import jp.revati.skyabyss.trial.storm.S02Sacs;
-import jp.revati.skyabyss.trial.storm.S03Pillars;
-import jp.revati.skyabyss.trial.storm.S09Nest;
-import jp.revati.skyabyss.trial.storm.S10Watch;
-import jp.revati.skyabyss.trial.tide.T02Crossing;
-import jp.revati.skyabyss.trial.tide.T03Jellies;
-import jp.revati.skyabyss.trial.tide.T04Whirl;
-import jp.revati.skyabyss.trial.tide.T08Shelf;
-import jp.revati.skyabyss.trial.tide.T11Clam;
-import jp.revati.skyabyss.trial.tide.T12Keeper;
-import jp.revati.skyabyss.trial.tide.T06Choir;
-import jp.revati.skyabyss.trial.tide.T07Seas;
-import jp.revati.skyabyss.trial.tide.T10Ring;
-import jp.revati.skyabyss.trial.whale.W03Moss;
-import jp.revati.skyabyss.trial.whale.W04Vents;
-import jp.revati.skyabyss.trial.whale.W11Coffin;
-import jp.revati.skyabyss.trial.whale.W12Arena;
-import jp.revati.skyabyss.trial.whale.W06Score;
-import jp.revati.skyabyss.trial.whale.W07Gates;
-import jp.revati.skyabyss.trial.whale.W08Shadows;
-import jp.revati.skyabyss.trial.whale.W10Fort;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.phys.AABB;
 
-// セルの登録簿。原型は LegacyCell で包み (口だけ)、岩鯨の新作 4 は動かす仕組みを持つセル。
+// セルの登録簿。原型は LegacyCell で包む (口だけ)。新作のセル (29 のプール) は巨神の中を建てなくなったので消した。
 // 巨神を増やすときは、ここに register(...) を足す (定義は TrialCatalog)
 public final class TrialCells {
     private TrialCells() {
@@ -63,47 +42,9 @@ public final class TrialCells {
             }
             register(new LegacyCell(d, legacyPorts(d)));
         }
-        register(new W03Moss());
-        register(new W04Vents());
-        register(new W06Score());
-        register(new W07Gates());
-        register(new W10Fort());
-        register(new S02Sacs());
-        register(new S03Pillars());
-        register(new S09Nest());
-        register(new S10Watch());
-        register(new jp.revati.skyabyss.trial.storm.S04Bridge());
-        register(new jp.revati.skyabyss.trial.storm.S07Mirrors());
-        register(new jp.revati.skyabyss.trial.storm.S08Valves());
-        register(new jp.revati.skyabyss.trial.storm.S11Cage());
-        register(new jp.revati.skyabyss.trial.storm.S12Summit());
-        register(new jp.revati.skyabyss.trial.ember.E02Vents());
-        register(new jp.revati.skyabyss.trial.ember.E06Flues());
-        register(new jp.revati.skyabyss.trial.ember.E07Bellows());
-        register(new jp.revati.skyabyss.trial.ember.E10Furnace());
-        register(new jp.revati.skyabyss.trial.ember.E03Chain());
-        register(new jp.revati.skyabyss.trial.ember.E04Carry());
-        register(new jp.revati.skyabyss.trial.ember.E08Mold());
-        register(new jp.revati.skyabyss.trial.ember.E11Cart());
-        register(new jp.revati.skyabyss.trial.ember.E12Nest());
-        register(new W11Coffin());
-        register(new W12Arena());
-        register(new T02Crossing());
-        register(new T06Choir());
-        register(new T07Seas());
-        register(new T10Ring());
-        // P3 (29 の 3.7): 岩鯨 W08・潮殻 T03・T04・T08・T11・T12
-        register(new W08Shadows());
-        register(new T03Jellies());
-        register(new T04Whirl());
-        register(new T08Shelf());
-        register(new T11Clam());
-        register(new T12Keeper());
         for (Def d : TrialCatalog.all()) {
             // レイドの部屋は区画に建てる (trial/raid)。セルの写しはない
-            if (!CELLS.containsKey(d.id()) && !jp.revati.skyabyss.trial.raid.RaidRooms.isRaid(d.id())) {
-                throw new IllegalStateException("trial " + d.id() + " has no cell");
-            }
+            // 新作のセル (29 のプール) は消した (巨神の中は建てない。docs/design/32 の 2.5)。原型の口だけが残る
         }
     }
 

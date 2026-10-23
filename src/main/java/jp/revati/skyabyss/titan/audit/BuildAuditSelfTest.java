@@ -189,22 +189,20 @@ public final class BuildAuditSelfTest {
             forceBox(server, EmberIds.BACK, EMBER_BOX, true);
         }));
         steps.add(Step.once("build audit (whale)", 400, server -> {
-            back(server, TitanTravel.TITAN_BACK, "whale", WHALE_BOX, level -> jp.revati.skyabyss.titan.dungeon.TitanBackAudit.run(level));
+            back(server, TitanTravel.TITAN_BACK, "whale", WHALE_BOX, level -> routeOf("whale", level));
             forceBox(server, TitanTravel.TITAN_BACK, WHALE_BOX, false);
         }));
         // 建てた直後は明かりの計算が終わっていない (灯りが光らず、暗さの数が 95 まで増える)。区画を読み込んだまま 400 tick おいてから調べ、外す
         steps.add(Step.once("build audit (tide)", 400, server -> {
-            back(server, TideTravel.TIDE_BACK, "tide", TIDE_BOX,
-                    level -> BackReach.run(level, jp.revati.skyabyss.titan.tide.back.TideBackAudit.spec()));
+            back(server, TideTravel.TIDE_BACK, "tide", TIDE_BOX, level -> routeOf("tide", level));
             forceBox(server, TideTravel.TIDE_BACK, TIDE_BOX, false);
         }));
         steps.add(Step.once("build audit (storm)", 400, server -> {
-            back(server, StormTravel.STORM_BACK, "storm", STORM_BOX,
-                    level -> jp.revati.skyabyss.titan.storm.back.StormBackAudit.run(level));
+            back(server, StormTravel.STORM_BACK, "storm", STORM_BOX, level -> routeOf("storm", level));
             forceBox(server, StormTravel.STORM_BACK, STORM_BOX, false);
         }));
         steps.add(Step.once("build audit (ember)", 400, server -> {
-            back(server, EmberIds.BACK, "ember", EMBER_BOX, level -> jp.revati.skyabyss.titan.ember.back.EmberBackAudit.run(level));
+            back(server, EmberIds.BACK, "ember", EMBER_BOX, level -> routeOf("ember", level));
             forceBox(server, EmberIds.BACK, EMBER_BOX, false);
         }));
         steps.add(Step.once("build audit", BuildAuditSelfTest::finish));
@@ -221,13 +219,17 @@ public final class BuildAuditSelfTest {
         void build(ServerLevel level);
     }
 
-    // 背ごとの到達の調べ (歩ける所 reached を持つ)。RouteLightDev も使う
+    // 背ごとの到達の調べ (歩ける所 reached を持つ)。巨神の中は建てない (docs/design/32 の 2.5) ので、歩ける所は体の外の心臓の間 (と前室) だけ。RouteLightDev も使う
     public static BackReach.Report routeOf(String name, ServerLevel level) {
+        return BackReach.run(level, jp.revati.skyabyss.trial.raid.InstanceArenas.heartReachSpec(routeTitan(name)));
+    }
+
+    private static String routeTitan(String name) {
         return switch (name) {
-            case "whale" -> jp.revati.skyabyss.titan.dungeon.TitanBackAudit.run(level);
-            case "tide" -> BackReach.run(level, jp.revati.skyabyss.titan.tide.back.TideBackAudit.spec());
-            case "storm" -> jp.revati.skyabyss.titan.storm.back.StormBackAudit.run(level);
-            default -> jp.revati.skyabyss.titan.ember.back.EmberBackAudit.run(level);
+            case "whale" -> jp.revati.skyabyss.progress.Titans.STONE_WHALE;
+            case "tide" -> jp.revati.skyabyss.progress.Titans.TIDE_SHELL;
+            case "storm" -> jp.revati.skyabyss.progress.Titans.THUNDER_WING;
+            default -> jp.revati.skyabyss.progress.Titans.EMBER;
         };
     }
 
@@ -267,6 +269,12 @@ public final class BuildAuditSelfTest {
         r.allow.addAll(ALL.allow);
         BuildAudit.WorldGrid grid = new BuildAudit.WorldGrid(level);
         BuildAudit.scan(grid, box, name, r);
+        // 体の外の封じた心臓の間 (と前室) も調べる
+        net.minecraft.world.phys.AABB heart = jp.revati.skyabyss.trial.raid.InstanceArenas.heartArena(routeTitan(name));
+        if (heart != null) {
+            net.minecraft.world.phys.AABB h = heart.inflate(16);
+            BuildAudit.scan(grid, new BackReach.Box((int) h.minX, (int) h.minY, (int) h.minZ, (int) h.maxX, (int) h.maxY, (int) h.maxZ), name + " heart", r);
+        }
         // 歩ける所 (BackReach の到達点) の暗さ
         try {
             BackReach.Report reach = router.run(level);
@@ -338,7 +346,7 @@ public final class BuildAuditSelfTest {
         SkyAbyss.LOGGER.info("SELFTEST build audit: scanned {} blocks, {} findings in {} groups, {} allowed", ALL.scanned, ALL.findings.size(), groups.size(),
                 ALL.suppressed.size());
         if (ALL.findings.isEmpty() && LINES.isEmpty()) {
-            SkyAbyss.LOGGER.info("SELFTEST build audit PASSED (stairs facing/gaps/embedding, doors, ladders, site floors, four backs)");
+            SkyAbyss.LOGGER.info("SELFTEST build audit PASSED (stairs facing/gaps/embedding, doors, ladders, site floors, four backs outside-only and their sealed heart arenas)");
         } else {
             LINES.forEach(l -> SkyAbyss.LOGGER.error("SELFTEST build audit FAILED: {}", l));
             for (var g : groups.entrySet()) {

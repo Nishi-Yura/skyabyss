@@ -811,8 +811,6 @@ public final class TitanBackTrials {
             }
         }
         // 設計書 26 の 8.7 の B: 広間の大きさは同じ。一人・二人は、湧き場所を入口側に寄せる (広間いっぱいは 4 人から)
-        BlockPos entrance = RoomPlayRooms.entranceOf(hall.id());
-        spawns = RoomPlay.spawnNear(spawns, entrance, state.players);
         List<String> wave = new ArrayList<>(state.waves.get(state.wave - 1));
         // 人数が多いほど番兵も増える (1人増えるごとに2体。番兵長の波では骨の番兵が増える。最大 6 人分)。
         // 老番兵の波は骨の番兵が増える (老番兵は体力が増える)。骨の砲手は 4 人から 2 体
@@ -837,7 +835,7 @@ public final class TitanBackTrials {
             String kind = wave.get(i);
             BlockPos at;
             if (kind.equals("captain") || kind.equals("elder")) {
-                at = bossSpot(level, hall, entrance, state.players);
+                at = bossSpot(level, hall, spawns.get(0), state.players);
             } else if (kind.equals("mortar")) {
                 // 骨の砲手は奥の壁ぎわ (広間の出口側の二つの角) から撃つ。少人数は入口側の湧き場所から、広間の内へ 2 マス
                 int m = mortars++ % 2;

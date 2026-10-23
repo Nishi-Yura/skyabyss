@@ -85,12 +85,6 @@ public final class TrialRegions {
             case Titans.THUNDER_WING, "storm" -> {
                 // 嵐の背の試練の床は広間 (床 134) の肩の階段より上 (竜骨の道と心臓の間は広間の床より下)
                 int y0 = StormBackLayout.HUB.floor() + 2;
-                // 試練の甲板の新作: そのグループが引いて、この石の枠にあたるセル (なければ原型の範囲)
-                AABB deckBox = group == null ? null : jp.revati.skyabyss.trial.storm.StormStones.regionOf(back, group, key);
-                if (deckBox != null) {
-                    out.add(deckBox);
-                    break;
-                }
                 switch (key) {
                     case "west" -> {
                         out.add(new AABB(StormBackLayout.RIB_X1 - 20, y0, StormBackLayout.BONE_Z1 - 12, -23, 240, StormBackLayout.BONE_Z2 + 12));
@@ -230,15 +224,11 @@ public final class TrialRegions {
             return null;
         }
         String t = signalTitan(titan);
-        if (t.equals("storm")) {
-            Trial.Def d = jp.revati.skyabyss.trial.storm.StormStones.cellOfKey(draw, key);
-            return d == null ? null : TrialCells.get(d.id());
-        }
         Slot slot;
         try {
             slot = switch (t) {
                 case "whale" -> Slot.ofStone(Integer.parseInt(key));
-                case "tide", "ember" -> switch (key) {
+                case "tide", "ember", "storm" -> switch (key) {
                     case "west" -> Slot.WALK;
                     case "east" -> Slot.WIT;
                     default -> Slot.FIGHT;
@@ -261,7 +251,7 @@ public final class TrialRegions {
         String t = signalTitan(titan);
         return switch (t) {
             case "whale" -> String.valueOf(def.slot().stone);
-            case "tide" -> switch (def.slot()) {
+            case "tide", "storm" -> switch (def.slot()) {
                 case WALK -> "west";
                 case WIT -> "east";
                 case FIGHT -> "front";
@@ -271,7 +261,6 @@ public final class TrialRegions {
                 case WIT -> "east";
                 case FIGHT -> "south";
             };
-            case "storm" -> jp.revati.skyabyss.trial.storm.StormStones.keyOf(draw, def);
             default -> null;
         };
     }

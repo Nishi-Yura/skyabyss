@@ -200,7 +200,7 @@ public final class TrialBacks {
     // ---------------------------------------------------------------- 雷翼 (風鳴り石。StormProgress の鳴った印。枠は StormStones が引きから決める)
     private static final Back STORM = new Back() {
         private jp.revati.skyabyss.titan.storm.back.StormBackState.Trial trial(ServerLevel back, UUID group, Def def) {
-            String key = jp.revati.skyabyss.trial.storm.StormStones.keyOf(TrialData.current(back, group), def);
+            String key = TrialRegions.keyOfDef(Titans.THUNDER_WING, def, TrialData.current(back, group));
             return jp.revati.skyabyss.titan.storm.back.StormBackState.Trial.valueOf(key.toUpperCase(java.util.Locale.ROOT));
         }
 

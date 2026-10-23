@@ -130,7 +130,6 @@ public final class SelfTestRunner {
         steps.add(Step.once("rebirth", 40, jp.revati.skyabyss.rebirth.RebirthSelfTest::runSelfTest));
         // 大事な場面のカメラ演出 (台本・日英の文・座標・サーバーの流れ)。docs/design/20_cinematics.md
         steps.add(Step.once("cinematic", jp.revati.skyabyss.cinematic.CinematicSelfTest::runSelfTest));
-        steps.add(Step.once("storm scan", jp.revati.skyabyss.titan.storm.back.StormBuildScan::runSelfTest));
         steps.add(jp.revati.skyabyss.cinematic.SightLiveSelfTest.step(jp.revati.skyabyss.progress.Titans.THUNDER_WING));
         // 深淵 (B04): 転生での開閉・修飾の段・心臓の湧き・落とし表・書き換えの効き。SKYABYSS_SELFTEST_ONLY="abyss"
         steps.addAll(jp.revati.skyabyss.abyss.AbyssSelfTest.steps());
@@ -245,8 +244,6 @@ public final class SelfTestRunner {
         steps.add(Step.once("heart bots", 40, jp.revati.skyabyss.combat.HeartBotSelfTest::runSelfTest));
         // 予告 (Telegraph): 当たる範囲と印が同じ形・予告 0.8 秒以上・番兵長と岩鯨の心臓の技・人数で増える。docs/design/02 の 5.4
         steps.addAll(jp.revati.skyabyss.combat.TelegraphSelfTest.steps());
-        // 広さの使い方 (26 の 8.7 の B): 人数ごとの湧き場所・罠と柱の置き場所・予告の長さ・重ならない・柱の段。SKYABYSS_SELFTEST_ONLY="room play"
-        steps.addAll(jp.revati.skyabyss.combat.RoomPlaySelfTest.steps());
         // 余燼のレイドの三つの部屋 (熾火運び・鍛冶の手順・炉を守る)。SKYABYSS_SELFTEST_ONLY="ember raid"
         steps.addAll(jp.revati.skyabyss.trial.raid.ember.EmberRaidSelfTest.steps());
         // 岩鯨の背の新しい敵 (骨の砲手・骨鳥・老番兵)。SKYABYSS_SELFTEST_ONLY="ch1 back mobs"。21 の 3.3

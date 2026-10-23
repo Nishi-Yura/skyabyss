@@ -36,9 +36,6 @@ import jp.revati.skyabyss.trial.TrialCatalog;
 import jp.revati.skyabyss.trial.TrialCell;
 import jp.revati.skyabyss.trial.TrialData;
 import jp.revati.skyabyss.trial.TrialDraw;
-import jp.revati.skyabyss.trial.whale.W06Score;
-import jp.revati.skyabyss.trial.whale.W07Gates;
-import jp.revati.skyabyss.trial.whale.W10Fort;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
@@ -217,14 +214,9 @@ public final class AbyssSelfTest {
         check(TrialData.current(Titans.STONE_WHALE, r, group, 4242L).encode().equals(on.encode()), "the abyss draw is not reproducible");
         Abyss.set(r, false);
         check(TrialData.current(Titans.STONE_WHALE, r, group, 4242L).encode().equals(off.encode()), "turning the abyss off did not restore the draw");
-        // 数字の底上げ: 極 (段 2) より厳しく、解ける線の下へは行かない。使われる 4 つの試練の式
+        // 数字の底上げ: 極 (段 2) より厳しく、解ける線の下へは行かない
         Mods hard = new Mods(0, new int[] {2, 2}, -1, new int[0], -1, Trial.Extreme.GAUNTLET, false, Rarity.EXTREME);
         Mods deep = new Mods(0, new int[] {2, 2}, -1, new int[0], -1, Trial.Extreme.GAUNTLET, false, Rarity.ABYSS);
-        TrialCell.Run runHard = new TrialCell.Run(UUID.randomUUID(), null, hard, 1L, 0L);
-        TrialCell.Run runDeep = new TrialCell.Run(UUID.randomUUID(), null, deep, 1L, 0L);
-        check(W07Gates.graceOf(runDeep) < W07Gates.graceOf(runHard) && W07Gates.graceOf(runDeep) >= Abyss.FLOOR_TICKS, "gate grace " + W07Gates.graceOf(runHard) + " -> " + W07Gates.graceOf(runDeep));
-        check(W06Score.length(runDeep) == W06Score.length(runHard) + 1, "score length did not grow by one");
-        check(W10Fort.gunners(runDeep, 1) == W10Fort.gunners(runHard, 1) + 1, "fort gunners did not grow by one");
         Mods plain = Mods.PLAIN;
         check(Abyss.shorter(plain, 100) == 100 && Abyss.narrower(plain, 0.5) == 0.5 && Abyss.longer(plain, 60) == 60 && Abyss.plusOne(plain, 3) == 3, "non-abyss numbers changed");
         check(Abyss.shorter(deep, 65) == Abyss.FLOOR_TICKS && Abyss.narrower(deep, 0.42) == Abyss.FLOOR_WINDOW, "the floors do not hold");
