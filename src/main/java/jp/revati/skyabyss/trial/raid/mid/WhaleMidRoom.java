@@ -46,6 +46,8 @@ public final class WhaleMidRoom extends MidRoom {
         for (int x = -HX + 1; x <= HX - 1; x++) {
             RaidKit.set(ctx.level(), ctx.local(x, 0, -HZ + 1), Blocks.POLISHED_DEEPSLATE.defaultBlockState());
         }
+        // 飾り (docs/design/39 の 4.1): 肋骨のアーチの喉の回廊と、奥の番兵長の額
+        jp.revati.skyabyss.trial.raid.whale.WhaleDecor.wrm(ctx);
         RaidKit.restInArena(ctx, 0, HZ - 2);
     }
 
@@ -105,6 +107,7 @@ public final class WhaleMidRoom extends MidRoom {
                 ps.add(p);
             }
         }
+        jp.revati.skyabyss.trial.raid.whale.WhaleDecor.exitLamps(ctx, true);
         TitanLoot.onCaptainDefeat(ctx.level(), ps, ids);
         jp.revati.skyabyss.titan.group.FightBadges.onVictory(ctx.level(), boss, ids, 0);
     }
@@ -112,6 +115,7 @@ public final class WhaleMidRoom extends MidRoom {
     @Override
     protected void resetFixtures(RaidCtx ctx) {
         wave = 0;
+        jp.revati.skyabyss.trial.raid.whale.WhaleDecor.exitLamps(ctx, false);
     }
 
     @Override

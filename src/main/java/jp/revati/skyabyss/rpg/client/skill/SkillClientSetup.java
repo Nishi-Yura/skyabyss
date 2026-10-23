@@ -58,5 +58,6 @@ public final class SkillClientSetup {
     static void onParticles(RegisterParticleProvidersEvent event) {
         event.registerSpriteSet(Skills.RUNE_SPARK.get(), SkillParticles.RuneSparkProvider::new);
         event.registerSpriteSet(Skills.SKY_MOTE.get(), SkillParticles.SkyMoteProvider::new);
+        event.registerSpriteSet(Skills.STORM_FEATHER.get(), jp.revati.skyabyss.client.combat.StormFeatherParticle.Provider::new);
     }
 }

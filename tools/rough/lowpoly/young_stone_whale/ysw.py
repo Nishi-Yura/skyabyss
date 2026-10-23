@@ -276,11 +276,54 @@ def pose_body(faces, pose):
 
 # ====================================================================== 書き出し
 
-def build_option(key, build, pal, body_hint=512):
+def fit_atlas(body, size):
+    """テクセルの密度 (lpkit.TEX) を上げて、島がちょうど size の正方形に収まるようにする (アトラスを広く使う)。
+    収まる一番高い密度を二分で探す。書き出しの texels_per_unit (tbc.TEX) も同じ値にする。"""
+    import lpkit
+    lo, hi = 1.0, 8.0
+    for _ in range(12):
+        mid = (lo + hi) / 2
+        lpkit.TEX = mid
+        if _pack_size(body, size) <= size:
+            lo = mid
+        else:
+            hi = mid
+    lpkit.TEX = tbc.TEX = round(lo, 3)
+    return build_atlas(body, size, 0)
+
+
+def _pack_size(faces, size):
+    """build_atlas と同じ詰め方で、size に収まるかだけを調べる (テクセルの配列は作らない)。"""
+    import lpkit
+    charts = []
+    for f in faces:
+        n = f.normal
+        u = nrm(f.verts[1] - f.verts[0])
+        w = np.cross(n, u)
+        q = np.array([[np.dot(p - f.verts[0], u), np.dot(p - f.verts[0], w)] for p in f.verts]) * lpkit.TEX
+        q = q - q.min(0)
+        charts.append((max(1, int(math.ceil(q[:, 0].max() - 1e-6))), max(1, int(math.ceil(q[:, 1].max() - 1e-6)))))
+    x = y = rowh = 0
+    for cw, ch in sorted(charts, key=lambda c: (-c[1], -c[0])):
+        if x + cw > size:
+            x, y, rowh = 0, y + rowh, 0
+        if y + ch > size or cw > size:
+            return size * 2
+        x += cw
+        rowh = max(rowh, ch)
+    return size
+
+
+def build_option(key, build, pal, body_hint=512, fit=None):
     body, eyes, extra = build()
     d = FOLDER / key
     d.mkdir(parents=True, exist_ok=True)
-    size, P, N, M, L = build_atlas(body, body_hint, 0)
+    if fit:
+        size, P, N, M, L = fit_atlas(body, fit)
+    else:
+        import lpkit
+        lpkit.TEX = tbc.TEX = 2.0
+        size, P, N, M, L = build_atlas(body, body_hint, 0)
 
     def ex(c, col, glow):
         if eyes:

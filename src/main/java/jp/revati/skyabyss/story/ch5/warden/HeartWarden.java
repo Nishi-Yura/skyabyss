@@ -170,7 +170,14 @@ public class HeartWarden extends Monster implements GeoEntity {
         }
         boolean hit = super.hurt(source, a);
         if (hit && isAlive() && !level().isClientSide) {
-            playAction("hurt");
+            // ひるみ (根の骨だけを動かす別の制御。技の溜め・振り抜きの形を崩さない)。技を流していない間だけ、体・頭も振られる被弾の動きも流す
+            if (tickCount - lastFlinchTick >= 6) {
+                lastFlinchTick = tickCount;
+                triggerAnim("hurt", "flinch");
+            }
+            if (tickCount >= actionEndTick) {
+                playAction("hurt");
+            }
         }
         return hit;
     }
@@ -506,7 +513,20 @@ public class HeartWarden extends Monster implements GeoEntity {
     // 動き: 歩きと待機は自動で切り替え、技と被弾・死は playAction でサーバーから流す (全員の画面に同期される)
     public void playAction(String name) {
         triggerAnim("action", name);
+        // 技の動きが終わる tick (動きの長さ。gen_heart_warden.py の claw 1.3・lunge 1.6・snuff 3.0・phase 2.0 秒)
+        int len = switch (name) {
+            case "claw" -> 26;
+            case "lunge" -> 32;
+            case "snuff" -> 60;
+            case "phase" -> 40;
+            default -> 0;
+        };
+        actionEndTick = Math.max(actionEndTick, tickCount + len);
     }
+
+    // 技の動きが終わる tick・最後にひるんだ tick (見た目だけ)
+    private int actionEndTick;
+    private int lastFlinchTick = -1000;
 
     @Override
     public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
@@ -518,6 +538,8 @@ public class HeartWarden extends Monster implements GeoEntity {
             action.triggerableAnim(name, name.equals("death") ? RawAnimation.begin().thenPlayAndHold(id) : RawAnimation.begin().thenPlay(id));
         }
         controllers.add(action);
+        controllers.add(new AnimationController<>(this, "hurt", 0, state -> PlayState.STOP)
+                .triggerableAnim("flinch", RawAnimation.begin().thenPlay(ANIM + "flinch")));
     }
 
     @Override

@@ -44,6 +44,11 @@ public abstract class GuardMob extends Monster implements GeoEntity, jp.revati.s
 
     private final String animPrefix;
 
+    // 動きの名前の頭 (animation.<これ>.idle など)
+    protected final String animPrefix() {
+        return animPrefix;
+    }
+
     // どのグループ (パーティ・一人) の試練の敵か。null なら誰にでも見えて誰でも狙える。湧かせる側が addFreshEntity の前に入れる
     @javax.annotation.Nullable
     private java.util.UUID groupId;

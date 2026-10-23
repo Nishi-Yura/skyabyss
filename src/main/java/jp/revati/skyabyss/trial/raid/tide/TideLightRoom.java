@@ -61,7 +61,7 @@ public final class TideLightRoom extends RaidRoom {
         ServerLevel level = ctx.level();
         origin = ctx.origin();
         generate(ctx);
-        RaidKit.buildCell(ctx, new RaidKit.Spec(HX, HZ, H, RaidKit.TIDE));
+        RaidKit.buildCell(ctx, new RaidKit.Spec(HX, HZ, H, TideBuild.PALETTE));
         BlockState brick = Blocks.PRISMARINE_BRICKS.defaultBlockState();
         BlockState dark = Blocks.DARK_PRISMARINE.defaultBlockState();
         // 灯台 (南の壁) と水晶の枠 (北の壁)
@@ -91,6 +91,69 @@ public final class TideLightRoom extends RaidRoom {
             int side = ctx.rng().nextBoolean() ? -1 : 1;
             int z = ctx.rng().nextInt(2 * HZ - 7) - HZ + 3;
             RaidKit.fill(level, origin.offset(side * (HX - 1), 1, z), origin.offset(side * (HX - 1), 1 + ctx.rng().nextInt(3), z), dead[ctx.rng().nextInt(dead.length)]);
+        }
+        dress(ctx);
+    }
+
+    // 飾り (docs/design/39 の 4.2「解く 光」): 北の水晶を真珠層の光の輪で囲む。光を水晶に保つあいだ、輪の八つの目が下から順に灯る。
+    // 南の灯台の上に縞の塔。南東の隅に見渡し台 (光の筋の高さより上から、台の格子の全体が見える)。台の格子と光の通る高さには何も置かない
+    private void dress(RaidCtx ctx) {
+        TideBuild d = new TideBuild(ctx);
+        d.keep(-10, 1, -12, 10, 6, 12);
+        int ex = LATTICE[emitterI];
+        int tx = LATTICE[targetI];
+        d.keep(ex - 1, 1, HZ - 1, ex + 1, 4, HZ);
+        d.keep(tx - 1, 1, -HZ, tx + 1, 5, -HZ + 1);
+        d.keep(9, 1, 9, HX, 6, HZ);
+        d.keep(tx - 5, 1, -HZ, tx + 5, H, -HZ);
+        d.keep(ex - 1, 1, HZ, ex + 1, H, HZ);
+        d.shell(2);
+        // 水晶の光の輪 (北の殻の面)
+        haloEyes.clear();
+        haloEyes.addAll(d.halo(true, tx, 3.5, 3.2, HALO_EYES));
+        // 灯台の縞の塔 (南の殻の面、灯台の上)
+        for (int y = 1; y <= H; y++) {
+            for (int x = ex - 1; x <= ex + 1; x++) {
+                if (Math.abs(x) <= 3 && y <= 5) {
+                    continue;
+                }
+                BlockPos w = origin.offset(x, y, HZ + 1);
+                if (!ctx.level().getBlockState(w).is(Blocks.IRON_BARS)) {
+                    RaidKit.set(ctx.level(), w, y % 2 == 0 ? Blocks.CALCITE.defaultBlockState() : Blocks.CHERRY_PLANKS.defaultBlockState());
+                }
+            }
+        }
+        // 見渡し台 (南東の隅、天板の高さ 3)
+        BlockState top = Blocks.CUT_SANDSTONE.defaultBlockState();
+        BlockState step = Blocks.SMOOTH_SANDSTONE_STAIRS.defaultBlockState().setValue(net.minecraft.world.level.block.StairBlock.FACING, net.minecraft.core.Direction.SOUTH);
+        for (int x = HX - 1; x <= HX; x++) {
+            RaidKit.set(ctx.level(), origin.offset(x, 1, HZ - 3), step);
+            RaidKit.set(ctx.level(), origin.offset(x, 1, HZ - 2), top);
+            RaidKit.set(ctx.level(), origin.offset(x, 2, HZ - 2), step);
+            for (int z = HZ - 1; z <= HZ; z++) {
+                RaidKit.set(ctx.level(), origin.offset(x, 1, z), top);
+                RaidKit.set(ctx.level(), origin.offset(x, 2, z), z == HZ ? Blocks.CHISELED_SANDSTONE.defaultBlockState() : top);
+            }
+        }
+        // 台座の縁 (光の格子の位置を床に): 格子の線を切った砂岩で
+        for (int a : LATTICE) {
+            d.floorLine(a, -HZ + 1, HZ - 1, Blocks.CUT_SANDSTONE.defaultBlockState());
+        }
+        d.hiddenLights(11, 4, false).ceilingCoral(8, 1, H - 1, 2).wallBranches(8, 5, 0).shards(3);
+        d.finish();
+        showHalo(ctx);
+    }
+
+    static final int HALO_EYES = 8;
+    private final List<BlockPos> haloEyes = new ArrayList<>();
+    private int haloShown = -1;
+
+    // 光の輪: 光を保った長さだけ目が灯る (越えたら全部)
+    private void showHalo(RaidCtx ctx) {
+        int n = done ? haloEyes.size() : Math.min(haloEyes.size(), lit * haloEyes.size() / HOLD_TICKS);
+        if (n != haloShown) {
+            haloShown = n;
+            TideBuild.lamps(ctx.level(), haloEyes, n);
         }
     }
 
@@ -261,6 +324,7 @@ public final class TideLightRoom extends RaidRoom {
         lit = 0;
         done = false;
         setCrystal(ctx, false);
+        showHalo(ctx);
         for (int i = 0; i < N; i++) {
             for (int j = 0; j < N; j++) {
                 if (mirror[i][j] >= 0 && mirror[i][j] != startFacing[i][j]) {
@@ -315,6 +379,7 @@ public final class TideLightRoom extends RaidRoom {
                 lit = 0;
             }
         }
+        showHalo(ctx);
         // 光の筋 (3 tick おき)
         if (now % 3 == 0) {
             ServerLevel level = ctx.level();

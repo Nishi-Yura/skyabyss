@@ -51,6 +51,9 @@ public final class TidePearlRoom extends RaidRoom {
     private final Map<UUID, BlockPos> lights = new HashMap<>();
     private final Map<UUID, Long> handoverAt = new HashMap<>();
     private final List<AABB> pillars = new ArrayList<>();
+    // 真珠の座の扇の灯る目 (窪み i に届けると i 番の組が灯る)
+    @SuppressWarnings("unchecked")
+    private final List<BlockPos>[] clamEyes = new List[] {new ArrayList<>(), new ArrayList<>(), new ArrayList<>()};
     private int count = 1;
     private BlockPos origin;
     private long nextSpawn;
@@ -61,16 +64,16 @@ public final class TidePearlRoom extends RaidRoom {
         ServerLevel level = ctx.level();
         origin = ctx.origin();
         count = Math.max(1, Math.min(MAX_PEARLS, ctx.scale()));
-        RaidKit.Cell c = RaidKit.buildCell(ctx, new RaidKit.Spec(HX, HZ, H, RaidKit.TIDE));
+        RaidKit.Cell c = RaidKit.buildCell(ctx, new RaidKit.Spec(HX, HZ, H, TideBuild.PALETTE));
         // 暗くする: 天井の灯りを暗い天井材に戻す (入口の間・出口の間の灯りは残る)
         for (int x = -HX + 3; x <= HX - 2; x += 8) {
             for (int z = -HZ + 3; z <= HZ - 2; z += 8) {
                 RaidKit.set(level, origin.offset(x, H + 1, z), c.palette().ceiling());
             }
         }
-        BlockState brick = Blocks.PRISMARINE_BRICKS.defaultBlockState();
-        // 祭壇: 北の壁ぎわの壇と、真珠の窪み三つ (灯るのは運んだ数だけ)
-        RaidKit.fill(level, origin.offset(-5, 1, ALTAR_Z - 1), origin.offset(5, 1, ALTAR_Z + 1), brick);
+        // 祭壇 (真珠の座): 北の壁ぎわの壇 (縁は石英、中は方解石) と、真珠の窪み三つ (灯るのは運んだ数だけ)
+        RaidKit.fill(level, origin.offset(-5, 1, ALTAR_Z - 1), origin.offset(5, 1, ALTAR_Z + 1), Blocks.SMOOTH_QUARTZ.defaultBlockState());
+        RaidKit.fill(level, origin.offset(-4, 1, ALTAR_Z), origin.offset(4, 1, ALTAR_Z), Blocks.CALCITE.defaultBlockState());
         RaidKit.fill(level, origin.offset(-5, 2, ALTAR_Z - 1), origin.offset(-5, 4, ALTAR_Z - 1), Blocks.DEAD_BRAIN_CORAL_BLOCK.defaultBlockState());
         RaidKit.fill(level, origin.offset(5, 2, ALTAR_Z - 1), origin.offset(5, 4, ALTAR_Z - 1), Blocks.DEAD_BRAIN_CORAL_BLOCK.defaultBlockState());
         // 暗がりの飾り: 死んだ珊瑚の柱 (2×2、高さ 5)。祭壇の前・戸の前を避けて 6 本
@@ -98,15 +101,6 @@ public final class TidePearlRoom extends RaidRoom {
             RaidKit.fill(level, origin.offset(x, 1, z), origin.offset(x + 1, 4, z + 1), st);
             RaidKit.fill(level, origin.offset(x, 5, z), origin.offset(x + 1, 5, z + 1), Blocks.DARK_PRISMARINE.defaultBlockState());
         }
-        // 床の模様: 紫と青の釉の板を少し混ぜる (灯りを持つと見える)。柱の根元と台座のある所は避ける
-        for (int i = 0; i < 40; i++) {
-            int x = ctx.rng().nextInt(2 * HX - 1) - HX + 1;
-            int z = ctx.rng().nextInt(2 * HZ - 1) - HZ + 1;
-            BlockPos p = origin.offset(x, 0, z);
-            if (level.getBlockState(p).is(Blocks.PRISMARINE_BRICKS)) {
-                RaidKit.set(level, p, ctx.rng().nextBoolean() ? Blocks.MAGENTA_GLAZED_TERRACOTTA.defaultBlockState() : Blocks.BLUE_GLAZED_TERRACOTTA.defaultBlockState());
-            }
-        }
         // 真珠の台: 帯 (中・左・右) に一つずつ。台は二ブロックの低い台と、上の暗い窪み
         int[] bands = {0, -10, 10};
         for (int i = 0; i < MAX_PEARLS; i++) {
@@ -124,7 +118,55 @@ public final class TidePearlRoom extends RaidRoom {
                 RaidKit.set(level, home[i].below(), Blocks.DARK_PRISMARINE.defaultBlockState());
             }
         }
+        dress(ctx);
         refreshSockets(ctx);
+    }
+
+    // 飾り (docs/design/39 の 4.2「運ぶ 真珠」): 届け先を真珠の座に。北の壁の帆立貝の扇は出口の戸を蝶番にして開き、
+    // 届けた真珠の数だけ扇の三つの畝の組 (見る人から見て左・中・右 = 窪み 1・2・3) が灯る。広間は暗いまま (灯りは真珠を持つ人のまわりだけ)
+    private void dress(RaidCtx ctx) {
+        TideBuild d = new TideBuild(ctx);
+        d.keep(-6, 1, ALTAR_Z - 2, 6, 6, ALTAR_Z + 2);
+        for (AABB b : pillars) {
+            d.keep((int) b.minX - 1, 1, (int) b.minZ - 1, (int) b.maxX, 7, (int) b.maxZ);
+        }
+        for (int i = 0; i < count; i++) {
+            int x = home[i].getX() - origin.getX();
+            int z = home[i].getZ() - origin.getZ();
+            d.keep(x - 2, 1, z - 2, x + 2, 4, z + 2);
+        }
+        d.keep(-8, 1, -HZ, 8, H, -HZ + 1);
+        d.shell(2);
+        // 真珠の座の扇 (半径 7、九本の畝)。灯る目は各組の偶数の畝の外寄りの所
+        List<List<BlockPos>> rays = d.fan(true, 0, 1, 7, 9);
+        for (int g = 0; g < MAX_PEARLS; g++) {
+            clamEyes[g].clear();
+            for (int k = 3 * g; k < 3 * g + 3; k++) {
+                if (k % 2 != 0) {
+                    continue;
+                }
+                for (BlockPos p : rays.get(k)) {
+                    double dist = Math.hypot(p.getX() - origin.getX(), p.getY() - origin.getY() - 1);
+                    if (dist >= 4.5 && dist <= 6.2) {
+                        RaidKit.set(ctx.level(), p, Blocks.CALCITE.defaultBlockState());
+                        clamEyes[g].add(p);
+                    }
+                }
+            }
+        }
+        // 祭壇の脇の柱の頭 (死んだ珊瑚の柱の上に珊瑚の芽)
+        d.mark(-5, 5, ALTAR_Z - 1, Blocks.CHERRY_PLANKS.defaultBlockState());
+        d.mark(5, 5, ALTAR_Z - 1, Blocks.MAGENTA_TERRACOTTA.defaultBlockState());
+        // 暗がりの柱の頭は珊瑚の頭に
+        for (AABB b : pillars) {
+            d.coralHead((int) b.minX, 5, (int) b.minZ);
+        }
+        // 入口から祭壇への一本の筋 (灯りを持つと見える)
+        d.floorLine(0, HZ - 1, ALTAR_Z + 2, Blocks.CUT_SANDSTONE.defaultBlockState());
+        d.wallBranches(10, 4, 0).ceilingCoral(10, 2, H - 1, 0).pools(3).shards(5);
+        // 扇の芯にだけ、ほのかな灯り (暗い広間でも目印の形が分かる)
+        d.light(0, 6, -HZ, 4);
+        d.finish();
     }
 
     private boolean nearPillar(BlockPos p, int margin) {
@@ -318,6 +360,7 @@ public final class TidePearlRoom extends RaidRoom {
         for (int i = 0; i < SOCKET_X.length; i++) {
             boolean lit = i < count && delivered[i];
             RaidKit.set(ctx.level(), origin.offset(SOCKET_X[i], 1, ALTAR_Z), lit ? Blocks.SEA_LANTERN.defaultBlockState() : Blocks.DARK_PRISMARINE.defaultBlockState());
+            TideBuild.lamps(ctx.level(), clamEyes[i], lit ? clamEyes[i].size() : 0);
         }
     }
 
@@ -418,6 +461,14 @@ public final class TidePearlRoom extends RaidRoom {
             }
         }
         return altar;
+    }
+
+    // 撮影用 (/skytideraid pose): 三つの真珠を届けた姿 (窪みと扇の三つの組が灯る)
+    public void showDelivered(RaidCtx ctx) {
+        for (int i = 0; i < SOCKET_X.length; i++) {
+            RaidKit.set(ctx.level(), origin.offset(SOCKET_X[i], 1, ALTAR_Z), Blocks.SEA_LANTERN.defaultBlockState());
+            TideBuild.lamps(ctx.level(), clamEyes[i], clamEyes[i].size());
+        }
     }
 
     // 試験用

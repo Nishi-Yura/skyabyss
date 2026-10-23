@@ -24,7 +24,7 @@ VIEWS = {
 
 def get_option(key):
     mod = importlib.import_module("opt_" + key)
-    return build_option(key, mod.build, mod.PAL, body_hint=getattr(mod, "HINT", 512)), mod
+    return build_option(key, mod.build, mod.PAL, body_hint=getattr(mod, "HINT", 512), fit=getattr(mod, "FIT", None)), mod
 
 
 def pose_of(spec):

@@ -16,6 +16,14 @@
    },
    "bones": [
     {
+     "name": "flinch",
+     "pivot": [
+      0.0,
+      16.0,
+      0.0
+     ]
+    },
+    {
      "name": "heart",
      "pivot": [
       0.0,
@@ -18029,7 +18037,8 @@
         }
        }
       }
-     ]
+     ],
+     "parent": "flinch"
     },
     {
      "name": "heart_vein",
@@ -19158,7 +19167,8 @@
         }
        }
       }
-     ]
+     ],
+     "parent": "flinch"
     },
     {
      "name": "vessel",
@@ -21658,7 +21668,8 @@
         }
        }
       }
-     ]
+     ],
+     "parent": "flinch"
     },
     {
      "name": "core_ring",
@@ -23721,7 +23732,8 @@
         }
        }
       }
-     ]
+     ],
+     "parent": "flinch"
     },
     {
      "name": "core_eye",
@@ -24056,7 +24068,8 @@
        ],
        "uv": {}
       }
-     ]
+     ],
+     "parent": "flinch"
     },
     {
      "name": "crust_glow",
@@ -28015,7 +28028,8 @@
         }
        }
       }
-     ]
+     ],
+     "parent": "flinch"
     },
     {
      "name": "crust",
@@ -68007,7 +68021,8 @@
         }
        }
       }
-     ]
+     ],
+     "parent": "flinch"
     },
     {
      "name": "drips",
@@ -81788,7 +81803,8 @@
         }
        }
       }
-     ]
+     ],
+     "parent": "flinch"
     },
     {
      "name": "drops",
@@ -82316,7 +82332,8 @@
         }
        }
       }
-     ]
+     ],
+     "parent": "flinch"
     },
     {
      "name": "cinders",
@@ -83214,7 +83231,8 @@
         }
        }
       }
-     ]
+     ],
+     "parent": "flinch"
     },
     {
      "name": "ash_drips",
@@ -83223,7 +83241,8 @@
       16.0,
       0.0
      ],
-     "cubes": []
+     "cubes": [],
+     "parent": "flinch"
     },
     {
      "name": "ash_shell",
@@ -83232,7 +83251,8 @@
       16.0,
       0.0
      ],
-     "cubes": []
+     "cubes": [],
+     "parent": "flinch"
     },
     {
      "name": "heart_crust",
@@ -83241,7 +83261,8 @@
       16.0,
       0.0
      ],
-     "cubes": []
+     "cubes": [],
+     "parent": "flinch"
     }
    ]
   }
