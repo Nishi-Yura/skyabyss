@@ -123,7 +123,7 @@ public final class SkillFx {
 
         // 手元 (右手の少し前・下)。一人称でも三人称でも、ここに粒があれば見える
         public Vec3 hand() {
-            return origin.add(fwd.scale(0.55)).add(right.scale(0.38)).add(0, -0.42, 0);
+            return origin.add(fwd.scale(1.1)).add(right.scale(0.5)).add(0, -0.6, 0);
         }
 
         // 足もと (今の位置)
