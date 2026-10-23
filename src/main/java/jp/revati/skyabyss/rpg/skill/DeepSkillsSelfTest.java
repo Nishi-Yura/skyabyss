@@ -370,6 +370,14 @@ final class DeepSkillsSelfTest {
         check(f, SkillExtOps.hasMaterial(p, blade), "materials were not counted");
         check(f, SkillExtOps.mutate(p, Skill.WIND_REND) == SkillExtOps.MutateResult.OK && "rend_blade".equals(d.mutations.get("wind_rend")), "the mutation was not chosen");
         check(f, SkillExtOps.count(p, blade.coreItem()) == 0 && SkillExtOps.count(p, blade.shardItem()) == 0, "materials were not taken");
+        // 素材は留め袋に入っていても数える・使える (拾った素材は袋へ自動で入る。持ち物だけを見ると「足りない」と出てしまった)
+        Mutation surge = Mutation.LUNGE_SURGE;
+        SkillManager.forceRank(p, Skill.LUNGE, Skill.LUNGE.maxRank);
+        jp.revati.skyabyss.pouch.Pouch.add(p, new ItemStack(surge.coreItem(), surge.CORES));
+        jp.revati.skyabyss.pouch.Pouch.add(p, new ItemStack(surge.shardItem(), surge.SHARDS));
+        check(f, SkillExtOps.hasMaterial(p, surge) && SkillExtOps.count(p, surge.coreItem()) == surge.CORES, "materials in the pouch were not counted");
+        check(f, SkillExtOps.mutate(p, Skill.LUNGE) == SkillExtOps.MutateResult.OK && "lunge_surge".equals(d.mutations.get("lunge")), "the pouch materials did not pay for a mutation");
+        check(f, SkillExtOps.count(p, surge.shardItem()) == 0, "the pouch materials were not taken");
         // 一度きり
         give(p, blade, 1, 3);
         check(f, SkillExtOps.mutate(p, Skill.WIND_REND) == SkillExtOps.MutateResult.ALREADY, "a skill mutated twice");

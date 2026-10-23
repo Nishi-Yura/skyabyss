@@ -12,15 +12,21 @@ cmd weather clear
 cmd gamemode survival
 cmd skyabyss level set @s 50
 cmd skyabyss dev rebirth 5
-cmd skill learn @s rock_call 1
-cmd skill learn @s whale_sweep 2
-cmd skill learn @s wind_rend 2
-cmd skill glyph @s rock 2
-cmd skill glyph @s wind 1
-cmd skill glyph @s ash 3
-cmd skill glyph @s bone 1
+cmd skyabyss skill learn @s rock_call 1
+cmd skyabyss skill learn @s whale_sweep 2
+cmd skyabyss skill learn @s wind_rend 2
+cmd skyabyss skill glyph @s rock 2
+cmd skyabyss skill glyph @s wind 1
+cmd skyabyss skill glyph @s ash 3
+cmd skyabyss skill glyph @s bone 1
 cmd give @s skyabyss:stone_whale_core 2
 cmd give @s skyabyss:stone_whale_shard 6
+wait 20
+open inventory
+wait 20
+shot crest_inv_materials
+close
+wait 10
 hud off
 waitchunks
 chat clear
@@ -29,8 +35,8 @@ wait 40
 open skills_ext
 wait 30
 shot crest_g2_empty
-cmd skill socket @s 0 whale_sweep
-cmd skill socket @s 1 rock_call
+cmd skyabyss skill socket @s 0 whale_sweep
+cmd skyabyss skill socket @s 1 rock_call
 wait 20
 shot crest_g2_placed
 close
@@ -40,5 +46,13 @@ wait 20
 open skills_ext
 wait 30
 shot crest_g3_placed
+close
+open skills_ext
+wait 30
+drag 200 135 200 135 2
+wait 10
+drag 200 135 200 135 2
+wait 30
+shot crest_mutated
 close
 echo done

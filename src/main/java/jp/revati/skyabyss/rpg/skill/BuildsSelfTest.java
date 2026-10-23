@@ -142,6 +142,11 @@ final class BuildsSelfTest {
             if (foe != null) {
                 foe.discard();
             }
+            // 放った矢は消す (後の段が、同じ場所の矢の数を数えるため)
+            for (net.minecraft.world.entity.projectile.AbstractArrow a : p.level().getEntitiesOfClass(net.minecraft.world.entity.projectile.AbstractArrow.class,
+                    p.getBoundingBox().inflate(40), e -> true)) {
+                a.discard();
+            }
             check(f, cast == SkillManager.CastResult.OK, pair[0] + ": the rewritten skill did not cast (" + cast + ", skill " + skill.id + ")");
             d.cooldowns.clear();
             d.globalCooldown = 0;

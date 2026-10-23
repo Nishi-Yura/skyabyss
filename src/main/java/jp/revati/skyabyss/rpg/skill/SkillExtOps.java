@@ -52,29 +52,18 @@ public final class SkillExtOps {
         return m != null && m.skill == skill && d.rank(skill) >= skill.maxRank ? m : null;
     }
 
+    // 素材は留め袋と持ち物の両方を数える (炉と同じ。拾った素材は袋へ自動で入るので、持ち物だけでは足りないと見えてしまう)
     public static int count(Player player, Item item) {
-        int n = 0;
-        for (ItemStack s : player.getInventory().items) {
-            if (s.is(item)) {
-                n += s.getCount();
-            }
-        }
-        return n;
+        return jp.revati.skyabyss.pouch.Pouch.countAll(player, item);
     }
 
     public static boolean hasMaterial(Player player, Mutation m) {
         return count(player, m.coreItem()) >= Mutation.CORES && count(player, m.shardItem()) >= Mutation.SHARDS;
     }
 
+    // 留め袋から先に、足りなければ持ち物から (炉の交換と同じ)
     private static void take(Player player, Item item, int amount) {
-        int left = amount;
-        for (ItemStack s : player.getInventory().items) {
-            if (left > 0 && s.is(item)) {
-                int n = Math.min(left, s.getCount());
-                s.shrink(n);
-                left -= n;
-            }
-        }
+        jp.revati.skyabyss.pouch.Pouch.takeAny(player, item, amount);
     }
 
     public static MutateResult mutate(ServerPlayer player, Skill skill) {
