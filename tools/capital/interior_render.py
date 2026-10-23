@@ -375,6 +375,34 @@ def main():
         d = pickle.load(open(a[1], 'rb'))
         x0, z0, x1, z1, y, h = [int(t) for t in a[2].split(',')]
         ascii_plan(d['b'], (x0, z0, x1, z1), y, h)
+    elif a[0] == 'contact':
+        # contact <dir> <出力 png>: 各部屋の before | after を縦に並べる
+        from PIL import ImageFont
+        d_, out_ = a[1], a[2]
+        rows = []
+        W = 560
+        for (nm, rect, y, h, mode) in ROOMS:
+            pb, pa = os.path.join(d_, 'interior_%s_before.png' % nm), os.path.join(d_, 'interior_%s_after.png' % nm)
+            if not (os.path.exists(pb) and os.path.exists(pa)):
+                continue
+            ims = []
+            for p_ in (pb, pa):
+                im = Image.open(p_).convert('RGB')
+                k = min(W / im.width, 420 / im.height)
+                ims.append(im.resize((max(1, int(im.width * k)), max(1, int(im.height * k)))))
+            rows.append((nm, ims))
+        Hrow = 440
+        for pg in range(0, len(rows), 5):
+            chunk = rows[pg:pg + 5]
+            sheet = Image.new('RGB', (2 * W + 20, Hrow * len(chunk) + 10), (24, 26, 30))
+            dr = ImageDraw.Draw(sheet)
+            for i, (nm, ims) in enumerate(chunk):
+                for j, im in enumerate(ims):
+                    sheet.paste(im, (10 + j * W, 10 + i * Hrow + 20))
+                dr.text((12, 10 + i * Hrow + 4), nm + '   before / after', fill=(230, 230, 230))
+            path = out_.replace('.png', '_%d.png' % (pg // 5 + 1))
+            sheet.save(path)
+            print('contact', path, sheet.size)
     elif a[0] == 'sheet':
         ims = [Image.open(p) for p in a[2:]]
         w = 640
