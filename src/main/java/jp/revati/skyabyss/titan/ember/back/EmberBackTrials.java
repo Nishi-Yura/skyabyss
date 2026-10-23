@@ -263,23 +263,8 @@ public final class EmberBackTrials {
     // ワールドのブロック (どのグループにも同じ): 扉はいつも扉のブロックとして置く (門と鍛え手の扉は閉じた既定、熾の底の入口は開いた既定)。
     // 石と光る床は鳴っていない姿、炉の火の所は空気 (火はグループの見かけ)
     public static void placeFixtures(ServerLevel level) {
-        GroupGates.place(level, gateBlocks(), false);
-        // 試練のプールの戸 (原型の入口は開いた既定、試練の階の入口は閉じた既定)
-        jp.revati.skyabyss.trial.TrialRuntime.installGates(level);
-        for (BlockPos p : HUB_FIRE) {
-            if (!level.getBlockState(p).isAir()) {
-                level.setBlock(p, Blocks.AIR.defaultBlockState(), 3);
-            }
-        }
-        GroupGates.place(level, boxBlocks(SMITH_DOOR), false);
+        // 体の中は建てない (外見だけ。docs/design/32 の 2.5)。置くのは体の外の熾の底の入口の扉だけ
         GroupGates.place(level, boxBlocks(HEART_DOOR), true);
-        for (EmberBackState.Trial t : EmberBackState.Trial.values()) {
-            BlockPos s = stonePos(t);
-            BlockState want = jp.revati.skyabyss.trial.TrialGoal.mark();
-            if (!level.getBlockState(s).equals(want)) {
-                level.setBlock(s, want, 3);
-            }
-        }
     }
 
     // ---------------------------------------------------------------- API

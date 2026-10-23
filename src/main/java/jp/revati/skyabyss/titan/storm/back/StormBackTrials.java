@@ -188,24 +188,7 @@ public final class StormBackTrials {
     // 背中そのもの (全員に同じ所) を置き直す。何度呼んでも同じ: 風切りの骨の道、竜骨の門の下の形、扉のブロック、
     // 風鳴り石・灯り・抜け道の床の既定の姿 (まだ鳴っていない)、持ち主のいない部屋
     static void applyWorld(ServerLevel level) {
-        StormBirdBuilder.carveWestRoute(new StormKit(level), StormBackState.get(level).westRoute());
-        StormBirdBuilder.carveKeel(level);
-        placeGates(level);
-        // 試練のプール (docs/design/29): 広間の三つの出口の戸と、試練の甲板の四つの戸
-        jp.revati.skyabyss.trial.TrialRuntime.installGates(level);
-        applyStones(level);
-        UUID east = RoomLocks.owner(EAST_ROOM);
-        if (east == null) {
-            StormEast.applyNeutral(level);
-        } else {
-            StormEast.apply(level, StormProgress.of(level, east));
-        }
-        UUID eye = RoomLocks.owner(EYE_ROOM);
-        if (eye == null) {
-            EyeMirrors.applyNeutral(level);
-        } else {
-            EyeMirrors.apply(level, StormProgress.of(level, eye));
-        }
+        // 体の中は建てない (外見だけ。docs/design/32 の 2.5)。道・竜骨の門・戸・石・部屋の仕掛けは置かない
     }
 
     // ---------------------------------------------------------------- 扉 (グループごと)

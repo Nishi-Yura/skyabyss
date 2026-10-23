@@ -68,7 +68,7 @@ public final class TrialRoute {
     // 越えてから次へ運ぶまで (29 の 4.6 の 4 秒)
     public static final int CARRY_DELAY = 80;
     // 入口に全員がそろってから始まるまでの予告
-    public static final int ENTRY_WAIT = 100;
+    public static final int ENTRY_WAIT = 60;
     // あきらめの提案が流れるまで / 次の提案まで
     public static final int ABANDON_WAIT = 20 * 30;
     public static final int ABANDON_COOLDOWN = 20 * 120;
@@ -176,20 +176,12 @@ public final class TrialRoute {
     // 入口の箱 (到着の台から体へ入る口。docs/design/32 の 2.2)
     @Nullable
     public static AABB entryBox(String titan) {
+        // 乗り込むと着く到着の台 (体の外。巨神の中は建てない。docs/design/32 の 2.2)。着いたその場が入口で、歩かずに部屋 1 へ運ばれる
         return switch (titan) {
-            // 登り口の階段の最初の 5 段 (台の北寄りから東へ)。段の足の高さは台の床 (FLANK_FLOOR_Y) から。広場の高さ (platformY) で
-            // 箱を置くと、箱が階段の 50 ブロック上の宙に浮いて、初回の順路が始まらなかった (R6 の撮影で見つけた)
-            case Titans.STONE_WHALE -> {
-                int y = TitanBackLayout.FLANK_FLOOR_Y + 1;
-                yield new AABB(TitanBackLayout.STAIR_X0, y, TitanBackLayout.STAIR_Z0,
-                        TitanBackLayout.STAIR_X0 + 5, y + TitanBackLayout.STAIR_HEIGHT + 2, TitanBackLayout.STAIR_Z1 + 1);
+            case Titans.STONE_WHALE, Titans.TIDE_SHELL, Titans.THUNDER_WING, Titans.EMBER -> {
+                BlockPos f = RouteSeals.safeFeet(titan);
+                yield new AABB(f.getX() - 6, f.getY() - 2, f.getZ() - 6, f.getX() + 7, f.getY() + 4, f.getZ() + 7);
             }
-            // 潮門の内側の段
-            case Titans.TIDE_SHELL -> new AABB(-111, 63, 82, -104, 71, 89);
-            // 尾の広場の北の端 (体へ入る口)
-            case Titans.THUNDER_WING -> new AABB(-5, 146, 103, 6, 153, 109);
-            // 口の奥の喉の降り口
-            case Titans.EMBER -> new AABB(-4, 77, -129, 5, 84, -121);
             default -> null;
         };
     }
@@ -829,11 +821,9 @@ public final class TrialRoute {
             }
             if (active(back, group)) {
                 trace(group, titan, "already on the route");
-                // 途中からは入れない (2.2)
+                // 順路の途中で到着の台に来た仲間 (あとから乗り込んだ・台へ戻された) は、仲間のいる今の部屋へそのまま運ぶ (2.2)
                 for (ServerPlayer p : inside) {
-                    if (!isParticipant(back, group, p.getUUID())) {
-                        Notice.bar(p, ModText.hint("message.skyabyss.route.in_progress"));
-                    }
+                    rejoin(back, group, titan, p);
                 }
                 continue;
             }
@@ -873,6 +863,43 @@ public final class TrialRoute {
                 Notice.bar(p, ModText.progress("message.skyabyss.route.starting", (left + 19) / 20));
             }
         }
+    }
+
+    // 順路の途中で到着の台にいる人を、そのグループの今の段の部屋へ運ぶ (参加者でなければ参加者に加える)。
+    // 次の段への運びを待っている間 (越えた 4 秒) は何もしない (その運びで一緒に運ばれる)。運んだか
+    public static boolean rejoin(ServerLevel back, UUID group, String titan, ServerPlayer p) {
+        BackGroupData.Record r = BackGroupData.get(back).peek(group);
+        if (r == null || step(r) <= 0 || PENDING.containsKey(group)) {
+            return false;
+        }
+        Set<UUID> who = party(r);
+        if (who.add(p.getUUID())) {
+            List<String> ids = new ArrayList<>();
+            for (UUID u : who) {
+                ids.add(u.toString());
+            }
+            r.putString(PARTY, String.join(",", ids));
+            r.changed();
+        }
+        int step = step(r);
+        boolean mid = r.getInt(MID) > 0;
+        BlockPos at = null;
+        float yaw = 180f;
+        jp.revati.skyabyss.trial.raid.RaidRun.Run run = jp.revati.skyabyss.trial.raid.RaidRun.of(group);
+        if (step >= LAST_STEP) {
+            at = jp.revati.skyabyss.trial.raid.InstanceArenas.heartEntry(titan);
+            yaw = jp.revati.skyabyss.trial.raid.InstanceArenas.heartEntryYaw(titan);
+        } else if (run != null && run.mid == mid && (mid || run.step == step)) {
+            at = run.ctx.cell().rest();
+        }
+        if (at == null) {
+            return false;
+        }
+        move(back, p, at, yaw);
+        RouteCard.show(p, back, group, titan, TrialData.current(back, group), step, mid);
+        sync(back, group);
+        SkyAbyss.LOGGER.info("Route of the {}: {} rejoined group {} at step {}{}", titan, p.getGameProfile().getName(), group, step, mid ? " (mid)" : "");
+        return true;
     }
 
     // 動いている順路の見張り: 中ボスを倒したか・参加者が背に残っているか (背を出る・ログアウトは EMPTY_GRACE の猶予で終わる)

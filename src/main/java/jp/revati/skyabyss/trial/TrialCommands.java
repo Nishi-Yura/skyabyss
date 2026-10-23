@@ -48,15 +48,6 @@ public final class TrialCommands {
                 .then(Commands.literal("dev").then(Commands.literal("trial")
                         .then(Commands.literal("board").executes(ctx -> board(ctx.getSource(), null))
                                 .then(Commands.argument("titan", StringArgumentType.word()).executes(ctx -> board(ctx.getSource(), StringArgumentType.getString(ctx, "titan")))))
-                        .then(Commands.literal("build").executes(ctx -> {
-                            ServerLevel here = back(ctx.getSource());
-                            if (Titans.TIDE_SHELL.equals(titan(here))) {
-                                jp.revati.skyabyss.titan.tide.TideBackBuilder.placeDeck(here);
-                            } else {
-                                jp.revati.skyabyss.titan.dungeon.TitanBackBuilder.placeDeck(here);
-                            }
-                            return 1;
-                        }))
                         .then(Commands.literal("list").executes(ctx -> list(ctx.getSource())))
                         .then(Commands.literal("cycle").then(Commands.argument("n", IntegerArgumentType.integer(1, 99))
                                 .executes(ctx -> cycle(ctx.getSource(), IntegerArgumentType.getInteger(ctx, "n")))))

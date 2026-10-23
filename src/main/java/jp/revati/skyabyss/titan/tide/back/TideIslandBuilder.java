@@ -46,28 +46,9 @@ public final class TideIslandBuilder {
     public static void restSteps(jp.revati.skyabyss.titan.BackBuildJobs.Steps s, TideKit kit) {
         // 仕上げが触る範囲 (背の監査の範囲) のチャンクを先に読み込む (読みに行くと、その場で tick が止まる)
         s.thenJob("load area", () -> jp.revati.skyabyss.titan.BackBuildJobs.loadArea(kit.level(), -190, -245, 190, 170));
+        // 体の中は建てない (外見だけ。docs/design/32 の 2.5)。外から見える所の手直しと、地上へ戻る潮門の到着の段だけ
         s.then("trenches", () -> fillTrenches(kit));
-        s.then("beach", () -> beach(kit));
         s.then("gate", () -> gate(kit));
-        s.then("cave", () -> cave(kit));
-        s.then("hub", () -> hub(kit));
-        s.then("ramp", () -> ramp(kit));
-        s.then("garden", () -> TideGardenBuilder.build(kit));
-        s.then("watch", () -> TideWatchBuilder.build(kit));
-        s.then("neck", () -> TideFlatsBuilder.neck(kit));
-        s.then("flats", () -> TideFlatsBuilder.flats(kit));
-        s.then("mouth stairs", () -> TideFlatsBuilder.mouthStairs(kit));
-        s.then("flats gates", () -> TideBossGates.flats(kit.level()));
-        s.then("spiral", () -> spiral(kit));
-        // 皮は x の帯ごとに一つの手順にする (一度に置くと一 tick に 0.6〜0.8 秒かかっていた)。置くのは固い所を別の固い所に替えるだけなので、順は結果を変えない
-        for (int x0 = -SHELL_RX - 14; x0 <= SHELL_RX + 14; x0 += SKIN_BAND) {
-            int a = x0;
-            s.then("skin", () -> skin(kit, a, Math.min(a + SKIN_BAND - 1, SHELL_RX + 14)));
-        }
-        // 試練の階 (潮の広間の南の戸口から。docs/design/29)。休み場の焚き火は fixtures が RESTS から置く
-        s.then("deck", () -> TideDeckBuilder.build(kit));
-        s.then("fixtures", () -> fixtures(kit));
-        s.then("entry lights", () -> entryLights(kit));
         s.then("wells", () -> fillWells(kit));
         // 心臓の間 (殻の底) と休み場 heart は体の外の封じた部屋 (trial/raid/InstanceArenas)
         jp.revati.skyabyss.trial.raid.InstanceArenas.addHeartSteps(s, kit.level(), jp.revati.skyabyss.progress.Titans.TIDE_SHELL);

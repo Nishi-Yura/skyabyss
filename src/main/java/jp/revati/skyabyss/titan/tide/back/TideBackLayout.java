@@ -315,7 +315,8 @@ public final class TideBackLayout {
 
     // 潮の底の門より奥 (螺旋の階段・前室・殻の底)
     public static boolean pastBottomGate(Vec3 p) {
-        return p.y < HUB_FLOOR && p.y > 45 && Math.abs(p.x) < 20 && p.z > -50 && p.z < 3;
+        // 心臓の間と休み場 heart は体の外の封じた部屋 (trial/raid/InstanceArenas)
+        return jp.revati.skyabyss.trial.raid.InstanceArenas.heartArena(jp.revati.skyabyss.progress.Titans.TIDE_SHELL).inflate(12).contains(p);
     }
 
     private TideBackLayout() {

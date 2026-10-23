@@ -144,59 +144,13 @@ public final class EmberBodyBuilder {
         });
         s.then("slit", () -> holder[0].plugSlit());
         s.then("mouth", () -> holder[0].mouth());
-        s.then("throat", () -> holder[0].throat());
-        s.then("hub", () -> holder[0].hub());
-        s.then("tubes", () -> holder[0].tubes());
-        s.then("trial boxes", () -> holder[0].trialBoxes());
-        s.then("gate shaft", () -> holder[0].gateShaft());
-        s.then("wall stair", () -> holder[0].wallStair());
-        s.then("deck rooms", () -> holder[0].deckRooms());
-        s.then("skin", () -> {
-            holder[0].skin();
-            t[1] = System.currentTimeMillis() - t[0];
-        });
-        s.then("throat lights", () -> holder[0].throatLights());
-        for (String room : EmberBackRooms.roomOrder()) {
-            if (room.equals("heart")) {
-                // 熾の底は体の外 (InstanceArenas)
-                continue;
-            }
-            s.then("room " + room, () -> {
-                long r0 = System.currentTimeMillis();
-                EmberBackRooms.buildOne(back, room);
-                t[2] += System.currentTimeMillis() - r0;
-            });
-        }
-        s.then("fixtures", () -> holder[0].fixtures());
-        s.then("deck content", () -> holder[0].deckContent());
-        // ボス部屋の大門 (鍛え手の扉)。部屋・休み場・碑文を置いたあと
-        s.then("boss gates", () -> EmberBossGates.build(back));
+        // 体の中は建てない (外見だけ。docs/design/32 の 2.5)。地の下・皮の割れ目の栓・口 (顔。地上へ戻る到着の所) だけ
+        s.then("outside", () -> t[1] = System.currentTimeMillis() - t[0]);
         // 熾の底 (心臓の間) と前室は体の外の封じた部屋 (trial/raid/InstanceArenas)
         jp.revati.skyabyss.trial.raid.InstanceArenas.addHeartSteps(s, back, jp.revati.skyabyss.progress.Titans.EMBER);
-        // 順路の部屋を分ける封じ (入口の箱の先・炉心の広間。trial/RouteSeals。32 の 2.5)
-        s.then("route seals", () -> jp.revati.skyabyss.trial.RouteSeals.place(back, jp.revati.skyabyss.progress.Titans.EMBER));
-        jp.revati.skyabyss.titan.audit.BackReach.RepairJob[] repair = new jp.revati.skyabyss.titan.audit.BackReach.RepairJob[1];
-        s.thenJob("repair", () -> repair[0] = holder[0].repairJob(back));
-        int[] dimples = new int[1];
-        s.then("repair report", () -> {
-            if (repair[0] != null && repair[0].filled() > 0) {
-                SkyAbyss.LOGGER.info("Ember back: filled {} blocks of dead-end pockets on the body's outside", repair[0].filled());
-            }
-        });
-        for (int pass = 0; pass < 2; pass++) {
-            for (Box b : DIMPLE_BOXES) {
-                s.then("dimples", () -> dimples[0] += holder[0].smoothDimples(b));
-            }
-        }
-        s.then("dimples report", () -> {
-            if (dimples[0] > 0) {
-                SkyAbyss.LOGGER.info("Ember back: smoothed {} one-block dimples", dimples[0]);
-            }
-        });
         s.then("mark built", () -> {
             data.markBuilt(buildVersion());
             EmberBackTrials.afterBuild(back);
-            jp.revati.skyabyss.titan.light.RouteLamps.place(back, "ember");
             long ms = System.currentTimeMillis() - start;
             lastBuildMs = ms;
             SkyAbyss.LOGGER.info("Built the ember back (build {}): {} body blocks in {} ms, carving {} ms, rooms {} ms, total {} ms",

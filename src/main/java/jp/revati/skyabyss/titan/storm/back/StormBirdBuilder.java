@@ -65,31 +65,14 @@ public final class StormBirdBuilder {
         });
         s.then("road", () -> road(kit));
         s.then("plaza", () -> plaza(kit));
-        s.then("gate", () -> gate(kit));
-        s.then("tail hall", () -> tailHall(kit));
-        s.then("hub", () -> hub(kit));
-        s.then("west", () -> StormWingBuilder.west(kit));
-        s.then("east", () -> StormWingBuilder.east(kit));
-        s.then("front", () -> StormHeadBuilder.front(kit));
-        s.then("keel", () -> keel(kit));
-        // 周回の風切りの骨の前の道 (版 31)。体を掘ったあと、壁の皮の前
-        s.then("long walk", () -> StormLongWalk.build(kit));
-        StormDeckBuilder.steps(s, kit);
-        for (var part : StormSilhouette.parts()) {
-            s.then("silhouette", () -> part.accept(kit));
-        }
-        s.then("skin", () -> n[0] = kit.skin(StormBirdBuilder::styleAt));
-        s.then("seal", () -> n[1] = kit.seal(p -> openToSky(p.getX(), p.getY(), p.getZ()), StormBirdBuilder::styleAt));
-        s.then("corners", () -> n[2] = kit.sealCorners(p -> openToSky(p.getX(), p.getY(), p.getZ()), StormBirdBuilder::styleAt));
+        // 体の中は建てない (外見だけ。docs/design/32 の 2.5)。尾羽の上の到着の台・羽軸の道・羽の広場と、肋の尖塔の外の姿だけ
         s.then("rib shell", () -> StormRibShell.build(kit));
-        s.then("fixtures", () -> fixtures(kit));
         // 鳥の背・翼の上の小さな縦穴 (落ちると出られない) を埋める (詰み監査)
         s.then("wells", () -> {
             if (BIRD.exists()) {
                 jp.revati.skyabyss.titan.WellFiller.fill(kit.level(), -330, 330, -190, 200, BIRD::top, 140);
             }
-            SkyAbyss.LOGGER.info("Carved the storm bird: {} cells, {} wall blocks, {} sealed, {} corner gaps closed in {} ms", kit.carved().size(), n[0], n[1], n[2],
-                    System.currentTimeMillis() - t0[0]);
+            SkyAbyss.LOGGER.info("Dressed the storm bird's outside in {} ms", System.currentTimeMillis() - t0[0]);
         });
     }
 

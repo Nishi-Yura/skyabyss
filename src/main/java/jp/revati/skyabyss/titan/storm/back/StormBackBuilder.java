@@ -66,12 +66,8 @@ public final class StormBackBuilder {
     }
 
     private static void finishSteps(jp.revati.skyabyss.titan.BackBuildJobs.Steps s, ServerLevel back, TitanBackData data, long start) {
-        // ボス部屋の大門 (竜骨の間の入口・雷獣の巣の口)。部屋と回廊を掘ったあと
-        s.then("boss gates", () -> StormBossGates.build(back));
         // 竜骨の間 (心臓の間) と前室は体の外の封じた部屋 (trial/raid/InstanceArenas)
         jp.revati.skyabyss.trial.raid.InstanceArenas.addHeartSteps(s, back, jp.revati.skyabyss.progress.Titans.THUNDER_WING);
-        // 順路の部屋を分ける封じ (入口の箱の先・風の広間・尾の間。trial/RouteSeals。32 の 2.5)
-        s.then("route seals", () -> jp.revati.skyabyss.trial.RouteSeals.place(back, jp.revati.skyabyss.progress.Titans.THUNDER_WING));
         // 入口の箱 (尾の広場の北の端。trial/TrialRoute.entryBox) の灯り: 箱の床の四隅に海のランタンを埋める (歩く邪魔にならない)。
         // 潮殻の入口と同じ。明るさ 6 で自己テスト trial walk (light) が暗いと言った (版 33)
         s.then("entry lights", () -> {
@@ -89,22 +85,11 @@ public final class StormBackBuilder {
                 }
             }
         });
-        // 印を付けるのは修復のあと (印のあとに人が入ると、建てかけの背を見る)。afterBuild と灯りは印の前と同じ順
-        jp.revati.skyabyss.titan.audit.BackReach.RepairJob[] repair = new jp.revati.skyabyss.titan.audit.BackReach.RepairJob[1];
         s.then("after build", () -> {
             data.markBuilt(LAYOUT_VERSION);
             StormBackTrials.afterBuild(back);
-            jp.revati.skyabyss.titan.light.RouteLamps.place(back, "storm");
         });
-        // 試練の仕掛け (昇り風の柱・戸・避雷の柱) を置いたあとで、鳥の背・翼の上の、落ちたら出られない小さな穴 (詰み監査) を埋める。
-        // 部屋より上 (y 159 以上) だけ。部屋・通路の中は直さずに報告に残す
-        s.thenJob("repair", () -> repair[0] = new jp.revati.skyabyss.titan.audit.BackReach.RepairJob(back, () -> StormBackAudit.spec(back),
-                java.util.List.of(new jp.revati.skyabyss.titan.audit.BackReach.Box(-330, 160, -190, 330, 235, 200)), 8, 6,
-                StormKit.FEATHER));
         s.then("done", () -> {
-            if (repair[0] != null && repair[0].filled() > 0) {
-                SkyAbyss.LOGGER.info("Storm back: filled {} blocks of dead-end pockets on the bird's surface", repair[0].filled());
-            }
             SkyAbyss.LOGGER.info("Built the storm back bird (layout {}) in {} ms", LAYOUT_VERSION, System.currentTimeMillis() - start);
         });
     }

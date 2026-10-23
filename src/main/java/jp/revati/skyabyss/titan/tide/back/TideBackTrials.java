@@ -200,22 +200,7 @@ public final class TideBackTrials {
                 && !(e instanceof jp.revati.skyabyss.titan.tide.heart.TideHeart))) {
             e.discard();
         }
-        GroupGates.place(level, TideGates.flats(), false);
-        GroupGates.place(level, TideGates.bottom(), false);
-        GroupGates.place(level, TideGates.bottomFixed(), false);
-        GroupGates.place(level, TideGates.mouth(), true);
-        for (int k = 0; k < 3; k++) {
-            GroupGates.place(level, TideGates.door(k), false);
-        }
-        GroupGates.place(level, TideGates.cave(), true);
-        // 試練の階の戸 (引いた三つだけ、そのグループに開く。docs/design/29)
-        jp.revati.skyabyss.trial.TrialRuntime.installGates(level);
-        level.setBlock(new BlockPos(0, HUB_FLOOR, 0), TideKit.LAMP, 3);
-        TideGarden.reset(level, null);
-        TideWatch.reset(level, null);
-        TideFlats.reset(level, null);
-        applyStones(level);
-        initPools(level);
+        // 体の中は建てない (外見だけ。docs/design/32 の 2.5)。戸・庭・潮見・干潟の仕掛けは置かない
     }
 
     // 建て直し (古い配置の島): どのグループの進みも最初に戻す (試練の番号が進み、古い休み場の記録は無効になる)
@@ -282,34 +267,8 @@ public final class TideBackTrials {
         if (!anyone) {
             return;
         }
-        if (!ready) {
-            TideGates.ensureAll(level);
-            initPools(level);
-            applyStones(level);
-        }
+        // 体の中は建てない (外見だけ。docs/design/32 の 2.5): 庭・潮見・干潟・戸・潮の溜め・潮鳴りは動かさない。潮の時計だけ進める
         TideClock.advance(level);
-        tickHorns(level);
-        FIELD.tick(level, p -> target(level, p));
-        boolean peaceful = level.getDifficulty() == Difficulty.PEACEFUL;
-        if (level.getGameTime() % 10 == 0) {
-            TideRooms.tick(level);
-        }
-        TideGarden.tick(level, peaceful);
-        if (!peaceful) {
-            TideWatch.tick(level, false);
-        }
-        TideFlats.tick(level, peaceful);
-        if (level.getGameTime() % 5 == 0) {
-            tickGates(level);
-            tickPeaceful(level, peaceful);
-            tickFrost(level);
-            TideGuide.tick(level);
-        }
-        TideClock.Phase phase = TideClock.phase(level);
-        if (phase != lastPhase || level.getGameTime() % 20 == 0) {
-            lastPhase = phase;
-            sendGauge(level);
-        }
     }
 
     // 満ちはじめる 10 秒前に低い潮鳴り、引きはじめる 10 秒前に高い音 (島じゅう。潮は全員のもの)

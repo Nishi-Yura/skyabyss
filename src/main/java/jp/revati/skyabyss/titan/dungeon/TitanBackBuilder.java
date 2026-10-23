@@ -40,13 +40,6 @@ public final class TitanBackBuilder {
         }
     }
 
-    // 開発・自己テスト: 試練の階を、いまの背へ後から置く (本番の建設では WhaleDeck.placed() が false のあいだ置かない)
-    public static void placeDeck(ServerLevel level) {
-        WhaleDeck.setPlaced(true);
-        WhaleDeckBuilder.build(new BuildKit(level, RandomSource.create(20261015L)));
-        jp.revati.skyabyss.trial.TrialRuntime.installGates(level);
-    }
-
     // 起動時: 島の体を何 tick かに分けて置き、そのあとの仕上げも手順ごとに tick に分けて建てる (BackBuildJobs。13 の 24.5節)
     public static void schedule(ServerLevel level, TitanBackData data) {
         BuildKit kit = new BuildKit(level, RandomSource.create(20261015L));
@@ -67,100 +60,13 @@ public final class TitanBackBuilder {
         // 仕上げが触る範囲のチャンクを先に読み込む (読みに行くと、その場で tick が止まる)
         s.thenJob("load area", () -> BackBuildJobs.loadArea(level, -RX, -RZ, RX, RZ));
         s.then("surface", () -> buildSurface(kit));
-        s.then("hub", () -> buildHub(kit));
-        s.then("treasury", () -> buildTreasury(kit));
-        // 鼓動の間と入口の通路は封じて誰も入らない (trial/RouteSeals)。柱・壁の灯りは置かない (版 32)
-        s.then("west wing", () -> WestWingBuilder.build(kit));
-        s.then("east wing", () -> EastWingBuilder.build(kit));
-        // 建築の監査 (版 18): 四方が 1 高い床の中で 1 マスだけ低いくぼみを埋める (背の殻の模型の窪みと、ひれの道の縁)
-        s.then("dimples", () -> {
-            smoothDimples(kit, -27, -17, 138, 152, 93, 103);
-            smoothDimples(kit, 54, 120, 70, 100, -75, -25);
-            smoothDimples(kit, -120, -54, 70, 112, -75, -25);
-        });
-        // 試練の階 (階段・広間・四つの新しいセル。docs/design/29)。入口の通路・東の翼の天井の上の、体の中の空き
-        s.then("deck", () -> {
-            if (WhaleDeck.placed()) {
-                WhaleDeckBuilder.build(kit);
-            }
-        });
-        // ボス部屋の大門 (心臓の間・番兵長の広間)。部屋と通路を掘ったあと
-        s.then("boss gates", () -> BossGates.build(kit));
-        s.then("maze fixtures", () -> MazeBuilder.buildFixtures(kit));
-        s.then("maze", () -> MazeBuilder.buildMaze(new BuildKit(level, RandomSource.create(data.mazeSeed())), data.mazeSeed()));
-        // 体内を掘ってから階段を通す (先に階段を作ると、通路の壁でふさがれる)
-        s.then("shrine and stairs", () -> buildShrineAndStairs(kit));
-        s.then("signs", () -> {
-            for (BlockPos p : GOAL_SPOTS) {
-                kit.set(p, jp.revati.skyabyss.trial.TrialGoal.mark());
-            }
-            // 物語の断片の碑文 (部屋と柱をすべて置いたあとに掛ける)
-            for (Inscription lore : LORE_SIGNS) {
-                if (lore.key().equals("sign.skyabyss.lore_heart")) {
-                    // 心臓の休み場の碑文は、体の外の心臓の間と一緒に建てる (InstanceArenas)
-                    continue;
-                }
-                kit.wallSign(lore.pos(), lore.facing(), lore.key());
-            }
-        });
-        // 歩く道の灯り (建築の監査 LIGHT_DARK。下の迷路は光の台の遊びなので暗いまま。場所は dev routelight whale が測った route_lamps.json)
-        s.then("route lamps", () -> jp.revati.skyabyss.titan.light.RouteLamps.place(level, "whale"));
-        // 休み場の復活位置に苔の敷物が落ちていたら除く (立てる所を空けておく)
-        s.then("rest spots", () -> {
-            for (BlockPos spawn : TitanBackTrials.checkpointSpawns().values()) {
-                if (kit.get(spawn.getX(), spawn.getY(), spawn.getZ()).is(Blocks.MOSS_CARPET)) {
-                    kit.set(spawn, BuildKit.AIR);
-                }
-            }
-        });
-        // 順路の部屋を分ける封じ (入口の箱の先・鼓動の間・入口の通路。trial/RouteSeals。32 の 2.5)
-        s.then("route seals", () -> jp.revati.skyabyss.trial.RouteSeals.place(level, jp.revati.skyabyss.progress.Titans.STONE_WHALE));
-        // 背・ひれの上の、落ちたら出られない凹み (詰み監査で見つけて埋める。部屋・通路の中は直さずに報告に残す)。tick をまたいで進める
-        jp.revati.skyabyss.titan.audit.BackReach.RepairJob[] repair = new jp.revati.skyabyss.titan.audit.BackReach.RepairJob[1];
-        s.thenJob("repair", () -> repair[0] = new jp.revati.skyabyss.titan.audit.BackReach.RepairJob(level, TitanBackAudit::spec,
-                java.util.List.of(new jp.revati.skyabyss.titan.audit.BackReach.Box(-RX, FLOOR + 8, -RZ, RX, 205, RZ)), 200, 14, Blocks.DEEPSLATE_BRICKS.defaultBlockState()));
         // 心臓の間 (体の外の封じた部屋。trial/raid/InstanceArenas)
         jp.revati.skyabyss.trial.raid.InstanceArenas.addHeartSteps(s, level, jp.revati.skyabyss.progress.Titans.STONE_WHALE);
         s.then("mark built", () -> {
-            int repaired = repair[0] == null ? 0 : repair[0].filled();
-            if (repaired > 0) {
-                SkyAbyss.LOGGER.info("Whale back: filled {} blocks of dead-end pockets on the outside", repaired);
-            }
             data.markBuilt();
             SkyAbyss.LOGGER.info("Built the stone whale's back in {} ms", System.currentTimeMillis() - start);
         });
         return s;
-    }
-
-    // 床 (上が 2 マス空いた固いブロック) で、四方の隣の 1 つ上の高さに固いブロックがあるものは、1 つ低く埋まったくぼみなので、1 つ上を同じブロックで埋める
-    private static void smoothDimples(BuildKit kit, int x1, int x2, int y1, int y2, int z1, int z2) {
-        int filled = 0;
-        for (int x = x1; x <= x2; x++) {
-            for (int z = z1; z <= z2; z++) {
-                for (int y = y1; y <= y2; y++) {
-                    BlockState here = kit.get(x, y, z);
-                    if (here.isAir() || !here.getFluidState().isEmpty() || !here.canOcclude() || !kit.get(x, y + 1, z).isAir() || !kit.get(x, y + 2, z).isAir()) {
-                        continue;
-                    }
-                    boolean pit = true;
-                    for (Direction d : Direction.Plane.HORIZONTAL) {
-                        int nx = x + d.getStepX();
-                        int nz = z + d.getStepZ();
-                        if (kit.get(nx, y + 1, nz).isAir() || !kit.get(nx, y + 2, nz).isAir() || !kit.get(nx, y + 3, nz).isAir() || !kit.get(nx, y + 4, nz).isAir()) {
-                            pit = false;
-                            break;
-                        }
-                    }
-                    if (pit && kit.get(x, y + 3, z).isAir()) {
-                        kit.set(x, y + 1, z, here);
-                        filled++;
-                    }
-                }
-            }
-        }
-        if (filled > 0) {
-            SkyAbyss.LOGGER.info("Whale back: filled {} floor dimples", filled);
-        }
     }
 
     // ---------------------------------------------------------------- 島: 岩鯨と同じ形のブロックの鯨 (WhaleShape)
@@ -199,7 +105,6 @@ public final class TitanBackBuilder {
         buildPlatform(kit);
         // 到着の台 (錨石の外) と、そこから背の広場へ体の中を登る階段
         buildFlankPlatform(kit);
-        buildClimb(kit);
     }
 
     // モデルの錨石 (左のわき腹の鉄の留め具) から、外へ張り出して雲の海の少し上まで垂れる鎖
@@ -343,30 +248,6 @@ public final class TitanBackBuilder {
         kit.set(anchor(), Blocks.LODESTONE.defaultBlockState());
     }
 
-    // 台から背の広場への登りの階段: 体の中を東へ、1 ブロックごとに 1 上がる (幅 3・高さ 4)。広場の石畳 (南西) へ出る。
-    // 体の面に近い所は、背の殻を割って階段が背へ出る。灯りを段ごとに交互に吊るす
-    private static void buildClimb(BuildKit kit) {
-        int steps = stairSteps();
-        BlockState up = Blocks.DEEPSLATE_BRICK_STAIRS.defaultBlockState().setValue(StairBlock.FACING, Direction.EAST);
-        BlockState lantern = Blocks.SOUL_LANTERN.defaultBlockState().setValue(net.minecraft.world.level.block.LanternBlock.HANGING, true);
-        for (int i = 0; i < steps; i++) {
-            int x = STAIR_X0 + i;
-            int feet = FLANK_FLOOR_Y + 1 + i;
-            for (int z = STAIR_Z0; z <= STAIR_Z1; z++) {
-                kit.fill(x, feet, z, x, feet + STAIR_HEIGHT - 1, z, BuildKit.AIR);
-                if (i > 0) {
-                    kit.set(x, feet - 1, z, up);
-                } else if (kit.get(x, feet - 1, z).isAir()) {
-                    kit.set(x, feet - 1, z, BuildKit.POLISHED);
-                }
-            }
-            // 灯り: 6 段ごとに、天井の中央から
-            if (i > 0 && i % 6 == 3 && !kit.get(x, feet + STAIR_HEIGHT, (STAIR_Z0 + STAIR_Z1) / 2).isAir()) {
-                kit.set(x, feet + STAIR_HEIGHT - 1, (STAIR_Z0 + STAIR_Z1) / 2, lantern);
-            }
-        }
-    }
-
     // 円形の石畳の模様。縁はレンガ、一つ内側に彫刻の線、その内側は市松、中央は扇形の模様
     private static BlockState plazaFloor(int x, int z, double d, RandomSource random) {
         if (d > 0.84) {
@@ -425,107 +306,6 @@ public final class TitanBackBuilder {
         kit.set(-2, py + 5, PLATFORM_Z + 5, Blocks.CHAIN.defaultBlockState());
         kit.set(2, py + 5, PLATFORM_Z + 5, Blocks.CHAIN.defaultBlockState());
         kit.hangingLantern(0, PLATFORM_Z + 5, py + 6, 1);
-    }
-
-
-    // ---------------------------------------------------------------- 祠と体内への階段
-    private static void buildShrineAndStairs(BuildKit kit) {
-        int sy = shrineY();
-        int z1 = SHRINE_Z - 16;
-        int z2 = SHRINE_Z + 16;
-        for (int x = -8; x <= 8; x++) {
-            for (int z = z1; z <= z2; z++) {
-                kit.fill(x, sy - 3, z, x, sy - 1, z, Blocks.TUFF.defaultBlockState());
-                boolean border = Math.abs(x) == 8 || z == z1 || z == z2;
-                kit.set(x, sy, z, border ? BuildKit.TILES : BuildKit.POLISHED);
-                kit.fill(x, sy + 1, z, x, sy + 12, z, BuildKit.AIR);
-            }
-        }
-        // 四隅と中ほどの柱、二段の屋根
-        for (int x : new int[]{-8, 8}) {
-            for (int z : new int[]{z1, SHRINE_Z - 8, SHRINE_Z, SHRINE_Z + 8, z2}) {
-                for (int y = sy + 1; y <= sy + 8; y++) {
-                    kit.set(x, y, z, y == sy + 8 ? BuildKit.CHISELED : BuildKit.POLISHED);
-                }
-            }
-        }
-        for (int x = -9; x <= 9; x++) {
-            for (int z = z1 - 1; z <= z2 + 1; z++) {
-                if ((x * 7 + z * 13) % 6 != 0) {
-                    kit.set(x, sy + 9, z, Blocks.DEEPSLATE_TILE_SLAB.defaultBlockState());
-                }
-                if (Math.abs(x) <= 5 && z >= z1 + 5 && z <= z2 - 5) {
-                    kit.set(x, sy + 10, z, Blocks.DEEPSLATE_TILE_SLAB.defaultBlockState());
-                }
-            }
-        }
-        // 灯りを吊るす所は、屋根の石を欠かさない (鎖が宙に残らない)
-        kit.set(0, sy + 9, SHRINE_Z + 10, BuildKit.TILES);
-        kit.set(0, sy + 9, SHRINE_Z - 10, BuildKit.TILES);
-        kit.hangingLantern(0, SHRINE_Z + 10, sy + 9, 2);
-        kit.hangingLantern(0, SHRINE_Z - 10, sy + 9, 2);
-        // 南の口 (広場から来る踏み跡) の段: 背は南へ下がっていくので、祠の床まで一段ずつ上がる段を置く
-        BlockState up = Blocks.DEEPSLATE_BRICK_STAIRS.defaultBlockState().setValue(StairBlock.FACING, Direction.NORTH);
-        for (int i = 1; i <= 14; i++) {
-            int z = z2 + i;
-            int y = sy - i;
-            boolean any = false;
-            for (int x = -3; x <= 3; x++) {
-                int t = top(x, z);
-                if (t >= y) {
-                    continue;
-                }
-                any = true;
-                kit.fill(x, t + 1, z, x, y - 1, z, BuildKit.BRICKS);
-                kit.set(x, y, z, up);
-                kit.fill(x, y + 1, z, x, y + 6, z, BuildKit.AIR);
-            }
-            if (!any) {
-                break;
-            }
-        }
-        // 北へ下りていく階段。1段ごとに1つ低くなり、体内の床の高さで終わる
-        BlockState step = Blocks.DEEPSLATE_BRICK_STAIRS.defaultBlockState().setValue(StairBlock.FACING, Direction.SOUTH);
-        for (int i = 0; ; i++) {
-            int z = SHRINE_Z - 1 - i;
-            int y = sy - 1 - i;
-            if (y < FLOOR) {
-                break;
-            }
-            for (int x = -SHRINE_STAIR_HALF - 1; x <= SHRINE_STAIR_HALF + 1; x++) {
-                boolean inside = Math.abs(x) <= SHRINE_STAIR_HALF;
-                for (int yy = y; yy <= y + SHRINE_STAIR_HEIGHT; yy++) {
-                    if (inside) {
-                        kit.set(x, yy, z, yy == y ? (y == FLOOR ? BuildKit.POLISHED : step) : BuildKit.AIR);
-                    } else if (yy < sy && !kit.get(x, yy, z).isAir()) {
-                        kit.set(x, yy, z, i % 4 == 0 ? Blocks.BONE_BLOCK.defaultBlockState() : BuildKit.BRICKS);
-                    }
-                }
-            }
-            // 版 32: 体内への階段は封じた側 (入口の箱の先) なので、灯りは置かない
-        }
-    }
-
-    // ---------------------------------------------------------------- 鼓動の間 (形だけ)
-    private static void buildHub(BuildKit kit) {
-        kit.room(HUB);
-        kit.room(ENTRY);
-        // 西・東の翼へ向かう通路
-        kit.room(WEST_HALL);
-        kit.room(EAST_HALL);
-        // 版 32: 鼓動の間は封じて誰も入らない (trial/RouteSeals)。肋・床の模様・台座・灯り・苔・鍾乳石は置かない (部屋の形だけ)。
-        // 西・東の翼へ向かう通路は、翼の前室 (W0・E0) から歩いて入れる行き止まりなので、壁の灯りを置く (鼓動の間の壁の灯りで照らしていた)
-        kit.wallLamps(WEST_HALL, 3, FLOOR + 4);
-        kit.wallLamps(EAST_HALL, 3, FLOOR + 4);
-    }
-
-    // ---------------------------------------------------------------- 北の封印 (心臓の回廊の入口)
-    // 版 18: 宝物庫の部屋は無くした (天の鍵の欠片は心臓を倒すと受け取る)。三つの石が歌うと、鼓動の間の北の封印が開き、そのまま心臓の回廊へ入る。
-    private static void buildTreasury(BuildKit kit) {
-        for (BlockPos p : GATE) {
-            kit.set(p, ModBlocks.SEALED_GATE.get().defaultBlockState());
-        }
-        // 版 32: 封印の両脇の柱は置かない (鼓動の間は封じて誰も入らない)
     }
 
     static BlockState sealed() {
