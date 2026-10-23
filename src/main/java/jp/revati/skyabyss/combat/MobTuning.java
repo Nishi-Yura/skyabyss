@@ -13,7 +13,7 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.EntityJoinLevelEvent;
 
 // mod の雑魚敵の体力と攻撃を一律に下げる (2026-10-23 の試遊: 体力は今の 8 割、攻撃も少し下げる)。
-// 傷は人が受けるときだけ 1 + ATTACK 倍。大物 (最大体力が ShieldRules.BIG_HEALTH 以上。心臓・中ボス・主・王) は下げない。数値は各敵の作りのまま、ここで掛けるだけ
+// 傷は人が受けるときだけ 1 + ATTACK 倍。ボスの帯を持つ敵と、大物 (最大体力が ShieldRules.BIG_HEALTH 以上。心臓・中ボス・主・王) は下げない。数値は各敵の作りのまま、ここで掛けるだけ
 public final class MobTuning {
     public static final double HEALTH = -0.2;
     public static final double ATTACK = -0.1;
@@ -32,7 +32,32 @@ public final class MobTuning {
             return false;
         }
         AttributeInstance hp = e.getAttribute(Attributes.MAX_HEALTH);
-        return hp != null && hp.getBaseValue() < ShieldRules.BIG_HEALTH;
+        return hp != null && hp.getBaseValue() < ShieldRules.BIG_HEALTH && !hasBossBar(e.getClass());
+    }
+
+    // 画面上のボスの帯を持つ敵 (中ボス・番人など) は雑魚ではない。帯 (ServerBossEvent) を持つ型かを型ごとに一度だけ調べる
+    private static final java.util.Map<Class<?>, Boolean> BOSS = new java.util.concurrent.ConcurrentHashMap<>();
+
+    static boolean hasBossBar(Class<?> type) {
+        return BOSS.computeIfAbsent(type, t -> {
+            for (Class<?> c = t; c != null && c != Object.class; c = c.getSuperclass()) {
+                for (java.lang.reflect.Field f : c.getDeclaredFields()) {
+                    if (net.minecraft.world.BossEvent.class.isAssignableFrom(f.getType())) {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        });
+    }
+
+    // 下げた分を外す (自己テストで、敵の作りの数そのものを確かめるとき)
+    public static void untune(LivingEntity e) {
+        AttributeInstance hp = e.getAttribute(Attributes.MAX_HEALTH);
+        if (hp != null && hp.hasModifier(HEALTH_ID)) {
+            hp.removeModifier(HEALTH_ID);
+            e.setHealth(e.getMaxHealth());
+        }
     }
 
     @EventBusSubscriber(modid = SkyAbyss.MODID)
