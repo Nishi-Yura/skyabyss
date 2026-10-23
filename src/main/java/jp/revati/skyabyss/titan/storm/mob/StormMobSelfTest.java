@@ -269,14 +269,14 @@ public final class StormMobSelfTest {
     private static void checkStun(ServerLevel level, BlockPos floor, List<Mob> made, List<String> failures) {
         FeatherWarden w = make(level, StormMobSetup.FEATHER_WARDEN.get(), top(floor), made);
         w.hurt(level.damageSources().magic(), 4);
-        check(failures, Math.abs(w.getHealth() - (FeatherWarden.HEALTH - 4)) < 1e-3, "warden takes 4 normally (" + w.getHealth() + ")");
+        check(failures, Math.abs(w.getHealth() - (w.getMaxHealth() - 4)) < 1e-3, "warden takes 4 normally (" + w.getHealth() + ")");
         FeatherWarden s = make(level, StormMobSetup.FEATHER_WARDEN.get(), top(floor), made);
         s.startCrouch();
         for (int i = 0; i < 80 && !s.isStunned(); i++) {
             s.tickDive();
         }
         s.hurt(level.damageSources().magic(), 4);
-        check(failures, Math.abs(s.getHealth() - (FeatherWarden.HEALTH - 6)) < 1e-3, "stunned warden takes 1.5x (" + s.getHealth() + ")");
+        check(failures, Math.abs(s.getHealth() - (s.getMaxHealth() - 6)) < 1e-3, "stunned warden takes 1.5x (" + s.getHealth() + ")");
     }
 
     // 雷蛾の連鎖: 3 ブロックおきに 5 人並べると 3 人まで、5 → 4 → 3.2。6 ブロック離れていれば跳ばない。静電を帯びない人で止まる

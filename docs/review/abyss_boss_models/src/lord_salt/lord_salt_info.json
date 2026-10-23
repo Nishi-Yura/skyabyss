@@ -1,0 +1,22 @@
+{
+ "name": "lord_salt",
+ "tris": 3094,
+ "atlas": [
+  1024,
+  512
+ ],
+ "open": 0,
+ "floating": [],
+ "bones": {
+  "root": 0,
+  "body": 480,
+  "tail": 54,
+  "shell": 1946,
+  "neck": 230,
+  "head": 196,
+  "stalk_l": 94,
+  "stalk_r": 94
+ },
+ "glow": 23822,
+ "height": 46.2
+}

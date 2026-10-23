@@ -34,7 +34,9 @@ import org.joml.Vector3f;
 // 層の印・門・近道・上り下りの鎖 (docs/design/36 の 8 章)。
 //   印の台 (mark_<層>_<i>。灰の骨の台): 右クリックで印を取る。巣・縄張りの道 (REQUIRE) は払ってから。取ると本人とパーティの全員が持つ
 //     (記録 LayerData の "mark:<層>_<i>"、合図 abyss_mark_<層>_<i> をパーティへ)。はじめて取られた印の近道の格子 (scut_<層>_<i>) が開く (ワールドで共有)
-//   門 (gate_<層>。野営の北の封じ石): 印が三つの人 (またはメインの段が印の段を越えた人) だけ、右クリックで向こうへ通る。内からはだれでも野営へ戻れる
+//   門 (gate_<層>。野営の北の格子の門): 印が三つの人 (またはメインの段が印の段を越えた人) が 5 以内に来ると格子が上がる (gateTick)。
+//     その人が離れて 3 秒たち、門の列にだれもいなければ下りる。右クリックでも向こうへ運ぶ。内からはだれでも野営へ戻れる
+//     (2026-10-23 の試遊「印をおいても鉄格子のところがあかない」: 前は封じ石を右クリックしたときだけ運んでいて、見た目は開かなかった)
 //   下りの鎖 (descend_<層>。主の間の奥): 主を倒した人だけ、次の層の野営 (arrive_<次>。灰の次は心臓の控えの間 heart_in) へ
 //   上りの鎖 (ascend_<層>。野営の南西。骨の層は地上への鎖 exit で AbyssGate の係): 前の層の野営へ。心臓の控えの間の ascend_heart は灰の野営へ
 //   門の上の三つの台座 (socket_<層>_<1..3>) は、持つ印の数だけ本人にだけ光る
@@ -79,6 +81,8 @@ public final class AbyssMarks {
             return false;
         }
         if (d.has(p.getUUID(), "mark:" + key)) {
+            // 仲間が取った印でも、近道の格子は開ける (開いていなかった時の直し)
+            openShortcut(p.serverLevel(), layer, i);
             Notice.bar(p, Component.translatable("message.skyabyss.abyss_v2.mark_have", count(p, layer)));
             return false;
         }
@@ -252,15 +256,118 @@ public final class AbyssMarks {
         }
     }
 
+    // ---------------------------------------------------------------- 格子の門
+    static final double GATE_NEAR = 5.0;
+    static final int GATE_LINGER = 60;
+    private static final Map<String, Long> GATE_UNTIL = new java.util.HashMap<>();
+    private static final Map<UUID, Long> GATE_HINTED = new java.util.HashMap<>();
+
+    // 門の格子のマス (幅 3・高さ 3)
+    static List<BlockPos> gateBars(BlockPos g) {
+        List<BlockPos> out = new ArrayList<>();
+        for (int dx = -1; dx <= 1; dx++) {
+            for (int dy = 0; dy <= 2; dy++) {
+                out.add(g.offset(dx, dy, 0));
+            }
+        }
+        return out;
+    }
+
+    // 門の列とその奥 (人が立っていれば下ろさない)
+    static boolean inGateway(BlockPos g, BlockPos at) {
+        return Math.abs(at.getX() - g.getX()) <= 1 && at.getY() >= g.getY() - 1 && at.getY() <= g.getY() + 2 && (at.getZ() == g.getZ() || at.getZ() == g.getZ() - 1);
+    }
+
+    public static boolean gateRaised(ServerLevel level, String layer) {
+        BlockPos g = AbyssBuild.mark("gate_" + layer);
+        return g != null && level.isLoaded(g) && !level.getBlockState(g.above()).is(Blocks.IRON_BARS);
+    }
+
+    // 10 tick ごと: 印が三つの人が近ければ上げる。だれもいなくなって GATE_LINGER たてば下ろす
+    static void gateTick(ServerLevel level, long now) {
+        gateTick(level, now, level.players());
+    }
+
+    static void gateTick(ServerLevel level, long now, List<ServerPlayer> players) {
+        for (String layer : Layers.ORDER) {
+            BlockPos g = AbyssBuild.mark("gate_" + layer);
+            if (g == null || !level.isLoaded(g)) {
+                continue;
+            }
+            boolean want = false;
+            boolean occupied = false;
+            for (ServerPlayer p : players) {
+                if (p.isSpectator() || !p.isAlive()) {
+                    continue;
+                }
+                BlockPos at = p.blockPosition();
+                if (inGateway(g, at)) {
+                    occupied = true;
+                }
+                boolean near = Math.abs(at.getY() - g.getY()) <= 4 && Math.hypot(p.getX() - (g.getX() + 0.5), p.getZ() - (g.getZ() + 0.5)) <= GATE_NEAR;
+                if (!near) {
+                    continue;
+                }
+                if (canPassGate(p, layer)) {
+                    want = true;
+                } else if (p.getZ() > g.getZ() + 0.5 && Math.hypot(p.getX() - (g.getX() + 0.5), p.getZ() - (g.getZ() + 0.5)) <= 2.6) {
+                    Long last = GATE_HINTED.get(p.getUUID());
+                    if (last == null || now - last > 200) {
+                        GATE_HINTED.put(p.getUUID(), now);
+                        Notice.hint(p, "message.skyabyss.abyss_v2.gate_closed", count(p, layer));
+                    }
+                }
+            }
+            boolean raised = gateRaised(level, layer);
+            if (want) {
+                GATE_UNTIL.put(layer, now + GATE_LINGER);
+                if (!raised) {
+                    setGate(level, g, true);
+                }
+            } else if (raised && !occupied && GATE_UNTIL.getOrDefault(layer, 0L) <= now) {
+                setGate(level, g, false);
+            }
+        }
+    }
+
+    static void setGate(ServerLevel level, BlockPos g, boolean open) {
+        for (BlockPos b : gateBars(g)) {
+            if (open) {
+                if (level.getBlockState(b).is(Blocks.IRON_BARS)) {
+                    level.setBlock(b, Blocks.AIR.defaultBlockState(), Block.UPDATE_ALL);
+                    level.sendParticles(SOCKET, b.getX() + 0.5, b.getY() + 0.5, b.getZ() + 0.5, 3, 0.25, 0.25, 0.1, 0);
+                }
+            } else if (level.getBlockState(b).isAir()) {
+                level.setBlock(b, Blocks.IRON_BARS.defaultBlockState(), Block.UPDATE_ALL);
+            }
+        }
+        if (!open) {
+            for (BlockPos b : gateBars(g)) {
+                var st = level.getBlockState(b);
+                if (st.is(Blocks.IRON_BARS)) {
+                    level.setBlock(b, Block.updateFromNeighbourShapes(st, level, b), Block.UPDATE_CLIENTS);
+                }
+            }
+        }
+        level.playSound(null, g, open ? SoundEvents.IRON_DOOR_OPEN : SoundEvents.IRON_DOOR_CLOSE, SoundSource.BLOCKS, 1.4f, 0.6f);
+        if (open) {
+            level.playSound(null, g, SoundEvents.RESPAWN_ANCHOR_CHARGE, SoundSource.BLOCKS, 1f, 0.7f);
+        }
+    }
+
     // ---------------------------------------------------------------- 見回り (台座の光・開いた近道を開いたままに)
     @SubscribeEvent
     static void onTick(ServerTickEvent.Post event) {
         MinecraftServer server = event.getServer();
-        if (server.getTickCount() % 20 != 9) {
+        if (server.getTickCount() % 10 != 4 && server.getTickCount() % 20 != 9) {
             return;
         }
         ServerLevel level = server.getLevel(AbyssWorld.LEVEL);
         if (level == null || level.players().isEmpty() || !AbyssBuild.built(server)) {
+            return;
+        }
+        if (server.getTickCount() % 10 == 4) {
+            gateTick(level, level.getGameTime());
             return;
         }
         LayerData d = LayerData.get(server);
@@ -271,6 +378,12 @@ public final class AbyssMarks {
             }
             String layer = Layers.ORDER.get(s);
             if (Layers.inCamp(layer, p.blockPosition())) {
+                // 開いた近道は、野営にだれかいる間は開いたまま (建て直し・読み込みの前に開けた分も)
+                for (int i = 1; i <= 3; i++) {
+                    if (d.isOpen("scut_" + layer + "_" + i)) {
+                        clearBox(level, "scut_" + layer + "_" + i, Blocks.IRON_BARS);
+                    }
+                }
                 int n = count(p, layer);
                 for (int i = 1; i <= 3; i++) {
                     BlockPos so = AbyssBuild.mark("socket_" + layer + "_" + i);

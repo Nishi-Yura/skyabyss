@@ -496,7 +496,11 @@ def build_side(L):
 # 荷運びのロク (塩の野営): 深淵の素材と、食べ物・灯りの取り替え
 TRADES = [('chips', 'skyabyss:abyss_bone_chip', 6, 'minecraft:cooked_beef', 4, '骨のかけら 6 → 焼いた肉 4', 'Bone chips ×6 → Cooked beef ×4'),
           ('salt', 'skyabyss:abyss_salt_crystal', 6, 'minecraft:golden_carrot', 3, '塩の結晶 6 → 金のにんじん 3', 'Salt crystals ×6 → Golden carrots ×3'),
-          ('copper', 'skyabyss:abyss_storm_copper', 4, 'minecraft:lantern', 4, '雷の銅 4 → ランタン 4', 'Storm copper ×4 → Lanterns ×4')]
+          ('copper', 'skyabyss:abyss_storm_copper', 4, 'minecraft:lantern', 4, '雷の銅 4 → ランタン 4', 'Storm copper ×4 → Lanterns ×4'),
+          # 深淵の装備 (docs/design/03 の 12 章): がらくたを錨鉄に、錨鉄を隊の道具に
+          ('anchor', 'skyabyss:abyss_bone_chip', 8, 'skyabyss:abyss_anchor_iron', 2, '骨のかけら 8 → 錨鉄 2', 'Bone chips ×8 → Anchor iron ×2'),
+          ('lamp_sword', 'skyabyss:abyss_anchor_iron', 20, 'skyabyss:abyss_lamp_sword', 1, '錨鉄 20 → 灯り番の剣', "Anchor iron ×20 → Lamp-Keeper's Sword"),
+          ('listener', 'skyabyss:abyss_anchor_iron', 16, 'skyabyss:abyss_pulse_listener', 1, '錨鉄 16 → 鼓動の聴き筒', 'Anchor iron ×16 → Pulse Listener')]
 
 
 def build_porter():

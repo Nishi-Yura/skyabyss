@@ -1,0 +1,31 @@
+{
+ "name": "lord_storm",
+ "tris": 3624,
+ "atlas": [
+  512,
+  512
+ ],
+ "open": 0,
+ "floating": [],
+ "bones": {
+  "root": 0,
+  "body": 2026,
+  "heart": 340,
+  "jaw": 130,
+  "buds": 348,
+  "leg0": 38,
+  "shin0": 92,
+  "leg1": 38,
+  "shin1": 92,
+  "leg2": 38,
+  "shin2": 92,
+  "leg3": 38,
+  "shin3": 92,
+  "leg4": 38,
+  "shin4": 92,
+  "leg5": 38,
+  "shin5": 92
+ },
+ "glow": 7935,
+ "height": 47.0
+}

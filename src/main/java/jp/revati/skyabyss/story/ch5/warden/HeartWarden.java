@@ -285,6 +285,8 @@ public class HeartWarden extends Monster implements GeoEntity {
 
     private void updateBar(ServerLevel level) {
         bar.setProgress(getHealth() / getMaxHealth());
+        // 段のボスバー (色で段。story/ch5/client/AbyssBossBarClient)
+        jp.revati.skyabyss.story.ch5.AbyssBossBars.phase(bar, phase - 1);
         List<ServerPlayer> in = WardenArena.inside(level);
         for (ServerPlayer p : in) {
             if (!bar.getPlayers().contains(p)) {

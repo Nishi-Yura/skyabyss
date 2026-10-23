@@ -12,7 +12,7 @@
   "gui.skyabyss.mount.whistle_have": "You carry a whistle",
   "item.skyabyss.mount_whistle": "Mount Whistle",
   "item.skyabyss.mount_whistle.desc": "A stable whistle. Blow it and your mount comes to you.",
-  "item.skyabyss.mount_whistle.use": "Right-click to call, again to send it home",
+  "item.skyabyss.mount_whistle.use": "Right-click to call, again to send back. Also works from the pouch: tap Y (pouch tool key)",
   "message.skyabyss.mount.bought_look": "Bought %s and set it as your look",
   "message.skyabyss.mount.bought_tier": "%s is now tier %s",
   "message.skyabyss.mount.called": "%s has come",

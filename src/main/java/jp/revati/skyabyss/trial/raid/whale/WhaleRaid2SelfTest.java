@@ -34,6 +34,9 @@ import net.neoforged.neoforge.common.util.FakePlayer;
 //   登録と周ごとの引き (枠ごとに二つのどちらも引かれうる)・建てた形・仕掛けの動き・目的の帯の中身・越える・リセットで build 直後へ戻る
 // SKYABYSS_SELFTEST_ONLY="raid" (実時間で 1 分ほど)。結果は SELFTEST raid whale 2 PASSED / FAILED
 public final class WhaleRaid2SelfTest {
+    // 目的の文のキーの頭 (lang の検査が文字列の頭をキーと見ないよう、分けて書く)
+    private static final String KEY_HEAD = "raid.skyabyss" + ".";
+
     private WhaleRaid2SelfTest() {
     }
 
@@ -341,7 +344,7 @@ public final class WhaleRaid2SelfTest {
             WhaleShaftRoom r = shaftRoom();
             check(r.fluidLevel(ctx) > 0 && r.fluidLevel(ctx) < 3, "WR4: the fluid is not rising slowly (" + r.fluidLevel(ctx) + ")");
             // 目的の帯
-            check(r.objectiveKey().startsWith("raid.skyabyss.WR4") && r.counterMax() == 4 && r.secondaryMax() > 0 && !r.secondaryKey().isEmpty(), "WR4: HUD values are empty");
+            check(r.objectiveKey().startsWith(KEY_HEAD + "WR4") && r.counterMax() == 4 && r.secondaryMax() > 0 && !r.secondaryKey().isEmpty(), "WR4: HUD values are empty");
             // 高いところ (踊り場 3) は無事。傷を受けない
             put(p1, r.landingSpot(ctx, 3));
             healAll();
@@ -496,7 +499,7 @@ public final class WhaleRaid2SelfTest {
                 check(level.getBlockState(ctx.origin().offset(WhaleTilesRoom.HX - 5 + i, i, 8)).getBlock() instanceof StairBlock, "WR5: balcony stair " + i + " missing");
             }
             // 目的の帯
-            check(room.objectiveKey().startsWith("raid.skyabyss.WR5"), "WR5: no objective text");
+            check(room.objectiveKey().startsWith(KEY_HEAD + "WR5"), "WR5: no objective text");
             // 挑戦ごとに形が違う (三つの種で同じにならない) と、どれも解ける
             return true;
         });
@@ -598,7 +601,7 @@ public final class WhaleRaid2SelfTest {
             check(level.getBlockState(ctx.origin().offset(14, 0, 14)).is(Blocks.RED_NETHER_BRICKS), "WR6: the corner outside the ring is not red");
             check(!level.getBlockState(ctx.origin().offset(5, 0, 5)).is(Blocks.RED_NETHER_BRICKS) && !level.getBlockState(ctx.origin().offset(5, 0, 5)).is(Blocks.REDSTONE_BLOCK),
                     "WR6: the floor inside the ring is painted");
-            check(room.objectiveKey().startsWith("raid.skyabyss.WR6") && room.counterMax() == 3 && room.secondaryMax() > 0 && !room.secondaryKey().isEmpty(), "WR6: HUD values are empty");
+            check(room.objectiveKey().startsWith(KEY_HEAD + "WR6") && room.counterMax() == 3 && room.secondaryMax() > 0 && !room.secondaryKey().isEmpty(), "WR6: HUD values are empty");
             snap("WR6a");
             put(p1, ctx.origin().offset(12, 1, 12));
             healAll();

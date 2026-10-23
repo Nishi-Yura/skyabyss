@@ -222,7 +222,8 @@ public final class MountService {
                 return true;
             }
         }
-        return false;
+        // 旅嚢に入っていても持っている (Y で呼べる)
+        return jp.revati.skyabyss.pouch.Pouch.count(player, MountSetup.WHISTLE.get()) > 0;
     }
 
     // ---------------------------------------------------------------- 厩舎の画面
@@ -320,7 +321,7 @@ public final class MountService {
                 continue;
             }
             m.setLook(all[i]);
-            Vec3 at = player.position().add(fwd.scale(9.0)).add(side.scale((i - (all.length - 1) / 2.0) * 2.6));
+            Vec3 at = player.position().add(fwd.scale(9.0)).add(side.scale((i - (all.length - 1) / 2.0) * 3.4));
             m.moveTo(at.x, at.y, at.z, player.getYRot() + 180f, 0f);
             m.setPersistenceRequired();
             level.addFreshEntity(m);

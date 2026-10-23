@@ -8,6 +8,7 @@ import java.util.UUID;
 import org.joml.Vector3f;
 
 import jp.revati.skyabyss.SkyAbyss;
+import jp.revati.skyabyss.abyss.boss.BossLook;
 import jp.revati.skyabyss.abyss.mobs.AbyssMob;
 import jp.revati.skyabyss.abyss.mobs.AbyssMobB;
 import jp.revati.skyabyss.abyss.mobs.AbyssMobKind;
@@ -72,6 +73,15 @@ public final class DepthBoss {
     }
 
     // ---------------------------------------------------------------- 決まり (純粋な計算)
+    public static int kingIndex(King def) {
+        for (int k = 0; k < KINGS.length; k++) {
+            if (KINGS[k] == def) {
+                return k;
+            }
+        }
+        return 0;
+    }
+
     public static King kingOf(int bossNo) {
         return KINGS[Math.floorMod(bossNo - 1, KINGS.length)];
     }
@@ -173,6 +183,8 @@ public final class DepthBoss {
         }
         LivingEntity king = (LivingEntity) e;
         double hp = hp(bossNo, party.size());
+        // 湧いた時の雑魚の下げ (MobTuning。体力を決める前の小さな体で付く) を外してから、王の体力を決める
+        jp.revati.skyabyss.combat.MobTuning.untune(king);
         king.getAttribute(Attributes.MAX_HEALTH).setBaseValue(hp);
         king.getAttribute(Attributes.ATTACK_DAMAGE).setBaseValue(dmg(bossNo) * 0.8);
         if (king.getAttribute(Attributes.SCALE) != null) {
@@ -184,6 +196,8 @@ public final class DepthBoss {
         king.setCustomNameVisible(true);
         king.addTag(KING_TAG);
         king.addTag(DepthMobs.TAG);
+        // 見た目: 型ごとの王の姿。周が進むと歪んだ姿 (BossLook)
+        BossLook.set(king, BossLook.pack(BossLook.KING_BONE + kingIndex(def), cycleOf(bossNo), 0));
         if (king instanceof Mob mob) {
             mob.setPersistenceRequired();
         }
@@ -252,6 +266,8 @@ public final class DepthBoss {
             f.bar.addPlayer(p);
         }
         f.bar.setProgress(Math.max(0f, king.getHealth() / king.getMaxHealth()));
+        // 段のボスバー (色で段。story/ch5/client/AbyssBossBarClient)
+        jp.revati.skyabyss.story.ch5.AbyssBossBars.phase(f.bar, f.phase);
         int ph = phaseOf(king.getHealth() / king.getMaxHealth());
         if (ph > f.phase) {
             f.phase = ph;
@@ -262,6 +278,8 @@ public final class DepthBoss {
             if (f.active != null) {
                 endMove(king, f);
             }
+            BossLook.clear(king);
+            BossLook.setPhase(king, ph);
         }
         double dmg = dmg(f.bossNo) * (1 + 0.08 * DepthPlan.stepsOf(f.floor));
         if (f.dash > 0) {
@@ -329,6 +347,7 @@ public final class DepthBoss {
         if (f.def.walks() && m != Move.SUMMON) {
             freeze(king, true);
         }
+        BossLook.windup(king, m.ordinal() + 1, f.total);
         for (ServerPlayer p : party) {
             level.playSound(null, p.blockPosition(), SoundEvents.WARDEN_HEARTBEAT, SoundSource.HOSTILE, 0.6f, 0.6f);
         }
@@ -450,6 +469,7 @@ public final class DepthBoss {
 
     static void resolve(ServerLevel level, DepthBuilder.Inst i, LivingEntity king, Fight f, List<ServerPlayer> party, double dmg) {
         Move m = f.active;
+        BossLook.strike(king, m.ordinal() + 1);
         switch (m) {
             case SLAM -> {
                 double r = 4.5 + 0.3 * f.phase;

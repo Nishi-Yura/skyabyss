@@ -638,14 +638,14 @@ public final class SkillRules {
             case ROCK_CALL -> new Object[] {fmt(ROCK_CALL_RADIUS), rockCallTicks(r) / SECOND, fmt(ROCK_CALL_KNOCKBACK)};
             case STONE_STANCE -> new Object[] {fmt(stanceArmor(r)), fmt(stanceKnockback(r) * 100)};
             case WHALE_SWEEP -> new Object[] {fmt(SWEEP_RADIUS), pct(sweepMultiplier(r)), fmtSeconds(cooldownTicks(skill, r))};
-            case STONE_OATH -> new Object[] {pct(OATH_SHARE), 1, fmt(ALLY_RANGE)};
+            case STONE_OATH -> new Object[] {pct(OATH_SHARE), 2, fmt(ALLY_RANGE)};
             case LUNGE -> new Object[] {fmt(LUNGE_RANGE), pct(LUNGE_MULTIPLIER), fmtSeconds(cooldownTicks(skill, r))};
             case NIMBLE -> new Object[] {fmt(nimbleMove(r) * 100), fmt(nimbleFall(r))};
             case BACKSTEP -> new Object[] {fmt(BACKSTEP_ENEMY_RANGE), fmtSeconds(cooldownTicks(skill, r))};
             case FORESIGHT -> new Object[] {fmt(foresightBonus(r) * 100), FORESIGHT_TICKS / SECOND};
             case WIND_REND -> new Object[] {pct(rendBack(r)), pct(rendFront(r))};
             case LONE_WIND -> new Object[] {pct(LONE_ATTACK), pct(LONE_MOVE), fmt(LONE_RANGE)};
-            case WARD_SONG -> new Object[] {fmt(WARD_SONG_RADIUS), fmt(wardAbsorb(r)), fmt(wardAbsorb(r) / 2), WARD_SONG_TICKS / SECOND};
+            case WARD_SONG -> new Object[] {fmt(WARD_SONG_RADIUS), fmt(wardAbsorb(r)), fmt(wardAbsorb(r)), WARD_SONG_TICKS / SECOND};
             case CALM_HEART -> new Object[] {fmt(calmHeartBonus(r) * 100)};
             case EBB_TIDE -> new Object[] {fmt(ebbRange(r)), ebbSlowTicks(r) / SECOND};
             case RIPPLE -> new Object[] {fmt(rippleSlow(r) * 100), RIPPLE_TICKS / SECOND};
@@ -667,7 +667,7 @@ public final class SkillRules {
             case READINESS_REWARD -> new Object[] {fmt(readinessMana(r)), fmt(readinessAttack(r) * 100)};
             case CAMP_HAND -> new Object[] {fmt(campRegen(r)), fmt(campHunger(r) * 100)};
             case APPRAISER -> new Object[] {1};
-            case FLEET_FOOT -> new Object[] {3, fmt(fleetBonus(r) * 100), FLEET_TICKS / SECOND, FLEET_COOLDOWN / SECOND};
+            case FLEET_FOOT -> new Object[] {6, fmt(fleetBonus(r) * 100), FLEET_TICKS / SECOND, FLEET_COOLDOWN / SECOND};
             case JOURNAL -> new Object[] {1};
             case DUST_CHARGE -> new Object[] {fmt(DUST_LENGTH), pct(dustMultiplier(r)), fmtSeconds(cooldownTicks(skill, r))};
             case SEA_BREEZE -> new Object[] {fmt(seaMove(r) * 100), fmt(seaRegen(r) * 100)};

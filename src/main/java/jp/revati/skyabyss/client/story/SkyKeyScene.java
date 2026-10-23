@@ -52,7 +52,11 @@ public final class SkyKeyScene extends Screen {
 
     public static void open(SkyKeyScenePayload payload) {
         Minecraft mc = Minecraft.getInstance();
-        mc.execute(() -> mc.setScreen(new SkyKeyScene(payload.days())));
+        mc.execute(() -> {
+            // 遺物の選択画面が開いていたら、鍵の場面を先に見せて、あとで開き直す
+            jp.revati.skyabyss.client.reward.HeartRewardClient.interruptedBy(mc.screen);
+            mc.setScreen(new SkyKeyScene(payload.days()));
+        });
     }
 
     // 場面の間は HUD (チャット・追跡表示・技の枠) を隠す。閉じたら元に戻す

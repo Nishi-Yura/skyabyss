@@ -42,6 +42,17 @@ public final class AbyssPressure {
     public static volatile ToIntFunction<ServerPlayer> lightBonus = p -> 0;
     // 闇のたまりの速さの倍 (心臓の間で灯籠が全部消えていると 2。warden.WardenArena が入れる)
     public static volatile ToDoubleFunction<ServerPlayer> voiceScale = p -> 1.0;
+    // 装備から掛ける倍率 (淵潜りの鎧・鼓動の聴き筒。abyss/gear/AbyssGearEvents が足す)。重み・声のたまりそれぞれに掛け合わせる
+    public static final java.util.List<ToDoubleFunction<ServerPlayer>> WEIGHT_FACTORS = new java.util.concurrent.CopyOnWriteArrayList<>();
+    public static final java.util.List<ToDoubleFunction<ServerPlayer>> VOICE_FACTORS = new java.util.concurrent.CopyOnWriteArrayList<>();
+
+    public static double factor(java.util.List<ToDoubleFunction<ServerPlayer>> list, ServerPlayer p) {
+        double m = 1.0;
+        for (ToDoubleFunction<ServerPlayer> f : list) {
+            m *= f.applyAsDouble(p);
+        }
+        return m;
+    }
 
     static final double WEIGHT_FREE = 6.0;
     static final double WEIGHT_SPAN = 40.0;
@@ -113,7 +124,7 @@ public final class AbyssPressure {
             s.lowY = y;
         }
         double relief = Mth.clamp(weightRelief.applyAsDouble(p), 0.0, 1.0);
-        s.weight = Mth.clamp((y - s.lowY - WEIGHT_FREE) / WEIGHT_SPAN, 0.0, 1.0) * (1.0 - relief);
+        s.weight = Mth.clamp((y - s.lowY - WEIGHT_FREE) / WEIGHT_SPAN, 0.0, 1.0) * (1.0 - relief) * factor(WEIGHT_FACTORS, p);
         apply(p, Attributes.MOVEMENT_SPEED, SPEED_ID, -SPEED_LOSS * s.weight);
         apply(p, Attributes.JUMP_STRENGTH, JUMP_ID, -JUMP_LOSS * s.weight);
         // ---- 闇がたまる
@@ -121,7 +132,7 @@ public final class AbyssPressure {
         int light = Math.max(p.serverLevel().getMaxLocalRawBrightness(at), Mth.clamp(lightBonus.applyAsInt(p), 0, 15));
         float d = light <= 3 ? VOICE_DARK : light <= 7 ? VOICE_DIM : VOICE_LIGHT;
         if (d > 0) {
-            d *= (float) (voiceScale.applyAsDouble(p) * AbyssRelics.voiceFactor(p));
+            d *= (float) (voiceScale.applyAsDouble(p) * AbyssRelics.voiceFactor(p) * factor(VOICE_FACTORS, p));
         }
         s.voice = Mth.clamp(s.voice + d, 0f, 100f);
         if (s.voice >= 40 && p.getRandom().nextInt(5) == 0) {
