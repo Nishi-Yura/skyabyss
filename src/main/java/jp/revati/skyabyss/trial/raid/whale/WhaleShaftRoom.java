@@ -103,6 +103,7 @@ public final class WhaleShaftRoom extends RaidRoom {
         }
         // 飾り (docs/design/39 の 4.1): 殻の濃淡と肋骨の輪、頂の喉の光。縦穴の中に足がかりは足さない
         WhaleDecor.wr4(ctx, this);
+        RaidKit.brightenFloor(ctx, 3);
     }
 
     private static BlockPos o(RaidKit.Cell c, int x, int y, int z) {
