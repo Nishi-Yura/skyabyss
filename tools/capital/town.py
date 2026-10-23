@@ -1779,6 +1779,7 @@ class Town(Facilities):
             n += 1
         self.tidy_for_walkers()
         self.drop_floaters()
+        self.polish_final()
         self.v.connect()
         return self.v
 

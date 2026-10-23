@@ -34,8 +34,6 @@ def emission(s):
     n = base_name(s)
     if n in LIGHT and n != 'campfire':
         return LIGHT[n]
-    if n in ('furnace', 'smoker', 'blast_furnace') and prop(s, 'lit') == 'true':
-        return 13
     if n == 'campfire' and prop(s, 'lit') == 'true':
         return 15
     if n.endswith('candle') and prop(s, 'lit') == 'true':

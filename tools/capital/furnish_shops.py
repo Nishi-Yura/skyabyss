@@ -204,8 +204,10 @@ class FurnishShops:
         # 客の側: 酒の台の前の止まり木 (椅子)、東の机と椅子
         self.chair(-35, 0, 39, 'west')
         self.chair(-35, 0, 41, 'west')
-        self.table_set(-32, 39, -31, 39, tops={(-32, 39): self.candle(2), (-31, 39): self.pot('south')})
-        self.fcol(-30, 41, [self.barrel('up'), self.LANT])
-        self.fcol(-30, 38, ['hay_block[axis=y]'])
+        self.ftable([(-31, 39), (-31, 40)], tops={(-31, 39): self.candle(2), (-31, 40): self.pot('south')})
+        for z in (39, 40):
+            self.chair(-32, 0, z, 'east')
+            self.chair(-30, 0, z, 'west')
+        self.fcol(-30, 38, [self.barrel('up'), self.LANT])
         self.chandelier(-33, 40, 0, 5, drop=3)
         self.fautolight(rect, 0, 5)

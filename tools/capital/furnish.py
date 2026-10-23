@@ -103,13 +103,28 @@ class Furnish:
                 pass
         return cells
 
+    def ceil_at(self, x, z, y0, ymax):
+        """y0 から上へ、最初の空気でないブロックの y (灯りや鎖でなく、丸ごとか梁や板)。無ければ None"""
+        for yy in range(y0, ymax + 1):
+            t = self.v.get(x, yy, z)
+            if t is None or t in AIRS:
+                continue
+            n = base_name(t)
+            if any(k in n for k in ('lantern', 'chain', 'candle', 'carpet', 'potted', 'flower', 'pot')):
+                return None
+            return yy
+        return None
+
     def hang(self, x, z, y, h, drop=3, s=None):
-        """天井 (床の上 y、部屋の高さ h → 天井の下端は y + h) から鎖で吊る。灯りは床の上 drop の高さ。梁があればその下に鎖が付く"""
-        top = y + h - 1
+        """鎖で吊る灯り (灯りは床の上 drop の高さ)。鎖は上の最初のブロック (梁か天井) まで。届かなければ置かない"""
         ly = y + drop
-        for yy in range(ly + 1, top + 1):
+        c = self.ceil_at(x, z, ly + 1, y + h + 2)
+        if c is None:
+            return False
+        for yy in range(ly + 1, c):
             self.v.set(x, yy, z, self.CHAIN)
         self.v.set(x, ly, z, s or self.LANTH)
+        return True
 
     def chandelier(self, x, z, y, h, drop=3):
         """車輪の吊り灯り: 鎖の先に柵の十字、四つの腕の先に灯り"""
@@ -203,7 +218,7 @@ class Furnish:
                 if self.v.get(x, y, z) in (None, 'air', 'cave_air') and self.solid_at(x, y - 1, z):
                     self.v.set(x, y, z, '%s_carpet' % (border if edge else color))
 
-    def fautolight(self, rect, y, h, drop=None, tries=60):
+    def fautolight(self, rect, y, h, drop=None, tries=300):
         """立てる床で明るさが 8 より低い所に、天井から吊る灯りを足す (家具の上に吊って、通り道は空ける)"""
         v = self.v
         x0, z0, x1, z1 = rect
@@ -223,7 +238,8 @@ class Furnish:
                 for z in range(z0, z1 + 1):
                     if (x, z) in self._hold:
                         continue
-                    ok = all((v.get(x, yy, z) in (None, 'air', 'cave_air')) for yy in range(y + drop, y + h))
+                    c = self.ceil_at(x, z, y + drop + 1, y + h + 2)
+                    ok = c is not None and all((v.get(x, yy, z) in (None, 'air', 'cave_air')) for yy in range(y + drop, c))
                     if not ok:
                         continue
                     n = sum(1 for (a, b) in dark if abs(a - x) + abs(b - z) <= r)
@@ -233,6 +249,76 @@ class Furnish:
             if not best:
                 break
             self.hang(best[1], best[2], y, h, drop)
+            added += 1
+        return added
+
+    def flight(self, rect, y, h, drop=None):
+        """部屋を作り直さずに明るさだけ足す"""
+        x0, z0, x1, z1 = rect
+        self._fr = (x0, z0, x1, z1, y, h)
+        self._hold = set()
+        return self.fautolight(rect, y, h, drop)
+
+    def fring_thin(self, rect, y, h):
+        """壁ぎわの輪 (room() の棚: 樽・本棚・鉢が全部の壁に並ぶ) を間引く: 鉢と上の小物を消し、3 つ置きに 3 つ消す"""
+        x0, z0, x1, z1 = rect
+        v = self.v
+        ring = [(x, z0) for x in range(x0, x1 + 1)] + [(x1, z) for z in range(z0 + 1, z1 + 1)] +                [(x, z1) for x in range(x1 - 1, x0 - 1, -1)] + [(x0, z) for z in range(z1 - 1, z0, -1)]
+        small = ('potted_', 'decorated_pot', 'candle', 'flower_pot', 'cake')
+        for i, (x, z) in enumerate(ring):
+            for yy in range(y, y + 3):
+                t = v.get(x, yy, z) or ''
+                n = base_name(t)
+                if any(k in n for k in small) or (n == 'lantern' and 'hanging=false' in t):
+                    v.set(x, yy, z, self.air(yy))
+            if (i // 3) % 2 == 1:
+                for yy in range(y, y + 3):
+                    t = v.get(x, yy, z) or ''
+                    if base_name(t) in ('bookshelf', 'barrel', 'chiseled_bookshelf'):
+                        v.set(x, yy, z, self.air(yy))
+
+    def fpost_light(self, rect, y, h, tries=300):
+        """高い広間 (社) の灯り: 壁や柱に寄せた石の灯籠 (石煉瓦の壁の上に灯り) を、暗い所が減るまで足す"""
+        v = self.v
+        x0, z0, x1, z1 = rect
+        self._fr = (x0, z0, x1, z1, y, h)
+        self._hold = set()
+        added = 0
+        avoid = set()
+        for nm, (mx, my, mz) in v.marks.items():
+            if abs(my - y) <= 1:
+                for a in range(-2, 3):
+                    for b in range(-2, 3):
+                        avoid.add((mx + a, mz + b))
+        for x in range(x0 - 1, x1 + 2):
+            for z in range(z0 - 1, z1 + 2):
+                if '_door[' in (v.get(x, y, z) or ''):
+                    for a in range(-2, 3):
+                        for b in range(-2, 3):
+                            avoid.add((x + a, z + b))
+        for _ in range(tries):
+            box = (x0 - 10, x1 + 10, y - 2, y + h + 1, z0 - 10, z1 + 10)
+            L = ai.light_map(v.b, box)
+            cells = ai.stand_cells(v.b, rect, y, h)
+            dark = [(x, z) for (x, z) in cells if L.get((x, y, z), 0) < 8]
+            if not dark:
+                break
+            best = None
+            for (x, z) in cells:
+                if (x, z) in avoid:
+                    continue
+                if (v.get(x, y, z) or 'air') not in AIRS or (v.get(x, y + 1, z) or 'air') not in AIRS:
+                    continue
+                wall = any(self.solid_at(x + a, y, z + b) for (a, b) in ((1, 0), (-1, 0), (0, 1), (0, -1)))
+                n = sum(1 for (a, b) in dark if abs(a - x) + abs(b - z) <= 6)
+                n = n * (4 if wall else 1)          # 壁や柱ぎわを先に。足りなければ床の上にも
+                if n and (best is None or n > best[0]):
+                    best = (n, x, z)
+            if not best:
+                break
+            _, x, z = best
+            v.set(x, y, z, self.st.railing)
+            v.set(x, y + 1, z, self.LANT)
             added += 1
         return added
 
@@ -252,6 +338,25 @@ class Furnish:
 
     def npc(self, role, x, y, z):
         self.attendant(role, x, y, z)
+
+    # ------------------------------------------------------------ 仕上げの灯り (town.build の最後、小物の整理のあと)
+    LIGHT_DROP = {'smithy': 4}
+
+    def polish_final(self):
+        import interior_render as ir
+        self.fw = self.st.wood
+        saved = self.rng
+        self.rng = self.frng()
+        try:
+            for (nm, rect, y, h, mode) in ir.ROOMS:
+                if nm == 'shrine':
+                    self.fpost_light(rect, y, h)
+                else:
+                    self.flight(rect, y, h, self.LIGHT_DROP.get(nm))
+            for (name, rect, y, names, rugc) in self.UPPER:
+                self.flight(rect, y, 5 if y == 7 else 4)
+        finally:
+            self.rng = saved
 
     # ------------------------------------------------------------ 本体
     def polish_interiors(self):
