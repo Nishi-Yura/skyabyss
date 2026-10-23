@@ -146,7 +146,7 @@ def hearth_core():
 
 SOUNDS = {
     "domain_stone_sea": (stone_sea, "石の海が広がる", "The Sea of Stone spreads"),
-    "domain_rising_tide": (rising_tide, "満ち潮が来る", "The Rising Tide arrives"),
+    "domain_rising_tide": (rising_tide, "合わせ貝が開く", "The Matching Shells open"),
     "domain_thunder_cage": (thunder_cage, "雷の檻が閉じる", "The Thunder Cage closes"),
     "domain_hearth_core": (hearth_core, "炉心が灯る", "The Hearth Core ignites"),
 }

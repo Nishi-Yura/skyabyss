@@ -455,6 +455,11 @@ public final class Ch3MobsSelfTest {
             FakePlayer in = fake(level, "w_in", SX + 2.0, SZ + 0.5);
             FakePlayer out = fake(level, "w_out", SX + 5.5, SZ + 0.5);
             ps.addAll(List.of(in, out));
+            // 露出を待つあいだに一人目へ寄る (跳ぶ) ことがあるので、輪の前に真ん中へ戻す
+            w.moveTo(SX + 0.5, FLOOR, SZ + 0.5, 0f, 0f);
+            w.setDeltaMovement(net.minecraft.world.phys.Vec3.ZERO);
+            w.getNavigation().stop();
+            net.minecraft.world.phys.Vec3 ringAt = w.position();
             List<TelegraphShape> shapes = new ArrayList<>();
             Telegraph.record(shapes);
             w.startRing();
@@ -468,7 +473,7 @@ public final class Ch3MobsSelfTest {
             Telegraph.record(null);
             check(first >= 20 && first >= ScorchedWarden.RING_WARN, "the ring hit after " + first + " ticks (needs 1 s)", f);
             check(Math.abs(lost(in) - ScorchedWarden.RING_DAMAGE) < 0.6f && lost(out) == 0, "ring damage in " + lost(in) + " / out " + lost(out), f);
-            check(!shapes.isEmpty() && shapes.get(0).contains(in.getX(), in.getZ()) && !shapes.get(0).contains(out.getX(), out.getZ()), "the ring shape does not match", f);
+            check(!shapes.isEmpty() && shapes.get(0).contains(in.getX(), in.getZ()) && !shapes.get(0).contains(out.getX(), out.getZ()), "the ring shape does not match (" + shapes.size() + " shapes, ring at " + ringAt + ", warden " + w.position() + ")", f);
             check(w.skill() == ScorchedWarden.NONE, "the ring never ended", f);
             notes.add("warden ring " + first);
             drop(ps);

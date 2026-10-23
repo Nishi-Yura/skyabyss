@@ -124,6 +124,7 @@
   "message.skyabyss.storm.mirrors_reset_wait": "The reset mirror is still heavy (%s s)",
   "message.skyabyss.storm.peaceful": "The titan does not wake (the trials sleep while the game is on Peaceful)",
   "message.skyabyss.storm.perching": "The wind has turned. The storm is coming down onto the peak...",
+  "message.skyabyss.storm.summit_noticed": "The thunder wing has noticed you on the peak. The wind spirals down...",
   "message.skyabyss.storm.return_hint": "Stand in the outer face of the feather gate to return to the ground",
   "message.skyabyss.storm.return_opened": "Trial cleared. You will be carried on shortly",
   "message.skyabyss.storm.rod_full": "The rod is full. A bone door slides open",
