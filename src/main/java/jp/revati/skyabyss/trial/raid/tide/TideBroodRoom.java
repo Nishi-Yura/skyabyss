@@ -216,6 +216,13 @@ public final class TideBroodRoom extends RaidRoom {
             if (mother.onGround() && level.getBlockState(at).isAir() && !level.getBlockState(at.below()).isAir()) {
                 RaidKit.set(level, at, PRINT);
                 prints.add(new long[] {at.asLong(), now + PRINT_LIFE});
+            } else if (level.getBlockState(at).is(PRINT.getBlock())) {
+                // 立ち止まっているあいだは、同じ足跡の寿命を延ばすだけ
+                for (long[] p : prints) {
+                    if (p[0] == at.asLong()) {
+                        p[1] = now + PRINT_LIFE;
+                    }
+                }
             }
         }
         while (!prints.isEmpty() && (prints.size() > MAX_PRINTS || prints.peekFirst()[1] <= now)) {
