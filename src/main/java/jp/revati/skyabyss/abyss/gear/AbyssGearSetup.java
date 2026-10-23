@@ -36,7 +36,7 @@ public final class AbyssGearSetup {
             () -> new MaterialItem(new Item.Properties().rarity(Rarity.UNCOMMON), 0xB7A6D8, "item.skyabyss.abyss_anchor_iron.desc", false));
     public static final DeferredItem<Item> CORE = ITEMS.register("abyss_core",
             () -> new MaterialItem(new Item.Properties().stacksTo(16).rarity(Rarity.EPIC), 0xC79BFF, "item.skyabyss.abyss_core.desc", true));
-    // 共鳴の欠片 (深淵): 深淵の専用伝説 3 つとの交換 (30 個)
+    // 共鳴の欠片 (深淵): 深淵のアーティファクト 3 つとの交換 (30 個)
     public static final DeferredItem<Item> RESONANCE_SHARD = ITEMS.register("resonance_shard_abyss",
             () -> new MaterialItem(new Item.Properties().rarity(Rarity.RARE), 0xB48CFF, "item.skyabyss.resonance_shard_abyss.desc", false));
 
@@ -67,7 +67,7 @@ public final class AbyssGearSetup {
     public static final DeferredItem<Item> LAMP_SWORD = ITEMS.register("abyss_lamp_sword",
             () -> new LampSwordItem(new Item.Properties().rarity(Rarity.RARE)));
     public static final DeferredItem<Item> LISTENER = ITEMS.register("abyss_pulse_listener",
-            () -> new AbyssTrinketItem(new Item.Properties().stacksTo(1).rarity(Rarity.RARE), GearTier.RARE,
+            () -> new AbyssTrinketItem(new Item.Properties().stacksTo(1).rarity(Rarity.RARE), GearTier.EPIC,
                     "item.skyabyss.abyss_pulse_listener.desc", false));
     public static final DeferredItem<Item> CHARM = ITEMS.register("abyss_lantern_charm",
             () -> new LanternCharmItem(new Item.Properties().stacksTo(1).rarity(Rarity.RARE)));
@@ -76,7 +76,7 @@ public final class AbyssGearSetup {
     public static final DeferredItem<Item> DAGGER = ITEMS.register("abyss_pulse_dagger",
             () -> new PulseDaggerItem(new Item.Properties().rarity(Rarity.EPIC)));
     public static final DeferredItem<Item> PLUMB = ITEMS.register("abyss_surveyor_plumb",
-            () -> new AbyssTrinketItem(new Item.Properties().stacksTo(1).rarity(Rarity.EPIC), GearTier.LEGENDARY,
+            () -> new AbyssTrinketItem(new Item.Properties().stacksTo(1).rarity(Rarity.EPIC), GearTier.HEROIC,
                     "item.skyabyss.abyss_surveyor_plumb.desc", true));
 
     private AbyssGearSetup() {

@@ -187,17 +187,10 @@ public final class TitanBackLayout {
     public static final List<BlockPos> GOAL_SPOTS = List.of(
             new BlockPos(-23, WEST_LEDGE_Y + 1, -50), new BlockPos(25, FLOOR + 1, -53), new BlockPos(26, MAZE_FLOOR + 5, -5));
 
-    // ---------------------------------------------------------------- 碑文 (物語の断片)。sign.skyabyss.lore_<name>
+    // ---------------------------------------------------------------- 看板 (心臓の間の入口の一言)
     // facing は看板の向く側。看板は反対側の壁に掛かる
     public record Inscription(String key, BlockPos pos, net.minecraft.core.Direction facing) {
     }
-
-    public static final List<Inscription> LORE_SIGNS = List.of(
-            new Inscription("sign.skyabyss.lore_heart", new BlockPos(6 + HEART_DX, FLOOR + 3, -90 + HEART_DZ), net.minecraft.core.Direction.WEST),
-            new Inscription("sign.skyabyss.lore_vault", new BlockPos(-3, FLOOR + 3, -64), net.minecraft.core.Direction.EAST),
-            new Inscription("sign.skyabyss.lore_west", new BlockPos(-24, WEST_LEDGE_Y + 2, -49), net.minecraft.core.Direction.NORTH),
-            new Inscription("sign.skyabyss.lore_east", new BlockPos(30, FLOOR + 3, -52), net.minecraft.core.Direction.NORTH),
-            new Inscription("sign.skyabyss.lore_below", new BlockPos(23, MAZE_FLOOR + 6, -3), net.minecraft.core.Direction.NORTH));
 
     // 心臓の間の入口 (最後の試練)
     public static final Inscription HEART_GATE_SIGN =

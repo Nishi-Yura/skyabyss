@@ -234,8 +234,8 @@ public final class ChapterGroundsSelfTest {
             Synth swamp = new Synth((x, z) -> z <= -400 && z >= -440 ? 63 : 70);
             List<BlockPos> low = ChapterGrounds.road(swamp, cap, new BlockPos(0, 70, -1000), 0);
             check(low.size() == road.size(), "a sea-level flat should still get its waymark: " + low.size());
-            List<BlockPos> whaleRoad = ChapterGrounds.road(flat, cap, new BlockPos(0, 70, -300), ChapterGrounds.WHALE_CAIRNS);
-            check(whaleRoad.size() >= ChapterGrounds.WHALE_CAIRNS, "the whale road should fit the 7 cairns even on a short band: " + whaleRoad.size());
+            List<BlockPos> whaleRoad = ChapterGrounds.road(flat, cap, new BlockPos(0, 70, -300), ChapterGrounds.WHALE_ROAD_POINTS);
+            check(whaleRoad.size() >= ChapterGrounds.WHALE_ROAD_POINTS, "the whale road should fit the shrine even on a short band: " + whaleRoad.size());
             // 祠は平らな所 (斜面のそばでも 9×9 が 3 以内)
             Synth slope = new Synth((x, z) -> 70 + Math.max(0, x) / 2);
             BlockPos shrine = ChapterGrounds.shrineNear(slope, new BlockPos(0, 70, 0), 16, List.of());
@@ -309,7 +309,7 @@ public final class ChapterGroundsSelfTest {
                 check(g.shrine != null && ChapterSites.horizontal(g.shrine, g.center) <= 160, s.chapter() + ": shrine spot missing or far: " + g.shrine);
                 check(ChapterSites.horizontal(g.center, camp) >= ChapterGrounds.CAMP_GAP - 2 || s.chapter() != Chapters.WHALE, "the whale ground is too near the camp");
                 check(ChapterGrounds.shrineSpot(server, s.chapter().titan()).isPresent(), s.chapter() + ": shrineSpot is empty");
-                check(g.road.size() >= (s.chapter() == Chapters.WHALE ? ChapterGrounds.WHALE_CAIRNS - 2 : 3), s.chapter() + ": too few waymarks (" + g.road.size() + ")");
+                check(g.road.size() >= (s.chapter() == Chapters.WHALE ? ChapterGrounds.WHALE_ROAD_POINTS : 3), s.chapter() + ": too few waymarks (" + g.road.size() + ")");
                 // 整えた地形 (形の中心の列を見る)
                 if (g.shaped && shape != Shape.NONE) {
                     BlockPos c = g.shapeCenter;

@@ -7,7 +7,7 @@
   (旧い備えの頼み 3 本 ch1/prep_* は、支度の段 ch1/trail_* に吸収した = tools/gen/ch1/gen_ch1_trails.py。ここでは書かない)
   data/skyabyss/dialogue/ch1/storyteller_prep.json               語り部の一言 1 つ (荷車の職人を指す。頼みの会話は職人 = tools/gen/items/gen_artisan_dialogue.py)
   data/skyabyss/dialogue/ch1/whale_chaser_prep.json              イサナの備えの一言 3 つ
-  data/skyabyss/lore/entry/ch1/road_cairns|song_chamber|cleft_cave.json
+  data/skyabyss/lore/entry/ch1/road_shrine|song_chamber|cleft_cave.json
   assets/skyabyss_ch1/lang/{ja_jp,en_us}.json  文 (既存のキーに混ぜる。キー順)
   assets/skyabyss/textures/item/{rock_shell_scrap,bone_chip,hare_quill,rock_shell_thread}.png と models/item/*.json (仮の絵。右上にマゼンタの印)
 語りの決まり (21 の 0.2・8): 心臓・深淵・巨神の眠りの理由を書かない。暮らしの小さな変化とほのめかしだけ。数字は言わない。
@@ -103,10 +103,10 @@ def dialogue():
 # ---------------------------------------------------------------- 伝承
 def lore():
     entries = [
-        ('road_cairns', 16, '空の下へ向かう石',
-         'The Stones Leading Under the Sky',
-         '石の積みは、一つとして同じ高さではなかった。ただ、どれも同じほうを指している。道の終わりには、屋根の低い祠があって、中の蝋燭は燃え尽きていた。\n\n七つ目の石の裏に、一行だけ、爪で彫ってあった。「ここまでは、歩いてこられた」\n\nそこから先は、歩かなかったのだろうか。',
-         'No two cairns were the same height, yet every one pointed the same way. At the end of the road stood a low-roofed shrine, its candle burnt out.\n\nBehind the seventh stone, one line was scratched with a nail: "Up to here, we could walk."\n\nDid they not walk any farther?'),
+        ('road_shrine', 16, '道の終わりの祠',
+         "The Shrine at the Road's End",
+         '道の終わりには、屋根の低い祠があって、中の蝋燭は燃え尽きていた。\n\n祠の裏に、一行だけ、爪で彫ってあった。「ここまでは、歩いてこられた」\n\nそこから先は、歩かなかったのだろうか。',
+         'At the end of the road stood a low-roofed shrine, its candle burnt out.\n\nBehind the shrine, one line was scratched with a nail: "Up to here, we could walk."\n\nDid they not walk any farther?'),
         ('song_chamber', 17, '鐘の下の部屋',
          'The Room Beneath the Bell',
          '鐘の足もとの石が、一つだけ、音もなく沈んだ。梯子の下に、小さな部屋があった。壁に、高さの違う五本の柱が並んでいる。いちばん低い柱から、いちばん高い柱へ。\n\n数え歌の「いつつ」は、数のことではなかったのかもしれない。高さの、順番のことだった。',
@@ -125,16 +125,7 @@ def lore():
 
 # ---------------------------------------------------------------- 場所の文・覚書
 def texts():
-    for n, (j, e) in enumerate([
-        ('低い石の積み。傍らに、石で作った矢印が空を指している。', 'A low cairn, with an arrow of stones pointing at the sky.'),
-        ('積み石が、さっきより少し高い。矢印は、同じほうを向いている。', 'This cairn is a little taller than the last. The arrow points the same way.'),
-        ('苔むした積み石。矢印の先は、雲の下だ。', 'A mossy cairn. The arrow ends under the clouds.'),
-        ('積み石の根もとに、爪の痕が一本。', 'A single nail scratch at the root of the cairn.'),
-        ('石は、空の下へ向かっている。', 'The stones lead under the sky.'),
-        ('積み石は、ここだけ崩れかけている。誰かが、何度も触ったように。', 'This cairn alone is on the verge of collapse, as if many hands had touched it.'),
-        ('道の終わりの祠。蝋燭は、燃え尽きている。', 'A shrine at the end of the road. The candle has burnt out.'),
-    ], 1):
-        put('message.skyabyss.ch1.arrive.ch1_road_cairn_%d' % n, j, e)
+    put('message.skyabyss.ch1.arrive.ch1_road_shrine', '道の終わりの祠。蝋燭は、燃え尽きている。', 'A shrine at the end of the road. The candle has burnt out.')
     put('message.skyabyss.ch1.arrive.ch1_bone_cache', '骨の山。誰かが集めて、運ぼうとしていた。', 'A heap of bones, gathered by something that meant to carry them off.')
     put('message.skyabyss.ch1.cache.found', '骨の山の下から、使える物を拾った。', 'You pick something usable from under the bones.')
     put('message.skyabyss.ch1.arrive.ch1_cart_track', '轍の先に、荷が広げてある。', 'Where the ruts end, a pack has been spread out.')

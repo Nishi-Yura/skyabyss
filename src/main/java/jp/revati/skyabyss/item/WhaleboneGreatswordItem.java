@@ -50,7 +50,7 @@ public class WhaleboneGreatswordItem extends SwordItem implements ModGear {
 
     @Override
     public GearTier tier() {
-        return GearTier.RARE;
+        return GearTier.EPIC;
     }
 
     @Override

@@ -117,10 +117,6 @@ public final class MapClient {
         List<MapMarks.Mark> m = new ArrayList<>();
         m.add(new MapMarks.Mark(MapMarks.Kind.TOWN, "town", "town", "", tx, tz, false, 0));
         m.add(new MapMarks.Mark(MapMarks.Kind.CAMP, "camp", "camp", "", x - 40, z + 30, false, 0));
-        for (int i = 0; i < 4; i++) {
-            m.add(new MapMarks.Mark(MapMarks.Kind.CAIRN, "cairn" + i, "cairn", "", x - 40 + (tx - x + 40) * (i + 1) / 5 + (i % 2) * 6,
-                    z + 30 + (tz - z - 30) * (i + 1) / 5, false, 0));
-        }
         m.add(new MapMarks.Mark(MapMarks.Kind.FOOTPRINT, "footprint0", "footprint", "", x + 10, z - 70, false, 0));
         m.add(new MapMarks.Mark(MapMarks.Kind.FOOTPRINT, "footprint1", "footprint", "", x + 46, z - 96, false, 0));
         m.add(new MapMarks.Mark(MapMarks.Kind.RIBS, "ribs", "ribs", "", tx - 260, tz + 160, false, 0x7FF4FF));

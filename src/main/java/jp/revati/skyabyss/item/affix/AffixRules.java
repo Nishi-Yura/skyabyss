@@ -19,14 +19,12 @@ import net.minecraft.world.item.SwordItem;
 
 // 特性の決まりごと (抽選・再鍛造・表示)。ゲームの状態に触れないので、自己テストからそのまま呼べる
 //  - 付くのはレア以上の武器と防具だけ。護符・護石・補強板 (持っているだけで効く品) には付けない
-//  - 数: レア 1〜2、伝説 2〜3。同じ種類は一つの装備に二度付かない
+//  - 数と幅は階級の表 (GearTier): レア・エピック 1〜2、ヒロイック・アーティファクト 2〜3 (幅 1.25 倍)。同じ種類は一つの装備に二度付かない
 //  - 再鍛造: 結晶を払って候補を一組ずつ作る (最大 3 組)。今の特性か候補のどれかを選んで確定する
 public final class AffixRules {
     public static final int MAX_TRIALS = 3;
     // 再鍛造の候補一組の費用 (共鳴の結晶)
     public static final int TRIAL_CRYSTALS = 1;
-    // 少ないほうの数になる確率 (レアなら 1 個、伝説なら 2 個)
-    public static final float FEWER_CHANCE = 0.6f;
     // 守り (受ける傷の軽減) の合計の上限
     public static final double WARD_CAP = 0.10;
 
@@ -41,7 +39,7 @@ public final class AffixRules {
     // ---------------------------------------------------------------- 対象
     @Nullable
     public static AffixType.Slot slotOf(Item item) {
-        if (!(item instanceof ModGear gear) || (gear.tier() != GearTier.RARE && gear.tier() != GearTier.LEGENDARY)) {
+        if (!(item instanceof ModGear gear) || !gear.tier().affixed()) {
             return null;
         }
         if (item instanceof SwordItem) {
@@ -58,16 +56,17 @@ public final class AffixRules {
         return !stack.isEmpty() && slotOf(stack.getItem()) != null;
     }
 
-    public static boolean legendary(ItemStack stack) {
-        return stack.getItem() instanceof ModGear gear && gear.tier() == GearTier.LEGENDARY;
+    // 幅の広い特性の階級 (ヒロイック以上。技の書き換えを持つ品もこの階級)
+    public static boolean wide(ItemStack stack) {
+        return stack.getItem() instanceof ModGear gear && gear.tier().wideAffixes;
     }
 
     public static int minCount(GearTier tier) {
-        return tier == GearTier.LEGENDARY ? 2 : tier == GearTier.RARE ? 1 : 0;
+        return tier.affixMin;
     }
 
     public static int maxCount(GearTier tier) {
-        return tier == GearTier.LEGENDARY ? 3 : tier == GearTier.RARE ? 2 : 0;
+        return tier.affixMax;
     }
 
     public static List<AffixType> pool(AffixType.Slot slot) {
@@ -82,8 +81,8 @@ public final class AffixRules {
 
     // ---------------------------------------------------------------- 抽選
     public static List<Affix> roll(AffixType.Slot slot, GearTier tier, RandomSource random) {
-        int count = random.nextFloat() < FEWER_CHANCE ? minCount(tier) : maxCount(tier);
-        boolean legendary = tier == GearTier.LEGENDARY;
+        int count = random.nextFloat() < tier.fewerChance ? minCount(tier) : maxCount(tier);
+        boolean legendary = tier.wideAffixes;
         List<AffixType> pool = pool(slot);
         List<Affix> out = new ArrayList<>();
         for (int i = 0; i < count && !pool.isEmpty(); i++) {
@@ -194,7 +193,7 @@ public final class AffixRules {
         if (list.size() < minCount(tier) || list.size() > maxCount(tier)) {
             return false;
         }
-        boolean legendary = tier == GearTier.LEGENDARY;
+        boolean legendary = tier.wideAffixes;
         List<AffixType> seen = new ArrayList<>();
         int marks = 0;
         for (Affix a : list) {

@@ -38,9 +38,5 @@ public final class StormBackSetup {
 
     public static void register(IEventBus modEventBus) {
         BLOCKS.register(modEventBus);
-        // 碑文と入口の一言の置き場所を伝承の担当へ (近くで目を向けるだけで読める)
-        java.util.List<java.util.Map.Entry<String, net.minecraft.core.BlockPos>> signs = new java.util.ArrayList<>();
-        StormBackLayout.LORE_SIGNS.forEach(i -> signs.add(java.util.Map.entry(i.key(), i.pos())));
-        jp.revati.skyabyss.titan.storm.lore.StormLore.inscriptionPositions(() -> signs);
     }
 }

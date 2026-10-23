@@ -81,12 +81,12 @@ LORE = [
      'A pack lay with its mouth open. Inside were provisions and a folded map. The map showed only roads; not one place had a name.\n\n'
      'A page lay flat at the bottom of the pack: "I gave my destination no name. If I did, it would remember me."\n\nWho feared being remembered?',
      []),
-    ('cairn_rounds', 'prologue', 36, manual,
-     '積み石の見回り', 'Rounds of the Cairns',
-     '積み石は、どれも崩れていなかった。風も雨もあったはずなのに。\n\n'
-     'ただ、石の積み方が少しずつ違う。右回りに重ねたもの、左回りに重ねたもの。同じ手で積んだものではない。\n\n誰が、道しるべをつなぎ直しているのだろう。',
-     'Not one of the cairns had fallen, though there must have been wind and rain.\n\n'
-     'But each was stacked a little differently, some wound to the right, some to the left. They were not the work of a single hand.\n\nWho keeps mending the waymarks?',
+    ('trace_rounds', 'prologue', 36, manual,
+     '旅の跡の見回り', 'Rounds of the Traces',
+     '旅の跡は、どれも荒らされていなかった。風も雨もあったはずなのに。\n\n'
+     'ただ、箱の蓋の閉じ方が少しずつ違う。右手で閉めたもの、左手で閉めたもの。同じ手で閉じたものではない。\n\n誰が、跡を整え続けているのだろう。',
+     'Not one of the traces had been disturbed, though there must have been wind and rain.\n\n'
+     'But each lid had been closed a little differently, some with the right hand, some with the left. They were not the work of a single hand.\n\nWho keeps tidying the traces?',
      ['prologue/camp']),
     ('lookout', 'titan_whale', 2, manual,
      '見張りの丘', 'The Lookout Hill',
@@ -148,10 +148,10 @@ put('item.skyabyss.lore_page.desc.ch1_diary', '荷車の持ち主が書いた日
 
 # ---------------------------------------------------------------- クエスト (3)
 QUEST_DIR = os.path.join(RES, 'data', 'skyabyss', 'quest', 'ch1')
-write_json(os.path.join(QUEST_DIR, 'day1_cairns.json'), {
+write_json(os.path.join(QUEST_DIR, 'day1_traces.json'), {
     'category': 'sub', 'order': 58, 'repeat': 'weekly', 'board': True, 'chapter': 'prologue',
-    'stages': [{'id': 'round', 'objectives': [{'id': 'round', 'type': 'signal', 'target': 'ch1_cairn_round', 'count': 2, 'party': False}]}],
-    'reward': {'xp': 20, 'items': [{'item': 'minecraft:bread', 'count': 2}], 'do': [{'type': 'lore', 'entry': 'ch1/cairn_rounds'}]},
+    'stages': [{'id': 'round', 'objectives': [{'id': 'round', 'type': 'signal', 'target': 'ch1_trace_round', 'count': 2, 'party': False}]}],
+    'reward': {'xp': 20, 'items': [{'item': 'minecraft:bread', 'count': 2}], 'do': [{'type': 'lore', 'entry': 'ch1/trace_rounds'}]},
 })
 write_json(os.path.join(QUEST_DIR, 'day1_firewood.json'), {
     'category': 'sub', 'order': 59, 'repeat': 'weekly', 'board': True, 'chapter': 'prologue',
@@ -167,13 +167,13 @@ write_json(os.path.join(QUEST_DIR, 'lost_traveller.json'), {
     'reward': {'xp': 25, 'items': [], 'affinity': {'skyabyss:storyteller': 3}},
 })
 
-put('quest.skyabyss.ch1.day1_cairns.title', '積み石の見回り', 'Rounds of the Cairns')
-put('quest.skyabyss.ch1.day1_cairns.summary', '道や旅の跡の積み石を、二か所見て回る。', 'Look over two of the cairns along the road and at the traces of travelers.')
-put('quest.skyabyss.ch1.day1_cairns.round.journal',
-    '語り部の頼み：「道に積んである石が崩れていないか、見てきておくれ。二つも見れば足りるよ」\n積み石は、道の脇や、旅の跡のそばにある。',
-    'The storyteller asked: "Go and see whether the stones piled along the road have fallen. Two will be enough."\nThe cairns stand beside the road and near the traces of travelers.')
-put('quest.skyabyss.ch1.day1_cairns.round.round', '道の積み石を二つ見に行こう', 'Go look at two cairns along the road')
-put('quest.skyabyss.ch1.day1_cairns.done', '「崩れていなかったかい。……それなら、いいんだよ」', '"Not a one had fallen? ...Then that is all right."')
+put('quest.skyabyss.ch1.day1_traces.title', '旅の跡の見回り', 'Rounds of the Traces')
+put('quest.skyabyss.ch1.day1_traces.summary', '旅の跡を、二か所見て回る。', 'Look over two of the traces travelers left behind.')
+put('quest.skyabyss.ch1.day1_traces.round.journal',
+    '語り部の頼み：「誰かが残していったものが、荒らされていないか、見てきておくれ。二つも見れば足りるよ」\n旅の跡は、野営地から宿りへ向かう道すじの脇にある。',
+    'The storyteller asked: "Go and see whether what travelers left behind has been disturbed. Two will be enough."\nThe traces lie beside the way from the camp to the lodge.')
+put('quest.skyabyss.ch1.day1_traces.round.round', '旅の跡を二か所見に行こう', 'Go look at two traces of travelers')
+put('quest.skyabyss.ch1.day1_traces.done', '「荒らされていなかったかい。……それなら、いいんだよ」', '"Nothing disturbed? ...Then that is all right."')
 
 put('quest.skyabyss.ch1.day1_firewood.title', '宿りの薪', 'Firewood for the Lodge')
 put('quest.skyabyss.ch1.day1_firewood.summary', '原木を八本、言伝ての板に納める。', 'Hand eight logs in at the message board.')
@@ -222,7 +222,7 @@ write_json(os.path.join(DIALOGUE_DIR, 'storyteller_ch1.json'), {
             'face': 'smile',
             'options': [
                 {'id': 'yes', 'goto': 'ch1_errand_ok', 'kind': 'quest',
-                 'do': [{'type': 'quest_start', 'quest': 'ch1/day1_cairns'}, {'type': 'quest_start', 'quest': 'ch1/day1_firewood'}]},
+                 'do': [{'type': 'quest_start', 'quest': 'ch1/day1_traces'}, {'type': 'quest_start', 'quest': 'ch1/day1_firewood'}]},
                 {'id': 'later', 'goto': 'menu'},
             ],
         },
@@ -232,13 +232,13 @@ write_json(os.path.join(DIALOGUE_DIR, 'storyteller_ch1.json'), {
 })
 put(ST + 'shadow0_b.ch1_help', '何か、手伝おうか？', 'Is there something I can do?')
 put(ST + 'ch1_errand_offer',
-    '手伝ってくれるのかい。助かるよ。\n道の積み石を二つ、見てきておくれ。崩れていないかどうか。\nそれと、夜に備えて薪をね。原木が八本あれば足りる。',
-    "You'll lend a hand? That's a help.\nGo and look at two of the stones piled along the road, to see whether they've fallen.\nAnd some firewood against the night. Eight logs will do.")
+    '手伝ってくれるのかい。助かるよ。\n旅の跡を二か所、見てきておくれ。荒らされていないかどうか。\nそれと、夜に備えて薪をね。原木が八本あれば足りる。',
+    "You'll lend a hand? That's a help.\nGo and look at two of the traces travelers left behind, to see whether they've been disturbed.\nAnd some firewood against the night. Eight logs will do.")
 put(ST + 'ch1_errand_offer.yes', '引き受ける。', "I'll do it.")
 put(ST + 'ch1_errand_offer.later', 'また今度。', 'Another time.')
 put(ST + 'ch1_errand_ok',
-    'ありがとうね。薪は、宿りの外の板に出しておくれ。\n……それから、積み石の数は、数えすぎないようにね。',
-    "Thank you. Put the firewood out at the board by the lodge.\n...And try not to count the stones too carefully.")
+    'ありがとうね。薪は、宿りの外の板に出しておくれ。\n……それから、跡の数は、数えすぎないようにね。',
+    "Thank you. Put the firewood out at the board by the lodge.\n...And try not to count the traces too carefully.")
 put(ST + 'ch1_diary_tell',
     '……その日記、見せておくれ。\n荷車の主は、ここへ着かなかったんだね。字が、……いや、何でもないよ。よく似た字を見たことがあるだけさ。\n探してくれて、ありがとう。',
     "...Let me see that diary.\nSo the cart's owner never made it here. The handwriting is... no, never mind. I've simply seen a hand like it before.\nThank you for looking.")

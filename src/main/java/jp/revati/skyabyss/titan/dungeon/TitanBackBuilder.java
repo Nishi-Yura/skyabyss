@@ -235,7 +235,7 @@ public final class TitanBackBuilder {
         kit.set(-7, py + 1, PLATFORM_Z + 6, jp.revati.skyabyss.relic.RelicBlocks.hearth(jp.revati.skyabyss.relic.RelicStyle.WHALE, true));
         kit.set(-8, py + 1, PLATFORM_Z + 6, Blocks.DEEPSLATE_BRICK_STAIRS.defaultBlockState().setValue(StairBlock.FACING, Direction.WEST));
         kit.set(-7, py + 1, PLATFORM_Z + 7, Blocks.DEEPSLATE_BRICK_SLAB.defaultBlockState());
-        // 広場の錨石の祠の台は飾り (錨石は左のわき腹の台にある)。案内の看板は置かない (BackWhispers)
+        // 広場の錨石の祠の台は飾り (錨石は左のわき腹の台にある)。案内の看板は置かない
     }
 
     // 左のわき腹の台 (到着): 錨石 (モデルの鉄の留め具) の外へ張り出した石の台。床は空だった所だけに置く (留め具と体はそのまま)。

@@ -53,7 +53,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.neoforged.neoforge.common.util.FakePlayer;
 
 // 深淵 (docs/design/31 の B04) の自己テスト。SKYABYSS_SELFTEST_ONLY="abyss"。
-//   転生での開閉・つまみの決まり / 修飾の段の数式 (全試練 × 乱数) / 深淵の心臓の湧き (つまみ → 心臓) / 専用伝説の落とし表 /
+//   転生での開閉・つまみの決まり / 修飾の段の数式 (全試練 × 乱数) / 深淵の心臓の湧き (つまみ → 心臓) / 専用の逸品の落とし表 /
 //   4 つの書き換えの効き (生きた敵と時間を使う。複数 tick の段)
 // 心臓の「予告を読む人形」の生き残りは combat/HeartBotSelfTest の checkAbyss (SELFTEST heart bots) が見る
 public final class AbyssSelfTest {
@@ -292,14 +292,14 @@ public final class AbyssSelfTest {
 
     // ---- 落とし表
     private static void dropTables(MinecraftServer server) {
-        // 四体 → 四つの専用伝説 (登録済み・伝説・その巨神の由来・書き換えの武器と一致)
+        // 四体 → 四つの専用の逸品 (登録済み・アーティファクト・その巨神の由来・書き換えの武器と一致)
         Set<String> ids = new HashSet<>();
         for (String titan : new String[] {Titans.STONE_WHALE, Titans.TIDE_SHELL, Titans.THUNDER_WING, Titans.EMBER}) {
             String id = AbyssSetup.legendOf(titan);
             check(ids.add(id), "two titans share the legend " + id);
             Item item = BuiltInRegistries.ITEM.get(ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, id));
             check(item != net.minecraft.world.item.Items.AIR, "legend " + id + " is not registered");
-            check(item instanceof ModGear g && g.tier() == GearTier.LEGENDARY && g.dungeon().equals(titan), "legend " + id + " is not a legendary of " + titan);
+            check(item instanceof ModGear g && g.tier() == GearTier.ARTIFACT && g.dungeon().equals(titan), "legend " + id + " is not an artifact of " + titan);
             boolean rune = false;
             for (Rune r : Rune.values()) {
                 if (r.weapon.equals(id)) {

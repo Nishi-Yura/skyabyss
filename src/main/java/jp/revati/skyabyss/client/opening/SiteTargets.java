@@ -17,7 +17,7 @@ import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 
 // 構造物の場所 (サーバーから届く) を、目的の帯 (ObjectiveStrip.targets) の目印として使えるようにする口 (拍子の担当が使う)。
 //   SiteTargets.bind("<クエストの id>", "camp")  : その目的のとき、帯に野営地の距離と方角を出す
-//   キー: camp / notebook / shelter / bell / ribs / footprint / footprint1 / footprint2 / cairn0…
+//   キー: camp / notebook / shelter / bell / ribs / footprint / footprint1 / footprint2
 //   bind していない id も、id がそのままキーなら (例えば id "shelter") その場所を指す
 //   位置を直接出したいとき (岩鯨など) は bindPos("<id>", () -> pos)
 public final class SiteTargets {

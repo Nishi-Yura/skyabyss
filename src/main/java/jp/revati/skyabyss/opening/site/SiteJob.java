@@ -680,7 +680,7 @@ public final class SiteJob {
                     placedCount++;
                 }
             }
-            // ならさない小さな部品 (積み石・柱) は、置く高さが 3x3 の中央値なので、低い列は下が空く。最下段の下の空きを土 (いちばん下は上面の土) で埋める
+            // ならさない小さな部品 (道しるべの石・柱) は、置く高さが 3x3 の中央値なので、低い列は下が空く。最下段の下の空きを土 (いちばん下は上面の土) で埋める
             // (建築の監査 SITE_FLOAT)。地下の部品 (部屋) と、足もとを延ばす骨・掘る足跡は対象外
             // ならす大きな部品 (都) も、床の段 (y=-1) の下が空いている所 (起伏の下・崖の縁) は、下の地面まで埋める
             boolean floorUnder = bp.level && bp.fillWater && c.y() == -1 && !state.isAir()
@@ -884,7 +884,7 @@ public final class SiteJob {
         if (home == null) {
             home = entry.pos;
         }
-        // 大きな構造物 (足跡・骨) は 12 の輪まで。小さな物 (野営地・宿り・積み石) は 14 回まで (輪は 3 回ごとに外へ)
+        // 大きな構造物 (足跡・骨) は 12 の輪まで。小さな物 (野営地・宿り) は 14 回まで (輪は 3 回ごとに外へ)
         int maxRings = bp.wetOk ? 12 : 14;
         if (force) {
             // 強行しても建てられなかった (水ばかり): ここで本当に諦める
@@ -1019,7 +1019,7 @@ public final class SiteJob {
             return true;
         }
         if (shelter != null && !kind.equals("shelter") && SiteFinder.capital()
-                && Math.hypot(x - shelter.getX(), z - shelter.getZ()) < (kind.equals("footprint") ? SiteFinder.CAPITAL_FOOT_MIN : SiteFinder.CAPITAL_CAIRN_STOP)) {
+                && Math.hypot(x - shelter.getX(), z - shelter.getZ()) < (kind.equals("footprint") ? SiteFinder.CAPITAL_FOOT_MIN : SiteFinder.CAPITAL_SITE_MIN)) {
             return false;
         }
         if (kind.equals("footprint") && shelter != null) {

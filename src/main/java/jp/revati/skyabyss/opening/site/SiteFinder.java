@@ -24,7 +24,7 @@ import net.minecraft.world.level.levelgen.RandomState;
 // (ワールドを始める瞬間に重くならない。木や人の建物は、建てる直前に実際のブロックを見て確かめる: SiteJob)。
 // 陸の判定: 水面と海底の高さが同じ (水がない)、群系が海・川・沼・ジャングル・暗い森・きのこ島でない、
 // 範囲の高さの差が小さい (険しい斜面を避ける)。
-// 配置: 野営地 = スポーン地点 (だめなら近い陸)、宿り = 野営地から 140〜220 (東を優先)、積み石 = 道に 40 ブロックおき、
+// 配置: 野営地 = スポーン地点 (だめなら近い陸)、宿り = 野営地から 140〜220 (東を優先)、
 //       足跡 = 道から 30〜60 ブロック外れた所に、一方向へ歩いた 4 歩 (96 ブロックおき、左右の足が交互。大きな足跡 = 長さ 50・幅 45)、
 //       骨 = 野営地から 250〜350 の丘 (宿りと違う方角。長さ 100・幅 47 の大きな骨)
 public final class SiteFinder {
@@ -254,7 +254,7 @@ public final class SiteFinder {
         return findCamp(p, spawn);
     }
 
-    // 野営地以外 (宿り・積み石・足跡・骨) と、章の跡地 (docs/design/33 の 3 章)。重い (地形生成の高さを何百回も問い合わせる) ので、別のスレッドで呼ぶ
+    // 野営地以外 (宿り・足跡・骨) と、章の跡地 (docs/design/33 の 3 章)。重い (地形生成の高さを何百回も問い合わせる) ので、別のスレッドで呼ぶ
     public record Rest(List<Planned> planned, List<ChapterGrounds.Found> grounds) {
     }
 
@@ -271,7 +271,6 @@ public final class SiteFinder {
         if (shelter != null) {
             out.add(new Planned(Kind.SHELTER.id, 0, shelter.pos(), encode(shelter.rot(), shelter.mirror())));
             pathYaw = Math.atan2(shelter.pos().getZ() - camp.getZ(), shelter.pos().getX() - camp.getX());
-            planCairns(p, out, camp, shelter.pos());
             planFootprints(p, out, camp, shelter.pos());
         } else {
             SkyAbyss.LOGGER.error("Opening sites: no land for the shelter near {}", camp);
@@ -480,41 +479,10 @@ public final class SiteFinder {
         return southBase ? dirIndex : (dirIndex + 2) & 3;
     }
 
-    // ---------------------------------------------------------------- 積み石: 道に 40 ブロックおき (道の脇 3〜4 ブロック)
-    static void planCairns(Probe p, List<Planned> out, BlockPos camp, BlockPos target) {
-        double dx = target.getX() - camp.getX();
-        double dz = target.getZ() - camp.getZ();
-        double len = Math.sqrt(dx * dx + dz * dz);
-        double ux = dx / len;
-        double uz = dz / len;
-        int index = 0;
-        // 都のときは、壁と門の外の道 (中心から 120) の手前で止める (積み石が都の中に立たない)
-        int stop = capital() ? CAPITAL_CAIRN_STOP : 24;
-        for (int k = 1; 40 * k <= len - stop; k++) {
-            int side = (k % 2 == 0) ? 1 : -1;
-            for (int shift = 0; shift <= 24; shift += 4) {
-                for (int s = 0; s < (shift == 0 ? 1 : 2); s++) {
-                    double along = 40 * k + (s == 0 ? shift : -shift);
-                    int x = camp.getX() + (int) Math.round(ux * along - uz * 4 * side);
-                    int z = camp.getZ() + (int) Math.round(uz * along + ux * 4 * side);
-                    Area ar = area(p, x, z, 1, 1, 3);
-                    if (!ar.ok()) {
-                        ar = area(p, x, z, 1, 1, 7);
-                    }
-                    if (ar.ok()) {
-                        out.add(new Planned("cairn", index++, new BlockPos(x, ar.median() + 1, z), 0));
-                        shift = 999;
-                        break;
-                    }
-                }
-            }
-        }
-    }
-
     // ---------------------------------------------------------------- 足跡: 道から 30〜60 ブロック外れた所に、道と同じ向きへ歩いた 4 歩
     // 足跡は大きい (長さ 50・幅 45)。歩く向きは東西南北のどれか (部品を 90 度ずつ回して置くため)。一歩は 96 ブロックおき、左右の足が道の左右に 14 ずつずれる
     // (地面が合わなければ、少し前後・左右にずらして探す)。野営地から宿りの側へ向かう向きだけを使う (index が大きいほど野営地から遠い。最後の足跡の先に、地へ潜った穴がある)。
-    // 必ず建つように、条件 (高さの差・本数・道からの距離) を段階的にゆるめる。ただし道からの距離の上限は 150 (道・積み石・宿り・野営地に重ならない下限もある)
+    // 必ず建つように、条件 (高さの差・本数・道からの距離) を段階的にゆるめる。ただし道からの距離の上限は 150 (道・宿り・野営地に重ならない下限もある)
     static final int STRIDE = 96;
     static final int LATERAL = 14;
     static final int PRINTS = 4;
@@ -524,9 +492,9 @@ public final class SiteFinder {
     // 足跡の中心から、道・宿り・野営地までの下限 (足跡の半分の大きさ + 余白)
     static final int FOOT_ROAD_MIN = 38;
     static final int FOOT_SITE_MIN = 62;
-    // 都 (鐘の宿り) は大きい (中心から壁まで約 100、墓地まで 140)。足跡は中心から 210 より外に置く。積み石は中心から 150 の手前で止める
+    // 都 (鐘の宿り) は大きい (中心から壁まで約 100、墓地まで 140)。足跡は中心から 210 より外に置く。そのほかの場所は 150 より外
     static final int CAPITAL_FOOT_MIN = 210;
-    static final int CAPITAL_CAIRN_STOP = 150;
+    static final int CAPITAL_SITE_MIN = 150;
 
     public static boolean capital() {
         return System.getenv("SKYABYSS_SMALL_SHELTER") == null;

@@ -33,7 +33,7 @@ public class TideTridentItem extends TideWeaponItem {
                 .withModifierAdded(Attributes.ENTITY_INTERACTION_RANGE,
                         new AttributeModifier(ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "tide_trident_reach"), TideGear.TRIDENT_REACH,
                                 AttributeModifier.Operation.ADD_VALUE),
-                        EquipmentSlotGroup.MAINHAND)), GearTier.RARE, "item.skyabyss.tide_shell_trident.desc");
+                        EquipmentSlotGroup.MAINHAND)), GearTier.EPIC, "item.skyabyss.tide_shell_trident.desc");
     }
 
     @Override

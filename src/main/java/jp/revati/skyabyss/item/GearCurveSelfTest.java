@@ -99,7 +99,7 @@ public final class GearCurveSelfTest {
         check(f, jaStories >= gear && enStories >= gear, "story line tables should hold a line for each of the " + gear + " gear items: " + jaStories + "/" + enStories);
     }
 
-    private static java.util.Map<String, String> lang(String path, List<String> f) {
+    static java.util.Map<String, String> lang(String path, List<String> f) {
         java.util.Map<String, String> map = new java.util.HashMap<>();
         try (java.io.InputStream in = GearCurveSelfTest.class.getResourceAsStream(path)) {
             if (in == null) {

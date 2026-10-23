@@ -29,7 +29,7 @@ public class TitanMemoryData extends SavedData {
         public int memory;
         // これまでに心臓を倒した回数
         public int clears;
-        // 手にしたことのある図鑑の装備 (アイテムID。専用伝説もここに入る)
+        // 手にしたことのある図鑑の装備 (アイテムID。専用の逸品もここに入る)
         public final Set<String> owned = new LinkedHashSet<>();
         // 天の鍵の欠片を受け取ったか (一人一つ)
         public boolean fragment;

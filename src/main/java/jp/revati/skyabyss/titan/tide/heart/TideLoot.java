@@ -52,8 +52,8 @@ import net.neoforged.neoforge.event.RegisterCommandsEvent;
 // - 巨神の記憶 (天井) と図鑑は巨神ごとの記録 (TitanMemoryData の "tide_shell")。岩鯨の記録とは別に数える
 //   新しい品の出ない撃破で +1、3 以上で図鑑の確率 2 倍、5 で未所持を一つ保証。図鑑にない品を手にすると 0
 // - 天の鍵の欠片は一人一回 (巨神ごと。岩鯨の鱗片とは別の一つ)
-// - 初めての撃破では、専用伝説三つから一つを選ぶ
-// 潮殻の殻片と潮干しの貝は背中の敵の担当が登録した (TideMobSetup)。心核・鎧・三叉槍・盾・護符・専用伝説はまだ作られていない (ラフから)。
+// - 初めての撃破では、専用の逸品三つから一つを選ぶ
+// 潮殻の殻片と潮干しの貝は背中の敵の担当が登録した (TideMobSetup)。心核・鎧・三叉槍・盾・護符・専用の逸品はまだ作られていない (ラフから)。
 // 表は品の ID で持ち、登録されていない品は抽選から外す (図鑑にも記さない)。品が登録されれば、そのまま出るようになる
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class TideLoot {
@@ -76,7 +76,7 @@ public final class TideLoot {
     public static final String TRIDENT = id("tide_shell_trident");
     public static final String SHIELD = id("coral_shield");
     public static final String CHARM = id("tide_chime_charm");
-    // 専用伝説: 潮招きの大鋏、珊瑚憑きの銛、月潮の真珠
+    // 専用の逸品: 潮招きの大鋏、珊瑚憑きの銛、月潮の真珠
     public static final List<String> EXCLUSIVES = List.of(id("tidecaller_claw"), id("coral_harpoon"), id("moontide_pearl"));
 
     public static final float ARMOR_CHANCE = 0.25f;
@@ -97,7 +97,7 @@ public final class TideLoot {
         return SkyAbyss.MODID + ":" + path;
     }
 
-    // 図鑑 (10 品): 鎧 4、三叉槍、盾、護符、専用伝説 3。表と確率は装備の担当の TideGear.SET (巨神ごとの装備の表、TitanGearSet)
+    // 図鑑 (10 品): 鎧 4、三叉槍、盾、護符、専用の逸品 3。表と確率は装備の担当の TideGear.SET (巨神ごとの装備の表、TitanGearSet)
     public static List<String> collection() {
         return jp.revati.skyabyss.titan.tide.gear.TideGear.SET.collection();
     }
@@ -370,7 +370,7 @@ public final class TideLoot {
         long total = 0;
         for (int i = 0; i < runs; i++) {
             TitanMemoryData.Record r = new TitanMemoryData.Record();
-            // 初回は専用伝説を一つ選ぶ (6.4節の前提)
+            // 初回は専用の逸品を一つ選ぶ (6.4節の前提)
             r.owned.add(EXCLUSIVES.get(random.nextInt(EXCLUSIVES.size())));
             int n = 0;
             while (collected(r) < collection().size() && n < 200) {
