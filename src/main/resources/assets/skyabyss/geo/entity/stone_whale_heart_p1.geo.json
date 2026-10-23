@@ -16,13 +16,22 @@
    },
    "bones": [
     {
+     "name": "flinch",
+     "pivot": [
+      0.0,
+      0.0,
+      0.0
+     ]
+    },
+    {
      "name": "seams",
      "pivot": [
       0,
       12.0,
       0.0
      ],
-     "cubes": []
+     "cubes": [],
+     "parent": "flinch"
     },
     {
      "name": "crown",
@@ -1906,7 +1915,8 @@
         }
        }
       }
-     ]
+     ],
+     "parent": "flinch"
     },
     {
      "name": "base",
@@ -3150,7 +3160,8 @@
         }
        }
       }
-     ]
+     ],
+     "parent": "flinch"
     },
     {
      "name": "tendrils",
@@ -3928,7 +3939,8 @@
         }
        }
       }
-     ]
+     ],
+     "parent": "flinch"
     },
     {
      "name": "heart",
@@ -5388,7 +5400,8 @@
         }
        }
       }
-     ]
+     ],
+     "parent": "flinch"
     },
     {
      "name": "plate_0",
@@ -19537,7 +19550,8 @@
         }
        }
       }
-     ]
+     ],
+     "parent": "flinch"
     },
     {
      "name": "plate_1",
@@ -29320,7 +29334,8 @@
         }
        }
       }
-     ]
+     ],
+     "parent": "flinch"
     },
     {
      "name": "plate_2",
@@ -39345,7 +39360,8 @@
         }
        }
       }
-     ]
+     ],
+     "parent": "flinch"
     },
     {
      "name": "plate_3",
@@ -51116,7 +51132,8 @@
         }
        }
       }
-     ]
+     ],
+     "parent": "flinch"
     },
     {
      "name": "plate_4",
@@ -54327,7 +54344,8 @@
         }
        }
       }
-     ]
+     ],
+     "parent": "flinch"
     },
     {
      "name": "plate_5",
@@ -57538,7 +57556,8 @@
         }
        }
       }
-     ]
+     ],
+     "parent": "flinch"
     },
     {
      "name": "plate_6",
@@ -61793,7 +61812,8 @@
         }
        }
       }
-     ]
+     ],
+     "parent": "flinch"
     },
     {
      "name": "plate_7",
@@ -65004,7 +65024,8 @@
         }
        }
       }
-     ]
+     ],
+     "parent": "flinch"
     },
     {
      "name": "seam_0",
@@ -66917,7 +66938,8 @@
       12.0,
       0
      ],
-     "cubes": []
+     "cubes": [],
+     "parent": "flinch"
     },
     {
      "name": "chains",
@@ -66926,7 +66948,8 @@
       12.0,
       0
      ],
-     "cubes": []
+     "cubes": [],
+     "parent": "flinch"
     },
     {
      "name": "core",
@@ -66935,7 +66958,8 @@
       12.0,
       0
      ],
-     "cubes": []
+     "cubes": [],
+     "parent": "flinch"
     },
     {
      "name": "crack_3",
@@ -66944,7 +66968,8 @@
       12.0,
       0
      ],
-     "cubes": []
+     "cubes": [],
+     "parent": "flinch"
     },
     {
      "name": "crack_7",
@@ -66953,7 +66978,8 @@
       12.0,
       0
      ],
-     "cubes": []
+     "cubes": [],
+     "parent": "flinch"
     },
     {
      "name": "cracks",
@@ -66962,7 +66988,8 @@
       12.0,
       0
      ],
-     "cubes": []
+     "cubes": [],
+     "parent": "flinch"
     },
     {
      "name": "heart_veins",
@@ -66971,7 +66998,8 @@
       12.0,
       0
      ],
-     "cubes": []
+     "cubes": [],
+     "parent": "flinch"
     },
     {
      "name": "shard",
@@ -66980,7 +67008,8 @@
       12.0,
       0
      ],
-     "cubes": []
+     "cubes": [],
+     "parent": "flinch"
     },
     {
      "name": "spikes",
@@ -66989,7 +67018,8 @@
       12.0,
       0
      ],
-     "cubes": []
+     "cubes": [],
+     "parent": "flinch"
     }
    ]
   }

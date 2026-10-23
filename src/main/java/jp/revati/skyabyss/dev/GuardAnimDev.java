@@ -31,6 +31,10 @@ public final class GuardAnimDev {
                                         if (e instanceof GuardMob mob) {
                                             mob.playAction(StringArgumentType.getString(ctx, "action"));
                                             n++;
+                                        } else if (e instanceof jp.revati.skyabyss.story.ch5.warden.HeartWarden warden) {
+                                            // 番人は自分の playAction で流す (技の動きの長さを覚え、その間は被弾の動きで上書きしない)
+                                            warden.playAction(StringArgumentType.getString(ctx, "action"));
+                                            n++;
                                         } else if (e instanceof software.bernie.geckolib.animatable.GeoEntity geo) {
                                             // 水路の顎など、GuardMob でない GeckoLib のモブ ("action" の制御に bite など)
                                             geo.triggerAnim("action", StringArgumentType.getString(ctx, "action"));

@@ -16,13 +16,22 @@
    },
    "bones": [
     {
+     "name": "flinch",
+     "pivot": [
+      0.0,
+      0.0,
+      0.0
+     ]
+    },
+    {
      "name": "bowl",
      "pivot": [
       0,
       6.0,
       0.0
      ],
-     "cubes": []
+     "cubes": [],
+     "parent": "flinch"
     },
     {
      "name": "shard",
@@ -31,7 +40,8 @@
       24.0,
       0.0
      ],
-     "cubes": []
+     "cubes": [],
+     "parent": "flinch"
     },
     {
      "name": "base",
@@ -1275,7 +1285,8 @@
         }
        }
       }
-     ]
+     ],
+     "parent": "flinch"
     },
     {
      "name": "tendrils",
@@ -2053,7 +2064,8 @@
         }
        }
       }
-     ]
+     ],
+     "parent": "flinch"
     },
     {
      "name": "heart_veins",
@@ -4508,7 +4520,8 @@
         }
        }
       }
-     ]
+     ],
+     "parent": "flinch"
     },
     {
      "name": "heart",
@@ -36484,7 +36497,8 @@
         }
        }
       }
-     ]
+     ],
+     "parent": "flinch"
     },
     {
      "name": "core",
@@ -37894,7 +37908,8 @@
         }
        }
       }
-     ]
+     ],
+     "parent": "flinch"
     },
     {
      "name": "chains",
@@ -41566,7 +41581,8 @@
         }
        }
       }
-     ]
+     ],
+     "parent": "flinch"
     },
     {
      "name": "bowl_0",
@@ -80481,7 +80497,8 @@
       12.0,
       0
      ],
-     "cubes": []
+     "cubes": [],
+     "parent": "flinch"
     },
     {
      "name": "crack_7",
@@ -80490,7 +80507,8 @@
       12.0,
       0
      ],
-     "cubes": []
+     "cubes": [],
+     "parent": "flinch"
     },
     {
      "name": "cracks",
@@ -80499,7 +80517,8 @@
       12.0,
       0
      ],
-     "cubes": []
+     "cubes": [],
+     "parent": "flinch"
     },
     {
      "name": "crown",
@@ -80508,7 +80527,8 @@
       12.0,
       0
      ],
-     "cubes": []
+     "cubes": [],
+     "parent": "flinch"
     },
     {
      "name": "plate_0",
@@ -80517,7 +80537,8 @@
       12.0,
       0
      ],
-     "cubes": []
+     "cubes": [],
+     "parent": "flinch"
     },
     {
      "name": "plate_1",
@@ -80526,7 +80547,8 @@
       12.0,
       0
      ],
-     "cubes": []
+     "cubes": [],
+     "parent": "flinch"
     },
     {
      "name": "plate_2",
@@ -80535,7 +80557,8 @@
       12.0,
       0
      ],
-     "cubes": []
+     "cubes": [],
+     "parent": "flinch"
     },
     {
      "name": "plate_3",
@@ -80544,7 +80567,8 @@
       12.0,
       0
      ],
-     "cubes": []
+     "cubes": [],
+     "parent": "flinch"
     },
     {
      "name": "plate_4",
@@ -80553,7 +80577,8 @@
       12.0,
       0
      ],
-     "cubes": []
+     "cubes": [],
+     "parent": "flinch"
     },
     {
      "name": "plate_5",
@@ -80562,7 +80587,8 @@
       12.0,
       0
      ],
-     "cubes": []
+     "cubes": [],
+     "parent": "flinch"
     },
     {
      "name": "plate_6",
@@ -80571,7 +80597,8 @@
       12.0,
       0
      ],
-     "cubes": []
+     "cubes": [],
+     "parent": "flinch"
     },
     {
      "name": "plate_7",
@@ -80580,7 +80607,8 @@
       12.0,
       0
      ],
-     "cubes": []
+     "cubes": [],
+     "parent": "flinch"
     },
     {
      "name": "seam_0",
@@ -80589,7 +80617,8 @@
       12.0,
       0
      ],
-     "cubes": []
+     "cubes": [],
+     "parent": "flinch"
     },
     {
      "name": "seam_1",
@@ -80598,7 +80627,8 @@
       12.0,
       0
      ],
-     "cubes": []
+     "cubes": [],
+     "parent": "flinch"
     },
     {
      "name": "seam_2",
@@ -80607,7 +80637,8 @@
       12.0,
       0
      ],
-     "cubes": []
+     "cubes": [],
+     "parent": "flinch"
     },
     {
      "name": "seam_3",
@@ -80616,7 +80647,8 @@
       12.0,
       0
      ],
-     "cubes": []
+     "cubes": [],
+     "parent": "flinch"
     },
     {
      "name": "seam_4",
@@ -80625,7 +80657,8 @@
       12.0,
       0
      ],
-     "cubes": []
+     "cubes": [],
+     "parent": "flinch"
     },
     {
      "name": "seam_5",
@@ -80634,7 +80667,8 @@
       12.0,
       0
      ],
-     "cubes": []
+     "cubes": [],
+     "parent": "flinch"
     },
     {
      "name": "seam_6",
@@ -80643,7 +80677,8 @@
       12.0,
       0
      ],
-     "cubes": []
+     "cubes": [],
+     "parent": "flinch"
     },
     {
      "name": "seams",
@@ -80652,7 +80687,8 @@
       12.0,
       0
      ],
-     "cubes": []
+     "cubes": [],
+     "parent": "flinch"
     },
     {
      "name": "spikes",
@@ -80661,7 +80697,8 @@
       12.0,
       0
      ],
-     "cubes": []
+     "cubes": [],
+     "parent": "flinch"
     }
    ]
   }

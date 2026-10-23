@@ -32,6 +32,9 @@ public final class Skills {
     // 空の淡い羽のような粒 (弓使いの技)
     public static final DeferredHolder<ParticleType<?>, SimpleParticleType> SKY_MOTE = PARTICLES.register("sky_mote",
             () -> new SimpleParticleType(false));
+    // 雷翼の心臓の技の羽 (羽の雨など。client/combat/AttackFx・StormFeatherParticle)。粒の登録がここにまとまっているので、ここに置く
+    public static final DeferredHolder<ParticleType<?>, SimpleParticleType> STORM_FEATHER = PARTICLES.register("storm_feather",
+            () -> new SimpleParticleType(false));
 
     public static final DeferredHolder<SoundEvent, SoundEvent> SOUND_CLEAVE = sound("skill_cleave");
     public static final DeferredHolder<SoundEvent, SoundEvent> SOUND_RIPOSTE = sound("skill_riposte");

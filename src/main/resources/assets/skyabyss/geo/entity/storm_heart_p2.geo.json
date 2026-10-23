@@ -16,6 +16,14 @@
    },
    "bones": [
     {
+     "name": "flinch",
+     "pivot": [
+      0.0,
+      22.0,
+      0.0
+     ]
+    },
+    {
      "name": "heart",
      "pivot": [
       0.0,
@@ -16895,7 +16903,8 @@
         }
        }
       }
-     ]
+     ],
+     "parent": "flinch"
     },
     {
      "name": "heart_vein",
@@ -17337,7 +17346,8 @@
         }
        }
       }
-     ]
+     ],
+     "parent": "flinch"
     },
     {
      "name": "vessel",
@@ -19011,7 +19021,8 @@
         }
        }
       }
-     ]
+     ],
+     "parent": "flinch"
     },
     {
      "name": "core",
@@ -20867,7 +20878,8 @@
         }
        }
       }
-     ]
+     ],
+     "parent": "flinch"
     },
     {
      "name": "core_eye",
@@ -20876,7 +20888,8 @@
       22.0,
       0.0
      ],
-     "cubes": []
+     "cubes": [],
+     "parent": "flinch"
     },
     {
      "name": "wing_l",
@@ -39736,7 +39749,8 @@
         }
        }
       }
-     ]
+     ],
+     "parent": "flinch"
     },
     {
      "name": "crest_l",
@@ -49258,7 +49272,8 @@
         }
        }
       }
-     ]
+     ],
+     "parent": "flinch"
     },
     {
      "name": "wing_r",
@@ -68118,7 +68133,8 @@
         }
        }
       }
-     ]
+     ],
+     "parent": "flinch"
     },
     {
      "name": "crest_r",
@@ -77374,7 +77390,8 @@
         }
        }
       }
-     ]
+     ],
+     "parent": "flinch"
     },
     {
      "name": "finger",
@@ -77383,7 +77400,8 @@
       18.0,
       0.0
      ],
-     "cubes": []
+     "cubes": [],
+     "parent": "flinch"
     },
     {
      "name": "joint",
@@ -77392,7 +77410,8 @@
       18.0,
       0.0
      ],
-     "cubes": []
+     "cubes": [],
+     "parent": "flinch"
     },
     {
      "name": "shed",
@@ -77401,7 +77420,8 @@
       18.0,
       0.0
      ],
-     "cubes": []
+     "cubes": [],
+     "parent": "flinch"
     },
     {
      "name": "web",
@@ -77410,7 +77430,8 @@
       18.0,
       0.0
      ],
-     "cubes": []
+     "cubes": [],
+     "parent": "flinch"
     }
    ]
   }

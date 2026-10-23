@@ -241,7 +241,24 @@ public abstract class HeartBoss extends GuardMob {
     // 体力 ×1.2 は、受ける傷を 1/1.2 にして出す (最大体力は属性の上限 1024 に近いので増やせない。各心臓の「硬さ」の掛け算と同じ形。HeartBalance の effectiveHp)
     @Override
     public boolean hurt(DamageSource source, float amount) {
-        return super.hurt(source, isAbyss() ? amount / jp.revati.skyabyss.abyss.Abyss.HEART_HP : amount);
+        boolean hit = super.hurt(source, isAbyss() ? amount / jp.revati.skyabyss.abyss.Abyss.HEART_HP : amount);
+        // 被弾のひるみ (見た目だけ)。技の動きとは別の制御 "hurt" で、技の骨に触らない包みの骨 flinch だけを動かす
+        // (tools/gen/world/polish_boss_anims.py)。だから技の溜め・当たりの形は崩れない。続けて当たっても 0.3 秒に一度
+        if (hit && isAlive() && !level().isClientSide && !isIntroPlaying() && tickCount - lastFlinchTick >= 6) {
+            lastFlinchTick = tickCount;
+            triggerAnim("hurt", "flinch");
+        }
+        return hit;
+    }
+
+    private int lastFlinchTick = -1000;
+
+    @Override
+    public void registerControllers(software.bernie.geckolib.animation.AnimatableManager.ControllerRegistrar controllers) {
+        super.registerControllers(controllers);
+        controllers.add(new software.bernie.geckolib.animation.AnimationController<>(this, "hurt", 0,
+                state -> software.bernie.geckolib.animation.PlayState.STOP)
+                .triggerableAnim("flinch", software.bernie.geckolib.animation.RawAnimation.begin().thenPlay("animation." + animPrefix() + ".flinch")));
     }
 
     // 深淵にする (または戻す)

@@ -239,15 +239,18 @@ LIGHT = LIGHT / np.linalg.norm(LIGHT)
 
 # ------------------------------------------------------------------ 絵
 
-def paint(faces, size, P, N, M, ctx, phase):
+def paint(faces, size, P, N, M, ctx, phase, k=1):
     D, K, LU, LV, CW, CH, INS = edge_fields(faces, size)
+    if k > 1:  # upscale_atlas の絵: 縁の幅・島の大きさは段階 1 と同じ 3D の大きさに揃える (テクセルの数だけ k 倍)
+        D, LU, LV, CW, CH = D / k, LU / k, LV / k, CW / k, CH / k
     H = W = size
     yy, xx = np.mgrid[0:H, 0:W]
     fi = np.where(M >= 0, M, 0)
     owned = M >= 0
     mats = np.array([f.mat for f in faces])[fi]
     Pw, Nw = P, N
-    bay = BAYER[yy % 4, xx % 4] - 0.5
+    # 細かいアトラス (k > 1) ではディザを弱める (細かい色の斑で騒がしくしない)
+    bay = (BAYER[yy % 4, xx % 4] - 0.5) * (0.5 if k > 1 else 1.0)
     ny = Nw[..., 1]
     lit = Nw @ LIGHT
     edge = (D < 1.05) & INS
@@ -283,6 +286,12 @@ def paint(faces, size, P, N, M, ctx, phase):
     put(mats == "plate", c_sh)
     put(mats == "rib", c_rib)
     put(mats == "lip", c_lip)
+    if k > 1:
+        # 細部 (細かいアトラスだけ): 殻の板の成長線 (渦を横切る細い暗い線。約 1 単位おき、少し揺れる)
+        ang_s = np.degrees(np.arctan2(Y - S[1], X - S[0]))
+        gq = ang_s / 6.0 + 0.9 * (vnoise(Pw * 0.22 + 71, 9) - 0.5)
+        gline = (np.abs(gq - np.round(gq)) < 0.11) & np.isin(mats, ["shell", "plate", "lip"]) & ~edge & (area > 8)
+        col = np.where(gline[..., None], col * 0.84, col)
     # 割れ: 縁の光る割れ (段階が進むほど多く太い)
     cw = ctx["crack_w"][phase - 1]
     if cw > 0:
@@ -290,6 +299,10 @@ def paint(faces, size, P, N, M, ctx, phase):
         n3 = vnoise(Pw * ctx.get("crack_f", 0.30) * 1.9 + 17, 5)
         cr = ((np.abs(n2 - 0.5) < cw) | ((np.abs(n3 - 0.5) < cw * 0.55) & (n2 > 0.5))) & shell_like & (area > 8)
         gv = 0.62 + 0.25 * (1 - np.abs(n2 - 0.5) / max(cw, 1e-6)) + 0.1 * bay
+        if k > 1:
+            # 割れの際: 光らない淡い青のにじみ (割れが殻に滲みて見える)
+            halo = (np.abs(n2 - 0.5) < cw * 2.0) & ~cr & shell_like & (area > 8)
+            col = np.where(halo[..., None], col * 0.72 + np.array([70, 170, 200]) * 0.28, col)
         put(cr, ramp(FIRE_CY, gv))
         glow |= cr
     # 溝の光 (凹んだ縁。段階ごとの確率)
@@ -322,6 +335,12 @@ def paint(faces, size, P, N, M, ctx, phase):
         put(mats == "petal", c_pt)
         c_pe, _ = stone(ctx.get("pearl_in", pe_pal), 0.50, 0.30, 0.10)
     put(mats == "pearl", c_pe)
+    if k > 1:
+        # 真珠の層 (核を中心にした淡い輪)
+        d3c = np.sqrt(((Pw - CORE) ** 2).sum(-1))
+        rq = d3c * 0.75 + 0.6 * (vnoise(Pw * 0.3 + 91, 10) - 0.5)
+        nac = (np.abs(rq - np.round(rq)) < 0.10) & (mats == "pearl") & ~edge
+        col = np.where(nac[..., None], np.minimum(col * 1.07 + 6, 255), col)
     dx, dy = X - CORE[0], Y - CORE[1]
     rr = np.sqrt(dx * dx + dy * dy)
     ang = np.arctan2(dy, dx)
@@ -435,9 +454,10 @@ def paint(faces, size, P, N, M, ctx, phase):
 # ------------------------------------------------------------------ 出力
 
 INSET = 0.02
+MIN_ATLAS = 256  # どの段階のアトラスもこの大きさ以上で描く
 
 
-def export_mesh(faces, size, path, name, texture, glowfile, bones):
+def export_mesh(faces, size, path, name, texture, glowfile, bones, tpu=TEX):
     bd = {b: {"vertices": [], "uvs": [], "triangles": []} for b in bones}
     for f in faces:
         b = bd[f.bone]
@@ -465,7 +485,7 @@ def export_mesh(faces, size, path, name, texture, glowfile, bones):
     data = {"format_version": 1, "name": name,
             "units": "1/16 block, y up, front = -Z (absolute model-space vertices, like geo cubes; all bones have no rest rotation)",
             "uv": "normalized, origin top-left (v down)", "texture": texture, "glowmask": glowfile,
-            "texture_size": [size, size], "texels_per_unit": TEX, "uv_inset_texels": INSET, "triangle_count": tot,
+            "texture_size": [size, size], "texels_per_unit": tpu, "uv_inset_texels": INSET, "triangle_count": tot,
             "bones": out}
     Path(path).write_text(json.dumps(data, ensure_ascii=False), encoding="utf-8")
     return data
@@ -479,8 +499,12 @@ def build_phase(opt, phase, outdir=None, save=True):
         assert f.bone in bones, f.bone
         assert f.bone in pres, (f.bone, "not present in this phase's geo")
     size, P, N, M, L = build_atlas(faces, 128, 0)
+    # 詰めた島が 128 に収まる段階も 256 で描く (並びはそのまま 2 倍、絵は 3D 位置から描き直す。段階 1 と同じ大きさのアトラス)
+    k = max(1, MIN_ATLAS // size)
+    if k > 1:
+        size, P, N, M, L = upscale_atlas(faces, size, k)
     ctx = opt["ctx"]
-    atlas, glow = paint(faces, size, P, N, M, ctx, phase)
+    atlas, glow = paint(faces, size, P, N, M, ctx, phase, k)
     data = None
     if save:
         d = Path(outdir)
@@ -490,6 +514,6 @@ def build_phase(opt, phase, outdir=None, save=True):
         gm[glow] = (255, 255, 255, 255)
         Image.fromarray(gm, "RGBA").save(d / f"p{phase}_glowmask.png")
         data = export_mesh(faces, size, d / f"p{phase}_mesh.json", f"tide_heart_p{phase}_lowpoly",
-                           f"p{phase}_atlas.png", f"p{phase}_glowmask.png", bones)
+                           f"p{phase}_atlas.png", f"p{phase}_glowmask.png", bones, TEX * k)
     return dict(faces=faces, size=size, atlas=atlas, glow=glow, data=data, bones=bones, tris=tri_count(faces),
                 by_bone={b: tri_count([f for f in faces if f.bone == b]) for b in sorted({f.bone for f in faces})})

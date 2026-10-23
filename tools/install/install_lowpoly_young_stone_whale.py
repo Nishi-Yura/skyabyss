@@ -72,5 +72,5 @@ print("audit %s (option %s): tris=%d open_edges=%d anims=%s seat tops=%s (SEAT_Y
       % (NAME, opt, tris, open_edges, sorted(k.split(".")[-1] for k in anim["animations"]),
          [round(s, 3) for s in seat_hits], SEAT_Y, SEAT_Y / 16))
 assert open_edges == 0
-assert tris < 3000
+assert tris < 4000   # the other young: 3,100-3,400
 assert all(s is not None and abs(s - SEAT_Y) < 0.01 for s in seat_hits)

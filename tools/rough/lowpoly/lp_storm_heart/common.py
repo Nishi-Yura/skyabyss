@@ -252,14 +252,17 @@ LIGHT = np.array([-0.35, 0.85, -0.4])
 LIGHT = LIGHT / np.linalg.norm(LIGHT)
 
 
-def paint(faces, size, P, N, M, L, ctx, phase):
+def paint(faces, size, P, N, M, L, ctx, phase, k=1):
     D, K, LU, LV, CW, CH, INS = edge_fields(faces, size)
+    if k > 1:  # upscale_atlas の絵: 縁の幅・島の大きさは段階 1 と同じ 3D の大きさに揃える (テクセルの数だけ k 倍)
+        D, LU, LV, CW, CH = D / k, LU / k, LV / k, CW / k, CH / k
     H = W = size
     yy, xx = np.mgrid[0:H, 0:W]
     fi = np.where(M >= 0, M, 0)
     owned = M >= 0
     mats = np.array([f.mat for f in faces])[fi]
-    bay = BAYER[yy % 4, xx % 4] - 0.5
+    # 細かいアトラス (k > 1) ではディザを弱める
+    bay = (BAYER[yy % 4, xx % 4] - 0.5) * (0.5 if k > 1 else 1.0)
     lit = N @ LIGHT
     edge = (D < 1.05) & INS
     convex = edge & (K > 24)
@@ -294,9 +297,17 @@ def paint(faces, size, P, N, M, L, ctx, phase):
     st = stone(ctx["stone"], ctx.get("stone_base", 0.5))
     put(mats == "stone", st)
     stone_like = mats == "stone"
+    if k > 1:
+        # 細部 (細かいアトラスだけ): 石の細いひび (光らない暗い線)
+        hl = (np.abs(vnoise(P * 0.85 + 83, 11) - 0.5) < 0.022) & stone_like & ~edge
+        col = np.where(hl[..., None], col * 0.76, col)
     sc_w = ctx["scar_w"][ph]
     if sc_w > 0:
         cr = scars(ctx.get("scar_f", 0.32), sc_w) & stone_like & (area > 6)
+        if k > 1:
+            # 傷の際: 光らない淡い青のにじみ
+            halo = scars(ctx.get("scar_f", 0.32), sc_w * 2.0) & ~cr & stone_like & (area > 6)
+            col = np.where(halo[..., None], col * 0.72 + np.array([90, 150, 220]) * 0.28, col)
         gv = 0.60 + 0.3 * (1 - np.abs(vnoise(P * 0.32 + 7, 3) - 0.5) / max(sc_w, 1e-6)) + 0.1 * bay
         put(cr, ramp(ARC, 0.72 + 0.25 * (gv - 0.6) + 0.06 * bay))
         glow |= cr
@@ -310,6 +321,10 @@ def paint(faces, size, P, N, M, L, ctx, phase):
     c_v = pick(ctx["vane"], vidx)
     put(mats == "vane", c_v)
     vane = mats == "vane"
+    if k > 1:
+        # 羽枝の境の細い暗い線
+        bq = q * 2.0
+        col = np.where((vane & ((bq - np.floor(bq)) < 0.16))[..., None], col * 0.86, col)
     # 軸 (銅)
     shaft = vane & (np.abs(s) < ctx.get("shaft_w", 0.13))
     cu_idx = np.floor(1.6 + 2.4 * (0.5 + 0.5 * lit) + 0.7 * bay + 0.6 * (n_mid - 0.5)).astype(int)
@@ -388,9 +403,10 @@ def paint(faces, size, P, N, M, L, ctx, phase):
 # ------------------------------------------------------------------ 出力
 
 INSET = 0.02
+MIN_ATLAS = 256  # どの段階のアトラスもこの大きさ以上で描く
 
 
-def export_mesh(faces, size, path, name, texture, glowfile, bones):
+def export_mesh(faces, size, path, name, texture, glowfile, bones, tpu=TEX):
     bd = {b: {"vertices": [], "uvs": [], "triangles": []} for b in bones}
     for f in faces:
         b = bd[f.bone]
@@ -418,7 +434,7 @@ def export_mesh(faces, size, path, name, texture, glowfile, bones):
     data = {"format_version": 1, "name": name,
             "units": "1/16 block, y up, front = -Z (absolute model-space vertices, like geo cubes; all bones have no rest rotation)",
             "uv": "normalized, origin top-left (v down)", "texture": texture, "glowmask": glowfile,
-            "texture_size": [size, size], "texels_per_unit": TEX, "uv_inset_texels": INSET, "triangle_count": tot,
+            "texture_size": [size, size], "texels_per_unit": tpu, "uv_inset_texels": INSET, "triangle_count": tot,
             "bones": out}
     Path(path).write_text(json.dumps(data, ensure_ascii=False), encoding="utf-8")
     return data
@@ -432,7 +448,11 @@ def build_phase(opt, phase, outdir=None, save=True):
         assert f.bone in bones, f.bone
         assert f.bone in pres, (f.bone, "not present in this phase's geo")
     size, P, N, M, L = build_atlas(faces, 128, 0)
-    atlas, glow = paint(faces, size, P, N, M, L, opt["ctx"], phase)
+    # 詰めた島が 128 に収まる段階も 256 で描く (並びはそのまま 2 倍、絵は 3D 位置から描き直す。段階 1 と同じ大きさのアトラス)
+    k = max(1, MIN_ATLAS // size)
+    if k > 1:
+        size, P, N, M, L = upscale_atlas(faces, size, k)
+    atlas, glow = paint(faces, size, P, N, M, L, opt["ctx"], phase, k)
     data = None
     if save:
         d = Path(outdir)
@@ -442,6 +462,6 @@ def build_phase(opt, phase, outdir=None, save=True):
         gm[glow] = (255, 255, 255, 255)
         Image.fromarray(gm, "RGBA").save(d / f"p{phase}_glowmask.png")
         data = export_mesh(faces, size, d / f"p{phase}_mesh.json", f"storm_heart_p{phase}_lowpoly",
-                           f"p{phase}_atlas.png", f"p{phase}_glowmask.png", bones)
+                           f"p{phase}_atlas.png", f"p{phase}_glowmask.png", bones, TEX * k)
     return dict(faces=faces, size=size, atlas=atlas, glow=glow, data=data, bones=bones, tris=tri_count(faces),
                 by_bone={b: tri_count([f for f in faces if f.bone == b]) for b in sorted({f.bone for f in faces})})

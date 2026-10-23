@@ -1416,7 +1416,8 @@ public class StormHeart extends HeartBoss {
                         .onImpact(s -> {
                             s.playSound(null, x, y, z, SoundEvents.AMETHYST_CLUSTER_BREAK, SoundSource.HOSTILE, 1.4f, 1.6f);
                             s.sendParticles(ParticleTypes.WHITE_ASH, x, y + 1.5, z, 40, 1.2, 1.0, 1.2, 0.05);
-                            warn(s, ParticleTypes.END_ROD, x, y + 1.0, z, 10, 0.8, 0.5, 0.8, 0.02);
+                            // 羽が舞う (前の end_rod は人の目の高さで大きな白い四角に見えた。羽の粒は小さく、目の近くで薄れる)
+                            warn(s, jp.revati.skyabyss.rpg.skill.Skills.STORM_FEATHER.get(), x, y + 1.0, z, 10, 0.8, 0.5, 0.8, 0.02);
                         })
                         .onHit((s, player) -> {
                             strike(player, FEATHER_DAMAGE);
