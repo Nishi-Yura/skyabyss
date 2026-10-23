@@ -53,14 +53,13 @@ def main():
     args = sys.argv[1:]
     tag = args.pop(0)
     pair = None
-    if args and args[0] == "--pair":
-        args.pop(0)
-        pair = args.pop(0)
     global OUT, VIEWS
-    while args and args[0] in ("--out", "--views"):
+    while args and args[0] in ("--pair", "--out", "--views"):
         k = args.pop(0)
         v = args.pop(0)
-        if k == "--out":
+        if k == "--pair":
+            pair = v
+        elif k == "--out":
             OUT = ROOT / v
         else:
             VIEWS = v.split(",")

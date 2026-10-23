@@ -15,7 +15,7 @@ R = ROOT / "src/main/resources/assets/skyabyss"
 MOBS = [
     ("rock_shell_beetle", "rock_shell_beetle", 1.0, "charge", 10),
     ("spine_hare", "spine_hare", 1.0, "shoot", 8),
-    ("bone_hauler", "bone_hauler", 1.0, None, 0),
+    ("bone_hauler", "bone_hauler", 1.0, "startle", 3),
     ("elder_sentry", "elder_sentry", 1.0, "attack", 8),
     ("tidepool_clam", "tidepool_clam", 1.0, "pinch", 6),
     ("sand_burrower", "sand_burrower", 1.0, "bite", 6),
@@ -25,7 +25,7 @@ MOBS = [
     ("peak_fledgling", "peak_fledgling", 1.0, "dive", 8),
     ("lightning_gleaner", "lightning_gleaner", 1.0, "peck", 6),
     ("scorched_warden", "scorched_warden", 1.0, "attack", 8),
-    ("cinder_mite", "cinder_mite", 1.5, None, 0),
+    ("cinder_mite", "cinder_mite", 1.5, "attack", 1),
     ("ash_dragger", "ash_dragger", 1.0, "curl", 10),
     ("ash_husk", "ash_husk", 0.85, "attack", 8),
     ("elder_thrall", "elder_thrall", 1.15, "attack", 8),
@@ -62,12 +62,12 @@ MOBS = [
     ("white_shell_keeper", "abyss_white_shell_keeper_s1", 1.0, "attack", 8),
     ("ash_trail", "ash_trail", 1.0, "attack", 8),
     ("ember_keeper", "ember_keeper", 1.0, "telegraph", 10),
-    ("soot_child", "soot_child", 1.0, "attack", 8),
+    ("soot_child", "soot_child", 1.0, "attack", 2),
     ("past_shadow", "past_shadow", 1.0, "mirror", 8),
     ("nameless_shape", "nameless_shape", 1.0, "shoot", 8),
     ("lamp_eater", "lamp_eater", 1.0, "snuff", 8),
     ("ceiling_walker", "ceiling_walker", 1.0, "drop", 8),
-    ("heartbeat_mimic", "heartbeat_mimic", 1.0, "bite", 8),
+    ("heartbeat_mimic", "heartbeat_mimic", 1.0, "bite", 6),
     ("rope_hanger", "rope_hanger", 1.0, "pull", 8),
 ]
 
@@ -79,6 +79,13 @@ EXTRA["lamp_eater"] = [("snuff", 6)]
 for _e, _t in (("bone_sentinel", 30), ("rib_archer", 30), ("elder_sentinel", 34), ("whalebone_captain", 44), ("bone_mortar", 26), ("bone_gull", 22)):
     EXTRA[_e] = [("hurt", 2), ("death", _t)]
 EXTRA["nameless_shape"] = [("shoot", 10)]
+# 2026-10-23 (三回目): 作り直した 3 種と、被弾・倒れる・攻撃を足した敵
+EXTRA["ember_keeper"] = [("heat", 2), ("hurt", 1), ("death", 30)]
+EXTRA["soot_child"] = [("hurt", 1), ("death", 18)]
+EXTRA["heartbeat_mimic"] = [("lure", 2), ("hurt", 1), ("death", 30)]
+EXTRA["waterway_maw"] = [("hurt", 1), ("death", 34)]
+EXTRA["cinder_mite"] = [("hurt", 1)]
+EXTRA["bone_hauler"] = [("hurt", 2)]
 
 
 def extent(mesh, scale):
