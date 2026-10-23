@@ -60,24 +60,48 @@ public final class TideMidRoom extends MidRoom implements TideBeckoner.Flats {
     @Override
     public void build(RaidCtx ctx) {
         this.ctx = ctx;
-        RaidKit.buildCell(ctx, new RaidKit.Spec(HX, HZ, HEIGHT, RaidKit.TIDE));
+        RaidKit.buildCell(ctx, new RaidKit.Spec(HX, HZ, HEIGHT, jp.revati.skyabyss.trial.raid.tide.TideBuild.PALETTE));
         ServerLevel level = ctx.level();
         BlockState sand = Blocks.SAND.defaultBlockState();
+        // 干潟の砂 (下は殻なので落ちない)。砂紋: 波打つ筋に砂岩
         for (int x = -HX + 1; x <= HX - 1; x++) {
             for (int z = -HZ + 1; z <= HZ - 1; z++) {
-                RaidKit.set(level, ctx.local(x, 0, z), (x * 7 + z * 3) % 11 == 0 ? Blocks.SANDSTONE.defaultBlockState() : sand);
+                double w = z + 1.6 * Math.sin(x * 0.33) + 0.8 * Math.sin(x * 0.11 + z * 0.2);
+                boolean ripple = Math.floorMod((int) Math.floor(w), 4) == 0;
+                RaidKit.set(level, ctx.local(x, 0, z), ripple ? ((x * 7 + z * 3) % 5 == 0 ? Blocks.SMOOTH_SANDSTONE.defaultBlockState() : Blocks.SANDSTONE.defaultBlockState()) : sand);
             }
         }
+        // 岩の小島 = 干上がった礁 (下は死んだ珊瑚、上は方解石の平ら。真ん中に桃の珊瑚の目)。招き潮のあいだの立つ所
         for (int[] r : ROCKS) {
             for (int dx = -1; dx <= 1; dx++) {
                 for (int dz = -1; dz <= 1; dz++) {
                     for (int y = 1; y <= FLOOD; y++) {
-                        RaidKit.set(level, ctx.local(r[0] + dx, y, r[1] + dz), y == FLOOD ? Blocks.MOSSY_COBBLESTONE.defaultBlockState() : Blocks.TUFF.defaultBlockState());
+                        BlockState st = y < FLOOD ? (Math.floorMod(dx + dz + r[0], 2) == 0 ? Blocks.DEAD_BRAIN_CORAL_BLOCK : Blocks.DEAD_TUBE_CORAL_BLOCK).defaultBlockState()
+                                : dx == 0 && dz == 0 ? Blocks.CHERRY_PLANKS.defaultBlockState() : Blocks.CALCITE.defaultBlockState();
+                        RaidKit.set(level, ctx.local(r[0] + dx, y, r[1] + dz), st);
                     }
                 }
             }
         }
         RaidKit.restInArena(ctx, 0, HZ - 2);
+        dress(ctx);
+    }
+
+    // 飾り (docs/design/39 の 4.2「闘技場」): 潮招きが現れる砂の後ろ、北の壁に大きな巻貝の断面。東西の壁に箱庭の窪み (遠くの巻貝の塔)。
+    // 壁の高い所から珊瑚の枝、天井から珊瑚の房。招き潮の満ちる高さ (床の上 2) と岩の小島のまわりには何も置かない
+    private void dress(RaidCtx ctx) {
+        jp.revati.skyabyss.trial.raid.tide.TideBuild d = new jp.revati.skyabyss.trial.raid.tide.TideBuild(ctx);
+        for (int[] r : ROCKS) {
+            d.keep(r[0] - 2, 1, r[1] - 2, r[0] + 2, 6, r[1] + 2);
+        }
+        d.keep(-HX + 3, 1, -HZ + 3, HX - 3, 6, HZ - 3);
+        d.keep(-7, 1, -HZ, 7, HEIGHT, -HZ + 1);
+        d.shell(2);
+        d.spiral(true, 0, 8, 6, 2.6);
+        d.vista(true, 0, 3);
+        d.vista(false, 0, 3);
+        d.hiddenLights(11, 4, false).ceilingCoral(20, 3, HEIGHT - 3, 4).wallBranches(18, 6, 4);
+        d.finish();
     }
 
     @Override

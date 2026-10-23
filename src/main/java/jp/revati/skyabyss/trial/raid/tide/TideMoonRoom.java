@@ -47,7 +47,7 @@ public final class TideMoonRoom extends RaidRoom {
         ServerLevel level = ctx.level();
         first = ctx.rng().nextInt(PHASES);
         step = ctx.rng().nextBoolean() ? 1 : PHASES - 1;
-        RaidKit.buildCell(ctx, new RaidKit.Spec(HX, HZ, H, RaidKit.TIDE));
+        RaidKit.buildCell(ctx, new RaidKit.Spec(HX, HZ, H, TideBuild.PALETTE));
         // 壁画: 北の壁に 1〜3、南の壁に 4〜6 (どちらも見る人から見て左から右)
         for (int k = 0; k < DIALS; k++) {
             boolean north = k < 3;
@@ -87,6 +87,68 @@ public final class TideMoonRoom extends RaidRoom {
             int z = ctx.rng().nextInt(2 * HZ - 5) - HZ + 3;
             RaidKit.fill(level, origin.offset(side * (HX - 1), 1, z), origin.offset(side * (HX - 1), 1 + ctx.rng().nextInt(3), z), dead[ctx.rng().nextInt(dead.length)]);
         }
+        dress(ctx);
+    }
+
+    // 飾り (docs/design/39 の 4.2「解く 月・潮見の暦」): 六つの壁画を貝殻の額 (石英の枠と桃の縁) に入れ、天井の真ん中に月の円盤。
+    // 壁画の面と月の石の台のまわりには何も置かない (見分けを邪魔しない)
+    private void dress(RaidCtx ctx) {
+        TideBuild d = new TideBuild(ctx);
+        for (int k = 0; k < DIALS; k++) {
+            boolean north = k < 3;
+            int cx = north ? CENTER_X[k] : -CENTER_X[k - 3];
+            int wz = north ? -HZ : HZ;
+            d.keep(cx - 4, MURAL_Y - 2, wz - 1, cx + 4, H, wz + 1);
+            d.keep(dialX(k) - 4, 1, dialZ(k) - 2, dialX(k) + 4, 4, dialZ(k) + 2);
+        }
+        d.shell(2);
+        // 壁画の額: 左右の柱 (方解石と石英)、上の庇 (石英の板)、北の壁画には下の棚
+        for (int k = 0; k < DIALS; k++) {
+            boolean north = k < 3;
+            int cx = north ? CENTER_X[k] : -CENTER_X[k - 3];
+            int wz = north ? -HZ : HZ;
+            for (int y = MURAL_Y - 1; y <= MURAL_Y + 4; y++) {
+                BlockState st = y == MURAL_Y + 2 ? Blocks.CHERRY_PLANKS.defaultBlockState() : Blocks.SMOOTH_QUARTZ.defaultBlockState();
+                d.mark(cx - 3, y, wz, st);
+                d.mark(cx + 3, y, wz, st);
+            }
+            for (int x = cx - 3; x <= cx + 3; x++) {
+                d.mark(x, MURAL_Y + 5, wz, x == cx ? Blocks.CHISELED_QUARTZ_BLOCK.defaultBlockState() : Blocks.QUARTZ_BRICKS.defaultBlockState());
+                if (north) {
+                    d.mark(x, MURAL_Y - 2, wz, Blocks.SMOOTH_QUARTZ_SLAB.defaultBlockState()
+                            .setValue(net.minecraft.world.level.block.SlabBlock.TYPE, net.minecraft.world.level.block.state.properties.SlabType.TOP));
+                }
+            }
+        }
+        // 天井の月の円盤 (天井の板を塗る。真ん中だけ真珠の光)
+        for (int x = -4; x <= 4; x++) {
+            for (int z = -4; z <= 4; z++) {
+                double r = Math.hypot(x, z);
+                if (r > 4.3) {
+                    continue;
+                }
+                BlockState st = r < 0.5 ? Blocks.PEARLESCENT_FROGLIGHT.defaultBlockState() : r > 3.4 ? Blocks.SMOOTH_QUARTZ.defaultBlockState()
+                        : (x * 3 + z * 5) % 4 == 0 ? Blocks.CALCITE.defaultBlockState() : Blocks.WHITE_CONCRETE.defaultBlockState();
+                d.paint(x, H + 1, z, st);
+            }
+        }
+        // 月の円盤の縁から垂れる六つの珊瑚 (六つの顔の数)
+        for (int i = 0; i < PHASES; i++) {
+            double a = Math.PI * 2 * i / PHASES;
+            int x = (int) Math.round(Math.cos(a) * 5);
+            int z = (int) Math.round(Math.sin(a) * 5);
+            d.deco(x, H, z, Blocks.CHERRY_PLANKS.defaultBlockState());
+            d.deco(x, H - 1, z, i % 2 == 0 ? Blocks.CALCITE.defaultBlockState() : Blocks.MAGENTA_TERRACOTTA.defaultBlockState());
+        }
+        // 床: 真ん中の渦と、月の石の台の列の筋
+        d.floorSpiral(0, 0, 3, 1.5, Blocks.CUT_SANDSTONE.defaultBlockState());
+        for (int z : DIAL_Z) {
+            for (int x = -HX + 2; x <= HX - 2; x++) {
+                d.floorPut(x, z + 2 * Integer.signum(z), Blocks.CUT_SANDSTONE.defaultBlockState());
+            }
+        }
+        d.hiddenLights(11, 4, false).ceilingCoral(8, 2, H - 1, 2).wallBranches(10, 6, 2).pools(2).shards(4);
+        d.finish();
     }
 
     // 番号 k (0 始まり) の台に並べる月

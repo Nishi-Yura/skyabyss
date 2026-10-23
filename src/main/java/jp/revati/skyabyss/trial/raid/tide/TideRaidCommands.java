@@ -40,6 +40,7 @@ public final class TideRaidCommands {
     // ---- 撮影: 順路を通さずに部屋を一つ建てて動かす (潮殻の背の中で。区画 1・段 1 の原点)
     private static RaidCtx shotCtx;
     private static RaidRoom shotRoom;
+    private static boolean shotStill;
 
     private static int endShot() {
         if (shotCtx != null && shotRoom != null && shotCtx.cell() != null) {
@@ -49,13 +50,16 @@ public final class TideRaidCommands {
         }
         shotCtx = null;
         shotRoom = null;
+        shotStill = false;
         return 1;
     }
 
     private static int room(CommandContext<CommandSourceStack> ctx) throws com.mojang.brigadier.exceptions.CommandSyntaxException {
         ServerPlayer p = ctx.getSource().getPlayerOrException();
         String id = com.mojang.brigadier.arguments.StringArgumentType.getString(ctx, "id");
-        RaidRoom room = RaidRooms.create(id);
+        // TRM = 潮殻の中ボスの間 (撮影では建てるだけ。潮招きは湧かせず、tick も回さない)
+        boolean mid = jp.revati.skyabyss.trial.raid.mid.TideMidRoom.ID.equals(id);
+        RaidRoom room = mid ? jp.revati.skyabyss.trial.raid.mid.MidRooms.create("tide") : RaidRooms.create(id);
         if (room == null) {
             ctx.getSource().sendFailure(net.minecraft.network.chat.Component.literal("unknown raid room " + id));
             return 0;
@@ -66,8 +70,11 @@ public final class TideRaidCommands {
         RaidKit.setGate(c, c.cell().entryGate(), true);
         shotCtx = c;
         shotRoom = room;
+        shotStill = mid;
         p.teleportTo(c.cell().rest().getX() + 0.5, c.cell().rest().getY(), c.cell().rest().getZ() + 0.5);
-        room.start(c);
+        if (!mid) {
+            room.start(c);
+        }
         return 1;
     }
 
@@ -84,13 +91,15 @@ public final class TideRaidCommands {
         return 1;
     }
 
-    // 部屋の途中の姿: TR5 = 光を水晶へ導いた姿、TR6 = 台の半分を合わせた姿、TR7 = 母の近くへ寄る
+    // 部屋の途中の姿: TR1 = 三つの真珠を届けた姿、TR5 = 光を水晶へ導いた姿、TR6 = 台の半分を合わせた姿、TR7 = 母の近くへ寄る
     private static int pose(CommandContext<CommandSourceStack> ctx) throws com.mojang.brigadier.exceptions.CommandSyntaxException {
         ServerPlayer p = ctx.getSource().getPlayerOrException();
         if (shotCtx == null) {
             return 0;
         }
-        if (shotRoom instanceof TideLightRoom r) {
+        if (shotRoom instanceof TidePearlRoom r) {
+            r.showDelivered(shotCtx);
+        } else if (shotRoom instanceof TideLightRoom r) {
             for (int[] n : r.pathNodes()) {
                 for (int k = 0; k < 4 && r.facing(n[0], n[1]) != r.correctFacing(n[0], n[1]); k++) {
                     r.onUse(shotCtx, p, r.mirrorPos(n[0], n[1]), false);
@@ -111,7 +120,7 @@ public final class TideRaidCommands {
 
     @SubscribeEvent
     static void onTick(net.neoforged.neoforge.event.tick.ServerTickEvent.Post event) {
-        if (shotCtx != null && shotRoom != null && shotCtx.cell() != null) {
+        if (shotCtx != null && shotRoom != null && shotCtx.cell() != null && !shotStill) {
             shotRoom.tick(shotCtx);
         }
     }

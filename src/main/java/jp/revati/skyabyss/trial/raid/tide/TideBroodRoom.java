@@ -55,7 +55,7 @@ public final class TideBroodRoom extends RaidRoom {
         origin = ctx.origin();
         ServerLevel level = ctx.level();
         decoyCount = Math.min(6, 2 + ctx.scale() + 1);
-        cell = RaidKit.buildCell(ctx, new RaidKit.Spec(HX, HZ, H, RaidKit.TIDE));
+        cell = RaidKit.buildCell(ctx, new RaidKit.Spec(HX, HZ, H, TideBuild.PALETTE));
         BlockState[] coral = {Blocks.DEAD_TUBE_CORAL_BLOCK.defaultBlockState(), Blocks.DEAD_BRAIN_CORAL_BLOCK.defaultBlockState(),
                 Blocks.DEAD_BUBBLE_CORAL_BLOCK.defaultBlockState(), Blocks.DEAD_HORN_CORAL_BLOCK.defaultBlockState()};
         int tries = 0;
@@ -79,13 +79,26 @@ public final class TideBroodRoom extends RaidRoom {
             RaidKit.fill(level, origin.offset(x, 1, z), origin.offset(x + 1, 4, z + 1), coral[ctx.rng().nextInt(coral.length)]);
             RaidKit.fill(level, origin.offset(x, 5, z), origin.offset(x + 1, 5, z + 1), Blocks.DARK_PRISMARINE.defaultBlockState());
         }
-        // 床の模様: 薄い色の釉の板を混ぜる (足跡が見やすいよう、床は暗めのまま)
-        for (int i = 0; i < 30; i++) {
-            BlockPos p = origin.offset(ctx.rng().nextInt(2 * HX - 1) - HX + 1, 0, ctx.rng().nextInt(2 * HZ - 1) - HZ + 1);
-            if (level.getBlockState(p).is(Blocks.PRISMARINE_BRICKS)) {
-                RaidKit.set(level, p, Blocks.DARK_PRISMARINE.defaultBlockState());
-            }
+        dress(ctx);
+    }
+
+    // 飾り (docs/design/39 の 4.2「守る 群れ」): 群れの母の巣 = 北の壁の巻貝の断面 (出口の戸の上)。床は明るい砂岩のまま (水色の足跡が見える)。
+    // 柱の頭は珊瑚の頭に。戦う床の真ん中には何も足さない
+    private void dress(RaidCtx ctx) {
+        TideBuild d = new TideBuild(ctx);
+        d.keep(-10, 1, -10, 10, 4, 10);
+        for (AABB b : pillars) {
+            d.keep((int) b.minX - 1, 1, (int) b.minZ - 1, (int) b.maxX, 7, (int) b.maxZ);
         }
+        d.keep(-5, 1, -HZ, 5, H, -HZ + 1);
+        d.shell(2);
+        d.spiral(true, 0, 6, 4, 2.2);
+        for (AABB b : pillars) {
+            d.coralHead((int) b.minX, 5, (int) b.minZ);
+        }
+        d.floorSpiral(0, -3, 7, 2.0, Blocks.CUT_SANDSTONE.defaultBlockState());
+        d.hiddenLights(11, 4, false).ceilingCoral(10, 2, H - 2, 3).wallBranches(10, 5, 2).pools(2).shards(4);
+        d.finish();
     }
 
     @Override

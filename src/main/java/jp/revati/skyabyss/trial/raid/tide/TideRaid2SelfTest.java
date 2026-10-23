@@ -106,6 +106,7 @@ public final class TideRaid2SelfTest {
             b.setPos(0, 70, 0);
             draws();
             texts();
+            builds();
         } catch (RuntimeException e) {
             SkyAbyss.LOGGER.error("SELFTEST tide raid2 setup crashed", e);
             F.add("setup crashed: " + e);
@@ -142,6 +143,97 @@ public final class TideRaid2SelfTest {
         TrialDraw.Memory mem = new TrialDraw.Memory();
         TrialDraw.Draw first = TrialDraw.draw(t, 1, 4242L, new UUID(9, 9), mem);
         check(first.picks().size() == 3 && first.picks().stream().noneMatch(p -> p.cellId().equals("TR2")), "a cycle-1 draw has TR2 or is not three");
+    }
+
+    // 建築 (docs/design/39): 潮殻の六つの部屋と中ボスの間を建てて調べる。飾りの費用 (8 千ブロック・明るさ 12 以上が 40・ブロックエンティティ 24・
+    // 飾りのエンティティ 16)、殻の外側が全部不透明 (虚空が見えない)、入口の休み場から出口と目的の所まで歩ける、出口の戸が開くと枠が灯る
+    private static void builds() {
+        for (String id : List.of("TR1", "TR3", "TR4", "TR5", "TR6", "TR7", jp.revati.skyabyss.trial.raid.mid.TideMidRoom.ID)) {
+            boolean mid = id.equals(jp.revati.skyabyss.trial.raid.mid.TideMidRoom.ID);
+            RaidCtx c = RaidCtx.forTest(back, group, Titans.TIDE_SHELL, id, SLOT, 1, 4321L);
+            RaidRoom r = mid ? jp.revati.skyabyss.trial.raid.mid.MidRooms.create("tide") : RaidRooms.create(id);
+            try {
+                r.build(c);
+                BlockPos o = c.origin();
+                List<BlockPos> targets = new ArrayList<>();
+                if (r instanceof TidePearlRoom p) {
+                    for (int i = 0; i < p.pearlCount(); i++) {
+                        targets.add(p.pearlHome(i));
+                    }
+                    targets.add(o.offset(0, 1, TidePearlRoom.ALTAR_Z + 2));
+                } else if (r instanceof TideSaplingRoom p) {
+                    for (int[] a : p.saplingSpots()) {
+                        targets.add(o.offset(a[0], 1, a[1] + 2));
+                    }
+                } else if (r instanceof TideCoralRoadRoom p) {
+                    for (int row = 0; row < TideCoralRoadRoom.ROWS; row++) {
+                        for (int lane = 0; lane < TideCoralRoadRoom.LANE_X.length; lane++) {
+                            targets.add(p.gateSpot(row, lane));
+                        }
+                    }
+                } else if (r instanceof TideLightRoom) {
+                    targets.add(o.offset(TideLightRoom.HX, 3, TideLightRoom.HZ));
+                } else if (r instanceof TideMoonRoom) {
+                    for (int k = 0; k < TideMoonRoom.DIALS; k++) {
+                        targets.add(o.offset(TideMoonRoom.dialX(k), 1, TideMoonRoom.dialZ(k) + (k < 3 ? -2 : 2)));
+                    }
+                } else if (r instanceof TideBroodRoom) {
+                    targets.add(o.offset(0, 1, 0));
+                } else if (mid) {
+                    for (int[] rock : new int[][] {{-14, -9}, {14, -9}, {-16, 6}, {16, 6}, {0, -13}, {-6, 11}, {7, 11}}) {
+                        // 小島は高さ 2 (招き潮の水で泳いで上がる)。その南の脇の砂まで歩けるか
+                        targets.add(o.offset(rock[0], 1, rock[1] + 2));
+                    }
+                }
+                TideBuild.Cost cost = TideBuild.last(id);
+                check(cost != null, id + ": the tide build did not run");
+                if (cost != null) {
+                    check(cost.blocks() <= TideBuild.MAX_BLOCKS, id + ": " + cost.blocks() + " decoration blocks (limit " + TideBuild.MAX_BLOCKS + ")");
+                    check(cost.bright() <= TideBuild.MAX_BRIGHT, id + ": " + cost.bright() + " bright decoration blocks (limit " + TideBuild.MAX_BRIGHT + ")");
+                    check(cost.blockEntities() <= TideBuild.MAX_BLOCK_ENTITIES, id + ": " + cost.blockEntities() + " decoration block entities");
+                }
+                TideBuild.Audit au = TideBuild.audit(back, c.cell(), targets);
+                check(au.leak() == null, id + ": the shell is open to the outside at " + au.leak());
+                check(au.unreachable().isEmpty(), id + ": cannot walk from the rest spot to " + au.unreachable());
+                check(au.blockEntities() <= TideBuild.MAX_BLOCK_ENTITIES, id + ": " + au.blockEntities() + " block entities in the room");
+                check(au.entities() <= TideBuild.MAX_ENTITIES, id + ": " + au.entities() + " decoration entities in the room");
+                // 出口の枠の灯り: 閉じているあいだは消え、開くと灯る
+                BlockPos lamp = o.offset(0, 4, -c.cell().hz() - 1);
+                check(back.getBlockState(lamp).is(net.minecraft.world.level.block.Blocks.CALCITE), id + ": the exit frame lamp is not dark while closed");
+                RaidKit.setGate(c, c.cell().exitGate(), true);
+                TideBuild.pollWatch();
+                check(back.getBlockState(lamp).is(net.minecraft.world.level.block.Blocks.PEARLESCENT_FROGLIGHT), id + ": the exit frame lamp did not light when the exit opened");
+                // 床の上 1〜2 段に何があるか (飾りが通り道に出ていないかを、記録で見られるように)
+                java.util.Map<String, Integer> low = new java.util.TreeMap<>();
+                for (int x = -c.cell().hx(); x <= c.cell().hx(); x++) {
+                    for (int z = -c.cell().hz(); z <= c.cell().hz(); z++) {
+                        for (int y = 1; y <= 2; y++) {
+                            net.minecraft.world.level.block.state.BlockState st = back.getBlockState(o.offset(x, y, z));
+                            if (!st.isAir()) {
+                                low.merge(net.minecraft.core.registries.BuiltInRegistries.BLOCK.getKey(st.getBlock()).getPath(), 1, Integer::sum);
+                            }
+                        }
+                    }
+                }
+                SkyAbyss.LOGGER.info("SELFTEST tide raid2 build {} low blocks: {}", id, low);
+                SkyAbyss.LOGGER.info("SELFTEST tide raid2 build {}: deco {} blocks / {} bright / {} BE; room {} bright, {} BE, {} entities", id,
+                        cost == null ? -1 : cost.blocks(), cost == null ? -1 : cost.bright(), cost == null ? -1 : cost.blockEntities(), au.bright(), au.blockEntities(), au.entities());
+            } catch (RuntimeException e) {
+                SkyAbyss.LOGGER.error("SELFTEST tide raid2 build " + id + " crashed", e);
+                F.add(id + ": build audit crashed: " + e);
+            } finally {
+                if (c.cell() != null) {
+                    try {
+                        r.end(c);
+                    } catch (RuntimeException ignored) {
+                        // 片付けの失敗は数えない
+                    }
+                    c.clearMobs();
+                    RaidKit.clear(back, c.cell().bounds());
+                }
+            }
+        }
+        TideBuild.pollWatch();
     }
 
     // 文言: 部屋の名前・説明・目的・メッセージ・碑・心の声 (日本語と英語)
