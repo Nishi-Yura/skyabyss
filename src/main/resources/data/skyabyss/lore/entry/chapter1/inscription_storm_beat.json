@@ -1,0 +1,15 @@
+{
+  "chapter": "titan_storm",
+  "order": 174,
+  "inscription_sign": "sign.skyabyss.lore_storm_beat",
+  "unlock": [
+    {
+      "type": "sign",
+      "target": "sign.skyabyss.lore_storm_beat"
+    }
+  ],
+  "related": [
+    "chapter1/inscription_storm_hub",
+    "chapter1/wind_ledger"
+  ]
+}
