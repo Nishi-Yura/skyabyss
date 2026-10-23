@@ -113,6 +113,8 @@ public abstract class HeartDomain {
     protected final double radius;
     protected final Predicate<ServerPlayer> victims;
     protected final BiConsumer<ServerPlayer, Float> striker;
+    // 領域の決まりの傷の倍率 (各領域の *_DAMAGE はこの前の値)
+    public static final float RULE_DAMAGE_SCALE = 0.85f;
     protected final Supplier<Collection<ServerPlayer>> players;
     private final SoundEvent sting;
     protected final List<Node> nodes = new ArrayList<>();
@@ -137,7 +139,8 @@ public abstract class HeartDomain {
         this.floorY = floorY;
         this.radius = radius;
         this.victims = victims;
-        this.striker = striker;
+        // 領域の決まりの傷は、すべてここを通る。0.5.1 の試遊で「ほんの少し下げてよい」と言われ、0.85 倍 (予告の長さ・周期は変えない)
+        this.striker = (p, dmg) -> striker.accept(p, dmg * RULE_DAMAGE_SCALE);
         this.players = players;
         this.sting = sting;
     }

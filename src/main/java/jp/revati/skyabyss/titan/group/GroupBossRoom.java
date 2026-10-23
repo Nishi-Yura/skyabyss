@@ -128,6 +128,21 @@ public final class GroupBossRoom {
         return null;
     }
 
+    // このボス (エンティティの UUID) を戦わせている部屋が、いまあるか。心臓は、これが偽のまま続くと自分を消す (HeartBoss の見張り)。
+    // 部屋の状態はメモリにだけあるので、サーバーの再起動・部屋の作り直し (別の場所の部屋) のあとに残った心臓は、誰にも戦われていない
+    public static boolean claims(UUID boss) {
+        for (GroupBossRoom room : ACTIVE) {
+            if (room.active && boss.equals(room.bossId)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // 背中の次元に人が一人もいないときも、戦いの放棄を数えるか (既定 true)。偽のプレイヤーで戦いを続ける自己テストはレベルの人の一覧に
+    // 入らないので、自己テストの実行では切っておき、見る自己テスト (HeartOrphanSelfTest) だけが入れる
+    public static boolean abandonWhenLevelEmpty = !jp.revati.skyabyss.SelfTestRunner.enabled();
+
     // 鼓動守をこの戦いで使ってよいか (その人が初めてなら true にして記録する)
     public boolean claimWard(UUID player) {
         return wardUsed.add(player);
@@ -375,6 +390,9 @@ public final class GroupBossRoom {
             lastInside.add(player.getUUID());
         }
         bossId = boss.getUUID();
+        if (boss instanceof jp.revati.skyabyss.entity.HeartBoss heart) {
+            heart.markRoomBound();
+        }
         host.seal(level, group);
         return true;
     }

@@ -259,7 +259,15 @@ public final class StormHeartBattle {
         if (!(event.getLevel() instanceof ServerLevel level) || level.dimension() != StormTravel.STORM_BACK) {
             return;
         }
-        if (level.players().isEmpty() || level.getGameTime() % 10 != 0) {
+        if (level.players().isEmpty()) {
+            // 背中に人が一人もいない (全滅して地上へ戻った・全員が出た・切断した)。戦いは「部屋に誰もいない」と同じに数えて放棄する
+            // (前はここで止まり、戦いが閉じたまま心臓だけ残った)
+            if (GroupBossRoom.abandonWhenLevelEmpty && level.getGameTime() % 10 == 0 && ROOMS.anyActive()) {
+                ROOMS.tick(level, HOST);
+            }
+            return;
+        }
+        if (level.getGameTime() % 10 != 0) {
             return;
         }
         if (level.getGameTime() % 100 == 0 && !ROOMS.anyActive()) {
