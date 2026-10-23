@@ -1,5 +1,7 @@
-# 雷翼のレイcmd gamemode spectator
+# 雷翼のレイwait 300
+cmd gamemode spectator
 fov 95
+cmd gamemode spectator
 cmd skystormraid show SR4
 wait 20
 waitchunks
@@ -23,6 +25,7 @@ shot sr4_7
 wait 9
 shot sr4_8
 wait 9
+cmd gamemode spectator
 cmd skystormraid show SR5
 wait 20
 waitchunks
@@ -48,6 +51,7 @@ shot sr5_8
 wait 9
 shot sr5_9
 wait 9
+cmd gamemode spectator
 cmd skystormraid show SR6
 wait 20
 waitchunks
