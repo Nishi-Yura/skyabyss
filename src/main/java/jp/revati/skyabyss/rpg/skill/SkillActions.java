@@ -60,7 +60,7 @@ public final class SkillActions {
     // 雲穿ちの矢 (寿命を数え、尾を引かせる)
     public static final String PIERCE_TAG = "skyabyss_cloud_pierce";
     public static final String LIGHTNING_TAG = "skyabyss_cloud_pierce_lightning";
-    // 伝説の書き換え「天落とし」(雷淵の弓): 矢の止まった所に 0.8 秒後、雷の柱
+    // 逸品の書き換え「天落とし」(雷淵の弓): 矢の止まった所に 0.8 秒後、雷の柱
     public static final String SKY_FALL_TAG = "skyabyss_cloud_pierce_sky_fall";
     private static final List<TrackedArrow> ARROWS = new ArrayList<>();
     // 天の驟雨の、これから降る分
@@ -336,7 +336,7 @@ public final class SkillActions {
         return null;
     }
 
-    // 伝説の書き換え「奈落断ち」(底なしの大剣。docs/design/31 の B04): 振った扇が 1.2 秒後に裂けて、同じ扇にもう一度 ×0.6 の遅れた刃
+    // 逸品の書き換え「奈落断ち」(底なしの大剣。docs/design/31 の B04): 振った扇が 1.2 秒後に裂けて、同じ扇にもう一度 ×0.6 の遅れた刃
     private static void abyssCleaveEcho(ServerPlayer player, ServerLevel level, Vec3 origin, Vec3 dir, float base) {
         SkillEffects.later(level, jp.revati.skyabyss.abyss.Abyss.ECHO_DELAY, () -> {
             if (!player.isAlive() || player.level() != level) {
@@ -484,7 +484,7 @@ public final class SkillActions {
             }
         }
         if (rune == 3 || rune == 4) {
-            // 突き通し: 通り道の全員に ×0.6 (伝説の突き通し・骨は ×1.0)
+            // 突き通し: 通り道の全員に ×0.6 (逸品の突き通し・骨は ×1.0)
             double through = rune == 4 ? SkillRules.BONE_PIERCE_MULTIPLIER : SkillRules.PIERCE_THROUGH_MULTIPLIER;
             for (LivingEntity e : foesAroundAny(player, range + 2)) {
                 if (e != target && distanceToSegment(e.position(), from, reached) <= 1.3 + e.getBbWidth() / 2) {
@@ -756,7 +756,7 @@ public final class SkillActions {
         return null;
     }
 
-    // 伝説の書き換え「沈む唄」(沈み鐘の杖): 割られずに残った守りは、唄の終わりに体力へ沈み、いちばん傷ついた仲間にも合計の半分が届く
+    // 逸品の書き換え「沈む唄」(沈み鐘の杖): 割られずに残った守りは、唄の終わりに体力へ沈み、いちばん傷ついた仲間にも合計の半分が届く
     private static void abyssSunkSong(ServerPlayer player, List<ServerPlayer> targets, int ticks) {
         ServerLevel level = player.serverLevel();
         SkillEffects.later(level, Math.max(1, ticks - 2), () -> {
@@ -1039,7 +1039,7 @@ public final class SkillActions {
         return null;
     }
 
-    // 伝説の書き換え「這う灰」(灰喰いの鎌): 灰かぶりの敵のまわりの敵へ、2 秒おきに灰が移る (最大 3 度)。灰かぶりは重ならないので、数が増えるだけ
+    // 逸品の書き換え「這う灰」(灰喰いの鎌): 灰かぶりの敵のまわりの敵へ、2 秒おきに灰が移る (最大 3 度)。灰かぶりは重ならないので、数が増えるだけ
     private static void abyssCreepingAsh(ServerPlayer player, ServerLevel level, int rank) {
         for (int step = 1; step <= jp.revati.skyabyss.abyss.Abyss.ASH_STEPS; step++) {
             SkillEffects.later(level, step * jp.revati.skyabyss.abyss.Abyss.ASH_EVERY, () -> {

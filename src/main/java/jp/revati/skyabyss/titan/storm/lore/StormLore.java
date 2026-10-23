@@ -3,10 +3,8 @@ package jp.revati.skyabyss.titan.storm.lore;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Supplier;
 
 import jp.revati.skyabyss.SkyAbyss;
-import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -51,14 +49,11 @@ public final class StormLore {
     public static final String PAGE_SOURCE = "storm_back";
 
     // ---------------------------------------------------------------- 看板 (lang のキー。末尾の .1〜.4 を除く)
-    // 碑文 6 枚 (光る文字、4 行)。場所は 12 の 3.3 節
+    // 碑文 3 枚 (光る文字、4 行)。レイドの部屋の入口の碑 (trial/raid/RaidLore。SR3 尾・SR1 西・SR2 東)
     public static final Map<String, String> INSCRIPTIONS = Map.of(
             "tail", "sign.skyabyss.lore_storm_tail",
-            "hub", "sign.skyabyss.lore_storm_hub",
             "west", "sign.skyabyss.lore_storm_west",
-            "east", "sign.skyabyss.lore_storm_east",
-            "eye", "sign.skyabyss.lore_storm_eye",
-            "heart", "sign.skyabyss.lore_storm_heart");
+            "east", "sign.skyabyss.lore_storm_east");
     // 試練の入口の一言 3 枚 (2 行): 左の肩の門・右の肩の門・首の前室
     public static final Map<String, String> TRIAL_SIGNS = Map.of(
             "west", "sign.skyabyss.storm_west",
@@ -67,18 +62,6 @@ public final class StormLore {
 
     public static String inscriptionLore(String place) {
         return "chapter1/inscription_storm_" + place;
-    }
-
-    // 碑文に「近くで目を向けるだけで読める」を効かせるための置き場所。背中の担当が建てたあとで登録する
-    // (StormLore.inscriptionPositions(() -> List.of(Map.entry(キー, 位置), ...)))。登録がなければ、右クリックで読むだけになる
-    private static Supplier<List<Map.Entry<String, BlockPos>>> positions = List::of;
-
-    public static void inscriptionPositions(Supplier<List<Map.Entry<String, BlockPos>>> where) {
-        positions = where;
-    }
-
-    public static List<Map.Entry<String, BlockPos>> inscriptionPositions() {
-        return positions.get();
     }
 
     // ---------------------------------------------------------------- クエスト (data/skyabyss/quest/*storm*。tools/gen/story/gen_storm_lore.py が書く)

@@ -131,7 +131,7 @@ public final class AbyssGearLoot {
     }
 
     // ---------------------------------------------------------------- 果てない深みの箱
-    // DepthLoot.roll から。錨鉄 (ふつうの箱は 60%、ほかは必ず) と図鑑の品の機会。王の褒美だけ専用伝説も出る (5 回に 1 回)
+    // DepthLoot.roll から。錨鉄 (ふつうの箱は 60%、ほかは必ず) と図鑑の品の機会。王の褒美だけ専用の逸品も出る (5 回に 1 回)
     public static void chest(List<ItemStack> out, int floor, int tier, Random r) {
         if (tier > 0 || r.nextDouble() < 0.6) {
             add(out, AbyssGear.SHARD, 1 + r.nextInt(2) + floor / 6 + tier);

@@ -244,8 +244,7 @@ public final class SiteSelfTest {
         } else {
             check(f, dr >= 200 && dr <= 380, "ribs distance " + dr);
         }
-        SkyAbyss.LOGGER.info("[opening] camp {} shelter {} ({} blocks) ribs {} ({} blocks) footprints {} cairns {}", camp, shelter, (int) ds, ribs, (int) dr, prints,
-                OpeningSites.cairns(server).size());
+        SkyAbyss.LOGGER.info("[opening] camp {} shelter {} ({} blocks) ribs {} ({} blocks) footprints {}", camp, shelter, (int) ds, ribs, (int) dr, prints);
         double ang = Math.abs(Math.toDegrees(Math.atan2(shelter.getZ() - camp.getZ(), shelter.getX() - camp.getX())
                 - Math.atan2(ribs.getZ() - camp.getZ(), ribs.getX() - camp.getX())));
         ang = ang > 180 ? 360 - ang : ang;
@@ -298,15 +297,6 @@ public final class SiteSelfTest {
             check(f, !bell.equals(t) && !bell.equals(jp.revati.skyabyss.opening.OpeningDirector.target(level, "find_isana")), "find_isana points at the bell");
         }
         check(f, OpeningSites.smoke(server).map(p -> level.getBlockState(p).is(Blocks.CAMPFIRE)).orElse(false), "no smoking campfire");
-        // 積み石
-        // 道が池や海をまたぐ世界では積み石が少なくなる (飾りの目印なので 1 つあればよい)
-        check(f, OpeningSites.cairns(server).size() >= 1, "no cairns");
-        if (OpeningSites.cairns(server).size() < 2) {
-            SkyAbyss.LOGGER.warn("[opening] only {} cairn (the road crosses water)", OpeningSites.cairns(server).size());
-        }
-        for (BlockPos c : OpeningSites.cairns(server)) {
-            check(f, level.getBlockState(c).is(Blocks.STONE), "no cairn at " + c);
-        }
         // 骨: 骨のブロックが十分あり、石板の碑に文がある
         int bones = 0;
         for (int x = -56; x <= 56; x++) {
@@ -331,7 +321,7 @@ public final class SiteSelfTest {
         return p == null ? fallback : p;
     }
 
-    // 人の建物の上には建てない: 板の床と箱のある所に積み石を頼むと、壊さずにずれる (あきらめる)
+    // 人の建物の上には建てない: 板の床と箱のある所に小さな石を頼むと、壊さずにずれる (あきらめる)
     static void conflict(MinecraftServer server) {
         List<String> f = new ArrayList<>();
         try {
@@ -358,8 +348,9 @@ public final class SiteSelfTest {
             }
             level.getChunk(at.getX() >> 4, at.getZ() >> 4);
             SiteData data = SiteData.get(level);
-            SiteData.Entry probeEntry = new SiteData.Entry("cairn", 99, new BlockPos(at.getX(), at.getY() + 1, at.getZ()), 0);
-            SiteJob job = CairnBuilder.create(level, data, probeEntry);
+            SiteData.Entry probeEntry = new SiteData.Entry("ch1_road_cairn", 99, new BlockPos(at.getX(), at.getY() + 1, at.getZ()), 0);
+            SiteJob job = new SiteJob(level, data, probeEntry, Blueprint.get("ch1_road_cairn"), "conflict probe", j -> {
+            });
             int g = job.ground(at.getX(), at.getZ());
             BlockPos floor = new BlockPos(at.getX(), g, at.getZ());
             List<BlockPos> made = new ArrayList<>();

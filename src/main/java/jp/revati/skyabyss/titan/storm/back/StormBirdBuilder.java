@@ -346,11 +346,6 @@ public final class StormBirdBuilder {
                 kit.campfire(rest.campfire());
             }
         }
-        for (Inscription i : LORE_SIGNS) {
-            if (i.key().equals("sign.skyabyss.lore_storm_heart")) {
-                kit.wallSign(i.pos(), i.facing(), i.key());
-            }
-        }
     }
 
 }

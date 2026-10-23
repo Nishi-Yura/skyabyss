@@ -335,7 +335,7 @@ public final class SkillRules {
     public static final double LUNGE_MULTIPLIER = 1.3;
     // 突き通し: 通り道の全員に ×0.6
     public static final double PIERCE_THROUGH_MULTIPLIER = 0.6;
-    // 伝説の書き換え (docs/design/27 の 4.2)
+    // 逸品の書き換え (docs/design/27 の 4.2)
     // 突き通し・骨: 通り道の全員に ×1.0、3 回に 1 度、着いた足もとから骨 (半径 2.5、×0.5)
     public static final double BONE_PIERCE_MULTIPLIER = 1.0;
     public static final int BONE_EVERY = 3;

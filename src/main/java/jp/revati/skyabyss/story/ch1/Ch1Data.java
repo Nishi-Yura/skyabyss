@@ -14,7 +14,7 @@ import net.minecraft.world.level.saveddata.SavedData;
 
 // 序章・一章 (P4a) の小要素の記録 (オーバーワールドに保存。docs/design/17 の 1.5)。
 //   人ごと (Player): 歌石の進み (song)、小さな異変を起こした日 (oddityDay) と使った種類 (oddityMask) と回数 (oddityCount)、
-//                    見て回った積み石・跡の印 (rounds)、積み石の見回りの頼みに送った印 (signalled)、足跡の道しるべを描いている頼みの出どころ
+//                    見て回った旅の跡の印 (rounds)、旅の跡の見回りの頼みに送った印 (signalled)、足跡の道しるべを描いている頼みの出どころ
 //   世界 (World):  岩鯨が初めて降りたときの「影と静けさ」(hush) の状態、宿りの炉端 (ベッド・かまど・板) を置いたか (nook)
 public final class Ch1Data extends SavedData {
     private static final String NAME = "skyabyss_ch1";
@@ -29,9 +29,9 @@ public final class Ch1Data extends SavedData {
         public long oddityDay = -1;
         public int oddityMask;
         public int oddityCount;
-        // 見て回った積み石・跡の印 ("c:x,z" か "s:要素 ID#番号")
+        // 見て回った旅の跡の印 ("s:要素 ID#番号"。古いセーブの "c:x,z" は読むだけで数えない)
         public final java.util.Set<String> rounds = new java.util.LinkedHashSet<>();
-        // 積み石の見回りの頼みへ、もう合図を送った印
+        // 旅の跡の見回りの頼みへ、もう合図を送った印
         public final java.util.Set<String> signalled = new java.util.LinkedHashSet<>();
         // 小さな印 (起きたことの記録)
         public final java.util.Set<String> flags = new java.util.LinkedHashSet<>();

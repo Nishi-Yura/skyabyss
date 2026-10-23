@@ -26,15 +26,15 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 
 // 装備の必要レベル (成長の Lv。03 の 10章、2026-10-17)。
-//  - 必要 Lv = その巨神の推奨 Lv (GearCurve.STAGES) から、レア以下は −4、伝説以上は −2
+//  - 必要 Lv = その巨神の推奨 Lv (GearCurve.STAGES) から、エピック以下は −4、ヒロイック以上は −2 (GearTier.levelMargin)
 //  - 足りないとき: 防具は身につけられない (枠に入らず、着ていたら持ち物へ戻す)。装飾は枠に付けられない。
 //    武器は手に持てるが、品の修飾子 (攻撃力・速さ・間合い・強化・特性) を打ち消し、固有効果と特性が働かない (素手と同じ)
 //  - 拾う・渡す・預ける・強化・再鍛造・交換は、レベルに関わらずできる
 //  - 創造モードでは問わない
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class GearLevel {
-    public static final int RARE_MARGIN = 4;
-    public static final int LEGENDARY_MARGIN = 2;
+    public static final int RARE_MARGIN = GearTier.RARE.levelMargin;
+    public static final int LEGENDARY_MARGIN = GearTier.ARTIFACT.levelMargin;
 
     private static final Map<Player, List<Lock>> LOCKS = new WeakHashMap<>();
 
@@ -59,7 +59,7 @@ public final class GearLevel {
         if (base <= 0) {
             return 0;
         }
-        int margin = gear.tier().ordinal() >= GearTier.LEGENDARY.ordinal() ? LEGENDARY_MARGIN : RARE_MARGIN;
+        int margin = gear.tier().levelMargin;
         return Math.max(1, base - margin);
     }
 

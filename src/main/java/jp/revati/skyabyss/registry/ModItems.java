@@ -70,13 +70,13 @@ public final class ModItems {
             () -> new Item(new Item.Properties().food(new FoodProperties.Builder().nutrition(6).saturationModifier(0.7f)
                     .effect(() -> new MobEffectInstance(MobEffects.SLOW_FALLING, 600, 0), 1f).build())));
 
-    // 岩鯨の専用装備 (周回で集める)。伝説は個人抽選と「巨神の記憶」の天井で手に入る
+    // 岩鯨の専用装備 (周回で集める)。専用の逸品は個人抽選と「巨神の記憶」の天井で手に入る
     public static final DeferredItem<Item> CAPTAIN_PIKE = ITEMS.register("captain_pike",
             () -> new CaptainPikeItem(new Item.Properties().rarity(Rarity.EPIC).fireResistant()));
     public static final DeferredItem<Item> WATERWAY_FANG = ITEMS.register("waterway_fang",
             () -> new WaterwayFangItem(new Item.Properties().rarity(Rarity.EPIC).fireResistant()));
     public static final DeferredItem<Item> STONE_WHALE_PLATING = ITEMS.register("stone_whale_plating",
-            () -> new GearItem(new Item.Properties().stacksTo(1).rarity(Rarity.EPIC).fireResistant(), GearTier.LEGENDARY,
+            () -> new GearItem(new Item.Properties().stacksTo(1).rarity(Rarity.EPIC).fireResistant(), GearTier.HEROIC,
                     "item.skyabyss.stone_whale_plating.desc", false));
     public static final DeferredItem<Item> MOSS_TALISMAN = ITEMS.register("moss_talisman",
             () -> new GearItem(new Item.Properties().stacksTo(1).rarity(Rarity.RARE), GearTier.RARE,

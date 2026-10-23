@@ -42,7 +42,7 @@ public final class GearFreedomItems {
         }
     }
 
-    // アスペクトの芯: 伝説の書き換えを一つ取り出したもの。レアの武器・防具へ刻む (1 装備に 1 つ)
+    // アスペクトの芯: 逸品の書き換えを一つ取り出したもの。レアの武器・防具へ刻む (1 装備に 1 つ)
     public static class AspectCore extends Item {
         public AspectCore() {
             super(new Item.Properties().stacksTo(1).rarity(Rarity.EPIC));

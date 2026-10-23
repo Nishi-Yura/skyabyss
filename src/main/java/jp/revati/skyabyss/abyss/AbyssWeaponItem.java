@@ -13,7 +13,7 @@ import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.neoforged.neoforge.common.SimpleTier;
 
-// 深淵の専用伝説 (剣型: 大剣・杖・鎌。docs/design/31 の B04)。階級は伝説、由来は巨神 (dungeon)。強化・特性・必要 Lv は ModGear の共通の扱い。
+// 深淵のアーティファクト (剣型: 大剣・杖・鎌。docs/design/31 の B04)。階級はアーティファクト、由来は巨神 (dungeon)。強化・特性・必要 Lv は ModGear の共通の扱い。
 // 固有の性質は持たない: 「技の書き換え」(Rune の 4 番目。主の手に持つあいだだけ) が、この品の役目。ツールチップに書き換える技の一行 (SkillClient)
 public class AbyssWeaponItem extends SwordItem implements ModGear {
     // 耐久はネザライトの剣より少し多い。echo の欠片で直す
@@ -31,7 +31,7 @@ public class AbyssWeaponItem extends SwordItem implements ModGear {
 
     @Override
     public GearTier tier() {
-        return GearTier.LEGENDARY;
+        return GearTier.ARTIFACT;
     }
 
     @Override
@@ -41,11 +41,11 @@ public class AbyssWeaponItem extends SwordItem implements ModGear {
 
     @Override
     public Component getName(ItemStack stack) {
-        return ModGear.name(stack, super.getName(stack), GearTier.LEGENDARY);
+        return ModGear.name(stack, super.getName(stack), GearTier.ARTIFACT);
     }
 
     @Override
     public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
-        ModGear.tooltip(stack, tooltip, GearTier.LEGENDARY, descKey, true);
+        ModGear.tooltip(stack, tooltip, GearTier.ARTIFACT, descKey, true);
     }
 }
