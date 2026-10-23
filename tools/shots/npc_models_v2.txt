@@ -92,9 +92,15 @@ shot c_near_right
 camera minecraft:overworld 0 -58.2 34.0 0 10
 wait 20
 shot c_back
-camera minecraft:overworld -5.0 -58.45 41.9 180 2
+camera minecraft:overworld -5.0 -58.4 43.0 180 3
 wait 20
 shot c_face_mio
+camera minecraft:overworld 2.6 -58.4 43.0 180 3
+wait 20
+shot c_face_toya
+camera minecraft:overworld 0.2 -58.4 43.0 180 3
+wait 20
+shot c_face_shizu
 camera minecraft:overworld 0 -58.0 70.5 180 8
 wait 30
 shot d_all
@@ -107,7 +113,13 @@ shot d_near_right
 camera minecraft:overworld 0 -58.2 54.0 0 10
 wait 20
 shot d_back
-camera minecraft:overworld -8.0 -58.45 1.9 180 2
+camera minecraft:overworld -2.0 -58.9 62.6 180 3
+wait 20
+shot d_face_child
+camera minecraft:overworld -8.0 -58.4 3.0 180 3
 wait 20
 shot a_face_clerk
+camera minecraft:overworld 6.0 -58.4 3.0 180 3
+wait 20
+shot a_face_priest
 quit
