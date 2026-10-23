@@ -48,7 +48,7 @@ public class CinderMite extends EmberMob {
     private int touchCooldown;
 
     public CinderMite(EntityType<? extends Monster> type, Level level) {
-        super(type, level, "cinder_mite");
+        super(type, level, "cinder_mite", "attack");
         this.xpReward = 1;
     }
 
@@ -122,6 +122,7 @@ public class CinderMite extends EmberMob {
         LivingEntity t = getTarget();
         if (t != null && t.isAlive() && touchCooldown == 0 && distanceTo(t) <= TOUCH + t.getBbWidth() / 2) {
             touchCooldown = 20;
+            playAction("attack");   // 当たりと同じ tick に噛む動き (アニメの山は 0.06 秒)
             doHurtTarget(t);
         }
     }
