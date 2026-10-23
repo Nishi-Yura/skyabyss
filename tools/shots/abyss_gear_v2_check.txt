@@ -1,0 +1,65 @@
+# 確認の撮り直し (一人称の大きさ・灯籠の持ち方)
+world shots flat
+size 960 540
+timeout 1500
+render 6
+cmd time set noon
+cmd weather clear
+cmd gamemode creative
+camera 0 -60 8 180 0
+waitchunks
+hud on
+wait 350
+cmd skyabyss cinematic stop
+close
+wait 20
+swingpose off
+cmd item replace entity @s weapon.mainhand with skyabyss:abyss_lamp_sword
+mainhand right
+wait 40
+perspective first
+hud on
+wait 8
+chat clear
+shot abyss_lamp_sword_fpIdle2
+cmd item replace entity @s weapon.mainhand with skyabyss:abyss_sinking_anchor
+mainhand right
+wait 40
+perspective first
+hud on
+wait 8
+chat clear
+shot abyss_sinking_anchor_fpIdle2
+cmd item replace entity @s weapon.mainhand with skyabyss:abyss_pulse_dagger
+mainhand right
+wait 40
+perspective first
+hud on
+wait 8
+chat clear
+shot abyss_pulse_dagger_fpIdle2
+cmd item replace entity @s weapon.mainhand with skyabyss:whalebone_greatsword
+mainhand right
+wait 40
+perspective first
+hud on
+wait 8
+chat clear
+shot whalebone_greatsword_fpIdle2
+cmd item replace entity @s weapon.mainhand with skyabyss:waterway_fang
+mainhand right
+wait 40
+perspective first
+hud on
+wait 8
+chat clear
+shot waterway_fang_fpIdle2
+cmd item replace entity @s weapon.mainhand with skyabyss:abyss_lantern_charm
+perspective front
+hud off
+wait 10
+shot lantern_tp2
+perspective back
+wait 10
+shot lantern_tp2_back
+quit
