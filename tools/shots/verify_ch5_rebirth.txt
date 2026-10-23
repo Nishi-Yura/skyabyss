@@ -1,0 +1,30 @@
+# 五章の検証: 転生の台座 (岩鯨の鼓動の間の中央) から転生まで。何が残って何が戻るか、告知と演出。
+# ./gradlew runShots -Pscript=tools/shots/verify_ch5_rebirth.txt -PshotsName=verify_ch5_rebirth
+world verify_ch5_rebirth flat
+size 1280 720
+timeout 2400
+render 6
+clouds off
+guiscale 2
+
+cmd time set noon
+cmd weather clear
+cmd gamemode survival
+cmd skyabyss level set @s 50
+cmd skill learn @s rock_call 1
+cmd skill learn @s whale_sweep 2
+cmd give @s skyabyss:resonance_crystal 12
+cmd skyabyss soul set @s 2
+hud on
+waitchunks
+chat clear
+wait 40
+
+cmd skyabyss play goto whale-hub
+wait 200
+chat clear
+shot rebirth_arrive
+cmd skyabyss soul open @s
+wait 30
+shot rebirth_screen_before
+echo done

@@ -49,7 +49,7 @@ public class RaijuRenderer extends LowPolyGeoRenderer<Raiju> {
         @Override
         public void render(PoseStack poseStack, Raiju raiju, BakedGeoModel model, RenderType renderType,
                            MultiBufferSource buffers, VertexConsumer buffer, float partialTick, int packedLight, int packedOverlay) {
-            if (raiju.isInvisible() || LowPoly.enabled) {
+            if (raiju.isInvisible() || LowPoly.enabled || !LowPoly.cubeHere(GLOW)) {
                 return;
             }
             RenderType glow = RenderType.eyes(GLOW);

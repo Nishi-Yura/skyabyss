@@ -99,7 +99,7 @@ public final class TideMobRenderers {
         @Override
         public ResourceLocation getTextureResource(CoralThrall thrall) {
             if (thrall.isStatue() && !LowPoly.debug) {
-                return LowPoly.enabled ? STATUE_LOW : STATUE;
+                return LowPoly.enabled ? STATUE_LOW : LowPoly.cubeOr(STATUE, STATUE_LOW);
             }
             return super.getTextureResource(thrall);
         }

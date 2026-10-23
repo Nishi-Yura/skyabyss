@@ -1,0 +1,84 @@
+# 五章の検証: 深淵の心臓 (潮殻の深淵版) の勝ちと専用の遺物 4 点の見え方。
+# ./gradlew runShots -Pscript=tools/shots/verify_ch5_heart.txt -PshotsName=verify_ch5_heart
+world verify_ch5_heart flat
+size 1280 720
+timeout 2400
+render 8
+clouds off
+
+cmd skyabyss cinematic stop
+cmd time set noon
+cmd weather clear
+cmd gamemode survival
+hud on
+waitchunks
+chat clear
+wait 20
+
+cmd give @s skyabyss:abyss_greatsword
+cmd give @s skyabyss:abyss_bell_staff
+cmd give @s skyabyss:abyss_storm_bow
+cmd give @s skyabyss:abyss_ash_scythe
+wait 10
+open inventory
+wait 20
+open inventory
+wait 20
+hover 211 280
+wait 20
+shot heart_inv_greatsword
+close
+wait 10
+open inventory
+wait 20
+hover 238 280
+wait 20
+shot heart_inv_bell
+close
+wait 10
+open inventory
+wait 20
+hover 265 280
+wait 20
+shot heart_inv_bow
+close
+wait 10
+open inventory
+wait 20
+hover 292 280
+wait 20
+shot heart_inv_scythe
+close
+wait 10
+close
+wait 10
+cmd item replace entity @s weapon.mainhand with skyabyss:abyss_ash_scythe
+wait 20
+chat clear
+shot heart_hand_scythe
+cmd item replace entity @s weapon.mainhand with skyabyss:abyss_storm_bow
+wait 20
+shot heart_hand_bow
+cmd item replace entity @s weapon.mainhand with minecraft:air
+wait 10
+
+cmd skyabyss play chapter 5
+cmd skyabyss dev abyss on tide
+cmd skyabyss cinematic stop
+cmd skyabyss play goto tide-hub
+wait 600
+cmd skyabyss tideheart go
+wait 400
+cmd skyabyss tideheart start
+wait 40
+wait 600
+cmd skyabyss tideheart status
+wait 20
+shot heart_arena
+cmd skyabyss tideheart win
+wait 400
+chat clear
+shot heart_win_notice
+wait 200
+shot heart_after
+echo done

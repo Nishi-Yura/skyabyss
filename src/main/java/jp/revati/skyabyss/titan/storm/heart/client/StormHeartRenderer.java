@@ -71,9 +71,13 @@ public class StormHeartRenderer extends LowPolyGeoRenderer<StormHeart> {
                 return;
             }
             // 低ポリ: アトラスの光る画素の色だけを載せた絵 (tools/install/install_lowpoly_storm.py が焼く)
-            RenderType glow = RenderType.eyes(Model.path(LowPoly.enabled
-                    ? "textures/lowpoly/storm_heart_p" + Model.phase(heart) + "_glow.png"
-                    : "textures/entity/storm_heart_p" + Model.phase(heart) + "_glowmask.png"));
+            ResourceLocation cubeMask = Model.path("textures/entity/storm_heart_p" + Model.phase(heart) + "_glowmask.png");
+            if (!LowPoly.enabled && !LowPoly.cubeHere(cubeMask)) {
+                return;
+            }
+            RenderType glow = RenderType.eyes(LowPoly.enabled
+                    ? Model.path("textures/lowpoly/storm_heart_p" + Model.phase(heart) + "_glow.png")
+                    : cubeMask);
             getRenderer().reRender(model, poseStack, buffers, heart, glow, buffers.getBuffer(glow), partialTick,
                     LightTexture.FULL_BRIGHT, packedOverlay, getRenderer().getRenderColor(heart, partialTick, packedLight).argbInt());
         }
@@ -87,7 +91,8 @@ public class StormHeartRenderer extends LowPolyGeoRenderer<StormHeart> {
             if (LowPoly.enabled) {
                 return path("geo/entity/storm_heart_p" + phase(heart) + "_lowpoly" + (LowPoly.debug ? "_debug" : "") + ".geo.json");
             }
-            return path("geo/entity/storm_heart_p" + phase(heart) + ".geo.json");
+            return LowPoly.cubeOr(path("geo/entity/storm_heart_p" + phase(heart) + ".geo.json"),
+                    path("geo/entity/storm_heart_p" + phase(heart) + "_lowpoly.geo.json"));
         }
 
         @Override
@@ -95,7 +100,7 @@ public class StormHeartRenderer extends LowPolyGeoRenderer<StormHeart> {
             if (LowPoly.enabled) {
                 return LowPoly.debug ? path("textures/lowpoly/debug.png") : path("textures/lowpoly/storm_heart_p" + phase(heart) + ".png");
             }
-            return path("textures/entity/storm_heart_p" + phase(heart) + ".png");
+            return LowPoly.cubeOr(path("textures/entity/storm_heart_p" + phase(heart) + ".png"), path("textures/lowpoly/storm_heart_p" + phase(heart) + ".png"));
         }
 
         @Override

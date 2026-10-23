@@ -13,6 +13,7 @@ import net.minecraft.server.level.TicketType;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.LightBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 
@@ -91,6 +92,8 @@ public final class RaidKit {
     private static final int ENTRY_DEPTH = 5;
     private static final int EXIT_DEPTH = 3;
     private static final int FLAG = Block.UPDATE_CLIENTS;
+    // 床の灯り (見えない光源。明るさ 11 は 12 未満なので、飾りの明るい塊の数には入らない)
+    private static final BlockState FLOOR_LIGHT = Blocks.LIGHT.defaultBlockState().setValue(LightBlock.LEVEL, 11);
 
     // 部屋を建てる (RaidRoom.build の中で一度)。ctx.cell() にも入る
     public static Cell buildCell(RaidCtx ctx, Spec spec) {
@@ -137,6 +140,13 @@ public final class RaidKit {
                 set(level, new BlockPos(o.getX() + x, fy + h + 1, o.getZ() + z), pal.light());
             }
         }
+        // 床の灯り (見えない灯り): 床から二ブロック上に、四ブロックおきに光源。天井だけでは床の隅が暗い (39 の 3.7 節)。
+        // 立つ所 (床の上の一ブロック) は空気のまま、頭の上を通るので歩き・戦いの邪魔にならない。飾りや仕掛けは後から足して上書きできる
+        for (int x = -hx + 2; x <= hx - 2; x += 4) {
+            for (int z = -hz + 2; z <= hz - 2; z += 4) {
+                set(level, new BlockPos(o.getX() + x, fy + 2, o.getZ() + z), FLOOR_LIGHT);
+            }
+        }
         // 入口の間 (南)
         int ez0 = o.getZ() + hz + 2;
         fill(level, o.getX() - 3, fy + 1, ez0, o.getX() + 3, fy + 4, ez0 + ENTRY_DEPTH - 1, Blocks.AIR.defaultBlockState());
@@ -164,6 +174,23 @@ public final class RaidKit {
         ctx.setCell(cell);
         RaidLore.placeTablet(ctx, cell);
         return cell;
+    }
+
+    // 飾りや仕掛けの陰で床が暗いときの補い (飾りを置いたあと、build の最後に呼ぶ)。広間の空気の所だけ、床から二ブロック上に step おきに光源を足す
+    public static void brightenFloor(RaidCtx ctx, int step) {
+        Cell c = ctx.cell();
+        ServerLevel level = ctx.level();
+        for (int x = -c.hx() + 1; x <= c.hx() - 1; x += step) {
+            for (int z = -c.hz() + 1; z <= c.hz() - 1; z += step) {
+                BlockPos p = c.origin().offset(x, 2, z);
+                if (level.getBlockState(p).isAir()) {
+                    set(level, p, FLOOR_LIGHT);
+                } else if (level.getBlockState(p.below()).isAir()) {
+                    // 頭の上が塞がれた所 (張り出しの下): 足もとの空気に光源を置く (光源は通り抜けられる)
+                    set(level, p.below(), FLOOR_LIGHT);
+                }
+            }
+        }
     }
 
     // 中ボス・心臓の部屋: 運ばれる所 (休み場。全滅のあとに戻る所も) を広間の中の (x, z) へ移す。入口の間を歩かずに、そのまま広間で始まる

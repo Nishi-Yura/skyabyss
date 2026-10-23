@@ -102,7 +102,57 @@ final class BuildsSelfTest {
         d.slots[0] = Skill.TEMPER.id;
         check(f, SkillManager.cast(p, 0) == SkillManager.CastResult.OK && d.temperUntil > level.getGameTime(), "the poker temper did not work");
         SkillEffects.clear();
+        abyssLegends(p, f);
         SkillManager.forgetAll(p);
+    }
+
+    // 深淵の心臓の四つのアーティファクト (灰喰い・雷淵・沈み鐘・底なし)。持つと、その一つの書き換えだけが選べて、書き換えた技が出る
+    private static void abyssLegends(FakePlayer p, List<String> f) {
+        SkillData d = SkillManager.get(p);
+        String[][] pairs = {
+            {"abyss_greatsword", Skill.TITAN_CLEAVE.id},
+            {"abyss_bell_staff", Skill.WARD_SONG.id},
+            {"abyss_storm_bow", Skill.CLOUD_PIERCE.id},
+            {"abyss_ash_scythe", Skill.ASH_SCATTER.id}};
+        for (String[] pair : pairs) {
+            Skill skill = Skill.byId(pair[1]);
+            SkillManager.forceRank(p, skill, skill.maxRank);
+            d.cooldowns.clear();
+            d.globalCooldown = 0;
+            d.mana = 100;
+            p.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, new ItemStack(Items.IRON_SWORD));
+            check(f, SkillManager.chooseRune(p, skill, 4) == SkillManager.RuneResult.NOT_AVAILABLE, pair[0] + ": chosen without the weapon");
+            p.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, legendStack(pair[0]));
+            check(f, SkillManager.chooseRune(p, skill, 4) == SkillManager.RuneResult.OK && SkillManager.runeOf(p, skill) == 4,
+                    pair[0] + ": the rewrite was not chosen with the weapon");
+            d.slots[0] = skill.id;
+            // 弓の書き換えは矢が要り、灰の書き換えは近くに敵が要る (技の中身の前提。書き換えの当たりとは別)
+            p.getInventory().clearContent();
+            p.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, legendStack(pair[0]));
+            if (pair[0].equals("abyss_storm_bow")) {
+                p.getInventory().add(new ItemStack(Items.ARROW, 16));
+            }
+            net.minecraft.world.entity.monster.Zombie foe = null;
+            if (skill == Skill.ASH_SCATTER) {
+                foe = new net.minecraft.world.entity.monster.Zombie(net.minecraft.world.entity.EntityType.ZOMBIE, p.level());
+                foe.setPos(p.getX() + 2, p.getY(), p.getZ());
+                p.level().addFreshEntity(foe);
+            }
+            SkillManager.CastResult cast = SkillManager.cast(p, 0);
+            if (foe != null) {
+                foe.discard();
+            }
+            // 放った矢は消す (後の段が、同じ場所の矢の数を数えるため)
+            for (net.minecraft.world.entity.projectile.AbstractArrow a : p.level().getEntitiesOfClass(net.minecraft.world.entity.projectile.AbstractArrow.class,
+                    p.getBoundingBox().inflate(40), e -> true)) {
+                a.discard();
+            }
+            check(f, cast == SkillManager.CastResult.OK, pair[0] + ": the rewritten skill did not cast (" + cast + ", skill " + skill.id + ")");
+            d.cooldowns.clear();
+            d.globalCooldown = 0;
+            d.runes.remove(skill.id);
+            SkillEffects.clear();
+        }
     }
 
     // ---------------------------------------------------------------- 木の印

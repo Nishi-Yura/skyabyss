@@ -161,6 +161,9 @@ public final class AshSmithClient {
                 return;
             }
             boolean white = smith.isWeak() || smith.isEnraged();
+            if (!LowPoly.enabled && !LowPoly.cubeHere(white ? GLOW_WHITE : GLOW)) {
+                return;
+            }
             RenderType glow = RenderType.eyes(LowPoly.enabled ? (white ? GLOW_LOW_WHITE : GLOW_LOW) : (white ? GLOW_WHITE : GLOW));
             int color = -1;
             if (smith.isEnraged() && !smith.isWeak()) {

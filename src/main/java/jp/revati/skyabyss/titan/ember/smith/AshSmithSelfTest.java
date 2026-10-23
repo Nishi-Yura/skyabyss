@@ -142,10 +142,10 @@ public final class AshSmithSelfTest {
 
     private static void checkAssets(List<String> f) {
         List<String> paths = new ArrayList<>(List.of(
-                "/assets/skyabyss/geo/entity/ash_smith.geo.json",
-                "/assets/skyabyss/textures/entity/ash_smith.png",
-                "/assets/skyabyss/textures/entity/ash_smith_glowmask.png",
-                "/assets/skyabyss/textures/entity/ash_smith_glowmask_white.png",
+                "/assets/skyabyss/geo/entity/ash_smith_lowpoly.geo.json",
+                "/assets/skyabyss/textures/lowpoly/ash_smith.png",
+                "/assets/skyabyss/textures/lowpoly/ash_smith_glow.png",
+                "/assets/skyabyss/textures/lowpoly/ash_smith_glow_white.png",
                 "/assets/skyabyss/animations/entity/ash_smith.animation.json",
                 "/assets/skyabyss/geo/gear/smith_hammer.geo.json",
                 "/assets/skyabyss/textures/gear/smith_hammer.png",
@@ -170,7 +170,7 @@ public final class AshSmithSelfTest {
             check(anim.contains("\"animation.ash_smith." + a + "\""), "animation missing: " + a, f);
         }
         // 受け口の骨 (大鎚・火箸) と鞴・前掛けの骨がある
-        String geo = text("/assets/skyabyss/geo/entity/ash_smith.geo.json");
+        String geo = text("/assets/skyabyss/geo/entity/ash_smith_lowpoly.geo.json");
         for (String b : new String[] {"socket_main", "socket_off", "bellows_l", "bellows_r", "apron", "head", "arm_r", "arm_l", "forearm_r", "forearm_l"}) {
             check(java.util.regex.Pattern.compile("\"name\"\\s*:\\s*\"" + b + "\"").matcher(geo).find(), "bone missing: " + b, f);
         }

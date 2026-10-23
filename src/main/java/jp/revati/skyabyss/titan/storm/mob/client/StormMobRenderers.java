@@ -71,7 +71,8 @@ public final class StormMobRenderers {
 
     // 雷蛾の帯電: 足す光を、帯電の割合の明るさで重ねる (RenderType.eyes は足し合わせるので、色の明るさがそのまま割合になる)
     static final class ChargeLayer extends GeoRenderLayer<StaticMoth> {
-        private static final RenderType TYPE = RenderType.eyes(ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "textures/entity/static_moth_charge.png"));
+        private static final ResourceLocation CHARGE_CUBE = ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "textures/entity/static_moth_charge.png");
+        private static final RenderType TYPE = RenderType.eyes(CHARGE_CUBE);
         // 低ポリのアトラスの翅の面を明るくした絵 (tools/install/install_lowpoly_storm.py)
         private static final RenderType TYPE_LOW = RenderType.eyes(ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "textures/lowpoly/static_moth_charge.png"));
 
@@ -92,7 +93,7 @@ public final class StormMobRenderers {
             }
             int v = Math.round(255 * c);
             int colour = 0xFF000000 | (v << 16) | (v << 8) | v;
-            RenderType type = LowPoly.enabled ? TYPE_LOW : TYPE;
+            RenderType type = LowPoly.enabled || !LowPoly.cubeHere(CHARGE_CUBE) ? TYPE_LOW : TYPE;
             getRenderer().reRender(model, poseStack, buffers, moth, type, buffers.getBuffer(type), partialTick, LightTexture.FULL_BRIGHT,
                     packedOverlay, colour);
         }

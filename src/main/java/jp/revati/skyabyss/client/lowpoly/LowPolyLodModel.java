@@ -42,7 +42,7 @@ public abstract class LowPolyLodModel<T extends GeoAnimatable> extends Defaulted
     @Override
     public ResourceLocation getModelResource(T animatable) {
         int l = lod(animatable);
-        return LowPoly.enabled ? (LowPoly.debug ? debugGeo[l] : lowGeo[l]) : cubeGeo[l];
+        return LowPoly.enabled ? (LowPoly.debug ? debugGeo[l] : lowGeo[l]) : LowPoly.cubeOr(cubeGeo[l], lowGeo[l]);
     }
 
     @Override
@@ -50,6 +50,6 @@ public abstract class LowPolyLodModel<T extends GeoAnimatable> extends Defaulted
         if (LowPoly.enabled) {
             return LowPoly.debug ? DEBUG_TEXTURE : atlas[lod(animatable)];
         }
-        return super.getTextureResource(animatable);
+        return LowPoly.cubeOr(super.getTextureResource(animatable), atlas[lod(animatable)]);
     }
 }

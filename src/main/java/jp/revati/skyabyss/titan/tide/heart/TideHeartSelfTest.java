@@ -91,9 +91,9 @@ public final class TideHeartSelfTest {
     private static void checkAssets(List<String> failures) {
         List<String> paths = new ArrayList<>(List.of("/assets/skyabyss/animations/entity/tide_heart.animation.json"));
         for (int n = 1; n <= TideHeart.PHASE_COUNT; n++) {
-            paths.add("/assets/skyabyss/geo/entity/tide_heart_p" + n + ".geo.json");
-            paths.add("/assets/skyabyss/textures/entity/tide_heart_p" + n + ".png");
-            paths.add("/assets/skyabyss/textures/entity/tide_heart_p" + n + "_glowmask.png");
+            paths.add("/assets/skyabyss/geo/entity/tide_heart_p" + n + "_lowpoly.geo.json");
+            paths.add("/assets/skyabyss/textures/lowpoly/tide_heart_p" + n + ".png");
+            paths.add("/assets/skyabyss/textures/lowpoly/tide_heart_p" + n + "_glowmask.png");
             paths.add("/assets/skyabyss/textures/gui/boss/tide_heart_frame_p" + n + ".png");
             paths.add("/assets/skyabyss/textures/gui/boss/tide_heart_icon_p" + n + ".png");
         }

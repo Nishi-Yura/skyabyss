@@ -86,7 +86,7 @@ public final class AbyssMobRenderers {
                 return BossRender.geo(look);
             }
             if (!LowPoly.enabled) {
-                return super.getModelResource(a);
+                return LowPoly.cubeOr(id("geo/entity/" + stemOf(kind, 1) + ".geo.json"), id("geo/entity/" + stemOf(kind, a.stage()) + "_lowpoly.geo.json"));
             }
             return id("geo/entity/" + stemOf(kind, a.stage()) + (LowPoly.debug ? "_lowpoly_debug" : "_lowpoly") + ".geo.json");
         }
@@ -98,7 +98,7 @@ public final class AbyssMobRenderers {
                 return LowPoly.debug ? super.getTextureResource(a) : BossRender.texture(look);
             }
             if (!LowPoly.enabled) {
-                return super.getTextureResource(a);
+                return LowPoly.cubeOr(id("textures/entity/" + stemOf(kind, 1) + ".png"), id("textures/lowpoly/" + stemOf(kind, a.stage()) + ".png"));
             }
             return id("textures/lowpoly/" + stemOf(kind, a.stage()) + ".png");
         }
