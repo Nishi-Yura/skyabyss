@@ -46,9 +46,9 @@ t(G + 'escort_hold', '%1$sが錨を打つあいだ守ろう（残り %2$s 秒）
 t(G + 'escort_beacon_ash', '光の術で燠の跡をたどり、迷路の出口の火を灯そう', 'Follow the embers with the light art and light the fire at the maze exit')
 t(G + 'escort_seal', '%1$sを守りながら、封の前で光・重さ・鼓動を続けて使おう', 'Cast light, weight and the beat at the seal (keep %1$s safe)')
 t(G + 'escort_clear', '燠の番と煤の子の群れを払おう', 'Clear the ember keeper and the soot swarms')
-t(G + 'escort_ready', '%1$sのそばへ行こう。そろったら走り出す', 'Stand by %1$s. You run when everyone is together')
-t(G + 'escort_run_salt', '崩れより先に、主の間の前の格子の門へ走れ', 'Outrun the collapse to the bars before the lord\'s hall')
-t(G + 'escort_run_ash', '闇の波より先に格子の門へ走れ。光の術で押し返せる', 'Outrun the dark wave to the bars. The light art pushes it back')
+t(G + 'escort_ready', '%1$sのそばへ行こう。そろったら走り出そう', 'Stand by %1$s. You run when everyone is together')
+t(G + 'escort_run_salt', '崩れより先に、主の間の前の格子の門へ走ろう', 'Outrun the collapse to the bars before the lord\'s hall')
+t(G + 'escort_run_ash', '闇の波より先に格子の門へ走ろう。光の術で押し返せる', 'Outrun the dark wave to the bars. The light art pushes it back')
 
 # ---------------------------------------------------------------- はじめての手引き
 t(M + 'tip.home', '手引き：野営の西の壁ぞいの白い祠。磁石石に触れると、いつでも地上（都の下の門）へ帰れる。',
