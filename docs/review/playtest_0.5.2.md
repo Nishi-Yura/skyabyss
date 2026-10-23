@@ -1,7 +1,7 @@
 # 試遊 0.5.2 の確かめ順
 
 0.5.1 のあとに一晩で入れたもので、**人の目でまだ見ていないもの**を上から順に並べた。各項目は「見る所」だけ確かめて、気になった所を一言ずつメモしてもらえれば十分。
-コマンドは `/skyabyss play …`（一覧は docs/design/37_playtest_commands.md）。新しい世界で始める。
+コマンドは `/skyabyss play …`（一覧は docs/design/37_playtest_commands.md）。新しい世界で始める。  複数人は対象に `@a`（例 `play quest next @a` でクエストを次へ、`play raid whale 2 @a` で部屋へ）。`play help` に短い案内。
 
 ## 1. すぐ分かる直し（5 分）
 

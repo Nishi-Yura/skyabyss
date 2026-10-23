@@ -141,6 +141,8 @@ public final class SelfTestRunner {
         // 深淵の敵 A (9 種の型・三段の素材・段の決まり・数字の伸び・予告・殻と盾・塩の抜け殻の割れ)。SKYABYSS_SELFTEST_ONLY="abyss enemies a"
         steps.add(Step.once("abyss enemies a", jp.revati.skyabyss.abyss.mobs.AbyssMobsASelfTest::runSelfTest));
         // 深淵の敵 B 組 (灰の層・深み・深淵だけ): 登録・素材・形・数字・灰の這い跡の光・天井歩き・灯喰い・縄の人・湧きの休み場。SKYABYSS_SELFTEST_ONLY="abyss enemies b"
+        // 層の主・歪んだ王の見た目 (型・周・段の同期、19 の素材と動きの名前)。SKYABYSS_SELFTEST_ONLY="abyss boss looks"
+        steps.add(Step.once("abyss boss looks", jp.revati.skyabyss.abyss.boss.BossLookSelfTest::runSelfTest));
         steps.add(Step.once("abyss enemies b", jp.revati.skyabyss.abyss.mobs.AbyssMobsBSelfTest::runSelfTest));
         // 建てた深淵での湧き (層ごとの種・形・床・休み場・心臓の間・人数の上限・数字・暗さ)。SKYABYSS_SELFTEST_ONLY="abyss enemies spawn"
         steps.add(Step.once("abyss enemies spawn", jp.revati.skyabyss.abyss.mobs.AbyssEnemiesSpawnSelfTest::run));
@@ -178,7 +180,8 @@ public final class SelfTestRunner {
         steps.add(Step.once("pouch", jp.revati.skyabyss.pouch.PouchSelfTest::runSelfTest));
         steps.add(Step.once("playtest", 40, jp.revati.skyabyss.playtest.PlaytestSelfTest::runSelfTest));
         // 試遊コマンド (skyabyss play): 登録・移動先・章の段階・道具・文言。docs/design/37 の 4 節。SKYABYSS_SELFTEST_ONLY="play"
-        steps.add(Step.once("play", 40, jp.revati.skyabyss.dev.play.PlaySelfTest::runSelfTest));
+        steps.add(Step.once("playtest play", 40, jp.revati.skyabyss.dev.play.PlaySelfTest::runSelfTest));
+        steps.addAll(jp.revati.skyabyss.dev.play.PlayMultiSelfTest.steps());
         steps.add(Step.once("item glow", jp.revati.skyabyss.glow.ItemGlowSelfTest::runSelfTest));
         steps.add(Step.once("progress", ProgressSelfTest::runSelfTest));
         steps.add(Step.once("lore", LoreSelfTest::runSelfTest));

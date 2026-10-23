@@ -25,7 +25,7 @@ import software.bernie.geckolib.animation.AnimationController;
 // 骨棘の射手: 肋骨の弓で、骨の棘を放つ。当たると動きが鈍る
 public class RibArcher extends GuardMob implements RangedAttackMob {
     public RibArcher(EntityType<? extends Monster> type, Level level) {
-        super(type, level, "rib_archer", "shoot");
+        super(type, level, "rib_archer", "shoot", "hurt", "death");
     }
 
     public static AttributeSupplier.Builder createAttributes() {
@@ -112,5 +112,11 @@ public class RibArcher extends GuardMob implements RangedAttackMob {
     @Override
     public float getVoicePitch() {
         return 1.0f + (random.nextFloat() - random.nextFloat()) * 0.08f;
+    }
+
+    // 被弾・倒れるアニメ (tools/gen/mobs/gen_guard_hurt_death.py)
+    @Override
+    protected boolean autoHurtDeath() {
+        return true;
     }
 }
