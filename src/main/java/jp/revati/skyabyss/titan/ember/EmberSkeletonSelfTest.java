@@ -148,11 +148,18 @@ public final class EmberSkeletonSelfTest {
         FakePlayer ground = new FakePlayer(server.overworld(), new GameProfile(UUID.randomUUID(), "ember_test_ground"));
         expect(!EmberHeat.affects(ground) && EmberHeat.add(ground, 50, EmberHeat.Reason.VENT) == 0f, "heat builds outside the ember back", f);
 
-        // ---- 部屋の箱: 重ならない、体の箱の中、休み場は床の上が空いているはずの箱の中
+        // ---- 部屋の箱: 重ならない、体の箱の中 (心臓の間と前室は体の外の区画 0 番の枠の封じた一室。trial/raid/InstanceArenas)、
+        // 休み場は床の上が空いているはずの箱の中
         List<Map.Entry<String, EmberBackLayout.Box>> rooms = new ArrayList<>(EmberBackLayout.ROOMS.entrySet());
         for (int i = 0; i < rooms.size(); i++) {
             EmberBackLayout.Box bi = rooms.get(i).getValue();
-            expect(bi.inside(EmberBackLayout.BODY), "room " + rooms.get(i).getKey() + " is outside the body box", f);
+            String key = rooms.get(i).getKey();
+            if (key.equals("heart") || key.equals("heart_ante")) {
+                expect(jp.revati.skyabyss.trial.TrialSlot.inInstance(bi.minX(), bi.minZ()) && jp.revati.skyabyss.trial.TrialSlot.inInstance(bi.maxX(), bi.maxZ())
+                        && !bi.intersects(EmberBackLayout.BODY), "room " + key + " is not a sealed room in the instance area", f);
+            } else {
+                expect(bi.inside(EmberBackLayout.BODY), "room " + key + " is outside the body box", f);
+            }
             for (int j = i + 1; j < rooms.size(); j++) {
                 expect(!bi.intersects(rooms.get(j).getValue()), "rooms " + rooms.get(i).getKey() + " and " + rooms.get(j).getKey() + " overlap", f);
             }
