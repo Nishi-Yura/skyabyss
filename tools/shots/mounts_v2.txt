@@ -15,6 +15,8 @@ cmd gamerule doDaylightCycle false
 cmd gamemode creative
 camera minecraft:overworld 0 -60 2 180 8
 waitchunks
+wait 200
+cmd skyabyss cinematic stop
 hud on
 chat clear
 hud off
@@ -25,25 +27,25 @@ shot v2_row
 cmd tp @s -9 -60 -1 -50 12
 wait 20
 shot v2_side
-cmd tp @s 13.2 -60 2.4 33 14
+cmd tp @s 11.8 -60 1.0 15 12
 wait 15
 shot v2_horn_beast_front
-cmd tp @s 9.8 -60 2.4 33 14
+cmd tp @s 8.4 -60 1.0 15 12
 wait 15
 shot v2_ash_deer_front
-cmd tp @s 6.4 -60 2.4 33 14
+cmd tp @s 5.0 -60 1.0 15 12
 wait 15
 shot v2_great_lizard_front
-cmd tp @s 3.0 -60 2.4 33 14
+cmd tp @s 1.6 -60 1.0 15 12
 wait 15
 shot v2_whale_calf_front
-cmd tp @s -0.4 -60 2.4 33 14
+cmd tp @s -1.8 -60 1.0 15 12
 wait 15
 shot v2_shell_tortoise_front
-cmd tp @s -3.8 -60 2.4 33 14
+cmd tp @s -5.2 -60 1.0 15 12
 wait 15
 shot v2_storm_chick_front
-cmd tp @s -7.2 -60 2.4 33 14
+cmd tp @s -8.6 -60 1.0 15 12
 wait 15
 shot v2_ember_fox_front
 cmd tp @s 10.2 -60 7 180 0
