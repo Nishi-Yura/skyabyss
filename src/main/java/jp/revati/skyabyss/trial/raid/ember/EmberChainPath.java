@@ -213,12 +213,12 @@ public final class EmberChainPath extends EmberRoom {
                 }
             } else if (spanState[s] == REBUILDING) {
                 for (int j = 0; j < len; j++) {
-                    if (dt == (long) j * REBUILD_GAP) {
+                    if (dt - 1 == (long) j * REBUILD_GAP) {
                         setRow(ctx, SPANS[s][0] - j, PLANK);
                         ctx.level().playSound(null, ctx.local(0, DECK, SPANS[s][0] - j), SoundEvents.CHAIN_PLACE, SoundSource.BLOCKS, 0.6f, 1.1f);
                     }
                 }
-                if (dt >= (long) (len - 1) * REBUILD_GAP) {
+                if (dt - 1 >= (long) (len - 1) * REBUILD_GAP) {
                     spanState[s] = INTACT;
                 }
             }

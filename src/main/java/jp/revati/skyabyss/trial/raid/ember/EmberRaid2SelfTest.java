@@ -41,9 +41,16 @@ final class EmberRaid2SelfTest {
         try {
             server.setDifficulty(Difficulty.NORMAL, true);
             draw(f);
-            chain(level, f, fakes);
-            valves(level, f, fakes);
-            apprentices(level, f, fakes);
+            StringBuilder dump = new StringBuilder("{");
+            chain(level, f, fakes, dump);
+            valves(level, f, fakes, dump);
+            apprentices(level, f, fakes, dump);
+            dump.append("}");
+            try {
+                java.nio.file.Files.writeString(java.nio.file.Path.of("raid_ember2_dump.json"), dump.toString());
+            } catch (java.io.IOException e) {
+                f.add("dump write failed: " + e);
+            }
         } catch (RuntimeException | ReflectiveOperationException e) {
             SkyAbyss.LOGGER.error("SELFTEST ember raid (rooms 2) crashed", e);
             f.add("crashed: " + e);
@@ -106,11 +113,12 @@ final class EmberRaid2SelfTest {
     }
 
     // ---- ER4
-    private static void chain(ServerLevel level, List<String> f, List<FakePlayer> fakes) throws ReflectiveOperationException {
+    private static void chain(ServerLevel level, List<String> f, List<FakePlayer> fakes, StringBuilder dump) throws ReflectiveOperationException {
         EmberChainPath room = new EmberChainPath();
         RaidCtx ctx = EmberRaidSelfTest.newCtx(level, 41);
         room.build(ctx);
         EmberRaidSelfTest.sealed(level, ctx, f, "ER4");
+        EmberRaidSelfTest.dumpPlan(level, ctx, "ER4", dump);
         FakePlayer a = EmberRaidSelfTest.fake(level, "a4");
         FakePlayer b = EmberRaidSelfTest.fake(level, "b4");
         fakes.add(a);
@@ -209,11 +217,12 @@ final class EmberRaid2SelfTest {
     }
 
     // ---- ER5
-    private static void valves(ServerLevel level, List<String> f, List<FakePlayer> fakes) throws ReflectiveOperationException {
+    private static void valves(ServerLevel level, List<String> f, List<FakePlayer> fakes, StringBuilder dump) throws ReflectiveOperationException {
         EmberValves room = new EmberValves();
         RaidCtx ctx = EmberRaidSelfTest.newCtx(level, 51);
         room.build(ctx);
         EmberRaidSelfTest.sealed(level, ctx, f, "ER5");
+        EmberRaidSelfTest.dumpPlan(level, ctx, "ER5", dump);
         FakePlayer a = EmberRaidSelfTest.fake(level, "a5");
         fakes.add(a);
         room.testPlayers = List.of(a);
@@ -268,11 +277,12 @@ final class EmberRaid2SelfTest {
     }
 
     // ---- ER6
-    private static void apprentices(ServerLevel level, List<String> f, List<FakePlayer> fakes) throws ReflectiveOperationException {
+    private static void apprentices(ServerLevel level, List<String> f, List<FakePlayer> fakes, StringBuilder dump) throws ReflectiveOperationException {
         EmberApprentices room = new EmberApprentices();
         RaidCtx ctx = EmberRaidSelfTest.newCtx(level, 61);
         room.build(ctx);
         EmberRaidSelfTest.sealed(level, ctx, f, "ER6");
+        EmberRaidSelfTest.dumpPlan(level, ctx, "ER6", dump);
         FakePlayer a = EmberRaidSelfTest.fake(level, "a6");
         fakes.add(a);
         room.testPlayers = List.of(a);
