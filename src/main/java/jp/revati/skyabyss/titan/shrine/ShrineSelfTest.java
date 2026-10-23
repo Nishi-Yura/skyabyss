@@ -43,6 +43,80 @@ public final class ShrineSelfTest {
         }
     }
 
+    private static boolean walkable(ServerLevel level, BlockPos feet) {
+        return level.getBlockState(feet).getCollisionShape(level, feet).isEmpty() && level.getBlockState(feet.above()).getCollisionShape(level, feet.above()).isEmpty()
+                && level.getBlockState(feet.above(2)).getCollisionShape(level, feet.above(2)).isEmpty()
+                && level.getBlockState(feet).getFluidState().isEmpty()
+                && !level.getBlockState(feet.below()).getCollisionShape(level, feet.below()).isEmpty();
+    }
+
+    // 参道のはじめ (南 15 マス) から碑の南の隣まで、一段ずつ (跳んで一段まで) 歩いて行けるか
+    static boolean reachable(ServerLevel level, BlockPos c) {
+        return walkSet(level, c).contains(c.south());
+    }
+
+    static java.util.Set<BlockPos> walkSet(ServerLevel level, BlockPos c) {
+        BlockPos start = c.south(15);
+        java.util.ArrayDeque<BlockPos> queue = new java.util.ArrayDeque<>();
+        java.util.Set<BlockPos> seen = new java.util.HashSet<>();
+        queue.add(start);
+        seen.add(start);
+        if (!walkable(level, start)) {
+            return seen;
+        }
+        while (!queue.isEmpty()) {
+            BlockPos p = queue.poll();
+            for (net.minecraft.core.Direction d : net.minecraft.core.Direction.Plane.HORIZONTAL) {
+                for (int dy = 1; dy >= -3; dy--) {
+                    BlockPos n = p.relative(d).above(dy);
+                    if (Math.abs(n.getX() - c.getX()) > 14 || n.getZ() - c.getZ() > 45 || n.getZ() - c.getZ() < -14 || !walkable(level, n)) {
+                        continue;
+                    }
+                    if (dy == 1 && !level.getBlockState(p.above(2)).getCollisionShape(level, p.above(2)).isEmpty()) {
+                        continue;
+                    }
+                    if (seen.add(n)) {
+                        queue.add(n);
+                    }
+                    break;
+                }
+            }
+        }
+        return seen;
+    }
+
+    // 台地・拝殿・参道の立てる床のうち、近く (歩いて 9 マス) に光るものがない所 (なければ null)
+    static String unlit(ServerLevel level, BlockPos c) {
+        List<BlockPos> sources = new ArrayList<>();
+        for (int x = -13; x <= 13; x++) {
+            for (int z = -13; z <= 40; z++) {
+                for (int y = -30; y <= 24; y++) {
+                    BlockPos p = c.offset(x, y, z);
+                    if (level.getBlockState(p).getLightEmission() > 0) {
+                        sources.add(p);
+                    }
+                }
+            }
+        }
+        java.util.Set<BlockPos> built = ShrineArchitect.STANDING.getOrDefault(c, java.util.Set.of());
+        for (BlockPos p : walkSet(level, c)) {
+            if (!built.contains(p)) {
+                continue;
+            }
+            boolean lit = false;
+            for (BlockPos s : sources) {
+                if (s.distManhattan(p) <= 9) {
+                    lit = true;
+                    break;
+                }
+            }
+            if (!lit) {
+                return p.toShortString() + " rel=" + p.subtract(c).toShortString();
+            }
+        }
+        return null;
+    }
+
     private static void run(MinecraftServer server) {
         List<String> f = new ArrayList<>();
         ServerLevel level = server.overworld();
@@ -59,6 +133,9 @@ public final class ShrineSelfTest {
                 check(f, TitanShrineBlock.titanOf(st).equals(titan), titan + ": the stele names another titan");
                 check(f, level.getBlockState(c.below().north(TitanShrine.RING)).equals(TitanShrine.ringBlock(titan)), titan + ": the ring is not of the titan's stone");
                 check(f, level.getBlockState(c.east(TitanShrine.PEDESTAL)).is(ModBlocks.RESONANCE_FORGE.get()), titan + ": no resonance forge beside the shrine");
+                check(f, reachable(level, c), titan + ": the stele cannot be walked to from the approach path");
+                String dark = unlit(level, c);
+                check(f, dark == null, titan + ": a walkable floor has no light nearby (mobs can spawn): " + dark);
                 check(f, TitanShrine.ensure(server, titan).equals(c) && c.equals(TitanShrine.posOf(server, titan)), titan + ": the shrine moved when ensured again");
                 a.setPos(c.getX() + 0.5, c.getY(), c.getZ() + 2.5);
                 b.setPos(c.getX() + 0.5, c.getY(), c.getZ() + 9.5);

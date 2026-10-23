@@ -182,6 +182,13 @@ public final class StructureDump {
 
     // 巨神の背を書き出す。まだ建っていなければ建てる。だめなら理由を返す
     public static String queuePreset(MinecraftServer server, String name) {
+        if (name.startsWith("shrine_")) {
+            // 地上の巨神の祠 (建っていなければ建てる): shrine_<stone_whale|tide_shell|thunder_wing|ember>
+            String titan = name.substring(7);
+            BlockPos c = jp.revati.skyabyss.titan.shrine.TitanShrine.ensure(server, titan);
+            queueRange(server.overworld(), name, c.offset(-13, -24, -14), c.offset(13, 26, 46), Map.of("center", c.above()));
+            return null;
+        }
         Box box = PRESETS.get(name);
         if (box == null) {
             return "unknown preset " + name + " (" + PRESETS.keySet() + ")";
