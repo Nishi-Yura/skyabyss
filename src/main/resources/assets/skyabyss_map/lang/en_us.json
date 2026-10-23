@@ -1,9 +1,8 @@
 {
   "key.skyabyss.travel_map": "Travel map",
   "gui.skyabyss.map.title": "Travel Map",
-  "gui.skyabyss.map.scale.near": "Around town · 600",
-  "gui.skyabyss.map.scale.far": "The world · 2,400",
-  "gui.skyabyss.map.hint": "Scroll to change the scale",
+  "gui.skyabyss.map.scale": "Radius %s",
+  "gui.skyabyss.map.hint": "Scroll or +/− to zoom · drag to pan · right-click to recentre",
   "gui.skyabyss.map.waiting": "Reading the marks…",
   "gui.skyabyss.map.elsewhere": "You are not on the ground (no mark for you)",
   "gui.skyabyss.map.dist": "%s %s",

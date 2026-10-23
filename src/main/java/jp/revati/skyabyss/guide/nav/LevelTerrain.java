@@ -11,14 +11,21 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.LevelChunk;
 
-// 本物の世界の地形 (読み込み済みのチャンクだけ。読み込みは起こさない)。一回の探索のあいだ使う (チャンクの引きを覚える)
+// 本物の世界の地形 (読み込み済みのチャンクだけ。読み込みは起こさない)。一回の探索のあいだ使う (チャンクの引きを覚える)。
+// load = true なら、読み込まれていないチャンクも読む (都の案内: 都の中だけの一回きりの探索。建てたあとなので生成は起きない)
 public final class LevelTerrain implements PathFinder.Terrain {
     private final Level level;
+    private final boolean load;
     private final HashMap<Long, LevelChunk> chunks = new HashMap<>();
     private final BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
 
     public LevelTerrain(Level level) {
+        this(level, false);
+    }
+
+    public LevelTerrain(Level level, boolean load) {
         this.level = level;
+        this.load = load;
     }
 
     @Override
@@ -35,7 +42,7 @@ public final class LevelTerrain implements PathFinder.Terrain {
             if (chunks.containsKey(ck)) {
                 return PathFinder.Cell.UNLOADED;
             }
-            chunk = level.getChunkSource().getChunkNow(x >> 4, z >> 4);
+            chunk = load ? level.getChunk(x >> 4, z >> 4) : level.getChunkSource().getChunkNow(x >> 4, z >> 4);
             chunks.put(ck, chunk);
             if (chunk == null) {
                 return PathFinder.Cell.UNLOADED;
@@ -45,7 +52,7 @@ public final class LevelTerrain implements PathFinder.Terrain {
         return classify(chunk.getBlockState(pos), level, pos);
     }
 
-    static PathFinder.Cell classify(BlockState s, Level level, BlockPos p) {
+    public static PathFinder.Cell classify(BlockState s, Level level, BlockPos p) {
         if (s.isAir()) {
             return PathFinder.Cell.AIR;
         }

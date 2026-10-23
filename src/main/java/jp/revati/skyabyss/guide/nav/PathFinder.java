@@ -20,6 +20,11 @@ public final class PathFinder {
 
     public interface Terrain {
         Cell cell(int x, int y, int z);
+
+        // 立ち位置 (x, y, z) へ歩く手間の上乗せ (0 = なし)。都の案内 (facility/TownGuide) が、狭い路地より大通りの真ん中を選ばせるのに使う
+        default float extraCost(int x, int y, int z) {
+            return 0f;
+        }
     }
 
     // nodes: 出発点から順の足の位置 (先頭 = 出発点)。reached = 目印のすぐそばまで着いた。progress = 役に立つ前進がある (見つかった扱い)
@@ -189,6 +194,7 @@ public final class PathFinder {
             } else if (ny < n.y) {
                 cost += 0.25f * (n.y - ny);
             }
+            cost += terrain.extraCost(nx, ny, nz);
             if (terrain.cell(nx, ny, nz) == Cell.WATER) {
                 cost += WATER_COST + (terrain.cell(nx, ny + 1, nz) == Cell.WATER ? DEEP_COST : 0f);
             }

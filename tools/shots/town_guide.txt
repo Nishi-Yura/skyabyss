@@ -1,0 +1,59 @@
+# 都の案内人と灯りの道 (facility/TownGuide。docs/design/35 の 6.13)。本物の世界に都を建て、広場の案内人の前で一覧を開き、
+# 道具屋・宿・社を選んで地面の灯りと帯の「〜へ向かおう」を撮る。最後に旅の地図 (M) を寄せて開く。
+#   bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/town_guide.txt -PshotsName=town_guide
+world opening_townguide normal
+size 1280 720
+timeout 900
+render 8
+clouds off
+guiscale 2
+wait 100
+cmd skyabyss cinematic stop
+wait 10
+cmd skyabyss cinematic stop
+waitscreen 900 none
+cmd time set noon
+cmd weather clear
+cmd gamerule doDaylightCycle false
+cmd gamemode creative
+cmd skyabyss dev opening build
+cmd skyabyss dev opening at shelter 0 0 2 60 180 0
+waitchunks
+wait 100
+cmd skyabyss facility place
+cmd skyabyss facility guide go plaza
+waitchunks
+wait 120
+hud on
+chat clear
+shot guide_npc
+cmd skyabyss facility guide
+wait 20
+shot guide_list
+close
+wait 10
+cmd skyabyss facility guide face tool_shop
+wait 40
+shot guide_lanterns_tool_shop
+cmd skyabyss facility guide go s
+waitchunks
+wait 60
+cmd skyabyss facility guide face inn
+wait 40
+shot guide_lanterns_inn
+cmd time set 14000
+wait 30
+shot guide_lanterns_inn_night
+cmd time set noon
+cmd skyabyss facility guide go w
+waitchunks
+wait 60
+cmd skyabyss facility guide face shrine
+wait 40
+shot guide_lanterns_shrine
+key key.skyabyss.travel_map
+wait 40
+mapscale 200
+wait 10
+shot guide_map_200
+close

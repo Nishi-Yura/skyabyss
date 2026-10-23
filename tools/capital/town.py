@@ -1894,6 +1894,25 @@ class Town(Facilities):
         put('npc_shrine_priest', m.get('open_shrine'), (-1, 0))
         put('npc_keep_veteran', m.get('open_keep'), (0, -1))
         put('npc_archivist', m.get('open_hall'), (0, -1))
+        # 都の案内人 (docs/design/35 の 6.12): 四つの門の内と広場。門の碑と反対の側の、大通りの縁 (真ん中の 6 マスは空ける)。
+        # 立てる所が無ければ近くを探す (半径 3)
+        def near(name, x0, y0, z0):
+            for r in range(0, 4):
+                for dx in range(-r, r + 1):
+                    for dz in range(-r, r + 1):
+                        if max(abs(dx), abs(dz)) != r:
+                            continue
+                        x, z = x0 + dx, z0 + dz
+                        if free(x, y0, z) and floor(x, y0, z):
+                            self.mark(name, x, y0, z)
+                            return
+            raise RuntimeError('no spot for ' + name)
+
+        near('npc_guide_n', -3, TER + 1, -88)
+        near('npc_guide_s', 2, 0, 88)
+        near('npc_guide_w', -88, 0, 2)
+        near('npc_guide_e', 88, 0, -3)
+        near('npc_guide_plaza', 2, 0, -9)
 
     def tidy_for_walkers(self):
         """入れる建物のまわりと中の、歩く人のじゃまになる飾りを直す (ゲーム内の建築の監査に合わせる)。

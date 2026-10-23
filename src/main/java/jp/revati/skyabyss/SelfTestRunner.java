@@ -174,6 +174,8 @@ public final class SelfTestRunner {
         steps.addAll(jp.revati.skyabyss.npc.ArtisanSelfTest.steps());
         // 都の施設 (係の人・鐘銭・店・預かり所・宿・ギルド)。docs/design/35。SKYABYSS_SELFTEST_ONLY=facility
         steps.addAll(jp.revati.skyabyss.facility.FacilitySelfTest.steps());
+        // 都の案内人と灯りの道 (印・どの施設にも道・選んだときの知らせ)。docs/design/35 の 6.12。SKYABYSS_SELFTEST_ONLY="town guide"
+        steps.addAll(jp.revati.skyabyss.facility.TownGuideSelfTest.steps());
         // 乗り物 (見た目と性能の買い物・呼ぶ/帰す・背中と深淵の禁止)。docs/design/38。SKYABYSS_SELFTEST_ONLY=mount
         steps.addAll(jp.revati.skyabyss.mount.MountSelfTest.steps());
         // 町のクエスト (限定の人・噂・墓守・酔いどれ・地図屋・古井戸)。docs/design/35 の 3.3・3.5。SKYABYSS_SELFTEST_ONLY=town

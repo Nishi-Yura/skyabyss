@@ -189,6 +189,17 @@ add("stable_keeper", ja="厩舎の番", anim="hold_r",
     pal_extra=dict(scarf=(180, 70, 50)),
     lower="trousers", sleeve="rolled", gloves=True, arms=STAFF_R, props={"prop_r": P2.pitchfork})
 
+# 都の案内人 (門と広場に立つ。話すと施設の一覧 → 選んだ施設の戸まで色つきの灯りの道。docs/design/35 の 6.12)。
+# 白い外套 (長い上着 + 肩掛け + 背へ下ろした頭巾)、金の縁、角灯を提げた杖に四色の房
+add("guide", ja="都の案内人", anim="hold_r",
+    pal=dict(skin=SKIN["mid"], hair=(70, 52, 40), coat=(232, 230, 222), mantle=(242, 240, 234), trim=(196, 162, 78), sash=(70, 108, 150),
+             metal=(206, 170, 90), metal2=(96, 90, 84), trousers=(120, 112, 100), boot=(76, 56, 40), leather=(118, 86, 54)),
+    face=dict(eye="kind", iris=(80, 110, 130), brow="soft", mouth="smile", blush=0.12),
+    hair=dict(style="short", front=27.6, side=25.0, back=23.8, fringe=[(-1.6, 27.9, 1.6, 0.7, -0.4), (0.6, 28.0, 1.5, 0.7, 0.3)]),
+    hairline=27.6, build="avg",
+    upper=dict(mantle=dict(bottom=16.2, clasp=True, hood_down=True), sash=True, collar=True, collar_mat="trim", pouches=[(3.6, 10.4, "pouch")]),
+    lower="coat_long", sleeve="fitted", arms=STAFF_R, props={"prop_r": P2.guide_staff})
+
 # ====================================================================== 深淵の生き残り (探掘隊)
 
 add("survivor_bone", ja="灯り番ミオ", anim="hold2",

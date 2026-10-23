@@ -459,5 +459,16 @@
     "atlas": 64
    }
   }
+ },
+ "guide": {
+  "tris": 1560,
+  "atlas": 256,
+  "buried": [],
+  "props": {
+   "prop_r": {
+    "tris": 320,
+    "atlas": 64
+   }
+  }
  }
 }

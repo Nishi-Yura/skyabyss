@@ -1,0 +1,79 @@
+{
+  "npc": "skyabyss:attendant_guide",
+  "entries": [
+    {
+      "if": {
+        "type": "not",
+        "of": {
+          "type": "flag",
+          "flag": "intro"
+        }
+      },
+      "node": "intro"
+    },
+    {
+      "node": "menu"
+    }
+  ],
+  "nodes": {
+    "intro": {
+      "face": "smile",
+      "do": [
+        {
+          "type": "flag",
+          "flag": "intro"
+        }
+      ],
+      "next": "menu"
+    },
+    "again": {
+      "face": "neutral",
+      "next": "menu",
+      "text": "dialogue.skyabyss.attendant_guide.intro"
+    },
+    "colors": {
+      "face": "neutral",
+      "next": "menu"
+    },
+    "gates": {
+      "face": "neutral",
+      "next": "menu"
+    },
+    "menu": {
+      "face": "neutral",
+      "options": [
+        {
+          "id": "way",
+          "kind": "talk",
+          "do": [
+            {
+              "type": "facility",
+              "open": "guide"
+            }
+          ],
+          "goto": "end"
+        },
+        {
+          "id": "colors",
+          "kind": "talk",
+          "goto": "colors"
+        },
+        {
+          "id": "gates",
+          "kind": "talk",
+          "goto": "gates"
+        },
+        {
+          "id": "about",
+          "kind": "talk",
+          "goto": "again"
+        },
+        {
+          "id": "bye",
+          "kind": "leave",
+          "goto": "end"
+        }
+      ]
+    }
+  }
+}

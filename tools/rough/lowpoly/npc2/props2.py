@@ -344,6 +344,27 @@ def bread_basket(c):
     return F
 
 
+# ---------------------------------------------------------------- 都の案内人: 角灯を提げた杖 (右手で立てる)。杖の頭の鉤から角灯、四色の房 (施設の色分け 金・青・赤・紫)
+def guide_staff(c):
+    from props import lantern
+    h = hand(c, -1)
+    F = part("gs_pole", rod("prop_r", "wood", h + V(0, -11.4, -0.1), h + V(0, 12.6, 0.1), 0.42, 0.36, sides=6))
+    top = h + V(0, 12.6, 0.1)
+    # 前へ曲がる鉤 (先から角灯を提げる)
+    F += part("gs_crook", tube("prop_r", "brass", [top + V(0, -0.2, 0), top + V(-0.5, 1.2, -0.2), top + V(-1.9, 1.4, -0.4), top + V(-2.9, 0.6, -0.5)],
+                               ra=[0.36, 0.32, 0.28, 0.24], sides=5, caps=(True, True), hint=(0, 0, 1)))
+    hook = top + V(-2.9, 0.2, -0.5)
+    F += part("gs_chain", rod("prop_r", "metal2", hook, hook + V(0, -1.4, 0), 0.12, sides=4))
+    F += lantern(c, hook + V(0, -4.2, 0), s=0.85, bone="prop_r", hook=hook + V(0, -1.3, 0))
+    for i, (m, dx, dz) in enumerate((("rib_gold", 0.5, 0.0), ("rib_blue", 0.0, 0.5), ("rib_red", -0.5, 0.0), ("rib_violet", 0.0, -0.5))):
+        a = top + V(dx * 0.7, -0.9, dz * 0.7)
+        F += part(f"gs_rib{i}", tube("prop_r", m, [a, a + V(dx * 0.9, -2.0, dz * 0.9), a + V(dx * 1.3, -4.4, dz * 1.2)], ra=[0.4, 0.34, 0.0],
+                                    rb=[0.12, 0.12, 0.0], sides=4, caps=(True, False), hint=(0, 1, 0)))
+    F += part("gs_band", disc("prop_r", "brass", top + V(0, -0.8, 0), 0.52, 0.22, n=6))
+    F += part("gs_foot", disc("prop_r", "metal2", h + V(0, -11.0, -0.1), 0.55, 0.4, n=6))
+    return F
+
+
 MORE_MATS = {
     "wood2": dict(ramp=[(32, 20, 14), (60, 40, 26), (92, 64, 40), (124, 90, 58)], base=0.56, lit=0.3, noise=0.08, crack=0, min=0, stripe=3, axis="v"),
     "foam": dict(ramp=[(180, 170, 140), (220, 214, 190), (244, 240, 226)], base=0.65, lit=0.3, noise=0.04, crack=0, min=0),
@@ -367,5 +388,10 @@ MORE_MATS = {
     "babyskin": dict(ramp=[(170, 120, 96), (210, 160, 132), (236, 196, 170), (250, 220, 198)], base=0.72, lit=0.16, noise=0.0, crack=0, min=1),
     "ash": dict(ramp=[(40, 38, 38), (70, 66, 64), (104, 100, 96), (140, 136, 130)], base=0.6, lit=0.3, noise=0.14, crack=0, min=0),
     "dark": dict(ramp=[(10, 8, 8), (24, 18, 16)], base=0.6, lit=0.0, noise=0.0, crack=0, min=0),
+    # 案内人の杖の四色の房 (施設の色分け。client/facility/TownGuideScreen と同じ色味)
+    "rib_gold": dict(ramp=[(120, 82, 20), (190, 140, 40), (236, 192, 80), (252, 226, 140)], base=0.62, lit=0.3, noise=0.03, crack=0, min=0, stripe=2, axis="v"),
+    "rib_blue": dict(ramp=[(24, 52, 96), (44, 92, 150), (84, 140, 200), (150, 196, 236)], base=0.6, lit=0.3, noise=0.03, crack=0, min=0, stripe=2, axis="v"),
+    "rib_red": dict(ramp=[(96, 20, 20), (156, 40, 36), (206, 70, 58), (236, 120, 100)], base=0.6, lit=0.3, noise=0.03, crack=0, min=0, stripe=2, axis="v"),
+    "rib_violet": dict(ramp=[(56, 30, 80), (96, 56, 130), (140, 96, 178), (190, 150, 220)], base=0.6, lit=0.3, noise=0.03, crack=0, min=0, stripe=2, axis="v"),
 }
 PROP_MATS.update(MORE_MATS)

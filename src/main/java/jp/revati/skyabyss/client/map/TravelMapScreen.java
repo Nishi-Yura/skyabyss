@@ -33,7 +33,9 @@ import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.network.PacketDistributor;
 
 // 旅の地図 (M キー。docs/design/33 の 4 章)。北が上、町を中心にした印だけの地図 (地形は描かない。座標の数字も出さない)。
-// 縮尺は 2 段 (町のまわり 600 / 世界 2,400。ホイールで替える)。印を指すと名前と「北東 420」(自分からの方角と距離)。
+// 縮尺はホイール (と ＋／− のキー・右上のつまみ) でなめらかに替える: 半径 96 (都の中) 〜 4,800 (世界の果てまで)。指した所を中心に寄る。
+// 印を指すと名前と「北東 420」(自分からの方角と距離)。大事な印 (都・巨神・章の場所・祠・仲間・目的・墓) は、名前の札を常に出す (重なる札は出さない)。
+// 輪には距離の数字。自分の矢印は 2 倍で、暗い丸の上に。寄せると都の壁の四角 (2026-10-23: 地図を読みやすく・もっと寄せて・もっと引いて)。
 // 巨神の子に乗っているとき (chart != null) は、子の海図 (旧 TravelChartScreen) をこの画面に重ねる: 行ける行き先の印が光り、
 // 印か右の一覧で選んで「出発」。印の出どころはサーバーの MapMarks (一か所) と、クライアントが持つ自分・仲間・墓・目的の標。
 // 見た目は 3 案 (設定 mapStyle。SLATE = 石板の枠に丸い海図 (既定)、PARCHMENT = 骨の枠に羊皮紙、INK = 枠なしの墨の夜図)。
@@ -48,9 +50,16 @@ public class TravelMapScreen extends Screen {
     static final int S_TOWN = 0, S_CAMP = 1, S_FOOTPRINT = 2, S_RIBS = 3, S_WAYMARK = 4, S_SITE = 5, S_TITAN = 6, S_GRAVE = 7,
             S_PARTY = 8, S_OBJECTIVE = 9, S_RUMOR = 10, S_SELF = 11, S_SPAWN = 12, S_SHRINE = 13, S_GLOW = 14, S_CAIRN = 15;
 
-    // 縮尺 (中心から縁までのブロック)
-    static final int[] RANGE = {600, 2400};
-    static final int[][] RINGS = {{200, 400, 600}, {600, 1200, 1800, 2400}};
+    // 縮尺 (中心から縁までのブロック): いちばん寄せた / いちばん引いた / 開いたとき (町のまわり・世界)。ホイール一目盛りで 1.25 倍
+    static final double MIN_RANGE = 96;
+    static final double MAX_RANGE = 4800;
+    static final double NEAR = 600;
+    static final double FAR = 2400;
+    static final double ZOOM_STEP = 1.25;
+    // 輪の間の候補 (半径の中に輪が 2〜4 本になるものを選ぶ)
+    static final int[] RING_STEPS = {25, 50, 100, 200, 250, 500, 1000, 2000, 2500, 5000};
+    // 都の壁 (真ん中から壁の外の面まで。tools/capital/town.py の W)
+    static final int TOWN_HALF = 100;
 
     // 見た目ごとの色
     record Palette(int text, int dim, int accent, int pale, int ring, int ringStrong, int road, int rim, int lost) {
@@ -72,7 +81,12 @@ public class TravelMapScreen extends Screen {
     @Nullable
     private MapMarks.Sheet sheet;
     private boolean demo;
-    private int scale;
+    // いま描いている縮尺 (なめらかに target へ寄る) と、寄せる先。anchor = 寄るときに動かない画面の点
+    private double view;
+    private double target;
+    private double anchorX;
+    private double anchorY;
+    private long lastFrame;
     private int scroll;
     @Nullable
     private String selected;
@@ -89,7 +103,8 @@ public class TravelMapScreen extends Screen {
         this.chart = chart;
         this.sheet = sheet;
         // 海図は遠くまで行くので世界の縮尺から
-        this.scale = chart != null ? 1 : 0;
+        this.view = chart != null ? FAR : NEAR;
+        this.target = view;
         pickDefault();
     }
 
@@ -148,7 +163,50 @@ public class TravelMapScreen extends Screen {
 
     // 撮影の台本 (mapscale) から縮尺を替える (0 = 町のまわり、1 = 世界)
     public void scale(int s) {
-        this.scale = Mth.clamp(s, 0, RANGE.length - 1);
+        zoomTo(s <= 0 ? NEAR : FAR);
+    }
+
+    // 撮影の台本 (mapscale <ブロック>) から: その半径にすぐ替える
+    public void zoomTo(double range) {
+        view = target = Mth.clamp(range, MIN_RANGE, MAX_RANGE);
+        clampPan();
+    }
+
+    public double range() {
+        return view;
+    }
+
+    // ホイール・キー・つまみ: steps 目盛り寄せる (負なら引く)。(ax, ay) の画面の点のまわりで (丸の外なら真ん中)
+    private void zoomBy(double steps, double ax, double ay) {
+        double next = Mth.clamp(target / Math.pow(ZOOM_STEP, steps), MIN_RANGE, MAX_RANGE);
+        if (Math.abs(next - target) < 1e-6) {
+            return;
+        }
+        boolean inDisc = Math.hypot(ax - cx, ay - cy) <= radius;
+        anchorX = inDisc ? ax : cx;
+        anchorY = inDisc ? ay : cy;
+        target = next;
+        click(steps > 0 ? 1.3f : 1.0f);
+    }
+
+    // 毎フレーム: 縮尺を寄せる先へなめらかに (寄る点の下の世界の場所は動かさない)
+    private void animateZoom() {
+        long now = net.minecraft.Util.getMillis();
+        double dt = lastFrame == 0 ? 0.016 : Math.min(0.1, (now - lastFrame) / 1000.0);
+        lastFrame = now;
+        if (view == target || radius <= 0) {
+            return;
+        }
+        double next = view + (target - view) * (1 - Math.exp(-dt * 14));
+        if (Math.abs(next - target) < target * 0.003) {
+            next = target;
+        }
+        double k0 = view / radius;
+        double k1 = next / radius;
+        panX += (anchorX - cx) * (k0 - k1);
+        panZ += (anchorY - cy) * (k0 - k1);
+        view = next;
+        clampPan();
     }
 
     // 撮影の台本 (mapstyle) から見た目を替える
@@ -265,7 +323,7 @@ public class TravelMapScreen extends Screen {
     @Override
     public boolean mouseDragged(double mx, double my, int button, double dx, double dy) {
         if (button == 0 && radius > 0 && Math.hypot(mx - cx, my - cy) <= radius + 8) {
-            double k = RANGE[scale] / (double) radius;
+            double k = view / radius;
             panX -= dx * k;
             panZ -= dy * k;
             clampPan();
@@ -276,7 +334,7 @@ public class TravelMapScreen extends Screen {
 
     // 世界の (x, z) を画面へ。縁より外は縁に寄せる (out[2] = 1 なら縁に寄せた)
     private int[] project(double x, double z) {
-        double k = radius / (double) RANGE[scale];
+        double k = radius / view;
         double dx = (x - centerX()) * k;
         double dz = (z - centerZ()) * k;
         double d = Math.hypot(dx, dz);
@@ -317,12 +375,15 @@ public class TravelMapScreen extends Screen {
     @Override
     public void render(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
         super.render(g, mouseX, mouseY, partialTick);
+        animateZoom();
         Palette p = palette();
         drawSheet(g, p);
         drawRings(g, p);
+        drawTown(g, p);
         List<Hit> hits = new ArrayList<>();
         drawMarks(g, p, hits, mouseX, mouseY);
-        drawHeader(g, p);
+        drawCompass(g, p);
+        drawHeader(g, p, mouseX, mouseY);
         if (chart != null) {
             drawList(g, p, mouseX, mouseY);
             drawButtons(g, p, mouseX, mouseY);
@@ -381,17 +442,41 @@ public class TravelMapScreen extends Screen {
         }
     }
 
+    static int ringStep(double range) {
+        for (int st : RING_STEPS) {
+            if (range / st <= 4.2) {
+                return st;
+            }
+        }
+        return RING_STEPS[RING_STEPS.length - 1];
+    }
+
+    // 距離の輪 (2〜4 本。縮尺に合わせた切りのよい数) と、その距離の数字 (輪の南の内側)
     private void drawRings(GuiGraphics g, Palette p) {
-        int[] rings = RINGS[scale];
-        for (int i = 0; i < rings.length; i++) {
-            int r = (int) Math.round(radius * rings[i] / (double) RANGE[scale]);
-            boolean outer = i == rings.length - 1;
-            if (style() == Config.MapStyle.SLATE && outer) {
+        int step = ringStep(view);
+        boolean shadow = style() != Config.MapStyle.PARCHMENT;
+        for (int d = step; d < view * 0.97; d += step) {
+            int r = (int) Math.round(radius * d / view);
+            if (r < 14) {
                 continue;
             }
-            circle(g, cx, cy, r, outer ? p.ringStrong() : p.ring(), 1, outer ? 0 : 3);
+            circle(g, cx, cy, r, p.ring(), 1, 3);
+            // 数字は南の十字の線の右、輪のすぐ内 (印の多い東西を避ける)
+            String label = String.format("%,d", d);
+            if (r > 20) {
+                g.drawString(font, label, cx + 3, cy + r - 10, (p.dim() & 0x00FFFFFF) | 0xC0000000, shadow);
+            }
         }
-        // 方位の刻みと N E S W
+        if (style() != Config.MapStyle.SLATE) {
+            circle(g, cx, cy, radius, p.ringStrong(), 1, 0);
+        }
+        // 十字の細い線 (方位の輪)
+        dashed(g, cx - radius + 8, cy, cx + radius - 8, cy, p.ring(), 2, 4);
+        dashed(g, cx, cy - radius + 8, cx, cy + radius - 8, p.ring(), 2, 4);
+    }
+
+    // 方位の刻みと N E S W (印の上に描く)
+    private void drawCompass(GuiGraphics g, Palette p) {
         for (int k = 0; k < 32; k++) {
             double a = k / 32.0 * Math.PI * 2;
             int len = k % 8 == 0 ? 6 : k % 4 == 0 ? 4 : 2;
@@ -403,9 +488,6 @@ public class TravelMapScreen extends Screen {
                 g.fill(x, y, x + 1, y + 1, c);
             }
         }
-        // 十字の細い線 (方位の輪)
-        dashed(g, cx - radius + 8, cy, cx + radius - 8, cy, p.ring(), 2, 4);
-        dashed(g, cx, cy - radius + 8, cx, cy + radius - 8, p.ring(), 2, 4);
         int lc = p.accent();
         g.drawCenteredString(font, Component.translatable("gui.skyabyss.travel.dir.n"), cx, cy - radius - 13, lc);
         drawCentered(g, Component.translatable("gui.skyabyss.travel.dir.s"), cx, cy + radius + 6, lc);
@@ -413,11 +495,60 @@ public class TravelMapScreen extends Screen {
         drawCentered(g, Component.translatable("gui.skyabyss.travel.dir.e"), cx + radius + 10, cy - 4, lc);
     }
 
+    // 寄せたとき (半径 400 まで): 都の壁の四角 (点線) と大通りの十字
+    private void drawTown(GuiGraphics g, Palette p) {
+        if (view > 400 || sheet == null || !sheet.townKnown()) {
+            return;
+        }
+        MapMarks.Mark town = null;
+        for (MapMarks.Mark m : sheet.marks()) {
+            if (m.kind() == MapMarks.Kind.TOWN && !m.rumor()) {
+                town = m;
+            }
+        }
+        if (town == null) {
+            return;
+        }
+        int[] a = project(town.x() - TOWN_HALF, town.z() - TOWN_HALF);
+        int[] b = project(town.x() + TOWN_HALF, town.z() + TOWN_HALF);
+        if (a[2] == 1 || b[2] == 1) {
+            return;
+        }
+        boolean parch = style() == Config.MapStyle.PARCHMENT;
+        int c = (p.rim() & 0x00FFFFFF) | 0xB0000000;
+        g.fill(a[0], a[1], b[0] + 1, b[1] + 1, parch ? 0x206B5236 : 0x28E2D9C2);
+        dashed(g, a[0], a[1], b[0], a[1], c, 3, 2);
+        dashed(g, a[0], b[1], b[0], b[1], c, 3, 2);
+        dashed(g, a[0], a[1], a[0], b[1], c, 3, 2);
+        dashed(g, b[0], a[1], b[0], b[1], c, 3, 2);
+        int mx = (a[0] + b[0]) / 2;
+        int my = (a[1] + b[1]) / 2;
+        int sc = (p.rim() & 0x00FFFFFF) | 0x48000000;
+        g.fill(a[0] + 1, my - 1, b[0], my + 1, sc);
+        g.fill(mx - 1, a[1] + 1, mx + 1, b[1], sc);
+    }
+
     private void drawCentered(GuiGraphics g, Component c, int x, int y, int color) {
         g.drawString(font, c, x - font.width(c) / 2, y, color, style() != Config.MapStyle.PARCHMENT);
     }
 
-    private void drawHeader(GuiGraphics g, Palette p) {
+    // 右上の縮尺: 「半径 600」と、寄せ・引きのつまみ (− 目盛り ＋。押しても替わる)
+    private static final int ZB = 11;
+    private static final int GAUGE_W = 54;
+
+    private int zoomRight() {
+        return chart != null ? listX - 12 : fx + fw - 14;
+    }
+
+    private int plusX() {
+        return zoomRight() - ZB;
+    }
+
+    private int minusX() {
+        return plusX() - 8 - GAUGE_W - ZB;
+    }
+
+    private void drawHeader(GuiGraphics g, Palette p, int mouseX, int mouseY) {
         boolean shadow = style() != Config.MapStyle.PARCHMENT;
         Component t = chart != null ? chartTitle() : title;
         g.drawString(font, t, fx + 14, fy + 10, p.pale(), shadow);
@@ -426,12 +557,38 @@ public class TravelMapScreen extends Screen {
                     : Component.translatable("gui.skyabyss.travel.leader_chooses", chart.leaderName());
             g.drawString(font, sub, listX, fy + 22, p.dim(), shadow);
         }
-        Component sc = Component.translatable(scale == 0 ? "gui.skyabyss.map.scale.near" : "gui.skyabyss.map.scale.far");
-        int right = chart != null ? listX - 12 : fx + fw - 14;
-        g.drawString(font, sc, right - font.width(sc), fy + 10, p.dim(), shadow);
+        int y = fy + 8;
+        int gaugeX = minusX() + ZB + 4;
+        zoomButton(g, p, minusX(), y, false, mouseX, mouseY);
+        zoomButton(g, p, plusX(), y, true, mouseX, mouseY);
+        // 目盛り: 右ほど寄せている (対数)。開いたときの二つの縮尺 (町のまわり・世界) に刻み
+        double span = Math.log(MAX_RANGE / MIN_RANGE);
+        int gy = y + ZB / 2;
+        g.fill(gaugeX, gy, gaugeX + GAUGE_W, gy + 1, p.ring() | 0xFF000000);
+        for (double mark : new double[] {NEAR, FAR}) {
+            int mx = gaugeX + (int) Math.round((1 - Math.log(mark / MIN_RANGE) / span) * GAUGE_W);
+            g.fill(mx, gy - 2, mx + 1, gy + 3, p.dim());
+        }
+        int kx = gaugeX + (int) Math.round(Mth.clamp(1 - Math.log(view / MIN_RANGE) / span, 0, 1) * GAUGE_W);
+        g.fill(kx - 2, gy - 3, kx + 3, gy + 4, 0xFF0C0E12);
+        g.fill(kx - 1, gy - 2, kx + 2, gy + 3, p.accent());
+        Component sc = Component.translatable("gui.skyabyss.map.scale", String.format("%,d", (int) Math.round(view / 10.0) * 10));
+        g.drawString(font, sc, minusX() - 6 - font.width(sc), fy + 10, p.text(), shadow);
         Component foot = sheet == null ? Component.translatable("gui.skyabyss.map.waiting")
                 : !onGround() ? Component.translatable("gui.skyabyss.map.elsewhere") : Component.translatable("gui.skyabyss.map.hint");
         g.drawString(font, foot, fx + 14, fy + fh - 14, p.dim(), shadow);
+    }
+
+    private void zoomButton(GuiGraphics g, Palette p, int x, int y, boolean plus, int mouseX, int mouseY) {
+        boolean can = plus ? target > MIN_RANGE + 1e-6 : target < MAX_RANGE - 1e-6;
+        boolean hover = can && inside(mouseX, mouseY, x, y, ZB, ZB);
+        g.fill(x, y, x + ZB, y + ZB, 0xFF0C0E12);
+        g.fill(x + 1, y + 1, x + ZB - 1, y + ZB - 1, hover ? 0xFF2A5E6A : 0xFF1C222C);
+        int c = !can ? p.lost() : hover ? 0xFFFFFFFF : p.accent();
+        g.fill(x + 3, y + ZB / 2, x + ZB - 3, y + ZB / 2 + 1, c);
+        if (plus) {
+            g.fill(x + ZB / 2, y + 3, x + ZB / 2 + 1, y + ZB - 3, c);
+        }
     }
 
     private Component chartTitle() {
@@ -444,11 +601,16 @@ public class TravelMapScreen extends Screen {
     record Hit(int x, int y, int order, List<FormattedCharSequence> lines, @Nullable String destId) {
     }
 
+    // 名前の札を出す印 (重なる札は、先に置いた (大事な) 方を残す)。priority が大きいほど先
+    private record Label(int x, int y, Component text, int color, int priority) {
+    }
+
     private void drawMarks(GuiGraphics g, Palette p, List<Hit> hits, int mouseX, int mouseY) {
         double[] me = self();
         long time = Minecraft.getInstance().level == null ? 0 : Minecraft.getInstance().level.getGameTime();
         List<MapMarks.Mark> marks = sheet == null ? List.of() : sheet.marks();
-        // 道しるべの線: 町から積み石を近い順にたどり、野営地まで
+        List<Label> labels = new ArrayList<>();
+        List<int[]> icons = new ArrayList<>();
         // 道 (町から道しるべをつなぐ線) は描かない (2026-10-21 の試遊: ごちゃつく)
         // 下から: 噂 → 章の場所・碑・足跡・骨 → 野営地・町 → 巨神
         List<MapMarks.Mark> ordered = new ArrayList<>(marks);
@@ -466,7 +628,13 @@ public class TravelMapScreen extends Screen {
             if (m.rumor()) {
                 sprite(g, S_RUMOR, at[0], at[1], 0, 0.85f);
             } else {
+                backing(g, at[0], at[1], at[2] == 1 ? 0.45f : 0.75f);
                 sprite(g, sprite(m.kind()), at[0], at[1], rim, at[2] == 1 ? 0.6f : 1f);
+                icons.add(new int[] {at[0] - 8, at[1] - 8, 16, 16});
+                int pr = labelPriority(m);
+                if (pr > 0 && at[2] == 0) {
+                    labels.add(new Label(at[0], at[1], MapText.name(m), m.kind() == MapMarks.Kind.TITAN || m.color() != 0 ? rim : p.text(), pr));
+                }
             }
             List<Component> lines = new ArrayList<>();
             lines.add(MapText.name(m));
@@ -491,7 +659,12 @@ public class TravelMapScreen extends Screen {
                 }
                 int sp = d.kind() == 4 ? S_TOWN : d.kind() == 0 ? S_SPAWN : d.kind() == 2 ? S_TITAN : S_WAYMARK;
                 int rim = d.kind() == 2 ? 0xFF000000 | TravelDest.titanColor(d.name()) : isSel ? 0xFF9FE8FF : p.rim();
+                backing(g, at[0], at[1], ok ? 0.75f : 0.4f);
                 sprite(g, sp, at[0], at[1], rim, ok ? 1f : 0.45f);
+                icons.add(new int[] {at[0] - 8, at[1] - 8, 16, 16});
+                if (isSel && at[2] == 0) {
+                    labels.add(new Label(at[0], at[1], TravelDest.destName(d), 0xFF9FE8FF, 95));
+                }
                 List<Component> lines = new ArrayList<>();
                 lines.add(TravelDest.destName(d));
                 lines.add(MapText.where(me, d.x() + 0.5, d.z() + 0.5));
@@ -505,7 +678,12 @@ public class TravelMapScreen extends Screen {
                 continue;
             }
             int[] at = project(gm.x() + 0.5, gm.z() + 0.5);
+            backing(g, at[0], at[1], 0.75f);
             sprite(g, S_GRAVE, at[0], at[1], 0xFFD9779A, at[2] == 1 ? 0.6f : 1f);
+            icons.add(new int[] {at[0] - 8, at[1] - 8, 16, 16});
+            if (at[2] == 0) {
+                labels.add(new Label(at[0], at[1], Component.translatable("map.skyabyss.mark.grave"), 0xFFD9779A, 60));
+            }
             hits.add(hit(at, 60, List.of(Component.translatable("map.skyabyss.mark.grave"), MapText.where(me, gm.x() + 0.5, gm.z() + 0.5)), null));
         }
         for (PartyLocator.Entry e : party()) {
@@ -513,24 +691,123 @@ public class TravelMapScreen extends Screen {
                 continue;
             }
             int[] at = project(e.x() + 0.5, e.z() + 0.5);
+            backing(g, at[0], at[1], 0.75f);
             sprite(g, S_PARTY, at[0], at[1], 0xFF8FE0FF, at[2] == 1 ? 0.6f : 1f);
+            icons.add(new int[] {at[0] - 8, at[1] - 8, 16, 16});
+            labels.add(new Label(at[0], at[1], Component.literal(e.name()), 0xFF8FE0FF, at[2] == 0 ? 85 : 84));
             hits.add(hit(at, 70, List.of(Component.literal(e.name()), MapText.where(me, e.x() + 0.5, e.z() + 0.5)), null));
         }
         BlockPos obj = objective();
         if (obj != null) {
             int[] at = project(obj.getX() + 0.5, obj.getZ() + 0.5);
-            sprite(g, S_OBJECTIVE, at[0], at[1], 0, at[2] == 1 ? 0.7f : 1f);
+            // 目的は明滅する光の輪の上に (いちばん目立つ印)
+            float pulse = 0.35f + 0.3f * (float) Math.sin((time + Minecraft.getInstance().getTimer().getGameTimeDeltaPartialTick(true)) * 0.2);
+            sprite(g, S_GLOW, at[0], at[1], 0, 0f, 0xFFF2C14E, pulse);
+            backing(g, at[0], at[1], 0.8f);
+            sprite(g, S_OBJECTIVE, at[0], at[1], 0, at[2] == 1 ? 0.75f : 1f);
+            icons.add(new int[] {at[0] - 8, at[1] - 8, 16, 16});
+            labels.add(new Label(at[0], at[1], Component.translatable("map.skyabyss.mark.objective"), 0xFFF2C14E, 90));
             hits.add(hit(at, 80, List.of(Component.translatable("map.skyabyss.mark.objective"), MapText.where(me, obj.getX() + 0.5, obj.getZ() + 0.5)), null));
         }
+        int[] selfAt = null;
         if (me != null) {
-            int[] at = project(me[0], me[1]);
+            selfAt = project(me[0], me[1]);
+            // 自分: 暗い丸と、ゆっくり広がる輪の上に、2 倍の矢印
+            float t = (time % 40 + Minecraft.getInstance().getTimer().getGameTimeDeltaPartialTick(true)) / 40f;
+            int ring = 9 + (int) (t * 7);
+            circle(g, selfAt[0], selfAt[1], ring, ((int) ((1 - t) * 0xB0) << 24) | (p.accent() & 0xFFFFFF), 1, 0);
+            disc(g, selfAt[0], selfAt[1], 10, 0xC00A0D12);
+            circle(g, selfAt[0], selfAt[1], 10, p.accent(), 1, 0);
             g.pose().pushPose();
-            g.pose().translate(at[0], at[1], 0);
+            g.pose().translate(selfAt[0], selfAt[1], 0);
             g.pose().mulPose(Axis.ZP.rotationDegrees((float) me[2] + 180f));
-            sprite(g, S_SELF, 0, 0, p.rim(), 1f);
+            g.pose().scale(1.5f, 1.5f, 1f);
+            sprite(g, S_SELF, 0, 0, 0xFFFFFFFF, 1f);
             g.pose().popPose();
-            hits.add(hit(at, 90, List.of(Component.translatable("map.skyabyss.mark.self")), null));
+            icons.add(new int[] {selfAt[0] - 11, selfAt[1] - 11, 22, 22});
+            hits.add(hit(selfAt, 90, List.of(Component.translatable("map.skyabyss.mark.self")), null));
         }
+        drawLabels(g, labels, icons);
+    }
+
+    // 名前の札を出す印の大事さ (0 = 出さない)。足跡・骨・碑・噂は、指したときだけ
+    private int labelPriority(MapMarks.Mark m) {
+        return switch (m.kind()) {
+            case TOWN -> 80;
+            case TITAN -> 75;
+            case SHRINE -> 70;
+            case SITE -> 65;
+            case CAMP -> view <= 1200 ? 40 : 0;
+            case SPAWN -> view <= 1200 ? 35 : 0;
+            default -> 0;
+        };
+    }
+
+    // 札: 印の右 (入らなければ左・下・上) に、暗い地の名前。ほかの札・印と重なる所には置かない
+    private void drawLabels(GuiGraphics g, List<Label> labels, List<int[]> icons) {
+        labels.sort(Comparator.comparingInt(Label::priority).reversed());
+        List<int[]> placed = new ArrayList<>();
+        boolean parch = style() == Config.MapStyle.PARCHMENT;
+        for (Label l : labels) {
+            String text = font.plainSubstrByWidth(l.text().getString(), 110);
+            int w = font.width(text) + 6;
+            int h = 11;
+            int[][] spots = {{l.x() + 10, l.y() - 5}, {l.x() - 10 - w, l.y() - 5}, {l.x() - w / 2, l.y() + 10}, {l.x() - w / 2, l.y() - 10 - h}};
+            for (int[] sp : spots) {
+                int[] r = {sp[0], sp[1], w, h};
+                if (Math.hypot(sp[0] + w / 2.0 - cx, sp[1] + h / 2.0 - cy) > radius - 6 && Math.hypot(sp[0] - cx, sp[1] - cy) > radius - 4) {
+                    continue;
+                }
+                if (overlaps(r, placed) || overlapsIcons(r, icons, l)) {
+                    continue;
+                }
+                placed.add(r);
+                g.fill(r[0], r[1], r[0] + w, r[1] + h, parch ? 0xC8F2E6C8 : 0xC80A0D12);
+                g.fill(r[0], r[1], r[0] + 1, r[1] + h, l.color());
+                g.drawString(font, text, r[0] + 4, r[1] + 2, parch ? 0xFF3B2A1A : l.color(), !parch);
+                break;
+            }
+        }
+    }
+
+    private static boolean overlaps(int[] r, List<int[]> list) {
+        for (int[] o : list) {
+            if (r[0] < o[0] + o[2] && o[0] < r[0] + r[2] && r[1] < o[1] + o[3] && o[1] < r[1] + r[3]) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // 札が、自分の印ではないほかの印に重なるか
+    private static boolean overlapsIcons(int[] r, List<int[]> icons, Label own) {
+        for (int[] o : icons) {
+            if (Math.abs(o[0] + o[2] / 2 - own.x()) <= 1 && Math.abs(o[1] + o[3] / 2 - own.y()) <= 1) {
+                continue;
+            }
+            if (r[0] < o[0] + o[2] - 3 && o[0] + 3 < r[0] + r[2] && r[1] < o[1] + o[3] - 3 && o[1] + 3 < r[1] + r[3]) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // 印の下の暗い丸 (どんな地の上でも印が浮く)
+    private void backing(GuiGraphics g, int x, int y, float alpha) {
+        int a = (int) (alpha * (style() == Config.MapStyle.PARCHMENT ? 0x50 : 0x90));
+        disc(g, x, y, 8, a << 24 | (style() == Config.MapStyle.PARCHMENT ? 0x3B2A1A : 0x05070A));
+    }
+
+    // 塗りつぶした丸 (半分の画素で)
+    private static void disc(GuiGraphics g, int cx, int cy, int r, int color) {
+        g.pose().pushPose();
+        g.pose().scale(0.5f, 0.5f, 1f);
+        int rr = r * 2;
+        for (int dy = -rr; dy <= rr; dy++) {
+            int half = (int) Math.floor(Math.sqrt(rr * rr - dy * dy));
+            g.fill(cx * 2 - half, cy * 2 + dy, cx * 2 + half + 1, cy * 2 + dy + 1, color);
+        }
+        g.pose().popPose();
     }
 
     private static int layer(MapMarks.Mark m) {
@@ -751,6 +1028,24 @@ public class TravelMapScreen extends Screen {
             onClose();
             return true;
         }
+        // ＋／− (テンキーも) で寄せる・引く。0 で開いたときの縮尺と自分へ戻す
+        if (key == org.lwjgl.glfw.GLFW.GLFW_KEY_EQUAL || key == org.lwjgl.glfw.GLFW.GLFW_KEY_KP_ADD) {
+            zoomBy(1, cx, cy);
+            return true;
+        }
+        if (key == org.lwjgl.glfw.GLFW.GLFW_KEY_MINUS || key == org.lwjgl.glfw.GLFW.GLFW_KEY_KP_SUBTRACT) {
+            zoomBy(-1, cx, cy);
+            return true;
+        }
+        if (key == org.lwjgl.glfw.GLFW.GLFW_KEY_0 || key == org.lwjgl.glfw.GLFW.GLFW_KEY_KP_0) {
+            target = chart != null ? FAR : NEAR;
+            anchorX = cx;
+            anchorY = cy;
+            panX = 0;
+            panZ = 0;
+            click(1.1f);
+            return true;
+        }
         return super.keyPressed(key, scan, mods);
     }
 
@@ -760,10 +1055,8 @@ public class TravelMapScreen extends Screen {
             scroll = Mth.clamp(scroll - (int) Math.signum(dy), 0, Math.max(0, chart.dests().size() - listRows));
             return true;
         }
-        int next = dy > 0 ? 0 : 1;
-        if (next != scale) {
-            scale = next;
-            click(next == 0 ? 1.3f : 1.0f);
+        if (dy != 0) {
+            zoomBy(Math.signum(dy), mx, my);
         }
         return true;
     }
@@ -772,6 +1065,14 @@ public class TravelMapScreen extends Screen {
     public boolean mouseClicked(double mx, double my, int button) {
         int mouseX = (int) mx;
         int mouseY = (int) my;
+        if (button == 0 && inside(mouseX, mouseY, minusX(), fy + 8, ZB, ZB)) {
+            zoomBy(-1, cx, cy);
+            return true;
+        }
+        if (button == 0 && inside(mouseX, mouseY, plusX(), fy + 8, ZB, ZB)) {
+            zoomBy(1, cx, cy);
+            return true;
+        }
         if (button == 1 && radius > 0 && Math.hypot(mx - cx, my - cy) <= radius + 8) {
             panX = 0;
             panZ = 0;

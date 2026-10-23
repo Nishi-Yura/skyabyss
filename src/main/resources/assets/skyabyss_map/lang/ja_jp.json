@@ -1,9 +1,8 @@
 {
   "key.skyabyss.travel_map": "旅の地図",
   "gui.skyabyss.map.title": "旅の地図",
-  "gui.skyabyss.map.scale.near": "町のまわり 600",
-  "gui.skyabyss.map.scale.far": "世界 2,400",
-  "gui.skyabyss.map.hint": "ホイールで縮尺を替える",
+  "gui.skyabyss.map.scale": "半径 %s",
+  "gui.skyabyss.map.hint": "ホイール・＋／−で寄せる・引く　左で引いて動かす　右クリックで自分へ",
   "gui.skyabyss.map.waiting": "印を読んでいる…",
   "gui.skyabyss.map.elsewhere": "いまは地上にいない（自分の印は出ない）",
   "gui.skyabyss.map.dist": "%s %s",

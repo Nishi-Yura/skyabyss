@@ -37,6 +37,7 @@
 | 庭 5 | 隅（前の空き区画のあと） | 水盤と花壇と腰掛けの小さな庭（入れる。建てる所ではない） | なし |
 | 取引所 | 東の大通り、鯨追いの組合の東（x 82..93） | プレイヤーどうしの取引（取引所の番。出品・申請・受ける。6.11） | 取引所の番 |
 | 門・墓地・各碑 | 壁と西門の外 | 碑を読むと伝承 | なし |
+| 都の案内人 5 | 四つの門の内（大通りの縁）と広場の噴水の南 | 行き先を選ぶと、足もとから施設の戸まで色つきの灯りがともる（6.12） | 都の案内人 |
 
 入れない家（中を埋めた町家）は 2 列目より奥の 45 棟（建て直しの前は 83 棟）。窓から見える施設の二階（道具屋・預かり所・薬師・止まり木の番小屋・酒場・闇市・鯨追いの組合）にも家具がある（物置・帳場・薬草の間・寝室など。`interiors.upper_rooms`）。宿の二階の廊下は幅いっぱいの梁で区切り、両端に透明な窓、吊り灯りを 3〜4 ごと、壁ぎわに小卓と腰掛け、天井は明るい板、階段の上の踊り場に談話の席。まだないもの: 前の私の頁（砦の本丸の奥。三章）。
 
@@ -173,8 +174,10 @@
 | `mapmaker` | 地図屋 | 地図屋の屋根裏 | 地図、跡地の噂 |
 | `drunkard` | 酔いどれ | 酒場の地下 | もう一つの空のこと（深淵の手がかり） |
 | `trade_keeper` | 取引所の番 | 取引所 | 取引所を開く（`trade`。6.11）、取引の決まり |
+| `stable_keeper` | 厩舎の番 | 厩舎 | 乗り物を見る・買う（`mount_shop`。38）、乗り笛の決まり |
+| `guide`（印は `npc_guide_<所>`） | 都の案内人（5 人） | 四つの門と広場 | 行き先を選ぶ（`guide`。6.12）、灯りの色のこと、都の門のこと |
 
-- 会話の結果 `{"type": "facility", "open": "shop|stash|inn_rest|rumor|perch|map|guild|repair|guild_storage|respec_quote|respec_skills|respec_skills_coins|respec_stats|respec_stats_coins|lore_book|map_copy|key_offer|key_return|records|brew_lesson|trade", "shop": "<店>"}`（`FacilityActions`。知らない名前は読み込みで弾く）。
+- 会話の結果 `{"type": "facility", "open": "shop|stash|inn_rest|rumor|perch|map|guild|repair|guild_storage|respec_quote|respec_skills|respec_skills_coins|respec_stats|respec_stats_coins|lore_book|map_copy|key_offer|key_return|records|brew_lesson|trade|mount_shop|guide", "shop": "<店>"}`（`FacilityActions`。知らない名前は読み込みで弾く）。
 
 ### 6.2 鐘銭と店（`facility/Coins`・`ShopDef`・`ShopService`、画面 `client/facility/ShopScreen`）
 
@@ -234,6 +237,7 @@
 | `npc_guild_clerk` `npc_smith` `npc_tool_merchant` `npc_apothecary` `npc_storage_keeper` `npc_innkeeper` `npc_perch_keeper` `npc_trade_keeper` | 1 列目の施設の受付の机の向こう（囲いの中の床） | `Attendants`（`ShelterBuilder.finish`・見回り） |
 | `npc_shrine_priest` `npc_keep_veteran` `npc_archivist` `npc_training_master` | 章で開く施設の中（戸が開くまでは閉じた建物の中に立つ）。師範は訓練場（はじめから開いている）の東屋の机の向こう | 同上 |
 | `npc_black_marketeer` `npc_gravekeeper` `npc_mapmaker` `npc_drunkard` | 裏通りの施設の中（地図屋は屋根裏 y 6、酔いどれは酒場の地下 y -5） | 同上 |
+| `npc_guide_n` `npc_guide_s` `npc_guide_e` `npc_guide_w` `npc_guide_plaza` | 四つの門の内の大通りの縁（門の碑と反対の側。北は段の上）と、広場の噴水の南 | `Attendants`（役は案内人。`AttendantRole.byMark` が `npc_guide_*` を読む）。前の版で建てた都にも、見回りが設計図の印から立たせる（`TownGuide.guideSpots`） |
 | `inn_bed`・`inn_bed_2` … `inn_bed_9` | 宿の二階の客室 9 の寝台の頭 | `FacilityActions.innBed` |
 | `quest_house_1` … `quest_house_11` | 町のクエストの家の一階の床（住み手は 6.8） | `town/TownGuests`（限定の人の立つ所。6.10） |
 | `open_training`・`sign_training` | 訓練場の門（開いたまま）と碑 | 碑の文だけ（`ShelterBuilder`）。`CapitalDoors` は読まない（訓練場ははじめから使える） |
@@ -310,6 +314,31 @@
 - **画面**: 店と同じ絵柄。つまみ 5 つ: 市（ほかの人の出品。出す品 → ほしいもの、出す人、残りの日、「申請」「別に」。ほしいものがそろっていなければ「申請」が赤）、出す（左に出す品の 4 枠と持ち物。押すと全部、右で 1 つずつ。右にほしい鐘銭と品の 4 枠、名前で探す。「別に」から来たときは相手の出品と足す鐘銭）、自分の品（出品の一覧と申請の数、選んだ出品の申請: いる人の点、そろっている / 足りない / 不在、✔ ✘、取り下げ）、申請（自分の申請。そろっているか、取り下げ）、受け取り。
 - **記録**: ワールド（`TradeData`、`skyabyss_trade`）。出品・申請・受け取り箱・知らせ。
 - 自己テスト `SKYABYSS_SELFTEST_ONLY="facility trade"`（出す・預かる・10 品・大事な品、申請で品が動かない、断る、受ける、足りない・一杯で何も動かない、いない人、別の申し出、取り下げと受け取り箱、期限、保存）。撮影 `tools/shots/trade.txt`。
+
+### 6.12 都の案内人と灯りの道（`facility/TownGuide`、画面 `client/facility/TownGuideScreen`、描画 `client/guide/TownGuideClient`）
+
+2026-10-23 の試遊「施設の場所が分かりにくい」への答え（`docs/review/town_finding/` の案 C。屋根の旗柱はなし）。
+
+- **案内人**: 係の人の役 `guide`（都の案内人。白い外套と肩掛け、背に下ろした頭巾、金の縁と青い帯、角灯を提げた杖に四色の房）。四つの門の内と広場に一人ずつ（印 `npc_guide_<所>`。6.6）。形は NPC v2（`tools/rough/lowpoly/npc2/cast.py` の `guide`、杖は `props2.guide_staff`、入れるのは `install_npc2.py guide`）。
+- **会話**: 初めは一言（行き先を言えば戸口まで灯りをともす）。選択肢は「行き先を選ぶ（灯りで案内）」（`{"type": "facility", "open": "guide"}`）・「灯りの色のこと」・「都の門のこと」。
+- **一覧**（都の中にいるときだけ。都の真ん中から 190 ブロック）: 種類ごとに見出しと色の札、その下に施設の名前・ひとこと・いまの場所からの距離（5 ブロック単位）。案内中の施設には「案内中」。行を押すとその戸までの灯りがともり、一覧が閉じる。下に「案内をやめる」（案内中だけ）と「閉じる」。
+
+| 種類（色） | 施設（戸の印） |
+| --- | --- |
+| 金 = 買う・預ける | 道具屋（`label_tool_shop`）・預かり所（`label_storage`）・取引所（`label_trade`）・薬師の店（`label_apothecary`） |
+| 青 = 休む・旅 | 宿「鐘の宿」（`label_inn`）・厩舎（`label_stable`）・子の止まり木（`label_perch`） |
+| 赤 = 鍛える・戦う | 鯨追いの組合（`open_guild`）・鍛冶場（`label_smithy`）・訓練場（`open_training`） |
+| 紫 = 物語・祈り | 四巨神の社（`open_shrine`）・空見の砦（`open_keep`）・空見の館（`open_hall`） |
+| 灰 = 裏通り | 酒場「深い杯」（`label_tavern`）・墓所（`sign_graveyard`） |
+
+  闇市と地図屋は自分で見つける所なので載せない（戸の上の名も出していない）。章で開く施設（組合・社・砦・館）も載せる（戸まで行ける。開くかどうかは戸の決まりのまま）。
+- **道**: 選ぶとサーバーが、その人の足もとから戸の印（水平 2 ブロック以内）までの歩ける道を `guide/nav/PathFinder`（A*）で探す。地形は本物の世界（都の中は読み込まれていないチャンクも読む）。**大通りの真ん中を好む**: 横に 3 マス先のどれかが頭の高さで塞がる所（路地・壁ぎわ）は 1 マス +1.3、屋根の下（2〜7 上に固いブロック）は +2.5。上限は出発点から 280 の四角・9 万ノード・900 歩（都のどこからでも足りる。自己テストでは最も重い道で 40 ms ほど）。押し続けても積もらないよう一人 1 秒に一度。戸まで着けなければ近づけた所までの道と「途中までしか見つからない」の一言。
+- **印の位置**: 都の設計図（`capital.json`）の印を、建てた向きと鐘の位置から世界の座標へ直す（`TownGuide.worldMarks`）。前の版で建てた都でも、新しい印（案内人の立つ所）が使える。
+- **灯り**（その人にだけ見える。18 の 8.5）: 道にそって 3 ブロックごとに、施設の種類の色の小さな灯り（床の光の輪・灯りの台と火袋・上の淡い光の玉）。足もとから先 56 ブロックまで、手前ほど明るく、光の波が戸の方へ流れる。選んだすぐあとは足もとから戸の方へ順に灯る。戸の前の灯りは一回り大きい。
+- **消えるとき**: 戸に着いた（水平 3.5 ブロック・高さ 4.5 以内。画面の下に「〇〇に着いた」）、5 分たった、別の施設を選んだ（前の灯りは薄れて、新しい道が灯る）、「案内をやめる」、都から離れた（戸から 260）、別の世界へ移った。
+- **目的の帯**: 案内のあいだは、序盤の目的・クエストより先に「〇〇へ向かおう」と矢印・距離（18 の 8）。画面の目的の標・旅の地図の目的の印も戸を指す（`ObjectiveStrip.resolve`）。
+- 試し（OP）: `/skyabyss facility guide`（一覧を開く）、`guide <施設>`（その戸まで）、`guide face <施設>`（選んで道の先を向く。撮影用）、`guide stop`、`guide go <n|s|e|w|plaza>`（その案内人の前へ）。撮影 `tools/shots/town_guide.txt`。
+- 自己テスト `SKYABYSS_SELFTEST_ONLY="town guide"`: 設計図に案内人の印が五つ（役は案内人）、一覧の施設にはどれも戸の印、**設計図の上で五人の案内人のどこからも 15 の施設すべての戸まで道が着く**（屋根の下を通るのは道の 1 割まで）、選んだときの知らせ（施設・種類・戸・道）と灯りの並び（3 ブロックごと・最後は戸の前）、送る形の往復、会話の「行き先を選ぶ」。
 
 ## 7. 町並みの決まり（2026-10-21 の試遊のあと）
 
