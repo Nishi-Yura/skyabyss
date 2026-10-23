@@ -298,7 +298,7 @@ LORDS = {
              '肋の主が崩れた。光の中なら、闇のものにも刃は届く。', 'The Lord of Ribs collapses. In the light, even things of the dark can be cut.',
              '光の外では、刃が通らない。', 'Your blade will not bite outside the light.'),
     'salt': ('白殻の主', 'Lord of White Shells',
-             '白殻の主を倒そう。足もとの赤い輪からは、すぐ出よう', 'Lord of White Shells: leave the red rings',
+             '白殻の主を倒そう。赤い輪からは離れよう', 'Lord of White Shells: leave the red rings',
              '天井から、白い殻の塊が落ちてきた。', 'A mass of white shell drops from the ceiling.',
              '赤い輪には重さが落ちる。重さの術の中なら、押しつぶされずに済む。',
              'Weight falls inside the red rings. Under the weight art, it will not crush you.',
@@ -312,7 +312,7 @@ LORDS = {
               '鼓動まねの主が黙った。本物の鼓動は、いつもひとつ。', 'The Lord of Mimicked Beats falls silent. There is only ever one true heartbeat.',
               '', ''),
     'ash': ('灯り喰いの主', 'Lord of Eaten Light',
-            '灯り喰いの主を倒そう。闇の波のあとは光の術で照らそう', 'Light-eater lord: cast light after dark',
+            '灯り喰いを倒そう。闇のあとは光の術で照らそう', 'Light-eater lord: cast light after dark',
             '灯りが一つずつ消え、闇の奥で口が開いた。', 'The lights go out one by one, and a mouth opens in the dark.',
             '闇の波が来ると、灯りが全部消える。闇の中の主には刃が届かない。光の術で主を照らせ。',
             'When the dark wave comes, every light dies, and the lord cannot be cut in the dark. Light it with your art.',
@@ -683,11 +683,11 @@ for L in LAYERS:
 # 目的の帯の一言は lang を直接直してあり、上の文には戻していない。書き出しの前にここで上書きし、
 # コミット済みの lang と同じにする (tools/audit/check_generators.py で確かめる)。
 HAND_EDITS = [  # (鍵, 日本語, 英語)
-    ("objective.skyabyss.abyss_v2.lord_ash", "灯り喰いの主を倒そう。闇の波のあとは光の術で照らそう", "Light-eater lord: cast light after dark"),
+    ("objective.skyabyss.abyss_v2.lord_ash", "灯り喰いを倒そう。闇のあとは光の術で照らそう", "Light-eater lord: cast light after dark"),
     ("objective.skyabyss.abyss_v2.warden_p1", "灯りを点けて、光の中の番人を斬ろう", "Light lamps; hit the warden in the light"),
     ("objective.skyabyss.abyss_v2.warden_snuff", "灯りを守ろう。番人が吹き消しに来る", "Guard the light. It comes to snuff a lamp"),
     ("objective.skyabyss.abyss_v2.lord_bone", "肋の主を倒そう。灯台を灯して、光の中で斬ろう", "Ribs lord: light lamps, fight in light"),
-    ("objective.skyabyss.abyss_v2.lord_salt", "白殻の主を倒そう。足もとの赤い輪からは、すぐ出よう", "Lord of White Shells: leave the red rings"),
+    ("objective.skyabyss.abyss_v2.lord_salt", "白殻の主を倒そう。赤い輪からは離れよう", "Lord of White Shells: leave the red rings"),
     ("objective.skyabyss.abyss_v2.lord_storm", "鼓動まねの主を倒そう。鼓動の聞こえる方が本物", "Beat-mimic lord: hit the one with a pulse"),
     ("objective.skyabyss.abyss_v2.flash_weight", "赤い輪から出ろ。重さの術なら耐えられる", "Leave the red rings, or endure with weight"),
     ("objective.skyabyss.abyss_v2.flash_dark", "闇の中では刃が届かない。光の術で照らそう", "Blades miss in the dark. Cast light"),
