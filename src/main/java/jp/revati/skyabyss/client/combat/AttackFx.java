@@ -28,7 +28,9 @@ import net.neoforged.neoforge.client.event.ClientTickEvent;
 // 粒の数: 1 tick の上限 (BASE_BUDGET。画面の粒の設定で減る) を、いま見た目のある予告の数で分ける。人数が増えて予告が増えても、合計は上限を超えない
 @EventBusSubscriber(modid = SkyAbyss.MODID, value = Dist.CLIENT)
 public final class AttackFx {
-    private static final int BASE_BUDGET = 420;
+    private static final int BASE_BUDGET = 900;
+    // 全体の濃さ (2026-10-23 の撮影で「まだ薄い」ため 2.2 倍。上限 BASE_BUDGET は変わらず効く)
+    private static final double INTENSITY = 2.2;
     // 当たったあとの残りの長さ (tick)
     private static final int LINGER_TICKS = 26;
     private static final int SHOCK_TICKS = 8;
@@ -67,8 +69,8 @@ public final class AttackFx {
     private static int take(ClientLevel level, AttackLook look, double want) {
         refresh(level);
         double share = Math.max(0.3, Math.min(1.0, 6.0 / looksLastTick));
-        int n = (int) Math.round(want * look.weight * share);
-        if (n <= 0 && want > 0 && level.random.nextDouble() < want * share) {
+        int n = (int) Math.round(want * INTENSITY * look.weight * share);
+        if (n <= 0 && want > 0 && level.random.nextDouble() < want * INTENSITY * share) {
             n = 1;
         }
         n = Math.min(n, budget);
@@ -82,14 +84,14 @@ public final class AttackFx {
         return new DustParticleOptions(new Vector3f(((rgb >> 16) & 0xFF) / 255f, ((rgb >> 8) & 0xFF) / 255f, (rgb & 0xFF) / 255f), size);
     }
 
-    private static final DustParticleOptions BONE_DUST = dust(0xE8DCC0, 1.3f);
-    private static final DustParticleOptions CORE_CYAN = dust(0x8CF6FF, 1.2f);
-    private static final DustParticleOptions FOAM = dust(0xF2FFFF, 1.5f);
-    private static final DustParticleOptions SEA = dust(0x58D6E8, 1.2f);
-    private static final DustParticleOptions VOLT = dust(0xE6F6FF, 1.1f);
-    private static final DustParticleOptions VOLT_GOLD = dust(0xFFF0A0, 1.0f);
-    private static final DustParticleOptions HEAT = dust(0xFF8A2A, 1.3f);
-    private static final DustParticleOptions CINDER = dust(0xFFC860, 0.9f);
+    private static final DustParticleOptions BONE_DUST = dust(0xE8DCC0, 1.8f);
+    private static final DustParticleOptions CORE_CYAN = dust(0x8CF6FF, 1.7f);
+    private static final DustParticleOptions FOAM = dust(0xF2FFFF, 2.0f);
+    private static final DustParticleOptions SEA = dust(0x58D6E8, 1.7f);
+    private static final DustParticleOptions VOLT = dust(0xE6F6FF, 1.6f);
+    private static final DustParticleOptions VOLT_GOLD = dust(0xFFF0A0, 1.4f);
+    private static final DustParticleOptions HEAT = dust(0xFF8A2A, 1.8f);
+    private static final DustParticleOptions CINDER = dust(0xFFC860, 1.3f);
 
     private static ParticleOptions debris(AttackLook.Element el, RandomSource r) {
         return switch (el) {

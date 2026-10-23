@@ -13,6 +13,16 @@ HEARTS = [
     ("ember", "skyabyss:ember_heart", "-58", "emberforce",
      ["BREATH", "PULSE", "ORB", "GALE", "PELLET", "FADING", "FORGE", "EMBERS"]),
 ]
+import sys
+# 続きから撮る: python heart_fx_gen.py storm:CHARGE  (その心臓のその技から。前の心臓は飛ばす)
+START = sys.argv[1].split(":") if len(sys.argv) > 1 else None
+if START:
+    _keys = [h[0] for h in HEARTS]
+    _i = _keys.index(START[0])
+    _h = HEARTS[_i]
+    HEARTS_RUN = [(_h[0], _h[1], _h[2], _h[3], _h[4][_h[4].index(START[1]):])] + HEARTS[_i + 1:]
+else:
+    HEARTS_RUN = HEARTS
 CAM = "camera minecraft:overworld 0.5 -43 14.5 180 38"
 out = []
 w = out.append
@@ -42,7 +52,7 @@ def stage():
     w("chat clear")
 
 
-for key, ent, y, force, actions in HEARTS:
+for key, ent, y, force, actions in HEARTS_RUN:
     w(f"# ---- {key}")
     stage()
     w(f"cmd summon {ent} 0 {y} 0 {{PersistenceRequired:1b,Rotation:[0f,0f]}}")
