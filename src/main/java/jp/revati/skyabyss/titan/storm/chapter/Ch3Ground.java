@@ -47,7 +47,7 @@ import net.neoforged.neoforge.event.tick.ServerTickEvent;
 //   ch3/lightning_pillars (語り部)  台に避雷針 4 本 (合図 ch3_pillar ×4) → 戸の奥の風の民の書 (伝承 ch3/stayer_returns)
 //   ch3/scorched_watch    (職人)    焼けた見張り塔を抜ける (伝承 ch3/scorched_watch) → 職人に頁を見せる
 //   ch3/sky_stone         (イサナ)  ダイヤ 5、またはダイヤの胸当てか剣
-//   三本そろうと合図 ch3_ready (進捗 storm_trail)。眼の間の遅れた影は MirrorLag、イサナの決意と語り部の数え歌は会話の足し書き (dialogue/ch3/*_ground.json)
+//   三本そろうと合図 ch3_ready (進捗 storm_trail)。竜骨の間の入口の遅れた影は MirrorLag、イサナの決意と語り部の数え歌は会話の足し書き (dialogue/ch3/*_ground.json)
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class Ch3Ground {
     public static final String FLAG = "ch3_wind_flag";

@@ -468,17 +468,6 @@ def shelter_c(g: Grid, rec):
     g.mark("door", -3, 0, -1)
 
 
-# ---------------------------------------------------------------- 積み石 (道しるべ。野営地から宿りへ 40 ブロックおき)
-def cairn(g: Grid, rec=None):
-    g.meta = {"rect": [-1, -1, 1, 1], "level": False}
-    g.set(0, 0, 0, "stone")
-    g.set(0, 1, 0, "cobblestone")
-    g.set(0, 2, 0, "andesite_slab[type=bottom]")
-    g.set(1, 0, 0, "cobblestone_slab[type=bottom]")
-    g.set(0, 0, 1, "mossy_cobblestone_slab[type=bottom]")
-    g.mark("top", 0, 3, 0)
-
-
 # ---------------------------------------------------------------- 巨大な足跡 v2 (長さ 50 ほど・深さ 4〜8。北向き = 指が -z。中心は土踏まず)
 # 地面の高さに沿って掘る (起伏のある所でも、足跡は地面に押し込まれた形になる)。ゲーム側 (SiteJob.applyRelief) は
 # 列ごとの「relief」(kind 0 = 掘る [深さ, 底のブロック, 雨水], 1 = 盛る [高さ, 上, 中], 2 = 物を立てる [高さ, ブロック]) を地面の高さから適用する。
@@ -1424,7 +1413,7 @@ def main():
             bp = blueprint(s, ADOPTED[s])
             (DATA / f"{s}.json").write_text(json.dumps(bp, separators=(",", ":")), encoding="utf-8")
             print("installed", s, ADOPTED[s], len(bp["blocks"]), "blocks")
-        for name, fn in (("cairn", cairn), ("slab", slab), ("footprint_end", footprint_end)):
+        for name, fn in (("slab", slab), ("footprint_end", footprint_end)):
             bp = blueprint_small(name, fn)
             (DATA / f"{name}.json").write_text(json.dumps(bp, separators=(",", ":")), encoding="utf-8")
         return

@@ -156,9 +156,8 @@ public final class EmberIds {
     public static final String SOUTH = "south";
     public static final List<String> TRIALS = List.of(WEST, EAST, SOUTH);
 
-    // ================================================================ 碑文 (9.2節。看板の文の鍵は sign.skyabyss.<ID>.1〜4、伝承は chapter1/inscription_<ID の lore_ を除いた残り>。→ B が置く、G が文)
-    public static final List<String> INSCRIPTIONS = List.of("lore_ember_mouth", "lore_ember_hub", "lore_ember_west", "lore_ember_east",
-            "lore_ember_south", "lore_ember_heart");
+    // ================================================================ 碑文 (レイドの部屋の入口の碑の 3 枚。看板の文の鍵は sign.skyabyss.<ID>.1〜4、伝承は chapter1/inscription_<ID の lore_ を除いた残り>。→ B が置く、G が文)
+    public static final List<String> INSCRIPTIONS = List.of("lore_ember_west", "lore_ember_east", "lore_ember_south");
 
     // ================================================================ 伝承の書 (9.3節。→ G。chapter1/ember は 14 の 5.2節の約束の仮の項目で、A が見つけたときに記す)
     public static final String LORE_FOUND = "chapter1/ember";

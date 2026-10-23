@@ -5,7 +5,6 @@ import java.util.List;
 import org.joml.Vector3f;
 
 import jp.revati.skyabyss.SkyAbyss;
-import jp.revati.skyabyss.opening.OpeningSites;
 import jp.revati.skyabyss.opening.site.ChapterSites;
 import jp.revati.skyabyss.quest.QuestDef;
 import jp.revati.skyabyss.quest.QuestLog;
@@ -24,13 +23,11 @@ import net.neoforged.neoforge.common.util.FakePlayer;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 
 // 初日のお使い (E3+E8) と失せ物の旅人 (E2) の下働き (17 の 1.5)。1 秒に 1 回、人ごとに。
-//   積み石の見回り: 道の積み石 (OpeningSites.cairns) と、旅の跡の積み石のそばに初めて着いたら「見て回った」印を付ける (頼みを受ける前の分も数える)。
-//                  頼みが進んでいる間、まだ送っていない印のぶんだけ合図 ch1_cairn_round を送る。頼みが済んだら送った印は忘れる (次の週にまた数える)
+//   旅の跡の見回り: 旅の跡 (序章 3・一章 2。Sites.trace) の近くに初めて着いたら「見て回った」印を付ける (頼みを受ける前の分も数える。印は Sites が付ける)。
+//                  頼みが進んでいる間、まだ送っていない印のぶんだけ合図 ch1_trace_round を送る。頼みが済んだら送った印は忘れる (次の週にまた数える)
 //   足跡のくぼみ:  失せ物の旅人の頼みの「たどる」段の間、荷車から日記の場所へ、粒だけの足跡を近くに描く (建築は触らない)
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class Errands {
-    // 積み石に「着いた」とみなす水平の距離
-    static final double CAIRN_NEAR = 4.5;
     // 足跡を描く間隔と、本人からの範囲
     static final double TRAIL_STEP = 3.0;
     static final double TRAIL_RANGE = 30.0;
@@ -55,22 +52,16 @@ public final class Errands {
         trail(player, level);
     }
 
-    // ---------------------------------------------------------------- 積み石の見回り
+    // ---------------------------------------------------------------- 旅の跡の見回り
     static void round(ServerPlayer player, ServerLevel level) {
         Ch1Data data = Ch1Data.get(level.getServer().overworld());
         Ch1Data.Player st = data.player(player.getUUID());
-        for (BlockPos cairn : OpeningSites.cairns(level.getServer())) {
-            if (Math.hypot(cairn.getX() + 0.5 - player.getX(), cairn.getZ() + 0.5 - player.getZ()) <= CAIRN_NEAR
-                    && Math.abs(cairn.getY() - player.getY()) <= 6 && st.rounds.add("c:" + cairn.getX() + "," + cairn.getZ())) {
-                data.setDirty();
-            }
-        }
         syncSignals(player, st, data);
     }
 
     // 頼みが進んでいるなら、まだ送っていない見回りの合図を送る。進んでいなければ送った印を忘れる (自己テストからも呼ぶ)
     static int syncSignals(ServerPlayer player, Ch1Data.Player st, Ch1Data data) {
-        QuestLog.Entry entry = QuestLog.of(player).entry(Ch1.Q_CAIRNS);
+        QuestLog.Entry entry = QuestLog.of(player).entry(Ch1.Q_ROUNDS);
         if (entry == null || entry.done) {
             if (!st.signalled.isEmpty()) {
                 st.signalled.clear();
@@ -80,7 +71,7 @@ public final class Errands {
         }
         int sent = 0;
         for (String key : List.copyOf(st.rounds)) {
-            if (st.signalled.add(key)) {
+            if (key.startsWith("s:") && st.signalled.add(key)) {
                 data.setDirty();
                 Quests.signal(player, Ch1.SIGNAL_ROUND);
                 sent++;

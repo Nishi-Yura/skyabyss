@@ -201,7 +201,7 @@ public final class Ch1SelfTest {
         }
         int questXp = 0;
         int prologueQuestXp = 0;
-        for (String q : List.of(Ch1.Q_CAIRNS, Ch1.Q_FIREWOOD, Ch1.Q_TRAVELLER)) {
+        for (String q : List.of(Ch1.Q_ROUNDS, Ch1.Q_FIREWOOD, Ch1.Q_TRAVELLER)) {
             QuestDef def = QuestManager.quest(q);
             if (def == null) {
                 continue;
@@ -219,7 +219,7 @@ public final class Ch1SelfTest {
     }
 
     private static void quests(MinecraftServer server) {
-        for (String id : List.of(Ch1.Q_CAIRNS, Ch1.Q_FIREWOOD, Ch1.Q_TRAVELLER)) {
+        for (String id : List.of(Ch1.Q_ROUNDS, Ch1.Q_FIREWOOD, Ch1.Q_TRAVELLER)) {
             QuestDef def = QuestManager.quest(id);
             check(def != null, "quest " + id + " is missing");
             if (def == null) {
@@ -239,16 +239,16 @@ public final class Ch1SelfTest {
                 }
             }
         }
-        QuestDef cairns = QuestManager.quest(Ch1.Q_CAIRNS);
+        QuestDef traces = QuestManager.quest(Ch1.Q_ROUNDS);
         QuestDef wood = QuestManager.quest(Ch1.Q_FIREWOOD);
-        if (cairns != null && wood != null) {
-            check(cairns.board() && wood.board() && cairns.repeats() && wood.repeats(), "the day-1 errands belong on the board as repeating errands");
-            check(cairns.chapter().equals("prologue") && wood.chapter().equals("prologue"), "day-1 errands belong to the prologue");
+        if (traces != null && wood != null) {
+            check(traces.board() && wood.board() && traces.repeats() && wood.repeats(), "the day-1 errands belong on the board as repeating errands");
+            check(traces.chapter().equals("prologue") && wood.chapter().equals("prologue"), "day-1 errands belong to the prologue");
             // 日 1 から板に 2 本ある (週替わりの欄は抽選に関わらず常に並ぶ)
             List<QuestDef> today = Board.todays(server);
-            check(today.contains(cairns) && today.contains(wood), "both day-1 errands should be on the board today");
+            check(today.contains(traces) && today.contains(wood), "both day-1 errands should be on the board today");
             FakePlayer p = fake(server, "board");
-            check(Board.canAccept(p, cairns) && Board.canAccept(p, wood), "a new player (stage 0) should be able to take both errands");
+            check(Board.canAccept(p, traces) && Board.canAccept(p, wood), "a new player (stage 0) should be able to take both errands");
         }
         QuestDef lost = QuestManager.quest(Ch1.Q_TRAVELLER);
         if (lost != null) {
@@ -315,7 +315,7 @@ public final class Ch1SelfTest {
                 check(bp.marks.containsKey("chest"), name + ": no chest mark");
             }
             if (Sites.isTrace(name)) {
-                check(bp.marks.containsKey("cairn"), name + ": no cairn mark (the rounds look for it)");
+                check(!bp.marks.containsKey("cairn"), name + ": a trace should not have a cairn any more");
             }
         }
         check(ChapterSites.elements(Chapters.PROLOGUE).stream().map(ChapterSites.Element::id).sorted().toList().equals(Sites.PROLOGUE.stream().sorted().toList()),
@@ -407,16 +407,17 @@ public final class Ch1SelfTest {
         st.rounds.clear();
         st.signalled.clear();
         // 頼みを受ける前に見て回った分も、受けたあとの最初の見回りで数える
-        st.rounds.add("c:10,10");
+        st.rounds.add("c:10,10"); // 古いセーブの積み石の印は数えない
         st.rounds.add("s:ch1_trace_camp#0");
+        st.rounds.add("s:ch1_trace_cart#0");
         check(Errands.syncSignals(p, st, data) == 0, "no signal should be sent while the errand is not taken");
-        check(Quests.start(p, Ch1.Q_CAIRNS), "could not take the cairn rounds");
+        check(Quests.start(p, Ch1.Q_ROUNDS), "could not take the trace rounds");
         check(Errands.syncSignals(p, st, data) == 2, "the two visits made before should count");
-        QuestLog.Entry e = QuestLog.of(p).entry(Ch1.Q_CAIRNS);
-        check(e != null && e.done, "the cairn rounds should be done after two visits");
-        check(Lore.state(p).has(Ch1.ROUNDS), "finishing the rounds should write the cairn_rounds page");
+        QuestLog.Entry e = QuestLog.of(p).entry(Ch1.Q_ROUNDS);
+        check(e != null && e.done, "the trace rounds should be done after two visits");
+        check(Lore.state(p).has(Ch1.TRACE_ROUNDS), "finishing the rounds should write the trace_rounds page");
         check(Errands.syncSignals(p, st, data) == 0 && st.signalled.isEmpty(), "after the errand is done the sent marks are forgotten");
-        check(!Quests.start(p, Ch1.Q_CAIRNS), "a weekly errand must not be taken twice in the same week");
+        check(!Quests.start(p, Ch1.Q_ROUNDS), "a weekly errand must not be taken twice in the same week");
         // 薪: 原木 8 本を板で納める
         check(Quests.start(p, Ch1.Q_FIREWOOD), "could not take the firewood errand");
         p.getInventory().add(new ItemStack(Items.OAK_LOG, 8));
@@ -709,7 +710,7 @@ public final class Ch1SelfTest {
             }
             check(st.songDone, "tapping the five placed stones in order should finish the song");
             Tasks.flush();
-            // 見回りの目印: 旅の跡の積み石は、積み石の見回りの数えに入る
+            // 旅の跡の頁は 5 枚
             check(Ch1.TRACE_LORE.size() == 5, "five trace pages");
             st.songDone = false;
             st.song = 0;
@@ -759,7 +760,7 @@ public final class Ch1SelfTest {
         return null;
     }
 
-    // 部品の積み石 (丸石と苔むした丸石の柱) の高さ: 近くの柱の、丸石の段数の最大
+    // 歌石の積み石 (丸石と苔むした丸石の柱) の高さ: 近くの柱の、丸石の段数の最大
     private static int cairnHeight(ServerLevel level, BlockPos pos) {
         int best = 0;
         for (BlockPos p : BlockPos.betweenClosed(pos.offset(-5, -2, -5), pos.offset(5, 8, 5))) {

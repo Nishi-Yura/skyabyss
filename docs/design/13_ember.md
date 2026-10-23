@@ -829,14 +829,11 @@
 
 | 場所 | ID | 碑文（4 行） |
 |---|---|---|
-| 到着（口の奥） | `lore_ember_mouth` | 火に呑まれよ / 呑まれて 歩け / 口の奥に / 我らの炉がある |
 | ER1 の入口の間（西の壁） | `lore_ember_west` | 灰をまけば / 血は冷える / 冷えた血は / いずれ 崩れる |
 | ER2 の入口の間（東の壁） | `lore_ember_east` | 鍵は 一つだった / 四つに割り / 四つの背に / 預けた |
 | ER3 の入口の間（南の壁） | `lore_ember_south` | 火が細れば / 巨神は眠る / 眠るたびに / 下へ 沈む |
 | ER4〜ER6 の入口の間 | `lore_raid_ember_chain` / `_valve` / `_pupil` | 文は `skyabyss_trial` の lang（19.3b の内容） |
-| 熾の底の前室 | `lore_ember_heart` | 四つの拍は / 一つから 分けた / 分けた者は / まだ 下にいる |
 
-- 「分かたれた鼓動」は前室の碑文で、これまでで一番はっきり書く。ただし「なぜ分けたか」「下にいる者は何か」は書かない（五章で明かす）。岩鯨の「地の底から預かった」、潮殻の「誰が 押しているのか」を受けて、四体目で「分けた者がいる。まだ下にいる」まで進める。
 - ER2 の碑文（鍵は一つだった）は、巨神編の締め（12.4）で欠片が一つにつながることへの伏線。ER3 の碑文（眠るたびに下へ沈む）は、巨神が地の中を泳ぐ理由のほのめかし。
 - 看板や碑文で「鍵」は天の鍵の意味だけに使う。
 
@@ -901,8 +898,7 @@
 
 | 使う場所 | 鍵（`EmberLore` の名前） | 文（日本語） |
 |---|---|---|
-| 碑（看板） | 碑文 `sign.skyabyss.lore_ember_{mouth,west,east,south,heart}.1〜4`、`sign.skyabyss.lore_raid_ember_{chain,valve,pupil}.1〜4`（`EmberLore.sign(EmberIds.INSCRIPTIONS の名前)`） | 12.2 のとおり |
-| 囁き（`EmberWhispers`） | `WHISPERS`: tongue（語り）、heart（語り） | 舌の上に立っている。奥から、鞴のような息がゆっくり行き来している／格子の下から、熾の光と、少し遅れた拍が上がってくる |
+| 碑（看板） | 碑文 `sign.skyabyss.lore_ember_{west,east,south}.1〜4`、`sign.skyabyss.lore_raid_ember_{chain,valve,pupil}.1〜4`（`EmberLore.sign(EmberIds.INSCRIPTIONS の名前)`） | 12.2 のとおり |
 | 地上 | `SURFACE_SLEEP_NEAR`・`SURFACE_BREATH_HINT`・`SURFACE_SPAT_OUT`・`SURFACE_STONE_GIVEN` | 土の匂いが熱い。どこかで、山が寝息をたてている……／息を吸っているあいだに、口へ／巨神の息が、あなたを吐き出した。まだ早い／懐に、いつのまにか温かい石があった |
 | 温石 | `SURFACE_WARM` + right・left・ahead・behind、`SURFACE_DIST` + far・near・close、`SURFACE_STATE` + sleeping・burrowing、`SURFACE_ASKED`・`SURFACE_ASKED_OTHER`（%s）・`SURFACE_ASK_TAKEN` | 右手が温かい／左手が温かい／胸のあたりが温かい／背中が温かい、遠い／近い／すぐそこ、眠っている／地の中、石を握った。今夜は、このそばで眠るだろう／今夜は、%sの近くで眠る／石は温まらない。今夜は、もう誰かが呼んでいる |
 | 静かな周 | `BACK_TRIAL_QUIET`（%s に周の部屋の名前） | %sは、今宵は静かだ（敵が少ない） |
@@ -912,14 +908,14 @@
 | 伝承 | `chapter1/ember_titan` は近づく・背中に入ると自動、`ash_smith`・`ember_stilled` は倒れると自動（`kill`）。どれも `manual` でも記せる | 12.3 |
 
 - 書き方: 雷翼の文（`tools/gen/story/gen_storm_lore.py`）と言い回しをかぶらせない。看板の 1 行は 8 字まで。声に出して読み、主語の抜けと語尾のそろいを確かめる。
-- 言いすぎない: 正体の名（見る者・留まる者・深淵）は出さない（自己テストで見る）。「なぜ分けたか」「下にいる者は何か」は書かない。ほのめかしの濃さは、前室の碑文（分けた者は まだ 下にいる）・ER3 の碑文（眠るたびに下へ沈む）・鍛えの帳の最後の行（下へ）・前室の囁き（少し遅れた拍）・夜明けの寝返り、の順に積む。
+- 言いすぎない: 正体の名（見る者・留まる者・深淵）は出さない（自己テストで見る）。「なぜ分けたか」「下にいる者は何か」は書かない。ほのめかしの濃さは、ER3 の碑文（眠るたびに下へ沈む）・鍛えの帳の最後の行（下へ）・夜明けの寝返り、の順に積む。
 
 ### 12.6 実装（`titan/ember/lore`）
 
 | 作ったもの | ファイル |
 |---|---|
 | 伝承の項目（地を泳ぐもの、灰の民の炉、鍛えの帳、灰の鍛え手、消えた火、碑文） | `data/skyabyss/lore/entry/chapter1/{ember_titan,ember_ruins,forge_ledger,ash_smith,ember_stilled,inscription_ember_*}.json`。並びは 177〜179（story の「余燼の巨神」176 と「天の鍵」180 のあいだ） |
-| 文（伝承・碑文・入口・囁き・語り・品） | `assets/skyabyss_ember/lang/{ja_jp,en_us}.json` の「__ember.G」の下。生成元 `tools/gen/story/gen_ember_lore.py` |
+| 文（伝承・碑文・入口・語り・品） | `assets/skyabyss_ember/lang/{ja_jp,en_us}.json` の「__ember.G」の下。生成元 `tools/gen/story/gen_ember_lore.py` |
 | 鍵の約束 | `EmberLore`（12.5） |
 | 夜明けの地鳴り（12.4） | `EmberFinale`・`client/EmberFinaleClient`。余燼の心臓を自分で止めた人が、地上へ出て 10 秒たったあとの最初の夜明け（日の時刻 22800〜1200）に一度だけ: 遠い地鳴り（地上の `ember_world_turn`、まだなければバニラの低い鼓動）と 3 秒のごく小さな揺れ（画面の揺れの設定を切っていれば出さない）、チャットに語りの色で一行。記録は持ち主の永続データ（死んでも消えない）。パケットの版 `ember-lore-1` |
 | 天の鍵の締め | 新しいクラスは作らない。`SignFit` に `skyabyss_ember` の lang を読ませ、`LoreSelfTest` に余燼の碑文・頁・待っている ID（`ember_titan`・`ash_smith`・`ember_heart`）と文の名前空間を足す |
@@ -949,7 +945,6 @@
 | 心臓の間 | `GroupBossRoom`・`GroupBossRooms` | 鍛え手の間と熾の底の両方（グループごとの戦い。部屋は `RoomLocks` で一度に一グループ） |
 | 段階のバー | `PhasedBossBar` | 枠の絵は `tools/gen/world/gen_ember_heart_bar.py` |
 | 伝承・碑文 | `Lore*`、`SignFit` | `skyabyss_ember` の lang を `SignFit` に読ませる |
-| 囁き | `TideWhispers`（岩鯨は `BackWhispers`） | `EmberWhispers` |
 | 乗り込みの判定と画面の沈み | `TideGateEntity` の作り、`TideNetwork.Plunge` | `EmberMouthEntity`、沈みの色を橙に（`EmberSurfaceNetwork`） |
 | 巨神の形の体 | `tools/gen/mobs/gen_tide_back_turtle.py` | `tools/gen/items/gen_ember_back_body.py` |
 | 起動時に建てる | `TideTravel.onServerStarted`、`BackBuildJobs` | 余燼の体も同じ時に建てる（32 の 5.3） |
@@ -995,7 +990,7 @@
 | 素材 | `ember_shard`・`ember_core`・`spark_dust`・`cinder_husk`・`ember_horn`（熾火の角杯） |
 | 図鑑の 10 品 | `ember_helmet`・`ember_chestplate`・`ember_leggings`・`ember_boots`・`ember_war_axe`・`ember_mantle`（外套）・`kindling_charm`（護符）・`smith_hammer`・`thrall_poker`・`ember_lantern`（灯）。初回の選択は後ろの 3 つ |
 | 休み場 | 部屋ごとの入口の休み場（`RaidKit`）、中ボスの間の休み場、`heart` |
-| 碑文 | `lore_ember_mouth`・`_west`・`_east`・`_south`・`_heart`、`lore_raid_ember_chain`・`_valve`・`_pupil` |
+| 碑文 | `lore_ember_west`・`_east`・`_south`、`lore_raid_ember_chain`・`_valve`・`_pupil` |
 | 伝承 | 12.3 |
 | 音 | 熱 `ember_heat_warn`・`ember_scorch`。地上 `ember_rumble`・`ember_breath_in`・`ember_breath_out`・`ember_swallow`・`ember_wall_scrape`・`ember_far_beat`・`ember_world_turn`。体 `ember_back_ambient`・`ember_stone_ring`・`ember_forge_dim`。試練 `ember_ash_scatter`・`ember_crust_{crack,sink}`・`ember_engulf`・`ember_bellows`・`ember_anvil_{strike,ting}`・`ember_bloom_crack`・`ember_quench`・`ember_door_kindle`・`ember_vent_{hiss,burst}`。敵 `ash_thrall_*`・`ember_moth_*`・`cinder_roller_*`。鍛え手 `ash_smith_*`。心臓 `ember_heart_*` |
 
@@ -1011,7 +1006,7 @@
 |---|---|
 | 骨組み | `EmberIds`、`EmberSetup`、`EmberNetwork`・`client/EmberHeatClient`、`back/EmberHeat`、`EmberSkeletonSelfTest`、共通化 3 つ（13.2） |
 | 地上（A） | 2.9 |
-| 体（B） | `back/EmberBackLayout`、`EmberBodyBuilder`、`EmberBackState`、`EmberWhispers`、`client/HeatHud`、`EmberBackSelfTest`、`tools/gen/items/gen_ember_back_body.py` |
+| 体（B） | `back/EmberBackLayout`、`EmberBodyBuilder`、`EmberBackState`、`client/HeatHud`、`EmberBackSelfTest`、`tools/gen/items/gen_ember_back_body.py` |
 | 試練（ER1〜ER6） | 19 章 |
 | 敵（D） | 6.5 |
 | 鍛え手（E） | 7.4 |
@@ -1055,7 +1050,7 @@
 | `ember mobs` | 登録と強さ、スポーンエッグと ID、炎の傷を受けない、試練の個体は保存しない、経験値（26/4/16、Lv30）、落とす物の表（2 万回の割合が表の ±4σ）、03 の目安の回数、殻・燃え上がり・振り下ろし・蛾・燠虫の動き |
 | `ash smith` | 素材・lang（日英 19 鍵）・強さ・技の時間と傷（偽のプレイヤーに与えた傷を `AshSmith.testLog` で数える）・部屋・戦いの始まり・報酬の表（4,000 回）・撃破・放棄、誰もいない部屋では戦いが始まらない、03 の目安（7.6） |
 | `ember heart` | 絵・音・文、数（傷・熱・半径・時間・十の技・技の間・段の境・傷の倍率・凍えの数）、熾の底（立てる所 803 か所、入口の橋の奥から台と六つの区画のすべてへ歩ける）、区画（予告 2.0 秒のあいだは沈まない・同時に 2 つまで・8 秒で戻る）、冷え、戦い、十の技（すべて最後まで回る）、凍え（熱 0 で凍え、10 を超えると解ける）、報酬（心核・欠片・図鑑の割合、ハード天井、欠片は一人一回）、天の鍵（三つでは組まない → 欠片がちょうど一つ渡る → 四つで `SkyKey.ready` → `assemble` で鍵一つ・欠片 0）、撃破の記録と `reawaken` |
-| `ember lore` | 伝承の項目と日英の文、碑文が看板を写す、頁から鍛えの帳、言いすぎない、看板 9 枚のはみ出し 0（いちばん長い行 87 / 90 px）、囁き 8 と語りの文 37 と品の名前の日英・%s の数、天の鍵の継ぎ目（三つでは組まない・余燼を止める前の四つ目では組まない・余燼の四つ目で一度だけ組む・終わりの札の文がある）、夜明け（余燼を止めた人だけ・夜明けだけ・地上へ出て 10 秒後・一度だけ） |
+| `ember lore` | 伝承の項目と日英の文、碑文が看板を写す、頁から鍛えの帳、言いすぎない、看板 6 枚のはみ出し 0、語りの文 37 と品の名前の日英・%s の数、天の鍵の継ぎ目（三つでは組まない・余燼を止める前の四つ目では組まない・余燼の四つ目で一度だけ組む・終わりの札の文がある）、夜明け（余燼を止めた人だけ・夜明けだけ・地上へ出て 10 秒後・一度だけ） |
 | `ember gear` | 品・熱のたまり方・大鎚の亀裂・護符・`GearCurve` |
 
 - 偽のプレイヤー（`FakePlayer`）は接続が無く、傷を受けない（`isInvulnerableTo` が真で、湧いた直後の無敵 60 tick も減らない）。傷を受けるサブクラス（反射）を使う。`tickCount` は本来レベルが進めるので、手で tick を回すテストでは足す。

@@ -121,7 +121,7 @@ public final class GuideSelfTest {
             // 一章は支度の段 (ch1/trail_*)。二〜四章は既定の形 (ch<n>/prep_*)。一章の ch1/prep_* はもう 3 本に数えない
             check(f, PrepQuests.chapterOf("ch1/trail_iron") == 1 && PrepQuests.chapterOf("ch1/trail_shield") == 1 && PrepQuests.chapterOf("ch1/prep_gear") == 0
                     && PrepQuests.chapterOf("ch2/prep_gear") == 2 && PrepQuests.chapterOf("ch4/prep_pulse") == 4 && PrepQuests.chapterOf("ch5/prep_gear") == 0
-                    && PrepQuests.chapterOf("ch1/day1_cairns") == 0 && PrepQuests.chapterOf("main_song") == 0, "chapterOf does not read ch1/trail_* and ch2〜ch4/prep_*");
+                    && PrepQuests.chapterOf("ch1/day1_traces") == 0 && PrepQuests.chapterOf("main_song") == 0, "chapterOf does not read ch1/trail_* and ch2〜ch4/prep_*");
             check(f, PrepQuests.kindOf("ch2/prep_blade").equals("blade") && PrepQuests.kindOf("ch1/trail_shield").equals("shield") && PrepQuests.readySignal(3).equals("ch3_ready")
                     && PrepQuests.id(2, "pulse").equals("ch2/prep_pulse") && PrepQuests.ids(1).equals(List.of("ch1/trail_iron", "ch1/trail_blade", "ch1/trail_shield"))
                     && PrepQuests.isTrail(1) && !PrepQuests.isTrail(2), "kind / signal / id helpers are wrong");

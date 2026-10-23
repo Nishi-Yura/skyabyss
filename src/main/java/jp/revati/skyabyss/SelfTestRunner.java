@@ -281,7 +281,7 @@ public final class SelfTestRunner {
         steps.add(Step.until("storm chapter (wait)", jp.revati.skyabyss.titan.storm.chapter.StormChapterSelfTest::ready));
         steps.add(Step.once("storm chapter", jp.revati.skyabyss.titan.storm.chapter.StormChapterSelfTest::runSelfTest));
         steps.addAll(jp.revati.skyabyss.titan.storm.chapter.StormChapterSelfTest.siteSteps());
-        // 三章の地上 (避雷の柱・焼けた見張り塔・空の石・風の道の旗・雷拾いの原・風読みの崖・眼の間の遅れた影)。docs/design/34 の C3。SKYABYSS_SELFTEST_ONLY="ch3 ground"
+        // 三章の地上 (避雷の柱・焼けた見張り塔・空の石・風の道の旗・雷拾いの原・風読みの崖・竜骨の間の入口の遅れた影)。docs/design/34 の C3。SKYABYSS_SELFTEST_ONLY="ch3 ground"
         steps.addAll(jp.revati.skyabyss.titan.storm.chapter.Ch3GroundSelfTest.steps());
         // 三章の地上の敵 (帯電毛玉・峰の雛・雷拾い・焼けた羽守。P16。21 の 5.1)。SKYABYSS_SELFTEST_ONLY="ch3 mobs"
         steps.addAll(jp.revati.skyabyss.titan.storm.chapter.mob.Ch3MobsSelfTest.steps());

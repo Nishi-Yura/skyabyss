@@ -150,19 +150,11 @@ public final class StormBackLayout {
     // 東の石は洞の頂の台の上。雷獣を倒すと、洞の真ん中の昇り風が立って台へ届く
     public static final BlockPos EAST_STONE = new BlockPos(RAIJU_NEST.getX() + 4, BONE_FLOOR + 14, WZ);
 
-    // ---------------------------------------------------------------- 前の試練 嵐の冠・眼の間
+    // ---------------------------------------------------------------- 前の試練 嵐の冠
     // 首の回廊 (広間の上の回廊 → 冠の間)。幅 7
     public static final Area NECK = new Area(-3, 3, -76, -36, UPPER_GALLERY_Y, 7);
     // 冠の間 (嵐の冠。7 本の銅の避雷針が頭の上に立つ。休み場 f0・舵・戻しの鏡)
     public static final Area F0 = new Area(-10, 10, -97, -77, UPPER_GALLERY_Y, 9);
-    // 眼の間 (鏡の台 5x5、間隔 4)
-    public static final Area EYE_HALL = new Area(-11, 11, -137, -115, 148, 10);
-    public static final BlockPos EYE_HALL_CENTER = new BlockPos(0, 149, -126);
-    // 鏡の台の格子。光は床から 2 の高さ
-    public static final int GRID_X0 = -8;
-    public static final int GRID_Z0 = -134;
-    public static final int GRID_STEP = 4;
-    public static final int BEAM_Y = 150;
     public static final BlockPos FRONT_STONE = new BlockPos(0, 149, -144);
 
     // 竜骨の間 (心臓の間) と前室 (休み場 heart) は体の外の封じた部屋 (区画 0 番の枠。trial/raid/InstanceArenas) へ移した (2026-10-23)。
@@ -215,22 +207,7 @@ public final class StormBackLayout {
         REST_ORDER = List.copyOf(order);
     }
 
-    // ---------------------------------------------------------------- 看板 (碑文 6 枚と入口の一言 3 枚と、見晴らしの碑 2 枚)
-    public static final List<Inscription> LORE_SIGNS = concat(List.of(
-            new Inscription("sign.skyabyss.lore_storm_tail", new BlockPos(-5, 147, 30), Direction.SOUTH),
-            new Inscription("sign.skyabyss.lore_storm_hub", new BlockPos(-6, 136, 10), Direction.NORTH),
-            new Inscription("sign.skyabyss.lore_storm_west", new BlockPos(-60, BONE_FLOOR + 2, BONE_Z2), Direction.NORTH),
-            new Inscription("sign.skyabyss.lore_storm_east", new BlockPos(60, BONE_FLOOR + 2, BONE_Z2), Direction.NORTH),
-            new Inscription("sign.skyabyss.lore_storm_eye", new BlockPos(6, 150, -114), Direction.NORTH),
-            new Inscription("sign.skyabyss.lore_storm_heart", new BlockPos(-3 + HEART_DX, KEEL_ANTE.floor() + 2, -48 + HEART_DZ), Direction.SOUTH),
-            new Inscription("sign.skyabyss.lore_storm_vane_w", new BlockPos(-19, 148, 104), Direction.SOUTH),
-            new Inscription("sign.skyabyss.lore_storm_vane_e", new BlockPos(19, 148, 104), Direction.SOUTH),
-            new Inscription("sign.skyabyss.lore_storm_crown", new BlockPos(6, UPPER_GALLERY_Y + 2, -98), Direction.SOUTH),
-            new Inscription("sign.skyabyss.lore_storm_vault_w1", new BlockPos(-98, BONE_FLOOR + 2, -47), Direction.SOUTH),
-            new Inscription("sign.skyabyss.lore_storm_vault_w2", new BlockPos(-90, BONE_FLOOR + 2, -47), Direction.SOUTH),
-            new Inscription("sign.skyabyss.lore_storm_vault_e1", new BlockPos(182, BONE_FLOOR + 2, -47), Direction.SOUTH),
-            new Inscription("sign.skyabyss.lore_storm_vault_e2", new BlockPos(187, BONE_FLOOR + 2, -47), Direction.SOUTH)),
-            List.of());
+    // ---------------------------------------------------------------- 看板 (試練の入口の一言 3 枚)
     public static final List<Inscription> ENTRANCE_SIGNS = List.of(
             new Inscription("sign.skyabyss.storm_west", new BlockPos(-23, 137, WZ - 5), Direction.EAST),
             new Inscription("sign.skyabyss.storm_east", new BlockPos(23, 137, WZ - 5), Direction.WEST),
@@ -296,11 +273,6 @@ public final class StormBackLayout {
 
     public static boolean inTrial(Vec3 p) {
         return inWest(p) || inEast(p) || inFront(p) || pastKeel(p);
-    }
-
-    // 眼の間の格子の台の座標 (列 c・行 r)
-    public static BlockPos gridCell(int c, int r) {
-        return new BlockPos(GRID_X0 + GRID_STEP * c, BEAM_Y, GRID_Z0 + GRID_STEP * r);
     }
 
 }
