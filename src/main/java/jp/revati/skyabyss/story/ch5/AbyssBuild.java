@@ -24,7 +24,7 @@ import net.neoforged.neoforge.event.tick.ServerTickEvent;
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class AbyssBuild {
     public static final String BLUEPRINT = "abyss_layers";
-    public static final int VERSION = 10;
+    public static final int VERSION = 11;
     static final long BUDGET_MS = 20;
 
     @Nullable
@@ -96,6 +96,10 @@ public final class AbyssBuild {
 
     // 野営の道の口の碑に、道の名を刻む (印 routesign_<層>_<道>。文は lang の sign.skyabyss.abyss_route.<層>_<道>)
     private static void writeRouteSigns(ServerLevel level) {
+        BlockPos home = mark("returnsign");
+        if (home != null) {
+            jp.revati.skyabyss.tablet.Tablets.write(level, home, "sign.skyabyss.abyss_return");
+        }
         for (String layer : new String[] {"bone", "salt", "storm", "ash"}) {
             for (int i = 1; i <= 3; i++) {
                 BlockPos at = mark("routesign_" + layer + "_" + i);

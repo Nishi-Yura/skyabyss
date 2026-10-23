@@ -62,17 +62,32 @@ public final class MobTuning {
 
     @EventBusSubscriber(modid = SkyAbyss.MODID)
     static final class Events {
+        // 湧いた tick には体力を決めていない敵がある (深みの王・層の主は湧いたあとで体力を入れる) ので、一 tick 待ってから見分ける
+        private static final java.util.List<LivingEntity> PENDING = new java.util.ArrayList<>();
+
         @SubscribeEvent
         static void onJoin(EntityJoinLevelEvent event) {
-            if (event.getLevel().isClientSide() || !(event.getEntity() instanceof LivingEntity e) || !applies(e)) {
+            if (!event.getLevel().isClientSide() && event.getEntity() instanceof LivingEntity e && e instanceof Enemy) {
+                PENDING.add(e);
+            }
+        }
+
+        @SubscribeEvent
+        static void onTick(net.neoforged.neoforge.event.tick.ServerTickEvent.Post event) {
+            if (PENDING.isEmpty()) {
                 return;
             }
-            AttributeInstance hp = e.getAttribute(Attributes.MAX_HEALTH);
-            boolean fresh = !hp.hasModifier(HEALTH_ID);
-            hp.addOrUpdateTransientModifier(new AttributeModifier(HEALTH_ID, HEALTH, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
-            if (fresh && e.getHealth() > e.getMaxHealth()) {
-                e.setHealth(e.getMaxHealth());
+            for (LivingEntity e : java.util.List.copyOf(PENDING)) {
+                if (e.isAlive() && applies(e)) {
+                    AttributeInstance hp = e.getAttribute(Attributes.MAX_HEALTH);
+                    boolean fresh = !hp.hasModifier(HEALTH_ID);
+                    hp.addOrUpdateTransientModifier(new AttributeModifier(HEALTH_ID, HEALTH, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
+                    if (fresh && e.getHealth() > e.getMaxHealth()) {
+                        e.setHealth(e.getMaxHealth());
+                    }
+                }
             }
+            PENDING.clear();
         }
 
         // 攻撃は傷の側で下げる (敵ごとに技の傷を数で持っているものが多く、攻撃力の属性だけでは効かないため)

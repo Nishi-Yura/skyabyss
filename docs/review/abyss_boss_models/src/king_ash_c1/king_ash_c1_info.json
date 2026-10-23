@@ -1,0 +1,27 @@
+{
+ "name": "king_ash_c1",
+ "tris": 2856,
+ "atlas": [
+  512,
+  512
+ ],
+ "open": 0,
+ "floating": [],
+ "bones": {
+  "root": 0,
+  "body": 186,
+  "robe_f": 76,
+  "robe_b": 76,
+  "chest": 500,
+  "head": 240,
+  "crown": 1050,
+  "arm_l": 44,
+  "fore_l": 318,
+  "arm_r": 44,
+  "fore_r": 178,
+  "leg_l": 72,
+  "leg_r": 72
+ },
+ "glow": 14195,
+ "height": 57.3
+}

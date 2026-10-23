@@ -105,6 +105,8 @@ public final class YoungReach {
         // 転生の絆 (docs/design/31 の B14): 持ち主の運ぶ速さの倍率 (所要時間の見積りに入れる)
         double bond = jp.revati.skyabyss.rebirth.Rebirth.youngSpeed(player.server, player.getUUID());
         list.add(build(level, kind, origin, "spawn", "", "", level.getSharedSpawnPos(), 0, true, bond));
+        // 町 (都)。建っていれば、巨神の子は町にも運ぶ
+        jp.revati.skyabyss.opening.OpeningSites.shelter(player.server).ifPresent(town -> list.add(build(level, kind, origin, "town", "", "", town, 4, true, bond)));
         TravelWorldData world = TravelWorldData.get(player.server);
         TravelState state = Voyages.state(player);
         for (BlockPos pos : state.waymarks) {

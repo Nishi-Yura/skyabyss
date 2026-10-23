@@ -96,7 +96,7 @@ public final class ObjectiveStrip {
             return true;
         }
         return OpeningClient.objective() != null || jp.revati.skyabyss.story.ch5.client.AbyssSectionClient.objective() != null
-                || current(mc, QuestLog.of(mc.player)) != null;
+                || jp.revati.skyabyss.story.ch5.client.AbyssSectionClient.guide() != null || current(mc, QuestLog.of(mc.player)) != null;
     }
 
     // 帯がいまこのクエストを出しているか (出していなければ、追跡の札の側が出す。序盤の目的を帯が出しているときなど)
@@ -129,6 +129,11 @@ public final class ObjectiveStrip {
         String fight = jp.revati.skyabyss.story.ch5.client.AbyssSectionClient.objective();
         if (fight != null) {
             return new Cur(fight, Resolved.NONE);
+        }
+        // 深淵の中はいつも道案内 (次の印・門・主・次の野営。story/ch5/layers/AbyssGuide)。矢印と距離も
+        String abyssGuide = jp.revati.skyabyss.story.ch5.client.AbyssSectionClient.guide();
+        if (abyssGuide != null) {
+            return new Cur(abyssGuide, new Resolved(jp.revati.skyabyss.story.ch5.client.AbyssSectionClient.target(), false));
         }
         OpeningClient.Objective opening = OpeningClient.objective();
         if (opening != null) {
@@ -263,6 +268,9 @@ public final class ObjectiveStrip {
         OpeningClient.Objective opening = OpeningClient.objective();
         if (opening != null) {
             return new Resolved(opening.target(), false);
+        }
+        if (jp.revati.skyabyss.story.ch5.client.AbyssSectionClient.guide() != null) {
+            return new Resolved(jp.revati.skyabyss.story.ch5.client.AbyssSectionClient.target(), false);
         }
         QuestLog log = QuestLog.of(mc.player);
         QuestDef def = current(mc, log);

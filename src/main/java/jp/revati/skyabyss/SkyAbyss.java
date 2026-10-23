@@ -153,6 +153,8 @@ public class SkyAbyss {
     }
 
     private void commonSetup(FMLCommonSetupEvent event) {
+        // 層の主の戦いの合図を見た目 (BossLook) へつなぐ
+        jp.revati.skyabyss.abyss.boss.BossLookHook.install();
         LOGGER.info("[{}] 天と淵のあいだ を読み込みました", MODID);
     }
 }

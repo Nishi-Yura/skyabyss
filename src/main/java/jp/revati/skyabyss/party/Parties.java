@@ -74,8 +74,12 @@ public final class Parties {
         return PartyData.get(player.server).of(player.getUUID());
     }
 
-    public static List<ServerPlayer> onlineMembers(MinecraftServer server, PartyData.Party party) {
+    // パーティの今いる人 (パーティが無ければ空。2026-10-23: 一人で深淵の印を取ると落ちて、近道の格子が開かなかった)
+    public static List<ServerPlayer> onlineMembers(MinecraftServer server, @org.jetbrains.annotations.Nullable PartyData.Party party) {
         List<ServerPlayer> list = new ArrayList<>();
+        if (party == null) {
+            return list;
+        }
         for (UUID id : party.members) {
             ServerPlayer p = server.getPlayerList().getPlayer(id);
             if (p != null) {

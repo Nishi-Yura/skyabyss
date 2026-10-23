@@ -8,6 +8,8 @@ import java.util.UUID;
 
 import org.jetbrains.annotations.Nullable;
 
+import jp.revati.skyabyss.combat.Telegraph;
+import jp.revati.skyabyss.combat.TelegraphShape;
 import jp.revati.skyabyss.SkyAbyss;
 import jp.revati.skyabyss.abyss.mobs.AbyssMobSpawner;
 import jp.revati.skyabyss.notice.Notice;
@@ -33,6 +35,7 @@ import net.neoforged.neoforge.event.tick.ServerTickEvent;
 // 層の戦い (docs/design/36 の 8 章): 巣 (三つの波)・縄張り (大きい敵一体と取り巻き)・待ち伏せ・前の私の影。
 //   巣 nest_bone・nest_storm: 払っていない人が 7 以内に入ると三つの波。全部倒すと、そのとき巣の 16 以内にいた人とそのパーティに "clear:<巣>"
 //   縄張り terr_salt・terr_ash: 払っていない人が 10 以内に入ると主 (体力 3 倍・大きさ 1.5) と取り巻き。主が倒れると 24 以内の人とパーティに "clear:<縄張り>"
+//     縄張りの主はボスバー (二段。半分で二段目) と三つの予告つきの技 (叩きつけ r3.8・突進 長さ 10・足もとの吐きかけ r2.2。eliteMove)
 //   待ち伏せ ambush_bone (骨の広間)・bridge_bone_a/b (肋の橋): 人ごとに一度ずつ (5 分あけてまた)
 //   だれもいなくなって 30 秒たつと、巣と縄張りの敵は消えて元に戻る
 @EventBusSubscriber(modid = SkyAbyss.MODID)
@@ -56,6 +59,11 @@ public final class LayerFights {
         final List<UUID> mobs = new ArrayList<>();
         long emptySince = -1;
         long nextAt;
+        // 縄張りの主のボスバーと技
+        @Nullable
+        net.minecraft.server.level.ServerBossEvent bar;
+        long nextMove;
+        int moveN;
 
         Run(String name) {
             this.name = name;
@@ -204,7 +212,13 @@ public final class LayerFights {
             return;
         }
         Entity boss = run.mobs.isEmpty() ? null : level.getEntity(run.mobs.get(0));
+        if (boss instanceof LivingEntity le && le.isAlive()) {
+            eliteTick(level, run, le, inside, now);
+        }
         if (boss == null || !boss.isAlive()) {
+            if (run.bar != null) {
+                run.bar.removeAllPlayers();
+            }
             for (ServerPlayer p : inside) {
                 for (UUID who : AbyssMarks.withParty(p)) {
                     d.set(who, "clear:" + name);
@@ -216,6 +230,88 @@ public final class LayerFights {
         }
     }
 
+    // 縄張りの主: ボスバーと技 (0.5 秒ごと)
+    static void eliteTick(ServerLevel level, Run run, LivingEntity boss, List<ServerPlayer> inside, long now) {
+        if (run.bar == null) {
+            run.bar = new net.minecraft.server.level.ServerBossEvent(boss.getCustomName() != null ? boss.getCustomName() : boss.getName(),
+                    net.minecraft.world.BossEvent.BossBarColor.RED, net.minecraft.world.BossEvent.BossBarOverlay.NOTCHED_10);
+            run.nextMove = now + 40;
+        }
+        float ratio = boss.getHealth() / boss.getMaxHealth();
+        run.bar.setProgress(Math.max(0f, Math.min(1f, ratio)));
+        int phase = ratio > 0.5f ? 0 : 1;
+        jp.revati.skyabyss.story.ch5.AbyssBossBars.phase(run.bar, phase);
+        for (ServerPlayer p : inside) {
+            run.bar.addPlayer(p);
+        }
+        for (ServerPlayer p : List.copyOf(run.bar.getPlayers())) {
+            if (!inside.contains(p)) {
+                run.bar.removePlayer(p);
+            }
+        }
+        if (now < run.nextMove || inside.isEmpty()) {
+            return;
+        }
+        ServerPlayer target = LordMoves.nearest(boss, inside);
+        if (target == null || target.distanceTo(boss) > 18) {
+            return;
+        }
+        int kind = run.moveN++ % 3;
+        double y = boss.getY();
+        double bx = boss.getX(), bz = boss.getZ();
+        double ang = Math.atan2(target.getZ() - bz, target.getX() - bx);
+        float dmg = (run.name.equals("terr_ash") ? 7f : 6f) * (1f + 0.2f * phase);
+        int li = run.name.equals("terr_ash") ? 3 : 1;
+        int warn;
+        level.playSound(null, boss.blockPosition(), SoundEvents.RAVAGER_ROAR, SoundSource.HOSTILE, 0.9f, 1.3f);
+        LordMoves.element(level, li, bx, y + 1, bz, 12, 0.6);
+        Telegraph.Hit hit = (lvl, p) -> {
+            p.hurt(lvl.damageSources().mobAttack(boss), dmg);
+            if (li == 3) {
+                p.igniteForTicks(40);
+            } else {
+                p.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.MOVEMENT_SLOWDOWN, 40, 1, false, true));
+            }
+        };
+        switch (kind) {
+            case 0 -> {
+                warn = 26;
+                LordAnim.windup(boss, "attack_elite_slam", warn);
+                Telegraph.in(level, TelegraphShape.circle(bx, bz, 3.8)).floor(y).warn(warn).danger().owner(boss)
+                        .onImpact(lvl -> {
+                            LordAnim.strike(boss, "attack_elite_slam");
+                            LordMoves.element(lvl, li, bx, y + 0.3, bz, 30, 2);
+                            lvl.playSound(null, bx, y, bz, SoundEvents.GENERIC_EXPLODE.value(), SoundSource.HOSTILE, 0.7f, 1.2f);
+                        }).onHit(hit).start();
+            }
+            case 1 -> {
+                warn = 24;
+                LordAnim.windup(boss, "attack_elite_charge", warn);
+                Telegraph.in(level, TelegraphShape.line(bx, bz, ang, 10, 1.4)).floor(y).warn(warn).danger().owner(boss)
+                        .onImpact(lvl -> {
+                            LordAnim.strike(boss, "attack_elite_charge");
+                            for (double dd = 1; dd <= 10; dd += 1.5) {
+                                LordMoves.element(lvl, li, bx + Math.cos(ang) * dd, y + 0.4, bz + Math.sin(ang) * dd, 3, 0.3);
+                            }
+                            boss.teleportTo(bx + Math.cos(ang) * 8, y, bz + Math.sin(ang) * 8);
+                        }).onHit(hit).start();
+            }
+            default -> {
+                warn = 28;
+                LordAnim.windup(boss, "attack_elite_spit", warn);
+                for (ServerPlayer p : inside) {
+                    double px = p.getX(), pz = p.getZ();
+                    Telegraph.in(level, TelegraphShape.circle(px, pz, 2.2)).floor(p.getY()).warn(warn).danger().owner(boss)
+                            .onImpact(lvl -> {
+                                LordAnim.strike(boss, "attack_elite_spit");
+                                LordMoves.element(lvl, li, px, p.getY() + 0.3, pz, 16, 1);
+                            }).onHit(hit).start();
+                }
+            }
+        }
+        run.nextMove = now + warn + (phase == 0 ? 70 : 50);
+    }
+
     // 主を一体 (体力の倍・大きさ・名前)
     @Nullable
     public static LivingEntity elite(ServerLevel level, String id, BlockPos at, double hp, double scale, String nameKey) {
@@ -225,6 +321,8 @@ public final class LayerFights {
         }
         e.addTag(TAG);
         AttributeInstance h = le.getAttribute(Attributes.MAX_HEALTH);
+        // 縄張りの主は雑魚の下げ (MobTuning) を外す (ボスバーのある主)
+        jp.revati.skyabyss.combat.MobTuning.untune(le);
         if (h != null) {
             h.setBaseValue(h.getBaseValue() * hp);
             le.setHealth(le.getMaxHealth());
@@ -258,6 +356,9 @@ public final class LayerFights {
             if (e != null) {
                 e.discard();
             }
+        }
+        if (run.bar != null) {
+            run.bar.removeAllPlayers();
         }
         RUNS.remove(run.name);
         return true;

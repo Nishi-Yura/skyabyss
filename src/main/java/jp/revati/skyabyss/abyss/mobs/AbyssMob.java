@@ -105,6 +105,12 @@ public class AbyssMob extends GuardMob {
         return kind;
     }
 
+    // 白殻の主 (白い貝守の体): 殻が閉じている間は首を引っこめる (BossLook の見た目だけ)
+    @Override
+    protected boolean bossClosed() {
+        return kind != null && kind.mode == AbyssMobKind.Mode.SHELL && !entityData.get(OPEN);
+    }
+
     public int stage() {
         return entityData.get(STAGE);
     }

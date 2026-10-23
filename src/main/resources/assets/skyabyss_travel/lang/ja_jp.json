@@ -27,6 +27,7 @@
   "gui.skyabyss.travel.choose": "行き先を選ぶ",
   "gui.skyabyss.travel.leader_chooses": "行き先は %s が決める",
   "gui.skyabyss.travel.spawn": "はじまりの地",
+  "gui.skyabyss.travel.town": "町",
   "gui.skyabyss.travel.waymark_unnamed": "名もない碑",
   "gui.skyabyss.travel.waymark_of": "%sの碑",
   "gui.skyabyss.travel.detail": "%s・%s・約%s秒",
