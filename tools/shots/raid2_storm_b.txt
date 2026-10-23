@@ -1,0 +1,30 @@
+# 雷翼のレイcmd skyabyss cinematic stop
+wait 400
+cmd skyabyss cinematic stop
+wait 200
+cmd gamemode spectator
+fov 95
+cmd gamemode spectator
+cmd skystormraid show SR4
+wait 20
+waitchunks
+camera -4399.5 156.5 5011.5 180 30
+wait 40
+shot sr4_0
+wait 9
+shot sr4_1
+wait 9
+shot sr4_2
+wait 9
+shot sr4_3
+wait 9
+shot sr4_4
+wait 9
+shot sr4_5
+wait 9
+shot sr4_6
+wait 9
+shot sr4_7
+wait 9
+shot sr4_8
+wait 9

@@ -25,7 +25,8 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 
-// 潮殻のレイドの三つの部屋 (docs/design/08 のレイドの節): 歩 TR1「真珠の灯り運び」・智 TR2「貝の音合わせ」・闘 TR3「珊瑚の苗を守る」。
+// 潮殻のレイドの部屋 (docs/design/08 のレイドの節): 歩 TR1「真珠の灯り運び」/TR4「伸びる珊瑚の道」・智 TR5「光を返す真珠」/TR6「潮見の暦」・闘 TR3「珊瑚の苗を守る」/TR7「本物の群れの母」。
+// (TR2「貝の音合わせ」は選ばれなかったので登録しない)
 // 水の仕掛け・水没はない (潮殻は水を嫌う声が多い)。部屋は RaidKit.buildCell の閉じた一室。敵は潮殻の背の敵 (磯走り・泡吹き)。
 // 珊瑚憑きは潮で像になる (潮は全体の時計) ので、部屋の敵には使わない
 public final class TideRaid {
@@ -33,9 +34,13 @@ public final class TideRaid {
     }
 
     public static void register() {
+        // 各枠の部屋から一回の挑戦ごとに一つ引く (RaidRooms.drawOf)。TR2「貝の音合わせ」(TideShellRoom) は部品として残すが、登録しない (プールに入れない)
         RaidRooms.register(Titans.TIDE_SHELL, Slot.WALK, "TR1", TidePearlRoom::new);
-        RaidRooms.register(Titans.TIDE_SHELL, Slot.WIT, "TR2", TideShellRoom::new);
+        RaidRooms.register(Titans.TIDE_SHELL, Slot.WALK, "TR4", TideCoralRoadRoom::new);
+        RaidRooms.register(Titans.TIDE_SHELL, Slot.WIT, "TR5", TideLightRoom::new);
+        RaidRooms.register(Titans.TIDE_SHELL, Slot.WIT, "TR6", TideMoonRoom::new);
         RaidRooms.register(Titans.TIDE_SHELL, Slot.FIGHT, "TR3", TideSaplingRoom::new);
+        RaidRooms.register(Titans.TIDE_SHELL, Slot.FIGHT, "TR7", TideBroodRoom::new);
     }
 
     // 部屋の敵を湧かせる (グループの敵・保存しない印つき・ctx に登録)
