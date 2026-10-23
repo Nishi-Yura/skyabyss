@@ -36,7 +36,7 @@
 
 マイクラをいくつ同時に立ち上げてもよい。ただし、ほかの担当のウィンドウに入力が入らないよう、次を守る。
 
-- `tools/gen/story/gen_opening_text.py` は再実行しない（書き出したあとの手直しの方が新しい。走らせても何も書かない。書き直すときだけ `SKYABYSS_FORCE_GEN=1`）。`tools/gen/story/gen_free_quests.py`・`tools/gen/story/gen_story_quests.py` も同じく再実行しない。
+- `tools/gen/story/gen_opening_text.py` は再実行しない（書き出したあとの手直しの方が新しい。走らせても何も書かない。書き直すときだけ `SKYABYSS_FORCE_GEN=1`）。`tools/gen/story/gen_free_quests.py`・`tools/gen/story/gen_story_quests.py` は、いまは手直しを取り込んであり (下の「生成スクリプトとコミット済みデータの同期」)、順番を守れば再実行してもデータは変わらない。
 - **OS のキー送り・マウス操作・ウィンドウのフォーカス操作は禁止** (PowerShell の SendKeys、AppActivate、SetForegroundWindow、nircmd など全部)。前面のウィンドウは誰のものか分からない
 - **画面の確認は台本で撮る** (下の「台本で撮るスクショ」)。ゲームの中から撮るので、ウィンドウが裏にあっても撮れる。最小化だけはしない
 - **建築の抜け・不具合はデータで確かめる** (下の「構造をデータで確かめる」)。試遊 (歩いて回る) での確認はしない
@@ -192,6 +192,30 @@ SKYABYSS_LANG=en_us ./gradlew runShots -Pscript=tools/shots/first_hour.txt   # �
 新しいプレイヤーが、序章 → 帳面 → 煙 → 語り部 → 最初の影 → 破れた頁 → イサナ → 足音の夜 → 歌の夜 → 岩鯨の初見 → 鎖、を進む間の「帯の文・画面・知らせ」を、ゲーム内の時刻つきで `run/shots/first_hour/shots/first_hour/shots.log` の `[watch]` に残す (開発用。本番の計測ではない)。拍子の強制 (`opening <拍子>`) は使わず、影・足音・歌・岩鯨は本物の判断に任せて総 tick を 60 分ぶん流す (`cmd tick rate 100` でサーバーだけ 5 倍)。歩きは `dev opening view|goto` で運び、会話は `dev talk "<役>"` / `dev talk say <continue|leave|番号>` で本物の会話 (DialogueService) を進める (節と選択肢が `[dialogue]` に出る)。結果の読み方と見つけた穴は `docs/review/first_hour_log.md`。
 
 - 巨神が地形にめり込まない・潮殻の乗り場の輪 (`TitanGround`、08 の 2.2〜2.4): `python tools/gen/shots/gen_titan_ground_shots.py` → `SKYABYSS_SHOTS_SEED=4242 ./gradlew runShots -Pscript=tools/shots/titan_ground.txt` → `python tools/sheets/titan_ground_sheet.py` で `docs/review/previews/titan_ground_sheet.png` (前後。開発コマンド `/skyabyss dev titanground <true|false>`・`place tide <x> <z> <yaw>`・`scout`)。自己テストは `SKYABYSS_SELFTEST=1 SKYABYSS_SELFTEST_ONLY="titan ground" ./gradlew runServer` (体積の柱ごとにブロックを数える)。台本の世界の種は環境変数 `SKYABYSS_SHOTS_SEED` で変えられる
+
+## 生成スクリプトとコミット済みデータの同期 (`tools/audit/check_generators.py`)
+
+`src/main/resources` の `data/` と `assets/*/lang` を書く生成スクリプトは、あとからの手直しを取り込んである (コミット済みのデータが正)。
+走らせても、書き換わるのは生成物の写しの `docs/design/07` などの表だけ。ずれ (ドリフト) は次で確かめる。
+
+```
+PYTHONPATH=tools/lib python tools/audit/check_generators.py                 # 一覧を順に走らせ、最後にコミット済みと違うファイルを出す (一時コピーの中で走る。本物は触らない)
+PYTHONPATH=tools/lib python tools/audit/check_generators.py --isolated      # 1 本ずつ別々に走らせ、本ごとに出す (ほかの生成スクリプトが足す分は、その本では足りなく見える)
+PYTHONPATH=tools/lib python tools/audit/check_generators.py story_quests --diff   # 名前の一部で絞る / 差分の中身も出す
+PYTHONPATH=tools/lib python tools/audit/check_generators.py --list          # 一覧だけ
+```
+
+- 比べ方: 改行コード (CRLF/LF) と PNG の再圧縮は無視、JSON はキー順を無視 (`--strict` でバイト列まで)。見る場所は `data/` と `assets/*/lang`。終了コードは 0 (ドリフトなし) か 1。
+- **順番が大事**: 同じファイルを何本かが書く。一章の lang は `gen_ch1_content` が土台を書き、`gen_ch1_prep`・`gen_ch1_trails`・`gen_ch1_travel`・`gen_artisan_dialogue` が足す。`gen_ch4_ground` は `main_ember.json`・`main_key.json` (と lang) に支度の段・イサナの目的を足す (`gen_story_quests` のあと)。`gen_ch2_ground`・`gen_ch3_ground` も、章の content のあと。一覧 (`GENERATORS`) の並びがその順。
+- 持たないキーは残す: lang の書き出しは、いまあるファイルを土台に自分のキーだけ上書きする (`tools/lib/langmerge.py`。`gen_ch4_content` が先にやっていたのと同じ決まり)。手で足した文・ほかのスクリプトの文は消えない。
+- 手で直した言い回しは、生成スクリプトの中に取り込んである。まとまった量は `tools/trial_lang/zz_hand_edits.py` (試練)、`HAND_EDITS` の表 (`gen_storm_lore.py`・`gen_ch5_layers.py`)。直したあとの文を変えるときは、ここも合わせる。
+- 一時コピーを使い回す開発用の環境変数: `SKYABYSS_GENCHECK_DIR` (コピー先。2 回目から速い)、`SKYABYSS_GENCHECK_EXPORT` (ドリフトしたファイルの生成結果の書き出し先)。
+- 古い・見ない生成スクリプト (一覧に入れていない。止めたまま残す):
+  - `tools/gen/items/gen_relic_blocks.py` — 遺物の部品の模型・テクスチャ用。封印 (`trial_seal`) まわりは古く、走らせると消した `trial_seal` の blockstate・模型を作り直し、試練の lang に `block.skyabyss.trial_seal` を足す。**古い (走らせない)**。
+  - `tools/gen/world/gen_titan_volumes.py` — 巨神の立入禁止の体積をメッシュから焼く。メッシュが変わると結果が変わる (`data/skyabyss/titan_volumes/*`)。メッシュを直したときだけ手で走らせる。
+  - `tools/gen/ch4/gen_ch4_gear.py`・`tools/gen/abyss/gen_abyss_mobs_a.py` など `docs/review` のラフを読むもの — ラフが無いと走らない (一時コピーに入れていない)。
+  - `*_ground_mobs.py`・`gen_mobs.py`・`gen_items.py`・`gen_weapon_models*.py`・`gen_block_textures.py`・`gen_opening_sounds.py`・`gen_sky_sounds.py`・`gen_titan_sounds.py`・`gen_heart.py`・`gen_titan_model.py` — 採用済みの素材を上書きするので止めてある (`SKYABYSS_ALLOW_REGEN`)。**古い**。
+- `sys.path` の足し (`for p in ('../lib')` のように文字列の括弧だけだったもの) は、1 字ずつ分かれて効いていなかった。`('../lib',)` に直した (40 本)。
 
 ## ソースの検査 (ゲームを立てずに)
 

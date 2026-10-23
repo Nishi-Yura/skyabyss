@@ -191,6 +191,11 @@ public final class RoutePartySelfTest {
     }
 
     private static boolean near(ServerPlayer p, ServerLevel back, String titan, TrialDraw.Draw draw, int step) {
+        // レイドの部屋の段は、区画に建てた部屋の中へ (二人とも同じ部屋の入口。docs/design/32 の 7 章)
+        if (jp.revati.skyabyss.trial.raid.RaidRun.isRaidStep(back, Groups.keyOf(p), step)) {
+            var run = jp.revati.skyabyss.trial.raid.RaidRun.of(Groups.keyOf(p));
+            return run != null && run.step == step && run.ctx.cell().bounds().contains(p.position());
+        }
         String rest = TrialRoute.restFor(back, Groups.keyOf(p), titan, draw, step, false);
         BlockPos at = rest == null ? null : TrialRoute.spawnOf(back, titan, rest);
         at = at == null ? null : TrialRoute.frameOfStep(back, Groups.keyOf(p), draw, step, false).at(at);

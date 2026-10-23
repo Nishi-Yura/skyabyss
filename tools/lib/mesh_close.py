@@ -20,7 +20,7 @@ from __future__ import annotations
 # tools 内の他グループのモジュールを import できるようにする（フォルダ移動後も兄弟モジュールを解決）
 import os as _os
 import sys as _sys
-_sys.path[:0] = [_os.path.join(_os.path.dirname(_os.path.abspath(__file__)), p) for p in ('../audit')]
+_sys.path[:0] = [_os.path.join(_os.path.dirname(_os.path.abspath(__file__)), p) for p in ('../audit',)]
 
 import collections
 import glob
@@ -33,6 +33,7 @@ import numpy as np
 from scipy.spatial import cKDTree
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "audit"))  # mesh_audit は tools/audit/
 import mesh_audit as ma  # noqa: E402
 
 MARK = "skyabyss_closed"

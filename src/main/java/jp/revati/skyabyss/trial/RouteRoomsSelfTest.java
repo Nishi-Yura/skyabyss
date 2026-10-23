@@ -51,7 +51,11 @@ public final class RouteRoomsSelfTest {
                 // 部屋の一覧: 原型の入口の休み場 (試練ごと)、中ボスの前室 (その原型の中)、心臓の前室
                 Map<String, BlockPos> rooms = new LinkedHashMap<>();
                 Map<String, String> owner = new LinkedHashMap<>();
+                boolean raid = jp.revati.skyabyss.trial.raid.RaidRooms.active(titan);
                 for (Def d : TrialCatalog.originals(titan)) {
+                    if (jp.revati.skyabyss.trial.raid.RaidRooms.isRaid(d.id())) {
+                        continue; // レイドの部屋は背の上ではなく区画の写しに建つ (運ばれて入る。背の上の休み場は使わない)
+                    }
                     String rest = TrialRoute.entryRest(titan, d, null);
                     BlockPos at = rest == null ? null : TrialRoute.spawnOf(back, titan, rest);
                     if (at != null) {
@@ -73,6 +77,10 @@ public final class RouteRoomsSelfTest {
                 BlockPos arrival = jp.revati.skyabyss.titan.end.ReturnBeacons.arrivalOf(titan).above();
                 // 到着の台から
                 checked += reachNone(f, back, titan, "arrival", arrival, rooms, null);
+                // レイドの順路: 中ボスの前室から心臓の前室へは歩けない (倒すと運ばれる)
+                if (raid && mid != null && heart != null) {
+                    checked += reachNone(f, back, titan, "mid", mid, Map.of("heart", heart), null);
+                }
                 // 原型の入口から
                 for (Map.Entry<String, BlockPos> e : rooms.entrySet()) {
                     if (e.getKey().equals("mid") || e.getKey().equals("heart")) {

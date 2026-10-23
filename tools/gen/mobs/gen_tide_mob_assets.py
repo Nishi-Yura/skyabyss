@@ -21,7 +21,7 @@
 # tools 内の他グループのモジュールを import できるようにする（フォルダ移動後も兄弟モジュールを解決）
 import os as _os
 import sys as _sys
-_sys.path[:0] = [_os.path.join(_os.path.dirname(_os.path.abspath(__file__)), p) for p in ('../sound')]
+_sys.path[:0] = [_os.path.join(_os.path.dirname(_os.path.abspath(__file__)), p) for p in ('../sound',)]
 from pathlib import Path
 
 import numpy as np

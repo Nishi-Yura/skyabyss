@@ -31,7 +31,10 @@ public final class RaidLore {
             Map.entry("SR3", "sign.skyabyss.lore_storm_tail"),
             Map.entry("ER1", "sign.skyabyss.lore_ember_west"),
             Map.entry("ER2", "sign.skyabyss.lore_ember_east"),
-            Map.entry("ER3", "sign.skyabyss.lore_ember_south"));
+            Map.entry("ER3", "sign.skyabyss.lore_ember_south"),
+            Map.entry("ER4", "sign.skyabyss.lore_raid_ember_chain"),
+            Map.entry("ER5", "sign.skyabyss.lore_raid_ember_valve"),
+            Map.entry("ER6", "sign.skyabyss.lore_raid_ember_pupil"));
 
     private RaidLore() {
     }
