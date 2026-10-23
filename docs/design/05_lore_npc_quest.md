@@ -118,7 +118,7 @@ data/skyabyss/lore/entry/<章>/<名前>.json      項目 (ID は "<章>/<名前>
 assets/skyabyss_lore/lang/{ja_jp,en_us}.json   伝承の文 (題・本文・碑文・章の名・手がかり・画面とコマンドの文)
 ```
 
-項目の JSON（例: 西の碑文）:
+項目の JSON（例: 骨玉の間の碑文）:
 
 ```json
 {
@@ -285,15 +285,15 @@ assets/skyabyss_lore/lang/{ja_jp,en_us}.json   伝承の文 (題・本文・碑�
 | --- | --- | --- | --- |
 | `chapter1/stone_whale` | 岩鯨 | `skyabyss:stone_whale` が 160 ブロック以内、`skyabyss:titan_back` に入る | 背中の遺跡、鯨の歌 |
 | `chapter1/sky_ruins` | 背中の遺跡 | `skyabyss:titan_back` に入る | 運ばれる者 |
-| `chapter1/inscription_west` | 西の碑文 | 碑文 `lore_west` を読む | 運ばれる者、水路の碑文 |
-| `chapter1/inscription_east` | 東の碑文 | 碑文 `lore_east` を読む | 鯨骨の番兵長 |
-| `chapter1/inscription_below` | 水路の碑文 | 碑文 `lore_below` を読む | 前室の碑文 |
+| `chapter1/inscription_west` | 骨玉の間の碑文 | 碑文 `lore_west` を読む | 運ばれる者、共鳴の間の碑文 |
+| `chapter1/inscription_east` | 核の間の碑文 | 碑文 `lore_east` を読む | 鯨骨の番兵長 |
+| `chapter1/inscription_below` | 共鳴の間の碑文 | 碑文 `lore_below` を読む | 前室の碑文 |
 | `chapter1/inscription_vault` | 宝物庫の碑文 | 碑文 `lore_vault` を読む | 白紙の帳面、天の鍵の欠片 |
-| `chapter1/inscription_heart` | 前室の碑文 | 碑文 `lore_heart` を読む | 止まった鼓動、水路の碑文 |
-| `chapter1/captain` | 鯨骨の番兵長 | `skyabyss:whalebone_captain` が倒れる（倒した人か 32 ブロック以内） | 東の碑文 |
+| `chapter1/inscription_heart` | 前室の碑文 | 碑文 `lore_heart` を読む | 止まった鼓動、共鳴の間の碑文 |
+| `chapter1/captain` | 鯨骨の番兵長 | `skyabyss:whalebone_captain` が倒れる（倒した人か 32 ブロック以内） | 核の間の碑文 |
 | `chapter1/heart_stilled` | 止まった鼓動 | `skyabyss:stone_whale_heart` が倒れる（倒した人か 40 ブロック以内）、どれかの欠片を持つ | 前室の碑文、天の鍵の欠片 |
 | `chapter1/sky_key` | 天の鍵の欠片 | `skyabyss:sky_key_fragment` を持つ | 宝物庫の碑文 |
-| `chapter1/carried_people` | 運ばれる者 | 破れた頁（岩鯨の背） | 背中の遺跡、西の碑文 |
+| `chapter1/carried_people` | 運ばれる者 | 破れた頁（岩鯨の背） | 背中の遺跡、骨玉の間の碑文 |
 | `chapter1/return_fire` | 返り火 | 破れた頁（岩鯨の背） | 運ばれる者 |
 | `chapter1/whale_song` | 鯨の歌 | 破れた頁（岩鯨の背） | 岩鯨 |
 | `chapter1/whale_chaser` | 鯨追いのイサナ | 鯨追いが名乗ったとき（会話の `c_first`・`c_deja`。`manual`。00 の 11） | 鯨の歌 |
@@ -314,7 +314,7 @@ assets/skyabyss_lore/lang/{ja_jp,en_us}.json   伝承の文 (題・本文・碑�
 
 立ち止まっていると、石畳ごと体がわずかに持ち上がり、また下がる。ここは地面ではない。
 
-**西の碑文**（`chapter1/inscription_west`）
+**骨玉の間の碑文**（`chapter1/inscription_west`）
 
 > 骨の道は  
 > 我らの巡礼路  
@@ -325,7 +325,7 @@ assets/skyabyss_lore/lang/{ja_jp,en_us}.json   伝承の文 (題・本文・碑�
 
 石に耳を当てると、低いうなりが聞こえた。
 
-**東の碑文**（`chapter1/inscription_east`）
+**核の間の碑文**（`chapter1/inscription_east`）
 
 > 番兵は眠らない  
 > この鼓動を  
@@ -336,7 +336,7 @@ assets/skyabyss_lore/lang/{ja_jp,en_us}.json   伝承の文 (題・本文・碑�
 
 「返す」と彫ってある。番兵たちは、その日を見ないまま骨になった。
 
-**水路の碑文**（`chapter1/inscription_below`）
+**共鳴の間の碑文**（`chapter1/inscription_below`）
 
 > 鯨は息をしない  
 > 体を巡るのは  

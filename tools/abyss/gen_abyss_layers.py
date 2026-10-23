@@ -404,7 +404,7 @@ def build_camp(ctx, layer, n):
     camp = '%s_camp' % layer
     lay.layer_of[camp] = layer
     lay.cur = 'camp_%s' % layer
-    lay.segs[lay.cur] = dict(layer=layer, kind='camp', floor=Y, top=Y + CAMP_H + 1, depth=5, dome=0.7, room=None)
+    lay.segs[lay.cur] = dict(layer=layer, kind='camp', floor=Y, top=Y + CAMP_H + 1, depth=9, dome=0.7, room=None)
     lay.box(-CAMP_HALF, Y, -CAMP_HALF, CAMP_HALF, Y + CAMP_H - 1, CAMP_HALF, camp)
     # 天井を少し高く (真ん中)
     lay.box(-4, Y + CAMP_H, -4, 4, Y + CAMP_H + 1, 4, camp)
@@ -580,7 +580,37 @@ def build_route(ctx, layer, i, spec):
     r.put(mu, w, sy + 1, 'respawn_anchor[charges=0]')
     r.mark('mark_%s_%d' % (layer, i), mu, w, sy + 1)
     r.mark('markroom_%s_%d' % (layer, i), u, w, sy)
+    frame_mouth(ctx, r, layer, i)
     return r, rooms
+
+
+def frame_mouth(ctx, r, layer, i):
+    """野営から道への口の枠: 戸口の両脇の支え木 (縦)・上の梁・梁から下がる灯り・脇の壁の碑 (道の名)。
+    枠は野営の箱の端 (u = CAMP_HALF) に置く。碑の文は AbyssBuild が建て終えに刻む (印 routesign_<層>_<道>)"""
+    lay, v = ctx.lay, ctx.v
+    Y = CAMP_Y[layer]
+    u = CAMP_HALF
+    wc = ROUTE_W
+
+    def put(a, b, y, st):
+        x, z = r.xz(a, b)
+        lay.put(x, y, z, st)
+        del_air(lay, x, y, z, y)
+        return x, z
+
+    for b in (wc - 2, wc + 2):
+        for yy in range(Y, Y + 4):
+            put(u, b, yy, 'stripped_spruce_log[axis=y]')
+    x0, z0 = r.xz(u, wc)
+    x1, z1 = r.xz(u, wc + 1)
+    axis = 'x' if x1 != x0 else 'z'
+    for b in range(wc - 2, wc + 3):
+        put(u, b, Y + 4, 'stripped_spruce_log[axis=%s]' % axis)
+    put(u, wc, Y + 3, 'lantern[hanging=true,waterlogged=false]')
+    # 脇の碑 (野営の中へ向く)。箱の壁の外の面 (u = CAMP_HALF + 1) の、枠の外の一マス
+    tx, tz = r.xz(u + 1, wc + 3)
+    lay.put(tx, Y + 1, tz, 'skyabyss:tablet[facing=%s,standing=false]' % r.facing(-1, 0))
+    v.mark('routesign_%s_%d' % (layer, i), tx, Y + 1, tz)
 
 
 def build_heart(ctx):

@@ -4,7 +4,7 @@ set TIDE_MAP_W=1 for a wider window x -14..14 z -16..10 printed without the circ
 # tools 内の他グループのモジュールを import できるようにする（フォルダ移動後も兄弟モジュールを解決）
 import os as _os
 import sys as _sys
-_sys.path[:0] = [_os.path.join(_os.path.dirname(_os.path.abspath(__file__)), p) for p in ('../lib')]
+_sys.path[:0] = [_os.path.join(_os.path.dirname(_os.path.abspath(__file__)), p) for p in ('../lib',)]
 import sys
 
 sys.path.insert(0, 'tools')

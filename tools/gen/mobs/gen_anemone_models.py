@@ -1,4 +1,4 @@
-"""灯の台・苗床・数え石・品のモデルと blockstate を作る (docs/design/23)。python -I tools/gen/mobs/gen_anemone_models.py"""
+"""灯りの台・苗床・数え石・品のモデルと blockstate を作る (docs/design/23)。python -I tools/gen/mobs/gen_anemone_models.py"""
 import json
 from pathlib import Path
 
