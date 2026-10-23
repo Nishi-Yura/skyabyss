@@ -152,15 +152,17 @@
 ### 5.3 建てる重さ
 
 - 背の次元を建てるのは新しいワールドの起動時と版が変わったときだけ（`titan/BackBuildJobs` で tick に分ける）。体の中を建てなくなったので、体を置いたあとの仕上げ（部屋を掘る・中身・修復・灯り・封じ）がほぼ無くなった。
-- 測った数（自己テストの記録。同じ自己テストの組・新しいワールド）:
+- 測った数（自己テスト `back builds`。新しいワールドで、起動時に四体を裏で建て終えるまで。`Built the … in the background` の仕事の ms と、いちばん長い tick）:
 
 | 背 | 前（中も建てる） | 今（外見だけ） |
 | --- | --- | --- |
-| 岩鯨 | BUILD_WHALE_BEFORE | BUILD_WHALE_AFTER |
-| 潮殻 | BUILD_TIDE_BEFORE | BUILD_TIDE_AFTER |
-| 雷翼 | BUILD_STORM_BEFORE | BUILD_STORM_AFTER |
-| 余燼 | BUILD_EMBER_BEFORE | BUILD_EMBER_AFTER |
+| 岩鯨 | 5,676 ms（最長の tick 131 ms） | 1,691 ms（42 ms） |
+| 潮殻 | 3,270 ms（148 ms） | 2,202 ms（84 ms） |
+| 雷翼 | 3,503 ms（238 ms） | 1,235 ms（113 ms） |
+| 余燼 | 6,407 ms（371 ms） | 3,410 ms（350 ms） |
+| 計 | 18,856 ms | 8,538 ms（−55%） |
 
+- 残りはほぼ体のブロックを置く時間（`build work … body`）。心臓の間のまわりの箱は列ごとに tick に分けて詰める（`InstanceArenas.Fill`）。
 - 建て直しの ms は自己テスト `titan back (rebuild)` が記録に出す（`SELFTEST titan back build ms`）。
 - 起動時に裏で建てる予算は、人がいなければ 1 tick 25 ms、人がいれば tick の余り次第で 10〜25 ms（`BackBuildJobs.budgetMs`）。
 
