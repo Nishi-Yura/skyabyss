@@ -1,0 +1,20 @@
+{
+ "name": "lord_ash",
+ "tris": 3970,
+ "atlas": [
+  512,
+  512
+ ],
+ "open": 0,
+ "floating": [],
+ "bones": {
+  "root": 0,
+  "body": 1250,
+  "jaw": 224,
+  "lamps": 1788,
+  "hooks_l": 354,
+  "hooks_r": 354
+ },
+ "glow": 4129,
+ "height": 40.4
+}

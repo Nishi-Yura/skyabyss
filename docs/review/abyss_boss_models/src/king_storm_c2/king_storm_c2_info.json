@@ -1,0 +1,20 @@
+{
+ "name": "king_storm_c2",
+ "tris": 2462,
+ "atlas": [
+  1024,
+  512
+ ],
+ "open": 0,
+ "floating": [],
+ "bones": {
+  "root": 60,
+  "body": 1024,
+  "head": 780,
+  "halo": 246,
+  "arm_l": 176,
+  "arm_r": 176
+ },
+ "glow": 67356,
+ "height": 75.6
+}
