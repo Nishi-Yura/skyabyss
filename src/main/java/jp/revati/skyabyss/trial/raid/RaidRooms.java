@@ -52,6 +52,20 @@ public final class RaidRooms {
         }, 1, false, true, Trial.Space.EMPTY));
     }
 
+    // 登録したすべての部屋 (id → 巨神。登録の順)。自己テスト raid solo が一つずつ一人で越える
+    public static Map<String, String> all() {
+        ensure();
+        Map<String, String> out = new LinkedHashMap<>();
+        for (Map.Entry<String, Map<Slot, List<Entry>>> t : BY_TITAN.entrySet()) {
+            for (List<Entry> list : t.getValue().values()) {
+                for (Entry e : list) {
+                    out.put(e.id(), t.getKey());
+                }
+            }
+        }
+        return out;
+    }
+
     // 三つそろった巨神か (レイドの順路で動かす)
     public static boolean active(String titan) {
         ensure();

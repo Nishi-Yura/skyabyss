@@ -19,10 +19,15 @@ public final class RaidHudNet {
     private RaidHudNet() {
     }
 
-    private static final String PROTOCOL_VERSION = "raid_hud-1";
+    private static final String PROTOCOL_VERSION = "raid_hud-2";
 
-    public record Hud(String cellId, String objKey, List<String> args, int cur, int max, String secKey, int sec, int secMax, int timer, boolean done)
-            implements CustomPacketPayload {
+    // guide = 行き先の印があるか (gx, gy, gz はその位置。帯に矢印と距離を出す。RaidRoom.guideTarget)
+    public record Hud(String cellId, String objKey, List<String> args, int cur, int max, String secKey, int sec, int secMax, int timer, boolean done,
+            boolean guide, int gx, int gy, int gz) implements CustomPacketPayload {
+        public Hud(String cellId, String objKey, List<String> args, int cur, int max, String secKey, int sec, int secMax, int timer, boolean done) {
+            this(cellId, objKey, args, cur, max, secKey, sec, secMax, timer, done, false, 0, 0, 0);
+        }
+
         public static final Type<Hud> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "raid_hud"));
         public static final Hud OFF = new Hud("", "", List.of(), 0, 0, "", 0, 0, -1, false);
         public static final StreamCodec<RegistryFriendlyByteBuf, Hud> STREAM_CODEC = StreamCodec.of(
@@ -40,6 +45,12 @@ public final class RaidHudNet {
                     buf.writeVarInt(t.secMax);
                     buf.writeInt(t.timer);
                     buf.writeBoolean(t.done);
+                    buf.writeBoolean(t.guide);
+                    if (t.guide) {
+                        buf.writeInt(t.gx);
+                        buf.writeInt(t.gy);
+                        buf.writeInt(t.gz);
+                    }
                 }, buf -> {
                     String cell = buf.readUtf(16);
                     String obj = buf.readUtf(96);
@@ -48,8 +59,18 @@ public final class RaidHudNet {
                     for (int i = 0; i < n; i++) {
                         args.add(buf.readUtf(64));
                     }
-                    return new Hud(cell, obj, List.copyOf(args), buf.readVarInt(), buf.readVarInt(), buf.readUtf(96), buf.readVarInt(), buf.readVarInt(),
-                            buf.readInt(), buf.readBoolean());
+                    int cur = buf.readVarInt();
+                    int max = buf.readVarInt();
+                    String sec = buf.readUtf(96);
+                    int secV = buf.readVarInt();
+                    int secMax = buf.readVarInt();
+                    int timer = buf.readInt();
+                    boolean done = buf.readBoolean();
+                    boolean guide = buf.readBoolean();
+                    int gx = guide ? buf.readInt() : 0;
+                    int gy = guide ? buf.readInt() : 0;
+                    int gz = guide ? buf.readInt() : 0;
+                    return new Hud(cell, obj, List.copyOf(args), cur, max, sec, secV, secMax, timer, done, guide, gx, gy, gz);
                 });
 
         @Override

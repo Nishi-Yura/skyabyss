@@ -289,6 +289,44 @@ public final class RaidRun {
         if (now % HUD_EVERY == 0 && !run.hudOff) {
             sendHud(run, false);
         }
+        if (run.phase == Phase.ACTIVE && now % GUIDE_EVERY == 0) {
+            guidePillar(run);
+        }
+    }
+
+    // 行き先の印の光の柱を立てる間隔 (tick)
+    public static final int GUIDE_EVERY = 5;
+
+    @Nullable
+    private static BlockPos guideOf(Run run) {
+        try {
+            return run.phase == Phase.ACTIVE ? run.room.guideTarget(run.ctx) : null;
+        } catch (RuntimeException e) {
+            return null;
+        }
+    }
+
+    // 行き先の印: 床から部屋の天井まで、細い光の柱 (ビーコンのような白い粒と、根元の輪)。部屋の人にだけ見える
+    private static void guidePillar(Run run) {
+        BlockPos g = guideOf(run);
+        if (g == null) {
+            return;
+        }
+        RaidCtx ctx = run.ctx;
+        double top = ctx.cell().bounds().maxY - 1;
+        double x = g.getX() + 0.5;
+        double z = g.getZ() + 0.5;
+        long t = ctx.now();
+        for (ServerPlayer p : ctx.players()) {
+            for (double y = g.getY() + 0.2; y < top; y += 0.7) {
+                ctx.level().sendParticles(p, net.minecraft.core.particles.ParticleTypes.END_ROD, true, x, y, z, 1, 0.04, 0.1, 0.04, 0.0);
+            }
+            double a = (t % 40) / 40.0 * Math.PI * 2;
+            for (int i = 0; i < 6; i++) {
+                double b = a + i * Math.PI / 3;
+                ctx.level().sendParticles(p, net.minecraft.core.particles.ParticleTypes.GLOW, true, x + Math.cos(b) * 1.1, g.getY() + 0.15, z + Math.sin(b) * 1.1, 1, 0, 0, 0, 0);
+            }
+        }
     }
 
     // 部屋にいる参加者が全員倒れているか (一人でも立っていれば続く)
@@ -464,8 +502,9 @@ public final class RaidRun {
                 args.add(String.valueOf(o));
             }
             boolean fin = done || run.phase == Phase.COMPLETE;
+            BlockPos g = fin ? null : guideOf(run);
             hud = new RaidHudNet.Hud(run.ctx.roomId(), room.objectiveKey(), args, room.counter(), room.counterMax(), room.secondaryKey(), room.secondary(),
-                    room.secondaryMax(), room.timerTicks(), fin);
+                    room.secondaryMax(), room.timerTicks(), fin, g != null, g == null ? 0 : g.getX(), g == null ? 0 : g.getY(), g == null ? 0 : g.getZ());
         }
         run.lastHud = hud;
         for (ServerPlayer p : run.ctx.players()) {

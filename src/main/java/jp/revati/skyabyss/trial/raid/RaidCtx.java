@@ -43,6 +43,11 @@ public final class RaidCtx {
         return new RaidCtx(back, group, titan, roomId, slot, step, RaidRun.originOf(slot, step), seed);
     }
 
+    // 一人で越える自己テスト (raid solo) 用: 区画の外 (origin を直に渡す) に部屋を建てる文脈
+    public static RaidCtx forSolo(ServerLevel back, UUID group, String titan, String roomId, int step, BlockPos origin, long seed) {
+        return new RaidCtx(back, group, titan, roomId, 0, step, origin, seed);
+    }
+
     RaidCtx(ServerLevel back, UUID group, String titan, String roomId, int slot, int step, BlockPos origin, long seed) {
         this.back = back;
         this.group = group;
@@ -171,7 +176,7 @@ public final class RaidCtx {
     }
 
     @Nullable
-    String takeFail() {
+    public String takeFail() {
         String k = failKey;
         failKey = null;
         return k;

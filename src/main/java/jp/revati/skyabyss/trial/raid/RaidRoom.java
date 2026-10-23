@@ -71,6 +71,13 @@ public abstract class RaidRoom {
         return -1;
     }
 
+    // 行き先の印 (任意。運ぶ部屋の届け先・次に叩く仕掛けなど)。null なら出さない。
+    // RaidRun が、ここに床から天井までの光の柱 (粒) を立て、目的の帯に矢印と距離 (「↗ 12m」) を出す。毎回呼ばれるので、いまの進みで返してよい
+    @javax.annotation.Nullable
+    public net.minecraft.core.BlockPos guideTarget(RaidCtx ctx) {
+        return null;
+    }
+
     // 部屋の中のブロックを叩いた・使った (任意。attack = 左クリック)。扱ったら true (元の動作を打ち消す)。部屋の中のブロックはどのみち壊せず置けない
     public boolean onUse(RaidCtx ctx, net.minecraft.server.level.ServerPlayer player, net.minecraft.core.BlockPos pos, boolean attack) {
         return false;

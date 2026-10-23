@@ -31,7 +31,28 @@ public final class RaidHudClient {
         if (h.cellId().isEmpty() || mc.level == null || mc.level.getGameTime() - at > STALE_TICKS) {
             return null;
         }
-        return text(h);
+        String line = text(h);
+        if (h.guide() && !h.done() && mc.player != null) {
+            line += "  " + arrow(mc.player.getX(), mc.player.getZ(), mc.player.getYRot(), h.gx() + 0.5, h.gz() + 0.5);
+        }
+        return line;
+    }
+
+    private static final String[] ARROWS = {"↑", "↗", "→", "↘", "↓", "↙", "←", "↖"};
+
+    // 行き先の印への矢印と距離 (「↗ 12m」。自分の向きから見て)。近ければ「ここ」
+    public static String arrow(double px, double pz, float yaw, double tx, double tz) {
+        double dx = tx - px;
+        double dz = tz - pz;
+        double dist = Math.sqrt(dx * dx + dz * dz);
+        if (dist < 1.5) {
+            return Component.translatable("raid.skyabyss.hud.here").getString();
+        }
+        // 向き: Minecraft の yaw は南が 0、西が 90。行き先の角度を同じ測り方で出し、自分の向きとの差を 8 方位にする
+        double to = Math.toDegrees(Math.atan2(-dx, dz));
+        double rel = net.minecraft.util.Mth.wrapDegrees(to - yaw);
+        int idx = Math.floorMod((int) Math.round(rel / 45.0), 8);
+        return ARROWS[idx] + " " + Math.round(dist) + "m";
     }
 
     public static String text(RaidHudNet.Hud h) {
