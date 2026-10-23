@@ -52,20 +52,20 @@ public final class ShrineSelfTest {
 
     // 参道のはじめ (南 15 マス) から碑の南の隣まで、一段ずつ (跳んで一段まで) 歩いて行けるか
     static boolean reachable(ServerLevel level, BlockPos c) {
+        return walkSet(level, c).contains(c.south());
+    }
+
+    static java.util.Set<BlockPos> walkSet(ServerLevel level, BlockPos c) {
         BlockPos start = c.south(15);
-        BlockPos goal = c.south();
         java.util.ArrayDeque<BlockPos> queue = new java.util.ArrayDeque<>();
         java.util.Set<BlockPos> seen = new java.util.HashSet<>();
         queue.add(start);
         seen.add(start);
         if (!walkable(level, start)) {
-            return false;
+            return seen;
         }
         while (!queue.isEmpty()) {
             BlockPos p = queue.poll();
-            if (p.equals(goal)) {
-                return true;
-            }
             for (net.minecraft.core.Direction d : net.minecraft.core.Direction.Plane.HORIZONTAL) {
                 for (int dy = 1; dy >= -3; dy--) {
                     BlockPos n = p.relative(d).above(dy);
@@ -82,7 +82,7 @@ public final class ShrineSelfTest {
                 }
             }
         }
-        return false;
+        return seen;
     }
 
     // 台地・拝殿・参道の立てる床のうち、近く (歩いて 9 マス) に光るものがない所 (なければ null)
@@ -90,7 +90,7 @@ public final class ShrineSelfTest {
         List<BlockPos> sources = new ArrayList<>();
         for (int x = -13; x <= 13; x++) {
             for (int z = -13; z <= 40; z++) {
-                for (int y = -3; y <= 24; y++) {
+                for (int y = -30; y <= 24; y++) {
                     BlockPos p = c.offset(x, y, z);
                     if (level.getBlockState(p).getLightEmission() > 0) {
                         sources.add(p);
@@ -98,26 +98,20 @@ public final class ShrineSelfTest {
                 }
             }
         }
-        for (int x = -11; x <= 11; x++) {
-            for (int z = -11; z <= 32; z++) {
-                for (int y = -2; y <= 3; y++) {
-                    BlockPos p = c.offset(x, y, z);
-                    if (Math.abs(x) <= 3 || z <= 11 || z <= 30) {
-                        if (!walkable(level, p) || (z > 11 && Math.abs(x) > 3)) {
-                            continue;
-                        }
-                        boolean lit = false;
-                        for (BlockPos s : sources) {
-                            if (s.distManhattan(p) <= 9) {
-                                lit = true;
-                                break;
-                            }
-                        }
-                        if (!lit) {
-                            return p.toShortString();
-                        }
-                    }
+        java.util.Set<BlockPos> built = ShrineArchitect.STANDING.getOrDefault(c, java.util.Set.of());
+        for (BlockPos p : walkSet(level, c)) {
+            if (!built.contains(p)) {
+                continue;
+            }
+            boolean lit = false;
+            for (BlockPos s : sources) {
+                if (s.distManhattan(p) <= 9) {
+                    lit = true;
+                    break;
                 }
+            }
+            if (!lit) {
+                return p.toShortString() + " rel=" + p.subtract(c).toShortString();
             }
         }
         return null;

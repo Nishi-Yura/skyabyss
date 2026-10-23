@@ -43,6 +43,9 @@ final class ShrineArchitect {
     static final int PATH_MAX_END = 40;
     static final int FLAT_UNTIL = 15;
 
+    // 建てた床の立つ位置 (碑の位置ごと。自己テストの光の検査用)
+    static final Map<BlockPos, java.util.Set<BlockPos>> STANDING = new HashMap<>();
+
     // ---------------------------------------------------------------- 材質
     record Theme(BlockState floorA, BlockState floorB, BlockState trim, BlockState panel, BlockState pillar, BlockState pillarBase, BlockState cap,
             BlockState beam, BlockState roofFill, Block roofStair, BlockState upFill, Block upStair, BlockState drumWall, BlockState drumWindow,
@@ -256,6 +259,11 @@ final class ShrineArchitect {
         path(b, plan, titan);
         motif(b, plan, titan);
         lighting(b, plan);
+        java.util.Set<BlockPos> stand = new java.util.HashSet<>();
+        for (int[] f : b.floors) {
+            stand.add(b.origin.offset(f[0], f[1], f[2]).above());
+        }
+        STANDING.put(center, stand);
         return apply(level, b);
     }
 
