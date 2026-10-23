@@ -146,6 +146,14 @@ public final class TideRaid2SelfTest {
 
     // 文言: 部屋の名前・説明・目的・メッセージ・碑・心の声 (日本語と英語)
     private static void texts() {
+        // 碑の各行が、看板の幅 (90 px) に収まる
+        List<String> signKeys = new ArrayList<>();
+        for (String id : List.of("TR4", "TR5", "TR6", "TR7")) {
+            signKeys.add(RaidLore.SIGNS.get(id));
+        }
+        for (String f : SignFit.check(signKeys)) {
+            F.add(f);
+        }
         for (String lg : List.of("ja_jp", "en_us")) {
             var lang = SignFit.lang(lg);
             for (String id : List.of("TR4", "TR5", "TR6", "TR7")) {
@@ -262,6 +270,7 @@ public final class TideRaid2SelfTest {
     }
 
     private static void advance() {
+        finishRoom();
         stage++;
         phase = 0;
         ticks = 0;

@@ -1,0 +1,81 @@
+# 潮殻のレイドの新しい四部屋 (docs/design/08 の 13a): TR4 伸びる珊瑚の道・TR5 光を返す真珠・TR6 潮見の暦・TR7 本物の群れの母。
+# 順路を通さず /skytideraid room <id> で部屋を建てる (区画 1・段 1 の原点 5120, 64, 4096。北が -z)。台紙は tools/shots/raid2_tide_sheet.py
+#   ./gradlew runShots -Pscript=tools/shots/raid2_tide.txt -PshotsName=raid2_tide   絵は run/shots/raid2_tide/shots/raid2_tide/ → docs/review/raid2_tide/
+world raid2_tide normal
+size 1280 720
+timeout 6000
+render 12
+clouds off
+
+wait 100
+cmd skyabyss cinematic stop
+wait 10
+cmd skyabyss cinematic stop
+cmd skyabyss playtest skip opening
+cmd time set noon
+cmd weather clear
+cmd gamerule doDaylightCycle false
+cmd skyabyss playtest god on
+cmd skyabyss playtest gear tide
+cmd skyabyss playtest board tide
+wait 1000
+cmd skyabyss playtest goto tide hub
+wait 100
+waitchunks
+wait 20
+chat clear
+cmd skyroute tidyhud
+# ---- TR4 伸びる珊瑚の道
+cmd skytideraid room TR4
+wait 60
+waitchunks
+wait 40
+cmd tp @s 5120.5 65 4110.5 180 6
+wait 30
+shot tr4_a_gates
+cmd tp @s 5121.5 65 4100.5 180 6
+wait 90
+shot tr4_b_carpet
+cmd skytideraid end
+# ---- TR5 光を返す真珠
+cmd skytideraid room TR5
+wait 60
+waitchunks
+wait 40
+cmd tp @s 5120.5 65 4108.5 180 10
+wait 30
+shot tr5_a_unsolved
+cmd skytideraid pose
+wait 70
+shot tr5_b_lit
+cmd skytideraid end
+# ---- TR6 潮見の暦
+cmd skytideraid room TR6
+wait 60
+waitchunks
+wait 40
+cmd tp @s 5120.5 65 4104.5 180 -12
+wait 30
+shot tr6_a_mural_north
+cmd tp @s 5120.5 65 4088.5 0 -12
+wait 20
+shot tr6_b_mural_south
+cmd skytideraid pose
+cmd tp @s 5120.5 65 4102.5 180 24
+wait 20
+shot tr6_c_dials
+cmd skytideraid end
+# ---- TR7 本物の群れの母
+cmd skytideraid room TR7
+wait 60
+waitchunks
+wait 80
+cmd tp @s 5120.5 65 4108.5 180 8
+wait 30
+shot tr7_a_hall
+cmd skytideraid pose
+cmd tp @s ~ ~ ~ 180 22
+wait 20
+shot tr7_b_mother
+cmd skytideraid end
+cmd skyroute clear
