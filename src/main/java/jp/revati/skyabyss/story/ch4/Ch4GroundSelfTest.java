@@ -181,7 +181,7 @@ public final class Ch4GroundSelfTest {
         // メインの段: 灰の昇る山に「乗る」(心臓を先に止めれば飛ばす)、天の鍵に二人の答え
         QuestDef ember = QuestManager.quest("main_ember");
         List<String> stages = ember == null ? List.of() : ember.stages().stream().map(QuestDef.Stage::id).toList();
-        check(f, stages.equals(List.of("rumor", "see", "board", "heart", "key")), "main_ember should be rumor → see → board → heart → key (" + stages + ")");
+        check(f, stages.equals(List.of("rumor", "prepare", "see", "board", "heart", "key")), "main_ember should be rumor → prepare → see → board → heart → key (" + stages + ")");
         QuestDef key = QuestManager.quest("main_key");
         check(f, key != null && key.stages().get(0).objectives().size() == 2, "main_key should ask for both answers (storyteller and Isana)");
         // 文 (日英)
@@ -427,14 +427,28 @@ public final class Ch4GroundSelfTest {
             check(f, Progression.stage(p) == 3 && Chapters.of(p) == Chapters.EMBER, "three stilled hearts should open chapter 4 (stage " + Progression.stage(p) + ")");
             Quests.start(p, "main_ember");
             Quests.poll(p, true);
-            for (String id : Ch4Ground.TRAILS) {
-                check(f, QuestLog.of(p).entry(id) != null, id + " did not appear on its own in chapter 4");
-            }
+            // メインの段は一本ずつ (二章・三章と同じ): 噂のあいだは支度の段も鍵の話も出ない
+            check(f, QuestLog.of(p).entry(Ch4Ground.Q_DRAUGHT) == null && QuestLog.of(p).entry(Ch4Ground.Q_FORGE) == null
+                    && QuestLog.of(p).entry("ch4/fragments") == null, "chapter-4 steps appeared before Isana's rumor");
             check(f, QuestLog.of(p).entry(Ch4Ground.Q_ROAD) != null && QuestLog.of(p).entry(Ch4Ground.Q_DRAGGER) != null, "the chapter-4 side quests did not appear");
-            // 噂 → 見る → 乗る
+            // 噂 → 支度 (火除けの薬 → 炉跡の順に一本ずつ) → 見る → 乗る
             Quests.onTalk(p, "skyabyss:whale_chaser", "ms_c_ember2");
             Quests.poll(p, true);
-            check(f, "see".equals(stage(p, "main_ember")), "the rumor did not move main_ember to see: " + stage(p, "main_ember"));
+            check(f, "prepare".equals(stage(p, "main_ember")), "the rumor did not move main_ember to the chapter-4 preparations: " + stage(p, "main_ember"));
+            check(f, QuestLog.of(p).entry(Ch4Ground.Q_DRAUGHT) != null && QuestLog.of(p).entry(Ch4Ground.Q_FORGE) == null,
+                    "after the rumor only the fire draught should be open (forge " + QuestLog.of(p).entry(Ch4Ground.Q_FORGE) + ")");
+            check(f, QuestLog.of(p).entry("ch4/fragments") != null && !QuestManager.quest("ch4/fragments").main(), "the key talk should open as a side quest after the rumor");
+            p.getInventory().add(firePotion(false));
+            p.getInventory().add(firePotion(false));
+            Quests.poll(p, true);
+            Quests.onTalk(p, "skyabyss:artisan", "ch4g_draught_show");
+            Quests.poll(p, true);
+            check(f, "pit".equals(stage(p, Ch4Ground.Q_FORGE)), "the forge ruins did not open after the fire draught: " + stage(p, Ch4Ground.Q_FORGE));
+            Lore.unlock(p, Ch4Ground.PAGE_FORGE, false);
+            Quests.poll(p, true);
+            Quests.onTalk(p, "skyabyss:storyteller", "ch4g_forge_read2");
+            Quests.poll(p, true);
+            check(f, PrepQuests.ready(p, 4) && "see".equals(stage(p, "main_ember")), "the chapter-4 trail steps did not finish the preparations: " + stage(p, "main_ember"));
             Lore.unlock(p, "chapter1/ember", false);
             Quests.poll(p, true);
             check(f, "board".equals(stage(p, "main_ember")), "seeing the ember did not move to board: " + stage(p, "main_ember"));
@@ -443,15 +457,6 @@ public final class Ch4GroundSelfTest {
             Lore.unlock(p, "chapter1/ember_ruins", false);
             Quests.poll(p, true);
             check(f, "heart".equals(stage(p, "main_ember")), "boarding did not move to the heart: " + stage(p, "main_ember"));
-            // 支度の段 (どちらも勧め。心臓の前に済ませる)
-            p.getInventory().add(firePotion(false));
-            p.getInventory().add(firePotion(false));
-            Quests.poll(p, true);
-            Quests.onTalk(p, "skyabyss:artisan", "ch4g_draught_show");
-            Lore.unlock(p, Ch4Ground.PAGE_FORGE, false);
-            Quests.poll(p, true);
-            Quests.onTalk(p, "skyabyss:storyteller", "ch4g_forge_read2");
-            check(f, PrepQuests.ready(p, 4), "the chapter-4 trail steps did not finish in the flow");
             // 心臓 → 欠片 4 で天の鍵
             Progression.onTitanStopped(server, List.of(p.getUUID()), Titans.EMBER);
             Quests.poll(p, true);
@@ -471,7 +476,7 @@ public final class Ch4GroundSelfTest {
             Quests.poll(p, true);
             check(f, "done".equals(stage(p, "main_key")), "Isana's answer did not finish main_key");
             for (QuestDef d : QuestManager.all()) {
-                if (d.main() && Chapters.EMBER.id().equals(d.chapter()) && !d.id().equals("ch4/fragments")) {
+                if (d.main() && Chapters.EMBER.id().equals(d.chapter())) {
                     check(f, "done".equals(stage(p, d.id())), "chapter-4 main quest " + d.id() + " is not done at the end: " + stage(p, d.id()));
                 }
             }

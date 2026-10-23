@@ -1,0 +1,56 @@
+{
+  "category": "sub",
+  "chapter": "chapter2",
+  "order": 63,
+  "giver": "skyabyss:attendant_innkeeper",
+  "min_stage": 4,
+  "stages": [
+    {
+      "id": "pack",
+      "objectives": [
+        {
+          "id": "bread",
+          "type": "collect",
+          "target": "minecraft:bread",
+          "count": 12,
+          "party": false
+        }
+      ]
+    },
+    {
+      "id": "deliver",
+      "xp": 150,
+      "objectives": [
+        {
+          "id": "talk",
+          "type": "talk",
+          "target": "skyabyss:attendant_survivor_bone",
+          "topic": "ch5i_rations"
+        }
+      ]
+    },
+    {
+      "id": "tell",
+      "objectives": [
+        {
+          "id": "talk",
+          "type": "talk",
+          "target": "skyabyss:attendant_innkeeper",
+          "topic": "ch5i_back"
+        }
+      ]
+    }
+  ],
+  "reward": {
+    "xp": 450,
+    "items": [
+      {
+        "item": "minecraft:golden_carrot",
+        "count": 6
+      }
+    ],
+    "affinity": {
+      "skyabyss:attendant_innkeeper": 3
+    }
+  }
+}

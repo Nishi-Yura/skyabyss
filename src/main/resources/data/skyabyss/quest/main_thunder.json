@@ -103,12 +103,12 @@
           "id": "read",
           "type": "lore",
           "targets": [
-            "chapter1/inscription_storm_tail",
-            "chapter1/inscription_storm_hub",
             "chapter1/inscription_storm_west",
+            "chapter1/inscription_storm_column",
             "chapter1/inscription_storm_east",
-            "chapter1/inscription_storm_eye",
-            "chapter1/inscription_storm_heart"
+            "chapter1/inscription_storm_beat",
+            "chapter1/inscription_storm_tail",
+            "chapter1/inscription_storm_gale"
           ],
           "count": 2
         },

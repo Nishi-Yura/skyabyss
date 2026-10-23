@@ -24,7 +24,7 @@ import net.neoforged.neoforge.event.tick.ServerTickEvent;
 // 前の探掘隊の生き残りと手記 (docs/design/36 の 8 章「物語」)。
 //   生き残り: 層ごとに一人、野営に立つ (係の人の形 AttendantEntity。役 survivor_<層>、会話は data/skyabyss/dialogue/ch5/attendant_survivor_<層>.json)。
 //     骨 = 灯り番のミオ、塩 = 測量士のハヤセ (と荷運びのロク abyss_porter。品の取り替え)、雷 = 薬師のシズ、灰 = 隊長のトウヤ。
-//     いなくなったら (コマンドで消した等)、人が近くに来たときに立て直す
+//     いなくなったら (コマンドで消した等)、人が近くに来たときに立て直す。塩のロクと灰のトウヤは、護りの下り道のあいだ野営にいない (AbyssEscort)
 //   手記: 野営の帳面 (journal_<層>_0) と、道ごとの書見台 (journal_<層>_1..3)。右クリックで読む (人ごとに記録 "read:journal_<層>_<i>"、合図 abyss_journal_<層>_<i>)
 //     文は message.skyabyss.abyss_v2.journal.<層>_<i>_1 / _2 (tools/gen/ch5/gen_ch5_layers.py)
 @EventBusSubscriber(modid = SkyAbyss.MODID)
@@ -49,7 +49,8 @@ public final class AbyssSurvivors {
         }
         for (String[] who : PEOPLE) {
             BlockPos at = AbyssBuild.mark(who[1]);
-            if (at == null || !level.isLoaded(at)) {
+            if (at == null || !level.isLoaded(at) || AbyssEscort.busy(who[0])) {
+                // 護りの下り道に出ている人 (AbyssEscort) は、野営に立てない
                 continue;
             }
             boolean near = false;

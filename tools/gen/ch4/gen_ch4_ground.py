@@ -402,8 +402,10 @@ def quest(q, is_='active', stage=None):
     return c
 
 
-# 二本とも、四章 (段階 3) の人に、メイン「灰の昇る山」が始まったら出る (イサナの灰の山の話のころ)
-START = {'type': 'all', 'of': [{'type': 'stage', 'min': 3, 'max': 3}, quest('main_ember', 'started')]}
+# 支度の段は一本ずつ (二章・三章と同じ形): 火除けの薬は、四章 (段階 3) の人がイサナの灰の山の話 (main_ember の rumor) を聞いたあと。
+# 炉跡は、火除けの薬を終えたあと
+START = {'type': 'all', 'of': [{'type': 'stage', 'min': 3, 'max': 3}, quest('main_ember', 'started'), not_(quest('main_ember', 'active', 'rumor'))]}
+START_FORGE = {'type': 'all', 'of': [{'type': 'stage', 'min': 3, 'max': 3}, quest('ch4/fire_draught', 'done')]}
 # 耐火のポーション (延長版も数える。品の ID @ 効き目の ID。QuestItems)
 FIRE_POTION = 'minecraft:potion@minecraft:fire_resistance'
 
@@ -421,7 +423,7 @@ def quests():
         'reward': {'xp': 120, 'items': [], 'affinity': {ARTISAN: 3}},
     })
     write_json(os.path.join(q, 'forge_ruins.json'), {
-        'category': 'main', 'order': 42, 'giver': STORYTELLER, 'chapter': CH, 'start_when': START,
+        'category': 'main', 'order': 42, 'giver': STORYTELLER, 'chapter': CH, 'start_when': START_FORGE,
         'stages': [
             # 消えた炉の坑を抜けると (奥の間の古い灰の番人を倒す)、冷えた金床の上の頁 (DeadForgePit が伝承 ch4/forge_page を記す)
             {'id': 'pit', 'xp': 60, 'objectives': [{'id': 'page', 'type': 'lore', 'targets': ['ch4/forge_page']}]},
@@ -456,6 +458,42 @@ def quests():
         ],
         'reward': {'xp': 60, 'items': [{'item': 'skyabyss:soot_iron', 'count': 2}]},
     })
+    # 余燼の日替わり・週替わり (2026-10-23 の点検: 余燼に繰り返しが無い)。板の頼みの形は雷翼の「背の見回り」「嵐の鼓動をもう一度」と同じ。
+    # 灰被りの屑 (ash_husk) は四章の地上の夜のひとり歩き (Ch4Mobs) と、消えた炉の坑の湧き台に出る。心臓は祠からの順路の終わりで何度でも
+    write_json(os.path.join(RES, 'data/skyabyss/quest/daily_ash_watch.json'), {
+        'category': 'sub', 'order': 67, 'repeat': 'daily', 'board': True, 'min_stage': 3,
+        'unlock': {'type': 'flag', 'flag': 'met', 'npc': ISANA},
+        'stages': [
+            {'id': 'watch', 'objectives': [{'id': 'kill', 'type': 'kill', 'target': 'skyabyss:ash_husk', 'count': 6}]},
+        ],
+        'reward': {'xp': 120, 'items': [{'item': 'skyabyss:ash_hemp', 'count': 3}, {'item': 'skyabyss:soot_iron', 'count': 1}]},
+    })
+    write_json(os.path.join(RES, 'data/skyabyss/quest/weekly_ember_heart.json'), {
+        'category': 'sub', 'order': 85, 'repeat': 'weekly', 'board': True, 'min_stage': 4,
+        'unlock': {'type': 'flag', 'flag': 'met', 'npc': ISANA},
+        'stages': [
+            {'id': 'heart', 'objectives': [{'id': 'heart', 'type': 'kill', 'target': 'skyabyss:ember_heart', 'count': 1}]},
+        ],
+        'reward': {'xp': 320, 'items': [{'item': 'skyabyss:resonance_crystal', 'count': 1},
+                                        {'item': 'skyabyss:ember_shard', 'count': 3, 'optional': True}]},
+    })
+
+    b = 'quest.skyabyss.daily_ash_watch.'
+    put(b + 'title', '灰の夜回り', 'Night Watch on the Ash')
+    put(b + 'summary', '灰の地をうろつく灰被りの屑を六体倒す。仲間の分も数える。', 'Defeat six ash husks roaming the ash land. Party members count too.')
+    put(b + 'done', '干し場の灰麻は、今夜は荒らされずに済むだろう。', 'The ash hemp on the drying racks should be left alone tonight.')
+    put(b + 'watch.journal', '板の紙（灰の染みた字）：「夜になると、灰被りの屑が干し場の灰麻を荒らしに来る。六つほど追い払ってほしい。消えた炉の坑の鍛えの跡にも、昼から湧いている」',
+        'A note on the board, in ash-stained writing: "At night, ash husks come to tear up the ash hemp on the drying racks. Drive off six or so. They also rise in the old forging hall of the dead forge pit, even by day."')
+    put(b + 'watch.kill', '灰の地で、灰被りの屑を倒そう', 'Defeat ash husks on the ash land')
+    put(b + 'unlock_hint', 'イサナと話すと、受けられる', 'Talk to Isana to take this on')
+    b = 'quest.skyabyss.weekly_ember_heart.'
+    put(b + 'title', '熾の鼓動をもう一度', 'The Ember\'s Heart, Once More')
+    put(b + 'summary', '余燼の心臓を、もう一度止める。戦いに加わった仲間の分も数える。', 'Still the ember\'s heart once more. Party members in the fight count too.')
+    put(b + 'done', '熾は鎮まった。けれど灰の下で、火はまだ息をしている。', 'The embers have settled. But under the ash, the fire still breathes.')
+    put(b + 'heart.journal', '板の隅の紙（同じ、名前のない字）：「熾は七日でまた熱を持つ。熱くなりきる前に、確かめてきてほしい」',
+        'A note in the corner of the board, in the same unsigned hand: "The embers grow hot again in seven days. Go and make sure, before they are hot through."')
+    put(b + 'heart.heart', '余燼の心臓を止めよう', 'Still the ember\'s heart')
+    put(b + 'unlock_hint', 'イサナと話すと、受けられる', 'Talk to Isana to take this on')
 
     b = 'quest.skyabyss.ch4.fire_draught.'
     put(b + 'title', '火除けの薬', 'The Fire Draught')
@@ -705,7 +743,8 @@ def texts():
                         ('elder_thrall_wave', '熱の波', 'Heat wave'), ('elder_thrall_rake', '火掻きが振り上がる', 'Rake raised')):
         put('subtitles.skyabyss_ch4.' + sid, sj, se)
     # 試遊のコマンド /skyabyss playtest now の四章の分 (story/ch4/Ch4Playtest)
-    for k, j, e in (('ch4_draught', '耐火のポーションを 2 つ渡した。旅の職人に見せよう', 'Gave two fire resistance potions. Show them to the artisan'),
+    for k, j, e in (('ch4_rumor', 'イサナの灰の山の話を聞いた扱いにした。支度の段が出る', "Counted Isana's tale of the ash mountain as heard. The preparations open"),
+                    ('ch4_draught', '耐火のポーションを 2 つ渡した。旅の職人に見せよう', 'Gave two fire resistance potions. Show them to the artisan'),
                     ('ch4_draught_show', '耐火のポーションを、旅の職人に見せた扱いにした', 'Counted the draughts as shown to the artisan'),
                     ('ch4_pit', '消えた炉の坑の口へ運んだ。奥の古い灰の番人を倒そう', 'Moved you to the dead forge pit. Fell the old thrall at the bottom'),
                     ('ch4_forge_page', '炉跡の頁を記した。語り部に見せよう', 'Recorded the forge page. Show it to the storyteller'),

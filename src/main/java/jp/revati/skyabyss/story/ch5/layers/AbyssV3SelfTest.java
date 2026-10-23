@@ -197,8 +197,8 @@ public final class AbyssV3SelfTest {
 
     // ---------------------------------------------------------------- 縄張りの主
     static void elite(List<String> f, MinecraftServer server, ServerLevel level) {
-        BlockPos at = AbyssBuild.mark("terr_salt");
-        check(f, at != null, "terr_salt mark is missing");
+        BlockPos at = AbyssBuild.mark("wp_salt_3");
+        check(f, at != null, "wp_salt_3 mark is missing");
         if (at == null) {
             return;
         }

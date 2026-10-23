@@ -102,12 +102,12 @@
           "id": "read",
           "type": "lore",
           "targets": [
-            "chapter1/inscription_tide_beach",
-            "chapter1/inscription_tide_hub",
             "chapter1/inscription_tide_west",
-            "chapter1/inscription_tide_east",
+            "chapter1/inscription_tide_coral",
+            "chapter1/inscription_tide_light",
+            "chapter1/inscription_tide_calendar",
             "chapter1/inscription_tide_front",
-            "chapter1/inscription_tide_heart"
+            "chapter1/inscription_tide_brood"
           ],
           "count": 2
         }

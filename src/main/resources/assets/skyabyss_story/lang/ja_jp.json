@@ -169,5 +169,8 @@
   "subtitles.skyabyss_story.deep_beat": "足もとの遠い鼓動",
   "subtitles.skyabyss_story.key_form": "欠片が触れ合う",
   "chapter.skyabyss.aftermath.head": "%s　完",
-  "chapter.skyabyss.aftermath.preview": "この鼓動は、地の底から預かったもの。"
+  "chapter.skyabyss.aftermath.preview": "この鼓動は、地の底から預かったもの。",
+  "quest.skyabyss.main_ember.prepare.journal": "イサナは言った。燃える山へ行くなら、火に負けない支度をしろ、と。\n職人は火除けの薬の作り方を、語り部は灰の民の炉跡のことを知っているらしい。",
+  "quest.skyabyss.main_ember.prepare.lead": "イサナ「燃える山へ行くなら、まず火に負けない支度だ。職人と語り部を訪ねてみろ」",
+  "quest.skyabyss.main_ember.prepare.ready": "火除けの薬と炉跡で、火の山への支度をしよう"
 }

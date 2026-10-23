@@ -463,6 +463,9 @@ def cond_ob(oid, ja, en, c):
 
 
 # ---- メイン 2: 満ち引きの門 (潮殻)
+# 潮殻のレイドの部屋 (TR1・TR4 / TR5・TR6 / TR3・TR7) の入口の碑が記す碑文 (trial/raid/RaidLore.SIGNS)。
+# 枠ごとに 2 部屋から一つを引くので、どの引きでも三つの部屋を越えると 3 つ記される → count 2 はかならず届く (自己テスト raid lore が引きを全部たしかめる)
+TIDE_INSCRIPTIONS = [f"chapter1/inscription_tide_{p}" for p in ("west", "coral", "light", "calendar", "front", "brood")]
 quest(TIDE, "main", 20, ("満ち引きの門", "The Gate of Ebb and Flow"),
       ("二つ目の欠片を求めて、海の巨神の背へ渡る。", "Cross onto the back of the titan of the sea, in search of the second fragment."),
       ("空にも、海にも、何かが脈を打っている。", "Something beats in the sky, and in the sea."),
@@ -487,8 +490,7 @@ quest(TIDE, "main", 20, ("満ち引きの門", "The Gate of Ebb and Flow"),
        stage("inscriptions", ("甲羅の中は、三つの試練の間が一つずつ続いている。\n間の入口には、背中の民の碑文が残っている。三つを越えて、奥へ進もう。",
                               "Inside the shell, three trial rooms follow one after another.\nThe people of the back left inscriptions at their entrances. Cross all three and go deeper."),
              [ob("read", "lore", "三つの試練を越え、間の碑文を読もう", "Clear the trials, read their words",
-                 targets=["chapter1/inscription_tide_beach", "chapter1/inscription_tide_hub", "chapter1/inscription_tide_west",
-                          "chapter1/inscription_tide_east", "chapter1/inscription_tide_front", "chapter1/inscription_tide_heart"], count=2)],
+                 targets=TIDE_INSCRIPTIONS, count=2)],
              xp=90, skip_if=stilled("tide_shell")),
        stage("heart", ("三つの試練と潮招きの先、甲羅の奥で、潮のように満ち引きする鼓動がある。\n欠片は、そのそばに納められているのだろう。",
                        "Past the three trials and the tide beckoner, deep in the shell, a heartbeat rises and falls like the tide.\nThe fragment must lie beside it."),
@@ -505,7 +507,8 @@ quest(TIDE, "main", 20, ("満ち引きの門", "The Gate of Ebb and Flow"),
 # 進みは伝承 (見た・渡った・碑文)、背中の担当の合図 storm_trial_<west|east|front>、心臓の記録 (Progression.onTitanStopped) で数える。
 # 本体がなくても /skyabyss lore unlock と /skyabyss quest signal で通せる
 STORM_SIGHT = ["chapter1/thunder_wing", "chapter1/storm_wing"]
-STORM_INSCRIPTIONS = [f"chapter1/inscription_storm_{p}" for p in ("tail", "hub", "west", "east", "eye", "heart")]
+# 雷翼のレイドの部屋 (SR1〜SR6) の入口の碑が記す碑文。上の TIDE_INSCRIPTIONS と同じ決まり
+STORM_INSCRIPTIONS = [f"chapter1/inscription_storm_{p}" for p in ("west", "column", "east", "beat", "tail", "gale")]
 quest(THUNDER, "main", 30, ("嵐を渡る翼", "Wings Across the Storm"),
       ("三つ目の欠片を求めて、風に逆らう嵐を追い、その背へ渡る。", "In search of the third fragment, chase the storm that moves against the wind and cross onto its back."),
       ("残りは一つ。", "Only one left."),
@@ -554,6 +557,13 @@ quest(EMBER, "main", 40, ("灰の昇る山", "The Mountain Where Ash Rises"),
                        "Only one left. Isana has seen many things on his travels.\nI'll go to his fire and ask."),
              [ob("talk", "talk", "イサナに、四つ目のことを尋ねよう", "Ask Isana about the fourth", target=WC, topic="ms_c_ember2")], xp=40,
              skip_if=any_(lore("chapter1/ember"), stilled("ember"))),
+       # 四章の支度 (火除けの薬 → 炉跡。一本ずつ出る。帯は支度の段のほうを出す)
+       stage("prepare", ("イサナは言った。燃える山へ行くなら、火に負けない支度をしろ、と。\n職人は火除けの薬の作り方を、語り部は灰の民の炉跡のことを知っているらしい。",
+                         "Isana said that to go to the burning mountain, you must first be ready for the fire.\nThe artisan knows how to make a fire-ward draught, and the storyteller knows of the ash folk's old forge."),
+             [cond_ob("ready", "火除けの薬と炉跡で、火の山への支度をしよう", "Get ready for the mountain of fire", {"type": "prep", "chapter": 4})],
+             skip_if=any_(lore("chapter1/ember"), stilled("ember")), prep=True,
+             lead=("イサナ「燃える山へ行くなら、まず火に負けない支度だ。職人と語り部を訪ねてみろ」",
+                   "Isana: \"If you mean to go to the burning mountain, get ready for the fire first. Go and see the artisan and the storyteller.\"")),
        stage("see", ("灰が空へ昇っていく山があるという。火の気のない晩でも、その山だけはうっすら赤い。",
                      "There is a mountain where the ash rises into the sky. Even on nights without fire, it glows faintly red."),
              [ob("see", "lore", f"灰の昇る山で、{EM_JA}を探そう", f"Find {EM_EN}'s mountain",

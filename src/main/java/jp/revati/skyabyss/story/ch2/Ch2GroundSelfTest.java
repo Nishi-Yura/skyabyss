@@ -269,6 +269,11 @@ public final class Ch2GroundSelfTest {
             for (int z = -6; z <= 6; z++) {
                 level.getChunk(base.offset(x, 0, z));
                 level.setBlock(base.offset(x, 0, z), Blocks.SAND.defaultBlockState(), 2 | 16);
+                // 箱の上の元の地形 (丘・木・前の段が建てた物) も消す。残ると標が地形の上に立ち、世界の種と段の順しだいで落ちる
+                int top = level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.WORLD_SURFACE, base.getX() + x, base.getZ() + z);
+                for (int y = base.getY() + 1; y < top; y++) {
+                    level.setBlock(new BlockPos(base.getX() + x, y, base.getZ() + z), Blocks.AIR.defaultBlockState(), 2 | 16);
+                }
             }
         }
         BlockPos at = SaltVault.placeMark(level, base.getX(), base.getZ(), base.offset(30, 0, 0));

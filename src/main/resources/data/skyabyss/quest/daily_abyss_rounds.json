@@ -1,0 +1,100 @@
+{
+  "category": "sub",
+  "order": 69,
+  "repeat": "daily",
+  "board": true,
+  "min_stage": 4,
+  "unlock": {
+    "type": "all",
+    "of": [
+      {
+        "type": "quest",
+        "quest": "main_abyss",
+        "is": "started"
+      },
+      {
+        "type": "not",
+        "of": {
+          "type": "any",
+          "of": [
+            {
+              "type": "quest",
+              "quest": "main_abyss",
+              "is": "active",
+              "stage": "rumor"
+            },
+            {
+              "type": "quest",
+              "quest": "main_abyss",
+              "is": "active",
+              "stage": "prepare"
+            },
+            {
+              "type": "quest",
+              "quest": "main_abyss",
+              "is": "active",
+              "stage": "door"
+            },
+            {
+              "type": "quest",
+              "quest": "main_abyss",
+              "is": "active",
+              "stage": "shaft"
+            },
+            {
+              "type": "quest",
+              "quest": "main_abyss",
+              "is": "active",
+              "stage": "gate"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "stages": [
+    {
+      "id": "rounds",
+      "objectives": [
+        {
+          "id": "kill",
+          "type": "kill",
+          "targets": [
+            "skyabyss:bone_picker",
+            "skyabyss:rib_guard",
+            "skyabyss:bone_flute",
+            "skyabyss:salt_husk",
+            "skyabyss:tide_hands",
+            "skyabyss:white_shell_keeper",
+            "skyabyss:charged_moth",
+            "skyabyss:lightning_idol",
+            "skyabyss:scorched_bird",
+            "skyabyss:ash_trail",
+            "skyabyss:soot_child",
+            "skyabyss:ember_keeper",
+            "skyabyss:past_shadow",
+            "skyabyss:nameless_shape",
+            "skyabyss:lamp_eater",
+            "skyabyss:ceiling_walker",
+            "skyabyss:heartbeat_mimic",
+            "skyabyss:rope_hanger"
+          ],
+          "count": 12
+        }
+      ]
+    }
+  ],
+  "reward": {
+    "xp": 160,
+    "items": [
+      {
+        "item": "skyabyss:abyss_anchor_iron",
+        "count": 1
+      },
+      {
+        "item": "minecraft:bread",
+        "count": 4
+      }
+    ]
+  }
+}

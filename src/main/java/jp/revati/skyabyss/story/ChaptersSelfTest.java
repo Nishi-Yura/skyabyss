@@ -87,7 +87,32 @@ public final class ChaptersSelfTest {
         }
         check(Chapters.PROLOGUE.titan() == null && Chapters.PROLOGUE.levelCap() == ProgressRules.LEVEL_CAP[0] && !Chapters.PROLOGUE.titanChapter(), "prologue", failures);
         check(Chapters.WHALE.levelCap() == Chapters.PROLOGUE.levelCap(), "prologue and chapter 1 share the stage-0 cap", failures);
-        check(Chapters.ABYSS.stage() == 4 && Chapters.ABYSS.levelFrom() == ProgressRules.LEVEL_CAP[4], "abyss chapter starts at the post-ember cap", failures);
+        // 五章の始まりは四章の帯の終わり (levelTo) から上限 (levelCap) のあいだ = 余燼を止める前に届く。番人の前の上限 (40) より下
+        check(Chapters.ABYSS.stage() == 4 && Chapters.ABYSS.levelFrom() >= Chapters.EMBER.levelTo() && Chapters.ABYSS.levelFrom() <= Chapters.EMBER.levelCap()
+                && Chapters.ABYSS.levelFrom() < ProgressRules.LEVEL_CAP[4] && Chapters.ABYSS.levelTo() == ProgressRules.ABYSS_CAP,
+                "abyss chapter should start where chapter 4 ends (" + Chapters.ABYSS.levelFrom() + ") and end at the warden cap", failures);
+        // 五章の一度きりの経験値 (番人の前): 章のクエスト (番人と報告の段・メインの報酬を除く) + 印 12 + 層の主 4 が、
+        // 帯の始まりから番人の前の上限 (Lv 32 → 40) の 4〜8 割。残りを敵と繰り返しで (docs/design/36 の 7.1)
+        long band = jp.revati.skyabyss.rpg.GrowthRules.totalXpFor(ProgressRules.LEVEL_CAP[4]) - jp.revati.skyabyss.rpg.GrowthRules.totalXpFor(Chapters.ABYSS.levelFrom());
+        long once = 12L * jp.revati.skyabyss.story.ch5.layers.AbyssMarks.MARK_XP;
+        for (int xp : jp.revati.skyabyss.story.ch5.layers.AbyssLords.LORD_XP) {
+            once += xp;
+        }
+        for (jp.revati.skyabyss.quest.QuestDef q : jp.revati.skyabyss.quest.QuestManager.all()) {
+            if (!Chapters.ABYSS.id().equals(q.chapter()) || q.repeats()) {
+                continue;
+            }
+            boolean main = q.id().equals("main_abyss");
+            once += main ? 0 : q.reward().xp();
+            for (jp.revati.skyabyss.quest.QuestDef.Stage st : q.stages()) {
+                if (main && (st.id().equals("warden") || st.id().equals("heart") || st.id().equals("report"))) {
+                    continue;
+                }
+                once += st.xp();
+            }
+        }
+        check(band > 0 && once >= band * 4 / 10 && once <= band * 8 / 10, "chapter 5 one-time xp before the warden (" + once + ") should be 40-80% of the "
+                + Chapters.ABYSS.levelFrom() + "-" + ProgressRules.LEVEL_CAP[4] + " band (" + band + ")", failures);
 
         // 伝承の章との一致: 章の ID ごとに伝承の章があり、項目の "chapter" 欄はすべてどれかの章を指す
         LoreCatalog catalog = LoreManager.catalog();

@@ -4,6 +4,10 @@
   2. 落ちるブロックの下が空でない
   3. 歩いて届くか: 各層の野営から、三つの印・門・主の間・下りの鎖まで。戸・封・格子・門は開いたものとして、
      下りの鎖 → 次の層の着く所、井戸の底 → 上の口 (重さの術で浮く) はつながりとして数える
+  4. 形 A: 近道の格子を開けると、印の部屋から野営へ歩いて帰れる
+     形 B (護りの下り道): 連れて下りる人の道すじ (esc_<層>_<n>) の一マスずつに歩いて届く (井戸の梯子の列は除く)、
+     主の間から下り道を逆にたどって野営へ帰れる (帰りの鎖は使わない。井戸は縁から底へ下りられる)
+  どの層も: 主の間から、門の奥の廊下を上り返して門の前へ歩いて戻れる
 
 python -I tools/abyss/audit_layers.py   (設計図を作り直すが書き出さない。書くのは gen_abyss_layers.py)
 """
@@ -55,11 +59,15 @@ def boxes(marks, scuts=True):
             out.append((marks[m + '_a'], marks[m + '_b']))
     for L in g.ORDER:
         for i in (1, 2, 3):
-            if scuts:
+            if scuts and 'scut_%s_%d_a' % (L, i) in marks:
                 out.append((marks['scut_%s_%d_a' % (L, i)], marks['scut_%s_%d_b' % (L, i)]))
-        Y = g.CAMP_Y[L]
-        out.append(([-1, Y, -g.CAMP_HALF - 2], [1, Y + 2, -g.CAMP_HALF - 1]))
+        gx, gy, gz = marks['gate_%s' % L]
+        out.append(([gx - 1, gy, gz - 1], [gx + 1, gy + 2, gz]))
     return out
+
+
+def expedition(marks, L):
+    return 'esc_%s_0' % L in marks
 
 
 def main():
@@ -98,13 +106,16 @@ def main():
         nxt = 'arrive_%s' % g.ORDER[i + 1] if i + 1 < len(g.ORDER) else 'heart_in'
         links[tuple(marks['descend_%s' % L])] = tuple(marks[nxt])
     links[tuple(marks['well_salt'])] = tuple(marks['well_salt_top'])
+    down = {tuple(marks['well_salt_top']): tuple(marks['well_salt'])}     # 井戸を下りる (縁から飛び降りる・梯子)
 
-    def walk(start):
+    def walk(start, extra=None):
         seen = {start}
         q = deque([start])
+        ls = dict(links)
+        ls.update(extra or {})
         while q:
             x, y, z = q.popleft()
-            for (lx, ly, lz), to in links.items():
+            for (lx, ly, lz), to in ls.items():
                 if abs(lx - x) <= 2 and abs(lz - z) <= 2 and abs(ly - y) <= 1 and to not in seen:
                     seen.add(to)
                     q.append(to)
@@ -131,6 +142,18 @@ def main():
         must += ['journal_%s_%d' % (L, i) for i in (1, 2, 3)]
         must += ['grave_%s_%d' % (L, i) for i in (1, 2, 3)]
     must += ['heart', 'heart_in', 'rest_5']
+    for L in g.ORDER:
+        if not expedition(marks, L):
+            continue
+        lad = (marks['ladder_salt_a'], marks['ladder_salt_b']) if L == 'salt' else None
+        must += ['escstart_%s' % L, 'escend_%s' % L, 'back_%s' % L] + ['escwait_%s_%d' % (L, k) for k in (1, 2, 3)]
+        i = 0
+        while 'esc_%s_%d' % (L, i) in marks:
+            x, y, z = marks['esc_%s_%d' % (L, i)]
+            if not (lad and lad[0][0] <= x <= lad[1][0] and lad[0][2] <= z <= lad[1][2] and lad[0][1] < y <= lad[1][1] + 1):
+                if (x, y, z) not in seen:
+                    probs.append('escort node %s %d at %s: not reached on foot' % (L, i, (x, y, z)))
+            i += 1
     for m in must:
         mx, my, mz = marks[m]
         if not any((mx + a, my + c, mz + e) in seen for a in range(-2, 3) for e in range(-2, 3) for c in (-1, 0, 1)):
@@ -143,6 +166,18 @@ def main():
                     w[(x, y, z)] = 'air'
     # 近道の線の上にいれば、印の部屋から野営へ歩いて帰れる (格子は開いたもの)
     for L in g.ORDER:
+        # 主の間から門の前へ (下りの廊下を上り返せる)
+        up = walk(tuple(marks['arena_%s' % L]), down)
+        ox, oy, oz = marks['gate_%s_out' % L]
+        if not any((ox + a, oy + c, oz + e) in up for a in range(-1, 2) for e in range(-1, 2) for c in (-1, 0, 1)):
+            probs.append('%s: no way back on foot from the lord hall to the gate' % L)
+        if expedition(marks, L):
+            # 形 B: 主の間 (門の内) から、下り道を逆にたどって野営へ (帰りの鎖は使わない)
+            home = walk(tuple(marks['gate_%s_in' % L]), down)
+            cx, cy, cz = marks['camp_%s' % L]
+            if not any((cx + a, cy, cz + e) in home for a in range(-3, 4) for e in range(-3, 4)):
+                probs.append('expedition %s: no way back on foot from the lord hall to camp' % L)
+            continue
         for i in (1, 2, 3):
             back = walk(tuple(marks['markroom_%s_%d' % (L, i)]))
             cx, cy, cz = marks['camp_%s' % L]

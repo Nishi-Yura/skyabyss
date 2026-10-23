@@ -104,7 +104,7 @@ public final class AbyssMobsA {
     private static void onCommonSetup(FMLCommonSetupEvent event) {
         event.enqueueWork(() -> {
             for (AbyssMobKind k : AbyssMobKind.values()) {
-                GrowthRewards.MOD_ENEMIES.put(SkyAbyss.MODID + ":" + k.id, new GrowthRewards.Source(k.xp, AbyssScaling.ABYSS_LEVEL));
+                GrowthRewards.MOD_ENEMIES.put(SkyAbyss.MODID + ":" + k.id, new GrowthRewards.Source(AbyssScaling.growthXp(k.xp), AbyssScaling.ABYSS_LEVEL));
             }
         });
     }

@@ -588,12 +588,13 @@ quest("daily_bone_sentry", 63, ("骨の番兵の見回り", "Sentinel Rounds"),
 
 # ---- 言伝ての板 (週替わり)
 quest("weekly_back_trials", 80, ("背中の試練", "Trials of the Back"),
-      ("岩鯨の背の試練を三つ越える。一緒にいた仲間の分も数える。", "Clear three trials on the stone whale's back. Party members with you count too."),
+      ("巨神の背の試練の間を三つ越える。どの巨神の背でもよく、一緒にいた仲間の分も数える。",
+       "Clear three trial rooms on a titan's back. Any titan will do, and party members with you count too."),
       ("三つの試練を越えた。", "Three trials passed."),
-      [stage("trials", ("板の紙：「鯨の背の試練を、三つ越えてきてほしい。光る印に着いたと聞いたら、それでいい。——鯨追い」",
-                        "A note on the board: \"Clear three of the trials on the whale's back. Once I hear you reached the glowing marks, "
+      [stage("trials", ("板の紙：「背の試練の間を、三つ越えてきてほしい。どの巨神の背でもいい。間の扉が開いたと聞いたら、それでいい。——鯨追い」",
+                        "A note on the board: \"Clear three trial rooms on a titan's back. Any titan will do. Once I hear the doors of the rooms opened, "
                         "that's enough. —The whale chaser\""),
-             [ob("trial", "signal", "岩鯨の背の試練を越えよう（光る印に着く）", "Clear a trial on the stone whale's back (reach the glowing mark)",
+             [ob("trial", "signal", "背の試練の間を越えよう", "Clear trial rooms on a titan's back",
                  target="back_trial_cleared", count=3)])],
       {"xp": 100, "items": [{"item": "skyabyss:stone_whale_shard", "count": 3}, {"item": "skyabyss:resonance_shard_stone_whale", "count": 1}]},
       repeat="weekly", board=True, unlock_=all_(lore("chapter1/sky_ruins"), flag("met", WC)),
