@@ -87,7 +87,8 @@ wait 60
 shot a05_guide_strip
 cmd effect give @s night_vision 9999 0 true
 cmd skyabyss abyss layer go arena_bone 180
-cmd tp @s ~ ~ ~8
+wait 20
+cmd tp @s 0 174 -40 180 5
 wait 40
 cmd skyabyss abyss layer lord bone
 wait 30
@@ -97,19 +98,22 @@ shot a07_lord_bone_move
 wait 50
 shot a08_lord_bone_move2
 cmd skyabyss abyss layer go arena_salt 180
-cmd tp @s ~ ~ ~8
+wait 20
+cmd tp @s 0 54 -40 180 5
 wait 40
 cmd skyabyss abyss layer lord salt
 wait 110
 shot a09_lord_salt_move
 cmd skyabyss abyss layer go arena_storm 180
-cmd tp @s ~ ~ ~8
+wait 20
+cmd tp @s 0 -66 -40 180 5
 wait 40
 cmd skyabyss abyss layer lord storm
 wait 110
 shot a10_lord_storm_move
 cmd skyabyss abyss layer go arena_ash 180
-cmd tp @s ~ ~ ~8
+wait 20
+cmd tp @s 0 -186 -40 180 5
 wait 40
 cmd skyabyss abyss layer lord ash
 wait 110

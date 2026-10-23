@@ -174,8 +174,11 @@ public final class AbyssLords {
             }
             return;
         }
-        // 眠る (だれもいない 30 秒)
+        // 眠る (だれもいない 30 秒)。出て行った人のボスバーはすぐ外す
         if (in.isEmpty()) {
+            if (!f.bar.getPlayers().isEmpty()) {
+                f.bar.removeAllPlayers();
+            }
             if (f.emptySince < 0) {
                 f.emptySince = now;
             }
