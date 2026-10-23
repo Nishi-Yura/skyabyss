@@ -28,6 +28,7 @@ public class SkyAbyss {
     public static final Logger LOGGER = LogUtils.getLogger();
 
     public SkyAbyss(IEventBus modEventBus, ModContainer modContainer) {
+        SelfTestRunner.listAndExitIfRequested();
         modEventBus.addListener(this::commonSetup);
         ModSounds.register(modEventBus);
         MobSounds.register(modEventBus);

@@ -76,7 +76,7 @@ public class WhaleboneCaptain extends GuardMob {
     private Vec3 leapTo = Vec3.ZERO;
 
     public WhaleboneCaptain(EntityType<? extends Monster> type, Level level) {
-        super(type, level, "whalebone_captain", "sweep", "leap", "slam", "roar");
+        super(type, level, "whalebone_captain", "sweep", "leap", "slam", "roar", "hurt", "death");
         this.xpReward = 150;
     }
 
@@ -488,5 +488,11 @@ public class WhaleboneCaptain extends GuardMob {
         if (level().isClientSide && random.nextFloat() < 0.15f) {
             level().addParticle(ParticleTypes.SOUL_FIRE_FLAME, getX() + Mth.nextDouble(random, -0.6, 0.6), getY() + 2.4, getZ() + Mth.nextDouble(random, -0.6, 0.6), 0, 0.02, 0);
         }
+    }
+
+    // 被弾・倒れるアニメ (tools/gen/mobs/gen_guard_hurt_death.py)
+    @Override
+    protected boolean autoHurtDeath() {
+        return true;
     }
 }
