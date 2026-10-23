@@ -107,9 +107,9 @@ public final class StormHeartSelfTest {
         List<String> paths = new ArrayList<>(List.of("/assets/skyabyss/animations/entity/storm_heart.animation.json",
                 "/assets/skyabyss_storm_heart/sounds.json"));
         for (int n = 1; n <= StormHeart.PHASE_COUNT; n++) {
-            paths.add("/assets/skyabyss/geo/entity/storm_heart_p" + n + ".geo.json");
-            paths.add("/assets/skyabyss/textures/entity/storm_heart_p" + n + ".png");
-            paths.add("/assets/skyabyss/textures/entity/storm_heart_p" + n + "_glowmask.png");
+            paths.add("/assets/skyabyss/geo/entity/storm_heart_p" + n + "_lowpoly.geo.json");
+            paths.add("/assets/skyabyss/textures/lowpoly/storm_heart_p" + n + ".png");
+            paths.add("/assets/skyabyss/textures/lowpoly/storm_heart_p" + n + "_glow.png");
             paths.add("/assets/skyabyss/textures/gui/boss/storm_heart_frame_p" + n + ".png");
             paths.add("/assets/skyabyss/textures/gui/boss/storm_heart_icon_p" + n + ".png");
         }

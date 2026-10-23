@@ -295,9 +295,14 @@ public final class EmberSelfTest {
 
     private static void checkModel(List<String> f) {
         int[] counts = new int[3];
+        boolean cubeCounts = true;
         String[] files = {"ember_titan", "ember_titan_mid", "ember_titan_far"};
         for (int i = 0; i < 3; i++) {
-            JsonObject geo = json("/assets/skyabyss/geo/entity/" + files[i] + ".geo.json", f);
+            // キューブの箱の数を数えるので、キューブの geo を読む (ジャーに無いときは低ポリの骨だけを見る。箱の数の検査は飛ばす)
+            String cubePath = "/assets/skyabyss/geo/entity/" + files[i] + ".geo.json";
+            boolean cubeHere = EmberSelfTest.class.getResource(cubePath) != null;
+            cubeCounts &= cubeHere;
+            JsonObject geo = json(cubeHere ? cubePath : "/assets/skyabyss/geo/entity/" + files[i] + "_lowpoly.geo.json", f);
             if (geo == null) {
                 return;
             }
@@ -323,9 +328,13 @@ public final class EmberSelfTest {
             double minY = cubes.stream().mapToDouble(c -> c[1]).min().orElse(0);
             expect(minY >= -1e-6, files[i] + " has cubes under the ground plane (y " + minY + ")", f);
         }
-        expect(counts[0] >= 2000 && counts[0] <= 3500, "the near LOD should be about 2500 to 3300 cubes (high-poly trims, design doc 15): " + counts[0], f);
-        expect(counts[1] < counts[0] && counts[2] < counts[1] && counts[2] > 0, "the LODs do not get coarser: " + java.util.Arrays.toString(counts), f);
-        expect(glowPixels("/assets/skyabyss/textures/entity/ember_titan_glowmask.png", f) > 0, "the ember titan glowmask has no glowing pixels", f);
+        if (cubeCounts) {
+            expect(counts[0] >= 2000 && counts[0] <= 3500, "the near LOD should be about 2500 to 3300 cubes (high-poly trims, design doc 15): " + counts[0], f);
+            expect(counts[1] < counts[0] && counts[2] < counts[1] && counts[2] > 0, "the LODs do not get coarser: " + java.util.Arrays.toString(counts), f);
+        } else {
+            SkyAbyss.LOGGER.info("SELFTEST ember surface: cube geo not in the jar (tools/sources/geo_cube); skipped the cube LOD counts");
+        }
+        expect(glowPixels("/assets/skyabyss/textures/lowpoly/ember_titan_glowmask.png", f) > 0, "the ember titan glowmask has no glowing pixels", f);
         JsonObject anim = json("/assets/skyabyss/animations/entity/ember_titan.animation.json", f);
         if (anim != null) {
             for (String a : ANIMS) {

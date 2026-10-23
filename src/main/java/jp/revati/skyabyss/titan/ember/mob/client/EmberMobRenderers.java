@@ -85,7 +85,7 @@ public final class EmberMobRenderers {
             if (LowPoly.enabled && !LowPoly.debug) {
                 return thrall.isFlared() ? FLARED_LOW : super.getTextureResource(thrall);
             }
-            return thrall.isFlared() ? FLARED : super.getTextureResource(thrall);
+            return thrall.isFlared() && LowPoly.cubeHere(FLARED) ? FLARED : super.getTextureResource(thrall);
         }
     }
 

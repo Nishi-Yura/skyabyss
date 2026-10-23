@@ -75,13 +75,13 @@ public final class MountClient {
         @Override
         public ResourceLocation getModelResource(MountEntity e) {
             ResourceLocation[] r = res(e.look());
-            return LowPoly.enabled ? (LowPoly.debug ? r[2] : r[1]) : r[0];
+            return LowPoly.enabled ? (LowPoly.debug ? r[2] : r[1]) : LowPoly.cubeOr(r[0], r[1]);
         }
 
         @Override
         public ResourceLocation getTextureResource(MountEntity e) {
             ResourceLocation[] r = res(e.look());
-            return LowPoly.enabled ? (LowPoly.debug ? DEBUG_TEXTURE : r[4]) : r[3];
+            return LowPoly.enabled ? (LowPoly.debug ? DEBUG_TEXTURE : r[4]) : LowPoly.cubeOr(r[3], r[4]);
         }
 
         @Override

@@ -70,7 +70,11 @@ public class TideHeartRenderer extends jp.revati.skyabyss.client.lowpoly.LowPoly
             if (heart.isInvisible() || LowPoly.enabled) {
                 return;
             }
-            RenderType glow = RenderType.eyes(Model.path("textures/entity/tide_heart_p" + Model.phase(heart) + "_glowmask.png"));
+            ResourceLocation mask = Model.path("textures/entity/tide_heart_p" + Model.phase(heart) + "_glowmask.png");
+            if (!LowPoly.cubeHere(mask)) {
+                return;
+            }
+            RenderType glow = RenderType.eyes(mask);
             getRenderer().reRender(model, poseStack, buffers, heart, glow, buffers.getBuffer(glow), partialTick,
                     LightTexture.FULL_BRIGHT, packedOverlay, getRenderer().getRenderColor(heart, partialTick, packedLight).argbInt());
         }
@@ -84,7 +88,8 @@ public class TideHeartRenderer extends jp.revati.skyabyss.client.lowpoly.LowPoly
             if (LowPoly.enabled) {
                 return path("geo/entity/tide_heart_p" + phase(heart) + "_lowpoly" + (LowPoly.debug ? "_debug" : "") + ".geo.json");
             }
-            return path("geo/entity/tide_heart_p" + phase(heart) + ".geo.json");
+            return LowPoly.cubeOr(path("geo/entity/tide_heart_p" + phase(heart) + ".geo.json"),
+                    path("geo/entity/tide_heart_p" + phase(heart) + "_lowpoly.geo.json"));
         }
 
         @Override
@@ -92,7 +97,7 @@ public class TideHeartRenderer extends jp.revati.skyabyss.client.lowpoly.LowPoly
             if (LowPoly.enabled) {
                 return LowPoly.debug ? path("textures/lowpoly/debug.png") : path("textures/lowpoly/tide_heart_p" + phase(heart) + ".png");
             }
-            return path("textures/entity/tide_heart_p" + phase(heart) + ".png");
+            return LowPoly.cubeOr(path("textures/entity/tide_heart_p" + phase(heart) + ".png"), path("textures/lowpoly/tide_heart_p" + phase(heart) + ".png"));
         }
 
         @Override

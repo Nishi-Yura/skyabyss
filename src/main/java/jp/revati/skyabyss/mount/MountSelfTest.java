@@ -89,8 +89,7 @@ public final class MountSelfTest {
     private static void assets(List<String> f) {
         String a = "/assets/skyabyss/";
         for (MountLook look : MountLook.values()) {
-            check(f, resource(a + "geo/entity/" + look.model() + ".geo.json"), "geo " + look.id);
-            check(f, resource(a + "textures/entity/" + look.model() + ".png"), "texture " + look.id);
+            check(f, resource(a + "textures/lowpoly/" + look.model() + ".png"), "lowpoly texture " + look.id);
             check(f, resource(a + "geo/entity/" + look.model() + "_lowpoly.geo.json") && resource(a + "lowpoly/" + look.model() + ".json")
                     && resource(a + "textures/lowpoly/" + look.model() + ".png"), "low-poly mesh " + look.id);
             check(f, resource(a + "animations/entity/" + look.model() + ".animation.json"), "animation " + look.id);

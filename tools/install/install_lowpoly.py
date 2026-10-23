@@ -46,6 +46,8 @@ import mesh_close  # noqa: E402  (メッシュは書き出す前に水密にす�
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 ASSETS = os.path.join(ROOT, "src", "main", "resources", "assets", "skyabyss")
+# 元のキューブの geo は通常のジャーに入れていない (tools/sources/geo_cube/geo/entity/。戻すのは tools/dev/cube_geo.py back)。読むのはここ
+CUBE_GEO = os.path.join(ROOT, "tools", "sources", "geo_cube", "geo", "entity")
 
 
 def write_json(path, data):
@@ -177,7 +179,7 @@ def main():
 
     # Bones: name / parent / pivot / rest rotation. Mesh JSON wins where it states them, otherwise the original geo.
     # Bones the mesh lacks (sockets...) are carried over from the original geo, rotation included.
-    orig_path = os.path.join(ASSETS, "geo", "entity", a.name + ".geo.json")
+    orig_path = os.path.join(CUBE_GEO, a.name + ".geo.json")
     desc = {"identifier": "geometry." + geo_name + "_lowpoly", "texture_width": 16, "texture_height": 16,
             "visible_bounds_width": 4, "visible_bounds_height": 4, "visible_bounds_offset": [0, 1.5, 0]}
     orig_bones = {}

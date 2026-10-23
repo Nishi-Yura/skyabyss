@@ -82,13 +82,14 @@ public final class AbyssMobsBRenderers {
             if (look != 0) {
                 return LowPoly.debug ? DEBUG : BossRender.texture(look);
             }
+            ResourceLocation low = id("textures/lowpoly/" + name + STAGE_SUFFIX[Math.max(0, Math.min(2, mob.stage() - 1))] + ".png");
             if (LowPoly.enabled) {
                 if (LowPoly.debug) {
                     return DEBUG;
                 }
-                return id("textures/lowpoly/" + name + STAGE_SUFFIX[Math.max(0, Math.min(2, mob.stage() - 1))] + ".png");
+                return low;
             }
-            return entityTexture;
+            return LowPoly.cubeOr(entityTexture, low);
         }
     }
 

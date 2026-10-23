@@ -28,7 +28,7 @@ import yt  # noqa: E402
 A = os.path.join(ROOT, "src/main/resources/assets/skyabyss")
 mesh = json.load(open(os.path.join(A, "lowpoly", NAME + ".json"), encoding="utf-8"))
 skel = json.load(open(os.path.join(A, "geo/entity", NAME + "_lowpoly.geo.json"), encoding="utf-8"))
-cube = json.load(open(os.path.join(A, "geo/entity", NAME + ".geo.json"), encoding="utf-8"))
+cube = json.load(open(os.path.join(ROOT, "tools/sources/geo_cube/geo/entity", NAME + ".geo.json"), encoding="utf-8"))
 anim = json.load(open(os.path.join(A, "animations/entity", NAME + ".animation.json"), encoding="utf-8"))
 oe = yt.open_edges(mesh)
 hs = yt.seat_heights(mesh)

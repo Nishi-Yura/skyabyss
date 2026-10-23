@@ -16,7 +16,8 @@ public class StoneWhaleHeartModel extends GeoModel<StoneWhaleHeart> {
         if (LowPoly.enabled) {
             return path("geo/entity/" + meshName(heart) + "_lowpoly" + (LowPoly.debug ? "_debug" : "") + ".geo.json");
         }
-        return path("geo/entity/stone_whale_heart_p" + phase(heart) + ".geo.json");
+        return LowPoly.cubeOr(path("geo/entity/stone_whale_heart_p" + phase(heart) + ".geo.json"),
+                path("geo/entity/" + meshName(heart) + "_lowpoly.geo.json"));
     }
 
     @Override
@@ -24,7 +25,7 @@ public class StoneWhaleHeartModel extends GeoModel<StoneWhaleHeart> {
         if (LowPoly.enabled) {
             return LowPoly.debug ? path("textures/lowpoly/debug.png") : path("textures/lowpoly/" + meshName(heart) + ".png");
         }
-        return path("textures/entity/stone_whale_heart_p" + phase(heart) + ".png");
+        return LowPoly.cubeOr(path("textures/entity/stone_whale_heart_p" + phase(heart) + ".png"), path("textures/lowpoly/" + meshName(heart) + ".png"));
     }
 
     @Override
