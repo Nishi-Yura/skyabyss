@@ -1770,6 +1770,7 @@ class Town(Facilities):
         self.terrace_steps()
         self.graveyard()
         self.gravekeeper_hut()
+        self.polish_interiors()
         self.mark('stand', 0, 0, 94)
         self.attendants()
         n = 7
@@ -1778,6 +1779,7 @@ class Town(Facilities):
             n += 1
         self.tidy_for_walkers()
         self.drop_floaters()
+        self.polish_final()
         self.v.connect()
         return self.v
 
