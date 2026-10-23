@@ -1,15 +1,996 @@
 {
-  "format_version": "1.8.0",
-  "animations": {
-    "animation.lightning_idol.idle": {
-      "loop": true,
-      "animation_length": 1.0,
-      "bones": {}
+ "format_version": "1.8.0",
+ "animations": {
+  "animation.lightning_idol.idle": {
+   "loop": true,
+   "animation_length": 4.0,
+   "bones": {
+    "body": {
+     "rotation": [
+      "-(0.8 * math.sin(90 * query.anim_time + 0))",
+      "0",
+      "0"
+     ],
+     "position": [
+      "0",
+      "0.12 * math.sin(90 * query.anim_time + 0)",
+      "0"
+     ]
     },
-    "animation.lightning_idol.walk": {
-      "loop": true,
-      "animation_length": 1.0,
-      "bones": {}
+    "head": {
+     "rotation": [
+      "-(-2 * math.sin(90 * query.anim_time + 60))",
+      "12 * math.sin(45 * query.anim_time + 0)",
+      "0"
+     ]
+    },
+    "arm_l": {
+     "rotation": [
+      "-(2 * math.sin(90 * query.anim_time + 90))",
+      "0",
+      "3 + -1.5 * math.sin(90 * query.anim_time + 0)"
+     ]
+    },
+    "arm_r": {
+     "rotation": [
+      "-(2 * math.sin(90 * query.anim_time + 90))",
+      "0",
+      "-3 + 1.5 * math.sin(90 * query.anim_time + 0)"
+     ]
+    },
+    "leg_l": {
+     "rotation": [
+      "-((0) - (0.8 * math.sin(90 * query.anim_time + 0)))",
+      "0",
+      "0"
+     ]
+    },
+    "leg_r": {
+     "rotation": [
+      "-((0) - (0.8 * math.sin(90 * query.anim_time + 0)))",
+      "0",
+      "0"
+     ]
     }
+   }
+  },
+  "animation.lightning_idol.walk": {
+   "loop": true,
+   "animation_length": 1.4,
+   "bones": {
+    "leg_l": {
+     "rotation": [
+      "-((14 * math.sin(257.143 * query.anim_time + 0)) - (-3))",
+      "0",
+      "0"
+     ]
+    },
+    "leg_r": {
+     "rotation": [
+      "-((-14 * math.sin(257.143 * query.anim_time + 0)) - (-3))",
+      "0",
+      "0"
+     ]
+    },
+    "arm_r": {
+     "rotation": [
+      "-(-8 * math.sin(257.143 * query.anim_time + 0))",
+      "0",
+      "-3"
+     ]
+    },
+    "body": {
+     "rotation": [
+      "-(-3)",
+      "4 * math.sin(257.143 * query.anim_time + 0)",
+      "0"
+     ],
+     "position": [
+      "0",
+      "0.45 * math.abs(math.sin(257.143 * query.anim_time))",
+      "0"
+     ]
+    },
+    "head": {
+     "rotation": [
+      "-(2)",
+      "-4 * math.sin(257.143 * query.anim_time + 0)",
+      "0"
+     ]
+    },
+    "arm_l": {
+     "rotation": [
+      "-(8 * math.sin(257.143 * query.anim_time + 0))",
+      "0",
+      "3"
+     ]
+    }
+   }
+  },
+  "animation.lightning_idol.charge": {
+   "loop": false,
+   "animation_length": 1.9,
+   "bones": {
+    "arm_l": {
+     "rotation": {
+      "0": {
+       "vector": [
+        0,
+        0,
+        0
+       ]
+      },
+      "0.5": {
+       "vector": [
+        -150,
+        0,
+        22
+       ]
+      },
+      "0.9": {
+       "vector": [
+        -168,
+        0,
+        16
+       ]
+      },
+      "0.95": {
+       "vector": [
+        -168,
+        0,
+        19
+       ]
+      },
+      "1.025": {
+       "vector": [
+        -168,
+        0,
+        13
+       ]
+      },
+      "1.1": {
+       "vector": [
+        -168,
+        0,
+        19
+       ]
+      },
+      "1.175": {
+       "vector": [
+        -168,
+        0,
+        13
+       ]
+      },
+      "1.25": {
+       "vector": [
+        -168,
+        0,
+        19
+       ]
+      },
+      "1.325": {
+       "vector": [
+        -168,
+        0,
+        13
+       ]
+      },
+      "1.4": {
+       "vector": [
+        -168,
+        0,
+        19
+       ]
+      },
+      "1.5": {
+       "vector": [
+        -70,
+        0,
+        6
+       ]
+      },
+      "1.62": {
+       "vector": [
+        -62,
+        0,
+        6
+       ]
+      },
+      "1.9": {
+       "vector": [
+        0,
+        0,
+        0
+       ]
+      }
+     }
+    },
+    "arm_r": {
+     "rotation": {
+      "0": {
+       "vector": [
+        0,
+        0,
+        0
+       ]
+      },
+      "0.5": {
+       "vector": [
+        -150,
+        0,
+        -22
+       ]
+      },
+      "0.9": {
+       "vector": [
+        -168,
+        0,
+        -16
+       ]
+      },
+      "0.95": {
+       "vector": [
+        -168,
+        0,
+        -13
+       ]
+      },
+      "1.025": {
+       "vector": [
+        -168,
+        0,
+        -19
+       ]
+      },
+      "1.1": {
+       "vector": [
+        -168,
+        0,
+        -13
+       ]
+      },
+      "1.175": {
+       "vector": [
+        -168,
+        0,
+        -19
+       ]
+      },
+      "1.25": {
+       "vector": [
+        -168,
+        0,
+        -13
+       ]
+      },
+      "1.325": {
+       "vector": [
+        -168,
+        0,
+        -19
+       ]
+      },
+      "1.4": {
+       "vector": [
+        -168,
+        0,
+        -13
+       ]
+      },
+      "1.5": {
+       "vector": [
+        -70,
+        0,
+        -6
+       ]
+      },
+      "1.62": {
+       "vector": [
+        -62,
+        0,
+        -6
+       ]
+      },
+      "1.9": {
+       "vector": [
+        0,
+        0,
+        0
+       ]
+      }
+     }
+    },
+    "body": {
+     "rotation": {
+      "0": {
+       "vector": [
+        0,
+        0,
+        0
+       ]
+      },
+      "0.9": {
+       "vector": [
+        -8,
+        0,
+        0
+       ]
+      },
+      "1.45": {
+       "vector": [
+        -10,
+        0,
+        0
+       ]
+      },
+      "1.5": {
+       "vector": [
+        14,
+        0,
+        0
+       ]
+      },
+      "1.62": {
+       "vector": [
+        12,
+        0,
+        0
+       ]
+      },
+      "1.9": {
+       "vector": [
+        0,
+        0,
+        0
+       ]
+      }
+     },
+     "position": {
+      "0": {
+       "vector": [
+        0,
+        0,
+        0
+       ]
+      },
+      "0.9": {
+       "vector": [
+        0,
+        0.6,
+        0
+       ]
+      },
+      "1.45": {
+       "vector": [
+        0,
+        0.8,
+        0
+       ]
+      },
+      "1.5": {
+       "vector": [
+        0,
+        -0.6,
+        -0.8
+       ]
+      },
+      "1.9": {
+       "vector": [
+        0,
+        0,
+        0
+       ]
+      }
+     }
+    },
+    "head": {
+     "rotation": {
+      "0": {
+       "vector": [
+        0,
+        0,
+        0
+       ]
+      },
+      "0.9": {
+       "vector": [
+        -22,
+        0,
+        0
+       ]
+      },
+      "1.45": {
+       "vector": [
+        -26,
+        0,
+        0
+       ]
+      },
+      "1.5": {
+       "vector": [
+        12,
+        0,
+        0
+       ]
+      },
+      "1.9": {
+       "vector": [
+        0,
+        0,
+        0
+       ]
+      }
+     }
+    },
+    "leg_l": {
+     "rotation": {
+      "0": {
+       "vector": [
+        0,
+        0,
+        0
+       ]
+      },
+      "0.9": {
+       "vector": [
+        8.0,
+        0,
+        0
+       ]
+      },
+      "1.45": {
+       "vector": [
+        10.0,
+        0,
+        0
+       ]
+      },
+      "1.5": {
+       "vector": [
+        -14.0,
+        0,
+        0
+       ]
+      },
+      "1.62": {
+       "vector": [
+        -12.0,
+        0,
+        0
+       ]
+      },
+      "1.9": {
+       "vector": [
+        0,
+        0,
+        0
+       ]
+      }
+     }
+    },
+    "leg_r": {
+     "rotation": {
+      "0": {
+       "vector": [
+        0,
+        0,
+        0
+       ]
+      },
+      "0.9": {
+       "vector": [
+        8.0,
+        0,
+        0
+       ]
+      },
+      "1.45": {
+       "vector": [
+        10.0,
+        0,
+        0
+       ]
+      },
+      "1.5": {
+       "vector": [
+        -14.0,
+        0,
+        0
+       ]
+      },
+      "1.62": {
+       "vector": [
+        -12.0,
+        0,
+        0
+       ]
+      },
+      "1.9": {
+       "vector": [
+        0,
+        0,
+        0
+       ]
+      }
+     }
+    }
+   }
+  },
+  "animation.lightning_idol.attack": {
+   "loop": false,
+   "animation_length": 0.7,
+   "bones": {
+    "arm_r": {
+     "rotation": {
+      "0": {
+       "vector": [
+        0,
+        0,
+        0
+       ]
+      },
+      "0.15": {
+       "vector": [
+        30,
+        0,
+        0
+       ]
+      },
+      "0.3": {
+       "vector": [
+        -80,
+        0,
+        0
+       ]
+      },
+      "0.7": {
+       "vector": [
+        0,
+        0,
+        0
+       ]
+      }
+     }
+    },
+    "body": {
+     "rotation": {
+      "0": {
+       "vector": [
+        0,
+        0,
+        0
+       ]
+      },
+      "0.15": {
+       "vector": [
+        -4,
+        10,
+        0
+       ]
+      },
+      "0.3": {
+       "vector": [
+        8,
+        -8,
+        0
+       ]
+      },
+      "0.7": {
+       "vector": [
+        0,
+        0,
+        0
+       ]
+      }
+     }
+    },
+    "leg_l": {
+     "rotation": {
+      "0": {
+       "vector": [
+        0,
+        0,
+        0
+       ]
+      },
+      "0.15": {
+       "vector": [
+        4.0,
+        0,
+        0
+       ]
+      },
+      "0.3": {
+       "vector": [
+        -8.0,
+        0,
+        0
+       ]
+      },
+      "0.7": {
+       "vector": [
+        0,
+        0,
+        0
+       ]
+      }
+     }
+    },
+    "leg_r": {
+     "rotation": {
+      "0": {
+       "vector": [
+        0,
+        0,
+        0
+       ]
+      },
+      "0.15": {
+       "vector": [
+        4.0,
+        0,
+        0
+       ]
+      },
+      "0.3": {
+       "vector": [
+        -8.0,
+        0,
+        0
+       ]
+      },
+      "0.7": {
+       "vector": [
+        0,
+        0,
+        0
+       ]
+      }
+     }
+    }
+   }
+  },
+  "animation.lightning_idol.hurt": {
+   "loop": false,
+   "animation_length": 0.3,
+   "bones": {
+    "body": {
+     "rotation": {
+      "0": {
+       "vector": [
+        0,
+        0,
+        0
+       ]
+      },
+      "0.06": {
+       "vector": [
+        -3,
+        0,
+        2
+       ]
+      },
+      "0.14": {
+       "vector": [
+        2,
+        0,
+        -1.5
+       ]
+      },
+      "0.3": {
+       "vector": [
+        0,
+        0,
+        0
+       ]
+      }
+     }
+    },
+    "head": {
+     "rotation": {
+      "0": {
+       "vector": [
+        0,
+        0,
+        0
+       ]
+      },
+      "0.06": {
+       "vector": [
+        -6,
+        0,
+        -4
+       ]
+      },
+      "0.3": {
+       "vector": [
+        0,
+        0,
+        0
+       ]
+      }
+     }
+    },
+    "leg_l": {
+     "rotation": {
+      "0": {
+       "vector": [
+        0,
+        0,
+        0
+       ]
+      },
+      "0.06": {
+       "vector": [
+        3.0,
+        0,
+        0
+       ]
+      },
+      "0.14": {
+       "vector": [
+        -2.0,
+        0,
+        0
+       ]
+      },
+      "0.3": {
+       "vector": [
+        0,
+        0,
+        0
+       ]
+      }
+     }
+    },
+    "leg_r": {
+     "rotation": {
+      "0": {
+       "vector": [
+        0,
+        0,
+        0
+       ]
+      },
+      "0.06": {
+       "vector": [
+        3.0,
+        0,
+        0
+       ]
+      },
+      "0.14": {
+       "vector": [
+        -2.0,
+        0,
+        0
+       ]
+      },
+      "0.3": {
+       "vector": [
+        0,
+        0,
+        0
+       ]
+      }
+     }
+    }
+   }
+  },
+  "animation.lightning_idol.death": {
+   "loop": false,
+   "animation_length": 1.6,
+   "bones": {
+    "body": {
+     "rotation": {
+      "0": {
+       "vector": [
+        0,
+        0,
+        0
+       ]
+      },
+      "0.3": {
+       "vector": [
+        -2,
+        0,
+        3
+       ]
+      },
+      "0.5": {
+       "vector": [
+        4,
+        0,
+        2
+       ]
+      },
+      "1.2": {
+       "vector": [
+        84,
+        0,
+        4
+       ]
+      },
+      "1.35": {
+       "vector": [
+        80,
+        0,
+        4
+       ]
+      },
+      "1.6": {
+       "vector": [
+        88,
+        0,
+        4
+       ]
+      }
+     },
+     "position": {
+      "0": {
+       "vector": [
+        0,
+        0,
+        0
+       ]
+      },
+      "0.5": {
+       "vector": [
+        0,
+        0,
+        0
+       ]
+      },
+      "1.2": {
+       "vector": [
+        0,
+        -9.5,
+        0
+       ]
+      },
+      "1.6": {
+       "vector": [
+        0,
+        -10,
+        0
+       ]
+      }
+     }
+    },
+    "head": {
+     "rotation": {
+      "0": {
+       "vector": [
+        0,
+        0,
+        0
+       ]
+      },
+      "1.2": {
+       "vector": [
+        6,
+        0,
+        0
+       ]
+      },
+      "1.35": {
+       "vector": [
+        -10,
+        10,
+        16
+       ]
+      },
+      "1.6": {
+       "vector": [
+        -6,
+        14,
+        18
+       ]
+      }
+     }
+    },
+    "arm_l": {
+     "rotation": {
+      "0": {
+       "vector": [
+        0,
+        0,
+        0
+       ]
+      },
+      "1.2": {
+       "vector": [
+        -10,
+        0,
+        -8
+       ]
+      },
+      "1.35": {
+       "vector": [
+        -40,
+        0,
+        -30
+       ]
+      },
+      "1.6": {
+       "vector": [
+        -44,
+        0,
+        -34
+       ]
+      }
+     }
+    },
+    "arm_r": {
+     "rotation": {
+      "0": {
+       "vector": [
+        0,
+        0,
+        0
+       ]
+      },
+      "1.2": {
+       "vector": [
+        -10,
+        0,
+        8
+       ]
+      },
+      "1.35": {
+       "vector": [
+        -36,
+        0,
+        26
+       ]
+      },
+      "1.6": {
+       "vector": [
+        -40,
+        0,
+        30
+       ]
+      }
+     }
+    },
+    "leg_l": {
+     "rotation": {
+      "0": {
+       "vector": [
+        0,
+        0,
+        0
+       ]
+      },
+      "1.6": {
+       "vector": [
+        0,
+        0,
+        0
+       ]
+      }
+     }
+    },
+    "leg_r": {
+     "rotation": {
+      "0": {
+       "vector": [
+        0,
+        0,
+        0
+       ]
+      },
+      "1.6": {
+       "vector": [
+        0,
+        0,
+        0
+       ]
+      }
+     }
+    }
+   }
   }
+ }
 }

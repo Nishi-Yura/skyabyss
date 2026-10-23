@@ -25,7 +25,7 @@ import software.bernie.geckolib.animation.AnimationController;
 // 骨の番兵: 鯨骨の鎧をまとった剣士。正面からの攻撃は骨の盾で受け、半分しか通らない (回り込めば効く)
 public class BoneSentinel extends GuardMob {
     public BoneSentinel(EntityType<? extends Monster> type, Level level) {
-        super(type, level, "bone_sentinel", "attack", "block");
+        super(type, level, "bone_sentinel", "attack", "block", "hurt", "death");
     }
 
     public static AttributeSupplier.Builder createAttributes() {
@@ -102,5 +102,11 @@ public class BoneSentinel extends GuardMob {
     @Override
     public float getVoicePitch() {
         return 1.0f + (random.nextFloat() - random.nextFloat()) * 0.08f;
+    }
+
+    // 被弾・倒れるアニメ (tools/gen/mobs/gen_guard_hurt_death.py)
+    @Override
+    protected boolean autoHurtDeath() {
+        return true;
     }
 }
