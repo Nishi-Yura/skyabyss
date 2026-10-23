@@ -109,7 +109,7 @@ public final class BeatTiles extends RaidRoom {
         }
     }
 
-    private static final BlockState DIM = Blocks.WAXED_WEATHERED_COPPER.defaultBlockState();
+    private static final BlockState DIM = Blocks.WAXED_COPPER_BLOCK.defaultBlockState();
     private static final BlockState SHOWN = Blocks.OCHRE_FROGLIGHT.defaultBlockState();
     private static final BlockState HIT = Blocks.VERDANT_FROGLIGHT.defaultBlockState();
 
