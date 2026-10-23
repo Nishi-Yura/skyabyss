@@ -270,6 +270,11 @@ public final class TrialRouteSelfTest {
             var run = jp.revati.skyabyss.trial.raid.RaidRun.of(Groups.keyOf(p));
             return run != null && run.step == step && run.ctx.cell().bounds().contains(p.position());
         }
+        // 中ボスの段は、区画の段 4 に建てた中ボスの間の中 (trial/raid/mid。前室を歩かない)
+        if (mid && jp.revati.skyabyss.trial.raid.mid.MidRooms.idOf(titan) != null) {
+            var run = jp.revati.skyabyss.trial.raid.RaidRun.of(Groups.keyOf(p));
+            return run != null && run.mid && run.ctx.cell().inner().contains(p.position());
+        }
         String rest = TrialRoute.restFor(back, Groups.keyOf(p), titan, draw, step, mid);
         BlockPos at = rest == null ? null : TrialRoute.spawnOf(back, titan, rest);
         // 区画の写しで遊ぶ段は、写しの入口の休み場

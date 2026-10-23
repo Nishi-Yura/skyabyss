@@ -130,6 +130,32 @@ public class TideBeckoner extends TideMob {
     // 試験・開発用: 戦いの人を決める (null なら干潟の戦いの人)、人数を多いことにする、技を自分で始めない
     @Nullable
     private List<ServerPlayer> devFighters;
+    // 順路の中ボスの部屋 (trial/raid/mid) で戦うときの干潟の代わり。null なら背の中の干潟 (TideFlats)
+    @Nullable
+    private Flats flats;
+
+    // 干潟の代わり (招き潮・人・咆哮の群れ・倒れたとき・戦いの範囲)
+    public interface Flats {
+        boolean beckoning();
+
+        boolean flooded(ServerLevel level);
+
+        void warnBeckon(ServerLevel level, int ticks);
+
+        void beckon(ServerLevel level, int ticks);
+
+        List<ServerPlayer> fighters(ServerLevel level);
+
+        void roarSpawn(ServerLevel level, TideBeckoner boss);
+
+        void defeated(ServerLevel level, TideBeckoner boss);
+
+        AABB arena();
+    }
+
+    public void bindFlats(@Nullable Flats flats) {
+        this.flats = flats;
+    }
     private int partyOverride;
     private boolean holdAttacks;
 
@@ -234,7 +260,7 @@ public class TideBeckoner extends TideMob {
             return;
         }
         double dist = Math.sqrt(distanceToSqr(target));
-        if (beckonCooldown <= 0 && !TideFlats.beckoning()) {
+        if (beckonCooldown <= 0 && !(flats != null ? flats.beckoning() : TideFlats.beckoning())) {
             start(server, Action.BECKON);
         } else if (burrowCooldown <= 0) {
             start(server, Action.BURROW);
@@ -243,7 +269,7 @@ public class TideBeckoner extends TideMob {
         } else if (dist < 18 && dist > 5 && breathCooldown <= 0) {
             start(server, Action.BREATH);
         } else if (dist > 3.5) {
-            double speed = TideFlats.beckoning() ? 1.45 : 1.0;
+            double speed = (flats != null ? flats.beckoning() : TideFlats.beckoning()) ? 1.45 : 1.0;
             getNavigation().moveTo(target, speed);
         } else {
             getNavigation().stop();
@@ -252,7 +278,7 @@ public class TideBeckoner extends TideMob {
 
     // 狙える人 (干潟の戦いの人。試験・開発では指定した人)
     private List<ServerPlayer> fighters(ServerLevel server) {
-        return devFighters != null ? devFighters : TideFlats.fighters(server);
+        return devFighters != null ? devFighters : flats != null ? flats.fighters(server) : TideFlats.fighters(server);
     }
 
     private boolean isFighter(ServerPlayer p) {
@@ -375,7 +401,11 @@ public class TideBeckoner extends TideMob {
             case BECKON -> {
                 playAction("beckon");
                 sound(server, TideBackSetup.BECKONER_BECKON.get(), 3f, 0.8f);
-                TideFlats.warnBeckon(server, BECKON_WINDUP);
+                if (flats != null) {
+                    flats.warnBeckon(server, BECKON_WINDUP);
+                } else {
+                    TideFlats.warnBeckon(server, BECKON_WINDUP);
+                }
             }
             case BREATH -> {
                 playAction("breath");
@@ -403,7 +433,11 @@ public class TideBeckoner extends TideMob {
             case SLAM -> tickSlam(server);
             case BECKON -> {
                 if (actionTick == BECKON_WINDUP) {
-                    TideFlats.beckon(server, BECKON_FLOOD);
+                    if (flats != null) {
+                        flats.beckon(server, BECKON_FLOOD);
+                    } else {
+                        TideFlats.beckon(server, BECKON_FLOOD);
+                    }
                     beckonCooldown = angry ? BECKON_EVERY_ANGRY : BECKON_EVERY;
                     finish();
                 }
@@ -425,7 +459,11 @@ public class TideBeckoner extends TideMob {
                 }
                 if (actionTick == ROAR_TICKS) {
                     server.sendParticles(ParticleTypes.EXPLOSION, getX(), getY() + 0.5, getZ(), 4, 2, 0.2, 2, 0);
-                    TideFlats.roarSpawn(server, this);
+                    if (flats != null) {
+                        flats.roarSpawn(server, this);
+                    } else {
+                        TideFlats.roarSpawn(server, this);
+                    }
                     finish();
                 }
             }
@@ -451,7 +489,7 @@ public class TideBeckoner extends TideMob {
                 angles[i] = angles[0] + (i % 2 == 1 ? 1 : -1) * Math.toRadians(40) * ((i + 1) / 2);
             }
         }
-        boolean flooded = TideFlats.flatsFlooded(server);
+        boolean flooded = flats != null ? flats.flooded(server) : TideFlats.flatsFlooded(server);
         double ground = groundY(position());
         for (int i = 0; i < angles.length; i++) {
             double angle = angles[i];
@@ -740,7 +778,11 @@ public class TideBeckoner extends TideMob {
         setMode(MODE_NORMAL);
         setInvisible(false);
         if (level() instanceof ServerLevel server) {
-            TideFlats.onBeckonerDefeated(server, this);
+            if (flats != null) {
+                flats.defeated(server, this);
+            } else {
+                TideFlats.onBeckonerDefeated(server, this);
+            }
         }
     }
 
@@ -807,6 +849,6 @@ public class TideBeckoner extends TideMob {
 
     // 戦いの範囲 (干潟) の外へ出たら、真ん中へ戻す (TideFlats が見る)
     public AABB arena() {
-        return TideBackLayout.FLATS.aabb().inflate(0, 4, 0);
+        return flats != null ? flats.arena() : TideBackLayout.FLATS.aabb().inflate(0, 4, 0);
     }
 }

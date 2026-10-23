@@ -572,6 +572,11 @@ public final class TrialRoute {
             sync(back, group);
             return members(back, group).size();
         }
+        // 中ボスの段は、区画に中ボスの間を建てて、そのまま間の中へ (trial/raid/mid)
+        if (mid && jp.revati.skyabyss.trial.raid.RaidRun.enterMid(back, group, titan)) {
+            sync(back, group);
+            return members(back, group).size();
+        }
         TrialDraw.Draw draw = TrialData.current(back, group);
         // 心臓の段は、体の外の封じた心臓の間 (trial/raid/InstanceArenas) の中へ直に運ぶ (前室を歩かない。中に入ると集合の 5 秒のあと封じる)
         if (!mid && step >= LAST_STEP) {

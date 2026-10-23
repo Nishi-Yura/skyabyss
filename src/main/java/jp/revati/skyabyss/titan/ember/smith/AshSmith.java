@@ -160,6 +160,11 @@ public class AshSmith extends EmberMob {
     private Action action = Action.NONE;
     private int actionTick;
     private float multiplier = 1f;
+    // 部屋のずれ (EmberBackLayout の鍛え手の間からの差)。順路の中ボスの部屋 (trial/raid/mid) では区画の部屋へずらす。0 = 背の中の元の間
+    private net.minecraft.core.BlockPos shift = net.minecraft.core.BlockPos.ZERO;
+    // 倒れたときに知らせる先 (中ボスの部屋)。null なら AshSmithBattle
+    @org.jetbrains.annotations.Nullable
+    private java.util.function.Consumer<AshSmith> onDeath;
     private boolean raged;
     private int slamCooldown = 50;
     private int breathCooldown = 100;
@@ -231,6 +236,16 @@ public class AshSmith extends EmberMob {
         addTag(SMITH_TAG);
     }
 
+    // 順路の中ボスの部屋で戦わせる (区画の部屋への、元の間からのずれ・倒れたときの知らせ先)
+    public void bindRoom(net.minecraft.core.BlockPos shift, java.util.function.Consumer<AshSmith> onDeath) {
+        this.shift = shift;
+        this.onDeath = onDeath;
+    }
+
+    public net.minecraft.core.BlockPos shift() {
+        return shift;
+    }
+
     public static float scaleFor(int challengers) {
         return 1f + 0.6f * (Math.max(1, challengers) - 1);
     }
@@ -289,7 +304,7 @@ public class AshSmith extends EmberMob {
 
     // 床の高さ (人が立つ高さ)。鍛え手の間の中ならその床。ほかの場所 (開発用の平らな世界) では足もと
     private double floorY() {
-        return AshSmithArena.inside(position()) ? AshSmithArena.FLOOR + 1 : getY();
+        return AshSmithArena.inside(position(), shift) ? AshSmithArena.FLOOR + shift.getY() + 1 : getY();
     }
 
     // 人数による技の本数・数 (一人でも、印を見れば傷なしで避けられる)
@@ -414,7 +429,7 @@ public class AshSmith extends EmberMob {
         }
         List<ServerPlayer> out = new ArrayList<>();
         for (ServerPlayer p : Players.snapshot(server.players())) {
-            if (p.isAlive() && !p.isSpectator() && !p.isCreative() && AshSmithArena.inside(p.position())
+            if (p.isAlive() && !p.isSpectator() && !p.isCreative() && AshSmithArena.inside(p.position(), shift)
                     && jp.revati.skyabyss.titan.group.GroupOwned.mayTarget(this, p)) {
                 out.add(p);
             }
@@ -459,7 +474,7 @@ public class AshSmith extends EmberMob {
                 startBreath(server);
             }
             case QUENCH -> {
-                trough = AshSmithArena.nearestTrough(position());
+                trough = AshSmithArena.nearestTrough(position(), shift);
                 quenchPhase = 0;
                 broadcast(server, ModText.battle("message.skyabyss.ember.smith.quench"));
             }
@@ -724,7 +739,7 @@ public class AshSmith extends EmberMob {
 
     // ---- 焼き入れ
     private void tickQuench(ServerLevel server) {
-        Vec3 stand = AshSmithArena.troughStand(trough);
+        Vec3 stand = AshSmithArena.troughStand(trough, shift);
         if (quenchPhase == 0) {
             double d = horizontalDistance(stand);
             if (d <= 1.6 || stuck > 120) {
@@ -744,7 +759,7 @@ public class AshSmith extends EmberMob {
         }
         if (actionTick == STEAM_START) {
             steamTicks = STEAM_TICKS;
-            steamSide = AshSmithArena.steamSide(trough);
+            steamSide = AshSmithArena.steamSide(trough, shift);
             coldSlams = COLD_SLAMS;
             entityData.set(COLD, true);
             server.playSound(null, getX(), getY(), getZ(), SoundEvents.GENERIC_EXTINGUISH_FIRE, SoundSource.HOSTILE, 3f, 0.7f);
@@ -781,12 +796,12 @@ public class AshSmith extends EmberMob {
                     double oz = i < ps.size() ? 0 : (random.nextDouble() * 2 - 1) * SPARK_FILL_MAX;
                     double x = p.getX() + ox;
                     double z = p.getZ() + oz;
-                    double dx = x - (AshSmithArena.CX + 0.5);
-                    double dz = z - (AshSmithArena.CZ + 0.5);
+                    double dx = x - ((AshSmithArena.CX + shift.getX()) + 0.5);
+                    double dz = z - ((AshSmithArena.CZ + shift.getZ()) + 0.5);
                     double d = Math.hypot(dx, dz);
-                    if (AshSmithArena.inside(position()) && d > AshSmithArena.RADIUS - 1.5) {
-                        x = AshSmithArena.CX + 0.5 + dx * (AshSmithArena.RADIUS - 1.5) / d;
-                        z = AshSmithArena.CZ + 0.5 + dz * (AshSmithArena.RADIUS - 1.5) / d;
+                    if (AshSmithArena.inside(position(), shift) && d > AshSmithArena.RADIUS - 1.5) {
+                        x = (AshSmithArena.CX + shift.getX()) + 0.5 + dx * (AshSmithArena.RADIUS - 1.5) / d;
+                        z = (AshSmithArena.CZ + shift.getZ()) + 0.5 + dz * (AshSmithArena.RADIUS - 1.5) / d;
                     }
                     startSpark(server, x, z, i);
                 }
@@ -824,10 +839,10 @@ public class AshSmith extends EmberMob {
             warn(server, ParticleTypes.FLAME, getX(), getY() + 2.4, getZ(), 10, 0.8, 0.8, 0.8, 0.05);
         }
         if (actionTick == RAGE_TICKS / 2) {
-            AshSmithArena.buildFurnace(server, true);
-            server.playSound(null, AshSmithArena.FURNACE_DOOR.minX(), AshSmithArena.FLOOR + 2, AshSmithArena.FURNACE_DOOR.minZ(),
+            AshSmithArena.buildFurnace(server, true, shift);
+            server.playSound(null, AshSmithArena.FURNACE_DOOR.minX() + shift.getX(), AshSmithArena.FLOOR + shift.getY() + 2, AshSmithArena.FURNACE_DOOR.minZ() + shift.getZ(),
                     SoundEvents.IRON_DOOR_OPEN, SoundSource.HOSTILE, 3f, 0.5f);
-            for (Vec3 at : AshSmithArena.furnaceSpawns()) {
+            for (Vec3 at : AshSmithArena.furnaceSpawns(shift)) {
                 AshThrall thrall = EmberMobSetup.ASH_THRALL.get().create(server);
                 if (thrall == null) {
                     continue;
@@ -879,8 +894,8 @@ public class AshSmith extends EmberMob {
     }
 
     private void steamParticles(ServerLevel server) {
-        double cx = AshSmithArena.CX + 0.5;
-        double cz = AshSmithArena.CZ + 0.5;
+        double cx = (AshSmithArena.CX + shift.getX()) + 0.5;
+        double cz = (AshSmithArena.CZ + shift.getZ()) + 0.5;
         for (int i = 0; i < 28; i++) {
             double x = cx + steamSide * random.nextDouble() * (AshSmithArena.RADIUS - 0.5);
             double z = cz + (random.nextDouble() * 2 - 1) * (AshSmithArena.RADIUS - 1);
@@ -889,7 +904,7 @@ public class AshSmith extends EmberMob {
             if (dx * dx + dz * dz > (AshSmithArena.RADIUS - 0.5) * (AshSmithArena.RADIUS - 0.5)) {
                 continue;
             }
-            double y = AshSmithArena.FLOOR + 1.0 + random.nextDouble() * 4.0;
+            double y = AshSmithArena.FLOOR + shift.getY() + 1.0 + random.nextDouble() * 4.0;
             warn(server, ParticleTypes.CLOUD, x, y, z, 1, 0.5, 0.4, 0.5, 0.01);
         }
     }
@@ -972,7 +987,9 @@ public class AshSmith extends EmberMob {
         entityData.set(WEAK, false);
         entityData.set(COLD, false);
         sparks.clear();
-        if (level() instanceof ServerLevel server) {
+        if (onDeath != null) {
+            onDeath.accept(this);
+        } else if (level() instanceof ServerLevel server) {
             AshSmithBattle.onDefeated(server, this);
         }
     }

@@ -166,6 +166,14 @@ public final class RaidKit {
         return cell;
     }
 
+    // 中ボス・心臓の部屋: 運ばれる所 (休み場。全滅のあとに戻る所も) を広間の中の (x, z) へ移す。入口の間を歩かずに、そのまま広間で始まる
+    public static Cell restInArena(RaidCtx ctx, int x, int z) {
+        Cell c = ctx.cell();
+        Cell n = new Cell(c.origin(), c.hx(), c.hz(), c.height(), c.floor(x, z), c.exitSpot(), c.inner(), c.bounds(), c.entryGate(), c.exitGate(), c.palette());
+        ctx.setCell(n);
+        return n;
+    }
+
     // ---- 戸
     // 箱の中のブロックの位置の一覧 (戸にする箱)
     public static List<BlockPos> gateBox(int x0, int y0, int z0, int x1, int y1, int z1) {

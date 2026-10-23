@@ -122,6 +122,9 @@ public class Raiju extends GuardMob {
     private final ServerBossEvent bossBar = new ServerBossEvent(getDisplayName(), BossEvent.BossBarColor.BLUE, BossEvent.BossBarOverlay.NOTCHED_10);
     @Nullable
     private RaijuNest.Site site;
+    // 倒れたときに知らせる先 (順路の中ボスの部屋。trial/raid/mid)。null なら RaijuBattle
+    @org.jetbrains.annotations.Nullable
+    private java.util.function.Consumer<Raiju> onDeath;
     private Action action = Action.NONE;
     private int actionTick;
     private int rod = -1;
@@ -192,6 +195,11 @@ public class Raiju extends GuardMob {
         perchOn(startRod);
         perchTimer = 60;
         railsLeft = RAILS_PER_PERCH;
+    }
+
+    // 順路の中ボスの部屋で戦わせる (巣は区画の部屋。倒れたら onDeath へ)
+    public void bindRoom(java.util.function.Consumer<Raiju> onDeath) {
+        this.onDeath = onDeath;
     }
 
     // 挑む人数の倍率 (上限なし。パーティの 6 人で 4.0)
@@ -1092,7 +1100,11 @@ public class Raiju extends GuardMob {
         if (level() instanceof ServerLevel server) {
             setMode(MODE_GROUND);
             playAction("death");
-            RaijuBattle.onDefeated(server, this);
+            if (onDeath != null) {
+                onDeath.accept(this);
+            } else {
+                RaijuBattle.onDefeated(server, this);
+            }
         }
     }
 

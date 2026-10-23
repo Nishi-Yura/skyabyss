@@ -342,6 +342,8 @@ public final class SelfTestRunner {
         steps.addAll(jp.revati.skyabyss.trial.raid.whale.WhaleRaidSelfTest.steps());
         // 岩鯨のレイドの二つ目の部屋 WR4〜WR6 (直接建てて台本で解く)。SKYABYSS_SELFTEST_ONLY="raid"
         steps.addAll(jp.revati.skyabyss.trial.raid.whale.WhaleRaid2SelfTest.steps());
+        // 順路の中ボスの間 (四体。三つ目の部屋のあと区画の中ボスの間へ・一人で倒せる・倒すと心臓の段)。SKYABYSS_SELFTEST_ONLY="raid mid"
+        steps.addAll(jp.revati.skyabyss.trial.raid.mid.MidRoomSelfTest.steps());
         // レイドの部屋の碑と心の声と伝承 (十二の部屋)。SKYABYSS_SELFTEST_ONLY="raid lore"
         steps.add(Step.once("raid lore", jp.revati.skyabyss.trial.raid.RaidLoreSelfTest::run));
         steps.addAll(jp.revati.skyabyss.trial.RouteWalkSelfTest.steps());
