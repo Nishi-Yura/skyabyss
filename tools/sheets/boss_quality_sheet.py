@@ -18,7 +18,7 @@ from PIL import Image, ImageDraw, ImageFont
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 OUT = os.path.join(ROOT, "docs", "review", "boss_quality_v2")
-SHOTS = os.path.join(ROOT, "run", "shots", "boss_quality_v2")
+SHOTS = os.path.join(ROOT, "run", "shots", "boss_quality_v2", "shots", "boss_quality_v2")
 A = "src/main/resources/assets/skyabyss/"
 BEFORE = "4c54f1fe"  # 仕上げの前 (m1-sky-pass)
 

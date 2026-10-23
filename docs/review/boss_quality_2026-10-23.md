@@ -11,6 +11,8 @@
 | `offline_warden.png` | 番人の絵の前/後 (正射影、光の中の色) |
 | `shell_marks_font.png` | 合わせ貝の新しい印 (4 倍) |
 
+ゲームの絵の注意: 平らな試しの世界で撮ったので、合わせ貝の心臓は領域のあいだ傷を受けず消せず、板がその後の絵にも残っている (心臓の間では起きない)。番人の絵は遠く暗いので、番人の絵の前/後は `offline_warden.png` を見る。
+
 作り直し: `python tools/sheets/boss_quality_sheet.py` (ゲームの絵)、`--offline` (前/後の正射影)。
 
 ## 1. 基準 (いちばん出来の良いもの)
@@ -68,3 +70,8 @@
 - 動き: `python tools/gen/world/polish_boss_anims.py` (心臓・巨神の animation.json に上書き・追加。足すぶれの元は `tools/sources/anim_base/`。心臓や巨神の install を流し直したら、これも流す)。番人は `tools/gen/world/gen_heart_warden.py`。
 - 番人の絵: `python tools/rough/lowpoly/abyss/warden_model.py` → `python tools/gen/world/gen_heart_warden.py`。
 - 合わせ貝の印: `python tools/gen/ui/gen_shell_marks.py` (`assets/skyabyss/font/shell_marks.json`・`textures/font/shell_marks.png`)。
+
+## 6. 確かめ
+
+- `compileJava` 通る。
+- 自己テスト (`SKYABYSS_SELFTEST_ONLY="lowpoly,heart,domain,warden,abyss warden"`): heart reentry・heart balance・heart reward・heart_cinematic (四体の登場・倒れる)・heart bots (板の数 = 3 x 12 を含む)・abyss warden は通る。domain room は四体とも「仕掛けが床の上にない」で落ちる (仕掛けの置き場所の検査。今回は置き場所に触れていないので、前からの落ち。別に見る)。
