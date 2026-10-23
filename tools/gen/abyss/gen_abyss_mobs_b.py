@@ -2,7 +2,7 @@
 """五章の深淵の敵 9 体 (B 組: 灰の層 3・深み 2・深淵だけ 4) の素材を入れる (docs/design/36 の 4・4.1、A3)。
 
   python -I tools/abyss/paint_abyss_b.py      (先に絵を描く: docs/review/abyss_painted/)
-  PYTHONIOENCODING=utf-8 python -I tools/gen/abyss/gen_abyss_mobs_b.py
+  PYTHONIOENCODING=utf-8 python -I tools/gen/abyss/gen_abyss_mobs_b.py [名前...]   (名前を並べるとその敵だけ)
 
 入力: docs/review/abyss_roughs/<id>/<案>/<id>_<案>_mesh.json   (メッシュ。絵は docs/review/abyss_painted/)
 出力 (assets/skyabyss/ の下):
@@ -122,36 +122,6 @@ def ash_trail():
             p + "attack": once(0.3, attack), p + "hurt": once(0.22, hurt_bones()), p + "death": once(0.6, death_bones(120, 0.5), True)}
 
 
-# ---------------------------------------------------------------- 燠の番人 (熱の気配。胸の燠が先に見える。前かがみ・手を上げる熱の輪)
-def ember_keeper():
-    p = "animation.ember_keeper."
-    idle = {"body": bone(["0", "0", S(0, 2, 60)], [0, S(0, 0.2, 60), 0]), "head": bone(["0", S(90, 6, 60), "0"]),
-            "arm_l": bone([S(0, 6, 60), "0", "0"]), "arm_r": bone([S(180, 6, 60), "0", "0"])}
-    walk = legs_walk(["leg_l", "leg_r"], 360, 18, 3)
-    walk["body"] = bone(["0", "0", S(0, 2, 360)])
-    walk["arm_l"] = bone([S(0, 10, 360), "0", "0"])
-    walk["arm_r"] = bone([S(180, 10, 360), "0", "0"])
-    # 予告 (赤い輪の前触れ): 手を胸の前へ、体が少し前へ。熱の輪: 両腕を広げて前へ
-    telegraph = {"arm_l": bone(kf({0: (0, 0, 0), 0.8: (-70, 0, -20)})), "arm_r": bone(kf({0: (0, 0, 0), 0.8: (-70, 0, 20)})),
-                 "body": bone(kf({0: (0, 0, 0), 0.8: (-14, 0, 0)}))}
-    heat = {"arm_l": bone(kf({0: (0, 0, 0), 0.1: (-120, 0, -30), 0.4: (-120, 0, -30), 0.6: (0, 0, 0)})),
-            "arm_r": bone(kf({0: (0, 0, 0), 0.1: (-120, 0, 30), 0.4: (-120, 0, 30), 0.6: (0, 0, 0)})),
-            "body": bone(kf({0: (0, 0, 0), 0.1: (-16, 0, 0), 0.6: (0, 0, 0)}))}
-    return {p + "idle": loop(3.0, idle), p + "walk": loop(1.0, walk), p + "telegraph": once(0.8, telegraph, True),
-            p + "heat": once(0.6, heat), p + "hurt": once(0.22, hurt_bones()), p + "death": once(0.9, death_bones(90, 1.0), True)}
-
-
-# ---------------------------------------------------------------- 煤の子 (小さい。数で来る。跳ねる)
-def soot_child():
-    p = "animation.soot_child."
-    idle = {"body": bone(["0", "0", S(0, 4, 120)], [0, S(0, 0.25, 120), 0]), "head": bone(["0", S(60, 12, 120), "0"])}
-    walk = {"body": bone(["0", "0", S(0, 6, 480)], [0, "math.abs(%s)*0.6" % S(0, 1, 480), 0]),
-            "arm_l": bone([S(0, 30, 480), "0", "0"]), "arm_r": bone([S(180, 30, 480), "0", "0"])}
-    attack = {"body": bone(kf({0: (0, 0, 0), 0.1: (-35, 0, 0), 0.3: (0, 0, 0)})), "head": bone(kf({0: (0, 0, 0), 0.1: (-30, 0, 0), 0.3: (0, 0, 0)}))}
-    return {p + "idle": loop(2.0, idle), p + "walk": loop(0.4, walk), p + "attack": once(0.3, attack),
-            p + "hurt": once(0.2, hurt_bones()), p + "death": once(0.5, death_bones(170, 0.1), True)}
-
-
 # ---------------------------------------------------------------- 前の私の影 (濡れた影。人の動きを遅れてなぞる。揺れ・鏡の振り)
 def past_shadow():
     p = "animation.past_shadow."
@@ -213,24 +183,6 @@ def ceiling_walker():
             p + "drop": once(0.5, drop, True), p + "hurt": once(0.25, hurt_bones()), p + "death": once(0.9, death_bones(180, 0.6), True)}
 
 
-# ---------------------------------------------------------------- 鼓動もどき (膜の袋。こぶが拍を打つ。噛むときは顎が開く)
-def heartbeat_mimic():
-    p = "animation.heartbeat_mimic."
-    beat = lambda speed, amp: {"bulge_a": bone(["0", "0", "0"], [S(0, 0, speed), S(0, 0, speed), 0]),
-                               "bulge_b": bone([0, 0, 0]), "bulge_c": bone([0, 0, 0])}
-    idle = {"body": bone(["0", "0", S(0, 2, 120)], [0, "math.abs(%s)*0.5" % S(0, 1, 60), 0]),
-            "bulge_a": bone(["0", "0", "0"], [0, "math.abs(%s)*0.8" % S(0, 1, 60), 0]),
-            "bulge_b": bone(["0", "0", "0"], [0, "math.abs(%s)*0.6" % S(40, 1, 60), 0]),
-            "bulge_c": bone(["0", "0", "0"], [0, "math.abs(%s)*0.6" % S(80, 1, 60), 0])}
-    lure = {"body": bone(["0", "0", S(0, 3, 240)], [0, "math.abs(%s)*1.0" % S(0, 1, 240), 0]),
-            "bulge_a": bone(["0", "0", "0"], [0, "math.abs(%s)*1.2" % S(0, 1, 240), 0])}
-    bite = {"jaw": bone(kf({0: (0, 0, 0), 0.1: (-50, 0, 0), 0.25: (0, 0, 0)})), "body": bone(kf({0: (0, 0, 0), 0.1: (-10, 0, 0), 0.25: (0, 0, 0)}))}
-    for i in range(4):
-        bite["rib%d" % i] = bone(kf({0: (0, 0, 0), 0.1: (0, 0, 14 if i % 2 else -14), 0.25: (0, 0, 0)}))
-    return {p + "idle": loop(3.0, idle), p + "lure": loop(1.0, lure), p + "bite": once(0.3, bite),
-            p + "hurt": once(0.25, hurt_bones()), p + "death": once(1.0, death_bones(90, 0.4), True)}
-
-
 # ---------------------------------------------------------------- 縄の人 (縄から垂れる。揺れる。引くときは体を後ろへ反らす)
 def rope_hanger():
     p = "animation.rope_hanger."
@@ -245,20 +197,229 @@ def rope_hanger():
             p + "death": once(1.2, death_bones(120, 2.0, "figure"), True)}
 
 
+# ---------------------------------------------------------------- 2026-10-23 作り直した 3 種 (燠の番人・煤の子・鼓動もどき) の動き
+# 向き (rot の数学の右手系): x の + = 垂れた部品 (腕・脚・鎖) が前へ振れる・立つ部品 (胴・頭) が後ろへ反る・前へ伸びた部品 (花弁の上) が上がる。
+# z の + = +x の側の垂れた部品が外へ上がる (-x の側は内へ)。scale は [x, y, z] の倍率。
+def sc(frames):
+    return {"%.2f" % t: list(v) for t, v in frames.items()}
+
+
+def ember_keeper():
+    """燠の番人 (灰の僧): 裾と足・袖と前腕・頭巾の尾二節・鎖と灯し。予告 telegraph 0.8 秒 (TELL_TICKS 16) で灯しを掲げて右手を開き、
+    heat で両腕を払って裾が広がる。歩くと足が裾の下から交互に出て、裾・頭巾の尾・灯しが遅れて揺れる。"""
+    p = "animation.ember_keeper."
+    idle = {"body": bone(["0", "0", S(0, 1.5, 120)], [0, S(0, 0.15, 120), 0]),
+            "hem": bone([S(40, 1.2, 120), "0", S(180, 1.0, 120)]),
+            "head": bone([S(60, 3, 72), S(90, 7, 60), "0"]),
+            "hood_t1": bone([S(30, 5, 120), "0", S(120, 3, 72)]), "hood_t2": bone([S(80, 8, 120), "0", S(170, 5, 72)]),
+            "arm_l": bone([S(0, 3, 120), "0", "0"]), "forearm_l": bone([S(30, 3, 120), "0", "0"]),
+            "chain": bone([S(60, 5, 120), "0", S(150, 4, 90)]), "lamp": bone([S(100, 4, 120), S(0, 20, 45), S(190, 3, 90)]),
+            "arm_r": bone([S(180, 3, 120), "0", "0"]), "forearm_r": bone([S(210, 4, 120), "0", "0"])}
+    walk = legs_walk(["leg_l", "leg_r"], 360, 24, 1.2)
+    walk["body"] = bone(["4", S(0, 3, 360), S(90, 2, 360)], [0, "math.abs(%s)*0.35" % S(0, 1, 360), 0])
+    walk["hem"] = bone([S(90, 5, 360), "0", S(0, 3, 360)])
+    walk["head"] = bone(["-3", S(180, 3, 360), "0"])
+    walk["hood_t1"] = bone([S(60, 8, 360), "0", S(150, 4, 360)])
+    walk["hood_t2"] = bone([S(120, 12, 360), "0", S(210, 6, 360)])
+    walk["arm_l"] = bone([S(180, 8, 360), "0", "0"])
+    walk["forearm_l"] = bone(["-10", "0", "0"])
+    walk["chain"] = bone([S(30, 14, 360), "0", S(120, 6, 360)])
+    walk["lamp"] = bone([S(80, 10, 360), "0", S(160, 6, 360)])
+    walk["arm_r"] = bone([S(0, 18, 360), "0", "0"])
+    walk["forearm_r"] = bone([S(30, 10, 360), "0", "0"])
+    # 予告 (0.8 秒): 0〜0.5 で前へかがみ、左の灯しを前へ掲げ (鎖は垂れたまま)、右手を前へ開く。0.5〜0.8 は熱で震える
+    def tremble(base, amp, axis=2):
+        out = {0.5: base}
+        for i, t in enumerate((0.56, 0.62, 0.68, 0.74, 0.8)):
+            v = list(base)
+            v[axis] += amp if i % 2 == 0 else -amp
+            out[t] = tuple(v)
+        return out
+    telegraph = {"body": bone(kf({0: (0, 0, 0), 0.5: (-14, 0, 0), **{t: v for t, v in tremble((-14, 0, 0), 1.2).items() if t > 0.5}})),
+                 "hem": bone(kf({0: (0, 0, 0), 0.5: (10, 0, 0)})),
+                 "head": bone(kf({0: (0, 0, 0), 0.5: (6, 0, 0)})),
+                 "hood_t1": bone(kf({0: (0, 0, 0), 0.5: (14, 0, 0), 0.8: (20, 0, 0)})), "hood_t2": bone(kf({0: (0, 0, 0), 0.5: (18, 0, 0), 0.8: (26, 0, 0)})),
+                 "arm_l": bone(kf({0: (0, 0, 0), 0.5: (74, 0, -12), 0.8: (80, 0, -12)})), "forearm_l": bone(kf({0: (0, 0, 0), 0.5: (34, 0, 0)})),
+                 "chain": bone(kf({0: (0, 0, 0), 0.5: (-98, 0, 10), 0.65: (-112, 0, 6), 0.8: (-104, 0, 12)})),
+                 "lamp": bone(kf({0: (0, 0, 0), 0.5: (0, 90, 0), 0.8: (0, 160, 0)}), None),
+                 "arm_r": bone(kf({0: (0, 0, 0), 0.5: (58, 0, -14), **{t: v for t, v in tremble((58, 0, -14), 3).items() if t > 0.5}})),
+                 "forearm_r": bone(kf({0: (0, 0, 0), 0.5: (30, 0, 0)}))}
+    telegraph["lamp"]["scale"] = sc({0: (1, 1, 1), 0.5: (1.15, 1.15, 1.15), 0.65: (1.05, 1.05, 1.05), 0.8: (1.2, 1.2, 1.2)})
+    # 熱の輪 (0.6 秒): 0.1 で両腕を外へ払い、胴は起きて反る。裾が一度広がって戻る
+    heat = {"body": bone(kf({0: (-14, 0, 0), 0.1: (8, 0, 0), 0.35: (4, 0, 0), 0.6: (0, 0, 0)})),
+            "hem": bone(kf({0: (10, 0, 0), 0.1: (-6, 0, 0), 0.6: (0, 0, 0)})),
+            "head": bone(kf({0: (6, 0, 0), 0.1: (12, 0, 0), 0.6: (0, 0, 0)})),
+            "hood_t1": bone(kf({0: (20, 0, 0), 0.1: (40, 0, 0), 0.6: (0, 0, 0)})), "hood_t2": bone(kf({0: (26, 0, 0), 0.15: (55, 0, 0), 0.6: (0, 0, 0)})),
+            "arm_l": bone(kf({0: (80, 0, -12), 0.1: (40, 0, 70), 0.35: (35, 0, 62), 0.6: (0, 0, 0)})),
+            "forearm_l": bone(kf({0: (34, 0, 0), 0.1: (10, 0, 0), 0.6: (0, 0, 0)})),
+            "chain": bone(kf({0: (-104, 0, 12), 0.1: (-60, 0, -70), 0.3: (-20, 0, -40), 0.6: (0, 0, 0)})),
+            "lamp": bone(kf({0: (0, 160, 0), 0.3: (0, 260, 0), 0.6: (0, 360, 0)})),
+            "arm_r": bone(kf({0: (58, 0, -14), 0.1: (40, 0, -70), 0.35: (35, 0, -62), 0.6: (0, 0, 0)})),
+            "forearm_r": bone(kf({0: (30, 0, 0), 0.1: (10, 0, 0), 0.6: (0, 0, 0)}))}
+    heat["hem"]["scale"] = sc({0: (1, 1, 1), 0.1: (1.22, 0.96, 1.22), 0.35: (1.08, 1, 1.08), 0.6: (1, 1, 1)})
+    heat["lamp"]["scale"] = sc({0: (1.2, 1.2, 1.2), 0.1: (1.4, 1.4, 1.4), 0.6: (1, 1, 1)})
+    hurt = {"body": bone(kf({0: (0, 0, 0), 0.06: (10, 0, 4), 0.25: (0, 0, 0)})), "head": bone(kf({0: (0, 0, 0), 0.06: (12, 0, 0), 0.25: (0, 0, 0)})),
+            "chain": bone(kf({0: (0, 0, 0), 0.08: (-30, 0, 10), 0.25: (0, 0, 0)})), "hem": bone(kf({0: (0, 0, 0), 0.06: (-5, 0, 0), 0.25: (0, 0, 0)}))}
+    # 倒れる (1.4 秒): 膝が抜けて沈み (0.4)、前へ崩れ伏す (1.0)。裾はしぼみ、灯しは床へ落ちて転がる
+    death = {"body": bone(kf({0: (0, 0, 0), 0.4: (-12, 0, 4), 1.0: (-82, 0, 8), 1.4: (-86, 0, 8)}),
+                          kf({0: (0, 0, 0), 0.4: (0, -1.6, 0), 1.0: (0, -9.5, -1.0), 1.4: (0, -9.8, -1.0)}, False)),
+             "hem": bone(kf({0: (0, 0, 0), 0.4: (14, 0, 0), 1.0: (30, 0, 0)})),
+             "head": bone(kf({0: (0, 0, 0), 0.4: (-14, 0, 0), 1.0: (10, 0, 10)})),
+             "hood_t1": bone(kf({0: (0, 0, 0), 1.0: (30, 0, 0)})), "hood_t2": bone(kf({0: (0, 0, 0), 1.0: (40, 0, 0)})),
+             "arm_l": bone(kf({0: (0, 0, 0), 0.4: (20, 0, 10), 1.0: (150, 0, 20)})), "arm_r": bone(kf({0: (0, 0, 0), 0.4: (20, 0, -10), 1.0: (150, 0, -20)})),
+             "chain": bone(kf({0: (0, 0, 0), 0.4: (-20, 0, 0), 1.0: (-150, 0, 0), 1.4: (-160, 0, 0)})),
+             "lamp": bone(kf({0: (0, 0, 0), 1.0: (60, 40, 30), 1.4: (80, 60, 40)})),
+             "leg_l": bone(kf({0: (0, 0, 0), 0.4: (-30, 0, 0), 1.0: (-80, 0, 0)}), kf({0: (0, 0, 0), 0.4: (0, -1.5, 0), 1.0: (0, -8.0, -2.0)}, False)),
+             "leg_r": bone(kf({0: (0, 0, 0), 0.4: (-30, 0, 0), 1.0: (-80, 0, 0)}), kf({0: (0, 0, 0), 0.4: (0, -1.5, 0), 1.0: (0, -8.0, -2.0)}, False))}
+    death["hem"]["scale"] = sc({0: (1, 1, 1), 0.4: (1.05, 0.9, 1.05), 1.0: (1.12, 0.62, 1.12)})
+    return {p + "idle": loop(3.0, idle), p + "walk": loop(1.0, walk), p + "telegraph": once(0.8, telegraph, True),
+            p + "heat": once(0.6, heat), p + "hurt": once(0.25, hurt), p + "death": once(1.4, death, True)}
+
+
+def soot_child():
+    """煤の子 (煤の団子): 腹・頭・顎・短い腕と足・煙の尾二節。噛む attack は予告 0.2 秒 (Tell の 4 tick): 0.1 で頭を反らして口を開け、
+    0.2 で前へ飛びつきながら口を閉じる。歩きは左右に揺れる小走りで、足が交互に出る。"""
+    p = "animation.soot_child."
+    idle = {"body": bone(["0", "0", S(0, 3, 180)], [0, "math.abs(%s)*0.25" % S(0, 1, 180), 0]),
+            "head": bone([S(60, 4, 180), S(30, 14, 90), "0"]), "jaw": bone([S(0, 4, 270), "0", "0"]),
+            "arm_l": bone([S(0, 8, 180), "0", S(90, 5, 180)]), "arm_r": bone([S(180, 8, 180), "0", S(270, 5, 180)]),
+            "wisp": bone([S(40, 8, 180), "0", S(130, 6, 120)]), "wisp_2": bone([S(100, 14, 180), "0", S(190, 10, 120)])}
+    walk = legs_walk(["leg_l", "leg_r"], 900, 36, 0.6)
+    walk["body"] = bone(["6", "0", S(0, 9, 900)], [0, "math.abs(%s)*0.5" % S(0, 1, 900), 0])
+    walk["head"] = bone(["4", "0", S(180, 5, 900)])
+    walk["arm_l"] = bone([S(180, 34, 900), "0", "12"])
+    walk["arm_r"] = bone([S(0, 34, 900), "0", "-12"])
+    walk["wisp"] = bone(["-20", "0", S(90, 10, 900)])
+    walk["wisp_2"] = bone(["-24", "0", S(180, 14, 900)])
+    attack = {"body": bone(kf({0: (0, 0, 0), 0.1: (10, 0, 0), 0.2: (-28, 0, 0), 0.3: (-18, 0, 0), 0.45: (0, 0, 0)}),
+                           kf({0: (0, 0, 0), 0.1: (0, -0.3, 0.4), 0.2: (0, 0.6, -1.4), 0.3: (0, 0.2, -1.0), 0.45: (0, 0, 0)}, False)),
+              "head": bone(kf({0: (0, 0, 0), 0.1: (22, 0, 0), 0.2: (-10, 0, 0), 0.45: (0, 0, 0)})),
+              "jaw": bone(kf({0: (0, 0, 0), 0.1: (-42, 0, 0), 0.17: (-42, 0, 0), 0.21: (4, 0, 0), 0.45: (0, 0, 0)})),
+              "arm_l": bone(kf({0: (0, 0, 0), 0.1: (40, 0, 30), 0.2: (95, 0, -10), 0.45: (0, 0, 0)})),
+              "arm_r": bone(kf({0: (0, 0, 0), 0.1: (40, 0, -30), 0.2: (95, 0, 10), 0.45: (0, 0, 0)})),
+              "wisp": bone(kf({0: (0, 0, 0), 0.2: (-35, 0, 0), 0.45: (0, 0, 0)})), "wisp_2": bone(kf({0: (0, 0, 0), 0.25: (-40, 0, 0), 0.45: (0, 0, 0)}))}
+    hurt = {"body": bone(kf({0: (0, 0, 0), 0.05: (16, 0, 8), 0.2: (0, 0, 0)}), kf({0: (0, 0, 0), 0.05: (0, 0.2, 0.5), 0.2: (0, 0, 0)}, False)),
+            "head": bone(kf({0: (0, 0, 0), 0.05: (14, 0, 0), 0.2: (0, 0, 0)})), "jaw": bone(kf({0: (0, 0, 0), 0.05: (-25, 0, 0), 0.2: (0, 0, 0)}))}
+    hurt["body"]["scale"] = sc({0: (1, 1, 1), 0.05: (1.12, 0.86, 1.12), 0.2: (1, 1, 1)})
+    # 倒れる (0.8 秒): 横へ転がって (0.35)、煤の山にしぼむ (0.8)。口は開いたまま、目の熾が下を向く
+    death = {"body": bone(kf({0: (0, 0, 0), 0.35: (10, 0, 80), 0.8: (6, 0, 92)}), kf({0: (0, 0, 0), 0.35: (0, -0.5, 0), 0.8: (0, -1.0, 0)}, False)),
+             "head": bone(kf({0: (0, 0, 0), 0.35: (20, 0, 0), 0.8: (30, 0, 0)})), "jaw": bone(kf({0: (0, 0, 0), 0.35: (-36, 0, 0)})),
+             "arm_l": bone(kf({0: (0, 0, 0), 0.35: (0, 0, 60), 0.8: (0, 0, 40)})), "arm_r": bone(kf({0: (0, 0, 0), 0.35: (0, 0, -60), 0.8: (0, 0, -40)})),
+             "leg_l": bone(kf({0: (0, 0, 0), 0.35: (-50, 0, 0)})), "leg_r": bone(kf({0: (0, 0, 0), 0.35: (-30, 0, 20)})),
+             "wisp": bone(kf({0: (0, 0, 0), 0.8: (-60, 0, 0)})), "wisp_2": bone(kf({0: (0, 0, 0), 0.8: (-50, 0, 0)}))}
+    death["body"]["scale"] = sc({0: (1, 1, 1), 0.35: (1, 1, 1), 0.8: (1.15, 0.7, 1.15)})
+    return {p + "idle": loop(2.0, idle), p + "walk": loop(0.4, walk), p + "attack": once(0.45, attack),
+            p + "hurt": once(0.2, hurt), p + "death": once(0.8, death, True)}
+
+
+def heartbeat_mimic():
+    """鼓動もどき (膜の袋): 三つの膨らみが「どくん・どくん」と二拍ずつ打ち、口の四枚の花弁がわずかに息をする。根は床で時々ひきつる。
+    呼ぶ lure (2 秒ごと): 二拍に合わせて花弁が開き、奥の青緑の芯が脈を打つ。噛む bite は予告 0.4 秒 (Tell の 8 tick): 0〜0.35 で花弁が大きく開き
+    袋が息を吸ってふくらみ、0.4 で前へ跳ねて花弁を閉じる。倒れるは膨らみがしぼみ、袋がつぶれて花弁が垂れる。"""
+    p = "animation.heartbeat_mimic."
+
+    def beat(speed, amp, phase=0):
+        # 二拍 (どくん・どくん): |sin| の山を二つずつ。式は 0〜amp
+        return "math.pow(math.abs(math.sin(query.anim_time * %d + %d)), 6) * %s" % (speed, phase, amp)
+
+    def scale_beat(speed, amp, phase=0):
+        e = "1 + %s" % beat(speed, amp, phase)
+        return [e, e, e]
+
+    idle = {"body": {"scale": ["1 + %s" % beat(120, 0.03), "1 - %s" % beat(120, 0.02), "1 + %s" % beat(120, 0.03)]},
+            "bulge_a": {"scale": scale_beat(120, 0.22, 0)}, "bulge_b": {"scale": scale_beat(120, 0.2, 25)},
+            "bulge_c": {"scale": scale_beat(120, 0.2, 50)}, "core": {"scale": scale_beat(120, 0.25, 10)},
+            "petal_t": bone([S(0, 4, 60), "0", "0"]), "petal_b": bone([S(0, -4, 60), "0", "0"]),
+            "petal_l": bone(["0", S(0, -4, 60), "0"]), "petal_r": bone(["0", S(0, 4, 60), "0"]),
+            "root_fl": bone(["0", "0", "math.pow(math.abs(math.sin(query.anim_time * 47)), 12) * 6"]),
+            "root_fr": bone(["0", "0", "-math.pow(math.abs(math.sin(query.anim_time * 53 + 30)), 12) * 6"]),
+            "root_bl": bone(["math.pow(math.abs(math.sin(query.anim_time * 41 + 60)), 12) * -5", "0", "0"]),
+            "root_br": bone(["math.pow(math.abs(math.sin(query.anim_time * 59 + 90)), 12) * -5", "0", "0"])}
+    # 呼ぶ (1.0 秒): 0.1 と 0.35 の二拍。花弁が開いて芯が光る
+    two = {0: 1.0, 0.1: 1.35, 0.22: 1.0, 0.35: 1.28, 0.5: 1.0, 1.0: 1.0}
+    lure = {"bulge_a": {"scale": sc({t: (v, v, v) for t, v in two.items()})},
+            "bulge_b": {"scale": sc({t + (0.04 if 0 < t < 1 else 0): (v, v, v) for t, v in two.items()})},
+            "bulge_c": {"scale": sc({t + (0.08 if 0 < t < 1 else 0): (v, v, v) for t, v in two.items()})},
+            "core": {"scale": sc({0: (1, 1, 1), 0.1: (1.5, 1.5, 1.5), 0.25: (1.1, 1.1, 1.1), 0.35: (1.45, 1.45, 1.45), 0.6: (1, 1, 1)})},
+            "body": {"scale": sc({0: (1, 1, 1), 0.1: (1.06, 0.97, 1.06), 0.22: (1, 1, 1), 0.35: (1.05, 0.98, 1.05), 0.5: (1, 1, 1)})},
+            "petal_t": bone(kf({0: (0, 0, 0), 0.1: (24, 0, 0), 0.6: (18, 0, 0), 1.0: (0, 0, 0)})),
+            "petal_b": bone(kf({0: (0, 0, 0), 0.1: (-24, 0, 0), 0.6: (-18, 0, 0), 1.0: (0, 0, 0)})),
+            "petal_l": bone(kf({0: (0, 0, 0), 0.1: (0, -24, 0), 0.6: (0, -18, 0), 1.0: (0, 0, 0)})),
+            "petal_r": bone(kf({0: (0, 0, 0), 0.1: (0, 24, 0), 0.6: (0, 18, 0), 1.0: (0, 0, 0)}))}
+    # 噛む (0.8 秒、当たりは 0.4): 開く → 閉じて前へ跳ねる → 戻る
+    op = 62
+    bite = {"petal_t": bone(kf({0: (0, 0, 0), 0.3: (op, 0, 0), 0.37: (op + 6, 0, 0), 0.43: (-8, 0, 0), 0.55: (-4, 0, 0), 0.8: (0, 0, 0)})),
+            "petal_b": bone(kf({0: (0, 0, 0), 0.3: (-op, 0, 0), 0.37: (-op - 6, 0, 0), 0.43: (8, 0, 0), 0.55: (4, 0, 0), 0.8: (0, 0, 0)})),
+            "petal_l": bone(kf({0: (0, 0, 0), 0.3: (0, -op, 0), 0.37: (0, -op - 6, 0), 0.43: (0, 8, 0), 0.55: (0, 4, 0), 0.8: (0, 0, 0)})),
+            "petal_r": bone(kf({0: (0, 0, 0), 0.3: (0, op, 0), 0.37: (0, op + 6, 0), 0.43: (0, -8, 0), 0.55: (0, -4, 0), 0.8: (0, 0, 0)})),
+            "body": bone(kf({0: (0, 0, 0), 0.3: (6, 0, 0), 0.4: (-16, 0, 0), 0.55: (-12, 0, 0), 0.8: (0, 0, 0)}),
+                         kf({0: (0, 0, 0), 0.3: (0, 0.3, 0.6), 0.4: (0, -0.2, -1.8), 0.55: (0, 0, -1.2), 0.8: (0, 0, 0)}, False)),
+            "core": bone(None, kf({0: (0, 0, 0), 0.3: (0, 0, -0.5), 0.4: (0, 0, 0), 0.8: (0, 0, 0)}, False)),
+            "root_fl": bone(kf({0: (0, 0, 0), 0.3: (0, 0, 8), 0.4: (0, 0, -6), 0.8: (0, 0, 0)})),
+            "root_fr": bone(kf({0: (0, 0, 0), 0.3: (0, 0, -8), 0.4: (0, 0, 6), 0.8: (0, 0, 0)})),
+            "root_bl": bone(kf({0: (0, 0, 0), 0.4: (-10, 0, 0), 0.8: (0, 0, 0)})), "root_br": bone(kf({0: (0, 0, 0), 0.4: (-10, 0, 0), 0.8: (0, 0, 0)}))}
+    bite["body"]["scale"] = sc({0: (1, 1, 1), 0.3: (1.1, 1.08, 1.1), 0.4: (0.94, 0.96, 1.06), 0.55: (1, 1, 1)})
+    bite["core"]["scale"] = sc({0: (1, 1, 1), 0.3: (1.5, 1.5, 1.5), 0.4: (1, 1, 1)})
+    hurt = {"body": {"scale": sc({0: (1, 1, 1), 0.06: (1.1, 0.86, 1.1), 0.25: (1, 1, 1)})},
+            "petal_t": bone(kf({0: (0, 0, 0), 0.06: (-10, 0, 0), 0.25: (0, 0, 0)})), "petal_b": bone(kf({0: (0, 0, 0), 0.06: (10, 0, 0), 0.25: (0, 0, 0)})),
+            "bulge_a": {"scale": sc({0: (1, 1, 1), 0.06: (0.8, 0.8, 0.8), 0.25: (1, 1, 1)})},
+            "bulge_b": {"scale": sc({0: (1, 1, 1), 0.06: (0.8, 0.8, 0.8), 0.25: (1, 1, 1)})}}
+    death = {"body": bone(kf({0: (0, 0, 0), 0.5: (-8, 0, 6), 1.4: (-14, 0, 10)}), kf({0: (0, 0, 0), 0.5: (0, -0.8, 0), 1.4: (0, -2.4, 0)}, False)),
+             "bulge_a": {"scale": sc({0: (1, 1, 1), 0.2: (1.3, 1.3, 1.3), 0.8: (0.35, 0.35, 0.35)})},
+             "bulge_b": {"scale": sc({0: (1, 1, 1), 0.3: (1.25, 1.25, 1.25), 0.9: (0.35, 0.35, 0.35)})},
+             "bulge_c": {"scale": sc({0: (1, 1, 1), 0.4: (1.2, 1.2, 1.2), 1.0: (0.35, 0.35, 0.35)})},
+             "core": {"scale": sc({0: (1, 1, 1), 0.6: (0.3, 0.3, 0.3)})},
+             "petal_t": bone(kf({0: (0, 0, 0), 0.6: (-20, 0, 0), 1.4: (-55, 0, 0)})), "petal_b": bone(kf({0: (0, 0, 0), 0.6: (-30, 0, 0), 1.4: (-40, 0, 0)})),
+             "petal_l": bone(kf({0: (0, 0, 0), 1.4: (-30, -40, 0)})), "petal_r": bone(kf({0: (0, 0, 0), 1.4: (-30, 40, 0)})),
+             "root_fl": bone(kf({0: (0, 0, 0), 1.4: (0, 0, 22)})), "root_fr": bone(kf({0: (0, 0, 0), 1.4: (0, 0, -22)})),
+             "root_bl": bone(kf({0: (0, 0, 0), 1.4: (-20, 0, 14)})), "root_br": bone(kf({0: (0, 0, 0), 1.4: (-20, 0, -14)}))}
+    death["body"]["scale"] = sc({0: (1, 1, 1), 0.5: (1.04, 0.92, 1.04), 1.4: (1.2, 0.5, 1.2)})
+    return {p + "idle": loop(3.0, idle), p + "lure": once(1.0, lure), p + "bite": once(0.8, bite),
+            p + "hurt": once(0.25, hurt), p + "death": once(1.4, death, True)}
+
+
 ANIMS = {"ash_trail": ash_trail, "ember_keeper": ember_keeper, "soot_child": soot_child, "past_shadow": past_shadow,
          "nameless_shape": nameless_shape, "lamp_eater": lamp_eater, "ceiling_walker": ceiling_walker,
          "heartbeat_mimic": heartbeat_mimic, "rope_hanger": rope_hanger}
 
 
 # ---------------------------------------------------------------- 素材を入れる
-def install():
+# 2026-10-23 に作り直した 3 種。ラフは 3 案で骨の表を共有するので、選んだ案に無い (面の無い、子も無い) 骨を落として入れる
+REBUILT = ("ember_keeper", "soot_child", "heartbeat_mimic")
+
+
+def strip_empty_bones(src, dst):
+    m = json.load(open(src, encoding="utf-8"))
+    bones = m["bones"]
+    while True:
+        parents = {b.get("parent") for b in bones.values()}
+        drop = [n for n, b in bones.items() if n != "root" and not b["triangles"] and n not in parents]
+        if not drop:
+            break
+        for n in drop:
+            del bones[n]
+    with open(dst, "w", encoding="utf-8") as f:
+        json.dump(m, f, ensure_ascii=False)
+    return dst
+
+
+def install(only=()):
     for mob, opt in CHOICE.items():
+        if only and mob not in only:
+            continue
         stem = "%s_%s" % (mob, opt)
         mesh = os.path.join(ROUGH, mob, opt, stem + "_mesh.json")
+        if mob in REBUILT:
+            mesh = strip_empty_bones(mesh, os.path.join(ROUGH, mob, opt, stem + "_mesh_used.json"))
+            old_geo = os.path.join(A, "geo", "entity", mob + ".geo.json")
+            if os.path.exists(old_geo):
+                os.remove(old_geo)
         base = os.path.join(PAINT, mob + "_base_atlas.png")
         gmask = os.path.join(PAINT, mob + "_base_glowmask.png")
         subprocess.check_call([sys.executable, os.path.join(ROOT, "tools", "install/install_lowpoly.py"), mob, "--mesh", mesh, "--atlas", base,
                                "--glow", gmask], cwd=ROOT)
+        if mob in REBUILT:
+            os.remove(mesh)   # 骨を落とした一時の写し
         tex = os.path.join(A, "textures", "lowpoly")
         for tag in ("s1", "s2"):
             shutil.copyfile(os.path.join(PAINT, "%s_%s_atlas.png" % (mob, tag)), os.path.join(tex, "%s_%s.png" % (mob, tag)))
@@ -369,7 +530,8 @@ def item_textures():
 
 
 def main():
-    install()
+    only = set(sys.argv[1:])   # 名前を並べると、その敵の素材だけ入れ直す (音・品の絵は毎回書く)
+    install(only)
     sounds()
     item_textures()
     print("done")

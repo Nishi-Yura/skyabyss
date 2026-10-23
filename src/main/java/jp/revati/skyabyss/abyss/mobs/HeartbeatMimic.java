@@ -41,6 +41,12 @@ public class HeartbeatMimic extends AbyssMobB {
         targetSelector.addGoal(1, new NearestAttackableTargetGoal<>(this, Player.class, true));
     }
 
+    // 呼ぶ (2 秒ごと) は飾りの動作なので、被弾の動きを止めない
+    @Override
+    protected boolean guardsAgainstHurt(String action) {
+        return !action.equals("lure");
+    }
+
     @Override
     public void tick() {
         super.tick();

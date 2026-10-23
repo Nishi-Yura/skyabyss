@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """五章の深淵の敵 9 体 (灰の層 3・深み 2・深淵だけ 4) の絵を描き直す (docs/design/36 の 4 と 4.1、A3)。
 
-  python -I tools/abyss/paint_abyss_b.py
+  python -I tools/abyss/paint_abyss_b.py [名前...]   (名前を並べるとその敵だけ)
 
 入力: docs/review/abyss_roughs/<id>/<案>/<id>_<案>_{atlas.png,glowmask.png}  (選んだ案。ラフは粗いので描き直す)
 出力: docs/review/abyss_painted/<id>_{base,s1,s2}_atlas.png と <id>_{base,s1,s2}_glowmask.png
@@ -249,7 +249,10 @@ def _stage(img, mask, seed, level):
 
 def main():
     os.makedirs(OUT, exist_ok=True)
+    only = set(sys.argv[1:])   # 名前を並べると、その敵だけ描き直す
     for mob, opt in CHOICE.items():
+        if only and mob not in only:
+            continue
         stem = "%s_%s" % (mob, opt)
         src = os.path.join(ROUGH, mob, opt)
         atlas = Image.open(os.path.join(src, stem + "_atlas.png")).convert("RGBA")

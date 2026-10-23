@@ -79,9 +79,14 @@ public abstract class GuardMob extends Monster implements GeoEntity, jp.revati.s
     // 攻撃などの動作アニメーションを流す (サーバー側で呼ぶ)
     public void playAction(String name) {
         triggerAnim("action", name);
-        if (!name.equals("hurt")) {
+        if (!name.equals("hurt") && guardsAgainstHurt(name)) {
             lastActionTick = tickCount;
         }
+    }
+
+    // その動作の間は被弾の動きで上書きしないか (既定は全部。鼓動もどきの「呼ぶ」のような、繰り返す飾りの動作は false にする)
+    protected boolean guardsAgainstHurt(String action) {
+        return true;
     }
 
     // 最後に被弾以外の動作を流した tick (被弾の動きで攻撃の構え・盾の受けを上書きしないため)

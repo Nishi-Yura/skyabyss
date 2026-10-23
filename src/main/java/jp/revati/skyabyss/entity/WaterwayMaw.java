@@ -47,6 +47,10 @@ import java.util.UUID;
 public class WaterwayMaw extends Monster implements GeoEntity {
     private static final RawAnimation SWIM = RawAnimation.begin().thenLoop("animation.waterway_maw.swim");
     private static final RawAnimation BITE = RawAnimation.begin().thenPlay("animation.waterway_maw.bite");
+    // 被弾 (節が波打つ) と倒れる (腹を上にして沈む。終わった姿で止める)。tools/gen/mobs/gen_mob_quality3_anims.py
+    private static final RawAnimation HURT = RawAnimation.begin().thenPlay("animation.waterway_maw.hurt");
+    private static final RawAnimation DEATH = RawAnimation.begin().thenPlayAndHold("animation.waterway_maw.death");
+    private int lastBiteTick = -1000;
     // 来てから襲うまでの猶予（5 秒）と、来た人を数える範囲（16 ブロック。外へ 24 ブロック離れると忘れる）
     // 来てから襲うまでの猶予は 10 秒 (岩棚を渡る間は襲われない)
     public static final int ARRIVAL_GRACE = 200;
@@ -177,6 +181,7 @@ public class WaterwayMaw extends Monster implements GeoEntity {
     @Override
     public boolean doHurtTarget(Entity target) {
         triggerAnim("action", "bite");
+        lastBiteTick = tickCount;
         boolean hit = target.hurt(damageSources().mobAttack(this), BITE_DAMAGE);
         if (hit && target instanceof LivingEntity living) {
             living.knockback(1.1, getX() - living.getX(), getZ() - living.getZ());
@@ -365,10 +370,29 @@ public class WaterwayMaw extends Monster implements GeoEntity {
         return MobSounds.WATERWAY_MAW_DEATH.get();
     }
 
+    // 被弾の動き (噛んだ直後の 0.6 秒は噛む動きを残す)。傷・数値は変えない
+    @Override
+    public boolean hurt(DamageSource source, float amount) {
+        boolean hit = super.hurt(source, amount);
+        if (hit && !level().isClientSide && isAlive() && tickCount - lastBiteTick > 12) {
+            triggerAnim("action", "hurt");
+        }
+        return hit;
+    }
+
+    @Override
+    public void die(DamageSource source) {
+        super.die(source);
+        if (!level().isClientSide) {
+            triggerAnim("action", "death");
+        }
+    }
+
     @Override
     public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
         controllers.add(new AnimationController<>(this, "move", 4, state -> state.setAndContinue(SWIM)));
-        controllers.add(new AnimationController<>(this, "action", 0, state -> PlayState.STOP).triggerableAnim("bite", BITE));
+        controllers.add(new AnimationController<>(this, "action", 0, state -> PlayState.STOP).triggerableAnim("bite", BITE)
+                .triggerableAnim("hurt", HURT).triggerableAnim("death", DEATH));
     }
 
     @Override

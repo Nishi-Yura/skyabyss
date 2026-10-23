@@ -37,7 +37,7 @@ public class BoneHauler extends GuardMob {
     private BlockPos home;
 
     public BoneHauler(EntityType<? extends Monster> type, Level level) {
-        super(type, level, "bone_hauler", "hurt", "death");
+        super(type, level, "bone_hauler", "hurt", "death", "startle");
         this.xpReward = 0;
     }
 
@@ -112,6 +112,7 @@ public class BoneHauler extends GuardMob {
         @Override
         public void start() {
             recalc = 0;
+            mob.playAction("startle");   // 人を見て驚く (前脚を上げてから走り出す。動きだけで、逃げ方は変えない)
         }
 
         @Override

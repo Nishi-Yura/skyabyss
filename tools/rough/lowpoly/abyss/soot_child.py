@@ -9,7 +9,10 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from ck_ab import *  # noqa
 
 BONES = {"root": (None, (0, 0, 0)), "body": ("root", (0, 2.0, 0)), "head": ("body", (0, 3.4, 0)),
-         "arm_l": ("body", (1.6, 2.6, 0)), "arm_r": ("body", (-1.6, 2.6, 0))}
+         "arm_l": ("body", (1.6, 2.6, 0)), "arm_r": ("body", (-1.6, 2.6, 0)),
+         # 2026-10-23 (A を作り直し): 顎・足・背の煙の尾を足した (骨 10)
+         "jaw": ("body", (0, 2.3, -1.6)), "leg_l": ("root", (1.1, 1.0, -0.2)), "leg_r": ("root", (-1.1, 1.0, -0.2)),
+         "wisp": ("head", (0, 4.2, 1.2)), "wisp_2": ("wisp", (0, 5.4, 2.6))}
 PAL = {"mats": {
     "soot": mat(SOOT, 0.55, crack=0.0, noise=0.2),
     "char": mat(CHAR, 0.5, crack=0.0, noise=0.12),
@@ -19,14 +22,42 @@ PAL = {"mats": {
 
 
 def build_a(k):
-    """A 煤の団子: 丸い煤の体、熾の目二つ、短い腕。"""
+    """A 煤の団子 (2026-10-23 作り直し。前は丸い塊に腕二本で、頭の骨が空だった):
+    下の腹 (body) と上の頭 (head: 熾の目二つ・眉の煤の庇・頭の煤の毛) に分け、前に口 (jaw の下顎、開くと奥の熾が見える)。
+    短い腕の先に炭の爪三本、短い足二本 (歩くと交互に出る)、頭の後ろから煙の尾 (wisp > wisp_2) がたなびく。"""
     F = []
-    F += part("body", ellipsoid("body", "soot", (0, 1.6, 0), (2.4, 2.1, 2.4), segs=10, rings=4))
-    F += part("eye_l", ellipsoid("body", "ember", (-0.9, 2.6, -2.2), (0.45, 0.45, 0.3), segs=8, rings=3))
-    F += part("eye_r", ellipsoid("body", "ember", (0.9, 2.6, -2.2), (0.45, 0.45, 0.3), segs=8, rings=3))
-    F += part("arm_l", tube("arm_l", "char", [(1.6, 2.6, 0), (3.2, 2.2, -0.2), (4.0, 1.3, -0.6)], ra=[0.9, 0.72, 0.42], sides=6, caps=(True, True)))
-    F += part("arm_r", tube("arm_r", "char", [(-1.6, 2.6, 0), (-3.2, 2.2, -0.2), (-4.0, 1.3, -0.6)], ra=[0.9, 0.72, 0.42], sides=6, caps=(True, True)))
-    return F, [eye(-0.9, 2.6, -2.5, 0.35), eye(0.9, 2.6, -2.5, 0.35)]
+    # 腹 (body): 下ぶくれの煤の団子。腹の煤の粒
+    F += part("belly", ellipsoid("body", "soot", (0, 1.9, 0.1), (2.4, 1.9, 2.35), segs=12, rings=4))
+    F += part("lumps", lumps("body", "char", [((-1.7, 1.4, 1.2), 0.7), ((1.8, 1.6, 0.9), 0.65), ((0.6, 0.9, 1.9), 0.6), ((-0.9, 2.4, 1.9), 0.55)]))
+    # 口: 奥の熾 (喉) と上唇は腹、下顎は jaw
+    F += part("throat", ellipsoid("body", "ember", (0, 2.15, -1.95), (0.9, 0.42, 0.4), segs=8, rings=2))
+    F += part("lip", ellipsoid("body", "char", (0, 2.55, -2.05), (1.15, 0.32, 0.45), segs=8, rings=1))
+    F += part("jaw", ellipsoid("jaw", "char", (0, 1.8, -1.95), (1.05, 0.45, 0.55), segs=8, rings=2))
+    for j, x in enumerate((-0.55, 0.0, 0.55)):
+        F += part(f"tooth{j}", cone("jaw", "ember", (x, 1.95, -2.2), (0, 1, -0.2), 0.45, 0.16, sides=3, rings=1))
+    # 頭 (head): 腹に半ば沈んだ上の丸み。眉の庇の下に熾の目
+    F += part("crown", ellipsoid("head", "soot", (0, 3.35, -0.05), (2.05, 1.45, 2.0), segs=12, rings=3))
+    F += part("brow", tube("head", "char", [(-1.5, 3.55, -1.55), (-0.5, 3.95, -1.95), (0.5, 3.95, -1.95), (1.5, 3.55, -1.55)],
+                           ra=[0.22, 0.32, 0.32, 0.22], sides=4, hint=(0, 0, 1), caps=(True, True)))
+    F += part("eye_l", ellipsoid("head", "ember", (-0.8, 3.25, -1.85), (0.42, 0.38, 0.3), segs=8, rings=2))
+    F += part("eye_r", ellipsoid("head", "ember", (0.8, 3.25, -1.85), (0.42, 0.38, 0.3), segs=8, rings=2))
+    for j, (x, z, dx, dz, ln) in enumerate(((-0.9, -0.3, -0.5, -0.3, 1.2), (0.0, -0.6, 0.1, -0.5, 1.4), (0.9, -0.2, 0.5, -0.2, 1.1),
+                                            (-0.4, 0.6, -0.3, 0.4, 1.0), (0.5, 0.7, 0.4, 0.5, 1.0))):
+        F += part(f"tuft{j}", cone("head", "soot", (x, 4.45, z), (dx, 1.0, dz), ln, 0.42, sides=4, rings=2))
+    # 煙の尾 (wisp > wisp_2): 頭の後ろから上へ流れて先が細る
+    F += part("wisp", tube("wisp", "char", [(0, 3.9, 1.0), (0, 4.7, 1.8), (0, 5.4, 2.6)], ra=[0.6, 0.48, 0.38], sides=5, hint=(1, 0, 0), caps=(True, True)))
+    F += part("wisp_2", tube("wisp_2", "soot", [(0, 5.25, 2.45), (0, 6.0, 3.3), (0, 6.2, 4.3)], ra=[0.4, 0.26, 0.0], sides=5, hint=(1, 0, 0), caps=(True, False)))
+    # 腕 (短い) と炭の爪
+    for s_, b in ((1, "arm_l"), (-1, "arm_r")):
+        F += part(b, tube(b, "char", [(s_ * 1.5, 2.6, 0), (s_ * 2.8, 2.25, -0.3), (s_ * 3.4, 1.5, -0.7)], ra=[0.75, 0.6, 0.5], sides=6, caps=(True, True)))
+        F += part(b + "_hand", ellipsoid(b, "char", (s_ * 3.5, 1.25, -0.8), (0.55, 0.5, 0.55), segs=6, rings=2))
+        for j, (dx, dz) in enumerate(((0.35, -0.5), (0.0, -0.65), (-0.35, -0.5))):
+            F += part(f"{b}_claw{j}", cone(b, "ember" if j == 1 else "char", (s_ * 3.5 + dx * 0.5, 1.0, -0.9 + dz * 0.4), (dx * 0.4, -0.8, dz), 0.8, 0.17, sides=3, rings=1))
+    # 足 (短い炭の足)
+    for s_, b in ((1, "leg_l"), (-1, "leg_r")):
+        F += part(b, tube(b, "char", [(s_ * 1.1, 1.1, -0.2), (s_ * 1.2, 0.55, -0.5)], ra=[0.6, 0.55], sides=6, caps=(True, True)))
+        F += part(b + "_foot", ellipsoid(b, "char", (s_ * 1.2, 0.38, -0.85), (0.65, 0.38, 0.85), segs=6, rings=2))
+    return F, [eye(-0.8, 3.25, -2.1, 0.3), eye(0.8, 3.25, -2.1, 0.3)]
 
 
 def build_b(k):
@@ -56,7 +87,7 @@ def build(k):
     return {"a": build_a, "b": build_b, "c": build_c}[k](k)
 
 
-POSES = {"idle": {}, "wave": {"arm_l": (0, 0, 40), "arm_r": (0, 0, -40)}}
+POSES = {"idle": {}, "wave": {"arm_l": (0, 0, 40), "arm_r": (0, 0, -40)}, "bite": {"head": (-20, 0, 0), "jaw": (35, 0, 0)}}
 
 LATER = {'a': '歪み: 団子が割れ、中から小さな目が増える / 崩れ: 割れた煤が床に広がり、数だけが残る。', 'b': '歪み: 人形の頭が骨の白の仮面になり、首が長くなる / 崩れ: 人形がほどけ、紙の頭だけが転がる。', 'c': '歪み: 背の点が増えて光の筋になる / 崩れ: 床いっぱいの影になり、踏むと一斉に起きる。'}
 
@@ -81,8 +112,9 @@ SPEC = dict(
 ROWS = [("前 3/4", "idle", 212, 18, 240, (0, 3, 0), 32.0, None),
         ("横", "idle", 270, 6, 240, (0, 3, 0), 32.0, None),
         ("上から (群れで見る面)", "idle", 200, 60, 240, (0, 2, 0), 32.0, None),
-        ("手を伸ばす", "wave", 212, 18, 240, (0, 3, 0), 32.0, None)]
+        ("手を伸ばす", "wave", 212, 18, 240, (0, 3, 0), 32.0, None),
+        ("噛む (口が開く)", "bite", 212, 18, 240, (0, 3, 0), 32.0, None)]
 SPEC["rows"] = ROWS
 
 if __name__ == "__main__":
-    run(SPEC, build, PAL, BONES, ROWS, hint=64)
+    run(SPEC, build, PAL, BONES, ROWS, hint=128)

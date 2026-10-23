@@ -6,7 +6,6 @@ import jp.revati.skyabyss.entity.GuardMob;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
-import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -78,21 +77,10 @@ public abstract class AbyssMobB extends GuardMob {
         return distanceToClosestPlayer > 48;
     }
 
+    // 被弾・倒れるは GuardMob が流す (2026-10-23: 予告の構えを流してから 1.5 秒の内は被弾の動きで上書きしない)
     @Override
-    public boolean hurt(DamageSource source, float amount) {
-        boolean hit = super.hurt(source, amount);
-        if (hit && !level().isClientSide && isAlive()) {
-            playAction("hurt");
-        }
-        return hit;
-    }
-
-    @Override
-    public void die(DamageSource source) {
-        super.die(source);
-        if (!level().isClientSide) {
-            playAction("death");
-        }
+    protected boolean autoHurtDeath() {
+        return true;
     }
 
     protected void strike(LivingEntity target, float amount) {

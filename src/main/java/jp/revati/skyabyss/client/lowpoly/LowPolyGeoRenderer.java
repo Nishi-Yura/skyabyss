@@ -52,6 +52,10 @@ public class LowPolyGeoRenderer<T extends Entity & GeoAnimatable> extends GeoEnt
         if (animatable instanceof jp.revati.skyabyss.entity.GuardMob g && g.hasAction("death")) {
             return 0f;
         }
+        // 水路の顎は GuardMob ではないが、倒れるアニメ (腹を上にして沈む) を自分で流す
+        if (animatable instanceof jp.revati.skyabyss.entity.WaterwayMaw) {
+            return 0f;
+        }
         return super.getDeathMaxRotation(animatable);
     }
 
