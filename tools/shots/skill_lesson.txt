@@ -85,7 +85,8 @@ wait 30
 cmd skyabyss dev talk "skyabyss:attendant_training_master"
 wait 40
 shot lesson_6_menu
-cmd skyabyss dev talk say 2
+# 選択肢の番号は会話の節の並び (見えない分も数える): 振り直し・木偶・稽古・稽古(新)・振り直しのこと(稽古) = 4
+cmd skyabyss dev talk say 4
 wait 40
 shot lesson_6_respec
 close

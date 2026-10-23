@@ -796,7 +796,12 @@ public class SkillScreen extends Screen implements jp.revati.skyabyss.client.ui.
             if (learn.active && learn.visible) {
                 jp.revati.skyabyss.client.tutorial.SkillLessonClient.frame(g, learn.getX(), learn.getY(), learn.getWidth(), learn.getHeight());
             }
-            g.drawString(font, Component.translatable("lesson.skyabyss.screen.learn"), left + 38, top + 25, 0xFF000000 | GOLD, false);
+            // 上の段 (木のつまみの右、「刻まれた技」の左の空き) に 0.8 倍で
+            g.pose().pushPose();
+            g.pose().translate(left + 38, top + 11, 0);
+            g.pose().scale(0.8f, 0.8f, 1f);
+            g.drawString(font, Component.translatable("lesson.skyabyss.screen.learn"), 0, 0, 0xFF000000 | GOLD, false);
+            g.pose().popPose();
         }
         if (tryon != null && page == 0) {
             g.drawString(font, Component.translatable("gui.skyabyss.skill.tryon_banner", tryonOrder.size()), left + 38, top + 25 + 0, 0xFF7FFFA0, false);

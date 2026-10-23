@@ -4,6 +4,12 @@
   "nodes": {
     "lesson_offer": {
       "face": "neutral",
+      "do": [
+        {
+          "type": "lesson",
+          "act": "track"
+        }
+      ],
       "options": [
         {
           "id": "ok",

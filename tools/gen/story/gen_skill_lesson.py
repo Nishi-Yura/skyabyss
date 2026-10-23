@@ -186,8 +186,8 @@ t("lesson.skyabyss.hint.learn", "%s で技の画面を開き、光る技を覚�
 t("lesson.skyabyss.hint.cast", "木偶を向いて %s で技を使う", "Face a dummy and press %s")
 t("lesson.skyabyss.hint.behind", "木偶の後ろの光へ回り込んで打つ", "Circle to the light behind a dummy and strike")
 t("lesson.skyabyss.hint.stance", "%s で構えを切り替える", "Press %s to switch stance")
-t("lesson.skyabyss.hint.reset", "師範に話しかけ「振り直しのこと」を聞く", "Talk to the master: \"About respecs\"")
-t("lesson.skyabyss.screen.learn", "稽古: 光る技を選び「習得」を押す", "Lesson: pick a glowing skill, then Learn")
+t("lesson.skyabyss.hint.reset", "師範に「振り直しのこと (稽古)」を聞く", "Ask the master: \"About respecs (lesson)\"")
+t("lesson.skyabyss.screen.learn", "稽古: 光る技を選んで「習得」", "Lesson: glowing skill, then Learn")
 
 # ######################################################################
 # 師範の会話の足し書き
@@ -229,6 +229,7 @@ menu("lesson_skip", ("稽古を切り上げる", "End the lesson"), "lesson_skip
 
 node("lesson_offer", ("背に上がる気か。なら、木偶を相手に型を見せてみろ。覚える、置く、当てる、回り込む、構える。それだけだ。",
                       "Going up a back? Then show me your forms on the dummies. Learn, slot, hit, circle, stance. That's all."),
+     do=[{"type": "lesson", "act": "track"}],
      options=[("ok", ("頼む", "Teach me"), "end"),
               ("skip", ("今はいい (飛ばす)", "Not now (skip)"), "lesson_skip")])
 node("lesson_new", ("いいだろう。もう一度、頭から見てやる。", "Fine. I'll take you through it from the top."),

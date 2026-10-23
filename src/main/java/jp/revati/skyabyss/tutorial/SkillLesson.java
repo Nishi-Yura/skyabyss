@@ -59,7 +59,7 @@ public final class SkillLesson {
     public static final String MASTER = "skyabyss:attendant_training_master";
     public static final String SKIP_FLAG = "lesson_skip";
     public static final String REWARD_FLAG = "lesson_rewarded";
-    public static final Set<String> ACTS = Set.of("say", "finish", "skip", "replay");
+    public static final Set<String> ACTS = Set.of("say", "finish", "skip", "replay", "track");
     public static final String SIG_SLOTTED = "skill_lesson:slotted";
     public static final String SIG_DUMMY = "skill_lesson:dummy";
     public static final String SIG_BEHIND = "skill_lesson:behind";
@@ -147,6 +147,12 @@ public final class SkillLesson {
             case "skip" -> {
                 Quests.forget(player, QUEST);
                 Notice.hint(player, "message.skyabyss.lesson.skipped");
+            }
+            // 師範に頼んだ: 稽古を追う (目的の帯・印がこちらを指す)
+            case "track" -> {
+                if (stage(player) != null) {
+                    Quests.track(player, QUEST);
+                }
             }
             case "replay" -> {
                 Quests.forget(player, QUEST);
