@@ -17,7 +17,7 @@ import net.minecraft.world.item.SwordItem;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.neoforged.neoforge.common.SimpleTier;
 
-// 雷獣の爪 (伝説): 雷獣の前脚の爪を、握りの革に三本並べた片手の爪の武器。速く振れる。
+// 雷獣の爪 (ヒロイック): 雷獣の前脚の爪を、握りの革に三本並べた片手の爪の武器。速く振れる。
 // 三度目ごとに (+5 から二度目ごとに)、4 ブロック内の別の敵へ雷が跳ぶ (攻撃力の 40%。+10 で二体へ)。
 // 跳ぶ雷は斬った相手には当たらないので、一体への 1 秒あたりは攻撃力 × 速さのまま (7.5 × 2.0 = 15.0)
 public class RaijuClawItem extends StormWeaponItem {
@@ -27,7 +27,7 @@ public class RaijuClawItem extends StormWeaponItem {
     private static final String HITS = SkyAbyss.MODID + ":raiju_claw_hits";
 
     public RaijuClawItem(Properties properties) {
-        super(TIER, properties.attributes(SwordItem.createAttributes(TIER, 4, -2.0f)), GearTier.LEGENDARY, "item.skyabyss.raiju_claw.desc");
+        super(TIER, properties.attributes(SwordItem.createAttributes(TIER, 4, -2.0f)), GearTier.HEROIC, "item.skyabyss.raiju_claw.desc");
     }
 
     public static int every(ItemStack stack) {

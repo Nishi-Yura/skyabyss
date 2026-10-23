@@ -161,7 +161,7 @@ public final class WeaponItemRenderer extends BlockEntityWithoutLevelRenderer {
             return forced;
         }
         GearTier tier = stack.getItem() instanceof ModGear g ? g.tier() : GearTier.COMMON;
-        return tier.ordinal() >= GearTier.LEGENDARY.ordinal() ? "legend" : tier == GearTier.RARE ? "rare" : "common";
+        return tier.meshTier;
     }
 
     // 弓の引き絵の段 (-1 = 引いていない)。バニラの pulling / pull の述語と同じ: 引いている間は 0、pull 0.65 から 1、0.9 から 2

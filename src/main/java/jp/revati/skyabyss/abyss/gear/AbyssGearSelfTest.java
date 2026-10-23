@@ -43,7 +43,7 @@ import net.minecraft.world.item.component.ItemAttributeModifiers;
 import net.neoforged.neoforge.common.util.FakePlayer;
 
 // 五章「深淵」の装備の自己テスト (SKYABYSS_SELFTEST=1、段 "abyss gear")。
-//  - 表: 10 品と素材 3 つが登録され、由来が深淵、必要 Lv (レア 40・伝説 42)、図鑑が TitanGearSets にある、強化の燃料が錨鉄
+//  - 表: 10 品と素材 3 つが登録され、由来が深淵、必要 Lv (エピック以下 40・ヒロイック以上 42)、図鑑が TitanGearSets にある、強化の燃料が錨鉄
 //  - 数値と強さの曲線: 武器の攻撃力・速さ、+0 / +10 が深淵の段の目安 ±5%、余燼の段から逆転しない (+0 は余燼 +0 の 1.1 倍以上・余燼 +10 以下、+10 は余燼 +10 より上)。
 //    鎧 23 / 15 (+3 で 18)、余燼の鎧より硬い
 //  - 一式・固有効果: 2 部位の強靭、暗い所の傷、錘の深さ、短剣の拍の数え方
@@ -104,7 +104,7 @@ public final class AbyssGearSelfTest {
             Item it = item(id);
             check(f, it instanceof ModGear g && g.dungeon().equals(AbyssGear.DUNGEON), id + " is not abyss gear");
             boolean ex = AbyssGear.SET.isExclusive(id);
-            check(f, it instanceof ModGear g && g.tier() == (ex ? GearTier.LEGENDARY : GearTier.RARE), id + " has the wrong tier");
+            check(f, it instanceof ModGear g && g.tier() == (ex ? GearTier.HEROIC : it instanceof net.minecraft.world.item.ArmorItem ? GearTier.RARE : GearTier.EPIC), id + " has the wrong tier");
             int want = ex ? 42 : 40;
             check(f, GearLevel.required(it) == want, id + " requires Lv " + GearLevel.required(it) + " (want " + want + ")");
             check(f, TitanGearSets.of(it) == AbyssGear.SET, id + " does not map to the abyss set");

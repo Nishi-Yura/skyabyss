@@ -35,8 +35,7 @@ public final class Ch1Prep {
     public static final List<String> TRAILS = List.of(Q_IRON, Q_BLADE, Q_SHIELD);
 
     // 地上の新しい場所の要素 ID (ChapterSites)
-    public static final String CAIRN_PREFIX = "ch1_road_cairn_";
-    public static final int CAIRNS = 7;
+    public static final String ROAD_SHRINE_ID = "ch1_road_shrine";
     public static final String BONE_CACHE = "ch1_bone_cache";
     public static final String CLEFT_CAVE = "ch1_cleft_shell_cave";
     public static final String BONE_PIT = "ch1_bone_pit";
@@ -55,7 +54,7 @@ public final class Ch1Prep {
     public static final String SENTRY_TALLY = "skyabyss:sentry_tally";
 
     // 伝承 (manual。コードが記す。lore/entry/ch1/)
-    public static final String ROAD_CAIRNS = "ch1/road_cairns";
+    public static final String ROAD_SHRINE = "ch1/road_shrine";
     public static final String SONG_CHAMBER = "ch1/song_chamber";
     public static final String CLEFT_CAVE_LORE = "ch1/cleft_cave";
     // 前の私の頁 (支度の段。34 の 5 章) と冷えの戸の碑文
@@ -63,9 +62,9 @@ public final class Ch1Prep {
     public static final String PAGE_BLADE = "ch1/trail_blade";
     public static final String PAGE_SHIELD = "ch1/trail_shield";
     public static final String COLD_DOOR = "ch1/cold_door";
-    public static final List<String> LORE = List.of(ROAD_CAIRNS, SONG_CHAMBER, CLEFT_CAVE_LORE, PAGE_IRON, PAGE_BLADE, PAGE_SHIELD, COLD_DOOR);
+    public static final List<String> LORE = List.of(ROAD_SHRINE, SONG_CHAMBER, CLEFT_CAVE_LORE, PAGE_IRON, PAGE_BLADE, PAGE_SHIELD, COLD_DOOR);
     // 「はじめて見た物」の経験値 (一人一回。章の枠では「既存の小要素」の側に数える小さな分。頁は 0 = 経験値は支度の段が持つ)
-    public static final Map<String, Integer> LORE_XP = Map.of(ROAD_CAIRNS, 10, SONG_CHAMBER, 10, CLEFT_CAVE_LORE, 0);
+    public static final Map<String, Integer> LORE_XP = Map.of(ROAD_SHRINE, 10, SONG_CHAMBER, 10, CLEFT_CAVE_LORE, 0);
 
     // 旅の覚書 (一章) が解くレシピ (data/skyabyss/recipe。解くまで作れない = guide/RecipeLock。hare_quill_arrow は予約だけ (棘針の矢。まだ無い。存在しない ID は WayfarerNotes が無視する))
     public static final List<String> RECIPES = List.of("whale_road_helmet", "whale_road_chestplate", "whale_road_leggings", "whale_road_boots",
@@ -76,7 +75,7 @@ public final class Ch1Prep {
 
     // 登録 (Ch1 の共通の初期化から)
     static void register() {
-        GrowthRewards.LORE_XP.putIfAbsent(ROAD_CAIRNS, 10);
+        GrowthRewards.LORE_XP.putIfAbsent(ROAD_SHRINE, 10);
         GrowthRewards.LORE_XP.putIfAbsent(SONG_CHAMBER, 10);
         GrowthRewards.LORE_XP.putIfAbsent(CLEFT_CAVE_LORE, 0);
         ResourceLocation[] ids = RECIPES.stream().map(n -> ResourceLocation.fromNamespaceAndPath("skyabyss", n)).toArray(ResourceLocation[]::new);

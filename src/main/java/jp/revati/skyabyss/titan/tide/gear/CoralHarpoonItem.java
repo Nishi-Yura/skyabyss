@@ -23,7 +23,7 @@ import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.block.Blocks;
 import net.neoforged.neoforge.common.SimpleTier;
 
-// 珊瑚憑きの銛 (伝説): 珊瑚憑きが握っていた珊瑚の銛。間合い +1。
+// 珊瑚憑きの銛 (ヒロイック): 珊瑚憑きが握っていた珊瑚の銛。間合い +1。
 // 突いた敵の足もとから珊瑚が生え、1 秒動けなくする (同じ敵には 8 秒に一度。+5 から 1.5 秒・6 秒に一度)
 public class CoralHarpoonItem extends TideWeaponItem {
     // 攻撃力 7.5 = 1 + 2.5 + 4、攻撃速度 1.8。1 秒あたり 13.5
@@ -37,7 +37,7 @@ public class CoralHarpoonItem extends TideWeaponItem {
                 .withModifierAdded(Attributes.ENTITY_INTERACTION_RANGE,
                         new AttributeModifier(ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "coral_harpoon_reach"), TideGear.HARPOON_REACH,
                                 AttributeModifier.Operation.ADD_VALUE),
-                        EquipmentSlotGroup.MAINHAND)), GearTier.LEGENDARY, "item.skyabyss.coral_harpoon.desc");
+                        EquipmentSlotGroup.MAINHAND)), GearTier.HEROIC, "item.skyabyss.coral_harpoon.desc");
     }
 
     @Override

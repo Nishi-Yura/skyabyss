@@ -29,7 +29,13 @@ import jp.revati.skyabyss.rpg.Growth;
 import jp.revati.skyabyss.story.Chapters;
 import jp.revati.skyabyss.tablet.TabletBlockEntity;
 import jp.revati.skyabyss.titan.group.Groups;
-import jp.revati.skyabyss.titan.storm.back.StormBackLayout;
+import jp.revati.skyabyss.progress.Titans;
+import jp.revati.skyabyss.titan.group.BackGroupData;
+import jp.revati.skyabyss.titan.storm.StormTravel;
+import jp.revati.skyabyss.titan.storm.back.StormBackSetup;
+import jp.revati.skyabyss.titan.storm.heart.StormHeartArena;
+import jp.revati.skyabyss.trial.TrialRoute;
+import jp.revati.skyabyss.trial.raid.InstanceArenas;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
@@ -242,22 +248,50 @@ public final class Ch3GroundSelfTest {
     }
 
     private static void mirror(MinecraftServer server, List<String> f) {
-        BlockPos cell = StormBackLayout.gridCell(2, 2);
+        // 面の計算 (純粋): 入口の鏡の壁の羽鏡 (中心から北へ 6、東西 3 つずつ) で、着いた所の人を折り返す
+        BlockPos cell = StormHeartArena.mirrorWall().get(3);
         double cx = cell.getX() + 0.5;
         double cz = cell.getZ() + 0.5;
-        MirrorLag.Plane east = MirrorLag.planeAt(cell, new Vec3(cx + 5, cell.getY(), cz + 1));
-        check(f, east != null && east.axis() == 0 && Math.abs(east.reflect(new Vec3(cx + 5, 0, cz + 1)).x - (cx - 5)) < 1e-6,
-                "a player east of a mirror should be folded across the mirror's x plane");
-        MirrorLag.Plane south = MirrorLag.planeAt(cell, new Vec3(cx + 1, cell.getY(), cz + 6));
-        check(f, south != null && south.axis() == 1 && Math.abs(south.reflect(new Vec3(cx + 1, 0, cz + 6)).z - (cz - 6)) < 1e-6, "south of a mirror folds across z");
+        Vec3 landing = Vec3.atBottomCenterOf(InstanceArenas.heartEntry(Titans.THUNDER_WING));
+        MirrorLag.Plane north = MirrorLag.planeAt(cell, landing);
+        check(f, north != null && north.axis() == 1 && Math.abs(north.reflect(landing).z - (2 * cz - landing.z)) < 1e-6 && StormHeartArena.inRoom(north.reflect(landing)),
+                "a player landing at the heart entry should be folded across the mirror's z plane, inside the round room");
         check(f, MirrorLag.planeAt(cell, new Vec3(cx + 1.5, cell.getY(), cz)) == null, "too close to a mirror should show nothing");
         check(f, MirrorLag.planeAt(cell, new Vec3(cx + 12, cell.getY(), cz)) == null, "too far from a mirror should show nothing");
-        BlockPos edge = StormBackLayout.gridCell(0, 2);
-        check(f, MirrorLag.planeAt(edge, new Vec3(edge.getX() + 0.5 + 5, edge.getY(), edge.getZ() + 0.5)) == null, "a reflection outside the eye hall should be refused");
+        check(f, MirrorLag.planeAt(cell, new Vec3(cx, cell.getY(), cz + 14)) == null, "a reflection outside the round room should be refused");
         check(f, Math.abs(new MirrorLag.Plane(0, 0).reflectYaw(30f) + 30f) < 1e-4 && Math.abs(new MirrorLag.Plane(1, 0).reflectYaw(30f) - 150f) < 1e-4,
                 "reflected facing is wrong");
-        check(f, !MirrorLag.eligible(fake(server, "mirror")), "a fake player in the overworld should never see the shadow");
+        FakePlayer me = fake(server, "mirror");
+        check(f, !MirrorLag.eligible(me), "a fake player in the overworld should never see the shadow");
         check(f, MirrorLag.DELAY >= 10 && MirrorLag.DELAY <= 40 && MirrorLag.DURATION >= 100, "the lag should be about a second and last several seconds");
+        // 建てたあとの部屋: 鏡の壁がある・着く所から面が決まる・順路の人だけ・伝承が記される
+        ServerLevel back = server.getLevel(StormTravel.STORM_BACK);
+        if (back == null) {
+            SkyAbyss.LOGGER.warn("SELFTEST ch3 ground: no storm back level, mirror wall build checks skipped");
+            return;
+        }
+        InstanceArenas.ensureHeart(back, Titans.THUNDER_WING);
+        for (BlockPos m : StormHeartArena.mirrorWall()) {
+            check(f, back.getBlockState(m).is(StormBackSetup.MIRROR.get()), "no feather mirror at " + m);
+            check(f, back.getBlockState(m.above()).isAir() && !back.getBlockState(m.below()).isAir(), "the mirror at " + m + " should stand on the floor with air above");
+        }
+        check(f, StormHeartArena.isBuilt(back), "the keel chamber should count as built with its mirror wall");
+        check(f, MirrorLag.planeFor(back, landing) != null, "the built arena should give the landing a mirror plane");
+        UUID group = Groups.keyOf(me);
+        BackGroupData.Record rec = BackGroupData.get(back).of(group);
+        try {
+            check(f, !MirrorLag.onStormRoute(back, group, me.getUUID()), "a player off the route should not trigger the shadow");
+            rec.putInt(TrialRoute.STEP, TrialRoute.LAST_STEP);
+            rec.putString(TrialRoute.PARTY, me.getUUID().toString());
+            check(f, MirrorLag.onStormRoute(back, group, me.getUUID()), "a route participant at the heart step should trigger the shadow");
+            rec.putInt(TrialRoute.STEP, 2);
+            check(f, !MirrorLag.onStormRoute(back, group, me.getUUID()), "a participant before the heart step should not");
+        } finally {
+            TrialRoute.reset(rec);
+        }
+        check(f, !Lore.state(me).has(Ch3Ground.PAGE_MIRROR), "a fresh player should not have the mirror page yet");
+        MirrorLag.record(me);
+        check(f, Lore.state(me).has(Ch3Ground.PAGE_MIRROR), "the shadow should record ch3/mirror_lag");
     }
 
     private static void flags(List<String> f) {

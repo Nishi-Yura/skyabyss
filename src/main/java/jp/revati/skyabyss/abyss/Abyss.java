@@ -96,11 +96,11 @@ public final class Abyss {
         return abyss ? Math.max(8, (int) Math.round(ticks / DOMAIN_PACE)) : ticks;
     }
 
-    // 専用の伝説が出る確率 (深淵の心臓)。連続で出ないと LEGEND_PITY 回目で保証 (AbyssLoot)
+    // アーティファクトが出る確率 (深淵の心臓)。連続で出ないと LEGEND_PITY 回目で保証 (AbyssLoot)
     public static final float LEGEND_CHANCE = 0.25f;
     public static final int LEGEND_PITY = 4;
 
-    // ---------------------------------------------------------------- 深淵の専用伝説の書き換え (docs/design/27 の 4.2 と同格。数字は小さく、形で遊ぶ)
+    // ---------------------------------------------------------------- 深淵のアーティファクトの書き換え (docs/design/27 の 4.2 と同格。数字は小さく、形で遊ぶ)
     // 奈落断ち (巨神斬り): 遅れた第二の刃
     public static final int ECHO_DELAY = 24;
     public static final double ECHO_SCALE = 0.6;

@@ -212,7 +212,6 @@ public final class StructureDump {
             job.point("west_stone", jp.revati.skyabyss.titan.storm.back.StormBackLayout.WEST_STONE.offset(1, 0, 0));
             job.point("east_stone", jp.revati.skyabyss.titan.storm.back.StormBackLayout.EAST_STONE.offset(-1, 0, 0));
             job.point("front_stone", jp.revati.skyabyss.titan.storm.back.StormBackLayout.FRONT_STONE.offset(1, 0, 0));
-            job.point("eye_hall", jp.revati.skyabyss.titan.storm.back.StormBackLayout.EYE_HALL_CENTER.offset(1, 0, 6));
         } else if (name.startsWith("ember_")) {
             job.point("arrival", jp.revati.skyabyss.titan.ember.back.EmberBackLayout.ARRIVAL.above());
         } else {

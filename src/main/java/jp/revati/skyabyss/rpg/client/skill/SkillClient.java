@@ -39,7 +39,7 @@ public final class SkillClient {
         }
     }
 
-    // 伝説の武器の説明に、書き換わる技を一行添える
+    // ヒロイック以上の武器の説明に、書き換わる技を一行添える
     @SubscribeEvent
     static void onTooltip(net.neoforged.neoforge.event.entity.player.ItemTooltipEvent event) {
         String path = net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(event.getItemStack().getItem()).getPath();

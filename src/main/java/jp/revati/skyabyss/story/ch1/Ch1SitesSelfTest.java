@@ -35,7 +35,7 @@ import net.neoforged.neoforge.common.util.FakePlayer;
 import net.neoforged.neoforge.common.util.FakePlayerFactory;
 
 // 一章の地上 (P6。docs/design/21 の 3.1〜3.2) の自己テスト。Ch1SelfTest の「ch1 sites」のあと (本物の世界に小要素が建ったあと) に流す。結果は SELFTEST ch1 p6 PASSED / FAILED
-//   sites    新しい場所が全部建つ (石標 7・骨の集め場・割れ殻の洞)・拠点から 150 以内・鯨道の石標の道すじ (遠くなる順)・洞の部品が人のブロックを壊さない・
+//   sites    新しい場所が全部建つ (道の祠・骨の集め場・割れ殻の洞)・拠点から 150 以内・洞の部品が人のブロックを壊さない・
 //            洞の部屋の敵の立ち位置が空気 (向きが合っている)・鳴り石と格子の印・荷車の傍らの道・歌の間 (人の建てた物には置かない・置く・戸が開く・壁画)
 //   cave     洞の湧き台: 二つのグループが同時に入れる・敵が部屋に立つ・鳴り石の順 (誤りで戻る・低い順で格子が開く)・クリアの記録 (経験値・宝・合図)
 //   pit      骨の坑 (34 の 4.2.1): 碑 2 枚の文・荷の樽・冷えの戸 9 マス・鉄鉱石の筋・水の坑道・出口の梯子・湧き台の立ち位置、
@@ -104,7 +104,7 @@ public final class Ch1SitesSelfTest {
             FORCED.clear();
         }
         if (F.isEmpty()) {
-            SkyAbyss.LOGGER.info("SELFTEST ch1 p6 PASSED (7 road cairns outward, bone cache, cleft shell cave with rooms/mechanism/clear, cart track, song chamber, "
+            SkyAbyss.LOGGER.info("SELFTEST ch1 p6 PASSED (road shrine, bone cache, cleft shell cave with rooms/mechanism/clear, cart track, song chamber, "
                     + "bone pit with tablets/pack/cold door/clear, 3 trail steps to ch1_ready and the whale chaser's mark, whale descent gate, xp within the budget)");
         } else {
             F.forEach(m -> SkyAbyss.LOGGER.error("SELFTEST ch1 p6 FAILED: {}", m));
@@ -116,7 +116,6 @@ public final class Ch1SitesSelfTest {
         ServerLevel level = server.overworld();
         BlockPos base0 = Ch1SelfTest.baseAt();
         BlockPos capital = jp.revati.skyabyss.opening.OpeningSites.shelter(server).orElse(null);
-        double prev = 0;
         for (String id : Sites.WHALE_P6) {
             var list = ChapterSites.sitesFor(server, base.getUUID(), id);
             check(list.size() == 1 && list.get(0).built(), id + ": should be placed and built exactly once (" + list.size() + ")");
@@ -124,28 +123,18 @@ public final class Ch1SitesSelfTest {
                 continue;
             }
             BlockPos pos = list.get(0).pos();
-            // 跡地の要素は一章の跡地の中心から 150 以内。道の石標 (anchor = null) は都から跡地への道の上
+            // 跡地の要素は一章の跡地の中心から 150 以内。道の祠 (anchor = null) は都から跡地への道の上
             BlockPos anchor = base0 == null ? null : ChapterSites.anchorFor(server, id, base0);
             double d = anchor == null ? 0 : Math.hypot(pos.getX() - anchor.getX(), pos.getZ() - anchor.getZ());
             check(anchor == null || d <= 152, id + " is " + (int) d + " from its anchor " + anchor);
-            if (id.startsWith(Ch1Prep.CAIRN_PREFIX)) {
-                // 道すじ: 番号が大きいほど都から遠い (北の丘へ向かう)。跡地がない世界では拠点から外へ (n 番目は 24 + 18 (n-1) から)
-                int n = Integer.parseInt(id.substring(id.lastIndexOf('_') + 1));
+            if (id.equals(Ch1Prep.ROAD_SHRINE_ID)) {
+                // 道の終わりの祠: 石レンガの祠。跡地がない世界では拠点から外へ
+                check(near(level, pos, 4, Blocks.CHISELED_STONE_BRICKS), id + ": no shrine blocks near " + pos);
                 if (anchor == null && capital != null) {
-                    double dc = Math.hypot(pos.getX() - capital.getX(), pos.getZ() - capital.getZ());
-                    // 建てるときに少し動くことがある (20 まで)
-                    check(dc > prev - 20, id + " is " + (int) dc + " from the capital, not beyond the previous cairn (" + (int) prev + ")");
-                    prev = Math.max(prev, dc);
-                } else {
-                    check(anchor == null || d >= 24 + 18 * (n - 1) - 12, id + " is only " + (int) d + " from the base (outward order)");
+                    check(Math.hypot(pos.getX() - capital.getX(), pos.getZ() - capital.getZ()) > 100, id + " is too near the capital");
                 }
-                // 積み石の部品: 丸石の柱がある
-                check(near(level, pos, 3, Blocks.COBBLESTONE) || near(level, pos, 4, Blocks.STONE_BRICKS), id + ": no cairn/shrine blocks near " + pos);
             }
         }
-        // 7 つ目は祠
-        var seventh = ChapterSites.sitesFor(server, base.getUUID(), Sites.roadCairnId(Ch1Prep.CAIRNS));
-        check(!seventh.isEmpty() && near(level, seventh.get(0).pos(), 4, Blocks.CHISELED_STONE_BRICKS), "the seventh cairn should be the shrine");
         // 骨の集め場: 骨のブロック
         var cache = ChapterSites.sitesFor(server, base.getUUID(), Ch1Prep.BONE_CACHE);
         check(!cache.isEmpty() && near(level, cache.get(0).pos(), 4, Blocks.BONE_BLOCK), "the bone cache has no bone blocks");

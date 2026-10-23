@@ -79,7 +79,7 @@ public final class StormGearSetup {
     public static final DeferredItem<Item> BOW = ITEMS.register("thunder_wing_bow",
             () -> new ThunderWingBowItem(new Item.Properties().durability(1100).rarity(Rarity.RARE)));
     public static final DeferredItem<Item> ANKLET = ITEMS.register("storm_anklet",
-            () -> new StormTrinketItem(new Item.Properties().stacksTo(1).rarity(Rarity.RARE), GearTier.RARE,
+            () -> new StormTrinketItem(new Item.Properties().stacksTo(1).rarity(Rarity.RARE), GearTier.EPIC,
                     "item.skyabyss.storm_anklet.desc", false));
     public static final DeferredItem<Item> CHARM = ITEMS.register("storm_charm",
             () -> new StormCharmItem(new Item.Properties().stacksTo(1).rarity(Rarity.RARE)));
@@ -88,7 +88,7 @@ public final class StormGearSetup {
     public static final DeferredItem<Item> GLAIVE = ITEMS.register("warden_glaive",
             () -> new WardenGlaiveItem(new Item.Properties().rarity(Rarity.EPIC).fireResistant()));
     public static final DeferredItem<Item> EYE_FEATHER = ITEMS.register("storm_eye_feather",
-            () -> new StormTrinketItem(new Item.Properties().stacksTo(1).rarity(Rarity.EPIC).fireResistant(), GearTier.LEGENDARY,
+            () -> new StormTrinketItem(new Item.Properties().stacksTo(1).rarity(Rarity.EPIC).fireResistant(), GearTier.HEROIC,
                     "item.skyabyss.storm_eye_feather.desc", true));
 
     private StormGearSetup() {

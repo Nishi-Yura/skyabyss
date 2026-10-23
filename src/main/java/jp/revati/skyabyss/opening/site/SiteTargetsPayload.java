@@ -10,7 +10,7 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 
-// サーバー → クライアント: 序盤の構造物の場所 (目的の帯の方角と距離のため)。キーは "camp" "shelter" "footprint" "ribs" "notebook" "bell" "cairn0"…
+// サーバー → クライアント: 序盤の構造物の場所 (目的の帯の方角と距離のため)。キーは "camp" "shelter" "footprint" "ribs" "notebook" "bell"
 public record SiteTargetsPayload(Map<String, BlockPos> sites) implements CustomPacketPayload {
     public static final Type<SiteTargetsPayload> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "opening_sites"));
 

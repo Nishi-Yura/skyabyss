@@ -48,7 +48,7 @@ final class BuildsSelfTest {
         return new ItemStack(net.minecraft.core.registries.BuiltInRegistries.ITEM.get(net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, path)));
     }
 
-    // ---------------------------------------------------------------- 伝説の書き換え (4 番目の刻印)
+    // ---------------------------------------------------------------- 逸品の書き換え (4 番目の刻印)
     private static void legendary(MinecraftServer server, List<String> f) {
         ServerLevel level = server.overworld();
         BlockPos spawn = level.getSharedSpawnPos();
@@ -58,7 +58,7 @@ final class BuildsSelfTest {
         SkillData d = SkillManager.get(p);
         d.bonusPoints = 60;
         d.calling = "";
-        // 書き換えは 12 つ (従来 8 + 深淵の専用伝説 4。abyss/AbyssSelfTest)。武器の品は実在し、書き換える技は使う技
+        // 書き換えは 12 つ (従来 8 + 深淵のアーティファクト 4。abyss/AbyssSelfTest)。武器の品は実在し、書き換える技は使う技
         int count = 0;
         for (Rune r : Rune.values()) {
             if (!r.legendary()) {
@@ -130,7 +130,7 @@ final class BuildsSelfTest {
         int seen = 0;
         for (int i = 0; i < 4000; i++) {
             List<jp.revati.skyabyss.item.affix.Affix> list = jp.revati.skyabyss.item.affix.AffixRules.roll(jp.revati.skyabyss.item.affix.AffixType.Slot.WEAPON,
-                    jp.revati.skyabyss.item.GearTier.LEGENDARY, rnd);
+                    jp.revati.skyabyss.item.GearTier.HEROIC, rnd);
             long n = list.stream().filter(a -> a.kind() != null && a.kind().isMark()).count();
             check(f, n <= 1, "a weapon rolled two marks");
             seen += (int) n;

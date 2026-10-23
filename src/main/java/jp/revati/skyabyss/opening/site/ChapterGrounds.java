@@ -88,11 +88,11 @@ public final class ChapterGrounds {
     public static final int COVE_WATER = 78;
     public static final int COVE_FLOOR = 15;
     public static final int COVE_BEACH = 90;
-    // 道しるべ: 都の中心から 150 で始め、40 ごと。跡地の中心の手前 40 で止める。一章は石標 7 つが入るよう間を詰める (12 まで)
+    // 道しるべ: 都の中心から 150 で始め、40 ごと。跡地の中心の手前 40 で止める。一章は道の終わりの祠が入る点を取る
     public static final int ROAD_START = 150;
     public static final int ROAD_STEP = 40;
     public static final int ROAD_END_GAP = 40;
-    public static final int WHALE_CAIRNS = 7;
+    public static final int WHALE_ROAD_POINTS = 1;
 
     // 決めた跡地 (まだ SiteData には書かない。別のスレッドで探すため)
     public record Found(Chapters chapter, BlockPos center, Shape shape, BlockPos shapeCenter, int baseY, @Nullable BlockPos sea, float restYaw,
@@ -142,6 +142,9 @@ public final class ChapterGrounds {
         }
         roadsRegistered = true;
         for (Spec s : SPECS) {
+            if (s.chapter() == Chapters.WHALE) {
+                continue; // 一章の道には道しるべの石を並べない (道の終わりの祠だけ。story/ch1/Sites)
+            }
             ChapterSites.element(roadId(s.chapter()), s.chapter(), ROAD_BLUEPRINT).fillRoad().arriveRadius(6).onArrive((p, site) -> {
                 // 着いた記録だけ (地図の道しるべの点)
             }).register();
@@ -455,7 +458,7 @@ public final class ChapterGrounds {
     static Found finish(Ground raw, BlockPos capital, Found f) {
         Ground g = overlay(raw, List.of(f));
         BlockPos shrine = shrineNear(g, f.center(), f.chapter() == Chapters.WHALE ? 56 : 16, List.of());
-        List<BlockPos> road = road(g, capital, f.center(), f.chapter() == Chapters.WHALE ? WHALE_CAIRNS : 0);
+        List<BlockPos> road = road(g, capital, f.center(), f.chapter() == Chapters.WHALE ? WHALE_ROAD_POINTS : 0);
         return new Found(f.chapter(), f.center(), f.shape(), f.shapeCenter(), f.baseY(), f.sea(), f.restYaw(), f.fixedRest(), shrine, road, f.dist(), f.deg());
     }
 

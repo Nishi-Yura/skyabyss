@@ -16,7 +16,7 @@ import net.minecraft.world.item.SwordItem;
 public class EmberWarAxeItem extends EmberWeaponItem {
     public EmberWarAxeItem(Properties properties) {
         // 攻撃力 16 = 1 + 5 + 10、攻撃速度 1.0 = 4 − 3
-        super(properties.attributes(SwordItem.createAttributes(TIER, 10, -3.0f)), GearTier.RARE, "item.skyabyss.ember_war_axe.desc");
+        super(properties.attributes(SwordItem.createAttributes(TIER, 10, -3.0f)), GearTier.EPIC, "item.skyabyss.ember_war_axe.desc");
     }
 
     @Override
