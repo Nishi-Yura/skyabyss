@@ -22,7 +22,7 @@ import net.neoforged.neoforge.event.server.ServerStoppedEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
 
 // 章の跡地 (docs/design/33 の 3 章。W2)。はじまりの都から決まった方位と距離の帯に、章ごとに世界で一つ。
-//   一章 岩鯨 = 北 280〜460 の丘 (2026-10-21 の試遊で近づけた。道しるべの入る間は残す)、二章 潮殻 = 東 800〜1,400 の海辺、三章 雷翼 = 西 1,000〜1,800 の峰 (y 150 以上)、四章 余燼 = 南 1,200〜2,000 の乾いた低地。
+//   一章 岩鯨 = 北 240〜360 の丘、二章 潮殻 = 東 520〜900 の海辺、三章 雷翼 = 西 650〜1,170 の峰 (y 150 以上)、四章 余燼 = 南 780〜1,300 の乾いた低地 (2026-10-23 の試遊でさらに近づけた。約 65%)。
 //   探し方: 方位の扇 (±25 度) の中で、帯の内側から外側へ 32 ブロック刻み (扇は 5 度刻み、まんなかから)。合う地形があればそこ。
 //     バニラの村・構造物の出るチャンクが 192 以内なら、その候補を飛ばす (= 少しずらす。小要素の広がりのぶん 128 より広め。道しるべの点は 48)。一章は野営地・足跡からも離す。
 //     無ければ帯のまんなかのそばの、いちばん乾いて平らな所に「整える形」を作る (丘 96・入り江 160・峰 128 で +60 まで・灰の盆地 160。ShapeJob)。
@@ -48,17 +48,17 @@ public final class ChapterGrounds {
     }
 
     public static final List<Spec> SPECS = List.of(
-            new Spec(Chapters.WHALE, 0, -1, 280, 460, Shape.HILL, 96),
-            new Spec(Chapters.TIDE, 1, 0, 800, 1400, Shape.COVE, 160),
-            new Spec(Chapters.STORM, -1, 0, 1000, 1800, Shape.PEAK, 128),
-            new Spec(Chapters.EMBER, 0, 1, 1200, 2000, Shape.BASIN, 160));
+            new Spec(Chapters.WHALE, 0, -1, 240, 360, Shape.HILL, 96),
+            new Spec(Chapters.TIDE, 1, 0, 520, 900, Shape.COVE, 160),
+            new Spec(Chapters.STORM, -1, 0, 650, 1170, Shape.PEAK, 128),
+            new Spec(Chapters.EMBER, 0, 1, 780, 1300, Shape.BASIN, 160));
 
     // 扇の片側の開き (度) と刻み、距離の刻み
     public static final int SECTOR = 25;
     static final int ANGLE_STEP = 5;
     static final int DIST_STEP = 32;
     // バニラの構造物を避ける距離 (跡地の中心から。小要素は中心から 150 まで広がるので、33 の「128 以内」より広めに)、道しるべの点から
-    static final int STRUCTURE_GAP = 192;
+    static final int STRUCTURE_GAP = 128;   // 跡地を 65% の距離にしたので 192 → 128
     static final int ROAD_STRUCTURE_GAP = 48;
     // 一章の跡地と野営地・足跡の間 (一章の小要素は中心から 110 まで広がる)
     static final int CAMP_GAP = 140;

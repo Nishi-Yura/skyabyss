@@ -571,6 +571,8 @@ public class EmberTitanEntity extends Entity implements GeoEntity, jp.revati.sky
 
     private void startSleep(ServerLevel level) {
         setPos(getX(), sleepHeight(), getZ());
+        // 伏せる体のなかに食い込む地形・木を取り除く (めり込まない)
+        jp.revati.skyabyss.titan.TitanClearing.carve(level, volumeName(), getX(), sleepHeight(), getZ(), getYRot());
         setMode(Mode.SLEEP);
         // 眠ってから 20 分、動かず口を開け閉めする (夜明けでは沈まない。TitanStay)
         forcedTicks = TitanStay.TICKS;

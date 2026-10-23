@@ -40,7 +40,7 @@ public final class PlayCommands {
     private PlayCommands() {
     }
 
-    static final int HELP_LINES = 12;
+    static final int HELP_LINES = 16;
 
     private interface Fn {
         int run(CommandContext<CommandSourceStack> ctx, Collection<ServerPlayer> targets) throws CommandSyntaxException;
@@ -64,12 +64,6 @@ public final class PlayCommands {
             }
             return t.size();
         }));
-        // 章: 自分だけ。stage を渡すとその章の主線の段階を決める
-        play.then(Commands.literal("chapter").then(Commands.argument("n", IntegerArgumentType.integer(0, PlayChapters.CHAPTERS - 1))
-                .executes(ctx -> chapter(ctx, null))
-                .then(Commands.argument("stage", StringArgumentType.word())
-                        .suggests((ctx, b) -> SharedSuggestionProvider.suggest(stageIds(), b))
-                        .executes(ctx -> chapter(ctx, StringArgumentType.getString(ctx, "stage"))))));
         play.then(Commands.literal("goto").then(targeted(Commands.argument("place", StringArgumentType.word())
                 .suggests((ctx, b) -> SharedSuggestionProvider.suggest(PlayPlaces.names(), b)),
                 (ctx, t) -> {
@@ -91,19 +85,6 @@ public final class PlayCommands {
                     }
                     return each(ctx, t, "kit", p -> PlayChapters.kit(p, tier));
                 })));
-        play.then(Commands.literal("boss").then(Commands.argument("name", StringArgumentType.word())
-                .suggests((ctx, b) -> SharedSuggestionProvider.suggest(PlayChapters.BOSSES, b))
-                .executes(ctx -> boss(ctx, null))
-                .then(Commands.argument("tier", IntegerArgumentType.integer(0, 4)).executes(ctx -> boss(ctx,
-                        IntegerArgumentType.getInteger(ctx, "tier"))))));
-        play.then(Commands.literal("quest").then(Commands.argument("id", StringArgumentType.word())
-                .suggests((ctx, b) -> SharedSuggestionProvider.suggest(QuestManager.all().stream().map(QuestDef::id), b))
-                .executes(ctx -> quest(ctx, "show"))
-                .then(Commands.literal("done").executes(ctx -> quest(ctx, "done")))
-                .then(Commands.literal("reset").executes(ctx -> quest(ctx, "reset")))
-                .then(Commands.argument("stage", StringArgumentType.word())
-                        .suggests((ctx, b) -> SharedSuggestionProvider.suggest(stageIds(), b))
-                        .executes(ctx -> quest(ctx, StringArgumentType.getString(ctx, "stage"))))));
         play.then(Commands.literal("lore")
                 .then(targeted(Commands.literal("unlock-all"), (ctx, t) -> each(ctx, t, "lore_all", PlayCommands::unlockAllLore)))
                 .then(targeted(Commands.literal("reset"), (ctx, t) -> each(ctx, t, "lore_reset", Lore::reset))));
@@ -127,10 +108,157 @@ public final class PlayCommands {
         play.then(Commands.literal("god")
                 .then(targeted(Commands.literal("on"), (ctx, t) -> each(ctx, t, "god_on", p -> Playtest.god(p, true))))
                 .then(targeted(Commands.literal("off"), (ctx, t) -> each(ctx, t, "god_off", p -> Playtest.god(p, false)))));
-        play.then(Commands.literal("reset").then(Commands.literal("me").executes(ctx -> reset(ctx, List.of(ctx.getSource().getPlayerOrException())))
+        // ---- 章・ボス・レイド・クエスト (対象は引数のあと。省略できる引数があるものは、対象を先に置く)
+        play.then(Commands.literal("chapter").then(Commands.argument("n", IntegerArgumentType.integer(0, PlayChapters.CHAPTERS - 1))
+                .executes(ctx -> chapter(ctx, List.of(ctx.getSource().getPlayerOrException()), null))
                 .then(Commands.argument("targets", EntityArgument.players())
-                        .executes(ctx -> reset(ctx, EntityArgument.getPlayers(ctx, "targets"))))));
+                        .executes(ctx -> chapter(ctx, EntityArgument.getPlayers(ctx, "targets"), null))
+                        .then(Commands.argument("stage", StringArgumentType.word())
+                                .suggests((ctx, b) -> SharedSuggestionProvider.suggest(stageIds(), b))
+                                .executes(ctx -> chapter(ctx, EntityArgument.getPlayers(ctx, "targets"), StringArgumentType.getString(ctx, "stage")))))));
+        play.then(Commands.literal("boss").then(Commands.argument("name", StringArgumentType.word())
+                .suggests((ctx, b) -> SharedSuggestionProvider.suggest(PlayChapters.BOSSES, b))
+                .executes(ctx -> boss(ctx, List.of(ctx.getSource().getPlayerOrException()), null))
+                .then(Commands.argument("targets", EntityArgument.players())
+                        .executes(ctx -> boss(ctx, EntityArgument.getPlayers(ctx, "targets"), null))
+                        .then(Commands.argument("tier", IntegerArgumentType.integer(0, 4))
+                                .executes(ctx -> boss(ctx, EntityArgument.getPlayers(ctx, "targets"), IntegerArgumentType.getInteger(ctx, "tier")))))));
+        play.then(Commands.literal("raid").then(Commands.argument("titan", StringArgumentType.word())
+                .suggests((ctx, b) -> SharedSuggestionProvider.suggest(Playtest.TITANS, b))
+                .then(targeted(Commands.argument("room", StringArgumentType.word())
+                        .suggests((ctx, b) -> SharedSuggestionProvider.suggest(PlayRaid.rooms(), b)),
+                        (ctx, t) -> {
+                            String miss = PlayRaid.run(t, StringArgumentType.getString(ctx, "titan"), StringArgumentType.getString(ctx, "room"));
+                            if (miss != null) {
+                                ctx.getSource().sendFailure(Component.translatable(miss, StringArgumentType.getString(ctx, "room")));
+                                return 0;
+                            }
+                            say(ctx, "raid", StringArgumentType.getString(ctx, "titan"), StringArgumentType.getString(ctx, "room"), t.size());
+                            return t.size();
+                        }))));
+        play.then(Commands.literal("trials").then(targeted(Commands.argument("titan", StringArgumentType.word())
+                .suggests((ctx, b) -> SharedSuggestionProvider.suggest(Playtest.TITANS, b)), (ctx, t) -> {
+                    int idx = Playtest.index(StringArgumentType.getString(ctx, "titan"));
+                    if (idx < 0) {
+                        return unknown(ctx, StringArgumentType.getString(ctx, "titan"));
+                    }
+                    int c = 0;
+                    for (java.util.UUID g : Playtest.groupsOf(t)) {
+                        c += Playtest.trials(ctx.getSource().getServer(), g, idx) ? 1 : 0;
+                    }
+                    final int count = c;
+                    ctx.getSource().sendSuccess(() -> Component.translatable("commands.skyabyss_play.done",
+                            Component.translatable("commands.skyabyss_play.act.trials"), count).withStyle(ChatFormatting.AQUA), true);
+                    return count;
+                })));
+        play.then(Commands.literal("skip").then(targeted(Commands.literal("opening"), (ctx, t) -> each(ctx, t, "skip_opening", Playtest::skipOpening))));
+        play.then(targeted(Commands.literal("now"), (ctx, t) -> now(ctx, t, false)));
+        LiteralArgumentBuilder<CommandSourceStack> quest = Commands.literal("quest");
+        quest.then(targeted(Commands.literal("list"), (ctx, t) -> {
+            for (ServerPlayer p : t) {
+                ctx.getSource().sendSuccess(() -> Component.translatable("commands.skyabyss_play.status_head", p.getDisplayName()).withStyle(ChatFormatting.AQUA), false);
+                List<String> lines = PlayQuests.list(p);
+                if (lines.isEmpty()) {
+                    ctx.getSource().sendSuccess(() -> Component.translatable("commands.skyabyss_play.quest_none"), false);
+                }
+                for (String l : lines) {
+                    ctx.getSource().sendSuccess(() -> Component.literal(l), false);
+                }
+            }
+            return t.size();
+        }));
+        quest.then(Commands.literal("next")
+                .executes(ctx -> questNext(ctx, List.of(ctx.getSource().getPlayerOrException()), null))
+                .then(Commands.argument("targets", EntityArgument.players())
+                        .executes(ctx -> questNext(ctx, EntityArgument.getPlayers(ctx, "targets"), null))
+                        .then(Commands.argument("id", StringArgumentType.word()).suggests(QUEST_IDS)
+                                .executes(ctx -> questNext(ctx, EntityArgument.getPlayers(ctx, "targets"), StringArgumentType.getString(ctx, "id"))))));
+        quest.then(Commands.literal("set").then(Commands.argument("id", StringArgumentType.word()).suggests(QUEST_IDS)
+                .then(targeted(Commands.argument("stage", StringArgumentType.word()).suggests((ctx, b) -> {
+                    QuestDef def = QuestManager.quest(StringArgumentType.getString(ctx, "id"));
+                    return SharedSuggestionProvider.suggest(def == null ? List.<String>of() : def.stages().stream().map(QuestDef.Stage::id).toList(), b);
+                }), (ctx, t) -> questEach(ctx, t, StringArgumentType.getString(ctx, "id"), StringArgumentType.getString(ctx, "stage"))))));
+        quest.then(Commands.literal("done").then(targeted(Commands.argument("id", StringArgumentType.word()).suggests(QUEST_IDS),
+                (ctx, t) -> questEach(ctx, t, StringArgumentType.getString(ctx, "id"), "done"))));
+        quest.then(Commands.literal("reset").then(targeted(Commands.argument("id", StringArgumentType.word()).suggests(QUEST_IDS),
+                (ctx, t) -> questEach(ctx, t, StringArgumentType.getString(ctx, "id"), "reset"))));
+        // 旧い形 (quest <id> [段階|done|reset]) も残す。自分だけ
+        quest.then(Commands.argument("id", StringArgumentType.word()).suggests(QUEST_IDS)
+                .executes(ctx -> questEach(ctx, List.of(ctx.getSource().getPlayerOrException()), StringArgumentType.getString(ctx, "id"), "show"))
+                .then(Commands.literal("done").executes(ctx -> questEach(ctx, List.of(ctx.getSource().getPlayerOrException()),
+                        StringArgumentType.getString(ctx, "id"), "done")))
+                .then(Commands.literal("reset").executes(ctx -> questEach(ctx, List.of(ctx.getSource().getPlayerOrException()),
+                        StringArgumentType.getString(ctx, "id"), "reset")))
+                .then(Commands.argument("stage", StringArgumentType.word()).suggests((ctx, b) -> SharedSuggestionProvider.suggest(stageIds(), b))
+                        .executes(ctx -> questEach(ctx, List.of(ctx.getSource().getPlayerOrException()), StringArgumentType.getString(ctx, "id"),
+                                StringArgumentType.getString(ctx, "stage")))));
+        play.then(quest);
+        play.then(Commands.literal("day").then(Commands.argument("n", IntegerArgumentType.integer(0, 1000)).executes(ctx -> {
+            Playtest.day(ctx.getSource().getServer(), IntegerArgumentType.getInteger(ctx, "n"));
+            say(ctx, "day", IntegerArgumentType.getInteger(ctx, "n"));
+            return 1;
+        })));
+        play.then(Commands.literal("fast")
+                .then(Commands.literal("on").executes(ctx -> fast(ctx, true)))
+                .then(Commands.literal("off").executes(ctx -> fast(ctx, false))));
+        // reset: 対象を省略 = 自分。旧い形 (reset me [対象]) も残す
+        play.then(targeted(Commands.literal("reset"), (ctx, t) -> reset(ctx, t))
+                .then(Commands.literal("me").executes(ctx -> reset(ctx, List.of(ctx.getSource().getPlayerOrException())))));
         return play;
+    }
+
+    private static final com.mojang.brigadier.suggestion.SuggestionProvider<CommandSourceStack> QUEST_IDS =
+            (ctx, b) -> SharedSuggestionProvider.suggest(QuestManager.all().stream().map(QuestDef::id), b);
+
+    private static int fast(CommandContext<CommandSourceStack> ctx, boolean on) {
+        Playtest.fast(ctx.getSource().getServer(), on);
+        say(ctx, on ? "fast_on" : "fast_off");
+        return 1;
+    }
+
+    private static int now(CommandContext<CommandSourceStack> ctx, Collection<ServerPlayer> t, boolean next) {
+        for (ServerPlayer p : t) {
+            String key = Playtest.now(p, next);
+            ctx.getSource().sendSuccess(() -> Component.translatable("commands.skyabyss.playtest.now", p.getDisplayName(), Component.translatable(key))
+                    .withStyle(ChatFormatting.AQUA), true);
+        }
+        return t.size();
+    }
+
+    private static int questNext(CommandContext<CommandSourceStack> ctx, Collection<ServerPlayer> t, String id) {
+        int ok = 0;
+        for (ServerPlayer p : t) {
+            PlayQuests.Result r = PlayQuests.next(p, id);
+            ctx.getSource().sendSuccess(() -> Component.translatable("commands.skyabyss_play.quest_next", p.getDisplayName(), r.line())
+                    .withStyle(r.ok() ? ChatFormatting.AQUA : ChatFormatting.YELLOW), true);
+            ok += r.ok() ? 1 : 0;
+        }
+        return ok;
+    }
+
+    private static int questEach(CommandContext<CommandSourceStack> ctx, Collection<ServerPlayer> t, String id, String action) {
+        if (QuestManager.quest(id) == null) {
+            ctx.getSource().sendFailure(Component.translatable("commands.skyabyss_play.unknown_quest", id));
+            return 0;
+        }
+        int n = 0;
+        for (ServerPlayer p : t) {
+            switch (action) {
+                case "show" -> {
+                }
+                case "done" -> PlayChapters.finish(p, id);
+                case "reset" -> Quests.setStage(p, id, null);
+                default -> {
+                    if (!Quests.setStage(p, id, action)) {
+                        ctx.getSource().sendFailure(Component.translatable("commands.skyabyss_play.bad_stage", action));
+                        return n;
+                    }
+                }
+            }
+            n++;
+            ctx.getSource().sendSuccess(() -> Component.translatable("commands.skyabyss_play.quest_next", p.getDisplayName(), PlayQuests.line(p, id)), false);
+        }
+        return n;
     }
 
     // node の末尾 (引数のあと) に [targets] (省略で自分) を付けて fn をつなぐ
@@ -144,58 +272,38 @@ public final class PlayCommands {
         return QuestManager.all().stream().flatMap(d -> d.stages().stream().map(QuestDef.Stage::id)).distinct().sorted().toList();
     }
 
-    private static int chapter(CommandContext<CommandSourceStack> ctx, String stage) throws CommandSyntaxException {
-        ServerPlayer p = ctx.getSource().getPlayerOrException();
+    private static int chapter(CommandContext<CommandSourceStack> ctx, Collection<ServerPlayer> t, String stage) {
         int n = IntegerArgumentType.getInteger(ctx, "n");
-        String miss = PlayChapters.chapter(p, n, stage);
-        if (miss != null) {
-            ctx.getSource().sendFailure(Component.translatable(miss));
-            return 0;
+        int ok = 0;
+        for (ServerPlayer p : t) {
+            String miss = PlayChapters.chapter(p, n, stage);
+            if (miss != null) {
+                ctx.getSource().sendFailure(Component.translatable(miss, stage == null ? "-" : stage));
+                continue;
+            }
+            ok++;
         }
-        say(ctx, "chapter", n, stage == null ? "-" : stage);
-        return 1;
+        if (ok > 0) {
+            say(ctx, "chapter", n, stage == null ? "-" : stage, ok);
+        }
+        return ok;
     }
 
-    private static int boss(CommandContext<CommandSourceStack> ctx, Integer tier) throws CommandSyntaxException {
-        ServerPlayer p = ctx.getSource().getPlayerOrException();
+    private static int boss(CommandContext<CommandSourceStack> ctx, Collection<ServerPlayer> t, Integer tier) {
         String name = StringArgumentType.getString(ctx, "name");
-        String miss = PlayChapters.boss(p, name, tier);
-        if (miss != null) {
-            ctx.getSource().sendFailure(Component.translatable(miss, name));
-            return 0;
-        }
-        say(ctx, "boss", name);
-        return 1;
-    }
-
-    private static int quest(CommandContext<CommandSourceStack> ctx, String action) throws CommandSyntaxException {
-        ServerPlayer p = ctx.getSource().getPlayerOrException();
-        String id = StringArgumentType.getString(ctx, "id");
-        if (QuestManager.quest(id) == null) {
-            ctx.getSource().sendFailure(Component.translatable("commands.skyabyss_play.unknown_quest", id));
-            return 0;
-        }
-        switch (action) {
-            case "show" -> {
-                ctx.getSource().sendSuccess(() -> Component.translatable("commands.skyabyss_play.quest_line", questLine(p, id)), false);
-                return 1;
+        int ok = 0;
+        for (ServerPlayer p : t) {
+            String miss = PlayChapters.boss(p, name, tier);
+            if (miss != null) {
+                ctx.getSource().sendFailure(Component.translatable(miss, name));
+                continue;
             }
-            case "done" -> PlayChapters.finish(p, id);
-            case "reset" -> Quests.setStage(p, id, null);
-            default -> {
-                if (!Quests.setStage(p, id, action)) {
-                    ctx.getSource().sendFailure(Component.translatable("commands.skyabyss_play.bad_stage", action));
-                    return 0;
-                }
-            }
+            ok++;
         }
-        String label = switch (action) {
-            case "done" -> "commands.skyabyss_play.act.quest_done";
-            case "reset" -> "commands.skyabyss_play.act.quest_reset";
-            default -> "commands.skyabyss_play.act.quest_stage";
-        };
-        say(ctx, "quest", id, Component.translatable(label, action));
-        return 1;
+        if (ok > 0) {
+            say(ctx, "boss", name, ok);
+        }
+        return ok;
     }
 
     private static int time(CommandContext<CommandSourceStack> ctx, int tick) throws CommandSyntaxException {

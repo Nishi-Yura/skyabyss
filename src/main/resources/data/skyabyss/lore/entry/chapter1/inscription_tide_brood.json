@@ -1,0 +1,15 @@
+{
+  "chapter": "titan_tide",
+  "order": 123,
+  "inscription_sign": "sign.skyabyss.lore_tide_brood",
+  "unlock": [
+    {
+      "type": "sign",
+      "target": "sign.skyabyss.lore_tide_brood"
+    }
+  ],
+  "related": [
+    "chapter1/inscription_tide_calendar",
+    "chapter1/inscription_tide_heart"
+  ]
+}

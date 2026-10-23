@@ -1,0 +1,28 @@
+{
+ "name": "lord_rib",
+ "tris": 4398,
+ "atlas": [
+  1024,
+  512
+ ],
+ "open": 0,
+ "floating": [],
+ "bones": {
+  "root": 0,
+  "body": 386,
+  "chest": 1500,
+  "lamps": 404,
+  "head": 670,
+  "jaw": 44,
+  "arm_l": 80,
+  "fore_l": 374,
+  "arm_r": 80,
+  "fore_r": 408,
+  "leg_l": 32,
+  "shin_l": 194,
+  "leg_r": 32,
+  "shin_r": 194
+ },
+ "glow": 1460,
+ "height": 65.7
+}

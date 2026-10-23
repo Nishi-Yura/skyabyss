@@ -265,6 +265,11 @@ public final class DeathEvents {
         if (!(event.getEntity() instanceof ServerPlayer player) || event.isEndConquered()) {
             return;
         }
+        // 宿を寝る場所に決めているなら、町の真ん中から始まる
+        net.minecraft.world.phys.Vec3 plaza = jp.revati.skyabyss.facility.FacilityActions.plazaSpotFor(player);
+        if (plaza != null) {
+            player.teleportTo(player.server.overworld(), plaza.x, plaza.y, plaza.z, player.getYRot(), 0f);
+        }
         CompoundTag tag = persisted(player);
         if (!tag.contains(NOTE_TAG)) {
             return;

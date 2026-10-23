@@ -32,11 +32,8 @@ public final class AbyssSections {
     private record Line(String key, long until) {
     }
 
-    private record Sent(int section, String objective) {
-    }
-
     private static final Map<UUID, Line> OBJECTIVE = new HashMap<>();
-    private static final Map<UUID, Sent> SENT = new HashMap<>();
+    private static final Map<UUID, AbyssNetwork.Section> SENT = new HashMap<>();
     // 場面のあとに題字を出す待ち (場面の ID → 区切り)
     private static final Map<UUID, Integer> CARD_AFTER = new HashMap<>();
     private static boolean hooked;
@@ -80,13 +77,19 @@ public final class AbyssSections {
         }
         int section = AbyssWorld.in(p) && AbyssBuild.built(p.server) ? Layers.sectionAt(p.blockPosition()) : -1;
         String obj = section >= 0 ? objectiveNow(p) : "";
-        Sent now = new Sent(section, obj);
+        AbyssNetwork.Section now = AbyssNetwork.Section.of(section, obj);
+        if (section >= 0) {
+            AbyssGuide.Line g = AbyssGuide.lineFor(p);
+            BlockPos t = g.target();
+            now = new AbyssNetwork.Section(section, obj, g.key(), g.args(), t != null, t == null ? 0 : t.getX(), t == null ? 0 : t.getY(), t == null ? 0 : t.getZ());
+        }
         if (!Objects.equals(SENT.get(p.getUUID()), now)) {
             SENT.put(p.getUUID(), now);
-            PacketDistributor.sendToPlayer(p, new AbyssNetwork.Section(section, obj));
+            PacketDistributor.sendToPlayer(p, now);
         }
         if (section >= 0) {
             arrive(p, section);
+            AbyssGuide.tick(p);
         }
     }
 

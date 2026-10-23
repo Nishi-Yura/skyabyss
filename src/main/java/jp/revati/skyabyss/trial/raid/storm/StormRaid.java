@@ -22,7 +22,7 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 
-// 雷翼のレイドの三つの部屋 (docs/design/12 の「レイド」節)。歩 SR1「避雷の羽運び」・智 SR2「銅の回路つなぎ」・闘 SR3「帯電の連鎖」。
+// 雷翼のレイドの三つの部屋 (docs/design/12 の「レイド」節)。歩 SR1「避雷の羽運び」/SR4「雷柱から逃げて鍵集め」・智 SR2「銅の回路つなぎ」/SR5「雷の拍子覚え」・闘 SR3「帯電の連鎖」/SR6「嵐の目へ」。枠ごとに二つ、周ごとに一つ引く。
 // 色は雷翼のパレット (RaidKit.STORM: 銅・緑青・蛙灯)。予告は赤だけ (combat/Telegraph)
 public final class StormRaid {
     private StormRaid() {
@@ -31,11 +31,17 @@ public final class StormRaid {
     public static final String SR1 = "SR1";
     public static final String SR2 = "SR2";
     public static final String SR3 = "SR3";
+    public static final String SR4 = "SR4";
+    public static final String SR5 = "SR5";
+    public static final String SR6 = "SR6";
 
     public static void register() {
         RaidRooms.register(Titans.THUNDER_WING, Trial.Slot.WALK, SR1, FeatherCarry::new);
         RaidRooms.register(Titans.THUNDER_WING, Trial.Slot.WIT, SR2, CircuitRoom::new);
         RaidRooms.register(Titans.THUNDER_WING, Trial.Slot.FIGHT, SR3, ChargeChain::new);
+        RaidRooms.register(Titans.THUNDER_WING, Trial.Slot.WALK, SR4, ColumnChase::new);
+        RaidRooms.register(Titans.THUNDER_WING, Trial.Slot.WIT, SR5, BeatTiles::new);
+        RaidRooms.register(Titans.THUNDER_WING, Trial.Slot.FIGHT, SR6, EyeAdvance::new);
     }
 
     // ---- 共通の小道具

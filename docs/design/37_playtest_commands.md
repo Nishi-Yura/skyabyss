@@ -2,8 +2,8 @@
 
 - 範囲: `/skyabyss ...` 以下に登録されている開発・試遊のコマンドの一覧（棚卸し）と、試遊のための新しい木 `/skyabyss play ...` の仕様と使い方。
 - 状態: **棚卸しは静的（ソースの登録とその参照先を読んだもの）。実行して確かめたのは `play` の自己テストだけ。** 古いコマンドの実行確認は未了。
-- 関係: 既存の `/skyabyss playtest ...`（`/試遊 ...`）はそのまま残す。`play` はその上の薄い層で、同じ部品（`Playtest` の補助）と公開の API（`Quests`・`Progression`・`Growth`・`Lore`）を使う。
-- 実装: `jp.revati.skyabyss.dev.play`（`PlayCommands`・`PlayChapters`・`PlayPlaces`・`PlaySelfTest`）。文言は `assets/skyabyss_play/lang`。
+- 関係: 試遊のコマンドは `/skyabyss play ...` の一本に集めた。旧 `/skyabyss playtest ...` は当面そのまま動く（働きの同じ語は `play` に統合済み。1 節の表の「試遊（旧）」）。`play` は `Playtest` の補助と公開の API（`Quests`・`Progression`・`Growth`・`Lore`・`TrialRoute`）だけを使う薄い層。
+- 実装: `jp.revati.skyabyss.dev.play`（`PlayCommands`・`PlayChapters`・`PlayPlaces`・`PlayQuests`・`PlayRaid`・`PlaySelfTest`・`PlayMultiSelfTest`）。文言は `assets/skyabyss_play/lang`。
 
 ## 1. 棚卸し
 
@@ -75,25 +75,43 @@
 
 ## 2. 試遊の木（`/skyabyss play`）
 
-権限 2。最後の `[対象]` は省略で自分。候補（Brigadier の suggestions）は場所名・章の段階・クエスト id・ボス名・道具の名前・時刻・天気。文言は `commands.skyabyss_play.*`（ja_jp・en_us）。
+権限 2。試遊のコマンドはこの一本の木（`/skyabyss play`）に集めた。旧い `/skyabyss playtest ...` は当面そのまま動く（同じ働きの語は `play` に統合済み。`/skyabyss play help` の末尾に案内を出す）。文言は `commands.skyabyss_play.*`（ja_jp・en_us）。
+
+### 2.0 対象（複数人）の決まり
+
+- どの人向けのコマンドも `[対象]`（`@a`・`@p`・名前・パーティの人たち）を取り、**省略で自分**。複数人なら全員に同じことをする（結果は件数で返す）。
+- `[対象]` の位置: 必須の引数があるものは**そのあと**（`goto <場所> [対象]`・`raid <巨神> <部屋> [対象]`）。省略できる引数があるものは**対象が先**（`chapter <n> [対象] [段階]`・`boss <名> [対象] [tier]`・`quest next [対象] [id]`）。段階や id と選択子の区別をつけるため。
+- 世界に効くもの（`time`・`weather`・`peaceful`・`day`・`fast`）は対象を取らない。
+- 候補（tab 補完）: 場所名・章の段階・クエスト id（選んだ id の段階も）・ボス名・巨神名・部屋（段・枠・id）・道具・時刻・天気。
 
 ```
 /skyabyss play help
 /skyabyss play status [対象]
-/skyabyss play chapter <0-5> [段階]          自分だけ
+/skyabyss play chapter <0-5> [対象] [段階]
 /skyabyss play goto <場所> [対象]
+/skyabyss play skip opening [対象]
+/skyabyss play now [対象]
 /skyabyss play kit <iron|whale|tide|storm|ember> [対象]
-/skyabyss play boss <whale|tide|storm|ember|raiju|smith|warden|nightmare> [段階 0-4]
-/skyabyss play quest <id> [段階|done|reset]
+/skyabyss play boss <whale|tide|storm|ember|raiju|smith|warden|nightmare> [対象] [tier 0-4]
+/skyabyss play raid <whale|tide|storm|ember> <部屋> [対象]
+/skyabyss play trials <巨神> [対象]
+/skyabyss play quest list [対象]
+/skyabyss play quest next [対象] [id]
+/skyabyss play quest set <id> <段階> [対象]
+/skyabyss play quest done <id> [対象]
+/skyabyss play quest reset <id> [対象]
 /skyabyss play lore unlock-all|reset [対象]
+/skyabyss play heal|feed [対象]
+/skyabyss play god on|off [対象]
+/skyabyss play reset [対象]
 /skyabyss play time day|noon|night|midnight
+/skyabyss play day <n>
+/skyabyss play fast on|off
 /skyabyss play weather clear|rain|thunder
 /skyabyss play peaceful on|off
-/skyabyss play heal [対象]
-/skyabyss play feed [対象]
-/skyabyss play god on|off [対象]
-/skyabyss play reset me [対象]
 ```
+
+旧い形で残しているもの: `quest <id> [段階|done|reset]`（自分だけ）・`reset me [対象]`。旧 `playtest` の `board`（= `goto <巨神>`）・`goto <巨神> <地点>`（= `goto <巨神>-<地点>`）・`gear`（= `kit`）・`whale`（= `boss whale`）に当たる語は、`play` 側の新しい語へ寄せた。
 
 ### 2.1 章（chapter）
 
@@ -148,14 +166,27 @@
 
 `[段階 0-4]` を付けると、先に `kit` と同じ装備にする。
 
-### 2.5 クエスト・伝承・時刻・その他
+### 2.5 クエスト（quest）・伝承・時刻・その他
 
-- `quest <id>`（状態を一行で見る）・`quest <id> done`（段階を最後まで済ませる）・`quest <id> reset`（最初の段階に戻す）・`quest <id> <段階>`（段階を決める）
+- `quest list [対象]`: 進行中のクエストを一行ずつ（メインが先。種類・id・段階名・何段中何段目）。
+- `quest next [対象] [id]`: **次の段階へ進める**。id を省略すると、追跡中のクエスト、進行中のメイン（定義順）、未着手の最初のメイン（始める）の順に選ぶ。id を渡せばサブ・サイドも同じ。未着手なら始める。進め方は本物の道（`Quests.forceStage` = 段の完了、報酬・シグナル、次の段の計測・アクション、同期）なので、日誌・目的の帯・NPC の話題・パーティの進みは本物と同じに更新される。結果は「前 → 後」の一行で、完了済みのものは進めずに知らせる。
+- `quest set <id> <段階> [対象]`: 段階を決める（`Quests.setStage`）。`quest done <id> [対象]`: 最後まで済ませる（段を順に完了。上限 60）。`quest reset <id> [対象]`: 最初に戻す。
 - `lore unlock-all`（伝承をすべて開く。`unlockable` のものだけ）・`lore reset`（白紙に戻す）
-- `time`・`weather` は vanilla の `time set` と `weather` を流すだけ
+- `time`・`weather` は vanilla の `time set` と `weather`、`day <n>` は n 日目の朝、`fast` は tick レート 2 倍/通常
 - `peaceful on|off` は `difficulty peaceful` / `difficulty normal`（世界の難易度。全員に効く）
 - `heal` は体力と満腹を戻す。`feed` は満腹だけ。`god on|off` は無敵
-- `reset me` は、章・クエスト・伝承・止めた巨神・体力の目安・無敵を全部戻す
+- `reset` は、章・クエスト・伝承・止めた巨神・体力の目安・無敵を全部戻す
+- `skip opening` は序章を飛ばす。`now` は今の目的の次の出来事を本物の仕組みで起こす（旧 `playtest now`）
+- `trials <巨神>` はその背の試練を全部済ませた状態にする（旧 `playtest trials`）
+
+### 2.5.1 レイドの部屋へ（raid）
+
+`raid <巨神> <部屋> [対象]`: 対象全員を背に乗せ、順路の指定の部屋へ運ぶ。
+
+- 部屋の指定: 段 `1`〜`3`（歩・智・闘の順）、枠 `walk`・`wit`・`fight`（その周の引きの部屋）、部屋の id（例 `WR1`。引きと違えば、その枠の引きを入れ替えて保存する）。
+- 流れ: 全員の準備（序章を飛ばす・前の巨神を止めた状態・その巨神の装備・**主線をその巨神の順路の段階 `inscriptions` に合わせる**）、全員が背に乗ったら、グループごとに公開の入口（`TrialRoute.start`、段が 1 でなければ `TrialRoute.carry`）で順路を始めて運ぶ。部屋の建てかたと運びは `RaidRun` 側が持つので、このコマンドは薄い層。
+- 巨神がまだ出ていなければ、出るのを待ってから乗せる（`boss` と同じ）。レイドの部屋のない巨神は断る（`raid_none`）。
+- 順路の記録（段・参加者・引き）は、本物の入口から始めたときと同じになる。パーティの人は同じグループの記録を共有する。
 
 ### 2.6 状態（status）
 
@@ -171,12 +202,14 @@
 ```
 
 - **序盤（章 0 から）**: `/skyabyss play chapter 0` → 序章をふつうに遊ぶ。
-- **岩鯨（章 1）**: `/skyabyss play chapter 1` → `/skyabyss play boss whale 0`（心臓の部屋へ）
-- **潮殻（章 2）**: `/skyabyss play chapter 2` → `/skyabyss play boss tide 1`
-- **雷翼（章 3）**: `/skyabyss play chapter 3` → `/skyabyss play boss raiju 2` → `/skyabyss play boss storm 2`
-- **余燼（章 4）**: `/skyabyss play chapter 4` → `/skyabyss play boss smith 3` → `/skyabyss play boss ember 3`
+- **岩鯨（章 1）**: `/skyabyss play chapter 1` → `/skyabyss play boss whale`（心臓の部屋へ）。順路の部屋なら `/skyabyss play raid whale 2 @a`
+- **潮殻（章 2）**: `/skyabyss play chapter 2` → `/skyabyss play boss tide @s 1`
+- **雷翼（章 3）**: `/skyabyss play chapter 3` → `/skyabyss play boss raiju @s 2` → `/skyabyss play boss storm @s 2`
+- **余燼（章 4）**: `/skyabyss play chapter 4` → `/skyabyss play boss smith @s 3` → `/skyabyss play boss ember @s 3`
+- **パーティで**: 全員に `@a` を付ける（例 `/skyabyss play chapter 2 @a`、`/skyabyss play quest next @a`、`/skyabyss play raid tide wit @a`）。一人ずつ違うことをしたいときは名前で指す
+- **クエストを進める**: `/skyabyss play quest next`（追跡中）、`/skyabyss play quest next @a main_tide`、サブは id を付ける。段の指定は `quest set <id> <段階>`
 - **深淵（章 5）**: `/skyabyss play chapter 5` → `/skyabyss play goto abyss` → `/skyabyss play boss warden` → `/skyabyss play goto abyss-depth-5`
-- **どこでも**: `/skyabyss play time noon` `/skyabyss play weather clear` `/skyabyss play god on` `/skyabyss play reset me`
+- **どこでも**: `/skyabyss play time noon` `/skyabyss play weather clear` `/skyabyss play god on` `/skyabyss play reset`
 
 ## 4. 未対応（理由つき）
 
@@ -189,7 +222,9 @@
 
 ## 5. 自己テスト
 
-`SKYABYSS_SELFTEST=1 SKYABYSS_SELFTEST_ONLY=play ./gradlew runServer`（`PlaySelfTest`）。見ること:
+`SKYABYSS_SELFTEST=1 SKYABYSS_SELFTEST_ONLY="playtest" bash tools/dev/mc_run.sh runServer`（`PlaySelfTest`＝段 `playtest play`、`PlayMultiSelfTest`＝段 `playtest multi`、旧 `PlaytestSelfTest`＝段 `playtest`）。見ること:
+
+0. 複数人（`PlayMultiSelfTest`）: 新しい形（対象つき・なし・旧い形）がすべて構文を通る。偽の二人で `quest next` がメインとサブを一段進め（段階が変わり、追跡が空にならない）、完了後は進めず、`set`・`done` が効く。同じパーティの偽の二人に `raid` を流すと、二人とも指定の段（`2`）と指定の部屋（id）の中に着き、順路の記録の段が合い、主線が `inscriptions` になる。
 
 1. 登録: `skyabyss play` があり、権限 2（権限 1 では通らない）。全部の例の構文が通る。
 2. 移動先: 候補の場所を解決し、立てる場所なら OK。立てる場所が取れないものは理由つきで飛ばす（ログに出る）。**この自己テストの世界では背も深淵も組まれていなかったため、立てる場所は 0 件確認、101 件を飛ばした。移動先が本当に立てるかは、背と層を組んだ世界で確かめる必要がある。**

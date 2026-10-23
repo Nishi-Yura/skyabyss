@@ -31,13 +31,13 @@ public final class PlaySelfTest {
     }
 
     // 文言の鍵 (ja_jp と en_us の両方にある必要がある)
-    static final List<String> KEYS = List.of("help.0", "help.11", "bad_chapter", "bad_stage", "unknown_boss", "bad_tier", "unknown_place", "place_missing",
+    static final List<String> KEYS = List.of("help.0", "help.15", "raid_none", "raid_bad_room", "quest_none", "quest_next", "act.trials", "act.skip_opening", "said.raid", "said.day", "said.fast_on", "said.fast_off", "bad_chapter", "bad_stage", "unknown_boss", "bad_tier", "unknown_place", "place_missing",
             "unknown", "unknown_quest", "status_head", "quest_line", "titans_line", "stilled", "not_yet", "done", "act.quest_done", "act.quest_reset", "act.quest_stage", "act.goto", "act.kit", "act.lore_all", "act.lore_reset",
             "act.heal", "act.feed", "act.god_on", "act.god_off", "act.reset", "said.chapter", "said.boss", "said.quest", "said.time", "said.clear",
             "said.rain", "said.thunder", "said.peaceful_on", "said.peaceful_off");
 
-    private static final List<String> COMMANDS = List.of("play help", "play status", "play chapter 2", "play chapter 2 see", "play goto whale-heart",
-            "play goto abyss-depth-5", "play kit tide", "play boss tide 2", "play boss warden", "play quest main_song done", "play quest main_song reset",
+    private static final List<String> COMMANDS = List.of("play help", "play status", "play chapter 2", "play chapter 2 @a see", "play goto whale-heart",
+            "play goto abyss-depth-5", "play kit tide", "play boss tide @a 2", "play boss warden", "play quest main_song done", "play quest main_song reset",
             "play quest main_song see_whale", "play lore unlock-all", "play lore reset", "play time day", "play weather clear", "play peaceful on",
             "play heal", "play feed", "play god on", "play god off", "play reset me");
 
