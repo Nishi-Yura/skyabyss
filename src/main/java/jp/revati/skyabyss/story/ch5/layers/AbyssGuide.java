@@ -157,7 +157,7 @@ public final class AbyssGuide {
         if (sv != null && camp && sv.closerThan(at, 6)) {
             String state = survivorState(p, layer);
             String key = layer + "." + state;
-            if (!key.equals(SAID.get(p.getUUID())) && LayerData.get(p.server).set(p.getUUID(), "said:" + key)) {
+            if (!"none".equals(state) && !key.equals(SAID.get(p.getUUID())) && LayerData.get(p.server).set(p.getUUID(), "said:" + key)) {
                 SAID.put(p.getUUID(), key);
                 Notice.narrate(p, NS + "survivor." + key);
             }

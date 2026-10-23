@@ -252,6 +252,8 @@ public final class DepthBoss {
             f.bar.addPlayer(p);
         }
         f.bar.setProgress(Math.max(0f, king.getHealth() / king.getMaxHealth()));
+        // 段のボスバー (色で段。story/ch5/client/AbyssBossBarClient)
+        jp.revati.skyabyss.story.ch5.AbyssBossBars.phase(f.bar, f.phase);
         int ph = phaseOf(king.getHealth() / king.getMaxHealth());
         if (ph > f.phase) {
             f.phase = ph;

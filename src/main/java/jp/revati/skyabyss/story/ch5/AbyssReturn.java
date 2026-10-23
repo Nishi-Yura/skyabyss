@@ -158,7 +158,7 @@ public final class AbyssReturn {
     }
 
     // 自己テスト: 待ちを今すぐ流す
-    static void flushForTest(MinecraftServer server) {
+    public static void flushForTest(MinecraftServer server) {
         List<Pending> due = List.copyOf(LATER);
         LATER.clear();
         due.forEach(e -> e.run().run());
