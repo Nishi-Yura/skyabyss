@@ -1,0 +1,44 @@
+# 五章の検証: 紋の盤 (穴・紋・中心の技) と変異の画面 (素材・一度きりの選び)。GUI 2 と 3 で見る。
+# ./gradlew runShots -Pscript=tools/shots/verify_ch5_crest.txt -PshotsName=verify_ch5_crest
+world verify_ch5_crest flat
+size 1280 720
+timeout 1500
+render 6
+clouds off
+guiscale 2
+
+cmd time set noon
+cmd weather clear
+cmd gamemode survival
+cmd skyabyss level set @s 50
+cmd skyabyss dev rebirth 5
+cmd skill learn @s rock_call 1
+cmd skill learn @s whale_sweep 2
+cmd skill learn @s wind_rend 2
+cmd skill glyph @s rock 2
+cmd skill glyph @s wind 1
+cmd skill glyph @s ash 3
+cmd skill glyph @s bone 1
+cmd give @s skyabyss:stone_whale_core 2
+cmd give @s skyabyss:stone_whale_shard 6
+hud off
+waitchunks
+chat clear
+wait 40
+
+open skills_ext
+wait 30
+shot crest_g2_empty
+cmd skill socket @s 0 whale_sweep
+cmd skill socket @s 1 rock_call
+wait 20
+shot crest_g2_placed
+close
+wait 10
+guiscale 3
+wait 20
+open skills_ext
+wait 30
+shot crest_g3_placed
+close
+echo done
