@@ -22,19 +22,19 @@ def t(key, ja, en):
 
 
 # ---------------------------------------------------------------- 道案内 (目的の帯。%1$s などは AbyssGuide が渡す)
-t(G + 'survivor', '野営の%1$sと話す', 'Talk to %1$s at the camp')
-t(G + 'mark', '%1$sを取りに行く（印 %2$s／3）', 'Fetch the %1$s (marks %2$s/3)')
-t(G + 'nest', '%1$sの台を囲む巣を払う（印 %2$s／3）', 'Clear the nest around the %1$s (marks %2$s/3)')
-t(G + 'terr', '%1$sの台を守る縄張りの主を倒す（印 %2$s／3）', 'Defeat the territory boss guarding the %1$s (marks %2$s/3)')
-t(G + 'gate', '印が三つそろった。野営の北の格子の門へ', 'Three marks. Go to the barred gate north of the camp')
-t(G + 'arena', '門の奥の主の間へ。%1$sが待つ', 'Go down to the lord\'s hall. %1$s waits')
-t(G + 'lord', '%1$sを倒す', 'Defeat %1$s')
-t(G + 'descend', '主の間の奥の下りの鎖で、%1$sへ', 'Take the descending chain at the back of the hall to %1$s')
-t(G + 'descend_heart', '主の間の奥の下りの鎖で、%1$sへ', 'Take the descending chain at the back of the hall to %1$s')
-t(G + 'heart_room', '奥の廊下を抜けて、心臓の間へ', 'Go through the corridor into the heart chamber')
-t(G + 'warden', '心臓の番人を倒す。灯籠を灯し、光の中で', 'Defeat the Heart Warden. Light the lanterns and fight in the light')
-t(G + 'heart_touch', '心臓の台に触れる', 'Touch the heart\'s altar')
-t(G + 'home', '上りの鎖で野営へ戻り、骨の野営の白い磁石石から地上へ', 'Climb back by the chains and return to the surface from the white lodestone in the bone camp')
+t(G + 'survivor', '野営の%1$sと話そう', 'Talk to %1$s at the camp')
+t(G + 'mark', '%1$sを取りに行こう（印 %2$s／3）', 'Fetch the %1$s (marks %2$s/3)')
+t(G + 'nest', '%1$sの台を囲む巣を払おう（印 %2$s／3）', 'Clear the nest around the %1$s (marks %2$s/3)')
+t(G + 'terr', '%1$sの台の縄張りの主を倒そう（印 %2$s／3）', 'Defeat the territory boss guarding the %1$s (marks %2$s/3)')
+t(G + 'gate', '印が三つそろった。野営の北の格子の門へ行こう', 'Three marks. Go to the barred gate north of the camp')
+t(G + 'arena', '%1$sが待つ、門の奥の主の間へ行こう', 'Go down to the lord\'s hall. %1$s waits')
+t(G + 'lord', '%1$sを倒そう', 'Defeat %1$s')
+t(G + 'descend', '主の間の奥の下りの鎖で、%1$sへ下りよう', 'Take the descending chain at the back of the hall to %1$s')
+t(G + 'descend_heart', '主の間の奥の下りの鎖で、%1$sへ下りよう', 'Take the descending chain at the back of the hall to %1$s')
+t(G + 'heart_room', '奥の廊下を抜けて、心臓の間へ行こう', 'Go through the corridor into the heart chamber')
+t(G + 'warden', '灯籠を灯し、光の中で心臓の番人を倒そう', 'Defeat the Heart Warden. Light the lanterns and fight in the light')
+t(G + 'heart_touch', '心臓の台に触れよう', 'Touch the heart\'s altar')
+t(G + 'home', '鎖で骨の野営まで上り、白い磁石石から地上へ帰ろう', 'Climb back by the chains and return to the surface from the white lodestone in the bone camp')
 
 # ---------------------------------------------------------------- はじめての手引き
 t(M + 'tip.home', '手引き：野営の西の壁ぞいの白い祠。磁石石に触れると、いつでも地上（都の下の門）へ帰れる。',

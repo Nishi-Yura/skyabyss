@@ -123,7 +123,7 @@ public final class ObjectiveStrip {
     private static Cur cur(Minecraft mc) {
         if (demo) {
             BlockPos at = mc.player.blockPosition().offset(96, 0, -70);
-            return new Cur("岩鯨の背へ上る鎖を探す", new Resolved(at, false));
+            return new Cur("岩鯨の背へ上る鎖を探そう", new Resolved(at, false));
         }
         // 深淵の主・番人の戦いのあいだは、戦いの一言 (story/ch5/layers/AbyssSections)
         String fight = jp.revati.skyabyss.story.ch5.client.AbyssSectionClient.objective();

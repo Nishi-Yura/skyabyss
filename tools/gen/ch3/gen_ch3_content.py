@@ -210,10 +210,10 @@ text("quest.skyabyss.ch3.sub_wind_marks.done", "風の民は、影を神と呼�
 text("quest.skyabyss.ch3.sub_wind_marks.trace.journal",
      "朝から、風が逆向きに吹いている。\n高い所に、風見が立っているという。折れた塔の跡と、焼けた荷、風の民の碑も、近くにあるらしい。",
      "Since morning the wind has blown the wrong way.\nA vane is said to stand on the heights, and a broken tower, a charred pack and the wind folk's tablets lie nearby.")
-text("quest.skyabyss.ch3.sub_wind_marks.trace.vane", "風見の丘を見つける", "Find the vane on the hill")
-text("quest.skyabyss.ch3.sub_wind_marks.trace.ruin", "避雷の塔の跡を見つける", "Find the broken lightning tower")
-text("quest.skyabyss.ch3.sub_wind_marks.trace.pack", "雷に焼かれた荷を見つける", "Find the pack burnt by lightning")
-text("quest.skyabyss.ch3.sub_wind_marks.trace.tablets", "風の碑を見つける（3 枚）", "Find the wind tablets (3)")
+text("quest.skyabyss.ch3.sub_wind_marks.trace.vane", "風見の丘を見つけよう", "Find the vane on the hill")
+text("quest.skyabyss.ch3.sub_wind_marks.trace.ruin", "避雷の塔の跡を見つけよう", "Find the broken lightning tower")
+text("quest.skyabyss.ch3.sub_wind_marks.trace.pack", "雷に焼かれた荷を見つけよう", "Find the pack burnt by lightning")
+text("quest.skyabyss.ch3.sub_wind_marks.trace.tablets", "風の碑を見つけよう（3 枚）", "Find the wind tablets (3)")
 
 # イサナ: 夕立の刻に峰の足もとへ行く → 聞かせる。乗るのは自分だけ、とイサナが決める (追う人から見送る人へ)
 write(DATA / "quest/ch3/sub_isana_wait.json", {
@@ -235,10 +235,10 @@ text("quest.skyabyss.ch3.sub_isana_wait.done", "イサナは、火のそばで�
 text("quest.skyabyss.ch3.sub_isana_wait.climb.journal",
      "夕立の刻に、巨大な鳥が峰へ降りるという。\n峰の足もとまで行って、風がどう動くか、見てこよう。",
      "In the afternoon storm hour the giant bird settles on a peak.\nI will go to the foot of the peak and watch how the wind moves.")
-text("quest.skyabyss.ch3.sub_isana_wait.climb.foot", "夕立の刻に、峰の足もとへ行く", "Reach the foot of the perched titan in the storm hour")
+text("quest.skyabyss.ch3.sub_isana_wait.climb.foot", "夕立の刻に、峰の足もとへ行こう", "Reach the foot of the perched titan in the storm hour")
 text("quest.skyabyss.ch3.sub_isana_wait.tell.journal", "風は、鳥の足もとで渦を巻いていた。\nイサナのところへ、話しに行こう。",
      "The wind spiralled at the bird's feet.\nI will go and tell Isana.")
-text("quest.skyabyss.ch3.sub_isana_wait.tell.talk", "イサナに、峰の足もとの話をする", "Tell Isana about the foot of the peak")
+text("quest.skyabyss.ch3.sub_isana_wait.tell.talk", "イサナに、峰の足もとの話をしよう", "Tell Isana about the foot of the peak")
 
 # ================================================================ 会話 (イサナの足し書き。節は ch3_ で始める)
 CHASER = "dialogue.skyabyss.whale_chaser."

@@ -40,9 +40,9 @@ def fac(open_, **kw):
 
 
 ROLES = {
-    "guild_clerk": ("組合の受付の書記", "Guild Clerk",
+    "guild_clerk": ("鯨追いの組合の書記", "Guild Clerk",
                     ("鯨追いの組合へようこそ。ここではギルドを作るか、入る申請を出せます。言伝ての板の頼みも、ここで見られますよ。",
-                     "Welcome to the Whale-Chasers' Hall. You can found a guild here, or apply to join one. The message board's errands are here too."),
+                     "Welcome to the Whale Chasers' Guild. You can found a guild here, or apply to join one. The message board's errands are here too."),
                     [("guild", "talk", [fac("guild")], None, "ギルドの窓口 (作る・入る・頼み・旗・功績)", "Guild desk (found, join, requests, banner, deeds)", None, None),
                      ("storage", "talk", [fac("guild_storage")], None, "ギルドの倉庫を開く", "Open the guild storehouse", None, None),
                      ("board", "talk", [{"type": "open_board"}], None, "言伝ての板を見る", "Look at the message board", None, None),
@@ -662,7 +662,7 @@ TRADE = [
 RUMORS = {
     1: [("北の岩鯨は、鎖が鳴るたびに少しだけ目を開けるらしい。", "They say the stone whale in the north opens its eyes a little whenever the chains ring."),
         ("墓地の外れで、夜に骨を数える声がするって。", "Someone counts bones at night, out past the graveyard."),
-        ("組合の見習いが、最初の登りで足を挫いたそうだ。崖の縄には気をつけな。", "A guild apprentice twisted an ankle on the first climb. Mind the cliff ropes.")],
+        ("鯨追いの組合の見習いが、最初の登りで足を挫いたそうだ。崖の縄には気をつけな。", "An apprentice of the Whale Chasers' Guild twisted an ankle on the first climb. Mind the cliff ropes.")],
     2: [("潮が引く日には、海の底の道が見えるそうだよ。", "On low-tide days, they say a road shows on the sea floor."),
         ("漁師が網に真珠ほどの目玉を拾ったって。気味が悪い。", "A fisher netted an eye the size of a pearl. Gives me the creeps."),
         ("東の浜で、殻の鳴る音が夜通し続いたらしい。", "On the east shore, shells rang all night long.")],

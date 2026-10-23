@@ -505,7 +505,7 @@ def quests():
     put(b + 'summary', '浜を歩く宿借りの行列を追い、筏の跡へ。', 'Follow the hermit crabs along the beach to the drift raft.')
     put(b + 'raft.journal', 'イサナ「浜の宿借りは、流れ着いた物のところへ行列を作る。……あいつらの後をついていけば、何か見つかるかもしれない」',
         'Isana: "The hermits on the beach form a line to whatever washes up. ...Follow them and you may find something."')
-    put(b + 'raft.raft', '浜の筏の跡を探す', 'Find the drift raft on the beach')
+    put(b + 'raft.raft', '浜の筏の跡を探そう', 'Find the drift raft on the beach')
     put(b + 'done', '「筏か。……誰かが、ここから沖へ出ようとしたんだな」', '"A raft. ...Someone tried to put out to sea from here."')
 
     b = 'quest.skyabyss.ch2.wader_gear.'
@@ -513,9 +513,9 @@ def quests():
     put(b + 'summary', '旅の職人に潮渡りの旅装の作り方を教わり、一式そろえる（任意）。', 'Learn the tide-wader garb from the traveling artisan and make the full set (optional).')
     put(b + 'learn.journal', '職人の前掛けは塩で白い。「水の中で足が重いなら、それ用の旅装がある。教えようか」',
         'The artisan\'s apron is white with salt. "If water drags at your legs, there is garb for that. Shall I show you?"')
-    put(b + 'learn.talk', '旅の職人に、潮渡りの旅装を教わる', 'Learn the tide-wader garb from the artisan')
+    put(b + 'learn.talk', '旅の職人に、潮渡りの旅装を教わろう', 'Learn the tide-wader garb from the artisan')
     put(b + 'make.journal', '小真珠と塩結晶と、前の巨神の鱗片。作り方は旅の覚書に。', 'Small pearls, salt crystals and scales from the last titan. The patterns are in your wayfarer\'s notes.')
-    put(b + 'make.made', '潮渡りの旅装を一式そろえる', 'Make the full tide-wader set')
+    put(b + 'make.made', '潮渡りの旅装を一式そろえよう', 'Make the full tide-wader set')
     put(b + 'done', '「道具は覚えている。……着ているうちに、あんたの歩き方を覚えるよ」', '"Tools remember. ...Wear it a while and it will learn the way you walk."')
 
     b = 'quest.skyabyss.daily_pool_sweep.'
@@ -523,9 +523,9 @@ def quests():
     put(b + 'summary', '浜の潮だまり貝を六つ鎮め、小真珠を四つ納める。', 'Quiet six tidepool clams on the beach and hand in four small pearls.')
     put(b + 'pools.journal', '板の紙（塩で白い字）：「潮だまりの貝が、また口を開けている。足を挟まれた者がいる。六つ、閉じさせてきてほしい」',
         'A note on the board (salt-white ink): "The tide pool clams are gaping again. Someone got a foot caught. Close six of them, please."')
-    put(b + 'pools.kill', '潮だまり貝を倒す', 'Defeat tidepool clams')
+    put(b + 'pools.kill', '潮だまり貝を倒そう', 'Defeat tidepool clams')
     put(b + 'pearls.journal', '「貝の中の小真珠は、薬師が欲しがる。四つ、板の箱へ」', '"The apothecary wants the small pearls from inside. Four, into the board\'s box."')
-    put(b + 'pearls.pearl', '小真珠を納める', 'Hand in small pearls')
+    put(b + 'pearls.pearl', '小真珠を納めよう', 'Hand in small pearls')
     put(b + 'done', '浜は、しばらく静かになるだろう。', 'The beach should be quiet for a while.')
     put(b + 'unlock_hint', 'イサナと話すと、受けられる', 'Talk to Isana to take this on')
 

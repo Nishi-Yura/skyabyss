@@ -449,7 +449,7 @@ def quests():
     put(b + 'summary', '峰の稜線に立つ旗を、五つ辿る。', 'Follow the five flags along the ridge.')
     put(b + 'trace.journal', '峰の稜線に、銅の細線を巻いた旗の柱が並んでいるらしい。旗は、風の向きを示している。',
         'Flag posts wound with fine copper wire are said to line the ridge. The flags show which way the wind blows.')
-    put(b + 'trace.flags', '風の道の旗を辿る', 'Follow the flags of the wind road')
+    put(b + 'trace.flags', '風の道の旗を辿ろう', 'Follow the flags of the wind road')
     put(b + 'done', '旗は、いまも風に逆らって鳴っている。', 'The flags still snap against the wind.')
 
 

@@ -15,10 +15,17 @@
       "xp": 150,
       "objectives": [
         {
-          "id": "ingot",
+          "id": "rod",
           "type": "collect",
-          "target": "minecraft:netherite_ingot",
-          "count": 1,
+          "target": "minecraft:blaze_rod",
+          "count": 3,
+          "party": false
+        },
+        {
+          "id": "obsidian",
+          "type": "collect",
+          "target": "minecraft:obsidian",
+          "count": 2,
           "party": false
         }
       ]

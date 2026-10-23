@@ -100,8 +100,8 @@ def texts():
     put('item.skyabyss.tide_pickle', '潮の塩漬け', 'Tide Pickle')
     put('item.skyabyss.tide_pickle.desc', '昆布を塩で漬けた浜の糧。60 秒、水の中で息が続く', 'Kelp pickled in salt. Lets you breathe underwater for sixty seconds.')
     put('item.skyabyss.pearl_powder', '真珠の粉薬', 'Pearl Powder')
-    put('item.skyabyss.pearl_powder.desc', '真珠を挽いた粉。飲み下すとすぐに傷がふさがり (3❤)、浮く体と重い足が戻る',
-        'Ground pearl. Swallow it to close wounds at once (3 hearts) and shake off levitation and slowness.')
+    put('item.skyabyss.pearl_powder.desc', '真珠を挽いた粉。飲み下すとすぐに傷がふさがり (体力 6)、浮く体と重い足が戻る',
+        'Ground pearl. Swallow it to close wounds at once (6 HP) and shake off levitation and slowness.')
     put('item.skyabyss.tide_hourglass', '潮の刻みの砂時計', 'Tide Hourglass')
     put('item.skyabyss.tide_hourglass.desc', '使うと、次の干潮と満潮までの秒数が分かる（世界の潮。30 秒に一度）',
         'Use it to learn how many seconds remain until the next low and high tide (the world\'s tide; once every 30 seconds).')
