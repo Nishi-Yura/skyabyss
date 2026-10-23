@@ -1792,6 +1792,7 @@ class Town(Facilities):
         self.polish_final()
         self.fix_stairs()
         self.street_light()
+        self.house_lights()
         self.fix_gates()
         self.drop_unsupported()
         self.v.connect()
@@ -1867,6 +1868,41 @@ class Town(Facilities):
         ring = check_light.plan_wall_torches(self.v.b, target=4, region=lambda p: not check_light.in_core(p),
                                              min_gap=10, max_add=300)
         self.torches = core + ring
+
+    def house_lights(self):
+        """通りに面した家と店の灯り (暖かい色だけ):
+        - 通りに面した窓 (ガラスの板) の、家の中の一マスを発光する石 (glowstone)。外が空気・中が空気のときだけ
+        - 戸口の上に、腕 (フェンス) と吊りランタンの店の灯り (戸の一段上・一マス外)。外が空気のときだけ"""
+        v = self.v
+        b = v.b
+        air = (None, 'air', 'cave_air')
+        n_win = n_door = 0
+        for (x, y, z), s in list(b.items()):
+            if y < 1 or y > 4 or max(abs(x), abs(z)) > 97:
+                continue
+            if not s.split('[')[0].endswith('glass_pane'):
+                continue
+            for dx, dz in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+                outside = b.get((x + dx, y, z + dz))
+                inside = (x - dx, y, z - dz)
+                if outside in air and b.get(inside) in air:
+                    b[inside] = 'glowstone'
+                    n_win += 1
+                    break
+        for (x, y, z), s in list(b.items()):
+            if y != 0 or '_door[' not in s or 'half=lower' not in s or 'trapdoor' in s:
+                continue
+            if max(abs(x), abs(z)) > 97:
+                continue
+            f = s.split('facing=')[1].split(',')[0].split(']')[0]
+            dx, dz = DX[OPP[f]]
+            ax, az = x + dx, z + dz
+            if b.get((ax, 3, az)) not in air or b.get((ax, 2, az)) not in air or b.get((x, 3, z)) in air:
+                continue
+            b[(ax, 3, az)] = 'dark_oak_fence[east=false,north=false,south=false,west=false,waterlogged=false]'
+            b[(ax, 2, az)] = 'lantern[hanging=true,waterlogged=false]'
+            n_door += 1
+        self.house_lamps = (n_win, n_door)
 
     def drop_floaters(self):
         """床に置く小物 (壺・鉢・ろうそく・置いた灯り・敷物) で、下が空いているものを消す。
