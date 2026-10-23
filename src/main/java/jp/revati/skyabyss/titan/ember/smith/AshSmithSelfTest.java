@@ -360,6 +360,10 @@ public final class AshSmithSelfTest {
             f.add("no ember_back level");
             return null;
         }
+        // 背は外見だけで体の中の間は建たないので、先に中身を建てる (何度呼んでも同じ形)
+        if (!AshSmithArena.isBuilt(back)) {
+            AshSmithArena.build(back, AshSmithArena.BOX);
+        }
         clearFight(back);
         AshSmith s = EmberSmithSetup.ASH_SMITH.get().create(back);
         if (s == null) {

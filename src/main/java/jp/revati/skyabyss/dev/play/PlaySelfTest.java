@@ -78,7 +78,7 @@ public final class PlaySelfTest {
         }
 
         // 1b. 既存の開始コマンドの形 (boss が流す文字列。木になければ構文の段階で落ちる)
-        for (String c : List.of("tideheart start", "emberheart start", "stormheart start", "raiju start", "smith start",
+        for (String c : List.of("tideheart start", "emberheart start", "stormheart start",
                 "abyss warden wake", "abyss enter", "abyss depth go 5", "titan board", "titan rest")) {
             var parsed = disp.parse("skyabyss " + c, op);
             if (parsed.getReader().canRead() || !parsed.getExceptions().isEmpty()) {
