@@ -382,9 +382,9 @@ public final class StormRaidSelfTest {
             }
         }
         room.start(ctx);
-        // 柱は最も近い人へ歩き、立ち止まって赤い帯を引く (人は北東の端の仮の目標)
-        double tx = ctx.origin().getX() + 12.5;
-        double tz = ctx.origin().getZ() - 1.5;
+        // 柱は最も近い人へ歩き、立ち止まって赤い帯を引く (人は広間の南寄りの仮の目標。鍵から離す)
+        double tx = ctx.origin().getX() + 0.5;
+        double tz = ctx.origin().getZ() + 8.5;
         List<double[]> target = List.of(new double[] {tx, tz});
         double d0 = Math.hypot(room.colX() - tx, room.colZ() - tz);
         for (int i = 0; i < ColumnChase.GRACE - 2; i++) {
