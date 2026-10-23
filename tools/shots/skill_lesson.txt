@@ -1,0 +1,100 @@
+# 技の稽古 (師範の手ほどき。tutorial.SkillLesson / tools/gen/story/gen_skill_lesson.py) の確認
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/skill_lesson.txt -PshotsName=skill_lesson --no-daemon  (絵は docs/review/skill_lesson/ へ写す)
+world shots flat
+size 1280 720
+timeout 600
+render 6
+clouds off
+guiscale 3
+wait 100
+cmd skyabyss cinematic stop
+wait 10
+cmd skyabyss cinematic stop
+cmd time set noon
+cmd weather clear
+cmd gamerule doDaylightCycle false
+cmd gamemode survival
+cmd effect give @s minecraft:resistance 9999 10 true
+cmd kill @e[type=!minecraft:player,distance=..64]
+cmd fill -6 -60 -6 6 -58 6 minecraft:air
+cmd setblock -2 -60 -3 minecraft:oak_fence
+cmd setblock -2 -59 -3 minecraft:hay_block
+cmd setblock -2 -58 -3 minecraft:carved_pumpkin[facing=south]
+cmd setblock 2 -60 -3 minecraft:oak_fence
+cmd setblock 2 -59 -3 minecraft:hay_block
+cmd setblock 2 -58 -3 minecraft:carved_pumpkin[facing=south]
+cmd skyabyss skill forget @s
+cmd skyabyss quest forget @s all
+camera minecraft:overworld 0 -60 2 180 8
+waitchunks
+cmd skyabyss facility dummy
+cmd summon skyabyss:attendant 0.5 -60 -0.5 {NoAI:1b,Role:"training_master",Rotation:[180f,0f],PersistenceRequired:1b}
+wait 20
+hud on
+chat clear
+
+# 1. 師範に稽古を頼む (会話)
+cmd skyabyss quest start @s "lesson/skills"
+wait 40
+cmd skyabyss dev talk "skyabyss:attendant_training_master"
+wait 40
+cmd skyabyss dev talk say continue
+wait 30
+shot lesson_1_menu
+cmd skyabyss dev talk say 2
+wait 40
+shot lesson_1_offer
+cmd skyabyss dev talk say 0
+wait 30
+close
+wait 30
+
+# 2. 覚える段: 手引きの行と、技の画面の光
+shot lesson_2_learn_hud
+open skills
+wait 30
+shot lesson_2_learn_screen
+close
+wait 10
+
+# 3. 使う段: 枠の金の縁・キーの案内・木偶の上の光
+cmd skyabyss skill learn @s titan_cleave 1
+wait 40
+chat clear
+shot lesson_3_cast
+
+# 4. 背後の段: 木偶の背中側の光
+cmd skyabyss quest stage @s "lesson/skills" behind
+camera minecraft:overworld 0 -60 -8 0 10
+wait 40
+chat clear
+shot lesson_4_behind
+cmd damage @e[type=skyabyss:training_dummy,limit=1,sort=nearest] 3 minecraft:player_attack by @s
+wait 8
+shot lesson_4_behind_hit
+
+# 5. 構えの段
+camera minecraft:overworld 0 -60 2 180 8
+wait 40
+chat clear
+shot lesson_5_stance
+
+# 6. 振り直しの段: 師範の会話
+cmd skyabyss quest stage @s "lesson/skills" reset
+wait 30
+cmd skyabyss dev talk "skyabyss:attendant_training_master"
+wait 40
+shot lesson_6_menu
+cmd skyabyss dev talk say 2
+wait 40
+shot lesson_6_respec
+close
+wait 30
+shot lesson_7_done
+wait 60
+shot lesson_7_done2
+
+# 7. 後の章: 新しい木の一段 (星術師)
+cmd skyabyss quest start @s "lesson/tree_star"
+wait 60
+shot lesson_8_tree
