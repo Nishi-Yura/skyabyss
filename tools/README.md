@@ -222,6 +222,7 @@ PYTHONPATH=tools/lib python tools/audit/check_generators.py --list          # �
 ```
 python tools/audit/check_lang_keys.py     # コード・データの文字列リテラルの翻訳キーが ja_jp / en_us にあるか (LangSelfTest (4) と同じ規則。偽陽性の許可リストは両方に同じ内容)
 python tools/audit/check_band_width.py    # 目的の帯の文が幅 230 px に入るか (ObjectiveBandSelfTest と同じ字幅表。目印の付く目的は距離の札の分を引く)
+python tools/audit/check_stairs.py        # 設計図 (data/skyabyss/opening/*.json) の階段: 床の逆さ・逆向き・並びの食い違い・1 段より高い段・埋まった段・戸口の段・屋根の抜け・角の抜け。--sbd <書き出し> で Java で建てる物 (祠は SKYABYSS_DUMP=shrine_<巨神>) も。都は town.py が同じ規則の fix() で直してから書く
 ```
 
 自己テストは `SKYABYSS_SELFTEST=1 SKYABYSS_SELFTEST_ONLY=lang ./gradlew runServer` (`lang` と `lang objective band` の二段)。

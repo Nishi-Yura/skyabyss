@@ -171,6 +171,14 @@ def eff_shape(g, x, y, z, p):
     return 'straight'
 
 
+def run_on(g, x, y, z):
+    """段の背の高い側の先 (1 つ上の高さ) が、頭の空いた所か次の下付きの段"""
+    if g.clear(x, y, z):
+        return True
+    n = stair_props(g, x, y, z)
+    return n is not None and n.get('half') == 'bottom' and g.clear(x, y + 1, z)
+
+
 def standable(g, x, y, z):
     """(x, y, z) に足を置いて立てる (足と頭が空き、下に床)"""
     return g.clear(x, y, z) and g.clear(x, y + 1, z) and g.top(x, y - 1, z) >= 0.5
@@ -273,7 +281,7 @@ def check(g, label, seeds=None):
                 flag('STAIR_RUN', (x, y, z), 'neighbour stair in the same row faces the opposite way (%s vs %s)' % (f, OPP[f]))
         # 次の段: 1 つ上の下付きの階段で、頭が空き、その背の高い側の先にも頭の空きがある (窓台・蛇腹は除く)
         up = [d for d, (dx, dz) in DX.items() if (n := stair_props(g, x + dx, y + 1, z + dz)) and n.get('half') == 'bottom'
-              and g.clear(x + dx, y + 2, z + dz) and g.clear(x + dx + DX[n.get('facing', 'north')][0], y + 2, z + dz + DX[n.get('facing', 'north')][1])]
+              and g.clear(x + dx, y + 2, z + dz) and run_on(g, x + dx + DX[n.get('facing', 'north')][0], y + 2, z + dz + DX[n.get('facing', 'north')][1])]
         down = [d for d, (dx, dz) in DX.items() if (n := stair_props(g, x + dx, y - 1, z + dz)) and n.get('half') == 'bottom'
                 and g.clear(x + dx, y, z + dz)]
         if up:
@@ -585,7 +593,18 @@ def main():
                 findings.append(f)
     for path in sbds:
         label = os.path.basename(path)
-        for f in check(Grid(load_sbd(path)), label):
+        cells = load_sbd(path)
+        g = Grid(cells)
+        grids[label] = g
+        # 歩き始め: 書き出した箱の外周の柱の、いちばん上の立てる所
+        hi = {}
+        for (x, y, z), st in cells.items():
+            if top(st) > 0 and y > hi.get((x, z), -10 ** 6):
+                hi[(x, z)] = y
+        xs = [k[0] for k in hi]
+        zs = [k[1] for k in hi]
+        seeds = [(x, y + 1, z) for (x, z), y in hi.items() if x in (min(xs), max(xs)) or z in (min(zs), max(zs))]
+        for f in check(g, label, seeds):
             if allowed(*f[:3]):
                 skipped[f[1]] += 1
             else:

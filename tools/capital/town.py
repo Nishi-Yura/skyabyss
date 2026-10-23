@@ -1780,8 +1780,19 @@ class Town(Facilities):
         self.tidy_for_walkers()
         self.drop_floaters()
         self.polish_final()
+        self.fix_stairs()
         self.v.connect()
         return self.v
+
+    def fix_stairs(self):
+        """階段の検査 (tools/audit/check_stairs.py) で、形から直せる指摘を直す: 部品どうしが重なって埋まった段・逆向きの段・
+        次の段と向きの合わない段・床の高さの逆さの段・軒の 1 マスの抜け。歩ける所は印と町の外周から探す"""
+        sys.path.insert(0, os.path.join(ROOT, 'tools', 'audit'))
+        import check_stairs  # noqa: E402
+        v = self.v
+        seeds = check_stairs.seeds_of({'marks': v.marks, 'meta': {'rect': [-140, -120, 120, 120], 'level': True}}, v.b)
+        done, left = check_stairs.fix(v.b, seeds)
+        self.stairs_fixed, self.stairs_left = done, left
 
     def drop_floaters(self):
         """床に置く小物 (壺・鉢・ろうそく・置いた灯り・敷物) で、下が空いているものを消す。
