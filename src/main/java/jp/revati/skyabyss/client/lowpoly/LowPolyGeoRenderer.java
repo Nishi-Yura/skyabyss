@@ -46,6 +46,15 @@ public class LowPolyGeoRenderer<T extends Entity & GeoAnimatable> extends GeoEnt
     }
 
     // false のときは発光層 (AutoGlowingGeoLayer) を描かない。潮殻の心臓のように、元のキューブ版が自前の発光層を持つモブが上書きする
+    // 倒れるアニメを持つ番兵の仲間は、バニラの横倒し (90 度) を重ねない (アニメの倒れ方だけにする)
+    @Override
+    protected float getDeathMaxRotation(T animatable) {
+        if (animatable instanceof jp.revati.skyabyss.entity.GuardMob g && g.hasAction("death")) {
+            return 0f;
+        }
+        return super.getDeathMaxRotation(animatable);
+    }
+
     protected boolean autoGlow() {
         return true;
     }

@@ -73,7 +73,7 @@ public class ElderSentinel extends GuardMob {
     private boolean holdAttacks;
 
     public ElderSentinel(EntityType<? extends Monster> type, Level level) {
-        super(type, level, "elder_sentinel", "attack", "block", "rush", "stomp", "flute");
+        super(type, level, "elder_sentinel", "attack", "block", "rush", "stomp", "flute", "hurt", "death");
         this.xpReward = 60;
     }
 
@@ -407,5 +407,11 @@ public class ElderSentinel extends GuardMob {
     @Override
     protected float getSoundVolume() {
         return 1.5f;
+    }
+
+    // 被弾・倒れるアニメ (tools/gen/mobs/gen_guard_hurt_death.py)
+    @Override
+    protected boolean autoHurtDeath() {
+        return true;
     }
 }

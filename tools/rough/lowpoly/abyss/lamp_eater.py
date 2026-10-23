@@ -26,10 +26,15 @@ def build_a(k):
     F = []
     F += part("body", ellipsoid("body", "void", (0, 8.0, 0), (4.4, 4.4, 4.4), segs=14, rings=6))
     F += part("mouth", ellipsoid("body", "teal", (0, 8.0, -4.0), (2.2, 2.2, 0.6), segs=8, rings=2))
+    # 下の歯三本と下唇は顎の骨 (jaw) に載せる (2026-10-23: 前は全部が胴で、灯りを食う時に口が開かなかった)。
+    # 顎は口の縁の高さ (pivot 0,8,-3) で前へ開き、奥の青緑が見える
     for i in range(8):
         a = 2 * 3.14159265 * i / 8
         x, y = 3.2 * math.cos(a), 8.0 + 3.2 * math.sin(a)
-        F += part(f"tooth{i}", cone("body", "bone", (x * 0.9, 8.0 + (y - 8.0) * 0.9, -2.0), (x * 0.3, (y - 8.0) * 0.3, -1.0), 2.0, 0.55, sides=8, rings=2))
+        b = "jaw" if 4 < i < 8 else "body"
+        F += part(f"tooth{i}", cone(b, "bone", (x * 0.9, 8.0 + (y - 8.0) * 0.9, -2.0), (x * 0.3, (y - 8.0) * 0.3, -1.0), 2.0, 0.55, sides=8, rings=2))
+    F += part("lip", ellipsoid("jaw", "void", (0, 5.6, -3.0), (2.9, 1.1, 1.3), segs=8, rings=2))
+    F += part("throat", ellipsoid("body", "teal", (0, 7.0, -3.2), (1.5, 1.2, 0.5), segs=6, rings=2))
     return F, []
 
 

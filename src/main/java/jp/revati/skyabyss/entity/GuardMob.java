@@ -79,6 +79,45 @@ public abstract class GuardMob extends Monster implements GeoEntity, jp.revati.s
     // 攻撃などの動作アニメーションを流す (サーバー側で呼ぶ)
     public void playAction(String name) {
         triggerAnim("action", name);
+        if (!name.equals("hurt")) {
+            lastActionTick = tickCount;
+        }
+    }
+
+    // 最後に被弾以外の動作を流した tick (被弾の動きで攻撃の構え・盾の受けを上書きしないため)
+    private int lastActionTick = -1000;
+
+    // その動作のアニメを持っているか (描画側: 倒れるアニメがあるモブはバニラの横倒しをしない)
+    public boolean hasAction(String name) {
+        for (String a : actions) {
+            if (a.equals(name)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // 被弾・倒れるアニメを GuardMob が流すか (自分で流す種は false のまま。tools/gen/mobs/gen_guard_hurt_death.py で付けた種は true)
+    protected boolean autoHurtDeath() {
+        return false;
+    }
+
+    @Override
+    public boolean hurt(net.minecraft.world.damagesource.DamageSource source, float amount) {
+        boolean hit = super.hurt(source, amount);
+        // 構え・攻撃・盾の受けの途中 (動作を流してから 1.5 秒の内) は被弾の動きを流さない。予告の形を崩さない
+        if (hit && autoHurtDeath() && !level().isClientSide && isAlive() && hasAction("hurt") && tickCount - lastActionTick > 30) {
+            playAction("hurt");
+        }
+        return hit;
+    }
+
+    @Override
+    public void die(net.minecraft.world.damagesource.DamageSource source) {
+        super.die(source);
+        if (autoHurtDeath() && !level().isClientSide && hasAction("death")) {
+            playAction("death");
+        }
     }
 
     @Override
