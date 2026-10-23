@@ -124,6 +124,10 @@ public final class Config {
             .comment("画面の絵柄のパック (A 暗い板) をはじめての起動で選んだか (一度だけ。外したあとは選び直さない。リソースパックの画面で A/B/C を替えられる)")
             .define("uiSkinInstalled", false);
 
+    public static final ModConfigSpec.BooleanValue FONT_INSTALLED = CLIENT_BUILDER
+            .comment("mod の字のパック (DotGothic16・Zen Antique) をはじめての起動で選んだか (一度だけ。外したあとは選び直さない。外すとバニラの字)")
+            .define("fontInstalled", false);
+
     public static final ModConfigSpec.EnumValue<NotifyMode> NOTIFY_MODE = CLIENT_BUILDER
             .comment("知らせの出し先。TOAST = 画面の演出 (字幕・札・帯) だけ, CHAT = チャットだけ (今までどおり), BOTH = 両方。流れた知らせは N の「知らせの記録」で読み返せる")
             .defineEnum("notifyMode", NotifyMode.TOAST);

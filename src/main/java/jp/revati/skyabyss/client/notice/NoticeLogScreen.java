@@ -48,7 +48,7 @@ public class NoticeLogScreen extends Screen implements jp.revati.skyabyss.client
     private List<Row> rows(Font font, int width) {
         List<Row> out = new ArrayList<>();
         for (NoticeLog.Entry e : NoticeLog.entries()) {
-            List<FormattedCharSequence> lines = font.split(e.text(), width);
+            List<FormattedCharSequence> lines = jp.revati.skyabyss.client.ui.JpWrap.split(font, e.text(), width);
             for (int i = 0; i < lines.size(); i++) {
                 out.add(new Row(i == 0 ? e.time() : "", colorOf(e.kind()), lines.get(i)));
             }

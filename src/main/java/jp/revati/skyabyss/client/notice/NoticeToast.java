@@ -23,7 +23,7 @@ public class NoticeToast implements Toast {
     NoticeToast(Font font, Component head, Component body, int accent) {
         this.head = head;
         this.accent = accent;
-        List<FormattedCharSequence> split = font.split(body, WIDTH - 16);
+        List<FormattedCharSequence> split = jp.revati.skyabyss.client.ui.JpWrap.split(font, body, WIDTH - 16);
         this.lines = split.size() > MAX_LINES ? split.subList(0, MAX_LINES) : split;
         this.height = 20 + 10 * Math.max(1, lines.size()) + 3;
     }

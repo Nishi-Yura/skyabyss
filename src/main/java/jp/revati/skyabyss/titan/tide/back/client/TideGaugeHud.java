@@ -63,7 +63,7 @@ public final class TideGaugeHud {
         if (gauge == null || gauge.goal().isEmpty()) {
             return 0;
         }
-        int lines = Math.min(4, mc.font.split(goalBody(), w - 10).size());
+        int lines = Math.min(4, jp.revati.skyabyss.client.ui.JpWrap.split(mc.font, goalBody(), w - 10).size());
         return 6 + 11 + lines * 10 + (showsLevels() ? 11 : 0);
     }
 
@@ -174,7 +174,7 @@ public final class TideGaugeHud {
             g.fill(dx, y + 5, dx + 5, y + 10, i < gauge.done() ? 0xFFF0D060 : 0xFF404848);
         }
         int ty = y + 4 + 11;
-        var lines = mc.font.split(goalBody(), w - 10);
+        var lines = jp.revati.skyabyss.client.ui.JpWrap.split(mc.font, goalBody(), w - 10);
         for (int i = 0; i < Math.min(4, lines.size()); i++) {
             g.drawString(mc.font, lines.get(i), x + 5, ty + i * 10, 0xFFE6F2EE, true);
         }

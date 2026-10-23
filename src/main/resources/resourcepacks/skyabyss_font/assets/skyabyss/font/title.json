@@ -1,0 +1,45 @@
+{
+  "providers": [
+    {
+      "type": "ttf",
+      "file": "skyabyss:zen_antique.ttf",
+      "size": 8,
+      "oversample": 4,
+      "shift": [
+        0,
+        0
+      ]
+    },
+    {
+      "type": "space",
+      "advances": {
+        "　": 8
+      }
+    },
+    {
+      "type": "reference",
+      "id": "minecraft:include/space"
+    },
+    {
+      "type": "reference",
+      "id": "minecraft:include/default",
+      "filter": {
+        "uniform": false
+      }
+    },
+    {
+      "type": "ttf",
+      "file": "skyabyss:dotgothic16.ttf",
+      "size": 8,
+      "oversample": 6,
+      "shift": [
+        0,
+        0
+      ]
+    },
+    {
+      "type": "reference",
+      "id": "minecraft:include/unifont"
+    }
+  ]
+}

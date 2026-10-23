@@ -54,7 +54,7 @@ public class WayfarerNotesScreen extends Screen implements jp.revati.skyabyss.cl
         List<List<FormattedCharSequence>> wrapped = new ArrayList<>();
         int content = 0;
         for (Component line : lines) {
-            List<FormattedCharSequence> wl = font.split(line, list.width());
+            List<FormattedCharSequence> wl = jp.revati.skyabyss.client.ui.JpWrap.split(font, line, list.width());
             wrapped.add(wl);
             content += wl.size() * LINE_H + GAP;
         }

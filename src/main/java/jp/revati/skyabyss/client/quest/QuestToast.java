@@ -23,7 +23,7 @@ public class QuestToast implements Toast {
         this.head = head;
         this.title = title;
         this.main = main;
-        List<FormattedCharSequence> split = Minecraft.getInstance().font.split(title, width() - 16);
+        List<FormattedCharSequence> split = jp.revati.skyabyss.client.ui.JpWrap.split(Minecraft.getInstance().font, title, width() - 16);
         this.lines = split.size() > 2 ? split.subList(0, 2) : split;
     }
 

@@ -279,7 +279,7 @@ public final class DomainClient {
             int alpha = Mth.clamp((int) (la * 255f), 4, 255) << 24;
             Component text = Component.translatable("gui.skyabyss.domain." + r.id + ".line").withStyle(Style.EMPTY.withColor(0xEBD07F));
             int maxW = Math.min(w - 60, Math.max(180, (int) (w * 0.62f)));
-            List<FormattedCharSequence> rows = mc.font.split(text, maxW);
+            List<FormattedCharSequence> rows = jp.revati.skyabyss.client.ui.JpWrap.split(mc.font, text, maxW);
             if (rows.size() > 2) {
                 rows = rows.subList(0, 2);
             }
@@ -416,7 +416,7 @@ public final class DomainClient {
         // いまの手順 (常時。二行まで)
         Component stand = Component.translatable(r.standKey.isEmpty() ? "gui.skyabyss.domain." + r.id + ".goal" : r.standKey, r.standA, r.standB);
         int ty = y + 20;
-        for (FormattedCharSequence row : mc.font.split(stand, pw - 10).stream().limit(2).toList()) {
+        for (FormattedCharSequence row : jp.revati.skyabyss.client.ui.JpWrap.split(mc.font, stand, pw - 10).stream().limit(2).toList()) {
             g.drawString(mc.font, row, x + 5, ty, ia | 0xFFF4D0, true);
             ty += 10;
         }
@@ -427,7 +427,7 @@ public final class DomainClient {
             String mark = r.flashMood == 1 ? "◎ " : r.flashMood == 2 ? "✖ " : "";
             Component fl = Component.literal(mark).append(Component.translatable(r.flashKey, r.flashA, r.flashB));
             int fy = y + 41;
-            for (FormattedCharSequence row : mc.font.split(fl, pw - 10).stream().limit(1).toList()) {
+            for (FormattedCharSequence row : jp.revati.skyabyss.client.ui.JpWrap.split(mc.font, fl, pw - 10).stream().limit(1).toList()) {
                 g.drawString(mc.font, row, x + 5, fy, (Mth.clamp((int) (a * fa * 255), 4, 255) << 24) | fc, true);
                 fy += 10;
             }

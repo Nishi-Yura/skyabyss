@@ -515,7 +515,7 @@ public class GuildScreen extends Screen {
             g.drawString(font, font.plainSubstrByWidth(pname, pw), px, y0 + 70, FacilityUi.TEXT, false);
         }
         if (locked) {
-            List<net.minecraft.util.FormattedCharSequence> lines = font.split(Component.translatable("gui.skyabyss.guild.locked_by",
+            List<net.minecraft.util.FormattedCharSequence> lines = jp.revati.skyabyss.client.ui.JpWrap.split(font, Component.translatable("gui.skyabyss.guild.locked_by",
                     Component.translatable("gui.skyabyss.guild.ach." + em.unlock())), pw);
             for (int i = 0; i < lines.size() && i < 2; i++) {
                 g.drawString(font, lines.get(i), px, y0 + 84 + i * 10, FacilityUi.LACK, false);
@@ -541,7 +541,7 @@ public class GuildScreen extends Screen {
         int bx = drawBadge(g, font, rx, y0 + 142, t, c, a, pl);
         g.drawString(font, Minecraft.getInstance().player == null ? "" : Minecraft.getInstance().player.getGameProfile().getName(), bx + 2, y0 + 142,
                 FacilityUi.TEXT, false);
-        List<net.minecraft.util.FormattedCharSequence> rule = font.split(Component.translatable("gui.skyabyss.guild.banner_rule"), x0 + W - 16 - rx);
+        List<net.minecraft.util.FormattedCharSequence> rule = jp.revati.skyabyss.client.ui.JpWrap.split(font, Component.translatable("gui.skyabyss.guild.banner_rule"), x0 + W - 16 - rx);
         for (int i = 0; i < rule.size() && i < 2; i++) {
             g.drawString(font, rule.get(i), rx, y0 + 156 + i * 10, FacilityUi.DIM, false);
         }

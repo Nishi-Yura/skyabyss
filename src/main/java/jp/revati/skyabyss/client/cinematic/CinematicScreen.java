@@ -162,7 +162,7 @@ final class CinematicScreen extends Screen {
         }
         MutableComponent text = Component.translatable(line.text()).withStyle(style);
         int maxW = Math.min(w - 60, Math.max(180, (int) (w * 0.62f)));
-        List<FormattedCharSequence> rows = font.split(text, maxW);
+        List<FormattedCharSequence> rows = jp.revati.skyabyss.client.ui.JpWrap.split(font, text, maxW);
         if (rows.size() > 3) {
             rows = rows.subList(0, 3);
         }

@@ -8,7 +8,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
 
-// この mod の文字の大きさと色の決まり。字は絵にせず、いつもバニラのフォントを Component で描く (docs/design/18 の 7 章)。
+// この mod の文字の大きさと色の決まり。字は絵にせず、いつもフォントを Component で描く (docs/design/18 の 7 章。字体は mod の字のパック、ModFont)。
 // 大きい字はポーズの拡大で描き、やわらかい光はフォントを重ねて作る。
 //   TITLE   : 題字・章の題字 (2.2 倍、金)
 //   HEADING : 場所の名前・見出し・レベルの数字・副題 (1.5 倍)
@@ -63,7 +63,7 @@ public enum TextStyle {
 
     // 折り返し (この大きさで maxWidth に収まるように)
     public List<FormattedCharSequence> split(Font font, Component text, int maxWidth) {
-        return font.split(text, Math.max(8, (int) (maxWidth / scale)));
+        return jp.revati.skyabyss.client.ui.JpWrap.split(font, text, Math.max(8, (int) (maxWidth / scale)));
     }
 
     // 中央揃えで一行。x は中心、y は上端。rgb は 0xRRGGBB (濃さは alpha で)

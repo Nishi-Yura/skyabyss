@@ -92,7 +92,7 @@ public final class TextClip {
     }
 
     public static int wrapped(GuiGraphics g, Font font, Component text, int x, int y, int w, int maxLines, int lineH, int color, boolean shadow) {
-        return lines(g, font, font.split(text, w), x, y, w, maxLines, lineH, color, shadow);
+        return lines(g, font, jp.revati.skyabyss.client.ui.JpWrap.split(font, text, w), x, y, w, maxLines, lineH, color, shadow);
     }
 
     // 折り返した行を maxLines まで。超えた分は捨て、最後の行を「…」で終える。lineH: 行の高さ
