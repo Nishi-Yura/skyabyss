@@ -58,7 +58,7 @@ public final class ChapterGrounds {
     static final int ANGLE_STEP = 5;
     static final int DIST_STEP = 32;
     // バニラの構造物を避ける距離 (跡地の中心から。小要素は中心から 150 まで広がるので、33 の「128 以内」より広めに)、道しるべの点から
-    static final int STRUCTURE_GAP = 192;
+    static final int STRUCTURE_GAP = 128;   // 跡地を 65% の距離にしたので 192 → 128
     static final int ROAD_STRUCTURE_GAP = 48;
     // 一章の跡地と野営地・足跡の間 (一章の小要素は中心から 110 まで広がる)
     static final int CAMP_GAP = 140;
