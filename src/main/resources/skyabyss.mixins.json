@@ -11,6 +11,7 @@
   ],
   "client": [
     "GuiGraphicsMixin",
+    "FontItalicMixin",
     "ToastShiftMixin",
     "ChatLinesMixin",
     "ToastAddMixin",

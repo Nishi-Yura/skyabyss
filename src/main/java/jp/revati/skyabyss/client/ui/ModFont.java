@@ -86,17 +86,40 @@ public final class ModFont {
         }
 
         private static boolean envDone;
+        private static int ticks;
 
         // 撮影・確かめ用: 環境変数 SKYABYSS_FONT=on で字のパックを選ぶ (最初の tick で一度。撮影はタイトル画面を通らないことがある)
+        // 字のパックが入っているかは 20 tick おきに見直す (描く所から毎回は見ない)
         @SubscribeEvent
         static void onTick(net.neoforged.neoforge.client.event.ClientTickEvent.Post event) {
-            if (envDone) {
+            if (!envDone) {
+                envDone = true;
+                if ("on".equals(System.getenv("SKYABYSS_FONT"))) {
+                    select();
+                }
+            }
+            if (ticks++ % 20 == 0) {
+                refreshActive();
+            }
+        }
+    }
+
+    private static volatile boolean active;
+
+    // mod の字のパックが選ばれているか (斜体を外すかの判断に使う。ItalicStyle)
+    public static boolean active() {
+        return active;
+    }
+
+    static void refreshActive() {
+        try {
+            Minecraft mc = Minecraft.getInstance();
+            if (mc == null || mc.getResourcePackRepository() == null) {
                 return;
             }
-            envDone = true;
-            if ("on".equals(System.getenv("SKYABYSS_FONT"))) {
-                select();
-            }
+            active = mc.getResourcePackRepository().getSelectedIds().stream().anyMatch(s -> s.endsWith(PACK));
+        } catch (RuntimeException e) {
+            active = false;
         }
     }
 
