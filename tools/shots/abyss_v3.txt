@@ -74,6 +74,10 @@ wait 40
 shot a03_bar_gate_closed
 cmd skyabyss abyss layer marks bone
 cmd gamemode creative
+wait 30
+cmd skyabyss cinematic stop
+wait 20
+cmd skyabyss cinematic stop
 cmd tp @s 0 180 -6 180 8
 wait 40
 shot a04_bar_gate_raised
@@ -81,6 +85,7 @@ hud on
 cmd tp @s 2 180 4 -40 5
 wait 60
 shot a05_guide_strip
+cmd effect give @s night_vision 9999 0 true
 cmd skyabyss abyss layer go arena_bone 180
 cmd tp @s ~ ~ ~8
 wait 40

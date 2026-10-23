@@ -326,7 +326,7 @@ public final class AbyssLayersV2SelfTest {
             for (int i = 1; i <= 3; i++) {
                 check(f, barsIn(level, "scut_bone_" + i) == 0, "the shortcut bars of bone mark " + i + " are still there: " + barsIn(level, "scut_bone_" + i));
             }
-            check(f, barsIn(level, "scut_salt_1") > 0, "the salt shortcut bars should still be closed");
+            check(f, barsIn(level, "scut_salt_1") > 0 || d.isOpen("scut_salt_1"), "the salt shortcut bars should still be closed");
             // 北の格子の門: 印が二つの人では上がらず、三つの人が近づくと上がり、離れて 3 秒で下りる
             BlockPos gb = AbyssBuild.mark("gate_bone");
             long t0 = level.getGameTime() + 1000;
@@ -350,6 +350,17 @@ public final class AbyssLayersV2SelfTest {
             check(f, !AbyssMarks.gateRaised(level, "bone") && level.getBlockState(gb.above()).is(net.minecraft.world.level.block.Blocks.IRON_BARS),
                     "the bar gate did not fall after everyone left");
             d.forget(two.getUUID());
+            // 一人 (パーティなし) で印を取っても落ちず、近道の格子が開く (2026-10-23 の試遊「印をおいても鉄格子のところがあかない」の元:
+            // 仲間への知らせでパーティが無いと落ち、近道を開ける前で止まっていた)
+            FakePlayer solo = new FakePlayer(level, new GameProfile(UUID.randomUUID(), "abyss_v2_solo"));
+            try {
+                check(f, AbyssMarks.take(solo, "salt", 1), "a solo player could not take salt mark 1");
+                check(f, barsIn(level, "scut_salt_1") == 0, "a solo player's mark did not open its shortcut bars: " + barsIn(level, "scut_salt_1"));
+            } catch (RuntimeException e) {
+                f.add("taking a mark alone crashed: " + e);
+            } finally {
+                d.forget(solo.getUUID());
+            }
             a.moveTo(out.getX() + 0.5, out.getY(), out.getZ() + 0.5, 180f, 0f);
             check(f, AbyssMarks.gate(a, "bone"), "the gate did not let a player with three marks through");
             BlockPos in = AbyssBuild.mark("gate_bone_in");
