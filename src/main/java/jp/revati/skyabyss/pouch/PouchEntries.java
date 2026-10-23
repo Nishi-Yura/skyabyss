@@ -153,9 +153,6 @@ public final class PouchEntries {
         // 序盤の小さな素材 (骨片・棘針)
         add(list, jp.revati.skyabyss.guide.GuideSetup.BONE_CHIP.get(), Category.SMALL, 999, false, false);
         add(list, jp.revati.skyabyss.guide.GuideSetup.HARE_QUILL.get(), Category.SMALL, 999, false, false);
-        // 五章「深淵」の装備の素材 (錨鉄・共鳴の欠片 (深淵))。末尾に足して既存の枠の位置を動かさない
-        add(list, jp.revati.skyabyss.abyss.gear.AbyssGearSetup.SHARD.get(), Category.MATERIAL, 999, false, false);
-        add(list, jp.revati.skyabyss.abyss.gear.AbyssGearSetup.RESONANCE_SHARD.get(), Category.RESONANCE, 999, false, false);
         return list;
     }
 
