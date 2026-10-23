@@ -1,5 +1,5 @@
 # 雷翼のレイドの三つの部屋 (SR1 避雷の羽運び・SR2 銅の回路つなぎ・SR3 帯電の連鎖) の撮影。docs/design/12 のレイドの節
-#   ./gradlew runShots -Pscript=tools/shots/raid_storm.txt   絵は run/shots/raid_storm/ → docs/review/raid_storm/ (台紙は tools/shots/raid_storm_sheet.py)
+#   ./gradlew runShots -Pscript=tools/shots/raid_storm.txt   絵は run/shots/raid_storm/ → docs/review/raid_storm/ (台紙は tools/sheets/raid_storm_sheet.py)
 world raid_storm normal
 size 1280 720
 timeout 5400

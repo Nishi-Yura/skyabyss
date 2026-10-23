@@ -1,5 +1,5 @@
 # 雷翼のレイドの三つの部屋の台紙 (docs/review/raid_storm/sheet.png)。
-#   python tools/shots/raid_storm_sheet.py run/shots/raid_storm/shots/raid_storm docs/review/raid_storm
+#   python tools/sheets/raid_storm_sheet.py run/shots/raid_storm/shots/raid_storm docs/review/raid_storm
 # 撮影は tools/shots/raid_storm.txt。落ち着いた色の台紙に、部屋ごとの二枚と一行の説明を並べる
 import sys
 from PIL import Image, ImageDraw, ImageFont

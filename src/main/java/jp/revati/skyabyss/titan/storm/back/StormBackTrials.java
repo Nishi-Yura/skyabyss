@@ -5,7 +5,6 @@ import static jp.revati.skyabyss.titan.storm.back.StormBackLayout.*;
 
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -25,7 +24,6 @@ import jp.revati.skyabyss.titan.group.Groups;
 import jp.revati.skyabyss.titan.group.RoomLocks;
 import jp.revati.skyabyss.titan.storm.StormTravel;
 import jp.revati.skyabyss.titan.storm.heart.StormHeartBattle;
-import jp.revati.skyabyss.titan.storm.raiju.RaijuBattle;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -53,9 +51,8 @@ import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 //    または心臓を倒したあと、そのグループのだれも心臓の間の奥にいないまま 30 秒
 //  - 休み場の記録 (着くと記録、倒れるとそこで目を覚ます。記録はグループの番号つき)。焚き火にしゃがんで触れると順路のあきらめ
 //  - 倒れても持ち物と経験値は預かる (岩鯨と同じ部品 TitanBackTrials.keepBelongings)
-//  - 背中にだれもいなくなって 3 分: 背の敵・雷・心臓と雷獣の部屋の持ち主を片付ける
+//  - 背中にだれもいなくなって 3 分: 背の敵・雷・心臓の部屋の持ち主を片付ける
 // 背で湧かせた敵には StormMob.TRIAL_TAG とグループ (GroupOwned.setGroupId) を付けると、そのグループのリセットで消える。
-// 雷獣を倒したら onRaijuDefeated(level, group) を呼ぶ
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class StormBackTrials {
     public static final String TRIAL_TAG = "skyabyss_storm_trial";
@@ -138,11 +135,6 @@ public final class StormBackTrials {
         }
     }
 
-    // 雷獣を倒した (雷獣の担当が、倒したグループで呼ぶ)
-    public static void onRaijuDefeated(ServerLevel level, UUID group) {
-        StormProgress.of(level, group).setRaijuDefeated(true);
-    }
-
     // ---------------------------------------------------------------- リセット (グループごと)
     private static void tickReset(ServerLevel level, boolean anyone) {
         if (!anyone) {
@@ -192,9 +184,7 @@ public final class StormBackTrials {
             e.discard();
         }
         StormStrike.cancelAll(level);
-        for (String room : List.of(StormHeartBattle.ROOM, RaijuBattle.ROOM)) {
-            RoomLocks.release(room);
-        }
+        RoomLocks.release(StormHeartBattle.ROOM);
         SkyAbyss.LOGGER.info("Storm back cleaned up (nobody on the back)");
     }
 
@@ -206,7 +196,7 @@ public final class StormBackTrials {
     }
 
     // そのグループの進みを最初に戻す (12 の 7.1節)。記録の番号が進み (古い休み場の記録は無効)、心臓も眠り直す。
-    // そのグループの心臓・雷獣の戦いを止め、そのグループの背の敵と雷を消す
+    // そのグループの心臓の戦いを止め、そのグループの背の敵と雷を消す
     public static void resetGroup(ServerLevel level, UUID group, boolean announce, @Nullable StormBackState.Trial forceSleep, boolean noSleep,
             boolean moveOut) {
         // そのグループの進みが元に戻る = 鼓動が戻る。眠っている巨神は、最短の長さを過ぎていれば目覚める (titan/end)
@@ -215,7 +205,6 @@ public final class StormBackTrials {
         p.reset(level.random, forceSleep, noSleep);
         AFTER_HEART.remove(group);
         StormHeartBattle.onGroupReset(level, group);
-        RaijuBattle.onGroupReset(level, group);
         jp.revati.skyabyss.trial.TrialRuntime.onGroupReset(level, group);
         GroupOverlays.refresh(level, group);
         for (Entity e : level.getEntitiesOfClass(Entity.class, BODY,
@@ -293,11 +282,6 @@ public final class StormBackTrials {
         tag.remove(TAG_CHECKPOINT_EPOCH);
     }
 
-    // 倒れて目覚める休み場。順路では、その段の休み場で目覚める (32 の 2.4)
-    public static String respawnCheckpoint(java.util.UUID group, String cp) {
-        return cp;
-    }
-
     public static BlockPos restSpawn(ServerLevel level, String id) {
         for (Rest r : RESTS) {
             if (r.id().equals(id)) {
@@ -338,7 +322,7 @@ public final class StormBackTrials {
         }
         int epoch = epochOf(back, player);
         String cp = validCheckpoint(tag, epoch);
-        BlockPos spawn = cp.isEmpty() ? ARRIVAL : restSpawn(back, respawnCheckpoint(Groups.keyOf(player), cp));
+        BlockPos spawn = cp.isEmpty() ? ARRIVAL : restSpawn(back, cp);
         REVIVING.add(player.getUUID());
         try {
             player.teleportTo(back, spawn.getX() + 0.5, spawn.getY(), spawn.getZ() + 0.5, player.getYRot(), 0f);

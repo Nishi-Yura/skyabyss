@@ -141,6 +141,23 @@ public final class PlayRaid {
         return null;
     }
 
+    // 中ボスの間へ運ぶ (play boss raiju|smith)。背の上にいるグループで順路を始め、段 3 の先の中ボスの段にして運ぶ。成功 null、失敗は翻訳キー
+    @Nullable
+    public static String enterMid(ServerPlayer p, int idx) {
+        String titan = ProgressRules.TITAN_ORDER.get(idx);
+        if (!RaidRooms.active(titan)) {
+            return "commands.skyabyss_play.raid_none";
+        }
+        ServerLevel back = p.serverLevel();
+        UUID group = Groups.keyOf(p);
+        TrialRoute.start(back, group, titan, TrialRoute.members(back, group));
+        var r = GroupProgress.of(back, group);
+        r.putInt(TrialRoute.STEP, 3);
+        r.putInt(TrialRoute.MID, 1);
+        r.changed();
+        return TrialRoute.carry(back, group, titan, 3, true) > 0 ? null : "commands.skyabyss_play.raid_bad_room";
+    }
+
     // コマンド: 対象を背に乗せ、全員が乗ったらグループごとに運ぶ (巨神の呼び出しを待つことがある)。受け付けたら null、だめなら翻訳キー
     @Nullable
     public static String run(Collection<ServerPlayer> targets, String titanName, String specText) {

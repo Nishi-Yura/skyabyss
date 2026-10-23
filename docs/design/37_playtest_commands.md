@@ -39,8 +39,6 @@
 | 誓い | `vow` | add remove clear | 2 | 試遊 | |
 | 岩鯨の背 | `dev backmetrics`・`dev buildaudit`・`dev routelight`・`dev titanground`・`dev force` | （計測・監査・灯り・地面・強制） | 開発 | 開発 | |
 | 潮殻・雷翼・余燼の心臓 | `tideheart`・`stormheart`・`emberheart`（start phase reset chamber など）・`dev tideforce`・`dev emberforce` | start phase reset rebuild | 2・開発 | 試遊 | 「`/skyabyss tideheart start`」の形（`play boss` が使う） |
-| 中ボス | `raiju`・`smith` | start reset rebuild | 2 | 試遊 | `play boss raiju|smith` が使う |
-| 背の動き | `dev anemone`（lamp tp light all clear exit entry at path pocket cut vista zone info look） | | 開発 | 開発 | 大きい部品の確認用 |
 | 深淵 | `abyss`・`dev abyss` | enter build leave mob art learn up open・on off status | 2・開発 | 試遊 | 層の建て直しは `build` |
 | 深淵の番人 | `abyss warden` | wake reset dev(lamp dark) | 2・開発 | 試遊 | |
 | 深淵の深さ | `abyss depth` | go kind records | 2 | 試遊 | |
@@ -160,7 +158,7 @@
 | --- | --- |
 | `whale` | 岩鯨の心臓の部屋へ（開始のコマンドはない。部屋に入ると始まる） |
 | `tide` `storm` `ember` | 背に乗せ、心臓の部屋へ行き、`skyabyss <巨神>heart start` を流す |
-| `raiju` `smith` | 雷翼・余燼の背に乗せ、中の広間へ行き、`skyabyss raiju start` / `skyabyss smith start` |
+| `raiju` `smith` | 雷翼・余燼の背に乗せ、順路を始めて中ボスの間（`trial/raid/mid`）へ運ぶ。間に着くと戦いが始まる |
 | `warden` | 深淵に入り、`skyabyss abyss warden wake` |
 | `nightmare` | 深淵に入り、`skyabyss_nightmare enter`。段階は記録で決まる（選べない） |
 

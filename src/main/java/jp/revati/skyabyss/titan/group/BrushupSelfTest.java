@@ -3,23 +3,11 @@ package jp.revati.skyabyss.titan.group;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import java.util.function.Function;
 
 import com.mojang.authlib.GameProfile;
 
 import jp.revati.skyabyss.SkyAbyss;
 import jp.revati.skyabyss.titan.TitanTravel;
-import jp.revati.skyabyss.titan.ember.back.EmberBackLayout;
-import jp.revati.skyabyss.titan.ember.back.EmberBackTrials;
-import jp.revati.skyabyss.titan.ember.heart.EmberHeartBattle;
-import jp.revati.skyabyss.titan.ember.smith.AshSmithBattle;
-import jp.revati.skyabyss.titan.storm.back.StormBackLayout;
-import jp.revati.skyabyss.titan.storm.back.StormBackTrials;
-import jp.revati.skyabyss.titan.storm.heart.StormHeartBattle;
-import jp.revati.skyabyss.titan.storm.raiju.RaijuBattle;
-import jp.revati.skyabyss.titan.tide.back.TideBackLayout;
-import jp.revati.skyabyss.titan.tide.back.TideBackTrials;
-import jp.revati.skyabyss.titan.tide.heart.TideHeartBattle;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
@@ -28,8 +16,6 @@ import net.neoforged.neoforge.common.util.FakePlayerFactory;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 
 // brushup_review の直しの自己テスト:
-//  - P1-1 戦いの最中の復活先: 潮殻・雷翼・余燼でも、心臓 (と中ボス) の戦いの最中は、前室の休み場ではなく鼓動の間 (hub) で目覚める。
-//    そのグループが戦っているときだけ・戦いが終われば元に戻る・別のグループの戦いでは動かない
 //  - P1-4 ReentryRules の守りの記録: 退出・サーバー停止・別の次元へ移ったとき捨てる
 public final class BrushupSelfTest {
     private BrushupSelfTest() {
@@ -39,7 +25,6 @@ public final class BrushupSelfTest {
         List<String> f = new ArrayList<>();
         try {
             guardCleanup(server, f);
-            fightRespawn(f);
             titanTargets(server, f);
         } catch (RuntimeException e) {
             SkyAbyss.LOGGER.error("SELFTEST brushup crashed", e);
@@ -133,50 +118,6 @@ public final class BrushupSelfTest {
             slot.lastX = x;
             slot.lastY = y;
             slot.lastZ = z;
-        }
-    }
-
-    // ---------------------------------------------------------------- P1-1
-    private interface Mapper {
-        String of(UUID group, String cp);
-    }
-
-    private static void fightRespawn(List<String> f) {
-        UUID g = UUID.fromString("00000000-0000-0000-0000-0000000000c1");
-        UUID other = UUID.fromString("00000000-0000-0000-0000-0000000000c2");
-        // 戻り先の鼓動の間 (hub) が各背にあること
-        check(f, TideBackLayout.RESTS.stream().anyMatch(r -> r.id().equals("hub")), "the tide back has no hub rest");
-        check(f, StormBackLayout.RESTS.stream().anyMatch(r -> r.id().equals("hub")), "the storm back has no hub rest");
-        check(f, EmberBackLayout.RESTS.stream().anyMatch(r -> r.name().equals("hub")), "the ember back has no hub rest");
-        // 潮殻: 心臓
-        fight(f, "tide heart", TideHeartBattle::room, "heart", g, other, TideBackTrials::respawnCheckpoint, List.of("hub", "g0", "g1", "s0", "f0"));
-        // 雷翼: 心臓と雷獣 (東の端の休み場)
-        fight(f, "storm heart", StormHeartBattle::room, "heart", g, other, StormBackTrials::respawnCheckpoint, List.of("hub", "w0", "w1", "e0", "f0"));
-        fight(f, "raiju", RaijuBattle::room, "e1", g, other, StormBackTrials::respawnCheckpoint, List.of("hub", "w0", "w1", "e0", "f0", "heart"));
-        // 余燼: 心臓と灰の鍛え手 (東の試練の休み場)
-        fight(f, "ember heart", group -> EmberHeartBattle.rooms().of(group), "heart", g, other, EmberBackTrials::respawnCheckpoint,
-                List.of("hub", "throat", "w0", "w1", "s0"));
-        fight(f, "ash smith", group -> AshSmithBattle.rooms().of(group), "e0", g, other, EmberBackTrials::respawnCheckpoint,
-                List.of("hub", "throat", "w0", "w1", "s0", "heart"));
-    }
-
-    private static void fight(List<String> f, String what, Function<UUID, GroupBossRoom> rooms, String cp, UUID group, UUID other, Mapper mapper,
-            List<String> unaffected) {
-        GroupBossRoom room = rooms.apply(group);
-        try {
-            room.testGather(false);
-            check(f, cp.equals(mapper.of(group, cp)), what + ": rest " + cp + " moved without a fight");
-            room.testGather(true);
-            // 順路では広間を封じたので、戦いの最中でもその段の休み場 (前室) で目覚める (32 の 2.4)
-            check(f, cp.equals(mapper.of(group, cp)), what + ": a player who fell in the fight would wake at " + mapper.of(group, cp) + ", not the rest " + cp);
-            check(f, cp.equals(mapper.of(other, cp)), what + ": another group's fight moved this group's rest point");
-            for (String rest : unaffected) {
-                check(f, rest.equals(mapper.of(group, rest)), what + ": the fight moved the unrelated rest " + rest);
-            }
-            room.testGather(false);
-            check(f, cp.equals(mapper.of(group, cp)), what + ": rest " + cp + " stayed moved after the fight");
-        } finally {
-            room.testGather(false);
         }
     }
 }

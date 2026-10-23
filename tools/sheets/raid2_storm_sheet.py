@@ -1,5 +1,5 @@
 # 雷翼のレイドの新しい三つの部屋 (SR4・SR5・SR6) の台紙 (docs/review/raid2_storm/sheet.png)。
-#   python tools/shots/raid2_storm_sheet.py run/shots/raid2_storm/shots/raid2_storm docs/review/raid2_storm
+#   python tools/sheets/raid2_storm_sheet.py run/shots/raid2_storm/shots/raid2_storm docs/review/raid2_storm
 # 撮影は tools/shots/raid2_storm.txt。落ち着いた色の台紙に、部屋ごとの二枚と一行の説明を並べる
 import sys
 from PIL import Image, ImageDraw, ImageFont

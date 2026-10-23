@@ -235,16 +235,8 @@ public final class EmberBackLayout {
         }
     }
 
-    public static final List<Rest> RESTS = java.util.stream.Stream.concat(List.of(
-            new Rest("throat", new BlockPos(0, THROAT_LANDING, -125), 0f),
-            new Rest("hub", new BlockPos(0, FLOOR_HUB, -72), 0f),
-            new Rest("w0", new BlockPos(TUBE_WEST_X, FLOOR_WEST, -6), 0f),
-            new Rest("w1", new BlockPos(TUBE_WEST_X, FLOOR_WEST, 70), 0f),
-            // 前の湖の北の岸 (周回の長い灰の道。版 31)
-            new Rest("wp", new BlockPos(-58, FLOOR_WEST, -95), 0f),
-            new Rest("e0", new BlockPos(TUBE_EAST_X - 5, FLOOR_EAST, 24), 0f),
-            new Rest("s0", new BlockPos(0, FLOOR_SOUTH, 0), 0f),
-            new Rest("heart", new BlockPos(HEART_DX, FLOOR_HEART, -27 + HEART_DZ), 0f)).stream(), java.util.stream.Stream.<Rest>empty()).toList();
+    // 背は外見だけ (体の中は建てない) なので、休み場は心臓の間の前室 (区画の封じた部屋) だけ
+    public static final List<Rest> RESTS = List.of(new Rest("heart", new BlockPos(HEART_DX, FLOOR_HEART, -27 + HEART_DZ), 0f));
 
     public static Rest rest(String name) {
         for (Rest r : RESTS) {
@@ -260,30 +252,10 @@ public final class EmberBackLayout {
     public static List<Box> reserved(String room) {
         List<Box> out = new ArrayList<>();
         switch (room) {
-            case "west" -> {
-                out.add(new Box(-46, FLOOR_WEST, -14, -40, FLOOR_WEST + 6, -12));
-                out.add(rest("w0").area());
-                // 中ノ岸の休み場
-                out.add(rest("w1").area());
-                // 奥の岸 (熾り石・光る床・碑文。床は FLOOR_WEST。第二の湖はこの岸の北の縁 z 104 まで)
-                out.add(new Box(-48, FLOOR_WEST, 105, -38, FLOOR_WEST + 6, 111));
-            }
-            case "east" -> {
-                out.add(new Box(41, FLOOR_EAST, -14, 47, FLOOR_EAST + 6, -12));
-                out.add(rest("e0").area());
-                // 鍛え手の扉の前 (扉そのものは C2 が SMITH_DOOR に置く)
-                out.add(new Box(43, FLOOR_EAST, 55, 45, FLOOR_EAST + 4, 56));
-            }
             case "smith" -> {
                 out.add(new Box(43, FLOOR_EAST, 60, 45, FLOOR_EAST + 4, 61));
                 // 奥 (東の熾り石・光る床・碑文)
                 out.add(new Box(39, FLOOR_EAST, 80, 49, FLOOR_EAST + 4, 86));
-            }
-            case "south" -> {
-                out.add(new Box(-3, FLOOR_SOUTH, -8, 3, FLOOR_SOUTH + 6, -6));
-                out.add(rest("s0").area());
-                // 谷の奥 (南の熾り石・光る床・碑文。火床は C3 がこれより北に置く)
-                out.add(new Box(-5, FLOOR_SOUTH, 56, 5, FLOOR_SOUTH + 5, 65));
             }
             case "heart" -> out.add(new Box(-1 + HEART_DX, FLOOR_HEART, -21 + HEART_DZ, 1 + HEART_DX, FLOOR_HEART + 4, -20 + HEART_DZ));
             default -> {

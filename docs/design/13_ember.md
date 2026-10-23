@@ -443,11 +443,11 @@
 | ファイル | 中身 |
 |---|---|
 | `AshSmith` | 鍛え手本体（`EmberMob` の型）。技 5 つ、背の弱み、湯気、遅れて起きる効果 |
-| `AshSmithArena` | 鍛え手の間の中身（区画の中ボスの間 ERM に建てる）。入口の封じ・開け、炉の扉 |
-| `AshSmithBattle` | `GroupBossRooms` の戦い（グループごと）。集合 5 秒 → 入口がそのグループに閉じる → 奥に鍛え手（そのグループのもの） → 放棄 3 秒。撃破でそのグループの段 4 を越えた記録を立て、報酬 |
+| `AshSmithArena` | 鍛え手の間の中身（区画の中ボスの間 ERM に、ずらして建てる）。槽・灰溜まり・柱・炉の扉 |
+| `trial/raid/mid/EmberMidRoom` | 中ボスの間 ERM。部屋を建て、鍛え手を出し（そのグループのもの）、倒すと越える。報酬は `AshSmithLoot` |
 | `AshSmithLoot` | 9.3 の報酬の表と成長の経験値。大鎚 5% は `EmberGearLoot.rollSmith`（特性を付け、図鑑に記す） |
-| `EmberSmithSetup` | エンティティ `ash_smith`、音 7 つ、試練のリセットの受け口 `onReset("smith", …)`、扉が開いたときの受け口への登録 |
-| `AshSmithCommands`、`AshSmithSelfTest` | コマンド（14）、自己テスト |
+| `EmberSmithSetup` | エンティティ `ash_smith`、音 7 つ |
+| `AshSmithSelfTest` | 自己テスト（技・数値・報酬。部屋の流れは `raid mid`） |
 | `client/AshSmithClient` | 描画（受け口に大鎚・火箸、発光の層）と 10 段のボスバー（橙） |
 
 - 段 3 を越えたグループが間の中へ運ばれると、戦いの受け口が呼ばれる。部屋が建っていなければ建て、5 秒の集合のあと鍛え手が現れる（`GroupBossRooms` の見回り）。戦うのは間へ運ばれたグループで、そのグループがこの周に鍛え手を倒していれば始まらない。鍛え手と呼んだ灰被りはそのグループのもの（ほかのグループには見えず、狙わない）。ボスバーもそのグループにだけ出す。
@@ -461,7 +461,7 @@
 | `geo/gear/smith_hammer.*`、`smith_tongs.*` | 大鎚（27 箱）・火箸（18 箱）は別のモデル。`GearLayer` で `socket_main`・`socket_off` に付く。大鎚の静止の回転は GeckoLib の符号で (45, 0, 0)（意図は前へ 45 度。頭が床に載ると確認済み） |
 | `textures/gui/boss/ash_smith_{frame,notches,icon}.png` | 10 段のバー（橙の帯、鋲の縁、鉄の面の顔の印） |
 
-- 生成は `tools/install/install_ember_smith.py`（`--option b|c` で案 B・C に差し替え。選ばれなかった案は `docs/review/ember_roughs/ash_smith/`）。台本 `tools/shots/ember_smith.txt`。
+- 生成は `tools/install/install_ember_smith.py`（`--option b|c` で案 B・C に差し替え。選ばれなかった案は `docs/review/ember_roughs/ash_smith/`）。台本は中ボスの間の `tools/shots/raid_build_ember.txt`（ERM）。
 - **部屋の明るさで色が沈まない描き方**（08 の 5.4 節）: 基のテクスチャの暗い画素を持ち上げた（`lift`: c' = 255 × (c/255)^0.78 × 1.08 + 5）。光る画素は `AshSmithClient.GlowLayer`（`RenderType.eyes` で glowmask を足す。`AutoGlowingGeoLayer` は使わない）。ブロックの光は最低 13 で描く。
 - 鞴が白く光る間（吐いたあとの 3 秒）と怒りは `_glowmask_white` に替える。怒ったら前掛けの骨 `apron` を隠す。
 - アニメ: `idle`（鞴が息をする）`walk` `slam`（溜め 1.0 秒 → 1.05 秒で打つ）`slam_cold` `breath`（吸いきりが 1.45 秒）`quench` `sparks`（0.82 秒で叩く）`rage` `hurt` `death`。鞴は `scale` で膨らむ。時間はサーバーの時間と合わせてある。
@@ -1031,7 +1031,6 @@
 | `titan reset ember` / `titan rebuild ember` | 試練だけ戻す / 体を建て直す |
 | `/skyabyss emberback heat <0-100>` / `status` | 自分の熱を決める / 背中の状態 |
 | `/skyabyss embermob spawn <thrall\|moth\|roller\|mix> [数]` / `ignite` / `clear` | 敵を湧かせる（自分のまわり 4〜7 ブロック。保存されない。moth は数を省くと 3〜6 体、mix は灰被り 1・蛾の群れ・燠虫 1）/ まわり 16 ブロックの灰被りの殻を割る / まわり 64 ブロックの余燼の敵を消す |
-| `/skyabyss smith go\|start\|win\|reset\|rebuild\|action <slam\|breath\|quench\|sparks\|rage>\|status` | 鍛え手の確かめ。`go` は鍛え手の間へ（建っていなければ建てる）。`start` は集合を待たず部屋の中の人で始める。`win` は倒したことにする（報酬まで通る） |
 | `/skyabyss emberheart go\|start\|phase <1-3>\|action <技>\|sink <0-5>\|win\|reset\|rebuild\|status\|shot <人> <名前>` | 心臓の確かめ（`action` は breath・pulse・orb・floor・gale・pellet・chill・embers・fading・veil・roar）。`go` は前室へ |
 | `/skyabyss dev emberforce <対象> <技> [人数]` | 開発用（本番の jar には入らない）。心臓（BREATH・PULSE・ORB・FLOOR・GALE・PELLET・EMBERS・FADING・VEIL・ROAR）と鍛え手（SLAM・COLD_SLAM・BREATH・SPARKS）の技を、部屋の外（平らな世界）でも一つ出す。人数は部屋にいる人数を多いことにする（18 章） |
 | `/titanmemory ember` | 初回の選択（誰でも） |
@@ -1160,7 +1159,7 @@
 
 - 四章の地上の場所・小さなダンジョン「消えた炉の坑」・敵 4 種・支度の段 2 本（火除けの薬・炉跡）は 34 の 4.5.1 と 21 の 6.1。コードは `story/ch4/`。上の小要素 3 つ（炉跡・観測点・岩棚）はそのまま。
 - メイン「灰の昇る山」は 噂 → 見る → **乗る**（伝承 `chapter1/ember_ruins`。心臓を先に止めれば飛ばす）→ 心臓 → 鍵。
-- **灰の鍛え手の一言**: 鍛え手の間で鍛え手が現れたとき（`AshSmithBattle` が湧かせた瞬間）、まわりの人に一度だけ「……返しに来たか」（伝承 `ch4/return_the_beat`）。鍛え手のコードは触らず、`story/ch4/Ch4Ground.onSmithJoin` が現れたことを聞いて出す。
+- **灰の鍛え手の一言**: 中ボスの間で鍛え手が現れたとき（`EmberMidRoom` が湧かせた瞬間）、まわりの人に一度だけ「……返しに来たか」（伝承 `ch4/return_the_beat`）。鍛え手のコードは触らず、`story/ch4/Ch4Ground.onSmithJoin` が現れたことを聞いて出す。
 - メイン「天の鍵」は語り部とイサナの二人の答え（語り部「返せ」、イサナ「眠らせてよかったのか」）を聞いて終わる。その前に語り部が数え歌のよっつめを口にする。
 
 ### 17.6 余韻と巨神編の終わり
@@ -1294,7 +1293,7 @@
 - **入口の場面**（碑の言葉と同じ話）: ER1 落とした熾と火ばさみと灰／ER2 割れた鋳型と金のかけら／ER3 消えかけの火鉢／ER4 切れた鎖と落ちた板／ER5 鞴と樽／ER6 槌の掛け台と打ちかけの刃。
 - **目印**: ER1 噴き口の後ろの北の壁に大きな炉の口（奥が熾の色）、冷えた炉の煙突の上に届け先の黄の灯り（黄土のカエルの光）と煤の覆い、入口から炉への金の筋／ER2 壁画の上の梁と金の鋲、南東の入口の脇に鞴の見渡し台（二段。西から階段）／ER3 大炉の上に天井から下りる煙突の覆い、床に半径 5 と 9.5 の輪、敵の湧く八つの所の壁に暗い灰の口、火鉢の上の吊り鎖／ER4 奥の戸の後ろに大きな炉の口、熾の海から立つ岩柱、南の壁の高い所の遠景の窓／ER5 七つの炉（東西の壁ぎわに三つずつと入口の戸の上に一つ。台・大釜・間・覆い）が、そろった針の数（`counter`）に合わせて熾で満ち、越えると全部満ちる。弁から圧力計への床の配管。弁の銅の輪は蝋引き（錆びない）／ER6 外周の金床の環（八つ。南北・東西の軸は切れ目）の上のランタンが、弟子を一人倒すごとに二つ消える。壁際の炉と砥石の上に槌の掛け台／ERM 円の縁の玄武岩の付け柱、炉の扉の煉瓦の枠と金の要石、真ん中の上の吊るし輪（鉄格子の輪を八本の鎖で）、四隅の壁を帯の色に。床の模様・槽・灰溜まり・柱はそのまま。
 - **負荷**: 部屋ごとに数えてログへ出す（`Ember raid room <id> decor: …`）。上限は飾り 8 千ブロック・明るさ 12 以上 40・ブロックエンティティ 24・飾りのエンティティ 16（39 の 6 章）。いまは飾り 2 千〜3.5 千、明るい灯り 30 以下。
-- **撮影**: `/skyemberraid room <ER1..ER6|ERM>`・`at <dx> <dy> <dz> <yaw> <pitch>`・`end`（`EmberRaidCommands`。順路を通さずに区画 1 の原点に建てる。動かさない）。台本は `python -I tools/gen/shots/gen_raid_build_ember_shots.py tools/shots/raid_build_ember.txt` で作り、`./gradlew runShots -Pscript=tools/shots/raid_build_ember.txt -PshotsName=after`、並べるのは `python -I tools/shots/raid_build_ember_sheet.py <前> <出力> <後>`。絵は `docs/review/raid_build_ember/`。
+- **撮影**: `/skyemberraid room <ER1..ER6|ERM>`・`at <dx> <dy> <dz> <yaw> <pitch>`・`end`（`EmberRaidCommands`。順路を通さずに区画 1 の原点に建てる。動かさない）。台本は `python -I tools/gen/shots/gen_raid_build_ember_shots.py tools/shots/raid_build_ember.txt` で作り、`./gradlew runShots -Pscript=tools/shots/raid_build_ember.txt -PshotsName=after`、並べるのは `python -I tools/sheets/raid_build_ember_sheet.py <前> <出力> <後>`。絵は `docs/review/raid_build_ember/`。
 
 ### 19.4 自己テスト
 `EmberRaid2SelfTest`（同じ `ember raid` の中）: 枠ごとの引きが二つのどちらにもなる・文が日英にある・ER4（橋が赤い予告のあと順に落ちる・落ちた人が戻り傷なし・吊り直し・一人で渡りきる・二人は全員が渡るまで越えない・全滅で元に戻る）・ER5（毎回違う始まり・四十の種で必ず解ける/最初はそろっていない・弁で針と隣が動く・左で戻る・解いて越える・リセット）・ER6（一人ずつ出る・後ほど強い・弟子ごとに技が一つずつ増える・予告のあと傷・倒して四人で越える・灯・リセット・人数で体力）。

@@ -1,7 +1,7 @@
 # 心臓の技の見た目 (AttackLook / client AttackFx) の撮影台本を作る。
-#   python tools/shots/heart_fx_gen.py > tools/shots/heart_fx.txt
+#   python tools/gen/shots/gen_heart_fx_shots.py > tools/shots/heart_fx.txt
 #   ./gradlew runShots -Pscript=tools/shots/heart_fx.txt -PshotsName=heart_fx   (tools/dev/mc_run.sh 経由で)
-#   python tools/shots/heart_fx_sheet.py run/shots/heart_fx/shots/heart_fx docs/review/heart_fx
+#   python tools/sheets/heart_fx_sheet.py run/shots/heart_fx/shots/heart_fx docs/review/heart_fx
 # 技ごとに 4 枚 (溜め → 当たり → 残り を 8 tick おき)。台は telegraph_red.txt と同じ平らな床と見下ろしのカメラ
 HEARTS = [
     ("whale", "skyabyss:stone_whale_heart", "-59", "force",
@@ -14,7 +14,7 @@ HEARTS = [
      ["BREATH", "PULSE", "ORB", "GALE", "PELLET", "FADING", "FORGE", "EMBERS"]),
 ]
 import sys
-# 続きから撮る: python heart_fx_gen.py storm:CHARGE  (その心臓のその技から。前の心臓は飛ばす)
+# 続きから撮る: python tools/gen/shots/gen_heart_fx_shots.py storm:CHARGE  (その心臓のその技から。前の心臓は飛ばす)
 START = sys.argv[1].split(":") if len(sys.argv) > 1 else None
 if START:
     _keys = [h[0] for h in HEARTS]
@@ -26,7 +26,7 @@ else:
 CAM = "camera minecraft:overworld 0.5 -43 14.5 180 38"
 out = []
 w = out.append
-w("# 心臓の技の見た目 (2026-10-23): 技ごとに 溜め → 当たり → 残り を 4 枚。heart_fx_gen.py が書く")
+w("# 心臓の技の見た目 (2026-10-23): 技ごとに 溜め → 当たり → 残り を 4 枚。tools/gen/shots/gen_heart_fx_shots.py が書く")
 w("world shots flat")
 w("size 960 540")
 w("timeout 7200")

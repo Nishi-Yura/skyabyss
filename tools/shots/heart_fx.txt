@@ -1,4 +1,4 @@
-# 心臓の技の見た目 (2026-10-23): 技ごとに 溜め → 当たり → 残り を 4 枚。heart_fx_gen.py が書く
+# 心臓の技の見た目 (2026-10-23): 技ごとに 溜め → 当たり → 残り を 4 枚。tools/gen/shots/gen_heart_fx_shots.py が書く
 world shots flat
 size 960 540
 timeout 7200

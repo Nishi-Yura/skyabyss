@@ -10,9 +10,7 @@ import javax.annotation.Nullable;
 
 import jp.revati.skyabyss.SkyAbyss;
 import jp.revati.skyabyss.titan.TitanTravel;
-import jp.revati.skyabyss.titan.dungeon.TitanBackLayout;
 import jp.revati.skyabyss.titan.dungeon.TitanBackTrials;
-import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceKey;
@@ -28,8 +26,6 @@ import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.phys.AABB;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -38,7 +34,6 @@ import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
 import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.server.ServerStoppedEvent;
-import net.neoforged.neoforge.event.tick.LevelTickEvent;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 
 // 経験値の入り口: 敵の撃破、ボス (参加者ごと)、試練の踏破、新しい場所。
@@ -301,7 +296,7 @@ public final class GrowthRewards {
         if (level.dimension() == TitanTravel.TITAN_BACK) {
             CompoundTag persisted = player.getPersistentData().getCompound(Player.PERSISTED_NBT_TAG);
             String cp = persisted.getString("skyabyss_checkpoint");
-            if (!cp.isEmpty() && !"hub".equals(cp) && Growth.discover(player, "rest:stone_whale/" + cp)) {
+            if (!cp.isEmpty() && Growth.discover(player, "rest:stone_whale/" + cp)) {
                 Growth.addXp(player, REST_POINT_XP, "checkpoint.skyabyss." + cp);
             }
         }
