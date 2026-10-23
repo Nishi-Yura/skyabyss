@@ -150,6 +150,8 @@ public final class TitanShrine {
         int cx = center.getX();
         int cz = center.getZ();
         int top = center.getY() - 1;
+        ShrineArchitect.Plan plan = ShrineArchitect.plan(level, center);
+        ShrineArchitect.prepare(level, center, plan);
         for (int dx = -PEDESTAL; dx <= PEDESTAL; dx++) {
             for (int dz = -PEDESTAL; dz <= PEDESTAL; dz++) {
                 int x = cx + dx;
@@ -180,12 +182,14 @@ public final class TitanShrine {
         }
         level.setBlock(new BlockPos(cx + PEDESTAL, top + 1, cz), ModBlocks.RESONANCE_FORGE.get().defaultBlockState()
                 .setValue(jp.revati.skyabyss.forge.ResonanceForgeBlock.FACING, Direction.WEST), 3);
+        int blocks = ShrineArchitect.finish(level, center, titan, plan);
+        SkyAbyss.LOGGER.info("Shrine of the {} architecture: {} blocks, path to z+{}", titan, blocks, plan.end());
     }
 
     // 台座の守る箱 (壊せない)
     static AABB guard(BlockPos center) {
-        return new AABB(center.getX() - PEDESTAL, center.getY() - 2, center.getZ() - PEDESTAL, center.getX() + PEDESTAL + 1, center.getY() + 5,
-                center.getZ() + PEDESTAL + 1);
+        return new AABB(center.getX() - ShrineArchitect.TERRACE, center.getY() - 2, center.getZ() - ShrineArchitect.TERRACE, center.getX() + ShrineArchitect.TERRACE + 1,
+                center.getY() + 24, center.getZ() + ShrineArchitect.TERRACE + 1);
     }
 
     // 輪の中か
