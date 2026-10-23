@@ -305,7 +305,7 @@ public final class SkillActions {
             }
             if (hit(player, e, amount, Skill.TITAN_CLEAVE)) {
                 // 当たった印 (大きな相手には多め)
-                particle(level, Skills.RUNE_SPARK.get(), e.position().add(0, e.getBbHeight() * 0.6, 0), large ? 14 : 5, large ? 0.4 : 0.25, 0.06);
+                particle(level, Skills.RUNE_SPARK.get(), e.position().add(0, e.getBbHeight() * 0.6, 0), large ? 3 : 1, large ? 0.4 : 0.25, 0.06);
                 bigHit |= large;
             }
         }
@@ -320,15 +320,8 @@ public final class SkillActions {
                     level.sendParticles(Skills.RUNE_SPARK.get(), p.x, p.y + 0.2, p.z, 1, 0.05, 0.05, 0.05, 0.0);
                 }
             }
-        } else {
-            // 弧を描く光: 右上から左下へ、半径 2.6 の扇に沿って
-            double span = Math.min(halfAngle, 90);
-            for (int i = 0; i <= 24; i++) {
-                double a = Math.toRadians(-span + i * span * 2 / 24.0);
-                Vec3 p = origin.add(dir.scale(Math.cos(a) * 2.6)).add(side.scale(Math.sin(a) * 2.6)).add(0, 1.8 - i * 0.045, 0);
-                level.sendParticles(Skills.RUNE_SPARK.get(), p.x, p.y, p.z, 1, 0.05, 0.05, 0.05, 0.0);
-            }
         }
+        // 弧を描く光はクライアントの SkillFx が描く
         if (rune == 4) {
             abyssCleaveEcho(player, level, origin, dir, base);
         }
@@ -403,9 +396,6 @@ public final class SkillActions {
         SkillData d = SkillManager.get(player);
         d.tauntUntil = player.level().getGameTime() + ticks;
         d.tauntRune = rune;
-        ServerLevel level = player.serverLevel();
-        ring(level, Skills.RUNE_SPARK.get(), player.position(), radius * 0.5, 20, 0.3);
-        ring(level, Skills.RUNE_SPARK.get(), player.position(), radius, 32, 0.3);
         player.swing(InteractionHand.MAIN_HAND, true);
         sound(player, Skills.SOUND_SWEEP.get(), 1.0f, 0.55f);
         return null;
@@ -476,12 +466,6 @@ public final class SkillActions {
         Vec3 from = player.position();
         if (reached.distanceToSqr(from) > 0.01) {
             player.connection.teleport(reached.x, reached.y, reached.z, yaw, player.getXRot());
-            // 通った跡に光を残す
-            int steps = (int) Math.ceil(reached.distanceTo(from) / 0.6);
-            for (int i = 0; i <= steps; i++) {
-                Vec3 p = from.lerp(reached, i / (double) Math.max(1, steps)).add(0, 0.9, 0);
-                level.sendParticles(Skills.RUNE_SPARK.get(), p.x, p.y, p.z, 1, 0.15, 0.3, 0.15, 0.0);
-            }
         }
         if (rune == 3 || rune == 4) {
             // 突き通し: 通り道の全員に ×0.6 (逸品の突き通し・骨は ×1.0)
@@ -566,7 +550,6 @@ public final class SkillActions {
     }
 
     private static void sweepOnce(ServerPlayer player, float damage, int rune) {
-        ServerLevel level = player.serverLevel();
         double radius = SkillRules.SWEEP_RADIUS + (WeaponType.has(player, WeaponType.LONG) ? 0.5 : 0);
         for (LivingEntity e : foesAround(player, radius + 1, 1.0, 2.0)) {
             double dx = e.getX() - player.getX();
@@ -592,11 +575,6 @@ public final class SkillActions {
                     e.knockback(push(player, rune == 1 ? SkillRules.SWEEP_PUSH * 2 : SkillRules.SWEEP_PUSH), -dx, -dz);
                 }
             }
-        }
-        // 足もとに輪を二重に
-        for (int r = 0; r < 2; r++) {
-            double rr = (r == 0 ? 1.6 : 3.2) * (radius / SkillRules.SWEEP_RADIUS);
-            ring(level, Skills.RUNE_SPARK.get(), player.position(), rr, r == 0 ? 12 : 22, 0.9 + r * 0.2);
         }
     }
 
@@ -642,7 +620,6 @@ public final class SkillActions {
         } else if (rune == 3) {
             SkillEffects.zone(SkillEffects.ZoneKind.WHIRL, player, origin, SkillRules.WHIRL_RADIUS, SkillRules.WHIRL_TICKS, rank);
         }
-        level.sendParticles(Skills.SKY_MOTE.get(), player.getX(), player.getY() + 0.3, player.getZ(), 12, 0.4, 0.1, 0.4, 0.02);
         sound(player, Skills.SOUND_BACKSTEP.get(), 0.8f, 1.0f);
         return null;
     }
@@ -722,14 +699,9 @@ public final class SkillActions {
     }
 
     private static void slash(ServerLevel level, ServerPlayer player, LivingEntity foe, boolean back) {
+        // 斬りの筋はクライアントの SkillFx が描く。ここは当たりの小さな火花だけ (背後なら印の色)
         Vec3 c = foe.position().add(0, foe.getBbHeight() * 0.6, 0);
-        for (int i = 0; i < 8; i++) {
-            double t = (i - 3.5) * 0.18;
-            level.sendParticles(Skills.SKY_MOTE.get(), c.x + t, c.y + t * 0.8, c.z - t * 0.5, 1, 0.02, 0.02, 0.02, 0.0);
-        }
-        if (back) {
-            level.sendParticles(Skills.RUNE_SPARK.get(), c.x, c.y, c.z, 4, 0.25, 0.25, 0.25, 0.05);
-        }
+        level.sendParticles(back ? Skills.RUNE_SPARK.get() : Skills.SKY_MOTE.get(), c.x, c.y, c.z, 1, 0.1, 0.1, 0.1, 0.02);
     }
 
     // ---------------------------------------------------------------- 潮歌い
@@ -745,8 +717,6 @@ public final class SkillActions {
         targets.addAll(SkillEffects.allies(player, radius));
         for (ServerPlayer t : targets) {
             SkillEffects.absorb(t, amount, ticks, rune == 3);
-            player.serverLevel().sendParticles(ParticleTypes.NOTE, t.getX(), t.getY() + 2.1, t.getZ(), 3, 0.3, 0.15, 0.3, 1.0);
-            player.serverLevel().sendParticles(Skills.SKY_MOTE.get(), t.getX(), t.getY() + 1.0, t.getZ(), 8, 0.4, 0.6, 0.4, 0.02);
         }
         if (rune == 4) {
             abyssSunkSong(player, targets, ticks);
@@ -832,7 +802,7 @@ public final class SkillActions {
                 e.hurtMarked = true;
             }
             SkillEffects.slow(e, 0.30, slowTicks);
-            level.sendParticles(Skills.SKY_MOTE.get(), e.getX(), e.getY() + e.getBbHeight() * 0.5, e.getZ(), 6, 0.3, 0.3, 0.3, 0.02);
+            level.sendParticles(Skills.SKY_MOTE.get(), e.getX(), e.getY() + e.getBbHeight() * 0.5, e.getZ(), 1, 0.15, 0.15, 0.15, 0.02);
         }
         if (rune == 2) {
             SkillEffects.zone(SkillEffects.ZoneKind.WHIRL, player, origin.add(dir.scale(1.5)), SkillRules.WHIRL_RADIUS, SkillRules.WHIRL_TICKS, rank);
@@ -846,12 +816,6 @@ public final class SkillActions {
                 }
             }
             tieStep(player, level, tied, tied.position(), SkillRules.HARPOON_TICKS / 10);
-        }
-        // 引く波の筋
-        for (int i = 0; i < 18; i++) {
-            double t = range - i * range / 18.0;
-            Vec3 p = origin.add(dir.scale(t));
-            level.sendParticles(Skills.SKY_MOTE.get(), p.x, p.y + 0.4, p.z, 1, 0.5, 0.1, 0.5, 0.0);
         }
         player.swing(InteractionHand.MAIN_HAND, true);
         sound(player, Skills.SOUND_BACKSTEP.get(), 1.0f, 0.6f);
@@ -892,12 +856,10 @@ public final class SkillActions {
         SkillData self = SkillManager.get(player);
         self.regenBoostUntil = until;
         self.regenBoost = SkillRules.CYCLE_SONG_SELF * power;
-        player.serverLevel().sendParticles(ParticleTypes.NOTE, player.getX(), player.getY() + 2.1, player.getZ(), 4, 0.3, 0.15, 0.3, 1.0);
         for (ServerPlayer ally : SkillEffects.allies(player, SkillRules.CYCLE_SONG_RADIUS)) {
             SkillData d = SkillManager.get(ally);
             d.regenBoostUntil = until;
             d.regenBoost = SkillRules.CYCLE_SONG_ALLY * power;
-            player.serverLevel().sendParticles(ParticleTypes.NOTE, ally.getX(), ally.getY() + 2.1, ally.getZ(), 3, 0.3, 0.15, 0.3, 1.0);
         }
         player.swing(InteractionHand.MAIN_HAND, true);
         sound(player, Skills.SOUND_MARK.get(), 0.9f, 0.6f);
@@ -917,7 +879,6 @@ public final class SkillActions {
             target = p;
         }
         long now = player.level().getGameTime();
-        ServerLevel level = player.serverLevel();
         List<ServerPlayer> targets = new ArrayList<>();
         targets.add(target);
         if (rune(player, Skill.TEMPER) == 4) {
@@ -942,8 +903,6 @@ public final class SkillActions {
             SkillData d = SkillManager.get(t);
             d.temperUntil = now + SkillRules.TEMPER_TICKS;
             d.temperMult = SkillRules.temperMultiplier(rank);
-            level.sendParticles(ParticleTypes.FLAME, t.getX(), t.getY() + 1.1, t.getZ(), 18, 0.35, 0.5, 0.35, 0.02);
-            level.sendParticles(ParticleTypes.LAVA, t.getX(), t.getY() + 1.2, t.getZ(), 4, 0.3, 0.3, 0.3, 0.0);
         }
         player.swing(InteractionHand.MAIN_HAND, true);
         sound(player, Skills.SOUND_RIPOSTE.get(), 0.9f, 0.6f);
@@ -1004,14 +963,6 @@ public final class SkillActions {
                 e.setRemainingFireTicks(Math.max(e.getRemainingFireTicks(), 40));
             }
         }
-        if (pillar) {
-            for (int k = 0; k < 14; k++) {
-                level.sendParticles(ParticleTypes.FLAME, center.x, center.y + k * 0.3, center.z, 3, 0.2, 0.05, 0.2, 0.02);
-            }
-        } else {
-            ring(level, ParticleTypes.FLAME, center, radius, 26, 0.2);
-            level.sendParticles(ParticleTypes.LAVA, center.x, center.y + 0.3, center.z, 8, radius * 0.4, 0.1, radius * 0.4, 0.0);
-        }
     }
 
     // 灰散らし: 周りの敵に「灰かぶり」(攻撃が弱まり、飛び道具が遅くなる)
@@ -1028,9 +979,8 @@ public final class SkillActions {
         ServerLevel level = player.serverLevel();
         for (LivingEntity e : foes) {
             SkillEffects.ashFall(e, SkillRules.ashScatterTicks(rank));
-            level.sendParticles(ParticleTypes.ASH, e.getX(), e.getY() + e.getBbHeight() * 0.6, e.getZ(), 14, 0.35, 0.4, 0.35, 0.02);
+            level.sendParticles(ParticleTypes.ASH, e.getX(), e.getY() + e.getBbHeight() * 0.6, e.getZ(), 2, 0.2, 0.2, 0.2, 0.02);
         }
-        ring(level, ParticleTypes.ASH, player.position(), SkillRules.ASH_SCATTER_RADIUS, 36, 0.8);
         if (rune(player, Skill.ASH_SCATTER) == 4) {
             abyssCreepingAsh(player, level, rank);
         }
@@ -1124,7 +1074,6 @@ public final class SkillActions {
             ammo.shrink(net.minecraft.world.item.enchantment.EnchantmentHelper.processAmmoUse(level, bow, ammo, 1));
         }
         player.swing(player.getMainHandItem() == bow ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND, true);
-        particle(level, Skills.SKY_MOTE.get(), player.getEyePosition().add(player.getLookAngle().scale(1.2)), 8, 0.15, 0.05);
         sound(player, Skills.SOUND_PIERCE.get(), 1.0f, rune == 2 ? 0.7f : 1.0f);
         return null;
     }
@@ -1135,8 +1084,6 @@ public final class SkillActions {
             return "message.skyabyss.skill.need_ground";
         }
         SkillEffects.zone(SkillEffects.ZoneKind.TRAP, player, player.position(), SkillRules.TRAP_TRIGGER, SkillRules.TRAP_LIFETIME, rank);
-        ServerLevel level = player.serverLevel();
-        ring(level, Skills.RUNE_SPARK.get(), player.position(), 1.0, 14, 0.15);
         player.swing(InteractionHand.MAIN_HAND, true);
         sound(player, Skills.SOUND_BACKSTEP.get(), 0.7f, 0.5f);
         return null;
@@ -1151,7 +1098,7 @@ public final class SkillActions {
             SkillEffects.bind(victim, SkillRules.trapBindTicks(rank));
         }
         hit(owner, victim, amount, Skill.BONE_TRAP);
-        particle(level, Skills.RUNE_SPARK.get(), at.add(0, 0.5, 0), 22, 0.5, 0.08);
+        particle(level, Skills.RUNE_SPARK.get(), at.add(0, 0.5, 0), 3, 0.3, 0.05);
         level.playSound(null, at.x, at.y, at.z, Skills.SOUND_MARK.get(), SoundSource.PLAYERS, 0.8f, 0.6f);
     }
 
@@ -1182,12 +1129,6 @@ public final class SkillActions {
         int agility = Growth.get(player).stat(GrowthRules.Stat.AGILITY);
         double damage = SkillRules.rainDamage(rank) * (1 + GrowthRules.projectileMultiplier(agility));
         RAINS.add(new Rain(level, center, player.getUUID(), damage));
-        // 降る範囲を地面に輪で示す (どこに降るか分かるように)
-        for (int i = 0; i < 28; i++) {
-            double a = Math.PI * 2 * i / 28;
-            level.sendParticles(Skills.SKY_MOTE.get(), center.x + Math.cos(a) * SkillRules.RAIN_RADIUS, center.y + 0.15,
-                    center.z + Math.sin(a) * SkillRules.RAIN_RADIUS, 1, 0.02, 0.02, 0.02, 0.0);
-        }
         player.swing(InteractionHand.MAIN_HAND, true);
         level.playSound(null, center.x, center.y, center.z, Skills.SOUND_RAIN.get(), SoundSource.PLAYERS, 1.2f, 1.0f);
         sound(player, Skills.SOUND_PIERCE.get(), 0.5f, 1.4f);
@@ -1277,23 +1218,11 @@ public final class SkillActions {
         for (Iterator<Rain> it = RAINS.iterator(); it.hasNext();) {
             Rain r = it.next();
             r.ticks++;
-            // 降ってくる光の矢 (毎 tick 3 本。1 本は縦に並んだ 3 粒で、筋に見える)
-            for (int i = 0; i < 3; i++) {
-                double a = r.level.random.nextDouble() * Math.PI * 2;
-                double d = Math.sqrt(r.level.random.nextDouble()) * SkillRules.RAIN_RADIUS;
-                double top = r.center.y + 5 + r.level.random.nextDouble() * 2;
-                for (int k = 0; k < 3; k++) {
-                    r.level.sendParticles(Skills.SKY_MOTE.get(), r.center.x + Math.cos(a) * d, top + k * 0.45,
-                            r.center.z + Math.sin(a) * d, 0, 0, -1.4, 0, 1.0);
-                }
-            }
+            // 降る矢・輪・地面ではじける光はクライアントの SkillFx が描く
             if (r.ticks % SkillRules.RAIN_INTERVAL != 0) {
                 continue;
             }
             r.pulses++;
-            // 一度降るたびに、地面で光がはじける
-            r.level.sendParticles(Skills.SKY_MOTE.get(), r.center.x, r.center.y + 0.2, r.center.z, 10,
-                    SkillRules.RAIN_RADIUS * 0.45, 0.05, SkillRules.RAIN_RADIUS * 0.45, 0.03);
             ServerPlayer caster = server.getPlayerList().getPlayer(r.caster);
             if (caster != null && caster.level() == r.level && caster.isAlive()) {
                 AABB box = new AABB(r.center, r.center).inflate(SkillRules.RAIN_RADIUS, 1, SkillRules.RAIN_RADIUS).expandTowards(0, 4, 0);
