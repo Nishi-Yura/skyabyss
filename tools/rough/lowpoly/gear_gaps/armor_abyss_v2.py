@@ -178,11 +178,11 @@ def a_chest():
         cx = s * 6.0
         g = dloft(ab, "cloth", [sring(y, hx, zf, zb, n=N, p=3.0, cx=cx) for y, hx, zf, zb in
                                 [(24.0, 2.75, -2.8, 2.8), (18.0, 2.5, -2.65, 2.65), (14.6, 2.55, -2.65, 2.65), (12.0, 2.6, -2.7, 2.7)]])
-        # 肩の丸い錨鉄 (襟板の続き)
-        g += dloft(ab, "plate", [sring(y, hx, -hz, hz, n=N, p=2.4, cx=cx + s * dx) for y, hx, hz, dx in
-                                 [(21.4, 3.3, 3.2, 0.2), (23.2, 3.4, 3.3, 0.1), (24.6, 2.8, 2.8, -0.2), (25.2, 1.6, 1.6, -0.5)]],
-                   caps=(False, "plate"), mats=["bevel", "plate", "plate"])
-        g += dloft(ab, "trim", [sring(21.3, 3.42, -3.32, 3.32, n=N, p=2.4, cx=cx + s * 0.2), sring(21.9, 3.42, -3.32, 3.32, n=N, p=2.4, cx=cx + s * 0.2)])
+        # 肩の丸い錨鉄 (襟板の続き) と肩の縁は胴の骨に付ける (腕と一緒に回らない)。上の縁は低くして、頭を下へ向けても兜に入らない
+        out[B] += dloft(B, "plate", [sring(y, hx, -hz, hz, n=N, p=2.4, cx=s * 6.0 + s * dx) for y, hx, hz, dx in
+                                     [(21.4, 3.3, 3.2, 0.2), (23.0, 3.4, 3.3, 0.1), (23.6, 2.6, 2.6, -0.2)]],
+                        caps=(False, "plate"), mats=["bevel", "plate", "plate"])
+        out[B] += dloft(B, "trim", [sring(21.3, 3.42, -3.32, 3.32, n=N, p=2.4, cx=s * 6.0 + s * 0.2), sring(21.9, 3.42, -3.32, 3.32, n=N, p=2.4, cx=s * 6.0 + s * 0.2)])
         # 肘当てと革の袖口 (真鍮の輪)
         g += E(ab, "plate", (cx + s * 0.4, 17.6, 1.2), (2.1, 1.5, 2.0), segs=8, rings=2)
         g += dloft(ab, "sash", [sring(12.4, 2.85, -2.95, 2.95, n=N, p=3.0, cx=cx), sring(14.4, 2.8, -2.9, 2.9, n=N, p=3.0, cx=cx)])

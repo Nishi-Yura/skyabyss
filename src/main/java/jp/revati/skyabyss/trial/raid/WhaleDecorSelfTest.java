@@ -152,7 +152,8 @@ public final class WhaleDecorSelfTest {
             BlockState was = level.getBlockState(p);
             boolean hall = Math.abs(x) <= pc.hx() && Math.abs(z) <= pc.hz() && y >= 1 && y <= pc.height();
             boolean floor = Math.abs(x) <= pc.hx() && Math.abs(z) <= pc.hz() && y == 0;
-            boolean gameplay = hall && !was.isAir() || floor && was != pal.floor() && was != pal.trim() || was == pal.gate();
+            // 見えない光源 (RaidKit の床の灯り) は仕掛けではない
+            boolean gameplay = hall && !was.isAir() && !was.is(net.minecraft.world.level.block.Blocks.LIGHT) || floor && was != pal.floor() && was != pal.trim() || was == pal.gate();
             if (!gameplay) {
                 continue;
             }

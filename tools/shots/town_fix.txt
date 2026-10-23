@@ -1,0 +1,73 @@
+# 町の広場の階段と暗い所の確認 (town_fix)。前後で同じ台本を流して比べる。
+# 暗い所 d1..d3 は、直す前の設計図で明るさ 0 の所 (中心 |x|,|z| <= 60) の、いちばん集まっている所。
+# ./gradlew runShots -Pscript=tools/shots/town_fix.txt -PshotsName=town_fix_before   (または bash tools/dev/mc_run.sh runShots ...)
+# at shelter 0 x y z yaw pitch: 設計図の座標と向き (yaw 0 = 南、180 = 北、90 = 西、-90 = 東)。y=1 は地面に立つ高さ
+world audit_town normal
+size 1280 720
+timeout 1500
+render 8
+clouds off
+guiscale 2
+
+wait 100
+cmd skyabyss cinematic stop
+wait 10
+cmd skyabyss cinematic stop
+cmd weather clear
+cmd gamerule doDaylightCycle false
+cmd gamemode spectator
+cmd skyabyss dev opening build
+hud off
+cmd time set 6000
+cmd skyabyss dev opening at shelter 0 0 1 -30 180 14
+waitchunks 1200
+wait 120
+shot p_grand_noon
+cmd skyabyss dev opening at shelter 0 39 1 -22 180 12
+waitchunks 600
+wait 120
+shot p_shop_noon
+cmd skyabyss dev opening at shelter 0 29 1 -33 180 22
+waitchunks 600
+wait 120
+shot p_east_noon
+cmd skyabyss dev opening at shelter 0 -27 1 -33 180 22
+waitchunks 600
+wait 120
+shot p_west_noon
+cmd skyabyss dev opening at shelter 0 20 1 -30 -144 14
+waitchunks 600
+wait 120
+shot p_east_wide_noon
+cmd time set 18000
+wait 120
+shot p_east_wide_night
+cmd skyabyss dev opening at shelter 0 29 1 -33 180 22
+waitchunks 600
+wait 120
+shot p_east_night
+cmd skyabyss dev opening at shelter 0 0 1 -30 180 14
+waitchunks 600
+wait 120
+shot p_grand_night
+cmd skyabyss dev opening at shelter 0 39 1 -22 180 12
+waitchunks 600
+wait 120
+shot p_shop_night
+cmd skyabyss dev opening at shelter 0 -43 1 56 180 15
+waitchunks 600
+wait 120
+shot d1_night
+cmd skyabyss dev opening at shelter 0 -32 1 -12 180 15
+waitchunks 600
+wait 120
+shot d2_night
+cmd skyabyss dev opening at shelter 0 52 1 34 180 15
+waitchunks 600
+wait 120
+shot d3_night
+cmd skyabyss dev opening at shelter 0 -27 1 -33 180 22
+waitchunks 600
+wait 120
+shot p_west_night
+quit

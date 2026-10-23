@@ -15,6 +15,7 @@
   STAIR_DOOR      戸の前後 (足と頭の高さ) を塞ぐ階段・戸から遠ざかって上がる段
   ROOF_GAP        屋根の段の穴 (列の 1 マスの抜け・2 段の跳び)
   CORNER_MISSING  二つの列が出会う角の 1 マスが空いている (角の形の階段が無い)
+  CORNER_SLAB     直角に出会う二つの段の列の角が、段でなく半ブロック (角の段を置く。建物の足元の段・壁の足元の段)
 階段の形 (内角・外角) は置いたあとゲームが隣に合わせる (SiteJob.finish) ので、ここでもバニラの決め方で計算してから見る。
 許す例は ALLOW に理由つきで書く。指摘が 1 つでもあれば終了コード 1。
 """
@@ -369,7 +370,35 @@ def check(g, label, seeds=None):
                     # 列が p をはさんで続いているか (角の先が無い = 本当の端)
                     if is_stair(g.get(x + ax, y, z + az)) and is_stair(g.get(px - 2 * bx, y, pz - 2 * bz)) and g.clear(px, y + 1, pz):
                         flag('CORNER_MISSING', (px, y, pz), 'rows of %s (facing %s) and (facing %s) meet here but the corner cell is empty' % (name(s), f, fq))
+    # 角の段が無い: 直角に出会う二つの段の列の角が、段でなく半ブロック・空き (角の内側・外側の段が要る)
+    for (x, y, z), s in g.c.items():
+        if not corner_gap(g, x, y, z, s):
+            continue
+        nb = corner_neighbours(g, x, y, z)
+        flag('CORNER_SLAB', (x, y, z), 'rows of stairs meet at a corner that is %s, not a stair (facing %s / %s)' % (name(s) or 'air', nb[0], nb[1]))
     return out
+
+
+def corner_neighbours(g, x, y, z):
+    """(x, y, z) の横の段のうち、直角に出会う二つ (向き) を返す。無ければ None"""
+    nb = {}
+    for d_, (dx, dz) in DX.items():
+        n = stair_props(g, x + dx, y, z + dz)
+        if n is not None and n.get('half') == 'bottom':
+            nb[d_] = n.get('facing')
+    for a, b in (('east', 'south'), ('east', 'north'), ('west', 'south'), ('west', 'north')):
+        if a in nb and b in nb and nb[a] in (b, OPP[b]) and nb[b] in (a, OPP[a]):
+            return nb[a], nb[b]
+    return None
+
+
+def corner_gap(g, x, y, z, s):
+    """角の一マス: 段でも丸ごとのブロックでもなく、半ブロック・空きで、直角の段の列が二つ出会う"""
+    if is_stair(s) or full_cube(s) or not (name(s).endswith('_slab') or name(s) in ('air', 'cave_air') or s is None):
+        return False
+    if g.top(x, y, z) >= 1 or g.top(x, y + 1, z) >= 1:
+        return False
+    return corner_neighbours(g, x, y, z) is not None
 
 
 FULL_OF = {'brick': 'bricks', 'stone_brick': 'stone_bricks', 'mossy_stone_brick': 'mossy_stone_bricks', 'deepslate_brick': 'deepslate_bricks',
@@ -439,6 +468,20 @@ def fix(cells, seeds=None, rounds=4, ground=-1):
                         break
                 else:
                     continue
+            elif kind == 'CORNER_SLAB':
+                # 角を、出会う列の一つと同じ材の段で埋める (向きは、その列の段の向き)
+                nb = corner_neighbours(Grid(cells, ground), x, y, z)
+                if nb is None:
+                    continue
+                ref = None
+                for dd, (dx, dz) in DX.items():
+                    n = cells.get((x + dx, y, z + dz))
+                    if is_stair(n) and props(n).get('facing') == nb[0]:
+                        ref = n
+                        break
+                if ref is None:
+                    continue
+                cells[(x, y, z)] = with_props(ref, facing=nb[0], half='bottom', shape='straight', waterlogged='false')
             elif kind == 'CORNER_MISSING':
                 # 角を同じ材の階段で埋める (内角・外角の形はゲームが隣に合わせて決める。ここでも stair_shapes で決める)
                 for dx, dz in DX.values():
