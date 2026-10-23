@@ -34,7 +34,7 @@ ACCESSORIES = {
 }
 import os
 # 旧アイコンが 3D の形・色と合っている品 (2026-10-23 の比較で確認)。作り直さない
-KEEP = {"abyss_greatsword", "abyss_bell_staff", "abyss_storm_bow"}
+KEEP = set()
 AUTO = os.environ.get("ICON_AUTO") == "1"  # 比較シートの 3 列目を自動案にする (確認用)
 DAGGER_GROW = {"waterway_fang", "raiju_claw", "tidecaller_claw", "thrall_poker"}
 
