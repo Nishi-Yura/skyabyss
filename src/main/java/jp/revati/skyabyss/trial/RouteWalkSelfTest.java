@@ -50,6 +50,7 @@ public final class RouteWalkSelfTest {
     private static int reached;
     private static int landings;
     private static int longWalks;
+    private static int raidSteps;
 
     private static void run(MinecraftServer server) {
         List<String> f = new ArrayList<>();
@@ -57,6 +58,7 @@ public final class RouteWalkSelfTest {
         reached = 0;
         landings = 0;
         longWalks = 0;
+        raidSteps = 0;
         Map<String, String> ja;
         try {
             ja = LangSelfTest.table("ja_jp");
@@ -96,8 +98,8 @@ public final class RouteWalkSelfTest {
             f.add("no titan back was built (the walk needs the backs; run with the backs built)");
         }
         if (f.isEmpty()) {
-            SkyAbyss.LOGGER.info("SELFTEST trial walk PASSED ({} titan(s): first run and replays, {} landings on floors, {} trials walked from their entry to the stone, {} long walks)",
-                    walked, landings, reached, longWalks);
+            SkyAbyss.LOGGER.info("SELFTEST trial walk PASSED ({} titan(s): first run and replays, {} landings on floors, {} trials walked from their entry to the stone, {} long walks, {} raid-room steps carried)",
+                    walked, landings, reached, longWalks, raidSteps);
         } else {
             for (String s : f) {
                 SkyAbyss.LOGGER.error("SELFTEST trial walk FAILED: {}", s);
@@ -240,7 +242,12 @@ public final class RouteWalkSelfTest {
                             longWalks++;
                         }
                     }
-                    if (d != null && d.original() && !MOVING.contains(d.id())) {
+                    // レイドの部屋の段は区画の写しに建てた部屋 (固定の部屋。歩けるかは raid の自己テストと route rooms が見る)
+                    boolean raid = jp.revati.skyabyss.trial.raid.RaidRun.isRaidStep(back, g, step);
+                    if (raid) {
+                        raidSteps++;
+                    }
+                    if (!raid && d != null && d.original() && !MOVING.contains(d.id())) {
                         reach(f, back, titan, g, draw, step, d, a, st);
                     }
                     TrialRoute.onCleared(back, g, titan, TrialRoute.keyOf(titan, draw, step), null);

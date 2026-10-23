@@ -204,6 +204,8 @@ public final class DepthBoss {
         for (ServerPlayer p : party) {
             f.bar.addPlayer(p);
             Notice.alert(p, "message.skyabyss.depths.king.appear", name);
+            // 王の正体を一行で (心の声)
+            Notice.narrate(p, "message.skyabyss.depths.king.reveal." + def.id());
             Notice.objective(p, "message.skyabyss.depths.obj.king", name);
         }
         SkyAbyss.LOGGER.info("[abyss depth] king {} woke on floor {} (hp {}, party {})", def.id(), i.floor, hp, party.size());

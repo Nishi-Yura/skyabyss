@@ -1,9 +1,9 @@
-"""光る海のイソギンチャク (持ち運ぶ灯) の絵と、灯の台のブロックの絵を作る (docs/design/23 の案 B)。
+"""光る海のイソギンチャク (持ち運ぶ灯) の絵と、灯りの台のブロックの絵を作る (docs/design/23 の案 B)。
 
 使い方: python -I tools/gen/mobs/gen_anemone_art.py
 出力:
   docs/review/anemone/item_{a,b,c}.png     灯の品のアイコン 3 案 (32x32)
-  docs/review/anemone/pedestal_{a,b,c}.png 灯の台の表面 3 案 (32x32)
+  docs/review/anemone/pedestal_{a,b,c}.png 灯りの台の表面 3 案 (32x32)
   docs/review/anemone/sheet.png            3 案ずつ並べた確認用の絵
   src/main/resources/assets/skyabyss/textures/ に既定 (案 A) を入れる。選ばれたら次のように入れ直す
     --install a|b|c         品と台を同じ案で入れる
@@ -195,7 +195,7 @@ def bloom():
 
 
 def bed():
-    """灯の苗床: 砂と石にイソギンチャクが生える (灯の受け取り場所)"""
+    """灯りの苗床: 砂と石にイソギンチャクが生える (灯の受け取り場所)"""
     rng = random.Random(44)
     im = stone_tile(rng, (178, 164, 128, 255), (205, 192, 156, 255), (122, 108, 82, 255), cracks=2)
     for x, y in ((6, 8), (22, 6), (13, 20), (25, 24), (4, 26)):
@@ -206,7 +206,7 @@ def bed():
 
 
 def tally():
-    """入口の数え石: 深層岩の石に、三つの丸い窪み (灯の台と同じ数。丸は横一列、y 13〜17、中心は x 8・16・24)"""
+    """入口の数え石: 深層岩の石に、三つの丸い窪み (灯りの台と同じ数。丸は横一列、y 13〜17、中心は x 8・16・24)"""
     rng = random.Random(55)
     im = stone_tile(rng, ROCK_M, ROCK_H, ROCK_D, cracks=4)
     d = ImageDraw.Draw(im)

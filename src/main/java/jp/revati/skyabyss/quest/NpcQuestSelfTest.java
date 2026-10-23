@@ -133,6 +133,9 @@ public final class NpcQuestSelfTest {
             // 係の人 (attendant_<役>) と町のクエストの限定の人 (guest_<人>) は、エンティティの型一つに役を持つ
             boolean known = BuiltInRegistries.ENTITY_TYPE.containsKey(ResourceLocation.parse(d.role()))
                     || jp.revati.skyabyss.facility.AttendantRole.byDialogueRole(d.role()) != null
+                    // 深淵の生き残りなど、施設の役でない係の人の形 (AttendantEntity.setRoleId。story/ch5/layers/AbyssSurvivors)
+                    || (d.role().startsWith(jp.revati.skyabyss.facility.AttendantRole.DIALOGUE_PREFIX)
+                    && jp.revati.skyabyss.facility.AttendantEntity.extraRole(d.role().substring(jp.revati.skyabyss.facility.AttendantRole.DIALOGUE_PREFIX.length())))
                     || (d.role().startsWith(jp.revati.skyabyss.town.TownGuests.ROLE_PREFIX)
                     && jp.revati.skyabyss.town.TownGuests.byId(d.role().substring(jp.revati.skyabyss.town.TownGuests.ROLE_PREFIX.length())) != null);
             check(known, "dialogue for unknown entity " + d.role(), failures);
@@ -349,8 +352,9 @@ public final class NpcQuestSelfTest {
             // 1 章の続き (メイン 4 本・サブ 4 本) の文は skyabyss_story に置いた
             // 雷翼の背の周回のクエスト (*storm*) と風見鶏の文は skyabyss_storm にある (12 の 11.2 節、伝承の担当)
             // 語り部の墓の救いの文は skyabyss_grave にある (11 の 6 章)
+            // 深淵の層の生き残りの会話の文は skyabyss_abyss_v2 (tools/gen/ch5/gen_ch5_layers.py)
             // 章ごとのクエスト・追加の会話の文は skyabyss_ch1〜ch4 にある (三章の職人の覚書・鼓動守の会話は skyabyss_ch3gear)
-            for (String ns : List.of("skyabyss_quest", "skyabyss_story", "skyabyss_storm", "skyabyss_grave", "skyabyss_ch1", "skyabyss_ch2", "skyabyss_ch3", "skyabyss_ch3gear", "skyabyss_ch4", "skyabyss_ch5", "skyabyss_vow", "skyabyss_fac", "skyabyss_town")) {
+            for (String ns : List.of("skyabyss_quest", "skyabyss_story", "skyabyss_storm", "skyabyss_grave", "skyabyss_ch1", "skyabyss_ch2", "skyabyss_ch3", "skyabyss_ch3gear", "skyabyss_ch4", "skyabyss_ch5", "skyabyss_abyss_v2", "skyabyss_vow", "skyabyss_fac", "skyabyss_town")) {
                 JsonObject extra = json("/assets/" + ns + "/lang/" + code + ".json", failures);
                 if (extra != null) {
                     extra.entrySet().forEach(e -> {
@@ -690,6 +694,30 @@ public final class NpcQuestSelfTest {
         Lore.unlock(c, "chapter1/stone_whale", false);
         Quests.poll(c, true);
         check(stage(c, "main_song").equals("board"), "a player who found the whale first should skip to board: " + stage(c, "main_song"), failures);
+
+        // レイドの順路だけを通った人 (碑文を一つも記さずに心臓を止めた): 段 inscriptions は飛び、一章が済み、二章が始まる (fun_review P1-1)
+        FakePlayer r = player(level, 12, at);
+        jp.revati.skyabyss.progress.ProgressData pd = jp.revati.skyabyss.progress.ProgressData.get(level.getServer());
+        try {
+            Lore.unlock(r, "chapter1/stone_whale", false);
+            Lore.unlock(r, "chapter1/sky_ruins", false);
+            Quests.poll(r, true);
+            check(stage(r, "main_song").equals("inscriptions"), "raid route: should wait at inscriptions before the heart: " + stage(r, "main_song"), failures);
+            pd.markPersonal(r.getUUID(), "stone_whale");
+            Lore.unlock(r, "chapter1/heart_stilled", false);
+            Lore.unlock(r, "chapter1/sky_key", false);
+            Quests.poll(r, true);
+            check(stage(r, "main_song").equals("return") && !Lore.state(r).has("chapter1/inscription_west"),
+                    "raid route: stilling the whale without inscriptions did not skip to return: " + stage(r, "main_song"), failures);
+            DialogueService.open(r, wc);
+            next(r);
+            check(stage(r, "main_song").equals("done"), "raid route: chapter 1 did not finish: " + stage(r, "main_song"), failures);
+            DialogueService.close(r);
+            Quests.poll(r, true);
+            check(QuestLog.of(r).entry("main_tide") != null, "raid route: chapter 2 (main_tide) did not start after chapter 1", failures);
+        } finally {
+            pd.clearPersonal(r.getUUID(), "stone_whale");
+        }
 
         // サブ「鯨のかけら」: 背中に乗った人に頼む → 3 つ集める → 渡す → 遠眼鏡
         DialogueService.open(a, wc);

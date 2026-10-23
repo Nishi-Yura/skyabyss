@@ -5,6 +5,7 @@
   "progress.skyabyss.titan.ember": "余燼の巨神",
   "message.skyabyss.progress.capped": "これ以上は強くなれない（上限 Lv %s）。%sの心臓を止めれば、その先へ進める",
   "message.skyabyss.progress.capped_end": "これ以上は強くなれない（上限 Lv %s）。物語の続きを待て",
+  "message.skyabyss.progress.capped_abyss": "これ以上は強くなれない（上限 Lv %s）。深淵の底で心臓の番人を倒せば、その先へ進める",
   "message.skyabyss.progress.not_ready": "%sには、まだ乗れない。先に%sの心臓を止めること",
   "message.skyabyss.progress.not_ready_hint": "巨神は順に目を覚ます。乗れるのは、%sの心臓を自分の手で止めた者だけ（/story で進みを見る）",
   "message.skyabyss.progress.stage_up": "%sの心臓を止めた。レベルの上限が Lv %s に上がった",

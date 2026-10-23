@@ -47,8 +47,9 @@ public final class DialogueService {
             SkyAbyss.LOGGER.warn("[dialogue] no dialogue for {}", role);
             return;
         }
-        // 見回りは 1 秒おき。段が進んだ直後に話しかけても、その人の今の記録で話題を決める (他の人の見回りには依らない)
-        Quests.poll(player, false);
+        // 見回りは 1 秒おき。段が進んだ直後に話しかけても、その人の今の記録で話題を決める (他の人の見回りには依らない)。
+        // 新しい頼みの自動開始は見回りに任せる (会話の入口を、話しかけた瞬間に始まった頼みが横取りしないように)
+        Quests.refresh(player, false);
         StoryContext ctx = new StoryContext(player, role, npc);
         Dialogue.Node node = dialogue.entryNode(ctx);
         if (node == null) {

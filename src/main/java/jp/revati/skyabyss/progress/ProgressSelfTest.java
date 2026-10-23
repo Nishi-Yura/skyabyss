@@ -68,6 +68,10 @@ public final class ProgressSelfTest {
             check(f, ProgressRules.levelCap(i) == ProgressRules.TITAN_LEVEL[i] + GrowthRules.FALLOFF_GRACE, "cap " + i + " is not recommended + grace");
         }
         check(f, ProgressRules.levelCap(99) == ProgressRules.LEVEL_CAP[4] && ProgressRules.levelCap(-1) == 15, "cap is not clamped");
+        // 番人を倒すと 50 (転生の Lv 50 に届く。P7-1)。四体がそろわないうちは段階の上限のまま
+        check(f, ProgressRules.levelCap(4, true) == 50 && ProgressRules.levelCap(4, false) == 40 && ProgressRules.levelCap(3, true) == 33,
+                "the warden does not raise the cap to 50");
+        check(f, ProgressRules.levelCap(4, true) >= jp.revati.skyabyss.rebirth.RebirthRules.MIN_LEVEL, "rebirth level is out of reach after the warden");
         check(f, GrowthRules.VANILLA_DAILY == 100, "vanilla daily limit is " + GrowthRules.VANILLA_DAILY);
 
         // ---------------------------------------------------------------- 上限で止まる経験値
@@ -112,6 +116,23 @@ public final class ProgressSelfTest {
             check(f, Progression.canBoard(a, "tide_shell"), "the one who stopped the heart cannot board the tide shell");
             check(f, !Progression.canBoard(b, "tide_shell"), "a player who did not stop the heart can board the tide shell");
             check(f, ProgressRules.levelCap(Progression.stage(a)) == 21 && ProgressRules.levelCap(Progression.stage(b)) == 15, "caps by stage are wrong");
+            check(f, !Progression.wardenFelled(c), "a new player has felled the warden");
+            Progression.markWardenFelled(c);
+            check(f, Progression.wardenFelled(c) && Progression.stage(c) == 0, "felling the warden was not recorded (or counted as a titan)");
+            data.clearPersonal(c.getUUID(), ProgressRules.WARDEN);
+            // 初めての乗り込みは時刻を待たない (fun_review P3-1): 乗る資格のある人が 30 秒待てば来る。資格のない巨神・止めた巨神は待てない
+            check(f, jp.revati.skyabyss.titan.FirstBoardWait.waiting(c, "stone_whale") && !jp.revati.skyabyss.titan.FirstBoardWait.waiting(c, "thunder_wing"),
+                    "first boarding wait: eligibility is wrong");
+            check(f, !jp.revati.skyabyss.titan.FirstBoardWait.waiting(a, "stone_whale"), "first boarding wait: a player who stopped the heart still waits");
+            jp.revati.skyabyss.titan.FirstBoardWait wait = new jp.revati.skyabyss.titan.FirstBoardWait();
+            boolean early = false;
+            for (int t = 20; t < jp.revati.skyabyss.titan.FirstBoardWait.WAIT; t += 20) {
+                early |= wait.count(c, 20) != null;
+            }
+            check(f, !early && wait.count(c, 20) == c && wait.waited() == 0, "first boarding wait: the titan did not come after 30 s");
+            wait.count(c, 20);
+            wait.count(null, 20);
+            check(f, wait.waited() == 0, "first boarding wait: leaving did not reset the wait");
 
             // 世界の最初の知らせ (M2): まだその巨神を止めていない人・本人には送らない (チャットにも流さない)
             check(f, Progression.worldFirstAudience(List.of(a, b, c), b, 0).equals(List.of(a)), "world-first audience should be only those who stopped that titan");

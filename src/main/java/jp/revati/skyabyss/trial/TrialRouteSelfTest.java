@@ -315,7 +315,11 @@ public final class TrialRouteSelfTest {
             // 越えるたびに次へ (4 秒後)。別のグループは動かない
             for (int i = 1; i <= 3; i++) {
                 String key = TrialRoute.keyOf(titan, draw, i);
-                TrialRoute.onCleared(back, ga, titan, key, null);
+                // レイドの部屋を越えた形 (RaidRun.complete と同じ口)。四体とも試練の経験値が入る (fun_review P2-1)
+                long xpBefore = jp.revati.skyabyss.rpg.Growth.get(a).level * 1_000_000L + jp.revati.skyabyss.rpg.Growth.get(a).xp;
+                TrialRoute.onCleared(back, ga, titan, key, null, true);
+                check(f, jp.revati.skyabyss.rpg.Growth.get(a).level * 1_000_000L + jp.revati.skyabyss.rpg.Growth.get(a).xp > xpBefore,
+                        titan + ": clearing raid room " + i + " gave no trial xp");
                 boolean toMid = i == 3 && TrialMidBoss.needed(titan, draw);
                 int expect = toMid ? 3 : i + 1;
                 check(f, TrialRoute.step(back, ga) == expect && TrialRoute.mid(back, ga) == toMid, titan + ": after clearing " + key + " the step is " + TrialRoute.step(back, ga) + ", expected " + expect);

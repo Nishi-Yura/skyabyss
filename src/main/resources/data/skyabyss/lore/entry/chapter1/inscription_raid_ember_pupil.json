@@ -1,0 +1,14 @@
+{
+  "chapter": "titan_ember",
+  "order": 179,
+  "inscription_sign": "sign.skyabyss.lore_raid_ember_pupil",
+  "unlock": [
+    {
+      "type": "sign",
+      "target": "sign.skyabyss.lore_raid_ember_pupil"
+    }
+  ],
+  "related": [
+    "chapter1/ember_ruins"
+  ]
+}
