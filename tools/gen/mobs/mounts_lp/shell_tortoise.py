@@ -46,8 +46,8 @@ def coral(m, name, bone, base, h, mat, tip, lean=(0.0, 0.0, 0.0), n=3, r=1.4, se
         a = math.radians(i * 360.0 / n + 30 + seed * 40)
         tipp = top + np.array([math.sin(a) * h * 0.36, h * (0.46 + 0.1 * (i % 2)), math.cos(a) * h * 0.36]) + lean * 0.5
         mid = lerp(top, tipp, 0.5) + np.array([0, h * 0.12, 0])
-        m.add(f"{name}_b{i}", tub(bone, mat, [top, mid, tipp], [r * 0.95, r * 0.8, r * 0.62], None, sides=5))
-        m.add(f"{name}_k{i}", ell(bone, tip, tipp, (r * 0.85, r * 0.85, r * 0.85), segs=6, rings=2))
+        m.add(f"{name}_b{i}", tub(bone, mat, [top, mid, tipp], [r * 0.95, r * 0.8, r * 0.62], None, sides=4))
+        m.add(f"{name}_k{i}", ell(bone, tip, tipp, (r * 0.85, r * 0.85, r * 0.85), segs=5, rings=2))
 
 
 def build():
@@ -61,14 +61,14 @@ def build():
 
     # ---------------------------------------------------------------- 甲羅 (丸い高い背甲、縁の甲板、腹甲)
     rings = []
-    for z in (-17.2, -15.0, -11.0, -5.0, 0.0, 5.0, 11.0, 15.0, 17.2):
+    for z in (-17.2, -14.4, -8.0, 0.0, 8.0, 14.4, 17.2):
         q = max(0.06, 1 - (z / 17.6) ** 2) ** 0.5
-        rings.append(rsec(z, 13.6 + 16.6 * q ** 0.9, 11.6, 13.2 * q ** 0.55, 13.8, n=18, p=2.0, pb=4.0))
+        rings.append(rsec(z, 13.6 + 16.6 * q ** 0.9, 11.6, 13.2 * q ** 0.55, 13.8, n=16, p=2.0, pb=4.0))
     m.add("carapace", lof("body", "shell", rings), core=True)
     rim = []
-    for z in (-17.8, -15.4, -11.0, -5.0, 0.0, 5.0, 11.0, 15.4, 17.8):
+    for z in (-17.8, -14.8, -8.0, 0.0, 8.0, 14.8, 17.8):
         q = max(0.05, 1 - (z / 18.2) ** 2) ** 0.5
-        rim.append(rsec(z, 14.6, 11.0, 13.9 * q ** 0.5, 12.8, n=16, p=3.0))
+        rim.append(rsec(z, 14.6, 11.0, 13.9 * q ** 0.5, 12.8, n=12, p=3.0))
     m.add("rim", lof("body", "rim", rim))
     m.add("plastron", lof("body", "plast", [rsec(-13.6, 11.6, 9.0, 8.4, 10.8, n=12, p=3), rsec(0, 11.6, 8.4, 10.4, 10.4, n=12, p=3),
                                             rsec(13.6, 11.6, 9.0, 8.4, 10.8, n=12, p=3)]))
@@ -76,7 +76,7 @@ def build():
     # 背の稜の甲板 (鞍の前と後ろ)
     for i, z in enumerate((-11.6, 11.6)):
         y = top_y(ct, 0, z)
-        m.add(f"scute{i}", cbox("body", "shell", (0, y - 0.3, z), (6.4, 2.2, 5.2), R=rot_x(-math.copysign(34, z)), taper=0.7, cut=0.5))
+        m.add(f"scute{i}", box("body", "shell", (0, y - 0.3, z), (6.4, 2.2, 5.2), R=rot_x(-math.copysign(34, z)), taper=(0.7, 0.6), cut=0.5))
     # 縁の甲板の段 (前と後ろの反り返り)
     for i, (x, z) in enumerate(((0, -17.6), (5.6, -16.6), (-5.6, -16.6), (0, 17.6), (5.8, 16.6), (-5.8, 16.6))):
         m.add(f"marg{i}", ell("body", "rim", (x, 13.4, z), (3.0, 1.4, 1.8), segs=6, rings=2))
@@ -128,9 +128,6 @@ def build():
             a = math.radians((j - 1.5) * 30)
             p = fc + np.array([math.sin(a) * 3.6, -0.5, -math.cos(a) * 3.8])
             m.add(f"{k}_nail{j}", ell(lo, "beak", p, (1.0, 0.8, 1.1), segs=5, rings=1))
-        for j in range(3):
-            p = knee + np.array([s * 2.8, -0.6 - j * 1.6, -1.4 + j * 1.2])
-            m.add(f"{k}_scale{j}", ell(lo, "skin", p, (1.4, 1.2, 1.4), segs=5, rings=1))
     tp = m.pv("tail")
     m.add("tail", cone("tail", "skin", tp + np.array([0, 0, -1.6]), (0, -0.5, 1), 6.2, 2.4, sides=6, rings=2))
 

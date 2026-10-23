@@ -962,7 +962,8 @@ def write_anims(gaits, path):
 
 def anim_R(rx, ry, rz):
     """GeckoLib のアニメの回転 (度) を作図空間の回転へ。x 正 = 前が下がる。"""
-    return rot_z(rz) @ rot_y(ry) @ rot_x(-rx)
+    # GeckoLib は x・y の値の符号を反転し、焼いた頂点は x が鏡写し。作図空間では z だけ符号が逆、x は「前が下がる」向き
+    return rot_z(-rz) @ rot_y(ry) @ rot_x(-rx)
 
 
 def posed(m, pose, faces=None):

@@ -56,7 +56,7 @@ def build():
     tt = tri_arrays(m.faces_of(["torso"]))
     for i, (z, w, h) in enumerate(((9.4, 4.8, 2.6), (12.2, 3.8, 2.2), (14.6, 2.8, 1.8))):
         yb = top_y(tt, 0, z)
-        m.add(f"ridge{i}", cbox("body", "stone", (0, yb + h * 0.1, z), (w, h * 1.5, 3.8), R=rot_x(-16), taper=0.6, cut=0.5))
+        m.add(f"ridge{i}", box("body", "stone", (0, yb + h * 0.1, z), (w, h * 1.5, 3.8), R=rot_x(-16), taper=(0.6, 0.5), cut=0.5))
 
     # ---------------------------------------------------------------- 頭 (丸い額、口の線、下あご)
     head = [rsec(-10, 31.6, 12.6, 11.2, 21.0, n=16), rsec(-17, 33.4, 12.4, 11.8, 21.6, n=16), rsec(-23, 33.0, 13.0, 11.0, 21.8, n=16),
@@ -137,11 +137,11 @@ def build():
 
     # ---------------------------------------------------------------- 馬具: 首の綱 (石の札)、頭の綱
     t_all = tri_arrays(m.faces_of(["torso"]))
-    pts = surface_arc(t_all, -13.6, 22.0, 0, 360, 14, off=0.5)
+    pts = surface_arc(t_all, -13.6, 22.0, 0, 360, 10, off=0.5)
     m.add("collar", tub("body", "cloth", pts, 0.8, None, sides=4, hint=(0, 0, 1)))
     low = min(pts, key=lambda p: p[1])
     m.add("collar_tag", box("body", "brass", low + np.array([0, -1.4, -0.6]), (2.6, 3.0, 0.8), cut=0.4))
-    hpts = surface_arc(head_t, -27.4, 22.0, 0, 360, 14, off=0.45)
+    hpts = surface_arc(head_t, -27.4, 22.0, 0, 360, 10, off=0.45)
     m.add("halter", tub("head", "leathd", hpts, 0.6, None, sides=4, hint=(0, 0, 1)))
     for s, k in ((1, "l"), (-1, "r")):
         p = max(hpts, key=lambda q: s * q[0])
