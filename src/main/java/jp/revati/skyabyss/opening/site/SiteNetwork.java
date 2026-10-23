@@ -58,10 +58,6 @@ public final class SiteNetwork {
             m.put(i == 0 ? "footprint" : "footprint" + i, p);
             i++;
         }
-        i = 0;
-        for (BlockPos p : OpeningSites.cairns(server)) {
-            m.put("cairn" + i++, p);
-        }
         // 話す相手の居場所 (道しるべの目印): 語り部は宿りの鐘のそば、鯨追いは外れの焚き火
         OpeningSites.bell(server).or(() -> OpeningSites.shelter(server)).ifPresent(bell -> {
             m.put(SiteTargets.NPC_PREFIX + "storyteller", bell);

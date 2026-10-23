@@ -139,15 +139,6 @@ public final class OpeningSites {
         return pos(server, Kind.RIBS);
     }
 
-    // 野営地から宿りへの道の積み石 (40 ブロックおき。野営地に近い順)
-    public static List<BlockPos> cairns(MinecraftServer server) {
-        List<BlockPos> out = new ArrayList<>();
-        for (SiteData.Entry e : data(server).entries("cairn")) {
-            out.add(e.pos);
-        }
-        return out;
-    }
-
     // 全部 (自己テスト・開発コマンド・地図向け)
     public static List<Site> all(MinecraftServer server) {
         List<Site> out = new ArrayList<>();

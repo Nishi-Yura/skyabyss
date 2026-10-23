@@ -18,7 +18,7 @@ import net.minecraft.server.MinecraftServer;
 import net.neoforged.neoforge.common.util.FakePlayer;
 
 // 旅の地図の印 (docs/design/33 の 4 章) の自己テスト: 序盤の記録から「噂/見た」を決める・噂は本当の位置を出さない (方角は 16 方位の内、距離は 100 刻み)・
-// すでに遊んでいた人は全部見た・積み石は町を見たあと・一人ぶんの集めがこわれない・パケットの往復・キー M
+// すでに遊んでいた人は全部見た・一人ぶんの集めがこわれない・パケットの往復・キー M
 public final class MapMarksSelfTest {
     private MapMarksSelfTest() {
     }
@@ -50,9 +50,6 @@ public final class MapMarksSelfTest {
             s.add(new MapMarks.Spot("footprint", i, new BlockPos(30 + i * 20, 70, -40 - i * 15)));
         }
         s.add(new MapMarks.Spot("ribs", 0, RIBS));
-        for (int i = 0; i < 4; i++) {
-            s.add(new MapMarks.Spot("cairn", i, new BlockPos(26 * (i + 1), 70, -24 * (i + 1))));
-        }
         return s;
     }
 
@@ -67,7 +64,7 @@ public final class MapMarksSelfTest {
     }
 
     private static void run(MinecraftServer server, List<String> f) {
-        // 1. 目覚めたばかり: 野営地は見た、町は野営地からの噂 (本当の位置ではない)、足跡・骨・積み石はまだ
+        // 1. 目覚めたばかり: 野営地は見た、町は野営地からの噂 (本当の位置ではない)、足跡・骨はまだ
         List<MapMarks.Mark> fresh = marks(false, EnumSet.of(OpeningBeat.AWAKE), CAMP);
         if (of(fresh, MapMarks.Kind.CAMP).size() != 1 || of(fresh, MapMarks.Kind.CAMP).get(0).rumor()) {
             f.add("a fresh player should see the camp");
@@ -91,21 +88,18 @@ public final class MapMarksSelfTest {
                 f.add("the town rumor distance should be rounded to 200, got " + d);
             }
         }
-        if (!of(fresh, MapMarks.Kind.FOOTPRINT).isEmpty() || !of(fresh, MapMarks.Kind.RIBS).isEmpty() || !of(fresh, MapMarks.Kind.CAIRN).isEmpty()) {
-            f.add("a fresh player should not see footprints, ribs or cairns");
+        if (!of(fresh, MapMarks.Kind.FOOTPRINT).isEmpty() || !of(fresh, MapMarks.Kind.RIBS).isEmpty()) {
+            f.add("a fresh player should not see footprints or ribs");
         }
         // 噂は何度でも同じ点 (開き直すたびに動かない)
         if (!MapMarks.rumor(CAMP, TOWN, 5).equals(MapMarks.rumor(CAMP, TOWN, 5))) {
             f.add("rumor position is not stable");
         }
-        // 2. 町の近くに来た: 町は見た (本当の位置)、積み石の道しるべが出る
+        // 2. 町の近くに来た: 町は見た (本当の位置)
         List<MapMarks.Mark> near = marks(false, EnumSet.of(OpeningBeat.AWAKE, OpeningBeat.CAMP), TOWN.offset(20, 0, 10));
         List<MapMarks.Mark> nearTown = of(near, MapMarks.Kind.TOWN);
         if (nearTown.size() != 1 || nearTown.get(0).rumor() || nearTown.get(0).x() != TOWN.getX() || nearTown.get(0).z() != TOWN.getZ()) {
             f.add("being near the town should make it seen at its true position: " + nearTown);
-        }
-        if (of(near, MapMarks.Kind.CAIRN).size() != 4) {
-            f.add("cairns should show once the town is seen: " + of(near, MapMarks.Kind.CAIRN).size());
         }
         // 3. 足跡の拍子・イサナのあと: 足跡 3 つ、骨は町からの噂
         List<MapMarks.Mark> mid = marks(false, EnumSet.of(OpeningBeat.FOOTPRINTS, OpeningBeat.STORYTELLER, OpeningBeat.ISANA), null);

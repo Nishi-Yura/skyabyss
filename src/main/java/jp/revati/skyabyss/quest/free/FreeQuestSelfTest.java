@@ -460,14 +460,13 @@ public final class FreeQuestSelfTest {
         Quests.poll(a, true);
         check(stage(a, "sub_lore_gaps").equals("chapter1"), "prologue complete did not move on: " + stage(a, "sub_lore_gaps"), failures);
         List<String> ch1 = List.of("chapter1/stone_whale", "chapter1/sky_ruins", "chapter1/inscription_west", "chapter1/inscription_east",
-                "chapter1/inscription_below", "chapter1/inscription_heart", "chapter1/inscription_vault", "chapter1/captain",
-                "chapter1/heart_stilled", "chapter1/sky_key");
+                "chapter1/inscription_below", "chapter1/captain", "chapter1/heart_stilled", "chapter1/sky_key");
         ch1.forEach(e -> Lore.unlock(a, e, false));
         Quests.poll(a, true);
-        check(stage(a, "sub_lore_gaps").equals("chapter1"), "ten chapter-one entries should not be enough", failures);
+        check(stage(a, "sub_lore_gaps").equals("chapter1"), "eight chapter-one entries should not be enough", failures);
         Lore.unlock(a, "chapter1/whale_song", false);
         Quests.poll(a, true);
-        check(stage(a, "sub_lore_gaps").equals("tell"), "eleven chapter-one entries did not move on", failures);
+        check(stage(a, "sub_lore_gaps").equals("tell"), "nine chapter-one entries did not move on", failures);
         // 欠片を記したのでメインは「語り部に見せる」の段にいる。そこではメインの報告が先に開く (頼みの報告はその次)
         talk(a, st);
         check(node(a).equals("fragment"), "the main quest's report should come first: " + node(a), failures);

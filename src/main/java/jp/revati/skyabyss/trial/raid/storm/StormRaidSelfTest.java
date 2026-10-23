@@ -74,6 +74,7 @@ public final class StormRaidSelfTest {
             checkBeat(level, failures);
             checkEye(level, failures);
             checkDraw(failures);
+            checkDeco(level, failures, notes);
         } catch (Throwable e) {
             SkyAbyss.LOGGER.error("SELFTEST storm raid crashed", e);
             failures.add("crashed: " + e);
@@ -578,6 +579,72 @@ public final class StormRaidSelfTest {
     }
 
     // 枠ごとに二つの部屋があり、周ごとにどちらも引かれる
+    // 建築 (docs/design/39 の 4.3。StormRoomDeco): 七つの部屋 (SR1〜SR6・SRM) を建て直し、
+    // 飾りが費用の上限 (8 千ブロック・灯り 40・ブロックエンティティ 24・エンティティ 16) の内、空気も視線も部屋の外へ抜けない、床の下の雲の層が箱の中
+    private static void checkDeco(ServerLevel level, List<String> failures, List<String> notes) throws Exception {
+        String[] ids = {"SR1", "SR2", "SR3", "SR4", "SR5", "SR6", "SRM"};
+        for (int i = 0; i < ids.length; i++) {
+            String id = ids[i];
+            RaidCtx ctx = ctx(level, id, XS[i % XS.length], 4242L + i);
+            RaidRoom room = switch (id) {
+                case "SR1" -> new FeatherCarry();
+                case "SR2" -> new CircuitRoom();
+                case "SR3" -> new ChargeChain();
+                case "SR4" -> new ColumnChase();
+                case "SR5" -> new BeatTiles();
+                case "SR6" -> new EyeAdvance();
+                default -> new jp.revati.skyabyss.trial.raid.mid.StormMidRoom();
+            };
+            StormRoomDeco.LAST.remove(id);
+            room.build(ctx);
+            StormRoomDeco.Stats st = StormRoomDeco.LAST.get(id);
+            check(failures, st != null, id + " deco: dressed");
+            if (st != null) {
+                notes.add(id + " deco: " + st.blocks() + " blocks, " + st.bright() + " bright, " + st.blockEntities() + " block entities");
+                check(failures, st.blocks() <= StormRoomDeco.MAX_BLOCKS, id + " deco: " + st.blocks() + " blocks (<= " + StormRoomDeco.MAX_BLOCKS + ")");
+                check(failures, st.bright() <= StormRoomDeco.MAX_BRIGHT, id + " deco: " + st.bright() + " bright lights (<= " + StormRoomDeco.MAX_BRIGHT + ")");
+                check(failures, st.blockEntities() <= StormRoomDeco.MAX_BLOCK_ENTITIES, id + " deco: " + st.blockEntities() + " block entities");
+                check(failures, st.entities() <= StormRoomDeco.MAX_ENTITIES, id + " deco: entities");
+                check(failures, st.minY() >= ctx.cell().bounds().minY, id + " deco: the cell bounds cover the clouds under the floor");
+            }
+            check(failures, sealed(level, ctx.cell(), 400000), id + " deco: cell is sealed (air)");
+            BlockPos leak = viewLeak(level, ctx.cell(), 400000);
+            check(failures, leak == null, id + " deco: no view out of the cell (see-through block at " + leak + ")");
+            room.end(ctx);
+            ctx.clearMobs();
+        }
+    }
+
+    // 透ける物 (空気・ガラス・格子・鎖・半ブロックなど、光を遮る全体の箱でない物) をたどって、部屋の箱の外へ出る所 (出なければ null)
+    private static BlockPos viewLeak(ServerLevel level, RaidKit.Cell c, int maxSteps) {
+        AABB b = c.bounds();
+        ArrayDeque<BlockPos> q = new ArrayDeque<>();
+        Set<BlockPos> seen = new HashSet<>();
+        for (BlockPos s : new BlockPos[] {c.rest(), c.origin().above(), c.exitSpot()}) {
+            q.add(s);
+            seen.add(s);
+        }
+        int steps = 0;
+        while (!q.isEmpty() && steps++ < maxSteps) {
+            BlockPos p = q.poll();
+            if (!b.contains(p.getX() + 0.5, p.getY() + 0.5, p.getZ() + 0.5)) {
+                return p;
+            }
+            for (net.minecraft.core.Direction d : net.minecraft.core.Direction.values()) {
+                BlockPos n = p.relative(d);
+                if (seen.contains(n)) {
+                    continue;
+                }
+                var st = level.getBlockState(n);
+                if (!(st.canOcclude() && st.isCollisionShapeFullBlock(level, n))) {
+                    seen.add(n);
+                    q.add(n);
+                }
+            }
+        }
+        return steps < maxSteps ? null : c.origin();
+    }
+
     private static void checkDraw(List<String> failures) {
         for (Trial.Slot slot : Trial.Slot.values()) {
             List<String> ids = RaidRooms.idsOf(Titans.THUNDER_WING, slot);

@@ -26,9 +26,9 @@ import net.minecraft.world.item.Item;
 //
 // 後の巨神の担当へ: 本体 (心臓) ができたら、起動時 (FMLCommonSetupEvent の enqueueWork など) に一行
 //     TitanPages.register(TitanPages.fromGearSet(Titans.THUNDER_WING));
-// を呼ぶ (図鑑・専用伝説・率・心核は TitanGearSets の表から)。巨神の記憶 (TitanMemoryData) の記録の名前は巨神の名前と同じにする (天井・撃破数・図鑑・欠片はそこから読む)
+// を呼ぶ (図鑑・専用の逸品・率・心核は TitanGearSets の表から)。巨神の記憶 (TitanMemoryData) の記録の名前は巨神の名前と同じにする (天井・撃破数・図鑑・欠片はそこから読む)
 public final class TitanPages {
-    // collection: 図鑑の品 (まだ作られていない品は入れない)。exclusive: 正体を伏せる品 (専用伝説)
+    // collection: 図鑑の品 (まだ作られていない品は入れない)。exclusive: 正体を伏せる品 (専用の逸品)
     // chance: 心臓の一回で出る率 (天井の倍率をかける前)。core: 心核 (なければ null)。exchange: 共鳴の炉で交換できるか
     public record Page(String titan, Supplier<List<Item>> collection, Predicate<Item> exclusive, ToDoubleFunction<Item> chance,
                        Supplier<Item> core, boolean exchange) {

@@ -38,6 +38,39 @@ abstract class EmberRoom extends RaidRoom {
     // reset のたびに増える。遅れて実る予告の傷が、リセット前のものを捨てるため
     int generation;
 
+    // 飾り (EmberRaidDecor): 出口の戸の枠の灯り (越えると点く)・飾りのブロックの数と負荷の数え (自己テスト)
+    List<BlockPos> exitLamps = List.of();
+    int decoBlocks;
+    @Nullable
+    EmberRaidDecor.Audit decorAudit;
+    private boolean lampsOn;
+
+    // 飾りの仕上げ (build の終わり): 出口の灯りを消しておき、負荷を数える
+    void finishDecor(RaidCtx ctx, EmberRaidDecor d, List<BlockPos> lamps) {
+        exitLamps = List.copyOf(lamps);
+        EmberRaidDecor.exitLamps(ctx, exitLamps, false);
+        lampsOn = false;
+        decoBlocks = d.finish();
+        decorAudit = EmberRaidDecor.audit(ctx.level(), ctx.cell(), decoBlocks);
+        EmberRaidDecor.log(ctx.roomId(), decorAudit);
+    }
+
+    // 越えた: 出口の戸の枠の灯りを点ける (次はここ)
+    void opened(RaidCtx ctx) {
+        if (!lampsOn) {
+            lampsOn = true;
+            EmberRaidDecor.exitLamps(ctx, exitLamps, true);
+        }
+    }
+
+    // やり直し: 灯りを消す
+    void closed(RaidCtx ctx) {
+        if (lampsOn) {
+            lampsOn = false;
+            EmberRaidDecor.exitLamps(ctx, exitLamps, false);
+        }
+    }
+
     List<ServerPlayer> who(RaidCtx ctx) {
         if (testPlayers != null) {
             List<ServerPlayer> out = new ArrayList<>();

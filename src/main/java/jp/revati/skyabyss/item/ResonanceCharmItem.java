@@ -72,7 +72,7 @@ public class ResonanceCharmItem extends Item implements ModGear, Accessory {
 
     @Override
     public GearTier tier() {
-        return GearTier.RARE;
+        return GearTier.EPIC;
     }
 
     @Override

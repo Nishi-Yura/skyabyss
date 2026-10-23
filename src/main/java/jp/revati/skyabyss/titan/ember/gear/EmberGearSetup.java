@@ -73,7 +73,7 @@ public final class EmberGearSetup {
     public static final DeferredItem<Item> WAR_AXE = ITEMS.register(EmberIds.EMBER_WAR_AXE,
             () -> new EmberWarAxeItem(new Item.Properties().rarity(Rarity.RARE).fireResistant()));
     public static final DeferredItem<Item> MANTLE = ITEMS.register(EmberIds.EMBER_MANTLE,
-            () -> new EmberTrinketItem(new Item.Properties().stacksTo(1).rarity(Rarity.RARE).fireResistant(), GearTier.RARE,
+            () -> new EmberTrinketItem(new Item.Properties().stacksTo(1).rarity(Rarity.RARE).fireResistant(), GearTier.EPIC,
                     "item.skyabyss.ember_mantle.desc", false));
     public static final DeferredItem<Item> CHARM = ITEMS.register(EmberIds.KINDLING_CHARM,
             () -> new KindlingCharmItem(new Item.Properties().stacksTo(1).rarity(Rarity.RARE).fireResistant()));
@@ -82,7 +82,7 @@ public final class EmberGearSetup {
     public static final DeferredItem<Item> POKER = ITEMS.register(EmberIds.THRALL_POKER,
             () -> new ThrallPokerItem(new Item.Properties().rarity(Rarity.EPIC).fireResistant()));
     public static final DeferredItem<Item> LANTERN = ITEMS.register(EmberIds.EMBER_LANTERN,
-            () -> new EmberTrinketItem(new Item.Properties().stacksTo(1).rarity(Rarity.EPIC).fireResistant(), GearTier.LEGENDARY,
+            () -> new EmberTrinketItem(new Item.Properties().stacksTo(1).rarity(Rarity.EPIC).fireResistant(), GearTier.HEROIC,
                     "item.skyabyss.ember_lantern.desc", true));
 
     private EmberGearSetup() {

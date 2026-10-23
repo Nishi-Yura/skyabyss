@@ -68,7 +68,7 @@ import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 //  - 3 以上: 装備の確率が2倍 (ソフト天井)
 //  - 5 で: 図鑑にまだない装備を一つ必ず受け取る (ハード天井)。全部持っていれば共鳴の欠片に変わる
 //  - 図鑑にない装備を手にすると 0 に戻る (持っているものが重なっても戻らない)
-// 初めて心臓を倒したときは、専用伝説三つから一つを選んで受け取れる
+// 初めて心臓を倒したときは、専用の逸品三つから一つを選んで受け取れる
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class TitanLoot {
     public static final String STONE_WHALE = "stone_whale";
@@ -103,7 +103,7 @@ public final class TitanLoot {
     }
 
     // ---------------------------------------------------------------- 図鑑
-    // 岩鯨の専用伝説 (初回の選択の対象)
+    // 岩鯨の専用の逸品 (初回の選択の対象)
     public static List<Item> exclusives() {
         return List.of(ModItems.CAPTAIN_PIKE.get(), ModItems.WATERWAY_FANG.get(), ModItems.STONE_WHALE_PLATING.get());
     }
@@ -113,7 +113,7 @@ public final class TitanLoot {
                 ModItems.STONE_WHALE_LEGGINGS.get(), ModItems.STONE_WHALE_BOOTS.get());
     }
 
-    // 図鑑: 天井が数える装備 (甲殻4部位・大剣・護符・専用伝説3つ)
+    // 図鑑: 天井が数える装備 (甲殻4部位・大剣・護符・専用の逸品3つ)
     public static List<Item> collection() {
         List<Item> all = new ArrayList<>(armorSet());
         all.add(ModItems.WHALEBONE_GREATSWORD.get());
@@ -696,7 +696,7 @@ public final class TitanLoot {
             owned.append("  ");
         }
         player.sendSystemMessage(owned);
-        // 共鳴の炉での交換 (欠片 30 で専用伝説)
+        // 共鳴の炉での交換 (欠片 30 で専用の逸品)
         ForgeRules.ExchangeState exchange = exchangeState(r);
         if (exchange == ForgeRules.ExchangeState.READY || exchange == ForgeRules.ExchangeState.USED) {
             player.sendSystemMessage(ModText.hint(exchange == ForgeRules.ExchangeState.READY
@@ -723,7 +723,7 @@ public final class TitanLoot {
     }
 
     // ---------------------------------------------------------------- 交換 (共鳴の炉。03 の 2.4節)
-    // 共鳴の欠片 30 で、まだ持っていない専用伝説を一つ。心臓を倒すごとに一度 (周回を促し、急がせない)。
+    // 共鳴の欠片 30 で、まだ持っていない専用の逸品を一つ。心臓を倒すごとに一度 (周回を促し、急がせない)。
     // 天井のカウンタは戻さない (買ったものは「心臓から出た新しい品」ではないため。初回の選択と同じ扱い)
     public static List<Item> missingExclusives(TitanMemoryData.Record r) {
         return exclusives().stream().filter(i -> !r.owned.contains(id(i))).toList();
@@ -739,7 +739,7 @@ public final class TitanLoot {
         return r.lastExchangeClears >= r.clears ? ForgeRules.ExchangeState.USED : ForgeRules.ExchangeState.READY;
     }
 
-    // 炉の画面に見せる: 持っている専用伝説の印 (1 ビットずつ)
+    // 炉の画面に見せる: 持っている専用の逸品の印 (1 ビットずつ)
     public static int ownedExclusiveMask(@Nullable TitanMemoryData.Record r) {
         int mask = 0;
         List<Item> all = exclusives();
@@ -832,7 +832,7 @@ public final class TitanLoot {
                             pityHits++;
                         }
                         if (run == 1) {
-                            // 初回の選択 (専用伝説のどれか一つ)
+                            // 初回の選択 (専用の逸品のどれか一つ)
                             r.owned.add(id(exclusives().get(random.nextInt(3))));
                         }
                         dry[p] = roll.fresh().isEmpty() && !captainFresh ? dry[p] + 1 : 0;

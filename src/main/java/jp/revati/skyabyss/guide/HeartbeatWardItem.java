@@ -9,7 +9,7 @@ public class HeartbeatWardItem extends GearItem {
     private final String titan;
 
     public HeartbeatWardItem(Properties properties, String titan) {
-        super(properties, GearTier.UNCOMMON, "item.skyabyss.heartbeat_ward.desc", false);
+        super(properties, GearTier.COMMON, "item.skyabyss.heartbeat_ward.desc", false);
         this.titan = titan;
     }
 

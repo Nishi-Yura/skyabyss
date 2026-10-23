@@ -53,6 +53,12 @@ public final class EmberForgeDefense extends EmberRoom {
     public void build(RaidCtx ctx) {
         RaidKit.buildCell(ctx, new RaidKit.Spec(13, 13, 9, RaidKit.EMBER));
         var lv = ctx.level();
+        EmberRaidDecor deco = EmberRaidDecor.of(ctx);
+        deco.shell(true);
+        // 入口から大炉への金の筋と、大炉のまわりの輪 (半径 5)
+        deco.goldLine(0, 4, 12);
+        deco.floorRing(0, 0, 5, b(Blocks.POLISHED_BLACKSTONE_BRICKS));
+        deco.floorRing(0, 0, 9.5, b(Blocks.POLISHED_BLACKSTONE_BRICKS));
         forge = ctx.local(0, 0, 0);
         // 大炉: 5x5 の台、3x3 の炉身、上の口、四つの火口 (マグマ)
         RaidKit.fill(lv, ctx.local(-2, 0, -2), ctx.local(2, 0, 2), b(Blocks.POLISHED_BLACKSTONE_BRICKS));
@@ -70,7 +76,67 @@ public final class EmberForgeDefense extends EmberRoom {
             RaidKit.fill(lv, ctx.local(c[0] - 1, 0, c[1] - 1), ctx.local(c[0] + 1, 0, c[1] + 1), b(Blocks.SMOOTH_BASALT));
             RaidKit.fill(lv, ctx.local(c[0], 1, c[1]), ctx.local(c[0], 2, c[1]), b(Blocks.POLISHED_BASALT));
         }
+        decorate(ctx, deco);
         resetState(ctx);
+    }
+
+    // 飾り (docs/design/39 の 4.4 の「守る」): 大炉の上に天井から下りる煙突の覆い (鎖つき)、火鉢の上の吊り鎖、
+    // 敵の湧く八つの所の壁に暗い灰の口、壁は玄武岩の柱と熾の溝。大炉のまわり (半径 3)・火鉢・湧く所・入口からの道は空ける
+    private void decorate(RaidCtx ctx, EmberRaidDecor d) {
+        d.keepAround(0, 0, 3, 7);
+        for (int[] c : BRAZIERS) {
+            d.keepAround(c[0], c[1], 2, 4);
+        }
+        for (int[] s : SPAWNS) {
+            d.keepAround(s[0], s[1], 2, 4);
+        }
+        d.keep(-1, 0, 3, 1, 3, 13);
+        // 煙突の覆い: dy 9 (天井の下) に 5x5、dy 8 に口の輪 (真ん中は空けて炉の火を見せる)、四隅に短い鎖
+        for (int x = -2; x <= 2; x++) {
+            for (int z = -2; z <= 2; z++) {
+                d.place(x, 9, z, Math.abs(x) == 2 || Math.abs(z) == 2 ? EmberRaidDecor.BRICKS : EmberRaidDecor.CHISELED);
+                if (Math.max(Math.abs(x), Math.abs(z)) == 1) {
+                    d.place(x, 8, z, EmberRaidDecor.BRICKS);
+                }
+            }
+        }
+        for (int[] k : new int[][] {{-2, -2}, {2, -2}, {-2, 2}, {2, 2}}) {
+            d.place(k[0], 8, k[1], EmberRaidDecor.CHAIN);
+        }
+        d.put(0, 7, 0, EmberRaidDecor.light(10));
+        // 火鉢の上の吊り鎖 (天井から火鉢の頭の二つ上まで)
+        for (int[] c : BRAZIERS) {
+            for (int y = 6; y <= 9; y++) {
+                d.place(c[0], y, c[1], EmberRaidDecor.CHAIN);
+            }
+            d.place(c[0], 5, c[1], EmberRaidDecor.IRON_BARS);
+        }
+        // 灰の口: 湧く所の後ろの壁 (殻) を、煤けた深層岩の暗い枠に
+        for (int[] s : SPAWNS) {
+            boolean xWall = Math.abs(s[0]) == 11;
+            for (int k = -1; k <= 1; k++) {
+                for (int dy = 1; dy <= 3; dy++) {
+                    int x = xWall ? Integer.signum(s[0]) * 14 : s[0] + k;
+                    int z = xWall ? s[1] + k : Integer.signum(s[1]) * 14;
+                    boolean rim = Math.abs(k) == 1 || dy == 3;
+                    d.repaint(x, dy, z, rim ? b(Blocks.CRACKED_DEEPSLATE_TILES) : b(Blocks.COBBLED_DEEPSLATE));
+                }
+            }
+        }
+        // 大炉の脇の床の明るさ (見えない灯り)
+        for (int[] k : new int[][] {{-4, -4}, {4, -4}, {-4, 4}, {4, 4}}) {
+            if (ctx.level().getBlockState(ctx.local(k[0], 3, k[1])).isAir()) {
+                d.put(k[0], 3, k[1], EmberRaidDecor.light(10));
+            }
+        }
+        d.exitFrame();
+        d.relief();
+        d.veins(3);
+        d.chains(6, 5, 2, 0, 0, 6);
+        d.entry(EmberRaidDecor.Scene.BRAZIER);
+        d.exitRoom();
+        d.lights(4, 6, 9);
+        finishDecor(ctx, d, d.defaultExitLamps());
     }
 
     private void showBrazier(RaidCtx ctx, int i) {
@@ -99,6 +165,7 @@ public final class EmberForgeDefense extends EmberRoom {
     @Override
     public void reset(RaidCtx ctx) {
         generation++;
+        closed(ctx);
         failRequested = false;
         resetState(ctx);
     }
@@ -246,6 +313,7 @@ public final class EmberForgeDefense extends EmberRoom {
             nextWave = t + WAVE_GAP;
             if (wavesCleared >= WAVES) {
                 done = true;
+                opened(ctx);
                 particles(ctx, ParticleTypes.LAVA, fx, forge.getY() + 5, fz, 30, 1.0, 0.2);
                 ctx.level().playSound(null, forge, SoundEvents.BLASTFURNACE_FIRE_CRACKLE, SoundSource.BLOCKS, 1.5f, 0.6f);
             }

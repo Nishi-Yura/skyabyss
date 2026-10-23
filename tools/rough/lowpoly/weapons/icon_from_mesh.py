@@ -25,12 +25,14 @@ WEAPONS = {
     "thunder_wing_bow": "rare", "warden_glaive": "legend", "raiju_claw": "legend",
     "ember_war_axe": "rare", "smith_hammer": "legend", "thrall_poker": "legend",
     "abyss_greatsword": "legend", "abyss_ash_scythe": "legend", "abyss_bell_staff": "legend", "abyss_storm_bow": "legend",
+    "abyss_lamp_sword": "rare", "abyss_sinking_anchor": "legend", "abyss_pulse_dagger": "legend",
 }
 ACCESSORIES = {
     "resonance_charm": "rare", "moss_talisman": "rare", "stone_whale_plating": "legend",
     "tide_chime_charm": "rare", "moontide_pearl": "legend", "tide_watching_shell": "common", "tide_pearl": "common",
     "storm_charm": "rare", "storm_anklet": "rare", "storm_eye_feather": "legend", "gale_feather": "common",
     "kindling_charm": "rare", "ember_mantle": "rare", "ember_lantern": "legend", "ember_horn": "common", "cinder_lamp": "common",
+    "abyss_pulse_listener": "rare", "abyss_lantern_charm": "rare", "abyss_surveyor_plumb": "legend",
 }
 import os
 # 旧アイコンが 3D の形・色と合っている品 (2026-10-23 の比較で確認)。作り直さない

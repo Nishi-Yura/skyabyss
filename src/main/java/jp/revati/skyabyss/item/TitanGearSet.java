@@ -18,7 +18,7 @@ import net.minecraft.world.item.Item;
 //  - titan: 由来の巨神の ID。ModGear.dungeon() と、巨神の記憶 (TitanMemoryData) の記録の名前に使う
 //  - shard: その巨神の素材 (岩鯨の鱗片・潮殻の殻片・雷翼の羽軸・余燼の燠石。強化の燃料・レア以下の分解で戻るもの)
 //  - core: その巨神の心核 (神器の材料。図鑑には数えない)
-//  - pieces: 図鑑の品 (天井が数える装備)。並びは図鑑の並び。exclusive は専用伝説 (初回の選択と交換の対象)
+//  - pieces: 図鑑の品 (天井が数える装備)。並びは図鑑の並び。exclusive は専用の逸品 (初回の選択と交換の対象)
 // 品は ID (文字列) で持つ。まだ登録されていない品は抽選と図鑑から外す (作りかけの巨神でも表を先に書ける)。
 // 登録は TitanGearSets.register。後の巨神 (雷翼・余燼) は、同じ形で表を一つ書いて登録すればよい
 public final class TitanGearSet {

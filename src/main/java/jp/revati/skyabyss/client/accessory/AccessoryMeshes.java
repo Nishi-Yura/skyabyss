@@ -50,7 +50,7 @@ public final class AccessoryMeshes {
             return forced;
         }
         GearTier tier = stack.getItem() instanceof ModGear g ? g.tier() : GearTier.COMMON;
-        return tier.ordinal() >= GearTier.LEGENDARY.ordinal() ? "legend" : tier == GearTier.RARE ? "rare" : "common";
+        return tier.meshTier;
     }
 
     public static LowPolyMesh mesh(ItemStack stack) {

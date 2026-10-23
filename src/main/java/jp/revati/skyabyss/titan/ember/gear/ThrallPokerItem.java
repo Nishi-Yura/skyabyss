@@ -18,7 +18,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.SwordItem;
 import net.minecraft.world.level.block.Blocks;
 
-// 灰被りの火掻き (伝説): 灰被りが握っていた長い火掻き棒 (敵の火掻き棒と同じ形)。攻撃力 11、速さ 1.6、間合い +1。
+// 灰被りの火掻き (ヒロイック): 灰被りが握っていた長い火掻き棒 (敵の火掻き棒と同じ形)。攻撃力 11、速さ 1.65、間合い +1。
 // 打つたびに相手へ「灰」を積む。5 つ (+5 から 4 つ) 積もると灰が固まり、3 秒 鈍足 II と防御 −4 (EmberGearEvents.brittle)。
 // 灰は最後に積んでから 6 秒で崩れる
 public class ThrallPokerItem extends EmberWeaponItem {
@@ -26,12 +26,12 @@ public class ThrallPokerItem extends EmberWeaponItem {
     private static final String ASH_AT = SkyAbyss.MODID + ":poker_ash_at";
 
     public ThrallPokerItem(Properties properties) {
-        // 攻撃力 11 = 1 + 5 + 5、攻撃速度 1.6 = 4 − 2.4
-        super(properties.attributes(SwordItem.createAttributes(TIER, 5, -2.4f)
+        // 攻撃力 11 = 1 + 5 + 5、攻撃速度 1.65 = 4 − 2.35 (ヒロイックなのでエピックの戦斧 17.6 より上。2026-10-24 に 1.6 から)
+        super(properties.attributes(SwordItem.createAttributes(TIER, 5, -2.35f)
                 .withModifierAdded(Attributes.ENTITY_INTERACTION_RANGE,
                         new AttributeModifier(ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "thrall_poker_reach"), EmberGear.POKER_REACH,
                                 AttributeModifier.Operation.ADD_VALUE),
-                        EquipmentSlotGroup.MAINHAND)), GearTier.LEGENDARY, "item.skyabyss.thrall_poker.desc");
+                        EquipmentSlotGroup.MAINHAND)), GearTier.HEROIC, "item.skyabyss.thrall_poker.desc");
     }
 
     public static int stacksNeeded(ItemStack stack) {

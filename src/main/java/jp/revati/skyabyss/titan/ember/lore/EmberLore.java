@@ -28,12 +28,12 @@ public final class EmberLore {
     public static final String PAGE_SOURCE = "ember_back";
 
     public static String inscriptionLore(String inscription) {
-        // lore_ember_mouth → chapter1/inscription_ember_mouth
+        // lore_ember_west → chapter1/inscription_ember_west
         return "chapter1/inscription_" + inscription.substring("lore_".length());
     }
 
     // ---------------------------------------------------------------- 看板 (lang の鍵。末尾の .1〜.4 を除く。B が置く)
-    // 碑文 6 枚 (光る文字、4 行): EmberIds.INSCRIPTIONS → sign.skyabyss.lore_ember_*
+    // 碑文 3 枚 (光る文字、4 行。レイドの部屋の入口の碑): EmberIds.INSCRIPTIONS → sign.skyabyss.lore_ember_*
     public static String sign(String inscription) {
         return "sign.skyabyss." + inscription;
     }
@@ -43,18 +43,6 @@ public final class EmberLore {
             EmberIds.WEST, "sign.skyabyss.ember_west",
             EmberIds.EAST, "sign.skyabyss.ember_east",
             EmberIds.SOUTH, "sign.skyabyss.ember_south");
-
-    // ---------------------------------------------------------------- 囁き (B の EmberWhispers が一度だけ出す。場所 → 鍵)
-    // lore は場所の気配 (語りの色)、hint は使い方 (手がかりの色)。場所は 13 の 3.3節
-    public static final String WHISPER = "message.skyabyss.ember.lore.whisper.";
-    public static final Map<String, String> WHISPERS = ordered(
-            "tongue", WHISPER + "tongue",     // lore  到着 (舌の上)
-            "throat", WHISPER + "throat",     // hint  喉の休み場 (熱の目盛り)
-            "hub", WHISPER + "hub",           // hint  炉心の広間 (熾り石三つ)
-            "west", WHISPER + "west",         // hint  灰の道の岸 (壺・殻・灰溜まり)
-            "east", WHISPER + "east",         // hint  鍛えの間の前室 (色が合ったら打て)
-            "south", WHISPER + "south",       // hint  火守りの谷の入口 (熾・噴気)
-            "heart", WHISPER + "heart");      // lore  熾の底の前室
 
     // ---------------------------------------------------------------- 語りの文 (13 の各章から想定した鍵。担当ごとに頭を分けた)
     public static final String LINE = "message.skyabyss.ember.lore.";

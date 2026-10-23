@@ -258,7 +258,7 @@ public final class SkillManager {
         if (r <= 0 || !d.runeUsable(skill, r)) {
             return 0;
         }
-        // 伝説の書き換えは、その武器を持つあいだだけ
+        // 逸品の書き換えは、その武器を持つあいだだけ
         return Rune.valid(skill, r) && Rune.heldOf(skill, r, player) ? r : 0;
     }
 

@@ -34,7 +34,7 @@
           "do": [
             {
               "type": "quest_start",
-              "quest": "ch1/day1_cairns"
+              "quest": "ch1/day1_traces"
             },
             {
               "type": "quest_start",

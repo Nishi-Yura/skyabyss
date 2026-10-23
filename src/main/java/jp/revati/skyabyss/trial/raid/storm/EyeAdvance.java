@@ -127,6 +127,8 @@ public final class EyeAdvance extends RaidRoom {
                 RaidKit.set(level, o.offset(x, H - 1, z), Blocks.LIGHTNING_ROD.defaultBlockState());
             }
         }
+        // 建築 (docs/design/39 の 4.3): 丸い広間・天井の嵐の目・羽の段の壁 (胸の高さの広間の中には足さない)
+        StormRoomDeco.dressSR6(ctx);
     }
 
     @Override
@@ -142,6 +144,7 @@ public final class EyeAdvance extends RaidRoom {
         keeperSpawned = true;
         if (keeper == null) {
             done = true;
+            StormRoomDeco.exitLit(ctx, true);
             return;
         }
         AttributeInstance hp = keeper.getAttribute(Attributes.MAX_HEALTH);
@@ -176,6 +179,7 @@ public final class EyeAdvance extends RaidRoom {
             }
         } else if (keeperSpawned && keeper != null) {
             done = true;
+            StormRoomDeco.exitLit(ctx, true);
         }
     }
 
@@ -272,6 +276,7 @@ public final class EyeAdvance extends RaidRoom {
         done = false;
         started = false;
         age = 0;
+        StormRoomDeco.exitLit(ctx, false);
     }
 
     @Override

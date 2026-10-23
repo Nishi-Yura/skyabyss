@@ -55,7 +55,7 @@
 | `manual` | コマンドや、ほかの仕組み（会話・クエスト・拍子の担当）からだけ記す | `Lore.unlock` |
 
 - 毎 tick の見回りは、人ごとに時刻をずらして間引く。
-- 岩鯨の試練のコード（`titan/`）には手を入れていない。碑文は碑の文と `TitanBackLayout.LORE_SIGNS` の位置、心臓と番兵長は死亡イベント、天の鍵の欠片は持ち物で拾う。空の影だけは進行中の通過を見るため `SkyEvents.activePass()`（読むだけ）を足した。
+- 岩鯨の試練のコード（`titan/`）には手を入れていない。碑文は碑の文（レイドの部屋の入口の碑。`RaidLore`）、心臓と番兵長は死亡イベント、天の鍵の欠片は持ち物で拾う。空の影だけは進行中の通過を見るため `SkyEvents.activePass()`（読むだけ）を足した。
 - 新しい条件の種類は `LoreTrigger.TYPES` に加え、`LoreEvents` で拾い、`gui.skyabyss.lore.hint.<種類>` の手がかりを両方の lang に書く。
 
 ---
@@ -287,12 +287,10 @@ assets/skyabyss_lore/lang/{ja_jp,en_us}.json   伝承の文 (題・本文・碑�
 | `chapter1/sky_ruins` | 背中の遺跡 | `skyabyss:titan_back` に入る | 運ばれる者 |
 | `chapter1/inscription_west` | 骨玉の間の碑文 | 碑文 `lore_west` を読む | 運ばれる者、共鳴の間の碑文 |
 | `chapter1/inscription_east` | 核の間の碑文 | 碑文 `lore_east` を読む | 鯨骨の番兵長 |
-| `chapter1/inscription_below` | 共鳴の間の碑文 | 碑文 `lore_below` を読む | 前室の碑文 |
-| `chapter1/inscription_vault` | 宝物庫の碑文 | 碑文 `lore_vault` を読む | 白紙の帳面、天の鍵の欠片 |
-| `chapter1/inscription_heart` | 前室の碑文 | 碑文 `lore_heart` を読む | 止まった鼓動、共鳴の間の碑文 |
+| `chapter1/inscription_below` | 共鳴の間の碑文 | 碑文 `lore_below` を読む | 鯨骨の番兵長 |
 | `chapter1/captain` | 鯨骨の番兵長 | `skyabyss:whalebone_captain` が倒れる（倒した人か 32 ブロック以内） | 核の間の碑文 |
-| `chapter1/heart_stilled` | 止まった鼓動 | `skyabyss:stone_whale_heart` が倒れる（倒した人か 40 ブロック以内）、どれかの欠片を持つ | 前室の碑文、天の鍵の欠片 |
-| `chapter1/sky_key` | 天の鍵の欠片 | `skyabyss:sky_key_fragment` を持つ | 宝物庫の碑文 |
+| `chapter1/heart_stilled` | 止まった鼓動 | `skyabyss:stone_whale_heart` が倒れる（倒した人か 40 ブロック以内）、どれかの欠片を持つ | 共鳴の間の碑文、天の鍵の欠片 |
+| `chapter1/sky_key` | 天の鍵の欠片 | `skyabyss:sky_key_fragment` を持つ | 止まった鼓動 |
 | `chapter1/carried_people` | 運ばれる者 | 破れた頁（岩鯨の背） | 背中の遺跡、骨玉の間の碑文 |
 | `chapter1/return_fire` | 返り火 | 破れた頁（岩鯨の背） | 運ばれる者 |
 | `chapter1/whale_song` | 鯨の歌 | 破れた頁（岩鯨の背） | 岩鯨 |
@@ -346,28 +344,6 @@ assets/skyabyss_lore/lang/{ja_jp,en_us}.json   伝承の文 (題・本文・碑�
 背の上の小部屋の壁にあった。
 
 息をしない生き物が、なぜ歌うのだろう。水の中で耳を澄ますと、拍はたしかに下のほうから来ていた。
-
-**宝物庫の碑文**（`chapter1/inscription_vault`）
-
-> 我らは鍵を  
-> 鼓動のそばに納めた  
-> いつの日か  
-> 留まる者が来る  
-
-封印の奥、宝物庫の壁にあった。
-
-「留まる者」という言葉の脇に、爪で引っかいたような細い傷が並んでいる。数えると、七本あった。
-
-**前室の碑文**（`chapter1/inscription_heart`）
-
-> この鼓動は  
-> 巨神のものではない  
-> 深い地の底から  
-> 預かったものだ  
-
-心臓の間の手前、前室の壁にあった。
-
-扉の向こうで、何かが脈を打っている。巨神のものでないなら、持ち主はどこにいるのだろう。
 
 **鯨骨の番兵長**（`chapter1/captain`）
 
@@ -552,7 +528,7 @@ Lore.state(player).has("chapter1/heart_stilled");         // 記されている�
 | --- | --- |
 | JSON の読み込み | 読めないファイルがない。章がない・関連先がない・条件がない・枠に条件がある、がない |
 | 項目の数 | 序章と一〜四章で 12〜75。五章以降は枠だけ |
-| 条件の先 | 碑のキーが `LORE_SIGNS` にある。アイテム・エンティティ・ディメンションが実在する。`kill` と `near_entity` に半径がある |
+| 条件の先 | 碑のキーが `RaidLore.SIGNS`（レイドの部屋の入口の碑）か地上の碑（骨の坑・塩の蔵）にある。アイテム・エンティティ・ディメンションが実在する。`kill` と `near_entity` に半径がある |
 | 文 | ja_jp と en_us の両方に、題・本文・碑文・章の名・手がかり・画面とコマンドの文がある。碑文の写しに使う碑の行が lang にある |
 | 送る形 | 一覧を書いて読み戻すと同じ |
 | 折り返し | 幅を超えない、字が欠けない、行頭に句読点・閉じかっこが来ない、行末に開きかっこが残らない。英語は語の途中で切らない |

@@ -1,0 +1,36 @@
+{
+  "category": "sub",
+  "order": 58,
+  "repeat": "weekly",
+  "board": true,
+  "chapter": "prologue",
+  "stages": [
+    {
+      "id": "round",
+      "objectives": [
+        {
+          "id": "round",
+          "type": "signal",
+          "target": "ch1_trace_round",
+          "count": 2,
+          "party": false
+        }
+      ]
+    }
+  ],
+  "reward": {
+    "xp": 20,
+    "items": [
+      {
+        "item": "minecraft:bread",
+        "count": 2
+      }
+    ],
+    "do": [
+      {
+        "type": "lore",
+        "entry": "ch1/trace_rounds"
+      }
+    ]
+  }
+}

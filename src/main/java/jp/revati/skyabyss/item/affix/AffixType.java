@@ -4,7 +4,7 @@ import org.jetbrains.annotations.Nullable;
 
 // ランダムな特性 (Affix) の種類。表と数値の理由は docs/design/03_gear_and_endgame.md 8章。
 //  - 武器の特性は手に持っているときだけ、防具の特性はその部位に着ているときだけ効く
-//  - 値の幅はレアのもの。伝説は幅の上下を LEGENDARY_SCALE 倍する
+//  - 値の幅はレアのもの。ヒロイック以上は幅の上下を LEGENDARY_SCALE 倍する
 //  - percent の値は割合 (0.05 = 5%) で持つ
 public enum AffixType {
     // ---- 武器 (メインハンド)
@@ -27,7 +27,7 @@ public enum AffixType {
     CALM("calm", Slot.ARMOR, 15, 3, 6, 1, false),
     STEADY("steady", Slot.ARMOR, 15, 0.05, 0.10, 0.01, true);
 
-    // 伝説は値の幅を広げる (下も上も 1.25 倍)
+    // ヒロイック以上は値の幅を広げる (下も上も 1.25 倍)
     public static final double LEGENDARY_SCALE = 1.25;
 
     public enum Slot {

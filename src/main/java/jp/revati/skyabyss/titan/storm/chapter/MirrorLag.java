@@ -11,9 +11,11 @@ import jp.revati.skyabyss.client.story.MirrorLagClient;
 import jp.revati.skyabyss.lore.Lore;
 import jp.revati.skyabyss.notice.Notice;
 import jp.revati.skyabyss.story.Chapters;
-import jp.revati.skyabyss.titan.storm.back.StormBackLayout;
+import jp.revati.skyabyss.titan.group.Groups;
 import jp.revati.skyabyss.titan.storm.back.StormBackSetup;
+import jp.revati.skyabyss.titan.storm.heart.StormHeartArena;
 import jp.revati.skyabyss.titan.storm.mob.StormMob;
+import jp.revati.skyabyss.trial.TrialRoute;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
@@ -30,10 +32,10 @@ import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 
-// 眼の間の遅れた影 (docs/design/34 の 1 章・4.4、12 の 4.3)。三章の人が雷翼の背の眼の間に入ると、一度だけ、近くの羽鏡に自分の姿が映り、
-// 映った影が少し遅れて動く。説明はしない (正体は三章では言わない。01)。
-//   条件   雷翼の背 (storm_back)、章が三章 (Chapters.STORM)、伝承 ch3/mirror_lag をまだ持たない、眼の間に 5 秒いる、
-//          3〜10 ブロック先に羽鏡があり、その鏡で映した位置が眼の間の中に収まる
+// 竜骨の間の入口の遅れた影 (docs/design/34 の 1 章・4.4、12 の 4.3)。三章の人が雷翼の順路の段 4 で竜骨の間 (心臓の間) へ運ばれると、一度だけ、
+// 入口の内側の羽鏡の壁 (StormHeartArena.mirrorWall) に自分の姿が映り、映った影が少し遅れて動く。説明はしない (正体は三章では言わない。01)。
+//   条件   雷翼の背 (storm_back)、章が三章 (Chapters.STORM)、雷翼の順路の段 4 の参加者 (TrialRoute)、伝承 ch3/mirror_lag をまだ持たない、
+//          竜骨の間の中に 5 秒いる、3〜10 ブロック先に羽鏡があり、その鏡で映した位置が丸い部屋の中に収まる
 //   映し方 鏡の台の中心を通る面 (人から見て遠い軸と直角) で、人の位置を折り返す。面と影の遅れ (DELAY tick)・長さはクライアントへ送る (MirrorLagPayload)。
 //          クライアントは自分の世界にだけ人影 (見る者の形。06) を置き、DELAY 前の自分の位置と向きを折り返して動かす (client/story/MirrorLagClient)。
 //          見つめ続けると、影が先にこちらを向いて薄れる
@@ -47,7 +49,7 @@ public final class MirrorLag {
     public static final double MAX_DIST = 10;
     private static final String PROTOCOL_VERSION = "ch3g-1";
 
-    // 人 → 眼の間にいた秒数 (保存しない)
+    // 人 → 竜骨の間にいた秒数 (保存しない)
     private static final Map<UUID, Integer> DWELLING = new HashMap<>();
     // 見せた人 (伝承が記されるまでの間に二度見せない。保存しない)
     private static final java.util.Set<UUID> SHOWN = new java.util.HashSet<>();
@@ -90,29 +92,26 @@ public final class MirrorLag {
                 .playToClient(Payload.TYPE, Payload.STREAM_CODEC, (payload, context) -> MirrorLagClient.receive(payload));
     }
 
-    // 人の位置から、いちばん近い羽鏡の面 (映した位置が眼の間に収まるもの)。なければ null
+    // 人の位置から、いちばん近い羽鏡の面 (映した位置が丸い部屋に収まるもの)。なければ null
     @Nullable
     public static Plane planeFor(ServerLevel level, Vec3 at) {
         Plane best = null;
         double bestD = Double.MAX_VALUE;
-        for (int c = 0; c < 5; c++) {
-            for (int r = 0; r < 5; r++) {
-                BlockPos cell = StormBackLayout.gridCell(c, r);
-                if (!level.getBlockState(cell).is(StormBackSetup.MIRROR.get())) {
-                    continue;
-                }
-                Plane p = planeAt(cell, at);
-                double d = Math.hypot(at.x - (cell.getX() + 0.5), at.z - (cell.getZ() + 0.5));
-                if (p != null && d < bestD) {
-                    best = p;
-                    bestD = d;
-                }
+        for (BlockPos cell : StormHeartArena.mirrorWall()) {
+            if (!level.getBlockState(cell).is(StormBackSetup.MIRROR.get())) {
+                continue;
+            }
+            Plane p = planeAt(cell, at);
+            double d = Math.hypot(at.x - (cell.getX() + 0.5), at.z - (cell.getZ() + 0.5));
+            if (p != null && d < bestD) {
+                best = p;
+                bestD = d;
             }
         }
         return best;
     }
 
-    // 鏡の台 cell で at を映す面 (遠い軸と直角)。距離と、映した位置が眼の間の中かを見る
+    // 鏡の台 cell で at を映す面 (遠い軸と直角)。距離と、映した位置が丸い部屋の中かを見る
     @Nullable
     public static Plane planeAt(BlockPos cell, Vec3 at) {
         double cx = cell.getX() + 0.5;
@@ -124,17 +123,18 @@ public final class MirrorLag {
             return null;
         }
         Plane p = Math.abs(dx) >= Math.abs(dz) ? new Plane(0, cx) : new Plane(1, cz);
-        Vec3 r = p.reflect(at);
-        StormBackLayout.Area hall = StormBackLayout.EYE_HALL;
-        if (r.x < hall.x1() + 1 || r.x > hall.x2() || r.z < hall.z1() + 1 || r.z > hall.z2()) {
-            return null;
-        }
-        return p;
+        return StormHeartArena.inRoom(p.reflect(at)) ? p : null;
+    }
+
+    // 雷翼の順路の段 4 の参加者か (背の次元で、その人のグループの記録を見る)
+    public static boolean onStormRoute(ServerLevel back, java.util.UUID group, UUID player) {
+        return TrialRoute.step(back, group) >= TrialRoute.LAST_STEP && !TrialRoute.mid(back, group) && TrialRoute.isParticipant(back, group, player);
     }
 
     public static boolean eligible(ServerPlayer p) {
         return !(p instanceof FakePlayer) && p.level().dimension() == StormMob.STORM_BACK && Chapters.of(p) == Chapters.STORM
-                && !Lore.state(p).has(Ch3Ground.PAGE_MIRROR) && StormBackLayout.EYE_HALL.contains(p.blockPosition());
+                && !Lore.state(p).has(Ch3Ground.PAGE_MIRROR) && StormHeartArena.arena().contains(p.position())
+                && onStormRoute(p.serverLevel(), Groups.keyOf(p), p.getUUID());
     }
 
     @SubscribeEvent
@@ -163,7 +163,12 @@ public final class MirrorLag {
         PacketDistributor.sendToPlayer(player, new Payload(plane.axis(), plane.plane(), DELAY, DURATION));
         Notice.narrate(player, "message.skyabyss.ch3g.mirror.1");
         StormChapter.later(player.server, 60, () -> Notice.narrate(player, "message.skyabyss.ch3g.mirror.2"));
-        StormChapter.later(player.server, 180, () -> Lore.unlock(player, Ch3Ground.PAGE_MIRROR, true));
+        StormChapter.later(player.server, 180, () -> record(player));
+    }
+
+    // 伝承を記す (一度だけ。自己テストからも)
+    public static void record(ServerPlayer player) {
+        Lore.unlock(player, Ch3Ground.PAGE_MIRROR, true);
     }
 
     static void forget() {

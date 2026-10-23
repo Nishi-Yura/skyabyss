@@ -53,7 +53,7 @@ import net.neoforged.neoforge.event.RegisterCommandsEvent;
 // - 巨神の記憶 (天井) と図鑑は巨神ごとの記録 (TitanMemoryData の "ember")。ほかの巨神の記録とは別に数える
 //   新しい品の出ない撃破で +1、3 以上で図鑑の確率 2 倍、5 で未所持を一つ保証。図鑑にない品を手にすると 0
 // - 天の鍵の欠片は一人一回 (四つ目。巨神ごと)。受け取ったとき、四体を止めて欠片が四つなら、story の SkyKey が 1 秒ごとの見回りで一つの鍵にする
-// - 初めての撃破では、専用伝説三つから一つを選ぶ
+// - 初めての撃破では、専用の逸品三つから一つを選ぶ
 // 表は品の ID で持ち、登録されていない品は抽選から外す (図鑑にも記さない)
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class EmberLoot {
@@ -70,7 +70,7 @@ public final class EmberLoot {
     public static final String SHARD = EmberGear.SHARD;
     public static final String CORE = EmberGear.CORE;
     public static final String HORN = EmberIds.id(EmberIds.EMBER_HORN).toString();
-    // 専用伝説: 鍛え手の大鎚、灰被りの火掻き、余燼の灯
+    // 専用の逸品: 鍛え手の大鎚、灰被りの火掻き、余燼の灯
     public static final List<String> EXCLUSIVES = EmberGear.SET.exclusives();
 
     public static final float CORE_CHANCE = 0.25f;
@@ -88,7 +88,7 @@ public final class EmberLoot {
         return SkyAbyss.MODID + ":" + path;
     }
 
-    // 図鑑 (10 品): 鎧 4、戦斧、外套、護符、専用伝説 3
+    // 図鑑 (10 品): 鎧 4、戦斧、外套、護符、専用の逸品 3
     public static List<String> collection() {
         return EmberGear.SET.collection();
     }
@@ -337,7 +337,7 @@ public final class EmberLoot {
         long total = 0;
         for (int i = 0; i < runs; i++) {
             TitanMemoryData.Record r = new TitanMemoryData.Record();
-            // 初回は専用伝説の中でいちばん出にくい余燼の灯を選ぶ (6.4節の前提)
+            // 初回は専用の逸品の中でいちばん出にくい余燼の灯を選ぶ (6.4節の前提)
             r.owned.add(EmberGear.LANTERN);
             int n = 0;
             while (collected(r) < collection().size() && n < 200) {

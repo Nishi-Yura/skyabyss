@@ -29,9 +29,7 @@ import net.minecraft.world.item.ItemStack;
 // 装備の自由度 (docs/design/31 の A02 アスペクト・A06 技の修飾ルーン・A07 ソケット・B15 世代刻み) の決まり。
 // 画面 (forge) もコマンドも自己テストも、ここだけを呼ぶ。対象は特性の付く装備 (レア以上の武器・防具・盾)
 public final class GearFreedom {
-    // 穴の抽選 (レア / 伝説): 0 個・1 個・2 個
-    private static final int[] SOCKET_ODDS_RARE = {50, 38, 12};
-    private static final int[] SOCKET_ODDS_LEGENDARY = {30, 45, 25};
+    // 穴の抽選 (0 個・1 個・2 個の重み) は階級の表 GearTier.socketOdds
 
     // 炉の費用 (共鳴の結晶)
     public static final int EXTRACT_DESTROY_CRYSTALS = 2;
@@ -81,7 +79,7 @@ public final class GearFreedom {
 
     // ---------------------------------------------------------------- 抽選 (手にしたとき・古い装備)
     public static int rollSockets(GearTier tier, RandomSource random) {
-        int[] odds = tier == GearTier.LEGENDARY ? SOCKET_ODDS_LEGENDARY : SOCKET_ODDS_RARE;
+        int[] odds = tier.socketOdds();
         int total = 0;
         for (int o : odds) {
             total += o;
@@ -202,10 +200,10 @@ public final class GearFreedom {
     }
 
     // ---------------------------------------------------------------- アスペクト (A02)
-    // その伝説自身の書き換え (なければ null)
+    // その品自身の書き換え (ヒロイック以上の品。なければ null)
     @Nullable
     public static Rune ownRune(ItemStack stack) {
-        if (stack.isEmpty() || !AffixRules.legendary(stack)) {
+        if (stack.isEmpty() || !AffixRules.wide(stack)) {
             return null;
         }
         String path = BuiltInRegistries.ITEM.getKey(stack.getItem()).getPath();
@@ -253,9 +251,9 @@ public final class GearFreedom {
         return r != null && r.legendary() ? r : null;
     }
 
-    // 刻める装備: レア (伝説は自分の書き換えがある) の武器か防具で、まだアスペクトがないもの
+    // 刻める装備: レアかエピック (ヒロイック以上は自分の書き換えがある) の武器か防具で、まだアスペクトがないもの
     public static boolean canImprint(ItemStack stack, ItemStack core) {
-        return coreRune(core) != null && eligible(stack) && stack.getItem() instanceof ModGear g && g.tier() == GearTier.RARE
+        return coreRune(core) != null && eligible(stack) && stack.getItem() instanceof ModGear g && g.tier().aspectHost()
                 && extras(stack).aspect().isEmpty();
     }
 

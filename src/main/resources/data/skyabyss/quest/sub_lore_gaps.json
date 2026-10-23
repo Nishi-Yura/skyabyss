@@ -34,8 +34,6 @@
             "chapter1/inscription_west",
             "chapter1/inscription_east",
             "chapter1/inscription_below",
-            "chapter1/inscription_heart",
-            "chapter1/inscription_vault",
             "chapter1/captain",
             "chapter1/heart_stilled",
             "chapter1/sky_key",
@@ -44,7 +42,7 @@
             "chapter1/whale_song",
             "chapter1/tide_hours"
           ],
-          "count": 11
+          "count": 9
         }
       ],
       "xp": 60

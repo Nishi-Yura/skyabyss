@@ -118,6 +118,7 @@ final class EmberRaid2SelfTest {
         RaidCtx ctx = EmberRaidSelfTest.newCtx(level, 41);
         room.build(ctx);
         EmberRaidSelfTest.sealed(level, ctx, f, "ER4");
+        EmberRaidSelfTest.decor(f, room, "ER4");
         EmberRaidSelfTest.dumpPlan(level, ctx, "ER4", dump);
         FakePlayer a = EmberRaidSelfTest.fake(level, "a4");
         FakePlayer b = EmberRaidSelfTest.fake(level, "b4");
@@ -222,6 +223,7 @@ final class EmberRaid2SelfTest {
         RaidCtx ctx = EmberRaidSelfTest.newCtx(level, 51);
         room.build(ctx);
         EmberRaidSelfTest.sealed(level, ctx, f, "ER5");
+        EmberRaidSelfTest.decor(f, room, "ER5");
         EmberRaidSelfTest.dumpPlan(level, ctx, "ER5", dump);
         FakePlayer a = EmberRaidSelfTest.fake(level, "a5");
         fakes.add(a);
@@ -282,6 +284,7 @@ final class EmberRaid2SelfTest {
         RaidCtx ctx = EmberRaidSelfTest.newCtx(level, 61);
         room.build(ctx);
         EmberRaidSelfTest.sealed(level, ctx, f, "ER6");
+        EmberRaidSelfTest.decor(f, room, "ER6");
         EmberRaidSelfTest.dumpPlan(level, ctx, "ER6", dump);
         FakePlayer a = EmberRaidSelfTest.fake(level, "a6");
         fakes.add(a);
