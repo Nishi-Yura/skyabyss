@@ -1,0 +1,123 @@
+# 五章「深淵」の装備 (03 の 12.1) と四章の旅装 (余燼のアンコモン、03 の 5.8) の見た目。./gradlew runShots -Pscript=tools/shots/gear_gaps.txt -PshotsName=gear_gaps
+# 出力: run/shots/gear_gaps/... (docs/review/gear_gaps/ へ写す)。音なし・日本語 (ShotRunner の決まり)
+world shots flat
+size 1280 720
+timeout 900
+render 8
+
+cmd time set noon
+cmd weather clear
+cmd gamemode creative
+cmd kill @e[type=minecraft:armor_stand,distance=0..]
+# 防具立て: 淵潜りの鎧に剣・錨・短剣。右端は灰歩きの旅装 (余燼のアンコモン)
+cmd summon armor_stand 0 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[0f,0f],ArmorItems:[{id:"skyabyss:abyss_diver_boots",count:1},{id:"skyabyss:abyss_diver_leggings",count:1},{id:"skyabyss:abyss_diver_chestplate",count:1},{id:"skyabyss:abyss_diver_helmet",count:1}],HandItems:[{id:"skyabyss:abyss_lamp_sword",count:1},{}]}
+cmd summon armor_stand 2.5 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[180f,0f],ArmorItems:[{id:"skyabyss:abyss_diver_boots",count:1},{id:"skyabyss:abyss_diver_leggings",count:1},{id:"skyabyss:abyss_diver_chestplate",count:1},{id:"skyabyss:abyss_diver_helmet",count:1}],HandItems:[{id:"skyabyss:abyss_sinking_anchor",count:1},{}]}
+cmd summon armor_stand -2.5 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[40f,0f],ArmorItems:[{id:"skyabyss:abyss_diver_boots",count:1},{id:"skyabyss:abyss_diver_leggings",count:1},{id:"skyabyss:abyss_diver_chestplate",count:1},{id:"skyabyss:abyss_diver_helmet",count:1}],HandItems:[{id:"skyabyss:abyss_pulse_dagger",count:1},{}]}
+cmd summon armor_stand -5 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[0f,0f],ArmorItems:[{id:"skyabyss:ash_walking_boots",count:1},{id:"skyabyss:ash_walking_leggings",count:1},{id:"skyabyss:ash_walking_chestplate",count:1},{id:"skyabyss:ash_walking_helmet",count:1}],HandItems:[{id:"skyabyss:ember_war_axe",count:1},{}]}
+cmd gamemode spectator
+camera -1.2 -58.6 6 180 8
+waitchunks
+wait 20
+hud off
+chat clear
+shot stands_day
+camera 0 -60 2.6 180 12
+wait 10
+shot diver_front_close
+camera 2.5 -60 2.6 180 12
+wait 10
+shot diver_back_close
+camera -2.5 -60 2.6 180 12
+wait 10
+shot diver_three_quarter_close
+camera -5 -60 2.6 180 12
+wait 10
+shot ash_walking_close
+cmd time set midnight
+wait 10
+camera -1.2 -58.6 6 180 8
+wait 10
+shot stands_night
+# 一人称と三人称で手に持つ
+cmd time set noon
+cmd gamemode creative
+camera 0 -59 8 180 5
+hud on
+cmd item replace entity @s weapon.mainhand with skyabyss:abyss_lamp_sword
+perspective first
+wait 10
+chat clear
+shot hand_lamp_sword
+perspective front
+hud off
+bodyyaw 35
+wait 10
+shot tp_lamp_sword
+cmd item replace entity @s weapon.mainhand with skyabyss:abyss_sinking_anchor
+perspective first
+hud on
+bodyyaw 0
+wait 10
+chat clear
+shot hand_sinking_anchor
+perspective front
+hud off
+bodyyaw 35
+wait 10
+shot tp_sinking_anchor
+cmd item replace entity @s weapon.mainhand with skyabyss:abyss_pulse_dagger
+perspective first
+hud on
+bodyyaw 0
+wait 10
+chat clear
+shot hand_pulse_dagger
+perspective front
+hud off
+bodyyaw 35
+wait 10
+shot tp_pulse_dagger
+# 体に付けた装飾 (聴き筒・錘) と手の護符
+accequip abyss_pulse_listener abyss_surveyor_plumb
+cmd item replace entity @s weapon.mainhand with skyabyss:abyss_lantern_charm
+bodyyaw 20
+wait 10
+shot tp_trinkets_worn
+bodyyaw 200
+wait 10
+shot tp_trinkets_worn_back
+perspective first
+hud on
+bodyyaw 0
+wait 10
+chat clear
+shot hand_lantern_charm
+accequip
+# 持ち物の画面 (アイコン)
+cmd clear @s
+cmd give @s skyabyss:abyss_diver_helmet
+cmd give @s skyabyss:abyss_diver_chestplate
+cmd give @s skyabyss:abyss_diver_leggings
+cmd give @s skyabyss:abyss_diver_boots
+cmd give @s skyabyss:abyss_lamp_sword
+cmd give @s skyabyss:abyss_sinking_anchor
+cmd give @s skyabyss:abyss_pulse_dagger
+cmd give @s skyabyss:abyss_pulse_listener
+cmd give @s skyabyss:abyss_lantern_charm
+cmd give @s skyabyss:abyss_surveyor_plumb
+cmd give @s skyabyss:abyss_anchor_iron 16
+cmd give @s skyabyss:abyss_core
+cmd give @s skyabyss:resonance_shard_abyss 8
+cmd give @s skyabyss:ash_walking_helmet
+cmd give @s skyabyss:ash_walking_chestplate
+cmd give @s skyabyss:ash_walking_leggings
+cmd give @s skyabyss:ash_walking_boots
+cmd give @s skyabyss:soot_whetstone
+cmd give @s skyabyss:ash_baked_bread
+cmd gamemode survival
+chat clear
+open inventory
+wait 10
+shot inventory_icons
+close
+quit
