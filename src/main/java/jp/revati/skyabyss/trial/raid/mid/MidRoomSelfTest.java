@@ -111,7 +111,17 @@ public final class MidRoomSelfTest {
                 continue;
             }
             TrialRoute.clearAll();
-            player = FakePlayerFactory.get(back, new GameProfile(UUID.fromString("7a0b1d00-0000-4000-8000-00000000a1d" + index), "raid_mid_" + index));
+            // 世界に入れた偽の人 (中ボスが狙えるように。潮招きは狙う人がいないと砂に潜ったまま出てこない)
+            if (player != null && !player.isRemoved()) {
+                player.discard();
+            }
+            player = new net.neoforged.neoforge.common.util.FakePlayer(back, new GameProfile(UUID.fromString("7a0b1d00-0000-4000-8000-00000000a1d" + index), "raid_mid_" + index)) {
+                @Override
+                public boolean isInvulnerableTo(net.minecraft.world.damagesource.DamageSource source) {
+                    return false;
+                }
+            };
+            back.addFreshEntity(player);
             group = Groups.keyOf(player);
             List<ServerPlayer> ps = List.of(player);
             ServerLevel lv = back;
@@ -191,7 +201,7 @@ public final class MidRoomSelfTest {
                 boss.invulnerableTime = 0;
                 boss.hurt(back.damageSources().playerAttack(player), 20f);
                 if (boss.getHealth() >= before) {
-                    return timeout(800, "a solo hit to damage the boss"); // 潮招きは潜る・守りの間 (数秒〜十数秒) は傷が通らない
+                    return timeout(400, "a solo hit to damage the boss"); // 潮招きは潜る・守りの間 (数秒) は傷が通らない
                 }
                 check(scaleOk(boss), "the boss is scaled for more than one player");
                 stage = Titans.TIDE_SHELL.equals(titan) && !wiped ? 7 : 9;
@@ -262,6 +272,9 @@ public final class MidRoomSelfTest {
                 BackGroupData.get(back).remove(group);
             }
         } finally {
+            if (player != null && !player.isRemoved()) {
+                player.discard();
+            }
             TrialRoute.clearAll();
         }
     }

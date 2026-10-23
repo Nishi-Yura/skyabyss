@@ -369,16 +369,26 @@ public final class EmberBodyBuilder {
     // ---------------------------------------------------------------- 体の外の封じた熾の底 (trial/raid/InstanceArenas。版 33)
     // 体の芯の石で詰めた箱 → 熾の底の箱 (仮の床) → 入口 → 前室 → 休み場 heart → 入口の通り道の床 → 碑文 → 心臓の担当の部屋 (EmberBackRooms) → 大門
     public static void buildHeartInstance(ServerLevel level) {
+        heartFill(level).runAll();
+        buildHeartInstance(level, false);
+    }
+
+    // 熾の底のまわりを体の芯の石で詰める箱 (tick に分けて詰められる。trial/raid/InstanceArenas.addHeartSteps)
+    public static jp.revati.skyabyss.trial.raid.InstanceArenas.Fill heartFill(ServerLevel level) {
+        EmberBodyBuilder b = new EmberBodyBuilder(level);
+        Box h = HEART;
+        return new jp.revati.skyabyss.trial.raid.InstanceArenas.Fill(h.minX() - 3, h.maxX() + 3, HEART_ANTE.minZ() - 3, h.maxZ() + 3, h.minY() - 3, h.maxY() + 8,
+                (x, y, z) -> b.kit.set(x, y, z, EmberKit.CORE));
+    }
+
+    // 詰めた箱の中に、元の形を掘って建てる (withFill = 先に箱を詰める)
+    public static void buildHeartInstance(ServerLevel level, boolean withFill) {
+        if (withFill) {
+            heartFill(level).runAll();
+        }
         long t0 = System.nanoTime();
         EmberBodyBuilder b = new EmberBodyBuilder(level);
         Box h = HEART;
-        for (int x = h.minX() - 3; x <= h.maxX() + 3; x++) {
-            for (int z = HEART_ANTE.minZ() - 3; z <= h.maxZ() + 3; z++) {
-                for (int y = h.minY() - 3; y <= h.maxY() + 8; y++) {
-                    b.kit.set(x, y, z, EmberKit.CORE);
-                }
-            }
-        }
         b.carve(h);
         int f = floorOf("heart");
         for (int x = h.minX(); x <= h.maxX(); x++) {

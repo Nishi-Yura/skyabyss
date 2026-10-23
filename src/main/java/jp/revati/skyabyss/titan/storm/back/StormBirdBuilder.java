@@ -299,15 +299,24 @@ public final class StormBirdBuilder {
     // 体の外の封じた竜骨の間 (trial/raid/InstanceArenas。版 34): 竜骨の材質で詰めた箱 → 前室 (休み場 heart) → 入口 → 竜骨の間 → 柱・風穴・灯り →
     // 心臓の担当の形 (StormHeartArena.buildShape) → 大門 → 焚き火と碑文
     public static void buildHeartInstance(net.minecraft.server.level.ServerLevel level) {
+        heartFill(level).runAll();
+        buildHeartInstance(level, false);
+    }
+
+    // 竜骨の間のまわりを竜骨の石で詰める箱 (tick に分けて詰められる。trial/raid/InstanceArenas.addHeartSteps)
+    public static jp.revati.skyabyss.trial.raid.InstanceArenas.Fill heartFill(net.minecraft.server.level.ServerLevel level) {
         StormKit kit = new StormKit(level);
         int r0 = HEART_ROOM_RADIUS + 4;
-        for (int x = HEART_ROOM.getX() - r0; x <= HEART_ROOM.getX() + r0; x++) {
-            for (int z = KEEL_ANTE.z1() - 4; z <= HEART_ROOM.getZ() + r0; z++) {
-                for (int y = HEART_ROOM.getY() - 4; y <= HEART_ROOM_CEILING + 3; y++) {
-                    kit.put(x, y, z, StormKit.wall(Style.KEEL, x, y, z));
-                }
-            }
+        return new jp.revati.skyabyss.trial.raid.InstanceArenas.Fill(HEART_ROOM.getX() - r0, HEART_ROOM.getX() + r0, KEEL_ANTE.z1() - 4, HEART_ROOM.getZ() + r0, HEART_ROOM.getY() - 4,
+                HEART_ROOM_CEILING + 3, (x, y, z) -> kit.put(x, y, z, StormKit.wall(Style.KEEL, x, y, z)));
+    }
+
+    // 詰めた箱の中に、元の形を掘って建てる (withFill = 先に箱を詰める)
+    public static void buildHeartInstance(net.minecraft.server.level.ServerLevel level, boolean withFill) {
+        if (withFill) {
+            heartFill(level).runAll();
         }
+        StormKit kit = new StormKit(level);
         kit.room(KEEL_ANTE, Style.KEEL, 3);
         int hx = HEART_ROOM.getX();
         // 竜骨の間の入口 (前室の南の口)

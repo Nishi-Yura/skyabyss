@@ -30,16 +30,24 @@ public final class HeartArenaBuilder {
 
     // 体の外の封じた心臓の間 (詰めた箱 → 元の部屋 → 大門 → 碑文)
     public static void buildInstance(net.minecraft.server.level.ServerLevel level) {
+        heartFill(level).runAll();
+        buildInstance(level, false);
+    }
+
+    // 心臓の間のまわりを肉の材質で詰める箱 (tick に分けて詰められる。trial/raid/InstanceArenas.addHeartSteps)
+    public static jp.revati.skyabyss.trial.raid.InstanceArenas.Fill heartFill(net.minecraft.server.level.ServerLevel level) {
         BuildKit kit = new BuildKit(level, RandomSource.create(20261015L));
-        RandomSource r = kit.random;
         int y2 = Math.max(ARENA_TOP, FLOOR + 22) + 1;
-        for (int x = HEART_CX - EXTENT - 1; x <= HEART_CX + EXTENT + 1; x++) {
-            for (int z = HEART.z1() - 2; z <= HEART_REST.z2() + 2; z++) {
-                for (int y = FLOOR - 1; y <= y2; y++) {
-                    kit.set(x, y, z, flesh(r));
-                }
-            }
+        return new jp.revati.skyabyss.trial.raid.InstanceArenas.Fill(HEART_CX - EXTENT - 1, HEART_CX + EXTENT + 1, HEART.z1() - 2, HEART_REST.z2() + 2, FLOOR - 1, y2,
+                (x, y, z) -> kit.set(x, y, z, flesh(kit.random)));
+    }
+
+    // 詰めた箱の中に、元の形を掘って建てる (withFill = 先に箱を詰める)
+    public static void buildInstance(net.minecraft.server.level.ServerLevel level, boolean withFill) {
+        if (withFill) {
+            heartFill(level).runAll();
         }
+        BuildKit kit = new BuildKit(level, RandomSource.create(20261015L));
         build(kit);
         BossGates.buildHeart(kit);
         for (Inscription lore : LORE_SIGNS) {

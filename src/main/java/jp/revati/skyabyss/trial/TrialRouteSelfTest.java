@@ -211,12 +211,9 @@ public final class TrialRouteSelfTest {
     }
 
     // 段 1 の休み場の足もとが固い (背が建ててある) か
+    // 背が建っているか: 乗り込みで着く到着の台に立てる (巨神の中は建てないので、台だけを見る。docs/design/32 の 2.5)
     private static boolean ready(ServerLevel back, String titan) {
-        String rest = TrialRoute.restOf(titan, firstDraw(titan), 1, false);
-        BlockPos at = rest == null ? null : TrialRoute.spawnOf(back, titan, rest);
-        if (at == null) {
-            return false;
-        }
+        BlockPos at = RouteSeals.safeFeet(titan);
         back.getChunk(at);
         return !back.getBlockState(at.below()).isAir() && back.getBlockState(at).isAir();
     }

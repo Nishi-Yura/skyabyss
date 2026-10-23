@@ -274,18 +274,28 @@ public final class TideHeartArena {
 
     // 体の外の封じた心臓の間 (InstanceArenas): 海の石で詰めた箱 → 元の部屋と前室 → 前室の南の休み場 heart (焚き火と碑文)
     public static void buildInstance(ServerLevel back) {
-        int flags = 2 | 16;
+        heartFill(back).runAll();
+        buildInstance(back, false);
+    }
+
+    // 殻の底のまわりを海の石で詰める箱 (tick に分けて詰められる。trial/raid/InstanceArenas.addHeartSteps)
+    public static jp.revati.skyabyss.trial.raid.InstanceArenas.Fill heartFill(ServerLevel back) {
         BlockState wall = Blocks.PRISMARINE_BRICKS.defaultBlockState();
         BlockPos.MutableBlockPos p = new BlockPos.MutableBlockPos();
         var rest = jp.revati.skyabyss.titan.tide.back.TideBackLayout.HEART_REST;
         int zTop = Math.max(rest.z2(), CZ + ANTE_Z1 + 1) + 3;
-        for (int x = CX - RADIUS - 5; x <= CX + RADIUS + 5; x++) {
-            for (int z = CZ - RADIUS - 5; z <= zTop; z++) {
-                for (int y = FLOOR - 3; y <= FLOOR + 18; y++) {
-                    back.setBlock(p.set(x, y, z), wall, flags);
-                }
-            }
+        return new jp.revati.skyabyss.trial.raid.InstanceArenas.Fill(CX - RADIUS - 5, CX + RADIUS + 5, CZ - RADIUS - 5, zTop, FLOOR - 3, FLOOR + 18,
+                (x, y, z) -> back.setBlock(p.set(x, y, z), wall, 2 | 16));
+    }
+
+    // 詰めた箱の中に、元の形を掘って建てる (withFill = 先に箱を詰める)
+    public static void buildInstance(ServerLevel back, boolean withFill) {
+        if (withFill) {
+            heartFill(back).runAll();
         }
+        int flags = 2 | 16;
+        BlockPos.MutableBlockPos p = new BlockPos.MutableBlockPos();
+        var rest = jp.revati.skyabyss.titan.tide.back.TideBackLayout.HEART_REST;
         build(back);
         BlockState air = Blocks.AIR.defaultBlockState();
         for (int x = rest.x1(); x <= rest.x2(); x++) {

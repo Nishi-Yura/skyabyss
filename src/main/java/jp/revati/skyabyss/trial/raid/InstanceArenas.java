@@ -30,7 +30,79 @@ public final class InstanceArenas {
     // 背を建てる手順に、心臓の間を建てる手順を足す (各巨神の背の建設から一行で呼ぶ)
     public static void addHeartSteps(BackBuildJobs.Steps s, ServerLevel level, String titan) {
         s.thenJob("heart arena area", () -> BackBuildJobs.loadArea(level, HEART_X - LOAD_R, HEART_Z - LOAD_R, HEART_X + LOAD_R, HEART_Z + LOAD_R));
-        s.then("heart arena", () -> buildHeart(level, titan));
+        // まわりの箱を詰めるのは列ごとに tick に分ける (一度に詰めると一 tick が 1〜9 秒止まった)。掘って建てるのはそのあと一度に
+        s.thenJob("heart arena fill", () -> fillOf(level, titan).job());
+        s.then("heart arena", () -> carve(level, titan));
+    }
+
+    // 心臓の間のまわりを詰める箱と、一つのブロックの置き方 (巨神ごとの材質)
+    public record Fill(int x1, int x2, int z1, int z2, int y1, int y2, Setter set) {
+        public interface Setter {
+            void set(int x, int y, int z);
+        }
+
+        // その場で全部詰める
+        public void runAll() {
+            for (int x = x1; x <= x2; x++) {
+                column(x);
+            }
+        }
+
+        private void column(int x) {
+            for (int z = z1; z <= z2; z++) {
+                for (int y = y1; y <= y2; y++) {
+                    set.set(x, y, z);
+                }
+            }
+        }
+
+        // x の列ごとに予算の中で詰める仕事
+        public BackBuildJobs.Job job() {
+            int[] next = {x1};
+            int[] placed = {0};
+            return new BackBuildJobs.Job() {
+                @Override
+                public boolean step(long deadlineNanos) {
+                    while (next[0] <= x2) {
+                        column(next[0]++);
+                        placed[0] += (z2 - z1 + 1) * (y2 - y1 + 1);
+                        if (System.nanoTime() >= deadlineNanos) {
+                            return next[0] > x2;
+                        }
+                    }
+                    return true;
+                }
+
+                @Override
+                public int placed() {
+                    return placed[0];
+                }
+            };
+        }
+    }
+
+    static Fill fillOf(ServerLevel level, String titan) {
+        return switch (titan) {
+            case Titans.STONE_WHALE -> jp.revati.skyabyss.titan.dungeon.HeartArenaBuilder.heartFill(level);
+            case Titans.TIDE_SHELL -> jp.revati.skyabyss.titan.tide.heart.TideHeartArena.heartFill(level);
+            case Titans.THUNDER_WING -> jp.revati.skyabyss.titan.storm.back.StormBirdBuilder.heartFill(level);
+            default -> jp.revati.skyabyss.titan.ember.back.EmberBodyBuilder.heartFill(level);
+        };
+    }
+
+    // 詰めた箱の中に、元の心臓の間の形を掘って建てる
+    static void carve(ServerLevel level, String titan) {
+        long t0 = System.nanoTime();
+        switch (titan) {
+            case Titans.STONE_WHALE -> jp.revati.skyabyss.titan.dungeon.HeartArenaBuilder.buildInstance(level, false);
+            case Titans.TIDE_SHELL -> jp.revati.skyabyss.titan.tide.heart.TideHeartArena.buildInstance(level, false);
+            case Titans.THUNDER_WING -> jp.revati.skyabyss.titan.storm.back.StormBirdBuilder.buildHeartInstance(level, false);
+            case Titans.EMBER -> jp.revati.skyabyss.titan.ember.back.EmberBodyBuilder.buildHeartInstance(level, false);
+            default -> {
+                return;
+            }
+        }
+        SkyAbyss.LOGGER.info("Carved the {} heart arena in the instance area in {} ms", titan, (System.nanoTime() - t0) / 1_000_000L);
     }
 
     // 心臓の間をその場で建てる (背の建設・開発のコマンド・自己テスト)
