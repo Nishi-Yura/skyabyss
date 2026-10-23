@@ -196,6 +196,8 @@ public final class WhaleTilesRoom extends RaidRoom {
             RaidKit.fill(level, cell.origin().offset(-HX, H - 3, z), cell.origin().offset(-HX, H, z), bone);
             RaidKit.fill(level, cell.origin().offset(HX, H - 3, z), cell.origin().offset(HX, H, z), bone);
         }
+        // 飾り (docs/design/39 の 4.1): 見本を化石の鯨の額に。床の石板・見本・見張り台からの眺めは空ける
+        WhaleDecor.wr5(ctx);
     }
 
     private void drawTile(RaidCtx ctx, int c, int r) {
@@ -258,6 +260,7 @@ public final class WhaleTilesRoom extends RaidRoom {
         if (allSolved()) {
             solved = true;
             solvedAt = ctx.now();
+            WhaleDecor.exitLamps(ctx, true);
             ctx.level().playSound(null, ctx.origin(), SoundEvents.NOTE_BLOCK_CHIME.value(), SoundSource.BLOCKS, 2.0f, 0.5f);
         }
     }
@@ -281,6 +284,7 @@ public final class WhaleTilesRoom extends RaidRoom {
     @Override
     public void reset(RaidCtx ctx) {
         solved = false;
+        WhaleDecor.exitLamps(ctx, false);
         for (int c = 0; c < COLS; c++) {
             for (int r = 0; r < ROWS; r++) {
                 rot[c][r] = initial[c][r];

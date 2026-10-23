@@ -101,6 +101,8 @@ public final class WhaleShaftRoom extends RaidRoom {
             placeSwitch(ctx, o(c, MASTER[f][0], MASTER[f][1], MASTER[f][2]), false);
             placeSwitch(ctx, o(c, LOCAL[f][0], LOCAL[f][1], LOCAL[f][2]), false);
         }
+        // 飾り (docs/design/39 の 4.1): 殻の濃淡と肋骨の輪、頂の喉の光。縦穴の中に足がかりは足さない
+        WhaleDecor.wr4(ctx, this);
     }
 
     private static BlockPos o(RaidKit.Cell c, int x, int y, int z) {
@@ -198,6 +200,7 @@ public final class WhaleShaftRoom extends RaidRoom {
         tier = Math.max(0, t);
         if (!cleared && tier >= FLIGHTS) {
             cleared = true;
+            WhaleDecor.exitLamps(ctx, true);
         }
         if (!cleared && lv >= TOP + 3) {
             ctx.fail(FAIL_KEY);
@@ -295,6 +298,7 @@ public final class WhaleShaftRoom extends RaidRoom {
 
     @Override
     public void reset(RaidCtx ctx) {
+        WhaleDecor.exitLamps(ctx, false);
         for (int f = 0; f < FLIGHTS; f++) {
             retract(ctx, f);
             lightSwitches(ctx, f, false);

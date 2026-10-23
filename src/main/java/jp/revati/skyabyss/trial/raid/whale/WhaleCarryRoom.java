@@ -109,6 +109,8 @@ public final class WhaleCarryRoom extends RaidRoom {
             }
             home[i] = at == null ? c.floor(bands[i], 4) : at;
         }
+        // 飾り (docs/design/39 の 4.1): 耳の骨の椀・肋骨のアーチ・地層の壁。台座・骨玉の場所・柱のまわりは空ける
+        WhaleDecor.wr1(ctx, java.util.Arrays.asList(home), pillars);
     }
 
     @Override
@@ -244,6 +246,10 @@ public final class WhaleCarryRoom extends RaidRoom {
         for (int sx : SOCKET_X) {
             RaidKit.set(ctx.level(), ctx.origin().offset(sx, 1, ALTAR_Z), Blocks.CHISELED_STONE_BRICKS.defaultBlockState());
         }
+        for (int i = 0; i < ORBS; i++) {
+            WhaleDecor.setCandle(ctx, WhaleDecor.wr1Candle(ctx, i), false);
+        }
+        WhaleDecor.exitLamps(ctx, false);
     }
 
     @Override
@@ -332,6 +338,11 @@ public final class WhaleCarryRoom extends RaidRoom {
         count++;
         BlockPos at = ctx.origin().offset(SOCKET_X[idx], 1, ALTAR_Z);
         RaidKit.set(ctx.level(), at, Blocks.SEA_LANTERN.defaultBlockState());
+        // 椀の縁の燭台が一つ灯る。三つめで出口の燭台も
+        WhaleDecor.setCandle(ctx, WhaleDecor.wr1Candle(ctx, count - 1), true);
+        if (count >= ORBS) {
+            WhaleDecor.exitLamps(ctx, true);
+        }
         ctx.level().playSound(null, at, SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, 1.2f, 0.6f + 0.2f * count);
         ctx.level().sendParticles(ParticleTypes.END_ROD, at.getX() + 0.5, at.getY() + 1.2, at.getZ() + 0.5, 20, 0.3, 0.4, 0.3, 0.04);
     }

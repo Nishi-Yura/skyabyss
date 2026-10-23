@@ -96,8 +96,8 @@ LORE = [
      ("帯電の連鎖の間の入口、休み場の壁にあった。最後の行だけ刻みが浅く、急いで彫ったように見える。",
       "On the wall at the entrance to the room of the charged chain. Only the last line is carved shallow, as if in a hurry."), "tail"),
     ("inscription_storm_west", 165, None, ["chapter1/storm_ruins"], ("羽の間の碑文", "Inscription of the Feather Deck"),
-     ("雷羽運びの甲板の入口、休み場の壁にあった。字の溝を、骨の中を通る風が細く鳴らしている。",
-      "On the wall at the entrance to the deck where the thunder feathers are carried. The wind running through the bones whistles thinly in the grooves of the letters."), "west"),
+     ("雷羽運びの甲板の入口、休み場の壁にあった。字の溝を、骨の中を通る風が細く鳴らしている。\n\nそばの壁に、小さな人の浮き彫りがある。四角い頭をしていた。",
+      "On the wall at the entrance to the deck where the thunder feathers are carried. The wind running through the bones whistles thinly in the grooves of the letters.\n\nOn the wall beside it is a small carving of a person. Its head is square."), "west"),
     ("inscription_storm_east", 166, None, ["chapter1/raiju"], ("回路の間の碑文", "Inscription of the Circuit Room"),
      ("銅の回路の間の入口、休み場の壁にあった。壁の石は、そこだけ焦げていない。",
       "On the wall at the entrance to the copper circuit room. Only that stretch of wall is unscorched."), "east"),
@@ -425,7 +425,7 @@ END_MARK = "<!-- 伝承とクエスト 生成ここまで -->"
 # 書き出しの前にここで上書きし、コミット済みの lang と同じにする (tools/audit/check_generators.py で確かめる)。
 HAND_EDITS = [  # (鍵, 日本語, 英語)
     ("growth.skyabyss.reason.storm_trial", "光る印", "Wind chime stone"),
-    ("lore.skyabyss.chapter1.inscription_storm_west.body", "雷羽運びの甲板の入口、休み場の壁にあった。字の溝を、骨の中を通る風が細く鳴らしている。", "On the wall at the entrance to the deck where the thunder feathers are carried. The wind running through the bones whistles thinly in the grooves of the letters."),
+    ("lore.skyabyss.chapter1.inscription_storm_west.body", "雷羽運びの甲板の入口、休み場の壁にあった。字の溝を、骨の中を通る風が細く鳴らしている。\n\nそばの壁に、小さな人の浮き彫りがある。四角い頭をしていた。", "On the wall at the entrance to the deck where the thunder feathers are carried. The wind running through the bones whistles thinly in the grooves of the letters.\n\nOn the wall beside it is a small carving of a person. Its head is square."),
     ("message.skyabyss.raiju.east_stone_ready", "瘤の頂で、光る印が着くのを待っている。", "At the crown of the knuckle, a wind chime stone waits to ring."),
     ("message.skyabyss.storm.trials_renewed", "雷翼の心臓が、再び脈を打ち始めた。地の遠い底から、拍が戻ってくる。背中の試練が、元の形に戻った", "The thunder wing's heart beats again, a beat returning from deep beneath the ground. The trials on its back are as they were"),
     ("sign.skyabyss.storm_east.2", "回路で戸へ", "Wire the bolt"),
