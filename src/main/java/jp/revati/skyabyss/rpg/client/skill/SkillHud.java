@@ -167,6 +167,10 @@ public final class SkillHud {
                 g.fill(x, y, x + 1, y + SLOT, a | 0xD9779A);
                 g.fill(x + SLOT - 1, y, x + SLOT, y + SLOT, a | 0xD9779A);
             }
+            // 技の稽古: 使う枠を金の縁で呼吸させる
+            if (i == jp.revati.skyabyss.client.tutorial.SkillLessonClient.castSlot(mc)) {
+                jp.revati.skyabyss.client.tutorial.SkillLessonClient.frame(g, x, y, SLOT, SLOT);
+            }
             // キーの名前 (右下、ホットバーの数と同じ置き方)
             Component key = SkillClientSetup.SLOT_KEYS[i].getTranslatedKeyMessage();
             String k = key.getString();

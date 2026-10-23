@@ -22,6 +22,7 @@ GENERATORS = """
 tools/gen/story/gen_story_quests.py
 tools/gen/story/gen_free_quests.py
 tools/gen/story/gen_town_quests.py
+tools/gen/story/gen_skill_lesson.py
 tools/gen/story/gen_advancements.py
 tools/gen/story/gen_ember_lore.py
 tools/gen/story/gen_storm_lore.py

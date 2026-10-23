@@ -1,0 +1,158 @@
+{
+  "npc": "skyabyss:attendant_training_master",
+  "extends": true,
+  "nodes": {
+    "lesson_offer": {
+      "face": "neutral",
+      "options": [
+        {
+          "id": "ok",
+          "goto": "end",
+          "kind": "talk"
+        },
+        {
+          "id": "skip",
+          "goto": "lesson_skip",
+          "kind": "talk"
+        }
+      ]
+    },
+    "lesson_new": {
+      "face": "neutral",
+      "do": [
+        {
+          "type": "unflag",
+          "flag": "lesson_skip"
+        },
+        {
+          "type": "quest_start",
+          "quest": "lesson/skills"
+        }
+      ],
+      "options": [
+        {
+          "id": "go",
+          "goto": "lesson_offer",
+          "kind": "talk"
+        }
+      ]
+    },
+    "lesson_again": {
+      "face": "neutral",
+      "do": [
+        {
+          "type": "lesson",
+          "act": "replay"
+        }
+      ],
+      "options": [
+        {
+          "id": "go",
+          "goto": "lesson_offer",
+          "kind": "talk"
+        }
+      ]
+    },
+    "lesson_skip": {
+      "face": "neutral",
+      "do": [
+        {
+          "type": "flag",
+          "flag": "lesson_skip"
+        },
+        {
+          "type": "lesson",
+          "act": "skip"
+        }
+      ]
+    },
+    "lesson_respec": {
+      "face": "neutral",
+      "options": [
+        {
+          "id": "try",
+          "goto": "respec",
+          "kind": "talk"
+        },
+        {
+          "id": "later",
+          "goto": "end",
+          "kind": "talk"
+        }
+      ]
+    }
+  },
+  "add_options": {
+    "menu": {
+      "before": "about",
+      "options": [
+        {
+          "id": "lesson",
+          "goto": "lesson_offer",
+          "kind": "quest",
+          "if": {
+            "type": "quest",
+            "quest": "lesson/skills",
+            "is": "active",
+            "stage": "meet"
+          }
+        },
+        {
+          "id": "lesson_new",
+          "goto": "lesson_new",
+          "kind": "quest",
+          "if": {
+            "type": "quest",
+            "quest": "lesson/skills",
+            "is": "none"
+          }
+        },
+        {
+          "id": "lesson_respec",
+          "goto": "lesson_respec",
+          "kind": "quest",
+          "if": {
+            "type": "quest",
+            "quest": "lesson/skills",
+            "is": "active",
+            "stage": "reset"
+          }
+        },
+        {
+          "id": "lesson_again",
+          "goto": "lesson_again",
+          "kind": "talk",
+          "if": {
+            "type": "quest",
+            "quest": "lesson/skills",
+            "is": "done"
+          }
+        },
+        {
+          "id": "lesson_skip",
+          "goto": "lesson_skip",
+          "kind": "talk",
+          "if": {
+            "type": "all",
+            "of": [
+              {
+                "type": "quest",
+                "quest": "lesson/skills",
+                "is": "active"
+              },
+              {
+                "type": "not",
+                "of": {
+                  "type": "quest",
+                  "quest": "lesson/skills",
+                  "is": "active",
+                  "stage": "meet"
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  }
+}
