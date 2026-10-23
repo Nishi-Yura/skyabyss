@@ -8,7 +8,7 @@
 # tools 内の他グループのモジュールを import できるようにする（フォルダ移動後も兄弟モジュールを解決）
 import os as _os
 import sys as _sys
-_sys.path[:0] = [_os.path.join(_os.path.dirname(_os.path.abspath(__file__)), p) for p in ('../sound')]
+_sys.path[:0] = [_os.path.join(_os.path.dirname(_os.path.abspath(__file__)), p) for p in ('../sound',)]
 import json
 from pathlib import Path
 
@@ -262,7 +262,7 @@ def main():
         p = d / (code + ".json")
         cur = json.loads(p.read_text(encoding="utf-8")) if p.exists() else {}
         cur.update(data)
-        p.write_text(json.dumps(cur, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+        p.write_text(json.dumps(cur, ensure_ascii=False, indent=2), encoding="utf-8")  # この lang は末尾の改行なし (コミット済みのまま)
 
 
 if __name__ == "__main__":

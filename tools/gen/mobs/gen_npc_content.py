@@ -714,6 +714,9 @@ quest(MAIN, "main", 10, ST,
                            "ja": "鎖をのぼって、岩鯨の背中へ渡ろう", "en": "Climb the chain to its back",
                            "sub": {"wait": ("空の岩鯨を、追いかけよう", "Follow the stone whale")}}]},
           {"id": "inscriptions", "xp": 90,
+           # 碑文は岩鯨のレイドの部屋 1〜3 の入口の碑 (RaidLore) で読める。越えても記される (TrialRoute.WHALE_ROOM_INSCRIPTIONS)。
+           # 読み逃しても心臓を止めれば飛ぶ (潮殻・雷翼と同じ形。fun_review P1-1)
+           "skip_if": {"type": "stilled", "titan": "stone_whale"},
            "journal": ("背中には、崩れた町があった。入口から先は、三つの試練の間が一つずつ続いている。\nどの間の入口にも、背中の民の碑文がある。三つを越えて、背の奥へ進もう。",
                        "On its back lay a ruined town. Past the entrance, three trial rooms follow one after another.\nAt the entrance of each, the people of the back left an inscription. Cross all three and go deeper."),
            "lead": ("背中には、崩れた町があった。三つの試練の間の碑文が、ここに誰がいたのかを語るかもしれない。",

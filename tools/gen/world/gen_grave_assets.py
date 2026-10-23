@@ -10,12 +10,15 @@
 重なる面は作らない (光る印の板は外側の面だけ。中の段の面にぴったり付けるが、向きが逆なので見えない面は持たない)。
 """
 import json
+import sys
 from pathlib import Path
 
 import numpy as np
 from PIL import Image
 
 ROOT = Path(__file__).resolve().parent.parent.parent.parent
+sys.path.insert(0, str(ROOT / "tools" / "lib"))
+from langmerge import merged  # noqa: E402
 RES = ROOT / "src/main/resources"
 ASSETS = RES / "assets/skyabyss"
 TEX = ASSETS / "textures/block"
@@ -165,7 +168,7 @@ JA = {
     "skyabyss_grave.collected_part": "一部を取り戻した（%2$s 種類は墓に残る）",
     "skyabyss_grave.expired": "時の経った墓が崩れて、中身が地面に散らばった",
     "skyabyss_grave.rescue_none": "呼び戻せる墓はない",
-    "skyabyss_grave.rescued": "語り部の呼びかけで、品 %s 個と経験値 %s が戻った（墓の %s％）。墓は土に還った",
+    "skyabyss_grave.rescued": "語り部の呼びかけで、品 %s 個と経験値 %s が戻った（墓の %s％）",
     "skyabyss_grave.rescued_pending": "入りきらなかった %s 個は、報酬の預かりに入れた。控え帳から受け取れる",
     "dialogue.skyabyss.storyteller.menu.grave": "なくしたものがある。",
     "dialogue.skyabyss.storyteller.lost_ask": "……なくしたのかい。何をだい。",
@@ -212,7 +215,7 @@ EN = {
     "skyabyss_grave.collected_part": "Took back some things (%2$s kinds remain in the grave)",
     "skyabyss_grave.expired": "An old grave crumbled and its contents spilled onto the ground",
     "skyabyss_grave.rescue_none": "There is no grave to call back",
-    "skyabyss_grave.rescued": "At the storyteller's call, %s items and %s experience came back (%s%% of the grave). The grave returned to the earth",
+    "skyabyss_grave.rescued": "At the storyteller's call: %s items, %s xp back (%s%%)",
     "skyabyss_grave.rescued_pending": "%s items did not fit and were set aside as held rewards. Claim them in the record book",
     "dialogue.skyabyss.storyteller.menu.grave": "I've lost something.",
     "dialogue.skyabyss.storyteller.lost_ask": "...Lost something, have you. What?",
@@ -232,7 +235,7 @@ EN = {
     "gui.skyabyss.grave.age.now": "just now",
     "gui.skyabyss.grave.age.minutes": "%s min ago",
     "gui.skyabyss.grave.age.hours": "%s h ago",
-    "gui.skyabyss.grave.age.days": "%s days ago",
+    "gui.skyabyss.grave.age.days": "%sd ago",
     "gui.skyabyss.grave.dim.overworld": "Overworld",
     "gui.skyabyss.grave.dim.nether": "Nether",
     "gui.skyabyss.grave.dim.end": "The End",
@@ -262,8 +265,10 @@ def main():
     write_json(ASSETS / "blockstates/grave.json", {"variants": {"": {"model": "skyabyss:block/grave"}}})
     write_json(ASSETS / "models/block/grave.json", model())
     write_json(RES / "data/skyabyss/dialogue/storyteller_aa_grave.json", dialogue())
-    write_json(RES / "assets/skyabyss_grave/lang/ja_jp.json", JA)
-    write_json(RES / "assets/skyabyss_grave/lang/en_us.json", EN)
+    # 持たないキー (手で足した文) は残して書く (tools/lib/langmerge.py)
+    for _code, _table in (("ja_jp", JA), ("en_us", EN)):
+        _p = RES / f"assets/skyabyss_grave/lang/{_code}.json"
+        write_json(_p, merged(_p, _table))
     print("grave assets written")
 
 

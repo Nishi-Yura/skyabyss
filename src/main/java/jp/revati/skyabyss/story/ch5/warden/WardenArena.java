@@ -171,6 +171,8 @@ public final class WardenArena {
         Data d = Data.get(level.getServer());
         d.cleared = true;
         d.setDirty();
+        // 上限を 50 へ (段の経験値より先に。P7-1)
+        inside(level).forEach(jp.revati.skyabyss.progress.Progression::markWardenFelled);
         Quests.signalWithParty(level, inside(level), SIGNAL_HEART);
     }
 

@@ -184,28 +184,28 @@ t('message.skyabyss.abyss_v2.shadow_gone', '影がほどけて、静かになっ
 # ---------------------------------------------------------------- 層の主
 LORDS = {
     'bone': ('肋の主', 'Lord of Ribs',
-             '肋の主を倒せ。灯台を灯し、光の中で斬れ', 'Defeat the Lord of Ribs. Light the lamps and strike inside the light',
+             '肋の主を倒せ。灯台を灯し、光の中で斬れ', 'Ribs lord: light lamps, fight in light',
              '間の奥で、積み上がった肋が立ち上がった。', 'At the back of the hall, a heap of ribs stands up.',
              '灯台は右クリックで灯る。光の外では、刃が骨に弾かれる。……底の番人も、こうなのだろうか。',
              'The lamps light with a right-click. Outside the light, your blade glances off. ...Is the warden below like this too?',
              '肋の主が崩れた。光の中なら、闇のものにも刃は届く。', 'The Lord of Ribs collapses. In the light, even things of the dark can be cut.',
              '光の外では、刃が通らない。', 'Your blade will not bite outside the light.'),
     'salt': ('白殻の主', 'Lord of White Shells',
-             '白殻の主を倒せ。足もとの赤い輪から出ろ', 'Defeat the Lord of White Shells. Step out of the red rings',
+             '白殻の主を倒せ。足もとの赤い輪から出ろ', 'Lord of White Shells: leave the red rings',
              '天井から、白い殻の塊が落ちてきた。', 'A mass of white shell drops from the ceiling.',
              '赤い輪には重さが落ちる。重さの術の中なら、押しつぶされずに済む。',
              'Weight falls inside the red rings. Under the weight art, it will not crush you.',
              '白殻の主が割れた。重さは、避けるか、軽くなって受け流せる。', 'The Lord of White Shells cracks open. Weight can be dodged, or shrugged off if you are light.',
              '', ''),
     'storm': ('鼓動まねの主', 'Lord of Mimicked Beats',
-              '鼓動まねの主を倒せ。鼓動の聞こえる方が本物', 'Defeat the Lord of Mimicked Beats. The one with the heartbeat is real',
+              '鼓動まねの主を倒せ。鼓動の聞こえる方が本物', 'Beat-mimic lord: hit the one with a pulse',
               '銅の壁が一斉に鳴り、間に鼓動が満ちた。', 'The copper walls ring together and the hall fills with a heartbeat.',
               '主は写しに分かれる。鼓動を立てるのは本物だけ。鼓動の術を使えば、本物の輪郭が見える。',
               'It splits into copies. Only the real one beats. The heartbeat art will outline the true one.',
               '鼓動まねの主が黙った。本物の鼓動は、いつもひとつ。', 'The Lord of Mimicked Beats falls silent. There is only ever one true heartbeat.',
               '', ''),
     'ash': ('灯り喰いの主', 'Lord of Eaten Light',
-            '灯り喰いの主を倒せ。闇の波のあとは、光の術で照らせ', 'Defeat the Lord of Eaten Light. After the dark wave, light it with your art',
+            '灯り喰いの主。闇の波のあとは光の術で照らせ', 'Light-eater lord: cast light after dark',
             '灯りが一つずつ消え、闇の奥で口が開いた。', 'The lights go out one by one, and a mouth opens in the dark.',
             '闇の波が来ると、灯りが全部消える。闇の中の主には刃が届かない。光の術で主を照らせ。',
             'When the dark wave comes, every light dies, and the lord cannot be cut in the dark. Light it with your art.',
@@ -222,16 +222,16 @@ for L, v in LORDS.items():
         t('message.skyabyss.abyss_v2.lord_dim.%s' % L, v[10], v[11])
 t('objective.skyabyss.abyss_v2.flash_light_lamps', '灯台を灯せ（右クリック）', 'Light the lamps (right-click)')
 t('objective.skyabyss.abyss_v2.flash_guard_lamp', '灯りを守れ。赤い輪の中に立て', 'Guard the light. Stand inside the red ring')
-t('objective.skyabyss.abyss_v2.flash_weight', '赤い輪から出ろ。重さの術なら耐えられる', 'Leave the red rings. The weight art lets you endure')
+t('objective.skyabyss.abyss_v2.flash_weight', '赤い輪から出ろ。重さの術なら耐えられる', 'Leave the red rings, or endure with weight')
 t('objective.skyabyss.abyss_v2.flash_beat', '鼓動の聞こえる方が本物', 'The one with the heartbeat is real')
-t('objective.skyabyss.abyss_v2.flash_dark', '闇の中では刃が届かない。光の術で照らせ', 'No blade reaches it in the dark. Light it with your art')
+t('objective.skyabyss.abyss_v2.flash_dark', '闇の中では刃が届かない。光の術で照らせ', 'Blades miss in the dark. Cast light')
 t('message.skyabyss.abyss_v2.dark_coming', '主が三度吠えた。闇の波が来る。', 'The lord howls three times. The dark wave is coming.')
 # 番人の戦いの帯 (story/ch5/warden/HeartWarden)
-t('objective.skyabyss.abyss_v2.warden_p1', '灯籠を点け、光の中の番人を斬れ', 'Light the lanterns and strike the warden in the light')
-t('objective.skyabyss.abyss_v2.warden_snuff', '灯りを守れ。番人が灯籠を吹き消しに来る', 'Guard the light. The warden is coming to snuff a lantern')
+t('objective.skyabyss.abyss_v2.warden_p1', '灯りを点け、光の中の番人を斬れ', 'Light lamps; hit the warden in the light')
+t('objective.skyabyss.abyss_v2.warden_snuff', '灯りを守れ。番人が吹き消しに来る', 'Guard the light. It comes to snuff a lamp')
 t('objective.skyabyss.abyss_v2.warden_p2', '鼓動の聞こえる方が本物', 'The one with the heartbeat is real')
-t('objective.skyabyss.abyss_v2.warden_crush', '赤い輪は重い。外へ出るか、重さの術で耐えろ', 'The red rings are heavy. Get out, or endure with the weight art')
-t('objective.skyabyss.abyss_v2.warden_p3', '闇の波のあとは、光の術で照らせ', 'After the dark wave, make light with your art')
+t('objective.skyabyss.abyss_v2.warden_crush', '赤い輪は重い。外へ出るか、重さの術で耐えろ', 'Red rings crush: leave, or bear weight')
+t('objective.skyabyss.abyss_v2.warden_p3', '闇の波のあとは、光の術で照らせ', 'After the dark wave, cast light')
 
 # ---------------------------------------------------------------- 手記 (野営の帳面 0、道ごと 1〜3)
 JOURNALS = {
@@ -504,7 +504,6 @@ def build_porter():
     nodes = {'intro': {'face': 'smile', 'do': [{'type': 'flag', 'flag': 'abyss_porter_intro'}], 'next': 'intro2'},
              'intro2': {'face': 'neutral', 'next': 'menu'},
              'trade_done': {'face': 'smile', 'next': 'menu'},
-             'trade_none': {'face': 'neutral', 'next': 'menu'},
              'menu': {'face': 'neutral', 'options': []}}
     node_text(role, 'intro', 'よっ。生きた顔を見るのは久しぶりだ。荷運びのロク。隊長に帰れって言われて、帰り道の途中で座りこんでる',
               'Hey. Been a while since I saw a living face. Roku, the porter. The captain told me to go home, and I sat down halfway.')
@@ -512,7 +511,6 @@ def build_porter():
               'You\'re carrying abyss junk, right? I\'ll swap you food for it. Carrying the way home is my job.')
     node_text(role, 'menu', '何と取り替える？', 'What\'ll it be?')
     node_text(role, 'trade_done', 'まいど。上に戻ったら、ミオによろしく', 'Pleasure. Say hi to Mio when you\'re back up.')
-    node_text(role, 'trade_none', '足りないな。もう少し拾ってきな', 'Not enough. Go pick up a bit more.')
     for (oid, give_item, gn, get_item, cn, ja, en) in TRADES:
         nodes['menu']['options'].append({'id': oid, 'goto': 'trade_done', 'kind': 'give',
                                          'if': {'type': 'item', 'item': give_item, 'count': gn},
@@ -565,6 +563,23 @@ for L in LAYERS:
     t(k + '%s_lord.defeat' % L, j[5], e[5])
 
 
+# ---------------------------------------------------------------- 手直しの取り込み
+# 目的の帯の一言は lang を直接直してあり、上の文には戻していない。書き出しの前にここで上書きし、
+# コミット済みの lang と同じにする (tools/audit/check_generators.py で確かめる)。
+HAND_EDITS = [  # (鍵, 日本語, 英語)
+    ("objective.skyabyss.abyss_v2.lord_ash", "灯り喰いの主。闇の波のあとは光の術で照らせ", "Light-eater lord: cast light after dark"),
+    ("objective.skyabyss.abyss_v2.warden_p1", "灯りを点け、光の中の番人を斬れ", "Light lamps; hit the warden in the light"),
+    ("objective.skyabyss.abyss_v2.warden_snuff", "灯りを守れ。番人が吹き消しに来る", "Guard the light. It comes to snuff a lamp"),
+    ("objective.skyabyss.abyss_v2.lord_bone", "肋の主を倒せ。灯台を灯し、光の中で斬れ", "Ribs lord: light lamps, fight in light"),
+    ("objective.skyabyss.abyss_v2.lord_salt", "白殻の主を倒せ。足もとの赤い輪から出ろ", "Lord of White Shells: leave the red rings"),
+    ("objective.skyabyss.abyss_v2.lord_storm", "鼓動まねの主を倒せ。鼓動の聞こえる方が本物", "Beat-mimic lord: hit the one with a pulse"),
+    ("objective.skyabyss.abyss_v2.flash_weight", "赤い輪から出ろ。重さの術なら耐えられる", "Leave the red rings, or endure with weight"),
+    ("objective.skyabyss.abyss_v2.flash_dark", "闇の中では刃が届かない。光の術で照らせ", "Blades miss in the dark. Cast light"),
+    ("objective.skyabyss.abyss_v2.warden_crush", "赤い輪は重い。外へ出るか、重さの術で耐えろ", "Red rings crush: leave, or bear weight"),
+    ("objective.skyabyss.abyss_v2.warden_p3", "闇の波のあとは、光の術で照らせ", "After the dark wave, cast light"),
+]
+
+
 def main():
     sides = {}
     for L in LAYERS:
@@ -572,6 +587,8 @@ def main():
         write(os.path.join(DATA, 'quest', SIDE[L] + '.json'), sides[L])
         write(os.path.join(DATA, 'dialogue', 'ch5', 'attendant_survivor_%s.json' % L), build_survivor(L))
     write(os.path.join(DATA, 'dialogue', 'ch5', 'attendant_abyss_porter.json'), build_porter())
+    _hand = {k: (j, e) for k, j, e in HAND_EDITS}
+    T[:] = [(k,) + _hand.get(k, (j, e)) for k, j, e in T]
     keys = [k for k, _, _ in T]
     dup = {k for k in keys if keys.count(k) > 1}
     if dup:

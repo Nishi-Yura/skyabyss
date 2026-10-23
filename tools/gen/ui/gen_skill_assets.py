@@ -24,7 +24,7 @@ docs/review/skill_icons_roughs/ に、アイコンのラフ 3 案 (a: 碑文、b
 # tools 内の他グループのモジュールを import できるようにする（フォルダ移動後も兄弟モジュールを解決）
 import os as _os
 import sys as _sys
-_sys.path[:0] = [_os.path.join(_os.path.dirname(_os.path.abspath(__file__)), p) for p in ('../items')]
+_sys.path[:0] = [_os.path.join(_os.path.dirname(_os.path.abspath(__file__)), p) for p in ('../items',)]
 import math
 import sys
 from pathlib import Path

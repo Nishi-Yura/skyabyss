@@ -321,20 +321,59 @@ public final class GrowthRewards {
         }
     }
 
-    // ---------------------------------------------------------------- 試練の踏破 (岩鯨。順路の段を越えたとき TrialRoute.onCleared から)
-    // 越えた試練の参加者に渡し、同じ背中にいない仲間にも分け前。潮殻・雷翼・余燼は各背の石の仕組みが渡す
+    // ---------------------------------------------------------------- 試練の踏破 (順路の段を越えたとき TrialRoute.onCleared から)
+    // 越えた試練の参加者に渡し、同じ背中にいない仲間にも分け前。数字は各背の TRIAL_XP と推奨レベル (P2-1)。
+    // 岩鯨は石でもレイドの部屋でもここ。潮殻・雷翼・余燼の原型の石は自分で渡すので、ここへ来るのはレイドの部屋を越えたときだけ
     public static void onWhaleTrialCleared(ServerLevel level, List<ServerPlayer> near) {
+        onRouteTrialCleared(level, jp.revati.skyabyss.progress.Titans.STONE_WHALE, near, null);
+    }
+
+    // titan は進行の名前 (stone_whale / tide_shell / thunder_wing / ember)。signal はその巨神の試練の合図 (storm_trial_west など。無ければ null)
+    public static void onRouteTrialCleared(ServerLevel level, String titan, List<ServerPlayer> near, @Nullable String signal) {
+        int base = trialXp(titan);
+        int rec = trialLevel(titan);
+        String reason = trialReason(titan);
         for (ServerPlayer player : near) {
-            int xp = (int) Math.round(TRIAL_XP * GrowthRules.levelFalloff(Growth.get(player).level, STONE_WHALE_LEVEL));
-            Growth.addXp(player, xp, "growth.skyabyss.reason.trial");
+            int xp = (int) Math.round(base * GrowthRules.levelFalloff(Growth.get(player).level, rec));
+            Growth.addXp(player, xp, reason);
+            if (signal != null) {
+                jp.revati.skyabyss.quest.Quests.signal(player, signal);
+            }
         }
         double rate = jp.revati.skyabyss.party.Parties.shareRate(level.getServer());
         for (ServerPlayer mate : jp.revati.skyabyss.party.Parties.absentMates(level, near)) {
-            int xp = (int) Math.round(TRIAL_XP * rate * GrowthRules.levelFalloff(Growth.get(mate).level, STONE_WHALE_LEVEL));
+            int xp = (int) Math.round(base * rate * GrowthRules.levelFalloff(Growth.get(mate).level, rec));
             Growth.addXp(mate, xp, "growth.skyabyss.reason.party");
         }
-        // サブクエストの「試練を踏破する」(居合わせた人と、同じ背中の仲間。quest/free)
+        // サブクエストの「試練を踏破する」と進捗 trial:<巨神> (居合わせた人と、同じ背中の仲間。quest/free)
         jp.revati.skyabyss.quest.Quests.signalWithParty(level, near, jp.revati.skyabyss.quest.free.FreeQuestEvents.TRIAL_CLEARED);
+    }
+
+    public static int trialXp(String titan) {
+        return switch (titan) {
+            case jp.revati.skyabyss.progress.Titans.TIDE_SHELL -> jp.revati.skyabyss.titan.tide.back.TideBackTrials.TRIAL_XP;
+            case jp.revati.skyabyss.progress.Titans.THUNDER_WING -> jp.revati.skyabyss.titan.storm.back.StormBackTrials.TRIAL_XP;
+            case jp.revati.skyabyss.progress.Titans.EMBER -> jp.revati.skyabyss.titan.ember.back.EmberBackTrials.TRIAL_XP;
+            default -> TRIAL_XP;
+        };
+    }
+
+    private static int trialLevel(String titan) {
+        return switch (titan) {
+            case jp.revati.skyabyss.progress.Titans.TIDE_SHELL -> jp.revati.skyabyss.titan.tide.heart.TideLoot.TIDE_LEVEL;
+            case jp.revati.skyabyss.progress.Titans.THUNDER_WING -> jp.revati.skyabyss.titan.storm.back.StormBackTrials.STORM_LEVEL;
+            case jp.revati.skyabyss.progress.Titans.EMBER -> jp.revati.skyabyss.titan.ember.back.EmberBackTrials.EMBER_LEVEL;
+            default -> STONE_WHALE_LEVEL;
+        };
+    }
+
+    private static String trialReason(String titan) {
+        return switch (titan) {
+            case jp.revati.skyabyss.progress.Titans.TIDE_SHELL -> "growth.skyabyss.reason.tide_trial";
+            case jp.revati.skyabyss.progress.Titans.THUNDER_WING -> "growth.skyabyss.reason.storm_trial";
+            case jp.revati.skyabyss.progress.Titans.EMBER -> "growth.skyabyss.reason.ember_trial";
+            default -> "growth.skyabyss.reason.trial";
+        };
     }
 
     @SubscribeEvent

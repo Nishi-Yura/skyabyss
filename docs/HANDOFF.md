@@ -137,3 +137,5 @@ m1-sky-pass に入っているもの（push 済み・compileJava 通る）: 倒�
 m1-sky-pass に入ったもの: レイドの枠組み（trial/raid、枠ごとに複数部屋・周ごとに引く）と 4 巨神 × 3 部屋（WR・TR・SR・ER）／乗り物の店（荷獣・鹿・大トカゲ + 巨神ゆかり 4、都の厩舎、docs/design/38）／深淵の層の作り直し（野営 → 三本の道 → 印 → 門 → 層の主、節の札・場面、生き残り 4 人と荷運び、術の仕掛け）／深みの不思議のダンジョン化（5 階ごとに歪んだ王）／HUD の点検（深淵の術・深さを HudLayout に、HP 帯の遅れ帯の速さ）／ギルド画面の送り／都の厩舎の壊れたブロック名。
 全部の自己テスト: 152 PASSED、かみ合わせの失敗が残っていて 2 つの作業が直している（`wip/fix-story-npc`: npc・cinematic・story・freequest・帯の長さ、`wip/fix-raid-tests`: trial walk・route party/rooms・trial pool storm・ash smith・ch1/ch3 mobs）。`wip/abyss-organic` は深淵の層を箱の部屋から洞窟の形へ。
 朝に選んでもらうもの: 部屋の 12 問（各ふたつ、ASCII の id に直した）／乗り物 7 体の絵（docs/review/mount_roughs/）／層の主・生き残り・歪んだ王の見た目。
+
+朝の時点（2026-10-23 8 時）: 上の二つの直しと、深淵の灯り・野営の手直し、生成スクリプトの同期（`PYTHONPATH=tools/lib python tools/audit/check_generators.py` でドリフト 0）、レイドの部屋の碑文と心の声、進めなくなる所の直し（一章の碑文・4 巨神の部屋の経験値・番人で上限 50・初回の乗り込みの時刻待ちなし）も入った。全部の自己テスト 164 PASSED（残りは都の遠い草の ATTACH_SUPPORT だけ）。jar は build/libs/skyabyss-0.5.2.jar、確かめ順は docs/review/playtest_0.5.2.md。設計の見直しは docs/review/fun_review_2026-10-23.md（Q1〜Q9 は試遊者の判断待ち）。選定ページの「新しい見た目」（乗り物 7・層の主 4・歪んだ王 5・生き残り 5）と部屋の 12 問（各ふたつ）も答え待ち。

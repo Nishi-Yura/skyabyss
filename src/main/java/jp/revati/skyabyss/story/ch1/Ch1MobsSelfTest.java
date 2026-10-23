@@ -665,17 +665,17 @@ public final class Ch1MobsSelfTest {
             e.forceAction("HORN", p);
             tick(level, e, 22);
             check(Telegraph.damagingCreated() == before, "the horn should not make a damaging telegraph", f);
-            check(e.liveSummons() == 2, "horn should call 2 archers (" + e.liveSummons() + ")", f);
+            check(e.liveSummons() == ElderSentry.MAX_SUMMONS, "horn should call " + ElderSentry.MAX_SUMMONS + " archer(s) (" + e.liveSummons() + ")", f);
             List<RibArcher> archers = level.getEntitiesOfClass(RibArcher.class, area());
-            check(archers.size() == 2 && archers.stream().allMatch(a -> a.getTags().contains(GuardMob.TEMP_TAG) && !a.shouldBeSaved()), "summoned archers: tagged and unsaved", f);
+            check(archers.size() == ElderSentry.MAX_SUMMONS && archers.stream().allMatch(a -> a.getTags().contains(GuardMob.TEMP_TAG) && !a.shouldBeSaved()), "summoned archers: tagged and unsaved", f);
             tick(level, e, 30);
             e.forceAction("HORN", p);
             tick(level, e, 22);
-            check(e.liveSummons() == 2 && level.getEntitiesOfClass(RibArcher.class, area()).size() == 2, "a second horn must not exceed 2 archers", f);
+            check(e.liveSummons() == ElderSentry.MAX_SUMMONS && level.getEntitiesOfClass(RibArcher.class, area()).size() == ElderSentry.MAX_SUMMONS, "a second horn must not exceed the archer cap", f);
             e.hurt(level.damageSources().playerAttack(p), 100000f);
             tick(level, e, 2);
             check(level.getEntitiesOfClass(RibArcher.class, area(), a -> a.isAlive()).isEmpty(), "archers should vanish when the elder falls", f);
-            notes.add("elder horn calls 2 archers (cap 2), cleared on death");
+            notes.add("elder horn calls " + ElderSentry.MAX_SUMMONS + " archer(s) (cap " + ElderSentry.MAX_SUMMONS + "), cleared on death");
         } finally {
             drop(ps);
             e.discard();

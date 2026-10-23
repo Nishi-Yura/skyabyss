@@ -367,5 +367,95 @@
         "stream": false
       }
     ]
+  },
+  "voice.abyss_section_bone.l0": {
+    "subtitle": "subtitles.skyabyss_cinematic.voice.hero",
+    "sounds": [
+      {
+        "name": "skyabyss_cinematic:voice/abyss_section_bone/l0",
+        "stream": false
+      }
+    ]
+  },
+  "voice.abyss_section_bone.l1": {
+    "subtitle": "subtitles.skyabyss_cinematic.voice.hero",
+    "sounds": [
+      {
+        "name": "skyabyss_cinematic:voice/abyss_section_bone/l1",
+        "stream": false
+      }
+    ]
+  },
+  "voice.abyss_section_salt.l0": {
+    "subtitle": "subtitles.skyabyss_cinematic.voice.hero",
+    "sounds": [
+      {
+        "name": "skyabyss_cinematic:voice/abyss_section_salt/l0",
+        "stream": false
+      }
+    ]
+  },
+  "voice.abyss_section_salt.l1": {
+    "subtitle": "subtitles.skyabyss_cinematic.voice.hero",
+    "sounds": [
+      {
+        "name": "skyabyss_cinematic:voice/abyss_section_salt/l1",
+        "stream": false
+      }
+    ]
+  },
+  "voice.abyss_section_storm.l0": {
+    "subtitle": "subtitles.skyabyss_cinematic.voice.hero",
+    "sounds": [
+      {
+        "name": "skyabyss_cinematic:voice/abyss_section_storm/l0",
+        "stream": false
+      }
+    ]
+  },
+  "voice.abyss_section_storm.l1": {
+    "subtitle": "subtitles.skyabyss_cinematic.voice.hero",
+    "sounds": [
+      {
+        "name": "skyabyss_cinematic:voice/abyss_section_storm/l1",
+        "stream": false
+      }
+    ]
+  },
+  "voice.abyss_section_ash.l0": {
+    "subtitle": "subtitles.skyabyss_cinematic.voice.hero",
+    "sounds": [
+      {
+        "name": "skyabyss_cinematic:voice/abyss_section_ash/l0",
+        "stream": false
+      }
+    ]
+  },
+  "voice.abyss_section_ash.l1": {
+    "subtitle": "subtitles.skyabyss_cinematic.voice.hero",
+    "sounds": [
+      {
+        "name": "skyabyss_cinematic:voice/abyss_section_ash/l1",
+        "stream": false
+      }
+    ]
+  },
+  "voice.abyss_section_heart.l0": {
+    "subtitle": "subtitles.skyabyss_cinematic.voice.hero",
+    "sounds": [
+      {
+        "name": "skyabyss_cinematic:voice/abyss_section_heart/l0",
+        "stream": false
+      }
+    ]
+  },
+  "voice.abyss_section_heart.l1": {
+    "subtitle": "subtitles.skyabyss_cinematic.voice.hero",
+    "sounds": [
+      {
+        "name": "skyabyss_cinematic:voice/abyss_section_heart/l1",
+        "stream": false
+      }
+    ]
   }
 }
