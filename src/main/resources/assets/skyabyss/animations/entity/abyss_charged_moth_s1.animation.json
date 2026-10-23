@@ -21,7 +21,7 @@
     },
     "body": {
      "rotation": [
-      "-4 + 4 * math.sin(450 * query.anim_time + 0)",
+      "-(-4 + 4 * math.sin(450 * query.anim_time + 0))",
       "0",
       "4 * math.sin(225 * query.anim_time + 0)"
      ],
@@ -33,14 +33,14 @@
     },
     "abd": {
      "rotation": [
-      "6 + 8 * math.sin(450 * query.anim_time + 90)",
+      "-(-(6 + 8 * math.sin(450 * query.anim_time + 90)))",
       "0",
       "0"
      ]
     },
     "head": {
      "rotation": [
-      "4 * math.sin(450 * query.anim_time + 30)",
+      "-(-(4 * math.sin(450 * query.anim_time + 30)))",
       "0",
       "0"
      ]
@@ -67,7 +67,7 @@
     },
     "body": {
      "rotation": [
-      "-14 + 4 * math.sin(450 * query.anim_time + 0)",
+      "-(-14 + 4 * math.sin(450 * query.anim_time + 0))",
       "0",
       "6 * math.sin(225 * query.anim_time + 0)"
      ],
@@ -79,14 +79,14 @@
     },
     "abd": {
      "rotation": [
-      "6 + 8 * math.sin(450 * query.anim_time + 90)",
+      "-(-(6 + 8 * math.sin(450 * query.anim_time + 90)))",
       "0",
       "0"
      ]
     },
     "head": {
      "rotation": [
-      "4 * math.sin(450 * query.anim_time + 30)",
+      "-(-(4 * math.sin(450 * query.anim_time + 30)))",
       "0",
       "0"
      ]
@@ -108,14 +108,14 @@
       },
       "0.1": {
        "vector": [
-        16,
+        -16,
         0,
         0
        ]
       },
       "0.2": {
        "vector": [
-        -26,
+        26,
         0,
         0
        ]
@@ -170,21 +170,21 @@
       },
       "0.1": {
        "vector": [
-        -30,
+        30,
         0,
         0
        ]
       },
       "0.2": {
        "vector": [
-        60,
+        -60,
         0,
         0
        ]
       },
       "0.32": {
        "vector": [
-        54,
+        -54,
         0,
         0
        ]
@@ -265,7 +265,7 @@
       },
       "0.05": {
        "vector": [
-        20,
+        -20,
         0,
         24
        ]
@@ -290,7 +290,7 @@
       },
       "0.05": {
        "vector": [
-        -20,
+        20,
         0,
         0
        ]
@@ -321,21 +321,21 @@
       },
       "0.3": {
        "vector": [
-        30,
+        -30,
         120,
         40
        ]
       },
       "0.7": {
        "vector": [
-        70,
+        -70,
         300,
         80
        ]
       },
       "1": {
        "vector": [
-        80,
+        -80,
         360,
         90
        ]
@@ -426,7 +426,7 @@
       },
       "1": {
        "vector": [
-        40,
+        -40,
         0,
         0
        ]

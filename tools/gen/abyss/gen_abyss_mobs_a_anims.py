@@ -8,7 +8,9 @@
   骨笛 call 1.5 秒 (WARN_CALL 30)、塩の抜け殻 crack 1.5 秒 (WARN_CRACK 30) と wake、潮だまりの手 grasp 1.5 秒で閉じる (WARN_RING 30)、
   避雷の像 charge 1.5 秒で振り下ろす (WARN_RING 30)、焦げた鳥の影 shadow 1.2 秒 (WARN_SHADOW 24) と dive 2 秒 (急降下 40 tick)、
   白い貝守は殻の開け閉め (open / shut の繰り返し。AbyssMob の shell の制御が OPEN で選ぶ)。
-向き: このパイプラインの x 回転は、下へ垂れた部品 (腕・脚) の + が前へ振る、上に立つ部品 (胴・頭) の + が後ろへ反る。
+向き: 下の関数は「垂れた部品 (腕・脚) の x の + が前へ振る、立つ部品 (胴・頭) と前へ伸びた部品 (鳥の胴・首) の x の - が前へ倒れる」で書き、
+書き出すときに x を反転する (flip_x)。ゲームの GeckoLib では、ファイルの x の + で立つ部品が前へ倒れる (像が倒れる向きで確かめた。
+docs/review/mob_quality_v2/)。
 """
 import json
 import math
@@ -261,8 +263,9 @@ def bone_picker():
         }),
         # ひっくり返って脚を縮める
         "death": once(1.0, {
-            "body": rp({0: Z, 0.2: [0, 0, 40], 0.45: [0, 0, 178], 0.55: [0, 0, 168], 0.7: [0, 0, 180], 1.0: [0, 0, 180]},
-                       {0: Z, 0.2: [0, 1.6, 0], 0.45: [0, 3.6, 0], 0.7: [0, 3.2, 0], 1.0: [0, 3.2, 0]}),
+            # 横へ転がって脚を縮める (裏返しは付け根の高さで浮いて見えたので、横倒しで止める)
+            "body": rp({0: Z, 0.2: [0, 0, 30], 0.45: [0, 0, 92], 0.55: [0, 0, 80], 0.7: [0, 0, 88], 1.0: [0, 0, 86]},
+                       {0: Z, 0.2: [0, 0.6, 0], 0.45: [0, 0, 0], 1.0: [0, -0.4, 0]}),
             "leg_l1": rp({0: Z, 0.5: [30, 0, 40], 0.8: [20, 0, 50], 1.0: [24, 0, 46]}),
             "leg_l2": rp({0: Z, 0.5: [-30, 0, 40], 0.8: [-20, 0, 50], 1.0: [-24, 0, 46]}),
             "leg_r1": rp({0: Z, 0.5: [30, 0, -40], 0.8: [20, 0, -50], 1.0: [24, 0, -46]}),
@@ -363,7 +366,8 @@ def white_shell_keeper():
         }),
         "hurt": once(0.3, {"shell": rp({0: Z, 0.07: [8, 0, 6], 0.3: Z}, {0: Z, 0.07: [0, -0.4, 0], 0.3: Z})}),
         "death": once(1.2, {
-            "shell": rp({0: Z, 0.3: [0, 0, 20], 0.7: [0, 0, 160], 0.85: [0, 0, 172], 1.2: [0, 0, 180]}, {0: Z, 0.3: [0, 1.5, 0], 0.7: [0, 7.5, 0], 1.2: [0, 8.2, 0]}),
+            # 殻ごと前へ傾いて沈み、鋏がだらりと伸びる
+            "shell": rp({0: Z, 0.3: [-6, 0, 10], 0.7: [12, 0, 18], 0.85: [9, 0, 16], 1.2: [12, 0, 20]}, {0: Z, 0.3: [0, 0.4, 0], 0.7: [0, -1.2, 0], 1.2: [0, -1.5, 0]}),
             "claw_l": rp({0: Z, 0.7: [40, 0, 30], 1.2: [50, 0, 40]}),
             "claw_r": rp({0: Z, 0.7: [40, 0, -30], 1.2: [50, 0, -40]}),
         }, hold=True),
@@ -492,6 +496,22 @@ KINDS = {
 
 
 HUMANS = ("rib_guard", "salt_husk", "lightning_idol")
+# 潮だまりの手の回転は outward() (溜まりの中心から外へ) で作ってあり、ゲームで外へ開くのを確かめた向きなので反転しない
+NO_FLIP = ("tide_hands",)
+
+
+def flip_x(anims):
+    """回転の x を反転する (上の向きの約束 → ゲームの向き)。"""
+    for a in anims.values():
+        for b in a["bones"].values():
+            r = b.get("rotation")
+            if isinstance(r, list):
+                x = r[0]
+                b["rotation"] = [("-(%s)" % x) if isinstance(x, str) and x not in ("0", "") else (-x if not isinstance(x, str) else x)] + r[1:]
+            elif isinstance(r, dict):
+                for k in r.values():
+                    k["vector"][0] = -k["vector"][0] if k["vector"][0] else 0
+    return anims
 
 
 def write_all():
@@ -500,6 +520,8 @@ def write_all():
         made = fn()
         if kind in HUMANS:
             counter_legs(made)
+        if kind not in NO_FLIP:
+            flip_x(made)
         anims = {"animation.%s.%s" % (kind, k): v for k, v in made.items()}
         doc = {"format_version": "1.8.0", "animations": anims}
         p = os.path.join(OUT, "abyss_%s_s1.animation.json" % kind)

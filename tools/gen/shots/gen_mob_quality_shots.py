@@ -76,6 +76,8 @@ MOBS = [
 EXTRA = {e: [("death", 30)] for e in ("bone_flute", "bone_picker", "charged_moth", "lightning_idol", "rib_guard", "salt_husk",
                                      "scorched_bird", "tide_hands", "white_shell_keeper")}
 EXTRA["lamp_eater"] = [("snuff", 6)]
+for _e, _t in (("bone_sentinel", 30), ("rib_archer", 30), ("elder_sentinel", 34), ("whalebone_captain", 44), ("bone_mortar", 26), ("bone_gull", 22)):
+    EXTRA[_e] = [("hurt", 2), ("death", _t)]
 EXTRA["nameless_shape"] = [("shoot", 10)]
 
 

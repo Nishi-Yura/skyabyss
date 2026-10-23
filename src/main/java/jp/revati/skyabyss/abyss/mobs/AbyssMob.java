@@ -95,12 +95,10 @@ public class AbyssMob extends GuardMob {
         return hit;
     }
 
+    // 被弾・倒れる動き (GuardMob が流す。予告の構えの途中は被弾の動きを流さない)
     @Override
-    public void die(DamageSource source) {
-        super.die(source);
-        if (!level().isClientSide) {
-            playAction("death");
-        }
+    protected boolean autoHurtDeath() {
+        return true;
     }
 
     public AbyssMobKind kind() {
@@ -438,11 +436,7 @@ public class AbyssMob extends GuardMob {
         if (kind.mode == AbyssMobKind.Mode.AMBUSH && !awake && level() instanceof ServerLevel s) {
             wake(s);
         }
-        boolean hit = super.hurt(source, a);
-        if (hit && !level().isClientSide && isAlive()) {
-            playAction("hurt");
-        }
-        return hit;
+        return super.hurt(source, a);
     }
 
     // ---------------------------------------------------------------- 落とし物 (段が上がるほど出やすい)
