@@ -127,6 +127,17 @@ abstract class EmberRoom extends RaidRoom {
         return ctx.adopt(mob);
     }
 
+    // 人を動かす (本物は teleportTo、偽の人は moveTo)
+    static void moveTo(ServerPlayer p, double x, double y, double z) {
+        if (p instanceof net.neoforged.neoforge.common.util.FakePlayer || p.connection == null) {
+            p.moveTo(x, y, z, p.getYRot(), p.getXRot());
+        } else {
+            p.teleportTo(x, y, z);
+        }
+        p.fallDistance = 0;
+        p.setDeltaMovement(Vec3.ZERO);
+    }
+
     static BlockState b(net.minecraft.world.level.block.Block block) {
         return block.defaultBlockState();
     }

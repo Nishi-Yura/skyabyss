@@ -164,12 +164,16 @@ public final class BuildAuditSelfTest {
         }
         steps.add(Step.once("build audit (backs build)", server -> BackBuildJobs.runAll()));
         // 背を全部建ててから、光の計算が落ち着くのを待って (200 tick) 調べる
-        steps.add(Step.once("build audit (whale build)", server -> build(server, TitanTravel.TITAN_BACK, level -> {
-            TitanBackData data = TitanBackData.get(level);
-            if (data.needsBuild()) {
-                TitanBackBuilder.build(level, data);
-            }
-        })));
+        // 鯨も、建てたあと区画を読み込んだままにする (この試験の中で建てると、外れた区画の灯りが計算されず 600 件以上暗く数えられた)
+        steps.add(Step.once("build audit (whale build)", server -> {
+            build(server, TitanTravel.TITAN_BACK, level -> {
+                TitanBackData data = TitanBackData.get(level);
+                if (data.needsBuild()) {
+                    TitanBackBuilder.build(level, data);
+                }
+            });
+            forceBox(server, TitanTravel.TITAN_BACK, WHALE_BOX, true);
+        }));
         // 潮と嵐の背も、建てたあと区画を読み込んだままにする (読み込みの外れた区画は、灯りの計算が済まず暗く数えられる。余燼と同じ)
         steps.add(Step.once("build audit (tide build)", server -> {
             build(server, TideTravel.TIDE_BACK, TideBackBuilder::ensureBuilt);
@@ -184,8 +188,10 @@ public final class BuildAuditSelfTest {
             build(server, EmberIds.BACK, EmberBodyBuilder::ensureBuilt);
             forceBox(server, EmberIds.BACK, EMBER_BOX, true);
         }));
-        steps.add(Step.once("build audit (whale)", 200, server -> back(server, TitanTravel.TITAN_BACK, "whale", WHALE_BOX,
-                level -> jp.revati.skyabyss.titan.dungeon.TitanBackAudit.run(level))));
+        steps.add(Step.once("build audit (whale)", 400, server -> {
+            back(server, TitanTravel.TITAN_BACK, "whale", WHALE_BOX, level -> jp.revati.skyabyss.titan.dungeon.TitanBackAudit.run(level));
+            forceBox(server, TitanTravel.TITAN_BACK, WHALE_BOX, false);
+        }));
         // 建てた直後は明かりの計算が終わっていない (灯りが光らず、暗さの数が 95 まで増える)。区画を読み込んだまま 400 tick おいてから調べ、外す
         steps.add(Step.once("build audit (tide)", 400, server -> {
             back(server, TideTravel.TIDE_BACK, "tide", TIDE_BOX,

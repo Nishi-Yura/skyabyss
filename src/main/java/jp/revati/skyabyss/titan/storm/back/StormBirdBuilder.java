@@ -707,6 +707,8 @@ public final class StormBirdBuilder {
             }
         }
         setIfDifferent(level, new BlockPos(0, HUB.floor() - 4, kz), StormKit.LAMP);
+        // 穴の底の床にも灯り (床 131 の下の灯りは床に隠れて届かない。暗い角が build audit の LIGHT_DARK に出ていた)
+        setIfDifferent(level, new BlockPos(-2, HUB.floor() - 3, kz), StormKit.LAMP);
     }
 
     private static void setIfDifferent(net.minecraft.server.level.ServerLevel level, BlockPos p, BlockState s) {

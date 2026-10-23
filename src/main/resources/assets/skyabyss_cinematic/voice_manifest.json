@@ -39,5 +39,15 @@
 {"scene":"heart_ember","idx":1,"at":2.1,"duration":1.9,"speaker":"HERO","label":"","text":"cinematic.skyabyss.heart.ember.hero"},
 {"scene":"titan_end_ember","idx":0,"at":0.8,"duration":3.6,"speaker":"HERO","label":"","text":"cinematic.skyabyss.end.ember.1"},
 {"scene":"titan_end_ember","idx":1,"at":6.0,"duration":4.6,"speaker":"HEAVEN","label":"","text":"cinematic.skyabyss.end.ember.2"},
-{"scene":"titan_end_ember","idx":2,"at":11.4,"duration":4.2,"speaker":"HERO","label":"","text":"cinematic.skyabyss.end.ember.3"}
+{"scene":"titan_end_ember","idx":2,"at":11.4,"duration":4.2,"speaker":"HERO","label":"","text":"cinematic.skyabyss.end.ember.3"},
+{"scene":"abyss_section_bone","idx":0,"at":0.6,"duration":3.4,"speaker":"HERO","label":"","text":"cinematic.skyabyss.abyss_v2.bone.hero1"},
+{"scene":"abyss_section_bone","idx":1,"at":4.4,"duration":3.6,"speaker":"HERO","label":"","text":"cinematic.skyabyss.abyss_v2.bone.hero2"},
+{"scene":"abyss_section_salt","idx":0,"at":0.6,"duration":3.4,"speaker":"HERO","label":"","text":"cinematic.skyabyss.abyss_v2.salt.hero1"},
+{"scene":"abyss_section_salt","idx":1,"at":4.4,"duration":3.6,"speaker":"HERO","label":"","text":"cinematic.skyabyss.abyss_v2.salt.hero2"},
+{"scene":"abyss_section_storm","idx":0,"at":0.6,"duration":3.4,"speaker":"HERO","label":"","text":"cinematic.skyabyss.abyss_v2.storm.hero1"},
+{"scene":"abyss_section_storm","idx":1,"at":4.4,"duration":3.6,"speaker":"HERO","label":"","text":"cinematic.skyabyss.abyss_v2.storm.hero2"},
+{"scene":"abyss_section_ash","idx":0,"at":0.6,"duration":3.4,"speaker":"HERO","label":"","text":"cinematic.skyabyss.abyss_v2.ash.hero1"},
+{"scene":"abyss_section_ash","idx":1,"at":4.4,"duration":3.6,"speaker":"HERO","label":"","text":"cinematic.skyabyss.abyss_v2.ash.hero2"},
+{"scene":"abyss_section_heart","idx":0,"at":0.6,"duration":3.4,"speaker":"HERO","label":"","text":"cinematic.skyabyss.abyss_v2.heart.hero1"},
+{"scene":"abyss_section_heart","idx":1,"at":4.4,"duration":3.6,"speaker":"HERO","label":"","text":"cinematic.skyabyss.abyss_v2.heart.hero2"}
 ]}

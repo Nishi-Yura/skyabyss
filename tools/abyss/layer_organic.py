@@ -41,6 +41,7 @@ class Grow:
                 for dy in (-1, 0, 1):
                     for dz in (-1, 0, 1):
                         self.blocked.add((x + dx, y + dy, z + dz))
+        self.guard = GUARD
         self.cells = {}
         for p, s in lay.seg.items():
             self.cells.setdefault(s, []).append(p)
@@ -51,9 +52,10 @@ class Grow:
             return False
         x, y, z = q
         air, seg = lay.air, lay.seg
-        for dx in range(-GUARD, GUARD + 1):
-            for dy in range(-GUARD, GUARD + 1):
-                for dz in range(-GUARD, GUARD + 1):
+        gd = self.guard
+        for dx in range(-gd, gd + 1):
+            for dy in range(-gd, gd + 1):
+                for dz in range(-gd, gd + 1):
                     n = (x + dx, y + dy, z + dz)
                     if n in air and seg.get(n) not in group:
                         return False
@@ -70,6 +72,7 @@ class Grow:
         cells = self.cells.get(sg)
         if not cells:
             return
+        self.guard = 1 if meta['kind'] == 'camp' else GUARD
         owner = lay.air[cells[0]]
         L = meta['layer']
         kind = meta['kind']
@@ -206,8 +209,12 @@ class Grow:
                             continue
                         seen.add(c)
                         cx, cz = c
-                        n = noise(cx, y * 0.7, cz, 4.0, seed) * 0.7 + noise(cx, y, cz, 1.7, seed + 1) * 0.3
-                        reach = depth * min(1.0, max(0.0, (n - 0.3) / 0.45))
+                        if meta.get('kind') == 'camp':
+                            n = noise(cx, y * 0.5, cz, 6.5, seed) * 0.75 + noise(cx, y, cz, 2.2, seed + 1) * 0.25
+                            reach = depth * min(1.0, max(0.0, (n - 0.2) / 0.3))
+                        else:
+                            n = noise(cx, y * 0.7, cz, 4.0, seed) * 0.7 + noise(cx, y, cz, 1.7, seed + 1) * 0.3
+                            reach = depth * min(1.0, max(0.0, (n - 0.3) / 0.45))
                         if d > reach + 0.5:
                             continue
                         if y == f0 and d >= 2 and noise(cx, 1, cz, 3.0, seed) > 0.6:
@@ -637,6 +644,55 @@ def _arena(ctx, d, L, sg, meta):
                 while d.air((x, yy, z)):
                     d.b[(x, yy, z)] = 'basalt[axis=y]'
                     yy += 1
+    if L in ('storm', 'ash'):
+        _arena_light(ctx, d, L, cells, ax, az, R)
+
+
+def _column_floor(d, cells_by_col, x, z):
+    col = cells_by_col.get((x, z))
+    if not col:
+        return None
+    p = min(col, key=lambda q: q[1])
+    if p in d.keep or p in d.lay.fixed or not d.air(p):
+        return None
+    for dy in (1, 2, 3):
+        if not d.air((p[0], p[1] + dy, p[2])):
+            return None
+    return p
+
+
+def _arena_light(ctx, d, L, cells, ax, az, R):
+    """主の間の足元の明るさ (ブロック光 7 以上が床の大半)。雷: 銅の柱に灯る電球。灰: 黒石の台に燠の火。
+    置くのは床の上の小さな柱だけ (壁・天井は変えない)。灰の迷路には置かない (ここは主の間だけ)"""
+    cols = {}
+    for p in cells:
+        cols.setdefault((p[0], p[2]), []).append(p)
+    rings = [(5, 4, math.pi / 4), (10, 8, math.pi / 8), (R - 1, 8 if L == 'storm' else 4, 0.0)]
+    for rad, n, off in rings:
+        for k in range(n):
+            ang = off + k * 2 * math.pi / n
+            x, z = ax + int(round(math.cos(ang) * rad)), az + int(round(math.sin(ang) * rad))
+            p = None
+            for dx, dz in ((0, 0), (1, 0), (-1, 0), (0, 1), (0, -1)):
+                p = _column_floor(d, cols, x + dx, z + dz)
+                if p:
+                    break
+            if not p:
+                continue
+            x, y, z = p
+            if L == 'storm':
+                d.b[(x, y, z)] = 'oxidized_cut_copper'
+                d.b[(x, y + 1, z)] = 'weathered_cut_copper' if k % 2 else 'oxidized_cut_copper'
+                d.b[(x, y + 2, z)] = 'waxed_copper_bulb[lit=true,powered=false]'
+                d.b[(x, y + 3, z)] = 'lightning_rod[facing=up,powered=false,waterlogged=false]'
+            else:
+                d.b[(x, y, z)] = 'polished_blackstone_bricks' if k % 2 else 'blackstone'
+                d.b[(x, y + 1, z)] = 'campfire[facing=north,lit=true,signal_fire=false,waterlogged=false]'
+                if rad > 5:
+                    for sx, sz in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+                        q = (x + sx, y, z + sz)
+                        if d.air(q) and q not in d.keep and ctx.h3(q[0], 0, q[2], 93) < 0.4 and d.floor.get(q) == y:
+                            d.b[q] = 'magma_block'
 
 
 def _vista(ctx, d, L):
@@ -724,3 +780,35 @@ def _camp(ctx, d, L, sg):
                 d.b[(x, y + 1, z)] = 'spruce_slab[type=bottom,waterlogged=false]'
         elif r < 0.2:
             d.b[p] = 'brown_carpet' if r < 0.17 else 'white_carpet'
+
+    # 壁に沿った支え木 (縦の丸太を三つ・頭に板)。通り道の口・印の回りは避ける。間は四マス以上空ける
+    posts = []
+    allc = [p for p in d.layer_cells.get(L, []) if d.lay.seg.get(p) == sg]
+    for p in sorted(allc):
+        x, y, z = p
+        if d.floor.get(p) != y or p in d.keep or p in d.lay.fixed or not d.air(p) or d.b.get(p) != 'air':
+            continue
+        if h3(x, y, z, 131) > 0.22:
+            continue
+        side = [q for q in ((x + 1, y, z), (x - 1, y, z), (x, y, z + 1), (x, y, z - 1)) if d.shell(q)]
+        if not side:
+            continue
+        if any(abs(x - a) + abs(z - b) < 5 for (a, b) in posts):
+            continue
+        bad = False
+        for dx in range(-2, 3):
+            for dz in range(-2, 3):
+                for dy in range(0, 3):
+                    q = (x + dx, y + dy, z + dz)
+                    if q in d.lay.air and d.lay.seg.get(q) != sg:
+                        bad = True
+                    if q in d.lay.fixed and q != p:
+                        bad = True
+        if bad or not all(d.air((x, y + k, z)) for k in range(1, 4)):
+            continue
+        for k in range(3):
+            d.b[(x, y + k, z)] = 'stripped_spruce_log[axis=y]'
+        d.b[(x, y + 3, z)] = 'spruce_planks'
+        posts.append((x, z))
+        if h3(x, y, z, 132) < 0.35:
+            d.b[(x, y + 2, z)] = 'stripped_spruce_log[axis=y]'

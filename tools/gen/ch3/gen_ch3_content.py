@@ -235,7 +235,7 @@ text("quest.skyabyss.ch3.sub_isana_wait.done", "イサナは、火のそばで�
 text("quest.skyabyss.ch3.sub_isana_wait.climb.journal",
      "夕立の刻に、巨大な鳥が峰へ降りるという。\n峰の足もとまで行って、風がどう動くか、見てこよう。",
      "In the afternoon storm hour the giant bird settles on a peak.\nI will go to the foot of the peak and watch how the wind moves.")
-text("quest.skyabyss.ch3.sub_isana_wait.climb.foot", "夕立の刻に、峰の足もとへ行く", "Reach the foot of the peak in the storm hour")
+text("quest.skyabyss.ch3.sub_isana_wait.climb.foot", "夕立の刻に、峰の足もとへ行く", "Reach the foot of the perched titan in the storm hour")
 text("quest.skyabyss.ch3.sub_isana_wait.tell.journal", "風は、鳥の足もとで渦を巻いていた。\nイサナのところへ、話しに行こう。",
      "The wind spiralled at the bird's feet.\nI will go and tell Isana.")
 text("quest.skyabyss.ch3.sub_isana_wait.tell.talk", "イサナに、峰の足もとの話をする", "Tell Isana about the foot of the peak")

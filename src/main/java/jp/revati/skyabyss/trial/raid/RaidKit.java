@@ -162,6 +162,7 @@ public final class RaidKit {
         AABB inner = new AABB(o.getX() - hx, fy + 1, o.getZ() - hz, o.getX() + hx + 1, fy + h + 1, o.getZ() + hz + 1);
         Cell cell = new Cell(o, hx, hz, h, rest, exitSpot, inner, bounds, entryGate, exitGate, pal);
         ctx.setCell(cell);
+        RaidLore.placeTablet(ctx, cell);
         return cell;
     }
 

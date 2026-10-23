@@ -22,7 +22,7 @@ from __future__ import annotations
 # tools 内の他グループのモジュールを import できるようにする（フォルダ移動後も兄弟モジュールを解決）
 import os as _os
 import sys as _sys
-_sys.path[:0] = [_os.path.join(_os.path.dirname(_os.path.abspath(__file__)), p) for p in ('../mobs')]
+_sys.path[:0] = [_os.path.join(_os.path.dirname(_os.path.abspath(__file__)), p) for p in ('../mobs',)]
 
 import json
 import re
@@ -128,8 +128,8 @@ OBJECTIVES = [
     ("read_page", "破れた頁を拾って、読んでみよう", "Take the torn page, and read it", "B4 影が去ってから、落ちてきた破れた頁を読むまで (メインの段 watch_sky のまま。OpeningLogic.objective)"),
     ("ask_storyteller", "宿りの語り部に話しかけよう", "Talk to the lodge storyteller", "B4 影を見てから、語り部に尋ねるまで (メインの段 ask_storyteller)"),
     ("find_isana", "外れの焚き火の旅人に話しかけよう", "Talk to the traveler at the fire", "B5 語り部のあと、イサナと話すまで (メインの段 find_chaser)"),
-    ("wait_steps", "夜は、明かりのそばで過ごそう", "Spend the night near a light", "B7 イサナと話してから、夜の足音 (B6) を聞くまで (メインの段 see_whale。夜 1 に来るのは足音だけなので歌とは言わない。first_hour_log B-1)"),
-    ("see_whale", "夜空に耳をすませよう（明かりのそばで）", "Listen to the night sky (near a light)", "B7〜B10 足音のあと、歌 (B9) を聞くまで (メインの段 see_whale)"),
+    ("wait_steps", "夜は、灯りのそばで過ごそう", "Spend the night near a light", "B7 イサナと話してから、夜の足音 (B6) を聞くまで (メインの段 see_whale。夜 1 に来るのは足音だけなので歌とは言わない。first_hour_log B-1)"),
+    ("see_whale", "夜空に耳をすませよう（灯りのそばで）", "Listen to the night sky (near a light)", "B7〜B10 足音のあと、歌 (B9) を聞くまで (メインの段 see_whale)"),
     ("wait_whale", "夕方の空に、岩鯨を探そう", "Look for the stone whale in the dusk sky", "歌を聞き、イサナと会ったあと、岩鯨を見るまで (メインの段 see_whale。歌のあとで帯が変わる)"),
     ("bone_hill", "白く霞む丘を確かめに行ってみよう", "Check the hazy white hill", "B8 日 2 の昼の寄り道 (任意。出さなくてもよい)"),
 ]

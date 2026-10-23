@@ -165,7 +165,7 @@ ROLES = {
                       ("うちは厩舎だ。町から町へ、荷も人も運ぶ獣を預かってる。笛を一本持っていきな、吹けばどこにでも来る。",
                        "This is the stable. We keep beasts that carry load and rider alike. Take a whistle; blow it and your mount comes, wherever you are."),
                       [("mount", "talk", [fac("mount_shop")], None, "乗り物を見る・買う (見た目と性能)", "Browse mounts (looks and stats)", None, None),
-                       ("rules", "talk", None, "rules", "呼び笛の決まり", "How the whistle works",
+                       ("rules", "talk", None, "rules", "乗り笛の決まり", "How the whistle works",
                         "笛を吹けば目の前に来る。もう一度吹けば帰る。巨神の背と淵の底、心臓の間には連れていけない。主が遠くへ行ったり、眠りについたりしても帰っちまう。見た目は章を越えるごとに増える。性能は鐘銭で磨くんだ。",
                         "Blow once and it comes; blow again and it goes home. It can't follow you onto a titan's back, down into the abyss, or into a heart chamber. It also leaves if you wander far or log off. New looks arrive as you clear chapters; stats you polish with bell coins.")]),
 }
