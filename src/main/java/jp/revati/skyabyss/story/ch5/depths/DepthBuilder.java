@@ -59,6 +59,9 @@ public final class DepthBuilder {
         public DepthBoss.Fight boss;
         public int bossDeadAt = -1;
         public boolean shopped;
+        // 王の階の、入口のそばの前の私の手記 (碑)。置けなかったら null
+        @Nullable
+        public BlockPos noteAt;
 
         Inst(UUID group, int slot, int floor, int salt, long worldSeed) {
             this.group = group;
@@ -235,6 +238,9 @@ public final class DepthBuilder {
         }
         QUEUE.pollFirst();
         fillChests(level, job);
+        if (job.plan.boss()) {
+            placeNote(level, job);
+        }
         job.ready = true;
         SkyAbyss.LOGGER.info("[abyss depth] floor {} built (slot {}, {} cells, kind {})", job.floor, job.slot, h * n * n, job.plan.kind());
     }
@@ -254,6 +260,24 @@ public final class DepthBuilder {
                 cb.setChanged();
             }
         }
+    }
+
+    // 王の階の入口のそばに、前の私の手記を一枚立てる (fun_review 2026-10-23 の P7-2)。文は王の型ごと (sign.skyabyss.depth_note_<型>.1〜4)。
+    // 次にこの箱を建て直すとき、ほかの床と同じく見比べで消える
+    static void placeNote(ServerLevel level, Inst i) {
+        String key = "sign.skyabyss.depth_note_" + DepthBoss.kingOf(DepthPlan.bossNo(i.floor)).id();
+        BlockPos e = i.entryFeet();
+        int[][] offs = {{2, 0}, {-2, 0}, {0, 2}, {0, -2}, {2, 2}, {-2, 2}, {2, -2}, {-2, -2}, {1, 0}, {-1, 0}, {0, 1}, {0, -1}};
+        for (int[] o : offs) {
+            BlockPos p = e.offset(o[0], 0, o[1]);
+            if (i.contains(p) && level.getBlockState(p).isAir() && level.getBlockState(p.above()).isAir() && level.getBlockState(p.below()).isSolid()) {
+                level.setBlock(p, jp.revati.skyabyss.tablet.Tablets.standingState(), Block.UPDATE_ALL);
+                jp.revati.skyabyss.tablet.Tablets.write(level, p, key);
+                i.noteAt = p;
+                return;
+            }
+        }
+        i.noteAt = null;
     }
 
     // 頼まれた階を、その場で最後まで建てる (自己テストと開発用)

@@ -40,7 +40,8 @@ public final class EmberRaidSelfTest {
     public static List<SelfTestRunner.Step> steps() {
         return List.of(
                 SelfTestRunner.Step.once("ember raid (load)", EmberRaidSelfTest::load),
-                SelfTestRunner.Step.once("ember raid", 30, EmberRaidSelfTest::run));
+                SelfTestRunner.Step.once("ember raid", 30, EmberRaidSelfTest::run),
+                EmberRaid2SelfTest.steps().get(0));
     }
 
     static void load(MinecraftServer server) {
@@ -93,14 +94,14 @@ public final class EmberRaidSelfTest {
         }
     }
 
-    private static void check(List<String> f, String what, boolean ok) {
+    static void check(List<String> f, String what, boolean ok) {
         if (!ok) {
             f.add(what);
         }
     }
 
     // ---- 部品
-    private static RaidCtx newCtx(ServerLevel level, long seed) throws ReflectiveOperationException {
+    static RaidCtx newCtx(ServerLevel level, long seed) throws ReflectiveOperationException {
         Constructor<RaidCtx> c = RaidCtx.class.getDeclaredConstructor(ServerLevel.class, UUID.class, String.class, String.class, int.class, int.class,
                 BlockPos.class, long.class);
         c.setAccessible(true);
@@ -108,7 +109,7 @@ public final class EmberRaidSelfTest {
                 new BlockPos(CX, FLOOR, CZ), seed);
     }
 
-    private static FakePlayer fake(ServerLevel level, String tag) {
+    static FakePlayer fake(ServerLevel level, String tag) {
         FakePlayer p = new FakePlayer(level, new GameProfile(UUID.nameUUIDFromBytes(("ember raid " + tag).getBytes(java.nio.charset.StandardCharsets.UTF_8)),
                 "[er_" + tag + "]")) {
             @Override
@@ -131,12 +132,12 @@ public final class EmberRaidSelfTest {
         return p;
     }
 
-    private static void at(FakePlayer p, BlockPos pos) {
+    static void at(FakePlayer p, BlockPos pos) {
         p.moveTo(pos.getX() + 0.5, FLOOR + 1, pos.getZ() + 0.5, 0, 0);
         p.setOnGround(true);
     }
 
-    private static void ticks(ServerLevel level, EmberRoom room, RaidCtx ctx, int n) {
+    static void ticks(ServerLevel level, EmberRoom room, RaidCtx ctx, int n) {
         for (int i = 0; i < n; i++) {
             Telegraph.tickNow(level);
             room.tick(ctx);
@@ -144,7 +145,7 @@ public final class EmberRaidSelfTest {
     }
 
     // 部屋を建てて、上から見た形 (各 x,z の一番上のブロック) を dump へ
-    private static void dumpPlan(ServerLevel level, RaidCtx ctx, String id, StringBuilder dump) {
+    static void dumpPlan(ServerLevel level, RaidCtx ctx, String id, StringBuilder dump) {
         var cell = ctx.cell();
         if (dump.length() > 1) {
             dump.append(",");
@@ -192,7 +193,7 @@ public final class EmberRaidSelfTest {
         dump.append("]}");
     }
 
-    private static boolean sealed(ServerLevel level, RaidCtx ctx, List<String> f, String id) {
+    static boolean sealed(ServerLevel level, RaidCtx ctx, List<String> f, String id) {
         // 閉じている: 部屋の外周 (殻) に空気がない。入口・出口の戸の外側は戸が閉じていること
         var b = ctx.cell().bounds();
         int bad = 0;

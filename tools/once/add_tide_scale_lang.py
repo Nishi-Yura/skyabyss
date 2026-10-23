@@ -24,13 +24,13 @@ TABLETS = {
     "cairn_3": (["南西の標石", "浜の天窓が", "足もとに光る", "潮門は近い"], ["SW cairn.", "Skylights glow", "below you.", "The gate is near"]),
     "cairn_4": (["北の標石", "首の先に頭が", "ある。亀は北へ", "歩いている"], ["North cairn.", "Beyond the neck", "the head. It", "walks north"]),
     "fin_w_gate": (["西のひれの道", "貝の間は二つ", "先に景色と宝", "宝は隠れている"], ["West fin road:", "two shell halls,", "then a view and", "a hidden cache"]),
-    "fin_e_gate": (["東のひれの道", "貝の間は二つ", "先に灯と宝", "宝は隠れている"], ["East fin road:", "two shell halls,", "then a lamp and", "a hidden cache"]),
+    "fin_e_gate": (["東のひれの道", "貝の間は二つ", "先に灯りと宝", "宝は隠れている"], ["East fin road:", "two shell halls,", "then a lamp and", "a hidden cache"]),
     "fin_w1": (["三つの貝が鳴く", "低い声から", "高い声へ", "順に叩け"], ["Three shells.", "Strike them from", "the low voice to", "the high voice"]),
     "fin_w2": (["海は向きを変える", "引き潮は昇り", "満ち潮は降りる", "声の順も同じ"], ["The sea turns:", "at the ebb climb,", "at the flood fall.", "So does the song"]),
     "fin_e1": (["壁の色を読め", "北から南へ", "同じ色の貝を", "順に叩け"], ["Read the wall.", "North to south,", "strike the shell", "of each colour"]),
     "fin_e2": (["海は鏡に書く", "壁を南から", "北へ読み", "同じ色を叩け"], ["The sea writes in", "a mirror. Read", "the wall south to", "north, then strike"]),
     "fin_w_tip": (["ひれの先に着いた", "海は広く", "亀は止まらない", "歩み続ける"], ["The fin's tip.", "The sea is wide.", "The turtle never", "stops walking"]),
-    "fin_e_tip": (["東の先で", "灯は海を見ない", "歩く者を見る", "あなたを見る"], ["At the east tip", "the lamp watches", "no sea but you", "who walked here"]),
+    "fin_e_tip": (["東の先で", "灯りは海を見ない", "歩く者を見る", "あなたを見る"], ["At the east tip", "the lamp watches", "no sea but you", "who walked here"]),
 }
 MESSAGES = {
     "message.skyabyss.tide_fin_done": ("貝はもう鳴り終えた", "The shells have sung already"),

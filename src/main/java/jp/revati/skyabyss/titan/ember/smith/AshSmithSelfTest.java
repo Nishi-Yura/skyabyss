@@ -180,7 +180,7 @@ public final class AshSmithSelfTest {
         // 受け口の骨 (大鎚・火箸) と鞴・前掛けの骨がある
         String geo = text("/assets/skyabyss/geo/entity/ash_smith.geo.json");
         for (String b : new String[] {"socket_main", "socket_off", "bellows_l", "bellows_r", "apron", "head", "arm_r", "arm_l", "forearm_r", "forearm_l"}) {
-            check(geo.contains("\"name\": \"" + b + "\""), "bone missing: " + b, f);
+            check(java.util.regex.Pattern.compile("\"name\"\\s*:\\s*\"" + b + "\"").matcher(geo).find(), "bone missing: " + b, f);
         }
         // 大鎚と火箸は別のモデル (体に焼き込まれていない)
         check(!text("/assets/skyabyss/geo/gear/smith_hammer.geo.json").contains("socket_main"), "the hammer model contains a socket", f);

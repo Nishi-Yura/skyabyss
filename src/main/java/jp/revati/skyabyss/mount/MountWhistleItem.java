@@ -12,7 +12,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 
-// 呼び笛 (乗り物の笛)。右クリックで目の前に乗り物を呼び、もう一度で帰す。見た目と性能は厩舎で買う
+// 乗り笛 (乗り物の笛)。右クリックで目の前に乗り物を呼び、もう一度で帰す。見た目と性能は厩舎で買う
 public class MountWhistleItem extends Item {
     public MountWhistleItem(Properties properties) {
         super(properties);

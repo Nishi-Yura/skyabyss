@@ -17,13 +17,13 @@ P = 'message.skyabyss.abyss_nm.'
 
 # 段 n の (名前, 決まり)。決まりは前の段の決まりに足す (表と同じ順)
 TIERS = [
-    ('短い灯', '灯りの持ちが四分の一短くなる（30 秒・22.5 秒・15 秒）。体力 +10%。',
+    ('短い灯り', '灯りの持ちが四分の一短くなる（30 秒・22.5 秒・15 秒）。体力 +10%。',
      'The Short Light', 'Every lantern lasts a quarter less (30 s, 22.5 s, 15 s). Health +10%.'),
     ('二度の爪', '爪のあと、同じ扇がもう一度来る（一秒後・赤い予告つき）。体力 +20%。',
      'Two Claws', 'After a claw, the same fan comes again one second later (red warning). Health +20%.'),
     ('写しの牙', '影の写しが、本物の爪と踏み込みを使う。傷 +10%・体力 +30%。',
      'Fangs of the Shades', 'The shades use the real claw and lunge. Damage +10%, health +30%.'),
-    ('六つの灯', '灯りは六つだけ。七つ目と八つ目は点かない。体力 +40%。',
+    ('六つの灯り', '灯りは六つだけ。七つ目と八つ目は点かない。体力 +40%。',
      'Six Lanterns', 'Only six lanterns. The seventh and eighth do not light. Health +40%.'),
     ('二度の闇', '闇の波が二度来る。二度目は体力 12% のとき。傷 +20%・体力 +50%。',
      'Twice Dark', 'The dark wave comes twice; the second at 12% health. Damage +20%, health +50%.'),

@@ -533,7 +533,92 @@ def dump(d):
     return "\n".join(lines) + "\n"
 
 
+# ------------------------------------------------------------------ 仕上げ (2026-10-23 の見直し、docs/review/weapon_quality_2026-10-23.md)
+# 一番よくできた鯨骨の大剣の段は「構え → 溜め (止め) → 当たり → 振り抜き → 収まり → 戻り」の 6〜8 キー。
+# キーが 5 つの段 (溜めの止めも収まりもない) は、振りが等速に見えて軽い。次の 3 つを足す (当たる時刻は変えない):
+#   溜めの止め: 溜めのキーと当たりの間 (溜め側 55%) に、溜めを少し深くした止めのキー (linear)。当たりまでが短くなり、打ちが鋭くなる
+#   収まり: 振り抜きと戻りの間 (振り抜き側 45%) に、戻りの 70% まで戻したキー (out)。最後の戻りを smooth にして重さを出す
+#   光と体: 段に GLOW が無ければ当たりで 0.6・振り抜きで 0.25。LEAN が無ければ溜め -2・当たり 4・振り抜き 3 (前へ体重を乗せる)
+POLISH = {
+    "waterway_fang": (0, 1, 2), "raiju_claw": (0, 1, 2), "thrall_poker": (0, 1, 2),
+    "coral_harpoon": (1,), "tide_shell_trident": (1,), "warden_glaive": (1,), "tidecaller_claw": (1,),
+    "smith_hammer": (1,), "abyss_ash_scythe": (1,), "abyss_bell_staff": (1,),
+}
+_ROT = ("RX", "RY", "RZ")
+
+
+def _value_at(keys, ch, t):
+    """チャンネル ch の t での値 (そのチャンネルを持つキーの間を直線で。持つキーが無ければ None)。"""
+    pts = [(kk["t"], kk["v"][ch]) for kk in keys if ch in kk["v"]]
+    if not pts:
+        return None
+    if t <= pts[0][0]:
+        return pts[0][1]
+    for (t0, v0), (t1, v1) in zip(pts, pts[1:]):
+        if t0 <= t <= t1:
+            return v0 + (v1 - v0) * ((t - t0) / (t1 - t0) if t1 > t0 else 0)
+    return pts[-1][1]
+
+
+def polish_step(s):
+    ks = s["keys"]
+    hi = next(j for j, kk in enumerate(ks) if kk.get("hit"))
+    if hi < 2 or hi + 1 >= len(ks):
+        return
+    wind, hit = ks[hi - 1], ks[hi]
+    chans = set().union(*(kk["v"] for kk in ks))
+    # 光と体 (先に入れて、止め・収まりのキーにも値が乗るように)
+    if "GLOW" not in chans:
+        hit["v"]["GLOW"] = 0.6
+        if hi + 1 < len(ks):
+            ks[hi + 1]["v"]["GLOW"] = 0.25
+        ks[-1]["v"]["GLOW"] = 0
+        ks[0]["v"].setdefault("GLOW", 0)
+    if "LEAN" not in chans:
+        wind["v"]["LEAN"] = -2
+        hit["v"]["LEAN"] = 4
+        if hi + 1 < len(ks):
+            ks[hi + 1]["v"]["LEAN"] = 3
+        ks[-1]["v"]["LEAN"] = 0
+        ks[0]["v"].setdefault("LEAN", 0)
+    chans = set().union(*(kk["v"] for kk in ks))
+    # 溜めの止め
+    if hit["t"] - wind["t"] >= 0.12 and not (hi >= 2 and wind["t"] - ks[hi - 2]["t"] <= 0.1 and ks[hi - 2]["t"] > 0):
+        th = round(wind["t"] + 0.55 * (hit["t"] - wind["t"]), 3)
+        hv = {}
+        for ch in wind["v"]:
+            v = wind["v"][ch]
+            if ch in ("TRAIL", "GLOW"):
+                hv[ch] = v
+            elif ch in _ROT or ch in ("BY", "LEAN", "PZ"):
+                hv[ch] = round(v * 1.08, 4)
+            else:
+                base = ks[0]["v"].get(ch, 0.0)
+                hv[ch] = round(base + (v - base) * 1.06, 4)
+        ks.insert(hi, {"t": th, "e": "linear", "v": hv})
+        hi += 1
+    # 収まり
+    if hi + 3 == len(ks):  # 当たり・振り抜き・戻りだけ
+        fol, end = ks[hi + 1], ks[-1]
+        ts = round(fol["t"] + 0.45 * (end["t"] - fol["t"]), 3)
+        sv = {}
+        for ch in fol["v"]:
+            a = fol["v"][ch]
+            b = _value_at(ks, ch, end["t"])
+            b = a if b is None else b
+            sv[ch] = round(a + 0.7 * (b - a), 4)
+        ks.insert(hi + 2, {"t": ts, "e": "out", "v": sv})
+        ks[-1]["e"] = "smooth"
+
+
+def polish():
+    for item, idx in POLISH.items():
+        for i in idx:
+            polish_step(W[item]["steps"][i])
+
+
 def main():
+    polish()
     os.makedirs(OUT, exist_ok=True)
     for item, d in W.items():
         with open(os.path.join(OUT, item + ".json"), "w", encoding="utf-8", newline="\n") as f:

@@ -159,6 +159,10 @@
     },
     {
       "id": "inscriptions",
+      "skip_if": {
+        "type": "stilled",
+        "titan": "stone_whale"
+      },
       "xp": 90,
       "objectives": [
         {

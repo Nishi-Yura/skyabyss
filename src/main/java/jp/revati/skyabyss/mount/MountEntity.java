@@ -33,7 +33,7 @@ import software.bernie.geckolib.animation.AnimationController;
 import software.bernie.geckolib.animation.RawAnimation;
 import software.bernie.geckolib.util.GeckoLibUtil;
 
-// 呼び笛で来る乗り物 (docs/design/38)。馬の操縦 (鞍つき・自分で歩かせる・跳びの溜め) をそのまま使い、
+// 乗り笛で来る乗り物 (docs/design/38)。馬の操縦 (鞍つき・自分で歩かせる・跳びの溜め) をそのまま使い、
 // 飼いならし・繁殖・持ち物は持たない。持ち主の人だけが乗れる。世界に保存しない (笛で帰す・持ち主が去る・遠く離れる・倒れると消える)。
 // 見た目 (MountLook) と性能 (MountStats の段) は持ち主の MountData から MountService が与える。落下で傷つかない
 public class MountEntity extends AbstractHorse implements GeoEntity {
