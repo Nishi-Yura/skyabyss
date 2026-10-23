@@ -40,7 +40,7 @@ def fac(open_, **kw):
 
 
 ROLES = {
-    "guild_clerk": ("鯨追いの組合の書記", "Guild Clerk",
+    "guild_clerk": ("鯨追いの組合の書記", "Whale Chasers' Clerk",
                     ("鯨追いの組合へようこそ。ここではギルドを作るか、入る申請を出せます。言伝ての板の頼みも、ここで見られますよ。",
                      "Welcome to the Whale Chasers' Guild. You can found a guild here, or apply to join one. The message board's errands are here too."),
                     [("guild", "talk", [fac("guild")], None, "ギルドの窓口 (作る・入る・頼み・旗・功績)", "Guild desk (found, join, requests, banner, deeds)", None, None),
