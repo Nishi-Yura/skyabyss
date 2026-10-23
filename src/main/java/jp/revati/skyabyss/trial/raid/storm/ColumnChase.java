@@ -119,6 +119,8 @@ public final class ColumnChase extends RaidRoom {
         RaidKit.fill(level, o.offset(-1, 0, -HZ + 2), o.offset(1, 0, -HZ + 4), Blocks.WAXED_OXIDIZED_COPPER.defaultBlockState());
         colX = o.getX() + 0.5;
         colZ = o.getZ() - HZ + 3 + 0.5;
+        // 建築 (docs/design/39 の 4.3): 鍵の台の縁と天井の雲の切れ目・羽の段の壁・雲の天井・雲の窓
+        StormRoomDeco.dressSR4(ctx, keyRel);
     }
 
     private boolean pillarOk(int x, int z) {
@@ -242,6 +244,9 @@ public final class ColumnChase extends RaidRoom {
         taken[i] = true;
         count++;
         setKey(ctx, i, false);
+        if (isComplete()) {
+            StormRoomDeco.exitLit(ctx, true);
+        }
         BlockPos at = ctx.origin().offset(keyRel[i][0], 2, keyRel[i][1]);
         ctx.level().playSound(null, at, SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, 1.3f, 0.6f + 0.25f * count);
         ctx.level().sendParticles(ParticleTypes.ELECTRIC_SPARK, at.getX() + 0.5, at.getY() + 0.5, at.getZ() + 0.5, 30, 0.3, 0.6, 0.3, 0.08);
@@ -314,6 +319,7 @@ public final class ColumnChase extends RaidRoom {
         count = 0;
         started = false;
         touchCd = 0;
+        StormRoomDeco.exitLit(ctx, false);
         colX = ctx.origin().getX() + 0.5;
         colZ = ctx.origin().getZ() - HZ + 3 + 0.5;
         enter(Phase.GRACE);
