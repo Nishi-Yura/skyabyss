@@ -1,9 +1,16 @@
 # 五章「深淵」の装備 (03 の 12.1) と四章の旅装 (余燼のアンコモン、03 の 5.8) の見た目。./gradlew runShots -Pscript=tools/shots/gear_gaps.txt -PshotsName=gear_gaps
 # 出力: run/shots/gear_gaps/... (docs/review/gear_gaps/ へ写す)。音なし・日本語 (ShotRunner の決まり)
-world shots flat
+world gear_gaps flat
 size 1280 720
 timeout 900
 render 8
+clouds off
+wait 40
+cmd skyabyss playtest skip opening
+wait 60
+cmd skyabyss cinematic stop
+cmd gamerule doDaylightCycle false
+cmd gamerule doMobSpawning false
 
 cmd time set noon
 cmd weather clear
