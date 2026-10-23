@@ -1,0 +1,168 @@
+# 余燼のレイドの部屋の建築 (docs/design/39 の 4.4)。/skyemberraid room <id> で区画 1 の原点に建て、入口・中・見下ろし・振り返りを撮る
+#   ./gradlew runShots -Pscript=tools/shots/raid_build_ember.txt -PshotsName=<before|after>   絵は docs/review/raid_build_ember/
+world raid_build_ember flat
+size 1280 720
+timeout 3000
+render 10
+clouds off
+
+wait 300
+cmd skyabyss cinematic stop
+wait 10
+cmd skyabyss cinematic stop
+cmd skyabyss playtest skip opening
+cmd time set midnight
+cmd weather clear
+cmd gamerule doDaylightCycle false
+cmd gamerule doMobSpawning false
+hud off
+cmd gamemode spectator
+
+# ---- ER1
+cmd skyemberraid room ER1
+wait 40
+waitchunks
+wait 60
+chat clear
+cmd skyemberraid at 0 0 19 180 2
+wait 30
+shot er1_a_entry
+cmd skyemberraid at 0 0.5 14 180 8
+wait 30
+shot er1_b_inside
+cmd skyemberraid at 11 6 14 140 32
+wait 30
+shot er1_c_overview
+cmd skyemberraid at -11 4 -14 -40 22
+wait 30
+shot er1_d_back
+cmd skyemberraid end
+wait 10
+
+# ---- ER2
+cmd skyemberraid room ER2
+wait 40
+waitchunks
+wait 60
+chat clear
+cmd skyemberraid at 0 0 17 180 2
+wait 30
+shot er2_a_entry
+cmd skyemberraid at 0 0.5 12 180 8
+wait 30
+shot er2_b_inside
+cmd skyemberraid at 10 6 12 140 32
+wait 30
+shot er2_c_overview
+cmd skyemberraid at -10 4 -12 -40 22
+wait 30
+shot er2_d_back
+cmd skyemberraid end
+wait 10
+
+# ---- ER3
+cmd skyemberraid room ER3
+wait 40
+waitchunks
+wait 60
+chat clear
+cmd skyemberraid at 0 0 17 180 2
+wait 30
+shot er3_a_entry
+cmd skyemberraid at 0 0.5 12 180 8
+wait 30
+shot er3_b_inside
+cmd skyemberraid at 12 7 12 140 32
+wait 30
+shot er3_c_overview
+cmd skyemberraid at -12 5 -12 -40 22
+wait 30
+shot er3_d_back
+cmd skyemberraid end
+wait 10
+
+# ---- ER4
+cmd skyemberraid room ER4
+wait 40
+waitchunks
+wait 60
+chat clear
+cmd skyemberraid at 0 0 31 180 2
+wait 30
+shot er4_a_entry
+cmd skyemberraid at 0 0.5 26 180 8
+wait 30
+shot er4_b_inside
+cmd skyemberraid at 8 8 26 140 32
+wait 30
+shot er4_c_overview
+cmd skyemberraid at -8 6 -26 -40 22
+wait 30
+shot er4_d_back
+cmd skyemberraid end
+wait 10
+
+# ---- ER5
+cmd skyemberraid room ER5
+wait 40
+waitchunks
+wait 60
+chat clear
+cmd skyemberraid at 0 0 16 180 2
+wait 30
+shot er5_a_entry
+cmd skyemberraid at 0 0.5 11 180 8
+wait 30
+shot er5_b_inside
+cmd skyemberraid at 8 6 11 140 32
+wait 30
+shot er5_c_overview
+cmd skyemberraid at -8 4 -11 -40 22
+wait 30
+shot er5_d_back
+cmd skyemberraid end
+wait 10
+
+# ---- ER6
+cmd skyemberraid room ER6
+wait 40
+waitchunks
+wait 60
+chat clear
+cmd skyemberraid at 0 0 15 180 2
+wait 30
+shot er6_a_entry
+cmd skyemberraid at 0 0.5 10 180 8
+wait 30
+shot er6_b_inside
+cmd skyemberraid at 10 7 10 140 32
+wait 30
+shot er6_c_overview
+cmd skyemberraid at -10 5 -10 -40 22
+wait 30
+shot er6_d_back
+cmd skyemberraid end
+wait 10
+
+# ---- ERM
+cmd skyemberraid room ERM
+wait 40
+waitchunks
+wait 60
+chat clear
+cmd skyemberraid at 0 0 17 180 2
+wait 30
+shot erm_a_entry
+cmd skyemberraid at 0 0.5 12 180 8
+wait 30
+shot erm_b_inside
+cmd skyemberraid at 6 9 7 140 34
+wait 30
+shot erm_c_overview
+cmd skyemberraid at -6 7 -8 -35 22
+wait 30
+shot erm_d_back
+cmd skyemberraid end
+wait 10
+
+quit

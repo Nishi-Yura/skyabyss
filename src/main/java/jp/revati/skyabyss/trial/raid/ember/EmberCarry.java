@@ -48,6 +48,10 @@ public final class EmberCarry extends EmberRoom {
     public void build(RaidCtx ctx) {
         RaidKit.buildCell(ctx, new RaidKit.Spec(12, 15, 8, RaidKit.EMBER));
         var lv = ctx.level();
+        EmberRaidDecor deco = EmberRaidDecor.of(ctx);
+        deco.shell(true);
+        // 噴き口 (北) から冷えた炉 (南) への金の筋。噴気の穴はこの上に建つ
+        deco.goldLine(0, -10, 8);
         source = ctx.local(0, 0, -12);
         forge = ctx.local(0, 0, 10);
         // 噴き口の台 (3x3 の玄武岩、真ん中がマグマ)。熾はその上の灯り
@@ -77,7 +81,48 @@ public final class EmberCarry extends EmberRoom {
         for (int x : SOCKET_X) {
             RaidKit.fill(lv, ctx.local(x, 1, 10), ctx.local(x, 1, 11), b(Blocks.POLISHED_BLACKSTONE_BRICKS));
         }
+        decorate(ctx, deco);
         resetState(ctx);
+    }
+
+    // 飾り (docs/design/39 の 4.4 の「運ぶ」): 噴き口の後ろの北の壁に大きな炉の口 (熾の色の奥)、冷えた炉の煙突に黄の灯りと煤の覆い、
+    // 壁は玄武岩の柱の列と熾の溝、天井から鎖と金床、南西の壁に遠くの炉の窓。噴き口・炉・噴気の穴・道 (x = 0) は空ける
+    private void decorate(RaidCtx ctx, EmberRaidDecor d) {
+        d.keep(-4, 0, -15, 4, 6, -9);
+        d.keep(-5, 0, 8, 5, 6, 15);
+        for (int[] v : VENTS) {
+            d.keepAround(v[0], v[1], 2, 4);
+        }
+        d.keep(-1, 0, -15, 1, 3, 15);
+        d.forgeMouth(0, 4, 7, 2);
+        d.exitFrame();
+        d.vistaSouth(-9, -5, 1);
+        // 冷えた炉: 煙突の上に届け先の黄の灯り、その上に天井へつながる煤の覆い。炉の両脇に鋳型の山と金床
+        d.put(0, 7, 12, b(Blocks.OCHRE_FROGLIGHT));
+        for (int x = -2; x <= 2; x++) {
+            for (int z = 11; z <= 13; z++) {
+                d.place(x, 8, z, EmberRaidDecor.BRICKS);
+            }
+        }
+        d.place(-1, 7, 12, EmberRaidDecor.CHISELED);
+        d.place(1, 7, 12, EmberRaidDecor.CHISELED);
+        for (int side = -1; side <= 1; side += 2) {
+            d.put(side * 6, 1, 10, EmberRaidDecor.anvil(net.minecraft.core.Direction.EAST));
+            d.put(side * 6, 2, 10, EmberRaidDecor.IRON_BARS);
+            d.put(side * 6, 1, 12, EmberRaidDecor.slab(b(Blocks.POLISHED_BLACKSTONE_SLAB), false));
+            d.put(side * 7, 1, 12, b(Blocks.POLISHED_BLACKSTONE_BRICKS));
+            d.put(side * 7, 2, 12, EmberRaidDecor.slab(b(Blocks.POLISHED_BLACKSTONE_SLAB), false));
+            // 冷えた溶けた金 (炉の脇の床)
+            d.put(side * 6, 0, 13, b(Blocks.GILDED_BLACKSTONE));
+            d.put(side * 5, 1, 13, b(Blocks.RAW_GOLD_BLOCK));
+        }
+        d.relief();
+        d.veins(2);
+        d.chains(7, 4, 2, 0, 0, 0);
+        d.entry(EmberRaidDecor.Scene.ASH);
+        d.exitRoom();
+        d.lights(3, 5, 10);
+        finishDecor(ctx, d, d.defaultExitLamps());
     }
 
     private void resetState(RaidCtx ctx) {
@@ -110,6 +155,7 @@ public final class EmberCarry extends EmberRoom {
     @Override
     public void reset(RaidCtx ctx) {
         generation++;
+        closed(ctx);
         failRequested = false;
         resetState(ctx);
     }
@@ -180,6 +226,7 @@ public final class EmberCarry extends EmberRoom {
                 ctx.level().playSound(null, forge, SoundEvents.BLASTFURNACE_FIRE_CRACKLE, SoundSource.BLOCKS, 1.2f, 0.8f);
                 if (delivered >= NEED) {
                     done = true;
+                    opened(ctx);
                     ctx.level().playSound(null, forge, SoundEvents.FIRECHARGE_USE, SoundSource.BLOCKS, 1.5f, 0.5f);
                 }
                 continue;
