@@ -314,9 +314,9 @@ public final class AffixSelfTest {
         }
         check(f, Math.abs(p.getAttributeValue(Attributes.MAX_HEALTH) - (health + 4)) < 1e-6,
                 "four vigor 1.0 pieces gave max health " + p.getAttributeValue(Attributes.MAX_HEALTH));
-        // 表示は体力の表し方 (Hp.of。2026-10-23 からハートでなく数)。内部の 1.0 はそのまま
-        check(f, jp.revati.skyabyss.Hp.of(1.0).equals(AffixRules.number(AffixType.VIGOR, 1.0)) && jp.revati.skyabyss.Hp.of(5.0).equals(AffixRules.number(AffixType.VIGOR, 5.0)),
-                "vigor is not shown like other health numbers: " + AffixRules.number(AffixType.VIGOR, 1.0));
+        // 表示は HP の帯と同じ体力の点 (Hp。ハートの記号は使わない): 「最大体力 +1」。内部の 1.0 はそのまま
+        check(f, "1".equals(AffixRules.number(AffixType.VIGOR, 1.0)) && "2.5".equals(AffixRules.number(AffixType.VIGOR, 2.5)),
+                "vigor is not shown as plain HP points: " + AffixRules.number(AffixType.VIGOR, 1.0));
         double expectTough = tough + 4 * 2.0 + 4 * 2 * jp.revati.skyabyss.item.GearEvents.TOUGHNESS_PER_LEVEL;
         check(f, Math.abs(p.getAttributeValue(Attributes.ARMOR_TOUGHNESS) - expectTough) < 1e-6,
                 "enhance toughness of four pieces did not add up: " + p.getAttributeValue(Attributes.ARMOR_TOUGHNESS) + " vs " + expectTough);

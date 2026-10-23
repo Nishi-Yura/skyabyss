@@ -209,6 +209,13 @@ final class ShapeJob {
                         set(p.immutable(), Blocks.AIR.defaultBlockState());
                     }
                 }
+                // 灰 (粉のコンクリート) と砂利は落ちるブロック。その下が洞窟の空気・水だと列ごと 1 段落ちて床にくぼみが残った
+                // (2026-10-24 の build audit の FLOOR_DIMPLE)。砂利の下を石で支える
+                p.setY(target - 2);
+                BlockState under = level.getBlockState(p);
+                if (under.isAir() || under.canBeReplaced() || !under.getFluidState().isEmpty() || under.getBlock() instanceof net.minecraft.world.level.block.FallingBlock) {
+                    set(p.immutable(), Blocks.STONE.defaultBlockState());
+                }
                 p.setY(target);
                 set(p.immutable(), ash());
                 p.setY(target - 1);

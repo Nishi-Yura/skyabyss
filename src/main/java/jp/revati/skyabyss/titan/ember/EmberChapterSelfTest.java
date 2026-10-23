@@ -293,13 +293,19 @@ public final class EmberChapterSelfTest {
         }
         expect(titan.mode() == EmberTitanEntity.Mode.SLEEP, "the titan did not finish rising: " + titan.mode(), f);
         List<BlockState> after = snapshot(level);
+        // 伏せる体に食い込む地形 (台の石) は取り除いてよい (titan/TitanClearing。docs/design/33)。人の建物 (板・ガラス・丸石・松明・箱) と空気は変わらない
         int changed = 0;
-        for (int i = 0; i < before.size(); i++) {
+        int carved = 0;
+        for (int i = 0; i < Math.min(before.size(), after.size()); i++) {
             if (before.get(i) != after.get(i)) {
-                changed++;
+                if (jp.revati.skyabyss.titan.TitanClearing.natural(before.get(i)) && after.get(i).isAir()) {
+                    carved++;
+                } else {
+                    changed++;
+                }
             }
         }
-        expect(before.size() == after.size() && changed == 0, "the rising changed " + changed + " blocks of the player build area", f);
+        expect(before.size() == after.size() && changed == 0, "the rising changed " + changed + " blocks of the player build area (terrain carved " + carved + ")", f);
         expect(level.getBlockEntity(chest) instanceof ChestBlockEntity be2 && be2.getItem(0).is(Items.DIAMOND) && be2.getItem(0).getCount() == 7,
                 "the player's chest changed during the rising", f);
         // 一度だけ

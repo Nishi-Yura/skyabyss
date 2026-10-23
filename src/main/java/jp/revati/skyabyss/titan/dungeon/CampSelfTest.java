@@ -40,7 +40,8 @@ public final class CampSelfTest {
 
     private static FakePlayer player(ServerLevel level, String name) {
         FakePlayer p = new FakePlayer(level, new GameProfile(UUID.randomUUID(), name));
-        p.setPos(0.5, FLOOR + 1, -20.5);
+        BlockPos a = TitanBackLayout.arrival();
+        p.setPos(a.getX() + 0.5, a.getY(), a.getZ() + 0.5);
         return p;
     }
 
@@ -53,12 +54,12 @@ public final class CampSelfTest {
         return stack.useOn(new UseOnContext(level, p, hand, stack, hit));
     }
 
-    // ふつうの床の置き場所 (評価が通る所) を、広間から count 個 探す
+    // ふつうの床の置き場所 (評価が通る所) を、到着の台 (背で人が野営できる唯一の所。docs/design/32 の 2.4) から count 個 探す
     private static List<BlockPos> goodSpots(ServerLevel level, FakePlayer owner, int count, BlockState sample) {
         List<BlockPos> out = new ArrayList<>();
-        for (int x = -8; x <= 8 && out.size() < count; x += 2) {
-            for (int z = -31; z <= -13 && out.size() < count; z += 2) {
-                BlockPos pos = new BlockPos(x, FLOOR + 1, z);
+        for (int x = TitanBackLayout.FLANK_X0 + 1; x <= TitanBackLayout.FLANK_X1 - 1 && out.size() < count; x += 2) {
+            for (int z = TitanBackLayout.FLANK_Z0 + 1; z <= TitanBackLayout.FLANK_Z1 - 3 && out.size() < count; z += 2) {
+                BlockPos pos = new BlockPos(x, TitanBackLayout.FLANK_FLOOR_Y + 1, z);
                 BlockPos floor = pos.below();
                 if (!level.getBlockState(pos).isAir() || !level.getBlockState(floor).isFaceSturdy(level, floor, Direction.UP)) {
                     continue;
@@ -119,7 +120,7 @@ public final class CampSelfTest {
     private static void run(MinecraftServer server, ServerLevel back, FakePlayer owner, FakePlayer stranger, List<String> f) {
         List<BlockPos> spots = goodSpots(back, owner, 12, Blocks.CRAFTING_TABLE.defaultBlockState());
         if (spots.size() < 12) {
-            f.add("could not find 12 free floor spots in the hub (" + spots.size() + ")");
+            f.add("could not find 12 free floor spots on the arrival pad (" + spots.size() + ")");
             return;
         }
         // 1. 置けないブロックは、手持ちが減らず、ブロックも残らない
@@ -170,21 +171,31 @@ public final class CampSelfTest {
         }
         back.setBlock(stacked, Blocks.AIR.defaultBlockState(), 3);
 
-        // 3. 仕掛け (封印の扉) のそばには置けない。手持ちは減らない
-        BlockPos nearGate = new BlockPos(0, FLOOR + 1, TitanBackLayout.GATE.get(0).getZ() + 1);
-        if (!back.getBlockState(nearGate).isAir()) {
-            f.add("test spot near the treasury gate is not free: " + back.getBlockState(nearGate));
+        // 3. 仕掛け (レバー。到着の台には仕掛けがないので、試しに一つ置く) から 2 ブロック以内には置けない。手持ちは減らない
+        BlockPos nearGate = spots.get(11);
+        BlockPos lever = nearGate.east(2);
+        if (!back.getBlockState(lever).isAir() || !back.getBlockState(lever.below()).isFaceSturdy(back, lever.below(), Direction.UP)) {
+            f.add("no free floor for the test lever at " + lever.toShortString() + ": " + back.getBlockState(lever));
         } else {
+            back.setBlock(lever, Blocks.LEVER.defaultBlockState().setValue(net.minecraft.world.level.block.LeverBlock.FACE,
+                    net.minecraft.world.level.block.state.properties.AttachFace.FLOOR), 2);
             owner.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.FURNACE, 1));
             place(back, owner, InteractionHand.MAIN_HAND, nearGate);
             if (!back.getBlockState(nearGate).isAir() || owner.getMainHandItem().getCount() != 1) {
-                f.add("a furnace was placed within 2 blocks of the treasury seal or vanished (" + back.getBlockState(nearGate) + ")");
+                f.add("a furnace was placed within 2 blocks of a lever or vanished (" + back.getBlockState(nearGate) + ")");
             }
+            back.setBlock(lever, Blocks.AIR.defaultBlockState(), 2);
+            back.setBlock(nearGate, Blocks.AIR.defaultBlockState(), 2);
         }
-        // 戦いの部屋の中 (心臓の間) では置けない
-        BlockPos arena = TitanBackLayout.HEART.aabb().getCenter() == null ? null : BlockPos.containing(TitanBackLayout.HEART.aabb().getCenter().x, FLOOR + 1, TitanBackLayout.HEART.aabb().getCenter().z);
-        if (arena != null && CampBlocks.evaluate(owner, back, arena, Blocks.CRAFTING_TABLE.defaultBlockState()) != CampBlocks.Refusal.ARENA) {
+        // 戦いの部屋の中 (心臓の間・区画のレイドの部屋と中ボスの間) では置けない
+        net.minecraft.world.phys.Vec3 hc = jp.revati.skyabyss.trial.raid.InstanceArenas.heartArena(jp.revati.skyabyss.progress.Titans.STONE_WHALE).getCenter();
+        BlockPos arena = BlockPos.containing(hc.x, FLOOR + 1, hc.z);
+        if (CampBlocks.evaluate(owner, back, arena, Blocks.CRAFTING_TABLE.defaultBlockState()) != CampBlocks.Refusal.ARENA) {
             f.add("the heart arena did not refuse a camp block");
+        }
+        BlockPos room = jp.revati.skyabyss.trial.TrialSlot.frame(1).at(new BlockPos(0, FLOOR + 1, 0));
+        if (CampBlocks.evaluate(owner, back, room, Blocks.CRAFTING_TABLE.defaultBlockState()) != CampBlocks.Refusal.ARENA) {
+            f.add("a raid room cell did not refuse a camp block");
         }
 
         // 4. 数の上限 (一人 8 個)。最初の 1 個 + 7 個で 8、次は断られる
