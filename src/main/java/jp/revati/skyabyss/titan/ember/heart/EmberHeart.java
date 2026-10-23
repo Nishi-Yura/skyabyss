@@ -769,7 +769,7 @@ public class EmberHeart extends HeartBoss {
             server.sendParticles(ParticleTypes.LAVA, getX(), coreY(), getZ(), 40, 1.6, 1.4, 1.6, 0);
             server.sendParticles(ParticleTypes.FLAME, getX(), coreY(), getZ(), 60, 1.6, 1.4, 1.6, 0.1);
             // 押し返す輪 (傷はない)。広がる範囲は、始めの 1.1 秒だけ床に描く
-            tg(server, TelegraphShape.wave(getX(), getZ(), 2.5, 18, 1.0, new double[0], 0), ROAR_WARN, H)
+            tg(server, TelegraphShape.wave(getX(), getZ(), 2.5, 18, 1.0, new double[0], 0), ROAR_WARN, H).look(jp.revati.skyabyss.combat.AttackLook.EMBER_ROAR)
                     .active((int) Math.ceil((18 - 2.5) / 0.8))
                     .onImpact(s -> sound(s, SoundEvents.GENERIC_EXPLODE.value(), 1.2f, 0.6f))
                     .onHit((s, player) -> {
@@ -989,7 +989,7 @@ public class EmberHeart extends HeartBoss {
                 double dz = Math.sin(angle);
                 boolean lead = first;
                 first = false;
-                tg(server, TelegraphShape.line(getX() + dx * 0.5, getZ() + dz * 0.5, angle, BREATH_LENGTH, BREATH_HALF_WIDTH), BREATH_WARN, D).target(aim)
+                tg(server, TelegraphShape.line(getX() + dx * 0.5, getZ() + dz * 0.5, angle, BREATH_LENGTH, BREATH_HALF_WIDTH), BREATH_WARN, D).look(jp.revati.skyabyss.combat.AttackLook.EMBER_BREATH).target(aim)
                         .onImpact(s -> {
                             if (lead) {
                                 sound(s, SoundEvents.BLAZE_SHOOT, 2f, 0.6f);
@@ -1025,7 +1025,7 @@ public class EmberHeart extends HeartBoss {
             int active = (int) Math.ceil((PULSE_REACH - PULSE_START) / 0.8);
             for (int i = 0; i < rings; i++) {
                 boolean lead = i == 0;
-                tg(server, TelegraphShape.wave(getX(), getZ(), PULSE_START, PULSE_REACH, 0.9, gaps, LANE_HALF), PULSE_WARN + i * 14, D)
+                tg(server, TelegraphShape.wave(getX(), getZ(), PULSE_START, PULSE_REACH, 0.9, gaps, LANE_HALF), PULSE_WARN + i * 14, D).look(jp.revati.skyabyss.combat.AttackLook.EMBER_PULSE)
                         .active(active).jumpClear(0.9)
                         .onImpact(s -> {
                             if (lead) {
@@ -1060,7 +1060,7 @@ public class EmberHeart extends HeartBoss {
                 double x = at.x;
                 double z = at.z;
                 orbs.add(new Orb(x, z, tickCount + ORB_WARN));
-                tg(server, TelegraphShape.circle(x, z, ORB_RADIUS), ORB_WARN, D)
+                tg(server, TelegraphShape.circle(x, z, ORB_RADIUS), ORB_WARN, D).look(jp.revati.skyabyss.combat.AttackLook.EMBER_ORB)
                         .onImpact(s -> impactOrb(s, x, z))
                         .onHit((s, player) -> {
                             strike(player, ORB_DAMAGE);
@@ -1102,7 +1102,9 @@ public class EmberHeart extends HeartBoss {
             int k = EmberHeartArena.pickSector(server, lastSector);
             if (k >= 0 && EmberHeartArena.crack(server, k)) {
                 lastSector = k;
-                tg(server, new EmberSectorShape(k), EmberHeartArena.CRACK_TICKS, D)
+                tg(server, new EmberSectorShape(k), EmberHeartArena.CRACK_TICKS, D).look(jp.revati.skyabyss.combat.AttackLook.EMBER_CRACK)
+                        // 区画の形は床の印を持たない (クライアントの見た目が出ない) ので、沈む瞬間の噴き上がりはここで送る
+                        .onImpact(s -> sectorErupt(s, k))
                         .onHit((s, player) -> {
                             // 区画が戻された・やり直された (放棄・段階 3 への切り替え) あとは、古い予告で呑まない
                             if (EmberHeartArena.cracking(k) || EmberHeartArena.sunk(k)) {
@@ -1112,6 +1114,30 @@ public class EmberHeart extends HeartBoss {
                         .start();
             }
         }
+    }
+
+    // 区画が沈む瞬間: 区画の中に溶岩と炎の噴き上がり、縁に煙 (送る数は合わせて 80 ほど)
+    private void sectorErupt(ServerLevel server, int k) {
+        EmberSectorShape shape = new EmberSectorShape(k);
+        double fy = floorY();
+        double[] b = shape.bounds();
+        int sent = 0;
+        for (int i = 0; i < 60 && sent < 22; i++) {
+            double x = b[0] + random.nextDouble() * (b[2] - b[0]);
+            double z = b[1] + random.nextDouble() * (b[3] - b[1]);
+            if (!shape.contains(x, z)) {
+                continue;
+            }
+            sent++;
+            server.sendParticles(ParticleTypes.LAVA, x, fy + 0.3, z, 1, 0.2, 0.1, 0.2, 0);
+            server.sendParticles(ParticleTypes.FLAME, x, fy + 0.3, z, 2, 0.2, 0.6, 0.2, 0.08);
+        }
+        int[] edge = {0};
+        shape.outline((x, z) -> {
+            if (edge[0]++ % 3 == 0) {
+                server.sendParticles(ParticleTypes.LARGE_SMOKE, x, fy + 0.4, z, 1, 0.1, 0.2, 0.1, 0.02);
+            }
+        }, 1.2);
     }
 
     // 段階 2 のあいだ、6〜8 秒ごとに次の区画を割る (同時に沈むのは最大 2 区画)
@@ -1130,7 +1156,7 @@ public class EmberHeart extends HeartBoss {
         if (actionTicks == 1) {
             sound(server, EmberHeartSetup.GALE.get(), 2.4f, 1f);
             double[] gaps = laneGaps();
-            tg(server, TelegraphShape.circle(getX(), getZ(), GALE_RADIUS), GALE_WARN, D)
+            tg(server, TelegraphShape.circle(getX(), getZ(), GALE_RADIUS), GALE_WARN, D).look(jp.revati.skyabyss.combat.AttackLook.EMBER_GALE)
                     .onImpact(s -> {
                         sound(s, SoundEvents.GENERIC_EXPLODE.value(), 1.6f, 0.7f);
                         s.sendParticles(ParticleTypes.FLAME, getX(), floorY() + 0.5, getZ(), 100, 3.0, 0.5, 3.0, 0.2);
@@ -1145,7 +1171,7 @@ public class EmberHeart extends HeartBoss {
             showLanes(server, gaps, GALE_WARN);
             int active = (int) Math.ceil((PULSE_REACH - GALE_RADIUS - 0.8) / 0.8);
             for (int i = 0; i < galeWaves(present(server)); i++) {
-                tg(server, TelegraphShape.wave(getX(), getZ(), GALE_RADIUS + 0.8, PULSE_REACH, 0.9, gaps, LANE_HALF), GALE_WARN + i * 14, D)
+                tg(server, TelegraphShape.wave(getX(), getZ(), GALE_RADIUS + 0.8, PULSE_REACH, 0.9, gaps, LANE_HALF), GALE_WARN + i * 14, D).look(jp.revati.skyabyss.combat.AttackLook.EMBER_GALE_WAVE)
                         .active(active).jumpClear(0.9)
                         .onHit((s, player) -> {
                             strike(player, GALE_WAVE_DAMAGE);
@@ -1190,7 +1216,7 @@ public class EmberHeart extends HeartBoss {
                 double a = Math.toRadians(attackYaw + 90 + (i - (count - 1) / 2.0) * (360.0 / Math.max(5, count)));
                 Vec3 from = new Vec3(getX() - Math.sin(a) * 3.0, coreY() + ((i % 3) - 1) * 0.5, getZ() + Math.cos(a) * 3.0);
                 EmberAshPellet pellet = new EmberAshPellet(server, this, from, land, PELLET_WARN);
-                Telegraph t = tg(server, TelegraphShape.circle(land.x, land.z, PELLET_RADIUS), PELLET_WARN, D)
+                Telegraph t = tg(server, TelegraphShape.circle(land.x, land.z, PELLET_RADIUS), PELLET_WARN, D).look(jp.revati.skyabyss.combat.AttackLook.EMBER_PELLET)
                         .onImpact(s -> pellet.land())
                         .onHit((s, player) -> strike(player, PELLET_DAMAGE))
                         .start();
@@ -1404,7 +1430,7 @@ public class EmberHeart extends HeartBoss {
         if (actionTicks == 1) {
             sound(server, EmberHeartSetup.FADING.get(), 2.5f, 1f);
             double[] gaps = laneGaps();
-            tg(server, TelegraphShape.circle(getX(), getZ(), FADING_RADIUS), FADING_WARN, D)
+            tg(server, TelegraphShape.circle(getX(), getZ(), FADING_RADIUS), FADING_WARN, D).look(jp.revati.skyabyss.combat.AttackLook.EMBER_FADING)
                     .onImpact(s -> {
                         sound(s, SoundEvents.WARDEN_HEARTBEAT, 3f, 0.5f);
                         s.sendParticles(ParticleTypes.ASH, getX(), floorY() + 0.5, getZ(), 120, 4.0, 0.5, 4.0, 0.1);
@@ -1419,7 +1445,7 @@ public class EmberHeart extends HeartBoss {
             showLanes(server, gaps, FADING_WARN);
             int active = (int) Math.ceil((PULSE_REACH - FADING_RADIUS - 1.4) / 0.8);
             for (int i = 0; i < fadingWaves(present(server)); i++) {
-                tg(server, TelegraphShape.wave(getX(), getZ(), FADING_RADIUS + 1.4, PULSE_REACH, 0.9, gaps, LANE_HALF), FADING_WARN + i * 16, D)
+                tg(server, TelegraphShape.wave(getX(), getZ(), FADING_RADIUS + 1.4, PULSE_REACH, 0.9, gaps, LANE_HALF), FADING_WARN + i * 16, D).look(jp.revati.skyabyss.combat.AttackLook.EMBER_FADING_WAVE)
                         .active(active).jumpClear(0.9)
                         .onHit((s, player) -> {
                             strike(player, FADING_WAVE_DAMAGE);
@@ -1457,7 +1483,7 @@ public class EmberHeart extends HeartBoss {
                 double dx = Math.cos(angle);
                 double dz = Math.sin(angle);
                 boolean lead = i == 0;
-                tg(server, TelegraphShape.cone(getX(), getZ(), angle, FORGE_RANGE, FORGE_HALF), FORGE_WARN + i * FORGE_STEP, D)
+                tg(server, TelegraphShape.cone(getX(), getZ(), angle, FORGE_RANGE, FORGE_HALF), FORGE_WARN + i * FORGE_STEP, D).look(jp.revati.skyabyss.combat.AttackLook.EMBER_FORGE)
                         .onImpact(s -> {
                             s.playSound(null, getX(), floorY(), getZ(), SoundEvents.ANVIL_LAND, SoundSource.HOSTILE, lead ? 2.5f : 2.0f, 0.5f);
                             double fy = floorY();
@@ -1473,7 +1499,7 @@ public class EmberHeart extends HeartBoss {
                         })
                         .start();
             }
-            tg(server, TelegraphShape.circle(getX(), getZ(), FORGE_CORE_RADIUS), FORGE_CORE_WARN, D)
+            tg(server, TelegraphShape.circle(getX(), getZ(), FORGE_CORE_RADIUS), FORGE_CORE_WARN, D).look(jp.revati.skyabyss.combat.AttackLook.EMBER_FORGE_CORE)
                     .onImpact(s -> {
                         sound(s, SoundEvents.ANVIL_LAND, 3f, 0.4f);
                         s.sendParticles(ParticleTypes.FLAME, getX(), floorY() + 0.5, getZ(), 80, 2.5, 0.4, 2.5, 0.12);
@@ -1562,7 +1588,7 @@ public class EmberHeart extends HeartBoss {
 
     // 燃える床の燃え立ち一回 (予告 1.0 秒のあと、その円の中だけ。当たる瞬間に次の一回を予告する)
     private void blazeBurn(ServerLevel server, double x, double z, int left) {
-        tg(server, TelegraphShape.circle(x, z, BLAZE_RADIUS), BLAZE_WARN, D)
+        tg(server, TelegraphShape.circle(x, z, BLAZE_RADIUS), BLAZE_WARN, D).look(jp.revati.skyabyss.combat.AttackLook.EMBER_BLAZE)
                 .onImpact(s -> {
                     if (left > 1 && isAlive()) {
                         blazeBurn(s, x, z, left - 1);
@@ -1614,7 +1640,7 @@ public class EmberHeart extends HeartBoss {
             int age = tickCount - e.startAt();
             int first = EMBER_BURST_FIRST - EMBER_BURST_WARN;
             if (age == first || age == first + 40 || age == first + 80) {
-                tg(server, TelegraphShape.circle(e.x(), e.z(), EMBER_RADIUS), EMBER_BURST_WARN, D)
+                tg(server, TelegraphShape.circle(e.x(), e.z(), EMBER_RADIUS), EMBER_BURST_WARN, D).look(jp.revati.skyabyss.combat.AttackLook.EMBER_EMBERS)
                         .onHit((s, player) -> {
                             burn(s, player, EMBER_BURN_DAMAGE);
                             s.sendParticles(ParticleTypes.FLAME, player.getX(), player.getY() + 0.3, player.getZ(), 10, 0.3, 0.2, 0.3, 0.05);

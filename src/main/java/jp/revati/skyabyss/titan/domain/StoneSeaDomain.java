@@ -118,7 +118,7 @@ public final class StoneSeaDomain extends HeartDomain {
     private void wave(ServerLevel level, double[] gaps, int extraWarn) {
         double reach = radius + 0.5;
         int active = (int) Math.ceil((reach - WAVE_START) / WAVE_SPEED);
-        tg(level, TelegraphShape.wave(cx, cz, WAVE_START, reach, WAVE_HALF_THICKNESS, gaps, GAP_HALF), WAVE_WARN + extraWarn)
+        tg(level, TelegraphShape.wave(cx, cz, WAVE_START, reach, WAVE_HALF_THICKNESS, gaps, GAP_HALF), WAVE_WARN + extraWarn).look(jp.revati.skyabyss.combat.AttackLook.DOMAIN_STONE_WAVE)
                 .active(active).jumpClear(0.9)
                 .onImpact(s -> {
                     s.playSound(null, cx, floorY + 1, cz, MobSounds.STONE_HEART_SHOCKWAVE.get(), SoundSource.HOSTILE, 2.2f, 0.9f);
@@ -129,7 +129,7 @@ public final class StoneSeaDomain extends HeartDomain {
     }
 
     private void spike(ServerLevel level, double x, double z) {
-        tg(level, TelegraphShape.circle(x, z, SPIKE_RADIUS), SPIKE_WARN)
+        tg(level, TelegraphShape.circle(x, z, SPIKE_RADIUS), SPIKE_WARN).look(jp.revati.skyabyss.combat.AttackLook.DOMAIN_STONE_SPIKE)
                 .onImpact(s -> {
                     s.playSound(null, x, floorY, z, MobSounds.STONE_HEART_SPIKE_BURST.get(), SoundSource.HOSTILE, 1.3f, 1.0f);
                     s.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.BONE_BLOCK.defaultBlockState()), x, floorY + 0.5, z, 20, 0.5, 0.5, 0.5, 0.2);

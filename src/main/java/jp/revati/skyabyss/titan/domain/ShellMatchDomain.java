@@ -228,7 +228,7 @@ public final class ShellMatchDomain extends HeartDomain {
     }
 
     private void slam(ServerLevel level, Vec3 at) {
-        tg(level, TelegraphShape.circle(at.x, at.z, SLAM_RADIUS), SLAM_WARN)
+        tg(level, TelegraphShape.circle(at.x, at.z, SLAM_RADIUS), SLAM_WARN).look(jp.revati.skyabyss.combat.AttackLook.DOMAIN_SHELL_SLAM)
                 .reach(FLOOR_REACH).active(SLAM_ACTIVE).jumpClear(0.7)
                 .onImpact(s -> {
                     s.playSound(null, at.x, floorY, at.z, MobSounds.TIDE_HEART_HURT.get(), SoundSource.HOSTILE, 1.2f, 0.8f);
@@ -239,7 +239,7 @@ public final class ShellMatchDomain extends HeartDomain {
     }
 
     private void sweep(ServerLevel level, double start, double span) {
-        tg(level, TelegraphShape.sweep(cx, cz, start, span, radius, 1.6), SWEEP_WARN)
+        tg(level, TelegraphShape.sweep(cx, cz, start, span, radius, 1.6), SWEEP_WARN).look(jp.revati.skyabyss.combat.AttackLook.DOMAIN_SHELL_SWEEP)
                 .reach(FLOOR_REACH).active(SWEEP_ACTIVE).jumpClear(0.7)
                 .onImpact(s -> s.playSound(null, cx, floorY, cz, MobSounds.TIDE_HEART_HURT.get(), SoundSource.HOSTILE, 1.4f, 0.6f))
                 .onHit((s, p) -> striker.accept(p, RING_DAMAGE))

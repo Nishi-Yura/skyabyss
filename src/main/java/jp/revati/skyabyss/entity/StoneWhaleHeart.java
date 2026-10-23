@@ -662,7 +662,7 @@ public class StoneWhaleHeart extends HeartBoss {
             sound(server, MobSounds.STONE_HEART_ROAR.get(), 3f, 1.0f);
             server.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.STONE_BRICKS.defaultBlockState()),
                     getX(), coreHeight(), getZ(), 60, 1.5, 1.2, 1.5, 0.2);
-            tg(server, TelegraphShape.circle(getX(), getZ(), ROAR_PUSH_RADIUS), ROAR_PUSH_WARN, H)
+            tg(server, TelegraphShape.circle(getX(), getZ(), ROAR_PUSH_RADIUS), ROAR_PUSH_WARN, H).look(jp.revati.skyabyss.combat.AttackLook.WHALE_ROAR)
                     .onImpact(s -> sound(s, MobSounds.STONE_HEART_SHOCKWAVE.get(), 2.5f, 1.0f))
                     .onHit((s, player) -> {
                         Vec3 to = player.position().subtract(position()).multiply(1, 0, 1);
@@ -670,7 +670,7 @@ public class StoneWhaleHeart extends HeartBoss {
                     })
                     .start();
             // 広がる輪 (見た目だけ)
-            tg(server, TelegraphShape.wave(getX(), getZ(), 1.5, 20, 0.9, new double[0], 0), ROAR_PUSH_WARN, H).active(30).start();
+            tg(server, TelegraphShape.wave(getX(), getZ(), 1.5, 20, 0.9, new double[0], 0), ROAR_PUSH_WARN, H).look(jp.revati.skyabyss.combat.AttackLook.WHALE_ROAR).active(30).start();
         }
         if (actionTicks % 4 == 0 && actionTicks < 56) {
             if (enrageRoar) {
@@ -714,7 +714,7 @@ public class StoneWhaleHeart extends HeartBoss {
                 double dz = Math.sin(angle);
                 boolean sounds = first;
                 first = false;
-                tg(server, TelegraphShape.line(getX() + dx * 0.5, getZ() + dz * 0.5, angle, THRUST_LENGTH, THRUST_HALF_WIDTH), THRUST_WARN, D).target(aimedAt(server, angle))
+                tg(server, TelegraphShape.line(getX() + dx * 0.5, getZ() + dz * 0.5, angle, THRUST_LENGTH, THRUST_HALF_WIDTH), THRUST_WARN, D).look(jp.revati.skyabyss.combat.AttackLook.WHALE_THRUST).target(aimedAt(server, angle))
                         .onImpact(s -> {
                             if (sounds) {
                                 sound(s, MobSounds.STONE_HEART_SLAM.get(), 2.5f, 1.0f);
@@ -745,7 +745,7 @@ public class StoneWhaleHeart extends HeartBoss {
             for (int i = 0; i < arms; i++) {
                 double mid = Telegraph.angleOf(forward(attackYaw)) + Math.PI * i;
                 // 腕の通る扇 (見た目だけ。当たるのは棘の円)
-                tg(server, TelegraphShape.cone(getX(), getZ(), mid, 13, Math.toRadians(62)), 20, D).start();
+                tg(server, TelegraphShape.cone(getX(), getZ(), mid, 13, Math.toRadians(62)), 20, D).look(jp.revati.skyabyss.combat.AttackLook.WHALE_SWEEP).start();
             }
         }
         if (actionTicks >= 20 && actionTicks <= 68 && actionTicks % 3 == 0) {
@@ -767,7 +767,7 @@ public class StoneWhaleHeart extends HeartBoss {
 
     // 石棘 1 本: 半径 1.4 の円の印 (1.1 秒)。当たると少し跳ね上がる
     private void stoneSpike(ServerLevel server, double x, double y, double z) {
-        Telegraph.in(server, TelegraphShape.circle(x, z, SPIKE_RADIUS)).floor(y).warn(SPIKE_WARN).danger().owner(this).victims(this::canReach)
+        Telegraph.in(server, TelegraphShape.circle(x, z, SPIKE_RADIUS)).look(jp.revati.skyabyss.combat.AttackLook.WHALE_SPIKE).floor(y).warn(SPIKE_WARN).danger().owner(this).victims(this::canReach)
                 .onImpact(s -> {
                     s.playSound(null, x, y, z, MobSounds.STONE_HEART_SPIKE_BURST.get(), SoundSource.HOSTILE, 1.4f, 1.0f);
                     s.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.BONE_BLOCK.defaultBlockState()), x, y + 0.5, z, 20, 0.5, 0.5, 0.5, 0.2);
@@ -788,7 +788,7 @@ public class StoneWhaleHeart extends HeartBoss {
             double gapBase = random.nextDouble() * Math.PI * 2;
             double[] gaps = {gapBase, gapBase + Math.PI};
             double gapHalf = Math.toRadians(22);
-            tg(server, TelegraphShape.circle(getX(), getZ(), LEAP_CORE), LEAP_WARN, D)
+            tg(server, TelegraphShape.circle(getX(), getZ(), LEAP_CORE), LEAP_WARN, D).look(jp.revati.skyabyss.combat.AttackLook.WHALE_LEAP)
                     .onImpact(s -> {
                         sound(s, MobSounds.STONE_HEART_SHOCKWAVE.get(), 2.5f, 0.85f);
                         s.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.STONE.defaultBlockState()),
@@ -803,7 +803,7 @@ public class StoneWhaleHeart extends HeartBoss {
             int rings = enraged ? 3 : leapRings(present(server));
             for (int i = 0; i < rings; i++) {
                 int active = (int) Math.ceil((LEAP_WAVE_REACH - LEAP_CORE) / 0.55);
-                tg(server, TelegraphShape.wave(getX(), getZ(), LEAP_CORE, LEAP_WAVE_REACH, 0.9, gaps, gapHalf), LEAP_WARN + i * 14, D)
+                tg(server, TelegraphShape.wave(getX(), getZ(), LEAP_CORE, LEAP_WAVE_REACH, 0.9, gaps, gapHalf), LEAP_WARN + i * 14, D).look(jp.revati.skyabyss.combat.AttackLook.WHALE_LEAP_WAVE)
                         .active(active).jumpClear(0.9)
                         .onHit((s, player) -> {
                             strike(player, LEAP_WAVE_DAMAGE);
@@ -835,7 +835,7 @@ public class StoneWhaleHeart extends HeartBoss {
                 double length = Math.max(4, Math.min(26, dist + 4) - 2);
                 boolean sounds = first;
                 first = false;
-                tg(server, TelegraphShape.line(getX() + dx * 2, getZ() + dz * 2, angle, length, CRACK_HALF_WIDTH), CRACK_WARN, D).target(aimedAt(server, angle))
+                tg(server, TelegraphShape.line(getX() + dx * 2, getZ() + dz * 2, angle, length, CRACK_HALF_WIDTH), CRACK_WARN, D).look(jp.revati.skyabyss.combat.AttackLook.WHALE_CRACK).target(aimedAt(server, angle))
                         .onImpact(s -> {
                             if (sounds) {
                                 sound(s, MobSounds.STONE_HEART_FLAME_BURST.get(), 2.5f, 1.0f);
@@ -894,7 +894,7 @@ public class StoneWhaleHeart extends HeartBoss {
                 double y0 = getY() + 3.6;
                 boolean sounds = first;
                 first = false;
-                tg(server, TelegraphShape.line(getX() + dx * 1.2, getZ() + dz * 1.2, angle, 30, VOLLEY_HALF_WIDTH), VOLLEY_WARN, D).target(aimedAt(server, angle))
+                tg(server, TelegraphShape.line(getX() + dx * 1.2, getZ() + dz * 1.2, angle, 30, VOLLEY_HALF_WIDTH), VOLLEY_WARN, D).look(jp.revati.skyabyss.combat.AttackLook.WHALE_VOLLEY).target(aimedAt(server, angle))
                         .onImpact(s -> {
                             if (sounds) {
                                 sound(s, MobSounds.STONE_HEART_VOLLEY_SHOT.get(), 2.5f, 1.0f);
@@ -937,7 +937,7 @@ public class StoneWhaleHeart extends HeartBoss {
             for (int i = 0; i < count; i++) {
                 double mid = base + Math.PI * 2 * i / count;
                 boolean sounds = i == 0;
-                tg(server, TelegraphShape.sweep(getX(), getZ(), mid - span / 2, span, BEAM_LENGTH, 1.1), BEAM_WARN, D)
+                tg(server, TelegraphShape.sweep(getX(), getZ(), mid - span / 2, span, BEAM_LENGTH, 1.1), BEAM_WARN, D).look(jp.revati.skyabyss.combat.AttackLook.WHALE_BEAM)
                         .active(BEAM_ACTIVE)
                         .onImpact(s -> {
                             if (sounds) {
@@ -986,7 +986,7 @@ public class StoneWhaleHeart extends HeartBoss {
             double base = Telegraph.angleOf(forward(attackYaw));
             for (int i = 0; i < count; i++) {
                 double mid = base + Math.PI * 2 * i / count;
-                tg(server, TelegraphShape.sweep(getX(), getZ(), mid - span / 2, span, CHAIN_LENGTH, 1.2), CHAIN_WARN, D)
+                tg(server, TelegraphShape.sweep(getX(), getZ(), mid - span / 2, span, CHAIN_LENGTH, 1.2), CHAIN_WARN, D).look(jp.revati.skyabyss.combat.AttackLook.WHALE_CHAIN)
                         .active(CHAIN_ACTIVE).jumpClear(0.7)
                         .onHit((s, player) -> {
                             strike(player, CHAIN_DAMAGE);
@@ -1023,7 +1023,7 @@ public class StoneWhaleHeart extends HeartBoss {
     }
 
     private void shellDrop(ServerLevel server, double x, double y, double z) {
-        Telegraph.in(server, TelegraphShape.circle(x, z, DROP_RADIUS)).floor(y).warn(DROP_WARN).danger().owner(this).victims(this::canReach)
+        Telegraph.in(server, TelegraphShape.circle(x, z, DROP_RADIUS)).look(jp.revati.skyabyss.combat.AttackLook.WHALE_SHELL_DROP).floor(y).warn(DROP_WARN).danger().owner(this).victims(this::canReach)
                 .onImpact(s -> {
                     s.playSound(null, x, y, z, MobSounds.STONE_HEART_SLAM.get(), SoundSource.HOSTILE, 2.5f, 0.9f);
                     s.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.STONE_BRICKS.defaultBlockState()), x, y + 0.5, z, 50, 1.4, 0.6, 1.4, 0.25);

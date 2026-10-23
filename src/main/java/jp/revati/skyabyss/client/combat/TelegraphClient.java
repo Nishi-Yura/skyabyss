@@ -50,6 +50,9 @@ public final class TelegraphClient {
         final UUID target;
         final TelegraphGround ground;
         boolean burst;
+        // 技の見た目 (AttackLook) と技の主のエンティティ番号 (-1 = なし)。AttackFx が使う
+        jp.revati.skyabyss.combat.AttackLook look = jp.revati.skyabyss.combat.AttackLook.NONE;
+        int owner = -1;
 
         Decal(int id, TelegraphShape shape, double floor, long localStart, int warn, int active, int rgb,
                 Telegraph.Style style, @Nullable UUID target) {
@@ -135,8 +138,11 @@ public final class TelegraphClient {
         if (p.warn() < 1 || p.warn() > 1200 || p.active() < 0 || p.active() > 1200) {
             return;
         }
-        DECALS.put(p.id(), new Decal(p.id(), shape, p.floor(), level.getGameTime() - p.ageAtSend(), p.warn(), p.active(), p.rgb(),
-                Telegraph.Style.byId(p.style()), p.target()));
+        Decal d = new Decal(p.id(), shape, p.floor(), level.getGameTime() - p.ageAtSend(), p.warn(), p.active(), p.rgb(),
+                Telegraph.Style.byId(p.style()), p.target());
+        d.look = jp.revati.skyabyss.combat.AttackLook.byId(p.look());
+        d.owner = p.owner();
+        DECALS.put(p.id(), d);
     }
 
     public static void cancel(int id) {
@@ -176,8 +182,12 @@ public final class TelegraphClient {
             long t = now - d.localStart;
             if (!d.burst && t >= d.warn) {
                 d.burst = true;
-                ImpactFx.burst(level, d);
+                // 技の見た目があれば、当たりの粒はそちらで描く (音と画面の揺れは共通)
+                boolean bespoke = d.look.impact != jp.revati.skyabyss.combat.AttackLook.Impact.NONE;
+                ImpactFx.burst(level, d, bespoke);
+                AttackFx.impact(level, d);
             }
+            AttackFx.tick(level, d, (int) t);
             if (t > d.lifetime()) {
                 it.remove();
             } else if (particles && t < d.warn + Math.max(0, d.active) && t % 2 == 0) {

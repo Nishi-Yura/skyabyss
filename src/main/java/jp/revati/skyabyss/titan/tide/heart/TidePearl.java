@@ -88,6 +88,13 @@ public class TidePearl extends Entity implements ItemSupplier, jp.revati.skyabys
             if (random.nextFloat() < 0.5f) {
                 level().addParticle(ParticleTypes.END_ROD, getX(), getY() + 0.3, getZ(), 0, 0, 0);
             }
+            // 真珠の光の尾と、はじける泡
+            if (tickCount % 2 == 0) {
+                level().addParticle(ParticleTypes.GLOW, xo, yo + 0.3, zo, 0, 0.01, 0);
+            }
+            if (random.nextFloat() < 0.2f) {
+                level().addParticle(ParticleTypes.BUBBLE_POP, getX(), getY() + 0.3, getZ(), 0, 0.03, 0);
+            }
             return;
         }
         if (lockedAt >= 0) {
