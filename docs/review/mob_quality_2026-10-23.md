@@ -90,7 +90,8 @@
 ## 確かめ
 
 - 前後の絵: `docs/review/mob_quality_v2/<名>_compare.png` (上が直す前、下が直した後。斜め前・横・後ろ・構え)、倒れる姿は `docs/review/mob_quality_v2/after_*.png`
-- `compileJava`、自己テスト `lowpoly,mobs` (結果は下)
+- `compileJava` 通過。`python -I tools/audit/mesh_audit.py --check` 失敗 0
+- 自己テスト (`lowpoly`・`mobs` で始まる段は無いので、敵の段を並べた): `SKYABYSS_SELFTEST_ONLY="abyss enemies a,abyss enemies b,ch1 back mobs,ch1 mobs,ch2 mobs,ch3 mobs,ch4 mobs,storm mobs,ember mobs"` で ch1 back mobs 以外はすべて PASSED。ch1 back mobs は並べて流すと老番兵の突進の段が落ちるが、単独で流すと PASSED (m1-sky-pass の元のコードでも単独で PASSED。並べた時の前の段の影響で、今回の変更とは関係しない)
 
 ## 残り (次にやるなら)
 
