@@ -14,7 +14,6 @@ cmd weather clear
 cmd gamerule doDaylightCycle false
 cmd gamemode creative
 cmd fill -12 -61 -12 12 -61 12 minecraft:polished_andesite destroy
-cmd fill -12 -60 -12 12 -50 12 minecraft:air destroy
 cmd kill @e[type=!minecraft:player,distance=..80]
 hud on
 waitchunks
