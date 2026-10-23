@@ -19,10 +19,7 @@ import org.jetbrains.annotations.Nullable;
 
 import jp.revati.skyabyss.ModText;
 import jp.revati.skyabyss.SkyAbyss;
-import jp.revati.skyabyss.combat.RoomPlay;
-import jp.revati.skyabyss.entity.ElderSentinel;
 import jp.revati.skyabyss.entity.StoneWhaleHeart;
-import jp.revati.skyabyss.entity.WhaleboneCaptain;
 import jp.revati.skyabyss.loot.TitanLoot;
 import jp.revati.skyabyss.registry.Ch1BackEntities;
 import jp.revati.skyabyss.registry.ModBlocks;
@@ -30,7 +27,6 @@ import jp.revati.skyabyss.registry.ModEntities;
 import jp.revati.skyabyss.titan.TitanTravel;
 import jp.revati.skyabyss.titan.group.Activity;
 import jp.revati.skyabyss.titan.group.BackGroupData;
-import jp.revati.skyabyss.titan.group.FirstRun;
 import jp.revati.skyabyss.titan.group.GroupBossRoom;
 import jp.revati.skyabyss.titan.group.GroupBossRooms;
 import jp.revati.skyabyss.titan.group.GroupEvents;
@@ -56,13 +52,10 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.Difficulty;
-import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobSpawnType;
-import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.EnchantmentEffectComponents;
@@ -124,33 +117,12 @@ public final class TitanBackTrials {
     private record Checkpoint(String id, Box area, BlockPos spawn) {
     }
 
-    public static final String MAZE_ENTRY = "mz0";
+    // 背は外見だけ (体の中は建てない) なので、休み場は心臓の間の前室 (区画の封じた部屋。trial/raid/InstanceArenas) だけ
     private static final List<Checkpoint> BASE_CHECKPOINTS = List.of(
-            // 鼓動の間の中央は眠る心臓の台座 (強化深層岩) なので、南へずらす
-            new Checkpoint("hub", HUB, HUB.center().offset(0, 0, 6)),
-            // 休み場の焚き火のまわり (中心から 2 マスの東西南北) には腰掛けがあるので、斜めに置く
-            new Checkpoint("w0", W0, W0.center().offset(2, 0, 2)),
-            new Checkpoint("w1", W1, W1.center().offset(2, 0, 2)),
-            new Checkpoint("w2", W2, W2.center().offset(2, 0, 2)),
-            // 前の谷の休み場 (周回の長い裂け目の回廊。版 31。trial/LongWalk)
-            // 焚き火と腰掛けを避け、北の戸口 (前の谷) が見える列に立つ
-            new Checkpoint("wp", WP0, WP0.center().offset(-3, 0, 3)),
-            // 谷の中ほどの島は休み場にしない (版 25: コースの途中の休み場をなくした。落ちると、その谷の入口の休み場 w0・w1・w2 へ戻る)
-            // 戦いの部屋の扉から離れた隅に置く (E0 は西の隅、CE1 は南東の隅。どちらも扉から 5 マス以上)。
-            // 倒れて目覚めた所の目の前が戦場、にならないように
-            new Checkpoint("e0", E0, E0.center().offset(-2, 0, -2)),
-            new Checkpoint("ce1", CE1, CE1.center().offset(2, 0, -2)),
-            new Checkpoint("heart", HEART_REST, HEART_REST.center().offset(1, 0, 1)),
-            // 第二の広間と詰所のあいだの休み場 (焚き火のまわりの腰掛けを避けて斜めに置く)
-            new Checkpoint("ckr", CK_PASS, CK_PASS.center().offset(4, 0, 1)),
-            // 闇の水路の 2 つめの入口の小部屋
-            new Checkpoint("mz1", MAZE_ENTRY_ROOM2, new BlockPos(MAZE_ENTRY_ROOM2.x1(), MAZE_ENTRY_ROOM2.floorY() + 1, MAZE_ENTRY_ROOM2.z2())),
-            // 闇の水路の入口: はしごを下りた先の乾いた小部屋。水の外・戦いの外。足元は部屋の床の一段上
-            new Checkpoint(MAZE_ENTRY, MAZE_ENTRY_ROOM, new BlockPos(MAZE_ENTRY_ROOM.x1(), MAZE_ENTRY_ROOM.floorY() + 1, MAZE_ENTRY_ROOM.z2())));
+            new Checkpoint("heart", HEART_REST, HEART_REST.center().offset(1, 0, 1)));
     private static List<Checkpoint> checkpoints() {
         return BASE_CHECKPOINTS;
     }
-    private static final List<String> WEST_CHECKPOINTS = List.of("w0", "w1", "w2", "wp");
 
     private static List<Checkpoint> checkpointsOf(ServerLevel level) {
         return checkpoints();
@@ -880,18 +852,6 @@ public final class TitanBackTrials {
             return;
         }
         BlockPos pos = player.blockPosition();
-        // 谷に落ちたら、直前の休み場へ戻す (闇の水路は谷の真下を通るので、谷の底より上だけを見る)
-        if (player.getY() < FALL_LINE && player.getY() > FALL_LINE - 6) {
-            for (Box pit : PITS) {
-                if (pos.getX() >= pit.x1() - 1 && pos.getX() <= pit.x2() + 1 && pos.getZ() >= pit.z1() - 1 && pos.getZ() <= pit.z2() + 1) {
-                    String cp = validCheckpoint(persisted(player), epochOf(player.serverLevel(), player));
-                    returnTo(player, WEST_CHECKPOINTS.contains(cp) ? cp : "w0");
-                    player.hurt(player.damageSources().fall(), 3f);
-                    Notice.bar(player, ModText.deny("message.skyabyss.fell_pit"));
-                    return;
-                }
-            }
-        }
         if (player.tickCount % 5 != 0) {
             return;
         }
@@ -1022,12 +982,6 @@ public final class TitanBackTrials {
             }
         }
         return want;
-    }
-
-    private static void returnTo(ServerPlayer player, String id) {
-        BlockPos spawn = checkpointSpawn(player.serverLevel(), id);
-        player.fallDistance = 0;
-        player.teleportTo(player.serverLevel(), spawn.getX() + 0.5, spawn.getY(), spawn.getZ() + 0.5, player.getYRot(), 0f);
     }
 
     // 乗り込み・地上へ戻る (次元の移動) では、休み場の記録を消す。背中で倒れて連れ戻すときだけは残す
@@ -1205,8 +1159,7 @@ public final class TitanBackTrials {
                 // 記録が古い (リセットより前) か無ければ、尾の台へ
                 int epoch = epochOf(back, player);
                 String cp = validCheckpoint(tag, epoch);
-                // 休み場が、いまの戦いの扉の前室なら、戦場の目の前で目覚めないよう鼓動の間 (安全な所) にする
-                BlockPos spawn = cp.isEmpty() ? jp.revati.skyabyss.trial.RouteSeals.safeFeet(jp.revati.skyabyss.progress.Titans.STONE_WHALE) : checkpointSpawn(back, respawnCheckpoint(back, Groups.keyOf(player), cp));
+                BlockPos spawn = cp.isEmpty() ? jp.revati.skyabyss.trial.RouteSeals.safeFeet(jp.revati.skyabyss.progress.Titans.STONE_WHALE) : checkpointSpawn(back, cp);
                 REVIVING.add(player.getUUID());
                 try {
                     player.teleportTo(back, spawn.getX() + 0.5, spawn.getY(), spawn.getZ() + 0.5, player.getYRot(), 0f);
@@ -1223,13 +1176,6 @@ public final class TitanBackTrials {
             }
         }
         deliverExtra(player);
-    }
-
-    // 倒れて目覚める休み場。その休み場が戦いの部屋の前室で、そのグループがいま戦っている最中なら、鼓動の間にする
-    // (倒れて戻れない扉の前、または戦場のすぐそばで目覚めないように。02 の 7.3)
-    static String respawnCheckpoint(ServerLevel level, UUID group, String cp) {
-        // 順路では、広間 (hub) は封じて誰も入らない (trial/RouteSeals)。戦いの前室でも、その段の休み場で目覚める (32 の 2.4)
-        return cp;
     }
 
     // ---------------------------------------------------------------- 台座と焚き火

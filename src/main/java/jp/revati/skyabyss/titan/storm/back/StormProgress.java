@@ -13,23 +13,13 @@ import net.minecraft.util.RandomSource;
 
 // 雷翼の背の、グループ (Groups: パーティ、または一人) ごとの試練の進み (docs/design/12 の 7 章・10 の 9 章)。
 // 中身は storm_back の BackGroupData の記録 (Record) の data に書く。このクラスはその読み書きの窓で、自分では何も持たない。
-//  - 鳴った風鳴り石 (ビット)、眠っている試練、東の骨の戸 (ビット)、雷獣を倒したか、竜骨の門が開いたか
-//  - 眼の間: 配置の番号、鏡の向き (無ければ配置の最初の向き)、光った受け羽 (ビット)
+//  - 鳴った風鳴り石 (ビット)、眠っている試練
 //  - 心臓を倒したか・試練の番号 (休み場の記録の番号) は Record の共通の欄 (isHeartDefeated・epoch)
 //  - リセットをまたいで残すもの ("keep." で始まる欄): 心臓を一度でも倒したか (2 周目から一つ眠る)、前の周に眠った試練
 // 試練を最初に戻す (reset) と、記録の番号が一つ進み、上のものは消える (扉の上書きも消える。呼ぶ側が syncGates で戻す)
 public final class StormProgress {
     static final String RUNG = "storm.rung";
     static final String SLEEPING = "storm.sleeping";
-    static final String DOORS = "storm.doors";
-    static final String RAIJU = "storm.raiju";
-    static final String KEEL = "storm.keel";
-    static final String MIRROR_ROTS = "storm.mirror_rots";
-    static final String RECEIVERS = "storm.receivers";
-    // 周回の長い雷の回路 (32 の 4 章、R5): 一度目の雷が戸の柱へ届いて組み変わった回路 (ビット。長い周は組み変わったあとの二度目で戸が開く)
-    static final String REWIRED = "storm.rewired";
-    static final String RIB = "storm.rib";
-    static final String RIB_RINGS = "storm.rib_rings";
     static final String EVER_DEFEATED = "keep.storm.ever_defeated";
     static final String LAST_SLEEPING = "keep.storm.last_sleeping";
 
@@ -112,42 +102,11 @@ public final class StormProgress {
         return record.isHeartDefeated();
     }
 
-    // ---------------------------------------------------------------- 西の肋の間 (25 の 5章 A)
-    // 着いた層の岩棚の最高 (0 = 床だけ。RIB_LAYERS = 頂)
-    public int ribLayer() {
-        return record.getInt(RIB);
-    }
-
-    public void openEastDoor(int i) {
-        record.putInt(DOORS, record.getInt(DOORS) | (1 << i));
-    }
-
-    public boolean raijuDefeated() {
-        return record.flag(RAIJU);
-    }
-
-    public void setRaijuDefeated(boolean v) {
-        record.setFlag(RAIJU, v);
-    }
-
-    public boolean keelOpen() {
-        return record.flag(KEEL);
-    }
-
-    public void setKeelOpen(boolean v) {
-        record.setFlag(KEEL, v);
-    }
-
-    public int receivers() {
-        return record.getInt(RECEIVERS);
-    }
-
     // ---------------------------------------------------------------- リセット
     // 戻す意味のある進みがあるか (眠っている試練の石と、リセットをまたいで残す欄だけなら無い)
     public boolean needsReset() {
         Trial s = sleeping();
-        return rungCount() > (s != null ? 1 : 0) || record.isHeartDefeated() || receivers() != 0 || raijuDefeated() || record.getInt(DOORS) != 0 || record.getInt(REWIRED) != 0
-                || keelOpen() || record.has(MIRROR_ROTS) || ribLayer() > 0 || record.getInt(RIB_RINGS) != 0;
+        return rungCount() > (s != null ? 1 : 0) || record.isHeartDefeated();
     }
 
     // 試練を最初に戻す (12 の 7.1節)。番号が進み (古い休み場の記録は無効)、心臓も眠り直す。

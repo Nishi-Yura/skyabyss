@@ -27,7 +27,6 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.ChunkPos;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LeverBlock;
 import net.minecraft.world.phys.Vec3;
 
@@ -170,9 +169,8 @@ public final class RaijuSelfTest {
 
     // 文は伝承の担当の skyabyss_storm の lang にまとまっている (鍵が日英ともにある)
     static final String[] LANG_KEYS = {"entity.skyabyss.raiju", "gui.skyabyss.boss.raiju.angry", "gui.skyabyss.boss.raiju.stunned",
-            "message.skyabyss.raiju.after", "message.skyabyss.raiju.asleep", "message.skyabyss.raiju.begin", "message.skyabyss.raiju.defeated",
-            "message.skyabyss.raiju.east_stone_ready", "message.skyabyss.raiju.go",
-            "message.skyabyss.raiju.stunned", "message.skyabyss.raiju.hint_plug", "message.skyabyss.raiju.plug_already",
+            "message.skyabyss.raiju.defeated",
+            "message.skyabyss.raiju.stunned", "message.skyabyss.raiju.plug_already",
             "message.skyabyss.raiju.grounded", "message.skyabyss.raiju.plug_wait", "message.skyabyss.raiju.roar",
             "subtitles.skyabyss.raiju_ambient", "subtitles.skyabyss.raiju_hurt", "subtitles.skyabyss.raiju_death",
             "subtitles.skyabyss.raiju_rail_charge", "subtitles.skyabyss.raiju_leap", "subtitles.skyabyss.raiju_pounce",

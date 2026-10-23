@@ -11,7 +11,6 @@ import jp.revati.skyabyss.SkyAbyss;
 import jp.revati.skyabyss.notice.Notice;
 import jp.revati.skyabyss.progress.Titans;
 import jp.revati.skyabyss.titan.dungeon.TitanBackLayout;
-import jp.revati.skyabyss.titan.dungeon.TitanBackTrials;
 import jp.revati.skyabyss.titan.ember.back.EmberBackLayout;
 import jp.revati.skyabyss.titan.storm.back.StormBackLayout;
 import jp.revati.skyabyss.titan.tide.back.TideBackLayout;
@@ -37,8 +36,8 @@ import org.joml.Vector3f;
 
 // 真ん中へ戻る光 (docs/design/01 の 4.3「全巨神に共通の決まり」、02 の 2.11・08 の 2.5・12・13)。
 // 【今は出さない】試練を越えたあとは、順路が仲間を次の試練の入口へ運ぶ (trial/TrialRoute。32 の 2.3)。この光の出し口 (offer) は
-// どこからも呼ばない。真ん中へ戻す toHub と、笛で地上へ下りる whistleInBack、休み場の表 (restSpots・hubOf) は使っている。
-//   試練を越えた人のそばに、5 分だけ個人の光の柱を立てる (その人にだけ見える)。光の中でしゃがんで 1.5 秒で、その背中の真ん中 (鼓動の間・休み場 "hub") へ戻る。
+// どこからも呼ばない。真ん中へ戻す toHub と、笛で地上へ下りる whistleInBack、真ん中 (hubOf = 到着の台) は使っている。
+//   試練を越えた人のそばに、5 分だけ個人の光の柱を立てる (その人にだけ見える)。光の中でしゃがんで 1.5 秒で、その背中の真ん中 (到着の台) へ戻る。
 //   途中から地上へ戻る道は、光ではなく、その巨神の呼び笛 (旅嚢) を背中の中で使う: 「地上へ下りる？」と聞かれ、5 秒以内にもう一度使うと地上へ戻る (Titans.sendDown)。
 //   心臓を止めたあとの運び出しは別 (TitanEnd)。
 @EventBusSubscriber(modid = SkyAbyss.MODID)
@@ -107,23 +106,10 @@ public final class ReturnBeacons {
 
     // ---------------------------------------------------------------- 場所
 
-    // その巨神の背中の、休み場の復活の位置 (id つき)。巨神ごとの配置表から
-    public static Map<String, BlockPos> restSpots(String titan) {
-        Map<String, BlockPos> map = new java.util.LinkedHashMap<>();
-        switch (titan) {
-            case Titans.TIDE_SHELL -> TideBackLayout.RESTS.forEach(r -> map.put(r.id(), r.spawn()));
-            case Titans.THUNDER_WING -> StormBackLayout.RESTS.forEach(r -> map.put(r.id(), r.spawn()));
-            case Titans.EMBER -> EmberBackLayout.RESTS.forEach(r -> map.put(r.name(), r.floor().above()));
-            default -> map.putAll(TitanBackTrials.checkpointSpawns());
-        }
-        return map;
-    }
-
-    // その背中の真ん中 (鼓動の間・休み場 "hub") の、戻ってきたとき立つ所
+    // その背中の真ん中の、戻ってきたとき立つ所。背は外見だけなので、到着の台 (入口の箱の手前。trial/RouteSeals)。巨神でなければ null
     @Nullable
     public static BlockPos hubOf(String titan) {
-        // 広間は封じた (trial/RouteSeals)。戻る所は到着の台 (入口の箱の手前)
-        return restSpots(titan).containsKey("hub") ? jp.revati.skyabyss.trial.RouteSeals.safeFeet(titan) : null;
+        return jp.revati.skyabyss.progress.ProgressRules.TITAN_ORDER.contains(titan) ? jp.revati.skyabyss.trial.RouteSeals.safeFeet(titan) : null;
     }
 
     // 到着点の位置 (自己テスト・開発用)

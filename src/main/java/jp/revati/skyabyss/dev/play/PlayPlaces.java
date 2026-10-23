@@ -8,10 +8,6 @@ import org.jetbrains.annotations.Nullable;
 import jp.revati.skyabyss.playtest.Playtest;
 import jp.revati.skyabyss.story.ch5.AbyssWorld;
 import jp.revati.skyabyss.story.ch5.AbyssBuild;
-import jp.revati.skyabyss.titan.dungeon.TitanBackTrials;
-import jp.revati.skyabyss.titan.ember.back.EmberBackLayout;
-import jp.revati.skyabyss.titan.storm.back.StormBackLayout;
-import jp.revati.skyabyss.titan.tide.back.TideBackLayout;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -28,7 +24,7 @@ public final class PlayPlaces {
     public record Spot(ServerLevel level, BlockPos at, float yaw) {
     }
 
-    // 候補に出す名前。背の地点は Playtest.spots (背の中の休み場と心臓・中央)
+    // 候補に出す名前。背の地点は Playtest.spots (心臓の前室ほかの休み場と、真ん中 = 到着の台)
     public static List<String> names() {
         List<String> out = new ArrayList<>();
         out.add("overworld");
@@ -118,32 +114,9 @@ public final class PlayPlaces {
         if (level == null) {
             return null;
         }
-        BlockPos at = null;
-        float yaw = 0f;
-        switch (idx) {
-            case 0 -> {
-                at = TitanBackTrials.checkpointSpawns().get(spot);
-                if (at != null) {
-                    at = TitanBackTrials.safeSpot(level, at);
-                }
-            }
-            case 1 -> {
-                for (var r : TideBackLayout.RESTS) {
-                    if (r.id().equals(spot)) {
-                        at = r.spawn();
-                    }
-                }
-            }
-            case 2 -> at = StormBackLayout.REST.get(spot);
-            default -> {
-                for (var r : EmberBackLayout.RESTS) {
-                    if (r.name().equals(spot)) {
-                        at = r.floor().above();
-                        yaw = r.yaw();
-                    }
-                }
-            }
-        }
+        Playtest.SpotAt where = Playtest.spotAt(level, idx, spot, 0f);
+        BlockPos at = where == null ? null : where.pos();
+        float yaw = where == null ? 0f : where.yaw();
         if (at == null || !standable(level, at)) {
             return null;
         }

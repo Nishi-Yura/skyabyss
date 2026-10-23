@@ -1,5 +1,5 @@
 # 余燼のレイドの部屋の見比べ (tools/shots/raid_build_ember.txt の絵を並べる)。
-#   python -I tools/shots/raid_build_ember_sheet.py <絵のフォルダ> <出力.png> [<比べるフォルダ>]
+#   python -I tools/sheets/raid_build_ember_sheet.py <絵のフォルダ> <出力.png> [<比べるフォルダ>]
 # 部屋ごとに一行 (入口・中・見下ろし・振り返り)。比べるフォルダを渡すと、部屋ごとに 前 (上) / 後 (下) の二行
 import os
 import sys

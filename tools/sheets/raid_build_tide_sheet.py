@@ -1,5 +1,5 @@
 # 潮殻のレイドの部屋の建築の見比べ (docs/review/raid_build_tide/sheet.png)。
-#   python tools/shots/raid_build_tide_sheet.py docs/review/raid_build_tide
+#   python tools/sheets/raid_build_tide_sheet.py docs/review/raid_build_tide
 # 撮影は tools/shots/raid_build_tide.txt (前 = before/、後 = after/)。部屋ごとに「前の広間・後の広間・後の入口・後の隅」を並べる
 import sys
 from PIL import Image, ImageDraw, ImageFont

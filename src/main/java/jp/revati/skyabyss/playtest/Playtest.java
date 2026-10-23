@@ -286,11 +286,6 @@ public final class Playtest {
                 for (StormBackState.Trial t : StormBackState.Trial.values()) {
                     sp.setRung(t, true);
                 }
-                sp.setRaijuDefeated(true);
-                sp.setKeelOpen(true);
-                for (int i = 0; i < StormBackLayout.EAST_DOORS.length; i++) {
-                    sp.openEastDoor(i);
-                }
             }
             default -> {
                 EmberBackState es = EmberBackState.of(level, group);
@@ -303,8 +298,10 @@ public final class Playtest {
         return true;
     }
 
+    // 背の地点: 休み場 (心臓の前室ほか) と、真ん中 "hub" (背は外見だけなので、到着の台。trial/RouteSeals.safeFeet)
     public static List<String> spots(int idx) {
         List<String> out = new ArrayList<>();
+        out.add("hub");
         switch (idx) {
             case 0 -> out.addAll(TitanBackTrials.checkpointSpawns().keySet());
             case 1 -> TideBackLayout.RESTS.forEach(r -> out.add(r.id()));
@@ -315,13 +312,16 @@ public final class Playtest {
         return out;
     }
 
-    public static boolean gotoSpot(ServerPlayer p, int idx, String spot) {
-        ServerLevel level = p.server.getLevel(back(idx));
-        if (level == null) {
-            return false;
+    // 地点の立つ位置と向き (知らない名前なら null)
+    public record SpotAt(BlockPos pos, float yaw) {
+    }
+
+    @Nullable
+    public static SpotAt spotAt(ServerLevel level, int idx, String spot, float yaw) {
+        if (spot.equals("hub")) {
+            return new SpotAt(jp.revati.skyabyss.trial.RouteSeals.safeFeet(ProgressRules.TITAN_ORDER.get(idx)), yaw);
         }
         BlockPos at = null;
-        float yaw = p.getYRot();
         switch (idx) {
             case 0 -> {
                 at = TitanBackTrials.checkpointSpawns().get(spot);
@@ -346,11 +346,20 @@ public final class Playtest {
                 }
             }
         }
+        return at == null ? null : new SpotAt(at, yaw);
+    }
+
+    public static boolean gotoSpot(ServerPlayer p, int idx, String spot) {
+        ServerLevel level = p.server.getLevel(back(idx));
+        if (level == null) {
+            return false;
+        }
+        SpotAt at = spotAt(level, idx, spot, p.getYRot());
         if (at == null) {
             return false;
         }
         p.fallDistance = 0;
-        p.teleportTo(level, at.getX() + 0.5, at.getY(), at.getZ() + 0.5, yaw, 0f);
+        p.teleportTo(level, at.pos().getX() + 0.5, at.pos().getY(), at.pos().getZ() + 0.5, at.yaw(), 0f);
         return true;
     }
 

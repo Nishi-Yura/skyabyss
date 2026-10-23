@@ -1,5 +1,5 @@
 # 潮殻のレイドの新しい四部屋の台紙 (docs/review/raid2_tide/sheet.png)。
-#   python tools/shots/raid2_tide_sheet.py run/shots/raid2_tide/shots/raid2_tide docs/review/raid2_tide
+#   python tools/sheets/raid2_tide_sheet.py run/shots/raid2_tide/shots/raid2_tide docs/review/raid2_tide
 # 撮影は tools/shots/raid2_tide.txt。落ち着いた色の台紙に、部屋ごとの二枚と一行の説明を並べる
 import sys
 from PIL import Image, ImageDraw, ImageFont

@@ -122,7 +122,7 @@ public class Raiju extends GuardMob {
     private final ServerBossEvent bossBar = new ServerBossEvent(getDisplayName(), BossEvent.BossBarColor.BLUE, BossEvent.BossBarOverlay.NOTCHED_10);
     @Nullable
     private RaijuNest.Site site;
-    // 倒れたときに知らせる先 (順路の中ボスの部屋。trial/raid/mid)。null なら RaijuBattle
+    // 倒れたときに知らせる先 (順路の中ボスの部屋。trial/raid/mid)
     @org.jetbrains.annotations.Nullable
     private java.util.function.Consumer<Raiju> onDeath;
     private Action action = Action.NONE;
@@ -185,7 +185,7 @@ public class Raiju extends GuardMob {
         // 動きは aiStep の中で決める
     }
 
-    // ---------------------------------------------------------------- 戦いの部屋と結びつける (RaijuBattle から)
+    // ---------------------------------------------------------------- 戦いの部屋と結びつける (中ボスの間 StormMidRoom から)
 
     public void bind(RaijuNest.Site site, int challengers, int startRod) {
         this.site = site;
@@ -1102,8 +1102,6 @@ public class Raiju extends GuardMob {
             playAction("death");
             if (onDeath != null) {
                 onDeath.accept(this);
-            } else {
-                RaijuBattle.onDefeated(server, this);
             }
         }
     }

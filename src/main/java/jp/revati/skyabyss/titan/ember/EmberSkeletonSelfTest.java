@@ -176,7 +176,7 @@ public final class EmberSkeletonSelfTest {
             restNames.add(r.name());
         }
         expect(restNames.equals(EmberIds.RESTS), "the rests are not EmberIds.RESTS: " + restNames, f);
-        String[][] restIn = {{"hub", "hub"}, {"w0", "west"}, {"w1", "west"}, {"e0", "east"}, {"s0", "south"}, {"heart", "heart_ante"}};
+        String[][] restIn = {{"heart", "heart_ante"}};
         for (String[] ri : restIn) {
             expect(EmberBackLayout.ROOMS.get(ri[1]).contains(EmberBackLayout.rest(ri[0]).floor()), "rest " + ri[0] + " is not in " + ri[1], f);
         }
