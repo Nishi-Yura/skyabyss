@@ -34,10 +34,6 @@
       "face": "smile",
       "next": "menu"
     },
-    "trade_none": {
-      "face": "neutral",
-      "next": "menu"
-    },
     "menu": {
       "face": "neutral",
       "options": [

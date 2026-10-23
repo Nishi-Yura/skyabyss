@@ -54,7 +54,13 @@ G_KEYS = {"gear.skyabyss.origin.ember", "gui.skyabyss.forge.exchange_no_clear.em
           "skyabyss_record.h.ember", "item.skyabyss.lore_page.desc.ember_back"}
 
 
+# 入口と試練の階の看板 (ember_entrance_*・ember_board_*) の文は、生成元のないまま lang に直接ある。消さずに残す
+KEEP_PREFIXES = ("sign.skyabyss.ember_entrance_", "sign.skyabyss.ember_board_")
+
+
 def owned(key: str) -> bool:
+    if key.startswith(KEEP_PREFIXES):
+        return False
     if key in G_KEYS or key.startswith(G_PREFIXES):
         return True
     for item in ITEMS:
@@ -150,15 +156,15 @@ INSCRIPTION_LORE = {
     "hub": ("炉心の広間の碑文", "Inscription of the Hearth Hall",
             "広間の大きな炉の脇にあった。炉の底をのぞくと、赤い光がずっと下まで続いている。",
             "It stood beside the great forge in the hall. Looking into the forge's floor, the red glow goes on far below."),
-    "west": ("灰の道の碑文", "Inscription of the Ash Path",
-             "灰の道の奥の岸にあった。読んでいるあいだにも、足もとの冷え殻が小さく鳴っていた。",
-             "It stood on the far shore of the Ash Path. Even as you read, the cooled crust underfoot creaked."),
-    "east": ("鍛え手の間の碑文", "Inscription of the Smith's Hall",
-             "鍛え手の間の、焼き入れの槽の上に刻まれていた。四つのうちの一つを、いま自分が持っている。",
-             "It was carved above the quenching trough in the Smith's Hall. One of the four is in your hands now."),
-    "south": ("火床の碑文", "Inscription of the Hearth",
-              "背の亀裂の底、火床の石に刻まれていた。火が細るたびに、足もとがかすかに沈む気がする。",
-              "It was carved into the hearthstone at the bottom of the rift. Each time the fire thins, the ground seems to sink a little."),
+    "west": ("熾火の間の碑文", "Inscription of the Ember Room",
+             "熾火運びの間の入口、休み場の壁にあった。読んでいるあいだにも、足もとの冷え殻が小さく鳴っていた。",
+             "On the wall at the entrance to the ember-carrying room. Even as you read, the cooled crust underfoot crackled softly."),
+    "east": ("鍛冶の間の碑文", "Inscription of the Smithing Room",
+             "鍛冶の手順の間の入口、休み場の壁に刻まれていた。四つのうち三つは、もう手もとにある。",
+             "Carved on the wall at the entrance to the room of the smithing order. Three of the four are already in your hands."),
+    "south": ("炉の間の碑文", "Inscription of the Furnace Room",
+              "大炉を守る間の入口、休み場の壁に刻まれていた。火が細るたびに、足もとがかすかに沈む気がする。",
+              "Carved on the wall at the entrance to the room of the great furnace. Each time the fire thins, the floor seems to sink a little."),
     "heart": ("熾の底の前室の碑文", "Inscription Before the Ember Depths",
               "熾の底へ下りる前室の壁にあった。この一枚だけ、何度も彫り直した跡がある。",
               "It was on the wall of the room before the Ember Depths. This one alone has been carved over, again and again."),
@@ -184,16 +190,14 @@ WHISPERS = [
      "You stand on the tongue. From deep in the throat, a breath like a bellows comes and goes"),
     ("throat", "右上の目盛りが体の熱。溶岩のそばでたまり、灰溜まりで冷える。火照っていると、灰の殻が割れやすい",
      "The gauge at the top right is your heat. It rises near lava and falls in ash heaps. While you are flushed, ash shells crack easily"),
-    ("hub", "西・東・南の三つの熾り石を鳴らせば、中央の炉が冷えて、炉の底がひらく",
-     "Ring the three kindle stones, west, east and south, and the central forge will cool and its floor will open"),
+    ("hub", "西・東・南の三つの光る印に着けば、中央の炉が冷えて、炉の底がひらく",
+     "Reach the three glowing marks, west, east and south, and the central forge will cool and its floor will open"),
     ("west", "壺の灰を溶岩にまくと、冷えた殻の道になる。殻はやがて崩れる。灰は島の灰溜まりで満ちる",
      "Scatter ash from the urn on the lava to make a crust road. The crust soon crumbles. Ash heaps on the islands refill the urn"),
     ("east", "炉の色を読め。刻みの色が来たら打て。打ち終えたら、冷えて割れる前に槽へ",
      "Read the forge's color. Strike when it matches the mark. Then quench it before it cools and cracks"),
     ("south", "火床の火を絶やすな。熾をくべ、噴く割れ目の上へ敵を誘え",
      "Do not let the hearth die. Feed it live coals, and lure enemies over the vents"),
-    ("well", "縦穴の底から、炉の熱が上へ逃げていく。登るなら、一息に",
-     "The forge's heat escapes up the shaft. If you climb, climb in one breath"),
     ("heart", "格子の下から、熾の光と、少し遅れた拍が上がってくる",
      "From under the grate rise an ember glow and a beat that comes a little late"),
 ]
@@ -221,9 +225,9 @@ LINES = [
     ("surface.asked_other", "今夜は、%sの近くで眠る", "Tonight it sleeps near %s"),
     ("surface.ask_taken", "石は温まらない。今夜は、もう誰かが呼んでいる", "The stone stays cool. Someone else has called it tonight"),
     # B 体と広間
-    ("back.stone_rang", "熾り石が鳴った。広間の炉の火が、ひとつ落ちた", "A kindle stone rang. One of the hall's fires sank"),
-    ("back.all_stones", "三つの熾り石が鳴った。炉が冷えて、底の格子がひらく",
-     "All three kindle stones rang. The forge cools, and the grate in its floor opens"),
+    ("back.stone_rang", "光る印に着いた。広間の炉の火が、ひとつ落ちた", "A glowing mark is reached. One of the hall's fires sank"),
+    ("back.all_stones", "三つの光る印に着いた。炉が冷えて、底の格子がひらく",
+     "All three glowing marks are reached. The forge cools, and the grate in its floor opens"),
     ("back.trial_quiet", "%sの火は、今宵は静かだ", "The fire of the %s is quiet tonight"),
     ("back.trial.west", "灰の道", "Ash Path"),
     ("back.trial.east", "鍛えの間", "Forge Hall"),

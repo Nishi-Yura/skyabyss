@@ -309,8 +309,22 @@ public final class CinematicSelfTest {
         }
     }
 
+    // 場面の文は skyabyss_cinematic。深淵の区切りの場面 (SectionScenes) の文は、五章の層の文といっしょに skyabyss_abyss_v2 (tools/gen/ch5/gen_ch5_layers.py)
     private static JsonObject loadLang(String locale, List<String> f) {
-        String path = "/assets/skyabyss_cinematic/lang/" + locale + ".json";
+        JsonObject json = loadLangFile("skyabyss_cinematic", locale, f);
+        JsonObject extra = loadLangFile("skyabyss_abyss_v2", locale, f);
+        if (json != null && extra != null) {
+            extra.entrySet().forEach(e -> {
+                if (!json.has(e.getKey())) {
+                    json.add(e.getKey(), e.getValue());
+                }
+            });
+        }
+        return json;
+    }
+
+    private static JsonObject loadLangFile(String ns, String locale, List<String> f) {
+        String path = "/assets/" + ns + "/lang/" + locale + ".json";
         try (InputStream in = CinematicSelfTest.class.getResourceAsStream(path)) {
             if (in == null) {
                 f.add("missing lang file " + path);

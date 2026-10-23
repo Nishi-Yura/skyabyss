@@ -1,0 +1,203 @@
+# 深淵の層 (docs/design/36 の 8 章): 層ごとに 野営・道の仕掛け・印の部屋・層の主。最後に心臓の控えの間と、章の札の出る画面
+# 自然の洞にした後 (2026-10-23)。abyss_layers.txt と同じ見る所に、層ごとの見晴らし (門の奥の裂け目の橋) を足した
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/abyss_layers_polish.txt -PshotsName=abyss_layers_polish
+#   → python -I tools/abyss/abyss_layers_sheet.py run/shots/abyss_layers_polish/shots/abyss_layers_polish organic docs/review/abyss_v2_organic
+world abyss_layers flat
+size 1280 720
+timeout 3600
+render 10
+clouds off
+
+wait 80
+cmd skyabyss cinematic stop
+cmd gamemode spectator
+hud off
+cmd skyabyss abyss enter
+wait 40
+cmd skyabyss abyss build
+wait 1200
+
+cmd skyabyss abyss layer go arrive_bone 180
+wait 80
+shot 1bone_a_camp
+cmd skyabyss abyss layer go rest_1 -90
+wait 40
+shot 1bone_a2_mouth_e
+cmd skyabyss abyss layer go rest_1 0
+wait 40
+shot 1bone_a2_mouth_s
+cmd skyabyss abyss layer go rest_1 90
+wait 40
+shot 1bone_a2_mouth_w
+cmd skyabyss abyss layer go puzzle_bone -90
+cmd tp @s ~ ~1 ~
+wait 60
+shot 1bone_b_braziers
+cmd skyabyss abyss layer go nest_bone 0
+cmd tp @s ~ ~1 ~
+wait 60
+shot 1bone_b_nest
+cmd skyabyss abyss layer go bridge_bone_a 90
+cmd tp @s ~ ~1 ~
+wait 60
+shot 1bone_b_rib_bridge
+cmd skyabyss abyss layer go markroom_bone_1 -90
+cmd tp @s ~ ~1 ~
+wait 60
+shot 1bone_c_mark
+cmd skyabyss abyss layer go gate_bone_in 180
+wait 40
+shot 1bone_e_vista
+cmd tp @s ~ ~ ~-11 90 35
+wait 60
+shot 1bone_e_vista_down
+cmd tp @s ~-6 ~6 ~ -90 -20
+wait 60
+shot 1bone_e_vista_up
+cmd skyabyss abyss layer lord bone
+cmd skyabyss abyss layer go arena_bone 180
+cmd tp @s ~ ~2 ~7
+wait 80
+shot 1bone_d_lord
+cmd skyabyss abyss layer go arrive_salt 180
+wait 80
+shot 2salt_a_camp
+cmd skyabyss abyss layer go rest_2 -90
+wait 40
+shot 2salt_a2_mouth_e
+cmd skyabyss abyss layer go rest_2 0
+wait 40
+shot 2salt_a2_mouth_s
+cmd skyabyss abyss layer go rest_2 90
+wait 40
+shot 2salt_a2_mouth_w
+cmd skyabyss abyss layer go puzzle_salt -90
+cmd tp @s ~ ~1 ~
+wait 60
+shot 2salt_b_brittle
+cmd skyabyss abyss layer go well_salt 0
+cmd tp @s ~ ~1 ~
+wait 60
+shot 2salt_b_well
+cmd skyabyss abyss layer go terr_salt 90
+cmd tp @s ~ ~1 ~
+wait 60
+shot 2salt_b_territory
+cmd skyabyss abyss layer go markroom_salt_1 -90
+cmd tp @s ~ ~1 ~
+wait 60
+shot 2salt_c_mark
+cmd skyabyss abyss layer go gate_salt_in 180
+wait 40
+shot 2salt_e_vista
+cmd tp @s ~ ~ ~-11 90 35
+wait 60
+shot 2salt_e_vista_down
+cmd tp @s ~-6 ~6 ~ -90 -20
+wait 60
+shot 2salt_e_vista_up
+cmd skyabyss abyss layer lord salt
+cmd skyabyss abyss layer go arena_salt 180
+cmd tp @s ~ ~2 ~7
+wait 80
+shot 2salt_d_lord
+cmd skyabyss abyss layer go arrive_storm 180
+wait 80
+shot 3storm_a_camp
+cmd skyabyss abyss layer go rest_3 -90
+wait 40
+shot 3storm_a2_mouth_e
+cmd skyabyss abyss layer go rest_3 0
+wait 40
+shot 3storm_a2_mouth_s
+cmd skyabyss abyss layer go rest_3 90
+wait 40
+shot 3storm_a2_mouth_w
+cmd skyabyss abyss layer go puzzle_storm -90
+cmd tp @s ~ ~1 ~
+wait 60
+shot 3storm_b_doors
+cmd skyabyss abyss layer go bolt_storm_a 0
+cmd tp @s ~ ~1 ~
+wait 60
+shot 3storm_b_thunder_hall
+cmd skyabyss abyss layer go nest_storm 90
+cmd tp @s ~ ~1 ~
+wait 60
+shot 3storm_b_moth_nest
+cmd skyabyss abyss layer go markroom_storm_1 -90
+cmd tp @s ~ ~1 ~
+wait 60
+shot 3storm_c_mark
+cmd skyabyss abyss layer go gate_storm_in 180
+wait 40
+shot 3storm_e_vista
+cmd tp @s ~ ~ ~-11 90 35
+wait 60
+shot 3storm_e_vista_down
+cmd tp @s ~-6 ~6 ~ -90 -20
+wait 60
+shot 3storm_e_vista_up
+cmd skyabyss abyss layer lord storm
+cmd skyabyss abyss layer go arena_storm 180
+cmd tp @s ~ ~2 ~7
+wait 80
+shot 3storm_d_lord
+cmd skyabyss abyss layer go arrive_ash 180
+wait 80
+shot 4ash_a_camp
+cmd skyabyss abyss layer go rest_4 -90
+wait 40
+shot 4ash_a2_mouth_e
+cmd skyabyss abyss layer go rest_4 0
+wait 40
+shot 4ash_a2_mouth_s
+cmd skyabyss abyss layer go rest_4 90
+wait 40
+shot 4ash_a2_mouth_w
+cmd skyabyss abyss layer go maze_ash_in -90
+cmd tp @s ~ ~1 ~
+wait 60
+shot 4ash_b_maze
+cmd skyabyss abyss layer go puzzle_ash 0
+cmd tp @s ~ ~1 ~
+wait 60
+shot 4ash_b_seal
+cmd skyabyss abyss layer go terr_ash 90
+cmd tp @s ~ ~1 ~
+wait 60
+shot 4ash_b_territory
+cmd skyabyss abyss layer go markroom_ash_1 -90
+cmd tp @s ~ ~1 ~
+wait 60
+shot 4ash_c_mark
+cmd skyabyss abyss layer go gate_ash_in 180
+wait 40
+shot 4ash_e_vista
+cmd tp @s ~ ~ ~-11 90 35
+wait 60
+shot 4ash_e_vista_down
+cmd tp @s ~-6 ~6 ~ -90 -20
+wait 60
+shot 4ash_e_vista_up
+cmd skyabyss abyss layer lord ash
+cmd skyabyss abyss layer go arena_ash 180
+cmd tp @s ~ ~2 ~7
+wait 80
+shot 4ash_d_lord
+cmd skyabyss abyss layer go heart_in 180
+cmd tp @s ~ ~1 ~
+wait 60
+shot 5heart_a_ante
+# 章の札 (左上) と目的の帯
+cmd skyabyss play chapter 5
+wait 40
+cmd skyabyss cinematic stop
+cmd gamemode survival Dev
+hud on
+cmd skyabyss abyss layer go arrive_bone 180
+wait 100
+cmd skyabyss cinematic stop
+wait 40
+chat clear
+shot 6hud_bone_label

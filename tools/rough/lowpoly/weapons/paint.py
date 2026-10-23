@@ -48,7 +48,8 @@ PAL = dict(
 GLOW = dict(whale="CYAN", tide="PINK", thunder="VEIN", ember="LAVA")
 
 
-def paint(faces, size, P, N, M, L, titan, rarity="common", plus=0, inlay=None, edge_mats=(), tint=None):
+def paint(faces, size, P, N, M, L, titan, rarity="common", plus=0, inlay=None, edge_mats=(), tint=None, lift=0.0):
+    # lift: 余燼の黒い玄武岩と鉄を一段明るく (手の中で黒くつぶれないよう。2026-10-23 の見直しで武器だけ 0.14)
     D, K, LU, LV, CW, CH, INS = edge_fields(faces, size)
     H = W = size
     yy, xx = np.mgrid[0:H, 0:W]
@@ -168,15 +169,15 @@ def paint(faces, size, P, N, M, L, titan, rarity="common", plus=0, inlay=None, e
     else:  # ember
         RO, IR, RW, HA, AS = PAL["ROCK"], PAL["IRON"], PAL["ROCKW"], PAL["HAFT"], PAL["ASH"]
         facet = hash1(np.floor(Y * 0.5) * 7 + np.floor(X * 0.5) * 3 + fi, 8) * 0.18 - 0.09
-        put(m("main"), pick(RO, shaded(RO, 0.55, 0.34, 0.10, extra=facet) - (pit < 0.04)))
-        put(m("edge"), pick(IR, shaded(IR, 0.60, 0.30, 0.06) - (pit < 0.03)))
-        put(m("spine"), pick(IR, shaded(IR, 0.42, 0.30, 0.10) - (n_hi > 0.8)))
-        put(m("guard"), pick(RW, shaded(RW, 0.55, 0.30, 0.12)))
+        put(m("main"), pick(RO, shaded(RO, 0.55 + lift, 0.34, 0.10, extra=facet) - (pit < 0.04)))
+        put(m("edge"), pick(IR, shaded(IR, 0.60 + lift, 0.30, 0.06) - (pit < 0.03)))
+        put(m("spine"), pick(IR, shaded(IR, 0.42 + lift, 0.30, 0.10) - (n_hi > 0.8)))
+        put(m("guard"), pick(RW, shaded(RW, 0.55 + lift, 0.30, 0.12)))
         grain = (np.sin((X * 2.2 + Z * 1.3) + 5 * n_lo) > 0.6)
         put(m("grip"), pick(HA, shaded(HA, 0.45, 0.26, 0.1) - grain))
         stripe = (np.floor(Y * 0.8) % 2) == 0
         put(m("wrap"), pick(AS, shaded(AS, 0.4, 0.3, 0.1) - stripe))
-        put(m("acc"), pick(RW, shaded(RW, 0.5, 0.3, 0.14)))
+        put(m("acc"), pick(RW, shaded(RW, 0.5 + lift, 0.3, 0.14)))
         # 鍛冶場の使い込み: 鎖 (鉄の輪)、鉄の帯の錆びた斑、玄武岩の上向きの面の灰、焦げた縁
         put(m("chain"), pick(IR, shaded(IR, 0.34, 0.3, 0.1) - (pit < 0.1)))
         put(m("soot"), pick(AS, np.floor(0.6 + 1.0 * lit + bay).astype(int)) * 0.55)

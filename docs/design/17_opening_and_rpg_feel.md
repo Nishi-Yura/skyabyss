@@ -470,8 +470,8 @@
 | `objective.skyabyss.read_page` | 破れた頁を拾って、読んでみよう | Take the torn page, and read it | 影が去ってから、落ちてきた破れた頁を読むまで（段は `watch_sky` のまま。`OpeningLogic.objective` が頁を落とす予定 `pageAt`・自動で読む予定 `pageReadAt` を見る）。帯が「空を見上げよう」のままで頁の存在を言わなかった穴を埋める |
 | `objective.skyabyss.ask_storyteller` | 宿りの語り部に話しかけよう | Talk to the lodge storyteller | 影を見てから語り部に尋ねるまで（段 `ask_storyteller`） |
 | `objective.skyabyss.find_isana` | 外れの焚き火の旅人に話しかけよう | Talk to the traveler at the fire | 語り部のあとイサナと話すまで（段 `find_chaser`） |
-| `objective.skyabyss.wait_steps` | 夜は、明かりのそばで過ごそう | Spend the night near a light | 段 `see_whale` で、足音 (B6) をまだ聞いていない間。夜 1 に来るのは足音だけなので、歌とは言わない（`OpeningLogic.objective`） |
-| `objective.skyabyss.see_whale` | 夜空に耳をすませよう（明かりのそばで） | Listen to the night sky (near a light) | 段 `see_whale` で、足音を済ませたあと、歌 (B9) をまだ聞いていない間（歌は足音の次の夜以降） |
+| `objective.skyabyss.wait_steps` | 夜は、灯りのそばで過ごそう | Spend the night near a light | 段 `see_whale` で、足音 (B6) をまだ聞いていない間。夜 1 に来るのは足音だけなので、歌とは言わない（`OpeningLogic.objective`） |
+| `objective.skyabyss.see_whale` | 夜空に耳をすませよう（灯りのそばで） | Listen to the night sky (near a light) | 段 `see_whale` で、足音を済ませたあと、歌 (B9) をまだ聞いていない間（歌は足音の次の夜以降） |
 | `objective.skyabyss.wait_whale` | 夕方の空に、岩鯨を探そう | Look for the stone whale in the dusk sky | 段 `see_whale` で、歌を聞いたあと（イサナに会っていなければ `find_isana`）。岩鯨を見るまで。クエストログの同じ段は「夕方の空に、岩鯨を探そう」（`…see_whale.see.wait`、`QuestHud.objectiveText`）になる |
 | `objective.skyabyss.bone_hill` | 白く霞む丘を確かめに行ってみよう | Check the hazy white hill | 日 2 の昼の任意の寄り道 |
 

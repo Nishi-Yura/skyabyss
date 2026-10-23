@@ -36,6 +36,27 @@ KINGS = {
     'shadow': ('歪んだ影の王', 'The Warped Shadow King'),
 }
 
+# 王の正体 (目覚めたときの心の声、一行) と、王の階の入口に立つ前の私の手記 (碑。4 行。fun_review 2026-10-23 の P7-2)
+KING_REVEAL = {
+    'bone': ('……あれは、錨から漏れた岩鯨の鼓動の写しだ。', '...That is a copy of the stone whale\'s heartbeat, leaked from the anchor.'),
+    'salt': ('……あれは、錨から漏れた潮殻の鼓動の写しだ。', '...That is a copy of the tide shell\'s heartbeat, leaked from the anchor.'),
+    'storm': ('……あれは、錨から漏れた雷翼の鼓動の写しだ。', '...That is a copy of the thunder wing\'s heartbeat, leaked from the anchor.'),
+    'ember': ('……あれは、錨から漏れた余燼の鼓動の写しだ。', '...That is a copy of the ember titan\'s heartbeat, leaked from the anchor.'),
+    'shadow': ('……あれは、錨から漏れた鼓動が、前の私の形をなぞったものだ。', '...That is a leaked heartbeat tracing the shape of my past self.'),
+}
+NOTES = {
+    'bone': (('前の私の手記', 'ここで王に会った', 'あれは心臓の写し', '鯨の拍が骨を着る'),
+             ('My past self\'s note', 'I met the king here', 'It is a copy of a heart', 'The whale\'s beat in bone')),
+    'salt': (('前の私の手記', '塩の王も 写しだ', '潮殻の拍が漏れて', '塩に固まった'),
+             ('My past self\'s note', 'The salt king too', 'is the tide shell\'s beat', 'hardened into salt')),
+    'storm': (('前の私の手記', '雷の王は 雷翼の', '拍の写しだ', '錨はまだ漏れる'),
+              ('My past self\'s note', 'The storm king copies', 'the thunder wing\'s beat', 'The anchor still leaks')),
+    'ember': (('前の私の手記', '灰の王は 余燼の', '拍の写しだ', '倒しても また湧く'),
+              ('My past self\'s note', 'The ember king copies', 'the ember\'s beat', 'It returns when slain')),
+    'shadow': (('前の私の手記', '影の王は 私だ', '漏れた拍が', '私の形をなぞる'),
+               ('My past self\'s note', 'The shadow king is me', 'A leaked beat', 'traces my shape')),
+}
+
 MESSAGES = {
     'climb': ('鎖を登るには、しゃがんで右クリック。', 'To climb the chain, crouch and right-click.'),
     'descend': ('深み %1$s 階 ─ %2$s', 'Depth %1$s ─ %2$s'),
@@ -48,8 +69,8 @@ MESSAGES = {
     'merchant': ('底の行商', 'Merchant of the Depths'),
     'trap.spike': ('足もとから棘が突き上げた。', 'Spikes thrust up from the floor.'),
     'trap.poison': ('毒の霧が噴き出した。', 'A poison mist bursts out.'),
-    'trap.summon': ('呼び笛が鳴った。敵が集まってくる。', 'A whistle sounds. Foes gather.'),
-    'trap.dud': ('呼び笛が鳴った。だが、何も来なかった。', 'A whistle sounds, but nothing comes.'),
+    'trap.summon': ('角笛が鳴った。敵が集まってくる。', 'A whistle sounds. Foes gather.'),
+    'trap.dud': ('角笛が鳴った。だが、何も来なかった。', 'A whistle sounds, but nothing comes.'),
     'trap.blind': ('視界が闇に呑まれた。', 'Darkness swallows your sight.'),
     'trap.heavy': ('足が石のように重い。', 'Your legs turn to stone.'),
     'king.appear': ('%s が目を覚ました。', '%s wakes.'),
@@ -79,6 +100,11 @@ def build(i):
         out['message.skyabyss.depths.king.' + k] = v[i]
     for k, v in MESSAGES.items():
         out['message.skyabyss.depths.' + k] = v[i]
+    for k, v in KING_REVEAL.items():
+        out['message.skyabyss.depths.king.reveal.' + k] = v[i]
+    for k, v in NOTES.items():
+        for n, line in enumerate(v[i], 1):
+            out['sign.skyabyss.depth_note_' + k + '.' + str(n)] = line
     return out
 
 

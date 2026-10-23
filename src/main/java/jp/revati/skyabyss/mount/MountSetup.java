@@ -15,7 +15,7 @@ import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import net.neoforged.neoforge.registries.NeoForgeRegistries;
 
-// 乗り物 (docs/design/38) の登録: 乗り物、呼び笛、人ごとの持ち物。SkyAbyss のコンストラクタから register を一度だけ呼ぶ
+// 乗り物 (docs/design/38) の登録: 乗り物、乗り笛、人ごとの持ち物。SkyAbyss のコンストラクタから register を一度だけ呼ぶ
 public final class MountSetup {
     private static final DeferredRegister<EntityType<?>> ENTITIES = DeferredRegister.create(Registries.ENTITY_TYPE, SkyAbyss.MODID);
     private static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(SkyAbyss.MODID);

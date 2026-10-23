@@ -19,7 +19,7 @@
 # tools 内の他グループのモジュールを import できるようにする（フォルダ移動後も兄弟モジュールを解決）
 import os as _os
 import sys as _sys
-_sys.path[:0] = [_os.path.join(_os.path.dirname(_os.path.abspath(__file__)), p) for p in ('../ch1')]
+_sys.path[:0] = [_os.path.join(_os.path.dirname(_os.path.abspath(__file__)), p) for p in ('../ch1',)]
 import json
 import os
 import random
@@ -662,7 +662,7 @@ def texts():
     put(m + 'vault.shelf', '塩樽を乾いた棚に置いた。', 'You set the salt barrel on the dry shelf.')
     put(m + 'vault.wet_floor', '樽は、乾いた棚の上へ。', 'The barrel belongs on the dry shelf.')
     put(m + 'vault.door', '三つの樽が並ぶと、白い石の戸が、塩をこぼしながら退いていく。', 'With three barrels in a row, the white stone door slides back, shedding salt.')
-    put(m + 'vault.door_shut', '白い石の戸は動かない。棚が、三つの樽を待っている。', 'The white stone door will not move. The shelf seems to be waiting for three things.')
+    put(m + 'vault.door_shut', '白い石の戸は動かない。棚が、三つの樽を待っている。', 'The white stone door will not move. The shelf seems to be waiting for three barrels.')
     for n, (j, e) in enumerate((
             ('塩は、道を覚えている。', 'The salt remembers the road.'),
             ('柱の刻み。下の線が朝の潮、上の線が夕の潮の高さだ。', 'Marks on the pillar. The lower line is the morning tide, the upper the evening tide.'),

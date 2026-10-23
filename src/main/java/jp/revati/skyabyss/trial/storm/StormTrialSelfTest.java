@@ -143,6 +143,10 @@ public final class StormTrialSelfTest {
     // ---------------------------------------------------------------- 引き方 (ゲームなし)
     private static void pure() {
         String storm = Titans.THUNDER_WING;
+        if (jp.revati.skyabyss.trial.raid.RaidRooms.active(storm)) {
+            NOTES.add("pool draw skipped: the storm back is a raid route (fixed rooms; storm raid self-test)");
+            return; // レイドの巨神は引きのプールを使わない
+        }
         StormDeck.setPlaced(true);
         check(TrialCatalog.poolActive(storm), "the storm pool is not active with the deck placed");
         check(TrialCatalog.originals(storm).stream().map(Def::id).toList().equals(List.of("S01", "S05", "S06")), "storm originals are not S01 S05 S06");
