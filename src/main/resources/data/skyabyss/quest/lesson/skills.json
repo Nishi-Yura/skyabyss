@@ -1,0 +1,142 @@
+{
+  "category": "sub",
+  "order": 205,
+  "giver": "skyabyss:attendant_training_master",
+  "chapter": "titan_whale",
+  "min_stage": 0,
+  "stages": [
+    {
+      "id": "meet",
+      "objectives": [
+        {
+          "id": "meet",
+          "type": "talk",
+          "target": "skyabyss:attendant_training_master",
+          "topic": "lesson_offer"
+        }
+      ]
+    },
+    {
+      "id": "learn",
+      "objectives": [
+        {
+          "id": "slot",
+          "type": "signal",
+          "target": "skill_lesson:slotted",
+          "party": false
+        }
+      ],
+      "xp": 10,
+      "do": [
+        {
+          "type": "lesson",
+          "act": "say",
+          "line": "learn"
+        }
+      ]
+    },
+    {
+      "id": "cast",
+      "objectives": [
+        {
+          "id": "hit",
+          "type": "signal",
+          "target": "skill_lesson:dummy",
+          "party": false,
+          "count": 2
+        }
+      ],
+      "xp": 10,
+      "do": [
+        {
+          "type": "lesson",
+          "act": "say",
+          "line": "cast"
+        }
+      ]
+    },
+    {
+      "id": "behind",
+      "objectives": [
+        {
+          "id": "back",
+          "type": "signal",
+          "target": "skill_lesson:behind",
+          "party": false
+        }
+      ],
+      "xp": 10,
+      "do": [
+        {
+          "type": "lesson",
+          "act": "say",
+          "line": "behind"
+        }
+      ]
+    },
+    {
+      "id": "stance",
+      "objectives": [
+        {
+          "id": "stance",
+          "type": "signal",
+          "target": "skill_lesson:stance",
+          "party": false
+        }
+      ],
+      "xp": 10,
+      "do": [
+        {
+          "type": "lesson",
+          "act": "say",
+          "line": "stance"
+        }
+      ]
+    },
+    {
+      "id": "reset",
+      "objectives": [
+        {
+          "id": "reset",
+          "type": "talk",
+          "target": "skyabyss:attendant_training_master",
+          "topic": "lesson_respec"
+        }
+      ],
+      "xp": 10,
+      "do": [
+        {
+          "type": "lesson",
+          "act": "finish"
+        }
+      ]
+    }
+  ],
+  "start_when": {
+    "type": "all",
+    "of": [
+      {
+        "type": "quest",
+        "quest": "main_song",
+        "is": "started"
+      },
+      {
+        "type": "not",
+        "of": {
+          "type": "quest",
+          "quest": "main_song",
+          "is": "active",
+          "stage": "follow_smoke"
+        }
+      },
+      {
+        "type": "not",
+        "of": {
+          "type": "flag",
+          "npc": "skyabyss:attendant_training_master",
+          "flag": "lesson_skip"
+        }
+      }
+    ]
+  }
+}

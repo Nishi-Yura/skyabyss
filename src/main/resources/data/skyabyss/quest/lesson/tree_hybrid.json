@@ -1,0 +1,21 @@
+{
+  "category": "sub",
+  "order": 206,
+  "giver": "skyabyss:attendant_training_master",
+  "chapter": "titan_tide",
+  "min_stage": 0,
+  "stages": [
+    {
+      "id": "try",
+      "objectives": [
+        {
+          "id": "try",
+          "type": "signal",
+          "target": "skill_lesson:tree:hybrid",
+          "party": false
+        }
+      ],
+      "xp": 15
+    }
+  ]
+}
