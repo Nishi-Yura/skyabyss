@@ -106,23 +106,38 @@ public final class AbyssEntranceSelfTest {
             AbyssEntrance.check(server, p, "shaft", door);
             Quests.poll(p, true);
             check(f, "gate".equals(TownGuests.stageOf(p, AbyssEntrance.QUEST)), "reaching the threshold did not advance to gate: " + TownGuests.stageOf(p, AbyssEntrance.QUEST));
-            // 門 (格子の列は印の北 1)
-            for (int dx = -1; dx <= 1; dx++) {
-                for (int dy = 0; dy <= 4; dy++) {
-                    level.setBlock(AbyssGate.bar(gate, dx, dy), Blocks.IRON_BARS.defaultBlockState(), 3);
+            // 門: 都は回して建つので、格子の列は印の東 1 (枠の柱は列の両端の外、幅 5・高さ 6) にして確かめる
+            //   (2026-10-23 の試遊「鉄格子全部消えなかった」: 前は列を北と決め打ちしていて、回った都では一部しか溶けなかった)
+            AbyssGate.forgetFacing();
+            BlockPos row = gate.east();
+            for (int a = -3; a <= 3; a++) {
+                for (int dy = 0; dy <= 6; dy++) {
+                    BlockPos q = row.south(a).above(dy);
+                    boolean pillar = Math.abs(a) == 3;
+                    level.setBlock(q, pillar ? Blocks.REINFORCED_DEEPSLATE.defaultBlockState()
+                            : dy == 6 ? Blocks.CRYING_OBSIDIAN.defaultBlockState() : Blocks.IRON_BARS.defaultBlockState(), 3);
                 }
             }
             level.setBlock(gate.below(), Blocks.POLISHED_DEEPSLATE.defaultBlockState(), 3);
-            check(f, AbyssGate.inGate(gate.north(), gate) && AbyssGate.inGate(gate.north().east(), gate) && !AbyssGate.inGate(gate, gate) && !AbyssGate.inGate(gate.north().east(2), gate),
+            AbyssGate.Facing fa = AbyssGate.facing(server, level, gate);
+            check(f, fa.toward() == net.minecraft.core.Direction.EAST && fa.half() == 2, "the gate facing was not found from the pillars: " + fa);
+            check(f, AbyssGate.barsLeft(level, gate) == 30, "the test gate should have 30 bars: " + AbyssGate.barsLeft(level, gate));
+            check(f, AbyssGate.inGate(gate.east(), gate, fa) && AbyssGate.inGate(gate.east().south(2), gate, fa) && AbyssGate.inGate(gate.east().north(2), gate, fa)
+                    && !AbyssGate.inGate(gate, gate, fa) && !AbyssGate.inGate(gate.east().south(3), gate, fa) && !AbyssGate.inGate(gate.north(), gate, fa),
                     "inGate does not match the bar row");
             ItemStack key = p.getInventory().removeItem(p.getInventory().findSlotMatchingItem(new ItemStack(StorySetup.SKY_KEY.get())), 1);
             AbyssGate.check(server, p, gate, false);
-            check(f, !AbyssGate.isOpen(server) && level.getBlockState(AbyssGate.bar(gate, 0, 1)).is(Blocks.IRON_BARS), "the gate opened without the key");
+            check(f, !AbyssGate.isOpen(server) && AbyssGate.barsLeft(level, gate) == 30, "the gate opened without the key");
             p.getInventory().add(key);
             AbyssGate.check(server, p, gate, false);
-            check(f, AbyssGate.isOpen(server) && level.getBlockState(AbyssGate.bar(gate, 0, 1)).isAir() && level.getBlockState(AbyssGate.bar(gate, 1, 4)).isAir(),
-                    "the key did not melt the bars");
-            p.moveTo(gate.getX() + 0.5, gate.getY(), gate.getZ() - 0.5);
+            check(f, AbyssGate.isOpen(server) && AbyssGate.barsLeft(level, gate) == 0, "the key did not melt every bar: " + AbyssGate.barsLeft(level, gate) + " left");
+            // 開いたあとに格子が戻っても (都の建て直し・古い記録)、近くに来れば全部溶け直す
+            level.setBlock(bar(gate, 2, 5), Blocks.IRON_BARS.defaultBlockState(), 3);
+            level.setBlock(bar(gate, -2, 0), Blocks.IRON_BARS.defaultBlockState(), 3);
+            AbyssGate.forgetFacing();
+            AbyssGate.check(server, p, gate, false);
+            check(f, AbyssGate.barsLeft(level, gate) == 0, "bars that came back after opening were not melted again: " + AbyssGate.barsLeft(level, gate));
+            p.moveTo(gate.getX() + 1.5, gate.getY(), gate.getZ() + 0.5);
             AbyssGate.check(server, p, gate, false);
             Quests.poll(p, true);
             check(f, "bone_camp".equals(TownGuests.stageOf(p, AbyssEntrance.QUEST)), "passing the gate did not advance to bone_camp: " + TownGuests.stageOf(p, AbyssEntrance.QUEST));
@@ -132,13 +147,14 @@ public final class AbyssEntranceSelfTest {
             f.add("crashed: " + e);
         } finally {
             TownGuests.setTestMarks(null);
+            AbyssGate.forgetFacing();
             data.abyssOpen = wasOpen;
             data.abyssGateOpen = gateWas;
             data.cellarOpen = cellarWas;
             force(level, false);
         }
         if (f.isEmpty()) {
-            SkyAbyss.LOGGER.info("SELFTEST ch5 entrance PASSED (quests, prep reward, door needs the stage and the key, carve and record, landing lines once, threshold signal, gate needs the key, bars melt, gate row signal)");
+            SkyAbyss.LOGGER.info("SELFTEST ch5 entrance PASSED (quests, prep reward, door needs the stage and the key, carve and record, landing lines once, threshold signal, gate needs the key, every bar of a turned gate melts and melts again, gate row signal)");
         } else {
             f.forEach(m -> SkyAbyss.LOGGER.error("SELFTEST ch5 entrance FAILED: {}", m));
         }
@@ -195,6 +211,10 @@ public final class AbyssEntranceSelfTest {
         check(f, iron != null, "ch5/black_iron is not loaded");
         check(f, QuestManager.loadErrors().stream().noneMatch(e -> e.contains("main_abyss") || e.contains("black_iron")),
                 "load errors for the chapter-5 quests: " + QuestManager.loadErrors());
+    }
+
+    private static BlockPos bar(BlockPos gate, int along, int dy) {
+        return gate.east().south(along).above(dy);
     }
 
     private static void check(List<String> f, boolean ok, String what) {

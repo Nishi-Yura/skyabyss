@@ -1,0 +1,13 @@
+{
+  "providers": [
+    {
+      "type": "bitmap",
+      "file": "skyabyss:font/shell_marks.png",
+      "height": 12,
+      "ascent": 10,
+      "chars": [
+        "\ue100\ue101\ue102\ue103"
+      ]
+    }
+  ]
+}
