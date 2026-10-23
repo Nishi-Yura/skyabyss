@@ -178,7 +178,8 @@ public final class SelfTestRunner {
         steps.add(Step.once("pouch", jp.revati.skyabyss.pouch.PouchSelfTest::runSelfTest));
         steps.add(Step.once("playtest", 40, jp.revati.skyabyss.playtest.PlaytestSelfTest::runSelfTest));
         // 試遊コマンド (skyabyss play): 登録・移動先・章の段階・道具・文言。docs/design/37 の 4 節。SKYABYSS_SELFTEST_ONLY="play"
-        steps.add(Step.once("play", 40, jp.revati.skyabyss.dev.play.PlaySelfTest::runSelfTest));
+        steps.add(Step.once("playtest play", 40, jp.revati.skyabyss.dev.play.PlaySelfTest::runSelfTest));
+        steps.addAll(jp.revati.skyabyss.dev.play.PlayMultiSelfTest.steps());
         steps.add(Step.once("item glow", jp.revati.skyabyss.glow.ItemGlowSelfTest::runSelfTest));
         steps.add(Step.once("progress", ProgressSelfTest::runSelfTest));
         steps.add(Step.once("lore", LoreSelfTest::runSelfTest));
