@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "pattern": [
+    "IRI",
+    "IAI",
+    " I "
+  ],
+  "key": {
+    "R": {
+      "item": "skyabyss:abyss_relic_ash_3"
+    },
+    "I": {
+      "item": "skyabyss:abyss_anchor_iron"
+    },
+    "A": {
+      "item": "minecraft:amethyst_shard"
+    }
+  },
+  "result": {
+    "id": "skyabyss:abyss_pulse_listener",
+    "count": 1
+  }
+}

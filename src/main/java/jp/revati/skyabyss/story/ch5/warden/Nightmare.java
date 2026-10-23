@@ -217,6 +217,8 @@ public final class Nightmare {
             }
         }
         settle(level.getServer(), s.group(), s.tier(), members);
+        // 深淵の装備 (段が深いほど錨鉄が増える。abyss/gear/AbyssGearLoot)
+        jp.revati.skyabyss.abyss.gear.AbyssGearLoot.warden(level, members, s.tier().n());
     }
 
     // 段の記録と報酬 (初めて / 繰り返し)。first は組の一番高い段より上のとき

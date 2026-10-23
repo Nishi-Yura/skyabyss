@@ -156,6 +156,7 @@ public final class SelfTestRunner {
         steps.add(Step.once("storm gear", jp.revati.skyabyss.item.storm.StormGearSelfTest::runSelfTest));
         // 余燼の装備と伝承・天の鍵の締め (13 の 11.2節の担当 G)
         steps.add(Step.once("ember gear", jp.revati.skyabyss.titan.ember.gear.EmberGearSelfTest::runSelfTest));
+        steps.add(Step.once("abyss gear", jp.revati.skyabyss.abyss.gear.AbyssGearSelfTest::runSelfTest));
         steps.add(Step.once("ember lore", jp.revati.skyabyss.titan.ember.lore.EmberLoreSelfTest::runSelfTest));
         steps.add(Step.once("record", RecordSelfTest::runSelfTest));
         // 備えの三灯 (式・色の境目・乗り込みの確認の流れ・前室の囁き・控え帳の行)。docs/design/21 の 1.2、11 の 9 章
