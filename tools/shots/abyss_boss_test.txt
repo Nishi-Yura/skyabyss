@@ -1,0 +1,35 @@
+# 層の主・歪んだ王の見た目の試し (一体だけ)。./gradlew runShots -Pscript=tools/shots/abyss_boss_test.txt
+world abyss_boss_test flat
+size 1280 720
+timeout 900
+render 8
+clouds off
+wait 60
+cmd skyabyss cinematic stop
+cmd gamemode spectator
+cmd time set noon
+cmd gamerule doDaylightCycle false
+hud off
+camera 0.5 -59 9.5 180 -6
+waitchunks 300
+cmd skyabyss abyss boss lord_rib 0 - 40 9
+wait 60
+shot lord_rib_idle
+cmd skyabyss abyss bossdo snuff 50
+wait 50
+shot lord_rib_windup
+cmd skyabyss abyss bossdo strike_snuff
+wait 4
+shot lord_rib_strike
+wait 30
+cmd skyabyss abyss bossdo phase
+wait 14
+shot lord_rib_phase
+wait 40
+camera 7.5 -59 0.5 90 -6
+wait 20
+shot lord_rib_side
+cmd kill @e[type=skyabyss:rib_guard]
+wait 26
+shot lord_rib_death
+quit

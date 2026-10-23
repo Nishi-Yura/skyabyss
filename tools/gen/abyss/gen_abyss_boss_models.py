@@ -1,0 +1,384 @@
+"""層の主・歪んだ王の素材を入れる (docs/design/15 の 9.7、abyss.boss.BossLook)。
+
+    python tools/gen/abyss/gen_abyss_boss_models.py [名前…]      (名前を省くと全部)
+
+入れるもの (名前ごと):
+  lowpoly/<stem>.json・textures/lowpoly/<stem>.png (+ _glowmask)・geo/entity/<stem>_lowpoly(_debug).geo.json   (tools/install/install_lowpoly.py)
+  animations/entity/<animStem>.animation.json   (下の動き。王は三つの周で同じ骨・同じ動き)
+入力: docs/review/abyss_boss_models/src/<stem>/ (tools/rough/lowpoly/abyss/boss_lords.py・boss_kings.py が書く)
+
+動きの約束 (GuardMob の "boss" の制御が名前で呼ぶ):
+  idle・walk (繰り返し)、attack (0.5 秒。体の敵のふつうの殴り)、phase (2 秒)、death (2.2 秒、最後で止める)、
+  windup_<技> (2.0 秒、最後で止める。予告の長さに合わせて速さが変わる: BossLook.WINDUP_SEC)、strike_<技> (0.8 秒)。
+  技: 王 slam・charge・summon・bolts・sweep、主 snuff (骨)・crush (塩)・split (雷)・roar (灰)。
+  体の敵が自分で流す動き (AbyssMobB の playAction: bite・lure・snuff・telegraph・heat・mirror・hurt・death) も同じ名前で置く。
+回転の値は gen_abyss_mobs_b の kf の約束 (x 正 = 上が後ろへ倒れる / 垂れた腕なら前へ上がる)。
+"""
+import json
+import os
+import subprocess
+import sys
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, HERE)
+import gen_abyss_mobs_b as G  # noqa: E402
+
+ROOT = os.path.dirname(os.path.dirname(os.path.dirname(HERE)))
+A = os.path.join(ROOT, "src", "main", "resources", "assets", "skyabyss")
+SRC = os.path.join(ROOT, "docs", "review", "abyss_boss_models", "src")
+
+
+def R(frames):
+    return G.kf(frames, True)
+
+
+def T(frames):
+    return G.kf(frames, False)
+
+
+def bone(rot=None, pos=None, scale=None):
+    d = {}
+    if rot:
+        d["rotation"] = rot
+    if pos:
+        d["position"] = pos
+    if scale:
+        d["scale"] = scale
+    return d
+
+
+def clean(bones):
+    return {n: {k: v for k, v in b.items() if v} for n, b in bones.items() if any(b.values())}
+
+
+def S(phase, amp, speed=120):
+    return G.S(phase, amp, speed)
+
+
+def scale_kf(frames):
+    return T({t: (v, v, v) if isinstance(v, (int, float)) else v for t, v in frames.items()})
+
+
+# ====================================================================== 肋の主
+def lord_rib():
+    idle = {
+        "chest": bone([S(0, 1.5, 120), "0", "0"], scale=None),
+        "head": bone([S(40, 3, 120), S(0, 6, 60), S(90, 2, 60)]),
+        "jaw": bone([S(0, 3, 240), "0", "0"]),
+        "lamps": bone([S(0, 5, 90), "0", S(70, 4, 90)]),
+        "arm_l": bone([S(0, 3, 120), "0", "0"]),
+        "arm_r": bone([S(180, 2, 120), "0", "0"]),
+        "fore_l": bone([S(60, 4, 120), "0", "0"]),
+    }
+    idle["chest"]["scale"] = scale_kf({0: 1.0, 1.5: (1.03, 1.02, 1.04), 3.0: 1.0})
+    walk = G.legs_walk(["leg_l", "leg_r"], 257, 20, 2)
+    walk["shin_l"] = bone(["math.max(0, %s)" % S(60, 26, 257), "0", "0"])
+    walk["shin_r"] = bone(["math.max(0, %s)" % S(240, 26, 257), "0", "0"])
+    walk["body"] = bone(["0", S(0, 4, 257), S(0, 2.5, 257)], [0, "math.abs(%s)*0.6" % S(0, 1, 257), 0])
+    walk["chest"] = bone(["-6", S(180, 5, 257), "0"])
+    walk["arm_l"] = bone([S(180, 14, 257), "0", "0"])
+    walk["arm_r"] = bone([S(0, 8, 257), "0", "0"])
+    walk["lamps"] = bone([S(90, 9, 257), "0", S(0, 5, 257)])
+    walk["head"] = bone([S(90, 3, 514), "0", "0"])
+    # 吹き消し (予告 50 tick): 灯台へ身を乗り出し、顎を開けて胸を膨らませる (吸う)。最後の姿で止める
+    windup = {
+        "chest": bone(R({0: (0, 0, 0), 0.8: (-24, 0, 0), 2.0: (-30, 0, 0)}), scale=scale_kf({0: 1.0, 1.2: (1.08, 1.05, 1.1), 2.0: (1.12, 1.06, 1.14)})),
+        "head": bone(R({0: (0, 0, 0), 0.8: (-10, 0, 0), 2.0: (-18, 0, 0)})),
+        "jaw": bone(R({0: (0, 0, 0), 1.0: (24, 0, 0), 2.0: (30, 0, 0)})),
+        "arm_r": bone(R({0: (0, 0, 0), 0.8: (40, 0, 8), 2.0: (52, 0, 10)})),
+        "fore_r": bone(R({0: (0, 0, 0), 2.0: (24, 0, 0)})),
+        "arm_l": bone(R({0: (0, 0, 0), 2.0: (-18, 0, -14)})),
+        "lamps": bone(R({0: (0, 0, 0), 2.0: (22, 0, 0)})),
+        "leg_l": bone(R({0: (0, 0, 0), 2.0: (14, 0, 0)})),
+        "leg_r": bone(R({0: (0, 0, 0), 2.0: (-22, 0, 0)})),
+        "shin_r": bone(R({0: (0, 0, 0), 2.0: (24, 0, 0)})),
+    }
+    strike = {
+        "chest": bone(R({0: (-30, 0, 0), 0.12: (-40, 0, 0), 0.5: (-26, 0, 0), 0.8: (0, 0, 0)}),
+                      scale=scale_kf({0: (1.12, 1.06, 1.14), 0.15: (0.9, 0.96, 0.88), 0.5: (0.95, 0.98, 0.94), 0.8: 1.0})),
+        "head": bone(R({0: (-18, 0, 0), 0.1: (-32, 0, 0), 0.5: (-22, 0, 0), 0.8: (0, 0, 0)})),
+        "jaw": bone(R({0: (30, 0, 0), 0.1: (44, 0, 0), 0.5: (36, 0, 0), 0.8: (0, 0, 0)})),
+        "arm_r": bone(R({0: (52, 0, 10), 0.15: (70, 0, 12), 0.8: (0, 0, 0)})),
+        "fore_r": bone(R({0: (24, 0, 0), 0.8: (0, 0, 0)})),
+        "arm_l": bone(R({0: (-18, 0, -14), 0.8: (0, 0, 0)})),
+        "leg_l": bone(R({0: (14, 0, 0), 0.8: (0, 0, 0)})),
+        "leg_r": bone(R({0: (-22, 0, 0), 0.8: (0, 0, 0)})),
+        "shin_r": bone(R({0: (24, 0, 0), 0.8: (0, 0, 0)})),
+    }
+    # 殴り: 鉤の杖を振り下ろす
+    attack = {
+        "arm_r": bone(R({0: (0, 0, 0), 0.15: (-40, 0, 20), 0.3: (70, 0, 4), 0.5: (0, 0, 0)})),
+        "fore_r": bone(R({0: (0, 0, 0), 0.15: (30, 0, 0), 0.3: (10, 0, 0), 0.5: (0, 0, 0)})),
+        "chest": bone(R({0: (0, 0, 0), 0.15: (6, 14, 0), 0.3: (-12, -10, 0), 0.5: (0, 0, 0)})),
+    }
+    # 段: 杖を掲げ、頭を上げて吠える (肋が開く)
+    phase = {
+        "chest": bone(R({0: (0, 0, 0), 0.4: (12, 0, 0), 1.6: (12, 0, 0), 2.0: (0, 0, 0)}),
+                      scale=scale_kf({0: 1.0, 0.4: (1.12, 1.04, 1.12), 1.6: (1.12, 1.04, 1.12), 2.0: 1.0})),
+        "head": bone(R({0: (0, 0, 0), 0.4: (28, 0, 0), 0.6: (24, 6, 0), 0.8: (28, -6, 0), 1.0: (26, 4, 0), 1.6: (26, 0, 0), 2.0: (0, 0, 0)})),
+        "jaw": bone(R({0: (0, 0, 0), 0.4: (36, 0, 0), 1.6: (36, 0, 0), 2.0: (0, 0, 0)})),
+        "arm_r": bone(R({0: (0, 0, 0), 0.5: (-150, 0, 10), 1.6: (-150, 0, 10), 2.0: (0, 0, 0)})),
+        "fore_r": bone(R({0: (0, 0, 0), 0.5: (-20, 0, 0), 1.6: (-20, 0, 0), 2.0: (0, 0, 0)})),
+        "arm_l": bone(R({0: (0, 0, 0), 0.5: (0, 0, -40), 1.6: (0, 0, -40), 2.0: (0, 0, 0)})),
+        "lamps": bone(R({0: (0, 0, 0), 0.5: (-20, 0, 10), 0.8: (16, 0, -10), 1.1: (-10, 0, 6), 1.6: (0, 0, 0)})),
+    }
+    # 倒れる: 膝が折れ、前へ崩れて骨が散る (頭が落ちる)
+    death = {
+        "body": bone(R({0: (0, 0, 0), 0.6: (-8, 0, 0), 1.4: (-70, 0, 6), 2.2: (-84, 0, 8)}),
+                     T({0: (0, 0, 0), 0.6: (0, -6, 0), 1.4: (0, -18, -6), 2.2: (0, -24, -10)})),
+        "leg_l": bone(R({0: (0, 0, 0), 0.6: (-50, 0, 0), 1.4: (-80, 0, -10), 2.2: (-80, 0, -10)})),
+        "leg_r": bone(R({0: (0, 0, 0), 0.6: (-44, 0, 0), 1.4: (-86, 0, 12), 2.2: (-86, 0, 12)})),
+        "shin_l": bone(R({0: (0, 0, 0), 0.6: (90, 0, 0), 2.2: (110, 0, 0)})),
+        "shin_r": bone(R({0: (0, 0, 0), 0.6: (84, 0, 0), 2.2: (120, 0, 0)})),
+        "head": bone(R({0: (0, 0, 0), 1.2: (-20, 0, 0), 1.8: (40, 30, 60), 2.2: (50, 40, 80)}),
+                     T({0: (0, 0, 0), 1.2: (0, 0, 0), 1.8: (6, -10, -8), 2.2: (8, -14, -12)})),
+        "jaw": bone(R({0: (0, 0, 0), 1.0: (40, 0, 0), 2.2: (40, 0, 0)})),
+        "arm_l": bone(R({0: (0, 0, 0), 1.4: (-60, 0, -30), 2.2: (-70, 0, -40)})),
+        "arm_r": bone(R({0: (0, 0, 0), 1.4: (-70, 0, 30), 2.2: (-80, 0, 40)})),
+        "chest": bone(scale=scale_kf({0: 1.0, 1.6: 1.0, 2.2: (1.1, 0.8, 1.1)})),
+    }
+    return {"idle": G.loop(3.0, clean(idle)), "walk": G.loop(1.4, clean(walk)), "attack": G.once(0.5, clean(attack)),
+            "windup_snuff": G.once(2.0, clean(windup), True), "strike_snuff": G.once(0.8, clean(strike)),
+            "phase": G.once(2.0, clean(phase)), "death": G.once(2.2, clean(death), True)}
+
+
+def hurt(bone="body"):
+    return G.once(0.3, clean({bone: bone_(R({0: (0, 0, 0), 0.08: (-6, 0, 5), 0.3: (0, 0, 0)}))}))
+
+
+bone_ = bone
+
+
+# ====================================================================== 白殻の主
+def lord_salt():
+    idle = {
+        "neck": bone([S(0, 4, 90), S(30, 8, 45), "0"]),
+        "head": bone([S(60, 5, 90), S(90, 10, 45), "0"]),
+        "stalk_l": bone([S(0, 10, 120), "0", S(20, 8, 90)]),
+        "stalk_r": bone([S(140, 10, 120), "0", S(200, 8, 90)]),
+        "shell": bone(["0", "0", S(0, 1.5, 60)]),
+        "tail": bone(["0", S(0, 6, 90), "0"]),
+        "body": bone(scale=scale_kf({0: 1.0, 1.5: (1.02, 0.98, 1.02), 3.0: 1.0})),
+    }
+    walk = {
+        "body": bone(["0", "0", S(0, 1.5, 360)], scale=scale_kf({0: 1.0, 0.25: (0.98, 1.0, 1.06), 0.5: (1.02, 1.0, 0.95), 0.75: (0.98, 1.0, 1.06), 1.0: 1.0})),
+        "shell": bone([S(0, 3, 360), "0", S(90, 2, 360)], [0, "math.abs(%s)*0.6" % S(0, 1, 360), 0]),
+        "tail": bone(["0", S(90, 12, 360), "0"]),
+        "neck": bone(["-8", S(180, 5, 360), "0"]),
+        "head": bone(["6", S(0, 6, 360), "0"]),
+        "stalk_l": bone(["-14", "0", S(0, 6, 360)]),
+        "stalk_r": bone(["-14", "0", S(180, 6, 360)]),
+    }
+    # 殻にこもる (殻が閉じている間: 首と頭が殻の口へ引っこむ)
+    closed = {
+        "neck": bone(R({0: (40, 0, 0)}), T({0: (2, -6, 12)}), scale_kf({0: (0.7, 0.7, 0.55)})),
+        "head": bone(R({0: (30, 0, 0)})),
+        "stalk_l": bone(R({0: (60, 0, 30)}), scale=scale_kf({0: 0.4})),
+        "stalk_r": bone(R({0: (60, 0, -30)}), scale=scale_kf({0: 0.4})),
+        "shell": bone(R({0: (-4, 0, 0)}), T({0: (0, -1.2, 0)})),
+    }
+    # 押しつぶし (予告 32 tick): 前を持ち上げて殻を後ろへ反らせ、首を高く掲げる。最後で止める
+    windup = {
+        "body": bone(R({0: (0, 0, 0), 1.2: (12, 0, 0), 2.0: (16, 0, 0)}), T({0: (0, 0, 0), 2.0: (0, 2.5, 0)})),
+        "shell": bone(R({0: (0, 0, 0), 1.2: (14, 0, 0), 2.0: (20, 0, 0)}), T({0: (0, 0, 0), 2.0: (0, 3.0, 0)})),
+        "neck": bone(R({0: (0, 0, 0), 1.0: (26, 0, 0), 2.0: (34, 0, 0)})),
+        "head": bone(R({0: (0, 0, 0), 2.0: (-24, 0, 0)})),
+        "stalk_l": bone(R({0: (0, 0, 0), 2.0: (-30, 0, 14)})),
+        "stalk_r": bone(R({0: (0, 0, 0), 2.0: (-30, 0, -14)})),
+        "tail": bone(R({0: (0, 0, 0), 2.0: (-10, 0, 0)})),
+    }
+    strike = {
+        "body": bone(R({0: (16, 0, 0), 0.12: (-6, 0, 0), 0.4: (-3, 0, 0), 0.8: (0, 0, 0)}), T({0: (0, 2.5, 0), 0.12: (0, -1.0, 0), 0.8: (0, 0, 0)}),
+                     scale_kf({0: 1.0, 0.12: (1.1, 0.82, 1.06), 0.35: (0.97, 1.04, 0.98), 0.8: 1.0})),
+        "shell": bone(R({0: (20, 0, 0), 0.12: (-12, 0, 0), 0.35: (-4, 0, 0), 0.8: (0, 0, 0)}), T({0: (0, 3.0, 0), 0.12: (0, -1.5, 0), 0.8: (0, 0, 0)})),
+        "neck": bone(R({0: (34, 0, 0), 0.12: (-22, 0, 0), 0.5: (-10, 0, 0), 0.8: (0, 0, 0)})),
+        "head": bone(R({0: (-24, 0, 0), 0.12: (10, 0, 0), 0.8: (0, 0, 0)})),
+    }
+    attack = {
+        "neck": bone(R({0: (0, 0, 0), 0.15: (18, 0, 0), 0.28: (-30, 0, 0), 0.5: (0, 0, 0)})),
+        "head": bone(R({0: (0, 0, 0), 0.15: (-10, 0, 0), 0.28: (18, 0, 0), 0.5: (0, 0, 0)})),
+    }
+    phase = {
+        "shell": bone(R({0: (0, 0, 0), 0.2: (0, 0, 6), 0.4: (0, 0, -6), 0.6: (0, 0, 6), 0.8: (0, 0, -6), 1.0: (0, 0, 0)})),
+        "neck": bone(R({0: (0, 0, 0), 0.6: (40, 0, 0), 1.6: (40, 0, 0), 2.0: (0, 0, 0)})),
+        "head": bone(R({0: (0, 0, 0), 0.6: (-30, 0, 0), 0.9: (-30, 12, 0), 1.2: (-30, -12, 0), 1.6: (-30, 0, 0), 2.0: (0, 0, 0)})),
+        "stalk_l": bone(R({0: (0, 0, 0), 0.6: (-20, 0, 40), 1.6: (-20, 0, 40), 2.0: (0, 0, 0)})),
+        "stalk_r": bone(R({0: (0, 0, 0), 0.6: (-20, 0, -40), 1.6: (-20, 0, -40), 2.0: (0, 0, 0)})),
+    }
+    death = {
+        "body": bone(R({0: (0, 0, 0), 1.0: (0, 0, 10), 2.2: (0, 0, 16)}), T({0: (0, 0, 0), 2.2: (0, -2, 0)})),
+        "shell": bone(R({0: (0, 0, 0), 0.8: (0, 0, 20), 1.6: (0, 0, 64), 2.2: (0, 0, 70)}), T({0: (0, 0, 0), 1.6: (4, -3, 0), 2.2: (5, -4, 0)})),
+        "neck": bone(R({0: (0, 0, 0), 0.8: (30, 0, 0), 1.6: (-50, 20, 0), 2.2: (-60, 24, 0)})),
+        "head": bone(R({0: (0, 0, 0), 1.6: (40, 0, 20), 2.2: (40, 0, 24)})),
+        "stalk_l": bone(scale=scale_kf({0: 1.0, 1.4: 0.6, 2.2: 0.3})),
+        "stalk_r": bone(scale=scale_kf({0: 1.0, 1.4: 0.6, 2.2: 0.3})),
+    }
+    return {"idle": G.loop(3.0, clean(idle)), "walk": G.loop(1.0, clean(walk)), "closed": G.loop(1.0, clean(closed)), "attack": G.once(0.5, clean(attack)),
+            "windup_crush": G.once(2.0, clean(windup), True), "strike_crush": G.once(0.8, clean(strike)),
+            "phase": G.once(2.0, clean(phase)), "death": G.once(2.2, clean(death), True)}
+
+
+# ====================================================================== 鼓動まねの主
+STORM_LEGS = [(-1, -1, 0), (1, -1, 1), (-1, 0, 2), (1, 0, 3), (-1, 1, 4), (1, 1, 5)]
+
+
+def beat(t0=0.0, amp=0.16, length=1.5):
+    return {t0: 1.0, t0 + 0.08: 1 + amp, t0 + 0.2: 1.0, t0 + 0.32: 1 + amp * 0.7, t0 + 0.5: 1.0, length: 1.0}
+
+
+def lord_storm():
+    idle = {
+        "heart": bone(scale=scale_kf(beat())),
+        "body": bone(["0", S(0, 3, 60), S(90, 1.5, 60)], scale=scale_kf({0: 1.0, 0.08: 1.02, 0.2: 1.0, 1.5: 1.0})),
+        "jaw": bone([S(0, 4, 120), "0", "0"]),
+        "buds": bone([S(0, 4, 90), "0", S(60, 5, 90)]),
+    }
+    for sx, fz, i in STORM_LEGS:
+        idle["leg%d" % i] = bone(["0", "0", S(i * 40, 2, 120)])
+    walk = {"heart": bone(scale=scale_kf(beat(0, 0.14, 0.8))), "body": bone(["0", S(0, 4, 450), S(0, 3, 450)], [0, "math.abs(%s)*0.8" % S(0, 1, 450), 0]),
+            "buds": bone([S(90, 8, 450), "0", S(0, 6, 450)])}
+    for sx, fz, i in STORM_LEGS:
+        ph = 0 if i in (0, 3, 4) else 180          # 三本ずつ交互 (三脚の歩み)
+        walk["leg%d" % i] = bone(["0", S(ph, 18, 450), "math.max(0, %s) * %d" % (S(ph + 90, 16, 450), -sx)])
+        walk["shin%d" % i] = bone(["0", "0", "math.max(0, %s) * %d" % (S(ph + 90, 14, 450), sx)])
+    # 写しに散る (予告なしの一瞬): 体が縮んでから弾け、背の芽が前へ飛び出す
+    strike_split = {
+        "body": bone(R({0: (0, 0, 0), 0.1: (6, 0, 0), 0.3: (-8, 0, 0), 0.8: (0, 0, 0)}), scale=scale_kf({0: 1.0, 0.12: (0.86, 0.92, 0.86), 0.3: (1.14, 1.08, 1.14), 0.8: 1.0})),
+        "buds": bone(R({0: (0, 0, 0), 0.3: (-40, 0, 0), 0.8: (0, 0, 0)}), scale=scale_kf({0: 1.0, 0.3: 1.5, 0.8: 1.0})),
+        "heart": bone(scale=scale_kf({0: 1.0, 0.1: 1.3, 0.25: 0.9, 0.4: 1.2, 0.8: 1.0})),
+    }
+    windup_split = {"body": bone(scale=scale_kf({0: 1.0, 2.0: (0.9, 0.94, 0.9)})), "heart": bone(scale=scale_kf({0: 1.0, 2.0: 1.2}))}
+    attack = {
+        "jaw": bone(R({0: (0, 0, 0), 0.15: (40, 0, 0), 0.28: (-4, 0, 0), 0.5: (0, 0, 0)})),
+        "body": bone(R({0: (0, 0, 0), 0.15: (8, 0, 0), 0.28: (-14, 0, 0), 0.5: (0, 0, 0)}), T({0: (0, 0, 0), 0.28: (0, 0, -3), 0.5: (0, 0, 0)})),
+    }
+    lure = {"heart": bone(scale=scale_kf({0: 1.0, 0.1: 1.25, 0.25: 1.0, 0.35: 1.18, 0.6: 1.0})), "jaw": bone(R({0: (0, 0, 0), 0.3: (10, 0, 0), 0.6: (0, 0, 0)}))}
+    phase = {
+        "body": bone(R({0: (0, 0, 0), 0.5: (16, 0, 0), 1.6: (16, 0, 0), 2.0: (0, 0, 0)}), T({0: (0, 0, 0), 0.5: (0, 3, 0), 1.6: (0, 3, 0), 2.0: (0, 0, 0)})),
+        "jaw": bone(R({0: (0, 0, 0), 0.5: (50, 0, 0), 1.6: (50, 0, 0), 2.0: (0, 0, 0)})),
+        "heart": bone(scale=scale_kf({0: 1.0, 0.15: 1.3, 0.3: 1.0, 0.45: 1.3, 0.6: 1.0, 0.75: 1.3, 0.9: 1.0, 1.05: 1.3, 1.2: 1.0, 2.0: 1.0})),
+        "buds": bone(R({0: (0, 0, 0), 0.5: (-20, 0, 0), 1.6: (-20, 0, 0), 2.0: (0, 0, 0)}), scale=scale_kf({0: 1.0, 0.5: 1.25, 1.6: 1.25, 2.0: 1.0})),
+    }
+    for sx, fz, i in STORM_LEGS:
+        phase["leg%d" % i] = bone(R({0: (0, 0, 0), 0.5: (0, 0, -sx * 14), 1.6: (0, 0, -sx * 14), 2.0: (0, 0, 0)}))
+    death = {
+        "body": bone(R({0: (0, 0, 0), 1.2: (10, 0, 6), 2.2: (14, 0, 8)}), T({0: (0, 0, 0), 1.2: (0, -8, 0), 2.2: (0, -10, 0)}),
+                     scale_kf({0: 1.0, 1.0: (1.06, 0.94, 1.06), 2.2: (1.16, 0.72, 1.16)})),
+        "heart": bone(scale=scale_kf({0: 1.0, 0.2: 1.3, 0.5: 1.0, 1.4: 1.0, 1.6: 1.2, 2.2: 0.6})),
+        "jaw": bone(R({0: (0, 0, 0), 1.0: (36, 0, 0), 2.2: (30, 0, 0)})),
+        "buds": bone(R({0: (0, 0, 0), 2.2: (30, 0, 0)}), scale=scale_kf({0: 1.0, 2.2: 0.7})),
+    }
+    for sx, fz, i in STORM_LEGS:
+        death["leg%d" % i] = bone(R({0: (0, 0, 0), 1.2: (0, 0, sx * 40), 2.2: (0, 0, sx * 46)}))
+        death["shin%d" % i] = bone(R({0: (0, 0, 0), 1.2: (0, 0, -sx * 30), 2.2: (0, 0, -sx * 40)}))
+    return {"idle": G.loop(1.5, clean(idle)), "walk": G.loop(0.8, clean(walk)), "attack": G.once(0.5, clean(attack)), "lure": G.once(0.6, clean(lure)),
+            "hurt": hurt(), "windup_split": G.once(2.0, clean(windup_split), True), "strike_split": G.once(0.8, clean(strike_split)),
+            "phase": G.once(2.0, clean(phase)), "death": G.once(2.2, clean(death), True)}
+
+
+# ====================================================================== 灯り喰いの主
+def lord_ash():
+    idle = {
+        "body": bone(["0", S(0, 10, 30), S(90, 3, 60)], [0, S(0, 1.2, 120), 0]),
+        "jaw": bone(["math.max(0, %s)" % S(0, 8, 120), "0", "0"]),
+        "lamps": bone([S(60, 6, 120), "0", S(150, 6, 90)]),
+        "hooks_l": bone(["0", S(0, 8, 120), S(30, 6, 120)]),
+        "hooks_r": bone(["0", S(180, 8, 120), S(210, 6, 120)]),
+    }
+    walk = {
+        "body": bone(["-10", "0", S(0, 4, 240)], [0, S(0, 1.6, 240), 0]),
+        "lamps": bone(["18", "0", S(90, 8, 240)]),
+        "hooks_l": bone(["0", S(0, 20, 360), S(0, 12, 360)]),
+        "hooks_r": bone(["0", S(180, 20, 360), S(180, 12, 360)]),
+        "jaw": bone(["4", "0", "0"]),
+    }
+    # 三度吠える (予告 45 tick): 口が三度開き、だんだん大きく。体は後ろへ反り、鉤が開く。最後は大きく開けて止める
+    windup = {
+        "jaw": bone(R({0: (0, 0, 0), 0.25: (30, 0, 0), 0.5: (6, 0, 0), 0.85: (42, 0, 0), 1.15: (8, 0, 0), 1.55: (58, 0, 0), 2.0: (62, 0, 0)})),
+        "body": bone(R({0: (0, 0, 0), 0.25: (6, 0, 0), 0.5: (0, 0, 0), 0.85: (10, 0, 0), 1.15: (2, 0, 0), 1.55: (16, 0, 0), 2.0: (18, 0, 0)}),
+                     T({0: (0, 0, 0), 2.0: (0, 3, 0)}), scale_kf({0: 1.0, 0.25: 1.04, 0.5: 1.0, 0.85: 1.06, 1.15: 1.0, 1.55: 1.1, 2.0: 1.1})),
+        "hooks_l": bone(R({0: (0, 0, 0), 2.0: (0, -20, -30)})),
+        "hooks_r": bone(R({0: (0, 0, 0), 2.0: (0, 20, 30)})),
+        "lamps": bone(R({0: (0, 0, 0), 0.25: (-8, 0, 6), 0.85: (8, 0, -8), 1.55: (-12, 0, 10), 2.0: (-10, 0, 8)})),
+    }
+    strike = {
+        "jaw": bone(R({0: (62, 0, 0), 0.1: (70, 0, 0), 0.3: (0, 0, 0), 0.8: (0, 0, 0)})),
+        "body": bone(R({0: (18, 0, 0), 0.1: (-14, 0, 0), 0.4: (-6, 0, 0), 0.8: (0, 0, 0)}), T({0: (0, 3, 0), 0.1: (0, 0, -4), 0.8: (0, 0, 0)}),
+                     scale_kf({0: 1.1, 0.1: 1.22, 0.3: 0.94, 0.8: 1.0})),
+        "hooks_l": bone(R({0: (0, -20, -30), 0.1: (0, 10, 20), 0.8: (0, 0, 0)})),
+        "hooks_r": bone(R({0: (0, 20, 30), 0.1: (0, -10, -20), 0.8: (0, 0, 0)})),
+        "lamps": bone(R({0: (-10, 0, 8), 0.15: (30, 0, -20), 0.5: (-14, 0, 10), 0.8: (0, 0, 0)})),
+    }
+    attack = {
+        "jaw": bone(R({0: (0, 0, 0), 0.15: (44, 0, 0), 0.3: (0, 0, 0), 0.5: (0, 0, 0)})),
+        "body": bone(R({0: (0, 0, 0), 0.15: (8, 0, 0), 0.3: (-16, 0, 0), 0.5: (0, 0, 0)}), T({0: (0, 0, 0), 0.3: (0, 0, -4), 0.5: (0, 0, 0)})),
+    }
+    phase = {
+        "body": bone(R({0: (0, 0, 0), 1.2: (0, 360, 0), 2.0: (0, 360, 0)}), T({0: (0, 0, 0), 0.6: (0, 4, 0), 1.6: (0, 4, 0), 2.0: (0, 0, 0)})),
+        "jaw": bone(R({0: (0, 0, 0), 0.4: (60, 0, 0), 1.6: (60, 0, 0), 2.0: (0, 0, 0)})),
+        "hooks_l": bone(R({0: (0, 0, 0), 0.4: (0, -30, -40), 1.6: (0, -30, -40), 2.0: (0, 0, 0)})),
+        "hooks_r": bone(R({0: (0, 0, 0), 0.4: (0, 30, 40), 1.6: (0, 30, 40), 2.0: (0, 0, 0)})),
+        "lamps": bone(R({0: (0, 0, 0), 0.6: (30, 0, 0), 1.2: (-30, 0, 0), 2.0: (0, 0, 0)})),
+    }
+    death = {
+        "body": bone(R({0: (0, 0, 0), 0.8: (-20, 0, 30), 1.6: (-30, 0, 80), 2.2: (-30, 0, 90)}), T({0: (0, 0, 0), 0.8: (0, -6, 0), 1.6: (0, -12, 0), 2.2: (0, -12, 0)}),
+                     scale_kf({0: 1.0, 1.6: 1.0, 2.2: (1.05, 0.9, 1.05)})),
+        "jaw": bone(R({0: (0, 0, 0), 0.6: (50, 0, 0), 2.2: (40, 0, 0)})),
+        "lamps": bone(R({0: (0, 0, 0), 1.0: (-30, 0, 20), 2.2: (-80, 0, 60)})),
+        "hooks_l": bone(R({0: (0, 0, 0), 2.2: (0, 30, 40)})),
+        "hooks_r": bone(R({0: (0, 0, 0), 2.2: (0, -30, -40)})),
+    }
+    return {"idle": G.loop(3.0, clean(idle)), "walk": G.loop(1.5, clean(walk)), "attack": G.once(0.5, clean(attack)), "hurt": hurt(),
+            "windup_roar": G.once(2.0, clean(windup), True), "strike_roar": G.once(0.8, clean(strike)),
+            "phase": G.once(2.0, clean(phase)), "death": G.once(2.2, clean(death), True)}
+
+
+# ====================================================================== 入れる
+# stem -> (動きの名前, 動きを作る関数, 体の敵の動きの名前の頭, 体の敵が流す動き → 置き換える動き)
+MODELS = {
+    "lord_rib": ("lord_rib", lord_rib, None, {}),
+    "lord_salt": ("lord_salt", lord_salt, None, {}),
+    "lord_storm": ("lord_storm", lord_storm, "heartbeat_mimic", {"bite": "attack", "lure": "lure", "hurt": "hurt", "death": "death"}),
+    "lord_ash": ("lord_ash", lord_ash, "lamp_eater", {"snuff": "attack", "hurt": "hurt", "death": "death"}),
+}
+
+
+def write_anim(anim_stem, anims, body_prefix, aliases):
+    out = {}
+    for k, v in anims.items():
+        out["animation.%s.%s" % (anim_stem, k)] = v
+    if body_prefix:
+        for act, to in aliases.items():
+            out["animation.%s.%s" % (body_prefix, act)] = anims[to]
+    path = os.path.join(A, "animations", "entity", anim_stem + ".animation.json")
+    with open(path, "w", encoding="utf-8", newline="\n") as f:
+        json.dump({"format_version": "1.8.0", "animations": out}, f, ensure_ascii=False, indent=1)
+        f.write("\n")
+
+
+def install(stem):
+    d = os.path.join(SRC, stem)
+    cmd = [sys.executable, os.path.join(ROOT, "tools", "install", "install_lowpoly.py"), stem,
+           "--mesh", os.path.join(d, stem + "_mesh.json"), "--atlas", os.path.join(d, stem + "_atlas.png")]
+    g = os.path.join(d, stem + "_glowmask.png")
+    if os.path.exists(g):
+        cmd += ["--glow", g]
+    env = dict(os.environ)
+    env["PYTHONPATH"] = os.pathsep.join([os.path.join(ROOT, "tools", "lib"), os.path.join(ROOT, "tools", "audit")] +
+                                        ([env["PYTHONPATH"]] if env.get("PYTHONPATH") else []))
+    subprocess.check_call(cmd, cwd=ROOT, env=env)
+
+
+def main(names):
+    done_anim = set()
+    for stem, (anim_stem, fn, body_prefix, aliases) in MODELS.items():
+        if names and stem not in names and anim_stem not in names:
+            continue
+        install(stem)
+        if anim_stem not in done_anim:
+            write_anim(anim_stem, fn(), body_prefix, aliases)
+            done_anim.add(anim_stem)
+
+
+if __name__ == "__main__":
+    main(sys.argv[1:])

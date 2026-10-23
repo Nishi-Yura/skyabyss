@@ -1,0 +1,17 @@
+{
+ "name": "king_storm_c0",
+ "tris": 1886,
+ "atlas": 512,
+ "open": 0,
+ "floating": [],
+ "bones": {
+  "root": 60,
+  "body": 704,
+  "head": 524,
+  "halo": 246,
+  "arm_l": 176,
+  "arm_r": 176
+ },
+ "glow": 27369,
+ "height": 65.2
+}

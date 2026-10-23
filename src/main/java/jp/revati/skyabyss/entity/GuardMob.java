@@ -94,6 +94,8 @@ public abstract class GuardMob extends Monster implements GeoEntity, jp.revati.s
     private int bossActAt;
     private int bossSeenPhase;
     private int bossPhaseAt = -1000;
+    private int bossSwingAt = -1000;
+    private boolean bossSwung;
     private static final java.util.Map<String, RawAnimation> BOSS_ANIMS = new java.util.concurrent.ConcurrentHashMap<>();
 
     @Override
@@ -145,6 +147,11 @@ public abstract class GuardMob extends Monster implements GeoEntity, jp.revati.s
         });
     }
 
+    // 主・王の姿で「殻を閉じた」動きを見せるか (白い貝守の体の主)。体の敵が上書きする
+    protected boolean bossClosed() {
+        return false;
+    }
+
     // 溜めの速さ (2 秒で作った動きを、予告の長さで終わるように)
     private double bossSpeed() {
         int act = bossAct();
@@ -183,15 +190,24 @@ public abstract class GuardMob extends Monster implements GeoEntity, jp.revati.s
             bossActAt = tickCount;
             c.forceAnimationReset();
         }
-        if (act == 0) {
-            return PlayState.STOP;
+        // ふつうの殴り (体の敵の近接。腕を振る合図 swinging)
+        boolean striking = act != 0 && (act & (1 << 16)) != 0 && tickCount - bossActAt <= jp.revati.skyabyss.abyss.boss.BossLook.STRIKE_TICKS;
+        boolean winding = act != 0 && (act & (1 << 16)) == 0;
+        if (swinging && !bossSwung && !winding && !striking) {
+            bossSwingAt = tickCount;
+            c.forceAnimationReset();
+        }
+        bossSwung = swinging;
+        if (!winding && !striking && tickCount - bossSwingAt < 10) {
+            return state.setAndContinue(bossAnim(stem + "attack", 2));
+        }
+        if (act == 0 || (!winding && !striking)) {
+            // 殻にこもっている間 (白殻の主): 首を引っこめた姿
+            return bossClosed() ? state.setAndContinue(bossAnim(stem + "closed", 0)) : PlayState.STOP;
         }
         String move = jp.revati.skyabyss.abyss.boss.BossLook.actName(act & 0xff);
         if ((act & (1 << 16)) == 0) {
             return state.setAndContinue(bossAnim(stem + "windup_" + move, 1));
-        }
-        if (tickCount - bossActAt > jp.revati.skyabyss.abyss.boss.BossLook.STRIKE_TICKS) {
-            return PlayState.STOP;
         }
         return state.setAndContinue(bossAnim(stem + "strike_" + move, 2));
     }
