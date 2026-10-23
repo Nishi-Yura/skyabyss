@@ -365,7 +365,7 @@ def check(g, label, seeds=None):
                 if q is None or q.get('half') != half:
                     continue
                 fq = q.get('facing')
-                if f in (b, OPP[b]) and fq in (a, OPP[a]) and ((f == b) == (fq == a)):
+                if f in (b, OPP[b]) and fq in (a, OPP[a]) and ((f == OPP[b]) == (fq == a)):
                     # 列が p をはさんで続いているか (角の先が無い = 本当の端)
                     if is_stair(g.get(x + ax, y, z + az)) and is_stair(g.get(px - 2 * bx, y, pz - 2 * bz)) and g.clear(px, y + 1, pz):
                         flag('CORNER_MISSING', (px, y, pz), 'rows of %s (facing %s) and (facing %s) meet here but the corner cell is empty' % (name(s), f, fq))
@@ -435,6 +435,15 @@ def fix(cells, seeds=None, rounds=4, ground=-1):
                     n = cells.get((x + dx, y, z + dz))
                     m = cells.get((x - dx, y, z - dz))
                     if is_stair(n) and n == m:
+                        cells[(x, y, z)] = n
+                        break
+                else:
+                    continue
+            elif kind == 'CORNER_MISSING':
+                # 角を同じ材の階段で埋める (内角・外角の形はゲームが隣に合わせて決める。ここでも stair_shapes で決める)
+                for dx, dz in DX.values():
+                    n = cells.get((x + dx, y, z + dz))
+                    if is_stair(n):
                         cells[(x, y, z)] = n
                         break
                 else:
