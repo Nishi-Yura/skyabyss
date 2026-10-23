@@ -38,14 +38,13 @@ import jp.revati.skyabyss.titan.group.Groups;
 import jp.revati.skyabyss.trial.Trial.Def;
 import jp.revati.skyabyss.util.Players;
 
-// 巨神の順路 (docs/design/32 の 2 章): 歩 → 智 → 闘 → (中ボス) → 心臓。
-//  - 段 1〜3 の試練は、そのグループの今の周の引き (TrialData.current) の順 (歩・智・闘)。周回 1 は原型の三つ、周回 2 からはプールから
-//  - 初回 (物語): 入口 (到着の台から体へ入る口) に、その背にいるグループ全員が入ると 5 秒の予告のあと段 1 へ運ぶ (2.2)。
-//    体の中の原型は一度に一グループ (決定 207): ほかのグループの初回の順路が動いているあいだは、入口で待つ
-//  - 周回: 祠 (titan/shrine) で品を使うと start が呼ばれる。入口の箱では始まらない
-//  - 試練を越える (石が鳴る) と 4 秒後に、順路の参加者 (始めたときにいた人) を次の段の入口の休み場へ運ぶ (2.3)。
-//    中ボスのいる原型 (TrialMidBoss) を引いていない周は、闘のあと中ボスの前室へ (段 3.5。決定 201)。中ボスを倒すと心臓の前室へ
-//  - 途中からは入れない: 順路のあとに背へ来た仲間は運ばれず、入口で「順路の途中」と出る
+// 巨神の順路 (docs/design/32 の 2 章): 歩 → 智 → 闘 → 中ボス → 心臓。どれも体の外の閉じた部屋 (巨神の中は建てない。32 の 2.5)
+//  - 段 1〜3 は、そのグループの今の周の引き (TrialData.current) の三つのレイドの部屋 (trial/raid。枠ごとの二案から一つ)
+//  - 初回 (物語): 乗り込みで着く到着の台 (entryBox) に、その背にいるグループ全員がそろうと 3 秒の予告のあと部屋 1 の中へ運ぶ (2.2)。
+//    ほかのグループの順路が動いていても待たない (部屋は区画ごとに別)
+//  - 周回: 祠 (titan/shrine) で品を使うと start が呼ばれる。到着の台では始まらない
+//  - 部屋を越えると 4 秒後に、順路の参加者を次の部屋の中へ運ぶ (2.3)。三つ目のあとは中ボスの間の中 (段 3.5)、倒すと心臓の間の中へ
+//  - 途中から乗り込んだ仲間は、到着の台に着くと参加者に加わり、今の部屋へ運ばれる (rejoin)
 //  - あきらめは焚き火で提案し、全員の「はい」で成立。成立するとグループ全員が背の外へ出される (2.4)
 //  - 参加者が背に一人もいなくなって EMPTY_GRACE たつと順路は終わる (背を出る・ログアウト)。3 分の不在のリセットでも終わる
 //  - 記録はグループの記録の keep.trial.* (keep. なので試練のリセットでは消えない)。順路を終えるとき (心臓を止めた・あきらめ・
@@ -772,17 +771,6 @@ public final class TrialRoute {
         tickGroups(back, titan, now);
     }
 
-    // 初回の順路が、体の中で動いているほかのグループ (決定 207)
-    @Nullable
-    private static UUID otherFirstRun(ServerLevel back, UUID group) {
-        for (UUID g : BackGroupData.get(back).ids()) {
-            if (!g.equals(group) && active(back, g) && FirstRun.isFirstRun(back, g)) {
-                return g;
-            }
-        }
-        return null;
-    }
-
     // 開発用: 環境変数 SKYABYSS_ROUTE_TRACE があると、入口の箱の判断 (待つ・断る・始める) が変わるたびに記録へ書く (R6 の撮影で、始まらない理由を見る)
     private static final boolean TRACE = System.getenv("SKYABYSS_ROUTE_TRACE") != null;
     private static final Map<UUID, String> TRACE_LAST = new HashMap<>();
@@ -832,14 +820,6 @@ public final class TrialRoute {
                 // 周回は祠から (決定 204)
                 for (ServerPlayer p : inside) {
                     Notice.bar(p, ModText.hint("message.skyabyss.route.use_shrine"));
-                }
-                continue;
-            }
-            if (otherFirstRun(back, group) != null) {
-                trace(group, titan, "the body is busy with " + otherFirstRun(back, group));
-                ENTRY_START.remove(group);
-                for (ServerPlayer p : inside) {
-                    Notice.bar(p, ModText.hint("message.skyabyss.route.body_busy"));
                 }
                 continue;
             }

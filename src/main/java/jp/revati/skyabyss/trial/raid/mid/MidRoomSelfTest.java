@@ -191,7 +191,7 @@ public final class MidRoomSelfTest {
                 boss.invulnerableTime = 0;
                 boss.hurt(back.damageSources().playerAttack(player), 20f);
                 if (boss.getHealth() >= before) {
-                    return timeout(200, "a solo hit to damage the boss");
+                    return timeout(800, "a solo hit to damage the boss"); // 潮招きは潜る・守りの間 (数秒〜十数秒) は傷が通らない
                 }
                 check(scaleOk(boss), "the boss is scaled for more than one player");
                 stage = Titans.TIDE_SHELL.equals(titan) && !wiped ? 7 : 9;

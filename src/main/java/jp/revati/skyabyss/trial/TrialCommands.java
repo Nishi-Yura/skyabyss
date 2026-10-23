@@ -54,9 +54,7 @@ public final class TrialCommands {
                         .then(Commands.literal("force").then(Commands.argument("ids", StringArgumentType.greedyString())
                                 .executes(ctx -> force(ctx.getSource(), StringArgumentType.getString(ctx, "ids")))))
                         .then(Commands.literal("mods").then(Commands.argument("id", StringArgumentType.word()).then(Commands.argument("code", StringArgumentType.word())
-                                .executes(ctx -> mods(ctx.getSource(), StringArgumentType.getString(ctx, "id"), StringArgumentType.getString(ctx, "code"))))))
-                        .then(Commands.literal("tp").then(Commands.argument("where", StringArgumentType.word())
-                                .executes(ctx -> tp(ctx.getSource(), StringArgumentType.getString(ctx, "where"))))))));
+                                .executes(ctx -> mods(ctx.getSource(), StringArgumentType.getString(ctx, "id"), StringArgumentType.getString(ctx, "code")))))))));
     }
 
     // 命令を打った人がいる背 (背の外なら岩鯨の背)
@@ -152,65 +150,4 @@ public final class TrialCommands {
         return list(src);
     }
 
-    // 余燼の背: hub = 炉心の広間の休み場、deck = 試練の階の広間、セルの id = そのセルの入口の内側
-    private static int tpEmber(ServerPlayer sp, ServerLevel back, String where) {
-        int y = jp.revati.skyabyss.titan.ember.back.EmberDeck.Y + 1;
-        BlockPos at = switch (where.toLowerCase()) {
-            case "hub" -> jp.revati.skyabyss.titan.ember.back.EmberBackLayout.rest("hub").floor().above();
-            case "deck" -> jp.revati.skyabyss.titan.ember.back.EmberDeck.RESTS.get(0).floor().above();
-            case "e02" -> new BlockPos(16, y, 25);
-            case "e10" -> new BlockPos(16, y, 75);
-            case "e06" -> new BlockPos(-16, y, 25);
-            case "e07" -> new BlockPos(-16, y, 67);
-            case "e03" -> new BlockPos(-16, y, 10);
-            case "e04" -> new BlockPos(21, y, 111);
-            case "e08" -> new BlockPos(25, y, 8);
-            case "e11" -> new BlockPos(-22, y, 111);
-            case "e12" -> new BlockPos(0, y, 112);
-            default -> null;
-        };
-        if (at == null) {
-            return 0;
-        }
-        sp.teleportTo(back, at.getX() + 0.5, at.getY(), at.getZ() + 0.5, where.equalsIgnoreCase("e06") || where.equalsIgnoreCase("e07") ? 90f : -90f, 0f);
-        return 1;
-    }
-
-    private static int tp(CommandSourceStack src, String where) throws com.mojang.brigadier.exceptions.CommandSyntaxException {
-        ServerPlayer sp = src.getPlayerOrException();
-        ServerLevel back = back(src);
-        BlockPos at;
-        float yaw = 0;
-        if (Titans.EMBER.equals(titan(back))) {
-            return tpEmber(sp, back, where);
-        }
-        switch (where) {
-            case "hub" -> at = Titans.TIDE_SHELL.equals(titan(back)) ? jp.revati.skyabyss.titan.tide.back.TideBackLayout.RESTS.get(0).spawn()
-                    : jp.revati.skyabyss.titan.dungeon.TitanBackLayout.HUB.center().offset(0, 0, 4);
-            case "deck" -> {
-                at = Titans.TIDE_SHELL.equals(titan(back)) ? jp.revati.skyabyss.titan.tide.back.TideDeck.rests().get(0).spawn() : WhaleDeck.D0.center().offset(4, 0, 2);
-            }
-            default -> {
-                TrialCell cell = TrialCells.get(where.toUpperCase());
-                if (cell == null || !cell.runtime()) {
-                    src.sendFailure(Component.literal("unknown cell " + where));
-                    return 0;
-                }
-                BlockPos g = cell.ports().entrance().get(cell.ports().entrance().size() / 2);
-                // 入口の戸の奥へ (入口の休み場があればそこ)
-                at = switch (cell.def().id()) {
-                    case "W06" -> new BlockPos(36, WhaleDeck.Y + 1, 34);
-                    case "W07" -> new BlockPos(-6, WhaleDeck.Y + 1, 85);
-                    case "W10" -> new BlockPos(30, WhaleDeck.Y + 1, 86);
-                    default -> cell.ports().rests().isEmpty() ? g.offset(0, 0, 2) : cell.ports().rests().get(0).spawn();
-                };
-                yaw = cell.def().id().equals("W06") ? 90f : 0f;
-                if (g == null) {
-                    return 0;
-                }
-            }
-        }
-        sp.teleportTo(back, at.getX() + 0.5, at.getY(), at.getZ() + 0.5, yaw, 0f);
-        return 1;
-    }
 }

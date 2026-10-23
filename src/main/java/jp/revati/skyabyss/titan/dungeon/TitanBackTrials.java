@@ -335,9 +335,9 @@ public final class TitanBackTrials {
     private static final GroupBossRooms HEART_ROOMS = new GroupBossRooms();
 
     // 扉: 建てたときに閉じているもの (進みで開く) と、開いているもの (戦いの間だけ閉じる)
-    private static final List<List<BlockPos>> CLOSED_GATES = List.of(GATE, E1_EXIT,
-            E3_LOCK);
-    private static final List<List<BlockPos>> OPEN_GATES = List.of(E1_ENTRANCE, E3_ENTRANCE, HEART_GATE, CK_ENTRANCE);
+    // 巨神の中は建てない (docs/design/32 の 2.5)。置く戸は体の外の心臓の間の大門だけ
+    private static final List<List<BlockPos>> CLOSED_GATES = List.of();
+    private static final List<List<BlockPos>> OPEN_GATES = List.of(HEART_GATE);
 
     private TitanBackTrials() {
     }
@@ -375,10 +375,6 @@ public final class TitanBackTrials {
         for (List<BlockPos> gate : OPEN_GATES) {
             GroupGates.place(level, gate, true);
         }
-        boolean peaceful = level.getDifficulty() == Difficulty.PEACEFUL;
-        GroupGates.place(level, shrineSeal(), !peaceful);
-        // 試練の階の入口・出口の戸と、原型の三つの入口の戸 (docs/design/29)
-        jp.revati.skyabyss.trial.TrialRuntime.installGates(level);
     }
 
     // 世界の共有の見かけ以外の、グループごとの見かけ (鳴らした共鳴石)
@@ -515,28 +511,11 @@ public final class TitanBackTrials {
                 }
             }
         }
-        // ピースフル: 祠の階段を封じ、戦いを静かに終わらせ、体内の人を尾の台へ出す
+        // ピースフル: 戦いを静かに終わらせる。体の中の広間は建てないので、動かすのは体の外の心臓の間だけ (docs/design/32 の 2.5)
         boolean peaceful = level.getDifficulty() == Difficulty.PEACEFUL;
-        tickShrineSeal(level, peaceful);
-        // 試練を動かすのは、動いている人のいるグループだけ (観戦者・放置の人がいても、ほかのグループの進行を止めない)
-        List<UUID> groups = activeGroups(level);
         if (peaceful) {
             sleepForPeaceful(level, data);
         } else {
-            for (UUID group : groups) {
-                BackGroupData.Record record = record(level, group);
-                for (Hall hall : HALLS) {
-                    if (!record.isHallCleared(hall.id())) {
-                        tickHall(level, record, group, hall);
-                    }
-                }
-            }
-            // 誰もいなくなったグループの戦いは、最初に戻す
-            for (HallState state : List.copyOf(HALL_STATES.values())) {
-                if (!groups.contains(state.group)) {
-                    resetHall(level, state.hall, state.group, false);
-                }
-            }
             tickHearts(level);
         }
         // 心臓を倒したグループは、封印の先に誰もいなくなって30秒たったら試練が戻る。
@@ -567,37 +546,6 @@ public final class TitanBackTrials {
         // 誰も背中にいなくなって (または動かなくなって) 3 分たったグループは、試練が戻る
         for (UUID id : GroupProgress.idleGroups(level)) {
             resetGroup(level, id);
-        }
-        // 世界: 動いている人が誰もいなくなって 3 分たったら、アスレチックと迷路 (みんなで共有する形) を新しい種で作り直す
-        if (groups.isEmpty()) {
-            emptyWorldTicks += 10;
-            if (emptyWorldTicks >= RESET_AFTER_IDLE && !sharedRenewed) {
-                sharedRenewed = true;
-                renewShared(level);
-            }
-        } else {
-            emptyWorldTicks = 0;
-            sharedRenewed = false;
-        }
-    }
-
-    // ---------------------------------------------------------------- ピースフル (試練は眠る)
-    // 祠の階段の封印: ピースフルのあいだだけ閉じ (扉のブロックの既定を変える)、ほかの難易度に戻ると開ける (読み込まれているときだけ触る)
-    private static void tickShrineSeal(ServerLevel level, boolean peaceful) {
-        List<BlockPos> seal = shrineSeal();
-        if (!level.isLoaded(seal.get(0))) {
-            return;
-        }
-        BlockState first = level.getBlockState(seal.get(0));
-        boolean gate = first.is(ModBlocks.SEALED_GATE.get());
-        boolean closed = gate && !first.getValue(SealedGateBlock.OPEN);
-        if (peaceful && !closed) {
-            // 封印の面に立っている人は先に尾の台へ出す (sleepForPeaceful)。人のいない所だけ閉じる
-            if (level.getEntitiesOfClass(Player.class, doorBox(seal)).isEmpty()) {
-                GroupGates.setDefault(level, seal, false);
-            }
-        } else if (!peaceful && (closed || !gate)) {
-            GroupGates.setDefault(level, seal, true);
         }
     }
 
@@ -1471,20 +1419,6 @@ public final class TitanBackTrials {
         SkyAbyss.LOGGER.info("The stone whale's trials have been reset for group {} (epoch {})", group, epoch);
     }
 
-    // 世界のリセット: 動いている人が誰もいなくなって久しいとき。みんなで共有するアスレチックと迷路を、新しい種で作り直す
-    public static void renewShared(ServerLevel level) {
-        TitanBackData data = TitanBackData.get(level);
-        BuildKit kit = new BuildKit(level, RandomSource.create(level.getRandom().nextLong()));
-        WestWingBuilder.clearCourses(kit, ParkourCourses.forSeed(data.courseSeed()));
-        // 灯の台と戸の場所は迷路の種で決まる: 古い種のうちに、全グループの灯の記録と戸の上書きを消す (23)
-        AnemoneLights.clearGroups(level, data.mazeSeed());
-        data.reseed(level.getRandom());
-        WestWingBuilder.placeCourses(kit, ParkourCourses.forSeed(data.courseSeed()));
-        MazeBuilder.buildMaze(new BuildKit(level, RandomSource.create(data.mazeSeed())), data.mazeSeed());
-        // 進みのない古いグループの記録を捨てる
-        SkyAbyss.LOGGER.info("The stone whale's shared courses were renewed");
-    }
-
     // 背中を建て直すとき: 全グループの進みを戻して試練の番号を進める (古い休み場の記録を無効にする)。扉のブロックは建て直しのあとに置き直す
     public static void resetAllGroups(ServerLevel level) {
         // 野営の道具は、建て直しで消える前に持ち主へ戻す
@@ -1504,7 +1438,6 @@ public final class TitanBackTrials {
         for (UUID id : BackGroupData.get(level).ids()) {
             resetGroup(level, id);
         }
-        renewShared(level);
         gatesInstalled = false;
     }
 

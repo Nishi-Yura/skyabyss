@@ -236,6 +236,9 @@ public final class BackBuildJobs {
         private int placed;
         private long longestNanos;
         private String longest = "";
+        // 建てる重さの記録 (docs/design/32 の 5.3): 体を置く手順 (名前が body) と、それ以外の仕上げの手順の合計
+        private long bodyNanos;
+        private long finishNanos;
 
         public Steps(String name) {
             this.name = name;
@@ -285,6 +288,10 @@ public final class BackBuildJobs {
                     }
                 }
                 index++;
+                if (index >= steps.size()) {
+                    SkyAbyss.LOGGER.info("{}: build work {} ms (body {} ms, finishing {} ms in {} steps)", name, (bodyNanos + finishNanos) / 1_000_000L,
+                            bodyNanos / 1_000_000L, finishNanos / 1_000_000L, steps.size());
+                }
                 if (System.nanoTime() >= deadlineNanos) {
                     return index >= steps.size();
                 }
@@ -293,6 +300,11 @@ public final class BackBuildJobs {
         }
 
         private void note(String step, long dt) {
+            if (step.equals("body")) {
+                bodyNanos += dt;
+            } else {
+                finishNanos += dt;
+            }
             if (dt > longestNanos) {
                 longestNanos = dt;
                 longest = step;

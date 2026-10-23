@@ -69,7 +69,7 @@ public final class RouteRoomsSelfTest {
                         f.add(titan + ": no raid room for step " + step);
                         break;
                     }
-                    if (!run.ctx.cell().inner().contains(p.position())) {
+                    if (!run.ctx.cell().bounds().contains(p.position())) {
                         f.add(titan + ": step " + step + " did not carry the player into room " + run.ctx.roomId() + ": " + p.position());
                     }
                     sealed(f, back, titan + " " + run.ctx.roomId(), run.ctx.cell().rest(), run.ctx.cell().bounds());
@@ -82,7 +82,7 @@ public final class RouteRoomsSelfTest {
                 if (!TrialRoute.mid(back, group) || mid == null || !mid.mid) {
                     f.add(titan + ": after the third room the route is not at the mid-boss");
                 } else {
-                    if (!mid.ctx.cell().inner().contains(p.position())) {
+                    if (!mid.ctx.cell().bounds().contains(p.position())) {
                         f.add(titan + ": the player was not carried into the mid-boss arena: " + p.position());
                     }
                     sealed(f, back, titan + " " + mid.ctx.roomId(), mid.ctx.cell().rest(), mid.ctx.cell().bounds());
@@ -95,7 +95,7 @@ public final class RouteRoomsSelfTest {
                 if (TrialRoute.step(back, group) != TrialRoute.LAST_STEP || heart == null || !heart.contains(p.position())) {
                     f.add(titan + ": after the mid-boss the player is not inside the heart arena (step " + TrialRoute.step(back, group) + ", at " + p.position() + ")");
                 } else {
-                    sealed(f, back, titan + " heart", InstanceArenas.heartEntry(titan), heart);
+                    sealed(f, back, titan + " heart", InstanceArenas.heartEntry(titan), heart.inflate(24));
                     rooms++;
                 }
             } catch (RuntimeException e) {

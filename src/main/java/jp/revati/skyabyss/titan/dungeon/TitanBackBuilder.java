@@ -60,6 +60,12 @@ public final class TitanBackBuilder {
         // 仕上げが触る範囲のチャンクを先に読み込む (読みに行くと、その場で tick が止まる)
         s.thenJob("load area", () -> BackBuildJobs.loadArea(level, -RX, -RZ, RX, RZ));
         s.then("surface", () -> buildSurface(kit));
+        // 四方が 1 高い床の中で 1 マスだけ低いくぼみを埋める (背の殻の模型の窪みと、ひれの縁。体の外)
+        s.then("dimples", () -> {
+            smoothDimples(kit, -27, -17, 138, 152, 93, 103);
+            smoothDimples(kit, 54, 120, 70, 100, -75, -25);
+            smoothDimples(kit, -120, -54, 70, 112, -75, -25);
+        });
         // 心臓の間 (体の外の封じた部屋。trial/raid/InstanceArenas)
         jp.revati.skyabyss.trial.raid.InstanceArenas.addHeartSteps(s, level, jp.revati.skyabyss.progress.Titans.STONE_WHALE);
         s.then("mark built", () -> {
@@ -67,6 +73,37 @@ public final class TitanBackBuilder {
             SkyAbyss.LOGGER.info("Built the stone whale's back in {} ms", System.currentTimeMillis() - start);
         });
         return s;
+    }
+
+    // 床 (上が 2 マス空いた固いブロック) で、四方の隣の 1 つ上の高さに固いブロックがあるものは、1 つ低く埋まったくぼみなので、1 つ上を同じブロックで埋める
+    private static void smoothDimples(BuildKit kit, int x1, int x2, int y1, int y2, int z1, int z2) {
+        int filled = 0;
+        for (int x = x1; x <= x2; x++) {
+            for (int z = z1; z <= z2; z++) {
+                for (int y = y1; y <= y2; y++) {
+                    BlockState here = kit.get(x, y, z);
+                    if (here.isAir() || !here.getFluidState().isEmpty() || !here.canOcclude() || !kit.get(x, y + 1, z).isAir() || !kit.get(x, y + 2, z).isAir()) {
+                        continue;
+                    }
+                    boolean pit = true;
+                    for (Direction d : Direction.Plane.HORIZONTAL) {
+                        int nx = x + d.getStepX();
+                        int nz = z + d.getStepZ();
+                        if (kit.get(nx, y + 1, nz).isAir() || !kit.get(nx, y + 2, nz).isAir() || !kit.get(nx, y + 3, nz).isAir() || !kit.get(nx, y + 4, nz).isAir()) {
+                            pit = false;
+                            break;
+                        }
+                    }
+                    if (pit && kit.get(x, y + 3, z).isAir()) {
+                        kit.set(x, y + 1, z, here);
+                        filled++;
+                    }
+                }
+            }
+        }
+        if (filled > 0) {
+            SkyAbyss.LOGGER.info("Whale back: filled {} floor dimples", filled);
+        }
     }
 
     // ---------------------------------------------------------------- 島: 岩鯨と同じ形のブロックの鯨 (WhaleShape)

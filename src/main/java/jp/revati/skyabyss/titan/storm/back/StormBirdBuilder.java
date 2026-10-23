@@ -65,8 +65,8 @@ public final class StormBirdBuilder {
         });
         s.then("road", () -> road(kit));
         s.then("plaza", () -> plaza(kit));
-        // 体の中は建てない (外見だけ。docs/design/32 の 2.5)。尾羽の上の到着の台・羽軸の道・羽の広場と、肋の尖塔の外の姿だけ
-        s.then("rib shell", () -> StormRibShell.build(kit));
+        // 体の中は建てない (外見だけ。docs/design/32 の 2.5)。尾羽の上の到着の台・羽軸の道・羽の広場だけ
+        // (肋の尖塔は肋の間を囲む飾りで、間を掘らないと灯りが宙に浮くので建てない)
         // 鳥の背・翼の上の小さな縦穴 (落ちると出られない) を埋める (詰み監査)
         s.then("wells", () -> {
             if (BIRD.exists()) {

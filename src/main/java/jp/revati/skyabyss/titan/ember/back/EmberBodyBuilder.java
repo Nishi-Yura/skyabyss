@@ -148,6 +148,13 @@ public final class EmberBodyBuilder {
         s.then("outside", () -> t[1] = System.currentTimeMillis() - t[0]);
         // 熾の底 (心臓の間) と前室は体の外の封じた部屋 (trial/raid/InstanceArenas)
         jp.revati.skyabyss.trial.raid.InstanceArenas.addHeartSteps(s, back, jp.revati.skyabyss.progress.Titans.EMBER);
+        // 体の外の、四方が 1 高い床の中の 1 マスの凹みを埋める (詰みにならない背の上・脚のあいだ・顎のまわり)
+        int[] dimples = new int[1];
+        for (int pass = 0; pass < 2; pass++) {
+            for (Box b : DIMPLE_BOXES) {
+                s.then("dimples", () -> dimples[0] += holder[0].smoothDimples(b));
+            }
+        }
         s.then("mark built", () -> {
             data.markBuilt(buildVersion());
             EmberBackTrials.afterBuild(back);

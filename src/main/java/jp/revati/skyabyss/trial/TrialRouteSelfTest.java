@@ -32,7 +32,7 @@ import jp.revati.skyabyss.trial.Trial.Mods;
 //  - 形: 四体とも、周回 1 の引きが原型の三つ (歩・智・闘、鍵が違う)、全部の試練に入口の休み場、中ボスの原型と前室、入口の箱
 //  - 初回の流れ (背が建ててある巨神): 入口に立つ → 予告のあと段 1 へ → 越えるたびに次の段の入口へ → 三つで心臓の前室。
 //    別のグループの人は動かない。越えた順が前後しても段は戻らない。途中で入口に立っても始め直さない。ほかのグループの初回の順路が
-//    動いているあいだは、入口で待つ (決定 207)。周回のグループは入口では始まらない (祠から)
+//    動いていても待たない (部屋は区画ごとに別)。周回のグループは入口では始まらない (祠から)
 //  - 周回の流れ: 引いた三つ (新作を含む) の入口の休み場へ運ばれ、今の段のセルの戸だけが開く。中ボスの原型を引いていない周は
 //    闘のあと中ボスの前室へ、倒すと心臓の前室へ。二つのグループは別の区画の番号で同時に進み、終えると番号が返る
 //  - あきらめ (一人は提案で成立)・参加者がいなくなったとき・心臓を止めたときに順路が終わる。心臓で順路の記録 (回数) が増える
@@ -370,11 +370,14 @@ public final class TrialRouteSelfTest {
             check(f, b.position().distanceTo(bAt) < 0.5, titan + ": a player of another group was moved at the start");
             check(f, TrialRoute.isParticipant(back, ga, a.getUUID()) && !TrialRoute.isParticipant(back, ga, b.getUUID()), titan + ": the party record is wrong");
             check(f, TrialSlot.of(GroupProgress.of(back, ga)) > 0, titan + ": the route has no slot number");
-            // ほかのグループの初回の順路が動いているあいだは、入口で始まらない (決定 207)
+            // ほかのグループの初回の順路が動いていても、待たずに始まる (部屋は区画ごとに別。docs/design/32 の 5.1)
             b.setPos(door);
             TrialRoute.tick(back, titan, players, now + 1000);
             TrialRoute.tick(back, titan, players, now + 1000 + TrialRoute.ENTRY_WAIT + 10);
-            check(f, TrialRoute.step(back, gb) == 0, titan + ": a second first-run group started while the body was in use");
+            check(f, TrialRoute.step(back, gb) == 1, titan + ": a second first-run group waited for the other group's route");
+            check(f, TrialSlot.of(GroupProgress.of(back, gb)) > 0 && TrialSlot.of(GroupProgress.of(back, gb)) != TrialSlot.of(GroupProgress.of(back, ga)),
+                    titan + ": the two groups did not get their own slots");
+            TrialRoute.finish(back, gb);
             b.setPos(bAt);
             // 越えるたびに次へ (4 秒後)。別のグループは動かない
             for (int i = 1; i <= 3; i++) {
