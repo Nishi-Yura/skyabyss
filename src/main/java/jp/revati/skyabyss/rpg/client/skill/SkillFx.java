@@ -222,47 +222,80 @@ public final class SkillFx {
     }
 
     // 中心のまわりに散らす (速さは ±speed)
+    // 手元の一粒。カメラから CAMERA_CLEAR ブロック以内は出さない (目の前の大きな四角を作らない)
+    public static final double CAMERA_CLEAR = 2.4;
+
+    public static boolean put(Cast c, ParticleOptions p, double x, double y, double z, double vx, double vy, double vz) {
+        Vec3 cam = Minecraft.getInstance().gameRenderer.getMainCamera().getPosition();
+        double dx = x - cam.x;
+        double dy = y - cam.y;
+        double dz = z - cam.z;
+        if (dx * dx + dy * dy + dz * dz < CAMERA_CLEAR * CAMERA_CLEAR) {
+            return false;
+        }
+        c.level.addParticle(p, x, y, z, vx, vy, vz);
+        return true;
+    }
+
+    // 中心のまわりに散らす (速さは ±speed)。形を作るには使わない (雑になる)。散らしたいときだけ
     public static void burst(Cast c, ParticleOptions p, Vec3 at, int n, double spread, double speed) {
         int k = spend(c, n);
         RandomSource r = c.level.random;
         for (int i = 0; i < k; i++) {
-            c.level.addParticle(p, at.x + sym(r) * spread, at.y + sym(r) * spread, at.z + sym(r) * spread,
+            put(c, p, at.x + sym(r) * spread, at.y + sym(r) * spread, at.z + sym(r) * spread,
                     sym(r) * speed, sym(r) * speed, sym(r) * speed);
         }
     }
 
-    // 地面 (水平) の輪。outward の速さで外へ広がる
+    // 地面 (水平) の輪。等間隔の点を円周に置く (揺らさない)。outward の速さで外へ広がる
     public static void ring(Cast c, ParticleOptions p, Vec3 center, double radius, int n, double lift, double outward) {
         int k = spend(c, n);
-        RandomSource r = c.level.random;
         for (int i = 0; i < k; i++) {
-            double a = Math.PI * 2 * (i + r.nextDouble() * 0.5) / Math.max(1, k);
+            double a = Math.PI * 2 * i / Math.max(1, k);
             double cs = Math.cos(a);
             double sn = Math.sin(a);
-            c.level.addParticle(p, center.x + cs * radius, center.y + lift, center.z + sn * radius,
-                    cs * outward, 0.0, sn * outward);
+            put(c, p, center.x + cs * radius, center.y + lift, center.z + sn * radius, cs * outward, 0.0, sn * outward);
         }
     }
 
-    // 二点のあいだに一列に並べる (前へ伸びる筋・鎖・線)。jitter で揺らす
+    // 弧: 中心の水平な円の、角度 from から to (ラジアン) までを等間隔の点で置く。y は高さ。
+    // 振りの弧は、時間ごとに区間を分けて c.at(...) から呼ぶ (一度に出さない)
+    public static void arc(Cast c, ParticleOptions p, Vec3 center, double radius, double from, double to, double y, int n) {
+        int k = spend(c, n);
+        for (int i = 0; i < k; i++) {
+            double t = k <= 1 ? 0 : (double) i / (k - 1);
+            double a = from + (to - from) * t;
+            put(c, p, center.x + Math.cos(a) * radius, center.y + y, center.z + Math.sin(a) * radius, 0, 0, 0);
+        }
+    }
+
+    // 柱: 底から高さ h まで、等間隔に積む (上へ動かさない)
+    public static void pillar(Cast c, ParticleOptions p, Vec3 base, double h, int n) {
+        int k = spend(c, n);
+        for (int i = 0; i < k; i++) {
+            double t = k <= 1 ? 0 : (double) i / (k - 1);
+            put(c, p, base.x, base.y + h * t, base.z, 0, 0, 0);
+        }
+    }
+
+    // 二点のあいだに一列に並べる (前へ伸びる筋・鎖・線)。等間隔、揺らさない
     public static void line(Cast c, ParticleOptions p, Vec3 a, Vec3 b, int n, double jitter, double speed) {
         int k = spend(c, n);
         RandomSource r = c.level.random;
         for (int i = 0; i < k; i++) {
             double t = k <= 1 ? 0 : (double) i / (k - 1);
             Vec3 q = a.lerp(b, t);
-            c.level.addParticle(p, q.x + sym(r) * jitter, q.y + sym(r) * jitter, q.z + sym(r) * jitter,
+            put(c, p, q.x + sym(r) * jitter, q.y + sym(r) * jitter, q.z + sym(r) * jitter,
                     sym(r) * speed, sym(r) * speed, sym(r) * speed);
         }
     }
 
-    // 閃光 (白い星の粒を重ねて一瞬だけ)
+    // 閃光: 当たりの一点だけに一つ (FLASH の大きさは固定なので、カメラから離れた所でだけ使う)
     public static void flash(Cast c, Vec3 at) {
-        if (spend(c, 2) < 2) {
+        if (spend(c, 1) < 1) {
             return;
         }
-        c.level.addParticle(ParticleTypes.FLASH, at.x, at.y, at.z, 0, 0, 0);
-        c.level.addParticle(ParticleTypes.FLASH, at.x, at.y + 0.2, at.z, 0, 0, 0);
+        put(c, ParticleTypes.FLASH, at.x, at.y, at.z, 0, 0, 0);
     }
 
     // 段取りの音を一つ重ねる (音程は少しずらす)。サーバーの音 (技ごとの効果音) とは別の層として鳴る
