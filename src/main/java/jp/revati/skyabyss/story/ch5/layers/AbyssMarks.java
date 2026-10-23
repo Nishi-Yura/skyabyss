@@ -86,10 +86,12 @@ public final class AbyssMarks {
             Notice.bar(p, Component.translatable("message.skyabyss.abyss_v2.mark_have", count(p, layer)));
             return false;
         }
+        ServerLevel level = p.serverLevel();
+        // 初めて記した人に経験値 (人ごとに一度。取った人は満額、オンラインの仲間は分け前)。印は仲間と共有なので、記す前に数える
+        firstXp(level, List.of(p), lacking(p, "mark:" + key), MARK_XP, "growth.skyabyss.reason.abyss_mark");
         for (UUID who : withParty(p)) {
             d.set(who, "mark:" + key);
         }
-        ServerLevel level = p.serverLevel();
         Quests.signalWithParty(level, List.of(p), SIGNAL_MARK + key);
         int n = count(p, layer);
         Notice.gain(p, Component.translatable("message.skyabyss.abyss_v2.mark_got", Component.translatable("abyss_v2.skyabyss.mark." + key), n));
@@ -111,6 +113,33 @@ public final class AbyssMarks {
     }
 
     // 本人とパーティの全員 (いない人も)
+    // 印を初めて記したときの経験値 (層に 3 つ × 4 層。docs/design/36 の 4.2・8 章)
+    public static final int MARK_XP = 60;
+
+    // p とオンラインの仲間のうち、まだ flag を持っていない人
+    static List<ServerPlayer> lacking(ServerPlayer p, String flag) {
+        LayerData d = LayerData.get(p.server);
+        List<ServerPlayer> out = new ArrayList<>();
+        for (UUID u : withParty(p)) {
+            ServerPlayer m = p.server.getPlayerList().getPlayer(u);
+            if (m != null && !d.has(u, flag) && !out.contains(m)) {
+                out.add(m);
+            }
+        }
+        return out;
+    }
+
+    // 初めての経験値: present (その場にいた人) は満額、ほかの仲間は分け前 (Parties.shareRate)
+    static void firstXp(ServerLevel level, List<ServerPlayer> present, List<ServerPlayer> who, int xp, String reason) {
+        double rate = Parties.shareRate(level.getServer());
+        for (ServerPlayer m : who) {
+            int amount = present.contains(m) ? xp : (int) Math.round(xp * rate);
+            if (amount > 0) {
+                jp.revati.skyabyss.rpg.Growth.addXp(m, amount, reason);
+            }
+        }
+    }
+
     static List<UUID> withParty(ServerPlayer p) {
         List<UUID> out = new ArrayList<>();
         out.add(p.getUUID());

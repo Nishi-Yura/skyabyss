@@ -36,7 +36,8 @@ public enum Chapters {
     TIDE("titan_tide", "tide_shell", 1, 12, 18, 21),
     STORM("titan_storm", "thunder_wing", 2, 18, 24, 27),
     EMBER("titan_ember", "ember", 3, 24, 30, 33),
-    ABYSS("chapter2", null, 4, 40, 50, 50),
+    // 五章は Lv 32 から (四章の終わりの 30〜33 とつなぐ。2026-10-23 の点検で 40 から下げた)。番人の前の上限は 40 (ProgressRules.LEVEL_CAP[4])、倒すと 50
+    ABYSS("chapter2", null, 4, 32, 50, 50),
     MOON("chapter3", null, -1, -1, -1, -1),
     FINALE("finale", null, -1, -1, -1, -1);
 

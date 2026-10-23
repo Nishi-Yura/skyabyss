@@ -131,11 +131,11 @@ def quests():
     put(b + 'summary', '鯨を迎える支度の一つめ。イサナの話の旅人の道を辿って骨の坑へ行き、鉄の防具を着る。',
         'The first step in getting ready for the whale. Follow the road of the traveller Isana spoke of to the Bone Pit, and wear iron.')
     put(b + 'pit.journal',
-        'イサナが言っていた。「鎖は素手では上れない。前にここへ来た旅人は、鉄を着ていた」\n都の北門から丘を越える石標が、その旅人の道だという。行き着く先は、骨の坑という古い坑道。何か残っているかもしれない。',
-        'Isana said: "You cannot climb the chain bare-handed. The traveller who came here before wore iron."\nThe cairns from the north gate over the hills are that traveller\'s road. They end at an old mine called the Bone Pit. Something may be left there.')
-    put(b + 'pit.lead', 'イサナ「まずは鉄だ。前の旅人の道を辿れ。石標の先の、骨の坑だ」',
-        'Isana: "Iron first. Follow the road of the one before you. The cairns lead to the Bone Pit."')
-    put(b + 'pit.page', '石標を辿り、骨の坑の奥の荷を探そう', 'Find the pack in the Bone Pit')
+        'イサナが言っていた。「鎖は素手では上れない。前にここへ来た旅人は、鉄を着ていた」\n旅人は都の北門を出て、北の丘を越えていったという。行き着く先は、骨の坑という古い坑道（都から北へ三百ブロックほど）。何か残っているかもしれない。',
+        'Isana said: "You cannot climb the chain bare-handed. The traveller who came here before wore iron."\nThat traveller left by the north gate and went over the northern hills, to an old mine called the Bone Pit (about three hundred blocks north of the capital). Something may be left there.')
+    put(b + 'pit.lead', 'イサナ「まずは鉄だ。前の旅人の道を辿れ。北の丘を越えた先の、骨の坑だ」',
+        'Isana: "Iron first. Follow the road of the one before you. Over the northern hills, to the Bone Pit."')
+    put(b + 'pit.page', '北の丘を越え、骨の坑の奥の荷を探そう', 'Find the pack in the Bone Pit')
     put(b + 'armor.journal',
         '荷の頁には、こうあった。「鉄を二十四。胸当てと脚当てを先に。背の風は骨まで冷える」\n鉄の鉱石は、かまどで溶かせば鉄になる。坑の壁にも、筋が走っていた。兜と胸当てと脚当てと靴を作って、身につけよう。坑の奥の冷えの戸も、鉄の防具を着ていれば開く。',
         'The page in the pack read: "Twenty-four iron. Breastplate and leggings first. The wind on the back cuts to the bone."\nIron ore smelts into iron in a furnace; the pit walls were streaked with it. Make a helmet, chestplate, leggings and boots, and wear them.')
@@ -266,7 +266,7 @@ def lore():
 def texts():
     put('message.skyabyss.ch1.arrive.ch1_bone_pit', '地面から、大きな肋骨が二本、門のように突き出している。下から、冷たい風。',
         'Two enormous ribs jut from the ground like a gate. A cold wind rises from below.')
-    put('message.skyabyss.ch1.pit.trail', '石標の矢印は、ここで途切れていた。', 'The cairns\' arrows end here.')
+    put('message.skyabyss.ch1.pit.trail', '前の旅人の足跡は、ここで途切れていた。', 'The traveller\'s tracks end here.')
     put('message.skyabyss.ch1.pit.pack', '荷の底に、油紙で包んだ頁が一枚。鉄と松明も、きちんと揃えてある。',
         'At the bottom of the pack, a page wrapped in oilcloth. Iron and torches, neatly set out.')
     put('message.skyabyss.ch1.pit.pack_hint', '古い荷がある。触れてみよう', 'An old pack lies here. Try touching it')

@@ -1,0 +1,87 @@
+{
+  "category": "sub",
+  "order": 86,
+  "repeat": "weekly",
+  "board": true,
+  "min_stage": 4,
+  "unlock": {
+    "type": "all",
+    "of": [
+      {
+        "type": "quest",
+        "quest": "main_abyss",
+        "is": "started"
+      },
+      {
+        "type": "not",
+        "of": {
+          "type": "any",
+          "of": [
+            {
+              "type": "quest",
+              "quest": "main_abyss",
+              "is": "active",
+              "stage": "rumor"
+            },
+            {
+              "type": "quest",
+              "quest": "main_abyss",
+              "is": "active",
+              "stage": "prepare"
+            },
+            {
+              "type": "quest",
+              "quest": "main_abyss",
+              "is": "active",
+              "stage": "door"
+            },
+            {
+              "type": "quest",
+              "quest": "main_abyss",
+              "is": "active",
+              "stage": "shaft"
+            },
+            {
+              "type": "quest",
+              "quest": "main_abyss",
+              "is": "active",
+              "stage": "gate"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "stages": [
+    {
+      "id": "haul",
+      "objectives": [
+        {
+          "id": "chips",
+          "type": "turn_in",
+          "target": "skyabyss:abyss_bone_chip",
+          "count": 8
+        },
+        {
+          "id": "salt",
+          "type": "turn_in",
+          "target": "skyabyss:abyss_salt_crystal",
+          "count": 6
+        }
+      ]
+    }
+  ],
+  "reward": {
+    "xp": 450,
+    "items": [
+      {
+        "item": "skyabyss:abyss_anchor_iron",
+        "count": 4
+      },
+      {
+        "item": "skyabyss:resonance_crystal",
+        "count": 1
+      }
+    ]
+  }
+}

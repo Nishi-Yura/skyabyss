@@ -6,8 +6,12 @@ package jp.revati.skyabyss.abyss.mobs;
 //   段 (元の姿 1・歪み 2・崩れ 3) は見た目と、上の層の敵が混ざる割合・落とし物の確率にだけ使う。段で数字は変えない。
 //   経験値の推奨の段 (ABYSS_LEVEL) もここに一つだけ置く (A 組の CONTENT_LEVEL と B 組の ABYSS_LEVEL を統一)。
 public final class AbyssScaling {
-    // 深淵の敵の成長の推奨の段 (docs/design/34 の 4.5 の深淵の段の目安。仮の値。決まったら直す)
-    public static final int ABYSS_LEVEL = 33;
+    // 深淵の敵の成長の推奨の段 (docs/design/36 の 4.2)。五章の帯 Lv 32〜50 (番人の前の上限 40) の、番人の前の上限に合わせる。
+    // Lv 43 (40 + 猶予 3) までは満額、その先は 1 レベルごとに 10% 減る (GrowthRules.levelFalloff)
+    public static final int ABYSS_LEVEL = 40;
+    // 成長の経験値の倍率 (表 4.2.1 の経験値に掛ける。バニラの経験値の玉 xpReward には掛けない)。
+    // 2026-10-23: 四章の終わり (Lv 30〜33) から五章の帯へ届くように 1.5 倍
+    public static final double GROWTH_XP_MUL = 1.5;
 
     // 縦穴の上端 (骨の層の上) と、心臓の間の底。数字はこの間で直線に増える
     public static final int TOP_Y = 240;
@@ -28,6 +32,11 @@ public final class AbyssScaling {
     public static final int FORM_MAX = 3;
 
     private AbyssScaling() {
+    }
+
+    // 成長の経験値 (表の値 × GROWTH_XP_MUL。四捨五入、1 以上)
+    public static int growthXp(int base) {
+        return Math.max(1, (int) Math.round(base * GROWTH_XP_MUL));
     }
 
     // 深さの割合 (0 = 縦穴の上端、1 = 心臓の間の底。外は端で止める)

@@ -101,6 +101,8 @@ public final class LoreSelfTest {
         signKeys.add(jp.revati.skyabyss.story.ch1.BonePit.COLD_SIGN);
         // 二章の地上: 沈んだ塩の蔵の奥の刻み (SaltVault.decorate が刻む)
         signKeys.add(jp.revati.skyabyss.story.ch2.SaltVault.WALL_SIGN);
+        // レイドの部屋の入口の間の碑 (RaidLore.placeTablet。部屋ごとに一つ。docs/design/32 の 7 章)
+        signKeys.addAll(jp.revati.skyabyss.trial.raid.RaidLore.SIGNS.values());
         // 雷翼の巨神・雷獣・心臓・背中は別の担当が登録する。まだないうちは失敗にせず、待っているものとして書き出す
         Set<String> pending = new java.util.TreeSet<>();
         Set<String> usedSigns = new HashSet<>();
@@ -202,7 +204,7 @@ public final class LoreSelfTest {
             }
             // 潮殻の背の看板の文は skyabyss_tide にある
             // 雷翼の背の看板の文は skyabyss_storm に、都の碑の文は skyabyss_opening にある
-            for (String ns : List.of("skyabyss_tide", "skyabyss_storm", "skyabyss_ember", "skyabyss_ch3", "skyabyss_ch4", "skyabyss_opening", "skyabyss_ch1", "skyabyss_ch2")) {
+            for (String ns : List.of("skyabyss_tide", "skyabyss_storm", "skyabyss_ember", "skyabyss_ch3", "skyabyss_ch4", "skyabyss_opening", "skyabyss_ch1", "skyabyss_ch2", "skyabyss_trial")) {
                 JsonObject backSigns = json("/assets/" + ns + "/lang/" + lang + ".json", failures);
                 if (backSigns != null) {
                     backSigns.entrySet().forEach(e -> {
@@ -417,7 +419,9 @@ public final class LoreSelfTest {
         // 五章「深淵」の刻み・墓 (skyabyss_ch5) と遺品の項目 (skyabyss_abyss_rl)
         JsonObject ch5 = json("/assets/skyabyss_ch5/lang/" + code + ".json", failures);
         JsonObject relics = json("/assets/skyabyss_abyss_rl/lang/" + code + ".json", failures);
-        for (JsonObject extra : java.util.Arrays.asList(quest, tide, story, storm, ember, ch1, ch2, ch3, ch4, town, ch5, relics)) {
+        // レイドの部屋の入口の碑 (RaidLore.SIGNS) のうち、余燼の二つ目の部屋 (ER4〜6) の項目の文は skyabyss_trial にある
+        JsonObject trial = json("/assets/skyabyss_trial/lang/" + code + ".json", failures);
+        for (JsonObject extra : java.util.Arrays.asList(quest, tide, story, storm, ember, ch1, ch2, ch3, ch4, town, ch5, relics, trial)) {
             if (lang != null && extra != null) {
                 extra.entrySet().forEach(e -> {
                     if (!lang.has(e.getKey())) {

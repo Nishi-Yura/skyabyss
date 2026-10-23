@@ -188,10 +188,13 @@ def write_data() -> None:
                                          "unlock": [{"type": "page", "target": "ember_hearth"}, {"type": "manual"}],
                                          "related": ["chapter1/ember_hearth"]})
 
+    # 語り部とイサナの鍵の話はサブ (四章のメインは main_ember と支度の段を一本ずつ。2026-10-23 の点検: メインが同時に 4 本)。
+    # イサナの噂 (main_ember の rumor) を聞いたあとに出る
     dump(RES / "data/skyabyss/quest/ch4/fragments.json", {
-        "category": "main", "chapter": "titan_ember", "order": 45, "giver": "skyabyss:storyteller",
+        "category": "sub", "chapter": "titan_ember", "order": 45, "giver": "skyabyss:storyteller",
         "min_stage": 3,
-        "start_when": {"type": "stage", "min": 3},
+        "start_when": {"type": "all", "of": [{"type": "stage", "min": 3}, {"type": "quest", "quest": "main_ember", "is": "started"},
+                                             {"type": "not", "of": {"type": "quest", "quest": "main_ember", "is": "active", "stage": "rumor"}}]},
         "stages": [
             {"id": "teller", "objectives": [{"id": "talk", "type": "talk", "target": "skyabyss:storyteller", "topic": "ch4_s_three"}]},
             {"id": "isana", "objectives": [{"id": "talk", "type": "talk", "target": "skyabyss:whale_chaser", "topic": "ch4_i_three"}]},

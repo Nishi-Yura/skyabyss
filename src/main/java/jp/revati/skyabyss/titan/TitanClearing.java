@@ -11,7 +11,8 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
 
 // 地面に休む巨神 (潮殻・燃えがらの巨神) が座るとき、体のなかに食い込む地形・木を取り除く (「ブロックにめり込まない」)。
-// 体の柱 (TitanVolume.coreColumns) ごとに、体の底から頂までの高さにある固いブロックを消す (水・流体・岩盤・都や場所の中は触らない)。
+// 体の柱 (TitanVolume.coreColumns) ごとに、体の底から頂までの高さにある固いブロックを消す (水・流体・岩盤・都や場所の中は触らない。
+// 海の底を削ったところは水で埋める)。
 // 体の頂より上に残った葉・雪も払う (宙に浮く葉を残さない)。
 public final class TitanClearing {
     // 1 回で壊す上限 (重さの歯止め)
@@ -52,7 +53,9 @@ public final class TitanClearing {
                         if (s.isAir() || !s.getFluidState().isEmpty() || s.is(Blocks.BEDROCK) || s.getDestroySpeed(level, p) < 0) {
                             continue;
                         }
-                        level.setBlock(p, Blocks.AIR.defaultBlockState(), 2 | 16);
+                        // 海の底 (海面より下で、真上が水) は水で埋める。空気にすると、近所の更新を出さないので海の底に空気の穴が残る
+                        boolean wet = y < level.getSeaLevel() && level.getFluidState(p.above()).is(net.minecraft.tags.FluidTags.WATER);
+                        level.setBlock(p, wet ? Blocks.WATER.defaultBlockState() : Blocks.AIR.defaultBlockState(), 2 | 16);
                         if (++removed >= MAX_BLOCKS) {
                             return removed;
                         }

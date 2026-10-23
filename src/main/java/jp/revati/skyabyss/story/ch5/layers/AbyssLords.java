@@ -65,6 +65,8 @@ public final class AbyssLords {
     static final double[] HP = {260, 320, 300, 380};          // 一人のときの体力
     static final double[] SCALE = {1.9, 2.0, 1.7, 1.8};
     static final double PER_MATE = 0.6;                       // 一人ふえるごとに体力 +60%
+    // 初めて倒したときの経験値 (骨・塩・雷・灰。人ごとに一度。間にいた人は満額、オンラインの仲間は分け前)。docs/design/36 の 8 章
+    public static final int[] LORD_XP = {800, 1000, 1200, 1400};
     static final int LAMP_LIFE = 800;
     static final double LAMP_R = 6;
     static final float DIM = 0.25f;                           // 光の外・闇の中の刃の通り
@@ -387,6 +389,15 @@ public final class AbyssLords {
             }
         }
         LayerData d = LayerData.get(level.getServer());
+        List<ServerPlayer> first = new ArrayList<>();
+        for (ServerPlayer p : in) {
+            for (ServerPlayer m : AbyssMarks.lacking(p, "lord:" + f.layer)) {
+                if (!first.contains(m)) {
+                    first.add(m);
+                }
+            }
+        }
+        AbyssMarks.firstXp(level, in, first, LORD_XP[f.li], "growth.skyabyss.reason.abyss_lord");
         for (ServerPlayer p : in) {
             for (UUID who : AbyssMarks.withParty(p)) {
                 d.set(who, "lord:" + f.layer);

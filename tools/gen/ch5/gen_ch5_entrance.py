@@ -7,6 +7,9 @@ python -I tools/gen/ch5/gen_ch5_entrance.py
   data/skyabyss/quest/ch5/black_iron.json        支度の段: ブレイズロッド 3・黒曜石 2 → 鍛冶師に見せる (鍛冶型の写し 1)
   data/skyabyss/dialogue/ch5/storyteller_abyss.json   語り部の一言 (噂・報告)
   data/skyabyss/dialogue/ch5/smith_abyss.json        鍛冶師の一言 (黒い鉄の頁・見せる)
+  data/skyabyss/quest/ch5/{shaft_landings,party_rations,gate_sweep}.json   大坑道と骨の層のサブ (預かり所・宿・組合が頼む)
+  data/skyabyss/dialogue/ch5/{store_landings,inn_rations,guild_sweep,survivor_bone_rations}.json   その頼みと報告の一言
+  data/skyabyss/quest/{daily_abyss_rounds,weekly_abyss_haul}.json   深淵の日替わり・週替わり (言伝ての板)
   assets/skyabyss_ch5/lang/ja_jp.json・en_us.json
 """
 from __future__ import annotations
@@ -239,16 +242,217 @@ TEXTS = [
 ]
 
 
+# ---------------------------------------------------------------- 大坑道と酒場の地下の頼み (2026-10-23 の点検: 四章の終わりから五章の帯への経験値の橋)
+# 探掘隊 (隊長トウヤの七人。36 の 8 章の野営の生き残り) が都から降りたときの名残り。都の三人が、隊の補給と坑道の片付けを頼む。
+# どれもサブ (メインの段は一つずつ)。戸を開けたあと (段 door を越えたら) 都の三人のメニューに出る。章の経験値の枠 (ChapterXpBudget) は四章までなので数えない
+STORE = 'skyabyss:attendant_storage_keeper'
+INN = 'skyabyss:attendant_innkeeper'
+GUILD = 'skyabyss:attendant_guild_clerk'
+MIO = 'skyabyss:attendant_survivor_bone'
+BONE_FOES = ['skyabyss:bone_picker', 'skyabyss:rib_guard', 'skyabyss:bone_flute']
+# 深淵の 18 種 (abyss/mobs の A 組 9・B 組 9。どの層の湧きの表 AbyssMobSpawner.TABLE にも出る)
+ABYSS_FOES = BONE_FOES + ['skyabyss:salt_husk', 'skyabyss:tide_hands', 'skyabyss:white_shell_keeper',
+                          'skyabyss:charged_moth', 'skyabyss:lightning_idol', 'skyabyss:scorched_bird',
+                          'skyabyss:ash_trail', 'skyabyss:soot_child', 'skyabyss:ember_keeper', 'skyabyss:past_shadow',
+                          'skyabyss:nameless_shape', 'skyabyss:lamp_eater', 'skyabyss:ceiling_walker', 'skyabyss:heartbeat_mimic',
+                          'skyabyss:rope_hanger']
+
+
+def not_(c):
+    return {'type': 'not', 'of': c}
+
+
+def past(*stages):
+    # main_abyss を始めていて、並べた段のどれにもいない (= その先にいるか、終えた)
+    return {'type': 'all', 'of': [{'type': 'quest', 'quest': 'main_abyss', 'is': 'started'},
+                                  not_({'type': 'any', 'of': [q_active('main_abyss', s) for s in stages]})]}
+
+
+AFTER_DOOR = past('rumor', 'prepare', 'door')
+AFTER_GATE = past('rumor', 'prepare', 'door', 'shaft', 'gate')
+
+SIDE = {
+    'ch5/shaft_landings': {
+        'category': 'sub', 'chapter': CH, 'order': 62, 'giver': STORE, 'min_stage': 4,
+        'stages': [
+            {'id': 'workshop', 'xp': 100, 'objectives': [{'id': 'reach', 'type': 'signal', 'targets': ['ch5_landing_1'], 'count': 1, 'party': False}]},
+            {'id': 'camp', 'xp': 100, 'objectives': [{'id': 'reach', 'type': 'signal', 'targets': ['ch5_landing_2'], 'count': 1, 'party': False}]},
+            {'id': 'tell', 'objectives': [{'id': 'talk', 'type': 'talk', 'target': STORE, 'topic': 'ch5s_back'}]},
+        ],
+        'reward': {'xp': 400, 'items': [{'item': 'minecraft:lantern', 'count': 3}], 'affinity': {STORE: 3}},
+    },
+    'ch5/party_rations': {
+        'category': 'sub', 'chapter': CH, 'order': 63, 'giver': INN, 'min_stage': 4,
+        'stages': [
+            {'id': 'pack', 'objectives': [{'id': 'bread', 'type': 'collect', 'target': 'minecraft:bread', 'count': 12, 'party': False}]},
+            {'id': 'deliver', 'xp': 150, 'objectives': [{'id': 'talk', 'type': 'talk', 'target': MIO, 'topic': 'ch5i_rations'}]},
+            {'id': 'tell', 'objectives': [{'id': 'talk', 'type': 'talk', 'target': INN, 'topic': 'ch5i_back'}]},
+        ],
+        'reward': {'xp': 450, 'items': [{'item': 'minecraft:golden_carrot', 'count': 6}], 'affinity': {INN: 3}},
+    },
+    'ch5/gate_sweep': {
+        'category': 'sub', 'chapter': CH, 'order': 64, 'giver': GUILD, 'min_stage': 4,
+        'stages': [
+            {'id': 'sweep', 'xp': 200, 'objectives': [{'id': 'kill', 'type': 'kill', 'targets': BONE_FOES, 'count': 15}]},
+            {'id': 'tell', 'objectives': [{'id': 'talk', 'type': 'talk', 'target': GUILD, 'topic': 'ch5g_back'}]},
+        ],
+        'reward': {'xp': 500, 'items': [{'item': 'skyabyss:abyss_anchor_iron', 'count': 3}], 'affinity': {GUILD: 3}},
+    },
+}
+
+
+def offer_dialogue(npc, quest, offer_if):
+    # 都の人のメニューに足す: 頼み (まだ受けていない) → 受ける / やめる。報告 (段 tell) は入口と同じに先に出す
+    return {
+        'npc': npc, 'extends': True,
+        'entries': [{'node': quest_node(quest, 'back'), 'if': q_active(quest, 'tell')}],
+        'add_options': {'menu': {'before': 'about', 'options': [
+            {'id': quest_node(quest, 'offer'), 'goto': quest_node(quest, 'offer'), 'kind': 'quest',
+             'if': {'type': 'all', 'of': [offer_if, {'type': 'quest', 'quest': quest, 'is': 'none'}]}},
+        ]}},
+        'nodes': {
+            quest_node(quest, 'offer'): {'face': 'neutral', 'next': quest_node(quest, 'offer') + '2'},
+            quest_node(quest, 'offer') + '2': {'face': 'neutral', 'options': [
+                {'id': 'go', 'goto': 'end', 'kind': 'quest', 'do': [{'type': 'quest_start', 'quest': quest}]},
+                {'id': 'no', 'goto': 'menu', 'kind': 'talk'}]},
+            quest_node(quest, 'back'): {'face': 'smile', 'options': [{'id': 'ok', 'goto': 'end', 'kind': 'talk'}]},
+        },
+    }
+
+
+TOPIC = {'ch5/shaft_landings': 'ch5s', 'ch5/party_rations': 'ch5i', 'ch5/gate_sweep': 'ch5g'}
+
+
+def quest_node(quest, kind):
+    return '%s_%s' % (TOPIC[quest], kind)
+
+
+SIDE_DIALOGUES = {
+    'ch5/store_landings.json': offer_dialogue(STORE, 'ch5/shaft_landings', AFTER_DOOR),
+    'ch5/inn_rations.json': offer_dialogue(INN, 'ch5/party_rations', AFTER_DOOR),
+    'ch5/guild_sweep.json': offer_dialogue(GUILD, 'ch5/gate_sweep', AFTER_DOOR),
+    # 灯り番のミオ (骨の野営) が、宿の主のパンを受け取る
+    'ch5/survivor_bone_rations.json': {
+        'npc': MIO, 'extends': True,
+        'add_options': {'menu': {'before': 'bye', 'options': [
+            {'id': 'ch5i_rations', 'goto': 'ch5i_rations', 'kind': 'quest',
+             'if': {'type': 'all', 'of': [q_active('ch5/party_rations', 'deliver'), {'type': 'item', 'item': 'minecraft:bread', 'count': 12}]}},
+        ]}},
+        'nodes': {
+            'ch5i_rations': {'face': 'smile', 'do': [{'type': 'take', 'item': 'minecraft:bread', 'count': 12}], 'next': 'ch5i_rations2'},
+            'ch5i_rations2': {'face': 'neutral', 'options': [{'id': 'ok', 'goto': 'menu', 'kind': 'talk'}]},
+        },
+    },
+}
+
+# ---------------------------------------------------------------- 深淵の日替わり・週替わり (言伝ての板。10 の 8.6 節の形)
+# 敵は深淵の湧きの表 (AbyssMobSpawner.TABLE) の 18 種。週替わりの品は上の二層の敵 (A 組) が落とす素材 (36 の 4.2 の落とし)
+REPEATS = {
+    'daily_abyss_rounds': {
+        'category': 'sub', 'order': 69, 'repeat': 'daily', 'board': True, 'min_stage': 4, 'unlock': AFTER_GATE,
+        'stages': [{'id': 'rounds', 'objectives': [{'id': 'kill', 'type': 'kill', 'targets': ABYSS_FOES, 'count': 12}]}],
+        'reward': {'xp': 160, 'items': [{'item': 'skyabyss:abyss_anchor_iron', 'count': 1}, {'item': 'minecraft:bread', 'count': 4}]},
+    },
+    'weekly_abyss_haul': {
+        'category': 'sub', 'order': 86, 'repeat': 'weekly', 'board': True, 'min_stage': 4, 'unlock': AFTER_GATE,
+        'stages': [{'id': 'haul', 'objectives': [
+            {'id': 'chips', 'type': 'turn_in', 'target': 'skyabyss:abyss_bone_chip', 'count': 8},
+            {'id': 'salt', 'type': 'turn_in', 'target': 'skyabyss:abyss_salt_crystal', 'count': 6}]}],
+        'reward': {'xp': 450, 'items': [{'item': 'skyabyss:abyss_anchor_iron', 'count': 4}, {'item': 'skyabyss:resonance_crystal', 'count': 1}]},
+    },
+}
+
+TEXTS += [
+    # 踊り場の荷 (預かり所)
+    ('quest.skyabyss.ch5.shaft_landings.title', '踊り場の荷', 'Crates on the Landings'),
+    ('quest.skyabyss.ch5.shaft_landings.summary', '探掘隊が大坑道の踊り場に置いていった荷が、まだあるか確かめる。', 'Check whether the crates the excavation party left on the shaft landings are still there.'),
+    ('quest.skyabyss.ch5.shaft_landings.done', '「帳面の荷は、そろっていました。……取りに戻る人が、いなかっただけで」', '"Every crate in the ledger was there. ...There was just no one left to come back for them."'),
+    ('quest.skyabyss.ch5.shaft_landings.workshop.journal', '預かり所の帳面に、探掘隊の荷が二つ残っている。「灰の民の作業場」と「野営」。どちらも大坑道の踊り場だという。\n上の踊り場から見てこよう。', 'The storage ledger still lists two of the excavation party\'s crates: "the ash folk\'s workshop" and "the camp". Both are landings in the great shaft.\nStart with the upper landing.'),
+    ('quest.skyabyss.ch5.shaft_landings.workshop.reach', '大坑道の上の踊り場（作業場）へ行こう', 'Reach the upper landing (the workshop)'),
+    ('quest.skyabyss.ch5.shaft_landings.camp.journal', '作業場の隅に、帳面と同じ印の木箱があった。中は綱と楔。\nもう一つは、下の踊り場の野営に置いたらしい。', 'In a corner of the workshop stood a crate with the ledger\'s mark. Rope and wedges inside.\nThe other was left at the camp on the lower landing.'),
+    ('quest.skyabyss.ch5.shaft_landings.camp.reach', '大坑道の下の踊り場（野営）へ行こう', 'Reach the lower landing (the camp)'),
+    ('quest.skyabyss.ch5.shaft_landings.tell.journal', '野営の木箱には、乾いたパンと油が残っていた。封は切られていない。\n預かり所に知らせよう。', 'The camp crate still held dry bread and oil, the seal unbroken.\nLet the storage keeper know.'),
+    ('quest.skyabyss.ch5.shaft_landings.tell.talk', '踊り場の荷のことを、預かり所に知らせよう', 'Tell the storage keeper about the crates'),
+    ('dialogue.skyabyss.attendant_storage_keeper.menu.ch5s_offer', '探掘隊の荷のこと', 'About the excavation party\'s crates'),
+    ('dialogue.skyabyss.attendant_storage_keeper.ch5s_offer', '酒場の下の戸が開いたそうですね。……帳面に、ずっと消せない行があるんです。\n十年ほど前、探掘隊が大坑道へ降りるときに預けた荷です。二つの踊り場に置く、と書いてある。', 'I hear the door under the tavern is open. ...There are lines in my ledger I have never been able to strike out.\nCrates the excavation party left when they went down the great shaft, ten years or so ago. Two landings, it says.'),
+    ('dialogue.skyabyss.attendant_storage_keeper.ch5s_offer2', '取りに来た人はいません。まだあるのか、それとも誰かが持って降りたのか。\n降りるついでに、見てきてもらえませんか。', 'No one ever came back for them. Are they still there, or did someone carry them further down?\nIf you\'re going down anyway, would you take a look?'),
+    ('dialogue.skyabyss.attendant_storage_keeper.ch5s_offer2.go', '見てくる', 'I\'ll look'),
+    ('dialogue.skyabyss.attendant_storage_keeper.ch5s_offer2.no', '今はいい', 'Not now'),
+    ('dialogue.skyabyss.attendant_storage_keeper.ch5s_back', '封が切られていない……そうですか。\n帳面の行は、このまま残しておきます。消すのは、誰かが帰ってきてからにします。これは灯りの足しに。', 'The seals unbroken... I see.\nI\'ll leave those lines in the ledger. I\'ll strike them when someone comes home. Take these for light.'),
+    ('dialogue.skyabyss.attendant_storage_keeper.ch5s_back.ok', '受け取る', 'Thanks'),
+    # 隊の糧 (宿)
+    ('quest.skyabyss.ch5.party_rations.title', '隊の糧', 'Rations for the Party'),
+    ('quest.skyabyss.ch5.party_rations.summary', '宿の主が探掘隊に持たせていたパンを、深淵の骨の野営へ届ける。', 'Carry bread from the innkeeper to the bone camp in the abyss, as the inn once did for the excavation party.'),
+    ('quest.skyabyss.ch5.party_rations.done', '「生きてたか。……次の分も、焼いておくよ」', '"She\'s alive. ...I\'ll bake the next batch, then."'),
+    ('quest.skyabyss.ch5.party_rations.pack.journal', '宿の主が言っていた。探掘隊が降りるとき、宿は毎回パンを持たせた。最後の便は届けられないままだった、と。\nパンを 12 個そろえよう。パンは小麦 3 つから作業台で作れる。', 'The innkeeper said the inn sent bread with the excavation party every time they went down. The last batch was never delivered.\nGather 12 bread. Three wheat make a loaf at a crafting table.'),
+    ('quest.skyabyss.ch5.party_rations.pack.bread', '届けるパンを 12 個そろえよう', 'Gather 12 bread to deliver'),
+    ('quest.skyabyss.ch5.party_rations.deliver.journal', 'パンがそろった。深淵の骨の層の野営に、隊の生き残りがいるはずだ。届けよう。', 'The bread is ready. A survivor of the party should be at the camp in the bone layer of the abyss. Take it to her.'),
+    ('quest.skyabyss.ch5.party_rations.deliver.talk', '骨の野営の灯り番に、パンを届けよう', 'Bring the bread to the lamp keeper at the bone camp'),
+    ('quest.skyabyss.ch5.party_rations.tell.journal', '灯り番のミオは、パンを半分だけ食べて、残りを隊長の分だと言って包んだ。\n宿の主に伝えよう。', 'Mio the lamp keeper ate half the bread and wrapped the rest, saying it was the captain\'s share.\nTell the innkeeper.'),
+    ('quest.skyabyss.ch5.party_rations.tell.talk', '届けたことを、宿の主に伝えよう', 'Tell the innkeeper it was delivered'),
+    ('dialogue.skyabyss.attendant_innkeeper.menu.ch5i_offer', '探掘隊のこと', 'About the excavation party'),
+    ('dialogue.skyabyss.attendant_innkeeper.ch5i_offer', '下へ行くのか。……あの隊も、ここで寝て、朝に降りていった。\n降りるたびに、うちのパンを持たせた。最後の便だけ、渡せなかった。', 'Going down, are you. ...That party slept here too, and went down in the morning.\nEvery time, I sent our bread with them. Only the last batch never went.'),
+    ('dialogue.skyabyss.attendant_innkeeper.ch5i_offer2', 'パンを 12、持っていってくれないか。もし、まだ誰か下にいるなら。\n……いなかったら、あんたが食べればいい。', 'Take twelve loaves down, would you. In case anyone is still below.\n...If no one is, eat them yourself.'),
+    ('dialogue.skyabyss.attendant_innkeeper.ch5i_offer2.go', '届ける', 'I\'ll take them'),
+    ('dialogue.skyabyss.attendant_innkeeper.ch5i_offer2.no', '今はいい', 'Not now'),
+    ('dialogue.skyabyss.attendant_innkeeper.ch5i_back', '灯り番の娘が……そうか。隊長の分を取っておいた、か。\n次の分も焼いておく。降りるときは、声をかけてくれ。', 'The lamp keeper girl... I see. Saved the captain\'s share, did she.\nI\'ll bake the next batch. Let me know when you go down.'),
+    ('dialogue.skyabyss.attendant_innkeeper.ch5i_back.ok', '頼む', 'Please do'),
+    ('dialogue.skyabyss.attendant_survivor_bone.menu.ch5i_rations', '宿の主のパンを渡す', 'Give her the innkeeper\'s bread'),
+    ('dialogue.skyabyss.attendant_survivor_bone.ch5i_rations', '鐘の宿のパン……。この匂い、覚えてる。降りる朝に、いつも焼きたてだった', 'Bread from the Bell Inn... I remember this smell. It was always fresh the morning we went down.'),
+    ('dialogue.skyabyss.attendant_survivor_bone.ch5i_rations2', '半分だけ、もらう。残りは隊長の分。……持っていけたら、いいんだけど', 'I\'ll take half. The rest is the captain\'s share. ...If only I could take it to him.'),
+    ('dialogue.skyabyss.attendant_survivor_bone.ch5i_rations2.ok', 'わかった', 'I see'),
+    # 門の下の骨拾い (組合)
+    ('quest.skyabyss.ch5.gate_sweep.title', '門の下の骨拾い', 'Below the Gate'),
+    ('quest.skyabyss.ch5.gate_sweep.summary', '深淵の骨の層で、骨拾い・肋の番・骨笛を十五体減らす。仲間の分も数える。', 'Thin out fifteen bone pickers, rib guards or bone flutes in the bone layer of the abyss. Party members count too.'),
+    ('quest.skyabyss.ch5.gate_sweep.done', '「これで、門の下の音も少しは静かになるでしょう」', '"That should quiet the noise below the gate a little."'),
+    ('quest.skyabyss.ch5.gate_sweep.sweep.journal', '組合の受付が言っていた。門が開いてから、夜になると大坑道の底で骨の鳴る音がする。探掘隊も、最初は骨の層で道を拓いたという。\n門の下の骨の層で、骨拾い・肋の番・骨笛を減らそう。肋の番は盾の正面を避けて、横から。', 'The guild clerk said that since the gate opened, bones rattle at the bottom of the shaft at night. The excavation party also cleared a path through the bone layer first.\nThin out the bone pickers, rib guards and bone flutes in the bone layer below the gate. Hit rib guards from the side, not into the shield.'),
+    ('quest.skyabyss.ch5.gate_sweep.sweep.kill', '骨の層で、骨拾い・肋の番・骨笛を倒そう', 'Defeat bone pickers, rib guards and bone flutes'),
+    ('quest.skyabyss.ch5.gate_sweep.tell.journal', '骨の層の音が、少し遠のいた。組合に知らせよう。', 'The rattle in the bone layer has faded a little. Report to the guild.'),
+    ('quest.skyabyss.ch5.gate_sweep.tell.talk', '骨の層のことを、組合の受付に知らせよう', 'Report to the guild clerk'),
+    ('dialogue.skyabyss.attendant_guild_clerk.menu.ch5g_offer', '大坑道の底の音のこと', 'About the noise at the bottom of the shaft'),
+    ('dialogue.skyabyss.attendant_guild_clerk.ch5g_offer', '門が開いてから、夜になると、酒場の床の下で骨の鳴る音がすると苦情が来ています。\n探掘隊の記録では、門の下の層は骨ばかりで、最初にそこで道を拓いたそうです。', 'Since the gate opened, we\'ve had complaints of bones rattling under the tavern floor at night.\nThe excavation party\'s records say the layer below the gate is all bone, and they cleared their path there first.'),
+    ('dialogue.skyabyss.attendant_guild_clerk.ch5g_offer2', '組合として、正式に頼みます。骨の層で、十五ほど数を減らしてきてください。お礼は、隊の残した錨鉄で。', 'Officially, from the guild: please thin them out in the bone layer, fifteen or so. We\'ll pay in the anchor iron the party left behind.'),
+    ('dialogue.skyabyss.attendant_guild_clerk.ch5g_offer2.go', '引き受ける', 'I\'ll take it'),
+    ('dialogue.skyabyss.attendant_guild_clerk.ch5g_offer2.no', '今はいい', 'Not now'),
+    ('dialogue.skyabyss.attendant_guild_clerk.ch5g_back', '確かに。苦情の紙は、これで片付けられます。\nこちらがお礼の錨鉄です。……探掘隊の名前で、組合の帳面に記しておきますね。', 'Confirmed. I can file away the complaints now.\nHere is the anchor iron. ...I\'ll record it in the guild ledger under the excavation party\'s name.'),
+    ('dialogue.skyabyss.attendant_guild_clerk.ch5g_back.ok', '受け取る', 'Thanks'),
+    # 深淵の日替わり・週替わり
+    ('quest.skyabyss.daily_abyss_rounds.title', '縦穴の見回り', 'Rounds in the Abyss'),
+    ('quest.skyabyss.daily_abyss_rounds.summary', '深淵の層で、深淵の敵を十二体倒す。仲間の分も数える。', 'Defeat twelve foes in the layers of the abyss. Party members count too.'),
+    ('quest.skyabyss.daily_abyss_rounds.done', '今夜は、酒場の床の下も静かだろう。', 'The tavern floor should be quiet tonight.'),
+    ('quest.skyabyss.daily_abyss_rounds.rounds.journal', '板の紙（組合の判）：「深淵の層を見回り、這い上がってくるものを十二ほど減らしてほしい。どの層でもよい」', 'A note on the board, with the guild\'s seal: "Patrol the layers of the abyss and thin out twelve or so of what crawls upward. Any layer will do."'),
+    ('quest.skyabyss.daily_abyss_rounds.rounds.kill', '深淵の層で、敵を倒そう', 'Defeat foes in the abyss'),
+    ('quest.skyabyss.daily_abyss_rounds.unlock_hint', '深淵の門をくぐると、受けられる', 'Available once you have passed the abyss gate'),
+    ('quest.skyabyss.weekly_abyss_haul.title', '深淵の荷', 'A Haul from the Abyss'),
+    ('quest.skyabyss.weekly_abyss_haul.summary', '骨の層と塩の層の敵が落とす骨のかけら 8 と塩の結晶 6 を、板に納める。', 'Deliver 8 bone chips and 6 salt crystals, dropped by foes of the bone and salt layers, to the board.'),
+    ('quest.skyabyss.weekly_abyss_haul.done', '荷は、組合の蔵に収まった。', 'The haul is in the guild\'s storehouse.'),
+    ('quest.skyabyss.weekly_abyss_haul.haul.journal', '板の紙（預かり所の字）：「探掘隊がしていたように、深淵の品を上へ運んでほしい。骨のかけら八つ、塩の結晶六つ。七日に一度で十分です」', 'A note on the board, in the storage keeper\'s hand: "Carry abyss goods up, as the excavation party used to. Eight bone chips, six salt crystals. Once every seven days is enough."'),
+    ('quest.skyabyss.weekly_abyss_haul.haul.chips', '骨のかけらを納めよう', 'Deliver bone chips'),
+    ('quest.skyabyss.weekly_abyss_haul.haul.salt', '塩の結晶を納めよう', 'Deliver salt crystals'),
+    ('quest.skyabyss.weekly_abyss_haul.unlock_hint', '深淵の門をくぐると、受けられる', 'Available once you have passed the abyss gate'),
+    # 深淵の初めての経験値 (story/ch5/layers の印・層の主)
+    ('growth.skyabyss.reason.abyss_mark', '深淵の印', 'Abyss mark'),
+    ('growth.skyabyss.reason.abyss_lord', '層の主を倒した', 'Layer lord defeated'),
+]
+
+
 def main():
     write(os.path.join(DATA, 'quest', 'main_abyss.json'), MAIN)
     write(os.path.join(DATA, 'quest', 'ch5', 'black_iron.json'), IRON)
     write(os.path.join(DATA, 'dialogue', 'ch5', 'storyteller_abyss.json'), ST_DIALOGUE)
     write(os.path.join(DATA, 'dialogue', 'ch5', 'smith_abyss.json'), SMITH_DIALOGUE)
+    for qid, q in SIDE.items():
+        write(os.path.join(DATA, 'quest', qid + '.json'), q)
+    for name, d in SIDE_DIALOGUES.items():
+        write(os.path.join(DATA, 'dialogue', name), d)
+    for qid, q in REPEATS.items():
+        write(os.path.join(DATA, 'quest', qid + '.json'), q)
     ja = {k: j for k, j, _ in TEXTS}
     en = {k: e for k, _, e in TEXTS}
     write(os.path.join(LANG, 'ja_jp.json'), ja)
     write(os.path.join(LANG, 'en_us.json'), en)
-    print('wrote main_abyss, ch5/black_iron, 2 dialogues, %d texts' % len(TEXTS))
+    print('wrote main_abyss, ch5/black_iron, %d side quests, %d repeats, %d dialogues, %d texts'
+          % (len(SIDE), len(REPEATS), 2 + len(SIDE_DIALOGUES), len(TEXTS)))
 
 
 if __name__ == '__main__':

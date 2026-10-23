@@ -1,0 +1,55 @@
+{
+  "npc": "skyabyss:attendant_survivor_bone",
+  "extends": true,
+  "add_options": {
+    "menu": {
+      "before": "bye",
+      "options": [
+        {
+          "id": "ch5i_rations",
+          "goto": "ch5i_rations",
+          "kind": "quest",
+          "if": {
+            "type": "all",
+            "of": [
+              {
+                "type": "quest",
+                "quest": "ch5/party_rations",
+                "is": "active",
+                "stage": "deliver"
+              },
+              {
+                "type": "item",
+                "item": "minecraft:bread",
+                "count": 12
+              }
+            ]
+          }
+        }
+      ]
+    }
+  },
+  "nodes": {
+    "ch5i_rations": {
+      "face": "smile",
+      "do": [
+        {
+          "type": "take",
+          "item": "minecraft:bread",
+          "count": 12
+        }
+      ],
+      "next": "ch5i_rations2"
+    },
+    "ch5i_rations2": {
+      "face": "neutral",
+      "options": [
+        {
+          "id": "ok",
+          "goto": "menu",
+          "kind": "talk"
+        }
+      ]
+    }
+  }
+}

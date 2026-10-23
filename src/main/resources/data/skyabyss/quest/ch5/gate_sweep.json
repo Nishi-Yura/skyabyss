@@ -1,0 +1,48 @@
+{
+  "category": "sub",
+  "chapter": "chapter2",
+  "order": 64,
+  "giver": "skyabyss:attendant_guild_clerk",
+  "min_stage": 4,
+  "stages": [
+    {
+      "id": "sweep",
+      "xp": 200,
+      "objectives": [
+        {
+          "id": "kill",
+          "type": "kill",
+          "targets": [
+            "skyabyss:bone_picker",
+            "skyabyss:rib_guard",
+            "skyabyss:bone_flute"
+          ],
+          "count": 15
+        }
+      ]
+    },
+    {
+      "id": "tell",
+      "objectives": [
+        {
+          "id": "talk",
+          "type": "talk",
+          "target": "skyabyss:attendant_guild_clerk",
+          "topic": "ch5g_back"
+        }
+      ]
+    }
+  ],
+  "reward": {
+    "xp": 500,
+    "items": [
+      {
+        "item": "skyabyss:abyss_anchor_iron",
+        "count": 3
+      }
+    ],
+    "affinity": {
+      "skyabyss:attendant_guild_clerk": 3
+    }
+  }
+}

@@ -1,0 +1,110 @@
+{
+  "npc": "skyabyss:attendant_innkeeper",
+  "extends": true,
+  "entries": [
+    {
+      "node": "ch5i_back",
+      "if": {
+        "type": "quest",
+        "quest": "ch5/party_rations",
+        "is": "active",
+        "stage": "tell"
+      }
+    }
+  ],
+  "add_options": {
+    "menu": {
+      "before": "about",
+      "options": [
+        {
+          "id": "ch5i_offer",
+          "goto": "ch5i_offer",
+          "kind": "quest",
+          "if": {
+            "type": "all",
+            "of": [
+              {
+                "type": "all",
+                "of": [
+                  {
+                    "type": "quest",
+                    "quest": "main_abyss",
+                    "is": "started"
+                  },
+                  {
+                    "type": "not",
+                    "of": {
+                      "type": "any",
+                      "of": [
+                        {
+                          "type": "quest",
+                          "quest": "main_abyss",
+                          "is": "active",
+                          "stage": "rumor"
+                        },
+                        {
+                          "type": "quest",
+                          "quest": "main_abyss",
+                          "is": "active",
+                          "stage": "prepare"
+                        },
+                        {
+                          "type": "quest",
+                          "quest": "main_abyss",
+                          "is": "active",
+                          "stage": "door"
+                        }
+                      ]
+                    }
+                  }
+                ]
+              },
+              {
+                "type": "quest",
+                "quest": "ch5/party_rations",
+                "is": "none"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  },
+  "nodes": {
+    "ch5i_offer": {
+      "face": "neutral",
+      "next": "ch5i_offer2"
+    },
+    "ch5i_offer2": {
+      "face": "neutral",
+      "options": [
+        {
+          "id": "go",
+          "goto": "end",
+          "kind": "quest",
+          "do": [
+            {
+              "type": "quest_start",
+              "quest": "ch5/party_rations"
+            }
+          ]
+        },
+        {
+          "id": "no",
+          "goto": "menu",
+          "kind": "talk"
+        }
+      ]
+    },
+    "ch5i_back": {
+      "face": "smile",
+      "options": [
+        {
+          "id": "ok",
+          "goto": "end",
+          "kind": "talk"
+        }
+      ]
+    }
+  }
+}

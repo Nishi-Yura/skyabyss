@@ -532,12 +532,12 @@ wc.node("c_whale2",
         "Sometimes it comes down below the clouds and lets down a chain long enough to reach the ground.\nI've... never once caught it. It always comes down over someone far away.",
         face="grave", next="c_whale_iron", note="ここに入るとメインの「イサナに話を聞く」が済む")
 wc.node("c_whale_iron",
-        "鎖は、素手では上れない。……前にここへ来た旅人は、鉄を着ていた。\n都の北門から丘を越えていく石標が、その人の道だ。行き着く先は、骨の坑と呼ばれている。",
-        "You cannot climb the chain bare-handed. ...The traveller who came here before wore iron.\nThe cairns from the north gate over the hills are that one's road. Where they end is called the Bone Pit.",
+        "鎖は、素手では上れない。……前にここへ来た旅人は、鉄を着ていた。\nその人は都の北門を出て、北の丘を越えていった。行き着いた先は、骨の坑と呼ばれている。",
+        "You cannot climb the chain bare-handed. ...The traveller who came here before wore iron.\nThat one left by the north gate and went over the northern hills. The place they reached is called the Bone Pit.",
         next="c_whale3", note="一章の支度の段「鉄の跡」(ch1/trail_iron) の理由。この話のあと、支度の段 3 本が出る (34 の 4.2)")
 wc.node("c_whale3",
-        "鯨が降りてくる前に、支度をしておけ。まずは鉄だ。石標を辿って、骨の坑へ行け。\n刃のことは旅の職人が、盾のことは語り部が知っている。……支度ができたら、あんたの上に来るかもしれないな。",
-        "Get ready before the whale comes down. Iron first. Follow the cairns to the Bone Pit.\nThe traveling artisan knows about blades, the storyteller about shields. ...Once you're ready, maybe it'll come over you.",
+        "鯨が降りてくる前に、支度をしておけ。まずは鉄だ。北の丘を越えて、骨の坑へ行け。\n刃のことは旅の職人が、盾のことは語り部が知っている。……支度ができたら、あんたの上に来るかもしれないな。",
+        "Get ready before the whale comes down. Iron first. Go over the northern hills to the Bone Pit.\nThe traveling artisan knows about blades, the storyteller about shields. ...Once you're ready, maybe it'll come over you.",
         options=[
             ("grab", "支度をしてくる。", "I'll go and get ready.", {"do": [add_aff(2)]}),
             ("afraid", "怖くはないのか？", "Aren't you afraid?", {"goto": "c_afraid"}),

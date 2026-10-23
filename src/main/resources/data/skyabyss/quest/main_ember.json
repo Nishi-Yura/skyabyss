@@ -35,6 +35,32 @@
       }
     },
     {
+      "id": "prepare",
+      "skip_if": {
+        "type": "any",
+        "of": [
+          {
+            "type": "lore",
+            "entry": "chapter1/ember"
+          },
+          {
+            "type": "stilled",
+            "titan": "ember"
+          }
+        ]
+      },
+      "objectives": [
+        {
+          "id": "ready",
+          "type": "condition",
+          "if": {
+            "type": "prep",
+            "chapter": 4
+          }
+        }
+      ]
+    },
+    {
       "id": "see",
       "objectives": [
         {

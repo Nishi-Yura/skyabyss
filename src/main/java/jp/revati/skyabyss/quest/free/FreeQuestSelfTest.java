@@ -55,6 +55,9 @@ public final class FreeQuestSelfTest {
     private static final String ST = NpcSetup.STORYTELLER_ID;
     private static final String WC = NpcSetup.WHALE_CHASER_ID;
     private static final Set<String> INTROS = Set.of("first", "c_first", "deja_vu", "deja_vu_song", "c_deja");
+    // 四章・五章の板の頼み (余燼の夜回り・熾の鼓動、深淵の見回り・荷)。序章〜一章の頼みの決まり (段階 1 までに開く) の外なので数えず、
+    // laterBoard が別に見る: 章の段階で開く・倒す相手が本当に湧く (章の地上のひとり歩き・場所の湧き台・深淵の湧きの表・心臓)
+    static final Set<String> LATER_BOARD = Set.of("daily_ash_watch", "weekly_ember_heart", "daily_abyss_rounds", "weekly_abyss_haul");
 
     private FreeQuestSelfTest() {
     }
@@ -96,6 +99,7 @@ public final class FreeQuestSelfTest {
                 .filter(q -> !jp.revati.skyabyss.titan.storm.lore.StormLore.QUESTS.contains(q.id()))
                 // 序章・一章の小要素のお使い (story/ch1。story/ch1/Ch1SelfTest が確かめる)
                 .filter(q -> !q.id().startsWith("ch1/"))
+                .filter(q -> !LATER_BOARD.contains(q.id()))
                 .filter(q -> q.board() || q.id().startsWith("sub_") && !List.of("sub_song", "sub_shards").contains(q.id()))
                 .toList();
     }
@@ -309,6 +313,50 @@ public final class FreeQuestSelfTest {
         check(c != null && c.nodes().containsKey("fq_c_menu") && c.nodes().get("c_menu").options().stream().anyMatch(o -> o.id().equals("errands")),
                 "whale chaser extension not merged", failures);
         notes.add("loaded " + free.size() + " free quests (" + daily + " daily, " + weekly + " weekly); dialogue extensions merged in place");
+        laterBoard(failures, notes);
+    }
+
+    // 四章・五章の板の頼み: 繰り返しの板の頼みで、四章 (段階 3) / 五章 (段階 4) から。倒す相手は、その章で本当に湧くもの
+    private static void laterBoard(List<String> failures, List<String> notes) {
+        Set<String> spawns = new java.util.HashSet<>();
+        jp.revati.skyabyss.guide.ChapterMobSpawner.registered().forEach(w -> spawns.add(w.entity()));
+        for (jp.revati.skyabyss.guide.SiteSpawner.Def d : jp.revati.skyabyss.guide.SiteSpawner.defs()) {
+            d.pads().forEach(pad -> pad.spawns().forEach(sp -> spawns.add(sp.entity())));
+        }
+        Set<String> abyss = new java.util.HashSet<>();
+        for (jp.revati.skyabyss.abyss.mobs.AbyssMobKind k : jp.revati.skyabyss.abyss.mobs.AbyssMobKind.values()) {
+            abyss.add(SkyAbyss.MODID + ":" + k.id);
+        }
+        for (String id : jp.revati.skyabyss.abyss.mobs.AbyssMobSpawner.FOES) {
+            abyss.add(SkyAbyss.MODID + ":" + id);
+        }
+        Set<String> hearts = Set.of(SkyAbyss.MODID + ":ember_heart");
+        int kills = 0;
+        for (String id : LATER_BOARD) {
+            QuestDef q = QuestManager.quest(id);
+            check(q != null, id + " did not load", failures);
+            if (q == null) {
+                continue;
+            }
+            boolean deep = id.contains("abyss");
+            check(q.board() && q.repeats() && (id.startsWith("daily") ? q.repeat().equals("daily") : q.repeat().equals("weekly")),
+                    id + " should be a " + (id.startsWith("daily") ? "daily" : "weekly") + " board quest", failures);
+            check(q.minStage() == (deep || id.equals("weekly_ember_heart") ? 4 : 3), id + " opens at the wrong stage " + q.minStage(), failures);
+            for (QuestDef.Stage s : q.stages()) {
+                for (QuestDef.Objective o : s.objectives()) {
+                    if (!o.type().equals("kill")) {
+                        continue;
+                    }
+                    for (String t : o.targets()) {
+                        kills++;
+                        boolean ok = deep ? abyss.contains(t) : spawns.contains(t) || hearts.contains(t);
+                        check(ok, id + ": " + t + " does not spawn where this quest sends you", failures);
+                    }
+                }
+            }
+        }
+        check(kills >= 18 + 2, "the later board quests should ask for the 18 abyss foes, the ash husk and the ember heart (" + kills + ")", failures);
+        notes.add("later board quests: " + LATER_BOARD.size() + " (ember daily/weekly, abyss daily/weekly), " + kills + " kill targets all spawn");
     }
 
     // ---------------------------------------------------------------- 一度きり (語り部・鯨追い)
