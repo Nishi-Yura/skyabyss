@@ -19,7 +19,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.SwordItem;
 import net.minecraft.world.phys.Vec3;
 
-// 沈め錨 (伝説): 深淵の心臓につながる錨の、欠けた爪を柄に付けた両手の錨。攻撃力 21、速さ 0.8。
+// 沈め錨 (ヒロイック): 深淵の心臓につながる錨の、欠けた爪を柄に付けた両手の錨。攻撃力 21、速さ 0.8。
 // 三度目ごとに (+5 から二度目ごとに) 「錨の重し」: 打った相手のまわり半径 3 (+10 で 4) の敵に攻撃力の 50%、鈍足 III 1.5 秒、下へ引く。
 // 上昇の重みを敵に背負わせる形。「両手」は説明と持ち方だけ (余燼の大鎚と同じく、左手の盾は使える)
 public class SinkingAnchorItem extends AbyssGearWeaponItem {
@@ -27,7 +27,7 @@ public class SinkingAnchorItem extends AbyssGearWeaponItem {
 
     public SinkingAnchorItem(Properties properties) {
         // 攻撃力 21 = 1 + 5 + 15、攻撃速度 0.8 = 4 − 3.2
-        super(properties.attributes(SwordItem.createAttributes(TIER, 15, -3.2f)), GearTier.LEGENDARY, "item.skyabyss.abyss_sinking_anchor.desc");
+        super(properties.attributes(SwordItem.createAttributes(TIER, 15, -3.2f)), GearTier.HEROIC, "item.skyabyss.abyss_sinking_anchor.desc");
     }
 
     public static int every(ItemStack stack) {

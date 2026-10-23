@@ -70,12 +70,19 @@ public final class GearFreedomSelfTest {
         // ---- 穴の抽選と、古い装備の移行
         int[] rare = new int[3];
         int[] legend = new int[3];
+        int[] epic = new int[3];
+        int[] artifact = new int[3];
         for (int i = 0; i < 6000; i++) {
             rare[GearFreedom.rollSockets(GearTier.RARE, random)]++;
-            legend[GearFreedom.rollSockets(GearTier.LEGENDARY, random)]++;
+            legend[GearFreedom.rollSockets(GearTier.HEROIC, random)]++;
+            epic[GearFreedom.rollSockets(GearTier.EPIC, random)]++;
+            artifact[GearFreedom.rollSockets(GearTier.ARTIFACT, random)]++;
         }
+        // 階級が上がるほど穴が多い (0 個の割合が減り、2 個の割合が増える)
+        check(f, rare[0] > epic[0] && epic[0] > legend[0] && legend[0] > artifact[0] && rare[2] < epic[2] && epic[2] < legend[2] && legend[2] < artifact[2],
+                "socket odds do not rise with the tier " + java.util.Arrays.toString(rare) + java.util.Arrays.toString(epic) + java.util.Arrays.toString(legend) + java.util.Arrays.toString(artifact));
         check(f, Math.abs(rare[0] / 6000.0 - 0.50) < 0.03 && Math.abs(rare[2] / 6000.0 - 0.12) < 0.02, "rare socket odds off " + java.util.Arrays.toString(rare));
-        check(f, Math.abs(legend[0] / 6000.0 - 0.30) < 0.03 && Math.abs(legend[2] / 6000.0 - 0.25) < 0.03, "legendary socket odds off " + java.util.Arrays.toString(legend));
+        check(f, Math.abs(legend[0] / 6000.0 - 0.30) < 0.03 && Math.abs(legend[2] / 6000.0 - 0.25) < 0.03, "heroic socket odds off " + java.util.Arrays.toString(legend));
         ItemStack old = new ItemStack(ModItems.WHALEBONE_GREATSWORD.get());
         old.set(ModDataComponents.AFFIXES.get(), List.of(new Affix(AffixType.SHARP, 0.05)));
         check(f, !GearFreedom.has(old) && GearFreedom.ensure(old, random) && GearFreedom.has(old), "legacy gear did not get its sockets rolled once");

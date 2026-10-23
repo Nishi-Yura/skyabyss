@@ -33,7 +33,7 @@ public final class ModDataComponents {
     public static final DeferredHolder<DataComponentType<?>, DataComponentType<jp.revati.skyabyss.item.extra.GearExtras>> GEAR_EXTRAS = COMPONENTS.registerComponentType("gear_extras",
             builder -> builder.persistent(jp.revati.skyabyss.item.extra.GearExtras.CODEC).networkSynchronized(jp.revati.skyabyss.item.extra.GearExtras.STREAM_CODEC).cacheEncoding());
 
-    // アスペクトの芯 (品) が持つ、伝説の書き換え (Rune の id)
+    // アスペクトの芯 (品) が持つ、逸品の書き換え (Rune の id)
     public static final DeferredHolder<DataComponentType<?>, DataComponentType<String>> ASPECT = COMPONENTS.registerComponentType("aspect",
             builder -> builder.persistent(Codec.STRING).networkSynchronized(ByteBufCodecs.STRING_UTF8));
 

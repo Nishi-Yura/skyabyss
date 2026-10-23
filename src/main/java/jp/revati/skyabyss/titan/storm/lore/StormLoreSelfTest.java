@@ -24,7 +24,6 @@ import jp.revati.skyabyss.quest.QuestDef;
 import jp.revati.skyabyss.quest.QuestLog;
 import jp.revati.skyabyss.quest.QuestManager;
 import jp.revati.skyabyss.quest.Quests;
-import jp.revati.skyabyss.titan.dungeon.BackWhispers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
@@ -37,17 +36,16 @@ import net.neoforged.neoforge.common.util.FakePlayer;
 import net.neoforged.neoforge.common.util.FakePlayerFactory;
 
 // 雷翼の伝承とクエストの自己テスト (SELFTEST storm lore。12 の 11.2 節の担当 6 の確かめ方)。
-//  - 伝承: 雷翼の 12 項目と「雷翼の巨神」があり、文が日英にある。碑文の項目は StormLore の看板のキーを写す。破れた頁から風見の帳が出る
-//  - 看板: 碑文 6 枚と入口の一言 3 枚がはみ出さない (SignFit、1 行 90 px)
-//  - 囁き: 8 か所それぞれで一度だけ。文が日英にある
+//  - 伝承: 雷翼の項目と「雷翼の巨神」があり、文が日英にある。碑文の項目は StormLore の看板のキーを写す。破れた頁から風見の帳が出る
+//  - 看板: 碑文 3 枚 (レイドの部屋の入口の碑) と入口の一言 3 枚がはみ出さない (SignFit、1 行 90 px)
 //  - クエスト: メイン「嵐を渡る翼」を、本体がなくても伝承と合図だけで通しで終えられる (見る → 乗る → 碑文 2 と風鳴り石 → 心臓 → 報告)。
 //    心臓を先に止めた人は背と試練の段を飛ばす。雷翼の背の周回 (日替わり・週替わり) が倒した数で終わり、報酬が出る
 // 記録は写して試し、最後に戻す
 public final class StormLoreSelfTest {
     private static final String[] LANGS = {"ja_jp", "en_us"};
     static final List<String> ENTRIES = List.of(StormLore.LORE_SIGHT, StormLore.LORE_TITAN, StormLore.LORE_RUINS, StormLore.LORE_COWER,
-            StormLore.LORE_LEDGER, StormLore.LORE_RAIJU, StormLore.LORE_STILLED, StormLore.inscriptionLore("tail"), StormLore.inscriptionLore("hub"),
-            StormLore.inscriptionLore("west"), StormLore.inscriptionLore("east"), StormLore.inscriptionLore("eye"), StormLore.inscriptionLore("heart"));
+            StormLore.LORE_LEDGER, StormLore.LORE_RAIJU, StormLore.LORE_STILLED, StormLore.inscriptionLore("tail"),
+            StormLore.inscriptionLore("west"), StormLore.inscriptionLore("east"));
 
     private StormLoreSelfTest() {
     }
@@ -61,7 +59,6 @@ public final class StormLoreSelfTest {
             lore(f, notes);
             signs(f, notes);
             ServerLevel level = server.overworld();
-            whispers(level, f, notes);
             quests(server, level, f, notes);
         } catch (RuntimeException e) {
             f.add("exception: " + e);
@@ -71,8 +68,8 @@ public final class StormLoreSelfTest {
         }
         notes.forEach(n -> SkyAbyss.LOGGER.info("SELFTEST storm lore: {}", n));
         if (f.isEmpty()) {
-            SkyAbyss.LOGGER.info("SELFTEST storm lore PASSED ({} lore entries, {} signs, {} whispers, main quest and 2 board quests, {} checks)",
-                    ENTRIES.size(), StormLore.INSCRIPTIONS.size() + StormLore.TRIAL_SIGNS.size(), StormWhispers.WHISPERS.size(), notes.size());
+            SkyAbyss.LOGGER.info("SELFTEST storm lore PASSED ({} lore entries, {} signs, main quest and 2 board quests, {} checks)",
+                    ENTRIES.size(), StormLore.INSCRIPTIONS.size() + StormLore.TRIAL_SIGNS.size(), notes.size());
         } else {
             f.forEach(x -> SkyAbyss.LOGGER.error("SELFTEST storm lore FAILED: {}", x));
         }
@@ -157,57 +154,6 @@ public final class StormLoreSelfTest {
         }
         check(SignFit.allSignKeys().containsAll(keys), "SignFit does not see the storm signs (skyabyss_storm lang)", f);
         notes.add("signs: " + keys.size() + " storm signs, " + bad.size() + " overflowing lines");
-    }
-
-    // ---------------------------------------------------------------- 囁き
-    private static void whispers(ServerLevel level, List<String> f, List<String> notes) {
-        for (String code : LANGS) {
-            JsonObject lang = json("/assets/skyabyss_storm/lang/" + code + ".json", f);
-            if (lang == null) {
-                continue;
-            }
-            List<String> keys = new ArrayList<>(StormWhispers.keys());
-            keys.add(StormWhispers.CAMPFIRE_KEY);
-            for (String k : keys) {
-                check(lang.has(k) && !lang.get(k).getAsString().isBlank(), code + ": missing whisper " + k, f);
-            }
-        }
-        check(StormWhispers.WHISPERS.size() == 7, "expected 7 whispers, found " + StormWhispers.WHISPERS.size(), f);
-        FakePlayer p = player(level, "w");
-        forgetWhispers(p);
-        for (StormWhispers.Whisper w : StormWhispers.WHISPERS) {
-            BlockPos at = center(w.id());
-            StormWhispers.Whisper found = StormWhispers.at(at);
-            check(found != null && found.id().equals(w.id()), "the middle of " + w.id() + " whispers " + (found == null ? "nothing" : found.id()), f);
-            StormWhispers.hearAt(p, at);
-            check(BackWhispers.heardAlready(p, w.id()), w.id() + " was not heard", f);
-        }
-        check(BackWhispers.heardAlready(p, StormWhispers.CAMPFIRE_FLAG), "the campfire hint was not added at the first rest point", f);
-        check(StormWhispers.at(new BlockPos(0, 60, 0)) == null, "a whisper outside the bird", f);
-        forgetWhispers(p);
-        notes.add("whispers: 8 places, each heard once, the campfire hint at the first rest point");
-    }
-
-    private static BlockPos center(String id) {
-        StormWhispers.Box b = switch (id) {
-            case "storm_landing" -> StormWhispers.LANDING;
-            case "storm_tail" -> StormWhispers.TAIL;
-            case "storm_hub" -> StormWhispers.HUB;
-            case "storm_west" -> StormWhispers.WEST;
-            case "storm_east" -> StormWhispers.EAST;
-            case "storm_front" -> StormWhispers.FRONT;
-            default -> StormWhispers.HEART;
-        };
-        return new BlockPos((b.x0() + b.x1()) / 2, (b.y0() + b.y1()) / 2, (b.z0() + b.z1()) / 2);
-    }
-
-    private static void forgetWhispers(Player p) {
-        CompoundTag persisted = p.getPersistentData().getCompound(Player.PERSISTED_NBT_TAG);
-        CompoundTag heard = persisted.getCompound("skyabyss_back_heard");
-        for (StormWhispers.Whisper w : StormWhispers.WHISPERS) {
-            heard.remove(w.id());
-        }
-        heard.remove(StormWhispers.CAMPFIRE_FLAG);
     }
 
     // ---------------------------------------------------------------- クエスト

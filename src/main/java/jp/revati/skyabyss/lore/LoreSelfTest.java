@@ -17,7 +17,6 @@ import com.mojang.serialization.Codec;
 import jp.revati.skyabyss.SkyAbyss;
 import jp.revati.skyabyss.registry.ModEntities;
 import jp.revati.skyabyss.registry.ModItems;
-import jp.revati.skyabyss.titan.dungeon.TitanBackLayout;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
@@ -90,13 +89,7 @@ public final class LoreSelfTest {
         }
         // ---- 条件の先が実在するか
         Set<String> signKeys = new HashSet<>();
-        TitanBackLayout.LORE_SIGNS.forEach(s -> signKeys.add(s.key()));
-        // 潮殻の背の碑文 (08 の 9.2節)
-        jp.revati.skyabyss.titan.tide.back.TideBackLayout.LORE_SIGNS.stream().forEach(s -> signKeys.add(s.key()));
-        // 雷翼の背の碑文 (12 の 9.2節。キーは伝承の担当が決め、背中の担当がこのキーで看板を立てる)
-        signKeys.addAll(jp.revati.skyabyss.titan.storm.lore.StormLore.INSCRIPTIONS.values());
-        // 余燼の背の碑文 (13 の 9.2節。文は担当 G、看板は B が置く)
-        signKeys.addAll(jp.revati.skyabyss.titan.ember.lore.EmberLore.inscriptionSigns());
+        // 体の中の碑文はない。碑はレイドの部屋の入口の間 (RaidLore) と一章・二章の地上の碑だけ
         // 一章の地上: 骨の坑の冷えの戸の奥の碑 (34 の 4.2.1。BonePit.finish が刻む)
         signKeys.add(jp.revati.skyabyss.story.ch1.BonePit.COLD_SIGN);
         // 二章の地上: 沈んだ塩の蔵の奥の刻み (SaltVault.decorate が刻む)
@@ -276,14 +269,14 @@ public final class LoreSelfTest {
         a.getInventory().clearContent();
         b.getInventory().clearContent();
         // 碑文を読む → 記される。書をまだ持っていないので、荷物の中に現れ、書の項目も記される
-        int n = Lore.fire(a, "sign", t -> t.target().equals("sign.skyabyss.lore_heart"));
-        if (n != 1 || !Lore.state(a).has("chapter1/inscription_heart")) {
-            failures.add("reading the heart inscription did not write chapter1/inscription_heart (" + n + ")");
+        int n = Lore.fire(a, "sign", t -> t.target().equals("sign.skyabyss.lore_west"));
+        if (n != 1 || !Lore.state(a).has("chapter1/inscription_west")) {
+            failures.add("reading the west inscription did not write chapter1/inscription_west (" + n + ")");
         }
         if (!Lore.state(a).bookGiven() || !Lore.hasBook(a) || !Lore.state(a).has(Lore.BOOK_ENTRY)) {
             failures.add("the first entry did not hand over the lore book");
         }
-        if (Lore.fire(a, "sign", t -> t.target().equals("sign.skyabyss.lore_heart")) != 0) {
+        if (Lore.fire(a, "sign", t -> t.target().equals("sign.skyabyss.lore_west")) != 0) {
             failures.add("an entry was written twice");
         }
         // ほかの人の書には何も起きない

@@ -1,6 +1,5 @@
 {
   "gear.skyabyss.origin.tide_shell": "Tide Shell gear",
-
   "gear.skyabyss.origin_weapon.tide_shell": "Tide Shell weapon",
   "item.skyabyss.tide_shell_helmet": "Tide Shell Helm",
   "item.skyabyss.tide_shell_chestplate": "Tide Shell Cuirass",
@@ -20,7 +19,7 @@
   "item.skyabyss.moontide_pearl": "Moontide Pearl",
   "item.skyabyss.moontide_pearl.desc": "Worn in a trinket slot, it wraps you in a bubble shield when badly hurt (sleeps for 90 seconds after)",
   "item.skyabyss.tide_shell_core": "Tide Shell Core",
-  "item.skyabyss.tide_shell_core.desc": "A fragment of the tide shell's heart. Material for a future relic",
+  "item.skyabyss.tide_shell_core.desc": "A fragment of the tide shell's heart. Material for a future artifact",
   "gui.skyabyss.forge.exchange_titan": "%s ▸",
   "gui.skyabyss.forge.exchange_titan_hint": "Switch which titan to trade for",
   "gui.skyabyss.forge.exchange_no_clear.tide_shell": "Defeat the Tide Shell's Heart to unlock trading",

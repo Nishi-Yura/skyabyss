@@ -16,7 +16,6 @@ import jp.revati.skyabyss.sky.SkyEventData;
 import jp.revati.skyabyss.sky.SkyEvents;
 import jp.revati.skyabyss.sky.SkyPass;
 import jp.revati.skyabyss.titan.TitanTravel;
-import jp.revati.skyabyss.titan.dungeon.TitanBackLayout;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -58,9 +57,6 @@ public final class LoreEvents {
     private static final long DROP_DELAY = 60;
     // 落ちてきた書を拾わないまま 2 分たったら、荷物の中へ移す
     private static final long DROP_TIMEOUT = 2400;
-    // 碑文を「読んだ」とみなす距離と、目を向けている度合い (視線と碑文への向きの内積)
-    private static final double SIGN_READ_DISTANCE = 4.5;
-    private static final double SIGN_READ_FACING = 0.8;
     // 空の影を「見た」とみなす、影の中心からの水平距離
     private static final double SHADOW_WITNESS_DISTANCE = 150;
     // 岩鯨の背の番兵が破れた頁を落とす確率 (倒した人だけが拾える)
@@ -125,38 +121,6 @@ public final class LoreEvents {
         return null;
     }
 
-    // 岩鯨の背の碑文は、近くで目を向けるだけでも読める (光る字は遠くからでも見えるので、右クリックを知らない人のため)
-    private static void readNearbyInscriptions(ServerPlayer player) {
-        Vec3 eye = player.getEyePosition();
-        Vec3 look = player.getLookAngle();
-        java.util.List<java.util.Map.Entry<String, net.minecraft.core.BlockPos>> signs = new java.util.ArrayList<>();
-        if (player.level().dimension() == TitanTravel.TITAN_BACK) {
-            TitanBackLayout.LORE_SIGNS.forEach(i -> signs.add(java.util.Map.entry(i.key(), i.pos())));
-        } else if (player.level().dimension() == jp.revati.skyabyss.titan.storm.lore.StormLore.STORM_BACK) {
-            // 雷翼の背の碑文 (置き場所は背中の担当が StormLore に登録する)
-            signs.addAll(jp.revati.skyabyss.titan.storm.lore.StormLore.inscriptionPositions());
-        } else {
-            jp.revati.skyabyss.titan.tide.back.TideBackLayout.LORE_SIGNS.forEach(i -> signs.add(java.util.Map.entry(i.key(), i.pos())));
-        }
-        for (java.util.Map.Entry<String, net.minecraft.core.BlockPos> inscription : signs) {
-            Vec3 at = Vec3.atCenterOf(inscription.getValue());
-            Vec3 to = at.subtract(eye);
-            double distance = to.length();
-            if (distance > SIGN_READ_DISTANCE || distance < 1.0e-3) {
-                continue;
-            }
-            if (to.scale(1.0 / distance).dot(look) < SIGN_READ_FACING) {
-                continue;
-            }
-            // 壁の向こうの碑文は読めない (看板には当たり判定がないので、看板の中心まで何にも当たらなければ見えている)
-            var hit = player.level().clip(new net.minecraft.world.level.ClipContext(eye, at,
-                    net.minecraft.world.level.ClipContext.Block.COLLIDER, net.minecraft.world.level.ClipContext.Fluid.NONE, player));
-            if (hit.getType() == net.minecraft.world.phys.HitResult.Type.MISS || hit.getBlockPos().equals(inscription.getValue())) {
-                Lore.fire(player, "sign", t -> t.target().equals(inscription.getKey()));
-            }
-        }
-    }
-
     // ---------------------------------------------------------------- 毎 tick の見回り (人ごとに間引く)
     @SubscribeEvent
     static void onPlayerTick(PlayerTickEvent.Post event) {
@@ -167,11 +131,6 @@ public final class LoreEvents {
         long now = level.getGameTime();
         int phase = player.getId() & 0xFF;
         LoreState state = Lore.state(player);
-        if ((now + phase) % 5 == 0 && (level.dimension() == TitanTravel.TITAN_BACK || level.dimension() == jp.revati.skyabyss.titan.tide.TideTravel.TIDE_BACK
-                || level.dimension() == jp.revati.skyabyss.titan.storm.lore.StormLore.STORM_BACK)
-                && anyLocked(state, "sign")) {
-            readNearbyInscriptions(player);
-        }
         if ((now + phase) % 10 == 0 && level.dimension() == Level.OVERWORLD) {
             watchSky(player, level, state, now);
         }

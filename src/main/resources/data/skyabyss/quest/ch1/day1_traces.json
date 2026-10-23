@@ -11,7 +11,7 @@
         {
           "id": "round",
           "type": "signal",
-          "target": "ch1_cairn_round",
+          "target": "ch1_trace_round",
           "count": 2,
           "party": false
         }
@@ -29,7 +29,7 @@
     "do": [
       {
         "type": "lore",
-        "entry": "ch1/cairn_rounds"
+        "entry": "ch1/trace_rounds"
       }
     ]
   }

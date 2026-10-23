@@ -140,7 +140,7 @@ public final class EmberBackLayout {
     // 火守りの谷 (幅 35・奥行き 75、天井まで 29)。天井は閉じた洞 → C3
     public static final int FLOOR_SOUTH = 83;
     public static final Box SOUTH = new Box(-17, 83, -8, 17, 112, 66);
-    // 熾の底の前室 (9 × 7。螺旋の階段の下。大きさ据え置き) → B (碑文 lore_ember_heart と休み場 heart)
+    // 熾の底の前室 (9 × 7。螺旋の階段の下。大きさ据え置き) → B (休み場 heart)
     public static final int FLOOR_HEART = 50;
     // 熾の底 (心臓の間) と前室は体の外の封じた部屋 (区画 0 番の枠。trial/raid/InstanceArenas) へ移した (2026-10-23。版 33)。
     // 元の座標 (中心 (0, 50, -4)) を HEART_DX / HEART_DZ だけずらす。高さは元のまま。螺旋の縦穴 (GATE_SHAFT) とはつながらない
@@ -178,17 +178,9 @@ public final class EmberBackLayout {
     public static final BlockPos EJECT_EAST = new BlockPos(23, FLOOR_HUB + 1, -54);
     public static final BlockPos EJECT_SOUTH = new BlockPos(0, FLOOR_HUB + 1, -31);
 
-    // 碑文 (9.2節。看板の位置と、文が向く向き。看板の後ろか下に台のブロックを B が置く)
+    // 看板の位置と、文が向く向き
     public record Inscription(String id, BlockPos pos, Direction facing) {
     }
-
-    public static final List<Inscription> INSCRIPTIONS = List.of(
-            new Inscription("lore_ember_mouth", new BlockPos(5, MOUTH_FLOOR + 1, -246), Direction.NORTH),
-            new Inscription("lore_ember_hub", new BlockPos(0, FLOOR_HUB + 2, -58), Direction.NORTH),
-            new Inscription("lore_ember_west", new BlockPos(TUBE_WEST_X - 3, FLOOR_WEST + 1, 111), Direction.NORTH),
-            new Inscription("lore_ember_east", new BlockPos(TUBE_EAST_X - 3, FLOOR_EAST + 1, 85), Direction.NORTH),
-            new Inscription("lore_ember_south", new BlockPos(3, FLOOR_SOUTH + 1, 65), Direction.NORTH),
-            new Inscription("lore_ember_heart", new BlockPos(3 + HEART_DX, FLOOR_HEART + 1, -28 + HEART_DZ), Direction.SOUTH));
 
     // 試練の入口の一言の看板 (広間の扉の内側の脇。3 枚)。扉の色の道 (西 = 灰・青の灯、東 = 橙の灯、南 = 赤の灯) の脇に立てる
     public static final List<Inscription> ENTRANCE_SIGNS = List.of(

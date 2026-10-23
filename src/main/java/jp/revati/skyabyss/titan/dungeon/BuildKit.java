@@ -260,7 +260,7 @@ final class BuildKit {
         }
     }
 
-    // 休み場の設え: 青い焚き火、腰掛け、灯り。案内の看板は置かない (着いたことは焚き火と音で、先の様子は最初の一度だけの囁きで伝える: BackWhispers)
+    // 休み場の設え: 青い焚き火、腰掛け、灯り。案内の看板は置かない (着いたことは焚き火と音で伝える)
     void restPoint(Box box) {
         restPoint(box, false);
     }

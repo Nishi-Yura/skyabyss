@@ -57,6 +57,11 @@ public final class StormHeartArena {
     // 入口 (北の壁。前室 KEEL_ANTE の北の口 = 背中の HEART_DOOR) と、その内側の壁の厚み (z GATE_Z + 1)
     static final int GATE_Z = StormBackLayout.KEEL_ANTE.z2() + 1;
 
+    // 入口の鏡の壁 (三章の「遅れて映る影」。titan/storm/chapter/MirrorLag): 入口の内側 (中心から北へ 6) に、竜骨の筋をはさんで羽鏡が東西 3 つずつ。
+    // 順路の段 4 で運ばれた人の着く所 (InstanceArenas.heartEntry = CX+3, CZ-11) から南へ 5 ブロック。羽鏡の台は FLOOR の高さに立つ
+    public static final int MIRROR_Z = CZ - 6;
+    public static final int[] MIRROR_DX = {-4, -3, -2, 2, 3, 4};
+
     // 柱の満ちた段 (部屋は一つ。竜骨の間は一度に一つのグループだけが入れる部屋なので、その持ち主の戦いの段)
     private static final int[] CHARGE = new int[4];
 
@@ -66,6 +71,20 @@ public final class StormHeartArena {
     // 心臓の居場所の水平の中心
     public static Vec3 center() {
         return new Vec3(CX + 0.5, FLOOR, CZ + 0.5);
+    }
+
+    // 入口の鏡の壁の羽鏡の台の座標 (FLOOR の高さ)
+    public static List<BlockPos> mirrorWall() {
+        List<BlockPos> list = new ArrayList<>();
+        for (int dx : MIRROR_DX) {
+            list.add(new BlockPos(CX + dx, FLOOR, MIRROR_Z));
+        }
+        return list;
+    }
+
+    // 点が丸い部屋の中 (壁から 1 ブロック内) か
+    public static boolean inRoom(Vec3 p) {
+        return dist(p.x, p.z) <= RADIUS - 1;
     }
 
     // 戦いの部屋の内側 (入口の封印より奥)。技と狙いもこの中に限る
@@ -206,7 +225,8 @@ public final class StormHeartArena {
         return back.getBlockState(new BlockPos(CX, FLOOR - 2, CZ)).is(Blocks.CHISELED_TUFF_BRICKS)
                 && back.getBlockState(new BlockPos(CX + 3, FLOOR + 6, CZ + 3)).isAir()
                 && back.getBlockState(rod(0).above(ROD_HEIGHT - 1)).is(Blocks.END_ROD)
-                && !back.getBlockState(new BlockPos(CX + 1, FLOOR, GATE_Z + 1)).isSolid();
+                && !back.getBlockState(new BlockPos(CX + 1, FLOOR, GATE_Z + 1)).isSolid()
+                && back.getBlockState(mirrorWall().get(0)).is(StormBackSetup.MIRROR.get());
     }
 
     public static void ensureBuilt(ServerLevel back) {
@@ -323,6 +343,12 @@ public final class StormHeartArena {
                     back.setBlock(new BlockPos(hx + dx, top - 1, hz + dz), lamp, flags);
                 }
             }
+        }
+        // 入口の鏡の壁: 羽鏡の台 (台の向きは外側へ振って、光を散らす)
+        int[] rot = {0, 1, 0, 1, 0, 1};
+        List<BlockPos> mirrors = mirrorWall();
+        for (int i = 0; i < mirrors.size(); i++) {
+            back.setBlock(mirrors.get(i), StormBackSetup.MIRROR.get().defaultBlockState().setValue(StormBlocks.Mirror.ROT, rot[i]), flags);
         }
         // 見えない光 (床の 1 段上、3 ブロックおき)。床はどこでも明るさ 12 以上になる。
         // 当たり判定がないので、歩くのにも、閃光の陰や技の判定にも効かない

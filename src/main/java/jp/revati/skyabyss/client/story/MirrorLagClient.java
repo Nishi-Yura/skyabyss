@@ -20,7 +20,7 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
 
-// 眼の間の遅れた影 (サーバーは titan/storm/chapter/MirrorLag) のクライアント側。自分の世界にだけ、見る者の形の人影を一つ置く。
+// 竜骨の間の入口の遅れた影 (サーバーは titan/storm/chapter/MirrorLag) のクライアント側。自分の世界にだけ、見る者の形の人影を一つ置く。
 // - 毎 tick、自分の位置と向きを覚え、delay tick 前のものを鏡の面で折り返した所へ影を動かす (映った自分が遅れて動く)
 // - 影は半透明 (0.55)。目の光は弱い。見つめ続けると (1.5 秒)、影が先にこちらを向き、薄れて消える
 // - 長さ (duration) が過ぎる・次元が変わる・切断で消す

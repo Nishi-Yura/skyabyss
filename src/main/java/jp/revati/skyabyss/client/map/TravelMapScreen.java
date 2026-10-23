@@ -48,7 +48,7 @@ public class TravelMapScreen extends Screen {
 
     // 印の絵の番号 (marks.png の並び。tools/gen/world/gen_travel_map_assets.py の SPRITES と同じ)
     static final int S_TOWN = 0, S_CAMP = 1, S_FOOTPRINT = 2, S_RIBS = 3, S_WAYMARK = 4, S_SITE = 5, S_TITAN = 6, S_GRAVE = 7,
-            S_PARTY = 8, S_OBJECTIVE = 9, S_RUMOR = 10, S_SELF = 11, S_SPAWN = 12, S_SHRINE = 13, S_GLOW = 14, S_CAIRN = 15;
+            S_PARTY = 8, S_OBJECTIVE = 9, S_RUMOR = 10, S_SELF = 11, S_SPAWN = 12, S_SHRINE = 13, S_GLOW = 14;
 
     // 縮尺 (中心から縁までのブロック): いちばん寄せた / いちばん引いた / 開いたとき (町のまわり・世界)。ホイール一目盛りで 1.25 倍
     static final double MIN_RANGE = 96;
@@ -616,9 +616,6 @@ public class TravelMapScreen extends Screen {
         List<MapMarks.Mark> ordered = new ArrayList<>(marks);
         ordered.sort(Comparator.comparingInt(TravelMapScreen::layer));
         for (MapMarks.Mark m : ordered) {
-            if (m.kind() == MapMarks.Kind.CAIRN) {
-                continue;
-            }
             if (chart != null && (m.kind() == MapMarks.Kind.WAYMARK || m.kind() == MapMarks.Kind.TITAN || m.kind() == MapMarks.Kind.SPAWN)) {
                 // 海図の行き先として描く (下)
                 continue;
@@ -815,7 +812,6 @@ public class TravelMapScreen extends Screen {
             return 0;
         }
         return switch (m.kind()) {
-            case CAIRN -> 0;
             case SITE, WAYMARK, SHRINE -> 10;
             case FOOTPRINT, RIBS, SPAWN -> 20;
             case CAMP -> 30;
@@ -834,45 +830,8 @@ public class TravelMapScreen extends Screen {
             case SITE -> S_SITE;
             case TITAN -> S_TITAN;
             case SHRINE -> S_SHRINE;
-            case CAIRN -> S_CAIRN;
             case SPAWN -> S_SPAWN;
         };
-    }
-
-    private void drawRoad(GuiGraphics g, Palette p, List<MapMarks.Mark> marks) {
-        MapMarks.Mark town = null;
-        MapMarks.Mark camp = null;
-        List<MapMarks.Mark> cairns = new ArrayList<>();
-        for (MapMarks.Mark m : marks) {
-            if (m.kind() == MapMarks.Kind.TOWN && !m.rumor()) {
-                town = m;
-            } else if (m.kind() == MapMarks.Kind.CAMP) {
-                camp = m;
-            } else if (m.kind() == MapMarks.Kind.CAIRN) {
-                cairns.add(m);
-            }
-        }
-        if (town == null || cairns.isEmpty()) {
-            return;
-        }
-        MapMarks.Mark from = town;
-        cairns.sort(Comparator.comparingDouble(c -> Math.hypot(c.x() - from.x(), c.z() - from.z())));
-        List<MapMarks.Mark> path = new ArrayList<>();
-        path.add(town);
-        path.addAll(cairns);
-        if (camp != null) {
-            path.add(camp);
-        }
-        for (int i = 0; i + 1 < path.size(); i++) {
-            int[] a = project(path.get(i).x(), path.get(i).z());
-            int[] b = project(path.get(i + 1).x(), path.get(i + 1).z());
-            dashed(g, a[0], a[1], b[0], b[1], p.road(), 1, 3);
-        }
-        for (MapMarks.Mark c : cairns) {
-            int[] a = project(c.x(), c.z());
-            g.fill(a[0] - 1, a[1] - 1, a[0] + 2, a[1] + 2, 0xFF0C0E12);
-            g.fill(a[0], a[1], a[0] + 1, a[1] + 1, p.road() | 0xFF000000);
-        }
     }
 
     private Hit hit(int[] at, int order, List<Component> lines, @Nullable String destId) {

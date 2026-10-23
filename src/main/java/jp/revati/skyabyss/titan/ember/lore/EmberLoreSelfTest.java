@@ -32,9 +32,9 @@ import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.common.util.FakePlayer;
 
 // 余燼の伝承と締めの自己テスト (SELFTEST ember lore。13 の 11.2節の担当 G の確かめ方)。
-//  - 伝承: 余燼の 11 項目があり、文が日英にある。碑文の項目は看板の 4 行を写す。破れた頁 (ember_back) から鍛えの帳が出る。言いすぎない
-//  - 看板: 碑文 6 枚と入口の一言 3 枚がはみ出さない (SignFit、1 行 90 px)
-//  - 囁きと語りの文 (ほかの担当が使う鍵): 日英にある、%s の数がそろう
+//  - 伝承: 余燼の項目があり、文が日英にある。碑文の項目は看板の 4 行を写す。破れた頁 (ember_back) から鍛えの帳が出る。言いすぎない
+//  - 看板: 碑文 3 枚 (レイドの部屋の入口の碑) と入口の一言 3 枚がはみ出さない (SignFit、1 行 90 px)
+//  - 語りの文 (ほかの担当が使う鍵): 日英にある、%s の数がそろう
 //  - 品の名前と説明: 日英にある
 //  - 天の鍵との継ぎ目: 余燼の燠石が四つ目として story の SkyKey につながる (四体を止めて四つで鍵、三つでは組まない、止めていなければ組まない)。
 //    「第一章 了」は SkyKey の終わりの札 (一章　天の鍵 / ベータ版はここまでです) で出す
@@ -43,9 +43,8 @@ import net.neoforged.neoforge.common.util.FakePlayer;
 public final class EmberLoreSelfTest {
     private static final String[] LANGS = {"ja_jp", "en_us"};
     static final List<String> ENTRIES = List.of(EmberLore.LORE_TITAN, EmberLore.LORE_RUINS, EmberLore.LORE_LEDGER, EmberLore.LORE_SMITH,
-            EmberLore.LORE_STILLED, EmberLore.inscriptionLore("lore_ember_mouth"), EmberLore.inscriptionLore("lore_ember_hub"),
-            EmberLore.inscriptionLore("lore_ember_west"), EmberLore.inscriptionLore("lore_ember_east"), EmberLore.inscriptionLore("lore_ember_south"),
-            EmberLore.inscriptionLore("lore_ember_heart"));
+            EmberLore.LORE_STILLED, EmberLore.inscriptionLore("lore_ember_west"), EmberLore.inscriptionLore("lore_ember_east"),
+            EmberLore.inscriptionLore("lore_ember_south"));
     static final List<String> ITEMS = List.of("ember_helmet", "ember_chestplate", "ember_leggings", "ember_boots", "ember_war_axe", "ember_mantle",
             "kindling_charm", "smith_hammer", "thrall_poker", "ember_lantern", "ember_horn", "ember_shard", "ember_core", "spark_dust", "cinder_husk");
 
@@ -72,8 +71,8 @@ public final class EmberLoreSelfTest {
         }
         notes.forEach(n -> SkyAbyss.LOGGER.info("SELFTEST ember lore: {}", n));
         if (f.isEmpty()) {
-            SkyAbyss.LOGGER.info("SELFTEST ember lore PASSED ({} lore entries, {} signs, {} whispers, {} lines, sky key link, dawn)",
-                    ENTRIES.size(), EmberIds.INSCRIPTIONS.size() + EmberLore.TRIAL_SIGNS.size(), EmberLore.WHISPERS.size(), EmberLore.LINES.size());
+            SkyAbyss.LOGGER.info("SELFTEST ember lore PASSED ({} lore entries, {} signs, {} lines, sky key link, dawn)",
+                    ENTRIES.size(), EmberIds.INSCRIPTIONS.size() + EmberLore.TRIAL_SIGNS.size(), EmberLore.LINES.size());
         } else {
             f.forEach(x -> SkyAbyss.LOGGER.error("SELFTEST ember lore FAILED: {}", x));
         }
@@ -173,7 +172,7 @@ public final class EmberLoreSelfTest {
         notes.add("signs: " + keys.size() + " fit the sign width (widest line " + widest + " / " + SignFit.MAX_LINE_WIDTH + " px)");
     }
 
-    // ---------------------------------------------------------------- 囁き・語りの文・品の名前
+    // ---------------------------------------------------------------- 語りの文・品の名前
     private static int args(String s) {
         int n = 0;
         for (int i = s.indexOf("%s"); i >= 0; i = s.indexOf("%s", i + 2)) {
@@ -183,8 +182,7 @@ public final class EmberLoreSelfTest {
     }
 
     private static void lines(List<JsonObject> langs, List<String> f, List<String> notes) {
-        List<String> keys = new ArrayList<>(EmberLore.WHISPERS.values());
-        keys.addAll(EmberLore.LINES);
+        List<String> keys = new ArrayList<>(EmberLore.LINES);
         for (String item : ITEMS) {
             keys.add("item.skyabyss." + item);
             if (!item.startsWith("ember_helmet") && !item.equals("ember_chestplate") && !item.equals("ember_leggings") && !item.equals("ember_boots")) {
@@ -201,7 +199,7 @@ public final class EmberLoreSelfTest {
                 check(args(langs.get(0).get(key).getAsString()) == args(langs.get(1).get(key).getAsString()), key + " has different %s counts", f);
             }
         }
-        notes.add("lines: " + EmberLore.WHISPERS.size() + " whispers, " + EmberLore.LINES.size() + " narration lines and " + ITEMS.size()
+        notes.add("lines: " + EmberLore.LINES.size() + " narration lines and " + ITEMS.size()
                 + " item names in both languages");
     }
 
