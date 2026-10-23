@@ -85,6 +85,8 @@ public final class SelfTestRunner {
         steps.add(Step.once("group", jp.revati.skyabyss.titan.group.GroupSelfTest::runSelfTest));
         // 倒れた参加者の再入場 (20 秒の待ち・回数・全滅でやり直し・ゲームルール)。docs/design/02 の 4.2、10 の 10.4
         steps.add(Step.once("heart reentry", jp.revati.skyabyss.titan.group.ReentrySelfTest::runSelfTest));
+        // 全滅・全員が出る・再起動・保存から戻る・背中に誰もいない で、心臓が残らない (2026-10-23 の試遊の不具合)。SKYABYSS_SELFTEST_ONLY="heart orphan"
+        steps.addAll(jp.revati.skyabyss.titan.group.HeartOrphanSelfTest.steps());
         // 背の野営の道具 (置けない物の手持ち・置ける道具・上限・外す・背中を出ると戻る)。docs/design/08 の背中の決まり
         steps.add(Step.once("camp blocks", jp.revati.skyabyss.titan.dungeon.CampSelfTest::runSelfTest));
         // パーティの石: 誰かが試練のあとの石を鳴らせば、仲間全員 (離れた人・あとから入った人) のクエストが数える。docs/design/10 の 10.9
@@ -176,6 +178,8 @@ public final class SelfTestRunner {
         steps.addAll(jp.revati.skyabyss.mount.MountSelfTest.steps());
         // 町のクエスト (限定の人・噂・墓守・酔いどれ・地図屋・古井戸)。docs/design/35 の 3.3・3.5。SKYABYSS_SELFTEST_ONLY=town
         steps.addAll(jp.revati.skyabyss.town.TownSelfTest.steps());
+        // NPC v2 (人ごとの形・持ち物・動き)。docs/review/npc_quality_2026-10-23.md。SKYABYSS_SELFTEST_ONLY="lowpoly npc"
+        steps.addAll(jp.revati.skyabyss.npc.NpcModelSelfTest.steps());
         // 倒れたときの決まりと墓 (docs/design/11 の 6 章)
         steps.add(Step.once("grave (load)", jp.revati.skyabyss.grave.GraveSelfTest::load));
         steps.add(Step.once("grave", 40, jp.revati.skyabyss.grave.GraveSelfTest::runSelfTest));

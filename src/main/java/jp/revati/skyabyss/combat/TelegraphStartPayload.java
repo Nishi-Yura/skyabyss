@@ -9,7 +9,7 @@ import net.minecraft.resources.ResourceLocation;
 // サーバー -> クライアント: 床の印 (decal) を出す。形の数値・色・予告の長さ・いま何 tick 経っているか。
 // 見える人 (Telegraph と同じグループの規則) にだけ送る。取り消しは TelegraphCancelPayload。
 public record TelegraphStartPayload(int id, int kind, float[] params, float floor, int ageAtSend, int warn, int active, int rgb, int style,
-        @org.jetbrains.annotations.Nullable java.util.UUID target)
+        @org.jetbrains.annotations.Nullable java.util.UUID target, int look, int owner)
         implements CustomPacketPayload {
     public static final Type<TelegraphStartPayload> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "telegraph_start"));
 
@@ -34,6 +34,9 @@ public record TelegraphStartPayload(int id, int kind, float[] params, float floo
                 if (p.target() != null) {
                     buf.writeUUID(p.target());
                 }
+                // 技の見た目 (AttackLook の番号) と、技の主のエンティティ番号 (+1。0 = なし)
+                buf.writeVarInt(Math.max(0, p.look()));
+                buf.writeVarInt(p.owner() + 1);
             },
             buf -> {
                 int id = buf.readVarInt();
@@ -53,17 +56,24 @@ public record TelegraphStartPayload(int id, int kind, float[] params, float floo
                 int rgb = buf.readInt();
                 int style = buf.readByte();
                 java.util.UUID target = buf.readBoolean() ? buf.readUUID() : null;
-                return new TelegraphStartPayload(id, kind, params, floor, age, warn, active, rgb, style, target);
+                int look = buf.readVarInt();
+                int owner = buf.readVarInt() - 1;
+                return new TelegraphStartPayload(id, kind, params, floor, age, warn, active, rgb, style, target, look, owner);
             });
 
     public static TelegraphStartPayload of(int id, TelegraphShape shape, double floor, int ageAtSend, int warn, int active, int rgb, int style,
             @org.jetbrains.annotations.Nullable java.util.UUID target) {
+        return of(id, shape, floor, ageAtSend, warn, active, rgb, style, target, 0, -1);
+    }
+
+    public static TelegraphStartPayload of(int id, TelegraphShape shape, double floor, int ageAtSend, int warn, int active, int rgb, int style,
+            @org.jetbrains.annotations.Nullable java.util.UUID target, int look, int owner) {
         double[] d = shape.params();
         float[] f = new float[d.length];
         for (int i = 0; i < d.length; i++) {
             f[i] = (float) d[i];
         }
-        return new TelegraphStartPayload(id, shape.kind(), f, (float) floor, ageAtSend, warn, active, rgb, style, target);
+        return new TelegraphStartPayload(id, shape.kind(), f, (float) floor, ageAtSend, warn, active, rgb, style, target, look, owner);
     }
 
     // 受け取った側で形を戻す (壊れていれば null)

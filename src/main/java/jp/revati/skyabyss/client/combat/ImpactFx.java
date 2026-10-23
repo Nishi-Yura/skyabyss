@@ -46,6 +46,11 @@ public final class ImpactFx {
 
     // 当たった瞬間に 1 回だけ呼ぶ
     static void burst(ClientLevel level, TelegraphClient.Decal d) {
+        burst(level, d, false);
+    }
+
+    // bespoke: 技の見た目 (AttackFx) が当たりの粒を描くので、ここは音と揺れだけ
+    static void burst(ClientLevel level, TelegraphClient.Decal d, boolean bespoke) {
         if (d.style == Telegraph.Style.SAFE) {
             return;
         }
@@ -89,6 +94,10 @@ public final class ImpactFx {
         if (light) {
             return;
         }
+        if (bespoke) {
+            shake(cx, cz, radius, size);
+            return;
+        }
         final double fy0 = y0;
         ParticleOptions rim = rimParticle(el);
         double spacing = Math.max(0.7, Math.max(b[2] - b[0], b[3] - b[1]) / 24.0);
@@ -117,6 +126,10 @@ public final class ImpactFx {
             }
         }
         level.addParticle(ParticleTypes.EXPLOSION, cx, fy0 + 0.3, cz, 0, 0, 0);
+        shake(cx, cz, radius, size);
+    }
+
+    private static void shake(double cx, double cz, double radius, float size) {
         Minecraft mc = Minecraft.getInstance();
         if (mc.player != null && Config.SCREEN_SHAKE.get()) {
             double dist = Math.hypot(mc.player.getX() - cx, mc.player.getZ() - cz);

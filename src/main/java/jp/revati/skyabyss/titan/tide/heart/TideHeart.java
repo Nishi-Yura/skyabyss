@@ -801,7 +801,7 @@ public class TideHeart extends HeartBoss {
     // 床を走る輪 (跳べば当たらない。安全な筋は何もない)
     private void ripple(ServerLevel server, double r0, int warn, double[] gaps, float damage, boolean slow, boolean first) {
         int active = (int) Math.ceil((SHELL_REACH - r0) / SHELL_SPEED);
-        tg(server, TelegraphShape.wave(getX(), getZ(), r0, SHELL_REACH, 0.9, gaps, LANE_HALF), warn, D).active(active).jumpClear(0.9)
+        tg(server, TelegraphShape.wave(getX(), getZ(), r0, SHELL_REACH, 0.9, gaps, LANE_HALF), warn, D).look(jp.revati.skyabyss.combat.AttackLook.TIDE_RIPPLE).active(active).jumpClear(0.9)
                 .onImpact(s -> {
                     if (first) {
                         sound(s, SoundEvents.TURTLE_EGG_CRACK, 2f, 0.5f);
@@ -839,7 +839,7 @@ public class TideHeart extends HeartBoss {
             entityData.set(DATA_ROARING, true);
             sound(server, TideHeartSetup.ROAR.get(), 3f, 1f);
             server.sendParticles(ParticleTypes.SPLASH, getX(), coreY(), getZ(), 80, 1.6 * BODY_SCALE, 1.4 * BODY_SCALE, 1.6 * BODY_SCALE, 0.3);
-            tg(server, TelegraphShape.circle(getX(), getZ(), ROAR_PUSH_RADIUS), ROAR_PUSH_WARN, H).reach(3.5)
+            tg(server, TelegraphShape.circle(getX(), getZ(), ROAR_PUSH_RADIUS), ROAR_PUSH_WARN, H).look(jp.revati.skyabyss.combat.AttackLook.TIDE_ROAR).reach(3.5)
                     .onImpact(s -> {
                         sound(s, SoundEvents.GENERIC_SPLASH, 2f, 0.6f);
                         s.sendParticles(ParticleTypes.SPLASH, getX(), floorY() + 0.5, getZ(), 80, 4.0, 0.3, 4.0, 0.4);
@@ -899,7 +899,7 @@ public class TideHeart extends HeartBoss {
                 double dz = Math.sin(angle);
                 boolean sounds = first;
                 first = false;
-                tg(server, TelegraphShape.line(getX() + dx * 0.5, getZ() + dz * 0.5, angle, BREATH_LENGTH, BREATH_HALF_WIDTH), BREATH_WARN, D).target(aim)
+                tg(server, TelegraphShape.line(getX() + dx * 0.5, getZ() + dz * 0.5, angle, BREATH_LENGTH, BREATH_HALF_WIDTH), BREATH_WARN, D).look(jp.revati.skyabyss.combat.AttackLook.TIDE_BREATH).target(aim)
                         .onImpact(s -> {
                             if (sounds) {
                                 sound(s, SoundEvents.GENERIC_SPLASH, 2f, 0.7f);
@@ -931,7 +931,7 @@ public class TideHeart extends HeartBoss {
             int n = present(server);
             lockedCount = shellRings(n);
             double[] gaps = lanes(random.nextDouble() * Math.PI * 2, shellLanes(n));
-            tg(server, TelegraphShape.circle(getX(), getZ(), SHELL_CORE), SHELL_WARN, D)
+            tg(server, TelegraphShape.circle(getX(), getZ(), SHELL_CORE), SHELL_WARN, D).look(jp.revati.skyabyss.combat.AttackLook.TIDE_SHELL_STRIKE)
                     .onImpact(s -> {
                         sound(s, SoundEvents.TURTLE_EGG_CRACK, 2f, 0.4f);
                         s.sendParticles(ParticleTypes.SPLASH, getX(), floorY() + 0.4, getZ(), 50, 2.0, 0.3, 2.0, 0.2);
@@ -961,7 +961,7 @@ public class TideHeart extends HeartBoss {
         double fy = floorY();
         if (actionTicks == 1) {
             sound(server, TideHeartSetup.WHIRL.get(), 2.2f, 1f);
-            tg(server, TelegraphShape.circle(getX(), getZ(), WHIRL_BLAST), WHIRL_WARN, D)
+            tg(server, TelegraphShape.circle(getX(), getZ(), WHIRL_BLAST), WHIRL_WARN, D).look(jp.revati.skyabyss.combat.AttackLook.TIDE_WHIRL)
                     .onImpact(s -> {
                         sound(s, SoundEvents.GENERIC_SPLASH, 2.5f, 0.6f);
                         s.sendParticles(ParticleTypes.SPLASH, getX(), floorY() + 0.5, getZ(), 120, 3.0, 0.5, 3.0, 0.4);
@@ -1081,7 +1081,7 @@ public class TideHeart extends HeartBoss {
             double z = p.z;
             boolean sounds = first;
             first = false;
-            Telegraph.in(server, TelegraphShape.circle(x, z, SPEAR_RADIUS)).floor(fy).warn(SPEAR_WARN).danger().owner(this).victims(this::canReach)
+            Telegraph.in(server, TelegraphShape.circle(x, z, SPEAR_RADIUS)).look(jp.revati.skyabyss.combat.AttackLook.TIDE_SPEAR).floor(fy).warn(SPEAR_WARN).danger().owner(this).victims(this::canReach)
                     .reach(FLOOR_REACH)
                     .onImpact(s -> {
                         s.playSound(null, x, fy, z, TideHeartSetup.SPEAR.get(), SoundSource.HOSTILE, sounds ? 1.6f : 0.9f, 1f);
@@ -1182,7 +1182,7 @@ public class TideHeart extends HeartBoss {
             sound(server, TideHeartSetup.EBB.get(), 2.2f, 1f);
             int n = present(server);
             lockedCount = ebbRipples(n);
-            tg(server, TelegraphShape.circle(getX(), getZ(), EBB_BLAST), EBB_WARN, D)
+            tg(server, TelegraphShape.circle(getX(), getZ(), EBB_BLAST), EBB_WARN, D).look(jp.revati.skyabyss.combat.AttackLook.TIDE_EBB)
                     .onImpact(s -> {
                         sound(s, SoundEvents.GENERIC_SPLASH, 2.5f, 0.5f);
                         s.sendParticles(ParticleTypes.SPLASH, getX(), floorY() + 0.5, getZ(), 160, 4.0, 0.6, 4.0, 0.5);
@@ -1237,7 +1237,7 @@ public class TideHeart extends HeartBoss {
             moonBase = random.nextDouble() * Math.PI * 2;
             for (int i = 0; i < bars; i++) {
                 double start = moonBase + Math.PI * 2 * i / bars;
-                tg(server, TelegraphShape.sweep(getX(), getZ(), start, moonSpan, MOON_LENGTH, MOON_HALF_WIDTH), MOON_WARN, D).active(MOON_ACTIVE)
+                tg(server, TelegraphShape.sweep(getX(), getZ(), start, moonSpan, MOON_LENGTH, MOON_HALF_WIDTH), MOON_WARN, D).look(jp.revati.skyabyss.combat.AttackLook.TIDE_MOON_WAVE).active(MOON_ACTIVE)
                         .onImpact(s -> sound(s, TideHeartSetup.WAVE.get(), 2f, 1.3f))
                         .onHit((s, player) -> {
                             strike(player, WAVE_DAMAGE);
@@ -1334,7 +1334,7 @@ public class TideHeart extends HeartBoss {
             sound(server, TideHeartSetup.EBB.get(), 2.5f, 1.3f);
             int n = present(server);
             springGaps = lanes(random.nextDouble() * Math.PI * 2, shellLanes(n));
-            tg(server, TelegraphShape.circle(getX(), getZ(), EBB_BLAST), SPRING_WARN, D)
+            tg(server, TelegraphShape.circle(getX(), getZ(), EBB_BLAST), SPRING_WARN, D).look(jp.revati.skyabyss.combat.AttackLook.TIDE_SPRING_TIDE)
                     .onImpact(s -> {
                         sound(s, SoundEvents.GENERIC_SPLASH, 2.5f, 0.5f);
                         s.sendParticles(ParticleTypes.SPLASH, getX(), floorY() + 0.5, getZ(), 160, 4.0, 0.6, 4.0, 0.5);

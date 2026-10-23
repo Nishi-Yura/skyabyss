@@ -38,6 +38,13 @@ public abstract class HeartBoss extends GuardMob {
     // 深淵の心臓か (docs/design/31 の B04。見た目 = 暗い染め・粒は両側で読む)
     private static final EntityDataAccessor<Boolean> DATA_ABYSS = SynchedEntityData.defineId(HeartBoss.class, EntityDataSerializers.BOOLEAN);
 
+    // 部屋 (GroupBossRoom) が湧かせた心臓か (保存する)。そうなら、戦わせている部屋がなくなったまま ORPHAN_TICKS たつと自分を消す。
+    // 不具合 (2026-10-23 の試遊「死んでも巨神のボスが消えないときがある」) の安全網: 部屋の状態はメモリにだけあり、サーバーの再起動・
+    // 部屋の持ち主の入れ替わり・部屋を動かさない間に、部屋だけが先に終わって心臓が残ることがあった。/summon やテストで置いた心臓は対象外
+    private boolean roomBound;
+    private int orphanTicks;
+    public static final int ORPHAN_TICKS = 100;
+
     // 0 = まだ始めていない、1 = 流れている、2 = 終わった (保存する。読み込みで二度流さない)
     private int introState;
     private int introTicks;
@@ -99,6 +106,33 @@ public abstract class HeartBoss extends GuardMob {
     @net.neoforged.bus.api.SubscribeEvent
     static void onServerStopped(net.neoforged.neoforge.event.server.ServerStoppedEvent event) {
         LIVE.clear();
+    }
+
+    // GroupBossRoom.start から: 部屋が湧かせた心臓の印
+    public final void markRoomBound() {
+        roomBound = true;
+        orphanTicks = 0;
+    }
+
+    public final boolean roomBound() {
+        return roomBound;
+    }
+
+    // 戦わせている部屋がないまま ORPHAN_TICKS たったら消す (20 tick ごとに見る)
+    private void tickOrphan(ServerLevel server) {
+        if (!roomBound || isDeadOrDying() || tickCount % 20 != 0) {
+            return;
+        }
+        if (jp.revati.skyabyss.titan.group.GroupBossRoom.claims(getUUID())) {
+            orphanTicks = 0;
+            return;
+        }
+        orphanTicks += 20;
+        if (orphanTicks >= ORPHAN_TICKS) {
+            SkyAbyss.LOGGER.info("A heart ({}) with no room fighting it was put back to sleep", getType().getDescriptionId());
+            heartBar().removeAllPlayers();
+            discard();
+        }
     }
 
     // 自己テスト用: いま登録されている心臓の数
@@ -376,6 +410,10 @@ public abstract class HeartBoss extends GuardMob {
                     setAbyss(true);
                 }
             }
+            tickOrphan(server);
+            if (isRemoved()) {
+                return;
+            }
             tickCinematicServer(server);
             holdHeight();
             if (isAbyss()) {
@@ -490,11 +528,13 @@ public abstract class HeartBoss extends GuardMob {
         super.addAdditionalSaveData(tag);
         tag.putBoolean("IntroDone", introState == 2);
         tag.putBoolean("Abyss", isAbyss());
+        tag.putBoolean("RoomBound", roomBound);
     }
 
     @Override
     public void readAdditionalSaveData(CompoundTag tag) {
         super.readAdditionalSaveData(tag);
+        roomBound = tag.getBoolean("RoomBound");
         if (tag.getBoolean("IntroDone")) {
             introState = 2;
         }

@@ -108,7 +108,7 @@ public final class ThunderCageDomain extends HeartDomain {
             double sz = cz + nz * d - tz * length / 2;
             boolean sounds = first;
             first = false;
-            tg(level, TelegraphShape.line(sx, sz, theta, length, HALF_WIDTH), WARN)
+            tg(level, TelegraphShape.line(sx, sz, theta, length, HALF_WIDTH), WARN).look(jp.revati.skyabyss.combat.AttackLook.DOMAIN_THUNDER_LINE)
                     .reach(REACH)
                     .onImpact(s -> {
                         if (sounds) {
@@ -250,7 +250,7 @@ public final class ThunderCageDomain extends HeartDomain {
         if (k == chargeTicks() - TELE_WARN) {
             double x = n.pos.x;
             double z = n.pos.z;
-            pending = tg(level, TelegraphShape.circle(x, z, ROD_RADIUS), TELE_WARN)
+            pending = tg(level, TelegraphShape.circle(x, z, ROD_RADIUS), TELE_WARN).look(jp.revati.skyabyss.combat.AttackLook.DOMAIN_THUNDER_ROD)
                     .onImpact(s -> s.playSound(null, x, floorY + 1, z, SoundEvents.LIGHTNING_BOLT_IMPACT, SoundSource.HOSTILE, 2.5f, 1.2f))
                     .onHit((s, p) -> striker.accept(p, ROD_DAMAGE))
                     .start();
