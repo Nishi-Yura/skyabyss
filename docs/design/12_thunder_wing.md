@@ -619,12 +619,13 @@
 | 歩 SR1 の入口 | `sign.skyabyss.lore_storm_west` | 骨は空洞 / 風の通う道 / 我らは骨の中で / 飛ぶことを知った | Bones are hollow / roads for wind. / Inside them we / learned to fly | 86 px |
 | 智 SR2 の入口 | `sign.skyabyss.lore_storm_east` | 雷は柱を選ぶ / 柱は我らを / 守ってくれた / あの夜までは | Bolts seek rods, / and the rods / kept us safe / until that night | 82 px |
 | 闘 SR3 の入口 | `sign.skyabyss.lore_storm_tail` | 嵐は鳥の衣 / 衣を脱がぬのは / 見つかるからだ / 上の影に | Storm cloaks / the bird. It / hides from the / shadow above | 73 px |
-| 歩 SR4 の入口 | `sign.skyabyss.lore_storm_column` | 雷の柱が歩く / 守る者を失い / なお見回りを / やめられぬまま | A bolt-pillar / still walks the / deck, guarding / those long gone | 81 px |
+| 歩 SR4 の入口 | `sign.skyabyss.lore_storm_column` | 雷の柱が歩く / 柱は来る者を / 覚えている / お前の顔も | A bolt-pillar / walks. It knows / all who come, / your face too. | 73 px |
 | 智 SR5 の入口 | `sign.skyabyss.lore_storm_beat` | 民は足で拍を / 数えて踊った / 鳥の鼓動に / 足並みを揃えて | The folk danced, / counting beats / with their feet / in step with it | 83 px |
 | 闘 SR6 の入口 | `sign.skyabyss.lore_storm_gale` | 嵐の目は静か / そこに守り手 / 兜の奥に / 誰かがいた | The eye is calm. / A keeper stands / there. Inside / the helm, someone | 89 px |
 
-- レイドの SR4〜SR6 の碑（雷柱・拍子・嵐の目）も同じ決まり（入口の休み場の壁。`RaidLore.SIGNS`。心の声は `message.skyabyss.raid_lore.SR4〜6.1/.2`）。雷柱は「守る者を失ってなお見回る」、拍子は「民が足で拍を数えて鳥の鼓動に合わせた」、嵐の目は「守り手の兜の奥に誰かがいた」。いずれも民のその後は書かず、羽守・雷乞いの伏線にとどめる
+- レイドの SR4〜SR6 の碑（雷柱・拍子・嵐の目）も同じ決まり（入口の休み場の壁。`RaidLore.SIGNS`。心の声は `message.skyabyss.raid_lore.SR4〜6.1/.2`）。雷柱は「来る者の顔を覚えている」、拍子は「民が足で拍を数えて鳥の鼓動に合わせた」、嵐の目は「守り手の兜の奥に誰かがいた」。いずれも民のその後は書かず、羽守・雷乞いの伏線にとどめる
 - 闘 SR3 の碑文は、空の影（巡礼者）への伏線。「上の影」が何かは書かない。
+- **分かたれた鼓動と「前にも来た者」の糸**（34 の 1.1）: どの引きでも三つとも出る。歩 = 来る者の顔を覚えている（SR4 の碑・SR1 の心の声「名を呼んだ気がした」と羽の間の碑文の項目の四角い頭の浮き彫り）／智 = 四本ずつ束ねた棒の刻み（SR2・SR5 の心の声）／闘 = 雷は空から、拍だけは下から昇る（SR3・SR6 の心の声）。
 - 置き場所は部屋の入口（`RaidLore.SIGNS`）だけ。体の中の碑文・囁きはない。
 
 ### 9.3 伝承の書の項目
