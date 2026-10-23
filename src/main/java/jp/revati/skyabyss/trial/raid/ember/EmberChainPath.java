@@ -54,6 +54,8 @@ public final class EmberChainPath extends EmberRoom {
     public void build(RaidCtx ctx) {
         RaidKit.buildCell(ctx, new RaidKit.Spec(HX, HZ, 10, RaidKit.EMBER));
         var lv = ctx.level();
+        EmberRaidDecor deco = EmberRaidDecor.of(ctx);
+        deco.shell(true);
         // 熾の海 (床をところどころマグマと玄武岩に。ctx.rng() で毎回少し変わる)
         int salt = ctx.rng().nextInt(16);
         for (int x = -HX + 1; x < HX; x++) {
@@ -93,7 +95,49 @@ public final class EmberChainPath extends EmberRoom {
                 }
             }
         }
+        decorate(ctx, deco);
         resetState(ctx);
+    }
+
+    // 飾り (docs/design/39 の 4.4 の「運ぶ (鎖の道)」): 奥の戸の後ろに大きな炉の口 (ゴールの額)、熾の海から立つ玄武岩の岩柱、
+    // 海の上の吊り鎖と鉤、壁は玄武岩の柱と熾の溝、南の壁の高い所に遠くの炉の窓。橋・島・上り段・下り段の通り道 (x ±5) は空ける
+    private void decorate(RaidCtx ctx, EmberRaidDecor d) {
+        d.keep(-5, 0, -23, 5, 10, HZ);
+        d.keep(-4, 0, -26, 4, 3, -23);
+        d.forgeMouth(0, 4, 9, 2);
+        d.exitFrame();
+        d.vistaSouth(-9, -5, 5);
+        // 熾の海の岩柱 (橋から離れた両脇。高さはまちまち、頭は磨いた玄武岩)
+        net.minecraft.util.RandomSource r = net.minecraft.util.RandomSource.create(0xE4C4A1L);
+        int made = 0;
+        for (int tries = 0; tries < 60 && made < 8; tries++) {
+            int x = (r.nextBoolean() ? 1 : -1) * (6 + r.nextInt(2));
+            int z = r.nextInt(2 * HZ - 7) - HZ + 4;
+            int top = 2 + r.nextInt(5);
+            boolean ok = true;
+            for (int y = 1; y <= top + 1; y++) {
+                ok &= d.free(x, y, z) && d.free(x, y, z + 1);
+            }
+            if (!ok) {
+                continue;
+            }
+            for (int y = 1; y <= top; y++) {
+                d.put(x, y, z, y == top ? EmberRaidDecor.axis(EmberRaidDecor.P_BASALT, net.minecraft.core.Direction.Axis.Y)
+                        : EmberRaidDecor.axis(EmberRaidDecor.BASALT, net.minecraft.core.Direction.Axis.Y));
+            }
+            if (top >= 4) {
+                d.put(x, 1, z + 1, EmberRaidDecor.axis(EmberRaidDecor.BASALT, net.minecraft.core.Direction.Axis.Y));
+                d.put(x, 2, z + 1, EmberRaidDecor.axis(EmberRaidDecor.P_BASALT, net.minecraft.core.Direction.Axis.Y));
+            }
+            made++;
+        }
+        d.relief(1);
+        d.veins(3);
+        d.chains(8, 5, 3, 0, 0, 0);
+        d.entry(EmberRaidDecor.Scene.CHAIN);
+        d.exitRoom();
+        d.lights(6, 5, 10);
+        finishDecor(ctx, d, d.defaultExitLamps());
     }
 
     private void setRow(RaidCtx ctx, int z, BlockState st) {
@@ -124,6 +168,7 @@ public final class EmberChainPath extends EmberRoom {
     @Override
     public void reset(RaidCtx ctx) {
         generation++;
+        closed(ctx);
         failRequested = false;
         resetState(ctx);
     }
@@ -249,6 +294,7 @@ public final class EmberChainPath extends EmberRoom {
         crossed = n;
         if (!ps.isEmpty() && n == ps.size()) {
             done = true;
+            opened(ctx);
             particles(ctx, ParticleTypes.LAVA, ctx.origin().getX() + 0.5, fy + 3, ctx.origin().getZ() - HZ + 2, 20, 1.5, 0.2);
         }
     }

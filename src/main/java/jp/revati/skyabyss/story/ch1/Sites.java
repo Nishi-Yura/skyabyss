@@ -21,7 +21,7 @@ import net.minecraft.world.item.Items;
 
 // 序章・一章の小要素の登録 (ChapterSites。docs/design/17 の 3.8)。部品は data/skyabyss/opening/ch1_*.json (tools/gen/ch1/gen_ch1_blueprints.py)。
 // 章が開いたとき、その人の拠点のまわりに扇形の 3 方向へ置かれる。拠点から 150 ブロック以内に 2 つ以上 (序章は 3 つ)。
-//   序章 (日 1)  旅の跡 3 つ (石の輪・倒れた荷車・小さな祭壇)。どれも箱 (食料・松明・低い装備) と頁 1 枚と積み石
+//   序章 (日 1)  旅の跡 3 つ (石の輪・倒れた荷車・小さな祭壇)。どれも箱 (食料・松明・低い装備) と頁 1 枚
 //   一章         旅の跡 2 つ (井戸・置き去りの荷)、見張りの丘、歌石 5 つ、失せ物の荷車、日記の場所
 public final class Sites {
     // 序章
@@ -37,7 +37,7 @@ public final class Sites {
     public static final String DIARY_SPOT = "ch1_diary_spot";
     public static final List<String> WHALE = List.of(TRACE_WELL, TRACE_PACK, LOOKOUT, LOST_CART, DIARY_SPOT,
             songStoneId(1), songStoneId(2), songStoneId(3), songStoneId(4), songStoneId(5));
-    // 一章の地上の新しい場所 (21 の 3.1、P6。34 の 4.2.1): 鯨道の石標 7 (7 つ目が祠)・骨の集め場・割れ殻の洞・骨の坑。荷車の傍らの道は失せ物の荷車の隣 (LOST_CART の post)、
+    // 一章の地上の新しい場所 (21 の 3.1、P6。34 の 4.2.1): 鯨道の祠・骨の集め場・割れ殻の洞・骨の坑。荷車の傍らの道は失せ物の荷車の隣 (LOST_CART の post)、
     // 歌の間は宿りの鐘の下 (SongChamber)
     public static final List<String> WHALE_P6 = buildP6();
 
@@ -46,24 +46,18 @@ public final class Sites {
 
     private static List<String> buildP6() {
         java.util.ArrayList<String> ids = new java.util.ArrayList<>();
-        for (int n = 1; n <= Ch1Prep.CAIRNS; n++) {
-            ids.add(roadCairnId(n));
-        }
+        ids.add(Ch1Prep.ROAD_SHRINE_ID);
         ids.add(Ch1Prep.BONE_CACHE);
         ids.add(Ch1Prep.CLEFT_CAVE);
         ids.add(Ch1Prep.BONE_PIT);
         return List.copyOf(ids);
     }
 
-    public static String roadCairnId(int n) {
-        return Ch1Prep.CAIRN_PREFIX + n;
-    }
-
     public static String songStoneId(int n) {
         return "ch1_song_stone_" + n;
     }
 
-    // 旅の跡 (箱と頁と積み石を持つ要素)
+    // 旅の跡 (箱と頁を持つ要素)
     public static boolean isTrace(String id) {
         return id.startsWith("ch1_trace_");
     }
@@ -101,18 +95,12 @@ public final class Sites {
 
     // ---------------------------------------------------------------- 21 の 3.1 の新しい場所 (P6)
     static void registerP6() {
-        // 鯨道の石標: 拠点から外へ、空の下へ向かう道すじ (n 番目は 24 + 18 (n-1) から 16 ブロックの幅の輪に置く。扇の 3 方向に散る)。7 つ目は祠
-        for (int n = 1; n <= Ch1Prep.CAIRNS; n++) {
-            int min = 24 + 18 * (n - 1);
-            int last = n;
-            ChapterSites.element(roadCairnId(n), Chapters.WHALE, last == Ch1Prep.CAIRNS ? "ch1_road_shrine" : "ch1_road_cairn").atRoad().dist(min, Math.min(150, min + 16))
-                    .arriveRadius(6).onArrive((p, s) -> {
-                        arrive(p, s);
-                        if (last == Ch1Prep.CAIRNS) {
-                            Tasks.later(40, () -> Lore.unlock(p, Ch1Prep.ROAD_CAIRNS, true));
-                        }
-                    }).register();
-        }
+        // 鯨道の祠: 都から一章の跡地 (北の丘) への道の終わり。道しるべの点のうち跡地にいちばん近い点に置く (atRoad)。着くと頁 ch1/road_shrine
+        ChapterSites.element(Ch1Prep.ROAD_SHRINE_ID, Chapters.WHALE, Ch1Prep.ROAD_SHRINE_ID).atRoad().dist(132, 148)
+                .arriveRadius(6).onArrive((p, s) -> {
+                    arrive(p, s);
+                    Tasks.later(40, () -> Lore.unlock(p, Ch1Prep.ROAD_SHRINE, true));
+                }).register();
         // 骨の集め場: 骨の山。人ごとの一度きりの抽選 (旅装の素材 + 道の固焼き 3)。TODO(P7): 骨負いがここへ導く (ch1/follow_hauler)
         SiteTreasure.register(Ch1Prep.BONE_CACHE, SiteTreasure.Table.of(List.of(new SiteTreasure.Entry("skyabyss:rock_shell_scrap", 3),
                 new SiteTreasure.Entry("skyabyss:bone_chip", 3),
@@ -144,7 +132,7 @@ public final class Sites {
                 .post(job -> fill(job, true, Ch1.PAGE_TRACE))
                 .onArrive((p, s) -> {
                     arrive(p, s);
-                    // 積み石の見回りの数に数える
+                    // 旅の跡の見回りの数に数える
                     Ch1Data data = Ch1Data.get(p.serverLevel().getServer().overworld());
                     if (data.player(p.getUUID()).rounds.add("s:" + s.id() + "#" + s.index())) {
                         data.setDirty();

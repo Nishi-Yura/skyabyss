@@ -5,7 +5,7 @@
 
 形式は tools/rough/opening_sites.py と同じ (palette / blocks [x,y,z,palette 番号] / marks / meta)。
 座標は部品の中心が (0, 0)、y=0 が最初の段 (地面の上面は y=-1)。向きは SiteJob が回す・反転するので、向きのある物は北向きで書く。
-小要素は「人が去った跡」。説明の看板は置かない (17 の 3.6)。積み石 (cairn) は、序章の「積み石の見回り」の目印にもなる。
+小要素は「人が去った跡」。説明の看板は置かない (17 の 3.6)。歌石のそばの積み石 (cairn) は番号の目印。
 """
 import json
 import os
@@ -120,7 +120,6 @@ def trace_camp():
     bp.set(-3, 0, 2, CARPET_W)
     bp.set(2, 0, -2, CHEST)
     bp.mark('chest', 2, 0, -2)
-    bp.cairn(3, -2, 3)
     bp.mark('stand', 0, 0, 3)
     return bp
 
@@ -128,7 +127,6 @@ def trace_camp():
 def trace_cart():
     bp = BP('ch1_trace_cart', [-5, -3, 5, 4])
     cart(bp, 0, 0)
-    bp.cairn(-4, 3, 3)
     bp.mark('stand', 0, 0, 3)
     return bp
 
@@ -145,7 +143,6 @@ def trace_altar():
             bp.set(x, 0, z, 'minecraft:cobblestone_wall[up=true,east=none,north=none,south=none,west=none,waterlogged=false]')
     bp.set(0, 0, -2, CHEST)
     bp.mark('chest', 0, 0, -2)
-    bp.cairn(3, 2, 2)
     bp.mark('stand', 0, 0, 3)
     return bp
 
@@ -165,7 +162,6 @@ def trace_well():
     bp.fill(-1, 3, -1, 1, 3, 1, 'minecraft:spruce_slab[type=bottom]')
     bp.set(2, 0, 2, BARREL)
     bp.mark('chest', 2, 0, 2)
-    bp.cairn(-3, -2, 3)
     bp.mark('stand', 0, 0, 3)
     return bp
 
@@ -181,7 +177,6 @@ def trace_pack():
     bp.set(1, 0, 1, CARPET_W)
     bp.set(2, 0, -1, 'minecraft:lantern[hanging=false,waterlogged=false]')
     bp.set(-2, 0, 1, LOG_X)
-    bp.cairn(3, 2, 2)
     bp.mark('stand', 0, 0, 3)
     return bp
 

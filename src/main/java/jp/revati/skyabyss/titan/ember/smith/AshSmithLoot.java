@@ -26,7 +26,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
 // 灰の鍛え手の報酬 (13 の 6.2節)。必ず出る品はない。参加者それぞれに別々に抽選し、持ち物へ直接入れる (受け取れない人の分は預かる)。
-//   経験値 50 (バニラ。必ず) / 余燼の燠石 60% 2〜4 / 共鳴の欠片 35% 1〜2 / 熾火の角杯 20% 1〜2 / 鍛え手の大鎚 5% (専用伝説。EmberGearLoot で特性を付け、図鑑に記す)
+//   経験値 50 (バニラ。必ず) / 余燼の燠石 60% 2〜4 / 共鳴の欠片 35% 1〜2 / 熾火の角杯 20% 1〜2 / 鍛え手の大鎚 5% (専用の逸品。EmberGearLoot で特性を付け、図鑑に記す)
 // 品は ID で持つ (EmberGear の ID)。まだ登録されていない品は抽選から外す。成長の経験値は 220 (初回 +100、推奨 Lv 30)
 public final class AshSmithLoot {
     public static final int VANILLA_XP = 50;

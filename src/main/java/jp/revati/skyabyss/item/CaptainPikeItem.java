@@ -27,7 +27,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.common.SimpleTier;
 
-// 番兵長の鉾 (伝説): 鯨骨の番兵長が振るっていた長柄。
+// 番兵長の鉾 (ヒロイック): 鯨骨の番兵長が振るっていた長柄。
 // 間合いが長く、一振りが前方の扇形に届く。三度目ごとに、足もとから骨が噴き上がる
 public class CaptainPikeItem extends SwordItem implements ModGear {
     public static final SimpleTier TIER = new SimpleTier(BlockTags.INCORRECT_FOR_IRON_TOOL, 2200, 6.0f, 3.5f, 16,
@@ -44,7 +44,7 @@ public class CaptainPikeItem extends SwordItem implements ModGear {
 
     @Override
     public GearTier tier() {
-        return GearTier.LEGENDARY;
+        return GearTier.HEROIC;
     }
 
     @Override

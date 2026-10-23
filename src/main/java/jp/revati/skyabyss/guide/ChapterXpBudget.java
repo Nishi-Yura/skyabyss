@@ -26,7 +26,7 @@ public final class ChapterXpBudget {
     public static final double MAX_RATIO = 1.6;
 
     // 「既存の小要素」に数え済みのクエスト (新しい分に数えない)
-    public static final Set<String> LEGACY = Set.of("ch1/day1_cairns", "ch1/day1_firewood", "ch1/lost_traveller", "ch2/ebb_road", "ch2/shore_signs",
+    public static final Set<String> LEGACY = Set.of("ch1/day1_traces", "ch1/day1_firewood", "ch1/lost_traveller", "ch2/ebb_road", "ch2/shore_signs",
             "ch3/sub_isana_wait", "ch3/sub_wind_marks", "ch4/fragments");
 
     private ChapterXpBudget() {

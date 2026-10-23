@@ -13,10 +13,17 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.TooltipFlag;
 
-// 雷淵の弓 (深淵の専用伝説の弓)。引き方はバニラの弓と同じ。矢の傷は ×1.8 (雷翼の弓 ×1.75 の少し上。伝説の枠)。
+// 雷淵の弓 (深淵のアーティファクトの弓)。引き方はバニラの弓と同じ。矢の傷は ×2.0 (エピックの雷翼の弓 ×1.75 の 1 割上。
+// ×1.8 では満月の矢の傷の切り上げが雷翼の弓と同じ 11 になり、階級の差が出なかった。2026-10-24)。
 // 本領は「雲穿ち」の書き換え「天落とし」(Rune.SKY_FALL。主の手に持つあいだだけ)
 public class AbyssBowItem extends BowItem implements ModGear {
-    public static final double DAMAGE = 1.8;
+    public static final double DAMAGE = 2.0;
+
+    // 一体への 1 秒あたり (満月で撃ち続ける。雷翼の弓と同じ式)
+    public static double dps(int enhance) {
+        return jp.revati.skyabyss.item.storm.ThunderWingBowItem.fullShotDamage(DAMAGE * (1 + jp.revati.skyabyss.item.GearEvents.ATTACK_RATE_PER_LEVEL * enhance))
+                / jp.revati.skyabyss.item.storm.StormGear.BOW_CYCLE;
+    }
 
     private final String dungeon;
     private final String descKey;
@@ -48,7 +55,7 @@ public class AbyssBowItem extends BowItem implements ModGear {
 
     @Override
     public GearTier tier() {
-        return GearTier.LEGENDARY;
+        return GearTier.ARTIFACT;
     }
 
     @Override
@@ -58,11 +65,11 @@ public class AbyssBowItem extends BowItem implements ModGear {
 
     @Override
     public Component getName(ItemStack stack) {
-        return ModGear.name(stack, super.getName(stack), GearTier.LEGENDARY);
+        return ModGear.name(stack, super.getName(stack), GearTier.ARTIFACT);
     }
 
     @Override
     public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
-        ModGear.tooltip(stack, tooltip, GearTier.LEGENDARY, descKey, true);
+        ModGear.tooltip(stack, tooltip, GearTier.ARTIFACT, descKey, true);
     }
 }

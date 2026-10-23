@@ -158,6 +158,8 @@ public final class FeatherCarry extends RaidRoom {
                 RaidKit.set(level, o.offset(x, H - 1, z), Blocks.LIGHTNING_ROD.defaultBlockState());
             }
         }
+        // 建築 (docs/design/39 の 4.3): 羽の座の扇・羽の段の壁・雲の天井・雲の窓
+        StormRoomDeco.dressSR1(ctx, PERCH_X, PERCH_Z, charmHomes);
     }
 
     // 置いてあるもの (羽・板・止まり木・護符) から r ブロック以上離れた (x, z) か。南の戸の前の通り道 (x ≈ 0 の南寄り) も避ける
@@ -307,6 +309,10 @@ public final class FeatherCarry extends RaidRoom {
         perchTaken[k] = true;
         count++;
         setPerch(ctx, PERCH_Z[k], true);
+        StormRoomDeco.fanLit(ctx, PERCH_Z[k], true);
+        if (count >= FEATHERS) {
+            StormRoomDeco.exitLit(ctx, true);
+        }
         BlockPos at = ctx.origin().offset(PERCH_X, 3, PERCH_Z[k]);
         ctx.level().playSound(null, at, SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, 1.2f, 0.6f + 0.2f * count);
         ctx.level().sendParticles(ParticleTypes.ELECTRIC_SPARK, at.getX() + 0.5, at.getY() + 1.4, at.getZ() + 0.5, 26, 0.3, 0.5, 0.3, 0.08);
@@ -455,7 +461,9 @@ public final class FeatherCarry extends RaidRoom {
         for (int k = 0; k < PERCH_Z.length; k++) {
             perchTaken[k] = false;
             setPerch(ctx, PERCH_Z[k], false);
+            StormRoomDeco.fanLit(ctx, PERCH_Z[k], false);
         }
+        StormRoomDeco.exitLit(ctx, false);
         count = 0;
         beat = 0;
         started = false;

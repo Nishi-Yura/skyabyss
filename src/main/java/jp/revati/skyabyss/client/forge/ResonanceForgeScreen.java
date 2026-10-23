@@ -56,7 +56,7 @@ public class ResonanceForgeScreen extends AbstractContainerScreen<ResonanceForge
         ENHANCE, REFORGE, EXCHANGE, INSCRIBE
     }
 
-    // 刻みの中の三つの頁: 抽出 (伝説 → アスペクトの芯)・刻印 (芯 → レアの装備)・穴 (欠片とルーンを差す)
+    // 刻みの中の三つの頁: 抽出 (ヒロイック以上 → アスペクトの芯)・刻印 (芯 → レア・エピックの装備)・穴 (欠片とルーンを差す)
     private enum Sub {
         EXTRACT, IMPRINT, SOCKET
     }
@@ -468,7 +468,7 @@ public class ResonanceForgeScreen extends AbstractContainerScreen<ResonanceForge
                         drawWrapped(g, Component.translatable(have.nameKey()), x, 52, 132, 1, TEXT);
                         drawWrapped(g, Component.translatable("tooltip.skyabyss.legend_rewrite", Component.translatable(have.skillNameKey()), Component.translatable(have.nameKey())), x, 62, 132, 2, DIM);
                     }
-                } else if (!(gear.getItem() instanceof ModGear mg) || mg.tier() != jp.revati.skyabyss.item.GearTier.RARE) {
+                } else if (!(gear.getItem() instanceof ModGear mg) || !mg.tier().aspectHost()) {
                     drawWrapped(g, Component.translatable("gui.skyabyss.forge.imprint_rare_only"), x, 42, 132, 4, DIM);
                 } else if (core == null) {
                     drawWrapped(g, Component.translatable("gui.skyabyss.forge.imprint_help"), x, 42, 132, 4, DIM);
@@ -528,7 +528,7 @@ public class ResonanceForgeScreen extends AbstractContainerScreen<ResonanceForge
         }
         drawWrapped(g, gear.getHoverName(), INFO_X, 19, 94, 1, TEXT);
         if (gear.getItem() instanceof ModGear mg) {
-            Component tier = Component.translatable("gear.skyabyss.tier." + mg.tier().key);
+            Component tier = Component.translatable(mg.tier().translationKey());
             Component line = mg.enhanceable()
                     ? tier.copy().append(Component.literal("  +" + ModGear.enhance(gear) + "/" + ModGear.MAX_ENHANCE))
                     : tier;
@@ -645,7 +645,7 @@ public class ResonanceForgeScreen extends AbstractContainerScreen<ResonanceForge
         }
     }
 
-    // 交換の巨神の表と、その専用伝説 (まだ登録されていない品は null。番号は set.exclusives() の並び)
+    // 交換の巨神の表と、その専用の逸品 (まだ登録されていない品は null。番号は set.exclusives() の並び)
     private TitanGearSet set() {
         List<TitanGearSet> all = TitanGearSets.all();
         return all.get(Math.min(titan, all.size() - 1));

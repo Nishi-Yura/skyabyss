@@ -3,17 +3,14 @@
   "subtitles.skyabyss_ch2.conch_far": "A conch sounds far away",
   "subtitles.skyabyss_ch2.ebb_recede": "The sea draws back",
   "subtitles.skyabyss_ch2.ebb_return": "The tide returns",
-
   "message.skyabyss.ch2.beat.cairn": "The foot of the cairn is white. A touch to the tongue: salt.",
   "message.skyabyss.ch2.beat.conch": "Far off, something like a conch being blown. The seabirds are all flying the same way.",
   "message.skyabyss.ch2.beat.rim": "The island out at sea is not where it was yesterday. The rim of its shell stands above the water.",
-
   "message.skyabyss.ch2.cairn.tall": "A tall cairn. The salt line at its foot is the height of the morning tide.",
   "message.skyabyss.ch2.cairn.low": "A low cairn. The salt line at its foot is the height of the evening tide.",
   "message.skyabyss.ch2.cargo.shell": "At the bottom of the washed-up cargo, a shell that points the way of the tide. A page, too.",
   "message.skyabyss.ch2.cargo.page": "Washed-up cargo. Nothing left but dried kelp and a page you have read.",
   "message.skyabyss.ch2.stele": "You copied the words on the beach stele into your book.",
-
   "message.skyabyss.ch2.conch.none": "The shell is silent. No sign of the island out at sea.",
   "message.skyabyss.ch2.conch.far_from_sea": "Too far from the sea. The sound will not reach the water.",
   "message.skyabyss.ch2.conch.not_now": "Not the hour to blow it. Try again a little before the ebb.",
@@ -35,7 +32,6 @@
   "message.skyabyss.ch2.conch.tier.0": "far",
   "message.skyabyss.ch2.conch.tier.1": "near",
   "message.skyabyss.ch2.conch.tier.2": "right here",
-
   "message.skyabyss.ch2.ebb.begin": "The sea draws back farther than ever. A stone road has appeared on the seabed.",
   "message.skyabyss.ch2.ebb.warn": "The tide is about to turn. If you are out on the road, hurry.",
   "message.skyabyss.ch2.ebb.return": "The tide is back. The road has hidden itself under the water.",
@@ -43,21 +39,18 @@
   "message.skyabyss.ch2.ebb.pushed_back": "The tide pushed you back.",
   "message.skyabyss.ch2.aftermath": "The stele reads: \"Under the water, something is pushing from below. Who? From deep below.\"",
   "chapter.skyabyss.aftermath.titan_tide": "The tide has returned. Under the water, something is pushing from below.",
-
   "commands.skyabyss.ch2.ebb.start": "The great ebb has begun",
   "commands.skyabyss.ch2.ebb.end": "The great ebb has ended",
   "commands.skyabyss.ch2.ebb.reset": "The great ebb records (running ones and who had theirs) were cleared",
   "commands.skyabyss.ch2.ebb.not_none": "A great ebb is already under way near here",
   "commands.skyabyss.ch2.ebb.no_sea": "No sea nearby where a road can be laid",
   "commands.skyabyss.ch2.ebb.not_active": "The great ebb is not under way",
-
   "lore.skyabyss.chapter1.ch2_drift_log.title": "Page from the Washed-up Cargo",
   "lore.skyabyss.chapter1.ch2_drift_log.body": "Wedged at the bottom of the cargo from the sea, a wet, rippled page.\n\n\"I note the hour the tide goes out, every day. Morning and evening. Three days running, the same hour. The island keeps its promise.\"\n\nThe letters slant as if written in a hurry. You feel you have seen that slant somewhere.",
   "lore.skyabyss.chapter1.ch2_beach_stele.title": "The Beach Stele",
   "lore.skyabyss.chapter1.ch2_beach_stele.body": "Three lines were cut into the stone on the beach.\n\nOne: the tide fills in order to leave.\nTwo: the island comes to those who wait.\nThree: if you walk the road the sea gives up, return before the tide does.\n\nEvery line is cut at the height of the water.",
   "lore.skyabyss.chapter1.ch2_ebb_page.title": "Page of the Tide Folk",
   "lore.skyabyss.chapter1.ch2_ebb_page.body": "A page found at the end of the road, on the night the sea drew far back.\n\n\"We on the shell walked the road across the sea to the shore. The road opens for one night only.\nIt is not the tide that opens it. The island exhales and pushes the sea aside.\n\nEach time it exhales, a little of the seabed shows. Beneath the seabed, something is still there.\"",
-
   "quest.skyabyss.ch2.shore_signs.title": "Marks on the Shore",
   "quest.skyabyss.ch2.shore_signs.summary": "Marks left by people who read the tide are scattered along the beach.",
   "quest.skyabyss.ch2.shore_signs.done": "Someone read the tide. And they, too, were waiting for it.",
@@ -70,7 +63,6 @@
   "quest.skyabyss.ch2.ebb_road.done": "At the end of the road, you found a page. The sea returned with the dawn.",
   "quest.skyabyss.ch2.ebb_road.walk.journal": "The sea has drawn far back. Walk to the end of the road before the tide hides it. The water is only knee-deep.",
   "quest.skyabyss.ch2.ebb_road.walk.walk": "Walk the road on the seabed to its end",
-
   "dialogue.skyabyss.storyteller.ch2_ledger": "Ah, you came. ...Good timing. Before we talk about the sea, there is something I want you to see.",
   "dialogue.skyabyss.storyteller.ch2_ledger2": "This ledger. The tide diary the villagers have kept for generations. Here, the recent pages... this hand.\nIt isn't mine. Whose was it? Somewhere I have...",
   "dialogue.skyabyss.storyteller.ch2_ledger3": "Will you look?",
@@ -84,9 +76,7 @@
   "dialogue.skyabyss.storyteller.ch2_conch_ask.yes": "I'll gladly take it.",
   "dialogue.skyabyss.storyteller.ch2_conch_ask.no": "No, I'll look for it again.",
   "dialogue.skyabyss.storyteller.ch2_conch_done": "There. Don't let go of this one.\nThe tide will wait for you, but a shell won't.",
-
   "message.skyabyss.ch2.trail.mark": "You received the Tide Crosser's Mark",
-
   "quest.skyabyss.ch2.salt_road.title": "The Salt Road",
   "quest.skyabyss.ch2.salt_road.summary": "The first step in getting ready to cross. Follow the salt pillars inland from the beach to the Sunken Salt Vault, and look for a way to read the tide.",
   "quest.skyabyss.ch2.salt_road.road.lead": "Isana: \"You cannot cross to the island if you cannot read the tide. The storyteller knows the old road on the beach.\"",

@@ -11,7 +11,7 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ItemStack;
 
 // 低ポリの防具 (案 C「骨組み」) の選び方 (docs/design/16_armor_design.md 5 章)。
-//  - メッシュ: 階級で決まる (コモン・アンコモン = 無印、レア = _rare、伝説・神器 = _legend)
+//  - メッシュ: 階級で決まる (コモン・アンコモン = 無印、レア = _rare、ヒロイック・アーティファクト = _legend)
 //  - アトラス + 光る画素: 強化段階で決まる (+0〜4 = 基準、+5〜9 = _plus5、+10 = _plus10)。無印メッシュには +5/+10 の絵が無いので基準のまま
 // 戻し方: enabled = false にすると 4 組とも元のキューブの geo (geo/armor/<組>_armor.geo.json) に戻る
 public final class LowPolyArmor {
@@ -46,9 +46,9 @@ public final class LowPolyArmor {
             };
         }
         GearTier tier = stack.getItem() instanceof ModGear g ? g.tier() : GearTier.COMMON;
-        return switch (tier) {
-            case COMMON, UNCOMMON -> "";
-            case RARE -> "_rare";
+        return switch (tier.meshTier) {
+            case "common" -> "";
+            case "rare" -> "_rare";
             default -> "_legend";
         };
     }

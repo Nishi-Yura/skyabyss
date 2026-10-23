@@ -50,11 +50,6 @@ public final class HeartArenaBuilder {
         BuildKit kit = new BuildKit(level, RandomSource.create(20261015L));
         build(kit);
         BossGates.buildHeart(kit);
-        for (Inscription lore : LORE_SIGNS) {
-            if (lore.key().equals("sign.skyabyss.lore_heart")) {
-                kit.wallSign(lore.pos(), lore.facing(), lore.key());
-            }
-        }
     }
 
     static void build(BuildKit kit) {

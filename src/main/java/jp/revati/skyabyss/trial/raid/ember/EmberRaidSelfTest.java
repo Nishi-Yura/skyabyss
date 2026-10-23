@@ -67,6 +67,7 @@ public final class EmberRaidSelfTest {
             carry(level, f, fakes, dump);
             order(level, f, fakes, dump);
             defense(level, f, fakes, dump);
+            smithHall(level, f);
             dump.append("}");
             try {
                 Files.writeString(Path.of("raid_ember_dump.json"), dump.toString());
@@ -193,6 +194,56 @@ public final class EmberRaidSelfTest {
         dump.append("]}");
     }
 
+    // 飾り (docs/design/39 の 6 章の負荷の上限): 飾りのブロック 8 千・明るさ 12 以上 40・ブロックエンティティ 24・飾りのエンティティ 16。
+    // 飾りが付いていること (ただの箱に戻っていない) も見る
+    static void decor(List<String> f, EmberRoom room, String id) {
+        EmberRaidDecor.Audit a = room.decorAudit;
+        if (a == null) {
+            f.add(id + " has no decoration audit (EmberRaidDecor)");
+            return;
+        }
+        if (!a.ok()) {
+            f.add(id + " decoration over budget: " + a);
+        }
+        if (a.deco() < 800) {
+            f.add(id + " has almost no decoration: " + a);
+        }
+        if (room.exitLamps.isEmpty()) {
+            f.add(id + " has no exit lamps");
+        }
+    }
+
+    // 中ボスの間 ERM の飾り: 建てて、閉じていて、負荷の内か。片付ける
+    private static void smithHall(ServerLevel level, List<String> f) throws ReflectiveOperationException {
+        RaidCtx ctx = newCtx(level, 77);
+        jp.revati.skyabyss.trial.raid.RaidRoom room = jp.revati.skyabyss.trial.raid.mid.MidRooms.create(jp.revati.skyabyss.progress.Titans.EMBER);
+        if (room == null) {
+            f.add("ERM is not registered");
+            return;
+        }
+        room.build(ctx);
+        try {
+            sealed(level, ctx, f, "ERM");
+            EmberRaidDecor.Audit a = EmberRaidDecor.lastSmithAudit;
+            if (a == null || !a.ok() || a.deco() < 800) {
+                f.add("ERM decoration missing or over budget: " + a);
+            }
+            // 元の間の仕掛け (灰溜まり・炉の扉) は残っている
+            BlockPos s = ctx.origin().subtract(jp.revati.skyabyss.titan.ember.back.EmberBackLayout.SMITH_CENTER);
+            for (BlockPos p : jp.revati.skyabyss.titan.ember.smith.AshSmithArena.PUDDLES) {
+                if (!level.getBlockState(p.offset(s)).is(Blocks.GRAY_WOOL)) {
+                    f.add("ERM ash puddle covered at " + p.offset(s).toShortString());
+                }
+            }
+            if (jp.revati.skyabyss.titan.ember.smith.AshSmithArena.furnaceOpen(level, s)) {
+                f.add("ERM furnace door is open after decorating");
+            }
+        } finally {
+            room.end(ctx);
+            jp.revati.skyabyss.trial.raid.RaidKit.clear(level, ctx.cell().bounds());
+        }
+    }
+
     static boolean sealed(ServerLevel level, RaidCtx ctx, List<String> f, String id) {
         // 閉じている: 部屋の外周 (殻) に空気がない。入口・出口の戸の外側は戸が閉じていること
         var b = ctx.cell().bounds();
@@ -234,6 +285,7 @@ public final class EmberRaidSelfTest {
         RaidCtx ctx = newCtx(level, 11);
         room.build(ctx);
         sealed(level, ctx, f, "ER1");
+        EmberRaidSelfTest.decor(f, room, "ER1");
         dumpPlan(level, ctx, "ER1", dump);
         room.start(ctx);
         FakePlayer a = fake(level, "a1");
@@ -306,6 +358,7 @@ public final class EmberRaidSelfTest {
         RaidCtx ctx = newCtx(level, 21);
         room.build(ctx);
         sealed(level, ctx, f, "ER2");
+        EmberRaidSelfTest.decor(f, room, "ER2");
         dumpPlan(level, ctx, "ER2", dump);
         room.start(ctx);
         FakePlayer a = fake(level, "a2");
@@ -377,6 +430,7 @@ public final class EmberRaidSelfTest {
         RaidCtx ctx = newCtx(level, 31);
         room.build(ctx);
         sealed(level, ctx, f, "ER3");
+        EmberRaidSelfTest.decor(f, room, "ER3");
         dumpPlan(level, ctx, "ER3", dump);
         room.start(ctx);
         FakePlayer a = fake(level, "a3");

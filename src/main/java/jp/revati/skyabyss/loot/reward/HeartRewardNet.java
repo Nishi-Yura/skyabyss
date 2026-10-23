@@ -14,7 +14,7 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 
 // 心臓の遺物の選択画面のパケット (docs/design/30_heart_reward_ui.md)。決めるのは全部サーバー。クライアントは見せて、押したものを伝えるだけ。
-//   Open    (サーバー → 持ち主): 画面を開く。巨神・選べる品の ID・持っている印 (専用伝説の並びの 1 ビットずつ)・自動で開いたか (場面のあと)
+//   Open    (サーバー → 持ち主): 画面を開く。巨神・選べる品の ID・持っている印 (専用の逸品の並びの 1 ビットずつ)・自動で開いたか (場面のあと)
 //   State   (サーバー → 持ち主): 「受け取れる遺物がある」の旗。旅嚢の「遺物」ボタンの出し入れ。入ったとき・選んだとき・足されたときに送る
 //   Result  (サーバー → 持ち主): 選んだ結果 (0 = 受け取った、ほかは HeartReward.Result の番号)
 //   Claim   (持ち主 → サーバー): この品を選ぶ

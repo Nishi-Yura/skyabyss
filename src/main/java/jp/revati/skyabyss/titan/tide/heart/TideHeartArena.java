@@ -314,11 +314,6 @@ public final class TideHeartArena {
                 kit.campfire(r.campfire());
             }
         }
-        for (var i : jp.revati.skyabyss.titan.tide.back.TideBackLayout.LORE_SIGNS) {
-            if (i.key().equals("sign.skyabyss.lore_tide_heart")) {
-                kit.wallSign(i.pos(), i.facing(), i.key());
-            }
-        }
     }
 
     private static void floorLamp(ServerLevel back, int dx, int dz, BlockState lamp, int flags) {

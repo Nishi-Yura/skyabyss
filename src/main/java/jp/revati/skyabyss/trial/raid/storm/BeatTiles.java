@@ -107,6 +107,8 @@ public final class BeatTiles extends RaidRoom {
                 RaidKit.set(level, o.offset(x, H - 1, z), Blocks.LIGHTNING_ROD.defaultBlockState());
             }
         }
+        // 建築 (docs/design/39 の 4.3): 雲に浮く板 (板の間の筋は格子)・北の壁の拍子の見本・見渡し台・羽の段の壁・雲の天井
+        StormRoomDeco.dressSR5(ctx);
     }
 
     private static final BlockState DIM = Blocks.WAXED_COPPER_BLOCK.defaultBlockState();
@@ -118,6 +120,7 @@ public final class BeatTiles extends RaidRoom {
         int cx = tileC(i % N);
         int cz = tileC(i / N);
         RaidKit.fill(ctx.level(), o.offset(cx - 1, 0, cz - 1), o.offset(cx + 1, 0, cz + 1), st);
+        StormRoomDeco.beatMirror(ctx, i, st != DIM);
     }
 
     private void paintAll(RaidCtx ctx, BlockState st) {
@@ -223,6 +226,7 @@ public final class BeatTiles extends RaidRoom {
                     round++;
                     if (round >= ROUNDS) {
                         enter(Phase.DONE);
+                        StormRoomDeco.exitLit(ctx, true);
                     } else {
                         paintAll(ctx, DIM);
                         enter(Phase.SHOW);
@@ -296,6 +300,7 @@ public final class BeatTiles extends RaidRoom {
         phase = Phase.IDLE;
         phaseAge = 0;
         paintAll(ctx, DIM);
+        StormRoomDeco.exitLit(ctx, false);
     }
 
     @Override

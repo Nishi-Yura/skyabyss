@@ -204,17 +204,9 @@ public final class TideBackLayout {
         return List.copyOf(out);
     }
 
-    // ---------------------------------------------------------------- 碑文 (05 の型。4 行の光る看板)
+    // 看板の位置と、文が向く向き (試練の入口の一言。TideIslandBuilder)
     public record Inscription(String key, BlockPos pos, Direction facing) {
     }
-
-    public static final List<Inscription> LORE_SIGNS = List.of(
-            new Inscription("sign.skyabyss.lore_tide_beach", new BlockPos(-36, 68, 67), Direction.SOUTH),
-            new Inscription("sign.skyabyss.lore_tide_hub", new BlockPos(-8, HUB_LEDGE + 2, 26), Direction.NORTH),
-            new Inscription("sign.skyabyss.lore_tide_west", new BlockPos(ALTAR[0] - 2, ALTAR_TOP + 2, ALTAR[1] - 4), Direction.SOUTH),
-            new Inscription("sign.skyabyss.lore_tide_east", new BlockPos(85, LEDGE_FLOOR + 2, -39), Direction.SOUTH),
-            new Inscription("sign.skyabyss.lore_tide_front", new BlockPos(-7, ROCK_TOP + 1, -119), Direction.UP),
-            new Inscription("sign.skyabyss.lore_tide_heart", new BlockPos(-4 + HEART_DX, 52, -8 + HEART_DZ), Direction.EAST));
 
     // 潮の底の門より奥 (螺旋の階段・前室・殻の底)
     public static boolean pastBottomGate(Vec3 p) {

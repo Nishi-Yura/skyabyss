@@ -52,6 +52,10 @@ public final class EmberForgeOrder extends EmberRoom {
     public void build(RaidCtx ctx) {
         RaidKit.buildCell(ctx, new RaidKit.Spec(11, 13, 8, RaidKit.EMBER));
         var lv = ctx.level();
+        EmberRaidDecor deco = EmberRaidDecor.of(ctx);
+        deco.shell(true);
+        // 入口から壁画への金の筋
+        deco.goldLine(0, -10, 12);
         List<Integer> kinds = new ArrayList<>(List.of(0, 1, 2, 3));
         Collections.shuffle(kinds, new java.util.Random(ctx.rng().nextLong()));
         for (int i = 0; i < 4; i++) {
@@ -69,7 +73,8 @@ public final class EmberForgeOrder extends EmberRoom {
             set(ctx, c.above(), b(STATION[kindAt[i]]));
             for (int[] d : new int[][] {{-2, -2}, {2, -2}, {-2, 2}, {2, 2}}) {
                 RaidKit.fill(lv, c.offset(d[0], 1, d[1]), c.offset(d[0], 2, d[1]), b(Blocks.POLISHED_BLACKSTONE_BRICKS));
-                set(ctx, c.offset(d[0], 3, d[1]), b(Blocks.SHROOMLIGHT));
+                // 台の四隅の柱の頭は燭台 (明るさ 12 以上の灯りは部屋に 40 まで。docs/design/39 の 6.2)
+                set(ctx, c.offset(d[0], 3, d[1]), EmberRaidDecor.candles(3));
             }
         }
         // 壁画 (北の壁ぎわ。左から順に 3x3 の色の板と、真ん中の道具、上に順の数の灯り、下に済みの灯り)
@@ -86,7 +91,56 @@ public final class EmberForgeOrder extends EmberRoom {
                 set(ctx, ctx.local(cx - s / 2 + j - (s % 2 == 0 ? 0 : 0), 6, z), b(Blocks.SHROOMLIGHT));
             }
         }
+        decorate(ctx, deco);
         resetState(ctx);
+    }
+
+    // 飾り (docs/design/39 の 4.4 の「解く」): 北の壁画の上に梁と鎖、南東の入口の脇に鞴の見渡し台 (二段。階段で上る)、
+    // 壁は玄武岩の柱と熾の溝、南西に遠くの炉の窓。台 (色の床と四隅の柱) と壁画の前は空ける
+    private void decorate(RaidCtx ctx, EmberRaidDecor d) {
+        for (int[] s : SPOTS) {
+            d.keepAround(s[0], s[1], 3, 5);
+        }
+        d.keep(-11, 0, -13, 11, 6, -11);
+        d.keep(-1, 0, -13, 1, 3, 13);
+        // 壁画の上の梁 (dy 7)。金の鋲を四つの絵の真上に
+        for (int x = -10; x <= 10; x++) {
+            boolean stud = false;
+            for (int mx : MURAL_X) {
+                stud |= x == mx;
+            }
+            d.place(x, 7, -13, stud ? EmberRaidDecor.GILD : EmberRaidDecor.axis(EmberRaidDecor.P_BASALT, net.minecraft.core.Direction.Axis.X));
+        }
+        for (int mx : MURAL_X) {
+            d.chainAt(mx + (mx < 0 ? -2 : 2), -12, 7, null);
+        }
+        // 見渡し台 (鞴の上): x 7..10, z 10..12。胴は茶の羊毛 (鞴の革)、上は唐檜の板。西から階段二段
+        for (int x = 7; x <= 10; x++) {
+            for (int z = 10; z <= 12; z++) {
+                boolean rim = x == 7 || x == 10 || z == 10 || z == 12;
+                d.put(x, 1, z, rim ? b(Blocks.BROWN_WOOL) : b(Blocks.POLISHED_BLACKSTONE_BRICKS));
+                d.put(x, 2, z, b(Blocks.SPRUCE_PLANKS));
+            }
+        }
+        for (int z = 10; z <= 12; z++) {
+            d.put(5, 1, z, b(Blocks.POLISHED_BLACKSTONE_BRICK_STAIRS).setValue(net.minecraft.world.level.block.StairBlock.FACING, net.minecraft.core.Direction.EAST));
+            d.put(6, 1, z, b(Blocks.POLISHED_BLACKSTONE_BRICKS));
+            d.put(6, 2, z, b(Blocks.POLISHED_BLACKSTONE_BRICK_STAIRS).setValue(net.minecraft.world.level.block.StairBlock.FACING, net.minecraft.core.Direction.EAST));
+        }
+        // 鞴の口 (北へ向いた鉄の筒) と、台の隅の金床・燭台
+        d.put(8, 1, 9, b(Blocks.IRON_BARS));
+        d.put(10, 3, 12, EmberRaidDecor.anvil(net.minecraft.core.Direction.NORTH));
+        d.put(10, 3, 10, EmberRaidDecor.candles(2));
+        d.exitFrame();
+        d.vistaSouth(-9, -5, 1);
+        d.relief();
+        d.veins(2);
+        d.chains(6, 4, 2, 0, 0, 0);
+        d.entry(EmberRaidDecor.Scene.MOLD);
+        d.exitRoom();
+        d.lights(3, 5, 10);
+        // 出口の灯り: 壁画の切れ目 (x ±1) から見える殻の上の段
+        finishDecor(ctx, d, List.of(ctx.local(-1, 4, -14), ctx.local(1, 4, -14)));
     }
 
     private void resetState(RaidCtx ctx) {
@@ -128,6 +182,7 @@ public final class EmberForgeOrder extends EmberRoom {
     @Override
     public void reset(RaidCtx ctx) {
         generation++;
+        closed(ctx);
         failRequested = false;
         wrongs = 0;
         resetState(ctx);
@@ -203,6 +258,7 @@ public final class EmberForgeOrder extends EmberRoom {
             particles(ctx, ParticleTypes.LAVA, c.getX() + 0.5, c.getY() + 0.5, c.getZ() + 0.5, 8, 0.4, 0.1);
             if (next >= 4) {
                 done = true;
+                opened(ctx);
             }
         } else {
             wrongs++;

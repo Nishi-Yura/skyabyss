@@ -23,7 +23,7 @@ import net.neoforged.neoforge.registries.RegisterEvent;
 //
 //   小要素 (ChapterSites)  序章: 旅の跡 3 (Sites.PROLOGUE)。一章: 旅の跡 2・見張りの丘・歌石 5・失せ物の荷車と日記の場所 (Sites.WHALE)
 //   宿りの炉端 (LodgeNook)   鐘の宿りの小屋に、ベッド・かまど・言伝ての板 (初日から使える)
-//   初日のお使い             quest/ch1/day1_cairns・day1_firewood (言伝ての板の週替わりの欄に常にある。語り部も頼む)
+//   初日のお使い             quest/ch1/day1_traces・day1_firewood (言伝ての板の週替わりの欄に常にある。語り部も頼む)
 //   小さな異変 (Oddities)    毎日 1 つ (日 1 から。夜に岩鯨の方を向く見る者・縁の音は別の担当に残す)
 //   歌石 (SongStones)        5 つ。積み石の低い順に叩くと 5 つ目で宿りの鐘が応える
 //   見張りの丘 (Lookout)     夕方に筒を覗くと遠い雲に縁
@@ -47,24 +47,24 @@ public final class Ch1 {
     public static final String SENTRY = "ch1/sentry";
     public static final String HUSH = "ch1/whale_hush";
     public static final String WRONGS = "ch1/small_wrongs";
-    public static final String ROUNDS = "ch1/cairn_rounds";
+    public static final String TRACE_ROUNDS = "ch1/trace_rounds";
     // 頁の数 (控え帳の「縁と頁」が埋まる)
     public static final List<String> ALL_LORE = List.of("ch1/trace_ring", "ch1/trace_cart", "ch1/trace_altar", "ch1/trace_well", "ch1/trace_pack",
-            DIARY, LOOKOUT, SONG, SENTRY, HUSH, WRONGS, ROUNDS);
+            DIARY, LOOKOUT, SONG, SENTRY, HUSH, WRONGS, TRACE_ROUNDS);
     // コードが直接記す項目 (条件が manual のもの)
-    public static final List<String> MANUAL_LORE = List.of(LOOKOUT, SONG, SENTRY, HUSH, WRONGS, ROUNDS);
+    public static final List<String> MANUAL_LORE = List.of(LOOKOUT, SONG, SENTRY, HUSH, WRONGS, TRACE_ROUNDS);
     // 経験値 (「はじめて見た物」。GrowthRewards.LORE_XP に足す。一人一回)
     public static final Map<String, Integer> LORE_XP = Map.ofEntries(
             Map.entry("ch1/trace_ring", 6), Map.entry("ch1/trace_cart", 6), Map.entry("ch1/trace_altar", 6),
             Map.entry("ch1/trace_well", 6), Map.entry("ch1/trace_pack", 6),
             Map.entry(DIARY, 12), Map.entry(LOOKOUT, 15), Map.entry(SONG, 20), Map.entry(SENTRY, 15),
-            Map.entry(HUSH, 15), Map.entry(WRONGS, 8), Map.entry(ROUNDS, 0));
+            Map.entry(HUSH, 15), Map.entry(WRONGS, 8), Map.entry(TRACE_ROUNDS, 0));
 
     // ---------------------------------------------------------------- クエスト (quest/ch1/)
-    public static final String Q_CAIRNS = "ch1/day1_cairns";
+    public static final String Q_ROUNDS = "ch1/day1_traces";
     public static final String Q_FIREWOOD = "ch1/day1_firewood";
     public static final String Q_TRAVELLER = "ch1/lost_traveller";
-    public static final String SIGNAL_ROUND = "ch1_cairn_round";
+    public static final String SIGNAL_ROUND = "ch1_trace_round";
     public static final String TOPIC_DIARY_TELL = "ch1_diary_tell";
 
     public static final ResourceLocation SONG_STONE_ID = ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "song_stone");

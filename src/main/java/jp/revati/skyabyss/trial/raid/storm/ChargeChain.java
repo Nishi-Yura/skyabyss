@@ -91,6 +91,8 @@ public final class ChargeChain extends RaidRoom {
             int z = (i % 2 == 0 ? -1 : 1) * (9 + ctx.rng().nextInt(3));
             RaidKit.fill(level, o.offset(x - 1, 1, z), o.offset(x + 1, 1, z), cut);
         }
+        // 建築 (docs/design/39 の 4.3): 中央の吊りの避雷の尖塔・雲の床の輪・羽の段の壁・雲の天井
+        StormRoomDeco.dressSR3(ctx);
     }
 
     @Override
@@ -145,6 +147,7 @@ public final class ChargeChain extends RaidRoom {
         if (eliteSpawned) {
             if (elite != null && (!elite.isAlive() || elite.isRemoved())) {
                 done = true;
+                StormRoomDeco.exitLit(ctx, true);
                 for (Mob m : new ArrayList<>(alive)) {
                     m.kill();
                 }
@@ -193,6 +196,7 @@ public final class ChargeChain extends RaidRoom {
         eliteSpawned = false;
         done = false;
         started = false;
+        StormRoomDeco.exitLit(ctx, false);
     }
 
     @Override
@@ -265,6 +269,7 @@ public final class ChargeChain extends RaidRoom {
         elite = spawn(ctx, StormMobSetup.FEATHER_WARDEN.get(), at.getX() + 0.5, at.getY(), at.getZ() + 0.5);
         if (elite == null) {
             done = true;
+            StormRoomDeco.exitLit(ctx, true);
             return;
         }
         AttributeInstance hp = elite.getAttribute(Attributes.MAX_HEALTH);

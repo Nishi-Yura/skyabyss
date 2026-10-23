@@ -1,0 +1,198 @@
+# 雷翼のレイドの部屋 (SR1〜SR6) と中ボスの間 (SRM) の建築の見比べ (docs/design/39 の 4.3)。前と後で同じ台本を流す
+#   bash tools/dev/mc_run.sh runShots --no-daemon -Pscript=tools/shots/raid_build_storm.txt -PshotsName=raid_build_storm_after
+#   絵は run/shots/<名前>/shots/raid_build_storm/ → python -I tools/shots/raid_build_storm_sheet.py が docs/review/raid_build_storm/ へ台紙
+# 部屋は /skystormraid show <id> が y 150 に建てる (入口の戸は開けてある)。観戦の姿で、入口の戸・高い隅・広間の中・入口の間から撮る
+world raid_build_storm flat
+size 1280 720
+timeout 2400
+render 8
+clouds off
+wait 200
+cmd skyabyss cinematic stop
+wait 10
+cmd skyabyss cinematic stop
+cmd skyabyss playtest skip opening
+cmd time set noon
+cmd gamerule doDaylightCycle false
+cmd gamerule doMobSpawning false
+hud off
+fov 90
+cmd gamemode spectator
+wait 40
+
+# SR1
+cmd skystormraid show SR1
+wait 40
+waitchunks 400
+camera -4599.5 151 5013.3 180 6
+wait 60
+shot sr1_a_entry
+camera -4587.5 156 5009.5 135 26
+wait 30
+shot sr1_b_corner
+camera -4603.5 151 5000.5 270 4
+wait 30
+shot sr1_c_east
+camera -4599.5 151 4997.5 0 -12
+wait 30
+shot sr1_d_south
+camera -4612.5 151 4990.5 315 -18
+wait 30
+shot sr1_e_ceiling
+camera -4597.5 151 5017.5 90 8
+wait 30
+shot sr1_f_vestibule
+cmd skystormraid exit
+wait 10
+camera -4599.5 151 4991.5 180 4
+wait 30
+shot sr1_h_exit
+
+# SR2
+cmd skystormraid show SR2
+wait 40
+waitchunks 400
+camera -4799.5 151 5010.3 180 6
+wait 60
+shot sr2_a_entry
+camera -4793.5 155 5006.5 135 26
+wait 30
+shot sr2_b_corner
+camera -4803.5 151 5000.5 270 4
+wait 30
+shot sr2_c_east
+camera -4799.5 151 4997.5 0 -12
+wait 30
+shot sr2_d_south
+camera -4806.5 151 4993.5 315 -18
+wait 30
+shot sr2_e_ceiling
+camera -4797.5 151 5014.5 90 8
+wait 30
+shot sr2_f_vestibule
+camera -4799.5 156 5012.5 180 38
+wait 30
+shot sr2_g_overlook
+
+# SR3
+cmd skystormraid show SR3
+wait 40
+waitchunks 400
+camera -4999.5 151 5014.3 180 6
+wait 60
+shot sr3_a_entry
+camera -4989.5 157 5010.5 135 26
+wait 30
+shot sr3_b_corner
+camera -5003.5 151 5000.5 270 4
+wait 30
+shot sr3_c_east
+camera -4999.5 151 4997.5 0 -12
+wait 30
+shot sr3_d_south
+camera -5010.5 151 4989.5 315 -18
+wait 30
+shot sr3_e_ceiling
+camera -4997.5 151 5018.5 90 8
+wait 30
+shot sr3_f_vestibule
+cmd skystormraid exit
+wait 10
+camera -4999.5 151 4990.5 180 4
+wait 30
+shot sr3_h_exit
+
+# SR4
+cmd skystormraid show SR4
+wait 40
+waitchunks 400
+camera -4399.5 151 5012.3 180 6
+wait 60
+shot sr4_a_entry
+camera -4388.5 156 5008.5 135 26
+wait 30
+shot sr4_b_corner
+camera -4403.5 151 5000.5 270 4
+wait 30
+shot sr4_c_east
+camera -4399.5 151 4997.5 0 -12
+wait 30
+shot sr4_d_south
+camera -4411.5 151 4991.5 315 -18
+wait 30
+shot sr4_e_ceiling
+camera -4397.5 151 5016.5 90 8
+wait 30
+shot sr4_f_vestibule
+
+# SR5
+cmd skystormraid show SR5
+wait 40
+waitchunks 400
+camera -4199.5 151 5008.3 180 6
+wait 60
+shot sr5_a_entry
+camera -4195.5 155 5004.5 135 26
+wait 30
+shot sr5_b_corner
+camera -4203.5 151 5000.5 270 4
+wait 30
+shot sr5_c_east
+camera -4199.5 151 4997.5 0 -12
+wait 30
+shot sr5_d_south
+camera -4204.5 151 4995.5 315 -18
+wait 30
+shot sr5_e_ceiling
+camera -4197.5 151 5012.5 90 8
+wait 30
+shot sr5_f_vestibule
+camera -4199.5 156 5010.5 180 38
+wait 30
+shot sr5_g_overlook
+
+# SR6
+cmd skystormraid show SR6
+wait 40
+waitchunks 400
+camera -3999.5 151 5014.3 180 6
+wait 60
+shot sr6_a_entry
+camera -3989.5 157 5010.5 135 26
+wait 30
+shot sr6_b_corner
+camera -4003.5 151 5000.5 270 4
+wait 30
+shot sr6_c_east
+camera -3999.5 151 4997.5 0 -12
+wait 30
+shot sr6_d_south
+camera -4010.5 151 4989.5 315 -18
+wait 30
+shot sr6_e_ceiling
+camera -3997.5 151 5018.5 90 8
+wait 30
+shot sr6_f_vestibule
+
+# SRM
+cmd skystormraid show SRM
+wait 40
+waitchunks 400
+camera -5199.5 151 5010.5 180 6
+wait 60
+shot srm_a_entry
+camera -5190.5 162 5009.5 135 26
+wait 30
+shot srm_b_corner
+camera -5203.5 151 5000.5 270 4
+wait 30
+shot srm_c_east
+camera -5199.5 151 4997.5 0 -12
+wait 30
+shot srm_d_south
+camera -5209.5 151 4990.5 315 -18
+wait 30
+shot srm_e_ceiling
+
+cmd skystormraid off
+quit

@@ -1,0 +1,272 @@
+# 五章「深淵」の装備 v2 (abyss_v2) の見た目: 一人称・三人称の構えと連撃の止め絵、点検、体に付けた装飾、持ち物の画面。
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/abyss_gear_v2.txt -PshotsName=abyss_gear_v2。音なし・日本語。docs/review/abyss_gear_v2/game/ へ写す
+world shots flat
+size 960 540
+timeout 3000
+render 6
+cmd time set noon
+cmd weather clear
+cmd gamemode creative
+camera 0 -60 8 180 0
+waitchunks
+hud on
+wait 350
+cmd skyabyss cinematic stop
+close
+wait 20
+swingpose off
+cmd item replace entity @s weapon.mainhand with skyabyss:abyss_lamp_sword
+mainhand right
+swingpose off
+wait 40
+perspective first
+bodyyaw 0
+hud on
+close
+wait 8
+chat clear
+shot abyss_lamp_sword_fpIdle
+perspective front
+bodyyaw 0
+hud off
+wait 8
+shot abyss_lamp_sword_tpIdle
+perspective front
+bodyyaw 70
+wait 8
+shot abyss_lamp_sword_tpSide
+bodyyaw 0
+perspective first
+hud on
+swingstep 0
+swingpose 0.25
+wait 3
+chat clear
+shot abyss_lamp_sword_fpS0_25
+swingstep 0
+swingpose 0.5
+wait 3
+chat clear
+shot abyss_lamp_sword_fpS0_5
+swingstep 1
+swingpose 0.25
+wait 3
+chat clear
+shot abyss_lamp_sword_fpS1_25
+swingstep 1
+swingpose 0.5
+wait 3
+chat clear
+shot abyss_lamp_sword_fpS1_5
+swingstep 2
+swingpose 0.25
+wait 3
+chat clear
+shot abyss_lamp_sword_fpS2_25
+swingstep 2
+swingpose 0.5
+wait 3
+chat clear
+shot abyss_lamp_sword_fpS2_5
+perspective front
+hud off
+swingstep 0
+swingpose 0.5
+wait 3
+shot abyss_lamp_sword_tpS0_50
+swingstep 1
+swingpose 0.5
+wait 3
+shot abyss_lamp_sword_tpS1_50
+swingstep 2
+swingpose 0.5
+wait 3
+shot abyss_lamp_sword_tpS2_50
+swingpose off
+perspective first
+hud on
+inspectpose 0.5
+wait 3
+chat clear
+shot abyss_lamp_sword_fpInspect
+inspectpose off
+wait 5
+cmd item replace entity @s weapon.mainhand with skyabyss:abyss_sinking_anchor
+mainhand right
+swingpose off
+wait 40
+perspective first
+bodyyaw 0
+hud on
+close
+wait 8
+chat clear
+shot abyss_sinking_anchor_fpIdle
+perspective front
+bodyyaw 0
+hud off
+wait 8
+shot abyss_sinking_anchor_tpIdle
+perspective front
+bodyyaw 70
+wait 8
+shot abyss_sinking_anchor_tpSide
+bodyyaw 0
+perspective first
+hud on
+swingstep 0
+swingpose 0.25
+wait 3
+chat clear
+shot abyss_sinking_anchor_fpS0_25
+swingstep 0
+swingpose 0.5
+wait 3
+chat clear
+shot abyss_sinking_anchor_fpS0_5
+swingstep 1
+swingpose 0.25
+wait 3
+chat clear
+shot abyss_sinking_anchor_fpS1_25
+swingstep 1
+swingpose 0.5
+wait 3
+chat clear
+shot abyss_sinking_anchor_fpS1_5
+perspective front
+hud off
+swingstep 0
+swingpose 0.5
+wait 3
+shot abyss_sinking_anchor_tpS0_50
+swingstep 1
+swingpose 0.5
+wait 3
+shot abyss_sinking_anchor_tpS1_50
+swingpose off
+perspective first
+hud on
+inspectpose 0.5
+wait 3
+chat clear
+shot abyss_sinking_anchor_fpInspect
+inspectpose off
+wait 5
+cmd item replace entity @s weapon.mainhand with skyabyss:abyss_pulse_dagger
+mainhand right
+swingpose off
+wait 40
+perspective first
+bodyyaw 0
+hud on
+close
+wait 8
+chat clear
+shot abyss_pulse_dagger_fpIdle
+perspective front
+bodyyaw 0
+hud off
+wait 8
+shot abyss_pulse_dagger_tpIdle
+perspective front
+bodyyaw 70
+wait 8
+shot abyss_pulse_dagger_tpSide
+bodyyaw 0
+perspective first
+hud on
+swingstep 0
+swingpose 0.25
+wait 3
+chat clear
+shot abyss_pulse_dagger_fpS0_25
+swingstep 0
+swingpose 0.5
+wait 3
+chat clear
+shot abyss_pulse_dagger_fpS0_5
+swingstep 1
+swingpose 0.25
+wait 3
+chat clear
+shot abyss_pulse_dagger_fpS1_25
+swingstep 1
+swingpose 0.5
+wait 3
+chat clear
+shot abyss_pulse_dagger_fpS1_5
+swingstep 2
+swingpose 0.25
+wait 3
+chat clear
+shot abyss_pulse_dagger_fpS2_25
+swingstep 2
+swingpose 0.5
+wait 3
+chat clear
+shot abyss_pulse_dagger_fpS2_5
+perspective front
+hud off
+swingstep 0
+swingpose 0.5
+wait 3
+shot abyss_pulse_dagger_tpS0_50
+swingstep 1
+swingpose 0.5
+wait 3
+shot abyss_pulse_dagger_tpS1_50
+swingstep 2
+swingpose 0.5
+wait 3
+shot abyss_pulse_dagger_tpS2_50
+swingpose off
+perspective first
+hud on
+inspectpose 0.5
+wait 3
+chat clear
+shot abyss_pulse_dagger_fpInspect
+inspectpose off
+wait 5
+cmd item replace entity @s weapon.mainhand with skyabyss:abyss_lantern_charm
+perspective first
+hud on
+wait 10
+chat clear
+shot abyss_lantern_charm_fp
+perspective front
+hud off
+bodyyaw 30
+wait 10
+shot abyss_lantern_charm_tp
+accequip abyss_pulse_listener abyss_surveyor_plumb
+cmd item replace entity @s weapon.mainhand with minecraft:air
+bodyyaw 20
+wait 10
+shot trinkets_worn_front
+bodyyaw 120
+wait 10
+shot trinkets_worn_side
+bodyyaw 200
+wait 10
+shot trinkets_worn_back
+bodyyaw 0
+accequip
+cmd clear @s
+cmd give @s skyabyss:abyss_lamp_sword
+cmd give @s skyabyss:abyss_sinking_anchor
+cmd give @s skyabyss:abyss_pulse_dagger
+cmd give @s skyabyss:abyss_pulse_listener
+cmd give @s skyabyss:abyss_lantern_charm
+cmd give @s skyabyss:abyss_surveyor_plumb
+cmd give @s skyabyss:whalebone_greatsword
+cmd give @s skyabyss:waterway_fang
+cmd give @s skyabyss:smith_hammer
+cmd gamemode survival
+chat clear
+open inventory
+wait 10
+shot inventory_icons
+close
+quit

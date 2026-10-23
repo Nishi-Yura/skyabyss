@@ -13,9 +13,9 @@ import net.minecraft.world.item.ItemStack;
 
 // 共鳴の炉の決まりごと (画面の表示とサーバーの処理で同じ計算を使う)
 //  強化: 由来の巨神の素材 (岩鯨の品は岩鯨の鱗片、潮殻の品は潮殻の殻片。TitanGearSets.shardFor) と共鳴の結晶を持ち物から使い、段階を一つ上げる。失敗はない
-//  分解: 装備を壊し、由来の巨神の共鳴の欠片 (伝説) か由来の巨神の素材 (それ以外) に戻す。鍛えた分の欠片も半分戻る。特性の付く品は結晶も
+//  分解: 装備を壊し、由来の巨神の共鳴の欠片 (ヒロイック) か由来の巨神の素材 (それ以外) に戻す。鍛えた分の欠片も半分戻る。特性の付く品は結晶も
 //  再鍛造: 共鳴の結晶 1 つで特性の候補を一組 (最大 3 組)。今のものか候補を選んで確定する (item/affix/AffixRules)
-//  交換: その巨神の共鳴の欠片 30 で、まだ持っていない専用伝説を一つ。心臓を倒すごとに一度 (loot/TitanLoot.exchange)。
+//  交換: その巨神の共鳴の欠片 30 で、まだ持っていない専用の逸品を一つ。心臓を倒すごとに一度 (loot/TitanLoot.exchange)。
 //        共鳴の欠片は巨神ごと (岩鯨・潮殻・雷翼・余燼。ModItems.resonanceShard)。古い共通の共鳴の欠片は、どの巨神の交換にも使える
 public final class ForgeRules {
     private ForgeRules() {
@@ -48,22 +48,21 @@ public final class ForgeRules {
     }
 
     // 分解で得るもの: [共鳴の欠片の数 (resonanceItem), 由来の巨神の素材の数 (shardItem), 共鳴の結晶の数]
-    // 結晶は特性の付く武器・防具だけ (レア 1、伝説 2)。重なった甲殻や大剣が、再鍛造の結晶になる
+    // 結晶は特性の付く武器・防具だけ (階級の表 GearTier.dismantleCrystals: レア・エピック 1、ヒロイック 2、アーティファクト 3)。
+    // 共鳴の欠片はヒロイック以上 (専用の逸品・深淵のアーティファクト)。エピック以下は由来の巨神の素材が戻る。重なった甲殻や大剣が、再鍛造の結晶になる
     public static int[] dismantleYield(ItemStack stack) {
         if (!(stack.getItem() instanceof ModGear gear)) {
             return new int[]{0, 0, 0};
         }
         int refund = shardsSpent(ModGear.enhance(stack)) / 2;
-        int crystals = AffixRules.eligible(stack) ? (gear.tier() == GearTier.LEGENDARY ? DISMANTLE_CRYSTALS_LEGENDARY : DISMANTLE_CRYSTALS_RARE) : 0;
-        return switch (gear.tier()) {
-            case LEGENDARY -> new int[]{gear.tier().dismantleValue, refund, crystals};
-            default -> new int[]{0, gear.tier().dismantleValue + refund, crystals};
-        };
+        GearTier tier = gear.tier();
+        int crystals = AffixRules.eligible(stack) ? tier.dismantleCrystals : 0;
+        return tier.shardDismantle
+                ? new int[]{tier.dismantleValue, refund, crystals}
+                : new int[]{0, tier.dismantleValue + refund, crystals};
     }
 
     // ---------------------------------------------------------------- 再鍛造
-    public static final int DISMANTLE_CRYSTALS_RARE = 1;
-    public static final int DISMANTLE_CRYSTALS_LEGENDARY = 2;
 
     public static Cost trialCost() {
         return new Cost(0, AffixRules.TRIAL_CRYSTALS);
@@ -175,7 +174,7 @@ public final class ForgeRules {
         return jp.revati.skyabyss.item.extra.GearFreedom.canExtract(gear) && crystalsAvailable(player, extractCost(destroy));
     }
 
-    // 伝説の書き換えを抽出して芯にする。壊すなら装備は呼び出し側が捨てる。芯を返す (できなければ空)
+    // 逸品の書き換えを抽出して芯にする。壊すなら装備は呼び出し側が捨てる。芯を返す (できなければ空)
     public static ItemStack extract(Player player, ItemStack gear, boolean destroy) {
         if (!canExtract(player, gear, destroy)) {
             return ItemStack.EMPTY;
@@ -200,10 +199,10 @@ public final class ForgeRules {
         return true;
     }
 
-    // ---------------------------------------------------------------- 交換 (共鳴の欠片 30 で、まだ持っていない専用伝説を一つ)
+    // ---------------------------------------------------------------- 交換 (共鳴の欠片 30 で、まだ持っていない専用の逸品を一つ)
     public static final int EXCHANGE_SHARDS = 30;
 
-    // 交換できるか: 心臓をまだ倒していない / この周回ではもう交換した / 図鑑の専用伝説をすべて持っている / できる
+    // 交換できるか: 心臓をまだ倒していない / この周回ではもう交換した / 図鑑の専用の逸品をすべて持っている / できる
     public enum ExchangeState {
         READY, NO_CLEAR, USED, ALL_OWNED
     }
@@ -213,7 +212,7 @@ public final class ForgeRules {
         return count(inventory, ModItems.resonanceShard(titan)) + count(inventory, ModItems.RESONANCE_SHARD.get());
     }
 
-    // 巨神 titan (stone_whale / tide_shell / thunder_wing / ember) の専用伝説を交換する分の共鳴の欠片があるか
+    // 巨神 titan (stone_whale / tide_shell / thunder_wing / ember) の専用の逸品を交換する分の共鳴の欠片があるか
     public static boolean exchangeAffordable(Player player, String titan) {
         return player.isCreative() || resonanceHeld(player, titan) >= EXCHANGE_SHARDS;
     }
@@ -228,7 +227,7 @@ public final class ForgeRules {
         }
     }
 
-    // 分解で戻る共鳴の欠片 (伝説。由来の巨神の欠片)
+    // 分解で戻る共鳴の欠片 (ヒロイック以上。由来の巨神の欠片)
     public static Item resonanceItem(ItemStack stack) {
         jp.revati.skyabyss.item.TitanGearSet set = TitanGearSets.of(stack.getItem());
         return ModItems.resonanceShard(set == null ? "stone_whale" : set.titan);

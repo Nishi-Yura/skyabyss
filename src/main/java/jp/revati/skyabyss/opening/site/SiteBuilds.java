@@ -172,13 +172,13 @@ public final class SiteBuilds {
         SiteNetwork.broadcast(server);
     }
 
-    // 建て終わっていない物を、野営地 → 宿り → 積み石 → 足跡 → 骨の順で予約する
+    // 建て終わっていない物を、野営地 → 宿り → 足跡 → 骨の順で予約する
     public static synchronized void enqueueMissing(MinecraftServer server) {
         ServerLevel level = server.overworld();
         SiteData data = SiteData.get(level);
         java.util.Set<SiteData.Entry> queued = new java.util.HashSet<>();
         QUEUE.forEach(j -> queued.add(j.entry));
-        for (String kind : new String[] {Kind.CAMP.id, Kind.SHELTER.id, "cairn", Kind.FOOTPRINT.id, Kind.RIBS.id}) {
+        for (String kind : new String[] {Kind.CAMP.id, Kind.SHELTER.id, Kind.FOOTPRINT.id, Kind.RIBS.id}) {
             for (SiteData.Entry e : data.entries(kind)) {
                 // 跡地の中の物 (一章の骨) は、跡地を整え終わってから
                 if (!e.built && !queued.contains(e) && !waitsForGround(data, e.pos)) {
@@ -227,7 +227,7 @@ public final class SiteBuilds {
             case "shelter" -> ShelterBuilder.create(level, data, e);
             case "footprint" -> FootprintBuilder.create(level, data, e);
             case "ribs" -> RibBuilder.create(level, data, e);
-            default -> CairnBuilder.create(level, data, e);
+            default -> throw new IllegalArgumentException("unknown opening site kind " + e.kind);
         };
     }
 
@@ -449,7 +449,7 @@ public final class SiteBuilds {
         for (int i = 0; i < e.extraNames.size(); i++) {
             points.put(e.extraNames.get(i), e.extraPos.get(i));
         }
-        String name = "opening_" + e.kind + (e.kind.equals("footprint") || e.kind.equals("cairn") ? "_" + e.index : "");
+        String name = "opening_" + e.kind + (e.kind.equals("footprint") ? "_" + e.index : "");
         ServerLevel level = ctx.getSource().getServer().overworld();
         StructureDump.queueRange(level, name, new BlockPos(r[0] - pad, y0, r[1] - pad), new BlockPos(r[2] + pad, y1, r[3] + pad), points);
         ctx.getSource().sendSuccess(() -> Component.literal("dumping " + name), false);

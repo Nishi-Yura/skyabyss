@@ -27,7 +27,7 @@ import net.neoforged.neoforge.common.util.FakePlayerFactory;
 
 // 心臓の遺物の選択 (HeartReward) の自己テスト。SKYABYSS_SELFTEST_ONLY="heart reward" でこれだけ流せる。結果は SELFTEST heart reward PASSED / FAILED。
 // 画面の描画は窓がないと確かめられないので、サーバーの決まりを確かめる:
-//   選べる品 (四体とも・専用伝説・作られた品だけ)、一度だけ受け取れる (二度目は断る・持ち物に一つ・図鑑に記す)、
+//   選べる品 (四体とも・専用の逸品・作られた品だけ)、一度だけ受け取れる (二度目は断る・持ち物に一つ・図鑑に記す)、
 //   選べない品・持っている品は断る (記録は変わらない)、入り直し (記録の往復・パケットの往復・開き直せる)、
 //   二人 (それぞれ別に選べる・同じ品を選んでもよい・一人の選びがもう一人を消さない)、「あとで」で記録が変わらず、あとでも一度だけ受け取れる、
 //   場面の終わりで画面が開く (スキップでも。終わる前には開かない)、日英の文、旧コマンド (/titanmemory choose) が同じ決まりを通る
@@ -120,7 +120,7 @@ public final class HeartRewardSelfTest {
     }
 
     private static void run(MinecraftServer server, FakePlayer a, FakePlayer b, FakePlayer c, List<String> f) {
-        // ---- 選べる品: 四体とも、専用伝説だけ、作られた品だけ
+        // ---- 選べる品: 四体とも、専用の逸品だけ、作られた品だけ
         for (String t : TITANS) {
             List<String> options = HeartReward.options(t);
             TitanGearSet set = TitanGearSets.get(t);
