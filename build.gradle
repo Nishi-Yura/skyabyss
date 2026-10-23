@@ -258,25 +258,22 @@ tasks.named('runServer') {
 }
 
 // jar を軽くする 2 つ (中身は変えない)。
-// (1) PNG の可逆圧縮: src の PNG を tools/dev/optimize_pngs.py で小さく書き直す。見た目 (デコードした RGBA) が元と一致したものだけ置き換える。
-//     素材を作り直したあとも、次のビルドでまた詰まる。Python が無いとビルドは止まる (tools/ の生成スクリプトと同じ前提)。
+// (1) PNG の可逆圧縮: jar に入る (build/resources/main の) PNG を tools/dev/optimize_pngs.py で小さく書き直す。見た目 (デコードした RGBA) が元と一致したものだけ置き換える。
+//     src は触らない (前は src を書き直していて、並行の作業の間で絵の差分がぶつかった)。jar を作るときだけ走る。Python が無いと jar は止まる
 def pngOptimize = tasks.register('optimizePngs', Exec) {
     group = 'build'
-    description = 'PNG を見た目を変えずに可逆圧縮する (src/main/resources)'
-    inputs.files(fileTree('src/main/resources') { include '**/*.png' })
-    inputs.file('tools/dev/optimize_pngs.py')
-    def stamp = layout.buildDirectory.file('png-optimize.stamp')
-    outputs.file(stamp)
-    commandLine 'python', 'tools/dev/optimize_pngs.py', 'src/main/resources'
-    doLast {
-        stamp.get().asFile.text = 'done'
-    }
+    description = 'jar に入る PNG を見た目を変えずに可逆圧縮する (build/resources/main)'
+    dependsOn 'processResources'
+    outputs.upToDateWhen { false }
+    commandLine 'python', 'tools/dev/optimize_pngs.py', 'build/resources/main'
+}
+tasks.named('jar') {
+    dependsOn pngOptimize
 }
 
 // (2) JSON の詰め込み: jar に入る (build/resources/main の) data/・assets の models・blockstates・lang・geo・animations の JSON を
 //     1 行に詰める。パースした中身は同じ。src 側は見やすい整形のまま。
 tasks.named('processResources') {
-    dependsOn pngOptimize
     doLast {
         def slurper = new groovy.json.JsonSlurper()
         // 日本語をエスケープすると lang が膨らむので、そのまま書く

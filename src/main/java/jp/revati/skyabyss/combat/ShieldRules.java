@@ -11,12 +11,12 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.living.LivingShieldBlockEvent;
 
 // 人の盾を弱める (2026-10-23 の試遊: 盾を構えればボスの技も全部止まって強すぎた)。バニラは正面の傷を全部止める。
-//  ふつうの敵の傷は KEEP (半分) だけ止め、大物 (最大体力 BIG_HEALTH 以上。心臓・中ボス・番人) と、持ち主のいない傷 (床の予告の技など) は KEEP_BIG だけ。
+//  ふつうの敵の傷は KEEP (全部) 止め、大物 (最大体力 BIG_HEALTH 以上。心臓・中ボス・番人) と、持ち主のいない傷 (床の予告の技など) は KEEP_BIG だけ。
 //  珊瑚の盾はどちらも CORAL_BONUS だけ多く止める。
 //  一度に BREAK_DAMAGE 以上を受けると、盾は BREAK_TICKS のあいだ構えられない (斧で叩かれたときと同じ待ち)。
 public final class ShieldRules {
-    public static final float KEEP = 0.5f;
-    public static final float KEEP_BIG = 0.25f;
+    public static final float KEEP = 1.0f;   // 2026-10-23 午後: 構えているのに傷を受けるのは違和感、と。ふつうの敵は全部止める
+    public static final float KEEP_BIG = 0.6f;
     public static final float BIG_HEALTH = 150f;
     public static final float BREAK_DAMAGE = 10f;
     public static final int BREAK_TICKS = 40;

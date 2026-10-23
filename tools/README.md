@@ -23,7 +23,7 @@
 | `once/` | 一度だけ走らせた移行スクリプト (`add_*_lang`・`fix_*`)。履歴として残す。もう走らせない |
 | `run/` | 実行の包み (`run_portrait_shots.sh`、`run_weapon_lp_shots.py`) |
 | `misc/` | 単発の調査・プローブ |
-| `dev/` | 開発用 (`rcon.py`、`mc_run.sh`) |
+| `dev/` | 開発用 (`rcon.py`、`mc_run.sh`、`quick_check.sh`、`world_template.sh`)。使い方は下の「開発の速い回し方」 |
 | `abyss/` `capital/` `rough/` `readme/` `structure/` `ui/` `trial_lang/` `sources/` `shots/` | 既存の作業フォルダ (ラフ・都・構造の検査・台本・入力の素材など) |
 | `site/` | サイト用 (別作業) |
 
@@ -419,3 +419,13 @@ python tools/gen/sound/gen_cinematic_voice.py --review                     # 3 �
 - 各段に `hit` の key が 1 つあり、その時刻 = 武器の `strike` (サーバーがダメージを入れる、振りの何割か)。自己テスト `SKYABYSS_SELFTEST=1 SKYABYSS_SELFTEST_ONLY="weapon" ./gradlew runServer` が、同期・連撃・釣り合い・預けたクリックの当たる tick を見る
 - 一人称の連続の絵 `python tools/sheets/weapon_moves_sheet.py` → `docs/review/previews/weapon_moves_sheet.png`。ゲーム内の確認は `tools/shots/weapon_moves.txt` (台本の `swingstep <段>`・`inspectpose <0..1>` が使える)
 - 画面の揺れは設定 `weaponShake`、軌跡は `weaponTrail`。点検のキーは `[` (`KeyDefaults.WEAPON_INSPECT`)
+
+## 開発の速い回し方 (エージェント向け。2026-10-23)
+
+- **コミット前の確認**: `bash tools/dev/quick_check.sh` (compileJava + check_generators + check_text_fit + 階段の検査があれば。ゲームは起動しない。`--no-java` で Python の確認だけ)。生成物を手で書き直さない (`check_generators.py` がずれを見つける)。
+- **ゲームの起動は必ず枠を通す**: `bash tools/dev/mc_run.sh runServer` / `runShots ...`。枠は `MC_SLOTS` 個 (既定 4)、空き物理メモリが `MC_SLOT_MB` (既定 3500) を切ると取らずに待つ (待つあいだ 30 秒おきに状況を出す)。`gradlew runServer` を直接叩かない。
+- **自己テストの絞り方** `SKYABYSS_SELFTEST=1 SKYABYSS_SELFTEST_ONLY=<指定>[,<指定>…]`。指定は 名前の頭 (`"storm back"`) / `group:<タグ>` (`group:raid` `abyss` `ui` `story` `titan` `combat` `backs` `mobs` `world`) / `~<語>` (名前に含む。例 `~quest`)。合うものが無ければ段の一覧を出して止める。複数指定しても流れる順は全体の順。
+- **段の名前の一覧**: `SKYABYSS_SELFTEST_LIST=1 ./gradlew --no-daemon --offline runServer` はワールドを読む前に `selftest_steps.txt` (run/ の中) と標準出力へ一覧とグループを出して終わる (枠は要らない。起動は数十秒)。
+- **ワールドの雛形**: 背を建て済みの `run/world` を、同じソース (titan/ abyss/ story/ch5/ registry/ block/ data/ の中身) ごとに一度だけ作り、`mc_run.sh` が `run/world` が無いときに自動で写す。作るのは `bash tools/dev/world_template.sh make ["titan back (build)"]`、無効化は `SKYABYSS_NO_TEMPLATE=1`、キーは `... key`。対象のソースを変えると別の雛形になる (古い雛形で試して見落とさないため)。
+- 自分が起動した java だけ PID で止める。`run/` の自分のワールドは終わったら消す。`gradlew --stop` は使わない。
+
