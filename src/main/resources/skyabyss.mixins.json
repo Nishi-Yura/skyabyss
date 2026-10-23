@@ -16,7 +16,9 @@
     "ToastAddMixin",
     "AdvancementToastAccessor",
     "ContainerLabelMixin",
-    "MountRiderLegsMixin"
+    "MountRiderLegsMixin",
+    "TrueTypeProviderAccessor",
+    "TrueTypeGlyphShadowMixin"
   ],
   "injectors": {
     "defaultRequire": 1

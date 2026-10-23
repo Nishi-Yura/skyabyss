@@ -21,7 +21,7 @@ import jp.revati.skyabyss.Config;
 import jp.revati.skyabyss.SkyAbyss;
 
 // mod の字 (mod に同梱のリソースパック skyabyss_font。tools/gen/ui/gen_fonts.py が作る)。
-//   本文の字: DotGothic16。パックが minecraft:default の日本語 (Unifont) を差し替えるので、バニラの画面も含めて日本語の字が変わる (英数はバニラのまま)
+//   本文の字: DotGothic16。パックが minecraft:default を差し替えるので、バニラの画面も含めて英数も日本語も変わる
 //   題字の字: Zen Antique (skyabyss:title)。章の題字・場所の名前・余韻の札だけに title() で掛ける
 // はじめて起動したときにパックを選んだ状態にする (設定 fontInstalled)。リソースパックの画面で外すとバニラの字に戻り、
 // そのときは skyabyss:title もバニラの字になる (mod 本体の assets/skyabyss/font/title.json は minecraft:default を指すだけ)
@@ -30,6 +30,9 @@ public final class ModFont {
     }
 
     public static final String PACK = "skyabyss_font";
+    // 本文の点の字の oversample (tools/gen/ui/gen_fonts.py と同じ値)。影のずれを直す目印にも使う (mixin/TrueTypeGlyphShadowMixin)。
+    // ほかの TTF ではこの値を使わない
+    public static final float PIXEL_OVERSAMPLE = 6f;
     // 題字の字は描く大きさで三つ (細かさが違う。tools/gen/ui/gen_fonts.py)。2 倍より大きく描く所は TITLE、1.5 倍は TITLE_MID、1〜1.2 倍は TITLE_SMALL
     public static final ResourceLocation TITLE = ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "title");
     public static final ResourceLocation TITLE_MID = ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "title_mid");
