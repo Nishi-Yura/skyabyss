@@ -197,7 +197,7 @@ public final class EmberTravel {
             return;
         }
         // 順路の区画の写し (背の次元の遠く。docs/design/32 の 5 章) の中は体の外ではない (R6 の通しで、写しのセルに着いた人が到着点へ戻されていた)
-        if (jp.revati.skyabyss.trial.TrialSlot.slotAt(player.getX(), player.getZ()) > 0) {
+        if (jp.revati.skyabyss.trial.TrialSlot.inInstance(player.getX(), player.getZ())) {
             ON_PLAIN.remove(player.getUUID());
             return;
         }

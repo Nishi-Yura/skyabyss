@@ -169,7 +169,8 @@ public final class StormTravel {
             return;
         }
         // 嵐の雲の天井より下へ落ちた: 白い閃光、休み場へ戻し、低速落下 5 秒、傷
-        if (player.getY() < StormBackLayout.CLOUD_Y && !coolingDown(player)) {
+        // 区画の部屋・中ボスの間・心臓の間 (体の外の閉じた部屋。床は雲より下のこともある) の中は落ちたことにしない
+        if (player.getY() < StormBackLayout.CLOUD_Y && !coolingDown(player) && !jp.revati.skyabyss.trial.TrialSlot.inInstance(player.getX(), player.getZ())) {
             fallBack(player);
         }
     }

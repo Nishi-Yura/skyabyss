@@ -472,6 +472,13 @@ public final class TrialSlot {
     }
 
     // その座標がどの区画か (番号)。区画の外なら 0
+    // 体の外の、閉じた部屋の並ぶ所 (区画 1〜32 の枠と、心臓の間のある 0 番の枠、自己テストの 33 番の枠) か。
+    // 背の決まり (雲より下へ落ちた・島から流された・灰の原へ出た) で人を到着の台へ戻さない所
+    public static boolean inInstance(double x, double z) {
+        int n = (int) Math.floor((x - ORIGIN_X + STRIDE / 2.0) / STRIDE);
+        return n >= 0 && n <= MAX + 1 && Math.abs(z - ORIGIN_Z) <= STRIDE / 2.0;
+    }
+
     public static int slotAt(double x, double z) {
         int n = (int) Math.floor((x - ORIGIN_X + STRIDE / 2.0) / STRIDE);
         if (n < 1 || n > MAX || Math.abs(z - ORIGIN_Z) > STRIDE / 2.0) {
