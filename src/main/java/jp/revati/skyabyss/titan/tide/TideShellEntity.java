@@ -4,7 +4,9 @@ import jp.revati.skyabyss.util.Players;
 
 import jp.revati.skyabyss.notice.Notice;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.jetbrains.annotations.Nullable;
 
@@ -24,6 +26,7 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MoverType;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
@@ -363,6 +366,7 @@ public class TideShellEntity extends Entity implements GeoEntity, TravelTitan, j
         // 先の地形は 5 tick ごと (今の位置の分は、動かしたあとの rise が毎 tick 測る)
         if (tickCount % 5 == 0) {
             sampleAhead(level);
+            forceAhead(level);
         }
         if (voyage) {
             tickVoyage(level);
@@ -710,6 +714,16 @@ public class TideShellEntity extends Entity implements GeoEntity, TravelTitan, j
         }
         double vx = -Mth.sin(yaw * Mth.DEG_TO_RAD) * forward;
         double vz = Mth.cos(yaw * Mth.DEG_TO_RAD) * forward;
+        // 進む先 (12〜48 ブロック) の地形が読み込まれていないあいだは進まない (読み込まれて高さが分かったところで跳ねるのを防ぐ)
+        double fx = -Mth.sin(yaw * Mth.DEG_TO_RAD);
+        double fz = Mth.cos(yaw * Mth.DEG_TO_RAD);
+        for (double d = 12; d <= 48; d += 12) {
+            if (!jp.revati.skyabyss.titan.TitanGround.loadedAt((ServerLevel) level(), getX() + fx * d, getZ() + fz * d)) {
+                vx = 0;
+                vz = 0;
+                break;
+            }
+        }
         Vec3 motion = getDeltaMovement().lerp(new Vec3(vx, 0, vz), 0.05);
         setDeltaMovement(motion);
         move(MoverType.SELF, motion);
@@ -746,6 +760,54 @@ public class TideShellEntity extends Entity implements GeoEntity, TravelTitan, j
         }
     }
 
+    // 進む先 (96 ブロックまで) の区画を読み込みに固定する。先の地形が読み込まれてから持ち上がると、体が一瞬で跳ねるため。外れた区画は外す
+    private final Set<Long> aheadChunks = new HashSet<>();
+
+    private void forceAhead(ServerLevel level) {
+        Set<Long> want = new HashSet<>();
+        if (mode != Mode.REST) {
+            double fx = -Mth.sin(getYRot() * Mth.DEG_TO_RAD);
+            double fz = Mth.cos(getYRot() * Mth.DEG_TO_RAD);
+            for (int d = 0; d <= 96; d += 16) {
+                int cx = Mth.floor(getX() + fx * d) >> 4;
+                int cz = Mth.floor(getZ() + fz * d) >> 4;
+                for (int dx = -1; dx <= 1; dx++) {
+                    for (int dz = -1; dz <= 1; dz++) {
+                        want.add(ChunkPos.asLong(cx + dx, cz + dz));
+                    }
+                }
+            }
+        }
+        for (long k : aheadChunks) {
+            if (!want.contains(k)) {
+                level.setChunkForced(ChunkPos.getX(k), ChunkPos.getZ(k), false);
+            }
+        }
+        for (long k : want) {
+            if (!aheadChunks.contains(k)) {
+                level.setChunkForced(ChunkPos.getX(k), ChunkPos.getZ(k), true);
+            }
+        }
+        aheadChunks.clear();
+        aheadChunks.addAll(want);
+    }
+
+    @Override
+    public void remove(RemovalReason reason) {
+        if (level() instanceof ServerLevel sl) {
+            for (long k : aheadChunks) {
+                sl.setChunkForced(ChunkPos.getX(k), ChunkPos.getZ(k), false);
+            }
+        }
+        aheadChunks.clear();
+        super.remove(reason);
+    }
+
+    // 試験用: 寄せる高さの材料 (今の位置の下限・先の下限・モード)
+    public String debugGround() {
+        return "groundNow=" + String.format("%.2f", groundNow) + " groundAhead=" + String.format("%.2f", groundAhead) + " mode=" + mode + " y=" + String.format("%.2f", getY());
+    }
+
     // 地形に関わらず高さを寄せる (眠って海へ沈み去る演出だけ)
     private void riseRaw(double ty, double rate) {
         double dy = Mth.clamp(ty - getY(), -rate, rate);
@@ -762,6 +824,7 @@ public class TideShellEntity extends Entity implements GeoEntity, TravelTitan, j
     // 進む先の地形 (巡航・接近で動いているあいだだけ。止まっているときは、前の地形に持ち上げられない。寄っていくときは、休む場所の先までは見ない)
     private void sampleAhead(ServerLevel level) {
         jp.revati.skyabyss.titan.solid.TitanVolume volume = jp.revati.skyabyss.titan.solid.TitanVolume.get(volumeName());
+        double heldAhead = groundAhead;
         groundAhead = Double.NEGATIVE_INFINITY;
         // 休む場所の手前 60 ブロックからは、足・ひれと腹を海底へ沈めてよい (REST_BURY)。先読みは、その分を数えられないので、今の位置の下限 (sampleNow) に任せる
         boolean settling = mode == Mode.APPROACH && horizontalDistanceTo(restX, restZ) < 60;
@@ -769,8 +832,16 @@ public class TideShellEntity extends Entity implements GeoEntity, TravelTitan, j
             double cap = mode == Mode.APPROACH ? horizontalDistanceTo(restX, restZ) : Double.MAX_VALUE;
             double[] distances = java.util.Arrays.stream(GROUND_LOOK).filter(d -> d < cap).toArray();
             if (distances.length > 0) {
-                groundAhead = jp.revati.skyabyss.titan.TitanGround.requiredAhead(level, jp.revati.skyabyss.titan.TitanGround.Surface.FLOOR, volume,
+                double fresh = jp.revati.skyabyss.titan.TitanGround.requiredAhead(level, jp.revati.skyabyss.titan.TitanGround.Surface.FLOOR, volume,
                         getX(), getZ(), getYRot(), distances, 1);
+                // 読み込まれていない先の地形は数えられない。その分は前に分かった高さを保つ (跳ね防止)
+                boolean unknown = false;
+                double fx = -Mth.sin(getYRot() * Mth.DEG_TO_RAD);
+                double fz = Mth.cos(getYRot() * Mth.DEG_TO_RAD);
+                for (double d : distances) {
+                    unknown |= jp.revati.skyabyss.titan.TitanGround.anyUnloaded(level, volume, getX() + fx * d, getZ() + fz * d, getYRot(), 0.0);
+                }
+                groundAhead = unknown ? Math.max(heldAhead, fresh) : fresh;
             }
         }
     }
@@ -779,12 +850,15 @@ public class TideShellEntity extends Entity implements GeoEntity, TravelTitan, j
     private void sampleNow(ServerLevel level) {
         // 休む・休む場所へ寄る最後の 60 ブロックは、足・ひれを海底に埋めてよい (腹だけが海底・岸・丘に触れない)
         boolean settling = mode == Mode.REST || (mode == Mode.APPROACH && horizontalDistanceTo(restX, restZ) < 60);
-        groundNow = jp.revati.skyabyss.titan.TitanGround.requiredYPadded(level, jp.revati.skyabyss.titan.TitanGround.Surface.FLOOR,
-                jp.revati.skyabyss.titan.solid.TitanVolume.get(volumeName()), getX(), getZ(), getYRot(), jp.revati.skyabyss.titan.TitanGround.MARGIN, 3.0,
+        jp.revati.skyabyss.titan.solid.TitanVolume volume = jp.revati.skyabyss.titan.solid.TitanVolume.get(volumeName());
+        double fresh = jp.revati.skyabyss.titan.TitanGround.requiredYPadded(level, jp.revati.skyabyss.titan.TitanGround.Surface.FLOOR,
+                volume, getX(), getZ(), getYRot(), jp.revati.skyabyss.titan.TitanGround.MARGIN, 3.0,
                 settling ? REST_LEG_SKIP : Double.NEGATIVE_INFINITY, settling ? REST_SKIRT_HI : Double.NEGATIVE_INFINITY);
-        if (settling && Double.isFinite(groundNow)) {
-            groundNow -= REST_BURY;
+        if (settling && Double.isFinite(fresh)) {
+            fresh -= REST_BURY;
         }
+        // 読み込まれていない区画の地形は分からない。そこを数えないで下げると、読み込まれた瞬間に体が跳ねるので、分かっている高さを保つ
+        groundNow = jp.revati.skyabyss.titan.TitanGround.anyUnloaded(level, volume, getX(), getZ(), getYRot(), 3.0) ? Math.max(groundNow, fresh) : fresh;
     }
 
     // 試験用: 今の位置・向きで体が地形にめり込まない最低の高さ (間引かずに測る)

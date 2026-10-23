@@ -129,6 +129,7 @@ public final class TitanGroundSelfTest {
         double maxStep;
         double minMargin = Double.MAX_VALUE;
         double lastY;
+        String maxStepInfo = "";
 
         Cruise(TideShellEntity titan, double sx, double sz, Shore shore, boolean found) {
             this.titan = titan;
@@ -402,7 +403,11 @@ public final class TitanGroundSelfTest {
             c.worstOverlap = Math.max(c.worstOverlap, overlap);
             c.minMargin = Math.min(c.minMargin, -overlap);
             if (c.t >= 10) {
-                c.maxStep = Math.max(c.maxStep, Math.abs(c.titan.getY() - c.lastY));
+                double st = Math.abs(c.titan.getY() - c.lastY);
+                if (st > c.maxStep) {
+                    c.maxStepInfo = "t=" + c.t + " step=" + String.format("%.2f", st) + " " + c.titan.debugGround();
+                }
+                c.maxStep = Math.max(c.maxStep, st);
             }
             c.lastY = c.titan.getY();
         }
@@ -421,7 +426,7 @@ public final class TitanGroundSelfTest {
             r.failures.add("the cruising tide shell clipped into terrain by " + c.worstOverlap + " blocks on shore " + (int) s.land().x + ", " + (int) s.land().z);
         }
         if (c.maxStep > 1.05) {
-            r.failures.add("the tide shell jerked vertically by " + c.maxStep + " blocks in one tick");
+            r.failures.add("the tide shell jerked vertically by " + c.maxStep + " blocks in one tick (" + c.maxStepInfo + ")");
         }
         r.notes.add("cruise from " + (int) c.sx + ", " + (int) c.sz + (c.found ? " (open water start)" : " (rough start)") + " toward the shore at " + (int) s.land().x + ", " + (int) s.land().z
                 + ": worst overlap " + String.format("%.2f", c.worstOverlap) + ", min clearance " + String.format("%.2f", c.minMargin) + ", max step "
