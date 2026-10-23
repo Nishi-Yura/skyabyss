@@ -959,6 +959,9 @@ class Town(Facilities):
         if len(extra) > 1:
             v.set(x + 1, 0, z, extra[1])
         v.set(x, 2, z, 'lantern[hanging=true,waterlogged=false]')
+        # 日よけの下の灯り: 手前の縁の両わき (縞の日よけの下、売り台の上)
+        v.set(x - 1, 2, z + 2, 'lantern[hanging=true,waterlogged=false]')
+        v.set(x + 1, 2, z - 2, 'lantern[hanging=true,waterlogged=false]')
 
     # ---------------------------------------------------------------- 鯨追いの組合
     def guild(self):
