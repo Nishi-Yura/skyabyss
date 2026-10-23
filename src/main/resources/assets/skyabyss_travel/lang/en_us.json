@@ -27,6 +27,7 @@
   "gui.skyabyss.travel.choose": "Choose a destination",
   "gui.skyabyss.travel.leader_chooses": "%s chooses where to go",
   "gui.skyabyss.travel.spawn": "Where It Began",
+  "gui.skyabyss.travel.town": "The Town",
   "gui.skyabyss.travel.waymark_unnamed": "Nameless Waymark",
   "gui.skyabyss.travel.waymark_of": "Waymark of %s",
   "gui.skyabyss.travel.detail": "%s · %s · ~%ss",
