@@ -1,35 +1,68 @@
-# 層の主・歪んだ王の見た目の試し (一体だけ)。./gradlew runShots -Pscript=tools/shots/abyss_boss_test.txt
+# 層の主・歪んだ王の見た目の試し。./gradlew runShots -Pscript=tools/shots/abyss_boss_test.txt
 world abyss_boss_test flat
 size 1280 720
-timeout 900
+timeout 1500
 render 8
 clouds off
+wait 40
+cmd skyabyss playtest skip opening
 wait 60
 cmd skyabyss cinematic stop
 cmd gamemode spectator
 cmd time set noon
 cmd gamerule doDaylightCycle false
+cmd gamerule doMobSpawning false
 hud off
+chat clear
 camera 0.5 -59 9.5 180 -6
 waitchunks 300
+wait 200
 cmd skyabyss abyss boss lord_rib 0 - 40 9
-wait 60
-shot lord_rib_idle
+camera 8.5 -59 0.5 90 -6
+wait 40
+shot rib_side_idle
 cmd skyabyss abyss bossdo snuff 50
 wait 50
-shot lord_rib_windup
-cmd skyabyss abyss bossdo strike_snuff
-wait 4
-shot lord_rib_strike
-wait 30
+shot rib_side_windup
 cmd skyabyss abyss bossdo phase
 wait 14
-shot lord_rib_phase
+shot rib_side_phase
 wait 40
-camera 7.5 -59 0.5 90 -6
-wait 20
-shot lord_rib_side
 cmd kill @e[type=skyabyss:rib_guard]
-wait 26
-shot lord_rib_death
+wait 30
+shot rib_side_death
+wait 30
+camera 0.5 -59 9.5 180 -6
+wait 10
+cmd skyabyss abyss boss lord_salt 0 - 40 9
+camera 7.5 -59 7.5 135 -6
+wait 40
+shot salt_34_idle
+cmd skyabyss abyss bossdo crush 32
+wait 32
+shot salt_34_windup
+cmd kill @e[type=skyabyss:white_shell_keeper]
+wait 40
+camera 0.5 -59 9.5 180 -6
+wait 10
+cmd skyabyss abyss boss lord_storm 0 - 40 9
+camera 7.5 -59 7.5 135 -6
+wait 40
+shot storm_34_idle
+cmd skyabyss abyss bossdo phase
+wait 16
+shot storm_34_phase
+cmd kill @e[type=skyabyss:heartbeat_mimic]
+wait 40
+camera 0.5 -59 9.5 180 -6
+wait 10
+cmd skyabyss abyss boss lord_ash 0 - 40 9
+camera 7.5 -59 7.5 135 -6
+wait 40
+shot ash_34_idle
+cmd skyabyss abyss bossdo roar 45
+wait 45
+shot ash_34_windup
+cmd kill @e[type=skyabyss:lamp_eater]
+wait 30
 quit

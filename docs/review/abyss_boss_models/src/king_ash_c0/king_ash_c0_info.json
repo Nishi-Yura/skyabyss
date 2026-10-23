@@ -1,7 +1,10 @@
 {
  "name": "king_ash_c0",
  "tris": 2596,
- "atlas": 512,
+ "atlas": [
+  512,
+  512
+ ],
  "open": 0,
  "floating": [],
  "bones": {

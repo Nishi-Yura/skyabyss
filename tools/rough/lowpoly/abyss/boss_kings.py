@@ -228,7 +228,7 @@ def build_salt(cycle):
         F += part("crown_teal", ellipsoid("head", "teal", tuple(hp(0, 27.0, -1.9)), (0.35 * S, 0.45 * S, 0.25 * S), segs=6, rings=2))
     skull(F, "salt", "saltd", "teal", 1.0, crown)
     if cycle >= 1:
-        for i, (x, y, z) in enumerate(((-3.0, 17.0, -0.8), (3.2, 19.6, -0.6), (-2.2, 21.0, 1.2), (2.4, 15.6, 1.0))):
+        for i, (x, y, z) in enumerate(((-3.0, 17.0, -0.8), (3.2, 19.6, -0.6), (-2.2, 21.0, 1.2), (2.0, 15.8, 0.7))):
             F += part(f"growth{i}", cone(c, "salt", tuple(hp(x, y, z)), (x * 0.3, 0.6, z * 0.3 - 0.2), (1.2 + 0.5 * cycle) * S, 0.5 * S, sides=5, rings=2))
     if cycle >= 2:
         for s in (-1, 1):
@@ -272,8 +272,8 @@ def build_storm(cycle):
         F += part(f"rune{i}", tube(b, "teal", [P(p0[0], p0[1], -10.45), P(p1[0], p1[1], -10.45)], ra=0.35, sides=4, caps=(True, True)))
     for k in range(4):
         a = math.radians(45 + 90 * k)
-        F += part(f"crack{k}", tube(b, "bolt" if cycle >= 1 else "hollow", [P(11.2 * math.sin(a), 5.6, -11.2 * math.cos(a)), P(10.7 * math.sin(a + 0.06), 9.0, -10.7 * math.cos(a + 0.06)),
-                                                                          P(10.4 * math.sin(a - 0.05), 11.0, -10.4 * math.cos(a - 0.05))], ra=0.3, sides=4, caps=(True, True)))
+        F += part(f"crack{k}", tube(b, "bolt" if cycle >= 1 else "hollow", [P(11.0 * math.sin(a), 5.6, -11.0 * math.cos(a)), P(10.5 * math.sin(a + 0.06), 9.0, -10.5 * math.cos(a + 0.06)),
+                                                                          P(10.2 * math.sin(a - 0.05), 11.0, -10.2 * math.cos(a - 0.05))], ra=0.3, sides=4, caps=(True, True)))
     # 顔 (割れた面の奥に光)
     h = "head"
     F += part("head", loft(h, "basalt", [octa(42.0, 5.2), octa(46.0, 6.0), octa(52.0, 5.8), octa(55.0, 4.4), octa(56.4, 2.6)], caps=(True, True)))
@@ -300,12 +300,12 @@ def build_storm(cycle):
     if cycle >= 1:
         for i in range(4 + 2 * cycle):
             a = math.radians(30 + i * (300 / (3 + 2 * cycle)))
-            F += part(f"shard{i}", cone(b, "basalt", (10.2 * math.sin(a), 36.0 + (i % 2) * 2, -10.2 * math.cos(a)), (math.sin(a), 0.6, -math.cos(a)), 4.0 + cycle, 1.5, sides=4, rings=2))
+            F += part(f"shard{i}", cone(b, "basalt", (8.4 * math.sin(a), 36.0 + (i % 2) * 2, -8.4 * math.cos(a)), (math.sin(a), 0.6, -math.cos(a)), 4.0 + cycle, 1.5, sides=4, rings=2))
     if cycle >= 2:
         for i in range(6):
             a = math.radians(60 * i + 30)
-            F += part(f"bolt{i}", tube(b, "bolt", [P(11.0 * math.sin(a), 6.0, -11.0 * math.cos(a)), P(10.6 * math.sin(a + 0.15), 12.0, -10.6 * math.cos(a + 0.15)),
-                                                    P(10.2 * math.sin(a - 0.1), 18.0, -10.2 * math.cos(a - 0.1))], ra=0.3, sides=4, caps=(True, True)))
+            F += part(f"bolt{i}", tube(b, "bolt", [P(10.0 * math.sin(a), 6.0, -10.0 * math.cos(a)), P(9.6 * math.sin(a + 0.15), 12.0, -9.6 * math.cos(a + 0.15)),
+                                                    P(9.2 * math.sin(a - 0.1), 18.0, -9.2 * math.cos(a - 0.1))], ra=0.3, sides=4, caps=(True, True)))
     return F
 
 

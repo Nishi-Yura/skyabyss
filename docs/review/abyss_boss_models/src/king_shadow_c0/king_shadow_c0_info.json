@@ -1,7 +1,10 @@
 {
  "name": "king_shadow_c0",
  "tris": 1426,
- "atlas": 512,
+ "atlas": [
+  512,
+  512
+ ],
  "open": 0,
  "floating": [],
  "bones": {

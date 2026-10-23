@@ -1,0 +1,235 @@
+# 層の主・歪んだ王の見た目 (docs/design/15 の 9.7)。各型の待機と技の溜め (予告の終わり近く)、王は周 0・1・2。音なし・日本語。
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/abyss_boss_models.txt -PshotsName=abyss_boss_models
+#   → python tools/sheets/abyss_boss_models_sheet.py (docs/review/abyss_boss_models/)
+world abyss_boss_models flat
+size 1280 720
+timeout 4000
+render 8
+clouds off
+wait 40
+cmd skyabyss playtest skip opening
+wait 60
+cmd skyabyss cinematic stop
+cmd gamemode spectator
+cmd time set noon
+cmd gamerule doDaylightCycle false
+cmd gamerule doMobSpawning false
+hud off
+chat clear
+camera 0.5 -59 9.5 180 -6
+waitchunks 300
+wait 200
+# ---- lord_rib 周 0
+camera 0.5 -59 9.5 180 -6
+wait 10
+cmd skyabyss abyss boss lord_rib 0 - 40 9
+camera 7.2 -58.5 7.2 135 -4
+wait 50
+shot lord_rib_c0_idle
+cmd skyabyss abyss bossdo snuff 50
+wait 42
+shot lord_rib_c0_snuff
+cmd kill @e[type=skyabyss:rib_guard]
+wait 50
+# ---- lord_salt 周 0
+camera 0.5 -59 9.5 180 -6
+wait 10
+cmd skyabyss abyss boss lord_salt 0 - 40 9
+camera 7.2 -58.5 7.2 135 -4
+wait 50
+shot lord_salt_c0_idle
+cmd skyabyss abyss bossdo crush 32
+wait 27
+shot lord_salt_c0_crush
+cmd kill @e[type=skyabyss:white_shell_keeper]
+wait 50
+# ---- lord_storm
+camera 0.5 -59 9.5 180 -6
+wait 10
+cmd skyabyss abyss boss lord_storm 0 - 40 9
+camera 7.0 -58.5 7.0 135 -4
+wait 50
+shot lord_storm_c0_idle
+cmd skyabyss abyss bossdo phase
+wait 16
+shot lord_storm_c0_phase
+cmd kill @e[type=skyabyss:heartbeat_mimic]
+wait 50
+# ---- lord_ash 周 0
+camera 0.5 -59 9.5 180 -6
+wait 10
+cmd skyabyss abyss boss lord_ash 0 - 40 9
+camera 7.2 -58.5 7.2 135 -4
+wait 50
+shot lord_ash_c0_idle
+cmd skyabyss abyss bossdo roar 45
+wait 38
+shot lord_ash_c0_roar
+cmd kill @e[type=skyabyss:lamp_eater]
+wait 50
+# ---- king_bone 周 0
+camera 0.5 -59 11.5 180 -6
+wait 10
+cmd skyabyss abyss boss king_bone 0 - 40 11
+camera 6.2 -58.5 6.2 135 -4
+wait 50
+shot king_bone_c0_idle
+cmd skyabyss abyss bossdo slam 40
+wait 34
+shot king_bone_c0_slam
+cmd kill @e[type=skyabyss:rib_guard]
+wait 50
+# ---- king_bone 周 1
+camera 0.5 -59 11.5 180 -6
+wait 10
+cmd skyabyss abyss boss king_bone 1 - 40 11
+camera 7.2 -58.5 7.2 135 -4
+wait 50
+shot king_bone_c1_idle
+cmd kill @e[type=skyabyss:rib_guard]
+wait 50
+# ---- king_bone 周 2
+camera 0.5 -59 11.5 180 -6
+wait 10
+cmd skyabyss abyss boss king_bone 2 - 40 11
+camera 8.3 -58.5 8.3 135 -4
+wait 50
+shot king_bone_c2_idle
+cmd skyabyss abyss bossdo slam 40
+wait 34
+shot king_bone_c2_slam
+cmd kill @e[type=skyabyss:rib_guard]
+wait 50
+# ---- king_salt 周 0
+camera 0.5 -59 11.5 180 -6
+wait 10
+cmd skyabyss abyss boss king_salt 0 - 40 11
+camera 6.2 -58.5 6.2 135 -4
+wait 50
+shot king_salt_c0_idle
+cmd skyabyss abyss bossdo charge 40
+wait 34
+shot king_salt_c0_charge
+cmd kill @e[type=skyabyss:salt_husk]
+wait 50
+# ---- king_salt 周 1
+camera 0.5 -59 11.5 180 -6
+wait 10
+cmd skyabyss abyss boss king_salt 1 - 40 11
+camera 7.2 -58.5 7.2 135 -4
+wait 50
+shot king_salt_c1_idle
+cmd kill @e[type=skyabyss:salt_husk]
+wait 50
+# ---- king_salt 周 2
+camera 0.5 -59 11.5 180 -6
+wait 10
+cmd skyabyss abyss boss king_salt 2 - 40 11
+camera 8.3 -58.5 8.3 135 -4
+wait 50
+shot king_salt_c2_idle
+cmd skyabyss abyss bossdo charge 40
+wait 34
+shot king_salt_c2_charge
+cmd kill @e[type=skyabyss:salt_husk]
+wait 50
+# ---- king_storm 周 0
+camera 0.5 -59 11.5 180 -6
+wait 10
+cmd skyabyss abyss boss king_storm 0 - 40 11
+camera 6.2 -58.5 6.2 135 -4
+wait 50
+shot king_storm_c0_idle
+cmd skyabyss abyss bossdo bolts 40
+wait 34
+shot king_storm_c0_bolts
+cmd kill @e[type=skyabyss:lightning_idol]
+wait 50
+# ---- king_storm 周 1
+camera 0.5 -59 11.5 180 -6
+wait 10
+cmd skyabyss abyss boss king_storm 1 - 40 11
+camera 7.2 -58.5 7.2 135 -4
+wait 50
+shot king_storm_c1_idle
+cmd kill @e[type=skyabyss:lightning_idol]
+wait 50
+# ---- king_storm 周 2
+camera 0.5 -59 11.5 180 -6
+wait 10
+cmd skyabyss abyss boss king_storm 2 - 40 11
+camera 8.3 -58.5 8.3 135 -4
+wait 50
+shot king_storm_c2_idle
+cmd skyabyss abyss bossdo bolts 40
+wait 34
+shot king_storm_c2_bolts
+cmd kill @e[type=skyabyss:lightning_idol]
+wait 50
+# ---- king_ash 周 0
+camera 0.5 -59 11.5 180 -6
+wait 10
+cmd skyabyss abyss boss king_ash 0 - 40 11
+camera 6.2 -58.5 6.2 135 -4
+wait 50
+shot king_ash_c0_idle
+cmd skyabyss abyss bossdo summon 40
+wait 34
+shot king_ash_c0_summon
+cmd kill @e[type=skyabyss:ember_keeper]
+wait 50
+# ---- king_ash 周 1
+camera 0.5 -59 11.5 180 -6
+wait 10
+cmd skyabyss abyss boss king_ash 1 - 40 11
+camera 7.2 -58.5 7.2 135 -4
+wait 50
+shot king_ash_c1_idle
+cmd kill @e[type=skyabyss:ember_keeper]
+wait 50
+# ---- king_ash 周 2
+camera 0.5 -59 11.5 180 -6
+wait 10
+cmd skyabyss abyss boss king_ash 2 - 40 11
+camera 8.3 -58.5 8.3 135 -4
+wait 50
+shot king_ash_c2_idle
+cmd skyabyss abyss bossdo summon 40
+wait 34
+shot king_ash_c2_summon
+cmd kill @e[type=skyabyss:ember_keeper]
+wait 50
+# ---- king_shadow 周 0
+camera 0.5 -59 11.5 180 -6
+wait 10
+cmd skyabyss abyss boss king_shadow 0 - 40 11
+camera 6.2 -58.5 6.2 135 -4
+wait 50
+shot king_shadow_c0_idle
+cmd skyabyss abyss bossdo sweep 40
+wait 34
+shot king_shadow_c0_sweep
+cmd kill @e[type=skyabyss:past_shadow]
+wait 50
+# ---- king_shadow 周 1
+camera 0.5 -59 11.5 180 -6
+wait 10
+cmd skyabyss abyss boss king_shadow 1 - 40 11
+camera 7.2 -58.5 7.2 135 -4
+wait 50
+shot king_shadow_c1_idle
+cmd kill @e[type=skyabyss:past_shadow]
+wait 50
+# ---- king_shadow 周 2
+camera 0.5 -59 11.5 180 -6
+wait 10
+cmd skyabyss abyss boss king_shadow 2 - 40 11
+camera 8.3 -58.5 8.3 135 -4
+wait 50
+shot king_shadow_c2_idle
+cmd skyabyss abyss bossdo sweep 40
+wait 34
+shot king_shadow_c2_sweep
+cmd kill @e[type=skyabyss:past_shadow]
+wait 50
+quit

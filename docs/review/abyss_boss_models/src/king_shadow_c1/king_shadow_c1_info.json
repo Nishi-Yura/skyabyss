@@ -1,0 +1,27 @@
+{
+ "name": "king_shadow_c1",
+ "tris": 1502,
+ "atlas": [
+  512,
+  512
+ ],
+ "open": 0,
+ "floating": [],
+ "bones": {
+  "root": 0,
+  "body": 238,
+  "neck": 44,
+  "head": 212,
+  "threads": 240,
+  "leg_fl": 80,
+  "low_fl": 112,
+  "leg_fr": 80,
+  "low_fr": 112,
+  "leg_bl": 80,
+  "low_bl": 112,
+  "leg_br": 80,
+  "low_br": 112
+ },
+ "glow": 6659,
+ "height": 38.4
+}

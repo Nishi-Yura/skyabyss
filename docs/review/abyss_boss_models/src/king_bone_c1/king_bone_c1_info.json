@@ -1,0 +1,27 @@
+{
+ "name": "king_bone_c1",
+ "tris": 3678,
+ "atlas": [
+  512,
+  512
+ ],
+ "open": 0,
+ "floating": [],
+ "bones": {
+  "root": 0,
+  "body": 216,
+  "chest": 1382,
+  "head": 670,
+  "jaw": 44,
+  "arm_l": 114,
+  "fore_l": 452,
+  "arm_r": 114,
+  "fore_r": 306,
+  "leg_l": 38,
+  "shin_l": 152,
+  "leg_r": 38,
+  "shin_r": 152
+ },
+ "glow": 11308,
+ "height": 60.8
+}

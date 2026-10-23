@@ -493,6 +493,26 @@ gear の作り（`tools/rough/hp_gear.py`、取り込み `tools/install/install_
 - **負荷**（`tools/shots/lp_ember_perf.txt`、灰被り 8（殻 4・燃え上がり 4）+ 火の粉蛾 8 + 燠虫 8 + 鍛え手 1 = 25 体、1280x720、垂直同期なし、他の作業と並行）: 低ポリ 7.6〜11.3 ms/frame（最初の一回は 11.3、あとの二回は 7.6）、箱 16.8〜27.4 ms/frame（2〜3 倍ほど速い）。
 - **滑らかな NPC のラフ**（`docs/review/smooth_npc_roughs/<名前>/<案>/`）は消した（`tools/install/install_smooth_npcs.py` が読んでいたが、その入力は `LowPoly.enabled = false` の箱の描画としてすでに assets に入っている。スクリプトは回らなくなったので、冒頭に書いた）。
 
+### 9.7 層の主・歪んだ王（深淵のボス 9 型。`python tools/gen/abyss/gen_abyss_boss_models.py` で一度に入る）
+
+| 型 | 案 | 骨 | 体 (戦いの決まり) |
+| --- | --- | --- | --- |
+| 肋の主 `lord_rib` | A 肋の檻の灯守 | 14 | 肋の番 |
+| 白殻の主 `lord_salt` | A 巻貝の巨殻 (渦の管の殻) | 8 | 白い貝守 (殻が閉じると首を引っこめる `closed`) |
+| 鼓動まねの主 `lord_storm` | A 心臓むき出しの袋 (六本脚) | 17 | 鼓動もどき (写しも同じ姿) |
+| 灯り喰いの主 `lord_ash` | A 灯の山を吊る黒い口 | 6 | 灯喰い |
+| 骨の王 `king_bone_c0..2` | A 肋の檻の王 | 13 | 肋の番 |
+| 塩の王 `king_salt_c0..2` | C 結晶の冠の王 | 13 | 塩の抜け殻 |
+| 雷の王 `king_storm_c0..2` | B 避雷針の林の王 (動かない) | 6 | 避雷の像 |
+| 灰の王 `king_ash_c0..2` | C 灯火の冠の僧 | 13 | 燠の番人 |
+| 影の王 `king_shadow_c0..2` | C 這いずる影 (四つ足) | 13 | 前の私の影 |
+
+- 形: `tools/rough/lowpoly/abyss/boss_lords.py`・`boss_kings.py`（共通は `boss_kit.py`: 彫り、部品 × 向きの UV の島（重なる面は別の島）、材質ごとの決まりの絵（段の量子化 + Bayer のディザ）、横長のアトラス、水密と浮きの検査）。出力は `docs/review/abyss_boss_models/src/<stem>/`（`_views.png`・`_close.png`・`_info.json`）。三角形は 1 体 1,400〜4,400。
+- 見た目の切り替え: 主・王は今までどおり深淵の敵の体 (AbyssMob / AbyssMobB) で、戦いの決まり・数字は同じ。`GuardMob` の同期の値 `BOSS_LOOK`（型・周・段）と `BOSS_ACT`（技・予告の長さ・当たり）を `abyss.boss.BossLook` が入れ、深淵の敵の二つの描画が look のあるときだけ `lowpoly/<stem>` と `animations/entity/<animStem>` に替える（`BossRender`）。模型は「SCALE をかけた後の大きさ」で作り、描画が `BossLook.authorScale` で戻す（主は AbyssLords.SCALE、王は一周目の 1.6。周が進むと SCALE で大きくなる）。
+- 動き（`GuardMob` の `boss` の制御）: 倒れる (2.2 秒、体は 44 tick 残す) > 段の変わり目 `phase` (2 秒) > 技の溜め `windup_<技>`（2 秒で作り、予告の長さで終わる速さに変える: 当たりの瞬間に溜めが終わる）> 当たり `strike_<技>`（0.8 秒）> ふつうの殴り `attack`（腕を振る合図）。技は王 slam・charge・summon・bolts・sweep（DepthBoss.begin / resolve）、主 snuff 50 tick・crush 32・split（予告なし）・roar 45（AbyssLords）。主の段は見た目だけ（体力が半分で一度吠える）。
+- 王の周: 0 = 案どおり、1・2 = 頂点と骨の pivot を同じ関数で伸ばし・傾け・うねらせ (`boss_kit.warp`)、部品が増え（棘・瘤・角・針・灯し・糸）、割れ目が光る。骨の名前は同じなので動きは共通。
+- 確かめ: `/skyabyss abyss boss <型> [周] [技] [tick] [距離]`（動かない一体を置く）・`/skyabyss abyss bossdo <技|phase|strike_<技>|->`。台本 `tools/shots/abyss_boss_models.txt` → `docs/review/abyss_boss_models/`。
+
 ## 旧節番号の対応
 
 コードのコメントにある旧い節番号が、今どこにあるか。この書類は担当ごとの記録で見出し番号が重複していたので、見出しの題も添える。

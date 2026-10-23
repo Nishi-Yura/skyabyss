@@ -287,7 +287,7 @@ def build_salt():
     for i in range(7):
         z = -16 + i * 5.2
         for s in (-1, 1):
-            F += part(f"frill{i}{s}", ellipsoid("body", "sea", (s * 9.8, 2.6, z), (1.6, 1.4, 2.8), segs=6, rings=2))
+            F += part(f"frill{i}{s}", ellipsoid("body", "sea", (s * (9.6 * math.sqrt(max(0.0, 1 - ((z + 1.0) / 19.5) ** 2)) + 0.1), 2.6, z), (1.6, 1.4, 2.8), segs=6, rings=2))
     F += part("tailtip", ellipsoid("tail", "sea", (0, 3.4, 18.0), (6.0, 3.0, 7.0), segs=9, rings=3))
     # ---- 首と頭 (殻の口から伸びる青白い首)
     neck_pts = [P(1.2, 9.6, 5.0), P(0.9, 10.4, -3.0), P(0.5, 14.6, -12.0), P(0.2, 20.0, -18.4), P(0, 23.4, -21.0)]
@@ -307,7 +307,7 @@ def build_salt():
                                     sides=6, caps=(True, True)))
         F += part(f"eye{s}", ellipsoid(st, "pale", (s * 4.7, 38.6, -23.2), (1.6, 1.6, 1.6), segs=7, rings=3))
         F += part(f"pupil{s}", ellipsoid(st, "hollow", (s * 4.9, 38.7, -24.6), (0.6, 0.8, 0.3), segs=5, rings=2))
-    return sculpt(F, lambda p: p * 0.92)
+    return sculpt(F, lambda p: p * 1.15)
 
 
 # ====================================================================== 鼓動まねの主 (心臓むき出しの袋)
@@ -471,7 +471,7 @@ def build_ash():
 LORDS = {
     "lord_ash": (build_ash, ASH_BONES, dict(tpu=2.5, center=(0, 22, 0), scale=4.4)),
     "lord_storm": (build_storm, {k: (v[0], tuple(c * 0.86 for c in v[1])) for k, v in STORM_BONES.items()}, dict(tpu=2.5, center=(0, 20, 0), scale=4.6)),
-    "lord_salt": (build_salt, {k: (v[0], tuple(c * 0.92 for c in v[1])) for k, v in SALT_BONES.items()}, dict(tpu=2.5, center=(0, 18, 0), scale=4.6)),
+    "lord_salt": (build_salt, {k: (v[0], tuple(c * 1.15 for c in v[1])) for k, v in SALT_BONES.items()}, dict(tpu=2.5, center=(0, 22, 0), scale=3.8)),
     "lord_rib": (build_rib, RIB_BONES, dict(tpu=2.5, center=(0, 32, 0), scale=4.2)),
 }
 

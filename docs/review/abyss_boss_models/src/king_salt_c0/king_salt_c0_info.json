@@ -1,7 +1,10 @@
 {
  "name": "king_salt_c0",
  "tris": 2818,
- "atlas": 512,
+ "atlas": [
+  512,
+  256
+ ],
  "open": 0,
  "floating": [],
  "bones": {

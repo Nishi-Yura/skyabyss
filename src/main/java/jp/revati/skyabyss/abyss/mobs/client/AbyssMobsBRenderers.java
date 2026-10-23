@@ -94,7 +94,8 @@ public final class AbyssMobsBRenderers {
 
     static final class Foe<T extends AbyssMobB> extends LowPolyGeoRenderer<T> {
         Foe(EntityRendererProvider.Context ctx, String name, float shadow) {
-            super(ctx, new Model<>(name), e -> BossRender.look(e) != 0 ? BossRender.mesh(BossRender.look(e)) : name, 1.0f);
+            // 名前の Model は継いだ LowPolyGeoRenderer.Model を指してしまうので、この係の Model を明示する (段の絵・主と王の姿)
+            super(ctx, new AbyssMobsBRenderers.Model<>(name), e -> BossRender.look(e) != 0 ? BossRender.mesh(BossRender.look(e)) : name, 1.0f);
             this.shadowRadius = shadow;
         }
 
