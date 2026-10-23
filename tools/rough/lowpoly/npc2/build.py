@@ -127,6 +127,13 @@ def write(name):
     Image.fromarray(atlas, "RGBA").save(d / f"{name}_atlas.png")
     bones = grow_bones(c, bones)
     data = export(grow(c, body), size, d / f"{name}_mesh.json", name, bones)
+    # 絵だけ替える装い (旅の職人の章): 同じ面・同じ UV で色を替えて描き直す
+    for v, over in c.get("variants", {}).items():
+        cv = copy.deepcopy({k: x for k, x in c.items() if not k.startswith("_pal")})
+        cv["pal"].update(over)
+        vs, va, _ = paint(cv, body, 256)
+        assert vs == size
+        Image.fromarray(va, "RGBA").save(d / f"{name}_{v}_atlas.png")
     rep = {"tris": data["triangle_count"], "atlas": size, "buried": CK.check_buried(body), "props": {}}
     res = dict(c=c, body=body, bones=bones, atlas=atlas, glow=glow, props={})
     for sock, pf in props.items():

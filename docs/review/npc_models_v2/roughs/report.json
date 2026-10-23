@@ -1,6 +1,6 @@
 {
  "guild_clerk": {
-  "tris": 1468,
+  "tris": 1580,
   "atlas": 256,
   "buried": [],
   "props": {
@@ -11,7 +11,7 @@
   }
  },
  "survivor_bone": {
-  "tris": 1331,
+  "tris": 1443,
   "atlas": 256,
   "buried": [],
   "props": {
@@ -22,7 +22,7 @@
   }
  },
  "smith": {
-  "tris": 1400,
+  "tris": 1540,
   "atlas": 256,
   "buried": [],
   "props": {
@@ -33,7 +33,7 @@
   }
  },
  "tool_merchant": {
-  "tris": 1504,
+  "tris": 1616,
   "atlas": 256,
   "buried": [],
   "props": {
@@ -44,7 +44,7 @@
   }
  },
  "apothecary": {
-  "tris": 1782,
+  "tris": 1894,
   "atlas": 256,
   "buried": [],
   "props": {
@@ -55,7 +55,7 @@
   }
  },
  "storage_keeper": {
-  "tris": 1288,
+  "tris": 1428,
   "atlas": 256,
   "buried": [],
   "props": {
@@ -66,7 +66,7 @@
   }
  },
  "innkeeper": {
-  "tris": 1654,
+  "tris": 1766,
   "atlas": 256,
   "buried": [
    [
@@ -88,7 +88,7 @@
   }
  },
  "perch_keeper": {
-  "tris": 1387,
+  "tris": 1499,
   "atlas": 256,
   "buried": [],
   "props": {
@@ -99,7 +99,7 @@
   }
  },
  "shrine_priest": {
-  "tris": 1520,
+  "tris": 1632,
   "atlas": 256,
   "buried": [
    [
@@ -116,7 +116,7 @@
   }
  },
  "keep_veteran": {
-  "tris": 1418,
+  "tris": 1530,
   "atlas": 256,
   "buried": [],
   "props": {
@@ -127,7 +127,7 @@
   }
  },
  "archivist": {
-  "tris": 1558,
+  "tris": 1670,
   "atlas": 256,
   "buried": [],
   "props": {
@@ -138,7 +138,7 @@
   }
  },
  "training_master": {
-  "tris": 1434,
+  "tris": 1546,
   "atlas": 256,
   "buried": [
    [
@@ -160,9 +160,15 @@
   }
  },
  "black_marketeer": {
-  "tris": 1616,
+  "tris": 1626,
   "atlas": 256,
-  "buried": [],
+  "buried": [
+   [
+    "hair",
+    "hood",
+    0.55
+   ]
+  ],
   "props": {
    "prop_l": {
     "tris": 110,
@@ -171,7 +177,7 @@
   }
  },
  "gravekeeper": {
-  "tris": 1542,
+  "tris": 1654,
   "atlas": 256,
   "buried": [],
   "props": {
@@ -182,7 +188,7 @@
   }
  },
  "mapmaker": {
-  "tris": 1365,
+  "tris": 1505,
   "atlas": 256,
   "buried": [],
   "props": {
@@ -197,7 +203,7 @@
   }
  },
  "drunkard": {
-  "tris": 1139,
+  "tris": 1279,
   "atlas": 256,
   "buried": [],
   "props": {
@@ -208,7 +214,7 @@
   }
  },
  "trade_keeper": {
-  "tris": 1646,
+  "tris": 1758,
   "atlas": 256,
   "buried": [],
   "props": {
@@ -219,7 +225,7 @@
   }
  },
  "stable_keeper": {
-  "tris": 1430,
+  "tris": 1570,
   "atlas": 256,
   "buried": [],
   "props": {
@@ -230,7 +236,7 @@
   }
  },
  "survivor_salt": {
-  "tris": 1341,
+  "tris": 1453,
   "atlas": 256,
   "buried": [],
   "props": {
@@ -245,7 +251,7 @@
   }
  },
  "survivor_storm": {
-  "tris": 1485,
+  "tris": 1597,
   "atlas": 256,
   "buried": [
    [
@@ -262,7 +268,7 @@
   }
  },
  "survivor_ash": {
-  "tris": 1383,
+  "tris": 1495,
   "atlas": 256,
   "buried": [],
   "props": {
@@ -273,7 +279,7 @@
   }
  },
  "abyss_porter": {
-  "tris": 1454,
+  "tris": 1594,
   "atlas": 256,
   "buried": [],
   "props": {
@@ -284,7 +290,7 @@
   }
  },
  "guest_apprentice": {
-  "tris": 1259,
+  "tris": 1399,
   "atlas": 256,
   "buried": [],
   "props": {
@@ -295,7 +301,7 @@
   }
  },
  "guest_bellkeeper": {
-  "tris": 1242,
+  "tris": 1354,
   "atlas": 256,
   "buried": [
    [
@@ -312,7 +318,7 @@
   }
  },
  "guest_fisher": {
-  "tris": 1558,
+  "tris": 1596,
   "atlas": 256,
   "buried": [],
   "props": {
@@ -323,7 +329,7 @@
   }
  },
  "guest_bard": {
-  "tris": 1653,
+  "tris": 1765,
   "atlas": 256,
   "buried": [],
   "props": {
@@ -334,7 +340,7 @@
   }
  },
  "guest_child": {
-  "tris": 1401,
+  "tris": 1513,
   "atlas": 256,
   "buried": [],
   "props": {
@@ -345,7 +351,7 @@
   }
  },
  "guest_weaver": {
-  "tris": 1716,
+  "tris": 1828,
   "atlas": 256,
   "buried": [
    [
@@ -367,7 +373,7 @@
   }
  },
  "guest_ash_apprentice": {
-  "tris": 1292,
+  "tris": 1432,
   "atlas": 256,
   "buried": [],
   "props": {
@@ -378,7 +384,7 @@
   }
  },
  "guest_herbalist": {
-  "tris": 1758,
+  "tris": 1768,
   "atlas": 256,
   "buried": [
    [
@@ -400,7 +406,7 @@
   }
  },
  "guest_sailor": {
-  "tris": 1674,
+  "tris": 1712,
   "atlas": 256,
   "buried": [],
   "props": {
@@ -411,7 +417,7 @@
   }
  },
  "guest_mother": {
-  "tris": 1615,
+  "tris": 1755,
   "atlas": 256,
   "buried": [
    [
@@ -433,12 +439,23 @@
   }
  },
  "guest_baker": {
-  "tris": 1544,
+  "tris": 1582,
   "atlas": 256,
   "buried": [],
   "props": {
    "prop_l": {
     "tris": 132,
+    "atlas": 64
+   }
+  }
+ },
+ "artisan": {
+  "tris": 1724,
+  "atlas": 256,
+  "buried": [],
+  "props": {
+   "prop_r": {
+    "tris": 56,
     "atlas": 64
    }
   }

@@ -719,16 +719,20 @@ def build_arm(c, side):
     r_wr = {"fitted": 1.12, "wide": 1.95, "rolled": 0.95, "puff": 1.1}[sl]
     sm = c.get("sleeve_mat", "coat")
     # 上腕 (肩は胴の中へ 0.8 沈める)
-    sh_in = sh + V(-side * 0.9, 0.0, 0.0)
-    F += part(up_b + "u", tube(up_b, sm, [sh_in, sh + V(side * 0.15, -0.4, 0), el], ra=[r_up, r_up, r_el], sides=7, caps=(True, True)))
+    du = (el - sh) / np.linalg.norm(el - sh)
+    sh_in = sh - du * 1.2   # 肩の付け根は上腕の向きのまま胴の中へ (曲げない: 折れ目で面が裏返らない)
+    F += part(up_b + "u", tube(up_b, sm, [sh_in, el], ra=[r_up, r_el], sides=7, caps=(True, True)))
+    F += part(up_b + "s", ellipsoid(up_b, sm, sh + du * 0.4, (r_up * 1.08, r_up * 1.1, r_up * 1.08), segs=7, rings=3))
     # 肘から先 (肘の球で上腕とつなぐ。前腕の付け根は上腕の中)
-    d = el - sh
-    el_in = el - d / np.linalg.norm(d) * 0.9
+    d = wr - el
+    el_in = el - d / np.linalg.norm(d) * 1.0   # 前腕の付け根は前腕の向きのまま上腕の中へ
+    # 肘の玉 (前腕の骨。肘を曲げても上腕との間に隙間が開かない)
+    F += part(fo_b + "e", ellipsoid(fo_b, sm, el, (r_el * 1.02, r_el * 1.02, r_el * 1.02), segs=7, rings=3))
     if sl == "rolled":
         F += part(fo_b + "roll", tube(fo_b, sm, [el_in, el + (wr - el) * 0.22], ra=[r_el + 0.12, r_el + 0.12], sides=7, caps=(True, True)))
         F += part(fo_b + "f", tube(fo_b, "skin", [el, wr], ra=[r_el * 0.85, r_wr], sides=6, caps=(True, True)))
     else:
-        F += part(fo_b + "f", tube(fo_b, sm, [el_in, el, wr + (wr - el) * 0.06], ra=[r_el, r_el, r_wr], sides=7, caps=(True, True)))
+        F += part(fo_b + "f", tube(fo_b, sm, [el_in, wr + (wr - el) * 0.06], ra=[r_el, r_wr], sides=7, caps=(True, True)))
         cm = c.get("cuff_mat", "trim")
         if cm:
             c0 = wr + (el - wr) * 0.16
@@ -758,8 +762,8 @@ def build_legs(c):
         if lw == "robe":
             pass  # 衣の下: 靴だけ (脛は衣の中で見えないので作らない)
         else:
-            F += part(b + "t", tube(b, "trousers", [V(x * 0.85, top, 0.1), V(x, 7.0, 0.05), V(x * 1.02, 3.6, 0.0)],
-                                    ra=[1.75, 1.5, 1.3], sides=7, caps=(True, True)))
+            F += part(b + "t", tube(b, "trousers", [V(x * 0.9, top + 0.8, 0.1), V(x, 7.0, 0.05), V(x * 1.02, 3.6, 0.0)],
+                                    ra=[1.5, 1.5, 1.3], sides=7, caps=(True, True)))
         bt = c.get("boots", "boot") if lw != "robe" else "shoe"
         if bt == "boot":
             F += part(b + "b", tube(b, "boot", [V(x * 1.02, 0.9, 0.15), V(x * 1.02, 4.9, 0.05)], ra=[1.5, 1.48], sides=7, caps=(True, True)))

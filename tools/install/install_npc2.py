@@ -58,6 +58,7 @@ def bake_glow(atlas_path, mask_path, out_path):
 
 
 def install(name, kind):
+    """name の書き出し (docs/review/npc_models_v2/roughs/<name>/) を入れる。kind = 動きの型。"""
     d = os.path.join(SRC, name)
     full = "npc_" + name
     mesh = json.load(open(os.path.join(d, name + "_mesh.json"), encoding="utf-8"))
@@ -104,12 +105,36 @@ def install(name, kind):
         if not lit and os.path.exists(glow):
             os.remove(glow)
         props.append(f"{sock} ({g['triangle_count']} tris{', glow' if lit else ''})")
-    prefix = "animation.town_guest" if name.startswith("guest_") else "animation.attendant"
+    prefix = "animation.town_guest" if name.startswith("guest_") else "animation.artisan" if name == "artisan" else "animation.attendant"
+    # 絵だけ替える装い (旅の職人の章): textures/lowpoly/npc_<名>_<装い>.png
+    import glob
+    for vp in glob.glob(os.path.join(d, name + "_ch*_atlas.png")):
+        v = os.path.basename(vp)[len(name) + 1:-len("_atlas.png")]
+        shutil.copyfile(vp, os.path.join(TEX, f"{full}_{v}.png"))
     with open(os.path.join(ASSETS, "animations", "entity", full + ".animation.json"), "w", encoding="utf-8", newline="\n") as f:
         json.dump(AN.animation_file(prefix, kind), f, ensure_ascii=False, indent=1)
     # 水密にする (開いた縁を塞ぎ、子の骨の付け根を親の中へ延ばす。関節の確かめは上の動きの回転幅で行う)
-    st = MC.close_mesh_file(os.path.join(ASSETS, "lowpoly", full + ".json"), with_collar=True, force=True)
-    mesh = json.load(open(os.path.join(ASSETS, "lowpoly", full + ".json"), encoding="utf-8"))
+    mp = os.path.join(ASSETS, "lowpoly", full + ".json")
+    raw = json.load(open(mp, encoding="utf-8"))
+    st = MC.close_mesh_file(mp, with_collar=True, force=True)
+    mesh = json.load(open(mp, encoding="utf-8"))
+    # 襟 (付け根の延長) が隣の骨の側まで伸びた骨 (両脚が股で近いと起きる) は、襟なしで塞いだものに替える。
+    # 脚の付け根は胴の中へ 1.4 単位以上沈めてあるので、襟がなくても関節から中は見えない
+    plain, _ = MC.close_mesh(json.loads(json.dumps(raw)), with_collar=False)
+    swapped = []
+    for n in ("legL", "legR", "armL", "armR"):
+        a = mesh["bones"][n]["vertices"]
+        b = plain["bones"][n]["vertices"]
+        if a and b:
+            wa = max(v[0] for v in a) - min(v[0] for v in a)
+            wb = max(v[0] for v in b) - min(v[0] for v in b)
+            if wa > wb * 1.3 + 0.5:
+                mesh["bones"][n] = plain["bones"][n]
+                swapped.append(n)
+    if swapped:
+        mesh["triangle_count"] = sum(len(b.get("triangles", [])) for b in mesh["bones"].values())
+        write_json(mp, mesh)
+        st = dict(st, plain=swapped)
     print("%-24s %5d tris  %s  anim=%s  close=%s" % (full, mesh["triangle_count"], ", ".join(props) or "-", kind, st))
 
 

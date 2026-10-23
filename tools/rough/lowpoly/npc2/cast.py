@@ -340,3 +340,34 @@ add("guest_baker", ja="パン焼き", anim="hold_l",
     hat=dict(kind="kerchief"), beard="moustache", hairline=27.2, build="stout",
     upper=dict(apron=dict(bottom=4.8, top=18.0, w=3.4), collar=True, collar_mat="shirt"),
     lower="trousers", sleeve="rolled", arms=HOLD_L, props={"prop_l": P2.bread_basket})
+
+
+# ====================================================================== 旅の職人 (章ごとに絵だけ替える: variants)
+
+def goggles(c):
+    """額へ押し上げた眼鏡 (革の帯と丸いレンズ二つ)。"""
+    import kit as K
+    hs = c["_hs"]
+    F = []
+    F += K.part("gog_strap", K.shell("head", "leather", hs, lambda a: 27.7, 28.5, 0.75, top_off=0.75, n=16, rows=1))
+    zf = K.prof_at(hs, 28.4)[1]
+    for s in (-1, 1):
+        cen = K.V(s * 1.55, 28.45, zf - 0.75)
+        F += K.part(f"lens{s}", K.disc("head", "glass", cen, 0.95, 0.35, n=8, axis="z"))
+        F += K.part(f"lens_rim{s}", K.disc("head", "metal", cen + K.V(0, 0, 0.12), 1.15, 0.32, n=8, axis="z"))
+    return F
+
+
+add("artisan", ja="旅の職人", anim="hold_r", group="artisan",
+    pal=dict(skin=SKIN["mid"], hair=(42, 38, 44), coat=(68, 86, 112), apron=(116, 126, 138), shirt=(156, 148, 124), trim=(38, 34, 40), metal=(132, 136, 144),
+             trousers=(38, 34, 40), boot=(30, 24, 20), leather=(100, 72, 46), glass=(120, 150, 160)),
+    variants={"ch1": dict(apron=(116, 126, 138), trim=(38, 34, 40), metal=(148, 158, 168)),
+              "ch2": dict(apron=(200, 206, 204), trim=(38, 34, 40), metal=(228, 232, 226)),
+              "ch3": dict(apron=(90, 66, 46), trim=(166, 96, 48), metal=(210, 136, 76)),
+              "ch4": dict(apron=(60, 50, 46), trim=(38, 34, 32), metal=(206, 110, 30))},
+    face=dict(eye="kind", iris=(80, 96, 110), brow="flat", mouth="smile"),
+    hair=dict(style="short", front=27.4, side=24.8, back=23.6, fringe=[(-1.2, 27.8, 1.4, 0.7, -0.3), (1.0, 27.8, 1.4, 0.7, 0.3)]),
+    beard="stubble", hairline=27.4, build="avg",
+    upper=dict(apron=dict(bottom=6.0, top=18.6, w=3.2), collar=True, collar_mat="trim", buttons=[19.4],
+               pouches=[(-3.8, 10.4, "pouch"), (3.8, 10.4, "pouch")]),
+    lower="tails", sleeve="fitted", gloves=True, extra_body=[goggles], props={"prop_r": P2.hammer})

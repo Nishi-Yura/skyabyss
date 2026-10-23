@@ -14,7 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 // NPC v2 (人ごとの形。client/npc/NpcModels・tools/install/install_npc2.py) の素材の自己テスト。段: "lowpoly npc"。
-//   都の係の人 (全役)・深淵の生き残り 4 人と荷運び・町の人 (全員) に、体のメッシュ・絵・骨の geo・動き (idle / walk / talk) があること。
+//   都の係の人 (全役)・深淵の生き残り 4 人と荷運び・町の人 (全員)・旅の職人 (章ごとの絵 4 枚) に、体のメッシュ・絵・骨の geo・動き (idle / walk / talk) があること。
 //   メッシュは水密の印 (mesh_close) があり、動きが使う骨 (body・head・armL/R・foreL/R・legL/R・hem・hairB・受け口) がそろっていること。
 //   持ち物のメッシュ (npc_<id>_<受け口>.json) があれば、その絵があり、受け口のメッシュ (socket: true) であること。
 public final class NpcModelSelfTest {
@@ -38,6 +38,7 @@ public final class NpcModelSelfTest {
         for (TownGuests.Guest g : TownGuests.ALL) {
             out.add("guest_" + g.id());
         }
+        out.add("artisan");
         return out;
     }
 
@@ -84,6 +85,14 @@ public final class NpcModelSelfTest {
             if (!resource(a + "textures/lowpoly/" + m + ".png")) {
                 f.add("texture " + m);
             }
+            if (id.equals("artisan")) {
+                // 旅の職人は章ごとの絵 (形は一つ)
+                for (int ch = 1; ch <= 4; ch++) {
+                    if (!resource(a + "textures/lowpoly/" + m + "_ch" + ch + ".png")) {
+                        f.add("texture " + m + "_ch" + ch);
+                    }
+                }
+            }
             JsonObject geo = json(a + "geo/entity/" + m + "_lowpoly.geo.json");
             if (geo == null) {
                 f.add("geo " + m);
@@ -94,7 +103,7 @@ public final class NpcModelSelfTest {
                 }
             }
             JsonObject anim = json(a + "animations/entity/" + m + ".animation.json");
-            String prefix = id.startsWith("guest_") ? "animation.town_guest." : "animation.attendant.";
+            String prefix = id.startsWith("guest_") ? "animation.town_guest." : id.equals("artisan") ? "animation.artisan." : "animation.attendant.";
             for (String clip : List.of("idle", "walk", "talk")) {
                 if (anim == null || !anim.getAsJsonObject("animations").has(prefix + clip)) {
                     f.add("animation " + prefix + clip + " for " + m);
