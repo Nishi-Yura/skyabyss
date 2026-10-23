@@ -1,6 +1,7 @@
 """敵の質の見直しのスクショ一覧 (docs/review/mob_quality_v2/sheet_<tag>.png) を組む。
 入力: run/shots/mob_quality_<tag>/shots/mob_quality_<tag>/mq_<id>_{q,side,back,atk}.png (tools/gen/shots/gen_mob_quality_shots.py の台本)
-使い方: python -I tools/sheets/mob_quality_sheet.py <tag> [--pair <before_tag>] [名前...]
+使い方: python -I tools/sheets/mob_quality_sheet.py <tag> [--pair <before_tag>] [--out <dir>] [--views q,side,atk,...] [名前...]
+  --out で出す先 (既定 docs/review/mob_quality_v2)、--views で並べる絵 (既定 q,side,back,atk。hurt・death など追加の動きも指定できる)
   --pair を付けると、名前ごとに「前 (before_tag) / 後 (tag)」の 2 段で並べる (docs/review/mob_quality_v2/<名前>_compare.png)
 """
 import sys
@@ -11,6 +12,7 @@ from PIL import Image, ImageDraw, ImageFont
 ROOT = Path(__file__).resolve().parents[2]
 OUT = ROOT / "docs/review/mob_quality_v2"
 VIEWS = ["q", "side", "back", "atk"]
+LABELS = {"q": "斜め前", "side": "横", "back": "後ろ", "atk": "攻撃の構え", "hurt": "被弾", "death": "倒れる", "atk2": "攻撃の当たり"}
 CW, CH = 320, 180
 
 
@@ -54,14 +56,22 @@ def main():
     if args and args[0] == "--pair":
         args.pop(0)
         pair = args.pop(0)
+    global OUT, VIEWS
+    while args and args[0] in ("--out", "--views"):
+        k = args.pop(0)
+        v = args.pop(0)
+        if k == "--out":
+            OUT = ROOT / v
+        else:
+            VIEWS = v.split(",")
     names = args or names_of(tag)
     OUT.mkdir(parents=True, exist_ok=True)
     f = font(18)
     if pair:
         for eid in names:
-            img = Image.new("RGB", (110 + CW * 4, 30 + CH * 2), (24, 24, 28))
+            img = Image.new("RGB", (110 + CW * len(VIEWS), 30 + CH * 2), (24, 24, 28))
             dr = ImageDraw.Draw(img)
-            dr.text((8, 6), f"{eid}  斜め前 / 横 / 後ろ / 攻撃の構え", fill=(230, 230, 230), font=f)
+            dr.text((8, 6), f"{eid}  " + " / ".join(LABELS.get(v, v) for v in VIEWS), fill=(230, 230, 230), font=f)
             for r, (t, label) in enumerate([(pair, "直す前"), (tag, "直した後")]):
                 dr.text((8, 30 + r * CH + CH // 2 - 10), label, fill=(240, 220, 160), font=f)
                 for c, cell in enumerate(row(t, eid)):
@@ -73,7 +83,7 @@ def main():
     per = 14
     for page in range(0, len(names), per):
         chunk = names[page:page + per]
-        img = Image.new("RGB", (220 + CW * 4, 30 + CH * len(chunk)), (24, 24, 28))
+        img = Image.new("RGB", (220 + CW * len(VIEWS), 30 + CH * len(chunk)), (24, 24, 28))
         dr = ImageDraw.Draw(img)
         dr.text((8, 6), "敵の見直し  斜め前 / 横 / 後ろ / 攻撃の構え", fill=(230, 230, 230), font=f)
         for r, eid in enumerate(chunk):
