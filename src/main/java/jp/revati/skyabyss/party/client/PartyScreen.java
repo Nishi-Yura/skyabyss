@@ -148,11 +148,11 @@ public final class PartyScreen extends Screen implements jp.revati.skyabyss.clie
                     boolean still = jp.revati.skyabyss.client.rebirth.RebirthClient.still();
                     Component head = jp.revati.skyabyss.rebirth.RebirthText.symbols(m.rebirths(), t, still).append(" ")
                             .append(jp.revati.skyabyss.rebirth.RebirthText.level(m.level(), m.rebirths(), t, still));
-                    Component hp = Component.literal(" " + jp.revati.skyabyss.Hearts.number(m.health()) + "/" + jp.revati.skyabyss.Hearts.of(m.maxHealth()));
+                    Component hp = Component.literal(" " + jp.revati.skyabyss.Hp.number(m.health()) + "/" + jp.revati.skyabyss.Hp.of(m.maxHealth()));
                     // 横に収まらなければ体力は省く (隣の列と重ねない)
                     g.drawString(font, font.width(head) + font.width(hp) <= 108 ? head.copy().append(hp) : head, left + 68, y, SOFT, false);
                 } else {
-                    g.drawString(font, "Lv" + m.level() + " " + jp.revati.skyabyss.Hearts.number(m.health()) + "/" + jp.revati.skyabyss.Hearts.of(m.maxHealth()), left + 68, y,
+                    g.drawString(font, "Lv" + m.level() + " " + jp.revati.skyabyss.Hp.number(m.health()) + "/" + jp.revati.skyabyss.Hp.of(m.maxHealth()), left + 68, y,
                             m.sameDim() ? SOFT : 0x707070, false);
                 }
             }

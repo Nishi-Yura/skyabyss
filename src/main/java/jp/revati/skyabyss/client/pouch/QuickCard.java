@@ -129,6 +129,9 @@ public final class QuickCard {
         if (e.item() instanceof WeathercockItem) {
             return new QuickPick.Cand(e.id(), QuickPick.Role.STORM, null);
         }
+        if (e.item() instanceof jp.revati.skyabyss.mount.MountWhistleItem) {
+            return new QuickPick.Cand(e.id(), QuickPick.Role.MOUNT, null);
+        }
         return new QuickPick.Cand(e.id(), QuickPick.Role.OTHER, null);
     }
 

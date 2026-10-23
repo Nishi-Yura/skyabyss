@@ -75,6 +75,77 @@ public final class ArtClient {
                 PacketDistributor.sendToServer(new ArtCastPayload(a.ordinal()));
             }
         }
+        // しゃがみ + ジャンプ = 重さ (深淵の中。押した瞬間だけ)
+        boolean combo = mc.options.keyShift.isDown() && mc.options.keyJump.isDown();
+        if (combo && !comboHeld && canContext(mc, AbyssArt.WEIGHT)) {
+            PacketDistributor.sendToServer(new ArtCastPayload(AbyssArt.WEIGHT.ordinal()));
+        }
+        comboHeld = combo;
+    }
+
+    private static boolean comboHeld;
+
+    // 場面の操作で使えるか: 深淵の中・覚えている・待ちでない (使えないときは今までの操作のまま)
+    private static boolean canContext(Minecraft mc, AbyssArt a) {
+        if (mc.player == null || mc.level == null || mc.level.dimension() != AbyssWorld.LEVEL || mc.player.isSpectator()) {
+            return false;
+        }
+        return AbyssArts.data(mc.player).rank(a) > 0 && UNTIL[a.ordinal()] <= mc.level.getGameTime();
+    }
+
+    // 右クリック = 光、しゃがみ + 右クリック = 鼓動。素手か武器を持っているとき、何もない所か何も起きない壁・床に向けたときだけ
+    // (扉・箱・人・使える道具の右クリックはそのまま)
+    @SubscribeEvent
+    static void onInteract(net.neoforged.neoforge.client.event.InputEvent.InteractionKeyMappingTriggered event) {
+        Minecraft mc = Minecraft.getInstance();
+        if (!event.isUseItem() || event.getHand() != net.minecraft.world.InteractionHand.MAIN_HAND || mc.player == null || mc.screen != null) {
+            return;
+        }
+        AbyssArt a = mc.player.isShiftKeyDown() ? AbyssArt.HEARTBEAT : AbyssArt.LIGHT;
+        if (!canContext(mc, a) || !plainHands(mc) || !plainTarget(mc)) {
+            return;
+        }
+        PacketDistributor.sendToServer(new ArtCastPayload(a.ordinal()));
+        event.setCanceled(true);
+        event.setSwingHand(false);
+    }
+
+    private static boolean plainHands(Minecraft mc) {
+        net.minecraft.world.item.ItemStack main = mc.player.getMainHandItem();
+        if (!mc.player.getOffhandItem().isEmpty()) {
+            return false;
+        }
+        if (main.isEmpty()) {
+            return true;
+        }
+        // 武器 (攻撃力のある品) で、右クリックの使い道がないもの
+        if (main.getItem() instanceof jp.revati.skyabyss.pouch.PouchUsable || main.getUseAnimation() != net.minecraft.world.item.UseAnim.NONE
+                || main.getItem() instanceof net.minecraft.world.item.BlockItem) {
+            return false;
+        }
+        boolean[] weapon = {false};
+        main.forEachModifier(net.minecraft.world.entity.EquipmentSlot.MAINHAND, (attr, mod) -> {
+            if (attr.is(net.minecraft.world.entity.ai.attributes.Attributes.ATTACK_DAMAGE)) {
+                weapon[0] = true;
+            }
+        });
+        return weapon[0];
+    }
+
+    private static boolean plainTarget(Minecraft mc) {
+        net.minecraft.world.phys.HitResult hit = mc.hitResult;
+        if (hit == null || hit.getType() == net.minecraft.world.phys.HitResult.Type.MISS) {
+            return true;
+        }
+        if (hit instanceof net.minecraft.world.phys.BlockHitResult b) {
+            net.minecraft.world.level.block.state.BlockState st = mc.level.getBlockState(b.getBlockPos());
+            return !(st.getBlock() instanceof net.minecraft.world.level.block.EntityBlock)
+                    && st.getMenuProvider(mc.level, b.getBlockPos()) == null
+                    && !st.is(net.minecraft.tags.BlockTags.DOORS) && !st.is(net.minecraft.tags.BlockTags.TRAPDOORS)
+                    && !st.is(net.minecraft.tags.BlockTags.BUTTONS) && !st.is(net.minecraft.tags.BlockTags.FENCE_GATES)
+                    && !st.is(net.minecraft.world.level.block.Blocks.LEVER) && !st.is(net.minecraft.tags.BlockTags.BEDS);
+        }
+        return false;
     }
 
     @SubscribeEvent
@@ -95,14 +166,16 @@ public final class ArtClient {
         ArtData data = AbyssArts.data(mc.player);
         for (AbyssArt a : AbyssArt.values()) {
             int rank = data.rank(a);
-            String keyName = KEYS[a.ordinal()].getTranslatedKeyMessage().getString();
+            // 場面の操作 (右クリックなど) を先に、専用の鍵を後ろに。狭い欄では場面の操作だけ
+            String alt = Component.translatable("hud.skyabyss.art.alt." + a.id).getString();
+            String keyName = alt + "/" + KEYS[a.ordinal()].getTranslatedKeyMessage().getString();
             Component name = Component.translatable(a.nameKey());
             Component line;
             Component shortLine;
             int color;
             if (rank == 0) {
                 line = Component.translatable("hud.skyabyss.art.none", keyName, name);
-                shortLine = Component.translatable("hud.skyabyss.art.short_none", keyName);
+                shortLine = Component.translatable("hud.skyabyss.art.short_none", alt);
                 color = 0x808080;
             } else {
                 long left = Math.max(0, UNTIL[a.ordinal()] - now);
@@ -111,8 +184,8 @@ public final class ArtClient {
                         ? Component.translatable("hud.skyabyss.art.wait", keyName, name, rank, secs)
                         : Component.translatable("hud.skyabyss.art.ready", keyName, name, rank);
                 shortLine = left > 0
-                        ? Component.translatable("hud.skyabyss.art.short_wait", keyName, rank, secs)
-                        : Component.translatable("hud.skyabyss.art.short_ready", keyName, rank);
+                        ? Component.translatable("hud.skyabyss.art.short_wait", alt, rank, secs)
+                        : Component.translatable("hud.skyabyss.art.short_ready", alt, rank);
                 color = left > 0 ? 0xB8B8B8 : 0xE6F4FF;
             }
             LINES[a.ordinal()] = line;

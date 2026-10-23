@@ -36,6 +36,10 @@ public enum WeaponKind {
             // 深淵の専用伝説 (剣型の 3 点。弓は WeaponClient が BowExtension で登録する)
             Map.entry("abyss_greatsword", GREATSWORD),
             Map.entry("abyss_bell_staff", POKER),
+            // 五章「深淵」の装備 (abyss/gear)
+            Map.entry("abyss_lamp_sword", GREATSWORD),
+            Map.entry("abyss_sinking_anchor", HAMMER),
+            Map.entry("abyss_pulse_dagger", FANG),
             Map.entry("abyss_ash_scythe", AXE));
 
     public static Iterable<Map.Entry<String, WeaponKind>> items() {

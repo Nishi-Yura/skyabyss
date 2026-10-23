@@ -174,6 +174,8 @@ public final class WardenArena {
         // 上限を 50 へ (段の経験値より先に。P7-1)
         inside(level).forEach(jp.revati.skyabyss.progress.Progression::markWardenFelled);
         Quests.signalWithParty(level, inside(level), SIGNAL_HEART);
+        // 深淵の装備 (図鑑・天井・心核。abyss/gear/AbyssGearLoot)
+        jp.revati.skyabyss.abyss.gear.AbyssGearLoot.warden(level, inside(level), 0);
     }
 
     @SubscribeEvent

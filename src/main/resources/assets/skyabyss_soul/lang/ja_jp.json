@@ -1,7 +1,7 @@
 {
   "rebirth.skyabyss.arm.rock.short": "岩",
   "rebirth.skyabyss.arm.rock": "岩の腕",
-  "rebirth.skyabyss.arm.rock.desc": "岩の腕: 受ける傷 −0.4%、体力 +0.25 ハート（1 節ごと）",
+  "rebirth.skyabyss.arm.rock.desc": "岩の腕: 受ける傷 −0.4%、最大体力 +0.5（1 節ごと）",
   "rebirth.skyabyss.arm.wind.short": "風",
   "rebirth.skyabyss.arm.wind": "風の腕",
   "rebirth.skyabyss.arm.wind.desc": "風の腕: 技の待ち −0.6%、足の速さ +0.3%（1 節ごと）",
@@ -24,7 +24,7 @@
   "rebirth.skyabyss.boon.scholar": "学びの手",
   "rebirth.skyabyss.boon.scholar.desc": "得る経験値 +3%",
   "rebirth.skyabyss.boon.hardy": "太い骨",
-  "rebirth.skyabyss.boon.hardy.desc": "最大体力 +1 ハート",
+  "rebirth.skyabyss.boon.hardy.desc": "最大体力 +2",
   "rebirth.skyabyss.boon.tidewell": "潮だまり",
   "rebirth.skyabyss.boon.tidewell.desc": "最大マナ +4",
   "rebirth.skyabyss.boon.ashen": "燃えさし",

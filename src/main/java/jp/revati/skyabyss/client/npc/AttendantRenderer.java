@@ -23,11 +23,23 @@ public final class AttendantRenderer {
     @SubscribeEvent
     static void register(EntityRenderersEvent.RegisterRenderers event) {
         event.registerEntityRenderer(FacilitySetup.ATTENDANT.get(), ctx -> new LowPolyGeoRenderer<NpcEntity>(ctx, new Model(),
-                e -> "attendant_" + AttendantLook.look(e.variant()), 1.0f) {
+                AttendantRenderer::meshName, 1.0f) {
             {
                 this.shadowRadius = 0.42f;
+                // 役の持ち物 (v2 の人だけ。受け口 prop_r / prop_l / prop_back に別のメッシュ)
+                addRenderLayer(new NpcModels.PropLayer<>(this, e -> NpcModels.has(role(e)) ? NpcModels.mesh(role(e)) : null));
             }
         });
+    }
+
+    static String role(NpcEntity e) {
+        return e instanceof AttendantEntity a ? a.roleId() : "guild_clerk";
+    }
+
+    // v2 (人ごとの形。NpcModels) が入っている役はその形、無ければ前の作り (見た目の案ごとの共通の形)
+    static String meshName(NpcEntity e) {
+        String r = role(e);
+        return NpcModels.has(r) ? NpcModels.mesh(r) : "attendant_" + AttendantLook.look(e.variant());
     }
 
     static final class Model extends NpcRenderer.Model {
@@ -47,13 +59,27 @@ public final class AttendantRenderer {
 
         @Override
         public ResourceLocation getModelResource(NpcEntity entity) {
+            String r = role(entity);
+            if (NpcModels.has(r)) {
+                return NpcModels.geo(r);
+            }
             return ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "geo/entity/attendant_" + AttendantLook.look(entity.variant()) + "_lowpoly.geo.json");
         }
 
         @Override
         public ResourceLocation getTextureResource(NpcEntity entity) {
-            String role = entity instanceof AttendantEntity a ? a.roleId() : "guild_clerk";
-            return ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "textures/lowpoly/" + AttendantLook.texture(entity.variant(), role) + ".png");
+            String r = role(entity);
+            if (NpcModels.has(r)) {
+                return NpcModels.texture(r);
+            }
+            return ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "textures/lowpoly/" + AttendantLook.texture(entity.variant(), r) + ".png");
+        }
+
+        // v2 の人は持ち方に合わせた動き (animations/entity/npc_<役>.animation.json。名前は animation.attendant.*)
+        @Override
+        public ResourceLocation getAnimationResource(NpcEntity entity) {
+            String r = role(entity);
+            return NpcModels.has(r) ? NpcModels.animation(r) : super.getAnimationResource(entity);
         }
     }
 }

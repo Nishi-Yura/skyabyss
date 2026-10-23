@@ -127,6 +127,8 @@ public final class SelfTestRunner {
         // HUD の置き場の計算 (倍率 1〜4 × 代表的な窓で重ならない)。docs/design/18 の 14 章
         steps.add(Step.once("hud layout", jp.revati.skyabyss.hud.HudLayoutSelfTest::runSelfTest));
         steps.add(Step.once("tutorial", jp.revati.skyabyss.tutorial.TutorialSelfTest::runSelfTest));
+        // 技の稽古 (師範の手ほどき: 覚える・置く・木偶に当てる・背後・構え・振り直し・後の章の一段)。SKYABYSS_SELFTEST_ONLY="skill lesson"
+        steps.add(Step.once("skill lesson", jp.revati.skyabyss.tutorial.SkillLessonSelfTest::runSelfTest));
         // 転生の見せ方 (色の段・記号・称号・順位表・同期・記録・墓の飾り)。docs/design/31
         steps.add(Step.once("rebirth load", jp.revati.skyabyss.rebirth.RebirthSelfTest::load));
         steps.add(Step.once("rebirth", 40, jp.revati.skyabyss.rebirth.RebirthSelfTest::runSelfTest));
@@ -160,6 +162,7 @@ public final class SelfTestRunner {
         steps.add(Step.once("storm gear", jp.revati.skyabyss.item.storm.StormGearSelfTest::runSelfTest));
         // 余燼の装備と伝承・天の鍵の締め (13 の 11.2節の担当 G)
         steps.add(Step.once("ember gear", jp.revati.skyabyss.titan.ember.gear.EmberGearSelfTest::runSelfTest));
+        steps.add(Step.once("abyss gear", jp.revati.skyabyss.abyss.gear.AbyssGearSelfTest::runSelfTest));
         steps.add(Step.once("ember lore", jp.revati.skyabyss.titan.ember.lore.EmberLoreSelfTest::runSelfTest));
         steps.add(Step.once("record", RecordSelfTest::runSelfTest));
         // 備えの三灯 (式・色の境目・乗り込みの確認の流れ・前室の囁き・控え帳の行)。docs/design/21 の 1.2、11 の 9 章
@@ -175,6 +178,8 @@ public final class SelfTestRunner {
         steps.addAll(jp.revati.skyabyss.mount.MountSelfTest.steps());
         // 町のクエスト (限定の人・噂・墓守・酔いどれ・地図屋・古井戸)。docs/design/35 の 3.3・3.5。SKYABYSS_SELFTEST_ONLY=town
         steps.addAll(jp.revati.skyabyss.town.TownSelfTest.steps());
+        // NPC v2 (人ごとの形・持ち物・動き)。docs/review/npc_quality_2026-10-23.md。SKYABYSS_SELFTEST_ONLY="lowpoly npc"
+        steps.addAll(jp.revati.skyabyss.npc.NpcModelSelfTest.steps());
         // 倒れたときの決まりと墓 (docs/design/11 の 6 章)
         steps.add(Step.once("grave (load)", jp.revati.skyabyss.grave.GraveSelfTest::load));
         steps.add(Step.once("grave", 40, jp.revati.skyabyss.grave.GraveSelfTest::runSelfTest));

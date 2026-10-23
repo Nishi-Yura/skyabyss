@@ -401,6 +401,8 @@ public final class AbyssLords {
                 c.discard();
             }
         }
+        // 深淵の装備 (その層の鎧の一部位・錨鉄。abyss/gear/AbyssGearLoot)
+        jp.revati.skyabyss.abyss.gear.AbyssGearLoot.lord(level, f.layer, in);
         f.bar.removeAllPlayers();
         FIGHTS.remove(f.layer);
         BlockPos dsc = AbyssBuild.mark("descend_" + f.layer);

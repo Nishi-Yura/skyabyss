@@ -49,6 +49,8 @@ public final class DepthLoot {
         if (tier >= 1 && floor >= 10 && r.nextDouble() < 0.25) {
             out.add(new ItemStack(Items.TOTEM_OF_UNDYING));
         }
+        // 深淵の装備: 錨鉄と、図鑑の品の機会 (abyss/gear/AbyssGearLoot)
+        jp.revati.skyabyss.abyss.gear.AbyssGearLoot.chest(out, floor, tier, r);
         return out;
     }
 

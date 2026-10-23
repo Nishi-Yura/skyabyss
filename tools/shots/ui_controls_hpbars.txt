@@ -1,0 +1,27 @@
+# 2026-10-23: 敵の頭の上の体力の帯 (GeckoLib の敵とバニラの敵)。./gradlew runShots -Pscript=tools/shots/ui_controls_hpbars.txt -PshotsName=ui_controls
+world ui_controls flat
+size 1280 720
+timeout 900
+render 8
+clouds off
+guiscale 3
+
+wait 80
+cmd skyabyss cinematic stop
+cmd gamemode creative Dev
+cmd time set noon
+cmd weather clear
+cmd tp @s 0 -60 0 0 8
+wait 20
+cmd summon minecraft:zombie 0 -60 5 {NoAI:1b,PersistenceRequired:1b,Health:12f}
+cmd summon skyabyss:moss_crawler -3 -60 5 {NoAI:1b,PersistenceRequired:1b}
+cmd summon skyabyss:spine_hare 3 -60 6 {NoAI:1b,PersistenceRequired:1b}
+cmd summon skyabyss:whalebone_captain 0 -60 11 {NoAI:1b,PersistenceRequired:1b}
+wait 60
+cmd effect give @e[type=skyabyss:moss_crawler] minecraft:instant_damage 1 0 true
+wait 40
+shot hpbars_near
+cmd tp @s 0 -60 -4 0 6
+wait 30
+shot hpbars_far
+quit

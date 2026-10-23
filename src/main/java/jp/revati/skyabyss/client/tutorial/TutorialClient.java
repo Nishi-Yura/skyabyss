@@ -161,6 +161,11 @@ public final class TutorialClient {
         long tick = mc.level == null ? -1 : mc.level.getGameTime();
         if (tick != textsTick || tick < 0) {
             List<Component> out = new ArrayList<>();
+            // 技の稽古の今の段の案内 (SkillLessonClient)。手引きより先に
+            Component lesson = SkillLessonClient.hint(mc);
+            if (lesson != null) {
+                out.add(lesson);
+            }
             for (String id : active) {
                 Component t = text(mc, id);
                 if (t != null) {
