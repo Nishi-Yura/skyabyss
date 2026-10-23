@@ -49,3 +49,4 @@ venv/
 
 # 生成スクリプトの確認用の絵
 docs/review/previews/
+/.claude/

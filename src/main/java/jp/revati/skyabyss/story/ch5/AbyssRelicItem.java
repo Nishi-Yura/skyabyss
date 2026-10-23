@@ -17,6 +17,17 @@ public final class AbyssRelicItem extends Item {
         this.descKey = descKey;
     }
 
+    // 作業台で遺品をなぞって深淵の装備を作るとき (灯籠の護符・鼓動の聴き筒。data/skyabyss/recipe/abyss_*)、遺品は減らずに残る
+    @Override
+    public boolean hasCraftingRemainingItem(ItemStack stack) {
+        return true;
+    }
+
+    @Override
+    public ItemStack getCraftingRemainingItem(ItemStack stack) {
+        return stack.copyWithCount(1);
+    }
+
     // 品の一行 (墓の文の要点) と、組で効く三つの段 (二・四・六つ) を出す
     @Override
     public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltip, TooltipFlag flag) {

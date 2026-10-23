@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>深淵の装備 選定</title>
+<style>
+:root{
+  --bg:#eceef0; --panel:#f8f9fa; --ink:#1b2129; --muted:#5b6672; --line:#c9d0d6;
+  --accent:#6a4bc4; --accent-ink:#ffffff; --ok:#2f8a4b; --shot:#14141c;
+  --body:"Zen Kaku Gothic New","Hiragino Sans","Yu Gothic",system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#101318; --panel:#171b22; --ink:#e3e8ee; --muted:#93a0ad; --line:#2a313b;
+  --accent:#b79cff; --accent-ink:#0b1216; --ok:#6fd18c; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#101318; --panel:#171b22; --ink:#e3e8ee; --muted:#93a0ad; --line:#2a313b;
+  --accent:#b79cff; --accent-ink:#0b1216; --ok:#6fd18c; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.7;margin:0}
+.wrap{max-width:1100px;margin:0 auto;padding-inline:16px;padding-block:28px 80px}
+h1{font-weight:700;font-size:clamp(24px,4vw,34px);margin:0 0 8px;letter-spacing:.03em;text-wrap:balance}
+h2{font-size:19px;margin:34px 0 10px}
+.intro{color:var(--muted);max-width:70ch;margin:0 0 6px}
+figure{margin:0}
+img{display:block;width:100%;height:auto;background:var(--shot);border:1px solid var(--line);image-rendering:pixelated}
+.option{background:var(--panel);border:1px solid var(--line);padding:14px;margin:16px 0}
+.option h3{margin:0 0 4px;font-size:18px}
+.option p{margin:0 0 10px;color:var(--muted)}
+.option figure + figure{margin-top:8px}
+figcaption{font-size:12px;color:var(--muted);margin-top:2px}
+.scroll{overflow-x:auto}
+.scroll img{min-width:720px}
+.opts{border:0;padding:0;margin:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.opt{display:flex;gap:10px;align-items:center;padding:12px;background:var(--panel);border:1px solid var(--line);cursor:pointer}
+.opt input{position:absolute;opacity:0;pointer-events:none}
+.letter{font-size:22px;font-weight:700;width:36px;height:36px;display:grid;place-items:center;border:1px solid var(--line);flex:none}
+.opt:has(input:checked){border-color:var(--accent)}
+.opt:has(input:checked) .letter{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.opt:has(input:focus-visible){outline:2px solid var(--accent);outline-offset:2px}
+.note{width:100%;font:inherit;color:var(--ink);background:var(--panel);border:1px solid var(--line);padding:8px 10px;resize:vertical}
+.note:focus{outline:2px solid var(--accent)}
+.note-l{font-size:13px;color:var(--muted);display:block;margin:14px 0 4px}
+.save{color:var(--muted);font-size:13px;margin-top:6px}
+@media (max-width:760px){ .opts{grid-template-columns:minmax(0,1fr)} }
+</style>
+<style>
+.sec{border-top:2px solid var(--line);margin-top:40px;padding-top:6px}
+.sec h2{font-size:22px;margin:18px 0 6px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>五章「深淵」の装備の形</h1>
+  <p class="intro">五章の深淵で手に入る新しい装備（武器 3・装飾と護符 3・鎧 4 部位）のラフ 3 案です。どれも低ポリの立体で、32x32 のアイコンは立体を写したものです。共通の色は深淵の紫黒の土台に錨鉄（青灰の鉄と鋲）、縁は階級の色（レア = 青い鋼、伝説 = 紫銀）。各品の A 案を仮にゲームに入れてあります。</p>
+  <div id="root"></div>
+</div>
+<script>
+(() => {
+  const ITEMS = {"abyss_lamp_sword": {"jp": "灯り番の剣", "intro": "レアの片手剣（攻撃 11・速さ 1.6）。灯りの中で +10%、闇で斬った敵を光らせる。光は灯りの琥珀。", "kind": "weapon", "opts": {"a": {"title": "A 吊り灯", "desc": "吊り灯。真っ直ぐな刃と十字の鍔。鍔の腕から小さな角灯が鎖で垂れる。灯り番の剣と一目で分かる。"}, "b": {"title": "B 灯の柄頭", "desc": "灯の柄頭。柄頭そのものが角灯で、刃の根に琥珀の小窓。手もとが光る。"}, "c": {"title": "C 灯窓", "desc": "灯窓。幅広の刃の根に縦長の灯りの窓が通る。鍔は錨鉄の円盤。いちばん静か。"}}}, "abyss_sinking_anchor": {"jp": "沈め錨", "intro": "伝説の両手の錨（攻撃 21・速さ 0.8）。3 度に 1 度、まわりへ重しを落として引き下ろす。光は淵の紫。", "kind": "weapon", "opts": {"a": {"title": "A 古い錨", "desc": "古い錨。胴の先に左右へ反った二本の腕と爪、横木、胴に鎖。いちばん「錨」と読める。"}, "b": {"title": "B 四つ爪の錨鉤", "desc": "四つ爪の錨鉤。四方へ鉤が開き、輪郭が十字になる。引き下ろす武器らしさ。"}, "c": {"title": "C 欠けた錨", "desc": "欠けた錨。片方の腕が大きく、もう片方は根で折れて紫の割れ目が光る。心臓の錨の欠けた爪という由来の形。"}}}, "abyss_pulse_dagger": {"jp": "鼓動の短剣", "intro": "伝説の短剣（攻撃 9・速さ 2.0）。同じ敵への連撃 4 度目ごとに追い打ちの拍。光は鼓動の赤。", "kind": "weapon", "opts": {"a": {"title": "A 肋の刃", "desc": "肋の刃。番人の肋のように反った刃、鍔に心臓の形の赤い核。"}, "b": {"title": "B 脈の針", "desc": "脈の針。細い刺突の刃に赤い脈の筋。鍔は小さな肋かご。"}, "c": {"title": "C 波の刃", "desc": "波の刃。鼓動の波形のように揺れる刃、柄頭に大きな心臓の核。"}}}, "abyss_pulse_listener": {"jp": "鼓動の聴き筒", "intro": "レアの装飾。4 秒ごとにまわりの敵の輪郭を光らせる。付けた姿は胸の左。", "kind": "acc", "opts": {"a": {"title": "A 聴き喇叭", "desc": "聴き喇叭。細い筒の先が喇叭に開き、巻きの真ん中に赤い鼓動の核。"}, "b": {"title": "B 聴き円盤", "desc": "聴き円盤。胸に当てる錨鉄の円盤と赤い核、二本の管。"}, "c": {"title": "C 巻き貝の耳", "desc": "巻き貝の耳。白い貝を錨鉄の帯で留めた耳当て、口の奥で赤い核。"}}}, "abyss_lantern_charm": {"jp": "灯籠の護符", "intro": "レアの護符（H キー）。足もとに深淵の灯りを置き、敵を光らせて押し返す。", "kind": "acc", "opts": {"a": {"title": "A 小さな灯籠", "desc": "小さな灯籠。心臓の間の灯籠を写した籠。いちばん素直に「灯籠」。"}, "b": {"title": "B 灯の円札", "desc": "灯の円札。六角の札に灯の形の窓。札らしく平たい。"}, "c": {"title": "C 吊り灯の鈴", "desc": "吊り灯の鈴。鐘の形の灯、口の下から琥珀がのぞく。"}}}, "abyss_surveyor_plumb": {"jp": "測量士の錘", "intro": "伝説の装飾。深いほど与える傷が増える。付けた姿は腰の右の後ろ。", "kind": "acc", "opts": {"a": {"title": "A 下げ振り", "desc": "下げ振り。涙の形の錘、腹に紫の目盛り。測量の道具と一目で分かる。"}, "b": {"title": "B 測鉛", "desc": "測鉛。円筒の鉛と巻いた測り縄、紫の結び目が深さの目盛り。"}, "c": {"title": "C 小さな錨", "desc": "小さな錨。錨の形の錘、腕の先に紫の爪。沈め錨と対になる。"}}}, "abyss_diver_armor": {"jp": "淵潜りの鎧", "intro": "レアの鎧 4 部位（防御 23・強靭 15 + 一式 3）。4 部位で上昇の重みと闇のたまりが軽くなり、暗い所の傷が減る。", "kind": "armor", "opts": {"a": {"title": "A 錨鉄の潜り鎧", "desc": "鋲の錨鉄の板・額の角灯・胸を斜めに渡る鎖・丸い肩の 3 段・重りの靴底。"}, "b": {"title": "B 灯り番の外套", "desc": "紫黒の長い外套・錨鉄の縁・腰に吊った角灯・頭巾の額の灯。"}, "c": {"title": "C 肋と鎖", "desc": "鎖の帷子に白紫の肋の板・肋の冠・面頬の覗き窓が光る。"}}}};
+  const mk = (tag, cls, html) => { const e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; return e; };
+  const root = document.getElementById('root');
+  const dbp = (async () => {
+    const c = window.claude && window.claude.use ? window.claude : null;
+    return c ? await c.use('db') : null;
+  })();
+  for (const id of Object.keys(ITEMS)) {
+    const W = ITEMS[id];
+    const docId = 'gear_gaps_' + id;
+    const sec = mk('section', 'sec');
+    sec.appendChild(mk('h2', '', W.jp));
+    sec.appendChild(mk('p', 'intro', W.intro));
+    sec.appendChild(mk('figure', 'scroll', `<img src="${id}/compare.png" alt="${W.jp} 3 案の並び" loading="lazy"><figcaption>3 案の並び${W.kind === 'armor' ? '（正面・背面・横・3/4・兜と胸の拡大、下はアイコン）' : '（前・前 3/4、下は 32x32 のアイコン）'}</figcaption>`));
+    const fs = mk('fieldset', 'opts');
+    for (const k of Object.keys(W.opts)) {
+      const o = mk('section', 'option');
+      o.appendChild(mk('h3', '', W.opts[k].title));
+      o.appendChild(mk('p', '', W.opts[k].desc));
+      if (W.kind === 'weapon') {
+        o.appendChild(mk('figure', 'scroll', `<img src="${id}/opt_${k}_views.png" alt="${W.opts[k].title} 回転 4 方向" loading="lazy"><figcaption>前・横・後ろ・前 3/4</figcaption>`));
+        o.appendChild(mk('figure', 'scroll', `<img src="${id}/opt_${k}_actions.png" alt="${W.opts[k].title} 手と地面" loading="lazy"><figcaption>手に持つ（三人称・一人称。持ち方は目安）・地面・強化の光り方</figcaption>`));
+      }
+      sec.appendChild(o);
+      fs.appendChild(mk('label', 'opt', `<input type="radio" name="style_${id}" value="${k}"><span class="letter">${k.toUpperCase()}</span><span>${W.opts[k].title}</span>`));
+    }
+    sec.appendChild(mk('h2', '', `${W.jp}: 採用する案`));
+    sec.appendChild(fs);
+    sec.appendChild(mk('label', 'note-l', '直してほしい点（任意）'));
+    const note = mk('textarea', 'note'); note.rows = 3;
+    sec.appendChild(note);
+    const saveEl = mk('div', 'save', '読み込み中…');
+    sec.appendChild(saveEl);
+    root.appendChild(sec);
+    let db = null, timer = null;
+    const chosen = () => { const r = sec.querySelector('input[type=radio]:checked'); return r ? r.value : ''; };
+    const save = async () => {
+      if (!db) return;
+      saveEl.textContent = '保存中…';
+      try { await db.doc('choices/' + docId).set({ option: chosen(), note: note.value, at: Date.now() }); saveEl.textContent = '保存しました'; }
+      catch (e) { saveEl.textContent = '保存できませんでした。もう一度選び直してください'; }
+    };
+    sec.querySelectorAll('input[type=radio]').forEach(r => r.addEventListener('change', save));
+    note.addEventListener('input', () => { clearTimeout(timer); timer = setTimeout(save, 800); });
+    (async () => {
+      db = await dbp;
+      if (!db) { saveEl.textContent = 'この表示では選択を保存できません (サインインして開いてください)'; return; }
+      try {
+        const snap = await db.collection('choices').get();
+        for (const d of (snap.docs || snap)) {
+          if (d.id !== docId) continue;
+          const v = typeof d.data === 'function' ? d.data() : d.data;
+          if (v && v.option) { const r = sec.querySelector(`input[type=radio][value="${v.option}"]`); if (r) r.checked = true; }
+          if (v && v.note) note.value = v.note;
+        }
+        saveEl.textContent = '選ぶと自動で保存されます';
+      } catch (e) { saveEl.textContent = '前回の選択を読み込めませんでした'; }
+    })();
+  }
+})();
+</script>
+</body>
+</html>

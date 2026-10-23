@@ -1,0 +1,21 @@
+{
+  "category": "sub",
+  "order": 207,
+  "giver": "skyabyss:attendant_training_master",
+  "chapter": "titan_storm",
+  "min_stage": 0,
+  "stages": [
+    {
+      "id": "try",
+      "objectives": [
+        {
+          "id": "try",
+          "type": "signal",
+          "target": "skill_lesson:keystone",
+          "party": false
+        }
+      ],
+      "xp": 15
+    }
+  ]
+}

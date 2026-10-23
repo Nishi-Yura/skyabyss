@@ -534,6 +534,8 @@ public class TideShellEntity extends Entity implements GeoEntity, TravelTitan, j
 
     private void startRest(ServerLevel level) {
         setMode(Mode.REST);
+        // 座る体のなかに食い込む浜・岩・木を取り除く (めり込まない)
+        jp.revati.skyabyss.titan.TitanClearing.carve(level, volumeName(), getX(), level.getSeaLevel() - REST_DRAFT, getZ(), getYRot());
         shoreDock = null;
         shoreSearched = false;
         // 潮門を開けておく長さは、地上の干潮の刻ではなく 20 分 (TitanStay)。背の中の潮 (TideClock) は別の時計で、触らない

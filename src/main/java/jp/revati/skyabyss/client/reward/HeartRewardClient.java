@@ -20,6 +20,11 @@ public final class HeartRewardClient {
     // 受け取れる遺物がある (サーバーが State で知らせる)
     private static boolean pending;
 
+    // 鍵の場面 (SkyKeyScene) が出ている間に届いた・場面に押しのけられた選択画面。場面が閉じて何も開いていなくなってから開く
+    private static HeartRewardNet.Open deferred;
+    // 今開いている選択画面の元 (場面に押しのけられたとき、開き直すため)
+    private static HeartRewardNet.Open current;
+
     private HeartRewardClient() {
     }
 
@@ -31,8 +36,30 @@ public final class HeartRewardClient {
         Minecraft.getInstance().execute(() -> pending = state.pending());
     }
 
+    // 鍵の場面を出す直前に呼ぶ: 選択画面が開いていれば、場面のあとに開き直す
+    public static void interruptedBy(net.minecraft.client.gui.screens.Screen screen) {
+        if (screen instanceof HeartRewardScreen && current != null) {
+            deferred = current;
+        }
+    }
+
+    @SubscribeEvent
+    static void onTick(net.neoforged.neoforge.client.event.ClientTickEvent.Post event) {
+        Minecraft mc = Minecraft.getInstance();
+        if (deferred != null && mc.player != null && mc.screen == null && !jp.revati.skyabyss.client.cinematic.CinematicClient.active()) {
+            HeartRewardNet.Open d = deferred;
+            deferred = null;
+            onOpen(d);
+        }
+    }
+
     public static void onOpen(HeartRewardNet.Open open) {
         Minecraft.getInstance().execute(() -> {
+            if (Minecraft.getInstance().screen instanceof jp.revati.skyabyss.client.story.SkyKeyScene
+                    || jp.revati.skyabyss.client.cinematic.CinematicClient.active()) {
+                deferred = open;
+                return;
+            }
             List<ItemStack> stacks = new ArrayList<>();
             for (String id : open.options()) {
                 TitanGearSet.item(id).ifPresent(item -> stacks.add(new ItemStack(item)));
@@ -45,6 +72,8 @@ public final class HeartRewardClient {
             if (mc.screen instanceof HeartRewardScreen) {
                 return;
             }
+            current = open;
+            deferred = null;
             mc.setScreen(new HeartRewardScreen(open.titan(), stacks, open.ownedMask(), open.auto()));
         });
     }
@@ -65,5 +94,7 @@ public final class HeartRewardClient {
     @SubscribeEvent
     static void onLogout(ClientPlayerNetworkEvent.LoggingOut event) {
         pending = false;
+        deferred = null;
+        current = null;
     }
 }

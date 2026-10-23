@@ -119,6 +119,7 @@ public class SkyAbyss {
         // 余燼の装備 (鎧・戦斧・外套・護符・専用伝説・角杯・素材) と図鑑の表、伝承の締め。13 の 11.2節の担当 G
         jp.revati.skyabyss.titan.ember.gear.EmberGearSetup.register(modEventBus);
         jp.revati.skyabyss.abyss.AbyssSetup.register(modEventBus);
+        jp.revati.skyabyss.abyss.gear.AbyssGearSetup.register(modEventBus);
         // 前の私の落とし物 (深淵の墓の遺品 12。docs/design/36 の 9 章)
         jp.revati.skyabyss.story.ch5.AbyssRelics.register(modEventBus);
         jp.revati.skyabyss.abyss.mobs.AbyssMobsBSetup.register(modEventBus);
@@ -153,6 +154,8 @@ public class SkyAbyss {
     }
 
     private void commonSetup(FMLCommonSetupEvent event) {
+        // 層の主の戦いの合図を見た目 (BossLook) へつなぐ
+        jp.revati.skyabyss.abyss.boss.BossLookHook.install();
         LOGGER.info("[{}] 天と淵のあいだ を読み込みました", MODID);
     }
 }

@@ -12,7 +12,7 @@
   "gui.skyabyss.mount.whistle_have": "乗り笛は持っている",
   "item.skyabyss.mount_whistle": "乗り笛",
   "item.skyabyss.mount_whistle.desc": "厩舎の笛。吹くと乗り物が目の前に来る。",
-  "item.skyabyss.mount_whistle.use": "右クリックで呼ぶ・もう一度で帰す",
+  "item.skyabyss.mount_whistle.use": "右クリックで呼ぶ・もう一度で帰す。旅嚢に入れても、Y（旅嚢の道具キー）の短押しで呼べる",
   "message.skyabyss.mount.bought_look": "%s を買った。いまの見た目にした",
   "message.skyabyss.mount.bought_tier": "%s が %s 段になった",
   "message.skyabyss.mount.called": "%s が来た",

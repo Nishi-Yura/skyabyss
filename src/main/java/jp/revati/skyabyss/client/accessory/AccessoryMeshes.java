@@ -29,7 +29,8 @@ public final class AccessoryMeshes {
     public static final Set<String> IDS = Set.of("storm_charm", "storm_anklet", "storm_eye_feather", "gale_feather",
             "kindling_charm", "ember_mantle", "ember_lantern", "ember_horn", "cinder_lamp",
             "resonance_charm", "moss_talisman", "stone_whale_plating",
-            "tide_chime_charm", "moontide_pearl", "tide_watching_shell", "tide_pearl");
+            "tide_chime_charm", "moontide_pearl", "tide_watching_shell", "tide_pearl",
+            "abyss_pulse_listener", "abyss_lantern_charm", "abyss_surveyor_plumb");
     public static final int WHITE = 0xFFFFFFFF;
     public static final int FULL_BRIGHT = 0xF000F0;
 

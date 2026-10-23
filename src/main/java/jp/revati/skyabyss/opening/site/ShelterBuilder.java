@@ -108,6 +108,13 @@ public final class ShelterBuilder {
                 SiteKit.writeSign(job.level, at, "sign.skyabyss.capital." + (key.startsWith("lot_") ? "lot" : key));
             }
         }
+        // 五章の大坑道の碑 (通路の「大坑道」と、門の大広間の「深淵の門」)
+        for (String[] sign : new String[][] {{"abyss_shaft_sign", "sign.skyabyss.abyss_shaft"}, {"abyss_gate_sign", "sign.skyabyss.abyss_gate"}}) {
+            BlockPos at = job.mark(sign[0]);
+            if (at != null && job.level.getBlockState(at).is(jp.revati.skyabyss.registry.ModBlocks.TABLET.get())) {
+                SiteKit.writeSign(job.level, at, sign[1]);
+            }
+        }
         // 章で開く施設の戸の印と碑の印 (CapitalDoors が読む)
         for (String key : List.of("open_guild", "open_shrine", "open_keep", "open_keep2", "open_hall", "open_training",
                 "sign_guild", "sign_shrine", "sign_keep", "sign_hall", "sign_training", "chaser", "altar",
@@ -116,7 +123,7 @@ public final class ShelterBuilder {
                 // 酒場の地下の奥の壁と隠し通路 (cellar_gap の 2 マスを空気にすると開く)
                 "perch", "old_well", "well_down", "well_chest", "cellar_wall", "cellar_gap", "cellar_passage", "abyss_hint", "abyss_door",
                 // 五章の大坑道 (34 の 4.7。story/ch5/AbyssEntrance)
-                "abyss_landing_1", "abyss_landing_2", "abyss_gate")) {
+                "abyss_landing_1", "abyss_landing_2", "abyss_gate", "abyss_gate_bars")) {
             BlockPos at = job.mark(key);
             if (at != null) {
                 job.entry.extra(key, at);

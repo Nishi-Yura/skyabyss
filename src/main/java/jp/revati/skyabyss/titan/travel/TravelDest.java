@@ -16,6 +16,9 @@ public final class TravelDest {
         if (dest.kind() == 0) {
             return Component.translatable("gui.skyabyss.travel.spawn");
         }
+        if (dest.kind() == 4) {
+            return Component.translatable("gui.skyabyss.travel.town");
+        }
         if (dest.kind() == 2) {
             return Component.translatable("progress.skyabyss.titan." + dest.name());
         }

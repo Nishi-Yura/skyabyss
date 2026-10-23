@@ -170,7 +170,8 @@ public final class NpcQuestSelfTest {
             }
             // クエストを始める道がある (自動で始まるか、どこかの会話が始める)
             // 序章・一章の小要素 (story/ch1) の頼みは、章の小要素に着いたときにコードが始める (ChapterSites の onArrive)
-            boolean started = q.startWhen() != null || q.board() || q.id().startsWith("ch1/") || rumorStarted(q.id()) || DialogueManager.all().values().stream().flatMap(d -> d.nodes().values().stream())
+            // 後の章の技の稽古 (lesson/tree_*) は、木・要が開いたときにコードが始める (tutorial.SkillLesson の poll)
+            boolean started = q.startWhen() != null || q.board() || q.id().startsWith("ch1/") || q.id().startsWith("lesson/tree_") || rumorStarted(q.id()) || DialogueManager.all().values().stream().flatMap(d -> d.nodes().values().stream())
                     .anyMatch(n -> n.actions().stream().anyMatch(a -> a.type().equals("quest_start") && a.str("quest").equals(q.id()))
                             || n.options().stream().anyMatch(o -> o.actions().stream()
                             .anyMatch(a -> a.type().equals("quest_start") && a.str("quest").equals(q.id()))));
@@ -354,7 +355,7 @@ public final class NpcQuestSelfTest {
             // 語り部の墓の救いの文は skyabyss_grave にある (11 の 6 章)
             // 深淵の層の生き残りの会話の文は skyabyss_abyss_v2 (tools/gen/ch5/gen_ch5_layers.py)
             // 章ごとのクエスト・追加の会話の文は skyabyss_ch1〜ch4 にある (三章の職人の覚書・鼓動守の会話は skyabyss_ch3gear)
-            for (String ns : List.of("skyabyss_quest", "skyabyss_story", "skyabyss_storm", "skyabyss_grave", "skyabyss_ch1", "skyabyss_ch2", "skyabyss_ch3", "skyabyss_ch3gear", "skyabyss_ch4", "skyabyss_ch5", "skyabyss_abyss_v2", "skyabyss_vow", "skyabyss_fac", "skyabyss_town")) {
+            for (String ns : List.of("skyabyss_quest", "skyabyss_story", "skyabyss_storm", "skyabyss_grave", "skyabyss_ch1", "skyabyss_ch2", "skyabyss_ch3", "skyabyss_ch3gear", "skyabyss_ch4", "skyabyss_ch5", "skyabyss_abyss_v2", "skyabyss_vow", "skyabyss_fac", "skyabyss_town", "skyabyss_lesson")) {
                 JsonObject extra = json("/assets/" + ns + "/lang/" + code + ".json", failures);
                 if (extra != null) {
                     extra.entrySet().forEach(e -> {
