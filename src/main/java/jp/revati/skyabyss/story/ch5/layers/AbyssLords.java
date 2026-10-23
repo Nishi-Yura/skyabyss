@@ -294,6 +294,8 @@ public final class AbyssLords {
         le.addTag(LayerFights.TAG);
         double want = HP[li] * (1 + PER_MATE * Math.max(0, in.size() - 1));
         var hp = le.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.MAX_HEALTH);
+        // 湧いた時の雑魚の下げ (MobTuning。体力を決める前の小さな体で付く) を外す。主の体力は表のまま
+        jp.revati.skyabyss.combat.MobTuning.untune(le);
         if (hp != null) {
             hp.setBaseValue(want);
             le.setHealth(le.getMaxHealth());

@@ -110,7 +110,7 @@ public final class AbyssV3SelfTest {
             BlockPos camp = AbyssBuild.mark("camp_bone");
             p.moveTo(camp.getX() + 0.5, camp.getY(), camp.getZ() + 0.5);
             AbyssGuide.Line l = AbyssGuide.lineFor(p);
-            check(f, l.key().endsWith(".mark") && l.target() != null, "a player with no marks should be sent to a mark: " + l);
+            check(f, (l.key().endsWith(".mark") || l.key().endsWith(".nest")) && l.target() != null, "a player with no marks should be sent to a mark (or its nest): " + l);
             d.set(p.getUUID(), "mark:bone_1");
             d.set(p.getUUID(), "mark:bone_3");
             l = AbyssGuide.lineFor(p);

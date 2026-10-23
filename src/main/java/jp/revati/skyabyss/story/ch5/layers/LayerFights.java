@@ -321,6 +321,8 @@ public final class LayerFights {
         }
         e.addTag(TAG);
         AttributeInstance h = le.getAttribute(Attributes.MAX_HEALTH);
+        // 縄張りの主は雑魚の下げ (MobTuning) を外す (ボスバーのある主)
+        jp.revati.skyabyss.combat.MobTuning.untune(le);
         if (h != null) {
             h.setBaseValue(h.getBaseValue() * hp);
             le.setHealth(le.getMaxHealth());

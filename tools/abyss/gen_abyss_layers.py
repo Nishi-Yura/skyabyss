@@ -542,6 +542,7 @@ def build_return_shrine(lay, v, Y):
             else:
                 fl = 'gold_block' if (x + z) % 2 == 0 else 'polished_diorite'
             lay.floor_of[(x, z, Y - 1)] = fl
+            lay.put(x, Y - 1, z, fl)    # 物の立つマス (磁石石・柱・ろうそくの台) の下にも同じ床
     # 奥 (西) の二本の柱 (石英の柱、先に上向きの光の棒)。手前 (東) の二つは石英の台に白いろうそく
     for z in (cz - 2, cz + 2):
         x = cx - 2
@@ -579,7 +580,9 @@ def build_ascend_dais(lay, Y):
     cx, cz = -6, 2
     for x in range(cx - 1, cx + 2):
         for z in range(cz - 1, cz + 2):
-            lay.floor_of[(x, z, Y - 1)] = 'polished_deepslate' if (x, z) != (cx, cz) else 'chiseled_deepslate'
+            fl = 'polished_deepslate' if (x, z) != (cx, cz) else 'chiseled_deepslate'
+            lay.floor_of[(x, z, Y - 1)] = fl
+            lay.put(x, Y - 1, z, fl)
     for z in (cz - 1, cz + 1):
         lay.put(cx - 1, Y, z, 'polished_deepslate')
         lay.put(cx - 1, Y + 1, z, 'candle[candles=3,lit=true,waterlogged=false]')
