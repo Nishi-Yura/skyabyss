@@ -30,6 +30,10 @@ public final class TideRaidCommands {
                 .then(Commands.literal("hurt").executes(TideRaidCommands::hurt))
                 .then(Commands.literal("room").then(Commands.argument("id", com.mojang.brigadier.arguments.StringArgumentType.word()).executes(TideRaidCommands::room)))
                 .then(Commands.literal("pose").executes(TideRaidCommands::pose))
+                .then(Commands.literal("at").then(Commands.argument("dx", com.mojang.brigadier.arguments.DoubleArgumentType.doubleArg())
+                        .then(Commands.argument("dz", com.mojang.brigadier.arguments.DoubleArgumentType.doubleArg())
+                                .then(Commands.argument("yaw", com.mojang.brigadier.arguments.FloatArgumentType.floatArg())
+                                        .then(Commands.argument("pitch", com.mojang.brigadier.arguments.FloatArgumentType.floatArg()).executes(TideRaidCommands::at))))))
                 .then(Commands.literal("end").executes(c -> endShot())));
     }
 
@@ -64,6 +68,19 @@ public final class TideRaidCommands {
         shotRoom = room;
         p.teleportTo(c.cell().rest().getX() + 0.5, c.cell().rest().getY(), c.cell().rest().getZ() + 0.5);
         room.start(c);
+        return 1;
+    }
+
+    // 撮影: 部屋の床の中心からの (dx, dz) の立つ位置へ、向きを決めて運ぶ (北 = -z、yaw 180 = 北向き)
+    private static int at(CommandContext<CommandSourceStack> ctx) throws com.mojang.brigadier.exceptions.CommandSyntaxException {
+        ServerPlayer p = ctx.getSource().getPlayerOrException();
+        if (shotCtx == null) {
+            return 0;
+        }
+        var o = shotCtx.origin();
+        p.teleportTo(p.serverLevel(), o.getX() + 0.5 + com.mojang.brigadier.arguments.DoubleArgumentType.getDouble(ctx, "dx"), o.getY() + 1,
+                o.getZ() + 0.5 + com.mojang.brigadier.arguments.DoubleArgumentType.getDouble(ctx, "dz"), java.util.Set.of(),
+                com.mojang.brigadier.arguments.FloatArgumentType.getFloat(ctx, "yaw"), com.mojang.brigadier.arguments.FloatArgumentType.getFloat(ctx, "pitch"));
         return 1;
     }
 

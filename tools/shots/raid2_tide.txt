@@ -30,10 +30,10 @@ cmd skytideraid room TR4
 wait 60
 waitchunks
 wait 40
-cmd tp @s 5120.5 65 4110.5 180 6
+cmd skytideraid at 0 13 180 4
 wait 30
 shot tr4_a_gates
-cmd tp @s 5121.5 65 4100.5 180 6
+cmd skytideraid at 1 4 180 8
 wait 90
 shot tr4_b_carpet
 cmd skytideraid end
@@ -42,7 +42,7 @@ cmd skytideraid room TR5
 wait 60
 waitchunks
 wait 40
-cmd tp @s 5120.5 65 4108.5 180 10
+cmd skytideraid at 0 12 180 12
 wait 30
 shot tr5_a_unsolved
 cmd skytideraid pose
@@ -54,14 +54,14 @@ cmd skytideraid room TR6
 wait 60
 waitchunks
 wait 40
-cmd tp @s 5120.5 65 4104.5 180 -12
+cmd skytideraid at 0 9 180 -14
 wait 30
 shot tr6_a_mural_north
-cmd tp @s 5120.5 65 4088.5 0 -12
+cmd skytideraid at 0 -8 0 -14
 wait 20
 shot tr6_b_mural_south
 cmd skytideraid pose
-cmd tp @s 5120.5 65 4102.5 180 24
+cmd skytideraid at 0 9 180 22
 wait 20
 shot tr6_c_dials
 cmd skytideraid end
@@ -70,7 +70,7 @@ cmd skytideraid room TR7
 wait 60
 waitchunks
 wait 80
-cmd tp @s 5120.5 65 4108.5 180 8
+cmd skytideraid at 0 12 180 8
 wait 30
 shot tr7_a_hall
 cmd skytideraid pose
