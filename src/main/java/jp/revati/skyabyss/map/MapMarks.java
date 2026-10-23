@@ -33,10 +33,9 @@ import net.minecraft.world.phys.Vec3;
 //   野営地          camp。いつも見た (目覚めの場所)
 //   巨大な足跡      footprint。足跡の拍子 (FOOTPRINTS) のあと
 //   巨神の骨        ribs。骨の拍子 (BONES) のあと見た。イサナ (ISANA) のあとは町からの方角の噂
-//   積み石          cairn と一章の道の積み石。町を見たあと、道しるべの線 (点) として
 //   章の跡地        ChapterGrounds の四つの跡地 (33 の 3 章)。その章が開いた人に、都からの方角だけの「噂」。跡地の近く (96) に来たら「見た」
 //                   (SiteData.Ground.seen に残る)。その章を終えた人にはいつも「見た」
-//   章の場所        ChapterSites の小要素。その人が使う拠点 (跡地を含む) の分で、近くに着いた (arrived) ものだけ。都から跡地への道しるべは積み石の点
+//   章の場所        ChapterSites の小要素。その人が使う拠点 (跡地を含む) の分で、近くに着いた (arrived) ものだけ。
 //   碑              覚えた碑 (TravelState.waymarks)。壊された碑は出さない
 //   巨神            出会った巨神の今の場所 (読み込まれていなければ最後に見た場所)。眠った巨神・まだ姿を見せない巨神は出さない
 // すでに遊んでいた人 (OpeningState.legacy) には序盤の場所を全部「見た」で出す。新しい保存は足さない (記録はどれも既存のものを読む)。
@@ -46,7 +45,7 @@ import net.minecraft.world.phys.Vec3;
 public final class MapMarks {
     // 印の種類 (画面の絵の番号と同じ順。MapSprites)
     public enum Kind {
-        TOWN, CAMP, FOOTPRINT, RIBS, WAYMARK, SITE, TITAN, SHRINE, CAIRN, SPAWN
+        TOWN, CAMP, FOOTPRINT, RIBS, WAYMARK, SITE, TITAN, SHRINE, SPAWN
     }
 
     // 一つの印。name は文の鍵の材料 (種類ごと。画面の MapText が文にする)、extra は付け足し (碑の土地の名・章の ID)。
@@ -138,13 +137,6 @@ public final class MapMarks {
                 }
             }
         }
-        if (townSeen) {
-            for (Spot e : entries) {
-                if (e.kind().equals("cairn")) {
-                    out.add(new Mark(Kind.CAIRN, "cairn" + e.index(), "cairn", "", e.pos().getX(), e.pos().getZ(), false, 0));
-                }
-            }
-        }
         if (k.did(OpeningBeat.FOOTPRINTS)) {
             for (Spot e : entries) {
                 if (e.kind().equals("footprint")) {
@@ -214,7 +206,7 @@ public final class MapMarks {
         return "ground_" + ch.id();
     }
 
-    // 章の小要素: その人の拠点の分で、着いたものだけ。一章の道の積み石は道しるべの点に
+    // 章の小要素: その人の拠点の分で、着いたものだけ。章の道しるべの石は出さない
     static void chapterMarks(SiteData data, UUID player, List<Mark> out) {
         for (SiteData.ChapterPlan plan : data.plans()) {
             if (!plan.players.contains(player)) {
@@ -226,8 +218,10 @@ public final class MapMarks {
                 if (!e.built || !e.arrived.contains(player)) {
                     continue;
                 }
-                boolean roadCairn = e.blueprint.equals("ch1_road_cairn");
-                out.add(new Mark(roadCairn ? Kind.CAIRN : Kind.SITE, e.siteId + "#" + e.index + "@" + plan.anchor.asLong(), e.siteId, plan.chapter,
+                if (e.blueprint.equals("ch1_road_cairn")) {
+                    continue; // 章の道しるべの石 (地図には出さない)
+                }
+                out.add(new Mark(Kind.SITE, e.siteId + "#" + e.index + "@" + plan.anchor.asLong(), e.siteId, plan.chapter,
                         e.pos.getX(), e.pos.getZ(), false, color));
             }
         }

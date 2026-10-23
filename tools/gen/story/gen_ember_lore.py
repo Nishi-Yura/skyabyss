@@ -70,21 +70,15 @@ def owned(key: str) -> bool:
 
 
 # ================================================================ 看板 (13 の 9.2節)
-# 碑文 6 枚 (4 行。1 行は日本語 8 字まで、英語は 90 px まで。SignFit が自己テストで測る)。
+# 碑文 3 枚 (レイドの部屋の入口の碑。4 行。1 行は日本語 8 字まで、英語は 90 px まで。SignFit が自己テストで測る)。
 # 言いすぎない: 「なぜ分けたか」「下にいる者は何か」は書かない。四体目で「分けた者は まだ 下にいる」まで進める
 INSCRIPTIONS = {
-    "mouth": (("火に呑まれよ", "呑まれて 歩け", "喉の先に", "我らの炉がある"),
-              ("Be swallowed,", "and walk on.", "Past the throat", "lies our forge")),
-    "hub": (("この火は", "下から来た", "我らは 一度も", "絶やさなかった"),
-            ("This fire came", "from below.", "Not once did we", "let it go out")),
     "west": (("灰をまけば", "血は冷える", "冷えた血は", "いずれ 崩れる"),
              ("Scatter ash,", "and blood cools.", "Cooled blood", "crumbles in time")),
     "east": (("鍵は 一つだった", "四つに割り", "四つの背に", "預けた"),
              ("The key was one.", "We broke it", "in four, and gave", "it to four backs")),
     "south": (("火が細れば", "巨神は眠る", "眠るたびに", "下へ 沈む"),
               ("When fire thins,", "the titan sleeps.", "Each sleep sinks", "it deeper")),
-    "heart": (("四つの拍は", "一つから 分けた", "分けた者は", "まだ 下にいる"),
-              ("Four beats were", "split from one.", "The one who split", "them is below")),
 }
 # 試練の入口の一言 3 枚 (2 行)
 TRIAL_SIGNS = {
@@ -113,7 +107,7 @@ LORE = [
      None),
     ("ember_ruins", 178,
      [{"type": "dimension", "target": "skyabyss:ember_back"}],
-     ["chapter1/ember_titan", "chapter1/inscription_ember_hub"],
+     ["chapter1/ember_titan"],
      ("灰の民の炉", "The Forge of the Ash Folk"),
      ("胸の奥に、大きな炉があった。鞴も金床も焼き入れの槽も、ついさっきまで使っていたように、手の届く所に置いてある。\n\n"
       "床の灰は、ところどころ、人の背丈ほどに積もっていた。",
@@ -140,7 +134,7 @@ LORE = [
      None),
     ("ember_stilled", 179,
      [{"type": "kill", "target": "skyabyss:ember_heart", "radius": 64}, {"type": "manual"}],
-     ["chapter1/inscription_ember_heart", "chapter1/storm_stilled", "chapter1/sky_key_whole"],
+     ["chapter1/storm_stilled", "chapter1/sky_key_whole"],
      ("消えた火", "The Fire Gone Out"),
      ("余燼の心臓が止まった。血管の光が一つずつ消えて、部屋は急に冷えた。灰だけが、まだ降りつづけている。\n\n"
       "この火は、どこから来て、どこへ行ったのか。",
@@ -150,12 +144,6 @@ LORE = [
 ]
 # 碑文ごとの項目 (看板の 4 行を写す。本文は見つけた場所)
 INSCRIPTION_LORE = {
-    "mouth": ("舌の上の碑文", "Inscription on the Tongue",
-              "喉へ下りる手前、巨神の舌の上に立っていた。客を迎える言葉のようにも、言いつけのようにも読める。",
-              "It stood on the titan's tongue, just before the throat. It reads like a welcome, or like an order."),
-    "hub": ("炉心の広間の碑文", "Inscription of the Hearth Hall",
-            "広間の大きな炉の脇にあった。炉の底をのぞくと、赤い光がずっと下まで続いている。",
-            "It stood beside the great forge in the hall. Looking into the forge's floor, the red glow goes on far below."),
     "west": ("熾火の間の碑文", "Inscription of the Ember Room",
              "熾火運びの間の入口、休み場の壁にあった。読んでいるあいだにも、足もとの冷え殻が小さく鳴っていた。",
              "On the wall at the entrance to the ember-carrying room. Even as you read, the cooled crust underfoot crackled softly."),
@@ -165,16 +153,11 @@ INSCRIPTION_LORE = {
     "south": ("炉の間の碑文", "Inscription of the Furnace Room",
               "大炉を守る間の入口、休み場の壁に刻まれていた。火が細るたびに、足もとがかすかに沈む気がする。",
               "Carved on the wall at the entrance to the room of the great furnace. Each time the fire thins, the floor seems to sink a little."),
-    "heart": ("熾の底の前室の碑文", "Inscription Before the Ember Depths",
-              "熾の底へ下りる前室の壁にあった。この一枚だけ、何度も彫り直した跡がある。",
-              "It was on the wall of the room before the Ember Depths. This one alone has been carved over, again and again."),
 }
 for place, (tja, ten, bja, ben) in INSCRIPTION_LORE.items():
     related = ["chapter1/ember_ruins"]
     if place == "east":
         related = ["chapter1/ash_smith", "chapter1/sky_key_whole"]
-    elif place == "heart":
-        related = ["chapter1/ember_stilled", "chapter1/inscription_storm_heart"]
     LORE.append((f"inscription_ember_{place}", 178, [{"type": "sign", "target": f"sign.skyabyss.lore_ember_{place}"}], related,
                  (tja, ten), (bja, ben), f"sign.skyabyss.lore_ember_{place}"))
 
@@ -183,26 +166,6 @@ for lid, order, unlock, related, title, body, sign in LORE:
     text(f"lore.skyabyss.chapter1.{lid}.body", body[0], body[1])
 text("item.skyabyss.lore_page.desc.ember_back", "余燼の背で拾った。煤けた字で、数がびっしり並んでいる",
      "Found on the ember titan's back. Columns of numbers in sooty ink")
-
-# ================================================================ 囁き 8 つ (B の EmberWhispers。lore は場所の気配、hint は使い方)
-WHISPERS = [
-    ("tongue", "舌の上に立っている。喉の奥から、鞴のような息がゆっくり行き来している",
-     "You stand on the tongue. From deep in the throat, a breath like a bellows comes and goes"),
-    ("throat", "右上の目盛りが体の熱。溶岩のそばでたまり、灰溜まりで冷える。火照っていると、灰の殻が割れやすい",
-     "The gauge at the top right is your heat. It rises near lava and falls in ash heaps. While you are flushed, ash shells crack easily"),
-    ("hub", "西・東・南の三つの光る印に着けば、中央の炉が冷えて、炉の底がひらく",
-     "Reach the three glowing marks, west, east and south, and the central forge will cool and its floor will open"),
-    ("west", "壺の灰を溶岩にまくと、冷えた殻の道になる。殻はやがて崩れる。灰は島の灰溜まりで満ちる",
-     "Scatter ash from the urn on the lava to make a crust road. The crust soon crumbles. Ash heaps on the islands refill the urn"),
-    ("east", "炉の色を読め。刻みの色が来たら打て。打ち終えたら、冷えて割れる前に槽へ",
-     "Read the forge's color. Strike when it matches the mark. Then quench it before it cools and cracks"),
-    ("south", "火床の火を絶やすな。熾をくべ、噴く割れ目の上へ敵を誘え",
-     "Do not let the hearth die. Feed it live coals, and lure enemies over the vents"),
-    ("heart", "格子の下から、熾の光と、少し遅れた拍が上がってくる",
-     "From under the grate rise an ember glow and a beat that comes a little late"),
-]
-for place, ja, en in WHISPERS:
-    text(f"message.skyabyss.ember.lore.whisper.{place}", ja, en)
 
 # ================================================================ 語りの文 (13 から想定した鍵。担当ごとの頭。Java は EmberLore)
 LINES = [

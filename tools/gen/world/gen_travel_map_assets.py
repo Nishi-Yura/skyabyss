@@ -261,18 +261,9 @@ def glow():
     return Image.fromarray(a, "RGBA")
 
 
-def cairn():
-    """積み石 (道しるべの線の点。小さい)"""
-    img, d = canvas()
-    d.ellipse([12, 18, 20, 22], fill=STONE_LO)
-    d.ellipse([13, 14, 19, 18], fill=STONE)
-    d.ellipse([14, 11, 18, 14], fill=STONE_HI)
-    return outline(img)
-
-
-SPRITES = [town, camp, footprint, ribs, waymark, site, titan, grave, party, objective, rumor, self_arrow, spawn, shrine, glow, cairn]
-# 縁取りを付けない印 (光の輪・噂・積み石は縁なし)
-NO_RIM = {"glow", "rumor", "cairn"}
+SPRITES = [town, camp, footprint, ribs, waymark, site, titan, grave, party, objective, rumor, self_arrow, spawn, shrine, glow]
+# 縁取りを付けない印 (光の輪・噂は縁なし)
+NO_RIM = {"glow", "rumor"}
 
 
 def marks():
