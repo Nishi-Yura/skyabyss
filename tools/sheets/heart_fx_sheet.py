@@ -1,5 +1,5 @@
-# 心臓の技の見た目の台紙 (docs/review/heart_fx/<心臓>.png)。撮影は tools/shots/heart_fx.txt (heart_fx_gen.py が書く)
-#   python tools/shots/heart_fx_sheet.py run/shots/heart_fx/shots/heart_fx docs/review/heart_fx
+# 心臓の技の見た目の台紙 (docs/review/heart_fx/<心臓>.png)。撮影は tools/shots/heart_fx.txt (tools/gen/shots/gen_heart_fx_shots.py が書く)
+#   python tools/sheets/heart_fx_sheet.py run/shots/heart_fx/shots/heart_fx docs/review/heart_fx
 # 一行 = 一つの技。左から 溜め → 当たり → 残り (8 tick おき)
 import os
 import sys

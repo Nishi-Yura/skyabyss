@@ -115,12 +115,13 @@ public final class PlayChapters {
                 return null;
             }
             case "raiju", "smith" -> {
-                // 中ボス: 背に乗せて中の広間へ、着いてから開始
+                // 中ボス: 背に乗せて、順路の中ボスの間 (trial/raid/mid) へ運ぶ。戦いは間に着くと始まる
                 int idx = name.equals("raiju") ? 2 : 3;
-                String cmd = name.equals("raiju") ? "skyabyss raiju start" : "skyabyss smith start";
                 Playtest.board(p, idx, pp -> {
-                    Playtest.gotoSpot(pp, idx, "hub");
-                    Playtest.run(pp, cmd);
+                    String miss = PlayRaid.enterMid(pp, idx);
+                    if (miss != null) {
+                        pp.sendSystemMessage(net.minecraft.network.chat.Component.translatable(miss, name));
+                    }
                 });
                 return null;
             }

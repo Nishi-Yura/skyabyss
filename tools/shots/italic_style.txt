@@ -1,0 +1,51 @@
+# 斜体の三案 (ItalicStyle) の見え方。場所の副題 (明るい空の上)・字幕 (NARRATE)・心の声 (シネマティック) を GUI 2 と 3 で撮る
+# 使い方 (三案それぞれ。名前だけ変える):
+#   SKYABYSS_FONT=on SKYABYSS_ITALIC_STYLE=a bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/italic_style.txt -PshotsName=italic_a
+#   SKYABYSS_FONT=on SKYABYSS_ITALIC_STYLE=b bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/italic_style.txt -PshotsName=italic_b
+#   SKYABYSS_FONT=on SKYABYSS_ITALIC_STYLE=c bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/italic_style.txt -PshotsName=italic_c
+world shots flat
+size 1280 720
+timeout 400
+render 8
+clouds off
+
+cmd time set noon
+cmd weather clear
+cmd gamemode creative
+hud on
+wait 100
+cmd skyabyss cinematic stop
+waitscreen 900 none
+wait 60
+waitchunks
+chat clear
+wait 20
+
+guiscale 2
+cmd skyabyss dev notice narrate message.skyabyss.raid_lore.WR1.1
+cmd skyabyss dev notice place message.skyabyss.memory_title_stone_whale message.skyabyss.heart_begin
+wait 45
+shot italic_place_gui2
+wait 200
+
+guiscale 3
+cmd skyabyss dev notice narrate message.skyabyss.raid_lore.WR2.2
+cmd skyabyss dev notice place message.skyabyss.memory_title_stone_whale message.skyabyss.heart_begin
+wait 45
+shot italic_place_gui3
+wait 200
+
+cmd skyabyss cinematic play whale_first_sight
+wait 50
+shot italic_inner_gui3
+wait 200
+cmd skyabyss cinematic stop
+wait 40
+
+guiscale 2
+cmd skyabyss cinematic play whale_first_sight
+wait 50
+shot italic_inner_gui2
+wait 200
+cmd skyabyss cinematic stop
+echo done

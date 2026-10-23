@@ -180,19 +180,10 @@ public final class StormBackLayout {
     public static final BlockPos LAMP_FRONT = new BlockPos(0, 134, 9);
 
     // ---------------------------------------------------------------- 休み場 (焚き火)
-    public static final List<Rest> RESTS = concat(List.of(
+    // 背は外見だけ (体の中は建てない) なので、休み場は外の尾の広場と、心臓の間の前室 (区画の封じた部屋) だけ
+    public static final List<Rest> RESTS = List.of(
             new Rest("tail", new BlockPos(0, 147, 115), new BlockPos(2, 147, 114), TAIL_PLAZA),
-            new Rest("hub", new BlockPos(-17, 135, 7), new BlockPos(-15, 135, 7), HUB),
-            new Rest("w0", new BlockPos(-56, BONE_FLOOR + 1, BONE_Z2 - 1), new BlockPos(-58, BONE_FLOOR + 1, BONE_Z2 - 1), W0),
-            new Rest("wm", new BlockPos(-95, BONE_FLOOR + 1, BONE_Z2 - 2), new BlockPos(-97, BONE_FLOOR + 1, BONE_Z2 - 2), WEST_ISLAND),
-            new Rest("w1", new BlockPos(-132, BONE_FLOOR + 1, WZ + 7), new BlockPos(-132, BONE_FLOOR + 1, WZ + 5),
-                    new Area(-146, -118, BONE_Z1 - 3, BONE_Z2 + 3, BONE_FLOOR, 12)),
-            ribRest("w2", 1), ribRest("w3", 2), ribRest("w4", RIB_LAYERS),
-            new Rest("e0", new BlockPos(56, BONE_FLOOR + 1, BONE_Z2 - 1), new BlockPos(58, BONE_FLOOR + 1, BONE_Z2 - 1), E0),
-            eastRest("e1", 0), eastRest("e2", 1), eastRest("e3", 2),
-            new Rest("f0", new BlockPos(7, UPPER_GALLERY_Y + 1, -84), new BlockPos(5, UPPER_GALLERY_Y + 1, -84), F0),
-            new Rest("heart", new BlockPos(2 + HEART_DX, KEEL_ANTE.floor() + 1, -44 + HEART_DZ), new BlockPos(HEART_DX, KEEL_ANTE.floor() + 1, -43 + HEART_DZ), KEEL_ANTE)),
-            List.of());
+            new Rest("heart", new BlockPos(2 + HEART_DX, KEEL_ANTE.floor() + 1, -44 + HEART_DZ), new BlockPos(HEART_DX, KEEL_ANTE.floor() + 1, -43 + HEART_DZ), KEEL_ANTE));
     public static final Map<String, BlockPos> REST;
     public static final List<String> REST_ORDER;
 
@@ -214,28 +205,6 @@ public final class StormBackLayout {
             new Inscription("sign.skyabyss.storm_front", new BlockPos(-6, UPPER_GALLERY_Y + 2, -98), Direction.SOUTH));
 
     private StormBackLayout() {
-    }
-
-    private static <T> List<T> concat(List<T> a, List<T> b) {
-        List<T> out = new ArrayList<>(a);
-        out.addAll(b);
-        return List.copyOf(out);
-    }
-
-    // 肋の間の層 layer の岩棚の休み場 (板の隅に焚き火。昇り風の穴から 1.7 以上離す)
-    private static Rest ribRest(String id, int layer) {
-        BlockPos c = ribLanding(layer);
-        boolean top = layer == RIB_LAYERS;
-        BlockPos fire = top ? RIB_TOP_REST : c.offset(2, 1, -2);
-        BlockPos spawn = top ? RIB_TOP.offset(0, 1, 1) : c.offset(2, 1, 2);
-        return new Rest(id, fire, spawn, ribSlab(layer));
-    }
-
-    // 東の回廊の休み場 (戸 i の向こう側の、南の壁ぎわ)
-    private static Rest eastRest(String id, int door) {
-        int x = door < 2 ? EAST_DOORS[door] + 5 : EAST_X2 - 4;
-        int z = BONE_Z2 - 1;
-        return new Rest(id, new BlockPos(x, BONE_FLOOR + 1, z), new BlockPos(x + 2, BONE_FLOOR + 1, z), new Area(x - 5, x + 7, BONE_Z1, BONE_Z2, BONE_FLOOR, EAST_HEIGHT));
     }
 
     // 雷獣の巣の避雷の柱 (6 本、60 度おき) の根元

@@ -199,6 +199,11 @@ public final class GraveSelfTest {
                 }
             }
         }
+        // 前の回 (同じワールドを使い回したとき) に散らばった品がこの台に残っていると「散らかした」と数えてしまうので、片付けてから使う
+        for (net.minecraft.world.entity.item.ItemEntity old : level.getEntitiesOfClass(net.minecraft.world.entity.item.ItemEntity.class,
+                new net.minecraft.world.phys.AABB(c).inflate(12, 16, 12))) {
+            old.discard();
+        }
         return c;
     }
 

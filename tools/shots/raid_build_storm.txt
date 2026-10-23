@@ -1,6 +1,6 @@
 # 雷翼のレイドの部屋 (SR1〜SR6) と中ボスの間 (SRM) の建築の見比べ (docs/design/39 の 4.3)。前と後で同じ台本を流す
 #   bash tools/dev/mc_run.sh runShots --no-daemon -Pscript=tools/shots/raid_build_storm.txt -PshotsName=raid_build_storm_after
-#   絵は run/shots/<名前>/shots/raid_build_storm/ → python -I tools/shots/raid_build_storm_sheet.py が docs/review/raid_build_storm/ へ台紙
+#   絵は run/shots/<名前>/shots/raid_build_storm/ → python -I tools/sheets/raid_build_storm_sheet.py が docs/review/raid_build_storm/ へ台紙
 # 部屋は /skystormraid show <id> が y 150 に建てる (入口の戸は開けてある)。観戦の姿で、入口の戸・高い隅・広間の中・入口の間から撮る
 world raid_build_storm flat
 size 1280 720

@@ -34,7 +34,6 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.AABB;
-import net.minecraft.world.phys.Vec3;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -249,15 +248,13 @@ public final class TideBackTrials {
         }
         BlockPos pos = player.blockPosition();
         for (Rest r : RESTS) {
-            if (r.area().contains(pos) || (r.id().equals("hub") && pos.distSqr(r.spawn()) < 25)) {
+            if (r.area().contains(pos)) {
                 if (!r.id().equals(validCheckpoint(tag, epoch))) {
                     tag.putString(TAG_CHECKPOINT, r.id());
                     tag.putInt(TAG_CHECKPOINT_EPOCH, epoch);
-                    if (!r.id().equals("hub")) {
-                        Notice.bar(player, ModText.progress("message.skyabyss.checkpoint",
-                                Component.translatable("checkpoint.skyabyss.tide_" + r.id())));
-                        player.level().playSound(null, pos, SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, 1f, 1.2f);
-                    }
+                    Notice.bar(player, ModText.progress("message.skyabyss.checkpoint",
+                            Component.translatable("checkpoint.skyabyss.tide_" + r.id())));
+                    player.level().playSound(null, pos, SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, 1f, 1.2f);
                 }
                 return;
             }
@@ -287,11 +284,6 @@ public final class TideBackTrials {
         CompoundTag tag = persisted(player);
         tag.remove(TAG_CHECKPOINT);
         tag.remove(TAG_CHECKPOINT_EPOCH);
-    }
-
-    // 倒れて目覚める休み場。順路では、その段の休み場で目覚める (32 の 2.4)
-    public static String respawnCheckpoint(java.util.UUID group, String cp) {
-        return cp;
     }
 
     // 休み場の復活位置 (立てる場所を探す)。記録がなければ到着地点
@@ -330,7 +322,7 @@ public final class TideBackTrials {
         }
         int epoch = epochOf(back, player);
         String cp = validCheckpoint(tag, epoch);
-        BlockPos spawn = cp.isEmpty() ? ARRIVAL : restSpawn(back, respawnCheckpoint(Groups.keyOf(player), cp));
+        BlockPos spawn = cp.isEmpty() ? ARRIVAL : restSpawn(back, cp);
         REVIVING.add(player.getUUID());
         try {
             player.teleportTo(back, spawn.getX() + 0.5, spawn.getY(), spawn.getZ() + 0.5, player.getYRot(), 0f);
@@ -409,9 +401,5 @@ public final class TideBackTrials {
         AFTER_HEART.clear();
         REVIVING.clear();
         TideClock.force(null);
-    }
-
-    public static Vec3 hubSpawn() {
-        return Vec3.atBottomCenterOf(RESTS.get(0).spawn());
     }
 }

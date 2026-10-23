@@ -187,11 +187,6 @@ public final class GroupBossRoom {
         return gather >= 0;
     }
 
-    // 自己テスト用: 集合中の状態にする / 戻す (復活先の判断の検査。部屋の仕掛けは動かさない)
-    public void testGather(boolean on) {
-        gather = on ? GATHER_TICKS : -1;
-    }
-
     @Nullable
     public UUID bossId() {
         return bossId;

@@ -19,7 +19,6 @@ import jp.revati.skyabyss.titan.ember.mob.AshThrall;
 import jp.revati.skyabyss.titan.ember.mob.EmberMob;
 import jp.revati.skyabyss.titan.ember.mob.EmberMobSetup;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -42,7 +41,6 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
-import org.joml.Vector3f;
 
 // 中ボス「灰の鍛え手」(13 の 5.2節)。灰の民の大炉を守る、背の曲がった大きな鍛冶。背に二つの鞴、右手に大鎚、左手に赤く焼けた塊の火箸
 // (大鎚・火箸は別のモデルで、手の受け口 socket_main / socket_off に付く。AshSmithRenderer)。背丈 4.5 ブロック。
@@ -162,7 +160,7 @@ public class AshSmith extends EmberMob {
     private float multiplier = 1f;
     // 部屋のずれ (EmberBackLayout の鍛え手の間からの差)。順路の中ボスの部屋 (trial/raid/mid) では区画の部屋へずらす。0 = 背の中の元の間
     private net.minecraft.core.BlockPos shift = net.minecraft.core.BlockPos.ZERO;
-    // 倒れたときに知らせる先 (中ボスの部屋)。null なら AshSmithBattle
+    // 倒れたときに知らせる先 (中ボスの部屋)
     @org.jetbrains.annotations.Nullable
     private java.util.function.Consumer<AshSmith> onDeath;
     private boolean raged;
@@ -228,7 +226,7 @@ public class AshSmith extends EmberMob {
         // 動きは aiStep の中で決める
     }
 
-    // ---------------------------------------------------------------- 戦いの部屋と結びつける (AshSmithBattle から)
+    // ---------------------------------------------------------------- 戦いの部屋と結びつける (中ボスの間 EmberMidRoom から)
     public void bind(int challengers) {
         multiplier = scaleFor(challengers);
         addTag(TitanBackTrials.HEART_TAG);
@@ -989,8 +987,6 @@ public class AshSmith extends EmberMob {
         sparks.clear();
         if (onDeath != null) {
             onDeath.accept(this);
-        } else if (level() instanceof ServerLevel server) {
-            AshSmithBattle.onDefeated(server, this);
         }
     }
 
