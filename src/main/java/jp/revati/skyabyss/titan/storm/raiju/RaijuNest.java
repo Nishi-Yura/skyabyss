@@ -226,20 +226,14 @@ public final class RaijuNest {
         }
     }
 
-    // 巣を戦いの前の姿に戻す: 背中が建っていなければ建て、柱を登録し直し (満ちた柱)、栓と電球を戻し、入口を開ける。
-    // 前の版 (1) の雷獣は自前の洞を背中の上に彫っていたので、柱が見つからない古い世界は背中を一度だけ建て直す
+    // 巣を戦いの前の姿に戻す: 柱を登録し直し (満ちた柱)、栓と電球を戻し、入口を開ける。
+    // 巣の形は区画の中ボスの間 (trial/raid/mid/StormMidRoom) が建てる (巨神の中は建てない。docs/design/32 の 2.5)
     public static void build(Site site) {
         ServerLevel level = site.level();
         if (!isNestLevel(level)) {
             return;
         }
-        StormBackBuilder.ensureBuilt(level);
-        RaijuState state = RaijuState.get(level.getServer());
-        if (!level.getBlockState(site.rodTop(0)).is(StormBackSetup.ROD_TIP.get()) && state.built() < LAYOUT_VERSION) {
-            SkyAbyss.LOGGER.info("Found the raiju nest of an older version; rebuilding the storm back once");
-            StormBackBuilder.build(level, TitanBackData.get(level));
-        }
-        state.markBuilt(LAYOUT_VERSION);
+        RaijuState.get(level.getServer()).markBuilt(LAYOUT_VERSION);
         for (int i = 0; i < RODS; i++) {
             READY_AT.remove(site.rod(i));
             BlockPos rod = site.rod(i);
