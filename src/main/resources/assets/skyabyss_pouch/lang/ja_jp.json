@@ -19,7 +19,7 @@
   "skyabyss_pouch.cmd.migrated": "移し替えを流した（%s 個）",
   "skyabyss_pouch.tab": "旅嚢",
   "skyabyss_pouch.key.open": "旅嚢を開く",
-  "skyabyss_pouch.key.use": "旅嚢の道具（長押しで輪・短押しで左の札の道具）",
+  "skyabyss_pouch.key.use": "旅嚢の道具（短押しで左の札の道具・ふだんは乗り笛、長押しで輪。書は輪から）",
   "skyabyss_pouch.screen.empty": "ここに、旅で手に入れた大事な品が自然に入る",
   "skyabyss_pouch.screen.unknown": "？？？",
   "skyabyss_pouch.screen.unknown_hint": "まだ手に入れていない品",

@@ -7,7 +7,7 @@ import org.jetbrains.annotations.Nullable;
 import net.minecraft.resources.ResourceLocation;
 
 // 一枚札 (ホットバーの左の「短押しで使う道具」) の選び方。画面に依らない純粋な関数 (自己テストが直接呼ぶ)。
-//   順: 置いた札 (pin) > 巨神の乗り場・巨神のそば (呼び笛・呼び貝) > 海の上 (潮見の貝) > 嵐 (風見鶏) > 前回の道具 > 使える品の先頭
+//   順: 置いた札 (pin) > 巨神の乗り場・巨神のそば (呼び笛・呼び貝) > 海の上 (潮見の貝) > 嵐 (風見鶏) > 乗り笛 > 前回の道具 > 使える品の先頭
 public final class QuickPick {
     private QuickPick() {
     }
@@ -19,6 +19,8 @@ public final class QuickPick {
         SEA,
         // 風見鶏
         STORM,
+        // 乗り笛 (場面がないときの短押しの既定)
+        MOUNT,
         OTHER
     }
 
@@ -74,6 +76,11 @@ public final class QuickPick {
             if (r != null) {
                 return r;
             }
+        }
+        // 場面がなければ乗り笛 (持っていれば)。書などは長押しの輪か、置いた札から
+        ResourceLocation mount = ofRole(usable, Role.MOUNT);
+        if (mount != null) {
+            return mount;
         }
         if (last != null && has(usable, last)) {
             return last;

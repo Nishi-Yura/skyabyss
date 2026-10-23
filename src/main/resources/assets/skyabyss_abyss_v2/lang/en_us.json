@@ -318,5 +318,8 @@
   "dialogue.skyabyss.attendant_abyss_porter.menu.chips": "Bone chips ×6 → Cooked beef ×4",
   "dialogue.skyabyss.attendant_abyss_porter.menu.salt": "Salt crystals ×6 → Golden carrots ×3",
   "dialogue.skyabyss.attendant_abyss_porter.menu.copper": "Storm copper ×4 → Lanterns ×4",
+  "dialogue.skyabyss.attendant_abyss_porter.menu.anchor": "Bone chips ×8 → Anchor iron ×2",
+  "dialogue.skyabyss.attendant_abyss_porter.menu.lamp_sword": "Anchor iron ×20 → Lamp-Keeper's Sword",
+  "dialogue.skyabyss.attendant_abyss_porter.menu.listener": "Anchor iron ×16 → Pulse Listener",
   "dialogue.skyabyss.attendant_abyss_porter.menu.bye": "Leave"
 }

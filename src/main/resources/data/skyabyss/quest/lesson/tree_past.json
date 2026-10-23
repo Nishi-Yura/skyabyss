@@ -1,0 +1,21 @@
+{
+  "category": "sub",
+  "order": 211,
+  "giver": "skyabyss:attendant_training_master",
+  "chapter": "",
+  "min_stage": 0,
+  "stages": [
+    {
+      "id": "try",
+      "objectives": [
+        {
+          "id": "try",
+          "type": "signal",
+          "target": "skill_lesson:tree:past",
+          "party": false
+        }
+      ],
+      "xp": 15
+    }
+  ]
+}

@@ -31,9 +31,14 @@
 
 - 場所: 都の東の大通りの南、薬師の店の東（x 82..93, z 6..17、戸は北）。厩舎の番（`stable_keeper`）が立ち、頭の上と戸の上に印と名。
 - 番に話しかけて「乗り物を見る・買う」で専用の画面（`MountShopScreen`）。左に見た目の一覧（持っている・値段・章の壁）と選ぶ・買う、中に今の見た目の 3D の見本、右に 3 つの段の買うボタン。
-- 開発コマンド（OP）: `/skyabyss facility mount`（画面）・`mount demo`（前に七つを並べる）。撮影 `tools/shots/mounts.txt`、絵は `docs/review/mounts/`。
+- 開発コマンド（OP）: `/skyabyss facility mount`（画面）・`mount demo`（前に七つを 3.4 ブロックおきに並べる）。撮影 `tools/shots/mounts_v2.txt`（並び・寄り・乗った姿・駆ける姿）、絵は `docs/review/mounts_v2/`（前の箱のモデルの絵は `docs/review/mounts/`）。
 
 ## 5. 作り
 
-- モデルは GeckoLib（`geo/entity/mount_<id>.geo.json`、絵 `textures/entity/mount_<id>.png`、動き `animations/entity/mount.animation.json`）。生成は `python -I tools/gen/mobs/gen_mounts.py install`、ラフ 3 案は `... sheets`（`docs/review/mount_roughs/<id>.png`）。ゲームには案 1 を入れてある。体は閉じた箱で、脚・頭・尾は体に沈めてある。
+- モデルは低ポリ（docs/design/15 の 9）。見た目ごとに `lowpoly/mount_<id>.json`・`textures/lowpoly/mount_<id>.png`（光る見た目は `_glowmask.png`）・骨だけの `geo/entity/mount_<id>_lowpoly.geo.json`・動き `animations/entity/mount_<id>.animation.json`。`LowPoly.enabled = false` のときは骨ごとの箱の `geo/entity/mount_<id>.geo.json`。描画は `MountClient.MountRenderer`（`LowPolyGeoRenderer` の派生）。
+- 生成: `python -I tools/gen/mobs/mounts_lp/build_all.py [id ...]`（一体ずつ `<id>.py`、共通は `mlp.py`）。形・鞍・あぶみ・絵・骨・動きを作って入れ、比べシート `docs/review/mounts_v2/<id>_sheet.png`（四方・乗った人・寄り・歩き/駆け/跳び/待機の帯）を書き、`MountLook` の当たり・席の高さ・乗った人の脚の向きを書き換える。メッシュは閉じていて、脚・首・尾は親に沈めてある（`tools/audit/mesh_audit.py mount_ --check`）。
+- 採用した案（`docs/review/roughs_mounts/`）: 角の荷獣 C 渦角の山羊（荷袋・巻いた荷・首の鈴）、灰色の鹿 A 枝角の牡鹿、大トカゲ B 帆背のトカゲ（襟・喉袋・帆、口が開く）、岩の子鯨 A 四つ足の子鯨（フジツボの石・尾びれ・首の綱）、殻の亀 A 珊瑚の丸甲亀、雷の雛 B まるまる雛（冠・翼・尾羽の雷が光る）、炉の狐 C 三尾の熾狐（尾の先・耳の内・背の割れ目が光る）。三角形は一体 2,300 から 3,400。
+- 鞍は体の表面を光線で拾って沿わせる（敷き布・座・前後の山・横の垂れ・腹帯）。席は原点の真上（`MountEntity` の乗る位置は x = z = 0）で、`seat` は鞍の上面 - 1/16 ブロック。
+- 乗った人の脚: 馬の「前へ投げ出す」脚では胴の太い乗り物に脚が入るので、見た目ごとの向き（`MountLook.legPitch` 前への回し・`legSpread` 外への開き、度）で置く（`mixin/MountRiderLegsMixin`、`HumanoidModel.setupAnim` の後）。向きは生成の道具が、脚の箱の標本点が体の中に入らない向きのうち好みに近いものを選ぶ。脚を下ろす向きのときは足先にあぶみを吊る。
+- 動き: 待機 `idle`（息・耳・尾・飾り）、歩き `walk`、駆け `run`、跳び `jump`（宙に 3 tick いると。終わりで止まる）。歩き・駆けの脚の運びは時間でなく歩いた距離で進む（molang の `variable.mount_dist`。`MountEntity.travel` を `MountModel.applyMolangQueries` が渡す）ので、段で速さが変わっても足が滑らない。歩き → 駆けの境は 0.2 ブロック/tick。
 - 自己テスト: `SKYABYSS_SELFTEST_ONLY="mount"`（買う・章の壁・呼ぶ/帰す・性能・背と淵での断り・遠くで消える・乗る・落下無効・保存）。

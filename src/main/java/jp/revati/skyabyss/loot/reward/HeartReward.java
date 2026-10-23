@@ -197,7 +197,9 @@ public final class HeartReward {
             if (player.hasDisconnected() || player.isRemoved()) {
                 return;
             }
-            if (!player.isAlive() || Cinematics.active(player) || jp.revati.skyabyss.titan.end.TitanEnd.holding(player)) {
+            if (!player.isAlive() || Cinematics.active(player) || jp.revati.skyabyss.titan.end.TitanEnd.holding(player)
+                    // 天の鍵がそろう (鍵の場面が先に出る) ときは待つ
+                    || jp.revati.skyabyss.story.SkyKey.ready(player)) {
                 if (tries < RETRY_MAX) {
                     scheduleOpen(player, titan, RETRY_TICKS, auto, tries + 1);
                 }

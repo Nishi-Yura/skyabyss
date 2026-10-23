@@ -40,7 +40,7 @@ import net.minecraft.world.item.ItemStack;
 //   town        {act}              : 町のクエストと裏通りの働き (酒場の地下の壁を開ける・地図屋の噂と描き足し。town.TownActions)
 public final class Action {
     public static final Set<String> TYPES = Set.of("quest_start", "signal", "affinity", "flag", "unflag", "lore", "give", "take", "xp",
-            "open_board", "grave_rescue", "grave_choose", "give_notes", "unlock_recipes", "remake_ward", "facility", "town");
+            "open_board", "grave_rescue", "grave_choose", "give_notes", "unlock_recipes", "remake_ward", "facility", "town", "lesson");
 
     private final String type;
     private final JsonObject json;
@@ -114,7 +114,7 @@ public final class Action {
             case "give_notes", "unlock_recipes" -> "chapter";
             case "remake_ward" -> "titan";
             case "facility" -> "open";
-            case "town" -> "act";
+            case "town", "lesson" -> "act";
             default -> null;
         };
         if (need != null && !o.has(need)) {
@@ -127,6 +127,10 @@ public final class Action {
         }
         if (type.equals("town") && !jp.revati.skyabyss.town.TownActions.ACTS.contains(GsonHelper.getAsString(o, "act"))) {
             errors.add(where + ": unknown town act " + GsonHelper.getAsString(o, "act"));
+            return null;
+        }
+        if (type.equals("lesson") && !jp.revati.skyabyss.tutorial.SkillLesson.ACTS.contains(GsonHelper.getAsString(o, "act"))) {
+            errors.add(where + ": unknown lesson act " + GsonHelper.getAsString(o, "act"));
             return null;
         }
         // give の optional: 別の担当がまだ登録していない品。ないうちは何も渡さない (読み込みは止めない)
@@ -185,6 +189,7 @@ public final class Action {
             case "open_board" -> jp.revati.skyabyss.quest.free.Board.open(player, ctx.npc() != null ? ctx.npc().blockPosition() : player.blockPosition(), true);
             case "facility" -> jp.revati.skyabyss.facility.FacilityActions.run(player, ctx.npc(), str("open"), optStr("shop"));
             case "town" -> jp.revati.skyabyss.town.TownActions.run(player, ctx.npc(), str("act"));
+            case "lesson" -> jp.revati.skyabyss.tutorial.SkillLesson.act(player, str("act"), optStr("line"));
             case "grave_rescue" -> jp.revati.skyabyss.grave.GraveRescue.run(player);
             case "grave_choose" -> jp.revati.skyabyss.grave.GraveChooser.open(player);
             case "xp" -> {

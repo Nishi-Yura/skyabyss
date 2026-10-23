@@ -84,7 +84,7 @@ public final class AbyssLayersV2SelfTest {
         }
         if (f.isEmpty()) {
             SkyAbyss.LOGGER.info("SELFTEST abyss layers v2 PASSED (layout: every mark, gate, arena, descent and the heart reached from the arrival; "
-                    + "shortcuts lead back to camp; marks guarded by nests; party-shared marks; three marks open the gate; "
+                    + "shortcuts lead back to camp; marks guarded by nests; party-shared marks; three marks open the gate; shortcut bars gone from the world; the bar gate rises for three marks and falls when left; "
                     + "party of two advances bone camp → marks → lord → salt camp; braziers open the bone door; ash maze trail)");
         } else {
             f.forEach(m -> SkyAbyss.LOGGER.error("SELFTEST abyss layers v2 FAILED: {}", m));
@@ -286,6 +286,20 @@ public final class AbyssLayersV2SelfTest {
         return seen;
     }
 
+    static int barsIn(ServerLevel level, String box) {
+        BlockPos a = AbyssBuild.mark(box + "_a");
+        BlockPos b = AbyssBuild.mark(box + "_b");
+        int n = 0;
+        if (a != null && b != null) {
+            for (BlockPos q : BlockPos.betweenClosed(a, b)) {
+                if (level.getBlockState(q).is(net.minecraft.world.level.block.Blocks.IRON_BARS)) {
+                    n++;
+                }
+            }
+        }
+        return n;
+    }
+
     // ---------------------------------------------------------------- 印と門 (二人のパーティ)
     static void marks(List<String> f, MinecraftServer server, ServerLevel level) {
         FakePlayer a = new FakePlayer(level, new GameProfile(UUID.randomUUID(), "abyss_v2_a"));
@@ -308,6 +322,45 @@ public final class AbyssLayersV2SelfTest {
             check(f, AbyssMarks.take(c, "bone", 3), "the mate could not take the third mark");
             check(f, AbyssMarks.count(a, "bone") == 3 && AbyssMarks.canPassGate(a, "bone"), "three marks do not open the gate");
             check(f, d.isOpen("scut_bone_3"), "taking a mark did not open its shortcut");
+            // 近道の格子が世界から消えている (2026-10-23 の試遊「印をおいても鉄格子のところがあかない」)
+            for (int i = 1; i <= 3; i++) {
+                check(f, barsIn(level, "scut_bone_" + i) == 0, "the shortcut bars of bone mark " + i + " are still there: " + barsIn(level, "scut_bone_" + i));
+            }
+            check(f, barsIn(level, "scut_salt_1") > 0 || d.isOpen("scut_salt_1"), "the salt shortcut bars should still be closed");
+            // 北の格子の門: 印が二つの人では上がらず、三つの人が近づくと上がり、離れて 3 秒で下りる
+            BlockPos gb = AbyssBuild.mark("gate_bone");
+            long t0 = level.getGameTime() + 1000;
+            AbyssMarks.setGate(level, gb, false);
+            FakePlayer two = new FakePlayer(level, new GameProfile(UUID.randomUUID(), "abyss_v2_two"));
+            d.set(two.getUUID(), "mark:bone_1");
+            d.set(two.getUUID(), "mark:bone_2");
+            two.moveTo(out.getX() + 0.5, out.getY(), out.getZ() + 0.5, 180f, 0f);
+            AbyssMarks.gateTick(level, t0, List.of(two));
+            check(f, !AbyssMarks.gateRaised(level, "bone"), "the bar gate rose for a player with two marks");
+            a.moveTo(out.getX() + 0.5, out.getY(), out.getZ() + 0.5, 180f, 0f);
+            AbyssMarks.gateTick(level, t0 + 10, List.of(a, two));
+            check(f, AbyssMarks.gateRaised(level, "bone") && level.getBlockState(gb).isAir() && level.getBlockState(gb.offset(1, 2, 0)).isAir(),
+                    "the bar gate did not rise for a player with three marks");
+            a.moveTo(out.getX() + 0.5, out.getY(), out.getZ() + 30.5, 180f, 0f);
+            two.moveTo(gb.getX() + 0.5, gb.getY(), gb.getZ() + 0.5, 180f, 0f);
+            AbyssMarks.gateTick(level, t0 + 200, List.of(a, two));
+            check(f, AbyssMarks.gateRaised(level, "bone"), "the bar gate fell on a player standing in it");
+            two.moveTo(out.getX() + 0.5, out.getY(), out.getZ() + 30.5, 180f, 0f);
+            AbyssMarks.gateTick(level, t0 + 210, List.of(a, two));
+            check(f, !AbyssMarks.gateRaised(level, "bone") && level.getBlockState(gb.above()).is(net.minecraft.world.level.block.Blocks.IRON_BARS),
+                    "the bar gate did not fall after everyone left");
+            d.forget(two.getUUID());
+            // 一人 (パーティなし) で印を取っても落ちず、近道の格子が開く (2026-10-23 の試遊「印をおいても鉄格子のところがあかない」の元:
+            // 仲間への知らせでパーティが無いと落ち、近道を開ける前で止まっていた)
+            FakePlayer solo = new FakePlayer(level, new GameProfile(UUID.randomUUID(), "abyss_v2_solo"));
+            try {
+                check(f, AbyssMarks.take(solo, "salt", 1), "a solo player could not take salt mark 1");
+                check(f, barsIn(level, "scut_salt_1") == 0, "a solo player's mark did not open its shortcut bars: " + barsIn(level, "scut_salt_1"));
+            } catch (RuntimeException e) {
+                f.add("taking a mark alone crashed: " + e);
+            } finally {
+                d.forget(solo.getUUID());
+            }
             a.moveTo(out.getX() + 0.5, out.getY(), out.getZ() + 0.5, 180f, 0f);
             check(f, AbyssMarks.gate(a, "bone"), "the gate did not let a player with three marks through");
             BlockPos in = AbyssBuild.mark("gate_bone_in");

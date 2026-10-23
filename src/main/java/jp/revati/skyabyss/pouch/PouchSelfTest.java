@@ -135,6 +135,12 @@ public final class PouchSelfTest {
         check(f, whale.equals(QuickPick.pick(all, none, null, null)), "quick card: no context and no last must give the first tool");
         check(f, conch.equals(QuickPick.pick(all, none, null, conch)), "quick card: nothing relevant must give the last tool");
         check(f, shell.equals(QuickPick.pick(all, new QuickPick.Ctx("shell", false, false, false), null, conch)), "quick card: near a titan must give its own call");
+        var mount = net.minecraft.resources.ResourceLocation.parse("skyabyss:mount_whistle");
+        var withMount = new java.util.ArrayList<>(all);
+        withMount.add(new QuickPick.Cand(mount, QuickPick.Role.MOUNT, null));
+        check(f, mount.equals(QuickPick.pick(withMount, none, null, book)), "quick card: with no scene the mount whistle must be the default (Y tap)");
+        check(f, shell.equals(QuickPick.pick(withMount, new QuickPick.Ctx("shell", false, false, false), null, mount)), "quick card: a titan scene must still beat the mount whistle");
+        check(f, book.equals(QuickPick.pick(withMount, none, book, null)), "quick card: a pinned tool must beat the mount whistle");
         check(f, whale.equals(QuickPick.pick(all, new QuickPick.Ctx("whale", true, true, true), null, conch)), "quick card: a titan must beat the sea and the storm");
         check(f, shell.equals(QuickPick.pick(all, new QuickPick.Ctx(null, true, false, false), null, shell)), "quick card: a waymark must give the last call tool");
         check(f, whale.equals(QuickPick.pick(all, new QuickPick.Ctx(null, true, false, false), null, conch)), "quick card: a waymark without a last call tool must give the first call");

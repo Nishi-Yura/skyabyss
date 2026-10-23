@@ -137,31 +137,31 @@ public final class ChapterGroundsSelfTest {
                 check(inSector(cap, f.shape() == Shape.COVE ? f.shapeCenter() : f.center(), s, 1, 0), s.chapter() + ": the shape is outside the sector or the band: " + f.center());
                 check(f.shrine() != null, s.chapter() + ": no shrine spot");
             }
-            // 丘 (北 400 に高さ 30 の丘) → 形なしで、その丘
-            Synth hill = new Synth((x, z) -> 70 + (int) Math.max(0, 30 - Math.hypot(x, z + 420) * 0.4));
+            // 丘 (北 300 に高さ 30 の丘。跡地は 2026-10-23 に 65% の距離へ) → 形なしで、その丘
+            Synth hill = new Synth((x, z) -> 70 + (int) Math.max(0, 30 - Math.hypot(x, z + 300) * 0.4));
             Found wh = ChapterGrounds.find(hill, cap, ChapterGrounds.spec(Chapters.WHALE), List.of());
-            check(wh.shape() == Shape.NONE && Math.hypot(wh.center().getX(), wh.center().getZ() + 420) < 48, "the whale ground should take the hill north of the capital: " + wh.center());
+            check(wh.shape() == Shape.NONE && Math.hypot(wh.center().getX(), wh.center().getZ() + 300) < 48, "the whale ground should take the hill north of the capital: " + wh.center() + " " + wh.shape());
             // 野営地が丘の上にあれば、そこは避ける
-            Found wh2 = ChapterGrounds.find(hill, cap, ChapterGrounds.spec(Chapters.WHALE), List.of(new ChapterGrounds.Obstacle(new BlockPos(0, 70, -420), 190)));
-            check(Math.hypot(wh2.center().getX(), wh2.center().getZ() + 420) >= 150, "the whale ground should keep away from the camp: " + wh2.center());
+            Found wh2 = ChapterGrounds.find(hill, cap, ChapterGrounds.spec(Chapters.WHALE), List.of(new ChapterGrounds.Obstacle(new BlockPos(0, 70, -300), 110)));
+            check(Math.hypot(wh2.center().getX(), wh2.center().getZ() + 300) >= 90, "the whale ground should keep away from the camp: " + wh2.center());
             // 構造物 (村) が丘のそばにあれば、ずらす
             hill.structureX = 0;
-            hill.structureZ = -440;
+            hill.structureZ = -320;
             Found wh3 = ChapterGrounds.find(hill, cap, ChapterGrounds.spec(Chapters.WHALE), List.of());
-            check(Math.hypot(wh3.center().getX(), wh3.center().getZ() + 440) > ChapterGrounds.STRUCTURE_GAP, "the whale ground should move off a village: " + wh3.center());
-            // 峰 (西 1,300 に y 175) → 形なし
-            Synth peak = new Synth((x, z) -> 70 + (int) Math.max(0, 105 - Math.hypot(x + 1300, z) * 0.6));
+            check(Math.hypot(wh3.center().getX(), wh3.center().getZ() + 320) > ChapterGrounds.STRUCTURE_GAP, "the whale ground should move off a village: " + wh3.center());
+            // 峰 (西 850 に y 175) → 形なし
+            Synth peak = new Synth((x, z) -> 70 + (int) Math.max(0, 105 - Math.hypot(x + 850, z) * 0.6));
             Found st = ChapterGrounds.find(peak, cap, ChapterGrounds.spec(Chapters.STORM), List.of());
             check(st.shape() == Shape.NONE && st.center().getY() >= ChapterGrounds.PEAK_Y, "the storm ground should take the peak in the west: " + st.center());
             // 灰の地 (乾いた群系) → 帯の内側の端
             Synth dry = new Synth((x, z) -> 72);
             dry.dry = true;
             Found em = ChapterGrounds.find(dry, cap, ChapterGrounds.spec(Chapters.EMBER), List.of());
-            check(em.shape() == Shape.NONE && em.dist() == 1200 && em.deg() == 0, "dry lowland: the ember ground should be at the inner edge, due south: " + em.dist() + " " + em.deg());
-            // 海辺 (x 1,000 から東が深さ 20 の海) → 形なし、浜は海の手前
-            Synth coast = new Synth((x, z) -> x < 1000 ? 66 : 43);
+            check(em.shape() == Shape.NONE && em.dist() == ChapterGrounds.spec(Chapters.EMBER).min() && em.deg() == 0, "dry lowland: the ember ground should be at the inner edge, due south: " + em.dist() + " " + em.deg());
+            // 海辺 (x 650 から東が深さ 20 の海) → 形なし、浜は海の手前
+            Synth coast = new Synth((x, z) -> x < 650 ? 66 : 43);
             Found td = ChapterGrounds.find(coast, cap, ChapterGrounds.spec(Chapters.TIDE), List.of());
-            check(td.shape() == Shape.NONE && td.center().getX() < 1000 && td.center().getX() >= 1000 - ChapterGrounds.SHORE_REACH - 8 && td.sea() != null && td.sea().getX() > 1000,
+            check(td.shape() == Shape.NONE && td.center().getX() < 650 && td.center().getX() >= 650 - ChapterGrounds.SHORE_REACH - 8 && td.sea() != null && td.sea().getX() > 650,
                     "the tide ground should take the beach before the sea: " + td.center() + " sea " + td.sea());
 
             // 形を重ねた高さ

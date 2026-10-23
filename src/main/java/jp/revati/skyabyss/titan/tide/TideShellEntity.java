@@ -63,6 +63,8 @@ public class TideShellEntity extends Entity implements GeoEntity, TravelTitan, j
     private static final RawAnimation REST_ANIM = RawAnimation.begin().thenLoop("animation.tide_shell.rest");
     private static final RawAnimation HEAD_IDLE = RawAnimation.begin().thenLoop("animation.tide_shell.head_idle");
     private static final RawAnimation LOOK_UP = RawAnimation.begin().thenLoop("animation.tide_shell.look");
+    // 眠る潮殻 (DormantTitan): 体は休みの姿、首は甲羅の方へ下げる
+    private static final RawAnimation HEAD_SLEEP = RawAnimation.begin().thenLoop("animation.tide_shell.head_sleep");
 
     // ---- 体の寸法 (ブロック。モデルの geo 単位の半分)。横は左が + (ゲームでは geo の +X が左)
     // 潮門 (geo の gate 骨): 甲羅の後ろ左の縁。口 (geo x 58〜74, y 9〜31, z 55〜73) は横 29〜37、後ろ 27.5〜36.5、高さ 4.5〜15.5
@@ -532,6 +534,8 @@ public class TideShellEntity extends Entity implements GeoEntity, TravelTitan, j
 
     private void startRest(ServerLevel level) {
         setMode(Mode.REST);
+        // 座る体のなかに食い込む浜・岩・木を取り除く (めり込まない)
+        jp.revati.skyabyss.titan.TitanClearing.carve(level, volumeName(), getX(), level.getSeaLevel() - REST_DRAFT, getZ(), getYRot());
         shoreDock = null;
         shoreSearched = false;
         // 潮門を開けておく長さは、地上の干潮の刻ではなく 20 分 (TitanStay)。背の中の潮 (TideClock) は別の時計で、触らない
@@ -1132,8 +1136,8 @@ public class TideShellEntity extends Entity implements GeoEntity, TravelTitan, j
 
     @Override
     public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
-        controllers.add(new AnimationController<>(this, "body", 20, state -> state.setAndContinue(isResting() ? REST_ANIM : WALK)));
-        controllers.add(new AnimationController<>(this, "head", 20, state -> state.setAndContinue(entityData.get(LOOK) ? LOOK_UP : HEAD_IDLE)));
+        controllers.add(new AnimationController<>(this, "body", 20, state -> state.setAndContinue(isResting() || isDormantNow() ? REST_ANIM : WALK)));
+        controllers.add(new AnimationController<>(this, "head", 20, state -> state.setAndContinue(isDormantNow() ? HEAD_SLEEP : entityData.get(LOOK) ? LOOK_UP : HEAD_IDLE)));
     }
 
     @Override

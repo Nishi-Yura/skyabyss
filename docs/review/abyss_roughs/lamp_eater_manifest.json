@@ -6,10 +6,10 @@
  "sheets": [
   "abyss_roughs/lamp_eater.png"
  ],
- "extra": "深淵だけの敵。骨 7 本 (root > body > jaw / wing_l / wing_r / neck > head)。鍵は食う口と奥の青緑。 三角形 (全身): A 440 / B 480 / C 250 (目安 単体の敵 200〜400)。検査: A 埋まり なし / 水密 開いた辺・裏返しなし / 浮き 0 / 箱の浮き 0 / B 埋まり なし / 水密 開いた辺・裏返しなし / 浮き 0 / 箱の浮き 0 / C 埋まり なし / 水密 開いた辺・裏返しなし / 浮き 0 / 箱の浮き 0 。メッシュ・アトラス・光る画素のマスクは docs/review/abyss_roughs/lamp_eater/{a,b,c}/。生成: tools/rough/lowpoly/abyss/lamp_eater.py。",
+ "extra": "深淵だけの敵。骨 7 本 (root > body > jaw / wing_l / wing_r / neck > head)。鍵は食う口と奥の青緑。 三角形 (全身): A 496 / B 480 / C 250 (目安 単体の敵 200〜400)。検査: A 埋まり なし / 水密 開いた辺・裏返しなし / 浮き 0 / 箱の浮き 0 / B 埋まり なし / 水密 開いた辺・裏返しなし / 浮き 0 / 箱の浮き 0 / C 埋まり なし / 水密 開いた辺・裏返しなし / 浮き 0 / 箱の浮き 0 。メッシュ・アトラス・光る画素のマスクは docs/review/abyss_roughs/lamp_eater/{a,b,c}/。生成: tools/rough/lowpoly/abyss/lamp_eater.py。",
  "options": {
   "a": {
-   "name": "A 黒い口の球 (440 三角形)",
+   "name": "A 黒い口の球 (496 三角形)",
    "desc": "虚の黒の球に、前面の口の縁の歯の輪。奥に青緑がかすかに灯る。転がってきて、灯りの前で口が開く。一番読みやすい「食う」形。"
   },
   "b": {

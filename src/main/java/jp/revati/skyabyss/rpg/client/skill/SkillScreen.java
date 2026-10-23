@@ -792,6 +792,17 @@ public class SkillScreen extends Screen implements jp.revati.skyabyss.client.ui.
             ext.render(g, font, minecraft, d, left, top, mouseX, mouseY);
         }
         renderBottom(g, d, level);
+        if (lessonLearn && page == 0) {
+            if (learn.active && learn.visible) {
+                jp.revati.skyabyss.client.tutorial.SkillLessonClient.frame(g, learn.getX(), learn.getY(), learn.getWidth(), learn.getHeight());
+            }
+            // 上の段 (木のつまみの右、「刻まれた技」の左の空き) に 0.8 倍で
+            g.pose().pushPose();
+            g.pose().translate(left + 38, top + 11, 0);
+            g.pose().scale(0.8f, 0.8f, 1f);
+            g.drawString(font, Component.translatable("lesson.skyabyss.screen.learn"), 0, 0, 0xFF000000 | GOLD, false);
+            g.pose().popPose();
+        }
         if (tryon != null && page == 0) {
             g.drawString(font, Component.translatable("gui.skyabyss.skill.tryon_banner", tryonOrder.size()), left + 38, top + 25 + 0, 0xFF7FFFA0, false);
         }
@@ -844,7 +855,10 @@ public class SkillScreen extends Screen implements jp.revati.skyabyss.client.ui.
         }
     }
 
+    private boolean lessonLearn;
+
     private void renderTree(GuiGraphics g, SkillData d, int level) {
+        lessonLearn = tryon == null && jp.revati.skyabyss.client.tutorial.SkillLessonClient.learning(minecraft);
         // 見出し: 木の名前 (天職なら印を添える)
         MutableComponent head = Component.translatable(tree.nameKey());
         int headColor = GOLD;
@@ -928,6 +942,10 @@ public class SkillScreen extends Screen implements jp.revati.skyabyss.client.ui.
             }
             if (s == selected) {
                 g.blit(SkillHud.TEXTURE, x - 1, y - 1, NODE + 2, NODE + 2, 192, 384, 48, 48, SkillHud.TEX_W, SkillHud.TEX_H);
+            }
+            // 技の稽古の覚える段: 覚えられる能動の技を光らせる
+            if (lessonLearn && s.active && rank == 0 && d.canLearn(s, level) == SkillData.LearnResult.OK) {
+                jp.revati.skyabyss.client.tutorial.SkillLessonClient.frame(g, x, y, NODE, NODE);
             }
             // 段 (小さく、印の下)。要は段がないので出さない
             if (!s.keystone() || rank == 0) {

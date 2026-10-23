@@ -56,6 +56,10 @@ public final class GuideNetwork {
 
     // クライアントからの知らせ (自分の道だけ。ほかの人の道は触れない)
     static void onTarget(ServerPlayer player, GuideTarget t) {
+        // 道しるべ (地面の道の探索) は廃止 (2026-10-23: 重さの原因)。知らせは受け流す
+        if (t.active() || SCHEDULER.size() == 0) {
+            return;
+        }
         long now = player.serverLevel().getGameTime();
         Long last = LAST_HEARD.get(player.getUUID());
         if (last != null && now - last < MIN_GAP && now >= last && t.active()) {
