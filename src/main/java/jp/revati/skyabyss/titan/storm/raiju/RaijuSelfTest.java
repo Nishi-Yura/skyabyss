@@ -18,11 +18,8 @@ import jp.revati.skyabyss.titan.storm.back.StormRods;
 import jp.revati.skyabyss.titan.storm.back.StormStrike;
 import jp.revati.skyabyss.titan.storm.back.StormTestPlayer;
 import jp.revati.skyabyss.titan.group.BackGroupData;
-import jp.revati.skyabyss.titan.group.GroupGates;
 import jp.revati.skyabyss.titan.group.GroupOwned;
 import jp.revati.skyabyss.titan.group.Groups;
-import jp.revati.skyabyss.titan.group.RoomLocks;
-import jp.revati.skyabyss.registry.ModBlocks;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.core.BlockPos;
@@ -35,23 +32,50 @@ import net.minecraft.world.level.block.LeverBlock;
 import net.minecraft.world.phys.Vec3;
 
 // 雷獣の自己テスト (SKYABYSS_SELFTEST)。結果はログに SELFTEST raiju PASSED / FAILED。
-// 素材 (模型・テクスチャ・発光・アニメ・バーの絵・音)、巣の形 (柱 6 本・栓・入口・天井)、接地の栓 (8 秒・待ち・見た目)、
-// 戦いの始まりと封印、保存されない、体力と人数の倍率、接地した柱へ渡ると痺れて落ちる (受ける傷 1.5 倍)、接地していない柱には乗る、
-// すべての技が最後まで回る、50% の咆哮、巣の外へ出た雷獣を戻す、誰もいなければ放棄、報酬の表 (確率・数・作られていない品は出さない・
-// いない人の分は預かる)、撃破の記録 (背中の記録にも) と、もう一度挑めるようにする。巣は背中の担当が建てた本物 (storm_back) で試す
+// 素材 (模型・テクスチャ・発光・アニメ・バーの絵・音)、巣の形 (柱 6 本・栓・天井)、接地の栓 (8 秒・待ち・見た目)、
+// 保存されない、体力と人数の倍率、接地した柱へ渡ると痺れて落ちる (受ける傷 1.5 倍)、接地していない柱には乗る、
+// すべての技が最後まで回る、50% の咆哮、グループごとの見え方と狙い、報酬の表 (確率・数・作られていない品は出さない・
+// いない人の分は預かる)、倒れると部屋へ知らせる。
+// 巣は区画の中ボスの間 (trial/raid/mid/StormMidRoom。docs/design/32 の 9.2) を、自己テストの枠 (TrialSlot.MAX + 1) の
+// raid solo と重ならない所に建てて試す。部屋の流れ (運ばれる・準備・越える) は SELFTEST raid mid が見る
 public final class RaijuSelfTest {
     private RaijuSelfTest() {
     }
 
-    // 呼ぶのは SelfTestRunner: 読み込み (load) → 決まった tick 待つ → 試す (runSelfTest)
-    public static void load(MinecraftServer server) {
-        RaijuNest.Site site = RaijuNest.site(server);
-        ChunkPos c = new ChunkPos(site.center());
-        for (int dx = -2; dx <= 1; dx++) {
-            for (int dz = -1; dz <= 1; dz++) {
-                site.level().setChunkForced(c.x + dx, c.z + dz, true);
+    // 試す巣の床の中心 (自己テストの枠。raid solo は z = ORIGIN_Z の列に並べるので、z をずらす)
+    static final BlockPos ORIGIN = new BlockPos(jp.revati.skyabyss.trial.TrialSlot.frame(jp.revati.skyabyss.trial.TrialSlot.MAX + 1).dx(),
+            jp.revati.skyabyss.trial.raid.RaidRun.FLOOR_Y, jp.revati.skyabyss.trial.TrialSlot.ORIGIN_Z + 320);
+
+    private static void force(MinecraftServer server, boolean on) {
+        ServerLevel back = server.getLevel(RaijuNest.STORM_BACK);
+        if (back == null) {
+            return;
+        }
+        ChunkPos c = new ChunkPos(ORIGIN);
+        for (int dx = -2; dx <= 2; dx++) {
+            for (int dz = -2; dz <= 2; dz++) {
+                back.setChunkForced(c.x + dx, c.z + dz, on);
             }
         }
+    }
+
+    // 呼ぶのは SelfTestRunner: 読み込み (load) → 決まった tick 待つ → 試す (runSelfTest)
+    public static void load(MinecraftServer server) {
+        force(server, true);
+    }
+
+    // 中ボスの間を建てて、その巣を返す (本番の RaidRun と同じ StormMidRoom.build)
+    @javax.annotation.Nullable
+    static RaijuNest.Site buildSite(MinecraftServer server) {
+        ServerLevel back = server.getLevel(RaijuNest.STORM_BACK);
+        if (back == null) {
+            return null;
+        }
+        jp.revati.skyabyss.trial.raid.RaidCtx ctx = jp.revati.skyabyss.trial.raid.RaidCtx.forSolo(back, GROUP_A,
+                jp.revati.skyabyss.progress.Titans.THUNDER_WING, jp.revati.skyabyss.trial.raid.mid.StormMidRoom.ID,
+                jp.revati.skyabyss.trial.raid.RaidRun.MID_STEP, ORIGIN, 7L);
+        new jp.revati.skyabyss.trial.raid.mid.StormMidRoom().build(ctx);
+        return new RaijuNest.Site(back, ctx.origin());
     }
 
     public static void runSelfTest(MinecraftServer server) {
@@ -68,13 +92,7 @@ public final class RaijuSelfTest {
         } else {
             failures.forEach(f -> SkyAbyss.LOGGER.error("SELFTEST raiju FAILED: {}", f));
         }
-        RaijuNest.Site site = RaijuNest.site(server);
-        ChunkPos c = new ChunkPos(site.center());
-        for (int dx = -2; dx <= 1; dx++) {
-            for (int dz = -1; dz <= 1; dz++) {
-                site.level().setChunkForced(c.x + dx, c.z + dz, false);
-            }
-        }
+        force(server, false);
     }
 
     private static void check(boolean ok, String message, List<String> failures) {
@@ -84,8 +102,12 @@ public final class RaijuSelfTest {
     }
 
     private static void run(MinecraftServer server, List<String> failures, List<String> notes) {
-        RaijuNest.Site site = RaijuNest.site(server);
-        notes.add("storm back nest " + site.center());
+        RaijuNest.Site site = buildSite(server);
+        if (site == null) {
+            failures.add("storm_back is missing");
+            return;
+        }
+        notes.add("mid room nest " + site.center());
         checkAssets(failures);
         checkTimings(failures);
         checkLang(failures);
@@ -93,9 +115,12 @@ public final class RaijuSelfTest {
         check(src != null && src.xp() == 170 && src.contentLevel() == 24, "growth source for raiju is not 170 / Lv24", failures);
         checkNest(site, failures);
         checkPlugs(site, failures);
-        checkBattle(server, site, failures, notes);
+        checkBattle(site, failures, notes);
         checkLoot(server, failures, notes);
-        checkDefeat(server, site, failures);
+        checkDefeat(site, failures);
+        for (Raiju r : site.level().getEntitiesOfClass(Raiju.class, site.arena().inflate(8))) {
+            r.discard();
+        }
     }
 
     private static void checkAssets(List<String> failures) {
@@ -173,18 +198,15 @@ public final class RaijuSelfTest {
     }
 
     private static void checkNest(RaijuNest.Site site, List<String> failures) {
-        RaijuBattle.abandonAll(site.level().getServer());
-        RoomLocks.release(RaijuBattle.ROOM);
         ServerLevel level = site.level();
         check(level.dimension() == RaijuNest.STORM_BACK, "the nest is not in the storm back (" + level.dimension().location() + ")", failures);
-        check(site.center().equals(StormBackLayout.RAIJU_NEST), "the nest is not at StormBackLayout.RAIJU_NEST", failures);
-        RaijuNest.build(site);
         check(RaijuNest.isBuilt(site), "nest not recognised as built", failures);
-        List<BlockPos> layoutRods = StormBackLayout.raijuRods();
+        BlockPos shift = site.center().subtract(StormBackLayout.RAIJU_NEST);
+        List<BlockPos> layoutRods = StormBackLayout.raijuRods().stream().map(b -> b.offset(shift)).toList();
         for (int i = 0; i < RaijuNest.RODS; i++) {
             BlockPos rod = site.rod(i);
             BlockPos top = site.rodTop(i);
-            check(rod.equals(layoutRods.get(i)), "rod " + i + " is not StormBackLayout.raijuRods() " + i, failures);
+            check(rod.equals(layoutRods.get(i)), "rod " + i + " is not StormBackLayout.raijuRods() " + i + " moved to the room", failures);
             check(level.getBlockState(top).is(StormBackSetup.ROD_TIP.get()), "rod " + i + " has no lightning rod on top", failures);
             for (int k = 1; k <= 3; k++) {
                 check(level.getBlockState(rod.above(k)).is(StormBackSetup.ROD_BULB.get()) && level.getBlockState(rod.above(k)).getValue(StormBlocks.RodBulb.LIT),
@@ -211,34 +233,7 @@ public final class RaijuSelfTest {
         check(!level.getBlockState(new BlockPos(c.getX(), site.ceiling() + 1, c.getZ())).isAir(), "nest has no ceiling", failures);
         check(!level.getBlockState(c.offset(2, 0, 2)).isAir(), "nest has no floor", failures);
         check(site.ceiling() - c.getY() == 15, "nest height should be 15 (" + (site.ceiling() - c.getY()) + ")", failures);
-        // 入口: 開いた封印の扉のブロック (どのグループにも開いている)、封じる面のまわりは壁 (封じると回廊がふさがる)
-        int minY = Integer.MAX_VALUE;
-        int maxY = Integer.MIN_VALUE;
-        int minZ = Integer.MAX_VALUE;
-        int maxZ = Integer.MIN_VALUE;
-        for (BlockPos g : site.gate()) {
-            check(level.getBlockState(g).is(ModBlocks.SEALED_GATE.get()) && GroupGates.isOpen(level, GROUP_A, g)
-                    && level.getBlockState(g).getCollisionShape(level, g).isEmpty(), "entrance is not an open gate at " + g, failures);
-            minY = Math.min(minY, g.getY());
-            maxY = Math.max(maxY, g.getY());
-            minZ = Math.min(minZ, g.getZ());
-            maxZ = Math.max(maxZ, g.getZ());
-        }
-        int gx = site.gateCenter().getX();
-        for (int y = minY; y <= maxY; y++) {
-            check(!level.getBlockState(new BlockPos(gx, y, minZ - 1)).isAir() && !level.getBlockState(new BlockPos(gx, y, maxZ + 1)).isAir(),
-                    "entrance does not span the corridor at y " + y, failures);
-        }
-        for (int z = minZ; z <= maxZ; z++) {
-            check(!level.getBlockState(new BlockPos(gx, minY - 1, z)).isAir() && !level.getBlockState(new BlockPos(gx, maxY + 1, z)).isAir(),
-                    "entrance does not span the corridor at z " + z, failures);
-        }
-        check(site.ante().contains(site.anteSpawn()) && !site.inside(site.anteSpawn()), "antechamber spawn is wrong", failures);
-        check(site.inside(site.entranceInside()) && site.inside(site.home()), "entrance / home not inside", failures);
-        check(level.getBlockState(BlockPos.containing(site.anteSpawn())).isAir() && !level.getBlockState(BlockPos.containing(site.anteSpawn()).below()).isAir(),
-                "cannot stand at the antechamber spawn", failures);
-        check(level.getBlockState(BlockPos.containing(site.entranceInside())).isAir()
-                && !level.getBlockState(BlockPos.containing(site.entranceInside()).below()).isAir(), "cannot stand inside the entrance", failures);
+        check(site.inside(site.home()), "home not inside", failures);
     }
 
     private static void checkPlugs(RaijuNest.Site site, List<String> failures) {
@@ -260,15 +255,33 @@ public final class RaijuSelfTest {
     static final UUID GROUP_A = UUID.fromString("5c1e0a2b-0000-4000-8000-0000005ba001");
     static final UUID GROUP_B = UUID.fromString("5c1e0a2b-0000-4000-8000-0000005bb002");
 
-    private static Raiju startRaiju(MinecraftServer server, List<String> failures) {
-        RaijuBattle.reawaken(server, GROUP_A);
-        check(RaijuBattle.startNow(server, GROUP_A), "battle did not start", failures);
-        Raiju r = RaijuBattle.current(server, GROUP_A);
+    // 倒れた雷獣の数 (部屋へ知らせる口 bindRoom で数える)
+    private static int deaths;
+
+    // 中ボスの間の湧かせ方 (StormMidRoom.spawnBoss) と同じに、一人ぶんで湧かせる
+    @javax.annotation.Nullable
+    private static Raiju startRaiju(RaijuNest.Site site, List<String> failures) {
+        for (Raiju old : site.level().getEntitiesOfClass(Raiju.class, site.arena().inflate(8))) {
+            old.discard();
+        }
+        for (int i = 0; i < RaijuNest.RODS; i++) {
+            StormRods.register(site.level(), site.rod(i));
+            StormRods.charge(site.level(), site.rod(i), StormRods.FULL);
+            RaijuNest.show(site, i, false);
+        }
+        Raiju r = RaijuSetup.RAIJU.get().create(site.level());
         if (r == null) {
-            RaijuNest.Site site = RaijuNest.site(server);
-            failures.add("no raiju after starting (difficulty " + site.level().getDifficulty() + ", raiju nearby "
-                    + site.level().getEntitiesOfClass(Raiju.class, site.arena().inflate(8)).size() + ", boss id " + RaijuBattle.room(GROUP_A).bossId()
-                    + ", entity ticking " + site.level().isPositionEntityTicking(site.rodTop(0)) + ")");
+            failures.add("could not create a raiju");
+            return null;
+        }
+        r.moveTo(site.home().x, site.floor() + 7, site.home().z, 90f, 0f);
+        r.bind(site, 1, 0);
+        r.setGroupId(GROUP_A);
+        r.bindRoom(x -> deaths++);
+        if (!site.level().addFreshEntity(r)) {
+            failures.add("the raiju was not added (difficulty " + site.level().getDifficulty() + ", entity ticking "
+                    + site.level().isPositionEntityTicking(site.rodTop(0)) + ")");
+            return null;
         }
         return r;
     }
@@ -282,13 +295,11 @@ public final class RaijuSelfTest {
         }
     }
 
-    private static void checkBattle(MinecraftServer server, RaijuNest.Site site, List<String> failures, List<String> notes) {
-        Raiju r = startRaiju(server, failures);
+    private static void checkBattle(RaijuNest.Site site, List<String> failures, List<String> notes) {
+        Raiju r = startRaiju(site, failures);
         if (r == null) {
             return;
         }
-        check(RaijuNest.sealed(site, GROUP_A), "entrance not sealed when the fight starts", failures);
-        check(!RaijuNest.sealed(site, GROUP_B), "entrance sealed for another group", failures);
         check(r.getTags().contains(TitanBackTrials.HEART_TAG) && r.getTags().contains(Raiju.TRIAL_TAG), "raiju not tagged", failures);
         check(!r.shouldBeSaved(), "raiju would be saved to disk", failures);
         check(Math.abs(r.getMaxHealth() - Raiju.HEALTH) < 0.01, "max health is " + r.getMaxHealth(), failures);
@@ -349,24 +360,14 @@ public final class RaijuSelfTest {
         check(r.roared() && r.isAngry(), "roar did not make the raiju angry", failures);
         checkGroups(site, r, failures, notes);
         notes.add(ran + "/" + (Raiju.Action.values().length - 1) + " moves ran to the end");
-        // 巣の外へ出た雷獣は戻る。誰もいなければ 3 秒で放棄
-        RaijuBattle.Host host = RaijuBattle.host(server);
-        r.forceAction(Raiju.Action.CLAW);
-        tick(r, Raiju.CLAW_TICKS + 2);
-        r.moveTo(site.home().x + 30, site.floor(), site.home().z);
-        RaijuBattle.room(GROUP_A).tick(site.level(), host);
-        check(r.distanceToSqr(site.home()) < 1, "raiju outside the nest was not brought back", failures);
-        for (int i = 0; i < 6; i++) {
-            RaijuBattle.room(GROUP_A).tick(site.level(), host);
-        }
-        check(!RaijuBattle.room(GROUP_A).active() && !r.isAlive() && !RaijuNest.sealed(site, GROUP_A), "empty nest was not abandoned", failures);
+        r.discard();
         // 体力 50% を切ると咆哮 (自動)
-        Raiju r2 = startRaiju(server, failures);
+        Raiju r2 = startRaiju(site, failures);
         if (r2 != null) {
             r2.setHealth(r2.getMaxHealth() * 0.45f);
             tick(r2, 2);
             check(r2.currentAction() == Raiju.Action.ROAR, "no roar below 50% (" + r2.currentAction() + ")", failures);
-            RaijuBattle.abandon(server, GROUP_A);
+            r2.discard();
         }
     }
 
@@ -453,20 +454,18 @@ public final class RaijuSelfTest {
         check(held.xp == RaijuLoot.VANILLA_XP, "held xp should be " + RaijuLoot.VANILLA_XP + " (" + held.xp + ")", failures);
     }
 
-    private static void checkDefeat(MinecraftServer server, RaijuNest.Site site, List<String> failures) {
-        Raiju r = startRaiju(server, failures);
+    private static void checkDefeat(RaijuNest.Site site, List<String> failures) {
+        Raiju r = startRaiju(site, failures);
         if (r == null) {
             return;
         }
+        int before = deaths;
         r.setHealth(1f);
         r.invulnerableTime = 0;
         r.hurt(r.damageSources().genericKill(), 1000f);
         check(!r.isAlive(), "raiju did not die", failures);
-        check(RaijuBattle.defeated(site.level(), GROUP_A), "defeat was not recorded", failures);
-        check(!RaijuBattle.defeated(site.level(), GROUP_B), "group A's defeat was recorded for group B", failures);
-        check(!RaijuBattle.room(GROUP_A).active() && !RaijuNest.sealed(site, GROUP_A), "entrance did not reopen after the defeat", failures);
-        RaijuBattle.reawaken(server, GROUP_A);
-        check(!RaijuBattle.defeated(site.level(), GROUP_A), "reawaken did not reset the raiju", failures);
+        check(deaths == before + 1, "the raiju's death was not reported to its room", failures);
+        r.discard();
         BackGroupData.get(site.level()).remove(GROUP_A);
         BackGroupData.get(site.level()).remove(GROUP_B);
     }

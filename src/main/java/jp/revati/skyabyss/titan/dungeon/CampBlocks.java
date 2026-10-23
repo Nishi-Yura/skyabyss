@@ -219,6 +219,13 @@ public final class CampBlocks {
         return grown;
     }
 
+    // 背の次元の区画 (レイドの部屋・中ボスの間・心臓の間とその前室。docs/design/32 の 2.4)。どれも閉じた戦いの部屋なので、野営の道具は置けない
+    // (人が野営できるのは到着の台だけ)
+    public static boolean inInstanceRooms(ResourceKey<Level> dim, BlockPos pos) {
+        boolean back = dim == TitanTravel.TITAN_BACK || dim == TideTravel.TIDE_BACK || dim == StormTravel.STORM_BACK || dim == EmberIds.BACK;
+        return back && jp.revati.skyabyss.trial.TrialSlot.inInstance(pos.getX() + 0.5, pos.getZ() + 0.5);
+    }
+
     public static boolean inArena(ResourceKey<Level> dim, BlockPos pos) {
         Vec3 c = Vec3.atCenterOf(pos);
         for (AABB a : arenas(dim)) {
@@ -257,7 +264,7 @@ public final class CampBlocks {
             return Refusal.NOT_CAMP;
         }
         ResourceKey<Level> dim = level.dimension();
-        if (inArena(dim, pos) || inArena(dim, player.blockPosition())) {
+        if (inArena(dim, pos) || inArena(dim, player.blockPosition()) || inInstanceRooms(dim, pos) || inInstanceRooms(dim, player.blockPosition())) {
             return Refusal.ARENA;
         }
         // 支え: 背中のブロック (道具どうしを積んで足場にさせない)。吊りランタン・壁たいまつはそれぞれの向きで

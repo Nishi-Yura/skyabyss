@@ -358,11 +358,8 @@ public final class AshSmithSelfTest {
                 "centre is not open", f);
         check(!level.getBlockState(BlockPos.containing(AshSmithArena.ENTRANCE_INSIDE).below()).isAir(), "no floor at the entrance", f);
         check(level.getBlockState(BlockPos.containing(AshSmithArena.ENTRANCE_INSIDE)).isAir(), "entrance is blocked", f);
-        // 取っておく場所は空気のまま (B が後で台・石・碑文を置く)
-        for (EmberBackLayout.Box r : EmberBackLayout.reserved("smith")) {
-            BlockPos mid = r.center();
-            check(level.getBlockState(new BlockPos(mid.getX(), r.minY() + 2, mid.getZ())).isAir(), "reserved place was built in at " + mid, f);
-        }
+        // (取っておく場所 EmberBackLayout.reserved("smith") は体の中の鍛え手の間の前と奥。体の中は建てなくなった (2026-10-23。
+        // 鍛え手の間は区画の中ボスの間 EmberMidRoom) ので見ない。部屋の流れは SELFTEST raid mid)
         // 入口: 既定は閉じた扉 (火の鍵で開けたグループにだけ開く)。開ける・封じるはそのグループにだけで、扉のブロックはワールドに残る
         UUID g = AshSmithBattle.TEST_GROUP;
         jp.revati.skyabyss.titan.group.GroupGates.place(level, jp.revati.skyabyss.titan.ember.back.EmberBackTrials.boxBlocks(AshSmithArena.DOOR), false);

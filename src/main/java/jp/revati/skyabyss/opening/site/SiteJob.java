@@ -1330,17 +1330,25 @@ public final class SiteJob {
         BlockPos.MutableBlockPos p = new BlockPos.MutableBlockPos();
         int y0 = origin.getY() + Math.min(bp.minY, 0) - 4;
         int y1 = origin.getY() + Math.max(bp.maxY, 2) + 6;
-        for (int x = rect[0] - 3; x <= rect[2] + 3; x++) {
-            for (int z = rect[1] - 3; z <= rect[3] + 3; z++) {
-                for (int y = y1; y >= y0; y--) {
-                    p.set(x, y, z);
-                    BlockState s = level.getBlockState(p);
-                    if (s.isAir() || !s.getFluidState().isEmpty() || ours.contains(p.asLong()) || s.canSurvive(level, p)) {
-                        continue;
+        // 支えは連なる (背の高い草の上の半分は下の半分に、下の半分は地面に)。上から一度だけ見ると、下の半分だけ消えて上の半分が浮いた
+        // (2026-10-24 の build audit の ATTACH_SUPPORT)。消すものが無くなるまで繰り返す
+        for (int pass = 0; pass < 4; pass++) {
+            int before = n;
+            for (int x = rect[0] - 3; x <= rect[2] + 3; x++) {
+                for (int z = rect[1] - 3; z <= rect[3] + 3; z++) {
+                    for (int y = y1; y >= y0; y--) {
+                        p.set(x, y, z);
+                        BlockState s = level.getBlockState(p);
+                        if (s.isAir() || !s.getFluidState().isEmpty() || ours.contains(p.asLong()) || s.canSurvive(level, p)) {
+                            continue;
+                        }
+                        level.setBlock(p, Blocks.AIR.defaultBlockState(), FLAGS);
+                        n++;
                     }
-                    level.setBlock(p, Blocks.AIR.defaultBlockState(), FLAGS);
-                    n++;
                 }
+            }
+            if (n == before) {
+                break;
             }
         }
         return n;
