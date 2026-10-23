@@ -61,11 +61,13 @@ public final class TrialRouteSelfTest {
                     f.add(titan + ": the back dimension is missing");
                     continue;
                 }
+                // 心臓の段の運び: 心臓の間は体の外の封じた部屋なので、背の体が建っていなくても部屋だけ建てて見る
+                jp.revati.skyabyss.trial.raid.InstanceArenas.ensureHeart(back, titan);
+                heartCarry(f, server, back, titan);
                 if (ready(back, titan)) {
                     rests(f, back, titan);
                     firstRun(f, back, titan);
                     replay(f, back, titan);
-                    heartCarry(f, server, back, titan);
                     worlds++;
                 } else {
                     SkyAbyss.LOGGER.info("SELFTEST trial route: {} back is not built here, checked the shape only", titan);

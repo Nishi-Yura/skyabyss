@@ -10,7 +10,6 @@ import jp.revati.skyabyss.entity.StoneWhaleHeart;
 import jp.revati.skyabyss.registry.ModEntities;
 import jp.revati.skyabyss.titan.TitanTravel;
 import jp.revati.skyabyss.titan.audit.BackReach;
-import jp.revati.skyabyss.titan.audit.BuildAuditSelfTest;
 import jp.revati.skyabyss.titan.dungeon.TitanBackLayout;
 import jp.revati.skyabyss.titan.dungeon.TitanBackTrials;
 import jp.revati.skyabyss.titan.ember.EmberIds;
@@ -57,6 +56,14 @@ public final class DomainRoomSelfTest {
         List<String> f = new ArrayList<>();
         List<String> notes = new ArrayList<>();
         try {
+            // 心臓の間は体の外の封じた部屋 (InstanceArenas)。背の体が建っていなくても、部屋だけ建てて見る
+            for (String t : jp.revati.skyabyss.progress.Titans.all()) {
+                ResourceKey<Level> key = jp.revati.skyabyss.progress.Titans.backOf(t);
+                ServerLevel lv = key == null ? null : server.getLevel(key);
+                if (lv != null && jp.revati.skyabyss.trial.raid.InstanceArenas.ensureHeart(lv, t)) {
+                    notes.add("built the " + t + " heart arena");
+                }
+            }
             for (String name : List.of("whale", "tide", "storm", "ember")) {
                 check(server, name, f, notes);
             }
@@ -132,7 +139,14 @@ public final class DomainRoomSelfTest {
             f.add(name + ": the heart made no domain");
             return;
         }
-        BackReach.Report reach = BuildAuditSelfTest.routeOf(name, level);
+        // 心臓の間は体の外の封じた部屋 (InstanceArenas)。運ばれる所 (入口の内側) から歩いて届くかを見る
+        String titan = switch (name) {
+            case "whale" -> jp.revati.skyabyss.progress.Titans.STONE_WHALE;
+            case "tide" -> jp.revati.skyabyss.progress.Titans.TIDE_SHELL;
+            case "storm" -> jp.revati.skyabyss.progress.Titans.THUNDER_WING;
+            default -> jp.revati.skyabyss.progress.Titans.EMBER;
+        };
+        BackReach.Report reach = BackReach.reachGoals(level, jp.revati.skyabyss.trial.raid.InstanceArenas.heartReachSpec(titan));
         LongOpenHashSet walk = reach.reached;
         int bad = 0;
         int far = 0;

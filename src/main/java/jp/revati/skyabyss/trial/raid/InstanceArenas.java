@@ -48,6 +48,35 @@ public final class InstanceArenas {
         SkyAbyss.LOGGER.info("Built the {} heart arena in the instance area in {} ms", titan, (System.nanoTime() - t0) / 1_000_000L);
     }
 
+    // 心臓の間が建っているか (運ばれる所の足もとが床で、頭まで空いている)
+    public static boolean heartBuilt(ServerLevel level, String titan) {
+        BlockPos in = heartEntry(titan);
+        return in != null && !level.getBlockState(in.below()).isAir() && level.getBlockState(in).isAir() && level.getBlockState(in.above()).isAir();
+    }
+
+    // 建っていなければ建てる (自己テスト・古い世界の保険)。建てたか
+    public static boolean ensureHeart(ServerLevel level, String titan) {
+        if (heartBuilt(level, titan)) {
+            return false;
+        }
+        buildHeart(level, titan);
+        return true;
+    }
+
+    // 心臓の間の中を歩いて調べる指定 (BackReach)。運ばれる所から歩き始める (心臓の間は体の外なので、到着の台からは届かない)
+    public static jp.revati.skyabyss.titan.audit.BackReach.Spec heartReachSpec(String titan) {
+        AABB a = heartArena(titan).inflate(14, 4, 14);
+        jp.revati.skyabyss.titan.audit.BackReach.Spec s = new jp.revati.skyabyss.titan.audit.BackReach.Spec(titan + " heart",
+                new jp.revati.skyabyss.titan.audit.BackReach.Box((int) Math.floor(a.minX), (int) Math.floor(a.minY), (int) Math.floor(a.minZ),
+                        (int) Math.ceil(a.maxX), (int) Math.ceil(a.maxY), (int) Math.ceil(a.maxZ)));
+        BlockPos in = heartEntry(titan);
+        if (in != null) {
+            s.entrances.add(in);
+            s.exits.add(in);
+        }
+        return s;
+    }
+
     // 心臓の間の戦いの箱 (技と狙いの範囲)
     public static AABB heartArena(String titan) {
         return switch (titan) {
