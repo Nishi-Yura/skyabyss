@@ -3,7 +3,7 @@ docs/design/36 の 6・6.6。3 案のラフ (warden.py) から形を借り、次
   - 骨の組: 肋と核は「ribs」(胸が息をする) の中に、心臓の光は「heart」(鼓動) の中に。腕・脚・頭は今までどおり。
   - UV: 面ごとの島をやめ、同じ向きの面を一つの島にまとめる (部品 × 骨 × 主軸 × 向き)。島を詰めて縞にならないようにする。
   - 絵: 手で描いたものではなく、材質ごとの決まりで描く (骨は粒と隙間の暗い線、虚は黒、鎖は暗い鉄の縁の光、心臓は青緑の光)。
-  - 発光: 心臓の画素だけ (発光マスク)。肋の縁の薄い光は、マスクが二値なので入れない (残り)。
+  - 発光: 心臓の画素と、肋の縁の細い筋 (淡い青緑。光の中だけ描く)。虚の体には光の中でだけ浮かぶ筋の網の模様。
 
 出力: docs/review/warden_model/ (heart_warden_mesh.json・heart_warden_atlas.png・heart_warden_glowmask.png・heart_warden_views.png)
 生成: python tools/rough/lowpoly/abyss/warden_model.py   (numpy / PIL / scipy)
@@ -142,10 +142,21 @@ def paint_face_texels(mat, p, n, edge):
         col = mix([58, 50, 42], [226, 214, 186], t)
         crev = np.clip((edge - 0.04) / 0.12, 0, 1)            # 縁の隙間は暗い線
         col *= (0.45 + 0.55 * crev)[:, None]
-        return col, np.zeros(len(p), bool)
+        # 肋の淡い光 (36 の 6.6): 骨のひびの細い筋だけ青緑に光る (発光マスク。光の中だけ描く。三角形の縁は使わない)
+        crack = np.abs(value_noise(p, 1.1, 41.0) - 0.5)
+        seam = (crack < 0.018) & (up > 0.25)
+        col[seam] = mix([34, 100, 96], [76, 160, 150], g[seam])
+        return col, seam
     if mat == "void":
+        # 虚の体: 闇に溶ける黒紫。光の中でだけ浮かぶ模様 (36 の 6.6) として、錨の鎖のような細い筋の網と、
+        # 上からの淡い光 (上の面ほど明るい)・下の面の沈みを描く。輪郭だけ (鼓動の術) の描画では色が沈んで見えない
         g = value_noise(p, 2.0, 5.0)
-        col = mix([3, 3, 6], [30, 28, 40], np.clip(0.25 + 0.5 * g + 0.2 * up, 0, 1))
+        t = np.clip(0.18 + 0.50 * up + 0.30 * (g - 0.5), 0, 1)
+        col = mix([6, 6, 11], [62, 56, 84], t)
+        vein = np.abs(value_noise(p, 0.9, 21.0) - 0.5)
+        vein2 = np.abs(value_noise(p, 1.7, 33.0) - 0.5)
+        line = np.clip(1 - np.minimum(vein, vein2 * 1.3) / 0.035, 0, 1)
+        col = col * (1 - line[:, None] * 0.75) + np.array([118, 108, 150], float)[None, :] * (line[:, None] * 0.75) * (0.5 + 0.5 * up)[:, None]
         return col, np.zeros(len(p), bool)
     if mat == "slate":
         g = value_noise(p, 3.0, 11.0)
@@ -161,6 +172,23 @@ def paint_face_texels(mat, p, n, edge):
         return col, np.ones(len(p), bool)
     col = mix([128, 128, 128], [200, 200, 200], np.full(len(p), 0.5))
     return col, np.zeros(len(p), bool)
+
+
+# 目: 頭蓋 (中心 (0, 47, -5.5)、半径 (3.6, 3.2, 4.2)) の前の面に、横に細い二つの光の切れ目。光の中だけ光る (闇では頭ごと描かない)
+EYES = ((-1.55, 47.7), (1.55, 47.7))
+
+
+def eyes(p, col, lit):
+    col = col.copy()
+    lit = lit.copy()
+    for ex, ey in EYES:
+        d = np.sqrt(((p[:, 0] - ex) / 1.05) ** 2 + ((p[:, 1] - ey) / 0.42) ** 2)
+        socket = d < 1.45
+        col[socket] = col[socket] * 0.25
+        eye = d < 1.0
+        col[eye] = mix([90, 200, 190], [200, 255, 248], np.clip(1 - d[eye], 0, 1))
+        lit = lit | eye
+    return col, lit
 
 
 def paint(faces, size):
@@ -192,6 +220,8 @@ def paint(faces, size):
             pos = w @ f.verts[[a, b, c]]
             edge = w.min(1)
             col, lit = paint_face_texels(f.mat, pos, np.repeat(np.asarray(f.normal)[None], len(pos), 0), edge)
+            if f.bone == "head" and f.mat == "void" and f.normal[2] < -0.2:
+                col, lit = eyes(pos, col, lit)
             xi = q[:, 0].astype(int)
             yi = q[:, 1].astype(int)
             atlas[yi, xi, :3] = np.clip(col, 0, 255).astype(np.uint8)

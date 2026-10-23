@@ -391,16 +391,10 @@ MATERIAL_EN = {"abyss_bone_chip": "Bone Chip", "abyss_salt_crystal": "Salt Cryst
 
 
 def write_animations():
-    d = os.path.join(ROOT, "src", "main", "resources", "assets", "skyabyss", "animations", "entity")
-    os.makedirs(d, exist_ok=True)
-    for kind in CHOICE:
-        anims = {}
-        for name in ("idle", "walk"):
-            anims["animation.%s.%s" % (kind, name)] = {"loop": True, "animation_length": 1.0, "bones": {}}
-        doc = {"format_version": "1.8.0", "animations": anims}
-        with open(os.path.join(d, "abyss_%s_s1.animation.json" % kind), "w", encoding="utf-8", newline="\n") as f:
-            json.dump(doc, f, indent=2)
-            f.write("\n")
+    """アニメは tools/gen/abyss/gen_abyss_mobs_a_anims.py が書く (前は idle / walk の空の枠だった)。"""
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    import gen_abyss_mobs_a_anims
+    gen_abyss_mobs_a_anims.write_all()
 
 
 MATERIAL_COLOR = {"abyss_bone_chip": (214, 202, 170), "abyss_salt_crystal": (232, 238, 242), "abyss_storm_copper": (92, 186, 170)}

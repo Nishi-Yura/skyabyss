@@ -54,6 +54,8 @@ public class StoneWhaleEntity extends Entity implements GeoEntity, TravelTitan, 
     // 眠りの姿 (TitanDormancy)。起きていれば -1、眠って沈みはじめてからは tick (600 で止まる)
     private static final EntityDataAccessor<Integer> REST = SynchedEntityData.defineId(StoneWhaleEntity.class, EntityDataSerializers.INT);
     private static final RawAnimation SWIM = RawAnimation.begin().thenLoop("animation.stone_whale.swim");
+    // 眠る岩鯨 (DormantTitan): 口を閉じ、ひれを止め、息だけ
+    private static final RawAnimation SLEEP = RawAnimation.begin().thenLoop("animation.stone_whale.sleep");
 
     // 鎖の付け根まわり (採用案 B のモデルに合わせる。geo の 1 単位は 0.5 ブロック。ゲームでは geo の +X が左)
     // 錨石 (geo の chain 骨、左のわき腹 x 19.5〜22.5、y 37〜41、z 60〜62 単位) の中心は、
@@ -990,7 +992,7 @@ public class StoneWhaleEntity extends Entity implements GeoEntity, TravelTitan, 
 
     @Override
     public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
-        controllers.add(new AnimationController<>(this, "swim", 0, state -> state.setAndContinue(SWIM)));
+        controllers.add(new AnimationController<>(this, "swim", 20, state -> state.setAndContinue(isDormantNow() ? SLEEP : SWIM)));
     }
 
     @Override

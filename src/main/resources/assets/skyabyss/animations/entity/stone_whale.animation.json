@@ -1,53 +1,101 @@
 {
- "format_version": "1.8.0",
- "animations": {
-  "animation.stone_whale.swim": {
-   "loop": true,
-   "animation_length": 12.0,
-   "bones": {
-    "head": {
-     "rotation": [
-      "math.sin(query.anim_time * 60 - 60) * 1.4",
-      "math.sin(query.anim_time * 60) * 2.2",
-      "0"
-     ]
+  "format_version": "1.8.0",
+  "animations": {
+    "animation.stone_whale.swim": {
+      "loop": true,
+      "animation_length": 12.0,
+      "bones": {
+        "head": {
+          "rotation": [
+            "math.sin(query.anim_time * 60 - 60) * 1.4",
+            "math.sin(query.anim_time * 60) * 2.2",
+            "0"
+          ]
+        },
+        "jaw": {
+          "rotation": [
+            "(0.5 + 0.5 * math.sin(query.anim_time * 60 - 90)) * 6",
+            "0",
+            "0"
+          ]
+        },
+        "tail": {
+          "rotation": [
+            "0",
+            "math.sin(query.anim_time * 60 - 90) * 4.5",
+            "0"
+          ]
+        },
+        "fluke": {
+          "rotation": [
+            "0",
+            "0",
+            "math.sin(query.anim_time * 60 - 150) * 7"
+          ]
+        },
+        "fin_left": {
+          "rotation": [
+            "0",
+            "0",
+            "math.sin(query.anim_time * 120 - 30) * 5"
+          ]
+        },
+        "fin_right": {
+          "rotation": [
+            "0",
+            "0",
+            "-math.sin(query.anim_time * 120 - 30) * 5"
+          ]
+        }
+      }
     },
-    "jaw": {
-     "rotation": [
-      "(0.5 + 0.5 * math.sin(query.anim_time * 60 - 90)) * 6",
-      "0",
-      "0"
-     ]
-    },
-    "tail": {
-     "rotation": [
-      "0",
-      "math.sin(query.anim_time * 60 - 90) * 4.5",
-      "0"
-     ]
-    },
-    "fluke": {
-     "rotation": [
-      "0",
-      "0",
-      "math.sin(query.anim_time * 60 - 150) * 7"
-     ]
-    },
-    "fin_left": {
-     "rotation": [
-      "0",
-      "0",
-      "math.sin(query.anim_time * 120 - 30) * 5"
-     ]
-    },
-    "fin_right": {
-     "rotation": [
-      "0",
-      "0",
-      "-math.sin(query.anim_time * 120 - 30) * 5"
-     ]
+    "animation.stone_whale.sleep": {
+      "loop": true,
+      "animation_length": 12.0,
+      "bones": {
+        "head": {
+          "rotation": [
+            "3 + math.sin(query.anim_time * 30) * 0.6",
+            "0",
+            "0"
+          ]
+        },
+        "jaw": {
+          "rotation": [
+            "0",
+            "0",
+            "0"
+          ]
+        },
+        "tail": {
+          "rotation": [
+            "0",
+            "math.sin(query.anim_time * 30 - 90) * 0.9",
+            "0"
+          ]
+        },
+        "fluke": {
+          "rotation": [
+            "0",
+            "0",
+            "math.sin(query.anim_time * 30 - 150) * 1.4"
+          ]
+        },
+        "fin_left": {
+          "rotation": [
+            "0",
+            "0",
+            "math.sin(query.anim_time * 30) * 0.8"
+          ]
+        },
+        "fin_right": {
+          "rotation": [
+            "0",
+            "0",
+            "-math.sin(query.anim_time * 30) * 0.8"
+          ]
+        }
+      }
     }
-   }
   }
- }
 }
