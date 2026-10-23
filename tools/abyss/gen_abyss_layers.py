@@ -428,9 +428,10 @@ def build_camp(ctx, layer, n):
     for (x, z) in ((2, 0), (-2, 0), (0, -2)):
         lay.put(x, Y, z, 'cobbled_deepslate_slab[type=bottom,waterlogged=false]')
     # 寝床と荷 (南西の隅)、帳面 (南東)
-    lay.put(-5, Y, 5, 'brown_wool')
-    lay.put(-5, Y, 4, 'brown_carpet')
-    lay.put(-6, Y, 5, 'barrel[facing=up,open=false]')
+    # (西の壁ぞいは骨の層の帰りの祠にあけた。寝床は東の北寄り)
+    lay.put(6, Y, -2, 'brown_wool')
+    lay.put(6, Y, -3, 'brown_carpet')
+    lay.put(7, Y, -2, 'barrel[facing=up,open=false]')
     lay.put(5, Y, 5, 'lectern[facing=north,has_book=true,powered=false]')
     v.mark('journal_%s_0' % layer, 5, Y, 5)
     # 生き残りの立つ所 (焚き火の東)
@@ -446,10 +447,23 @@ def build_camp(ctx, layer, n):
     gate = '%s_gate' % layer
     lay.layer_of[gate] = layer
     lay.allow(camp, gate)
+    # 2026-10-23 の試遊「印をおいても鉄格子のところがあかない」: 封じ石 (右クリックで運ぶだけ) をやめ、見える格子の門にした。
+    #   格子 (幅 3・高さ 3、z = -CAMP_HALF - 1) は印が三つの人が近づくと上がる (story/ch5/layers/AbyssMarks.gateTick)。奥 (z - 2) は通り道
+    #   枠: 両わきに封じ石の柱 (高さ 4)、上に封じ石の楣と三つの台座。足もとに層の縁の石
     for z in (-CAMP_HALF - 1, -CAMP_HALF - 2):
         for x in range(-1, 2):
             for yy in range(Y, Y + 3):
-                lay.put(x, yy, z, m['seal'])
+                lay.carve(x, yy, z, gate)
+    for x in range(-1, 2):
+        for yy in range(Y, Y + 3):
+            lay.put(x, yy, -CAMP_HALF - 1, 'iron_bars[east=true,north=false,south=false,waterlogged=false,west=true]')
+        lay.floor_of[(x, -CAMP_HALF - 1, Y - 1)] = m['trim']
+        lay.floor_of[(x, -CAMP_HALF - 2, Y - 1)] = m['trim']
+    for x in (-2, 2):
+        for yy in range(Y, Y + 4):
+            lay.put(x, yy, -CAMP_HALF - 1, m['seal'])
+    for x in range(-2, 3):
+        lay.put(x, Y + 3, -CAMP_HALF - 1, m['seal'])
     v.mark('gate_%s' % layer, 0, Y, -CAMP_HALF - 1)
     v.mark('gate_%s_out' % layer, 0, Y, -CAMP_HALF + 1)
     v.mark('gate_%s_in' % layer, 0, Y, -CAMP_HALF - 4)
@@ -501,6 +515,64 @@ def build_camp(ctx, layer, n):
         lay.put(dx_, yy, dz_, 'chain[axis=y,waterlogged=false]')
     v.mark('descend_%s' % layer, dx_, ay, dz_)
     return camp
+
+
+def build_return_shrine(lay, v, Y):
+    """地上へ帰る磁石石の祠 (骨の野営の西の壁ぞい、磁石石 (-6, Y, 2))。2026-10-23 の試遊「派手にしてもいい。これで帰れたんだってなる」。
+    深淵の黒の中で、ここだけ地上の色 (白い石英・空色の窓・金の縁)。光と音と帰りの場面は story/ch5/AbyssReturn。返り値は磁石石の (x, z)"""
+    cx, cz = -6, 2
+    # 壇: 磁石石の下は彫った石英、まわり 3×3 は滑らかな石英、外の輪は金の縁 (金のブロックと磨いた閃緑岩を交互に)
+    for x in range(cx - 2, cx + 3):
+        for z in range(cz - 2, cz + 3):
+            if x < -CAMP_HALF:
+                continue
+            if abs(x - cx) <= 1 and abs(z - cz) <= 1:
+                fl = 'chiseled_quartz_block' if (x, z) == (cx, cz) else 'smooth_quartz'
+            else:
+                fl = 'gold_block' if (x + z) % 2 == 0 else 'polished_diorite'
+            lay.floor_of[(x, z, Y - 1)] = fl
+    # 奥 (西) の二本の柱 (石英の柱、先に上向きの光の棒)。手前 (東) の二つは石英の台に白いろうそく
+    for z in (cz - 2, cz + 2):
+        x = cx - 2
+        for yy in range(Y, Y + 3):
+            lay.put(x, yy, z, 'quartz_pillar[axis=y]' if yy < Y + 2 else 'chiseled_quartz_block')
+        lay.put(x, Y + 3, z, 'end_rod[facing=up]')
+        del_air(lay, x, Y, z, Y + 3)
+        x = cx + 2
+        lay.put(x, Y, z, 'quartz_block')
+        lay.put(x, Y + 1, z, 'white_candle[candles=4,lit=true,waterlogged=false]')
+        del_air(lay, x, Y, z, Y + 1)
+    # 奥の壁 (x = -CAMP_HALF - 1): 空色の窓 (地上の空のしるし)。石英の額、光る蛙の光と空色のガラスの段、下の真ん中に碑「地上へ」
+    wx = -CAMP_HALF - 1
+    for z in range(cz - 2, cz + 3):
+        for yy in range(Y, Y + 6):
+            edge = abs(z - cz) == 2 or yy in (Y, Y + 5)
+            lay.put(wx, yy, z, 'quartz_bricks' if edge else ('pearlescent_froglight[axis=y]' if (yy - Y) % 2 == 1 else 'light_blue_stained_glass'))
+    lay.put(wx, Y + 6, cz, 'chiseled_quartz_block')
+    lay.put(wx, Y + 1, cz, 'skyabyss:tablet[facing=east,standing=false]')
+    v.mark('returnsign', wx, Y + 1, cz)
+    for z in (cz - 1, cz + 1):
+        lay.put(wx + 1, Y + 4, z, 'end_rod[facing=east]')
+        del_air(lay, wx + 1, Y + 4, z, Y + 4)
+    # 天井: 鎖の上に光の塊、両わきに吊った灯り
+    lay.put(cx, Y + CAMP_H, cz, 'pearlescent_froglight[axis=y]')
+    for z in (cz - 2, cz + 2):
+        lay.put(cx, Y + CAMP_H - 1, z, 'lantern[hanging=true,waterlogged=false]')
+        del_air(lay, cx, Y + CAMP_H - 1, z, Y + CAMP_H - 1)
+    return cx, cz
+
+
+def build_ascend_dais(lay, Y):
+    """上りの鎖 (前の層の野営へ) の小さな壇: 磁石石のまわりに層の縁の石と、ろうそく二つ。
+    骨の祠と同じ西の壁ぞい (前は南の道の口の前にあって、道をふさぎかけていた)"""
+    cx, cz = -6, 2
+    for x in range(cx - 1, cx + 2):
+        for z in range(cz - 1, cz + 2):
+            lay.floor_of[(x, z, Y - 1)] = 'polished_deepslate' if (x, z) != (cx, cz) else 'chiseled_deepslate'
+    for z in (cz - 1, cz + 1):
+        lay.put(cx - 1, Y, z, 'polished_deepslate')
+        lay.put(cx - 1, Y + 1, z, 'candle[candles=3,lit=true,waterlogged=false]')
+        del_air(lay, cx - 1, Y, z, Y + 1)
 
 
 def del_air(lay, x, y0, z, y1):
@@ -698,11 +770,16 @@ def main():
         lay.fresh('hook')
         # 上りの鎖 (骨は地上へ: 印 exit。ほかは前の層の野営へ: 印 ascend_<層>)。着く所 (arrive_<層>) は野営の南
         Y = CAMP_Y[layer]
-        lay.put(-3, Y, 6, 'lodestone')
+        if layer == 'bone':
+            ex, ez = build_return_shrine(lay, v, Y)
+        else:
+            ex, ez = -6, 2
+            build_ascend_dais(lay, Y)
+        lay.put(ex, Y, ez, 'lodestone')
         for yy in range(Y + 1, Y + CAMP_H):
-            lay.put(-3, yy, 6, 'chain[axis=y,waterlogged=false]')
-        del_air(lay, -3, Y, 6, Y + CAMP_H - 1)
-        v.mark('exit' if layer == 'bone' else 'ascend_%s' % layer, -3, Y, 6)
+            lay.put(ex, yy, ez, 'chain[axis=y,waterlogged=false]')
+        del_air(lay, ex, Y, ez, Y + CAMP_H - 1)
+        v.mark('exit' if layer == 'bone' else 'ascend_%s' % layer, ex, Y, ez)
         v.mark('arrive_%s' % layer, 0, Y, 5)
         if layer == 'bone':
             v.mark('arrival', 0, Y, 5)
