@@ -1,0 +1,44 @@
+# 対話の肖像 v2 (tools/gen/mobs/gen_portraits_v2.py): 灯り番ミオ・都の案内人・鍛冶師の会話の画面を撮る (音なし・日本語)
+# SKYABYSS_MUTE=1 bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/portraits_v2.txt -PshotsName=portraits_v2  (絵は docs/review/portraits_v2/ へ写す)
+world shots flat
+size 1280 720
+timeout 900
+render 8
+clouds off
+wait 100
+cmd skyabyss cinematic stop
+wait 10
+cmd skyabyss cinematic stop
+cmd time set noon
+cmd weather clear
+cmd gamerule doDaylightCycle false
+cmd gamemode creative
+cmd fill -12 -61 -12 12 -61 12 minecraft:polished_andesite destroy
+cmd fill -12 -60 -12 12 -50 12 minecraft:air destroy
+cmd kill @e[type=!minecraft:player,distance=..80]
+hud on
+waitchunks
+wait 200
+cmd summon skyabyss:attendant -3.0 -60 4.5 {NoAI:1b,Role:"survivor_bone",Rotation:[180f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:attendant 0.0 -60 4.5 {NoAI:1b,Role:"guide",Rotation:[180f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:attendant 3.0 -60 4.5 {NoAI:1b,Role:"smith",Rotation:[180f,0f],PersistenceRequired:1b}
+camera minecraft:overworld 0 -59 0 0 0
+wait 40
+chat clear
+cmd skyabyss dev talk "skyabyss:attendant_survivor_bone"
+wait 120
+shot dialogue_survivor_bone
+close
+wait 20
+chat clear
+cmd skyabyss dev talk "skyabyss:attendant_guide"
+wait 120
+shot dialogue_guide
+close
+wait 20
+chat clear
+cmd skyabyss dev talk "skyabyss:attendant_smith"
+wait 120
+shot dialogue_smith
+close
+wait 20

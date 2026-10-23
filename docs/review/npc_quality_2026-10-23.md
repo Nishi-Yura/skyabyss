@@ -65,7 +65,8 @@
 
 ## 4. 残り・次にやるとよいこと
 
-- 会話の肖像 (`textures/gui/npc/face/*`) は前の 2D の絵のまま。色とかぶり物は揃えたが、生き残り 5 人の肖像は仮の絵 (灰色にくすませたもの) なので、新しい顔から描き直すとよい。
+- 会話の肖像 (`textures/gui/npc/face/*`) は v2 の 35 人 (案内人を含む) 全員を新しいメッシュから描き直した (2026-10-24、`tools/gen/mobs/gen_portraits_v2.py`)。
+  前 | 後の一覧: `docs/review/portraits_v2/sheet_*.png`。語り部・イサナの肖像は形が変わっていないのでそのまま。
 - 見張り (序章) は人の NPC ではないので今回は触っていない。
 - 係の人の見た目の案 (`AttendantLook` の a/b/c) は v2 の人には使わない (v2 のメッシュが無いときだけ前の形に戻る)。
 - 作り直し: `python -I tools/rough/lowpoly/npc2/build.py [名]` → `python -I tools/install/install_npc2.py [名]`。
