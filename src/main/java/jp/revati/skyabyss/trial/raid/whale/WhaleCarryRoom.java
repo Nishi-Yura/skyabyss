@@ -30,6 +30,7 @@ import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 
 // 歩 WR1「骨玉運び」: 光る骨玉 (部屋のあちこちに三つ) を、北の台座へ運ぶ。
 //  - 持つ (持ち物に入る) と遅くなり、跳べない。一人が一つまで。敵は持っている人を狙う
@@ -151,6 +152,7 @@ public final class WhaleCarryRoom extends RaidRoom {
             }
         }
         carried = !carriers.isEmpty();
+        nextOrb = null;
         // 床の骨玉: 元の場所から離れて落ちたまま LINGER たつと戻る
         for (ItemEntity e : level.getEntitiesOfClass(ItemEntity.class, ctx.cell().inner().inflate(2))) {
             int idx = orbIndex(e.getItem());
@@ -162,6 +164,9 @@ public final class WhaleCarryRoom extends RaidRoom {
                 continue;
             }
             located[idx] = true;
+            if (nextOrb == null || e.distanceToSqr(Vec3.atCenterOf(altar(ctx))) < Vec3.atCenterOf(nextOrb).distanceToSqr(Vec3.atCenterOf(altar(ctx)))) {
+                nextOrb = e.blockPosition();
+            }
             e.setNoGravity(false);
             boolean atHome = e.distanceToSqr(home[idx].getX() + 0.5, home[idx].getY() + 0.2, home[idx].getZ() + 0.5) < 2.5 * 2.5;
             // 止まるのを待たない (壁に押し出されて浮いたまま動き続けることがある)
@@ -252,6 +257,17 @@ public final class WhaleCarryRoom extends RaidRoom {
     }
 
     private boolean carried;
+    // 床に落ちている骨玉のうち、台座にいちばん近いもの (行き先の印)。tick ごとに見直す
+    private BlockPos nextOrb;
+
+    // 行き先の印: 誰かが骨玉を持っていれば台座、持っていなければ次に拾う骨玉
+    @Override
+    public BlockPos guideTarget(RaidCtx ctx) {
+        if (count >= ORBS) {
+            return null;
+        }
+        return carried || nextOrb == null ? altar(ctx).above() : nextOrb;
+    }
 
     @Override
     public int counter() {

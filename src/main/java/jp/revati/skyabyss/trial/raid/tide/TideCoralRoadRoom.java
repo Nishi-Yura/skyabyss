@@ -276,6 +276,27 @@ public final class TideCoralRoadRoom extends RaidRoom {
         return ROWS;
     }
 
+    // 行き先の印: まだ越えていない人のいちばん手前の壁の、いま開いている戸
+    @Override
+    public BlockPos guideTarget(RaidCtx ctx) {
+        if (done || origin == null) {
+            return null;
+        }
+        int row = ROWS;
+        for (ServerPlayer p : ctx.standing()) {
+            row = Math.min(row, passedBy(p));
+        }
+        if (row >= ROWS) {
+            return null;
+        }
+        for (int lane = 0; lane < LANE_X.length; lane++) {
+            if (fullyOpen(row, lane)) {
+                return gateSpot(row, lane);
+            }
+        }
+        return null;
+    }
+
     // 試験用・目的の数: その人が越えた壁の数
     public int passedBy(ServerPlayer p) {
         int n = 0;

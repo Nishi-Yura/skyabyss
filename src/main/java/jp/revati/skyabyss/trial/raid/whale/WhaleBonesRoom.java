@@ -260,6 +260,15 @@ public final class WhaleBonesRoom extends RaidRoom {
         return mode == Mode.LISTEN;
     }
 
+    // 和音のうち、もう叩いた本数
+    int struckCount() {
+        return struck.size();
+    }
+
+    boolean inputting() {
+        return mode == Mode.INPUT;
+    }
+
     public int mistakes() {
         return mistakes;
     }

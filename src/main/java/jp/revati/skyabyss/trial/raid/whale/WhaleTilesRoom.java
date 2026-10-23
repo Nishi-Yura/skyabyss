@@ -19,7 +19,7 @@ import net.minecraft.world.level.block.state.BlockState;
 //  - 正しく合わせると、筋がつながって一頭の鯨の骨 (背骨・肋骨・潮吹き・尾びれ) になる。その姿は北の壁の高いところに「見本」として彫ってある
 //    (入口の上の見張り台からだと、見本も床の全体も見渡せる)
 //  - 鯨の骨の形は挑戦ごとに違う (肋骨の本数と長さ・潮吹きの位置と高さ・尾びれ)。石板の向きはぐちゃぐちゃに回してあり、必ず回して合わせられる
-//  - どの石板が合っているかは教えない (見本と見比べる)。一人でも合わせられ、人数がいれば別々の石板を同時に回せて早い。間違っても傷はない
+//  - 合っている石板の数は目的の帯に出る (どれかは教えない。見本と見比べる)。一人でも合わせられ、人数がいれば別々の石板を同時に回せて早い。間違っても傷はない
 public final class WhaleTilesRoom extends RaidRoom {
     static final int HX = 11;
     static final int HZ = 11;
@@ -292,6 +292,25 @@ public final class WhaleTilesRoom extends RaidRoom {
     @Override
     public String objectiveKey() {
         return "raid.skyabyss.WR5.align";
+    }
+
+    // 合っている石板の数 (目的の帯に「21/35」。どの石板かは教えない)
+    @Override
+    public int counter() {
+        int n = 0;
+        for (int c = 0; c < COLS; c++) {
+            for (int r = 0; r < ROWS; r++) {
+                if (rotate(target[c][r], rot[c][r]) == target[c][r]) {
+                    n++;
+                }
+            }
+        }
+        return n;
+    }
+
+    @Override
+    public int counterMax() {
+        return COLS * ROWS;
     }
 
     // ---- 試験用

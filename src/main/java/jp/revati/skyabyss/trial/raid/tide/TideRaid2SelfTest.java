@@ -534,7 +534,7 @@ public final class TideRaid2SelfTest {
         r.tick(ctx);
         switch (phase) {
             case 0 -> {
-                check(!r.objectiveKey().isEmpty() && r.counterMax() <= 0, "TR6: HUD");
+                check(!r.objectiveKey().isEmpty() && r.counterMax() == 6 && r.counter() < 6, "TR6: HUD shows how many moon stones are right");
                 check(!r.onUse(ctx, a, ctx.origin().offset(-TideMoonRoom.HX, 1, 0), true), "TR6: onUse took a click on the wall");
                 int before = r.phaseOf(2);
                 check(r.onUse(ctx, a, r.dialPos(2), false), "TR6: onUse did not take a dial click");

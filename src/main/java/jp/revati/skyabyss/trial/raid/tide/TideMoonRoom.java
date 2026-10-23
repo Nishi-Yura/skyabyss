@@ -17,7 +17,7 @@ import net.minecraft.world.level.block.state.BlockState;
 // 広間の床には六つの「月の石」の台があり、叩く・使うと満ち欠けの形が変わる (使う = 次の形、叩く = 前の形)。壁画と同じ順に、点の数が同じ番号の台へ同じ月を並べる。
 //  - 月の形は六つ: 新月・三日月・上弦・満月・下弦・欠けた月 (欠けの輪)。壁画は北の壁に 1・2・3 番、南の壁に 4・5・6 番 (どちらも見る人から見て左から右)
 //  - 暦の順 (どの月から始まり、満ちる向きか欠ける向きか) は挑戦ごとに変わる。壁画を読まないと分からない
-//  - 全部が合うまで、どの台が合っているかは教えない (試しに回して当てるのは遠回り)。一人が壁画を読み、一人が台を回すと早い
+//  - 合っている台の数は目的の帯に出る (どの台かは教えない)。一人が壁画を読み、一人が台を回すと早い
 //  - 水・敵・ダメージはない
 public final class TideMoonRoom extends RaidRoom {
     static final int HX = 13;
@@ -204,6 +204,26 @@ public final class TideMoonRoom extends RaidRoom {
     @Override
     public String objectiveKey() {
         return "raid.skyabyss.TR6.arrange";
+    }
+
+    // 合っている月の石の数 (目的の帯に「4/6」。docs/design/32 の 9 章: 謎の部屋は進みを帯に出す)
+    @Override
+    public int counter() {
+        if (done) {
+            return DIALS;
+        }
+        int n = 0;
+        for (int i = 0; i < DIALS; i++) {
+            if (phase[i] == correct(i)) {
+                n++;
+            }
+        }
+        return n;
+    }
+
+    @Override
+    public int counterMax() {
+        return DIALS;
     }
 
     // ---- 試験用

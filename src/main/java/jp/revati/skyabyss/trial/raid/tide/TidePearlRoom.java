@@ -400,6 +400,26 @@ public final class TidePearlRoom extends RaidRoom {
         return count;
     }
 
+    // 行き先の印: 誰かが真珠を持っていれば奥の祭壇、持っていなければ次に取る真珠の台
+    @Override
+    public BlockPos guideTarget(RaidCtx ctx) {
+        if (origin == null || delivered() >= count) {
+            return null;
+        }
+        BlockPos altar = origin.offset(0, 2, ALTAR_Z);
+        for (int i = 0; i < count; i++) {
+            if (carrier[i] != null && !delivered[i]) {
+                return altar;
+            }
+        }
+        for (int i = 0; i < count; i++) {
+            if (!delivered[i] && home[i] != null) {
+                return home[i];
+            }
+        }
+        return altar;
+    }
+
     // 試験用
     public BlockPos pearlHome(int i) {
         return home[i];

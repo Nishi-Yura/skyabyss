@@ -61,7 +61,8 @@ public final class RaidSolo {
     }
 
     public static void put(ServerPlayer p, Vec3 feet) {
-        p.teleportTo(feet.x, feet.y, feet.z);
+        // 偽の人の teleportTo は通信の口 (FakePlayerNetHandler) を通るだけで動かないので、位置を直に置く
+        p.setPos(feet.x, feet.y, feet.z);
         p.setDeltaMovement(Vec3.ZERO);
         p.fallDistance = 0;
     }

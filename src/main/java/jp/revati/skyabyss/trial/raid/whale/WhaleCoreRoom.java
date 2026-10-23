@@ -21,6 +21,7 @@ import net.minecraft.world.phys.Vec3;
 //  - 核の体力 (CORE_MAX) は目的の帯に出る。敵が核のそばにいるあいだ減り (剣・盾は近くで一秒に 1.2、射手は離れて 0.6)、敵がいないと少し戻る
 //  - 敵は核へ向かう (人を狙える間は人を狙う)。核が壊れたら部屋をやり直す。波は 4・6・8 体 (人数で増える)、最後の波に番兵長の影
 //  - 敵の組・出る角度・数は挑戦ごとに少し変わる
+//  - 一人のときは核の削れが SOLO_DRAIN 倍 (一人でも越えられる。docs/design/32 の 9 章)
 public final class WhaleCoreRoom extends RaidRoom {
     static final int HX = 16;
     static final int HZ = 16;
@@ -33,6 +34,8 @@ public final class WhaleCoreRoom extends RaidRoom {
     static final double SHOT_DPS = 0.6;
     static final double REGEN_DPS = 0.6;
     static final int WAVE_GAP = 80;
+    // 一人のときの核の削れの倍率
+    static final double SOLO_DRAIN = 0.55;
 
     private double hp = CORE_MAX;
     private int wave;
@@ -111,7 +114,8 @@ public final class WhaleCoreRoom extends RaidRoom {
             }
         }
         if (dmg > 0) {
-            hp -= dmg / 20.0;
+            // 一人のときは、核の削れを遅くする (一人では四方から来る敵を同時に止められない。二人からは今のまま)
+            hp -= dmg * (ctx.scale() == 1 ? SOLO_DRAIN : 1.0) / 20.0;
             if (now - lastHurtFx >= 10) {
                 lastHurtFx = now;
                 ServerLevel level = ctx.level();
