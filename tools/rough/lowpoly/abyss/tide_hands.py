@@ -55,12 +55,76 @@ def build_a(k):
 
 
 def build_b(k):
-    """B 貝殻の手: 腕に貝の板の籠手 (手首まで)。指は短い。貝の縁が内側へ沈む。"""
+    """B 貝殻の手 (2026-10-23 作り直し): 溜まりの縁に塩の殻がこびりつき、四本の腕が外へ反ってから肘で内へ折れ、
+    貝の板を三枚重ねた籠手の先で、節のある四指と親指が溜まりの真ん中へ鉤のように曲がる。腕ごとに高さと反りを変える。"""
     F = []
     pool(F, "sea")
+    # 溜まりの縁の塩の殻 (縁に沈めた小さな塊。間隔と大きさを揃えない)
+    for i in range(9):
+        a = 2 * math.pi * (i + 0.37 * (i % 3)) / 9
+        rr = 0.55 + 0.25 * ((i * 7) % 3) / 2
+        F += part(f"rim{i}", ellipsoid("pool", "saltc" if i % 2 else "salt", (4.5 * math.cos(a), 0.15, 3.9 * math.sin(a)),
+                                       (rr * 1.3, rr * 0.7, rr), segs=5, rings=1))
+    # 溜まりの水面 (少し暗い内側の円盤)
+    F += part("water", ellipsoid("pool", "hollow", (0, 0.35, 0), (3.6, 0.25, 3.1), segs=8, rings=1))
+    H = {"a1": 8.2, "a2": 7.4, "a3": 8.8, "a4": 6.8}
     for nm, x, z, ang in ARMS:
-        arm(F, nm, x, z, ang, "salt", fingers=3, glove="saltc", flen=1.6)
+        arm_b(F, nm, x, z, H[nm])
     return F, []
+
+
+def arm_b(F, nm, x, z, h):
+    """B の腕一本。根元 (x,0,z) から外へ反って立ち上がり、肘で内へ折れ、手首から先は溜まりの中心へ向く。"""
+    c = np.array([0.0, 0.0, 0.0])
+    base = np.array([x, 0.0, z])
+    out = base - c
+    out[1] = 0
+    out = out / (np.linalg.norm(out) or 1)
+    inn = -out
+    up = np.array([0.0, 1.0, 0.0])
+    side = np.cross(up, out)
+
+    def P(o, y, s=0.0):
+        return tuple(base + out * o + up * y + side * s)
+
+    elbow = P(1.5, h * 0.5)
+    wrist = P(1.15, h * 0.86)
+    path = [P(0, -0.6), P(0.8, h * 0.22), elbow, P(1.35, h * 0.7), wrist]
+    F += part(nm, tube(nm, "salt", path, ra=[0.95, 0.82, 0.74, 0.66, 0.58], sides=7, hint=tuple(side), caps=(False, True)))
+    # 肘の節 (外へ少し張る)
+    F += part(nm + "_elbow", ellipsoid(nm, "saltc", elbow, (0.82, 0.8, 0.82), segs=6, rings=1))
+    # 貝の板の籠手: 手首へ向かって開く三枚 (それぞれ前の板にかぶさる)
+    w = np.array(wrist)
+    e = np.array(elbow)
+    ax = (w - e) / np.linalg.norm(w - e)
+    a1 = np.cross(ax, side)
+    a1 = a1 / np.linalg.norm(a1)
+    a2 = np.cross(ax, a1)
+    for j, (t, r0, r1, ln) in enumerate(((0.1, 0.78, 1.05, 0.95), (0.5, 0.72, 1.1, 0.9))):
+        c0 = e + (w - e) * t
+        rings = []
+        for tt, rr in ((0.0, r0), (0.55, (r0 + r1) / 2), (1.0, r1)):
+            cc = c0 + ax * ln * tt
+            rings.append([tuple(cc + rr * (math.cos(th) * a1 + math.sin(th) * a2) * (1.0 if k % 2 == 0 else 0.86))
+                          for k, th in enumerate(np.linspace(0, 2 * math.pi, 8)[:-1])])
+        F += part(f"{nm}_shell{j}", loft(nm, "saltc", rings, caps=("saltc", False)))
+    # 手のひら: 中心へ向けた平たい塊
+    palm_c = w + ax * 0.75 + inn * 0.15
+    F += part(nm + "_palm", ellipsoid(nm, "salt", tuple(palm_c), (1.0, 0.6, 1.0), segs=6, rings=2))
+    # 指: 根元 → 第二関節 → 第三関節 → 先 (中心へ鉤に曲がって下を向く)。四指 + 親指
+    for i, sp in enumerate((-0.75, -0.25, 0.25, 0.75)):
+        root = palm_c + side * sp + inn * 0.55 + up * 0.25
+        ln = 1.0 if i in (1, 2) else 0.82
+        k1 = root + inn * ln * 0.45 + up * ln * 0.95
+        k2 = k1 + inn * ln * 0.6 + up * ln * 0.45
+        tip = k2 + inn * ln * 0.55 - up * ln * 0.3
+        F += part(f"{nm}_f{i}", tube(nm, "salt", [tuple(root), tuple(k1), tuple(k2), tuple(tip)], ra=[0.27, 0.24, 0.2, 0.0],
+                                     sides=4, hint=tuple(side), caps=(True, False)))
+        F += part(f"{nm}_k{i}", ellipsoid(nm, "saltc", tuple(k1), (0.3, 0.3, 0.3), segs=4, rings=1))
+    th = palm_c - side * 1.05 + inn * 0.1
+    t1 = th + inn * 0.6 - side * 0.3 + up * 0.55
+    t2 = t1 + inn * 0.55 + up * 0.1
+    F += part(f"{nm}_thumb", tube(nm, "salt", [tuple(th), tuple(t1), tuple(t2)], ra=[0.3, 0.24, 0.0], sides=5, hint=tuple(up), caps=(True, False)))
 
 
 def build_c(k):

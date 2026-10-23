@@ -51,14 +51,14 @@ MOBS = [
     ("raiju", "raiju", 1.0, "claw", 8),
     ("ash_smith", "ash_smith", 1.0, "slam", 12),
     ("heart_warden", "heart_warden", 1.0, "claw", 8),
-    ("bone_flute", "abyss_bone_flute_s1", 1.0, "attack", 8),
+    ("bone_flute", "abyss_bone_flute_s1", 1.0, "call", 28),
     ("bone_picker", "abyss_bone_picker_s1", 1.0, "attack", 8),
     ("charged_moth", "abyss_charged_moth_s1", 1.0, "attack", 8),
-    ("lightning_idol", "abyss_lightning_idol_s1", 1.0, "attack", 8),
-    ("rib_guard", "abyss_rib_guard_s1", 1.0, "attack", 8),
-    ("salt_husk", "abyss_salt_husk_s1", 1.0, "attack", 8),
-    ("scorched_bird", "abyss_scorched_bird_s1", 1.0, "attack", 8),
-    ("tide_hands", "abyss_tide_hands_s1", 1.0, "attack", 8),
+    ("lightning_idol", "abyss_lightning_idol_s1", 1.0, "charge", 20),
+    ("rib_guard", "abyss_rib_guard_s1", 1.0, "attack", 5),
+    ("salt_husk", "abyss_salt_husk_s1", 1.0, "attack", 5),
+    ("scorched_bird", "abyss_scorched_bird_s1", 1.0, "shadow", 18),
+    ("tide_hands", "abyss_tide_hands_s1", 1.0, "grasp", 22),
     ("white_shell_keeper", "abyss_white_shell_keeper_s1", 1.0, "attack", 8),
     ("ash_trail", "ash_trail", 1.0, "attack", 8),
     ("ember_keeper", "ember_keeper", 1.0, "telegraph", 10),
@@ -101,7 +101,7 @@ def main():
         d = max(1.8, 1.55 * size + 0.6)
         cy = round(-60 + y0 + h * 0.5 - 1.62, 2)
         a = round(d * 0.7, 2)
-        L += [f"# --- {eid}", "cmd kill @e[type=!minecraft:player,distance=..80]",
+        L += [f"# --- {eid}", "cmd kill @e[type=!minecraft:player,distance=..80]", "cmd kill @e[type=minecraft:item]",
               f"cmd summon skyabyss:{eid} 0 -60 0 {{NoAI:1b,NoGravity:1b,Rotation:[0f,0f],PersistenceRequired:1b,Invulnerable:1b,Tags:[\"m\"]}}",
               f"camera minecraft:overworld {a} {cy} {a} 135 0", "waitchunks", "wait 60",
               f"shot mq_{eid}_q"]
