@@ -159,31 +159,6 @@ public final class EmberBodyBuilder {
         return s;
     }
 
-    // 体の外 (脚のあいだ・火口の縁など) の、落ちたら出られない凹みを、詰み監査で見つけて埋める (部屋・通路の中は触らない)。docs/design/13 の詰み監査
-    jp.revati.skyabyss.titan.audit.BackReach.RepairJob repairJob(ServerLevel back) {
-        List<jp.revati.skyabyss.titan.audit.BackReach.Box> within = List.of(
-                new jp.revati.skyabyss.titan.audit.BackReach.Box(-190, 63, 80, -40, 130, 240),
-                new jp.revati.skyabyss.titan.audit.BackReach.Box(40, 63, 80, 190, 130, 240),
-                new jp.revati.skyabyss.titan.audit.BackReach.Box(-72, 150, -130, 72, 232, 24),
-                new jp.revati.skyabyss.titan.audit.BackReach.Box(-110, 63, -245, 110, 128, -90));
-        return new jp.revati.skyabyss.titan.audit.BackReach.RepairJob(back, () -> EmberBackAudit.spec(back), within, 200, 14,
-                Blocks.BASALT.defaultBlockState());
-    }
-
-    // 体の外 (脚のあいだ・火口の縁など) の、落ちたら出られない凹みを、詰み監査で見つけて埋める (部屋・通路の中は触らない)。docs/design/13 の詰み監査
-    void repairPockets(ServerLevel back) {
-        List<jp.revati.skyabyss.titan.audit.BackReach.Box> within = List.of(
-                new jp.revati.skyabyss.titan.audit.BackReach.Box(-190, 63, 80, -40, 130, 240),
-                new jp.revati.skyabyss.titan.audit.BackReach.Box(40, 63, 80, 190, 130, 240),
-                new jp.revati.skyabyss.titan.audit.BackReach.Box(-72, 150, -130, 72, 232, 24),
-                new jp.revati.skyabyss.titan.audit.BackReach.Box(-110, 63, -245, 110, 128, -90));
-        int filled = jp.revati.skyabyss.titan.audit.BackReach.repair(back, () -> EmberBackAudit.spec(back), within, 200, 14,
-                Blocks.BASALT.defaultBlockState());
-        if (filled > 0) {
-            SkyAbyss.LOGGER.info("Ember back: filled {} blocks of dead-end pockets on the body's outside", filled);
-        }
-    }
-
     // 1 つだけ四方より 1 低い床のブロック (建築の監査 FLOOR_DIMPLE) を、同じブロックを重ねて平らにする。体の外 (repairPockets の範囲) と喉・尾根の広間の中。
     // 床 = 上が 2 つ空いた固いブロック。四方の隣も同じ高さの床 (上が空いている) より 1 高く並んでいる所
     void smoothDimples() {
@@ -295,11 +270,6 @@ public final class EmberBodyBuilder {
         carved.add(new Box(Math.min(x1, x2), Math.min(y1, y2), Math.min(z1, z2), Math.max(x1, x2), Math.max(y1, y2), Math.max(z1, z2)));
     }
 
-    private void trackTube(int x1, int y1, int z1, int x2, int y2, int z2) {
-        track(x1, y1, z1, x2, y2, z2);
-        tubes.add(new Box(Math.min(x1, x2), Math.min(y1, y2), Math.min(z1, z2), Math.max(x1, x2), Math.max(y1, y2), Math.max(z1, z2)).grow(1));
-    }
-
     // ---------------------------------------------------------------- 口 (舌の上の到着点と、顎の先への段)
     // モデルの口は開いている (舌の上面 y 70、空洞 y 71〜75、上あごの下面 y 76。z -272〜-238。左右にも開いている)。
     // 到着の床を舌より 1 低い 69 にならし (幅 19)、天井はモデルのまま。顎の先 (z -267) から灰の原へ 5 段下りる。口の縁に灯りの柱
@@ -349,14 +319,6 @@ public final class EmberBodyBuilder {
         return FLOOR_HUB;
     }
 
-    // 喉の半幅 (z ごと)
-    public static int throatHalf(int z) {
-        if (z < HALL_Z1) {
-            return NECK_HALF;
-        }
-        return z <= HALL_Z2 ? HALL_HALF : RAMP_HALF;
-    }
-
     // 喉の天井までの空気の数 (床の上。端ほど低い丸い断面)
     public static int throatHeight(int z, int x) {
         int ax = Math.abs(x);
@@ -369,50 +331,6 @@ public final class EmberBodyBuilder {
         return 6 - Math.max(0, ax - 2);
     }
 
-    private void throat() {
-        for (int z = NECK_Z1; z <= HUB_DOOR_NORTH.getZ(); z++) {
-            int f = throatFloor(z);
-            boolean rise = z > NECK_Z1 && f > throatFloor(z - 1);
-            int hw = throatHalf(z);
-            for (int x = -hw; x <= hw; x++) {
-                if (rise && Math.abs(x) <= 4) {
-                    kit.stair(x, f, z, Direction.SOUTH);
-                } else {
-                    kit.set(x, f, z, Math.abs(x) <= 1 ? EmberKit.ruinFloor(x, z) : Math.abs(x) <= 4 ? EmberKit.BASALT : EmberKit.FLESH);
-                }
-                kit.set(x, f - 1, z, EmberKit.FLESH);
-                int h = throatHeight(z, x);
-                for (int y = f + 1; y <= f + h; y++) {
-                    kit.set(x, y, z, EmberKit.AIR);
-                }
-                // 段の上の前 (北) の床の高さまで空ける (頭を打たない)
-                if (rise) {
-                    int prev = throatFloor(z - 1);
-                    for (int y = f + h + 1; y <= prev + throatHeight(z - 1, x); y++) {
-                        kit.set(x, y, z, EmberKit.AIR);
-                    }
-                }
-            }
-        }
-        track(-NECK_HALF, MOUTH_FLOOR - 1, NECK_Z1, NECK_HALF, MOUTH_FLOOR + 9, HALL_Z1 - 1);
-        track(-HALL_HALF, MOUTH_FLOOR - 1, HALL_Z1, HALL_HALF, THROAT_LANDING + 14, HALL_Z2);
-        track(-RAMP_HALF, THROAT_LANDING - 1, RAMP_Z1, RAMP_HALF, FLOOR_HUB + 8, HUB_DOOR_NORTH.getZ());
-    }
-
-    // 順路の入口の箱 (喉の坂の休み場の平ら。32 の 2.2) の灯り (版 31: 真っ暗で予告の文字しか見えなかった)。壁の皮 (skin) を張ったあとに置く
-    void throatLights() {
-        for (int z = -128; z <= -120; z += 4) {
-            for (int x : new int[] {-RAMP_HALF - 1, RAMP_HALF + 1}) {
-                kit.set(x, THROAT_LANDING + 2, z, EmberKit.GLOW);
-            }
-        }
-        for (int[] c : new int[][] {{-RAMP_HALF, -129}, {RAMP_HALF, -129}, {-RAMP_HALF, -121}, {RAMP_HALF, -121}}) {
-            if (throatFloor(c[1]) == THROAT_LANDING) {
-                kit.set(c[0], THROAT_LANDING + 1, c[1], Blocks.LANTERN.defaultBlockState());
-            }
-        }
-    }
-
     // ---------------------------------------------------------------- 炉心の広間 (円 半径 27、床 92、天井は丸く 116〜108)
     public static double hubDist(int x, int z) {
         double dx = x - HUB_CENTER.getX();
@@ -422,67 +340,6 @@ public final class EmberBodyBuilder {
 
     public static int hubCeiling(double d) {
         return 116 - (int) Math.round(8 * (d / HUB_RADIUS) * (d / HUB_RADIUS));
-    }
-
-    private void hub() {
-        int cx = HUB_CENTER.getX();
-        int cz = HUB_CENTER.getZ();
-        int fy = HUB_CENTER.getY();
-        for (int x = cx - 28; x <= cx + 28; x++) {
-            for (int z = cz - 28; z <= cz + 28; z++) {
-                double d = hubDist(x, z);
-                if (d > HUB_RADIUS + 0.5) {
-                    continue;
-                }
-                kit.set(x, fy, z, EmberZones.hubFloor(x, z, d));
-                kit.set(x, fy - 1, z, EmberKit.RUIN);
-                int top = hubCeiling(d);
-                for (int y = fy + 1; y <= top; y++) {
-                    kit.set(x, y, z, EmberKit.AIR);
-                }
-            }
-        }
-        track(cx - 28, fy - 1, cz - 28, cx + 28, WELL_BOTTOM, cz + 28);
-        // 大きな炉 (5 × 5 の石の囲い、2 段 + 角の柱。中の 3 × 3 が熾の底の門。門 (扉のブロック) は EmberBackTrials.placeFixtures が置き、火と南の口はグループごとの見かけ)
-        for (int dx = -2; dx <= 2; dx++) {
-            for (int dz = -2; dz <= 2; dz++) {
-                if (Math.max(Math.abs(dx), Math.abs(dz)) != 2) {
-                    continue;
-                }
-                boolean corner = Math.abs(dx) == 2 && Math.abs(dz) == 2;
-                kit.set(cx + dx, fy + 1, cz + dz, corner ? EmberKit.BASALT : EmberKit.RUIN_CHISELED);
-                kit.set(cx + dx, fy + 2, cz + dz, corner ? EmberKit.BASALT : EmberKit.RUIN);
-                if (corner) {
-                    for (int y = fy + 3; y <= fy + 5; y++) {
-                        kit.set(cx + dx, y, cz + dz, y == fy + 5 ? EmberKit.GLOW : EmberKit.RAIL);
-                    }
-                }
-            }
-        }
-        // 灰溜まり (3 × 2 を四つ、壁ぎわ)
-        for (int[] a : EmberZones.HUB_ASH) {
-            for (int dx = 0; dx <= 2; dx++) {
-                for (int dz = 0; dz <= 1; dz++) {
-                    kit.set(cx + a[0] + dx, fy, cz + a[1] + dz, EmberKit.ASH);
-                }
-            }
-        }
-    }
-
-    // ---------------------------------------------------------------- 冷えた溶岩洞 (広間から三つの試練の入口。幅 7、高さ 5〜7 の丸い断面)
-    public static int tubeHeight(int lateral) {
-        return 7 - Math.max(0, Math.abs(lateral) - 1);
-    }
-
-    private void tubes() {
-        // 西: 広間の西の扉から西へ (z -57〜-51、床 92)、x -46〜-40 で南へ下り、灰の道の入口 (床 80)
-        tubeX(TUBE_Z, HUB_DOOR_WEST.getX(), TUBE_WEST_X - TUBE_HALF, FLOOR_HUB);
-        tubeZ(TUBE_WEST_X, TUBE_Z + TUBE_HALF + 1, WEST_DOOR.minZ() - 1, EmberBodyBuilder::legWestFloor);
-        // 東: 東の扉から東へ、x 41〜47 で南へ (床 92 → 86)
-        tubeX(TUBE_Z, TUBE_EAST_X + TUBE_HALF, HUB_DOOR_EAST.getX(), FLOOR_HUB);
-        tubeZ(TUBE_EAST_X, TUBE_Z + TUBE_HALF + 1, EAST_DOOR.minZ() - 1, EmberBodyBuilder::legEastFloor);
-        // 南: 南の扉から谷の入口 (床 92 → 83)
-        tubeZ(0, HUB_DOOR_SOUTH.getZ(), SOUTH_DOOR.minZ() - 1, EmberBodyBuilder::legSouthFloor);
     }
 
     // 洞の南の脚の床 (z ごと。灰の道・鍛えの間・火守りの谷の入口の高さへ下る)
@@ -500,120 +357,6 @@ public final class EmberBodyBuilder {
 
     public static int clamp(int v, int lo, int hi) {
         return Math.max(lo, Math.min(hi, v));
-    }
-
-    // 東西にまっすぐな洞 (中心の z、x の範囲)。床は平ら
-    private void tubeX(int cz, int xa, int xb, int floor) {
-        int x1 = Math.min(xa, xb);
-        int x2 = Math.max(xa, xb);
-        for (int x = x1; x <= x2; x++) {
-            for (int dz = -TUBE_HALF; dz <= TUBE_HALF; dz++) {
-                int z = cz + dz;
-                kit.set(x, floor, z, EmberZones.tubeFloor(x, z, dz));
-                kit.set(x, floor - 1, z, EmberKit.RUIN);
-                for (int y = floor + 1; y <= floor + tubeHeight(dz); y++) {
-                    kit.set(x, y, z, EmberKit.AIR);
-                }
-            }
-        }
-        trackTube(x1, floor - 1, cz - TUBE_HALF, x2, floor + 8, cz + TUBE_HALF);
-    }
-
-    // 南北の洞 (中心の x、z の範囲)。床は南へ下る (下りる所は北向きの階段)
-    private void tubeZ(int cx, int z1, int z2, IntUnaryOperator floorAt) {
-        int lo = Integer.MAX_VALUE;
-        for (int z = z1; z <= z2; z++) {
-            int f = floorAt.applyAsInt(z);
-            lo = Math.min(lo, f);
-            boolean drop = z > z1 && f < floorAt.applyAsInt(z - 1);
-            for (int dx = -TUBE_HALF; dx <= TUBE_HALF; dx++) {
-                int x = cx + dx;
-                // 下りる段は、前 (北) の床と同じ高さ (f + 1) に置く。背の高い側が前の床の上面にそろい、低い側が下りた床より半段高い
-                int top = drop ? f + 1 : f;
-                if (drop) {
-                    kit.set(x, f, z, EmberKit.RUIN);
-                    kit.stair(x, top, z, Direction.NORTH);
-                } else {
-                    kit.set(x, f, z, EmberZones.tubeFloor(x, z, dx));
-                }
-                kit.set(x, f - 1, z, EmberKit.RUIN);
-                for (int y = top + 1; y <= top + tubeHeight(dx); y++) {
-                    kit.set(x, y, z, EmberKit.AIR);
-                }
-                // 下りた段の上の前の床の高さまで空ける (段の頭を打たないように)
-                if (z > z1) {
-                    for (int y = top + tubeHeight(dx) + 1; y <= floorAt.applyAsInt(z - 1) + tubeHeight(dx); y++) {
-                        kit.set(x, y, z, EmberKit.AIR);
-                    }
-                }
-            }
-        }
-        trackTube(cx - TUBE_HALF, lo - 1, z1, cx + TUBE_HALF, floorAt.applyAsInt(z1) + 8, z2);
-    }
-
-    // ---------------------------------------------------------------- 試練の箱 (中は空気、仮の床は FLOOR_* の高さまで) と通り道
-    private void trialBoxes() {
-        for (String room : TRIAL_ROOMS) {
-            if (room.equals("heart")) {
-                // 熾の底は体の外 (buildHeartInstance)
-                continue;
-            }
-            Box b = ROOMS.get(room);
-            carve(b);
-            int f = floorOf(room);
-            for (int x = b.minX(); x <= b.maxX(); x++) {
-                for (int z = b.minZ(); z <= b.maxZ(); z++) {
-                    for (int y = b.minY(); y <= f; y++) {
-                        kit.set(x, y, z, y == f ? EmberKit.TEMP_FLOOR : EmberKit.CORE);
-                    }
-                }
-            }
-        }
-        for (Box door : List.of(WEST_DOOR, EAST_DOOR, SOUTH_DOOR, SMITH_DOOR)) {
-            carve(door);
-            for (int x = door.minX(); x <= door.maxX(); x++) {
-                for (int z = door.minZ(); z <= door.maxZ(); z++) {
-                    kit.set(x, door.minY() - 1, z, EmberKit.RUIN);
-                }
-            }
-        }
-    }
-
-    // ---------------------------------------------------------------- 熾の底の門の下の螺旋 (3 × 3、y 91 → 51) と前室への通路
-    private void gateShaft() {
-        int cx = HUB_CENTER.getX();
-        int cz = HUB_CENTER.getZ();
-        for (int dx = -1; dx <= 1; dx++) {
-            for (int dz = -1; dz <= 1; dz++) {
-                for (int y = FLOOR_HEART + 1; y <= FLOOR_HUB - 1; y++) {
-                    boolean pillar = dx == 0 && dz == 0;
-                    kit.set(cx + dx, y, cz + dz, pillar ? (y % 5 == 0 ? EmberKit.GLOW : EmberKit.RUIN_DARK) : EmberKit.AIR);
-                }
-                kit.set(cx + dx, FLOOR_HEART, cz + dz, EmberKit.RUIN);
-            }
-        }
-        for (int i = 0; i < GATE_STEPS; i++) {
-            int[] c = RING[(GATE_STEP_START + i) % 8];
-            int[] prev = RING[Math.floorMod(GATE_STEP_START + i - 1, 8)];
-            Direction up = Direction.fromDelta(prev[0] - c[0], 0, prev[1] - c[1]);
-            kit.stair(cx + c[0], FLOOR_HUB - 1 - i, cz + c[1], up == null ? Direction.NORTH : up);
-        }
-        track(cx - 1, FLOOR_HEART, cz - 1, cx + 1, FLOOR_HUB, cz + 1);
-        // 底から南の短い通路 (版 33: 前室は体の外へ移したので、元の前室の手前 z -30 で行き止まり)。壁に灯りを埋める
-        int anteZ = -29;
-        for (int x = -1; x <= 1; x++) {
-            for (int z = cz + 2; z < anteZ; z++) {
-                kit.set(x, FLOOR_HEART, z, EmberKit.RUIN);
-                for (int y = FLOOR_HEART + 1; y <= FLOOR_HEART + 3; y++) {
-                    kit.set(x, y, z, EmberKit.AIR);
-                }
-            }
-        }
-        for (int z = cz + 6; z < anteZ - 2; z += 6) {
-            kit.set(-2, FLOOR_HEART + 2, z, EmberKit.GLOW);
-            kit.set(2, FLOOR_HEART + 2, z, EmberKit.GLOW);
-        }
-        track(-1, FLOOR_HEART, cz + 2, 1, FLOOR_HEART + 3, anteZ - 1);
     }
 
     // ---------------------------------------------------------------- 体の外の封じた熾の底 (trial/raid/InstanceArenas。版 33)
@@ -671,162 +414,6 @@ public final class EmberBodyBuilder {
         carved.add(HEART_ANTE);
     }
 
-    // ---------------------------------------------------------------- 火の井戸の踊り場 (壁の螺旋で床 92 → 119。試練の階 EmberDeck への踊り場)
-    // 井戸の縦穴・火口・背へ出る洞は無い。踊り場から南は EmberDeck の通路が受け持つ
-    private void wallStair() {
-        // 壁の螺旋 (広間の南東の壁、3 × 3。床 92 → 119)
-        int sx = WELL_STAIR.getX();
-        int sz = WELL_STAIR.getZ();
-        for (int dx = -1; dx <= 1; dx++) {
-            for (int dz = -1; dz <= 1; dz++) {
-                for (int y = FLOOR_HUB + 1; y <= WELL_BOTTOM + 4; y++) {
-                    boolean pillar = dx == 0 && dz == 0 && y < WELL_BOTTOM;
-                    kit.set(sx + dx, y, sz + dz, pillar ? (y % 6 == 0 ? EmberKit.GLOW : EmberKit.BASALT) : EmberKit.AIR);
-                }
-                kit.set(sx + dx, FLOOR_HUB, sz + dz, EmberKit.RUIN);
-            }
-        }
-        kit.set(sx, WELL_BOTTOM, sz, EmberKit.RUIN);
-        for (int i = 0; i < WELL_STAIR_STEPS; i++) {
-            int[] c = RING[(WELL_STAIR_START + i) % 8];
-            int[] next = RING[(WELL_STAIR_START + i + 1) % 8];
-            Direction up = Direction.fromDelta(next[0] - c[0], 0, next[1] - c[1]);
-            kit.stair(sx + c[0], FLOOR_HUB + 1 + i, sz + c[1], up == null ? Direction.NORTH : up);
-        }
-        // 広間から壁の螺旋の最初の段への口 (最初の段の西の 1 マス)
-        int[] first = RING[WELL_STAIR_START];
-        for (int y = FLOOR_HUB + 1; y <= FLOOR_HUB + 4; y++) {
-            kit.set(sx + first[0] - 1, y, sz + first[1], EmberKit.AIR);
-        }
-        kit.set(sx + first[0] - 1, FLOOR_HUB, sz + first[1], EmberKit.RUIN);
-        track(sx - 2, FLOOR_HUB - 1, sz - 2, sx + 2, WELL_BOTTOM + 5, sz + 2);
-        // 踊り場 (床 119): 最後の段の高い側 (南) の 1 マスが着地。そこから東へ 3 (EmberDeck の踊り場 x 15〜18、z 幅 3)
-        int[] next = RING[(WELL_STAIR_START + WELL_STAIR_STEPS) % 8];
-        int lx = sx + next[0];
-        int lz = sz + next[1];
-        int ex = lx + 3;
-        for (int x = lx; x <= ex; x++) {
-            landingCell(x, lz);
-        }
-        track(lx - 2, WELL_BOTTOM - 1, lz - 2, ex + 2, WELL_BOTTOM + 5, lz + 3);
-    }
-
-    // 踊り場の 1 マス (幅 3・高さ 4。z は lz から南へ 0〜+2)
-    private void landingCell(int x, int z) {
-        for (int w = 0; w <= 2; w++) {
-            kit.set(x, WELL_BOTTOM, z + w, EmberKit.ruinFloor(x, z + w));
-            for (int y = WELL_BOTTOM + 1; y <= WELL_BOTTOM + 4; y++) {
-                kit.set(x, y, z + w, EmberKit.AIR);
-            }
-        }
-    }
-
-    // ---------------------------------------------------------------- 試練の階 (EmberDeck。docs/design/29)
-    // 箱を掘り、床を張り、回廊とセルのあいだの戸口 (高さ 5) を開ける。中身は deckContent (休み場・碑文のあと)
-    private void deckRooms() {
-        if (!EmberDeck.placed()) {
-            return;
-        }
-        for (Box b : EmberDeck.ROOMS) {
-            carve(b);
-        }
-        for (List<BlockPos> gate : EmberDeck.GATES) {
-            for (BlockPos p : gate) {
-                kit.set(p, EmberKit.AIR);
-            }
-            BlockPos lo = gate.get(0);
-            BlockPos hi = gate.get(gate.size() - 1);
-            track(lo.getX(), EmberDeck.Y, lo.getZ(), hi.getX(), EmberDeck.G1, hi.getZ());
-        }
-        EmberDeckBuilder.floors(kit);
-    }
-
-    private void deckContent() {
-        if (EmberDeck.placed()) {
-            EmberDeckBuilder.build(kit);
-        }
-    }
-
-    // ---------------------------------------------------------------- 掘った所の内壁を「肉と骨の壁」(洞は玄武岩) に (体の芯の凝灰岩・灰の原の石が見えたら)
-    static boolean coreMaterial(BlockState s) {
-        return s.is(Blocks.TUFF) || s.is(Blocks.DEEPSLATE) || s.is(Blocks.BASALT);
-    }
-
-    private boolean inTube(int x, int y, int z) {
-        for (Box t : tubes) {
-            if (t.contains(x, y, z)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private void skin() {
-        BlockPos.MutableBlockPos m = new BlockPos.MutableBlockPos();
-        BlockPos.MutableBlockPos n = new BlockPos.MutableBlockPos();
-        ServerLevel level = kit.level();
-        java.util.Set<Long> done = new java.util.HashSet<>();
-        for (Box b0 : carved) {
-            Box b = b0.grow(1);
-            for (int x = b.minX(); x <= b.maxX(); x++) {
-                for (int z = b.minZ(); z <= b.maxZ(); z++) {
-                    for (int y = b.minY(); y <= b.maxY(); y++) {
-                        m.set(x, y, z);
-                        if (!done.add(m.asLong())) {
-                            continue;
-                        }
-                        if (!coreMaterial(level.getBlockState(m))) {
-                            continue;
-                        }
-                        for (Direction d : Direction.values()) {
-                            n.setWithOffset(m, d);
-                            if (level.getBlockState(n).isAir()) {
-                                kit.set(x, y, z, inTube(x, y, z) ? EmberZones.tubeWall(x, y, z) : EmberKit.flesh(x, y, z));
-                                break;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    // ---------------------------------------------------------------- 休み場・熾り石・光る床・碑文・掲示・宝箱・飾り (担当の中身より後)
-    private void fixtures() {
-        EmberZones.dress(kit);
-        List<Box> restAreas = new ArrayList<>();
-        for (Rest r : RESTS) {
-            if (r.name().equals("heart")) {
-                continue;
-            }
-            rest(r);
-            restAreas.add(r.area());
-        }
-        // 取っておく場所のうち、床と同じ高さから始まる箱 (入口の通り道・奥の岸・扉の前) の床と空気 (休み場の台と亀裂の下は除く)
-        for (String room : TRIAL_ROOMS) {
-            Box rb = ROOMS.get(room);
-            int f = floorOf(room);
-            for (Box res : reserved(room)) {
-                if (res.minY() != f || restAreas.contains(res) || room.equals("heart")) {
-                    continue;
-                }
-                farFloor(res, rb.minY());
-            }
-        }
-        for (Inscription in : INSCRIPTIONS) {
-            if (in.id().equals("lore_ember_heart")) {
-                continue;
-            }
-            kit.wallSign(in.pos(), in.facing(), "sign.skyabyss." + in.id(), DyeColor.ORANGE);
-        }
-        for (Inscription in : ENTRANCE_SIGNS) {
-            kit.wallSign(in.pos(), in.facing(), "sign.skyabyss.ember_" + in.id(), DyeColor.ORANGE);
-        }
-        for (Inscription in : BOARDS) {
-            kit.board(in.pos(), in.facing(), "sign.skyabyss.ember_board_" + in.id(), DyeColor.WHITE);
-        }
-    }
-
     // 休み場の 5 × 5 の台 (下は箱の底まで詰める)、南の端の真ん中に青い焚き火、北の端に灰溜まり
     private void rest(Rest r) {
         Box a = r.area();
@@ -865,11 +452,6 @@ public final class EmberBodyBuilder {
                 }
             }
         }
-    }
-
-    // 体の中の芯か (自己テストの「穴」の検査で、体の外と中を分ける)
-    public static boolean bodyAt(int x, int y, int z) {
-        return BODY.at(x, y, z) != null;
     }
 
 }
