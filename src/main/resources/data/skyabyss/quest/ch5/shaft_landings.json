@@ -1,0 +1,62 @@
+{
+  "category": "sub",
+  "chapter": "chapter2",
+  "order": 62,
+  "giver": "skyabyss:attendant_storage_keeper",
+  "min_stage": 4,
+  "stages": [
+    {
+      "id": "workshop",
+      "xp": 100,
+      "objectives": [
+        {
+          "id": "reach",
+          "type": "signal",
+          "targets": [
+            "ch5_landing_1"
+          ],
+          "count": 1,
+          "party": false
+        }
+      ]
+    },
+    {
+      "id": "camp",
+      "xp": 100,
+      "objectives": [
+        {
+          "id": "reach",
+          "type": "signal",
+          "targets": [
+            "ch5_landing_2"
+          ],
+          "count": 1,
+          "party": false
+        }
+      ]
+    },
+    {
+      "id": "tell",
+      "objectives": [
+        {
+          "id": "talk",
+          "type": "talk",
+          "target": "skyabyss:attendant_storage_keeper",
+          "topic": "ch5s_back"
+        }
+      ]
+    }
+  ],
+  "reward": {
+    "xp": 400,
+    "items": [
+      {
+        "item": "minecraft:lantern",
+        "count": 3
+      }
+    ],
+    "affinity": {
+      "skyabyss:attendant_storage_keeper": 3
+    }
+  }
+}

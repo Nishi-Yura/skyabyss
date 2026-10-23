@@ -26,6 +26,8 @@ CH = 'chapter2'
 LAYERS = ['bone', 'salt', 'storm', 'ash']
 SURVIVOR = {L: 'skyabyss:attendant_survivor_%s' % L for L in LAYERS}
 PORTER = 'skyabyss:attendant_abyss_porter'
+# 層の形 B (護りの下り道。docs/design/36 の 8.1): 塩は荷運びのロク、灰は隊長のトウヤを連れて下りる
+EXPEDITION = ('salt', 'ash')
 
 
 def write(path, obj):
@@ -51,8 +53,11 @@ def section_stages():
     out = []
     for L in LAYERS:
         out.append({'id': '%s_camp' % L, 'xp': 60, 'objectives': [{'id': 'talk', 'type': 'talk', 'target': SURVIVOR[L], 'topic': 'ch5_%s_camp' % L}]})
-        out.append({'id': '%s_marks' % L, 'xp': 160, 'objectives': [
-            {'id': 'm%d' % i, 'type': 'signal', 'targets': ['abyss_mark_%s_%d' % (L, i)], 'count': 1} for i in (1, 2, 3)]})
+        obs = [{'id': 'm%d' % i, 'type': 'signal', 'targets': ['abyss_mark_%s_%d' % (L, i)], 'count': 1} for i in (1, 2, 3)]
+        if L in EXPEDITION:
+            # 形 B (護りの下り道): 三つの待ち場の印と、連れて下りる人を主の間の前の格子の門まで送ること (story/ch5/layers/AbyssEscort)
+            obs.append({'id': 'escape', 'type': 'signal', 'targets': ['abyss_escort_%s' % L], 'count': 1})
+        out.append({'id': '%s_marks' % L, 'xp': 160, 'objectives': obs})
         out.append({'id': '%s_lord' % L, 'xp': 260, 'objectives': [{'id': 'defeat', 'type': 'signal', 'targets': ['abyss_lord_%s' % L], 'count': 1}]})
     return out
 
@@ -123,14 +128,116 @@ t('message.skyabyss.abyss_v2.mark_mate', '%1$sが%2$sを取った。仲間の印
 t('message.skyabyss.abyss_v2.marks_all', '印が三つそろった。野営の北の封じ石へ。', 'All three marks. Go to the seal north of the camp.')
 t('message.skyabyss.abyss_v2.mark_guarded.nest_bone', '台の上を骨笛の群れが囲んでいる。巣を払わないと触れられない。', 'Bone flutes swarm the altar. Clear the nest first.')
 t('message.skyabyss.abyss_v2.mark_guarded.nest_storm', '羽虫の帯電で、台に手が届かない。巣を払おう。', 'The moths\' charge keeps your hand off the altar. Clear the nest.')
-t('message.skyabyss.abyss_v2.mark_guarded.terr_salt', '白い貝守が、この印を殻の奥にしまいこんでいる。', 'The white shell keeper has the mark shut away in its shell.')
-t('message.skyabyss.abyss_v2.mark_guarded.terr_ash', '燠の番がまだ近くにいる。台の火が消えない。', 'The ember keeper is still near. The altar\'s fire will not die.')
+for _L, _who in (('salt', ('ロク', 'Roku')), ('ash', ('トウヤ', 'Touya'))):
+    for _k in (1, 2, 3):
+        t('message.skyabyss.abyss_v2.mark_guarded.wp_%s_%d' % (_L, _k), '台は冷えている。%sと下りて、この待ち場を確かにしよう。' % _who[0],
+          'The altar is cold. Come down with %s and secure this resting place.' % _who[1])
 t('message.skyabyss.abyss_v2.gate_closed', '封じ石の穴が冷たい。印が足りない（%s／3）。', 'The seal\'s hollows are cold. Not enough marks (%s/3).')
 t('message.skyabyss.abyss_v2.gate_open', '三つの印が光り、封じ石が道をあけた。', 'The three marks flare and the seal lets you through.')
 t('message.skyabyss.abyss_v2.gate_back', '封じ石を抜けて、野営へ戻った。', 'You pass back through the seal to the camp.')
+t('message.skyabyss.abyss_v2.gate_closed_escort', '格子は下りたままだ。%sを、ここまで送り届けていない。',
+  'The bars stay down. You have not brought %s this far yet.')
+t('message.skyabyss.abyss_v2.gate_back_b', '格子を抜けて、下り道へ戻った。', 'You pass back through the bars onto the descent.')
+t('message.skyabyss.abyss_v2.back', '鎖をたぐって、この層の野営へ戻った。', 'You haul yourself up the chain to this layer\'s camp.')
 t('message.skyabyss.abyss_v2.descend_closed', '鎖は張りつめたまま動かない。この間の主が、まだ見ている。', 'The chain is taut and will not move. The lord of this hall is still watching.')
 t('message.skyabyss.abyss_v2.descend', '鎖を伝って、下の層へ下りた。', 'You ride the chain down to the next layer.')
 t('message.skyabyss.abyss_v2.ascend', '鎖をたぐって、上の野営へ戻った。', 'You haul yourself up the chain to the camp above.')
+
+# ---------------------------------------------------------------- 護りの下り道 (形 B。塩 = ロク、灰 = トウヤ。story/ch5/layers/AbyssEscort)
+E = 'message.skyabyss.abyss_v2.escort.'
+ESCORT = {
+    'salt': {
+        'start_1': ('ロク「ハヤセさんの縄を、主の間の前まで張っていく。帰り道のしるしだ。……おれの前を頼む」',
+                    'Roku: "I\'ll run Hayase\'s line down to the lord\'s hall. A mark for the way home. ...Keep ahead of me."'),
+        'start_2': ('ロク「待ち場で足を止める。そこを片づけてくれたら、また歩く。離れすぎないでくれよ」',
+                    'Roku: "I\'ll stop at each resting place. Clear it and I\'ll walk on. Don\'t get too far ahead."'),
+        'wait_you': ('ロク「待ってくれ。ひとりじゃ下りられない」', 'Roku: "Wait. I can\'t go down alone."'),
+        'wp_1': ('ロク「殻が薄い。おれが乗ったら割れる。向こうの杭に縄を張ってくれ。重さの術なら、殻はもつ」',
+                 'Roku: "The crust is thin. It\'ll break under me. Tie the line to the stake across. With the weight art, the crust will hold you."'),
+        'wp_2': ('ロク「上の縁に灯りがある。点けてくれたら、梯子が下りる。塩の風は、軽い者しか運ばない」',
+                 'Roku: "There\'s a lamp on the rim above. Light it and the ladder comes down. The salt wind only carries the light."'),
+        'wp_3': ('ロク「ここに錨を打つ。四十五数えるあいだ、背中を守ってくれ。……白い殻が動いた」',
+                 'Roku: "I\'ll drive the anchor here. Guard my back while I count forty-five. ...The white shell moved."'),
+        'harass': ('塩の殻虫が、壁の割れ目から這い出してきた。ロクを狙っている。', 'Salt husks crawl out of the cracks. They are going for Roku.'),
+        'worn': ('ロク「くっ……もう、あまりもたない」', 'Roku: "Agh... I can\'t hold much longer."'),
+        'fail': ('ロクが倒れた。……気がつくと、ひとつ前の待ち場まで戻っていた。ロク「すまん。もう一度だ」',
+                 'Roku went down. ...When he comes to, you are back at the last resting place. Roku: "Sorry. Once more."'),
+        'secured_1': ('縄が張れた。ロク「よし、板を渡す。……渡れた。次だ」', 'The line is tied. Roku: "Right, laying the planks. ...I\'m across. Next."'),
+        'secured_2': ('梯子が下りた。ロク「上る。……下を見るなよ、と自分に言ってる」', 'The ladder drops. Roku: "Climbing. ...Telling myself not to look down."'),
+        'secured_3': ('錨が鳴った。足もとの殻が、遠くで割れる音がする。ロク「打った。……まずい、崩れが来る」',
+                      'The anchor rings. Somewhere, the crust underfoot starts to crack. Roku: "Done. ...Bad. The collapse is coming."'),
+        'arm': ('ロク「そばに来てくれ。そろったら走る。崩れより先に、主の間の前の格子まで」',
+                'Roku: "Come close. When we\'re together, we run. Beat the collapse to the bars before the lord\'s hall."'),
+        'run': ('ロク「走れ！　後ろは見るな！」', 'Roku: "Run! Don\'t look back!"'),
+        'lead': ('ロク「急げ！　崩れが追いつく！」', 'Roku: "Hurry! The collapse is catching up!"'),
+        'caught': ('床が崩れる。足が取られた。前へ！', 'The floor gives way. Your feet sink. Forward!'),
+        'escape_fail': ('崩れに呑まれた。……錨の打った所で目が覚めた。ロク「もう一度。今度は止まるな」',
+                        'The collapse swallowed you. ...You wake by the anchor. Roku: "Again. Don\'t stop this time."'),
+        'done_1': ('ロク「着いた……！　縄は、ここまで張れた。これでハヤセさんの帰り道がつながる」',
+                   'Roku: "We made it...! The line runs all the way here. Now Hayase\'s way home is joined up."'),
+        'done_2': ('ロク「格子の向こうが主の間だ。おれはここで縄を見てる。行ってこい」',
+                   'Roku: "Past the bars is the lord\'s hall. I\'ll watch the line from here. Go."'),
+        'after': ('ロク「やったな。……縄をたどって、野営へ戻る。ハヤセさんに伝えるよ」',
+                  'Roku: "You did it. ...I\'ll follow the line back to camp and tell Hayase."'),
+        'home': ('ロクは縄をたどって、野営へ戻っていった。', 'Roku follows the line back up to the camp.'),
+        'bar': ('ロクの気力', 'Roku\'s Resolve'),
+        'talk_first': ('ロク「ハヤセさんの話を、先に聞いてやってくれ。下り口はそれからだ」',
+                       'Roku: "Hear Hayase out first. The way down can wait till then."'),
+    },
+    'ash': {
+        'start_1': ('トウヤ「灰の下り道は、俺が案内する。……心臓の手前の主の間まで。それが、隊長の最後の仕事だ」',
+                    'Touya: "I\'ll guide you down the ash road. ...As far as the hall before the heart. A captain\'s last job."'),
+        'start_2': ('トウヤ「灯りを喰うものが出る。俺の灯りを、絶やさせるな。待ち場では止まる。片づけたら歩く」',
+                    'Touya: "Things that eat light come out here. Don\'t let my lamp go out. I stop at each resting place; clear it and I walk."'),
+        'wait_you': ('トウヤ「……置いていくな。ひとりで下りるのは、もうごめんだ」', 'Touya: "...Don\'t leave me. I\'m done going down alone."'),
+        'wp_1': ('トウヤ「暗くて跡が見えん。お前の光の術なら燠の跡が浮かぶ。出口の火を灯してくれ。灯りを頼りに、跡をたどる」',
+                 'Touya: "Too dark to see the trail. Your light art will show the embers. Light the fire at the exit; I\'ll follow its glow."'),
+        'wp_2': ('トウヤ「三つの術の封だ。光、重さ、鼓動。続けて使え。俺は灯りを掲げて待つ」',
+                 'Touya: "The seal of three arts. Light, weight, the beat, one after another. I\'ll hold the lamp up."'),
+        'wp_3': ('トウヤ「燠の番の縄張りだ。あれを払わないと、先へは行けん。……来るぞ」',
+                 'Touya: "The ember keeper\'s ground. We don\'t go on until it\'s cleared. ...Here it comes."'),
+        'harass': ('煤の子が、灰の中から湧いた。トウヤの灯りに群がっていく。', 'Soot children well up from the ash, swarming Touya\'s lamp.'),
+        'wave': ('灰の底から、煤の子がもう一群れ。', 'Another swarm of soot children rises from the ash.'),
+        'worn': ('トウヤ「灯りが……痩せる。急げ」', 'Touya: "The lamp is... thinning. Hurry."'),
+        'fail': ('トウヤの灯りが消えた。……気がつくと、ひとつ前の待ち場まで戻っていた。トウヤ「まだだ。もう一度」',
+                 'Touya\'s lamp went out. ...You find yourselves back at the last resting place. Touya: "Not yet. Again."'),
+        'secured_1': ('出口の火が灯った。トウヤ「見えた。……跡をたどる」', 'The exit fire catches. Touya: "I see it. ...Following the trail."'),
+        'secured_2': ('封が崩れた。トウヤ「三つとも使えるのか。……俺には、できなかった」', 'The seal crumbles. Touya: "All three arts... I never could."'),
+        'secured_3': ('燠の番が灰に還った。遠くで、何かが息を吸う音。トウヤ「主が目を覚ました。闇の波が来る」',
+                      'The ember keeper returns to ash. Far off, something draws a breath. Touya: "The lord has woken. The dark wave is coming."'),
+        'arm': ('トウヤ「そばに来い。そろったら走る。闇に呑まれる前に、主の間の前の格子へ。光の術なら、闇は退く」',
+                'Touya: "Close in. When we\'re together, we run. Reach the bars before the dark takes us. Light art pushes it back."'),
+        'run': ('トウヤ「走れ！　灯りを背に！」', 'Touya: "Run! Keep the light behind you!"'),
+        'lead': ('トウヤ「遅れるな！　闇が来る！」', 'Touya: "Don\'t fall behind! The dark is coming!"'),
+        'caught': ('闇に包まれた。息が焼ける。光の術を、でなければ前へ！', 'The dark closes in. Your breath burns. Cast light, or run!'),
+        'escape_fail': ('闇に呑まれた。……燠の縄張りで目が覚めた。トウヤ「もう一度。光を絶やすな」',
+                        'The dark swallowed you. ...You wake in the ember ground. Touya: "Again. Keep the light alive."'),
+        'done_1': ('トウヤ「着いた。……俺の案内は、ここまでだ」', 'Touya: "Here. ...My guiding ends here."'),
+        'done_2': ('トウヤ「格子の向こうに灯り喰いの主がいる。闇が来たら、自分で灯りを点けろ。行け」',
+                   'Touya: "Past the bars is the Lord of Eaten Light. When the dark comes, make your own light. Go."'),
+        'after': ('トウヤ「越えたか。……下は心臓だ。俺は野営で、帰りを待つことにする。ミオのようにな」',
+                  'Touya: "You got past it. ...Below is the heart. I\'ll wait at camp for you to come back. Like Mio does."'),
+        'home': ('トウヤは灰の中を、ひとりで野営へ戻っていった。', 'Touya walks back up through the ash to the camp, alone.'),
+        'bar': ('トウヤの灯り', 'Touya\'s Lamp'),
+        'talk_first': ('トウヤ「……話が先だ。こっちへ来い」', 'Touya: "...Talk first. Over here."'),
+    },
+}
+for L, lines in ESCORT.items():
+    for k, (j, e) in lines.items():
+        if k in ('bar', 'talk_first'):
+            t(E + '%s.%s' % (k, L), j, e)
+        elif '_' in k and k.split('_')[-1].isdigit():
+            base, n = k.rsplit('_', 1)
+            t(E + '%s.%s_%s' % (base, L, n), j, e)
+        else:
+            t(E + '%s.%s' % (k, L), j, e)
+t(E + 'joined', '%sの道に加わった。待ち場を確かにすると印が入る。', 'You join %s on the way down. Secure each resting place to earn its mark.')
+t(E + 'hold_left', '錨を打ち終えるまで %s 秒', 'Anchor set in %s s')
+t(E + 'stake_done', '杭に縄を結んだ。', 'You tie the line to the stake.')
+t(E + 'stake_none', '縄を張る相手がいない。ロクと一緒に来よう。', 'There is no one to run a line for. Come with Roku.')
+t(E + 'stake_already', '縄はもう張ってある。', 'The line is already tied.')
+t(E + 'beacon_none', '灯りは冷えている。……連れて下りる人と来たときに点けよう。', 'The lamp is cold. ...Light it when you come down with your companion.')
+t(E + 'push', '光が闇を押し返した。', 'Your light drives the dark back.')
 
 # ---------------------------------------------------------------- 仕掛け
 t('message.skyabyss.abyss_v2.hint.bone', '三つの灯皿。どれも冷えきっている。……光の術なら、同時に灯せるかもしれない。',
@@ -236,9 +343,9 @@ t('objective.skyabyss.abyss_v2.warden_p3', '闇の波のあとは、光の術で
 # ---------------------------------------------------------------- 手記 (野営の帳面 0、道ごと 1〜3)
 JOURNALS = {
     'bone': [
-        ('探掘隊の帳面「都の井戸が、夜ごとに脈を打つ。ギルドの頼みで、七人で元を探しに下りる。隊長トウヤ」',
+        ('探掘隊の帳面「都の井戸が、夜ごとに脈を打つ。鯨追いの組合の頼みで、七人で元を探しに下りる。隊長トウヤ」',
          '帳面の続き「北の封じ石に穴が三つ。印をはめる穴らしい。三手に分かれて探す。灯りはミオの係」',
-         'Party ledger: "The capital\'s wells pulse every night. At the guild\'s request, six of us go down to find the source. — Captain Touya"',
+         'Party ledger: "The capital\'s wells pulse every night. At the Whale Chasers\' Guild\'s request, six of us go down to find the source. — Captain Touya"',
          'Ledger, continued: "Three hollows in the north seal, for marks it seems. We split three ways. Mio keeps the lights."'),
         ('書見台の頁「灯皿の間。三つを同時に灯せば戸が開く、と壁にある。……壁の字が、わたしたちの字に似ている」',
          '頁の続き「隊長は気のせいだと言った。でも、印を刻んだのは、わたしたちより前に来た誰かだ」',
@@ -259,9 +366,9 @@ JOURNALS = {
          'Hayase\'s ledger: "The deeper, the heavier. Climbing is worse. This is the weight of something vast below us."',
          'Ledger, continued: "The captain said: bring a shard of the heart to the capital and the wells will stop shaking. I nodded."'),
         ('書見台の頁「塩の殻の床。重いものは落ちる。荷を全部置いて、体を軽くして渡った」',
-         '頁の続き「わしの地図は、ここで殻と一緒に割れた。切れ端は三つの道に散った」',
+         '頁の続き「わしの地図は、ここで殻と一緒に割れた。切れ端は下り道に散った」',
          'Lectern page: "The salt crust floor. Heavy things fall through. We left every pack and went across light."',
-         'Page, continued: "My map broke here along with the crust. The pieces scattered down all three paths."'),
+         'Page, continued: "My map broke here along with the crust. The pieces scattered down the road."'),
         ('書見台の頁「井戸の底の風は、軽い者しか運ばない。シズが先に上がって、縄を下ろしてくれた」',
          '頁の続き「縄は、もう切れている。……ここから先、わしは上へは戻れんだろう」',
          'Lectern page: "The wind in the well carries only the light. Shizu went up first and dropped a rope."',
@@ -355,8 +462,9 @@ TALK = {
     'salt': {
         'camp': [('grave', 'おお……上から来たか。わしはハヤセ。探掘隊の測量士だ。足をこっちへ。座ったままですまんな', 'Oh... from above, are you. I am Hayase, the party\'s surveyor. Come closer. Forgive me for not standing.'),
                  ('neutral', '体が重くて、もう上れん。深淵は下りるほど重くなる。この重さは、下に途方もなく大きなものがある重さだ', 'My body is too heavy to climb now. The abyss grows heavier the deeper you go. It is the weight of something immense below.'),
-                 ('grave', '隊長は、心臓のかけらを都へ持ち帰れば井戸の揺れが止まると言った。わしは、うなずいてしまった。……ここの印も三つだ', 'The captain said a shard of the heart would stop the wells shaking. I nodded along. ...There are three marks here too.')],
-        'offer': [('neutral', 'わしの地図は、塩の殻の床で割れて散った。切れ端は三つの道に一枚ずつ。帰り道を描いた地図だ', 'My map broke on the salt crust and scattered. One piece down each of the three paths. It was a map of the way home.'),
+                 ('grave', '隊長は、心臓のかけらを都へ持ち帰れば井戸の揺れが止まると言った。わしは、うなずいてしまった', 'The captain said a shard of the heart would stop the wells shaking. I nodded along.'),
+                 ('neutral', 'ここの道は一本、長い下りだ。ロクがわしの縄を主の間の前まで張っていく。帰り道のしるしにな。……ロクを守ってやってくれ。北の下り口で待っとる', 'The way here is a single long descent. Roku will run my line down to the lord\'s hall, as a mark for the way home. ...Keep him safe. He waits at the north mouth.')],
+        'offer': [('neutral', 'わしの地図は、塩の殻の床で割れて散った。切れ端は下り道の三つの待ち場に一枚ずつ。帰り道を描いた地図だ', 'My map broke on the salt crust and scattered. One piece at each of the three resting places on the way down. It was a map of the way home.'),
                   ('grave', '拾ってきてくれんか。わしは帰れんでも、誰かが帰れるように', 'Would you gather them? Even if I can\'t go home, so that someone can.')],
         'return': [('smile', 'そうだ、この線だ。わしの字だ。……これで、上への道がつながる', 'Yes, this line. My hand. ...Now the way up joins together.'),
                    ('neutral', '代わりにこれを持っていけ。倒れた所を指す羅針だ。重さに負けそうになったら、重さの術を思い出せ', 'Take this in exchange. A compass that points to where you last fell. When the weight is beating you, remember the weight art.')],
@@ -377,8 +485,9 @@ TALK = {
     'ash': {
         'camp': [('grave', '……来たか。灰の中を、まっすぐここまで。お前は、迷わないんだな', '...So you came. Straight through the ash. You don\'t get lost, do you.'),
                  ('neutral', '探掘隊の隊長、トウヤだ。仲間を全部、上に置いてきた。ロクだけは帰した。帰り道を運ぶのが、荷運びの仕事だからな', 'Touya, captain of the excavation party. I left everyone above. Only Roku I sent home. A porter carries the way back.'),
-                 ('grave', '心臓の間を見たいなら、ここの印も三つだ。……その先のことは、俺の手記に書いた。散らしてある。誰もついてこないように', 'If you want the heart chamber, three marks again. ...What lies beyond, I wrote in my notes. Scattered, so no one would follow.')],
-        'offer': [('neutral', '手記は三冊。灰の層の三本の道に一冊ずつ。……読んでから、戻ってこい。それでも下りるなら、止めない', 'Three notebooks, one down each of the ash paths. ...Read them and come back. If you still go down after that, I won\'t stop you.')],
+                 ('grave', '心臓の間を見たいなら、灰の下り道を抜けるしかない。……俺が案内する。それと、その先のことは手記に書いた。散らしてある。誰もついてこないように', 'If you want the heart chamber, you go through the ash road. ...I\'ll guide you. And what lies beyond, I wrote in my notes. Scattered, so no one would follow.'),
+                 ('neutral', '北の下り口で待つ。俺の灯りを守れ。待ち場を三つ越えたら、灯り喰いの主の間だ', 'I\'ll wait at the north mouth. Guard my lamp. Three resting places, then the hall of the Lord of Eaten Light.')],
+        'offer': [('neutral', '手記は三冊。下り道の三つの待ち場に一冊ずつ。……読んでから、戻ってこい。それでも下りるなら、止めない', 'Three notebooks, one down each of the ash paths. ...Read them and come back. If you still go down after that, I won\'t stop you.')],
         'return': [('grave', '読んだか。……俺は、心臓のかけらを削ろうとした。都のためだと言いながら', 'You read them. ...I tried to cut a shard from the heart. Telling myself it was for the capital.'),
                    ('grave', '番人は心臓を守ってるんじゃない。世界が錨からほどけないように見張ってる。そして、あの声は……お前の声だった', 'The warden doesn\'t guard the heart. It watches so the world doesn\'t come loose from its anchor. And that voice... it was yours.'),
                    ('neutral', '灯り、重さ、鼓動、闇。層の主たちが一つずつ教えたはずだ。全部使え。……行け', 'Light, weight, the beat, the dark. The layer lords taught you each one. Use all of them. ...Go.')],
@@ -451,20 +560,20 @@ def stages_after(L):
 SIDE_QUESTS = {
     'bone': ('ch5/lamp_keeper', '探掘隊の灯り', 'The Party Lantern', 'ミオが落とした、隊の角灯を探す。', 'Find the party lantern Mio lost.',
              [('find', '光の中でだけ崩れる壁の奥に、角灯がある。', 'The lantern lies behind a wall that crumbles only in light.',
-               [('take', 'signal', ['abyss_hidden_bone'], '東の道の広間で、光の術を壁に当てる', 'Shine the light art on a wall in the east hall')])],
+               [('take', 'signal', ['abyss_hidden_bone'], '東の道の広間で、光の術を壁に当てよう', 'Shine the light art on a wall in the east hall')])],
              '「灯りが届く気がする」', '"I feel the light reaching them."'),
     'salt': ('ch5/surveyor_map', '破れた地図', 'The Torn Map', 'ハヤセの地図の切れ端を、三本の道から拾ってくる。', 'Gather Hayase\'s map fragments from the three paths.',
-             [('find', '切れ端は三つの道の箱に一枚ずつ。', 'One fragment lies in a chest on each path.',
-               [('f%d' % i, 'signal', ['abyss_frag_salt_%d' % i], '地図の切れ端（%s）' % ['塩の殻の床', '貯め池', '潮だまり'][i - 1],
-                 'Map fragment (%s)' % ['salt crust', 'cistern', 'tide pool'][i - 1]) for i in (1, 2, 3)])],
+             [('find', '切れ端は下り道の三つの待ち場の箱に一枚ずつ。', 'One fragment lies in a chest at each resting place on the way down.',
+               [('f%d' % i, 'signal', ['abyss_frag_salt_%d' % i], '地図の切れ端（%s）を探そう' % ['塩の殻の床', '貯め池', '白殻の縄張り'][i - 1],
+                 'Map fragment (%s)' % ['salt crust', 'cistern', 'white shell ground'][i - 1]) for i in (1, 2, 3)])],
              '「誰かが帰れるように」', '"So that someone can go home."'),
     'storm': ('ch5/shadow_rest', '戸の奥の影', 'The Shadow Behind the Door', '鼓動の戸の奥にいる影を、眠らせる。', 'Lay to rest the shadow behind the heartbeat doors.',
               [('find', '違う戸の奥に、自分によく似た影が座っている。', 'Behind a wrong door sits a shadow much like you.',
-                [('rest', 'signal', ['abyss_shadow_storm'], '戸の奥の影を倒す', 'Defeat the shadow behind the door')])],
+                [('rest', 'signal', ['abyss_shadow_storm'], '戸の奥の影を倒そう', 'Defeat the shadow behind the door')])],
               '「影は、帰れなかった人の形」', '"Shadows wear the shape of those who never came home."'),
     'ash': ('ch5/captain_pages', '散らした手記', 'The Scattered Notes', '隊長トウヤの手記を、灰の層の三本の道で読む。', 'Read Captain Touya\'s notes on the three ash paths.',
-            [('find', '手記は三冊。迷路・封の間・燠の縄張りの先に一冊ずつ。', 'Three notebooks: past the maze, the seal room and the ember ground.',
-              [('j%d' % i, 'signal', ['abyss_journal_ash_%d' % i], '隊長の手記（%s）' % ['一', '二', '三'][i - 1], 'Captain\'s notes (%d)' % i) for i in (1, 2, 3)])],
+            [('find', '手記は三冊。迷路の口・封の間・燠の縄張りに一冊ずつ。', 'Three notebooks: at the maze mouth, the seal room and the ember ground.',
+              [('j%d' % i, 'signal', ['abyss_journal_ash_%d' % i], '隊長の手記（%s）を探そう' % ['一', '二', '三'][i - 1], 'Captain\'s notes (%d)' % i) for i in (1, 2, 3)])],
             '「あの声は、お前の声だった」', '"That voice was yours."'),
 }
 REWARD_ITEM = {'bone': ('minecraft:soul_lantern', 2), 'salt': ('minecraft:recovery_compass', 1), 'storm': ('minecraft:golden_apple', 2),
@@ -487,7 +596,7 @@ def build_side(L):
         out.append({'id': sid, 'xp': 80, 'objectives': objs})
     out.append({'id': 'return', 'objectives': [{'id': 'talk', 'type': 'talk', 'target': SURVIVOR[L], 'topic': 'side_return'}]})
     t('%s.return.journal' % key, '%sに伝えに戻ろう。' % PEOPLE['survivor_' + L][0], 'Go back and tell %s.' % PEOPLE['survivor_' + L][1])
-    t('%s.return.talk' % key, '%sに話す' % PEOPLE['survivor_' + L][0], 'Talk to %s' % PEOPLE['survivor_' + L][1])
+    t('%s.return.talk' % key, '%sに話そう' % PEOPLE['survivor_' + L][0], 'Talk to %s' % PEOPLE['survivor_' + L][1])
     item, count = REWARD_ITEM[L]
     return {'category': 'sub', 'chapter': CH, 'order': 70 + LAYERS.index(L), 'giver': SURVIVOR[L], 'stages': out,
             'reward': {'xp': 300, 'items': [{'item': item, 'count': count}], 'affinity': {SURVIVOR[L]: 3}}}
@@ -528,31 +637,31 @@ def build_porter():
 
 # ---------------------------------------------------------------- main_abyss の段の文
 STAGE_TEXT = {
-    'bone': ('深淵の最初の層。野営に、探掘隊の灯り番が残っていた。話を聞こう。', '灯り番のミオと話す',
+    'bone': ('深淵の最初の層。野営に、探掘隊の灯り番が残っていた。話を聞こう。', '灯り番のミオと話そう',
              '北の封じ石を通るには、三本の道の奥の印が三つ要る。', '探掘隊の灯り番が言っていた。北の封じ石には印が三つ要る。三本の道の奥を探そう。',
-             '封じ石の奥、肋の主の間。灯台を灯し、光の中で斬る。', '肋の主を倒す'),
-    'salt': ('塩の層の野営に、測量士が座りこんでいた。', '測量士のハヤセと話す',
-             '塩の層の三つの印を集める。', '重さの術を覚えた。塩の殻の床、塩風の井戸、白い貝守の縄張り。三つの印を集めよう。',
-             '白殻の主の間。足もとの赤い輪には重さが落ちる。', '白殻の主を倒す'),
-    'storm': ('雷の層の野営で、薬師が誰かを待っていた。', '薬師のシズと話す',
+             '封じ石の奥、肋の主の間。灯台を灯し、光の中で斬る。', '肋の主を倒そう'),
+    'salt': ('塩の層の野営に、測量士が座りこんでいた。', '測量士のハヤセと話そう',
+             '荷運びのロクを、主の間の前まで送る。', '重さの術を覚えた。ロクがハヤセの縄を主の間の前まで張っていく。塩の殻の床、塩風の井戸、白殻の縄張り。三つの待ち場を確かにして、崩れより先に格子の門へ。',
+             '白殻の主の間。足もとの赤い輪には重さが落ちる。', '白殻の主を倒そう'),
+    'storm': ('雷の層の野営で、薬師が誰かを待っていた。', '薬師のシズと話そう',
               '雷の層の三つの印を集める。', '鼓動の術を覚えた。鼓動の戸、雷の回廊、羽虫の巣。三つの印を集めよう。',
-              '鼓動まねの主の間。鼓動の聞こえる方が本物。', '鼓動まねの主を倒す'),
-    'ash': ('灰の層の野営に、探掘隊の隊長がいた。', '隊長のトウヤと話す',
-            '灰の層の三つの印を集める。', '灯りがすぐ痩せる層。灰の迷路、三つの術の封、燠の番の縄張り。三つの印を集めよう。',
-            '灯り喰いの主の間。闇の波のあとは、光の術で照らす。', '灯り喰いの主を倒す'),
+              '鼓動まねの主の間。鼓動の聞こえる方が本物。', '鼓動まねの主を倒そう'),
+    'ash': ('灰の層の野営に、探掘隊の隊長がいた。', '隊長のトウヤと話そう',
+            '隊長のトウヤと、主の間の前まで下りる。', '灯りがすぐ痩せる層。トウヤの灯りを守って下りる。灰の迷路、三つの術の封、燠の番の縄張り。三つの待ち場を越えて、闇の波より先に格子の門へ。',
+            '灯り喰いの主の間。闇の波のあとは、光の術で照らす。', '灯り喰いの主を倒そう'),
 }
 STAGE_TEXT_EN = {
     'bone': ('The first layer of the abyss. A lamp keeper of the excavation party stayed at the camp. Hear her out.', 'Talk to Mio the lamp keeper',
              'The north seal needs three marks from the ends of the three paths.', 'The lamp keeper said the north seal needs three marks. Search the three paths.',
              'Beyond the seal: the Lord of Ribs. Light the lamps and strike in the light.', 'Defeat the Lord of Ribs'),
     'salt': ('A surveyor sits slumped at the salt layer camp.', 'Talk to Hayase the surveyor',
-             'Gather the three marks of the salt layer.', 'You learned the weight art. The salt crust floor, the salt wind well, the shell keeper\'s ground. Gather three marks.',
+             'See Roku the porter down to the lord\'s hall.', 'You learned the weight art. Roku runs Hayase\'s line down to the lord\'s hall. The salt crust, the salt wind well, the white shell ground: secure all three, then beat the collapse to the bars.',
              'The Lord of White Shells. Weight falls inside the red rings.', 'Defeat the Lord of White Shells'),
     'storm': ('At the storm layer camp, an apothecary waits for someone.', 'Talk to Shizu the apothecary',
               'Gather the three marks of the storm layer.', 'You learned the heartbeat art. The heartbeat doors, the thunder hall, the moth nest. Gather three marks.',
               'The Lord of Mimicked Beats. The one with the heartbeat is real.', 'Defeat the Lord of Mimicked Beats'),
     'ash': ('The party\'s captain is at the ash layer camp.', 'Talk to Captain Touya',
-            'Gather the three marks of the ash layer.', 'Light withers fast here. The ash maze, the three-arts seal, the ember keeper\'s ground. Gather three marks.',
+            'Go down with Captain Touya to the lord\'s hall.', 'Light withers fast here. Guard Touya\'s lamp on the way down. The ash maze, the three-arts seal, the ember ground: pass all three, then outrun the dark wave to the bars.',
             'The Lord of Eaten Light. After the dark wave, make light with your art.', 'Defeat the Lord of Eaten Light'),
 }
 for L in LAYERS:
@@ -562,7 +671,10 @@ for L in LAYERS:
     t(k + '%s_camp.talk' % L, j[1], e[1])
     t(k + '%s_marks.journal' % L, j[3], e[3])
     for i in (1, 2, 3):
-        t(k + '%s_marks.m%d' % (L, i), MARKS['%s_%d' % (L, i)][0], MARKS['%s_%d' % (L, i)][1])
+        t(k + '%s_marks.m%d' % (L, i), MARKS['%s_%d' % (L, i)][0] + 'を手に入れよう', MARKS['%s_%d' % (L, i)][1])  # 帯の目的は「〜しよう」
+    if L in EXPEDITION:
+        t(k + '%s_marks.escape' % L, {'salt': 'ロクを格子の門まで送り届けよう', 'ash': 'トウヤと格子の門まで下りよう'}[L],
+          {'salt': 'Bring Roku to the bars', 'ash': 'Reach the bars with Touya'}[L])
     t(k + '%s_lord.journal' % L, j[4], e[4])
     t(k + '%s_lord.defeat' % L, j[5], e[5])
 

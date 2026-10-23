@@ -1,0 +1,55 @@
+# 旅の地図 (M) の見やすさと縮尺 (2026-10-23)。見本の印 (MapClient.demoSheet) を、開いたとき (半径 600)・世界 (2,400)・
+# いちばん寄せた (96)・都の中 (200)・いちばん引いた (4,800) で撮る。羊皮紙と墨の見た目も一枚ずつ。音は消え、日本語の UI。
+#   bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/minimap_v2.txt -PshotsName=minimap_v2
+# 絵は run/shots/minimap_v2/*.png。docs/review/minimap_v2/ へ写す (前の版は before_*.png)
+world shots flat
+size 1280 720
+timeout 300
+render 6
+clouds off
+guiscale 2
+
+wait 100
+cmd skyabyss cinematic stop
+wait 10
+cmd skyabyss cinematic stop
+cmd time set noon
+cmd weather clear
+cmd gamerule doDaylightCycle false
+camera 0 -58 0 200 10
+waitchunks 200
+chat clear
+hud on
+
+mapstyle slate
+open travel_map_demo
+wait 10
+shot map_600
+mapscale far
+wait 5
+shot map_2400
+mapscale 200
+wait 5
+shot map_200
+mapscale 96
+wait 5
+shot map_96
+mapscale 4800
+wait 5
+shot map_4800
+close
+
+mapstyle parchment
+open travel_map_demo
+wait 10
+mapscale 300
+wait 5
+shot map_parchment_300
+close
+
+mapstyle ink
+open travel_map_demo
+wait 10
+shot map_ink_600
+close
+mapstyle slate

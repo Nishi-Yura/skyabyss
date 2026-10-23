@@ -1,0 +1,39 @@
+{
+  "category": "sub",
+  "order": 85,
+  "repeat": "weekly",
+  "board": true,
+  "min_stage": 4,
+  "unlock": {
+    "type": "flag",
+    "flag": "met",
+    "npc": "skyabyss:whale_chaser"
+  },
+  "stages": [
+    {
+      "id": "heart",
+      "objectives": [
+        {
+          "id": "heart",
+          "type": "kill",
+          "target": "skyabyss:ember_heart",
+          "count": 1
+        }
+      ]
+    }
+  ],
+  "reward": {
+    "xp": 320,
+    "items": [
+      {
+        "item": "skyabyss:resonance_crystal",
+        "count": 1
+      },
+      {
+        "item": "skyabyss:ember_shard",
+        "count": 3,
+        "optional": true
+      }
+    ]
+  }
+}

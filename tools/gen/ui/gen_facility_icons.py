@@ -87,6 +87,11 @@ def target():
         rows.append(r)
     return rows, holes
 
+# 都の案内人: 道しるべ (二枚の矢の板と柱)
+SIGNPOST = ["....##....", "########..", "#########.", "########..", "....##....", "..########", ".#########", "..########",
+            "....##....", "....##....", "....##....", "....##....", "...####..."]
+SIGNPOST_H = [(2, 2), (4, 2), (6, 2), (3, 6), (5, 6), (7, 6)]
+
 
 ICONS = {
     "guild_clerk": (BANNER, BANNER_H), "smith": (HAMMER, HAMMER_H), "tool_merchant": (LANTERN, []),
@@ -96,6 +101,7 @@ ICONS = {
     "gravekeeper": (GRAVE, GRAVE_H), "mapmaker": (MAP, MAP_H), "drunkard": (MUG, MUG_H),
     "trade_keeper": (SCALES, []),
     "stable_keeper": (HORSESHOE, []),
+    "guide": (SIGNPOST, SIGNPOST_H),
 }
 
 

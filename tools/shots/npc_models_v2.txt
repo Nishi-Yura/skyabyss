@@ -1,0 +1,125 @@
+# NPC v2 (人ごとの形。docs/review/npc_quality_2026-10-23.md): 都の係の人 17 役・深淵の生き残り 5 人・町の人 11 人の並び、近く、後ろ、顔
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/npc_models_v2.txt -PshotsName=npc_models_v2  (絵は docs/review/npc_models_v2/ へ写す)
+world shots flat
+size 1280 720
+timeout 900
+render 8
+clouds off
+wait 100
+cmd skyabyss cinematic stop
+wait 10
+cmd skyabyss cinematic stop
+cmd time set noon
+cmd weather clear
+cmd gamerule doDaylightCycle false
+cmd gamemode spectator
+cmd fill -18 -61 -10 18 -61 76 minecraft:polished_andesite destroy
+cmd fill -18 -60 -10 18 -50 76 minecraft:air destroy
+cmd kill @e[type=!minecraft:player,distance=..120]
+# ---- 組 A: 係の人 1〜9 (z = 0.5)
+cmd summon skyabyss:attendant -8.0 -60 0.5 {NoAI:1b,Role:"guild_clerk",Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:attendant -6.0 -60 0.5 {NoAI:1b,Role:"smith",Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:attendant -4.0 -60 0.5 {NoAI:1b,Role:"tool_merchant",Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:attendant -2.0 -60 0.5 {NoAI:1b,Role:"apothecary",Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:attendant 0.0 -60 0.5 {NoAI:1b,Role:"storage_keeper",Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:attendant 2.0 -60 0.5 {NoAI:1b,Role:"innkeeper",Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:attendant 4.0 -60 0.5 {NoAI:1b,Role:"perch_keeper",Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:attendant 6.0 -60 0.5 {NoAI:1b,Role:"shrine_priest",Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:attendant 8.0 -60 0.5 {NoAI:1b,Role:"keep_veteran",Rotation:[0f,0f],PersistenceRequired:1b}
+# ---- 組 B: 係の人 10〜17 (z = 20.5)
+cmd summon skyabyss:attendant -7.0 -60 20.5 {NoAI:1b,Role:"archivist",Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:attendant -5.0 -60 20.5 {NoAI:1b,Role:"training_master",Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:attendant -3.0 -60 20.5 {NoAI:1b,Role:"black_marketeer",Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:attendant -1.0 -60 20.5 {NoAI:1b,Role:"gravekeeper",Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:attendant 1.0 -60 20.5 {NoAI:1b,Role:"mapmaker",Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:attendant 3.0 -60 20.5 {NoAI:1b,Role:"drunkard",Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:attendant 5.0 -60 20.5 {NoAI:1b,Role:"trade_keeper",Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:attendant 7.0 -60 20.5 {NoAI:1b,Role:"stable_keeper",Rotation:[0f,0f],PersistenceRequired:1b}
+# ---- 組 C: 深淵の生き残り (z = 40.5)
+cmd summon skyabyss:attendant -5.0 -60 40.5 {NoAI:1b,Role:"survivor_bone",Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:attendant -2.4 -60 40.5 {NoAI:1b,Role:"survivor_salt",Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:attendant 0.2 -60 40.5 {NoAI:1b,Role:"survivor_storm",Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:attendant 2.6 -60 40.5 {NoAI:1b,Role:"survivor_ash",Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:attendant 5.4 -60 40.5 {NoAI:1b,Role:"abyss_porter",Rotation:[0f,0f],PersistenceRequired:1b}
+# ---- 組 D: 町の人 (z = 60.5)
+cmd summon skyabyss:town_guest -10.0 -60 60.5 {NoAI:1b,Guest:"apprentice",Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:town_guest -8.0 -60 60.5 {NoAI:1b,Guest:"bellkeeper",Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:town_guest -6.0 -60 60.5 {NoAI:1b,Guest:"fisher",Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:town_guest -4.0 -60 60.5 {NoAI:1b,Guest:"bard",Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:town_guest -2.0 -60 60.5 {NoAI:1b,Guest:"child",Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:town_guest 0.0 -60 60.5 {NoAI:1b,Guest:"weaver",Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:town_guest 2.0 -60 60.5 {NoAI:1b,Guest:"ash_apprentice",Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:town_guest 4.0 -60 60.5 {NoAI:1b,Guest:"herbalist",Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:town_guest 6.0 -60 60.5 {NoAI:1b,Guest:"sailor",Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:town_guest 8.0 -60 60.5 {NoAI:1b,Guest:"mother",Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:town_guest 10.0 -60 60.5 {NoAI:1b,Guest:"baker",Rotation:[0f,0f],PersistenceRequired:1b}
+# ---- 撮る
+hud off
+camera minecraft:overworld 0 -58.0 9.0 180 8
+waitchunks
+wait 60
+shot a_all
+camera minecraft:overworld -5.0 -58.6 3.4 200 6
+wait 20
+shot a_near_left
+camera minecraft:overworld 5.0 -58.6 3.4 160 6
+wait 20
+shot a_near_right
+camera minecraft:overworld 0 -58.2 -6.5 0 10
+wait 20
+shot a_back
+camera minecraft:overworld 0 -58.0 29.0 180 8
+wait 30
+shot b_all
+camera minecraft:overworld -4.0 -58.6 23.4 200 6
+wait 20
+shot b_near_left
+camera minecraft:overworld 4.0 -58.6 23.4 160 6
+wait 20
+shot b_near_right
+camera minecraft:overworld 0 -58.2 13.5 0 10
+wait 20
+shot b_back
+camera minecraft:overworld 0 -58.2 47.0 180 8
+wait 30
+shot c_all
+camera minecraft:overworld -2.6 -58.7 43.6 205 4
+wait 20
+shot c_near_left
+camera minecraft:overworld 3.4 -58.7 43.6 155 4
+wait 20
+shot c_near_right
+camera minecraft:overworld 0 -58.2 34.0 0 10
+wait 20
+shot c_back
+camera minecraft:overworld -5.0 -58.4 43.0 180 3
+wait 20
+shot c_face_mio
+camera minecraft:overworld 2.6 -58.4 43.0 180 3
+wait 20
+shot c_face_toya
+camera minecraft:overworld 0.2 -58.4 43.0 180 3
+wait 20
+shot c_face_shizu
+camera minecraft:overworld 0 -58.0 70.5 180 8
+wait 30
+shot d_all
+camera minecraft:overworld -6.0 -58.6 64.0 200 6
+wait 20
+shot d_near_left
+camera minecraft:overworld 6.0 -58.6 64.0 160 6
+wait 20
+shot d_near_right
+camera minecraft:overworld 0 -58.2 54.0 0 10
+wait 20
+shot d_back
+camera minecraft:overworld -2.0 -58.9 62.6 180 3
+wait 20
+shot d_face_child
+camera minecraft:overworld -8.0 -58.4 3.0 180 3
+wait 20
+shot a_face_clerk
+camera minecraft:overworld 6.0 -58.4 3.0 180 3
+wait 20
+shot a_face_priest
+quit

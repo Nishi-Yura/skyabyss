@@ -825,9 +825,14 @@ public final class ShotRunner {
                 return true;
             }
             case "mapscale" -> {
-                // mapscale near|far : 開いている旅の地図の縮尺 (町のまわり 600 / 世界 2,400)
+                // mapscale near|far|<半径> : 開いている旅の地図の縮尺 (町のまわり 600 / 世界 2,400 / 半径のブロック 96〜4,800)
                 if (mc.screen instanceof jp.revati.skyabyss.client.map.TravelMapScreen map) {
-                    map.scale(line.arg(0).equals("far") ? 1 : 0);
+                    String a = line.arg(0);
+                    if (a.equals("far") || a.equals("near")) {
+                        map.scale(a.equals("far") ? 1 : 0);
+                    } else {
+                        map.zoomTo(Double.parseDouble(a));
+                    }
                 }
                 return true;
             }

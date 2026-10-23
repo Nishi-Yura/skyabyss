@@ -1,0 +1,38 @@
+{
+  "category": "sub",
+  "order": 67,
+  "repeat": "daily",
+  "board": true,
+  "min_stage": 3,
+  "unlock": {
+    "type": "flag",
+    "flag": "met",
+    "npc": "skyabyss:whale_chaser"
+  },
+  "stages": [
+    {
+      "id": "watch",
+      "objectives": [
+        {
+          "id": "kill",
+          "type": "kill",
+          "target": "skyabyss:ash_husk",
+          "count": 6
+        }
+      ]
+    }
+  ],
+  "reward": {
+    "xp": 120,
+    "items": [
+      {
+        "item": "skyabyss:ash_hemp",
+        "count": 3
+      },
+      {
+        "item": "skyabyss:soot_iron",
+        "count": 1
+      }
+    ]
+  }
+}

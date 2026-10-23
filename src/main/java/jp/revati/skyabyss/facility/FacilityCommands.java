@@ -33,6 +33,8 @@ import net.neoforged.neoforge.event.RegisterCommandsEvent;
 //   /skyabyss facility brew                       薬師の醸造の手ほどき (四章の決まりのまま)
 //   /skyabyss facility trade [demo]               取引所の画面を番の前と同じに開く (出す・申請ができる。だれでもの /trade は番の前でない)。
 //                                                 demo = 撮影用の出品・申請・受け取りの品を足す
+//   /skyabyss facility guide [施設|stop|go <所>]  都の案内: 引数なし = 案内人の一覧を開く、施設 = その戸まで灯りの道 (TownGuide)、
+//                                                 stop = やめる、go <n|s|e|w|plaza> = その案内人の前へ飛ぶ (撮影・試し用)
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class FacilityCommands {
     private static final SuggestionProvider<CommandSourceStack> ROLES = (ctx, b) -> SharedSuggestionProvider.suggest(
@@ -53,6 +55,63 @@ public final class FacilityCommands {
                                         .executes(c -> spawn(c.getSource(), StringArgumentType.getString(c, "role"), IntegerArgumentType.getInteger(c, "look"))))))
                         .then(Commands.literal("mark").then(Commands.argument("name", StringArgumentType.word())
                                 .executes(c -> mark(c.getSource(), StringArgumentType.getString(c, "name")))))
+                        .then(Commands.literal("guide")
+                                .executes(c -> {
+                                    TownGuide.openMenu(c.getSource().getPlayerOrException());
+                                    return 1;
+                                })
+                                .then(Commands.literal("stop").executes(c -> {
+                                    TownGuide.pick(c.getSource().getPlayerOrException(), "");
+                                    return 1;
+                                }))
+                                .then(Commands.literal("go").then(Commands.argument("where", StringArgumentType.word())
+                                        .suggests((ctx, b) -> SharedSuggestionProvider.suggest(java.util.List.of("n", "s", "e", "w", "plaza"), b))
+                                        .executes(c -> {
+                                            ServerPlayer p = c.getSource().getPlayerOrException();
+                                            BlockPos at = TownGuide.guideSpots(p.server).get(TownGuide.GUIDE_MARK + StringArgumentType.getString(c, "where"));
+                                            if (at == null) {
+                                                c.getSource().sendFailure(Component.literal("no guide spot (capital not built?)"));
+                                                return 0;
+                                            }
+                                            // 案内人から都の真ん中の方へ 3 歩の所に、案内人の方を向いて
+                                            BlockPos mid = TownGuide.center(p.server) != null ? TownGuide.center(p.server) : at;
+                                            double dx = mid.getX() - at.getX();
+                                            double dz = mid.getZ() - at.getZ();
+                                            double len = Math.max(1e-6, Math.sqrt(dx * dx + dz * dz));
+                                            double x = at.getX() + 0.5 + dx / len * 3;
+                                            double z = at.getZ() + 0.5 + dz / len * 3;
+                                            float yaw = (float) Math.toDegrees(Math.atan2(-(at.getX() + 0.5 - x), at.getZ() + 0.5 - z));
+                                            p.teleportTo(p.serverLevel(), x, at.getY(), z, yaw, 10f);
+                                            return 1;
+                                        })))
+                                .then(Commands.literal("face").then(Commands.argument("place", StringArgumentType.word())
+                                        .suggests((ctx, b) -> SharedSuggestionProvider.suggest(TownGuide.PLACES.stream().map(TownGuide.Place::id), b))
+                                        .executes(c -> {
+                                            // 選んで、道の 12 ブロックほど先を向く (撮影用)
+                                            ServerPlayer p = c.getSource().getPlayerOrException();
+                                            TownGuideNetwork.Path path = TownGuide.pick(p, StringArgumentType.getString(c, "place"));
+                                            if (path == null || path.nodes().isEmpty()) {
+                                                return 0;
+                                            }
+                                            BlockPos to = path.nodes().get(path.nodes().size() - 1);
+                                            for (BlockPos n : path.nodes()) {
+                                                if (n.distSqr(p.blockPosition()) >= 12 * 12) {
+                                                    to = n;
+                                                    break;
+                                                }
+                                            }
+                                            double dx = to.getX() + 0.5 - p.getX();
+                                            double dz = to.getZ() + 0.5 - p.getZ();
+                                            float yaw = (float) Math.toDegrees(Math.atan2(-dx, dz));
+                                            p.teleportTo(p.serverLevel(), p.getX(), p.getY(), p.getZ(), yaw, 22f);
+                                            return 1;
+                                        })))
+                                .then(Commands.argument("place", StringArgumentType.word())
+                                        .suggests((ctx, b) -> SharedSuggestionProvider.suggest(TownGuide.PLACES.stream().map(TownGuide.Place::id), b))
+                                        .executes(c -> {
+                                            TownGuide.pick(c.getSource().getPlayerOrException(), StringArgumentType.getString(c, "place"));
+                                            return 1;
+                                        })))
                         .then(Commands.literal("place").executes(c -> {
                             ServerPlayer p = c.getSource().getPlayerOrException();
                             int n = Attendants.ensureAll(p.serverLevel(), OpeningSites.shelterExtras(p.server, AttendantRole.MARK_PREFIX));

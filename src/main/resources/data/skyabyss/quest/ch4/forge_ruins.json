@@ -13,8 +13,8 @@
       },
       {
         "type": "quest",
-        "quest": "main_ember",
-        "is": "started"
+        "quest": "ch4/fire_draught",
+        "is": "done"
       }
     ]
   },

@@ -136,24 +136,24 @@ public final class StorySelfTest {
                 + " (node " + node(p) + ", heard " + QuestLog.of(p).heard("main_tide", WC, "ms_c_tide2") + ", npc alive " + wc.isAlive() + ")", f);
         DialogueService.close(p);
 
-        // 余燼: 同じ。保存して読み直しても (ログイン) 聞いた記録は残る
+        // 余燼: 同じ (四章の支度がまだなら prepare)。保存して読み直しても (ログイン) 聞いた記録は残る
         Quests.setStage(p, "main_ember", "rumor");
         check(stage(p, "main_ember").equals("rumor"), "isana topics: main_ember did not start at rumor", f);
         talk(p, wc, "ms_c_ember", f);
         DialogueService.choose(p, "ms_c_ember", DialogueService.CONTINUE);
-        check(stage(p, "main_ember").equals("see"), "isana topics: hearing Isana's topic page did not finish main_ember's rumor: " + stage(p, "main_ember"), f);
+        check(stage(p, "main_ember").equals("see") || stage(p, "main_ember").equals("prepare"), "isana topics: hearing Isana's topic page did not finish main_ember's rumor: " + stage(p, "main_ember"), f);
         DialogueService.close(p);
         QuestLog before = QuestLog.of(p);
         QuestLog after = QuestLog.CODEC.parse(net.minecraft.nbt.NbtOps.INSTANCE, QuestLog.CODEC.encodeStart(net.minecraft.nbt.NbtOps.INSTANCE, before)
                 .getOrThrow()).getOrThrow();
         check(after.heard("main_ember", WC, "ms_c_ember2") && after.heard("main_tide", WC, "ms_c_tide2"), "isana topics: heard topics were lost across save and load", f);
         p.setData(QuestSetup.LOG, after);
-        check(stage(p, "main_ember").equals("see") && (stage(p, "main_tide").equals("see") || stage(p, "main_tide").equals("prepare")), "isana topics: stages changed across relog", f);
+        check((stage(p, "main_ember").equals("see") || stage(p, "main_ember").equals("prepare")) && (stage(p, "main_tide").equals("see") || stage(p, "main_tide").equals("prepare")), "isana topics: stages changed across relog", f);
 
         // 記録のあるのに段が残った状態 (古いセーブ・先に聞いていた) は、見回りが一度走れば済む
         Quests.setStage(p, "main_ember", "rumor");
         Quests.poll(p, true);
-        check(stage(p, "main_ember").equals("see"), "isana topics: a heard rumor stage did not self-heal on poll: " + stage(p, "main_ember"), f);
+        check(stage(p, "main_ember").equals("see") || stage(p, "main_ember").equals("prepare"), "isana topics: a heard rumor stage did not self-heal on poll: " + stage(p, "main_ember"), f);
         // 先の段の証拠 (心臓を止めた) があれば、聞いた記録がなくても飛ばす
         p.setData(QuestSetup.LOG, new QuestLog());
         Quests.setStage(p, "main_tide", "rumor");
@@ -361,10 +361,10 @@ public final class StorySelfTest {
         Quests.poll(p, true);
         Lore.unlock(p, "chapter1/tide_ruins", false);
         Quests.poll(p, true);
-        Lore.unlock(p, "chapter1/inscription_tide_beach", false);
+        Lore.unlock(p, "chapter1/inscription_tide_west", false);
         Quests.poll(p, true);
         check(stage(p, "main_tide").equals("inscriptions") && QuestLog.of(p).entry("main_tide").progress(0) == 1, "inscriptions should be 1/2", f);
-        Lore.unlock(p, "chapter1/inscription_tide_hub", false);
+        Lore.unlock(p, "chapter1/inscription_tide_light", false);
         Quests.poll(p, true);
         check(stage(p, "main_tide").equals("heart"), "two inscriptions did not advance to the heart: " + stage(p, "main_tide"), f);
         Progression.onTitanStopped(server, List.of(p.getUUID()), Titans.TIDE_SHELL);

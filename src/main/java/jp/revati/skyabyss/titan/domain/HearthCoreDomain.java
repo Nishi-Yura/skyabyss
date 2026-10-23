@@ -106,7 +106,7 @@ public final class HearthCoreDomain extends HeartDomain {
     }
 
     private void heat(ServerLevel level, TelegraphShape shape, double rr) {
-        tg(level, shape, WARN)
+        tg(level, shape, WARN).look(jp.revati.skyabyss.combat.AttackLook.DOMAIN_HEARTH_HEAT)
                 .active(ACTIVE).repeatEvery(REPEAT)
                 .onImpact(s -> {
                     s.playSound(null, cx, floorY, cz, SoundEvents.BLAZE_SHOOT, SoundSource.HOSTILE, 0.9f, 0.7f);

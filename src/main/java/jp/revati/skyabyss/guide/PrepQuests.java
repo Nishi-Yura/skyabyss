@@ -25,15 +25,15 @@ import net.minecraft.server.level.ServerPlayer;
 //            tools/gen/ch1/gen_ch1_trails.py が書く。旧い備えの頼み ch1/prep_* は、この 3 本に吸収した (置くと読み込みの警告)
 //   二章     支度の段 2 本 (34 の 4.3): ch2/salt_road (塩の道)・ch2/ebb_boat (船と貝)。tools/gen/ch2/gen_ch2_ground.py。旅装は任意のサブ ch2/wader_gear
 //   三章     支度の段: ch3/lightning_pillars (避雷の柱)・ch3/scorched_watch (焼けた見張り塔)・ch3/sky_stone (空の石)。tools/gen/ch3/gen_ch3_ground.py
-//   四章     支度の段 2 本 (34 の 4.5): ch4/fire_draught (火除けの薬)・ch4/forge_ruins (炉跡)。tools/gen/ch4/gen_ch4_ground.py
+//   四章     支度の段 2 本 (34 の 4.5): ch4/fire_draught (火除けの薬) → ch4/forge_ruins (炉跡)。tools/gen/ch4/gen_ch4_ground.py
 //   既定の形 (今はどの章も使っていない。仕組みと自己テストのために残す): data/skyabyss/quest/ch<n>/prep_gear.json (身ごしらえ) / prep_blade.json (刃を研ぐ) /
 //            prep_pulse.json (鼓動を聞く)。ID は ch<n>/prep_<kind>、文のキーは quest.skyabyss.ch<n>.prep_<kind>.title など (QuestDef.keyBase)。
 //            章の担当が 34 の段の名前に替えるときは、下の CHAPTER_IDS に一行足す
 //   必須     chapter = その章の ID (一章なら titan_whale)、start_when (章の頭に自動で出る)、repeat と board は付けない。
 //            category は支度の段 (CHAPTER_IDS) なら main、既定の備えの頼みなら sub。守っていなければ読み込みの警告 (QuestManager.loadErrors。validate)。
-//   順番     支度の段の章 (一〜三章) は、一本ずつ順に出る (前の段を終えると次が出る。start_when に前の段の done。2026-10-22 の試遊:
-//            メインが並ぶと迷う)。親のメイン (main_song・main_tide・main_thunder) には「支度」の段 prepare (目的 condition の prep) があり、
-//            目的の帯 (client/quest/ObjectiveStrip.current) は支度の段のほうを一つだけ出す。四章の既定の形はふさがない (ログの並びは order)。
+//   順番     支度の段の章 (一〜四章) は、一本ずつ順に出る (前の段を終えると次が出る。start_when に前の段の done。2026-10-22 の試遊:
+//            メインが並ぶと迷う)。親のメイン (main_song・main_tide・main_thunder・main_ember) には「支度」の段 prepare (目的 condition の prep) があり、
+//            目的の帯 (client/quest/ObjectiveStrip.current) は支度の段のほうを一つだけ出す。
 //   合図     三本が終わったとき (どの順でも)、その人に合図 `ch<n>_ready` (Quests.signal) を一度だけ送る。以降はいつでも `ready(player, n)` が真。
 //            クエストの条件では {"type":"prep","chapter":n,"min":k} (k 本以上。省くと全部) で読める。一章は、三本そろうまで岩鯨が初めて
 //            現れない (物語の運び。story.ch1.Ch1Trails.callReady・titan.TitanEvents)。見たあとの降下は今までどおり (21 の 3.2、Ch1Descent)。

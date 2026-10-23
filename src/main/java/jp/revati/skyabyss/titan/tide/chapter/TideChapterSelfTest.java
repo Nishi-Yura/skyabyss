@@ -380,6 +380,9 @@ public final class TideChapterSelfTest {
     // ---------------------------------------------------------------- 大干潮
     private static void ebb(MinecraftServer server, ServerLevel level, TitanWorldData data, List<String> f) {
         int sea = level.getSeaLevel();
+        // 前の浜の乗り場の検査 (shoreBoard) で休んだ潮殻が、座る体の下の海の底を削る (TitanClearing.carve)。
+        // 削れた底のままだと道の床の高さが途切れ、道が引けない。海を建て直してから調べる
+        buildSea(level);
         TideEbb.EbbData d = TideEbb.EbbData.get(level);
         d.runs.clear();
         d.witnessed.clear();

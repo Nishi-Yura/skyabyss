@@ -240,14 +240,14 @@ public final class StormLoreSelfTest {
         Lore.unlock(p, StormLore.LORE_RUINS, false);   // 背に入った
         Quests.poll(p, true);
         check(stage(p, "main_thunder").equals("trials"), "boarding did not lead to the trials: " + stage(p, "main_thunder"), f);
-        Lore.unlock(p, StormLore.inscriptionLore("tail"), false);
+        Lore.unlock(p, StormLore.inscriptionLore("west"), false);   // レイドの部屋の碑 (SR1)
         Quests.signal(p, StormLore.trialSignal("east"));
         Quests.signal(p, "storm_trial_nowhere");
         Quests.poll(p, true);
         QuestLog.Entry e = QuestLog.of(p).entry("main_thunder");
         check(stage(p, "main_thunder").equals("trials") && e.progress(0) == 1 && e.progress(1) == 1,
                 "one inscription and one stone should leave the trials at 1/2 and 1/1", f);
-        Lore.unlock(p, StormLore.inscriptionLore("hub"), false);
+        Lore.unlock(p, StormLore.inscriptionLore("column"), false); // 同 (SR4)
         Quests.poll(p, true);
         check(stage(p, "main_thunder").equals("heart"), "two inscriptions and a stone did not lead to the heart: " + stage(p, "main_thunder"), f);
         Quests.poll(p, true);

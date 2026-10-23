@@ -1,12 +1,31 @@
 {
-  "category": "main",
+  "category": "sub",
   "chapter": "titan_ember",
   "order": 45,
   "giver": "skyabyss:storyteller",
   "min_stage": 3,
   "start_when": {
-    "type": "stage",
-    "min": 3
+    "type": "all",
+    "of": [
+      {
+        "type": "stage",
+        "min": 3
+      },
+      {
+        "type": "quest",
+        "quest": "main_ember",
+        "is": "started"
+      },
+      {
+        "type": "not",
+        "of": {
+          "type": "quest",
+          "quest": "main_ember",
+          "is": "active",
+          "stage": "rumor"
+        }
+      }
+    ]
   },
   "stages": [
     {

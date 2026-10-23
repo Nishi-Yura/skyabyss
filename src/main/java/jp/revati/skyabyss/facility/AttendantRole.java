@@ -30,7 +30,9 @@ public enum AttendantRole {
     // 取引所 (プレイヤーどうしの売り買い。35 の 6.11)
     TRADE_KEEPER("trade_keeper", null, 1),
     // 厩舎 (乗り物の店。docs/design/38)
-    STABLE_KEEPER("stable_keeper", null, 1);
+    STABLE_KEEPER("stable_keeper", null, 1),
+    // 都の案内人 (門と広場に何人も。印は npc_guide_<所>。話すと施設の一覧 → 選んだ戸まで灯りの道。facility/TownGuide、35 の 6.12)
+    GUIDE("guide", null, 1);
 
     // 設計図の印の頭 (npc_<役>)
     public static final String MARK_PREFIX = "npc_";
@@ -71,11 +73,17 @@ public enum AttendantRole {
         return null;
     }
 
-    // 印の名前 (npc_smith) から役。印でなければ null
+    // 印の名前 (npc_smith) から役。印でなければ null。案内人は所ごとに印がある (npc_guide_n・npc_guide_plaza …)
     @Nullable
     public static AttendantRole byMark(String mark) {
-        return mark.startsWith(MARK_PREFIX) ? byId(mark.substring(MARK_PREFIX.length())) : null;
+        if (!mark.startsWith(MARK_PREFIX)) {
+            return null;
+        }
+        String id = mark.substring(MARK_PREFIX.length());
+        return id.startsWith(GUIDE_ID + "_") ? GUIDE : byId(id);
     }
+
+    private static final String GUIDE_ID = "guide";
 
     // 会話の役 (skyabyss:attendant_smith) から役
     @Nullable

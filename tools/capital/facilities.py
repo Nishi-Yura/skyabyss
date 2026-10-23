@@ -16,12 +16,16 @@ import math
 import vox
 from backalley import BackAlley
 from interiors import Interiors, HOME_THEMES
+from furnish import Furnish
+from furnish_shops import FurnishShops
+from furnish_shops2 import FurnishShops2
+from furnish_big import FurnishBig
 from vox import Body, DX, OPP, CW, gable_roof, hanging_sign, lamp_post, tree, bench, flowerbed, turret, rosette, hip_spire
 
 PLANK = '%s_planks'
 
 
-class Facilities(Interiors, BackAlley):
+class Facilities(FurnishBig, FurnishShops2, FurnishShops, Furnish, Interiors, BackAlley):
     # ---------------------------------------------------------------- 小道具
     def _init_fac(self):
         self.openings = []   # (外の面の x, z, 外向き): 戸の前。通りの灯りを避ける
@@ -1164,6 +1168,7 @@ class Facilities(Interiors, BackAlley):
         if ladder:
             keep |= {(ladder[0] + a, ladder[1] + c) for a in (-1, 0, 1) for c in (-1, 0, 1)}
         rect = (ax0, az0, ax1, az1)
+        self.home_rooms = getattr(self, 'home_rooms', []) + [('house_%d' % n, rect, y, 5), ('house_%d_up' % n, rect, y + 6, 4)]
         # 一階: 住み手の型、残りの床に敷物
         self.place_stamps(rect, y, ground_names, color=bedc, keep=keep)
         if theme == 'herbalist':

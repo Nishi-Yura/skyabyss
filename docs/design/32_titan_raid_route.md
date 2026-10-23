@@ -65,7 +65,7 @@
 - 「越えた → 4 秒 → 次の部屋の中」は `TrialRoute`（`RaidRun.complete` → `TrialRoute.onCleared(..., raid)`）。運ばれるのは**順路の参加者のうち、その背にいる人**。行き先は次の部屋の入口の休み場（`RaidKit.buildCell` が部屋ごとに建てる）。
 - 三つ目の部屋を越えると中ボスの間の中（`RaidRun.enterMid`）へ、中ボスを倒すと心臓の間の中（`InstanceArenas.heartEntry`、大門のすぐ内側で中心を向く）へ運ぶ。前室を歩く所はない。
 - 運ぶ前の 4 秒に、出口の戸が開く・報い・「越えた。次は〇〇」の一行（帯）。運ばれた瞬間に段の札（6 章）と、ビーコンの音。
-- 部屋を越えたときは、四体とも同じ口（`GrowthRewards.onRouteTrialCleared`）で、試練の経験値（岩鯨 40・潮殻 50・雷翼 60・余燼 60、推奨レベルで減る）・依頼の合図 `back_trial_cleared`（進捗 `trial:<巨神>`）・巨神ごとの試練の合図（部屋 1〜3 の順に `storm_trial_west/east/front` など。`TrialSteles.signalsOf`）を渡す。試練を越えた人には紋が一つ（31 の A14）。岩鯨の部屋 1〜3 を越えると、碑文 `inscription_west`・`inscription_east`・`inscription_below` を記す。
+- 部屋を越えたときは、四体とも同じ口（`GrowthRewards.onRouteTrialCleared`）で、試練の経験値（岩鯨 40・潮殻 50・雷翼 60・余燼 60、推奨レベルで減る）・依頼の合図 `back_trial_cleared`（進捗 `trial:<巨神>`）・巨神ごとの試練の合図（部屋 1〜3 の順に `storm_trial_west/east/front` など。`TrialSteles.signalsOf`）を渡す。試練を越えた人には紋が一つ（31 の A14）。岩鯨の部屋 1〜3 を越えると、碑文 `inscription_west`・`inscription_east`・`inscription_below` を記す。どの部屋も、越えるとその部屋の入口の碑の項目を記す（`RaidLore.SIGNS` → `chapter1/inscription_<碑>`）。二章・三章のメインの碑文の段（`main_tide.inscriptions`・`main_thunder.trials.read`）は、その巨神の六部屋の碑（潮殻 TR1・TR4・TR5・TR6・TR3・TR7、雷翼 SR1・SR4・SR2・SR5・SR3・SR6）から二つを数えるので、枠ごとの引きがどうなっても三部屋で済む（心臓を止めれば飛ぶ）。どの引きでも済むことは `SELFTEST raid lore` が全部の組で確かめる。
 
 ### 2.4 休み場・倒れたとき・あきらめ・終わり
 

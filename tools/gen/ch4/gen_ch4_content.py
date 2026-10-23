@@ -115,9 +115,9 @@ def write_text() -> None:
     text(q + "summary", "語り部とイサナから、鍵の話をそれぞれに聞く。", "Hear about the key from the storyteller and from Isana, each in their own way.")
     text(q + "done", "二人の話は、同じ鍵の、別の端を持っていた。", "Their two tales held different ends of the same key.")
     text(q + "teller.journal", "灰の朝が続く。語り部が、鍵のことで話したそうにしている。", "The ash mornings go on. The storyteller seems to want to talk about the key.")
-    text(q + "teller.talk", "語り部の話を聞く", "Hear the storyteller out")
+    text(q + "teller.talk", "語り部の話を聞こう", "Hear the storyteller out")
     text(q + "isana.journal", "イサナも、鍵のことを話したがっている。", "Isana, too, wants to speak of the key.")
-    text(q + "isana.talk", "イサナの話を聞く", "Hear Isana out")
+    text(q + "isana.talk", "イサナの話を聞こう", "Hear Isana out")
 
     # 会話 (語り部)
     s = "dialogue.skyabyss.storyteller."
@@ -188,10 +188,13 @@ def write_data() -> None:
                                          "unlock": [{"type": "page", "target": "ember_hearth"}, {"type": "manual"}],
                                          "related": ["chapter1/ember_hearth"]})
 
+    # 語り部とイサナの鍵の話はサブ (四章のメインは main_ember と支度の段を一本ずつ。2026-10-23 の点検: メインが同時に 4 本)。
+    # イサナの噂 (main_ember の rumor) を聞いたあとに出る
     dump(RES / "data/skyabyss/quest/ch4/fragments.json", {
-        "category": "main", "chapter": "titan_ember", "order": 45, "giver": "skyabyss:storyteller",
+        "category": "sub", "chapter": "titan_ember", "order": 45, "giver": "skyabyss:storyteller",
         "min_stage": 3,
-        "start_when": {"type": "stage", "min": 3},
+        "start_when": {"type": "all", "of": [{"type": "stage", "min": 3}, {"type": "quest", "quest": "main_ember", "is": "started"},
+                                             {"type": "not", "of": {"type": "quest", "quest": "main_ember", "is": "active", "stage": "rumor"}}]},
         "stages": [
             {"id": "teller", "objectives": [{"id": "talk", "type": "talk", "target": "skyabyss:storyteller", "topic": "ch4_s_three"}]},
             {"id": "isana", "objectives": [{"id": "talk", "type": "talk", "target": "skyabyss:whale_chaser", "topic": "ch4_i_three"}]},

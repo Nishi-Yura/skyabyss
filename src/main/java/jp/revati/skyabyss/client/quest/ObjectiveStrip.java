@@ -95,14 +95,15 @@ public final class ObjectiveStrip {
         if (demo) {
             return true;
         }
-        return OpeningClient.objective() != null || jp.revati.skyabyss.story.ch5.client.AbyssSectionClient.objective() != null
+        return jp.revati.skyabyss.client.guide.TownGuideClient.active() || OpeningClient.objective() != null
+                || jp.revati.skyabyss.story.ch5.client.AbyssSectionClient.objective() != null
                 || jp.revati.skyabyss.story.ch5.client.AbyssSectionClient.guide() != null || current(mc, QuestLog.of(mc.player)) != null;
     }
 
     // 帯がいまこのクエストを出しているか (出していなければ、追跡の札の側が出す。序盤の目的を帯が出しているときなど)
     static boolean showsQuest(QuestDef def) {
         Minecraft mc = Minecraft.getInstance();
-        if (!active() || demo || OpeningClient.objective() != null) {
+        if (!active() || demo || OpeningClient.objective() != null || jp.revati.skyabyss.client.guide.TownGuideClient.active()) {
             return false;
         }
         QuestDef cur = current(mc, QuestLog.of(mc.player));
@@ -123,7 +124,7 @@ public final class ObjectiveStrip {
     private static Cur cur(Minecraft mc) {
         if (demo) {
             BlockPos at = mc.player.blockPosition().offset(96, 0, -70);
-            return new Cur("岩鯨の背へ上る鎖を探す", new Resolved(at, false));
+            return new Cur("岩鯨の背へ上る鎖を探そう", new Resolved(at, false));
         }
         // 深淵の主・番人の戦いのあいだは、戦いの一言 (story/ch5/layers/AbyssSections)
         String fight = jp.revati.skyabyss.story.ch5.client.AbyssSectionClient.objective();
@@ -134,6 +135,11 @@ public final class ObjectiveStrip {
         String abyssGuide = jp.revati.skyabyss.story.ch5.client.AbyssSectionClient.guide();
         if (abyssGuide != null) {
             return new Cur(abyssGuide, new Resolved(jp.revati.skyabyss.story.ch5.client.AbyssSectionClient.target(), false));
+        }
+        // 都の案内人に選んだ行き先 (client/guide/TownGuideClient)。案内のあいだは、序盤の目的・クエストより先に「〜へ向かおう」
+        String town = jp.revati.skyabyss.client.guide.TownGuideClient.objective();
+        if (town != null) {
+            return new Cur(town, new Resolved(jp.revati.skyabyss.client.guide.TownGuideClient.door(), false));
         }
         OpeningClient.Objective opening = OpeningClient.objective();
         if (opening != null) {
@@ -264,6 +270,10 @@ public final class ObjectiveStrip {
     public static Resolved resolve(Minecraft mc) {
         if (mc.player == null) {
             return Resolved.NONE;
+        }
+        BlockPos town = jp.revati.skyabyss.client.guide.TownGuideClient.door();
+        if (town != null) {
+            return new Resolved(town, false);
         }
         OpeningClient.Objective opening = OpeningClient.objective();
         if (opening != null) {

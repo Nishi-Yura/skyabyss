@@ -980,7 +980,7 @@ public class StormHeart extends HeartBoss {
         }
         final int toRod = rod;
         double ceiling = isBound() ? StormHeartArena.CEILING - 0.5 : y + 12;
-        Telegraph.Builder b = tg(server, TelegraphShape.circle(x, z, radius), warn, D)
+        Telegraph.Builder b = tg(server, TelegraphShape.circle(x, z, radius), warn, D).look(jp.revati.skyabyss.combat.AttackLook.STORM_BOLT)
                 .floor(y)
                 .onImpact(s -> {
                     if (toRod >= 0) {
@@ -1022,14 +1022,14 @@ public class StormHeart extends HeartBoss {
             sound(server, StormHeartSetup.ROAR.get(), 3f, 1f);
             server.sendParticles(ParticleTypes.CLOUD, getX(), core().y, getZ(), 60, 1.6, 1.4, 1.6, 0.15);
             safeFallTicks = ROAR_TICKS + 60;
-            tg(server, TelegraphShape.circle(getX(), getZ(), ROAR_PUSH_RADIUS), 22, H)
+            tg(server, TelegraphShape.circle(getX(), getZ(), ROAR_PUSH_RADIUS), 22, H).look(jp.revati.skyabyss.combat.AttackLook.STORM_ROAR)
                     .onHit((s, player) -> {
                         Vec3 to = player.position().subtract(position()).multiply(1, 0, 1);
                         player.knockback(0.9, -to.x, -to.z);
                         player.hurtMarked = true;
                     })
                     .start();
-            tg(server, TelegraphShape.wave(getX(), getZ(), 1.5, Math.max(8, roomRadius()), 0.9, new double[0], 0), 22, H).active(24).start();
+            tg(server, TelegraphShape.wave(getX(), getZ(), 1.5, Math.max(8, roomRadius()), 0.9, new double[0], 0), 22, H).look(jp.revati.skyabyss.combat.AttackLook.STORM_ROAR).active(24).start();
         }
         if (actionTicks % 4 == 0 && actionTicks < 56) {
             if (enrageRoar) {
@@ -1094,7 +1094,7 @@ public class StormHeart extends HeartBoss {
                 double mid = base + i * 2 * Math.PI / arms;
                 armStart[i] = mid - armSpan / 2;
                 boolean first = i == 0;
-                tg(server, TelegraphShape.sweep(getX(), getZ(), armStart[i], armSpan, BLADE_REACH, BLADE_HALF_WIDTH), BLADE_WARN, D).target(first ? target : null)
+                tg(server, TelegraphShape.sweep(getX(), getZ(), armStart[i], armSpan, BLADE_REACH, BLADE_HALF_WIDTH), BLADE_WARN, D).look(jp.revati.skyabyss.combat.AttackLook.STORM_BLADE).target(first ? target : null)
                         .active(BLADE_ACTIVE)
                         .victims(p -> canReach(p) && bladeCrosses(p))
                         .onImpact(s -> {
@@ -1181,7 +1181,7 @@ public class StormHeart extends HeartBoss {
     private void chainSegment(ServerLevel server, double x, double z, double angle, double length, boolean sound, ServerPlayer aim) {
         double dx = Math.cos(angle);
         double dz = Math.sin(angle);
-        tg(server, TelegraphShape.line(x, z, angle, length, CHAIN_HALF_WIDTH), Action.CHAIN.warnTicks, D).target(aim)
+        tg(server, TelegraphShape.line(x, z, angle, length, CHAIN_HALF_WIDTH), Action.CHAIN.warnTicks, D).look(jp.revati.skyabyss.combat.AttackLook.STORM_CHAIN).target(aim)
                 .onImpact(s -> {
                     if (sound) {
                         s.playSound(null, getX(), floorY(), getZ(), StormHeartSetup.STRIKE.get(), SoundSource.HOSTILE, 2f, 1.3f);
@@ -1200,7 +1200,7 @@ public class StormHeart extends HeartBoss {
     }
 
     private void chainNode(ServerLevel server, double x, double z) {
-        tg(server, TelegraphShape.circle(x, z, CHAIN_NODE_RADIUS), Action.CHAIN.warnTicks, D)
+        tg(server, TelegraphShape.circle(x, z, CHAIN_NODE_RADIUS), Action.CHAIN.warnTicks, D).look(jp.revati.skyabyss.combat.AttackLook.STORM_CHAIN_NODE)
                 .onImpact(s -> warn(s, ParticleTypes.ELECTRIC_SPARK, x, floorY() + 1.0, z, 12, 0.6, 0.6, 0.6, 0.2))
                 .onHit((s, player) -> {
                     if (chainHit.add(player.getUUID())) {
@@ -1308,7 +1308,7 @@ public class StormHeart extends HeartBoss {
             if (isBound()) {
                 for (int k = 0; k < 4; k++) {
                     Vec3 h = StormHeartArena.hole(k);
-                    tg(server, TelegraphShape.circle(h.x, h.z, DOWNDRAFT_RADIUS), Action.WINGBEAT.warnTicks, D)
+                    tg(server, TelegraphShape.circle(h.x, h.z, DOWNDRAFT_RADIUS), Action.WINGBEAT.warnTicks, D).look(jp.revati.skyabyss.combat.AttackLook.STORM_DOWNDRAFT)
                             .reach(StormHeartArena.UPDRAFT_TOP - StormHeartArena.FLOOR + 3)
                             .victims(p -> canReach(p) && airborne(p))
                             .onHit((s, player) -> {
@@ -1330,7 +1330,7 @@ public class StormHeart extends HeartBoss {
             int rings = gustRings(present(server));
             for (int i = 0; i < rings; i++) {
                 int active = (int) Math.ceil((reach - 2.5) / 0.55);
-                tg(server, TelegraphShape.wave(getX(), getZ(), 2.5, reach, 0.9, gaps, gapHalf), Action.WINGBEAT.warnTicks + i * 14, D)
+                tg(server, TelegraphShape.wave(getX(), getZ(), 2.5, reach, 0.9, gaps, gapHalf), Action.WINGBEAT.warnTicks + i * 14, D).look(jp.revati.skyabyss.combat.AttackLook.STORM_WING_WAVE)
                         .active(active).jumpClear(0.9)
                         .onHit((s, player) -> {
                             strike(player, WINGBEAT_DAMAGE);
@@ -1383,7 +1383,7 @@ public class StormHeart extends HeartBoss {
                 }
             }
             for (Vec3 c : pads) {
-                tg(server, TelegraphShape.circle(c.x, c.z, CHARGE_RADIUS), Action.CHARGE.warnTicks, D)
+                tg(server, TelegraphShape.circle(c.x, c.z, CHARGE_RADIUS), Action.CHARGE.warnTicks, D).look(jp.revati.skyabyss.combat.AttackLook.STORM_CHARGE)
                         .active(CHARGE_ACTIVE).repeatEvery(10).jumpClear(0.6)
                         .onHit((s, player) -> {
                             strike(player, CHARGE_DAMAGE);
@@ -1411,7 +1411,7 @@ public class StormHeart extends HeartBoss {
                 double x = spot.x;
                 double y = spot.y;
                 double z = spot.z;
-                tg(server, TelegraphShape.circle(x, z, FEATHER_RADIUS), Action.FEATHER.warnTicks, D)
+                tg(server, TelegraphShape.circle(x, z, FEATHER_RADIUS), Action.FEATHER.warnTicks, D).look(jp.revati.skyabyss.combat.AttackLook.STORM_FEATHER)
                         .floor(y).reach(1.5)
                         .onImpact(s -> {
                             s.playSound(null, x, y, z, SoundEvents.AMETHYST_CLUSTER_BREAK, SoundSource.HOSTILE, 1.4f, 1.6f);
@@ -1444,7 +1444,7 @@ public class StormHeart extends HeartBoss {
             flashSeen.clear();
             for (Vec3 spot : pickSpots(server, flashFans(present(server)))) {
                 double angle = Telegraph.angleOf(spot.x - getX(), spot.z - getZ());
-                tg(server, TelegraphShape.cone(getX(), getZ(), angle, FLASH_RANGE, Math.toRadians(FLASH_HALF_ANGLE)), Action.FLASH.warnTicks, D).target(playerAt(server, spot))
+                tg(server, TelegraphShape.cone(getX(), getZ(), angle, FLASH_RANGE, Math.toRadians(FLASH_HALF_ANGLE)), Action.FLASH.warnTicks, D).look(jp.revati.skyabyss.combat.AttackLook.STORM_FLASH).target(playerAt(server, spot))
                         .victims(p -> canReach(p) && flashHits(level(), p.getEyePosition(), p.getViewVector(1f), core(), p))
                         .onHit((s, player) -> {
                             strike(player, FLASH_DAMAGE);
@@ -1507,7 +1507,7 @@ public class StormHeart extends HeartBoss {
                 double mid = base + i * 2 * Math.PI / arms;
                 armStart[i] = mid - armSpan / 2;
                 double armAngle = mid;
-                tg(server, TelegraphShape.sweep(centerX(), centerZ(), armStart[i], armSpan, WEB_REACH, WEB_HALF_WIDTH), Action.WEB.warnTicks, D)
+                tg(server, TelegraphShape.sweep(centerX(), centerZ(), armStart[i], armSpan, WEB_REACH, WEB_HALF_WIDTH), Action.WEB.warnTicks, D).look(jp.revati.skyabyss.combat.AttackLook.STORM_WEB)
                         .active(WEB_TICKS).jumpClear(WEB_JUMP)
                         .onHit((s, player) -> {
                             strike(player, WEB_DAMAGE);
@@ -1588,7 +1588,7 @@ public class StormHeart extends HeartBoss {
                 double dx = Math.cos(angle);
                 double dz = Math.sin(angle);
                 boolean first = i == 0;
-                tg(server, TelegraphShape.line(getX(), getZ(), angle, reach, CROSS_HALF_WIDTH), CROSS_WARN, D).target(first ? target : null)
+                tg(server, TelegraphShape.line(getX(), getZ(), angle, reach, CROSS_HALF_WIDTH), CROSS_WARN, D).look(jp.revati.skyabyss.combat.AttackLook.STORM_CROSS).target(first ? target : null)
                         .onImpact(s -> {
                             if (first) {
                                 s.playSound(null, getX(), floorY(), getZ(), StormHeartSetup.STRIKE.get(), SoundSource.HOSTILE, 2.4f, 1.1f);

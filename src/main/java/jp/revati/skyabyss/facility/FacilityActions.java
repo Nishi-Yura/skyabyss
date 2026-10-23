@@ -43,10 +43,11 @@ import net.minecraft.world.level.block.BedBlock;
 //   brew_lesson : 薬師が醸造を教える (四章。手ほどきの品を一度だけ)
 //   mount_shop : 厩舎の番。乗り物の店の画面 (mount/MountService。docs/design/38)
 //   trade     : 取引所の番。取引所の画面 (trade/TradeService。番の前なので出す・申請ができる)
+//   guide     : 都の案内人。施設の一覧の画面 → 選んだ施設の戸まで灯りの道 (TownGuide)
 public final class FacilityActions {
     public static final java.util.Set<String> OPENS = java.util.Set.of("shop", "stash", "inn_rest", "rumor", "perch", "map", "guild", "repair",
             "guild_storage", "respec_quote", "respec_skills", "respec_skills_coins", "respec_stats", "respec_stats_coins", "lore_book", "map_copy",
-            "key_offer", "key_return", "records", "brew_lesson", "trade", "mount_shop");
+            "key_offer", "key_return", "records", "brew_lesson", "trade", "mount_shop", "guide");
 
     private FacilityActions() {
     }
@@ -83,6 +84,7 @@ public final class FacilityActions {
             case "brew_lesson" -> brewLesson(player);
             case "trade" -> jp.revati.skyabyss.facility.trade.TradeService.open(player, npc);
             case "mount_shop" -> jp.revati.skyabyss.mount.MountService.open(player, npc);
+            case "guide" -> TownGuide.openMenu(player);
             default -> SkyAbyss.LOGGER.warn("[facility] unknown open {}", open);
         }
     }

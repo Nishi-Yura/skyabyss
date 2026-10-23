@@ -328,6 +328,7 @@ class Route:
         owner = owner or self.owner
         self.lay.fresh('corr')
         run = 0
+        trace = []         # 廊下の真ん中の列の立つ所 (世界の座標。道の順)。護りの道の歩く人の道すじ (gen の Exp)
         for (u0, w0, y0), (u1, w1, y1) in zip(path, path[1:]):
             if u0 != u1 and w0 != w1:
                 raise SystemExit('corridor must be axis aligned %s' % ((u0, w0, u1, w1),))
@@ -345,9 +346,14 @@ class Route:
             for i, (s, y) in enumerate(cells):
                 u, w = (s, w0) if axis == 'u' else (u0, s)
                 nxt = cells[i + 1][1] if i + 1 < len(cells) else y
+                tx, tz = self.f(u, w)
+                if not trace or trace[-1] != (tx, y, tz):
+                    trace.append((tx, y, tz))
+                # 下りの列は自分の高さから掘る (次の列の段へ半分ずつ下りる。前は次の列の高さまで掘っていて、上り返せない段差ができていた)
+                lo = y if nxt < y else min(y, nxt)
                 for k in range(-half, half + 1):
                     cu, cw = (u, w + k) if axis == 'u' else (u + k, w)
-                    for yy in range(min(y, nxt), max(y, nxt) + h):
+                    for yy in range(lo, max(y, nxt) + h):
                         self.cell(cu, cw, yy, owner)
                     if nxt > y:
                         # 上りの段: この列の足もとに階段 (上る向き)
@@ -361,6 +367,7 @@ class Route:
                 run += 1
                 if lamps and run % lamps == 0:
                     self.put(u, w, y + h, LAYERS[self.layer]['lamp'] + '[hanging=true,waterlogged=false]')
+        return trace
 
 
 def stair_of(layer):
@@ -396,8 +403,8 @@ class Ctx:
         return Route(self.lay, layer, d, '%s_r%d' % (layer, i), CAMP_Y[layer])
 
 
-def build_camp(ctx, layer, n):
-    """野営の部屋と門・主の間・下りの鎖"""
+def build_camp(ctx, layer, n, kind='A'):
+    """野営の部屋と門・主の間・下りの鎖 (形 A)。形 B は北の壁に下り口 (build_mouth_b) だけ。門と主の間は護りの道の終わり (build_expedition)"""
     lay, v = ctx.lay, ctx.v
     Y = CAMP_Y[layer]
     m = LAYERS[layer]
@@ -454,6 +461,9 @@ def build_camp(ctx, layer, n):
     lay.put(-5, Y, -5, 'sculk_shrieker[can_summon=false,shrieking=false,waterlogged=false]')
     lay.put(-5, Y + CAMP_H - 1, -5, 'soul_lantern[hanging=true,waterlogged=false]')
     v.mark('pool_%s' % layer, -5, Y, -5)
+    if kind == 'B':
+        build_mouth_b(ctx, layer)
+        return camp
     # 門 (北の壁の外、二枚の厚み)。印が三つの人だけが通れる
     gate = '%s_gate' % layer
     lay.layer_of[gate] = layer
@@ -461,49 +471,64 @@ def build_camp(ctx, layer, n):
     # 2026-10-23 の試遊「印をおいても鉄格子のところがあかない」: 封じ石 (右クリックで運ぶだけ) をやめ、見える格子の門にした。
     #   格子 (幅 3・高さ 3、z = -CAMP_HALF - 1) は印が三つの人が近づくと上がる (story/ch5/layers/AbyssMarks.gateTick)。奥 (z - 2) は通り道
     #   枠: 両わきに封じ石の柱 (高さ 4)、上に封じ石の楣と三つの台座。足もとに層の縁の石
-    for z in (-CAMP_HALF - 1, -CAMP_HALF - 2):
-        for x in range(-1, 2):
-            for yy in range(Y, Y + 3):
-                lay.carve(x, yy, z, gate)
-    for x in range(-1, 2):
-        for yy in range(Y, Y + 3):
-            lay.put(x, yy, -CAMP_HALF - 1, 'iron_bars[east=true,north=false,south=false,waterlogged=false,west=true]')
-        lay.floor_of[(x, -CAMP_HALF - 1, Y - 1)] = m['trim']
-        lay.floor_of[(x, -CAMP_HALF - 2, Y - 1)] = m['trim']
-    for x in (-2, 2):
-        for yy in range(Y, Y + 4):
-            lay.put(x, yy, -CAMP_HALF - 1, m['seal'])
-    for x in range(-2, 3):
-        lay.put(x, Y + 3, -CAMP_HALF - 1, m['seal'])
-    v.mark('gate_%s' % layer, 0, Y, -CAMP_HALF - 1)
-    v.mark('gate_%s_out' % layer, 0, Y, -CAMP_HALF + 1)
-    v.mark('gate_%s_in' % layer, 0, Y, -CAMP_HALF - 4)
+    build_gate(ctx, layer, 0, Y, -CAMP_HALF - 1, gate)
     # 門の上の三つの穴 (印の台座。持つ印の数だけ光る: story/ch5/layers/AbyssMarks)
     for k, x in enumerate((-2, 0, 2)):
-        lay.put(x, Y + 4, -CAMP_HALF - 1, 'chiseled_deepslate')
         v.mark('socket_%s_%d' % (layer, k + 1), x, Y + 4, -CAMP_HALF)
     r = Route(lay, layer, 'n', gate, Y)
     # 門の奥: 二マス平らに、それから下りの階段で主の間へ
     r.corridor([(CAMP_HALF + 3, 0, Y), (CAMP_HALF + 6, 0, Y), (ARENA_U - ARENA_R - 1, 0, Y - ARENA_DROP)], h=4, half=1, lamps=6)
     lay.segs['gatecorr_%s' % layer] = dict(layer=layer, kind='gatecorr', seg=lay.cur, route=r)
-    # 主の間 (丸い。高さ ARENA_H)
+    ax, az = DIRS['n'](ARENA_U, 0)
+    build_arena(ctx, layer, ax, az, Y - ARENA_DROP, gate)
+    return camp
+
+
+def build_gate(ctx, layer, gx, Y, gz, gate, fresh=False):
+    """格子の門 (幅 3・高さ 3)。格子は z = gz の列、その北 (gz - 1) が通り道。両わきに封じ石の柱、上に楣と三つの台座。
+    向こう (北) が主の間の側、手前 (南) が来た側 (AbyssMarks.gate の決まり)"""
+    lay, v = ctx.lay, ctx.v
+    m = LAYERS[layer]
+    if fresh:
+        lay.fresh('gate')
+    for z in (gz, gz - 1):
+        for x in range(gx - 1, gx + 2):
+            for yy in range(Y, Y + 3):
+                lay.carve(x, yy, z, gate)
+    for x in range(gx - 1, gx + 2):
+        for yy in range(Y, Y + 3):
+            lay.put(x, yy, gz, 'iron_bars[east=true,north=false,south=false,waterlogged=false,west=true]')
+        lay.floor_of[(x, gz, Y - 1)] = m['trim']
+        lay.floor_of[(x, gz - 1, Y - 1)] = m['trim']
+    for x in (gx - 2, gx + 2):
+        for yy in range(Y, Y + 4):
+            lay.put(x, yy, gz, m['seal'])
+    for x in range(gx - 2, gx + 3):
+        lay.put(x, Y + 3, gz, m['seal'])
+    for x in (gx - 2, gx, gx + 2):
+        lay.put(x, Y + 4, gz, 'chiseled_deepslate')
+    v.mark('gate_%s' % layer, gx, Y, gz)
+    v.mark('gate_%s_out' % layer, gx, Y, gz + 2)
+    v.mark('gate_%s_in' % layer, gx, Y, gz - 3)
+
+
+def build_arena(ctx, layer, ax, az, ay, entry):
+    """主の間 (丸い。半径 ARENA_R、高さ ARENA_H。中心 (ax, ay, az))。四つの灯台、天井の灯り、北の奥に下りの鎖。entry = 入口の持ち主"""
+    lay, v = ctx.lay, ctx.v
     arena = '%s_arena' % layer
     lay.layer_of[arena] = layer
-    lay.allow(gate, arena)
-    ay = Y - ARENA_DROP
+    lay.allow(entry, arena)
     lay.cur = 'arena_%s' % layer
     lay.segs[lay.cur] = dict(layer=layer, kind='arena', floor=ay, top=ay + ARENA_H - 1, depth=4, dome=1.3, room=None,
-                             center=DIRS['n'](ARENA_U, 0))
+                             center=(ax, az))
     for a in range(-ARENA_R, ARENA_R + 1):
         for b in range(-ARENA_R, ARENA_R + 1):
             d = math.hypot(a, b)
             if d > ARENA_R + 0.4:
                 continue
             top = ARENA_H if d < ARENA_R - 3 else ARENA_H - 2
-            x, z = DIRS['n'](ARENA_U + a, b)
             for yy in range(ay, ay + top):
-                lay.carve(x, yy, z, arena)
-    ax, az = DIRS['n'](ARENA_U, 0)
+                lay.carve(ax + b, yy, az - a, arena)
     v.mark('arena_%s' % layer, ax, ay, az)
     v.mark('lord_%s' % layer, ax, ay, az - 4)
     # 柱の灯台 (四つ。骨の層では主の戦いの灯り: 点けた灯りの中だけ刃が通る)
@@ -520,12 +545,183 @@ def build_camp(ctx, layer, n):
         lay.put(ax + int(round(math.cos(ang) * 12)), ay + ARENA_H - 3, az + int(round(math.sin(ang) * 12)),
                 'soul_lantern[hanging=true,waterlogged=false]')
     # 下りの鎖 (間の奥。主を倒した人だけが使える)
-    dx_, dz_ = DIRS['n'](ARENA_U + ARENA_R - 2, 0)
+    dx_, dz_ = ax, az - (ARENA_R - 2)
     lay.put(dx_, ay, dz_, 'lodestone')
     for yy in range(ay + 1, ay + ARENA_H - 2):
         lay.put(dx_, yy, dz_, 'chain[axis=y,waterlogged=false]')
     v.mark('descend_%s' % layer, dx_, ay, dz_)
-    return camp
+
+
+# ================================================================ 形 B: 護りの下り道 (塩・灰。docs/design/36 の 8.1)
+#   野営の北の口 → 長い下り道 (三つの待ち場。そこを確かにすると印) → 逃げの道 (後ろから崩れ・闇の波) → 格子の門 → 主の間。
+#   連れて下りる人 (塩 = 荷運びのロク、灰 = 隊長のトウヤ。story/ch5/layers/AbyssEscort) は、設計図の道すじ (印 esc_<層>_<n>) をたどる。
+#   局所の座標は北向き (u = 北、w = 東。x = w、z = -u)。野営の北の壁の口から:
+#     下り口 (u 9..10) → 道 A (北へ、見晴らしの裂け目の上) → 待ち場 1 (u 30..53) → 道 B (東へ) → 待ち場 2 (u 43..58, w 26..42)
+#     → 道 C (南へ長く下る) → 待ち場 3 (中心 (-40, 40)) → 逃げの道 (西へ下り、北へ) → 格子の門 (u -17) → 主の間 (中心 (0, -40))
+ESCAPE_FROM = (-44, 31)       # 逃げの道の始まり (待ち場 3 の西の縁の外)
+ESCAPE_TURN = (-44, -40)      # 逃げの道の角 (ここから北へ)
+GATE_B = (-17, -40)           # 主の間の前の格子の門 (局所)
+ARENA_B = (0, -40)            # 主の間の中心 (局所)
+DROP_B = {'wp1': 4, 'wp2': 8, 'wp3': 14, 'arena': 30}   # 野営の床からの下がり
+
+
+def build_mouth_b(ctx, layer):
+    """野営の北の壁の下り口 (格子のない口。両わきに封じ石の柱、上に楣と三つの台座。台座は持つ印の数だけ光る)"""
+    lay, v = ctx.lay, ctx.v
+    Y = CAMP_Y[layer]
+    m = LAYERS[layer]
+    X = '%s_x' % layer
+    lay.layer_of[X] = layer
+    lay.allow('%s_camp' % layer, X)
+    for z in (-CAMP_HALF - 1, -CAMP_HALF - 2):
+        for x in range(-1, 2):
+            for yy in range(Y, Y + 3):
+                lay.carve(x, yy, z, X)
+            lay.floor_of[(x, z, Y - 1)] = m['trim']
+    for x in (-2, 2):
+        for yy in range(Y, Y + 4):
+            lay.put(x, yy, -CAMP_HALF - 1, m['seal'])
+    for x in range(-2, 3):
+        lay.put(x, Y + 3, -CAMP_HALF - 1, m['seal'])
+    for k, x in enumerate((-2, 0, 2)):
+        lay.put(x, Y + 4, -CAMP_HALF - 1, 'chiseled_deepslate')
+        v.mark('socket_%s_%d' % (layer, k + 1), x, Y + 4, -CAMP_HALF)
+    # 口のわきの碑 (道の名。AbyssBuild が刻む)
+    lay.put(3, Y + 1, -CAMP_HALF - 1, 'skyabyss:tablet[facing=south,standing=false]')
+    v.mark('routesign_%s_1' % layer, 3, Y + 1, -CAMP_HALF - 1)
+    v.mark('escstart_%s' % layer, 0, Y, -CAMP_HALF + 2)
+    if layer == 'salt':
+        # 荷運びのロク (野営の東の隅。品の取り替え。護りの道で連れて下りる人)
+        v.mark('trader_salt', 5, Y, -3)
+
+
+class Exp:
+    """形 B の道の書き手。北向きの Route に、連れて下りる人の道すじ (trail。世界の座標の並び) を足していく"""
+
+    def __init__(self, ctx, layer):
+        self.ctx, self.lay, self.v = ctx, ctx.lay, ctx.v
+        self.layer = layer
+        self.Y = CAMP_Y[layer]
+        self.owner = '%s_x' % layer
+        self.r = Route(self.lay, layer, 'n', self.owner, self.Y)
+        self.trail = []
+        self.waits = {}
+        self.routes = []          # layer_common に渡す (Route, {名前: 部屋})
+
+    def xz(self, u, w):
+        return self.r.xz(u, w)
+
+    def add(self, x, y, z):
+        if not self.trail or self.trail[-1] != (x, y, z):
+            self.trail.append((x, y, z))
+
+    def corridor(self, path, **kw):
+        for p in self.r.corridor(path, **kw):
+            self.add(*p)
+
+    def walk(self, *pts):
+        """局所の点 (u, w, y) の折れ線を一マスずつ道すじに (隣どうしは u か w か y のどれかだけが変わる)"""
+        for (u0, w0, y0), (u1, w1, y1) in zip(pts, pts[1:]):
+            n = max(abs(u1 - u0), abs(w1 - w0), abs(y1 - y0))
+            for i in range(n + 1):
+                t = i / n if n else 0
+                u, w, y = round(u0 + (u1 - u0) * t), round(w0 + (w1 - w0) * t), round(y0 + (y1 - y0) * t)
+                x, z = self.xz(u, w)
+                self.add(x, y, z)
+
+    def wait(self, k):
+        """いまの道すじの終わりを待ち場 k の立つ所に"""
+        x, y, z = self.trail[-1]
+        self.waits[k] = (x, y, z)
+        self.v.mark('escwait_%s_%d' % (self.layer, k), x, y, z)
+
+    def room(self, name, u, w, y, hu, hw, h, lamps=2, kind='room'):
+        sg = '%s:%s' % (self.owner, name)
+        self.lay.segs[sg] = dict(layer=self.layer, kind=kind, name=name, floor=y, top=y + h - 1, depth=4, dome=0.6,
+                                 room=(u, w, y, hu, hw, h), route=self.r)
+        self.r.room(u, w, y, hu, hw, h, seg=sg)
+        for k in range(lamps):
+            lu = u + (hu - 1 if k == 0 else -(hu - 1))
+            self.r.put(lu, w, y + h, LAYERS[self.layer]['lamp'] + '[hanging=true,waterlogged=false]')
+        return (u, w, y, hu, hw, h)
+
+    def altar(self, k, u, w, y, room):
+        """待ち場 k の印の台 (確かにすると印が入る。右クリックでも取れる) と、待ち場の真ん中の印 wp_<層>_<k>"""
+        self.r.put(u, w, y, 'polished_deepslate')
+        self.r.put(u, w, y + 1, 'respawn_anchor[charges=0]')
+        self.r.mark('mark_%s_%d' % (self.layer, k), u, w, y + 1)
+        ru, rw, ry = room[0], room[1], room[2]
+        self.r.mark('markroom_%s_%d' % (self.layer, k), ru, rw, ry)
+        self.r.mark('wp_%s_%d' % (self.layer, k), ru, rw, ry)
+
+    def spawns(self, k, pts, y):
+        """待ち場 k で敵の湧く所 (待ち場の隅)"""
+        for j, (u, w) in enumerate(pts):
+            self.r.mark('wpspawn_%s_%d_%d' % (self.layer, k, j), u, w, y)
+
+
+def build_expedition(ctx, layer, n, mod):
+    """形 B の道 (層の組み立ては mod.build_b。待ち場 1〜3 と道 A〜C) と、共通の逃げの道・格子の門・主の間。返り値は layer_common に渡す道"""
+    lay, v = ctx.lay, ctx.v
+    ex = Exp(ctx, layer)
+    Y = ex.Y
+    # 野営の人の立つ所から下り口まで (焚き火と台を避けて、東の通りを北へ)
+    sx, sy, sz = v.marks['trader_salt' if layer == 'salt' else 'survivor_%s' % layer]
+    ex.add(sx, sy, sz)
+    for (x, z) in ((3, sz), (3, -3), (0, -3)):
+        a, b = ex.trail[-1][0], ex.trail[-1][2]
+        while (a, b) != (x, z):
+            a += (x > a) - (x < a)
+            b += (z > b) - (z < b)
+            ex.add(a, Y, b)
+    ex.walk((3, 0, Y), (10, 0, Y))
+    mod.build_b(ctx, ex)
+    # 逃げの道: 待ち場 3 の西の縁から西へ下り、北へ折れて格子の門の前まで。灯りは塩 7・灰 4 マスごと (闇の波が喰う灯り)
+    ay = Y - DROP_B['arena']
+    ex.corridor([(ESCAPE_FROM[0], ESCAPE_FROM[1], Y - DROP_B['wp3']), (ESCAPE_TURN[0], ESCAPE_TURN[1], ay), (GATE_B[0] - 1, GATE_B[1], ay)],
+                lamps=4 if layer == 'ash' else 7)
+    v.mark('escrun_%s' % layer, *ex.waits[3])
+    gate = '%s_gate' % layer
+    lay.layer_of[gate] = layer
+    lay.allow(ex.owner, gate)
+    gx, gz = ex.xz(GATE_B[0], GATE_B[1])
+    build_gate(ctx, layer, gx, ay, gz, gate, fresh=True)
+    # 格子と主の間のあいだを一マス (主の間の縁まで)
+    for x in range(gx - 1, gx + 2):
+        for yy in range(ay, ay + 3):
+            lay.carve(x, yy, gz - 2, gate)
+    v.mark('escend_%s' % layer, gx, ay, gz + 2)
+    ax, az = ex.xz(ARENA_B[0], ARENA_B[1])
+    build_arena(ctx, layer, ax, az, ay, gate)
+    # 帰りの鎖 (主の間の東の縁。野営へ戻る)
+    lay.put(ax + 12, ay, az, 'lodestone')
+    for yy in range(ay + 1, ay + 6):
+        lay.put(ax + 12, yy, az, 'chain[axis=y,waterlogged=false]')
+    del_air(lay, ax + 12, ay, az, ay + 5)
+    v.mark('back_%s' % layer, ax + 12, ay, az)
+    for i, p in enumerate(ex.trail):
+        v.mark('esc_%s_%d' % (layer, i), *stand_at(lay, *p))
+    return ex.routes
+
+
+def stand_at(lay, x, y, z):
+    """道すじの一マスの、実際に立つ高さ (廊下の段・梯子の列)。段 (階段・下の半石) はそのマスに立つ"""
+    def step(q):
+        st = lay.fixed.get(q, '')
+        return '_stairs[' in st or ('_slab[' in st and 'type=bottom' in st)
+
+    def solid(q):
+        if q in lay.fixed:
+            return not lay.fixed[q].startswith(('air', 'ladder', 'water'))
+        return q not in lay.air
+
+    for yy in (y, y - 1, y + 1, y - 2):
+        q, up = (x, yy, z), (x, yy + 1, z)
+        if up not in lay.air:
+            continue
+        if step(q) or (q in lay.air and (solid((x, yy - 1, z)) or lay.fixed.get(q, '').startswith('ladder'))):
+            return x, yy, z
+    return x, y, z
 
 
 def build_return_shrine(lay, v, Y):
@@ -771,13 +967,18 @@ def main():
     ctx = Ctx(v, lay)
     common = layer_module('common')
     for n, layer in enumerate(ORDER, start=1):
-        build_camp(ctx, layer, n)
         mod = layer_module(layer)
-        routes = []
-        for i, spec in enumerate(mod.ROUTES, start=1):
-            routes.append(build_route(ctx, layer, i, spec))
-        lay.fresh('hook')
-        mod.build(ctx, routes)
+        kind = getattr(mod, 'KIND', 'A')
+        build_camp(ctx, layer, n, kind)
+        if kind == 'B':
+            lay.fresh('hook')
+            routes = build_expedition(ctx, layer, n, mod)
+        else:
+            routes = []
+            for i, spec in enumerate(mod.ROUTES, start=1):
+                routes.append(build_route(ctx, layer, i, spec))
+            lay.fresh('hook')
+            mod.build(ctx, routes)
         lay.fresh('hook')
         if common is not None:
             common.build(ctx, layer, routes)

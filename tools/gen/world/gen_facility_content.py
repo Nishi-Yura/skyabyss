@@ -40,9 +40,9 @@ def fac(open_, **kw):
 
 
 ROLES = {
-    "guild_clerk": ("組合の受付の書記", "Guild Clerk",
+    "guild_clerk": ("鯨追いの組合の書記", "Guild Clerk",
                     ("鯨追いの組合へようこそ。ここではギルドを作るか、入る申請を出せます。言伝ての板の頼みも、ここで見られますよ。",
-                     "Welcome to the Whale-Chasers' Hall. You can found a guild here, or apply to join one. The message board's errands are here too."),
+                     "Welcome to the Whale Chasers' Guild. You can found a guild here, or apply to join one. The message board's errands are here too."),
                     [("guild", "talk", [fac("guild")], None, "ギルドの窓口 (作る・入る・頼み・旗・功績)", "Guild desk (found, join, requests, banner, deeds)", None, None),
                      ("storage", "talk", [fac("guild_storage")], None, "ギルドの倉庫を開く", "Open the guild storehouse", None, None),
                      ("board", "talk", [{"type": "open_board"}], None, "言伝ての板を見る", "Look at the message board", None, None),
@@ -168,7 +168,21 @@ ROLES = {
                        ("rules", "talk", None, "rules", "乗り笛の決まり", "How the whistle works",
                         "笛を吹けば目の前に来る。もう一度吹けば帰る。巨神の背と淵の底、心臓の間には連れていけない。主が遠くへ行ったり、眠りについたりしても帰っちまう。見た目は章を越えるごとに増える。性能は鐘銭で磨くんだ。",
                         "Blow once and it comes; blow again and it goes home. It can't follow you onto a titan's back, down into the abyss, or into a heart chamber. It also leaves if you wander far or log off. New looks arrive as you clear chapters; stats you polish with bell coins.")]),
+    # 都の案内人 (門と広場。docs/design/35 の 6.12)。行き先を選ぶと、その戸まで色つきの灯りが地面に灯る (facility/TownGuide)
+    "guide": ("都の案内人", "Town Guide",
+              ("ようこそ、鐘の宿りへ。広い都でしょう。行きたい所を言ってくれれば、足もとに灯りをともして戸口まで案内しますよ。",
+               "Welcome to the Bell's Rest. It's a big town. Tell me where you want to go, and I'll light the way to the door at your feet."),
+              [("way", "talk", [fac("guide")], None, "行き先を選ぶ (灯りで案内)", "Pick a destination (lanterns show the way)", None, None),
+               ("colors", "talk", None, "colors", "灯りの色のこと", "What do the colours mean?",
+                "灯りの色は施設の種類です。金は買う・預ける所、青は休む・旅立つ所、赤は鍛える・戦う所、紫は物語と祈りの所。灰は裏通り。着けば灯りは消えます。別の行き先を選べば、灯りはそちらへ移りますよ。",
+                "The colour tells you the kind of place. Gold is for buying and storing, blue for resting and setting out, red for training and fighting, violet for stories and prayer. Grey is the back streets. The lanterns go out when you arrive, and if you pick somewhere else, they move there."),
+               ("gates", "talk", None, "gates", "都の門のこと", "About the gates",
+                "門は四つ。北の鯨門、東の潮門、南の灰門、西の風門。どの門にも、わたしたち案内人が一人ずつ立っています。広場の噴水のそばにも一人。迷ったら、近くの白い外套を探してください。",
+                "There are four gates: the Whale Gate to the north, the Tide Gate east, the Ash Gate south and the Wind Gate west. One of us guides stands at each, and another by the fountain in the plaza. If you get lost, look for the nearest white cloak.")]),
 }
+
+# 会話の選択肢の上の一言 (役ごとに替えるとき)
+MENU = {"guide": ("どこへ案内しましょう。", "Where shall I take you?")}
 
 # 周回の誓い (titan/vow/Vows の登録と同じ id。名前と説明は誓いの文 vow.skyabyss.<id>(.desc) をそのまま使う。
 # 足りない誓いがあれば自己テスト facility extras が落ちる)
@@ -217,8 +231,11 @@ def dialogue(role, spec):
         "again": {"face": "neutral", "next": "menu", "text": base + ".intro"},
     }
     t(base + ".intro", intro_ja, intro_en)
-    t(base + ".menu", "……何か用か。" if role not in ("shrine_priest", "archivist", "apothecary", "storage_keeper", "guild_clerk") else "ご用件は。",
-      "What'll it be?" if role not in ("shrine_priest", "archivist", "apothecary", "storage_keeper", "guild_clerk") else "How may I help?")
+    if role in MENU:
+        t(base + ".menu", *MENU[role])
+    else:
+        t(base + ".menu", "……何か用か。" if role not in ("shrine_priest", "archivist", "apothecary", "storage_keeper", "guild_clerk") else "ご用件は。",
+          "What'll it be?" if role not in ("shrine_priest", "archivist", "apothecary", "storage_keeper", "guild_clerk") else "How may I help?")
     menu = []
     for spec_o in options:
         oid, kind, do, node, oja, oen, bja, ben = spec_o[:8]
@@ -370,6 +387,46 @@ SHOP_NAMES = {
 }
 
 # ====================================================================== 画面・知らせ
+# 都の案内 (facility/TownGuide、client/facility/TownGuideScreen、client/guide/TownGuideClient)。施設の名前は戸の上の名 (label.skyabyss.facility.*) に合わせる
+TOWN_GUIDE = {
+    # 施設: (名前 ja, en, ひとこと ja, en)
+    "tool_shop": ("道具屋", "Tool Shop", "糧・松明・矢を買う。素材の買い取りも", "Food, torches and arrows; buys spare materials"),
+    "storage": ("預かり所", "Storehouse", "持ち物を預ける・引き出す", "Leave and collect your belongings"),
+    "trade": ("取引所", "Exchange", "旅人どうしで品を出し合う", "Trade goods with other travellers"),
+    "apothecary": ("薬師の店", "Apothecary", "薬を買う。醸造の手ほどき", "Potions, and lessons in brewing"),
+    "inn": ("宿「鐘の宿」", "The Bell Inn", "目覚める場所を決める・噂を聞く", "Set where you wake; hear rumours"),
+    "stable": ("厩舎", "Stable", "乗り物と乗り笛", "Mounts and riding whistles"),
+    "perch": ("子の止まり木", "Young's Perch", "巨神の子を呼ぶ", "Call a titan's young"),
+    "guild": ("鯨追いの組合", "Whale Chasers' Guild", "ギルド・言伝ての板", "Guilds and the message board"),
+    "smithy": ("鍛冶場", "Smithy", "修理と共鳴の炉", "Repairs and the resonance forge"),
+    "training": ("訓練場", "Training Yard", "技と力の振り直し・打ち込み台", "Respec skills and stats; practice dummies"),
+    "shrine": ("四巨神の社", "Shrine of the Four", "誓い・鍵の間・転生", "Vows, the key room, rebirth"),
+    "keep": ("空見の砦", "Skywatch Keep", "試練の記録", "Records of your trials"),
+    "hall": ("空見の館", "Skywatch Hall", "伝承の書庫と地図の写し", "The lore archive and map copies"),
+    "tavern": ("酒場「深い杯」", "The Deep Cup", "裏通りの酒場", "A back-street tavern"),
+    "graveyard": ("墓所", "Graveyard", "西の門の外。墓守がいる", "Outside the west gate, with its keeper"),
+}
+TOWN_GUIDE_GROUPS = {
+    "gold": ("買う・預ける", "Buy & store"),
+    "blue": ("休む・旅", "Rest & travel"),
+    "red": ("鍛える・戦う", "Train & fight"),
+    "violet": ("物語・祈り", "Story & prayer"),
+    "grey": ("裏通り", "Back streets"),
+}
+TOWN_GUIDE_UI = [
+    ("gui.skyabyss.town_guide.title", "都の案内", "Town Guide"),
+    ("gui.skyabyss.town_guide.hint", "行き先を選ぶと、足もとから戸口まで灯りがともる", "Pick a place and lanterns will light the way to its door"),
+    ("gui.skyabyss.town_guide.current", "案内中", "Guiding"),
+    ("gui.skyabyss.town_guide.stop", "案内をやめる", "Stop guiding"),
+    ("gui.skyabyss.town_guide.close", "閉じる", "Close"),
+    ("gui.skyabyss.town_guide.far", "%s ブロック", "%s blocks"),
+    ("objective.skyabyss.town_guide", "%sへ向かおう", "Head to %s"),
+    ("message.skyabyss.town_guide.lit", "%sまで灯りをともした", "Lanterns lit to %s"),
+    ("message.skyabyss.town_guide.arrived", "%sに着いた", "You've reached %s"),
+    ("message.skyabyss.town_guide.no_path", "%sまでの道が途中までしか見つからない。灯りは行けるところまで", "Couldn't find the whole way to %s; the lanterns go as far as they can"),
+    ("message.skyabyss.town_guide.too_far", "都の中でないと案内できない", "The guide can only lead you within the town"),
+]
+
 UI = [
     ("item.skyabyss.bell_coin", "鐘銭", "Bell Coin"),
     ("item.skyabyss.bell_coin.desc", "鐘の国の古い銭。都の店で使える。", "An old coin of the Bell Kingdom. Spent in the capital's shops."),
@@ -662,7 +719,7 @@ TRADE = [
 RUMORS = {
     1: [("北の岩鯨は、鎖が鳴るたびに少しだけ目を開けるらしい。", "They say the stone whale in the north opens its eyes a little whenever the chains ring."),
         ("墓地の外れで、夜に骨を数える声がするって。", "Someone counts bones at night, out past the graveyard."),
-        ("組合の見習いが、最初の登りで足を挫いたそうだ。崖の縄には気をつけな。", "A guild apprentice twisted an ankle on the first climb. Mind the cliff ropes.")],
+        ("鯨追いの組合の見習いが、最初の登りで足を挫いたそうだ。崖の縄には気をつけな。", "An apprentice of the Whale Chasers' Guild twisted an ankle on the first climb. Mind the cliff ropes.")],
     2: [("潮が引く日には、海の底の道が見えるそうだよ。", "On low-tide days, they say a road shows on the sea floor."),
         ("漁師が網に真珠ほどの目玉を拾ったって。気味が悪い。", "A fisher netted an eye the size of a pearl. Gives me the creeps."),
         ("東の浜で、殻の鳴る音が夜通し続いたらしい。", "On the east shore, shells rang all night long.")],
@@ -688,8 +745,15 @@ def main():
             json.dump(shop, f, ensure_ascii=False, indent=2)
             f.write("\n")
         t("gui.skyabyss.shop." + sid, *SHOP_NAMES[sid])
-    for key, ja, en in UI + TRADE:
+    for key, ja, en in UI + TRADE + TOWN_GUIDE_UI:
         t(key, ja, en)
+    for fid, (nja, nen, dja, den) in TOWN_GUIDE.items():
+        t("gui.skyabyss.town_guide.place." + fid, nja, nen)
+        t("gui.skyabyss.town_guide.place." + fid + ".desc", dja, den)
+        # 文の中の名 (英語は冠詞つき。「Head to the Tool Shop」)
+        t("gui.skyabyss.town_guide.place." + fid + ".to", nja, nen if nen.startswith("Skywatch") else "the " + nen)
+    for gid, (ja, en) in TOWN_GUIDE_GROUPS.items():
+        t("gui.skyabyss.town_guide.group." + gid, ja, en)
     for k, (ja, en) in PATTERNS.items():
         t("gui.skyabyss.guild.pattern." + k, ja, en)
     for k, (ja, en) in PLATES.items():

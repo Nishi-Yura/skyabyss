@@ -27,9 +27,10 @@ public final class TownGuestRenderer {
 
     @SubscribeEvent
     static void register(EntityRenderersEvent.RegisterRenderers event) {
-        event.registerEntityRenderer(TownSetup.GUEST.get(), ctx -> new LowPolyGeoRenderer<NpcEntity>(ctx, new Model(), e -> MESH, 1.0f) {
+        event.registerEntityRenderer(TownSetup.GUEST.get(), ctx -> new LowPolyGeoRenderer<NpcEntity>(ctx, new Model(), TownGuestRenderer::meshName, 1.0f) {
             {
                 this.shadowRadius = 0.42f;
+                addRenderLayer(new NpcModels.PropLayer<>(this, e -> NpcModels.has(v2(e)) ? NpcModels.mesh(v2(e)) : null));
             }
 
             @Override
@@ -45,6 +46,19 @@ public final class TownGuestRenderer {
                 pose.popPose();
             }
         });
+    }
+
+    static String guest(NpcEntity e) {
+        return e instanceof TownGuestEntity g ? g.guestId() : "apprentice";
+    }
+
+    // v2 (NpcModels) の名前: guest_<人>
+    static String v2(NpcEntity e) {
+        return "guest_" + guest(e);
+    }
+
+    static String meshName(NpcEntity e) {
+        return NpcModels.has(v2(e)) ? NpcModels.mesh(v2(e)) : MESH;
     }
 
     static float scale(NpcEntity entity) {
@@ -72,13 +86,24 @@ public final class TownGuestRenderer {
 
         @Override
         public ResourceLocation getModelResource(NpcEntity entity) {
+            if (NpcModels.has(v2(entity))) {
+                return NpcModels.geo(v2(entity));
+            }
             return ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "geo/entity/" + MESH + "_lowpoly.geo.json");
         }
 
         @Override
         public ResourceLocation getTextureResource(NpcEntity entity) {
-            String id = entity instanceof TownGuestEntity g ? g.guestId() : "apprentice";
-            return ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "textures/lowpoly/guest_" + id + ".png");
+            if (NpcModels.has(v2(entity))) {
+                return NpcModels.texture(v2(entity));
+            }
+            return ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "textures/lowpoly/guest_" + guest(entity) + ".png");
+        }
+
+        // v2 の人は持ち方に合わせた動き (animations/entity/npc_guest_<人>.animation.json。名前は animation.town_guest.*)
+        @Override
+        public ResourceLocation getAnimationResource(NpcEntity entity) {
+            return NpcModels.has(v2(entity)) ? NpcModels.animation(v2(entity)) : super.getAnimationResource(entity);
         }
     }
 }

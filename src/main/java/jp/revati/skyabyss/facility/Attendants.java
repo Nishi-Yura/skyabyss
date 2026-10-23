@@ -106,6 +106,9 @@ public final class Attendants {
         if (capital == null || capital.distSqr(player.blockPosition()) > (double) KEEP_RADIUS * KEEP_RADIUS) {
             return;
         }
-        ensureAll(level, OpeningSites.shelterExtras(player.server, AttendantRole.MARK_PREFIX));
+        Map<String, BlockPos> marks = new java.util.LinkedHashMap<>(OpeningSites.shelterExtras(player.server, AttendantRole.MARK_PREFIX));
+        // 案内人は設計図の印から (前の版で建てた都には、写した印が無いので)
+        TownGuide.guideSpots(player.server).forEach(marks::putIfAbsent);
+        ensureAll(level, marks);
     }
 }

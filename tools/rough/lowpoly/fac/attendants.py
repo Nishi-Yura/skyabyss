@@ -40,12 +40,12 @@ BONES = ART.BONES
 
 ROLES = ["guild_clerk", "smith", "tool_merchant", "apothecary", "storage_keeper", "innkeeper", "perch_keeper",
          "shrine_priest", "keep_veteran", "archivist", "training_master", "black_marketeer", "gravekeeper",
-         "mapmaker", "drunkard", "trade_keeper", "stable_keeper"]
+         "mapmaker", "drunkard", "trade_keeper", "stable_keeper", "guide"]
 ROLE_JA = {"guild_clerk": "組合の受付の書記", "smith": "鍛冶師", "tool_merchant": "道具屋", "apothecary": "薬師",
            "storage_keeper": "預かり番", "innkeeper": "宿の女将", "perch_keeper": "止まり木の番", "shrine_priest": "社の祭司",
            "keep_veteran": "砦の老兵", "archivist": "書庫番", "training_master": "師範", "black_marketeer": "顔を隠した商人",
            "gravekeeper": "墓守", "mapmaker": "地図屋", "drunkard": "酔いどれ",
-           "trade_keeper": "取引所の番", "stable_keeper": "厩舎の番"}
+           "trade_keeper": "取引所の番", "stable_keeper": "厩舎の番", "guide": "都の案内人"}
 
 
 # ====================================================================== 色
@@ -88,6 +88,7 @@ PAL = {
     "drunkard":        dict(coat=(110, 92, 70), role=(122, 62, 78), trim=(76, 60, 46), acc=(140, 120, 80), hair=(96, 76, 58), skin="ruddy", guard=(100, 84, 66), sash=(98, 70, 50), drunk=True),
     "trade_keeper":    dict(coat=(44, 84, 82), role=(196, 160, 82), trim=(58, 40, 28), acc=(214, 184, 104), hair=(70, 52, 40), skin="mid", guard=(52, 72, 70), sash=(150, 110, 50)),
     "stable_keeper":   dict(coat=(116, 84, 56), role=(92, 120, 76), trim=(70, 48, 30), acc=(204, 172, 104), hair=(104, 76, 52), skin="tan", guard=(86, 70, 52), sash=(92, 120, 76)),
+    "guide":           dict(coat=(232, 230, 222), role=(242, 240, 234), trim=(196, 162, 78), acc=(206, 170, 90), hair=(70, 52, 40), skin="mid", guard=(214, 210, 200), sash=(70, 108, 150)),
 }
 
 LEATHER = CK.BROWN

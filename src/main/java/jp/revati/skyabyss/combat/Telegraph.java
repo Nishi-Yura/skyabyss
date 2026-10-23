@@ -128,6 +128,7 @@ public final class Telegraph {
     // 床の印 (decal) のパケットを送った人。あとから近づいた人にも送る
     private final Set<UUID> notified = new HashSet<>();
     private final boolean decal;
+    private final AttackLook look;
     private static int decalsSent;
     private final int id = created++;
     private int age;
@@ -160,6 +161,7 @@ public final class Telegraph {
         this.victims = b.victims;
         this.onImpact = b.onImpact;
         this.onHit = b.onHit;
+        this.look = hidden ? AttackLook.NONE : b.look;
         this.decal = !hidden && b.shape.kind() != TelegraphShape.KIND_NONE;
         if (b.onHit != null) {
             damagingCreated++;
@@ -230,6 +232,7 @@ public final class Telegraph {
         private SoundEvent sound;
         private float soundVolume = 2f;
         private float soundPitch = 1f;
+        private AttackLook look = AttackLook.NONE;
 
         private Builder(ServerLevel level, TelegraphShape shape) {
             this.level = level;
@@ -330,6 +333,12 @@ public final class Telegraph {
             this.sound = sound;
             this.soundVolume = volume;
             this.soundPitch = pitch;
+            return this;
+        }
+
+        // 技の見た目の言葉 (AttackLook)。床の印に足す粒だけ (判定は変えない)
+        public Builder look(AttackLook look) {
+            this.look = look == null ? AttackLook.NONE : look;
             return this;
         }
 
@@ -597,6 +606,10 @@ public final class Telegraph {
         return piercing;
     }
 
+    public AttackLook look() {
+        return look;
+    }
+
     public boolean hidden() {
         return hidden;
     }
@@ -641,7 +654,8 @@ public final class Telegraph {
             }
             if (p.distanceToSqr(cx, floor, cz) < reachSq && GroupOwned.visibleTo(owner != null ? owner : p, p)) {
                 if (payload == null) {
-                    payload = TelegraphStartPayload.of(id, shape, floor, age, warn, active, rgb, style.ordinal(), target);
+                    payload = TelegraphStartPayload.of(id, shape, floor, age, warn, active, rgb, style.ordinal(), target,
+                            look.ordinal(), owner != null ? owner.getId() : -1);
                 }
                 PacketDistributor.sendToPlayer(p, payload);
                 notified.add(p.getUUID());

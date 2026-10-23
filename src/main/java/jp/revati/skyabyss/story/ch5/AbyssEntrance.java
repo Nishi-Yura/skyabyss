@@ -31,7 +31,8 @@ import net.neoforged.neoforge.event.tick.ServerTickEvent;
 //              戸 (またはそのまわり 1) を右クリックすると開く。一度開けたらワールドで開いたまま (TownData.abyssOpen)。都を建て直して
 //              戸が戻っていたら、人が近くに来たとき開け直す。開いた戸の前 3 に段 door の人が来ても合図 ch5_abyss_door
 //   酒場の壁   メインが始まったら、酒場の地下の奥の壁 (TownCellar) を開ける (酔いどれの頼みをしていない人も戸まで行けるように)
-//   踊り場     印 abyss_landing_1・abyss_landing_2 の 6 以内に来た人に一度ずつ一言 (人ごとの印 skyabyss_ch5_landing_<n>)
+//   踊り場     印 abyss_landing_1・abyss_landing_2 の 6 以内に来た人に一度ずつ一言 (人ごとの印 skyabyss_ch5_landing_<n>)。
+//              いるあいだは合図 ch5_landing_<n> (サブ ch5/shaft_landings「踊り場の荷」。一人ずつ)
 //   底の境     印 abyss_gate の 6 以内で合図 ch5_threshold と一言 (段 shaft の人)。門を開けて深淵へ入るのは AbyssGate
 //   確かめ     SELFTEST ch5 entrance (story/ch5/AbyssEntranceSelfTest)
 @EventBusSubscriber(modid = SkyAbyss.MODID)
@@ -42,6 +43,7 @@ public final class AbyssEntrance {
     public static final String[] LANDINGS = {"abyss_landing_1", "abyss_landing_2"};
     static final String SIGNAL_DOOR = "ch5_abyss_door";
     static final String SIGNAL_THRESHOLD = "ch5_threshold";
+    static final String SIGNAL_LANDING = "ch5_landing_";
     private static final double NEAR = 6.0;
 
     private AbyssEntrance() {
@@ -163,8 +165,11 @@ public final class AbyssEntrance {
         }
         for (int i = 0; i < LANDINGS.length; i++) {
             BlockPos at = TownGuests.mark(server, LANDINGS[i]);
-            if (at != null && p.blockPosition().closerThan(at, NEAR) && once(p, "skyabyss_ch5_landing_" + (i + 1))) {
-                Notice.narrate(p, i == 0 ? "message.skyabyss.ch5.landing_workshop" : "message.skyabyss.ch5.landing_camp");
+            if (at != null && p.blockPosition().closerThan(at, NEAR)) {
+                Quests.signal(p, SIGNAL_LANDING + (i + 1));
+                if (once(p, "skyabyss_ch5_landing_" + (i + 1))) {
+                    Notice.narrate(p, i == 0 ? "message.skyabyss.ch5.landing_workshop" : "message.skyabyss.ch5.landing_camp");
+                }
             }
         }
         BlockPos gate = TownGuests.mark(server, GATE);

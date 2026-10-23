@@ -13,12 +13,12 @@ import org.jetbrains.annotations.Nullable;
 //   (tools/gen/mobs/mounts_lp/build_all.py が低ポリのモデルから測って書き換える)
 public enum MountLook {
     HORN_BEAST("horn_beast", 1, 0, 1.00f, 2.23f, 2.081, -30f, 52f),
-    ASH_DEER("ash_deer", 1, 60, 1.00f, 2.01f, 1.862, -30f, 44f),
-    GREAT_LIZARD("great_lizard", 1, 60, 1.00f, 1.77f, 1.623, -40f, 48f),
-    WHALE_CALF("whale_calf", 2, 120, 1.60f, 2.37f, 2.220, -70f, 40f),
-    SHELL_TORTOISE("shell_tortoise", 3, 200, 1.60f, 2.12f, 1.973, -40f, 44f),
-    STORM_CHICK("storm_chick", 4, 280, 1.43f, 2.19f, 2.037, -40f, 56f),
-    EMBER_FOX("ember_fox", 5, 360, 1.00f, 1.92f, 1.775, -30f, 44f);
+    ASH_DEER("ash_deer", 1, 30, 1.00f, 2.01f, 1.862, -30f, 44f),
+    GREAT_LIZARD("great_lizard", 1, 30, 1.00f, 1.77f, 1.623, -40f, 48f),
+    WHALE_CALF("whale_calf", 2, 60, 1.60f, 2.37f, 2.220, -70f, 40f),
+    SHELL_TORTOISE("shell_tortoise", 3, 100, 1.60f, 2.12f, 1.973, -40f, 44f),
+    STORM_CHICK("storm_chick", 4, 140, 1.43f, 2.19f, 2.037, -40f, 56f),
+    EMBER_FOX("ember_fox", 5, 180, 1.00f, 1.92f, 1.775, -30f, 44f);
 
     public final String id;
     public final int chapter;

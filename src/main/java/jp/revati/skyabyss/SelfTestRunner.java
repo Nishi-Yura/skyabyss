@@ -83,6 +83,8 @@ public final class SelfTestRunner {
         steps.add(Step.once("group", jp.revati.skyabyss.titan.group.GroupSelfTest::runSelfTest));
         // 倒れた参加者の再入場 (20 秒の待ち・回数・全滅でやり直し・ゲームルール)。docs/design/02 の 4.2、10 の 10.4
         steps.add(Step.once("heart reentry", jp.revati.skyabyss.titan.group.ReentrySelfTest::runSelfTest));
+        // 全滅・全員が出る・再起動・保存から戻る・背中に誰もいない で、心臓が残らない (2026-10-23 の試遊の不具合)。SKYABYSS_SELFTEST_ONLY="heart orphan"
+        steps.addAll(jp.revati.skyabyss.titan.group.HeartOrphanSelfTest.steps());
         // 背の野営の道具 (置けない物の手持ち・置ける道具・上限・外す・背中を出ると戻る)。docs/design/08 の背中の決まり
         steps.add(Step.once("camp blocks", jp.revati.skyabyss.titan.dungeon.CampSelfTest::runSelfTest));
         // パーティの石: 誰かが試練のあとの石を鳴らせば、仲間全員 (離れた人・あとから入った人) のクエストが数える。docs/design/10 の 10.9
@@ -169,10 +171,14 @@ public final class SelfTestRunner {
         steps.addAll(jp.revati.skyabyss.npc.ArtisanSelfTest.steps());
         // 都の施設 (係の人・鐘銭・店・預かり所・宿・ギルド)。docs/design/35。SKYABYSS_SELFTEST_ONLY=facility
         steps.addAll(jp.revati.skyabyss.facility.FacilitySelfTest.steps());
+        // 都の案内人と灯りの道 (印・どの施設にも道・選んだときの知らせ)。docs/design/35 の 6.12。SKYABYSS_SELFTEST_ONLY="town guide"
+        steps.addAll(jp.revati.skyabyss.facility.TownGuideSelfTest.steps());
         // 乗り物 (見た目と性能の買い物・呼ぶ/帰す・背中と深淵の禁止)。docs/design/38。SKYABYSS_SELFTEST_ONLY=mount
         steps.addAll(jp.revati.skyabyss.mount.MountSelfTest.steps());
         // 町のクエスト (限定の人・噂・墓守・酔いどれ・地図屋・古井戸)。docs/design/35 の 3.3・3.5。SKYABYSS_SELFTEST_ONLY=town
         steps.addAll(jp.revati.skyabyss.town.TownSelfTest.steps());
+        // NPC v2 (人ごとの形・持ち物・動き)。docs/review/npc_quality_2026-10-23.md。SKYABYSS_SELFTEST_ONLY="lowpoly npc"
+        steps.addAll(jp.revati.skyabyss.npc.NpcModelSelfTest.steps());
         // 倒れたときの決まりと墓 (docs/design/11 の 6 章)
         steps.add(Step.once("grave (load)", jp.revati.skyabyss.grave.GraveSelfTest::load));
         steps.add(Step.once("grave", 40, jp.revati.skyabyss.grave.GraveSelfTest::runSelfTest));
@@ -293,6 +299,10 @@ public final class SelfTestRunner {
         // 深淵 v3 (2026-10-23 の試遊の直し: 帰りの祠・道案内・主の技と段とボスバー・縄張りの主)。SKYABYSS_SELFTEST_ONLY="abyss v3"
         steps.add(Step.once("abyss v3 (load)", jp.revati.skyabyss.story.ch5.layers.AbyssV3SelfTest::load));
         steps.add(Step.once("abyss v3", 60, jp.revati.skyabyss.story.ch5.layers.AbyssV3SelfTest::run));
+        // 形 B の層の護りの下り道 (塩・灰。道すじに歩いて届く・一人で送りきる・気力が尽きると前の待ち場から・崩れに呑まれると待ち場 3 から・二人で灰を送る)。
+        // SKYABYSS_SELFTEST_ONLY="abyss escort"
+        steps.add(Step.once("abyss escort (load)", jp.revati.skyabyss.story.ch5.layers.AbyssEscortSelfTest::load));
+        steps.add(Step.once("abyss escort", 60, jp.revati.skyabyss.story.ch5.layers.AbyssEscortSelfTest::run));
         // 番人の悪夢 (段の表・入る条件・段の進み・報酬・保存・閉じたあとの後片付け)。docs/design/36 の 9。SKYABYSS_SELFTEST_ONLY="abyss nightmare"
         steps.add(Step.once("abyss nightmare (load)", jp.revati.skyabyss.story.ch5.warden.WardenSelfTest::load));
         steps.add(Step.once("abyss nightmare", 60, jp.revati.skyabyss.story.ch5.warden.NightmareSelfTest::run));

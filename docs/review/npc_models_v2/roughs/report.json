@@ -1,0 +1,474 @@
+{
+ "guild_clerk": {
+  "tris": 1580,
+  "atlas": 256,
+  "buried": [],
+  "props": {
+   "prop_l": {
+    "tris": 57,
+    "atlas": 64
+   }
+  }
+ },
+ "survivor_bone": {
+  "tris": 1443,
+  "atlas": 256,
+  "buried": [],
+  "props": {
+   "prop_r": {
+    "tris": 160,
+    "atlas": 64
+   }
+  }
+ },
+ "smith": {
+  "tris": 1540,
+  "atlas": 256,
+  "buried": [],
+  "props": {
+   "prop_r": {
+    "tris": 56,
+    "atlas": 64
+   }
+  }
+ },
+ "tool_merchant": {
+  "tris": 1616,
+  "atlas": 256,
+  "buried": [],
+  "props": {
+   "prop_back": {
+    "tris": 196,
+    "atlas": 128
+   }
+  }
+ },
+ "apothecary": {
+  "tris": 1894,
+  "atlas": 256,
+  "buried": [],
+  "props": {
+   "prop_l": {
+    "tris": 100,
+    "atlas": 64
+   }
+  }
+ },
+ "storage_keeper": {
+  "tris": 1428,
+  "atlas": 256,
+  "buried": [],
+  "props": {
+   "prop_r": {
+    "tris": 60,
+    "atlas": 64
+   }
+  }
+ },
+ "innkeeper": {
+  "tris": 1766,
+  "atlas": 256,
+  "buried": [
+   [
+    "legRt",
+    "skirt",
+    0.45
+   ],
+   [
+    "legLt",
+    "skirt",
+    0.45
+   ]
+  ],
+  "props": {
+   "prop_l": {
+    "tris": 216,
+    "atlas": 64
+   }
+  }
+ },
+ "perch_keeper": {
+  "tris": 1499,
+  "atlas": 256,
+  "buried": [],
+  "props": {
+   "prop_l": {
+    "tris": 143,
+    "atlas": 64
+   }
+  }
+ },
+ "shrine_priest": {
+  "tris": 1632,
+  "atlas": 256,
+  "buried": [
+   [
+    "clasp",
+    "beard",
+    0.54
+   ]
+  ],
+  "props": {
+   "prop_r": {
+    "tris": 190,
+    "atlas": 64
+   }
+  }
+ },
+ "keep_veteran": {
+  "tris": 1530,
+  "atlas": 256,
+  "buried": [],
+  "props": {
+   "prop_r": {
+    "tris": 86,
+    "atlas": 64
+   }
+  }
+ },
+ "archivist": {
+  "tris": 1670,
+  "atlas": 256,
+  "buried": [],
+  "props": {
+   "prop_l": {
+    "tris": 112,
+    "atlas": 64
+   }
+  }
+ },
+ "training_master": {
+  "tris": 1546,
+  "atlas": 256,
+  "buried": [
+   [
+    "legRt",
+    "skirt",
+    0.49
+   ],
+   [
+    "legLt",
+    "skirt",
+    0.49
+   ]
+  ],
+  "props": {
+   "prop_r": {
+    "tris": 68,
+    "atlas": 64
+   }
+  }
+ },
+ "black_marketeer": {
+  "tris": 1626,
+  "atlas": 256,
+  "buried": [
+   [
+    "hair",
+    "hood",
+    0.55
+   ]
+  ],
+  "props": {
+   "prop_l": {
+    "tris": 110,
+    "atlas": 64
+   }
+  }
+ },
+ "gravekeeper": {
+  "tris": 1654,
+  "atlas": 256,
+  "buried": [],
+  "props": {
+   "prop_r": {
+    "tris": 76,
+    "atlas": 64
+   }
+  }
+ },
+ "mapmaker": {
+  "tris": 1505,
+  "atlas": 256,
+  "buried": [],
+  "props": {
+   "prop_l": {
+    "tris": 144,
+    "atlas": 64
+   },
+   "prop_back": {
+    "tris": 84,
+    "atlas": 64
+   }
+  }
+ },
+ "drunkard": {
+  "tris": 1279,
+  "atlas": 256,
+  "buried": [],
+  "props": {
+   "prop_r": {
+    "tris": 108,
+    "atlas": 64
+   }
+  }
+ },
+ "trade_keeper": {
+  "tris": 1758,
+  "atlas": 256,
+  "buried": [],
+  "props": {
+   "prop_l": {
+    "tris": 118,
+    "atlas": 64
+   }
+  }
+ },
+ "stable_keeper": {
+  "tris": 1570,
+  "atlas": 256,
+  "buried": [],
+  "props": {
+   "prop_r": {
+    "tris": 50,
+    "atlas": 64
+   }
+  }
+ },
+ "survivor_salt": {
+  "tris": 1453,
+  "atlas": 256,
+  "buried": [],
+  "props": {
+   "prop_r": {
+    "tris": 189,
+    "atlas": 64
+   },
+   "prop_l": {
+    "tris": 36,
+    "atlas": 64
+   }
+  }
+ },
+ "survivor_storm": {
+  "tris": 1597,
+  "atlas": 256,
+  "buried": [
+   [
+    "fr2",
+    "kasa",
+    0.75
+   ]
+  ],
+  "props": {
+   "prop_back": {
+    "tris": 273,
+    "atlas": 128
+   }
+  }
+ },
+ "survivor_ash": {
+  "tris": 1495,
+  "atlas": 256,
+  "buried": [],
+  "props": {
+   "prop_r": {
+    "tris": 74,
+    "atlas": 64
+   }
+  }
+ },
+ "abyss_porter": {
+  "tris": 1594,
+  "atlas": 256,
+  "buried": [],
+  "props": {
+   "prop_back": {
+    "tris": 476,
+    "atlas": 128
+   }
+  }
+ },
+ "guest_apprentice": {
+  "tris": 1399,
+  "atlas": 256,
+  "buried": [],
+  "props": {
+   "prop_r": {
+    "tris": 60,
+    "atlas": 64
+   }
+  }
+ },
+ "guest_bellkeeper": {
+  "tris": 1354,
+  "atlas": 256,
+  "buried": [
+   [
+    "clasp",
+    "beard",
+    0.54
+   ]
+  ],
+  "props": {
+   "prop_l": {
+    "tris": 92,
+    "atlas": 64
+   }
+  }
+ },
+ "guest_fisher": {
+  "tris": 1596,
+  "atlas": 256,
+  "buried": [],
+  "props": {
+   "prop_r": {
+    "tris": 82,
+    "atlas": 64
+   }
+  }
+ },
+ "guest_bard": {
+  "tris": 1765,
+  "atlas": 256,
+  "buried": [],
+  "props": {
+   "prop_back": {
+    "tris": 164,
+    "atlas": 64
+   }
+  }
+ },
+ "guest_child": {
+  "tris": 1513,
+  "atlas": 256,
+  "buried": [],
+  "props": {
+   "prop_l": {
+    "tris": 120,
+    "atlas": 64
+   }
+  }
+ },
+ "guest_weaver": {
+  "tris": 1828,
+  "atlas": 256,
+  "buried": [
+   [
+    "legRt",
+    "skirt",
+    0.45
+   ],
+   [
+    "legLt",
+    "skirt",
+    0.45
+   ]
+  ],
+  "props": {
+   "prop_l": {
+    "tris": 80,
+    "atlas": 64
+   }
+  }
+ },
+ "guest_ash_apprentice": {
+  "tris": 1432,
+  "atlas": 256,
+  "buried": [],
+  "props": {
+   "prop_r": {
+    "tris": 170,
+    "atlas": 64
+   }
+  }
+ },
+ "guest_herbalist": {
+  "tris": 1768,
+  "atlas": 256,
+  "buried": [
+   [
+    "legRt",
+    "skirt",
+    0.47
+   ],
+   [
+    "legLt",
+    "skirt",
+    0.48
+   ]
+  ],
+  "props": {
+   "prop_l": {
+    "tris": 89,
+    "atlas": 64
+   }
+  }
+ },
+ "guest_sailor": {
+  "tris": 1712,
+  "atlas": 256,
+  "buried": [],
+  "props": {
+   "prop_l": {
+    "tris": 232,
+    "atlas": 64
+   }
+  }
+ },
+ "guest_mother": {
+  "tris": 1755,
+  "atlas": 256,
+  "buried": [
+   [
+    "legRt",
+    "skirt",
+    0.45
+   ],
+   [
+    "legLt",
+    "skirt",
+    0.45
+   ]
+  ],
+  "props": {
+   "prop_r": {
+    "tris": 104,
+    "atlas": 64
+   }
+  }
+ },
+ "guest_baker": {
+  "tris": 1582,
+  "atlas": 256,
+  "buried": [],
+  "props": {
+   "prop_l": {
+    "tris": 132,
+    "atlas": 64
+   }
+  }
+ },
+ "artisan": {
+  "tris": 1724,
+  "atlas": 256,
+  "buried": [],
+  "props": {
+   "prop_r": {
+    "tris": 56,
+    "atlas": 64
+   }
+  }
+ },
+ "guide": {
+  "tris": 1560,
+  "atlas": 256,
+  "buried": [],
+  "props": {
+   "prop_r": {
+    "tris": 320,
+    "atlas": 64
+   }
+  }
+ }
+}

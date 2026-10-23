@@ -104,6 +104,11 @@ public class EmberAshPellet extends Entity implements ItemSupplier, jp.revati.sk
             if (random.nextFloat() < 0.25f) {
                 level().addParticle(ParticleTypes.SMALL_FLAME, getX(), getY() + 0.3, getZ(), 0, 0.01, 0);
             }
+            // 尾を引く煙と熾 (動いた向きの後ろへ)
+            if (tickCount % 2 == 0) {
+                level().addParticle(ParticleTypes.SMOKE, xo, yo + 0.3, zo, 0, 0.02, 0);
+                level().addParticle(new net.minecraft.core.particles.DustParticleOptions(new org.joml.Vector3f(1f, 0.55f, 0.18f), 0.9f), xo, yo + 0.3, zo, 0, 0, 0);
+            }
             return;
         }
         Entity heart = heartId == null ? null : server.getEntity(heartId);

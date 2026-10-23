@@ -251,6 +251,11 @@ public final class TideHeartBattle {
             return;
         }
         if (level.players().isEmpty()) {
+            // 背中に人が一人もいない (全滅して地上へ戻った・全員が出た・切断した)。戦いは「部屋に誰もいない」と同じに数えて放棄する
+            // (前はここで止まり、戦いが閉じたまま心臓だけ残った)
+            if (GroupBossRoom.abandonWhenLevelEmpty && level.getGameTime() % 10 == 0 && ROOMS.anyActive()) {
+                ROOMS.tick(level, HOST);
+            }
             return;
         }
         TideHeartArena.tickFlood(level);

@@ -1,0 +1,110 @@
+{
+  "npc": "skyabyss:attendant_guild_clerk",
+  "extends": true,
+  "entries": [
+    {
+      "node": "ch5g_back",
+      "if": {
+        "type": "quest",
+        "quest": "ch5/gate_sweep",
+        "is": "active",
+        "stage": "tell"
+      }
+    }
+  ],
+  "add_options": {
+    "menu": {
+      "before": "about",
+      "options": [
+        {
+          "id": "ch5g_offer",
+          "goto": "ch5g_offer",
+          "kind": "quest",
+          "if": {
+            "type": "all",
+            "of": [
+              {
+                "type": "all",
+                "of": [
+                  {
+                    "type": "quest",
+                    "quest": "main_abyss",
+                    "is": "started"
+                  },
+                  {
+                    "type": "not",
+                    "of": {
+                      "type": "any",
+                      "of": [
+                        {
+                          "type": "quest",
+                          "quest": "main_abyss",
+                          "is": "active",
+                          "stage": "rumor"
+                        },
+                        {
+                          "type": "quest",
+                          "quest": "main_abyss",
+                          "is": "active",
+                          "stage": "prepare"
+                        },
+                        {
+                          "type": "quest",
+                          "quest": "main_abyss",
+                          "is": "active",
+                          "stage": "door"
+                        }
+                      ]
+                    }
+                  }
+                ]
+              },
+              {
+                "type": "quest",
+                "quest": "ch5/gate_sweep",
+                "is": "none"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  },
+  "nodes": {
+    "ch5g_offer": {
+      "face": "neutral",
+      "next": "ch5g_offer2"
+    },
+    "ch5g_offer2": {
+      "face": "neutral",
+      "options": [
+        {
+          "id": "go",
+          "goto": "end",
+          "kind": "quest",
+          "do": [
+            {
+              "type": "quest_start",
+              "quest": "ch5/gate_sweep"
+            }
+          ]
+        },
+        {
+          "id": "no",
+          "goto": "menu",
+          "kind": "talk"
+        }
+      ]
+    },
+    "ch5g_back": {
+      "face": "smile",
+      "options": [
+        {
+          "id": "ok",
+          "goto": "end",
+          "kind": "talk"
+        }
+      ]
+    }
+  }
+}
