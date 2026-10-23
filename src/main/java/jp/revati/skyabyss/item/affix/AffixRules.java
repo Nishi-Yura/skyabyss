@@ -257,7 +257,7 @@ public final class AffixRules {
 
     public static String number(AffixType t, double v) {
         if (t == AffixType.VIGOR) {
-            return jp.revati.skyabyss.Hearts.of(v);
+            return jp.revati.skyabyss.Hp.of(v);
         }
         if (t.percent) {
             double pct = v * 100;

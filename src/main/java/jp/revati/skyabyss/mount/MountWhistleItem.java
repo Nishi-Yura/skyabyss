@@ -13,7 +13,7 @@ import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 
 // 乗り笛 (乗り物の笛)。右クリックで目の前に乗り物を呼び、もう一度で帰す。見た目と性能は厩舎で買う
-public class MountWhistleItem extends Item {
+public class MountWhistleItem extends Item implements jp.revati.skyabyss.pouch.PouchUsable {
     public MountWhistleItem(Properties properties) {
         super(properties);
     }
@@ -26,6 +26,14 @@ public class MountWhistleItem extends Item {
             player.getCooldowns().addCooldown(this, 20);
         }
         return InteractionResultHolder.sidedSuccess(stack, level.isClientSide);
+    }
+
+    // 旅嚢の輪・Y の短押しからも呼べる (手に持たなくてよい)
+    @Override
+    public boolean usePouch(ServerPlayer player, Runnable consumeOne) {
+        MountService.toggle(player);
+        player.getCooldowns().addCooldown(this, 20);
+        return true;
     }
 
     @Override

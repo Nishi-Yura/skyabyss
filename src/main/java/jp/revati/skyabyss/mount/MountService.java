@@ -222,7 +222,8 @@ public final class MountService {
                 return true;
             }
         }
-        return false;
+        // 旅嚢に入っていても持っている (Y で呼べる)
+        return jp.revati.skyabyss.pouch.Pouch.count(player, MountSetup.WHISTLE.get()) > 0;
     }
 
     // ---------------------------------------------------------------- 厩舎の画面

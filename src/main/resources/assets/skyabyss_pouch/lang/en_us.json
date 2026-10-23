@@ -19,7 +19,7 @@
   "skyabyss_pouch.cmd.migrated": "Ran the migration (%s items)",
   "skyabyss_pouch.tab": "Satchel",
   "skyabyss_pouch.key.open": "Open the Travel Satchel",
-  "skyabyss_pouch.key.use": "Satchel tool (hold: wheel, tap: the quick card tool)",
+  "skyabyss_pouch.key.use": "Pouch tools (tap: the card on the left, usually the mount whistle; hold: wheel, books are in the wheel)",
   "skyabyss_pouch.screen.empty": "Important things you find on the road go in here by themselves",
   "skyabyss_pouch.screen.unknown": "???",
   "skyabyss_pouch.screen.unknown_hint": "Not found yet",

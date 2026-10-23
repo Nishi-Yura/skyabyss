@@ -248,6 +248,17 @@ public final class LangSelfTest {
                     enT.putAll(m.get("en_us"));
                 }
             });
+            // マイクラの言葉 (ハート・黄ハート・❤) は使わない。体力は mod の HP の数で書く (2026-10-23)
+            jaT.forEach((k, v) -> {
+                if (v.contains("ハート") || v.contains("❤")) {
+                    f.add("ja_jp uses a vanilla heart term (write HP numbers): " + k);
+                }
+            });
+            enT.forEach((k, v) -> {
+                if (v.matches("(?is).*\b(yellow )?hearts?\b.*") && !k.contains("heart") && !v.toLowerCase().contains("heartbeat")) {
+                    f.add("en_us uses a vanilla heart term (write HP numbers): " + k);
+                }
+            });
             int scanned = checkCodeKeys(jaT, enT, f);
             if (scanned >= 0 && scanned < 300) {
                 f.add("only " + scanned + " translation keys were found in the source (the scan is broken)");

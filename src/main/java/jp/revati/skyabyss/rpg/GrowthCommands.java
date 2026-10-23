@@ -149,7 +149,7 @@ public final class GrowthCommands {
                 pct(GrowthRules.meleeMultiplier(d.stat(Stat.STRENGTH))),
                 pct(GrowthRules.moveMultiplier(d.stat(Stat.AGILITY))),
                 pct(GrowthRules.projectileMultiplier(d.stat(Stat.AGILITY))),
-                jp.revati.skyabyss.Hearts.of(GrowthRules.bonusHealth(d.stat(Stat.VITALITY))),
+                jp.revati.skyabyss.Hp.of(GrowthRules.bonusHealth(d.stat(Stat.VITALITY))),
                 (int) Math.round(GrowthRules.BASE_MANA + GrowthRules.bonusMana(d.stat(Stat.SPIRIT)))));
         MutableComponent frag = ModText.lore("message.skyabyss.growth.fragments", d.fragmentCount(), d.fragmentCapacity);
         source.sendSystemMessage(frag);

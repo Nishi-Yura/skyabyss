@@ -153,6 +153,8 @@ public final class PouchEntries {
         // 序盤の小さな素材 (骨片・棘針)
         add(list, jp.revati.skyabyss.guide.GuideSetup.BONE_CHIP.get(), Category.SMALL, 999, false, false);
         add(list, jp.revati.skyabyss.guide.GuideSetup.HARE_QUILL.get(), Category.SMALL, 999, false, false);
+        // 乗り笛 (Y の短押しで呼ぶ・帰す)。登録の末尾に足して既存の枠の位置を動かさない
+        add(list, jp.revati.skyabyss.mount.MountSetup.WHISTLE.get(), Category.TOOL, 1, true, false);
         return list;
     }
 

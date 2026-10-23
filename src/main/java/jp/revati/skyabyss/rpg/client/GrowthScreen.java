@@ -313,7 +313,7 @@ public class GrowthScreen extends Screen implements jp.revati.skyabyss.client.ui
             case SPIRIT -> Component.translatable("gui.skyabyss.growth.effect.spirit",
                     (int) Math.round(GrowthRules.BASE_MANA + GrowthRules.bonusMana(value)));
             case VITALITY -> Component.translatable("gui.skyabyss.growth.effect.vitality",
-                    jp.revati.skyabyss.Hearts.of(GrowthRules.bonusHealth(value)));
+                    jp.revati.skyabyss.Hp.of(GrowthRules.bonusHealth(value)));
         };
     }
 

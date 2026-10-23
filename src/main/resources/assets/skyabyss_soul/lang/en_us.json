@@ -1,7 +1,7 @@
 {
   "rebirth.skyabyss.arm.rock.short": "R",
   "rebirth.skyabyss.arm.rock": "Arm of Stone",
-  "rebirth.skyabyss.arm.rock.desc": "Stone arm: −0.4% damage taken, +0.25 heart (per node)",
+  "rebirth.skyabyss.arm.rock.desc": "Stone arm: −0.4% damage taken, +0.5 max HP (per node)",
   "rebirth.skyabyss.arm.wind.short": "W",
   "rebirth.skyabyss.arm.wind": "Arm of Wind",
   "rebirth.skyabyss.arm.wind.desc": "Wind arm: −0.6% skill cooldowns, +0.3% move speed (per node)",
@@ -24,7 +24,7 @@
   "rebirth.skyabyss.boon.scholar": "Student's Hand",
   "rebirth.skyabyss.boon.scholar.desc": "+3% XP gained",
   "rebirth.skyabyss.boon.hardy": "Strong Bones",
-  "rebirth.skyabyss.boon.hardy.desc": "+1 heart max health",
+  "rebirth.skyabyss.boon.hardy.desc": "+2 max HP",
   "rebirth.skyabyss.boon.tidewell": "Tidepool",
   "rebirth.skyabyss.boon.tidewell.desc": "+4 max mana",
   "rebirth.skyabyss.boon.ashen": "Ember Spark",
