@@ -400,7 +400,7 @@
 
 - 自己テスト `abyss layers v2`（`AbyssLayersV2SelfTest`）: 設計図の上で着く所から全部の印・門の向こう・主の間・下りの鎖・心臓へ歩いて届く／格子を開けると印の部屋から野営へ帰れる／巣を払う前の印は取れない／印はパーティで共有／二つでは門が開かず三つで通れる／二人のパーティで門 → 骨の野営 → 印 → 骨の主 → 塩の野営と進む／灯皿で骨の戸が開く／迷路の跡が求まる。
 - 自己テスト `abyss v3`（`AbyssV3SelfTest`）: 帰りの祠のブロックと一度だけの帰り／道案内（近い印・巣が先・格子の門・主・下りの鎖・生き残りの一言の段）／主の技の数と段ごとの技・どの技も赤い予告・段の境・名乗りの間は刃が通らない・段の色がバーに出る・一度の当たりで段を越えない／縄張りの主のバーと技。`abyss layers v2` は近道の格子が世界から消えること・格子の門の上がり下がりも見る。`ch5 entrance` は回った都の門の格子が全部溶け、戻っても溶け直すことを見る。
-- 撮影: `tools/shots/abyss_two_types.txt` → `docs/review/abyss_two_types/`（形 B の下り口・待ち場・逃げの道・格子の門）、`tools/shots/abyss_layers.txt` → `docs/review/abyss_v2/`、`tools/shots/abyss_v3.txt` → `docs/review/abyss_v3/`（大坑道・門の大広間・帰りの祠・格子の門・道案内の帯・主）。
+- 撮影: `tools/shots/abyss_two_types.txt` → `docs/review/abyss_two_types/`（形 B の下り口・待ち場・逃げの道・格子の門）、`tools/shots/abyss_layers.txt` → `docs/review/abyss_v3/`、`tools/shots/abyss_v3.txt` → `docs/review/abyss_v3/`（大坑道・門の大広間・帰りの祠・格子の門・道案内の帯・主）。
 
 ### 8.8 まだ
 

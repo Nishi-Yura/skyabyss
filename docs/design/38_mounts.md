@@ -31,7 +31,7 @@
 
 - 場所: 都の東の大通りの南、薬師の店の東（x 82..93, z 6..17、戸は北）。厩舎の番（`stable_keeper`）が立ち、頭の上と戸の上に印と名。
 - 番に話しかけて「乗り物を見る・買う」で専用の画面（`MountShopScreen`）。左に見た目の一覧（持っている・値段・章の壁）と選ぶ・買う、中に今の見た目の 3D の見本、右に 3 つの段の買うボタン。
-- 開発コマンド（OP）: `/skyabyss facility mount`（画面）・`mount demo`（前に七つを 3.4 ブロックおきに並べる）。撮影 `tools/shots/mounts_v2.txt`（並び・寄り・乗った姿・駆ける姿）、絵は `docs/review/mounts_v2/`（前の箱のモデルの絵は `docs/review/mounts/`）。
+- 開発コマンド（OP）: `/skyabyss facility mount`（画面）・`mount demo`（前に七つを 3.4 ブロックおきに並べる）。撮影 `tools/shots/mounts_v2.txt`（並び・寄り・乗った姿・駆ける姿）、絵は `docs/review/mounts_v2/`（前の箱のモデルの絵は `docs/review/mounts_v2/`）。
 
 ## 5. 作り
 
