@@ -12,7 +12,12 @@ tools/sources/anim_base/ に一度だけ写して、そこから作る)。心臓
   2. 潮殻・雷翼・余燼の心臓: 技の当たりの直前 0.45 秒の「溜めの震え」と、当たりの瞬間の「押し出し・反動」を、心臓と殻に足す
      (元の動きの位置の鍵が無い骨だけ。大きさ・回転の鍵はそのまま)
   3. 四つの心臓: 「ひるみ」stagger (2 秒)。領域を解いて砕けた瞬間に流す (HeartDomain.end → HeartBoss.playAction)
-  4. 巨神: 岩鯨の眠り sleep、潮殻の頭の眠り head_sleep (眠る巨神 DormantTitan は動かず。泳ぎ・歩きのまま眠らない)
+  4. 巨神: 岩鯨の眠り sleep、潮殻の頭の眠り head_sleep (眠る巨神 DormantTitan は動かず。泳ぎ・歩きのま眠らない)
+  5. 被弾のひるみ flinch (四つの心臓と番人。0.45 秒)。技とは別の制御 "hurt" で流す (HeartBoss.hurt・HeartWarden.hurt)。
+     GeckoLib は同じ骨を動かす制御どうしでは後のものが上書きするので、ひるみは技が触らない骨だけを動かす:
+     心臓は全部の骨を包む骨 flinch を geo に足し (心臓の geo は骨が全部いちばん上にあるため。何度流しても一つだけ)、
+     番人はもとからある根の骨 root を動かす。だから技の溜め・当たりの形の上に、体ごとのけぞり・縮みが重なる。
+     心臓の geo を書き直す install (install_lowpoly.py・install_*heart*.py・install_heart_atlas_256.py) を流したら、これも流す。
 """
 import json
 import math
@@ -211,6 +216,70 @@ def tide_head_sleep():
     }}
 
 
+# ---------------------------------------------------------------- 5. 被弾のひるみ
+GEO = os.path.join(ROOT, "src", "main", "resources", "assets", "skyabyss", "geo", "entity")
+# 包みの骨の支点 (単位)。岩鯨の心臓は床の鉢ごと揺れるので床 (0) を支点に、浮かぶ三体は芯の高さ
+FLINCH_PIVOT = {"stone_whale_heart": [0.0, 0.0, 0.0], "tide_heart": [0.0, 16.0, 0.0],
+                "storm_heart": [0.0, 22.0, 0.0], "ember_heart": [0.0, 16.0, 0.0]}
+
+
+def wrap_geo(h):
+    """心臓の geo (段階ごと・低ポリ・低ポリの確かめ用・箱) に、いちばん上の骨を全部包む骨 flinch を足す"""
+    n = 0
+    for f in sorted(os.listdir(GEO)):
+        if not (f.startswith(h + "_p") or f == h + ".geo.json") or not f.endswith(".geo.json"):
+            continue
+        path = os.path.join(GEO, f)
+        with open(path, encoding="utf-8") as fh:
+            raw = fh.read()
+        d = json.loads(raw)
+        lines = raw.strip().split(chr(10))
+        compact = len(lines) == 1
+        indent = len(lines[1]) - len(lines[1].lstrip(" ")) if not compact else 0
+        trail = raw.endswith(chr(10))
+        for g in d["minecraft:geometry"]:
+            bones = g["bones"]
+            if any(b["name"] == "flinch" for b in bones):
+                continue
+            for b in bones:
+                if not b.get("parent"):
+                    b["parent"] = "flinch"
+            bones.insert(0, {"name": "flinch", "pivot": FLINCH_PIVOT[h]})
+        with open(path, "w", encoding="utf-8", newline=chr(10)) as fh:
+            # 元の書き方 (一行の低ポリの geo・字下げの箱の geo) のまま書く
+            if compact:
+                fh.write(json.dumps(d, ensure_ascii=False, separators=(",", ":")))
+            else:
+                json.dump(d, fh, ensure_ascii=False, indent=indent)
+                if trail:
+                    fh.write(chr(10))
+        n += 1
+    return n
+
+
+def heart_flinch(h):
+    # 当たった瞬間 (0.06 秒) に後ろへのけぞって押しつぶれ、0.16 秒に前へ戻りすぎて伸び、0.3 秒の小さな揺れで止まる。
+    # 浮かぶ心臓は沈んで跳ね、床の岩鯨の心臓は鉢ごと傾いて揺れる (沈まない)
+    floor = h == "stone_whale_heart"
+    tilt = 4.0 if floor else 7.0
+    return {"animation_length": 0.45, "bones": {"flinch": {
+        "rotation": keys({0: (0, 0, 0), 0.06: (-tilt, 0, tilt * 0.45), 0.16: (tilt * 0.4, 0, -tilt * 0.22),
+                          0.28: (-tilt * 0.12, 0, tilt * 0.08), 0.45: (0, 0, 0)}),
+        "position": keys({0: (0, 0, 0), 0.06: (0, 0 if floor else -0.9, 0), 0.16: (0, 0 if floor else 0.35, 0),
+                          0.3: (0, 0, 0), 0.45: (0, 0, 0)}),
+        "scale": keys({0: (1, 1, 1), 0.06: (1.07, 0.9, 1.07), 0.16: (0.97, 1.04, 0.97), 0.28: (1.01, 0.99, 1.01),
+                       0.45: (1, 1, 1)}),
+    }}}
+
+
+def warden_flinch():
+    # 番人: 根 (足もと) を支点にのけぞり、横へ振られ、膝が沈むように縮む。0.32 秒で戻る
+    return {"animation_length": 0.32, "bones": {"root": {
+        "rotation": keys({0: (0, 0, 0), 0.06: (-6, 0, 4), 0.16: (2.4, 0, -1.6), 0.24: (-0.6, 0, 0.4), 0.32: (0, 0, 0)}),
+        "scale": keys({0: (1, 1, 1), 0.06: (1.03, 0.95, 1.03), 0.16: (0.99, 1.02, 0.99), 0.32: (1, 1, 1)}),
+    }}}
+
+
 # ---------------------------------------------------------------- 書き込み
 def load(name):
     with open(os.path.join(ANIM, name + ".animation.json"), encoding="utf-8") as f:
@@ -252,7 +321,9 @@ def main():
                 if p + k in A:
                     windup_kick(A[p + k], w)
         A[p + "stagger"] = stagger(h)
+        A[p + "flinch"] = heart_flinch(h)
         save(h, data)
+        print("wrapped", wrap_geo(h), "geo of", h)
         print("polished", h)
     # 巨神
     d = load("stone_whale")
@@ -262,6 +333,11 @@ def main():
     d["animations"]["animation.tide_shell.head_sleep"] = tide_head_sleep()
     save("tide_shell", d)
     print("polished stone_whale, tide_shell")
+    # 番人のひるみ (gen_heart_warden.py を流し直したら、これも流す)
+    d = load("heart_warden")
+    d["animations"]["animation.heart_warden.flinch"] = warden_flinch()
+    save("heart_warden", d)
+    print("polished heart_warden")
     return 0
 
 

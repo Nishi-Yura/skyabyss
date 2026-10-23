@@ -102,7 +102,8 @@ public final class AttackFx {
             });
             case WATER -> r.nextBoolean() ? ParticleTypes.SPLASH : new BlockParticleOption(ParticleTypes.BLOCK,
                     r.nextBoolean() ? Blocks.PRISMARINE.defaultBlockState() : Blocks.BRAIN_CORAL_BLOCK.defaultBlockState());
-            case STORM -> r.nextInt(3) == 0 ? ParticleTypes.END_ROD : ParticleTypes.ELECTRIC_SPARK;
+            // 雷: 羽 (StormFeatherParticle) と火花。end_rod は目の近くで大きな白い四角に見えた
+            case STORM -> r.nextInt(3) == 0 ? feather() : ParticleTypes.ELECTRIC_SPARK;
             case EMBER -> r.nextInt(3) == 0 ? ParticleTypes.LAVA : ParticleTypes.FLAME;
         };
     }
@@ -142,9 +143,14 @@ public final class AttackFx {
         return switch (el) {
             case STONE -> new BlockParticleOption(ParticleTypes.FALLING_DUST, Blocks.STONE.defaultBlockState());
             case WATER -> ParticleTypes.FALLING_WATER;
-            case STORM -> ParticleTypes.END_ROD;
+            // 雷の空から降るもの = 雷翼の羽 (羽の雨)。小さく、揺れて回り、目の近くでは薄れる
+            case STORM -> feather();
             case EMBER -> r.nextBoolean() ? ParticleTypes.ASH : ParticleTypes.FALLING_LAVA;
         };
+    }
+
+    private static ParticleOptions feather() {
+        return jp.revati.skyabyss.rpg.skill.Skills.STORM_FEATHER.get();
     }
 
     // ---------------------------------------------------------------- 形の点
@@ -573,7 +579,8 @@ public final class AttackFx {
                 for (int i = 0; i < m; i++) {
                     double[] q = inside(s, r);
                     if (q != null) {
-                        level.addParticle(puff(el, r), q[0], ground(d, q[0], q[1]) + 0.4, q[1], 0, 0.05, 0);
+                        // 羽の雨の当たり: 雲の白い塊ではなく、舞い上がる羽
+                        level.addParticle(look == AttackLook.STORM_FEATHER ? feather() : puff(el, r), q[0], ground(d, q[0], q[1]) + 0.4, q[1], 0, 0.05, 0);
                     }
                 }
                 if (size > 3) {

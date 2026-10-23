@@ -16,6 +16,14 @@
    },
    "bones": [
     {
+     "name": "flinch",
+     "pivot": [
+      0.0,
+      16.0,
+      0.0
+     ]
+    },
+    {
      "name": "heart",
      "pivot": [
       0.0,
@@ -55559,7 +55567,8 @@
         }
        }
       }
-     ]
+     ],
+     "parent": "flinch"
     },
     {
      "name": "heart_vein",
@@ -58473,7 +58482,8 @@
         }
        }
       }
-     ]
+     ],
+     "parent": "flinch"
     },
     {
      "name": "vessel",
@@ -60662,7 +60672,8 @@
         }
        }
       }
-     ]
+     ],
+     "parent": "flinch"
     },
     {
      "name": "core_ring",
@@ -64858,7 +64869,8 @@
         }
        }
       }
-     ]
+     ],
+     "parent": "flinch"
     },
     {
      "name": "core_eye",
@@ -65115,7 +65127,8 @@
        ],
        "uv": {}
       }
-     ]
+     ],
+     "parent": "flinch"
     },
     {
      "name": "spiral",
@@ -73300,7 +73313,8 @@
         }
        }
       }
-     ]
+     ],
+     "parent": "flinch"
     },
     {
      "name": "chamber",
@@ -74158,7 +74172,8 @@
         }
        }
       }
-     ]
+     ],
+     "parent": "flinch"
     },
     {
      "name": "shard",
@@ -74692,7 +74707,8 @@
         }
        }
       }
-     ]
+     ],
+     "parent": "flinch"
     },
     {
      "name": "aperture_lip",
@@ -74701,7 +74717,8 @@
       16.0,
       0.0
      ],
-     "cubes": []
+     "cubes": [],
+     "parent": "flinch"
     },
     {
      "name": "barnacle",
@@ -74710,7 +74727,8 @@
       16.0,
       0.0
      ],
-     "cubes": []
+     "cubes": [],
+     "parent": "flinch"
     },
     {
      "name": "frond",
@@ -74719,7 +74737,8 @@
       16.0,
       0.0
      ],
-     "cubes": []
+     "cubes": [],
+     "parent": "flinch"
     },
     {
      "name": "moon_crescent",
@@ -74728,7 +74747,8 @@
       16.0,
       0.0
      ],
-     "cubes": []
+     "cubes": [],
+     "parent": "flinch"
     },
     {
      "name": "orbit",
@@ -74737,7 +74757,8 @@
       16.0,
       0.0
      ],
-     "cubes": []
+     "cubes": [],
+     "parent": "flinch"
     },
     {
      "name": "water_drop",
@@ -74746,7 +74767,8 @@
       16.0,
       0.0
      ],
-     "cubes": []
+     "cubes": [],
+     "parent": "flinch"
     }
    ]
   }

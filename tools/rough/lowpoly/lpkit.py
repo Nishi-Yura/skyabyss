@@ -441,6 +441,48 @@ def build_atlas(faces, size=128, pad=0):
     return size, P, N, M, L
 
 
+def upscale_atlas(faces, size, k):
+    """build_atlas で詰めた島の並びを、そのまま k 倍の解像度で取り直す (島の位置も大きさも k 倍)。
+    正規化した UV は変わらないので、詰め直したメッシュ (閉じた面などを足したもの) にそのまま新しい絵を当てられる。
+    絵は 3D 位置から描き直すので、拡大と違って細部が増える。戻り値は build_atlas と同じ (size*k, P, N, M, L)。"""
+    S = size * k
+    P = np.zeros((S, S, 3))
+    N = np.zeros((S, S, 3))
+    M = np.full((S, S), -1, int)
+    L = np.zeros((S, S, 3))
+    for fi, f in enumerate(faces):
+        x, y, cw, ch = f.chart
+        x, y, cw, ch = x * k, y * k, cw * k, ch * k
+        f.chart = (x, y, cw, ch)
+        f.uv = f.uv * k
+        xs = np.arange(x, x + cw) + 0.5
+        ys = np.arange(y, y + ch) + 0.5
+        gx, gy = np.meshgrid(xs, ys)
+        q = np.stack([gx, gy], -1).reshape(-1, 2)
+        pos = np.zeros((len(q), 3))
+        loc = np.zeros((len(q), 3))
+        best = np.full(len(q), -1e9)
+        for (a, b, c) in f.tris():
+            A, B, C = f.uv[a], f.uv[b], f.uv[c]
+            T = np.array([[B[0] - A[0], C[0] - A[0]], [B[1] - A[1], C[1] - A[1]]])
+            if abs(np.linalg.det(T)) < 1e-9:
+                continue
+            bc = np.linalg.solve(T, (q - A).T).T
+            w = np.stack([1 - bc[:, 0] - bc[:, 1], bc[:, 0], bc[:, 1]], -1)
+            score = w.min(1)
+            sel = score > best
+            best[sel] = score[sel]
+            pos[sel] = w[sel] @ f.verts[[a, b, c]]
+            loc[sel] = w[sel] @ f.loc[[a, b, c]]
+        yy = gy.reshape(-1).astype(int)
+        xx = gx.reshape(-1).astype(int)
+        P[yy, xx] = pos
+        L[yy, xx] = loc
+        N[yy, xx] = f.normal
+        M[yy, xx] = fi
+    return S, P, N, M, L
+
+
 # ------------------------------------------------------------------ レンダラ
 
 def shade_of(n, cam_dir):
