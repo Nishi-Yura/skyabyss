@@ -488,7 +488,7 @@ def quests():
     put(b + 'summary', '灰の降る円の縁まで、黒石の杭を五つ辿る。', 'Follow five blackstone posts to the rim of the falling ash.')
     put(b + 'trace.journal', '語り部が言っていた。灰の民は、黒石の杭で灰の積もりを測りながら、灰の降る円の縁まで歩いたという。',
         'The storyteller said the ash people walked to the rim of the falling ash, measuring how deep it lay with blackstone posts.')
-    put(b + 'trace.marks', '灰の道の標を辿る', 'Follow the marks of the ash road')
+    put(b + 'trace.marks', '灰の道の標を辿ろう', 'Follow the marks of the ash road')
     put(b + 'done', '杭の灰は、円の中ほど濃かった。', 'The nearer the circle, the deeper the ash on the posts.')
 
     b = 'quest.skyabyss.ch4.dragger_trail.'
@@ -497,7 +497,7 @@ def quests():
     put(b + 'follow.journal',
         'イサナが言っていた。「灰を引きずって歩く虫がいる。追うと丸まって転がって逃げる。逃げる先に、灰の民の窯があったんだ」',
         'Isana said: "There is a bug that drags ash behind it. Chase it and it curls up and rolls away. Where it rolls, there was a kiln of the ash people."')
-    put(b + 'follow.kiln', '灰ひきずりを追い、窯の跡を探す', 'Follow a dragger to the kiln')
+    put(b + 'follow.kiln', '灰ひきずりを追い、窯の跡を探そう', 'Follow a dragger to the kiln')
     put(b + 'done', '窯の跡は、灰ひきずりの巣になっていた。', 'The old kiln had become the draggers\' nest.')
 
     b = 'quest.skyabyss.daily_mite_clear.'
@@ -505,7 +505,7 @@ def quests():
     put(b + 'summary', '灰の地の熾り蟲を十匹払う。', 'Clear ten cinder mites from the ash lands.')
     put(b + 'sweep.journal', '板の紙（煤で汚れた字）：「熾り蟲が干し場の火に寄ってくる。十匹ほど払ってほしい。温石を持っていけば、向こうから来る」',
         'A note on the board, smudged with soot: "Cinder mites keep creeping to the drying fires. Clear about ten. Carry a warm stone and they will come to you."')
-    put(b + 'sweep.kill', '熾り蟲を払う', 'Clear cinder mites')
+    put(b + 'sweep.kill', '熾り蟲を払おう', 'Clear cinder mites')
     put(b + 'done', 'しばらく、火のまわりは静かだろう。', 'The fires will be quiet for a while.')
 
 

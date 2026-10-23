@@ -24,7 +24,7 @@ import net.minecraft.world.level.levelgen.Heightmap;
 import net.neoforged.neoforge.common.util.FakePlayer;
 
 // SELFTEST ch5 entrance: 五章の入口 (docs/design/34 の 4.7)。
-//   データ: main_abyss の段 (rumor・prepare・door・shaft・gate・層ごとの camp/marks/lord・descend・warden・heart・report)、支度 ch5/black_iron (ネザライトのインゴット → 鍛冶師。報酬に鍛冶型)
+//   データ: main_abyss の段 (rumor・prepare・door・shaft・gate・層ごとの camp/marks/lord・descend・warden・heart・report)、支度 ch5/black_iron (ブレイズロッド 3・黒曜石 2 → 鍛冶師。報酬に鍛冶型)
 //   流れ: 印を出発点のそばへ差し替え、戸の 2 マスを強化深層岩に。鍵なし・段の前は開かない → 段 door で鍵を持つと開く (記録・合図で段 shaft)
 //        → 底の境の印のそばで合図 (段 gate) → 鍵なしでは門は開かない → 鍵で格子が溶ける → 門の列で合図 (段 bone_camp)。踊り場の一言は人ごとに一度
 public final class AbyssEntranceSelfTest {

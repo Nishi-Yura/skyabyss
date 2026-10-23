@@ -115,9 +115,9 @@ def write_text() -> None:
     text(q + "summary", "語り部とイサナから、鍵の話をそれぞれに聞く。", "Hear about the key from the storyteller and from Isana, each in their own way.")
     text(q + "done", "二人の話は、同じ鍵の、別の端を持っていた。", "Their two tales held different ends of the same key.")
     text(q + "teller.journal", "灰の朝が続く。語り部が、鍵のことで話したそうにしている。", "The ash mornings go on. The storyteller seems to want to talk about the key.")
-    text(q + "teller.talk", "語り部の話を聞く", "Hear the storyteller out")
+    text(q + "teller.talk", "語り部の話を聞こう", "Hear the storyteller out")
     text(q + "isana.journal", "イサナも、鍵のことを話したがっている。", "Isana, too, wants to speak of the key.")
-    text(q + "isana.talk", "イサナの話を聞く", "Hear Isana out")
+    text(q + "isana.talk", "イサナの話を聞こう", "Hear Isana out")
 
     # 会話 (語り部)
     s = "dialogue.skyabyss.storyteller."

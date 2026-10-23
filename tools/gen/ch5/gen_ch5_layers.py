@@ -343,9 +343,9 @@ t('objective.skyabyss.abyss_v2.warden_p3', '闇の波のあとは、光の術で
 # ---------------------------------------------------------------- 手記 (野営の帳面 0、道ごと 1〜3)
 JOURNALS = {
     'bone': [
-        ('探掘隊の帳面「都の井戸が、夜ごとに脈を打つ。ギルドの頼みで、七人で元を探しに下りる。隊長トウヤ」',
+        ('探掘隊の帳面「都の井戸が、夜ごとに脈を打つ。鯨追いの組合の頼みで、七人で元を探しに下りる。隊長トウヤ」',
          '帳面の続き「北の封じ石に穴が三つ。印をはめる穴らしい。三手に分かれて探す。灯りはミオの係」',
-         'Party ledger: "The capital\'s wells pulse every night. At the guild\'s request, six of us go down to find the source. — Captain Touya"',
+         'Party ledger: "The capital\'s wells pulse every night. At the Whale Chasers\' Guild\'s request, six of us go down to find the source. — Captain Touya"',
          'Ledger, continued: "Three hollows in the north seal, for marks it seems. We split three ways. Mio keeps the lights."'),
         ('書見台の頁「灯皿の間。三つを同時に灯せば戸が開く、と壁にある。……壁の字が、わたしたちの字に似ている」',
          '頁の続き「隊長は気のせいだと言った。でも、印を刻んだのは、わたしたちより前に来た誰かだ」',
@@ -560,20 +560,20 @@ def stages_after(L):
 SIDE_QUESTS = {
     'bone': ('ch5/lamp_keeper', '探掘隊の灯り', 'The Party Lantern', 'ミオが落とした、隊の角灯を探す。', 'Find the party lantern Mio lost.',
              [('find', '光の中でだけ崩れる壁の奥に、角灯がある。', 'The lantern lies behind a wall that crumbles only in light.',
-               [('take', 'signal', ['abyss_hidden_bone'], '東の道の広間で、光の術を壁に当てる', 'Shine the light art on a wall in the east hall')])],
+               [('take', 'signal', ['abyss_hidden_bone'], '東の道の広間で、光の術を壁に当てよう', 'Shine the light art on a wall in the east hall')])],
              '「灯りが届く気がする」', '"I feel the light reaching them."'),
     'salt': ('ch5/surveyor_map', '破れた地図', 'The Torn Map', 'ハヤセの地図の切れ端を、三本の道から拾ってくる。', 'Gather Hayase\'s map fragments from the three paths.',
              [('find', '切れ端は下り道の三つの待ち場の箱に一枚ずつ。', 'One fragment lies in a chest at each resting place on the way down.',
-               [('f%d' % i, 'signal', ['abyss_frag_salt_%d' % i], '地図の切れ端（%s）' % ['塩の殻の床', '貯め池', '白殻の縄張り'][i - 1],
+               [('f%d' % i, 'signal', ['abyss_frag_salt_%d' % i], '地図の切れ端（%s）を探そう' % ['塩の殻の床', '貯め池', '白殻の縄張り'][i - 1],
                  'Map fragment (%s)' % ['salt crust', 'cistern', 'white shell ground'][i - 1]) for i in (1, 2, 3)])],
              '「誰かが帰れるように」', '"So that someone can go home."'),
     'storm': ('ch5/shadow_rest', '戸の奥の影', 'The Shadow Behind the Door', '鼓動の戸の奥にいる影を、眠らせる。', 'Lay to rest the shadow behind the heartbeat doors.',
               [('find', '違う戸の奥に、自分によく似た影が座っている。', 'Behind a wrong door sits a shadow much like you.',
-                [('rest', 'signal', ['abyss_shadow_storm'], '戸の奥の影を倒す', 'Defeat the shadow behind the door')])],
+                [('rest', 'signal', ['abyss_shadow_storm'], '戸の奥の影を倒そう', 'Defeat the shadow behind the door')])],
               '「影は、帰れなかった人の形」', '"Shadows wear the shape of those who never came home."'),
     'ash': ('ch5/captain_pages', '散らした手記', 'The Scattered Notes', '隊長トウヤの手記を、灰の層の三本の道で読む。', 'Read Captain Touya\'s notes on the three ash paths.',
             [('find', '手記は三冊。迷路の口・封の間・燠の縄張りに一冊ずつ。', 'Three notebooks: at the maze mouth, the seal room and the ember ground.',
-              [('j%d' % i, 'signal', ['abyss_journal_ash_%d' % i], '隊長の手記（%s）' % ['一', '二', '三'][i - 1], 'Captain\'s notes (%d)' % i) for i in (1, 2, 3)])],
+              [('j%d' % i, 'signal', ['abyss_journal_ash_%d' % i], '隊長の手記（%s）を探そう' % ['一', '二', '三'][i - 1], 'Captain\'s notes (%d)' % i) for i in (1, 2, 3)])],
             '「あの声は、お前の声だった」', '"That voice was yours."'),
 }
 REWARD_ITEM = {'bone': ('minecraft:soul_lantern', 2), 'salt': ('minecraft:recovery_compass', 1), 'storm': ('minecraft:golden_apple', 2),
@@ -596,7 +596,7 @@ def build_side(L):
         out.append({'id': sid, 'xp': 80, 'objectives': objs})
     out.append({'id': 'return', 'objectives': [{'id': 'talk', 'type': 'talk', 'target': SURVIVOR[L], 'topic': 'side_return'}]})
     t('%s.return.journal' % key, '%sに伝えに戻ろう。' % PEOPLE['survivor_' + L][0], 'Go back and tell %s.' % PEOPLE['survivor_' + L][1])
-    t('%s.return.talk' % key, '%sに話す' % PEOPLE['survivor_' + L][0], 'Talk to %s' % PEOPLE['survivor_' + L][1])
+    t('%s.return.talk' % key, '%sに話そう' % PEOPLE['survivor_' + L][0], 'Talk to %s' % PEOPLE['survivor_' + L][1])
     item, count = REWARD_ITEM[L]
     return {'category': 'sub', 'chapter': CH, 'order': 70 + LAYERS.index(L), 'giver': SURVIVOR[L], 'stages': out,
             'reward': {'xp': 300, 'items': [{'item': item, 'count': count}], 'affinity': {SURVIVOR[L]: 3}}}
@@ -637,18 +637,18 @@ def build_porter():
 
 # ---------------------------------------------------------------- main_abyss の段の文
 STAGE_TEXT = {
-    'bone': ('深淵の最初の層。野営に、探掘隊の灯り番が残っていた。話を聞こう。', '灯り番のミオと話す',
+    'bone': ('深淵の最初の層。野営に、探掘隊の灯り番が残っていた。話を聞こう。', '灯り番のミオと話そう',
              '北の封じ石を通るには、三本の道の奥の印が三つ要る。', '探掘隊の灯り番が言っていた。北の封じ石には印が三つ要る。三本の道の奥を探そう。',
-             '封じ石の奥、肋の主の間。灯台を灯し、光の中で斬る。', '肋の主を倒す'),
-    'salt': ('塩の層の野営に、測量士が座りこんでいた。', '測量士のハヤセと話す',
+             '封じ石の奥、肋の主の間。灯台を灯し、光の中で斬る。', '肋の主を倒そう'),
+    'salt': ('塩の層の野営に、測量士が座りこんでいた。', '測量士のハヤセと話そう',
              '荷運びのロクを、主の間の前まで送る。', '重さの術を覚えた。ロクがハヤセの縄を主の間の前まで張っていく。塩の殻の床、塩風の井戸、白殻の縄張り。三つの待ち場を確かにして、崩れより先に格子の門へ。',
-             '白殻の主の間。足もとの赤い輪には重さが落ちる。', '白殻の主を倒す'),
-    'storm': ('雷の層の野営で、薬師が誰かを待っていた。', '薬師のシズと話す',
+             '白殻の主の間。足もとの赤い輪には重さが落ちる。', '白殻の主を倒そう'),
+    'storm': ('雷の層の野営で、薬師が誰かを待っていた。', '薬師のシズと話そう',
               '雷の層の三つの印を集める。', '鼓動の術を覚えた。鼓動の戸、雷の回廊、羽虫の巣。三つの印を集めよう。',
-              '鼓動まねの主の間。鼓動の聞こえる方が本物。', '鼓動まねの主を倒す'),
-    'ash': ('灰の層の野営に、探掘隊の隊長がいた。', '隊長のトウヤと話す',
+              '鼓動まねの主の間。鼓動の聞こえる方が本物。', '鼓動まねの主を倒そう'),
+    'ash': ('灰の層の野営に、探掘隊の隊長がいた。', '隊長のトウヤと話そう',
             '隊長のトウヤと、主の間の前まで下りる。', '灯りがすぐ痩せる層。トウヤの灯りを守って下りる。灰の迷路、三つの術の封、燠の番の縄張り。三つの待ち場を越えて、闇の波より先に格子の門へ。',
-            '灯り喰いの主の間。闇の波のあとは、光の術で照らす。', '灯り喰いの主を倒す'),
+            '灯り喰いの主の間。闇の波のあとは、光の術で照らす。', '灯り喰いの主を倒そう'),
 }
 STAGE_TEXT_EN = {
     'bone': ('The first layer of the abyss. A lamp keeper of the excavation party stayed at the camp. Hear her out.', 'Talk to Mio the lamp keeper',
@@ -671,9 +671,9 @@ for L in LAYERS:
     t(k + '%s_camp.talk' % L, j[1], e[1])
     t(k + '%s_marks.journal' % L, j[3], e[3])
     for i in (1, 2, 3):
-        t(k + '%s_marks.m%d' % (L, i), MARKS['%s_%d' % (L, i)][0], MARKS['%s_%d' % (L, i)][1])
+        t(k + '%s_marks.m%d' % (L, i), MARKS['%s_%d' % (L, i)][0] + 'を手に入れよう', MARKS['%s_%d' % (L, i)][1])  # 帯の目的は「〜しよう」
     if L in EXPEDITION:
-        t(k + '%s_marks.escape' % L, {'salt': 'ロクを格子の門まで送る', 'ash': 'トウヤと格子の門まで下りる'}[L],
+        t(k + '%s_marks.escape' % L, {'salt': 'ロクを格子の門まで送り届けよう', 'ash': 'トウヤと格子の門まで下りよう'}[L],
           {'salt': 'Bring Roku to the bars', 'ash': 'Reach the bars with Touya'}[L])
     t(k + '%s_lord.journal' % L, j[4], e[4])
     t(k + '%s_lord.defeat' % L, j[5], e[5])

@@ -108,10 +108,10 @@ STORM_ENTRIES = {
     "message.skyabyss.storm.room.d_s12": ("羽守長の頂: 足場は半分ずつ運ばれる。黄は消える合図、橙は羽の嵐。芯は安全", "Chief's Summit: pads leave half at a time. Yellow = leaving, orange = feather storm. The core is safe"),
     "message.skyabyss.storm.room.d_s11": ("避雷の護送: 籠は近くに人がいるあいだ進む。雷は籠に落ちる。離れて守る", "Rod Escort: the cage moves while someone is near. Lightning strikes it. Guard from a distance"),
     # ---- 目的の帯
-    "objective.skyabyss.trial_storm_deck_bridge2": ("南の橋を渡って第二の渡り場へ", "Cross the south bridge"),
+    "objective.skyabyss.trial_storm_deck_bridge2": ("南の橋を渡って、第二の渡り場へ行こう", "Cross the south bridge"),
     "objective.skyabyss.trial_storm_deck_s04": ("白く光る陰を探して、柱から柱へ渡ろう", "Cross, sheltering at pillars"),
     "objective.skyabyss.trial_storm_deck_s07_a": ("鏡を裏返して、光を窓へ当てよう", "Flip mirrors, light the window"),
-    "objective.skyabyss.trial_storm_deck_s07_b": ("奥の部屋の鏡を直して、光を東の受け羽へ", "Aim the beam at the catcher"),
+    "objective.skyabyss.trial_storm_deck_s07_b": ("奥の部屋の鏡を直して、光を東の受け羽へ送ろう", "Aim the beam at the catcher"),
     "objective.skyabyss.trial_storm_deck_s08": ("弁を回して、気嚢の圧を金の印に合わせよう", "Turn the valves to match the gold marks"),
     "objective.skyabyss.trial_storm_deck_s11": ("籠から離れて見守りながら、道を進もう", "Follow the cage from a safe distance"),
     "objective.skyabyss.trial_storm_deck_s12": ("頂の真ん中へ進もう", "Advance to the middle of the summit"),

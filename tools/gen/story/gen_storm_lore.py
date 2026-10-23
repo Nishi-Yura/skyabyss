@@ -191,7 +191,7 @@ quest("daily_storm_rounds", 66, ("雷翼の背の見回り", "Rounds on the Thun
        "A note on the board, the ink run a little by rain: \"Inside the bones on the bird's back, the copper-helmed wardens and the glowing moths "
        "are stirring again. Quiet eight of them.\""),
       {"stage": "rounds", "id": "kill", "type": "kill", "targets": ["skyabyss:feather_warden", "skyabyss:static_moth", "skyabyss:thunder_supplicant"],
-       "count": 8, "text": ("雷翼の背で、羽守・雷蛾・雷乞いを倒す", "Defeat feather wardens, static moths and thunder supplicants on the thunder wing")},
+       "count": 8, "text": ("雷翼の背で、羽守・雷蛾・雷乞いを倒そう", "Defeat feather wardens, static moths and thunder supplicants on the thunder wing")},
       {"xp": 110, "items": [{"item": "skyabyss:thunder_wing_shard", "count": 2, "optional": True},
                             {"item": "skyabyss:resonance_shard_thunder_wing", "count": 1}]},
       "daily", "雷翼の背の周回の入口 (段階 3)。潮殻の「潮殻の背の見回り」と同じ形")
@@ -201,7 +201,7 @@ quest("weekly_storm_heart", 84, ("嵐の鼓動をもう一度", "The Storm's Hea
       ("板の隅の紙（同じ、名前のない字）：「嵐は七日で戻る。戻りきる前に、確かめてきてほしい」",
        "A note in the corner of the board, in the same unsigned hand: \"The storm comes back in seven days. Go and make sure, before it is back.\""),
       {"stage": "heart", "id": "heart", "type": "kill", "target": "skyabyss:thunder_wing_heart", "count": 1,
-       "text": ("雷翼の心臓を止める", "Still the thunder wing's heart")},
+       "text": ("雷翼の心臓を止めよう", "Still the thunder wing's heart")},
       {"xp": 260, "items": [{"item": "skyabyss:resonance_crystal", "count": 1},
                             {"item": "skyabyss:thunder_wing_shard", "count": 3, "optional": True}]},
       "weekly", "「心臓をもう一度」「潮の鼓動をもう一度」と同じ名前のない紙。七日という数を、三度目にほのめかす")
@@ -526,7 +526,7 @@ HAND_EDITS = [  # (鍵, 日本語, 英語)
     ("sign.skyabyss.storm_west.2", "縦に登る", "Climb the ribs"),
     ("subtitles.skyabyss.storm_stone", "光る印に着く", "Glowing mark reached"),
     ("message.skyabyss.storm_heart.defeated", "雷翼の心臓が止まった。胸の奥の風が、はじめて止んだ", "The thunder wing's heart has stopped. The wind in its chest falls still"),
-    ("quest.skyabyss.daily_storm_rounds.rounds.kill", "雷翼の背で、羽守・雷蛾・雷乞いを倒す", "Defeat feather wardens, moths and supplicants on the thunder wing"),
+    ("quest.skyabyss.daily_storm_rounds.rounds.kill", "雷翼の背で、羽守・雷蛾・雷乞いを倒そう", "Defeat feather wardens, moths and supplicants on the thunder wing"),
 ]
 NOT_HERE = (  # 生成しない鍵 (コミット済みの lang にはない)
     "block.skyabyss.wind_stone",

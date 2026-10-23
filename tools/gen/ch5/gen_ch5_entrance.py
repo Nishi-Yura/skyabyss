@@ -4,7 +4,7 @@
 python -I tools/gen/ch5/gen_ch5_entrance.py
 書くもの:
   data/skyabyss/quest/main_abyss.json            メイン: 噂 → 支度 (黒い鉄の器) → 封じた戸 → 大坑道 → 報告
-  data/skyabyss/quest/ch5/black_iron.json        支度の段: ネザライトのインゴット 1 → 鍛冶師に見せる (鍛冶型の写し 1)
+  data/skyabyss/quest/ch5/black_iron.json        支度の段: ブレイズロッド 3・黒曜石 2 → 鍛冶師に見せる (鍛冶型の写し 1)
   data/skyabyss/dialogue/ch5/storyteller_abyss.json   語り部の一言 (噂・報告)
   data/skyabyss/dialogue/ch5/smith_abyss.json        鍛冶師の一言 (黒い鉄の頁・見せる)
   assets/skyabyss_ch5/lang/ja_jp.json・en_us.json
@@ -66,7 +66,8 @@ IRON = {
     'category': 'main', 'chapter': CH, 'order': 61, 'giver': SMITH,
     'start_when': {'type': 'quest', 'quest': 'main_abyss', 'is': 'active', 'stage': 'prepare'},  # 噂を聞いて支度の段に入ってから (00 の見直し)
     'stages': [
-        {'id': 'iron', 'xp': 150, 'objectives': [{'id': 'ingot', 'type': 'collect', 'target': 'minecraft:netherite_ingot', 'count': 1, 'party': False}]},
+        {'id': 'iron', 'xp': 150, 'objectives': [{'id': 'rod', 'type': 'collect', 'target': 'minecraft:blaze_rod', 'count': 3, 'party': False},
+                                                 {'id': 'obsidian', 'type': 'collect', 'target': 'minecraft:obsidian', 'count': 2, 'party': False}]},
         {'id': 'show', 'objectives': [{'id': 'talk', 'type': 'talk', 'target': SMITH, 'topic': 'ch5_iron_show'}]},
     ],
     'reward': {'xp': 200, 'items': [{'item': 'minecraft:netherite_upgrade_smithing_template', 'count': 1}], 'affinity': {SMITH: 3}},
@@ -128,20 +129,21 @@ TEXTS = [
     ('quest.skyabyss.main_abyss.gate.journal', '底の境の門の向こうで、鼓動が鳴った。天の鍵がそれに応えて脈を打ち、門の格子が溶けた。門をくぐって、深淵へ降りよう。', 'Beyond the gate at the threshold, a heartbeat sounded. The sky key pulsed in answer and the bars melted away. Pass through the gate into the abyss.'),
     ('quest.skyabyss.main_abyss.gate.enter', '開いた門をくぐって、深淵へ入ろう', 'Pass through the open gate'),
     ('quest.skyabyss.main_abyss.descend.journal', '四つの層を越えた。灰の層の主の間の鎖の先に、心臓の控えの間がある。番人は、層の主たちが教えた灯り・重さ・鼓動・闇を全部使ってくる。', 'Four layers behind you. Past the chain in the hall of the ash lord lies the antechamber of the heart. The warden will use everything the layer lords taught: light, weight, the beat and the dark.'),
-    ('quest.skyabyss.main_abyss.descend.reach', '心臓の間へ入る', 'Enter the heart chamber'),
+    ('quest.skyabyss.main_abyss.descend.reach', '心臓の間へ入ろう', 'Enter the heart chamber'),
     ('quest.skyabyss.main_abyss.warden.journal', '心臓の間は真っ暗だった。闇の中に、姿の見えない番人がいる。\n輪に並んだ灯りに火を移せば、その光の中でだけ番人の姿が見える。闇の中の番人には、攻撃がほとんど効かない。', 'The heart room is pitch dark. Somewhere in it is a warden you cannot see.\nPass the flame to the ring of lanterns: only in their light does the warden take shape. In the dark, your blows barely reach it.'),
     ('quest.skyabyss.main_abyss.warden.defeat', '灯りを点けて、心臓の番人を倒そう', 'Defeat the heart warden'),
     ('quest.skyabyss.main_abyss.heart.journal', '番人は闇に溶けた。真ん中の台の上で、何かが脈打っている。', 'The warden melted into the dark. On the altar in the middle, something pulses.'),
     ('quest.skyabyss.main_abyss.heart.touch', '台の上の心臓に触れよう', 'Touch the heart on the altar'),
     # 支度
     ('quest.skyabyss.ch5.black_iron.title', '黒い鉄の器', 'A Cradle of Black Iron'),
-    ('quest.skyabyss.ch5.black_iron.summary', '鍵を収める器のために、ネザーの底で黒い鉄を手に入れる。', 'Get black iron from the depths of the Nether for the key\'s cradle.'),
+    ('quest.skyabyss.ch5.black_iron.summary', '鍵を収める器のために、ネザーで黒い鉄を打つ火と石を集める。', 'Gather fire and stone from the Nether to forge black iron for the key\'s cradle.'),
     ('quest.skyabyss.ch5.black_iron.done', '「器ができた。……この型も持っていけ。前のあんたも、同じ型を写していった」', '"The cradle\'s done. ...Take this template too. The you from before copied the same one."'),
-    ('quest.skyabyss.ch5.black_iron.iron.journal', '鍛冶師が言っていた。「火の国の底に、黒い鉄がある。古代の残骸を掘って、金と合わせればインゴットになる」\nネザーの低い所（溶岩の海の高さより下）で、古代の残骸を探そう。ベッドや TNT で掘ると早い。残骸 4 と金のインゴット 4 で、ネザライトのインゴット 1。', 'The smith said: "Black iron lies at the bottom of the land of fire. Dig ancient debris and add gold to make an ingot."\nLook for ancient debris low in the Nether (below the lava sea). Beds or TNT dig it faster. 4 debris and 4 gold ingots make 1 netherite ingot.'),
-    ('quest.skyabyss.main_abyss.prepare.lead', '鍛冶師「黒い鉄か。……火の国の底だな」', 'Smith: "Black iron, huh. ...The bottom of the land of fire."'),
-    ('quest.skyabyss.ch5.black_iron.iron.ingot', 'ネザーで、ネザライトのインゴットを作ろう', 'Make a netherite ingot from the Nether'),
-    ('quest.skyabyss.ch5.black_iron.show.journal', 'ネザライトのインゴットができた。鍛冶師に見せよう。', 'The netherite ingot is ready. Show it to the smith.'),
-    ('quest.skyabyss.ch5.black_iron.show.talk', 'ネザライトのインゴットを、鍛冶師に見せよう', 'Show the netherite ingot to the smith'),
+    ('quest.skyabyss.ch5.black_iron.iron.journal', '鍛冶師が言っていた。「黒い鉄は、火の国の火でしか打てん。ブレイズの棒で炉を焚いて、黒曜石を溶かし込む」\nネザーの要塞で、ブレイズを倒してブレイズロッドを 3 本集めよう。黒曜石 2 つは、溶岩に水をかければ作れる（ダイヤのつるはしで掘る）。', 'The smith said: "Black iron can only be forged with the fire of the land of fire. Fire the forge with blaze rods and melt obsidian into it."\nFind a Nether fortress and defeat blazes for 3 blaze rods. Pour water on lava to make 2 obsidian (mine it with a diamond pickaxe).'),
+    ('quest.skyabyss.main_abyss.prepare.lead', '鍛冶師「黒い鉄か。……火の国の火がいるな」', 'Smith: "Black iron, huh. ...That needs the fire of the land of fire."'),
+    ('quest.skyabyss.ch5.black_iron.iron.rod', 'ネザーの要塞で、ブレイズロッドを集めよう', 'Collect blaze rods in the Nether'),
+    ('quest.skyabyss.ch5.black_iron.iron.obsidian', '黒曜石を集めよう', 'Collect obsidian'),
+    ('quest.skyabyss.ch5.black_iron.show.journal', 'ブレイズロッドと黒曜石がそろった。鍛冶師に見せよう。', 'The blaze rods and obsidian are ready. Show them to the smith.'),
+    ('quest.skyabyss.ch5.black_iron.show.talk', 'ブレイズロッドと黒曜石を、鍛冶師に見せよう', 'Show the rods and obsidian to the smith'),
     # 語り部
     ('dialogue.skyabyss.storyteller.ch5_rumor', 'その鍵、ときどき下を向くだろう。……あたしも気づいてた。\n夜、都が静かになるとね、足の下から音がするんだよ。鐘じゃない。もっと、ゆっくりした音。', 'That key turns downward now and then, doesn\'t it. ...I noticed too.\nAt night, when the capital is quiet, there\'s a sound from under our feet. Not the bell. Something slower.'),
     ('dialogue.skyabyss.storyteller.ch5_rumor2', '酒場の地下の奥に、開かない戸があるだろう。祖母の祖母の頃から、あそこは封じてあった。\n前に来た人は……鍵を黒い鉄の器に収めて、あの戸の前に立ったそうだよ。', 'There\'s a door in the back of the tavern cellar that won\'t open. It has been sealed since my grandmother\'s grandmother\'s day.\nThe one who came before... set the key in a cradle of black iron and stood before that door, they say.'),
@@ -152,11 +154,11 @@ TEXTS = [
     ('dialogue.skyabyss.storyteller.ch5_report2.ok', 'また潜る', 'I\'ll go down again'),
     # 鍛冶師
     ('dialogue.skyabyss.attendant_smith.menu.ch5_iron_tell', '黒い鉄の器のこと', 'About the black iron cradle'),
-    ('dialogue.skyabyss.attendant_smith.ch5_iron_tell', '鍵を収める器？　……黒い鉄でなきゃ持たん。火の国の底、溶岩の海の下に、古代の残骸が埋まってる。\n掘り出して炉で溶かし、金と合わせればインゴットになる。一つあれば器は打てる。', 'A cradle for the key? ...Only black iron will hold. At the bottom of the land of fire, under the lava sea, ancient debris lies buried.\nDig it out, smelt it, add gold, and you have an ingot. One is enough for the cradle.'),
-    ('dialogue.skyabyss.attendant_smith.ch5_iron_tell2', '残骸は硬い。ダイヤのつるはしで掘れ。……ベッドや TNT で掘ると早いが、溶岩に気をつけろ。', 'The debris is hard. Use a diamond pickaxe. ...Blasting is faster, but mind the lava.'),
+    ('dialogue.skyabyss.attendant_smith.ch5_iron_tell', '鍵を収める器？　……黒い鉄でなきゃ持たん。黒い鉄は、火の国の火でしか打てん。\nブレイズの棒が 3 本。あれで炉を焚いて、黒曜石を 2 つ溶かし込む。それで器は打てる。', 'A cradle for the key? ...Only black iron will hold. And black iron can only be forged with the fire of the land of fire.\nThree blaze rods to fire the forge, two obsidian melted into it. That\'s enough for the cradle.'),
+    ('dialogue.skyabyss.attendant_smith.ch5_iron_tell2', 'ブレイズは火の国の砦にいる。火の玉を撃ってくるから、雪玉か盾を持っていけ。\n黒曜石は、溶岩に水をかければできる。ダイヤのつるはしで掘れ。', 'Blazes live in the fortresses of the land of fire. They throw fireballs, so bring snowballs or a shield.\nObsidian forms where water meets lava. Mine it with a diamond pickaxe.'),
     ('dialogue.skyabyss.attendant_smith.ch5_iron_tell2.ok', 'わかった', 'Got it'),
-    ('dialogue.skyabyss.attendant_smith.menu.ch5_iron_show', 'ネザライトのインゴットを見せる', 'Show the netherite ingot'),
-    ('dialogue.skyabyss.attendant_smith.ch5_iron_show', '……本物だ。よく持って帰った。\n器は打っておいた。鍵をここに。……ほら、ぴったりだ。前にも、同じ形の器を打った気がする。', '...The real thing. Good work bringing it back.\nI\'ve forged the cradle. Put the key here. ...There, a perfect fit. I feel like I\'ve forged one this shape before.'),
+    ('dialogue.skyabyss.attendant_smith.menu.ch5_iron_show', 'ブレイズロッドと黒曜石を見せる', 'Show the blaze rods and obsidian'),
+    ('dialogue.skyabyss.attendant_smith.ch5_iron_show', '……いい火だ。よく持って帰った。\n器は打っておいた。鍵をここに。……ほら、ぴったりだ。前にも、同じ形の器を打った気がする。', '...Good fire. Well done bringing it back.\nI\'ve forged the cradle. Put the key here. ...There, a perfect fit. I feel like I\'ve forged one this shape before.'),
     ('dialogue.skyabyss.attendant_smith.ch5_iron_show2', 'それと、この型を持っていけ。ダイヤの品を黒い鉄へ打ち直す型の写しだ。……前のあんたも、同じ型を写していった。', 'And take this template. A copy of the one that reforges diamond gear into black iron. ...The you from before copied the same one.'),
     ('dialogue.skyabyss.attendant_smith.ch5_iron_show2.ok', 'ありがとう', 'Thank you'),
     # 戸と坑道
