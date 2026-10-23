@@ -506,6 +506,8 @@ public final class CinematicSelfTest {
     private static void firstSights(ServerLevel level, FakePlayer a, FakePlayer b, List<String> f) {
         for (String titan : Scenes.FIRST_SIGHT_TITANS) {
             String scene = Scenes.firstId(titan);
+            // 眠っている巨神は見せない作りなので、前の段 (祠・巨神の子など) がワールドに残した眠りの記録を外してから確かめる
+            jp.revati.skyabyss.titan.end.TitanDormancy.clear(level.getServer(), titan);
             Cinematics.state(a).forgetAll();
             Cinematics.state(b).forgetAll();
             Cinematics.stop(a, false);

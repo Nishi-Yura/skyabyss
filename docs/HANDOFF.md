@@ -1,6 +1,6 @@
 # 引き継ぎ
 
-「天と淵のあいだ」(NeoForge 1.21.1)。今の仕様は `docs/design/README.md` の索引から読む（コードが正）。未決は `docs/design/00_decisions_needed.md` にだけある。リポジトリは github.com/Nishi-Yura/skyabyss、作業の幹は `m1-sky-pass`、途中の枝は `wip/*`。版は `gradle.properties` の `mod_version`（今 0.5.2）。
+「天と淵のあいだ」(NeoForge 1.21.1)。今の仕様は `docs/design/README.md` の索引から読む（コードが正）。未決は `docs/design/00_decisions_needed.md` にだけある。リポジトリは github.com/Nishi-Yura/skyabyss、作業の幹は `m1-sky-pass`、途中の枝は `wip/*`。版は `gradle.properties` の `mod_version`（今 0.5.3）。
 
 ## 1. 各システムの状態
 
@@ -36,7 +36,7 @@
 | --- | --- |
 | 岩鯨 `TitanBackLayout` | 34 |
 | 潮殻 `TideBackLayout` | 34 |
-| 雷翼 `StormBackLayout` | 35（`RaijuNest` は 4） |
+| 雷翼 `StormBackLayout` | 35 |
 | 余燼 `EmberBackLayout` | 34 |
 
 上げるときは、ほかの背の最大の次の番号にし、`docs/design/26` に書く。
@@ -44,17 +44,18 @@
 ## 4. 見る場所・選ぶ場所
 
 - 選定ページは `docs/review/<題>/index.html`。ラフの比較は artifact `https://claude.ai/artifact/EqFcC7E183D8uyyAo8yKMM`（`tools/rough/build_gallery.py <manifest.json>`）。選びは db の collection `choices`（`ArtifactData` で読む）。選び終えたラフは消す（入力と選ばれなかった案は `tools/sources/` と `docs/review/*_roughs/`）。
-- 今の状態のまとめ: `docs/review/status_2026-10-23.md`、クエストの流れ `quest_flow_2026-10-23.md`、設計の見直し `fun_review_2026-10-23.md`、試遊の確かめ順 `playtest_0.5.2.md`。
+- 今の状態のまとめ: `docs/review/status_2026-10-24.md`、クエストの流れ `quest_flow_2026-10-23.md`、設計の見直し `fun_review_2026-10-23.md`、試遊の確かめ順 `playtest_0.5.3.md`。
 - 試遊の声と判断の経緯はメモリ（`MEMORY.md` の索引）。設計書には経緯を書かない。
 
 ## 5. 残っている課題
 
-- **答え待ち**: レイドの部屋の 12 問（各ふたつ）、乗り物 7 体の絵（`docs/review/roughs_mounts/`・`mounts_v2/`）、層の主・歪んだ王・生き残りの見た目（`abyss_boss_models/`）、`fun_review_2026-10-23.md` の Q1〜Q9、町の施設を見つけやすくする 3 案、深淵の装備 10 品の見た目（`roughs_gear_gaps/`、仮に A）。
-- **作り込み**: レイドの部屋 24 の建築（39 の手引き）、会話の顔の絵、ボスの残り（心臓の被弾の動き、岩鯨の子のモデル、潮殻・雷翼の心臓の第二段階の絵、羽の雨の粒）、クエストの洗い出しで出た直し、文の総点検。
-- **背の古い仕組みの残り**（コードにあるが今は使われない所。消すか作り直すかの判断が要る）: 背の中の中ボス戦（`AshSmithBattle`・`RaijuBattle` の巣の戦い・岩鯨の心臓の前室の決まり。中ボスは区画の中ボスの間で戦う）、各背の休み場の表（体の中の座標）。
+- **0.5.3**: 版は上げてある。jar を作り、`docs/review/playtest_0.5.3.md` の順で試遊してもらう。声を受けて直す。
+- **答え待ち**（10-23 に挙げたもののうち、答えを確かめていないもの）: レイドの部屋の 12 問（各ふたつ）、町の施設を見つけやすくする 3 案。
+- **作り込み**: レイドの部屋の明るさ（全体に暗め）、文の総点検（10-23 以降に足した碑・心の声・生き残り・手引き）。
 - **部屋の報い**: 部屋を越えると経験値・紋・碑文。素材・共鳴の欠片・称号（29 の旧い報い）は出ない。足すかは判断待ち。
-- **揺れる自己テスト**: 全体を回すと `camp blocks`・`affix`・`tide_heart`・`storm_heart light`・`raiju`・`ash smith`・`ember chapter`・`ember heart`・`ember skeleton` が落ちる（雛形のワールドの背の作りと合わない所が多い。単独では通るものもある）。
+- **揺れる自己テスト**: 10-24 の全体の一回では落ちたものはない（前に揺れた `camp blocks`・`affix`・`tide_heart`・`storm_heart light`・`raiju`・`ember chapter`・`ember heart`・`ember skeleton` も通った）。雛形のワールドで単独に流すと揺れることがある。
 - **実機で確かめていないもの**: 深淵の心臓・専用伝説 4 点の見た目と効き、紋の盤・変異の画面、転生の台座から転生まで（本番の jar）、順位の石・飾り板の複数人での表示。
+- **軽くする候補**: 低ポリへ移したモブ・巨神の元のキューブの geo（約 24 MB。主に `LowPoly.enabled = false`（撮影の `lowpoly off`）の戻し用）と元のテクスチャ。ほかの使い道がないかを確かめてから、消すかを決める。
 
 ## 6. 作業の決まり（短く）
 
@@ -66,7 +67,7 @@
 - README とサイトの絵は手作りのドット絵。
 - セッションの終わりが近いときは、この文書を更新し、`m1-sky-pass` と `wip/*` を push して止める。
 
-## 7. 今の状態（2026-10-23 夜）
+## 7. 今の状態（2026-10-24 未明）
 
-- 本線 `m1-sky-pass` に、背の外見化（体の中・試練のプール・セル・石・甲板を消し、部屋と中ボスの間と心臓の間を区画へ）、決定の反映（黒い鉄の器・乗り物の値段・ギルドの呼び名・「〜しよう」の目的）、深淵の層の二種、町の案内人と灯りの道、戦いの調整が入っている。
-- 枝 `wip/tidy-1023`: 書類・ファイルの整理。背の体の中の動き（潮殻の庭・潮見・干潟と真珠守り・群れの巣、雷翼の西・東・眼・回路・舵・肋、余燼の灰の道・鍛えの間・火守り、岩鯨の番兵の広間・水路・灯り）と、そのブロック・品・音・絵・文、試練のセルと石の仕組み、雷翼の風見の目盛り、水路の顎を消した。設計書は今の仕様に直し、23・24・25 を消した。
+- 本線 `m1-sky-pass` に、背の外見化（体の中・試練のプール・セル・甲板を消し、部屋と中ボスの間と心臓の間を区画へ）、レイドの部屋 24 と中ボスの間 4 つの建築、心臓とボスの残り（ひるみ・第二段階の絵・羽の雨・岩鯨の子・灰の王の構え）、会話の顔 35 人の描き直し、深淵の装備の作り直しと潜水服の鎧、レア度 6 段、一章の積み石の削除、羽の鏡の心臓の間の入口への移動が入っている。
+- 枝 `wip/final-tidy`（10-24）: 背の中の中ボス戦（`RaijuBattle`・`RaijuCommands`・`RaijuState`・`AshSmithBattle`・`AshSmithCommands`）と、体の中の休み場の表（残すのは心臓の前室と雷翼の尾の広場）、戦い中の前室の決まり（`respawnCheckpoint`）、谷落ちの戻し、使われない文 92 件と封印・イソギンチャクの絵を消した。`/skyabyss play boss raiju|smith` は順路の中ボスの間へ運ぶ。`tools/shots/` は台本だけにした（台紙は `tools/sheets/`、`heart_fx` の台本作りは `tools/gen/shots/gen_heart_fx_shots.py`）。

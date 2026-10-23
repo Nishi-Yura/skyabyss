@@ -2,7 +2,7 @@
 """mod の字のリソースパック (skyabyss_font) を書く。はじめての起動で選んだ状態になり、リソースパックの画面で外すとバニラの字に戻る (client/ui/ModFont)。
 
   本文の字: DotGothic16 (SIL OFL 1.1。tools/sources/fonts/DotGothic16_OFL.txt)
-            バニラが日本語に使う Unifont の代わりに入れる (英数はバニラの字のまま)。
+            バニラの字の前に置き、英数も日本語もこの字で描く (点の字に無い字だけバニラの字・Unifont で出る)。
             元の TTF は点が 1 マスより少し小さく、ゲームの中でふちが灰色ににじむので、16px の白黒の点に描き直し、
             点をちょうど 1 マスの四角にした TTF (dotgothic16.ttf) を作って入れる。GUI の 8 px の高さ (1 マス = GUI の 0.5 px) で描き、
             oversample 6 で 1 マス = 3 画素なので、GUI 倍率 2・3 で画面の画素にちょうど重なる。送りは元の設計どおり (全角 8 px・半角 4 px)。
@@ -34,6 +34,8 @@ TITLE_SRC = os.path.join(SRC, "ZenAntique-Regular.ttf")
 # 点の字の置き方: 16 マスの高さ、上から 14 マス目が字の下の線 (Unifont と同じ)
 CELL = 16
 BASELINE = 14
+# 点の字の oversample。1 マス = 3 画素。client/ui/ModFont.PIXEL_OVERSAMPLE と同じ値にする (影のずれを直す目印)
+PIXEL_OVERSAMPLE = 6
 
 # かな・英数・記号は文に無くても入れておく
 BASE_RANGES = [(0x20, 0x7E), (0xA0, 0xFF), (0x2010, 0x2027), (0x2030, 0x203B), (0x2190, 0x2193), (0x25A0, 0x25FF), (0x2600, 0x2606),
@@ -192,12 +194,12 @@ def main():
     title_size = write_font(TITLE_SRC, os.path.join(FONT_DIR, "zen_antique.ttf"), title_set)
 
     dump(os.path.join(PACK, "pack.mcmeta"), {"pack": {"pack_format": 34, "description": "天と淵のあいだ: mod の字 (本文 DotGothic16・題字 Zen Antique)"}})
-    # 空白 → 英数 (バニラ) → 点の字 → Unifont (どれにも無い字)。全角の空白は全角の字と同じ送り
+    # 空白 → 点の字 (英数も) → バニラの字 (点の字に無い字: アクセント付きの欧文・キリル文字など) → Unifont。全角の空白は全角の字と同じ送り
     body = [
         {"type": "space", "advances": {"　": CELL // 2}},
         {"type": "reference", "id": "minecraft:include/space"},
+        {"type": "ttf", "file": "skyabyss:dotgothic16.ttf", "size": 8, "oversample": PIXEL_OVERSAMPLE, "shift": [0, 0]},
         {"type": "reference", "id": "minecraft:include/default", "filter": {"uniform": False}},
-        {"type": "ttf", "file": "skyabyss:dotgothic16.ttf", "size": 8, "oversample": 6, "shift": [0, 0]},
         {"type": "reference", "id": "minecraft:include/unifont"},
     ]
     dump(os.path.join(PACK, "assets", "minecraft", "font", "default.json"), {"providers": body})

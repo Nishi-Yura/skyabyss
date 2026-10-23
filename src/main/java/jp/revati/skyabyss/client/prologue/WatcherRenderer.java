@@ -171,7 +171,7 @@ public class WatcherRenderer extends LowPolyGeoRenderer<WatcherEntity> {
             if (LowPoly.enabled) {
                 return LowPoly.debug ? GEO_LOW_DEBUG : GEO_LOW;
             }
-            return GEO;
+            return LowPoly.cubeOr(GEO, GEO_LOW);
         }
 
         @Override
@@ -179,7 +179,7 @@ public class WatcherRenderer extends LowPolyGeoRenderer<WatcherEntity> {
             if (LowPoly.enabled) {
                 return LowPoly.debug ? path("textures/lowpoly/debug.png") : TEXTURE_LOW;
             }
-            return TEXTURE;
+            return LowPoly.cubeOr(TEXTURE, TEXTURE_LOW);
         }
 
         @Override
@@ -214,7 +214,7 @@ public class WatcherRenderer extends LowPolyGeoRenderer<WatcherEntity> {
             if (glow <= 0.004f) {
                 return;
             }
-            RenderType eyes = RenderType.eyes(LowPoly.enabled ? GLOWMASK_LOW : GLOWMASK);
+            RenderType eyes = RenderType.eyes(LowPoly.enabled ? GLOWMASK_LOW : LowPoly.cubeOr(GLOWMASK, GLOWMASK_LOW));
             int c = (int) (glow * 255f);
             int color = 0xFF000000 | c << 16 | c << 8 | c;
             getRenderer().reRender(bakedModel, poseStack, bufferSource, animatable, eyes, bufferSource.getBuffer(eyes), partialTick,

@@ -28,7 +28,7 @@ def mesh_tris(name):
 
 
 def cube_tris(name):
-    g = json.load(open(os.path.join(A, "geo", "entity", name + ".geo.json"), encoding="utf-8"))["minecraft:geometry"][0]
+    g = json.load(open(os.path.join(ROOT, "tools", "sources", "geo_cube", "geo", "entity", name + ".geo.json"), encoding="utf-8"))["minecraft:geometry"][0]
     out = []
     for b in g["bones"]:
         for c in b.get("cubes", []):

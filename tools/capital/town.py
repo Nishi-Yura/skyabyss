@@ -269,14 +269,23 @@ class Town(Facilities):
         z1 = TERZ
         for xa in (28, -32):
             xs = range(xa, xa + 4)
+            # 前の縁 (z1+1 の地面の段) から一段ずつ上がる: 段は z1 - k の列の、一つ上の高さ (k+1)。
+            # 前は地面の高さの列が二つ平らに続き、そのあと上がった (壁の前で段が揃わなかった: 2026-10-24 の試遊)
             for k in range(TER + 1):
                 z = z1 - k
                 for x in xs:
-                    for y in range(0, k):
-                        v.set(x, y, z, st.base.full)
-                    v.set(x, k, z, st.base.stairs('north', 'bottom'))
-                    for y in range(k + 1, TER + 4):
-                        v.set(x, y, z, 'air')
+                    if k < TER:
+                        for y in range(0, k + 1):
+                            v.set(x, y, z, st.base.full)
+                        v.set(x, k + 1, z, st.base.stairs('north', 'bottom'))
+                        for y in range(k + 2, TER + 4):
+                            v.set(x, y, z, 'air')
+                    else:
+                        for y in range(0, TER):
+                            v.set(x, y, z, st.base.full)
+                        v.set(x, TER, z, v.pick(st.pave))
+                        for y in range(TER + 1, TER + 4):
+                            v.set(x, y, z, 'air')
             # 上がりきった所 (段の上面) と、前の縁の欄干・軒をあける
             for x in xs:
                 for y in range(TER + 1, TER + 4):
@@ -950,6 +959,9 @@ class Town(Facilities):
         if len(extra) > 1:
             v.set(x + 1, 0, z, extra[1])
         v.set(x, 2, z, 'lantern[hanging=true,waterlogged=false]')
+        # 日よけの下の灯り: 手前の縁の両わき (縞の日よけの下、売り台の上)
+        v.set(x - 1, 2, z + 2, 'lantern[hanging=true,waterlogged=false]')
+        v.set(x + 1, 2, z - 2, 'lantern[hanging=true,waterlogged=false]')
 
     # ---------------------------------------------------------------- 鯨追いの組合
     def guild(self):
@@ -1782,6 +1794,8 @@ class Town(Facilities):
         self.drop_floaters()
         self.polish_final()
         self.fix_stairs()
+        self.street_light()
+        self.house_lights()
         self.fix_gates()
         self.drop_unsupported()
         self.v.connect()
@@ -1846,6 +1860,58 @@ class Town(Facilities):
         seeds = check_stairs.seeds_of({'marks': v.marks, 'meta': {'rect': [-140, -120, 120, 120], 'level': True}}, v.b)
         done, left = check_stairs.fix(v.b, seeds)
         self.stairs_fixed, self.stairs_left = done, left
+
+    def street_light(self):
+        """夜の街路を、暖かい灯りの柱で照らす (tools/audit/check_light.py)。魂の松明は使わない。
+        中心 (|x|,|z| <= 60) は歩く所の明るさ 7 未満を、外の輪は 4 未満を、柱の列 (8〜10 ほど離す) で埋める。
+        柱は道の端に立つ (四方の三つは空き)。灯りの高さは柱の上 (吊り灯り)"""
+        sys.path.insert(0, os.path.join(ROOT, 'tools', 'audit'))
+        import check_light  # noqa: E402
+        core = check_light.plan_wall_torches(self.v.b, target=7, region=check_light.in_core, min_gap=8, max_add=400)
+        ring = check_light.plan_wall_torches(self.v.b, target=4, region=lambda p: not check_light.in_core(p),
+                                             min_gap=10, max_add=300)
+        self.torches = core + ring
+
+    def house_lights(self):
+        """通りに面した家と店の灯り (暖かい色だけ):
+        - 通りに面した窓 (ガラスの板) の、家の中の一マスに見えない光 (light)。窓と壁には触れない (外が空気・家の中の両わきが空気のときだけ)
+        - 戸口の上に、腕 (フェンス) と吊りランタンの店の灯り (戸の一段上・一マス外)。外が空気のときだけ"""
+        v = self.v
+        b = v.b
+        air = (None, 'air', 'cave_air')
+        n_win = n_door = 0
+        for (x, y, z), s in list(b.items()):
+            if y < 1 or y > 4 or max(abs(x), abs(z)) > 97:
+                continue
+            if not s.split('[')[0].endswith('glass_pane'):
+                continue
+            for dx, dz in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+                outside = b.get((x + dx, y, z + dz))
+                inside = (x - dx, y, z - dz)
+                if outside not in air or b.get(inside) not in air:
+                    continue
+                # 家の中の一列目だけ (壁の列の隙間ではない): 窓の両わきが、家の中の空き (壁でない)
+                px, pz = dz, dx
+                if any(b.get((inside[0] + k * px, y, inside[2] + k * pz)) not in air for k in (1, -1)):
+                    continue
+                # 見えない光 (light) を家の中に置く。窓・壁・外には触れない
+                b[inside] = 'light[level=12,waterlogged=false]'
+                n_win += 1
+                break
+        for (x, y, z), s in list(b.items()):
+            if y != 0 or '_door[' not in s or 'half=lower' not in s or 'trapdoor' in s:
+                continue
+            if max(abs(x), abs(z)) > 97:
+                continue
+            f = s.split('facing=')[1].split(',')[0].split(']')[0]
+            dx, dz = DX[OPP[f]]
+            ax, az = x + dx, z + dz
+            if b.get((ax, 3, az)) not in air or b.get((ax, 2, az)) not in air or b.get((x, 3, z)) in air:
+                continue
+            b[(ax, 3, az)] = 'dark_oak_fence[east=false,north=false,south=false,west=false,waterlogged=false]'
+            b[(ax, 2, az)] = 'lantern[hanging=true,waterlogged=false]'
+            n_door += 1
+        self.house_lamps = (n_win, n_door)
 
     def drop_floaters(self):
         """床に置く小物 (壺・鉢・ろうそく・置いた灯り・敷物) で、下が空いているものを消す。

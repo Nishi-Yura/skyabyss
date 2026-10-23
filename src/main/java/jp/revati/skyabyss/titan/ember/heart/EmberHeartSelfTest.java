@@ -155,9 +155,9 @@ public final class EmberHeartSelfTest {
         List<String> paths = new ArrayList<>(List.of("/assets/skyabyss/animations/entity/ember_heart.animation.json",
                 "/data/skyabyss/damage_type/heat_burst.json", "/data/skyabyss/damage_type/engulfed.json"));
         for (int n = 1; n <= EmberHeart.PHASE_COUNT; n++) {
-            paths.add("/assets/skyabyss/geo/entity/ember_heart_p" + n + ".geo.json");
-            paths.add("/assets/skyabyss/textures/entity/ember_heart_p" + n + ".png");
-            paths.add("/assets/skyabyss/textures/entity/ember_heart_p" + n + "_glowmask.png");
+            paths.add("/assets/skyabyss/geo/entity/ember_heart_p" + n + "_lowpoly.geo.json");
+            paths.add("/assets/skyabyss/textures/lowpoly/ember_heart_p" + n + ".png");
+            paths.add("/assets/skyabyss/textures/lowpoly/ember_heart_p" + n + "_glow.png");
             paths.add("/assets/skyabyss/textures/gui/boss/ember_heart_frame_p" + n + ".png");
             paths.add("/assets/skyabyss/textures/gui/boss/ember_heart_icon_p" + n + ".png");
         }

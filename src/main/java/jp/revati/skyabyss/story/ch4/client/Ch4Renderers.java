@@ -117,20 +117,23 @@ public final class Ch4Renderers {
         private final ResourceLocation anim;
         private final ResourceLocation flaredLow;
         private final ResourceLocation flared;
+        private final ResourceLocation cubeGeo;
 
         VariantModel(String name, String animName) {
             super(name);
             this.anim = id("animations/entity/" + animName + ".animation.json");
             this.flaredLow = id("textures/lowpoly/" + name + "_flared.png");
             this.flared = id("textures/entity/" + name + "_flared.png");
+            this.cubeGeo = id("geo/entity/" + name + ".geo.json");
         }
 
+        // 低ポリの骨は灰の番人の共通の骨 (ash_thrall_lowpoly) を使う。キューブのときも、キューブの素材が無ければ同じ骨
         @Override
         public ResourceLocation getModelResource(T animatable) {
             if (LowPoly.enabled) {
                 return LowPoly.debug ? debugGeo : lowGeo;
             }
-            return super.getModelResource(animatable);
+            return LowPoly.cubeOr(cubeGeo, lowGeo);
         }
 
         @Override
@@ -138,7 +141,7 @@ public final class Ch4Renderers {
             if (LowPoly.enabled && !LowPoly.debug) {
                 return thrall.isFlared() ? flaredLow : super.getTextureResource(thrall);
             }
-            return !LowPoly.enabled && thrall.isFlared() ? flared : super.getTextureResource(thrall);
+            return !LowPoly.enabled && thrall.isFlared() && LowPoly.cubeHere(flared) ? flared : super.getTextureResource(thrall);
         }
 
         @Override

@@ -1,5 +1,5 @@
 # 潮殻のレイドの新しい四部屋 (docs/design/08 の 13a): TR4 伸びる珊瑚の道・TR5 光を返す真珠・TR6 潮見の暦・TR7 本物の群れの母。
-# 順路を通さず /skytideraid room <id> で部屋を建てる (区画 1・段 1 の原点 5120, 64, 4096。北が -z)。台紙は tools/shots/raid2_tide_sheet.py
+# 順路を通さず /skytideraid room <id> で部屋を建てる (区画 1・段 1 の原点 5120, 64, 4096。北が -z)。台紙は tools/sheets/raid2_tide_sheet.py
 #   ./gradlew runShots -Pscript=tools/shots/raid2_tide.txt -PshotsName=raid2_tide   絵は run/shots/raid2_tide/shots/raid2_tide/ → docs/review/raid2_tide/
 world raid2_tide normal
 size 1280 720

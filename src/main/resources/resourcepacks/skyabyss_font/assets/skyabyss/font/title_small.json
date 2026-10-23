@@ -21,13 +21,6 @@
       "id": "minecraft:include/space"
     },
     {
-      "type": "reference",
-      "id": "minecraft:include/default",
-      "filter": {
-        "uniform": false
-      }
-    },
-    {
       "type": "ttf",
       "file": "skyabyss:dotgothic16.ttf",
       "size": 8,
@@ -36,6 +29,13 @@
         0,
         0
       ]
+    },
+    {
+      "type": "reference",
+      "id": "minecraft:include/default",
+      "filter": {
+        "uniform": false
+      }
     },
     {
       "type": "reference",

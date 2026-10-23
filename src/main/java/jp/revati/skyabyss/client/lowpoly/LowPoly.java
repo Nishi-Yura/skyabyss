@@ -2,6 +2,11 @@ package jp.revati.skyabyss.client.lowpoly;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import jp.revati.skyabyss.SkyAbyss;
+import net.minecraft.client.Minecraft;
+import net.minecraft.resources.ResourceLocation;
 import org.joml.Matrix3f;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
@@ -31,7 +36,32 @@ public final class LowPoly {
     // 描画スレッドだけが使う作業用 (drawBone のたびに作らない)
     private static final Vector3f SCRATCH = new Vector3f();
 
+    // 元のキューブの素材 (geo/entity/<名>.geo.json・textures/entity/<名>.png) は、通常のジャーには入れていない
+    // (tools/sources/geo_cube/ に出してある。戻し方は tools/dev/cube_geo.py)。LowPoly.enabled = false のときに無ければ、
+    // 落ちずに低ポリのまま描く (素材ごとに一度だけログ)。リソースの再読み込みで LowPolyMeshes が clearCubeCache を呼ぶ
+    private static final Map<ResourceLocation, Boolean> CUBE_PRESENT = new ConcurrentHashMap<>();
+
     private LowPoly() {
+    }
+
+    // キューブの素材があるか (無ければ一度だけログを出す)。描画スレッドから呼ぶ
+    public static boolean cubeHere(ResourceLocation cube) {
+        return CUBE_PRESENT.computeIfAbsent(cube, c -> {
+            boolean ok = Minecraft.getInstance().getResourceManager().getResource(c).isPresent();
+            if (!ok) {
+                SkyAbyss.LOGGER.warn("[lowpoly] cube material missing, keeping the low-poly look: {} (copy it back: python tools/dev/cube_geo.py back)", c);
+            }
+            return ok;
+        });
+    }
+
+    // キューブの素材があればそれ、無ければ低ポリの素材
+    public static ResourceLocation cubeOr(ResourceLocation cube, ResourceLocation low) {
+        return cubeHere(cube) ? cube : low;
+    }
+
+    public static void clearCubeCache() {
+        CUBE_PRESENT.clear();
     }
 
     // 骨 1 本ぶんのメッシュを、今のポーズ (poseStack の先頭) で buffer へ流す。毎フレームは座標の変換だけ

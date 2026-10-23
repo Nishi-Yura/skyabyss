@@ -23,7 +23,8 @@
 | `once/` | 一度だけ走らせた移行スクリプト (`add_*_lang`・`fix_*`)。履歴として残す。もう走らせない |
 | `misc/` | 単発の調査・プローブ |
 | `dev/` | 開発用 (`rcon.py`、`mc_run.sh`、`quick_check.sh`、`world_template.sh`)。使い方は下の「開発の速い回し方」 |
-| `abyss/` `capital/` `rough/` `readme/` `structure/` `ui/` `trial_lang/` `sources/` `shots/` | 既存の作業フォルダ (ラフ・都・構造の検査・台本・入力の素材など) |
+| `shots/` | 撮影の台本 (`*.txt`) だけ。台本を書くスクリプトは `gen/shots/`、撮った絵を並べる台紙のスクリプトは `sheets/` に置く |
+| `abyss/` `capital/` `rough/` `readme/` `structure/` `ui/` `trial_lang/` `sources/` | 既存の作業フォルダ (ラフ・都・構造の検査・入力の素材など) |
 | `site/` | サイト用 (別作業) |
 
 フォルダの移動にともなう `sys.path` は、各スクリプトの先頭で他グループを足して解決する。
@@ -218,6 +219,7 @@ PYTHONPATH=tools/lib python tools/audit/check_generators.py --list          # �
 python tools/audit/check_lang_keys.py     # コード・データの文字列リテラルの翻訳キーが ja_jp / en_us にあるか (LangSelfTest (4) と同じ規則。偽陽性の許可リストは両方に同じ内容)
 python tools/audit/check_band_width.py    # 目的の帯の文が幅 230 px に入るか (ObjectiveBandSelfTest と同じ字幅表。目印の付く目的は距離の札の分を引く)
 python tools/audit/check_stairs.py        # 設計図 (data/skyabyss/opening/*.json) の階段: 床の逆さ・逆向き・並びの食い違い・1 段より高い段・埋まった段・戸口の段・屋根の抜け・角の抜け。--sbd <書き出し> で Java で建てる物 (祠は SKYABYSS_DUMP=shrine_<巨神>) も。都は town.py が同じ規則の fix() で直してから書く
+python tools/audit/check_light.py        # 都の街路・広場・階段の明るさ (夜の一番暗い見え方。ブロックの明るさが 4 未満の所を数える)。town.py の street_light が、中心の暗い所の近くの壁に魂の松明・柱の灯りを足す (道はふさがない)
 ```
 
 自己テストは `SKYABYSS_SELFTEST=1 SKYABYSS_SELFTEST_ONLY=lang ./gradlew runServer` (`lang` と `lang objective band` の二段)。

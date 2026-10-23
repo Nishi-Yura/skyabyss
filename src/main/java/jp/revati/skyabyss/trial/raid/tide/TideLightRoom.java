@@ -125,7 +125,8 @@ public final class TideLightRoom extends RaidRoom {
         }
         // 見渡し台 (南東の隅、天板の高さ 3)
         BlockState top = Blocks.CUT_SANDSTONE.defaultBlockState();
-        BlockState step = Blocks.SMOOTH_SANDSTONE_STAIRS.defaultBlockState().setValue(net.minecraft.world.level.block.StairBlock.FACING, net.minecraft.core.Direction.SOUTH);
+        // 北から南へ上る (低い側は北)
+        BlockState step = Blocks.SMOOTH_SANDSTONE_STAIRS.defaultBlockState().setValue(net.minecraft.world.level.block.StairBlock.FACING, net.minecraft.core.Direction.NORTH);
         for (int x = HX - 1; x <= HX; x++) {
             RaidKit.set(ctx.level(), origin.offset(x, 1, HZ - 3), step);
             RaidKit.set(ctx.level(), origin.offset(x, 1, HZ - 2), top);
