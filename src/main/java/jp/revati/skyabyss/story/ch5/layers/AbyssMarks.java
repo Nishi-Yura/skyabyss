@@ -44,8 +44,10 @@ import org.joml.Vector3f;
 public final class AbyssMarks {
     public static final String SIGNAL_MARK = "abyss_mark_";
     // 印を取る前に払う物 (人ごとの記録)
-    static final Map<String, String> REQUIRE = Map.of("bone_2", "clear:nest_bone", "salt_3", "clear:terr_salt", "storm_3", "clear:nest_storm",
-            "ash_3", "clear:terr_ash");
+    //   形 B (塩・灰。AbyssEscort) の印は、その待ち場を確かにした人 (とパーティ) だけ ("clear:wp_<層>_<k>")
+    static final Map<String, String> REQUIRE = Map.of("bone_2", "clear:nest_bone", "storm_3", "clear:nest_storm",
+            "salt_1", "clear:wp_salt_1", "salt_2", "clear:wp_salt_2", "salt_3", "clear:wp_salt_3",
+            "ash_1", "clear:wp_ash_1", "ash_2", "clear:wp_ash_2", "ash_3", "clear:wp_ash_3");
     static final DustParticleOptions SOCKET = new DustParticleOptions(new Vector3f(0.55f, 0.9f, 1f), 1.2f);
 
     private AbyssMarks() {
@@ -63,8 +65,20 @@ public final class AbyssMarks {
         return LayerData.get(p.server).marks(p.getUUID(), layer);
     }
 
+    // 形 B は印三つに加えて、連れて下りる人を門の前まで送ったこと (AbyssEscort)
     public static boolean canPassGate(ServerPlayer p, String layer) {
+        if (AbyssEscort.expedition(layer)) {
+            return Layers.pastMarks(p, layer) || count(p, layer) >= 3 && LayerData.get(p.server).has(p.getUUID(), "escort:" + layer);
+        }
         return count(p, layer) >= 3;
+    }
+
+    static void closedHint(ServerPlayer p, String layer) {
+        if (AbyssEscort.expedition(layer) && count(p, layer) >= 3) {
+            Notice.hint(p, "message.skyabyss.abyss_v2.gate_closed_escort", AbyssEscort.npcName(layer));
+        } else {
+            Notice.hint(p, "message.skyabyss.abyss_v2.gate_closed", count(p, layer));
+        }
     }
 
     public static boolean lordBeaten(ServerPlayer p, String layer) {
@@ -106,7 +120,7 @@ public final class AbyssMarks {
             level.sendParticles(ParticleTypes.SOUL_FIRE_FLAME, m.getX() + 0.5, m.getY() + 1.1, m.getZ() + 0.5, 20, 0.3, 0.3, 0.3, 0.02);
         }
         openShortcut(level, layer, i);
-        if (n >= 3) {
+        if (n >= 3 && !AbyssEscort.expedition(layer)) {
             Notice.objective(p, "message.skyabyss.abyss_v2.marks_all");
         }
         return true;
@@ -217,6 +231,10 @@ public final class AbyssMarks {
                 descend(p, layer);
                 return true;
             }
+            if (chain(at, "back_" + layer, 6)) {
+                go(p, "arrive_" + layer, "message.skyabyss.abyss_v2.back");
+                return true;
+            }
             if (chain(at, "ascend_" + layer, 7)) {
                 String prev = Layers.prev(layer);
                 if (prev != null) {
@@ -245,12 +263,11 @@ public final class AbyssMarks {
         }
         boolean campSide = p.getZ() > g.getZ() + 0.5;
         if (!campSide) {
-            go(p, "gate_" + layer + "_out", "message.skyabyss.abyss_v2.gate_back");
+            go(p, "gate_" + layer + "_out", AbyssEscort.expedition(layer) ? "message.skyabyss.abyss_v2.gate_back_b" : "message.skyabyss.abyss_v2.gate_back");
             return true;
         }
-        int n = count(p, layer);
-        if (n < 3) {
-            Notice.hint(p, "message.skyabyss.abyss_v2.gate_closed", n);
+        if (!canPassGate(p, layer)) {
+            closedHint(p, layer);
             p.serverLevel().playSound(null, g, SoundEvents.STONE_BUTTON_CLICK_OFF, SoundSource.BLOCKS, 0.8f, 0.6f);
             return false;
         }
@@ -343,7 +360,7 @@ public final class AbyssMarks {
                     Long last = GATE_HINTED.get(p.getUUID());
                     if (last == null || now - last > 200) {
                         GATE_HINTED.put(p.getUUID(), now);
-                        Notice.hint(p, "message.skyabyss.abyss_v2.gate_closed", count(p, layer));
+                        closedHint(p, layer);
                     }
                 }
             }

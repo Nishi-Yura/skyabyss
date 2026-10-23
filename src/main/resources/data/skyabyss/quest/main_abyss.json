@@ -172,6 +172,14 @@
             "abyss_mark_salt_3"
           ],
           "count": 1
+        },
+        {
+          "id": "escape",
+          "type": "signal",
+          "targets": [
+            "abyss_escort_salt"
+          ],
+          "count": 1
         }
       ]
     },
@@ -282,6 +290,14 @@
           "type": "signal",
           "targets": [
             "abyss_mark_ash_3"
+          ],
+          "count": 1
+        },
+        {
+          "id": "escape",
+          "type": "signal",
+          "targets": [
+            "abyss_escort_ash"
           ],
           "count": 1
         }

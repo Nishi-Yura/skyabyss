@@ -34,6 +34,10 @@
     },
     "ch5_salt_camp3": {
       "face": "grave",
+      "next": "ch5_salt_camp4"
+    },
+    "ch5_salt_camp4": {
+      "face": "neutral",
       "options": [
         {
           "id": "ok",

@@ -1,0 +1,84 @@
+# 深淵の層の二つの型 (docs/design/36 の 8.1・8.4): 形 B「護りの下り道」(塩 = ロク、灰 = トウヤ) の下り口・三つの待ち場・逃げの道・格子の門
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/abyss_two_types.txt -PshotsName=abyss_two_types   (音は消え、画面は日本語)
+#   → 絵は run/shots/abyss_two_types/shots/abyss_two_types/ (docs/review/abyss_two_types/ へ縮めて写す)
+world abyss_two_types flat
+size 1280 720
+timeout 2400
+render 10
+clouds off
+
+wait 80
+cmd skyabyss cinematic stop
+cmd gamemode creative
+hud off
+cmd skyabyss abyss enter
+wait 40
+cmd skyabyss abyss build
+wait 900
+cmd effect give @s night_vision 9999 0 true
+cmd gamerule doMobSpawning false
+
+# ---------------------------------------------------------------- 塩 (ロク)
+cmd tp @s 0 60 3 180 5
+wait 80
+cmd skyabyss cinematic stop
+wait 20
+shot s01_salt_mouth
+cmd skyabyss abyss layer escort salt start
+cmd skyabyss abyss layer escort salt at1
+cmd tp @s 1 56 -33 180 10
+hud on
+wait 140
+shot s02_salt_crust_wait
+cmd skyabyss abyss layer escort salt secure
+cmd skyabyss abyss layer escort salt at2
+cmd tp @s 31 52 -47 -90 -18
+wait 140
+shot s03_salt_well_bottom
+cmd skyabyss abyss layer escort salt secure
+cmd tp @s 40 52 -48 0 -55
+wait 40
+shot s04_salt_well_ladder
+cmd skyabyss abyss layer escort salt at3
+cmd tp @s 40 46 33 0 10
+wait 120
+shot s05_salt_anchor_hold
+cmd skyabyss abyss layer escort salt run
+cmd tp @s 20 46 44 -90 12
+wait 130
+shot s06_salt_collapse
+cmd skyabyss abyss layer escort salt stop
+cmd tp @s -40 30 23 180 5
+wait 40
+shot s07_salt_gate
+
+# ---------------------------------------------------------------- 灰 (トウヤ)
+cmd tp @s 0 -180 3 180 5
+wait 80
+cmd skyabyss cinematic stop
+wait 20
+shot a01_ash_mouth
+cmd skyabyss abyss layer escort ash start
+cmd skyabyss abyss layer escort ash at1
+cmd tp @s -2 -184 -31 127 12
+wait 140
+shot a02_ash_maze_mouth
+cmd skyabyss abyss layer escort ash secure
+cmd skyabyss abyss layer escort ash at2
+cmd tp @s 27 -188 -52 -90 6
+wait 140
+shot a03_ash_seal
+cmd skyabyss abyss layer escort ash secure
+cmd skyabyss abyss layer escort ash at3
+cmd tp @s 40 -194 33 0 10
+wait 120
+shot a04_ash_ember_ground
+cmd skyabyss abyss layer escort ash run
+cmd tp @s 20 -194 44 -90 12
+wait 130
+shot a05_ash_dark_wave
+cmd skyabyss abyss layer escort ash stop
+cmd tp @s -40 -210 23 180 5
+wait 40
+shot a06_ash_gate
+quit

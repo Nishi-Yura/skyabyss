@@ -34,8 +34,8 @@ import net.neoforged.neoforge.event.tick.ServerTickEvent;
 
 // 層の戦い (docs/design/36 の 8 章): 巣 (三つの波)・縄張り (大きい敵一体と取り巻き)・待ち伏せ・前の私の影。
 //   巣 nest_bone・nest_storm: 払っていない人が 7 以内に入ると三つの波。全部倒すと、そのとき巣の 16 以内にいた人とそのパーティに "clear:<巣>"
-//   縄張り terr_salt・terr_ash: 払っていない人が 10 以内に入ると主 (体力 3 倍・大きさ 1.5) と取り巻き。主が倒れると 24 以内の人とパーティに "clear:<縄張り>"
-//     縄張りの主はボスバー (二段。半分で二段目) と三つの予告つきの技 (叩きつけ r3.8・突進 長さ 10・足もとの吐きかけ r2.2。eliteMove)
+//   縄張りの主 (elite・eliteTick): 体力 3 倍・大きさ 1.5。ボスバー (二段。半分で二段目) と三つの予告つきの技 (叩きつけ r3.8・突進 長さ 10・足もとの吐きかけ r2.2)。
+//     いまは形 B の層 (塩・灰) の待ち場 3 で使う (AbyssEscort)。前の「縄張りの道」(terr_salt・terr_ash) は護りの下り道に変えた
 //   待ち伏せ ambush_bone (骨の広間)・bridge_bone_a/b (肋の橋): 人ごとに一度ずつ (5 分あけてまた)
 //   だれもいなくなって 30 秒たつと、巣と縄張りの敵は消えて元に戻る
 @EventBusSubscriber(modid = SkyAbyss.MODID)
@@ -50,8 +50,6 @@ public final class LayerFights {
                     {"lightning_idol", "charged_moth", "charged_moth", "scorched_bird"}},
     };
     static final String[] NESTS = {"nest_bone", "nest_storm"};
-    static final String[] TERRS = {"terr_salt", "terr_ash"};
-    static final String[][] TERR_MOBS = {{"white_shell_keeper", "salt_husk", "salt_husk"}, {"ember_keeper", "soot_child", "soot_child"}};
 
     static final class Run {
         final String name;
@@ -103,9 +101,6 @@ public final class LayerFights {
         long now = level.getGameTime();
         for (int k = 0; k < NESTS.length; k++) {
             nest(level, k, now);
-        }
-        for (int k = 0; k < TERRS.length; k++) {
-            territory(level, k, now);
         }
         ambush(level, now);
     }
@@ -174,62 +169,7 @@ public final class LayerFights {
         level.playSound(null, at, SoundEvents.SKELETON_HORSE_AMBIENT, SoundSource.HOSTILE, 1.2f, 0.6f);
     }
 
-    // ---------------------------------------------------------------- 縄張り
-    static void territory(ServerLevel level, int k, long now) {
-        String name = TERRS[k];
-        BlockPos at = AbyssBuild.mark(name);
-        if (at == null || !level.isLoaded(at)) {
-            return;
-        }
-        LayerData d = LayerData.get(level.getServer());
-        List<ServerPlayer> inside = near(level, at, 24);
-        Run run = RUNS.get(name);
-        if (run == null) {
-            for (ServerPlayer p : inside) {
-                if (p.blockPosition().closerThan(at, 10) && !d.has(p.getUUID(), "clear:" + name)) {
-                    run = new Run(name);
-                    RUNS.put(name, run);
-                    String[] ids = TERR_MOBS[k];
-                    LivingEntity boss = elite(level, ids[0], at, 3.0, 1.5, "abyss_v2.skyabyss.elite." + name);
-                    if (boss != null) {
-                        run.mobs.add(boss.getUUID());
-                    }
-                    for (int i = 1; i < ids.length; i++) {
-                        Entity e = AbyssMobSpawner.spawnAt(level, ids[i], at.getX() + 0.5 + (i == 1 ? 4 : -4), at.getY(), at.getZ() + 0.5, 2);
-                        if (e != null) {
-                            e.addTag(TAG);
-                        }
-                    }
-                    for (ServerPlayer q : inside) {
-                        Notice.alert(q, "message.skyabyss.abyss_v2.terr_wake." + name);
-                    }
-                    break;
-                }
-            }
-            return;
-        }
-        if (idle(level, run, inside, now)) {
-            return;
-        }
-        Entity boss = run.mobs.isEmpty() ? null : level.getEntity(run.mobs.get(0));
-        if (boss instanceof LivingEntity le && le.isAlive()) {
-            eliteTick(level, run, le, inside, now);
-        }
-        if (boss == null || !boss.isAlive()) {
-            if (run.bar != null) {
-                run.bar.removeAllPlayers();
-            }
-            for (ServerPlayer p : inside) {
-                for (UUID who : AbyssMarks.withParty(p)) {
-                    d.set(who, "clear:" + name);
-                }
-                Notice.objective(p, "message.skyabyss.abyss_v2.terr_clear." + name);
-                Quests.signalWithParty(level, List.of(p), "abyss_clear_" + name);
-            }
-            RUNS.remove(name);
-        }
-    }
-
+    // ---------------------------------------------------------------- 縄張りの主
     // 縄張りの主: ボスバーと技 (0.5 秒ごと)
     static void eliteTick(ServerLevel level, Run run, LivingEntity boss, List<ServerPlayer> inside, long now) {
         if (run.bar == null) {
@@ -260,8 +200,8 @@ public final class LayerFights {
         double y = boss.getY();
         double bx = boss.getX(), bz = boss.getZ();
         double ang = Math.atan2(target.getZ() - bz, target.getX() - bx);
-        float dmg = (run.name.equals("terr_ash") ? 7f : 6f) * (1f + 0.2f * phase);
-        int li = run.name.equals("terr_ash") ? 3 : 1;
+        float dmg = (run.name.endsWith("ash") ? 7f : 6f) * (1f + 0.2f * phase);
+        int li = run.name.endsWith("ash") ? 3 : 1;
         int warn;
         level.playSound(null, boss.blockPosition(), SoundEvents.RAVAGER_ROAR, SoundSource.HOSTILE, 0.9f, 1.3f);
         LordMoves.element(level, li, bx, y + 1, bz, 12, 0.6);
