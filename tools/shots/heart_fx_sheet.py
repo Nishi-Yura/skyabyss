@@ -101,7 +101,7 @@ def sheet(key, title, rows, prefix_of):
                 d.rectangle([x, y, x + W, y + H], outline=SUB)
                 d.text((x + 10, y + 10), "(no shot)", font=f_sub, fill=SUB)
         y += rowh
-    canvas.save(f"{out}/{key}.png", optimize=True)
+    canvas.convert("RGB").save(f"{out}/{key}.jpg", quality=85)
 
 
 for key, title, rows in SHEETS:
