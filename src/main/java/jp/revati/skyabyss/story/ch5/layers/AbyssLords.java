@@ -13,6 +13,7 @@ import jp.revati.skyabyss.abyss.arts.AbyssArt;
 import jp.revati.skyabyss.abyss.arts.AbyssArts;
 import jp.revati.skyabyss.abyss.arts.AbyssLight;
 import jp.revati.skyabyss.abyss.mobs.AbyssMobSpawner;
+import jp.revati.skyabyss.abyss.boss.BossLook;
 import jp.revati.skyabyss.combat.Telegraph;
 import jp.revati.skyabyss.combat.TelegraphShape;
 import jp.revati.skyabyss.notice.Notice;
@@ -182,6 +183,10 @@ public final class AbyssLords {
             lord.teleportTo(c.getX() + 0.5, c.getY(), c.getZ() + 0.5);
         }
         f.bar.setProgress(Math.max(0f, Math.min(1f, lord.getHealth() / lord.getMaxHealth())));
+        // 見た目だけの段 (体力が半分を切ると一度吠える。戦いの決まりは変わらない)
+        if (lord.getHealth() <= lord.getMaxHealth() * 0.5f) {
+            BossLook.setPhase(lord, 1);
+        }
         for (ServerPlayer p : in) {
             f.bar.addPlayer(p);
         }
@@ -235,6 +240,7 @@ public final class AbyssLords {
             sc.setBaseValue(SCALE[li]);
         }
         le.setCustomName(Component.translatable("abyss_v2.skyabyss.lord." + layer));
+        BossLook.set(le, BossLook.pack(BossLook.LORD_RIB + li, 0, 0));
         if (le instanceof net.minecraft.world.entity.Mob m) {
             m.setPersistenceRequired();
         }
@@ -454,8 +460,10 @@ public final class AbyssLords {
         Vec3 c = Vec3.atBottomCenterOf(m.below(2));
         flash(f, "objective.skyabyss.abyss_v2.flash_guard_lamp", now, 80);
         level.playSound(null, m, SoundEvents.WARDEN_SNIFF, SoundSource.HOSTILE, 1.4f, 0.8f);
+        BossLook.windup(lord, BossLook.SNUFF, 50);
         Telegraph.in(level, TelegraphShape.circle(c.x, c.z, 2.6)).floor(c.y).warn(50).danger().owner(lord)
                 .onImpact(lvl -> {
+                    BossLook.strike(lord, BossLook.SNUFF);
                     boolean guarded = false;
                     for (ServerPlayer p : inArena(lvl, f.layer)) {
                         if (Math.hypot(p.getX() - c.x, p.getZ() - c.z) <= 2.6) {
@@ -478,6 +486,8 @@ public final class AbyssLords {
         }
         f.nextMech = now + 170;
         flash(f, "objective.skyabyss.abyss_v2.flash_weight", now, 70);
+        BossLook.windup(lord, BossLook.CRUSH, 32);
+        LayerFights.later(level.getServer(), 32, () -> BossLook.strike(lord, BossLook.CRUSH));
         crush(level, in, lord, 9f);
         level.playSound(null, lord.blockPosition(), SoundEvents.ANVIL_LAND, SoundSource.HOSTILE, 1.2f, 0.5f);
     }
@@ -528,6 +538,7 @@ public final class AbyssLords {
         flash(f, "objective.skyabyss.abyss_v2.flash_beat", now, 200);
         level.playSound(null, lord.blockPosition(), SoundEvents.ILLUSIONER_MIRROR_MOVE, SoundSource.HOSTILE, 1.6f, 0.7f);
         // 四つの所に本物と写しを散らす
+        BossLook.strike(lord, BossLook.SPLIT);
         int real = level.random.nextInt(4);
         for (int i = 0; i < 4; i++) {
             double a = i * Math.PI / 2 + Math.PI / 4;
@@ -545,6 +556,9 @@ public final class AbyssLords {
                     sc.setBaseValue(SCALE[2]);
                 }
                 le.setCustomName(lord.getCustomName());
+                // 写しも本物と同じ姿 (見分けは鼓動の音だけ)
+                BossLook.set(le, BossLook.pack(BossLook.LORD_STORM, 0, 0));
+                BossLook.strike(le, BossLook.SPLIT);
                 f.copies.add(le.getUUID());
                 LayerFights.later(level.getServer(), 300, () -> {
                     Entity gone = level.getEntity(le.getUUID());
@@ -574,8 +588,12 @@ public final class AbyssLords {
             Notice.bar(p, Component.translatable("message.skyabyss.abyss_v2.dark_coming"));
         }
         level.playSound(null, lord.blockPosition(), SoundEvents.WARDEN_ROAR, SoundSource.HOSTILE, 1.4f, 0.7f);
+        BossLook.windup(lord, BossLook.ROAR, 45);
         Telegraph.in(level, TelegraphShape.ring(c.getX() + 0.5, c.getZ() + 0.5, Layers.ARENA_R - 2.5, Layers.ARENA_R)).floor(c.getY()).warn(45).danger().owner(lord)
-                .onImpact(lvl -> darkWave(lvl, f, Vec3.atBottomCenterOf(c), inArena(lvl, f.layer)))
+                .onImpact(lvl -> {
+                    BossLook.strike(lord, BossLook.ROAR);
+                    darkWave(lvl, f, Vec3.atBottomCenterOf(c), inArena(lvl, f.layer));
+                })
                 .onHit((lvl, p) -> p.hurt(lvl.damageSources().mobAttack(lord), 4f)).start();
     }
 

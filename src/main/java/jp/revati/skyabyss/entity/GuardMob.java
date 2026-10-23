@@ -8,6 +8,9 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.network.syncher.EntityDataSerializers;
+import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.level.Level;
@@ -15,6 +18,7 @@ import software.bernie.geckolib.animatable.GeoEntity;
 import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache;
 import software.bernie.geckolib.animation.AnimatableManager;
 import software.bernie.geckolib.animation.AnimationController;
+import software.bernie.geckolib.animation.AnimationState;
 import software.bernie.geckolib.animation.PlayState;
 import software.bernie.geckolib.animation.RawAnimation;
 import software.bernie.geckolib.util.GeckoLibUtil;
@@ -81,9 +85,127 @@ public abstract class GuardMob extends Monster implements GeoEntity, jp.revati.s
         triggerAnim("action", name);
     }
 
+    // ---- 層の主・歪んだ王の見た目 (abyss.boss.BossLook)。0 ならふつうの姿
+    private static final EntityDataAccessor<Integer> BOSS_LOOK = SynchedEntityData.defineId(GuardMob.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<Integer> BOSS_ACT = SynchedEntityData.defineId(GuardMob.class, EntityDataSerializers.INT);
+    private int bossSerial;
+    // 画面の側だけ: 見た値と、その値になった tick
+    private int bossSeenAct;
+    private int bossActAt;
+    private int bossSeenPhase;
+    private int bossPhaseAt = -1000;
+    private static final java.util.Map<String, RawAnimation> BOSS_ANIMS = new java.util.concurrent.ConcurrentHashMap<>();
+
+    @Override
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {
+        super.defineSynchedData(builder);
+        builder.define(BOSS_LOOK, 0).define(BOSS_ACT, 0);
+    }
+
+    public int bossLook() {
+        return entityData.get(BOSS_LOOK);
+    }
+
+    public void setBossLook(int look) {
+        entityData.set(BOSS_LOOK, look);
+    }
+
+    public int bossAct() {
+        return entityData.get(BOSS_ACT);
+    }
+
+    public void setBossAct(int code, int ticks, boolean strike) {
+        bossSerial = (bossSerial + 1) & 0x7f;
+        entityData.set(BOSS_ACT, (code & 0xff) | (Math.min(255, Math.max(0, ticks)) << 8) | (strike ? 1 << 16 : 0) | (bossSerial << 17));
+    }
+
+    public void clearBossAct() {
+        entityData.set(BOSS_ACT, 0);
+    }
+
+    // 主・王は倒れる動きを長めに見せる (戦いの決まりは死んだ時点で進む。体が消えるのを遅らせるだけ)
+    @Override
+    protected void tickDeath() {
+        if (bossLook() == 0) {
+            super.tickDeath();
+            return;
+        }
+        ++deathTime;
+        if (deathTime >= jp.revati.skyabyss.abyss.boss.BossLook.DEATH_TICKS && !level().isClientSide() && !isRemoved()) {
+            level().broadcastEntityEvent(this, (byte) 60);
+            remove(RemovalReason.KILLED);
+        }
+    }
+
+    private static RawAnimation bossAnim(String name, int kind) {
+        return BOSS_ANIMS.computeIfAbsent(kind + name, k -> switch (kind) {
+            case 0 -> RawAnimation.begin().thenLoop(name);
+            case 1 -> RawAnimation.begin().thenPlayAndHold(name);
+            default -> RawAnimation.begin().thenPlay(name);
+        });
+    }
+
+    // 溜めの速さ (2 秒で作った動きを、予告の長さで終わるように)
+    private double bossSpeed() {
+        int act = bossAct();
+        int ticks = (act >> 8) & 0xff;
+        if (bossLook() == 0 || act == 0 || (act & (1 << 16)) != 0 || ticks <= 0) {
+            return 1.0;
+        }
+        return jp.revati.skyabyss.abyss.boss.BossLook.WINDUP_SEC * 20.0 / ticks;
+    }
+
+    // 主・王の動き: 倒れる > 段の変わり目 > 技の溜め・当たり。どれでもなければ止めて、待機・歩きに任せる
+    private PlayState bossState(AnimationState<GuardMob> state) {
+        int look = bossLook();
+        if (look == 0) {
+            return PlayState.STOP;
+        }
+        String stem = "animation." + jp.revati.skyabyss.abyss.boss.BossLook.animStem(look) + ".";
+        AnimationController<GuardMob> c = state.getController();
+        if (isDeadOrDying()) {
+            return state.setAndContinue(bossAnim(stem + "death", 1));
+        }
+        int phase = jp.revati.skyabyss.abyss.boss.BossLook.phase(look);
+        if (phase != bossSeenPhase) {
+            if (phase > bossSeenPhase && tickCount > 5) {
+                bossPhaseAt = tickCount;
+                c.forceAnimationReset();
+            }
+            bossSeenPhase = phase;
+        }
+        if (tickCount - bossPhaseAt < jp.revati.skyabyss.abyss.boss.BossLook.PHASE_TICKS) {
+            return state.setAndContinue(bossAnim(stem + "phase", 1));
+        }
+        int act = bossAct();
+        if (act != bossSeenAct) {
+            bossSeenAct = act;
+            bossActAt = tickCount;
+            c.forceAnimationReset();
+        }
+        if (act == 0) {
+            return PlayState.STOP;
+        }
+        String move = jp.revati.skyabyss.abyss.boss.BossLook.actName(act & 0xff);
+        if ((act & (1 << 16)) == 0) {
+            return state.setAndContinue(bossAnim(stem + "windup_" + move, 1));
+        }
+        if (tickCount - bossActAt > jp.revati.skyabyss.abyss.boss.BossLook.STRIKE_TICKS) {
+            return PlayState.STOP;
+        }
+        return state.setAndContinue(bossAnim(stem + "strike_" + move, 2));
+    }
+
     @Override
     public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
-        controllers.add(new AnimationController<>(this, "move", 4, state -> state.setAndContinue(state.isMoving() ? walk : idle)));
+        controllers.add(new AnimationController<>(this, "move", 4, state -> {
+            int look = bossLook();
+            if (look != 0) {
+                String stem = "animation." + jp.revati.skyabyss.abyss.boss.BossLook.animStem(look) + ".";
+                return state.setAndContinue(bossAnim(stem + (state.isMoving() ? "walk" : "idle"), 0));
+            }
+            return state.setAndContinue(state.isMoving() ? walk : idle);
+        }));
         AnimationController<GuardMob> action = new AnimationController<>(this, "action", 0, state -> PlayState.STOP);
         for (String name : actions) {
             // 倒れる動きは、終わった姿で止める (消えるまで元の姿に戻らない)
@@ -91,6 +213,7 @@ public abstract class GuardMob extends Monster implements GeoEntity, jp.revati.s
             action.triggerableAnim(name, name.equals("death") ? RawAnimation.begin().thenPlayAndHold(id) : RawAnimation.begin().thenPlay(id));
         }
         controllers.add(action);
+        controllers.add(new AnimationController<>(this, "boss", 3, this::bossState).setAnimationSpeedHandler(m -> m.bossSpeed()));
     }
 
     @Override
