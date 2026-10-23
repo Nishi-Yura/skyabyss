@@ -298,6 +298,11 @@ public final class WhaleRingRoom extends RaidRoom {
         return wave;
     }
 
+    // 輪の縮みを ticks だけ進める (試験用)
+    public void rewindShrink(long ticks) {
+        startAt -= ticks;
+    }
+
     public long shrinkStart() {
         return startAt;
     }

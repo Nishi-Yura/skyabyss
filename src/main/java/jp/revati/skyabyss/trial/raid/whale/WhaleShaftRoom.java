@@ -350,6 +350,10 @@ public final class WhaleShaftRoom extends RaidRoom {
     private long lastNow;
 
     // ---- 試験用
+    public Direction ascend(int f) {
+        return Direction.fromDelta(DIR[f][0], 0, DIR[f][1]);
+    }
+
     public int grown(int f) {
         return grown[f];
     }
