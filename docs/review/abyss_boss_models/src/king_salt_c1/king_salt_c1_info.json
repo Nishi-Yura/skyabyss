@@ -1,0 +1,27 @@
+{
+ "name": "king_salt_c1",
+ "tris": 3018,
+ "atlas": [
+  512,
+  512
+ ],
+ "open": 0,
+ "floating": [],
+ "bones": {
+  "root": 0,
+  "body": 112,
+  "chest": 754,
+  "head": 988,
+  "jaw": 44,
+  "arm_l": 188,
+  "fore_l": 182,
+  "arm_r": 188,
+  "fore_r": 182,
+  "leg_l": 38,
+  "shin_l": 152,
+  "leg_r": 38,
+  "shin_r": 152
+ },
+ "glow": 7434,
+ "height": 71.1
+}

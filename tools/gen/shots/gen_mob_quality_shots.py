@@ -1,0 +1,131 @@
+"""敵の質の見直し (docs/review/mob_quality_2026-10-23.md) の台本 tools/shots/mob_quality[_<tag>].txt を書く。
+敵を目の前 (0, 地面, 0) に出し、斜め前・横・後ろ斜め・攻撃の構え (あれば) を撮る。大きさはメッシュの外形 x 描画の倍率から決める。
+使い方: python -I tools/gen/shots/gen_mob_quality_shots.py [tag] [名前...]
+        → bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/mob_quality_<tag>.txt
+        → python -I tools/sheets/mob_quality_sheet.py <tag>
+"""
+import json
+import sys
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[3]
+R = ROOT / "src/main/resources/assets/skyabyss"
+
+# (entity id, mesh, 描画の倍率, 撮る攻撃のアニメ (None = 無し), 何 tick 後に撮るか)
+MOBS = [
+    ("rock_shell_beetle", "rock_shell_beetle", 1.0, "charge", 10),
+    ("spine_hare", "spine_hare", 1.0, "shoot", 8),
+    ("bone_hauler", "bone_hauler", 1.0, None, 0),
+    ("elder_sentry", "elder_sentry", 1.0, "attack", 8),
+    ("tidepool_clam", "tidepool_clam", 1.0, "pinch", 6),
+    ("sand_burrower", "sand_burrower", 1.0, "bite", 6),
+    ("drift_hermit", "drift_hermit", 1.0, "spit", 8),
+    ("shore_warden", "shore_warden", 1.0, "thrust", 8),
+    ("static_puff", "static_puff", 1.0, "charge", 10),
+    ("peak_fledgling", "peak_fledgling", 1.0, "dive", 8),
+    ("lightning_gleaner", "lightning_gleaner", 1.0, "peck", 6),
+    ("scorched_warden", "scorched_warden", 1.0, "attack", 8),
+    ("cinder_mite", "cinder_mite", 1.5, None, 0),
+    ("ash_dragger", "ash_dragger", 1.0, "curl", 10),
+    ("ash_husk", "ash_husk", 0.85, "attack", 8),
+    ("elder_thrall", "elder_thrall", 1.15, "attack", 8),
+    ("bone_sentinel", "bone_sentinel", 1.0, "attack", 8),
+    ("rib_archer", "rib_archer", 1.0, "shoot", 10),
+    ("moss_crawler", "moss_crawler", 1.3, "pounce", 8),
+    ("waterway_maw", "waterway_maw", 0.58, "bite", 8),
+    ("bone_mortar", "bone_mortar", 1.5, "aim", 10),
+    ("bone_gull", "bone_gull", 1.6, "dive", 8),
+    ("elder_sentinel", "elder_sentinel", 1.0, "attack", 8),
+    ("coral_thrall", "coral_thrall", 1.0, "attack", 8),
+    ("reef_scuttler", "reef_scuttler", 1.0, "attack", 6),
+    ("bubble_puffer", "bubble_puffer", 1.0, "inflate", 10),
+    ("tide_beckoner", "tide_beckoner", 1.0, "slam_raise", 12),
+    ("feather_warden", "feather_warden", 1.0, "attack", 8),
+    ("static_moth", "static_moth", 1.0, "attack", 8),
+    ("thunder_supplicant", "thunder_supplicant", 1.0, "cast", 10),
+    ("ash_thrall", "ash_thrall", 1.0, "attack", 8),
+    ("ember_moth", "ember_moth", 1.0, "attack", 8),
+    ("cinder_roller", "cinder_roller", 1.0, "curl", 10),
+    ("whalebone_captain", "whalebone_captain", 1.0, "slam", 12),
+    ("pearl_keeper", "pearl_keeper", 1.0, "charge", 10),
+    ("raiju", "raiju", 1.0, "claw", 8),
+    ("ash_smith", "ash_smith", 1.0, "slam", 12),
+    ("heart_warden", "heart_warden", 1.0, "claw", 8),
+    ("bone_flute", "abyss_bone_flute_s1", 1.0, "call", 28),
+    ("bone_picker", "abyss_bone_picker_s1", 1.0, "attack", 8),
+    ("charged_moth", "abyss_charged_moth_s1", 1.0, "attack", 8),
+    ("lightning_idol", "abyss_lightning_idol_s1", 1.0, "charge", 20),
+    ("rib_guard", "abyss_rib_guard_s1", 1.0, "attack", 5),
+    ("salt_husk", "abyss_salt_husk_s1", 1.0, "attack", 5),
+    ("scorched_bird", "abyss_scorched_bird_s1", 1.0, "shadow", 18),
+    ("tide_hands", "abyss_tide_hands_s1", 1.0, "grasp", 22),
+    ("white_shell_keeper", "abyss_white_shell_keeper_s1", 1.0, "attack", 8),
+    ("ash_trail", "ash_trail", 1.0, "attack", 8),
+    ("ember_keeper", "ember_keeper", 1.0, "telegraph", 10),
+    ("soot_child", "soot_child", 1.0, "attack", 8),
+    ("past_shadow", "past_shadow", 1.0, "mirror", 8),
+    ("nameless_shape", "nameless_shape", 1.0, "shoot", 8),
+    ("lamp_eater", "lamp_eater", 1.0, "snuff", 8),
+    ("ceiling_walker", "ceiling_walker", 1.0, "drop", 8),
+    ("heartbeat_mimic", "heartbeat_mimic", 1.0, "bite", 8),
+    ("rope_hanger", "rope_hanger", 1.0, "pull", 8),
+]
+
+
+# 攻撃の構えのあとに撮る追加の動き (名前, 何 tick 後)。深淵の敵 A は 2026-10-23 にアニメを付けたので倒れる姿も見る
+EXTRA = {e: [("death", 30)] for e in ("bone_flute", "bone_picker", "charged_moth", "lightning_idol", "rib_guard", "salt_husk",
+                                     "scorched_bird", "tide_hands", "white_shell_keeper")}
+EXTRA["lamp_eater"] = [("snuff", 6)]
+for _e, _t in (("bone_sentinel", 30), ("rib_archer", 30), ("elder_sentinel", 34), ("whalebone_captain", 44), ("bone_mortar", 26), ("bone_gull", 22)):
+    EXTRA[_e] = [("hurt", 2), ("death", _t)]
+EXTRA["nameless_shape"] = [("shoot", 10)]
+
+
+def extent(mesh, scale):
+    d = json.loads((R / "lowpoly" / (mesh + ".json")).read_text(encoding="utf-8"))
+    lo = [1e9] * 3
+    hi = [-1e9] * 3
+    for b in d["bones"].values():
+        for v in b["vertices"]:
+            for i in range(3):
+                lo[i] = min(lo[i], v[i])
+                hi[i] = max(hi[i], v[i])
+    h = (hi[1] - lo[1]) / 16 * scale
+    w = max(hi[0] - lo[0], hi[2] - lo[2]) / 16 * scale
+    return max(h, 0.3), max(w, 0.3), lo[1] / 16 * scale
+
+
+def main():
+    tag = sys.argv[1] if len(sys.argv) > 1 else "all"
+    only = set(sys.argv[2:])
+    L = ["# Generated by tools/gen/shots/gen_mob_quality_shots.py: enemy quality review (3/4, side, back, attack pose)",
+         "world shots flat", "size 960 540", "timeout 1500", "render 8", "clouds off",
+         "cmd skyabyss cinematic stop", "cmd time set noon", "cmd gamerule doDaylightCycle false", "cmd weather clear",
+         "cmd gamemode spectator", "cmd fill -30 -61 -30 30 -61 30 minecraft:smooth_basalt destroy", "hud off", "lowpoly on", "fov 50", "wait 200"]
+    for eid, mesh, scale, anim, tick in MOBS:
+        if only and eid not in only:
+            continue
+        h, w, y0 = extent(mesh, scale)
+        size = max(h, w * 0.8)
+        d = max(1.8, 1.55 * size + 0.6)
+        cy = round(-60 + y0 + h * 0.5 - 1.62, 2)
+        a = round(d * 0.7, 2)
+        L += [f"# --- {eid}", "cmd kill @e[type=!minecraft:player,distance=..80]", "cmd kill @e[type=minecraft:item]",
+              f"cmd summon skyabyss:{eid} 0 -60 0 {{NoAI:1b,NoGravity:1b,Rotation:[0f,0f],PersistenceRequired:1b,Invulnerable:1b,Tags:[\"m\"]}}",
+              f"camera minecraft:overworld {a} {cy} {a} 135 0", "waitchunks", "wait 60",
+              f"shot mq_{eid}_q"]
+        L += [f"camera minecraft:overworld {round(d, 2)} {cy} 0 90 0", "wait 4", f"shot mq_{eid}_side"]
+        L += [f"camera minecraft:overworld {-a} {cy} {-a} -45 0", "wait 4", f"shot mq_{eid}_back"]
+        if anim:
+            L += [f"camera minecraft:overworld {a} {cy} {a} 135 0", "wait 4",
+                  f"cmd skyabyss dev anim @e[tag=m] {anim}", f"wait {tick}", f"shot mq_{eid}_atk"]
+        for xa, xt in EXTRA.get(eid, ()):
+            L += [f"cmd skyabyss dev anim @e[tag=m] {xa}", f"wait {xt}", f"shot mq_{eid}_{xa}", "wait 30"]
+        L += ["wait 10"]
+    L += ["cmd kill @e[type=!minecraft:player,distance=..80]"]
+    out = ROOT / f"tools/shots/mob_quality_{tag}.txt"
+    out.write_text("\n".join(L) + "\n", encoding="utf-8")
+    print(out)
+
+
+main()

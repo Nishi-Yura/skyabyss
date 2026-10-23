@@ -370,6 +370,10 @@ public abstract class HeartDomain {
         removeNodes(level);
         if (shattered) {
             stun = STUN_TICKS;
+            // 砕けた瞬間、心臓がひるむ (2 秒の動き。傷の倍率や技の間は変えない)
+            if (heart instanceof jp.revati.skyabyss.entity.GuardMob g && heart.isAlive()) {
+                g.playAction("stagger");
+            }
         }
         send(level, DomainPayload.end(id, shattered));
         if (shattered) {

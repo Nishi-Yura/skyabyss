@@ -277,6 +277,7 @@ public final class EmberMobSelfTest {
     // ---------------------------------------------------------------- 灰の殻と燃え上がり
     private static void checkShell(ServerLevel level, List<Mob> made, List<String> f) {
         AshThrall t = make(level, EmberMobSetup.ASH_THRALL.get(), TX - 4.5, TZ + 0.5, made);
+        jp.revati.skyabyss.combat.MobTuning.untune(t);
         // 防具を通る傷 (焦げ) で、殻の分け方だけを見る
         t.hurt(t.damage(EmberIds.HEAT, null), 10);
         expect(Math.abs(t.getHealth() - 55) < 1e-3 && Math.abs(t.shell() - 25) < 1e-3, "shell halves (hp " + t.getHealth() + ", shell " + t.shell() + ")", f);

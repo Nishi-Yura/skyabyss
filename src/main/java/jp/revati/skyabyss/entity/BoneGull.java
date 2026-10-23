@@ -54,7 +54,7 @@ public class BoneGull extends GuardMob {
     private Vec3 home;
 
     public BoneGull(EntityType<? extends Monster> type, Level level) {
-        super(type, level, "bone_gull", "cry", "dive");
+        super(type, level, "bone_gull", "cry", "dive", "hurt", "death");
         this.moveControl = new FlyingMoveControl(this, 20, true);
         this.xpReward = 4;
         this.orbit = random.nextDouble() * Math.PI * 2;
@@ -262,5 +262,11 @@ public class BoneGull extends GuardMob {
     @Override
     public boolean isNoGravity() {
         return super.isNoGravity() && !isDeadOrDying();
+    }
+
+    // 被弾・倒れるアニメ (tools/gen/mobs/gen_guard_hurt_death.py)
+    @Override
+    protected boolean autoHurtDeath() {
+        return true;
     }
 }

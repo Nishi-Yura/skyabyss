@@ -143,6 +143,8 @@ public final class SelfTestRunner {
         // 深淵の敵 A (9 種の型・三段の素材・段の決まり・数字の伸び・予告・殻と盾・塩の抜け殻の割れ)。SKYABYSS_SELFTEST_ONLY="abyss enemies a"
         steps.add(Step.once("abyss enemies a", jp.revati.skyabyss.abyss.mobs.AbyssMobsASelfTest::runSelfTest));
         // 深淵の敵 B 組 (灰の層・深み・深淵だけ): 登録・素材・形・数字・灰の這い跡の光・天井歩き・灯喰い・縄の人・湧きの休み場。SKYABYSS_SELFTEST_ONLY="abyss enemies b"
+        // 層の主・歪んだ王の見た目 (型・周・段の同期、19 の素材と動きの名前)。SKYABYSS_SELFTEST_ONLY="abyss boss looks"
+        steps.add(Step.once("abyss boss looks", jp.revati.skyabyss.abyss.boss.BossLookSelfTest::runSelfTest));
         steps.add(Step.once("abyss enemies b", jp.revati.skyabyss.abyss.mobs.AbyssMobsBSelfTest::runSelfTest));
         // 建てた深淵での湧き (層ごとの種・形・床・休み場・心臓の間・人数の上限・数字・暗さ)。SKYABYSS_SELFTEST_ONLY="abyss enemies spawn"
         steps.add(Step.once("abyss enemies spawn", jp.revati.skyabyss.abyss.mobs.AbyssEnemiesSpawnSelfTest::run));
@@ -180,7 +182,8 @@ public final class SelfTestRunner {
         steps.add(Step.once("pouch", jp.revati.skyabyss.pouch.PouchSelfTest::runSelfTest));
         steps.add(Step.once("playtest", 40, jp.revati.skyabyss.playtest.PlaytestSelfTest::runSelfTest));
         // 試遊コマンド (skyabyss play): 登録・移動先・章の段階・道具・文言。docs/design/37 の 4 節。SKYABYSS_SELFTEST_ONLY="play"
-        steps.add(Step.once("play", 40, jp.revati.skyabyss.dev.play.PlaySelfTest::runSelfTest));
+        steps.add(Step.once("playtest play", 40, jp.revati.skyabyss.dev.play.PlaySelfTest::runSelfTest));
+        steps.addAll(jp.revati.skyabyss.dev.play.PlayMultiSelfTest.steps());
         steps.add(Step.once("item glow", jp.revati.skyabyss.glow.ItemGlowSelfTest::runSelfTest));
         steps.add(Step.once("progress", ProgressSelfTest::runSelfTest));
         steps.add(Step.once("lore", LoreSelfTest::runSelfTest));
@@ -262,8 +265,10 @@ public final class SelfTestRunner {
         steps.add(Step.once("tide mobs", 45, TideMobSelfTest::runSelfTest));
         // 潮殻の心臓と中ボス潮招きの予告 (Telegraph): 印と当たりが同じ・予告 0.8 秒以上・安全な床 15% 以上・人数で増える・部屋に収まる。docs/design/08 の 5.5
         steps.addAll(jp.revati.skyabyss.titan.tide.TideTelegraphSelfTest.steps());
-        // 潮殻のレイドの部屋 TR1/TR2/TR3 (二人組で順路を始め、台本で解く・全滅で戻る)。SKYABYSS_SELFTEST_ONLY="tide raid"
+        // 潮殻のレイドの順路 (引かれた TR1・智の部屋・TR3 を二人組で順路で動かし、台本で解く・全滅で戻る)。SKYABYSS_SELFTEST_ONLY="tide raid"
         steps.addAll(jp.revati.skyabyss.trial.raid.tide.TideRaidSelfTest.steps());
+        // 潮殻のレイドの新しい四部屋 TR4〜TR7 と枠ごとの引き (TR2 は引かれない)。SKYABYSS_SELFTEST_ONLY="tide raid"
+        steps.addAll(jp.revati.skyabyss.trial.raid.tide.TideRaid2SelfTest.steps());
         // 雷翼の巨神 (窓・止まり木・昇り風・一体だけ・記録・戻る先・背中の結びつけ)
         steps.add(Step.once("storm (load)", jp.revati.skyabyss.titan.storm.StormSelfTest::load));
         steps.add(Step.once("storm", 50, jp.revati.skyabyss.titan.storm.StormSelfTest::runSelfTest));
@@ -291,6 +296,9 @@ public final class SelfTestRunner {
         // 深淵の層 (36 の 8 章。野営・三本の道・印・門・主の間・下り・心臓まで歩けるか、印と門、二人の段)。SKYABYSS_SELFTEST_ONLY="abyss layers v2"
         steps.add(Step.once("abyss layers v2 (load)", jp.revati.skyabyss.story.ch5.layers.AbyssLayersV2SelfTest::load));
         steps.add(Step.once("abyss layers v2", 60, jp.revati.skyabyss.story.ch5.layers.AbyssLayersV2SelfTest::run));
+        // 深淵 v3 (2026-10-23 の試遊の直し: 帰りの祠・道案内・主の技と段とボスバー・縄張りの主)。SKYABYSS_SELFTEST_ONLY="abyss v3"
+        steps.add(Step.once("abyss v3 (load)", jp.revati.skyabyss.story.ch5.layers.AbyssV3SelfTest::load));
+        steps.add(Step.once("abyss v3", 60, jp.revati.skyabyss.story.ch5.layers.AbyssV3SelfTest::run));
         // 番人の悪夢 (段の表・入る条件・段の進み・報酬・保存・閉じたあとの後片付け)。docs/design/36 の 9。SKYABYSS_SELFTEST_ONLY="abyss nightmare"
         steps.add(Step.once("abyss nightmare (load)", jp.revati.skyabyss.story.ch5.warden.WardenSelfTest::load));
         steps.add(Step.once("abyss nightmare", 60, jp.revati.skyabyss.story.ch5.warden.NightmareSelfTest::run));
@@ -360,6 +368,74 @@ public final class SelfTestRunner {
         return steps;
     }
 
+    // 段の名前から付く分類 (SKYABYSS_SELFTEST_ONLY="group:<タグ>")。名前の語で決める (段を足したら自然に入る)
+    private static final java.util.Map<String, java.util.function.Predicate<String>> GROUPS = new java.util.LinkedHashMap<>();
+
+    static {
+        GROUPS.put("raid", n -> n.contains("raid"));
+        GROUPS.put("abyss", n -> n.startsWith("abyss") || n.startsWith("ch5"));
+        GROUPS.put("ui", n -> has(n, "hud", "lang", "keys", "notice", "tutorial", "guide", "travel map", "ux ", "band", "glow", "cinematic"));
+        GROUPS.put("story", n -> has(n, "story", "opening", "chapters", "arc", "prologue", "lore", "npc", "freequest", "ch1", "ch2", "ch3", "ch4", "playtest"));
+        GROUPS.put("titan", n -> has(n, "titan", "whale", "tide", "storm", "ember", "young", "heart", "trial", "shrine", "raiju"));
+        GROUPS.put("combat", n -> has(n, "combat", "telegraph", "room play", "weapon", "heart", "affix", "gear", "accessory", "skills", "growth"));
+        GROUPS.put("backs", n -> n.contains("back") || n.contains("build audit") || n.startsWith("trial"));
+        GROUPS.put("mobs", n -> n.contains("mob") || n.contains("enemies"));
+        GROUPS.put("world", n -> has(n, "town", "site", "grounds", "grave", "mount", "facility", "artisan", "travel", "spawn", "chapter"));
+    }
+
+    private static boolean has(String name, String... words) {
+        for (String w : words) {
+            if (name.contains(w)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    static boolean matches(String name, String token) {
+        if (token.startsWith("group:")) {
+            var g = GROUPS.get(token.substring(6).trim().toLowerCase(java.util.Locale.ROOT));
+            return g != null && g.test(name.toLowerCase(java.util.Locale.ROOT));
+        }
+        if (token.startsWith("~")) {
+            return name.toLowerCase(java.util.Locale.ROOT).contains(token.substring(1).trim().toLowerCase(java.util.Locale.ROOT));
+        }
+        return name.startsWith(token);
+    }
+
+    static void printCatalog(List<Step> all) {
+        StringBuilder sb = new StringBuilder("SELFTEST catalog: ").append(all.size()).append(" steps\n");
+        for (Step s : all) {
+            sb.append("  STEP ").append(s.name()).append('\n');
+        }
+        GROUPS.forEach((tag, p) -> sb.append("  GROUP group:").append(tag).append(" = ")
+                .append(all.stream().filter(s -> p.test(s.name().toLowerCase(java.util.Locale.ROOT))).count()).append(" steps\n"));
+        SkyAbyss.LOGGER.info(sb.toString());
+    }
+
+    // SKYABYSS_SELFTEST_LIST=1: ワールドを読む前 (mod の構築時) に段の一覧を出して終わる。ふつうの起動には影響しない
+    public static void listAndExitIfRequested() {
+        if (System.getenv("SKYABYSS_SELFTEST_LIST") == null) {
+            return;
+        }
+        try {
+            List<Step> all = steps();
+            StringBuilder sb = new StringBuilder();
+            for (Step s : all) {
+                sb.append("STEP ").append(s.name()).append('\n');
+            }
+            GROUPS.forEach((tag, p) -> sb.append("GROUP group:").append(tag).append(" = ")
+                    .append(all.stream().filter(s -> p.test(s.name().toLowerCase(java.util.Locale.ROOT))).map(Step::name)
+                            .collect(java.util.stream.Collectors.joining(" | ")))
+                    .append('\n'));
+            java.nio.file.Files.writeString(java.nio.file.Path.of("selftest_steps.txt"), sb.toString());
+            System.out.println("SELFTEST LIST\n" + sb);
+        } catch (Throwable t) {
+            System.out.println("SELFTEST LIST failed: " + t);
+        }
+        Runtime.getRuntime().halt(0);
+    }
+
     @SubscribeEvent
     static void onServerStarted(ServerStartedEvent event) {
         if (!enabled()) {
@@ -367,23 +443,38 @@ public final class SelfTestRunner {
         }
         QUEUE.clear();
         QUEUE.addAll(steps());
-        // SKYABYSS_SELFTEST_ONLY=<名前の頭>[,<名前の頭>…] なら、その段だけ (例: "storm back"、"travel gear,artisan")。終わるとサーバーを止める
+        // SKYABYSS_SELFTEST_ONLY=<指定>[,<指定>…] なら、その段だけ。指定は 名前の頭 / "group:<タグ>" / "~<名前に含まれる語>"
+        // (例: "storm back"、"travel gear,artisan"、"group:raid"、"~quest")。何にも合わなければ段の名前の一覧を出して止める。終わるとサーバーを止める
         String only = System.getenv("SKYABYSS_SELFTEST_ONLY");
         // 全部を流したときも、終わればサーバーを止める (前は titan back の段が止めていた。2026-10-22 にその段が止めなくなり、
         // サーバーが残って共有のロックが空かなかった)
         haltWhenDone = true;
         if (only != null && !only.isBlank()) {
-            // カンマ区切りで複数 ("travel gear,artisan")。どれかの頭に合う段を残す
-            String[] prefixes = java.util.Arrays.stream(only.split(",")).map(String::trim).filter(x -> !x.isEmpty()).toArray(String[]::new);
-            QUEUE.removeIf(s -> java.util.Arrays.stream(prefixes).noneMatch(s.name()::startsWith));
-            haltWhenDone = true;
+            List<Step> all = new ArrayList<>(QUEUE);
+            List<Step> kept = new ArrayList<>();
+            for (String token : only.split(",")) {
+                String t = token.trim();
+                if (t.isEmpty()) {
+                    continue;
+                }
+                List<Step> hit = all.stream().filter(s -> matches(s.name(), t)).toList();
+                if (hit.isEmpty()) {
+                    SkyAbyss.LOGGER.warn("SELFTEST: nothing matches \"{}\" (prefix, group:<tag> or ~<substring>)", t);
+                }
+                for (Step s : hit) {
+                    if (!kept.contains(s)) {
+                        kept.add(s);
+                    }
+                }
+            }
+            // 元の並びを保つ (指定した順ではなく、全体の順に流す。段どうしの前提があるため)
+            QUEUE.clear();
+            all.stream().filter(kept::contains).forEach(QUEUE::add);
         }
         if (QUEUE.isEmpty()) {
-            // 名前の頭に合う段が無いときは、待ち続けずに知らせて止める
-            if (haltWhenDone) {
-                SkyAbyss.LOGGER.error("SELFTEST FAILED: no step name starts with \"{}\"", only);
-                event.getServer().halt(false);
-            }
+            SkyAbyss.LOGGER.error("SELFTEST FAILED: no step matches \"{}\". Available steps and groups:", only);
+            printCatalog(steps());
+            event.getServer().halt(false);
             return;
         }
         current = null;

@@ -110,7 +110,7 @@ public final class ShellMatchDomain extends HeartDomain {
 
     @Override
     public int propsPerNode() {
-        return 2;
+        return 3;
     }
 
     @Override
@@ -419,33 +419,64 @@ public final class ShellMatchDomain extends HeartDomain {
         return new Hint("gui.skyabyss.domain.shell_match.find." + current, PER_MARK - litOfCurrent(), PER_MARK);
     }
 
-    // ---------------------------------------------------------------- 見える物 (板 = 平たい箱 + 板の上の印の字)
+    // ---------------------------------------------------------------- 見える物 (板 = 平たい箱 + 板の上に浮かぶ印 + 板に描いた印)
+    // 印は文字の ▲◆★● ではなく、印のフォント (assets/skyabyss/font/shell_marks.json、tools/gen/ui/gen_shell_marks.py) の
+    // 太い塗りの形 (黒い縁と陰つき)。遠くからでも形で見分けられる。浮かぶ印は人の方を向き、板の印は床に寝かせて上から読める
+    public static final String[] MARK_CHAR = {"", "", "", ""};
+    // 浮かぶ印の大きさと高さ (板の上の中心)・板に描く印の大きさ
+    static final float FLOAT_SCALE = 7.5f;
+    static final double FLOAT_LIFT = 1.75;
+    static final float FLAT_SCALE = 5.2f;
+
     @Override
     protected boolean drawNode(ServerLevel level, Node n, int t) {
         int m = n.index < PANELS ? mark[n.index] : 0;
         int rgb = n.flash > 0 && n.flashRgb != 0 ? n.flashRgb : RGB[m];
         boolean lit = n.done;
         String key = m + "/" + lit + "/" + rgb;
-        if (key.equals(n.propKey) && n.props.size() == 2) {
+        if (key.equals(n.propKey) && n.props.size() == 3) {
             return true;
         }
         n.propKey = key;
         Block block = lit ? Blocks.SEA_LANTERN : TILE[m];
         float h = lit ? 0.45f : 0.2f;
-        String json = glyphJson(m);
-        if (n.props.size() < 2) {
+        String json = glyphJson(m, rgb);
+        // 板の印: 叩いて光った板は白地なので、印を板の色で濃く描く
+        String flat = glyphJson(m, lit ? darker(RGB[m]) : 0x10141A);
+        if (n.props.size() < 3) {
             removeProps(level, n);
             n.props.add(spawnDisplay(level, n.pos, block, rgb, -0.95f, 0f, -0.95f, 1.9f, h, 1.9f));
-            n.props.add(spawnText(level, n.pos.add(0, 1.4, 0), json, 8f));
+            n.props.add(spawnText(level, n.pos.add(0, FLOAT_LIFT, 0), json, FLOAT_SCALE, false));
+            n.props.add(spawnText(level, n.pos.add(0, h + 0.02, 0), flat, FLAT_SCALE, true));
         } else {
             retarget(level, n.props.get(0), block, rgb, -0.95f, 0f, -0.95f, 1.9f, h, 1.9f);
             retext(level, n.props.get(1), json);
+            moveTo(level, n.props.get(2), n.pos.add(0, h + 0.02, 0));
+            retext(level, n.props.get(2), flat);
         }
         return true;
     }
 
+    private static int darker(int rgb) {
+        int r = (rgb >> 16 & 0xFF) * 45 / 100;
+        int g = (rgb >> 8 & 0xFF) * 45 / 100;
+        int b = (rgb & 0xFF) * 45 / 100;
+        return r << 16 | g << 8 | b;
+    }
+
+    private static String glyphJson(int m, int rgb) {
+        return "{\"text\":\"" + MARK_CHAR[m] + "\",\"font\":\"skyabyss:shell_marks\",\"color\":\"#" + String.format("%06X", rgb & 0xFFFFFF) + "\"}";
+    }
+
     private static String glyphJson(int m) {
-        return "{\"text\":\"" + GLYPH[m] + "\",\"color\":\"#" + String.format("%06X", RGB[m]) + "\",\"bold\":true}";
+        return glyphJson(m, RGB[m]);
+    }
+
+    private void moveTo(ServerLevel level, UUID id, Vec3 pos) {
+        Entity e = level.getEntity(id);
+        if (e != null) {
+            e.setPos(pos.x, pos.y, pos.z);
+        }
     }
 
     private static ListTag floats(float... v) {
@@ -456,11 +487,12 @@ public final class ShellMatchDomain extends HeartDomain {
         return l;
     }
 
-    private UUID spawnText(ServerLevel level, Vec3 pos, String json, float scale) {
+    // flat = 床に寝かせる (上から読める。向きは北が上)。そうでなければ人の方を向く
+    private UUID spawnText(ServerLevel level, Vec3 pos, String json, float scale, boolean flat) {
         Display.TextDisplay d = EntityType.TEXT_DISPLAY.create(level);
         CompoundTag tag = d.saveWithoutId(new CompoundTag());
         tag.putString("text", json);
-        tag.putString("billboard", "center");
+        tag.putString("billboard", flat ? "fixed" : "center");
         tag.putInt("background", 0);
         tag.putInt("line_width", 400);
         tag.putBoolean("see_through", false);
@@ -468,8 +500,11 @@ public final class ShellMatchDomain extends HeartDomain {
         tag.putFloat("shadow_radius", 0f);
         CompoundTag tr = new CompoundTag();
         tr.put("scale", floats(scale, scale, scale));
-        tr.put("translation", floats(0, 0, 0));
-        tr.put("left_rotation", floats(0, 0, 0, 1));
+        // 文字の下の端が原点なので、印の中心が原点に来るようにずらす (印の高さ 12 画素 x 0.025 x scale の半分)
+        float half = 12 * 0.025f * scale / 2f;
+        tr.put("translation", floats(0, flat ? 0 : -half, flat ? half : 0));
+        float s45 = (float) Math.sqrt(0.5);
+        tr.put("left_rotation", flat ? floats(-s45, 0, 0, s45) : floats(0, 0, 0, 1));
         tr.put("right_rotation", floats(0, 0, 0, 1));
         tag.put("transformation", tr);
         CompoundTag br = new CompoundTag();
@@ -499,7 +534,7 @@ public final class ShellMatchDomain extends HeartDomain {
             return;
         }
         if (icon == null || level.getEntity(icon) == null) {
-            icon = spawnText(level, new Vec3(cx, floorY + 9.8, cz), glyphJson(current), 14f);
+            icon = spawnText(level, new Vec3(cx, floorY + 9.8, cz), glyphJson(current), 16f, false);
         } else if (iconKey != current) {
             retext(level, icon, glyphJson(current));
         }

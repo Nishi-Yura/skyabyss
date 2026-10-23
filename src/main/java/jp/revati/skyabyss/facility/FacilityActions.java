@@ -105,6 +105,46 @@ public final class FacilityActions {
         return best;
     }
 
+    // 宿を寝る場所に決めた人が起きる (復活する) とき、町の真ん中 (鐘のそば) に立たせる。宿の寝台に決めていなければ null
+    @Nullable
+    public static net.minecraft.world.phys.Vec3 plazaSpotFor(ServerPlayer player) {
+        BlockPos home = player.getRespawnPosition();
+        if (home == null || player.getRespawnDimension() != Level.OVERWORLD) {
+            return null;
+        }
+        boolean inn = false;
+        for (BlockPos b : OpeningSites.shelterExtras(player.server, Attendants.INN_BED).values()) {
+            if (b.distSqr(home) <= 9) {
+                inn = true;
+                break;
+            }
+        }
+        if (!inn) {
+            return null;
+        }
+        BlockPos centre = OpeningSites.bell(player.server).orElse(OpeningSites.shelter(player.server).orElse(null));
+        if (centre == null) {
+            return null;
+        }
+        net.minecraft.server.level.ServerLevel level = player.server.overworld();
+        for (int r = 1; r <= 5; r++) {
+            for (int dx = -r; dx <= r; dx++) {
+                for (int dz = -r; dz <= r; dz++) {
+                    if (Math.max(Math.abs(dx), Math.abs(dz)) != r) {
+                        continue;
+                    }
+                    for (int dy = 2; dy >= -3; dy--) {
+                        BlockPos at = centre.offset(dx, dy, dz);
+                        if (level.getBlockState(at).isAir() && level.getBlockState(at.above()).isAir() && level.getBlockState(at.below()).isSolid()) {
+                            return net.minecraft.world.phys.Vec3.atBottomCenterOf(at);
+                        }
+                    }
+                }
+            }
+        }
+        return net.minecraft.world.phys.Vec3.atBottomCenterOf(centre.above());
+    }
+
     public static boolean innRest(ServerPlayer player, @Nullable NpcEntity npc) {
         BlockPos bed = innBed(player, npc);
         if (bed == null) {

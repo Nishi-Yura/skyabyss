@@ -151,9 +151,11 @@ public abstract class HeartBoss extends GuardMob {
     }
 
     private static String[] withCinematic(String[] actions) {
-        String[] all = java.util.Arrays.copyOf(actions, actions.length + 2);
+        // stagger: 領域を解いて砕けた瞬間のひるみ (HeartDomain.end。見た目だけで、技の流れは変えない)
+        String[] all = java.util.Arrays.copyOf(actions, actions.length + 3);
         all[actions.length] = "intro";
         all[actions.length + 1] = "death";
+        all[actions.length + 2] = "stagger";
         return all;
     }
 

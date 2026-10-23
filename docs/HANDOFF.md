@@ -41,7 +41,7 @@
 - **メモリ**: `gradle.properties` は `-Xmx1G`。重い python（レンダラ・メッシュ処理）は 1.5 GB 以内で、並列にしない。
 - **ユーザーが試遊中のチェックアウト（Desktop\mod）では絶対にビルド・編集しない**（`build/classes` が差し替わり ClassNotFoundException で落ちる）。確認は worktree でする。
 - 型検査: `./gradlew compileJava --offline --no-daemon`。
-- 自己テスト: `SKYABYSS_SELFTEST=1 ./gradlew runServer --no-daemon`（全体は約 10 分。`SKYABYSS_SELFTEST` があるときだけ build.gradle が `run/server.properties` の `max-tick-time` を -1 にしてウォッチドッグを切る。巨神の着地の段がチャンクの同期生成で 1 tick 200 秒かかるため。**自己テスト中は重い python を並列で流さない**。`build audit` の地上の場所の指摘は、2026-10-22 の仕上げ（`SiteJob.settle`）で 5 つの種とも 0。繰り返しは `SKYABYSS_SELFTEST_ONLY=<段の名前の頭>`、例 `abyss`・`gear freedom`・`whale scale`。全体は最後に 1 回）。
+- 自己テスト: `SKYABYSS_SELFTEST=1 ./gradlew runServer --no-daemon`（全体は約 10 分。`SKYABYSS_SELFTEST` があるときだけ build.gradle が `run/server.properties` の `max-tick-time` を -1 にしてウォッチドッグを切る。巨神の着地の段がチャンクの同期生成で 1 tick 200 秒かかるため。**自己テスト中は重い python を並列で流さない**。`build audit` の地上の場所の指摘は、2026-10-22 の仕上げ（`SiteJob.settle`）で 5 つの種とも 0。繰り返しは `SKYABYSS_SELFTEST_ONLY=<段の名前の頭>`（カンマ区切り・`group:raid`・`~語` も可。一覧は `SKYABYSS_SELFTEST_LIST=1`）、例 `abyss`・`gear freedom`・`whale scale`。全体は最後に 1 回）。
 - 絵の確認: 台本で撮る `./gradlew runShots -Pscript=tools/shots/<台本>.txt --no-daemon`。出力は `run/shots/<台本>/shots/<台本>/`、最後の行が `SHOTS OK` なら成功。台本の書き方は `tools/README.md`。**OS のキー送り・フォーカス操作はしない**。音は自動で 0、言語は日本語（`SKYABYSS_LANG` で変更）。
 - マルチ: 専用サーバー + 二人のクライアント。ポートは `server-port=25666`・`rcon.port=25766`（パスワード `test`、`online-mode=false`）。worktree が並ぶときは番号を変える。
 - 試遊用コマンド（OP 権限 2）: `docs/playtest_commands.md`（`/skyabyss playtest now|next|board|goto|trials|gear|chapter|fast|reset`、`skyabyss dev trial|rebirth|…`、`skyabyss skill …`、`skyabyss dev backmetrics`）。
@@ -110,7 +110,7 @@
 - **UI**: 画面のゆとり（ScrollPanel・PanZoomCanvas・UiFit）。容器の画面 3 つ（旅嚢・装飾・鍛冶）は未対応。
 - **最適化**: HUD の描き（塗りをまとめて送る・文の作り直しを tick ごとに）。景色の描きとサーバーは、変えずに削れる所が見つからなかった。
 - **試験**: 全体 161 件通過・失敗 0（2026-10-22 夜）。止めるときの固まりは、外し忘れの強制読み込みを止める前に外して直した（SelfTestRunner.releaseForced）。
-- **ゲームの起動の枠**: `bash tools/dev/mc_run.sh runServer|runShots ...` で二つまで同時（.mc_lock と .mc_lock2、ポートは枠ごと）。compileJava は枠なしでよい。
+- **ゲームの起動の枠**: `bash tools/dev/mc_run.sh runServer|runShots ...` で `MC_SLOTS` 個（既定 4。空きメモリが足りないと待つ）まで同時。compileJava は枠なしでよい。詳しくは tools/README.md の「開発の速い回し方」（`quick_check.sh`・`SELFTEST_ONLY` の `group:`/`~`・`SELFTEST_LIST=1`・`world_template.sh`）。
 - **選定**: 答えの出ていない問いはない（00 は 272 番から）。
 - **次**: 試遊の結果を受けて直す。深みの浮かぶ墓場の島の下の光、遺品の絵の描き込み（B）、番人の倒れたあとの場面のカメラ。
 
