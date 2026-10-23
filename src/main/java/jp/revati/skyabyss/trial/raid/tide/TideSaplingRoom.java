@@ -9,6 +9,7 @@ import jp.revati.skyabyss.trial.raid.RaidCtx;
 import jp.revati.skyabyss.trial.raid.RaidKit;
 import jp.revati.skyabyss.trial.raid.RaidRoom;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
@@ -50,16 +51,10 @@ public final class TideSaplingRoom extends RaidRoom {
     @Override
     public void build(RaidCtx ctx) {
         ServerLevel level = ctx.level();
-        RaidKit.Cell c = RaidKit.buildCell(ctx, new RaidKit.Spec(HX, HZ, H, RaidKit.TIDE));
-        // 灯りを増やす: 天井の灯りの間にもう一組 (四ブロックおきに明るい広間)
-        for (int x = -HX + 7; x <= HX - 2; x += 8) {
-            for (int z = -HZ + 7; z <= HZ - 2; z += 8) {
-                RaidKit.set(level, c.origin().offset(x, H + 1, z), c.palette().light());
-            }
-        }
+        RaidKit.Cell c = RaidKit.buildCell(ctx, new RaidKit.Spec(HX, HZ, H, TideBuild.PALETTE));
         for (int i = 0; i < SAPLINGS; i++) {
-            // 苗床: 3×3 の台
-            RaidKit.fill(level, c.origin().offset(AT[i][0] - 1, 1, AT[i][1] - 1), c.origin().offset(AT[i][0] + 1, 1, AT[i][1] + 1), Blocks.PRISMARINE_BRICKS.defaultBlockState());
+            // 苗床: 3×3 の台 (縁は石英、芯は暗い海晶)
+            RaidKit.fill(level, c.origin().offset(AT[i][0] - 1, 1, AT[i][1] - 1), c.origin().offset(AT[i][0] + 1, 1, AT[i][1] + 1), Blocks.SMOOTH_QUARTZ.defaultBlockState());
             RaidKit.set(level, c.origin().offset(AT[i][0], 1, AT[i][1]), Blocks.DARK_PRISMARINE.defaultBlockState());
         }
         // 巣穴: 灰色の珊瑚のこぶ (2×2、低い)
@@ -67,7 +62,62 @@ public final class TideSaplingRoom extends RaidRoom {
             RaidKit.fill(level, c.origin().offset(d[0], 1, d[1]), c.origin().offset(d[0] + 1, 1, d[1] + 1), Blocks.DEAD_BRAIN_CORAL_BLOCK.defaultBlockState());
             RaidKit.set(level, c.origin().offset(d[0], 2, d[1]), Blocks.AIR.defaultBlockState());
         }
+        dress(ctx);
         resetSaplings(ctx);
+    }
+
+    // 飾り (docs/design/39 の 4.2「守る 苗」): 苗ごとに床の桃の輪 (半径 3) と天井から垂れる珊瑚の天蓋 (下に灯り = 部屋で一番明るい所)。
+    // 床には守る物を囲む巻貝の渦の線 (平らな模様。通り道は塞がない)。巣穴は壁ぎわの暗い珊瑚の庇。苗のまわり半径 3 と巣穴のまわりは空ける
+    private void dress(RaidCtx ctx) {
+        TideBuild d = new TideBuild(ctx);
+        for (int[] a : AT) {
+            d.keep(a[0] - 3, 1, a[1] - 3, a[0] + 3, H - 3, a[1] + 3);
+        }
+        for (int[] den : DEN) {
+            d.keep(den[0] - 1, 1, den[1] - 1, den[0] + 2, 4, den[1] + 2);
+        }
+        d.shell(2);
+        d.floorSpiral(0, -4, 12, 2.5, Blocks.CUT_SANDSTONE.defaultBlockState());
+        for (int[] a : AT) {
+            d.floorRing(a[0], a[1], 2.6, Blocks.CHERRY_PLANKS.defaultBlockState());
+            // 天蓋: 天井の板の下に三段 (広い → 狭い)
+            for (int dx = -2; dx <= 2; dx++) {
+                for (int dz = -2; dz <= 2; dz++) {
+                    int r2 = dx * dx + dz * dz;
+                    if (r2 <= 5) {
+                        d.mark(a[0] + dx, H, a[1] + dz, r2 >= 4 ? Blocks.MAGENTA_TERRACOTTA.defaultBlockState() : Blocks.CHERRY_PLANKS.defaultBlockState());
+                    }
+                    if (r2 <= 2) {
+                        d.mark(a[0] + dx, H - 1, a[1] + dz, r2 == 0 ? Blocks.CALCITE.defaultBlockState() : Blocks.PURPUR_BLOCK.defaultBlockState());
+                    }
+                }
+            }
+            for (Direction dir : Direction.Plane.HORIZONTAL) {
+                d.mark(a[0] + 2 * dir.getStepX(), H - 1, a[1] + 2 * dir.getStepZ(), TideBuild.rod(Direction.DOWN));
+            }
+            d.mark(a[0], H - 2, a[1], Blocks.PEARLESCENT_FROGLIGHT.defaultBlockState());
+            d.light(a[0], H - 3, a[1], 12);
+        }
+        // 巣穴の庇: 壁と巣穴のあいだを死んだ珊瑚で埋め、上 (高さ 5) に庇
+        for (int[] den : DEN) {
+            int sx = den[0] > 0 ? 1 : -1;
+            int wallX = sx * HX;
+            int inner = sx > 0 ? den[0] + 2 : den[0] - 1;
+            for (int x = Math.min(inner, wallX); x <= Math.max(inner, wallX); x++) {
+                for (int z = den[1] - 1; z <= den[1] + 2; z++) {
+                    for (int y = 1; y <= 4; y++) {
+                        d.mark(x, y, z, y == 4 ? Blocks.DARK_PRISMARINE.defaultBlockState() : Blocks.DEAD_TUBE_CORAL_BLOCK.defaultBlockState());
+                    }
+                }
+            }
+            for (int x = den[0] - 1; x <= den[0] + 2; x++) {
+                for (int z = den[1] - 1; z <= den[1] + 2; z++) {
+                    d.mark(x, 5, z, (x + z) % 2 == 0 ? Blocks.DEAD_BRAIN_CORAL_BLOCK.defaultBlockState() : Blocks.DARK_PRISMARINE.defaultBlockState());
+                }
+            }
+        }
+        d.hiddenLights(11, 4, true).wallBranches(12, 5, 2).shards(4);
+        d.finish();
     }
 
     @Override

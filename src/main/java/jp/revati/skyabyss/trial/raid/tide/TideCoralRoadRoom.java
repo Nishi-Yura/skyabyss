@@ -55,16 +55,25 @@ public final class TideCoralRoadRoom extends RaidRoom {
         ctxRef = ctx;
         ServerLevel level = ctx.level();
         origin = ctx.origin();
-        RaidKit.buildCell(ctx, new RaidKit.Spec(HX, HZ, H, RaidKit.TIDE));
+        RaidKit.buildCell(ctx, new RaidKit.Spec(HX, HZ, H, TideBuild.PALETTE));
         BlockState[] dead = {Blocks.DEAD_TUBE_CORAL_BLOCK.defaultBlockState(), Blocks.DEAD_BRAIN_CORAL_BLOCK.defaultBlockState(),
                 Blocks.DEAD_BUBBLE_CORAL_BLOCK.defaultBlockState(), Blocks.DEAD_HORN_CORAL_BLOCK.defaultBlockState()};
         BlockState lintel = Blocks.DARK_PRISMARINE.defaultBlockState();
         for (int r = 0; r < ROWS; r++) {
             int z = ROW_Z[r];
             // 壁: 端から端まで、高さ 6。戸の所だけ y=1〜GATE_H を空け、その上は梁
+            // 壁の姿: 足もとは干上がった礁 (死んだ珊瑚)、肩から上は珊瑚の色 (テラコッタ)、頭はところどころ一段高い
             for (int x = -HX; x <= HX; x++) {
                 BlockState st = dead[ctx.rng().nextInt(dead.length)];
-                RaidKit.fill(level, origin.offset(x, 1, z), origin.offset(x, 6, z + 1), st);
+                RaidKit.fill(level, origin.offset(x, 1, z), origin.offset(x, 4, z + 1), st);
+                for (int y = 5; y <= 6; y++) {
+                    for (int dz = 0; dz <= 1; dz++) {
+                        RaidKit.set(level, origin.offset(x, y, z + dz), WALL_CORAL[Math.floorMod(x * 7 + y * 3 + dz * 5 + r * 11, WALL_CORAL.length)]);
+                    }
+                }
+                if (Math.floorMod(x * 5 + r * 3, 7) < 3) {
+                    RaidKit.set(level, origin.offset(x, 7, z + Math.floorMod(x + r, 2)), WALL_CORAL[Math.floorMod(x + r, WALL_CORAL.length)]);
+                }
             }
             List<Integer> order = new ArrayList<>(List.of(0, 1, 2, 3));
             Collections.shuffle(order, new java.util.Random(ctx.seed() ^ (r * 0x9E3779B97F4A7C15L)));
@@ -92,7 +101,40 @@ public final class TideCoralRoadRoom extends RaidRoom {
             RaidKit.fill(level, origin.offset(side * (HX - 1), 1, z), origin.offset(side * (HX - 1), h, z), dead[ctx.rng().nextInt(dead.length)]);
         }
         // 出口の前の印 (越えた先)
-        RaidKit.fill(level, origin.offset(-2, 0, -HZ + 1), origin.offset(2, 0, -HZ + 1), Blocks.CHISELED_STONE_BRICKS.defaultBlockState());
+        RaidKit.fill(level, origin.offset(-2, 0, -HZ + 1), origin.offset(2, 0, -HZ + 1), Blocks.CHISELED_SANDSTONE.defaultBlockState());
+        dress(ctx);
+    }
+
+    // 壁の珊瑚の色 (伸びる柱の桃・紅のコンクリートと予告の桃の絨毯と見分けがつくよう、淡い桃・紫・白だけ)
+    static final BlockState[] WALL_CORAL = {Blocks.CHERRY_PLANKS.defaultBlockState(), Blocks.MAGENTA_TERRACOTTA.defaultBlockState(),
+            Blocks.PURPLE_TERRACOTTA.defaultBlockState(), Blocks.PURPUR_BLOCK.defaultBlockState(), Blocks.WHITE_TERRACOTTA.defaultBlockState(),
+            Blocks.CHERRY_PLANKS.defaultBlockState()};
+
+    // 飾り (docs/design/39 の 4.2「運ぶ 珊瑚の道」): 伸びる道の先、出口の戸を珊瑚の門 (枝の絡んだアーチ) で囲む。
+    // 戸の前の床に道の筋 (切った砂岩)。戸と予告の床 (戸の前後 2 ブロック) には何も置かない
+    private void dress(RaidCtx ctx) {
+        TideBuild d = new TideBuild(ctx);
+        for (int r = 0; r < ROWS; r++) {
+            for (int cx : LANE_X) {
+                d.keep(cx - 1, 1, ROW_Z[r] - 2, cx + 1, GATE_H + 1, ROW_Z[r] + 3);
+            }
+        }
+        d.keep(-8, 1, -HZ, 8, H, -HZ + 1);
+        d.shell(2);
+        // 戸の梁の要石
+        for (int r = 0; r < ROWS; r++) {
+            for (int cx : LANE_X) {
+                RaidKit.set(ctx.level(), origin.offset(cx, GATE_H + 2, ROW_Z[r]), Blocks.SMOOTH_QUARTZ.defaultBlockState());
+                RaidKit.set(ctx.level(), origin.offset(cx, GATE_H + 2, ROW_Z[r] + 1), Blocks.SMOOTH_QUARTZ.defaultBlockState());
+            }
+        }
+        // 道の筋: 四つの戸を南北に通す
+        for (int cx : LANE_X) {
+            d.floorLine(cx, HZ - 1, -HZ + 2, Blocks.CUT_SANDSTONE.defaultBlockState());
+        }
+        d.coralArch(6, H - 1, 2);
+        d.hiddenLights(11, 4, true).ceilingCoral(10, 2, H - 2, 3).wallBranches(8, 5, 2).shards(4);
+        d.finish();
     }
 
     private static boolean nearRow(int z) {
@@ -115,6 +157,12 @@ public final class TideCoralRoadRoom extends RaidRoom {
     @Override
     public void reset(RaidCtx ctx) {
         done = false;
+        clearAllGates(ctx);
+    }
+
+    // 片付けの前に戸の柱と予告の絨毯を消す (部屋を下から空気に戻すとき、支えを失った絨毯が拾える物として落ちないように)
+    @Override
+    public void end(RaidCtx ctx) {
         clearAllGates(ctx);
     }
 
