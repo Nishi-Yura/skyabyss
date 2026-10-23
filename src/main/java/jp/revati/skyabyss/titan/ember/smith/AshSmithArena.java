@@ -112,10 +112,10 @@ public final class AshSmithArena {
 
     // ---------------------------------------------------------------- 建てる
     private static void set(ServerLevel level, int x, int y, int z, BlockState state) {
-        if (!BOX.contains(x, y, z) || reserved(x, y, z)) {
+        if (!BOX.contains(x, y, z) || SHIFT == BlockPos.ZERO && reserved(x, y, z)) {
             return;
         }
-        level.setBlock(new BlockPos(x, y, z), state, 2);
+        level.setBlock(new BlockPos(x, y, z).offset(SHIFT), state, 2);
     }
 
     private static boolean outside(int x, int z) {
@@ -126,6 +126,16 @@ public final class AshSmithArena {
 
     // 箱の中を建てる (箱の中は空気で、いちばん下の段にだけ仮の床がある前提。何度呼んでもよい)
     public static void build(ServerLevel level, Box box) {
+        buildBody(level, box);
+        // 部屋を作り直すと壁の灯り (歩く道の灯り。四隅の壁にある) も戻るので置き直す (置いてある灯りは飛ばす)
+        jp.revati.skyabyss.titan.light.RouteLamps.place(level, "ember");
+    }
+
+    private static void buildShifted(ServerLevel level) {
+        buildBody(level, BOX);
+    }
+
+    private static void buildBody(ServerLevel level, Box box) {
         BlockState basalt = Blocks.POLISHED_BASALT.defaultBlockState();
         BlockState tile = Blocks.POLISHED_BLACKSTONE_BRICKS.defaultBlockState();
         BlockState wall = Blocks.BLACKSTONE.defaultBlockState();
@@ -149,7 +159,7 @@ public final class AshSmithArena {
             }
         }
         // 床の中心のしるし
-        level.setBlock(MARK, Blocks.CHISELED_POLISHED_BLACKSTONE.defaultBlockState(), 2);
+        level.setBlock(MARK.offset(SHIFT), Blocks.CHISELED_POLISHED_BLACKSTONE.defaultBlockState(), 2);
         for (BlockPos t : TROUGHS) {
             buildTrough(level, t);
         }
@@ -171,8 +181,6 @@ public final class AshSmithArena {
             }
         }
         buildFurnace(level, false);
-        // 部屋を作り直すと壁の灯り (歩く道の灯り。四隅の壁にある) も戻るので置き直す (置いてある灯りは飛ばす)
-        jp.revati.skyabyss.titan.light.RouteLamps.place(level, "ember");
     }
 
     private static void buildTrough(ServerLevel level, BlockPos c) {
@@ -220,6 +228,62 @@ public final class AshSmithArena {
         out.add(new Vec3(FURNACE_DOOR.minX() + 0.5, FLOOR + 1, FURNACE_DOOR.minZ() - 1.0));
         out.add(new Vec3(FURNACE_DOOR.maxX() + 0.5, FLOOR + 1, FURNACE_DOOR.minZ() - 1.0));
         return out;
+    }
+
+
+    // ---------------------------------------------------------------- ずらした間 (順路の中ボスの部屋。trial/raid/mid)
+    // s = 元の間 (EmberBackLayout.SMITH) からのずれ。ZERO なら元の間と同じ
+    public static boolean inside(Vec3 p, BlockPos s) {
+        return BOX.contains(p.subtract(s.getX(), s.getY(), s.getZ()));
+    }
+
+    public static Vec3 home(BlockPos s) {
+        return HOME.add(s.getX(), s.getY(), s.getZ());
+    }
+
+    public static BlockPos nearestTrough(Vec3 from, BlockPos s) {
+        return nearestTrough(from.subtract(s.getX(), s.getY(), s.getZ())).offset(s);
+    }
+
+    public static Vec3 troughStand(BlockPos trough, BlockPos s) {
+        return troughStand(trough.subtract(s)).add(s.getX(), s.getY(), s.getZ());
+    }
+
+    public static int steamSide(BlockPos trough, BlockPos s) {
+        return steamSide(trough.subtract(s));
+    }
+
+    public static List<Vec3> furnaceSpawns(BlockPos s) {
+        List<Vec3> out = new ArrayList<>();
+        for (Vec3 v : furnaceSpawns()) {
+            out.add(v.add(s.getX(), s.getY(), s.getZ()));
+        }
+        return out;
+    }
+
+    public static boolean furnaceOpen(ServerLevel level, BlockPos s) {
+        return level.getBlockState(new BlockPos(FURNACE_DOOR.minX() + 1, FURNACE_DOOR.minY() + 1, FURNACE_DOOR.minZ()).offset(s)).isAir();
+    }
+
+    // ずらした間の中身を建てる (箱の中は空気、または壁の前提。外周の壁は呼ぶ側が建てる)。元の間と同じ形
+    private static BlockPos SHIFT = BlockPos.ZERO;
+
+    public static void build(ServerLevel level, BlockPos s) {
+        SHIFT = s;
+        try {
+            buildShifted(level);
+        } finally {
+            SHIFT = BlockPos.ZERO;
+        }
+    }
+
+    public static void buildFurnace(ServerLevel level, boolean open, BlockPos s) {
+        SHIFT = s;
+        try {
+            buildFurnace(level, open);
+        } finally {
+            SHIFT = BlockPos.ZERO;
+        }
     }
 
     // ---------------------------------------------------------------- 入口 (鍛えの間からの扉)

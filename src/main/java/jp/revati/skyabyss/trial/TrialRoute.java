@@ -572,6 +572,11 @@ public final class TrialRoute {
             sync(back, group);
             return members(back, group).size();
         }
+        // 中ボスの段は、区画に中ボスの間を建てて、そのまま間の中へ (trial/raid/mid)
+        if (mid && jp.revati.skyabyss.trial.raid.RaidRun.enterMid(back, group, titan)) {
+            sync(back, group);
+            return members(back, group).size();
+        }
         TrialDraw.Draw draw = TrialData.current(back, group);
         String rest = restFor(back, group, titan, draw, step, mid);
         BlockPos at = rest == null ? null : spawnOf(back, titan, rest);

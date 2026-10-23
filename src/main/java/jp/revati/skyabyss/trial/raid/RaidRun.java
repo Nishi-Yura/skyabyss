@@ -53,21 +53,26 @@ public final class RaidRun {
     public static final int STEP_SPACING = 96;
     public static final int READY_TICKS = 60;
     public static final int HUD_EVERY = 10;
+    // 中ボスの部屋の段 (区画の中の場所は段 4。順路の記録では段 3 + keep.trial.mid)
+    public static final int MID_STEP = 4;
 
     public static final class Run {
         public final RaidRoom room;
         public final RaidCtx ctx;
         public final int step;
+        // 中ボスの部屋 (trial/raid/mid)
+        public final boolean mid;
         public Phase phase = Phase.COUNTDOWN;
         public long until;
         public int wipes;
         public RaidHudNet.Hud lastHud;
         public boolean hudOff;
 
-        Run(RaidRoom room, RaidCtx ctx, int step) {
+        Run(RaidRoom room, RaidCtx ctx, int step, boolean mid) {
             this.room = room;
             this.ctx = ctx;
             this.step = step;
+            this.mid = mid;
         }
     }
 
@@ -123,7 +128,7 @@ public final class RaidRun {
             return false;
         }
         BUILT.computeIfAbsent(group, k -> new ArrayList<>()).add(ctx.cell().bounds());
-        Run run = new Run(room, ctx, step);
+        Run run = new Run(room, ctx, step, false);
         run.until = back.getGameTime() + READY_TICKS;
         RUNS.put(group, run);
         Component name = Component.translatable(d.nameKey());
@@ -137,6 +142,61 @@ public final class RaidRun {
         sendHud(run, false);
         SkyAbyss.LOGGER.info("Raid: group {} entered room {} (step {}, slot {}, origin {})", group, d.id(), step, slot, ctx.origin().toShortString());
         return true;
+    }
+
+    // 中ボスの段: 区画の段 4 の場所に中ボスの間を建て、参加者をそのまま間の中へ運ぶ (前室を歩かない)。
+    // その巨神に中ボスの部屋がなければ false (呼ぶ側は従来どおり運ぶ)
+    public static boolean enterMid(ServerLevel back, UUID group, String titan) {
+        String id = jp.revati.skyabyss.trial.raid.mid.MidRooms.idOf(titan);
+        BackGroupData.Record r = BackGroupData.get(back).peek(group);
+        if (id == null || r == null) {
+            return false;
+        }
+        int slot = TrialSlot.of(r);
+        if (slot <= 0) {
+            slot = TrialSlot.assign(back, r);
+            r.changed();
+        }
+        if (slot <= 0) {
+            return false;
+        }
+        Run prev = RUNS.remove(group);
+        if (prev != null) {
+            safeEnd(prev);
+        }
+        RaidRoom room = jp.revati.skyabyss.trial.raid.mid.MidRooms.create(titan);
+        if (room == null) {
+            return false;
+        }
+        long seed = group.getLeastSignificantBits() ^ (back.getGameTime() * 0x9E3779B97F4A7C15L) ^ (MID_STEP * 0xC2B2AE3D27D4EB4FL);
+        RaidCtx ctx = new RaidCtx(back, group, titan, id, slot, MID_STEP, originOf(slot, MID_STEP), seed);
+        long t0 = System.nanoTime();
+        room.build(ctx);
+        if (ctx.cell() == null) {
+            SkyAbyss.LOGGER.warn("Raid mid room {} did not build a cell (RaidKit.buildCell)", id);
+            return false;
+        }
+        BUILT.computeIfAbsent(group, k -> new ArrayList<>()).add(ctx.cell().bounds());
+        Run run = new Run(room, ctx, MID_STEP, true);
+        run.until = back.getGameTime() + READY_TICKS;
+        RUNS.put(group, run);
+        TrialDraw.Draw draw = TrialData.current(back, group);
+        Component name = jp.revati.skyabyss.trial.TrialMidBoss.name(titan);
+        for (ServerPlayer p : TrialRoute.members(back, group)) {
+            TrialRoute.move(back, p, ctx.cell().rest(), 180f);
+            Notice.narrate(p, "message.skyabyss.route.mid", name);
+            RouteCard.show(p, back, group, titan, draw, 3, true);
+        }
+        sendHud(run, false);
+        SkyAbyss.LOGGER.info("Raid: group {} entered mid-boss room {} (slot {}, origin {}, built in {} ms)", group, id, slot, ctx.origin().toShortString(),
+                (System.nanoTime() - t0) / 1_000_000L);
+        return true;
+    }
+
+    // そのグループの中ボスの部屋を越えたか
+    public static boolean midCleared(UUID group) {
+        Run run = RUNS.get(group);
+        return run != null && run.mid && run.phase == Phase.COMPLETE;
     }
 
     // ---------------------------------------------------------------- tick
@@ -169,6 +229,13 @@ public final class RaidRun {
                 continue;
             }
             int step = TrialRoute.step(r);
+            if (r.getInt(TrialRoute.MID) > 0 && !TrialRoute.pending(g)) {
+                Run mr = RUNS.get(g);
+                if ((mr == null || !mr.mid) && !TrialRoute.members(level, g).isEmpty()) {
+                    enterMid(level, g, titan);
+                }
+                continue;
+            }
             if (step < 1 || step >= TrialRoute.LAST_STEP || r.getInt(TrialRoute.MID) > 0 || TrialRoute.pending(g)) {
                 continue;
             }
@@ -273,6 +340,11 @@ public final class RaidRun {
         ctx.clearMobs();
         RaidKit.setGate(ctx, ctx.cell().exitGate(), true);
         sendHud(run, true);
+        if (run.mid) {
+            SkyAbyss.LOGGER.info("Raid: mid-boss room {} cleared by group {} (wipes {})", ctx.roomId(), ctx.group(), run.wipes);
+            TrialRoute.onMidBossDefeated(ctx.level(), ctx.group(), ctx.titan());
+            return;
+        }
         TrialDraw.Draw draw = TrialData.current(ctx.level(), ctx.group());
         String key = TrialRoute.keyOf(ctx.titan(), draw, run.step);
         for (ServerPlayer p : ctx.players()) {

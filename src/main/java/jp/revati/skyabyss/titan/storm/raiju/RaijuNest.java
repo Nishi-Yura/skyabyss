@@ -63,8 +63,8 @@ public final class RaijuNest {
     public static final int PLUG_WAIT = 80;
 
     // 柱ごとの「栓をまた引ける時刻」と、最後に描いた接地の状態
-    private static final Map<Integer, Long> READY_AT = new HashMap<>();
-    private static final Map<Integer, Boolean> SHOWN = new HashMap<>();
+    private static final Map<BlockPos, Long> READY_AT = new HashMap<>();
+    private static final Map<BlockPos, Boolean> SHOWN = new HashMap<>();
 
     // 巣の場所 (背中の storm_back)。center は StormBackLayout.RAIJU_NEST (床のブロックの高さ)
     public record Site(ServerLevel level, BlockPos center) {
@@ -240,8 +240,8 @@ public final class RaijuNest {
             StormBackBuilder.build(level, TitanBackData.get(level));
         }
         state.markBuilt(LAYOUT_VERSION);
-        READY_AT.clear();
         for (int i = 0; i < RODS; i++) {
+            READY_AT.remove(site.rod(i));
             BlockPos rod = site.rod(i);
             StormRods.register(level, rod);
             StormRods.charge(level, rod, StormRods.FULL);
@@ -305,7 +305,7 @@ public final class RaijuNest {
             }
             return false;
         }
-        long ready = READY_AT.getOrDefault(i, 0L);
+        long ready = READY_AT.getOrDefault(rod, 0L);
         if (now < ready) {
             if (player != null) {
                 Notice.bar(player, ModText.deny("message.skyabyss.raiju.plug_wait", (ready - now + 19) / 20));
@@ -313,7 +313,7 @@ public final class RaijuNest {
             return false;
         }
         StormRods.ground(rod, GROUND_TICKS);
-        READY_AT.put(i, now + GROUND_TICKS + PLUG_WAIT);
+        READY_AT.put(rod, now + GROUND_TICKS + PLUG_WAIT);
         show(site, i, true);
         BlockPos top = site.rodTop(i);
         level.playSound(null, rod, RaijuSetup.GROUND.get(), SoundSource.BLOCKS, 1.4f, 1f);
@@ -325,7 +325,7 @@ public final class RaijuNest {
     }
 
     // 接地の見た目: 柱の段の電球 3 つを消し、栓を倒す (戻ると灯り、栓が起きる)
-    private static void show(Site site, int i, boolean grounded) {
+    public static void show(Site site, int i, boolean grounded) {
         ServerLevel level = site.level();
         BlockPos b = site.rodBase(i);
         for (int k = 1; k <= 3; k++) {
@@ -340,7 +340,7 @@ public final class RaijuNest {
         if (lever.is(jp.revati.skyabyss.registry.ModBlocks.RELIC_LEVER.get()) && lever.getValue(LeverBlock.POWERED) != grounded) {
             level.setBlock(plug, lever.setValue(LeverBlock.POWERED, grounded), 2);
         }
-        SHOWN.put(i, grounded);
+        SHOWN.put(site.rod(i), grounded);
     }
 
     // 5 tick ごと: 接地が切れた柱の見た目を戻す。灯っている柱の先に小さな火花
@@ -349,7 +349,7 @@ public final class RaijuNest {
         for (int i = 0; i < RODS; i++) {
             BlockPos top = site.rodTop(i);
             boolean g = StormRods.isGrounded(site.rod(i));
-            if (SHOWN.getOrDefault(i, false) != g) {
+            if (SHOWN.getOrDefault(site.rod(i), false) != g) {
                 show(site, i, g);
                 if (!g) {
                     level.playSound(null, top, net.minecraft.sounds.SoundEvents.COPPER_BULB_TURN_ON, SoundSource.BLOCKS, 1.2f, 1.2f);
