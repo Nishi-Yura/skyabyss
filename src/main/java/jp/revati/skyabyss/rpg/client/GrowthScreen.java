@@ -339,14 +339,14 @@ public class GrowthScreen extends Screen implements jp.revati.skyabyss.client.ui
             if (mouseX >= left + 8 && mouseX < left + 196 && mouseY >= ry && mouseY < ry + ROW_H - 2) {
                 List<FormattedCharSequence> lines = new ArrayList<>();
                 lines.add(Component.translatable(stat.nameKey()).withColor(GOLD).getVisualOrderText());
-                lines.addAll(font.split(Component.translatable("gui.skyabyss.growth.desc." + stat.id), 200));
-                lines.addAll(font.split(Component.translatable("gui.skyabyss.growth.cap", GrowthRules.STAT_CAP).withColor(SOFT), 200));
+                lines.addAll(jp.revati.skyabyss.client.ui.JpWrap.split(font, Component.translatable("gui.skyabyss.growth.desc." + stat.id), 200));
+                lines.addAll(jp.revati.skyabyss.client.ui.JpWrap.split(font, Component.translatable("gui.skyabyss.growth.cap", GrowthRules.STAT_CAP).withColor(SOFT), 200));
                 tip(lines);
                 return;
             }
         }
         if (mouseX >= left + 8 && mouseX < left + 130 && mouseY >= top + 162 && mouseY < top + 176) {
-            List<FormattedCharSequence> lines = new ArrayList<>(font.split(Component.translatable("gui.skyabyss.growth.fragments_desc"), 200));
+            List<FormattedCharSequence> lines = new ArrayList<>(jp.revati.skyabyss.client.ui.JpWrap.split(font, Component.translatable("gui.skyabyss.growth.fragments_desc"), 200));
             d.fragments.forEach((id, n) -> lines.add(Component.translatable(jp.revati.skyabyss.rpg.MemoryFragments.nameKey(id))
                     .append(" ×" + n).withColor(LORE).getVisualOrderText()));
             tip(lines);

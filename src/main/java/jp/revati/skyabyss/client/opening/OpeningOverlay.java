@@ -88,14 +88,15 @@ public final class OpeningOverlay {
             }
         }
         Font font = mc.font;
-        // 題字: バニラのフォントを大きく描き、青緑のかすかな光が呼吸する (lang の opening.skyabyss.title / title_sub。言語ごとに文が変わる)
+        // 題字: 題字の字 (ModFont) を大きく描き、青緑のかすかな光が呼吸する (lang の opening.skyabyss.title / title_sub。言語ごとに文が変わる)
         float title = textAlpha(t, 130f, 230f, 300f, 350f);
         if (title > 0.02f) {
-            Component main = Component.translatable("opening.skyabyss.title");
-            Component sub = Component.translatable("opening.skyabyss.title_sub");
             // 浮かび上がる: 少し下から上がる
             float rise = 1f - smooth((t - 130f) / 120f);
             float big = Mth.clamp(h / 270f, 1f, 2f);
+            // 題字の字 (mod の字のパックが外れているときはバニラの字)
+            Component main = jp.revati.skyabyss.client.ui.ModFont.title(Component.translatable("opening.skyabyss.title"), TextStyle.TITLE.scale() * big);
+            Component sub = jp.revati.skyabyss.client.ui.ModFont.title(Component.translatable("opening.skyabyss.title_sub"), TextStyle.HEADING.scale() * big * 0.8f);
             float mainH = TextStyle.TITLE.lineHeight() * big;
             float y = h * 0.30f - mainH * 0.5f + rise * 6f;
             // 明るい空でも読めるよう、題字のまわりをうっすら暗くする

@@ -334,7 +334,7 @@ public class TradeScreen extends Screen {
                 : Component.translatable("gui.skyabyss.trade.hint." + TABS[tab] + (tab == 1 && offerFor >= 0 ? "_offer" : ""));
         int footW = tab == 2 ? W - 120 : tab == 1 || tab == 4 ? W - 130 : W - 24;
         int fx = tab == 2 ? x0 + 108 : x0 + 12;
-        List<net.minecraft.util.FormattedCharSequence> lines = font.split(foot, footW);
+        List<net.minecraft.util.FormattedCharSequence> lines = jp.revati.skyabyss.client.ui.JpWrap.split(font, foot, footW);
         for (int i = 0; i < lines.size() && i < 2; i++) {
             g.drawString(font, lines.get(i), fx, y0 + H - 25 + i * 9, !view.atKeeper() && (tab == 0 || tab == 1) ? FacilityUi.LACK : FacilityUi.DIM, false);
         }

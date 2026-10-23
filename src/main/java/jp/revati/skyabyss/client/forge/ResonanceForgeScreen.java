@@ -668,7 +668,7 @@ public class ResonanceForgeScreen extends AbstractContainerScreen<ResonanceForge
 
     // 決めた幅で折り返し、決めた行数まで描く
     private void drawWrapped(GuiGraphics g, Component text, int x, int y, int width, int maxLines, int color) {
-        List<FormattedCharSequence> lines = font.split(text, width);
+        List<FormattedCharSequence> lines = jp.revati.skyabyss.client.ui.JpWrap.split(font, text, width);
         for (int i = 0; i < Math.min(maxLines, lines.size()); i++) {
             g.drawString(font, lines.get(i), x, y + i * 9, color, false);
         }

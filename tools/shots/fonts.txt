@@ -1,0 +1,60 @@
+# mod の字 (DotGothic16・Zen Antique) の見え方。GUI 2 と 3 で、知らせ・章の題字・余韻・クエストログ・チャット
+# SKYABYSS_FONT=on bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/fonts.txt -PshotsName=fonts
+world shots flat
+size 1280 720
+timeout 400
+render 8
+clouds off
+
+cmd time set noon
+cmd weather clear
+cmd gamemode creative
+hud on
+wait 100
+cmd skyabyss cinematic stop
+waitscreen 900 none
+wait 60
+waitchunks
+chat clear
+wait 20
+
+guiscale 2
+cmd skyabyss dev notice narrate message.skyabyss.raid_lore.WR1.1
+cmd skyabyss dev notice hint message.skyabyss.whisper.plaza
+cmd skyabyss dev notice gain message.skyabyss.boss_reward
+cmd skyabyss dev notice place message.skyabyss.memory_title_stone_whale message.skyabyss.heart_begin
+cmd say The quick brown fox 0123456789 HP 120/150
+wait 45
+shot fonts_notices_gui2
+wait 200
+cmd skyabyss dev arc card titan_whale
+wait 90
+shot fonts_chapter_gui2
+wait 220
+cmd skyabyss dev arc aftermath titan_whale
+wait 60
+shot fonts_aftermath_gui2
+wait 200
+
+guiscale 3
+cmd skyabyss dev notice narrate message.skyabyss.raid_lore.WR2.2
+cmd skyabyss dev notice place message.skyabyss.memory_title_stone_whale message.skyabyss.heart_begin
+wait 45
+shot fonts_notices_gui3
+wait 200
+cmd skyabyss dev arc card titan_storm
+wait 90
+shot fonts_chapter_gui3
+wait 200
+
+guiscale 2
+open quests
+wait 20
+shot fonts_quests_gui2
+close
+guiscale 3
+open quests
+wait 20
+shot fonts_quests_gui3
+close
+echo done

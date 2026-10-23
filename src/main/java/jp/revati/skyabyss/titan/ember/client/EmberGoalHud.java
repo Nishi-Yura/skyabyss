@@ -60,7 +60,7 @@ public final class EmberGoalHud {
         if (goal.id().isEmpty()) {
             return 0;
         }
-        int lines = Math.min(5, mc.font.split(body(), w - 10).size());
+        int lines = Math.min(5, jp.revati.skyabyss.client.ui.JpWrap.split(mc.font, body(), w - 10).size());
         return 6 + 11 + lines * 10;
     }
 
@@ -86,7 +86,7 @@ public final class EmberGoalHud {
             g.fill(dx, y + 5, dx + 5, y + 10, i < goal.done() ? 0xFFFFA048 : 0xFF3A2A24);
         }
         int ty = y + 4 + 11;
-        var lines = mc.font.split(body(), w - 10);
+        var lines = jp.revati.skyabyss.client.ui.JpWrap.split(mc.font, body(), w - 10);
         for (int i = 0; i < Math.min(5, lines.size()); i++) {
             g.drawString(mc.font, lines.get(i), x + 5, ty + i * 10, 0xFFF4E8DC, true);
         }

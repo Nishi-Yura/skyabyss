@@ -240,7 +240,7 @@ public final class CardFeed {
     // 本文は見出しの右に一行 (長い文は終わりを「…」で切る。全文は N の知らせの記録)
     private static List<FormattedCharSequence> lines(Font font, Entry e, int w) {
         int room = Math.max(40, w - font.width(e.head.getString()) - 14 - 12);
-        List<FormattedCharSequence> l = font.split(e.body, room);
+        List<FormattedCharSequence> l = jp.revati.skyabyss.client.ui.JpWrap.split(font, e.body, room);
         if (l.size() <= 2) {
             return l.isEmpty() ? List.of(FormattedCharSequence.EMPTY) : l;
         }

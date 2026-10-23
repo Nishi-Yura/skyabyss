@@ -170,8 +170,8 @@ public class HeartRewardScreen extends Screen {
             net.minecraft.resources.ResourceLocation key = net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(item);
             String base = "item." + key.getNamespace() + "." + key.getPath();
             net.minecraft.locale.Language lang = net.minecraft.locale.Language.getInstance();
-            List<FormattedCharSequence> effect = lang.has(base + ".desc") ? font.split(Component.translatable(base + ".desc"), width) : List.of();
-            List<FormattedCharSequence> story = lang.has(base + ".story") ? font.split(Component.translatable(base + ".story"), width) : List.of();
+            List<FormattedCharSequence> effect = lang.has(base + ".desc") ? jp.revati.skyabyss.client.ui.JpWrap.split(font, Component.translatable(base + ".desc"), width) : List.of();
+            List<FormattedCharSequence> story = lang.has(base + ".story") ? jp.revati.skyabyss.client.ui.JpWrap.split(font, Component.translatable(base + ".story"), width) : List.of();
             int required = GearLevel.required(stack);
             boolean levelOk = player == null || GearLevel.meets(player, stack);
             boolean owned = (ownedMask & (1 << i)) != 0;
@@ -820,7 +820,7 @@ public class HeartRewardScreen extends Screen {
             Component sub = Component.translatable("skyabyss_reward.sub." + titan);
             int ly = ly0 + 7;
             int lines = 0;
-            for (FormattedCharSequence line : font.split(sub, panelW() - 40)) {
+            for (FormattedCharSequence line : jp.revati.skyabyss.client.ui.JpWrap.split(font, sub, panelW() - 40)) {
                 TextStyle.BODY.drawCentered(g, font, line, cx, ly, a * 0.85f, 0xC8D0D8);
                 ly += 11;
                 if (++lines >= (mode == 0 ? 2 : 1)) {
@@ -885,7 +885,7 @@ public class HeartRewardScreen extends Screen {
         }
         // 名前 (階級の色)
         int innerW = w - 14;
-        for (FormattedCharSequence line2 : jp.revati.skyabyss.client.ui.TextClip.limit(font, font.split(c.name(), innerW), innerW, 2)) {
+        for (FormattedCharSequence line2 : jp.revati.skyabyss.client.ui.TextClip.limit(font, jp.revati.skyabyss.client.ui.JpWrap.split(font, c.name(), innerW), innerW, 2)) {
             TextStyle.BODY.drawCentered(g, font, line2, cx, ty, alpha, 0xFFFFFF);
             ty += 11;
         }
@@ -922,7 +922,7 @@ public class HeartRewardScreen extends Screen {
         if (ty + 10 <= y + h - 4) {
             g.fill(x + 8, ty - 1, x + w - 8, ty, argb(alpha * 0.5f, 0x3A4252));
             ty += 3;
-            for (FormattedCharSequence line2 : font.split(c.equippedLine(), innerW)) {
+            for (FormattedCharSequence line2 : jp.revati.skyabyss.client.ui.JpWrap.split(font, c.equippedLine(), innerW)) {
                 g.drawString(font, line2, x + 7, ty, argb(alpha * 0.9f, TEAL), false);
                 ty += 10;
                 break;
@@ -1018,13 +1018,13 @@ public class HeartRewardScreen extends Screen {
         }
         int cx = x + r[2] / 2;
         int ty = y + 10;
-        for (FormattedCharSequence line : font.split(head, r[2] - 24)) {
+        for (FormattedCharSequence line : jp.revati.skyabyss.client.ui.JpWrap.split(font, head, r[2] - 24)) {
             TextStyle.HEADING.drawCentered(g, font, line, cx, ty, a, 0xFFFFFF);
             ty += TextStyle.HEADING.lineHeight() - 2;
             break;
         }
         ty += 6;
-        for (FormattedCharSequence line : jp.revati.skyabyss.client.ui.TextClip.limit(font, font.split(body, r[2] - 28), r[2] - 28, Math.max(1, (y + r[3] - 30 - ty) / 10))) {
+        for (FormattedCharSequence line : jp.revati.skyabyss.client.ui.TextClip.limit(font, jp.revati.skyabyss.client.ui.JpWrap.split(font, body, r[2] - 28), r[2] - 28, Math.max(1, (y + r[3] - 30 - ty) / 10))) {
             TextStyle.BODY.drawCentered(g, font, line, cx, ty, a * 0.85f, 0xC8D0D8);
             ty += 10;
         }

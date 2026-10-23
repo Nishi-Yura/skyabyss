@@ -339,7 +339,7 @@ public class SoulScreen extends Screen implements jp.revati.skyabyss.client.ui.T
     }
 
     private int line(GuiGraphics g, int x, int y, int w, int color, Component text) {
-        for (FormattedCharSequence part : font.split(text, w)) {
+        for (FormattedCharSequence part : jp.revati.skyabyss.client.ui.JpWrap.split(font, text, w)) {
             g.drawString(font, part, x, y, color, false);
             y += 9;
         }

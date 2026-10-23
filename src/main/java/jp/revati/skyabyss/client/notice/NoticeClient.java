@@ -6,6 +6,7 @@ import jp.revati.skyabyss.hud.HudLayout.Rect;
 import jp.revati.skyabyss.hud.HudLayout.Region;
 import jp.revati.skyabyss.hud.HudLayout.Request;
 import jp.revati.skyabyss.hud.HudLayout.Size;
+import jp.revati.skyabyss.client.ui.ModFont;
 import jp.revati.skyabyss.client.ui.TextStyle;
 import java.util.List;
 
@@ -178,7 +179,11 @@ public final class NoticeClient {
             });
             case BANNER -> {
                 BANNER.setSpeed(speed);
-                BANNER.offer(new Line(body, payload.extra()), kind, key, key.length());
+                // 場所の名前・章の題字・余韻の一言は題字の字で (章の題字は副題も)
+                boolean big = kind == Notice.Kind.PLACE || kind == Notice.Kind.CHAPTER || kind == Notice.Kind.AFTERMATH;
+                Component text = big ? ModFont.title(body, kind == Notice.Kind.CHAPTER ? TextStyle.TITLE.scale() : TextStyle.HEADING.scale()) : body;
+                Component extra = kind == Notice.Kind.CHAPTER ? ModFont.title(payload.extra(), CARD_SUB_SCALE) : payload.extra();
+                BANNER.offer(new Line(text, extra), kind, key, key.length());
                 if (kind == Notice.Kind.CHAPTER) {
                     chime(mc, 0.7f, 0.5f);
                 }
@@ -319,7 +324,7 @@ public final class NoticeClient {
         if (wrap < 100 || maxLines < 1) {
             return null;
         }
-        List<FormattedCharSequence> lines = font.split(text, wrap);
+        List<FormattedCharSequence> lines = jp.revati.skyabyss.client.ui.JpWrap.split(font, text, wrap);
         if (lines.size() > maxLines) {
             lines = lines.subList(0, maxLines);
         }
@@ -338,7 +343,7 @@ public final class NoticeClient {
         if (wrap < 40) {
             return null;
         }
-        List<FormattedCharSequence> lines = font.split(text, wrap);
+        List<FormattedCharSequence> lines = jp.revati.skyabyss.client.ui.JpWrap.split(font, text, wrap);
         int maxLines = Mth.clamp((maxH - 10) / 11, 0, 2);
         if (maxLines < 1) {
             return null;
@@ -372,7 +377,7 @@ public final class NoticeClient {
         if (wrapPx < 40) {
             return null;
         }
-        List<FormattedCharSequence> lines = font.split(text, (int) (wrapPx / scale));
+        List<FormattedCharSequence> lines = jp.revati.skyabyss.client.ui.JpWrap.split(font, text, (int) (wrapPx / scale));
         int maxLines = chapter ? (title ? 1 : 3) : 2;
         if (lines.size() > maxLines) {
             lines = lines.subList(0, maxLines);
@@ -390,7 +395,7 @@ public final class NoticeClient {
             if (title) {
                 // 章の題字の札 (飾り枠つき): 章の番号の行・題名 (TITLE の拡大)・区切り線・副題。高さは CARD_H で固定
                 String[] parts = splitLabel(text.getString());
-                int nameW = (int) (font.width(parts[1]) * scale);
+                int nameW = (int) (font.width(ModFont.title(parts[1], scale)) * scale);
                 int subW = (int) (font.width(sub) * CARD_SUB_SCALE);
                 w = Math.min(maxW, Math.round(Math.max(200, Math.max(nameW, subW) + 90) * k));
                 h = Math.round(CARD_H * k);
@@ -404,7 +409,7 @@ public final class NoticeClient {
             w = blockW + 48;
             h = blockH + 4 + 2;
             if (place && !sub.getString().isEmpty()) {
-                List<FormattedCharSequence> sl = font.split(sub, Math.min(Math.min(guiW - 30, 340), maxW - 8));
+                List<FormattedCharSequence> sl = jp.revati.skyabyss.client.ui.JpWrap.split(font, sub, Math.min(Math.min(guiW - 30, 340), maxW - 8));
                 subLines = sl.subList(0, Math.min(2, sl.size()));
                 int sw = 0;
                 for (FormattedCharSequence l : subLines) {
@@ -613,9 +618,10 @@ public final class NoticeClient {
         float t1 = smooth((age - 250) / 500f);
         if (!parts[0].isEmpty() && t1 > 0f) {
             int na = Mth.clamp((int) (a * t1 * 255), 4, 255) << 24;
-            int nw = font.width(parts[0]);
+            Component num = ModFont.title(parts[0], 1f);
+            int nw = font.width(num);
             int ny = y0 + 9;
-            g.drawString(font, parts[0], cx - nw / 2, ny, na | 0xD9C48A, true);
+            g.drawString(font, num, cx - nw / 2, ny, na | 0xD9C48A, true);
             int arm = (int) (t1 * Math.max(0, Math.min(60, (w - nw) / 2 - 24)));
             int lc = ((int) (a * t1 * 0xB0) << 24) | 0xB8923A;
             g.fill(cx - nw / 2 - 6 - arm, ny + 4, cx - nw / 2 - 6, ny + 5, lc);
@@ -624,12 +630,13 @@ public final class NoticeClient {
         // 題名: 一文字ずつ、少し遅れて、下から浮かぶ
         float ns = TextStyle.TITLE.scale();
         String name = parts[1];
-        int nx = cx - (int) (font.width(name) * ns) / 2;
+        int nx = cx - (int) (font.width(ModFont.title(name, ns)) * ns) / 2;
         int ny = y0 + 22;
         int off = 0;
         for (int i = 0; i < name.length(); ) {
             int cp = name.codePointAt(i);
-            String ch = new String(Character.toChars(cp));
+            String s = new String(Character.toChars(cp));
+            Component ch = ModFont.title(s, ns);
             float t = smooth((age - 700 - i * 150L) / 420f);
             if (t > 0f) {
                 g.pose().pushPose();
@@ -639,7 +646,7 @@ public final class NoticeClient {
                 g.pose().popPose();
             }
             off += font.width(ch);
-            i += ch.length();
+            i += s.length();
         }
         long nameEnd = 700 + name.length() * 150L + 420;
         // 区切り線: 題名が現れきるころ、中央から左右へ
