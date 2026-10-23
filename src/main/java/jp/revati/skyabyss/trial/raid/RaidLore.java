@@ -26,6 +26,9 @@ public final class RaidLore {
             Map.entry("SR1", "sign.skyabyss.lore_storm_west"),
             Map.entry("SR2", "sign.skyabyss.lore_storm_east"),
             Map.entry("SR3", "sign.skyabyss.lore_storm_tail"),
+            Map.entry("SR4", "sign.skyabyss.lore_storm_column"),
+            Map.entry("SR5", "sign.skyabyss.lore_storm_beat"),
+            Map.entry("SR6", "sign.skyabyss.lore_storm_gale"),
             Map.entry("ER1", "sign.skyabyss.lore_ember_west"),
             Map.entry("ER2", "sign.skyabyss.lore_ember_east"),
             Map.entry("ER3", "sign.skyabyss.lore_ember_south"));
