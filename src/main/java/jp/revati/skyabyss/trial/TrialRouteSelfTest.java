@@ -29,12 +29,11 @@ import jp.revati.skyabyss.trial.Trial.Def;
 import jp.revati.skyabyss.trial.Trial.Mods;
 
 // 順路 (docs/design/32 の 2 章・5 章) の自己テスト。段の名前は "trial route"。
-//  - 形: 四体とも、周回 1 の引きが原型の三つ (歩・智・闘、鍵が違う)、全部の試練に入口の休み場、中ボスの原型と前室、入口の箱
-//  - 初回の流れ (背が建ててある巨神): 入口に立つ → 予告のあと段 1 へ → 越えるたびに次の段の入口へ → 三つで心臓の前室。
-//    別のグループの人は動かない。越えた順が前後しても段は戻らない。途中で入口に立っても始め直さない。ほかのグループの初回の順路が
-//    動いていても待たない (部屋は区画ごとに別)。周回のグループは入口では始まらない (祠から)
-//  - 周回の流れ: 引いた三つ (新作を含む) の入口の休み場へ運ばれ、今の段のセルの戸だけが開く。中ボスの原型を引いていない周は
-//    闘のあと中ボスの前室へ、倒すと心臓の前室へ。二つのグループは別の区画の番号で同時に進み、終えると番号が返る
+//  - 形: 四体とも、周回 1 の引きが歩・智・闘のレイドの部屋 (鍵が違う)、中ボスの段、心臓の休み場、到着の台の入口の箱
+//  - 初回の流れ (到着の台に立てる巨神): 台に立つ → 予告のあと部屋 1 の中へ → 越えるたびに次の部屋の中へ → 中ボスの間 → 心臓の間の中。
+//    別のグループの人は動かない。越えた順が前後しても段は戻らない。途中で台に立っても始め直さない。ほかのグループの初回の順路が
+//    動いていても待たない (部屋は区画ごとに別)。周回のグループは台では始まらない (祠から)
+//  - 周回の流れ: 引いた三つの部屋の中へ運ばれ、三つ目のあと中ボスの間、倒すと心臓の間の中へ。二つのグループは別の区画の番号で同時に進み、終えると番号が返る
 //  - あきらめ (一人は提案で成立)・参加者がいなくなったとき・心臓を止めたときに順路が終わる。心臓で順路の記録 (回数) が増える
 public final class TrialRouteSelfTest {
     private TrialRouteSelfTest() {
@@ -479,21 +478,6 @@ public final class TrialRouteSelfTest {
                     Def cur = TrialRoute.defOf(draw, step);
                     check(f, near(a, back, titan, draw, step, false), titan + " cycle " + cycle + ": not at step " + step + " (" + (cur == null ? "-" : cur.id()) + ") rest "
                             + TrialRoute.restOf(titan, draw, step, false) + ": " + a.position());
-                    // 今の段のセルの戸だけが開いている
-                    TrialRuntime.syncGates(back, ga, titan, draw);
-                    for (TrialCell c : TrialCells.of(titan)) {
-                        if (c.ports().entrance().isEmpty() || !TrialCatalog.deckPlaced(titan)) {
-                            continue;
-                        }
-                        // 区画の写しで遊ぶセルは写しの戸が開き、手本の戸は閉じたまま
-                        boolean want = cur != null && c.def().id().equals(cur.id());
-                        TrialFrame cf = TrialSlot.frameOf(back, ga, c);
-                        boolean open = GroupGates.isOpen(back, ga, cf.at(c.ports().entrance()));
-                        check(f, open == want, titan + " cycle " + cycle + " step " + step + ": the gate of " + c.def().id() + " is " + (open ? "open" : "closed"));
-                        if (!cf.isZero()) {
-                            check(f, !GroupGates.isOpen(back, ga, c.ports().entrance()), titan + " cycle " + cycle + ": the template gate of " + c.def().id() + " opened");
-                        }
-                    }
                     TrialRoute.onCleared(back, ga, titan, TrialRoute.keyOf(titan, draw, step), null);
                     TrialRoute.flushPending();
                     TrialRoute.tick(back, titan, players, now + 1);

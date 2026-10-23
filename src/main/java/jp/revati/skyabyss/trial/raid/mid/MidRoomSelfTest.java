@@ -140,6 +140,11 @@ public final class MidRoomSelfTest {
     @SuppressWarnings("unused")
     private static boolean step() {
         RaidRun.Run run = RaidRun.of(group);
+        // 偽の人は避けない。体力を毎 tick 戻す (中ボスの技で全滅して準備に戻らないように。全滅の決まりは潮殻の段で直に見る)
+        if (player != null) {
+            player.setHealth(player.getMaxHealth());
+            player.getFoodData().setFoodLevel(20);
+        }
         switch (stage) {
             case 0 -> {
                 TrialRoute.start(back, group, titan, List.of(player));
