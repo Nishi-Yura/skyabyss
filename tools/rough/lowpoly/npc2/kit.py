@@ -301,7 +301,8 @@ def build_hair(c):
         return []
     style = h.get("style", "short")
     F = []
-    if style != "bald":
+    covered = (c.get("hat") or {}).get("kind") in ("kerchief", "hood", "helmet")   # 布や兜の下の髪の殻は見えないので作らない
+    if style != "bald" and not covered:
         F += hair_shell(c, h)
     else:
         # 禿げ: 耳の上から後ろへの帯だけ
@@ -432,7 +433,7 @@ def build_hat(c):
     m = h.get("mat", "hat")
     F = []
     if kind == "band":
-        F += part("band", shell("head", m, hs, lambda a: 26.9, 28.0, 0.45, top_off=0.45, n=16, rows=1))
+        F += part("band", shell("head", m, hs, lambda a: 27.45, 28.45, 0.62, top_off=0.62, n=16, rows=1))
         F = [f for f in F if f.verts[:, 1].max() < 28.1 or True]
         # 後ろの結び目と垂れ
         F += part("band_knot", ellipsoid("hairB", m, (0.0, 27.5, 4.35), (0.9, 0.7, 0.55), segs=5, rings=1))
@@ -444,6 +445,9 @@ def build_hat(c):
             t = abs((a + 180) % 360 - 180) / 180
             return 27.6 - 1.6 * t if t < 0.6 else 26.6 - 3.0 * (t - 0.6)
         F += part("kerchief", shell("head", m, hs, y_of, hs[-1][0] + 0.2, 0.6, top_off=0.95, n=16, rows=4))
+        # 額の前の折り返し (布の縁の厚み)
+        rim = [surf(hs, y_of(a) + 0.25, a, 0.78) for a in np.linspace(-110, 110, 11)]
+        F += part("k_rim", tube("head", "hatd", rim, 0.4, sides=4, caps=(True, True), hint=(0, 1, 0)))
         F += part("k_knot", ellipsoid("hairB", m, (0.0, 25.3, 4.25), (1.1, 0.8, 0.7), segs=6, rings=2))
         for s in (-1, 1):
             F += part(f"k_tail{s}", tube("hairB", m, [V(s * 0.4, 25.0, 4.3), V(s * 1.2, 23.4, 4.6), V(s * 1.5, 22.3, 4.4)],
@@ -859,6 +863,18 @@ def face_paint(c, ctx, col, glow):
         col = np.where(sh[..., None], col * 0.86, col)
     neck = owned & (ctx["bones"] == "head") & (ctx["mats"] == "skin") & (P[..., 1] < 21.4)
     col = np.where(neck[..., None], col * 0.8, col)
+    # 髪の毛筋 (頭頂から放射に下りる暗い筋) と、頭の上の照り (途切れた明るい帯)
+    hm = owned & np.isin(ctx["mats"], ["hair", "beard"]) & np.isin(ctx["bones"], ["head", "hairB"])
+    if hm.any():
+        ang = np.degrees(np.arctan2(P[..., 0], -(P[..., 2] + 0.2)))
+        wav = 0.35 * np.sin(P[..., 1] * 1.4 + ang * 0.05)
+        sfr = np.mod(ang / 11.0 + wav, 1.0)
+        strand = hm & (sfr < 0.2)
+        col = np.where(strand[..., None], col * 0.78, col)
+        top = max((y for (y, _, _, _) in c["_hs"]), default=29.7)
+        band = hm & (ctx["bones"] == "head") & (P[..., 1] > top - 2.9) & (P[..., 1] < top - 1.7) & (N[..., 1] > -0.2) & \
+            (np.mod(ang / 11.0 + 0.5, 1.0) > 0.25) & (hash1(np.floor(ang / 11.0) * 3 + 17, 4) > 0.25)
+        col = np.where(band[..., None], np.clip(col * 1.22 + 14, 0, 255), col)
 
     def put(pat, ax0, ty0, side=0):
         nonlocal col
@@ -946,8 +962,7 @@ def palette(c):
     p = c["pal"]
     mats = {
         "skin": dict(ramp=skin_ramp(p["skin"]), base=0.86, lit=0.10, noise=0.0, facevar=0.0, crack=0, min=1, streak=0.0, ao=0.03),
-        "hair": dict(ramp=ramp(p["hair"], 5, 0.4, 1.35), base=0.58, lit=0.34, noise=0.06, facevar=0.05, crack=0, min=0, streak=0.0,
-                     stripe=2, axis="u", ao=0.02),
+        "hair": dict(ramp=ramp(p["hair"], 5, 0.4, 1.35), base=0.58, lit=0.34, noise=0.06, facevar=0.05, crack=0, min=0, streak=0.0, ao=0.02),
         "beard": dict(ramp=ramp(p.get("beard", p["hair"]), 5, 0.42, 1.3), base=0.6, lit=0.3, noise=0.08, facevar=0.05, crack=0, min=0,
                       streak=0.0, stripe=2, axis="v", ao=0.0),
         "brow": dict(ramp=ramp(p.get("beard", p["hair"]), 4, 0.5, 1.2), base=0.6, lit=0.25, noise=0.0, crack=0, min=0, ao=0.0),
@@ -972,6 +987,7 @@ def palette(c):
         "metal2": dict(ramp=ramp(p.get("metal2", (120, 124, 132)), 5, 0.4, 1.4), base=0.58, lit=0.4, noise=0.04, facevar=0.06, crack=0, min=0),
         "hat": cloth(p.get("hat", p["coat"])),
         "hat2": cloth(p.get("hat2", p.get("trim", (60, 46, 34))), stripe=2, axis="u"),
+        "hatd": cloth(tuple(int(x * 0.82) for x in p.get("hat", p["coat"])), stripe=2, axis="u"),
         "glove": cloth(p.get("glove", (96, 70, 48)), base=0.52, lit=0.3),
         "feather": cloth(p.get("feather", (220, 214, 200)), stripe=2, axis="v"),
         "cord": cloth(p.get("cord", (140, 110, 70)), stripe=2, axis="u"),
