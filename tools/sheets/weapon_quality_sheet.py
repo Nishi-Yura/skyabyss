@@ -10,6 +10,8 @@ from PIL import Image, ImageDraw, ImageFont
 ROOT = Path(__file__).resolve().parents[2]
 NAME = sys.argv[1] if len(sys.argv) > 1 else "weapon_quality"
 D = ROOT / f"run/shots/{NAME}/shots/{NAME}"
+if not D.exists():  # 撮ったあとで外の名前を変えたとき (例: weapon_quality_before) は中の唯一のフォルダ
+    D = next((ROOT / f"run/shots/{NAME}/shots").iterdir())
 OUT = Path(sys.argv[2]) if len(sys.argv) > 2 else ROOT / "docs/review/weapon_quality"
 sys.path.insert(0, str(ROOT / "tools/gen/shots"))
 from gen_weapon_quality_shots import MELEE, BOWS  # noqa: E402
