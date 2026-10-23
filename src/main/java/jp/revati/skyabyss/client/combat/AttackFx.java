@@ -247,7 +247,7 @@ public final class AttackFx {
             double p = Math.min(1.0, (double) (t - d.warn) / d.active);
             during(level, d, look, d.shape.at(p));
         } else if (t < d.warn + 3 && look.travel == AttackLook.Travel.BEAM) {
-            beam(level, d, look, 0.6);
+            beam(level, d, look, d.shape.at(1.0), 0.6);
         }
     }
 
@@ -485,10 +485,10 @@ public final class AttackFx {
                     level.addParticle(r.nextInt(3) == 0 ? puff(el, r) : debris(el, r), q[0], y + 0.2, q[1], 0, wave ? 0.22 : 0.1, 0);
                 }
                 if (!wave) {
-                    beam(level, d, look, 0.25);
+                    beam(level, d, look, now, 0.25);
                 }
             }
-            case BEAM -> beam(level, d, look, 0.5);
+            case BEAM -> beam(level, d, look, now, 0.5);
             default -> {
                 // 続く技 (active) は、形の中で湧く
                 double[] q = inside(now, r);
@@ -500,14 +500,14 @@ public final class AttackFx {
     }
 
     // 技の元から帯の先へ
-    private static void beam(ClientLevel level, TelegraphClient.Decal d, AttackLook look, double density) {
+    private static void beam(ClientLevel level, TelegraphClient.Decal d, AttackLook look, TelegraphShape now, double density) {
         RandomSource r = level.random;
         AttackLook.Element el = look.element;
         double[][] ax;
         if (d.shape.kind() == TelegraphShape.KIND_SWEEP) {
             // 振り回しの帯: 元から、いまの帯の先端へ
             double[] src = source(level, d);
-            List<double[]> o = outline(d.shape.at(1.0), 24);
+            List<double[]> o = outline(now, 24);
             double[] far = o.isEmpty() ? center(d.shape) : o.get(0);
             double best = -1;
             for (double[] q : o) {
@@ -554,7 +554,7 @@ public final class AttackFx {
             bolt(level, d, look, c[0], gy, c[1]);
         }
         if (look.travel == AttackLook.Travel.BEAM) {
-            beam(level, d, look, 1.0);
+            beam(level, d, look, d.shape.at(1.0), 1.0);
         }
         switch (look.impact) {
             case BURST -> {
