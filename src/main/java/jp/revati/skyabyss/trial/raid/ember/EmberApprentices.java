@@ -7,7 +7,6 @@ import javax.annotation.Nullable;
 import jp.revati.skyabyss.combat.Telegraph;
 import jp.revati.skyabyss.combat.TelegraphShape;
 import jp.revati.skyabyss.titan.ember.EmberIds;
-import jp.revati.skyabyss.titan.ember.back.trial.EmberTrials;
 import jp.revati.skyabyss.titan.ember.mob.EmberMobSetup;
 import jp.revati.skyabyss.trial.raid.RaidCtx;
 import jp.revati.skyabyss.trial.raid.RaidKit;
@@ -161,7 +160,7 @@ public final class EmberApprentices extends EmberRoom {
             return;
         }
         p.invulnerableTime = 0;
-        p.hurt(EmberTrials.damage(ctx.level(), EmberIds.HEAT_BURST, by), amount);
+        p.hurt(EmberIds.damage(ctx.level(), EmberIds.HEAT_BURST, by), amount);
     }
 
     // 技 (弟子 i が使える技の中から、順に)。傷は赤い予告のあと。リセットをまたいだ予告は捨てる

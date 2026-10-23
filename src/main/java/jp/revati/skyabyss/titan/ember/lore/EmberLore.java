@@ -55,7 +55,6 @@ public final class EmberLore {
             "east", WHISPER + "east",         // hint  鍛えの間の前室 (色が合ったら打て)
             "south", WHISPER + "south",       // hint  火守りの谷の入口 (熾・噴気)
             "heart", WHISPER + "heart");      // lore  熾の底の前室
-    public static final List<String> HINT_WHISPERS = List.of("throat", "hub", "west", "east", "south");
 
     // ---------------------------------------------------------------- 語りの文 (13 の各章から想定した鍵。担当ごとに頭を分けた)
     public static final String LINE = "message.skyabyss.ember.lore.";

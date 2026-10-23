@@ -337,7 +337,7 @@ public final class StormGearSelfTest {
             p.setOnGround(false);
             check(f, WardenGlaiveItem.aerialHit(p, big), "the glaive should count a heart while the wielder is in the air");
         }
-        // 空駆け: 4 部位・空中・待ちなしで跳べる。地面・待ちの最中・西の試練では跳べない
+        // 空駆け: 4 部位・空中・待ちなしで跳べる。地面・待ちの最中では跳べない
         check(f, StormGearEvents.canDash(p), "a 4-piece player in the air should be able to dash");
         Vec3 v = StormGearEvents.dashVelocity(p);
         check(f, near(Math.hypot(v.x, v.z), StormGear.DASH_FORWARD) && near(v.y, StormGear.DASH_LIFT), "dash velocity " + v);
@@ -349,9 +349,6 @@ public final class StormGearSelfTest {
         p.getCooldowns().removeCooldown(StormGearSetup.CHESTPLATE.get());
         p.setItemSlot(EquipmentSlot.FEET, ItemStack.EMPTY);
         check(f, !StormGearEvents.canDash(p), "dash with 3 pieces");
-        check(f, StormGear.inWestTrial(serverLevel(server, StormGear.STORM_BACK, level), new Vec3(-70, 145, -18)) == (server.getLevel(StormGear.STORM_BACK) != null),
-                "west trial box");
-        check(f, !StormGear.inWestTrial(level, new Vec3(-70, 145, -18)), "the west trial box must only be on the storm back");
         for (EquipmentSlot sl : slots) {
             p.setItemSlot(sl, ItemStack.EMPTY);
         }

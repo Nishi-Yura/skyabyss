@@ -50,10 +50,7 @@ public class EmberMoth extends EmberMob {
     public static final double LURE_RANGE = 16;
     static final double DIST_COST = 1.5;
     // 火の鍵を持つ人の熱の上乗せ (焼き入れ前は熱い、焼き入れたあとも温かい)
-    public static final float FIRE_KEY_HOT_BONUS = 60;
-    public static final float FIRE_KEY_BONUS = 30;
     // 冷え殻の熱 (灰の道の殻の上にいる人より少し低い)
-    public static final float COOLED_CRUST_HEAT = 45;
     // 触れたあとの間 (tick)。触れたら少し離れて、また来る
     static final int TOUCH_COOLDOWN = 34;
     // 一つの部屋の上限
@@ -72,10 +69,6 @@ public class EmberMoth extends EmberMob {
     }
 
     private static final List<LureSource> SOURCES = new CopyOnWriteArrayList<>();
-
-    public static void addLureSource(LureSource source) {
-        SOURCES.add(source);
-    }
 
     // 部屋の蛾の上限 (一人で 18、一人増えるごとに +4)
     public static int roomCap(int players) {
@@ -133,28 +126,9 @@ public class EmberMoth extends EmberMob {
 
     // ---------------------------------------------------------------- 熱の源を選ぶ
 
-    // 人の熱 (寄る強さ)。火の鍵を持っていれば上乗せ
+    // 人の熱 (寄る強さ)
     public static float playerHeat(Player p) {
-        float h = EmberHeat.get(p);
-        if (holds(p, EmberIds.FIRE_KEY_HOT)) {
-            h += FIRE_KEY_HOT_BONUS;
-        } else if (holds(p, EmberIds.FIRE_KEY)) {
-            h += FIRE_KEY_BONUS;
-        }
-        return h;
-    }
-
-    private static boolean holds(Player p, String itemId) {
-        var item = BuiltInRegistries.ITEM.getOptional(EmberIds.id(itemId));
-        if (item.isEmpty()) {
-            return false;
-        }
-        for (ItemStack s : p.getInventory().items) {
-            if (s.is(item.get())) {
-                return true;
-            }
-        }
-        return p.getOffhandItem().is(item.get());
+        return EmberHeat.get(p);
     }
 
     static boolean targetable(Player p) {
@@ -175,7 +149,6 @@ public class EmberMoth extends EmberMob {
             bestPos = bestPlayer.position().add(0, bestPlayer.getBbHeight() * 0.6, 0);
         }
         List<Lure> lures = new ArrayList<>();
-        collectCrust(server, here, lures);
         for (LureSource s : SOURCES) {
             s.collect(server, here, LURE_RANGE, lures);
         }
@@ -212,34 +185,6 @@ public class EmberMoth extends EmberMob {
             }
         }
         return best;
-    }
-
-    // 冷え殻 (灰の道。C1 が登録していれば) を近く 6 ブロックで探す
-    private void collectCrust(ServerLevel level, Vec3 here, List<Lure> out) {
-        var crust = BuiltInRegistries.BLOCK.getOptional(EmberIds.id(EmberIds.COOLED_CRUST));
-        if (crust.isEmpty()) {
-            return;
-        }
-        Block block = crust.get();
-        BlockPos c = BlockPos.containing(here);
-        if (!jp.revati.skyabyss.util.SectionScan.mayContain(level, c.offset(-6, -4, -6), c.offset(6, 2, 6), s -> s.is(block))) {
-            return;
-        }
-        BlockPos nearest = null;
-        double nd = Double.MAX_VALUE;
-        for (BlockPos p : BlockPos.betweenClosed(c.offset(-6, -4, -6), c.offset(6, 2, 6))) {
-            BlockState st = level.getBlockState(p);
-            if (st.is(block)) {
-                double d = p.distSqr(c);
-                if (d < nd) {
-                    nd = d;
-                    nearest = p.immutable();
-                }
-            }
-        }
-        if (nearest != null) {
-            out.add(new Lure(Vec3.atCenterOf(nearest).add(0, 1.2, 0), COOLED_CRUST_HEAT));
-        }
     }
 
     public Vec3 lure() {
@@ -414,14 +359,4 @@ public class EmberMoth extends EmberMob {
     protected void playStepSound(BlockPos pos, BlockState state) {
     }
 
-    // 試練の担当が湧かせるときのための、近くの人の数 (部屋の上限を出す)
-    public static int playersNear(ServerLevel level, AABB room) {
-        int n = 0;
-        for (ServerPlayer p : Players.snapshot(level.players())) {
-            if (targetable(p) && room.contains(p.position())) {
-                n++;
-            }
-        }
-        return n;
-    }
 }

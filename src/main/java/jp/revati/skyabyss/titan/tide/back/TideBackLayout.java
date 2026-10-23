@@ -52,19 +52,12 @@ public final class TideBackLayout {
     public static final int LAYOUT_VERSION = 34;
     // 生成の海 (水の最上段は y=62)
     public static final int SEA = 63;
-    public static final int SEA_FLOOR = 41;
 
     // ---------------------------------------------------------------- 甲羅 (モデルの超楕円。tide_shell_titan.py の plan と同じ形、x1.6)
     // 版 20 の甲羅は中心 z -5、半長 137、半幅 114、n 2.6
     public static final int SHELL_CZ = -5;
-    public static final int SHELL_RX = 114;
-    public static final int SHELL_RZ = 136;
     public static final double SHELL_N = 2.6;
-    // 甲羅の上 (外) の歩ける地面 = いちばん下の台地 (T1) の高さ。上の三つの台地は 130・146・159
-    // 広間の水の盆の底 (気室の底だった高さ。広間の水を掘る深さ)
-    public static final int POOL_FLOOR = 108;
     public static final int TOP_Y = 113;
-    public static final int[] TERRACE_Y = {113, 130, 146, 159};
 
     // 甲羅の地表の高さ (甲羅のいちばん上のブロックの y。上の遺跡・珊瑚は含まない)。甲羅の無い柱は Integer.MIN_VALUE
     public static int shellTop(int x, int z) {
@@ -100,13 +93,6 @@ public final class TideBackLayout {
 
     // 潮門の浜 (甲羅の中の広間)。焚き火・炉・腰掛け・碑文・潮だまり。西の潮門の廊下から入り、北の回廊で広間へ
     public static final Area BEACH = new Area(-46, -12, 66, 100, 66, 12);
-    public static final int BEACH_CEILING = 84;
-    // 潮門 (モデルの左後ろの縁の大きな門。光る面は x -101〜-99、z 74〜99。口の下は y 65〜72)。
-    // 光る面の下をくぐって中へ入り、廊下 (z 84〜89、床 64 → 66) で浜の西の壁へ
-    public static final int GATE_MOUTH_X1 = -98;
-    public static final int GATE_MOUTH_X2 = -80;
-    public static final int GATE_MOUTH_Z1 = 77;
-    public static final int GATE_MOUTH_Z2 = 96;
     public static final int GATE_FLOOR = 64;
     public static final int GATE_HALL_Z1 = 84;
     public static final int GATE_HALL_Z2 = 89;
@@ -120,38 +106,12 @@ public final class TideBackLayout {
     public static final int GATE_Z = 85;
     public static final int GATE_Y0 = 63;
     public static final int GATE_Y1 = 66;
-    // 月の窓の縦穴 (広間の上。中心は (0, -5))
-    public static final int TOWER_CZ = -5;
-
-    // 縁の回廊 (浜から広間の南の段へ上る屋根のある坂。x -13〜-7)
-    public static final int CAVE_X1 = -19;
-    public static final int CAVE_X2 = -13;
-    public static final int CAVE_Z_BEACH = 65;
-    public static final int CAVE_Z_HUB = 26;
-    // ピースフルのあいだ封じる所 (回廊の途中)
-    public static final int CAVE_SEAL_Z = 45;
 
     // 潮の広間
     public static final int HUB_R = 23;
     public static final int HUB_FLOOR = 70;
     public static final int HUB_LEDGE = 74;
-    public static final int HUB_CEILING = 93;
-    public static final int MOON_R = 4;
-    // 月の窓の縦穴の中心 (頂の塔の真下。広間の中心から 5 だけ北)。塔の柱の段のガラスの床まで抜ける
-    public static final int MOON_CZ = TOWER_CZ;
     public static final Area HUB = new Area(-HUB_R, HUB_R, -HUB_R, HUB_R, HUB_FLOOR, 22);
-    // 南の段 (浜から) と西の段 (庭へ) はつながった L 字。東の回廊 (潮見の間へ) は離れている
-    public static final Area LEDGE_S = new Area(-22, -3, 19, 26, HUB_LEDGE, 8);
-    public static final Area LEDGE_W = new Area(-26, -19, -11, 18, HUB_LEDGE, 8);
-    public static final Area GALLERY_E = new Area(19, 26, -14, 4, HUB_LEDGE, 8);
-    // 南の段から水盤の底へ下りる階段 (x -12〜-8、z 18〜16 の 3 段)
-    public static final int HUB_STAIR_X1 = -12;
-    public static final int HUB_STAIR_X2 = -8;
-    // 干潟の門 (北の壁、x -2〜2、y 71〜73、z -24)。いつも開いている (戦っているグループにだけ閉じる)
-    public static final int FLATS_GATE_Z = -24;
-    public static final int FLATS_GATE_HALF = 2;
-    // 潮の底の門 (床の格子、x -1〜1、z -1〜1、y 70)。三つの石で開く
-    public static final int BOTTOM_GATE_R = 1;
     // 三つの石の灯り (底の門のまわりの床。西・東・前)
     public static final BlockPos LAMP_WEST = new BlockPos(-3, HUB_FLOOR, 0);
     public static final BlockPos LAMP_EAST = new BlockPos(3, HUB_FLOOR, 0);
@@ -160,20 +120,10 @@ public final class TideBackLayout {
     // 回り道 (干潮の道): 水盤の底の南東の戸口から、東の回廊の先まで上る坂。点を結ぶ幅 5 の通路
     // { x, z, 床の高さ }。最初の点は広間の戸口 (水盤の一部として満ちる)
     public static final int RAMP_HALF = 2;
-    public static final int[][] RAMP = {
-            {16, 14, 70}, {27, 14, 70}, {27, 22, 71}, {40, 22, 72}, {40, 8, 73}, {33, 8, 74}, {33, -4, 74}};
     // 東の回廊から潮見の間の前庭への道 (y 74 の床)
     public static final Area EAST_HALL = new Area(27, 39, -10, -4, HUB_LEDGE, 8);
 
-    // 珊瑚の庭 (西)。屋根のない、潮で 0〜3 満ちる水路の庭 (水路の幅 5)
-    public static final Area GARDEN = new Area(-99, -32, -67, 64, 64, 36);
-    public static final int GARDEN_FLOOR = 64;
-    public static final int GARDEN_DEPTH = 3;
-    public static final int GARDEN_WALL_TOP = 73;
-    // 庭は甲羅の中の洞。天井はおよそ 96〜98 (甲羅の低い縁では、地表から 4 段下)
-    public static final int GARDEN_CEILING = 96;
     public static final int PLATFORM_TOP = 68;
-    public static final int CHANNEL_HALF = 2;
     // 台の中心 (潮除けの台)。上は 7x7、高さ 4 (床 68)
     public static final int PLAT_CORE = 3;
     public static final int[] PLAT_A = {-80, 42};
@@ -202,47 +152,19 @@ public final class TideBackLayout {
         }
     }
 
-    // 道の形: 開く水路の組 (clam-A と g0-C はいつも開く)
-    public static final Channel[][] GARDEN_ROUTES = {
-            {Channel.A_B1, Channel.B1_C, Channel.C_D1, Channel.D1_E},
-            {Channel.A_B2, Channel.B2_C, Channel.C_D2, Channel.D2_E},
-            {Channel.A_B1, Channel.B1_C, Channel.C_D2, Channel.D2_E}};
-
-    // 潮見の間 (東)。広間 (x 40〜98、z -64〜-6) の中に、三段の溜め (下 B・中 M・上 T) の仕掛け (版 12 までの形を (+30, -4) 動かした)。
-    // 段の床は 74・80・86、岩棚は 92。溜めと戸と取っ手の相互の位置は仕掛け (TideWatch) と一体なので動かさない
-    public static final int WATCH_DX = 30;
-    public static final int WATCH_DZ = -4;
-    public static final Area WATCH_HALL = new Area(40, 98, -64, -6, HUB_LEDGE, 30);
     public static final Area S0 = new Area(40, 59, -20, -6, HUB_LEDGE, 8);
-    public static final int[] TIER_FLOOR = {74, 80, 86};
     public static final int LEDGE_FLOOR = 92;
     // 溜めの内側 (x1, x2, z1, z2)。床のブロックは段の床 - 1。浮き石は B と M だけ
     public static final int[][] BASIN = {{64, 68, -16, -12}, {75, 79, -16, -12}, {81, 85, -25, -21}};
-    // 溜めの戸 (人が浮き石へ乗る口。溜めの水が 1 段以下のときだけ開く)。T は南と北の二つ (水が 0 のときだけ開く)
-    public static final BlockPos[] BASIN_DOOR = {new BlockPos(63, 75, -14), new BlockPos(74, 81, -14), new BlockPos(83, 87, -20)};
-    public static final BlockPos T_EXIT_DOOR = new BlockPos(83, 87, -26);
-    // 段の広さ (浮き石を降りて立つ所)
-    public static final Area TIER0 = new Area(58, 62, -18, -10, 74, 5);
-    public static final Area TIER1 = new Area(69, 73, -17, -11, 80, 5);
-    public static final Area TIER2 = new Area(80, 86, -19, -12, 86, 5);
-    public static final Area LEDGE_E = new Area(80, 86, -39, -35, LEDGE_FLOOR, 5);
 
     // 群れの干潟 (前)。甲羅の前の洞 (天井 84)。北の壁の向こうに首がある。北東・北西の角の窓から首と頭が見える
     public static final Area FLATS = new Area(-38, 38, -131, -80, 63, 21);
-    public static final int FLATS_CEILING = 84;
-    public static final int FLATS_FLOOR = 63;
-    public static final int FLATS_DEPTH = 2;
     // 首の長い廊下の前室 f0 (z -64〜-48、床 66)
     public static final Area F0 = new Area(-8, 8, -64, -48, 66, 8);
     public static final int TUNNEL_FLOOR = 66;
     // 干潟の口 (廊下の北の端。潮招きの戦いの間だけ閉じる)
     public static final int MOUTH_Z = -79;
     public static final int MOUTH_HALF = 2;
-    // 版 12 までの干潟のずらし (今は 0。式が残っている所のため)
-    public static final int FLATS_DZ = 0;
-    // 岩の島 (中心、上は 3x3、上の床 66)。北のはし (0, -126) は東の石の島
-    public static final int[][] FLATS_ROCKS = {{-28, -92}, {-10, -90}, {10, -93}, {28, -91}, {-32, -104}, {-18, -107}, {-4, -102}, {12, -107},
-            {26, -105}, {-24, -119}, {-9, -121}, {9, -117}, {24, -120}, {0, -127}};
     public static final int ROCK_TOP = 66;
     // 巣の候補地 (10 か所から、リセットの種で 5 つ)
     public static final int NEST_COUNT = 5;
@@ -250,11 +172,7 @@ public final class TideBackLayout {
     public static final int NEST_COUNT_LONG = 8;
     public static final int[][] NEST_SITES = {{-19, -97}, {19, -98}, {-32, -112}, {32, -112}, {-12, -113}, {14, -113}, {-27, -126}, {28, -125},
             {-3, -85}, {5, -122}};
-    public static final BlockPos BECKONER_HOME = new BlockPos(0, 64, -108);
 
-    // ---------------------------------------------------------------- 殻の底 (心臓の間) と、潮の底の門からの螺旋の階段
-    public static final int SPIRAL_TOP = 69;
-    public static final int SPIRAL_BOTTOM = 51;
     public static final Area SPIRAL = new Area(-2, 2, -2, 2, 50, 20);
     // 心臓の間 (殻の底) は体の外の封じた部屋 (区画 0 番の枠。trial/raid/InstanceArenas) へ移した (2026-10-23)。元の座標 (中心 (0, 51, -30)) を
     // HEART_DX / HEART_DZ だけずらす。前室の南の休み場 heart も一緒に動く (螺旋の階段とはつながらない)
@@ -266,10 +184,6 @@ public final class TideBackLayout {
     // ---------------------------------------------------------------- 潮鳴り石と、抜け道 (石が鳴ると光る床。踏むと戻れる)
     public static final BlockPos STONE_WEST = new BlockPos(ALTAR[0], ALTAR_TOP + 1, ALTAR[1] - 2);
     public static final BlockPos STONE_EAST = new BlockPos(83, LEDGE_FLOOR + 1, -38);
-    public static final BlockPos STONE_FRONT = new BlockPos(0, ROCK_TOP + 1, -127);
-    // 石の近くから広間へ運ぶ先 (庭・潮見の間の出口の床)
-    public static final BlockPos EJECT_GARDEN = new BlockPos(-22, HUB_LEDGE + 1, 0);
-    public static final BlockPos EJECT_WATCH = new BlockPos(22, HUB_LEDGE + 1, -4);
 
     // ---------------------------------------------------------------- 休み場 (焚き火のまわりに立つ)
     public record Rest(String id, Area area, BlockPos campfire, BlockPos spawn) {
@@ -282,8 +196,7 @@ public final class TideBackLayout {
             new Rest("s0", S0, new BlockPos(42, HUB_LEDGE + 1, -18), new BlockPos(45, HUB_LEDGE + 1, -13)),
             new Rest("f0", F0, new BlockPos(-6, TUNNEL_FLOOR + 1, -62), new BlockPos(0, TUNNEL_FLOOR + 1, -56)),
             new Rest("heart", HEART_REST, new BlockPos(3 + HEART_DX, 51, -6 + HEART_DZ), new BlockPos(-2 + HEART_DX, 51, -6 + HEART_DZ))),
-            // 試練の階 (TideDeck。番号は 10 から。上の 10 個の並びは変えない: RESTS.get(n) で引く所がある)
-            TideDeck.rests());
+            List.of());
 
     private static List<Rest> concat(List<Rest> a, List<Rest> b) {
         List<Rest> out = new ArrayList<>(a);
@@ -302,17 +215,6 @@ public final class TideBackLayout {
             new Inscription("sign.skyabyss.lore_tide_east", new BlockPos(85, LEDGE_FLOOR + 2, -39), Direction.SOUTH),
             new Inscription("sign.skyabyss.lore_tide_front", new BlockPos(-7, ROCK_TOP + 1, -119), Direction.UP),
             new Inscription("sign.skyabyss.lore_tide_heart", new BlockPos(-4 + HEART_DX, 52, -8 + HEART_DZ), Direction.EAST));
-
-    // ---------------------------------------------------------------- リセットで広間へ移す所 (試練の中)
-    public static List<Area> trialAreas() {
-        List<Area> list = new ArrayList<>();
-        list.add(GARDEN);
-        list.add(new Area(39, 99, -65, -5, 70, 34));
-        list.add(new Area(-40, 40, -133, -31, 60, 26));
-        list.add(new Area(-18, 18, -48, -3, 45, 18));
-        list.add(new Area(-2, 2, -2, 2, 48, 22));
-        return list;
-    }
 
     // 潮の底の門より奥 (螺旋の階段・前室・殻の底)
     public static boolean pastBottomGate(Vec3 p) {

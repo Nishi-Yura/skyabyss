@@ -26,10 +26,10 @@ import net.neoforged.neoforge.client.event.RegisterClientReloadListenersEvent;
 // 装飾品は鍛えないので、絵は階級ごとに 1 枚 (+ 光る画素の画像)。
 public final class AccessoryMeshes {
     // 低ポリにした品 (models/item/<id>.json が builtin/entity)。tools/install/install_lowpoly_accessories.py の ITEMS と同じ
-    public static final Set<String> IDS = Set.of("storm_charm", "storm_anklet", "storm_eye_feather", "gale_feather",
+    public static final Set<String> IDS = Set.of("storm_charm", "storm_anklet", "storm_eye_feather",
             "kindling_charm", "ember_mantle", "ember_lantern", "ember_horn", "cinder_lamp",
             "resonance_charm", "moss_talisman", "stone_whale_plating",
-            "tide_chime_charm", "moontide_pearl", "tide_watching_shell", "tide_pearl",
+            "tide_chime_charm", "moontide_pearl", "tide_watching_shell",
             "abyss_pulse_listener", "abyss_lantern_charm", "abyss_surveyor_plumb");
     public static final int WHITE = 0xFFFFFFFF;
     public static final int FULL_BRIGHT = 0xF000F0;

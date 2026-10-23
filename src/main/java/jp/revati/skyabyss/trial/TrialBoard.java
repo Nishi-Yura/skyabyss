@@ -144,8 +144,6 @@ public final class TrialBoard {
             return;
         }
         r.changed();
-        TrialRuntime.stopGroup(back, group);
-        TrialRuntime.syncGates(back, group, titan, TrialData.current(back, group));
         for (ServerPlayer m : Groups.online(back, group)) {
             Notice.hint(m, on ? "message.skyabyss.abyss.on" : "message.skyabyss.abyss.off");
         }

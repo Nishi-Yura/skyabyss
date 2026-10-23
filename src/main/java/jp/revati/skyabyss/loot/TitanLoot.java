@@ -26,7 +26,6 @@ import jp.revati.skyabyss.entity.BoneSentinel;
 import jp.revati.skyabyss.entity.ElderSentinel;
 import jp.revati.skyabyss.entity.MossCrawler;
 import jp.revati.skyabyss.entity.RibArcher;
-import jp.revati.skyabyss.entity.WaterwayMaw;
 import jp.revati.skyabyss.forge.ForgeRules;
 import jp.revati.skyabyss.item.affix.AffixRules;
 import jp.revati.skyabyss.registry.ModItems;
@@ -257,13 +256,6 @@ public final class TitanLoot {
     // 道中の番兵を倒した人への、一体ぶんの抽選。甲殻が出たら図鑑にも記す
     public static List<ItemStack> rollGuard(LivingEntity mob, @Nullable TitanMemoryData.Record r, RandomSource random) {
         List<ItemStack> items = new ArrayList<>();
-        if (mob instanceof WaterwayMaw) {
-            // 水路の顎はスポナーから湧き続けるので、欠片だけ
-            if (random.nextFloat() < 0.10f) {
-                items.add(new ItemStack(ModItems.STONE_WHALE_SHARD.get()));
-            }
-            return items;
-        }
         if (mob instanceof BoneMortar || mob instanceof BoneGull || mob instanceof ElderSentinel) {
             return rollNewGuard(mob, r, random);
         }

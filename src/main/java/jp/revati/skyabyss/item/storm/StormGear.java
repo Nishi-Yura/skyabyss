@@ -123,11 +123,6 @@ public final class StormGear {
     public static final ResourceKey<Level> STORM_BACK = ResourceKey.create(Registries.DIMENSION,
             ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "storm_back"));
 
-    // 西の試練 (風切りの骨と左手首の瘤) の中か。12 の 8章: ここでは空駆けが効かない
-    public static boolean inWestTrial(Level level, Vec3 p) {
-        return level.dimension() == STORM_BACK && p.x < -22.5 && p.x > -142 && p.z > -32 && p.z < 2 && p.y > 138 && p.y < 162;
-    }
-
     private StormGear() {
     }
 

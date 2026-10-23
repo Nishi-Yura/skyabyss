@@ -23,7 +23,4 @@ public final class TrialGoal {
         return state.is(Blocks.GLOWSTONE) || state.is(Blocks.GOLD_BLOCK);
     }
 
-    public static boolean isReached(BlockState state) {
-        return state.is(Blocks.GOLD_BLOCK);
-    }
 }

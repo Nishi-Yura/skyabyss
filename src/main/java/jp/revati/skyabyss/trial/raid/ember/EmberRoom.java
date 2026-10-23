@@ -10,7 +10,6 @@ import jp.revati.skyabyss.combat.TelegraphShape;
 import jp.revati.skyabyss.notice.Notice;
 import jp.revati.skyabyss.party.Downed;
 import jp.revati.skyabyss.titan.ember.EmberIds;
-import jp.revati.skyabyss.titan.ember.back.trial.EmberTrials;
 import jp.revati.skyabyss.titan.ember.mob.EmberMob;
 import jp.revati.skyabyss.titan.group.GroupOwned;
 import jp.revati.skyabyss.trial.raid.RaidCtx;
@@ -95,7 +94,7 @@ abstract class EmberRoom extends RaidRoom {
             return false;
         }
         p.invulnerableTime = 0;
-        return p.hurt(EmberTrials.damage(ctx.level(), EmberIds.HEAT_BURST, null), amount);
+        return p.hurt(EmberIds.damage(ctx.level(), EmberIds.HEAT_BURST, null), amount);
     }
 
     // 赤だけの予告の円。warn tick のあと、円の中の人へ onHit。リセットをまたいだら黙って捨てる

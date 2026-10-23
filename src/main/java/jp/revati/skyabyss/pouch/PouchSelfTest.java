@@ -188,11 +188,8 @@ public final class PouchSelfTest {
         for (Item guarded : Keepsakes.guardedItems()) {
             check(f, PouchEntries.any(guarded) != null, "a guarded keepsake is missing in the pouch entries: " + guarded);
         }
-        // 背中の試練の道具・食べ物・装備は入れない (22 の 2.2)
-        for (Item out : new Item[]{jp.revati.skyabyss.titan.ember.back.trial.EmberTrialSetup.FIRE_KEY.get(),
-                jp.revati.skyabyss.titan.ember.back.trial.EmberTrialSetup.FIRE_KEY_HOT.get(), jp.revati.skyabyss.titan.ember.back.trial.EmberTrialSetup.ASH_URN.get(),
-                jp.revati.skyabyss.titan.tide.back.TideBackSetup.TIDE_PEARL.get(), jp.revati.skyabyss.titan.storm.back.StormBackSetup.GALE_FEATHER.get(),
-                ModItems.CLOUD_JERKY.get(), ModItems.CAPTAIN_PIKE.get(), ModItems.STONE_WHALE_HELMET.get(), ModItems.RESONANCE_CHARM.get(), Items.BREAD}) {
+        // 食べ物・装備は入れない (22 の 2.2)
+        for (Item out : new Item[]{ModItems.CLOUD_JERKY.get(), ModItems.CAPTAIN_PIKE.get(), ModItems.STONE_WHALE_HELMET.get(), ModItems.RESONANCE_CHARM.get(), Items.BREAD}) {
             check(f, PouchEntries.any(out) == null, "an item that must stay in the inventory is a pouch entry: " + out);
         }
         for (PouchEntries.Entry e : all) {

@@ -8,15 +8,7 @@ import net.minecraft.world.level.block.state.BlockState;
 // 矢じるしは進む向き、色の線は行き先 (西 = 青、東 = 金、前 = 白)、灯の柱は道の縁
 final class StormDeco {
     static final BlockState POST = Blocks.WAXED_CUT_COPPER.defaultBlockState();
-    static final BlockState POST_TOP = Blocks.WAXED_CHISELED_COPPER.defaultBlockState();
     static final BlockState RAIL = Blocks.DIORITE_WALL.defaultBlockState();
-    // 行き先の色: 西 (風 = 水色)、東 (雷 = 金)、前 (眼 = 白)
-    static final BlockState WEST_LINE = Blocks.LIGHT_BLUE_CONCRETE.defaultBlockState();
-    static final BlockState EAST_LINE = Blocks.YELLOW_CONCRETE.defaultBlockState();
-    static final BlockState FRONT_LINE = Blocks.WHITE_CONCRETE.defaultBlockState();
-    static final BlockState WEST_PIP = Blocks.SEA_LANTERN.defaultBlockState();
-    static final BlockState EAST_PIP = Blocks.OCHRE_FROGLIGHT.defaultBlockState();
-    static final BlockState FRONT_PIP = Blocks.PEARLESCENT_FROGLIGHT.defaultBlockState();
 
     private StormDeco() {
     }
@@ -88,12 +80,4 @@ final class StormDeco {
         }
     }
 
-    // 腰掛け (半ブロックの階段の並び。向きは facing の先を向く)
-    static void bench(StormKit kit, int x1, int x2, int z1, int z2, int y, Direction facing) {
-        for (int x = Math.min(x1, x2); x <= Math.max(x1, x2); x++) {
-            for (int z = Math.min(z1, z2); z <= Math.max(z1, z2); z++) {
-                kit.stair(x, y, z, facing.getOpposite(), Blocks.POLISHED_DIORITE_STAIRS.defaultBlockState());
-            }
-        }
-    }
 }

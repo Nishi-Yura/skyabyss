@@ -29,7 +29,6 @@ import jp.revati.skyabyss.ModText;
 import jp.revati.skyabyss.SkyAbyss;
 import jp.revati.skyabyss.notice.Notice;
 import jp.revati.skyabyss.progress.Titans;
-import jp.revati.skyabyss.titan.dungeon.TitanBackLayout;
 import jp.revati.skyabyss.titan.dungeon.TitanBackTrials;
 import jp.revati.skyabyss.titan.group.BackGroupData;
 import jp.revati.skyabyss.titan.group.FirstRun;
@@ -75,7 +74,6 @@ public final class TrialRoute {
     public static final int EMPTY_GRACE = 20 * 10;
     public static final int TICK_EVERY = 10;
     public static final int LAST_STEP = 4;
-    public static final String HEART_REST = "heart";
     // 順路を越えた (心臓を止めた) ときのクエストの合図 (自由なモードの依頼「順路を越える」)
     public static final String QUEST_SIGNAL = "route_cleared";
 
@@ -94,81 +92,13 @@ public final class TrialRoute {
     private static final Set<String> CLEARED_KEYS = new LinkedHashSet<>();
 
     // ---------------------------------------------------------------- 順路の形
-    // 原型の枠の順 (歩・智・闘) の石の鍵 (TrialSteles / TrialRegions の key)
+    // 枠の順 (歩・智・闘) の鍵 (TrialSteles / TrialRegions の key)
     public static List<String> keysOf(String titan) {
         return switch (titan) {
             case Titans.STONE_WHALE -> List.of("0", "2", "1");
             case Titans.TIDE_SHELL, Titans.THUNDER_WING -> List.of("west", "east", "front");
             case Titans.EMBER -> List.of("west", "east", "south");
             default -> List.of();
-        };
-    }
-
-    // 原型の試練の入口の休み場 (石の鍵から)
-    @Nullable
-    public static String legacyRest(String titan, String key) {
-        return switch (titan) {
-            case Titans.STONE_WHALE -> switch (key) {
-                case "0" -> "w0";
-                case "2" -> TitanBackTrials.MAZE_ENTRY;
-                case "1" -> "e0";
-                default -> null;
-            };
-            case Titans.TIDE_SHELL -> switch (key) {
-                case "west" -> "g0";
-                case "east" -> "s0";
-                case "front" -> "f0";
-                default -> null;
-            };
-            case Titans.THUNDER_WING -> switch (key) {
-                case "west" -> "w0";
-                case "east" -> "e0";
-                case "front" -> "f0";
-                default -> null;
-            };
-            case Titans.EMBER -> switch (key) {
-                case "west" -> "w0";
-                case "east" -> "e0";
-                case "south" -> "s0";
-                default -> null;
-            };
-            default -> null;
-        };
-    }
-
-    // 試練 def の入口の休み場。原型は石の鍵から、新作はセルの最初の休み場 (なければ戻りの休み場)
-    @Nullable
-    public static String entryRest(String titan, Def def, @Nullable TrialDraw.Draw draw) {
-        if (def.original()) {
-            String key = TrialRegions.keyOfDef(titan, def, draw);
-            return key == null ? null : legacyRest(titan, key);
-        }
-        if (Titans.THUNDER_WING.equals(titan)) {
-            List<jp.revati.skyabyss.titan.storm.back.StormBackLayout.Rest> rs = jp.revati.skyabyss.titan.storm.back.StormDeck.restsOf(def.id());
-            if (rs.isEmpty()) {
-                rs = jp.revati.skyabyss.titan.storm.back.StormDeck2.restsOf(def.id());
-            }
-            return rs.isEmpty() ? null : rs.get(0).id();
-        }
-        TrialCell cell = TrialCells.get(def.id());
-        if (cell == null) {
-            return null;
-        }
-        if (!cell.ports().rests().isEmpty()) {
-            return cell.ports().rests().get(0).id();
-        }
-        return cell.ports().returnRest().isEmpty() ? null : cell.ports().returnRest();
-    }
-
-    // 休み場の立つ位置 (各背の休み場の表から。立てる場所を探す)
-    @Nullable
-    public static BlockPos spawnOf(ServerLevel back, String titan, String rest) {
-        return switch (titan) {
-            case Titans.STONE_WHALE -> TitanBackTrials.restSpawn(back, rest);
-            case Titans.TIDE_SHELL -> jp.revati.skyabyss.titan.tide.back.TideBackTrials.restSpawn(back, rest);
-            case Titans.THUNDER_WING -> jp.revati.skyabyss.titan.storm.back.StormBackTrials.restSpawn(back, rest);
-            case Titans.EMBER -> jp.revati.skyabyss.titan.ember.back.EmberBackTrials.restSpawn(back, rest);
-            default -> null;
         };
     }
 
@@ -198,31 +128,6 @@ public final class TrialRoute {
     public static String keyOf(String titan, TrialDraw.Draw draw, int step) {
         Def d = defOf(draw, step);
         return d == null ? null : TrialRegions.keyOfDef(titan, d, draw);
-    }
-
-    // 段 step (mid = 中ボスの段) の入口の休み場
-    @Nullable
-    public static String restOf(String titan, TrialDraw.Draw draw, int step, boolean mid) {
-        if (mid) {
-            return TrialMidBoss.restOf(titan);
-        }
-        if (step >= LAST_STEP) {
-            return HEART_REST;
-        }
-        Def d = defOf(draw, step);
-        return d == null ? null : entryRest(titan, d, draw);
-    }
-
-    // そのグループが段 step で運ばれる休み場 (周回で長くなる歩の原型は、前の道の休み場。LongWalk)
-    @Nullable
-    public static String restFor(ServerLevel back, UUID group, String titan, TrialDraw.Draw draw, int step, boolean mid) {
-        if (!mid && step >= 1 && step < LAST_STEP) {
-            LongWalk.Pre pre = LongWalk.preOf(back, group, titan, defOf(draw, step));
-            if (pre != null) {
-                return pre.rest();
-            }
-        }
-        return restOf(titan, draw, step, mid);
     }
 
     // ---------------------------------------------------------------- 記録
@@ -321,12 +226,8 @@ public final class TrialRoute {
         }
         r.putString(PARTY, String.join(",", who));
         r.putLong(START, back.getGameTime());
-        // 区画の番号を取り、引いた三つのうち写せるセルを区画へ写す (docs/design/32 の 5 章)
-        if (soon) {
-            TrialSlot.buildSoon(back, TrialSlot.assign(back, r), draw);
-        } else {
-            TrialSlot.build(back, TrialSlot.assign(back, r), draw);
-        }
+        // 区画の番号を取る (部屋は運ぶときに RaidRun がそこへ建てる。docs/design/32 の 5 章)
+        TrialSlot.assign(back, r);
         r.changed();
         ENTRY_START.remove(group);
         for (ServerPlayer p : party) {
@@ -334,28 +235,13 @@ public final class TrialRoute {
             p.playNotifySound(SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.PLAYERS, 1f, 0.6f);
         }
         SkyAbyss.LOGGER.info("Route of the {} started for group {} ({}, party {}, slot {})", titan, group, ids, party.size(), TrialSlot.of(r));
-        TrialRuntime.syncGates(back, group, titan, draw);
         if (soon) {
-            // 段 1 の写しが済むのを待って運ぶ (tick の PENDING)
+            // 祠の帳のあいだ: 次の tick で運ぶ (PENDING)
             PENDING.put(group, new Pending(group, titan, 1, false, back.getGameTime()));
         } else {
             carry(back, group, titan, 1, false);
         }
     }
-
-    // 段 step の試練を区画の写しで遊ぶなら、その写しが済んでいるか
-    private static boolean copyReady(ServerLevel back, UUID group, int step, boolean mid) {
-        BackGroupData.Record r = BackGroupData.get(back).peek(group);
-        if (r == null || mid || step < 1 || step >= LAST_STEP) {
-            return true;
-        }
-        TrialDraw.Draw draw = TrialData.current(back, group);
-        Def d = defOf(draw, step);
-        return d == null || frameOfStep(back, group, draw, step, false).isZero() || TrialSlot.ready(back, TrialSlot.of(r), d.id());
-    }
-
-    // 写しを待ってよい長さ (これを過ぎたら、その場で写し終える)
-    static final int COPY_WAIT = 200;
 
     @Nullable
     private static String progressName(String titan) {
@@ -416,7 +302,6 @@ public final class TrialRoute {
             r.putInt(MID, 1);
         }
         r.changed();
-        TrialRuntime.syncGates(back, group, titan, draw);
         queue(back, group, titan, next, mid);
         sync(back, group);
         Component what = mid ? TrialMidBoss.name(titan) : next >= LAST_STEP ? Component.empty() : trialName(defOf(draw, next));
@@ -424,35 +309,6 @@ public final class TrialRoute {
             Notice.bar(p, ModText.progress(mid ? "message.skyabyss.route.next_mid" : next >= LAST_STEP ? "message.skyabyss.route.next_heart" : "message.skyabyss.route.next", what));
         }
         SkyAbyss.LOGGER.info("Route of the {}: group {} cleared step {} ({}), next {}{}", titan, group, step, key, next, mid ? " (mid-boss)" : "");
-    }
-
-    // 開発・撮影・自己テスト: 引きの歩を原型に (周回の前の道を通る)、闘を中ボスの原型でないものに (中ボスの段を通る) 替えた引き。智はそのまま
-    public static TrialDraw.Draw walkOriginalDraw(String titan, TrialDraw.Draw d) {
-        String host = TrialMidBoss.hostOf(titan);
-        List<TrialDraw.Pick> picks = new ArrayList<>();
-        for (TrialDraw.Pick pk : d.picks()) {
-            Def def = pk.def();
-            if (def != null && def.slot() == Trial.Slot.WALK) {
-                Def walk = null;
-                for (Def o : TrialCatalog.originals(titan)) {
-                    if (o.slot() == Trial.Slot.WALK) {
-                        walk = o;
-                    }
-                }
-                picks.add(walk == null ? pk : new TrialDraw.Pick(walk.id(), Trial.Mods.PLAIN));
-            } else if (def != null && def.slot() == Trial.Slot.FIGHT && def.id().equals(host)) {
-                Def other = null;
-                for (Def o : TrialCatalog.inSlot(titan, Trial.Slot.FIGHT)) {
-                    if (!o.id().equals(host) && other == null) {
-                        other = o;
-                    }
-                }
-                picks.add(other == null ? pk : new TrialDraw.Pick(other.id(), Trial.Mods.PLAIN));
-            } else {
-                picks.add(pk);
-            }
-        }
-        return new TrialDraw.Draw(d.cycle(), picks);
     }
 
     // 開発・撮影: 今の段を越えたことにする (試練なら石が鳴ったのと同じ、中ボスなら倒したのと同じ)。何をしたかを返す
@@ -568,49 +424,15 @@ public final class TrialRoute {
             sync(back, group);
             return members(back, group).size();
         }
-        TrialDraw.Draw draw = TrialData.current(back, group);
         // 心臓の段は、体の外の封じた心臓の間 (trial/raid/InstanceArenas) の中へ直に運ぶ (前室を歩かない。中に入ると集合の 5 秒のあと封じる)
         if (!mid && step >= LAST_STEP) {
             BlockPos in = jp.revati.skyabyss.trial.raid.InstanceArenas.heartEntry(titan);
             if (in != null) {
-                return carryIntoHeart(back, group, titan, draw, in);
+                return carryIntoHeart(back, group, titan, TrialData.current(back, group), in);
             }
         }
-        String rest = restFor(back, group, titan, draw, step, mid);
-        BlockPos at = rest == null ? null : spawnOf(back, titan, rest);
-        if (at == null) {
-            SkyAbyss.LOGGER.warn("Route of the {}: no rest for step {}{}", titan, step, mid ? " (mid)" : "");
-            return 0;
-        }
-        // 区画の写しで遊ぶ段は、写しの入口の休み場へ (写しがまだなら、その場で写し終える)
-        TrialFrame frame = frameOfStep(back, group, draw, step, mid);
-        if (!frame.isZero() && !copyReady(back, group, step, mid)) {
-            BackGroupData.Record rr = BackGroupData.get(back).peek(group);
-            TrialSlot.finishNow(back, rr == null ? 0 : TrialSlot.of(rr));
-        }
-        at = frame.at(at);
-        if (mid) {
-            TrialMidBoss.prime(back, group, titan);
-        }
-        int n = 0;
-        // 運ばれた人は、休み場の中のいちばん見通しのきく向きを向く (壁や閉じた戸を向いて着かない。R6 の撮影で番兵の前室が戸を向いていた)
-        // 見通しが同じくらいなら、行く先 (前の道なら出口の戸、試練なら石) の向き
-        LongWalk.Pre pre = mid || step >= LAST_STEP ? null : LongWalk.preOf(back, group, titan, defOf(draw, step));
-        BlockPos toward = pre != null && !pre.gate().isEmpty() ? pre.gate().get(0)
-                : mid || step >= LAST_STEP ? null : TrialRegions.stoneOf(titan, keyOf(titan, draw, step));
-        float yaw = facingAt(back, at, toward == null ? null : frameOfStep(back, group, draw, step, mid).at(toward));
-        Component what = mid ? TrialMidBoss.name(titan) : step >= LAST_STEP ? Component.empty() : trialName(defOf(draw, step));
-        String line = mid ? "message.skyabyss.route.mid" : step >= LAST_STEP ? "message.skyabyss.route.heart" : "message.skyabyss.route.step" + step;
-        for (ServerPlayer p : members(back, group)) {
-            move(back, p, at, yaw);
-            n++;
-            Notice.narrate(p, line, what);
-            RouteCard.show(p, back, group, titan, draw, step, mid);
-        }
-        back.playSound(null, at.getX() + 0.5, at.getY(), at.getZ() + 0.5, SoundEvents.BEACON_ACTIVATE, SoundSource.PLAYERS, 0.8f, 1.6f);
-        sync(back, group);
-        SkyAbyss.LOGGER.info("Route of the {}: group {} carried to step {}{} ({}) x{}", titan, group, step, mid ? " (mid)" : "", rest, n);
-        return n;
+        SkyAbyss.LOGGER.warn("Route of the {}: nowhere to carry group {} for step {}{}", titan, group, step, mid ? " (mid)" : "");
+        return 0;
     }
 
     private static int carryIntoHeart(ServerLevel back, UUID group, String titan, TrialDraw.Draw draw, BlockPos at) {
@@ -626,41 +448,6 @@ public final class TrialRoute {
         sync(back, group);
         SkyAbyss.LOGGER.info("Route of the {}: group {} carried into the heart arena at {} x{}", titan, group, at.toShortString(), n);
         return n;
-    }
-
-    // 段 step の試練を区画の写しで遊ぶなら、そのずれ (中ボス・心臓・原型・写せないセルは ZERO)
-    public static TrialFrame frameOfStep(ServerLevel back, UUID group, TrialDraw.Draw draw, int step, boolean mid) {
-        if (mid || step < 1 || step >= LAST_STEP) {
-            return TrialFrame.ZERO;
-        }
-        Def d = defOf(draw, step);
-        TrialCell cell = d == null ? null : TrialCells.get(d.id());
-        return cell == null ? TrialFrame.ZERO : TrialSlot.frameOf(back, group, cell);
-    }
-
-    // 写しで遊んでいる段の参加者が、手本の部屋に出てしまったら (倒れて休み場で目を覚ました・決まりの外の戻し) 写しへ移す
-    private static void keepInCopy(ServerLevel back, UUID group, BackGroupData.Record r) {
-        int step = step(r);
-        if (r.getInt(MID) > 0 || step < 1 || step >= LAST_STEP || PENDING.containsKey(group)) {
-            return;
-        }
-        TrialDraw.Draw draw = TrialData.current(back, group);
-        TrialFrame f = frameOfStep(back, group, draw, step, false);
-        if (f.isZero()) {
-            return;
-        }
-        Def d = defOf(draw, step);
-        TrialCell cell = d == null ? null : TrialCells.get(d.id());
-        if (cell == null) {
-            return;
-        }
-        AABB template = cell.buildBox();
-        for (ServerPlayer p : members(back, group)) {
-            if (template.contains(p.position())) {
-                Vec3 to = f.world(p.position());
-                move(back, p, BlockPos.containing(to));
-            }
-        }
     }
 
     public static void move(ServerLevel back, ServerPlayer p, BlockPos at) {
@@ -749,7 +536,6 @@ public final class TrialRoute {
                 return;
             }
             tick(level, titan, players, level.getGameTime());
-            TrialStones.autoStones(level, titan, players, level.getGameTime());
         } finally {
             jp.revati.skyabyss.dev.Prof.end("server.trialRoute", prof);
         }
@@ -758,9 +544,6 @@ public final class TrialRoute {
     public static void tick(ServerLevel back, String titan, List<ServerPlayer> players, long now) {
         for (Pending p : new ArrayList<>(PENDING.values())) {
             if (now < p.due() || Titans.backOf(p.titan()) != back.dimension()) {
-                continue;
-            }
-            if (!copyReady(back, p.group(), p.step(), p.mid()) && now - p.due() < COPY_WAIT) {
                 continue;
             }
             PENDING.remove(p.group());
@@ -897,7 +680,6 @@ public final class TrialRoute {
                 // 入り直した人・ログインし直した人にも、今の段を送り直す
                 sync(back, group);
             }
-            keepInCopy(back, group, r);
             if (!members(back, group).isEmpty() || PENDING.containsKey(group)) {
                 EMPTY_SINCE.remove(group);
                 continue;
@@ -918,7 +700,6 @@ public final class TrialRoute {
         if (r != null && r.hasProgress() && titan != null) {
             fullReset(back, group, titan);
         }
-        TrialRuntime.stopGroup(back, group);
         // 誓いは順路が終わると降りる (docs/design/32 の 3.1)
         jp.revati.skyabyss.titan.vow.Vows.lift(back, group);
     }
@@ -1106,7 +887,6 @@ public final class TrialRoute {
         ENTRY_START.clear();
         EMPTY_SINCE.clear();
         CLEARED_KEYS.clear();
-        TrialStones.clearAll();
     }
 
     @SubscribeEvent

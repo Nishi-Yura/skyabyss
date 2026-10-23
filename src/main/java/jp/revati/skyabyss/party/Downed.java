@@ -195,7 +195,6 @@ public final class Downed {
         player.clearFire();
         release(player);
         GroupBossRoom.noteDown(player.getUUID());
-        jp.revati.skyabyss.titan.dungeon.TitanBackTrials.noteDown(player.getUUID());
         jp.revati.skyabyss.rebirth.RebirthFx.burst(player, false);
         if (player.level() instanceof ServerLevel level) {
             level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_HURT, SoundSource.PLAYERS, 1f, 0.6f);

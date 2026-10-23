@@ -69,8 +69,6 @@ public final class EmberSmithSetup {
         event.enqueueWork(() -> {
             EmberBackRooms.register("smith", AshSmithArena::build);
             EmberBackRooms.onReset("smith", (level, sleeping) -> AshSmithBattle.reset(level));
-            // 鍛えの間の扉が開いたら (C2)、鍛え手の戦いの受け付けを始める
-            jp.revati.skyabyss.titan.ember.back.trial.Forge.onDoorOpened(AshSmithBattle::onForgeDoorOpened);
         });
     }
 }

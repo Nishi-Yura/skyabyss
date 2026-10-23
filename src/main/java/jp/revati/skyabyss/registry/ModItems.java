@@ -164,8 +164,6 @@ public final class ModItems {
             () -> new DeferredSpawnEggItem(ModEntities.DRIFT_HERMIT, 0x6C5C4C, 0xE48070, new Item.Properties()));
     public static final DeferredItem<Item> SHORE_WARDEN_EGG = ITEMS.register("shore_warden_spawn_egg",
             () -> new DeferredSpawnEggItem(ModEntities.SHORE_WARDEN, 0x3A6470, 0xF0F0EC, new Item.Properties()));
-    public static final DeferredItem<Item> WATERWAY_MAW_EGG = ITEMS.register("waterway_maw_spawn_egg",
-            () -> new DeferredSpawnEggItem(ModEntities.WATERWAY_MAW, 0x46565C, 0x7FD6D0, new Item.Properties()));
     public static final DeferredItem<Item> WHALEBONE_CAPTAIN_EGG = ITEMS.register("whalebone_captain_spawn_egg",
             () -> new DeferredSpawnEggItem(ModEntities.WHALEBONE_CAPTAIN, 0xE2D8C0, 0x3C8CAA, new Item.Properties()));
     public static final DeferredItem<Item> STONE_WHALE_HEART_EGG = ITEMS.register("stone_whale_heart_spawn_egg",
@@ -175,12 +173,9 @@ public final class ModItems {
     public static final DeferredItem<BlockItem> CRUMBLING_BONE = ITEMS.registerSimpleBlockItem(ModBlocks.CRUMBLING_BONE);
     public static final DeferredItem<BlockItem> RESONANCE_FORGE = ITEMS.registerSimpleBlockItem(ModBlocks.RESONANCE_FORGE);
 
-    // 闇の水路の灯 (docs/design/23): 持ち運ぶ光る海のイソギンチャクと、灯の台・苗床・数え石
+    // 光る海のイソギンチャク (持つと、まわりをうっすら照らす灯。店で売る)
     public static final DeferredItem<Item> GLOW_ANEMONE = ITEMS.register("glow_anemone",
             () -> new jp.revati.skyabyss.titan.dungeon.GlowAnemoneItem(new Item.Properties().stacksTo(3).rarity(Rarity.UNCOMMON)));
-    public static final DeferredItem<BlockItem> ANEMONE_PEDESTAL = ITEMS.registerSimpleBlockItem(ModBlocks.ANEMONE_PEDESTAL);
-    public static final DeferredItem<BlockItem> ANEMONE_BED = ITEMS.registerSimpleBlockItem(ModBlocks.ANEMONE_BED);
-    public static final DeferredItem<BlockItem> ANEMONE_TALLY = ITEMS.registerSimpleBlockItem(ModBlocks.ANEMONE_TALLY);
 
     // 遺物ブロック (巨神ごとの様式は設置側が決める。持ち物のは鯨の様式)
     public static final DeferredItem<BlockItem> RELIC_CACHE = ITEMS.registerSimpleBlockItem(ModBlocks.RELIC_CACHE);
@@ -245,15 +240,11 @@ public final class ModItems {
                 output.accept(SAND_BURROWER_EGG.get());
                 output.accept(DRIFT_HERMIT_EGG.get());
                 output.accept(SHORE_WARDEN_EGG.get());
-                output.accept(WATERWAY_MAW_EGG.get());
                 output.accept(WHALEBONE_CAPTAIN_EGG.get());
                 output.accept(STONE_WHALE_HEART_EGG.get());
                 output.accept(SEALED_GATE.get());
                 output.accept(CRUMBLING_BONE.get());
                 output.accept(GLOW_ANEMONE.get());
-                output.accept(ANEMONE_PEDESTAL.get());
-                output.accept(ANEMONE_BED.get());
-                output.accept(ANEMONE_TALLY.get());
             })
             .build());
 

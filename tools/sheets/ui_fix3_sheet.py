@@ -11,7 +11,6 @@ from PIL import Image, ImageDraw, ImageFont
 ROOT = Path(__file__).resolve().parents[2]
 OUT = ROOT / "docs/review/previews/ui_fix3_sheet.png"
 SHOTS = ROOT / "run/shots/ui_fix3/shots/ui_fix3"
-MAZE = ROOT / "run/shots/ui_fix3_maze/shots/ui_fix3_maze"
 FONT = "C:/Windows/Fonts/meiryo.ttc"
 BG, INK = (22, 26, 33), (232, 236, 240)
 W, H = 640, 360
@@ -28,8 +27,6 @@ PANELS = [
     ("pouch_g3", "旅嚢 GUI 3: つまみの字"),
     ("acc_g4", "装飾 GUI 4"),
     ("acc_g2", "装飾 GUI 2"),
-    ("MAZE:maze_bed_tp", "光海の迷路 (三人称): 床の金の線だけで案内"),
-    ("MAZE:maze_bed_far", "光海の迷路 (一人称・矢印なしの帯)"),
 ]
 
 
@@ -44,7 +41,7 @@ def main():
         x = 10 + (i % cols) * (W + 10)
         y = 48 + (i // cols) * (H + 40)
         d.text((x, y), label, font=f, fill=INK)
-        p = (MAZE if name.startswith("MAZE:") else SHOTS) / (name.split(":")[-1] + ".png")
+        p = SHOTS / (name + ".png")
         if p.exists():
             im = Image.open(p).convert("RGB")
             im.thumbnail((W, H))

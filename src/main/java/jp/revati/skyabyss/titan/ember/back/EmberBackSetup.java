@@ -31,9 +31,6 @@ public final class EmberBackSetup {
                     .pushReaction(PushReaction.DESTROY)));
     public static final DeferredItem<BlockItem> CINDER_LAMP_ITEM = ITEMS.registerSimpleBlockItem(CINDER_LAMP);
 
-    public static final DeferredHolder<SoundEvent, SoundEvent> BACK_AMBIENT = sound(EmberIds.SOUND_BACK_AMBIENT);
-    public static final DeferredHolder<SoundEvent, SoundEvent> STONE_RING = sound(EmberIds.SOUND_STONE_RING);
-    public static final DeferredHolder<SoundEvent, SoundEvent> FORGE_DIM = sound(EmberIds.SOUND_FORGE_DIM);
 
     private EmberBackSetup() {
     }

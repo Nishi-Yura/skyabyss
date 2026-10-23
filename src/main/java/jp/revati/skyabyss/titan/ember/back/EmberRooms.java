@@ -119,19 +119,4 @@ public final class EmberRooms {
         }
     }
 
-    // 自己テスト用: 持ち主をその場で決める (偽のプレイヤーは部屋の中の人として数えられないため)
-    public static void claimForTest(ServerLevel level, Room room, UUID group) {
-        RoomLocks.release(room.lock());
-        forceOwner(room.lock(), group, level.getGameTime());
-        EmberBackRooms.resetRoom(level, room);
-    }
-
-    public static void releaseForTest(ServerLevel level, Room room) {
-        RoomLocks.release(room.lock());
-        EmberBackRooms.resetRoom(level, room);
-    }
-
-    private static void forceOwner(String lock, UUID group, long now) {
-        RoomLocks.claim(lock, group, now);
-    }
 }

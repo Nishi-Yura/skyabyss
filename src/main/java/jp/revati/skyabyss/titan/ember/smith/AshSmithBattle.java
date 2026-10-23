@@ -13,7 +13,6 @@ import jp.revati.skyabyss.titan.ember.EmberIds;
 import jp.revati.skyabyss.titan.ember.back.EmberBackState;
 import jp.revati.skyabyss.titan.ember.back.EmberBackTrials;
 import jp.revati.skyabyss.titan.ember.back.EmberRooms;
-import jp.revati.skyabyss.titan.ember.back.trial.Forge;
 import jp.revati.skyabyss.titan.ember.mob.EmberMob;
 import jp.revati.skyabyss.titan.group.GroupBossRoom;
 import jp.revati.skyabyss.titan.group.GroupBossRooms;
@@ -257,34 +256,6 @@ public final class AshSmithBattle {
         }
         Host host = new Host();
         return room.start(level, host, host.playersInside(level).stream().filter(p -> Groups.isMember(p, group)).toList());
-    }
-
-    // 鍛えの間の扉 (C2) が開いて 5 秒の予告が済んだ (Forge.onDoorOpened)。部屋が建っていなければ建て、
-    // 扉を開けたグループの人がもう中にいれば (予告のうちに入った人) 集合を待たずに始める。誰も入っていなければ、人が入ったとき (onLevelTick) に 5 秒の集合から始まる
-    public static void onForgeDoorOpened(ServerLevel level) {
-        if (level.dimension() != EmberIds.BACK) {
-            return;
-        }
-        UUID group = Forge.doorGroup();
-        if (group == null) {
-            group = EmberRooms.owner(EmberRooms.EAST);
-        }
-        if (group == null || done(level, group)) {
-            return;
-        }
-        if (!AshSmithArena.isBuilt(level)) {
-            AshSmithArena.build(level, AshSmithArena.BOX);
-        }
-        Host host = new Host();
-        GroupBossRoom room = ROOMS.of(group);
-        if (room.active() || host.asleep(level)) {
-            return;
-        }
-        UUID g = group;
-        List<ServerPlayer> inside = host.playersInside(level).stream().filter(p -> Groups.isMember(p, g)).toList();
-        if (!inside.isEmpty()) {
-            room.start(level, host, inside);
-        }
     }
 
     public static void abandon(MinecraftServer server) {

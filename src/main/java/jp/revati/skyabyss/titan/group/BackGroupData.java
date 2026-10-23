@@ -254,23 +254,6 @@ public final class BackGroupData extends SavedData {
             return out;
         }
 
-        public boolean addString(String key, String value) {
-            Set<String> set = strings(key);
-            if (!set.add(value)) {
-                return false;
-            }
-            ListTag list = new ListTag();
-            set.forEach(s -> list.add(StringTag.valueOf(s)));
-            data.put(key, list);
-            dirty();
-            return true;
-        }
-
-        public void clearStrings(String key) {
-            data.remove(key);
-            dirty();
-        }
-
         // 扉の上書きの読み書き (GroupGates から)
         public boolean hasOverride() {
             return !openOverride.isEmpty() || !closedOverride.isEmpty();

@@ -91,10 +91,6 @@
     "en": "The pillar of light carries you upward.",
     "ja": "光の柱に包まれ、上へ運ばれた。"
   },
-  "message.skyabyss.storm_heart.choice_later": {
-    "en": "This titan's legendary items do not exist in this world yet. Once they do, choose one with /titanmemory storm.",
-    "ja": "この巨神の伝説の品は、まだこの世界にない。現れたら /titanmemory storm で一つ選べる。"
-  },
   "message.skyabyss.memory_title_thunder_wing": {
     "en": "Memory of the Thunder Wing",
     "ja": "雷翼の記憶"

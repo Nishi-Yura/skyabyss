@@ -105,8 +105,6 @@ public final class TrialSteles {
 
     // by: 鳴らした人 (わかれば。「誰が鳴らしたか」の表示のために控える。踏破の数え方には使わない)
     public static void onRung(ServerLevel back, UUID group, String titan, String trial, @Nullable Component name, @Nullable ServerPlayer by) {
-        // 試練のプール (docs/design/29): 原型の石は図鑑・報いに数える (新作の石は TrialRuntime が自分で数える)
-        jp.revati.skyabyss.trial.TrialRuntime.onStoneRung(back, group, titan, trial, by);
         // 試練を越えた: 順路の今の段なら、4 秒後に次の段の入口へ運ぶ (docs/design/32 の 2.3)
         jp.revati.skyabyss.trial.TrialRoute.onCleared(back, group, titan, trial, by);
         if (by != null) {
@@ -159,13 +157,6 @@ public final class TrialSteles {
                     : Component.translatable("message.skyabyss.steles.who_other", w.name());
             case NONE -> Component.translatable("message.skyabyss.steles.who_none");
         };
-    }
-
-    // すでに鳴っている石に触ったとき、画面の下に「あなたが鳴らした / 〇〇が鳴らした」を出す
-    public static void tellWho(ServerPlayer player, String titan, String trial) {
-        jp.revati.skyabyss.tutorial.TutorialHints.start(player, jp.revati.skyabyss.tutorial.TutorialHints.RECORD);
-        WhoRang w = who(player.server, Groups.keyOf(player), player.getUUID(), signal(titan, trial));
-        Notice.bar(player, jp.revati.skyabyss.ModText.hint("message.skyabyss.steles.who", whoText(w)));
     }
 
     // 控え帳の頁用: 巨神 (進行の名前: stone_whale / tide_shell / thunder_wing / ember) の石の合図の一覧。石のない巨神は空

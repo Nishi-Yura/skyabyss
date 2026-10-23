@@ -177,12 +177,6 @@ public final class StormRods {
         GROUNDED.put(rod.immutable(), now + ticks);
     }
 
-    // 接地が残る tick (していなければ 0)
-    public static int groundedTicks(BlockPos rod) {
-        Long until = GROUNDED.get(rod);
-        return until == null ? 0 : (int) Math.max(0, until - now);
-    }
-
     @EventBusSubscriber(modid = SkyAbyss.MODID)
     static final class Ticker {
         private Ticker() {

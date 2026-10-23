@@ -130,33 +130,6 @@ public final class TideIslandBuilder {
         return ((h ^ (h >>> 16)) & 0xFFFF) / 65535.0;
     }
 
-    // 甲羅の地表: 甲羅の板の継ぎ目 (同心の環と放射の線) は暗い石、板の上は苔と砂の大きな斑、ところどころ珊瑚の色
-    static BlockState reef(int i) {
-        return switch (Math.floorMod(i, 5)) {
-            case 0 -> Blocks.PINK_TERRACOTTA.defaultBlockState();
-            case 1 -> Blocks.RED_TERRACOTTA.defaultBlockState();
-            case 2 -> Blocks.ORANGE_TERRACOTTA.defaultBlockState();
-            case 3 -> Blocks.YELLOW_TERRACOTTA.defaultBlockState();
-            default -> Blocks.MAGENTA_TERRACOTTA.defaultBlockState();
-        };
-    }
-
-    // 枯れた珊瑚は、ふだんの形 (defaultBlockState) が水に浸かっている。空気の中に置くと、隣が変わったときに水が流れ出すので、乾いた形で置く
-    // (潮で庭が満ちるときは TideField が水に沈める)
-    static BlockState deadFan(int i) {
-        BlockState s = switch (Math.floorMod(i, 4)) {
-            case 0 -> Blocks.DEAD_BRAIN_CORAL.defaultBlockState();
-            case 1 -> Blocks.DEAD_FIRE_CORAL.defaultBlockState();
-            case 2 -> Blocks.DEAD_TUBE_CORAL_FAN.defaultBlockState();
-            default -> Blocks.DEAD_HORN_CORAL.defaultBlockState();
-        };
-        return s.setValue(net.minecraft.world.level.block.state.properties.BlockStateProperties.WATERLOGGED, false);
-    }
-
-    // ---------------------------------------------------------------- 潮門の浜 (甲羅の中の広間。砂岩と貝の白、天井は肋のドーム)
-    // 潮だまり (浅い水盤)・肋の梁・天窓・焚き火と炉・灯りの道。西の廊下から入り、北東の回廊で広間へ、北西の口から甲羅の上へ
-    static final int[] BEACH_POOL = {-36, 94};
-
     // ---------------------------------------------------------------- 潮門 (モデルの左後ろの門)、到着の段、見送りの段、潮門の廊下
     private static void gate(TideKit kit) {
         kit.zone(TideZone.BEACH);
@@ -263,36 +236,6 @@ public final class TideIslandBuilder {
     public static boolean inReturnGate(double x, double y, double z) {
         return x >= GATE_X - 1 && x < GATE_X + 2 && z >= GATE_Z && z < GATE_Z + 2 && y >= GATE_Y0 - 0.5 && y < GATE_Y1;
     }
-
-    // ---------------------------------------------------------------- 縁の回廊 (浜 66 → 広間の南の段 74): 幅 7、高さ 7。柱とアーチの階段回廊。途中に碑と宝の窪み
-    static int caveFloor(int z) {
-        int len = CAVE_Z_BEACH - CAVE_Z_HUB;
-        return BEACH.floor() + (int) Math.round((HUB_LEDGE - BEACH.floor()) * (CAVE_Z_BEACH - z) / (double) len);
-    }
-
-    // 回廊の脇の窪み (東の壁、z 47〜52。床 69〜70)
-    static final int[] CAVE_NICHE = {-11, -5, 48, 53};
-
-    // ---------------------------------------------------------------- 珊瑚の庭 (西) / 潮見の間 (東) / 干潟 (前)。それぞれの Builder へ
-    public static List<BlockPos> channelCells(Channel c) {
-        return TideGardenBuilder.channelCells(c);
-    }
-
-    public static void carveGardenRoute(TideKit kit, int route, boolean full) {
-        TideGardenBuilder.carveRoute(kit, route, full);
-    }
-
-    // 干潟の窓 (北西・北東の角。x だけ使う)
-    public static final int[][] FLATS_WINDOWS = {{-32, 0}, {30, 0}};
-
-    // ---------------------------------------------------------------- 潮の底の門の下: 螺旋の階段と、殻の底の前室への通路
-    // 螺旋の段の並び (中心の柱のまわり 8 マス)。最後の段 (18 番目) は北西の角、そこから北の通路へ
-    public static final int[][] SPIRAL_RING = {{-1, 1}, {-1, 0}, {-1, -1}, {0, -1}, {1, -1}, {1, 0}, {1, 1}, {0, 1}};
-    public static final int SPIRAL_STEPS = SPIRAL_TOP - SPIRAL_BOTTOM + 1;
-
-    // ---------------------------------------------------------------- 掘った所の内壁を、潮の民の石にする (体の芯の凝灰岩が見えたら)
-    // 皮の手順の x の幅
-    static final int SKIN_BAND = 16;
 
     private static int surface(int x, int z) {
         return Math.max(TideTurtle.top(x, z), shellTop(x, z));

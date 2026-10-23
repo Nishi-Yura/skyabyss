@@ -54,7 +54,6 @@ public final class GuardRenderers {
             return r;
         });
         event.registerEntityRenderer(ModEntities.MOSS_CRAWLER.get(), GuardRenderers::mossCrawler);
-        event.registerEntityRenderer(ModEntities.WATERWAY_MAW.get(), ctx -> new LowPolyGeoRenderer<jp.revati.skyabyss.entity.WaterwayMaw>(ctx, "waterway_maw", 0.58f));
         event.registerEntityRenderer(ModEntities.WHALEBONE_CAPTAIN.get(), ctx -> {
             LowPolyGeoRenderer<jp.revati.skyabyss.entity.WhaleboneCaptain> r = new LowPolyGeoRenderer<>(ctx, "whalebone_captain", 1.0f);
             r.addRenderLayer(GearLayer.item(r, "socket_main", captainPikeStack(), ItemDisplayContext.NONE, GuardRenderers::captainPike, () -> !LowPoly.enabled));

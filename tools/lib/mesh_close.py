@@ -643,8 +643,6 @@ JOINT_TOUCHUPS = {
     ("static_moth", "wing_r"): ((0, -1, 0), 1.5, 4.0),
     ("moss_crawler", "lure_l"): ((0, -1, 0), 0.7, None),
     ("moss_crawler", "lure_r"): ((0, -1, 0), 0.7, None),
-    # 顎の後ろの上の縁を頭蓋の底へ立ち上げる (あごの枝。蝶番が頭蓋の中に入る)。(lift, 後ろ z0, 前 z1, 下の y)
-    ("waterway_maw", "jaw"): ("ramus", 6.0, -14.0, -26.0, 2.0),
 }
 
 

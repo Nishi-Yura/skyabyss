@@ -235,11 +235,6 @@ public final class RouteSeals {
         }
     }
 
-    // ---------------------------------------------------------------- 調べる
-    public static boolean isSeal(ServerLevel back, BlockPos p) {
-        return Data.get(back).seals.contains(p.asLong());
-    }
-
     public static int count(ServerLevel back) {
         return Data.get(back).seals.size();
     }

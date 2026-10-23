@@ -117,13 +117,8 @@ public final class TitanBackTrials {
     private static final int RESET_AFTER_IDLE = 20 * 60 * 3;
     // 心臓を倒したあと、封印の先 (宝物庫より奥) に誰もいなくなってから試練を戻すまで (30 秒)
     private static final int RESET_AFTER_HEART = 20 * 30;
-    private static final int WAVE_DELAY = 60;
     // 扉が閉じるまでの集合の時間 (5 秒)
     public static final int GATHER_TICKS = 100;
-    // 心臓の間から人が消えてから、心臓を眠らせて入口を開けるまでの時間
-    private static final int HEART_ABANDON_DELAY = 60;
-    // 心臓が撃破の報告なしに消えたとき、次に集合を始めるまでの間 (開け閉めを繰り返さないように)
-    private static final int HEART_RETRY_COOLDOWN = 100;
 
     // ---------------------------------------------------------------- 休憩地点
     private record Checkpoint(String id, Box area, BlockPos spawn) {
@@ -152,176 +147,19 @@ public final class TitanBackTrials {
             new Checkpoint("mz1", MAZE_ENTRY_ROOM2, new BlockPos(MAZE_ENTRY_ROOM2.x1(), MAZE_ENTRY_ROOM2.floorY() + 1, MAZE_ENTRY_ROOM2.z2())),
             // 闇の水路の入口: はしごを下りた先の乾いた小部屋。水の外・戦いの外。足元は部屋の床の一段上
             new Checkpoint(MAZE_ENTRY, MAZE_ENTRY_ROOM, new BlockPos(MAZE_ENTRY_ROOM.x1(), MAZE_ENTRY_ROOM.floorY() + 1, MAZE_ENTRY_ROOM.z2())));
-    // 試練の階 (WhaleDeck。docs/design/29) の休み場も、階を置いたあと (WhaleDeck.placed) は同じ決まりで数える
-    private static final List<Checkpoint> WITH_DECK_CHECKPOINTS = concatCheckpoints(BASE_CHECKPOINTS,
-            WhaleDeck.rests().stream().map(r -> new Checkpoint(r.id(), r.area(), r.spawn())).toList());
-
     private static List<Checkpoint> checkpoints() {
-        return WhaleDeck.placed() ? WITH_DECK_CHECKPOINTS : BASE_CHECKPOINTS;
+        return BASE_CHECKPOINTS;
     }
     private static final List<String> WEST_CHECKPOINTS = List.of("w0", "w1", "w2", "wp");
 
-    private static List<Checkpoint> concatCheckpoints(List<Checkpoint> a, List<Checkpoint> b) {
-        List<Checkpoint> out = new ArrayList<>(a);
-        out.addAll(b);
-        return List.copyOf(out);
-    }
-
-    // 闇の水路の中ほどの休み場 (息継ぎのくぼみの一つに、乾いた足場を作ってある)。迷路は種で形が変わるので、場所は種から出す
-    public static final String MAZE_REST = "mz";
-    private static long mazeRestSeed = Long.MIN_VALUE;
-    private static Checkpoint mazeRest;
-
-    private static Checkpoint mazeRest(ServerLevel level) {
-        long seed = TitanBackData.get(level).mazeSeed();
-        if (mazeRest == null || mazeRestSeed != seed) {
-            BlockPos p = MazeBuilder.midPocket(MazeBuilder.maze(seed));
-            // 足場の床 (y = p.y + 1) の上の空気の層。中は 3×3
-            mazeRest = new Checkpoint(MAZE_REST, new Box(p.getX(), p.getX() + MAZE_CELL - 1, p.getZ(), p.getZ() + MAZE_CELL - 1, p.getY() + 1, 3),
-                    MazeBuilder.restSpot(p));
-            mazeRestSeed = seed;
-        }
-        return mazeRest;
-    }
-
     private static List<Checkpoint> checkpointsOf(ServerLevel level) {
-        if (!TitanBackData.get(level).isBuilt()) {
-            return checkpoints();
-        }
-        List<Checkpoint> all = new ArrayList<>(checkpoints());
-        all.add(mazeRest(level));
-        return all;
-    }
-
-    // ---------------------------------------------------------------- 番兵の広間
-    // ante は入口の手前の前室 (扉が閉じるとき、ここにいる人も中へ入れる)
-    // cuts: 動かせる仕切り (版 18。少人数のグループだけに、広間の中に立つ封印の壁。人数が maxPlayers 以下のとき張り、封じた側 (sealed) には湧かない)
-    private record Cut(int maxPlayers, List<BlockPos> wall, java.util.function.Predicate<BlockPos> sealed) {
-    }
-
-    private record Hall(String id, Box box, AABB ante, List<BlockPos> entrance, List<BlockPos> exit, List<List<String>> waves,
-            List<Cut> cuts) {
-        // その人数のとき封じている仕切りの壁の全部
-        List<BlockPos> walls(int players) {
-            List<BlockPos> out = new ArrayList<>();
-            for (Cut c : cuts) {
-                if (players <= c.maxPlayers()) {
-                    out.addAll(c.wall());
-                }
-            }
-            return out;
-        }
-
-        // その人数のとき、湧いてよい場所か (封じた側ではない)
-        boolean open(int players, BlockPos p) {
-            for (Cut c : cuts) {
-                if (players <= c.maxPlayers() && c.sealed().test(p)) {
-                    return false;
-                }
-            }
-            return true;
-        }
-
-        List<BlockPos> allWalls() {
-            List<BlockPos> out = new ArrayList<>();
-            for (Cut c : cuts) {
-                out.addAll(c.wall());
-            }
-            return out;
-        }
-    }
-
-    private static List<BlockPos> concat(List<BlockPos> a, List<BlockPos> b) {
-        List<BlockPos> out = new ArrayList<>(a);
-        out.addAll(b);
-        return List.copyOf(out);
-    }
-
-    // 第一の広間は、近接の波 (番兵が前に立ち、苔這いが回り込む) → 射手の波 (番兵の盾の後ろから射手 3 体が撃つ。奥の壁ぎわで骨の砲手が
-    // 足もとへ骨の塊を落とす) → 老番兵の波 (名づきの小さな中ボス。号令の骨笛で射手を呼ぶ)。
-    // 番兵長の広間の第一波で両方が混ざる。(配置の版 2 で第二の広間を除き、その射手の波を第一の広間へ移した)
-    // 動かせる仕切りは、使わない (設計書 26 の 8.7 は B: 同じ広間で湧きを入口側へ寄せ、罠と柱で使わせる。RoomPlay)。入れるなら、各広間の NO_CUTS を
-    // List.of(new Cut(最大人数, VEIL_E1, 封じる側の判定), ...) に替え、VEIL_* を OPEN_GATES に足す (仕組みは applyVeil・spawnWave・resetHall が持っている)
-    private static final List<Cut> NO_CUTS = List.of();
-
-    private static final List<Hall> HALLS = List.of(
-            // 第一の広間 (練兵場): 二人以下は南を封じ (z -26 より南)、一人はさらに東 (x 48 より東) を封じる
-            new Hall("e1", E1, E0.aabb(), E1_ENTRANCE, E1_EXIT, List.of(
-                    List.of("sentinel", "sentinel", "crawler", "crawler"),
-                    List.of("archer", "archer", "archer", "sentinel", "mortar")),
-                    NO_CUTS),
-            // 版 25: 第二の広間 (射手の回廊) は戦わない通路にした。東の翼の戦いは 3 つ (第一の広間・詰所・番兵長の広間)
-            // 番兵の詰所: 盾の壁の列 (骨の番兵 4) → 老番兵。倒すと番兵長の広間への戸 (割符の戸) が開く。初回だけ
-            new Hall("ck", CK, CK_PASS.aabb(), CK_ENTRANCE, E3_LOCK, List.of(
-                    List.of("sentinel", "sentinel", "sentinel", "sentinel"),
-                    List.of("elder")), List.of()),
-            // 番兵長の広間: 二人以下は南 (共鳴石の側) を封じる。倒すと開く
-            new Hall("e3", E3, E3_ANTE, E3_ENTRANCE, List.of(), List.of(
-                    List.of("sentinel", "sentinel", "archer", "crawler", "crawler"),
-                    List.of("captain")), NO_CUTS));
-
-    // 周回の長い広間 (32 の 4 章、R5): 第一の広間と番兵長の広間に一波ずつ足す (詰所は初回だけなので、周回の戦いは 4 波 → 6 波)
-    static final Map<String, List<List<String>>> LONG_WAVES = Map.of(
-            "e1", List.of(
-                    List.of("sentinel", "sentinel", "crawler", "crawler"),
-                    List.of("archer", "archer", "archer", "sentinel", "mortar"),
-                    List.of("crawler", "crawler", "sentinel", "archer", "sentinel")),
-            "e3", List.of(
-                    List.of("sentinel", "sentinel", "archer", "crawler", "crawler"),
-                    List.of("archer", "archer", "sentinel", "sentinel", "mortar"),
-                    List.of("captain")));
-
-    // 周回で戦う広間 (第一の広間・番兵長の広間) の波の数の合計。extended = 周回の長い並び (自己テスト用)
-    public static int replayWaves(boolean extended) {
-        int n = 0;
-        for (Hall h : HALLS) {
-            if (LONG_WAVES.containsKey(h.id())) {
-                n += extended ? LONG_WAVES.get(h.id()).size() : h.waves().size();
-            }
-        }
-        return n;
-    }
-
-    // その広間の波の並び (周回のグループは LONG_WAVES)
-    static List<List<String>> wavesOf(ServerLevel level, UUID group, Hall hall) {
-        List<List<String>> longer = LONG_WAVES.get(hall.id());
-        return longer != null && jp.revati.skyabyss.trial.RouteLength.extended(level, group) ? longer : hall.waves();
+        return checkpoints();
     }
 
     // ---------------------------------------------------------------- 状態 (グループごと)
     // 試練の進み (制圧した広間・宝物庫の封印・心臓の撃破・鳴らした石・扉の開け閉め) は、グループ (パーティ、または一人) の記録
     // (BackGroupData.Record) にある。ここにあるのは、戦いの最中のメモリの状態 (保存しない) だけで、(グループ, 広間) ごとに持つ。
     // 同じ広間・心臓の間で、グループごとに別々の戦いが同時に動く (敵・ボスはグループの印つきで、ほかのグループには見えない)
-    private static final class HallState {
-        final UUID group;
-        final Hall hall;
-        // 0 = 集合中 (扉は開いている)、1 以上 = 戦っている波の番号
-        int wave;
-        int gather = GATHER_TICKS;
-        int delay;
-        int players;
-        // 広間が空に見えてからの時間 (一瞬の取りこぼしでは戻さない)
-        int emptyTicks;
-        // 戦いの参加者 (扉が閉じたときに中にいた人。途中で倒れた人も残す)
-        final Set<UUID> participants = new LinkedHashSet<>();
-        // 戦いの最中に倒れた参加者の再入場 (20 秒の待ち・回数。戦いが終わる・やり直しで消える。報酬の参加者には残る)
-        final Reentry reentry = new Reentry();
-        // この戦いでパーティが倒れた回数 (倒れた状態 + 倒れずに死んだ回数)。番兵長に勝ったときの札に使う
-        int falls;
-
-        // この戦いの波の並び (周回は長い。wavesOf)
-        List<List<String>> waves;
-
-        HallState(UUID group, Hall hall) {
-            this.group = group;
-            this.hall = hall;
-            this.waves = hall.waves();
-        }
-    }
-
-    private static final Map<String, HallState> HALL_STATES = new HashMap<>();
-    // 集合の知らせを最後に出した時刻 (出入りを繰り返しても流れ続けないように)
-    private static final Map<String, Long> LAST_GATHER_NOTICE = new HashMap<>();
     // 背中で倒れ、背中へ連れ戻している途中の人 (次元の移動で休み場の記録を消さないため)
     private static final Set<UUID> REVIVING = new HashSet<>();
     private static boolean cleanedAfterLoad;
@@ -340,13 +178,6 @@ public final class TitanBackTrials {
     private static final List<List<BlockPos>> OPEN_GATES = List.of(HEART_GATE);
 
     private TitanBackTrials() {
-    }
-
-    // 戸口の位置の一覧 (閉じている戸・開いている戸の全部)
-    static List<List<BlockPos>> allDoorLists() {
-        List<List<BlockPos>> all = new ArrayList<>(CLOSED_GATES);
-        all.addAll(OPEN_GATES);
-        return all;
     }
 
     // 倒れても消えないよう、PlayerPersisted (死んでも引き継がれる領域) に書く
@@ -451,8 +282,6 @@ public final class TitanBackTrials {
 
     @SubscribeEvent
     static void onServerStopped(ServerStoppedEvent event) {
-        HALL_STATES.clear();
-        LAST_GATHER_NOTICE.clear();
         REVIVING.clear();
         HEART_ROOMS.clear();
         AFTER_HEART_IDLE.clear();
@@ -564,9 +393,6 @@ public final class TitanBackTrials {
                 e -> e.getTags().contains(MOB_TAG) || e.getTags().contains(HEART_TAG)))) {
             e.discard();
         }
-        for (HallState state : List.copyOf(HALL_STATES.values())) {
-            resetHall(level, state.hall, state.group, false);
-        }
         HEART_ROOMS.resetAll(level, HEART_HOST, false);
         // 戦いの間だけ閉じる入口は、どのグループにも開け直す
         BackGroupData records = BackGroupData.get(level);
@@ -585,9 +411,7 @@ public final class TitanBackTrials {
 
     // 心臓の回廊 (宝物庫の奥の扉から心臓の間の入口まで)
     // リセットで作り直したり封じたりしない場所 (鼓動の間とその周り)。リセットのとき、ここにいる人は動かさない
-    private static final List<Box> SAFE_ON_RESET = List.of(HUB, ENTRY, W0, E0, WEST_HALL, EAST_HALL, WhaleDeck.STAIR, WhaleDeck.D0, WhaleDeck.C1, WhaleDeck.S0,
-            WhaleDeck.W06, WhaleDeck.W07, WhaleDeck.W10, WhaleDeck.C2, WhaleDeck.S1, WhaleDeck.W03, WhaleDeck.W04, WhaleDeck.W04_STONE_ROOM,
-            WhaleDeck.W11, WhaleDeck.W11_STONE_ROOM, WhaleDeck.W12,
+    private static final List<Box> SAFE_ON_RESET = List.of(HUB, ENTRY, W0, E0, WEST_HALL, EAST_HALL,
             // 台から背の広場へ登る階段 (到着の道。リセットで動かさない)
             new Box(STAIR_X0, STAIR_X0 + 64, STAIR_Z0, STAIR_Z1, FLANK_FLOOR_Y, 64));
 
@@ -603,290 +427,18 @@ public final class TitanBackTrials {
         return shape(p.getX(), p.getZ()) > 0 && p.getY() <= top(p.getX(), p.getZ());
     }
 
-    // ---------------------------------------------------------------- 番兵の広間 (グループごと)
-    private static String hallKey(UUID group, String hall) {
-        return group + "|" + hall;
-    }
-
-    private static void tickHall(ServerLevel level, BackGroupData.Record record, UUID group, Hall hall) {
-        String key = hallKey(group, hall.id());
-        HallState state = HALL_STATES.get(key);
-        if (state == null || state.wave == 0) {
-            List<ServerPlayer> inside = playersInside(level, hall, group);
-            if (state == null) {
-                if (!inside.isEmpty()) {
-                    // 集合: 扉は開いたまま、5 秒待つ
-                    state = new HallState(group, hall);
-                    state.waves = wavesOf(level, group, hall);
-                    HALL_STATES.put(key, state);
-                    announceGathering(level, group, key, hall.box());
-                    applyVeil(level, group, hall, groupNear(level, group, hall));
-                }
-                return;
-            }
-            applyVeil(level, group, hall, groupNear(level, group, hall));
-            if (inside.isEmpty() && playersInHall(level, hall, group).isEmpty()) {
-                // 中から人がいなくなったので、集合を取りやめる
-                HALL_STATES.remove(key);
-                return;
-            }
-            state.gather -= 10;
-            if (state.gather > 0) {
-                countdown(level, group, hall.box(), state.gather);
-                return;
-            }
-            // 扉が閉じる: 戸口と前室にいる人も中へ入れ、中にいる人を参加者として数える
-            pullIn(level, group, hall.entrance(), hall.box().center(), hall.ante());
-            for (ServerPlayer player : playersInHall(level, hall, group)) {
-                state.participants.add(player.getUUID());
-            }
-            if (state.participants.isEmpty()) {
-                HALL_STATES.remove(key);
-                return;
-            }
-            state.wave = 1;
-            state.players = state.participants.size();
-            applyVeil(level, group, hall, state.players);
-            GroupGates.seal(level, group, hall.entrance());
-            playToGroup(level, group, hall.entrance().get(0), SoundEvents.IRON_DOOR_CLOSE, 2f, 0.5f);
-            broadcast(level, group, hall.box(), ModText.battle("message.skyabyss.hall_begin"));
-            SkyAbyss.LOGGER.info("Hall {} sealed with {} challenger(s) of group {}", hall.id(), state.players, group);
-            spawnWave(level, hall, state);
-            return;
-        }
-        // 戦いが始まったら、壁ぎわや戸口に立っていても「中にいる」と数える。
-        // 全員が倒れて (休み場へ戻されて) 3秒たったときだけ、広間を最初に戻す
-        List<ServerPlayer> inHall = playersInHall(level, hall, group);
-        if (inHall.isEmpty()) {
-            state.emptyTicks += 10;
-            if (state.emptyTicks >= 60) {
-                resetHall(level, hall, group, true);
-            }
-            return;
-        }
-        for (ServerPlayer player : inHall) {
-            state.participants.add(player.getUUID());
-        }
-        state.emptyTicks = 0;
-        // 倒れていない参加者 (離れて戻ってきた人) は、戦いが続いている間、扉に触れると内側へ戻れる。
-        // 倒れた人は、前室で目を覚まして 20 秒たち、回数 (skyabyssHeartReentryLimit) が残っているときだけ
-        tellFallen(level, state.reentry, inHall, state.participants);
-        letParticipantsBack(level, group, hall.entrance(), hall.box().center(), state.participants, state.reentry);
-        clearStrays(level, hall, group);
-        if (aliveGuards(level, hall, group) > 0) {
-            return;
-        }
-        if (state.delay == 0) {
-            state.delay = WAVE_DELAY;
-            if (state.wave < state.waves.size()) {
-                broadcast(level, group, hall.box(), ModText.battle("message.skyabyss.arena_next"));
-            }
-            return;
-        }
-        state.delay -= 10;
-        if (state.delay > 0) {
-            return;
-        }
-        state.delay = 0;
-        if (state.wave >= state.waves.size()) {
-            // 制圧: 出口と入口の両方が (このグループには) 開く。倒れて控えの間で目を覚ました仲間も、先へ進める
-            record.markHallCleared(hall.id());
-            HALL_STATES.remove(key);
-            // 制圧のあとに、遅れて呼ばれた仲間・取りこぼしを残さない (行く手をふさぐので)
-            for (Mob left : level.getEntitiesOfClass(Mob.class, hall.box().aabb().inflate(14, 2, 14),
-                    e -> e.getTags().contains(MOB_TAG) && group.equals(Groups.keyOf(e)))) {
-                left.discard();
-            }
-            GroupGates.open(level, group, hall.exit());
-            GroupGates.release(level, group, hall.entrance());
-            GroupGates.release(level, group, hall.allWalls());
-            playToGroup(level, group, hall.box().center(), SoundEvents.BEACON_POWER_SELECT, 2f, 0.8f);
-            broadcast(level, group, hall.box(), ModText.progress(hall.exit().isEmpty() ? "message.skyabyss.arena_cleared" : "message.skyabyss.hall_cleared"));
-        } else {
-            state.wave++;
-            spawnWave(level, hall, state);
-        }
-    }
-
-    // 中にいた全員が倒れたので、そのグループの番兵を眠らせて最初に戻す (入口が開き、休み場からやり直せる)。出口は閉じたまま
-    private static void resetHall(ServerLevel level, Hall hall, UUID group, boolean announce) {
-        for (Entity e : level.getEntitiesOfClass(Entity.class, hall.box().aabb().inflate(4),
-                e -> e.getTags().contains(MOB_TAG) && group.equals(Groups.keyOf(e)))) {
-            e.discard();
-        }
-        HALL_STATES.remove(hallKey(group, hall.id()));
-        GroupGates.release(level, group, hall.entrance());
-        GroupGates.release(level, group, hall.allWalls());
-        if (!record(level, group).isHallCleared(hall.id())) {
-            GroupGates.release(level, group, hall.exit());
-        }
-        if (announce) {
-            broadcast(level, group, hall.box(), ModText.deny("message.skyabyss.arena_reset"));
-        }
-    }
-
-    // 広間の近く (40 マス以内) にいる、そのグループの人の数 (幕を張るかどうかの目安)
-    private static int groupNear(ServerLevel level, UUID group, Hall hall) {
-        return Math.max(1, Groups.inBox(level, group, hall.box().aabb().inflate(40)).size());
-    }
-
-    // 仕切り (少人数だけ、広間の一部を封じる)。人数に合わせて立てる・外す (人数が増えれば外れる)
-    private static void applyVeil(ServerLevel level, UUID group, Hall hall, int players) {
-        for (Cut cut : hall.cuts()) {
-            if (players <= cut.maxPlayers()) {
-                GroupGates.seal(level, group, cut.wall());
-            } else {
-                GroupGates.release(level, group, cut.wall());
-            }
-        }
-    }
-
-    private static int aliveGuards(ServerLevel level, Hall hall, UUID group) {
-        return level.getEntitiesOfClass(Mob.class, hall.box().aabb().inflate(3),
-                e -> e.isAlive() && e.getTags().contains(MOB_TAG) && group.equals(Groups.keyOf(e))).size();
-    }
-
-    // 人数の上限 (パーティは最大 6 人)
-    private static final int MAX_SCALE_PLAYERS = jp.revati.skyabyss.party.Parties.MAX_MEMBERS;
-
-    private static void spawnWave(ServerLevel level, Hall hall, HallState state) {
-        List<BlockPos> spawns = EastWingBuilder.spawnPoints(hall.box());
-        if (!hall.cuts().isEmpty()) {
-            // 仕切りが立っているあいだは、封じていない側にだけ湧かせる
-            List<BlockPos> near = spawns.stream().filter(p -> hall.open(state.players, p)).toList();
-            if (!near.isEmpty()) {
-                spawns = near;
-            }
-        }
-        // 設計書 26 の 8.7 の B: 広間の大きさは同じ。一人・二人は、湧き場所を入口側に寄せる (広間いっぱいは 4 人から)
-        List<String> wave = new ArrayList<>(state.waves.get(state.wave - 1));
-        // 人数が多いほど番兵も増える (1人増えるごとに2体。番兵長の波では骨の番兵が増える。最大 6 人分)。
-        // 老番兵の波は骨の番兵が増える (老番兵は体力が増える)。骨の砲手は 4 人から 2 体
-        boolean elderWave = wave.get(0).equals("elder");
-        for (int extra = 1; extra < Math.min(state.players, MAX_SCALE_PLAYERS); extra++) {
-            if (wave.get(0).equals("captain")) {
-                wave.add("sentinel");
-                wave.add("archer");
-            } else if (elderWave) {
-                wave.add("sentinel");
-                wave.add("sentinel");
-            } else {
-                wave.add(wave.get(0));
-                wave.add(wave.get(1));
-            }
-        }
-        if (wave.contains("mortar") && state.players >= 4) {
-            wave.add("mortar");
-        }
-        int mortars = 0;
-        for (int i = 0; i < wave.size(); i++) {
-            String kind = wave.get(i);
-            BlockPos at;
-            if (kind.equals("captain") || kind.equals("elder")) {
-                at = bossSpot(level, hall, spawns.get(0), state.players);
-            } else if (kind.equals("mortar")) {
-                // 骨の砲手は奥の壁ぎわ (広間の出口側の二つの角) から撃つ。少人数は入口側の湧き場所から、広間の内へ 2 マス
-                int m = mortars++ % 2;
-                BlockPos base = spawns.get(m);
-                at = base.offset(Integer.signum(hall.box().center().getX() - base.getX()) * 2, 0, 0);
-            } else {
-                at = spawns.get(i % spawns.size());
-            }
-            Mob mob = spawnGuard(level, kind, at, state.group);
-            if (mob instanceof WhaleboneCaptain || mob instanceof ElderSentinel) {
-                // 番兵長・老番兵は心臓と同じ式で、人数に応じて体力が増える (280・220 × (1 + 0.6 × (人数 − 1)))
-                var health = mob.getAttribute(Attributes.MAX_HEALTH);
-                if (health != null) {
-                    health.setBaseValue(Math.min(1024, health.getBaseValue() * StoneWhaleHeart.scaleFor(state.players)));
-                    mob.setHealth(mob.getMaxHealth());
-                }
-            }
-        }
-        broadcast(level, state.group, hall.box(), ModText.battle("message.skyabyss.arena_wave", state.wave, state.waves.size()));
-    }
-
-    // 番兵長・老番兵の立つ場所: 4 人からは広間の真ん中。一人・二人は入口から真ん中へ向かう道の途中 (45%・60%・80%)。
-    // 体が大きいので、そこが柱や置物にふさがれていたら真ん中へ戻す
-    private static BlockPos bossSpot(ServerLevel level, Hall hall, BlockPos entrance, int players) {
-        BlockPos c = hall.box().center();
-        if (players >= 4 || hall.id().equals("ck")) {
-            return c;
-        }
-        double f = RoomPlay.keepFraction(players);
-        int x = (int) Math.round(entrance.getX() + (c.getX() - entrance.getX()) * f);
-        int z = (int) Math.round(entrance.getZ() + (c.getZ() - entrance.getZ()) * f);
-        x = Math.max(hall.box().x1() + 3, Math.min(hall.box().x2() - 3, x));
-        z = Math.max(hall.box().z1() + 3, Math.min(hall.box().z2() - 3, z));
-        BlockPos at = new BlockPos(x, c.getY(), z);
-        net.minecraft.world.phys.AABB body = new net.minecraft.world.phys.AABB(x - 1.6, c.getY(), z - 1.6, x + 2.6, c.getY() + 4, z + 2.6);
-        return level.noCollision(body) ? at : c;
-    }
-
     @Nullable
     public static Mob spawnGuard(ServerLevel level, String kind, BlockPos pos) {
         return spawnGuard(level, kind, pos, null);
     }
 
-    // その位置を含む番兵の広間 (なければ null)
-    @Nullable
-    private static Hall hallAt(BlockPos pos) {
-        for (Hall h : HALLS) {
-            if (h.box().aabb().inflate(0, 1, 0).contains(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5)) {
-                return h;
-            }
-        }
-        return null;
-    }
-
-    // 広間の中の、spot にいちばん近い立てる床 (壁ぎわ 1 マスは除く)。なければ null
-    @Nullable
-    private static BlockPos insideSpot(ServerLevel level, Hall hall, BlockPos spot) {
-        Box b = hall.box();
-        int x = Math.max(b.x1() + 1, Math.min(b.x2() - 1, spot.getX()));
-        int z = Math.max(b.z1() + 1, Math.min(b.z2() - 1, spot.getZ()));
-        BlockPos p = new BlockPos(x, b.floorY() + 1, z);
-        return level.getBlockState(p.below()).isSolid() && level.getBlockState(p).isAir() && level.getBlockState(p.above()).isAir() ? p : null;
-    }
-
-    // 番兵長・老番兵などが「呼ぶ」仲間 (咆哮の番兵・骨笛の射手)。広間の中の戦いだけで呼べる:
-    //  - 呼ぶ者が倒れた・消えたあと (予告の円が遅れて実るとき) は呼ばない
-    //  - その広間の戦いがもう終わっている (制圧済み・戦いの外) なら呼ばない
-    //  - 位置は広間の中だけ。壁・戸の外なら広間の内へ寄せる (寄せられなければ呼ばない)
-    // 広間でない所 (試練の階のセル) の呼び出しは、呼ぶ者が生きているときだけ通す
+    // 番兵長・老番兵などが「呼ぶ」仲間 (咆哮の番兵・骨笛の射手)。呼ぶ者が倒れた・消えたあと (予告の円が遅れて実るとき) は呼ばない
     @Nullable
     public static Mob spawnSummon(ServerLevel level, String kind, BlockPos pos, @Nullable UUID group, Mob owner) {
         if (owner == null || !owner.isAlive() || owner.isRemoved()) {
             return null;
         }
-        Hall hall = hallAt(owner.blockPosition());
-        if (hall == null) {
-            return spawnGuard(level, kind, pos, group);
-        }
-        if (group != null) {
-            HallState state = HALL_STATES.get(hallKey(group, hall.id()));
-            if (state == null || state.wave == 0 || record(level, group).isHallCleared(hall.id())) {
-                return null;
-            }
-        }
-        BlockPos at = pos;
-        if (hallAt(pos) != hall || !level.getBlockState(pos).isAir()) {
-            at = insideSpot(level, hall, pos);
-            if (at == null) {
-                return null;
-            }
-        }
-        return spawnGuard(level, kind, at, group);
-    }
-
-    // 戦いのさなかに広間の外 (壁の向こう・戸の先) へ出てしまった (湧いた) そのグループの番兵を片づける。数えに入らず、行く手をふさぐので
-    private static void clearStrays(ServerLevel level, Hall hall, UUID group) {
-        net.minecraft.world.phys.AABB room = hall.box().aabb().inflate(0.6, 1.5, 0.6);
-        for (Mob m : level.getEntitiesOfClass(Mob.class, room.inflate(12, 1.5, 12),
-                e -> e.isAlive() && e.getTags().contains(MOB_TAG) && group.equals(Groups.keyOf(e)))) {
-            if (!room.contains(m.position()) && hallAt(m.blockPosition()) == null) {
-                m.discard();
-            }
-        }
+        return spawnGuard(level, kind, pos, group);
     }
 
     // group: そのグループの敵として湧かせる (ほかのグループには見えず、狙われず、傷を受けない)。null なら所属なし
@@ -944,70 +496,7 @@ public final class TitanBackTrials {
         Groups.sound(level, group, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, sound, SoundSource.BLOCKS, volume, pitch);
     }
 
-    // 封印された広間の中にいる、そのグループの人 (壁ぎわも含む)
-    private static List<ServerPlayer> playersInHall(ServerLevel level, Hall hall, UUID group) {
-        return Groups.inBox(level, group, hall.box().aabb().inflate(0, 1, 0));
-    }
-
-    private static List<ServerPlayer> playersInside(ServerLevel level, Hall hall, UUID group) {
-        // 戸口に立っているだけでは始まらないよう、内側に1マス入ったところから数える
-        return Groups.inBox(level, group, hall.box().aabb().deflate(1, 0, 1));
-    }
-
-    // 番兵長が倒れたら、そのグループの E3 の参加者に中ボスの報酬を渡す (TitanLoot)
-    @SubscribeEvent(priority = EventPriority.LOW)
-    static void onCaptainDeath(LivingDeathEvent event) {
-        if (!(event.getEntity() instanceof WhaleboneCaptain captain) || event.isCanceled()
-                || !(captain.level() instanceof ServerLevel level) || level.dimension() != TitanTravel.TITAN_BACK
-                || !captain.getTags().contains(MOB_TAG)) {
-            return;
-        }
-        UUID group = captain.groupId();
-        Set<UUID> ids = new LinkedHashSet<>();
-        int falls = 0;
-        if (group != null) {
-            HallState state = HALL_STATES.get(hallKey(group, "e3"));
-            if (state != null) {
-                ids.addAll(state.participants);
-                falls = state.falls;
-            }
-            for (ServerPlayer player : Groups.inBox(level, group, E3.aabb().inflate(0, 1, 0))) {
-                ids.add(player.getUUID());
-            }
-        } else {
-            for (ServerPlayer player : level.getEntitiesOfClass(ServerPlayer.class, E3.aabb().inflate(0, 1, 0), p -> !p.isSpectator())) {
-                ids.add(player.getUUID());
-            }
-        }
-        TitanLoot.onCaptainDefeat(level, onlinePlayers(level, ids), ids);
-        // 倒れた回数の札 (中ボス。見た目だけ)
-        jp.revati.skyabyss.titan.group.FightBadges.onVictory(level, captain, ids, falls);
-    }
-
-    // UUID の一覧から、いまサーバーにいる人を集める (倒れて復活を待っている人も含む)
-    private static List<ServerPlayer> onlinePlayers(ServerLevel level, Set<UUID> ids) {
-        List<ServerPlayer> players = new ArrayList<>();
-        for (UUID id : ids) {
-            ServerPlayer player = level.getServer().getPlayerList().getPlayer(id);
-            if (player != null) {
-                players.add(player);
-            }
-        }
-        return players;
-    }
-
-    // ---------------------------------------------------------------- 集合と扉
-    private static void announceGathering(ServerLevel level, UUID group, String key, Box area) {
-        long now = level.getGameTime();
-        Long last = LAST_GATHER_NOTICE.get(key);
-        if (last == null || now - last > 400) {
-            LAST_GATHER_NOTICE.put(key, now);
-            broadcast(level, group, area, ModText.battle("message.skyabyss.gate_gathering", GATHER_TICKS / 20));
-        }
-        playToGroup(level, group, area.center(), SoundEvents.BELL_RESONATE, 1.5f, 0.6f);
-        jp.revati.skyabyss.readiness.ReadinessSummary.show(level, Groups.inBox(level, group, area.aabb().inflate(12)), GATHER_TICKS / 20, true);
-    }
-
+    // ---------------------------------------------------------------- 扉 (心臓の間の集合と再入場)
     // 扉が閉じるまでの残りを、近くのそのグループの人の画面に出す (1 秒ごと)
     private static void countdown(ServerLevel level, UUID group, Box area, int ticksLeft) {
         if (ticksLeft % 20 != 0) {
@@ -1109,76 +598,16 @@ public final class TitanBackTrials {
         }
     }
 
-    // 外にいる倒れた人へ、待ち時間・戻れる・戻れない、を 1 秒ごとに画面の下へ。目を覚ました時刻もここで取る
-    private static void tellFallen(ServerLevel level, Reentry reentry, List<ServerPlayer> inHall, Set<UUID> participants) {
-        long now = level.getGameTime();
-        int limit = ReentryRules.limit(level.getServer());
-        boolean notice = now % 20 < 10;
-        for (UUID id : reentry.fallenIds()) {
-            ServerPlayer p = level.getServer().getPlayerList().getPlayer(id);
-            if (p == null || !p.isAlive() || p.level() != level || inHall.contains(p)) {
-                continue;
-            }
-            reentry.observeAwake(id, now);
-            if (notice) {
-                ReentryRules.tell(p, reentry.status(id, now, limit), reentry.remaining(id, now), reentry.used(id), limit);
+    // UUID の一覧から、いまサーバーにいる人を集める (倒れて復活を待っている人も含む)
+    private static List<ServerPlayer> onlinePlayers(ServerLevel level, Set<UUID> ids) {
+        List<ServerPlayer> players = new ArrayList<>();
+        for (UUID id : ids) {
+            ServerPlayer player = level.getServer().getPlayerList().getPlayer(id);
+            if (player != null) {
+                players.add(player);
             }
         }
-    }
-
-    // 参加者が倒れた状態になった (party.Downed から)。死んではいないので再入場の記録は付けず、回数だけ数える
-    public static void noteDown(UUID player) {
-        for (HallState state : HALL_STATES.values()) {
-            if (state.wave > 0 && state.participants.contains(player)) {
-                state.falls++;
-            }
-        }
-    }
-
-    // 戦いの最中に倒れた参加者を覚える (20 秒の待ちの起点)。LivingDeathEvent から
-    static void noteFallen(ServerPlayer player) {
-        // 倒れた状態から死んだ人は、倒れたときに数えている
-        boolean wasDown = jp.revati.skyabyss.party.Downed.takeDownDeath(player.getUUID());
-        for (HallState state : HALL_STATES.values()) {
-            if (state.wave > 0 && state.participants.contains(player.getUUID())) {
-                state.reentry.fell(player.getUUID());
-                if (!wasDown) {
-                    state.falls++;
-                }
-            }
-        }
-    }
-
-    // 自己テスト用: そのグループの広間の戦いを始めた状態にする / 終える (やり直しと同じ後始末)
-    static void testBeginFight(UUID group, String hallId, Set<UUID> participants) {
-        for (Hall hall : HALLS) {
-            if (hall.id().equals(hallId)) {
-                HallState state = new HallState(group, hall);
-                state.wave = 1;
-                state.participants.addAll(participants);
-                HALL_STATES.put(hallKey(group, hallId), state);
-            }
-        }
-    }
-
-    static void testEndFight(ServerLevel level, UUID group, String hallId) {
-        for (Hall hall : HALLS) {
-            if (hall.id().equals(hallId)) {
-                resetHall(level, hall, group, false);
-            }
-        }
-    }
-
-    // その広間の戦いの再入場の記録 (戦っていなければ null。自己テスト用)
-    @Nullable
-    static Reentry reentryOf(UUID group, String hall) {
-        HallState state = HALL_STATES.get(hallKey(group, hall));
-        return state == null ? null : state.reentry;
-    }
-
-    static boolean isFallen(UUID group, String hall, UUID player) {
-        Reentry r = reentryOf(group, hall);
-        return r != null && r.isFallen(player);
+        return players;
     }
 
     // ---------------------------------------------------------------- 心臓の間 (最終ボス・グループごと)
@@ -1289,15 +718,6 @@ public final class TitanBackTrials {
         }
     };
 
-    // 心臓を今すぐ始める (自己テスト・コマンド用)。そのグループの、部屋にいる人を挑む人にする
-    public static boolean startHeartNow(ServerLevel level, UUID group) {
-        GroupBossRoom room = HEART_ROOMS.of(group);
-        if (room.active()) {
-            return false;
-        }
-        return room.start(level, HEART_HOST, Groups.inBox(level, group, heartArena()));
-    }
-
     // 心臓の間の部屋の仕組み (自己テストが、倒したあとに湧き直さないことを確かめる)
     public static GroupBossRoom.Host heartHost() {
         return HEART_HOST;
@@ -1385,9 +805,6 @@ public final class TitanBackTrials {
     public static void resetGroup(ServerLevel level, UUID group) {
         // そのグループの試練が元に戻る = 鼓動が戻る。眠っている巨神は、最短の長さを過ぎていれば目覚める (titan/end)
         jp.revati.skyabyss.titan.end.TitanDormancy.requestWake(level.getServer(), jp.revati.skyabyss.progress.Titans.STONE_WHALE);
-        for (Hall hall : HALLS) {
-            resetHall(level, hall, group, false);
-        }
         GroupBossRoom room = HEART_ROOMS.peek(group);
         if (room != null) {
             room.reset(level, HEART_HOST, false);
@@ -1428,7 +845,6 @@ public final class TitanBackTrials {
             GroupProgress.reset(level, id);
         }
         HEART_ROOMS.clear();
-        HALL_STATES.clear();
         gatesInstalled = false;
         jp.revati.skyabyss.trial.TrialRuntime.clearAll();
     }
@@ -1513,9 +929,6 @@ public final class TitanBackTrials {
         if (id.isEmpty() || tag.getInt(TAG_CHECKPOINT_EPOCH) != epoch) {
             return "";
         }
-        if (MAZE_REST.equals(id)) {
-            return id;
-        }
         for (Checkpoint cp : checkpoints()) {
             if (cp.id().equals(id)) {
                 return id;
@@ -1564,15 +977,6 @@ public final class TitanBackTrials {
         return false;
     }
 
-    private static BlockPos checkpointSpawnRaw(String id) {
-        for (Checkpoint cp : checkpoints()) {
-            if (cp.id().equals(id)) {
-                return cp.spawn();
-            }
-        }
-        return plaza();
-    }
-
     private static BlockPos checkpointSpawn(ServerLevel level, String id) {
         for (Checkpoint cp : checkpointsOf(level)) {
             if (cp.id().equals(id)) {
@@ -1618,15 +1022,6 @@ public final class TitanBackTrials {
             }
         }
         return want;
-    }
-
-    // 人がいま記録している休み場 (なければ "")。試練の階のセルが、落ちた人を戻すのに使う
-    public static String checkpointOf(ServerPlayer player) {
-        return validCheckpoint(persisted(player), epochOf(player.serverLevel(), player));
-    }
-
-    public static void returnToCheckpoint(ServerPlayer player, String id) {
-        returnTo(player, id);
     }
 
     private static void returnTo(ServerPlayer player, String id) {
@@ -1688,7 +1083,6 @@ public final class TitanBackTrials {
             return;
         }
         persisted(player).putBoolean(TAG_DIED_ON_BACK, true);
-        noteFallen(player);
         keepBelongings(player);
     }
 
@@ -1836,26 +1230,6 @@ public final class TitanBackTrials {
     static String respawnCheckpoint(ServerLevel level, UUID group, String cp) {
         // 順路では、広間 (hub) は封じて誰も入らない (trial/RouteSeals)。戦いの前室でも、その段の休み場で目覚める (32 の 2.4)
         return cp;
-    }
-
-    // 休み場 cp が、そのグループの戦っている部屋の前室か
-    static boolean isFightNear(UUID group, String cp) {
-        switch (cp) {
-            case "e0":
-                return hallFighting(group, "e1");
-            case "ckr":
-                return hallFighting(group, "ck");
-            case "heart":
-                GroupBossRoom room = HEART_ROOMS.peek(group);
-                return room != null && (room.active() || room.gathering());
-            default:
-                return false;
-        }
-    }
-
-    private static boolean hallFighting(UUID group, String hall) {
-        HallState state = HALL_STATES.get(hallKey(group, hall));
-        return state != null;
     }
 
     // ---------------------------------------------------------------- 台座と焚き火

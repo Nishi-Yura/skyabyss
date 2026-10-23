@@ -80,10 +80,6 @@ public class TideBackState extends SavedData {
         private static final String EAST = "tide.east";
         private static final String NEST_SITES = "tide.nest_sites";
         private static final String NESTS_BROKEN = "tide.nests_broken";
-        // 周回の長い潮見の間 (32 の 4 章、R5): 解いた配置の数 (長い周は 2 つ目を解くと岩棚へ)
-        private static final String EAST_STAGE = "tide.east_stage";
-        // 周回の長い珊瑚の庭 (32 の 4 章、R5): 据えた真珠の数 (長い周は二つ据えると西の石が鳴る。二つ目は別の道の形)
-        private static final String GARDEN_STAGE = "tide.garden_stage";
         private static final String BECKONER = "tide.beckoner";
         private static final String BOTTOM = "tide.bottom";
         private static final String LAST_SLEEPING = "keep.tide.last_sleeping";
@@ -157,69 +153,13 @@ public class TideBackState extends SavedData {
             record.setFlag(EVER_DEFEATED, true);
         }
 
-        public int gardenRoute() {
-            return record.getInt(ROUTE);
-        }
-
-        public int gardenStage() {
-            return record.getInt(GARDEN_STAGE);
-        }
-
-        // 一つ目の真珠を据えた: 庭の道の形を次の形 (今と違う) へ
-        public void nextGardenStage() {
-            record.putInt(GARDEN_STAGE, gardenStage() + 1);
-            record.putInt(ROUTE, Math.floorMod(gardenRoute() + 1, TideBackLayout.GARDEN_ROUTES.length));
-        }
-
-        // 西の石を鳴らすまでに据える真珠の数 (周回のグループは 2)
-        public int gardenStagesNeeded() {
-            return jp.revati.skyabyss.trial.RouteLength.extended(record) ? TideGarden.PEARLS_LONG : 1;
-        }
-
-        public int eastStage() {
-            return record.getInt(EAST_STAGE);
-        }
-
-        // 一つ目の配置を解いた: 次の配置 (今と違う 1〜3) へ
-        public void nextEastStage() {
-            record.putInt(EAST_STAGE, eastStage() + 1);
-            int cur = eastConfig();
-            record.putInt(EAST, 1 + Math.floorMod(cur, TidePuzzle.CONFIGS.length - 1));
-        }
-
-        // 岩棚へ行くまでに解く配置の数 (周回のグループは 2)
-        public int eastStagesNeeded() {
-            return jp.revati.skyabyss.trial.RouteLength.extended(record) ? TideWatch.STAGES_LONG : 1;
-        }
-
-        public int eastConfig() {
-            return record.getInt(EAST);
-        }
-
-        public boolean eastFirstUsed() {
-            return record.flag(EAST_FIRST_USED);
-        }
-
         public int nestSites() {
             int s = record.getInt(NEST_SITES);
             return s == 0 ? (1 << TideBackLayout.NEST_COUNT) - 1 : s;
         }
 
-        public boolean nestBroken(int site) {
-            return (record.getInt(NESTS_BROKEN) & (1 << site)) != 0;
-        }
-
-        public void breakNest(int site) {
-            record.putInt(NESTS_BROKEN, record.getInt(NESTS_BROKEN) | (1 << site));
-        }
-
         public boolean nestsBrokenAny() {
             return (record.getInt(NESTS_BROKEN) & nestSites()) != 0;
-        }
-
-        // 選ばれた巣がすべて壊れたか
-        public boolean allNestsBroken() {
-            return (record.getInt(NESTS_BROKEN) & nestSites()) == nestSites();
         }
 
         public boolean beckonerDefeated() {

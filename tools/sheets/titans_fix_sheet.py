@@ -12,9 +12,6 @@ TILES = [
     ("tide_low_in_water", "亀: 休むとき腹が水に沈む (喫水 11)"),
     ("tide_doorway_front", "亀の入口: 光の門と水面の光の道 (内向きの山形)"),
     ("tide_doorway_above", "同じ入口を上から (昇る柱はなし)"),
-    ("ember_valley_entrance", "火守り: 短くした谷と目的の板 (一行ずつ)"),
-    ("ember_lane_vents", "灰運びの道 (壁と黒石の床) と噴気の予告・噴出"),
-    ("ember_hearth_end", "道の先の火床と熾り石の岸"),
 ]
 
 

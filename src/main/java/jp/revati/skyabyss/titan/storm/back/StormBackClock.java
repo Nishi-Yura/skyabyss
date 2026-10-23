@@ -35,10 +35,6 @@ public final class StormBackClock {
     public static final int WARN_TICKS = 10 * 20;
     public static final BackCycle CYCLE = new BackCycle(WARN_TICKS, CALM_TICKS, RISE_TICKS, STORM_TICKS, FALL_TICKS);
 
-    // 昇り風の上がる高さ (凪 4・嵐 13)
-    public static final double CALM_LIFT = 4;
-    public static final double STORM_LIFT = 13;
-
     @Nullable
     private static Phase forced;
 
@@ -92,11 +88,6 @@ public final class StormBackClock {
             case RISING -> (in + 1) / (double) RISE_TICKS;
             case FALLING -> 1 - (in + 1) / (double) FALL_TICKS;
         };
-    }
-
-    // 今の昇り風の高さ (凪 4・嵐 13。荒れる・静まるは間)
-    public static double liftHeight(ServerLevel level) {
-        return CALM_LIFT + (STORM_LIFT - CALM_LIFT) * strength(level);
     }
 
     // 1 tick 進める (背中に人がいる間だけ)。段階が変わる 10 秒前なら、その段階を返す (音を鳴らすため)

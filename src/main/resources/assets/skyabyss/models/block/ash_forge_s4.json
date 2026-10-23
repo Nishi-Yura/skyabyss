@@ -1,6 +1,0 @@
-{
-  "parent": "minecraft:block/cube_all",
-  "textures": {
-    "all": "skyabyss:block/ash_forge_s4"
-  }
-}

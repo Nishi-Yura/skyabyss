@@ -33,7 +33,6 @@ import jp.revati.skyabyss.trial.Trial.Mods;
 import jp.revati.skyabyss.trial.Trial.Rarity;
 import jp.revati.skyabyss.trial.TrialBoard;
 import jp.revati.skyabyss.trial.TrialCatalog;
-import jp.revati.skyabyss.trial.TrialCell;
 import jp.revati.skyabyss.trial.TrialData;
 import jp.revati.skyabyss.trial.TrialDraw;
 import net.minecraft.core.BlockPos;

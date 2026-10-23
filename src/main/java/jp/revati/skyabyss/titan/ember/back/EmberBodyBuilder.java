@@ -28,25 +28,11 @@ public final class EmberBodyBuilder {
     public static final TitanBodyBlocks BODY = new TitanBodyBlocks(EmberIds.BODY_BIN);
     // 熾の底の門の下の螺旋の段の並び (中心の柱のまわり 8 マス。潮殻の SPIRAL_RING と同じ並び)
     public static final int[][] RING = {{-1, 1}, {-1, 0}, {-1, -1}, {0, -1}, {1, -1}, {1, 0}, {1, 1}, {0, 1}};
-    // 門の螺旋: 最初の段は南の真ん中 (並びの 7 番)、広間の床の 1 下から 1 段ずつ y 51 まで
-    public static final int GATE_STEP_START = 7;
-    public static final int GATE_STEPS = (FLOOR_HUB - 1) - (FLOOR_HEART + 1) + 1;
-    // 壁の螺旋 (広間の床 → 井戸の底 119): 最初の段は並びの 3 番 (北の真ん中)。最後の段が角でなく辺の真ん中 (並びの 5 番) になるので、まっすぐ登って着地する
-    public static final int WELL_STAIR_START = 3;
-    public static final int WELL_STAIR_STEPS = WELL_BOTTOM - FLOOR_HUB;
-    // 喉の幅 (半幅): 首 4、尾根の広間 12、坂 3
-    public static final int NECK_HALF = 4;
     public static final int HALL_HALF = 12;
     public static final int RAMP_HALF = 3;
-    public static final int NECK_Z1 = -237;
-    public static final int HALL_Z1 = -208;
-    public static final int HALL_Z2 = -132;
-    public static final int RAMP_Z1 = -131;
 
     private final EmberKit kit;
     private final List<Box> carved = new ArrayList<>();
-    // 黒い玄武岩の内壁にする洞 (skin が肉と骨の壁でなく玄武岩の壁にする所)
-    private final List<Box> tubes = new ArrayList<>();
 
     private EmberBodyBuilder(ServerLevel level) {
         this.kit = new EmberKit(level);
@@ -310,56 +296,6 @@ public final class EmberBodyBuilder {
                 kit.set(x, PLAIN_TOP, z, x == 0 ? EmberKit.EMBERLIGHT : EmberKit.RUIN_CHISELED);
             }
         }
-    }
-
-    // ---------------------------------------------------------------- 喉 (首 幅 9 → 尾根の広間 幅 25 → 坂 幅 7。床 69 → 78 (休み場の平ら) → 92)
-    public static int throatFloor(int z) {
-        if (z <= HALL_Z1) {
-            return MOUTH_FLOOR;
-        }
-        if (z <= -121) {
-            return Math.min(THROAT_LANDING, MOUTH_FLOOR + Math.floorDiv(z + 207, 8));
-        }
-        if (z <= -84) {
-            return THROAT_LANDING + (int) Math.round((z + 121) * 14 / 37.0);
-        }
-        return FLOOR_HUB;
-    }
-
-    // 喉の天井までの空気の数 (床の上。端ほど低い丸い断面)
-    public static int throatHeight(int z, int x) {
-        int ax = Math.abs(x);
-        if (z < HALL_Z1) {
-            return 7 - Math.max(0, ax - 2);
-        }
-        if (z <= HALL_Z2) {
-            return 12 - Math.max(0, ax - 9);
-        }
-        return 6 - Math.max(0, ax - 2);
-    }
-
-    // ---------------------------------------------------------------- 炉心の広間 (円 半径 27、床 92、天井は丸く 116〜108)
-    public static double hubDist(int x, int z) {
-        double dx = x - HUB_CENTER.getX();
-        double dz = z - HUB_CENTER.getZ();
-        return Math.sqrt(dx * dx + dz * dz);
-    }
-
-    public static int hubCeiling(double d) {
-        return 116 - (int) Math.round(8 * (d / HUB_RADIUS) * (d / HUB_RADIUS));
-    }
-
-    // 洞の南の脚の床 (z ごと。灰の道・鍛えの間・火守りの谷の入口の高さへ下る)
-    public static int legWestFloor(int z) {
-        return FLOOR_HUB - clamp((int) Math.round((z + 46) * 12 / 30.0), 0, 12);
-    }
-
-    public static int legEastFloor(int z) {
-        return FLOOR_HUB - clamp((int) Math.round((z + 46) * 6 / 30.0), 0, 6);
-    }
-
-    public static int legSouthFloor(int z) {
-        return FLOOR_HUB - clamp((int) Math.round((z + 26) * 9 / 17.0), 0, 9);
     }
 
     public static int clamp(int v, int lo, int hi) {

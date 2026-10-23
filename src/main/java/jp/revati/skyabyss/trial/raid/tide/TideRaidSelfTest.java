@@ -114,7 +114,6 @@ public final class TideRaidSelfTest {
 
     private static void clean() {
         TrialRoute.finish(back, group);
-        TrialRuntime.stopGroup(back, group);
         GroupGates.reset(back, group);
         BackGroupData.get(back).remove(group);
     }

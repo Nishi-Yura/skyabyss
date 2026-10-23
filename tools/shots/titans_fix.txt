@@ -74,21 +74,4 @@ camera minecraft:overworld 60 80 -60 60 35
 wait 30
 shot tide_doorway_above
 marker clear
-cmd skyabyss embertrial build
-cmd skyabyss embertrial hearth 40
-hud on
-camera skyabyss:ember_back 0 82 -3 0 14
-waitchunks 900
-wait 80
-shot ember_valley_entrance
-camera skyabyss:ember_back 12 90 4 0 38
-wait 20
-cmd execute in skyabyss:ember_back run setblock 0 78 12 skyabyss:heat_vent[phase=2]
-cmd execute in skyabyss:ember_back run setblock 1 78 16 skyabyss:heat_vent[phase=1]
-wait 10
-shot ember_lane_vents
-hud off
-camera skyabyss:ember_back 0 84 33 180 22
-wait 20
-shot ember_hearth_end
 quit

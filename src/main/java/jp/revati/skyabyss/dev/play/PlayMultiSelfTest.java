@@ -220,7 +220,6 @@ public final class PlayMultiSelfTest {
     private static void clean(ServerLevel back, UUID g) {
         RaidRun.clearAll();
         TrialRoute.finish(back, g);
-        TrialRuntime.stopGroup(back, g);
         GroupGates.reset(back, g);
         BackGroupData.get(back).remove(g);
     }

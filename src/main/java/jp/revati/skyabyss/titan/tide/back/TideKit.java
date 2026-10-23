@@ -27,7 +27,6 @@ public final class TideKit {
     public static final BlockState SANDSTONE = Blocks.SANDSTONE.defaultBlockState();
     public static final BlockState LAMP = Blocks.SEA_LANTERN.defaultBlockState();
     public static final BlockState SHELL = Blocks.TUFF.defaultBlockState();
-    public static final BlockState SHELL_DARK = Blocks.DEEPSLATE_TILES.defaultBlockState();
 
     private final ServerLevel level;
     final RandomSource random;
@@ -88,14 +87,6 @@ public final class TideKit {
     // 灯りのブロック (場所の材質。潮殻は海のランタン)
     public BlockState lamp() {
         return zone.lamp;
-    }
-
-    // 灯りを壁・天井に埋める (そこが固い石のときだけ。空気や仕掛けには置かない)
-    public void lampIn(int x, int y, int z) {
-        BlockState cur = get(x, y, z);
-        if (!cur.isAir() && cur.isCollisionShapeFullBlock(level, new BlockPos(x, y, z)) && !cur.is(Blocks.WATER)) {
-            set(x, y, z, zone.lamp);
-        }
     }
 
     // 柱 (床 y1 から y2。柱頭は cap)。足もとと頭が固い所に立てる

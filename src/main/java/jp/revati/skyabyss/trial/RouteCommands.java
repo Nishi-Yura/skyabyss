@@ -145,9 +145,6 @@ public final class RouteCommands {
             r.putInt(TrialData.DONE, 1);
         }
         r.remove(TrialData.DRAW);
-        // 撮影のための引き: 歩は原型 (周回の前の道を通る)、闘は中ボスの原型でないもの (中ボスの段を通る)。智は引いたまま
-        TrialDraw.Draw d = TrialRoute.walkOriginalDraw(titan, TrialData.current(back, g));
-        r.putString(TrialData.DRAW, d.encode());
         r.changed();
         jp.revati.skyabyss.progress.ProgressData.get(p.server).markPersonal(p.getUUID(), titan);
         jp.revati.skyabyss.titan.TitanVisibility.clearCache();

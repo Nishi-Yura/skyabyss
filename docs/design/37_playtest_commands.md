@@ -174,7 +174,7 @@
 - `lore unlock-all`（伝承をすべて開く。`unlockable` のものだけ）・`lore reset`（白紙に戻す）
 - `time`・`weather` は vanilla の `time set` と `weather`、`day <n>` は n 日目の朝、`fast` は tick レート 2 倍/通常
 - `peaceful on|off` は `difficulty peaceful` / `difficulty normal`（世界の難易度。全員に効く）
-- `heal` は体力と満腹を戻す。`feed` は満腹だけ。`god on|off` は無敵
+- `heal` は体力を全快し、効果と火を消す。`feed` は満腹の値を最大にする（空腹はない）。`god on|off` は無敵
 - `reset` は、章・クエスト・伝承・止めた巨神・体力の目安・無敵を全部戻す
 - `skip opening` は序章を飛ばす。`now` は今の目的の次の出来事を本物の仕組みで起こす（旧 `playtest now`）
 - `trials <巨神>` はその背の試練を全部済ませた状態にする（旧 `playtest trials`）

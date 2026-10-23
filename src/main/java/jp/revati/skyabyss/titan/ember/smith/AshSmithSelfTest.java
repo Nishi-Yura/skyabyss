@@ -131,7 +131,6 @@ public final class AshSmithSelfTest {
         checkGeometry(f);
         checkArena(back, f);
         checkBattle(server, back, f);
-        checkForgeDoor(server, back, f);
         checkMoves(server, back, f, notes);
         checkRage(server, back, f);
         checkAbandon(server, back, f);
@@ -425,13 +424,6 @@ public final class AshSmithSelfTest {
         AshSmithBattle.abandon(server);
     }
 
-    // C2 の扉が開いた知らせ (Forge.onDoorOpened) を、鍛え手が受けている。誰もいなければ戦いは始まらず、部屋は建ったまま
-    private static void checkForgeDoor(MinecraftServer server, ServerLevel level, List<String> f) {
-        check(jp.revati.skyabyss.titan.ember.back.trial.Forge.doorListeners() >= 1, "the smith did not register on Forge.onDoorOpened", f);
-        AshSmithBattle.reawaken(server);
-        jp.revati.skyabyss.titan.ember.back.trial.Forge.notifyDoorOpened(level);
-        check(!AshSmithBattle.room().active() && AshSmithArena.isBuilt(level), "an empty arena started a fight on the door notice", f);
-    }
 
     // 鍛え手と戦わない、もう一つのグループ
     static final UUID OTHER_GROUP = UUID.nameUUIDFromBytes("skyabyss ash smith other group".getBytes(java.nio.charset.StandardCharsets.UTF_8));

@@ -243,10 +243,7 @@ public final class StormGearEvents {
 
     // 嵐纏の足環: 滑空を速める (プレイヤーの側。動きは手元で付けるので遅れて揺れない)
     //  - エリトラ: 横の空気抵抗 0.99 を 0.99 × K にして、行き着く速さを 1.15 倍にする (K = (1 − 0.01/1.15) / 0.99)
-    //  - 風切りの羽根 (背中の担当の GaleFeather): 羽根の滑空が前の速さを 0.35 へ 1/4 ずつ寄せるのに、0.35 × 0.15 の 1/4 を足して、
-    //    行き着く速さを 0.4025 にする (羽根の動きのあと。優先度を低くしている)
     private static final double ELYTRA_K = (1 - 0.01 / (1 + StormGear.ANKLET_GLIDE)) / 0.99;
-    private static final ResourceLocation GALE_FEATHER = ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "gale_feather");
 
     @SubscribeEvent(priority = EventPriority.LOW)
     static void onPlayerTickPre(PlayerTickEvent.Pre event) {
@@ -257,24 +254,7 @@ public final class StormGearEvents {
         Vec3 v = p.getDeltaMovement();
         if (p.isFallFlying()) {
             p.setDeltaMovement(v.x * ELYTRA_K, v.y, v.z * ELYTRA_K);
-        } else if (featherGliding(p)) {
-            Vec3 look = p.getLookAngle();
-            Vec3 flat = new Vec3(look.x, 0, look.z);
-            if (flat.lengthSqr() > 1e-4) {
-                flat = flat.normalize().scale(0.35 * StormGear.ANKLET_GLIDE * 0.25);
-                p.setDeltaMovement(v.add(flat.x, 0, flat.z));
-            }
         }
-    }
-
-    // 風切りの羽根の滑空 (GaleFeather.gliding と同じ条件。羽根は ID で引く)
-    public static boolean featherGliding(Player p) {
-        if (p.level().dimension() != StormGear.STORM_BACK || p.onGround() || !p.isShiftKeyDown() || p.getAbilities().flying
-                || p.isInWater() || p.getDeltaMovement().y >= 0) {
-            return false;
-        }
-        Item feather = BuiltInRegistries.ITEM.get(GALE_FEATHER);
-        return feather != net.minecraft.world.item.Items.AIR && p.getInventory().hasAnyMatching(s -> s.is(feather));
     }
 
     // ---------------------------------------------------------------- 空駆け
@@ -282,7 +262,7 @@ public final class StormGearEvents {
     public static boolean canDash(Player p) {
         return ThunderWingArmorItem.piecesWorn(p) >= 4 && !p.getCooldowns().isOnCooldown(StormGearSetup.CHESTPLATE.get())
                 && !p.onGround() && !p.isFallFlying() && !p.getAbilities().flying && !p.isInWater() && !p.isInLava()
-                && !p.isPassenger() && !p.onClimbable() && !p.isSpectator() && !StormGear.inWestTrial(p.level(), p.position());
+                && !p.isPassenger() && !p.onClimbable() && !p.isSpectator();
     }
 
     // 空駆けの向き (見ている向きの水平、前へ 1.15・上へ 0.32)

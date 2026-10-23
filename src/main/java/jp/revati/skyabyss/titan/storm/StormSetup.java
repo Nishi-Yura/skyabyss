@@ -46,11 +46,6 @@ public final class StormSetup {
     public static final DeferredHolder<SoundEvent, SoundEvent> THUNDER_FAR = sound("storm_thunder_far");
     public static final DeferredHolder<SoundEvent, SoundEvent> GALE = sound("storm_gale");
     public static final DeferredHolder<SoundEvent, SoundEvent> BACK_WIND = sound("storm_back_wind");
-    public static final DeferredHolder<SoundEvent, SoundEvent> RISE_WARN = sound("storm_rise_warn");
-    public static final DeferredHolder<SoundEvent, SoundEvent> FALL_WARN = sound("storm_fall_warn");
-    public static final DeferredHolder<SoundEvent, SoundEvent> CROSSWIND = sound("storm_crosswind");
-    public static final DeferredHolder<SoundEvent, SoundEvent> MIRROR_TURN = sound("storm_mirror_turn");
-    public static final DeferredHolder<SoundEvent, SoundEvent> RECEIVER_LIT = sound("storm_receiver_lit");
 
     private StormSetup() {
     }

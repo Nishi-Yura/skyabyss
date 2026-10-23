@@ -248,24 +248,6 @@ public final class StormBirdBuilder {
         }
     }
 
-    // 5x5 の外周 16 マス (北西の角から時計回り)
-    static List<int[]> ring5(int cx, int cz) {
-        List<int[]> out = new ArrayList<>();
-        for (int x = cx - 2; x <= cx + 2; x++) {
-            out.add(new int[] {x, cz - 2});
-        }
-        for (int z = cz - 1; z <= cz + 2; z++) {
-            out.add(new int[] {cx + 2, z});
-        }
-        for (int x = cx + 1; x >= cx - 2; x--) {
-            out.add(new int[] {x, cz + 2});
-        }
-        for (int z = cz + 1; z >= cz - 1; z--) {
-            out.add(new int[] {cx - 2, z});
-        }
-        return out;
-    }
-
     // 昇り風の穴 (3x3 の銅の格子と、その下の灯り)
     static void vent(StormKit kit, BlockPos c) {
         for (int dx = -1; dx <= 1; dx++) {
@@ -274,15 +256,6 @@ public final class StormBirdBuilder {
             }
         }
         kit.put(c.getX(), c.getY() - 1, c.getZ(), StormKit.LAMP);
-    }
-
-    // 道の形 (リセットの種)。西の骨の割れた床の形 (StormWingBuilder)
-    public static void carveWestRoute(StormKit kit, int route) {
-        StormWingBuilder.carveWestRoute(kit, route);
-    }
-
-    static boolean inGap(int x) {
-        return StormWingBuilder.inGap(x);
     }
 
     // 避雷の柱 (根元 base、高さ 6)。専用のブロック: 根元の台、段の電球 3 つ、軸、先の針 (12 の 120)
@@ -378,18 +351,6 @@ public final class StormBirdBuilder {
                 kit.wallSign(i.pos(), i.facing(), i.key());
             }
         }
-    }
-
-    // 竜骨の門の栓 (広間の床の 5x5。グループごとの扉 = 封印の扉のブロック。三つの石がそろったグループにだけ開く)
-    public static List<BlockPos> keelPlug() {
-        List<BlockPos> out = new ArrayList<>();
-        int kz = HUB_CENTER.getZ();
-        for (int x = -2; x <= 2; x++) {
-            for (int z = kz - 2; z <= kz + 2; z++) {
-                out.add(new BlockPos(x, HUB.floor(), z));
-            }
-        }
-        return out;
     }
 
 }

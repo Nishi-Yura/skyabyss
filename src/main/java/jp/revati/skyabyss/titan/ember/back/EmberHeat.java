@@ -192,8 +192,7 @@ public final class EmberHeat {
                 }
             }
         }
-        if (under.is(net.minecraft.world.level.block.Blocks.MAGMA_BLOCK)
-                || EmberIds.id(EmberIds.COOLED_CRUST).equals(net.minecraft.core.registries.BuiltInRegistries.BLOCK.getKey(under.getBlock()))) {
+        if (under.is(net.minecraft.world.level.block.Blocks.MAGMA_BLOCK)) {
             return Spot.HOT_GROUND;
         }
         return Spot.NONE;
@@ -243,10 +242,6 @@ public final class EmberHeat {
             player.serverLevel().sendParticles(h >= SCORCHING ? net.minecraft.core.particles.ParticleTypes.FLAME
                     : net.minecraft.core.particles.ParticleTypes.SMALL_FLAME, player.getX(), player.getY() + 1.0, player.getZ(), n, 0.3, 0.5, 0.3, 0.005);
         }
-    }
-
-    public static boolean scorched(Player player) {
-        return SCORCHED.contains(player.getUUID());
     }
 
     // マグマの継ぎ目の「熱い床」の傷は、余燼の背では熱に置きかえる (継ぎ目の上は熱が 1 秒に +1)

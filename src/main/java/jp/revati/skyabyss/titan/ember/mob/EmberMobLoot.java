@@ -42,7 +42,6 @@ public final class EmberMobLoot {
     public static final ResourceLocation HORN = EmberIds.id(EmberIds.EMBER_HORN);
     public static final ResourceLocation SPARK_DUST = EmberIds.id(EmberIds.SPARK_DUST);
     public static final ResourceLocation CINDER_HUSK = EmberIds.id(EmberIds.CINDER_HUSK);
-    public static final ResourceLocation LIVE_COAL = EmberIds.id(EmberIds.LIVE_COAL);
     public static final List<ResourceLocation> ARMOR = List.of(EmberIds.id(EmberIds.EMBER_HELMET), EmberIds.id(EmberIds.EMBER_CHESTPLATE),
             EmberIds.id(EmberIds.EMBER_LEGGINGS), EmberIds.id(EmberIds.EMBER_BOOTS));
 
@@ -106,25 +105,12 @@ public final class EmberMobLoot {
         return out;
     }
 
-    // 火守りの谷 (C3 の部屋の箱) で倒れた灰被りか
-    public static boolean inHearthValley(LivingEntity mob) {
-        return EmberBackLayout.SOUTH.contains(BlockPos.containing(mob.position()));
-    }
-
     @SubscribeEvent
     static void onDrops(LivingDropsEvent event) {
         LivingEntity mob = event.getEntity();
         Row r = row(mob);
         if (r == null || !(mob.level() instanceof ServerLevel level) || level.dimension() != EmberIds.BACK) {
             return;
-        }
-        // 火守りの谷の灰被りは熾を必ず落とす (だれでも拾える。灰運び。倒し方を問わない)
-        if (mob instanceof AshThrall && inHearthValley(mob)) {
-            for (ItemStack coal : stacks(List.of(new Drop(LIVE_COAL, 1)))) {
-                ItemEntity item = new ItemEntity(level, mob.getX(), mob.getY() + 0.5, mob.getZ(), coal);
-                item.setDefaultPickUpDelay();
-                event.getDrops().add(item);
-            }
         }
         ServerPlayer killer = null;
         if (event.getSource().getEntity() instanceof ServerPlayer p) {

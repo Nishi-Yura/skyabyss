@@ -11,7 +11,6 @@ MODELS = [
     ("whalebone_captain", 3.2, -60, "slam", 12, False),
     ("static_moth", 1.0, -59.3, "attack", 8, True),
     ("moss_crawler", 1.5, -60, "pounce", 8, False),
-    ("waterway_maw", 2.0, -58.4, "bite", 8, True),
     ("elder_sentry", 2.3, -60, "attack", 8, False),
     ("thunder_supplicant", 2.3, -60, "attack", 8, False),
     ("elder_sentinel", 2.9, -60, "pounce", 8, False),

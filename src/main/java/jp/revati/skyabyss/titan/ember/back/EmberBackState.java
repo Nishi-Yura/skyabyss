@@ -46,10 +46,8 @@ public final class EmberBackState {
     private static final String READY = "ember.ready.";
     private static final String SLEEPING = "ember.sleeping";
     private static final String GATE_OPEN = "ember.gateOpen";
-    private static final String FORGE_PATTERN = "ember.forgePattern";
     private static final String EVER_DEFEATED = "keep.ember.everDefeated";
     private static final String LAST_SLEEPING = "keep.ember.lastSleeping";
-    private static final String FIRST_FORGE = "keep.ember.firstForgeUsed";
     private static final String RESETS = "keep.ember.resets";
     private static final String HEART_DEFEATS = "keep.ember.heartDefeats";
 
@@ -81,11 +79,6 @@ public final class EmberBackState {
     // グループが null なら「最初の形」
     public static EmberBackState ofNullable(ServerLevel level, @Nullable UUID group) {
         return group == null ? none() : of(level, group);
-    }
-
-    // 試練の部屋の持ち主 (RoomLocks) の状態。持ち主がいなければ「最初の形」
-    public static EmberBackState forRoom(ServerLevel level, String room) {
-        return ofNullable(level, EmberRooms.owner(room));
     }
 
     public static EmberBackState none() {
@@ -153,10 +146,6 @@ public final class EmberBackState {
         return record != null && record.isHeartDefeated();
     }
 
-    public int heartDefeats() {
-        return record == null ? 0 : record.getInt(HEART_DEFEATS);
-    }
-
     // リセットの種: グループの鍵と試練の番号から (グループごとに違い、リセットで変わる)
     public int seed() {
         if (group == null) {
@@ -168,10 +157,6 @@ public final class EmberBackState {
         h *= 0xBF58476D1CE4E5B9L;
         h ^= h >>> 32;
         return (int) h;
-    }
-
-    public boolean firstForgeUsed() {
-        return record != null && record.flag(FIRST_FORGE);
     }
 
     public int resets() {
@@ -192,21 +177,6 @@ public final class EmberBackState {
             }
         }
         return false;
-    }
-
-    // 鍛えの間の打つ順の番号。この周で初めて聞かれたときに決めて覚える (打つ途中で「初めての挑戦」が済んでも、順は変わらない)
-    public int forgePattern(int patterns) {
-        if (record == null) {
-            return 0;
-        }
-        int stored = record.getInt(FORGE_PATTERN);
-        if (stored > 0) {
-            return stored - 1;
-        }
-        // 初めての周と、静かな東の周は、いちばんやさしい順 (赤→橙→黄)
-        int idx = firstForgeUsed() && !quiet(Trial.EAST) ? Math.floorMod(seed(), patterns) : 0;
-        record.putInt(FORGE_PATTERN, idx + 1);
-        return idx;
     }
 
     // ---------------------------------------------------------------- 書く (EmberBackTrials・試練の担当から)
@@ -241,20 +211,6 @@ public final class EmberBackState {
             record.markHeartDefeated();
             record.putInt(HEART_DEFEATS, record.getInt(HEART_DEFEATS) + 1);
             record.setFlag(EVER_DEFEATED, true);
-        }
-    }
-
-    // 自己テストが、試したあとに元へ戻す
-    public void setEverDefeated(boolean value) {
-        if (record != null) {
-            record.setFlag(EVER_DEFEATED, value);
-        }
-    }
-
-    // 鍛えの間で初めての打つ順を使った
-    public void markFirstForgeUsed() {
-        if (record != null) {
-            record.setFlag(FIRST_FORGE, true);
         }
     }
 

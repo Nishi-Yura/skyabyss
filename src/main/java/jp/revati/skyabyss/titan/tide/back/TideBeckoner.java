@@ -130,7 +130,7 @@ public class TideBeckoner extends TideMob {
     // 試験・開発用: 戦いの人を決める (null なら干潟の戦いの人)、人数を多いことにする、技を自分で始めない
     @Nullable
     private List<ServerPlayer> devFighters;
-    // 順路の中ボスの部屋 (trial/raid/mid) で戦うときの干潟の代わり。null なら背の中の干潟 (TideFlats)
+    // 順路の中ボスの部屋 (trial/raid/mid) の戦いの場 (招き潮・人・咆哮の群れ・倒れたとき・範囲)。null なら技は場に何もしない
     @Nullable
     private Flats flats;
 
@@ -260,7 +260,7 @@ public class TideBeckoner extends TideMob {
             return;
         }
         double dist = Math.sqrt(distanceToSqr(target));
-        if (beckonCooldown <= 0 && !(flats != null ? flats.beckoning() : TideFlats.beckoning())) {
+        if (beckonCooldown <= 0 && !(flats != null && flats.beckoning())) {
             start(server, Action.BECKON);
         } else if (burrowCooldown <= 0) {
             start(server, Action.BURROW);
@@ -269,7 +269,7 @@ public class TideBeckoner extends TideMob {
         } else if (dist < 18 && dist > 5 && breathCooldown <= 0) {
             start(server, Action.BREATH);
         } else if (dist > 3.5) {
-            double speed = (flats != null ? flats.beckoning() : TideFlats.beckoning()) ? 1.45 : 1.0;
+            double speed = (flats != null && flats.beckoning()) ? 1.45 : 1.0;
             getNavigation().moveTo(target, speed);
         } else {
             getNavigation().stop();
@@ -278,7 +278,7 @@ public class TideBeckoner extends TideMob {
 
     // 狙える人 (干潟の戦いの人。試験・開発では指定した人)
     private List<ServerPlayer> fighters(ServerLevel server) {
-        return devFighters != null ? devFighters : flats != null ? flats.fighters(server) : TideFlats.fighters(server);
+        return devFighters != null ? devFighters : flats != null ? flats.fighters(server) : List.of();
     }
 
     private boolean isFighter(ServerPlayer p) {
@@ -403,8 +403,6 @@ public class TideBeckoner extends TideMob {
                 sound(server, TideBackSetup.BECKONER_BECKON.get(), 3f, 0.8f);
                 if (flats != null) {
                     flats.warnBeckon(server, BECKON_WINDUP);
-                } else {
-                    TideFlats.warnBeckon(server, BECKON_WINDUP);
                 }
             }
             case BREATH -> {
@@ -435,8 +433,6 @@ public class TideBeckoner extends TideMob {
                 if (actionTick == BECKON_WINDUP) {
                     if (flats != null) {
                         flats.beckon(server, BECKON_FLOOD);
-                    } else {
-                        TideFlats.beckon(server, BECKON_FLOOD);
                     }
                     beckonCooldown = angry ? BECKON_EVERY_ANGRY : BECKON_EVERY;
                     finish();
@@ -461,8 +457,6 @@ public class TideBeckoner extends TideMob {
                     server.sendParticles(ParticleTypes.EXPLOSION, getX(), getY() + 0.5, getZ(), 4, 2, 0.2, 2, 0);
                     if (flats != null) {
                         flats.roarSpawn(server, this);
-                    } else {
-                        TideFlats.roarSpawn(server, this);
                     }
                     finish();
                 }
@@ -489,7 +483,7 @@ public class TideBeckoner extends TideMob {
                 angles[i] = angles[0] + (i % 2 == 1 ? 1 : -1) * Math.toRadians(40) * ((i + 1) / 2);
             }
         }
-        boolean flooded = flats != null ? flats.flooded(server) : TideFlats.flatsFlooded(server);
+        boolean flooded = flats != null && flats.flooded(server);
         double ground = groundY(position());
         for (int i = 0; i < angles.length; i++) {
             double angle = angles[i];
@@ -721,10 +715,6 @@ public class TideBeckoner extends TideMob {
         actionTick = 0;
     }
 
-    private Vec3 bandPoint(double forward, double side) {
-        return position().add(slamDir.x * forward - slamDir.z * side, 0, slamDir.z * forward + slamDir.x * side);
-    }
-
     private double groundY(Vec3 p) {
         BlockPos b = BlockPos.containing(p.x, getY() + 2, p.z);
         for (int i = 0; i < 6; i++) {
@@ -780,8 +770,6 @@ public class TideBeckoner extends TideMob {
         if (level() instanceof ServerLevel server) {
             if (flats != null) {
                 flats.defeated(server, this);
-            } else {
-                TideFlats.onBeckonerDefeated(server, this);
             }
         }
     }

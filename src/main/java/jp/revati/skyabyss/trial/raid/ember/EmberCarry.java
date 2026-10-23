@@ -5,13 +5,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import jp.revati.skyabyss.titan.ember.back.trial.HearthVents;
 import jp.revati.skyabyss.trial.raid.RaidCtx;
 import jp.revati.skyabyss.trial.raid.RaidKit;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.phys.Vec3;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.level.block.Blocks;
@@ -126,7 +126,7 @@ public final class EmberCarry extends EmberRoom {
             int at = (int) ((t + phase[i]) % VENT_CYCLE);
             if (at == 0) {
                 BlockPos v = ctx.local(VENTS[i][0], 0, VENTS[i][1]);
-                redCircle(ctx, v.getX() + 0.5, v.getZ() + 0.5, 2.0, VENT_WARN, (lvl, p) -> HearthVents.hit(lvl, p, v));
+                redCircle(ctx, v.getX() + 0.5, v.getZ() + 0.5, 2.0, VENT_WARN, (lvl, p) -> ventBurst(lvl, p, v));
             } else if (at == VENT_WARN) {
                 BlockPos v = ctx.local(VENTS[i][0], 1, VENTS[i][1]);
                 particles(ctx, ParticleTypes.FLAME, v.getX() + 0.5, v.getY(), v.getZ() + 0.5, 24, 0.5, 0.08);
@@ -257,4 +257,21 @@ public final class EmberCarry extends EmberRoom {
         }
         return carry.isEmpty() ? source.above() : forge.above();
     }
+
+    // 噴気に当たった: 熱 25・傷 6 と、噴き口から外への跳ね上げ
+    private static void ventBurst(net.minecraft.server.level.ServerLevel level, ServerPlayer p, BlockPos vent) {
+        if (p.isCreative()) {
+            return;
+        }
+        jp.revati.skyabyss.titan.ember.back.EmberHeat.add(p, VENT_HEAT, jp.revati.skyabyss.titan.ember.back.EmberHeat.Reason.VENT);
+        p.invulnerableTime = 0;
+        p.hurt(jp.revati.skyabyss.titan.ember.EmberIds.damage(level, jp.revati.skyabyss.titan.ember.EmberIds.HEAT_BURST, null), VENT_DAMAGE);
+        Vec3 away = p.position().subtract(vent.getX() + 0.5, 0, vent.getZ() + 0.5).multiply(1, 0, 1);
+        Vec3 push = away.lengthSqr() < 1e-3 ? Vec3.ZERO : away.normalize().scale(0.25);
+        p.setDeltaMovement(push.x, 0.65, push.z);
+        p.hurtMarked = true;
+    }
+
+    private static final float VENT_HEAT = 25f;
+    private static final float VENT_DAMAGE = 6f;
 }

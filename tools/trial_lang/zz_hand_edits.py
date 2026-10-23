@@ -18,9 +18,6 @@ JA = {
     "message.skyabyss.domain.hearth_core.hint": "叩いても冷めない。しゃがもう",
     "gui.skyabyss.trial.title": "巨神の祠",
     "message.skyabyss.trial.board_far": "祠が遠い。碑のそばで開く",
-    "message.skyabyss.trial.stone_not_yours": "ここは、別の一行の試練の光る印だ",
-    "message.skyabyss.trial.w07.weight_off": "重りを外した（残り %s）",
-    "message.skyabyss.trial.w07.weight_on": "重りを載せた（残り %s）",
 }
 EN = {
     "gui.skyabyss.domain.stone_sea.goal": "Strike the resonant bones in the order they sounded",
@@ -39,9 +36,6 @@ EN = {
     "message.skyabyss.domain.hearth_core.hint": "Striking won't cool it. Crouch",
     "gui.skyabyss.trial.title": "Titan Shrine",
     "message.skyabyss.trial.board_far": "The shrine is too far. Open it beside the stone",
-    "message.skyabyss.trial.stone_not_yours": "This is another party's trial goal",
-    "message.skyabyss.trial.w07.weight_off": "Weight removed (%s left)",
-    "message.skyabyss.trial.w07.weight_on": "Weight placed (%s left)",
 }
 NOT_HERE = (
     "gui.skyabyss.domain.rising_tide.goal",

@@ -8,11 +8,6 @@
 - storm_thunder_far.ogg  : 遠くの雷。最初の割れる音のあとに低い地鳴り
 - storm_gale.ogg         : 昇り風の唸り。5 秒で切れ目なくループする
 - storm_back_wind.ogg    : 背中の風の環境音。12 秒で切れ目なくループする (北から南へ流れる風)
-- storm_rise_warn.ogg    : 10 秒前の予告 (低い風の唸りが上がっていく。昇り風が来る)
-- storm_fall_warn.ogg    : 10 秒前の予告 (遠くの高い鳴き声が下がっていく。凪が来る)
-- storm_crosswind.ogg    : 横風の口笛 (1.5 秒で上がる)
-- storm_mirror_turn.ogg  : 羽鏡を回す音 (銅の小さなかちりという音と震え)
-- storm_receiver_lit.ogg : 受け羽が光った音 (明るい鈴の和音)
 """
 from pathlib import Path
 
@@ -87,63 +82,10 @@ def back_wind():
     return finish(reverb(air + thin + low, 2.2, 0.35, circular=True), -7.0, trim=False)
 
 
-def rise_warn():
-    t = t_axis(10.0)
-    n = len(t)
-    # 低い唸りが少しずつ上がり、最後の 2 秒で強くなる (昇り風が来る合図)
-    growl = band_noise(n, 60, 320) * env(t, [(0, 0.1), (4, 0.4), (8, 0.8), (9.5, 1.0), (10, 0)])
-    drone = sweep(t, [(0, 55), (5, 70), (9, 92), (10, 96)]) * env(t, [(0, 0), (1, 0.4), (6, 0.6), (9.5, 0.8), (10, 0)])
-    rush = band_noise(n, 500, 2400) * env(t, [(0, 0), (5, 0.05), (9, 0.35), (10, 0)]) * 0.5
-    # 残響の尾は 10 秒で切る (予告の長さを 10 秒に合わせる)
-    return finish(reverb(growl * 0.9 + drone * 0.35 + rush, 2.5, 0.35)[:SR * 10], -3.0)
-
-
-def fall_warn():
-    t = t_axis(10.0)
-    n = len(t)
-    # 遠くの高い鳴き声が、10 秒かけて下がっていく (凪が来る合図)。ところどころ揺れる
-    cry = sweep(t, [(0, 1250), (3, 1050), (6, 820), (9, 640), (10, 600)])
-    cry *= 1 + 0.03 * np.sin(2 * np.pi * 5.0 * t)
-    cry *= env(t, [(0, 0), (0.6, 0.9), (4, 0.6), (8.5, 0.5), (10, 0)])
-    air = lowpass(band_noise(n, 300, 2000), 1400) * env(t, [(0, 0), (2, 0.25), (9, 0.2), (10, 0)])
-    return finish(reverb(lowpass(cry * 0.5 + air * 0.4, 3000), 3.0, 0.45)[:SR * 10], -4.0)
-
-
-def crosswind():
-    t = t_axis(1.5)
-    n = len(t)
-    whistle = sweep(t, [(0, 620), (1.5, 1900)]) * env(t, [(0, 0), (0.2, 0.8), (1.2, 0.8), (1.5, 0)])
-    breath = band_noise(n, 1200, 5000) * env(t, [(0, 0), (0.3, 0.3), (1.5, 0.5), (1.5, 0)]) * 0.4
-    return finish(reverb(whistle * 0.6 + breath, 1.2, 0.25), -4.0)
-
-
-def mirror_turn():
-    t = t_axis(0.9)
-    n = len(t)
-    # 銅の板が触れて鳴る音: 高い非整数倍音が速く減る、その後に小さな震え
-    ring = sum(np.sin(2 * np.pi * f * t) * a for f, a in ((2140.0, 1.0), (3410.0, 0.6), (5230.0, 0.35), (7790.0, 0.2)))
-    ring *= env(t, [(0, 0), (0.005, 1.0), (0.12, 0.45), (0.5, 0.1), (0.9, 0)])
-    tick = band_noise(n, 2000, 9000) * env(t, [(0, 0), (0.004, 1.0), (0.03, 0.0), (0.9, 0)]) * 0.6
-    shiver = band_noise(n, 800, 3000) * env(t, [(0, 0), (0.1, 0.0), (0.3, 0.25), (0.6, 0.1), (0.9, 0)]) * 0.25
-    return finish(reverb(ring * 0.5 + tick + shiver, 0.9, 0.2), -5.0)
-
-
-def receiver_lit():
-    t = t_axis(1.8)
-    # 明るい鈴の和音 (完全 5 度と 8 度)。少しずれた二重の音で、きらめきを出す
-    base = [1046.5, 1568.0, 2093.0, 2637.0]
-    bell = sum(np.sin(2 * np.pi * f * t) * np.exp(-t * (2.2 + 0.4 * i)) for i, f in enumerate(base))
-    shim = sum(np.sin(2 * np.pi * f * 1.004 * t) * np.exp(-t * 3.0) for f in base[1:]) * 0.4
-    up = sweep(t, [(0, 1046.5), (0.12, 2093.0)]) * env(t, [(0, 0), (0.02, 0.4), (0.12, 0.0), (1.8, 0)]) * 0.3
-    return finish(reverb(bell * 0.5 + shim * 0.3 + up, 2.0, 0.3), -4.0)
-
-
 def main():
     OUT.mkdir(parents=True, exist_ok=True)
     for name, fn in (("storm_wing_call", wing_call), ("storm_thunder_far", thunder_far), ("storm_gale", gale),
-                     ("storm_back_wind", back_wind), ("storm_rise_warn", rise_warn), ("storm_fall_warn", fall_warn),
-                     ("storm_crosswind", crosswind), ("storm_mirror_turn", mirror_turn),
-                     ("storm_receiver_lit", receiver_lit)):
+                     ("storm_back_wind", back_wind)):
         data = fn().astype(np.float32)
         write_ogg(OUT / f"{name}.ogg", data)
         print(name, "%.2f s" % (len(data) / SR), "peak %.3f" % float(np.max(np.abs(data))))

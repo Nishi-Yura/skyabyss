@@ -3,9 +3,6 @@ package jp.revati.skyabyss.registry;
 import jp.revati.skyabyss.SkyAbyss;
 import jp.revati.skyabyss.forge.ResonanceForgeBlock;
 import jp.revati.skyabyss.tablet.TabletBlock;
-import jp.revati.skyabyss.titan.dungeon.AnemoneBedBlock;
-import jp.revati.skyabyss.titan.dungeon.AnemonePedestalBlock;
-import jp.revati.skyabyss.titan.dungeon.AnemoneTallyBlock;
 import jp.revati.skyabyss.titan.dungeon.CrumblingBoneBlock;
 import jp.revati.skyabyss.titan.dungeon.SealedGateBlock;
 import net.minecraft.world.level.block.Block;
@@ -26,16 +23,6 @@ public final class ModBlocks {
             () -> new SealedGateBlock(unbreakable(MapColor.COLOR_PURPLE).noOcclusion().dynamicShape()
                     .isSuffocating((state, level, pos) -> false).isViewBlocking((state, level, pos) -> false)
                     .lightLevel(state -> state.getValue(SealedGateBlock.OPEN) ? 0 : 3)));
-
-    // 闇の水路の灯 (docs/design/23): 灯の台 (ともした姿はグループごとの上書き)・灯の苗床・入口の数え石
-    public static final DeferredBlock<AnemonePedestalBlock> ANEMONE_PEDESTAL = BLOCKS.register("anemone_pedestal",
-            () -> new AnemonePedestalBlock(unbreakable(MapColor.COLOR_CYAN).noOcclusion()
-                    .lightLevel(state -> state.getValue(AnemonePedestalBlock.LIT) ? 15 : 5)));
-    public static final DeferredBlock<AnemoneBedBlock> ANEMONE_BED = BLOCKS.register("anemone_bed",
-            () -> new AnemoneBedBlock(unbreakable(MapColor.SAND).noOcclusion().sound(net.minecraft.world.level.block.SoundType.SAND).lightLevel(state -> 7)));
-    public static final DeferredBlock<AnemoneTallyBlock> ANEMONE_TALLY = BLOCKS.register("anemone_tally",
-            () -> new AnemoneTallyBlock(unbreakable(MapColor.COLOR_GRAY)
-                    .lightLevel(state -> state.getValue(AnemoneTallyBlock.COUNT) == 0 ? 0 : 6 + 2 * state.getValue(AnemoneTallyBlock.COUNT))));
 
     // 乗ると崩れ、しばらくすると戻る骨の足場
     public static final DeferredBlock<CrumblingBoneBlock> CRUMBLING_BONE = BLOCKS.register("crumbling_bone",

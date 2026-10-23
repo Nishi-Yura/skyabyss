@@ -109,11 +109,6 @@ public final class TideClock {
         };
     }
 
-    // 深さ depth の溜めの、いまの水の段の数
-    public static int levelFor(double fullness, int depth) {
-        return (int) Math.min(depth, Math.floor(fullness * depth + 1e-9));
-    }
-
     // 1 tick 進める
     static void advance(ServerLevel level) {
         if (forced != null) {

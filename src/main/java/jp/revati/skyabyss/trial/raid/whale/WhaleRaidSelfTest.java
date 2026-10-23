@@ -135,7 +135,6 @@ public final class WhaleRaidSelfTest {
         try {
             if (group != null && back != null) {
                 TrialRoute.finish(back, group);
-                TrialRuntime.stopGroup(back, group);
                 GroupGates.reset(back, group);
                 BackGroupData.get(back).remove(group);
             }

@@ -23,13 +23,13 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
-// 雷翼の背の試練のブロック (どれも壊せない。見た目はバニラのテクスチャを使う)
+// 雷翼のブロック (どれも壊せない。見た目はバニラのテクスチャを使う): 羽鏡と避雷の柱
 public final class StormBlocks {
     private StormBlocks() {
     }
 
     // 羽鏡 (眼の間)。磨いた銅の羽を 45 度に立てた片面の鏡。右クリックで 90 度ずつ回る (ROT 0〜3)。
-    // ROT k の鏡は、二つの向きの光をつなぐ: 0 = 北と東、1 = 東と南、2 = 南と西、3 = 西と北 (EyeMirrors)
+    // ROT k の鏡は、二つの向きの光をつなぐ: 0 = 北と東、1 = 東と南、2 = 南と西、3 = 西と北
     public static class Mirror extends Block {
         public static final IntegerProperty ROT = IntegerProperty.create("rot", 0, 3);
         private static final VoxelShape SHAPE = Block.box(1, 0, 1, 15, 16, 15);
@@ -47,38 +47,6 @@ public final class StormBlocks {
         @Override
         protected VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext ctx) {
             return SHAPE;
-        }
-
-        @Override
-        protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
-            if (level instanceof ServerLevel server && player instanceof ServerPlayer sp) {
-                EyeMirrors.turn(server, pos, sp);
-            }
-            return InteractionResult.SUCCESS;
-        }
-
-        @Override
-        protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand,
-                BlockHitResult hit) {
-            if (level instanceof ServerLevel server && player instanceof ServerPlayer sp) {
-                EyeMirrors.turn(server, pos, sp);
-            }
-            return ItemInteractionResult.SUCCESS;
-        }
-    }
-
-    // 受け羽 (眼の間の壁の白い羽の飾り)。光が当たると光り続ける
-    public static class Receiver extends Block {
-        public static final BooleanProperty LIT = BooleanProperty.create("lit");
-
-        public Receiver(Properties p) {
-            super(p);
-            registerDefaultState(stateDefinition.any().setValue(LIT, false));
-        }
-
-        @Override
-        protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> b) {
-            b.add(LIT);
         }
     }
 
@@ -99,7 +67,7 @@ public final class StormBlocks {
         }
     }
 
-    // 段の電球。柱が満ちた段だけ青白く光る (LIT)。光の段は StormEast・RaijuNest・StormHeartArena が切り替える
+    // 段の電球。柱が満ちた段だけ青白く光る (LIT)。光の段は RaijuNest・StormHeartArena が切り替える
     public static class RodBulb extends Block {
         public static final BooleanProperty LIT = BlockStateProperties.LIT;
         private static final VoxelShape SHAPE = Block.box(3, 0, 3, 13, 16, 13);
@@ -117,71 +85,6 @@ public final class StormBlocks {
         @Override
         protected VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext ctx) {
             return SHAPE;
-        }
-    }
-
-    // 戻しの鏡 (前室の台の上の取っ手つきの手鏡。12 の 120)。引く動作は StormBackTrials の右クリックが受ける (座標 MIRROR_RESET)
-    public static class ReturnMirror extends Block {
-        public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
-        private static final VoxelShape SHAPE = Block.box(2, 0, 2, 14, 14, 14);
-
-        public ReturnMirror(Properties p) {
-            super(p);
-            registerDefaultState(stateDefinition.any().setValue(FACING, Direction.NORTH));
-        }
-
-        @Override
-        protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> b) {
-            b.add(FACING);
-        }
-
-        @Override
-        public BlockState getStateForPlacement(BlockPlaceContext ctx) {
-            return defaultBlockState().setValue(FACING, ctx.getHorizontalDirection().getOpposite());
-        }
-
-        @Override
-        protected VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext ctx) {
-            return SHAPE;
-        }
-    }
-
-    // ---- 拍の舵 (25 の 5章 C。入口の台。右クリックでその試練の拍を 60 秒、凪か嵐に固定する。StormHelm) ----
-    public static class Helm extends Block {
-        public static final BooleanProperty ACTIVE = BooleanProperty.create("active");
-        // 台座と舵輪 (台座の幅 11、舵輪は薄い)
-        private static final VoxelShape HELM_SHAPE = Block.box(2.5, 0, 2.5, 13.5, 16, 13.5);
-
-        @Override
-        protected VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext ctx) {
-            return HELM_SHAPE;
-        }
-
-        public Helm(Properties p) {
-            super(p);
-            registerDefaultState(stateDefinition.any().setValue(ACTIVE, false));
-        }
-
-        @Override
-        protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> b) {
-            b.add(ACTIVE);
-        }
-
-        @Override
-        protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
-            if (level instanceof ServerLevel server && player instanceof ServerPlayer sp) {
-                StormHelm.use(server, pos, sp);
-            }
-            return InteractionResult.SUCCESS;
-        }
-
-        @Override
-        protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand,
-                BlockHitResult hit) {
-            if (level instanceof ServerLevel server && player instanceof ServerPlayer sp) {
-                StormHelm.use(server, pos, sp);
-            }
-            return ItemInteractionResult.SUCCESS;
         }
     }
 }

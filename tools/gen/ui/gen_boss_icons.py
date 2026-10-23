@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
-"""ボスバーの左に出す 16x16 のドット絵 (中ボス 4 体: 鯨骨の隊長・古い見張り・真珠の番人・潮呼び) を書く。
+"""ボスバーの左に出す 16x16 のドット絵 (中ボス 3 体: 鯨骨の隊長・古い見張り・潮呼び) を書く。真珠の番人は消えた。
 使い方: python tools/gen/ui/gen_boss_icons.py
-出力: src/main/resources/assets/skyabyss/textures/gui/boss/{captain,elder_sentry,pearl_keeper,tide_beckoner}_icon.png
+出力: src/main/resources/assets/skyabyss/textures/gui/boss/{captain,elder_sentry,tide_beckoner}_icon.png
 (四つの心臓・雷獣・灰の鍛冶は、すでに <名前>_icon*.png がある。暗い縁取りは心臓の印と同じ)
 """
 from pathlib import Path
@@ -56,19 +56,6 @@ def elder_sentry():
     return finish(img)
 
 
-def pearl_keeper():
-    img, d = new()
-    d.pieslice((1, 2, 14, 15), 180, 360, fill=(236, 190, 196, 255))  # 貝の上の殻
-    d.pieslice((1, 0, 14, 12), 0, 180, fill=(214, 156, 168, 255))  # 貝の下の殻
-    d.line((3, 7, 12, 7), fill=(150, 98, 114, 255))
-    for x in (4, 6, 9, 11):
-        d.line((x, 3, x, 6), fill=(196, 138, 152, 255))
-    d.ellipse((5, 6, 10, 11), fill=(250, 248, 240, 255))  # 真珠
-    d.point((6, 7), fill=(255, 255, 255, 255))
-    d.point((9, 10), fill=(196, 206, 224, 255))
-    return finish(img)
-
-
 def tide_beckoner():
     img, d = new()
     d.polygon([(1, 13), (1, 8), (3, 4), (7, 2), (11, 3), (13, 6), (11, 7), (9, 6), (7, 7), (8, 9), (6, 11), (4, 13)], fill=(78, 196, 188, 255))  # 巻く波
@@ -84,6 +71,5 @@ def tide_beckoner():
 OUT.mkdir(parents=True, exist_ok=True)
 captain().save(OUT / "captain_icon.png")
 elder_sentry().save(OUT / "elder_sentry_icon.png")
-pearl_keeper().save(OUT / "pearl_keeper_icon.png")
 tide_beckoner().save(OUT / "tide_beckoner_icon.png")
 print(OUT)

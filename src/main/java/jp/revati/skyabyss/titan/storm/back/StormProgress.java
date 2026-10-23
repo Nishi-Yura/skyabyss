@@ -24,11 +24,8 @@ public final class StormProgress {
     static final String DOORS = "storm.doors";
     static final String RAIJU = "storm.raiju";
     static final String KEEL = "storm.keel";
-    static final String MIRROR_CONFIG = "storm.mirror_config";
     static final String MIRROR_ROTS = "storm.mirror_rots";
     static final String RECEIVERS = "storm.receivers";
-    // 周回の長い眼の間 (32 の 4 章、R5): 解いた配置の数 (0 = まだ。長い周は 2 つ解くと嘴の戸が開く)
-    static final String MIRROR_STAGE = "storm.mirror_stage";
     // 周回の長い雷の回路 (32 の 4 章、R5): 一度目の雷が戸の柱へ届いて組み変わった回路 (ビット。長い周は組み変わったあとの二度目で戸が開く)
     static final String REWIRED = "storm.rewired";
     static final String RIB = "storm.rib";
@@ -77,11 +74,6 @@ public final class StormProgress {
         return Integer.bitCount(record.getInt(RUNG) & 7);
     }
 
-    // 三つとも鳴ったか (眠っている試練の石は鳴っている)
-    public boolean allRung() {
-        return rungCount() >= 3;
-    }
-
     @Nullable
     public Trial sleeping() {
         return Trial.byId(record.getString(SLEEPING));
@@ -126,76 +118,8 @@ public final class StormProgress {
         return record.getInt(RIB);
     }
 
-    public void setRibLayer(int layer) {
-        record.putInt(RIB, Math.max(ribLayer(), layer));
-    }
-
-    // くぐった滑空の輪 (ビット)
-    public boolean ribRingLit(int k) {
-        return (record.getInt(RIB_RINGS) & (1 << k)) != 0;
-    }
-
-    public void setRibRingLit(int k) {
-        record.putInt(RIB_RINGS, record.getInt(RIB_RINGS) | (1 << k));
-    }
-
-    public int ribRingCount() {
-        return Integer.bitCount(record.getInt(RIB_RINGS));
-    }
-
-    // ---------------------------------------------------------------- 東の試練・雷獣・竜骨の門
-    public boolean eastDoorOpen(int i) {
-        return (record.getInt(DOORS) & (1 << i)) != 0;
-    }
-
     public void openEastDoor(int i) {
         record.putInt(DOORS, record.getInt(DOORS) | (1 << i));
-    }
-
-    public int openDoorCount() {
-        return Integer.bitCount(record.getInt(DOORS));
-    }
-
-    // 回路 i が組み変わったか (長い周の一度目の雷が戸の柱へ届いた)
-    public boolean rewired(int i) {
-        return (record.getInt(REWIRED) & (1 << i)) != 0;
-    }
-
-    public void markRewired(int i) {
-        record.putInt(REWIRED, record.getInt(REWIRED) | (1 << i));
-    }
-
-    // 戸を開けるまでに戸の柱へ届かせる回数 (周回のグループは 2。二度目は組み変わった回路で)
-    public int circuitRoundsNeeded() {
-        return jp.revati.skyabyss.trial.RouteLength.extended(record) ? StormCircuit.ROUNDS_LONG : 1;
-    }
-
-    // 自己テスト用: 組み変わった回路にも解があり、解 (倒すレバーの組) が組み変わる前と違うか。問題の一覧
-    public static java.util.List<String> longCircuitProblems() {
-        java.util.List<String> out = new java.util.ArrayList<>();
-        for (StormCircuit.Circuit c : StormCircuit.CIRCUITS) {
-            try {
-                java.util.List<net.minecraft.core.BlockPos> a = StormCircuit.solution(c, false);
-                java.util.List<net.minecraft.core.BlockPos> b = StormCircuit.solution(c, true);
-                if (new java.util.HashSet<>(a).equals(new java.util.HashSet<>(b))) {
-                    out.add("circuit " + c.index() + " has the same levers after rewiring");
-                }
-                if (StormCircuit.trace(c, b::contains, true).outcome() != StormCircuit.Outcome.DOOR) {
-                    out.add("circuit " + c.index() + " rewired solution does not reach the door");
-                }
-                if (StormCircuit.trace(c, a::contains, true).outcome() == StormCircuit.Outcome.DOOR) {
-                    out.add("circuit " + c.index() + " first solution still reaches the door after rewiring");
-                }
-            } catch (IllegalStateException e) {
-                out.add(e.getMessage());
-            }
-        }
-        return out;
-    }
-
-    // 東の戸がこのグループにとって開いているか (開けた戸、または東が眠っている周)
-    public boolean eastDoorPassable(int i) {
-        return eastDoorOpen(i) || sleeping() == Trial.EAST;
     }
 
     public boolean raijuDefeated() {
@@ -206,11 +130,6 @@ public final class StormProgress {
         record.setFlag(RAIJU, v);
     }
 
-    // 雷獣の巣の真ん中の昇り風が立っているか
-    public boolean raijuVent() {
-        return raijuDefeated() || sleeping() == Trial.EAST || rung(Trial.EAST);
-    }
-
     public boolean keelOpen() {
         return record.flag(KEEL);
     }
@@ -219,67 +138,8 @@ public final class StormProgress {
         record.setFlag(KEEL, v);
     }
 
-    // ---------------------------------------------------------------- 眼の間
-    public int mirrorConfig() {
-        return Math.floorMod(record.getInt(MIRROR_CONFIG), EyeMirrors.CONFIGS.size());
-    }
-
-    public void setMirrorConfig(int c) {
-        record.putInt(MIRROR_CONFIG, Math.floorMod(c, EyeMirrors.CONFIGS.size()));
-        resetMirrorRots();
-    }
-
-    public EyeMirrors.Config config() {
-        return EyeMirrors.CONFIGS.get(mirrorConfig());
-    }
-
-    // 鏡の向き (配置の鏡の順)。回していなければ配置の最初の向き
-    public int[] mirrorRots() {
-        EyeMirrors.Config cfg = config();
-        int[] saved = record.data().getIntArray(MIRROR_ROTS);
-        if (saved.length != cfg.mirrors().size()) {
-            return cfg.init().clone();
-        }
-        return saved.clone();
-    }
-
-    public void setMirrorRot(int i, int rot) {
-        int[] rots = mirrorRots();
-        rots[i] = rot & 3;
-        record.data().putIntArray(MIRROR_ROTS, rots);
-        record.changed();
-    }
-
-    public void resetMirrorRots() {
-        if (record.has(MIRROR_ROTS)) {
-            record.remove(MIRROR_ROTS);
-        }
-    }
-
     public int receivers() {
         return record.getInt(RECEIVERS);
-    }
-
-    public int mirrorStage() {
-        return record.getInt(MIRROR_STAGE);
-    }
-
-    public void setMirrorStage(int v) {
-        record.putInt(MIRROR_STAGE, v);
-    }
-
-    // 嘴の戸を開けるまでに解く配置の数 (周回のグループは 2)
-    public int mirrorStagesNeeded() {
-        return jp.revati.skyabyss.trial.RouteLength.extended(record) ? EyeMirrors.STAGES_LONG : 1;
-    }
-
-    public void setReceivers(int bits) {
-        record.putInt(RECEIVERS, bits);
-    }
-
-    // 嘴の小部屋の戸がこのグループにとって開いているか
-    public boolean beakOpen() {
-        return receivers() == 7 || rung(Trial.FRONT);
     }
 
     // ---------------------------------------------------------------- リセット
@@ -291,7 +151,6 @@ public final class StormProgress {
     }
 
     // 試練を最初に戻す (12 の 7.1節)。番号が進み (古い休み場の記録は無効)、心臓も眠り直す。
-    // 眼の間は新しい配置を引く (このグループが初めて挑むときだけ、いちばんやさしい 0)。
     // 試練はどれも、いつでも入れて終えられる (25 の 2章): 周回で試練が眠って飛ばされることはない。
     // forceSleep は開発用のコマンドだけ (試練を眠らせた状態の確かめ)。noSleep は残してあるが、自動で眠らせないので効果はない
     public void reset(RandomSource random, @Nullable Trial forceSleep, boolean noSleep) {
@@ -300,7 +159,6 @@ public final class StormProgress {
         if (ever) {
             markEverDefeated();
         }
-        record.putInt(MIRROR_CONFIG, 1 + random.nextInt(EyeMirrors.CONFIGS.size() - 1));
         if (forceSleep != null) {
             setSleeping(forceSleep);
         }

@@ -258,31 +258,6 @@ def moss_step():
 
 # ---------------------------------------------------------------- 水路の顎 (暗い水路の魚のような捕食者)
 
-def waterway_maw_ambient():
-    t = t_axis(1.8)
-    f0 = np.interp(t, [0, 0.8, 1.8], [70, 95, 60])
-    v = voice(t, f0, [(250, 120, 1.0), (700, 200, 0.5)], rough=0.04, breath=0.12)
-    v = lowpass(v, 900) * E(t, [(0, 0), (0.5, 0.5), (1.2, 0.45), (1.8, 0)])
-    gurgle = lowpass(band_noise(len(t), 150, 900), 900) * (0.5 + 0.5 * np.sin(2 * np.pi * 7 * t)) * E(t, [(0, 0), (0.6, 0.6), (1.8, 0)])
-    return finish(reverb(v * 0.6 + gurgle * 0.5 + bubbles(t, 7, 300, 900, amp=0.15), 1.0, 0.3), -7.0)
-
-
-def waterway_maw_hurt():
-    t = t_axis(0.6)
-    f0 = np.interp(t, [0, 0.12, 0.6], [180, 260, 90])
-    v = voice(t, f0, [(450, 200, 1.0), (1100, 300, 0.5)], rough=0.05, breath=0.15) * E(t, [(0, 0), (0.02, 1), (0.3, 0.5), (0.6, 0)])
-    splash = lowpass(band_noise(len(t), 200, 3000), 3000) * E(t, [(0, 0.9), (0.15, 0.4), (0.4, 0)])
-    return finish(reverb(lowpass(v, 1800) * 0.6 + splash * 0.5 + bubbles(t, 6, 500, 1500, amp=0.2), 0.7, 0.25), -4.0)
-
-
-def waterway_maw_death():
-    t = t_axis(2.0)
-    f0 = np.interp(t, [0, 0.4, 2.0], [150, 130, 40])
-    v = voice(t, f0, [(300, 150, 1.0), (800, 250, 0.5)], rough=0.06, breath=0.15) * E(t, [(0, 0), (0.05, 1), (1.0, 0.5), (2.0, 0)])
-    sink = lowpass(band_noise(len(t), 80, 1200), 1200) * E(t, [(0, 0.4), (0.8, 0.8), (2.0, 0)])
-    return finish(reverb(lowpass(v, 1500) * 0.6 + sink * 0.5 + bubbles(t, 22, 250, 1100, amp=0.2, span=(0.1, 1.8)), 1.2, 0.3), -3.0)
-
-
 # ---------------------------------------------------------------- 鯨骨の番兵長 (大きな鯨の骨の戦士)
 
 def captain_ambient():
@@ -458,9 +433,6 @@ SOUNDS = {
     "moss_crawler_death": moss_crawler_death,
     "moss_crawler_step_1": moss_step,
     "moss_crawler_step_2": moss_step,
-    "waterway_maw_ambient": waterway_maw_ambient,
-    "waterway_maw_hurt": waterway_maw_hurt,
-    "waterway_maw_death": waterway_maw_death,
     "whalebone_captain_ambient": captain_ambient,
     "whalebone_captain_hurt_1": lambda: captain_hurt(300),
     "whalebone_captain_hurt_2": lambda: captain_hurt(380),

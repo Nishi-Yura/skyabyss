@@ -125,63 +125,6 @@ public final class TrialCatalog {
         return out;
     }
 
-    // 引き方 (プール) を動かす巨神か。三つの枠すべてに、作ってある試練が二つ以上ある巨神だけ (そうでなければ周回しても原型のまま)
-    public static boolean poolActive(String titan) {
-        if (jp.revati.skyabyss.trial.raid.RaidRooms.active(titan)) {
-            return false;
-        }
-        if (!deckPlaced(titan)) {
-            return false;
-        }
-        for (Slot s : Slot.values()) {
-            if (inSlot(titan, s).size() < 2) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    // 新作のセルを背に置いてあるか (岩鯨の試練の階。体の作り直しが済むまで置かない。WhaleDeck.placed)。ほかの巨神は新作がまだ無いので false
-    public static boolean deckPlaced(String titan) {
-        return Titans.STONE_WHALE.equals(titan) && jp.revati.skyabyss.titan.dungeon.WhaleDeck.placed()
-                || Titans.TIDE_SHELL.equals(titan) && jp.revati.skyabyss.titan.tide.back.TideDeck.placed()
-                || Titans.THUNDER_WING.equals(titan) && jp.revati.skyabyss.titan.storm.back.StormDeck.placed()
-                || Titans.EMBER.equals(titan) && jp.revati.skyabyss.titan.ember.back.EmberDeck.placed();
-    }
-
-    // 石の合図 (TrialSteles の titan と trial の文字) から、その石の原型の試練。なければ null
-    @Nullable
-    public static Def legacyOfStone(String steleTitan, String trial) {
-        String id = switch (steleTitan) {
-            case "whale" -> switch (trial) {
-                case "0" -> "W01";
-                case "1" -> "W09";
-                case "2" -> "W05";
-                default -> null;
-            };
-            case "tide" -> switch (trial) {
-                case "west" -> "T01";
-                case "east" -> "T05";
-                case "front" -> "T09";
-                default -> null;
-            };
-            case "storm" -> switch (trial) {
-                case "west" -> "S01";
-                case "east" -> "S05";
-                case "front" -> "S06";
-                default -> null;
-            };
-            case "ember" -> switch (trial) {
-                case "west" -> "E01";
-                case "east" -> "E05";
-                case "south" -> "E09";
-                default -> null;
-            };
-            default -> null;
-        };
-        return id == null ? null : get(id);
-    }
-
     // 巨神の名前の短い札 (lang の trial.skyabyss.titan.<id>)
     public static String titanKey(String titan) {
         return "trial.skyabyss.titan." + titan;

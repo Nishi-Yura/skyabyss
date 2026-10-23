@@ -9,7 +9,6 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 
 import jp.revati.skyabyss.SkyAbyss;
 import jp.revati.skyabyss.progress.Titans;
-import jp.revati.skyabyss.titan.dungeon.WhaleDeck;
 import jp.revati.skyabyss.titan.group.BackGroupData;
 import jp.revati.skyabyss.titan.group.GroupOverlays;
 import jp.revati.skyabyss.titan.group.GroupProgress;
@@ -33,7 +32,6 @@ import net.neoforged.neoforge.event.RegisterCommandsEvent;
 //   cycle <n>                そのグループの周を n にして、引き直す (履歴は消す)
 //   force <id> <id> <id>     引いた三つを決める (修飾は標準)
 //   mods <id> <符号>         引いた試練の修飾を、符号 (Mods.encode) で決める
-//   tp <id|deck|hub>         セルの入口・試練の階・鼓動の間へ行く (岩鯨・潮殻の背。いまいる背で)
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class TrialCommands {
     private TrialCommands() {
@@ -100,8 +98,6 @@ public final class TrialCommands {
             r.remove(TrialData.SEEN + s.id);
             r.remove(TrialData.LAST + s.id);
         }
-        TrialRuntime.stopGroup(back, group);
-        TrialRuntime.syncGates(back, group, titan(back), TrialData.current(back, group));
         return list(src);
     }
 
@@ -119,8 +115,6 @@ public final class TrialCommands {
             picks.add(new TrialDraw.Pick(id, Mods.PLAIN));
         }
         r.putString(TrialData.DRAW, new TrialDraw.Draw(TrialData.cycle(r), picks).encode());
-        TrialRuntime.stopGroup(back, group);
-        TrialRuntime.syncGates(back, group, titan(back), TrialData.current(back, group));
         return list(src);
     }
 
@@ -145,7 +139,6 @@ public final class TrialCommands {
             return 0;
         }
         r.putString(TrialData.DRAW, new TrialDraw.Draw(draw.cycle(), picks).encode());
-        TrialRuntime.stopGroup(back, group);
         GroupOverlays.refresh(back, group);
         return list(src);
     }

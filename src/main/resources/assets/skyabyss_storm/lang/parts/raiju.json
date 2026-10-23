@@ -59,10 +59,6 @@
     "en": "Raiju's nest: walk in to begin (5 s). /skyabyss raiju start to begin now",
     "ja": "雷獣の巣: 中へ入ると 5 秒で始まる。すぐ始めるなら /skyabyss raiju start"
   },
-  "message.skyabyss.raiju.go_temporary": {
-    "en": "Raiju's nest (temporary, in the overworld sky until the storm back exists). Walk in to begin",
-    "ja": "雷獣の巣 (仮。雷翼の背ができるまで、オーバーワールドの空に置いてある)。中へ入ると始まる"
-  },
   "subtitles.skyabyss.raiju_ambient": {
     "en": "Raiju growls and crackles",
     "ja": "雷獣が唸り、毛が爆ぜる"

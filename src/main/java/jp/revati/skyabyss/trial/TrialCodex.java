@@ -85,27 +85,8 @@ public final class TrialCodex extends SavedData {
         return n;
     }
 
-    public int totalGoals(UUID player) {
-        int n = 0;
-        Map<String, Entry> m = entries.get(player);
-        if (m != null) {
-            for (Entry e : m.values()) {
-                n += e.goals;
-            }
-        }
-        return n;
-    }
-
     public Set<String> titles(UUID player) {
         return titles.getOrDefault(player, Set.of());
-    }
-
-    public boolean addTitle(UUID player, String title) {
-        if (titles.computeIfAbsent(player, k -> new LinkedHashSet<>()).add(title)) {
-            setDirty();
-            return true;
-        }
-        return false;
     }
 
     public int routeClears(UUID player, String titan) {

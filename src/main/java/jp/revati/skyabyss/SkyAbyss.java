@@ -125,8 +125,6 @@ public class SkyAbyss {
         jp.revati.skyabyss.abyss.mobs.AbyssMobsBSetup.register(modEventBus);
         // 余燼の心臓 (最終ボス: 熾の底、三段階、灰の礫、報酬、天の鍵の四つ目の欠片)。13 の 11.2節の担当 F
         jp.revati.skyabyss.titan.ember.heart.EmberHeartSetup.register(modEventBus);
-        // 余燼の三つの試練 (灰の道・鍛えの間・火守り。13 の 4 章)
-        jp.revati.skyabyss.titan.ember.back.trial.EmberTrialSetup.register(modEventBus);
 
         // 序盤の拍子 (プレイヤーごとの状態・音)。docs/design/17 の担当 3
         jp.revati.skyabyss.opening.OpeningSetup.register(modEventBus);

@@ -82,10 +82,6 @@ public final class StormStrike {
             return left;
         }
 
-        public Strike noCharge() {
-            charges = false;
-            return this;
-        }
     }
 
     private StormStrike() {
@@ -128,11 +124,6 @@ public final class StormStrike {
     // そのグループの予告中の雷を消す (グループのリセット)
     public static void cancel(ServerLevel level, UUID group) {
         PENDING.removeIf(s -> s.level == level && group.equals(s.group));
-    }
-
-    // 箱の中の予告中の雷を消す (部屋の持ち主が変わったとき)
-    public static void cancelIn(ServerLevel level, AABB box) {
-        PENDING.removeIf(s -> s.level == level && box.contains(s.pos));
     }
 
     // public: 敵の自己テストが予告から落雷までを進めるために呼ぶ

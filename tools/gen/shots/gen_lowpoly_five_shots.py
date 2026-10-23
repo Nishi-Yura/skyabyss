@@ -95,15 +95,6 @@ def main():
     b += "lowpoly off\nwait 5\n" + cam(0, -60, 4.5, 180, 4) + "wait 20\nshot cubes_archer_front\nlowpoly on\n"
     write("archer", b, "rib_archer low-poly: idle views, face, bow, shoot (draw/release, strings)")
 
-    # waterway maw (scale 0.58)
-    b = "cmd summon skyabyss:waterway_maw 0 -59 0 {NoAI:1b,NoGravity:1b,Rotation:[0f,0f],PersistenceRequired:1b,Invulnerable:1b,Tags:[\"m\"]}\n"
-    b += cam(0, -60, 5, 180, 2) + "waitchunks\nwait 60\n"
-    b += views("lp_maw_idle", 5, -60, 2)
-    b += cam(0, -57, 0.5, 180, 90) + "wait 12\nshot lp_maw_top\n"
-    b += pose("lp_maw", "@e[tag=m]", "bite", (3, 6, 9, 12, 16, 20), 3.6, -60, 2)
-    b += "lowpoly off\nwait 5\n" + cam(0, -60, 5, 180, 2) + "wait 20\nshot cubes_maw_front\nlowpoly on\n"
-    write("maw", b, "waterway_maw low-poly: idle views, top, bite")
-
     # stone whale heart: phases 1-3, intro and death
     b = ""
     for ph, hp in ((1, 450), (2, 248), (3, 90)):

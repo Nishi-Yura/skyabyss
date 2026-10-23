@@ -148,12 +148,12 @@ public final class RoutePartySelfTest {
             b.setPos(door);
             TrialRoute.startSoon(back, group, titan, List.of(a, b));
             check(f, TrialRoute.step(back, group) == 1, "the shrine start did not set step 1");
-            check(f, TrialRoute.pending(group), "the shrine start did not wait for the copy");
+            check(f, TrialRoute.pending(group), "the shrine start did not queue the carry");
             TrialDraw.Draw replay = TrialData.current(back, group);
             long due = back.getGameTime();
-            TrialRoute.tick(back, titan, pair, due + TrialRoute.COPY_WAIT + 1);
+            TrialRoute.tick(back, titan, pair, due + 1);
             check(f, !TrialRoute.pending(group), "the shrine carry stayed queued");
-            check(f, near(a, back, titan, replay, 1) && near(b, back, titan, replay, 1), "the shrine did not carry both to the first rest of the copy: " + a.position() + " / " + b.position());
+            check(f, near(a, back, titan, replay, 1) && near(b, back, titan, replay, 1), "the shrine did not carry both into the first room: " + a.position() + " / " + b.position());
             check(f, TrialSlot.of(GroupProgress.of(back, group)) > 0, "the replay has no slot");
         } catch (RuntimeException e) {
             SkyAbyss.LOGGER.error("SELFTEST route party crashed", e);
@@ -177,7 +177,6 @@ public final class RoutePartySelfTest {
 
     private static void clean(ServerLevel back, UUID g) {
         TrialRoute.finish(back, g);
-        TrialRuntime.stopGroup(back, g);
         GroupGates.reset(back, g);
         BackGroupData.get(back).remove(g);
     }
@@ -194,9 +193,6 @@ public final class RoutePartySelfTest {
             var run = jp.revati.skyabyss.trial.raid.RaidRun.of(Groups.keyOf(p));
             return run != null && run.step == step && run.ctx.cell().bounds().contains(p.position());
         }
-        String rest = TrialRoute.restFor(back, Groups.keyOf(p), titan, draw, step, false);
-        BlockPos at = rest == null ? null : TrialRoute.spawnOf(back, titan, rest);
-        at = at == null ? null : TrialRoute.frameOfStep(back, Groups.keyOf(p), draw, step, false).at(at);
-        return at != null && p.position().distanceTo(Vec3.atBottomCenterOf(at)) < 2.5;
+        return false;
     }
 }

@@ -29,7 +29,7 @@ import jp.revati.skyabyss.trial.Trial.Def;
 import jp.revati.skyabyss.trial.Trial.Mods;
 
 // 順路 (docs/design/32 の 2 章・5 章) の自己テスト。段の名前は "trial route"。
-//  - 形: 四体とも、周回 1 の引きが歩・智・闘のレイドの部屋 (鍵が違う)、中ボスの段、心臓の休み場、到着の台の入口の箱
+//  - 形: 四体とも、周回 1 の引きが歩・智・闘のレイドの部屋 (鍵が違う)、中ボスの段、到着の台の入口の箱
 //  - 初回の流れ (到着の台に立てる巨神): 台に立つ → 予告のあと部屋 1 の中へ → 越えるたびに次の部屋の中へ → 中ボスの間 → 心臓の間の中。
 //    別のグループの人は動かない。越えた順が前後しても段は戻らない。途中で台に立っても始め直さない。ほかのグループの初回の順路が
 //    動いていても待たない (部屋は区画ごとに別)。周回のグループは台では始まらない (祠から)
@@ -64,7 +64,7 @@ public final class TrialRouteSelfTest {
                 jp.revati.skyabyss.trial.raid.InstanceArenas.ensureHeart(back, titan);
                 heartCarry(f, server, back, titan);
                 if (ready(back, titan)) {
-                    rests(f, back, titan);
+                    entryFloor(f, back, titan);
                     firstRun(f, back, titan);
                     replay(f, back, titan);
                     worlds++;
@@ -82,7 +82,7 @@ public final class TrialRouteSelfTest {
             TrialRoute.PLAYERS = l -> jp.revati.skyabyss.util.Players.snapshot(l.players());
         }
         if (f.isEmpty()) {
-            SkyAbyss.LOGGER.info("SELFTEST trial route PASSED (shape for four titans; walked first runs and replays in {} built back(s); long prototypes on replays)", worlds);
+            SkyAbyss.LOGGER.info("SELFTEST trial route PASSED (shape for four titans; walked first runs and replays in {} built back(s); long replays)", worlds);
         } else {
             for (String s : f) {
                 SkyAbyss.LOGGER.error("SELFTEST trial route FAILED: {}", s);
@@ -90,8 +90,8 @@ public final class TrialRouteSelfTest {
         }
     }
 
-    // ---------------------------------------------------------------- 太らせた原型 (R5。32 の 4 章)
-    // 周回のグループ (心臓を一度止めた) だけが長い。初回は今の長さ。長さは 1.5〜2 倍
+    // ---------------------------------------------------------------- 周回の長さ (32 の 4 章)
+    // 周回のグループ (心臓を一度止めた) だけが長い。初回は今の長さ
     private static void fattened(List<String> f, MinecraftServer server) {
         ServerLevel any = server.getLevel(Titans.backOf(Titans.STONE_WHALE));
         if (any != null) {
@@ -101,61 +101,6 @@ public final class TrialRouteSelfTest {
             fresh.markFirstCleared();
             check(f, RouteLength.extended(fresh) && RouteLength.extended(any, probe), "a replaying group should play the long prototypes");
             BackGroupData.get(any).remove(probe);
-        }
-        double waves = jp.revati.skyabyss.titan.dungeon.TitanBackTrials.replayWaves(true) / (double) jp.revati.skyabyss.titan.dungeon.TitanBackTrials.replayWaves(false);
-        check(f, waves >= 1.5 && waves <= 2.0, "W09: the replay halls should have 1.5-2x the waves: " + waves);
-        double nests = jp.revati.skyabyss.titan.tide.back.TideBackLayout.NEST_COUNT_LONG / (double) jp.revati.skyabyss.titan.tide.back.TideBackLayout.NEST_COUNT;
-        check(f, nests >= 1.5 && nests <= 2.0 && jp.revati.skyabyss.titan.tide.back.TideBackLayout.NEST_COUNT_LONG <= jp.revati.skyabyss.titan.tide.back.TideBackLayout.NEST_SITES.length,
-                "T09: the long flats should have 1.5-2x the nests within the sites: " + nests);
-        check(f, jp.revati.skyabyss.titan.tide.back.TideWatch.STAGES_LONG == 2 && jp.revati.skyabyss.titan.storm.back.EyeMirrors.STAGES_LONG == 2
-                && jp.revati.skyabyss.titan.ember.back.trial.Forge.KEYS_LONG == 2 && jp.revati.skyabyss.titan.ember.back.trial.Hearth.FLARES_LONG == 2,
-                "T05/S06/E05/E09: the long rooms should ask for two rounds");
-        float hearth = (jp.revati.skyabyss.titan.ember.back.trial.Hearth.MAX - jp.revati.skyabyss.titan.ember.back.trial.Hearth.START
-                + jp.revati.skyabyss.titan.ember.back.trial.Hearth.MAX - jp.revati.skyabyss.titan.ember.back.trial.Hearth.RELIGHT)
-                / (jp.revati.skyabyss.titan.ember.back.trial.Hearth.MAX - jp.revati.skyabyss.titan.ember.back.trial.Hearth.START);
-        check(f, hearth >= 1.5 && hearth <= 2.0, "E09: the long hearth should burn 1.5-2x the fire: " + hearth);
-        // W05 灯をたずさえる: 周回は灯を一つずつしか持てない。一人で歩く道のり (近道を通る) が 1.5〜2.2 倍
-        double sum = 0;
-        double lo = Double.MAX_VALUE;
-        double hi = 0;
-        int seeds = 24;
-        for (long seed = 1; seed <= seeds; seed++) {
-            int first = jp.revati.skyabyss.titan.dungeon.AnemoneLights.soloWalk(seed * 7919L, jp.revati.skyabyss.titan.dungeon.AnemoneLights.LIGHTS);
-            // 周回: 一度に二つまで、苗床は入口の二つだけ (中ほどは眠っている)
-            int replay = jp.revati.skyabyss.titan.dungeon.AnemoneLights.soloWalk(seed * 7919L, jp.revati.skyabyss.titan.dungeon.AnemoneLights.CARRY_LONG, 3, true);
-            double r = replay / (double) Math.max(1, first);
-            sum += r;
-            lo = Math.min(lo, r);
-            hi = Math.max(hi, r);
-        }
-        double mean = sum / seeds;
-        // S05 雷の回路: 周回は二度届かせる。組み変わった回路にも解があり、解は前と違う
-        check(f, jp.revati.skyabyss.titan.storm.back.StormProgress.longCircuitProblems().isEmpty(), "S05: " + jp.revati.skyabyss.titan.storm.back.StormProgress.longCircuitProblems());
-        // 眼の間: 長い周は一つ目の配置を解くと次の配置に替わり、二つ目で嘴の戸が開く
-        ServerLevel storm = server.getLevel(Titans.backOf(Titans.THUNDER_WING));
-        if (storm != null) {
-            UUID g = UUID.randomUUID();
-            jp.revati.skyabyss.titan.storm.back.StormProgress sp = jp.revati.skyabyss.titan.storm.back.StormProgress.of(storm, g);
-            BackGroupData.get(storm).of(g).markFirstCleared();
-            int cfg0 = sp.mirrorConfig();
-            jp.revati.skyabyss.titan.storm.back.EyeMirrors.testLightAll(storm, sp);
-            check(f, sp.mirrorStage() == 1 && sp.receivers() == 0 && sp.mirrorConfig() != cfg0 && !sp.beakOpen(),
-                    "S06: the long eye room should turn to a new pattern after the first: stage " + sp.mirrorStage() + " config " + sp.mirrorConfig());
-            jp.revati.skyabyss.titan.storm.back.EyeMirrors.testLightAll(storm, sp);
-            check(f, sp.receivers() == 7 && sp.beakOpen(), "S06: the second pattern should open the beak");
-            BackGroupData.get(storm).remove(g);
-        }
-        ServerLevel tide = server.getLevel(Titans.backOf(Titans.TIDE_SHELL));
-        if (tide != null) {
-            UUID g = UUID.randomUUID();
-            jp.revati.skyabyss.titan.tide.back.TideBackState.Group tg = jp.revati.skyabyss.titan.tide.back.TideBackState.of(tide, g);
-            check(f, tg.eastStagesNeeded() == 1, "T05: a first-run group solves one watch pattern");
-            BackGroupData.get(tide).of(g).markFirstCleared();
-            int c0 = tg.eastConfig();
-            tg.nextEastStage();
-            check(f, tg.eastStagesNeeded() == 2 && tg.eastStage() == 1 && tg.eastConfig() != c0 && tg.eastConfig() >= 1,
-                    "T05: the long watch room should move to another pattern: " + tg.eastConfig());
-            BackGroupData.get(tide).remove(g);
         }
     }
 
@@ -176,35 +121,13 @@ public final class TrialRouteSelfTest {
             String key = TrialRoute.keyOf(titan, first, step);
             check(f, key != null && TrialRegions.keys(titan).contains(key), titan + ": step " + step + " has no stele key (" + key + ")");
             keys.add(key);
-            check(f, TrialRoute.restOf(titan, first, step, false) != null, titan + ": no rest for first-run step " + step);
         }
         check(f, keys.size() == 3, titan + ": the first route repeats a stele: " + keys);
         check(f, TrialRoute.keysOf(titan).equals(java.util.Arrays.asList(TrialRoute.keyOf(titan, first, 1), TrialRoute.keyOf(titan, first, 2), TrialRoute.keyOf(titan, first, 3))),
                 titan + ": the first route order is not walk, wit, fight: " + keys);
-        check(f, TrialRoute.HEART_REST.equals(TrialRoute.restOf(titan, first, TrialRoute.LAST_STEP, false)), titan + ": the last step is not the heart rest");
         check(f, TrialRoute.defOf(first, 0) == null && TrialRoute.defOf(first, 4) == null, titan + ": defOf bounds");
-        // 全部の試練に入口の休み場
-        for (Def d : TrialCatalog.of(titan)) {
-            TrialDraw.Draw one = new TrialDraw.Draw(2, List.of(new TrialDraw.Pick(d.id(), Mods.PLAIN)));
-            check(f, TrialRoute.entryRest(titan, d, one) != null, titan + ": " + d.id() + " has no entry rest");
-        }
-        // 中ボス: 原型の中にいる。周回 1 は要らない。中ボスの原型を引いていない周は要る
-        String host = TrialMidBoss.hostOf(titan);
-        Def hostDef = host == null ? null : TrialCatalog.get(host);
-        check(f, hostDef != null && hostDef.original(), titan + ": the mid-boss host is not an original trial: " + host);
-        check(f, TrialMidBoss.restOf(titan) != null, titan + ": no mid-boss antechamber");
-        check(f, TrialMidBoss.needed(titan, first) == jp.revati.skyabyss.trial.raid.RaidRooms.active(titan),
-                titan + ": the first run's mid-boss step does not match the raid mode (raid routes always have a separate mid-boss step)");
-        List<TrialDraw.Pick> noHost = new ArrayList<>();
-        for (Trial.Slot s : Trial.Slot.values()) {
-            for (Def d : TrialCatalog.inSlot(titan, s)) {
-                if (!d.id().equals(host)) {
-                    noHost.add(new TrialDraw.Pick(d.id(), Mods.PLAIN));
-                    break;
-                }
-            }
-        }
-        check(f, TrialMidBoss.needed(titan, new TrialDraw.Draw(2, noHost)), titan + ": a draw without the mid-boss host has no mid-boss step");
+        // 中ボス: 四体とも、三つ目の部屋のあとに中ボスの段がある
+        check(f, TrialMidBoss.needed(titan, first), titan + ": the route has no mid-boss step");
         AABB entry = TrialRoute.entryBox(titan);
         check(f, entry != null && entry.getXsize() >= 3 && entry.getYsize() >= 3 && entry.getZsize() >= 3, titan + ": entry box missing or tiny: " + entry);
     }
@@ -217,23 +140,8 @@ public final class TrialRouteSelfTest {
         return !back.getBlockState(at.below()).isAir() && back.getBlockState(at).isAir();
     }
 
-    // 全部の試練の入口の休み場と中ボスの前室が、到着の台の代わり (知らない名前) ではない
-    private static void rests(List<String> f, ServerLevel back, String titan) {
-        BlockPos arrival = ReturnBeacons.arrivalOf(titan);
-        List<String> ids = new ArrayList<>();
-        for (Def d : TrialCatalog.of(titan)) {
-            ids.add(TrialRoute.entryRest(titan, d, new TrialDraw.Draw(2, List.of(new TrialDraw.Pick(d.id(), Mods.PLAIN)))));
-        }
-        ids.add(TrialMidBoss.restOf(titan));
-        ids.add(TrialRoute.HEART_REST);
-        for (String id : ids) {
-            if (id == null) {
-                continue;
-            }
-            BlockPos at = TrialRoute.spawnOf(back, titan, id);
-            check(f, at != null && at.distSqr(arrival) > 36, titan + ": rest " + id + " resolves to the arrival (unknown rest?) " + at);
-        }
-        // 入口の箱は床の上にある: 箱のまんなかの列に、箱の高さの中で立てる所 (固い足場の上に空気 2 つ) がある (宙に浮いた箱では始まらない)
+    // 入口の箱は床の上にある: 箱のまんなかの列に、箱の高さの中で立てる所 (固い足場の上に空気 2 つ) がある (宙に浮いた箱では始まらない)
+    private static void entryFloor(List<String> f, ServerLevel back, String titan) {
         AABB box = TrialRoute.entryBox(titan);
         if (box != null) {
             int cx = (int) Math.floor(box.getCenter().x);
@@ -271,17 +179,12 @@ public final class TrialRouteSelfTest {
             var run = jp.revati.skyabyss.trial.raid.RaidRun.of(Groups.keyOf(p));
             return run != null && run.mid && run.ctx.cell().inner().contains(p.position());
         }
-        String rest = TrialRoute.restFor(back, Groups.keyOf(p), titan, draw, step, mid);
-        BlockPos at = rest == null ? null : TrialRoute.spawnOf(back, titan, rest);
-        // 区画の写しで遊ぶ段は、写しの入口の休み場
-        at = at == null ? null : TrialRoute.frameOfStep(back, Groups.keyOf(p), draw, step, mid).at(at);
-        return at != null && p.position().distanceTo(Vec3.atBottomCenterOf(at)) < 2.5;
+        return false;
     }
 
     private static void clean(ServerLevel back, UUID... groups) {
         for (UUID g : groups) {
             TrialRoute.finish(back, g);
-            TrialRuntime.stopGroup(back, g);
             GroupGates.reset(back, g);
             BackGroupData.get(back).remove(g);
         }
@@ -391,7 +294,7 @@ public final class TrialRouteSelfTest {
                 check(f, TrialRoute.pendingCount() == 1, titan + ": the carry ran before its delay");
                 TrialRoute.tick(back, titan, players, now + 1 + TrialRoute.CARRY_DELAY);
                 check(f, TrialRoute.pendingCount() == 0, titan + ": the carry stayed queued");
-                check(f, near(a, back, titan, draw, expect, toMid), titan + ": not carried to step " + expect + " rest " + TrialRoute.restOf(titan, draw, expect, false) + ": " + a.position());
+                check(f, near(a, back, titan, draw, expect, toMid), titan + ": not carried to step " + expect + ": " + a.position());
                 check(f, b.position().distanceTo(bAt) < 0.5, titan + ": a player of another group was carried");
             }
             if (TrialRoute.mid(back, ga)) {
@@ -476,8 +379,7 @@ public final class TrialRouteSelfTest {
                 check(f, draw.cycle() == cycle, titan + ": the replay draw is on cycle " + draw.cycle() + ", expected " + cycle);
                 for (int step = 1; step <= 3; step++) {
                     Def cur = TrialRoute.defOf(draw, step);
-                    check(f, near(a, back, titan, draw, step, false), titan + " cycle " + cycle + ": not at step " + step + " (" + (cur == null ? "-" : cur.id()) + ") rest "
-                            + TrialRoute.restOf(titan, draw, step, false) + ": " + a.position());
+                    check(f, near(a, back, titan, draw, step, false), titan + " cycle " + cycle + ": not at step " + step + " (" + (cur == null ? "-" : cur.id()) + "): " + a.position());
                     TrialRoute.onCleared(back, ga, titan, TrialRoute.keyOf(titan, draw, step), null);
                     TrialRoute.flushPending();
                     TrialRoute.tick(back, titan, players, now + 1);

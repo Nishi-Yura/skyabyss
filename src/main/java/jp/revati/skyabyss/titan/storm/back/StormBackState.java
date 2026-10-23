@@ -73,15 +73,4 @@ public class StormBackState extends SavedData {
         return westRoute;
     }
 
-    public void setWestRoute(int route) {
-        westRoute = Math.floorMod(route, 3);
-        setDirty();
-    }
-
-    // 道の形を引き直し、拍を凪の始まりへ (背中にだれもいなくなったとき)
-    public void reroll(RandomSource random) {
-        westRoute = random.nextInt(3);
-        clock = 0;
-        setDirty();
-    }
 }

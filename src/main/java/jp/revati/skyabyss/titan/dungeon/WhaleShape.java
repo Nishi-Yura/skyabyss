@@ -239,12 +239,6 @@ public final class WhaleShape {
         return job.placed();
     }
 
-    static int placeBodyOnly(BuildKit kit) {
-        jp.revati.skyabyss.titan.BackBuildJobs.Job job = job(kit);
-        job.step(Long.MAX_VALUE);
-        return job.placed();
-    }
-
     // 同じ置き方を、1 列ずつ何 tick かに分けて進められる形で返す (BackBuildJobs)。
     // 深い内側 (長い同じブロックの区間。外から 5 ブロックより奥) は、LevelChunk.setBlockState (高さ地図・明るさ・更新) を通さずに
     // 区画 (16×16×16) へ直接書く。区画の全部が同じ石なら、区画ごと入れ替える (26 の 4.2 の「詰まった区画の一括」)。

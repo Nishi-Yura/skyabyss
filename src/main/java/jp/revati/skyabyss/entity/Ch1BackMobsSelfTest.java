@@ -1,8 +1,6 @@
 package jp.revati.skyabyss.entity;
 
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -38,7 +36,6 @@ import net.neoforged.neoforge.common.util.FakePlayer;
 //  A. 骨の砲手: 印の円 (半径 2) = 当たり (内側は傷・外側は無傷・予告 24 tick ≥ 16)、人数で同時に落とす数が増える (最大 3)、正面は半分
 //  B. 骨鳥: 印の線 = 当たり、予告 16 tick 以上、降りたあとのよろめき、1 体ずつ降りる
 //  C. 老番兵: 突進の線 = 当たり、足踏みの円 = 当たり、骨笛 (傷のない円・人数で射手が増える)、一度に呼べる数の上限
-//  D. 広間の波 (第一の広間): 配置の数・砲手が奥の壁ぎわ・老番兵の体力が人数で増える
 //  E. 落とす物・経験値・スポーンエッグ・骨鳥の場所の数・床の 4 割の規則
 public final class Ch1BackMobsSelfTest {
     private static final double SX = 110.5;
@@ -118,7 +115,6 @@ public final class Ch1BackMobsSelfTest {
             mortar(level, f, notes);
             gull(level, f, notes);
             elder(level, f, notes);
-            waves(level, f, notes);
             misc(level, f, notes);
         } catch (RuntimeException e) {
             SkyAbyss.LOGGER.error("SELFTEST ch1 back mobs crashed", e);
@@ -531,104 +527,6 @@ public final class Ch1BackMobsSelfTest {
             }
         } finally {
             e.discard();
-        }
-    }
-
-    // ---------------------------------------------------------------- D. 第一の広間の波 (TitanBackTrials.spawnWave を、広間の座標のまま作った足場の上で)
-
-    private static void waves(ServerLevel level, List<String> f, List<String> notes) {
-        try {
-            Class<?> trials = TitanBackTrials.class;
-            Field hallsField = trials.getDeclaredField("HALLS");
-            hallsField.setAccessible(true);
-            Object hall = ((List<?>) hallsField.get(null)).get(0);
-            Class<?> hallClass = hall.getClass();
-            Method waves = hallClass.getDeclaredMethod("waves");
-            waves.setAccessible(true);
-            int waveCount = ((List<?>) waves.invoke(hall)).size();
-            check(waveCount == 2, "the first hall has " + waveCount + " waves (expected 2: melee, archers + mortar; the elder moved to the guard post)", f);
-            Class<?> stateClass = Class.forName(trials.getName() + "$HallState");
-            Constructor<?> ctor = stateClass.getDeclaredConstructors()[0];
-            ctor.setAccessible(true);
-            Field waveField = stateClass.getDeclaredField("wave");
-            waveField.setAccessible(true);
-            Field playersField = stateClass.getDeclaredField("players");
-            playersField.setAccessible(true);
-            Method spawnWave = trials.getDeclaredMethod("spawnWave", ServerLevel.class, hallClass, stateClass);
-            spawnWave.setAccessible(true);
-            AABB box = TitanBackLayout.E1.aabb().inflate(2);
-            // 番兵の詰所 (ck) を名前で探す (広間の並びは版で変わる。第二の広間をなくした版 25 で番号がずれた)
-            Method idOf = hallClass.getDeclaredMethod("id");
-            idOf.setAccessible(true);
-            Object ckHall = null;
-            for (Object h : (List<?>) hallsField.get(null)) {
-                if ("ck".equals(idOf.invoke(h))) {
-                    ckHall = h;
-                }
-            }
-            check(ckHall != null, "the guard post hall (ck) is not in the hall list", f);
-            if (ckHall == null) {
-                return;
-            }
-            for (int players : new int[] {1, 3, 4}) {
-                for (int wave = 2; wave <= 3; wave++) {
-                    // 波 3 = 番兵の詰所 (ck) の老番兵の波。第一の広間は 2 波まで
-                    Object hall2 = wave == 3 ? ckHall : hall;
-                    int waveNo = wave == 3 ? 2 : wave;
-                    Object state = ctor.newInstance(UUID.randomUUID(), hall2);
-                    waveField.setInt(state, waveNo);
-                    playersField.setInt(state, players);
-                    AABB box2 = wave == 3 ? TitanBackLayout.CK.aabb().inflate(2) : box;
-                    // 広間のチャンクを読み込んでから湧かせる (読み込まれていないと、湧いた敵が見つからない)
-                    for (int cx = (int) Math.floor(box2.minX) >> 4; cx <= (int) Math.floor(box2.maxX) >> 4; cx++) {
-                        for (int cz = (int) Math.floor(box2.minZ) >> 4; cz <= (int) Math.floor(box2.maxZ) >> 4; cz++) {
-                            level.getChunk(cx, cz);
-                        }
-                    }
-                    BlockPos mid = BlockPos.containing(box2.getCenter());
-                    int refusedBefore = jp.revati.skyabyss.util.SpawnSafety.refused;
-                    spawnWave.invoke(null, level, hall2, state);
-                    if (jp.revati.skyabyss.util.SpawnSafety.refused > refusedBefore) {
-                        StringBuilder col = new StringBuilder();
-                        for (int y = TitanBackLayout.FLOOR; y <= TitanBackLayout.FLOOR + 6; y++) {
-                            col.append(level.getBlockState(new BlockPos(mid.getX(), y, mid.getZ())).getBlock().getDescriptionId().replace("block.minecraft.", "")).append(' ');
-                        }
-                        notes.add("spawn refused near " + mid + " column from floor: " + col + "entityTicking=" + level.isPositionEntityTicking(new BlockPos(mid.getX(), TitanBackLayout.FLOOR + 1, mid.getZ())));
-                    }
-                    List<Mob> mobs = level.getEntitiesOfClass(Mob.class, box2, m -> m.getTags().contains(TitanBackTrials.MOB_TAG));
-                    List<BoneMortar> mortars = mobs.stream().filter(m -> m instanceof BoneMortar).map(m -> (BoneMortar) m).toList();
-                    List<ElderSentinel> elders = mobs.stream().filter(m -> m instanceof ElderSentinel).map(m -> (ElderSentinel) m).toList();
-                    long archers = mobs.stream().filter(m -> m instanceof RibArcher).count();
-                    long sentinels = mobs.stream().filter(m -> m instanceof BoneSentinel).count();
-                    String label = "wave " + wave + " / " + players + " player(s)" + " [refused " + jp.revati.skyabyss.util.SpawnSafety.refused + ", moved " + jp.revati.skyabyss.util.SpawnSafety.moved
-                            + ", wide " + level.getEntitiesOfClass(Mob.class, box2.inflate(30), m -> m.getTags().contains(TitanBackTrials.MOB_TAG)).stream().map(m -> m.getType().toShortString() + "@" + m.blockPosition().toShortString()).toList()
-                            + ", mobs " + mobs.stream().map(m -> m.getType().toShortString() + "@" + m.blockPosition().toShortString()).toList() + "]";
-                    if (wave == 2) {
-                        int expectedMortars = players >= 4 ? 2 : 1;
-                        check(mortars.size() == expectedMortars, label + ": " + mortars.size() + " mortars (expected " + expectedMortars + ")", f);
-                        check(archers == 3 + 2L * (players - 1) && sentinels == 1 + 0, label + ": " + archers + " archers, " + sentinels + " sentinels", f);
-                        for (BoneMortar m : mortars) {
-                            // 設計書 26 の 8.7 B: 少人数は湧き場所を入口側へ寄せるので、奥の壁ぎわに立つのは 4 人から。それ以下は広間の中ならよい
-                            boolean line = players < 4 || m.getZ() <= TitanBackLayout.E1.z1() + 3.5;
-                            check(line && TitanBackLayout.E1.contains(m.blockPosition()) && m.getTags().contains(TitanBackTrials.MOB_TAG),
-                                    label + ": a mortar is not in its place (back line from 4 players): " + m.position(), f);
-                        }
-                    } else {
-                        check(elders.size() == 1 && archers == 0, label + ": " + elders.size() + " elders, " + archers + " archers", f);
-                        check(sentinels == 2L * (players - 1), label + ": " + sentinels + " sentinels (expected " + (2 * (players - 1)) + ")", f);
-                        if (elders.size() == 1) {
-                            double want = 220 * StoneWhaleHeart.scaleFor(players);
-                            check(Math.abs(elders.get(0).getMaxHealth() - want) < 1.0 && elders.get(0).getHealth() == elders.get(0).getMaxHealth(),
-                                    label + ": elder health " + elders.get(0).getMaxHealth() + " (expected " + want + ")", f);
-                            notes.add("elder health with " + players + " player(s): " + Math.round(elders.get(0).getMaxHealth()));
-                        }
-                    }
-                    mobs.forEach(Entity::discard);
-                }
-            }
-            notes.add("first hall: 2 waves; guard post: shield wall + elder");
-        } catch (ReflectiveOperationException e) {
-            f.add("could not drive TitanBackTrials.spawnWave: " + e);
         }
     }
 

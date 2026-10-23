@@ -10,7 +10,7 @@ ROOT = Path(__file__).resolve().parents[2]
 SHOTS = ROOT / "run/shots/joints/shots/joints"
 OUT = ROOT / "docs/review/previews/joints_sheet.png"
 NAMES = [("bone_sentinel", "骨の番兵", "a"), ("whalebone_captain", "鯨骨の隊長", "a"), ("static_moth", "静電の蛾", "a"),
-         ("moss_crawler", "苔這い", "a"), ("waterway_maw", "水路の顎", "a"), ("elder_sentry", "古い歩哨", "a"),
+         ("moss_crawler", "苔這い", "a"), ("elder_sentry", "古い歩哨", "a"),
          ("thunder_supplicant", "雷の請い人", "a"), ("elder_sentinel", "古い番兵", "a")]
 
 

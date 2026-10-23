@@ -46,29 +46,14 @@ record ZonePalette(String name, BlockState wall, BlockState wallAlt, BlockState 
             b(Blocks.POLISHED_BLACKSTONE), b(Blocks.POLISHED_BASALT), b(Blocks.BLACKSTONE), b(Blocks.BONE_BLOCK), b(Blocks.CHISELED_POLISHED_BLACKSTONE),
             b(Blocks.CHISELED_POLISHED_BLACKSTONE), b(Blocks.BONE_BLOCK), b(Blocks.SEA_LANTERN), b(Blocks.PEARLESCENT_FROGLIGHT), false);
 
-    // 東の第一の広間 (番兵の練兵場): 石レンガと苔、黒樫の梁。暖かい灯り
-    static final ZonePalette DRILL = new ZonePalette("drill", b(Blocks.STONE_BRICKS), b(Blocks.MOSSY_STONE_BRICKS), b(Blocks.POLISHED_ANDESITE),
-            b(Blocks.STONE_BRICKS), b(Blocks.DARK_OAK_PLANKS), b(Blocks.POLISHED_ANDESITE), b(Blocks.CHISELED_STONE_BRICKS), b(Blocks.CHISELED_STONE_BRICKS),
-            b(Blocks.DARK_OAK_LOG), b(Blocks.OCHRE_FROGLIGHT), b(Blocks.OCHRE_FROGLIGHT), true);
-
     // 第二の広間 (射手の回廊): 磨いた安山岩と雲母の灰色、トウヒの梁
     static final ZonePalette GALLERY = new ZonePalette("gallery", b(Blocks.POLISHED_ANDESITE), b(Blocks.ANDESITE), b(Blocks.SMOOTH_STONE),
             b(Blocks.STONE), b(Blocks.SPRUCE_PLANKS), b(Blocks.STRIPPED_SPRUCE_LOG), b(Blocks.CHISELED_STONE_BRICKS), b(Blocks.CHISELED_STONE_BRICKS),
             b(Blocks.SPRUCE_LOG), b(Blocks.SHROOMLIGHT), b(Blocks.SHROOMLIGHT), true);
 
-    // 番兵の詰所: トウヒの板張り
-    static final ZonePalette BARRACKS = new ZonePalette("barracks", b(Blocks.SPRUCE_PLANKS), b(Blocks.STRIPPED_SPRUCE_LOG), b(Blocks.SPRUCE_PLANKS),
-            b(Blocks.DARK_OAK_PLANKS), b(Blocks.SPRUCE_PLANKS), b(Blocks.STRIPPED_SPRUCE_LOG), b(Blocks.STRIPPED_DARK_OAK_LOG), b(Blocks.STRIPPED_DARK_OAK_LOG),
-            b(Blocks.DARK_OAK_LOG), b(Blocks.SHROOMLIGHT), b(Blocks.SHROOMLIGHT), true);
-
     // 番兵長の広間: 黒い磨き石と金の差し色、赤い絨毯
     static final ZonePalette CAPTAIN = new ZonePalette("captain", b(Blocks.POLISHED_BLACKSTONE_BRICKS), b(Blocks.CRACKED_POLISHED_BLACKSTONE_BRICKS),
             b(Blocks.POLISHED_BLACKSTONE), b(Blocks.POLISHED_BLACKSTONE_BRICKS), b(Blocks.BLACKSTONE), b(Blocks.GILDED_BLACKSTONE), b(Blocks.GILDED_BLACKSTONE),
             b(Blocks.CHISELED_POLISHED_BLACKSTONE), b(Blocks.DARK_OAK_LOG), b(Blocks.SHROOMLIGHT), b(Blocks.SHROOMLIGHT), true);
-
-    // 封印の回廊 (心臓へ): 赤いネザーレンガと泣く黒曜石 (泣く黒曜石が灯りになる)
-    static final ZonePalette HEARTWAY = new ZonePalette("heartway", b(Blocks.RED_NETHER_BRICKS), b(Blocks.CRACKED_NETHER_BRICKS), b(Blocks.POLISHED_BLACKSTONE),
-            b(Blocks.NETHER_BRICKS), b(Blocks.NETHER_BRICKS), b(Blocks.CRYING_OBSIDIAN), b(Blocks.CRYING_OBSIDIAN), b(Blocks.CHISELED_NETHER_BRICKS),
-            b(Blocks.BONE_BLOCK), b(Blocks.CRYING_OBSIDIAN), b(Blocks.SHROOMLIGHT), false);
 
 }

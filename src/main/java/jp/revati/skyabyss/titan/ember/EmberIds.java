@@ -21,6 +21,12 @@ public final class EmberIds {
     private EmberIds() {
     }
 
+    // 余燼の傷 (熱の噴き出しなど)。by は傷を与えたもの (なければ null)
+    public static net.minecraft.world.damagesource.DamageSource damage(net.minecraft.server.level.ServerLevel level, ResourceKey<DamageType> type,
+            @javax.annotation.Nullable net.minecraft.world.entity.Entity by) {
+        return new net.minecraft.world.damagesource.DamageSource(level.registryAccess().registryOrThrow(Registries.DAMAGE_TYPE).getHolderOrThrow(type), by);
+    }
+
     public static ResourceLocation id(String path) {
         return ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, path);
     }
@@ -62,24 +68,10 @@ public final class EmberIds {
     public static final String CINDER_ROLLER_EGG = "cinder_roller_spawn_egg";
 
     // ================================================================ ブロック
-    public static final String COOLED_CRUST = "cooled_crust";       // → C1 冷え殻 (灰の道。熾の底の区画の床も F がこれを使う)
-    public static final String ASH_URN_STAND = "ash_urn_stand";     // → C1 灰の壺の台
-    public static final String ASH_FORGE = "ash_forge";             // → C2 大炉 (炉の熱 0〜100、塊の色)
-    public static final String FORGE_BELLOWS = "forge_bellows";     // → C2 鞴の踏み板
-    public static final String ASH_ANVIL = "ash_anvil";             // → C2 金床 (刻みの色の印)
-    public static final String QUENCH_TROUGH = "quench_trough";     // → C2 焼き入れの槽 (鍛え手の間の槽も E が置く)
-    public static final String EMBER_HEARTH = "ember_hearth";       // → C3 余燼の火床
-    public static final String HEAT_VENT = "heat_vent";             // → C3 噴気の割れ目 (鍛え手の亀裂は E が粒と判定で出す)
-    public static final String KINDLE_STONE = "kindle_stone";       // → B 熾り石 (三つ。ResonanceStoneBlock の見た目違い)
     public static final String CINDER_LAMP = "cinder_lamp";         // → G 燠の灯 (光 12 の吊り灯。余裕があれば)
-    // 封印 (鍛え手の扉・熾の底の門・熾の底の入口) は共通の SealedGateBlock、灰溜まりは灰色の羊毛 (バニラ) を使う
+    // 封印 (熾の底の入口) は共通の SealedGateBlock
 
     // ================================================================ アイテム
-    // 試練の品 (背中の外へ持ち出せない)
-    public static final String ASH_URN = "ash_urn";                 // → C1 灰の壺 (灰 5 回分)
-    public static final String FIRE_KEY_HOT = "fire_key_hot";       // → C2 焼き入れ前の火の鍵 (10 秒で冷えて割れる)
-    public static final String FIRE_KEY = "fire_key";               // → C2 焼き入れた火の鍵 (鍛え手の扉に差す)
-    public static final String LIVE_COAL = "live_coal";             // → C3 熾 (火床に +8)
     // 地上
     public static final String WARM_STONE = "warm_stone";           // → A 温石 (巨神の向き・距離、眠る場所を頼む)
     // 素材
@@ -119,26 +111,6 @@ public final class EmberIds {
     public static final String SOUND_FAR_BEAT = "ember_far_beat";           // 遠い鼓動
     public static final String SOUND_WORLD_TURN = "ember_world_turn";       // 1 章の締めの夜明けの地鳴り (9.4節)
     // B 体と広間
-    public static final String SOUND_BACK_AMBIENT = "ember_back_ambient";   // 遠い溶岩と風
-    public static final String SOUND_STONE_RING = "ember_stone_ring";       // 熾り石が鳴る
-    public static final String SOUND_FORGE_DIM = "ember_forge_dim";         // 広間の炉の火が落ちる (三度)
-    // C1 灰の道
-    public static final String SOUND_ASH_SCATTER = "ember_ash_scatter";
-    public static final String SOUND_CRUST_CRACK = "ember_crust_crack";
-    public static final String SOUND_CRUST_SINK = "ember_crust_sink";
-    public static final String SOUND_ENGULF = "ember_engulf";               // 呑まれた (C1・F が使う)
-    // C2 鍛えの間
-    public static final String SOUND_BELLOWS = "ember_bellows";
-    public static final String SOUND_ANVIL_STRIKE = "ember_anvil_strike";
-    public static final String SOUND_ANVIL_TING = "ember_anvil_ting";       // 打てる色に入った瞬間の「ちん」
-    public static final String SOUND_BLOOM_CRACK = "ember_bloom_crack";
-    public static final String SOUND_QUENCH = "ember_quench";               // 焼き入れ (E の鍛え手の焼き入れも使う)
-    public static final String SOUND_DOOR_KINDLE = "ember_door_kindle";     // 鍛え手の扉の文様が灯る
-    // C3 火守り
-    public static final String SOUND_VENT_HISS = "ember_vent_hiss";         // 噴く 1.5 秒前 (E の亀裂の予告も使う)
-    public static final String SOUND_VENT_BURST = "ember_vent_burst";
-    public static final String SOUND_HEARTH_FEED = "ember_hearth_feed";
-    public static final String SOUND_HEARTH_DOUSE = "ember_hearth_douse";
     // D 敵
     public static final String SOUND_THRALL_AMBIENT = "ash_thrall_ambient";
     public static final String SOUND_THRALL_HURT = "ash_thrall_hurt";
@@ -177,8 +149,7 @@ public final class EmberIds {
     public static final String SOUND_HEART_DEATH = "ember_heart_death";
 
     // ================================================================ 休み場 (7.3節。EmberBackLayout.RESTS の名前。→ B)
-    public static final List<String> RESTS = List.of("throat", "hub", "w0", "w1", "wp", "e0", "s0", "heart", "k0", "k_e02a", "k_e02b", "k_e10", "k_e06", "k_e07",
-            "k_e03", "k_e08", "k_e11", "k_e12", "k_e04");
+    public static final List<String> RESTS = List.of("throat", "hub", "w0", "w1", "wp", "e0", "s0", "heart");
     // 試練の名前 (眠る試練・石・コマンド)
     public static final String WEST = "west";
     public static final String EAST = "east";
@@ -204,14 +175,8 @@ public final class EmberIds {
     public static final String LANG_SURFACE = "message.skyabyss.ember.surface.";      // A 地上・乗り込み・温石
     public static final String LANG_COMMANDS = "commands.skyabyss.ember.";           // A・B のテスト用コマンド
     public static final String LANG_BACK = "message.skyabyss.ember.back.";            // B 背中・休み場・リセット・眠る試練
-    public static final String LANG_WHISPER = "message.skyabyss.ember.whisper.";      // B 一度だけの囁き
-    public static final String LANG_WEST = "message.skyabyss.ember.trial.west.";      // C1
-    public static final String LANG_EAST = "message.skyabyss.ember.trial.east.";      // C2
-    public static final String LANG_SOUTH = "message.skyabyss.ember.trial.south.";    // C3
     public static final String LANG_MOB = "message.skyabyss.ember.mob.";              // D
-    public static final String LANG_SMITH = "message.skyabyss.ember.smith.";          // E
     public static final String LANG_HEART = "message.skyabyss.ember.heart.";          // F
-    public static final String LANG_TOOLTIP = "tooltip.skyabyss.ember.";              // G
     // 品・ブロック・エンティティの名前はバニラの決まり (item.skyabyss.<ID>、block.skyabyss.<ID>、entity.skyabyss.<ID>) で、登録した担当が書く
     // 傷の死亡文: death.attack.skyabyss.heat、heat_burst、engulfed (と .player)。→ 0
     // 地上へ戻る・着いたときの題: title.skyabyss.ember_back(.sub)。→ A

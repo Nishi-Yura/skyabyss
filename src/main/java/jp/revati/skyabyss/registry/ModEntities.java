@@ -10,7 +10,6 @@ import jp.revati.skyabyss.entity.BoneSpike;
 import jp.revati.skyabyss.entity.MossCrawler;
 import jp.revati.skyabyss.entity.RibArcher;
 import jp.revati.skyabyss.entity.StoneWhaleHeart;
-import jp.revati.skyabyss.entity.WaterwayMaw;
 import jp.revati.skyabyss.entity.WhaleboneCaptain;
 import jp.revati.skyabyss.titan.StoneWhaleEntity;
 import jp.revati.skyabyss.titan.WhaleChainEntity;
@@ -57,8 +56,6 @@ public final class ModEntities {
     public static final DeferredHolder<EntityType<?>, EntityType<MossCrawler>> MOSS_CRAWLER = ENTITIES.register("moss_crawler",
             () -> EntityType.Builder.of(MossCrawler::new, MobCategory.MONSTER)
                     .sized(1.2f, 0.9f).eyeHeight(0.5f).clientTrackingRange(8).build(SkyAbyss.MODID + ":moss_crawler"));
-    public static final DeferredHolder<EntityType<?>, EntityType<WaterwayMaw>> WATERWAY_MAW = monster("waterway_maw",
-            WaterwayMaw::new, 1.2f, 0.7f);
     public static final DeferredHolder<EntityType<?>, EntityType<WhaleboneCaptain>> WHALEBONE_CAPTAIN = ENTITIES.register("whalebone_captain",
             () -> EntityType.Builder.<WhaleboneCaptain>of(WhaleboneCaptain::new, MobCategory.MONSTER)
                     .sized(1.8f, 2.9f).clientTrackingRange(10).fireImmune()
@@ -112,7 +109,6 @@ public final class ModEntities {
         event.put(BONE_SENTINEL.get(), BoneSentinel.createAttributes().build());
         event.put(RIB_ARCHER.get(), RibArcher.createAttributes().build());
         event.put(MOSS_CRAWLER.get(), MossCrawler.createAttributes().build());
-        event.put(WATERWAY_MAW.get(), WaterwayMaw.createAttributes().build());
         event.put(WHALEBONE_CAPTAIN.get(), WhaleboneCaptain.createAttributes().build());
         event.put(STONE_WHALE_HEART.get(), StoneWhaleHeart.createAttributes().build());
         event.put(ROCK_SHELL_BEETLE.get(), RockShellBeetle.createAttributes().build());

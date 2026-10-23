@@ -33,14 +33,6 @@ public final class Trial {
             return null;
         }
 
-        public static Slot ofStone(int stone) {
-            for (Slot s : values()) {
-                if (s.stone == stone) {
-                    return s;
-                }
-            }
-            throw new IllegalArgumentException("stone " + stone);
-        }
     }
 
     // 七つの類 (枠の中の味付け。板と図鑑のアイコン)

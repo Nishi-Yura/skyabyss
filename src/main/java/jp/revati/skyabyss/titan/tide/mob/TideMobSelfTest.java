@@ -225,7 +225,7 @@ public final class TideMobSelfTest {
     }
 
     // グループの印 (GroupOwned): 印のある敵は、そのグループの人にだけ見え、そのグループの人だけを狙う。印のない敵 (スポーンエッグ) は誰にでも。
-    // 群れの巣 (ReefNest) も同じ。泡の弾の持ち主のグループも引ける
+    // 泡の弾の持ち主のグループも引ける
     private static void checkGroup(ServerLevel level, BlockPos floor, List<Mob> made, List<String> failures) {
         java.util.UUID ga = java.util.UUID.fromString("7e1de0c4-0000-4000-8000-0000000000c1");
         java.util.UUID gb = java.util.UUID.fromString("7e1de0c4-0000-4000-8000-0000000000c2");
@@ -244,14 +244,6 @@ public final class TideMobSelfTest {
         BubbleShot shot = new BubbleShot(level, t, new net.minecraft.world.phys.Vec3(0, 0, 1));
         check(failures, ga.equals(jp.revati.skyabyss.titan.group.Groups.keyOf(shot)), "a bubble shot does not carry its puffer's group");
         shot.discard();
-        jp.revati.skyabyss.titan.tide.back.ReefNest nest = jp.revati.skyabyss.titan.tide.back.TideBackSetup.REEF_NEST.get().create(level);
-        check(failures, nest != null, "reef nest cannot be created");
-        if (nest != null) {
-            nest.setGroupId(ga);
-            check(failures, !jp.revati.skyabyss.titan.group.GroupOwned.visibleTo(nest, b) && jp.revati.skyabyss.titan.group.GroupOwned.visibleTo(nest, a),
-                    "group A's nest is visible to group B");
-            nest.discard();
-        }
     }
 
     // 泡は真上へだけ浮かせる (横の速さは当たる前のまま)

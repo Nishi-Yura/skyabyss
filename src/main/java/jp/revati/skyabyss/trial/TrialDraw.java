@@ -116,19 +116,11 @@ public final class TrialDraw {
     public static Draw draw(String titan, int cycle, long worldSeed, UUID group, Memory mem) {
         long seed = seed(worldSeed, group, titan, cycle);
         List<Def> chosen = new ArrayList<>();
-        if (cycle <= 1 || !TrialCatalog.poolActive(titan)) {
-            chosen.addAll(jp.revati.skyabyss.trial.raid.RaidRooms.active(titan) ? TrialCatalog.raidDraw(titan, seed) : TrialCatalog.originals(titan));
-            for (Def d : chosen) {
-                mem.seen(d.slot()).add(d.id());
-                mem.last.put(d.slot(), d.id());
-            }
-        } else {
-            for (Slot slot : Slot.values()) {
-                Def pick = drawSlot(titan, slot, cycle, seed, mem);
-                if (pick != null) {
-                    chosen.add(pick);
-                }
-            }
+        // 枠ごとに登録したレイドの部屋から種で引く (docs/design/32 の 7 章)。部屋のない巨神は原型の三つ
+        chosen.addAll(jp.revati.skyabyss.trial.raid.RaidRooms.active(titan) ? TrialCatalog.raidDraw(titan, seed) : TrialCatalog.originals(titan));
+        for (Def d : chosen) {
+            mem.seen(d.slot()).add(d.id());
+            mem.last.put(d.slot(), d.id());
         }
         List<Pick> picks = new ArrayList<>();
         for (Def d : chosen) {
@@ -145,64 +137,6 @@ public final class TrialDraw {
             }
         }
         return new Draw(cycle, List.copyOf(picks));
-    }
-
-    static Def drawSlot(String titan, Slot slot, int cycle, long seed, Memory mem) {
-        List<Def> all = TrialCatalog.inSlot(titan, slot);
-        if (all.isEmpty()) {
-            return null;
-        }
-        Set<String> seen = mem.seen(slot);
-        List<Def> cand = new ArrayList<>();
-        for (Def d : all) {
-            if (!seen.contains(d.id())) {
-                cand.add(d);
-            }
-        }
-        if (cand.isEmpty()) {
-            // 尽きた: その枠だけ、直前に引いたものを除いて元へ戻す
-            String last = mem.last.get(slot);
-            seen.clear();
-            if (last != null) {
-                seen.add(last);
-            }
-            for (Def d : all) {
-                if (!seen.contains(d.id())) {
-                    cand.add(d);
-                }
-            }
-            if (cand.isEmpty()) {
-                cand.addAll(all);
-            }
-        }
-        List<Def> byTier = new ArrayList<>();
-        for (Def d : cand) {
-            if (d.tier() <= cycle) {
-                byTier.add(d);
-            }
-        }
-        if (!byTier.isEmpty()) {
-            cand = byTier;
-        }
-        Random rng = new Random(mix(seed + slot.ordinal() * 7919L));
-        double total = 0;
-        double[] w = new double[cand.size()];
-        for (int i = 0; i < w.length; i++) {
-            w[i] = cand.get(i).tier() == cycle ? 1.5 : 1.0;
-            total += w[i];
-        }
-        double r = rng.nextDouble() * total;
-        Def pick = cand.get(cand.size() - 1);
-        for (int i = 0; i < w.length; i++) {
-            r -= w[i];
-            if (r < 0) {
-                pick = cand.get(i);
-                break;
-            }
-        }
-        seen.add(pick.id());
-        mem.last.put(slot, pick.id());
-        return pick;
     }
 
     // 修飾を引く。配置は必ず。ほかは試練の稀さ (常 70 / 稀 25 / 極 5) で

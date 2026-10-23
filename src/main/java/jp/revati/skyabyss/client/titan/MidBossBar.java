@@ -5,7 +5,6 @@ import java.util.Comparator;
 import jp.revati.skyabyss.SkyAbyss;
 import jp.revati.skyabyss.entity.ElderSentry;
 import jp.revati.skyabyss.entity.WhaleboneCaptain;
-import jp.revati.skyabyss.titan.tide.back.PearlKeeper;
 import jp.revati.skyabyss.titan.tide.back.TideBeckoner;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -34,7 +33,6 @@ public final class MidBossBar {
 
     private static final Look CAPTAIN = new Look("captain", 0x5C8FD0, 0x8CBBF0);
     private static final Look ELDER = new Look("elder_sentry", 0xA6AEC0, 0xD8DEEC);
-    private static final Look PEARL = new Look("pearl_keeper", 0xD89AAE, 0xF6CEDA);
     private static final Look BECKONER = new Look("tide_beckoner", 0x3FB4AE, 0x86E4DA);
 
     private MidBossBar() {
@@ -52,8 +50,7 @@ public final class MidBossBar {
         }
         BossEvent boss = event.getBossEvent();
         String name = boss.getName().getString();
-        Look look = near(mc, WhaleboneCaptain.class, boss) ? CAPTAIN : near(mc, ElderSentry.class, boss) ? ELDER
-                : near(mc, PearlKeeper.class, boss) ? PEARL : near(mc, TideBeckoner.class, boss) ? BECKONER : null;
+        Look look = near(mc, WhaleboneCaptain.class, boss) ? CAPTAIN : near(mc, ElderSentry.class, boss) ? ELDER : near(mc, TideBeckoner.class, boss) ? BECKONER : null;
         if (look == null) {
             return;
         }

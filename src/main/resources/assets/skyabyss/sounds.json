@@ -1,31 +1,4 @@
 {
-  "ember_back_ambient": {
-    "subtitle": "subtitles.skyabyss.ember_back_ambient",
-    "sounds": [
-      {
-        "name": "minecraft:ambient/nether/basalt_deltas/loop",
-        "stream": true
-      }
-    ]
-  },
-  "ember_stone_ring": {
-    "subtitle": "subtitles.skyabyss.ember_stone_ring",
-    "sounds": [
-      {
-        "name": "minecraft:block/bell/resonate",
-        "pitch": 0.6
-      }
-    ]
-  },
-  "ember_forge_dim": {
-    "subtitle": "subtitles.skyabyss.ember_forge_dim",
-    "sounds": [
-      {
-        "name": "minecraft:block/fire/extinguish",
-        "pitch": 0.5
-      }
-    ]
-  },
   "coral_thrall_ambient": {
     "subtitle": "subtitles.skyabyss.coral_thrall_ambient",
     "sounds": [
@@ -544,62 +517,6 @@
       }
     ]
   },
-  "tide_horn_low": {
-    "subtitle": "subtitles.skyabyss.tide_horn_low",
-    "sounds": [
-      {
-        "name": "skyabyss:tide_back/tide_horn_low"
-      }
-    ]
-  },
-  "tide_horn_high": {
-    "subtitle": "subtitles.skyabyss.tide_horn_high",
-    "sounds": [
-      {
-        "name": "skyabyss:tide_back/tide_horn_high"
-      }
-    ]
-  },
-  "tide_chime": {
-    "subtitle": "subtitles.skyabyss.tide_chime",
-    "sounds": [
-      {
-        "name": "skyabyss:tide_back/tide_chime"
-      }
-    ]
-  },
-  "tide_pearl_take": {
-    "subtitle": "subtitles.skyabyss.tide_pearl_take",
-    "sounds": [
-      {
-        "name": "skyabyss:tide_back/tide_pearl_take"
-      }
-    ]
-  },
-  "tide_pearl_return": {
-    "subtitle": "subtitles.skyabyss.tide_pearl_return",
-    "sounds": [
-      {
-        "name": "skyabyss:tide_back/tide_pearl_return"
-      }
-    ]
-  },
-  "tide_plug_flow": {
-    "subtitle": "subtitles.skyabyss.tide_plug_flow",
-    "sounds": [
-      {
-        "name": "skyabyss:tide_back/tide_plug_flow"
-      }
-    ]
-  },
-  "tide_lock": {
-    "subtitle": "subtitles.skyabyss.tide_lock",
-    "sounds": [
-      {
-        "name": "skyabyss:tide_back/tide_lock"
-      }
-    ]
-  },
   "reef_nest_open": {
     "subtitle": "subtitles.skyabyss.reef_nest_open",
     "sounds": [
@@ -829,46 +746,6 @@
     "sounds": [
       {
         "name": "skyabyss:storm/storm_back_wind"
-      }
-    ]
-  },
-  "storm_rise_warn": {
-    "subtitle": "subtitles.skyabyss.storm_wind",
-    "sounds": [
-      {
-        "name": "skyabyss:storm/storm_rise_warn"
-      }
-    ]
-  },
-  "storm_fall_warn": {
-    "subtitle": "subtitles.skyabyss.storm_cry",
-    "sounds": [
-      {
-        "name": "skyabyss:storm/storm_fall_warn"
-      }
-    ]
-  },
-  "storm_crosswind": {
-    "subtitle": "subtitles.skyabyss.storm_crosswind",
-    "sounds": [
-      {
-        "name": "skyabyss:storm/storm_crosswind"
-      }
-    ]
-  },
-  "storm_mirror_turn": {
-    "subtitle": "subtitles.skyabyss.storm_mirror",
-    "sounds": [
-      {
-        "name": "skyabyss:storm/storm_mirror_turn"
-      }
-    ]
-  },
-  "storm_receiver_lit": {
-    "subtitle": "subtitles.skyabyss.storm_feather",
-    "sounds": [
-      {
-        "name": "skyabyss:storm/storm_receiver_lit"
       }
     ]
   },
@@ -1363,14 +1240,6 @@
       }
     ]
   },
-  "ember_ash_scatter": {
-    "subtitle": "subtitles.skyabyss.ember_ash_scatter",
-    "sounds": [
-      {
-        "name": "skyabyss:ember_trial/ember_ash_scatter"
-      }
-    ]
-  },
   "ember_crust_crack": {
     "subtitle": "subtitles.skyabyss.ember_crust_crack",
     "sounds": [
@@ -1379,99 +1248,11 @@
       }
     ]
   },
-  "ember_crust_sink": {
-    "subtitle": "subtitles.skyabyss.ember_crust_sink",
-    "sounds": [
-      {
-        "name": "skyabyss:ember_trial/ember_crust_sink"
-      }
-    ]
-  },
-  "ember_engulf": {
-    "subtitle": "subtitles.skyabyss.ember_engulf",
-    "sounds": [
-      {
-        "name": "skyabyss:ember_trial/ember_engulf"
-      }
-    ]
-  },
-  "ember_bellows": {
-    "subtitle": "subtitles.skyabyss.ember_bellows",
-    "sounds": [
-      {
-        "name": "skyabyss:ember_trial/ember_bellows"
-      }
-    ]
-  },
-  "ember_anvil_strike": {
-    "subtitle": "subtitles.skyabyss.ember_anvil_strike",
-    "sounds": [
-      {
-        "name": "skyabyss:ember_trial/ember_anvil_strike"
-      }
-    ]
-  },
-  "ember_anvil_ting": {
-    "subtitle": "subtitles.skyabyss.ember_anvil_ting",
-    "sounds": [
-      {
-        "name": "skyabyss:ember_trial/ember_anvil_ting"
-      }
-    ]
-  },
-  "ember_bloom_crack": {
-    "subtitle": "subtitles.skyabyss.ember_bloom_crack",
-    "sounds": [
-      {
-        "name": "skyabyss:ember_trial/ember_bloom_crack"
-      }
-    ]
-  },
-  "ember_quench": {
-    "subtitle": "subtitles.skyabyss.ember_quench",
-    "sounds": [
-      {
-        "name": "skyabyss:ember_trial/ember_quench"
-      }
-    ]
-  },
-  "ember_door_kindle": {
-    "subtitle": "subtitles.skyabyss.ember_door_kindle",
-    "sounds": [
-      {
-        "name": "skyabyss:ember_trial/ember_door_kindle"
-      }
-    ]
-  },
-  "ember_vent_hiss": {
-    "subtitle": "subtitles.skyabyss.ember_vent_hiss",
-    "sounds": [
-      {
-        "name": "skyabyss:ember_trial/ember_vent_hiss"
-      }
-    ]
-  },
   "ember_vent_burst": {
     "subtitle": "subtitles.skyabyss.ember_vent_burst",
     "sounds": [
       {
         "name": "skyabyss:ember_trial/ember_vent_burst"
-      }
-    ]
-  },
-  "ember_hearth_feed": {
-    "subtitle": "subtitles.skyabyss.ember_hearth_feed",
-    "sounds": [
-      {
-        "name": "skyabyss:ember_trial/ember_hearth_feed"
-      }
-    ]
-  },
-  "ember_hearth_douse": {
-    "subtitle": "subtitles.skyabyss.ember_hearth_douse",
-    "sounds": [
-      {
-        "name": "skyabyss:ember_trial/ember_hearth_douse"
       }
     ]
   },
@@ -1651,30 +1432,6 @@
       },
       {
         "name": "skyabyss:mobs/moss_crawler_step_2"
-      }
-    ]
-  },
-  "waterway_maw_ambient": {
-    "subtitle": "subtitles.skyabyss.waterway_maw_ambient",
-    "sounds": [
-      {
-        "name": "skyabyss:mobs/waterway_maw_ambient"
-      }
-    ]
-  },
-  "waterway_maw_hurt": {
-    "subtitle": "subtitles.skyabyss.waterway_maw_hurt",
-    "sounds": [
-      {
-        "name": "skyabyss:mobs/waterway_maw_hurt"
-      }
-    ]
-  },
-  "waterway_maw_death": {
-    "subtitle": "subtitles.skyabyss.waterway_maw_death",
-    "sounds": [
-      {
-        "name": "skyabyss:mobs/waterway_maw_death"
       }
     ]
   },

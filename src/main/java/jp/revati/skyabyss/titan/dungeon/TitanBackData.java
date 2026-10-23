@@ -155,11 +155,6 @@ public class TitanBackData extends SavedData {
         return added;
     }
 
-    // 天の鍵の欠片をもう受け取ったか
-    public boolean hasClaimedFragment(UUID player) {
-        return fragmentClaimed.contains(player);
-    }
-
     public long courseSeed() {
         return courseSeed;
     }

@@ -26,9 +26,6 @@ public final class MobSounds {
     public static final DeferredHolder<SoundEvent, SoundEvent> MOSS_CRAWLER_HURT = register("moss_crawler_hurt");
     public static final DeferredHolder<SoundEvent, SoundEvent> MOSS_CRAWLER_DEATH = register("moss_crawler_death");
     public static final DeferredHolder<SoundEvent, SoundEvent> MOSS_CRAWLER_STEP = register("moss_crawler_step");
-    public static final DeferredHolder<SoundEvent, SoundEvent> WATERWAY_MAW_AMBIENT = register("waterway_maw_ambient");
-    public static final DeferredHolder<SoundEvent, SoundEvent> WATERWAY_MAW_HURT = register("waterway_maw_hurt");
-    public static final DeferredHolder<SoundEvent, SoundEvent> WATERWAY_MAW_DEATH = register("waterway_maw_death");
     public static final DeferredHolder<SoundEvent, SoundEvent> WHALEBONE_CAPTAIN_AMBIENT = register("whalebone_captain_ambient");
     public static final DeferredHolder<SoundEvent, SoundEvent> WHALEBONE_CAPTAIN_HURT = register("whalebone_captain_hurt");
     public static final DeferredHolder<SoundEvent, SoundEvent> WHALEBONE_CAPTAIN_DEATH = register("whalebone_captain_death");
