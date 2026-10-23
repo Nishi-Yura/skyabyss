@@ -7,6 +7,7 @@ import jp.revati.skyabyss.hud.HudLayout.Region;
 import jp.revati.skyabyss.hud.HudLayout.Request;
 import jp.revati.skyabyss.hud.HudLayout.Size;
 import jp.revati.skyabyss.client.ui.ModFont;
+import jp.revati.skyabyss.client.ui.ItalicStyle;
 import jp.revati.skyabyss.client.ui.TextStyle;
 import java.util.List;
 
@@ -517,6 +518,16 @@ public final class NoticeClient {
         }
         g.pose().popPose();
         int sy = ly + 6;
+        if (place && !p.subLines.isEmpty() && ItalicStyle.band()) {
+            // 副題の後ろの暗い帯 (字幕の帯と同じ二段。空の明るい所でも字が読めるように)
+            int sw = 0;
+            for (FormattedCharSequence l : p.subLines) {
+                sw = Math.max(sw, font.width(l));
+            }
+            int bh = p.subLines.size() * 11;
+            g.fill(cx - sw / 2 - 10, sy - 4, cx + sw / 2 + 10, sy + bh + 3, ((int) (a * 0xA0) << 24) | 0x0A0E12);
+            g.fill(cx - sw / 2 - 18, sy - 2, cx + sw / 2 + 18, sy + bh + 1, ((int) (a * 0x60) << 24) | 0x0A0E12);
+        }
         for (FormattedCharSequence l : p.subLines) {
             g.drawString(font, l, cx - font.width(l) / 2, sy, alphaOf(a) | 0xFFFFFF, true);
             sy += 11;

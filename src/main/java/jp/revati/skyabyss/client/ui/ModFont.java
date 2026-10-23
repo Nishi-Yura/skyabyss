@@ -21,7 +21,7 @@ import jp.revati.skyabyss.Config;
 import jp.revati.skyabyss.SkyAbyss;
 
 // mod の字 (mod に同梱のリソースパック skyabyss_font。tools/gen/ui/gen_fonts.py が作る)。
-//   本文の字: DotGothic16。パックが minecraft:default の日本語 (Unifont) を差し替えるので、バニラの画面も含めて日本語の字が変わる (英数はバニラのまま)
+//   本文の字: DotGothic16。パックが minecraft:default を差し替えるので、バニラの画面も含めて英数も日本語も変わる
 //   題字の字: Zen Antique (skyabyss:title)。章の題字・場所の名前・余韻の札だけに title() で掛ける
 // はじめて起動したときにパックを選んだ状態にする (設定 fontInstalled)。リソースパックの画面で外すとバニラの字に戻り、
 // そのときは skyabyss:title もバニラの字になる (mod 本体の assets/skyabyss/font/title.json は minecraft:default を指すだけ)
@@ -30,6 +30,9 @@ public final class ModFont {
     }
 
     public static final String PACK = "skyabyss_font";
+    // 本文の点の字の oversample (tools/gen/ui/gen_fonts.py と同じ値)。影のずれを直す目印にも使う (mixin/TrueTypeGlyphShadowMixin)。
+    // ほかの TTF ではこの値を使わない
+    public static final float PIXEL_OVERSAMPLE = 6f;
     // 題字の字は描く大きさで三つ (細かさが違う。tools/gen/ui/gen_fonts.py)。2 倍より大きく描く所は TITLE、1.5 倍は TITLE_MID、1〜1.2 倍は TITLE_SMALL
     public static final ResourceLocation TITLE = ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "title");
     public static final ResourceLocation TITLE_MID = ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "title_mid");
@@ -86,17 +89,40 @@ public final class ModFont {
         }
 
         private static boolean envDone;
+        private static int ticks;
 
         // 撮影・確かめ用: 環境変数 SKYABYSS_FONT=on で字のパックを選ぶ (最初の tick で一度。撮影はタイトル画面を通らないことがある)
+        // 字のパックが入っているかは 20 tick おきに見直す (描く所から毎回は見ない)
         @SubscribeEvent
         static void onTick(net.neoforged.neoforge.client.event.ClientTickEvent.Post event) {
-            if (envDone) {
+            if (!envDone) {
+                envDone = true;
+                if ("on".equals(System.getenv("SKYABYSS_FONT"))) {
+                    select();
+                }
+            }
+            if (ticks++ % 20 == 0) {
+                refreshActive();
+            }
+        }
+    }
+
+    private static volatile boolean active;
+
+    // mod の字のパックが選ばれているか (斜体を外すかの判断に使う。ItalicStyle)
+    public static boolean active() {
+        return active;
+    }
+
+    static void refreshActive() {
+        try {
+            Minecraft mc = Minecraft.getInstance();
+            if (mc == null || mc.getResourcePackRepository() == null) {
                 return;
             }
-            envDone = true;
-            if ("on".equals(System.getenv("SKYABYSS_FONT"))) {
-                select();
-            }
+            active = mc.getResourcePackRepository().getSelectedIds().stream().anyMatch(s -> s.endsWith(PACK));
+        } catch (RuntimeException e) {
+            active = false;
         }
     }
 

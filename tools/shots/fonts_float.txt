@@ -1,0 +1,29 @@
+# 宙に浮いた字 (text_display・名札) が mod の字で二重に見えないか。GUI 2・3
+# SKYABYSS_FONT=on bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/fonts_float.txt -PshotsName=fonts_float
+world shots flat
+size 1280 720
+timeout 300
+render 6
+clouds off
+
+cmd time set noon
+cmd weather clear
+cmd gamemode creative
+hud off
+wait 100
+cmd skyabyss cinematic stop
+waitscreen 900 none
+wait 40
+waitchunks
+cmd tp @s ~ ~ ~ 0 0
+wait 5
+cmd summon text_display ^ ^1.9 ^3 {billboard:"center",text:'"鯨追いの組合 Guild"'}
+cmd summon text_display ^ ^1.5 ^3 {billboard:"center",shadow:1b,text:'"宿屋 Inn 12/30"'}
+cmd summon armor_stand ^1 ^ ^4 {CustomName:'"案内人 Guide"',CustomNameVisible:1b,NoGravity:1b}
+wait 20
+guiscale 2
+shot fonts_float_gui2
+guiscale 3
+wait 5
+shot fonts_float_gui3
+echo done
