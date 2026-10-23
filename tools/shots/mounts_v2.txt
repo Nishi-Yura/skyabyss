@@ -1,0 +1,182 @@
+# 乗り物の低ポリ (docs/design/38 の 5、tools/gen/mobs/mounts_lp/)。並び・寄り・乗った姿・駆ける姿。
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/mounts_v2.txt -PshotsName=mounts_v2  (絵は docs/review/mounts_v2/ へ写す)
+world shots flat
+size 1280 720
+timeout 900
+render 6
+clouds off
+wait 100
+cmd skyabyss cinematic stop
+wait 10
+cmd skyabyss cinematic stop
+cmd time set noon
+cmd weather clear
+cmd gamerule doDaylightCycle false
+cmd gamemode creative
+camera minecraft:overworld 0 -60 2 180 8
+waitchunks
+hud on
+chat clear
+hud off
+cmd tp @s 0 -60 -2 0 0
+cmd skyabyss facility mount demo
+wait 40
+shot v2_row
+cmd tp @s -9 -60 -1 -50 12
+wait 20
+shot v2_side
+cmd tp @s 13.2 -60 2.4 33 14
+wait 15
+shot v2_horn_beast_front
+cmd tp @s 9.8 -60 2.4 33 14
+wait 15
+shot v2_ash_deer_front
+cmd tp @s 6.4 -60 2.4 33 14
+wait 15
+shot v2_great_lizard_front
+cmd tp @s 3.0 -60 2.4 33 14
+wait 15
+shot v2_whale_calf_front
+cmd tp @s -0.4 -60 2.4 33 14
+wait 15
+shot v2_shell_tortoise_front
+cmd tp @s -3.8 -60 2.4 33 14
+wait 15
+shot v2_storm_chick_front
+cmd tp @s -7.2 -60 2.4 33 14
+wait 15
+shot v2_ember_fox_front
+cmd tp @s 10.2 -60 7 180 0
+wait 5
+cmd ride @s mount @e[type=skyabyss:mount,limit=1,sort=nearest]
+wait 10
+perspective front
+wait 15
+shot v2_horn_beast_ride
+walk on
+wait 24
+shot v2_horn_beast_run_a
+wait 3
+shot v2_horn_beast_run_b
+wait 3
+shot v2_horn_beast_run_c
+walk off
+wait 10
+cmd ride @s dismount
+perspective first
+wait 5
+cmd tp @s 6.8 -60 7 180 0
+wait 5
+cmd ride @s mount @e[type=skyabyss:mount,limit=1,sort=nearest]
+wait 10
+perspective front
+wait 15
+shot v2_ash_deer_ride
+walk on
+wait 24
+shot v2_ash_deer_run_a
+wait 3
+shot v2_ash_deer_run_b
+wait 3
+shot v2_ash_deer_run_c
+walk off
+wait 10
+cmd ride @s dismount
+perspective first
+wait 5
+cmd tp @s 3.4 -60 7 180 0
+wait 5
+cmd ride @s mount @e[type=skyabyss:mount,limit=1,sort=nearest]
+wait 10
+perspective front
+wait 15
+shot v2_great_lizard_ride
+walk on
+wait 24
+shot v2_great_lizard_run_a
+wait 3
+shot v2_great_lizard_run_b
+wait 3
+shot v2_great_lizard_run_c
+walk off
+wait 10
+cmd ride @s dismount
+perspective first
+wait 5
+cmd tp @s 0.0 -60 7 180 0
+wait 5
+cmd ride @s mount @e[type=skyabyss:mount,limit=1,sort=nearest]
+wait 10
+perspective front
+wait 15
+shot v2_whale_calf_ride
+walk on
+wait 24
+shot v2_whale_calf_run_a
+wait 3
+shot v2_whale_calf_run_b
+wait 3
+shot v2_whale_calf_run_c
+walk off
+wait 10
+cmd ride @s dismount
+perspective first
+wait 5
+cmd tp @s -3.4 -60 7 180 0
+wait 5
+cmd ride @s mount @e[type=skyabyss:mount,limit=1,sort=nearest]
+wait 10
+perspective front
+wait 15
+shot v2_shell_tortoise_ride
+walk on
+wait 24
+shot v2_shell_tortoise_run_a
+wait 3
+shot v2_shell_tortoise_run_b
+wait 3
+shot v2_shell_tortoise_run_c
+walk off
+wait 10
+cmd ride @s dismount
+perspective first
+wait 5
+cmd tp @s -6.8 -60 7 180 0
+wait 5
+cmd ride @s mount @e[type=skyabyss:mount,limit=1,sort=nearest]
+wait 10
+perspective front
+wait 15
+shot v2_storm_chick_ride
+walk on
+wait 24
+shot v2_storm_chick_run_a
+wait 3
+shot v2_storm_chick_run_b
+wait 3
+shot v2_storm_chick_run_c
+walk off
+wait 10
+cmd ride @s dismount
+perspective first
+wait 5
+cmd tp @s -10.2 -60 7 180 0
+wait 5
+cmd ride @s mount @e[type=skyabyss:mount,limit=1,sort=nearest]
+wait 10
+perspective front
+wait 15
+shot v2_ember_fox_ride
+walk on
+wait 24
+shot v2_ember_fox_run_a
+wait 3
+shot v2_ember_fox_run_b
+wait 3
+shot v2_ember_fox_run_c
+walk off
+wait 10
+cmd ride @s dismount
+perspective first
+wait 5
+close
