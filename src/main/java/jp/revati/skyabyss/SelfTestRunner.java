@@ -304,6 +304,10 @@ public final class SelfTestRunner {
         // 深淵 v3 (2026-10-23 の試遊の直し: 帰りの祠・道案内・主の技と段とボスバー・縄張りの主)。SKYABYSS_SELFTEST_ONLY="abyss v3"
         steps.add(Step.once("abyss v3 (load)", jp.revati.skyabyss.story.ch5.layers.AbyssV3SelfTest::load));
         steps.add(Step.once("abyss v3", 60, jp.revati.skyabyss.story.ch5.layers.AbyssV3SelfTest::run));
+        // 形 B の層の護りの下り道 (塩・灰。道すじに歩いて届く・一人で送りきる・気力が尽きると前の待ち場から・崩れに呑まれると待ち場 3 から・二人で灰を送る)。
+        // SKYABYSS_SELFTEST_ONLY="abyss escort"
+        steps.add(Step.once("abyss escort (load)", jp.revati.skyabyss.story.ch5.layers.AbyssEscortSelfTest::load));
+        steps.add(Step.once("abyss escort", 60, jp.revati.skyabyss.story.ch5.layers.AbyssEscortSelfTest::run));
         // 番人の悪夢 (段の表・入る条件・段の進み・報酬・保存・閉じたあとの後片付け)。docs/design/36 の 9。SKYABYSS_SELFTEST_ONLY="abyss nightmare"
         steps.add(Step.once("abyss nightmare (load)", jp.revati.skyabyss.story.ch5.warden.WardenSelfTest::load));
         steps.add(Step.once("abyss nightmare", 60, jp.revati.skyabyss.story.ch5.warden.NightmareSelfTest::run));

@@ -57,7 +57,10 @@ public final class AbyssGuide {
         }
         String layer = Layers.ORDER.get(s);
         BlockPos gate = AbyssBuild.mark("gate_" + layer);
-        boolean beyondGate = gate != null && at.getZ() < gate.getZ() && !Layers.inCamp(layer, at);
+        boolean exp = AbyssEscort.expedition(layer);
+        // 形 B の格子の門は下り道の終わり (主の間の前)。門の向こうは主の間とその手前の通り道だけ
+        boolean beyondGate = gate != null && at.getZ() < gate.getZ() && !Layers.inCamp(layer, at)
+                && (!exp || Layers.inArena(layer, at) || Math.abs(at.getX() - gate.getX()) <= 2 && at.getZ() > gate.getZ() - 4);
         if (AbyssMarks.lordBeaten(p, layer)) {
             String next = Layers.next(layer);
             return Line.of(next == null ? "descend_heart" : "descend", AbyssBuild.mark("descend_" + layer),
@@ -70,10 +73,18 @@ public final class AbyssGuide {
             if (beyondGate) {
                 return Line.of("arena", AbyssBuild.mark("arena_" + layer), "abyss_v2.skyabyss.lord." + layer);
             }
-            return Line.of("gate", gate);
+            return Line.of(exp ? "gate_b" : "gate", gate);
         }
         if ((layer + "_camp").equals(Layers.stage(p))) {
+            AbyssEscort.Run r = AbyssEscort.run(layer);
+            if (r != null && "ash".equals(layer)) {
+                // 灰の隊長は道に出ている: 道の人のところへ (加わると話したことになる)
+                return Line.of("survivor_road", BlockPos.containing(r.pos()), "entity.skyabyss.attendant.survivor_" + layer);
+            }
             return Line.of("survivor", AbyssBuild.mark("survivor_" + layer), "entity.skyabyss.attendant.survivor_" + layer);
+        }
+        if (exp) {
+            return escortLine(p, layer);
         }
         int have = AbyssMarks.count(p, layer);
         int best = nextMark(p, layer);
@@ -90,6 +101,30 @@ public final class AbyssGuide {
             return Line.of(place.startsWith("nest") ? "nest" : "terr", guard != null ? guard : mark, "abyss_v2.skyabyss.mark." + key, "#" + have);
         }
         return Line.of("mark", mark, "abyss_v2.skyabyss.mark." + key, "#" + have);
+    }
+
+    // 形 B: 護りの下り道の様子 (AbyssEscort)
+    static Line escortLine(ServerPlayer p, String layer) {
+        AbyssEscort.Run r = AbyssEscort.run(layer);
+        String npc = "entity.skyabyss.attendant." + AbyssEscort.ROLE.get(layer);
+        String have = "#" + AbyssMarks.count(p, layer);
+        if (r == null) {
+            return Line.of("escort_meet", AbyssBuild.mark("escstart_" + layer), npc);
+        }
+        BlockPos np = BlockPos.containing(r.pos());
+        return switch (r.state()) {
+            case WALK -> Line.of("escort_follow", np, npc, have);
+            case WAIT -> switch (r.task()) {
+                case STAKE -> Line.of("escort_stake", AbyssBuild.mark("stake_salt"), npc);
+                case BEACON -> Line.of("escort_beacon_" + layer, AbyssBuild.mark("beacon_" + layer), npc);
+                case HOLD -> Line.of("escort_hold", np, npc, "#" + Math.max(0, (r.holdUntil - p.level().getGameTime() + 19) / 20));
+                case SEAL -> Line.of("escort_seal", AbyssBuild.mark("seal_ash"), npc);
+                case CLEAR -> Line.of("escort_clear", AbyssBuild.mark("wp_" + layer + "_3"), npc);
+            };
+            case ARMED -> Line.of("escort_ready", np, npc);
+            case ESCAPE -> Line.of("escort_run_" + layer, AbyssBuild.mark("gate_" + layer), npc);
+            case DONE -> Line.of("gate_b", AbyssBuild.mark("gate_" + layer));
+        };
     }
 
     // まだ取っていない印のうち、いちばん近いもの (無ければ -1)
@@ -140,13 +175,16 @@ public final class AbyssGuide {
         if (camp && "bone".equals(layer)) {
             tip(p, "home");
         }
-        if (camp) {
+        boolean exp = AbyssEscort.expedition(layer);
+        if (camp && exp) {
+            tip(p, "escort");
+        } else if (camp) {
             tip(p, "board");
         }
-        if (!camp && !Layers.inArena(layer, at) && AbyssMarks.count(p, layer) == 0 && LayerData.get(p.server).has(p.getUUID(), "tip:board")) {
+        if (!exp && !camp && !Layers.inArena(layer, at) && AbyssMarks.count(p, layer) == 0 && LayerData.get(p.server).has(p.getUUID(), "tip:board")) {
             tip(p, "marks");
         }
-        if (AbyssMarks.count(p, layer) >= 1) {
+        if (!exp && AbyssMarks.count(p, layer) >= 1) {
             tip(p, "shortcut");
         }
         if (Layers.inArena(layer, at)) {
@@ -174,6 +212,9 @@ public final class AbyssGuide {
         }
         if (AbyssMarks.canPassGate(p, layer)) {
             return "lord";
+        }
+        if (AbyssEscort.expedition(layer)) {
+            return "marks";
         }
         int best = nextMark(p, layer);
         if (best > 0) {
@@ -225,7 +266,15 @@ public final class AbyssGuide {
 
     static void board(ServerPlayer p, String layer, int i) {
         List<Component> lines = new ArrayList<>();
-        lines.add(boardLine(p, layer, i));
+        if (AbyssEscort.expedition(layer)) {
+            // 形 B: 下り口の碑に、三つの待ち場の様子
+            for (int k = 1; k <= 3; k++) {
+                Component name = Component.translatable("abyss_v2.skyabyss.mark." + layer + "_" + k);
+                lines.add(Component.translatable(NS + (AbyssMarks.hasMark(p, layer, k) ? "board_b.done" : "board_b.open"), name));
+            }
+        } else {
+            lines.add(boardLine(p, layer, i));
+        }
         Notice.hint(p, NS + "board.head", Component.translatable("sign.skyabyss.abyss_route." + layer + "_" + i + ".1"),
                 Component.translatable("sign.skyabyss.abyss_route." + layer + "_" + i + ".2"), AbyssMarks.count(p, layer));
         for (Component c : lines) {

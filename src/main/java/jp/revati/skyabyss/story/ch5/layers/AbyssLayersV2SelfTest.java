@@ -33,7 +33,7 @@ import net.neoforged.neoforge.common.util.FakePlayer;
 
 // SELFTEST abyss layers v2: 深淵の層 (docs/design/36 の 8 章。2026-10-23 の作り直し)。SKYABYSS_SELFTEST_ONLY="abyss layers v2"
 //   形: 設計図の上で歩いて (戸・封・門は開いたものとして、下りの鎖は次の野営へ)、着く所から各層の三つの印・門の向こう・主の間・下りの鎖・心臓まで届く。
-//       近道の格子を閉じたままでも届き、開けると印の部屋から野営へ歩いて帰れる
+//       近道の格子を閉じたままでも届き、開けると印の部屋から野営へ歩いて帰れる (形 B の塩・灰は近道がなく、下り道を逆にたどって帰れる)
 //   印: 巣を払う前の印は取れない。取るとパーティの二人とも持つ。三つで門を通れ、二つでは通れない
 //   段: 二人のパーティで、門 → 骨の野営 (話す) → 印三つ → 骨の主 → 塩の野営 と進む (仲間は離れていても進む)
 //   仕掛け: 三つの灯皿に光の術の灯りで骨の戸が開く。灰の迷路の跡が出口まで求まる
@@ -140,7 +140,9 @@ public final class AbyssLayersV2SelfTest {
                 f.add(m + " is not reached on foot from the arrival (nearest walked " + nearest(seen, AbyssBuild.mark(m)) + ")");
             }
         }
-        // 近道を開けると、印の部屋から野営へ歩いて帰れる
+        // 近道を開けると、印の部屋から野営へ歩いて帰れる (形 B は下り道を逆に。井戸は縁から底へ下りられる)
+        Map<Long, BlockPos> down = new HashMap<>();
+        link(down, "well_salt_top", "well_salt");
         Set<Long> withScuts = new HashSet<>(open);
         for (String layer : Layers.ORDER) {
             for (int i = 1; i <= 3; i++) {
@@ -154,7 +156,7 @@ public final class AbyssLayersV2SelfTest {
                     f.add("markroom_" + layer + "_" + i + " is missing");
                     continue;
                 }
-                Set<Long> back = walk(b, withScuts, Map.of(), room);
+                Set<Long> back = walk(b, withScuts, AbyssEscort.expedition(layer) ? down : Map.of(), room);
                 if (!reached(back, AbyssBuild.mark("camp_" + layer))) {
                     f.add("no shortcut back to camp from " + layer + " mark room " + i);
                 }
@@ -326,7 +328,7 @@ public final class AbyssLayersV2SelfTest {
             for (int i = 1; i <= 3; i++) {
                 check(f, barsIn(level, "scut_bone_" + i) == 0, "the shortcut bars of bone mark " + i + " are still there: " + barsIn(level, "scut_bone_" + i));
             }
-            check(f, barsIn(level, "scut_salt_1") > 0 || d.isOpen("scut_salt_1"), "the salt shortcut bars should still be closed");
+            check(f, barsIn(level, "scut_storm_1") > 0 || d.isOpen("scut_storm_1"), "the storm shortcut bars should still be closed");
             // 北の格子の門: 印が二つの人では上がらず、三つの人が近づくと上がり、離れて 3 秒で下りる
             BlockPos gb = AbyssBuild.mark("gate_bone");
             long t0 = level.getGameTime() + 1000;
@@ -354,8 +356,10 @@ public final class AbyssLayersV2SelfTest {
             // 仲間への知らせでパーティが無いと落ち、近道を開ける前で止まっていた)
             FakePlayer solo = new FakePlayer(level, new GameProfile(UUID.randomUUID(), "abyss_v2_solo"));
             try {
-                check(f, AbyssMarks.take(solo, "salt", 1), "a solo player could not take salt mark 1");
-                check(f, barsIn(level, "scut_salt_1") == 0, "a solo player's mark did not open its shortcut bars: " + barsIn(level, "scut_salt_1"));
+                check(f, AbyssMarks.take(solo, "storm", 1), "a solo player could not take storm mark 1");
+                check(f, barsIn(level, "scut_storm_1") == 0, "a solo player's mark did not open its shortcut bars: " + barsIn(level, "scut_storm_1"));
+                // 形 B (護りの下り道) の印は、その待ち場を確かにするまで取れない
+                check(f, !AbyssMarks.take(solo, "salt", 1), "a salt mark was taken without securing its resting place");
             } catch (RuntimeException e) {
                 f.add("taking a mark alone crashed: " + e);
             } finally {

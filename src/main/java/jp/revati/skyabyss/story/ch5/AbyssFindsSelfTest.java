@@ -59,8 +59,8 @@ public final class AbyssFindsSelfTest {
                     BlockPos m = AbyssBuild.mark("grave_" + layer + "_" + i);
                     check(f, m != null && level.getBlockState(m.above()).is(Blocks.SKELETON_SKULL), "grave_" + layer + "_" + i + " has no skull");
                 }
-                // 近道の格子 (三本の道の終わりから野営へ。story/ch5/layers/AbyssMarks)
-                for (int i = 1; i <= 3; i++) {
+                // 近道の格子 (形 A の三本の道の終わりから野営へ。story/ch5/layers/AbyssMarks。形 B の護りの下り道には近道がない)
+                for (int i = 1; i <= 3 && !jp.revati.skyabyss.story.ch5.layers.AbyssEscort.expedition(layer); i++) {
                     check(f, AbyssBuild.mark("scut_" + layer + "_" + i + "_a") != null && AbyssBuild.mark("scut_" + layer + "_" + i + "_b") != null,
                             "scut_" + layer + "_" + i + " box is missing");
                 }
@@ -98,7 +98,7 @@ public final class AbyssFindsSelfTest {
 
     private static void report(List<String> f) {
         if (f.isEmpty()) {
-            SkyAbyss.LOGGER.info("SELFTEST abyss finds PASSED (16 carvings, 12 graves, 12 shortcut boxes, 4 watcher spots, lore after a full layer, depth share)");
+            SkyAbyss.LOGGER.info("SELFTEST abyss finds PASSED (16 carvings, 12 graves, shortcut boxes on the type A layers, 4 watcher spots, lore after a full layer, depth share)");
         } else {
             f.forEach(m -> SkyAbyss.LOGGER.error("SELFTEST abyss finds FAILED: {}", m));
         }
