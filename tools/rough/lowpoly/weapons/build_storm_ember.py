@@ -32,6 +32,8 @@ ITEMS = {
     "thrall_poker": ("灰被りの火かき棒", "ember", m_pk.faces, m_pk.inlay, m_pk.EDGE, 1, (8.0, 10.0)),
 }
 RAR = ("common", "rare", "legend")
+# 余燼の武器の玄武岩・鉄を明るくする量 (paint の lift。2026-10-23: 手の中で黒い塊に見えたので 0.14)
+EMBER_LIFT = 0.14
 RAR_JP = dict(common="通常", rare="レア", legend="伝説")
 PLAT = (36, 40, 48)
 FONTS = ["C:/Windows/Fonts/YuGothB.ttc", "C:/Windows/Fonts/meiryob.ttc", "C:/Windows/Fonts/meiryo.ttc", "C:/Windows/Fonts/msgothic.ttc"]
@@ -50,7 +52,7 @@ def make(item, rarity, plus=0, stage=0):
     jp, titan, fn, inlay, em, nst, _ = ITEMS[item]
     faces = fn(rarity, stage) if nst > 1 else fn(rarity)
     faces, size, P, N, M, L = build(faces)
-    atlas, glow = paint(faces, size, P, N, M, L, titan, rarity, plus, inlay, em)
+    atlas, glow = paint(faces, size, P, N, M, L, titan, rarity, plus, inlay, em, lift=EMBER_LIFT if titan == "ember" else 0.0)
     return dict(faces=faces, size=size, atlas=atlas, glow=glow, tris=tri_count(faces))
 
 
