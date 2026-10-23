@@ -90,7 +90,7 @@ def arm_b(F, nm, x, z, h):
     elbow = P(1.5, h * 0.5)
     wrist = P(1.15, h * 0.86)
     path = [P(0, -0.6), P(0.8, h * 0.22), elbow, P(1.35, h * 0.7), wrist]
-    F += part(nm, tube(nm, "salt", path, ra=[0.95, 0.82, 0.74, 0.66, 0.58], sides=7, hint=tuple(side), caps=(False, True)))
+    F += part(nm, tube(nm, "salt", path, ra=[0.95, 0.82, 0.74, 0.66, 0.58], sides=7, hint=tuple(side), caps=(True, True)))
     # 肘の節 (外へ少し張る)
     F += part(nm + "_elbow", ellipsoid(nm, "saltc", elbow, (0.82, 0.8, 0.82), segs=6, rings=1))
     # 貝の板の籠手: 手首へ向かって開く三枚 (それぞれ前の板にかぶさる)
@@ -107,7 +107,7 @@ def arm_b(F, nm, x, z, h):
             cc = c0 + ax * ln * tt
             rings.append([tuple(cc + rr * (math.cos(th) * a1 + math.sin(th) * a2) * (1.0 if k % 2 == 0 else 0.86))
                           for k, th in enumerate(np.linspace(0, 2 * math.pi, 8)[:-1])])
-        F += part(f"{nm}_shell{j}", loft(nm, "saltc", rings, caps=("saltc", False)))
+        F += part(f"{nm}_shell{j}", loft(nm, "saltc", rings, caps=("saltc", "saltc")))
     # 手のひら: 中心へ向けた平たい塊
     palm_c = w + ax * 0.75 + inn * 0.15
     F += part(nm + "_palm", ellipsoid(nm, "salt", tuple(palm_c), (1.0, 0.6, 1.0), segs=6, rings=2))
