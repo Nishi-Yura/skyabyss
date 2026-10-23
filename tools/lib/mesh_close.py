@@ -33,6 +33,7 @@ import numpy as np
 from scipy.spatial import cKDTree
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "audit"))
 import mesh_audit as ma  # noqa: E402
 
 MARK = "skyabyss_closed"
