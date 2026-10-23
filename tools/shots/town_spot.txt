@@ -1,0 +1,40 @@
+# 利用者の場所 (北東の段の柱と深い色の壁・花壇・露店) を、昼と夜に撮る。
+# ./gradlew runShots -Pscript=tools/shots/town_spot.txt -PshotsName=town_spot_after  (前は同じ台本で、直す前の設計図)
+# at shelter 0 x y z yaw pitch: 設計図の座標と向き (yaw 0 = 南、180 = 北、90 = 西、-90 = 東)
+world audit_town normal
+size 1280 720
+timeout 1200
+render 8
+clouds off
+guiscale 2
+
+wait 100
+cmd skyabyss cinematic stop
+wait 10
+cmd skyabyss cinematic stop
+cmd weather clear
+cmd gamerule doDaylightCycle false
+cmd gamemode spectator
+cmd skyabyss dev opening build
+hud off
+cmd time set 6000
+cmd skyabyss dev opening at shelter 0 29 1 -33 180 22
+waitchunks 600
+wait 120
+shot s_flight_noon
+cmd skyabyss dev opening at shelter 0 20 1 -30 -144 14
+waitchunks 600
+wait 120
+shot s_wide_noon
+cmd time set 18000
+wait 120
+shot s_wide_night
+cmd skyabyss dev opening at shelter 0 29 1 -33 180 22
+waitchunks 600
+wait 120
+shot s_flight_night
+cmd skyabyss dev opening at shelter 0 24 1 -36 180 12
+waitchunks 600
+wait 120
+shot s_corner_night
+quit

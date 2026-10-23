@@ -141,7 +141,7 @@ def post_ok(cells, c):
     return free >= 3
 
 
-def plan_wall_torches(cells, target=DARK, max_add=3000, reach=8, log=None, region=in_core):
+def plan_wall_torches(cells, target=DARK, max_add=3000, reach=8, log=None, region=in_core, torches=False, min_gap=6, max_seeds=3000):
     """暗い歩く所の近くの壁に、魂の松明を足す (cells を書き換える)。
     いちばん暗い所を選び、その近く (reach の中) で、壁に付けられる空きの一マスのうち、
     いちばん多くの暗い所を (松明の届く中で) 照らす所を選ぶ。松明は当たりが無いので、道はふさがない。
@@ -152,17 +152,27 @@ def plan_wall_torches(cells, target=DARK, max_add=3000, reach=8, log=None, regio
     ball = [(a, b, c) for a in range(-6, 7) for b in range(-6, 7) for c in range(-6, 7) if abs(a) + abs(b) + abs(c) <= 6]
     placed = []
     hopeless = set()
-    while dark and len(placed) < max_add:
-        todo = [p for p in sorted(dark, key=lambda p: (lm.get(p, 0), p)) if p not in hopeless]
-        if not todo:
+    posts = set()
+    ball_gap = [(a, b) for a in range(-min_gap + 1, min_gap) for b in range(-min_gap + 1, min_gap) if abs(a) + abs(b) < min_gap]  # 柱どうしの平面の距離
+    order = sorted(dark, key=lambda p: (lm.get(p, 0), p))  # いちばん暗い所から順に (一度だけ並べる)
+    oi = 0
+    seeds_tried = 0
+    while dark and len(placed) < max_add and seeds_tried < max_seeds:
+        d = None
+        while oi < len(order):
+            p = order[oi]
+            if p in dark and p not in hopeless:
+                d = p
+                break
+            oi += 1
+        if d is None:
             break
-        d = todo[0]
         best = None
         for dx in range(-reach, reach + 1):
             for dy in range(-3, 4):
                 for dz in range(-reach, reach + 1):
                     c = (d[0] + dx, d[1] + dy, d[2] + dz)
-                    if not region(c) or c[1] < 1 or c[1] > 6 or cells.get(c) not in AIR or cells.get((c[0], c[1] + 1, c[2])) not in AIR:
+                    if not region(c) or c[1] < 0 or c[1] > 6 or cells.get(c) not in AIR or cells.get((c[0], c[1] + 1, c[2])) not in AIR:
                         continue
                     face = None
                     for f, (ex, ez) in (('north', (0, -1)), ('south', (0, 1)), ('west', (-1, 0)), ('east', (1, 0))):
@@ -170,19 +180,23 @@ def plan_wall_torches(cells, target=DARK, max_add=3000, reach=8, log=None, regio
                         if w is not None and cs.full_cube(w):
                             face = f
                             break
-                    score = sum(1 for o in ball if (c[0] + o[0], c[1] + o[1], c[2] + o[2]) in dark)
-                    if face is not None:
-                        kind, sc = 'torch', score
+                    if torches and face is not None:
+                        kind = 'torch'
                     else:
-                        # 壁の無い所は、柱の上に灯り (道の真ん中をふさがないよう、四方の三つは空いている所だけ)
+                        # 柱の上に灯り (道の真ん中をふさがないよう、四方の三つは空いている所だけ)。柱どうしは min_gap 以上離す
                         if not post_ok(cells, c):
                             continue
-                        kind, sc = 'post', score - POST_COST
+                        if any((c[0] + a, c[2] + b) in posts for a, b in ball_gap):
+                            continue
+                        kind = 'post'
+                    score = sum(1 for o in ball if (c[0] + o[0], c[1] + o[1], c[2] + o[2]) in dark)
+                    sc = score - POST_COST if kind == 'post' else score
                     if not score:
                         continue
                     key = (sc, -(abs(dx) + abs(dz)))
                     if best is None or key > best[0]:
                         best = (key, c, kind, face)
+        seeds_tried += 1
         if best is None:
             hopeless.add(d)
             continue
@@ -194,6 +208,7 @@ def plan_wall_torches(cells, target=DARK, max_add=3000, reach=8, log=None, regio
             placed.append((c[0], c[1], c[2], 'torch:' + facing))
             spread(cells, lm, c, TORCH_LEVEL)
         else:
+            posts.add((c[0], c[2]))
             cells[c] = POST_FENCE
             cells[(c[0], c[1] + 1, c[2])] = POST_FENCE
             cells[(c[0], c[1] + 2, c[2])] = 'lantern[hanging=false,waterlogged=false]'

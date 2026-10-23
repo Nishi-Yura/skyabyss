@@ -269,14 +269,23 @@ class Town(Facilities):
         z1 = TERZ
         for xa in (28, -32):
             xs = range(xa, xa + 4)
+            # 前の縁 (z1+1 の地面の段) から一段ずつ上がる: 段は z1 - k の列の、一つ上の高さ (k+1)。
+            # 前は地面の高さの列が二つ平らに続き、そのあと上がった (壁の前で段が揃わなかった: 2026-10-24 の試遊)
             for k in range(TER + 1):
                 z = z1 - k
                 for x in xs:
-                    for y in range(0, k):
-                        v.set(x, y, z, st.base.full)
-                    v.set(x, k, z, st.base.stairs('north', 'bottom'))
-                    for y in range(k + 1, TER + 4):
-                        v.set(x, y, z, 'air')
+                    if k < TER:
+                        for y in range(0, k + 1):
+                            v.set(x, y, z, st.base.full)
+                        v.set(x, k + 1, z, st.base.stairs('north', 'bottom'))
+                        for y in range(k + 2, TER + 4):
+                            v.set(x, y, z, 'air')
+                    else:
+                        for y in range(0, TER):
+                            v.set(x, y, z, st.base.full)
+                        v.set(x, TER, z, v.pick(st.pave))
+                        for y in range(TER + 1, TER + 4):
+                            v.set(x, y, z, 'air')
             # 上がりきった所 (段の上面) と、前の縁の欄干・軒をあける
             for x in xs:
                 for y in range(TER + 1, TER + 4):
@@ -1849,11 +1858,15 @@ class Town(Facilities):
         self.stairs_fixed, self.stairs_left = done, left
 
     def street_light(self):
-        """夜に暗い街路・広場・階段 (明るさ 0 の所) の近くの壁に、魂の松明を足す (tools/audit/check_light.py)。
-        松明は当たりが無く、壁の上に付けるので道はふさがない。灯りは街の所々だけ (全体を明るくはしない)"""
+        """夜の街路を、暖かい灯りの柱で照らす (tools/audit/check_light.py)。魂の松明は使わない。
+        中心 (|x|,|z| <= 60) は歩く所の明るさ 7 未満を、外の輪は 4 未満を、柱の列 (8〜10 ほど離す) で埋める。
+        柱は道の端に立つ (四方の三つは空き)。灯りの高さは柱の上 (吊り灯り)"""
         sys.path.insert(0, os.path.join(ROOT, 'tools', 'audit'))
         import check_light  # noqa: E402
-        self.torches = check_light.plan_wall_torches(self.v.b, target=check_light.DARK, log=None)
+        core = check_light.plan_wall_torches(self.v.b, target=7, region=check_light.in_core, min_gap=8, max_add=400)
+        ring = check_light.plan_wall_torches(self.v.b, target=4, region=lambda p: not check_light.in_core(p),
+                                             min_gap=10, max_add=300)
+        self.torches = core + ring
 
     def drop_floaters(self):
         """床に置く小物 (壺・鉢・ろうそく・置いた灯り・敷物) で、下が空いているものを消す。
