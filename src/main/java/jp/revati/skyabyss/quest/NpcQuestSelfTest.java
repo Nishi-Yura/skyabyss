@@ -170,7 +170,8 @@ public final class NpcQuestSelfTest {
             }
             // クエストを始める道がある (自動で始まるか、どこかの会話が始める)
             // 序章・一章の小要素 (story/ch1) の頼みは、章の小要素に着いたときにコードが始める (ChapterSites の onArrive)
-            boolean started = q.startWhen() != null || q.board() || q.id().startsWith("ch1/") || rumorStarted(q.id()) || DialogueManager.all().values().stream().flatMap(d -> d.nodes().values().stream())
+            // 後の章の技の稽古 (lesson/tree_*) は、木・要が開いたときにコードが始める (tutorial.SkillLesson の poll)
+            boolean started = q.startWhen() != null || q.board() || q.id().startsWith("ch1/") || q.id().startsWith("lesson/tree_") || rumorStarted(q.id()) || DialogueManager.all().values().stream().flatMap(d -> d.nodes().values().stream())
                     .anyMatch(n -> n.actions().stream().anyMatch(a -> a.type().equals("quest_start") && a.str("quest").equals(q.id()))
                             || n.options().stream().anyMatch(o -> o.actions().stream()
                             .anyMatch(a -> a.type().equals("quest_start") && a.str("quest").equals(q.id()))));
