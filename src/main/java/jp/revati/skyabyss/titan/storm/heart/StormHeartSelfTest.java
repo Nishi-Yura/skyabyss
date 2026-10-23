@@ -51,10 +51,14 @@ public final class StormHeartSelfTest {
         }
     }
 
+    // 心臓の間 (区画 0 番の枠の封じた一室。trial/raid/InstanceArenas) のチャンクを読み込んだままにする。
+    // 光の段 (checkLight) は 40 tick あとに測るので、そのあいだ部屋が下ろされないように
     private static void forceChunks(ServerLevel back) {
-        for (int dx = -2; dx <= 1; dx++) {
-            for (int dz = -3; dz <= 0; dz++) {
-                back.setChunkForced(dx, dz, true);
+        int cx = StormHeartArena.CX >> 4;
+        int cz = StormHeartArena.CZ >> 4;
+        for (int dx = -2; dx <= 2; dx++) {
+            for (int dz = -2; dz <= 2; dz++) {
+                back.setChunkForced(cx + dx, cz + dz, true);
             }
         }
     }

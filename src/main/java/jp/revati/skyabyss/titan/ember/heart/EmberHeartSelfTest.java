@@ -326,7 +326,7 @@ public final class EmberHeartSelfTest {
         check(!EmberHeartArena.arena().contains(EmberHeartArena.anteSpawn()), "antechamber spawn is inside the fight", f);
         check(EmberHeartArena.ante().contains(EmberHeartArena.anteSpawn()), "antechamber spawn is outside the antechamber", f);
         check(EmberHeartArena.arena().contains(EmberHeartArena.insideSpawn(0.5)), "inside spawn is outside the arena", f);
-        check(EmberHeartArena.sectorAt(0.5, cz - 12.5) == 3 && EmberHeartArena.sectorAt(0.5, cz + 12.5) == 0, "entrance sector is not 3 (south is 0)", f);
+        check(EmberHeartArena.sectorAt(cx + 0.5, cz - 12.5) == 3 && EmberHeartArena.sectorAt(cx + 0.5, cz + 12.5) == 0, "entrance sector is not 3 (south is 0)", f);
         check(EmberHeartArena.onPlatform(cx + 0.5, cz + 2) && !EmberHeartArena.onPlatform(cx + 5.5, cz + 0.5), "platform test is wrong", f);
         // 六つの区画: 大きさがそろい、台と溝に重ならない
         int total = 0;
@@ -622,7 +622,7 @@ public final class EmberHeartSelfTest {
         check(heart.isEnraged() && heart.getPhase() == 2 && !heart.isRoaring() && EmberHeartArena.isCold(), "the fury roar did not enrage the heart (phase " + heart.getPhase() + ")", f);
         heart.holdAttacks(false);
         // 部屋の外へ出た心臓は戻る。誰もいなければ 3 秒で放棄
-        heart.moveTo(0.5, EmberHeartArena.SURFACE + 3, EmberHeartArena.CZ + 30.5);
+        heart.moveTo(EmberHeartArena.CX + 0.5, EmberHeartArena.SURFACE + 3, EmberHeartArena.CZ + 30.5);
         EmberHeartBattle.room().tick(back, EmberHeartBattle.HOST);
         check(heart.distanceToSqr(EmberHeartArena.heartHome()) < 1, "heart outside the room was not brought back", f);
         for (int i = 0; i < 7; i++) {
