@@ -665,6 +665,7 @@ public final class EmberBodyBuilder {
     // ---------------------------------------------------------------- 体の外の封じた熾の底 (trial/raid/InstanceArenas。版 33)
     // 体の芯の石で詰めた箱 → 熾の底の箱 (仮の床) → 入口 → 前室 → 休み場 heart → 入口の通り道の床 → 碑文 → 心臓の担当の部屋 (EmberBackRooms) → 大門
     public static void buildHeartInstance(ServerLevel level) {
+        long t0 = System.nanoTime();
         EmberBodyBuilder b = new EmberBodyBuilder(level);
         Box h = HEART;
         for (int x = h.minX() - 3; x <= h.maxX() + 3; x++) {
@@ -697,8 +698,12 @@ public final class EmberBodyBuilder {
                 b.kit.wallSign(in.pos(), in.facing(), "sign.skyabyss." + in.id(), DyeColor.ORANGE);
             }
         }
-        EmberBackRooms.buildOne(level, "heart");
+        long t1 = System.nanoTime();
+        // 心臓の担当の部屋の中身 (EmberBackRooms の "heart" = EmberHeartArena.buildRoom から、体じゅうの歩く道の灯りの置き直しを除いたもの)
+        jp.revati.skyabyss.titan.ember.heart.EmberHeartArena.build(level);
+        long t2 = System.nanoTime();
         EmberBossGates.heart(level);
+        SkyAbyss.LOGGER.info("Ember heart arena: shell {} ms, room {} ms, gate {} ms", (t1 - t0) / 1_000_000L, (t2 - t1) / 1_000_000L, (System.nanoTime() - t2) / 1_000_000L);
     }
 
     // ---------------------------------------------------------------- 熾の底の前室 (床 50)
