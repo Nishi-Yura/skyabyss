@@ -127,7 +127,7 @@ def pair_overlap(posed, ignore_pairs):
 
 
 def main():
-    sets = [sys.argv[1]] if len(sys.argv) > 1 and sys.argv[1] in SETS else SETS
+    sets = [sys.argv[1]] if len(sys.argv) > 1 and os.path.isdir(os.path.join(MESH, sys.argv[1])) else SETS   # 4 組の外 (abyss_diver など) も名前で
     tiers = [sys.argv[2]] if len(sys.argv) > 2 else ['', '_rare', '_legend']
     P = poses()
     # the same-slot joints (leg/boot, which touch by design) are skipped

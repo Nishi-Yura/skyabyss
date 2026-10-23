@@ -1,0 +1,147 @@
+# 淵潜りの鎧 v2 (A 潜水兜と錨鉄の潜水服): 着た姿 (立ち・後ろ・横・歩き・しゃがみ・振り・見下ろし/見上げ・一人称・馬に乗る)、
+# 防具立て (前・横・後ろ・3/4、強化 +0/+5/+10、部位ごと)、持ち物のアイコン。絵は docs/review/abyss_armor_v2/
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/abyss_armor_v2.txt -PshotsName=abyss_armor_v2
+world shots flat
+size 1280 720
+timeout 1800
+render 8
+clouds off
+wait 100
+cmd skyabyss cinematic stop
+wait 10
+cmd skyabyss cinematic stop
+cmd time set noon
+cmd weather clear
+cmd gamerule doDaylightCycle false
+cmd fill -20 -61 -20 20 -61 20 minecraft:smooth_basalt destroy
+cmd kill @e[type=!minecraft:player,distance=..64]
+hud off
+# 新しい世界では始まりの題字が出るので消えるまで待つ
+wait 400
+armortier rare
+armorlevel 0
+# 着た姿 (先に撮る: 始まりの題字が消えるのを待つ間に)。手は空にする
+cmd gamemode creative
+cmd clear @s
+cmd item replace entity @s armor.feet with skyabyss:abyss_diver_boots
+cmd item replace entity @s armor.legs with skyabyss:abyss_diver_leggings
+cmd item replace entity @s armor.chest with skyabyss:abyss_diver_chestplate
+cmd item replace entity @s armor.head with skyabyss:abyss_diver_helmet
+fov 30
+camera minecraft:overworld 0 -60 0 180 0
+perspective front
+waitchunks
+wait 25
+shot worn_front
+perspective back
+wait 4
+shot worn_back
+perspective front
+bodyyaw 50
+wait 2
+shot worn_side
+bodyyaw 0
+walk on
+wait 9
+shot worn_walk
+wait 4
+shot worn_walk2
+walk off
+wait 6
+sneak on
+wait 12
+shot worn_sneak
+sneak off
+wait 4
+swing
+wait 2
+shot worn_swing
+wait 20
+camera minecraft:overworld 0 -60 0 180 50
+perspective front
+wait 4
+shot worn_look_down
+camera minecraft:overworld 0 -60 0 180 -40
+wait 4
+shot worn_look_up
+# 一人称 (手が見えるように hud を出す。兜は一人称では描かれないので視界はふさがない)
+fov 70
+hud on
+chat clear
+camera minecraft:overworld 0 -60 0 180 30
+perspective first
+wait 8
+shot first_person_down
+camera minecraft:overworld 0 -60 0 180 0
+wait 6
+shot first_person_ahead
+# 馬に乗る
+hud off
+fov 30
+cmd summon minecraft:horse 0 -60 0 {Tame:1b,SaddleItem:{id:"minecraft:saddle",count:1},NoAI:1b,Rotation:[180f,0f]}
+cmd ride @s mount @e[type=minecraft:horse,limit=1,sort=nearest]
+wait 20
+perspective front
+wait 6
+shot worn_mount_front
+perspective back
+wait 6
+shot worn_mount_back
+cmd ride @s dismount
+cmd kill @e[type=minecraft:horse]
+fov 70
+perspective first
+# 防具立て 4 体 (前・横・後ろ・3/4) を一列に
+cmd clear @s
+cmd kill @e[type=minecraft:item]
+cmd gamemode spectator
+cmd summon armor_stand -2.4 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[0f,0f],ArmorItems:[{id:"skyabyss:abyss_diver_boots",count:1},{id:"skyabyss:abyss_diver_leggings",count:1},{id:"skyabyss:abyss_diver_chestplate",count:1},{id:"skyabyss:abyss_diver_helmet",count:1}]}
+cmd summon armor_stand -0.8 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[90f,0f],ArmorItems:[{id:"skyabyss:abyss_diver_boots",count:1},{id:"skyabyss:abyss_diver_leggings",count:1},{id:"skyabyss:abyss_diver_chestplate",count:1},{id:"skyabyss:abyss_diver_helmet",count:1}]}
+cmd summon armor_stand 0.8 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[180f,0f],ArmorItems:[{id:"skyabyss:abyss_diver_boots",count:1},{id:"skyabyss:abyss_diver_leggings",count:1},{id:"skyabyss:abyss_diver_chestplate",count:1},{id:"skyabyss:abyss_diver_helmet",count:1}]}
+cmd summon armor_stand 2.4 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[35f,0f],ArmorItems:[{id:"skyabyss:abyss_diver_boots",count:1},{id:"skyabyss:abyss_diver_leggings",count:1},{id:"skyabyss:abyss_diver_chestplate",count:1},{id:"skyabyss:abyss_diver_helmet",count:1}]}
+camera minecraft:overworld 0 -60.4 4.6 180 4
+waitchunks
+wait 30
+shot stands_front_side_back_q34
+camera minecraft:overworld -1.6 -59.2 3.3 180 9
+wait 10
+shot stands_close_front_side
+camera minecraft:overworld 1.6 -59.2 3.3 180 9
+wait 10
+shot stands_close_back_q34
+armorlevel 5
+wait 6
+shot stands_close_back_q34_plus5
+armorlevel 10
+wait 6
+shot stands_close_back_q34_plus10
+camera minecraft:overworld -1.6 -59.2 3.3 180 9
+wait 6
+shot stands_close_front_side_plus10
+armorlevel 0
+# 部位ごと (兜だけ・胸だけ・脚だけ・靴だけ)
+cmd kill @e[type=minecraft:armor_stand]
+cmd summon armor_stand -2.4 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[25f,0f],ArmorItems:[{},{},{},{id:"skyabyss:abyss_diver_helmet",count:1}]}
+cmd summon armor_stand -0.8 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[25f,0f],ArmorItems:[{},{},{id:"skyabyss:abyss_diver_chestplate",count:1},{}]}
+cmd summon armor_stand 0.8 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[25f,0f],ArmorItems:[{},{id:"skyabyss:abyss_diver_leggings",count:1},{},{}]}
+cmd summon armor_stand 2.4 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[25f,0f],ArmorItems:[{id:"skyabyss:abyss_diver_boots",count:1},{},{},{}]}
+cmd kill @e[type=minecraft:item]
+camera minecraft:overworld 0 -60.4 4.6 180 4
+wait 20
+shot stands_pieces_alone
+cmd kill @e[type=minecraft:armor_stand]
+# 持ち物のアイコン
+cmd gamemode creative
+cmd clear @s
+cmd give @s skyabyss:abyss_diver_helmet
+cmd give @s skyabyss:abyss_diver_chestplate
+cmd give @s skyabyss:abyss_diver_leggings
+cmd give @s skyabyss:abyss_diver_boots
+cmd gamemode survival
+hud on
+chat clear
+open inventory
+wait 10
+shot inventory_icons
+close
+quit

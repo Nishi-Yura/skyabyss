@@ -3,15 +3,16 @@
 入力 (ラフ 3 案。先に作る):
   python -I tools/rough/lowpoly/weapons/gear_gaps/build_gaps.py      武器 3 点 → docs/review/roughs_gear_gaps/raw/<id>/<案>/
   python -I tools/rough/lowpoly/weapons/gear_gaps/acc_gaps.py        装飾品・護符 3 点と錨鉄 → 同上
-  python -I tools/rough/lowpoly/gear_gaps/armor_abyss.py             淵潜りの鎧 4 部位 → docs/review/roughs_gear_gaps/raw/armor_abyss/<案>/
+  python -I tools/rough/lowpoly/gear_gaps/armor_abyss.py             淵潜りの鎧 4 部位 (前の案) → docs/review/roughs_gear_gaps/raw/armor_abyss/<案>/
+  python -I tools/rough/lowpoly/gear_gaps/armor_abyss_v2.py a        淵潜りの鎧 v2 (今の A 案、強化 +5/+10 の絵つき) → raw/armor_abyss_v2/a/
 出力 (assets/skyabyss/ 以下):
   lowpoly/items/<id>/<階級>.json, textures/lowpoly/items/<id>/<階級>[_plusN]_atlas{,_glow}.png   武器 (WeaponItemRenderer)・装飾品 (AccessoryItemRenderer)
-  lowpoly/armor/abyss_diver/<部位>{,_rare}.json, textures/lowpoly/armor/abyss_diver/<部位>{,_rare}{,_glowmask}.png   鎧 (LowPolyArmorRenderer)
+  lowpoly/armor/abyss_diver/<部位>{,_rare}.json, textures/lowpoly/armor/abyss_diver/<部位>{,_rare}{,_plus5,_plus10}{,_glowmask}.png   鎧 (LowPolyArmorRenderer)
   models/item/<id>.json, textures/item/<id>.png                                                  品のモデル (base は builtin/entity) と、メッシュから写した 32x32 のアイコン
   共鳴の欠片 (深淵)・深淵の心核のアイコンは、余燼の同じ品の絵の色を深淵の紫に替えたもの (欠片と心核は巨神ごとに色だけ違う決まり)
   v2 (2026-10-24 の作り直し。選ばれた A 案を基準の鯨骨の大剣より細かく): python -I tools/rough/lowpoly/weapons/abyss_v2/build_v2.py → raw/<id>/v2/
        v2 の品のアイコンはメッシュから写す (tools/rough/lowpoly/weapons/icon_from_mesh.py の auto_icon)。武器の持ち方は tools/lib/weapon_display.py の表
-使い方: python -I tools/install/install_abyss_gear.py [--option abyss_lamp_sword=b abyss_diver=c ...]   (省くと武器・装飾品は v2、鎧は A 案。何度流してもよい)
+使い方: python -I tools/install/install_abyss_gear.py [--option abyss_lamp_sword=b abyss_diver=c ...]   (省くと武器・装飾品は v2、鎧は v2 の A 案 = v2a。何度流してもよい)
 """
 from __future__ import annotations
 import os as _os
@@ -137,11 +138,17 @@ def flat_model(name: str):
 
 
 def install_armor(opt: str):
-    src = SRC / "armor_abyss" / opt
+    """opt: 前の 3 案 a/b/c (raw/armor_abyss/<案>) か、作り直しの v2a/v2b/v2c (raw/armor_abyss_v2/<案>。強化 +5/+10 の絵つき)"""
+    if opt.startswith("v2"):
+        src, icons, o = SRC / "armor_abyss_v2" / opt[2:], SRC / "armor_abyss_v2/icons", opt[2:]
+    else:
+        src, icons, o = SRC / "armor_abyss" / opt, SRC / "armor_abyss/icons", opt
     mesh_dir = ASSETS / "lowpoly/armor/abyss_diver"
     tex_dir = ASSETS / "textures/lowpoly/armor/abyss_diver"
     mesh_dir.mkdir(parents=True, exist_ok=True)
     tex_dir.mkdir(parents=True, exist_ok=True)
+    for f in list(mesh_dir.glob("*.json")) + list(tex_dir.glob("*.png")):
+        f.unlink()
     for p in PIECES:
         d = json.loads((src / f"{p}_mesh.json").read_text(encoding="utf-8"))
         d["socket"] = False
@@ -149,12 +156,17 @@ def install_armor(opt: str):
         for suffix in ("", "_rare"):
             d["texture"] = f"armor/abyss_diver/{p}{suffix}"
             (mesh_dir / f"{p}{suffix}.json").write_text(json.dumps(d, separators=(",", ":")), encoding="utf-8")
-            glow, lit = bake_glow(src / f"{p}_atlas.png", src / f"{p}_glowmask.png")
-            if lit == 0:
-                sys.exit(p + ": no glow pixels (GeckoLib crashes on an empty glowmask)")
-            Image.open(src / f"{p}_atlas.png").convert("RGBA").save(tex_dir / f"{p}{suffix}.png", optimize=True)
-            glow.save(tex_dir / f"{p}{suffix}_glowmask.png", optimize=True)
-        shutil.copyfile(SRC / "armor_abyss/icons" / f"{opt}_{p}_32.png", ASSETS / "textures/item" / f"abyss_diver_{p}.png")
+            # 強化の段の絵 (+5 / +10) はレアのメッシュにだけ (LowPolyArmor.atlas は無ければ基準の絵を使う)
+            for lv in ("",) + (("_plus5", "_plus10") if suffix == "_rare" else ()):
+                atlas, mask = src / f"{p}{lv}_atlas.png", src / f"{p}{lv}_glowmask.png"
+                if not atlas.exists():
+                    continue
+                glow, lit = bake_glow(atlas, mask)
+                if lit == 0:
+                    sys.exit(p + lv + ": no glow pixels (GeckoLib crashes on an empty glowmask)")
+                Image.open(atlas).convert("RGBA").save(tex_dir / f"{p}{suffix}{lv}.png", optimize=True)
+                glow.save(tex_dir / f"{p}{suffix}{lv}_glowmask.png", optimize=True)
+        shutil.copyfile(icons / f"{o}_{p}_32.png", ASSETS / "textures/item" / f"abyss_diver_{p}.png")
         flat_model(f"abyss_diver_{p}")
     print("abyss_diver armor option", opt, "installed")
 
@@ -177,7 +189,7 @@ def recolor(src_name: str, dst_name: str, hue=0.76, sat_boost=1.0):
 
 def main():
     choice = {k: "v2" for k in list(WEAPONS) + list(ACCESSORIES)}
-    choice["abyss_diver"] = "a"
+    choice["abyss_diver"] = "v2a"   # 2026-10-24: 作り直しの A 案「潜水兜と錨鉄の潜水服」
     args = sys.argv[1:]
     if "--option" in args:
         for kv in args[args.index("--option") + 1:]:

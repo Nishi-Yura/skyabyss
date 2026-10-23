@@ -13,7 +13,7 @@
 実行: python -I tools/rough/lowpoly/gear_gaps/armor_abyss_v2.py [a b c]
 出力: docs/review/roughs_gear_gaps/raw/armor_abyss_v2/<案>/<部位>_{mesh.json,atlas.png,glowmask.png}・icons/<案>_<部位>_32.png
       docs/review/roughs_gear_gaps/abyss_diver_armor_v2/opt_<案>.png (前・横・後ろ・3/4・歩き・一人称・兜の拡大・部位ごと・アイコン) と compare.png
-入れ方: 選ばれたら tools/install/install_abyss_gear.py の install_armor を raw/armor_abyss_v2 から読むようにする (今はゲーム内は前の A 案のまま)
+入れ方: A 案が選ばれた (2026-10-24)。python -I tools/install/install_abyss_gear.py (既定 v2a = raw/armor_abyss_v2/a。強化 +5/+10 の絵 <部位>_plus5/_plus10 も入れる)
 """
 from __future__ import annotations
 
@@ -121,9 +121,19 @@ def a_helmet():
     f += bx(b, "plate", (0, 28.2, -7.4), (5.4, 0.4, 0.4))
     # 横の小窓 (左右) と上の窓
     for s in (-1, 1):
-        f += bplate(b, "glassd", "brass", ngon(2.8, 2.8, 10), c=(s * 6.75, 28.4, 0.4), R=M_SIDE(s), h=0.6, ins=0.3, ch=0.2)
-        f += ring_tube(b, "brass", (s * 7.05, 28.4, 0.4), 1.55, 0.35, n=10, sides=4, plane="xy") if False else []
-        f += bx(b, "plate", (s * 7.2, 28.4, 0.4), (0.4, 2.6, 0.4))
+        # 横の覗き窓: 硝子・真鍮の環 (横を向く輪)・格子 2 本・蝶ねじ 4
+        f += bplate(b, "glassd", "brass", ngon(3.0, 3.0, 10), c=(s * 6.7, 28.4, 0.4), R=M_SIDE(s), h=0.6, ins=0.3, ch=0.2)
+        pts = [(s * 7.0, 28.4 + 1.65 * math.cos(2 * math.pi * k / 10), 0.4 + 1.65 * math.sin(2 * math.pi * k / 10)) for k in range(11)]
+        f += crv(b, "brass", pts, [0.38] * 11, sides=4, hint=(1, 0, 0))
+        for dz in (-0.55, 0.55):
+            f += bx(b, "plate", (s * 7.15, 28.4, 0.4 + dz), (0.35, 2.9, 0.35))
+        for k in range(4):
+            a = 2 * math.pi * (k + 0.5) / 4
+            f += bx(b, "bevel", (s * 7.05, 28.4 + 2.05 * math.cos(a), 0.4 + 2.05 * math.sin(a)), (0.6, 0.6, 0.6), taper=(0.6, 0.6))
+    # 右前の排気弁 (真鍮の筒と小さな把手)
+    f += crv(b, "brass", [(4.6, 25.9, -4.4), (5.5, 26.0, -4.9), (6.1, 26.2, -5.1)], [0.75, 0.75, 0.7], sides=6, caps=(False, True))
+    f += bx(b, "brass", (6.25, 26.25, -5.15), (0.9, 1.8, 0.9), taper=(0.8, 0.8))
+    f += bx(b, "plate", (6.25, 27.45, -5.15), (1.6, 0.35, 0.35))
     # 額の灯 (覗き窓の上) と後ろの空気の弁
     f += lantern_s(b, (0, 32.3, -5.6), w=1.5, h=1.5)
     f += bx(b, "brass", (0, 31.4, -5.3), (1.8, 0.6, 1.6))
@@ -190,8 +200,23 @@ def a_legs():
         cx = s * 2.05
         g = dloft(lb, "cloth", [sring(y, hx, zf, zb, n=N, p=3.0, cx=cx) for y, hx, zf, zb in
                                 [(12.0, 2.6, -2.65, 2.6), (8.0, 2.45, -2.6, 2.55), (4.4, 2.4, -2.55, 2.5)]])
+        # 腰の継ぎ目の厚い帆布の折り返し (単体で穿いても服の継ぎ目に見える)
+        g += dloft(lb, "cloth", [sring(10.6, 2.62, -2.72, 2.66, n=N, p=3.0, cx=cx), sring(11.2, 2.74, -2.84, 2.78, n=N, p=3.0, cx=cx),
+                                 sring(12.2, 2.74, -2.84, 2.78, n=N, p=3.0, cx=cx)], caps=(False, "cloth"), mats=["under", "cloth"])
+        # 太ももの前の当て布 (革) と縫い目の鋲
+        g += bplate(lb, "sash", "sash", [(-1.5, 1.0), (1.5, 1.0), (1.7, -0.6), (0, -1.1), (-1.7, -0.6)], c=(cx, 9.6, -2.62), h=0.45, ins=0.4, ch=0.15, bow=0.4)
+        for dx in (-1.2, 1.2):
+            g += bx(lb, "brass", (cx + dx, 10.3, -3.0), (0.4, 0.4, 0.35), taper=(0.6, 0.6))
+        # 外側の縫い目 (レアの青い鋼の玉縁)
+        g += bx(lb, "trim", (cx + s * 2.5, 8.2, 0.0), (0.45, 6.6, 0.7))
+        # 膝の当て (錨鉄の円盤) と、ふくらはぎの後ろの締め紐 (実物の潜水服も脚の後ろを紐で締めて空気の溜まりを防ぐ)
         g += E(lb, "plate", (cx, 6.4, -2.4), (2.2, 1.9, 1.2), segs=8, rings=2)
         g += bx(lb, "bevel", (cx, 6.4, -3.6), (0.9, 0.9, 0.5), taper=(0.6, 0.6))
+        g += bx(lb, "sash", (cx, 8.0, 2.55), (1.5, 4.4, 0.35))
+        for k, y in enumerate((6.1, 7.1, 9.0, 9.9)):
+            for dx in (-0.75, 0.75):
+                g += bx(lb, "brass", (cx + dx, y, 2.8), (0.38, 0.38, 0.3), taper=(0.7, 0.7))
+            g += bx(lb, "hose", (cx, y + 0.5, 2.82), (1.5, 0.28, 0.25), rot=rot_z(28 if k % 2 else -28))
         for y in (5.0, 7.8):
             g += dloft(lb, "sash", [sring(y, 2.62, -2.75, 2.7, n=N, p=3.0, cx=cx), sring(y + 0.7, 2.62, -2.75, 2.7, n=N, p=3.0, cx=cx)])
         g += bx(lb, "brass", (cx + s * 2.6, 8.15, 0), (0.4, 0.9, 0.9))
@@ -208,13 +233,19 @@ def a_boots():
         bb = BOOT[s]
         cx = s * 2.05
         g = dloft(bb, "plate", [sring(y, hx, zf, zb, n=10, p=2.6, cx=cx) for y, hx, zf, zb in
-                                [(5.2, 2.55, -2.65, 2.6), (3.6, 2.65, -3.0, 2.7), (1.8, 2.8, -3.9, 2.8), (1.1, 2.95, -4.4, 2.95)]], caps=(False, False))
-        g += dloft(bb, "lead", [sring(1.15, 3.0, -4.5, 3.0, n=10, p=2.6, cx=cx), sring(0.0, 3.05, -4.6, 3.05, n=10, p=2.6, cx=cx)], caps=(False, "lead"))
+                                [(5.2, 2.55, -2.65, 2.6), (3.6, 2.6, -3.0, 2.7), (1.8, 2.72, -3.9, 2.8), (1.1, 2.84, -4.4, 2.95)]], caps=(False, False))
+        g += dloft(bb, "lead", [sring(1.15, 2.88, -4.5, 3.0, n=10, p=2.6, cx=cx), sring(0.0, 2.92, -4.6, 3.05, n=10, p=2.6, cx=cx)], caps=(False, "lead"))
         g += bplate(bb, "brass", "bevel", ngon(3.6, 2.6, 8, taper=0.1), c=(cx, 1.9, -3.95), R=rot_x(-40), h=0.7, ins=0.4, bow=0.5)
         for y in (3.0, 4.4):
             g += dloft(bb, "sash", [sring(y, 2.78, -2.95, 2.8, n=10, p=2.6, cx=cx), sring(y + 0.55, 2.74, -2.9, 2.76, n=10, p=2.6, cx=cx)])
             g += bx(bb, "brass", (cx + s * 2.85, y + 0.27, -0.6), (0.4, 0.8, 0.9))
         g += lume(bb, (cx, 3.3, -3.05), (0.7, 0.5, 0.3))
+        # 鉛底の縁の鋲 (前 3・横 2) と踵の真鍮の当て
+        for dx in (-1.7, 0.0, 1.7):
+            g += bx(bb, "bevel", (cx + dx, 0.58, -4.62 + abs(dx) * 0.08), (0.5, 0.5, 0.4), taper=(0.6, 0.6))
+        for dz in (-1.8, 0.8):
+            g += bx(bb, "bevel", (cx + s * 2.97, 0.58, dz), (0.4, 0.5, 0.5), taper=(0.6, 0.6))
+        g += bplate(bb, "brass", "bevel", ngon(3.4, 1.8, 8), c=(cx, 2.1, 2.72), R=rot_y(180), h=0.5, ins=0.3, ch=0.15, bow=0.5)
         out[bb] = g
     return out
 
@@ -526,7 +557,8 @@ PALS = dict(
 CLOTH_OF = {"a": "canvas", "b": "vcloth", "c": "vcloth"}
 
 
-def paint(faces, size, P, N_, M, L, o):
+def paint(faces, size, P, N_, M, L, o, lv=0):
+    """lv: 強化の段 (0 = +0〜4、1 = +5〜9、2 = +10)。メッシュは同じで、縁の光の破線がつながり (+5)、縁の角まで光る (+10)"""
     D, K, LU, LV, CW, CH, INS = edge_fields(faces, size)
     H = W = size
     yy, xx = np.mgrid[0:H, 0:W]
@@ -614,10 +646,15 @@ def paint(faces, size, P, N_, M, L, o):
     put(m("trim"), pick(tp, tidx - chase))
     put(m("trim") & convex, pick(tp, tidx + 1))
     along_u = CW >= CH
-    line = np.where(along_u, (LV == CH // 2) & (CH >= 3), (LU == CW // 2) & (CW >= 3)) & INS & ((np.where(along_u, LU, LV) % 8) < 5)
+    dash = (np.where(along_u, LU, LV) % 8) < (5 if lv == 0 else 8)
+    line = np.where(along_u, (LV == CH // 2) & (CH >= 3), (LU == CW // 2) & (CW >= 3)) & INS & dash
     tl = m("trim") & line & (np.maximum(CW, CH) >= 6)
     put(tl, ramp(gp, 0.5 + 0.4 * hash1(LU + LV * 3, 2)))
     glow |= tl
+    if lv >= 2:      # +10: 縁の角も光り、真鍮の凸の縁にかすかな灯り
+        te = m("trim") & convex & INS
+        put(te, ramp(gp, 0.55 + 0.3 * hash1(LU * 5 + LV, 3)))
+        glow |= te
     col = np.clip(col, 0, 255)
     img = np.zeros((H, W, 4), np.uint8)
     img[..., :3] = col.astype(np.uint8)
@@ -632,7 +669,8 @@ def build_piece(faces, o):
     lpkit.TEX = 2.0
     size, pos, N_, M, L = build_atlas(faces, 32, 0)
     atlas, glow = paint(faces, size, pos, N_, M, L, o)
-    return dict(faces=faces, size=size, atlas=atlas, glow=glow, tris=tri_count(faces))
+    lv = {k: paint(faces, size, pos, N_, M, L, o, lv=i) for i, k in ((1, "_plus5"), (2, "_plus10"))}
+    return dict(faces=faces, size=size, atlas=atlas, glow=glow, tris=tri_count(faces), levels=lv)
 
 
 # ====================================================================== 描く
@@ -726,9 +764,19 @@ DESC = {
 }
 
 
+# アイコンの角度は巨神シリーズ (armor/build_series_icons.py) と同じ: 脚は 2 本並べて正面寄り、靴は 2 足を 3/4 の上から
+ICON_VIEW = {"helmet": (205, 14), "chestplate": (195, 6), "leggings": (190, 6), "boots": (215, 18)}
+
+
 def icon_of(res, piece, o):
-    old_glow = OLD.scene.GLOW_RGB.get("whale")
-    return OLD.to_icon(OLD.icon_rgba(res, piece))
+    import aview
+    faces, atlas, glow = aview.scene_of({piece: res[piece]}, mann=False)
+    yaw, pitch = ICON_VIEW[piece]
+    allv = np.concatenate([np.asarray(f.verts, float) for f in faces])
+    lo, hi = allv.min(0), allv.max(0)
+    im = scene.view(faces, atlas, glow, "ad2_" + GLOWK[o], yaw, pitch, (512, 512), tuple(float(v) for v in (lo + hi) / 2),
+                    440.0 / float(np.linalg.norm(hi - lo)), ss=1)
+    return OLD.to_icon(np.array(im.transpose(Image.FLIP_LEFT_RIGHT)).astype(float))
 
 
 def main():
@@ -747,6 +795,11 @@ def main():
             gm[r["glow"]] = (255, 255, 255, 255)
             assert r["glow"].any(), f"{o} {p}: no glow pixels"
             save_img(gm, d / f"{p}_glowmask.png")
+            for k, (la, lg) in r["levels"].items():
+                save_img(la, d / f"{p}{k}_atlas.png")
+                gm = np.zeros((r["size"], r["size"], 4), np.uint8)
+                gm[lg] = (255, 255, 255, 255)
+                save_img(gm, d / f"{p}{k}_glowmask.png")
             export_mesh(r["faces"], r["size"], d / f"{p}_mesh.json", f"abyss_diver_v2_{o}_{p}", f"{p}_atlas.png", f"{p}_glowmask.png")
             icons[p] = icon_of(res, p, o)
             Image.fromarray(icons[p]).save(RAW / "icons" / f"{o}_{p}_32.png")
