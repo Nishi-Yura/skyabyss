@@ -12,7 +12,7 @@ ROOT = Path(__file__).resolve().parents[2]
 SRC = Path(sys.argv[1]) if len(sys.argv) > 1 else ROOT / "run/shots/ch1_sites/shots/ch1_sites"
 OUT = Path(sys.argv[2]) if len(sys.argv) > 2 else ROOT / "docs/review/previews"
 CELLS = [
-    ("01_road_cairn", "road cairn"), ("02_road_shrine", "road shrine (7th)"), ("03_bone_cache", "bone cache"), ("04_cart_track", "lost cart + cart track"),
+    ("01_road_cairn", "road cairn"), ("02_road_shrine", "road shrine"), ("03_bone_cache", "bone cache"), ("04_cart_track", "lost cart + cart track"),
     ("05_cave_mouth", "cleft shell: mouth"), ("06_cave_stairs", "cleft shell: stairs"), ("07_cave_room1", "room 1: entry"), ("08_cave_room2_plates", "room 2: spines + ringing stones"),
     ("09_cave_gate", "gate (iron bars)"), ("10_cave_room3", "room 3: elder"), ("11_song_chamber_door", "song chamber: door (opened)"), ("12_song_chamber_mural", "song chamber: mural"),
 ]

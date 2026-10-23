@@ -36,8 +36,8 @@ import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
 
-// 心臓を止めたあとに一度だけ選べる遺物 (初回の専用伝説) の選択。docs/design/30_heart_reward_ui.md。
-// 四体とも同じ決まり。選べる品は巨神の装備の表 (TitanGearSets) の専用伝説、持ち主は TitanMemoryData の記録 (choicePending)。
+// 心臓を止めたあとに一度だけ選べる遺物 (初回の専用の逸品) の選択。docs/design/30_heart_reward_ui.md。
+// 四体とも同じ決まり。選べる品は巨神の装備の表 (TitanGearSets) の専用の逸品、持ち主は TitanMemoryData の記録 (choicePending)。
 //  - 一人ずつ別 (記録は UUID ごと。パーティの仲間はそれぞれの画面でそれぞれ選ぶ)
 //  - 決めるのはサーバーだけ。choicePending を倒して渡すのは claim の一箇所で、同じ人の二度目は NOT_PENDING で断る
 //  - 保存は記録の choicePending のまま (ログアウト・サーバー再起動をまたぐ)。選ぶまで消えない
@@ -70,7 +70,7 @@ public final class HeartReward {
     }
 
     // ---------------------------------------------------------------- 選べる品・持ち主
-    // その巨神の選べる専用伝説 (まだ作られていない品は外す)
+    // その巨神の選べる専用の逸品 (まだ作られていない品は外す)
     public static List<String> options(String titan) {
         TitanGearSet set = TitanGearSets.get(titan);
         return set == null ? List.of() : set.exclusives().stream().filter(TitanGearSet::registered).toList();

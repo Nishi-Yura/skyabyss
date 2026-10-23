@@ -52,8 +52,8 @@ import net.neoforged.neoforge.event.RegisterCommandsEvent;
 // - 巨神の記憶 (天井) と図鑑は巨神ごとの記録 (TitanMemoryData の "thunder_wing")。岩鯨・潮殻の記録とは別に数える。
 //   新しい品の出ない撃破で +1、3 以上で図鑑の確率 2 倍、5 で未所持を一つ保証。図鑑にない品を手にすると 0
 // - 天の鍵の欠片は一人一回 (巨神ごと。三つ目の欠片)
-// - 初めての撃破では、専用伝説三つから一つを選ぶ (/titanmemory storm)
-// 装備の品 (羽衣・弓・足環・護符・専用伝説) と素材は、装備の担当 (12 の 11.2節の担当 5) が後で作る。表は品の ID で持ち、
+// - 初めての撃破では、専用の逸品三つから一つを選ぶ (/titanmemory storm)
+// 装備の品 (羽衣・弓・足環・護符・専用の逸品) と素材は、装備の担当 (12 の 11.2節の担当 5) が後で作る。表は品の ID で持ち、
 // 登録されていない品は抽選から外す (図鑑にも記さない)。品が登録されれば、そのまま出るようになる。ID の表は 12 の 17 章
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class StormLoot {
@@ -70,7 +70,7 @@ public final class StormLoot {
     public static final String SHARD = jp.revati.skyabyss.item.storm.StormGear.SHARD;
     public static final String CORE = jp.revati.skyabyss.item.storm.StormGear.CORE;
     public static final String FRUIT = jp.revati.skyabyss.item.storm.StormGear.FRUIT;
-    // 専用伝説 (図鑑の並び: 雷獣の爪、羽守の薙刀、嵐の目の羽根)
+    // 専用の逸品 (図鑑の並び: 雷獣の爪、羽守の薙刀、嵐の目の羽根)
     public static final List<String> EXCLUSIVES = jp.revati.skyabyss.item.storm.StormGear.SET.exclusives();
 
     public static final float CORE_CHANCE = 0.25f;
@@ -89,7 +89,7 @@ public final class StormLoot {
         return SkyAbyss.MODID + ":" + path;
     }
 
-    // 図鑑 (10 品): 羽衣 4、弓、足環、護符、専用伝説 3 (雷獣の爪・羽守の薙刀・嵐の目の羽根)。
+    // 図鑑 (10 品): 羽衣 4、弓、足環、護符、専用の逸品 3 (雷獣の爪・羽守の薙刀・嵐の目の羽根)。
     // 表と確率は装備の担当の StormGear.SET (巨神ごとの装備の表、TitanGearSet。潮殻の TideLoot と同じ形)
     public static List<String> collection() {
         return jp.revati.skyabyss.item.storm.StormGear.SET.collection();
@@ -360,7 +360,7 @@ public final class StormLoot {
         long total = 0;
         for (int i = 0; i < runs; i++) {
             TitanMemoryData.Record r = new TitanMemoryData.Record();
-            // 初回は専用伝説で一番出にくい嵐の目の羽根を選ぶ (6.4節の前提)
+            // 初回は専用の逸品で一番出にくい嵐の目の羽根を選ぶ (6.4節の前提)
             r.owned.add(jp.revati.skyabyss.item.storm.StormGear.EYE_FEATHER);
             int n = 0;
             while (collected(r) < collection().size() && n < 200) {

@@ -21,7 +21,7 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.common.SimpleTier;
 
-// 潮招きの大鋏 (伝説): 潮招きの大きなはさみを柄に据えた、重い片手の武器。
+// 潮招きの大鋏 (ヒロイック): 潮招きの大きなはさみを柄に据えた、重い片手の武器。
 // 三度目ごとに (+5 から二度目ごとに)、はさみが潮を招いて前へ水の線が走る (長さ 6、+10 で 9。攻撃力の 50%。斬った相手にも当たる)。
 // 水の中では攻撃速度 +20% (TideGearEvents)
 public class TidecallerClawItem extends TideWeaponItem {
@@ -31,7 +31,7 @@ public class TidecallerClawItem extends TideWeaponItem {
     private static final String HITS = SkyAbyss.MODID + ":claw_hits";
 
     public TidecallerClawItem(Properties properties) {
-        super(TIER, properties.attributes(SwordItem.createAttributes(TIER, 6, -3.0f)), GearTier.LEGENDARY, "item.skyabyss.tidecaller_claw.desc");
+        super(TIER, properties.attributes(SwordItem.createAttributes(TIER, 6, -3.0f)), GearTier.HEROIC, "item.skyabyss.tidecaller_claw.desc");
     }
 
     // 何度目ごとに水の線が走るか

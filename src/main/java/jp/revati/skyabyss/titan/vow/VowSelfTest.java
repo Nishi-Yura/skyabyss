@@ -13,7 +13,6 @@ import jp.revati.skyabyss.party.PartyData;
 import jp.revati.skyabyss.pouch.Pouch;
 import jp.revati.skyabyss.progress.Titans;
 import jp.revati.skyabyss.titan.TitanStay;
-import jp.revati.skyabyss.titan.dungeon.BackWhispers;
 import jp.revati.skyabyss.titan.dungeon.CampBlocks;
 import jp.revati.skyabyss.titan.group.BackGroupData;
 import jp.revati.skyabyss.titan.group.FirstRun;

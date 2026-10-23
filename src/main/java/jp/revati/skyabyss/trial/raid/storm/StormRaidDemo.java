@@ -18,8 +18,9 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
 
-// 開発・撮影 (OP): 雷翼のレイドの新しい三つの部屋 (SR4・SR5・SR6) を、順路なしで建てて動かす。/skystormraid show SR4|SR5|SR6|off
-// 部屋は自己テストと同じ場所 (x = -4400 / -4200 / -4000、y 150、z 5000)。人は参加者にならないので、SR4 の柱は仮の目標 (広間を回る点) を追う
+// 開発・撮影 (OP): 雷翼のレイドの部屋 (SR1〜SR6) と中ボスの間 (SRM) を、順路なしで建てる。/skystormraid show SR1..SR6|SRM|off、/skystormraid exit (出口の戸を開ける)
+// 部屋は自己テストと同じ場所 (x = -5000 / -4800 / -4600 / -4400 / -4200 / -4000、SRM は -5200。y 150、z 5000)。入口の戸は開けておく (撮影で広間が見えるように)。
+// 動かすのは SR4・SR5・SR6 だけ (人は参加者にならないので、SR4 の柱は仮の目標 (広間を回る点) を追う)。SR1〜SR3・SRM は建てて置くだけ
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class StormRaidDemo {
     private StormRaidDemo() {
@@ -35,6 +36,13 @@ public final class StormRaidDemo {
         event.getDispatcher().register(Commands.literal("skystormraid").requires(s -> s.hasPermission(2))
                 .then(Commands.literal("off").executes(c -> {
                     stop();
+                    return 1;
+                }))
+                .then(Commands.literal("exit").executes(c -> {
+                    if (room != null && ctx != null) {
+                        jp.revati.skyabyss.trial.raid.RaidKit.setGate(ctx, ctx.cell().exitGate(), true);
+                        StormRoomDeco.exitLit(ctx, true);
+                    }
                     return 1;
                 }))
                 .then(Commands.literal("show").then(Commands.argument("id", StringArgumentType.word()).executes(c -> {
@@ -56,6 +64,10 @@ public final class StormRaidDemo {
         stop();
         level = lv;
         int x = switch (id) {
+            case "SR1" -> -4600;
+            case "SR2" -> -4800;
+            case "SR3" -> -5000;
+            case "SRM" -> -5200;
             case "SR4" -> -4400;
             case "SR5" -> -4200;
             default -> -4000;
@@ -73,12 +85,19 @@ public final class StormRaidDemo {
             throw new IllegalStateException(e);
         }
         room = switch (id) {
+            case "SR1" -> new FeatherCarry();
+            case "SR2" -> new CircuitRoom();
+            case "SR3" -> new ChargeChain();
+            case "SRM" -> new jp.revati.skyabyss.trial.raid.mid.StormMidRoom();
             case "SR4" -> new ColumnChase();
             case "SR5" -> new BeatTiles();
             default -> new EyeAdvance();
         };
         room.build(ctx);
-        room.start(ctx);
+        jp.revati.skyabyss.trial.raid.RaidKit.setGate(ctx, ctx.cell().entryGate(), true);
+        if (!(room instanceof ChargeChain) && !"SRM".equals(id)) {
+            room.start(ctx);
+        }
         ticks = 0;
     }
 
@@ -93,7 +112,7 @@ public final class StormRaidDemo {
             c.update(ctx, List.of(new double[] {ctx.origin().getX() + 0.5 + Math.cos(a) * 9, ctx.origin().getZ() + 0.5 + Math.sin(a) * 6}));
         } else if (room instanceof BeatTiles b) {
             b.advance(ctx, new boolean[BeatTiles.N * BeatTiles.N]);
-        } else {
+        } else if (room instanceof EyeAdvance) {
             room.tick(ctx);
         }
     }

@@ -11,18 +11,18 @@ import net.minecraft.world.entity.player.Player;
 
 // 余燼の装備の表と数値 (docs/design/03_gear_and_endgame.md の 12章「余燼の装備の実装」、13_ember.md の 6.5節)。
 // 数値は 03 の 9.8節の余燼の段 (推奨 Lv 30、武器 +0 は 1 秒あたり 17.5・+10 で 22.8、防具 22 / 強靭 16) に寄せた。
-// 必要 Lv は GearLevel の決め方のまま (推奨 30 から、レア −4 = 26、伝説 −2 = 28)。
+// 必要 Lv は GearLevel の決め方のまま (推奨 30 から、エピック以下 −4 = 26、ヒロイック以上 −2 = 28)。階級は 03 の 1.2節 (2026-10-24 の 6 段)。
 //
 // | 品              | 種類            | 階級 | 必要 Lv | 1 秒あたり (+0 / +10) | 固有効果 |
 // | 余燼の鎧 4 部位 | 防具 (立体)     | レア | 26 | —             | 防御 4/8/6/4 = 22、強靭 3.25 ×4 = 13。2 部位で強靭 +3。4 部位で熱のたまり方 ×0.7・火照りの攻撃 +10% (背中)、火に触れると筋力 I 10 秒 |
-// | 余燼の戦斧      | 斧 (剣の扱い)   | レア | 26 | 17.6 / 22.9   | 命中で 4 秒くすぶらせる (燃えない相手にも印)。燃えている・くすぶる相手に +10% |
-// | 熾火の外套      | 装飾            | レア | 26 | —             | 熱のたまり方 ×0.75、燃焼・溶岩の傷 −30% (火炎耐性ではない) |
-// | 熾りの護符      | 護符 (H キー)   | レア | 26 | —             | 自分の熱を 0 に。半径 5 の敵に 6 の傷と 4 秒の燃焼。待ち 50 秒 |
-// | 鍛え手の大鎚    | 両手の大鎚      | 伝説 | 28 | 16.8 / 23.4   | 3 度に 1 度 (+5 で 2 度に 1 度)、床に亀裂が走り 0.8 秒後に噴く (長さ 5、+10 で 7。攻撃力の 50%) |
-// | 灰被りの火掻き  | 長柄            | 伝説 | 28 | 17.6 / 22.9   | 間合い +1。命中で灰を積む。5 つ (+5 で 4 つ) で鈍足 II 3 秒・防御 −4 |
-// | 余燼の灯        | 装飾            | 伝説 | 28 | —             | 倒れる傷を一度だけ体力 4 で踏みとどまり、まわり半径 3 に 6 の傷と燃焼。待ち 600 秒。不死のトーテムが先 |
+// | 余燼の戦斧      | 斧 (剣の扱い)   | エピック | 26 | 17.6 / 22.9   | 命中で 4 秒くすぶらせる (燃えない相手にも印)。燃えている・くすぶる相手に +10% |
+// | 熾火の外套      | 装飾            | エピック | 26 | —             | 熱のたまり方 ×0.75、燃焼・溶岩の傷 −30% (火炎耐性ではない) |
+// | 熾りの護符      | 護符 (H キー)   | エピック | 26 | —             | 自分の熱を 0 に。半径 5 の敵に 6 の傷と 4 秒の燃焼。待ち 50 秒 |
+// | 鍛え手の大鎚    | 両手の大鎚      | ヒロイック | 28 | 17.7 / 24.7   | 3 度に 1 度 (+5 で 2 度に 1 度)、床に亀裂が走り 0.8 秒後に噴く (長さ 5、+10 で 7。攻撃力の 50%) |
+// | 灰被りの火掻き  | 長柄            | ヒロイック | 28 | 18.2 / 23.6   | 間合い +1。命中で灰を積む。5 つ (+5 で 4 つ) で鈍足 II 3 秒・防御 −4 |
+// | 余燼の灯        | 装飾            | ヒロイック | 28 | —             | 倒れる傷を一度だけ体力 4 で踏みとどまり、まわり半径 3 に 6 の傷と燃焼。待ち 600 秒。不死のトーテムが先 |
 // | 熾火の角杯      | 食べ物          | —    | —  | —             | 回復 6・飽和 0.8。背中では 3 分 熱のたまり方 ×0.6、地上では火炎耐性 30 秒 |
-// | 余燼の心核      | 神器の素材      | —    | —  | —             | 心臓の初回は必ず、以後 25% |
+// | 余燼の心核      | アーティファクトの素材 | —    | —  | —             | 心臓の初回は必ず、以後 25% |
 public final class EmberGear {
     public static final String TITAN = EmberIds.TITAN;   // "ember"
 
@@ -73,16 +73,17 @@ public final class EmberGear {
     public static final double WAR_AXE_SPEED = 1.0;
     public static final double WAR_AXE_SMOLDER_BONUS = 0.10;
     public static final int WAR_AXE_SMOLDER_TICKS = 80;
-    // 大鎚: 攻撃力 18、速さ 0.8。亀裂の噴き (攻撃力の 50%) が 3 度に 1 度 → 一体へ 16.8。+5 から 2 度に 1 度 (+10 で 23.4)
-    public static final double HAMMER_ATTACK = 18;
+    // 大鎚: 攻撃力 19、速さ 0.8。亀裂の噴き (攻撃力の 50%) が 3 度に 1 度 → 一体へ 17.7。+5 から 2 度に 1 度 (+10 で 24.7)。
+    // ヒロイックなので、エピックの戦斧 (17.6 / 22.9) を +0 でも +10 でも下回らない (2026-10-24 に 18 から。03 の 1.2節の逆転なし)
+    public static final double HAMMER_ATTACK = 19;
     public static final double HAMMER_SPEED = 0.8;
     public static final double HAMMER_CRACK_RATE = 0.5;
     public static final double HAMMER_CRACK_LENGTH = 5;
     public static final double HAMMER_CRACK_LENGTH_MAX = 7;
     public static final int HAMMER_CRACK_DELAY = 16;
-    // 火掻き: 攻撃力 11、速さ 1.6、間合い +1 → 一体へ 17.6。灰 5 つ (+5 から 4 つ) で鈍足 II 3 秒・防御 −4 (3 秒)
+    // 火掻き: 攻撃力 11、速さ 1.65、間合い +1 → 一体へ 18.2 (+10 で 23.6)。灰 5 つ (+5 から 4 つ) で鈍足 II 3 秒・防御 −4 (3 秒)
     public static final double POKER_ATTACK = 11;
-    public static final double POKER_SPEED = 1.6;
+    public static final double POKER_SPEED = 1.65;
     public static final double POKER_REACH = 1.0;
     public static final int POKER_ASH_STACKS = 5;
     public static final int POKER_ASH_STACKS_AWAKENED = 4;

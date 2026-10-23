@@ -8,7 +8,6 @@
   "entity.skyabyss.ceiling_walker": "Ceiling Walker",
   "entity.skyabyss.heartbeat_mimic": "Heartbeat Mimic",
   "entity.skyabyss.rope_hanger": "Rope Hanger",
-
   "item.skyabyss.ash_trail_spawn_egg": "Ash Trail Spawn Egg",
   "item.skyabyss.ember_keeper_spawn_egg": "Ember Keeper Spawn Egg",
   "item.skyabyss.soot_child_spawn_egg": "Soot Child Spawn Egg",
@@ -18,7 +17,6 @@
   "item.skyabyss.ceiling_walker_spawn_egg": "Ceiling Walker Spawn Egg",
   "item.skyabyss.heartbeat_mimic_spawn_egg": "Heartbeat Mimic Spawn Egg",
   "item.skyabyss.rope_hanger_spawn_egg": "Rope Hanger Spawn Egg",
-
   "item.skyabyss.lamp_ash": "Lamp Ash",
   "item.skyabyss.lamp_ash.desc": "Ash left after a light goes out. Still faintly warm",
   "item.skyabyss.soot_clump": "Soot Clump",
@@ -29,7 +27,6 @@
   "item.skyabyss.echo_shard.desc": "A shard left by a past shadow. Holding it, you feel the weight of a hand three seconds ago",
   "item.skyabyss.pulse_membrane": "Pulse Membrane",
   "item.skyabyss.pulse_membrane.desc": "A thin membrane from a heartbeat mimic. It still seems to pulse",
-
   "subtitles.skyabyss_abyss_b.ash_trail_step": "Ash underfoot",
   "subtitles.skyabyss_abyss_b.ash_trail_reveal": "Something rises out of the ash",
   "subtitles.skyabyss_abyss_b.ash_trail_attack": "Ash scatters",
@@ -50,7 +47,6 @@
   "subtitles.skyabyss_abyss_b.heartbeat_bite": "The membrane snaps shut",
   "subtitles.skyabyss_abyss_b.rope_creak": "The rope creaks",
   "subtitles.skyabyss_abyss_b.rope_pull": "The rope pulls",
-
   "message.skyabyss_abyss_b.rope_pull": "The rope is pulling you. Crouch to hold your footing",
   "commands.skyabyss.foe.unknown": "No such abyss foe: %s",
   "commands.skyabyss.foe.spawned": "Spawned %s at stage %s"

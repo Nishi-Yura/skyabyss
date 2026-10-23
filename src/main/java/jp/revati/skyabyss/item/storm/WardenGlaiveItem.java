@@ -14,7 +14,7 @@ import net.minecraft.world.item.SwordItem;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.neoforged.neoforge.common.SimpleTier;
 
-// 羽守の鉤槍 (伝説): 羽守が握っていた、骨の柄に銅の鉤の付いた槍 (敵の鉤槍 gear/hooked_glaive と同じ形と色)。間合い +1。
+// 羽守の鉤槍 (ヒロイック): 羽守が握っていた、骨の柄に銅の鉤の付いた槍 (敵の鉤槍 gear/hooked_glaive と同じ形と色)。間合い +1。
 // 空中の敵と、落下中の自分の攻撃で傷 ×1.3 (+5 から ×1.4)。空駆け・滑空と組む (StormGearEvents)
 public class WardenGlaiveItem extends StormWeaponItem {
     // 攻撃力 10 = 1 + 4 + 5、攻撃速度 1.5 = 4 − 2.5。1 秒あたり 15.0 (空中の上乗せは場面しだいなので数えない)
@@ -26,7 +26,7 @@ public class WardenGlaiveItem extends StormWeaponItem {
                 .withModifierAdded(Attributes.ENTITY_INTERACTION_RANGE,
                         new AttributeModifier(ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "warden_glaive_reach"), StormGear.GLAIVE_REACH,
                                 AttributeModifier.Operation.ADD_VALUE),
-                        EquipmentSlotGroup.MAINHAND)), GearTier.LEGENDARY, "item.skyabyss.warden_glaive.desc");
+                        EquipmentSlotGroup.MAINHAND)), GearTier.HEROIC, "item.skyabyss.warden_glaive.desc");
     }
 
     public static double aerial(ItemStack stack) {

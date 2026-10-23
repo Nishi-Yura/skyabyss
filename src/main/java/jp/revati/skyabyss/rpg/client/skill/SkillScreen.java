@@ -1182,7 +1182,7 @@ public class SkillScreen extends Screen implements jp.revati.skyabyss.client.ui.
         info.drawBar(g, 0xFF10151D, 0xAA3E5A6B);
     }
 
-    // 伝説の書き換えの行を出すか (その武器を主の手に持っているか、もう選んでいるとき)
+    // 逸品の書き換えの行を出すか (その武器を主の手に持っているか、もう選んでいるとき)
     private boolean legendShown(SkillData d, Skill s) {
         Rune legend = Rune.legendaryOf(s);
         return legend != null && (legend.held(minecraft.player) || d.rune(s) == legend.index);
@@ -1254,7 +1254,7 @@ public class SkillScreen extends Screen implements jp.revati.skyabyss.client.ui.
                 hoverRune = Rune.MASTERY;
             }
         }
-        // 伝説の書き換え: 全幅の行 (その武器を持つあいだ)
+        // 逸品の書き換え: 全幅の行 (その武器を持つあいだ)
         boolean legendRow = legendShown(d, s);
         if (legendRow) {
             Rune r = Rune.legendaryOf(s);

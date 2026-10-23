@@ -79,13 +79,14 @@ public final class AffixSelfTest {
     // ---------------------------------------------------------------- 抽選の分布
     private static void distribution(List<String> f, RandomSource random) {
         int n = 40000;
-        for (GearTier tier : new GearTier[]{GearTier.RARE, GearTier.LEGENDARY}) {
+        for (GearTier tier : new GearTier[]{GearTier.RARE, GearTier.EPIC, GearTier.HEROIC, GearTier.ARTIFACT}) {
             for (AffixType.Slot slot : AffixType.Slot.values()) {
                 ItemStack sample = new ItemStack(slot == AffixType.Slot.WEAPON
-                        ? (tier == GearTier.LEGENDARY ? ModItems.CAPTAIN_PIKE.get() : ModItems.WHALEBONE_GREATSWORD.get())
+                        ? (tier == GearTier.ARTIFACT ? jp.revati.skyabyss.abyss.AbyssSetup.GREATSWORD_ITEM.get()
+                                : tier == GearTier.HEROIC ? ModItems.CAPTAIN_PIKE.get() : ModItems.WHALEBONE_GREATSWORD.get())
                         : ModItems.STONE_WHALE_HELMET.get());
                 if (((ModGear) sample.getItem()).tier() != tier) {
-                    // 伝説の防具はまだない。数と値の検めだけ、表の上で回す
+                    // その階級のその部位の品がない (レアの武器・エピック以上の防具)。数と値の検めだけ、表の上で回す
                     sample = null;
                 }
                 int[] counts = new int[5];
@@ -115,7 +116,7 @@ public final class AffixSelfTest {
                 int max = AffixRules.maxCount(tier);
                 double fewer = counts[min] / (double) n;
                 check(f, counts[min] + counts[max] == n, tier + " " + slot + " rolled a count outside " + min + "-" + max);
-                check(f, Math.abs(fewer - AffixRules.FEWER_CHANCE) < 0.02, tier + " " + slot + " fewer-count share is " + fmt(fewer));
+                check(f, Math.abs(fewer - tier.fewerChance) < 0.02, tier + " " + slot + " fewer-count share is " + fmt(fewer));
                 // 種類の出かた: 重みどおりか (重なりなしの抽選なので、一つ目だけを数える代わりに、全体の順位を見る)
                 List<AffixType> pool = AffixRules.pool(slot);
                 StringBuilder share = new StringBuilder();
@@ -125,7 +126,7 @@ public final class AffixSelfTest {
                     share.append(t.id).append(' ').append(fmt(c * 100.0 / n)).append("% ");
                     check(f, c > 0, tier + " " + slot + " never rolled " + t.id);
                     if (r != null) {
-                        boolean legendary = tier == GearTier.LEGENDARY;
+                        boolean legendary = tier.wideAffixes;
                         check(f, Math.abs(r[0] - t.min(legendary)) < 1e-9 && Math.abs(r[1] - t.max(legendary)) < 1e-9,
                                 t.id + " values span " + r[0] + ".." + r[1] + ", expected " + t.min(legendary) + ".." + t.max(legendary));
                         double mean = r[2] / c;
@@ -234,8 +235,10 @@ public final class AffixSelfTest {
         // 付かない品は試せない
         check(f, !AffixRules.canTrial(new ItemStack(ModItems.RESONANCE_CHARM.get())), "the charm could be reforged");
         // 分解で結晶が戻る (重なった装備が再鍛造の燃料になる)
-        check(f, ForgeRules.dismantleYield(new ItemStack(ModItems.STONE_WHALE_BOOTS.get()))[2] == ForgeRules.DISMANTLE_CRYSTALS_RARE
-                && ForgeRules.dismantleYield(new ItemStack(ModItems.CAPTAIN_PIKE.get()))[2] == ForgeRules.DISMANTLE_CRYSTALS_LEGENDARY
+        check(f, ForgeRules.dismantleYield(new ItemStack(ModItems.STONE_WHALE_BOOTS.get()))[2] == GearTier.RARE.dismantleCrystals
+                && ForgeRules.dismantleYield(new ItemStack(ModItems.WHALEBONE_GREATSWORD.get()))[2] == GearTier.EPIC.dismantleCrystals
+                && ForgeRules.dismantleYield(new ItemStack(ModItems.CAPTAIN_PIKE.get()))[2] == GearTier.HEROIC.dismantleCrystals
+                && ForgeRules.dismantleYield(new ItemStack(jp.revati.skyabyss.abyss.AbyssSetup.GREATSWORD_ITEM.get()))[2] == GearTier.ARTIFACT.dismantleCrystals
                 && ForgeRules.dismantleYield(new ItemStack(ModItems.RESONANCE_CHARM.get()))[2] == 0, "dismantle crystal yield is wrong");
     }
 
@@ -379,7 +382,7 @@ public final class AffixSelfTest {
             }
             runsTo30 += reach == 0 ? 60 : reach;
 
-            // 専用伝説 3 つ: 天井と初回の選択だけ / 交換もする
+            // 専用の逸品 3 つ: 天井と初回の選択だけ / 交換もする
             noExchangeAll += exclusivesRuns(random, false, ex);
             withExchangeAll += exclusivesRuns(random, true, ex);
         }
@@ -395,7 +398,7 @@ public final class AffixSelfTest {
         check(f, with >= 3, "exchange made exclusives too fast (" + fmt(with) + " clears)");
     }
 
-    // 専用伝説 3 つがそろうまでの心臓の撃破数 (一人)
+    // 専用の逸品 3 つがそろうまでの心臓の撃破数 (一人)
     private static int exclusivesRuns(RandomSource random, boolean exchange, List<Item> ex) {
         TitanMemoryData.Record r = new TitanMemoryData.Record();
         int shards = 0;
@@ -439,7 +442,7 @@ public final class AffixSelfTest {
             weapons[w] = new double[]{jp.revati.skyabyss.item.GearEvents.weaponAttack(items[w]) - 1, speeds[w]};
         }
         String[] names = {"greatsword", "pike", "fang"};
-        GearTier[] tiers = {GearTier.RARE, GearTier.LEGENDARY, GearTier.LEGENDARY};
+        GearTier[] tiers = {GearTier.EPIC, GearTier.HEROIC, GearTier.HEROIC};
         double worstAvg = 0;
         double worstMax = 0;
         for (int w = 0; w < weapons.length; w++) {
@@ -451,7 +454,7 @@ public final class AffixSelfTest {
                 List<Affix> list = AffixRules.roll(AffixType.Slot.WEAPON, tiers[w], random);
                 sum += dps(dmg, weapons[w][1], str, find(list, AffixType.SHARP), find(list, AffixType.SWIFT)) / plain;
             }
-            boolean legendary = tiers[w] == GearTier.LEGENDARY;
+            boolean legendary = tiers[w].wideAffixes;
             double best = dps(dmg, weapons[w][1], str, AffixType.SHARP.max(legendary), AffixType.SWIFT.max(legendary)) / plain;
             double avg = sum / n;
             worstAvg = Math.max(worstAvg, avg);

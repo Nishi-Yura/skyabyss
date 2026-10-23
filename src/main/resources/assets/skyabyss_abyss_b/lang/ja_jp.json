@@ -8,7 +8,6 @@
   "entity.skyabyss.ceiling_walker": "逆さ歩き",
   "entity.skyabyss.heartbeat_mimic": "鼓動もどき",
   "entity.skyabyss.rope_hanger": "縄の人",
-
   "item.skyabyss.ash_trail_spawn_egg": "灰の這い跡のスポーンエッグ",
   "item.skyabyss.ember_keeper_spawn_egg": "燠の番人のスポーンエッグ",
   "item.skyabyss.soot_child_spawn_egg": "煤の子のスポーンエッグ",
@@ -18,7 +17,6 @@
   "item.skyabyss.ceiling_walker_spawn_egg": "逆さ歩きのスポーンエッグ",
   "item.skyabyss.heartbeat_mimic_spawn_egg": "鼓動もどきのスポーンエッグ",
   "item.skyabyss.rope_hanger_spawn_egg": "縄の人のスポーンエッグ",
-
   "item.skyabyss.lamp_ash": "灯の灰",
   "item.skyabyss.lamp_ash.desc": "灯りを消したあとに残る灰。まだほのかに温かい",
   "item.skyabyss.soot_clump": "煤の団子",
@@ -29,7 +27,6 @@
   "item.skyabyss.echo_shard.desc": "前の私の影が残した欠片。持つと、三秒前の手の重さが分かる",
   "item.skyabyss.pulse_membrane": "鼓動の膜",
   "item.skyabyss.pulse_membrane.desc": "鼓動もどきの薄い膜。まだ脈を打っているように見える",
-
   "subtitles.skyabyss_abyss_b.ash_trail_step": "灰を踏む音",
   "subtitles.skyabyss_abyss_b.ash_trail_reveal": "灰の中から何かが現れる",
   "subtitles.skyabyss_abyss_b.ash_trail_attack": "灰が跳ねる",
@@ -50,7 +47,6 @@
   "subtitles.skyabyss_abyss_b.heartbeat_bite": "膜が閉じる",
   "subtitles.skyabyss_abyss_b.rope_creak": "縄がきしむ",
   "subtitles.skyabyss_abyss_b.rope_pull": "縄が引かれる",
-
   "message.skyabyss_abyss_b.rope_pull": "縄に引かれている。しゃがむと踏みとどまれる",
   "commands.skyabyss.foe.unknown": "深淵の敵の名前が違う: %s",
   "commands.skyabyss.foe.spawned": "%s を段 %s で湧かせた"

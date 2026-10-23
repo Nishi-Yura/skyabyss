@@ -61,6 +61,10 @@ public final class EmberApprentices extends EmberRoom {
     public void build(RaidCtx ctx) {
         RaidKit.buildCell(ctx, new RaidKit.Spec(HX, HZ, 9, RaidKit.EMBER));
         var lv = ctx.level();
+        EmberRaidDecor deco = EmberRaidDecor.of(ctx);
+        deco.shell(true);
+        deco.floorRing(0, 0, 4, b(Blocks.POLISHED_BLACKSTONE_BRICKS));
+        deco.floorRing(0, 0, 9, b(Blocks.POLISHED_BLACKSTONE_BRICKS));
         // 中央の金床の輪 (弟子が出てくる所)
         RaidKit.fill(lv, ctx.local(-2, 0, -2), ctx.local(2, 0, 2), b(Blocks.POLISHED_BASALT));
         RaidKit.fill(lv, ctx.local(-1, 0, -1), ctx.local(1, 0, 1), b(Blocks.SMOOTH_BASALT));
@@ -78,7 +82,47 @@ public final class EmberApprentices extends EmberRoom {
         for (int i = 0; i < COUNT; i++) {
             RaidKit.fill(lv, ctx.local(lampX(i) - 1, 3, -HZ), ctx.local(lampX(i) + 1, 5, -HZ), b(Blocks.POLISHED_BLACKSTONE_BRICKS));
         }
+        decorate(ctx, deco);
         resetState(ctx);
+    }
+
+    // 外周の金床の環 (八つ。戸の正面 = 南北の軸と東西の軸は切れ目)。弟子が一人倒れるたび、二つの金床の上のランタンが消える
+    private static final int[][] RING = {{8, 3}, {3, 8}, {-3, 8}, {-8, 3}, {-8, -3}, {-3, -8}, {3, -8}, {8, -3}};
+
+    // 飾り (docs/design/39 の 4.4 の「闘技場」): 金床の環、壁の道具棚の上の吊り鎖、壁は玄武岩の柱と熾の溝、南西の遠くの炉の窓。
+    // 真ん中の輪 (弟子の出る所) と四隅の柱、北の四つの灯、壁際の炉と砥石は空ける。床の真ん中に段差は置かない
+    private void decorate(RaidCtx ctx, EmberRaidDecor d) {
+        d.keepAround(0, 0, 6, 9);
+        for (int[] c : new int[][] {{-6, -6}, {6, -6}, {-6, 6}, {6, 6}}) {
+            d.keepAround(c[0], c[1], 1, 5);
+        }
+        d.keep(-9, 0, -HZ, 9, 6, -HZ + 1);
+        for (int[] r : RING) {
+            d.put(r[0], 1, r[1], EmberRaidDecor.anvil(Math.abs(r[0]) > Math.abs(r[1]) ? net.minecraft.core.Direction.NORTH : net.minecraft.core.Direction.EAST));
+            d.keepAround(r[0], r[1], 1, 4);
+        }
+        // 壁際の炉と砥石の上に、槌の掛け台 (鎖) と煤の棚
+        for (int z = -4; z <= 4; z += 4) {
+            for (int side = -1; side <= 1; side += 2) {
+                d.place(side * HX, 3, z, EmberRaidDecor.slab(b(Blocks.POLISHED_BLACKSTONE_SLAB), false));
+                d.place(side * HX, 4, z, EmberRaidDecor.CHAIN);
+                d.place(side * HX, 5, z, EmberRaidDecor.CHAIN);
+            }
+        }
+        d.exitFrame();
+        d.vistaSouth(-9, -5, 1);
+        d.relief();
+        d.veins(3);
+        d.chains(6, 5, 2, 0, 0, 6);
+        d.entry(EmberRaidDecor.Scene.HAMMERS);
+        d.exitRoom();
+        d.lights(4, 5, 10);
+        // 出口の灯り: 戸の上 (北の四つの灯の真ん中の切れ目)
+        finishDecor(ctx, d, List.of(ctx.local(0, 5, -HZ - 1)));
+    }
+
+    BlockPos ringLamp(RaidCtx ctx, int i) {
+        return ctx.local(RING[i][0], 2, RING[i][1]);
     }
 
     private static int lampX(int i) {
@@ -88,6 +132,10 @@ public final class EmberApprentices extends EmberRoom {
     private void lamps(RaidCtx ctx) {
         for (int i = 0; i < COUNT; i++) {
             set(ctx, ctx.local(lampX(i), 4, -HZ), i < defeated ? b(Blocks.SHROOMLIGHT) : b(Blocks.BLACKSTONE));
+        }
+        // 金床の環のランタン: 倒した弟子一人につき二つ消える
+        for (int i = 0; i < RING.length; i++) {
+            set(ctx, ringLamp(ctx, i), i < 2 * defeated ? AIR : EmberRaidDecor.lantern(false));
         }
     }
 
@@ -112,6 +160,7 @@ public final class EmberApprentices extends EmberRoom {
     @Override
     public void reset(RaidCtx ctx) {
         generation++;
+        closed(ctx);
         failRequested = false;
         ctx.clearMobs();
         resetState(ctx);
@@ -259,6 +308,7 @@ public final class EmberApprentices extends EmberRoom {
             ctx.level().playSound(null, ctx.local(0, 2, 0), SoundEvents.ANVIL_DESTROY, SoundSource.HOSTILE, 1f, 0.7f);
             if (defeated >= COUNT) {
                 done = true;
+                opened(ctx);
                 particles(ctx, ParticleTypes.LAVA, ctx.origin().getX() + 0.5, ctx.origin().getY() + 3, ctx.origin().getZ() + 0.5, 30, 1.5, 0.2);
                 return;
             }

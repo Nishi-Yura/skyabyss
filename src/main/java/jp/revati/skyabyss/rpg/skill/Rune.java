@@ -47,7 +47,7 @@ public enum Rune {
     THIN_ARROW("thin_arrow", Skill.CLOUD_PIERCE, 1),
     HEAVY_ARROW("heavy_arrow", Skill.CLOUD_PIERCE, 2),
     LIGHTNING("lightning", Skill.CLOUD_PIERCE, 3),
-    // ---- 伝説の書き換え (4 番目。その武器を主の手に持つあいだだけ選べて、効く。docs/design/27 の 4.2)
+    // ---- 逸品の書き換え (4 番目。その武器を主の手に持つあいだだけ選べて、効く。docs/design/27 の 4.2)
     BONE_PIERCE("pike_bone", Skill.LUNGE, 4, "captain_pike"),
     BITE("fang_bite", Skill.WIND_REND, 4, "waterway_fang"),
     SNIP("shears_cut", Skill.WHALE_SWEEP, 4, "tidecaller_claw"),
@@ -56,20 +56,20 @@ public enum Rune {
     HOOK_PULL("halberd_hook", Skill.ROCK_CALL, 4, "warden_glaive"),
     FIRE_BED("hammer_forge", Skill.EMBER_HAMMER, 4, "smith_hammer"),
     FIRE_PASS("poker_share", Skill.TEMPER, 4, "thrall_poker"),
-    // ---- 深淵の専用伝説 (深淵の心臓から。docs/design/31 の B04)。まだ書き換えのない 4 つの技へ
+    // ---- 深淵のアーティファクト (深淵の心臓から。docs/design/31 の B04)。まだ書き換えのない 4 つの技へ
     ABYSS_CLEAVE("abyss_cleave", Skill.TITAN_CLEAVE, 4, "abyss_greatsword"),
     SUNK_SONG("sunk_song", Skill.WARD_SONG, 4, "abyss_bell_staff"),
     SKY_FALL("sky_fall", Skill.CLOUD_PIERCE, 4, "abyss_storm_bow"),
     CREEPING_ASH("creeping_ash", Skill.ASH_SCATTER, 4, "abyss_ash_scythe");
 
-    // 熟練 3 で開く 4 つ目の刻印 (熟練の刻印)。どの使う技にもあり、番号は 5 (4 は伝説の書き換え)。docs/design/31 の A13
+    // 熟練 3 で開く 4 つ目の刻印 (熟練の刻印)。どの使う技にもあり、番号は 5 (4 は逸品の書き換え)。docs/design/31 の A13
     public static final int MASTERY = 5;
 
     public static boolean valid(Skill skill, int index) {
         return of(skill, index) != null || index == MASTERY && skill.active;
     }
 
-    // その刻印を今選べる手の状態か (熟練の刻印は常に。伝説は武器を持っているとき)
+    // その刻印を今選べる手の状態か (熟練の刻印は常に。逸品の書き換えは武器を持っているとき)
     public static boolean heldOf(Skill skill, int index, net.minecraft.world.entity.player.Player player) {
         Rune r = of(skill, index);
         return r == null ? index == MASTERY : r.held(player);
@@ -77,9 +77,9 @@ public enum Rune {
 
     public final String id;
     public final Skill skill;
-    // 1..3 (同じ技の中での番号。記録にはこの番号を入れる)。伝説の書き換えは 4
+    // 1..3 (同じ技の中での番号。記録にはこの番号を入れる)。逸品の書き換えは 4
     public final int index;
-    // 伝説の書き換えに要る武器 (品の id の path。ふつうの刻印は空)
+    // 逸品の書き換えに要る武器 (品の id の path。ふつうの刻印は空)
     public final String weapon;
 
     Rune(String id, Skill skill, int index) {
@@ -103,7 +103,7 @@ public enum Rune {
             return true;
         }
         net.minecraft.world.item.ItemStack hand = player.getMainHandItem();
-        // 自分の伝説を持っている (抽出して抜け殻になったものは除く)、または装備に刻んだアスペクト (item/extra/GearFreedom)
+        // 書き換えの品を持っている (抽出して抜け殻になったものは除く)、または装備に刻んだアスペクト (item/extra/GearFreedom)
         if (net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(hand.getItem()).getPath().equals(weapon)
                 && !jp.revati.skyabyss.item.extra.GearFreedom.isHollow(hand)) {
             return true;
@@ -128,7 +128,7 @@ public enum Rune {
         return nameKey() + ".effect";
     }
 
-    // 伝説の書き換えの説明に添える、書き換わる技の名前の鍵
+    // 逸品の書き換えの説明に添える、書き換わる技の名前の鍵
     public String skillNameKey() {
         return skill.nameKey();
     }

@@ -40,7 +40,7 @@ import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.component.ItemAttributeModifiers;
 import net.neoforged.neoforge.network.PacketDistributor;
 
-// 心臓の遺物の選択画面 (docs/design/30_heart_reward_ui.md)。心臓を止めたあと一度だけ選べる専用伝説を、大きなカードで見せて選ばせる。
+// 心臓の遺物の選択画面 (docs/design/30_heart_reward_ui.md)。心臓を止めたあと一度だけ選べる専用の逸品を、大きなカードで見せて選ばせる。
 // 暗い石板に画素の枠 (docs/design/18 の見た目)。巨神ごとに題字と差し色が違う。
 //   幕 (REVEAL)   : 暗転 → 題字が浮かぶ → カードが一枚ずつ上がる。このあいだは押せない (場面の続きで押してしまわないように)
 //   選ぶ (CHOOSE) : ← → / A D / Tab / マウスで見て、Enter / Space / クリックで決める (数字キーで直接も)。Esc は「あとで？」
@@ -162,7 +162,7 @@ public class HeartRewardScreen extends Screen {
             GearTier tier = item instanceof ModGear g ? g.tier() : GearTier.COMMON;
             int tierColor = tier.color.getValue();
             String origin = item instanceof ModGear g ? g.dungeon() : titan;
-            MutableComponent tierLine = Component.translatable("gear.skyabyss.tier." + tier.key).withStyle(s -> s.withColor(tierColor))
+            MutableComponent tierLine = Component.translatable(tier.translationKey()).withStyle(s -> s.withColor(tierColor))
                     .append(Component.literal(" · ").withStyle(s -> s.withColor(DIM)))
                     .append(kindOf(item).copy().withStyle(s -> s.withColor(DIM)));
             Component kind = kindOf(item);

@@ -23,8 +23,8 @@ import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.common.util.FakePlayer;
 
 // 深淵の心臓の報酬 (docs/design/31 の B04)。倒した人それぞれに:
-//   共鳴の欠片 ×HEART_SHARDS (必ず) と、専用の伝説 (その巨神の 1 点) が LEGEND_CHANCE。LEGEND_PITY 回続けて出なければ次で保証 (天井。巨神ごと)
-//   すでに持っているときは、伝説の分解と同じ量 (共鳴の欠片 ×DUPE_SHARDS) に替わる
+//   共鳴の欠片 ×HEART_SHARDS (必ず) と、アーティファクト (その巨神の 1 点) が LEGEND_CHANCE。LEGEND_PITY 回続けて出なければ次で保証 (天井。巨神ごと)
+//   すでに持っているときは、ヒロイック以上の分解と同じ量 (共鳴の欠片 ×DUPE_SHARDS) に替わる
 // 記録は巨神の記憶 (TitanMemoryData) に "abyss:<巨神>" の名前で (通常の天井・図鑑とは別。通常の心臓の報酬は変わらない)。
 public final class AbyssLoot {
     public static final int HEART_SHARDS = 2;

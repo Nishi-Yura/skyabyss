@@ -37,7 +37,7 @@ import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 public final class AffixEvents {
     private static final int THIRST_INTERVAL = 5;
     private static final float THIRST_MAX_HEAL = 2f;
-    // 冴えの上限 (伝説の最大 12.5% より少し上。今は一つの武器にしか付かないので届かない)
+    // 冴えの上限 (ヒロイック以上の最大 12.5% より少し上。今は一つの武器にしか付かないので届かない)
     private static final double KEEN_CAP = 0.15;
     private static final Map<Player, Long> lastThirst = new WeakHashMap<>();
 

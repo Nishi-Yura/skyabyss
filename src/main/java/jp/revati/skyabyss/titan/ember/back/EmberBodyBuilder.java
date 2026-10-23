@@ -343,11 +343,6 @@ public final class EmberBodyBuilder {
         b.ante();
         b.rest(EmberBackLayout.rest("heart"));
         b.farFloor(new Box(-1 + HEART_DX, FLOOR_HEART, -21 + HEART_DZ, 1 + HEART_DX, FLOOR_HEART + 4, -20 + HEART_DZ), h.minY());
-        for (Inscription in : INSCRIPTIONS) {
-            if (in.id().equals("lore_ember_heart")) {
-                b.kit.wallSign(in.pos(), in.facing(), "sign.skyabyss." + in.id(), DyeColor.ORANGE);
-            }
-        }
         long t1 = System.nanoTime();
         // 心臓の担当の部屋の中身 (EmberBackRooms の "heart" = EmberHeartArena.buildRoom から、体じゅうの歩く道の灯りの置き直しを除いたもの)
         jp.revati.skyabyss.titan.ember.heart.EmberHeartArena.build(level);

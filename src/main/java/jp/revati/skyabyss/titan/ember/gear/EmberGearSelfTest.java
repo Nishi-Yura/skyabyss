@@ -47,7 +47,7 @@ import net.neoforged.neoforge.common.util.FakePlayer;
 import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
 
 // 余燼の装備の自己テスト (SKYABYSS_SELFTEST=1、SELFTEST ember gear PASSED / FAILED)。03 の 13.8節の表と同じ検査:
-//  - 品の登録、図鑑の表 (10 品・EmberIds.CODEX の並び・確率)、必要 Lv (レア 26・伝説 28)、品の数値
+//  - 品の登録、図鑑の表 (10 品・EmberIds.CODEX の並び・確率)、必要 Lv (エピック以下 26・ヒロイック以上 28)、品の数値
 //  - 強さの曲線: GearCurve.STAGES の余燼の段 (03 の 9.8節) に +0 / +10 が入るか、潮殻・雷翼の目安との比べ、余燼の目安のボスとの手ごたえ、守り
 //  - 効果: 一式 (強靭・火に触れて筋力・熱のたまり方)、戦斧のくすぶり (火に強い相手にも) と +10%、大鎚の亀裂、火掻きの灰、外套、護符、灯、角杯
 //  - 報酬: 道中 1%・鍛え手 5%、図鑑に記す、天井、模擬の撃破数 (13 の 6.4節)
@@ -215,8 +215,9 @@ public final class EmberGearSelfTest {
             // +0 は雷翼の +0 の 1.1 倍以上で雷翼の +10 以下 (乗り換えの手応え)、余燼の目安 17.5 の ±5%
             check(f, d0 >= thunder.dps0() * 1.1 - 1e-6 && d0 <= thunder.dps10() + 1e-6, id + " +0 " + d0 + " is out of the ember stage range");
             check(f, d0 >= ember.dps0() * 0.95 && d0 <= ember.dps0() * 1.05, id + " +0 " + d0 + " is far from the stage dps0 " + ember.dps0());
-            // +10 は余燼の目安 22.8 の ±5% (1 章の最後の巨神。次の巨神の目安はまだない)
-            check(f, d10 >= ember.dps10() * 0.95 && d10 <= ember.dps10() * 1.05, id + " +10 " + d10 + " is far from the stage dps10 " + ember.dps10());
+            // +10 は余燼の目安 22.8 の ±5% (1 章の最後の巨神。次の巨神の目安はまだない)。ヒロイックはエピックの上に立つので上は 1.10 倍まで (03 の 1.2節)
+            double top = id.equals(EmberGear.WAR_AXE) ? 1.05 : 1.10;
+            check(f, d10 >= ember.dps10() * 0.95 && d10 <= ember.dps10() * top, id + " +10 " + d10 + " is far from the stage dps10 " + ember.dps10());
             // +0 は潮殻の +10 (17.2) の 0.95 倍以上 (次の巨神の +0 は前の巨神の +5 より上、+10 の手前)
             check(f, d0 >= tide.dps10() * 0.95, id + " +0 is far below the tide +10");
         }

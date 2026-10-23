@@ -46,20 +46,14 @@ def text(key, ja, en, owner="6"):
 
 
 # ================================================================ 看板 (12 の 9.2 節)
-# 碑文 6 枚 (4 行。1 行は日本語 8 字まで、英語は 90 px まで。SignFit と同じ字の幅で、ここでも測る)
+# 碑文 3 枚 (レイドの部屋の入口の碑。4 行。1 行は日本語 8 字まで、英語は 90 px まで。SignFit と同じ字の幅で、ここでも測る)
 INSCRIPTIONS = {
     "tail": (("嵐は鳥の衣", "衣を脱がぬのは", "見つかるからだ", "上の影に"),
              ("Storm cloaks", "the bird. It", "hides from the", "shadow above")),
-    "hub": (("凪には下を", "嵐には上を", "風の民は", "息を数えた"),
-            ("In calm, below", "in storm, above.", "The wind folk", "counted breaths")),
     "west": (("骨は空洞", "風の通う道", "我らは骨の中で", "飛ぶことを知った"),
              ("Bones are hollow", "roads for wind.", "Inside them we", "learned to fly")),
     "east": (("雷は柱を選ぶ", "柱は我らを", "守ってくれた", "あの夜までは"),
              ("Bolts seek rods,", "and the rods", "kept us safe", "until that night")),
-    "eye": (("眼は来る者を", "覚えている", "お前の顔は", "もう知っている"),
-            ("The eye recalls", "all who come.", "It already knows", "your face")),
-    "heart": (("雷は空から", "落ちてくる", "この拍だけは", "下から昇る"),
-              ("Bolts fall", "from the sky.", "This beat alone", "rises from below")),
 }
 # 試練の入口の一言 3 枚 (2 行)
 TRIAL_SIGNS = {
@@ -74,30 +68,6 @@ for trial, (ja, en) in TRIAL_SIGNS.items():
     for i in range(4):
         text(f"sign.skyabyss.storm_{trial}.{i + 1}", ja[i] if i < 2 else "", en[i] if i < 2 else "")
 
-# ================================================================ 囁き 8 つ (StormWhispers。lore は場所の気配、hint は使い方)
-WHISPERS = [
-    ("storm_landing", "lore", "尾羽の上に立っている。腰の羽根の門の奥で、何かが脈打っている",
-     "You stand on the tail feathers. Beyond the feather gate at the hips, something is beating"),
-    ("storm_tail", "hint", "右上の風見の板が、凪と嵐の拍。西・東・前の三つの風鳴り石を鳴らせば、広間の床の竜骨の門が開く。西の壁の段は背の上へ",
-     "The wind vane at the top right shows the beat of calm and storm. Ring the three wind stones (west, east, front) to open the keel gate "
-     "in the hall floor. The steps in the west wall climb onto the back"),
-    ("storm_hub", "lore", "凪には下を、嵐には上を。凪なら壁ぞいの坂で上の回廊へ。嵐なら、中央の昇り風がひと息に運ぶ",
-     "In calm, below; in storm, above. In a calm, take the ramp along the wall to the upper gallery. In a storm, the central updraft "
-     "carries you up in one breath"),
-    ("storm_west", "hint", "風切りの羽根を持って、空中でしゃがむと滑空する。床の穴の昇り風は、凪には低く、嵐には高く上がる。横風は梁の陰でやり過ごせ",
-     "With the gale feather, crouch in midair to glide. The updrafts from holes in the floor rise low in a calm and high in a storm. "
-     "Wait out the crosswinds behind the beams"),
-    ("storm_east", "hint", "足もとに白い輪が出たら、雷が来る。輪が銅の柱の近くなら、雷は柱へ落ちる。柱が満ちると、骨の戸が開く",
-     "When a white ring appears at your feet, lightning is coming. If the ring is near a copper rod, the bolt strikes the rod instead. "
-     "A full rod opens a bone door"),
-    ("storm_front", "hint", "羽鏡は手で回る。眼から差す光を、壁の三つの受け羽へ導け。詰まったら、前室の戻しの鏡で最初の向きに戻せる",
-     "The feather mirrors turn by hand. Guide the light from the eye to the three catch-feathers on the walls. If you get stuck, "
-     "the reset mirror in the antechamber turns them back"),
-    ("storm_heart", "hint", "この先は竜骨の間。心臓は、三つの試練で覚えたことを、一つずつ問うてくる",
-     "Beyond lies the keel chamber. The heart will test what you learned in the three trials, one at a time"),
-]
-for wid, _, ja, en in WHISPERS:
-    text(f"message.skyabyss.whisper.{wid}", ja, en)
 text("message.skyabyss.storm.campfire_hint", "しゃがんで焚き火に触れると、試練をあきらめて尾の間へ戻れる",
      "Crouch and touch the campfire to give up the trial and return to the tail chamber")
 text("item.skyabyss.lore_page.desc.storm_back", "雷翼の背で拾った。棒の刻みが、端までびっしり並んでいる",
@@ -125,20 +95,14 @@ LORE = [
     ("inscription_storm_tail", 163, None, ["chapter1/storm_ruins", "chapter1/storm_cower"], ("帯電の間の碑文", "Inscription of the Charge Room"),
      ("帯電の連鎖の間の入口、休み場の壁にあった。最後の行だけ刻みが浅く、急いで彫ったように見える。",
       "On the wall at the entrance to the room of the charged chain. Only the last line is carved shallow, as if in a hurry."), "tail"),
-    ("inscription_storm_hub", 164, None, ["chapter1/storm_ruins", "chapter1/wind_ledger"], ("風の広間の碑文", "Inscription in the Wind Hall"),
-     ("天窓の真下、昇り風の柱のそばの石にあった。石の縁には、棒の刻みが四本ずつ束ねて並んでいる。",
-      "On a stone beside the updraft, right under the skylight. Along its edge, strokes are cut in bundles of four."), "hub"),
-    ("inscription_storm_west", 165, None, ["chapter1/inscription_storm_hub"], ("羽の間の碑文", "Inscription of the Feather Deck"),
+    ("inscription_storm_west", 165, None, ["chapter1/storm_ruins"], ("羽の間の碑文", "Inscription of the Feather Deck"),
      ("雷羽運びの甲板の入口、休み場の壁にあった。字の溝を、骨の中を通る風が細く鳴らしている。",
       "On the wall at the entrance to the deck where the thunder feathers are carried. The wind running through the bones whistles thinly in the grooves of the letters."), "west"),
     ("inscription_storm_east", 166, None, ["chapter1/raiju"], ("回路の間の碑文", "Inscription of the Circuit Room"),
      ("銅の回路の間の入口、休み場の壁にあった。壁の石は、そこだけ焦げていない。",
       "On the wall at the entrance to the copper circuit room. Only that stretch of wall is unscorched."), "east"),
-    ("inscription_storm_eye", 167, None, ["chapter1/inscription_storm_heart"], ("眼の間の碑文", "Inscription in the Eye Hall"),
-     ("三つ目の受け羽の下にあった。そばの壁に、小さな人の浮き彫りがある。\n\n四角い頭をしていた。",
-      "Beneath the third catch-feather. On the wall beside it is a small carving of a person.\n\nIts head was square."), "eye"),
     ("wind_ledger", 168, [{"type": "page", "target": "storm_back"}, {"type": "manual"}],
-     ["chapter1/storm_ruins", "chapter1/inscription_storm_hub"], ("風見の帳", "The Wind Ledger"),
+     ["chapter1/storm_ruins"], ("風見の帳", "The Wind Ledger"),
      ("凪と嵐が、棒の数で書き留めてある。ある日から、棒の横に小さな印が付きはじめる。上を見るな、という意味の印らしい。\n\n"
       "最後の頁には、棒が一本もない。",
       "Calms and storms are tallied in strokes. From one day on, a small mark begins to appear beside them. "
@@ -148,13 +112,8 @@ LORE = [
      ("獣が倒れると、瘤の中に集まっていた雷が、行き場をなくして柱を何度も行き来した。やがて、柱は静かになった。",
       "When the beast fell, the lightning gathered in the knuckle had nowhere to go, and ran from rod to rod, again and again. "
       "At last the rods fell quiet."), None),
-    ("inscription_storm_heart", 171, None, ["chapter1/inscription_tide_heart", "chapter1/storm_stilled"],
-     ("竜骨の前室の碑文", "Inscription in the Keel Antechamber"),
-     ("竜骨の門の下、前室の壁にあった。石に耳を当てると、拍は確かに、足もとのほうから昇ってくる。",
-      "On the antechamber wall below the keel gate. With an ear to the stone, the beat does seem to rise from somewhere beneath your feet."),
-     "heart"),
     ("storm_stilled", 172, [{"type": "kill", "target": "skyabyss:thunder_wing_heart", "radius": 64}, {"type": "manual"}],
-     ["chapter1/inscription_storm_heart", "chapter1/tide_heart_stilled"], ("晴れた空", "A Clear Sky"),
+     ["chapter1/tide_heart_stilled"], ("晴れた空", "A Clear Sky"),
      ("雷翼の心臓が止まった。胸の奥の風が、はじめて止んだ。\n\n嵐の上の空は、ずっと晴れていた。それでも鳥は、嵐を脱がなかった。\n\n"
       "三つの欠片を手のひらに並べると、わずかに下を向いて寄り合った。",
       "The thunder wing's heart stopped. The wind deep in its chest fell still for the first time.\n\n"
@@ -435,9 +394,6 @@ def doc_tables() -> str:
     for t in TRIAL_SIGNS:
         k = f"sign.skyabyss.storm_{t}"
         L.append(f"| `{k}` | {JA[k + '.1']} / {JA[k + '.2']} | {EN[k + '.1']} / {EN[k + '.2']} | {max(width(EN[f'{k}.{i}']) for i in (1, 2))} px |")
-    L += ["\n#### 囁き（生成。`StormWhispers`）\n", "| ID | 種類 | 日本語 | 英語 |", "| --- | --- | --- | --- |"]
-    for wid, kind, ja, en in WHISPERS:
-        L.append(f"| `{wid}` | {kind} | {md(ja)} | {md(en)} |")
     L += ["\n#### 伝承の項目（生成。`lore.skyabyss.chapter1.*`）\n", "| 項目 | 順 | 記される条件 | 題 | 本文 |", "| --- | --- | --- | --- | --- |"]
     for lid, order, unlock_, related, title, body, sign in LORE:
         cond = f"碑文 `sign.skyabyss.lore_storm_{sign}`" if sign else "、".join(
@@ -472,8 +428,6 @@ HAND_EDITS = [  # (鍵, 日本語, 英語)
     ("lore.skyabyss.chapter1.inscription_storm_west.body", "雷羽運びの甲板の入口、休み場の壁にあった。字の溝を、骨の中を通る風が細く鳴らしている。", "On the wall at the entrance to the deck where the thunder feathers are carried. The wind running through the bones whistles thinly in the grooves of the letters."),
     ("message.skyabyss.raiju.east_stone_ready", "瘤の頂で、光る印が着くのを待っている。", "At the crown of the knuckle, a wind chime stone waits to ring."),
     ("message.skyabyss.storm.trials_renewed", "雷翼の心臓が、再び脈を打ち始めた。地の遠い底から、拍が戻ってくる。背中の試練が、元の形に戻った", "The thunder wing's heart beats again, a beat returning from deep beneath the ground. The trials on its back are as they were"),
-    ("message.skyabyss.whisper.storm_tail", "右上の風見の板が、凪と嵐の拍。広場の北の端の入口に一行がそろうと、順路の試練が始まる", "The wind vane at the top right shows the beat of calm and storm. When the whole party stands in the entrance at the north end of the plaza, the route of trials begins"),
-    ("message.skyabyss.whisper.storm_west", "風切りの羽根を持って、空中でしゃがむと滑空する。肋の間は格子の穴で上へ。凪は一段ずつ、嵐は高く昇って輪へ滑空。横風は岩棚の隅の陰で", "With the gale feather, crouch in midair to glide. In the rib hall, grates lift you: one step in calm, high in a storm, then glide to a ring. Shelter from crosswinds in a ledge corner"),
     ("sign.skyabyss.storm_east.2", "回路で戸へ", "Wire the bolt"),
     ("sign.skyabyss.storm_front.2", "鏡で光を三つへ", "Mirror the light"),
     ("sign.skyabyss.storm_west.2", "縦に登る", "Climb the ribs"),

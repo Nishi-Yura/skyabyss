@@ -16,7 +16,7 @@ import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.neoforged.neoforge.common.SimpleTier;
 
-// 水路の顎牙 (伝説): 闇の水路に棲む顎の牙を削った短剣。
+// 水路の顎牙 (ヒロイック): 闇の水路に棲む顎の牙を削った短剣。
 // 軽く速い。水の中ではさらに速く振れ (攻撃速度 +30%、GearEvents)、斬った相手は血を流す
 public class WaterwayFangItem extends SwordItem implements ModGear {
     public static final SimpleTier TIER = new SimpleTier(BlockTags.INCORRECT_FOR_IRON_TOOL, 1400, 8.0f, 2.5f, 18,
@@ -29,7 +29,7 @@ public class WaterwayFangItem extends SwordItem implements ModGear {
 
     @Override
     public GearTier tier() {
-        return GearTier.LEGENDARY;
+        return GearTier.HEROIC;
     }
 
     @Override
