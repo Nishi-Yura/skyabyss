@@ -34,6 +34,8 @@ public final class EmberForgeDefense extends EmberRoom {
     public static final double BRAZIER_RANGE = 7.0;
     public static final double BRAZIER_DOUSE = 2.5;
     public static final int RELIGHT_TICKS = 25;
+    // 一人のとき、炉の火を削る間隔 (tick。仲間がいれば 20)
+    public static final int SOLO_DOUSE_EVERY = 40;
     private static final int[][] BRAZIERS = {{-9, -9}, {9, -9}, {-9, 9}, {9, 9}};
     private static final int[][] SPAWNS = {{-11, -3}, {11, -3}, {-11, 3}, {11, 3}, {-4, -11}, {4, -11}, {-6, 11}, {6, 11}};
 
@@ -183,7 +185,9 @@ public final class EmberForgeDefense extends EmberRoom {
                     m.getMoveControl().setWantedPosition(fx, forge.getY() + 4, fz, 1.0);
                 }
             }
-            if (t % 20 == m.getId() % 20 && flat(m.position(), fx, fz) <= DOUSE_RANGE && Math.abs(m.getY() - forge.getY()) < 7) {
+            // 一人のときは守る手が一つなので、炉の消え方を半分にする (2 秒に一度。仲間がいれば毎秒)
+            int every = scale(ctx) <= 1 ? SOLO_DOUSE_EVERY : 20;
+            if (t % every == m.getId() % every && flat(m.position(), fx, fz) <= DOUSE_RANGE && Math.abs(m.getY() - forge.getY()) < 7) {
                 hp = Math.max(0, hp - douseRate(m));
                 particles(ctx, ParticleTypes.SMOKE, fx, forge.getY() + 4, fz, 10, 0.8, 0.03);
                 ctx.level().playSound(null, forge, SoundEvents.FIRE_EXTINGUISH, SoundSource.BLOCKS, 0.8f, 0.7f);

@@ -248,4 +248,13 @@ public final class EmberCarry extends EmberRoom {
     void forceCool(UUID id, int ticks) {
         carry.computeIfPresent(id, (k, v) -> ticks);
     }
+
+    // 行き先の印: 熾を持っている人がいれば冷えた炉、いなければ噴き口
+    @Override
+    public BlockPos guideTarget(RaidCtx ctx) {
+        if (done || source == null) {
+            return null;
+        }
+        return carry.isEmpty() ? source.above() : forge.above();
+    }
 }

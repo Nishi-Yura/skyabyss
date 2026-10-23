@@ -371,4 +371,20 @@ public final class ColumnChase extends RaidRoom {
     public List<int[]> pillars() {
         return pillars;
     }
+
+    // 行き先の印: まだ取っていない鍵 (いちばん若い番号)
+    @Override
+    @javax.annotation.Nullable
+    public BlockPos guideTarget(RaidCtx ctx) {
+        for (int i = 0; i < KEYS; i++) {
+            if (!taken[i]) {
+                return ctx.origin().offset(keyRel[i][0], 1, keyRel[i][1]);
+            }
+        }
+        return null;
+    }
+
+    public boolean taken(int i) {
+        return taken[i];
+    }
 }
