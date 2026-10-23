@@ -40,10 +40,20 @@ public class MountEntity extends AbstractHorse implements GeoEntity {
     private static final EntityDataAccessor<Integer> LOOK = SynchedEntityData.defineId(MountEntity.class, EntityDataSerializers.INT);
     private static final RawAnimation IDLE = RawAnimation.begin().thenLoop("animation.mount.idle");
     private static final RawAnimation WALK = RawAnimation.begin().thenLoop("animation.mount.walk");
+    private static final RawAnimation RUN = RawAnimation.begin().thenLoop("animation.mount.run");
+    private static final RawAnimation JUMP = RawAnimation.begin().thenPlayAndHold("animation.mount.jump");
+    // 歩き・駆けの境 (ブロック/tick)。乗って前へ進むと 0.3〜0.55 になる
+    private static final double WALK_FROM = 0.012;
+    private static final double RUN_FROM = 0.2;
 
     private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
     @Nullable
     private UUID owner;
+    // 描画側だけで数える: 歩いた距離 (ブロック。脚の運びを地面の速さに合わせる molang の variable.mount_dist)・滑らかにした速さ・宙にいる tick 数
+    private double travel;
+    private double travelO;
+    private double gaitSpeed;
+    private int airTicks;
 
     public MountEntity(EntityType<? extends MountEntity> type, Level level) {
         super(type, level);
@@ -114,6 +124,25 @@ public class MountEntity extends AbstractHorse implements GeoEntity {
     @Override
     protected Vec3 getPassengerAttachmentPoint(Entity passenger, EntityDimensions dimensions, float scale) {
         return new Vec3(0, look().seat * scale, 0);
+    }
+
+    @Override
+    public void tick() {
+        super.tick();
+        if (level().isClientSide) {
+            double dx = getX() - xo;
+            double dz = getZ() - zo;
+            double v = Math.min(1.5, Math.sqrt(dx * dx + dz * dz));
+            travelO = travel;
+            travel += v;
+            gaitSpeed = gaitSpeed * 0.6 + v * 0.4;
+            airTicks = onGround() || isInWater() || isInLava() ? 0 : airTicks + 1;
+        }
+    }
+
+    // 描画用: 歩いた距離 (部分 tick で補間)
+    public double travel(float partialTick) {
+        return travelO + (travel - travelO) * partialTick;
     }
 
     // ---------------------------------------------------------------- ふるまい
@@ -216,8 +245,16 @@ public class MountEntity extends AbstractHorse implements GeoEntity {
 
     @Override
     public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
-        controllers.add(new AnimationController<>(this, "move", 4, state -> state.setAndContinue(
-                state.isMoving() ? WALK : IDLE)));
+        // 宙 (跳び・落ち) → 跳び、速い → 駆け、動いている → 歩き、止まる → 待機。脚の運びは歩いた距離で進む (アニメの式の variable.mount_dist)
+        controllers.add(new AnimationController<>(this, "move", 4, state -> {
+            if (airTicks > 2) {
+                return state.setAndContinue(JUMP);
+            }
+            if (gaitSpeed > RUN_FROM) {
+                return state.setAndContinue(RUN);
+            }
+            return state.setAndContinue(gaitSpeed > WALK_FROM ? WALK : IDLE);
+        }));
     }
 
     @Override
