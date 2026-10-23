@@ -1,0 +1,112 @@
+# 深淵 v3 (2026-10-23 の試遊の直し): 広げた大坑道と門の大広間、骨の野営の帰りの祠、層の格子の門、道案内の帯、主の名乗り・技の予告・段のボスバー
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/abyss_v3.txt -PshotsName=abyss_v3   (設計図を変えたら run/shots/abyss_v3/saves を消す)
+#   → 絵は run/shots/abyss_v3/shots/abyss_v3/ (docs/review/abyss_v3/ へ縮めて写す)
+# at shelter 0 <x> <y> <z> <yaw> <pitch>: 都の設計図の座標と向き (yaw 0 = 南、180 = 北、90 = 西、-90 = 東)
+world opening_abyss_v3 normal
+size 1280 720
+timeout 3600
+render 10
+clouds off
+
+wait 100
+cmd skyabyss cinematic stop
+wait 10
+cmd skyabyss cinematic stop
+cmd time set 18000
+cmd gamerule doDaylightCycle false
+cmd gamemode spectator
+cmd skyabyss dev opening build
+hud off
+cmd skyabyss dev opening at shelter 0 -16 -8 40 -90 5
+waitchunks
+wait 200
+shot c01_sealed_door
+cmd skyabyss dev opening at shelter 0 -11 -8 40 -90 12
+waitchunks
+wait 60
+shot c02_corridor
+cmd skyabyss dev opening at shelter 0 -7 -7 40 -90 50
+waitchunks
+wait 60
+shot c03_shaft_top_down
+cmd skyabyss dev opening at shelter 0 1 -30 40 -90 12
+waitchunks
+wait 60
+shot c04_spiral_mid
+cmd skyabyss dev opening at shelter 0 13 -38 54 180 18
+waitchunks
+wait 60
+shot c05_landing_workshop
+cmd skyabyss dev opening at shelter 0 6 -68 28 180 18
+waitchunks
+wait 60
+shot c06_landing_camp
+cmd skyabyss dev opening at shelter 0 1 -96 41 0 12
+waitchunks
+wait 60
+shot c07_bottom_to_hall
+cmd skyabyss dev opening at shelter 0 1 -97 51 0 6
+waitchunks
+wait 60
+shot c08_gate_hall
+cmd skyabyss dev opening at shelter 0 -2 -98 61 20 0
+waitchunks
+wait 60
+shot c09_gate_close
+cmd skyabyss dev opening at shelter 0 1 -95 40 0 -88
+waitchunks
+wait 60
+shot c10_shaft_look_up
+
+# ---------------------------------------------------------------- 深淵
+cmd skyabyss abyss enter
+wait 40
+cmd skyabyss abyss build
+wait 1200
+cmd tp @s 0 181.6 3 90 12
+wait 80
+shot a01_return_shrine
+cmd tp @s -2 181 2 90 18
+wait 40
+shot a02_return_shrine_close
+cmd tp @s 0 181.5 -3 180 8
+wait 40
+shot a03_bar_gate_closed
+cmd skyabyss abyss layer marks bone
+cmd gamemode creative
+cmd tp @s 0 180 -6 180 8
+wait 40
+shot a04_bar_gate_raised
+hud on
+cmd tp @s 2 180 4 -40 5
+wait 60
+shot a05_guide_strip
+cmd skyabyss abyss layer go arena_bone 180
+cmd tp @s ~ ~ ~8
+wait 40
+cmd skyabyss abyss layer lord bone
+wait 30
+shot a06_lord_bone_intro
+wait 90
+shot a07_lord_bone_move
+wait 50
+shot a08_lord_bone_move2
+cmd skyabyss abyss layer go arena_salt 180
+cmd tp @s ~ ~ ~8
+wait 40
+cmd skyabyss abyss layer lord salt
+wait 110
+shot a09_lord_salt_move
+cmd skyabyss abyss layer go arena_storm 180
+cmd tp @s ~ ~ ~8
+wait 40
+cmd skyabyss abyss layer lord storm
+wait 110
+shot a10_lord_storm_move
+cmd skyabyss abyss layer go arena_ash 180
+cmd tp @s ~ ~ ~8
+wait 40
+cmd skyabyss abyss layer lord ash
+wait 110
+shot a11_lord_ash_move
+quit

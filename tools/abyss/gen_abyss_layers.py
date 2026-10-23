@@ -433,6 +433,17 @@ def build_camp(ctx, layer, n):
     lay.put(6, Y, -3, 'brown_carpet')
     lay.put(7, Y, -2, 'barrel[facing=up,open=false]')
     lay.put(5, Y, 5, 'lectern[facing=north,has_book=true,powered=false]')
+    # 野営の暮らしの跡 (2026-10-23 の作り込み): 荷の山 (樽と箱)、測量の机 (地図台に灯り)、天井の縄に吊った灯りの列 (南北の壁ぞい)
+    lay.put(7, Y, -3, 'barrel[facing=up,open=false]')
+    lay.put(7, Y + 1, -2, 'barrel[facing=up,open=false]')
+    lay.put(5, Y, -5, 'cartography_table')
+    lay.put(5, Y + 1, -5, 'lantern[hanging=false,waterlogged=false]')
+    lay.put(4, Y, -5, 'spruce_stairs[facing=east,half=bottom,shape=straight,waterlogged=false]')
+    for zz in (-7, 7):
+        for x in range(-6, 7):
+            lay.put(x, Y + 5, zz, 'chain[axis=x,waterlogged=false]')
+        for x in (-4, 0, 4):
+            lay.put(x, Y + 4, zz, 'lantern[hanging=true,waterlogged=false]')
     v.mark('journal_%s_0' % layer, 5, Y, 5)
     # 生き残りの立つ所 (焚き火の東)
     v.mark('survivor_%s' % layer, 3, Y, 1)
