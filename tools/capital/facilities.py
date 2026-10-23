@@ -1168,6 +1168,7 @@ class Facilities(FurnishBig, FurnishShops2, FurnishShops, Furnish, Interiors, Ba
         if ladder:
             keep |= {(ladder[0] + a, ladder[1] + c) for a in (-1, 0, 1) for c in (-1, 0, 1)}
         rect = (ax0, az0, ax1, az1)
+        self.home_rooms = getattr(self, 'home_rooms', []) + [('house_%d' % n, rect, y, 5), ('house_%d_up' % n, rect, y + 6, 4)]
         # 一階: 住み手の型、残りの床に敷物
         self.place_stamps(rect, y, ground_names, color=bedc, keep=keep)
         if theme == 'herbalist':

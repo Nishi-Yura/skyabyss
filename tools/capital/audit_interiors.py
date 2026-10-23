@@ -216,18 +216,20 @@ def audit_room(b, nm, rect, y, h, L):
 def main():
     args = [a for a in sys.argv[1:] if not a.startswith('-')]
     verbose = '-v' in sys.argv
+    homes = []
     if args:
         d = pickle.load(open(args[0], 'rb'))
         b = d['b']
+        homes = d.get('homes', [])
     else:
         import town
         import vox
-        b = town.Town(vox.STYLES['b']).build().b
+        t = town.Town(vox.STYLES['b'])
+        b = t.build().b
+        homes = getattr(t, 'home_rooms', [])
     bad = 0
     rows = []
-    for (nm, rect, y, h, mode) in ir.ROOMS:
-        if nm in ('shrine', 'gravekeeper', 'storyteller'):
-            pass
+    for (nm, rect, y, h, mode) in list(ir.ROOMS) + [(a, r, yy, hh, 'se') for (a, r, yy, hh) in homes]:
         x0, z0, x1, z1 = rect
         box = (x0 - 12, x1 + 12, y - 2, y + h + 1, z0 - 12, z1 + 12)
         L = light_map(b, box)

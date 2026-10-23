@@ -351,7 +351,7 @@ def dump(path):
     town.Town.room = rm
     t = town.Town(vox.STYLES['b'])
     v = t.build()
-    pickle.dump({'b': v.b, 'rects': rects, 'marks': v.marks}, open(path, 'wb'))
+    pickle.dump({'b': v.b, 'rects': rects, 'marks': v.marks, 'homes': getattr(t, 'home_rooms', [])}, open(path, 'wb'))
     print('dumped', len(v.b), 'blocks', len(rects), 'rects')
 
 

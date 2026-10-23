@@ -355,6 +355,8 @@ class Furnish:
                     self.flight(rect, y, h, self.LIGHT_DROP.get(nm))
             for (name, rect, y, names, rugc) in self.UPPER:
                 self.flight(rect, y, 5 if y == 7 else 4)
+            for (name, rect, y, h) in getattr(self, 'home_rooms', []):
+                self.flight(rect, y, h)
         finally:
             self.rng = saved
 
