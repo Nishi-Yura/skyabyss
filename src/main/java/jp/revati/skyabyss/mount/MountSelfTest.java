@@ -91,8 +91,11 @@ public final class MountSelfTest {
         for (MountLook look : MountLook.values()) {
             check(f, resource(a + "geo/entity/" + look.model() + ".geo.json"), "geo " + look.id);
             check(f, resource(a + "textures/entity/" + look.model() + ".png"), "texture " + look.id);
+            check(f, resource(a + "geo/entity/" + look.model() + "_lowpoly.geo.json") && resource(a + "lowpoly/" + look.model() + ".json")
+                    && resource(a + "textures/lowpoly/" + look.model() + ".png"), "low-poly mesh " + look.id);
+            check(f, resource(a + "animations/entity/" + look.model() + ".animation.json"), "animation " + look.id);
+            check(f, look.seat > 0.8 && look.seat < 2.6 && look.legPitch <= 0 && look.legSpread >= 0, "seat and rider legs " + look.id);
         }
-        check(f, resource(a + "animations/entity/mount.animation.json"), "animation");
         check(f, resource(a + "textures/item/mount_whistle.png") && resource(a + "models/item/mount_whistle.json"), "whistle item");
         check(f, resource(a + "textures/gui/npc_marker/fac_stable_keeper.png"), "stable keeper icon");
         check(f, resource("/data/skyabyss/dialogue/attendant_stable_keeper.json"), "stable keeper dialogue");

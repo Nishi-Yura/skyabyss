@@ -15,7 +15,8 @@
     "ChatLinesMixin",
     "ToastAddMixin",
     "AdvancementToastAccessor",
-    "ContainerLabelMixin"
+    "ContainerLabelMixin",
+    "MountRiderLegsMixin"
   ],
   "injectors": {
     "defaultRequire": 1
