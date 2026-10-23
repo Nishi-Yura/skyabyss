@@ -489,7 +489,7 @@ public class TravelMapScreen extends Screen {
                     float pulse = 0.45f + 0.35f * (float) Math.sin((time + Minecraft.getInstance().getTimer().getGameTimeDeltaPartialTick(true)) * 0.25);
                     sprite(g, S_GLOW, at[0], at[1], 0, 0f, isSel ? 0xFF9FE8FF : 0xFF7FD6D0, isSel ? 0.95f : pulse);
                 }
-                int sp = d.kind() == 0 ? S_SPAWN : d.kind() == 2 ? S_TITAN : S_WAYMARK;
+                int sp = d.kind() == 4 ? S_TOWN : d.kind() == 0 ? S_SPAWN : d.kind() == 2 ? S_TITAN : S_WAYMARK;
                 int rim = d.kind() == 2 ? 0xFF000000 | TravelDest.titanColor(d.name()) : isSel ? 0xFF9FE8FF : p.rim();
                 sprite(g, sp, at[0], at[1], rim, ok ? 1f : 0.45f);
                 List<Component> lines = new ArrayList<>();
