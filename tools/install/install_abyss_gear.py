@@ -9,7 +9,9 @@
   lowpoly/armor/abyss_diver/<部位>{,_rare}.json, textures/lowpoly/armor/abyss_diver/<部位>{,_rare}{,_glowmask}.png   鎧 (LowPolyArmorRenderer)
   models/item/<id>.json, textures/item/<id>.png                                                  品のモデル (base は builtin/entity) と、メッシュから写した 32x32 のアイコン
   共鳴の欠片 (深淵)・深淵の心核のアイコンは、余燼の同じ品の絵の色を深淵の紫に替えたもの (欠片と心核は巨神ごとに色だけ違う決まり)
-使い方: python -I tools/install/install_abyss_gear.py [--option abyss_lamp_sword=b abyss_diver=c ...]   (省くと全部 A 案。何度流してもよい)
+  v2 (2026-10-24 の作り直し。選ばれた A 案を基準の鯨骨の大剣より細かく): python -I tools/rough/lowpoly/weapons/abyss_v2/build_v2.py → raw/<id>/v2/
+       v2 の品のアイコンはメッシュから写す (tools/rough/lowpoly/weapons/icon_from_mesh.py の auto_icon)。武器の持ち方は tools/lib/weapon_display.py の表
+使い方: python -I tools/install/install_abyss_gear.py [--option abyss_lamp_sword=b abyss_diver=c ...]   (省くと武器・装飾品は v2、鎧は A 案。何度流してもよい)
 """
 from __future__ import annotations
 import os as _os
@@ -27,6 +29,9 @@ from PIL import Image
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import mesh_close  # noqa: E402
+import weapon_display  # noqa: E402
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "rough/lowpoly/weapons"))
+import icon_from_mesh  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[2]
 SRC = ROOT / "docs/review/roughs_gear_gaps/raw"
@@ -89,14 +94,19 @@ def install_mesh_item(item: str, opt: str, tier: str, levels):
         glow, lit = bake_glow(src / (name + ".png"), src / f"{tier}{lv}_glowmask.png")
         if lit > 0:
             glow.save(tex_dir / (name + "_glow.png"))
-    shutil.copyfile(src / "icon.png", ASSETS / "textures/item" / f"{item}.png")
+    if opt == "v2":
+        icon_from_mesh.auto_icon(item, tier).save(ASSETS / "textures/item" / f"{item}.png", optimize=True)
+    else:
+        shutil.copyfile(src / "icon.png", ASSETS / "textures/item" / f"{item}.png")
 
 
 def install_weapon(item: str, opt: str):
     tier, analog = WEAPONS[item]
     install_mesh_item(item, opt, tier, LEVELS)
     text = (ASSETS / "models/item" / f"{analog}.json").read_text(encoding="utf-8").replace(analog, item)
-    write_json(ASSETS / "models/item" / f"{item}.json", json.loads(text))
+    model = json.loads(text)
+    model["base"]["display"] = weapon_display.display_for(item, model["base"]["display"])
+    write_json(ASSETS / "models/item" / f"{item}.json", model)
     print(item, "option", opt, "installed")
 
 
@@ -154,7 +164,8 @@ def recolor(src_name: str, dst_name: str, hue=0.76, sat_boost=1.0):
 
 
 def main():
-    choice = {k: "a" for k in list(WEAPONS) + list(ACCESSORIES) + ["abyss_diver"]}
+    choice = {k: "v2" for k in list(WEAPONS) + list(ACCESSORIES)}
+    choice["abyss_diver"] = "a"
     args = sys.argv[1:]
     if "--option" in args:
         for kv in args[args.index("--option") + 1:]:
