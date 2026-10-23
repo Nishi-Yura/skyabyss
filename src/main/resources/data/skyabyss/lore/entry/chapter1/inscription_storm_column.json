@@ -1,0 +1,15 @@
+{
+  "chapter": "titan_storm",
+  "order": 173,
+  "inscription_sign": "sign.skyabyss.lore_storm_column",
+  "unlock": [
+    {
+      "type": "sign",
+      "target": "sign.skyabyss.lore_storm_column"
+    }
+  ],
+  "related": [
+    "chapter1/storm_ruins",
+    "chapter1/inscription_storm_east"
+  ]
+}

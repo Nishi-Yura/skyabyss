@@ -114,7 +114,8 @@ public final class GuideClient {
     }
 
     public static boolean trailEnabled() {
-        return Config.QUEST_TRAIL.get() != Config.TrailMode.OFF;
+        // 道しるべ (地面の道) は廃止 (2026-10-23: 重さの原因)。画面の目的の矢印だけ残す
+        return false;
     }
 
     @SubscribeEvent
@@ -126,12 +127,7 @@ public final class GuideClient {
     static void onTick(ClientTickEvent.Post event) {
         Minecraft mc = Minecraft.getInstance();
         while (TOGGLE_KEY.consumeClick()) {
-            if (mc.player != null && mc.screen == null) {
-                Config.TrailMode next = Config.QUEST_TRAIL.get() == Config.TrailMode.OFF ? Config.TrailMode.ON : Config.TrailMode.OFF;
-                Config.QUEST_TRAIL.set(next);
-                Config.QUEST_TRAIL.save();
-                mc.player.displayClientMessage(Component.translatable(next == Config.TrailMode.OFF ? "gui.skyabyss.guide.trail_off" : "gui.skyabyss.guide.trail_on"), true);
-            }
+            // 道しるべは廃止。キーは何もしない
         }
         if (debug && mc.player != null) {
             return;
@@ -183,6 +179,9 @@ public final class GuideClient {
     }
 
     private static boolean wantsTrail(Minecraft mc, BlockPos target) {
+        if (!trailEnabled()) {
+            return false;
+        }
         Config.TrailMode mode = Config.QUEST_TRAIL.get();
         if (mode == Config.TrailMode.OFF || mc.level.dimension() != Level.OVERWORLD) {
             return false;

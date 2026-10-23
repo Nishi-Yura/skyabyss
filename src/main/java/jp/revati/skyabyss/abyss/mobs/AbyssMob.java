@@ -55,14 +55,60 @@ public class AbyssMob extends GuardMob {
     private boolean touched;
 
     public AbyssMob(EntityType<? extends Monster> type, Level level, AbyssMobKind kind) {
-        super(type, level, kind.id);
+        super(type, level, kind.id, actionsOf(kind));
         this.kind = kind;
         this.xpReward = kind.xp;
         this.cool = 40 + random.nextInt(40);
     }
 
+    // 種ごとの動作アニメ (tools/gen/abyss/gen_abyss_mobs_a_anims.py)。予告の構えは予告の長さと同じ
+    private static String[] actionsOf(AbyssMobKind k) {
+        return switch (k.mode) {
+            case FLUTE -> new String[]{"call", "hurt", "death"};
+            case AMBUSH -> new String[]{"crack", "wake", "attack", "hurt", "death"};
+            case SNARE -> new String[]{"grasp", "hurt", "death"};
+            case STRIKE -> new String[]{"charge", "hurt", "death"};
+            case DIVE -> new String[]{"shadow", "dive", "attack", "hurt", "death"};
+            default -> new String[]{"attack", "hurt", "death"};
+        };
+    }
+
+    // 白い貝守: 殻の開け閉めは同期した OPEN で選ぶ (身と鋏だけ。殻の揺れは待機・歩きの側)
+    @Override
+    public void registerControllers(software.bernie.geckolib.animation.AnimatableManager.ControllerRegistrar controllers) {
+        super.registerControllers(controllers);
+        if (kind != null && kind.mode == AbyssMobKind.Mode.SHELL) {
+            software.bernie.geckolib.animation.RawAnimation open = software.bernie.geckolib.animation.RawAnimation.begin().thenLoop("animation." + kind.id + ".open");
+            software.bernie.geckolib.animation.RawAnimation shut = software.bernie.geckolib.animation.RawAnimation.begin().thenLoop("animation." + kind.id + ".shut");
+            controllers.add(new software.bernie.geckolib.animation.AnimationController<>(this, "shell", 6,
+                    state -> state.setAndContinue(entityData.get(OPEN) ? open : shut)));
+        }
+    }
+
+    // 近づいて殴る種 (骨拾い・肋の番・起きた塩の抜け殻・白い貝守) の振り
+    @Override
+    public boolean doHurtTarget(net.minecraft.world.entity.Entity target) {
+        boolean hit = super.doHurtTarget(target);
+        if (hit) {
+            playAction("attack");
+        }
+        return hit;
+    }
+
+    // 被弾・倒れる動き (GuardMob が流す。予告の構えの途中は被弾の動きを流さない)
+    @Override
+    protected boolean autoHurtDeath() {
+        return true;
+    }
+
     public AbyssMobKind kind() {
         return kind;
+    }
+
+    // 白殻の主 (白い貝守の体): 殻が閉じている間は首を引っこめる (BossLook の見た目だけ)
+    @Override
+    protected boolean bossClosed() {
+        return kind != null && kind.mode == AbyssMobKind.Mode.SHELL && !entityData.get(OPEN);
     }
 
     public int stage() {
@@ -211,6 +257,7 @@ public class AbyssMob extends GuardMob {
         } else if (--cool <= 0 && p != null) {
             warn = AbyssMobStats.WARN_CALL;
             cool = AbyssMobStats.CALL_EVERY;
+            playAction("call");
         }
     }
 
@@ -242,6 +289,7 @@ public class AbyssMob extends GuardMob {
             }
         } else if (p != null && AbyssMobStats.ambushWakes(p.distanceTo(this))) {
             warn = AbyssMobStats.WARN_CRACK;
+            playAction("crack");
             server.playSound(null, getX(), getY(), getZ(), SoundEvents.DEEPSLATE_BREAK, SoundSource.HOSTILE, 1.4f, 0.6f);
         }
     }
@@ -251,6 +299,7 @@ public class AbyssMob extends GuardMob {
             return;
         }
         awake = true;
+        playAction("wake");
         server.playSound(null, getX(), getY(), getZ(), SoundEvents.DEEPSLATE_BREAK, SoundSource.HOSTILE, 2.0f, 0.5f);
         server.sendParticles(ParticleTypes.POOF, getX(), getY() + 1, getZ(), 12, 0.3, 0.6, 0.3, 0.05);
     }
@@ -271,6 +320,7 @@ public class AbyssMob extends GuardMob {
         } else if (--cool <= 0) {
             warn = AbyssMobStats.WARN_RING;
             cool = AbyssMobStats.SNARE_EVERY;
+            playAction("grasp");
         }
     }
 
@@ -289,6 +339,7 @@ public class AbyssMob extends GuardMob {
         }
         if (touchCooldown == 0 && distanceTo(p) <= 1.2) {
             touchCooldown = 20;
+            playAction("attack");
             p.hurt(attackSource(), (float) getAttributeValue(Attributes.ATTACK_DAMAGE));
         }
     }
@@ -319,6 +370,7 @@ public class AbyssMob extends GuardMob {
             divePoint = p.position();
             warn = AbyssMobStats.WARN_RING;
             cool = AbyssMobStats.STRIKE_EVERY;
+            playAction("charge");
         }
     }
 
@@ -333,6 +385,7 @@ public class AbyssMob extends GuardMob {
             for (Player q : playersWithin(position(), 1.3)) {
                 if (!touched) {
                     touched = true;
+                    playAction("attack");
                     q.hurt(attackSource(), (float) getAttributeValue(Attributes.ATTACK_DAMAGE));
                     q.addEffect(new MobEffectInstance(MobEffects.LEVITATION, 20, 0));
                 }
@@ -354,6 +407,7 @@ public class AbyssMob extends GuardMob {
                 if (warn == 0) {
                     diveStage = 2;
                     diveLeft = 40;
+                    playAction("dive");
                     server.playSound(null, getX(), getY(), getZ(), SoundEvents.PHANTOM_SWOOP, SoundSource.HOSTILE, 1.4f, 0.9f);
                 }
             }
@@ -363,6 +417,7 @@ public class AbyssMob extends GuardMob {
             divePoint = p.position();
             diveStage = 1;
             warn = AbyssMobStats.WARN_SHADOW;
+            playAction("shadow");
         }
     }
 

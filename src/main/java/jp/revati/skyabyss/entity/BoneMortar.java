@@ -61,7 +61,7 @@ public class BoneMortar extends GuardMob {
     private final List<Vec3[]> shells = new ArrayList<>();
 
     public BoneMortar(EntityType<? extends Monster> type, Level level) {
-        super(type, level, "bone_mortar", "aim", "fire");
+        super(type, level, "bone_mortar", "aim", "fire", "hurt", "death");
         this.xpReward = 14;
     }
 
@@ -288,5 +288,11 @@ public class BoneMortar extends GuardMob {
     @Override
     protected void playStepSound(net.minecraft.core.BlockPos pos, net.minecraft.world.level.block.state.BlockState state) {
         modStep(Ch1BackSounds.MORTAR_STEP.get(), 0.4f);
+    }
+
+    // 被弾・倒れるアニメ (tools/gen/mobs/gen_guard_hurt_death.py)
+    @Override
+    protected boolean autoHurtDeath() {
+        return true;
     }
 }

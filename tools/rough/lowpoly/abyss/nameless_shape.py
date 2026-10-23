@@ -32,7 +32,8 @@ def build_a(k):
     for i, (x, y, z) in enumerate(dirs):
         m = "slate" if i % 2 == 0 else "bone"
         c = (x * 2.2, 12.0 + y * 2.8, z * 2.2)
-        F += part(f"shard{i}", shard("core", m, c, (x, y, z), 5.0, 1.8, sides=6))
+        # 欠片は輪の骨 (ring) に載せて、核のまわりを回す (2026-10-23: 前は核に沈めていて、待機でも撃つ時も動かなかった)
+        F += part(f"shard{i}", shard("ring", m, c, (x, y, z), 5.0, 1.8, sides=6))
     F += part("eye", ellipsoid("core", "teal", (0, 12.0, -2.9), (0.7, 0.7, 0.4), segs=6, rings=2))
     return F, [eye(0, 12.0, -3.5, 0.35)]
 
