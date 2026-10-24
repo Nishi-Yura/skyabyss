@@ -150,11 +150,11 @@ public final class FxFrontline {
         Vec3 side = c.right.scale(0.55).add(0, -0.25, 0);
         c.at(0, x -> {
             // 速い筋 (太い白、若葉の縁)。その後ろに残像の影 (半透明の柱) を三つ、跳んだ道に置く
-            FxDraw.add(x, Prim.line(from, to).color(WHITE).width(0.55).life(10).ease(Ease.OUT).glow(0.5).trail(0.5));
+            FxDraw.add(x, Prim.line(from, to).color(WHITE).width(0.95).life(10).ease(Ease.OUT).glow(0.5).trail(0.5));
             FxDraw.add(x, Prim.line(from.add(side), to.add(side)).color(GREEN).width(0.14).life(10).ease(Ease.OUT).alpha(0.9f).trail(0.4));
             for (int k = 1; k <= 3; k++) {
                 Vec3 g = from.lerp(to, k / 4.0);
-                FxDraw.add(x, Prim.beam(g.subtract(0, 1.0, 0), 1.9).color(GREEN).width(0.7).life(10).ease(Ease.OUT).alpha(0.4f));
+                FxDraw.add(x, Prim.beam(g.subtract(0, 1.0, 0), 2.4).color(GREEN).width(1.0).life(10).ease(Ease.OUT).alpha(0.6f));
             }
             SkillFx.sound(x, SoundEvents.ENDER_DRAGON_FLAP, from, 0.35f, 1.7f);
         });

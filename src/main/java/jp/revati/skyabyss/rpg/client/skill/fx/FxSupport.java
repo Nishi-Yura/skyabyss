@@ -125,7 +125,10 @@ public final class FxSupport {
         });
         c.at(6, x -> {
             SkillFx.flash(x, spot);
-            FxDraw.add(x, Prim.beam(spot, SIGNAL_HEIGHT).color(GOLD).width(1.0).life(36).ease(Ease.OUT3).glow(0.7).alpha(0.8f));
+            // 太い金の柱 (遠くから見えるように幅 2.4) と、その上に昇る輪
+            FxDraw.add(x, Prim.beam(spot, SIGNAL_HEIGHT).color(GOLD).width(2.4).life(36).ease(Ease.OUT3).alpha(0.9f));
+            FxDraw.add(x, Prim.beam(spot, SIGNAL_HEIGHT * 0.6).color(GOLD_WHITE).width(0.9).life(36).ease(Ease.OUT3));
+            FxDraw.add(x, Prim.ring(spot.add(0, SIGNAL_HEIGHT * 0.5, 0), 1.0, 3.5).color(GOLD).width(0.5).life(30).ease(Ease.OUT));
             FxDraw.add(x, Prim.ring(spot, 0.5, 4.0).color(GOLD).width(0.35).life(12).ease(Ease.OUT).glow(0.4));
             FxDraw.add(x, Prim.disc(spot, 0.3, 1.8).color(GOLD_WHITE).life(12).alpha(0.7f));
             SkillFx.burst(x, SkillFx.sky(), spot.add(0, SIGNAL_HEIGHT, 0), 5, 1.2, 0.08);
@@ -144,6 +147,11 @@ public final class FxSupport {
         c.at(0, x -> SkillFx.burst(x, SkillFx.sky(), x.hand(), 2, 0.2, 0.02));
         c.at(1, x -> {
             FxDraw.add(x, Prim.line(from, to).color(SAND).width(1.2).life(14).ease(Ease.OUT).alpha(0.55f).trail(0.6));
+            // 砂けむりの柱が道に沿って三本 (背の高さ、後ろから見て分かるように)
+            for (int k = 1; k <= 3; k++) {
+                Vec3 g = from.lerp(to, k / 4.0);
+                FxDraw.add(x, Prim.beam(g, 2.6).color(SAND).width(1.3).life(14).ease(Ease.OUT).alpha(0.7f));
+            }
             FxDraw.add(x, Prim.line(from.add(side), to.add(side)).color(WHITE).width(0.08).life(10).ease(Ease.OUT).alpha(0.8f).trail(0.4));
             FxDraw.add(x, Prim.line(from.subtract(side), to.subtract(side)).color(WHITE).width(0.08).life(10).ease(Ease.OUT).alpha(0.8f).trail(0.4));
             SkillFx.sound(x, SoundEvents.SAND_BREAK, x.feet(), 0.7f, 0.8f);

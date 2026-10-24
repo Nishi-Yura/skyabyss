@@ -90,7 +90,7 @@ public final class FxRanged {
             for (int k = 0; k < 3; k++) {
                 double ang = Math.PI * 2 * k / 3;
                 Vec3 p = base.add(Math.cos(ang) * 1.5, 0, Math.sin(ang) * 1.5);
-                FxDraw.add(x, Prim.beam(p, 2.0).color(TEAL).width(0.3).life(10).ease(Ease.OUT).glow(0.4));
+                FxDraw.add(x, Prim.beam(p, 2.6).color(TEAL).width(0.7).life(10).ease(Ease.OUT));
             }
         });
         c.at(2, x -> FxDraw.add(x, Prim.ring(base, 2.0, 0.5).color(BONE).width(0.25).life(8).ease(Ease.IN2)));
@@ -140,6 +140,8 @@ public final class FxRanged {
         Vec3 point = c.feet().add(c.fwd.scale(PULL_POINT));
         c.at(0, x -> {
             FxDraw.add(x, Prim.ring(point, PULL_RADIUS, 0.5).color(VIOLET).width(0.45).life(6).ease(Ease.IN2).glow(0.6));
+            // 引く柱: 寄せ点から上へ伸びる紫の幕 (後ろから見て分かる縦の形)
+            FxDraw.add(x, Prim.beam(point, 3.4).color(VIOLET).width(1.5).life(12).ease(Ease.OUT3).alpha(0.8f));
             SkillFx.sound(x, SoundEvents.PORTAL_AMBIENT, point, 0.25f, 2.0f);
         });
         c.at(6, x -> {
@@ -170,7 +172,9 @@ public final class FxRanged {
         }
         c.at(12, x -> {
             SkillFx.flash(x, waist);
-            FxDraw.add(x, Prim.arc(waist, new Vec3(1, 0, 0), new Vec3(0, 0, 1), 1.1, 0, Math.PI * 2).color(VIOLET).width(0.2).life(100).ease(Ease.LINEAR).trail(0.3).alpha(0.5f));
+            // 腰のまわりを回る紫の輪 (立った輪: 後ろから見ても円に見える)、その外に黒紫の柱
+            FxDraw.add(x, Prim.arc(waist, new Vec3(1, 0, 0), new Vec3(0, 1, 0), 1.2, 0, Math.PI * 2).color(VIOLET).width(0.45).life(100).ease(Ease.LINEAR).trail(0.3).alpha(0.9f));
+            FxDraw.add(x, Prim.beam(f, 3.0).color(DEEP_BLACK).width(1.2).life(20).ease(Ease.OUT3).alpha(0.8f));
             SkillFx.sound(x, SoundEvents.AMETHYST_BLOCK_RESONATE, f, 0.45f, 0.45f);
         });
         c.lasts(106);
@@ -188,11 +192,13 @@ public final class FxRanged {
         c.at(3, x -> FxDraw.add(x, Prim.ring(aim, MAW_RADIUS, 0.5).color(DEEP_BLACK).width(0.4).life(6).ease(Ease.IN2).glow(0.3)));
         c.at(8, x -> {
             SkillFx.flash(x, aim.add(0, 0.5, 0));
+            // 顎: 上下の二つの弧 (縦の面、前から後ろへ見て口の形)。牙は縁から立つ
+            FxDraw.add(x, Prim.arc(aim.add(0, 1.0, 0), x.fwd, new Vec3(0, 1, 0), 3.0, 0.5, 2.6).color(DEEP_BLACK).width(0.8).life(14).ease(Ease.OUT).alpha(0.95f));
+            FxDraw.add(x, Prim.arc(aim.add(0, 1.0, 0), x.fwd, new Vec3(0, 1, 0), 3.0, -0.5, -2.6).color(DEEP_BLACK).width(0.8).life(14).ease(Ease.OUT).alpha(0.95f));
             for (int k = 0; k < 8; k++) {
                 double a = Math.PI * 2 * k / 8;
                 Vec3 edge = aim.add(Math.cos(a) * MAW_RADIUS, 0, Math.sin(a) * MAW_RADIUS);
-                Vec3 inner = aim.add(Math.cos(a) * 1.0, 0, Math.sin(a) * 1.0);
-                FxDraw.add(x, Prim.line(edge, inner.add(0, 1.4, 0)).color(DEEP_BLACK).width(0.3).life(16).ease(Ease.OUT).alpha(0.9f));
+                FxDraw.add(x, Prim.beam(edge, 1.6).color(DEEP_BLACK).width(0.5).life(14).ease(Ease.OUT).alpha(0.9f));
             }
             FxDraw.add(x, Prim.shell(aim.add(0, 0.8, 0), 0.5, MAW_RADIUS, 1.8).color(DEEP_CORE).life(10).ease(Ease.OUT).width(0.3));
             SkillFx.kick(x, 0.9f);
@@ -210,7 +216,8 @@ public final class FxRanged {
         Vec3 up = new Vec3(0, 1, 0);
         c.at(0, x -> FxDraw.add(x, Prim.line(x.hand(), target).color(GOLD).width(0.1).life(4).ease(Ease.OUT).alpha(0.6f)));
         c.at(1, x -> {
-            FxDraw.add(x, Prim.arc(eye, x.fwd, x.right, 2.6, -Math.PI / 3, Math.PI / 3).color(GOLD).width(0.4).life(6).ease(Ease.OUT).glow(0.5).trail(0.6));
+            // 縦の斜めの三日月 (前へ 2.4、半径 2.2、幅 0.8): 後ろから見ても太い弧に見える
+            FxDraw.add(x, Prim.arc(eye.add(x.fwd.scale(2.4)), x.right, up, 2.2, 0.9, -0.9).color(GOLD).width(0.8).life(8).ease(Ease.OUT).glow(0.4).trail(0.6));
             SkillFx.sound(x, SoundEvents.AMETHYST_BLOCK_CHIME, eye, 0.6f, 1.2f);
         });
         c.at(6, x -> {
@@ -218,7 +225,7 @@ public final class FxRanged {
         });
         c.at(9, x -> {
             SkillFx.flash(x, target.add(0, 0.2, 0));
-            FxDraw.add(x, Prim.arc(eye, x.fwd, x.right, 2.6, Math.PI / 3, -Math.PI / 3).color(PALE_GOLD).width(0.35).life(8).ease(Ease.OUT).glow(0.5).trail(0.6));
+            FxDraw.add(x, Prim.arc(eye.add(x.fwd.scale(2.4)), x.right, up, 2.2, -0.9, 0.9).color(PALE_GOLD).width(0.7).life(8).ease(Ease.OUT).glow(0.4).trail(0.6));
             SkillFx.sound(x, SoundEvents.AMETHYST_BLOCK_CHIME, target, 0.6f, 0.7f);
         });
         c.at(12, x -> FxDraw.add(x, Prim.ring(target.add(0, -1.0, 0), 0.5, 1.6).color(GOLD).width(0.2).life(12)));

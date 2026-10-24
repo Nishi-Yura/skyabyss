@@ -321,7 +321,8 @@ public final class FxDraw {
         if (fade <= 0.001) {
             return;
         }
-        if (p.glow > 0) {
+        // 縦の柱にはにじみを付けない (太く白い長方形に見えるため)。にじみは弧・筋・線だけ
+        if (p.glow > 0 && p.kind != Kind.BEAM) {
             Prim halo = copy(p);
             halo.width = p.width * (1 + p.glow);
             paintOne(g, halo, e, fade * 0.35, prog);
