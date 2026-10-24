@@ -68,15 +68,15 @@ public class TideHeart extends HeartBoss {
 
     // 技の傷 (防具で減る前)。最も重い月潮の大波 26 が、想定の防具 (二章 +0) で想定の体力の約 28% (3〜4 回で危ない。HeartBalance.HEAVY_SHARE)。
     // ほかの技は大波との比を保つ。泡の牢は 1 秒ごと (最長 4 回) なので、一回は軽い
-    public static final float BREATH_DAMAGE = 22f;
-    public static final float SHELL_RING_DAMAGE = 17f;
-    public static final float WHIRL_DAMAGE = 21f;
-    public static final float SPEAR_DAMAGE = 19f;
+    public static final float BREATH_DAMAGE = 29.5f;
+    public static final float SHELL_RING_DAMAGE = 23f;
+    public static final float WHIRL_DAMAGE = 28.5f;
+    public static final float SPEAR_DAMAGE = 25.5f;
     public static final float BUBBLE_DAMAGE_PER_SECOND = 3f;
-    public static final float PEARL_DAMAGE = 16f;
-    public static final float EBB_DAMAGE = 24f;
-    public static final float WAVE_DAMAGE = 26f;
-    public static final float RAIN_DAMAGE = 21f;
+    public static final float PEARL_DAMAGE = 21.5f;
+    public static final float EBB_DAMAGE = 32.5f;
+    public static final float WAVE_DAMAGE = 35f;
+    public static final float RAIN_DAMAGE = 28.5f;
     // 引く速さ (ブロック/tick)。渦潮は歩けば逆らえる、引き潮は島の上では半分
     public static final double WHIRL_PULL = 0.08;
     public static final double EBB_PULL = 0.15;
@@ -453,8 +453,9 @@ public class TideHeart extends HeartBoss {
     }
 
     // 次の技までの間 (tick) の基準と幅 (段階 1 / 2 / 3)、最終段階。段階が進むほど短い (予告の長さはそのまま)
-    public static final int[] GAP = {25, 20, 15};
-    public static final int[] GAP_SPAN = {10, 8, 6};
+    // 2026-10-25 の試遊: 回復しながら押し切れる。技の間を、はじめはゆっくり (段階ごとに速く)、一撃は重く (×1.35)
+    public static final int[] GAP = {60, 38, 22};
+    public static final int[] GAP_SPAN = {14, 10, 6};
     public static final int GAP_FURY = 8;
     public static final int GAP_FURY_SPAN = 6;
 
@@ -648,11 +649,11 @@ public class TideHeart extends HeartBoss {
     public static final double SHELL_CORE = 3.6;
     public static final double SHELL_REACH = 15.5;
     public static final double SHELL_SPEED = 0.6;
-    public static final float SHELL_CORE_DAMAGE = 14f;
+    public static final float SHELL_CORE_DAMAGE = 19f;
     public static final int WHIRL_WARN = 70;
     public static final double WHIRL_BLAST = 5.0;
     public static final double WHIRL_POOL = 3.0;
-    public static final float WHIRL_POOL_DAMAGE = 15f;
+    public static final float WHIRL_POOL_DAMAGE = 20f;
     public static final int SPEAR_WARN = 20;
     public static final double SPEAR_RADIUS = 1.3;
     public static final int BUBBLE_WARN = 30;
@@ -662,7 +663,7 @@ public class TideHeart extends HeartBoss {
     public static final double PEARL_RADIUS = 2.2;
     public static final int EBB_WARN = 100;
     public static final double EBB_BLAST = 5.5;
-    public static final float EBB_RIPPLE_DAMAGE = 15f;
+    public static final float EBB_RIPPLE_DAMAGE = 20f;
     public static final int MOON_WARN = 40;
     public static final int MOON_ACTIVE = 40;
     public static final double MOON_LENGTH = 15;

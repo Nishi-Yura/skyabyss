@@ -78,17 +78,17 @@ public class EmberHeart extends HeartBoss {
     public static final float EXPOSED_TAKEN = 1.2f;
 
     // 技の傷 (防具で減る前。13 の 8.3節の表の値)。最も重い一撃 (消えかけの鼓動 37) が、想定の防具 22 / 強靭 16 で想定の体力 38 の 3 割弱
-    public static final float BREATH_DAMAGE = 32f;
+    public static final float BREATH_DAMAGE = 43f;
     public static final float BREATH_HEAT = 15f;
-    public static final float PULSE_DAMAGE = 24f;
+    public static final float PULSE_DAMAGE = 32.5f;
     public static final float PULSE_HEAT = 10f;
-    public static final float ORB_DAMAGE = 28f;
+    public static final float ORB_DAMAGE = 38f;
     // 燃える床の燃え立ち一回 (1 秒の予告つき、3 回)。小さな傷は防具でほとんど消えるので、倍にはしない
     public static final float ORB_FLOOR_DAMAGE = 5f;
     public static final float ORB_FLOOR_HEAT = 5f;
-    public static final float GALE_DAMAGE = 30f;
-    public static final float PELLET_DAMAGE = 18f;
-    public static final float FADING_DAMAGE = 37f;
+    public static final float GALE_DAMAGE = 40.5f;
+    public static final float PELLET_DAMAGE = 24.5f;
+    public static final float FADING_DAMAGE = 50f;
     // 残り火の燃え立ち (温まる代わりの小さな傷。1 秒の予告つき)
     public static final float EMBER_BURN_DAMAGE = 8f;
     public static final float EMBER_HEAT_PER_SECOND = 12f;
@@ -116,12 +116,12 @@ public class EmberHeart extends HeartBoss {
     public static final int BLAZE_BURNS = 3;
     public static final int GALE_WARN = 70;
     public static final double GALE_RADIUS = 6;
-    public static final float GALE_WAVE_DAMAGE = 15f;
+    public static final float GALE_WAVE_DAMAGE = 20f;
     public static final int PELLET_WARN = 30;
     public static final double PELLET_RADIUS = 1.6;
     public static final int FADING_WARN = 40;
     public static final double FADING_RADIUS = 6;
-    public static final float FADING_WAVE_DAMAGE = 18f;
+    public static final float FADING_WAVE_DAMAGE = 24.5f;
     public static final int EMBER_BURST_FIRST = 40;
     public static final int EMBER_BURST_WARN = 16;
     public static final int ROAR_WARN = 22;
@@ -136,12 +136,13 @@ public class EmberHeart extends HeartBoss {
     public static final double FORGE_HALF = Math.toRadians(45);
     public static final int FORGE_CORE_WARN = 72;
     public static final double FORGE_CORE_RADIUS = 5;
-    public static final float FORGE_DAMAGE = 34f;
-    public static final float FORGE_CORE_DAMAGE = 30f;
+    public static final float FORGE_DAMAGE = 46f;
+    public static final float FORGE_CORE_DAMAGE = 40.5f;
     public static final int FORGE_TICKS = 80;
     // 技の間 (tick): 段階 1 は 1.4〜1.9 秒、段階 2 は 1.1〜1.5 秒、段階 3 は 1.0〜1.4 秒 (冷えがあるので岩鯨より少し長い)。憤怒は 0.4〜0.7 秒
-    public static final int[] GAP_MIN = {28, 22, 20};
-    public static final int[] GAP_SPAN = {10, 8, 8};
+    // 2026-10-25 の試遊: 回復しながら押し切れる。技の間を、はじめはゆっくり (段階ごとに速く)、一撃は重く (×1.35)
+    public static final int[] GAP_MIN = {64, 42, 28};
+    public static final int[] GAP_SPAN = {14, 10, 8};
     public static final int GAP_FURY = 8;
     public static final int GAP_FURY_SPAN = 6;
     // 最初の技までと、咆哮のあとの間

@@ -214,10 +214,10 @@ public final class EmberHeartSelfTest {
     private static void checkNumbers(List<String> f, List<String> notes) {
         check(EmberHeart.MAX_HEALTH == jp.revati.skyabyss.combat.HeartBalance.MAX_HP && EmberHeart.BASE_RESIST == 1.84f,
                 "max health " + EmberHeart.MAX_HEALTH + " / resist " + EmberHeart.BASE_RESIST + " (want 1000 x 1.84)", f);
-        check(EmberHeart.BREATH_DAMAGE == 32f && EmberHeart.BREATH_HEAT == 15f && EmberHeart.PULSE_DAMAGE == 24f && EmberHeart.PULSE_HEAT == 10f
-                && EmberHeart.ORB_DAMAGE == 28f && EmberHeart.ORB_FLOOR_DAMAGE == 5f && EmberHeart.ORB_FLOOR_HEAT == 5f
-                && EmberHeart.GALE_DAMAGE == 30f && EmberHeart.PELLET_DAMAGE == 18f && EmberHeart.FADING_DAMAGE == 37f
-                && EmberHeart.FORGE_DAMAGE == 34f && EmberHeart.FORGE_CORE_DAMAGE == 30f
+        check(EmberHeart.BREATH_DAMAGE == 43f && EmberHeart.BREATH_HEAT == 15f && EmberHeart.PULSE_DAMAGE == 32.5f && EmberHeart.PULSE_HEAT == 10f
+                && EmberHeart.ORB_DAMAGE == 38f && EmberHeart.ORB_FLOOR_DAMAGE == 5f && EmberHeart.ORB_FLOOR_HEAT == 5f
+                && EmberHeart.GALE_DAMAGE == 40.5f && EmberHeart.PELLET_DAMAGE == 24.5f && EmberHeart.FADING_DAMAGE == 50f
+                && EmberHeart.FORGE_DAMAGE == 46f && EmberHeart.FORGE_CORE_DAMAGE == 40.5f
                 && EmberHeart.EMBER_BURN_DAMAGE == 8f && EmberHeart.EMBER_HEAT_PER_SECOND == 12f && EmberHeart.CHILL_PER_SECOND == 8f
                 && EmberHeartArena.ENGULF_DAMAGE == 18f && EmberHeartArena.ENGULF_HEAT == 40f, "damage or heat numbers differ from 13 の 8.3節", f);
         check(EmberHeart.GALE_PULL == 0.12 && EmberAshPellet.SPEED == 0.18 && EmberHeart.EMBER_RADIUS == 2.5 && EmberHeart.EMBER_TICKS == 160
@@ -226,10 +226,11 @@ public final class EmberHeartSelfTest {
         // 技は 10 (冷えは段階 3 に入る瞬間から効く常時の技)。三段階に三つずつ
         check(EmberHeart.bagFor(0).length == 3 && EmberHeart.bagFor(1).length == 3 && EmberHeart.bagFor(2).length == 3, "each phase should have 3 moves", f);
         check(EmberHeart.bagFor(0).length + EmberHeart.bagFor(1).length + EmberHeart.bagFor(2).length + 1 == 10, "should be 10 moves in all", f);
-        // 技の間: 段階 1 は 1.4〜1.9 秒、段階 2 は 1.1〜1.5 秒、段階 3 は 1.0〜1.4 秒、憤怒は 0.4〜0.7 秒。段階が進むほど短い
-        check(EmberHeart.GAP_MIN[0] == 28 && EmberHeart.GAP_MIN[0] + EmberHeart.GAP_SPAN[0] - 1 <= 37
-                && EmberHeart.GAP_MIN[1] == 22 && EmberHeart.GAP_MIN[1] + EmberHeart.GAP_SPAN[1] - 1 <= 29
-                && EmberHeart.GAP_MIN[2] == 20 && EmberHeart.GAP_MIN[2] + EmberHeart.GAP_SPAN[2] - 1 <= 27
+        // 技の間: 段階 1 は 3.2〜3.85 秒、段階 2 は 2.1〜2.55 秒、段階 3 は 1.4〜1.75 秒、憤怒は 0.4〜0.7 秒。段階が進むほど短い
+        // (2026-10-25: はじめをゆっくりに。前は 1.4〜1.9 / 1.1〜1.5 / 1.0〜1.4 秒)
+        check(EmberHeart.GAP_MIN[0] == 64 && EmberHeart.GAP_MIN[0] + EmberHeart.GAP_SPAN[0] - 1 <= 77
+                && EmberHeart.GAP_MIN[1] == 42 && EmberHeart.GAP_MIN[1] + EmberHeart.GAP_SPAN[1] - 1 <= 51
+                && EmberHeart.GAP_MIN[2] == 28 && EmberHeart.GAP_MIN[2] + EmberHeart.GAP_SPAN[2] - 1 <= 35
                 && EmberHeart.GAP_FURY + EmberHeart.GAP_FURY_SPAN - 1 < EmberHeart.GAP_MIN[2], "move gaps differ from 13", f);
         // 技の組: 二つ目は 16 tick 以上遅れ、組の長さは二つの技が終わるまで。段階 3 と憤怒の組に灰の帳・鞴の嵐・崩れる床は入らない。炉打ちは憤怒の組だけ
         for (EmberHeart.Pair[] set : List.of(EmberHeart.PAIRS_TWO, EmberHeart.PAIRS_THREE, EmberHeart.PAIRS_FURY)) {
@@ -791,7 +792,7 @@ public final class EmberHeartSelfTest {
             List<EmberAshPellet> pellets = back.getEntitiesOfClass(EmberAshPellet.class, EmberHeartArena.arena());
             check(early == 0, "pellets appeared before the 1.0 s charge (" + early + ")", f);
             check(pellets.size() == EmberHeart.pelletCount(1), "pellet count " + pellets.size() + " (want " + EmberHeart.pelletCount(1) + ")", f);
-            check(EmberHeart.PELLET_DAMAGE == 18f && EmberAshPellet.LIFE == 160 && EmberHeart.PELLET_WARN >= Telegraph.MIN_WARN_TICKS, "pellet numbers", f);
+            check(EmberHeart.PELLET_DAMAGE == 24.5f && EmberAshPellet.LIFE == 160 && EmberHeart.PELLET_WARN >= Telegraph.MIN_WARN_TICKS, "pellet numbers", f);
             check(1000 - target.getHealth() == 0, "a pellet hurt before landing", f);
             tickHeart(heart, EmberHeart.PELLET_WARN + 3);
             float lost = 1000 - target.getHealth();

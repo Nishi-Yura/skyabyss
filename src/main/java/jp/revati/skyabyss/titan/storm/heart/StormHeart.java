@@ -85,18 +85,18 @@ public class StormHeart extends HeartBoss {
     public static final int PERCH_TICKS = 160;
 
     // 技の傷 (防具で減る前。12 の 5.3節の表のまま)。最も重い雷の鎖 31 は、想定の防具 (21 / 14・一式 ×0.8) で想定の体力 34 の 28%
-    public static final float SUMMON_DAMAGE = 26f;
-    public static final float BLADE_DAMAGE = 28f;
-    public static final float CHAIN_DAMAGE = 31f;
-    public static final float WINGBEAT_DAMAGE = 16f;
+    public static final float SUMMON_DAMAGE = 30f;
+    public static final float BLADE_DAMAGE = 32f;
+    public static final float CHAIN_DAMAGE = 35.5f;
+    public static final float WINGBEAT_DAMAGE = 18.5f;
     // 帯電の床は 0.5 秒ごとの傷 (円に立ち続けると 5 回)
     public static final float CHARGE_DAMAGE = 6f;
-    public static final float FEATHER_DAMAGE = 24f;
-    public static final float FLASH_DAMAGE = 24f;
-    public static final float WEB_DAMAGE = 28f;
-    public static final float BARRAGE_DAMAGE = 20f;
+    public static final float FEATHER_DAMAGE = 27.5f;
+    public static final float FLASH_DAMAGE = 27.5f;
+    public static final float WEB_DAMAGE = 32f;
+    public static final float BARRAGE_DAMAGE = 23f;
     // 雷翼の十字 (憤怒だけ): 四方への雷の線が二度 (二度目は向き直す)、そのあと足もとの招雷
-    public static final float CROSS_DAMAGE = 26f;
+    public static final float CROSS_DAMAGE = 30f;
     public static final int CROSS_WARN = 24;
     public static final int CROSS_STEP = 20;
     public static final double CROSS_HALF_WIDTH = 1.2;
@@ -180,8 +180,9 @@ public class StormHeart extends HeartBoss {
     // 組が割り込む割合 (段階 1 / 2 / 3)。憤怒は組だけ
     public static final double[] COMBO_CHANCE = {0, 0.35, 0.7};
     // 次の技までの間 (tick) の基準と幅 (段階 1 / 2 / 3)、憤怒。段階が進むほど短い
-    public static final int[] GAP = {32, 22, 13};
-    public static final int[] GAP_SPAN = {10, 8, 4};
+    // 2026-10-25 の試遊: 回復しながら押し切れる。技の間を、はじめはゆっくり (段階ごとに速く)、一撃は重く (×1.15。雷翼はもとから重い)
+    public static final int[] GAP = {66, 40, 20};
+    public static final int[] GAP_SPAN = {14, 10, 5};
     public static final int GAP_FURY = 7;
     public static final int GAP_FURY_SPAN = 4;
 

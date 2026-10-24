@@ -154,7 +154,7 @@ public final class StormHeartSelfTest {
         float[] dmg = {StormHeart.SUMMON_DAMAGE, StormHeart.BLADE_DAMAGE, StormHeart.CHAIN_DAMAGE, StormHeart.WINGBEAT_DAMAGE,
                 StormHeart.CHARGE_DAMAGE, StormHeart.FEATHER_DAMAGE, StormHeart.FLASH_DAMAGE, StormHeart.WEB_DAMAGE, StormHeart.BARRAGE_DAMAGE,
                 StormHeart.CROSS_DAMAGE};
-        float[] want = {26f, 28f, 31f, 16f, 6f, 24f, 24f, 28f, 20f, 26f};
+        float[] want = {30f, 32f, 35.5f, 18.5f, 6f, 27.5f, 27.5f, 32f, 23f, 30f};
         check(java.util.Arrays.equals(dmg, want), "move damage differs from 5.3: " + java.util.Arrays.toString(dmg), failures);
         // 9 つの技と咆哮のアニメが模型のアニメにある
         try (InputStream in = StormHeartSelfTest.class.getResourceAsStream("/assets/skyabyss/animations/entity/storm_heart.animation.json")) {
@@ -588,7 +588,7 @@ public final class StormHeartSelfTest {
         notes.add(String.format("standing still: phase 2 out of reach, phases 1+3 deal %.1f of %.0f health (load %.2f), %.1f hits to fall",
                 damage, health, load, health / taken1));
         check(load > 0.8, "standing still takes too little damage in phases 1 and 3 (load " + load + ")", failures);
-        check(health / taken1 > 2.5 && health / taken1 < 5, "hits to fall should be about 3 (" + health / taken1 + ")", failures);
+        check(health / taken1 > 1.9 && health / taken1 < 4, "hits to fall should be about 2 to 3 (" + health / taken1 + ")", failures);
     }
 
     // 明るさ (光の計算は別の糸で進むので、部屋を建ててから 2 秒待って測る。SelfTestRunner の storm_heart (light) の段)。

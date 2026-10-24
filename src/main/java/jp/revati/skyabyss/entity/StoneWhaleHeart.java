@@ -378,8 +378,9 @@ public class StoneWhaleHeart extends HeartBoss {
     }
 
     // 次の技までの間 (tick) の基準と幅 (段階 1 / 2 / 3)、憤怒。段階が進むほど短い。憤怒は息をつく間もほとんどない (予告は 0.8 秒以上のまま)
-    static final int[] GAP = {25, 20, 15};
-    static final int[] GAP_SPAN = {10, 8, 6};
+    // 2026-10-25 の試遊: 回復しながら押し切れる。技の間を、はじめはゆっくり (段階ごとに速く)、一撃は重く (×1.25)
+    static final int[] GAP = {60, 38, 22};
+    static final int[] GAP_SPAN = {14, 10, 6};
     static final int GAP_FURY = 8;
     static final int GAP_FURY_SPAN = 6;
 
@@ -522,30 +523,30 @@ public class StoneWhaleHeart extends HeartBoss {
     public static final int THRUST_WARN = 24;
     public static final double THRUST_LENGTH = 9;
     public static final double THRUST_HALF_WIDTH = 2.0;
-    public static final float THRUST_DAMAGE = 22f;
+    public static final float THRUST_DAMAGE = 27.5f;
     public static final int SPIKE_WARN = 22;
     public static final double SPIKE_RADIUS = 1.4;
-    public static final float SPIKE_DAMAGE = 18f;
+    public static final float SPIKE_DAMAGE = 22.5f;
     public static final int LEAP_WARN = 24;
     public static final double LEAP_CORE = 4.5;
-    public static final float LEAP_CORE_DAMAGE = 20f;
+    public static final float LEAP_CORE_DAMAGE = 25f;
     public static final double LEAP_WAVE_REACH = 16;
-    public static final float LEAP_WAVE_DAMAGE = 16f;
+    public static final float LEAP_WAVE_DAMAGE = 20f;
     public static final int CRACK_WARN = 30;
     public static final double CRACK_HALF_WIDTH = 1.2;
-    public static final float CRACK_DAMAGE = 20f;
+    public static final float CRACK_DAMAGE = 25f;
     public static final int VOLLEY_WARN = 30;
     public static final double VOLLEY_HALF_WIDTH = 1.0;
-    public static final float VOLLEY_DAMAGE = 16f;
+    public static final float VOLLEY_DAMAGE = 20f;
     public static final int BEAM_WARN = 40;
     public static final int BEAM_ACTIVE = 24;
-    public static final float BEAM_DAMAGE = 20f;
+    public static final float BEAM_DAMAGE = 25f;
     public static final int CHAIN_WARN = 24;
     public static final int CHAIN_ACTIVE = 36;
-    public static final float CHAIN_DAMAGE = 20f;
+    public static final float CHAIN_DAMAGE = 25f;
     public static final int DROP_WARN = 30;
     public static final double DROP_RADIUS = 2.5;
-    public static final float DROP_DAMAGE = 22f;
+    public static final float DROP_DAMAGE = 27.5f;
     public static final int ROAR_PUSH_WARN = 22;
     public static final double ROAR_PUSH_RADIUS = 8;
 

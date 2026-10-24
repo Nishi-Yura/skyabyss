@@ -30,9 +30,10 @@ public final class HeartBalance {
     public static final float ENRAGE_AT = 0.15f;
     public static final double[] PHASE_SHARE = {0.34, 0.33, 0.18, 0.15};
     // 心臓の一撃の狙い: 想定の防具の +0 で、最も重い一撃が想定の体力の何割か (3〜4 回で危ない)
-    public static final double HEAVY_SHARE = 0.28;
-    public static final double HEAVY_SHARE_MIN = 0.22;
-    public static final double HEAVY_SHARE_MAX = 0.34;
+    // 2026-10-25: 一撃を重く (前は 0.28・0.22〜0.34)。2〜3 回で危ない
+    public static final double HEAVY_SHARE = 0.38;
+    public static final double HEAVY_SHARE_MIN = 0.30;
+    public static final double HEAVY_SHARE_MAX = 0.48;
     // 補給: 想定の備え (糧の灯 1.0) = 回復・吸収 24 点、戦いの中の自然回復は 1 秒あたり 0.1 点とみる
     public static final double PROVISIONS = Readiness.PROVISION_GOAL_POINTS;
     public static final double REGEN_PER_SECOND = 0.1;
