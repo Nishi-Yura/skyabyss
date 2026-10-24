@@ -9,7 +9,7 @@ import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 
 // 倒れたときの決まり (地上・ネザー・エンドなど、巨神の背中以外)。docs/design/11_record_screen.md の 6 章。
 // ゲームルールで切れる。バニラの keepInventory が true なら、これらより優先してバニラのとおり (全部残る)。
-//   skyabyssDeathMode        0 grave (既定) / 1 vanilla / 2 keep / 3 ledger  (ゲームルールは整数しか持てないので番号)
+//   skyabyssDeathMode        0 grave / 1 vanilla / 2 keep (既定) / 3 ledger  (ゲームルールは整数しか持てないので番号)
 //   skyabyssGraveKeepGear    grave のとき、装備中の防具・左手・装飾品・ホットバーを持ったまま復活する
 //   skyabyssGraveOwnerOnly   墓を持ち主だけが開けられる (false なら誰でも)
 //   skyabyssGraveExpire      墓が消えるまでの分。0 = 消えない。消えるときは中身を足もとへ落とす
@@ -22,7 +22,7 @@ public final class DeathRules {
     }
 
     public static final int DEFAULT_RESCUE = 50;
-    public static final int DEFAULT_DURABILITY = 10;
+    public static final int DEFAULT_DURABILITY = 0;
 
     public static GameRules.Key<GameRules.IntegerValue> MODE;
     public static GameRules.Key<GameRules.BooleanValue> KEEP_GEAR;
@@ -37,7 +37,8 @@ public final class DeathRules {
     @SubscribeEvent
     static void onCommonSetup(FMLCommonSetupEvent event) {
         event.enqueueWork(() -> {
-            MODE = GameRules.register("skyabyssDeathMode", GameRules.Category.PLAYER, GameRules.IntegerValue.create(Mode.GRAVE.ordinal()));
+            // 既定は keep (2026-10-25: 完全な RPG の決まり。倒れても落とさない。docs/design/40 の 2 章)
+            MODE = GameRules.register("skyabyssDeathMode", GameRules.Category.PLAYER, GameRules.IntegerValue.create(Mode.KEEP.ordinal()));
             KEEP_GEAR = GameRules.register("skyabyssGraveKeepGear", GameRules.Category.PLAYER, GameRules.BooleanValue.create(true));
             OWNER_ONLY = GameRules.register("skyabyssGraveOwnerOnly", GameRules.Category.PLAYER, GameRules.BooleanValue.create(true));
             EXPIRE = GameRules.register("skyabyssGraveExpire", GameRules.Category.PLAYER, GameRules.IntegerValue.create(0));
@@ -46,13 +47,13 @@ public final class DeathRules {
         });
     }
 
-    // 範囲外の番号は既定 (grave)
+    // 範囲外の番号は既定 (keep)
     public static Mode mode(MinecraftServer server) {
         if (MODE == null) {
-            return Mode.GRAVE;
+            return Mode.KEEP;
         }
         int v = server.getGameRules().getInt(MODE);
-        return v >= 0 && v < Mode.values().length ? Mode.values()[v] : Mode.GRAVE;
+        return v >= 0 && v < Mode.values().length ? Mode.values()[v] : Mode.KEEP;
     }
 
     public static boolean vanillaKeep(MinecraftServer server) {

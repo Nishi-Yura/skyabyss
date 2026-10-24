@@ -10,14 +10,15 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 
 // 巨神の背の中 (ブロックを置けない所) では、道具・武器・防具の耐久が減らない (2026-10-22 の二人の試遊。docs/design/32 の 2.4)。
-// 減らす呼び出し (ItemStack.hurtAndBreak) の頭で、背の次元なら何もしない。直す (負の値) のはそのまま
+// 減らす呼び出し (ItemStack.hurtAndBreak) の頭で、背の次元なら何もしない。直す (負の値) のはそのまま。
+// 完全な RPG の決まり skyabyssNoWear (rpg/rules/RpgRules) が入っていれば、どこでも人の持ち物は減らない
 @Mixin(ItemStack.class)
 public abstract class ItemStackDurabilityMixin {
     @Inject(method = "hurtAndBreak(ILnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/entity/LivingEntity;Ljava/util/function/Consumer;)V",
             at = @At("HEAD"), cancellable = true)
     private void skyabyss$noWearOnBacks(int amount, ServerLevel level, LivingEntity entity, java.util.function.Consumer<net.minecraft.world.item.Item> onBreak,
             CallbackInfo ci) {
-        if (amount > 0 && jp.revati.skyabyss.titan.BackDurability.keeps(level)) {
+        if (amount > 0 && (jp.revati.skyabyss.titan.BackDurability.keeps(level) || jp.revati.skyabyss.rpg.rules.RpgRules.noWear(level, entity))) {
             ci.cancel();
         }
     }

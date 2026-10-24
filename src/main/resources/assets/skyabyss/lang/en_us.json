@@ -1501,5 +1501,7 @@
   "gui.skyabyss.wheel.map": "Map",
   "gui.skyabyss.wheel.record": "Record",
   "gui.skyabyss.wheel.party": "Party",
-  "gui.skyabyss.wheel.notice": "Notices"
+  "gui.skyabyss.wheel.notice": "Notices",
+  "message.skyabyss.gather.tool": "This tool can't gather it",
+  "message.skyabyss.gather.wait": "Not ready to gather yet (%s s)"
 }

@@ -232,6 +232,7 @@ TEXTS = [
     ('hud.skyabyss.abyss.depth', '深さ %s', 'Depth %s'),
     ('hud.skyabyss.abyss.weight', '体が重い %s%%', 'Heavy %s%%'),
     ('message.skyabyss.abyss.voice_full', '闇の中から、名前を呼ばれた気がする。……灯りを。', 'Something in the dark seemed to call your name. ...Light, now.'),
+    ('message.skyabyss.abyss.voice_dark', '暗がりにいると、淵の声が満ちてくる。満ちると目の前が暗くなる。灯りのそばで静まる。', 'Stay in the dark and the abyss voice rises; when it fills, your sight goes dark. It quiets near light.'),
     # 心臓の番人 (story/ch5/warden。36 の 6)
     ('entity.skyabyss.heart_warden', '心臓の番人', 'Warden of the Heart'),
     ('message.skyabyss.warden.lighting', '灯りに火を移している……そばを離れないで。', 'Passing the flame to the lantern... stay close.'),

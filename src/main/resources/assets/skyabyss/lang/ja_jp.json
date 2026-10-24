@@ -1501,5 +1501,7 @@
   "gui.skyabyss.wheel.map": "旅の地図",
   "gui.skyabyss.wheel.record": "控え帳",
   "gui.skyabyss.wheel.party": "仲間",
-  "gui.skyabyss.wheel.notice": "知らせの記録"
+  "gui.skyabyss.wheel.notice": "知らせの記録",
+  "message.skyabyss.gather.tool": "この道具では採れない",
+  "message.skyabyss.gather.wait": "ここはまだ採れない（あと %s 秒）"
 }
