@@ -256,12 +256,11 @@ public final class SkillFx {
         }
     }
 
-    // 閃光: 当たりの一点だけに一つ (カメラから離れた所でだけ使う)
+    // 閃光: 当たりの一点の明るい芯 (約 1.5 ブロック四方・濃さ 0.8、6 tick)。
+    // 昔のバニラの閃光 (FLASH) は画面いっぱいの白い四角になるので使わない。カメラに向く板を一枚だけ描く
     public static void flash(Cast c, Vec3 at) {
-        if (spend(c, 1) < 1) {
-            return;
-        }
-        put(c, ParticleTypes.FLASH, at.x, at.y, at.z, 0, 0, 0);
+        FxDraw.add(c, FxDraw.Prim.beam(at.add(0, -0.75, 0), 1.5).color(0xFFFFFF).width(1.5).alpha(0.8f).life(6)
+                .ease(FxDraw.Ease.FULL));
     }
 
     // 段取りの音を一つ重ねる (音程は少しずらす)。サーバーの音 (技ごとの効果音) とは別の層として鳴る

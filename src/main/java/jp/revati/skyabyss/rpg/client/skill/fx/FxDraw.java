@@ -68,10 +68,11 @@ public final class FxDraw {
 
     // 進み方
     public enum Ease {
-        LINEAR, OUT, OUT3, IN2, SMOOTH;
+        LINEAR, OUT, OUT3, IN2, SMOOTH, FULL;
 
         public double apply(double p) {
             return switch (this) {
+                case FULL -> 1.0;
                 case LINEAR -> p;
                 case OUT -> Math.sqrt(p);
                 case OUT3 -> 1 - Math.pow(1 - p, 3);
