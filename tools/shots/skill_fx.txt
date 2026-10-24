@@ -1,9 +1,10 @@
-# 技の見た目 (2026-10-24, docs/review/skill_fx_2026-10-24.md)。25 本の能動の技を一本ずつ撃って、溜め・放ち・当たり・残りを撮る。
-# 昼 (a 溜め / b 放ち / c 当たり / d 残り)、夜 (b 放ち / c 当たり)。的は前 4 ブロックの動かないゾンビ。
+# 技の見た目 (2026-10-24 第二版)。25 本の能動の技を一本ずつ撃つ。
+# 昼: 一人称 a(溜め) b(放ち) c(当たり) d(残り)、三人称 b・c。夜: 一人称 b・c、三人称 b・c。
+# 的は前のハスク (昼でも燃えない)。弓の技は弓と矢を持たせてから撃つ。
 # 撮影: bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/skill_fx.txt -PshotsName=skill_fx
 world skill_fx flat
 size 1280 720
-timeout 1500
+timeout 2400
 render 6
 clouds off
 guiscale 2
@@ -17,516 +18,1311 @@ waitchunks
 chat clear
 wait 60
 
-cmd skyabyss skill cooldowns @s
 cmd skyabyss skill learn @s titan_cleave 3
 cmd skyabyss skill slot @s 1 titan_cleave
+cmd skyabyss skill cooldowns @s
 cmd kill @e[type=minecraft:husk]
 cmd execute at @s run summon minecraft:husk ~ ~ ~4 {NoAI:1b,Silent:1b}
 wait 10
 cmd skyabyss skill mana @s full
 cmd skyabyss skill cast @s 1
 wait 3
-shot titan_cleave_a
+shot titan_cleave_1p_a
 wait 4
-shot titan_cleave_b
+shot titan_cleave_1p_b
 wait 6
-shot titan_cleave_c
+shot titan_cleave_1p_c
 wait 14
-shot titan_cleave_d
+shot titan_cleave_1p_d
 cmd skyabyss skill cooldowns @s
-
+perspective front
+wait 6
+cmd skyabyss skill mana @s full
+cmd skyabyss skill cast @s 1
+wait 4
+shot titan_cleave_3p_b
+wait 6
+shot titan_cleave_3p_c
+cmd skyabyss skill cooldowns @s
+perspective first
+wait 4
 cmd skyabyss skill learn @s rock_call 3
 cmd skyabyss skill slot @s 1 rock_call
+cmd skyabyss skill cooldowns @s
 cmd kill @e[type=minecraft:husk]
 cmd execute at @s run summon minecraft:husk ~ ~ ~4 {NoAI:1b,Silent:1b}
 wait 10
 cmd skyabyss skill mana @s full
 cmd skyabyss skill cast @s 1
 wait 3
-shot rock_call_a
+shot rock_call_1p_a
 wait 4
-shot rock_call_b
+shot rock_call_1p_b
 wait 6
-shot rock_call_c
+shot rock_call_1p_c
 wait 14
-shot rock_call_d
+shot rock_call_1p_d
 cmd skyabyss skill cooldowns @s
-
+perspective front
+wait 6
+cmd skyabyss skill mana @s full
+cmd skyabyss skill cast @s 1
+wait 4
+shot rock_call_3p_b
+wait 6
+shot rock_call_3p_c
+cmd skyabyss skill cooldowns @s
+perspective first
+wait 4
 cmd skyabyss skill learn @s whale_sweep 3
 cmd skyabyss skill slot @s 1 whale_sweep
+cmd skyabyss skill cooldowns @s
 cmd kill @e[type=minecraft:husk]
 cmd execute at @s run summon minecraft:husk ~ ~ ~3 {NoAI:1b,Silent:1b}
 wait 10
 cmd skyabyss skill mana @s full
 cmd skyabyss skill cast @s 1
 wait 3
-shot whale_sweep_a
+shot whale_sweep_1p_a
 wait 4
-shot whale_sweep_b
+shot whale_sweep_1p_b
 wait 6
-shot whale_sweep_c
+shot whale_sweep_1p_c
 wait 14
-shot whale_sweep_d
+shot whale_sweep_1p_d
 cmd skyabyss skill cooldowns @s
-
+perspective front
+wait 6
+cmd skyabyss skill mana @s full
+cmd skyabyss skill cast @s 1
+wait 4
+shot whale_sweep_3p_b
+wait 6
+shot whale_sweep_3p_c
+cmd skyabyss skill cooldowns @s
+perspective first
+wait 4
 cmd skyabyss skill learn @s lunge 3
 cmd skyabyss skill slot @s 1 lunge
+cmd skyabyss skill cooldowns @s
 cmd kill @e[type=minecraft:husk]
 cmd execute at @s run summon minecraft:husk ~ ~ ~6 {NoAI:1b,Silent:1b}
 wait 10
 cmd skyabyss skill mana @s full
 cmd skyabyss skill cast @s 1
 wait 3
-shot lunge_a
+shot lunge_1p_a
 wait 4
-shot lunge_b
+shot lunge_1p_b
 wait 6
-shot lunge_c
+shot lunge_1p_c
 wait 14
-shot lunge_d
+shot lunge_1p_d
 cmd skyabyss skill cooldowns @s
-
+perspective front
+wait 6
+cmd skyabyss skill mana @s full
+cmd skyabyss skill cast @s 1
+wait 4
+shot lunge_3p_b
+wait 6
+shot lunge_3p_c
+cmd skyabyss skill cooldowns @s
+perspective first
+wait 4
 cmd skyabyss skill learn @s backstep 3
 cmd skyabyss skill slot @s 1 backstep
+cmd skyabyss skill cooldowns @s
 cmd kill @e[type=minecraft:husk]
 cmd execute at @s run summon minecraft:husk ~ ~ ~4 {NoAI:1b,Silent:1b}
 wait 10
 cmd skyabyss skill mana @s full
 cmd skyabyss skill cast @s 1
 wait 3
-shot backstep_a
+shot backstep_1p_a
 wait 4
-shot backstep_b
+shot backstep_1p_b
 wait 6
-shot backstep_c
+shot backstep_1p_c
 wait 14
-shot backstep_d
+shot backstep_1p_d
 cmd skyabyss skill cooldowns @s
-
+perspective front
+wait 6
+cmd skyabyss skill mana @s full
+cmd skyabyss skill cast @s 1
+wait 4
+shot backstep_3p_b
+wait 6
+shot backstep_3p_c
+cmd skyabyss skill cooldowns @s
+perspective first
+wait 4
 cmd skyabyss skill learn @s wind_rend 3
 cmd skyabyss skill slot @s 1 wind_rend
+cmd skyabyss skill cooldowns @s
 cmd kill @e[type=minecraft:husk]
 cmd execute at @s run summon minecraft:husk ~ ~ ~3 {NoAI:1b,Silent:1b}
 wait 10
 cmd skyabyss skill mana @s full
 cmd skyabyss skill cast @s 1
 wait 3
-shot wind_rend_a
+shot wind_rend_1p_a
 wait 4
-shot wind_rend_b
+shot wind_rend_1p_b
 wait 6
-shot wind_rend_c
+shot wind_rend_1p_c
 wait 14
-shot wind_rend_d
+shot wind_rend_1p_d
 cmd skyabyss skill cooldowns @s
-
+perspective front
+wait 6
+cmd skyabyss skill mana @s full
+cmd skyabyss skill cast @s 1
+wait 4
+shot wind_rend_3p_b
+wait 6
+shot wind_rend_3p_c
+cmd skyabyss skill cooldowns @s
+perspective first
+wait 4
 cmd skyabyss skill learn @s ward_song 3
 cmd skyabyss skill slot @s 1 ward_song
+cmd skyabyss skill cooldowns @s
 cmd kill @e[type=minecraft:husk]
 wait 10
 cmd skyabyss skill mana @s full
 cmd skyabyss skill cast @s 1
 wait 3
-shot ward_song_a
+shot ward_song_1p_a
 wait 4
-shot ward_song_b
+shot ward_song_1p_b
 wait 6
-shot ward_song_c
+shot ward_song_1p_c
 wait 14
-shot ward_song_d
+shot ward_song_1p_d
 cmd skyabyss skill cooldowns @s
-
+perspective front
+wait 6
+cmd skyabyss skill mana @s full
+cmd skyabyss skill cast @s 1
+wait 4
+shot ward_song_3p_b
+wait 6
+shot ward_song_3p_c
+cmd skyabyss skill cooldowns @s
+perspective first
+wait 4
 cmd skyabyss skill learn @s ebb_tide 3
 cmd skyabyss skill slot @s 1 ebb_tide
+cmd skyabyss skill cooldowns @s
 cmd kill @e[type=minecraft:husk]
 cmd execute at @s run summon minecraft:husk ~ ~ ~5 {NoAI:1b,Silent:1b}
 wait 10
 cmd skyabyss skill mana @s full
 cmd skyabyss skill cast @s 1
 wait 3
-shot ebb_tide_a
+shot ebb_tide_1p_a
 wait 4
-shot ebb_tide_b
+shot ebb_tide_1p_b
 wait 6
-shot ebb_tide_c
+shot ebb_tide_1p_c
 wait 14
-shot ebb_tide_d
+shot ebb_tide_1p_d
 cmd skyabyss skill cooldowns @s
-
+perspective front
+wait 6
+cmd skyabyss skill mana @s full
+cmd skyabyss skill cast @s 1
+wait 4
+shot ebb_tide_3p_b
+wait 6
+shot ebb_tide_3p_c
+cmd skyabyss skill cooldowns @s
+perspective first
+wait 4
 cmd skyabyss skill learn @s cycle_song 3
 cmd skyabyss skill slot @s 1 cycle_song
+cmd skyabyss skill cooldowns @s
 cmd kill @e[type=minecraft:husk]
 wait 10
 cmd skyabyss skill mana @s full
 cmd skyabyss skill cast @s 1
 wait 3
-shot cycle_song_a
+shot cycle_song_1p_a
 wait 4
-shot cycle_song_b
+shot cycle_song_1p_b
 wait 6
-shot cycle_song_c
+shot cycle_song_1p_c
 wait 14
-shot cycle_song_d
+shot cycle_song_1p_d
 cmd skyabyss skill cooldowns @s
-
+perspective front
+wait 6
+cmd skyabyss skill mana @s full
+cmd skyabyss skill cast @s 1
+wait 4
+shot cycle_song_3p_b
+wait 6
+shot cycle_song_3p_c
+cmd skyabyss skill cooldowns @s
+perspective first
+wait 4
 cmd skyabyss skill learn @s temper 3
 cmd skyabyss skill slot @s 1 temper
+cmd skyabyss skill cooldowns @s
 cmd kill @e[type=minecraft:husk]
 cmd execute at @s run summon minecraft:husk ~ ~ ~3 {NoAI:1b,Silent:1b}
 wait 10
 cmd skyabyss skill mana @s full
 cmd skyabyss skill cast @s 1
 wait 3
-shot temper_a
+shot temper_1p_a
 wait 4
-shot temper_b
+shot temper_1p_b
 wait 6
-shot temper_c
+shot temper_1p_c
 wait 14
-shot temper_d
+shot temper_1p_d
 cmd skyabyss skill cooldowns @s
-
+perspective front
+wait 6
+cmd skyabyss skill mana @s full
+cmd skyabyss skill cast @s 1
+wait 4
+shot temper_3p_b
+wait 6
+shot temper_3p_c
+cmd skyabyss skill cooldowns @s
+perspective first
+wait 4
 cmd skyabyss skill learn @s ember_hammer 3
 cmd skyabyss skill slot @s 1 ember_hammer
+cmd skyabyss skill cooldowns @s
 cmd kill @e[type=minecraft:husk]
 cmd execute at @s run summon minecraft:husk ~ ~ ~4 {NoAI:1b,Silent:1b}
 wait 10
 cmd skyabyss skill mana @s full
 cmd skyabyss skill cast @s 1
 wait 3
-shot ember_hammer_a
+shot ember_hammer_1p_a
 wait 4
-shot ember_hammer_b
+shot ember_hammer_1p_b
 wait 6
-shot ember_hammer_c
+shot ember_hammer_1p_c
 wait 14
-shot ember_hammer_d
+shot ember_hammer_1p_d
 cmd skyabyss skill cooldowns @s
-
+perspective front
+wait 6
+cmd skyabyss skill mana @s full
+cmd skyabyss skill cast @s 1
+wait 4
+shot ember_hammer_3p_b
+wait 6
+shot ember_hammer_3p_c
+cmd skyabyss skill cooldowns @s
+perspective first
+wait 4
 cmd skyabyss skill learn @s ash_scatter 3
 cmd skyabyss skill slot @s 1 ash_scatter
+cmd skyabyss skill cooldowns @s
 cmd kill @e[type=minecraft:husk]
 cmd execute at @s run summon minecraft:husk ~ ~ ~3 {NoAI:1b,Silent:1b}
 wait 10
 cmd skyabyss skill mana @s full
 cmd skyabyss skill cast @s 1
 wait 3
-shot ash_scatter_a
+shot ash_scatter_1p_a
 wait 4
-shot ash_scatter_b
+shot ash_scatter_1p_b
 wait 6
-shot ash_scatter_c
+shot ash_scatter_1p_c
 wait 14
-shot ash_scatter_d
+shot ash_scatter_1p_d
 cmd skyabyss skill cooldowns @s
-
-cmd item replace entity @s weapon.mainhand with minecraft:bow
-cmd give @s minecraft:arrow 64
+perspective front
+wait 6
+cmd skyabyss skill mana @s full
+cmd skyabyss skill cast @s 1
+wait 4
+shot ash_scatter_3p_b
+wait 6
+shot ash_scatter_3p_c
+cmd skyabyss skill cooldowns @s
+perspective first
+wait 4
 cmd skyabyss skill learn @s cloud_pierce 3
 cmd skyabyss skill slot @s 1 cloud_pierce
+cmd skyabyss skill cooldowns @s
+cmd item replace entity @s weapon.mainhand with minecraft:bow
+cmd give @s minecraft:arrow 64
 cmd kill @e[type=minecraft:husk]
 cmd execute at @s run summon minecraft:husk ~ ~ ~7 {NoAI:1b,Silent:1b}
 wait 10
 cmd skyabyss skill mana @s full
 cmd skyabyss skill cast @s 1
 wait 3
-shot cloud_pierce_a
+shot cloud_pierce_1p_a
 wait 4
-shot cloud_pierce_b
+shot cloud_pierce_1p_b
 wait 6
-shot cloud_pierce_c
+shot cloud_pierce_1p_c
 wait 14
-shot cloud_pierce_d
+shot cloud_pierce_1p_d
 cmd skyabyss skill cooldowns @s
-
+perspective front
+wait 6
+cmd skyabyss skill mana @s full
+cmd skyabyss skill cast @s 1
+wait 4
+shot cloud_pierce_3p_b
+wait 6
+shot cloud_pierce_3p_c
+cmd skyabyss skill cooldowns @s
+perspective first
+wait 4
 cmd skyabyss skill learn @s bone_trap 3
 cmd skyabyss skill slot @s 1 bone_trap
+cmd skyabyss skill cooldowns @s
 cmd kill @e[type=minecraft:husk]
 cmd execute at @s run summon minecraft:husk ~ ~ ~4 {NoAI:1b,Silent:1b}
 wait 10
 cmd skyabyss skill mana @s full
 cmd skyabyss skill cast @s 1
 wait 3
-shot bone_trap_a
+shot bone_trap_1p_a
 wait 4
-shot bone_trap_b
+shot bone_trap_1p_b
 wait 6
-shot bone_trap_c
+shot bone_trap_1p_c
 wait 14
-shot bone_trap_d
+shot bone_trap_1p_d
 cmd skyabyss skill cooldowns @s
-
-cmd item replace entity @s weapon.mainhand with minecraft:bow
-cmd give @s minecraft:arrow 64
+perspective front
+wait 6
+cmd skyabyss skill mana @s full
+cmd skyabyss skill cast @s 1
+wait 4
+shot bone_trap_3p_b
+wait 6
+shot bone_trap_3p_c
+cmd skyabyss skill cooldowns @s
+perspective first
+wait 4
 cmd skyabyss skill learn @s sky_rain 3
 cmd skyabyss skill slot @s 1 sky_rain
+cmd skyabyss skill cooldowns @s
+cmd item replace entity @s weapon.mainhand with minecraft:bow
+cmd give @s minecraft:arrow 64
 cmd kill @e[type=minecraft:husk]
 cmd execute at @s run summon minecraft:husk ~ ~ ~6 {NoAI:1b,Silent:1b}
 wait 10
 cmd skyabyss skill mana @s full
 cmd skyabyss skill cast @s 1
 wait 3
-shot sky_rain_a
+shot sky_rain_1p_a
 wait 4
-shot sky_rain_b
+shot sky_rain_1p_b
 wait 6
-shot sky_rain_c
+shot sky_rain_1p_c
 wait 14
-shot sky_rain_d
+shot sky_rain_1p_d
 cmd skyabyss skill cooldowns @s
-
+perspective front
+wait 6
+cmd skyabyss skill mana @s full
+cmd skyabyss skill cast @s 1
+wait 4
+shot sky_rain_3p_b
+wait 6
+shot sky_rain_3p_c
+cmd skyabyss skill cooldowns @s
+perspective first
+wait 4
 cmd skyabyss skill learn @s signal 3
 cmd skyabyss skill slot @s 1 signal
+cmd skyabyss skill cooldowns @s
 cmd kill @e[type=minecraft:husk]
 cmd execute at @s run summon minecraft:husk ~ ~ ~8 {NoAI:1b,Silent:1b}
 wait 10
 cmd skyabyss skill mana @s full
 cmd skyabyss skill cast @s 1
 wait 3
-shot signal_a
+shot signal_1p_a
 wait 4
-shot signal_b
+shot signal_1p_b
 wait 6
-shot signal_c
+shot signal_1p_c
 wait 14
-shot signal_d
+shot signal_1p_d
 cmd skyabyss skill cooldowns @s
-
+perspective front
+wait 6
+cmd skyabyss skill mana @s full
+cmd skyabyss skill cast @s 1
+wait 4
+shot signal_3p_b
+wait 6
+shot signal_3p_c
+cmd skyabyss skill cooldowns @s
+perspective first
+wait 4
 cmd skyabyss skill learn @s dust_charge 3
 cmd skyabyss skill slot @s 1 dust_charge
+cmd skyabyss skill cooldowns @s
 cmd kill @e[type=minecraft:husk]
 cmd execute at @s run summon minecraft:husk ~ ~ ~5 {NoAI:1b,Silent:1b}
 wait 10
 cmd skyabyss skill mana @s full
 cmd skyabyss skill cast @s 1
 wait 3
-shot dust_charge_a
+shot dust_charge_1p_a
 wait 4
-shot dust_charge_b
+shot dust_charge_1p_b
 wait 6
-shot dust_charge_c
+shot dust_charge_1p_c
 wait 14
-shot dust_charge_d
+shot dust_charge_1p_d
 cmd skyabyss skill cooldowns @s
-
+perspective front
+wait 6
+cmd skyabyss skill mana @s full
+cmd skyabyss skill cast @s 1
+wait 4
+shot dust_charge_3p_b
+wait 6
+shot dust_charge_3p_c
+cmd skyabyss skill cooldowns @s
+perspective first
+wait 4
 cmd skyabyss skill learn @s steam_bell 3
 cmd skyabyss skill slot @s 1 steam_bell
+cmd skyabyss skill cooldowns @s
 cmd kill @e[type=minecraft:husk]
 cmd execute at @s run summon minecraft:husk ~ ~ ~3 {NoAI:1b,Silent:1b}
 wait 10
 cmd skyabyss skill mana @s full
 cmd skyabyss skill cast @s 1
 wait 3
-shot steam_bell_a
+shot steam_bell_1p_a
 wait 4
-shot steam_bell_b
+shot steam_bell_1p_b
 wait 6
-shot steam_bell_c
+shot steam_bell_1p_c
 wait 14
-shot steam_bell_d
+shot steam_bell_1p_d
 cmd skyabyss skill cooldowns @s
-
+perspective front
+wait 6
+cmd skyabyss skill mana @s full
+cmd skyabyss skill cast @s 1
+wait 4
+shot steam_bell_3p_b
+wait 6
+shot steam_bell_3p_c
+cmd skyabyss skill cooldowns @s
+perspective first
+wait 4
 cmd skyabyss skill learn @s cinder_volley 3
 cmd skyabyss skill slot @s 1 cinder_volley
+cmd skyabyss skill cooldowns @s
 cmd kill @e[type=minecraft:husk]
 cmd execute at @s run summon minecraft:husk ~ ~ ~8 {NoAI:1b,Silent:1b}
 wait 10
 cmd skyabyss skill mana @s full
 cmd skyabyss skill cast @s 1
 wait 3
-shot cinder_volley_a
+shot cinder_volley_1p_a
 wait 4
-shot cinder_volley_b
+shot cinder_volley_1p_b
 wait 6
-shot cinder_volley_c
+shot cinder_volley_1p_c
 wait 14
-shot cinder_volley_d
+shot cinder_volley_1p_d
 cmd skyabyss skill cooldowns @s
-
+perspective front
+wait 6
+cmd skyabyss skill mana @s full
+cmd skyabyss skill cast @s 1
+wait 4
+shot cinder_volley_3p_b
+wait 6
+shot cinder_volley_3p_c
+cmd skyabyss skill cooldowns @s
+perspective first
+wait 4
 cmd skyabyss skill learn @s deep_pull 3
 cmd skyabyss skill slot @s 1 deep_pull
+cmd skyabyss skill cooldowns @s
 cmd kill @e[type=minecraft:husk]
 cmd execute at @s run summon minecraft:husk ~ ~ ~5 {NoAI:1b,Silent:1b}
 wait 10
 cmd skyabyss skill mana @s full
 cmd skyabyss skill cast @s 1
 wait 3
-shot deep_pull_a
+shot deep_pull_1p_a
 wait 4
-shot deep_pull_b
+shot deep_pull_1p_b
 wait 6
-shot deep_pull_c
+shot deep_pull_1p_c
 wait 14
-shot deep_pull_d
+shot deep_pull_1p_d
 cmd skyabyss skill cooldowns @s
-
+perspective front
+wait 6
+cmd skyabyss skill mana @s full
+cmd skyabyss skill cast @s 1
+wait 4
+shot deep_pull_3p_b
+wait 6
+shot deep_pull_3p_c
+cmd skyabyss skill cooldowns @s
+perspective first
+wait 4
 cmd skyabyss skill learn @s deep_echo 3
 cmd skyabyss skill slot @s 1 deep_echo
+cmd skyabyss skill cooldowns @s
 cmd kill @e[type=minecraft:husk]
 cmd execute at @s run summon minecraft:husk ~ ~ ~3 {NoAI:1b,Silent:1b}
 wait 10
 cmd skyabyss skill mana @s full
 cmd skyabyss skill cast @s 1
 wait 3
-shot deep_echo_a
+shot deep_echo_1p_a
 wait 4
-shot deep_echo_b
+shot deep_echo_1p_b
 wait 6
-shot deep_echo_c
+shot deep_echo_1p_c
 wait 14
-shot deep_echo_d
+shot deep_echo_1p_d
 cmd skyabyss skill cooldowns @s
-
+perspective front
+wait 6
+cmd skyabyss skill mana @s full
+cmd skyabyss skill cast @s 1
+wait 4
+shot deep_echo_3p_b
+wait 6
+shot deep_echo_3p_c
+cmd skyabyss skill cooldowns @s
+perspective first
+wait 4
 cmd skyabyss skill learn @s deep_maw 3
 cmd skyabyss skill slot @s 1 deep_maw
+cmd skyabyss skill cooldowns @s
 cmd kill @e[type=minecraft:husk]
 cmd execute at @s run summon minecraft:husk ~ ~ ~10 {NoAI:1b,Silent:1b}
 wait 10
 cmd skyabyss skill mana @s full
 cmd skyabyss skill cast @s 1
 wait 3
-shot deep_maw_a
+shot deep_maw_1p_a
 wait 4
-shot deep_maw_b
+shot deep_maw_1p_b
 wait 6
-shot deep_maw_c
+shot deep_maw_1p_c
 wait 14
-shot deep_maw_d
+shot deep_maw_1p_d
 cmd skyabyss skill cooldowns @s
-
+perspective front
+wait 6
+cmd skyabyss skill mana @s full
+cmd skyabyss skill cast @s 1
+wait 4
+shot deep_maw_3p_b
+wait 6
+shot deep_maw_3p_c
+cmd skyabyss skill cooldowns @s
+perspective first
+wait 4
 cmd skyabyss skill learn @s echo_strike 3
 cmd skyabyss skill slot @s 1 echo_strike
+cmd skyabyss skill cooldowns @s
 cmd kill @e[type=minecraft:husk]
 cmd execute at @s run summon minecraft:husk ~ ~ ~3 {NoAI:1b,Silent:1b}
 wait 10
 cmd skyabyss skill mana @s full
 cmd skyabyss skill cast @s 1
 wait 3
-shot echo_strike_a
+shot echo_strike_1p_a
 wait 4
-shot echo_strike_b
+shot echo_strike_1p_b
 wait 6
-shot echo_strike_c
+shot echo_strike_1p_c
 wait 14
-shot echo_strike_d
+shot echo_strike_1p_d
 cmd skyabyss skill cooldowns @s
-
+perspective front
+wait 6
+cmd skyabyss skill mana @s full
+cmd skyabyss skill cast @s 1
+wait 4
+shot echo_strike_3p_b
+wait 6
+shot echo_strike_3p_c
+cmd skyabyss skill cooldowns @s
+perspective first
+wait 4
 cmd skyabyss skill learn @s grave_bell 3
 cmd skyabyss skill slot @s 1 grave_bell
+cmd skyabyss skill cooldowns @s
 cmd kill @e[type=minecraft:husk]
 cmd execute at @s run summon minecraft:husk ~ ~ ~3 {NoAI:1b,Silent:1b}
 wait 10
 cmd skyabyss skill mana @s full
 cmd skyabyss skill cast @s 1
 wait 3
-shot grave_bell_a
+shot grave_bell_1p_a
 wait 4
-shot grave_bell_b
+shot grave_bell_1p_b
 wait 6
-shot grave_bell_c
+shot grave_bell_1p_c
 wait 14
-shot grave_bell_d
+shot grave_bell_1p_d
 cmd skyabyss skill cooldowns @s
-
+perspective front
+wait 6
+cmd skyabyss skill mana @s full
+cmd skyabyss skill cast @s 1
+wait 4
+shot grave_bell_3p_b
+wait 6
+shot grave_bell_3p_c
+cmd skyabyss skill cooldowns @s
+perspective first
+wait 4
 cmd skyabyss skill learn @s final_light 3
 cmd skyabyss skill slot @s 1 final_light
+cmd skyabyss skill cooldowns @s
 cmd kill @e[type=minecraft:husk]
 cmd execute at @s run summon minecraft:husk ~ ~ ~3 {NoAI:1b,Silent:1b}
 wait 10
 cmd skyabyss skill mana @s full
 cmd skyabyss skill cast @s 1
 wait 3
-shot final_light_a
+shot final_light_1p_a
 wait 4
-shot final_light_b
+shot final_light_1p_b
 wait 6
-shot final_light_c
+shot final_light_1p_c
 wait 14
-shot final_light_d
+shot final_light_1p_d
 cmd skyabyss skill cooldowns @s
-
-# ---- 夜 (b 放ち / c 当たり)
+perspective front
+wait 6
+cmd skyabyss skill mana @s full
+cmd skyabyss skill cast @s 1
+wait 4
+shot final_light_3p_b
+wait 6
+shot final_light_3p_c
+cmd skyabyss skill cooldowns @s
+perspective first
+wait 4
 cmd time set midnight
 wait 40
-cmd skyabyss skill cooldowns @s
 cmd skyabyss skill learn @s titan_cleave 3
 cmd skyabyss skill slot @s 1 titan_cleave
+cmd skyabyss skill cooldowns @s
 cmd kill @e[type=minecraft:husk]
 cmd execute at @s run summon minecraft:husk ~ ~ ~4 {NoAI:1b,Silent:1b}
 wait 10
 cmd skyabyss skill mana @s full
 cmd skyabyss skill cast @s 1
 wait 7
-shot night_titan_cleave_b
+shot night_titan_cleave_1p_b
 wait 6
-shot night_titan_cleave_c
+shot night_titan_cleave_1p_c
 cmd skyabyss skill cooldowns @s
-
-cmd skyabyss skill learn @s deep_maw 3
-cmd skyabyss skill slot @s 1 deep_maw
+perspective front
+wait 6
+cmd skyabyss skill mana @s full
+cmd skyabyss skill cast @s 1
+wait 7
+shot night_titan_cleave_3p_b
+wait 6
+shot night_titan_cleave_3p_c
+cmd skyabyss skill cooldowns @s
+perspective first
+wait 4
+cmd skyabyss skill learn @s rock_call 3
+cmd skyabyss skill slot @s 1 rock_call
+cmd skyabyss skill cooldowns @s
 cmd kill @e[type=minecraft:husk]
-cmd execute at @s run summon minecraft:husk ~ ~ ~10 {NoAI:1b,Silent:1b}
+cmd execute at @s run summon minecraft:husk ~ ~ ~4 {NoAI:1b,Silent:1b}
 wait 10
 cmd skyabyss skill mana @s full
 cmd skyabyss skill cast @s 1
 wait 7
-shot night_deep_maw_b
+shot night_rock_call_1p_b
 wait 6
-shot night_deep_maw_c
+shot night_rock_call_1p_c
 cmd skyabyss skill cooldowns @s
-
-cmd skyabyss skill learn @s final_light 3
-cmd skyabyss skill slot @s 1 final_light
+perspective front
+wait 6
+cmd skyabyss skill mana @s full
+cmd skyabyss skill cast @s 1
+wait 7
+shot night_rock_call_3p_b
+wait 6
+shot night_rock_call_3p_c
+cmd skyabyss skill cooldowns @s
+perspective first
+wait 4
+cmd skyabyss skill learn @s whale_sweep 3
+cmd skyabyss skill slot @s 1 whale_sweep
+cmd skyabyss skill cooldowns @s
 cmd kill @e[type=minecraft:husk]
 cmd execute at @s run summon minecraft:husk ~ ~ ~3 {NoAI:1b,Silent:1b}
 wait 10
 cmd skyabyss skill mana @s full
 cmd skyabyss skill cast @s 1
 wait 7
-shot night_final_light_b
+shot night_whale_sweep_1p_b
 wait 6
-shot night_final_light_c
+shot night_whale_sweep_1p_c
 cmd skyabyss skill cooldowns @s
-
+perspective front
+wait 6
+cmd skyabyss skill mana @s full
+cmd skyabyss skill cast @s 1
+wait 7
+shot night_whale_sweep_3p_b
+wait 6
+shot night_whale_sweep_3p_c
+cmd skyabyss skill cooldowns @s
+perspective first
+wait 4
+cmd skyabyss skill learn @s lunge 3
+cmd skyabyss skill slot @s 1 lunge
+cmd skyabyss skill cooldowns @s
+cmd kill @e[type=minecraft:husk]
+cmd execute at @s run summon minecraft:husk ~ ~ ~6 {NoAI:1b,Silent:1b}
+wait 10
+cmd skyabyss skill mana @s full
+cmd skyabyss skill cast @s 1
+wait 7
+shot night_lunge_1p_b
+wait 6
+shot night_lunge_1p_c
+cmd skyabyss skill cooldowns @s
+perspective front
+wait 6
+cmd skyabyss skill mana @s full
+cmd skyabyss skill cast @s 1
+wait 7
+shot night_lunge_3p_b
+wait 6
+shot night_lunge_3p_c
+cmd skyabyss skill cooldowns @s
+perspective first
+wait 4
+cmd skyabyss skill learn @s backstep 3
+cmd skyabyss skill slot @s 1 backstep
+cmd skyabyss skill cooldowns @s
+cmd kill @e[type=minecraft:husk]
+cmd execute at @s run summon minecraft:husk ~ ~ ~4 {NoAI:1b,Silent:1b}
+wait 10
+cmd skyabyss skill mana @s full
+cmd skyabyss skill cast @s 1
+wait 7
+shot night_backstep_1p_b
+wait 6
+shot night_backstep_1p_c
+cmd skyabyss skill cooldowns @s
+perspective front
+wait 6
+cmd skyabyss skill mana @s full
+cmd skyabyss skill cast @s 1
+wait 7
+shot night_backstep_3p_b
+wait 6
+shot night_backstep_3p_c
+cmd skyabyss skill cooldowns @s
+perspective first
+wait 4
+cmd skyabyss skill learn @s wind_rend 3
+cmd skyabyss skill slot @s 1 wind_rend
+cmd skyabyss skill cooldowns @s
+cmd kill @e[type=minecraft:husk]
+cmd execute at @s run summon minecraft:husk ~ ~ ~3 {NoAI:1b,Silent:1b}
+wait 10
+cmd skyabyss skill mana @s full
+cmd skyabyss skill cast @s 1
+wait 7
+shot night_wind_rend_1p_b
+wait 6
+shot night_wind_rend_1p_c
+cmd skyabyss skill cooldowns @s
+perspective front
+wait 6
+cmd skyabyss skill mana @s full
+cmd skyabyss skill cast @s 1
+wait 7
+shot night_wind_rend_3p_b
+wait 6
+shot night_wind_rend_3p_c
+cmd skyabyss skill cooldowns @s
+perspective first
+wait 4
 cmd skyabyss skill learn @s ward_song 3
 cmd skyabyss skill slot @s 1 ward_song
+cmd skyabyss skill cooldowns @s
 cmd kill @e[type=minecraft:husk]
 wait 10
 cmd skyabyss skill mana @s full
 cmd skyabyss skill cast @s 1
 wait 7
-shot night_ward_song_b
+shot night_ward_song_1p_b
 wait 6
-shot night_ward_song_c
+shot night_ward_song_1p_c
 cmd skyabyss skill cooldowns @s
-
-cmd item replace entity @s weapon.mainhand with minecraft:bow
-cmd give @s minecraft:arrow 64
+perspective front
+wait 6
+cmd skyabyss skill mana @s full
+cmd skyabyss skill cast @s 1
+wait 7
+shot night_ward_song_3p_b
+wait 6
+shot night_ward_song_3p_c
+cmd skyabyss skill cooldowns @s
+perspective first
+wait 4
+cmd skyabyss skill learn @s ebb_tide 3
+cmd skyabyss skill slot @s 1 ebb_tide
+cmd skyabyss skill cooldowns @s
+cmd kill @e[type=minecraft:husk]
+cmd execute at @s run summon minecraft:husk ~ ~ ~5 {NoAI:1b,Silent:1b}
+wait 10
+cmd skyabyss skill mana @s full
+cmd skyabyss skill cast @s 1
+wait 7
+shot night_ebb_tide_1p_b
+wait 6
+shot night_ebb_tide_1p_c
+cmd skyabyss skill cooldowns @s
+perspective front
+wait 6
+cmd skyabyss skill mana @s full
+cmd skyabyss skill cast @s 1
+wait 7
+shot night_ebb_tide_3p_b
+wait 6
+shot night_ebb_tide_3p_c
+cmd skyabyss skill cooldowns @s
+perspective first
+wait 4
+cmd skyabyss skill learn @s cycle_song 3
+cmd skyabyss skill slot @s 1 cycle_song
+cmd skyabyss skill cooldowns @s
+cmd kill @e[type=minecraft:husk]
+wait 10
+cmd skyabyss skill mana @s full
+cmd skyabyss skill cast @s 1
+wait 7
+shot night_cycle_song_1p_b
+wait 6
+shot night_cycle_song_1p_c
+cmd skyabyss skill cooldowns @s
+perspective front
+wait 6
+cmd skyabyss skill mana @s full
+cmd skyabyss skill cast @s 1
+wait 7
+shot night_cycle_song_3p_b
+wait 6
+shot night_cycle_song_3p_c
+cmd skyabyss skill cooldowns @s
+perspective first
+wait 4
+cmd skyabyss skill learn @s temper 3
+cmd skyabyss skill slot @s 1 temper
+cmd skyabyss skill cooldowns @s
+cmd kill @e[type=minecraft:husk]
+cmd execute at @s run summon minecraft:husk ~ ~ ~3 {NoAI:1b,Silent:1b}
+wait 10
+cmd skyabyss skill mana @s full
+cmd skyabyss skill cast @s 1
+wait 7
+shot night_temper_1p_b
+wait 6
+shot night_temper_1p_c
+cmd skyabyss skill cooldowns @s
+perspective front
+wait 6
+cmd skyabyss skill mana @s full
+cmd skyabyss skill cast @s 1
+wait 7
+shot night_temper_3p_b
+wait 6
+shot night_temper_3p_c
+cmd skyabyss skill cooldowns @s
+perspective first
+wait 4
+cmd skyabyss skill learn @s ember_hammer 3
+cmd skyabyss skill slot @s 1 ember_hammer
+cmd skyabyss skill cooldowns @s
+cmd kill @e[type=minecraft:husk]
+cmd execute at @s run summon minecraft:husk ~ ~ ~4 {NoAI:1b,Silent:1b}
+wait 10
+cmd skyabyss skill mana @s full
+cmd skyabyss skill cast @s 1
+wait 7
+shot night_ember_hammer_1p_b
+wait 6
+shot night_ember_hammer_1p_c
+cmd skyabyss skill cooldowns @s
+perspective front
+wait 6
+cmd skyabyss skill mana @s full
+cmd skyabyss skill cast @s 1
+wait 7
+shot night_ember_hammer_3p_b
+wait 6
+shot night_ember_hammer_3p_c
+cmd skyabyss skill cooldowns @s
+perspective first
+wait 4
+cmd skyabyss skill learn @s ash_scatter 3
+cmd skyabyss skill slot @s 1 ash_scatter
+cmd skyabyss skill cooldowns @s
+cmd kill @e[type=minecraft:husk]
+cmd execute at @s run summon minecraft:husk ~ ~ ~3 {NoAI:1b,Silent:1b}
+wait 10
+cmd skyabyss skill mana @s full
+cmd skyabyss skill cast @s 1
+wait 7
+shot night_ash_scatter_1p_b
+wait 6
+shot night_ash_scatter_1p_c
+cmd skyabyss skill cooldowns @s
+perspective front
+wait 6
+cmd skyabyss skill mana @s full
+cmd skyabyss skill cast @s 1
+wait 7
+shot night_ash_scatter_3p_b
+wait 6
+shot night_ash_scatter_3p_c
+cmd skyabyss skill cooldowns @s
+perspective first
+wait 4
 cmd skyabyss skill learn @s cloud_pierce 3
 cmd skyabyss skill slot @s 1 cloud_pierce
+cmd skyabyss skill cooldowns @s
+cmd item replace entity @s weapon.mainhand with minecraft:bow
+cmd give @s minecraft:arrow 64
 cmd kill @e[type=minecraft:husk]
 cmd execute at @s run summon minecraft:husk ~ ~ ~7 {NoAI:1b,Silent:1b}
 wait 10
 cmd skyabyss skill mana @s full
 cmd skyabyss skill cast @s 1
 wait 7
-shot night_cloud_pierce_b
+shot night_cloud_pierce_1p_b
 wait 6
-shot night_cloud_pierce_c
+shot night_cloud_pierce_1p_c
 cmd skyabyss skill cooldowns @s
-
+perspective front
+wait 6
+cmd skyabyss skill mana @s full
+cmd skyabyss skill cast @s 1
+wait 7
+shot night_cloud_pierce_3p_b
+wait 6
+shot night_cloud_pierce_3p_c
+cmd skyabyss skill cooldowns @s
+perspective first
+wait 4
+cmd skyabyss skill learn @s bone_trap 3
+cmd skyabyss skill slot @s 1 bone_trap
+cmd skyabyss skill cooldowns @s
+cmd kill @e[type=minecraft:husk]
+cmd execute at @s run summon minecraft:husk ~ ~ ~4 {NoAI:1b,Silent:1b}
+wait 10
+cmd skyabyss skill mana @s full
+cmd skyabyss skill cast @s 1
+wait 7
+shot night_bone_trap_1p_b
+wait 6
+shot night_bone_trap_1p_c
+cmd skyabyss skill cooldowns @s
+perspective front
+wait 6
+cmd skyabyss skill mana @s full
+cmd skyabyss skill cast @s 1
+wait 7
+shot night_bone_trap_3p_b
+wait 6
+shot night_bone_trap_3p_c
+cmd skyabyss skill cooldowns @s
+perspective first
+wait 4
+cmd skyabyss skill learn @s sky_rain 3
+cmd skyabyss skill slot @s 1 sky_rain
+cmd skyabyss skill cooldowns @s
+cmd item replace entity @s weapon.mainhand with minecraft:bow
+cmd give @s minecraft:arrow 64
+cmd kill @e[type=minecraft:husk]
+cmd execute at @s run summon minecraft:husk ~ ~ ~6 {NoAI:1b,Silent:1b}
+wait 10
+cmd skyabyss skill mana @s full
+cmd skyabyss skill cast @s 1
+wait 7
+shot night_sky_rain_1p_b
+wait 6
+shot night_sky_rain_1p_c
+cmd skyabyss skill cooldowns @s
+perspective front
+wait 6
+cmd skyabyss skill mana @s full
+cmd skyabyss skill cast @s 1
+wait 7
+shot night_sky_rain_3p_b
+wait 6
+shot night_sky_rain_3p_c
+cmd skyabyss skill cooldowns @s
+perspective first
+wait 4
+cmd skyabyss skill learn @s signal 3
+cmd skyabyss skill slot @s 1 signal
+cmd skyabyss skill cooldowns @s
+cmd kill @e[type=minecraft:husk]
+cmd execute at @s run summon minecraft:husk ~ ~ ~8 {NoAI:1b,Silent:1b}
+wait 10
+cmd skyabyss skill mana @s full
+cmd skyabyss skill cast @s 1
+wait 7
+shot night_signal_1p_b
+wait 6
+shot night_signal_1p_c
+cmd skyabyss skill cooldowns @s
+perspective front
+wait 6
+cmd skyabyss skill mana @s full
+cmd skyabyss skill cast @s 1
+wait 7
+shot night_signal_3p_b
+wait 6
+shot night_signal_3p_c
+cmd skyabyss skill cooldowns @s
+perspective first
+wait 4
+cmd skyabyss skill learn @s dust_charge 3
+cmd skyabyss skill slot @s 1 dust_charge
+cmd skyabyss skill cooldowns @s
+cmd kill @e[type=minecraft:husk]
+cmd execute at @s run summon minecraft:husk ~ ~ ~5 {NoAI:1b,Silent:1b}
+wait 10
+cmd skyabyss skill mana @s full
+cmd skyabyss skill cast @s 1
+wait 7
+shot night_dust_charge_1p_b
+wait 6
+shot night_dust_charge_1p_c
+cmd skyabyss skill cooldowns @s
+perspective front
+wait 6
+cmd skyabyss skill mana @s full
+cmd skyabyss skill cast @s 1
+wait 7
+shot night_dust_charge_3p_b
+wait 6
+shot night_dust_charge_3p_c
+cmd skyabyss skill cooldowns @s
+perspective first
+wait 4
 cmd skyabyss skill learn @s steam_bell 3
 cmd skyabyss skill slot @s 1 steam_bell
+cmd skyabyss skill cooldowns @s
 cmd kill @e[type=minecraft:husk]
 cmd execute at @s run summon minecraft:husk ~ ~ ~3 {NoAI:1b,Silent:1b}
 wait 10
 cmd skyabyss skill mana @s full
 cmd skyabyss skill cast @s 1
 wait 7
-shot night_steam_bell_b
+shot night_steam_bell_1p_b
 wait 6
-shot night_steam_bell_c
+shot night_steam_bell_1p_c
 cmd skyabyss skill cooldowns @s
-
+perspective front
+wait 6
+cmd skyabyss skill mana @s full
+cmd skyabyss skill cast @s 1
+wait 7
+shot night_steam_bell_3p_b
+wait 6
+shot night_steam_bell_3p_c
+cmd skyabyss skill cooldowns @s
+perspective first
+wait 4
+cmd skyabyss skill learn @s cinder_volley 3
+cmd skyabyss skill slot @s 1 cinder_volley
+cmd skyabyss skill cooldowns @s
+cmd kill @e[type=minecraft:husk]
+cmd execute at @s run summon minecraft:husk ~ ~ ~8 {NoAI:1b,Silent:1b}
+wait 10
+cmd skyabyss skill mana @s full
+cmd skyabyss skill cast @s 1
+wait 7
+shot night_cinder_volley_1p_b
+wait 6
+shot night_cinder_volley_1p_c
+cmd skyabyss skill cooldowns @s
+perspective front
+wait 6
+cmd skyabyss skill mana @s full
+cmd skyabyss skill cast @s 1
+wait 7
+shot night_cinder_volley_3p_b
+wait 6
+shot night_cinder_volley_3p_c
+cmd skyabyss skill cooldowns @s
+perspective first
+wait 4
+cmd skyabyss skill learn @s deep_pull 3
+cmd skyabyss skill slot @s 1 deep_pull
+cmd skyabyss skill cooldowns @s
+cmd kill @e[type=minecraft:husk]
+cmd execute at @s run summon minecraft:husk ~ ~ ~5 {NoAI:1b,Silent:1b}
+wait 10
+cmd skyabyss skill mana @s full
+cmd skyabyss skill cast @s 1
+wait 7
+shot night_deep_pull_1p_b
+wait 6
+shot night_deep_pull_1p_c
+cmd skyabyss skill cooldowns @s
+perspective front
+wait 6
+cmd skyabyss skill mana @s full
+cmd skyabyss skill cast @s 1
+wait 7
+shot night_deep_pull_3p_b
+wait 6
+shot night_deep_pull_3p_c
+cmd skyabyss skill cooldowns @s
+perspective first
+wait 4
+cmd skyabyss skill learn @s deep_echo 3
+cmd skyabyss skill slot @s 1 deep_echo
+cmd skyabyss skill cooldowns @s
+cmd kill @e[type=minecraft:husk]
+cmd execute at @s run summon minecraft:husk ~ ~ ~3 {NoAI:1b,Silent:1b}
+wait 10
+cmd skyabyss skill mana @s full
+cmd skyabyss skill cast @s 1
+wait 7
+shot night_deep_echo_1p_b
+wait 6
+shot night_deep_echo_1p_c
+cmd skyabyss skill cooldowns @s
+perspective front
+wait 6
+cmd skyabyss skill mana @s full
+cmd skyabyss skill cast @s 1
+wait 7
+shot night_deep_echo_3p_b
+wait 6
+shot night_deep_echo_3p_c
+cmd skyabyss skill cooldowns @s
+perspective first
+wait 4
+cmd skyabyss skill learn @s deep_maw 3
+cmd skyabyss skill slot @s 1 deep_maw
+cmd skyabyss skill cooldowns @s
+cmd kill @e[type=minecraft:husk]
+cmd execute at @s run summon minecraft:husk ~ ~ ~10 {NoAI:1b,Silent:1b}
+wait 10
+cmd skyabyss skill mana @s full
+cmd skyabyss skill cast @s 1
+wait 7
+shot night_deep_maw_1p_b
+wait 6
+shot night_deep_maw_1p_c
+cmd skyabyss skill cooldowns @s
+perspective front
+wait 6
+cmd skyabyss skill mana @s full
+cmd skyabyss skill cast @s 1
+wait 7
+shot night_deep_maw_3p_b
+wait 6
+shot night_deep_maw_3p_c
+cmd skyabyss skill cooldowns @s
+perspective first
+wait 4
+cmd skyabyss skill learn @s echo_strike 3
+cmd skyabyss skill slot @s 1 echo_strike
+cmd skyabyss skill cooldowns @s
+cmd kill @e[type=minecraft:husk]
+cmd execute at @s run summon minecraft:husk ~ ~ ~3 {NoAI:1b,Silent:1b}
+wait 10
+cmd skyabyss skill mana @s full
+cmd skyabyss skill cast @s 1
+wait 7
+shot night_echo_strike_1p_b
+wait 6
+shot night_echo_strike_1p_c
+cmd skyabyss skill cooldowns @s
+perspective front
+wait 6
+cmd skyabyss skill mana @s full
+cmd skyabyss skill cast @s 1
+wait 7
+shot night_echo_strike_3p_b
+wait 6
+shot night_echo_strike_3p_c
+cmd skyabyss skill cooldowns @s
+perspective first
+wait 4
+cmd skyabyss skill learn @s grave_bell 3
+cmd skyabyss skill slot @s 1 grave_bell
+cmd skyabyss skill cooldowns @s
+cmd kill @e[type=minecraft:husk]
+cmd execute at @s run summon minecraft:husk ~ ~ ~3 {NoAI:1b,Silent:1b}
+wait 10
+cmd skyabyss skill mana @s full
+cmd skyabyss skill cast @s 1
+wait 7
+shot night_grave_bell_1p_b
+wait 6
+shot night_grave_bell_1p_c
+cmd skyabyss skill cooldowns @s
+perspective front
+wait 6
+cmd skyabyss skill mana @s full
+cmd skyabyss skill cast @s 1
+wait 7
+shot night_grave_bell_3p_b
+wait 6
+shot night_grave_bell_3p_c
+cmd skyabyss skill cooldowns @s
+perspective first
+wait 4
+cmd skyabyss skill learn @s final_light 3
+cmd skyabyss skill slot @s 1 final_light
+cmd skyabyss skill cooldowns @s
+cmd kill @e[type=minecraft:husk]
+cmd execute at @s run summon minecraft:husk ~ ~ ~3 {NoAI:1b,Silent:1b}
+wait 10
+cmd skyabyss skill mana @s full
+cmd skyabyss skill cast @s 1
+wait 7
+shot night_final_light_1p_b
+wait 6
+shot night_final_light_1p_c
+cmd skyabyss skill cooldowns @s
+perspective front
+wait 6
+cmd skyabyss skill mana @s full
+cmd skyabyss skill cast @s 1
+wait 7
+shot night_final_light_3p_b
+wait 6
+shot night_final_light_3p_c
+cmd skyabyss skill cooldowns @s
+perspective first
+wait 4
 cmd kill @e[type=minecraft:husk]
 quit
