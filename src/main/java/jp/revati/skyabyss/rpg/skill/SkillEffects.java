@@ -435,13 +435,7 @@ public final class SkillEffects {
             long age = z.until - now;
             switch (z.kind) {
                 case EMBER -> {
-                    if (now % 4 == 0) {
-                        for (int i = 0; i < 5; i++) {
-                            double a = z.level.random.nextDouble() * Math.PI * 2;
-                            double d = Math.sqrt(z.level.random.nextDouble()) * z.radius;
-                            z.level.sendParticles(ParticleTypes.FLAME, z.center.x + Math.cos(a) * d, z.center.y + 0.1, z.center.z + Math.sin(a) * d, 1, 0.05, 0.1, 0.05, 0.01);
-                        }
-                    }
+                    // 熾の床の見た目は手元の SkillFx (FxDraw の円盤) が描く。ここは当たりと弱まりだけ
                     if (now % 10 == 0) {
                         for (LivingEntity e : foesIn(owner, z)) {
                             if (e.getRemainingFireTicks() < 50) {
@@ -468,9 +462,6 @@ public final class SkillEffects {
                     }
                 }
                 case TRAP -> {
-                    if (now % 8 == 0) {
-                        z.level.sendParticles(Skills.RUNE_SPARK.get(), z.center.x, z.center.y + 0.15, z.center.z, 1, 0.25, 0.02, 0.25, 0.0);
-                    }
                     if (now % 3 == 0) {
                         Zone near = new Zone(z.kind, z.level, z.center, SkillRules.TRAP_TRIGGER, z.owner, z.rank, z.until);
                         List<LivingEntity> foes = foesIn(owner, near);
@@ -482,15 +473,7 @@ public final class SkillEffects {
                     }
                 }
                 case SIGNAL -> {
-                    if (now % 4 == 0) {
-                        for (int k = 0; k < 14; k++) {
-                            z.level.sendParticles(ParticleTypes.END_ROD, z.center.x, z.center.y + 0.3 + k * 0.45, z.center.z, 1, 0.02, 0.02, 0.02, 0.0);
-                        }
-                        if (age < 60) {
-                            // 消える前は、ゆっくり明滅
-                            z.level.sendParticles(ParticleTypes.END_ROD, z.center.x, z.center.y + 7, z.center.z, 2, 0.3, 0.3, 0.3, 0.0);
-                        }
-                    }
+                    // 光の柱は手元の SkillFx (FxDraw の柱) が描く。ここでは何もしない (粒の重複を避ける)
                 }
             }
         }

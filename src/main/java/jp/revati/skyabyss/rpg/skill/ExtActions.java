@@ -221,7 +221,6 @@ final class ExtActions {
                     any = true;
                 }
             }
-            level.sendParticles(Skills.RUNE_SPARK.get(), end.x, end.y, end.z, 1, 0.1, 0.1, 0.1, 0.02);
         }
         if (flat.lengthSqr() < 0.0001) {
             any = false;

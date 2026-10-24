@@ -9,6 +9,7 @@ import java.util.function.Consumer;
 
 import jp.revati.skyabyss.Config;
 import jp.revati.skyabyss.SkyAbyss;
+import jp.revati.skyabyss.rpg.client.skill.fx.FxDraw;
 import jp.revati.skyabyss.rpg.client.skill.fx.FxFrontline;
 import jp.revati.skyabyss.rpg.client.skill.fx.FxRanged;
 import jp.revati.skyabyss.rpg.client.skill.fx.FxSupport;
@@ -32,16 +33,19 @@ import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.ViewportEvent;
 
 // 技の見た目 (手元だけで組む)。サーバーの合図 (SkillFxPayload) を受けて、段取りを 1 tick ずつ進める:
-//   溜め (手のまわりに集まる) → 放ち (前へ伸びる筋・地面の輪) → 当たり (閃光・衝撃の輪・音の層) → 残り (粒が漂って消える)
-// 段取りは技ごとに Plan で決める (fx/ の三つのファイル)。決めていない技は generic (下) を使う。
+//   溜め (手もとに集まる) → 放ち (形が出る) → 当たり (閃光・衝撃の殻) → 残り (形が消える・灯が残る)
+// 主役は形 (client/skill/fx/FxDraw の板: 弧・筋・輪・円盤・扇・柱・稲妻・殻)。粒は当たりの火花だけの脇役。
+// 段取りは技ごとに fx/ の三つのファイルで決める。決めていない技は generic (下) を使う。
 //
-// 粒の予算 (手元の 1 tick あたりと、1 発動あたり): 1 tick は BASE_BUDGET (画面の粒の設定で 1/2・1/5)、1 発動は CAST_CAP まで。
-// 粒は手元だけで足す (level.addParticle) ので、通信は合図の 1 通だけ。同時に出る発動は MAX_CASTS まで。
-// 環境変数 SKYABYSS_SKILLFX_LOG があると、発動が終わるたびに使った粒の数を log へ出す (撮影での計測用)。
+// 予算 (1 発動・1 tick・全体): 形は CAST_PRIMS 個まで、全体は FxDraw.MAX_PRIMS 個まで。
+// 粒は 1 発動 CAST_CAP 粒まで、1 tick は BASE_BUDGET (画面の粒の設定で 1/2・1/5)。
+// 形も粒も手元だけで足す (通信は合図の 1 通だけ)。同時に動く発動は MAX_CASTS まで。
+// 環境変数 SKYABYSS_SKILLFX_LOG があると、発動が終わるたびに使った形と粒の数を log へ出す (撮影での計測用)。
 @EventBusSubscriber(modid = SkyAbyss.MODID, value = Dist.CLIENT)
 public final class SkillFx {
-    public static final int BASE_BUDGET = 480;
-    public static final int CAST_CAP = 240;
+    public static final int BASE_BUDGET = 160;
+    public static final int CAST_CAP = 48;
+    public static final int CAST_PRIMS = 24;
     public static final int MAX_CASTS = 10;
     private static final boolean LOG = System.getenv("SKYABYSS_SKILLFX_LOG") != null;
 
@@ -82,13 +86,14 @@ public final class SkillFx {
         public final boolean self;
         public final int rank;
         public final boolean chain;
-        // 発動の瞬間の目の位置と向き (前へ伸ばす線・狙いの点に使う。動いた後も変えない)
+        // 発動の瞬間の目の位置と向き (前へ伸ばす形・狙いの点に使う。動いた後も変えない)
         public final Vec3 origin;
         public final Vec3 look;
         public final Vec3 fwd;
         public final Vec3 right;
         int age;
         int spent;
+        public int prims;
         int duration;
         private final List<Step> steps = new ArrayList<>();
 
@@ -112,7 +117,7 @@ public final class SkillFx {
             duration = Math.max(duration, tick);
         }
 
-        // 残りの長さ (最後の段取りの後も、この tick まで粒が漂う)
+        // 残りの長さ (最後の段取りの後も、この tick まで形が残る)
         public void lasts(int tick) {
             duration = Math.max(duration, tick);
         }
@@ -129,6 +134,11 @@ public final class SkillFx {
         // 足もと (今の位置)
         public Vec3 feet() {
             return caster.position().add(0, 0.05, 0);
+        }
+
+        // 腰の高さ (足もと + 1)
+        public Vec3 waist() {
+            return caster.position().add(0, 1.0, 0);
         }
 
         // 発動の向きに、この距離だけ先の点 (地面の高さは足もと基準)
@@ -176,10 +186,9 @@ public final class SkillFx {
 
     // 段取りを決めていない技の既定: 手に集まり、足もとの輪が広がり、狙いで閃く
     static void generic(Cast c) {
-        c.at(0, x -> burst(x, rune(), x.hand(), 6, 0.12, 0.02));
-        c.at(4, x -> ring(x, rune(), x.feet(), 1.6, 14, 0.25, 0.05));
+        c.at(0, x -> burst(x, rune(), x.hand(), 4, 0.12, 0.02));
+        c.at(3, x -> FxDraw.add(x, FxDraw.Prim.ring(x.feet(), 1.0, 4.0).color(0x8CF6FF).width(0.3).life(12)));
         c.at(6, x -> flash(x, x.aim(3.0)));
-        c.at(8, x -> burst(x, rune(), x.aim(2.4), 10, 0.5, 0.06));
         c.lasts(18);
     }
 
@@ -212,7 +221,7 @@ public final class SkillFx {
 
     // ================================================================ 道具 (段取りから呼ぶ)
 
-    // rune() は碑文の火花 (青緑・浮く)。sky() は空の粒 (流れる)。どちらも自分で光る
+    // rune() は碑文の火花 (青緑・浮く)。sky() は空の粒 (流れる)。脇役の粒にだけ使う
     public static ParticleOptions rune() {
         return Skills.RUNE_SPARK.get();
     }
@@ -221,10 +230,10 @@ public final class SkillFx {
         return Skills.SKY_MOTE.get();
     }
 
-    // 中心のまわりに散らす (速さは ±speed)
-    // 手元の一粒。カメラから CAMERA_CLEAR ブロック以内は出さない (目の前の大きな四角を作らない)
+    // カメラから CAMERA_CLEAR ブロック以内の粒は出さない (目の前の大きな四角を作らない)
     public static final double CAMERA_CLEAR = 2.4;
 
+    // 手元の一粒
     public static boolean put(Cast c, ParticleOptions p, double x, double y, double z, double vx, double vy, double vz) {
         Vec3 cam = Minecraft.getInstance().gameRenderer.getMainCamera().getPosition();
         double dx = x - cam.x;
@@ -237,7 +246,7 @@ public final class SkillFx {
         return true;
     }
 
-    // 中心のまわりに散らす (速さは ±speed)。形を作るには使わない (雑になる)。散らしたいときだけ
+    // 中心のまわりに散らす (火花・灰の脇役。形には使わない)
     public static void burst(Cast c, ParticleOptions p, Vec3 at, int n, double spread, double speed) {
         int k = spend(c, n);
         RandomSource r = c.level.random;
@@ -247,50 +256,7 @@ public final class SkillFx {
         }
     }
 
-    // 地面 (水平) の輪。等間隔の点を円周に置く (揺らさない)。outward の速さで外へ広がる
-    public static void ring(Cast c, ParticleOptions p, Vec3 center, double radius, int n, double lift, double outward) {
-        int k = spend(c, n);
-        for (int i = 0; i < k; i++) {
-            double a = Math.PI * 2 * i / Math.max(1, k);
-            double cs = Math.cos(a);
-            double sn = Math.sin(a);
-            put(c, p, center.x + cs * radius, center.y + lift, center.z + sn * radius, cs * outward, 0.0, sn * outward);
-        }
-    }
-
-    // 弧: 中心の水平な円の、角度 from から to (ラジアン) までを等間隔の点で置く。y は高さ。
-    // 振りの弧は、時間ごとに区間を分けて c.at(...) から呼ぶ (一度に出さない)
-    public static void arc(Cast c, ParticleOptions p, Vec3 center, double radius, double from, double to, double y, int n) {
-        int k = spend(c, n);
-        for (int i = 0; i < k; i++) {
-            double t = k <= 1 ? 0 : (double) i / (k - 1);
-            double a = from + (to - from) * t;
-            put(c, p, center.x + Math.cos(a) * radius, center.y + y, center.z + Math.sin(a) * radius, 0, 0, 0);
-        }
-    }
-
-    // 柱: 底から高さ h まで、等間隔に積む (上へ動かさない)
-    public static void pillar(Cast c, ParticleOptions p, Vec3 base, double h, int n) {
-        int k = spend(c, n);
-        for (int i = 0; i < k; i++) {
-            double t = k <= 1 ? 0 : (double) i / (k - 1);
-            put(c, p, base.x, base.y + h * t, base.z, 0, 0, 0);
-        }
-    }
-
-    // 二点のあいだに一列に並べる (前へ伸びる筋・鎖・線)。等間隔、揺らさない
-    public static void line(Cast c, ParticleOptions p, Vec3 a, Vec3 b, int n, double jitter, double speed) {
-        int k = spend(c, n);
-        RandomSource r = c.level.random;
-        for (int i = 0; i < k; i++) {
-            double t = k <= 1 ? 0 : (double) i / (k - 1);
-            Vec3 q = a.lerp(b, t);
-            put(c, p, q.x + sym(r) * jitter, q.y + sym(r) * jitter, q.z + sym(r) * jitter,
-                    sym(r) * speed, sym(r) * speed, sym(r) * speed);
-        }
-    }
-
-    // 閃光: 当たりの一点だけに一つ (FLASH の大きさは固定なので、カメラから離れた所でだけ使う)
+    // 閃光: 当たりの一点だけに一つ (カメラから離れた所でだけ使う)
     public static void flash(Cast c, Vec3 at) {
         if (spend(c, 1) < 1) {
             return;
@@ -354,8 +320,8 @@ public final class SkillFx {
 
     private static void finish(Cast c) {
         if (LOG) {
-            SkyAbyss.LOGGER.info("[skillfx] {} rank {} chain {} self {} particles {} (cap {}) ticks {}",
-                    c.skill.id, c.rank, c.chain, c.self, c.spent, CAST_CAP, c.duration);
+            SkyAbyss.LOGGER.info("[skillfx] {} rank {} chain {} self {} shapes {} (cap {}) particles {} (cap {}) ticks {}",
+                    c.skill.id, c.rank, c.chain, c.self, c.prims, CAST_PRIMS, c.spent, CAST_CAP, c.duration);
         }
     }
 
