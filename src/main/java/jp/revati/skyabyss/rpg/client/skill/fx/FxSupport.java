@@ -117,7 +117,8 @@ public final class FxSupport {
     // 形: 手から視線の先 32 へ金の線。着いたところに高さ 14 の金の柱と、金の輪、花火。柱は残る
     private static void signal(Cast c) {
         Vec3 hand = c.hand();
-        Vec3 spot = c.aim(SIGNAL_RANGE);
+        // サーバーが決めた標の点 (地面・相手の足もと)。古い合図なら視線の先
+        Vec3 spot = c.target != null ? c.target : c.aim(SIGNAL_RANGE);
         c.at(0, x -> SkillFx.burst(x, SkillFx.rune(), x.hand(), 3, 0.1, 0.02));
         c.at(1, x -> {
             FxDraw.add(x, Prim.line(hand, spot).color(GOLD).width(0.22).life(6).ease(Ease.OUT).glow(0.5).trail(0.3));

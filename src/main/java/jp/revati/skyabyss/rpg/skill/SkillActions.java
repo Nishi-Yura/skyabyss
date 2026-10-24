@@ -1167,6 +1167,7 @@ public final class SkillActions {
             signalTell(player, "message.skyabyss.signal.place", SkillRules.SIGNAL_TICKS / 20);
         }
         SkillEffects.zone(SkillEffects.ZoneKind.SIGNAL, player, at, 0.5, SkillRules.SIGNAL_TICKS, rank);
+        fxTarget = at;
         player.swing(InteractionHand.MAIN_HAND, true);
         level.playSound(null, at.x, at.y, at.z, Skills.SOUND_MARK.get(), SoundSource.PLAYERS, 1.0f, 1.3f);
         return null;

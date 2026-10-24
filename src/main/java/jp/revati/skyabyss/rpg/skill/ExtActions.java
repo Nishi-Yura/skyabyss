@@ -152,6 +152,8 @@ final class ExtActions {
         } else if (block.getType() != HitResult.Type.MISS) {
             center = center.add(0, 0.1, 0);
         }
+        // 見た目の合図にも同じ点を載せる (手元の向きからでは、敵の足もと・壁の手前が同じ点にならない)
+        SkillActions.fxTarget = center;
         return center;
     }
 

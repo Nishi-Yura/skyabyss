@@ -265,7 +265,8 @@ public final class FxRanged {
     // 形: 手から狙いへ黒紫の糸。狙いの地面に半径 4 の黒い輪が 6 tick で縮み、噛む瞬間に縁から牙が立つ
     private static void deepMaw(Cast c) {
         Vec3 hand = c.hand();
-        Vec3 aim = c.ahead(MAW_RANGE);
+        // サーバーが決めた顎の点 (壁の手前・敵の足もと)。古い合図なら前の地面
+        Vec3 aim = c.target != null ? c.target : c.ahead(MAW_RANGE);
         c.at(0, x -> {
             FxDraw.add(x, Prim.line(hand, aim.add(0, 1.0, 0)).color(DEEP_VIOLET).width(0.16).life(4).ease(Ease.OUT).glow(0.3).trail(0.6));
             SkillFx.sound(x, SoundEvents.WARDEN_SONIC_CHARGE, x.feet(), 0.25f, 1.6f);
