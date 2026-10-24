@@ -397,7 +397,7 @@ public final class Trades {
             }
         }
         // 申請のときは持っているかだけ見る (取らない)
-        if (!hasAll(main(applicant), items)) {
+        if (!holds(applicant, items)) {
             return Result.LACK;
         }
         TradeData.Application a = new TradeData.Application(applicant.getUUID());
@@ -459,10 +459,11 @@ public final class Trades {
         if (buyer == null) {
             return Result.APPLICANT_AWAY;
         }
-        if (!hasAll(main(buyer), a.offer)) {
+        if (!holds(buyer, a.offer)) {
             tell(server, applicantId, "message.skyabyss.trade.note_lacked", l.sellerName, "#" + l.id);
             return Result.APPLICANT_LACKS;
         }
+        stageCoins(buyer, a.offer);
         if (!fits(main(buyer), a.offer, split(l.give))) {
             tell(server, applicantId, "message.skyabyss.trade.note_no_room", l.sellerName, "#" + l.id);
             return Result.ROOM_APPLICANT;
@@ -594,6 +595,41 @@ public final class Trades {
 
     // 画面の「払える」: 持ち物に型の品がそろっているか
     public static boolean canPay(ServerPlayer p, List<ItemStack> templates) {
-        return hasAll(main(p), templates);
+        return holds(p, templates);
+    }
+
+    // 型の品がそろっているか。鐘銭は旅嚢の中も数える (2026-10-25: 鐘銭は袋にも入る)
+    static boolean holds(ServerPlayer p, List<ItemStack> templates) {
+        for (ItemStack t : combine(templates)) {
+            int have = isCoin(t) ? jp.revati.skyabyss.facility.Coins.count(p) : count(main(p), t);
+            if (have < t.getCount()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    // 払う前に、持ち物で足りない鐘銭を旅嚢から持ち物へ出す (取るのは持ち物から)
+    static void stageCoins(ServerPlayer p, List<ItemStack> templates) {
+        int need = 0;
+        for (ItemStack t : combine(templates)) {
+            if (isCoin(t)) {
+                need += t.getCount();
+            }
+        }
+        int lack = need - count(main(p), coins(1));
+        if (lack <= 0) {
+            return;
+        }
+        int got = jp.revati.skyabyss.pouch.Pouch.take(p, FacilitySetup.BELL_COIN.get(), lack);
+        while (got > 0) {
+            int k = Math.min(got, coins(1).getMaxStackSize());
+            ItemStack c = coins(k);
+            p.getInventory().add(c);
+            if (!c.isEmpty()) {
+                jp.revati.skyabyss.pouch.Pouch.add(p, c);
+            }
+            got -= k;
+        }
     }
 }
