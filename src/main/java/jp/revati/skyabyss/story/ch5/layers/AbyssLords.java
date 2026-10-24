@@ -62,7 +62,7 @@ public final class AbyssLords {
     public static final String TAG = "skyabyss_lord";
     public static final String COPY_TAG = "skyabyss_lord_copy";
     static final String[] MOB = {"rib_guard", "white_shell_keeper", "heartbeat_mimic", "lamp_eater"};
-    static final double[] HP = {260, 320, 300, 380};          // 一人のときの体力
+    static final double[] HP = {780, 960, 900, 1140};         // 一人のときの体力 (2026-10-25 に 3 倍。弱すぎた)
     static final double[] SCALE = {1.9, 2.0, 1.7, 1.8};
     static final double PER_MATE = 0.6;                       // 一人ふえるごとに体力 +60%
     // 初めて倒したときの経験値 (骨・塩・雷・灰。人ごとに一度。間にいた人は満額、オンラインの仲間は分け前)。docs/design/36 の 8 章
