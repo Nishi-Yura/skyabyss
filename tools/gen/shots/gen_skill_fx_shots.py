@@ -2,22 +2,30 @@
 """技の見た目の撮影台本 (tools/shots/skill_fx.txt) を作る。手で直さず、この生成器を直す。
 
 使い方 (リポジトリ直下で):  python tools/gen/shots/gen_skill_fx_shots.py
+同時に tools/shots/skill_fx_clips.json を書く (動画の fps と、当たりの位置。tools/site/encode_skill_fx_clips.py が読む)。
 
-台本の作り (25 本の能動の技、一本ずつ):
+台本の作り (25 本の能動の技、一本ずつ、昼の三人称の背中側だけ。一本が一つの動画):
   - 的は、自分の前 3.8 ブロック・右へ 2.2 ブロック寄せたハスク (NoAI・燃えない)。撃つ前に同じ名のハスクを消してから置く
     (kill は対象が無いと「No entity was found」で止まるので、execute if で守る)。
   - 三人称は後ろ (THIRD_PERSON_BACK) の視点。カメラは体の後ろ 4 ブロック、的は前 3.8 ブロックなので、
     カメラと的は 6〜8 ブロックの距離になる。カメラが的の中に入らない。
     真横からの視点は、今の camera 台本の作りでは作れない (カメラは体の向き = 視線に従うので、視線の先に的を置くと後ろからになる)。
-  - 撮る時刻は、撃った tick から数えて: a 溜め (1)・b 放ち (放ちの tick + 1)・c 当たり (当たりの tick + 1)・d 残り (残りの tick)。
-    放ち・当たり・残りの tick は下の表 (SKILLS) に書く。client/skill/fx の c.at の tick と合わせてある (変えたら両方直す)。
-  - 撮る順: 昼の一人称 (a b c d)、昼の三人称 (a b c d)、夜の一人称 (b c)、夜の三人称 (b c)。
+  - 録る範囲: 撃つ CLIP_PRE tick 前から録り始め、残り (linger) の後も少し録る (clip_ticks)。
+    record の間に cmd・wait を進められるので、撃つ・待つは普通の手順のまま書く。
+  - 録画の間は /tick rate を CLIP_TICK_RATE (5) に落とす。描画は 1 tick の間に何枚も描かれるので、
+    論理時刻 (tick + 割合) で CLIP_FPS (30) 枚ずつ撮れば、動きが滑らかになる。再生は 20 tick/s の実時間に戻る。
+    FX (client/skill/fx) は level.getGameTime() + partialTick で進むので、遅くしても時刻が合う。
   - 弓の技 (雲穿ち・天の驟雨) は弓と矢を持たせてから撃つ。
+  - 技の表 (SKILLS) の 放ち・当たり・残り の tick は client/skill/fx の c.at の tick と合わせてある (変えたら両方直す)。
+  - 天の驟雨は、降る光が RAIN_INTERVAL * RAIN_PULSES tick の間続く (SkillActions の RAINS)。終わるまで次の技を撮らない。
+  - 撮る前に、天候を晴れにして、前の技の的・矢・落ちた肉を消す。
 """
+import json
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[3]
 OUT = ROOT / "tools/shots/skill_fx.txt"
+CLIPS = ROOT / "tools/shots/skill_fx_clips.json"
 
 # 技 id, 放ち tick, 当たり tick, 残り tick, 弓を持つか
 SKILLS = [
@@ -48,6 +56,16 @@ SKILLS = [
     ("final_light", 0, 6, 20, False),
 ]
 
+# 録る時の tick の割合 (論理時刻)。動画は CLIP_FPS 枚/秒で、20 tick/s の実時間に合わせて再生する
+CLIP_TICK_RATE = 5
+CLIP_FPS = 30
+# 撃つ前から録り始める tick 数 (撃つ前の静けさを少し入れる)
+CLIP_PRE = 4
+# 録画を撃ってからの最低の長さ (残りが短い技も、消えるまで見せる)
+CLIP_MIN_AFTER = 32
+# 天の驟雨の降る光が続く tick (SkillRules.RAIN_INTERVAL * RAIN_PULSES)。次の技を撮るのは、これが終わってから
+SKY_RAIN_TICKS = 10 * 8
+
 # 体の置き場所と向き (絶対座標・yaw 0 = 南向き、前は +z、右は -x)。毎技この場所へ戻して撮る (枠のずれをなくす)
 CASTER_POS = "0.5 -60 0.5 0 0"
 # 的: 体の前 3 ブロック・右へ 1.5 (約 27 度)、絶対座標で置く (毎技 殺して置き直す)
@@ -55,37 +73,37 @@ TARGET_POS = "-1.0 -60 3.5"
 # 突進する技は、的を通り抜けると的が体の後ろ・カメラの真横に来て、黒い箱のように映る。
 # 砂の突進は的を進む先 (6.5 ブロック) の右側へ置く (突進の終点で隣に並ぶ)
 # 突進は前 25 度の中に的が無いと「的がない」で撃てない (27 度の既定の的では失敗していた)。的を真っすぐ前へ
-TARGET_BY_SKILL = {"dust_charge": "-0.7 -60 7.0", "lunge": "0.5 -60 5.5"}
+# 突進 (lunge) は的を体の真正面に置くと、後ろのカメラから見て体に隠れて消える (撮った絵で無いのを確かめた)。右へずらす
+TARGET_BY_SKILL = {"dust_charge": "-0.7 -60 7.0", "lunge": "-1.6 -60 6.5"}
+
+
 def husk_for(skill: str) -> str:
     # 体力を 500 にして、当たりで倒れない (倒れると死の煙が出る)
     return (f"summon minecraft:husk {TARGET_BY_SKILL.get(skill, TARGET_POS)} "
             "{NoAI:1b,Silent:1b,Health:500f,attributes:[{id:\"minecraft:max_health\",base:500.0d}]}")
+
+
 # 三人称は視野を狭めて、体と的を大きく撮る (カメラの距離は既定の 4 ブロックのまま。FOV だけ変える)
 FOV_BACK = 48
-FOV_NORMAL = 70
 
 
-def schedule(rel: int, imp: int, lin: int, full: bool) -> list[tuple[int, str]]:
-    """撃った tick からの撮る時刻 (tick, 名の印)。full なら a b c d、夜は b c だけ"""
-    a = 1
-    b = max(2, rel + 1)
-    c = imp + 1
-    if c <= b:
-        c = b + 2
-    d = max(lin, c + 3)
-    marks = [(a, "a"), (b, "b"), (c, "c"), (d, "d")]
-    return marks if full else [(b, "b"), (c, "c")]
+def clip_ticks(lin: int, sky: bool) -> int:
+    """録画の長さ (tick)。撃つ前の CLIP_PRE と、残りが消えてから少しの間 (CLIP_MIN_AFTER か 残り + 8 の長い方)"""
+    after = max(CLIP_MIN_AFTER, lin + 8)
+    if sky:
+        after = max(after, SKY_RAIN_TICKS + 4)
+    return CLIP_PRE + after
 
 
-def block(skill: str, rel: int, imp: int, lin: int, bow: bool, view: str, phase: str, full: bool) -> list[str]:
-    """一つの (技・時間・視点) の撮影。view は first か back、phase は day か night"""
+def block(skill: str, lin: int, bow: bool, total: int, sky: bool) -> list[str]:
+    """一つの技の撮影 (一つの動画)"""
     lines: list[str] = []
-    lines.append(f"perspective {'first' if view == 'first' else 'back'}")
-    lines.append(f"fov {FOV_NORMAL if view == 'first' else FOV_BACK}")
+    lines.append("perspective back")
+    lines.append(f"fov {FOV_BACK}")
     # 毎技、体を同じ場所・同じ向きへ戻す (絶対座標)。前の技の移動 (突進・跳び退き・砂の突進) は先の撮影が終わってから
     lines.append(f"cmd tp @s {CASTER_POS}")
     # 開幕の題字と HUD を消してから撮る (cinematic の停止と、部品の一括オフ)
-    # 天候は毎技そろえる (前の技の雨が残らないように)。夜の撮影は time set midnight のまま
+    # 天候は毎技そろえる (前の技の雨が残らないように)。時刻は昼のまま
     lines.append("cmd gamerule doWeatherCycle false")
     lines.append("cmd weather clear")
     lines.append("cmd skyabyss cinematic stop")
@@ -104,17 +122,16 @@ def block(skill: str, rel: int, imp: int, lin: int, bow: bool, view: str, phase:
     lines.append(f"cmd {husk_for(skill)}")
     lines.append("wait 10")
     lines.append("cmd skyabyss skill mana @s full")
+    # 録画は、撃つ CLIP_PRE tick 前から。撃つのは cmd で、録画の間に進む
+    lines.append(f"record {skill} {total} {CLIP_FPS}")
+    lines.append(f"wait {CLIP_PRE}")
     lines.append("cmd skyabyss skill cast @s 1")
-    now = 0
-    prefix = f"{skill}_{'' if phase == 'day' else 'night_'}{'1p' if view == 'first' else '3p'}"
-    for tick, mark in schedule(rel, imp, lin, full):
-        if tick > now:
-            lines.append(f"wait {tick - now}")
-            now = tick
-        lines.append(f"shot {prefix}_{mark}")
+    lines.append("recwait")
     lines.append("cmd skyabyss skill cooldowns @s")
-    # 移動する技が落ち着くまで待ってから、次の撮影へ (体を戻す前)
+    # 移動する技が落ち着くまで待ってから、次の撮影へ (体を戻す前)。天の驟雨は降る光が終わるまで
     lines.append("wait 30")
+    if sky:
+        lines.append(f"wait {SKY_RAIN_TICKS}")
     return lines
 
 
@@ -122,11 +139,11 @@ def main() -> None:
     out: list[str] = []
     out.append("# 技の見た目 (撮影台本)。tools/gen/shots/gen_skill_fx_shots.py が作る。手で直さず、生成器を直す。")
     out.append("# 撮影: bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/skill_fx.txt -PshotsName=skill_fx")
-    out.append("# 名前: <技>_1p_<a|b|c|d> (昼の一人称)、<技>_3p_<…> (昼の三人称)、<技>_night_1p_<b|c>、<技>_night_3p_<b|c>")
-    out.append("# a = 溜め (撃った 1 tick 後)、b = 放ち、c = 当たり、d = 残り")
+    out.append("# 一技 = 一つの動画 (record <技> <tick> <fps>)。run/shots/skill_fx/<技>/0000.png … に書く。")
+    out.append("# 録画の間は /tick rate 5 (論理時刻で撮る)。終わったら tools/site/encode_skill_fx_clips.py で webp にする。")
     out.append("world skill_fx flat")
     out.append("size 1280 720")
-    out.append("timeout 3600")
+    out.append("timeout 7200")
     out.append("render 6")
     out.append("clouds off")
     out.append("guiscale 2")
@@ -141,22 +158,27 @@ def main() -> None:
     out.append("waitchunks")
     out.append("chat clear")
     out.append("wait 200")
-    out.append("")
-    for skill, rel, imp, lin, bow in SKILLS:
-        out.append(f"# ---- {skill} (昼)")
-        out.extend(block(skill, rel, imp, lin, bow, "first", "day", True))
-        out.append("")
-        out.extend(block(skill, rel, imp, lin, bow, "back", "day", True))
-        out.append("")
-    out.append("perspective first")
-    out.append("cmd time set midnight")
+    # 入ったあとの題字 (最初の一本に残っていた) が消えてから、遅くして撮る
+    out.append("wait 240")
+    out.append(f"cmd tick rate {CLIP_TICK_RATE}")
     out.append("wait 20")
+    out.append("")
+    clips: dict[str, dict] = {}
     for skill, rel, imp, lin, bow in SKILLS:
-        out.append(f"# ---- {skill} (夜)")
-        out.extend(block(skill, rel, imp, lin, bow, "first", "night", False))
+        sky = skill == "sky_rain"
+        total = clip_ticks(lin, sky)
+        # 当たりの絵 (印): 撃った tick からの当たり (imp) の 1 tick 後。録り始めからは CLIP_PRE を足す
+        impact_tick = CLIP_PRE + imp + 1
+        clips[skill] = {
+            "fps": CLIP_FPS,
+            "ticks": total,
+            "frames": -(-total * CLIP_FPS // 20),
+            "impact_frame": round(impact_tick * CLIP_FPS / 20),
+        }
+        out.append(f"# ---- {skill} (昼・三人称の背中側。{total} tick)")
+        out.extend(block(skill, lin, bow, total, sky))
         out.append("")
-        out.extend(block(skill, rel, imp, lin, bow, "back", "night", False))
-        out.append("")
+    out.append("cmd tick rate 20")
     out.append("perspective first")
     out.append("cmd time set noon")
     out.append("cmd skyabyss skill cooldowns @s")
@@ -164,7 +186,10 @@ def main() -> None:
     OUT.parent.mkdir(parents=True, exist_ok=True)
     with open(OUT, "w", encoding="utf-8", newline="\n") as f:
         f.write("\n".join(out) + "\n")
-    print("wrote", OUT, "lines", len(out))
+    with open(CLIPS, "w", encoding="utf-8", newline="\n") as f:
+        json.dump(clips, f, ensure_ascii=False, indent=1)
+        f.write("\n")
+    print("wrote", OUT, "lines", len(out), "and", CLIPS.name)
 
 
 if __name__ == "__main__":

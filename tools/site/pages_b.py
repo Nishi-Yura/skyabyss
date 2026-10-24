@@ -197,30 +197,31 @@ def skills():
          "5 つの木と旅人、36 の技、天職、刻印、要、型、振り直し。", "Five trees plus the Wayfarer, 36 skills, callings, runes, keystones, weapon types and respec.", body)
 
 
-# 技の見た目 (site/img/skill_fx/<技>_<段>.webp。gen_skill_fx.py が作る)
+# 技の見た目 (site/img/skill_fx/<技>.webp の動く絵と <技>_poster.webp の止めた絵。tools/site/encode_skill_fx_clips.py が作る)
 ELEMENT = {"rock": ("岩", "Rock"), "wind": ("風", "Wind"), "tide": ("潮", "Tide"), "ash": ("灰", "Ash"),
            "bone": ("骨", "Bone"), "traveler": ("旅", "Traveler")}
-FX_PHASES = [("release", "放った瞬間", "release", "Release"), ("impact", "当たった瞬間", "impact", "Impact"),
-             ("linger", "余韻", "linger", "Linger")]
 
 
 def skill_card(s):
-    """技ひとつぶんの開閉パネル。中身は、一行の説明・属性・見た目 (2〜3 コマ)・最大段。"""
+    """技ひとつぶんの開閉パネル。中身は、一行の説明・属性・見た目 (放ってから消えるまでの動く絵)・最大段。
+    動く絵は、パネルを開いたときに初めて読む (それまでは止めた絵)。動きを減らす設定の人は、再生ボタンを押したときに読む (js/main.js)。"""
     sid = s["id"]
     kind = {"A": ("使う", "Active"), "P": ("常に効く", "Passive"), "K": ("要", "Keystone")}[s["kind"]]
     el = ELEMENT[s["tree"]]
-    frames = []
-    for ph, ja_l, _, en_l in FX_PHASES:
-        if os.path.exists(os.path.join(ROOT, "site", "img", "skill_fx", "%s_%s.webp" % (sid, ph))):
-            frames.append((ph, ja_l, en_l))
-    if frames:
-        figs = "".join(
-            '<figure><img src="img/skill_fx/%s_%s.webp" width="256" height="144" loading="lazy" alt="%s" '
-            'data-alt-ja="%s" data-alt-en="%s"><figcaption>%s</figcaption></figure>' % (
-                sid, ph, esc("%s の%s" % (s["ja"], ja_l)), esc("%s の%s" % (s["ja"], ja_l)),
-                esc("%s: %s" % (s["en"], en_l)), T(ja_l, en_l))
-            for ph, ja_l, en_l in frames)
-        visual = '<div class="fx-frames">%s</div>' % figs
+    fx_dir = os.path.join(ROOT, "site", "img", "skill_fx")
+    if os.path.exists(os.path.join(fx_dir, sid + ".webp")) and os.path.exists(os.path.join(fx_dir, sid + "_poster.webp")):
+        alt_ja = "%s の見た目（動く絵）" % s["ja"]
+        alt_en = "%s: the look in motion" % s["en"]
+        visual = ('<div class="fx-frames"><figure class="fx-clip" data-src="img/skill_fx/%(id)s.webp">'
+                  '<div class="fx-stage">'
+                  '<img class="fx-poster" src="img/skill_fx/%(id)s_poster.webp" width="640" height="360" loading="lazy" '
+                  'alt="%(alt_ja)s" data-alt-ja="%(alt_ja)s" data-alt-en="%(alt_en)s">'
+                  '<span class="fx-slot" aria-hidden="true"></span>'
+                  '<button type="button" class="fx-play" hidden>%(play)s</button>'
+                  '</div><figcaption>%(cap)s</figcaption></figure></div>') % dict(
+            id=sid, alt_ja=esc(alt_ja), alt_en=esc(alt_en),
+            play=T("▶ 動く絵を見る", "▶ Play the clip"),
+            cap=T("放ってから消えるまで（実時間）", "From cast to fade (real time)"))
     elif s["kind"] == "A":
         visual = '<p class="fx-none">%s</p>' % T("見た目は撮影を待っています。", "The in-game look is waiting for its shots.")
     else:

@@ -93,5 +93,47 @@
         tog.setAttribute("aria-expanded", open ? "true" : "false");
       });
     }
+
+    // 技の動く絵: パネルを開いたときだけ読み、閉じたら外す (それまでは止めた絵)。
+    // 動きを減らす設定の人は自動では読まず、再生ボタンを押したときに読む
+    var calm = !!(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+    var fxClips = document.querySelectorAll(".fx-clip");
+    var loadClip = function (fig) {
+      if (fig.getAttribute("data-live")) return;
+      var slot = fig.querySelector(".fx-slot");
+      var btn = fig.querySelector(".fx-play");
+      var im = new Image();
+      im.width = 640;
+      im.height = 360;
+      im.alt = "";
+      im.onload = function () {
+        slot.appendChild(im);
+        fig.setAttribute("data-live", "1");
+        if (btn) btn.hidden = true;
+      };
+      im.src = fig.getAttribute("data-src");
+    };
+    var unloadClip = function (fig) {
+      var slot = fig.querySelector(".fx-slot");
+      if (slot) slot.innerHTML = "";
+      fig.removeAttribute("data-live");
+      var btn = fig.querySelector(".fx-play");
+      if (btn && calm) btn.hidden = false;
+    };
+    for (var c = 0; c < fxClips.length; c++) {
+      (function (fig) {
+        var btn = fig.querySelector(".fx-play");
+        var det = fig.closest ? fig.closest("details") : null;
+        if (btn) {
+          btn.addEventListener("click", function () { loadClip(fig); });
+          if (calm) btn.hidden = false;
+        }
+        if (det) {
+          det.addEventListener("toggle", function () {
+            if (det.open) { if (!calm) loadClip(fig); } else { unloadClip(fig); }
+          });
+        }
+      })(fxClips[c]);
+    }
   });
 })();
