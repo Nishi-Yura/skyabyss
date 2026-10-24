@@ -45,7 +45,7 @@ import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 //
 // 時間: birth (発動の tick) から life tick。進み具合 p = 0..1、ease で形の伸び・広がりを決め、
 //       色の濃さは (1-p)^1.2 で消える。glow > 0 のとき同じ形を太く薄く一枚重ねる (光のにじみ)。
-// 予算: 1 発動は SkillFx.CAST_PRIMS 個まで、全体は MAX_PRIMS 個まで (足りないものは捨てる)。
+// 予算: 1 発動は同時に SkillFx.CAST_PRIMS 個まで (消えた形は数えない)、全体は MAX_PRIMS 個まで (足りないものは捨てる)。
 //       1 形は 16 区切りまで。頂点は一度に一つの BufferBuilder で作り、テクスチャは 2 回だけ切り替える。
 // 一人称の注意: 板の頂点が CLEAR (1.2 ブロック) より近いカメラの位置にある区切りは描かない。
 @EventBusSubscriber(modid = SkyAbyss.MODID, value = Dist.CLIENT)
@@ -86,6 +86,8 @@ public final class FxDraw {
     public static final class Prim {
         final Kind kind;
         long birth;
+        // 足した発動 (消えるときに、その発動の残りの数を減らす)
+        SkillFx.Cast owner;
         int life = 10;
         int rgb = 0xFFFFFF;
         float alpha = 1f;
@@ -221,12 +223,14 @@ public final class FxDraw {
 
     // 形を一つ足す。上限を超えるときは捨てる (false)。cast の上限は SkillFx.Cast.prims で数える
     public static boolean add(SkillFx.Cast c, Prim p) {
-        if (c.prims >= SkillFx.CAST_PRIMS || PRIMS.size() >= MAX_PRIMS) {
+        if (c.live >= SkillFx.CAST_PRIMS || PRIMS.size() >= MAX_PRIMS) {
             return false;
         }
         p.birth = c.level.getGameTime();
+        p.owner = c;
         PRIMS.add(p);
         c.prims++;
+        c.live++;
         return true;
     }
 
@@ -241,7 +245,15 @@ public final class FxDraw {
             return;
         }
         long now = mc.level.getGameTime();
-        PRIMS.removeIf(p -> now - p.birth > p.life + 2);
+        PRIMS.removeIf(p -> {
+            if (now - p.birth <= p.life + 2) {
+                return false;
+            }
+            if (p.owner != null) {
+                p.owner.live--;
+            }
+            return true;
+        });
     }
 
     // ================================================================ 描く

@@ -57,43 +57,70 @@ public final class FxRanged {
         plans.put(Skill.FINAL_LIGHT, FxRanged::finalLight);
     }
 
-    // 雲穿ち [溜め 0 / 放ち 1 (白い筋が視線の先へ・空の輪) / 当たり 壁か最後 (PIERCE_LIFETIME) / 残り 34]
-    // 形: 視線に垂直な空の輪が手元に出て、白い筋の頭が矢と一緒に進む。当たりの点に白い閃光の輪
+    // 雲穿ち [溜め 0 / 放ち 1 (足もとの衝撃の輪・弓のまわりの雲の輪) / 飛ぶ 1〜 (矢の道に光の輪が奥へ連なる) / 当たり 壁 / 残り 34]
+    // 形: 矢の道は視線の向きなので、後ろからは線が点に縮む。道に垂直な光の輪を、矢が通る順に奥へ並べる (後ろから見ると奥へ続く光の筒)。
+    // 壁に当たればそこで閃く (矢の届く 108 ブロックの先は見えないので、壁が無ければ閃かない)
     private static void cloudPierce(Cast c) {
         Vec3 start = c.origin.add(c.look.scale(1.3));
-        Vec3 end = c.aim(PIERCE_RANGE);
         Vec3 right = c.right;
         Vec3 up = new Vec3(0, 1, 0);
+        // 道に垂直な縦の向き (視線が上下を向いていても、輪が道に垂直になる)
+        Vec3 ringUp = right.cross(c.look).normalize();
+        if (ringUp.y < 0) {
+            ringUp = ringUp.scale(-1);
+        }
+        Vec3 ringV = ringUp;
+        Vec3 wall = wallAlong(c, PIERCE_RANGE);
+        double reach = wall == null ? TUNNEL_LENGTH : Math.min(TUNNEL_LENGTH, wall.distanceTo(c.origin));
         c.at(0, x -> SkillFx.burst(x, SkillFx.rune(), x.hand(), 2, 0.2, 0.02));
         c.at(1, x -> {
-            // 放つ: 弓のまわりに雲の輪 (視線に向く縦の輪が二重。後ろから丸く見える)
+            // 放つ: 弓のまわりに雲の輪 (視線に向く縦の輪が二重) と、足もとの衝撃の輪
             FxDraw.add(x, Prim.arc(start, right, up, 0.9, 0, Math.PI * 2).color(SKY_WHITE).width(0.4).life(12).ease(Ease.OUT).glow(0.5));
             FxDraw.add(x, Prim.arc(start, right, up, 1.7, 0, Math.PI * 2).color(SKY_BLUE).width(0.22).life(14).ease(Ease.OUT).alpha(0.7f));
-            FxDraw.add(x, Prim.line(start, end).color(SKY_WHITE).width(0.6).life(SkillRules.PIERCE_LIFETIME).ease(Ease.LINEAR).glow(0.9).trail(0.3));
-            // 途中に白い柱を三本 (視線の方向に伸びる筋は、後ろからでは点にしか見えないため)
-            for (int k = 1; k <= 3; k++) {
-                Vec3 g = start.lerp(end, k / 4.0);
-                FxDraw.add(x, Prim.beam(g, 2.4).color(SKY_WHITE).width(1.6).life(SkillRules.PIERCE_LIFETIME).ease(Ease.OUT).glow(0.8).alpha(0.95f));
-            }
-            // 矢の道の影: 地面に、道と同じ長さで六つの暗い円盤 (青灰。背景の空と緑の上で、道の先まで読める)
-            Vec3 foot = c.feet();
+            FxDraw.add(x, Prim.ring(x.feet().add(0, 0.05, 0), 0.6, 3.4).color(SKY_WHITE).width(0.4).life(10).ease(Ease.OUT).glow(0.5));
+            FxDraw.add(x, Prim.line(start, x.aim(reach)).color(SKY_WHITE).width(0.6).life(8).ease(Ease.LINEAR).glow(0.9).trail(0.3));
+            // 矢の道の影: 地面に、輪と同じ長さで暗い円盤 (背景の空と緑の上で、道の先まで読める)
+            Vec3 foot = x.feet();
             for (int k = 1; k <= 6; k++) {
-                Vec3 g = foot.add(c.fwd.scale(PIERCE_RANGE * k / 7.0)).add(0, 0.05, 0);
-                FxDraw.add(x, Prim.disc(g, 1.0, 1.8).color(SHADOW).life(34).alpha(0.65f));
+                Vec3 g = foot.add(x.fwd.scale(reach * k / 7.0)).add(0, 0.05, 0);
+                FxDraw.add(x, Prim.disc(g, 0.6, 1.4).color(SHADOW).life(24).alpha(0.55f));
             }
             SkillFx.sound(x, SoundEvents.CROSSBOW_SHOOT, x.hand(), 0.45f, 1.7f);
         });
-        c.at(SkillRules.PIERCE_LIFETIME, x -> {
-            // 当たり: 高く明るい柱 (高さ 12) と、柱のまわりの輪 (後ろからも見える縦の輪)
-            SkillFx.flash(x, end);
-            SkillFx.hitSpark(x, end, SKY_WHITE);
-            FxDraw.add(x, Prim.ring(end, 0.2, 2.6).color(WHITE).width(0.35).life(12).glow(0.6));
-            FxDraw.add(x, Prim.beam(end, 12.0).color(SKY_WHITE).width(2.6).life(20).ease(Ease.OUT3).glow(1.0).alpha(1.0f));
-            FxDraw.add(x, Prim.arc(end, right, up, 1.4, 0, Math.PI * 2).color(WHITE).width(0.35).life(14).ease(Ease.OUT).glow(0.5));
-            FxDraw.add(x, Prim.shell(end, 0.3, 1.8, 1.8).color(SKY_BLUE).life(10).width(0.25));
-            SkillFx.sound(x, SoundEvents.ARROW_SHOOT, end, 0.5f, 1.4f);
-        });
+        // 光の輪: 矢が通る順に、2.5 ブロックおきに道へ垂直な輪 (奥ほど小さく見えて、筒になる)
+        int rings = (int) Math.floor(reach / TUNNEL_STEP);
+        for (int k = 1; k <= rings; k++) {
+            double d = k * TUNNEL_STEP;
+            Vec3 p = c.origin.add(c.look.scale(d));
+            int at = 1 + (int) Math.round(d / SkillRules.PIERCE_SPEED);
+            int color = k % 2 == 0 ? SKY_BLUE : SKY_WHITE;
+            c.at(at, x -> FxDraw.add(x, Prim.arc(p, right, ringV, 1.3, 0, Math.PI * 2).color(color).width(0.4).life(22).ease(Ease.OUT).glow(0.9)));
+        }
+        if (wall != null) {
+            int hitAt = 1 + (int) Math.ceil(wall.distanceTo(c.origin) / SkillRules.PIERCE_SPEED);
+            c.at(hitAt, x -> {
+                // 壁に当たった: 明るい柱と、まわりの縦の輪
+                SkillFx.flash(x, wall);
+                SkillFx.hitSpark(x, wall, SKY_WHITE);
+                FxDraw.add(x, Prim.ring(wall, 0.2, 2.6).color(WHITE).width(0.35).life(12).glow(0.6));
+                FxDraw.add(x, Prim.beam(wall, 6.0).color(SKY_WHITE).width(1.6).life(16).ease(Ease.OUT3).glow(1.0));
+                FxDraw.add(x, Prim.arc(wall, right, ringV, 1.4, 0, Math.PI * 2).color(WHITE).width(0.35).life(14).ease(Ease.OUT).glow(0.5));
+                SkillFx.sound(x, SoundEvents.ARROW_HIT, wall, 0.5f, 1.4f);
+            });
+        }
         c.lasts(34);
+    }
+
+    // 雲穿ちの光の輪を並べる長さと間 (見た目だけ。矢そのものは PIERCE_RANGE まで飛ぶ)
+    private static final double TUNNEL_LENGTH = 22;
+    private static final double TUNNEL_STEP = 2.5;
+
+    // 視線の先の壁 (ブロック)。range の中に無ければ null
+    @javax.annotation.Nullable
+    private static Vec3 wallAlong(Cast c, double range) {
+        net.minecraft.world.phys.BlockHitResult hit = c.level.clip(new net.minecraft.world.level.ClipContext(c.origin, c.aim(range),
+                net.minecraft.world.level.ClipContext.Block.COLLIDER, net.minecraft.world.level.ClipContext.Fluid.NONE, c.caster));
+        return hit.getType() == net.minecraft.world.phys.HitResult.Type.MISS ? null : hit.getLocation();
     }
 
     // 骨の罠 [溜め 0 / 放ち 0-8 (罠の輪が内へ閉じる・三本の光の柱が昇る) / 当たり 11 / 残り 44]
@@ -123,37 +150,68 @@ public final class FxRanged {
         c.lasts(44);
     }
 
-    // 天の驟雨 [溜め 0 / 放ち 0-2 (範囲の輪・雲) / 当たり 一打ちごと 12 tick・8 回 / 残り 96]
-    // 形: 半径 4 の淡い輪 (地面) と、上空 9 の雲の輪。光の筋が 8 回、範囲の中へ落ちて、地面で弾ける
+    // 天の驟雨 [溜め 0 / 放ち 0-2 (降る所の輪・雲) / 当たり 一打ちごと 10 tick・8 回 / 残り 96]
+    // 降る所はサーバーが決めた点 (狙った先の地面・途中の敵の足もと。合図の target)。古い合図なら手元で同じように求める。
+    // 形: 降る所の地面に半径 4 の輪、上空 4.5 に雲の円盤 (三人称の後ろからも枠に入る高さ)。一打ちごとに光の筋が三本、雲から地面へ落ちて弾ける
     private static void skyRain(Cast c) {
-        Vec3 center = c.feet();
-        Vec3 cloud = center.add(0, 9, 0);
+        Vec3 center = c.target != null ? c.target : rainCenter(c);
+        Vec3 cloud = center.add(0, RAIN_CLOUD, 0);
         c.at(0, x -> {
             SkillFx.sound(x, SoundEvents.ARROW_SHOOT, x.hand(), 0.6f, 1.4f);
-            // 見える天井: 上空の雲の円盤 (淡く光る) と、その縁の輪。下から見上げて雲の面が読める
-            FxDraw.add(x, Prim.disc(cloud, 0.5, RAIN_RADIUS + 2.0).color(SKY_WHITE).life(96).alpha(0.5f));
-            FxDraw.add(x, Prim.ring(center, RAIN_RADIUS, RAIN_RADIUS).color(SKY_BLUE).width(0.25).life(96).alpha(0.4f));
-            FxDraw.add(x, Prim.ring(cloud, RAIN_RADIUS, RAIN_RADIUS + 1.0).color(SKY_WHITE).width(0.8).life(96).alpha(0.6f));
+            // 弓から降る所の雲へ、細い光の筋 (どこへ降らせたかが分かる)
+            FxDraw.add(x, Prim.line(x.hand(), cloud).color(SKY_WHITE).width(0.25).life(10).ease(Ease.OUT).glow(0.6).trail(0.5));
+            // 雲: 下が空の青、縁が白。下から見上げても、後ろから見ても面が読める
+            FxDraw.add(x, Prim.disc(cloud, 0.5, RAIN_RADIUS + 1.5).color(SKY_BLUE).life(96).alpha(0.55f));
+            FxDraw.add(x, Prim.ring(cloud, RAIN_RADIUS + 0.5, RAIN_RADIUS + 1.5).color(SKY_WHITE).width(0.7).life(96).alpha(0.75f).glow(0.4));
+            // 降る所の輪 (地面)。敵がどこまで巻き込まれるか
+            FxDraw.add(x, Prim.ring(center.add(0, 0.05, 0), RAIN_RADIUS, RAIN_RADIUS).color(SKY_WHITE).width(0.3).life(96).alpha(0.6f));
+            // 雲から地面までの薄い幕 (雨の柱の形)
+            FxDraw.add(x, Prim.shell(center, RAIN_RADIUS, RAIN_RADIUS, RAIN_CLOUD).color(SKY_BLUE).width(0.3).life(96).alpha(0.16f));
         });
-        for (int i = 0; i < 8; i++) {
-            double a = i * 2.399;
-            double r = RAIN_RADIUS * Math.sqrt((i + 0.5) / 8.0);
-            Vec3 spot = center.add(Math.cos(a) * r, 0, Math.sin(a) * r);
-            int at = 4 + i * 11;
-            c.at(at, x -> {
-                // 太い光の筋 (落ちる。後ろから見て細くならないよう幅を 0.9)
-                FxDraw.add(x, Prim.line(spot.add(0, 9, 0), spot).color(SKY_WHITE).width(0.9).life(6).ease(Ease.IN2).glow(1.2).trail(0.6));
-                SkillFx.sound(x, SoundEvents.ARROW_SHOOT, spot, 0.2f, 1.8f);
-            });
-            c.at(at + 5, x -> {
-                // 着地の輪 (地面に広がる)。明るい芯は輪の縁に集まる
-                FxDraw.add(x, Prim.ring(spot, 0.3, 1.6).color(SKY_WHITE).width(0.35).life(8).ease(Ease.OUT).glow(0.4));
-                SkillFx.burst(x, SkillFx.rune(), spot.add(0, 0.3, 0), 2, 0.3, 0.05);
-            });
+        for (int i = 0; i < SkillRules.RAIN_PULSES; i++) {
+            int at = 4 + i * SkillRules.RAIN_INTERVAL;
+            for (int j = 0; j < 3; j++) {
+                int n = i * 3 + j;
+                double a = n * 2.399;
+                double r = RAIN_RADIUS * Math.sqrt((n % 8 + 0.5) / 8.0);
+                Vec3 spot = center.add(Math.cos(a) * r, 0, Math.sin(a) * r);
+                int fall = at + j * 2;
+                c.at(fall, x -> {
+                    // 太い光の筋 (雲から落ちる。後ろから見て細くならないよう幅 0.8)
+                    FxDraw.add(x, Prim.line(spot.add(0, RAIN_CLOUD, 0), spot).color(SKY_WHITE).width(0.8).life(8).ease(Ease.LINEAR).glow(1.2).trail(0.7));
+                });
+                c.at(fall + 3, x -> {
+                    // 着地: 地面に広がる輪と、短い光の柱
+                    FxDraw.add(x, Prim.ring(spot.add(0, 0.05, 0), 0.3, 1.8).color(SKY_WHITE).width(0.35).life(8).ease(Ease.OUT).glow(0.4));
+                    FxDraw.add(x, Prim.beam(spot, 1.4).color(SKY_WHITE).width(0.6).life(6).ease(Ease.OUT).glow(0.8));
+                    SkillFx.burst(x, SkillFx.rune(), spot.add(0, 0.3, 0), 2, 0.3, 0.05);
+                });
+            }
+            c.at(at, x -> SkillFx.sound(x, SoundEvents.ARROW_SHOOT, center, 0.3f, 1.8f));
         }
         c.at(4, x -> SkillFx.flash(x, center.add(0, 1.0, 0)));
-        c.at(96 - 20, x -> FxDraw.add(x, Prim.shell(center, 0.5, RAIN_RADIUS, 9).color(SKY_BLUE).life(20).ease(Ease.OUT).width(0.4)));
+        c.at(96 - 20, x -> FxDraw.add(x, Prim.shell(center, 0.5, RAIN_RADIUS, RAIN_CLOUD).color(SKY_BLUE).life(20).ease(Ease.OUT).width(0.4)));
         c.lasts(96);
+    }
+
+    // 天の驟雨の雲の高さ (見た目だけ)
+    private static final double RAIN_CLOUD = 4.5;
+
+    // 降る所を手元で求める (サーバーの SkillActions.rain と同じ: 視線の先 24 の壁か終わり、途中の敵の足もと、宙なら 8 下の地面)
+    private static Vec3 rainCenter(Cast c) {
+        Vec3 end = c.aim(SkillRules.RAIN_REACH);
+        net.minecraft.world.phys.BlockHitResult block = c.level.clip(new net.minecraft.world.level.ClipContext(c.origin, end,
+                net.minecraft.world.level.ClipContext.Block.COLLIDER, net.minecraft.world.level.ClipContext.Fluid.NONE, c.caster));
+        Vec3 center = block.getType() == net.minecraft.world.phys.HitResult.Type.MISS ? end : block.getLocation();
+        var entityHit = net.minecraft.world.entity.projectile.ProjectileUtil.getEntityHitResult(c.caster, c.origin, center,
+                new net.minecraft.world.phys.AABB(c.origin, center).inflate(1.0),
+                e -> e instanceof net.minecraft.world.entity.monster.Enemy && e.isAlive(), c.origin.distanceToSqr(center));
+        if (entityHit != null) {
+            return entityHit.getEntity().position();
+        }
+        net.minecraft.world.phys.BlockHitResult ground = c.level.clip(new net.minecraft.world.level.ClipContext(center.add(0, 0.5, 0), center.add(0, -8, 0),
+                net.minecraft.world.level.ClipContext.Block.COLLIDER, net.minecraft.world.level.ClipContext.Fluid.NONE, c.caster));
+        return ground.getType() == net.minecraft.world.phys.HitResult.Type.MISS ? center : ground.getLocation();
     }
 
     // 淵の引き [溜め 0 / 放ち 1-6 (紫の輪が寄せ点へ縮む) / 当たり 6 / 残り 26]

@@ -24,7 +24,8 @@ import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 // 要求はすべてサーバーで検める (クライアントの言うことをそのまま信じない)
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class SkillNetwork {
-    private static final String PROTOCOL_VERSION = "1";
+    // 2: 技の見た目の合図に当たりの点 (SkillFxPayload.target)
+    private static final String PROTOCOL_VERSION = "2";
 
     private SkillNetwork() {
     }

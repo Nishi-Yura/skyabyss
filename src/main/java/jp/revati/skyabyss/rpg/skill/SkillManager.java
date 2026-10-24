@@ -476,6 +476,7 @@ public final class SkillManager {
         } else {
             d.chainSkill = "";
         }
+        SkillActions.fxTarget = null;
         String failure = SkillActions.perform(player, skill, rank);
         if (failure != null) {
             Notice.bar(player, ModText.deny(failure));
@@ -507,8 +508,9 @@ public final class SkillManager {
         sendResult(player, slot, true);
         // 見た目の合図 (持ち主と近くの人へ 1 通。段取りは手元で組む)
         if (!(player instanceof FakePlayer) && player.connection != null) {
-            PacketDistributor.sendToPlayersTrackingEntityAndSelf(player, new jp.revati.skyabyss.rpg.skill.net.SkillFxPayload(player.getId(), skill.id, rank, chain));
+            PacketDistributor.sendToPlayersTrackingEntityAndSelf(player, new jp.revati.skyabyss.rpg.skill.net.SkillFxPayload(player.getId(), skill.id, rank, chain, SkillActions.fxTarget));
         }
+        SkillActions.fxTarget = null;
         return CastResult.OK;
     }
 

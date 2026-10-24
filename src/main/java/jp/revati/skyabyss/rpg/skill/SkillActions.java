@@ -67,6 +67,8 @@ public final class SkillActions {
     private static final List<Rain> RAINS = new ArrayList<>();
     // 技が決める、このあとの待ちの倍率 (連ねは当たると 0.5)。SkillManager が読んで 1 に戻す
     static double cooldownScale = 1;
+    // 見た目の合図に載せる当たりの点 (技が決めたら置く。SkillManager が合図を送るときに取り出して消す)
+    static Vec3 fxTarget;
 
     private record TrackedArrow(AbstractArrow arrow, int[] age, int lifetime) {
     }
@@ -1127,6 +1129,7 @@ public final class SkillActions {
         int agility = Growth.get(player).stat(GrowthRules.Stat.AGILITY);
         double damage = SkillRules.rainDamage(rank) * (1 + GrowthRules.projectileMultiplier(agility));
         RAINS.add(new Rain(level, center, player.getUUID(), damage));
+        fxTarget = center;
         player.swing(InteractionHand.MAIN_HAND, true);
         level.playSound(null, center.x, center.y, center.z, Skills.SOUND_RAIN.get(), SoundSource.PLAYERS, 1.2f, 1.0f);
         sound(player, Skills.SOUND_PIERCE.get(), 0.5f, 1.4f);

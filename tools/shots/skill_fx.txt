@@ -378,7 +378,7 @@ wait 30
 # ---- sky_rain (昼・三人称の背中側。88 tick)
 perspective back
 fov 48
-cmd tp @s 0.5 -60 0.5 0 0
+cmd tp @s 0.5 -60 0.5 0 13
 cmd gamerule doWeatherCycle false
 cmd weather clear
 cmd skyabyss cinematic stop
@@ -392,7 +392,7 @@ cmd skyabyss skill slot @s 1 sky_rain
 cmd skyabyss skill cooldowns @s
 cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
 cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
-cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
+cmd summon minecraft:husk -0.5 -60 7.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
 wait 10
 cmd skyabyss skill mana @s full
 record sky_rain 88 30

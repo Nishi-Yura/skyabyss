@@ -74,7 +74,10 @@ TARGET_POS = "-1.0 -60 3.5"
 # 砂の突進は的を進む先 (6.5 ブロック) の右側へ置く (突進の終点で隣に並ぶ)
 # 突進は前 25 度の中に的が無いと「的がない」で撃てない (27 度の既定の的では失敗していた)。的を真っすぐ前へ
 # 突進 (lunge) は的を体の真正面に置くと、後ろのカメラから見て体に隠れて消える (撮った絵で無いのを確かめた)。右へずらす
-TARGET_BY_SKILL = {"dust_charge": "-0.7 -60 7.0", "lunge": "-1.6 -60 6.5"}
+TARGET_BY_SKILL = {"dust_charge": "-0.7 -60 7.0", "lunge": "-1.6 -60 6.5", "sky_rain": "-0.5 -60 7.5"}
+# 体の向きを技ごとに変える (yaw pitch)。天の驟雨は視線の先 (24 ブロック) の地面に降るので、少し下を向いて前 7 ブロックへ降らせる
+# (目の高さ 1.62 から 13 度下 = 前 7 ブロックの地面。的はその 1 ブロック右で、降る輪の中)
+CASTER_BY_SKILL = {"sky_rain": "0.5 -60 0.5 0 13"}
 
 
 def husk_for(skill: str) -> str:
@@ -101,7 +104,7 @@ def block(skill: str, lin: int, bow: bool, total: int, sky: bool) -> list[str]:
     lines.append("perspective back")
     lines.append(f"fov {FOV_BACK}")
     # 毎技、体を同じ場所・同じ向きへ戻す (絶対座標)。前の技の移動 (突進・跳び退き・砂の突進) は先の撮影が終わってから
-    lines.append(f"cmd tp @s {CASTER_POS}")
+    lines.append(f"cmd tp @s {CASTER_BY_SKILL.get(skill, CASTER_POS)}")
     # 開幕の題字と HUD を消してから撮る (cinematic の停止と、部品の一括オフ)
     # 天候は毎技そろえる (前の技の雨が残らないように)。時刻は昼のまま
     lines.append("cmd gamerule doWeatherCycle false")

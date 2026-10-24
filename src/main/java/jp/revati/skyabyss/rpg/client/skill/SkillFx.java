@@ -37,7 +37,7 @@ import net.neoforged.neoforge.client.event.ViewportEvent;
 // 主役は形 (client/skill/fx/FxDraw の板: 弧・筋・輪・円盤・扇・柱・稲妻・殻)。粒は当たりの火花だけの脇役。
 // 段取りは技ごとに fx/ の三つのファイルで決める。決めていない技は generic (下) を使う。
 //
-// 予算 (1 発動・1 tick・全体): 形は CAST_PRIMS 個まで、全体は FxDraw.MAX_PRIMS 個まで。
+// 予算 (1 発動・1 tick・全体): 形は 1 発動で同時に CAST_PRIMS 個まで (消えた形は数えない。長く降り続く技も最後まで描く)、全体は FxDraw.MAX_PRIMS 個まで。
 // 粒は 1 発動 CAST_CAP 粒まで、1 tick は BASE_BUDGET (画面の粒の設定で 1/2・1/5)。
 // 形も粒も手元だけで足す (通信は合図の 1 通だけ)。同時に動く発動は MAX_CASTS まで。
 // 環境変数 SKYABYSS_SKILLFX_LOG があると、発動が終わるたびに使った形と粒の数を log へ出す (撮影での計測用)。
@@ -91,9 +91,14 @@ public final class SkillFx {
         public final Vec3 look;
         public final Vec3 fwd;
         public final Vec3 right;
+        // サーバーが決めた当たりの点 (合図に載っていれば。天の驟雨の降る中心など)。無ければ null
+        @javax.annotation.Nullable
+        public Vec3 target;
         int age;
         int spent;
+        // 足した形の数 (記録用) と、いま残っている形の数 (上限を見る)
         public int prims;
+        public int live;
         int duration;
         private final List<Step> steps = new ArrayList<>();
 
@@ -169,6 +174,7 @@ public final class SkillFx {
             return;
         }
         Cast c = new Cast(level, skill, caster, caster == mc.player, payload.rank(), payload.chain());
+        c.target = payload.target();
         Consumer<Cast> plan = PLANS.get(skill);
         if (plan == null) {
             generic(c);
