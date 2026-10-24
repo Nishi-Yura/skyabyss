@@ -69,6 +69,13 @@ docs/design/32 の 9.4 の数を、部屋と中ボスの間を越えたときに
 - GUI 2 の左右の切れは、`textBounds()` (字を切る範囲) が論理の座標のままだったため。板は `UiFit` で窓に合わせて大きく描くので、切る範囲も同じ変換を通す必要があった (`fit.screenRect(0, 0, W, H)`)。他の画面 (RebirthScreen など) は既にこの形。
 - GUI 3・4 で足の行が切れたのは、板の高さ (252) が窓の高さより大きく、`UiFit` が 1 倍より小さくできなかったため。`UiFit.fit` に下限 (`floor`) を足し、板だけ 0.5 まで縮める。
 
+## 絵と説明の崩れ (後半の修正)
+
+- 部屋の絵 (歩・智・闘) と類の印が黒い四角・紫と黒の欠けになっていた。板の絵の帳 `textures/gui/trial/icons.png` が資源に無かった (ログに `Failed to load texture`)。`tools/gen/ui/gen_trial_icons.py` で 18 枚 (8 列 × 3 行) を書いて入れ、`check_generators` の一覧にも入れた。cube-geo で移した絵とは無関係。
+- cube-geo の戻し: 板は cube の絵を使わないが、src/main の `textures/…png` の参照を全部確かめると、無効時の枝で読む 8 枚が資源から無かった (`ash_smith_glowmask` と `_white`・`ash_thrall_flared`・`coral_thrall_statue`・`raiju_glowmask`・`static_moth_charge`・`watcher`・`watcher_glowmask`)。`tools/sources/geo_cube` から資源へ戻し、`tools/dev/cube_geo.py` の KEEP と `docs/review/cube_geo_2026-10-24.md` に入れた。`misc/white`・`misc/shadow`・`block/chain` は vanilla の `minecraft:` の絵で、資源に無いのが正しい。
+- 部屋の説明が途中で切れていた。カードを 52 px、一つ 56 px おきにして、説明は二行 (`JpWrap`) に。それでも長い文は切れるので、部屋 21 件の説明を縮めた (ja は 56 字まで、en は 100 字まで。鍵は同じ。`trial.skyabyss.cell.*.desc`、lang を直接直した)。
+- 板の高さは 262 px。GUI 2・3・4 で全部が枠の中に出る (`previews/raid_rewards_board_gui*.png`)。
+
 ## 未解決
 
 1. GUI 4 では板が小さい (文字は約 6 px 相当)。読めるかは実機の判断。

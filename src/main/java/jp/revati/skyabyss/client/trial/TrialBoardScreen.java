@@ -42,7 +42,7 @@ public class TrialBoardScreen extends Screen implements jp.revati.skyabyss.clien
     private static final int ABYSS = 0xD8343C;
 
     private static final int W = 360;
-    private static final int H = 252;
+    private static final int H = 262;
 
     private static final int ABYSS_W = 118;
     private static final int CRAFT_W = 86;
@@ -262,7 +262,7 @@ public class TrialBoardScreen extends Screen implements jp.revati.skyabyss.clien
                 continue;
             }
             int rc = rarityColor(card.rarity());
-            frame(g, px + 10, y, W - 20, 48, rc, CARD);
+            frame(g, px + 10, y, W - 20, 52, rc, CARD);
             // 枠の絵と名前
             icon(g, slotIcon(def.slot()), px + 19, y + 5, 18, 1f);
             Component slot = Component.translatable("trial.skyabyss.slot." + def.slot().id);
@@ -279,10 +279,14 @@ public class TrialBoardScreen extends Screen implements jp.revati.skyabyss.clien
             icon(g, I_KIND + def.kind().ordinal(), rx - font.width(st) - 8 - kw - 14, y + 6, 12, 1f);
             // 一行の説明
             Component desc = Component.translatable(def.descKey());
-            g.drawString(font, font.plainSubstrByWidth(desc.getString(), W - 20 - 48 - 12), px + 48, y + 20, argb(1f, DIM), false);
+            // 説明は二行まで (一行目 y+18、二行目 y+27)。三行目以降は切らずに、この二行で収まる文だけを出す
+            List<FormattedCharSequence> dl = jp.revati.skyabyss.client.ui.JpWrap.split(font, desc, W - 20 - 48 - 12);
+            for (int i = 0; i < Math.min(2, dl.size()); i++) {
+                g.drawString(font, dl.get(i), px + 48, y + 18 + i * 9, argb(1f, DIM), false);
+            }
             // 修飾の札
             int cx = px + 48;
-            int cy = y + 33;
+            int cy = y + 38;
             if (card.chips().isEmpty()) {
                 g.drawString(font, Component.translatable("trial.skyabyss.chip.plain"), cx, cy + 4, argb(1f, DIM), false);
             }
@@ -314,7 +318,7 @@ public class TrialBoardScreen extends Screen implements jp.revati.skyabyss.clien
                 Component b = Component.translatable(badge);
                 g.drawString(font, b, px + 28 - font.width(b) / 2, y + 34, argb(1f, card.state() == 0 ? GOLD : GOOD), false);
             }
-            y += 52;
+            y += 56;
         }
     }
 
