@@ -623,16 +623,21 @@ def particle_frames(kind):
         img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
         d = ImageDraw.Draw(img)
         c = 7.5
-        if kind == "rune_spark":
-            r = [6, 5, 3, 2][f]
-            glow = (127, 214, 208, 150)
-            core = (220, 255, 250, 255)
-            d.line([c - r, c, c + r, c], fill=glow, width=2)
-            d.line([c, c - r, c, c + r], fill=glow, width=2)
-            d.line([c - r + 1, c, c + r - 1, c], fill=core)
-            d.line([c, c - r + 1, c, c + r - 1], fill=core)
-            if f < 2:
-                d.point([(c - 2, c - 2), (c + 2, c + 2), (c + 2, c - 2), (c - 2, c + 2)], fill=glow)
+        if kind in ("rune_spark", "sky_mote"):
+            # 柔らかい光の点 (白い十字や角ばった四角にしない)。中心は明るく、縁へ向けて消える
+            s = ([3.4, 2.8, 2.0, 1.4] if kind == "rune_spark" else [2.6, 2.1, 1.6, 1.1])[f]
+            ys, xs = np.mgrid[0:16, 0:16]
+            dist2 = (xs + 0.5 - c) ** 2 + (ys + 0.5 - c) ** 2
+            a = np.exp(-dist2 / (2 * s * s))
+            px = np.zeros((16, 16, 4), dtype=np.uint8)
+            cool = np.array([127, 214, 208] if kind == "rune_spark" else [150, 200, 255], dtype=float)
+            hot = np.array([236, 255, 252] if kind == "rune_spark" else [240, 248, 255], dtype=float)
+            mix = np.clip(a * 1.4, 0, 1)[..., None]
+            px[..., :3] = (cool * (1 - mix) + hot * mix).astype(np.uint8)
+            px[..., 3] = (np.clip(a, 0, 1) * 255).astype(np.uint8)
+            img = Image.fromarray(px, "RGBA")
+            frames.append(img)
+            continue
         else:
             r = [4, 3, 2, 1][f]
             d.polygon([(c, c - r - 2), (c + r, c), (c, c + r + 2), (c - r, c)], fill=(170, 200, 255, 140))

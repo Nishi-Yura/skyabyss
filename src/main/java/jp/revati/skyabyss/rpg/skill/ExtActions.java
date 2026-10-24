@@ -161,7 +161,6 @@ final class ExtActions {
         if (!player.onGround() || player.isPassenger()) {
             return "message.skyabyss.skill.need_ground";
         }
-        ServerLevel level = player.serverLevel();
         Vec3 dir = SkillActions.flatLook(player);
         Vec3 from = player.position();
         Vec3 end = dashEnd(player, dir, SkillRules.DUST_LENGTH);
@@ -177,8 +176,6 @@ final class ExtActions {
                 e.hurtMarked = true;
             }
         }
-        line(level, dust(Blocks.SAND), from.add(0, 0.2, 0), end.add(0, 0.2, 0), 0.4, 0.25);
-        line(level, Skills.SKY_MOTE.get(), from.add(0, 1.0, 0), end.add(0, 1.0, 0), 0.6, 0.2);
         player.swing(InteractionHand.MAIN_HAND, true);
         SkillActions.sound(player, Skills.SOUND_LUNGE.get(), 0.9f, 0.7f);
         return null;
@@ -186,7 +183,6 @@ final class ExtActions {
 
     // 蒸気の鐘 (潮 + 灰): 足もとから熱い蒸気を吹き出し、周り (半径 4) の敵を打って足を鈍らせる
     static String steamBell(ServerPlayer player, int rank) {
-        ServerLevel level = player.serverLevel();
         Vec3 c = player.position();
         List<LivingEntity> foes = within(player, c, SkillRules.STEAM_RADIUS);
         float amount = atk(player, SkillRules.steamMultiplier(rank));
@@ -195,11 +191,6 @@ final class ExtActions {
                 SkillEffects.slow(e, SkillRules.STEAM_SLOW * (SkillActions.isLarge(e) ? 0.5 : 1.0), SkillRules.STEAM_TICKS);
             }
         }
-        for (int ring = 1; ring <= 3; ring++) {
-            double r = SkillRules.STEAM_RADIUS * ring / 3.0;
-            SkillActions.ring(level, ParticleTypes.CLOUD, c, r, 10 + ring * 6, 0.3 + ring * 0.25);
-        }
-        SkillActions.ring(level, ParticleTypes.FLAME, c, SkillRules.STEAM_RADIUS, 24, 0.2);
         SkillActions.sound(player, SoundEvents.BELL_BLOCK, 0.9f, 0.6f);
         SkillActions.sound(player, SoundEvents.FIRE_EXTINGUISH, 0.7f, 1.2f);
         player.swing(InteractionHand.MAIN_HAND, true);
@@ -230,8 +221,6 @@ final class ExtActions {
                     any = true;
                 }
             }
-            line(level, ParticleTypes.FLAME, eye.add(dir.scale(0.8)).add(0, -0.3, 0), end, 0.5, 0.03);
-            level.sendParticles(Skills.RUNE_SPARK.get(), end.x, end.y, end.z, 3, 0.1, 0.1, 0.1, 0.02);
         }
         if (flat.lengthSqr() < 0.0001) {
             any = false;
@@ -245,7 +234,6 @@ final class ExtActions {
     // ================================================================ 淵 (B09)
     // 淵の引き: 足もとの前 3 ブロックへ周り (半径 7) の敵を寄せ、少し傷つけて足を鈍らせる (混ぜるための下ごしらえ)
     static String deepPull(ServerPlayer player, int rank) {
-        ServerLevel level = player.serverLevel();
         Vec3 point = player.position().add(SkillActions.flatLook(player).scale(3.0));
         List<LivingEntity> foes = within(player, player.position(), SkillRules.PULL_RADIUS);
         if (foes.isEmpty()) {
@@ -258,8 +246,6 @@ final class ExtActions {
                 SkillEffects.slow(e, SkillRules.PULL_SLOW * (SkillActions.isLarge(e) ? 0.5 : 1.0), SkillRules.PULL_SLOW_TICKS);
             }
         }
-        spiral(level, point, SkillRules.PULL_RADIUS, ParticleTypes.PORTAL);
-        SkillActions.ring(level, Skills.RUNE_SPARK.get(), point, 1.2, 12, 0.2);
         SkillActions.sound(player, SoundEvents.ENDERMAN_TELEPORT, 0.7f, 0.5f);
         player.swing(InteractionHand.MAIN_HAND, true);
         return null;
@@ -277,9 +263,6 @@ final class ExtActions {
     static String deepEcho(ServerPlayer player, int rank) {
         SkillData d = SkillManager.get(player);
         d.echoUntil = player.level().getGameTime() + SkillRules.ECHO_TICKS;
-        ServerLevel level = player.serverLevel();
-        SkillActions.ring(level, Skills.RUNE_SPARK.get(), player.position(), 1.4, 20, 0.15);
-        SkillActions.ring(level, ParticleTypes.REVERSE_PORTAL, player.position(), 0.9, 14, 1.0);
         SkillActions.sound(player, Skills.SOUND_MARK.get(), 0.9f, 0.5f);
         return null;
     }
@@ -292,8 +275,6 @@ final class ExtActions {
         for (LivingEntity e : within(player, center, SkillRules.MAW_RADIUS)) {
             pull(e, center, 0.45);
         }
-        spiral(level, center, SkillRules.MAW_RADIUS, ParticleTypes.SMOKE);
-        SkillActions.ring(level, ParticleTypes.PORTAL, center, SkillRules.MAW_RADIUS, 28, 0.3);
         SkillActions.sound(player, SoundEvents.WARDEN_SONIC_CHARGE, 0.6f, 1.6f);
         SkillEffects.later(level, 8, () -> {
             if (!alive(player, level)) {
@@ -303,8 +284,6 @@ final class ExtActions {
                 float a = SkillActions.isLarge(e) ? amount * 1.2f : amount;
                 SkillActions.hit(player, e, a, Skill.DEEP_MAW);
             }
-            level.sendParticles(ParticleTypes.SMOKE, center.x, center.y + 0.8, center.z, 30, 0.8, 0.6, 0.8, 0.05);
-            SkillActions.ring(level, Skills.RUNE_SPARK.get(), center, 1.6, 20, 0.3);
             level.playSound(null, center.x, center.y, center.z, SoundEvents.GENERIC_EXPLODE.value(), net.minecraft.sounds.SoundSource.PLAYERS, 0.5f, 0.6f);
         });
         player.swing(InteractionHand.MAIN_HAND, true);
@@ -354,17 +333,13 @@ final class ExtActions {
     }
 
     private static void ghostSlash(ServerLevel level, LivingEntity foe, boolean reverse) {
+        // 斬りの筋はクライアントの SkillFx が描く。ここは当たりの小さな火花だけ
         Vec3 c = foe.position().add(0, foe.getBbHeight() * 0.6, 0);
-        for (int i = 0; i < 10; i++) {
-            double t = (i - 4.5) * 0.17 * (reverse ? -1 : 1);
-            level.sendParticles(ParticleTypes.SOUL_FIRE_FLAME, c.x + t, c.y - t * 0.8, c.z + t * 0.4, 1, 0.02, 0.02, 0.02, 0.0);
-        }
-        level.sendParticles(Skills.RUNE_SPARK.get(), c.x, c.y, c.z, 6, 0.3, 0.3, 0.3, 0.04);
+        level.sendParticles(Skills.RUNE_SPARK.get(), c.x, c.y, c.z, 1, 0.1, 0.1, 0.1, 0.02);
     }
 
     // 墓鐘 (転生 2): 鐘を 1 つ打つ。周り (半径 5) の敵を少し打って、3 秒、足を重くする
     static String graveBell(ServerPlayer player, int rank) {
-        ServerLevel level = player.serverLevel();
         Vec3 c = player.position();
         float amount = atk(player, SkillRules.bellMultiplier(rank));
         List<LivingEntity> foes = within(player, c, SkillRules.BELL_RADIUS);
@@ -373,9 +348,6 @@ final class ExtActions {
                 SkillEffects.slow(e, SkillRules.BELL_SLOW * (SkillActions.isLarge(e) ? 0.5 : 1.0), SkillRules.BELL_TICKS);
             }
         }
-        for (int ring = 1; ring <= 2; ring++) {
-            SkillActions.ring(level, ParticleTypes.SOUL_FIRE_FLAME, c, SkillRules.BELL_RADIUS * ring / 2.0, 14 + ring * 8, 0.15 + ring * 0.2);
-        }
         SkillActions.sound(player, SoundEvents.BELL_RESONATE, 1.0f, 0.5f);
         player.swing(InteractionHand.MAIN_HAND, true);
         return null;
@@ -383,22 +355,12 @@ final class ExtActions {
 
     // 最期の光 (転生 4): 前の人生の最後の瞬間。足もとから光の輪が三度ひろがり、周り (半径 5.5) の敵を打って押し出す (×1.5 / ×2.0)
     static String finalLight(ServerPlayer player, int rank) {
-        ServerLevel level = player.serverLevel();
         Vec3 c = player.position();
         float amount = atk(player, SkillRules.lightMultiplier(rank));
         for (LivingEntity e : within(player, c, SkillRules.LIGHT_RADIUS)) {
             if (SkillActions.hit(player, e, amount, Skill.FINAL_LIGHT)) {
                 push(e, c, 0.9);
             }
-        }
-        for (int i = 0; i < 3; i++) {
-            double r = SkillRules.LIGHT_RADIUS * (i + 1) / 3.0;
-            SkillEffects.later(level, i * 3, () -> {
-                if (alive(player, level)) {
-                    SkillActions.ring(level, ParticleTypes.END_ROD, c, r, 30, 0.2);
-                    SkillActions.ring(level, Skills.RUNE_SPARK.get(), c, r * 0.8, 18, 0.5);
-                }
-            });
         }
         SkillActions.sound(player, SoundEvents.BEACON_POWER_SELECT, 1.0f, 0.7f);
         SkillActions.sound(player, Skills.SOUND_CLEAVE.get(), 0.8f, 0.5f);
