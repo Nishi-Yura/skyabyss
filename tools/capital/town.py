@@ -1881,7 +1881,7 @@ class Town(Facilities):
 
     def street_light(self):
         """夜の街路を、暖かい灯りの柱で照らす (tools/audit/check_light.py)。魂の松明は使わない。
-        中心 (|x|,|z| <= 60) は歩く所の明るさ 7 未満を、外の輪は 4 未満を、柱の列 (8〜10 ほど離す) で埋める。
+        中心 (|x|,|z| <= 60) は歩く所の明るさ 3 未満を、外の輪は 1 未満を、柱の列 (16〜20 ほど離す) で埋める (道の目印ていど)。
         柱は道の端に立つ (四方の三つは空き)。灯りの高さは柱の上 (吊り灯り)"""
         sys.path.insert(0, os.path.join(ROOT, 'tools', 'audit'))
         import check_light  # noqa: E402
@@ -1890,10 +1890,11 @@ class Town(Facilities):
 
         def veto(cells, changes):
             return passage.placement_ok(cells, changes, **rules)
-        core = check_light.plan_wall_torches(self.v.b, target=7, region=check_light.in_core, min_gap=8, max_add=400,
+        # 2026-10-25 の試遊で「灯りが多すぎる」。町は安全 (敵が湧かない) なので、道の目印になる程度に間引く
+        core = check_light.plan_wall_torches(self.v.b, target=3, region=check_light.in_core, min_gap=16, max_add=120,
                                              veto=veto)
-        ring = check_light.plan_wall_torches(self.v.b, target=4, region=lambda p: not check_light.in_core(p),
-                                             min_gap=10, max_add=300, veto=veto)
+        ring = check_light.plan_wall_torches(self.v.b, target=1, region=lambda p: not check_light.in_core(p),
+                                             min_gap=20, max_add=60, veto=veto)
         self.torches = core + ring
 
     def house_lights(self):

@@ -130,6 +130,8 @@ public final class PouchEntries {
         // 共鳴
         add(list, ModItems.RESONANCE_CRYSTAL.get(), Category.RESONANCE, 999, false, false);
         add(list, ModItems.RESONANCE_SHARD.get(), Category.RESONANCE, 999, false, false);
+        // 鐘銭も袋へ (2026-10-25 の試遊。支払いは袋と持ち物の両方から: Coins)
+        add(list, jp.revati.skyabyss.facility.FacilitySetup.BELL_COIN.get(), Category.RESONANCE, 9999, false, false);
         for (String titan : jp.revati.skyabyss.progress.Titans.all()) {
             add(list, ModItems.resonanceShard(titan), Category.RESONANCE, 999, false, false);
         }

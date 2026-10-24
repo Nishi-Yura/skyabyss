@@ -103,8 +103,13 @@ public final class OpeningBeats {
         if (level.dimension() != Level.OVERWORLD || (level.getGameTime() + (player.getId() & 0xFF)) % CHECK_INTERVAL != 0) {
             return;
         }
-        run(level, player);
+        // 近くの村へ案内し、村が無ければ野営を作る案内は止めた (2026-10-25。語り部は都の大鐘楼にいる)。判断の部品 (decide) は残す
+        if (WILD_GUIDE) {
+            run(level, player);
+        }
     }
+
+    static final boolean WILD_GUIDE = false;
 
     static void run(ServerLevel level, ServerPlayer player) {
         if (!started(SkyEventData.get(level), SkyEvents.activePass() != null, Config.HORROR_EVENT_FREQUENCY.get())) {

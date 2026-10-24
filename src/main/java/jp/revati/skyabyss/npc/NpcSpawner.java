@@ -54,16 +54,23 @@ public final class NpcSpawner {
         if (level.dimension() != Level.OVERWORLD || (level.getGameTime() + (player.getId() & 0xFF)) % CHECK_INTERVAL != 0) {
             return;
         }
+        // 語り部と鯨追いは都の大鐘楼にだけ立つ (2026-10-25 の試遊: 野の村・野営に立つ語り部はいらない)。
+        // 前の版で野に立った二人は、近くを通ったときに消す
+        removeWild(level, player);
         Optional<BlockPos> bell = level.getPoiManager().findClosest(h -> h.is(PoiTypes.MEETING), player.blockPosition(), VILLAGE_RADIUS,
                 PoiManager.Occupancy.ANY);
-        if (bell.isPresent()) {
+        if (bell.isPresent() && jp.revati.skyabyss.opening.site.SiteGuard.inCapital(level, bell.get())) {
             visitVillage(level, capitalBell(level, bell.get()), player);
-            return;
         }
-        // 鐘のある村が近くに無い人のための野営 (StoryGuide が焚き火を置く)。村と同じように語り部が立ち、必要なら鯨追いも立つ
-        BlockPos camp = nearestCamp(NpcWorldData.get(level.getServer().overworld()), player.blockPosition(), VILLAGE_RADIUS);
-        if (camp != null) {
-            visitVillage(level, camp, player);
+    }
+
+    private static void removeWild(ServerLevel level, ServerPlayer player) {
+        net.minecraft.world.phys.AABB box = player.getBoundingBox().inflate(SEARCH);
+        for (NpcEntity npc : level.getEntitiesOfClass(NpcEntity.class, box,
+                n -> (n.getType() == NpcSetup.STORYTELLER.get() || n.getType() == NpcSetup.WHALE_CHASER.get())
+                        && !jp.revati.skyabyss.opening.site.SiteGuard.inCapital(level, n.blockPosition()))) {
+            SkyAbyss.LOGGER.info("[npc] removed a wild {} at {} (only the capital's bell tower keeps them)", npc.getType().toShortString(), npc.blockPosition());
+            npc.discard();
         }
     }
 

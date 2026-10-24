@@ -34,6 +34,7 @@ import net.neoforged.neoforge.event.server.ServerStoppedEvent;
 //   ・巨神の背中 (ダンジョン) の中では、同じ背中にいれば距離を問わない
 //   ・居合わせた仲間のいちばん高いレベルより 10 を超えて低い人には分けない (引き上げの抜け道)
 //   ・倒れている人・観戦者には分けない
+// - パーティの中では傷つけ合わない (onIncomingDamage)
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class Parties {
     public static final int MAX_MEMBERS = 6;
@@ -72,6 +73,24 @@ public final class Parties {
     @Nullable
     public static PartyData.Party of(ServerPlayer player) {
         return PartyData.get(player.server).of(player.getUUID());
+    }
+
+    // 同じパーティの人どうしか (自分どうしは false)
+    public static boolean sameParty(ServerPlayer a, ServerPlayer b) {
+        if (a == b || a.getUUID().equals(b.getUUID())) {
+            return false;
+        }
+        PartyData.Party pa = of(a);
+        return pa != null && pa == of(b);
+    }
+
+    // パーティの中では傷つけ合わない (2026-10-25 の試遊)。近接・矢・技など、傷の出どころが仲間なら傷を取り消す
+    @SubscribeEvent
+    static void onIncomingDamage(net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent event) {
+        if (event.getEntity() instanceof ServerPlayer victim && event.getSource().getEntity() instanceof ServerPlayer attacker
+                && sameParty(victim, attacker)) {
+            event.setCanceled(true);
+        }
     }
 
     // パーティの今いる人 (パーティが無ければ空。2026-10-23: 一人で深淵の印を取ると落ちて、近道の格子が開かなかった)

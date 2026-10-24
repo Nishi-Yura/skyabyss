@@ -26,7 +26,7 @@ def skills():
         lists.append('<h3 id="list-%s">%s</h3><div class="skill-list">%s</div>' % (
             t, T(nm[0] + "の技", nm[1] + " skills"), "".join(skill_card(s) for s in by[t])))
     legend = '<ul class="legend"><li><i class="a"></i>%s</li><li><i></i>%s</li><li><i class="k"></i>%s</li></ul>' % (
-        T("使う技（枠に置いて使う）", "Active (put in a slot)"), T("常に効く技（覚えるだけで効く）", "Passive (works once learned)"),
+        T("使う技（枠に置いて使う）", "Active (put in a slot)"), T("パッシブ（覚えるだけで効く）", "Passive (works once learned)"),
         T("要（かなめ。癖のある常時の技）", "Keystone (quirky always-on skill)"))
 
     ptable = table([T("レベル", "Level"), "1", "5", "10", "15", "21", "27", "33", "40"],
@@ -186,7 +186,7 @@ def skills():
         h_leg=T("書き換えの武器（4 番目の刻印）", "Rewrite weapons (the fourth rune)"),
         leg=T("8 本の書き換えの武器が、1 つの技を別の形に書き換えます。その武器を主の手に持つあいだだけ選べて効きます。", "Eight rewrite weapons each change one skill. They can be chosen and work only while held in your main hand."),
         legt=table([T("書き換えの武器", "Rewrite weapon"), T("書き換わる技", "Skill rewritten")], legend_rows),
-        h_key=T("要（かなめ）", "Keystones"), key=T("各木の 4 行目。得と引き換えに癖のある、常に効く技です。段は 1 つだけ。", "Row 4 of each tree: a quirky always-on skill with a trade-off. One rank only."), keyt=keys,
+        h_key=T("要（かなめ）", "Keystones"), key=T("各木の 4 行目。得と引き換えに癖のある、パッシブです。段は 1 つだけ。", "Row 4 of each tree: a quirky always-on skill with a trade-off. One rank only."), keyt=keys,
         h_bp=T("ステータスの刻み目", "Stat breakpoints"), bp=T("4 つのステータスそれぞれに、15 と 30 で小さな分かれ目があります（計 8 つ）。全部を 30 にするには力が 120 要るので、どこを届かせるかが選びです。", "Each stat has a small breakpoint at 15 and 30 (eight in total). Getting all four to 30 takes 120 points, so where to reach is a choice."), bpt=bp,
         h_types=T("武器の型", "Weapon types"), types=T("13 種の武器は 5 つの型に分かれます。合う型の武器を持つと、技に小さなおまけが付きます。縛りはありません。", "The 13 weapons fall into five types. Holding a matching type gives a small bonus; nothing is ever required."), typet=types,
         freedom=pages_d.skills_extra(),
@@ -206,7 +206,7 @@ def skill_card(s):
     """技ひとつぶんの開閉パネル。中身は、一行の説明・属性・見た目 (放ってから消えるまでの動く絵)・最大段。
     動く絵は、パネルを開いたときに初めて読む (それまでは止めた絵)。動きを減らす設定の人は、再生ボタンを押したときに読む (js/main.js)。"""
     sid = s["id"]
-    kind = {"A": ("使う", "Active"), "P": ("常に効く", "Passive"), "K": ("要", "Keystone")}[s["kind"]]
+    kind = {"A": ("使う", "Active"), "P": ("パッシブ", "Passive"), "K": ("要", "Keystone")}[s["kind"]]
     el = ELEMENT[s["tree"]]
     fx_dir = os.path.join(ROOT, "site", "img", "skill_fx")
     if os.path.exists(os.path.join(fx_dir, sid + ".webp")) and os.path.exists(os.path.join(fx_dir, sid + "_poster.webp")):
@@ -225,7 +225,7 @@ def skill_card(s):
     elif s["kind"] == "A":
         visual = '<p class="fx-none">%s</p>' % T("見た目は撮影を待っています。", "The in-game look is waiting for its shots.")
     else:
-        visual = '<p class="fx-none">%s</p>' % T("常に効く技なので、画面に出る見た目はありません。", "This skill is always on, so there is no on-screen visual.")
+        visual = '<p class="fx-none">%s</p>' % T("パッシブなので、画面に出る見た目はありません。", "This skill is always on, so there is no on-screen visual.")
     return (
         '<details class="skill" id="skill-%(id)s"><summary>'
         '<img class="ic px" src="img/skill/%(idx)02d.png" width="32" height="32" alt="">'

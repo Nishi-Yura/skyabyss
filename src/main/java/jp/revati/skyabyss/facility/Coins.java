@@ -35,19 +35,12 @@ public final class Coins {
         return Mth.clamp(Progression.stage(player) + 1, 1, 5);
     }
 
+    // 袋 (旅嚢) と持ち物の合計
     public static int count(ServerPlayer player) {
-        Inventory inv = player.getInventory();
-        int n = 0;
-        for (int i = 0; i < inv.getContainerSize(); i++) {
-            ItemStack s = inv.getItem(i);
-            if (s.is(FacilitySetup.BELL_COIN.get())) {
-                n += s.getCount();
-            }
-        }
-        return n;
+        return jp.revati.skyabyss.pouch.Pouch.countAll(player, FacilitySetup.BELL_COIN.get());
     }
 
-    // 足りなければ何も取らずに false
+    // 足りなければ何も取らずに false。袋から先に、足りない分を持ち物から
     public static boolean take(ServerPlayer player, int n) {
         if (n <= 0) {
             return true;
@@ -55,17 +48,7 @@ public final class Coins {
         if (count(player) < n) {
             return false;
         }
-        Inventory inv = player.getInventory();
-        int left = n;
-        for (int i = 0; i < inv.getContainerSize() && left > 0; i++) {
-            ItemStack s = inv.getItem(i);
-            if (s.is(FacilitySetup.BELL_COIN.get())) {
-                int k = Math.min(left, s.getCount());
-                s.shrink(k);
-                left -= k;
-            }
-        }
-        inv.setChanged();
+        jp.revati.skyabyss.pouch.Pouch.takeAny(player, FacilitySetup.BELL_COIN.get(), n);
         return true;
     }
 

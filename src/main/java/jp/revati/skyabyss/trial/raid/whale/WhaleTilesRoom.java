@@ -181,12 +181,12 @@ public final class WhaleTilesRoom extends RaidRoom {
                 RaidKit.set(level, cell.origin().offset(x, BALCONY_Y + 1, 9), Blocks.ANDESITE_WALL.defaultBlockState());
             }
         }
-        // 見張り台への階段 (西から東へ上る)。段の下は床まで埋める (空中に浮いた段にしない)。段の向きは低い側 = 西
+        // 見張り台への階段 (西から東へ上る)。段の下は床まで埋める (空中に浮いた段にしない)。段の向き (FACING) は高い側 = 東
         for (int i = 1; i <= BALCONY_Y; i++) {
             for (int y = 1; y < i; y++) {
                 RaidKit.set(level, cell.origin().offset(HX - 5 + i, y, 8), Blocks.SMOOTH_QUARTZ.defaultBlockState());
             }
-            RaidKit.set(level, cell.origin().offset(HX - 5 + i, i, 8), Blocks.SMOOTH_QUARTZ_STAIRS.defaultBlockState().setValue(StairBlock.FACING, Direction.WEST));
+            RaidKit.set(level, cell.origin().offset(HX - 5 + i, i, 8), Blocks.SMOOTH_QUARTZ_STAIRS.defaultBlockState().setValue(StairBlock.FACING, Direction.EAST));
         }
         // 見張り台の下の柱と灯り
         for (int x : new int[] {-HX + 1, 0, HX - 1}) {

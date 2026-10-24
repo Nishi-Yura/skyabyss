@@ -1,7 +1,5 @@
 package jp.revati.skyabyss.trial.raid.whale;
 
-import jp.revati.skyabyss.entity.StoneWhaleHeart;
-import jp.revati.skyabyss.entity.WhaleboneCaptain;
 import jp.revati.skyabyss.trial.raid.RaidCtx;
 import jp.revati.skyabyss.trial.raid.RaidKit;
 import jp.revati.skyabyss.trial.raid.RaidRoom;
@@ -19,7 +17,8 @@ import net.minecraft.world.phys.Vec3;
 
 // 闘 WR3「鯨の核を守る」: 部屋の中央の核を、三つの波から守る。
 //  - 核の体力 (CORE_MAX) は目的の帯に出る。敵が核のそばにいるあいだ減り (剣・盾は近くで一秒に 1.2、射手は離れて 0.6)、敵がいないと少し戻る
-//  - 敵は核へ向かう (人を狙える間は人を狙う)。核が壊れたら部屋をやり直す。波は 4・6・8 体 (人数で増える)、最後の波に番兵長の影
+//  - 敵は核へ向かう (人を狙える間は人を狙う)。核が壊れたら部屋をやり直す。波は 3・4 体 (人数で増える) と、三つ目は老番兵一体だけ
+//    (2026-10-25 の試遊: 骨守りが難しすぎた・三つ目に番兵長が出て、次の段の中ボスとかぶっていた)
 //  - 敵の組・出る角度・数は挑戦ごとに少し変わる
 //  - 一人のときは核の削れが SOLO_DRAIN 倍 (一人でも越えられる。docs/design/32 の 9 章)
 public final class WhaleCoreRoom extends RaidRoom {
@@ -30,12 +29,12 @@ public final class WhaleCoreRoom extends RaidRoom {
     static final int WAVES = 3;
     static final double MELEE_RANGE = 3.6;
     static final double SHOOT_RANGE = 11;
-    static final double MELEE_DPS = 1.2;
+    static final double MELEE_DPS = 0.9;
     static final double SHOT_DPS = 0.6;
-    static final double REGEN_DPS = 0.6;
+    static final double REGEN_DPS = 1.0;
     static final int WAVE_GAP = 80;
     // 一人のときの核の削れの倍率
-    static final double SOLO_DRAIN = 0.55;
+    static final double SOLO_DRAIN = 0.45;
 
     private double hp = CORE_MAX;
     private int wave;
@@ -154,29 +153,28 @@ public final class WhaleCoreRoom extends RaidRoom {
 
     private void spawnWave(RaidCtx ctx, int w) {
         int scale = ctx.scale();
-        int base = 2 + 2 * w;
-        int n = base + (int) Math.round((scale - 1) * (1.0 + 0.5 * w));
-        n += ctx.rng().nextInt(2);
-        int r = HX - 3;
-        for (int i = 0; i < n; i++) {
-            double a = angleOffset + Math.PI * 2 * i / n + ctx.rng().nextDouble() * 0.3;
-            int x = (int) Math.round(Math.cos(a) * r);
-            int z = (int) Math.round(Math.sin(a) * r);
-            BlockPos at = ctx.cell().floor(Math.max(-HX + 2, Math.min(HX - 2, x)), Math.max(-HZ + 2, Math.min(HZ - 2, z)));
-            String kind = w == 1 ? "sentinel" : (i % 3 == 0 ? "archer" : i % 3 == 1 ? "crawler" : "sentinel");
-            if (w == 3 && i % 4 == 0) {
-                kind = "archer";
-            }
-            ctx.spawnGuard(kind, at);
-        }
         if (w == WAVES) {
-            Mob shadow = ctx.spawnGuard("captain", ctx.cell().floor(0, -HZ + 3));
-            if (shadow instanceof WhaleboneCaptain) {
-                var health = shadow.getAttribute(Attributes.MAX_HEALTH);
+            // 三つ目: 老番兵 (盾の突進・足踏み・笛で射手を呼ぶ) 一体だけ。人数で体力が増える
+            Mob elder = ctx.spawnGuard("elder", ctx.cell().floor(0, -HZ + 3));
+            if (elder != null) {
+                var health = elder.getAttribute(Attributes.MAX_HEALTH);
                 if (health != null) {
-                    health.setBaseValue(Math.min(1024, health.getBaseValue() * 0.6 * StoneWhaleHeart.scaleFor(scale)));
-                    shadow.setHealth(shadow.getMaxHealth());
+                    health.setBaseValue(Math.min(1024, health.getBaseValue() * (1 + 0.5 * (scale - 1))));
+                    elder.setHealth(elder.getMaxHealth());
                 }
+            }
+        } else {
+            int base = 2 + w;
+            int n = base + (int) Math.round((scale - 1) * (1.0 + 0.5 * w));
+            n += ctx.rng().nextInt(2);
+            int r = HX - 3;
+            for (int i = 0; i < n; i++) {
+                double a = angleOffset + Math.PI * 2 * i / n + ctx.rng().nextDouble() * 0.3;
+                int x = (int) Math.round(Math.cos(a) * r);
+                int z = (int) Math.round(Math.sin(a) * r);
+                BlockPos at = ctx.cell().floor(Math.max(-HX + 2, Math.min(HX - 2, x)), Math.max(-HZ + 2, Math.min(HZ - 2, z)));
+                String kind = w == 1 ? "sentinel" : (i % 3 == 0 ? "archer" : i % 3 == 1 ? "crawler" : "sentinel");
+                ctx.spawnGuard(kind, at);
             }
         }
         for (ServerPlayer p : ctx.players()) {

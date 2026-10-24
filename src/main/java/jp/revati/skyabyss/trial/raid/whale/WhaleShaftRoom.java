@@ -32,11 +32,12 @@ public final class WhaleShaftRoom extends RaidRoom {
     static final int FLIGHTS = 4;
     static final int RISE = 5;
     static final int GROW_STEP = 3;
-    static final int EXTEND_TICKS = 300;
+    // 2026-10-25 の試遊で「簡単」: 階段の出ている間を短く、胃液を速く、上り始めの猶予を短く
+    static final int EXTEND_TICKS = 180;
     static final int WARN_TICKS = 60;
-    static final int GRACE = 240;
-    static final int RISE_TICKS = 110;
-    static final float DAMAGE = 3f;
+    static final int GRACE = 140;
+    static final int RISE_TICKS = 75;
+    static final float DAMAGE = 4f;
     static final int DAMAGE_EVERY = 10;
     static final int TOP = FLIGHTS * RISE;
     static final String FAIL_KEY = "message.skyabyss.raid.WR4.filled";
@@ -89,7 +90,7 @@ public final class WhaleShaftRoom extends RaidRoom {
         // 底の壇 (親台) と、そこへの一段
         RaidKit.fill(level, o(c, -5, 1, 4), o(c, -2, DAIS_Y, 6), Blocks.STONE_BRICKS.defaultBlockState());
         RaidKit.fill(level, o(c, -5, DAIS_Y, 4), o(c, -2, DAIS_Y, 6), bone);
-        RaidKit.set(level, o(c, -4, 1, 3), Blocks.SMOOTH_QUARTZ_STAIRS.defaultBlockState().setValue(StairBlock.FACING, Direction.NORTH));
+        RaidKit.set(level, o(c, -4, 1, 3), Blocks.SMOOTH_QUARTZ_STAIRS.defaultBlockState().setValue(StairBlock.FACING, Direction.SOUTH));
         // 天井の肋骨の弧
         for (int z : new int[] {-4, 0, 4}) {
             RaidKit.fill(level, o(c, -HX, H, z), o(c, HX, H, z), bone);
@@ -128,7 +129,8 @@ public final class WhaleShaftRoom extends RaidRoom {
     }
 
     private BlockState stair(int f) {
-        Direction face = DIR[f][1] < 0 ? Direction.SOUTH : DIR[f][1] > 0 ? Direction.NORTH : DIR[f][0] > 0 ? Direction.WEST : Direction.EAST;
+        // 段の向き (FACING) は高い側 = 上る向き (DIR)
+        Direction face = DIR[f][1] < 0 ? Direction.NORTH : DIR[f][1] > 0 ? Direction.SOUTH : DIR[f][0] > 0 ? Direction.EAST : Direction.WEST;
         return Blocks.SMOOTH_QUARTZ_STAIRS.defaultBlockState().setValue(StairBlock.FACING, face);
     }
 

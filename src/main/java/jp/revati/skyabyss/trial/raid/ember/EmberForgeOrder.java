@@ -123,16 +123,16 @@ public final class EmberForgeOrder extends EmberRoom {
             }
         }
         for (int z = 10; z <= 12; z++) {
-            // 西から東へ上る。段の向きは低い側 (西)。北の端 (z = 12) は壁に向くので段にせず、角の段の高さだけ揃える
+            // 西から東へ上る。段の向き (FACING) は高い側 = 東。北の端 (z = 12) は壁に向くので段にせず、角の段の高さだけ揃える
             if (z == 12) {
                 d.put(5, 1, z, b(Blocks.POLISHED_BLACKSTONE_BRICKS));
                 d.put(6, 1, z, b(Blocks.POLISHED_BLACKSTONE_BRICKS));
                 d.put(6, 2, z, b(Blocks.POLISHED_BLACKSTONE_BRICKS));
                 continue;
             }
-            d.put(5, 1, z, b(Blocks.POLISHED_BLACKSTONE_BRICK_STAIRS).setValue(net.minecraft.world.level.block.StairBlock.FACING, net.minecraft.core.Direction.WEST));
+            d.put(5, 1, z, b(Blocks.POLISHED_BLACKSTONE_BRICK_STAIRS).setValue(net.minecraft.world.level.block.StairBlock.FACING, net.minecraft.core.Direction.EAST));
             d.put(6, 1, z, b(Blocks.POLISHED_BLACKSTONE_BRICKS));
-            d.put(6, 2, z, b(Blocks.POLISHED_BLACKSTONE_BRICK_STAIRS).setValue(net.minecraft.world.level.block.StairBlock.FACING, net.minecraft.core.Direction.WEST));
+            d.put(6, 2, z, b(Blocks.POLISHED_BLACKSTONE_BRICK_STAIRS).setValue(net.minecraft.world.level.block.StairBlock.FACING, net.minecraft.core.Direction.EAST));
         }
         // 鞴の口 (北へ向いた鉄の筒) と、台の隅の金床・燭台
         d.put(8, 1, 9, b(Blocks.IRON_BARS));
