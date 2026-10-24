@@ -17,7 +17,8 @@ cmd weather clear
 cmd gamerule doDaylightCycle false
 cmd skyabyss playtest god on
 cmd skyabyss playtest gear tide
-wait 300
+# 四つの背の組み立てが終わるまで待つ (潮殻の背は組み立てに一分ほどかかる)
+wait 1500
 chat clear
 # 歩の部屋 (潮殻) へ。先に潮殻の背へ入る (raid_tide と同じ段取り)、そのあと /skyabyss play raid が部屋へ運ぶ
 cmd skyabyss playtest board tide
@@ -43,10 +44,15 @@ wait 200
 shot reward_notice_walk_late
 chat clear
 
-# 試練の板: 称号の行 (称号を二つ渡してから開く。id は raid.<種類>.<巨神>)
+# 試練の板: 称号の行 (三つ渡してから開く。id は raid.<種類>.<巨神>)。GUI 2 と 3 で撮る
 cmd skyabyss dev trial title raid.full.tide_shell
 cmd skyabyss dev trial title raid.nowipe.tide_shell
-cmd skyabyss dev trial board tide
-wait 80
-shot trial_board_titles
+cmd skyabyss dev trial title raid.rooms.tide_shell
+guiscale 2
+cmd skyabyss dev trial board tide_shell
+wait 200
+shot trial_board_titles_g2
+guiscale 3
+wait 40
+shot trial_board_titles_g3
 wait 10
