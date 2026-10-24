@@ -113,7 +113,7 @@ public final class FxRanged {
         c.at(0, x -> {
             SkillFx.sound(x, SoundEvents.ARROW_SHOOT, x.hand(), 0.6f, 1.4f);
             FxDraw.add(x, Prim.ring(center, RAIN_RADIUS, RAIN_RADIUS).color(SKY_BLUE).width(0.25).life(96).alpha(0.4f));
-            FxDraw.add(x, Prim.ring(cloud, RAIN_RADIUS, RAIN_RADIUS + 1.0).color(SKY_WHITE).width(0.5).life(96).alpha(0.35f));
+            FxDraw.add(x, Prim.ring(cloud, RAIN_RADIUS, RAIN_RADIUS + 1.0).color(SKY_WHITE).width(0.8).life(96).alpha(0.6f));
         });
         for (int i = 0; i < 8; i++) {
             double a = i * 2.399;
@@ -121,7 +121,7 @@ public final class FxRanged {
             Vec3 spot = center.add(Math.cos(a) * r, 0, Math.sin(a) * r);
             int at = 4 + i * 11;
             c.at(at, x -> {
-                FxDraw.add(x, Prim.line(spot.add(0, 9, 0), spot).color(SKY_WHITE).width(0.22).life(6).ease(Ease.IN2).glow(0.6).trail(0.6));
+                FxDraw.add(x, Prim.line(spot.add(0, 9, 0), spot).color(SKY_WHITE).width(0.42).life(6).ease(Ease.IN2).glow(0.9).trail(0.6));
                 SkillFx.sound(x, SoundEvents.ARROW_SHOOT, spot, 0.2f, 1.8f);
             });
             c.at(at + 5, x -> {
@@ -193,12 +193,15 @@ public final class FxRanged {
         c.at(8, x -> {
             SkillFx.flash(x, aim.add(0, 0.5, 0));
             // 顎: 上下の二つの弧 (縦の面、前から後ろへ見て口の形)。牙は縁から立つ
+            // 紫の縁を先に描いて、夜の空でも顎の形が読めるように。黒は内側に重ねる
+            FxDraw.add(x, Prim.arc(aim.add(0, 1.2, 0), x.fwd, new Vec3(0, 1, 0), 3.2, 0.5, 2.6).color(0xB58CFF).width(2.6).life(14).ease(Ease.OUT).glow(0.8).alpha(0.9f));
+            FxDraw.add(x, Prim.arc(aim.add(0, 1.2, 0), x.fwd, new Vec3(0, 1, 0), 3.2, -0.5, -2.6).color(0xB58CFF).width(2.6).life(14).ease(Ease.OUT).glow(0.8).alpha(0.9f));
             FxDraw.add(x, Prim.arc(aim.add(0, 1.2, 0), x.fwd, new Vec3(0, 1, 0), 3.2, 0.5, 2.6).color(DEEP_BLACK).width(1.5).life(14).ease(Ease.OUT).alpha(0.95f));
             FxDraw.add(x, Prim.arc(aim.add(0, 1.2, 0), x.fwd, new Vec3(0, 1, 0), 3.2, -0.5, -2.6).color(DEEP_BLACK).width(1.5).life(14).ease(Ease.OUT).alpha(0.95f));
             for (int k = 0; k < 8; k++) {
                 double a = Math.PI * 2 * k / 8;
                 Vec3 edge = aim.add(Math.cos(a) * MAW_RADIUS, 0, Math.sin(a) * MAW_RADIUS);
-                FxDraw.add(x, Prim.beam(edge, 2.2).color(DEEP_BLACK).width(0.9).life(14).ease(Ease.OUT).alpha(0.9f));
+                FxDraw.add(x, Prim.beam(edge, 2.2).color(0xB58CFF).width(1.5).life(14).ease(Ease.OUT).glow(0.5).alpha(0.9f));
             }
             FxDraw.add(x, Prim.shell(aim.add(0, 0.8, 0), 0.5, MAW_RADIUS, 1.8).color(DEEP_CORE).life(10).ease(Ease.OUT).width(0.3));
             SkillFx.kick(x, 0.9f);

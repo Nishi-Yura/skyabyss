@@ -126,8 +126,8 @@ public final class FxSupport {
         c.at(6, x -> {
             SkillFx.flash(x, spot);
             // 太い金の柱 (遠くから見えるように幅 2.4) と、その上に昇る輪
-            FxDraw.add(x, Prim.beam(spot, SIGNAL_HEIGHT).color(GOLD).width(2.4).life(36).ease(Ease.OUT3).alpha(0.9f));
-            FxDraw.add(x, Prim.beam(spot, SIGNAL_HEIGHT * 0.6).color(GOLD_WHITE).width(0.9).life(36).ease(Ease.OUT3));
+            FxDraw.add(x, Prim.beam(spot, SIGNAL_HEIGHT).color(GOLD).width(3.4).life(36).ease(Ease.OUT3).glow(0.8).alpha(0.95f));
+            FxDraw.add(x, Prim.beam(spot, SIGNAL_HEIGHT * 0.6).color(GOLD_WHITE).width(1.4).life(36).ease(Ease.OUT3).glow(0.5));
             FxDraw.add(x, Prim.ring(spot.add(0, SIGNAL_HEIGHT * 0.5, 0), 1.0, 3.5).color(GOLD).width(0.5).life(30).ease(Ease.OUT));
             FxDraw.add(x, Prim.ring(spot, 0.5, 4.0).color(GOLD).width(0.35).life(12).ease(Ease.OUT).glow(0.4));
             FxDraw.add(x, Prim.disc(spot, 0.3, 1.8).color(GOLD_WHITE).life(12).alpha(0.7f));

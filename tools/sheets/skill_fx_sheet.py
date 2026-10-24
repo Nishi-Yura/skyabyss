@@ -1,7 +1,7 @@
 from __future__ import annotations
 """技の見た目 (撮影台本 tools/shots/skill_fx.txt) から、技ごとのコンタクトシートを作る。
 
-使い方 (リポジトリ直下で):  python tools/sheets/skill_fx_sheet.py
+使い方 (リポジトリ直下で):  python tools/sheets/skill_fx_sheet.py [--night]  (--night で夜のシートを作る)
 入力: run/shots/skill_fx/ 以下の <技>_3p_{b,c,d}.png と <技>_1p_c.png (撮影の名前は tools/gen/shots/gen_skill_fx_shots.py が決める)
 出力: docs/review/previews/skill_fx_sheet.png (docs/review/previews は git 管理外。追跡は git add -f)
 行 = 技 (25)。左から 三人称の放ち | 三人称の当たり | 三人称の残り | 一人称の当たり。
@@ -13,6 +13,7 @@ from PIL import Image, ImageDraw, ImageFont
 
 ROOT = Path(__file__).resolve().parents[2]
 OUT = ROOT / "docs/review/previews/skill_fx_sheet.png"
+OUT_NIGHT = ROOT / "docs/review/previews/skill_fx_night_sheet.png"
 SHOTS = ROOT / "run/shots/skill_fx"
 FONTS = ["C:/Windows/Fonts/YuGothB.ttc", "C:/Windows/Fonts/meiryob.ttc", "C:/Windows/Fonts/msgothic.ttc",
          "/usr/share/fonts/opentype/ipafont-gothic/ipag.ttf"]
@@ -29,6 +30,8 @@ SKILLS = [
 ]
 # 列: (名の末尾, 見出し)
 COLS = [("3p_b", "三人称 放ち"), ("3p_c", "三人称 当たり"), ("3p_d", "三人称 残り"), ("1p_c", "一人称 当たり")]
+# 夜の列 (台本で夜は放ちと当たりだけ撮る)
+COLS_NIGHT = [("night_3p_b", "夜 三人称 放ち"), ("night_3p_c", "夜 三人称 当たり"), ("night_1p_c", "夜 一人称 当たり")]
 CELL_W, CELL_H = 336, 189
 LABEL_W = 210
 HEAD_H = 40
@@ -62,27 +65,30 @@ def cell(img_path: Path | None) -> Image.Image:
 
 
 def main() -> int:
+    night = "--night" in sys.argv
+    cols = COLS_NIGHT if night else COLS
+    out = OUT_NIGHT if night else OUT
     OUT.parent.mkdir(parents=True, exist_ok=True)
-    W = LABEL_W + CELL_W * len(COLS) + 8
+    W = LABEL_W + CELL_W * len(cols) + 8
     H = HEAD_H + CELL_H * len(SKILLS) + 8
     sheet = Image.new("RGB", (W, H), (18, 18, 22))
     d = ImageDraw.Draw(sheet)
     fh = font(18)
     fl = font(20)
-    for i, (_, head) in enumerate(COLS):
+    for i, (_, head) in enumerate(cols):
         d.text((LABEL_W + i * CELL_W + 8, 10), head, fill=(230, 230, 230), font=fh)
     missing = 0
     for r, (skill, label) in enumerate(SKILLS):
         y = HEAD_H + r * CELL_H
         d.text((10, y + CELL_H // 2 - 14), f"{label}", fill=(240, 240, 240), font=fl)
         d.text((10, y + CELL_H // 2 + 10), skill, fill=(150, 150, 160), font=font(13))
-        for c, (suffix, _) in enumerate(COLS):
+        for c, (suffix, _) in enumerate(cols):
             p = find(f"{skill}_{suffix}")
             if p is None:
                 missing += 1
             sheet.paste(cell(p), (LABEL_W + c * CELL_W, y))
-    sheet.save(OUT)
-    print("wrote", OUT, "missing cells", missing)
+    sheet.save(out)
+    print("wrote", out, "missing cells", missing)
     return 0 if missing == 0 else 1
 
 
