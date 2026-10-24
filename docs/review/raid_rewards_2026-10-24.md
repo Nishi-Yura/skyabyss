@@ -63,20 +63,24 @@ docs/design/32 の 9.4 の数を、部屋と中ボスの間を越えたときに
 
 - `raid_rewards_notice_walk.png`: 歩の部屋を越えた直後。「部屋を越えた」「獲得 受け取ったもの: 【潮殻の殻片】 【共鳴の欠片（潮殻）】」「進捗 満ち引きの試練」。文は切れていない。
 - `raid_rewards_notice_late.png`: 少し後。知らせは消えて、次の部屋の壁画と「潮見の暦」の手がかりだけが見える。
-- `raid_rewards_board_gui3.png`: 試練の板 (GUI 3)。三つのカードが足に重ならず、印も枠の中。称号は「称号 潮殻の順路を越えた者 / 潮殻を崩さずに越えた者 / 潮殻の六つの部屋を見届けた者」の二行。足の最後の行 (周回の説明) は画面の下端でやや切れる。
-- `raid_rewards_board_gui2.png`: 試練の板 (GUI 2)。**まだ崩れている**。文字が左へ約 140 px ずれて、左の端と右の端で切れる。「巨神の祠」の題と「潮殻 1 周目」が出ていない。同じ崩れが修正前の撮りでも出ていたので、板の描き方 (文字の位置の基準) の問題で、今回の変更では直っていない。
+- `raid_rewards_board_gui2.png` / `_gui3.png` / `_gui4.png`: 試練の板を GUI 2・3・4 で撮ったもの。どれも板の全体 (題・頁・三つのカード・足の記録と称号と説明) が枠の中に出る。称号は二行に折り返す。GUI 4 は板が小さく (倍率 約 0.67) 文字も小さい。
+
+## 板の崩れの原因と直し
+
+- GUI 2 の左右の切れは、`textBounds()` (字を切る範囲) が論理の座標のままだったため。板は `UiFit` で窓に合わせて大きく描くので、切る範囲も同じ変換を通す必要があった (`fit.screenRect(0, 0, W, H)`)。他の画面 (RebirthScreen など) は既にこの形。
+- GUI 3・4 で足の行が切れたのは、板の高さ (252) が窓の高さより大きく、`UiFit` が 1 倍より小さくできなかったため。`UiFit.fit` に下限 (`floor`) を足し、板だけ 0.5 まで縮める。
 
 ## 未解決
 
-1. 試練の板が GUI 2 で崩れる。文字の x 位置が約 140 gui px ずれる (板の枠は正しい位置)。`TrialBoardScreen.render` 周りの文字の基準か、`textBounds` の扱いを見る必要がある。
-2. 試練の板の足の最後の行 (周回の説明) が GUI 3 で画面の下端ぎりぎりになる。板の高さを減らすか、説明を一行短くする。
-3. 撮影の途中で一度、`raid_rewards` の世界が前の撮影のプロセスに掴まれていた (ログの ファイル使用中 の警告)。以後の撮りは別の名前 (raid_rewards2 … 7) で行った。前のプロセスは止められていない (他の人のものと区別がつかないため)。枠 `.mc_lock2` (pid 1543) の掃除は、ユーザーの判断に任せた。
+1. GUI 4 では板が小さい (文字は約 6 px 相当)。読めるかは実機の判断。
+2. 撮影の途中で一度、`raid_rewards` の世界が前の撮影のプロセスに掴まれていた (ログの ファイル使用中 の警告)。以後の撮りは別の名前 (raid_rewards2 … 7) で行った。前のプロセスは止められていない (他の人のものと区別がつかないため)。枠 `.mc_lock2` (pid 1543) の掃除は、ユーザーの判断に任せた。
 
 ## 変更したファイル
 
 - `src/main/java/jp/revati/skyabyss/trial/TrialCommands.java` (title の枝の括弧)
 - `src/main/java/jp/revati/skyabyss/client/notice/CardFeed.java` (本文は四行まで)
-- `src/main/java/jp/revati/skyabyss/client/trial/TrialBoardScreen.java` (カード・足・称号の行)
+- `src/main/java/jp/revati/skyabyss/client/trial/TrialBoardScreen.java` (カード・足・称号の行、文字の範囲、倍率の下限 0.5)
+- `src/main/java/jp/revati/skyabyss/client/ui/UiFit.java` (`fit` に倍率の下限を足す。既存の呼び方は変わらない)
 - `tools/shots/raid_rewards.txt` (撮影の台本)
 - `docs/review/raid_rewards_2026-10-24.md` (この文書)
 - `docs/review/previews/raid_rewards_*.png` (gitignore の対象。`git add -f`)

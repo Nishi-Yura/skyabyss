@@ -55,4 +55,7 @@ shot trial_board_titles_g2
 guiscale 3
 wait 40
 shot trial_board_titles_g3
+guiscale 4
+wait 40
+shot trial_board_titles_g4
 wait 10

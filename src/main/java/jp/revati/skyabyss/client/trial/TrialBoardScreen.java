@@ -193,7 +193,7 @@ public class TrialBoardScreen extends Screen implements jp.revati.skyabyss.clien
         Font font = Minecraft.getInstance().font;
         g.fill(0, 0, width, height, argb(0.80f, BG));
         // 板は窓に合わせて一様に大きく描く (描くのと当たりは同じ変換)。論理の (0, 0) に置く
-        fit.fit(width, height, W, H, 2.5f);
+        fit.fit(width, height, W, H, 2.5f, 0.5f);
         int mouseX = (int) Math.floor(fit.x(screenX));
         int mouseY = (int) Math.floor(fit.y(screenY));
         fit.begin(g);
@@ -382,6 +382,8 @@ public class TrialBoardScreen extends Screen implements jp.revati.skyabyss.clien
 
     @Override
     public int[] textBounds() {
-        return new int[] {(width - W) / 2, (height - H) / 2, W, H};
+        // 文字の範囲は描くときと同じ変換を通した画面の矩形 (論理の座標のままだと、倍率が 1 でない GUI で字が切れる)
+        fit.fit(width, height, W, H, 2.5f, 0.5f);
+        return fit.screenRect(0, 0, W, H);
     }
 }
