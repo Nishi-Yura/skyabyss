@@ -138,7 +138,7 @@ final class ExtActions {
         return reached;
     }
 
-    // 見ている先 (ブロックにぶつかるか reach まで)。途中の敵の足もとを優先
+    // 見ている先 (ブロックにぶつかるか reach まで)。途中の敵の足もとを優先。宙なら真下の地面
     private static Vec3 aim(ServerPlayer player, double reach) {
         ServerLevel level = player.serverLevel();
         Vec3 eye = player.getEyePosition();
@@ -151,6 +151,13 @@ final class ExtActions {
             center = entityHit.getEntity().position();
         } else if (block.getType() != HitResult.Type.MISS) {
             center = center.add(0, 0.1, 0);
+        } else {
+            // 宙を指していたら、真下の地面まで下ろす (8 ブロックまで。罠が宙に浮かず、顎・星が地面に出る)
+            BlockHitResult ground = level.clip(new ClipContext(center.add(0, 0.5, 0), center.add(0, -8, 0), ClipContext.Block.COLLIDER,
+                    ClipContext.Fluid.NONE, player));
+            if (ground.getType() != HitResult.Type.MISS) {
+                center = ground.getLocation().add(0, 0.1, 0);
+            }
         }
         // 見た目の合図にも同じ点を載せる (手元の向きからでは、敵の足もと・壁の手前が同じ点にならない)
         SkillActions.fxTarget = center;

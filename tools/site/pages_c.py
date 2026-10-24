@@ -85,7 +85,7 @@ def faq():
     qa_html = "".join("<details><summary>%s</summary><p>%s</p></details>" % (T(a, b), T(c, d)) for a, b, c, d in qa)
     limits = [
         ("マルチは、まだ人の手で通しの確認をしていません（特に 2 つのパーティが同じ背中にいるとき）。", "Multiplayer has not yet been verified end to end by people (especially with two parties on one back)."),
-        ("0.5.5 の部屋の報いと技の見た目は、まだ人の手で試遊していません。", "The room rewards and skill visuals in 0.5.5 have not been playtested by people yet."),
+        ("0.5.5 と 0.5.6 の部屋の報い・技の見た目・二人の部屋の直しは、まだ人の手で試遊していません。", "The room rewards, skill visuals and two-player room fixes in 0.5.5 and 0.5.6 have not been playtested by people yet."),
         ("心臓の戦いに勝つまで、台座で転生を実行するまで、順位の石を複数人で見る所は、ゲームの中でまだ通しで確かめていません。", "Winning a heart fight, rebirth at the pedestal, and the rank stone with several players have not yet been confirmed in-game end to end."),
         ("五章「深淵」は、まだ人の手で通しに遊ばれていません（特に番人の戦いと、クリア後の深みを）。", "Chapter 5, the abyss, has not yet been played through end to end by people (especially the warden's fight and the depths after the clear)."),
         ("乗り物の見た目の一部は、まだ仮のものです。", "Some mount models are still placeholders."),
@@ -176,6 +176,13 @@ def faq():
 def changelog():
     # 版ごとの主な変更（試遊の確かめ順と docs/review の記録から）。古い版は要点だけ残す。
     ver = [
+        ("v0.5.6", "2026-10-24", [
+            ("二人で順路の部屋: 部屋の外に出てしまった仲間は、3 秒で部屋の入口へ戻ります。入口では仲間が横に並んで立ちます。", "Raid rooms with friends: a party member left outside the room is brought back to its entrance after 3 seconds, and the party stands side by side at the entrance."),
+            ("F1 で、この mod の表示（レベル・目的の帯・技の枠・仲間の札）も消えます。", "F1 now also hides this mod's HUD (level, objective band, skill slots, party cards)."),
+            ("技の見た目: 天の驟雨は狙った先に降り、雲穿ちは矢の道に光の輪が続きます。長く続く技の光が途中で消えなくなりました。合図と淵の顎も、当たる所に出ます。", "Skill visuals: Sky Rain now falls where you aim, Cloud Pierce leaves rings of light along the arrow, long skills keep drawing to the end, and Signal and Deep Maw appear where they land."),
+            ("看板の文を、新しい字の幅に収まるよう短くしました（日本語と英語の 40 行）。", "Sign texts shortened to fit the new font (40 lines in Japanese and English)."),
+            ("試練の板の「図鑑」の札が、歌片の札の下に隠れていたのを直しました。", "The trial board's Codex tab is no longer hidden under the shard button."),
+        ]),
         ("v0.5.5", "2026-10-24", [
             ("技の見た目: 25 の技を、光の弧・地面の輪・光の柱・残像で描き直しました。一目でどの技か分かり、夜は光ります。", "Skill visuals: all 25 skills redrawn with arcs of light, ground rings, light pillars and afterimages. Each reads at a glance and glows at night."),
             ("部屋の報い: 部屋を越えると素材と共鳴の欠片。称号は巨神ごとに 3 つ（順路・崩れなし・六部屋）。", "Room rewards: clearing rooms grants materials and resonance fragments. Three titles per titan (route, no collapse, six rooms)."),
@@ -254,8 +261,8 @@ def changelog():
         items.append('<li%s><h3>%s</h3>%s<ul>%s</ul></li>' % (
             cls, T(v, TITLE_EN.get(v, v)), date,
             "".join("<li>%s</li>" % T(a, b) for a, b in notes)))
-    body = page_head("更新履歴", "Changelog", "ベータ版の主な変更です。新しい版が上。0.5.5 までは試遊の確かめ順と記録から書きました。",
-                     "Main changes in the beta, newest first. Versions up to 0.5.5 are written from the playtest checklists and notes.") + """
+    body = page_head("更新履歴", "Changelog", "ベータ版の主な変更です。新しい版が上。0.5.6 までは試遊の確かめ順と記録から書きました。",
+                     "Main changes in the beta, newest first. Versions up to 0.5.6 are written from the playtest checklists and notes.") + """
 <section aria-labelledby="log">
 <div class="wrap">
 <h2 id="log" style="position:absolute;left:-999px">%s</h2>
@@ -264,4 +271,4 @@ def changelog():
 </div>
 </section>
 """ % (T("更新履歴", "Changelog"), "".join(items), T("細かい変更の一覧は", "The full list of changes is on"), REPO)
-    page("changelog.html", "更新履歴 — 天と淵のあいだ", "Changelog — Between the Sky and the Abyss", "ベータ版の主な変更。最新は 0.5.5。", "Main changes in the beta. Latest: 0.5.5.", body)
+    page("changelog.html", "更新履歴 — 天と淵のあいだ", "Changelog — Between the Sky and the Abyss", "ベータ版の主な変更。最新は 0.5.6。", "Main changes in the beta. Latest: 0.5.6.", body)

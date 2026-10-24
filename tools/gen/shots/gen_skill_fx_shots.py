@@ -77,12 +77,17 @@ TARGET_POS = "-1.0 -60 3.5"
 TARGET_BY_SKILL = {"dust_charge": "-0.7 -60 7.0", "lunge": "-1.6 -60 6.5", "sky_rain": "-0.5 -60 7.5"}
 # 体の向きを技ごとに変える (yaw pitch)。天の驟雨は視線の先 (24 ブロック) の地面に降るので、少し下を向いて前 7 ブロックへ降らせる
 # (目の高さ 1.62 から 13 度下 = 前 7 ブロックの地面。的はその 1 ブロック右で、降る輪の中)
-CASTER_BY_SKILL = {"sky_rain": "0.5 -60 0.5 0 13"}
+# 合図も視線の先 (地面・相手の足もと) に立つので、同じく前 7 ブロックの地面へ
+CASTER_BY_SKILL = {"sky_rain": "0.5 -60 0.5 0 13", "signal": "0.5 -60 0.5 0 13"}
+
+
+# 的の生き物を技ごとに変える。突進は的の真ん前で止まるので、後ろのカメラからは体に隠れる。体より大きいラヴェジャーなら肩の向こうに見える
+TARGET_MOB_BY_SKILL = {"lunge": "minecraft:ravager"}
 
 
 def husk_for(skill: str) -> str:
     # 体力を 500 にして、当たりで倒れない (倒れると死の煙が出る)
-    return (f"summon minecraft:husk {TARGET_BY_SKILL.get(skill, TARGET_POS)} "
+    return (f"summon {TARGET_MOB_BY_SKILL.get(skill, 'minecraft:husk')} {TARGET_BY_SKILL.get(skill, TARGET_POS)} "
             "{NoAI:1b,Silent:1b,Health:500f,attributes:[{id:\"minecraft:max_health\",base:500.0d}]}")
 
 
@@ -121,6 +126,7 @@ def block(skill: str, lin: int, bow: bool, total: int, sky: bool) -> list[str]:
     lines.append("cmd skyabyss skill cooldowns @s")
     # 前の的は奈落へ送って消す (その場で kill すると死の煙が 1 秒ほど残り、落とした腐った肉と一緒に「当たりの白い粒」に見えていた)
     lines.append("cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~")
+    lines.append("cmd execute as @e[type=minecraft:ravager] run tp @s ~ -400 ~")
     lines.append("cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]")
     lines.append(f"cmd {husk_for(skill)}")
     lines.append("wait 10")

@@ -36,11 +36,30 @@ wait 200
 shot site_changelog
 
 # site_story
-cmd skyabyss dev opening at shelter 0 -12 6 -50 180 8
+cmd skyabyss dev opening at shelter 0 20 3 0 -90 16
+waitchunks
+cmd skyabyss facility place
+fov 50
+cmd execute at @p rotated ~ 0 run summon skyabyss:storyteller ^ ^ ^4.5 {PersistenceRequired:1b}
+wait 40
+cmd execute as @e[type=skyabyss:storyteller,sort=nearest,limit=1] at @s run tp @s ~ ~ ~ facing entity @p feet
+wait 20
+shot site_story
+cmd kill @e[type=skyabyss:storyteller,sort=nearest,limit=1]
+fov 70
+
+# site_rebirth
+cmd skyabyss dev opening at shelter 0 -64 5 -10 180 14
 waitchunks
 cmd skyabyss facility place
 wait 60
-shot site_story
+shot site_rebirth_a
+cmd skyabyss dev opening at shelter 0 -57 7 -12 145 20
+wait 30
+shot site_rebirth_b
+cmd skyabyss dev opening at shelter 0 -64 9 -11 180 28
+wait 30
+shot site_rebirth_c
 
 # site_pouch
 cmd skyabyss dev opening at shelter 0 0 6 8 180 22

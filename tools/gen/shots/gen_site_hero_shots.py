@@ -2,8 +2,9 @@
 """サイトの頁の頭に使う、実機の絵の撮影台本を書く (tools/site の gen_site_shots.py が webp にする)。
 
 使い方: python -I tools/gen/shots/gen_site_hero_shots.py
-        → tools/shots/site_hero_flat.txt (平らな世界。巨神の背・技・防具・転生)
-          tools/shots/site_hero_town.txt (はじまりの都。夕暮れ・語り部・大通り・焚き火)
+        → tools/shots/site_hero_flat.txt (平らな世界。巨神の背・仲間)
+          tools/shots/site_hero_town.txt (はじまりの都。夕暮れ・語り部・大通り・焚き火・四巨神の社)
+技の頁は技の動画の絵 (site/img/skill_fx)、防具の頁は余燼の防具の近景 (docs/review/ingame_ember_gear_stand_front_close.png) を使う
 撮る:   bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/site_hero_flat.txt -PshotsName=site_hero_flat
         bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/site_hero_town.txt -PshotsName=site_hero_town
 絵:     run/shots/<名>/shots/<名>/*.png を tools/sources/site/shots/ へ写す (名前は下の SHOTS の名)
@@ -64,49 +65,17 @@ SCENES_FLAT = [
         "shot site_titans",
     ]),
     ("site_party", [
-        "cmd execute in skyabyss:titan_back run summon armor_stand -70 98 176 {ShowArms:1b,NoBasePlate:1b,Rotation:[0f,0f],ArmorItems:[{id:\"skyabyss:ember_boots\",count:1},{id:\"skyabyss:ember_leggings\",count:1},{id:\"skyabyss:ember_chestplate\",count:1},{id:\"skyabyss:ember_helmet\",count:1}]}",
-        "cmd execute in skyabyss:titan_back run summon armor_stand -66 98 178 {ShowArms:1b,NoBasePlate:1b,Rotation:[0f,0f],ArmorItems:[{id:\"skyabyss:ember_boots\",count:1},{id:\"skyabyss:ember_leggings\",count:1},{id:\"skyabyss:ember_chestplate\",count:1},{id:\"skyabyss:ember_helmet\",count:1}]}",
-        "cmd execute in skyabyss:titan_back run summon armor_stand -62 98 178 {ShowArms:1b,NoBasePlate:1b,Rotation:[0f,0f],ArmorItems:[{id:\"skyabyss:ember_boots\",count:1},{id:\"skyabyss:ember_leggings\",count:1},{id:\"skyabyss:ember_chestplate\",count:1},{id:\"skyabyss:ember_helmet\",count:1}]}",
-        "cmd execute in skyabyss:titan_back run summon armor_stand -58 98 176 {ShowArms:1b,NoBasePlate:1b,Rotation:[0f,0f],ArmorItems:[{id:\"skyabyss:ember_boots\",count:1},{id:\"skyabyss:ember_leggings\",count:1},{id:\"skyabyss:ember_chestplate\",count:1},{id:\"skyabyss:ember_helmet\",count:1}]}",
-        "camera skyabyss:titan_back -64 101 158 0 4",
+        # 昼の光で、四つの巨神の防具 (岩鯨・潮殻・雷翼・余燼) を背の広場に半円に並べ、カメラは 6 ブロック手前から少し見下ろす
+        "cmd time set 4000",
+        "cmd execute in skyabyss:titan_back run summon armor_stand -67 98 178 {ShowArms:1b,NoBasePlate:1b,Rotation:[200f,0f],ArmorItems:[{id:\"skyabyss:stone_whale_boots\",count:1},{id:\"skyabyss:stone_whale_leggings\",count:1},{id:\"skyabyss:stone_whale_chestplate\",count:1},{id:\"skyabyss:stone_whale_helmet\",count:1}]}",
+        "cmd execute in skyabyss:titan_back run summon armor_stand -65 98 179 {ShowArms:1b,NoBasePlate:1b,Rotation:[190f,0f],ArmorItems:[{id:\"skyabyss:tide_shell_boots\",count:1},{id:\"skyabyss:tide_shell_leggings\",count:1},{id:\"skyabyss:tide_shell_chestplate\",count:1},{id:\"skyabyss:tide_shell_helmet\",count:1}]}",
+        "cmd execute in skyabyss:titan_back run summon armor_stand -63 98 179 {ShowArms:1b,NoBasePlate:1b,Rotation:[170f,0f],ArmorItems:[{id:\"skyabyss:thunder_wing_boots\",count:1},{id:\"skyabyss:thunder_wing_leggings\",count:1},{id:\"skyabyss:thunder_wing_chestplate\",count:1},{id:\"skyabyss:thunder_wing_helmet\",count:1}]}",
+        "cmd execute in skyabyss:titan_back run summon armor_stand -61 98 178 {ShowArms:1b,NoBasePlate:1b,Rotation:[160f,0f],ArmorItems:[{id:\"skyabyss:ember_boots\",count:1},{id:\"skyabyss:ember_leggings\",count:1},{id:\"skyabyss:ember_chestplate\",count:1},{id:\"skyabyss:ember_helmet\",count:1}]}",
+        "camera skyabyss:titan_back -64 100.2 172.5 0 8",
         "waitchunks",
         "wait 40",
         "shot site_party",
-    ]),
-    ("site_skills", [
-        "cmd gamemode creative",
-        "cmd skyabyss level set @p 50",
-        "cmd skyabyss skill forget @p",
-        "cmd skyabyss skill points @p 40",
-        "cmd skyabyss skill learn @p titan_cleave 3",
-        "cmd skyabyss skill slot @p 1 titan_cleave",
-        "camera skyabyss:titan_back -66 98 173 270 4",
-        "perspective back",
-        "fov 48",
-        "waitchunks",
-        "wait 20",
-        "cmd skyabyss skill cast @p 1",
-        "wait 6",
-        "shot site_skills",
-        "perspective first",
-        "fov 70",
-        "cmd gamemode spectator",
-    ]),
-    ("site_gear", [
-        "camera minecraft:overworld 0 -58.6 5 180 8",
-        "cmd summon armor_stand 0 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[0f,0f],ArmorItems:[{id:\"skyabyss:ember_boots\",count:1},{id:\"skyabyss:ember_leggings\",count:1},{id:\"skyabyss:ember_chestplate\",count:1},{id:\"skyabyss:ember_helmet\",count:1}]}",
-        "waitchunks",
-        "wait 40",
-        "shot site_gear",
-    ]),
-    ("site_rebirth", [
-        "cmd skyabyss dev rebirth 3",
-        "wait 140",
-        "cmd gamemode spectator",
-        "open rebirth",
-        "wait 40",
-        "shot site_rebirth",
-        "close",
+        "cmd time set 12200",
     ]),
 ]
 
@@ -151,11 +120,32 @@ SCENES_TOWN = [
         "shot site_changelog",
     ]),
     ("site_story", [
-        "cmd skyabyss dev opening at shelter 0 -12 6 -50 180 8",
+        # 夕暮れの大通りに語り部を立たせ、カメラの方を向かせる (大鐘楼の中は狭くて撮れない)。前 4.5 ブロックの地面に落として、少し見下ろす。視野を狭めて大きく
+        "cmd skyabyss dev opening at shelter 0 20 3 0 -90 16",
+        "waitchunks",
+        "cmd skyabyss facility place",
+        "fov 50",
+        "cmd execute at @p rotated ~ 0 run summon skyabyss:storyteller ^ ^ ^4.5 {PersistenceRequired:1b}",
+        "wait 40",
+        "cmd execute as @e[type=skyabyss:storyteller,sort=nearest,limit=1] at @s run tp @s ~ ~ ~ facing entity @p feet",
+        "wait 20",
+        "shot site_story",
+        "cmd kill @e[type=skyabyss:storyteller,sort=nearest,limit=1]",
+        "fov 70",
+    ]),
+    ("site_rebirth", [
+        # 四巨神の社は壁のある建物 (-78 -35 から -50 -7)。中の真ん中 (-64 -21) に三段の祭壇 (転生の台座)。南の戸の内側から祭壇を見る
+        "cmd skyabyss dev opening at shelter 0 -64 5 -10 180 14",
         "waitchunks",
         "cmd skyabyss facility place",
         "wait 60",
-        "shot site_story",
+        "shot site_rebirth_a",
+        "cmd skyabyss dev opening at shelter 0 -57 7 -12 145 20",
+        "wait 30",
+        "shot site_rebirth_b",
+        "cmd skyabyss dev opening at shelter 0 -64 9 -11 180 28",
+        "wait 30",
+        "shot site_rebirth_c",
     ]),
     ("site_pouch", [
         "cmd skyabyss dev opening at shelter 0 0 6 8 180 22",

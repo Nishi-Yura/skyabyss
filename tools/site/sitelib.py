@@ -198,11 +198,15 @@ def page_head(h1_ja, h1_en, sub_ja, sub_en):
 SHOTS = {
     "index.html": ("titans", "空を渡る巨神。夕暮れ、雲の上を泳いでいく。", "A titan crossing the sky at dusk, above the clouds."),
     "titans.html": ("index", "潮殻の背。島のような、段になった岩の背中。", "The back of the Tide Shell, a stepped island of stone."),
+    "play.html": ("play", "はじまりの都。門の上から見た、夕暮れの町。", "The first town at dusk, seen from above the gate."),
+    "skills.html": ("skills", "余燼の鎚。燃える一撃と、広がる金の輪。", "Ember Hammer: a burning blow and spreading rings of gold."),
+    "rebirth.html": ("rebirth", "四巨神の社。真ん中の祭壇が、転生の台座。", "The Shrine of the Four. The altar at its heart is where you are reborn."),
+    "gear.html": ("gear", "四つの巨神の防具が並ぶ。巨神の背の広場で。", "Armour of the four titans side by side, on a titan's back."),
     "pouch.html": ("pouch", "市の広場。布の屋根の屋台と、並んだ品物。", "The market square, with striped stalls and goods laid out."),
     "faq.html": ("faq", "夕暮れの大通り。灯りが並ぶ。", "Dusk on the main street, with lanterns lining the way."),
     "changelog.html": ("changelog", "夕暮れの都を上から。", "The town at dusk, seen from above."),
 }
-# 遊び方・転生・装備・仲間・物語・技の頁は、よい絵が撮れるまで絵を置かない (弱い絵は出さない)
+# 仲間・物語の頁は、よい絵が撮れるまで絵を置かない (弱い絵は出さない)
 
 
 def shot_figure(name, ja, en):

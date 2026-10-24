@@ -38,48 +38,15 @@ wait 40
 shot site_titans
 
 # site_party
-cmd execute in skyabyss:titan_back run summon armor_stand -70 98 176 {ShowArms:1b,NoBasePlate:1b,Rotation:[0f,0f],ArmorItems:[{id:"skyabyss:ember_boots",count:1},{id:"skyabyss:ember_leggings",count:1},{id:"skyabyss:ember_chestplate",count:1},{id:"skyabyss:ember_helmet",count:1}]}
-cmd execute in skyabyss:titan_back run summon armor_stand -66 98 178 {ShowArms:1b,NoBasePlate:1b,Rotation:[0f,0f],ArmorItems:[{id:"skyabyss:ember_boots",count:1},{id:"skyabyss:ember_leggings",count:1},{id:"skyabyss:ember_chestplate",count:1},{id:"skyabyss:ember_helmet",count:1}]}
-cmd execute in skyabyss:titan_back run summon armor_stand -62 98 178 {ShowArms:1b,NoBasePlate:1b,Rotation:[0f,0f],ArmorItems:[{id:"skyabyss:ember_boots",count:1},{id:"skyabyss:ember_leggings",count:1},{id:"skyabyss:ember_chestplate",count:1},{id:"skyabyss:ember_helmet",count:1}]}
-cmd execute in skyabyss:titan_back run summon armor_stand -58 98 176 {ShowArms:1b,NoBasePlate:1b,Rotation:[0f,0f],ArmorItems:[{id:"skyabyss:ember_boots",count:1},{id:"skyabyss:ember_leggings",count:1},{id:"skyabyss:ember_chestplate",count:1},{id:"skyabyss:ember_helmet",count:1}]}
-camera skyabyss:titan_back -64 101 158 0 4
+cmd time set 4000
+cmd execute in skyabyss:titan_back run summon armor_stand -67 98 178 {ShowArms:1b,NoBasePlate:1b,Rotation:[200f,0f],ArmorItems:[{id:"skyabyss:stone_whale_boots",count:1},{id:"skyabyss:stone_whale_leggings",count:1},{id:"skyabyss:stone_whale_chestplate",count:1},{id:"skyabyss:stone_whale_helmet",count:1}]}
+cmd execute in skyabyss:titan_back run summon armor_stand -65 98 179 {ShowArms:1b,NoBasePlate:1b,Rotation:[190f,0f],ArmorItems:[{id:"skyabyss:tide_shell_boots",count:1},{id:"skyabyss:tide_shell_leggings",count:1},{id:"skyabyss:tide_shell_chestplate",count:1},{id:"skyabyss:tide_shell_helmet",count:1}]}
+cmd execute in skyabyss:titan_back run summon armor_stand -63 98 179 {ShowArms:1b,NoBasePlate:1b,Rotation:[170f,0f],ArmorItems:[{id:"skyabyss:thunder_wing_boots",count:1},{id:"skyabyss:thunder_wing_leggings",count:1},{id:"skyabyss:thunder_wing_chestplate",count:1},{id:"skyabyss:thunder_wing_helmet",count:1}]}
+cmd execute in skyabyss:titan_back run summon armor_stand -61 98 178 {ShowArms:1b,NoBasePlate:1b,Rotation:[160f,0f],ArmorItems:[{id:"skyabyss:ember_boots",count:1},{id:"skyabyss:ember_leggings",count:1},{id:"skyabyss:ember_chestplate",count:1},{id:"skyabyss:ember_helmet",count:1}]}
+camera skyabyss:titan_back -64 100.2 172.5 0 8
 waitchunks
 wait 40
 shot site_party
-
-# site_skills
-cmd gamemode creative
-cmd skyabyss level set @p 50
-cmd skyabyss skill forget @p
-cmd skyabyss skill points @p 40
-cmd skyabyss skill learn @p titan_cleave 3
-cmd skyabyss skill slot @p 1 titan_cleave
-camera skyabyss:titan_back -66 98 173 270 4
-perspective back
-fov 48
-waitchunks
-wait 20
-cmd skyabyss skill cast @p 1
-wait 6
-shot site_skills
-perspective first
-fov 70
-cmd gamemode spectator
-
-# site_gear
-camera minecraft:overworld 0 -58.6 5 180 8
-cmd summon armor_stand 0 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[0f,0f],ArmorItems:[{id:"skyabyss:ember_boots",count:1},{id:"skyabyss:ember_leggings",count:1},{id:"skyabyss:ember_chestplate",count:1},{id:"skyabyss:ember_helmet",count:1}]}
-waitchunks
-wait 40
-shot site_gear
-
-# site_rebirth
-cmd skyabyss dev rebirth 3
-wait 140
-cmd gamemode spectator
-open rebirth
-wait 40
-shot site_rebirth
-close
+cmd time set 12200
 
 quit
