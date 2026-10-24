@@ -30,6 +30,7 @@ import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 // 背中のディメンションの一覧 (TitanBacks) のどれでも同じ決まりにする。巨神ごとの追加の禁止 (潮殻の背の舟など) は TitanBacks.extraBanned
 // サバイバルでは、ブロックを置く・壊す、水を撒く、ワープや跳躍で近道する、といったことができない。
 // (謎解きと試練を、正面から越えてもらうため。クリエイティブでは制限しない)
+// 深淵も、置く・壊すはできない (noBuilding)
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class TitanBackRules {
     private TitanBackRules() {
@@ -38,6 +39,12 @@ public final class TitanBackRules {
     private static boolean restricted(LevelAccessor level, Player player) {
         return player != null && !player.isCreative() && !player.isSpectator()
                 && level instanceof net.minecraft.world.level.Level l && TitanBacks.isBack(l.dimension());
+    }
+
+    // 置く・壊すを止める所: 巨神の背と、深淵 (2026-10-25 の試遊: 深淵でブロックが壊せた)。深淵では近道の道具は止めない
+    private static boolean noBuilding(LevelAccessor level, Player player) {
+        return restricted(level, player) || (player != null && !player.isCreative() && !player.isSpectator()
+                && level instanceof net.minecraft.world.level.Level l && l.dimension() == jp.revati.skyabyss.story.ch5.AbyssWorld.LEVEL);
     }
 
     private static boolean isShortcutItem(ItemStack stack) {
@@ -69,7 +76,7 @@ public final class TitanBackRules {
     // 掘ろうとしても、ひびすら入らない
     @SubscribeEvent
     static void onBreakSpeed(PlayerEvent.BreakSpeed event) {
-        if (restricted(event.getEntity().level(), event.getEntity())) {
+        if (noBuilding(event.getEntity().level(), event.getEntity())) {
             // 野営の道具は、持ち主 (と同じグループ) なら一瞬で外せる (外す処理は onBreak)
             if (event.getEntity() instanceof ServerPlayer sp && event.getPosition().isPresent()
                     && CampBlocks.at(sp.server, sp.level().dimension(), event.getPosition().get()) instanceof CampBlocks.Entry e
@@ -91,7 +98,7 @@ public final class TitanBackRules {
 
     @SubscribeEvent
     static void onBreak(BlockEvent.BreakEvent event) {
-        if (restricted(event.getLevel(), event.getPlayer())) {
+        if (noBuilding(event.getLevel(), event.getPlayer())) {
             event.setCanceled(true);
             if (event.getPlayer() instanceof ServerPlayer sp && event.getLevel() instanceof ServerLevel sl) {
                 CampBlocks.Entry camp = CampBlocks.at(sp.server, sl.dimension(), event.getPos());
@@ -110,7 +117,7 @@ public final class TitanBackRules {
 
     @SubscribeEvent
     static void onPlace(BlockEvent.EntityPlaceEvent event) {
-        if (event.getEntity() instanceof Player player && restricted(event.getLevel(), player)) {
+        if (event.getEntity() instanceof Player player && noBuilding(event.getLevel(), player)) {
             // 野営の道具 (作業台・かまど・たいまつ・チェストなど) は、決まりの中で置いてよい (CampBlocks)
             if (player instanceof ServerPlayer sp && event.getLevel() instanceof ServerLevel sl) {
                 CampBlocks.Refusal why = CampBlocks.evaluate(sp, sl, event.getPos(), event.getPlacedBlock());
