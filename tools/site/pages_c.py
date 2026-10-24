@@ -85,7 +85,7 @@ def faq():
     qa_html = "".join("<details><summary>%s</summary><p>%s</p></details>" % (T(a, b), T(c, d)) for a, b, c, d in qa)
     limits = [
         ("マルチは、まだ人の手で通しの確認をしていません（特に 2 つのパーティが同じ背中にいるとき）。", "Multiplayer has not yet been verified end to end by people (especially with two parties on one back)."),
-        ("次の版の、部屋の報いと技の見た目は、まだ試遊していません。", "The next version's room rewards and skill visuals have not been playtested yet."),
+        ("0.5.5 の部屋の報いと技の見た目は、まだ人の手で試遊していません。", "The room rewards and skill visuals in 0.5.5 have not been playtested by people yet."),
         ("心臓の戦いに勝つまで、台座で転生を実行するまで、順位の石を複数人で見る所は、ゲームの中でまだ通しで確かめていません。", "Winning a heart fight, rebirth at the pedestal, and the rank stone with several players have not yet been confirmed in-game end to end."),
         ("五章「深淵」は、まだ人の手で通しに遊ばれていません（特に番人の戦いと、クリア後の深みを）。", "Chapter 5, the abyss, has not yet been played through end to end by people (especially the warden's fight and the depths after the clear)."),
         ("乗り物の見た目の一部は、まだ仮のものです。", "Some mount models are still placeholders."),
@@ -176,6 +176,12 @@ def faq():
 def changelog():
     # 版ごとの主な変更（試遊の確かめ順と docs/review の記録から）。古い版は要点だけ残す。
     ver = [
+        ("v0.5.5", "2026-10-24", [
+            ("技の見た目: 25 の技を、光の弧・地面の輪・光の柱・残像で描き直しました。一目でどの技か分かり、夜は光ります。", "Skill visuals: all 25 skills redrawn with arcs of light, ground rings, light pillars and afterimages. Each reads at a glance and glows at night."),
+            ("部屋の報い: 部屋を越えると素材と共鳴の欠片。称号は巨神ごとに 3 つ（順路・崩れなし・六部屋）。", "Room rewards: clearing rooms grants materials and resonance fragments. Three titles per titan (route, no collapse, six rooms)."),
+            ("試練の板: GUI の大きさ 2 の崩れを直し、部屋の絵と類の印を出しました。説明は二行で。", "Trial board: fixed the layout at GUI scale 2, added room and kind icons, and wrapped descriptions to two lines."),
+            ("知らせの札は、受け取った物を全部出します（四行まで）。", "Notice cards list everything received (up to four lines)."),
+        ]),
         ("v0.5.4", "2026-10-24", [
             ("都の案内人（白い外套）に行き先を選ぶと、施設まで色の灯りが道に灯ります。", "A guide in a white cloak lights a colored path to the building you choose."),
             ("M の地図を追加。ホイールで寄る・引く、名前の札と自分の矢印。", "Added the M map: scroll to zoom, with name tags and your arrow."),
@@ -188,10 +194,6 @@ def changelog():
             ("潜水服の鎧: 肩の板を胴に付け直しました。", "Diver armor: shoulder plates are attached to the chest again."),
             ("変異の素材は、留め袋に入った素材も数えます。", "Mutation materials now count items stored in the pouch too."),
             ("jar を軽くしました（53.7 MB → 41.7 MB）。使っていない模型と絵を外しています。", "Lighter jar (53.7 MB to 41.7 MB) with unused models and images removed."),
-        ]),
-        ("次の版（作業中）", "", [
-            ("部屋の報い: 素材・共鳴の欠片・称号（巨神ごとに 3 つ）を渡します。", "Room rewards: materials, resonance fragments and titles (three per titan)."),
-            ("技の見た目: 光の弧・輪・柱で描き直した技（光の面で形を読めるように）。", "Skill visuals: skills redrawn with light arcs, rings and pillars so their shapes read at a glance."),
         ]),
         ("v0.5.3", "2026-10-24", [
             ("宿のベッドで寝ると、起きたあとは町の鐘のそばから始まります。", "Sleeping in a bed now wakes you by the town bell."),
@@ -244,8 +246,7 @@ def changelog():
             ("章に分かれました。潮見の貝、地上で倒れたときの墓、装飾の枠、READMEとドット絵の刷新。", "Split the story into chapters. Added the Tide-watching Shell, graves on ground deaths, accessory slots, and refreshed the README and pixel art."),
         ]),
     ]
-    TITLE_EN = {"次の版（作業中）": "Next version (in progress)",
-                "v0.2.2 以降（開発中・リリース前）": "After v0.2.2 (in development, unreleased)"}
+    TITLE_EN = {"v0.2.2 以降（開発中・リリース前）": "After v0.2.2 (in development, unreleased)"}
     items = []
     for v, d, notes in ver:
         date = '<p class="date">%s</p>' % d if d else ""
@@ -253,8 +254,8 @@ def changelog():
         items.append('<li%s><h3>%s</h3>%s<ul>%s</ul></li>' % (
             cls, T(v, TITLE_EN.get(v, v)), date,
             "".join("<li>%s</li>" % T(a, b) for a, b in notes)))
-    body = page_head("更新履歴", "Changelog", "ベータ版の主な変更です。新しい版が上。0.5.4 までは試遊の確かめ順と記録から書きました。",
-                     "Main changes in the beta, newest first. Versions up to 0.5.4 are written from the playtest checklists and notes.") + """
+    body = page_head("更新履歴", "Changelog", "ベータ版の主な変更です。新しい版が上。0.5.5 までは試遊の確かめ順と記録から書きました。",
+                     "Main changes in the beta, newest first. Versions up to 0.5.5 are written from the playtest checklists and notes.") + """
 <section aria-labelledby="log">
 <div class="wrap">
 <h2 id="log" style="position:absolute;left:-999px">%s</h2>
@@ -263,4 +264,4 @@ def changelog():
 </div>
 </section>
 """ % (T("更新履歴", "Changelog"), "".join(items), T("細かい変更の一覧は", "The full list of changes is on"), REPO)
-    page("changelog.html", "更新履歴 — 天と淵のあいだ", "Changelog — Between the Sky and the Abyss", "ベータ版の主な変更。最新は 0.5.4。", "Main changes in the beta. Latest: 0.5.4.", body)
+    page("changelog.html", "更新履歴 — 天と淵のあいだ", "Changelog — Between the Sky and the Abyss", "ベータ版の主な変更。最新は 0.5.5。", "Main changes in the beta. Latest: 0.5.5.", body)

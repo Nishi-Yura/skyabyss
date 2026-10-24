@@ -368,7 +368,7 @@ def _pool_html():
     panels = [
         (T("順路", "Route"), T("歩 → 智 → 闘 → 中ボス → 心臓の、一本道です。各枠は 2 部屋のどちらかが選ばれ、周ごとに変わります。", "Traverse, then wit, then combat, then the mid-boss and the heart, in one line. Each slot draws one of its two rooms, and the draw changes each cycle.")),
         (T("一人でも、仲間とでも", "Solo or together"), T("どの部屋も一人で越えられます。分担すると速くなり、部屋の戦いは中にいる人数に合わせて強くなります。", "Every room can be cleared alone. Sharing the work is faster, and fights grow with the number of people inside.")),
-        (T("部屋の報い（次の版から）", "Room rewards (next version)"), T("部屋を越えると、素材・共鳴の欠片・称号が渡ります。称号は巨神ごとに 3 つ（順路・六部屋・崩れなし）です。", "Clearing rooms will grant materials, resonance fragments and titles. Each titan has three titles: route, six rooms and no collapse.")),
+        (T("部屋の報い", "Room rewards"), T("部屋を越えると、その巨神の素材と共鳴の欠片が渡ります（歩・智は素材 1・欠片 1、闘は素材 2・欠片 1、中ボスは素材 2・欠片 2・結晶 1。崩れずに順路を越えると欠片 +2）。周回では半分、その日 6 部屋を超えると 4 分の 1。称号は巨神ごとに 3 つ（順路・崩れなし・六部屋）で、地上の祠の試練の板に出ます。", "Clearing a room grants that titan's materials and resonance fragments (traverse and wit: 1 material and 1 fragment; combat: 2 materials and 1 fragment; mid-boss: 2 materials, 2 fragments and 1 crystal; +2 fragments for a route with no collapse). Repeat runs give half, and a quarter after six rooms in a day. Each titan has three titles (route, no collapse, six rooms), shown on the trial board at the ground shrine.")),
         (T("全員が倒れたら", "If everyone falls"), T("その部屋の最初から始まります。背のパーティの全員がいなくなって約 3 分で、順路は最初に戻ります。", "The room restarts from its beginning. About three minutes after no one from the party is on the back, the route resets.")),
     ]
     grid = "".join('<div class="panel"><h3>%s</h3><p>%s</p></div>' % (h, p) for h, p in panels)
