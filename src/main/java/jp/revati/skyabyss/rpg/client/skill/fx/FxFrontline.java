@@ -156,13 +156,13 @@ public final class FxFrontline {
             for (int k = 1; k <= 5; k++) {
                 double t = k / 5.0;
                 Vec3 g = c.feet().add(c.fwd.scale(LUNGE_RANGE * t)).add(0, 0.05, 0);
-                FxDraw.add(x, Prim.disc(g, 0.15, 0.35 + 0.6 * t).color(WHITE).life(12).alpha(0.6f));
+                FxDraw.add(x, Prim.disc(g, 0.7, 1.3 + 0.5 * t).color(WHITE).life(14).alpha(0.85f));
             }
             FxDraw.add(x, Prim.line(from.add(side), to.add(side)).color(GREEN).width(0.14).life(10).ease(Ease.OUT).alpha(0.9f).trail(0.4));
             // 残像: 三つの縦の板 (カメラに向く)。道の手前ほど濃く、幅を太くして後ろからも読む
             for (int k = 1; k <= 3; k++) {
                 Vec3 g = from.lerp(to, k / 4.0);
-                FxDraw.add(x, Prim.beam(g.subtract(0, 1.0, 0), 3.2).color(k == 1 ? WHITE : GREEN).width(1.8 + 0.4 * (3 - k)).life(10).ease(Ease.OUT).glow(0.6).alpha(0.8f - 0.15f * k));
+                FxDraw.add(x, Prim.beam(g.subtract(0, 1.0, 0), 3.2).color(k == 1 ? WHITE : GREEN).width(2.6 + 0.4 * (3 - k)).life(12).ease(Ease.OUT).glow(0.8).alpha(0.95f - 0.1f * k));
             }
             SkillFx.sound(x, SoundEvents.ENDER_DRAGON_FLAP, from, 0.35f, 1.7f);
         });
@@ -221,6 +221,7 @@ public final class FxFrontline {
         c.at(5, x -> {
             Vec3 f = x.feet();
             SkillFx.flash(x, cen);
+            SkillFx.hitSpark(x, cen, WHITE);
             FxDraw.add(x, Prim.arc(cen, x.right, up, 2.0, 2.6, -0.6).color(WHITE).width(0.14).life(10).ease(Ease.OUT).alpha(0.9f));
             FxDraw.add(x, Prim.shell(f.add(0, 1.0, 0), 0.5, REND_RANGE, 2.0).color(GREEN).life(10).ease(Ease.OUT).width(0.3));
             SkillFx.kick(x, 0.6f);

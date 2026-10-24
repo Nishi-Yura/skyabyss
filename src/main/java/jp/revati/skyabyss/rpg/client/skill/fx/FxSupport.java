@@ -158,6 +158,7 @@ public final class FxSupport {
         });
         c.at(3, x -> {
             SkillFx.flash(x, to.add(0, 0.6, 0));
+            SkillFx.hitSpark(x, to.add(0, 0.6, 0), SAND);
             FxDraw.add(x, Prim.shell(to, 0.5, 3.0, 1.5).color(SAND).life(10).ease(Ease.OUT).width(0.3));
             FxDraw.add(x, Prim.disc(to, 0.3, 1.6).color(SAND).life(10).alpha(0.6f));
             SkillFx.kick(x, 0.6f);
@@ -210,6 +211,7 @@ public final class FxSupport {
         }
         c.at(7, x -> {
             SkillFx.flash(x, hand.add(x.fwd.scale(VOLLEY_LEN)));
+            SkillFx.hitSpark(x, hand.add(x.fwd.scale(VOLLEY_LEN)), EMBER);
             for (double deg : degs) {
                 Vec3 end = hand.add(rotate(x.fwd, deg).scale(VOLLEY_LEN));
                 FxDraw.add(x, Prim.disc(end, 0.3, 1.2).color(CINDER).life(10).alpha(0.7f));

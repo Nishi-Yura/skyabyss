@@ -43,7 +43,7 @@ public final class FxRanged {
     private static final int DEEP_CORE = 0xC88CFF;
     private static final int GOLD = 0xFFC94D;
     private static final int PALE_GOLD = 0xFFE39A;
-    private static final int SHADOW = 0x2C3B4E;
+    private static final int SHADOW = 0x17222E;
 
     public static void register(Map<Skill, Consumer<SkillFx.Cast>> plans) {
         plans.put(Skill.CLOUD_PIERCE, FxRanged::cloudPierce);
@@ -79,13 +79,14 @@ public final class FxRanged {
             Vec3 foot = c.feet();
             for (int k = 1; k <= 6; k++) {
                 Vec3 g = foot.add(c.fwd.scale(PIERCE_RANGE * k / 7.0)).add(0, 0.05, 0);
-                FxDraw.add(x, Prim.disc(g, 0.4, 1.1).color(SHADOW).life(34).alpha(0.4f));
+                FxDraw.add(x, Prim.disc(g, 1.0, 1.8).color(SHADOW).life(34).alpha(0.65f));
             }
             SkillFx.sound(x, SoundEvents.CROSSBOW_SHOOT, x.hand(), 0.45f, 1.7f);
         });
         c.at(SkillRules.PIERCE_LIFETIME, x -> {
             // 当たり: 高く明るい柱 (高さ 12) と、柱のまわりの輪 (後ろからも見える縦の輪)
             SkillFx.flash(x, end);
+            SkillFx.hitSpark(x, end, SKY_WHITE);
             FxDraw.add(x, Prim.ring(end, 0.2, 2.6).color(WHITE).width(0.35).life(12).glow(0.6));
             FxDraw.add(x, Prim.beam(end, 12.0).color(SKY_WHITE).width(2.6).life(20).ease(Ease.OUT3).glow(1.0).alpha(1.0f));
             FxDraw.add(x, Prim.arc(end, right, up, 1.4, 0, Math.PI * 2).color(WHITE).width(0.35).life(14).ease(Ease.OUT).glow(0.5));
@@ -193,6 +194,7 @@ public final class FxRanged {
         }
         c.at(12, x -> {
             SkillFx.flash(x, waist);
+            SkillFx.hitSpark(x, waist, DEEP_CORE);
             // 腰のまわりを回る紫の輪 (立った輪: 後ろから見ても円に見える)、その外に黒紫の柱
             FxDraw.add(x, Prim.arc(waist, new Vec3(1, 0, 0), new Vec3(0, 1, 0), 1.2, 0, Math.PI * 2).color(VIOLET).width(0.45).life(100).ease(Ease.LINEAR).trail(0.3).alpha(0.9f));
             FxDraw.add(x, Prim.beam(f, 3.0).color(DEEP_BLACK).width(1.2).life(20).ease(Ease.OUT3).alpha(0.8f));
@@ -213,6 +215,7 @@ public final class FxRanged {
         c.at(3, x -> FxDraw.add(x, Prim.ring(aim, MAW_RADIUS, 0.5).color(DEEP_BLACK).width(0.4).life(6).ease(Ease.IN2).glow(0.3)));
         c.at(8, x -> {
             SkillFx.flash(x, aim.add(0, 0.5, 0));
+            SkillFx.hitSpark(x, aim.add(0, 0.5, 0), DEEP_CORE);
             // 顎: 上下の二つの弧 (縦の面、前から後ろへ見て口の形)。牙は縁から立つ
             // 紫の縁を先に描いて、夜の空でも顎の形が読めるように。黒は内側に重ねる
             FxDraw.add(x, Prim.arc(aim.add(0, 1.2, 0), x.fwd, new Vec3(0, 1, 0), 3.2, 0.5, 2.6).color(0xB58CFF).width(2.6).life(14).ease(Ease.OUT).glow(0.8).alpha(0.9f));
@@ -249,6 +252,7 @@ public final class FxRanged {
         });
         c.at(9, x -> {
             SkillFx.flash(x, target.add(0, 0.2, 0));
+            SkillFx.hitSpark(x, target.add(0, 0.2, 0), GOLD);
             FxDraw.add(x, Prim.arc(eye.add(x.fwd.scale(2.4)), x.right, up, 2.2, -0.9, 0.9).color(PALE_GOLD).width(0.7).life(8).ease(Ease.OUT).glow(0.4).trail(0.6));
             SkillFx.sound(x, SoundEvents.AMETHYST_BLOCK_CHIME, target, 0.6f, 0.7f);
         });
@@ -268,6 +272,7 @@ public final class FxRanged {
         });
         c.at(3, x -> {
             SkillFx.flash(x, head);
+            SkillFx.hitSpark(x, head, PALE_GOLD);
             FxDraw.add(x, Prim.beam(f, BELL_HEAD).color(GOLD).width(0.6).life(16).ease(Ease.OUT3).glow(0.5));
             FxDraw.add(x, Prim.ring(f, 0.5, 2.5).color(GOLD).width(0.4).life(14).ease(Ease.OUT).glow(0.4));
             FxDraw.add(x, Prim.ring(f, 0.5, 5.0).color(PALE_GOLD).width(0.3).life(18).ease(Ease.OUT));
@@ -288,6 +293,7 @@ public final class FxRanged {
         Vec3 f = c.feet();
         c.at(0, x -> {
             SkillFx.flash(x, f.add(0, 1.0, 0));
+            SkillFx.hitSpark(x, f.add(0, 1.0, 0), PALE_GOLD);
             FxDraw.add(x, Prim.beam(f, 6.0).color(PALE_GOLD).width(0.9).life(40).ease(Ease.OUT3).glow(0.7));
             SkillFx.sound(x, SoundEvents.LIGHTNING_BOLT_THUNDER, f, 0.2f, 1.8f);
         });

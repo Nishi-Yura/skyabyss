@@ -246,16 +246,27 @@ public final class FxDraw {
 
     // ================================================================ 描く
 
+    private static long skillNanos;
+    private static int skillFrames;
+
     @SubscribeEvent
     static void onRenderLevel(RenderLevelStageEvent event) {
         if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_PARTICLES || PRIMS.isEmpty()) {
             return;
         }
         long prof = Prof.begin();
+        long t0 = System.nanoTime();
         try {
             draw(event);
         } finally {
             Prof.end("client.skillfx", prof);
+            // 描く時間の平均を、描いた 100 フレームごとに log へ出す (SKYABYSS_PROF の窓に頼らない)
+            skillNanos += System.nanoTime() - t0;
+            if (++skillFrames % 100 == 0) {
+                SkyAbyss.LOGGER.info("[skillfx] draw avg {} ms over {} frames ({} shapes now)",
+                        String.format(java.util.Locale.ROOT, "%.4f", skillNanos / 100.0 / 1.0e6), 100, PRIMS.size());
+                skillNanos = 0;
+            }
         }
     }
 
