@@ -111,6 +111,7 @@
   "hud.skyabyss.abyss.depth": "深さ %s",
   "hud.skyabyss.abyss.weight": "体が重い %s%%",
   "message.skyabyss.abyss.voice_full": "闇の中から、名前を呼ばれた気がする。……灯りを。",
+  "message.skyabyss.abyss.voice_dark": "暗がりにいると、淵の声が満ちてくる。満ちると目の前が暗くなる。灯りのそばで静まる。",
   "entity.skyabyss.heart_warden": "心臓の番人",
   "message.skyabyss.warden.lighting": "灯りに火を移している……そばを離れないで。",
   "message.skyabyss.warden.wake": "闇の奥で、何かが目を開けた。灯りを点けて、姿を照らそう。",

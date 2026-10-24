@@ -111,6 +111,7 @@
   "hud.skyabyss.abyss.depth": "Depth %s",
   "hud.skyabyss.abyss.weight": "Heavy %s%%",
   "message.skyabyss.abyss.voice_full": "Something in the dark seemed to call your name. ...Light, now.",
+  "message.skyabyss.abyss.voice_dark": "Stay in the dark and the abyss voice rises; when it fills, your sight goes dark. It quiets near light.",
   "entity.skyabyss.heart_warden": "Warden of the Heart",
   "message.skyabyss.warden.lighting": "Passing the flame to the lantern... stay close.",
   "message.skyabyss.warden.wake": "Something opened its eyes in the dark. Light the lanterns and catch it in the glow.",

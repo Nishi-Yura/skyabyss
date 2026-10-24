@@ -71,6 +71,8 @@ public final class AbyssPressure {
         float voice;
         double weight;
         boolean warned;
+        // 声がはじめて 40 を超えたときに、暗闇の理由を一度だけ知らせたか (2026-10-25 の試遊: 暗闇がなぜ付くか分からない)
+        boolean taught;
     }
 
     private static final Map<UUID, State> STATES = new ConcurrentHashMap<>();
@@ -135,6 +137,10 @@ public final class AbyssPressure {
             d *= (float) (voiceScale.applyAsDouble(p) * AbyssRelics.voiceFactor(p) * factor(VOICE_FACTORS, p));
         }
         s.voice = Mth.clamp(s.voice + d, 0f, 100f);
+        if (s.voice >= 40 && !s.taught) {
+            s.taught = true;
+            Notice.narrate(p, "message.skyabyss.abyss.voice_dark");
+        }
         if (s.voice >= 40 && p.getRandom().nextInt(5) == 0) {
             p.serverLevel().playSound(null, p.getX() + p.getRandom().nextGaussian() * 6, p.getY(), p.getZ() + p.getRandom().nextGaussian() * 6,
                     SoundEvents.SOUL_ESCAPE.value(), SoundSource.AMBIENT, 0.6f, 0.5f + p.getRandom().nextFloat() * 0.3f);
