@@ -48,8 +48,11 @@ SKILLS = [
     ("final_light", 0, 6, 20, False),
 ]
 
-# 的: 前 3 ブロック・右へ 1.5 (約 27 度)。三人称の後ろ視点で、体と的が画面の中で大きく収まる
-HUSK = "execute as @s at @s anchored eyes positioned ^-1.5 ^-1.6 ^3.0 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}"
+# 体の置き場所と向き (絶対座標・yaw 0 = 南向き、前は +z、右は -x)。毎技この場所へ戻して撮る (枠のずれをなくす)
+CASTER_POS = "0.5 -60 0.5 0 0"
+# 的: 体の前 3 ブロック・右へ 1.5 (約 27 度)、絶対座標で置く (毎技 殺して置き直す)
+TARGET_POS = "-1.0 -60 3.5"
+HUSK = f"summon minecraft:husk {TARGET_POS} {{NoAI:1b,Silent:1b}}"
 # 三人称は視野を狭めて、体と的を大きく撮る (カメラの距離は既定の 4 ブロックのまま。FOV だけ変える)
 FOV_BACK = 48
 FOV_NORMAL = 70
@@ -72,6 +75,8 @@ def block(skill: str, rel: int, imp: int, lin: int, bow: bool, view: str, phase:
     lines: list[str] = []
     lines.append(f"perspective {'first' if view == 'first' else 'back'}")
     lines.append(f"fov {FOV_NORMAL if view == 'first' else FOV_BACK}")
+    # 毎技、体を同じ場所・同じ向きへ戻す (絶対座標)。前の技の移動 (突進・跳び退き・砂の突進) は先の撮影が終わってから
+    lines.append(f"cmd tp @s {CASTER_POS}")
     # 開幕の題字と HUD を消してから撮る (cinematic の停止と、部品の一括オフ)
     lines.append("cmd skyabyss cinematic stop")
     lines.append("huddemo off")
@@ -96,6 +101,8 @@ def block(skill: str, rel: int, imp: int, lin: int, bow: bool, view: str, phase:
             now = tick
         lines.append(f"shot {prefix}_{mark}")
     lines.append("cmd skyabyss skill cooldowns @s")
+    # 移動する技が落ち着くまで待ってから、次の撮影へ (体を戻す前)
+    lines.append("wait 30")
     return lines
 
 

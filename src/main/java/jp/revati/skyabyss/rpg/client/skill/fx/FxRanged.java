@@ -193,12 +193,12 @@ public final class FxRanged {
         c.at(8, x -> {
             SkillFx.flash(x, aim.add(0, 0.5, 0));
             // 顎: 上下の二つの弧 (縦の面、前から後ろへ見て口の形)。牙は縁から立つ
-            FxDraw.add(x, Prim.arc(aim.add(0, 1.0, 0), x.fwd, new Vec3(0, 1, 0), 3.0, 0.5, 2.6).color(DEEP_BLACK).width(0.8).life(14).ease(Ease.OUT).alpha(0.95f));
-            FxDraw.add(x, Prim.arc(aim.add(0, 1.0, 0), x.fwd, new Vec3(0, 1, 0), 3.0, -0.5, -2.6).color(DEEP_BLACK).width(0.8).life(14).ease(Ease.OUT).alpha(0.95f));
+            FxDraw.add(x, Prim.arc(aim.add(0, 1.2, 0), x.fwd, new Vec3(0, 1, 0), 3.2, 0.5, 2.6).color(DEEP_BLACK).width(1.5).life(14).ease(Ease.OUT).alpha(0.95f));
+            FxDraw.add(x, Prim.arc(aim.add(0, 1.2, 0), x.fwd, new Vec3(0, 1, 0), 3.2, -0.5, -2.6).color(DEEP_BLACK).width(1.5).life(14).ease(Ease.OUT).alpha(0.95f));
             for (int k = 0; k < 8; k++) {
                 double a = Math.PI * 2 * k / 8;
                 Vec3 edge = aim.add(Math.cos(a) * MAW_RADIUS, 0, Math.sin(a) * MAW_RADIUS);
-                FxDraw.add(x, Prim.beam(edge, 1.6).color(DEEP_BLACK).width(0.5).life(14).ease(Ease.OUT).alpha(0.9f));
+                FxDraw.add(x, Prim.beam(edge, 2.2).color(DEEP_BLACK).width(0.9).life(14).ease(Ease.OUT).alpha(0.9f));
             }
             FxDraw.add(x, Prim.shell(aim.add(0, 0.8, 0), 0.5, MAW_RADIUS, 1.8).color(DEEP_CORE).life(10).ease(Ease.OUT).width(0.3));
             SkillFx.kick(x, 0.9f);
