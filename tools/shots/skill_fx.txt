@@ -9,6 +9,7 @@ render 6
 clouds off
 guiscale 2
 cmd time set noon
+cmd gamerule doWeatherCycle false
 cmd weather clear
 cmd gamemode survival
 camera 0 -60 0 0 0
@@ -22,6 +23,7 @@ wait 200
 perspective first
 fov 70
 cmd tp @s 0.5 -60 0.5 0 0
+cmd gamerule doWeatherCycle false
 cmd weather clear
 cmd skyabyss cinematic stop
 huddemo off
@@ -49,6 +51,7 @@ wait 30
 perspective back
 fov 48
 cmd tp @s 0.5 -60 0.5 0 0
+cmd gamerule doWeatherCycle false
 cmd weather clear
 cmd skyabyss cinematic stop
 huddemo off
@@ -77,6 +80,7 @@ wait 30
 perspective first
 fov 70
 cmd tp @s 0.5 -60 0.5 0 0
+cmd gamerule doWeatherCycle false
 cmd weather clear
 cmd skyabyss cinematic stop
 huddemo off
@@ -104,6 +108,7 @@ wait 30
 perspective back
 fov 48
 cmd tp @s 0.5 -60 0.5 0 0
+cmd gamerule doWeatherCycle false
 cmd weather clear
 cmd skyabyss cinematic stop
 huddemo off
@@ -132,6 +137,7 @@ wait 30
 perspective first
 fov 70
 cmd tp @s 0.5 -60 0.5 0 0
+cmd gamerule doWeatherCycle false
 cmd weather clear
 cmd skyabyss cinematic stop
 huddemo off
@@ -159,6 +165,7 @@ wait 30
 perspective back
 fov 48
 cmd tp @s 0.5 -60 0.5 0 0
+cmd gamerule doWeatherCycle false
 cmd weather clear
 cmd skyabyss cinematic stop
 huddemo off
@@ -187,6 +194,7 @@ wait 30
 perspective first
 fov 70
 cmd tp @s 0.5 -60 0.5 0 0
+cmd gamerule doWeatherCycle false
 cmd weather clear
 cmd skyabyss cinematic stop
 huddemo off
@@ -214,6 +222,7 @@ wait 30
 perspective back
 fov 48
 cmd tp @s 0.5 -60 0.5 0 0
+cmd gamerule doWeatherCycle false
 cmd weather clear
 cmd skyabyss cinematic stop
 huddemo off
@@ -242,6 +251,7 @@ wait 30
 perspective first
 fov 70
 cmd tp @s 0.5 -60 0.5 0 0
+cmd gamerule doWeatherCycle false
 cmd weather clear
 cmd skyabyss cinematic stop
 huddemo off
@@ -269,6 +279,7 @@ wait 30
 perspective back
 fov 48
 cmd tp @s 0.5 -60 0.5 0 0
+cmd gamerule doWeatherCycle false
 cmd weather clear
 cmd skyabyss cinematic stop
 huddemo off
@@ -297,6 +308,7 @@ wait 30
 perspective first
 fov 70
 cmd tp @s 0.5 -60 0.5 0 0
+cmd gamerule doWeatherCycle false
 cmd weather clear
 cmd skyabyss cinematic stop
 huddemo off
@@ -324,6 +336,7 @@ wait 30
 perspective back
 fov 48
 cmd tp @s 0.5 -60 0.5 0 0
+cmd gamerule doWeatherCycle false
 cmd weather clear
 cmd skyabyss cinematic stop
 huddemo off
@@ -352,6 +365,7 @@ wait 30
 perspective first
 fov 70
 cmd tp @s 0.5 -60 0.5 0 0
+cmd gamerule doWeatherCycle false
 cmd weather clear
 cmd skyabyss cinematic stop
 huddemo off
@@ -379,6 +393,7 @@ wait 30
 perspective back
 fov 48
 cmd tp @s 0.5 -60 0.5 0 0
+cmd gamerule doWeatherCycle false
 cmd weather clear
 cmd skyabyss cinematic stop
 huddemo off
@@ -407,6 +422,7 @@ wait 30
 perspective first
 fov 70
 cmd tp @s 0.5 -60 0.5 0 0
+cmd gamerule doWeatherCycle false
 cmd weather clear
 cmd skyabyss cinematic stop
 huddemo off
@@ -434,6 +450,7 @@ wait 30
 perspective back
 fov 48
 cmd tp @s 0.5 -60 0.5 0 0
+cmd gamerule doWeatherCycle false
 cmd weather clear
 cmd skyabyss cinematic stop
 huddemo off
@@ -462,6 +479,7 @@ wait 30
 perspective first
 fov 70
 cmd tp @s 0.5 -60 0.5 0 0
+cmd gamerule doWeatherCycle false
 cmd weather clear
 cmd skyabyss cinematic stop
 huddemo off
@@ -489,6 +507,7 @@ wait 30
 perspective back
 fov 48
 cmd tp @s 0.5 -60 0.5 0 0
+cmd gamerule doWeatherCycle false
 cmd weather clear
 cmd skyabyss cinematic stop
 huddemo off
@@ -517,6 +536,7 @@ wait 30
 perspective first
 fov 70
 cmd tp @s 0.5 -60 0.5 0 0
+cmd gamerule doWeatherCycle false
 cmd weather clear
 cmd skyabyss cinematic stop
 huddemo off
@@ -544,6 +564,7 @@ wait 30
 perspective back
 fov 48
 cmd tp @s 0.5 -60 0.5 0 0
+cmd gamerule doWeatherCycle false
 cmd weather clear
 cmd skyabyss cinematic stop
 huddemo off
@@ -572,6 +593,7 @@ wait 30
 perspective first
 fov 70
 cmd tp @s 0.5 -60 0.5 0 0
+cmd gamerule doWeatherCycle false
 cmd weather clear
 cmd skyabyss cinematic stop
 huddemo off
@@ -599,6 +621,7 @@ wait 30
 perspective back
 fov 48
 cmd tp @s 0.5 -60 0.5 0 0
+cmd gamerule doWeatherCycle false
 cmd weather clear
 cmd skyabyss cinematic stop
 huddemo off
@@ -627,6 +650,7 @@ wait 30
 perspective first
 fov 70
 cmd tp @s 0.5 -60 0.5 0 0
+cmd gamerule doWeatherCycle false
 cmd weather clear
 cmd skyabyss cinematic stop
 huddemo off
@@ -654,6 +678,7 @@ wait 30
 perspective back
 fov 48
 cmd tp @s 0.5 -60 0.5 0 0
+cmd gamerule doWeatherCycle false
 cmd weather clear
 cmd skyabyss cinematic stop
 huddemo off
@@ -682,6 +707,7 @@ wait 30
 perspective first
 fov 70
 cmd tp @s 0.5 -60 0.5 0 0
+cmd gamerule doWeatherCycle false
 cmd weather clear
 cmd skyabyss cinematic stop
 huddemo off
@@ -711,6 +737,7 @@ wait 30
 perspective back
 fov 48
 cmd tp @s 0.5 -60 0.5 0 0
+cmd gamerule doWeatherCycle false
 cmd weather clear
 cmd skyabyss cinematic stop
 huddemo off
@@ -741,6 +768,7 @@ wait 30
 perspective first
 fov 70
 cmd tp @s 0.5 -60 0.5 0 0
+cmd gamerule doWeatherCycle false
 cmd weather clear
 cmd skyabyss cinematic stop
 huddemo off
@@ -768,6 +796,7 @@ wait 30
 perspective back
 fov 48
 cmd tp @s 0.5 -60 0.5 0 0
+cmd gamerule doWeatherCycle false
 cmd weather clear
 cmd skyabyss cinematic stop
 huddemo off
@@ -796,6 +825,7 @@ wait 30
 perspective first
 fov 70
 cmd tp @s 0.5 -60 0.5 0 0
+cmd gamerule doWeatherCycle false
 cmd weather clear
 cmd skyabyss cinematic stop
 huddemo off
@@ -825,6 +855,7 @@ wait 30
 perspective back
 fov 48
 cmd tp @s 0.5 -60 0.5 0 0
+cmd gamerule doWeatherCycle false
 cmd weather clear
 cmd skyabyss cinematic stop
 huddemo off
@@ -855,6 +886,7 @@ wait 30
 perspective first
 fov 70
 cmd tp @s 0.5 -60 0.5 0 0
+cmd gamerule doWeatherCycle false
 cmd weather clear
 cmd skyabyss cinematic stop
 huddemo off
@@ -882,6 +914,7 @@ wait 30
 perspective back
 fov 48
 cmd tp @s 0.5 -60 0.5 0 0
+cmd gamerule doWeatherCycle false
 cmd weather clear
 cmd skyabyss cinematic stop
 huddemo off
@@ -910,6 +943,7 @@ wait 30
 perspective first
 fov 70
 cmd tp @s 0.5 -60 0.5 0 0
+cmd gamerule doWeatherCycle false
 cmd weather clear
 cmd skyabyss cinematic stop
 huddemo off
@@ -937,6 +971,7 @@ wait 30
 perspective back
 fov 48
 cmd tp @s 0.5 -60 0.5 0 0
+cmd gamerule doWeatherCycle false
 cmd weather clear
 cmd skyabyss cinematic stop
 huddemo off
@@ -965,6 +1000,7 @@ wait 30
 perspective first
 fov 70
 cmd tp @s 0.5 -60 0.5 0 0
+cmd gamerule doWeatherCycle false
 cmd weather clear
 cmd skyabyss cinematic stop
 huddemo off
@@ -992,6 +1028,7 @@ wait 30
 perspective back
 fov 48
 cmd tp @s 0.5 -60 0.5 0 0
+cmd gamerule doWeatherCycle false
 cmd weather clear
 cmd skyabyss cinematic stop
 huddemo off
@@ -1020,6 +1057,7 @@ wait 30
 perspective first
 fov 70
 cmd tp @s 0.5 -60 0.5 0 0
+cmd gamerule doWeatherCycle false
 cmd weather clear
 cmd skyabyss cinematic stop
 huddemo off
@@ -1047,6 +1085,7 @@ wait 30
 perspective back
 fov 48
 cmd tp @s 0.5 -60 0.5 0 0
+cmd gamerule doWeatherCycle false
 cmd weather clear
 cmd skyabyss cinematic stop
 huddemo off
@@ -1075,6 +1114,7 @@ wait 30
 perspective first
 fov 70
 cmd tp @s 0.5 -60 0.5 0 0
+cmd gamerule doWeatherCycle false
 cmd weather clear
 cmd skyabyss cinematic stop
 huddemo off
@@ -1102,6 +1142,7 @@ wait 30
 perspective back
 fov 48
 cmd tp @s 0.5 -60 0.5 0 0
+cmd gamerule doWeatherCycle false
 cmd weather clear
 cmd skyabyss cinematic stop
 huddemo off
@@ -1130,6 +1171,7 @@ wait 30
 perspective first
 fov 70
 cmd tp @s 0.5 -60 0.5 0 0
+cmd gamerule doWeatherCycle false
 cmd weather clear
 cmd skyabyss cinematic stop
 huddemo off
@@ -1157,6 +1199,7 @@ wait 30
 perspective back
 fov 48
 cmd tp @s 0.5 -60 0.5 0 0
+cmd gamerule doWeatherCycle false
 cmd weather clear
 cmd skyabyss cinematic stop
 huddemo off
@@ -1185,6 +1228,7 @@ wait 30
 perspective first
 fov 70
 cmd tp @s 0.5 -60 0.5 0 0
+cmd gamerule doWeatherCycle false
 cmd weather clear
 cmd skyabyss cinematic stop
 huddemo off
@@ -1212,6 +1256,7 @@ wait 30
 perspective back
 fov 48
 cmd tp @s 0.5 -60 0.5 0 0
+cmd gamerule doWeatherCycle false
 cmd weather clear
 cmd skyabyss cinematic stop
 huddemo off
@@ -1240,6 +1285,7 @@ wait 30
 perspective first
 fov 70
 cmd tp @s 0.5 -60 0.5 0 0
+cmd gamerule doWeatherCycle false
 cmd weather clear
 cmd skyabyss cinematic stop
 huddemo off
@@ -1267,6 +1313,7 @@ wait 30
 perspective back
 fov 48
 cmd tp @s 0.5 -60 0.5 0 0
+cmd gamerule doWeatherCycle false
 cmd weather clear
 cmd skyabyss cinematic stop
 huddemo off
@@ -1295,6 +1342,7 @@ wait 30
 perspective first
 fov 70
 cmd tp @s 0.5 -60 0.5 0 0
+cmd gamerule doWeatherCycle false
 cmd weather clear
 cmd skyabyss cinematic stop
 huddemo off
@@ -1322,6 +1370,7 @@ wait 30
 perspective back
 fov 48
 cmd tp @s 0.5 -60 0.5 0 0
+cmd gamerule doWeatherCycle false
 cmd weather clear
 cmd skyabyss cinematic stop
 huddemo off
@@ -1350,6 +1399,7 @@ wait 30
 perspective first
 fov 70
 cmd tp @s 0.5 -60 0.5 0 0
+cmd gamerule doWeatherCycle false
 cmd weather clear
 cmd skyabyss cinematic stop
 huddemo off
@@ -1377,6 +1427,7 @@ wait 30
 perspective back
 fov 48
 cmd tp @s 0.5 -60 0.5 0 0
+cmd gamerule doWeatherCycle false
 cmd weather clear
 cmd skyabyss cinematic stop
 huddemo off
@@ -1408,6 +1459,7 @@ wait 20
 perspective first
 fov 70
 cmd tp @s 0.5 -60 0.5 0 0
+cmd gamerule doWeatherCycle false
 cmd weather clear
 cmd skyabyss cinematic stop
 huddemo off
@@ -1431,6 +1483,7 @@ wait 30
 perspective back
 fov 48
 cmd tp @s 0.5 -60 0.5 0 0
+cmd gamerule doWeatherCycle false
 cmd weather clear
 cmd skyabyss cinematic stop
 huddemo off
@@ -1455,6 +1508,7 @@ wait 30
 perspective first
 fov 70
 cmd tp @s 0.5 -60 0.5 0 0
+cmd gamerule doWeatherCycle false
 cmd weather clear
 cmd skyabyss cinematic stop
 huddemo off
@@ -1478,6 +1532,7 @@ wait 30
 perspective back
 fov 48
 cmd tp @s 0.5 -60 0.5 0 0
+cmd gamerule doWeatherCycle false
 cmd weather clear
 cmd skyabyss cinematic stop
 huddemo off
@@ -1502,6 +1557,7 @@ wait 30
 perspective first
 fov 70
 cmd tp @s 0.5 -60 0.5 0 0
+cmd gamerule doWeatherCycle false
 cmd weather clear
 cmd skyabyss cinematic stop
 huddemo off
@@ -1525,6 +1581,7 @@ wait 30
 perspective back
 fov 48
 cmd tp @s 0.5 -60 0.5 0 0
+cmd gamerule doWeatherCycle false
 cmd weather clear
 cmd skyabyss cinematic stop
 huddemo off
@@ -1549,6 +1606,7 @@ wait 30
 perspective first
 fov 70
 cmd tp @s 0.5 -60 0.5 0 0
+cmd gamerule doWeatherCycle false
 cmd weather clear
 cmd skyabyss cinematic stop
 huddemo off
@@ -1572,6 +1630,7 @@ wait 30
 perspective back
 fov 48
 cmd tp @s 0.5 -60 0.5 0 0
+cmd gamerule doWeatherCycle false
 cmd weather clear
 cmd skyabyss cinematic stop
 huddemo off
@@ -1596,6 +1655,7 @@ wait 30
 perspective first
 fov 70
 cmd tp @s 0.5 -60 0.5 0 0
+cmd gamerule doWeatherCycle false
 cmd weather clear
 cmd skyabyss cinematic stop
 huddemo off
@@ -1619,6 +1679,7 @@ wait 30
 perspective back
 fov 48
 cmd tp @s 0.5 -60 0.5 0 0
+cmd gamerule doWeatherCycle false
 cmd weather clear
 cmd skyabyss cinematic stop
 huddemo off
@@ -1643,6 +1704,7 @@ wait 30
 perspective first
 fov 70
 cmd tp @s 0.5 -60 0.5 0 0
+cmd gamerule doWeatherCycle false
 cmd weather clear
 cmd skyabyss cinematic stop
 huddemo off
@@ -1666,6 +1728,7 @@ wait 30
 perspective back
 fov 48
 cmd tp @s 0.5 -60 0.5 0 0
+cmd gamerule doWeatherCycle false
 cmd weather clear
 cmd skyabyss cinematic stop
 huddemo off
@@ -1690,6 +1753,7 @@ wait 30
 perspective first
 fov 70
 cmd tp @s 0.5 -60 0.5 0 0
+cmd gamerule doWeatherCycle false
 cmd weather clear
 cmd skyabyss cinematic stop
 huddemo off
@@ -1713,6 +1777,7 @@ wait 30
 perspective back
 fov 48
 cmd tp @s 0.5 -60 0.5 0 0
+cmd gamerule doWeatherCycle false
 cmd weather clear
 cmd skyabyss cinematic stop
 huddemo off
@@ -1737,6 +1802,7 @@ wait 30
 perspective first
 fov 70
 cmd tp @s 0.5 -60 0.5 0 0
+cmd gamerule doWeatherCycle false
 cmd weather clear
 cmd skyabyss cinematic stop
 huddemo off
@@ -1760,6 +1826,7 @@ wait 30
 perspective back
 fov 48
 cmd tp @s 0.5 -60 0.5 0 0
+cmd gamerule doWeatherCycle false
 cmd weather clear
 cmd skyabyss cinematic stop
 huddemo off
@@ -1784,6 +1851,7 @@ wait 30
 perspective first
 fov 70
 cmd tp @s 0.5 -60 0.5 0 0
+cmd gamerule doWeatherCycle false
 cmd weather clear
 cmd skyabyss cinematic stop
 huddemo off
@@ -1807,6 +1875,7 @@ wait 30
 perspective back
 fov 48
 cmd tp @s 0.5 -60 0.5 0 0
+cmd gamerule doWeatherCycle false
 cmd weather clear
 cmd skyabyss cinematic stop
 huddemo off
@@ -1831,6 +1900,7 @@ wait 30
 perspective first
 fov 70
 cmd tp @s 0.5 -60 0.5 0 0
+cmd gamerule doWeatherCycle false
 cmd weather clear
 cmd skyabyss cinematic stop
 huddemo off
@@ -1854,6 +1924,7 @@ wait 30
 perspective back
 fov 48
 cmd tp @s 0.5 -60 0.5 0 0
+cmd gamerule doWeatherCycle false
 cmd weather clear
 cmd skyabyss cinematic stop
 huddemo off
@@ -1878,6 +1949,7 @@ wait 30
 perspective first
 fov 70
 cmd tp @s 0.5 -60 0.5 0 0
+cmd gamerule doWeatherCycle false
 cmd weather clear
 cmd skyabyss cinematic stop
 huddemo off
@@ -1901,6 +1973,7 @@ wait 30
 perspective back
 fov 48
 cmd tp @s 0.5 -60 0.5 0 0
+cmd gamerule doWeatherCycle false
 cmd weather clear
 cmd skyabyss cinematic stop
 huddemo off
@@ -1925,6 +1998,7 @@ wait 30
 perspective first
 fov 70
 cmd tp @s 0.5 -60 0.5 0 0
+cmd gamerule doWeatherCycle false
 cmd weather clear
 cmd skyabyss cinematic stop
 huddemo off
@@ -1948,6 +2022,7 @@ wait 30
 perspective back
 fov 48
 cmd tp @s 0.5 -60 0.5 0 0
+cmd gamerule doWeatherCycle false
 cmd weather clear
 cmd skyabyss cinematic stop
 huddemo off
@@ -1972,6 +2047,7 @@ wait 30
 perspective first
 fov 70
 cmd tp @s 0.5 -60 0.5 0 0
+cmd gamerule doWeatherCycle false
 cmd weather clear
 cmd skyabyss cinematic stop
 huddemo off
@@ -1997,6 +2073,7 @@ wait 30
 perspective back
 fov 48
 cmd tp @s 0.5 -60 0.5 0 0
+cmd gamerule doWeatherCycle false
 cmd weather clear
 cmd skyabyss cinematic stop
 huddemo off
@@ -2023,6 +2100,7 @@ wait 30
 perspective first
 fov 70
 cmd tp @s 0.5 -60 0.5 0 0
+cmd gamerule doWeatherCycle false
 cmd weather clear
 cmd skyabyss cinematic stop
 huddemo off
@@ -2046,6 +2124,7 @@ wait 30
 perspective back
 fov 48
 cmd tp @s 0.5 -60 0.5 0 0
+cmd gamerule doWeatherCycle false
 cmd weather clear
 cmd skyabyss cinematic stop
 huddemo off
@@ -2070,6 +2149,7 @@ wait 30
 perspective first
 fov 70
 cmd tp @s 0.5 -60 0.5 0 0
+cmd gamerule doWeatherCycle false
 cmd weather clear
 cmd skyabyss cinematic stop
 huddemo off
@@ -2095,6 +2175,7 @@ wait 30
 perspective back
 fov 48
 cmd tp @s 0.5 -60 0.5 0 0
+cmd gamerule doWeatherCycle false
 cmd weather clear
 cmd skyabyss cinematic stop
 huddemo off
@@ -2121,6 +2202,7 @@ wait 30
 perspective first
 fov 70
 cmd tp @s 0.5 -60 0.5 0 0
+cmd gamerule doWeatherCycle false
 cmd weather clear
 cmd skyabyss cinematic stop
 huddemo off
@@ -2144,6 +2226,7 @@ wait 30
 perspective back
 fov 48
 cmd tp @s 0.5 -60 0.5 0 0
+cmd gamerule doWeatherCycle false
 cmd weather clear
 cmd skyabyss cinematic stop
 huddemo off
@@ -2168,6 +2251,7 @@ wait 30
 perspective first
 fov 70
 cmd tp @s 0.5 -60 0.5 0 0
+cmd gamerule doWeatherCycle false
 cmd weather clear
 cmd skyabyss cinematic stop
 huddemo off
@@ -2191,6 +2275,7 @@ wait 30
 perspective back
 fov 48
 cmd tp @s 0.5 -60 0.5 0 0
+cmd gamerule doWeatherCycle false
 cmd weather clear
 cmd skyabyss cinematic stop
 huddemo off
@@ -2215,6 +2300,7 @@ wait 30
 perspective first
 fov 70
 cmd tp @s 0.5 -60 0.5 0 0
+cmd gamerule doWeatherCycle false
 cmd weather clear
 cmd skyabyss cinematic stop
 huddemo off
@@ -2238,6 +2324,7 @@ wait 30
 perspective back
 fov 48
 cmd tp @s 0.5 -60 0.5 0 0
+cmd gamerule doWeatherCycle false
 cmd weather clear
 cmd skyabyss cinematic stop
 huddemo off
@@ -2262,6 +2349,7 @@ wait 30
 perspective first
 fov 70
 cmd tp @s 0.5 -60 0.5 0 0
+cmd gamerule doWeatherCycle false
 cmd weather clear
 cmd skyabyss cinematic stop
 huddemo off
@@ -2285,6 +2373,7 @@ wait 30
 perspective back
 fov 48
 cmd tp @s 0.5 -60 0.5 0 0
+cmd gamerule doWeatherCycle false
 cmd weather clear
 cmd skyabyss cinematic stop
 huddemo off
@@ -2309,6 +2398,7 @@ wait 30
 perspective first
 fov 70
 cmd tp @s 0.5 -60 0.5 0 0
+cmd gamerule doWeatherCycle false
 cmd weather clear
 cmd skyabyss cinematic stop
 huddemo off
@@ -2332,6 +2422,7 @@ wait 30
 perspective back
 fov 48
 cmd tp @s 0.5 -60 0.5 0 0
+cmd gamerule doWeatherCycle false
 cmd weather clear
 cmd skyabyss cinematic stop
 huddemo off
@@ -2356,6 +2447,7 @@ wait 30
 perspective first
 fov 70
 cmd tp @s 0.5 -60 0.5 0 0
+cmd gamerule doWeatherCycle false
 cmd weather clear
 cmd skyabyss cinematic stop
 huddemo off
@@ -2379,6 +2471,7 @@ wait 30
 perspective back
 fov 48
 cmd tp @s 0.5 -60 0.5 0 0
+cmd gamerule doWeatherCycle false
 cmd weather clear
 cmd skyabyss cinematic stop
 huddemo off
@@ -2403,6 +2496,7 @@ wait 30
 perspective first
 fov 70
 cmd tp @s 0.5 -60 0.5 0 0
+cmd gamerule doWeatherCycle false
 cmd weather clear
 cmd skyabyss cinematic stop
 huddemo off
@@ -2426,6 +2520,7 @@ wait 30
 perspective back
 fov 48
 cmd tp @s 0.5 -60 0.5 0 0
+cmd gamerule doWeatherCycle false
 cmd weather clear
 cmd skyabyss cinematic stop
 huddemo off
@@ -2450,6 +2545,7 @@ wait 30
 perspective first
 fov 70
 cmd tp @s 0.5 -60 0.5 0 0
+cmd gamerule doWeatherCycle false
 cmd weather clear
 cmd skyabyss cinematic stop
 huddemo off
@@ -2473,6 +2569,7 @@ wait 30
 perspective back
 fov 48
 cmd tp @s 0.5 -60 0.5 0 0
+cmd gamerule doWeatherCycle false
 cmd weather clear
 cmd skyabyss cinematic stop
 huddemo off
@@ -2497,6 +2594,7 @@ wait 30
 perspective first
 fov 70
 cmd tp @s 0.5 -60 0.5 0 0
+cmd gamerule doWeatherCycle false
 cmd weather clear
 cmd skyabyss cinematic stop
 huddemo off
@@ -2520,6 +2618,7 @@ wait 30
 perspective back
 fov 48
 cmd tp @s 0.5 -60 0.5 0 0
+cmd gamerule doWeatherCycle false
 cmd weather clear
 cmd skyabyss cinematic stop
 huddemo off
@@ -2544,6 +2643,7 @@ wait 30
 perspective first
 fov 70
 cmd tp @s 0.5 -60 0.5 0 0
+cmd gamerule doWeatherCycle false
 cmd weather clear
 cmd skyabyss cinematic stop
 huddemo off
@@ -2567,6 +2667,7 @@ wait 30
 perspective back
 fov 48
 cmd tp @s 0.5 -60 0.5 0 0
+cmd gamerule doWeatherCycle false
 cmd weather clear
 cmd skyabyss cinematic stop
 huddemo off

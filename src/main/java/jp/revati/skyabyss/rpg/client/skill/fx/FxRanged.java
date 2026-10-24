@@ -70,7 +70,7 @@ public final class FxRanged {
             // 途中に空色の柱を三本 (視線の方向に伸びる筋は、後ろからでは点にしか見えないため)
             for (int k = 1; k <= 3; k++) {
                 Vec3 g = start.lerp(end, k / 4.0);
-                FxDraw.add(x, Prim.beam(g, 2.4).color(SKY_BLUE).width(1.0).life(SkillRules.PIERCE_LIFETIME).ease(Ease.OUT).glow(0.5).alpha(0.8f));
+                FxDraw.add(x, Prim.beam(g, 2.4).color(SKY_WHITE).width(1.3).life(SkillRules.PIERCE_LIFETIME).ease(Ease.OUT).glow(0.8).alpha(0.95f));
             }
             SkillFx.sound(x, SoundEvents.CROSSBOW_SHOOT, x.hand(), 0.45f, 1.7f);
         });

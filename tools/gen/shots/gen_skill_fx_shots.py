@@ -79,6 +79,7 @@ def block(skill: str, rel: int, imp: int, lin: int, bow: bool, view: str, phase:
     lines.append(f"cmd tp @s {CASTER_POS}")
     # 開幕の題字と HUD を消してから撮る (cinematic の停止と、部品の一括オフ)
     # 天候は毎技そろえる (前の技の雨が残らないように)。夜の撮影は time set midnight のまま
+    lines.append("cmd gamerule doWeatherCycle false")
     lines.append("cmd weather clear")
     lines.append("cmd skyabyss cinematic stop")
     lines.append("huddemo off")
@@ -121,6 +122,7 @@ def main() -> None:
     out.append("clouds off")
     out.append("guiscale 2")
     out.append("cmd time set noon")
+    out.append("cmd gamerule doWeatherCycle false")
     out.append("cmd weather clear")
     out.append("cmd gamemode survival")
     out.append("camera 0 -60 0 0 0")
