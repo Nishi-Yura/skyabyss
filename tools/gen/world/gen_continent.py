@@ -1,6 +1,6 @@
 # 大陸の地形の図を作る (docs/design/40 の 3 章「作る順」の 2)。
 #   python tools/gen/world/gen_continent.py
-#   -> src/main/resources/data/skyabyss/continent/height.bin (地面の高さ Y) と biome.bin (土地の番号)。どちらも gzip
+#   -> src/main/resources/data/skyabyss/continent/height.bin (地面の高さ Y)・biome.bin (生物群系の番号)・region.bin (土地の番号。敵の強さ)。どれも gzip
 #      layout.json (都・はじまり・町・跡地・道・渡し船・土地の名前の座標。world/continent/ContinentLayout が読む)
 #      assets/skyabyss/textures/gui/map/continent.png (旅の地図 (M) に敷く、描いた地図の絵。1024 x 1024 で 4000 x 4000)
 #      docs/review/continent_roughs/terrain_<案>.png (確かめ用の陰影図)
@@ -32,6 +32,9 @@ SEA_LEVEL = 63   # 水面は 62 まで
 BIOME_NAMES = ['deep_ocean', 'ocean', 'lukewarm_ocean', 'beach', 'plains', 'forest', 'meadow', 'windswept_hills', 'taiga',
                'savanna', 'windswept_gravelly_hills', 'stony_peaks', 'snowy_slopes', 'badlands', 'eroded_badlands']
 B = {n: i for i, n in enumerate(BIOME_NAMES)}
+
+# 土地 (見取り図の regions の種類) の番号。region.bin の値。world/continent/ContinentMap.region と同じ並び
+REGION_IDS = ['meadow', 'start', 'whale', 'tide', 'storm', 'ember']
 
 # 土地ごとの (なだらかな高さ, 起伏)。ブロック
 SHAPE = {
@@ -151,7 +154,11 @@ def build(key=CHOSEN, seed=7):
     biome[beach & ~keep] = B['beach']
     sea = ~land
     biome[sea] = np.where(inland[sea], B['lukewarm_ocean'], np.where(depth[sea] > 18, B['deep_ocean'], B['ocean']))
-    return lay, height, biome
+    # 土地の番号 (敵の強さ): REGION_IDS の並び。海も近い土地の番号
+    reg = np.zeros((SIZE, SIZE), dtype=np.uint8)
+    for i, k in enumerate(kinds):
+        reg[region == i] = REGION_IDS.index(k)
+    return lay, height, biome, reg
 
 
 def write_bin(path, arr):
@@ -298,9 +305,10 @@ def write_layout(lay):
 
 
 def main():
-    lay, height, biome = build()
+    lay, height, biome, reg = build()
     write_bin(os.path.join(OUT, 'height.bin'), height)
     write_bin(os.path.join(OUT, 'biome.bin'), biome)
+    write_bin(os.path.join(OUT, 'region.bin'), reg)
     preview(CHOSEN, height, biome)
     write_layout(lay)
     paint_map(lay, height, biome, os.path.join(ROOT, 'src', 'main', 'resources', 'assets', 'skyabyss', 'textures', 'gui', 'map', 'continent.png'))

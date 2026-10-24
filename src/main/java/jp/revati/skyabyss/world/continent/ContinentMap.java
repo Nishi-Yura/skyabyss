@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.zip.GZIPInputStream;
 
-// 大陸の地形の図 (docs/design/40 の 3 章)。tools/gen/world/gen_continent.py が書いた height.bin (地面の高さ Y) と biome.bin (土地の番号)。
+// 大陸の地形の図 (docs/design/40 の 3 章)。tools/gen/world/gen_continent.py が書いた height.bin (地面の高さ Y)・biome.bin (生物群系の番号)・region.bin (土地の番号)。
 // 1 升 = SCALE ブロック。升の間は高さをなめらかにつなぎ (双一次)、細かな揺らぎを足す。図の外は深い海。
 // 種に関係なく、どの世界でも同じ形
 public final class ContinentMap {
@@ -18,14 +18,24 @@ public final class ContinentMap {
     final int originZ;
     private final byte[] height;
     private final byte[] biome;
+    private final byte[] region;
 
-    private ContinentMap(int size, int scale, int originX, int originZ, byte[] height, byte[] biome) {
+    // 土地の番号 (region.bin。gen_continent.py の REGION_IDS の並び)
+    public static final int MEADOW = 0;
+    public static final int OUTSKIRTS = 1;
+    public static final int WHALE = 2;
+    public static final int TIDE = 3;
+    public static final int STORM = 4;
+    public static final int EMBER = 5;
+
+    private ContinentMap(int size, int scale, int originX, int originZ, byte[] height, byte[] biome, byte[] region) {
         this.size = size;
         this.scale = scale;
         this.originX = originX;
         this.originZ = originZ;
         this.height = height;
         this.biome = biome;
+        this.region = region;
     }
 
     public static synchronized ContinentMap get() {
@@ -33,7 +43,8 @@ public final class ContinentMap {
             int[] head = new int[4];
             byte[] h = read("height.bin", head);
             byte[] b = read("biome.bin", head);
-            instance = new ContinentMap(head[0], head[1], head[2], head[3], h, b);
+            byte[] r = read("region.bin", head);
+            instance = new ContinentMap(head[0], head[1], head[2], head[3], h, b, r);
         }
         return instance;
     }
@@ -110,6 +121,16 @@ public final class ContinentMap {
             return ContinentBiomes.DEEP_OCEAN;
         }
         return biome[j * size + i] & 0xFF;
+    }
+
+    // 土地の番号 (近い升)。図の外は都のまわり
+    public int region(int x, int z) {
+        int i = Math.floorDiv(x - originX + scale / 2, scale);
+        int j = Math.floorDiv(z - originZ + scale / 2, scale);
+        if (i < 0 || j < 0 || i >= size || j >= size) {
+            return MEADOW;
+        }
+        return region[j * size + i] & 0xFF;
     }
 
     public boolean inside(int x, int z) {

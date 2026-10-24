@@ -159,7 +159,34 @@ public final class RpgRules {
     static void onLogin(PlayerEvent.PlayerLoggedInEvent event) {
         if (event.getEntity() instanceof ServerPlayer player) {
             enforce(player);
+            starterKit(player);
         }
+    }
+
+    // ---------------------------------------------------------------- はじめの持ち物 (docs/design/40 の 4 章)
+    // 初めて入った人に一度だけ: 最初の武器 (石の剣)・軽い防具 (革の四つ。空いている所は身に着ける)・食べ物 10。
+    // 決まり (skyabyssAdventure) が切れている世界では渡さない
+    static final String KIT_TAG = "skyabyss_rpg_kit";
+
+    public static void starterKit(ServerPlayer player) {
+        if (player instanceof FakePlayer || !adventure(player.serverLevel()) || player.getPersistentData().getBoolean(KIT_TAG)) {
+            return;
+        }
+        player.getPersistentData().putBoolean(KIT_TAG, true);
+        jp.revati.skyabyss.quest.Quests.give(player, new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.STONE_SWORD));
+        net.minecraft.world.item.Item[] armor = {net.minecraft.world.item.Items.LEATHER_HELMET, net.minecraft.world.item.Items.LEATHER_CHESTPLATE,
+            net.minecraft.world.item.Items.LEATHER_LEGGINGS, net.minecraft.world.item.Items.LEATHER_BOOTS};
+        net.minecraft.world.entity.EquipmentSlot[] slots = {net.minecraft.world.entity.EquipmentSlot.HEAD, net.minecraft.world.entity.EquipmentSlot.CHEST,
+            net.minecraft.world.entity.EquipmentSlot.LEGS, net.minecraft.world.entity.EquipmentSlot.FEET};
+        for (int i = 0; i < armor.length; i++) {
+            net.minecraft.world.item.ItemStack stack = new net.minecraft.world.item.ItemStack(armor[i]);
+            if (player.getItemBySlot(slots[i]).isEmpty()) {
+                player.setItemSlot(slots[i], stack);
+            } else {
+                jp.revati.skyabyss.quest.Quests.give(player, stack);
+            }
+        }
+        jp.revati.skyabyss.quest.Quests.give(player, new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.BREAD, 10));
     }
 
     @SubscribeEvent

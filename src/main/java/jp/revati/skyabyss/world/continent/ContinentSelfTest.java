@@ -13,6 +13,7 @@ import net.minecraft.world.level.levelgen.Heightmap;
 
 // 天と淵の大陸の地形の自己テスト。段の名前は "continent"。
 //  - 図が読めて、都・内海・西の峰・外の海が思った高さと土地になっている (図だけで見る。どの世界でも)
+//  - 土地ごとの敵の強さ (都のまわりは弱く、灰の荒野は強い。二度かけない)
 //  - この世界が大陸の種類なら、本物のチャンクでも同じ: 都の地面は平らな草、外の海は水、峰は石、高さの問い合わせが地面と合う
 public final class ContinentSelfTest {
     private ContinentSelfTest() {
@@ -53,6 +54,19 @@ public final class ContinentSelfTest {
                 f.add("the western ridge peaks at only Y " + peak);
             }
             ServerLevel level = server.overworld();
+            // 土地ごとの敵の強さ: 都のまわりのゾンビは体力 11・攻撃 1.5、灰の荒野は 42・5.4。二度かけても変わらない
+            if (map.region(-450, 0) != ContinentMap.MEADOW || map.region(-760, 560) != ContinentMap.OUTSKIRTS) {
+                f.add("regions: capital " + map.region(-450, 0) + " start " + map.region(-760, 560));
+            }
+            for (int[] r : new int[][] {{ContinentMap.MEADOW, 11, 15}, {ContinentMap.EMBER, 42, 54}}) {
+                net.minecraft.world.entity.monster.Zombie z = new net.minecraft.world.entity.monster.Zombie(level);
+                ContinentDanger.apply(z, r[0]);
+                ContinentDanger.apply(z, r[0]);
+                double dmg = z.getAttributeValue(net.minecraft.world.entity.ai.attributes.Attributes.ATTACK_DAMAGE);
+                if (Math.abs(z.getMaxHealth() - r[1]) > 0.01 || Math.abs(dmg * 10 - r[2]) > 0.1) {
+                    f.add("danger in region " + r[0] + ": health " + z.getMaxHealth() + " damage " + dmg);
+                }
+            }
             if (level.getChunkSource().getGenerator() instanceof ContinentChunkGenerator gen) {
                 BlockPos cap = new BlockPos(-450, 0, 0);
                 int top = level.getHeight(Heightmap.Types.WORLD_SURFACE, cap.getX(), cap.getZ());
@@ -78,7 +92,7 @@ public final class ContinentSelfTest {
             f.add("crashed: " + e);
         }
         if (f.isEmpty()) {
-            SkyAbyss.LOGGER.info("SELFTEST continent PASSED (map loads; flat capital at Y 72, inland sea, outer deep sea, western peaks; real chunks match when the world is a continent)");
+            SkyAbyss.LOGGER.info("SELFTEST continent PASSED (map loads; flat capital at Y 72, inland sea, outer deep sea, western peaks; regional enemy strength; real chunks match when the world is a continent)");
         } else {
             for (String s : f) {
                 SkyAbyss.LOGGER.error("SELFTEST continent FAILED: {}", s);
