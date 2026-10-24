@@ -46,6 +46,8 @@ public class TrialBoardScreen extends Screen implements jp.revati.skyabyss.clien
 
     private static final int ABYSS_W = 118;
     private static final int CRAFT_W = 86;
+    // 頁の札の幅。二つの札・歌片を作る・深淵のつまみが一列に並んで重ならない幅 (360 - 余白 24 - 86 - 118 - 間 18 = 114 を二つに)
+    private static final int TAB_W = 57;
 
     private final jp.revati.skyabyss.client.ui.UiFit fit = new jp.revati.skyabyss.client.ui.UiFit();
     private TrialBoardNet.Open data;
@@ -101,8 +103,8 @@ public class TrialBoardScreen extends Screen implements jp.revati.skyabyss.clien
         int py = 0;
         if (button == 0 && my >= py + 34 && my < py + 50) {
             for (int t = 0; t < 2; t++) {
-                int tx = px + 12 + t * 110;
-                if (mx >= tx && mx < tx + 104) {
+                int tx = px + 12 + t * (TAB_W + 6);
+                if (mx >= tx && mx < tx + TAB_W) {
                     tab = t;
                     return true;
                 }
@@ -208,11 +210,11 @@ public class TrialBoardScreen extends Screen implements jp.revati.skyabyss.clien
         // 頁
         String[] tabs = {"gui.skyabyss.trial.tab.now", "gui.skyabyss.trial.tab.codex"};
         for (int t = 0; t < 2; t++) {
-            int tx = px + 12 + t * 110;
+            int tx = px + 12 + t * (TAB_W + 6);
             boolean on = tab == t;
-            frame(g, tx, py + 34, 104, 16, on ? GOLD : 0x2C3846, on ? 0x2A2618 : CARD);
+            frame(g, tx, py + 34, TAB_W, 16, on ? GOLD : 0x2C3846, on ? 0x2A2618 : CARD);
             Component label = Component.translatable(tabs[t]);
-            g.drawString(font, label, tx + 52 - font.width(label) / 2, py + 38, argb(1f, on ? GOLD : DIM), false);
+            g.drawString(font, label, tx + TAB_W / 2 - font.width(label) / 2, py + 38, argb(1f, on ? GOLD : DIM), false);
         }
         renderAbyssToggle(g, font, px + W - 12 - ABYSS_W, py + 34, mouseX, mouseY);
         renderCraft(g, font, px + W - 12 - ABYSS_W - 6 - CRAFT_W, py + 34, mouseX, mouseY);
