@@ -151,8 +151,11 @@ public final class FxFrontline {
         c.at(0, x -> {
             // 速い筋 (太い白、若葉の縁)。その後ろに残像の影 (半透明の柱) を三つ、跳んだ道に置く
             FxDraw.add(x, Prim.line(from, to).color(WHITE).width(2.4).life(10).ease(Ease.OUT).glow(0.9).trail(0.5));
-            // 足もとの白い帯 (地面に寝た筋。真後ろからでも道筋が見える)
-            FxDraw.add(x, Prim.line(c.feet().add(c.fwd.scale(0.5)).add(0, 0.05, 0), c.feet().add(c.fwd.scale(LUNGE_RANGE - 1.0)).add(0, 0.05, 0)).color(WHITE).width(1.6).life(12).ease(Ease.OUT).glow(0.6).alpha(0.8f));
+            // 足もとに白い円盤を道へ並べる (視線と同じ向きの線は後ろから潰れて見えないため、円盤で道筋を置く)
+            for (int k = 1; k <= 4; k++) {
+                Vec3 g = c.feet().add(c.fwd.scale(LUNGE_RANGE * k / 4.0)).add(0, 0.05, 0);
+                FxDraw.add(x, Prim.disc(g, 0.2, 1.1).color(WHITE).life(12).alpha(0.8f));
+            }
             FxDraw.add(x, Prim.line(from.add(side), to.add(side)).color(GREEN).width(0.14).life(10).ease(Ease.OUT).alpha(0.9f).trail(0.4));
             for (int k = 1; k <= 3; k++) {
                 Vec3 g = from.lerp(to, k / 4.0);

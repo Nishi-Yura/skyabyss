@@ -78,6 +78,8 @@ def block(skill: str, rel: int, imp: int, lin: int, bow: bool, view: str, phase:
     # 毎技、体を同じ場所・同じ向きへ戻す (絶対座標)。前の技の移動 (突進・跳び退き・砂の突進) は先の撮影が終わってから
     lines.append(f"cmd tp @s {CASTER_POS}")
     # 開幕の題字と HUD を消してから撮る (cinematic の停止と、部品の一括オフ)
+    # 天候は毎技そろえる (前の技の雨が残らないように)。夜の撮影は time set midnight のまま
+    lines.append("cmd weather clear")
     lines.append("cmd skyabyss cinematic stop")
     lines.append("huddemo off")
     lines.append("hud off")
