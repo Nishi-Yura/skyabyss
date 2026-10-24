@@ -366,6 +366,8 @@ public final class SelfTestRunner {
         steps.addAll(jp.revati.skyabyss.trial.raid.RaidLightSelfTest.steps());
         // 二人の試遊 (2026-10-22): 敵の無敵の間・背の耐久。SKYABYSS_SELFTEST_ONLY="combat rules"
         steps.addAll(jp.revati.skyabyss.combat.CombatRulesSelfTest.steps());
+        // 完全な RPG の決まり (採集・水汲み・倒れたときの既定)。docs/design/40。SKYABYSS_SELFTEST_ONLY="rpg rules"
+        steps.addAll(jp.revati.skyabyss.rpg.rules.RpgRulesSelfTest.steps());
         // 順路の部屋が分かれている (封じを壁として歩く)。SKYABYSS_SELFTEST_ONLY="route rooms"
         steps.addAll(jp.revati.skyabyss.trial.RouteRoomsSelfTest.steps());
         steps.addAll(jp.revati.skyabyss.trial.RoutePartySelfTest.steps());

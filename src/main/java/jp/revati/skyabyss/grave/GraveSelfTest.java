@@ -308,7 +308,7 @@ public final class GraveSelfTest {
                 && DeathRules.expireMinutes(server) == 0 && DeathRules.rescuePercent(server) == 50 && DeathRules.durabilityPercent(server) == 10,
                 "game rule readers do not match the settings");
         rule(server, DeathRules.MODE, 9);
-        check(f, DeathRules.mode(server) == DeathRules.Mode.GRAVE, "an out-of-range mode should fall back to grave");
+        check(f, DeathRules.mode(server) == DeathRules.Mode.KEEP, "an out-of-range mode should fall back to keep");
         rule(server, DeathRules.MODE, 0);
 
         // ---------------------------------------------------------------- grave (既定): 墓の中身がちょうど、残る物が残る

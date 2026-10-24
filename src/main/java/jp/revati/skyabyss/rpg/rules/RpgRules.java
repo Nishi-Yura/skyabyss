@@ -18,7 +18,8 @@ import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 //   skyabyssAdventure  (既定 true) サバイバルの人はアドベンチャーで遊ぶ (壊さない・置かない)。入る・生き返る・世界を移る時と、2 秒ごとに見る。
 //                      クリエイティブ・観戦者はそのまま
 //   skyabyssNoWear     (既定 true) 人の持つ武器・防具・道具の耐久は減らない (mixin/ItemStackDurabilityMixin)
-// 倒れても落とさない決まりは grave/DeathRules (既定の型 keep・耐久の減り 0)
+// 倒れても落とさない決まりは grave/DeathRules (既定の型 keep・耐久の減り 0)。
+// 前から遊んでいた世界は、初めてこの版で開いたときに一度だけ、倒れたときの型を keep・耐久の減りを 0 にする (Migrated)
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class RpgRules {
     public static GameRules.Key<GameRules.BooleanValue> ADVENTURE;
@@ -94,6 +95,48 @@ public final class RpgRules {
         LAST_CLICK.put(player.getUUID(), now);
         net.neoforged.neoforge.common.NeoForge.EVENT_BUS.post(new net.neoforged.neoforge.event.entity.player.PlayerInteractEvent.LeftClickBlock(player, click.pos(),
                 click.face(), net.neoforged.neoforge.event.entity.player.PlayerInteractEvent.LeftClickBlock.Action.START));
+    }
+
+    // ---------------------------------------------------------------- 前の世界の決まりを一度だけ移す
+    static final class Migrated extends net.minecraft.world.level.saveddata.SavedData {
+        static final String NAME = "skyabyss_rpg_rules";
+        static final int VERSION = 1;
+        private static final Factory<Migrated> FACTORY = new Factory<>(Migrated::new, Migrated::load);
+        int version;
+
+        static Migrated get(net.minecraft.server.MinecraftServer server) {
+            return server.overworld().getDataStorage().computeIfAbsent(FACTORY, NAME);
+        }
+
+        static Migrated load(net.minecraft.nbt.CompoundTag tag, net.minecraft.core.HolderLookup.Provider registries) {
+            Migrated m = new Migrated();
+            m.version = tag.getInt("version");
+            return m;
+        }
+
+        @Override
+        public net.minecraft.nbt.CompoundTag save(net.minecraft.nbt.CompoundTag tag, net.minecraft.core.HolderLookup.Provider registries) {
+            tag.putInt("version", version);
+            return tag;
+        }
+    }
+
+    @SubscribeEvent
+    static void onStarted(net.neoforged.neoforge.event.server.ServerStartedEvent event) {
+        migrate(event.getServer());
+    }
+
+    public static void migrate(net.minecraft.server.MinecraftServer server) {
+        Migrated m = Migrated.get(server);
+        if (m.version >= Migrated.VERSION || jp.revati.skyabyss.grave.DeathRules.MODE == null) {
+            return;
+        }
+        GameRules rules = server.getGameRules();
+        rules.getRule(jp.revati.skyabyss.grave.DeathRules.MODE).set(jp.revati.skyabyss.grave.DeathRules.Mode.KEEP.ordinal(), server);
+        rules.getRule(jp.revati.skyabyss.grave.DeathRules.DURABILITY).set(jp.revati.skyabyss.grave.DeathRules.DEFAULT_DURABILITY, server);
+        m.version = Migrated.VERSION;
+        m.setDirty();
+        SkyAbyss.LOGGER.info("RPG rules: this world now keeps items on death and has no wear (one-time switch)");
     }
 
     @SubscribeEvent
