@@ -85,7 +85,7 @@ public final class FxSupport {
             SkillFx.flash(x, pull.add(0, 0.5, 0));
             FxDraw.add(x, Prim.ring(f, EBB_RANGE, 1.5).color(FOAM).width(0.35).life(8).ease(Ease.IN2).glow(0.3));
             FxDraw.add(x, Prim.disc(pull, 0.5, 2.0).color(SEA).life(14).alpha(0.6f));
-            SkillFx.burst(x, SkillFx.rune(), pull, 3, 0.4, 0.08);
+            SkillFx.hitSpark(x, pull, SEA);
             SkillFx.sound(x, SoundEvents.PLAYER_SPLASH, pull, 0.6f, 1.2f);
         });
         c.lasts(20);
@@ -186,7 +186,7 @@ public final class FxSupport {
         });
         c.at(6, x -> {
             FxDraw.add(x, Prim.disc(f, 0.5, STEAM_RADIUS).color(STEAM).life(30).alpha(0.35f));
-            SkillFx.burst(x, SkillFx.rune(), f.add(0, 1.2, 0), 5, 1.2, 0.05);
+            SkillFx.hitSpark(x, f.add(0, 1.2, 0), STEAM);
             SkillFx.sound(x, SoundEvents.BELL_RESONATE, f, 0.4f, 1.0f);
         });
         c.lasts(34);

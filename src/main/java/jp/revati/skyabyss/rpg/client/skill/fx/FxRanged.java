@@ -67,8 +67,8 @@ public final class FxRanged {
         c.at(0, x -> SkillFx.burst(x, SkillFx.rune(), x.hand(), 2, 0.2, 0.02));
         c.at(1, x -> {
             // 放つ: 弓のまわりに雲の輪 (視線に向く縦の輪が二重。後ろから丸く見える)
-            FxDraw.add(x, Prim.arc(start, right, up, 1.6, 0, Math.PI * 2).color(SKY_WHITE).width(0.7).life(12).ease(Ease.OUT).glow(0.5));
-            FxDraw.add(x, Prim.arc(start, right, up, 2.8, 0, Math.PI * 2).color(SKY_BLUE).width(0.35).life(14).ease(Ease.OUT).alpha(0.7f));
+            FxDraw.add(x, Prim.arc(start, right, up, 0.9, 0, Math.PI * 2).color(SKY_WHITE).width(0.4).life(12).ease(Ease.OUT).glow(0.5));
+            FxDraw.add(x, Prim.arc(start, right, up, 1.7, 0, Math.PI * 2).color(SKY_BLUE).width(0.22).life(14).ease(Ease.OUT).alpha(0.7f));
             FxDraw.add(x, Prim.line(start, end).color(SKY_WHITE).width(0.6).life(SkillRules.PIERCE_LIFETIME).ease(Ease.LINEAR).glow(0.9).trail(0.3));
             // 途中に白い柱を三本 (視線の方向に伸びる筋は、後ろからでは点にしか見えないため)
             for (int k = 1; k <= 3; k++) {
@@ -88,7 +88,7 @@ public final class FxRanged {
             SkillFx.flash(x, end);
             FxDraw.add(x, Prim.ring(end, 0.2, 2.6).color(WHITE).width(0.35).life(12).glow(0.6));
             FxDraw.add(x, Prim.beam(end, 12.0).color(SKY_WHITE).width(2.6).life(20).ease(Ease.OUT3).glow(1.0).alpha(1.0f));
-            FxDraw.add(x, Prim.arc(end, right, up, 2.2, 0, Math.PI * 2).color(WHITE).width(0.5).life(14).ease(Ease.OUT).glow(0.5));
+            FxDraw.add(x, Prim.arc(end, right, up, 1.4, 0, Math.PI * 2).color(WHITE).width(0.35).life(14).ease(Ease.OUT).glow(0.5));
             FxDraw.add(x, Prim.shell(end, 0.3, 1.8, 1.8).color(SKY_BLUE).life(10).width(0.25));
             SkillFx.sound(x, SoundEvents.ARROW_SHOOT, end, 0.5f, 1.4f);
         });
@@ -115,7 +115,7 @@ public final class FxRanged {
             SkillFx.flash(x, base.add(0, 0.4, 0));
             FxDraw.add(x, Prim.disc(base, 0.3, 2.0).color(TEAL).life(10).alpha(0.7f));
             FxDraw.add(x, Prim.shell(base.add(0, 0.5, 0), 0.5, 2.0, 1.0).color(BONE).life(8).width(0.25));
-            SkillFx.burst(x, SkillFx.rune(), base.add(0, 0.5, 0), 4, 0.6, 0.12);
+            SkillFx.hitSpark(x, base.add(0, 0.5, 0), BONE);
             SkillFx.sound(x, SoundEvents.CHAIN_PLACE, base, 0.8f, 0.7f);
         });
         c.at(20, x -> FxDraw.add(x, Prim.ring(base, 2.0, 2.0).color(TEAL).width(0.14).life(24).alpha(0.3f)));
@@ -170,7 +170,7 @@ public final class FxRanged {
             FxDraw.add(x, Prim.disc(point, 0.3, 1.6).color(DEEP_CORE).life(10).alpha(0.9f));
             FxDraw.add(x, Prim.shell(point.add(0, 0.8, 0), 0.5, 3.0, 1.6).color(DEEP_BLACK).life(10).width(0.5));
             FxDraw.add(x, Prim.ring(point, 1.5, 2.8).color(VIOLET).width(0.3).life(26).alpha(0.4f));
-            SkillFx.burst(x, SkillFx.rune(), point, 3, 0.5, 0.06);
+            SkillFx.hitSpark(x, point, VIOLET);
             SkillFx.sound(x, SoundEvents.CHORUS_FRUIT_TELEPORT, point, 0.6f, 0.6f);
         });
         c.lasts(26);

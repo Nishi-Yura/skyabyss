@@ -56,7 +56,9 @@ TARGET_POS = "-1.0 -60 3.5"
 # 砂の突進は的を進む先 (6.5 ブロック) の右側へ置く (突進の終点で隣に並ぶ)
 TARGET_BY_SKILL = {"dust_charge": "-0.7 -60 7.0"}
 def husk_for(skill: str) -> str:
-    return f"summon minecraft:husk {TARGET_BY_SKILL.get(skill, TARGET_POS)} {{NoAI:1b,Silent:1b}}"
+    # 体力を 500 にして、当たりで倒れない (倒れると死の煙が出て、白い粒と見分けがつかなくなる)
+    return (f"summon minecraft:husk {TARGET_BY_SKILL.get(skill, TARGET_POS)} "
+            "{NoAI:1b,Silent:1b,Health:500f,attributes:[{id:\"minecraft:max_health\",base:500.0d}]}")
 # 三人称は視野を狭めて、体と的を大きく撮る (カメラの距離は既定の 4 ブロックのまま。FOV だけ変える)
 FOV_BACK = 48
 FOV_NORMAL = 70

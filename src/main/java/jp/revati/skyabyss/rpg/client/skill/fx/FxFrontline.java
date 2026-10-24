@@ -106,7 +106,7 @@ public final class FxFrontline {
             SkillFx.flash(x, base.add(0, 0.5, 0));
             // 地面の輪 4 → 6 ブロック (幅 0.6、芯は濃く)。大きな面は張らない
             FxDraw.add(x, Prim.ring(base, 3.5, 6.0).color(STONE).width(0.6).life(9).ease(Ease.OUT).glow(0.3));
-            SkillFx.burst(x, SkillFx.rune(), base.add(0, 0.6, 0), 3, 0.7, 0.1);
+            SkillFx.hitSpark(x, base.add(0, 0.6, 0), TEAL);
             SkillFx.kick(x, 0.9f);
             SkillFx.sound(x, SoundEvents.ANVIL_LAND, base, 0.5f, 0.5f);
         });
@@ -135,7 +135,7 @@ public final class FxFrontline {
             FxDraw.add(x, Prim.shell(f.add(0, 0.4, 0), 0.5, SWEEP_RADIUS, 1.3).color(SEA).life(10).ease(Ease.OUT).width(0.4));
             FxDraw.add(x, Prim.ring(f, SWEEP_RADIUS - 0.1, SWEEP_RADIUS + 0.2).color(FOAM).width(0.4).life(10));
             FxDraw.add(x, Prim.disc(f, 0.5, SWEEP_RADIUS).color(SEA).life(22).alpha(0.3f));
-            SkillFx.burst(x, SkillFx.rune(), f.add(0, 1.0, 0), 4, 0.8, 0.05);
+            SkillFx.hitSpark(x, f.add(0, 1.0, 0), SEA);
             SkillFx.kick(x, 0.8f);
             SkillFx.sound(x, SoundEvents.PLAYER_SPLASH_HIGH_SPEED, f, 0.4f, 0.8f);
         });
@@ -269,7 +269,7 @@ public final class FxFrontline {
             FxDraw.add(x, Prim.ring(center, 0.6, 1.5).color(ASH).width(0.35).life(10));
             FxDraw.add(x, Prim.ring(center, 1.6, HAMMER_RADIUS).color(CINDER).width(0.2).life(12).alpha(0.8f));
             FxDraw.add(x, Prim.shell(center.add(0, 0.8, 0), 0.3, 1.5, 1.6).color(ASH).life(10).width(0.2));
-            SkillFx.burst(x, SkillFx.rune(), center.add(0, 0.5, 0), 4, 0.6, 0.12);
+            SkillFx.hitSpark(x, center.add(0, 0.5, 0), EMBER);
             SkillFx.kick(x, 1.0f);
             SkillFx.sound(x, SoundEvents.ANVIL_LAND, center, 0.5f, 0.7f);
             SkillFx.sound(x, SoundEvents.FIRECHARGE_USE, center, 0.4f, 0.7f);
@@ -290,7 +290,7 @@ public final class FxFrontline {
             FxDraw.add(x, Prim.ring(base, 0.5, ASH_RADIUS).color(ASH).width(0.4).life(14).ease(Ease.OUT).glow(0.4));
             FxDraw.add(x, Prim.ring(base, 0.5, 3.5).color(CINDER).width(0.22).life(12));
             FxDraw.add(x, Prim.disc(base, 0.3, ASH_RADIUS).color(ASH).life(30).alpha(0.4f));
-            SkillFx.burst(x, SkillFx.rune(), base.add(0, 2.5, 0), 4, 2.0, 0.02);
+            SkillFx.hitSpark(x, base.add(0, 2.5, 0), ASH);
             SkillFx.kick(x, 0.7f);
             SkillFx.sound(x, SoundEvents.FIRE_EXTINGUISH, base, 0.5f, 0.6f);
             SkillFx.sound(x, SoundEvents.ENDER_DRAGON_FLAP, base, 0.35f, 0.6f);
