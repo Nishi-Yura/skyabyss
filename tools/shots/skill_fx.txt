@@ -953,7 +953,7 @@ cmd skyabyss skill learn @s dust_charge 3
 cmd skyabyss skill slot @s 1 dust_charge
 cmd skyabyss skill cooldowns @s
 cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
-cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b}
+cmd summon minecraft:husk -0.7 -60 7.0 {NoAI:1b,Silent:1b}
 wait 10
 cmd skyabyss skill mana @s full
 cmd skyabyss skill cast @s 1
@@ -981,7 +981,7 @@ cmd skyabyss skill learn @s dust_charge 3
 cmd skyabyss skill slot @s 1 dust_charge
 cmd skyabyss skill cooldowns @s
 cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
-cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b}
+cmd summon minecraft:husk -0.7 -60 7.0 {NoAI:1b,Silent:1b}
 wait 10
 cmd skyabyss skill mana @s full
 cmd skyabyss skill cast @s 1
@@ -2261,7 +2261,7 @@ cmd skyabyss skill learn @s dust_charge 3
 cmd skyabyss skill slot @s 1 dust_charge
 cmd skyabyss skill cooldowns @s
 cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
-cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b}
+cmd summon minecraft:husk -0.7 -60 7.0 {NoAI:1b,Silent:1b}
 wait 10
 cmd skyabyss skill mana @s full
 cmd skyabyss skill cast @s 1
@@ -2285,7 +2285,7 @@ cmd skyabyss skill learn @s dust_charge 3
 cmd skyabyss skill slot @s 1 dust_charge
 cmd skyabyss skill cooldowns @s
 cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
-cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b}
+cmd summon minecraft:husk -0.7 -60 7.0 {NoAI:1b,Silent:1b}
 wait 10
 cmd skyabyss skill mana @s full
 cmd skyabyss skill cast @s 1

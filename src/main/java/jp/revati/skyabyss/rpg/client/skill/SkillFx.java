@@ -181,6 +181,12 @@ public final class SkillFx {
         if (CASTS.size() >= MAX_CASTS) {
             CASTS.remove(0);
         }
+        // 溜め (tick 0) の段取りは、発動の瞬間に一度だけ走らせる (毎 tick の確かめは age を先に進めてから見るので、0 には届かない)
+        for (Step s : c.steps) {
+            if (s.at == 0) {
+                s.cue.run(c);
+            }
+        }
         CASTS.add(c);
     }
 
@@ -261,6 +267,20 @@ public final class SkillFx {
     public static void flash(Cast c, Vec3 at) {
         FxDraw.add(c, FxDraw.Prim.beam(at.add(0, -0.75, 0), 1.5).color(0xFFFFFF).width(1.5).alpha(0.8f).life(6)
                 .ease(FxDraw.Ease.FULL));
+    }
+
+    // 技の当たりの火花 (技ごとの色): 小さな白い閃光と、色のついた柔らかい粒 6 つ (カメラに向く板)。
+    // 白い十字の粒 (バニラの火花・碑文の粒) は当たりに使わない。形と同じ板で描くので、技の見た目がそろう
+    public static void hitSpark(Cast c, Vec3 at, int rgb) {
+        FxDraw.add(c, FxDraw.Prim.beam(at.add(0, -0.3, 0), 0.6).color(0xFFFFFF).width(0.9).alpha(0.8f).life(4)
+                .ease(FxDraw.Ease.FULL));
+        RandomSource r = c.level.random;
+        for (int i = 0; i < 6; i++) {
+            double a = r.nextDouble() * Math.PI * 2;
+            double d = 0.25 + r.nextDouble() * 0.25;
+            Vec3 p = at.add(Math.cos(a) * d, r.nextDouble() * 0.5, Math.sin(a) * d);
+            FxDraw.add(c, FxDraw.Prim.beam(p, 0.22).color(rgb).width(0.16).alpha(0.9f).life(8).ease(FxDraw.Ease.OUT).glow(0.5));
+        }
     }
 
     // 段取りの音を一つ重ねる (音程は少しずらす)。サーバーの音 (技ごとの効果音) とは別の層として鳴る

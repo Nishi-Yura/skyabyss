@@ -77,7 +77,7 @@ public final class FxFrontline {
             SkillFx.flash(x, hit);
             FxDraw.add(x, Prim.ring(f, 1.6, 2.6).color(BONE).width(0.35).life(8).glow(0.3));
             FxDraw.add(x, Prim.disc(hit, 0.2, 0.9).color(WHITE).life(4).alpha(0.8f));
-            SkillFx.burst(x, SkillFx.rune(), hit, 5, 0.25, 0.12);
+            SkillFx.hitSpark(x, hit, BONE);
             SkillFx.kick(x, 1.0f);
             SkillFx.sound(x, SoundEvents.ANVIL_LAND, f, 0.45f, 0.55f);
         });
@@ -148,27 +148,32 @@ public final class FxFrontline {
         Vec3 from = c.waist().add(c.fwd.scale(0.3));
         Vec3 to = c.waist().add(c.fwd.scale(LUNGE_RANGE - 1.0));
         Vec3 side = c.right.scale(0.55).add(0, -0.25, 0);
+        double dir = Math.atan2(c.fwd.z, c.fwd.x);
         c.at(0, x -> {
-            // 速い筋 (太い白、若葉の縁)。その後ろに残像の影 (半透明の柱) を三つ、跳んだ道に置く
+            // 速い筋 (太い白、若葉の縁)。視線と同じ向きの線は後ろから潰れるので、主役は地面の帯と残像の板
             FxDraw.add(x, Prim.line(from, to).color(WHITE).width(2.4).life(10).ease(Ease.OUT).glow(0.9).trail(0.5));
-            // 足もとに白い円盤を道へ並べる (視線と同じ向きの線は後ろから潰れて見えないため、円盤で道筋を置く)
-            for (int k = 1; k <= 4; k++) {
-                Vec3 g = c.feet().add(c.fwd.scale(LUNGE_RANGE * k / 4.0)).add(0, 0.05, 0);
-                FxDraw.add(x, Prim.disc(g, 0.2, 1.1).color(WHITE).life(12).alpha(0.8f));
+            // 地面の帯: 足もとから道の先へ、幅を増やす白い円盤を五つ (真上と斜めから見て道になる)
+            for (int k = 1; k <= 5; k++) {
+                double t = k / 5.0;
+                Vec3 g = c.feet().add(c.fwd.scale(LUNGE_RANGE * t)).add(0, 0.05, 0);
+                FxDraw.add(x, Prim.disc(g, 0.15, 0.35 + 0.6 * t).color(WHITE).life(12).alpha(0.6f));
             }
             FxDraw.add(x, Prim.line(from.add(side), to.add(side)).color(GREEN).width(0.14).life(10).ease(Ease.OUT).alpha(0.9f).trail(0.4));
+            // 残像: 三つの縦の板 (カメラに向く)。道の手前ほど濃く、幅を太くして後ろからも読む
             for (int k = 1; k <= 3; k++) {
                 Vec3 g = from.lerp(to, k / 4.0);
-                FxDraw.add(x, Prim.beam(g.subtract(0, 1.0, 0), 3.2).color(GREEN).width(2.2).life(10).ease(Ease.OUT).glow(0.6).alpha(0.85f));
+                FxDraw.add(x, Prim.beam(g.subtract(0, 1.0, 0), 3.2).color(k == 1 ? WHITE : GREEN).width(1.8 + 0.4 * (3 - k)).life(10).ease(Ease.OUT).glow(0.6).alpha(0.8f - 0.15f * k));
             }
             SkillFx.sound(x, SoundEvents.ENDER_DRAGON_FLAP, from, 0.35f, 1.7f);
         });
         c.at(6, x -> {
             Vec3 f = x.feet();
+            Vec3 arrive = f.add(x.fwd.scale(LUNGE_RANGE - 1.0));
             SkillFx.flash(x, to.add(0, 0.2, 0));
-            FxDraw.add(x, Prim.disc(f.add(x.fwd.scale(LUNGE_RANGE - 1.0)), 0.2, 1.8).color(WHITE).life(8).alpha(0.8f));
-            FxDraw.add(x, Prim.ring(f.add(x.fwd.scale(LUNGE_RANGE - 1.0)), 0.5, 2.5).color(GREEN).width(0.2).life(10));
-            SkillFx.burst(x, SkillFx.rune(), to, 4, 0.5, 0.12);
+            // 前への衝撃の扇 (地面、進んだ向き)
+            FxDraw.add(x, Prim.fan(arrive, dir, 0.9, 0.5, 3.2).color(WHITE).alpha(0.6f).life(10).ease(Ease.OUT));
+            FxDraw.add(x, Prim.ring(arrive, 0.5, 2.5).color(GREEN).width(0.2).life(10));
+            SkillFx.hitSpark(x, to, WHITE);
             SkillFx.sound(x, SoundEvents.PLAYER_ATTACK_STRONG, to, 0.5f, 1.3f);
         });
         c.lasts(14);

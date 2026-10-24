@@ -52,7 +52,11 @@ SKILLS = [
 CASTER_POS = "0.5 -60 0.5 0 0"
 # 的: 体の前 3 ブロック・右へ 1.5 (約 27 度)、絶対座標で置く (毎技 殺して置き直す)
 TARGET_POS = "-1.0 -60 3.5"
-HUSK = f"summon minecraft:husk {TARGET_POS} {{NoAI:1b,Silent:1b}}"
+# 突進する技は、的を通り抜けると的が体の後ろ・カメラの真横に来て、黒い箱のように映る。
+# 砂の突進は的を進む先 (6.5 ブロック) の右側へ置く (突進の終点で隣に並ぶ)
+TARGET_BY_SKILL = {"dust_charge": "-0.7 -60 7.0"}
+def husk_for(skill: str) -> str:
+    return f"summon minecraft:husk {TARGET_BY_SKILL.get(skill, TARGET_POS)} {{NoAI:1b,Silent:1b}}"
 # 三人称は視野を狭めて、体と的を大きく撮る (カメラの距離は既定の 4 ブロックのまま。FOV だけ変える)
 FOV_BACK = 48
 FOV_NORMAL = 70
@@ -92,7 +96,7 @@ def block(skill: str, rel: int, imp: int, lin: int, bow: bool, view: str, phase:
     lines.append(f"cmd skyabyss skill slot @s 1 {skill}")
     lines.append("cmd skyabyss skill cooldowns @s")
     lines.append("cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]")
-    lines.append(f"cmd {HUSK}")
+    lines.append(f"cmd {husk_for(skill)}")
     lines.append("wait 10")
     lines.append("cmd skyabyss skill mana @s full")
     lines.append("cmd skyabyss skill cast @s 1")

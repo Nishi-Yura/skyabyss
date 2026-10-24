@@ -305,7 +305,7 @@ public final class SkillActions {
             }
             if (hit(player, e, amount, Skill.TITAN_CLEAVE)) {
                 // 当たった印 (大きな相手には多め)
-                particle(level, Skills.RUNE_SPARK.get(), e.position().add(0, e.getBbHeight() * 0.6, 0), large ? 3 : 1, large ? 0.4 : 0.25, 0.06);
+                // (当たりの火花はクライアントの FX (SkillFx.hitSpark) が描く。サーバーの碑文の粒は出さない)
                 bigHit |= large;
             }
         }
@@ -349,8 +349,7 @@ public final class SkillActions {
                 }
                 float amount = base * (float) jp.revati.skyabyss.abyss.Abyss.ECHO_SCALE * (isLarge(e) ? (float) SkillRules.CLEAVE_LARGE_BONUS : 1f);
                 if (hit(player, e, amount, Skill.TITAN_CLEAVE)) {
-                    particle(level, jp.revati.skyabyss.abyss.AbyssFx.DUST, e.position().add(0, e.getBbHeight() * 0.6, 0), 10, 0.3, 0.02);
-                    particle(level, ParticleTypes.REVERSE_PORTAL, e.position().add(0, e.getBbHeight() * 0.6, 0), 8, 0.3, 0.1);
+                    // 当たりの火花はクライアントの FX が描く (サーバーの紫の粒は出さない)
                 }
             }
             // 裂け目の筋 (扇の中心線)
@@ -1098,7 +1097,6 @@ public final class SkillActions {
             SkillEffects.bind(victim, SkillRules.trapBindTicks(rank));
         }
         hit(owner, victim, amount, Skill.BONE_TRAP);
-        particle(level, Skills.RUNE_SPARK.get(), at.add(0, 0.5, 0), 3, 0.3, 0.05);
         level.playSound(null, at.x, at.y, at.z, Skills.SOUND_MARK.get(), SoundSource.PLAYERS, 0.8f, 0.6f);
     }
 

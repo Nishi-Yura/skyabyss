@@ -43,6 +43,7 @@ public final class FxRanged {
     private static final int DEEP_CORE = 0xC88CFF;
     private static final int GOLD = 0xFFC94D;
     private static final int PALE_GOLD = 0xFFE39A;
+    private static final int SHADOW = 0x2C3B4E;
 
     public static void register(Map<Skill, Consumer<SkillFx.Cast>> plans) {
         plans.put(Skill.CLOUD_PIERCE, FxRanged::cloudPierce);
@@ -65,19 +66,29 @@ public final class FxRanged {
         Vec3 up = new Vec3(0, 1, 0);
         c.at(0, x -> SkillFx.burst(x, SkillFx.rune(), x.hand(), 2, 0.2, 0.02));
         c.at(1, x -> {
-            FxDraw.add(x, Prim.arc(start, right, up, 1.0, 0, Math.PI * 2).color(SKY_BLUE).width(0.22).life(10).ease(Ease.OUT).alpha(0.85f).trail(0.4));
+            // 放つ: 弓のまわりに雲の輪 (視線に向く縦の輪が二重。後ろから丸く見える)
+            FxDraw.add(x, Prim.arc(start, right, up, 1.6, 0, Math.PI * 2).color(SKY_WHITE).width(0.7).life(12).ease(Ease.OUT).glow(0.5));
+            FxDraw.add(x, Prim.arc(start, right, up, 2.8, 0, Math.PI * 2).color(SKY_BLUE).width(0.35).life(14).ease(Ease.OUT).alpha(0.7f));
             FxDraw.add(x, Prim.line(start, end).color(SKY_WHITE).width(0.6).life(SkillRules.PIERCE_LIFETIME).ease(Ease.LINEAR).glow(0.9).trail(0.3));
-            // 途中に空色の柱を三本 (視線の方向に伸びる筋は、後ろからでは点にしか見えないため)
+            // 途中に白い柱を三本 (視線の方向に伸びる筋は、後ろからでは点にしか見えないため)
             for (int k = 1; k <= 3; k++) {
                 Vec3 g = start.lerp(end, k / 4.0);
-                FxDraw.add(x, Prim.beam(g, 2.4).color(SKY_WHITE).width(1.3).life(SkillRules.PIERCE_LIFETIME).ease(Ease.OUT).glow(0.8).alpha(0.95f));
+                FxDraw.add(x, Prim.beam(g, 2.4).color(SKY_WHITE).width(1.6).life(SkillRules.PIERCE_LIFETIME).ease(Ease.OUT).glow(0.8).alpha(0.95f));
+            }
+            // 矢の道の影: 地面に、道と同じ長さで六つの暗い円盤 (青灰。背景の空と緑の上で、道の先まで読める)
+            Vec3 foot = c.feet();
+            for (int k = 1; k <= 6; k++) {
+                Vec3 g = foot.add(c.fwd.scale(PIERCE_RANGE * k / 7.0)).add(0, 0.05, 0);
+                FxDraw.add(x, Prim.disc(g, 0.4, 1.1).color(SHADOW).life(34).alpha(0.4f));
             }
             SkillFx.sound(x, SoundEvents.CROSSBOW_SHOOT, x.hand(), 0.45f, 1.7f);
         });
         c.at(SkillRules.PIERCE_LIFETIME, x -> {
+            // 当たり: 高く明るい柱 (高さ 12) と、柱のまわりの輪 (後ろからも見える縦の輪)
             SkillFx.flash(x, end);
             FxDraw.add(x, Prim.ring(end, 0.2, 2.6).color(WHITE).width(0.35).life(12).glow(0.6));
-            FxDraw.add(x, Prim.beam(end, 6.0).color(SKY_WHITE).width(1.4).life(20).ease(Ease.OUT3).glow(0.6));
+            FxDraw.add(x, Prim.beam(end, 12.0).color(SKY_WHITE).width(2.6).life(20).ease(Ease.OUT3).glow(1.0).alpha(1.0f));
+            FxDraw.add(x, Prim.arc(end, right, up, 2.2, 0, Math.PI * 2).color(WHITE).width(0.5).life(14).ease(Ease.OUT).glow(0.5));
             FxDraw.add(x, Prim.shell(end, 0.3, 1.8, 1.8).color(SKY_BLUE).life(10).width(0.25));
             SkillFx.sound(x, SoundEvents.ARROW_SHOOT, end, 0.5f, 1.4f);
         });
@@ -118,6 +129,8 @@ public final class FxRanged {
         Vec3 cloud = center.add(0, 9, 0);
         c.at(0, x -> {
             SkillFx.sound(x, SoundEvents.ARROW_SHOOT, x.hand(), 0.6f, 1.4f);
+            // 見える天井: 上空の雲の円盤 (淡く光る) と、その縁の輪。下から見上げて雲の面が読める
+            FxDraw.add(x, Prim.disc(cloud, 0.5, RAIN_RADIUS + 2.0).color(SKY_WHITE).life(96).alpha(0.5f));
             FxDraw.add(x, Prim.ring(center, RAIN_RADIUS, RAIN_RADIUS).color(SKY_BLUE).width(0.25).life(96).alpha(0.4f));
             FxDraw.add(x, Prim.ring(cloud, RAIN_RADIUS, RAIN_RADIUS + 1.0).color(SKY_WHITE).width(0.8).life(96).alpha(0.6f));
         });
@@ -127,11 +140,13 @@ public final class FxRanged {
             Vec3 spot = center.add(Math.cos(a) * r, 0, Math.sin(a) * r);
             int at = 4 + i * 11;
             c.at(at, x -> {
-                FxDraw.add(x, Prim.line(spot.add(0, 9, 0), spot).color(SKY_WHITE).width(0.42).life(6).ease(Ease.IN2).glow(0.9).trail(0.6));
+                // 太い光の筋 (落ちる。後ろから見て細くならないよう幅を 0.9)
+                FxDraw.add(x, Prim.line(spot.add(0, 9, 0), spot).color(SKY_WHITE).width(0.9).life(6).ease(Ease.IN2).glow(1.2).trail(0.6));
                 SkillFx.sound(x, SoundEvents.ARROW_SHOOT, spot, 0.2f, 1.8f);
             });
             c.at(at + 5, x -> {
-                FxDraw.add(x, Prim.disc(spot, 0.2, 1.3).color(SKY_WHITE).life(8).alpha(0.7f));
+                // 着地の輪 (地面に広がる)。明るい芯は輪の縁に集まる
+                FxDraw.add(x, Prim.ring(spot, 0.3, 1.6).color(SKY_WHITE).width(0.35).life(8).ease(Ease.OUT).glow(0.4));
                 SkillFx.burst(x, SkillFx.rune(), spot.add(0, 0.3, 0), 2, 0.3, 0.05);
             });
         }
