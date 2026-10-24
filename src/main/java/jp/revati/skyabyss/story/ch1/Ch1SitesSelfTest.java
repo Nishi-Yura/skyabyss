@@ -328,6 +328,7 @@ public final class Ch1SitesSelfTest {
             check(placed, "a cave enemy is not standing at a room's spawn pad");
 
             // 鳴り石: 誤り → 戻る、1 → 2 → 3 で格子が開く。進みはグループごと
+            CleftCave.resetForTest(level, cave);
             check(!CleftCave.gateOpen(level, cave), "the gate should start closed");
             var r = CleftCave.tap(a, level, cave, 2);
             check(r.result() == SongStones.Result.WRONG && CleftCave.progress(ga, cave) == 0, "tapping plate 2 first should fail");

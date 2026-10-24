@@ -228,6 +228,17 @@ public final class CleftCave {
         return step;
     }
 
+    // 自己テスト用: 格子を閉じ直し、鳴り石の進みを消す (前の回で開けた格子が世界に残っていても、閉じたところから確かめる)
+    static void resetForTest(ServerLevel level, SiteData.Entry cave) {
+        for (int k = 0; k < GATE_CELLS; k++) {
+            BlockPos at = cave.extra("gate" + k);
+            if (at != null && level.hasChunkAt(at) && level.getBlockState(at).isAir()) {
+                level.setBlock(at, Blocks.IRON_BARS.defaultBlockState(), 3);
+            }
+        }
+        PROGRESS.keySet().removeIf(k -> k.endsWith("@" + cave.pos.asLong()));
+    }
+
     // 回廊の鉄格子を開ける (世界に一つ)
     public static void openGate(ServerLevel level, SiteData.Entry cave) {
         BlockPos centre = cave.extra("gate4");
