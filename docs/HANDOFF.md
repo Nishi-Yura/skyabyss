@@ -1,6 +1,6 @@
 # 引き継ぎ
 
-「天と淵のあいだ」(NeoForge 1.21.1)。今の仕様は `docs/design/README.md` の索引から読む（コードが正）。未決は `docs/design/00_decisions_needed.md` にだけある。リポジトリは github.com/Nishi-Yura/skyabyss、作業の幹は `m1-sky-pass`、途中の枝は `wip/*`。版は `gradle.properties` の `mod_version`（今 0.5.3）。
+「天と淵のあいだ」(NeoForge 1.21.1)。今の仕様は `docs/design/README.md` の索引から読む（コードが正）。未決は `docs/design/00_decisions_needed.md` にだけある。リポジトリは github.com/Nishi-Yura/skyabyss、作業の幹は `m1-sky-pass`、途中の枝は `wip/*`。版は `gradle.properties` の `mod_version`（今 0.5.4）。
 
 ## 1. 各システムの状態
 
@@ -44,18 +44,20 @@
 ## 4. 見る場所・選ぶ場所
 
 - 選定ページは `docs/review/<題>/index.html`。ラフの比較は artifact `https://claude.ai/artifact/EqFcC7E183D8uyyAo8yKMM`（`tools/rough/build_gallery.py <manifest.json>`）。選びは db の collection `choices`（`ArtifactData` で読む）。選び終えたラフは消す（入力と選ばれなかった案は `tools/sources/` と `docs/review/*_roughs/`）。
-- 今の状態のまとめ: `docs/review/status_2026-10-24.md`、クエストの流れ `quest_flow_2026-10-23.md`、設計の見直し `fun_review_2026-10-23.md`、試遊の確かめ順 `playtest_0.5.3.md`。
+- 今の状態のまとめ: `docs/review/status_2026-10-24.md`、クエストの流れ `quest_flow_2026-10-23.md`、設計の見直し `fun_review_2026-10-23.md`、試遊の確かめ順 `playtest_0.5.4.md`、夜の作業のまとめ `overnight_2026-10-24.md`。
 - 試遊の声と判断の経緯はメモリ（`MEMORY.md` の索引）。設計書には経緯を書かない。
 
-## 5. 残っている課題
+## 5. 残っている課題（2026-10-24 昼、PC の再起動の前に書いた）
 
-- **0.5.3**: 版は上げてある。jar を作り、`docs/review/playtest_0.5.3.md` の順で試遊してもらう。声を受けて直す。
-- **答え待ち**（10-23 に挙げたもののうち、答えを確かめていないもの）: レイドの部屋の 12 問（各ふたつ）、町の施設を見つけやすくする 3 案。
-- **作り込み**: レイドの部屋の明るさ（全体に暗め）、文の総点検（10-23 以降に足した碑・心の声・生き残り・手引き）。
-- **部屋の報い**: 部屋を越えると経験値・紋・碑文。素材・共鳴の欠片・称号（29 の旧い報い）は出ない。足すかは判断待ち。
-- **揺れる自己テスト**: 10-24 の全体の一回では落ちたものはない（前に揺れた `camp blocks`・`affix`・`tide_heart`・`storm_heart light`・`raiju`・`ember chapter`・`ember heart`・`ember skeleton` も通った）。雛形のワールドで単独に流すと揺れることがある。
-- **実機で確かめていないもの**: 深淵の心臓・専用伝説 4 点の見た目と効き、紋の盤・変異の画面、転生の台座から転生まで（本番の jar）、順位の石・飾り板の複数人での表示。
-- **軽くする候補**: 低ポリへ移したモブ・巨神の元のキューブの geo（約 24 MB。主に `LowPoly.enabled = false`（撮影の `lowpoly off`）の戻し用）と元のテクスチャ。ほかの使い道がないかを確かめてから、消すかを決める。
+- **0.5.4**: jar を作って渡した（`build/libs/skyabyss-0.5.4.jar`、41.7 MB）。`docs/review/playtest_0.5.4.md` の順で試遊してもらう。声を受けて直す。
+- **途中の枝（再起動で止めた。続きから）**:
+  - `wip/skill-fx3`: 技の見た目の三周目。光の面で形を描く道具 `client/skill/fx/FxDraw`（弧・線・輪・円盤・扇・柱・稲妻・殻）と 25 技の段取り、撮影の台本 `tools/gen/shots/gen_skill_fx_shots.py` → `tools/shots/skill_fx.txt`、台紙 `tools/sheets/skill_fx_sheet.py` → `docs/review/previews/skill_fx_sheet.png`。直す所: 輪が点線・柱が横縞のはしごに見える（貼り方か区切りの隙間）、的のまわりの白い四角い粒（バニラの当たりの粒か）、砂の突進の画面の端の四角、雲穿ち・合図の標・天の驟雨・火の矢の三人称が弱い。全 25 技が一コマで読めるまで直してから本線へ。
+  - `wip/raid-rewards`: レイドの部屋の報いに素材・共鳴の欠片・称号を足す（ユーザーが決めた）。数は `trial/raid/RaidRewards`（歩・智 素材 1 欠片 1、闘 素材 2 欠片 1、中ボス 素材 2 欠片 2 結晶 1、崩れなしの順路 欠片 +2。周回は半分、その日 6 部屋を超えたら 4 分の 1。渡し方は経験値と同じ）。称号は巨神ごとに 3 つ（順路・六部屋・崩れなし。`TrialCodex`、試練の板の「称号」の行）。docs/design/32 の 9.4。コンパイルは通る。残り: `RaidRewardsSelfTest` を新しい世界で通す（直したあとの再実行がまだ）→ 全体の自己テスト → 報いの札と称号の一覧を撮る → `docs/review/raid_rewards_2026-10-24.md` → 本線へ。
+- **決まったこと（10-24）**: 字は DotGothic16（英数も）と Zen Antique、斜体は C（mod の字のとき斜体をやめ、場所の副題に暗い帯）、技の画面の枠の組は「近接」/「弓」、二〜四章の道しるべの石標はやめた、届かない雷翼の試練の階の文は消した。
+- **実機で確かめていないもの**: 心臓の戦いに勝つまで、台座で転生を実行するまで、順位の石・飾り板の複数人での表示（自己テストは通る。`docs/review/verify_ch5_2026-10-24.md`）。
+- **測っていないもの**: 成体の巨神の休む場所の探しの最悪の場合、`TitanEnd.landing` の潮殻の分岐の同期の区画生成（`docs/review/call_perf_2026-10-24.md`）。
+- **潜水服の鎧**: 腕を真上に上げると兜に当たる（兜が頭より大きいので鎧では直せない。受け入れた）。
+- **古い四角い模型**: `tools/sources/geo_cube/` へ移した（jar に入れない）。撮影で比べるときは `python tools/dev/cube_geo.py back`、終わったら `out`。生成スクリプトの多くは今も `src/main/resources` へ書き戻すので、流したあとは `out` を忘れない。
 
 ## 6. 作業の決まり（短く）
 

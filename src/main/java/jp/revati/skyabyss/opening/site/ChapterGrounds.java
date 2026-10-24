@@ -124,32 +124,11 @@ public final class ChapterGrounds {
         return null;
     }
 
-    // ---------------------------------------------------------------- 道しるべの石標 (章ごとの道の残りの点。鯨道の石標と同じ部品)
-    public static final String ROAD_PREFIX = "w2_road_";
+    // ---------------------------------------------------------------- 道の部品
+    // 道しるべの石標は 2026-10-24 にやめた (都から跡地への道には、番号つきの目印と跡地だけ)。部品の絵は SiteJob の試験が使う
     public static final String ROAD_BLUEPRINT = "ch1_road_cairn";
     // 跡地を「見た」とみなす距離 (地図の印)
     public static final int SEEN_NEAR = 96;
-    private static boolean roadsRegistered;
-
-    public static String roadId(Chapters chapter) {
-        return ROAD_PREFIX + chapter.id();
-    }
-
-    // 道しるべの石標を章ごとに登録する (一度だけ。サーバーが始まるときに SiteBuilds が呼ぶ)
-    public static synchronized void registerRoads() {
-        if (roadsRegistered) {
-            return;
-        }
-        roadsRegistered = true;
-        for (Spec s : SPECS) {
-            if (s.chapter() == Chapters.WHALE) {
-                continue; // 一章の道には道しるべの石を並べない (道の終わりの祠だけ。story/ch1/Sites)
-            }
-            ChapterSites.element(roadId(s.chapter()), s.chapter(), ROAD_BLUEPRINT).fillRoad().arriveRadius(6).onArrive((p, site) -> {
-                // 着いた記録だけ (地図の道しるべの点)
-            }).register();
-        }
-    }
 
     // 人が跡地の近くにいれば「見た」に (ChapterSites の見張りから 1 秒おき)
     static void markSeen(SiteData data, java.util.UUID player, BlockPos pos) {
