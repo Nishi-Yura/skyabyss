@@ -203,6 +203,12 @@ public final class ChapterGrounds {
     }
 
     static Found find(Ground g, BlockPos capital, Spec s, List<Obstacle> obs) {
+        // 天と淵の大陸では、跡地は図に描いた場所 (docs/design/40 の 3 章)。そのまわり 160 の中で合う地形を探し、なければその場所に形を作る
+        BlockPos fixed = g instanceof SiteFinder.Probe probe && probe.continent()
+                ? jp.revati.skyabyss.world.continent.ContinentLayout.get().site(s.chapter().id()) : null;
+        if (fixed != null) {
+            return finish(g, capital, findNear(g, capital, s, fixed));
+        }
         for (int d = s.min(); d <= s.max(); d += DIST_STEP) {
             for (int off : offsets()) {
                 double a = s.angle() + Math.toRadians(off);
@@ -218,6 +224,31 @@ public final class ChapterGrounds {
             }
         }
         return finish(g, capital, shapeAt(g, capital, s, obs));
+    }
+
+    static Found findNear(Ground g, BlockPos capital, Spec s, BlockPos site) {
+        int d = (int) Math.round(Math.hypot(site.getX() - capital.getX(), site.getZ() - capital.getZ()));
+        for (int r = 0; r <= 160; r += 32) {
+            int n = r == 0 ? 1 : 12;
+            for (int i = 0; i < n; i++) {
+                double a = Math.PI * 2 * i / n;
+                int x = site.getX() + (int) Math.round(Math.cos(a) * r);
+                int z = site.getZ() + (int) Math.round(Math.sin(a) * r);
+                Found f = fit(g, capital, s, x, z, d, 0);
+                if (f != null) {
+                    return f;
+                }
+            }
+        }
+        int half = s.side() / 2;
+        List<Integer> hs = new ArrayList<>();
+        for (int i = -2; i <= 2; i++) {
+            for (int j = -2; j <= 2; j++) {
+                hs.add(g.topCoarse(site.getX() + i * half / 2, site.getZ() + j * half / 2));
+            }
+        }
+        hs.sort(Integer::compare);
+        return shaped(g, capital, s, site.getX(), site.getZ(), Math.max(g.sea(), hs.get(hs.size() / 2)), d, 0);
     }
 
     // 0, +5, -5, +10, -10, ... ±25
@@ -401,6 +432,11 @@ public final class ChapterGrounds {
             bz = capital.getZ() + s.dirZ() * mid;
             bBase = Math.max(g.sea(), g.topCoarse(bx, bz));
         }
+        return shaped(g, capital, s, bx, bz, bBase, bd, boff);
+    }
+
+    // (bx, bz) に、その章の形 (丘・峰・盆地・入り江) を作る跡地
+    static Found shaped(Ground g, BlockPos capital, Spec s, int bx, int bz, int bBase, int bd, int boff) {
         BlockPos sc = new BlockPos(bx, bBase, bz);
         return switch (s.shape()) {
             case HILL -> new Found(s.chapter(), new BlockPos(bx, bBase + HILL_RISE + 1, bz), Shape.HILL, sc, bBase, null, 0, false, null, List.of(), bd, boff);

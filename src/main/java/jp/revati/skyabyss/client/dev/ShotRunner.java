@@ -252,6 +252,11 @@ public final class ShotRunner {
         String type = script.worldType;
         mc.createWorldOpenFlows().createFreshLevel(name, settings, options, registries -> switch (type) {
             case "normal" -> WorldPresets.createNormalWorldDimensions(registries);
+            // 天と淵の大陸 (docs/design/40 の 3 章)
+            case "continent" -> registries.registryOrThrow(Registries.WORLD_PRESET)
+                    .getHolderOrThrow(net.minecraft.resources.ResourceKey.create(Registries.WORLD_PRESET,
+                            net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(jp.revati.skyabyss.SkyAbyss.MODID, "continent")))
+                    .value().createWorldDimensions();
             default -> registries.registryOrThrow(Registries.WORLD_PRESET)
                     .getHolderOrThrow(WorldPresets.FLAT)
                     .value().createWorldDimensions();
@@ -1062,6 +1067,7 @@ public final class ShotRunner {
         Supplier<Screen> s = switch (name.toLowerCase(Locale.ROOT)) {
             case "inventory" -> () -> new InventoryScreen(mc.player);
             case "travel_map_demo" -> () -> jp.revati.skyabyss.client.map.TravelMapScreen.demo(false);
+            case "travel_map" -> () -> { jp.revati.skyabyss.client.map.MapClient.open(); return mc.screen; };
             case "travel_map_voyage_demo" -> () -> jp.revati.skyabyss.client.map.TravelMapScreen.demo(true);
             case "lore", "lorebook" -> jp.revati.skyabyss.lore.client.LoreBookScreen::new;
             case "quests", "questlog" -> jp.revati.skyabyss.client.quest.QuestLogScreen::new;

@@ -378,6 +378,7 @@ public class TravelMapScreen extends Screen {
         animateZoom();
         Palette p = palette();
         drawSheet(g, p);
+        drawContinent(g);
         drawRings(g, p);
         drawTown(g, p);
         List<Hit> hits = new ArrayList<>();
@@ -438,6 +439,58 @@ public class TravelMapScreen extends Screen {
                     g.fill(listX - 4, fy + 14, listX - 4 + LIST_W, fy + fh - 14, 0x90080B10);
                     g.fill(listX - 5, fy + 14, listX - 4, fy + fh - 14, 0x804A9AA0);
                 }
+            }
+        }
+    }
+
+    // ---------------------------------------------------------------- 天と淵の大陸 (docs/design/40 の 3 章)
+    // 大陸の世界では、丸い盤の中に描いた大陸の絵 (continent.png。tools/gen/world/gen_continent.py) を敷き、引いたときは土地の名前と目安のレベルを書く
+    static final ResourceLocation CONTINENT = ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "textures/gui/map/continent.png");
+    static final int CONTINENT_HALF = 2000;
+    // 土地の名前を出す縮尺 (この間。引きすぎると重なる)
+    static final double NAMES_FROM = 700;
+    static final double NAMES_TO = 3200;
+
+    private void drawContinent(GuiGraphics g) {
+        if (!jp.revati.skyabyss.world.continent.ContinentInfo.clientContinent || radius <= 0) {
+            return;
+        }
+        double k = radius / view;
+        int x0 = cx + (int) Math.round((-CONTINENT_HALF - centerX()) * k);
+        int y0 = cy + (int) Math.round((-CONTINENT_HALF - centerZ()) * k);
+        int size = (int) Math.round(CONTINENT_HALF * 2 * k);
+        // 丸い盤の形に切る (一行ずつ切って、絵全体を置く)。外の海は透けて盤の地になじむ
+        com.mojang.blaze3d.systems.RenderSystem.enableBlend();
+        for (int y = cy - radius; y < cy + radius; y++) {
+            double dy = y + 0.5 - cy;
+            int w = (int) Math.floor(Math.sqrt(Math.max(0, (double) radius * radius - dy * dy)));
+            if (w <= 0) {
+                continue;
+            }
+            g.enableScissor(cx - w, y, cx + w, y + 1);
+            g.blit(CONTINENT, x0, y0, size, size, 0, 0, 1024, 1024, 1024, 1024);
+            g.disableScissor();
+        }
+        com.mojang.blaze3d.systems.RenderSystem.disableBlend();
+        if (view < NAMES_FROM || view > NAMES_TO) {
+            return;
+        }
+        jp.revati.skyabyss.world.continent.ContinentLayout lay = jp.revati.skyabyss.world.continent.ContinentLayout.get();
+        for (var e : lay.names().entrySet()) {
+            int[] at = project(e.getValue().getX(), e.getValue().getZ());
+            if (at[2] == 0) {
+                Component name = Component.translatable("map.skyabyss.continent." + e.getKey());
+                g.drawCenteredString(font, name, at[0], at[1] - 4, 0xFF4A3A2A);
+            }
+        }
+        for (var e : lay.levels().entrySet()) {
+            int[] at = project(e.getValue().pos().getX(), e.getValue().pos().getZ());
+            if (at[2] == 0) {
+                String s = "Lv " + e.getValue().text();
+                int w = font.width(s);
+                g.fill(at[0] - w / 2 - 3, at[1] - 6, at[0] + w / 2 + 3, at[1] + 6, 0xE0F4EAD2);
+                outlineRect(g, at[0] - w / 2 - 3, at[1] - 6, w + 6, 12, 0xFF7A5A3A);
+                g.drawString(font, s, at[0] - w / 2, at[1] - 4, 0xFF7A3C1E, false);
             }
         }
     }

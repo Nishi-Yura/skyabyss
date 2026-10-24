@@ -78,6 +78,11 @@ public final class SiteFinder {
             tops.defaultReturnValue(Integer.MIN_VALUE);
         }
 
+        // 天と淵の大陸 (場所は図に描いたとおり。docs/design/40 の 3 章)
+        public boolean continent() {
+            return gen instanceof jp.revati.skyabyss.world.continent.ContinentChunkGenerator;
+        }
+
         // 地面の一番上のブロックの高さ (海底を含む。木は数えない)
         @Override
         public int top(int x, int z) {
@@ -367,6 +372,10 @@ public final class SiteFinder {
     // ---------------------------------------------------------------- 野営地: スポーン地点。だめなら近い陸 (半径 160 まで)
     @Nullable
     static BlockPos findCamp(Probe p, BlockPos spawn) {
+        if (p.continent()) {
+            // 天と淵の大陸: 外れの谷の、図に描いたはじまりの場所のそば
+            spawn = jp.revati.skyabyss.world.continent.ContinentLayout.get().start();
+        }
         for (int range : new int[] {3, 6, 12}) {
             for (int r = 0; r <= 160; r += (r == 0 ? 6 : 6)) {
                 int n = r == 0 ? 1 : Math.max(8, (int) (Math.PI * 2 * r / 7));
@@ -406,6 +415,10 @@ public final class SiteFinder {
     static final int CAPITAL_STRUCTURE_GAP = 176;
 
     static Spot findShelter(Probe p, BlockPos camp) {
+        if (p.continent()) {
+            BlockPos c = jp.revati.skyabyss.world.continent.ContinentLayout.get().capital();
+            return new Spot(new BlockPos(c.getX(), p.top(c.getX(), c.getZ()) + 1, c.getZ()), rotToward(camp.getX() - c.getX(), camp.getZ() - c.getZ(), true), false);
+        }
         // 都 (docs/design/33 の 2): 一辺 200 の範囲。野営地から 260〜340 (壁の縁が野営地から 150 以上)。段差は整地で吸収するので広めに許す
         int[][] passes = {{260, 340, 20}, {260, 340, 32}, {240, 420, 48}, {240, 480, 80}};
         for (int[] pass : passes) {

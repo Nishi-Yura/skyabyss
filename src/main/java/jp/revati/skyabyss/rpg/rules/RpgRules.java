@@ -124,6 +124,22 @@ public final class RpgRules {
     @SubscribeEvent
     static void onStarted(net.neoforged.neoforge.event.server.ServerStartedEvent event) {
         migrate(event.getServer());
+        continentBorder(event.getServer());
+    }
+
+    // 天と淵の大陸: 世界の縁は大陸の図の外の海の中 (一辺 4,400)。広いまま (既定) のときだけ狭める。人が変えた縁はそのまま
+    static final double CONTINENT_BORDER = 4400;
+
+    static void continentBorder(net.minecraft.server.MinecraftServer server) {
+        net.minecraft.server.level.ServerLevel level = server.overworld();
+        if (!(level.getChunkSource().getGenerator() instanceof jp.revati.skyabyss.world.continent.ContinentChunkGenerator)) {
+            return;
+        }
+        net.minecraft.world.level.border.WorldBorder border = level.getWorldBorder();
+        if (border.getSize() > 1.0e6) {
+            border.setCenter(0, 0);
+            border.setSize(CONTINENT_BORDER);
+        }
     }
 
     public static void migrate(net.minecraft.server.MinecraftServer server) {

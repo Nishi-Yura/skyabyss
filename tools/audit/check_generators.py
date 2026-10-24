@@ -19,6 +19,7 @@ ROOT = Path(__file__).resolve().parents[2]
 
 # 出力が src/main/resources のデータ・lang に及ぶ生成スクリプト (ROOT からの相対パス)。
 GENERATORS = """
+tools/gen/world/gen_continent.py
 tools/gen/story/gen_story_quests.py
 tools/gen/story/gen_free_quests.py
 tools/gen/story/gen_town_quests.py

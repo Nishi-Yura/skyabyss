@@ -1,4 +1,11 @@
 {
+  "map.skyabyss.continent.whale": "Stone Whale Hills",
+  "map.skyabyss.continent.tide": "Tide Shore",
+  "map.skyabyss.continent.storm": "Storm Highlands",
+  "map.skyabyss.continent.ember": "Ash Wastes",
+  "map.skyabyss.continent.outskirts": "Outskirts Vale",
+  "map.skyabyss.continent.inland_sea": "Inland Sea",
+  "generator.skyabyss.continent": "Continent Between Sky and Abyss",
   "message.skyabyss.goal_not_yet": "You cannot reach the glowing mark yet. The guards are awake",
   "message.skyabyss.goal_name": "Trial goal",
   "skyabyss.configuration.title": "Between Sky and Abyss Configs",

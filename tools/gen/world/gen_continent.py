@@ -1,0 +1,312 @@
+# 大陸の地形の図を作る (docs/design/40 の 3 章「作る順」の 2)。
+#   python tools/gen/world/gen_continent.py
+#   -> src/main/resources/data/skyabyss/continent/height.bin (地面の高さ Y) と biome.bin (土地の番号)。どちらも gzip
+#      layout.json (都・はじまり・町・跡地・道・渡し船・土地の名前の座標。world/continent/ContinentLayout が読む)
+#      assets/skyabyss/textures/gui/map/continent.png (旅の地図 (M) に敷く、描いた地図の絵。1024 x 1024 で 4000 x 4000)
+#      docs/review/continent_roughs/terrain_<案>.png (確かめ用の陰影図)
+# 見取り図の値は tools/lib/continent_layout.py (CHOSEN の案)。1 升 = 4 ブロック、4000 x 4000 を 1000 x 1000 升で。
+# ゲーム側は world/continent/ContinentChunkGenerator が読み、升の間をなめらかにつなぎ、細かな揺らぎを足す。
+# 土地の番号は ContinentBiomeSource の biomes の並び (data/skyabyss/worldgen/world_preset/continent.json) と同じ
+import gzip
+import json
+import os
+import struct
+import sys
+
+import numpy as np
+from PIL import Image
+from scipy import ndimage
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+ROOT = os.path.dirname(os.path.dirname(os.path.dirname(HERE)))
+sys.path.insert(0, os.path.join(ROOT, 'tools', 'lib'))
+from continent_layout import CHOSEN, HALF, LAYOUTS, fbm, terrain  # noqa: E402
+
+OUT = os.path.join(ROOT, 'src', 'main', 'resources', 'data', 'skyabyss', 'continent')
+REVIEW = os.path.join(ROOT, 'docs', 'review', 'continent_roughs')
+SIZE = 1000
+SCALE = 4
+SEA_LEVEL = 63   # 水面は 62 まで
+
+# 土地の番号 (ContinentBiomeSource の並び)
+BIOME_NAMES = ['deep_ocean', 'ocean', 'lukewarm_ocean', 'beach', 'plains', 'forest', 'meadow', 'windswept_hills', 'taiga',
+               'savanna', 'windswept_gravelly_hills', 'stony_peaks', 'snowy_slopes', 'badlands', 'eroded_badlands']
+B = {n: i for i, n in enumerate(BIOME_NAMES)}
+
+# 土地ごとの (なだらかな高さ, 起伏)。ブロック
+SHAPE = {
+    'meadow': (8, 7),
+    'start': (10, 9),
+    'whale': (26, 26),
+    'tide': (4, 5),
+    'storm': (55, 45),
+    'ember': (18, 16),
+}
+# 平らにする所: (半径, なじませる外の半径, 高さ)。都は町を建てるので広く
+FLAT_CAPITAL = (130, 230, 72)
+FLAT_TOWN = (48, 110, None)
+FLAT_START = (30, 80, None)
+FLAT_SITE = (40, 90, None)
+
+# 確かめ用の色
+PREVIEW = {
+    'deep_ocean': (40, 70, 110), 'ocean': (60, 100, 140), 'lukewarm_ocean': (60, 130, 150), 'beach': (220, 210, 160),
+    'plains': (130, 170, 90), 'forest': (80, 130, 70), 'meadow': (150, 190, 110), 'windswept_hills': (130, 140, 120),
+    'taiga': (90, 120, 90), 'savanna': (180, 175, 100), 'windswept_gravelly_hills': (140, 140, 140), 'stony_peaks': (170, 170, 170),
+    'snowy_slopes': (240, 240, 245), 'badlands': (190, 110, 70), 'eroded_badlands': (90, 60, 60),
+}
+
+
+def flatten(y, X, Z, center, spec, land):
+    r0, r1, target = spec
+    cx, cz = center
+    d = np.hypot(X - cx, Z - cz)
+    if target is None:
+        target = float(np.median(y[(d < r0) & land])) if np.any((d < r0) & land) else 70.0
+        target = max(target, 66.0)
+    t = np.clip((d - r0) / (r1 - r0), 0, 1)
+    t = t * t * (3 - 2 * t)
+    return np.where(land | (d < r0), y * t + target * (1 - t), y)
+
+
+def build(key=CHOSEN, seed=7):
+    lay = LAYOUTS[key]
+    ex = {}
+    land, _, region = terrain(lay, seed, n=SIZE, out=ex)
+    X, Z, field, ridge, dists = ex['X'], ex['Z'], ex['field'], ex['ridge'], ex['dists']
+    kinds = [k for k, _ in lay['regions']]
+    # 土地どうしをなじませる重み
+    dmin = np.minimum.reduce(dists)
+    weights = [np.exp(-(d - dmin) / 120.0) for d in dists]
+    wsum = sum(weights)
+    base = sum(w * SHAPE[k][0] for w, k in zip(weights, kinds)) / wsum
+    rough = sum(w * SHAPE[k][1] for w, k in zip(weights, kinds)) / wsum
+    c = np.clip((field - 0.18) / 0.3, 0, 1)
+    hills = fbm(seed + 11, octaves=6, base=12, n=SIZE) + 0.5
+    fine = fbm(seed + 12, octaves=4, base=40, n=SIZE)
+    mid = fbm(seed + 13, octaves=3, base=48, n=SIZE)
+    # 尾根の線が立つ揺らぎ (峰と丘陵)。1 - |n| を二乗すると、細い尾根と谷が交互に並ぶ
+    ridged = (1 - np.abs(fbm(seed + 14, octaves=5, base=18, n=SIZE) * 2.2)) ** 2
+    wk = {k: sum(w for w, kk in zip(weights, kinds) if kk == k) / wsum for k in set(kinds)}
+    mountain = wk.get('storm', 0) * 1.0 + wk.get('whale', 0) * 0.35
+    y = (65 + c ** 0.6 * base + hills * rough * c ** 0.5 + ridge * 95 + fine * 3 * c
+         + mid * rough * 0.6 * c + ridged * mountain * 38 * c + ridge * ridged * 30)
+    # 灰の荒野: 段の付いた台地 (メサ)。ところどころに高い台
+    ember = wk.get('ember', 0)
+    mesa = np.clip(fbm(seed + 15, octaves=4, base=22, n=SIZE) * 3 - 0.2, 0, 1) * 26
+    ye = y + mesa * ember * c
+    step = 7.0
+    k = (ye - 65) / step
+    frac = k - np.floor(k)
+    terr = 65 + (np.floor(k) + np.clip((frac - 0.72) / 0.28, 0, 1) ** 2) * step
+    y = np.where(ember > 0.5, ye * (1 - ember) + terr * ember, ye)
+    # 火山の火口 (灰の荒野のいちばん高い所のくぼみ)
+    em = np.array([kk == 'ember' for kk in kinds])[region] & land
+    if em.any():
+        yy = np.where(em, y, -1)
+        pi, pj = np.unravel_index(np.argmax(yy), yy.shape)
+        d = np.hypot(X - X[pi, pj], Z - Z[pi, pj])
+        y = y - np.clip(1 - d / 60.0, 0, 1) ** 1.5 * 34 * em
+    # 海の深さ: 岸から離れるほど深く
+    px_from_land = ndimage.distance_transform_edt(~land)
+    inner = ~land
+    labels, _ = ndimage.label(inner)
+    border = set(np.unique(np.concatenate([labels[0], labels[-1], labels[:, 0], labels[:, -1]]))) - {0}
+    outer = np.isin(labels, list(border))
+    inland = inner & ~outer
+    depth = np.clip(px_from_land * SCALE / 5.0, 1, 30)
+    depth = np.where(inland, np.minimum(depth, 20), depth)
+    y = np.where(land, np.maximum(y, SEA_LEVEL + 1), SEA_LEVEL - 1 - depth)
+    # 平らにする所
+    y = flatten(y, X, Z, lay['capital'], FLAT_CAPITAL, land)
+    for _, p in lay['towns']:
+        y = flatten(y, X, Z, p, FLAT_TOWN, land)
+    for _, p in lay['sites']:
+        y = flatten(y, X, Z, p, FLAT_SITE, land)
+    y = flatten(y, X, Z, lay['start'], FLAT_START, land)
+    height = np.clip(np.round(y), 1, 250).astype(np.uint8)
+
+    # 土地の番号
+    biome = np.zeros((SIZE, SIZE), dtype=np.uint8)
+    patch = fbm(seed + 21, octaves=4, base=16, n=SIZE)
+    near_water = ndimage.distance_transform_edt(land) * SCALE <= 12
+    for i, k in enumerate(kinds):
+        m = (region == i) & land
+        if k == 'meadow':
+            biome[m] = np.where(patch[m] > 0.08, B['forest'], B['plains'])
+        elif k == 'start':
+            biome[m] = B['meadow']
+        elif k == 'whale':
+            biome[m] = np.where(height[m] > 100, B['windswept_hills'], np.where(patch[m] > 0.05, B['taiga'], B['plains']))
+        elif k == 'tide':
+            biome[m] = np.where(height[m] <= 70, B['beach'], B['savanna'])
+        elif k == 'storm':
+            biome[m] = np.where(height[m] > 175, B['snowy_slopes'],
+                                np.where(height[m] > 135, B['stony_peaks'],
+                                         np.where(patch[m] > 0, B['windswept_gravelly_hills'], B['windswept_hills'])))
+        elif k == 'ember':
+            biome[m] = np.where(height[m] > 120, B['eroded_badlands'], B['badlands'])
+    beach = land & near_water & (height <= SEA_LEVEL + 3)
+    keep = np.isin(biome, [B['badlands'], B['eroded_badlands'], B['stony_peaks'], B['snowy_slopes']])
+    biome[beach & ~keep] = B['beach']
+    sea = ~land
+    biome[sea] = np.where(inland[sea], B['lukewarm_ocean'], np.where(depth[sea] > 18, B['deep_ocean'], B['ocean']))
+    return lay, height, biome
+
+
+def write_bin(path, arr):
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    head = b'SKCN' + struct.pack('>iiii', SIZE, SCALE, -HALF, -HALF)
+    raw = head + arr.astype(np.uint8).tobytes()
+    with open(path, 'wb') as f:
+        # 時刻を入れない (何度作っても同じ中身)
+        f.write(gzip.compress(raw, compresslevel=9, mtime=0))
+
+
+def preview(key, height, biome):
+    col = np.zeros((SIZE, SIZE, 3))
+    for name, rgb in PREVIEW.items():
+        col[biome == B[name]] = rgb
+    h = height.astype(float)
+    gz, gx = np.gradient(h)
+    shade = np.clip(1.0 - (gx + gz) * 0.08, 0.55, 1.35)[..., None]
+    img = np.clip(col * shade, 0, 255).astype(np.uint8)
+    os.makedirs(REVIEW, exist_ok=True)
+    Image.fromarray(img).save(os.path.join(REVIEW, f'terrain_{key}.png'))
+
+
+# 道を曲線にする (角を丸める Catmull-Rom、約 24 ブロックごとの点)。決まった揺らぎで少し蛇行させる (端は動かさない)
+def curve(points, step=24.0, seed=31):
+    pts = [np.array(p, dtype=float) for p in points]
+    ext = [pts[0] * 2 - pts[1]] + pts + [pts[-1] * 2 - pts[-2]]
+    out = [pts[0]]
+    rng = np.random.default_rng(seed + int(abs(points[0][0]) + abs(points[-1][1])))
+    for i in range(1, len(ext) - 2):
+        p0, p1, p2, p3 = ext[i - 1], ext[i], ext[i + 1], ext[i + 2]
+        n = max(2, int(np.linalg.norm(p2 - p1) / step))
+        for k in range(1, n + 1):
+            t = k / n
+            q = 0.5 * ((2 * p1) + (-p0 + p2) * t + (2 * p0 - 5 * p1 + 4 * p2 - p3) * t * t + (-p0 + 3 * p1 - 3 * p2 + p3) * t ** 3)
+            out.append(q)
+    res = [out[0]]
+    for i in range(1, len(out) - 1):
+        d = out[i + 1] - out[i - 1]
+        nrm = np.array([-d[1], d[0]]) / (np.linalg.norm(d) + 1e-9)
+        res.append(out[i] + nrm * rng.uniform(-6, 6))
+    res.append(out[-1])
+    return [[int(round(q[0])), int(round(q[1]))] for q in res]
+
+
+# 土地の名前 (地図に出す。lang の map.skyabyss.continent.<id>)
+REGION_NAMES = {'岩鯨の丘陵': 'whale', '潮の浜': 'tide', '嵐の高地': 'storm', '灰の荒野': 'ember', '外れの谷': 'outskirts', '内海': 'inland_sea'}
+LEVEL_REGIONS = ['capital', 'whale', 'tide', 'storm', 'ember']
+MAP_PX = 1024
+MAP_COLORS = {
+    'deep_ocean': (150, 172, 172), 'ocean': (168, 188, 184), 'lukewarm_ocean': (160, 192, 186), 'beach': (226, 212, 166),
+    'plains': (176, 186, 124), 'forest': (150, 168, 108), 'meadow': (184, 194, 130), 'windswept_hills': (164, 166, 132),
+    'taiga': (140, 154, 108), 'savanna': (204, 194, 138), 'windswept_gravelly_hills': (170, 168, 150), 'stony_peaks': (186, 182, 168),
+    'snowy_slopes': (230, 228, 220), 'badlands': (200, 140, 100), 'eroded_badlands': (120, 92, 84),
+}
+PAPER = np.array((232, 220, 190), dtype=float)
+INK = (66, 52, 40)
+
+
+def paint_map(lay, height, biome, path):
+    from PIL import ImageDraw, ImageFilter
+    col = np.zeros((SIZE, SIZE, 3))
+    for name, rgb in MAP_COLORS.items():
+        col[biome == B[name]] = rgb
+    h = height.astype(float)
+    gz, gx = np.gradient(ndimage.gaussian_filter(h, 1.2))
+    shade = np.clip(1.0 - (gx + gz) * 0.05, 0.62, 1.25)[..., None]
+    land = h >= SEA_LEVEL
+    col = np.where(land[..., None], col * shade, col)
+    col = col * 0.8 + PAPER * 0.2
+    grain = fbm(91, octaves=3, base=80, n=SIZE)[..., None] * 18
+    img = Image.fromarray(np.clip(col + grain, 0, 255).astype(np.uint8)).resize((MAP_PX, MAP_PX), Image.BICUBIC)
+    # 等高線 (40 ごと、陸だけ、薄く)
+    band = (np.floor((h - SEA_LEVEL) / 40)).astype(int)
+    edges = (np.abs(np.diff(band, axis=0, prepend=band[:1])) + np.abs(np.diff(band, axis=1, prepend=band[:, :1]))) > 0
+    cont = Image.fromarray(((edges & land) * 255).astype(np.uint8)).resize((MAP_PX, MAP_PX), Image.NEAREST)
+    img.paste(Image.new('RGB', img.size, (110, 92, 70)), mask=cont.point(lambda v: 70 if v else 0))
+    # 岸の線と波
+    lm = Image.fromarray((land * 255).astype(np.uint8)).resize((MAP_PX, MAP_PX), Image.BICUBIC).point(lambda v: 255 if v > 127 else 0)
+    for k, a in ((6, 80), (13, 45)):
+        ring = lm.filter(ImageFilter.MaxFilter(k * 2 + 1)).filter(ImageFilter.FIND_EDGES)
+        img.paste(Image.new('RGB', img.size, (92, 120, 128)), mask=ring.point(lambda v, a=a: a if v else 0))
+    img.paste(Image.new('RGB', img.size, INK), mask=lm.filter(ImageFilter.FIND_EDGES).point(lambda v: 200 if v else 0))
+    d = ImageDraw.Draw(img)
+    rng = np.random.default_rng(5)
+    s = MAP_PX / SIZE
+
+    def px(p):
+        return ((p[0] + HALF) / (2 * HALF) * MAP_PX, (p[1] + HALF) / (2 * HALF) * MAP_PX)
+
+    # 峰の記号と林の点
+    for _ in range(5000):
+        i, j = int(rng.integers(4, SIZE - 4)), int(rng.integers(4, SIZE - 4))
+        x, y = i * s, j * s
+        b = BIOME_NAMES[biome[j, i]]
+        if h[j, i] > 150 and rng.random() < 0.5:
+            r = 3 + (h[j, i] - 150) / 30
+            d.line([(x - r, y + r * 0.6), (x, y - r * 0.7), (x + r, y + r * 0.6)], fill=INK, width=1)
+        elif b in ('forest', 'taiga') and rng.random() < 0.6:
+            d.ellipse([x - 2, y - 2, x + 2, y + 2], fill=(84, 108, 70))
+        elif b == 'eroded_badlands' and rng.random() < 0.3:
+            d.point((x, y), fill=(60, 40, 36))
+    # 道と渡し船
+    for road in lay['roads']:
+        pts = [px(q) for q in curve(road)]
+        d.line(pts, fill=(240, 228, 200), width=4, joint='curve')
+        d.line(pts, fill=(126, 82, 46), width=2, joint='curve')
+    for ferry in lay['ferries']:
+        pts = [px(q) for q in ferry]
+        for (x0, y0), (x1, y1) in zip(pts, pts[1:]):
+            n = max(1, int(np.hypot(x1 - x0, y1 - y0) / 6))
+            for i in range(0, n, 2):
+                a0, a1 = i / n, min(1, (i + 1) / n)
+                d.line([(x0 + (x1 - x0) * a0, y0 + (y1 - y0) * a0), (x0 + (x1 - x0) * a1, y0 + (y1 - y0) * a1)], fill=(60, 96, 120), width=2)
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    # 外の海は、岸から離れるほど透かす (地図の盤の地へなじませる。四角い縁を見せない)
+    far = ndimage.distance_transform_edt(~land) * SCALE
+    alpha = np.clip(1 - (far - 160) / 280, 0, 1)
+    a = Image.fromarray((alpha * 255).astype(np.uint8)).resize((MAP_PX, MAP_PX), Image.BICUBIC)
+    img = img.convert('RGBA')
+    img.putalpha(a)
+    img.save(path, optimize=True)
+
+
+def write_layout(lay):
+    def pt(p):
+        return [int(p[0]), int(p[1])]
+    kinds = {'岩鯨の跡地': 'whale', '潮殻の跡地': 'tide', '雷翼の跡地': 'storm', '余燼の跡地': 'ember'}
+    towns = {'鯨見': 'whale', '汐守': 'tide', '風待': 'storm', '灰炉': 'ember'}
+    out = {
+        'layout': CHOSEN,
+        'capital': pt(lay['capital']),
+        'start': pt(lay['start']),
+        'towns': {towns[n]: pt(p) for n, p in lay['towns']},
+        'sites': {kinds[n]: pt(p) for n, p in lay['sites']},
+        'roads': [curve(r) for r in lay['roads']],
+        'ferries': [[pt(p) for p in r] for r in lay['ferries']],
+        'names': {REGION_NAMES[n]: pt(p) for n, p in lay['names']},
+        'levels': {k: [lv.replace('Lv ', '').replace('–', '-'), pt(p)] for k, (lv, p) in zip(LEVEL_REGIONS, lay['levels'])},
+    }
+    with open(os.path.join(OUT, 'layout.json'), 'w', encoding='utf8', newline='\n') as f:
+        json.dump(out, f, ensure_ascii=False, separators=(',', ':'))
+        f.write('\n')
+
+
+def main():
+    lay, height, biome = build()
+    write_bin(os.path.join(OUT, 'height.bin'), height)
+    write_bin(os.path.join(OUT, 'biome.bin'), biome)
+    preview(CHOSEN, height, biome)
+    write_layout(lay)
+    paint_map(lay, height, biome, os.path.join(ROOT, 'src', 'main', 'resources', 'assets', 'skyabyss', 'textures', 'gui', 'map', 'continent.png'))
+    land = height >= SEA_LEVEL
+    print(f'layout {CHOSEN}: land {land.mean() * 100:.0f}%, max Y {height.max()}, capital Y {height[SIZE // 2, int((lay["capital"][0] + HALF) / SCALE)]}')
+
+
+if __name__ == '__main__':
+    main()

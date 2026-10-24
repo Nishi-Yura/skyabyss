@@ -35,6 +35,8 @@ public class SkyAbyss {
         ModEffects.register(modEventBus);
         ModDataComponents.register(modEventBus);
         ModBlocks.register(modEventBus);
+        // 天と淵の大陸 (ワールドの種類。docs/design/40 の 3 章)
+        jp.revati.skyabyss.world.continent.ContinentSetup.register(modEventBus);
         jp.revati.skyabyss.advancement.Beats.register(modEventBus);
         jp.revati.skyabyss.registry.ModBlockEntities.register(modEventBus);
         ModArmorMaterials.register(modEventBus);

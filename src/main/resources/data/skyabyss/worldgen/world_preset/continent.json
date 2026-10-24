@@ -1,0 +1,51 @@
+{
+  "dimensions": {
+    "minecraft:overworld": {
+      "type": "minecraft:overworld",
+      "generator": {
+        "type": "skyabyss:continent",
+        "biome_source": {
+          "type": "skyabyss:continent",
+          "biomes": [
+            "minecraft:deep_ocean",
+            "minecraft:ocean",
+            "minecraft:lukewarm_ocean",
+            "minecraft:beach",
+            "minecraft:plains",
+            "minecraft:forest",
+            "minecraft:meadow",
+            "minecraft:windswept_hills",
+            "minecraft:taiga",
+            "minecraft:savanna",
+            "minecraft:windswept_gravelly_hills",
+            "minecraft:stony_peaks",
+            "minecraft:snowy_slopes",
+            "minecraft:badlands",
+            "minecraft:eroded_badlands"
+          ]
+        }
+      }
+    },
+    "minecraft:the_nether": {
+      "type": "minecraft:the_nether",
+      "generator": {
+        "type": "minecraft:noise",
+        "settings": "minecraft:nether",
+        "biome_source": {
+          "type": "minecraft:multi_noise",
+          "preset": "minecraft:nether"
+        }
+      }
+    },
+    "minecraft:the_end": {
+      "type": "minecraft:the_end",
+      "generator": {
+        "type": "minecraft:noise",
+        "settings": "minecraft:end",
+        "biome_source": {
+          "type": "minecraft:the_end"
+        }
+      }
+    }
+  }
+}

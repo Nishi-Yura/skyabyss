@@ -1,4 +1,11 @@
 {
+  "map.skyabyss.continent.whale": "岩鯨の丘陵",
+  "map.skyabyss.continent.tide": "潮の浜",
+  "map.skyabyss.continent.storm": "嵐の高地",
+  "map.skyabyss.continent.ember": "灰の荒野",
+  "map.skyabyss.continent.outskirts": "外れの谷",
+  "map.skyabyss.continent.inland_sea": "内海",
+  "generator.skyabyss.continent": "天と淵の大陸",
   "message.skyabyss.goal_not_yet": "まだ光る印には着けない。番兵が目を覚ましている",
   "message.skyabyss.goal_name": "試練の光る印",
   "skyabyss.configuration.title": "天と淵のあいだ 設定",
