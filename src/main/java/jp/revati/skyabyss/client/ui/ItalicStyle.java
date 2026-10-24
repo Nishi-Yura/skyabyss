@@ -5,7 +5,7 @@ import java.util.Locale;
 import net.minecraft.network.chat.Style;
 
 // 斜体の扱い (撮影で三案を見比べるための切り替え。環境変数 SKYABYSS_ITALIC_STYLE を起動時に一度読む)
-//   未設定 (既定) : 現在のまま。斜体・帯なし
+//   未設定 (既定) : c (2026-10-24 に選んだ案)。current で元のまま (斜体・帯なし)
 //   a             : mod の字のパックが入っているとき斜体をやめる (パックが外れていれば斜体のまま)。帯なし
 //   b             : 斜体のまま。場所の副題の後ろに暗い帯
 //   c             : 斜体をやめる + 場所の副題の後ろに暗い帯
@@ -28,13 +28,14 @@ public enum ItalicStyle {
 
     private static ItalicStyle parse(String env) {
         if (env == null) {
-            return CURRENT;
+            return C;
         }
         return switch (env.trim().toLowerCase(Locale.ROOT)) {
             case "a" -> A;
             case "b" -> B;
             case "c" -> C;
-            default -> CURRENT;
+            case "current" -> CURRENT;
+            default -> C;
         };
     }
 

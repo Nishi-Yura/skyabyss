@@ -1062,7 +1062,7 @@
   "gui.skyabyss.skill.page_tip": "Switch between the tree page and the page for stances, chains, tags and keystones.",
   "gui.skyabyss.skill.points_tryon": "Trial pts %s",
   "gui.skyabyss.skill.bar_bow": "Bow",
-  "gui.skyabyss.skill.bar_melee": "Mel",
+  "gui.skyabyss.skill.bar_melee": "Melee",
   "gui.skyabyss.skill.set_head": "Tree set (%1$s pts, tier %2$s/3)",
   "gui.skyabyss.skill.set_line": "%1$s pts: %2$s",
   "gui.skyabyss.skill.mastery_short": "Mastery %s",
