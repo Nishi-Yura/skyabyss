@@ -101,6 +101,16 @@ public final class TideTravel {
     // 地上へ戻す
     public static void leave(ServerPlayer player) {
         ServerLevel overworld = player.server.overworld();
+        // 岸を探す区画が読み込まれるまで待つ (同期の読み込みで止めない)。待つあいだは背中にいる
+        Vec3 center = shoreCenter(overworld);
+        if (center != null && !jp.revati.skyabyss.util.ChunkWait.ready(overworld, center.x, center.z, jp.revati.skyabyss.util.ChunkWait.SHORE_REACH)) {
+            jp.revati.skyabyss.util.ChunkWait.later(overworld, center.x, center.z, jp.revati.skyabyss.util.ChunkWait.SHORE_REACH, () -> {
+                if (player.isAlive()) {
+                    leave(player);
+                }
+            });
+            return;
+        }
         Landing landing = landing(overworld);
         Vec3 drop = landing.pos();
         float yaw = Float.isNaN(landing.yaw()) ? player.getYRot() : landing.yaw();
@@ -135,6 +145,16 @@ public final class TideTravel {
         Landing(Vec3 pos, float yaw) {
             this(pos, yaw, false);
         }
+    }
+
+    // landing が岸を探す中心 (休んでいれば巨神の位置、休んでいなければ最後に休んだ場所。なければ null)。岸の探しが読むチャンクの中心
+    @javax.annotation.Nullable
+    static Vec3 shoreCenter(ServerLevel overworld) {
+        TideShellEntity titan = TideKeeper.KEEPER.current(overworld);
+        if (titan != null && titan.isResting()) {
+            return new Vec3(titan.getX(), 0, titan.getZ());
+        }
+        return titan != null ? titan.lastRestSpot() : lastRestFromRecord(overworld);
     }
 
     // 巨神が休んでいれば門の前の水の上 (巨神に背を向ける)、休んでいなければ最後に休んだ場所の岸、記録もなければ共有スポーン地点
