@@ -52,7 +52,7 @@ public final class TrialCommands {
                         .then(Commands.literal("force").then(Commands.argument("ids", StringArgumentType.greedyString())
                                 .executes(ctx -> force(ctx.getSource(), StringArgumentType.getString(ctx, "ids")))))
                         .then(Commands.literal("mods").then(Commands.argument("id", StringArgumentType.word()).then(Commands.argument("code", StringArgumentType.word())
-                                .executes(ctx -> mods(ctx.getSource(), StringArgumentType.getString(ctx, "id"), StringArgumentType.getString(ctx, "code")))))
+                                .executes(ctx -> mods(ctx.getSource(), StringArgumentType.getString(ctx, "id"), StringArgumentType.getString(ctx, "code"))))))
                         // 撮影用: 自分に称号を一つ渡す (試練の板の称号の行を見る。id は trial.skyabyss.title.<id> の id)
                         .then(Commands.literal("title").then(Commands.argument("id", StringArgumentType.greedyString())
                                 .executes(ctx -> {
@@ -61,7 +61,7 @@ public final class TrialCommands {
                                     boolean fresh = TrialCodex.get(sp.server).grantTitle(sp.getUUID(), id);
                                     ctx.getSource().sendSuccess(() -> Component.literal((fresh ? "granted " : "already had ") + id), false);
                                     return 1;
-                                })))))));
+                                }))))))  ;
     }
 
     // 命令を打った人がいる背 (背の外なら岩鯨の背)
