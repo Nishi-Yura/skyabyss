@@ -121,10 +121,12 @@ SCENES_TOWN = [
     ]),
     ("site_story", [
         # 夕暮れの大通りに語り部を立たせ、カメラの方を向かせる (大鐘楼の中は狭くて撮れない)。前 4.5 ブロックの地面に落として、少し見下ろす。視野を狭めて大きく
-        "cmd skyabyss dev opening at shelter 0 20 3 0 -90 16",
+        "cmd skyabyss dev opening at shelter 0 20 3 2 -90 26",
         "waitchunks",
         "cmd skyabyss facility place",
         "fov 50",
+        # 観戦者の人には顔を向けないので、この絵だけクリエイティブで撮る。カメラを街灯の列から 2 ブロック横へずらし、正面に立たせる
+        "cmd gamemode creative",
         "cmd execute at @p rotated ~ 0 run summon skyabyss:storyteller ^ ^ ^4.5 {PersistenceRequired:1b}",
         "wait 40",
         "cmd execute as @e[type=skyabyss:storyteller,sort=nearest,limit=1] at @s run tp @s ~ ~ ~ facing entity @p feet",
@@ -132,6 +134,7 @@ SCENES_TOWN = [
         "shot site_story",
         "cmd kill @e[type=skyabyss:storyteller,sort=nearest,limit=1]",
         "fov 70",
+        "cmd gamemode spectator",
     ]),
     ("site_rebirth", [
         # 四巨神の社は壁のある建物 (-78 -35 から -50 -7)。中の真ん中 (-64 -21) に三段の祭壇 (転生の台座)。南の戸の内側から祭壇を見る

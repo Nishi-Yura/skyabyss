@@ -203,10 +203,11 @@ SHOTS = {
     "rebirth.html": ("rebirth", "四巨神の社。真ん中の祭壇が、転生の台座。", "The Shrine of the Four. The altar at its heart is where you are reborn."),
     "gear.html": ("gear", "四つの巨神の防具が並ぶ。巨神の背の広場で。", "Armour of the four titans side by side, on a titan's back."),
     "pouch.html": ("pouch", "市の広場。布の屋根の屋台と、並んだ品物。", "The market square, with striped stalls and goods laid out."),
+    "story.html": ("story", "語り部。夕暮れの大通りで、話を聞かせてくれる。", "The storyteller, waiting on the main street at dusk to tell you the tale."),
     "faq.html": ("faq", "夕暮れの大通り。灯りが並ぶ。", "Dusk on the main street, with lanterns lining the way."),
     "changelog.html": ("changelog", "夕暮れの都を上から。", "The town at dusk, seen from above."),
 }
-# 仲間・物語の頁は、よい絵が撮れるまで絵を置かない (弱い絵は出さない)
+# 仲間の頁は、よい絵が撮れるまで絵を置かない (弱い絵は出さない)
 
 
 def shot_figure(name, ja, en):
