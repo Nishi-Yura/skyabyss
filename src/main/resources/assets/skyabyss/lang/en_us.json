@@ -237,6 +237,7 @@
   "message.skyabyss.memory_title_stone_whale": "── Titan's Memory: Stone Whale ──",
   "message.skyabyss.memory_clears": "Heart kills %s · Collection %s/%s",
   "message.skyabyss.reward_list": "Received: %s",
+  "message.skyabyss.raid.title": "Title earned: %s",
   "message.skyabyss.reward_nothing": "(experience only)",
   "message.skyabyss.gear_new": "New gear: %s (collection %s/%s)",
   "message.skyabyss.reward_pending": "Rewards you couldn't receive are being held. You get them when you wake (or with /titanmemory claim)",

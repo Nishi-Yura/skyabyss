@@ -35,6 +35,7 @@ import jp.revati.skyabyss.titan.group.FirstRun;
 import jp.revati.skyabyss.titan.group.GroupProgress;
 import jp.revati.skyabyss.titan.group.Groups;
 import jp.revati.skyabyss.trial.Trial.Def;
+import jp.revati.skyabyss.trial.raid.RaidRewards;
 import jp.revati.skyabyss.util.Players;
 
 // 巨神の順路 (docs/design/32 の 2 章): 歩 → 智 → 闘 → 中ボス → 心臓。どれも体の外の閉じた部屋 (巨神の中は建てない。32 の 2.5)
@@ -176,6 +177,8 @@ public final class TrialRoute {
         r.remove(START);
         r.remove(MID);
         r.remove(TrialSlot.SLOT);
+        r.remove(RaidRewards.ROUTE);
+        r.remove(RaidRewards.WIPES);
     }
 
     // 順路を終える (心臓を止めた・あきらめ・背を出た・グループのリセット)。記録とメモリの待ちを消す
@@ -316,6 +319,10 @@ public final class TrialRoute {
         BackGroupData.Record r = BackGroupData.get(back).peek(group);
         if (r == null || step(r) < 1) {
             return "no route";
+        }
+        // レイドの部屋が動いていれば、その部屋を実際に越えたことにする (報いも通る。RaidRun.devComplete)
+        if (jp.revati.skyabyss.trial.raid.RaidRun.devComplete(group)) {
+            return r.getInt(MID) > 0 ? "mid-boss room passed" : "raid room passed (step " + step(r) + ")";
         }
         if (r.getInt(MID) > 0) {
             onMidBossDefeated(back, group, titan);
@@ -843,6 +850,8 @@ public final class TrialRoute {
         if (titan == null) {
             return;
         }
+        // レイドの部屋の報い: 三つの部屋と中ボスを全部越えた順路なら、称号と崩れなしの分 (記録を消す前に読む)
+        RaidRewards.onRouteFinished(back, titan, r, party(r));
         long t = r.has(START) ? Math.max(0, back.getGameTime() - r.getLong(START)) : 0;
         TrialCodex codex = TrialCodex.get(back.getServer());
         for (UUID id : party(r)) {

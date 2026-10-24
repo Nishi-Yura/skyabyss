@@ -193,6 +193,16 @@ public final class RaidRun {
         return true;
     }
 
+    // 開発・撮影 (/skyroute pass): 今の部屋を越えたことにする。完了の処理と報いをそのまま通す。動いている部屋がなければ false
+    public static boolean devComplete(UUID group) {
+        Run run = RUNS.get(group);
+        if (run == null || run.phase != Phase.ACTIVE) {
+            return false;
+        }
+        complete(run);
+        return true;
+    }
+
     // そのグループの中ボスの部屋を越えたか
     public static boolean midCleared(UUID group) {
         Run run = RUNS.get(group);
@@ -347,6 +357,7 @@ public final class RaidRun {
     public static void wipe(Run run, @Nullable String reasonKey) {
         RaidCtx ctx = run.ctx;
         run.wipes++;
+        RaidRewards.onWipe(ctx.level(), ctx.group());
         for (ServerPlayer p : ctx.players()) {
             Downed.reviveFull(p);
             p.setHealth(p.getMaxHealth());
@@ -380,6 +391,7 @@ public final class RaidRun {
         sendHud(run, true);
         if (run.mid) {
             SkyAbyss.LOGGER.info("Raid: mid-boss room {} cleared by group {} (wipes {})", ctx.roomId(), ctx.group(), run.wipes);
+            RaidRewards.onMidCleared(ctx.level(), ctx.group(), ctx.titan());
             TrialRoute.onMidBossDefeated(ctx.level(), ctx.group(), ctx.titan());
             return;
         }
@@ -387,6 +399,10 @@ public final class RaidRun {
         String key = TrialRoute.keyOf(ctx.titan(), draw, run.step);
         for (ServerPlayer p : ctx.players()) {
             RaidLore.onCleared(p, ctx.roomId());
+        }
+        Trial.Def def = TrialRoute.defOf(draw, run.step);
+        if (def != null) {
+            RaidRewards.onRoomCleared(ctx.level(), ctx.group(), ctx.titan(), ctx.roomId(), def.slot());
         }
         SkyAbyss.LOGGER.info("Raid: room {} cleared by group {} (wipes {})", ctx.roomId(), ctx.group(), run.wipes);
         if (key != null) {

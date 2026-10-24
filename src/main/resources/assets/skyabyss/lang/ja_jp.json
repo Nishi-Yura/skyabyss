@@ -237,6 +237,7 @@
   "message.skyabyss.memory_title_stone_whale": "── 巨神の記憶: 岩鯨 ──",
   "message.skyabyss.memory_clears": "心臓の撃破 %s回 · 図鑑 %s/%s",
   "message.skyabyss.reward_list": "受け取ったもの: %s",
+  "message.skyabyss.raid.title": "称号「%s」を得た",
   "message.skyabyss.reward_nothing": "（経験値のみ）",
   "message.skyabyss.gear_new": "新しい装備 %s を手にした（図鑑 %s/%s）",
   "message.skyabyss.reward_pending": "受け取れなかった報酬を預かっている。目を覚ましたとき（または /titanmemory claim）に渡す",
