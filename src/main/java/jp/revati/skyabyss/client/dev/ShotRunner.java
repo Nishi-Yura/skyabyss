@@ -1084,6 +1084,8 @@ public final class ShotRunner {
             case "skills_signal" -> () -> new jp.revati.skyabyss.rpg.client.skill.SkillScreen().select(jp.revati.skyabyss.rpg.skill.Skill.SIGNAL);
             case "skills_rockcall" -> () -> new jp.revati.skyabyss.rpg.client.skill.SkillScreen().select(jp.revati.skyabyss.rpg.skill.Skill.ROCK_CALL);
             case "party" -> jp.revati.skyabyss.party.client.PartyScreen::new;
+            // 転生の画面 (魂盤・ビルドを組み直す)。開くまえに cmd skyabyss dev rebirth <n> で転生の数を入れておく
+            case "rebirth" -> () -> new jp.revati.skyabyss.client.rebirth.RebirthScreen(null);
             case "notices", "noticelog" -> jp.revati.skyabyss.client.notice.NoticeLogScreen::new;
             case "grave" -> jp.revati.skyabyss.client.grave.GraveScreen.Sample::new;
             // 旅嚢の輪 (札 2 / 5 / 9 枚。窓の大きさで半径と札の大きさが変わるかを見る)

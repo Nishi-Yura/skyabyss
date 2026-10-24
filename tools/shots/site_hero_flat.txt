@@ -1,0 +1,85 @@
+# サイトの頁の頭の絵 (平らな世界)。tools/gen/shots/gen_site_hero_shots.py が書く。
+world shots flat
+size 1280 720
+timeout 1200
+render 16
+clouds on
+cmd gamemode creative
+cmd skyabyss cinematic stop
+cmd time set 12200
+cmd weather clear
+cmd gamerule doDaylightCycle false
+cmd skyabyss dev arrive titan_back
+waitchunks
+wait 300
+cmd skyabyss cinematic stop
+chat clear
+hud off
+cmd gamemode spectator
+
+# site_index
+camera skyabyss:titan_back -60 -59 60 0 -35
+waitchunks
+wait 40
+shot site_index_a
+camera skyabyss:titan_back 0 -59 -120 0 -30
+waitchunks
+wait 40
+shot site_index_b
+camera skyabyss:titan_back -200 -59 170 270 -30
+waitchunks
+wait 40
+shot site_index_c
+
+# site_titans
+camera skyabyss:titan_back -150 150 60 290 10
+waitchunks
+wait 40
+shot site_titans
+
+# site_party
+cmd execute in skyabyss:titan_back run summon armor_stand -70 98 176 {ShowArms:1b,NoBasePlate:1b,Rotation:[0f,0f],ArmorItems:[{id:"skyabyss:ember_boots",count:1},{id:"skyabyss:ember_leggings",count:1},{id:"skyabyss:ember_chestplate",count:1},{id:"skyabyss:ember_helmet",count:1}]}
+cmd execute in skyabyss:titan_back run summon armor_stand -66 98 178 {ShowArms:1b,NoBasePlate:1b,Rotation:[0f,0f],ArmorItems:[{id:"skyabyss:ember_boots",count:1},{id:"skyabyss:ember_leggings",count:1},{id:"skyabyss:ember_chestplate",count:1},{id:"skyabyss:ember_helmet",count:1}]}
+cmd execute in skyabyss:titan_back run summon armor_stand -62 98 178 {ShowArms:1b,NoBasePlate:1b,Rotation:[0f,0f],ArmorItems:[{id:"skyabyss:ember_boots",count:1},{id:"skyabyss:ember_leggings",count:1},{id:"skyabyss:ember_chestplate",count:1},{id:"skyabyss:ember_helmet",count:1}]}
+cmd execute in skyabyss:titan_back run summon armor_stand -58 98 176 {ShowArms:1b,NoBasePlate:1b,Rotation:[0f,0f],ArmorItems:[{id:"skyabyss:ember_boots",count:1},{id:"skyabyss:ember_leggings",count:1},{id:"skyabyss:ember_chestplate",count:1},{id:"skyabyss:ember_helmet",count:1}]}
+camera skyabyss:titan_back -64 101 158 0 4
+waitchunks
+wait 40
+shot site_party
+
+# site_skills
+cmd gamemode creative
+cmd skyabyss level set @p 50
+cmd skyabyss skill forget @p
+cmd skyabyss skill points @p 40
+cmd skyabyss skill learn @p titan_cleave 3
+cmd skyabyss skill slot @p 1 titan_cleave
+camera skyabyss:titan_back -66 98 173 270 4
+perspective back
+fov 48
+waitchunks
+wait 20
+cmd skyabyss skill cast @p 1
+wait 6
+shot site_skills
+perspective first
+fov 70
+cmd gamemode spectator
+
+# site_gear
+camera minecraft:overworld 0 -58.6 5 180 8
+cmd summon armor_stand 0 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[0f,0f],ArmorItems:[{id:"skyabyss:ember_boots",count:1},{id:"skyabyss:ember_leggings",count:1},{id:"skyabyss:ember_chestplate",count:1},{id:"skyabyss:ember_helmet",count:1}]}
+waitchunks
+wait 40
+shot site_gear
+
+# site_rebirth
+cmd skyabyss dev rebirth 3
+wait 140
+cmd gamemode spectator
+open rebirth
+wait 40
+shot site_rebirth
+close
+
+quit

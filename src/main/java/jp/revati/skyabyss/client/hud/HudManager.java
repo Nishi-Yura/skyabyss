@@ -2,6 +2,7 @@ package jp.revati.skyabyss.client.hud;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import javax.annotation.Nullable;
 
@@ -14,6 +15,7 @@ import jp.revati.skyabyss.hud.HudLayout.Result;
 import jp.revati.skyabyss.hud.HudLayout.Scene;
 import net.minecraft.client.AttackIndicatorStatus;
 import net.minecraft.client.Minecraft;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.player.Player;
@@ -24,6 +26,7 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.ClientChatReceivedEvent;
 import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
 import net.neoforged.neoforge.client.event.RenderGuiEvent;
+import net.neoforged.neoforge.client.event.RenderGuiLayerEvent;
 
 // mod の HUD の置き場の司令塔 (docs/design/18 の 14 章)。毎フレームの最初 (RenderGuiEvent.Pre) に、
 //   1. バニラの状態 (画面の大きさ・利き手・オフハンド・体力の段・効き目・ボスバー・札・チャット) を集め、
@@ -106,6 +109,18 @@ public final class HudManager {
     // 画面の外の矢印 (仲間・墓の標) の置き場: 向き (vx, vy) の縁の点。板の上は避けて縁を伝う
     public static int[] edgePoint(double vx, double vy) {
         return HudLayout.edgePoint(current, vx, vy);
+    }
+
+    // ------------------------------------------------------------ F1 (hideGui) の間
+    // mod の層は、いずれも自分で hideGui を見る。取りこぼし (題字の層など) を一か所で止める。画面の暗転 (carry_fade・abyss_flash) は話の演出なので残す
+    private static final Set<String> KEEP_WHEN_HIDDEN = Set.of("carry_fade", "abyss_flash");
+
+    @SubscribeEvent(priority = EventPriority.HIGHEST)
+    static void onLayer(RenderGuiLayerEvent.Pre event) {
+        ResourceLocation name = event.getName();
+        if (Minecraft.getInstance().options.hideGui && SkyAbyss.MODID.equals(name.getNamespace()) && !KEEP_WHEN_HIDDEN.contains(name.getPath())) {
+            event.setCanceled(true);
+        }
     }
 
     // ------------------------------------------------------------ 計算

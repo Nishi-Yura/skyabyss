@@ -199,12 +199,14 @@ SHOTS = {
     "index.html": ("index", "海に浮かぶ巨神の背。島のような、階段状の背中。", "A titan's back afloat on the sea, a stepped island of stone."),
     "play.html": ("play", "最初の一時間の景色。雪の地表と、遠くの空。", "The first hour: snowy ground and a far sky."),
     "rebirth.html": ("rebirth", "転生の画面。魂盤で、ビルドを組み直す。", "The rebirth screen: rebuild the build on the soul board."),
-    "gear.html": ("gear", "防具と武器を並べた広場。", "A plaza with armor and weapons set out."),
-    "pouch.html": ("pouch", "伝承の書。開くと、物語の断片が読めます。", "The lore book, opened to a story fragment."),
-    "party.html": ("party", "巨神の祠の報いの板。いまの三つの試練を並べます。", "The shrine's reward board, with three trials at a time."),
+    "gear.html": ("gear", "平らな草原に立つ、余燼の鎧の一式。", "A set of ember armor standing on open grass."),
+    "pouch.html": ("pouch", "市の広場。布の屋根の屋台と、並んだ品物。", "The market square, with striped stalls and goods laid out."),
+    "party.html": ("party", "巨神の背の広場に並ぶ、三人の仲間。", "Three companions standing together on a titan's back."),
     "story.html": ("story", "語り部。話しかけると、言葉を選ばずに話してくれます。", "The storyteller, who will talk when you approach."),
-    "faq.html": ("faq", "最初の夜の野営地。", "The first night at camp."),
-    "changelog.html": ("changelog", "見る者。遠くから、こちらを見ている。", "The watcher, looking at you from afar."),
+    "faq.html": ("faq", "夕暮れの大通り。灯りが並ぶ。", "Dusk on the main street, with lanterns lining the way."),
+    "changelog.html": ("changelog", "夕暮れの都を上から。", "The town at dusk, seen from above."),
+    "titans.html": ("titans", "巨神の背の島。雲の海の上に、階段状の岩の背が伸びる。", "A titan's back over a sea of clouds, a stepped island of stone."),
+    "skills.html": ("skills", "技を放つ瞬間。青白い光の柱が立つ。", "A skill being cast, a pale column of light rising."),
 }
 
 

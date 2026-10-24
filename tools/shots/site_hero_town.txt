@@ -1,0 +1,52 @@
+# サイトの頁の頭の絵 (はじまりの都)。tools/gen/shots/gen_site_hero_shots.py が書く。
+world opening_capital_rebuild normal
+size 1280 720
+timeout 2400
+render 16
+clouds off
+cmd skyabyss cinematic stop
+wait 100
+cmd skyabyss cinematic stop
+cmd time set 12600
+cmd weather clear
+cmd gamerule doDaylightCycle false
+cmd gamemode spectator
+cmd skyabyss dev opening build
+hud off
+
+# site_play
+cmd skyabyss dev opening at shelter 0 0 70 150 180 26
+waitchunks
+cmd skyabyss facility place
+wait 120
+shot site_play
+
+# site_faq
+cmd skyabyss dev opening at shelter 0 20 4 0 -90 6
+waitchunks
+cmd skyabyss facility place
+wait 60
+shot site_faq
+
+# site_changelog
+cmd skyabyss dev opening at shelter 0 0 150 60 180 62
+waitchunks
+cmd skyabyss facility place
+wait 200
+shot site_changelog
+
+# site_story
+cmd skyabyss dev opening at shelter 0 -12 6 -50 180 8
+waitchunks
+cmd skyabyss facility place
+wait 60
+shot site_story
+
+# site_pouch
+cmd skyabyss dev opening at shelter 0 0 6 8 180 22
+waitchunks
+cmd skyabyss facility place
+wait 60
+shot site_pouch
+
+quit
