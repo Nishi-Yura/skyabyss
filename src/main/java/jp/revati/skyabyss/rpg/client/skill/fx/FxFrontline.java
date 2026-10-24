@@ -66,16 +66,17 @@ public final class FxFrontline {
         Vec3 up = new Vec3(0, 1, 0);
         c.at(0, x -> SkillFx.burst(x, SkillFx.rune(), x.hand(), 3, 0.1, 0.02));
         c.at(2, x -> {
-            FxDraw.add(x, Prim.arc(eye, x.fwd, up, CLEAVE_ARC_R, 1.9, -0.9).color(BONE).width(0.42).life(7).ease(Ease.OUT).glow(0.5).trail(0.55));
-            FxDraw.add(x, Prim.arc(eye, x.fwd, up, CLEAVE_ARC_R - 0.2, 1.8, -0.8).color(TEAL).width(0.14).life(7).ease(Ease.OUT).alpha(0.9f).trail(0.5));
+            // 太く明るい三日月 (幅 0.9、芯は濃く、縁は柔らかい)。頭が振り抜き、尾が遅れる
+            FxDraw.add(x, Prim.arc(eye, x.fwd, up, CLEAVE_ARC_R, 1.2, -0.9).color(BONE).width(0.9).life(8).ease(Ease.OUT).glow(0.35).trail(0.6));
+            FxDraw.add(x, Prim.arc(eye, x.fwd, up, CLEAVE_ARC_R - 0.3, 1.1, -0.7).color(TEAL).width(0.3).life(8).ease(Ease.OUT).alpha(0.9f).trail(0.6));
             SkillFx.sound(x, SoundEvents.PLAYER_ATTACK_SWEEP, eye, 0.6f, 0.6f);
         });
         c.at(5, x -> {
             Vec3 f = x.feet();
             Vec3 hit = f.add(x.fwd.scale(1.9)).add(0, 0.6, 0);
             SkillFx.flash(x, hit);
-            FxDraw.add(x, Prim.ring(f, 1.0, CLEAVE_RANGE).color(BONE).width(0.28).life(10).glow(0.3));
-            FxDraw.add(x, Prim.disc(hit, 0.2, 1.4).color(WHITE).life(5).alpha(0.8f));
+            FxDraw.add(x, Prim.ring(f, 1.6, 2.6).color(BONE).width(0.35).life(8).glow(0.3));
+            FxDraw.add(x, Prim.disc(hit, 0.2, 0.9).color(WHITE).life(4).alpha(0.8f));
             SkillFx.burst(x, SkillFx.rune(), hit, 5, 0.25, 0.12);
             SkillFx.kick(x, 1.0f);
             SkillFx.sound(x, SoundEvents.ANVIL_LAND, f, 0.45f, 0.55f);
@@ -92,20 +93,25 @@ public final class FxFrontline {
     private static void rockCall(Cast c) {
         Vec3 base = c.feet();
         c.at(0, x -> {
-            FxDraw.add(x, Prim.beam(base, 2.6).color(TEAL).width(0.9).life(8).ease(Ease.OUT3).glow(0.5));
+            FxDraw.add(x, Prim.beam(base, 2.6).color(TEAL).width(0.7).life(8).ease(Ease.OUT3).glow(0.4));
+            // 短い石の柱が三本、半径 2 に立つ (低く、密に)
+            for (int k = 0; k < 3; k++) {
+                double ang = Math.PI * 2 * k / 3 + 0.4;
+                Vec3 p = base.add(Math.cos(ang) * 2.0, 0, Math.sin(ang) * 2.0);
+                FxDraw.add(x, Prim.beam(p, 1.6).color(STONE).width(0.45).life(8).ease(Ease.OUT3));
+            }
             SkillFx.burst(x, SkillFx.rune(), base.add(0, 1.2, 0), 3, 0.5, 0.05);
         });
         c.at(4, x -> {
             SkillFx.flash(x, base.add(0, 0.5, 0));
-            FxDraw.add(x, Prim.shell(base.add(0, 0.7, 0), 0.5, ROCK_CALL_RADIUS, 1.4).color(TEAL).life(10).ease(Ease.OUT).width(0.4));
-            FxDraw.add(x, Prim.disc(base, 0.5, 3.0).color(TEAL).life(9).alpha(0.7f));
-            SkillFx.burst(x, SkillFx.rune(), base.add(0, 0.6, 0), 4, 0.7, 0.1);
+            // 地面の輪 4 → 6 ブロック (幅 0.6、芯は濃く)。大きな面は張らない
+            FxDraw.add(x, Prim.ring(base, 3.5, 6.0).color(STONE).width(0.6).life(9).ease(Ease.OUT).glow(0.3));
+            SkillFx.burst(x, SkillFx.rune(), base.add(0, 0.6, 0), 3, 0.7, 0.1);
             SkillFx.kick(x, 0.9f);
             SkillFx.sound(x, SoundEvents.ANVIL_LAND, base, 0.5f, 0.5f);
         });
         c.at(5, x -> {
-            FxDraw.add(x, Prim.ring(base, 4.0, ROCK_CALL_RADIUS).color(STONE).width(0.5).life(12).ease(Ease.OUT).glow(0.4));
-            FxDraw.add(x, Prim.ring(base, 2.0, 6.0).color(TEAL).width(0.18).life(12).ease(Ease.OUT).alpha(0.8f));
+            FxDraw.add(x, Prim.ring(base, 4.5, ROCK_CALL_RADIUS).color(TEAL).width(0.45).life(10).ease(Ease.OUT).glow(0.3));
         });
         c.at(12, x -> FxDraw.add(x, Prim.ring(base, ROCK_CALL_RADIUS - 1.0, ROCK_CALL_RADIUS).color(TEAL).width(0.3).life(8)));
         c.lasts(16);
@@ -143,9 +149,13 @@ public final class FxFrontline {
         Vec3 to = c.waist().add(c.fwd.scale(LUNGE_RANGE - 1.0));
         Vec3 side = c.right.scale(0.55).add(0, -0.25, 0);
         c.at(0, x -> {
-            FxDraw.add(x, Prim.ring(x.feet(), 0.4, 2.0).color(GREEN).width(0.22).life(6));
-            FxDraw.add(x, Prim.line(from, to).color(WHITE).width(0.26).life(10).ease(Ease.OUT).glow(0.6).trail(0.45));
-            FxDraw.add(x, Prim.line(from.add(side), to.add(side)).color(GREEN).width(0.1).life(10).ease(Ease.OUT).alpha(0.7f).trail(0.4));
+            // 速い筋 (太い白、若葉の縁)。その後ろに残像の影 (半透明の柱) を三つ、跳んだ道に置く
+            FxDraw.add(x, Prim.line(from, to).color(WHITE).width(0.55).life(10).ease(Ease.OUT).glow(0.5).trail(0.5));
+            FxDraw.add(x, Prim.line(from.add(side), to.add(side)).color(GREEN).width(0.14).life(10).ease(Ease.OUT).alpha(0.9f).trail(0.4));
+            for (int k = 1; k <= 3; k++) {
+                Vec3 g = from.lerp(to, k / 4.0);
+                FxDraw.add(x, Prim.beam(g.subtract(0, 1.0, 0), 1.9).color(GREEN).width(0.7).life(10).ease(Ease.OUT).alpha(0.4f));
+            }
             SkillFx.sound(x, SoundEvents.ENDER_DRAGON_FLAP, from, 0.35f, 1.7f);
         });
         c.at(6, x -> {
@@ -166,15 +176,20 @@ public final class FxFrontline {
         Vec3 end = c.waist().add(c.fwd.scale(-2.6));
         Vec3 landing = start.add(c.fwd.scale(-2.6));
         c.at(0, x -> {
-            FxDraw.add(x, Prim.beam(start, 2.2).color(FOAM).width(0.6).life(14).alpha(0.6f).glow(0.4));
-            FxDraw.add(x, Prim.ring(start, 0.6, 2.0).color(GREEN).width(0.22).life(6));
+            // 残像: 出た所に影の柱 (半透明) と、地面に白い滑りの筋
+            FxDraw.add(x, Prim.beam(start, 2.0).color(FOAM).width(0.8).life(14).alpha(0.5f).glow(0.3));
+            FxDraw.add(x, Prim.ring(start, 0.6, 1.6).color(GREEN).width(0.4).life(8).alpha(0.8f));
             SkillFx.sound(x, SoundEvents.ENDER_DRAGON_FLAP, start, 0.3f, 1.8f);
         });
-        c.at(1, x -> FxDraw.add(x, Prim.line(x.waist(), end).color(WHITE).width(0.22).life(12).ease(Ease.OUT).trail(0.5).glow(0.4)));
+        c.at(1, x -> {
+            // 後ろへ滑る白い筋 (地面の高さ、太く)
+            FxDraw.add(x, Prim.line(start.add(0, 0.1, 0), landing.add(0, 0.1, 0)).color(WHITE).width(0.8).life(12).ease(Ease.OUT).trail(0.6).glow(0.4));
+            FxDraw.add(x, Prim.beam(start.add(c.fwd.scale(-1.3)), 1.9).color(FOAM).width(0.7).life(12).alpha(0.35f));
+        });
         c.at(5, x -> {
             SkillFx.flash(x, landing.add(0, 0.4, 0));
-            FxDraw.add(x, Prim.ring(landing, 0.5, 2.4).color(WHITE).width(0.3).life(10).glow(0.3));
-            FxDraw.add(x, Prim.disc(landing, 0.3, 1.4).color(FOAM).life(6).alpha(0.6f));
+            FxDraw.add(x, Prim.ring(landing, 0.5, 2.2).color(WHITE).width(0.5).life(12).glow(0.3));
+            FxDraw.add(x, Prim.beam(landing, 1.8).color(FOAM).width(0.7).life(10).alpha(0.5f));
             SkillFx.burst(x, SkillFx.sky(), landing.add(0, 0.8, 0), 3, 0.4, 0.05);
         });
         c.lasts(12);
@@ -187,11 +202,11 @@ public final class FxFrontline {
         Vec3 up = new Vec3(0, 1, 0);
         c.at(0, x -> SkillFx.burst(x, SkillFx.sky(), x.hand(), 3, 0.1, 0.02));
         c.at(1, x -> {
-            FxDraw.add(x, Prim.arc(cen, x.right, up, 2.0, 2.6, -0.6).color(WHITE).width(0.3).life(6).ease(Ease.OUT).glow(0.4).trail(0.6));
+            FxDraw.add(x, Prim.arc(cen, x.right, up, 2.0, 2.6, -0.6).color(WHITE).width(0.6).life(8).ease(Ease.OUT).glow(0.5).trail(0.5));
             SkillFx.sound(x, SoundEvents.PLAYER_ATTACK_SWEEP, cen, 0.5f, 1.6f);
         });
         c.at(3, x -> {
-            FxDraw.add(x, Prim.arc(cen, x.right, up, 2.0, 0.6, 3.8).color(GREEN).width(0.3).life(6).ease(Ease.OUT).glow(0.4).trail(0.6));
+            FxDraw.add(x, Prim.arc(cen, x.right, up, 2.0, 0.6, 3.8).color(GREEN).width(0.6).life(8).ease(Ease.OUT).glow(0.5).trail(0.5));
         });
         c.at(5, x -> {
             Vec3 f = x.feet();

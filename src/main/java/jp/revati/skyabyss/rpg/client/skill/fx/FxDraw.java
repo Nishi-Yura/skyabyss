@@ -52,6 +52,7 @@ import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 public final class FxDraw {
     public static final int MAX_PRIMS = 96;
     public static final double CLEAR = 1.2;
+    public static final double LIFE_SCALE = 1.6;
     private static final boolean LOG = System.getenv("SKYABYSS_SKILLFX_LOG") != null;
 
     private static final ResourceLocation GLOW_TEX = ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "textures/fx/glow.png");
@@ -195,8 +196,9 @@ public final class FxDraw {
             return this;
         }
 
+        // 見える時間。短すぎると放ちで消えてしまうので、指定の長さを LIFE_SCALE 倍して使う (濃さは後ろで緩く落ちる)
         public Prim life(int ticks) {
-            this.life = ticks;
+            this.life = Math.max(8, (int) Math.round(ticks * LIFE_SCALE));
             return this;
         }
 
@@ -314,7 +316,8 @@ public final class FxDraw {
     // 種類ごとの描き分け。glow > 0 のときは同じ形を太く薄く重ねる
     private static void paint(Painter g, Prim p, double prog, long now) {
         double e = p.ease.apply(prog);
-        double fade = Math.pow(1 - prog, 1.2) * p.alpha;
+        // 消え方: 後半の四分の三まで濃いまま、最後に緩く消える (ease-out)
+        double fade = (1 - Math.pow(Mth.clamp((prog - 0.25) / 0.75, 0, 1), 2)) * p.alpha;
         if (fade <= 0.001) {
             return;
         }
@@ -361,7 +364,8 @@ public final class FxDraw {
             case FAN -> fan(g, p, e, fade);
             case BEAM -> beam(g, p, e, fade);
             case BOLT -> bolt(g, p, e, fade, prog);
-            case SHELL -> shell(g, p, e, fade);
+            // 殻は壁にならないよう、細い水平の輪として描く (縦の幕は画面を塞ぐので使わない)
+            case SHELL -> ring(g, p, e, fade * 0.9);
         }
     }
 
@@ -524,7 +528,7 @@ public final class FxDraw {
             for (int i = 0; i < n; i++) {
                 Vec3 p0 = pts[i];
                 Vec3 p1 = pts[i + 1];
-                if (nearCam(p0) && nearCam(p1)) {
+                if (nearCam(p0) || nearCam(p1)) {
                     continue;
                 }
                 Vec3 mid = p0.lerp(p1, 0.5);
@@ -560,7 +564,7 @@ public final class FxDraw {
             for (int i = 0; i + 1 < pts.length; i++) {
                 Vec3 p0 = pts[i];
                 Vec3 p1 = pts[i + 1];
-                if (nearCam(p0) && nearCam(p1)) {
+                if (nearCam(p0) || nearCam(p1)) {
                     continue;
                 }
                 double hh0 = w[i] * 0.5;
@@ -587,7 +591,7 @@ public final class FxDraw {
                 double a1 = full ? Math.PI * 2 * (i + 1) / n : dir - half + 2 * half * (i + 1) / n;
                 Vec3 p0 = c.add(Math.cos(a0) * r, 0, Math.sin(a0) * r);
                 Vec3 p1 = c.add(Math.cos(a1) * r, 0, Math.sin(a1) * r);
-                if (nearCam(p0) && nearCam(p1)) {
+                if (nearCam(p0) || nearCam(p1)) {
                     continue;
                 }
                 vertex(c, 0.5f, 0.5f, alpha, rr, gg, bb);

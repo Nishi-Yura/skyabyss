@@ -1,3 +1,4 @@
+from __future__ import annotations
 """技の見た目 (撮影台本 tools/shots/skill_fx.txt) から、技ごとのコンタクトシートを作る。
 
 使い方 (リポジトリ直下で):  python tools/sheets/skill_fx_sheet.py
@@ -33,16 +34,16 @@ LABEL_W = 210
 HEAD_H = 40
 
 
-def font(size: int) -> ImageFont.FreeTypeFont | ImageFont.ImageFont:
+def font(size: int):
     for f in FONTS:
         if Path(f).exists():
             return ImageFont.truetype(f, size)
     return ImageFont.load_default()
 
 
-def find(name: str) -> Path | None:
+def find(name: str):
     # 撮影の出力は run/shots/skill_fx/ の直下か、一段下にある
-    for p in (SHOTS / f"{name}.png", *SHOTS.glob(f"*/{name}.png")):
+    for p in (SHOTS / f"{name}.png", *SHOTS.rglob(f"{name}.png")):
         if p.exists():
             return p
     return None

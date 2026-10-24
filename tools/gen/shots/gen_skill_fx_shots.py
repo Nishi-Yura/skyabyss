@@ -48,7 +48,11 @@ SKILLS = [
     ("final_light", 0, 6, 20, False),
 ]
 
-HUSK = "execute as @s at @s anchored eyes positioned ^-2.2 ^-1.6 ^3.8 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}"
+# 的: 前 3 ブロック・右へ 1.5 (約 27 度)。三人称の後ろ視点で、体と的が画面の中で大きく収まる
+HUSK = "execute as @s at @s anchored eyes positioned ^-1.5 ^-1.6 ^3.0 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}"
+# 三人称は視野を狭めて、体と的を大きく撮る (カメラの距離は既定の 4 ブロックのまま。FOV だけ変える)
+FOV_BACK = 48
+FOV_NORMAL = 70
 
 
 def schedule(rel: int, imp: int, lin: int, full: bool) -> list[tuple[int, str]]:
@@ -67,7 +71,12 @@ def block(skill: str, rel: int, imp: int, lin: int, bow: bool, view: str, phase:
     """一つの (技・時間・視点) の撮影。view は first か back、phase は day か night"""
     lines: list[str] = []
     lines.append(f"perspective {'first' if view == 'first' else 'back'}")
-    lines.append("wait 4")
+    lines.append(f"fov {FOV_NORMAL if view == 'first' else FOV_BACK}")
+    # 開幕の題字と HUD を消してから撮る (cinematic の停止と、部品の一括オフ)
+    lines.append("cmd skyabyss cinematic stop")
+    lines.append("huddemo off")
+    lines.append("hud off")
+    lines.append("wait 30")
     if bow:
         lines.append("cmd item replace entity @s weapon.mainhand with minecraft:bow")
         lines.append("cmd give @s minecraft:arrow 64")
@@ -110,7 +119,7 @@ def main() -> None:
     out.append("cmd skyabyss cinematic stop")
     out.append("waitchunks")
     out.append("chat clear")
-    out.append("wait 60")
+    out.append("wait 200")
     out.append("")
     for skill, rel, imp, lin, bow in SKILLS:
         out.append(f"# ---- {skill} (昼)")

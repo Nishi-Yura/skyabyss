@@ -16,16 +16,20 @@ hud off
 cmd skyabyss cinematic stop
 waitchunks
 chat clear
-wait 60
+wait 200
 
 # ---- titan_cleave (昼)
 perspective first
-wait 4
+fov 70
+cmd skyabyss cinematic stop
+huddemo off
+hud off
+wait 30
 cmd skyabyss skill learn @s titan_cleave 3
 cmd skyabyss skill slot @s 1 titan_cleave
 cmd skyabyss skill cooldowns @s
 cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
-cmd execute as @s at @s anchored eyes positioned ^-2.2 ^-1.6 ^3.8 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
+cmd execute as @s at @s anchored eyes positioned ^-1.5 ^-1.6 ^3.0 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
 wait 10
 cmd skyabyss skill mana @s full
 cmd skyabyss skill cast @s 1
@@ -40,12 +44,16 @@ shot titan_cleave_1p_d
 cmd skyabyss skill cooldowns @s
 
 perspective back
-wait 4
+fov 48
+cmd skyabyss cinematic stop
+huddemo off
+hud off
+wait 30
 cmd skyabyss skill learn @s titan_cleave 3
 cmd skyabyss skill slot @s 1 titan_cleave
 cmd skyabyss skill cooldowns @s
 cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
-cmd execute as @s at @s anchored eyes positioned ^-2.2 ^-1.6 ^3.8 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
+cmd execute as @s at @s anchored eyes positioned ^-1.5 ^-1.6 ^3.0 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
 wait 10
 cmd skyabyss skill mana @s full
 cmd skyabyss skill cast @s 1
@@ -61,12 +69,16 @@ cmd skyabyss skill cooldowns @s
 
 # ---- rock_call (昼)
 perspective first
-wait 4
+fov 70
+cmd skyabyss cinematic stop
+huddemo off
+hud off
+wait 30
 cmd skyabyss skill learn @s rock_call 3
 cmd skyabyss skill slot @s 1 rock_call
 cmd skyabyss skill cooldowns @s
 cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
-cmd execute as @s at @s anchored eyes positioned ^-2.2 ^-1.6 ^3.8 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
+cmd execute as @s at @s anchored eyes positioned ^-1.5 ^-1.6 ^3.0 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
 wait 10
 cmd skyabyss skill mana @s full
 cmd skyabyss skill cast @s 1
@@ -81,12 +93,16 @@ shot rock_call_1p_d
 cmd skyabyss skill cooldowns @s
 
 perspective back
-wait 4
+fov 48
+cmd skyabyss cinematic stop
+huddemo off
+hud off
+wait 30
 cmd skyabyss skill learn @s rock_call 3
 cmd skyabyss skill slot @s 1 rock_call
 cmd skyabyss skill cooldowns @s
 cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
-cmd execute as @s at @s anchored eyes positioned ^-2.2 ^-1.6 ^3.8 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
+cmd execute as @s at @s anchored eyes positioned ^-1.5 ^-1.6 ^3.0 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
 wait 10
 cmd skyabyss skill mana @s full
 cmd skyabyss skill cast @s 1
@@ -102,12 +118,16 @@ cmd skyabyss skill cooldowns @s
 
 # ---- whale_sweep (昼)
 perspective first
-wait 4
+fov 70
+cmd skyabyss cinematic stop
+huddemo off
+hud off
+wait 30
 cmd skyabyss skill learn @s whale_sweep 3
 cmd skyabyss skill slot @s 1 whale_sweep
 cmd skyabyss skill cooldowns @s
 cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
-cmd execute as @s at @s anchored eyes positioned ^-2.2 ^-1.6 ^3.8 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
+cmd execute as @s at @s anchored eyes positioned ^-1.5 ^-1.6 ^3.0 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
 wait 10
 cmd skyabyss skill mana @s full
 cmd skyabyss skill cast @s 1
@@ -122,12 +142,16 @@ shot whale_sweep_1p_d
 cmd skyabyss skill cooldowns @s
 
 perspective back
-wait 4
+fov 48
+cmd skyabyss cinematic stop
+huddemo off
+hud off
+wait 30
 cmd skyabyss skill learn @s whale_sweep 3
 cmd skyabyss skill slot @s 1 whale_sweep
 cmd skyabyss skill cooldowns @s
 cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
-cmd execute as @s at @s anchored eyes positioned ^-2.2 ^-1.6 ^3.8 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
+cmd execute as @s at @s anchored eyes positioned ^-1.5 ^-1.6 ^3.0 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
 wait 10
 cmd skyabyss skill mana @s full
 cmd skyabyss skill cast @s 1
@@ -143,12 +167,16 @@ cmd skyabyss skill cooldowns @s
 
 # ---- lunge (昼)
 perspective first
-wait 4
+fov 70
+cmd skyabyss cinematic stop
+huddemo off
+hud off
+wait 30
 cmd skyabyss skill learn @s lunge 3
 cmd skyabyss skill slot @s 1 lunge
 cmd skyabyss skill cooldowns @s
 cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
-cmd execute as @s at @s anchored eyes positioned ^-2.2 ^-1.6 ^3.8 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
+cmd execute as @s at @s anchored eyes positioned ^-1.5 ^-1.6 ^3.0 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
 wait 10
 cmd skyabyss skill mana @s full
 cmd skyabyss skill cast @s 1
@@ -163,12 +191,16 @@ shot lunge_1p_d
 cmd skyabyss skill cooldowns @s
 
 perspective back
-wait 4
+fov 48
+cmd skyabyss cinematic stop
+huddemo off
+hud off
+wait 30
 cmd skyabyss skill learn @s lunge 3
 cmd skyabyss skill slot @s 1 lunge
 cmd skyabyss skill cooldowns @s
 cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
-cmd execute as @s at @s anchored eyes positioned ^-2.2 ^-1.6 ^3.8 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
+cmd execute as @s at @s anchored eyes positioned ^-1.5 ^-1.6 ^3.0 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
 wait 10
 cmd skyabyss skill mana @s full
 cmd skyabyss skill cast @s 1
@@ -184,12 +216,16 @@ cmd skyabyss skill cooldowns @s
 
 # ---- backstep (昼)
 perspective first
-wait 4
+fov 70
+cmd skyabyss cinematic stop
+huddemo off
+hud off
+wait 30
 cmd skyabyss skill learn @s backstep 3
 cmd skyabyss skill slot @s 1 backstep
 cmd skyabyss skill cooldowns @s
 cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
-cmd execute as @s at @s anchored eyes positioned ^-2.2 ^-1.6 ^3.8 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
+cmd execute as @s at @s anchored eyes positioned ^-1.5 ^-1.6 ^3.0 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
 wait 10
 cmd skyabyss skill mana @s full
 cmd skyabyss skill cast @s 1
@@ -204,12 +240,16 @@ shot backstep_1p_d
 cmd skyabyss skill cooldowns @s
 
 perspective back
-wait 4
+fov 48
+cmd skyabyss cinematic stop
+huddemo off
+hud off
+wait 30
 cmd skyabyss skill learn @s backstep 3
 cmd skyabyss skill slot @s 1 backstep
 cmd skyabyss skill cooldowns @s
 cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
-cmd execute as @s at @s anchored eyes positioned ^-2.2 ^-1.6 ^3.8 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
+cmd execute as @s at @s anchored eyes positioned ^-1.5 ^-1.6 ^3.0 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
 wait 10
 cmd skyabyss skill mana @s full
 cmd skyabyss skill cast @s 1
@@ -225,12 +265,16 @@ cmd skyabyss skill cooldowns @s
 
 # ---- wind_rend (昼)
 perspective first
-wait 4
+fov 70
+cmd skyabyss cinematic stop
+huddemo off
+hud off
+wait 30
 cmd skyabyss skill learn @s wind_rend 3
 cmd skyabyss skill slot @s 1 wind_rend
 cmd skyabyss skill cooldowns @s
 cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
-cmd execute as @s at @s anchored eyes positioned ^-2.2 ^-1.6 ^3.8 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
+cmd execute as @s at @s anchored eyes positioned ^-1.5 ^-1.6 ^3.0 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
 wait 10
 cmd skyabyss skill mana @s full
 cmd skyabyss skill cast @s 1
@@ -245,12 +289,16 @@ shot wind_rend_1p_d
 cmd skyabyss skill cooldowns @s
 
 perspective back
-wait 4
+fov 48
+cmd skyabyss cinematic stop
+huddemo off
+hud off
+wait 30
 cmd skyabyss skill learn @s wind_rend 3
 cmd skyabyss skill slot @s 1 wind_rend
 cmd skyabyss skill cooldowns @s
 cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
-cmd execute as @s at @s anchored eyes positioned ^-2.2 ^-1.6 ^3.8 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
+cmd execute as @s at @s anchored eyes positioned ^-1.5 ^-1.6 ^3.0 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
 wait 10
 cmd skyabyss skill mana @s full
 cmd skyabyss skill cast @s 1
@@ -266,12 +314,16 @@ cmd skyabyss skill cooldowns @s
 
 # ---- ward_song (昼)
 perspective first
-wait 4
+fov 70
+cmd skyabyss cinematic stop
+huddemo off
+hud off
+wait 30
 cmd skyabyss skill learn @s ward_song 3
 cmd skyabyss skill slot @s 1 ward_song
 cmd skyabyss skill cooldowns @s
 cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
-cmd execute as @s at @s anchored eyes positioned ^-2.2 ^-1.6 ^3.8 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
+cmd execute as @s at @s anchored eyes positioned ^-1.5 ^-1.6 ^3.0 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
 wait 10
 cmd skyabyss skill mana @s full
 cmd skyabyss skill cast @s 1
@@ -286,12 +338,16 @@ shot ward_song_1p_d
 cmd skyabyss skill cooldowns @s
 
 perspective back
-wait 4
+fov 48
+cmd skyabyss cinematic stop
+huddemo off
+hud off
+wait 30
 cmd skyabyss skill learn @s ward_song 3
 cmd skyabyss skill slot @s 1 ward_song
 cmd skyabyss skill cooldowns @s
 cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
-cmd execute as @s at @s anchored eyes positioned ^-2.2 ^-1.6 ^3.8 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
+cmd execute as @s at @s anchored eyes positioned ^-1.5 ^-1.6 ^3.0 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
 wait 10
 cmd skyabyss skill mana @s full
 cmd skyabyss skill cast @s 1
@@ -307,12 +363,16 @@ cmd skyabyss skill cooldowns @s
 
 # ---- ebb_tide (昼)
 perspective first
-wait 4
+fov 70
+cmd skyabyss cinematic stop
+huddemo off
+hud off
+wait 30
 cmd skyabyss skill learn @s ebb_tide 3
 cmd skyabyss skill slot @s 1 ebb_tide
 cmd skyabyss skill cooldowns @s
 cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
-cmd execute as @s at @s anchored eyes positioned ^-2.2 ^-1.6 ^3.8 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
+cmd execute as @s at @s anchored eyes positioned ^-1.5 ^-1.6 ^3.0 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
 wait 10
 cmd skyabyss skill mana @s full
 cmd skyabyss skill cast @s 1
@@ -327,12 +387,16 @@ shot ebb_tide_1p_d
 cmd skyabyss skill cooldowns @s
 
 perspective back
-wait 4
+fov 48
+cmd skyabyss cinematic stop
+huddemo off
+hud off
+wait 30
 cmd skyabyss skill learn @s ebb_tide 3
 cmd skyabyss skill slot @s 1 ebb_tide
 cmd skyabyss skill cooldowns @s
 cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
-cmd execute as @s at @s anchored eyes positioned ^-2.2 ^-1.6 ^3.8 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
+cmd execute as @s at @s anchored eyes positioned ^-1.5 ^-1.6 ^3.0 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
 wait 10
 cmd skyabyss skill mana @s full
 cmd skyabyss skill cast @s 1
@@ -348,12 +412,16 @@ cmd skyabyss skill cooldowns @s
 
 # ---- cycle_song (昼)
 perspective first
-wait 4
+fov 70
+cmd skyabyss cinematic stop
+huddemo off
+hud off
+wait 30
 cmd skyabyss skill learn @s cycle_song 3
 cmd skyabyss skill slot @s 1 cycle_song
 cmd skyabyss skill cooldowns @s
 cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
-cmd execute as @s at @s anchored eyes positioned ^-2.2 ^-1.6 ^3.8 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
+cmd execute as @s at @s anchored eyes positioned ^-1.5 ^-1.6 ^3.0 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
 wait 10
 cmd skyabyss skill mana @s full
 cmd skyabyss skill cast @s 1
@@ -368,12 +436,16 @@ shot cycle_song_1p_d
 cmd skyabyss skill cooldowns @s
 
 perspective back
-wait 4
+fov 48
+cmd skyabyss cinematic stop
+huddemo off
+hud off
+wait 30
 cmd skyabyss skill learn @s cycle_song 3
 cmd skyabyss skill slot @s 1 cycle_song
 cmd skyabyss skill cooldowns @s
 cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
-cmd execute as @s at @s anchored eyes positioned ^-2.2 ^-1.6 ^3.8 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
+cmd execute as @s at @s anchored eyes positioned ^-1.5 ^-1.6 ^3.0 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
 wait 10
 cmd skyabyss skill mana @s full
 cmd skyabyss skill cast @s 1
@@ -389,12 +461,16 @@ cmd skyabyss skill cooldowns @s
 
 # ---- temper (昼)
 perspective first
-wait 4
+fov 70
+cmd skyabyss cinematic stop
+huddemo off
+hud off
+wait 30
 cmd skyabyss skill learn @s temper 3
 cmd skyabyss skill slot @s 1 temper
 cmd skyabyss skill cooldowns @s
 cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
-cmd execute as @s at @s anchored eyes positioned ^-2.2 ^-1.6 ^3.8 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
+cmd execute as @s at @s anchored eyes positioned ^-1.5 ^-1.6 ^3.0 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
 wait 10
 cmd skyabyss skill mana @s full
 cmd skyabyss skill cast @s 1
@@ -409,12 +485,16 @@ shot temper_1p_d
 cmd skyabyss skill cooldowns @s
 
 perspective back
-wait 4
+fov 48
+cmd skyabyss cinematic stop
+huddemo off
+hud off
+wait 30
 cmd skyabyss skill learn @s temper 3
 cmd skyabyss skill slot @s 1 temper
 cmd skyabyss skill cooldowns @s
 cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
-cmd execute as @s at @s anchored eyes positioned ^-2.2 ^-1.6 ^3.8 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
+cmd execute as @s at @s anchored eyes positioned ^-1.5 ^-1.6 ^3.0 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
 wait 10
 cmd skyabyss skill mana @s full
 cmd skyabyss skill cast @s 1
@@ -430,12 +510,16 @@ cmd skyabyss skill cooldowns @s
 
 # ---- ember_hammer (昼)
 perspective first
-wait 4
+fov 70
+cmd skyabyss cinematic stop
+huddemo off
+hud off
+wait 30
 cmd skyabyss skill learn @s ember_hammer 3
 cmd skyabyss skill slot @s 1 ember_hammer
 cmd skyabyss skill cooldowns @s
 cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
-cmd execute as @s at @s anchored eyes positioned ^-2.2 ^-1.6 ^3.8 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
+cmd execute as @s at @s anchored eyes positioned ^-1.5 ^-1.6 ^3.0 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
 wait 10
 cmd skyabyss skill mana @s full
 cmd skyabyss skill cast @s 1
@@ -450,12 +534,16 @@ shot ember_hammer_1p_d
 cmd skyabyss skill cooldowns @s
 
 perspective back
-wait 4
+fov 48
+cmd skyabyss cinematic stop
+huddemo off
+hud off
+wait 30
 cmd skyabyss skill learn @s ember_hammer 3
 cmd skyabyss skill slot @s 1 ember_hammer
 cmd skyabyss skill cooldowns @s
 cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
-cmd execute as @s at @s anchored eyes positioned ^-2.2 ^-1.6 ^3.8 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
+cmd execute as @s at @s anchored eyes positioned ^-1.5 ^-1.6 ^3.0 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
 wait 10
 cmd skyabyss skill mana @s full
 cmd skyabyss skill cast @s 1
@@ -471,12 +559,16 @@ cmd skyabyss skill cooldowns @s
 
 # ---- ash_scatter (昼)
 perspective first
-wait 4
+fov 70
+cmd skyabyss cinematic stop
+huddemo off
+hud off
+wait 30
 cmd skyabyss skill learn @s ash_scatter 3
 cmd skyabyss skill slot @s 1 ash_scatter
 cmd skyabyss skill cooldowns @s
 cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
-cmd execute as @s at @s anchored eyes positioned ^-2.2 ^-1.6 ^3.8 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
+cmd execute as @s at @s anchored eyes positioned ^-1.5 ^-1.6 ^3.0 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
 wait 10
 cmd skyabyss skill mana @s full
 cmd skyabyss skill cast @s 1
@@ -491,12 +583,16 @@ shot ash_scatter_1p_d
 cmd skyabyss skill cooldowns @s
 
 perspective back
-wait 4
+fov 48
+cmd skyabyss cinematic stop
+huddemo off
+hud off
+wait 30
 cmd skyabyss skill learn @s ash_scatter 3
 cmd skyabyss skill slot @s 1 ash_scatter
 cmd skyabyss skill cooldowns @s
 cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
-cmd execute as @s at @s anchored eyes positioned ^-2.2 ^-1.6 ^3.8 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
+cmd execute as @s at @s anchored eyes positioned ^-1.5 ^-1.6 ^3.0 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
 wait 10
 cmd skyabyss skill mana @s full
 cmd skyabyss skill cast @s 1
@@ -512,14 +608,18 @@ cmd skyabyss skill cooldowns @s
 
 # ---- cloud_pierce (昼)
 perspective first
-wait 4
+fov 70
+cmd skyabyss cinematic stop
+huddemo off
+hud off
+wait 30
 cmd item replace entity @s weapon.mainhand with minecraft:bow
 cmd give @s minecraft:arrow 64
 cmd skyabyss skill learn @s cloud_pierce 3
 cmd skyabyss skill slot @s 1 cloud_pierce
 cmd skyabyss skill cooldowns @s
 cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
-cmd execute as @s at @s anchored eyes positioned ^-2.2 ^-1.6 ^3.8 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
+cmd execute as @s at @s anchored eyes positioned ^-1.5 ^-1.6 ^3.0 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
 wait 10
 cmd skyabyss skill mana @s full
 cmd skyabyss skill cast @s 1
@@ -534,14 +634,18 @@ shot cloud_pierce_1p_d
 cmd skyabyss skill cooldowns @s
 
 perspective back
-wait 4
+fov 48
+cmd skyabyss cinematic stop
+huddemo off
+hud off
+wait 30
 cmd item replace entity @s weapon.mainhand with minecraft:bow
 cmd give @s minecraft:arrow 64
 cmd skyabyss skill learn @s cloud_pierce 3
 cmd skyabyss skill slot @s 1 cloud_pierce
 cmd skyabyss skill cooldowns @s
 cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
-cmd execute as @s at @s anchored eyes positioned ^-2.2 ^-1.6 ^3.8 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
+cmd execute as @s at @s anchored eyes positioned ^-1.5 ^-1.6 ^3.0 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
 wait 10
 cmd skyabyss skill mana @s full
 cmd skyabyss skill cast @s 1
@@ -557,12 +661,16 @@ cmd skyabyss skill cooldowns @s
 
 # ---- bone_trap (昼)
 perspective first
-wait 4
+fov 70
+cmd skyabyss cinematic stop
+huddemo off
+hud off
+wait 30
 cmd skyabyss skill learn @s bone_trap 3
 cmd skyabyss skill slot @s 1 bone_trap
 cmd skyabyss skill cooldowns @s
 cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
-cmd execute as @s at @s anchored eyes positioned ^-2.2 ^-1.6 ^3.8 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
+cmd execute as @s at @s anchored eyes positioned ^-1.5 ^-1.6 ^3.0 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
 wait 10
 cmd skyabyss skill mana @s full
 cmd skyabyss skill cast @s 1
@@ -577,12 +685,16 @@ shot bone_trap_1p_d
 cmd skyabyss skill cooldowns @s
 
 perspective back
-wait 4
+fov 48
+cmd skyabyss cinematic stop
+huddemo off
+hud off
+wait 30
 cmd skyabyss skill learn @s bone_trap 3
 cmd skyabyss skill slot @s 1 bone_trap
 cmd skyabyss skill cooldowns @s
 cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
-cmd execute as @s at @s anchored eyes positioned ^-2.2 ^-1.6 ^3.8 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
+cmd execute as @s at @s anchored eyes positioned ^-1.5 ^-1.6 ^3.0 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
 wait 10
 cmd skyabyss skill mana @s full
 cmd skyabyss skill cast @s 1
@@ -598,14 +710,18 @@ cmd skyabyss skill cooldowns @s
 
 # ---- sky_rain (昼)
 perspective first
-wait 4
+fov 70
+cmd skyabyss cinematic stop
+huddemo off
+hud off
+wait 30
 cmd item replace entity @s weapon.mainhand with minecraft:bow
 cmd give @s minecraft:arrow 64
 cmd skyabyss skill learn @s sky_rain 3
 cmd skyabyss skill slot @s 1 sky_rain
 cmd skyabyss skill cooldowns @s
 cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
-cmd execute as @s at @s anchored eyes positioned ^-2.2 ^-1.6 ^3.8 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
+cmd execute as @s at @s anchored eyes positioned ^-1.5 ^-1.6 ^3.0 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
 wait 10
 cmd skyabyss skill mana @s full
 cmd skyabyss skill cast @s 1
@@ -620,14 +736,18 @@ shot sky_rain_1p_d
 cmd skyabyss skill cooldowns @s
 
 perspective back
-wait 4
+fov 48
+cmd skyabyss cinematic stop
+huddemo off
+hud off
+wait 30
 cmd item replace entity @s weapon.mainhand with minecraft:bow
 cmd give @s minecraft:arrow 64
 cmd skyabyss skill learn @s sky_rain 3
 cmd skyabyss skill slot @s 1 sky_rain
 cmd skyabyss skill cooldowns @s
 cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
-cmd execute as @s at @s anchored eyes positioned ^-2.2 ^-1.6 ^3.8 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
+cmd execute as @s at @s anchored eyes positioned ^-1.5 ^-1.6 ^3.0 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
 wait 10
 cmd skyabyss skill mana @s full
 cmd skyabyss skill cast @s 1
@@ -643,12 +763,16 @@ cmd skyabyss skill cooldowns @s
 
 # ---- signal (昼)
 perspective first
-wait 4
+fov 70
+cmd skyabyss cinematic stop
+huddemo off
+hud off
+wait 30
 cmd skyabyss skill learn @s signal 3
 cmd skyabyss skill slot @s 1 signal
 cmd skyabyss skill cooldowns @s
 cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
-cmd execute as @s at @s anchored eyes positioned ^-2.2 ^-1.6 ^3.8 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
+cmd execute as @s at @s anchored eyes positioned ^-1.5 ^-1.6 ^3.0 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
 wait 10
 cmd skyabyss skill mana @s full
 cmd skyabyss skill cast @s 1
@@ -663,12 +787,16 @@ shot signal_1p_d
 cmd skyabyss skill cooldowns @s
 
 perspective back
-wait 4
+fov 48
+cmd skyabyss cinematic stop
+huddemo off
+hud off
+wait 30
 cmd skyabyss skill learn @s signal 3
 cmd skyabyss skill slot @s 1 signal
 cmd skyabyss skill cooldowns @s
 cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
-cmd execute as @s at @s anchored eyes positioned ^-2.2 ^-1.6 ^3.8 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
+cmd execute as @s at @s anchored eyes positioned ^-1.5 ^-1.6 ^3.0 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
 wait 10
 cmd skyabyss skill mana @s full
 cmd skyabyss skill cast @s 1
@@ -684,12 +812,16 @@ cmd skyabyss skill cooldowns @s
 
 # ---- dust_charge (昼)
 perspective first
-wait 4
+fov 70
+cmd skyabyss cinematic stop
+huddemo off
+hud off
+wait 30
 cmd skyabyss skill learn @s dust_charge 3
 cmd skyabyss skill slot @s 1 dust_charge
 cmd skyabyss skill cooldowns @s
 cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
-cmd execute as @s at @s anchored eyes positioned ^-2.2 ^-1.6 ^3.8 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
+cmd execute as @s at @s anchored eyes positioned ^-1.5 ^-1.6 ^3.0 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
 wait 10
 cmd skyabyss skill mana @s full
 cmd skyabyss skill cast @s 1
@@ -704,12 +836,16 @@ shot dust_charge_1p_d
 cmd skyabyss skill cooldowns @s
 
 perspective back
-wait 4
+fov 48
+cmd skyabyss cinematic stop
+huddemo off
+hud off
+wait 30
 cmd skyabyss skill learn @s dust_charge 3
 cmd skyabyss skill slot @s 1 dust_charge
 cmd skyabyss skill cooldowns @s
 cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
-cmd execute as @s at @s anchored eyes positioned ^-2.2 ^-1.6 ^3.8 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
+cmd execute as @s at @s anchored eyes positioned ^-1.5 ^-1.6 ^3.0 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
 wait 10
 cmd skyabyss skill mana @s full
 cmd skyabyss skill cast @s 1
@@ -725,12 +861,16 @@ cmd skyabyss skill cooldowns @s
 
 # ---- steam_bell (昼)
 perspective first
-wait 4
+fov 70
+cmd skyabyss cinematic stop
+huddemo off
+hud off
+wait 30
 cmd skyabyss skill learn @s steam_bell 3
 cmd skyabyss skill slot @s 1 steam_bell
 cmd skyabyss skill cooldowns @s
 cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
-cmd execute as @s at @s anchored eyes positioned ^-2.2 ^-1.6 ^3.8 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
+cmd execute as @s at @s anchored eyes positioned ^-1.5 ^-1.6 ^3.0 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
 wait 10
 cmd skyabyss skill mana @s full
 cmd skyabyss skill cast @s 1
@@ -745,12 +885,16 @@ shot steam_bell_1p_d
 cmd skyabyss skill cooldowns @s
 
 perspective back
-wait 4
+fov 48
+cmd skyabyss cinematic stop
+huddemo off
+hud off
+wait 30
 cmd skyabyss skill learn @s steam_bell 3
 cmd skyabyss skill slot @s 1 steam_bell
 cmd skyabyss skill cooldowns @s
 cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
-cmd execute as @s at @s anchored eyes positioned ^-2.2 ^-1.6 ^3.8 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
+cmd execute as @s at @s anchored eyes positioned ^-1.5 ^-1.6 ^3.0 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
 wait 10
 cmd skyabyss skill mana @s full
 cmd skyabyss skill cast @s 1
@@ -766,12 +910,16 @@ cmd skyabyss skill cooldowns @s
 
 # ---- cinder_volley (昼)
 perspective first
-wait 4
+fov 70
+cmd skyabyss cinematic stop
+huddemo off
+hud off
+wait 30
 cmd skyabyss skill learn @s cinder_volley 3
 cmd skyabyss skill slot @s 1 cinder_volley
 cmd skyabyss skill cooldowns @s
 cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
-cmd execute as @s at @s anchored eyes positioned ^-2.2 ^-1.6 ^3.8 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
+cmd execute as @s at @s anchored eyes positioned ^-1.5 ^-1.6 ^3.0 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
 wait 10
 cmd skyabyss skill mana @s full
 cmd skyabyss skill cast @s 1
@@ -786,12 +934,16 @@ shot cinder_volley_1p_d
 cmd skyabyss skill cooldowns @s
 
 perspective back
-wait 4
+fov 48
+cmd skyabyss cinematic stop
+huddemo off
+hud off
+wait 30
 cmd skyabyss skill learn @s cinder_volley 3
 cmd skyabyss skill slot @s 1 cinder_volley
 cmd skyabyss skill cooldowns @s
 cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
-cmd execute as @s at @s anchored eyes positioned ^-2.2 ^-1.6 ^3.8 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
+cmd execute as @s at @s anchored eyes positioned ^-1.5 ^-1.6 ^3.0 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
 wait 10
 cmd skyabyss skill mana @s full
 cmd skyabyss skill cast @s 1
@@ -807,12 +959,16 @@ cmd skyabyss skill cooldowns @s
 
 # ---- deep_pull (昼)
 perspective first
-wait 4
+fov 70
+cmd skyabyss cinematic stop
+huddemo off
+hud off
+wait 30
 cmd skyabyss skill learn @s deep_pull 3
 cmd skyabyss skill slot @s 1 deep_pull
 cmd skyabyss skill cooldowns @s
 cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
-cmd execute as @s at @s anchored eyes positioned ^-2.2 ^-1.6 ^3.8 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
+cmd execute as @s at @s anchored eyes positioned ^-1.5 ^-1.6 ^3.0 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
 wait 10
 cmd skyabyss skill mana @s full
 cmd skyabyss skill cast @s 1
@@ -827,12 +983,16 @@ shot deep_pull_1p_d
 cmd skyabyss skill cooldowns @s
 
 perspective back
-wait 4
+fov 48
+cmd skyabyss cinematic stop
+huddemo off
+hud off
+wait 30
 cmd skyabyss skill learn @s deep_pull 3
 cmd skyabyss skill slot @s 1 deep_pull
 cmd skyabyss skill cooldowns @s
 cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
-cmd execute as @s at @s anchored eyes positioned ^-2.2 ^-1.6 ^3.8 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
+cmd execute as @s at @s anchored eyes positioned ^-1.5 ^-1.6 ^3.0 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
 wait 10
 cmd skyabyss skill mana @s full
 cmd skyabyss skill cast @s 1
@@ -848,12 +1008,16 @@ cmd skyabyss skill cooldowns @s
 
 # ---- deep_echo (昼)
 perspective first
-wait 4
+fov 70
+cmd skyabyss cinematic stop
+huddemo off
+hud off
+wait 30
 cmd skyabyss skill learn @s deep_echo 3
 cmd skyabyss skill slot @s 1 deep_echo
 cmd skyabyss skill cooldowns @s
 cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
-cmd execute as @s at @s anchored eyes positioned ^-2.2 ^-1.6 ^3.8 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
+cmd execute as @s at @s anchored eyes positioned ^-1.5 ^-1.6 ^3.0 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
 wait 10
 cmd skyabyss skill mana @s full
 cmd skyabyss skill cast @s 1
@@ -868,12 +1032,16 @@ shot deep_echo_1p_d
 cmd skyabyss skill cooldowns @s
 
 perspective back
-wait 4
+fov 48
+cmd skyabyss cinematic stop
+huddemo off
+hud off
+wait 30
 cmd skyabyss skill learn @s deep_echo 3
 cmd skyabyss skill slot @s 1 deep_echo
 cmd skyabyss skill cooldowns @s
 cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
-cmd execute as @s at @s anchored eyes positioned ^-2.2 ^-1.6 ^3.8 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
+cmd execute as @s at @s anchored eyes positioned ^-1.5 ^-1.6 ^3.0 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
 wait 10
 cmd skyabyss skill mana @s full
 cmd skyabyss skill cast @s 1
@@ -889,12 +1057,16 @@ cmd skyabyss skill cooldowns @s
 
 # ---- deep_maw (昼)
 perspective first
-wait 4
+fov 70
+cmd skyabyss cinematic stop
+huddemo off
+hud off
+wait 30
 cmd skyabyss skill learn @s deep_maw 3
 cmd skyabyss skill slot @s 1 deep_maw
 cmd skyabyss skill cooldowns @s
 cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
-cmd execute as @s at @s anchored eyes positioned ^-2.2 ^-1.6 ^3.8 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
+cmd execute as @s at @s anchored eyes positioned ^-1.5 ^-1.6 ^3.0 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
 wait 10
 cmd skyabyss skill mana @s full
 cmd skyabyss skill cast @s 1
@@ -909,12 +1081,16 @@ shot deep_maw_1p_d
 cmd skyabyss skill cooldowns @s
 
 perspective back
-wait 4
+fov 48
+cmd skyabyss cinematic stop
+huddemo off
+hud off
+wait 30
 cmd skyabyss skill learn @s deep_maw 3
 cmd skyabyss skill slot @s 1 deep_maw
 cmd skyabyss skill cooldowns @s
 cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
-cmd execute as @s at @s anchored eyes positioned ^-2.2 ^-1.6 ^3.8 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
+cmd execute as @s at @s anchored eyes positioned ^-1.5 ^-1.6 ^3.0 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
 wait 10
 cmd skyabyss skill mana @s full
 cmd skyabyss skill cast @s 1
@@ -930,12 +1106,16 @@ cmd skyabyss skill cooldowns @s
 
 # ---- echo_strike (昼)
 perspective first
-wait 4
+fov 70
+cmd skyabyss cinematic stop
+huddemo off
+hud off
+wait 30
 cmd skyabyss skill learn @s echo_strike 3
 cmd skyabyss skill slot @s 1 echo_strike
 cmd skyabyss skill cooldowns @s
 cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
-cmd execute as @s at @s anchored eyes positioned ^-2.2 ^-1.6 ^3.8 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
+cmd execute as @s at @s anchored eyes positioned ^-1.5 ^-1.6 ^3.0 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
 wait 10
 cmd skyabyss skill mana @s full
 cmd skyabyss skill cast @s 1
@@ -950,12 +1130,16 @@ shot echo_strike_1p_d
 cmd skyabyss skill cooldowns @s
 
 perspective back
-wait 4
+fov 48
+cmd skyabyss cinematic stop
+huddemo off
+hud off
+wait 30
 cmd skyabyss skill learn @s echo_strike 3
 cmd skyabyss skill slot @s 1 echo_strike
 cmd skyabyss skill cooldowns @s
 cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
-cmd execute as @s at @s anchored eyes positioned ^-2.2 ^-1.6 ^3.8 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
+cmd execute as @s at @s anchored eyes positioned ^-1.5 ^-1.6 ^3.0 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
 wait 10
 cmd skyabyss skill mana @s full
 cmd skyabyss skill cast @s 1
@@ -971,12 +1155,16 @@ cmd skyabyss skill cooldowns @s
 
 # ---- grave_bell (昼)
 perspective first
-wait 4
+fov 70
+cmd skyabyss cinematic stop
+huddemo off
+hud off
+wait 30
 cmd skyabyss skill learn @s grave_bell 3
 cmd skyabyss skill slot @s 1 grave_bell
 cmd skyabyss skill cooldowns @s
 cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
-cmd execute as @s at @s anchored eyes positioned ^-2.2 ^-1.6 ^3.8 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
+cmd execute as @s at @s anchored eyes positioned ^-1.5 ^-1.6 ^3.0 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
 wait 10
 cmd skyabyss skill mana @s full
 cmd skyabyss skill cast @s 1
@@ -991,12 +1179,16 @@ shot grave_bell_1p_d
 cmd skyabyss skill cooldowns @s
 
 perspective back
-wait 4
+fov 48
+cmd skyabyss cinematic stop
+huddemo off
+hud off
+wait 30
 cmd skyabyss skill learn @s grave_bell 3
 cmd skyabyss skill slot @s 1 grave_bell
 cmd skyabyss skill cooldowns @s
 cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
-cmd execute as @s at @s anchored eyes positioned ^-2.2 ^-1.6 ^3.8 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
+cmd execute as @s at @s anchored eyes positioned ^-1.5 ^-1.6 ^3.0 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
 wait 10
 cmd skyabyss skill mana @s full
 cmd skyabyss skill cast @s 1
@@ -1012,12 +1204,16 @@ cmd skyabyss skill cooldowns @s
 
 # ---- final_light (昼)
 perspective first
-wait 4
+fov 70
+cmd skyabyss cinematic stop
+huddemo off
+hud off
+wait 30
 cmd skyabyss skill learn @s final_light 3
 cmd skyabyss skill slot @s 1 final_light
 cmd skyabyss skill cooldowns @s
 cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
-cmd execute as @s at @s anchored eyes positioned ^-2.2 ^-1.6 ^3.8 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
+cmd execute as @s at @s anchored eyes positioned ^-1.5 ^-1.6 ^3.0 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
 wait 10
 cmd skyabyss skill mana @s full
 cmd skyabyss skill cast @s 1
@@ -1032,12 +1228,16 @@ shot final_light_1p_d
 cmd skyabyss skill cooldowns @s
 
 perspective back
-wait 4
+fov 48
+cmd skyabyss cinematic stop
+huddemo off
+hud off
+wait 30
 cmd skyabyss skill learn @s final_light 3
 cmd skyabyss skill slot @s 1 final_light
 cmd skyabyss skill cooldowns @s
 cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
-cmd execute as @s at @s anchored eyes positioned ^-2.2 ^-1.6 ^3.8 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
+cmd execute as @s at @s anchored eyes positioned ^-1.5 ^-1.6 ^3.0 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
 wait 10
 cmd skyabyss skill mana @s full
 cmd skyabyss skill cast @s 1
@@ -1056,12 +1256,16 @@ cmd time set midnight
 wait 20
 # ---- titan_cleave (夜)
 perspective first
-wait 4
+fov 70
+cmd skyabyss cinematic stop
+huddemo off
+hud off
+wait 30
 cmd skyabyss skill learn @s titan_cleave 3
 cmd skyabyss skill slot @s 1 titan_cleave
 cmd skyabyss skill cooldowns @s
 cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
-cmd execute as @s at @s anchored eyes positioned ^-2.2 ^-1.6 ^3.8 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
+cmd execute as @s at @s anchored eyes positioned ^-1.5 ^-1.6 ^3.0 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
 wait 10
 cmd skyabyss skill mana @s full
 cmd skyabyss skill cast @s 1
@@ -1072,12 +1276,16 @@ shot titan_cleave_night_1p_c
 cmd skyabyss skill cooldowns @s
 
 perspective back
-wait 4
+fov 48
+cmd skyabyss cinematic stop
+huddemo off
+hud off
+wait 30
 cmd skyabyss skill learn @s titan_cleave 3
 cmd skyabyss skill slot @s 1 titan_cleave
 cmd skyabyss skill cooldowns @s
 cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
-cmd execute as @s at @s anchored eyes positioned ^-2.2 ^-1.6 ^3.8 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
+cmd execute as @s at @s anchored eyes positioned ^-1.5 ^-1.6 ^3.0 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
 wait 10
 cmd skyabyss skill mana @s full
 cmd skyabyss skill cast @s 1
@@ -1089,12 +1297,16 @@ cmd skyabyss skill cooldowns @s
 
 # ---- rock_call (夜)
 perspective first
-wait 4
+fov 70
+cmd skyabyss cinematic stop
+huddemo off
+hud off
+wait 30
 cmd skyabyss skill learn @s rock_call 3
 cmd skyabyss skill slot @s 1 rock_call
 cmd skyabyss skill cooldowns @s
 cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
-cmd execute as @s at @s anchored eyes positioned ^-2.2 ^-1.6 ^3.8 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
+cmd execute as @s at @s anchored eyes positioned ^-1.5 ^-1.6 ^3.0 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
 wait 10
 cmd skyabyss skill mana @s full
 cmd skyabyss skill cast @s 1
@@ -1105,12 +1317,16 @@ shot rock_call_night_1p_c
 cmd skyabyss skill cooldowns @s
 
 perspective back
-wait 4
+fov 48
+cmd skyabyss cinematic stop
+huddemo off
+hud off
+wait 30
 cmd skyabyss skill learn @s rock_call 3
 cmd skyabyss skill slot @s 1 rock_call
 cmd skyabyss skill cooldowns @s
 cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
-cmd execute as @s at @s anchored eyes positioned ^-2.2 ^-1.6 ^3.8 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
+cmd execute as @s at @s anchored eyes positioned ^-1.5 ^-1.6 ^3.0 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
 wait 10
 cmd skyabyss skill mana @s full
 cmd skyabyss skill cast @s 1
@@ -1122,12 +1338,16 @@ cmd skyabyss skill cooldowns @s
 
 # ---- whale_sweep (夜)
 perspective first
-wait 4
+fov 70
+cmd skyabyss cinematic stop
+huddemo off
+hud off
+wait 30
 cmd skyabyss skill learn @s whale_sweep 3
 cmd skyabyss skill slot @s 1 whale_sweep
 cmd skyabyss skill cooldowns @s
 cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
-cmd execute as @s at @s anchored eyes positioned ^-2.2 ^-1.6 ^3.8 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
+cmd execute as @s at @s anchored eyes positioned ^-1.5 ^-1.6 ^3.0 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
 wait 10
 cmd skyabyss skill mana @s full
 cmd skyabyss skill cast @s 1
@@ -1138,12 +1358,16 @@ shot whale_sweep_night_1p_c
 cmd skyabyss skill cooldowns @s
 
 perspective back
-wait 4
+fov 48
+cmd skyabyss cinematic stop
+huddemo off
+hud off
+wait 30
 cmd skyabyss skill learn @s whale_sweep 3
 cmd skyabyss skill slot @s 1 whale_sweep
 cmd skyabyss skill cooldowns @s
 cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
-cmd execute as @s at @s anchored eyes positioned ^-2.2 ^-1.6 ^3.8 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
+cmd execute as @s at @s anchored eyes positioned ^-1.5 ^-1.6 ^3.0 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
 wait 10
 cmd skyabyss skill mana @s full
 cmd skyabyss skill cast @s 1
@@ -1155,12 +1379,16 @@ cmd skyabyss skill cooldowns @s
 
 # ---- lunge (夜)
 perspective first
-wait 4
+fov 70
+cmd skyabyss cinematic stop
+huddemo off
+hud off
+wait 30
 cmd skyabyss skill learn @s lunge 3
 cmd skyabyss skill slot @s 1 lunge
 cmd skyabyss skill cooldowns @s
 cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
-cmd execute as @s at @s anchored eyes positioned ^-2.2 ^-1.6 ^3.8 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
+cmd execute as @s at @s anchored eyes positioned ^-1.5 ^-1.6 ^3.0 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
 wait 10
 cmd skyabyss skill mana @s full
 cmd skyabyss skill cast @s 1
@@ -1171,12 +1399,16 @@ shot lunge_night_1p_c
 cmd skyabyss skill cooldowns @s
 
 perspective back
-wait 4
+fov 48
+cmd skyabyss cinematic stop
+huddemo off
+hud off
+wait 30
 cmd skyabyss skill learn @s lunge 3
 cmd skyabyss skill slot @s 1 lunge
 cmd skyabyss skill cooldowns @s
 cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
-cmd execute as @s at @s anchored eyes positioned ^-2.2 ^-1.6 ^3.8 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
+cmd execute as @s at @s anchored eyes positioned ^-1.5 ^-1.6 ^3.0 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
 wait 10
 cmd skyabyss skill mana @s full
 cmd skyabyss skill cast @s 1
@@ -1188,12 +1420,16 @@ cmd skyabyss skill cooldowns @s
 
 # ---- backstep (夜)
 perspective first
-wait 4
+fov 70
+cmd skyabyss cinematic stop
+huddemo off
+hud off
+wait 30
 cmd skyabyss skill learn @s backstep 3
 cmd skyabyss skill slot @s 1 backstep
 cmd skyabyss skill cooldowns @s
 cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
-cmd execute as @s at @s anchored eyes positioned ^-2.2 ^-1.6 ^3.8 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
+cmd execute as @s at @s anchored eyes positioned ^-1.5 ^-1.6 ^3.0 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
 wait 10
 cmd skyabyss skill mana @s full
 cmd skyabyss skill cast @s 1
@@ -1204,12 +1440,16 @@ shot backstep_night_1p_c
 cmd skyabyss skill cooldowns @s
 
 perspective back
-wait 4
+fov 48
+cmd skyabyss cinematic stop
+huddemo off
+hud off
+wait 30
 cmd skyabyss skill learn @s backstep 3
 cmd skyabyss skill slot @s 1 backstep
 cmd skyabyss skill cooldowns @s
 cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
-cmd execute as @s at @s anchored eyes positioned ^-2.2 ^-1.6 ^3.8 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
+cmd execute as @s at @s anchored eyes positioned ^-1.5 ^-1.6 ^3.0 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
 wait 10
 cmd skyabyss skill mana @s full
 cmd skyabyss skill cast @s 1
@@ -1221,12 +1461,16 @@ cmd skyabyss skill cooldowns @s
 
 # ---- wind_rend (夜)
 perspective first
-wait 4
+fov 70
+cmd skyabyss cinematic stop
+huddemo off
+hud off
+wait 30
 cmd skyabyss skill learn @s wind_rend 3
 cmd skyabyss skill slot @s 1 wind_rend
 cmd skyabyss skill cooldowns @s
 cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
-cmd execute as @s at @s anchored eyes positioned ^-2.2 ^-1.6 ^3.8 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
+cmd execute as @s at @s anchored eyes positioned ^-1.5 ^-1.6 ^3.0 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
 wait 10
 cmd skyabyss skill mana @s full
 cmd skyabyss skill cast @s 1
@@ -1237,12 +1481,16 @@ shot wind_rend_night_1p_c
 cmd skyabyss skill cooldowns @s
 
 perspective back
-wait 4
+fov 48
+cmd skyabyss cinematic stop
+huddemo off
+hud off
+wait 30
 cmd skyabyss skill learn @s wind_rend 3
 cmd skyabyss skill slot @s 1 wind_rend
 cmd skyabyss skill cooldowns @s
 cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
-cmd execute as @s at @s anchored eyes positioned ^-2.2 ^-1.6 ^3.8 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
+cmd execute as @s at @s anchored eyes positioned ^-1.5 ^-1.6 ^3.0 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
 wait 10
 cmd skyabyss skill mana @s full
 cmd skyabyss skill cast @s 1
@@ -1254,12 +1502,16 @@ cmd skyabyss skill cooldowns @s
 
 # ---- ward_song (夜)
 perspective first
-wait 4
+fov 70
+cmd skyabyss cinematic stop
+huddemo off
+hud off
+wait 30
 cmd skyabyss skill learn @s ward_song 3
 cmd skyabyss skill slot @s 1 ward_song
 cmd skyabyss skill cooldowns @s
 cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
-cmd execute as @s at @s anchored eyes positioned ^-2.2 ^-1.6 ^3.8 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
+cmd execute as @s at @s anchored eyes positioned ^-1.5 ^-1.6 ^3.0 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
 wait 10
 cmd skyabyss skill mana @s full
 cmd skyabyss skill cast @s 1
@@ -1270,12 +1522,16 @@ shot ward_song_night_1p_c
 cmd skyabyss skill cooldowns @s
 
 perspective back
-wait 4
+fov 48
+cmd skyabyss cinematic stop
+huddemo off
+hud off
+wait 30
 cmd skyabyss skill learn @s ward_song 3
 cmd skyabyss skill slot @s 1 ward_song
 cmd skyabyss skill cooldowns @s
 cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
-cmd execute as @s at @s anchored eyes positioned ^-2.2 ^-1.6 ^3.8 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
+cmd execute as @s at @s anchored eyes positioned ^-1.5 ^-1.6 ^3.0 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
 wait 10
 cmd skyabyss skill mana @s full
 cmd skyabyss skill cast @s 1
@@ -1287,12 +1543,16 @@ cmd skyabyss skill cooldowns @s
 
 # ---- ebb_tide (夜)
 perspective first
-wait 4
+fov 70
+cmd skyabyss cinematic stop
+huddemo off
+hud off
+wait 30
 cmd skyabyss skill learn @s ebb_tide 3
 cmd skyabyss skill slot @s 1 ebb_tide
 cmd skyabyss skill cooldowns @s
 cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
-cmd execute as @s at @s anchored eyes positioned ^-2.2 ^-1.6 ^3.8 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
+cmd execute as @s at @s anchored eyes positioned ^-1.5 ^-1.6 ^3.0 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
 wait 10
 cmd skyabyss skill mana @s full
 cmd skyabyss skill cast @s 1
@@ -1303,12 +1563,16 @@ shot ebb_tide_night_1p_c
 cmd skyabyss skill cooldowns @s
 
 perspective back
-wait 4
+fov 48
+cmd skyabyss cinematic stop
+huddemo off
+hud off
+wait 30
 cmd skyabyss skill learn @s ebb_tide 3
 cmd skyabyss skill slot @s 1 ebb_tide
 cmd skyabyss skill cooldowns @s
 cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
-cmd execute as @s at @s anchored eyes positioned ^-2.2 ^-1.6 ^3.8 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
+cmd execute as @s at @s anchored eyes positioned ^-1.5 ^-1.6 ^3.0 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
 wait 10
 cmd skyabyss skill mana @s full
 cmd skyabyss skill cast @s 1
@@ -1320,12 +1584,16 @@ cmd skyabyss skill cooldowns @s
 
 # ---- cycle_song (夜)
 perspective first
-wait 4
+fov 70
+cmd skyabyss cinematic stop
+huddemo off
+hud off
+wait 30
 cmd skyabyss skill learn @s cycle_song 3
 cmd skyabyss skill slot @s 1 cycle_song
 cmd skyabyss skill cooldowns @s
 cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
-cmd execute as @s at @s anchored eyes positioned ^-2.2 ^-1.6 ^3.8 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
+cmd execute as @s at @s anchored eyes positioned ^-1.5 ^-1.6 ^3.0 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
 wait 10
 cmd skyabyss skill mana @s full
 cmd skyabyss skill cast @s 1
@@ -1336,12 +1604,16 @@ shot cycle_song_night_1p_c
 cmd skyabyss skill cooldowns @s
 
 perspective back
-wait 4
+fov 48
+cmd skyabyss cinematic stop
+huddemo off
+hud off
+wait 30
 cmd skyabyss skill learn @s cycle_song 3
 cmd skyabyss skill slot @s 1 cycle_song
 cmd skyabyss skill cooldowns @s
 cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
-cmd execute as @s at @s anchored eyes positioned ^-2.2 ^-1.6 ^3.8 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
+cmd execute as @s at @s anchored eyes positioned ^-1.5 ^-1.6 ^3.0 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
 wait 10
 cmd skyabyss skill mana @s full
 cmd skyabyss skill cast @s 1
@@ -1353,12 +1625,16 @@ cmd skyabyss skill cooldowns @s
 
 # ---- temper (夜)
 perspective first
-wait 4
+fov 70
+cmd skyabyss cinematic stop
+huddemo off
+hud off
+wait 30
 cmd skyabyss skill learn @s temper 3
 cmd skyabyss skill slot @s 1 temper
 cmd skyabyss skill cooldowns @s
 cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
-cmd execute as @s at @s anchored eyes positioned ^-2.2 ^-1.6 ^3.8 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
+cmd execute as @s at @s anchored eyes positioned ^-1.5 ^-1.6 ^3.0 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
 wait 10
 cmd skyabyss skill mana @s full
 cmd skyabyss skill cast @s 1
@@ -1369,12 +1645,16 @@ shot temper_night_1p_c
 cmd skyabyss skill cooldowns @s
 
 perspective back
-wait 4
+fov 48
+cmd skyabyss cinematic stop
+huddemo off
+hud off
+wait 30
 cmd skyabyss skill learn @s temper 3
 cmd skyabyss skill slot @s 1 temper
 cmd skyabyss skill cooldowns @s
 cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
-cmd execute as @s at @s anchored eyes positioned ^-2.2 ^-1.6 ^3.8 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
+cmd execute as @s at @s anchored eyes positioned ^-1.5 ^-1.6 ^3.0 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
 wait 10
 cmd skyabyss skill mana @s full
 cmd skyabyss skill cast @s 1
@@ -1386,12 +1666,16 @@ cmd skyabyss skill cooldowns @s
 
 # ---- ember_hammer (夜)
 perspective first
-wait 4
+fov 70
+cmd skyabyss cinematic stop
+huddemo off
+hud off
+wait 30
 cmd skyabyss skill learn @s ember_hammer 3
 cmd skyabyss skill slot @s 1 ember_hammer
 cmd skyabyss skill cooldowns @s
 cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
-cmd execute as @s at @s anchored eyes positioned ^-2.2 ^-1.6 ^3.8 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
+cmd execute as @s at @s anchored eyes positioned ^-1.5 ^-1.6 ^3.0 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
 wait 10
 cmd skyabyss skill mana @s full
 cmd skyabyss skill cast @s 1
@@ -1402,12 +1686,16 @@ shot ember_hammer_night_1p_c
 cmd skyabyss skill cooldowns @s
 
 perspective back
-wait 4
+fov 48
+cmd skyabyss cinematic stop
+huddemo off
+hud off
+wait 30
 cmd skyabyss skill learn @s ember_hammer 3
 cmd skyabyss skill slot @s 1 ember_hammer
 cmd skyabyss skill cooldowns @s
 cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
-cmd execute as @s at @s anchored eyes positioned ^-2.2 ^-1.6 ^3.8 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
+cmd execute as @s at @s anchored eyes positioned ^-1.5 ^-1.6 ^3.0 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
 wait 10
 cmd skyabyss skill mana @s full
 cmd skyabyss skill cast @s 1
@@ -1419,12 +1707,16 @@ cmd skyabyss skill cooldowns @s
 
 # ---- ash_scatter (夜)
 perspective first
-wait 4
+fov 70
+cmd skyabyss cinematic stop
+huddemo off
+hud off
+wait 30
 cmd skyabyss skill learn @s ash_scatter 3
 cmd skyabyss skill slot @s 1 ash_scatter
 cmd skyabyss skill cooldowns @s
 cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
-cmd execute as @s at @s anchored eyes positioned ^-2.2 ^-1.6 ^3.8 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
+cmd execute as @s at @s anchored eyes positioned ^-1.5 ^-1.6 ^3.0 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
 wait 10
 cmd skyabyss skill mana @s full
 cmd skyabyss skill cast @s 1
@@ -1435,12 +1727,16 @@ shot ash_scatter_night_1p_c
 cmd skyabyss skill cooldowns @s
 
 perspective back
-wait 4
+fov 48
+cmd skyabyss cinematic stop
+huddemo off
+hud off
+wait 30
 cmd skyabyss skill learn @s ash_scatter 3
 cmd skyabyss skill slot @s 1 ash_scatter
 cmd skyabyss skill cooldowns @s
 cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
-cmd execute as @s at @s anchored eyes positioned ^-2.2 ^-1.6 ^3.8 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
+cmd execute as @s at @s anchored eyes positioned ^-1.5 ^-1.6 ^3.0 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
 wait 10
 cmd skyabyss skill mana @s full
 cmd skyabyss skill cast @s 1
@@ -1452,14 +1748,18 @@ cmd skyabyss skill cooldowns @s
 
 # ---- cloud_pierce (夜)
 perspective first
-wait 4
+fov 70
+cmd skyabyss cinematic stop
+huddemo off
+hud off
+wait 30
 cmd item replace entity @s weapon.mainhand with minecraft:bow
 cmd give @s minecraft:arrow 64
 cmd skyabyss skill learn @s cloud_pierce 3
 cmd skyabyss skill slot @s 1 cloud_pierce
 cmd skyabyss skill cooldowns @s
 cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
-cmd execute as @s at @s anchored eyes positioned ^-2.2 ^-1.6 ^3.8 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
+cmd execute as @s at @s anchored eyes positioned ^-1.5 ^-1.6 ^3.0 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
 wait 10
 cmd skyabyss skill mana @s full
 cmd skyabyss skill cast @s 1
@@ -1470,14 +1770,18 @@ shot cloud_pierce_night_1p_c
 cmd skyabyss skill cooldowns @s
 
 perspective back
-wait 4
+fov 48
+cmd skyabyss cinematic stop
+huddemo off
+hud off
+wait 30
 cmd item replace entity @s weapon.mainhand with minecraft:bow
 cmd give @s minecraft:arrow 64
 cmd skyabyss skill learn @s cloud_pierce 3
 cmd skyabyss skill slot @s 1 cloud_pierce
 cmd skyabyss skill cooldowns @s
 cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
-cmd execute as @s at @s anchored eyes positioned ^-2.2 ^-1.6 ^3.8 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
+cmd execute as @s at @s anchored eyes positioned ^-1.5 ^-1.6 ^3.0 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
 wait 10
 cmd skyabyss skill mana @s full
 cmd skyabyss skill cast @s 1
@@ -1489,12 +1793,16 @@ cmd skyabyss skill cooldowns @s
 
 # ---- bone_trap (夜)
 perspective first
-wait 4
+fov 70
+cmd skyabyss cinematic stop
+huddemo off
+hud off
+wait 30
 cmd skyabyss skill learn @s bone_trap 3
 cmd skyabyss skill slot @s 1 bone_trap
 cmd skyabyss skill cooldowns @s
 cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
-cmd execute as @s at @s anchored eyes positioned ^-2.2 ^-1.6 ^3.8 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
+cmd execute as @s at @s anchored eyes positioned ^-1.5 ^-1.6 ^3.0 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
 wait 10
 cmd skyabyss skill mana @s full
 cmd skyabyss skill cast @s 1
@@ -1505,12 +1813,16 @@ shot bone_trap_night_1p_c
 cmd skyabyss skill cooldowns @s
 
 perspective back
-wait 4
+fov 48
+cmd skyabyss cinematic stop
+huddemo off
+hud off
+wait 30
 cmd skyabyss skill learn @s bone_trap 3
 cmd skyabyss skill slot @s 1 bone_trap
 cmd skyabyss skill cooldowns @s
 cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
-cmd execute as @s at @s anchored eyes positioned ^-2.2 ^-1.6 ^3.8 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
+cmd execute as @s at @s anchored eyes positioned ^-1.5 ^-1.6 ^3.0 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
 wait 10
 cmd skyabyss skill mana @s full
 cmd skyabyss skill cast @s 1
@@ -1522,14 +1834,18 @@ cmd skyabyss skill cooldowns @s
 
 # ---- sky_rain (夜)
 perspective first
-wait 4
+fov 70
+cmd skyabyss cinematic stop
+huddemo off
+hud off
+wait 30
 cmd item replace entity @s weapon.mainhand with minecraft:bow
 cmd give @s minecraft:arrow 64
 cmd skyabyss skill learn @s sky_rain 3
 cmd skyabyss skill slot @s 1 sky_rain
 cmd skyabyss skill cooldowns @s
 cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
-cmd execute as @s at @s anchored eyes positioned ^-2.2 ^-1.6 ^3.8 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
+cmd execute as @s at @s anchored eyes positioned ^-1.5 ^-1.6 ^3.0 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
 wait 10
 cmd skyabyss skill mana @s full
 cmd skyabyss skill cast @s 1
@@ -1540,14 +1856,18 @@ shot sky_rain_night_1p_c
 cmd skyabyss skill cooldowns @s
 
 perspective back
-wait 4
+fov 48
+cmd skyabyss cinematic stop
+huddemo off
+hud off
+wait 30
 cmd item replace entity @s weapon.mainhand with minecraft:bow
 cmd give @s minecraft:arrow 64
 cmd skyabyss skill learn @s sky_rain 3
 cmd skyabyss skill slot @s 1 sky_rain
 cmd skyabyss skill cooldowns @s
 cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
-cmd execute as @s at @s anchored eyes positioned ^-2.2 ^-1.6 ^3.8 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
+cmd execute as @s at @s anchored eyes positioned ^-1.5 ^-1.6 ^3.0 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
 wait 10
 cmd skyabyss skill mana @s full
 cmd skyabyss skill cast @s 1
@@ -1559,12 +1879,16 @@ cmd skyabyss skill cooldowns @s
 
 # ---- signal (夜)
 perspective first
-wait 4
+fov 70
+cmd skyabyss cinematic stop
+huddemo off
+hud off
+wait 30
 cmd skyabyss skill learn @s signal 3
 cmd skyabyss skill slot @s 1 signal
 cmd skyabyss skill cooldowns @s
 cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
-cmd execute as @s at @s anchored eyes positioned ^-2.2 ^-1.6 ^3.8 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
+cmd execute as @s at @s anchored eyes positioned ^-1.5 ^-1.6 ^3.0 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
 wait 10
 cmd skyabyss skill mana @s full
 cmd skyabyss skill cast @s 1
@@ -1575,12 +1899,16 @@ shot signal_night_1p_c
 cmd skyabyss skill cooldowns @s
 
 perspective back
-wait 4
+fov 48
+cmd skyabyss cinematic stop
+huddemo off
+hud off
+wait 30
 cmd skyabyss skill learn @s signal 3
 cmd skyabyss skill slot @s 1 signal
 cmd skyabyss skill cooldowns @s
 cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
-cmd execute as @s at @s anchored eyes positioned ^-2.2 ^-1.6 ^3.8 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
+cmd execute as @s at @s anchored eyes positioned ^-1.5 ^-1.6 ^3.0 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
 wait 10
 cmd skyabyss skill mana @s full
 cmd skyabyss skill cast @s 1
@@ -1592,12 +1920,16 @@ cmd skyabyss skill cooldowns @s
 
 # ---- dust_charge (夜)
 perspective first
-wait 4
+fov 70
+cmd skyabyss cinematic stop
+huddemo off
+hud off
+wait 30
 cmd skyabyss skill learn @s dust_charge 3
 cmd skyabyss skill slot @s 1 dust_charge
 cmd skyabyss skill cooldowns @s
 cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
-cmd execute as @s at @s anchored eyes positioned ^-2.2 ^-1.6 ^3.8 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
+cmd execute as @s at @s anchored eyes positioned ^-1.5 ^-1.6 ^3.0 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
 wait 10
 cmd skyabyss skill mana @s full
 cmd skyabyss skill cast @s 1
@@ -1608,12 +1940,16 @@ shot dust_charge_night_1p_c
 cmd skyabyss skill cooldowns @s
 
 perspective back
-wait 4
+fov 48
+cmd skyabyss cinematic stop
+huddemo off
+hud off
+wait 30
 cmd skyabyss skill learn @s dust_charge 3
 cmd skyabyss skill slot @s 1 dust_charge
 cmd skyabyss skill cooldowns @s
 cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
-cmd execute as @s at @s anchored eyes positioned ^-2.2 ^-1.6 ^3.8 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
+cmd execute as @s at @s anchored eyes positioned ^-1.5 ^-1.6 ^3.0 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
 wait 10
 cmd skyabyss skill mana @s full
 cmd skyabyss skill cast @s 1
@@ -1625,12 +1961,16 @@ cmd skyabyss skill cooldowns @s
 
 # ---- steam_bell (夜)
 perspective first
-wait 4
+fov 70
+cmd skyabyss cinematic stop
+huddemo off
+hud off
+wait 30
 cmd skyabyss skill learn @s steam_bell 3
 cmd skyabyss skill slot @s 1 steam_bell
 cmd skyabyss skill cooldowns @s
 cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
-cmd execute as @s at @s anchored eyes positioned ^-2.2 ^-1.6 ^3.8 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
+cmd execute as @s at @s anchored eyes positioned ^-1.5 ^-1.6 ^3.0 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
 wait 10
 cmd skyabyss skill mana @s full
 cmd skyabyss skill cast @s 1
@@ -1641,12 +1981,16 @@ shot steam_bell_night_1p_c
 cmd skyabyss skill cooldowns @s
 
 perspective back
-wait 4
+fov 48
+cmd skyabyss cinematic stop
+huddemo off
+hud off
+wait 30
 cmd skyabyss skill learn @s steam_bell 3
 cmd skyabyss skill slot @s 1 steam_bell
 cmd skyabyss skill cooldowns @s
 cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
-cmd execute as @s at @s anchored eyes positioned ^-2.2 ^-1.6 ^3.8 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
+cmd execute as @s at @s anchored eyes positioned ^-1.5 ^-1.6 ^3.0 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
 wait 10
 cmd skyabyss skill mana @s full
 cmd skyabyss skill cast @s 1
@@ -1658,12 +2002,16 @@ cmd skyabyss skill cooldowns @s
 
 # ---- cinder_volley (夜)
 perspective first
-wait 4
+fov 70
+cmd skyabyss cinematic stop
+huddemo off
+hud off
+wait 30
 cmd skyabyss skill learn @s cinder_volley 3
 cmd skyabyss skill slot @s 1 cinder_volley
 cmd skyabyss skill cooldowns @s
 cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
-cmd execute as @s at @s anchored eyes positioned ^-2.2 ^-1.6 ^3.8 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
+cmd execute as @s at @s anchored eyes positioned ^-1.5 ^-1.6 ^3.0 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
 wait 10
 cmd skyabyss skill mana @s full
 cmd skyabyss skill cast @s 1
@@ -1674,12 +2022,16 @@ shot cinder_volley_night_1p_c
 cmd skyabyss skill cooldowns @s
 
 perspective back
-wait 4
+fov 48
+cmd skyabyss cinematic stop
+huddemo off
+hud off
+wait 30
 cmd skyabyss skill learn @s cinder_volley 3
 cmd skyabyss skill slot @s 1 cinder_volley
 cmd skyabyss skill cooldowns @s
 cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
-cmd execute as @s at @s anchored eyes positioned ^-2.2 ^-1.6 ^3.8 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
+cmd execute as @s at @s anchored eyes positioned ^-1.5 ^-1.6 ^3.0 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
 wait 10
 cmd skyabyss skill mana @s full
 cmd skyabyss skill cast @s 1
@@ -1691,12 +2043,16 @@ cmd skyabyss skill cooldowns @s
 
 # ---- deep_pull (夜)
 perspective first
-wait 4
+fov 70
+cmd skyabyss cinematic stop
+huddemo off
+hud off
+wait 30
 cmd skyabyss skill learn @s deep_pull 3
 cmd skyabyss skill slot @s 1 deep_pull
 cmd skyabyss skill cooldowns @s
 cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
-cmd execute as @s at @s anchored eyes positioned ^-2.2 ^-1.6 ^3.8 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
+cmd execute as @s at @s anchored eyes positioned ^-1.5 ^-1.6 ^3.0 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
 wait 10
 cmd skyabyss skill mana @s full
 cmd skyabyss skill cast @s 1
@@ -1707,12 +2063,16 @@ shot deep_pull_night_1p_c
 cmd skyabyss skill cooldowns @s
 
 perspective back
-wait 4
+fov 48
+cmd skyabyss cinematic stop
+huddemo off
+hud off
+wait 30
 cmd skyabyss skill learn @s deep_pull 3
 cmd skyabyss skill slot @s 1 deep_pull
 cmd skyabyss skill cooldowns @s
 cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
-cmd execute as @s at @s anchored eyes positioned ^-2.2 ^-1.6 ^3.8 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
+cmd execute as @s at @s anchored eyes positioned ^-1.5 ^-1.6 ^3.0 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
 wait 10
 cmd skyabyss skill mana @s full
 cmd skyabyss skill cast @s 1
@@ -1724,12 +2084,16 @@ cmd skyabyss skill cooldowns @s
 
 # ---- deep_echo (夜)
 perspective first
-wait 4
+fov 70
+cmd skyabyss cinematic stop
+huddemo off
+hud off
+wait 30
 cmd skyabyss skill learn @s deep_echo 3
 cmd skyabyss skill slot @s 1 deep_echo
 cmd skyabyss skill cooldowns @s
 cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
-cmd execute as @s at @s anchored eyes positioned ^-2.2 ^-1.6 ^3.8 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
+cmd execute as @s at @s anchored eyes positioned ^-1.5 ^-1.6 ^3.0 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
 wait 10
 cmd skyabyss skill mana @s full
 cmd skyabyss skill cast @s 1
@@ -1740,12 +2104,16 @@ shot deep_echo_night_1p_c
 cmd skyabyss skill cooldowns @s
 
 perspective back
-wait 4
+fov 48
+cmd skyabyss cinematic stop
+huddemo off
+hud off
+wait 30
 cmd skyabyss skill learn @s deep_echo 3
 cmd skyabyss skill slot @s 1 deep_echo
 cmd skyabyss skill cooldowns @s
 cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
-cmd execute as @s at @s anchored eyes positioned ^-2.2 ^-1.6 ^3.8 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
+cmd execute as @s at @s anchored eyes positioned ^-1.5 ^-1.6 ^3.0 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
 wait 10
 cmd skyabyss skill mana @s full
 cmd skyabyss skill cast @s 1
@@ -1757,12 +2125,16 @@ cmd skyabyss skill cooldowns @s
 
 # ---- deep_maw (夜)
 perspective first
-wait 4
+fov 70
+cmd skyabyss cinematic stop
+huddemo off
+hud off
+wait 30
 cmd skyabyss skill learn @s deep_maw 3
 cmd skyabyss skill slot @s 1 deep_maw
 cmd skyabyss skill cooldowns @s
 cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
-cmd execute as @s at @s anchored eyes positioned ^-2.2 ^-1.6 ^3.8 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
+cmd execute as @s at @s anchored eyes positioned ^-1.5 ^-1.6 ^3.0 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
 wait 10
 cmd skyabyss skill mana @s full
 cmd skyabyss skill cast @s 1
@@ -1773,12 +2145,16 @@ shot deep_maw_night_1p_c
 cmd skyabyss skill cooldowns @s
 
 perspective back
-wait 4
+fov 48
+cmd skyabyss cinematic stop
+huddemo off
+hud off
+wait 30
 cmd skyabyss skill learn @s deep_maw 3
 cmd skyabyss skill slot @s 1 deep_maw
 cmd skyabyss skill cooldowns @s
 cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
-cmd execute as @s at @s anchored eyes positioned ^-2.2 ^-1.6 ^3.8 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
+cmd execute as @s at @s anchored eyes positioned ^-1.5 ^-1.6 ^3.0 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
 wait 10
 cmd skyabyss skill mana @s full
 cmd skyabyss skill cast @s 1
@@ -1790,12 +2166,16 @@ cmd skyabyss skill cooldowns @s
 
 # ---- echo_strike (夜)
 perspective first
-wait 4
+fov 70
+cmd skyabyss cinematic stop
+huddemo off
+hud off
+wait 30
 cmd skyabyss skill learn @s echo_strike 3
 cmd skyabyss skill slot @s 1 echo_strike
 cmd skyabyss skill cooldowns @s
 cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
-cmd execute as @s at @s anchored eyes positioned ^-2.2 ^-1.6 ^3.8 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
+cmd execute as @s at @s anchored eyes positioned ^-1.5 ^-1.6 ^3.0 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
 wait 10
 cmd skyabyss skill mana @s full
 cmd skyabyss skill cast @s 1
@@ -1806,12 +2186,16 @@ shot echo_strike_night_1p_c
 cmd skyabyss skill cooldowns @s
 
 perspective back
-wait 4
+fov 48
+cmd skyabyss cinematic stop
+huddemo off
+hud off
+wait 30
 cmd skyabyss skill learn @s echo_strike 3
 cmd skyabyss skill slot @s 1 echo_strike
 cmd skyabyss skill cooldowns @s
 cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
-cmd execute as @s at @s anchored eyes positioned ^-2.2 ^-1.6 ^3.8 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
+cmd execute as @s at @s anchored eyes positioned ^-1.5 ^-1.6 ^3.0 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
 wait 10
 cmd skyabyss skill mana @s full
 cmd skyabyss skill cast @s 1
@@ -1823,12 +2207,16 @@ cmd skyabyss skill cooldowns @s
 
 # ---- grave_bell (夜)
 perspective first
-wait 4
+fov 70
+cmd skyabyss cinematic stop
+huddemo off
+hud off
+wait 30
 cmd skyabyss skill learn @s grave_bell 3
 cmd skyabyss skill slot @s 1 grave_bell
 cmd skyabyss skill cooldowns @s
 cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
-cmd execute as @s at @s anchored eyes positioned ^-2.2 ^-1.6 ^3.8 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
+cmd execute as @s at @s anchored eyes positioned ^-1.5 ^-1.6 ^3.0 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
 wait 10
 cmd skyabyss skill mana @s full
 cmd skyabyss skill cast @s 1
@@ -1839,12 +2227,16 @@ shot grave_bell_night_1p_c
 cmd skyabyss skill cooldowns @s
 
 perspective back
-wait 4
+fov 48
+cmd skyabyss cinematic stop
+huddemo off
+hud off
+wait 30
 cmd skyabyss skill learn @s grave_bell 3
 cmd skyabyss skill slot @s 1 grave_bell
 cmd skyabyss skill cooldowns @s
 cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
-cmd execute as @s at @s anchored eyes positioned ^-2.2 ^-1.6 ^3.8 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
+cmd execute as @s at @s anchored eyes positioned ^-1.5 ^-1.6 ^3.0 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
 wait 10
 cmd skyabyss skill mana @s full
 cmd skyabyss skill cast @s 1
@@ -1856,12 +2248,16 @@ cmd skyabyss skill cooldowns @s
 
 # ---- final_light (夜)
 perspective first
-wait 4
+fov 70
+cmd skyabyss cinematic stop
+huddemo off
+hud off
+wait 30
 cmd skyabyss skill learn @s final_light 3
 cmd skyabyss skill slot @s 1 final_light
 cmd skyabyss skill cooldowns @s
 cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
-cmd execute as @s at @s anchored eyes positioned ^-2.2 ^-1.6 ^3.8 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
+cmd execute as @s at @s anchored eyes positioned ^-1.5 ^-1.6 ^3.0 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
 wait 10
 cmd skyabyss skill mana @s full
 cmd skyabyss skill cast @s 1
@@ -1872,12 +2268,16 @@ shot final_light_night_1p_c
 cmd skyabyss skill cooldowns @s
 
 perspective back
-wait 4
+fov 48
+cmd skyabyss cinematic stop
+huddemo off
+hud off
+wait 30
 cmd skyabyss skill learn @s final_light 3
 cmd skyabyss skill slot @s 1 final_light
 cmd skyabyss skill cooldowns @s
 cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
-cmd execute as @s at @s anchored eyes positioned ^-2.2 ^-1.6 ^3.8 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
+cmd execute as @s at @s anchored eyes positioned ^-1.5 ^-1.6 ^3.0 run summon minecraft:husk ~ ~ ~ {NoAI:1b,Silent:1b}
 wait 10
 cmd skyabyss skill mana @s full
 cmd skyabyss skill cast @s 1
