@@ -1,4 +1,6 @@
 {
+  "message.skyabyss.tour.step": "町を回ろう %s/%s: %s へ（灯りの道をたどって）",
+  "message.skyabyss.tour.done": "町めぐりはおしまい。門の外の弱い敵で、腕を試そう",
   "map.skyabyss.town.whale": "鯨見の町",
   "map.skyabyss.town.tide": "汐守の港",
   "map.skyabyss.town.storm": "風待の里",
