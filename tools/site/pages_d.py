@@ -44,7 +44,7 @@ def skills_extra():
         + table([T("仕掛け", "System"), T("決まり", "Rule")], [
             [T("変異", "Mutations"), T("8 つの技に 1 つずつ。その技を極め、巨神の素材（核 1 と鱗・欠片 3）を持っていると選べます。技が形を変えます（例: 巨神斬り→断崖、風裂き→飛ぶ刃）。1 技に 1 つで、外せません。", "One per skill for eight skills. Master the skill and hold titan materials (1 core and 3 scales or fragments) to reshape it, for example Titan Cleave into Cliffbreak or Wind Rend into Flying Blade. One per skill, permanent.")],
             [T("橋", "Bridges"), T("木の輪（岩―風―潮―灰―骨―岩）の隣り合う 2 本から、技を 3 つずつ覚えると開く 5 つの技。両方のタグを数えます。", "Five skills that open when you know three skills in each of two neighbouring trees on the ring (Rock, Wind, Tide, Ash, Bone). They count both tags.")],
-            [T("紋の盤", "Glyph board"), T("試練を越えると紋（岩・風・潮・灰・骨、段 1〜3）が手に入ります。盤の穴は最初 3 つ、転生ごとに 1 つ開いて最大 6。穴ごとに中心の技を選ぶと、その技と隣の技が強まります。", "Clearing trials yields glyphs of five kinds and tiers 1 to 3. The board starts with three holes and gains one per rebirth, up to six. Pick a centre skill per hole to strengthen it and its neighbours.")],
+            [T("紋の盤", "Glyph board"), T("部屋を越えると紋（岩・風・潮・灰・骨、段 1〜3）が手に入ります。盤の穴は最初 3 つ、転生ごとに 1 つ開いて最大 6。穴ごとに中心の技を選ぶと、その技と隣の技が強まります。", "Clearing rooms yields glyphs of five kinds and tiers 1 to 3. The board starts with three holes and gains one per rebirth, up to six. Pick a centre skill per hole to strengthen it and its neighbours.")],
             [T("前世の技", "Past-life skills"), T("転生 1 回につき別枠の 2 点（最大 12）で取る 6 つ（遺響の一撃・旧き見張り・墓鐘・記憶の刃・最期の光・魂の糸）。", "Six skills bought with a separate pool of 2 points per rebirth (up to 12): Echo Strike, Old Watch, Grave Bell, Memory Blade, Last Light and Soul Thread.")],
             [T("淵の木", "The Abyss tree"), T("6 本目の木。転生した人にだけ見えます。引き・鏡・残響・貢ぎ・顎・誓いの 6 つ。他の木を混ぜるほど効く作りです。", "A sixth tree visible only to reborn players: Pull, Mirror, Echo, Tribute, Maw and Oath. It rewards mixing other trees.")],
         ])
@@ -69,18 +69,18 @@ def gear_extra():
         ("ash", "灰の欠片", "Ash shard"), ("bone", "骨の欠片", "Bone shard")))
     free = _sec("gearfree", T("装備の自由度", "Gear freedom"),
         '<p class="lead">%s</p>' % T("特性のほかに、穴・欠片・ルーン・アスペクト・世代が装備を育てます。特性の付くレア以上の武器と防具が対象です。",
-                                    "Beyond affixes, sockets, shards, runes, aspects and generations let gear grow. They apply to Rare and Legendary weapons and armor.")
+                                    "Beyond affixes, sockets, shards, runes, aspects and generations let gear grow. They apply to Rare and better weapons and armor.")
         + table([T("仕組み", "System"), T("決まり", "Rule")], [
-            [T("穴", "Sockets"), T("レアは 0〜2 個、伝説は 0〜2 個（多めに出ます）。共鳴の炉の打ち直しで必ず足せます（最大 2）。", "Rare gear has 0 to 2, Legendary 0 to 2 (more likely). The forge can always add one (up to 2).")],
+            [T("穴", "Sockets"), T("レア以上は 0〜2 個（上の階級ほど多く出ます）。共鳴の炉の打ち直しで必ず足せます（最大 2）。", "Rare and better gear has 0 to 2 sockets, more often at higher tiers. The forge can always add one (up to 2).")],
             [T("欠片", "Shards") + " " + shards,
-             T("岩・風・潮・灰・骨の 5 種。穴に差すとそのタグが 1 つ数えられ、装備に小さな数字が付きます。心臓や試練の報酬で出ます。", "Five kinds. Socketed, each counts as one tag for skills and adds a small stat. Dropped by hearts and trials.")],
+             T("岩・風・潮・灰・骨の 5 種。穴に差すとそのタグが 1 つ数えられ、装備に小さな数字が付きます。心臓や部屋の報酬で出ます。", "Five kinds. Socketed, each counts as one tag for skills and adds a small stat. Dropped by hearts and rooms.")],
             [T("技のルーン", "Skill runes") + " " + icon("img/item/skill_rune.png", "技のルーン", "Skill rune"), T("使う技 1 つに力 +10〜30% か待ち −10〜20%。穴に差します。1 つの技に効くのは 1 枚です。", "+10 to 30% power or -10 to 20% cooldown for one active skill, socketed. Only one rune applies per skill.")],
-            [T("アスペクト", "Aspects") + " " + icon("img/item/aspect_core.png", "アスペクトの芯", "Aspect core"), T("伝説の書き換えを炉で抜き取って「芯」にし、レアの武器・防具に刻めます。その装備を持つ（武器）か着る（防具）あいだ、その書き換えが効きます。", "At the forge extract a legendary's rewrite into a core and engrave it on a Rare weapon or armor. It works while you hold (weapon) or wear (armor) that piece.")],
+            [T("アスペクト", "Aspects") + " " + icon("img/item/aspect_core.png", "アスペクトの芯", "Aspect core"), T("書き換えの武器の力を炉で抜き取って「芯」にし、レアの武器・防具に刻めます。その装備を持つ（武器）か着る（防具）あいだ、その書き換えが効きます。", "At the forge extract a rewrite weapon's effect into a core and engrave it on a Rare weapon or armor. It works while you hold (weapon) or wear (armor) that piece.")],
             [T("世代", "Generations"), T("転生するたびに、持ち物の特性付き装備の世代が 1 上がります（最大 12）。世代 3 ごとに形見の小さな特性が 1 つ付きます。", "Each rebirth raises the generation of your affixed gear by one (max 12). Every third generation grants a small heirloom affix.")],
         ])
         + _note(T("共鳴の炉の画面に「刻み」のつまみ（抽出・刻印・穴）が加わりました。", "The forge screen has a new Engrave tab (extract, engrave, sockets).")))
-    ab = _sec("abyss-legends", T("深淵の専用伝説", "Abyss legendaries"),
-        '<p class="lead">%s</p>' % T("深淵の難度（<a href=\"rebirth.html#abyss\">転生のページ</a>）で心臓を止めたときだけ出る、巨神ごとの専用伝説です。まだ書き換えのない 4 つの技を別の形にします。",
+    ab = _sec("abyss-artifacts", T("深淵の専用アーティファクト", "Abyss artifacts"),
+        '<p class="lead">%s</p>' % T("深淵の難度（<a href=\"rebirth.html#abyss\">転生のページ</a>）で心臓を止めたときだけ出る、巨神ごとの専用アーティファクトです。まだ書き換えのない 4 つの技を別の形にします。",
                                     "Dropped only when a heart is stopped on Abyss difficulty (see <a href=\"rebirth.html#abyss\">Rebirth</a>), one per titan. Each rewrites a skill that had no rewrite yet.")
         + table([T("品", "Item"), T("巨神", "Titan"), T("書き換わる技", "Skill rewritten"), T("書き換えた形", "New form")], [
             [_item("abyss_greatsword"), T("岩鯨", "Stone Whale"), T("巨神斬り", "Titan Cleave"), T("奈落断ち: 振った扇が 1.2 秒後にもう一度裂ける", "Abyssal Cleave: the sweep splits again 1.2 s later")],
@@ -88,7 +88,7 @@ def gear_extra():
             [_item("abyss_storm_bow"), T("雷翼", "Thunder Wing"), T("雲穿ち", "Cloud Piercer"), T("天落とし: 矢の止まった所へ雷の柱", "Sky Drop: a lightning pillar where the arrow lands")],
             [_item("abyss_ash_scythe"), T("余燼", "Ember"), T("灰散らし", "Ash Scatter"), T("這う灰: 灰かぶりの敵のまわりへ灰が移る", "Creeping Ash: ash spreads among nearby enemies")],
         ])
-        + '<p>%s</p>' % T("心臓を倒した人それぞれに、共鳴の欠片 2 つは必ず、専用伝説は 25%（4 回続けて出なければ次で保証）。持っていれば欠片 10 に替わります。強化・特性・必要 Lv は他の伝説と同じです。", "Every player who clears the heart gets two resonance fragments for sure and a 25% chance at the legendary (guaranteed after four misses). If you already own it you get ten fragments instead. Enhancement, affixes and level requirements match other legendaries."), alt=True)
+        + '<p>%s</p>' % T("心臓を倒した人それぞれに、共鳴の欠片 2 つは必ず、専用アーティファクトは 25%（4 回続けて出なければ次で保証）。持っていれば欠片 10 に替わります。強化・特性・必要 Lv は他のアーティファクトと同じです。", "Every player who clears the heart gets two resonance fragments for sure and a 25% chance at an artifact (guaranteed after four misses). If you already own it you get ten fragments instead. Enhancement, affixes and level requirements match other artifacts."), alt=True)
     return free + ab
 
 
@@ -99,9 +99,9 @@ def titans_extra():
                                     "The four backs were rebuilt so a party of six can move. Bodies are 1.6x wider and about 1.3x taller, rooms are at least 2.6x the area and halls about 3.5x.")
         + _grid([
             (T("通路と広間", "Corridors and halls"), T("通路は幅 7・高さ 6 が標準で、6 人が並んで通れます。心臓の間だけは戦いの手ごたえを保つため、広げすぎていません。", "Corridors are 7 wide and 6 high, so six can walk abreast. Only the heart chamber stays modest to preserve the fight's feel.")),
-            (T("2 本の道", "Two lanes"), T("試練は 2〜3 本の道と役割のある仕掛けを持ち、一人でも解けます（重りや留めが人の代わりをします）。", "Trials offer two to three lanes and role-based gimmicks, and every one is solvable solo (weights and latches stand in for people).")),
+            (T("2 本の道", "Two lanes"), T("部屋は 2〜3 本の道と役割のある仕掛けを持ち、一人でも解けます（重りや留めが人の代わりをします）。", "Rooms offer two to three lanes and role-based gimmicks, and every one is solvable solo (weights and latches stand in for people).")),
             (T("任意の翼", "Optional wings"), T("必須の道のほかに、寄り道の翼・塔・庭があり、宝や読み物が置かれています。", "Beyond the main path there are optional wings, towers and gardens with treasure and lore.")),
-            (T("歩ける広さ", "Walkable space"), T("雷翼の歩ける床は約 29,300 m²。それでも歩きは 1 分未満で、時間は試練と戦いで使います。", "Thunder Wing has about 29,300 m² of walkable floor. Walking still takes under a minute; time goes to trials and fights.")),
+            (T("歩ける広さ", "Walkable space"), T("雷翼の歩ける床は約 29,300 m²。それでも歩きは 1 分未満で、時間は部屋と戦いで使います。", "Thunder Wing has about 29,300 m² of walkable floor. Walking still takes under a minute; time goes to rooms and fights.")),
         ]), alt=True)
 
 
@@ -127,8 +127,8 @@ def titans_abyss():
         lead=T("四体の心臓を返したあとも、空は静かになりません。都の地下の戸の向こうに、底の見えない大きな縦穴が口を開けています。巨神の背とは別の、深淵という世界です。",
                "Even after the four hearts the sky does not settle. Past the door under the capital yawns a shaft with no visible bottom: the abyss, a world apart from any titan's back."),
         grid=_grid([
-            (T("縦穴を下りる", "Down the shaft"), T("一続きの旅として下ります。骨・塩・雷・灰の四つの層を渡り、層ごとに違う遊びがあります。層のあいだの灯りで、再開できます。",
-                                             "One continuous descent through four layers (bone, salt, storm and ash), each with its own play. Lantern rests between the layers let you resume.")),
+            (T("縦穴を下りる", "Down the shaft"), T("一続きの旅として下ります。骨・雷の層は道を探して進み、塩・灰の層は生き残りを守って降ります。層ごとに違う遊びがあります。層のあいだの灯りで、再開できます。",
+                                             "One continuous descent through four layers (bone and storm are explored, salt and ash are escorted), each with its own play. Lantern rests between the layers let you resume.")),
             (T("深淵の術", "Abyss arts"), T("層ごとの溜まりで、光・重さ・鼓動の三つの術を覚えます。覚えた術は、次の層の道を開きます。深淵術師の木で育てます。",
                                          "Learn three arts at the pools of each layer: light, weight and heartbeat. Each opens the way ahead. Grow them in the Abyss Caster tree.")),
             (T("重さと闇", "Weight and dark"), T("上るほど体が重くなり、光の届かない所に長くいると、淵の声がたまります。深く潜るほど、敵は強くなり、深度の数字が上がります。",
@@ -150,6 +150,7 @@ def rebirth():
     crystal = icon("img/item/resonance_crystal.png", "共鳴の結晶", "Resonance crystal")
     body = page_head("転生と深淵", "Rebirth and the Abyss", "Lv 50 に着いたら、もう一度 Lv 1 から。装備と巨神の進みは残り、ビルドだけを作り直します。",
                      "Reach Lv 50 and start again from Lv 1. Gear and titan progress stay; only your build is rebuilt.")
+    body += toc([("rebirth", "転生の流れ", "How rebirth works"), ("reborn-extra", "転生のあとに増えるもの", "What opens after rebirth"), ("abyss", "深淵の難度", "Abyss difficulty"), ("show", "色・記号・称号・順位", "Colors, symbols, titles, boards"), ("rb-note", "考え方", "Design notes")])
     body += _sec("rebirth", T("転生の流れ", "How rebirth works"),
         '<p class="lead">%s</p>' % T("表示は「Lv 50+n」。レベルは 50 を超えず、n は転生した回数です。上限は 20 回です。", "Shown as \"Lv 50+n\". The level never exceeds 50; n counts your rebirths, up to 20.")
         + '<ul><li>%s</li><li>%s</li><li>%s</li><li>%s</li></ul>' % (
@@ -162,7 +163,7 @@ def rebirth():
             (T("3 択の恩恵", "Three boons"), T("転生のたびに 10 種の恩恵から 3 枚が示され、1 つ選びます（同じものを重ねられます）。", "Each rebirth offers three of ten boons; pick one (duplicates stack).")),
             (T("祖の力", "Ancestral power"), T("5 回ごとに全ダメージ +1%、上限 +4%。力の伸びは小さく、10 番目の節から先は収穫逓減です。", "+1% all damage every five rebirths, capped at +4%. Growth is small and diminishes beyond the tenth node.")),
             (T("共闘のレベル合わせ", "Level matching"), T("転生した人が低レベルの仲間と遊ぶときは、与える傷だけが下がります。体力と報酬は変わらず、未転生の人は置き去りになりません。", "A reborn player partnered with a much lower level deals reduced damage only. Health and rewards are untouched, so newcomers are never left behind.")),
-            (T("導きの欠片", "Guide shards"), T("未転生の仲間と同じ試練を遊ぶと転生者に欠片が付き、5 個で魂盤の節が 1 つ。仲間も経験値を得ます。", "Playing a trial with an unreborn partner earns shards; five grant a soul-board node, and your partner gains experience.")),
+            (T("導きの欠片", "Guide shards"), T("未転生の仲間と同じ部屋を越えると転生者に欠片が付き、5 個で魂盤の節が 1 つ。仲間も経験値を得ます。", "Clearing rooms with an unreborn partner earns shards; five grant a soul-board node, and your partner gains experience.")),
             (T("ポーチの余白と絆", "Satchel room and bonds"), T("転生 2・6・12 回でポーチの枠が増え、3・8・15 回で若い運び手が速く、遠くから呼べるようになります。", "Rebirths 2, 6 and 12 add satchel slots; 3, 8 and 15 make young carriers faster and summonable from farther away.")),
         ]))
     body += _sec("reborn-extra", T("転生のあとに増えるもの", "What opens after rebirth"),
@@ -171,12 +172,12 @@ def rebirth():
             (T("世代と形見", "Generations"), T("装備の世代が上がり、形見の特性が付きます。<a href=\"gear.html#gearfree\">装備のページ</a>へ。", "Your gear gains generations and heirloom affixes. See <a href=\"gear.html#gearfree\">Gear</a>.")),
         ]), alt=True)
     body += _sec("abyss", T("深淵の難度", "Abyss difficulty"),
-        '<p class="lead">%s</p>' % T("転生 3 回以上の人が、試練の板のつまみで選べる、極の上の難度です。引くものではなく選ぶもので、入れたあとは未転生の仲間も同じ試練を遊べます。", "Available from three rebirths via a switch on the trial board, above Extreme. It is chosen, not drawn, and unreborn partners can play the same trial.")
+        '<p class="lead">%s</p>' % T("転生 3 回以上の人が選べる、極の上の難度です。引くものではなく選ぶもので、入れたあとは未転生の仲間も同じ部屋を遊べます。", "Available from three rebirths, above Extreme. It is chosen, not drawn, and unreborn partners can clear the same rooms.")
         + '<ul><li>%s</li><li>%s</li><li>%s</li><li>%s</li></ul>' % (
             T("数字はすべてきびしい段になり、障害が二つ付き、任意の目標が必ず一つ付きます。拍の周期や猶予は短くなります。", "All numbers use the strictest tier, two hazards apply and one optional goal is always present. Beat periods and grace windows shrink."),
-            T("予告の見た目は変えず、一人で解けることも、時間・状態で閉じないことも変わりません。", "Telegraphs look the same, trials stay solvable solo and are never locked by time or state."),
+            T("予告の見た目は変えず、一人で解けることも、時間・状態で閉じないことも変わりません。", "Telegraphs look the same, rooms stay solvable solo and are never locked by time or state."),
             T("報いは素材 +3、共鳴の欠片が 12%、称号「深淵を渡る者」。", "Rewards: +3 materials, 12% resonance fragment and the title \"Abyss Crosser\"."),
-            T("深淵の心臓からは、巨神ごとの専用伝説が出ます（4 つ。<a href=\"gear.html#abyss-legends\">装備のページ</a>）。", "Abyss hearts drop one dedicated legendary per titan (four in all; see <a href=\"gear.html#abyss-legends\">Gear</a>).")))
+            T("深淵の心臓からは、巨神ごとの専用アーティファクトが出ます（4 つ。<a href=\"gear.html#abyss-artifacts\">装備のページ</a>）。", "Abyss hearts drop one dedicated artifact per titan (four in all; see <a href=\"gear.html#abyss-artifacts\">Gear</a>).")))
     body += _sec("show", T("色・記号・称号・順位", "Colors, symbols, titles, boards"),
         '<p class="lead">%s</p>' % T("転生の回数は、一目で伝わる形で見せられます。色が分からなくても縁の形で分かります。", "Your rebirth count shows at a glance; frame shapes differ so it is readable without color.")
         + table([T("回数", "Rebirths"), T("色", "Color"), T("縁", "Frame")], [

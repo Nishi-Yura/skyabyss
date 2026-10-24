@@ -398,7 +398,14 @@ python tools/gen/sound/gen_cinematic_voice.py --review                     # 3 �
 
 ## 公式サイト (`site/`)
 
-`python tools/site/gen_art.py`（ドット絵と素材の写し）→ `python tools/site/build.py`（HTML を書き出す）。`site/` はそのまま GitHub Pages に載る（`.github/workflows/pages.yml`）。技の木は `Skill.java` と lang から読むので、技を足したら build し直す。
+`python tools/site/gen_art.py`（ドット絵と素材の写し）→ `python tools/site/gen_skill_fx.py`（技の見た目の絵を縮めて `site/img/skill_fx/` へ）→ `python tools/site/build.py`（HTML を書き出す）。`site/` はそのまま GitHub Pages に載る（`.github/workflows/pages.yml`）。技の木は `Skill.java` と lang から読むので、技を足したら build し直す。
+
+### 技の見た目（技の一覧の開閉パネル）
+
+- 元の絵: `tools/sources/site/skill_fx/<技 ID>_{release,impact,linger}.png`（放った瞬間・当たった瞬間・余韻。余韻は無くてよい）。
+- 縮め方: `gen_skill_fx.py` が幅 320 px までに縮め、webp（品質 84）で `site/img/skill_fx/` に書く。build は、その絵が在る技だけに見た目を付ける（能動の技で絵が無いものは「撮影を待っています」と出る）。
+- 絵の更新: 技の FX が仕上がったら、(a) 撮影の原寸の絵を同じ名前で `tools/sources/site/skill_fx/` に置く、または (b) 台紙から切る: `python tools/site/split_skill_fx_sheet.py docs/review/previews/skill_fx_sheet.png`（台紙の並びは `tools/sheets/skill_fx_sheet.py` と同じ。切るのは三人称の放ち・当たり・残り）。そのあと `gen_skill_fx.py` と `build.py`。
+- 台紙の作り方: 撮影は `tools/shots/skill_fx.txt`（`bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/skill_fx.txt -PshotsName=skill_fx`）→ `python tools/sheets/skill_fx_sheet.py`。
 
 ## 文字のはみ出しの検査 (`python tools/audit/check_text_fit.py`)
 

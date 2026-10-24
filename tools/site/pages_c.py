@@ -75,7 +75,7 @@ def faq():
          "Only Java Edition %s with NeoForge %s. Forge, Fabric and Bedrock are not supported." % (MC, MC)),
         ("既存のワールドで遊べますか。", "Can I use an existing world?", "新しいワールドをおすすめします。長く遊んでいる世界でも、今の章から始まります。", "A new world is recommended. In a long-running world the mod simply starts from the current chapter."),
         ("世界を開いた直後が重いです。", "The game is heavy right after opening the world.", "巨神の背中の島を裏で少しずつ建てています。数分で落ち着きます。そのあいだに岩鯨の背に乗ろうとすると、一瞬止まることがあります。", "The titan back islands are built in the background. It settles in a few minutes; boarding the Stone Whale in the meantime may freeze briefly."),
-        ("ピースフルで遊べますか。", "Can I play on Peaceful?", "いいえ。ピースフルでは巨神の背中の試練が眠ったままです。難易度を上げてください。", "No. On Peaceful the back trials stay dormant; raise the difficulty."),
+        ("ピースフルで遊べますか。", "Can I play on Peaceful?", "いいえ。ピースフルでは巨神の背の部屋が眠ったままです。難易度を上げてください。", "No. On Peaceful the back rooms stay dormant; raise the difficulty."),
         ("怖い演出を減らせますか。", "Can I reduce the scary effects?", "設定ファイルの <code>horrorEventFrequency</code>、<code>watcherFrequency</code>、<code>cloudEyeFrequency</code>（0 で出なくなる）と、クライアント設定で、揺れや暗さを弱められます。", "Lower <code>horrorEventFrequency</code>, <code>watcherFrequency</code> and <code>cloudEyeFrequency</code> in the config (0 disables them); screen shake and darkness can be reduced in client settings."),
         ("キーがほかの mod とぶつかります。", "Keys clash with another mod.", "設定の「操作」にある「天と淵のあいだ」の項目で変えられます。", "Rebind them under Controls in the \"Between the Sky and the Abyss\" category."),
         ("大事な品をなくしました。", "I lost a key item.", "<kbd>B</kbd> の控え帳を開き、品の在りかと「呼び戻す」ボタンを使ってください。", "Open the record book (<kbd>B</kbd>) to see where it is and use the Recall button."),
@@ -85,14 +85,15 @@ def faq():
     qa_html = "".join("<details><summary>%s</summary><p>%s</p></details>" % (T(a, b), T(c, d)) for a, b, c, d in qa)
     limits = [
         ("マルチは、まだ人の手で通しの確認をしていません（特に 2 つのパーティが同じ背中にいるとき）。", "Multiplayer has not yet been verified end to end by people (especially with two parties on one back)."),
-        ("序盤の演出・予兆・仕掛けの濃さは、通しで確かめていません。", "The density of early-game staging, omens and small set pieces has not been playtested end to end."),
-        ("余燼の背中は、人が通しで遊んでいません。", "Ember's back has not been played through by a person."),
-        ("風見鶏と潮の真珠の絵は仮のものです。", "The art for the weathercock and the tide pearl is placeholder."),
+        ("次の版の、部屋の報いと技の見た目は、まだ試遊していません。", "The next version's room rewards and skill visuals have not been playtested yet."),
+        ("心臓の戦いに勝つまで、台座で転生を実行するまで、順位の石を複数人で見る所は、ゲームの中でまだ通しで確かめていません。", "Winning a heart fight, rebirth at the pedestal, and the rank stone with several players have not yet been confirmed in-game end to end."),
         ("五章「深淵」は、まだ人の手で通しに遊ばれていません（特に番人の戦いと、クリア後の深みを）。", "Chapter 5, the abyss, has not yet been played through end to end by people (especially the warden's fight and the depths after the clear)."),
+        ("乗り物の見た目の一部は、まだ仮のものです。", "Some mount models are still placeholders."),
+        ("潜水服の鎧は、腕を真上に上げたときだけ兜に少し当たります。", "The diver armor touches the helmet slightly when the arms are raised straight up."),
     ]
     lim = "".join("<li>%s</li>" % T(a, b) for a, b in limits)
     body = page_head("導入・FAQ", "Install and FAQ", "必要なもの、入れ方、サーバーの管理、よくある質問、既知の制限。",
-                     "Requirements, installation, server administration, FAQ and known limits.") + """
+                     "Requirements, installation, server administration, FAQ and known limits.") + toc([("requirements", "必要なもの", "Requirements"), ("install", "導入の手順", "Installation"), ("server", "サーバーの管理者向け", "For server administrators"), ("faq", "よくある質問", "FAQ"), ("limits", "既知の制限", "Known limits")]) + """
 <section aria-labelledby="req" id="requirements">
 <div class="wrap">
 <h2 id="req">%(h_req)s</h2>
@@ -173,46 +174,87 @@ def faq():
 
 
 def changelog():
+    # 版ごとの主な変更（試遊の確かめ順と docs/review の記録から）。古い版は要点だけ残す。
     ver = [
-        ("0.5.0", "2026-10-23", [
-            ("五章「深淵」を追加。都の地下の戸から大坑道を下り、骨・塩・雷・灰の四つの層を渡って、心臓の番人に挑みます。", "Added chapter 5, the abyss: down the great shaft under the capital, through four layers (bone, salt, storm, ash), to the warden of the heart."),
+        ("v0.5.4", "2026-10-24", [
+            ("都の案内人（白い外套）に行き先を選ぶと、施設まで色の灯りが道に灯ります。", "A guide in a white cloak lights a colored path to the building you choose."),
+            ("M の地図を追加。ホイールで寄る・引く、名前の札と自分の矢印。", "Added the M map: scroll to zoom, with name tags and your arrow."),
+            ("夜の町の灯り（道の端の黒い樫の柱と吊りランタン、戸の前の灯り）。北東の大広場の段は一段ずつ登れるように。", "Night lighting in town (black oak posts with hanging lanterns, lights by doors). The steps in the northeast square climb one block at a time."),
+            ("背のレイドの部屋（歩・智・闘）の明るさと階段の向きを直し、岩鯨の石の海の床に板目を付けました。", "Brighter raid rooms with corrected stair directions; the Stone Whale's sea-of-stone floor now shows plank seams."),
+            ("都の厩舎で乗り物（7 体）を買えるように。乗り笛で呼び、もう一度で帰せます。", "Mounts (seven kinds) are sold at the capital's stable. A mount whistle calls one; use it again to send it back."),
+            ("字: 本文は DotGothic16（英数も）、章の題字と場所の名前は Zen Antique。斜体をやめ、場所の副題の下に暗い帯。", "Type: body text in DotGothic16 (including Latin), chapter titles and place names in Zen Antique. No italics; place subtitles sit on a dark band."),
+            ("深淵: 骨・雷の層は道を探して進み、塩・灰の層は生き残りを守って降ります。層の主の技を先に見せ、番人の戦いのやることを帯に出します。", "Abyss: bone and storm layers are explored; salt and ash layers are escorted. Layer bosses show their moves first, and the warden's fight lists what to do on the objective strip."),
+            ("試遊用のコマンド /skyabyss play（OP）。/skyabyss play help で一覧を出せます。", "Tester commands /skyabyss play (op). /skyabyss play help lists them."),
+            ("潜水服の鎧: 肩の板を胴に付け直しました。", "Diver armor: shoulder plates are attached to the chest again."),
+            ("変異の素材は、留め袋に入った素材も数えます。", "Mutation materials now count items stored in the pouch too."),
+            ("jar を軽くしました（53.7 MB → 41.7 MB）。使っていない模型と絵を外しています。", "Lighter jar (53.7 MB to 41.7 MB) with unused models and images removed."),
+        ]),
+        ("次の版（作業中）", "", [
+            ("部屋の報い: 素材・共鳴の欠片・称号（巨神ごとに 3 つ）を渡します。", "Room rewards: materials, resonance fragments and titles (three per titan)."),
+            ("技の見た目: 光の弧・輪・柱で描き直した技（光の面で形を読めるように）。", "Skill visuals: skills redrawn with light arcs, rings and pillars so their shapes read at a glance."),
+        ]),
+        ("v0.5.3", "2026-10-24", [
+            ("宿のベッドで寝ると、起きたあとは町の鐘のそばから始まります。", "Sleeping in a bed now wakes you by the town bell."),
+            ("門と広場に案内人、町の施設の内装と階段、夜の町の灯りを整えました。", "Guides at the gate and square, interiors and stairs for town buildings."),
+            ("敵の頭の上に体力の帯。体力の右にマナを出します。", "Health bars over enemies; mana shows right of health."),
+            ("乗り物を作り直し、乗り笛で呼べるように。都の師範が技の稽古をつけます。", "Remade mounts, called with the whistle. The capital's master gives skill lessons."),
+            ("巨神の背: 乗ると一つ目の部屋へ直接入ります。歩・智・闘は枠ごとに 2 部屋のどちらかが選ばれます。", "On a back you enter the first room directly. Each traverse, wit or combat slot picks one of two rooms."),
+            ("心臓の攻撃の見た目を技ごとに分け、受けたときのひるみを付けました。", "Heart attacks now look different per skill and cause a flinch when they land."),
+            ("深淵: 黒い鉄の器、大坑道、底の門、深淵術（右クリックで光、しゃがみ＋右クリックで鼓動、しゃがみ＋ジャンプで重さ）。帰りは白い石英の祠から。", "Abyss: black iron vessels, the great shaft, the bottom gate, abyss arts (right-click for light, crouch and right-click for heartbeat, crouch and jump for weight). Return via the white quartz shrine."),
+            ("レア度を 6 段に: コモン・アンコモン・レア・エピック・ヒロイック・アーティファクト。", "Six rarity tiers: Common, Uncommon, Rare, Epic, Heroic and Artifact."),
+            ("盾の調整: ふつうの敵の傷は全部止め、大物と予告の技は正面で 6 割止めます。", "Shield tuning: normal enemies' hits are fully blocked; big foes and telegraphed skills are blocked 60% from the front."),
+            ("雑魚の体力を 8 割、与える傷を 9 割に。文の言い回しもそろえました。", "Ordinary mobs: 80% health and 90% damage. Wording made consistent throughout."),
+        ]),
+        ("v0.5.2", "2026-10-23", [
+            ("敵の頭の上に体力の帯が出ます（無傷のときは薄く）。盾は傷を全部は止めません。", "Enemy health bars appear above foes; shields no longer block everything."),
+            ("倒れている間は動けず、技も使えません。岩以外の技を強くしました。", "While downed you cannot move or cast. Skills outside Rock got stronger."),
+            ("敵を呼ぶ技の間隔を伸ばし、呼ぶ数を減らしました。", "Summoning skills fire less often and call fewer foes."),
+            ("都の東の大通りの南に厩舎ができました（乗り物の店）。", "A stable opened south of the east avenue (mount shop)."),
+            ("レイドの部屋: 巨神ごとに歩・智・闘の三部屋、中ボス、心臓の順。岩鯨は骨玉運び・共鳴の骨・鯨の核を守る。潮殻は真珠の灯り・貝の音合わせ・珊瑚の苗を守る。雷翼は避雷の羽・銅の回路・帯電の連鎖。余燼は熾火運び・鍛冶の手順・炉を守る。", "Raid rooms: each titan has traverse, wit and combat rooms, a mid-boss and the heart. Stone Whale: bone-ball carry, resonant bones, guard the core. Tide Shell: pearl light, shell tune match, coral saplings. Thunder Wing: feather carry, copper circuits, charged chain. Ember: ember carry, forging steps, guard the furnace."),
+            ("深淵: 層の形を、野営 → 三本の道 → 印 → 門 → 層の主に。生き残りの探掘隊と話し、手記を集められます。", "Abyss: layers now run camp, three paths, marks, gate, layer boss. Survivors of the survey party can be spoken to, and their notes collected."),
+            ("クリア後の深み: 階ごとに作り直される部屋。五階ごとに歪んだ王。", "Depths after the clear: rooms are rebuilt per floor, with a twisted king every five floors."),
+            ("深淵の入口で落ちていた不具合を直しました。", "Fixed a fall at the abyss entrance."),
+        ]),
+        ("v0.5.1", "2026-10-23", [
+            ("敵を殴るときの当たり判定を広げました（攻撃が当たりやすく）。", "Wider hit area when attacking enemies, so strikes land more reliably."),
+        ]),
+        ("v0.5.0", "2026-10-23", [
+            ("五章「深淵」を追加。都の地下の戸から大坑道を下り、四つの層を渡って、心臓の番人に挑みます。", "Added chapter 5, the abyss: down the great shaft under the capital, through four layers, to the warden of the heart."),
             ("深淵術（光・重さ・鼓動）と、深淵術師の木を追加。", "Added the three abyss arts (light, weight, heartbeat) and the Abyss Caster tree."),
-            ("クリアのあとに、番人の悪夢（段 1〜10）、前の自分たちの遺品 12 種（セットの効果つき）、心臓の下の果てない深み（区画 8 種・仕掛け 8 種）を追加。", "After the clear: the warden's nightmare (tiers 1 to 10), twelve past-self relics with set bonuses, and endless depths below the heart (8 section kinds, 8 gimmicks)."),
+            ("クリアのあとに、番人の悪夢（段 1〜10）、前の自分たちの遺品 12 種（セットの効果つき）、心臓の下の果てない深みを追加。", "After the clear: the warden's nightmare (tiers 1 to 10), twelve past-self relics with set bonuses, and endless depths below the heart."),
             ("深淵の敵 18 種を追加。深く潜るほど、同じ敵の変わり果てた姿が出ます。", "Added 18 abyss enemies. The deeper you go, the more twisted forms of the same foes appear."),
             ("画面にゆとり。巻物のパネル、技の木のドラッグとズーム、画面の大きさに合わせた表示。", "Roomier screens: scroll panels, drag and zoom on the skill tree, and layouts scaled to the window."),
-            ("HUD の描画を軽くしました。", "Lighter HUD drawing."),
-            ("1〜5 章の文章を見直し、用語をそろえました（灯りは「灯り」、灰被りは「灰の番人」、目的にイサナの名）。", "Reviewed the text of chapters 1 to 5 and made the terms consistent (灯り for lights, 灰の番人 for the ash warden, Isana named in the objectives)."),
-            ("試遊用のコマンド <code>/skyabyss play</code>（OP 用）を追加。", "Added the <code>/skyabyss play</code> tester commands (op only)."),
+            ("1〜5 章の文章を見直し、用語をそろえました。", "Reviewed the text of chapters 1 to 5 and made the terms consistent."),
         ]),
-        (T("0.2.2 以降（開発中・リリース前）", "After 0.2.2 (in development, unreleased)"), "2026-10-20", [
-            ("転生（Lv 50+n）を追加。魂盤・3 択の恩恵・祖の力・色と記号・称号 24・順位の石・飾りがあります。深淵の難度と、巨神ごとの専用伝説 4 つも加わりました。", "Added rebirth (Lv 50+n) with the soul board, three-choice boons, ancestral power, colors and symbols, 24 titles, a rank stone and cosmetics. Abyss difficulty and four dedicated abyss legendaries arrive with it."),
-            ("スキルの自由度を追加: 木は全部最初から開き、天職は専門に。タグ・セット・連鎖・構え・熟練・キーストーン・試着・型 4 つ。変異・橋・紋の盤・前世の技・淵の木も。", "Added skill freedom: every tree open from the start, callings as specialties, tags, sets, chains, stances, mastery, keystones, try-on and four loadouts, plus mutations, bridges, the glyph board, past-life skills and the Abyss tree."),
-            ("装備の自由度を追加: 穴・欠片・技のルーン・アスペクト・世代と、炉の「刻み」画面。", "Added gear freedom: sockets, shards, skill runes, aspects, generations and the forge's Engrave tab."),
-            ("試練のプールが各巨神 7 つ以上（原型 3 と新作 4 以上）になりました。巨神の背を大きく作り直しました（水平 ×1.6）。", "The trial pool now holds at least seven trials per titan (three originals plus four or more new), and the backs were rebuilt larger (1.6x horizontally)."),
-            ("心臓の領域が変わりました。時間では終わらず、三つの仕掛け（共鳴する骨・潮の水門・避雷の柱・熾の核）を解くまで続き、そのあいだ心臓は傷を受けません。", "Heart domains changed: they no longer time out and last until three gimmicks (resonant bones, tide valves, lightning rods, ember cores) are solved; the heart is invulnerable meanwhile."),
-            ("倒れた仲間を起こせるようになりました（約 15 秒の「倒れた」状態、3 秒の長押しで蘇生）。", "Party members can now revive a downed ally (about 15 s downed state, 3 s hold to revive)."),
-            ("試練のプール（巨神ごとに十二、周回ごとに歩・智・闘から一つずつ）、試練の板・図鑑・称号・今週の試練を追加。試練を越えると鼓動の間へ戻り、碑が光ります。", "Added the trial pool (twelve per titan, one drawn each cycle per Traverse/Wit/Combat slot), the trial board, codex, titles and weekly trial. Clearing a trial returns you to the hub and lights its tablet."),
-            ("巨神の子が運ぶ旅を追加（笛で子を呼び、パーティ全員で乗って海図から行き先を選ぶ）。成体はもう動きません。", "Added travel by young carriers (summon with a whistle, ride as a party, choose a destination from a chart); adult titans no longer move."),
-            ("5 つの木と旅人の 36 の技、天職、刻印、要、型、伝説の書き換え、ステータスの刻み目を追加。", "Added 36 skills across five trees and the Wayfarer, callings, runes, keystones, weapon types, legendary rewrites and stat breakpoints."),
+        ("v0.2.2 以降（開発中・リリース前）", "2026-10-20", [
+            ("転生（Lv 50+n）を追加。魂盤・3 択の恩恵・祖の力・色と記号・称号・順位の石・飾りがあります。", "Added rebirth (Lv 50+n) with the soul board, three-choice boons, ancestral power, colors and symbols, titles, a rank stone and cosmetics."),
+            ("スキルと装備の自由度を追加（タグ・セット・連鎖・構え・熟練・キーストーン・型、穴・欠片・技のルーン・世代）。", "Added skill and gear freedom: tags, sets, chains, stances, mastery, keystones, loadouts, sockets, shards, skill runes and generations."),
+            ("倒れた仲間を起こせるようになりました（約 15 秒の「倒れた」状態、3 秒の長押しで蘇生）。", "Party members can revive a downed ally (about 15 s downed, 3 s hold to revive)."),
+            ("巨神の子が運ぶ旅を追加（笛で子を呼び、パーティ全員で乗って海図から行き先を選ぶ）。成体はもう動きません。", "Added travel by young carriers (summon with a whistle, ride as a party, choose a destination from a chart). Adult titans no longer move."),
+            ("5 つの木と旅人の 36 の技、天職、刻印、要、型、ステータスの刻み目を追加。", "Added 36 skills across five trees and the Wayfarer, callings, runes, keystones, weapon types and stat breakpoints."),
         ]),
-        ("0.2.2", "2026-10-19", [
-            ("岩鯨の背を大きくしました（広間・心臓の間・水路）。", "Enlarged the Stone Whale's back (halls, heart chamber, channel)."),
-            ("ボスの技の予告を床に出すようにしました（橙・青白の破線・灰）。", "Boss attacks are now telegraphed on the floor (orange, pale dashed, gray)."),
-            ("備えの三灯、戦いの復帰（20 秒・3 回まで）、巨神の停泊 20 分を追加。", "Added the three readiness lamps, fight re-entry (20 s, 3 times) and the 20-minute titan stay."),
-            ("旅嚢（キー I、長押しの輪 Y）、心臓の遺物の選択画面、作業台が旅嚢の素材を使う仕組みを追加。", "Added the Travel Satchel (key I, hold-wheel Y), the heart relic selection screen and crafting from satchel materials."),
-            ("墓の置き方、パーティの仲間の札と矢印、背中の詰みの監査と修正。", "Reworked graves, added party tags and arrows, and audited and fixed dead-ends on the backs."),
+        ("v0.2.2", "2026-10-19", [
+            ("岩鯨の背を大きくしました。ボスの技の予告を床に出すようにしました。", "Enlarged the Stone Whale's back. Boss attacks are telegraphed on the floor."),
+            ("備えの三灯、戦いの復帰（20 秒・3 回まで）、旅嚢（キー I、長押しの輪 Y）、心臓の遺物の選択画面を追加。", "Added the readiness lamps, fight re-entry (20 s, three times), the Travel Satchel (I, hold-wheel Y) and the heart relic screen."),
         ]),
-        ("0.2.1", "2026-10-18", [
+        ("v0.2.1", "2026-10-18", [
             ("後から入った人に序盤や場面が出ない不具合を直しました。", "Fixed the opening and cutscenes not showing for players who join later."),
-            ("みんなで遊ぶときは、全員が同じ jar を使います。", "When playing together, everyone must use the same jar."),
         ]),
-        ("0.2.0", "2026-10-18", [
-            ("章に分かれました（題字の札、章の終わりの札、各章の小さな仕掛けと予兆）。", "Split the story into chapters (title cards, end cards, small set pieces and omens)."),
-            ("潮見の貝、地上で倒れたときの墓、装飾の枠、READMEとドット絵の刷新。", "Added the Tide-watching Shell, graves on ground deaths, accessory slots, and refreshed the README and pixel art."),
+        ("v0.2.0", "2026-10-18", [
+            ("章に分かれました。潮見の貝、地上で倒れたときの墓、装飾の枠、READMEとドット絵の刷新。", "Split the story into chapters. Added the Tide-watching Shell, graves on ground deaths, accessory slots, and refreshed the README and pixel art."),
         ]),
     ]
-    items = "".join('<li><h3>%s</h3><p class="date">%s</p><ul>%s</ul></li>' % (v if v.startswith("<") else "v" + v, d, "".join("<li>%s</li>" % T(a, b) for a, b in notes)) for v, d, notes in ver)
-    body = page_head("更新履歴", "Changelog", "ベータ版の主な変更です。", "Main changes in the beta versions.") + """
+    TITLE_EN = {"次の版（作業中）": "Next version (in progress)",
+                "v0.2.2 以降（開発中・リリース前）": "After v0.2.2 (in development, unreleased)"}
+    items = []
+    for v, d, notes in ver:
+        date = '<p class="date">%s</p>' % d if d else ""
+        cls = ' class="next"' if v.startswith("次") else ""
+        items.append('<li%s><h3>%s</h3>%s<ul>%s</ul></li>' % (
+            cls, T(v, TITLE_EN.get(v, v)), date,
+            "".join("<li>%s</li>" % T(a, b) for a, b in notes)))
+    body = page_head("更新履歴", "Changelog", "ベータ版の主な変更です。新しい版が上。0.5.4 までは試遊の確かめ順と記録から書きました。",
+                     "Main changes in the beta, newest first. Versions up to 0.5.4 are written from the playtest checklists and notes.") + """
 <section aria-labelledby="log">
 <div class="wrap">
 <h2 id="log" style="position:absolute;left:-999px">%s</h2>
@@ -220,6 +262,5 @@ def changelog():
 <p>%s <a href="%s/commits/main">GitHub</a></p>
 </div>
 </section>
-""" % (T("更新履歴", "Changelog"), items, T("細かい変更の一覧は", "The full list of changes is on"), REPO)
-    page("changelog.html", "更新履歴 — 天と淵のあいだ", "Changelog — Between the Sky and the Abyss", "ベータ版の主な変更。最新は 0.5.0。", "Main changes in the beta. Latest: 0.5.0.", body)
-
+""" % (T("更新履歴", "Changelog"), "".join(items), T("細かい変更の一覧は", "The full list of changes is on"), REPO)
+    page("changelog.html", "更新履歴 — 天と淵のあいだ", "Changelog — Between the Sky and the Abyss", "ベータ版の主な変更。最新は 0.5.4。", "Main changes in the beta. Latest: 0.5.4.", body)

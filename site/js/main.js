@@ -1,16 +1,18 @@
-/* 日本語 / English の切り替えと、狭い画面のメニュー。どちらも無くてもページは読める。 */
+/* 日本語 / English の切り替え、表示（自動・明るい・暗い）、狭い画面のメニュー。どれも無くてもページは読める。 */
 (function () {
-  var KEY = "skyabyss-site-lang";
+  var LANG_KEY = "skyabyss-site-lang";
+  var THEME_KEY = "skyabyss-site-theme";
   var root = document.documentElement;
 
-  function get() {
-    try { return localStorage.getItem(KEY); } catch (e) { return null; }
+  function store(key) {
+    try { return localStorage.getItem(key); } catch (e) { return null; }
   }
-  function put(v) {
-    try { localStorage.setItem(KEY, v); } catch (e) { /* 保存できなくても動く */ }
+  function save(key, v) {
+    try { localStorage.setItem(key, v); } catch (e) { /* 保存できなくても動く */ }
   }
 
-  function apply(lang) {
+  /* ---- 言語 ---- */
+  function applyLang(lang) {
     if (lang !== "en") lang = "ja";
     root.setAttribute("data-lang", lang);
     root.setAttribute("lang", lang);
@@ -34,19 +36,55 @@
     }
   }
 
+  /* ---- 表示（テーマ） ---- */
+  var THEME_LABEL = {
+    auto: ["表示: 自動", "Theme: auto"],
+    light: ["表示: 明るい", "Theme: light"],
+    dark: ["表示: 暗い", "Theme: dark"]
+  };
+  function currentTheme() {
+    var t = root.getAttribute("data-theme");
+    return t === "light" || t === "dark" ? t : "auto";
+  }
+  function applyTheme(mode) {
+    if (mode === "light" || mode === "dark") root.setAttribute("data-theme", mode);
+    else root.removeAttribute("data-theme");
+    var btn = document.querySelector("[data-theme-toggle]");
+    if (btn) {
+      var lab = THEME_LABEL[mode] || THEME_LABEL.auto;
+      btn.innerHTML = '<span class="ja" lang="ja">' + lab[0] + '</span><span class="en" lang="en">' + lab[1] + "</span>";
+      btn.setAttribute("data-mode", mode);
+      btn.setAttribute("aria-label", lab[0] + " / " + lab[1]);
+    }
+  }
+
+  applyLang(store(LANG_KEY) === "en" ? "en" : "ja");
   root.className += " js";
-  apply(get() === "en" ? "en" : "ja");
 
   document.addEventListener("DOMContentLoaded", function () {
-    apply(root.getAttribute("data-lang"));
-    var btns = document.querySelectorAll(".lang button");
-    for (var i = 0; i < btns.length; i++) {
-      btns[i].addEventListener("click", function () {
+    applyLang(root.getAttribute("data-lang") || "ja");
+    applyTheme(currentTheme());
+
+    var langBtns = document.querySelectorAll(".lang button");
+    for (var i = 0; i < langBtns.length; i++) {
+      langBtns[i].addEventListener("click", function () {
         var l = this.getAttribute("data-set");
-        put(l);
-        apply(l);
+        save(LANG_KEY, l);
+        applyLang(l);
       });
     }
+
+    var themeBtn = document.querySelector("[data-theme-toggle]");
+    if (themeBtn) {
+      themeBtn.addEventListener("click", function () {
+        var order = ["auto", "light", "dark"];
+        var next = order[(order.indexOf(currentTheme()) + 1) % order.length];
+        var mode = next === "auto" ? "" : next;
+        save(THEME_KEY, mode);
+        applyTheme(next);
+      });
+    }
+
     var tog = document.querySelector(".nav-toggle");
     var nav = document.getElementById("site-nav");
     if (tog && nav) {
