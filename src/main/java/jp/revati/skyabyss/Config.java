@@ -201,6 +201,10 @@ public final class Config {
             .comment("敵の頭の上に体力の帯を出すか (雑魚も。画面上の大きな帯が出るボスは除く)")
             .define("enemyHealthBars", true);
 
+    public static final ModConfigSpec.BooleanValue DAMAGE_NUMBERS = CLIENT_BUILDER
+            .comment("与えた傷の数字を、当てた敵の上に浮かべるか")
+            .define("damageNumbers", true);
+
     public static final ModConfigSpec.BooleanValue GRAVE_MARKER = CLIENT_BUILDER
             .comment("自分の墓の標 (画面の中の札・画面の端の矢印と距離。8 ブロック以内で消える) を画面に出すか (false = 出さない。サーバーからは届くが描かない)")
             .define("graveMarker", true);
