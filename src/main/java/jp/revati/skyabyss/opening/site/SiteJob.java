@@ -260,7 +260,9 @@ public final class SiteJob {
                 || s.is(Blocks.TUFF) || s.is(Blocks.DRIPSTONE_BLOCK) || s.is(Blocks.ANDESITE) || s.is(Blocks.DIORITE) || s.is(Blocks.GRANITE)
                 || s.is(Blocks.MOSSY_COBBLESTONE) || s.is(Blocks.PODZOL) || s.is(Blocks.MYCELIUM) || s.is(Blocks.BEDROCK) || s.is(Blocks.SMOOTH_BASALT) || s.is(Blocks.DIRT_PATH)
                 // 章の跡地の灰の盆地の上面 (ShapeJob。灰のまだら)
-                || s.is(Blocks.GRAY_CONCRETE_POWDER) || s.is(Blocks.LIGHT_GRAY_CONCRETE_POWDER) || s.is(Blocks.BASALT);
+                || s.is(Blocks.GRAY_CONCRETE_POWDER) || s.is(Blocks.LIGHT_GRAY_CONCRETE_POWDER) || s.is(Blocks.BASALT)
+                // 天と淵の大陸の地面 (峰に出る鉱石・火山の黒い石と溶岩の塊)
+                || s.is(net.neoforged.neoforge.common.Tags.Blocks.ORES) || s.is(Blocks.BLACKSTONE) || s.is(Blocks.MAGMA_BLOCK);
     }
 
     // 地面の上に自然にある物か (空気・草花・雪・葉・木・つる・実)
@@ -379,16 +381,32 @@ public final class SiteJob {
             conflictFound();
             return;
         }
-        // ならしたあとの上面のブロック: 範囲の中央の地面 (草なら草、砂なら砂、雪や石ならそれ)
-        BlockPos cp = new BlockPos(origin.getX(), 0, origin.getZ());
-        int cg = ground(cp.getX(), cp.getZ());
-        if (cg != WET) {
-            BlockState top = level.getBlockState(new BlockPos(cp.getX(), cg, cp.getZ()));
-            if (top.is(BlockTags.SAND) || top.is(BlockTags.DIRT) || top.is(Blocks.GRAVEL) || top.is(BlockTags.TERRACOTTA)) {
-                topState = top.is(Blocks.DIRT_PATH) ? Blocks.GRASS_BLOCK.defaultBlockState() : top;
-                fillState = top.is(BlockTags.SAND) ? top : top.is(BlockTags.TERRACOTTA) ? top : Blocks.DIRT.defaultBlockState();
+        // ならしたあとの上面のブロック: 範囲の中央と、まわり 8 点の地面でいちばん多いもの (草なら草、砂なら砂、雪や石ならそれ)。
+        // 道 (土の道) は数えない (大陸の町は道の交わる所に建つ)
+        java.util.Map<BlockState, Integer> votes = new java.util.HashMap<>();
+        int sx = Math.max(2, (rect[2] - rect[0]) / 4);
+        int sz = Math.max(2, (rect[3] - rect[1]) / 4);
+        for (int i = -1; i <= 1; i++) {
+            for (int j = -1; j <= 1; j++) {
+                int x = origin.getX() + i * sx;
+                int z = origin.getZ() + j * sz;
+                int cg = ground(x, z);
+                if (cg == WET) {
+                    continue;
+                }
+                BlockState top = level.getBlockState(new BlockPos(x, cg, z));
+                if (!top.is(Blocks.DIRT_PATH) && (top.is(BlockTags.SAND) || top.is(BlockTags.DIRT) || top.is(Blocks.GRAVEL) || top.is(BlockTags.TERRACOTTA)
+                        || top.is(Blocks.STONE) || top.is(Blocks.ANDESITE) || top.is(Blocks.SNOW_BLOCK) || top.is(Blocks.BASALT) || top.is(Blocks.BLACKSTONE))) {
+                    votes.merge(top, 1, Integer::sum);
+                }
             }
         }
+        votes.entrySet().stream().max(java.util.Map.Entry.comparingByValue()).ifPresent(v -> {
+            BlockState top = v.getKey();
+            topState = top;
+            fillState = top.is(BlockTags.SAND) || top.is(BlockTags.TERRACOTTA) || top.is(Blocks.STONE) || top.is(Blocks.ANDESITE) || top.is(Blocks.BASALT)
+                    || top.is(Blocks.BLACKSTONE) ? top : top.is(Blocks.SNOW_BLOCK) ? Blocks.STONE.defaultBlockState() : Blocks.DIRT.defaultBlockState();
+        });
         buildColumns(inner);
         buildSelective();
         entry.started = true;

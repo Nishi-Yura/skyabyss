@@ -314,6 +314,15 @@ public final class SiteFinder {
         } else {
             SkyAbyss.LOGGER.error("Opening sites: no hill for the rib bones near {}", camp);
         }
+        // 天と淵の大陸: 土地ごとの町 (図に描いた場所。docs/design/40 の 3 章)
+        if (p.continent()) {
+            for (int i = 0; i < jp.revati.skyabyss.world.continent.ContinentTowns.REGIONS.length; i++) {
+                BlockPos t = jp.revati.skyabyss.world.continent.ContinentLayout.get().town(jp.revati.skyabyss.world.continent.ContinentTowns.REGIONS[i]);
+                if (t != null) {
+                    out.add(new Planned(jp.revati.skyabyss.world.continent.ContinentTowns.KIND, i, new BlockPos(t.getX(), p.top(t.getX(), t.getZ()) + 1, t.getZ()), 0));
+                }
+            }
+        }
         SkyAbyss.LOGGER.info("Opening sites planned in {} ms ({} height queries, {} ms): camp {} shelter {} ribs {} ({} entries)", (System.nanoTime() - t0) / 1_000_000L,
                 p.queries, p.nanos / 1_000_000L, camp, shelter == null ? "-" : shelter.pos(), ribs == null ? "-" : ribs.pos(), out.size());
         return new Rest(out, grounds);

@@ -65,15 +65,10 @@ public final class SkillLessonSelfTest {
         return s == null ? (QuestLog.of(p).entry(SkillLesson.QUEST) != null && QuestLog.of(p).entry(SkillLesson.QUEST).done ? "done" : "none") : s;
     }
 
+    // 鐘銭は旅嚢にも入る (2026-10-25) ので、袋と持ち物の両方を数える
     private static int coins(FakePlayer p) {
         Item coin = BuiltInRegistries.ITEM.get(ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "bell_coin"));
-        int n = 0;
-        for (int i = 0; i < p.getInventory().getContainerSize(); i++) {
-            if (p.getInventory().getItem(i).is(coin)) {
-                n += p.getInventory().getItem(i).getCount();
-            }
-        }
-        return n;
+        return jp.revati.skyabyss.pouch.Pouch.countAll(p, coin);
     }
 
     private static void hit(FakePlayer p, TrainingDummy dummy, Skill skill, long castTick) {

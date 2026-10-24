@@ -225,6 +225,8 @@ public final class GuildSelfTest {
         check(f, Guilds.transfer(a, b.getUUID()) == Guilds.Result.NEW_LEADER && g.leader.equals(b.getUUID()) && !g.officers.contains(b.getUUID())
                 && g.officers.contains(a.getUUID()), "officer takes over");
         c.getInventory().clearContent();
+        jp.revati.skyabyss.facility.Coins.take(c, jp.revati.skyabyss.facility.Coins.count(c));
         b.getInventory().clearContent();
+        jp.revati.skyabyss.facility.Coins.take(b, jp.revati.skyabyss.facility.Coins.count(b));
     }
 }

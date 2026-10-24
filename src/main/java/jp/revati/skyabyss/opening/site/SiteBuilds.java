@@ -171,13 +171,13 @@ public final class SiteBuilds {
         SiteNetwork.broadcast(server);
     }
 
-    // 建て終わっていない物を、野営地 → 宿り → 足跡 → 骨の順で予約する
+    // 建て終わっていない物を、野営地 → 宿り → 足跡 → 骨 → 土地の町 (大陸のときだけ) の順で予約する
     public static synchronized void enqueueMissing(MinecraftServer server) {
         ServerLevel level = server.overworld();
         SiteData data = SiteData.get(level);
         java.util.Set<SiteData.Entry> queued = new java.util.HashSet<>();
         QUEUE.forEach(j -> queued.add(j.entry));
-        for (String kind : new String[] {Kind.CAMP.id, Kind.SHELTER.id, Kind.FOOTPRINT.id, Kind.RIBS.id}) {
+        for (String kind : new String[] {Kind.CAMP.id, Kind.SHELTER.id, Kind.FOOTPRINT.id, Kind.RIBS.id, jp.revati.skyabyss.world.continent.ContinentTowns.KIND}) {
             for (SiteData.Entry e : data.entries(kind)) {
                 // 跡地の中の物 (一章の骨) は、跡地を整え終わってから
                 if (!e.built && !queued.contains(e) && !waitsForGround(data, e.pos)) {
@@ -226,6 +226,7 @@ public final class SiteBuilds {
             case "shelter" -> ShelterBuilder.create(level, data, e);
             case "footprint" -> FootprintBuilder.create(level, data, e);
             case "ribs" -> RibBuilder.create(level, data, e);
+            case jp.revati.skyabyss.world.continent.ContinentTowns.KIND -> jp.revati.skyabyss.world.continent.ContinentTowns.create(level, data, e);
             default -> throw new IllegalArgumentException("unknown opening site kind " + e.kind);
         };
     }

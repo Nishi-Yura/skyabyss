@@ -91,6 +91,7 @@ public final class FacilitySelfTest {
             f.add("crashed: " + e);
         } finally {
             p.getInventory().clearContent();
+            jp.revati.skyabyss.facility.Coins.take(p, jp.revati.skyabyss.facility.Coins.count(p));
         }
         if (f.isEmpty()) {
             SkyAbyss.LOGGER.info("SELFTEST facility PASSED (assets 3 looks x 16 roles, dialogues, attendant spawn/keep/save, coins, shops buy/sell/rotation, stash, inn, repair)");
@@ -229,6 +230,7 @@ public final class FacilitySelfTest {
     // ---------------------------------------------------------------- 鐘銭
     private static void coins(List<String> f, FakePlayer p) {
         p.getInventory().clearContent();
+        jp.revati.skyabyss.facility.Coins.take(p, jp.revati.skyabyss.facility.Coins.count(p));
         Coins.give(p, 150);
         check(f, Coins.count(p) == 150, "give/count coins " + Coins.count(p));
         check(f, Coins.take(p, 40) && Coins.count(p) == 110, "take coins");
@@ -252,6 +254,7 @@ public final class FacilitySelfTest {
         check(f, board == null || Coins.errandReward(board, 4) > Coins.errandReward(board, 1), "errand coins grow by chapter");
         check(f, notBoard == null || Coins.errandReward(notBoard, 1) == 0, "story quests do not pay coins automatically");
         p.getInventory().clearContent();
+        jp.revati.skyabyss.facility.Coins.take(p, jp.revati.skyabyss.facility.Coins.count(p));
     }
 
     // ---------------------------------------------------------------- 店
@@ -281,6 +284,8 @@ public final class FacilitySelfTest {
         check(f, healing != null && healing.stack().has(net.minecraft.core.component.DataComponents.POTION_CONTENTS), "potion goods carry their potion");
 
         p.getInventory().clearContent();
+
+        jp.revati.skyabyss.facility.Coins.take(p, jp.revati.skyabyss.facility.Coins.count(p));
         Coins.give(p, 30);
         check(f, ShopService.buy(p, tools, "bread", 1) == ShopService.Result.OK, "buy bread");
         check(f, Coins.count(p) == 27 && p.getInventory().countItem(Items.BREAD) == 3, "bread paid and given");
@@ -330,6 +335,7 @@ public final class FacilitySelfTest {
             check(f, ledger.bought(black.id(), limited.id(), 10) == 0, "old days are forgotten");
         }
         p.getInventory().clearContent();
+        jp.revati.skyabyss.facility.Coins.take(p, jp.revati.skyabyss.facility.Coins.count(p));
     }
 
     // ---------------------------------------------------------------- 預かり所
@@ -379,6 +385,7 @@ public final class FacilitySelfTest {
         check(f, cost == 10, "repair cost half-worn = 10 (" + cost + ")");
         check(f, FacilityActions.repairCost(new ItemStack(Items.IRON_SWORD)) == 0, "unworn costs nothing");
         p.getInventory().clearContent();
+        jp.revati.skyabyss.facility.Coins.take(p, jp.revati.skyabyss.facility.Coins.count(p));
         p.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, sword);
         check(f, !FacilityActions.repair(p) && sword.isDamaged(), "repair needs coins");
         Coins.give(p, 10);

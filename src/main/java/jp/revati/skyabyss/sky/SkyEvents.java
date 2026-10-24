@@ -128,6 +128,19 @@ public final class SkyEvents {
             // 初めての通過の予定が遠すぎる記録 (頻度を下げた設定のまま始めたワールドなど)。早い予定に引き直す
             data.schedule(firstPassTime(now));
         }
+        // 天と淵の大陸: 最初の通過は、外れの一本道の終わり (都の門の前) に人が着いたとき (docs/design/40 の 4 章)。
+        // 誰も来ないまま予定より一日遅れたら、いつもどおり (下の時刻の決まり) に起こす
+        if (first && level.getChunkSource().getGenerator() instanceof jp.revati.skyabyss.world.continent.ContinentChunkGenerator) {
+            ServerPlayer atGate = atCapitalGate(level);
+            if (atGate != null) {
+                start(level, atGate, true);
+                data.schedule(now + randomGap(level, frequency));
+                return;
+            }
+            if (now < data.nextPassTick() + DAY) {
+                return;
+            }
+        }
         if (now < data.nextPassTick()) {
             return;
         }
@@ -143,6 +156,23 @@ public final class SkyEvents {
         }
         start(level, witness);
         data.schedule(now + randomGap(level, frequency));
+    }
+
+    // 都の門の前 (都の中心から GATE_RADIUS の中) にいる、地上の人 (観戦者は除く)。都がまだなければ null
+    static final double GATE_RADIUS = 130;
+
+    @Nullable
+    static ServerPlayer atCapitalGate(ServerLevel level) {
+        net.minecraft.core.BlockPos capital = jp.revati.skyabyss.opening.OpeningSites.shelter(level.getServer()).orElse(null);
+        if (capital == null) {
+            return null;
+        }
+        for (ServerPlayer p : level.players()) {
+            if (!p.isSpectator() && p.distanceToSqr(capital.getX() + 0.5, p.getY(), capital.getZ() + 0.5) <= GATE_RADIUS * GATE_RADIUS) {
+                return p;
+            }
+        }
+        return null;
     }
 
     // 最初の通過の予定の時刻: 初日の正午。始めたのがそれより遅ければ (古いワールド・夜に始めた) 2 分後

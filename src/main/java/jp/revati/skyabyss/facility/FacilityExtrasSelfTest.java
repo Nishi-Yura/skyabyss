@@ -71,6 +71,7 @@ public final class FacilityExtrasSelfTest {
             f.add("crashed: " + e);
         } finally {
             p.getInventory().clearContent();
+            jp.revati.skyabyss.facility.Coins.take(p, jp.revati.skyabyss.facility.Coins.count(p));
             KeyRoom.Data.get(server).offered.remove(p.getUUID());
         }
         if (f.isEmpty()) {
@@ -134,6 +135,7 @@ public final class FacilityExtrasSelfTest {
         BlockPos at = level.getSharedSpawnPos().atY(level.getMaxBuildHeight() - 6);
         p.moveTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5);
         p.getInventory().clearContent();
+        jp.revati.skyabyss.facility.Coins.take(p, jp.revati.skyabyss.facility.Coins.count(p));
         GrowthData gd = Growth.get(p);
         SkillData sd = SkillManager.get(p);
         gd.level = 16;
@@ -217,11 +219,13 @@ public final class FacilityExtrasSelfTest {
     // ---------------------------------------------------------------- 鍵の間
     private static void keyRoom(List<String> f, MinecraftServer server, FakePlayer p) {
         p.getInventory().clearContent();
+        jp.revati.skyabyss.facility.Coins.take(p, jp.revati.skyabyss.facility.Coins.count(p));
         KeyRoom.Data data = KeyRoom.Data.get(server);
         String titan = Titans.all().get(0);
         p.getInventory().add(new ItemStack(ModItems.SKY_KEY_FRAGMENT.get()));
         check(f, !KeyRoom.offer(p, titan, false), "no offering for a titan whose heart is still beating");
         p.getInventory().clearContent();
+        jp.revati.skyabyss.facility.Coins.take(p, jp.revati.skyabyss.facility.Coins.count(p));
         data.offered.put(p.getUUID(), new java.util.LinkedHashSet<>(Set.of(titan)));
         Keepsakes.Where w = Keepsakes.locate(p, ModItems.SKY_KEY_FRAGMENT.get());
         check(f, w.holders().getOrDefault(KeyRoom.HOLDER, 0) == 1 && w.safe() >= 1, "laid fragment counts as at hand " + w.holders());
@@ -237,6 +241,7 @@ public final class FacilityExtrasSelfTest {
         check(f, copy.offered.getOrDefault(p.getUUID(), Set.of()).contains(titan), "key room survives save");
         data.offered.remove(p.getUUID());
         p.getInventory().clearContent();
+        jp.revati.skyabyss.facility.Coins.take(p, jp.revati.skyabyss.facility.Coins.count(p));
     }
 
     // ---------------------------------------------------------------- 記録・印
@@ -266,12 +271,14 @@ public final class FacilityExtrasSelfTest {
         // 醸造: 四章より前は教えない、四章 (ここではクリエイティブで代える) で一度だけ
         FacilityMarks.remove(p, FacilityMarks.BREW_LESSON);
         p.getInventory().clearContent();
+        jp.revati.skyabyss.facility.Coins.take(p, jp.revati.skyabyss.facility.Coins.count(p));
         check(f, !FacilityActions.brewLesson(p) && !FacilityMarks.has(p, FacilityMarks.BREW_LESSON), "no brewing lesson before chapter 4");
         p.setGameMode(GameType.CREATIVE);
         check(f, FacilityActions.brewLesson(p) && p.getInventory().countItem(Items.BREWING_STAND) == 1, "brewing lesson gives the kit");
         check(f, !FacilityActions.brewLesson(p) && p.getInventory().countItem(Items.BREWING_STAND) == 1, "brewing kit only once");
         p.setGameMode(GameType.SURVIVAL);
         p.getInventory().clearContent();
+        jp.revati.skyabyss.facility.Coins.take(p, jp.revati.skyabyss.facility.Coins.count(p));
         FacilityActions.loreBook(p);
     }
 }

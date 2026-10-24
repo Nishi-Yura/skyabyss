@@ -134,7 +134,7 @@ public final class ContinentChunkGenerator extends ChunkGenerator {
             }
             case ContinentBiomes.ERODED_BADLANDS -> {
                 if (depth < 4) {
-                    if (top > 150 && depth == 0 && n > 0.5) {
+                    if (top > 185 && depth == 0 && n > 0.75) {
                         return Blocks.MAGMA_BLOCK.defaultBlockState();
                     }
                     return n > 0 ? Blocks.BASALT.defaultBlockState() : Blocks.BLACKSTONE.defaultBlockState();

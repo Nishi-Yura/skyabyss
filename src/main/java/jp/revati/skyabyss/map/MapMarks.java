@@ -144,6 +144,13 @@ public final class MapMarks {
                 }
             }
         }
+        // 天と淵の大陸の土地の町 (いつも出す。名前は map.skyabyss.town.<土地>)
+        for (Spot e : entries) {
+            if (e.kind().equals(jp.revati.skyabyss.world.continent.ContinentTowns.KIND)) {
+                String region = jp.revati.skyabyss.world.continent.ContinentTowns.region(e.index());
+                out.add(new Mark(Kind.TOWN, "town_" + region, "town", region, e.pos().getX(), e.pos().getZ(), false, 0));
+            }
+        }
         Spot ribsSpot = first(entries, "ribs");
         BlockPos ribs = ribsSpot == null ? null : ribsSpot.pos();
         if (ribs != null) {

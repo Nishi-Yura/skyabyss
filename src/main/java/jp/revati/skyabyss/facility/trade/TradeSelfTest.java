@@ -248,7 +248,10 @@ public final class TradeSelfTest {
         TradeData.Listing big = mine2.get(mine2.size() - 1);
         check(f, Trades.count(big.want, Trades.coins(1)) == 300, "large wanted counts survive save");
         s.getInventory().clearContent();
+        jp.revati.skyabyss.facility.Coins.take(s, jp.revati.skyabyss.facility.Coins.count(s));
         b.getInventory().clearContent();
+        jp.revati.skyabyss.facility.Coins.take(b, jp.revati.skyabyss.facility.Coins.count(b));
         c.getInventory().clearContent();
+        jp.revati.skyabyss.facility.Coins.take(c, jp.revati.skyabyss.facility.Coins.count(c));
     }
 }
