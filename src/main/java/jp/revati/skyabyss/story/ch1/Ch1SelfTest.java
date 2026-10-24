@@ -322,8 +322,7 @@ public final class Ch1SelfTest {
                 "prologue elements are not registered as expected");
         List<String> whaleIds = new ArrayList<>(Sites.WHALE);
         whaleIds.addAll(Sites.WHALE_P6);
-        // 道しるべの石標 (跡地への道の残りの点。ChapterGrounds) は一章の要素の表に数えない
-        check(ChapterSites.elements(Chapters.WHALE).stream().map(ChapterSites.Element::id).filter(id -> !id.startsWith(jp.revati.skyabyss.opening.site.ChapterGrounds.ROAD_PREFIX))
+        check(ChapterSites.elements(Chapters.WHALE).stream().map(ChapterSites.Element::id)
                 .sorted().toList().equals(whaleIds.stream().sorted().toList()),
                 "chapter 1 elements are not registered as expected");
         for (String id : Sites.WHALE_P6) {

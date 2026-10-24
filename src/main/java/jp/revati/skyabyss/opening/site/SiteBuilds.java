@@ -77,7 +77,6 @@ public final class SiteBuilds {
     @SubscribeEvent
     static void onServerStarted(ServerStartedEvent event) {
         MinecraftServer server = event.getServer();
-        ChapterGrounds.registerRoads();
         if (!enabled(server)) {
             return;
         }
