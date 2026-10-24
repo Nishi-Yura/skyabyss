@@ -1,0 +1,27 @@
+# 天と淵の大陸のはじめ (はじめの持ち物・町めぐり・門の前の空の影)。docs/design/40 の 4 章
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/continent_start.txt -PshotsName=continent_start
+world continent_start continent
+size 1600 900
+timeout 1500
+render 10
+guiscale 2
+wait 100
+cmd skyabyss dev opening build
+wait 300
+cmd time set 3000
+cmd weather clear
+hud on
+cmd tp @s -760 90 560
+waitchunks 400
+wait 60
+shot camp_view
+open inventory
+wait 20
+shot starter_kit
+close
+cmd tp @s -450 80 60 180 10
+waitchunks 400
+wait 100
+shot capital_gate
+wait 200
+shot capital_gate_later
