@@ -138,7 +138,8 @@ public final class EmberValves extends EmberRoom {
         int base = ctx.rng().nextInt(MARKS);
         do {
             Arrays.fill(needle, base);
-            int n = 9 + ctx.rng().nextInt(5);
+            // 2026-10-25 の試遊で難しすぎた: 逆回しは 3〜4 回 (前は 9〜13 回)。数手で読める
+            int n = 3 + ctx.rng().nextInt(2);
             for (int k = 0; k < n; k++) {
                 turn(ctx.rng().nextInt(4), ctx.rng().nextBoolean() ? 1 : -1);
             }

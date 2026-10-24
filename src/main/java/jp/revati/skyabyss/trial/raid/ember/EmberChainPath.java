@@ -15,7 +15,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 
 // 歩 ER4「落ちる鎖の道」(docs/design/13_ember.md)。熾の海の上に、鎖で吊った板の橋が三本。島を三つ越えて、奥の戸へ行く。
-//  - 橋に誰かが乗ると、その橋は手前の板から順に落ちる。板は落ちる 1 秒前に、赤い輪郭 (予告) と熱い色と鎖の音で知らせる。歩いて渡れば先に行ける
+//  - 橋に誰かが乗ると、その橋は手前の板から順に落ちる。板は落ちる 0.8 秒前に、赤い輪郭 (予告) と熱い色と鎖の音で知らせる。走って渡れば先に行ける (歩くと追いつかれる)
 //  - 落ちた人は、手前の島へ戻される (傷なし)。手前に人がいれば、落ちた橋は少しして一枚ずつ吊り直される
 //  - 全員が橋の向こうの下り段へ着くと越える。一人でも渡れる。手分けするなら、先に渡った人は向こうの島で待て、落ちた仲間は手前から渡り直せる
 //  - 全滅・リセットで、橋は全部吊り直される
@@ -23,8 +23,9 @@ public final class EmberChainPath extends EmberRoom {
     public static final String ID = "ER4";
     public static final int HX = 9;
     public static final int HZ = 27;
-    public static final int PLANK_GAP = 5;
-    public static final int PLANK_WARN = 20;
+    // 2026-10-25 の試遊で簡単すぎた: 板の落ちる間を 5 → 3 tick (歩くと追いつかれ、走れば渡れる)、予告を 20 → 16 tick
+    public static final int PLANK_GAP = 3;
+    public static final int PLANK_WARN = 16;
     public static final int REBUILD_WAIT = 60;
     public static final int REBUILD_GAP = 3;
     public static final int DECK = 3;

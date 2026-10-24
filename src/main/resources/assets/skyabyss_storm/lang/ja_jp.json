@@ -378,7 +378,7 @@
   "raid.skyabyss.SR6.keeper": "守り手",
   "message.skyabyss.raid.SR4.key": "鍵 %s / %s",
   "message.skyabyss.raid.SR5.round": "第 %s 回 / %s",
-  "message.skyabyss.raid.SR5.go": "あなたの番だ",
+  "message.skyabyss.raid.SR5.go": "さあ、順に踏め",
   "message.skyabyss.raid.SR5.miss": "違う。もう一度見せよう",
   "message.skyabyss.raid.SR6.gust": "突風が来る！ 柱の陰へ"
 }

@@ -378,7 +378,7 @@
   "raid.skyabyss.SR6.keeper": "Keeper",
   "message.skyabyss.raid.SR4.key": "Key %s / %s",
   "message.skyabyss.raid.SR5.round": "Round %s / %s",
-  "message.skyabyss.raid.SR5.go": "Your turn",
+  "message.skyabyss.raid.SR5.go": "Now step the order",
   "message.skyabyss.raid.SR5.miss": "Wrong, or too late. Watch again",
   "message.skyabyss.raid.SR6.gust": "A gust is coming! Get behind a pillar"
 }

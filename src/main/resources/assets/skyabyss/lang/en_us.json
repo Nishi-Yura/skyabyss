@@ -1380,7 +1380,7 @@
   "trial.skyabyss.cell.ER3": "Defend the Forge",
   "trial.skyabyss.cell.ER3.desc": "Defend the forge from three waves. Ash foes douse it. Relit braziers slow them; if it dies, restart.",
   "trial.skyabyss.cell.ER4": "The Falling Chain Road",
-  "trial.skyabyss.cell.ER4.desc": "Bridges over embers. Stepped planks glow, then fall. Fallers return to the island; no damage.",
+  "trial.skyabyss.cell.ER4.desc": "Bridges over embers. Planks fall one after another once stepped on; run across. Fallers return to the island; no damage.",
   "trial.skyabyss.cell.ER5": "The Forge Pressure",
   "trial.skyabyss.cell.ER5.desc": "Four north-wall gauges. Right-click raises a needle and lowers its neighbours. Match all four.",
   "trial.skyabyss.cell.ER6": "The Smith's Apprentices",

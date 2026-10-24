@@ -1379,7 +1379,7 @@
   "trial.skyabyss.cell.ER3": "炉を守る",
   "trial.skyabyss.cell.ER3.desc": "大炉を三波の敵から守る。灰の敵は炉を消しに来る。火床をつければ敵が鈍る。",
   "trial.skyabyss.cell.ER4": "落ちる鎖の道",
-  "trial.skyabyss.cell.ER4.desc": "火の海に三本の板橋。踏んだ板は赤く光って一秒後に落ちる。落ちた人は島へ戻る。",
+  "trial.skyabyss.cell.ER4.desc": "火の海に三本の板橋。踏むと板が手前から次々に落ちる。走って渡れ。落ちた人は島へ戻る。",
   "trial.skyabyss.cell.ER5": "炉の圧合わせ",
   "trial.skyabyss.cell.ER5.desc": "北の壁に四つの圧力計。右クリックで針を一つ上げ、隣の針を一つ下げる。全部を同じ目盛りに。",
   "trial.skyabyss.cell.ER6": "鍛え手の弟子たち",
