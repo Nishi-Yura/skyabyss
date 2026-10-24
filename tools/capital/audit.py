@@ -14,6 +14,7 @@ import os
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import passage  # noqa: E402
 import vox  # noqa: E402
 import town  # noqa: E402
 
@@ -232,6 +233,9 @@ def main():
     for (x, y, z), s_ in full.items():
         if y <= -1 and s_ == 'air':
             problems.append('plain air below ground at %s (use cave_air)' % ((x, y, z),))
+    # 戸の通り道と頭の上 (build audit の DOOR_BLOCKED・HEAD_DENT と同じ規則。灯りの置き場も同じ規則を通る)
+    for kind, pos, msg in passage.scan(full):
+        problems.append('%s at %s: %s' % (kind, pos, msg))
     print('houses: %d sealed, %d quest houses (enterable), facilities: %s' % (len(v.fake_doors), t.quest_n, ', '.join(t.fac_names)))
     print('walkable cells from the south gate: %d' % len(seen))
     print('checked %d doors, %d marks' % (doors, len(v.marks)))
