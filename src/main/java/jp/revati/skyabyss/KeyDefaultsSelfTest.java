@@ -13,8 +13,8 @@ public final class KeyDefaultsSelfTest {
     public static void runSelfTest(MinecraftServer server) {
         List<String> f = KeyDefaults.conflicts();
         // 22 = 19 + 深淵術の三つ (光・重さ・鼓動。docs/design/36 の 5)
-        if (KeyDefaults.all().size() != 22) {
-            f.add("the key list has " + KeyDefaults.all().size() + " entries (expected 22); update KeyDefaults.all() when a key is added");
+        if (KeyDefaults.all().size() != 23) {
+            f.add("the key list has " + KeyDefaults.all().size() + " entries (expected 23); update KeyDefaults.all() when a key is added");
         }
         if (f.isEmpty()) {
             SkyAbyss.LOGGER.info("SELFTEST keys PASSED ({} default keys, no duplicates, none on a vanilla default)", KeyDefaults.all().size());

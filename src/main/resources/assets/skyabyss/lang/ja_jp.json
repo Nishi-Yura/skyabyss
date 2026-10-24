@@ -1489,5 +1489,17 @@
   "raid.skyabyss.hud.here": "ここ",
   "sign.skyabyss.abyss_route.ash_1.3": "",
   "sign.skyabyss.abyss_shaft.4": "",
-  "sign.skyabyss.abyss_gate.4": ""
+  "sign.skyabyss.abyss_gate.4": "",
+  "key.skyabyss.wheel": "輪の選び画面 (長押し)",
+  "gui.skyabyss.wheel.title": "輪の選び画面",
+  "gui.skyabyss.wheel.hint": "向けて、離す",
+  "gui.skyabyss.wheel.key": "キー: %s",
+  "gui.skyabyss.wheel.quest": "クエスト",
+  "gui.skyabyss.wheel.pouch": "旅嚢",
+  "gui.skyabyss.wheel.skills": "技",
+  "gui.skyabyss.wheel.status": "状態",
+  "gui.skyabyss.wheel.map": "旅の地図",
+  "gui.skyabyss.wheel.record": "控え帳",
+  "gui.skyabyss.wheel.party": "仲間",
+  "gui.skyabyss.wheel.notice": "知らせの記録"
 }

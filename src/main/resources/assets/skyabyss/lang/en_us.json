@@ -1489,5 +1489,17 @@
   "sign.skyabyss.abyss_gate.3": "Return by the white",
   "sign.skyabyss.abyss_route.ash_1.3": "to the lord",
   "sign.skyabyss.abyss_shaft.4": "those who went down",
-  "sign.skyabyss.abyss_gate.4": "stone in the bone camp"
+  "sign.skyabyss.abyss_gate.4": "stone in the bone camp",
+  "key.skyabyss.wheel": "Menu wheel (hold)",
+  "gui.skyabyss.wheel.title": "Menu wheel",
+  "gui.skyabyss.wheel.hint": "Point, then release",
+  "gui.skyabyss.wheel.key": "Key: %s",
+  "gui.skyabyss.wheel.quest": "Quests",
+  "gui.skyabyss.wheel.pouch": "Pouch",
+  "gui.skyabyss.wheel.skills": "Skills",
+  "gui.skyabyss.wheel.status": "Status",
+  "gui.skyabyss.wheel.map": "Map",
+  "gui.skyabyss.wheel.record": "Record",
+  "gui.skyabyss.wheel.party": "Party",
+  "gui.skyabyss.wheel.notice": "Notices"
 }

@@ -7,7 +7,7 @@ import java.util.Map;
 // この mod のキーの既定の割り当て (GLFW のキーコード。サーバーの自己テストからも読めるよう、LWJGL に依存しない数で持つ)。
 // クライアントの KeyMapping はこの値で作る。2 つの操作が同じ既定を持たないこと・バニラの既定と重ならないことは KeyDefaultsSelfTest が見る。
 //   H 護符 / ; 道しるべ / N 知らせの記録 / Y 旅嚢で使う / I 旅嚢 / U クエスト / B 控え帳 / O 仲間 / M 旅の地図 / ' 合図 / J 状態 / K 技
-//   . 構えの切り替え / R G V Z , 技の枠 1〜5
+//   . 構えの切り替え / R G V Z , 技の枠 1〜5 / 左 Alt 輪の選び画面
 public final class KeyDefaults {
     public static final int CHARM = 72; // H
     public static final int GUIDE_TRAIL = 59; // ;
@@ -23,6 +23,7 @@ public final class KeyDefaults {
     public static final int SKILLS = 75; // K
     public static final int STANCE = 46; // .
     public static final int WEAPON_INSPECT = 91; // [ 武器の点検 (かざして回す)
+    public static final int WHEEL = 342; // 左 Alt 長押しで輪の選び画面 (クエスト・旅嚢・技・地図…を選んで開く)
     public static final int[] SLOTS = {82, 71, 86, 90, 44}; // R G V Z ,
 
     private KeyDefaults() {
@@ -45,6 +46,7 @@ public final class KeyDefaults {
         m.put("skills", SKILLS);
         m.put("stance", STANCE);
         m.put("weapon_inspect", WEAPON_INSPECT);
+        m.put("wheel", WHEEL);
         for (jp.revati.skyabyss.abyss.arts.AbyssArt art : jp.revati.skyabyss.abyss.arts.AbyssArt.values()) {
             m.put("abyss_art_" + art.id, art.key);
         }
