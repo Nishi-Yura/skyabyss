@@ -33,7 +33,7 @@ public final class FxSupport {
     // 色
     private static final int SEA = 0x58D6F0;
     private static final int FOAM = 0xF2FFFF;
-    private static final int GOLD = 0xFFD868;
+    private static final int GOLD = 0xFFB43C;
     private static final int GOLD_WHITE = 0xFFF0B8;
     private static final int SAND = 0xD9C28A;
     private static final int EMBER = 0xFF7A2A;

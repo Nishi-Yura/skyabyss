@@ -66,12 +66,18 @@ public final class FxRanged {
         c.at(0, x -> SkillFx.burst(x, SkillFx.rune(), x.hand(), 2, 0.2, 0.02));
         c.at(1, x -> {
             FxDraw.add(x, Prim.arc(start, right, up, 1.0, 0, Math.PI * 2).color(SKY_BLUE).width(0.22).life(10).ease(Ease.OUT).alpha(0.85f).trail(0.4));
-            FxDraw.add(x, Prim.line(start, end).color(SKY_WHITE).width(0.3).life(SkillRules.PIERCE_LIFETIME).ease(Ease.LINEAR).glow(0.7).trail(0.3));
+            FxDraw.add(x, Prim.line(start, end).color(SKY_WHITE).width(0.6).life(SkillRules.PIERCE_LIFETIME).ease(Ease.LINEAR).glow(0.9).trail(0.3));
+            // 途中に空色の柱を三本 (視線の方向に伸びる筋は、後ろからでは点にしか見えないため)
+            for (int k = 1; k <= 3; k++) {
+                Vec3 g = start.lerp(end, k / 4.0);
+                FxDraw.add(x, Prim.beam(g, 2.4).color(SKY_BLUE).width(1.0).life(SkillRules.PIERCE_LIFETIME).ease(Ease.OUT).glow(0.5).alpha(0.8f));
+            }
             SkillFx.sound(x, SoundEvents.CROSSBOW_SHOOT, x.hand(), 0.45f, 1.7f);
         });
         c.at(SkillRules.PIERCE_LIFETIME, x -> {
             SkillFx.flash(x, end);
-            FxDraw.add(x, Prim.ring(end, 0.2, 1.4).color(WHITE).width(0.2).life(10));
+            FxDraw.add(x, Prim.ring(end, 0.2, 2.6).color(WHITE).width(0.35).life(12).glow(0.6));
+            FxDraw.add(x, Prim.beam(end, 6.0).color(SKY_WHITE).width(1.4).life(20).ease(Ease.OUT3).glow(0.6));
             FxDraw.add(x, Prim.shell(end, 0.3, 1.8, 1.8).color(SKY_BLUE).life(10).width(0.25));
             SkillFx.sound(x, SoundEvents.ARROW_SHOOT, end, 0.5f, 1.4f);
         });
