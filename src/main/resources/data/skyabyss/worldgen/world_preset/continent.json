@@ -21,7 +21,8 @@
             "minecraft:stony_peaks",
             "minecraft:snowy_slopes",
             "minecraft:badlands",
-            "minecraft:eroded_badlands"
+            "minecraft:eroded_badlands",
+            "minecraft:river"
           ]
         }
       }

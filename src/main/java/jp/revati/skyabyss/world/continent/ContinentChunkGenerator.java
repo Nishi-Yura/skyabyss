@@ -44,6 +44,7 @@ public final class ContinentChunkGenerator extends ChunkGenerator {
     private static final BlockState STONE = Blocks.STONE.defaultBlockState();
     private static final BlockState DEEPSLATE = Blocks.DEEPSLATE.defaultBlockState();
     private static final BlockState BEDROCK = Blocks.BEDROCK.defaultBlockState();
+    private static final BlockState BRIDGE = Blocks.SPRUCE_PLANKS.defaultBlockState();
     private static final BlockState[] BANDS = {
         Blocks.ORANGE_TERRACOTTA.defaultBlockState(), Blocks.TERRACOTTA.defaultBlockState(), Blocks.YELLOW_TERRACOTTA.defaultBlockState(),
         Blocks.TERRACOTTA.defaultBlockState(), Blocks.RED_TERRACOTTA.defaultBlockState(), Blocks.WHITE_TERRACOTTA.defaultBlockState(),
@@ -95,7 +96,7 @@ public final class ContinentChunkGenerator extends ChunkGenerator {
         boolean steep = slope >= 3;
         double n = ContinentMap.value(x / 9.0, z / 9.0, 0x2B07);
         switch (biome) {
-            case ContinentBiomes.DEEP_OCEAN, ContinentBiomes.OCEAN, ContinentBiomes.INLAND_SEA -> {
+            case ContinentBiomes.DEEP_OCEAN, ContinentBiomes.OCEAN, ContinentBiomes.INLAND_SEA, ContinentBiomes.RIVER -> {
                 if (depth < 3) {
                     if (biome == ContinentBiomes.INLAND_SEA || top >= 48) {
                         return n > 0.55 ? Blocks.CLAY.defaultBlockState() : Blocks.SAND.defaultBlockState();
@@ -208,9 +209,12 @@ public final class ContinentChunkGenerator extends ChunkGenerator {
                     int sl = slope(t, dx, dz);
                     int biome = map.biome(x, z);
                     int upto = Math.max(top, SEA_LEVEL - 1);
-                    BlockState road = top >= SEA_LEVEL - 1 ? road(roads, x, z) : null;
+                    BlockState road = road(roads, x, z);
+                    // 道が川を渡る所は、水面に板の橋
+                    boolean bridge = road != null && top < SEA_LEVEL - 1;
                     for (int y = minY; y <= upto; y++) {
-                        BlockState st = y <= top ? (y == top && road != null ? road : solid(x, y, z, top, sl, biome)) : WATER;
+                        BlockState st = y <= top ? (y == top && road != null && !bridge ? road : solid(x, y, z, top, sl, biome))
+                                : bridge && y == SEA_LEVEL - 1 ? BRIDGE : WATER;
                         sections[chunk.getSectionIndex(y)].setBlockState(dx, y & 15, dz, st, false);
                     }
                 }

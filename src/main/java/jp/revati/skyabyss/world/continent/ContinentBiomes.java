@@ -29,6 +29,7 @@ public final class ContinentBiomes extends BiomeSource {
     public static final int SNOWY_SLOPES = 12;
     public static final int BADLANDS = 13;
     public static final int ERODED_BADLANDS = 14;
+    public static final int RIVER = 15;
 
     public static final MapCodec<ContinentBiomes> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
             Biome.CODEC.listOf().fieldOf("biomes").forGetter(s -> s.biomes)).apply(i, ContinentBiomes::new));

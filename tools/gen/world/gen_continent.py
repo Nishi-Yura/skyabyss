@@ -30,7 +30,7 @@ SEA_LEVEL = 63   # 水面は 62 まで
 
 # 土地の番号 (ContinentBiomeSource の並び)
 BIOME_NAMES = ['deep_ocean', 'ocean', 'lukewarm_ocean', 'beach', 'plains', 'forest', 'meadow', 'windswept_hills', 'taiga',
-               'savanna', 'windswept_gravelly_hills', 'stony_peaks', 'snowy_slopes', 'badlands', 'eroded_badlands']
+               'savanna', 'windswept_gravelly_hills', 'stony_peaks', 'snowy_slopes', 'badlands', 'eroded_badlands', 'river']
 B = {n: i for i, n in enumerate(BIOME_NAMES)}
 
 # 土地 (見取り図の regions の種類) の番号。region.bin の値。world/continent/ContinentMap.region と同じ並び
@@ -56,8 +56,118 @@ PREVIEW = {
     'deep_ocean': (40, 70, 110), 'ocean': (60, 100, 140), 'lukewarm_ocean': (60, 130, 150), 'beach': (220, 210, 160),
     'plains': (130, 170, 90), 'forest': (80, 130, 70), 'meadow': (150, 190, 110), 'windswept_hills': (130, 140, 120),
     'taiga': (90, 120, 90), 'savanna': (180, 175, 100), 'windswept_gravelly_hills': (140, 140, 140), 'stony_peaks': (170, 170, 170),
-    'snowy_slopes': (240, 240, 245), 'badlands': (190, 110, 70), 'eroded_badlands': (90, 60, 60),
+    'snowy_slopes': (240, 240, 245), 'badlands': (190, 110, 70), 'eroded_badlands': (90, 60, 60), 'river': (70, 120, 170),
 }
+
+
+# 川の種 (見取り図の案ごと)。近くの、ふもとの高さ (RIVER_SOURCE_Y) の所から下り始める
+RIVER_SEEDS = {
+    'c': [(200, -1000), (-200, -950), (-150, -450), (-950, 450), (1150, -450), (600, 700)],
+}
+RIVER_SOURCE_Y = (84, 112)
+RIVER_KEEP_OUT = 150  # 都・町・はじまりのまわり (ブロック) は削らない
+
+
+def n_of(a):
+    return a.shape[0]
+
+
+# 川すじを蛇行させる: 道のりに沿って、横へ波の形にずらす (波長と振れ幅は決まった乱数)。両端は動かさない。陸から出る点はずらさない
+def meander(path, land, seed):
+    if len(path) < 8:
+        return path
+    rng = np.random.default_rng(seed)
+    pts = np.array(path, dtype=float)
+    sm = ndimage.uniform_filter1d(pts, size=9, axis=0, mode='nearest')
+    tan = np.gradient(sm, axis=0)
+    tan /= np.maximum(1e-6, np.hypot(tan[:, 0], tan[:, 1]))[:, None]
+    nrm = np.stack([-tan[:, 1], tan[:, 0]], axis=1)
+    s_ = np.arange(len(pts))
+    lam = rng.uniform(35, 60)
+    amp = rng.uniform(5, 9)
+    env = np.minimum(1, np.minimum(s_, len(pts) - 1 - s_) / 15.0)
+    off = amp * env * (np.sin(2 * np.pi * s_ / lam + rng.uniform(0, 6.28)) + 0.4 * np.sin(2 * np.pi * s_ / (lam * 0.37)))
+    moved = sm + nrm * off[:, None]
+    n = land.shape[0]
+    out = []
+    prev = None
+    for (a, b), (oa, ob) in zip(moved, pts):
+        i, j = int(round(a)), int(round(b))
+        if not (0 <= i < n and 0 <= j < n and land[i, j]):
+            i, j = int(oa), int(ob)
+        # 隙間を埋める (一升ずつ)
+        if prev is not None:
+            pi, pj = prev
+            steps = max(abs(i - pi), abs(j - pj))
+            for t in range(1, steps):
+                out.append((pi + round((i - pi) * t / steps), pj + round((j - pj) * t / steps)))
+        out.append((i, j))
+        prev = (i, j)
+    return out
+
+
+def carve_rivers(y, land, X, Z, lay):
+    river = np.zeros(y.shape, dtype=bool)
+    seeds = RIVER_SEEDS.get(CHOSEN, [])
+    if not seeds:
+        return y, river
+    sm = ndimage.gaussian_filter(y, 3)
+    # 下る向きは「水までの近さ」が主 (行き止まりが無い)。高さと揺らぎで少し蛇行させる
+    to_water = ndimage.distance_transform_edt(land)
+    wiggle = fbm(77, octaves=3, base=14, n=n_of(y))
+    flow = to_water + (sm - SEA_LEVEL) * 0.08 + wiggle * 14
+    keep = np.zeros(y.shape, dtype=bool)
+    for c in [lay['capital'], lay['start']] + [p for _, p in lay['towns']]:
+        keep |= np.hypot(X - c[0], Z - c[1]) < RIVER_KEEP_OUT
+    ys = y.copy()
+    n = y.shape[0]
+    for sx, sz in seeds:
+        ci, cj = int((sz + HALF) / SCALE), int((sx + HALF) / SCALE)
+        # ふもとの高さの、いちばん近い所を探す
+        best = None
+        for r in range(0, 60):
+            for di in range(-r, r + 1):
+                for dj in (-r, r) if abs(di) != r else range(-r, r + 1):
+                    i, j = ci + di, cj + dj
+                    if 0 <= i < n and 0 <= j < n and land[i, j] and RIVER_SOURCE_Y[0] <= sm[i, j] <= RIVER_SOURCE_Y[1]:
+                        best = (i, j)
+                        break
+                if best:
+                    break
+            if best:
+                break
+        if best is None:
+            continue
+        path = [best]
+        seen = {best}
+        i, j = best
+        for _ in range(2000):
+            if not land[i, j] or ys[i, j] < SEA_LEVEL - 1:
+                break
+            nb = [(flow[i + a, j + b], to_water[i + a, j + b], i + a, j + b) for a in (-1, 0, 1) for b in (-1, 0, 1)
+                  if (a or b) and 0 <= i + a < n and 0 <= j + b < n and (i + a, j + b) not in seen]
+            if not nb:
+                break
+            down = [q for q in nb if q[0] < flow[i, j]]
+            # 行き止まり (揺らぎのくぼみ) では、水へ近づく向きへ
+            _, _, i, j = min(down) if down else min(nb, key=lambda q: q[1])
+            seen.add((i, j))
+            path.append((i, j))
+        path = meander(path, land, seed=len(path) + ci * 7 + cj)
+        for k, (i, j) in enumerate(path):
+            r = min(3.0, 1.2 + k / 200.0)
+            rr = int(r) + 30
+            i0, i1, j0, j1 = max(0, i - rr), min(n, i + rr + 1), max(0, j - rr), min(n, j + rr + 1)
+            ii, jj = np.mgrid[i0:i1, j0:j1]
+            d = np.hypot(ii - i, jj - j)
+            sub = y[i0:i1, j0:j1]
+            kp = keep[i0:i1, j0:j1]
+            bed = np.where(d <= r, SEA_LEVEL - 2 - (r - d), np.inf)
+            bank = np.where(d > r, SEA_LEVEL + (d - r) * 2.2, np.inf)
+            new = np.minimum(sub, np.minimum(bed, bank))
+            y[i0:i1, j0:j1] = np.where(kp, sub, new)
+            river[i0:i1, j0:j1] |= (d <= r) & ~kp
+    return y, river
 
 
 def flatten(y, X, Z, center, spec, land):
@@ -120,6 +230,8 @@ def build(key=CHOSEN, seed=7):
     depth = np.clip(px_from_land * SCALE / 5.0, 1, 30)
     depth = np.where(inland, np.minimum(depth, 20), depth)
     y = np.where(land, np.maximum(y, SEA_LEVEL + 1), SEA_LEVEL - 1 - depth)
+    # 川 (山のふもとから海へ。決まった種の点から坂を下る)
+    y, river = carve_rivers(y, land, X, Z, lay)
     # 平らにする所
     y = flatten(y, X, Z, lay['capital'], FLAT_CAPITAL, land)
     for _, p in lay['towns']:
@@ -152,6 +264,7 @@ def build(key=CHOSEN, seed=7):
     beach = land & near_water & (height <= SEA_LEVEL + 3)
     keep = np.isin(biome, [B['badlands'], B['eroded_badlands'], B['stony_peaks'], B['snowy_slopes']])
     biome[beach & ~keep] = B['beach']
+    biome[river & land & (height < SEA_LEVEL)] = B['river']
     sea = ~land
     biome[sea] = np.where(inland[sea], B['lukewarm_ocean'], np.where(depth[sea] > 18, B['deep_ocean'], B['ocean']))
     # 土地の番号 (敵の強さ): REGION_IDS の並び。海も近い土地の番号
@@ -212,7 +325,7 @@ MAP_COLORS = {
     'deep_ocean': (150, 172, 172), 'ocean': (168, 188, 184), 'lukewarm_ocean': (160, 192, 186), 'beach': (226, 212, 166),
     'plains': (176, 186, 124), 'forest': (150, 168, 108), 'meadow': (184, 194, 130), 'windswept_hills': (164, 166, 132),
     'taiga': (140, 154, 108), 'savanna': (204, 194, 138), 'windswept_gravelly_hills': (170, 168, 150), 'stony_peaks': (186, 182, 168),
-    'snowy_slopes': (230, 228, 220), 'badlands': (200, 140, 100), 'eroded_badlands': (120, 92, 84),
+    'snowy_slopes': (230, 228, 220), 'badlands': (200, 140, 100), 'eroded_badlands': (120, 92, 84), 'river': (150, 184, 186),
 }
 PAPER = np.array((232, 220, 190), dtype=float)
 INK = (66, 52, 40)

@@ -50,6 +50,16 @@ cmd tp @s -700 110 470 160 35
 waitchunks 900
 wait 60
 shot road_to_capital
+# 平原の川 (内海へ)
+cmd tp @s 30 120 -360 -150 35
+waitchunks 900
+wait 60
+shot river_meadow
+# 北の丘陵の川
+cmd tp @s 60 150 -1150 160 35
+waitchunks 900
+wait 60
+shot river_whale
 # 旅の地図 (描いた大陸の絵)
 cmd gamemode adventure
 cmd tp @s -450 80 0
