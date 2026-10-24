@@ -1,10 +1,10 @@
 # 技の見た目 (撮影台本)。tools/gen/shots/gen_skill_fx_shots.py が作る。手で直さず、生成器を直す。
 # 撮影: bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/skill_fx.txt -PshotsName=skill_fx
-# 名前: <技>_1p_<a|b|c|d> (昼の一人称)、<技>_3p_<…> (昼の三人称)、<技>_night_1p_<b|c>、<技>_night_3p_<b|c>
-# a = 溜め (撃った 1 tick 後)、b = 放ち、c = 当たり、d = 残り
+# 一技 = 一つの動画 (record <技> <tick> <fps>)。run/shots/skill_fx/<技>/0000.png … に書く。
+# 録画の間は /tick rate 5 (論理時刻で撮る)。終わったら tools/site/encode_skill_fx_clips.py で webp にする。
 world skill_fx flat
 size 1280 720
-timeout 3600
+timeout 7200
 render 6
 clouds off
 guiscale 2
@@ -19,1519 +19,11 @@ cmd skyabyss cinematic stop
 waitchunks
 chat clear
 wait 200
-
-# ---- titan_cleave (昼)
-perspective first
-fov 70
-cmd tp @s 0.5 -60 0.5 0 0
-cmd gamerule doWeatherCycle false
-cmd weather clear
-cmd skyabyss cinematic stop
-huddemo off
-hud off
-wait 30
-cmd skyabyss skill learn @s titan_cleave 3
-cmd skyabyss skill slot @s 1 titan_cleave
-cmd skyabyss skill cooldowns @s
-cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
-cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
-cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
-wait 10
-cmd skyabyss skill mana @s full
-cmd skyabyss skill cast @s 1
-wait 1
-shot titan_cleave_1p_a
-wait 2
-shot titan_cleave_1p_b
-wait 3
-shot titan_cleave_1p_c
-wait 8
-shot titan_cleave_1p_d
-cmd skyabyss skill cooldowns @s
-wait 30
-
-perspective back
-fov 48
-cmd tp @s 0.5 -60 0.5 0 0
-cmd gamerule doWeatherCycle false
-cmd weather clear
-cmd skyabyss cinematic stop
-huddemo off
-hud off
-wait 30
-cmd skyabyss skill learn @s titan_cleave 3
-cmd skyabyss skill slot @s 1 titan_cleave
-cmd skyabyss skill cooldowns @s
-cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
-cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
-cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
-wait 10
-cmd skyabyss skill mana @s full
-cmd skyabyss skill cast @s 1
-wait 1
-shot titan_cleave_3p_a
-wait 2
-shot titan_cleave_3p_b
-wait 3
-shot titan_cleave_3p_c
-wait 8
-shot titan_cleave_3p_d
-cmd skyabyss skill cooldowns @s
-wait 30
-
-# ---- rock_call (昼)
-perspective first
-fov 70
-cmd tp @s 0.5 -60 0.5 0 0
-cmd gamerule doWeatherCycle false
-cmd weather clear
-cmd skyabyss cinematic stop
-huddemo off
-hud off
-wait 30
-cmd skyabyss skill learn @s rock_call 3
-cmd skyabyss skill slot @s 1 rock_call
-cmd skyabyss skill cooldowns @s
-cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
-cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
-cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
-wait 10
-cmd skyabyss skill mana @s full
-cmd skyabyss skill cast @s 1
-wait 1
-shot rock_call_1p_a
-wait 1
-shot rock_call_1p_b
-wait 3
-shot rock_call_1p_c
-wait 7
-shot rock_call_1p_d
-cmd skyabyss skill cooldowns @s
-wait 30
-
-perspective back
-fov 48
-cmd tp @s 0.5 -60 0.5 0 0
-cmd gamerule doWeatherCycle false
-cmd weather clear
-cmd skyabyss cinematic stop
-huddemo off
-hud off
-wait 30
-cmd skyabyss skill learn @s rock_call 3
-cmd skyabyss skill slot @s 1 rock_call
-cmd skyabyss skill cooldowns @s
-cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
-cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
-cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
-wait 10
-cmd skyabyss skill mana @s full
-cmd skyabyss skill cast @s 1
-wait 1
-shot rock_call_3p_a
-wait 1
-shot rock_call_3p_b
-wait 3
-shot rock_call_3p_c
-wait 7
-shot rock_call_3p_d
-cmd skyabyss skill cooldowns @s
-wait 30
-
-# ---- whale_sweep (昼)
-perspective first
-fov 70
-cmd tp @s 0.5 -60 0.5 0 0
-cmd gamerule doWeatherCycle false
-cmd weather clear
-cmd skyabyss cinematic stop
-huddemo off
-hud off
-wait 30
-cmd skyabyss skill learn @s whale_sweep 3
-cmd skyabyss skill slot @s 1 whale_sweep
-cmd skyabyss skill cooldowns @s
-cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
-cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
-cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
-wait 10
-cmd skyabyss skill mana @s full
-cmd skyabyss skill cast @s 1
-wait 1
-shot whale_sweep_1p_a
-wait 1
-shot whale_sweep_1p_b
-wait 7
-shot whale_sweep_1p_c
-wait 7
-shot whale_sweep_1p_d
-cmd skyabyss skill cooldowns @s
-wait 30
-
-perspective back
-fov 48
-cmd tp @s 0.5 -60 0.5 0 0
-cmd gamerule doWeatherCycle false
-cmd weather clear
-cmd skyabyss cinematic stop
-huddemo off
-hud off
-wait 30
-cmd skyabyss skill learn @s whale_sweep 3
-cmd skyabyss skill slot @s 1 whale_sweep
-cmd skyabyss skill cooldowns @s
-cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
-cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
-cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
-wait 10
-cmd skyabyss skill mana @s full
-cmd skyabyss skill cast @s 1
-wait 1
-shot whale_sweep_3p_a
-wait 1
-shot whale_sweep_3p_b
-wait 7
-shot whale_sweep_3p_c
-wait 7
-shot whale_sweep_3p_d
-cmd skyabyss skill cooldowns @s
-wait 30
-
-# ---- lunge (昼)
-perspective first
-fov 70
-cmd tp @s 0.5 -60 0.5 0 0
-cmd gamerule doWeatherCycle false
-cmd weather clear
-cmd skyabyss cinematic stop
-huddemo off
-hud off
-wait 30
-cmd skyabyss skill learn @s lunge 3
-cmd skyabyss skill slot @s 1 lunge
-cmd skyabyss skill cooldowns @s
-cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
-cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
-cmd summon minecraft:husk 0.5 -60 5.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
-wait 10
-cmd skyabyss skill mana @s full
-cmd skyabyss skill cast @s 1
-wait 1
-shot lunge_1p_a
-wait 1
-shot lunge_1p_b
-wait 5
-shot lunge_1p_c
-wait 5
-shot lunge_1p_d
-cmd skyabyss skill cooldowns @s
-wait 30
-
-perspective back
-fov 48
-cmd tp @s 0.5 -60 0.5 0 0
-cmd gamerule doWeatherCycle false
-cmd weather clear
-cmd skyabyss cinematic stop
-huddemo off
-hud off
-wait 30
-cmd skyabyss skill learn @s lunge 3
-cmd skyabyss skill slot @s 1 lunge
-cmd skyabyss skill cooldowns @s
-cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
-cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
-cmd summon minecraft:husk 0.5 -60 5.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
-wait 10
-cmd skyabyss skill mana @s full
-cmd skyabyss skill cast @s 1
-wait 1
-shot lunge_3p_a
-wait 1
-shot lunge_3p_b
-wait 5
-shot lunge_3p_c
-wait 5
-shot lunge_3p_d
-cmd skyabyss skill cooldowns @s
-wait 30
-
-# ---- backstep (昼)
-perspective first
-fov 70
-cmd tp @s 0.5 -60 0.5 0 0
-cmd gamerule doWeatherCycle false
-cmd weather clear
-cmd skyabyss cinematic stop
-huddemo off
-hud off
-wait 30
-cmd skyabyss skill learn @s backstep 3
-cmd skyabyss skill slot @s 1 backstep
-cmd skyabyss skill cooldowns @s
-cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
-cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
-cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
-wait 10
-cmd skyabyss skill mana @s full
-cmd skyabyss skill cast @s 1
-wait 1
-shot backstep_1p_a
-wait 1
-shot backstep_1p_b
-wait 4
-shot backstep_1p_c
-wait 6
-shot backstep_1p_d
-cmd skyabyss skill cooldowns @s
-wait 30
-
-perspective back
-fov 48
-cmd tp @s 0.5 -60 0.5 0 0
-cmd gamerule doWeatherCycle false
-cmd weather clear
-cmd skyabyss cinematic stop
-huddemo off
-hud off
-wait 30
-cmd skyabyss skill learn @s backstep 3
-cmd skyabyss skill slot @s 1 backstep
-cmd skyabyss skill cooldowns @s
-cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
-cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
-cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
-wait 10
-cmd skyabyss skill mana @s full
-cmd skyabyss skill cast @s 1
-wait 1
-shot backstep_3p_a
-wait 1
-shot backstep_3p_b
-wait 4
-shot backstep_3p_c
-wait 6
-shot backstep_3p_d
-cmd skyabyss skill cooldowns @s
-wait 30
-
-# ---- wind_rend (昼)
-perspective first
-fov 70
-cmd tp @s 0.5 -60 0.5 0 0
-cmd gamerule doWeatherCycle false
-cmd weather clear
-cmd skyabyss cinematic stop
-huddemo off
-hud off
-wait 30
-cmd skyabyss skill learn @s wind_rend 3
-cmd skyabyss skill slot @s 1 wind_rend
-cmd skyabyss skill cooldowns @s
-cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
-cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
-cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
-wait 10
-cmd skyabyss skill mana @s full
-cmd skyabyss skill cast @s 1
-wait 1
-shot wind_rend_1p_a
-wait 1
-shot wind_rend_1p_b
-wait 4
-shot wind_rend_1p_c
-wait 8
-shot wind_rend_1p_d
-cmd skyabyss skill cooldowns @s
-wait 30
-
-perspective back
-fov 48
-cmd tp @s 0.5 -60 0.5 0 0
-cmd gamerule doWeatherCycle false
-cmd weather clear
-cmd skyabyss cinematic stop
-huddemo off
-hud off
-wait 30
-cmd skyabyss skill learn @s wind_rend 3
-cmd skyabyss skill slot @s 1 wind_rend
-cmd skyabyss skill cooldowns @s
-cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
-cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
-cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
-wait 10
-cmd skyabyss skill mana @s full
-cmd skyabyss skill cast @s 1
-wait 1
-shot wind_rend_3p_a
-wait 1
-shot wind_rend_3p_b
-wait 4
-shot wind_rend_3p_c
-wait 8
-shot wind_rend_3p_d
-cmd skyabyss skill cooldowns @s
-wait 30
-
-# ---- ward_song (昼)
-perspective first
-fov 70
-cmd tp @s 0.5 -60 0.5 0 0
-cmd gamerule doWeatherCycle false
-cmd weather clear
-cmd skyabyss cinematic stop
-huddemo off
-hud off
-wait 30
-cmd skyabyss skill learn @s ward_song 3
-cmd skyabyss skill slot @s 1 ward_song
-cmd skyabyss skill cooldowns @s
-cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
-cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
-cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
-wait 10
-cmd skyabyss skill mana @s full
-cmd skyabyss skill cast @s 1
-wait 1
-shot ward_song_1p_a
-wait 1
-shot ward_song_1p_b
-wait 7
-shot ward_song_1p_c
-wait 5
-shot ward_song_1p_d
-cmd skyabyss skill cooldowns @s
-wait 30
-
-perspective back
-fov 48
-cmd tp @s 0.5 -60 0.5 0 0
-cmd gamerule doWeatherCycle false
-cmd weather clear
-cmd skyabyss cinematic stop
-huddemo off
-hud off
-wait 30
-cmd skyabyss skill learn @s ward_song 3
-cmd skyabyss skill slot @s 1 ward_song
-cmd skyabyss skill cooldowns @s
-cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
-cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
-cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
-wait 10
-cmd skyabyss skill mana @s full
-cmd skyabyss skill cast @s 1
-wait 1
-shot ward_song_3p_a
-wait 1
-shot ward_song_3p_b
-wait 7
-shot ward_song_3p_c
-wait 5
-shot ward_song_3p_d
-cmd skyabyss skill cooldowns @s
-wait 30
-
-# ---- ebb_tide (昼)
-perspective first
-fov 70
-cmd tp @s 0.5 -60 0.5 0 0
-cmd gamerule doWeatherCycle false
-cmd weather clear
-cmd skyabyss cinematic stop
-huddemo off
-hud off
-wait 30
-cmd skyabyss skill learn @s ebb_tide 3
-cmd skyabyss skill slot @s 1 ebb_tide
-cmd skyabyss skill cooldowns @s
-cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
-cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
-cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
-wait 10
-cmd skyabyss skill mana @s full
-cmd skyabyss skill cast @s 1
-wait 1
-shot ebb_tide_1p_a
-wait 1
-shot ebb_tide_1p_b
-wait 5
-shot ebb_tide_1p_c
-wait 7
-shot ebb_tide_1p_d
-cmd skyabyss skill cooldowns @s
-wait 30
-
-perspective back
-fov 48
-cmd tp @s 0.5 -60 0.5 0 0
-cmd gamerule doWeatherCycle false
-cmd weather clear
-cmd skyabyss cinematic stop
-huddemo off
-hud off
-wait 30
-cmd skyabyss skill learn @s ebb_tide 3
-cmd skyabyss skill slot @s 1 ebb_tide
-cmd skyabyss skill cooldowns @s
-cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
-cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
-cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
-wait 10
-cmd skyabyss skill mana @s full
-cmd skyabyss skill cast @s 1
-wait 1
-shot ebb_tide_3p_a
-wait 1
-shot ebb_tide_3p_b
-wait 5
-shot ebb_tide_3p_c
-wait 7
-shot ebb_tide_3p_d
-cmd skyabyss skill cooldowns @s
-wait 30
-
-# ---- cycle_song (昼)
-perspective first
-fov 70
-cmd tp @s 0.5 -60 0.5 0 0
-cmd gamerule doWeatherCycle false
-cmd weather clear
-cmd skyabyss cinematic stop
-huddemo off
-hud off
-wait 30
-cmd skyabyss skill learn @s cycle_song 3
-cmd skyabyss skill slot @s 1 cycle_song
-cmd skyabyss skill cooldowns @s
-cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
-cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
-cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
-wait 10
-cmd skyabyss skill mana @s full
-cmd skyabyss skill cast @s 1
-wait 1
-shot cycle_song_1p_a
-wait 1
-shot cycle_song_1p_b
-wait 7
-shot cycle_song_1p_c
-wait 9
-shot cycle_song_1p_d
-cmd skyabyss skill cooldowns @s
-wait 30
-
-perspective back
-fov 48
-cmd tp @s 0.5 -60 0.5 0 0
-cmd gamerule doWeatherCycle false
-cmd weather clear
-cmd skyabyss cinematic stop
-huddemo off
-hud off
-wait 30
-cmd skyabyss skill learn @s cycle_song 3
-cmd skyabyss skill slot @s 1 cycle_song
-cmd skyabyss skill cooldowns @s
-cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
-cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
-cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
-wait 10
-cmd skyabyss skill mana @s full
-cmd skyabyss skill cast @s 1
-wait 1
-shot cycle_song_3p_a
-wait 1
-shot cycle_song_3p_b
-wait 7
-shot cycle_song_3p_c
-wait 9
-shot cycle_song_3p_d
-cmd skyabyss skill cooldowns @s
-wait 30
-
-# ---- temper (昼)
-perspective first
-fov 70
-cmd tp @s 0.5 -60 0.5 0 0
-cmd gamerule doWeatherCycle false
-cmd weather clear
-cmd skyabyss cinematic stop
-huddemo off
-hud off
-wait 30
-cmd skyabyss skill learn @s temper 3
-cmd skyabyss skill slot @s 1 temper
-cmd skyabyss skill cooldowns @s
-cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
-cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
-cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
-wait 10
-cmd skyabyss skill mana @s full
-cmd skyabyss skill cast @s 1
-wait 1
-shot temper_1p_a
-wait 1
-shot temper_1p_b
-wait 5
-shot temper_1p_c
-wait 13
-shot temper_1p_d
-cmd skyabyss skill cooldowns @s
-wait 30
-
-perspective back
-fov 48
-cmd tp @s 0.5 -60 0.5 0 0
-cmd gamerule doWeatherCycle false
-cmd weather clear
-cmd skyabyss cinematic stop
-huddemo off
-hud off
-wait 30
-cmd skyabyss skill learn @s temper 3
-cmd skyabyss skill slot @s 1 temper
-cmd skyabyss skill cooldowns @s
-cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
-cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
-cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
-wait 10
-cmd skyabyss skill mana @s full
-cmd skyabyss skill cast @s 1
-wait 1
-shot temper_3p_a
-wait 1
-shot temper_3p_b
-wait 5
-shot temper_3p_c
-wait 13
-shot temper_3p_d
-cmd skyabyss skill cooldowns @s
-wait 30
-
-# ---- ember_hammer (昼)
-perspective first
-fov 70
-cmd tp @s 0.5 -60 0.5 0 0
-cmd gamerule doWeatherCycle false
-cmd weather clear
-cmd skyabyss cinematic stop
-huddemo off
-hud off
-wait 30
-cmd skyabyss skill learn @s ember_hammer 3
-cmd skyabyss skill slot @s 1 ember_hammer
-cmd skyabyss skill cooldowns @s
-cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
-cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
-cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
-wait 10
-cmd skyabyss skill mana @s full
-cmd skyabyss skill cast @s 1
-wait 1
-shot ember_hammer_1p_a
-wait 1
-shot ember_hammer_1p_b
-wait 4
-shot ember_hammer_1p_c
-wait 14
-shot ember_hammer_1p_d
-cmd skyabyss skill cooldowns @s
-wait 30
-
-perspective back
-fov 48
-cmd tp @s 0.5 -60 0.5 0 0
-cmd gamerule doWeatherCycle false
-cmd weather clear
-cmd skyabyss cinematic stop
-huddemo off
-hud off
-wait 30
-cmd skyabyss skill learn @s ember_hammer 3
-cmd skyabyss skill slot @s 1 ember_hammer
-cmd skyabyss skill cooldowns @s
-cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
-cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
-cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
-wait 10
-cmd skyabyss skill mana @s full
-cmd skyabyss skill cast @s 1
-wait 1
-shot ember_hammer_3p_a
-wait 1
-shot ember_hammer_3p_b
-wait 4
-shot ember_hammer_3p_c
-wait 14
-shot ember_hammer_3p_d
-cmd skyabyss skill cooldowns @s
-wait 30
-
-# ---- ash_scatter (昼)
-perspective first
-fov 70
-cmd tp @s 0.5 -60 0.5 0 0
-cmd gamerule doWeatherCycle false
-cmd weather clear
-cmd skyabyss cinematic stop
-huddemo off
-hud off
-wait 30
-cmd skyabyss skill learn @s ash_scatter 3
-cmd skyabyss skill slot @s 1 ash_scatter
-cmd skyabyss skill cooldowns @s
-cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
-cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
-cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
-wait 10
-cmd skyabyss skill mana @s full
-cmd skyabyss skill cast @s 1
-wait 1
-shot ash_scatter_1p_a
-wait 1
-shot ash_scatter_1p_b
-wait 7
-shot ash_scatter_1p_c
-wait 11
-shot ash_scatter_1p_d
-cmd skyabyss skill cooldowns @s
-wait 30
-
-perspective back
-fov 48
-cmd tp @s 0.5 -60 0.5 0 0
-cmd gamerule doWeatherCycle false
-cmd weather clear
-cmd skyabyss cinematic stop
-huddemo off
-hud off
-wait 30
-cmd skyabyss skill learn @s ash_scatter 3
-cmd skyabyss skill slot @s 1 ash_scatter
-cmd skyabyss skill cooldowns @s
-cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
-cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
-cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
-wait 10
-cmd skyabyss skill mana @s full
-cmd skyabyss skill cast @s 1
-wait 1
-shot ash_scatter_3p_a
-wait 1
-shot ash_scatter_3p_b
-wait 7
-shot ash_scatter_3p_c
-wait 11
-shot ash_scatter_3p_d
-cmd skyabyss skill cooldowns @s
-wait 30
-
-# ---- cloud_pierce (昼)
-perspective first
-fov 70
-cmd tp @s 0.5 -60 0.5 0 0
-cmd gamerule doWeatherCycle false
-cmd weather clear
-cmd skyabyss cinematic stop
-huddemo off
-hud off
-wait 30
-cmd item replace entity @s weapon.mainhand with minecraft:bow
-cmd give @s minecraft:arrow 64
-cmd skyabyss skill learn @s cloud_pierce 3
-cmd skyabyss skill slot @s 1 cloud_pierce
-cmd skyabyss skill cooldowns @s
-cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
-cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
-cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
-wait 10
-cmd skyabyss skill mana @s full
-cmd skyabyss skill cast @s 1
-wait 1
-shot cloud_pierce_1p_a
-wait 1
-shot cloud_pierce_1p_b
-wait 29
-shot cloud_pierce_1p_c
-wait 3
-shot cloud_pierce_1p_d
-cmd skyabyss skill cooldowns @s
-wait 30
-
-perspective back
-fov 48
-cmd tp @s 0.5 -60 0.5 0 0
-cmd gamerule doWeatherCycle false
-cmd weather clear
-cmd skyabyss cinematic stop
-huddemo off
-hud off
-wait 30
-cmd item replace entity @s weapon.mainhand with minecraft:bow
-cmd give @s minecraft:arrow 64
-cmd skyabyss skill learn @s cloud_pierce 3
-cmd skyabyss skill slot @s 1 cloud_pierce
-cmd skyabyss skill cooldowns @s
-cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
-cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
-cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
-wait 10
-cmd skyabyss skill mana @s full
-cmd skyabyss skill cast @s 1
-wait 1
-shot cloud_pierce_3p_a
-wait 1
-shot cloud_pierce_3p_b
-wait 29
-shot cloud_pierce_3p_c
-wait 3
-shot cloud_pierce_3p_d
-cmd skyabyss skill cooldowns @s
-wait 30
-
-# ---- bone_trap (昼)
-perspective first
-fov 70
-cmd tp @s 0.5 -60 0.5 0 0
-cmd gamerule doWeatherCycle false
-cmd weather clear
-cmd skyabyss cinematic stop
-huddemo off
-hud off
-wait 30
-cmd skyabyss skill learn @s bone_trap 3
-cmd skyabyss skill slot @s 1 bone_trap
-cmd skyabyss skill cooldowns @s
-cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
-cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
-cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
-wait 10
-cmd skyabyss skill mana @s full
-cmd skyabyss skill cast @s 1
-wait 1
-shot bone_trap_1p_a
-wait 1
-shot bone_trap_1p_b
-wait 10
-shot bone_trap_1p_c
-wait 8
-shot bone_trap_1p_d
-cmd skyabyss skill cooldowns @s
-wait 30
-
-perspective back
-fov 48
-cmd tp @s 0.5 -60 0.5 0 0
-cmd gamerule doWeatherCycle false
-cmd weather clear
-cmd skyabyss cinematic stop
-huddemo off
-hud off
-wait 30
-cmd skyabyss skill learn @s bone_trap 3
-cmd skyabyss skill slot @s 1 bone_trap
-cmd skyabyss skill cooldowns @s
-cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
-cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
-cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
-wait 10
-cmd skyabyss skill mana @s full
-cmd skyabyss skill cast @s 1
-wait 1
-shot bone_trap_3p_a
-wait 1
-shot bone_trap_3p_b
-wait 10
-shot bone_trap_3p_c
-wait 8
-shot bone_trap_3p_d
-cmd skyabyss skill cooldowns @s
-wait 30
-
-# ---- sky_rain (昼)
-perspective first
-fov 70
-cmd tp @s 0.5 -60 0.5 0 0
-cmd gamerule doWeatherCycle false
-cmd weather clear
-cmd skyabyss cinematic stop
-huddemo off
-hud off
-wait 30
-cmd item replace entity @s weapon.mainhand with minecraft:bow
-cmd give @s minecraft:arrow 64
-cmd skyabyss skill learn @s sky_rain 3
-cmd skyabyss skill slot @s 1 sky_rain
-cmd skyabyss skill cooldowns @s
-cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
-cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
-cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
-wait 10
-cmd skyabyss skill mana @s full
-cmd skyabyss skill cast @s 1
-wait 1
-shot sky_rain_1p_a
-wait 1
-shot sky_rain_1p_b
-wait 3
-shot sky_rain_1p_c
-wait 35
-shot sky_rain_1p_d
-cmd skyabyss skill cooldowns @s
-wait 30
-
-perspective back
-fov 48
-cmd tp @s 0.5 -60 0.5 0 0
-cmd gamerule doWeatherCycle false
-cmd weather clear
-cmd skyabyss cinematic stop
-huddemo off
-hud off
-wait 30
-cmd item replace entity @s weapon.mainhand with minecraft:bow
-cmd give @s minecraft:arrow 64
-cmd skyabyss skill learn @s sky_rain 3
-cmd skyabyss skill slot @s 1 sky_rain
-cmd skyabyss skill cooldowns @s
-cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
-cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
-cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
-wait 10
-cmd skyabyss skill mana @s full
-cmd skyabyss skill cast @s 1
-wait 1
-shot sky_rain_3p_a
-wait 1
-shot sky_rain_3p_b
-wait 3
-shot sky_rain_3p_c
-wait 35
-shot sky_rain_3p_d
-cmd skyabyss skill cooldowns @s
-wait 30
-
-# ---- signal (昼)
-perspective first
-fov 70
-cmd tp @s 0.5 -60 0.5 0 0
-cmd gamerule doWeatherCycle false
-cmd weather clear
-cmd skyabyss cinematic stop
-huddemo off
-hud off
-wait 30
-cmd skyabyss skill learn @s signal 3
-cmd skyabyss skill slot @s 1 signal
-cmd skyabyss skill cooldowns @s
-cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
-cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
-cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
-wait 10
-cmd skyabyss skill mana @s full
-cmd skyabyss skill cast @s 1
-wait 1
-shot signal_1p_a
-wait 1
-shot signal_1p_b
-wait 5
-shot signal_1p_c
-wait 13
-shot signal_1p_d
-cmd skyabyss skill cooldowns @s
-wait 30
-
-perspective back
-fov 48
-cmd tp @s 0.5 -60 0.5 0 0
-cmd gamerule doWeatherCycle false
-cmd weather clear
-cmd skyabyss cinematic stop
-huddemo off
-hud off
-wait 30
-cmd skyabyss skill learn @s signal 3
-cmd skyabyss skill slot @s 1 signal
-cmd skyabyss skill cooldowns @s
-cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
-cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
-cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
-wait 10
-cmd skyabyss skill mana @s full
-cmd skyabyss skill cast @s 1
-wait 1
-shot signal_3p_a
-wait 1
-shot signal_3p_b
-wait 5
-shot signal_3p_c
-wait 13
-shot signal_3p_d
-cmd skyabyss skill cooldowns @s
-wait 30
-
-# ---- dust_charge (昼)
-perspective first
-fov 70
-cmd tp @s 0.5 -60 0.5 0 0
-cmd gamerule doWeatherCycle false
-cmd weather clear
-cmd skyabyss cinematic stop
-huddemo off
-hud off
-wait 30
-cmd skyabyss skill learn @s dust_charge 3
-cmd skyabyss skill slot @s 1 dust_charge
-cmd skyabyss skill cooldowns @s
-cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
-cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
-cmd summon minecraft:husk -0.7 -60 7.0 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
-wait 10
-cmd skyabyss skill mana @s full
-cmd skyabyss skill cast @s 1
-wait 1
-shot dust_charge_1p_a
-wait 1
-shot dust_charge_1p_b
-wait 2
-shot dust_charge_1p_c
-wait 10
-shot dust_charge_1p_d
-cmd skyabyss skill cooldowns @s
-wait 30
-
-perspective back
-fov 48
-cmd tp @s 0.5 -60 0.5 0 0
-cmd gamerule doWeatherCycle false
-cmd weather clear
-cmd skyabyss cinematic stop
-huddemo off
-hud off
-wait 30
-cmd skyabyss skill learn @s dust_charge 3
-cmd skyabyss skill slot @s 1 dust_charge
-cmd skyabyss skill cooldowns @s
-cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
-cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
-cmd summon minecraft:husk -0.7 -60 7.0 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
-wait 10
-cmd skyabyss skill mana @s full
-cmd skyabyss skill cast @s 1
-wait 1
-shot dust_charge_3p_a
-wait 1
-shot dust_charge_3p_b
-wait 2
-shot dust_charge_3p_c
-wait 10
-shot dust_charge_3p_d
-cmd skyabyss skill cooldowns @s
-wait 30
-
-# ---- steam_bell (昼)
-perspective first
-fov 70
-cmd tp @s 0.5 -60 0.5 0 0
-cmd gamerule doWeatherCycle false
-cmd weather clear
-cmd skyabyss cinematic stop
-huddemo off
-hud off
-wait 30
-cmd skyabyss skill learn @s steam_bell 3
-cmd skyabyss skill slot @s 1 steam_bell
-cmd skyabyss skill cooldowns @s
-cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
-cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
-cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
-wait 10
-cmd skyabyss skill mana @s full
-cmd skyabyss skill cast @s 1
-wait 1
-shot steam_bell_1p_a
-wait 3
-shot steam_bell_1p_b
-wait 1
-shot steam_bell_1p_c
-wait 15
-shot steam_bell_1p_d
-cmd skyabyss skill cooldowns @s
-wait 30
-
-perspective back
-fov 48
-cmd tp @s 0.5 -60 0.5 0 0
-cmd gamerule doWeatherCycle false
-cmd weather clear
-cmd skyabyss cinematic stop
-huddemo off
-hud off
-wait 30
-cmd skyabyss skill learn @s steam_bell 3
-cmd skyabyss skill slot @s 1 steam_bell
-cmd skyabyss skill cooldowns @s
-cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
-cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
-cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
-wait 10
-cmd skyabyss skill mana @s full
-cmd skyabyss skill cast @s 1
-wait 1
-shot steam_bell_3p_a
-wait 3
-shot steam_bell_3p_b
-wait 1
-shot steam_bell_3p_c
-wait 15
-shot steam_bell_3p_d
-cmd skyabyss skill cooldowns @s
-wait 30
-
-# ---- cinder_volley (昼)
-perspective first
-fov 70
-cmd tp @s 0.5 -60 0.5 0 0
-cmd gamerule doWeatherCycle false
-cmd weather clear
-cmd skyabyss cinematic stop
-huddemo off
-hud off
-wait 30
-cmd skyabyss skill learn @s cinder_volley 3
-cmd skyabyss skill slot @s 1 cinder_volley
-cmd skyabyss skill cooldowns @s
-cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
-cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
-cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
-wait 10
-cmd skyabyss skill mana @s full
-cmd skyabyss skill cast @s 1
-wait 1
-shot cinder_volley_1p_a
-wait 1
-shot cinder_volley_1p_b
-wait 6
-shot cinder_volley_1p_c
-wait 6
-shot cinder_volley_1p_d
-cmd skyabyss skill cooldowns @s
-wait 30
-
-perspective back
-fov 48
-cmd tp @s 0.5 -60 0.5 0 0
-cmd gamerule doWeatherCycle false
-cmd weather clear
-cmd skyabyss cinematic stop
-huddemo off
-hud off
-wait 30
-cmd skyabyss skill learn @s cinder_volley 3
-cmd skyabyss skill slot @s 1 cinder_volley
-cmd skyabyss skill cooldowns @s
-cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
-cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
-cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
-wait 10
-cmd skyabyss skill mana @s full
-cmd skyabyss skill cast @s 1
-wait 1
-shot cinder_volley_3p_a
-wait 1
-shot cinder_volley_3p_b
-wait 6
-shot cinder_volley_3p_c
-wait 6
-shot cinder_volley_3p_d
-cmd skyabyss skill cooldowns @s
-wait 30
-
-# ---- deep_pull (昼)
-perspective first
-fov 70
-cmd tp @s 0.5 -60 0.5 0 0
-cmd gamerule doWeatherCycle false
-cmd weather clear
-cmd skyabyss cinematic stop
-huddemo off
-hud off
-wait 30
-cmd skyabyss skill learn @s deep_pull 3
-cmd skyabyss skill slot @s 1 deep_pull
-cmd skyabyss skill cooldowns @s
-cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
-cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
-cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
-wait 10
-cmd skyabyss skill mana @s full
-cmd skyabyss skill cast @s 1
-wait 1
-shot deep_pull_1p_a
-wait 1
-shot deep_pull_1p_b
-wait 5
-shot deep_pull_1p_c
-wait 9
-shot deep_pull_1p_d
-cmd skyabyss skill cooldowns @s
-wait 30
-
-perspective back
-fov 48
-cmd tp @s 0.5 -60 0.5 0 0
-cmd gamerule doWeatherCycle false
-cmd weather clear
-cmd skyabyss cinematic stop
-huddemo off
-hud off
-wait 30
-cmd skyabyss skill learn @s deep_pull 3
-cmd skyabyss skill slot @s 1 deep_pull
-cmd skyabyss skill cooldowns @s
-cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
-cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
-cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
-wait 10
-cmd skyabyss skill mana @s full
-cmd skyabyss skill cast @s 1
-wait 1
-shot deep_pull_3p_a
-wait 1
-shot deep_pull_3p_b
-wait 5
-shot deep_pull_3p_c
-wait 9
-shot deep_pull_3p_d
-cmd skyabyss skill cooldowns @s
-wait 30
-
-# ---- deep_echo (昼)
-perspective first
-fov 70
-cmd tp @s 0.5 -60 0.5 0 0
-cmd gamerule doWeatherCycle false
-cmd weather clear
-cmd skyabyss cinematic stop
-huddemo off
-hud off
-wait 30
-cmd skyabyss skill learn @s deep_echo 3
-cmd skyabyss skill slot @s 1 deep_echo
-cmd skyabyss skill cooldowns @s
-cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
-cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
-cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
-wait 10
-cmd skyabyss skill mana @s full
-cmd skyabyss skill cast @s 1
-wait 1
-shot deep_echo_1p_a
-wait 2
-shot deep_echo_1p_b
-wait 10
-shot deep_echo_1p_c
-wait 17
-shot deep_echo_1p_d
-cmd skyabyss skill cooldowns @s
-wait 30
-
-perspective back
-fov 48
-cmd tp @s 0.5 -60 0.5 0 0
-cmd gamerule doWeatherCycle false
-cmd weather clear
-cmd skyabyss cinematic stop
-huddemo off
-hud off
-wait 30
-cmd skyabyss skill learn @s deep_echo 3
-cmd skyabyss skill slot @s 1 deep_echo
-cmd skyabyss skill cooldowns @s
-cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
-cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
-cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
-wait 10
-cmd skyabyss skill mana @s full
-cmd skyabyss skill cast @s 1
-wait 1
-shot deep_echo_3p_a
-wait 2
-shot deep_echo_3p_b
-wait 10
-shot deep_echo_3p_c
-wait 17
-shot deep_echo_3p_d
-cmd skyabyss skill cooldowns @s
-wait 30
-
-# ---- deep_maw (昼)
-perspective first
-fov 70
-cmd tp @s 0.5 -60 0.5 0 0
-cmd gamerule doWeatherCycle false
-cmd weather clear
-cmd skyabyss cinematic stop
-huddemo off
-hud off
-wait 30
-cmd skyabyss skill learn @s deep_maw 3
-cmd skyabyss skill slot @s 1 deep_maw
-cmd skyabyss skill cooldowns @s
-cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
-cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
-cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
-wait 10
-cmd skyabyss skill mana @s full
-cmd skyabyss skill cast @s 1
-wait 1
-shot deep_maw_1p_a
-wait 1
-shot deep_maw_1p_b
-wait 7
-shot deep_maw_1p_c
-wait 7
-shot deep_maw_1p_d
-cmd skyabyss skill cooldowns @s
-wait 30
-
-perspective back
-fov 48
-cmd tp @s 0.5 -60 0.5 0 0
-cmd gamerule doWeatherCycle false
-cmd weather clear
-cmd skyabyss cinematic stop
-huddemo off
-hud off
-wait 30
-cmd skyabyss skill learn @s deep_maw 3
-cmd skyabyss skill slot @s 1 deep_maw
-cmd skyabyss skill cooldowns @s
-cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
-cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
-cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
-wait 10
-cmd skyabyss skill mana @s full
-cmd skyabyss skill cast @s 1
-wait 1
-shot deep_maw_3p_a
-wait 1
-shot deep_maw_3p_b
-wait 7
-shot deep_maw_3p_c
-wait 7
-shot deep_maw_3p_d
-cmd skyabyss skill cooldowns @s
-wait 30
-
-# ---- echo_strike (昼)
-perspective first
-fov 70
-cmd tp @s 0.5 -60 0.5 0 0
-cmd gamerule doWeatherCycle false
-cmd weather clear
-cmd skyabyss cinematic stop
-huddemo off
-hud off
-wait 30
-cmd skyabyss skill learn @s echo_strike 3
-cmd skyabyss skill slot @s 1 echo_strike
-cmd skyabyss skill cooldowns @s
-cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
-cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
-cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
-wait 10
-cmd skyabyss skill mana @s full
-cmd skyabyss skill cast @s 1
-wait 1
-shot echo_strike_1p_a
-wait 1
-shot echo_strike_1p_b
-wait 8
-shot echo_strike_1p_c
-wait 4
-shot echo_strike_1p_d
-cmd skyabyss skill cooldowns @s
-wait 30
-
-perspective back
-fov 48
-cmd tp @s 0.5 -60 0.5 0 0
-cmd gamerule doWeatherCycle false
-cmd weather clear
-cmd skyabyss cinematic stop
-huddemo off
-hud off
-wait 30
-cmd skyabyss skill learn @s echo_strike 3
-cmd skyabyss skill slot @s 1 echo_strike
-cmd skyabyss skill cooldowns @s
-cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
-cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
-cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
-wait 10
-cmd skyabyss skill mana @s full
-cmd skyabyss skill cast @s 1
-wait 1
-shot echo_strike_3p_a
-wait 1
-shot echo_strike_3p_b
-wait 8
-shot echo_strike_3p_c
-wait 4
-shot echo_strike_3p_d
-cmd skyabyss skill cooldowns @s
-wait 30
-
-# ---- grave_bell (昼)
-perspective first
-fov 70
-cmd tp @s 0.5 -60 0.5 0 0
-cmd gamerule doWeatherCycle false
-cmd weather clear
-cmd skyabyss cinematic stop
-huddemo off
-hud off
-wait 30
-cmd skyabyss skill learn @s grave_bell 3
-cmd skyabyss skill slot @s 1 grave_bell
-cmd skyabyss skill cooldowns @s
-cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
-cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
-cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
-wait 10
-cmd skyabyss skill mana @s full
-cmd skyabyss skill cast @s 1
-wait 1
-shot grave_bell_1p_a
-wait 3
-shot grave_bell_1p_b
-wait 6
-shot grave_bell_1p_c
-wait 10
-shot grave_bell_1p_d
-cmd skyabyss skill cooldowns @s
-wait 30
-
-perspective back
-fov 48
-cmd tp @s 0.5 -60 0.5 0 0
-cmd gamerule doWeatherCycle false
-cmd weather clear
-cmd skyabyss cinematic stop
-huddemo off
-hud off
-wait 30
-cmd skyabyss skill learn @s grave_bell 3
-cmd skyabyss skill slot @s 1 grave_bell
-cmd skyabyss skill cooldowns @s
-cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
-cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
-cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
-wait 10
-cmd skyabyss skill mana @s full
-cmd skyabyss skill cast @s 1
-wait 1
-shot grave_bell_3p_a
-wait 3
-shot grave_bell_3p_b
-wait 6
-shot grave_bell_3p_c
-wait 10
-shot grave_bell_3p_d
-cmd skyabyss skill cooldowns @s
-wait 30
-
-# ---- final_light (昼)
-perspective first
-fov 70
-cmd tp @s 0.5 -60 0.5 0 0
-cmd gamerule doWeatherCycle false
-cmd weather clear
-cmd skyabyss cinematic stop
-huddemo off
-hud off
-wait 30
-cmd skyabyss skill learn @s final_light 3
-cmd skyabyss skill slot @s 1 final_light
-cmd skyabyss skill cooldowns @s
-cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
-cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
-cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
-wait 10
-cmd skyabyss skill mana @s full
-cmd skyabyss skill cast @s 1
-wait 1
-shot final_light_1p_a
-wait 1
-shot final_light_1p_b
-wait 5
-shot final_light_1p_c
-wait 13
-shot final_light_1p_d
-cmd skyabyss skill cooldowns @s
-wait 30
-
-perspective back
-fov 48
-cmd tp @s 0.5 -60 0.5 0 0
-cmd gamerule doWeatherCycle false
-cmd weather clear
-cmd skyabyss cinematic stop
-huddemo off
-hud off
-wait 30
-cmd skyabyss skill learn @s final_light 3
-cmd skyabyss skill slot @s 1 final_light
-cmd skyabyss skill cooldowns @s
-cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
-cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
-cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
-wait 10
-cmd skyabyss skill mana @s full
-cmd skyabyss skill cast @s 1
-wait 1
-shot final_light_3p_a
-wait 1
-shot final_light_3p_b
-wait 5
-shot final_light_3p_c
-wait 13
-shot final_light_3p_d
-cmd skyabyss skill cooldowns @s
-wait 30
-
-perspective first
-cmd time set midnight
+wait 240
+cmd tick rate 5
 wait 20
-# ---- titan_cleave (夜)
-perspective first
-fov 70
-cmd tp @s 0.5 -60 0.5 0 0
-cmd gamerule doWeatherCycle false
-cmd weather clear
-cmd skyabyss cinematic stop
-huddemo off
-hud off
-wait 30
-cmd skyabyss skill learn @s titan_cleave 3
-cmd skyabyss skill slot @s 1 titan_cleave
-cmd skyabyss skill cooldowns @s
-cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
-cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
-cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
-wait 10
-cmd skyabyss skill mana @s full
-cmd skyabyss skill cast @s 1
-wait 3
-shot titan_cleave_night_1p_b
-wait 3
-shot titan_cleave_night_1p_c
-cmd skyabyss skill cooldowns @s
-wait 30
 
+# ---- titan_cleave (昼・三人称の背中側。36 tick)
 perspective back
 fov 48
 cmd tp @s 0.5 -60 0.5 0 0
@@ -1549,40 +41,14 @@ cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
 cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
 wait 10
 cmd skyabyss skill mana @s full
+record titan_cleave 36 30
+wait 4
 cmd skyabyss skill cast @s 1
-wait 3
-shot titan_cleave_night_3p_b
-wait 3
-shot titan_cleave_night_3p_c
+recwait
 cmd skyabyss skill cooldowns @s
 wait 30
 
-# ---- rock_call (夜)
-perspective first
-fov 70
-cmd tp @s 0.5 -60 0.5 0 0
-cmd gamerule doWeatherCycle false
-cmd weather clear
-cmd skyabyss cinematic stop
-huddemo off
-hud off
-wait 30
-cmd skyabyss skill learn @s rock_call 3
-cmd skyabyss skill slot @s 1 rock_call
-cmd skyabyss skill cooldowns @s
-cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
-cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
-cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
-wait 10
-cmd skyabyss skill mana @s full
-cmd skyabyss skill cast @s 1
-wait 2
-shot rock_call_night_1p_b
-wait 3
-shot rock_call_night_1p_c
-cmd skyabyss skill cooldowns @s
-wait 30
-
+# ---- rock_call (昼・三人称の背中側。36 tick)
 perspective back
 fov 48
 cmd tp @s 0.5 -60 0.5 0 0
@@ -1600,40 +66,14 @@ cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
 cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
 wait 10
 cmd skyabyss skill mana @s full
+record rock_call 36 30
+wait 4
 cmd skyabyss skill cast @s 1
-wait 2
-shot rock_call_night_3p_b
-wait 3
-shot rock_call_night_3p_c
+recwait
 cmd skyabyss skill cooldowns @s
 wait 30
 
-# ---- whale_sweep (夜)
-perspective first
-fov 70
-cmd tp @s 0.5 -60 0.5 0 0
-cmd gamerule doWeatherCycle false
-cmd weather clear
-cmd skyabyss cinematic stop
-huddemo off
-hud off
-wait 30
-cmd skyabyss skill learn @s whale_sweep 3
-cmd skyabyss skill slot @s 1 whale_sweep
-cmd skyabyss skill cooldowns @s
-cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
-cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
-cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
-wait 10
-cmd skyabyss skill mana @s full
-cmd skyabyss skill cast @s 1
-wait 2
-shot whale_sweep_night_1p_b
-wait 7
-shot whale_sweep_night_1p_c
-cmd skyabyss skill cooldowns @s
-wait 30
-
+# ---- whale_sweep (昼・三人称の背中側。36 tick)
 perspective back
 fov 48
 cmd tp @s 0.5 -60 0.5 0 0
@@ -1651,40 +91,14 @@ cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
 cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
 wait 10
 cmd skyabyss skill mana @s full
+record whale_sweep 36 30
+wait 4
 cmd skyabyss skill cast @s 1
-wait 2
-shot whale_sweep_night_3p_b
-wait 7
-shot whale_sweep_night_3p_c
+recwait
 cmd skyabyss skill cooldowns @s
 wait 30
 
-# ---- lunge (夜)
-perspective first
-fov 70
-cmd tp @s 0.5 -60 0.5 0 0
-cmd gamerule doWeatherCycle false
-cmd weather clear
-cmd skyabyss cinematic stop
-huddemo off
-hud off
-wait 30
-cmd skyabyss skill learn @s lunge 3
-cmd skyabyss skill slot @s 1 lunge
-cmd skyabyss skill cooldowns @s
-cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
-cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
-cmd summon minecraft:husk 0.5 -60 5.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
-wait 10
-cmd skyabyss skill mana @s full
-cmd skyabyss skill cast @s 1
-wait 2
-shot lunge_night_1p_b
-wait 5
-shot lunge_night_1p_c
-cmd skyabyss skill cooldowns @s
-wait 30
-
+# ---- lunge (昼・三人称の背中側。36 tick)
 perspective back
 fov 48
 cmd tp @s 0.5 -60 0.5 0 0
@@ -1699,43 +113,17 @@ cmd skyabyss skill slot @s 1 lunge
 cmd skyabyss skill cooldowns @s
 cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
 cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
-cmd summon minecraft:husk 0.5 -60 5.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
+cmd summon minecraft:husk -1.6 -60 6.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
 wait 10
 cmd skyabyss skill mana @s full
-cmd skyabyss skill cast @s 1
-wait 2
-shot lunge_night_3p_b
-wait 5
-shot lunge_night_3p_c
-cmd skyabyss skill cooldowns @s
-wait 30
-
-# ---- backstep (夜)
-perspective first
-fov 70
-cmd tp @s 0.5 -60 0.5 0 0
-cmd gamerule doWeatherCycle false
-cmd weather clear
-cmd skyabyss cinematic stop
-huddemo off
-hud off
-wait 30
-cmd skyabyss skill learn @s backstep 3
-cmd skyabyss skill slot @s 1 backstep
-cmd skyabyss skill cooldowns @s
-cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
-cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
-cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
-wait 10
-cmd skyabyss skill mana @s full
-cmd skyabyss skill cast @s 1
-wait 2
-shot backstep_night_1p_b
+record lunge 36 30
 wait 4
-shot backstep_night_1p_c
+cmd skyabyss skill cast @s 1
+recwait
 cmd skyabyss skill cooldowns @s
 wait 30
 
+# ---- backstep (昼・三人称の背中側。36 tick)
 perspective back
 fov 48
 cmd tp @s 0.5 -60 0.5 0 0
@@ -1753,40 +141,14 @@ cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
 cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
 wait 10
 cmd skyabyss skill mana @s full
-cmd skyabyss skill cast @s 1
-wait 2
-shot backstep_night_3p_b
+record backstep 36 30
 wait 4
-shot backstep_night_3p_c
+cmd skyabyss skill cast @s 1
+recwait
 cmd skyabyss skill cooldowns @s
 wait 30
 
-# ---- wind_rend (夜)
-perspective first
-fov 70
-cmd tp @s 0.5 -60 0.5 0 0
-cmd gamerule doWeatherCycle false
-cmd weather clear
-cmd skyabyss cinematic stop
-huddemo off
-hud off
-wait 30
-cmd skyabyss skill learn @s wind_rend 3
-cmd skyabyss skill slot @s 1 wind_rend
-cmd skyabyss skill cooldowns @s
-cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
-cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
-cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
-wait 10
-cmd skyabyss skill mana @s full
-cmd skyabyss skill cast @s 1
-wait 2
-shot wind_rend_night_1p_b
-wait 4
-shot wind_rend_night_1p_c
-cmd skyabyss skill cooldowns @s
-wait 30
-
+# ---- wind_rend (昼・三人称の背中側。36 tick)
 perspective back
 fov 48
 cmd tp @s 0.5 -60 0.5 0 0
@@ -1804,40 +166,14 @@ cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
 cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
 wait 10
 cmd skyabyss skill mana @s full
-cmd skyabyss skill cast @s 1
-wait 2
-shot wind_rend_night_3p_b
+record wind_rend 36 30
 wait 4
-shot wind_rend_night_3p_c
-cmd skyabyss skill cooldowns @s
-wait 30
-
-# ---- ward_song (夜)
-perspective first
-fov 70
-cmd tp @s 0.5 -60 0.5 0 0
-cmd gamerule doWeatherCycle false
-cmd weather clear
-cmd skyabyss cinematic stop
-huddemo off
-hud off
-wait 30
-cmd skyabyss skill learn @s ward_song 3
-cmd skyabyss skill slot @s 1 ward_song
-cmd skyabyss skill cooldowns @s
-cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
-cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
-cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
-wait 10
-cmd skyabyss skill mana @s full
 cmd skyabyss skill cast @s 1
-wait 2
-shot ward_song_night_1p_b
-wait 7
-shot ward_song_night_1p_c
+recwait
 cmd skyabyss skill cooldowns @s
 wait 30
 
+# ---- ward_song (昼・三人称の背中側。36 tick)
 perspective back
 fov 48
 cmd tp @s 0.5 -60 0.5 0 0
@@ -1855,40 +191,14 @@ cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
 cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
 wait 10
 cmd skyabyss skill mana @s full
+record ward_song 36 30
+wait 4
 cmd skyabyss skill cast @s 1
-wait 2
-shot ward_song_night_3p_b
-wait 7
-shot ward_song_night_3p_c
+recwait
 cmd skyabyss skill cooldowns @s
 wait 30
 
-# ---- ebb_tide (夜)
-perspective first
-fov 70
-cmd tp @s 0.5 -60 0.5 0 0
-cmd gamerule doWeatherCycle false
-cmd weather clear
-cmd skyabyss cinematic stop
-huddemo off
-hud off
-wait 30
-cmd skyabyss skill learn @s ebb_tide 3
-cmd skyabyss skill slot @s 1 ebb_tide
-cmd skyabyss skill cooldowns @s
-cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
-cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
-cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
-wait 10
-cmd skyabyss skill mana @s full
-cmd skyabyss skill cast @s 1
-wait 2
-shot ebb_tide_night_1p_b
-wait 5
-shot ebb_tide_night_1p_c
-cmd skyabyss skill cooldowns @s
-wait 30
-
+# ---- ebb_tide (昼・三人称の背中側。36 tick)
 perspective back
 fov 48
 cmd tp @s 0.5 -60 0.5 0 0
@@ -1906,40 +216,14 @@ cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
 cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
 wait 10
 cmd skyabyss skill mana @s full
+record ebb_tide 36 30
+wait 4
 cmd skyabyss skill cast @s 1
-wait 2
-shot ebb_tide_night_3p_b
-wait 5
-shot ebb_tide_night_3p_c
+recwait
 cmd skyabyss skill cooldowns @s
 wait 30
 
-# ---- cycle_song (夜)
-perspective first
-fov 70
-cmd tp @s 0.5 -60 0.5 0 0
-cmd gamerule doWeatherCycle false
-cmd weather clear
-cmd skyabyss cinematic stop
-huddemo off
-hud off
-wait 30
-cmd skyabyss skill learn @s cycle_song 3
-cmd skyabyss skill slot @s 1 cycle_song
-cmd skyabyss skill cooldowns @s
-cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
-cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
-cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
-wait 10
-cmd skyabyss skill mana @s full
-cmd skyabyss skill cast @s 1
-wait 2
-shot cycle_song_night_1p_b
-wait 7
-shot cycle_song_night_1p_c
-cmd skyabyss skill cooldowns @s
-wait 30
-
+# ---- cycle_song (昼・三人称の背中側。36 tick)
 perspective back
 fov 48
 cmd tp @s 0.5 -60 0.5 0 0
@@ -1957,40 +241,14 @@ cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
 cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
 wait 10
 cmd skyabyss skill mana @s full
+record cycle_song 36 30
+wait 4
 cmd skyabyss skill cast @s 1
-wait 2
-shot cycle_song_night_3p_b
-wait 7
-shot cycle_song_night_3p_c
+recwait
 cmd skyabyss skill cooldowns @s
 wait 30
 
-# ---- temper (夜)
-perspective first
-fov 70
-cmd tp @s 0.5 -60 0.5 0 0
-cmd gamerule doWeatherCycle false
-cmd weather clear
-cmd skyabyss cinematic stop
-huddemo off
-hud off
-wait 30
-cmd skyabyss skill learn @s temper 3
-cmd skyabyss skill slot @s 1 temper
-cmd skyabyss skill cooldowns @s
-cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
-cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
-cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
-wait 10
-cmd skyabyss skill mana @s full
-cmd skyabyss skill cast @s 1
-wait 2
-shot temper_night_1p_b
-wait 5
-shot temper_night_1p_c
-cmd skyabyss skill cooldowns @s
-wait 30
-
+# ---- temper (昼・三人称の背中側。36 tick)
 perspective back
 fov 48
 cmd tp @s 0.5 -60 0.5 0 0
@@ -2008,40 +266,14 @@ cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
 cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
 wait 10
 cmd skyabyss skill mana @s full
-cmd skyabyss skill cast @s 1
-wait 2
-shot temper_night_3p_b
-wait 5
-shot temper_night_3p_c
-cmd skyabyss skill cooldowns @s
-wait 30
-
-# ---- ember_hammer (夜)
-perspective first
-fov 70
-cmd tp @s 0.5 -60 0.5 0 0
-cmd gamerule doWeatherCycle false
-cmd weather clear
-cmd skyabyss cinematic stop
-huddemo off
-hud off
-wait 30
-cmd skyabyss skill learn @s ember_hammer 3
-cmd skyabyss skill slot @s 1 ember_hammer
-cmd skyabyss skill cooldowns @s
-cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
-cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
-cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
-wait 10
-cmd skyabyss skill mana @s full
-cmd skyabyss skill cast @s 1
-wait 2
-shot ember_hammer_night_1p_b
+record temper 36 30
 wait 4
-shot ember_hammer_night_1p_c
+cmd skyabyss skill cast @s 1
+recwait
 cmd skyabyss skill cooldowns @s
 wait 30
 
+# ---- ember_hammer (昼・三人称の背中側。36 tick)
 perspective back
 fov 48
 cmd tp @s 0.5 -60 0.5 0 0
@@ -2059,40 +291,14 @@ cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
 cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
 wait 10
 cmd skyabyss skill mana @s full
-cmd skyabyss skill cast @s 1
-wait 2
-shot ember_hammer_night_3p_b
+record ember_hammer 36 30
 wait 4
-shot ember_hammer_night_3p_c
-cmd skyabyss skill cooldowns @s
-wait 30
-
-# ---- ash_scatter (夜)
-perspective first
-fov 70
-cmd tp @s 0.5 -60 0.5 0 0
-cmd gamerule doWeatherCycle false
-cmd weather clear
-cmd skyabyss cinematic stop
-huddemo off
-hud off
-wait 30
-cmd skyabyss skill learn @s ash_scatter 3
-cmd skyabyss skill slot @s 1 ash_scatter
-cmd skyabyss skill cooldowns @s
-cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
-cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
-cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
-wait 10
-cmd skyabyss skill mana @s full
 cmd skyabyss skill cast @s 1
-wait 2
-shot ash_scatter_night_1p_b
-wait 7
-shot ash_scatter_night_1p_c
+recwait
 cmd skyabyss skill cooldowns @s
 wait 30
 
+# ---- ash_scatter (昼・三人称の背中側。36 tick)
 perspective back
 fov 48
 cmd tp @s 0.5 -60 0.5 0 0
@@ -2110,42 +316,14 @@ cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
 cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
 wait 10
 cmd skyabyss skill mana @s full
+record ash_scatter 36 30
+wait 4
 cmd skyabyss skill cast @s 1
-wait 2
-shot ash_scatter_night_3p_b
-wait 7
-shot ash_scatter_night_3p_c
+recwait
 cmd skyabyss skill cooldowns @s
 wait 30
 
-# ---- cloud_pierce (夜)
-perspective first
-fov 70
-cmd tp @s 0.5 -60 0.5 0 0
-cmd gamerule doWeatherCycle false
-cmd weather clear
-cmd skyabyss cinematic stop
-huddemo off
-hud off
-wait 30
-cmd item replace entity @s weapon.mainhand with minecraft:bow
-cmd give @s minecraft:arrow 64
-cmd skyabyss skill learn @s cloud_pierce 3
-cmd skyabyss skill slot @s 1 cloud_pierce
-cmd skyabyss skill cooldowns @s
-cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
-cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
-cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
-wait 10
-cmd skyabyss skill mana @s full
-cmd skyabyss skill cast @s 1
-wait 2
-shot cloud_pierce_night_1p_b
-wait 29
-shot cloud_pierce_night_1p_c
-cmd skyabyss skill cooldowns @s
-wait 30
-
+# ---- cloud_pierce (昼・三人称の背中側。46 tick)
 perspective back
 fov 48
 cmd tp @s 0.5 -60 0.5 0 0
@@ -2165,40 +343,14 @@ cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
 cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
 wait 10
 cmd skyabyss skill mana @s full
+record cloud_pierce 46 30
+wait 4
 cmd skyabyss skill cast @s 1
-wait 2
-shot cloud_pierce_night_3p_b
-wait 29
-shot cloud_pierce_night_3p_c
+recwait
 cmd skyabyss skill cooldowns @s
 wait 30
 
-# ---- bone_trap (夜)
-perspective first
-fov 70
-cmd tp @s 0.5 -60 0.5 0 0
-cmd gamerule doWeatherCycle false
-cmd weather clear
-cmd skyabyss cinematic stop
-huddemo off
-hud off
-wait 30
-cmd skyabyss skill learn @s bone_trap 3
-cmd skyabyss skill slot @s 1 bone_trap
-cmd skyabyss skill cooldowns @s
-cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
-cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
-cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
-wait 10
-cmd skyabyss skill mana @s full
-cmd skyabyss skill cast @s 1
-wait 2
-shot bone_trap_night_1p_b
-wait 10
-shot bone_trap_night_1p_c
-cmd skyabyss skill cooldowns @s
-wait 30
-
+# ---- bone_trap (昼・三人称の背中側。36 tick)
 perspective back
 fov 48
 cmd tp @s 0.5 -60 0.5 0 0
@@ -2216,42 +368,14 @@ cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
 cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
 wait 10
 cmd skyabyss skill mana @s full
+record bone_trap 36 30
+wait 4
 cmd skyabyss skill cast @s 1
-wait 2
-shot bone_trap_night_3p_b
-wait 10
-shot bone_trap_night_3p_c
+recwait
 cmd skyabyss skill cooldowns @s
 wait 30
 
-# ---- sky_rain (夜)
-perspective first
-fov 70
-cmd tp @s 0.5 -60 0.5 0 0
-cmd gamerule doWeatherCycle false
-cmd weather clear
-cmd skyabyss cinematic stop
-huddemo off
-hud off
-wait 30
-cmd item replace entity @s weapon.mainhand with minecraft:bow
-cmd give @s minecraft:arrow 64
-cmd skyabyss skill learn @s sky_rain 3
-cmd skyabyss skill slot @s 1 sky_rain
-cmd skyabyss skill cooldowns @s
-cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
-cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
-cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
-wait 10
-cmd skyabyss skill mana @s full
-cmd skyabyss skill cast @s 1
-wait 2
-shot sky_rain_night_1p_b
-wait 3
-shot sky_rain_night_1p_c
-cmd skyabyss skill cooldowns @s
-wait 30
-
+# ---- sky_rain (昼・三人称の背中側。88 tick)
 perspective back
 fov 48
 cmd tp @s 0.5 -60 0.5 0 0
@@ -2271,40 +395,15 @@ cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
 cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
 wait 10
 cmd skyabyss skill mana @s full
+record sky_rain 88 30
+wait 4
 cmd skyabyss skill cast @s 1
-wait 2
-shot sky_rain_night_3p_b
-wait 3
-shot sky_rain_night_3p_c
+recwait
 cmd skyabyss skill cooldowns @s
 wait 30
+wait 80
 
-# ---- signal (夜)
-perspective first
-fov 70
-cmd tp @s 0.5 -60 0.5 0 0
-cmd gamerule doWeatherCycle false
-cmd weather clear
-cmd skyabyss cinematic stop
-huddemo off
-hud off
-wait 30
-cmd skyabyss skill learn @s signal 3
-cmd skyabyss skill slot @s 1 signal
-cmd skyabyss skill cooldowns @s
-cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
-cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
-cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
-wait 10
-cmd skyabyss skill mana @s full
-cmd skyabyss skill cast @s 1
-wait 2
-shot signal_night_1p_b
-wait 5
-shot signal_night_1p_c
-cmd skyabyss skill cooldowns @s
-wait 30
-
+# ---- signal (昼・三人称の背中側。36 tick)
 perspective back
 fov 48
 cmd tp @s 0.5 -60 0.5 0 0
@@ -2322,40 +421,14 @@ cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
 cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
 wait 10
 cmd skyabyss skill mana @s full
+record signal 36 30
+wait 4
 cmd skyabyss skill cast @s 1
-wait 2
-shot signal_night_3p_b
-wait 5
-shot signal_night_3p_c
+recwait
 cmd skyabyss skill cooldowns @s
 wait 30
 
-# ---- dust_charge (夜)
-perspective first
-fov 70
-cmd tp @s 0.5 -60 0.5 0 0
-cmd gamerule doWeatherCycle false
-cmd weather clear
-cmd skyabyss cinematic stop
-huddemo off
-hud off
-wait 30
-cmd skyabyss skill learn @s dust_charge 3
-cmd skyabyss skill slot @s 1 dust_charge
-cmd skyabyss skill cooldowns @s
-cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
-cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
-cmd summon minecraft:husk -0.7 -60 7.0 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
-wait 10
-cmd skyabyss skill mana @s full
-cmd skyabyss skill cast @s 1
-wait 2
-shot dust_charge_night_1p_b
-wait 2
-shot dust_charge_night_1p_c
-cmd skyabyss skill cooldowns @s
-wait 30
-
+# ---- dust_charge (昼・三人称の背中側。36 tick)
 perspective back
 fov 48
 cmd tp @s 0.5 -60 0.5 0 0
@@ -2373,40 +446,14 @@ cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
 cmd summon minecraft:husk -0.7 -60 7.0 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
 wait 10
 cmd skyabyss skill mana @s full
-cmd skyabyss skill cast @s 1
-wait 2
-shot dust_charge_night_3p_b
-wait 2
-shot dust_charge_night_3p_c
-cmd skyabyss skill cooldowns @s
-wait 30
-
-# ---- steam_bell (夜)
-perspective first
-fov 70
-cmd tp @s 0.5 -60 0.5 0 0
-cmd gamerule doWeatherCycle false
-cmd weather clear
-cmd skyabyss cinematic stop
-huddemo off
-hud off
-wait 30
-cmd skyabyss skill learn @s steam_bell 3
-cmd skyabyss skill slot @s 1 steam_bell
-cmd skyabyss skill cooldowns @s
-cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
-cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
-cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
-wait 10
-cmd skyabyss skill mana @s full
-cmd skyabyss skill cast @s 1
+record dust_charge 36 30
 wait 4
-shot steam_bell_night_1p_b
-wait 1
-shot steam_bell_night_1p_c
+cmd skyabyss skill cast @s 1
+recwait
 cmd skyabyss skill cooldowns @s
 wait 30
 
+# ---- steam_bell (昼・三人称の背中側。36 tick)
 perspective back
 fov 48
 cmd tp @s 0.5 -60 0.5 0 0
@@ -2424,40 +471,14 @@ cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
 cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
 wait 10
 cmd skyabyss skill mana @s full
-cmd skyabyss skill cast @s 1
+record steam_bell 36 30
 wait 4
-shot steam_bell_night_3p_b
-wait 1
-shot steam_bell_night_3p_c
-cmd skyabyss skill cooldowns @s
-wait 30
-
-# ---- cinder_volley (夜)
-perspective first
-fov 70
-cmd tp @s 0.5 -60 0.5 0 0
-cmd gamerule doWeatherCycle false
-cmd weather clear
-cmd skyabyss cinematic stop
-huddemo off
-hud off
-wait 30
-cmd skyabyss skill learn @s cinder_volley 3
-cmd skyabyss skill slot @s 1 cinder_volley
-cmd skyabyss skill cooldowns @s
-cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
-cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
-cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
-wait 10
-cmd skyabyss skill mana @s full
 cmd skyabyss skill cast @s 1
-wait 2
-shot cinder_volley_night_1p_b
-wait 6
-shot cinder_volley_night_1p_c
+recwait
 cmd skyabyss skill cooldowns @s
 wait 30
 
+# ---- cinder_volley (昼・三人称の背中側。36 tick)
 perspective back
 fov 48
 cmd tp @s 0.5 -60 0.5 0 0
@@ -2475,40 +496,14 @@ cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
 cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
 wait 10
 cmd skyabyss skill mana @s full
+record cinder_volley 36 30
+wait 4
 cmd skyabyss skill cast @s 1
-wait 2
-shot cinder_volley_night_3p_b
-wait 6
-shot cinder_volley_night_3p_c
+recwait
 cmd skyabyss skill cooldowns @s
 wait 30
 
-# ---- deep_pull (夜)
-perspective first
-fov 70
-cmd tp @s 0.5 -60 0.5 0 0
-cmd gamerule doWeatherCycle false
-cmd weather clear
-cmd skyabyss cinematic stop
-huddemo off
-hud off
-wait 30
-cmd skyabyss skill learn @s deep_pull 3
-cmd skyabyss skill slot @s 1 deep_pull
-cmd skyabyss skill cooldowns @s
-cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
-cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
-cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
-wait 10
-cmd skyabyss skill mana @s full
-cmd skyabyss skill cast @s 1
-wait 2
-shot deep_pull_night_1p_b
-wait 5
-shot deep_pull_night_1p_c
-cmd skyabyss skill cooldowns @s
-wait 30
-
+# ---- deep_pull (昼・三人称の背中側。36 tick)
 perspective back
 fov 48
 cmd tp @s 0.5 -60 0.5 0 0
@@ -2526,40 +521,14 @@ cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
 cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
 wait 10
 cmd skyabyss skill mana @s full
+record deep_pull 36 30
+wait 4
 cmd skyabyss skill cast @s 1
-wait 2
-shot deep_pull_night_3p_b
-wait 5
-shot deep_pull_night_3p_c
+recwait
 cmd skyabyss skill cooldowns @s
 wait 30
 
-# ---- deep_echo (夜)
-perspective first
-fov 70
-cmd tp @s 0.5 -60 0.5 0 0
-cmd gamerule doWeatherCycle false
-cmd weather clear
-cmd skyabyss cinematic stop
-huddemo off
-hud off
-wait 30
-cmd skyabyss skill learn @s deep_echo 3
-cmd skyabyss skill slot @s 1 deep_echo
-cmd skyabyss skill cooldowns @s
-cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
-cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
-cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
-wait 10
-cmd skyabyss skill mana @s full
-cmd skyabyss skill cast @s 1
-wait 3
-shot deep_echo_night_1p_b
-wait 10
-shot deep_echo_night_1p_c
-cmd skyabyss skill cooldowns @s
-wait 30
-
+# ---- deep_echo (昼・三人称の背中側。42 tick)
 perspective back
 fov 48
 cmd tp @s 0.5 -60 0.5 0 0
@@ -2577,40 +546,14 @@ cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
 cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
 wait 10
 cmd skyabyss skill mana @s full
+record deep_echo 42 30
+wait 4
 cmd skyabyss skill cast @s 1
-wait 3
-shot deep_echo_night_3p_b
-wait 10
-shot deep_echo_night_3p_c
+recwait
 cmd skyabyss skill cooldowns @s
 wait 30
 
-# ---- deep_maw (夜)
-perspective first
-fov 70
-cmd tp @s 0.5 -60 0.5 0 0
-cmd gamerule doWeatherCycle false
-cmd weather clear
-cmd skyabyss cinematic stop
-huddemo off
-hud off
-wait 30
-cmd skyabyss skill learn @s deep_maw 3
-cmd skyabyss skill slot @s 1 deep_maw
-cmd skyabyss skill cooldowns @s
-cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
-cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
-cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
-wait 10
-cmd skyabyss skill mana @s full
-cmd skyabyss skill cast @s 1
-wait 2
-shot deep_maw_night_1p_b
-wait 7
-shot deep_maw_night_1p_c
-cmd skyabyss skill cooldowns @s
-wait 30
-
+# ---- deep_maw (昼・三人称の背中側。36 tick)
 perspective back
 fov 48
 cmd tp @s 0.5 -60 0.5 0 0
@@ -2628,40 +571,14 @@ cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
 cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
 wait 10
 cmd skyabyss skill mana @s full
+record deep_maw 36 30
+wait 4
 cmd skyabyss skill cast @s 1
-wait 2
-shot deep_maw_night_3p_b
-wait 7
-shot deep_maw_night_3p_c
+recwait
 cmd skyabyss skill cooldowns @s
 wait 30
 
-# ---- echo_strike (夜)
-perspective first
-fov 70
-cmd tp @s 0.5 -60 0.5 0 0
-cmd gamerule doWeatherCycle false
-cmd weather clear
-cmd skyabyss cinematic stop
-huddemo off
-hud off
-wait 30
-cmd skyabyss skill learn @s echo_strike 3
-cmd skyabyss skill slot @s 1 echo_strike
-cmd skyabyss skill cooldowns @s
-cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
-cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
-cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
-wait 10
-cmd skyabyss skill mana @s full
-cmd skyabyss skill cast @s 1
-wait 2
-shot echo_strike_night_1p_b
-wait 8
-shot echo_strike_night_1p_c
-cmd skyabyss skill cooldowns @s
-wait 30
-
+# ---- echo_strike (昼・三人称の背中側。36 tick)
 perspective back
 fov 48
 cmd tp @s 0.5 -60 0.5 0 0
@@ -2679,40 +596,14 @@ cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
 cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
 wait 10
 cmd skyabyss skill mana @s full
-cmd skyabyss skill cast @s 1
-wait 2
-shot echo_strike_night_3p_b
-wait 8
-shot echo_strike_night_3p_c
-cmd skyabyss skill cooldowns @s
-wait 30
-
-# ---- grave_bell (夜)
-perspective first
-fov 70
-cmd tp @s 0.5 -60 0.5 0 0
-cmd gamerule doWeatherCycle false
-cmd weather clear
-cmd skyabyss cinematic stop
-huddemo off
-hud off
-wait 30
-cmd skyabyss skill learn @s grave_bell 3
-cmd skyabyss skill slot @s 1 grave_bell
-cmd skyabyss skill cooldowns @s
-cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
-cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
-cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
-wait 10
-cmd skyabyss skill mana @s full
-cmd skyabyss skill cast @s 1
+record echo_strike 36 30
 wait 4
-shot grave_bell_night_1p_b
-wait 6
-shot grave_bell_night_1p_c
+cmd skyabyss skill cast @s 1
+recwait
 cmd skyabyss skill cooldowns @s
 wait 30
 
+# ---- grave_bell (昼・三人称の背中側。36 tick)
 perspective back
 fov 48
 cmd tp @s 0.5 -60 0.5 0 0
@@ -2730,40 +621,14 @@ cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
 cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
 wait 10
 cmd skyabyss skill mana @s full
-cmd skyabyss skill cast @s 1
+record grave_bell 36 30
 wait 4
-shot grave_bell_night_3p_b
-wait 6
-shot grave_bell_night_3p_c
-cmd skyabyss skill cooldowns @s
-wait 30
-
-# ---- final_light (夜)
-perspective first
-fov 70
-cmd tp @s 0.5 -60 0.5 0 0
-cmd gamerule doWeatherCycle false
-cmd weather clear
-cmd skyabyss cinematic stop
-huddemo off
-hud off
-wait 30
-cmd skyabyss skill learn @s final_light 3
-cmd skyabyss skill slot @s 1 final_light
-cmd skyabyss skill cooldowns @s
-cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
-cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
-cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
-wait 10
-cmd skyabyss skill mana @s full
 cmd skyabyss skill cast @s 1
-wait 2
-shot final_light_night_1p_b
-wait 5
-shot final_light_night_1p_c
+recwait
 cmd skyabyss skill cooldowns @s
 wait 30
 
+# ---- final_light (昼・三人称の背中側。36 tick)
 perspective back
 fov 48
 cmd tp @s 0.5 -60 0.5 0 0
@@ -2781,14 +646,14 @@ cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
 cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
 wait 10
 cmd skyabyss skill mana @s full
+record final_light 36 30
+wait 4
 cmd skyabyss skill cast @s 1
-wait 2
-shot final_light_night_3p_b
-wait 5
-shot final_light_night_3p_c
+recwait
 cmd skyabyss skill cooldowns @s
 wait 30
 
+cmd tick rate 20
 perspective first
 cmd time set noon
 cmd skyabyss skill cooldowns @s

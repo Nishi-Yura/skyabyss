@@ -1,0 +1,152 @@
+{
+ "titan_cleave": {
+  "fps": 30,
+  "ticks": 36,
+  "frames": 54,
+  "impact_frame": 15
+ },
+ "rock_call": {
+  "fps": 30,
+  "ticks": 36,
+  "frames": 54,
+  "impact_frame": 14
+ },
+ "whale_sweep": {
+  "fps": 30,
+  "ticks": 36,
+  "frames": 54,
+  "impact_frame": 20
+ },
+ "lunge": {
+  "fps": 30,
+  "ticks": 36,
+  "frames": 54,
+  "impact_frame": 16
+ },
+ "backstep": {
+  "fps": 30,
+  "ticks": 36,
+  "frames": 54,
+  "impact_frame": 15
+ },
+ "wind_rend": {
+  "fps": 30,
+  "ticks": 36,
+  "frames": 54,
+  "impact_frame": 15
+ },
+ "ward_song": {
+  "fps": 30,
+  "ticks": 36,
+  "frames": 54,
+  "impact_frame": 20
+ },
+ "ebb_tide": {
+  "fps": 30,
+  "ticks": 36,
+  "frames": 54,
+  "impact_frame": 16
+ },
+ "cycle_song": {
+  "fps": 30,
+  "ticks": 36,
+  "frames": 54,
+  "impact_frame": 20
+ },
+ "temper": {
+  "fps": 30,
+  "ticks": 36,
+  "frames": 54,
+  "impact_frame": 16
+ },
+ "ember_hammer": {
+  "fps": 30,
+  "ticks": 36,
+  "frames": 54,
+  "impact_frame": 15
+ },
+ "ash_scatter": {
+  "fps": 30,
+  "ticks": 36,
+  "frames": 54,
+  "impact_frame": 20
+ },
+ "cloud_pierce": {
+  "fps": 30,
+  "ticks": 46,
+  "frames": 69,
+  "impact_frame": 52
+ },
+ "bone_trap": {
+  "fps": 30,
+  "ticks": 36,
+  "frames": 54,
+  "impact_frame": 24
+ },
+ "sky_rain": {
+  "fps": 30,
+  "ticks": 88,
+  "frames": 132,
+  "impact_frame": 14
+ },
+ "signal": {
+  "fps": 30,
+  "ticks": 36,
+  "frames": 54,
+  "impact_frame": 16
+ },
+ "dust_charge": {
+  "fps": 30,
+  "ticks": 36,
+  "frames": 54,
+  "impact_frame": 12
+ },
+ "steam_bell": {
+  "fps": 30,
+  "ticks": 36,
+  "frames": 54,
+  "impact_frame": 14
+ },
+ "cinder_volley": {
+  "fps": 30,
+  "ticks": 36,
+  "frames": 54,
+  "impact_frame": 18
+ },
+ "deep_pull": {
+  "fps": 30,
+  "ticks": 36,
+  "frames": 54,
+  "impact_frame": 16
+ },
+ "deep_echo": {
+  "fps": 30,
+  "ticks": 42,
+  "frames": 63,
+  "impact_frame": 26
+ },
+ "deep_maw": {
+  "fps": 30,
+  "ticks": 36,
+  "frames": 54,
+  "impact_frame": 20
+ },
+ "echo_strike": {
+  "fps": 30,
+  "ticks": 36,
+  "frames": 54,
+  "impact_frame": 21
+ },
+ "grave_bell": {
+  "fps": 30,
+  "ticks": 36,
+  "frames": 54,
+  "impact_frame": 21
+ },
+ "final_light": {
+  "fps": 30,
+  "ticks": 36,
+  "frames": 54,
+  "impact_frame": 16
+ }
+}

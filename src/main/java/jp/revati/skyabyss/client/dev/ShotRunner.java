@@ -93,6 +93,14 @@ public final class ShotRunner {
     private static int watchNotices;
     private static final java.util.List<String> seenNotices = new java.util.ArrayList<>();
     private static int noticeMark;
+    // 録画 (record <名前> <tick> [fps])。手順は止めず、録っている間ずっと描いた絵を論理時刻の決まった間隔で PNG に書く
+    private static boolean recording;
+    private static Path recDir;
+    private static int recTotal;
+    private static int recFps;
+    private static int recTicks;
+    private static double recNext;
+    private static int recFrames;
 
     private ShotRunner() {
     }
@@ -295,6 +303,13 @@ public final class ShotRunner {
         }
         if (mc.screen instanceof PauseScreen) {
             mc.setScreen(null);
+        }
+        if (recording) {
+            recTicks++;
+            if (recTicks >= recTotal) {
+                recording = false;
+                say("  recorded " + recFrames + " frames (" + recTotal + " ticks at " + recFps + " fps) -> " + recDir);
+            }
         }
         if (watching) {
             watchTick(mc);
@@ -853,6 +868,35 @@ public final class ShotRunner {
                 // 撮るのは描き終えたとき (onRenderFrame)。1 枚描いてから撮る
                 return shotDone;
             }
+            case "record" -> {
+                // record <名前> <tick> [fps] : いまから <tick> 分 (ゲームの論理時刻) の絵を、fps (既定 30) で <名前>/0000.png … に書く。
+                // 手順は止めない (録っている間に cmd・wait を進める)。終わるのを待つのは recwait。
+                // 論理時刻 = 録り始めてからの tick + 次の tick までの割合 (描画の補間と同じ)。tick を遅くしていれば、その分だけ細かく撮れる
+                if (recording) {
+                    throw new IllegalStateException("a recording is already running");
+                }
+                recTotal = line.intArg(1);
+                recFps = line.args().length > 2 ? line.intArg(2) : 30;
+                recDir = out.resolve(line.arg(0).replaceAll("[^A-Za-z0-9_.-]", "_"));
+                try {
+                    Files.createDirectories(recDir);
+                    try (var old = Files.list(recDir)) {
+                        for (Path p : old.filter(p -> p.getFileName().toString().endsWith(".png")).toList()) {
+                            Files.delete(p);
+                        }
+                    }
+                } catch (IOException e) {
+                    throw new IllegalStateException("cannot prepare " + recDir, e);
+                }
+                recTicks = 0;
+                recNext = 0;
+                recFrames = 0;
+                recording = true;
+                return true;
+            }
+            case "recwait" -> {
+                return !recording;
+            }
             case "waitdump" -> {
                 if (stepTicks > 20 * 600) {
                     throw new IllegalStateException("the structure dump did not finish");
@@ -913,6 +957,9 @@ public final class ShotRunner {
         if (perfOn) {
             perfFrames++;
         }
+        if (recording && active()) {
+            recordFrame(Minecraft.getInstance());
+        }
         if (!active() || shotName == null || shotDone || stepTicks < 2) {
             return;
         }
@@ -927,6 +974,23 @@ public final class ShotRunner {
             say("  could not save " + file + ": " + e);
         }
         shotDone = true;
+    }
+
+    // 録画の一枚。描き終えた絵を、目標の論理時刻 (recNext) を過ぎたときに一枚だけ書く
+    private static void recordFrame(Minecraft mc) {
+        double now = recTicks + mc.getTimer().getGameTimeDeltaPartialTick(false);
+        if (now < recNext) {
+            return;
+        }
+        Path file = recDir.resolve(String.format(Locale.ROOT, "%04d.png", recFrames));
+        try (NativeImage image = Screenshot.takeScreenshot(mc.getMainRenderTarget())) {
+            image.writeToFile(file);
+            recFrames++;
+        } catch (IOException e) {
+            failures++;
+            say("  could not save " + file + ": " + e);
+        }
+        recNext += 20.0 / recFps;
     }
 
     // ---------------------------------------------------------------- 部品

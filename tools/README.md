@@ -398,14 +398,13 @@ python tools/gen/sound/gen_cinematic_voice.py --review                     # 3 �
 
 ## 公式サイト (`site/`)
 
-`python tools/site/gen_art.py`（ドット絵と素材の写し）→ `python tools/site/gen_skill_fx.py`（技の見た目の絵を縮めて `site/img/skill_fx/` へ）→ `python tools/site/build.py`（HTML を書き出す）。`site/` はそのまま GitHub Pages に載る（`.github/workflows/pages.yml`）。技の木は `Skill.java` と lang から読むので、技を足したら build し直す。
+`python tools/site/gen_art.py`（ドット絵と素材の写し）→ `python tools/site/encode_skill_fx_clips.py`（技の動く絵を `site/img/skill_fx/` へ）→ `python tools/site/build.py`（HTML を書き出す）。`site/` はそのまま GitHub Pages に載る（`.github/workflows/pages.yml`）。技の木は `Skill.java` と lang から読むので、技を足したら build し直す。
 
-### 技の見た目（技の一覧の開閉パネル）
+### 技の見た目（技の一覧の開閉パネル・動く絵）
 
-- 元の絵: `tools/sources/site/skill_fx/<技 ID>_{release,impact,linger}.png`（放った瞬間・当たった瞬間・余韻。余韻は無くてよい）。
-- 縮め方: `gen_skill_fx.py` が幅 320 px までに縮め、webp（品質 84）で `site/img/skill_fx/` に書く。build は、その絵が在る技だけに見た目を付ける（能動の技で絵が無いものは「撮影を待っています」と出る）。
-- 絵の更新: 技の FX が仕上がったら、(a) 撮影の原寸の絵を同じ名前で `tools/sources/site/skill_fx/` に置く、または (b) 台紙から切る: `python tools/site/split_skill_fx_sheet.py docs/review/previews/skill_fx_sheet.png`（台紙の並びは `tools/sheets/skill_fx_sheet.py` と同じ。切るのは三人称の放ち・当たり・残り）。そのあと `gen_skill_fx.py` と `build.py`。
-- 台紙の作り方: 撮影は `tools/shots/skill_fx.txt`（`bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/skill_fx.txt -PshotsName=skill_fx`）→ `python tools/sheets/skill_fx_sheet.py`。
+- 撮り方: `python tools/gen/shots/gen_skill_fx_shots.py`（台本 `tools/shots/skill_fx.txt` と `tools/shots/skill_fx_clips.json` を書く）→ `bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/skill_fx.txt -PshotsName=skill_fx`。一技を一本の録画（`record <技> <tick> <fps>`）で撮り、`run/shots/skill_fx/<技>/0000.png …` に書く。録画の間は `/tick rate 5` で、論理時刻で 30 枚/秒ずつ撮る（台本の手順は止めない。終わるのを待つのは `recwait`）。撮りは 25 本で十数分。
+- 絵にする: `python tools/site/encode_skill_fx_clips.py`（幅 640・ループの動く webp を `site/img/skill_fx/<技>.webp`、当たりの瞬間の止めた絵を `<技>_poster.webp` に書く。目安 500 KB 以下、超えたら画質を下げる。ffmpeg は使わない）。録画の場所を変えるときは引数に渡す。
+- 見る側 (`pages_b.skill_card`・`js/main.js`): パネルを開いたとき初めて動く絵を読み、閉じたら外す。動きを減らす設定の人は止めた絵と再生ボタン。
 
 ## 文字のはみ出しの検査 (`python tools/audit/check_text_fit.py`)
 
