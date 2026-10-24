@@ -313,6 +313,9 @@ public final class FxDraw {
             }
             paint(g, p, Mth.clamp(t / p.life, 0, 1), now);
         }
+        if (LOG && (now % 40) == 0) {
+            SkyAbyss.LOGGER.info("[skillfx] group glow={} quads {} built {}", glow, g.quads, g.buf != null);
+        }
         if (g.buf == null) {
             return 0;
         }
