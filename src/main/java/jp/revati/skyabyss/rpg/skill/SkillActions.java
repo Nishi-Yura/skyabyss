@@ -1231,7 +1231,7 @@ public final class SkillActions {
                     double dz = e.getZ() - r.center.z;
                     if (dx * dx + dz * dz <= SkillRules.RAIN_RADIUS * SkillRules.RAIN_RADIUS + e.getBbWidth()) {
                         if (hit(caster, e, (float) r.damage, Skill.SKY_RAIN)) {
-                            r.level.sendParticles(Skills.SKY_MOTE.get(), e.getX(), e.getY() + e.getBbHeight() * 0.7, e.getZ(), 3, 0.2, 0.2, 0.2, 0.05);
+                            r.level.sendParticles(Skills.RUNE_SPARK.get(), e.getX(), e.getY() + e.getBbHeight() * 0.7, e.getZ(), 1, 0.2, 0.2, 0.2, 0.05);
                         }
                     }
                 }

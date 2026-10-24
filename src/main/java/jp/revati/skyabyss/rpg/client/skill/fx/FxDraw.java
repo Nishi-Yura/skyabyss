@@ -550,10 +550,11 @@ public final class FxDraw {
                 Vec3 s1 = side.scale(w1);
                 float a0 = al[i];
                 float a1 = al[i + 1];
-                vertex(p0.subtract(s0), 0f, 0f, a0, r, gg, b);
-                vertex(p1.subtract(s1), 0f, 1f, a1, r, gg, b);
-                vertex(p1.add(s1), 1f, 1f, a1, r, gg, b);
-                vertex(p0.add(s0), 1f, 0f, a0, r, gg, b);
+                // テクスチャの明るさは V (幅の方向) に従う。U は一定 (区切りごとに繰り返さない) — 縞模様の原因だった
+                vertex(p0.subtract(s0), 0.5f, 0f, a0, r, gg, b);
+                vertex(p1.subtract(s1), 0.5f, 0f, a1, r, gg, b);
+                vertex(p1.add(s1), 0.5f, 1f, a1, r, gg, b);
+                vertex(p0.add(s0), 0.5f, 1f, a0, r, gg, b);
                 quads++;
             }
         }

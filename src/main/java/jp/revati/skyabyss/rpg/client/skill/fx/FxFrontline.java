@@ -135,7 +135,7 @@ public final class FxFrontline {
             FxDraw.add(x, Prim.shell(f.add(0, 0.4, 0), 0.5, SWEEP_RADIUS, 1.3).color(SEA).life(10).ease(Ease.OUT).width(0.4));
             FxDraw.add(x, Prim.ring(f, SWEEP_RADIUS - 0.1, SWEEP_RADIUS + 0.2).color(FOAM).width(0.4).life(10));
             FxDraw.add(x, Prim.disc(f, 0.5, SWEEP_RADIUS).color(SEA).life(22).alpha(0.3f));
-            SkillFx.burst(x, SkillFx.sky(), f.add(0, 1.0, 0), 4, 0.8, 0.05);
+            SkillFx.burst(x, SkillFx.rune(), f.add(0, 1.0, 0), 4, 0.8, 0.05);
             SkillFx.kick(x, 0.8f);
             SkillFx.sound(x, SoundEvents.PLAYER_SPLASH_HIGH_SPEED, f, 0.4f, 0.8f);
         });
@@ -163,7 +163,7 @@ public final class FxFrontline {
             SkillFx.flash(x, to.add(0, 0.2, 0));
             FxDraw.add(x, Prim.disc(f.add(x.fwd.scale(LUNGE_RANGE - 1.0)), 0.2, 1.8).color(WHITE).life(8).alpha(0.8f));
             FxDraw.add(x, Prim.ring(f.add(x.fwd.scale(LUNGE_RANGE - 1.0)), 0.5, 2.5).color(GREEN).width(0.2).life(10));
-            SkillFx.burst(x, SkillFx.sky(), to, 4, 0.5, 0.12);
+            SkillFx.burst(x, SkillFx.rune(), to, 4, 0.5, 0.12);
             SkillFx.sound(x, SoundEvents.PLAYER_ATTACK_STRONG, to, 0.5f, 1.3f);
         });
         c.lasts(14);
@@ -190,7 +190,7 @@ public final class FxFrontline {
             SkillFx.flash(x, landing.add(0, 0.4, 0));
             FxDraw.add(x, Prim.ring(landing, 0.5, 2.2).color(WHITE).width(0.5).life(12).glow(0.3));
             FxDraw.add(x, Prim.beam(landing, 1.8).color(FOAM).width(0.7).life(10).alpha(0.5f));
-            SkillFx.burst(x, SkillFx.sky(), landing.add(0, 0.8, 0), 3, 0.4, 0.05);
+            SkillFx.burst(x, SkillFx.rune(), landing.add(0, 0.8, 0), 3, 0.4, 0.05);
         });
         c.lasts(12);
     }
@@ -200,7 +200,7 @@ public final class FxFrontline {
     private static void windRend(Cast c) {
         Vec3 cen = c.origin.add(c.fwd.scale(3.2));
         Vec3 up = new Vec3(0, 1, 0);
-        c.at(0, x -> SkillFx.burst(x, SkillFx.sky(), x.hand(), 3, 0.1, 0.02));
+        c.at(0, x -> SkillFx.burst(x, SkillFx.rune(), x.hand(), 3, 0.1, 0.02));
         c.at(1, x -> {
             FxDraw.add(x, Prim.arc(cen, x.right, up, 2.0, 2.6, -0.6).color(WHITE).width(0.6).life(8).ease(Ease.OUT).glow(0.5).trail(0.5));
             SkillFx.sound(x, SoundEvents.PLAYER_ATTACK_SWEEP, cen, 0.5f, 1.6f);
@@ -280,7 +280,7 @@ public final class FxFrontline {
             FxDraw.add(x, Prim.ring(base, 0.5, ASH_RADIUS).color(ASH).width(0.4).life(14).ease(Ease.OUT).glow(0.4));
             FxDraw.add(x, Prim.ring(base, 0.5, 3.5).color(CINDER).width(0.22).life(12));
             FxDraw.add(x, Prim.disc(base, 0.3, ASH_RADIUS).color(ASH).life(30).alpha(0.4f));
-            SkillFx.burst(x, SkillFx.sky(), base.add(0, 2.5, 0), 4, 2.0, 0.02);
+            SkillFx.burst(x, SkillFx.rune(), base.add(0, 2.5, 0), 4, 2.0, 0.02);
             SkillFx.kick(x, 0.7f);
             SkillFx.sound(x, SoundEvents.FIRE_EXTINGUISH, base, 0.5f, 0.6f);
             SkillFx.sound(x, SoundEvents.ENDER_DRAGON_FLAP, base, 0.35f, 0.6f);

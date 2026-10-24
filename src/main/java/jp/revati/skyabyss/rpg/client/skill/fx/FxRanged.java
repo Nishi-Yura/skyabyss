@@ -63,7 +63,7 @@ public final class FxRanged {
         Vec3 end = c.aim(PIERCE_RANGE);
         Vec3 right = c.right;
         Vec3 up = new Vec3(0, 1, 0);
-        c.at(0, x -> SkillFx.burst(x, SkillFx.sky(), x.hand(), 2, 0.2, 0.02));
+        c.at(0, x -> SkillFx.burst(x, SkillFx.rune(), x.hand(), 2, 0.2, 0.02));
         c.at(1, x -> {
             FxDraw.add(x, Prim.arc(start, right, up, 1.0, 0, Math.PI * 2).color(SKY_BLUE).width(0.22).life(10).ease(Ease.OUT).alpha(0.85f).trail(0.4));
             FxDraw.add(x, Prim.line(start, end).color(SKY_WHITE).width(0.3).life(SkillRules.PIERCE_LIFETIME).ease(Ease.LINEAR).glow(0.7).trail(0.3));
@@ -126,7 +126,7 @@ public final class FxRanged {
             });
             c.at(at + 5, x -> {
                 FxDraw.add(x, Prim.disc(spot, 0.2, 1.3).color(SKY_WHITE).life(8).alpha(0.7f));
-                SkillFx.burst(x, SkillFx.sky(), spot.add(0, 0.3, 0), 2, 0.3, 0.05);
+                SkillFx.burst(x, SkillFx.rune(), spot.add(0, 0.3, 0), 2, 0.3, 0.05);
             });
         }
         c.at(4, x -> SkillFx.flash(x, center.add(0, 1.0, 0)));
@@ -149,7 +149,7 @@ public final class FxRanged {
             FxDraw.add(x, Prim.disc(point, 0.3, 1.6).color(DEEP_CORE).life(10).alpha(0.9f));
             FxDraw.add(x, Prim.shell(point.add(0, 0.8, 0), 0.5, 3.0, 1.6).color(DEEP_BLACK).life(10).width(0.5));
             FxDraw.add(x, Prim.ring(point, 1.5, 2.8).color(VIOLET).width(0.3).life(26).alpha(0.4f));
-            SkillFx.burst(x, SkillFx.sky(), point, 3, 0.5, 0.06);
+            SkillFx.burst(x, SkillFx.rune(), point, 3, 0.5, 0.06);
             SkillFx.sound(x, SoundEvents.CHORUS_FRUIT_TELEPORT, point, 0.6f, 0.6f);
         });
         c.lasts(26);
