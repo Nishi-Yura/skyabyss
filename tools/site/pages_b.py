@@ -4,6 +4,12 @@ import skilldata
 import pages_d
 
 
+GEAR_TOC = [("weap", "13 種の武器", "Thirteen weapons"), ("tiers", "階級", "Tiers"), ("affix", "特性", "Affixes"), ("forge", "共鳴の炉", "Resonance Forge"), ("leg", "書き換えの武器", "Rewrite weapons"), ("acc", "装飾品", "Accessories"), ("armor", "防具", "Armor"), ("gearfree", "装備の自由度", "Gear freedom")]
+POUCH_TOC = [("why", "旅嚢とは", "What is the satchel"), ("what", "入るもの", "What goes in"), ("use", "使い方", "Using it"), ("tools", "そのほかの道具", "Other tools")]
+PARTY_TOC = [("party", "パーティを組む", "Forming a party"), ("shared", "背中の進みはパーティごと", "Per-party progress"), ("scale", "人数による強さ", "Scaling"), ("down", "倒れたとき", "Falling"), ("mark", "仲間の目印", "Party markers"), ("roles", "役目と設定", "Roles and settings")]
+SKILL_TOC = [("grow", "成長", "Growth"), ("trees", "五つの木と技", "Trees and skills"), ("calling", "天職", "Callings"), ("runes", "刻印と書き換え", "Runes and rewrites"), ("keys", "要", "Keystones"), ("bp", "ステータスの刻み目", "Stat breakpoints"), ("types", "武器の型", "Weapon types"), ("freedom", "自由に混ぜる", "Mixing freely"), ("respec", "振り直しと型の保存", "Respec and loadouts")]
+
+
 def skills():
     sk, tn = skilldata.load()
     by = {t: [s for s in sk if s["tree"] == t] for t in skilldata.TREES}
@@ -17,13 +23,8 @@ def skills():
         svg = tree_svg(nodes, nm[0], nm[1])
         cards.append('<div class="panel tree-card"><h3><img class="px" src="%s" width="32" height="32" alt="" style="vertical-align:middle;margin-right:6px">%s</h3><p class="meta">%s</p>%s</div>' % (
             meta[4], T(nm[0], nm[1]), T("%s ／ %s" % (meta[0], meta[1]), "%s / %s" % (meta[2], meta[3])), svg))
-        rows = []
-        for s in by[t]:
-            kind = {"A": ("使う", "Active"), "P": ("常に効く", "Passive"), "K": ("要", "Keystone")}[s["kind"]]
-            rows.append(['<img class="ic px" src="img/skill/%02d.png" width="32" height="32" alt="">%s' % (s["idx"], T(s["ja"], s["en"])),
-                         T(*kind), "%d" % s["rank"], T(s["dja"], s["den"])])
-        lists.append('<details><summary>%s</summary>%s</details>' % (T("技の一覧: " + nm[0], "Skill list: " + nm[1]),
-                                                                    table([T("技", "Skill"), T("種類", "Type"), T("最大段", "Max rank"), T("働き", "Effect")], rows)))
+        lists.append('<h3 id="list-%s">%s</h3><div class="skill-list">%s</div>' % (
+            t, T(nm[0] + "の技", nm[1] + " skills"), "".join(skill_card(s) for s in by[t])))
     legend = '<ul class="legend"><li><i class="a"></i>%s</li><li><i></i>%s</li><li><i class="k"></i>%s</li></ul>' % (
         T("使う技（枠に置いて使う）", "Active (put in a slot)"), T("常に効く技（覚えるだけで効く）", "Passive (works once learned)"),
         T("要（かなめ。癖のある常時の技）", "Keystone (quirky always-on skill)"))
@@ -81,7 +82,7 @@ def skills():
     ])
 
     body = page_head("スキルとビルド", "Skills and builds", "5 つの木と旅人、36 の技、天職、刻印、要、型。選ぶほど、遊び方が変わります。",
-                     "Five trees plus the Wayfarer, 36 skills, callings, runes, keystones and weapon types. What you choose changes how you play.") + """
+                     "Five trees plus the Wayfarer, 36 skills, callings, runes, keystones and weapon types. What you choose changes how you play.") + toc(SKILL_TOC) + """
 <section aria-labelledby="grow">
 <div class="wrap">
 <h2 id="grow">%(h_grow)s</h2>
@@ -182,9 +183,9 @@ def skills():
         r1=T("対象: 巨神斬り・鯨尾薙ぎ・岩呼び・踏み込み・跳び退き・風裂き・守りの唄・引き潮・熾火の槌・雲穿ち", "Skills: Titan Cleave, Whale-Tail Sweep, Rock Call, Lunge, Backstep, Wind Rend, Ward Song, Ebb Tide, Ember Hammer, Cloud Piercer"),
         r2=T("技を極める（最大段）と開きます。天職の前でも、どの木の技でも選べます。最初に選ぶのは 1 点です。", "Maxing a skill unlocks its runes, in any tree and even before choosing a calling. Choosing the first rune costs 1 point."),
         r3=T("付け替えは戦いの外で、炉・焚き火の近く。初回は無料、あとは共鳴の結晶 1。同時に効くのは 1 つです。", "Swap outside combat near a forge or campfire. The first swap is free, then 1 resonance crystal. Only one rune is active at a time."),
-        h_leg=T("伝説の書き換え（4 番目の刻印）", "Legendary rewrites (the fourth rune)"),
-        leg=T("8 つの伝説の武器が、1 つの技を別の形に書き換えます。その武器を主の手に持つあいだだけ選べて効きます。", "Eight legendary weapons each rewrite one skill. They can be chosen and work only while held in your main hand."),
-        legt=table([T("伝説の武器", "Legendary weapon"), T("書き換わる技", "Skill rewritten")], legend_rows),
+        h_leg=T("書き換えの武器（4 番目の刻印）", "Rewrite weapons (the fourth rune)"),
+        leg=T("8 本の書き換えの武器が、1 つの技を別の形に書き換えます。その武器を主の手に持つあいだだけ選べて効きます。", "Eight rewrite weapons each change one skill. They can be chosen and work only while held in your main hand."),
+        legt=table([T("書き換えの武器", "Rewrite weapon"), T("書き換わる技", "Skill rewritten")], legend_rows),
         h_key=T("要（かなめ）", "Keystones"), key=T("各木の 4 行目。得と引き換えに癖のある、常に効く技です。段は 1 つだけ。", "Row 4 of each tree: a quirky always-on skill with a trade-off. One rank only."), keyt=keys,
         h_bp=T("ステータスの刻み目", "Stat breakpoints"), bp=T("4 つのステータスそれぞれに、15 と 30 で小さな分かれ目があります（計 8 つ）。全部を 30 にするには力が 120 要るので、どこを届かせるかが選びです。", "Each stat has a small breakpoint at 15 and 30 (eight in total). Getting all four to 30 takes 120 points, so where to reach is a choice."), bpt=bp,
         h_types=T("武器の型", "Weapon types"), types=T("13 種の武器は 5 つの型に分かれます。合う型の武器を持つと、技に小さなおまけが付きます。縛りはありません。", "The 13 weapons fall into five types. Holding a matching type gives a small bonus; nothing is ever required."), typet=types,
@@ -196,6 +197,49 @@ def skills():
          "5 つの木と旅人、36 の技、天職、刻印、要、型、振り直し。", "Five trees plus the Wayfarer, 36 skills, callings, runes, keystones, weapon types and respec.", body)
 
 
+# 技の見た目 (site/img/skill_fx/<技>_<段>.webp。gen_skill_fx.py が作る)
+ELEMENT = {"rock": ("岩", "Rock"), "wind": ("風", "Wind"), "tide": ("潮", "Tide"), "ash": ("灰", "Ash"),
+           "bone": ("骨", "Bone"), "traveler": ("旅", "Traveler")}
+FX_PHASES = [("release", "放った瞬間", "release", "Release"), ("impact", "当たった瞬間", "impact", "Impact"),
+             ("linger", "余韻", "linger", "Linger")]
+
+
+def skill_card(s):
+    """技ひとつぶんの開閉パネル。中身は、一行の説明・属性・見た目 (2〜3 コマ)・最大段。"""
+    sid = s["id"]
+    kind = {"A": ("使う", "Active"), "P": ("常に効く", "Passive"), "K": ("要", "Keystone")}[s["kind"]]
+    el = ELEMENT[s["tree"]]
+    frames = []
+    for ph, ja_l, _, en_l in FX_PHASES:
+        if os.path.exists(os.path.join(ROOT, "site", "img", "skill_fx", "%s_%s.webp" % (sid, ph))):
+            frames.append((ph, ja_l, en_l))
+    if frames:
+        figs = "".join(
+            '<figure><img src="img/skill_fx/%s_%s.webp" width="256" height="144" loading="lazy" alt="%s" '
+            'data-alt-ja="%s" data-alt-en="%s"><figcaption>%s</figcaption></figure>' % (
+                sid, ph, esc("%s の%s" % (s["ja"], ja_l)), esc("%s の%s" % (s["ja"], ja_l)),
+                esc("%s: %s" % (s["en"], en_l)), T(ja_l, en_l))
+            for ph, ja_l, en_l in frames)
+        visual = '<div class="fx-frames">%s</div>' % figs
+    elif s["kind"] == "A":
+        visual = '<p class="fx-none">%s</p>' % T("見た目は撮影を待っています。", "The in-game look is waiting for its shots.")
+    else:
+        visual = '<p class="fx-none">%s</p>' % T("常に効く技なので、画面に出る見た目はありません。", "This skill is always on, so there is no on-screen visual.")
+    return (
+        '<details class="skill" id="skill-%(id)s"><summary>'
+        '<img class="ic px" src="img/skill/%(idx)02d.png" width="32" height="32" alt="">'
+        '<span class="sk-name">%(name)s</span>'
+        '<span class="tag">%(kind)s</span><span class="tag tag-el">%(el)s</span>'
+        '</summary><div class="sk-body">'
+        '<p class="sk-desc">%(desc)s</p>'
+        '<p class="sk-meta">%(el_line)s　%(rank)s</p>'
+        '%(visual)s</div></details>' % dict(
+            id=sid, idx=s["idx"], name=T(s["ja"], s["en"]), kind=T(*kind), el=T(el[0] + "属性", el[1] + " tree"),
+            desc=T(s["dja"], s["den"]),
+            el_line=T("属性: %s" % el[0], "Element: %s" % el[1]),
+            rank=T("最大 %d 段" % s["rank"], "Max rank %d" % s["rank"]), visual=visual))
+
+
 def item_li_inline(iid):
     ja, en = item_name(iid)
     return icon("img/item/%s.png" % iid, ja, en) + T(ja, en)
@@ -203,19 +247,19 @@ def item_li_inline(iid):
 
 # ------------------------------------------------------------------- 装備
 WEAPONS = [
-    ("whalebone_greatsword", "重", "Heavy", "岩鯨", "Stone Whale", "レア", "Rare"),
-    ("captain_pike", "長", "Long", "岩鯨", "Stone Whale", "伝説", "Legendary"),
-    ("waterway_fang", "速", "Fast", "岩鯨", "Stone Whale", "伝説", "Legendary"),
-    ("tide_shell_trident", "長", "Long", "潮殻", "Tide Shell", "レア", "Rare"),
-    ("coral_shield", "守", "Guard", "潮殻", "Tide Shell", "レア", "Rare"),
-    ("tidecaller_claw", "速", "Fast", "潮殻", "Tide Shell", "伝説", "Legendary"),
-    ("coral_harpoon", "長", "Long", "潮殻", "Tide Shell", "伝説", "Legendary"),
-    ("thunder_wing_bow", "遠", "Ranged", "雷翼", "Thunder Wing", "レア", "Rare"),
-    ("raiju_claw", "速", "Fast", "雷翼", "Thunder Wing", "伝説", "Legendary"),
-    ("warden_glaive", "長", "Long", "雷翼", "Thunder Wing", "伝説", "Legendary"),
-    ("ember_war_axe", "重", "Heavy", "余燼", "Ember", "レア", "Rare"),
-    ("smith_hammer", "重", "Heavy", "余燼", "Ember", "伝説", "Legendary"),
-    ("thrall_poker", "長", "Long", "余燼", "Ember", "伝説", "Legendary"),
+    ("whalebone_greatsword", "重", "Heavy", "岩鯨", "Stone Whale", "エピック", "Epic"),
+    ("captain_pike", "長", "Long", "岩鯨", "Stone Whale", "ヒロイック", "Heroic"),
+    ("waterway_fang", "速", "Fast", "岩鯨", "Stone Whale", "ヒロイック", "Heroic"),
+    ("tide_shell_trident", "長", "Long", "潮殻", "Tide Shell", "エピック", "Epic"),
+    ("coral_shield", "守", "Guard", "潮殻", "Tide Shell", "エピック", "Epic"),
+    ("tidecaller_claw", "速", "Fast", "潮殻", "Tide Shell", "ヒロイック", "Heroic"),
+    ("coral_harpoon", "長", "Long", "潮殻", "Tide Shell", "ヒロイック", "Heroic"),
+    ("thunder_wing_bow", "遠", "Ranged", "雷翼", "Thunder Wing", "エピック", "Epic"),
+    ("raiju_claw", "速", "Fast", "雷翼", "Thunder Wing", "ヒロイック", "Heroic"),
+    ("warden_glaive", "長", "Long", "雷翼", "Thunder Wing", "ヒロイック", "Heroic"),
+    ("ember_war_axe", "重", "Heavy", "余燼", "Ember", "エピック", "Epic"),
+    ("smith_hammer", "重", "Heavy", "余燼", "Ember", "ヒロイック", "Heroic"),
+    ("thrall_poker", "長", "Long", "余燼", "Ember", "ヒロイック", "Heroic"),
 ]
 
 
@@ -227,7 +271,9 @@ def gear():
         [T("コモン", "Common"), "0", T("雑魚、通常の宝箱", "Trash mobs, normal chests"), T("素材・入門用", "Materials, entry level")],
         [T("アンコモン", "Uncommon"), "0", T("宝箱、広間の撃破", "Chests, hall clears"), T("序盤の繋ぎ（食料・矢など）", "Early stopgaps (food, arrows)")],
         [T("レア（青）", "Rare (blue)"), "1–2", T("心臓の図鑑の品（甲殻・基本の武器・護符）", "Heart codex items (armor, base weapons, charms)"), T("各巨神の主力", "Mainstay of each titan")],
-        [T("伝説（金）", "Legendary (gold)"), "2–3", T("心臓・中ボスの低確率、初回の選択、天井保証、交換", "Low-chance drops from hearts and mid-bosses, first-clear choice, pity guarantee, trading"), T("専用装備の本体。固有効果と技の書き換え", "The core dedicated gear, with unique effects and skill rewrites")],
+        [T("エピック（紫）", "Epic (purple)"), "1–2", T("心臓・中ボスの通常の報い、交換", "Regular hearts and mid-boss rewards, trading"), T("巨神の基本の武器と、護符・装飾", "Base weapons, charms and accessories")],
+        [T("ヒロイック（橙）", "Heroic (orange)"), "2–3", T("心臓・中ボスの低確率、初回の選択、天井保証", "Low-chance drops from hearts and mid-bosses, first-clear choice, pity guarantee"), T("専用の武器と、技を書き換える武器", "Dedicated weapons, and the weapons that rewrite skills")],
+        [T("アーティファクト（金）", "Artifact (gold)"), "2–3", T("深淵の心臓と番人", "Abyss hearts and the warden"), T("深淵の専用装備", "Abyss-only gear")],
     ])
     affix = table([T("付く先", "On"), T("効果の例", "Example effect"), T("幅（レア）", "Range (Rare)")], [
         [T("武器", "Weapon"), T("攻撃力 +5%", "+5% attack"), "4–8%"],
@@ -243,14 +289,14 @@ def gear():
         [T("防具", "Armor"), T("最大マナ +4", "+4 max mana"), "3–6"],
         [T("防具", "Armor"), T("ノックバック耐性 +8%", "+8% knockback resistance"), "5–10%"],
     ])
-    levels = table([T("巨神", "Titan"), T("レア以下の必要 Lv", "Rare and below"), T("伝説の必要 Lv", "Legendary")], [
+    levels = table([T("巨神", "Titan"), T("コモン〜エピックの必要 Lv", "Common to Epic"), T("ヒロイック以上の必要 Lv", "Heroic and above")], [
         [T("岩鯨（推奨 12）", "Stone Whale (rec. 12)"), "8", "10"], [T("潮殻（推奨 18）", "Tide Shell (rec. 18)"), "14", "16"],
         [T("雷翼（推奨 24）", "Thunder Wing (rec. 24)"), "20", "22"], [T("余燼（推奨 30）", "Ember (rec. 30)"), "26", "28"]])
     armor = "".join('<li>%s</li>' % item_li_inline(i) for i in ("stone_whale_chestplate", "tide_shell_chestplate", "thunder_wing_chestplate", "ember_chestplate"))
     acc = "".join('<li>%s</li>' % item_li_inline(i) for i in ("resonance_charm", "tide_chime_charm", "storm_charm", "kindling_charm"))
     acc2 = "".join('<li>%s</li>' % item_li_inline(i) for i in ("stone_whale_plating", "moss_talisman", "moontide_pearl", "storm_anklet", "storm_eye_feather", "ember_mantle", "ember_lantern"))
     body = page_head("装備", "Gear", "13 種の武器、階級と特性、共鳴の炉、装飾品、防具。周回して揃えます。",
-                     "Thirteen weapons, tiers and affixes, the Resonance Forge, accessories and armor. Collect them across repeat runs.") + """
+                     "Thirteen weapons, tiers and affixes, the Resonance Forge, accessories and armor. Collect them across repeat runs.") + toc(GEAR_TOC) + """
 <section aria-labelledby="weap">
 <div class="wrap">
 <h2 id="weap">%(h_weap)s</h2>
@@ -323,16 +369,16 @@ def gear():
 </section>
 """ % dict(
         h_weap=T("13 種の武器", "Thirteen weapons"),
-        weap=T("巨神ごとに、レアの基本の武器と、伝説の専用武器があります。剣・鉾・短剣・槍・銛・盾・弓・斧・鎚と、形もさまざまです。", "Each titan drops rare base weapons and legendary dedicated ones, in many shapes: sword, glaive, dagger, trident, harpoon, shield, bow, axe and hammer."),
+        weap=T("巨神ごとに、エピックの基本の武器と、ヒロイックの専用武器があります。剣・鉾・短剣・槍・銛・盾・弓・斧・鎚と、形もさまざまです。", "Each titan drops Epic base weapons and Heroic dedicated ones, in many shapes: sword, glaive, dagger, trident, harpoon, shield, bow, axe and hammer."),
         wt=table([T("武器", "Weapon"), T("型", "Type"), T("巨神", "Titan"), T("階級", "Tier")], wrows),
         wnote=T("型は技との噛み合いです。<a href=\"skills.html#types\">スキルのページ</a>を見てください。", "Types describe synergy with skills; see <a href=\"skills.html#types\">the skills page</a>."),
         h_tiers=T("階級", "Tiers"), tt=tiers,
-        tnote=T("武器の見た目は階級で輪郭が変わります。コモンからレアで部品が一つ増え、レアから伝説で輪郭を変える大きな部品と金の縁が付きます。強化が +5 以上（覚醒）になると、縁の金属が一段明るくなり、刃の中心に光の筋が入ります。", "A weapon's silhouette changes with tier: Common to Rare adds a part, Rare to Legendary adds a large part and a gold rim. Enhancement of +5 or more (awakening) brightens the rim metal and adds a glowing line to the blade."),
+        tnote=T("武器の見た目は階級で輪郭が変わります。コモンからレアで部品が一つ増え、ヒロイック以上は輪郭を変える大きな部品が付きます。強化が +5 以上（覚醒）になると、縁の金属が一段明るくなり、刃の中心に光の筋が入ります。", "A weapon's silhouette changes with tier: Common to Rare adds a part, and Heroic and above add a large part that changes the outline. Enhancement of +5 or more (awakening) brightens the rim metal and adds a glowing line to the blade."),
         t1=T("入手は個人ごとの抽選です。他人が取っても、自分の機会は減りません。", "Drops are rolled per player; someone else's drop never reduces your chance."),
-        t2=T("「巨神の記憶」の天井（保証）があり、運が悪い周回が続いても報いがあります。", "A \"titan memory\" pity system guarantees a legendary after a run of bad luck."),
+        t2=T("「巨神の記憶」の天井（保証）があり、運が悪い周回が続いても報いがあります。", "A \"titan memory\" pity system guarantees a Heroic item after a run of bad luck."),
         t3=T("人数が増えると敵と心臓は強くなりますが、報酬は減りません。", "More players make enemies and hearts tougher, but rewards are never reduced."),
         h_aff=T("特性（アフィックス）", "Affixes"),
-        aff=T("レア以上の武器と防具には特性が付きます（レア 1〜2、伝説 2〜3）。値は幅の中でランダムで、伝説は幅の上下が 1.25 倍です。", "Rare and better weapons and armor carry affixes (Rare 1-2, Legendary 2-3). Values roll within a range; Legendary ranges are 1.25x."),
+        aff=T("レア以上の武器と防具には特性が付きます（レア・エピック 1〜2、ヒロイック・アーティファクト 2〜3）。値は幅の中でランダムで、ヒロイック以上は幅が 1.25 倍です。", "Rare and better weapons and armor carry affixes (Rare and Epic 1-2, Heroic and Artifact 2-3). Values roll within a range; Heroic and above use 1.25x ranges."),
         at=affix,
         a1=T("同じ種類は一つの装備に二度付きません。", "The same affix never appears twice on one item."),
         a2=T("武器の特性は利き手に持つとき、防具の特性は着ているときだけ効きます。", "Weapon affixes work when held in the main hand; armor affixes while worn."),
@@ -340,12 +386,12 @@ def gear():
         h_forge=T("共鳴の炉", "Resonance Forge"),
         forge=T("岩鯨の背に着いた台などにある炉です。作ることもできます。何も預からないので、何人でも同時に使えます。", "Found near the Stone Whale's tail platform, and craftable. It holds nothing, so any number of players can use it at once."),
         f1h=T("強化（+0〜+10）", "Enhance (+0 to +10)"), f1=T("その巨神の素材と共鳴の結晶で 1 段ずつ上げます。失敗はありません。武器は 1 段ごとに攻撃力の 3%（+10 で ×1.3）、防具は 1 段 1 部位ごとに強靭 +0.3。+5 で覚醒し、固有効果が強まります。", "Spend that titan's materials and resonance crystals to raise one step at a time; no failure. Weapons gain 3% attack per step (x1.3 at +10), armor +0.3 toughness per piece per step. At +5 it awakens and unique effects strengthen."),
-        f2h=T("分解", "Dismantle"), f2=T("伝説は共鳴の欠片 10 ＋素材の半分、レア以下はその巨神の素材になります。特性の付く品は共鳴の結晶も出ます。", "A Legendary yields 10 resonance fragments plus half the materials; lower tiers yield that titan's materials. Items with affixes also give resonance crystals."),
+        f2h=T("分解", "Dismantle"), f2=T("ヒロイック以上は共鳴の欠片 10 ＋素材の半分、それより下の階級はその巨神の素材になります。特性の付く品は共鳴の結晶も出ます。", "Heroic and above yield 10 resonance fragments plus half the materials; lower tiers yield that titan's materials. Items with affixes also give resonance crystals."),
         f3h=T("再鍛造", "Reforge"), f3=T("結晶 1 つで、特性をすべて振り直した候補を 1 組作ります（3 組まで）。候補のどれか、または「今のまま」を選んで確定するので、弱くなることはありません。", "One crystal makes a candidate set with all affixes rerolled (up to three). You pick one or \"keep current\", so you can never end up worse."),
-        f4h=T("交換", "Trade"), f4=T("巨神の共鳴の欠片で、その巨神の専用伝説 3 つから好きな物を選んで手に入れます。", "Spend a titan's resonance fragments to pick any of that titan's three dedicated legendaries."),
+        f4h=T("交換", "Trade"), f4=T("巨神の共鳴の欠片で、その巨神の専用の品 3 つから好きな物を選んで手に入れます。", "Spend a titan's resonance fragments to pick any of that titan's three dedicated items."),
         gfree=pages_d.gear_extra(),
-        h_leg=T("伝説の書き換え", "Legendary rewrites"),
-        leg=T("伝説の武器 8 本は、持っているあいだ、特定の技を別の形に書き換えられます。", "Eight legendary weapons can rewrite a specific skill while you hold them."), leg2=T("一覧はスキルのページへ。", "See the list on the skills page."),
+        h_leg=T("書き換えの武器", "Rewrite weapons"),
+        leg=T("書き換えの武器 8 本は、持っているあいだ、特定の技を別の形に書き換えられます。", "Eight rewrite weapons can change a specific skill while you hold them."), leg2=T("一覧はスキルのページへ。", "See the list on the skills page."),
         h_acc=T("装飾品", "Accessories"),
         acc=T("護符と装飾品は、持っているだけでは効きません。持ち物の画面の右上の「装飾」のつまみから開く専用の枠に付けたときだけ効きます。持ち物にある品を右クリックしても付けられます。", "Charms and accessories do nothing from the inventory. They work only in the dedicated slots opened from the \"Accessories\" tab at the top right of the inventory; right-clicking an item in your inventory also equips it."),
         c1h=T("護符（1 枠）", "Charm (1 slot)"), accl=acc, c1=T("使って効く品です。<kbd>H</kbd> で使い、待ち時間があります。", "Used actively with <kbd>H</kbd>; has a cooldown."),
@@ -355,7 +401,7 @@ def gear():
         armorl=armor,
         ar1=T("防具には必要レベルがあり、足りないと着られません。", "Armor has a required level and cannot be worn below it."),
         ar2=T("武器は必要レベルが足りなくても持てますが、素手と同じ力しか出ません。", "Weapons can be held below their level but deal only bare-hand damage."),
-        h_lv=T("必要レベル", "Required levels"), lv=T("推奨レベルから、レア以下は −4、伝説は −2 です。", "Rare and below are the recommended level -4; Legendary is -2."),
+        h_lv=T("必要レベル", "Required levels"), lv=T("推奨レベルから、コモン〜エピックは −4、ヒロイック以上は −2 です。", "Common to Epic is the recommended level -4; Heroic and above is -2."),
         levels=levels,
     )
     page("gear.html", "装備 — 天と淵のあいだ", "Gear — Between the Sky and the Abyss",
@@ -376,7 +422,7 @@ def pouch():
         row(["bone_chip", "tide_pearl"], "小さな素材", "Small materials", "999", "敵が落とす細かい素材。", "Small drops from enemies."),
     ]
     body = page_head("旅嚢と道具", "Travel Satchel and tools", "mod の集める品・鍵・笛・素材だけを入れる専用の持ち物と、控え帳、伝承の書。",
-                     "A dedicated inventory for the mod's keys, whistles and materials, plus the record book and the lore book.") + """
+                     "A dedicated inventory for the mod's keys, whistles and materials, plus the record book and the lore book.") + toc(POUCH_TOC) + """
 <section aria-labelledby="why">
 <div class="wrap">
 <h2 id="why">%(h_why)s</h2>
@@ -428,7 +474,7 @@ def pouch():
         c_h=T("品ごとの固定枠", "Fixed slots"), c=T("品の種類ごとに決まった枠があり、並びは変わりません。空の枠の輪郭が集める楽しみになります。", "Every item type has its own fixed slot and the layout never shifts; empty outlines invite you to collect."),
         d_h=T("扉も通す", "Opens doors"), d=T("鍵や欠片は、袋にあれば持っていなくても扉や仕掛けを通ります。", "Keys and fragments in the satchel open doors and mechanisms without being held."),
         h_what=T("入るもの", "What goes in"), t=table([T("品", "Items"), T("区分", "Category"), T("上限", "Cap"), T("備考", "Notes")], rows),
-        n=T("武器・防具・盾・弓と矢、護符・装飾、食べ物、バニラの品、試練の道具（手で運ぶこと自体が試練のもの）は、バニラの持ち物のままです。", "Weapons, armor, shields, bows and arrows, charms and accessories, food, vanilla items and trial tools (those you must physically carry) stay in the normal inventory."),
+        n=T("武器・防具・盾・弓と矢、護符・装飾、食べ物、バニラの品、仕掛けの道具（手で運ぶこと自体が仕掛けのもの）は、バニラの持ち物のままです。", "Weapons, armor, shields, bows and arrows, charms and accessories, food, vanilla items and puzzle tools (those you must physically carry) stay in the normal inventory."),
         h_use=T("使い方", "Using it"),
         u1=T("<kbd>I</kbd> で旅嚢の画面を直接開きます。持ち物の画面（サバイバル）の右上の「持ち物」「装飾」「旅嚢」のつまみからも開けます。", "Press <kbd>I</kbd> to open the satchel directly, or use the Inventory / Accessories / Satchel tabs at the top right of the survival inventory."),
         u2=T("<kbd>Y</kbd> を長押しすると道具の輪が開きます。マウスの向きで選び、離すと使います。短く押すと、前回の道具をすぐ使います。", "Hold <kbd>Y</kbd> for the tool wheel: aim with the mouse and release to use. Tap it to use the last tool."),
@@ -439,8 +485,8 @@ def pouch():
         l_h=T("伝承の書", "Lore book"), l=T("見たこと、読んだ物、聞いた話が少しずつ記されていきます。持って右クリックで開きます。なくしても戻ります。", "Records what you see, read and hear. Right-click it to open. If you lose it, it returns."),
         t_h=T("知らせの記録（N）", "Notice log (N)"), tt=T("流れた語り・獲得・場所の名前を新しい順に読み返します。", "Re-read narration, rewards and place names, newest first."),
         w_h=T("呼び笛と呼び貝", "Whistles and conches"), w=T("旅のために巨神の「子」を呼ぶ品です。鯨は笛、潮殻は貝。子にはパーティ全員（最大 6 人）が乗れ、海図で行き先を選びます。出発は全員が乗れば約 3 秒後で、乗っていない近くの仲間がいれば最大 30 秒待ちます。成体の巨神はもう動きません（<a href=\"titans.html#travel\">くわしくは巨神のページ</a>）。", "Items that summon a young carrier of the titan for travel: a whistle for the whale, a conch for the shell. The whole party (up to six) rides and picks a destination from a chart. Departure comes about 3 seconds after everyone is aboard, waiting up to 30 seconds for nearby party members who have not boarded. Adult titans no longer move (<a href=\"titans.html#travel\">details on the titans page</a>)."),
-        n_h=T("野営の道具", "Camp tools"), nn=T("背中の中でも、作業台・かまど・金床・チェストなどを、仕掛けや戦いの場所から離れた地面に一人 8 個まで置けます。背中を出ると中身ごと手もとへ戻ります。", "On a titan's back you may place crafting tables, furnaces, anvils and chests (up to 8 per player) away from trial areas. They return to you with contents when you leave."),
-        f_h=T("心臓の遺物の選択", "Relic choice"), f=T("心臓を初めて止めたあとに選べる専用伝説の画面を、旅嚢や控え帳からいつでも開き直せます。", "Reopen the relic choice screen from the satchel or the record book at any time."),
+        n_h=T("野営の道具", "Camp tools"), nn=T("背中の中でも、作業台・かまど・金床・チェストなどを、仕掛けや戦いの場所から離れた地面に一人 8 個まで置けます。背中を出ると中身ごと手もとへ戻ります。", "On a titan's back you may place crafting tables, furnaces, anvils and chests (up to 8 per player) away from puzzle areas. They return to you with contents when you leave."),
+        f_h=T("心臓の遺物の選択", "Relic choice"), f=T("心臓を初めて止めたあとに選べる遺物の画面を、旅嚢や控え帳からいつでも開き直せます。", "Reopen the relic choice screen from the satchel or the record book at any time."),
     )
     page("pouch.html", "旅嚢と道具 — 天と淵のあいだ", "Travel Satchel and tools — Between the Sky and the Abyss",
          "旅嚢（mod の品の専用の持ち物）、控え帳、伝承の書、呼び笛。", "The Travel Satchel, record book, lore book and whistles.", body)
@@ -453,7 +499,7 @@ def party():
         ["<code>skyabyssHeartReentryLimit</code>", T("戦いで倒れた人が、20 秒のあとに戻れる回数（既定 3。0 で数えない）", "How often a fallen player may re-enter after 20 s (default 3; 0 = unlimited)")],
     ])
     body = page_head("パーティとマルチ", "Party and multiplayer", "6 人まで。背中の進みはパーティごと。人数に合わせて敵が増え、報酬は減りません。",
-                     "Up to six players. Back progress is per party. Enemies scale with the party and rewards never shrink.") + """
+                     "Up to six players. Back progress is per party. Enemies scale with the party and rewards never shrink.") + toc(PARTY_TOC) + """
 <section aria-labelledby="party">
 <div class="wrap">
 <h2 id="party">%(h_party)s</h2>
@@ -517,14 +563,14 @@ def party():
         c_h=T("経験値", "Experience"), c=T("道中の敵の経験値は近くにいる全員で分けます。ボスは参加者それぞれに満額です。その場にいなかった仲間にも、いくらかの分け前が入ります。", "XP from regular enemies is split among nearby players. Bosses give full XP to each participant, and absent party members receive a share."),
         d_h=T("装備と報酬", "Gear and rewards"), d=T("専用装備は一人ずつの抽選です。心臓の遺物の選択も、仲間それぞれの画面で自分で選びます。", "Dedicated gear is rolled per player, and each party member picks their own heart relic on their own screen."),
         h_shared=T("背中の進みはパーティごと", "Back progress is per party"),
-        shared=T("開けた扉、鳴らした石、倒した心臓、試練のリセットは、パーティ（入っていない人は一人のパーティ）ごとに持ちます。", "Opened doors, rung stones, defeated hearts and trial resets are kept per party (a solo player counts as a party of one)."),
+        shared=T("開けた扉、倒した心臓、部屋のリセットは、パーティ（入っていない人は一人のパーティ）ごとに持ちます。", "Opened doors, defeated hearts and room resets are kept per party (a solo player counts as a party of one)."),
         s1=T("同じ背中に別のパーティがいても、扉や敵は混ざりません。ほかのパーティの敵は見えず、狙われもしません。", "Even with another party on the same back, doors and enemies never mix; you cannot see or be targeted by their enemies."),
-        s2=T("水や足場が動く部屋は、一度に一つのパーティだけが入れます。使っているときは「別のパーティーがこの試練に挑んでいる」と出ます。", "Rooms with moving water or platforms admit one party at a time; a notice says another party is attempting that trial."),
-        s3=T("途中でパーティを組む・抜けると、背中の進みはパーティの記録に切り替わります。体の中にいるときは広間へ戻されます。", "Joining or leaving a party mid-run switches to that party's record; if you are inside the body you are returned to the hall."),
+        s2=T("水や足場が動く部屋は、一度に一つのパーティだけが入れます。使っているときは「別のパーティーがこの部屋に挑んでいる」と出ます。", "Rooms with moving water or platforms admit one party at a time; a notice says another party is in that room."),
+        s3=T("途中でパーティを組む・抜けると、背中の進みはパーティの記録に切り替わります。部屋の中にいるときは鼓動の間へ戻されます。", "Joining or leaving a party mid-run switches to that party's record; if you are inside a room you are returned to the hub."),
         s4=T("全員が同じ順番で進みます。先に進んだ人がいても、遅れた人は自分の順番で進めます。", "Everyone progresses in the same order; stragglers keep their own pace."),
-        s5=T("試練の石には、パーティで鳴らした数と、誰が鳴らしたかが出ます（控え帳の「試練の石」）。試練を越えると、中にいた仲間は鼓動の間へ戻り、その碑がそのパーティの画面で光ります。", "Trial stones show how many the party rang and who rang them (record book, \"Trial stones\"). After a clear, members inside return to the hub and its tablet lights up on that party's screen."),
+        s5=T("部屋を越えると、次の部屋への道が開きます。越えた部屋は、そのパーティの記録に残ります。", "Clearing a room opens the way to the next. Cleared rooms stay recorded for that party."),
         h_scale=T("人数による強さ", "Scaling by entrants"),
-        c1=T("背中の試練は、6 人までを想定した敵の数です。人数に合わせて敵が増えるものがあります。", "Back trials are tuned for up to six; many trials add enemies as the party grows."),
+        c1=T("背の部屋は、6 人までを想定した敵の数です。人数に合わせて敵が増える部屋があります。", "Back rooms are tuned for up to six; many rooms add enemies as the party grows."),
         c2=T("心臓の体力は参加者の数に合わせて実質的に増え、一人あたりの戦いの長さが人数によらず 4 分ほどになるように調整されています（岩鯨）。", "Heart durability scales with participants so that the fight lasts about four minutes per player regardless of party size (Stone Whale)."),
         c3=T("戦いの強さは、部屋の中にいる人数に合わせて決まります。報酬は人数が増えても減りません。", "Combat strength follows the number of people inside the room. Rewards do not shrink as the party grows."),
         c4=T("一人でも遊べます。", "Solo play is fully supported."),

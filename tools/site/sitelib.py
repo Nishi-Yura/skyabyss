@@ -126,7 +126,8 @@ def head(title_ja, title_en, desc_ja, desc_en, depth_class="", ogimg="img/plate_
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DotGothic16&family=Noto+Sans+JP:wght@400;700&display=swap">
 <link rel="stylesheet" href="css/style.css">
-<script src="js/main.js"></script>
+<script>try{var t=localStorage.getItem("skyabyss-site-theme");if(t==="light"||t==="dark")document.documentElement.setAttribute("data-theme",t);}catch(e){}</script>
+<script src="js/main.js" defer></script>
 </head>
 <body class="%(cls)s">
 """ % dict(tj=esc(title_ja), te=esc(title_en), dj=esc(desc_ja), site=SITE_URL, og=ogimg, cls=depth_class)
@@ -134,19 +135,36 @@ def head(title_ja, title_en, desc_ja, desc_en, depth_class="", ogimg="img/plate_
 
 def header(current):
     links = []
+    cur_ja = cur_en = ""
     for href, ja, en in NAV:
         cur = ' aria-current="page"' if href == current else ""
+        if href == current:
+            cur_ja, cur_en = ja, en
         links.append('<a href="%s"%s>%s</a>' % (href, cur, T(ja, en)))
+    menu_label = T("メニュー", "Menu")
+    here = T("（今: %s）" % cur_ja, "(now: %s)" % cur_en) if cur_ja else ""
     return """<a class="skip" href="#main">%s</a>
 <header class="site-header">
 <div class="wrap bar">
 <a class="brand" href="index.html"><img class="px" src="img/favicon.png" width="32" height="32" alt=""><span>天と淵のあいだ</span></a>
+<div class="bar-tools">
 <span class="lang" role="group" aria-label="Language / 言語"><button type="button" data-set="ja" aria-pressed="true" lang="ja">日本語</button><button type="button" data-set="en" aria-pressed="false" lang="en">English</button></span>
-<button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav">%s</button>
+<button class="theme-toggle" type="button" data-theme-toggle aria-label="%s" title="%s"><span class="ja" lang="ja">表示: 自動</span><span class="en" lang="en">Theme: auto</span></button>
+<button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav">%s<span class="here">%s</span></button>
+</div>
 <nav class="nav" id="site-nav" aria-label="%s">%s</nav>
 </div>
 </header>
-""" % (T("本文へ", "Skip to content"), T("メニュー", "Menu"), "メニュー / Menu", "".join(links))
+""" % (T("本文へ", "Skip to content"), "表示の切り替え（自動・明るい・暗い） / Theme (auto, light, dark)",
+       "表示の切り替え（自動・明るい・暗い） / Theme (auto, light, dark)", menu_label, here,
+       "メニュー / Menu", "".join(links))
+
+
+def toc(items, title_ja="この頁の目次", title_en="On this page"):
+    """長い頁の目次。items は (アンカー, 日本語, 英語)。"""
+    li = "".join('<li><a href="#%s">%s</a></li>' % (a, T(j, e)) for a, j, e in items)
+    return ('<nav class="toc" aria-labelledby="toc-h"><details open><summary id="toc-h">%s</summary>'
+            '<ol>%s</ol></details></nav>') % (T(title_ja, title_en), li)
 
 
 def footer():
