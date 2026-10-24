@@ -12,6 +12,7 @@ cmd time set noon
 cmd gamerule doWeatherCycle false
 cmd weather clear
 cmd gamemode survival
+cmd gamerule doMobLoot false
 camera 0 -60 0 0 0
 hud off
 cmd skyabyss cinematic stop
@@ -32,7 +33,8 @@ wait 30
 cmd skyabyss skill learn @s titan_cleave 3
 cmd skyabyss skill slot @s 1 titan_cleave
 cmd skyabyss skill cooldowns @s
-cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
+cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
+cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
 cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
 wait 10
 cmd skyabyss skill mana @s full
@@ -60,7 +62,8 @@ wait 30
 cmd skyabyss skill learn @s titan_cleave 3
 cmd skyabyss skill slot @s 1 titan_cleave
 cmd skyabyss skill cooldowns @s
-cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
+cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
+cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
 cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
 wait 10
 cmd skyabyss skill mana @s full
@@ -89,7 +92,8 @@ wait 30
 cmd skyabyss skill learn @s rock_call 3
 cmd skyabyss skill slot @s 1 rock_call
 cmd skyabyss skill cooldowns @s
-cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
+cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
+cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
 cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
 wait 10
 cmd skyabyss skill mana @s full
@@ -117,7 +121,8 @@ wait 30
 cmd skyabyss skill learn @s rock_call 3
 cmd skyabyss skill slot @s 1 rock_call
 cmd skyabyss skill cooldowns @s
-cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
+cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
+cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
 cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
 wait 10
 cmd skyabyss skill mana @s full
@@ -146,7 +151,8 @@ wait 30
 cmd skyabyss skill learn @s whale_sweep 3
 cmd skyabyss skill slot @s 1 whale_sweep
 cmd skyabyss skill cooldowns @s
-cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
+cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
+cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
 cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
 wait 10
 cmd skyabyss skill mana @s full
@@ -174,7 +180,8 @@ wait 30
 cmd skyabyss skill learn @s whale_sweep 3
 cmd skyabyss skill slot @s 1 whale_sweep
 cmd skyabyss skill cooldowns @s
-cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
+cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
+cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
 cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
 wait 10
 cmd skyabyss skill mana @s full
@@ -203,8 +210,9 @@ wait 30
 cmd skyabyss skill learn @s lunge 3
 cmd skyabyss skill slot @s 1 lunge
 cmd skyabyss skill cooldowns @s
-cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
-cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
+cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
+cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
+cmd summon minecraft:husk 0.5 -60 5.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
 wait 10
 cmd skyabyss skill mana @s full
 cmd skyabyss skill cast @s 1
@@ -231,8 +239,9 @@ wait 30
 cmd skyabyss skill learn @s lunge 3
 cmd skyabyss skill slot @s 1 lunge
 cmd skyabyss skill cooldowns @s
-cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
-cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
+cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
+cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
+cmd summon minecraft:husk 0.5 -60 5.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
 wait 10
 cmd skyabyss skill mana @s full
 cmd skyabyss skill cast @s 1
@@ -260,7 +269,8 @@ wait 30
 cmd skyabyss skill learn @s backstep 3
 cmd skyabyss skill slot @s 1 backstep
 cmd skyabyss skill cooldowns @s
-cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
+cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
+cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
 cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
 wait 10
 cmd skyabyss skill mana @s full
@@ -288,7 +298,8 @@ wait 30
 cmd skyabyss skill learn @s backstep 3
 cmd skyabyss skill slot @s 1 backstep
 cmd skyabyss skill cooldowns @s
-cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
+cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
+cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
 cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
 wait 10
 cmd skyabyss skill mana @s full
@@ -317,7 +328,8 @@ wait 30
 cmd skyabyss skill learn @s wind_rend 3
 cmd skyabyss skill slot @s 1 wind_rend
 cmd skyabyss skill cooldowns @s
-cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
+cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
+cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
 cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
 wait 10
 cmd skyabyss skill mana @s full
@@ -345,7 +357,8 @@ wait 30
 cmd skyabyss skill learn @s wind_rend 3
 cmd skyabyss skill slot @s 1 wind_rend
 cmd skyabyss skill cooldowns @s
-cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
+cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
+cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
 cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
 wait 10
 cmd skyabyss skill mana @s full
@@ -374,7 +387,8 @@ wait 30
 cmd skyabyss skill learn @s ward_song 3
 cmd skyabyss skill slot @s 1 ward_song
 cmd skyabyss skill cooldowns @s
-cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
+cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
+cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
 cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
 wait 10
 cmd skyabyss skill mana @s full
@@ -402,7 +416,8 @@ wait 30
 cmd skyabyss skill learn @s ward_song 3
 cmd skyabyss skill slot @s 1 ward_song
 cmd skyabyss skill cooldowns @s
-cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
+cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
+cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
 cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
 wait 10
 cmd skyabyss skill mana @s full
@@ -431,7 +446,8 @@ wait 30
 cmd skyabyss skill learn @s ebb_tide 3
 cmd skyabyss skill slot @s 1 ebb_tide
 cmd skyabyss skill cooldowns @s
-cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
+cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
+cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
 cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
 wait 10
 cmd skyabyss skill mana @s full
@@ -459,7 +475,8 @@ wait 30
 cmd skyabyss skill learn @s ebb_tide 3
 cmd skyabyss skill slot @s 1 ebb_tide
 cmd skyabyss skill cooldowns @s
-cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
+cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
+cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
 cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
 wait 10
 cmd skyabyss skill mana @s full
@@ -488,7 +505,8 @@ wait 30
 cmd skyabyss skill learn @s cycle_song 3
 cmd skyabyss skill slot @s 1 cycle_song
 cmd skyabyss skill cooldowns @s
-cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
+cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
+cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
 cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
 wait 10
 cmd skyabyss skill mana @s full
@@ -516,7 +534,8 @@ wait 30
 cmd skyabyss skill learn @s cycle_song 3
 cmd skyabyss skill slot @s 1 cycle_song
 cmd skyabyss skill cooldowns @s
-cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
+cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
+cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
 cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
 wait 10
 cmd skyabyss skill mana @s full
@@ -545,7 +564,8 @@ wait 30
 cmd skyabyss skill learn @s temper 3
 cmd skyabyss skill slot @s 1 temper
 cmd skyabyss skill cooldowns @s
-cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
+cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
+cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
 cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
 wait 10
 cmd skyabyss skill mana @s full
@@ -573,7 +593,8 @@ wait 30
 cmd skyabyss skill learn @s temper 3
 cmd skyabyss skill slot @s 1 temper
 cmd skyabyss skill cooldowns @s
-cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
+cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
+cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
 cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
 wait 10
 cmd skyabyss skill mana @s full
@@ -602,7 +623,8 @@ wait 30
 cmd skyabyss skill learn @s ember_hammer 3
 cmd skyabyss skill slot @s 1 ember_hammer
 cmd skyabyss skill cooldowns @s
-cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
+cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
+cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
 cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
 wait 10
 cmd skyabyss skill mana @s full
@@ -630,7 +652,8 @@ wait 30
 cmd skyabyss skill learn @s ember_hammer 3
 cmd skyabyss skill slot @s 1 ember_hammer
 cmd skyabyss skill cooldowns @s
-cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
+cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
+cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
 cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
 wait 10
 cmd skyabyss skill mana @s full
@@ -659,7 +682,8 @@ wait 30
 cmd skyabyss skill learn @s ash_scatter 3
 cmd skyabyss skill slot @s 1 ash_scatter
 cmd skyabyss skill cooldowns @s
-cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
+cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
+cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
 cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
 wait 10
 cmd skyabyss skill mana @s full
@@ -687,7 +711,8 @@ wait 30
 cmd skyabyss skill learn @s ash_scatter 3
 cmd skyabyss skill slot @s 1 ash_scatter
 cmd skyabyss skill cooldowns @s
-cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
+cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
+cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
 cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
 wait 10
 cmd skyabyss skill mana @s full
@@ -718,7 +743,8 @@ cmd give @s minecraft:arrow 64
 cmd skyabyss skill learn @s cloud_pierce 3
 cmd skyabyss skill slot @s 1 cloud_pierce
 cmd skyabyss skill cooldowns @s
-cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
+cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
+cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
 cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
 wait 10
 cmd skyabyss skill mana @s full
@@ -748,7 +774,8 @@ cmd give @s minecraft:arrow 64
 cmd skyabyss skill learn @s cloud_pierce 3
 cmd skyabyss skill slot @s 1 cloud_pierce
 cmd skyabyss skill cooldowns @s
-cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
+cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
+cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
 cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
 wait 10
 cmd skyabyss skill mana @s full
@@ -777,7 +804,8 @@ wait 30
 cmd skyabyss skill learn @s bone_trap 3
 cmd skyabyss skill slot @s 1 bone_trap
 cmd skyabyss skill cooldowns @s
-cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
+cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
+cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
 cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
 wait 10
 cmd skyabyss skill mana @s full
@@ -805,7 +833,8 @@ wait 30
 cmd skyabyss skill learn @s bone_trap 3
 cmd skyabyss skill slot @s 1 bone_trap
 cmd skyabyss skill cooldowns @s
-cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
+cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
+cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
 cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
 wait 10
 cmd skyabyss skill mana @s full
@@ -836,7 +865,8 @@ cmd give @s minecraft:arrow 64
 cmd skyabyss skill learn @s sky_rain 3
 cmd skyabyss skill slot @s 1 sky_rain
 cmd skyabyss skill cooldowns @s
-cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
+cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
+cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
 cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
 wait 10
 cmd skyabyss skill mana @s full
@@ -866,7 +896,8 @@ cmd give @s minecraft:arrow 64
 cmd skyabyss skill learn @s sky_rain 3
 cmd skyabyss skill slot @s 1 sky_rain
 cmd skyabyss skill cooldowns @s
-cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
+cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
+cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
 cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
 wait 10
 cmd skyabyss skill mana @s full
@@ -895,7 +926,8 @@ wait 30
 cmd skyabyss skill learn @s signal 3
 cmd skyabyss skill slot @s 1 signal
 cmd skyabyss skill cooldowns @s
-cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
+cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
+cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
 cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
 wait 10
 cmd skyabyss skill mana @s full
@@ -923,7 +955,8 @@ wait 30
 cmd skyabyss skill learn @s signal 3
 cmd skyabyss skill slot @s 1 signal
 cmd skyabyss skill cooldowns @s
-cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
+cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
+cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
 cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
 wait 10
 cmd skyabyss skill mana @s full
@@ -952,7 +985,8 @@ wait 30
 cmd skyabyss skill learn @s dust_charge 3
 cmd skyabyss skill slot @s 1 dust_charge
 cmd skyabyss skill cooldowns @s
-cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
+cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
+cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
 cmd summon minecraft:husk -0.7 -60 7.0 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
 wait 10
 cmd skyabyss skill mana @s full
@@ -980,7 +1014,8 @@ wait 30
 cmd skyabyss skill learn @s dust_charge 3
 cmd skyabyss skill slot @s 1 dust_charge
 cmd skyabyss skill cooldowns @s
-cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
+cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
+cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
 cmd summon minecraft:husk -0.7 -60 7.0 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
 wait 10
 cmd skyabyss skill mana @s full
@@ -1009,7 +1044,8 @@ wait 30
 cmd skyabyss skill learn @s steam_bell 3
 cmd skyabyss skill slot @s 1 steam_bell
 cmd skyabyss skill cooldowns @s
-cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
+cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
+cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
 cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
 wait 10
 cmd skyabyss skill mana @s full
@@ -1037,7 +1073,8 @@ wait 30
 cmd skyabyss skill learn @s steam_bell 3
 cmd skyabyss skill slot @s 1 steam_bell
 cmd skyabyss skill cooldowns @s
-cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
+cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
+cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
 cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
 wait 10
 cmd skyabyss skill mana @s full
@@ -1066,7 +1103,8 @@ wait 30
 cmd skyabyss skill learn @s cinder_volley 3
 cmd skyabyss skill slot @s 1 cinder_volley
 cmd skyabyss skill cooldowns @s
-cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
+cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
+cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
 cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
 wait 10
 cmd skyabyss skill mana @s full
@@ -1094,7 +1132,8 @@ wait 30
 cmd skyabyss skill learn @s cinder_volley 3
 cmd skyabyss skill slot @s 1 cinder_volley
 cmd skyabyss skill cooldowns @s
-cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
+cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
+cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
 cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
 wait 10
 cmd skyabyss skill mana @s full
@@ -1123,7 +1162,8 @@ wait 30
 cmd skyabyss skill learn @s deep_pull 3
 cmd skyabyss skill slot @s 1 deep_pull
 cmd skyabyss skill cooldowns @s
-cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
+cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
+cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
 cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
 wait 10
 cmd skyabyss skill mana @s full
@@ -1151,7 +1191,8 @@ wait 30
 cmd skyabyss skill learn @s deep_pull 3
 cmd skyabyss skill slot @s 1 deep_pull
 cmd skyabyss skill cooldowns @s
-cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
+cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
+cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
 cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
 wait 10
 cmd skyabyss skill mana @s full
@@ -1180,7 +1221,8 @@ wait 30
 cmd skyabyss skill learn @s deep_echo 3
 cmd skyabyss skill slot @s 1 deep_echo
 cmd skyabyss skill cooldowns @s
-cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
+cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
+cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
 cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
 wait 10
 cmd skyabyss skill mana @s full
@@ -1208,7 +1250,8 @@ wait 30
 cmd skyabyss skill learn @s deep_echo 3
 cmd skyabyss skill slot @s 1 deep_echo
 cmd skyabyss skill cooldowns @s
-cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
+cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
+cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
 cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
 wait 10
 cmd skyabyss skill mana @s full
@@ -1237,7 +1280,8 @@ wait 30
 cmd skyabyss skill learn @s deep_maw 3
 cmd skyabyss skill slot @s 1 deep_maw
 cmd skyabyss skill cooldowns @s
-cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
+cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
+cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
 cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
 wait 10
 cmd skyabyss skill mana @s full
@@ -1265,7 +1309,8 @@ wait 30
 cmd skyabyss skill learn @s deep_maw 3
 cmd skyabyss skill slot @s 1 deep_maw
 cmd skyabyss skill cooldowns @s
-cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
+cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
+cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
 cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
 wait 10
 cmd skyabyss skill mana @s full
@@ -1294,7 +1339,8 @@ wait 30
 cmd skyabyss skill learn @s echo_strike 3
 cmd skyabyss skill slot @s 1 echo_strike
 cmd skyabyss skill cooldowns @s
-cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
+cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
+cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
 cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
 wait 10
 cmd skyabyss skill mana @s full
@@ -1322,7 +1368,8 @@ wait 30
 cmd skyabyss skill learn @s echo_strike 3
 cmd skyabyss skill slot @s 1 echo_strike
 cmd skyabyss skill cooldowns @s
-cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
+cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
+cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
 cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
 wait 10
 cmd skyabyss skill mana @s full
@@ -1351,7 +1398,8 @@ wait 30
 cmd skyabyss skill learn @s grave_bell 3
 cmd skyabyss skill slot @s 1 grave_bell
 cmd skyabyss skill cooldowns @s
-cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
+cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
+cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
 cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
 wait 10
 cmd skyabyss skill mana @s full
@@ -1379,7 +1427,8 @@ wait 30
 cmd skyabyss skill learn @s grave_bell 3
 cmd skyabyss skill slot @s 1 grave_bell
 cmd skyabyss skill cooldowns @s
-cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
+cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
+cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
 cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
 wait 10
 cmd skyabyss skill mana @s full
@@ -1408,7 +1457,8 @@ wait 30
 cmd skyabyss skill learn @s final_light 3
 cmd skyabyss skill slot @s 1 final_light
 cmd skyabyss skill cooldowns @s
-cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
+cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
+cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
 cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
 wait 10
 cmd skyabyss skill mana @s full
@@ -1436,7 +1486,8 @@ wait 30
 cmd skyabyss skill learn @s final_light 3
 cmd skyabyss skill slot @s 1 final_light
 cmd skyabyss skill cooldowns @s
-cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
+cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
+cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
 cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
 wait 10
 cmd skyabyss skill mana @s full
@@ -1468,7 +1519,8 @@ wait 30
 cmd skyabyss skill learn @s titan_cleave 3
 cmd skyabyss skill slot @s 1 titan_cleave
 cmd skyabyss skill cooldowns @s
-cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
+cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
+cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
 cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
 wait 10
 cmd skyabyss skill mana @s full
@@ -1492,7 +1544,8 @@ wait 30
 cmd skyabyss skill learn @s titan_cleave 3
 cmd skyabyss skill slot @s 1 titan_cleave
 cmd skyabyss skill cooldowns @s
-cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
+cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
+cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
 cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
 wait 10
 cmd skyabyss skill mana @s full
@@ -1517,7 +1570,8 @@ wait 30
 cmd skyabyss skill learn @s rock_call 3
 cmd skyabyss skill slot @s 1 rock_call
 cmd skyabyss skill cooldowns @s
-cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
+cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
+cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
 cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
 wait 10
 cmd skyabyss skill mana @s full
@@ -1541,7 +1595,8 @@ wait 30
 cmd skyabyss skill learn @s rock_call 3
 cmd skyabyss skill slot @s 1 rock_call
 cmd skyabyss skill cooldowns @s
-cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
+cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
+cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
 cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
 wait 10
 cmd skyabyss skill mana @s full
@@ -1566,7 +1621,8 @@ wait 30
 cmd skyabyss skill learn @s whale_sweep 3
 cmd skyabyss skill slot @s 1 whale_sweep
 cmd skyabyss skill cooldowns @s
-cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
+cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
+cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
 cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
 wait 10
 cmd skyabyss skill mana @s full
@@ -1590,7 +1646,8 @@ wait 30
 cmd skyabyss skill learn @s whale_sweep 3
 cmd skyabyss skill slot @s 1 whale_sweep
 cmd skyabyss skill cooldowns @s
-cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
+cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
+cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
 cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
 wait 10
 cmd skyabyss skill mana @s full
@@ -1615,8 +1672,9 @@ wait 30
 cmd skyabyss skill learn @s lunge 3
 cmd skyabyss skill slot @s 1 lunge
 cmd skyabyss skill cooldowns @s
-cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
-cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
+cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
+cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
+cmd summon minecraft:husk 0.5 -60 5.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
 wait 10
 cmd skyabyss skill mana @s full
 cmd skyabyss skill cast @s 1
@@ -1639,8 +1697,9 @@ wait 30
 cmd skyabyss skill learn @s lunge 3
 cmd skyabyss skill slot @s 1 lunge
 cmd skyabyss skill cooldowns @s
-cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
-cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
+cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
+cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
+cmd summon minecraft:husk 0.5 -60 5.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
 wait 10
 cmd skyabyss skill mana @s full
 cmd skyabyss skill cast @s 1
@@ -1664,7 +1723,8 @@ wait 30
 cmd skyabyss skill learn @s backstep 3
 cmd skyabyss skill slot @s 1 backstep
 cmd skyabyss skill cooldowns @s
-cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
+cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
+cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
 cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
 wait 10
 cmd skyabyss skill mana @s full
@@ -1688,7 +1748,8 @@ wait 30
 cmd skyabyss skill learn @s backstep 3
 cmd skyabyss skill slot @s 1 backstep
 cmd skyabyss skill cooldowns @s
-cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
+cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
+cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
 cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
 wait 10
 cmd skyabyss skill mana @s full
@@ -1713,7 +1774,8 @@ wait 30
 cmd skyabyss skill learn @s wind_rend 3
 cmd skyabyss skill slot @s 1 wind_rend
 cmd skyabyss skill cooldowns @s
-cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
+cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
+cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
 cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
 wait 10
 cmd skyabyss skill mana @s full
@@ -1737,7 +1799,8 @@ wait 30
 cmd skyabyss skill learn @s wind_rend 3
 cmd skyabyss skill slot @s 1 wind_rend
 cmd skyabyss skill cooldowns @s
-cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
+cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
+cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
 cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
 wait 10
 cmd skyabyss skill mana @s full
@@ -1762,7 +1825,8 @@ wait 30
 cmd skyabyss skill learn @s ward_song 3
 cmd skyabyss skill slot @s 1 ward_song
 cmd skyabyss skill cooldowns @s
-cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
+cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
+cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
 cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
 wait 10
 cmd skyabyss skill mana @s full
@@ -1786,7 +1850,8 @@ wait 30
 cmd skyabyss skill learn @s ward_song 3
 cmd skyabyss skill slot @s 1 ward_song
 cmd skyabyss skill cooldowns @s
-cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
+cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
+cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
 cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
 wait 10
 cmd skyabyss skill mana @s full
@@ -1811,7 +1876,8 @@ wait 30
 cmd skyabyss skill learn @s ebb_tide 3
 cmd skyabyss skill slot @s 1 ebb_tide
 cmd skyabyss skill cooldowns @s
-cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
+cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
+cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
 cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
 wait 10
 cmd skyabyss skill mana @s full
@@ -1835,7 +1901,8 @@ wait 30
 cmd skyabyss skill learn @s ebb_tide 3
 cmd skyabyss skill slot @s 1 ebb_tide
 cmd skyabyss skill cooldowns @s
-cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
+cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
+cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
 cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
 wait 10
 cmd skyabyss skill mana @s full
@@ -1860,7 +1927,8 @@ wait 30
 cmd skyabyss skill learn @s cycle_song 3
 cmd skyabyss skill slot @s 1 cycle_song
 cmd skyabyss skill cooldowns @s
-cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
+cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
+cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
 cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
 wait 10
 cmd skyabyss skill mana @s full
@@ -1884,7 +1952,8 @@ wait 30
 cmd skyabyss skill learn @s cycle_song 3
 cmd skyabyss skill slot @s 1 cycle_song
 cmd skyabyss skill cooldowns @s
-cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
+cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
+cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
 cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
 wait 10
 cmd skyabyss skill mana @s full
@@ -1909,7 +1978,8 @@ wait 30
 cmd skyabyss skill learn @s temper 3
 cmd skyabyss skill slot @s 1 temper
 cmd skyabyss skill cooldowns @s
-cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
+cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
+cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
 cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
 wait 10
 cmd skyabyss skill mana @s full
@@ -1933,7 +2003,8 @@ wait 30
 cmd skyabyss skill learn @s temper 3
 cmd skyabyss skill slot @s 1 temper
 cmd skyabyss skill cooldowns @s
-cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
+cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
+cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
 cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
 wait 10
 cmd skyabyss skill mana @s full
@@ -1958,7 +2029,8 @@ wait 30
 cmd skyabyss skill learn @s ember_hammer 3
 cmd skyabyss skill slot @s 1 ember_hammer
 cmd skyabyss skill cooldowns @s
-cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
+cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
+cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
 cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
 wait 10
 cmd skyabyss skill mana @s full
@@ -1982,7 +2054,8 @@ wait 30
 cmd skyabyss skill learn @s ember_hammer 3
 cmd skyabyss skill slot @s 1 ember_hammer
 cmd skyabyss skill cooldowns @s
-cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
+cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
+cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
 cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
 wait 10
 cmd skyabyss skill mana @s full
@@ -2007,7 +2080,8 @@ wait 30
 cmd skyabyss skill learn @s ash_scatter 3
 cmd skyabyss skill slot @s 1 ash_scatter
 cmd skyabyss skill cooldowns @s
-cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
+cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
+cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
 cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
 wait 10
 cmd skyabyss skill mana @s full
@@ -2031,7 +2105,8 @@ wait 30
 cmd skyabyss skill learn @s ash_scatter 3
 cmd skyabyss skill slot @s 1 ash_scatter
 cmd skyabyss skill cooldowns @s
-cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
+cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
+cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
 cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
 wait 10
 cmd skyabyss skill mana @s full
@@ -2058,7 +2133,8 @@ cmd give @s minecraft:arrow 64
 cmd skyabyss skill learn @s cloud_pierce 3
 cmd skyabyss skill slot @s 1 cloud_pierce
 cmd skyabyss skill cooldowns @s
-cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
+cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
+cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
 cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
 wait 10
 cmd skyabyss skill mana @s full
@@ -2084,7 +2160,8 @@ cmd give @s minecraft:arrow 64
 cmd skyabyss skill learn @s cloud_pierce 3
 cmd skyabyss skill slot @s 1 cloud_pierce
 cmd skyabyss skill cooldowns @s
-cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
+cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
+cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
 cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
 wait 10
 cmd skyabyss skill mana @s full
@@ -2109,7 +2186,8 @@ wait 30
 cmd skyabyss skill learn @s bone_trap 3
 cmd skyabyss skill slot @s 1 bone_trap
 cmd skyabyss skill cooldowns @s
-cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
+cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
+cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
 cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
 wait 10
 cmd skyabyss skill mana @s full
@@ -2133,7 +2211,8 @@ wait 30
 cmd skyabyss skill learn @s bone_trap 3
 cmd skyabyss skill slot @s 1 bone_trap
 cmd skyabyss skill cooldowns @s
-cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
+cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
+cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
 cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
 wait 10
 cmd skyabyss skill mana @s full
@@ -2160,7 +2239,8 @@ cmd give @s minecraft:arrow 64
 cmd skyabyss skill learn @s sky_rain 3
 cmd skyabyss skill slot @s 1 sky_rain
 cmd skyabyss skill cooldowns @s
-cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
+cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
+cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
 cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
 wait 10
 cmd skyabyss skill mana @s full
@@ -2186,7 +2266,8 @@ cmd give @s minecraft:arrow 64
 cmd skyabyss skill learn @s sky_rain 3
 cmd skyabyss skill slot @s 1 sky_rain
 cmd skyabyss skill cooldowns @s
-cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
+cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
+cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
 cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
 wait 10
 cmd skyabyss skill mana @s full
@@ -2211,7 +2292,8 @@ wait 30
 cmd skyabyss skill learn @s signal 3
 cmd skyabyss skill slot @s 1 signal
 cmd skyabyss skill cooldowns @s
-cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
+cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
+cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
 cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
 wait 10
 cmd skyabyss skill mana @s full
@@ -2235,7 +2317,8 @@ wait 30
 cmd skyabyss skill learn @s signal 3
 cmd skyabyss skill slot @s 1 signal
 cmd skyabyss skill cooldowns @s
-cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
+cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
+cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
 cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
 wait 10
 cmd skyabyss skill mana @s full
@@ -2260,7 +2343,8 @@ wait 30
 cmd skyabyss skill learn @s dust_charge 3
 cmd skyabyss skill slot @s 1 dust_charge
 cmd skyabyss skill cooldowns @s
-cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
+cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
+cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
 cmd summon minecraft:husk -0.7 -60 7.0 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
 wait 10
 cmd skyabyss skill mana @s full
@@ -2284,7 +2368,8 @@ wait 30
 cmd skyabyss skill learn @s dust_charge 3
 cmd skyabyss skill slot @s 1 dust_charge
 cmd skyabyss skill cooldowns @s
-cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
+cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
+cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
 cmd summon minecraft:husk -0.7 -60 7.0 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
 wait 10
 cmd skyabyss skill mana @s full
@@ -2309,7 +2394,8 @@ wait 30
 cmd skyabyss skill learn @s steam_bell 3
 cmd skyabyss skill slot @s 1 steam_bell
 cmd skyabyss skill cooldowns @s
-cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
+cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
+cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
 cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
 wait 10
 cmd skyabyss skill mana @s full
@@ -2333,7 +2419,8 @@ wait 30
 cmd skyabyss skill learn @s steam_bell 3
 cmd skyabyss skill slot @s 1 steam_bell
 cmd skyabyss skill cooldowns @s
-cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
+cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
+cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
 cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
 wait 10
 cmd skyabyss skill mana @s full
@@ -2358,7 +2445,8 @@ wait 30
 cmd skyabyss skill learn @s cinder_volley 3
 cmd skyabyss skill slot @s 1 cinder_volley
 cmd skyabyss skill cooldowns @s
-cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
+cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
+cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
 cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
 wait 10
 cmd skyabyss skill mana @s full
@@ -2382,7 +2470,8 @@ wait 30
 cmd skyabyss skill learn @s cinder_volley 3
 cmd skyabyss skill slot @s 1 cinder_volley
 cmd skyabyss skill cooldowns @s
-cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
+cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
+cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
 cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
 wait 10
 cmd skyabyss skill mana @s full
@@ -2407,7 +2496,8 @@ wait 30
 cmd skyabyss skill learn @s deep_pull 3
 cmd skyabyss skill slot @s 1 deep_pull
 cmd skyabyss skill cooldowns @s
-cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
+cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
+cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
 cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
 wait 10
 cmd skyabyss skill mana @s full
@@ -2431,7 +2521,8 @@ wait 30
 cmd skyabyss skill learn @s deep_pull 3
 cmd skyabyss skill slot @s 1 deep_pull
 cmd skyabyss skill cooldowns @s
-cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
+cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
+cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
 cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
 wait 10
 cmd skyabyss skill mana @s full
@@ -2456,7 +2547,8 @@ wait 30
 cmd skyabyss skill learn @s deep_echo 3
 cmd skyabyss skill slot @s 1 deep_echo
 cmd skyabyss skill cooldowns @s
-cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
+cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
+cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
 cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
 wait 10
 cmd skyabyss skill mana @s full
@@ -2480,7 +2572,8 @@ wait 30
 cmd skyabyss skill learn @s deep_echo 3
 cmd skyabyss skill slot @s 1 deep_echo
 cmd skyabyss skill cooldowns @s
-cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
+cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
+cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
 cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
 wait 10
 cmd skyabyss skill mana @s full
@@ -2505,7 +2598,8 @@ wait 30
 cmd skyabyss skill learn @s deep_maw 3
 cmd skyabyss skill slot @s 1 deep_maw
 cmd skyabyss skill cooldowns @s
-cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
+cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
+cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
 cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
 wait 10
 cmd skyabyss skill mana @s full
@@ -2529,7 +2623,8 @@ wait 30
 cmd skyabyss skill learn @s deep_maw 3
 cmd skyabyss skill slot @s 1 deep_maw
 cmd skyabyss skill cooldowns @s
-cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
+cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
+cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
 cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
 wait 10
 cmd skyabyss skill mana @s full
@@ -2554,7 +2649,8 @@ wait 30
 cmd skyabyss skill learn @s echo_strike 3
 cmd skyabyss skill slot @s 1 echo_strike
 cmd skyabyss skill cooldowns @s
-cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
+cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
+cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
 cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
 wait 10
 cmd skyabyss skill mana @s full
@@ -2578,7 +2674,8 @@ wait 30
 cmd skyabyss skill learn @s echo_strike 3
 cmd skyabyss skill slot @s 1 echo_strike
 cmd skyabyss skill cooldowns @s
-cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
+cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
+cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
 cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
 wait 10
 cmd skyabyss skill mana @s full
@@ -2603,7 +2700,8 @@ wait 30
 cmd skyabyss skill learn @s grave_bell 3
 cmd skyabyss skill slot @s 1 grave_bell
 cmd skyabyss skill cooldowns @s
-cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
+cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
+cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
 cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
 wait 10
 cmd skyabyss skill mana @s full
@@ -2627,7 +2725,8 @@ wait 30
 cmd skyabyss skill learn @s grave_bell 3
 cmd skyabyss skill slot @s 1 grave_bell
 cmd skyabyss skill cooldowns @s
-cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
+cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
+cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
 cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
 wait 10
 cmd skyabyss skill mana @s full
@@ -2652,7 +2751,8 @@ wait 30
 cmd skyabyss skill learn @s final_light 3
 cmd skyabyss skill slot @s 1 final_light
 cmd skyabyss skill cooldowns @s
-cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
+cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
+cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
 cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
 wait 10
 cmd skyabyss skill mana @s full
@@ -2676,7 +2776,8 @@ wait 30
 cmd skyabyss skill learn @s final_light 3
 cmd skyabyss skill slot @s 1 final_light
 cmd skyabyss skill cooldowns @s
-cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]
+cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
+cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
 cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
 wait 10
 cmd skyabyss skill mana @s full

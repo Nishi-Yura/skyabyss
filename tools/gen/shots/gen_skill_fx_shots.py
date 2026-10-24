@@ -54,9 +54,10 @@ CASTER_POS = "0.5 -60 0.5 0 0"
 TARGET_POS = "-1.0 -60 3.5"
 # 突進する技は、的を通り抜けると的が体の後ろ・カメラの真横に来て、黒い箱のように映る。
 # 砂の突進は的を進む先 (6.5 ブロック) の右側へ置く (突進の終点で隣に並ぶ)
-TARGET_BY_SKILL = {"dust_charge": "-0.7 -60 7.0"}
+# 突進は前 25 度の中に的が無いと「的がない」で撃てない (27 度の既定の的では失敗していた)。的を真っすぐ前へ
+TARGET_BY_SKILL = {"dust_charge": "-0.7 -60 7.0", "lunge": "0.5 -60 5.5"}
 def husk_for(skill: str) -> str:
-    # 体力を 500 にして、当たりで倒れない (倒れると死の煙が出て、白い粒と見分けがつかなくなる)
+    # 体力を 500 にして、当たりで倒れない (倒れると死の煙が出る)
     return (f"summon minecraft:husk {TARGET_BY_SKILL.get(skill, TARGET_POS)} "
             "{NoAI:1b,Silent:1b,Health:500f,attributes:[{id:\"minecraft:max_health\",base:500.0d}]}")
 # 三人称は視野を狭めて、体と的を大きく撮る (カメラの距離は既定の 4 ブロックのまま。FOV だけ変える)
@@ -97,7 +98,9 @@ def block(skill: str, rel: int, imp: int, lin: int, bow: bool, view: str, phase:
     lines.append(f"cmd skyabyss skill learn @s {skill} 3")
     lines.append(f"cmd skyabyss skill slot @s 1 {skill}")
     lines.append("cmd skyabyss skill cooldowns @s")
-    lines.append("cmd execute if entity @e[type=minecraft:husk] run kill @e[type=minecraft:husk]")
+    # 前の的は奈落へ送って消す (その場で kill すると死の煙が 1 秒ほど残り、落とした腐った肉と一緒に「当たりの白い粒」に見えていた)
+    lines.append("cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~")
+    lines.append("cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]")
     lines.append(f"cmd {husk_for(skill)}")
     lines.append("wait 10")
     lines.append("cmd skyabyss skill mana @s full")
@@ -131,6 +134,7 @@ def main() -> None:
     out.append("cmd gamerule doWeatherCycle false")
     out.append("cmd weather clear")
     out.append("cmd gamemode survival")
+    out.append("cmd gamerule doMobLoot false")
     out.append("camera 0 -60 0 0 0")
     out.append("hud off")
     out.append("cmd skyabyss cinematic stop")
