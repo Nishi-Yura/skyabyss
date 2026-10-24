@@ -1,0 +1,35 @@
+# サイトの頁の頭の絵 (site_hero)。tools/gen/shots/gen_site_hero_shots.py が書く。
+world shots flat
+size 1280 720
+timeout 900
+render 16
+clouds on
+cmd time set 11500
+cmd weather clear
+cmd gamemode spectator
+hud off
+chat clear
+
+# site_index_sky
+cmd skyabyss dev arrive tide_back
+waitchunks
+wait 300
+chat clear
+hud off
+camera skyabyss:tide_back 150 190 150 135 28
+waitchunks
+wait 40
+shot site_index_sky
+
+# site_titans_back
+cmd skyabyss dev arrive titan_back
+waitchunks
+wait 300
+chat clear
+hud off
+camera skyabyss:titan_back 0 150 140 180 25
+waitchunks
+wait 40
+shot site_titans_back
+
+quit

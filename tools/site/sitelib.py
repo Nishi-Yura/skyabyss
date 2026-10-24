@@ -196,9 +196,8 @@ def page_head(h1_ja, h1_en, sub_ja, sub_en):
 # 頁の頭に置く、ゲームの中で撮った全幅の絵 (site/img/shot/<名>.webp・元は tools/sources/site/shots/)。
 # (絵の名, 日本語の説明, 英語の説明)。説明は絵に写っているものだけ書く。
 SHOTS = {
-    "index.html": ("index", "空の影。遠くを泳ぐ巨神と、背に乗る前の旅人。", "A titan's shadow crossing the sky, and a traveler before boarding."),
+    "index.html": ("index", "海に浮かぶ巨神の背。島のような、階段状の背中。", "A titan's back afloat on the sea, a stepped island of stone."),
     "play.html": ("play", "最初の一時間の景色。雪の地表と、遠くの空。", "The first hour: snowy ground and a far sky."),
-    "titans.html": ("titans", "巨神の内側の広間。止めるべき心臓は、この先にあります。", "Inside a titan: the hall that leads to its heart."),
     "rebirth.html": ("rebirth", "転生の画面。魂盤で、ビルドを組み直す。", "The rebirth screen: rebuild the build on the soul board."),
     "gear.html": ("gear", "防具と武器を並べた広場。", "A plaza with armor and weapons set out."),
     "pouch.html": ("pouch", "伝承の書。開くと、物語の断片が読めます。", "The lore book, opened to a story fragment."),
