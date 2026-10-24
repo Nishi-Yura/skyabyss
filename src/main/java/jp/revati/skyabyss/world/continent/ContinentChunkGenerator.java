@@ -310,8 +310,15 @@ public final class ContinentChunkGenerator extends ChunkGenerator {
     public void buildSurface(WorldGenRegion level, StructureManager structureManager, RandomState random, ChunkAccess chunk) {
     }
 
+    // 生まれたときの動物 (羊・牛など。生物群系のとおり。羊を連れ戻す頼みなどに要る)
     @Override
     public void spawnOriginalMobs(WorldGenRegion level) {
+        net.minecraft.world.level.ChunkPos chunkpos = level.getCenter();
+        net.minecraft.core.Holder<net.minecraft.world.level.biome.Biome> holder = level.getBiome(chunkpos.getWorldPosition().atY(level.getMaxBuildHeight() - 1));
+        net.minecraft.world.level.levelgen.WorldgenRandom random = new net.minecraft.world.level.levelgen.WorldgenRandom(
+                new net.minecraft.world.level.levelgen.LegacyRandomSource(net.minecraft.world.level.levelgen.RandomSupport.generateUniqueSeed()));
+        random.setDecorationSeed(level.getSeed(), chunkpos.getMinBlockX(), chunkpos.getMinBlockZ());
+        net.minecraft.world.level.NaturalSpawner.spawnMobsForChunkGeneration(level, holder, chunkpos, random);
     }
 
     @Override

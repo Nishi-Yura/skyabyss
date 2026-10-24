@@ -116,6 +116,178 @@
         }
       ],
       "chapter": 5
+    },
+    {
+      "id": "iron_sword",
+      "item": "minecraft:iron_sword",
+      "count": 1,
+      "coins": 18
+    },
+    {
+      "id": "shield",
+      "item": "minecraft:shield",
+      "count": 1,
+      "coins": 12
+    },
+    {
+      "id": "iron_helmet",
+      "item": "minecraft:iron_helmet",
+      "count": 1,
+      "coins": 10
+    },
+    {
+      "id": "iron_chestplate",
+      "item": "minecraft:iron_chestplate",
+      "count": 1,
+      "coins": 16
+    },
+    {
+      "id": "iron_leggings",
+      "item": "minecraft:iron_leggings",
+      "count": 1,
+      "coins": 14
+    },
+    {
+      "id": "iron_boots",
+      "item": "minecraft:iron_boots",
+      "count": 1,
+      "coins": 8
+    },
+    {
+      "id": "iron_ingot",
+      "item": "minecraft:iron_ingot",
+      "count": 2,
+      "coins": 4
+    },
+    {
+      "id": "bone",
+      "item": "minecraft:bone",
+      "count": 3,
+      "coins": 3
+    },
+    {
+      "id": "candle",
+      "item": "minecraft:candle",
+      "count": 1,
+      "coins": 3
+    },
+    {
+      "id": "honey",
+      "item": "minecraft:honey_bottle",
+      "count": 1,
+      "coins": 4
+    },
+    {
+      "id": "boat",
+      "item": "minecraft:oak_boat",
+      "count": 1,
+      "coins": 8,
+      "chapter": 2
+    },
+    {
+      "id": "compass",
+      "item": "minecraft:compass",
+      "count": 1,
+      "coins": 10,
+      "chapter": 2
+    },
+    {
+      "id": "map",
+      "item": "minecraft:map",
+      "count": 1,
+      "coins": 6,
+      "chapter": 2
+    },
+    {
+      "id": "string",
+      "item": "minecraft:string",
+      "count": 4,
+      "coins": 4,
+      "chapter": 2
+    },
+    {
+      "id": "copper",
+      "item": "minecraft:copper_ingot",
+      "count": 3,
+      "coins": 4,
+      "chapter": 3
+    },
+    {
+      "id": "lightning_rod",
+      "item": "minecraft:lightning_rod",
+      "count": 1,
+      "coins": 6,
+      "chapter": 3
+    },
+    {
+      "id": "diamond",
+      "item": "minecraft:diamond",
+      "count": 1,
+      "coins": 14,
+      "chapter": 3
+    },
+    {
+      "id": "diamond_sword",
+      "item": "minecraft:diamond_sword",
+      "count": 1,
+      "coins": 50,
+      "chapter": 3
+    },
+    {
+      "id": "diamond_chestplate",
+      "item": "minecraft:diamond_chestplate",
+      "count": 1,
+      "coins": 70,
+      "chapter": 3
+    },
+    {
+      "id": "coal",
+      "item": "minecraft:coal",
+      "count": 4,
+      "coins": 3,
+      "chapter": 4
+    },
+    {
+      "id": "wheat",
+      "item": "minecraft:wheat",
+      "count": 8,
+      "coins": 4,
+      "chapter": 4
+    },
+    {
+      "id": "blast_furnace",
+      "item": "minecraft:blast_furnace",
+      "count": 1,
+      "coins": 16,
+      "chapter": 4
+    },
+    {
+      "id": "magma_block",
+      "item": "minecraft:magma_block",
+      "count": 2,
+      "coins": 4,
+      "chapter": 4
+    },
+    {
+      "id": "magma_cream",
+      "item": "minecraft:magma_cream",
+      "count": 2,
+      "coins": 5,
+      "chapter": 4
+    },
+    {
+      "id": "obsidian",
+      "item": "minecraft:obsidian",
+      "count": 1,
+      "coins": 6,
+      "chapter": 5
+    },
+    {
+      "id": "blaze_rod",
+      "item": "minecraft:blaze_rod",
+      "count": 1,
+      "coins": 8,
+      "chapter": 5
     }
   ],
   "buys": [
