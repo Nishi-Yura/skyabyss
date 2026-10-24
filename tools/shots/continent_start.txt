@@ -19,6 +19,14 @@ open inventory
 wait 20
 shot starter_kit
 close
+cmd tp @s -596 100 345 135 35
+waitchunks 300
+wait 60
+shot outskirts_fire
+cmd tp @s -500 100 175 135 35
+waitchunks 300
+wait 60
+shot outskirts_shrine
 cmd tp @s -450 80 60 180 10
 waitchunks 400
 wait 100

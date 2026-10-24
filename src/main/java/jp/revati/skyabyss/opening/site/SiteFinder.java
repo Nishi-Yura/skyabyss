@@ -322,6 +322,18 @@ public final class SiteFinder {
                     out.add(new Planned(jp.revati.skyabyss.world.continent.ContinentTowns.KIND, i, new BlockPos(t.getX(), p.top(t.getX(), t.getZ()) + 1, t.getZ()), 0));
                 }
             }
+            // 外れの一本道の休み場と祠
+            List<BlockPos> prints = new ArrayList<>();
+            for (Planned pl : out) {
+                if (pl.kind().equals(Kind.FOOTPRINT.id)) {
+                    prints.add(pl.pos());
+                }
+            }
+            List<int[]> stops = jp.revati.skyabyss.world.continent.ContinentOutskirts.spots(prints);
+            for (int i = 0; i < stops.size(); i++) {
+                int[] q = stops.get(i);
+                out.add(new Planned(jp.revati.skyabyss.world.continent.ContinentOutskirts.KIND, i, new BlockPos(q[0], p.top(q[0], q[1]) + 1, q[1]), 0));
+            }
         }
         SkyAbyss.LOGGER.info("Opening sites planned in {} ms ({} height queries, {} ms): camp {} shelter {} ribs {} ({} entries)", (System.nanoTime() - t0) / 1_000_000L,
                 p.queries, p.nanos / 1_000_000L, camp, shelter == null ? "-" : shelter.pos(), ribs == null ? "-" : ribs.pos(), out.size());

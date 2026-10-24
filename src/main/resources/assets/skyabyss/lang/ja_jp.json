@@ -1,4 +1,8 @@
 {
+  "sign.skyabyss.outskirts.fire.1": "旅の休み場",
+  "sign.skyabyss.outskirts.fire.2": "樽の糧を食べよう",
+  "sign.skyabyss.outskirts.shrine.1": "宿り木の祠",
+  "sign.skyabyss.outskirts.shrine.2": "そばで傷が癒える",
   "message.skyabyss.tour.step": "町を回ろう %s/%s: %s へ（灯りの道をたどって）",
   "message.skyabyss.tour.done": "町めぐりはおしまい。門の外の弱い敵で、腕を試そう",
   "map.skyabyss.town.whale": "鯨見の町",

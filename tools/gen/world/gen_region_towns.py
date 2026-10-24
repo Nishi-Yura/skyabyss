@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""天と淵の大陸の、土地ごとの小さな町 (docs/design/40 の 3 章「作る順」の 4) の部品を書き出す。
+"""天と淵の大陸の、土地ごとの小さな町 (docs/design/40 の 3 章「作る順」の 4) と、外れの一本道の休み場・祠 (4 章) の部品を書き出す。
 
   python tools/gen/world/gen_region_towns.py
-  -> src/main/resources/data/skyabyss/opening/town_{whale,tide,storm,ember}.json
+  -> src/main/resources/data/skyabyss/opening/town_{whale,tide,storm,ember}.json・outskirts_fire.json・outskirts_shrine.json
 
 形式は tools/gen/ch1/gen_ch1_blueprints.py と同じ (palette / blocks [x,y,z,palette 番号] / marks / meta)。
 座標は町の広場の中心が (0, 0)、y=0 が地面の一つ上 (地面の上面は y=-1)。北 (-z) 向きで書き、置く向きは SiteJob が回す。
@@ -52,6 +52,8 @@ class BP:
         self.cells = {}
         self.marks = {}
         self.palette = []
+        # 範囲の半分の一辺 (町は HALF)
+        self.meta_rect = HALF
 
     def idx(self, state):
         if state not in self.palette:
@@ -82,7 +84,7 @@ class BP:
             'palette': self.palette,
             'blocks': blocks,
             'marks': self.marks,
-            'meta': {'rect': [-HALF, -HALF, HALF, HALF], 'level': True, 'ring': 5},
+            'meta': {'rect': [-self.meta_rect, -self.meta_rect, self.meta_rect, self.meta_rect], 'level': True, 'ring': 5 if self.meta_rect >= HALF else 3},
         }
         with open(os.path.join(OUT, self.name + '.json'), 'w', encoding='utf-8', newline='\n') as f:
             json.dump(data, f, ensure_ascii=False, separators=(',', ':'))
@@ -251,11 +253,60 @@ AWNING = {
 FLOWERS = ['minecraft:poppy', 'minecraft:dandelion', 'minecraft:oxeye_daisy', 'minecraft:cornflower']
 
 
+def outskirts_fire():
+    """外れの一本道の休み場: 灯した焚き火・丸太の腰かけ・食べ物の樽・札。印 barrel・sign・stand"""
+    bp = BP('outskirts_fire')
+    for x in range(-4, 5):
+        for z in range(-4, 5):
+            if x * x + z * z <= 18:
+                bp.set(x, -1, z, 'minecraft:coarse_dirt' if (x + z) % 3 else 'minecraft:podzol')
+    bp.set(0, -1, 0, 'minecraft:cobblestone')
+    bp.set(0, 0, 0, 'minecraft:campfire[facing=north,lit=true,signal_fire=false,waterlogged=false]')
+    for x in (-1, 0, 1):
+        bp.set(x, 0, -3, 'minecraft:stripped_spruce_log[axis=x]')
+        bp.set(x, 0, 3, 'minecraft:stripped_spruce_log[axis=x]')
+    for z in (-1, 0, 1):
+        bp.set(-3, 0, z, 'minecraft:stripped_spruce_log[axis=z]')
+    bp.set(3, 0, -1, 'minecraft:barrel[facing=up,open=false]')
+    bp.mark('barrel', 3, 0, -1)
+    bp.set(3, 0, 1, 'minecraft:oak_sign[rotation=4,waterlogged=false]')
+    bp.mark('sign', 3, 0, 1)
+    bp.mark('stand', 2, 0, 0)
+    bp.meta_rect = 5
+    return bp
+
+
+def outskirts_shrine():
+    """外れの一本道の宿り木の祠: 苔の石の台に小さな屋根と灯り。そばにいると傷が癒える (ContinentOutskirts)。印 heal・sign"""
+    bp = BP('outskirts_shrine')
+    for x in range(-3, 4):
+        for z in range(-3, 4):
+            bp.set(x, -1, z, 'minecraft:mossy_stone_bricks' if (x * 3 + z) % 4 else 'minecraft:stone_bricks')
+    bp.fill(-1, 0, -1, 1, 0, 1, 'minecraft:mossy_stone_brick_slab[type=bottom,waterlogged=false]')
+    for x, z in ((-2, -2), (2, -2), (-2, 2), (2, 2)):
+        bp.fill(x, 0, z, x, 2, z, 'minecraft:spruce_fence')
+    for x in range(-3, 4):
+        bp.set(x, 3, -2, stairs('minecraft:spruce_stairs', 'south'))
+        bp.set(x, 3, 2, stairs('minecraft:spruce_stairs', 'north'))
+        for z in (-1, 0, 1):
+            bp.set(x, 3, z, 'minecraft:spruce_slab[type=bottom,waterlogged=false]')
+    bp.set(0, 1, 0, 'minecraft:flowering_azalea')
+    bp.set(0, 2, 0, 'minecraft:lantern[hanging=true,waterlogged=false]')
+    bp.set(0, 0, 3, 'minecraft:oak_sign[rotation=0,waterlogged=false]')
+    bp.mark('sign', 0, 0, 3)
+    bp.mark('heal', 0, 1, 0)
+    bp.mark('stand', 0, 0, 4)
+    bp.meta_rect = 4
+    return bp
+
+
 def main():
     os.makedirs(OUT, exist_ok=True)
     for region in PALETTES:
         n = town(region).save()
         print(f'town_{region}: {n} blocks')
+    for bp in (outskirts_fire(), outskirts_shrine()):
+        print(f'{bp.name}: {bp.save()} blocks')
 
 
 if __name__ == '__main__':

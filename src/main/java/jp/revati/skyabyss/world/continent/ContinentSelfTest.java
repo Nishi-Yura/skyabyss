@@ -54,6 +54,17 @@ public final class ContinentSelfTest {
                 f.add("the western ridge peaks at only Y " + peak);
             }
             ServerLevel level = server.overworld();
+            // 外れの一本道の休み場と祠: 二つ。足跡のそばは避ける
+            List<int[]> stops = ContinentOutskirts.spots(List.of());
+            if (stops.size() != 2) {
+                f.add("outskirts stops: " + stops.size());
+            } else {
+                BlockPos block = new BlockPos(stops.get(0)[0], 0, stops.get(0)[1]);
+                int[] moved = ContinentOutskirts.spots(List.of(block)).get(0);
+                if (Math.hypot(moved[0] - block.getX(), moved[1] - block.getZ()) < ContinentOutskirts.AVOID) {
+                    f.add("the rest stop did not move away from a footprint");
+                }
+            }
             // 土地ごとの敵の強さ: 都のまわりのゾンビは体力 11・攻撃 1.5、灰の荒野は 42・5.4。二度かけても変わらない
             if (map.region(-450, 0) != ContinentMap.MEADOW || map.region(-760, 560) != ContinentMap.OUTSKIRTS) {
                 f.add("regions: capital " + map.region(-450, 0) + " start " + map.region(-760, 560));
@@ -92,7 +103,7 @@ public final class ContinentSelfTest {
             f.add("crashed: " + e);
         }
         if (f.isEmpty()) {
-            SkyAbyss.LOGGER.info("SELFTEST continent PASSED (map loads; flat capital at Y 72, inland sea, outer deep sea, western peaks; regional enemy strength; real chunks match when the world is a continent)");
+            SkyAbyss.LOGGER.info("SELFTEST continent PASSED (map loads; flat capital at Y 72, inland sea, outer deep sea, western peaks; regional enemy strength; outskirts stops avoid footprints; real chunks match when the world is a continent)");
         } else {
             for (String s : f) {
                 SkyAbyss.LOGGER.error("SELFTEST continent FAILED: {}", s);

@@ -1,4 +1,8 @@
 {
+  "sign.skyabyss.outskirts.fire.1": "Wayside Rest",
+  "sign.skyabyss.outskirts.fire.2": "Food in barrel",
+  "sign.skyabyss.outskirts.shrine.1": "Mistletoe Shrine",
+  "sign.skyabyss.outskirts.shrine.2": "Heals wounds",
   "message.skyabyss.tour.step": "Town tour %s/%s: to %s (follow the lantern path)",
   "message.skyabyss.tour.done": "That is the town. Try your arm on the weak foes outside the gate",
   "map.skyabyss.town.whale": "Kujirami",

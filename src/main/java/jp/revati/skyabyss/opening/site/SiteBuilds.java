@@ -177,7 +177,8 @@ public final class SiteBuilds {
         SiteData data = SiteData.get(level);
         java.util.Set<SiteData.Entry> queued = new java.util.HashSet<>();
         QUEUE.forEach(j -> queued.add(j.entry));
-        for (String kind : new String[] {Kind.CAMP.id, Kind.SHELTER.id, Kind.FOOTPRINT.id, Kind.RIBS.id, jp.revati.skyabyss.world.continent.ContinentTowns.KIND}) {
+        for (String kind : new String[] {Kind.CAMP.id, Kind.SHELTER.id, Kind.FOOTPRINT.id, Kind.RIBS.id, jp.revati.skyabyss.world.continent.ContinentTowns.KIND,
+                jp.revati.skyabyss.world.continent.ContinentOutskirts.KIND}) {
             for (SiteData.Entry e : data.entries(kind)) {
                 // 跡地の中の物 (一章の骨) は、跡地を整え終わってから
                 if (!e.built && !queued.contains(e) && !waitsForGround(data, e.pos)) {
@@ -227,6 +228,7 @@ public final class SiteBuilds {
             case "footprint" -> FootprintBuilder.create(level, data, e);
             case "ribs" -> RibBuilder.create(level, data, e);
             case jp.revati.skyabyss.world.continent.ContinentTowns.KIND -> jp.revati.skyabyss.world.continent.ContinentTowns.create(level, data, e);
+            case jp.revati.skyabyss.world.continent.ContinentOutskirts.KIND -> jp.revati.skyabyss.world.continent.ContinentOutskirts.create(level, data, e);
             default -> throw new IllegalArgumentException("unknown opening site kind " + e.kind);
         };
     }
