@@ -18,8 +18,26 @@ import random
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import passage  # noqa: E402
 import vox  # noqa: E402
 from facilities import Facilities  # noqa: E402
+
+
+def _placement_rules(v):
+    """灯りの置き場の規則に要る一覧: 偽の戸 (前が空いていること) と碑 (前に立てること)。audit.py と同じ見方"""
+    stands = []
+    for nm, (x, y, z) in v.marks.items():
+        if nm.startswith('sign_'):
+            s = v.b.get((x, y, z), '')
+            f = s.split('facing=')[1].split(',')[0].split(']')[0] if 'facing=' in s else 'south'
+            stands.append((x, y, z, f))
+    return {'doors': list(v.fake_doors), 'stands': stands}
+
+
+def _lamp(v, x, y, z, state):
+    """灯り (吊り灯り・柱) は、戸の通り道と頭の上の規則 (build audit と同じ。passage.py) を通ったときだけ置く"""
+    if passage.placement_ok(v.b, {(x, y, z): state}, **_placement_rules(v)):
+        v.set(x, y, z, state)
 from vox import (Vox, Body, Mat, DX, OPP, gable_roof, hip_spire, tower, turret, arcade, fountain, rosette, pave,  # noqa: E402
                  flowerbed, lamp_post, double_lamp, tree, bench, planter, bush, pinnacle, _facade_cells)
 
@@ -643,8 +661,8 @@ class Town(Facilities):
         for x in (px0, px1):
             v.fill(x, y, z1 + 2, x, y + 2, z1 + 2, '%s[axis=y]' % log)
             v.set(x, y + 2, z1 + 1, '%s_fence' % st.wood)
-        v.set(px0 + 1, y + 2, z1 + 2, 'lantern[hanging=true,waterlogged=false]')
-        v.set(px1 - 1, y + 2, z1 + 2, 'lantern[hanging=true,waterlogged=false]')
+        _lamp(v, px0 + 1, y + 2, z1 + 2, 'lantern[hanging=true,waterlogged=false]')
+        _lamp(v, px1 - 1, y + 2, z1 + 2, 'lantern[hanging=true,waterlogged=false]')
         # 前庭 (柵、花壇、腰掛け)
         fz0, fz1 = z1 + 4, z1 + 9
         for x in range(x0 - 1, x1 + 2):
@@ -958,10 +976,10 @@ class Town(Facilities):
         v.set(x - 1, 0, z, extra[0])
         if len(extra) > 1:
             v.set(x + 1, 0, z, extra[1])
-        v.set(x, 2, z, 'lantern[hanging=true,waterlogged=false]')
+        _lamp(v, x, 2, z, 'lantern[hanging=true,waterlogged=false]')
         # 日よけの下の灯り: 手前の縁の両わき (縞の日よけの下、売り台の上)
-        v.set(x - 1, 2, z + 2, 'lantern[hanging=true,waterlogged=false]')
-        v.set(x + 1, 2, z - 2, 'lantern[hanging=true,waterlogged=false]')
+        _lamp(v, x - 1, 2, z + 2, 'lantern[hanging=true,waterlogged=false]')
+        _lamp(v, x + 1, 2, z - 2, 'lantern[hanging=true,waterlogged=false]')
 
     # ---------------------------------------------------------------- 鯨追いの組合
     def guild(self):
@@ -1502,7 +1520,7 @@ class Town(Facilities):
                     zc = (z0 + z1) // 2
                     if free(x, yb - 1, zc) and h >= 5:
                         v.set(x, yb - 1, zc, 'chain[axis=y,waterlogged=false]')
-                        v.set(x, yb - 2, zc, 'lantern[hanging=true,waterlogged=false]')
+                        _lamp(v, x, yb - 2, zc, 'lantern[hanging=true,waterlogged=false]')
             else:
                 for z in range(z0 + 2, z1 - 1, 4):
                     for x in range(x0, x1 + 1):
@@ -1511,7 +1529,7 @@ class Town(Facilities):
                     xc = (x0 + x1) // 2
                     if free(xc, yb - 1, z) and h >= 5:
                         v.set(xc, yb - 1, z, 'chain[axis=y,waterlogged=false]')
-                        v.set(xc, yb - 2, z, 'lantern[hanging=true,waterlogged=false]')
+                        _lamp(v, xc, yb - 2, z, 'lantern[hanging=true,waterlogged=false]')
         # 壁ぎわの棚 (戸の前とすでに物がある所は避ける)。2 段: 下は本棚・樽・箱、上に壺・鉢・灯り
         if shelves:
             cells = [(x, z0) for x in range(x0, x1 + 1)] + [(x, z1) for x in range(x0, x1 + 1)] + \
@@ -1867,9 +1885,15 @@ class Town(Facilities):
         柱は道の端に立つ (四方の三つは空き)。灯りの高さは柱の上 (吊り灯り)"""
         sys.path.insert(0, os.path.join(ROOT, 'tools', 'audit'))
         import check_light  # noqa: E402
-        core = check_light.plan_wall_torches(self.v.b, target=7, region=check_light.in_core, min_gap=8, max_add=400)
+        # 柱は戸の通り道と頭の上の規則 (build audit と同じ。passage.py) を通ったものだけ置く
+        rules = _placement_rules(self.v)
+
+        def veto(cells, changes):
+            return passage.placement_ok(cells, changes, **rules)
+        core = check_light.plan_wall_torches(self.v.b, target=7, region=check_light.in_core, min_gap=8, max_add=400,
+                                             veto=veto)
         ring = check_light.plan_wall_torches(self.v.b, target=4, region=lambda p: not check_light.in_core(p),
-                                             min_gap=10, max_add=300)
+                                             min_gap=10, max_add=300, veto=veto)
         self.torches = core + ring
 
     def house_lights(self):
@@ -1906,10 +1930,13 @@ class Town(Facilities):
             f = s.split('facing=')[1].split(',')[0].split(']')[0]
             dx, dz = DX[OPP[f]]
             ax, az = x + dx, z + dz
-            if b.get((ax, 3, az)) not in air or b.get((ax, 2, az)) not in air or b.get((x, 3, z)) in air:
+            # 店の灯りは戸の上 (枠の中、吊り灯り)。戸の前の通り道の筋には腕も灯りも置かない (passage.py の規則)
+            if b.get((x, 2, z)) not in air or b.get((x, 3, z)) in air:
                 continue
-            b[(ax, 3, az)] = 'dark_oak_fence[east=false,north=false,south=false,west=false,waterlogged=false]'
-            b[(ax, 2, az)] = 'lantern[hanging=true,waterlogged=false]'
+            lamp = {(x, 2, z): 'lantern[hanging=true,waterlogged=false]'}
+            if not passage.placement_ok(b, lamp, **_placement_rules(v)):
+                continue
+            b.update(lamp)
             n_door += 1
         self.house_lamps = (n_win, n_door)
 

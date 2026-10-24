@@ -56,12 +56,21 @@ public final class RaidKit {
             Blocks.IRON_BARS.defaultBlockState());
 
     // 広間の寸法 (hx・hz は床の中心から縁までの半分、height は床の上の高さ)
-    public record Spec(int hx, int hz, int height, Palette palette) {
+    // dark = 暗さそのものが遊びの部屋 (灯りを持つ人のまわりだけ見える)。床の見えない灯りを置かず、brightenFloor も触らない
+    public record Spec(int hx, int hz, int height, Palette palette, boolean dark) {
+        public Spec(int hx, int hz, int height, Palette palette) {
+            this(hx, hz, height, palette, false);
+        }
     }
 
-    // 建てた部屋。origin = 床の中心のブロック。inner = 広間の立てる空間、bounds = 部屋全体 (片付けに使う)
+    // 建てた部屋。origin = 床の中心のブロック。inner = 広間の立てる空間、bounds = 部屋全体 (片付けに使う)。dark = Spec.dark と同じ
     public record Cell(BlockPos origin, int hx, int hz, int height, BlockPos rest, BlockPos exitSpot, AABB inner, AABB bounds,
-            List<BlockPos> entryGate, List<BlockPos> exitGate, Palette palette) {
+            List<BlockPos> entryGate, List<BlockPos> exitGate, Palette palette, boolean dark) {
+        public Cell(BlockPos origin, int hx, int hz, int height, BlockPos rest, BlockPos exitSpot, AABB inner, AABB bounds,
+                List<BlockPos> entryGate, List<BlockPos> exitGate, Palette palette) {
+            this(origin, hx, hz, height, rest, exitSpot, inner, bounds, entryGate, exitGate, palette, false);
+        }
+
         // 広間の (x, z) (原点からの相対) の、床の上に立つ位置
         public BlockPos floor(int x, int z) {
             return origin.offset(x, 1, z);
@@ -142,7 +151,8 @@ public final class RaidKit {
         }
         // 床の灯り (見えない灯り): 床から二ブロック上に、四ブロックおきに光源。天井だけでは床の隅が暗い (39 の 3.7 節)。
         // 立つ所 (床の上の一ブロック) は空気のまま、頭の上を通るので歩き・戦いの邪魔にならない。飾りや仕掛けは後から足して上書きできる
-        for (int x = -hx + 2; x <= hx - 2; x += 4) {
+        // 暗い部屋 (Spec.dark) は置かない: 灯りは部屋の仕掛け (持つ人のまわり) だけ
+        for (int x = -hx + 2; x <= hx - 2 && !spec.dark(); x += 4) {
             for (int z = -hz + 2; z <= hz - 2; z += 4) {
                 set(level, new BlockPos(o.getX() + x, fy + 2, o.getZ() + z), FLOOR_LIGHT);
             }
@@ -170,7 +180,7 @@ public final class RaidKit {
         BlockPos rest = new BlockPos(o.getX(), fy + 1, ez0 + 2);
         BlockPos exitSpot = new BlockPos(o.getX(), fy + 1, xz1 - 1);
         AABB inner = new AABB(o.getX() - hx, fy + 1, o.getZ() - hz, o.getX() + hx + 1, fy + h + 1, o.getZ() + hz + 1);
-        Cell cell = new Cell(o, hx, hz, h, rest, exitSpot, inner, bounds, entryGate, exitGate, pal);
+        Cell cell = new Cell(o, hx, hz, h, rest, exitSpot, inner, bounds, entryGate, exitGate, pal, spec.dark());
         ctx.setCell(cell);
         RaidLore.placeTablet(ctx, cell);
         return cell;
@@ -179,6 +189,9 @@ public final class RaidKit {
     // 飾りや仕掛けの陰で床が暗いときの補い (飾りを置いたあと、build の最後に呼ぶ)。広間の空気の所だけ、床から二ブロック上に step おきに光源を足す
     public static void brightenFloor(RaidCtx ctx, int step) {
         Cell c = ctx.cell();
+        if (c.dark()) {
+            return;
+        }
         ServerLevel level = ctx.level();
         for (int x = -c.hx() + 1; x <= c.hx() - 1; x += step) {
             for (int z = -c.hz() + 1; z <= c.hz() - 1; z += step) {
@@ -196,7 +209,7 @@ public final class RaidKit {
     // 中ボス・心臓の部屋: 運ばれる所 (休み場。全滅のあとに戻る所も) を広間の中の (x, z) へ移す。入口の間を歩かずに、そのまま広間で始まる
     public static Cell restInArena(RaidCtx ctx, int x, int z) {
         Cell c = ctx.cell();
-        Cell n = new Cell(c.origin(), c.hx(), c.hz(), c.height(), c.floor(x, z), c.exitSpot(), c.inner(), c.bounds(), c.entryGate(), c.exitGate(), c.palette());
+        Cell n = new Cell(c.origin(), c.hx(), c.hz(), c.height(), c.floor(x, z), c.exitSpot(), c.inner(), c.bounds(), c.entryGate(), c.exitGate(), c.palette(), c.dark());
         ctx.setCell(n);
         return n;
     }

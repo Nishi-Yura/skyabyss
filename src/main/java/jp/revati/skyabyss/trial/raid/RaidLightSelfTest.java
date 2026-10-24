@@ -34,10 +34,14 @@ public final class RaidLightSelfTest {
     // 明るさ 4 以上の床の割合 (%) と、明るさ 8 以上の床の割合 (%)
     static final int MIN_SHARE_4 = 95;
     static final int MIN_SHARE_8 = 60;
+    // 暗い部屋 (Cell.dark: 暗さが遊びの部屋。TR1 の真珠の広間) は、灯りを持つ人がいない所の床がこれ以下のまま
+    // 5: 入口・出口の間の灯り (出口の枠の真珠の灯り 15 など) が、戸の鉄格子を抜けて広間の手前に一段だけ届く (実測 5)。奥の床は 4 以下 (TideRaidSelfTest の見る所)
+    static final int MAX_DARK_FLOOR = 5;
 
     private static final List<RaidCtx> BUILT = new ArrayList<>();
     private static final List<String> FAILS = new ArrayList<>();
     private static final List<String> LINES = new ArrayList<>();
+    private static int DARK_ROOMS;
 
     public static List<Step> steps() {
         return List.of(Step.once("raid light", RaidLightSelfTest::build),
@@ -48,6 +52,7 @@ public final class RaidLightSelfTest {
         FAILS.clear();
         LINES.clear();
         BUILT.clear();
+        DARK_ROOMS = 0;
         ServerLevel level = server.overworld();
         RaidRooms.ensureLoaded();
         int i = 0;
@@ -125,6 +130,7 @@ public final class RaidLightSelfTest {
             int lit4 = 0;
             int lit8 = 0;
             int min = 15;
+            int max = 0;
             String minAt = "";
             int sum = 0;
             for (int x = -c.hx(); x <= c.hx(); x++) {
@@ -141,6 +147,10 @@ public final class RaidLightSelfTest {
                     int b = level.getBrightness(LightLayer.BLOCK, p);
                     stand++;
                     sum += b;
+                    // 暗い部屋の戸の近く (三マス以内) は、入口・出口の間の灯りが戸の鉄格子を抜けて届く。その分は数えない (広間の奥を見る)
+                    if (!c.dark() || (z >= -c.hz() + 3 && z <= c.hz() - 3)) {
+                        max = Math.max(max, b);
+                    }
                     if (b < min) {
                         min = b;
                         minAt = "" + x + "," + z;
@@ -160,7 +170,27 @@ public final class RaidLightSelfTest {
             int share4 = lit4 * 100 / stand;
             int share8 = lit8 * 100 / stand;
             String line = String.format("%s min=%d avg=%.1f >=4=%d%% >=8=%d%%", ctx.roomId(), min, sum / (double) stand, share4, share8);
-            LINES.add(line);
+            LINES.add(line + (c.dark() ? " (dark room: stays dark, max " + max + ")" : ""));
+            if (c.dark()) {
+                // 暗さが遊び: 床を明るくしない。灯りは持つ人のまわりだけ (テストは灯りを持つ人を置かないので、どの床も暗い)
+                DARK_ROOMS++;
+                if (max > MAX_DARK_FLOOR) {
+                    // 原因の目安: 部屋の中で光る物 (発光 1 以上) を、原点からの位置で並べる
+                    StringBuilder emitters = new StringBuilder();
+                    int shown = 0;
+                    for (BlockPos p : BlockPos.betweenClosed((int) c.bounds().minX, (int) c.bounds().minY, (int) c.bounds().minZ,
+                            (int) c.bounds().maxX - 1, (int) c.bounds().maxY - 1, (int) c.bounds().maxZ - 1)) {
+                        BlockState st = level.getBlockState(p);
+                        if (st.getLightEmission(level, p) > 0 && shown++ < 16) {
+                            emitters.append(' ').append(p.getX() - c.origin().getX()).append(',').append(p.getY() - c.origin().getY())
+                                    .append(',').append(p.getZ() - c.origin().getZ()).append('=').append(st.getBlock()).append(':')
+                                    .append(st.getLightEmission(level, p));
+                        }
+                    }
+                    FAILS.add(ctx.roomId() + ": a dark room is lit: floor light " + max + " (max " + MAX_DARK_FLOOR + " without a carrier); emitters:" + emitters);
+                }
+                continue;
+            }
             if (min < MIN_FLOOR) {
                 BlockPos dark = c.origin().offset(Integer.parseInt(minAt.split(",")[0]), 1, Integer.parseInt(minAt.split(",")[1]));
                 FAILS.add(ctx.roomId() + ": a floor spot at (x,z) " + minAt + " from the origin has light " + min + " (need " + MIN_FLOOR + "); above: "
@@ -183,7 +213,7 @@ public final class RaidLightSelfTest {
         }
         BUILT.clear();
         if (FAILS.isEmpty()) {
-            SkyAbyss.LOGGER.info("SELFTEST raid light PASSED ({} rooms: every floor spot lit)", LINES.size());
+            SkyAbyss.LOGGER.info("SELFTEST raid light PASSED ({} rooms: every floor spot lit; {} dark rooms stay dark)", LINES.size() - DARK_ROOMS, DARK_ROOMS);
         } else {
             FAILS.forEach(x -> SkyAbyss.LOGGER.error("SELFTEST raid light FAILED: {}", x));
         }

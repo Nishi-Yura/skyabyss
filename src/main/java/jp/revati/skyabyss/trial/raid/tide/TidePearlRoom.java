@@ -64,7 +64,8 @@ public final class TidePearlRoom extends RaidRoom {
         ServerLevel level = ctx.level();
         origin = ctx.origin();
         count = Math.max(1, Math.min(MAX_PEARLS, ctx.scale()));
-        RaidKit.Cell c = RaidKit.buildCell(ctx, new RaidKit.Spec(HX, HZ, H, TideBuild.PALETTE));
+        // dark: 床の見えない灯りを置かない (RaidLightSelfTest は暗いまま見る)
+        RaidKit.Cell c = RaidKit.buildCell(ctx, new RaidKit.Spec(HX, HZ, H, TideBuild.PALETTE, true));
         // 暗くする: 天井の灯りを暗い天井材に戻す (入口の間・出口の間の灯りは残る)
         for (int x = -HX + 3; x <= HX - 2; x += 8) {
             for (int z = -HZ + 3; z <= HZ - 2; z += 8) {

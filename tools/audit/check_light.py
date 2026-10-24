@@ -141,7 +141,9 @@ def post_ok(cells, c):
     return free >= 3
 
 
-def plan_wall_torches(cells, target=DARK, max_add=3000, reach=8, log=None, region=in_core, torches=False, min_gap=6, max_seeds=3000):
+def plan_wall_torches(cells, target=DARK, max_add=3000, reach=8, log=None, region=in_core, torches=False, min_gap=6, max_seeds=3000,
+                      veto=None):
+    """veto(cells, changes) -> bool: 柱を置いてよいか (town.py は tools/capital/passage.placement_ok を渡す。戸の通り道と頭の上の規則)"""
     """暗い歩く所の近くの壁に、魂の松明を足す (cells を書き換える)。
     いちばん暗い所を選び、その近く (reach の中) で、壁に付けられる空きの一マスのうち、
     いちばん多くの暗い所を (松明の届く中で) 照らす所を選ぶ。松明は当たりが無いので、道はふさがない。
@@ -194,6 +196,13 @@ def plan_wall_torches(cells, target=DARK, max_add=3000, reach=8, log=None, regio
                     if not score:
                         continue
                     key = (sc, -(abs(dx) + abs(dz)))
+                    if best is not None and key <= best[0]:
+                        continue
+                    if kind == 'post' and veto is not None and not veto(cells, {
+                            (c[0], c[1], c[2]): POST_FENCE,
+                            (c[0], c[1] + 1, c[2]): POST_FENCE,
+                            (c[0], c[1] + 2, c[2]): 'lantern[hanging=false,waterlogged=false]'}):
+                        continue
                     if best is None or key > best[0]:
                         best = (key, c, kind, face)
         seeds_tried += 1

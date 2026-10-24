@@ -252,7 +252,9 @@ public final class EyeAdvance extends RaidRoom {
         double d = Math.hypot(dx, dz);
         for (double s = 1.5; s < d - 0.4; s += 0.35) {
             BlockPos at = BlockPos.containing(c.x + dx / d * s, y, c.z + dz / d * s);
-            if (!ctx.level().getBlockState(at).isAir()) {
+            BlockState st = ctx.level().getBlockState(at);
+            // 見えない灯り (minecraft:light) は陰にしない: 床の灯りが胸の高さに並んでも、通り道は開いたまま
+            if (!st.isAir() && !st.is(Blocks.LIGHT)) {
                 return true;
             }
         }

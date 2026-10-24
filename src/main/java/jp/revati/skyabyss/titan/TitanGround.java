@@ -140,6 +140,28 @@ public final class TitanGround {
         return need;
     }
 
+    // この体積・位置・向きで、読み込まれていない区画に入る柱があるか (地形が分からない)。spread は requiredYPadded と同じ広がり
+    public static boolean anyUnloaded(ServerLevel level, TitanVolume volume, double x, double z, float yaw, double spread) {
+        if (volume == null || !enabled) {
+            return false;
+        }
+        double fx = -Mth.sin(yaw * Mth.DEG_TO_RAD);
+        double fz = Mth.cos(yaw * Mth.DEG_TO_RAD);
+        for (TitanVolume.Column c : volume.coreColumns()) {
+            double wx = x + fx * c.fwd() + fz * c.side();
+            double wz = z + fz * c.fwd() - fx * c.side();
+            if (!level.getChunkSource().hasChunk(Mth.floor(wx) >> 4, Mth.floor(wz) >> 4)
+                    || (spread > 0 && (!loadedAt(level, wx + spread, wz) || !loadedAt(level, wx - spread, wz) || !loadedAt(level, wx, wz + spread) || !loadedAt(level, wx, wz - spread)))) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static boolean loadedAt(ServerLevel level, double x, double z) {
+        return level.getChunkSource().hasChunk(Mth.floor(x) >> 4, Mth.floor(z) >> 4);
+    }
+
     // 試験用: この位置・向き・高さ y で、体と地形の食い込み (ブロック。0 以下ならめり込んでいない)。柱ごとの (地形 - 体の底) の最大。余白は引かない
     public static double overlap(ServerLevel level, Surface surface, TitanVolume volume, double x, double y, double z, float yaw) {
         return requiredY(level, surface, volume, x, z, yaw, 0.0, 1) - y;
