@@ -20,7 +20,11 @@ ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)
 RES = os.path.join(ROOT, "src", "main", "resources", "assets", "skyabyss")
 STORE = os.path.join(ROOT, "tools", "sources", "geo_cube")
 # 通常のプレイで使うテクスチャ (キューブの絵ではない)。出さない
-KEEP = {"textures/entity/bone_spike.png", "textures/entity/bubble_shot.png", "textures/entity/rebirth_back.png", "textures/entity/watcher_glint.png"}
+# (下の 8 枚は、コードが無効時の枝で読むので残した。2026-10-24 の確認: 参照があるのに無いと、絵の読み込みで警告が出る)
+KEEP = {"textures/entity/bone_spike.png", "textures/entity/bubble_shot.png", "textures/entity/rebirth_back.png", "textures/entity/watcher_glint.png",
+        "textures/entity/ash_smith_glowmask.png", "textures/entity/ash_smith_glowmask_white.png", "textures/entity/ash_thrall_flared.png",
+        "textures/entity/coral_thrall_statue.png", "textures/entity/raiju_glowmask.png", "textures/entity/static_moth_charge.png",
+        "textures/entity/watcher.png", "textures/entity/watcher_glowmask.png"}
 
 
 def cube_files(base):

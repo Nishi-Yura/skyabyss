@@ -237,21 +237,28 @@ public final class CardFeed {
         }
     }
 
-    // 本文は見出しの右に一行 (長い文は終わりを「…」で切る。全文は N の知らせの記録)
+    // 本文は見出しの右に最大 BODY_LINES 行 (カードは行数だけ高くなる)。それを超える長い文は、最後の行の終わりを「…」で切る。全文は N の知らせの記録
+    static final int BODY_LINES = 4;
+
     private static List<FormattedCharSequence> lines(Font font, Entry e, int w) {
         int room = Math.max(40, w - font.width(e.head.getString()) - 14 - 12);
         List<FormattedCharSequence> l = jp.revati.skyabyss.client.ui.JpWrap.split(font, e.body, room);
-        if (l.size() <= 2) {
+        if (l.size() <= BODY_LINES) {
             return l.isEmpty() ? List.of(FormattedCharSequence.EMPTY) : l;
         }
-        // 3 行目からは切る: 2 行目の終わりを「…」に
-        String all = e.body.getString();
-        String first = font.plainSubstrByWidth(all, room);
-        String rest = all.substring(first.length());
+        // 最後の行に入りきらない分は「…」で切る
+        String rest = e.body.getString();
+        List<FormattedCharSequence> out = new java.util.ArrayList<>();
+        for (int i = 0; i < BODY_LINES - 1; i++) {
+            String part = font.plainSubstrByWidth(rest, room);
+            out.add(Component.literal(part).getVisualOrderText());
+            rest = rest.substring(part.length());
+        }
         while (rest.length() > 1 && font.width(rest + "…") > room) {
             rest = rest.substring(0, rest.length() - 1);
         }
-        return List.of(Component.literal(first).getVisualOrderText(), Component.literal(rest + "…").getVisualOrderText());
+        out.add(Component.literal(rest + "…").getVisualOrderText());
+        return out;
     }
 
     private static int rows(Font font, Entry e) {

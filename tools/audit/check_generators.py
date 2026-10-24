@@ -52,6 +52,7 @@ tools/gen/ch5/gen_ch5_entrance.py
 tools/gen/ch5/gen_ch5_layers.py
 tools/gen/ui/gen_deep_skill_lang.py
 tools/gen/fx/gen_fx_textures.py
+tools/gen/ui/gen_trial_icons.py
 tools/gen/world/gen_facility_content.py
 tools/gen/world/gen_grave_assets.py
 tools/gen/items/gen_back_blocks.py
