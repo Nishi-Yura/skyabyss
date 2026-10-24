@@ -1062,7 +1062,7 @@
   "gui.skyabyss.skill.page_tip": "構え（守・疾・歌）、連鎖、タグ、鍵石のページと、技の木のページを切り替える。",
   "gui.skyabyss.skill.points_tryon": "仮の点 %s",
   "gui.skyabyss.skill.bar_bow": "弓",
-  "gui.skyabyss.skill.bar_melee": "近",
+  "gui.skyabyss.skill.bar_melee": "近接",
   "gui.skyabyss.skill.set_head": "木のセット（点 %1$s・%2$s/3 段）",
   "gui.skyabyss.skill.set_line": "%1$s 点: %2$s",
   "gui.skyabyss.skill.mastery_short": "熟練 %s",
