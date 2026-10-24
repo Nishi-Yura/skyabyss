@@ -15,8 +15,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
 // 看板の各行が、実際に描かれる幅に収まるかを測る。バニラの看板は 1 行 90 px (SignBlockEntity の最大幅) を超えると、はみ出た分が描かれない。
-// サーバーには Font がないので、字の幅の表で測る (自己テスト用)。バニラの字と mod の字 (DotGothic16) の広いほうで見る。
-// クライアントでは本物の Font.width でも確かめる (SignFitClient)。
+// サーバーには Font がないので、バニラの字の幅の表で測る (自己テスト用)。クライアントでは本物の Font.width でも確かめる (SignFitClient)。
 //  - ASCII: バニラの ascii.png の字の幅 + 1 (字の間)。空白は 4
 //  - かな・漢字・全角記号: unifont の幅の上書き (left 0, right 15) で、どれも 9
 //  - そのほかの字: 9 とみなす (unifont の半角は 9 より狭いので、多めに見積もる)
@@ -32,23 +31,12 @@ public final class SignFit {
     private SignFit() {
     }
 
-    // 字の幅の表で見積もった、描かれる幅 (px)。バニラの字と mod の字 (DotGothic16。半角 4・全角 8) の広いほう
+    // 字の幅の表で見積もった、描かれる幅 (px)
     public static int approxWidth(String text) {
-        return Math.max(vanillaWidth(text), pixelFontWidth(text));
+        return vanillaWidth(text);
     }
 
-    // mod の字のパック (DotGothic16 を 16 px で点にした字。tools/gen/ui/gen_fonts.py) の幅: 半角はどれも 4、それ以外は 8
-    static int pixelFontWidth(String text) {
-        int w = 0;
-        for (int i = 0; i < text.length(); ) {
-            int cp = text.codePointAt(i);
-            i += Character.charCount(cp);
-            w += cp < 0x2000 || (cp >= 0xFF61 && cp <= 0xFF9F) ? 4 : 8;
-        }
-        return w;
-    }
-
-    // バニラの字 (字のパックを外した人) の幅
+    // バニラの字の幅
     static int vanillaWidth(String text) {
         int w = 0;
         for (int i = 0; i < text.length(); ) {
