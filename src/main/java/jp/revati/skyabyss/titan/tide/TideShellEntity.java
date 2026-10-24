@@ -586,8 +586,12 @@ public class TideShellEntity extends Entity implements GeoEntity, TravelTitan, j
             }
         }
         if (!shoreSearched) {
-            shoreSearched = true;
-            shoreDock = findShoreDock(level);
+            // 岸の探しが読むチャンクが読み込まれてから探す (同期の読み込みで止めない)。読み込まれるまでは乗り場なし
+            Vec3 dc = dockCenter();
+            if (jp.revati.skyabyss.util.ChunkWait.ready(level, dc.x, dc.z, jp.revati.skyabyss.util.ChunkWait.SHORE_REACH)) {
+                shoreSearched = true;
+                shoreDock = findShoreDock(level);
+            }
         }
         if (shoreDock != null) {
             // 浜の乗り場の光 (岸に立つ標。乗れる人にだけ見える)

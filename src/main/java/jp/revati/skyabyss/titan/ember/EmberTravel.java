@@ -115,6 +115,16 @@ public final class EmberTravel {
     // 地上へ戻す (Titans.bindBack の道)
     public static void leave(ServerPlayer player) {
         ServerLevel overworld = player.server.overworld();
+        // 立つ場所を探す区画が読み込まれるまで待つ (同期の読み込みで止めない)。待つあいだは背中にいる
+        Vec3 center = exitCenter(overworld);
+        if (center != null && !jp.revati.skyabyss.util.ChunkWait.ready(overworld, center.x, center.z, jp.revati.skyabyss.util.ChunkWait.LAND_REACH)) {
+            jp.revati.skyabyss.util.ChunkWait.later(overworld, center.x, center.z, jp.revati.skyabyss.util.ChunkWait.LAND_REACH, () -> {
+                if (player.isAlive()) {
+                    leave(player);
+                }
+            });
+            return;
+        }
         Landing landing = landing(overworld);
         float yaw = Float.isNaN(landing.yaw()) ? player.getYRot() : landing.yaw();
         PASSAGE.startCooldown(player);
@@ -128,6 +138,22 @@ public final class EmberTravel {
         Vec3 p = landing.pos();
         teleport(player, overworld, p.x, p.y, p.z, yaw);
         overworld.playSound(null, p.x, p.y, p.z, EmberTitanSetup.SWALLOW.get(), SoundSource.PLAYERS, 1.0f, 1.3f);
+    }
+
+    // landing が立つ場所を探す中心 (口の出口。なければ null)。探しが読むチャンクの中心
+    @javax.annotation.Nullable
+    static Vec3 exitCenter(ServerLevel overworld) {
+        EmberTitanEntity titan = EmberKeeper.KEEPER.current(overworld);
+        if (titan != null && titan.isSurfaced()) {
+            return titan.exitPoint();
+        }
+        Vec3 rec;
+        if (titan != null && titan.lastSleepSpot() != null) {
+            rec = EmberTitanEntity.exitFromRecord(titan.saveState());
+        } else {
+            rec = EmberTitanEntity.exitFromRecord(EmberKeeper.KEEPER.slot(overworld).state);
+        }
+        return rec == null ? null : new Vec3(rec.x, 0, rec.z);
     }
 
     // 戻る先と向き (向きが NaN なら今の向きのまま)

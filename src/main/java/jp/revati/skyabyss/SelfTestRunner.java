@@ -265,6 +265,8 @@ public final class SelfTestRunner {
         steps.add(Step.once("tide", 50, TideSelfTest::runSelfTest));
         // 巨神が地形にめり込まない (潮殻の休む場所・巡航、雷翼の止まり木、潮殻の乗り場が体の外)。SKYABYSS_SELFTEST_ONLY="titan ground"
         steps.add(new Step("titan ground", 10, jp.revati.skyabyss.titan.tide.TitanGroundSelfTest::tick));
+        // 呼びの探し・戻る探しの時間 (読み込まれた地形と新しい地形)。結果は変えない。SKYABYSS_SELFTEST_ONLY="call perf"
+        steps.addAll(jp.revati.skyabyss.titan.young.CallPerfSelfTest.steps());
         steps.add(Step.once("tide mobs (load)", TideMobSelfTest::load));
         steps.add(Step.once("tide mobs", 45, TideMobSelfTest::runSelfTest));
         // 潮殻の心臓と中ボス潮招きの予告 (Telegraph): 印と当たりが同じ・予告 0.8 秒以上・安全な床 15% 以上・人数で増える・部屋に収まる。docs/design/08 の 5.5
