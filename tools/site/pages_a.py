@@ -59,7 +59,7 @@ def index():
     body = """
 <section class="hero" aria-labelledby="hero-title">
 <div class="wrap">
-<h1 id="hero-title">天と淵のあいだ</h1>
+<h1 id="hero-title">天と淵の<br>あいだ</h1>
 <p class="sub">BETWEEN THE SKY AND THE ABYSS</p>
 <p class="pitch">%(pitch)s</p>
 <ul class="badges">

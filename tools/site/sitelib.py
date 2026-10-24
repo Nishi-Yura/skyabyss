@@ -124,7 +124,7 @@ def head(title_ja, title_en, desc_ja, desc_en, depth_class="", ogimg="img/plate_
 <link rel="icon" type="image/png" href="img/favicon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DotGothic16&family=Noto+Sans+JP:wght@400;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DotGothic16&family=Shippori+Mincho+B1:wght@400;700&family=Zen+Antique&display=swap">
 <link rel="stylesheet" href="css/style.css">
 <script>try{var t=localStorage.getItem("skyabyss-site-theme");if(t==="light"||t==="dark")document.documentElement.setAttribute("data-theme",t);}catch(e){}</script>
 <script src="js/main.js" defer></script>
@@ -163,8 +163,8 @@ def header(current):
 def toc(items, title_ja="この頁の目次", title_en="On this page"):
     """長い頁の目次。items は (アンカー, 日本語, 英語)。"""
     li = "".join('<li><a href="#%s">%s</a></li>' % (a, T(j, e)) for a, j, e in items)
-    return ('<nav class="toc" aria-labelledby="toc-h"><details open><summary id="toc-h">%s</summary>'
-            '<ol>%s</ol></details></nav>') % (T(title_ja, title_en), li)
+    return ('<div class="wrap"><nav class="toc" aria-labelledby="toc-h"><details open><summary id="toc-h">%s</summary>'
+            '<ol>%s</ol></details></nav></div>') % (T(title_ja, title_en), li)
 
 
 def footer():
@@ -193,8 +193,32 @@ def page_head(h1_ja, h1_en, sub_ja, sub_en):
     return '<div class="page-head"><div class="wrap"><h1>%s</h1><p>%s</p></div></div>' % (T(h1_ja, h1_en), T(sub_ja, sub_en))
 
 
+# 頁の頭に置く、ゲームの中で撮った全幅の絵 (site/img/shot/<名>.webp・元は tools/sources/site/shots/)。
+# (絵の名, 日本語の説明, 英語の説明)。説明は絵に写っているものだけ書く。
+SHOTS = {
+    "index.html": ("index", "空の影。遠くを泳ぐ巨神と、背に乗る前の旅人。", "A titan's shadow crossing the sky, and a traveler before boarding."),
+    "play.html": ("play", "最初の一時間の景色。雪の地表と、遠くの空。", "The first hour: snowy ground and a far sky."),
+    "titans.html": ("titans", "巨神の内側の広間。止めるべき心臓は、この先にあります。", "Inside a titan: the hall that leads to its heart."),
+    "rebirth.html": ("rebirth", "転生の画面。魂盤で、ビルドを組み直す。", "The rebirth screen: rebuild the build on the soul board."),
+    "gear.html": ("gear", "防具と武器を並べた広場。", "A plaza with armor and weapons set out."),
+    "pouch.html": ("pouch", "伝承の書。開くと、物語の断片が読めます。", "The lore book, opened to a story fragment."),
+    "party.html": ("party", "巨神の祠の報いの板。いまの三つの試練を並べます。", "The shrine's reward board, with three trials at a time."),
+    "story.html": ("story", "語り部。話しかけると、言葉を選ばずに話してくれます。", "The storyteller, who will talk when you approach."),
+    "faq.html": ("faq", "最初の夜の野営地。", "The first night at camp."),
+    "changelog.html": ("changelog", "見る者。遠くから、こちらを見ている。", "The watcher, looking at you from afar."),
+}
+
+
+def shot_figure(name, ja, en):
+    return ('<figure class="shot"><img src="img/shot/%s.webp" width="1600" height="900" loading="eager" alt="%s" '
+            'data-alt-ja="%s" data-alt-en="%s"><figcaption>%s</figcaption></figure>') % (
+        name, esc(ja), esc(ja), esc(en), T(ja, en))
+
+
 def page(fname, title_ja, title_en, desc_ja, desc_en, body, cls=""):
-    out = head(title_ja, title_en, desc_ja, desc_en, cls) + header(fname) + '<main id="main">' + body + "</main>\n" + footer()
+    s = SHOTS.get(fname)
+    lead_shot = shot_figure(*s) if s else ""
+    out = head(title_ja, title_en, desc_ja, desc_en, cls) + header(fname) + lead_shot + '<main id="main">' + body + "</main>\n" + footer()
     with open(os.path.join(SITE, fname), "w", encoding="utf8", newline="\n") as f:
         f.write(out)
 
