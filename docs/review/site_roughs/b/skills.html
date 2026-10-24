@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="ja" data-lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>スキルとビルド（案B ゲームの中の画面）</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DotGothic16&family=Zen+Antique&display=swap">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="wrap">
+
+<header class="topbar">
+  <a class="brand" href="index.html"><img class="px" src="../../../../site/img/favicon.png" width="32" height="32" alt=""><span><span class="ja">天と淵のあいだ</span><span class="en">Between the Sky and the Abyss</span></span></a>
+  <nav class="tabs" aria-label="頁">
+    <a href="index.html"><span class="ja">表紙</span><span class="en">Title</span></a>
+    <a href="skills.html" aria-current="page"><span class="ja">技</span><span class="en">Skills</span></a>
+    <a href="#"><span class="ja">転生</span><span class="en">Rebirth</span></a>
+    <a href="#"><span class="ja">装備</span><span class="en">Gear</span></a>
+    <a href="#"><span class="ja">物語</span><span class="en">Story</span></a>
+    <button type="button" data-set="ja" aria-pressed="true">日本語</button>
+    <button type="button" data-set="en" aria-pressed="false">English</button>
+  </nav>
+</header>
+
+<section class="section" style="margin-top:26px">
+  <div class="ptitle"><h2><span class="ja">スキルとビルド</span><span class="en">Skills and builds</span></h2><small><span class="ja">五つの木と旅人、36 の技、天職、刻印、要、型</span><span class="en">Five trees, the Wayfarer, 36 skills</span></small></div>
+  <div class="book frame">
+    <p class="lead"><span class="ja">レベルが上がると、力の振り分けと技の点が増えます。五つの木と旅人は、最初から全部の行が取れます。天職は木を開く鍵ではなく、あなたの専門です。</span><span class="en">Leveling grants stat points and skill points. Every tree and the Wayfarer is open from the start; a calling is your specialty, not a key.</span></p>
+    <p><span class="ja">技の画面（<kbd>K</kbd>）で、1 段 1 点。どの技も同じ値段です。三本の木を極めることはできません。何を選ぶかが、ビルドになります。</span><span class="en">Each rank costs one point in the skill screen (<kbd>K</kbd>), every skill alike. You cannot max three trees. What you pick is your build.</span></p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="ptitle"><h2><span class="ja">岩守りの木</span><span class="en">Rockwarden tree</span></h2><small><span class="ja">筋力・耐久 ／ 壁・近接</span><span class="en">Strength / Vitality / tank, melee</span></small><span class="tag" style="margin-left:0">Lv 1 · 5 · 12 · 20</span></div>
+  <div class="frame tree">
+    <div class="tree-body">
+      <div>
+        <div class="slots" aria-label="岩守りの技">
+          <div class="slot sel"><img class="px" src="../../../../site/img/skill/00.png" width="32" height="32" alt=""><span class="lv">3</span></div>
+          <div class="slot"><img class="px" src="../../../../site/img/skill/01.png" width="32" height="32" alt=""><span class="lv">3</span></div>
+          <div class="slot"><img class="px" src="../../../../site/img/skill/02.png" width="32" height="32" alt=""><span class="lv">2</span></div>
+          <div class="slot"><img class="px" src="../../../../site/img/skill/03.png" width="32" height="32" alt=""><span class="lv">3</span></div>
+          <div class="slot"><img class="px" src="../../../../site/img/skill/04.png" width="32" height="32" alt=""><span class="lv">3</span></div>
+          <div class="slot"><img class="px" src="../../../../site/img/skill/05.png" width="32" height="32" alt=""><span class="lv">K</span></div>
+        </div>
+        <div class="legend"><span><i></i><span class="ja">使う（枠に置く）</span><span class="en">Active (put in a slot)</span></span><span><i></i><span class="ja">常に効く</span><span class="en">Passive</span></span><span><i></i><span class="ja">要（癖のある常時の技）</span><span class="en">Keystone</span></span></div>
+        <div class="frame inset tight" style="margin-top:18px">
+          <p style="margin:0 0 4px;font-size:14px;color:var(--cyan)"><span class="ja">この木の点</span><span class="en">Points in this tree</span></p>
+          <p style="margin:0;font-size:15px"><span class="ja">行 1 の 2 つ + 行 2 の 2 つ ・ 必要レベル 1 と 5</span><span class="en">Row 1 and row 2 · levels 1 and 5</span></p>
+          <div class="bar" style="margin-top:10px"><i style="width:45%"></i></div>
+        </div>
+      </div>
+      <div>
+        <details class="skill" open id="skill-titan_cleave">
+          <summary>
+            <img class="ic px" src="../../../../site/img/skill/00.png" width="32" height="32" alt="">
+            <span class="nm"><span class="ja">巨神斬り</span><span class="en">Titan Cleave</span><small><span class="ja">岩属性</span><span class="en">Rock</span></small></span>
+            <span class="st"><span class="ja">使う</span><span class="en">Active</span></span>
+          </summary>
+          <div class="sk-body tip" style="max-width:none">
+            <span class="t"><span class="ja">巨神斬り</span><span class="en">Titan Cleave</span></span>
+            <span class="k"><span class="ja">使う ・ 岩属性 ・ 最大 3 段</span><span class="en">Active ・ Rock ・ Max rank 3</span></span>
+            <p><span class="ja">前方の扇を斬る。大きな相手に強い。</span><span class="en">Cone slash ahead; hits big foes harder.</span></p>
+            <p class="gray"><span class="ja">属性: 岩</span><span class="en">Element: Rock</span></p>
+            <div class="viewer">
+              <figure><div class="vscreen"><img src="../../../../site/img/skill_fx/titan_cleave_release.webp" width="256" height="144" alt="巨神斬り の放った瞬間" data-alt-ja="巨神斬り の放った瞬間" data-alt-en="Titan Cleave: Release" loading="lazy"></div><figcaption><b>R</b> <span class="ja">放った瞬間</span><span class="en">Release</span></figcaption></figure>
+              <figure><div class="vscreen"><img src="../../../../site/img/skill_fx/titan_cleave_impact.webp" width="256" height="144" alt="巨神斬り の当たった瞬間" data-alt-ja="巨神斬り の当たった瞬間" data-alt-en="Titan Cleave: Impact" loading="lazy"></div><figcaption><b>I</b> <span class="ja">当たった瞬間</span><span class="en">Impact</span></figcaption></figure>
+              <figure><div class="vscreen"><img src="../../../../site/img/skill_fx/titan_cleave_linger.webp" width="256" height="144" alt="巨神斬り の余韻" data-alt-ja="巨神斬り の余韻" data-alt-en="Titan Cleave: Linger" loading="lazy"></div><figcaption><b>L</b> <span class="ja">余韻</span><span class="en">Linger</span></figcaption></figure>
+            </div>
+          </div>
+        </details>
+        <details class="skill" id="skill-riposte">
+          <summary>
+            <img class="ic px" src="../../../../site/img/skill/01.png" width="32" height="32" alt="">
+            <span class="nm"><span class="ja">返し刃</span><span class="en">Riposte</span><small><span class="ja">岩属性</span><span class="en">Rock</span></small></span>
+            <span class="st"><span class="ja">常に効く</span><span class="en">Passive</span></span>
+          </summary>
+        </details>
+        <details class="skill" id="skill-rock_call">
+          <summary>
+            <img class="ic px" src="../../../../site/img/skill/02.png" width="32" height="32" alt="">
+            <span class="nm"><span class="ja">岩呼び</span><span class="en">Rock Call</span><small><span class="ja">岩属性</span><span class="en">Rock</span></small></span>
+            <span class="st"><span class="ja">使う</span><span class="en">Active</span></span>
+          </summary>
+        </details>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="ptitle"><h2><span class="ja">ほかの木</span><span class="en">Other trees</span></h2></div>
+  <div class="board">
+    <div class="frame row">
+      <div class="emb"><img class="px" src="../../../../site/img/skill/06.png" width="32" height="32" alt=""></div>
+      <div><h3><span class="ja">風読み</span><span class="en">Windreader</span></h3><p><span class="ja">敏捷 ／ 機動・短い間合いの攻め</span><span class="en">Agility / mobility / close offense</span></p></div>
+      <div class="rt"><span class="ja">踏み込み・軽業・跳び退き</span><span class="en">Lunge, Nimble, Backstep</span></div>
+    </div>
+    <div class="frame row">
+      <div class="emb"><img class="px" src="../../../../site/img/skill/12.png" width="32" height="32" alt=""></div>
+      <div><h3><span class="ja">潮歌い</span><span class="en">Tidesinger</span></h3><p><span class="ja">精神 ／ 支え・崩し</span><span class="en">Spirit / support / disruption</span></p></div>
+      <div class="rt"><span class="ja">守りの唄・引き潮・巡りの唄</span><span class="en">Ward Song, Ebb Tide, Cycle Song</span></div>
+    </div>
+    <div class="frame row">
+      <div class="emb"><img class="px" src="../../../../site/img/skill/18.png" width="32" height="32" alt=""></div>
+      <div><h3><span class="ja">灰の鍛え人</span><span class="en">Ashsmith</span></h3><p><span class="ja">筋力・精神 ／ 近接の攻め・火</span><span class="en">Strength / spirit / melee, fire</span></p></div>
+      <div class="rt"><span class="ja">焼き入れ・熾火の槌・灰散らし</span><span class="en">Tempering, Ember Hammer, Ash Scatter</span></div>
+    </div>
+    <div class="frame row">
+      <div class="emb"><img class="px" src="../../../../site/img/skill/24.png" width="32" height="32" alt=""></div>
+      <div><h3><span class="ja">骨の射手</span><span class="en">Boneshooter</span></h3><p><span class="ja">敏捷 ／ 遠い間合いの攻め・罠</span><span class="en">Agility / ranged offense / traps</span></p></div>
+      <div class="rt"><span class="ja">雲穿ち・骨の罠・天の驟雨</span><span class="en">Cloud Piercer, Bone Trap, Rain from the Sky</span></div>
+    </div>
+  </div>
+</section>
+
+<footer class="foot">
+  <span class="ja">天と淵のあいだ v0.5.5（ベータ版）。作 Nishi-Yura。</span><span class="en">Between the Sky and the Abyss v0.5.5 (beta) by Nishi-Yura.</span>
+</footer>
+
+</div>
+<script>
+  (function () {
+    var root = document.documentElement;
+    document.querySelectorAll("[data-set]").forEach(function (b) {
+      b.addEventListener("click", function () {
+        root.setAttribute("data-lang", b.dataset.set);
+        root.lang = b.dataset.set;
+        document.querySelectorAll("[data-set]").forEach(function (x) { x.setAttribute("aria-pressed", String(x === b)); });
+      });
+    });
+  })();
+</script>
+</body>
+</html>

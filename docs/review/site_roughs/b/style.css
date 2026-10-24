@@ -1,0 +1,214 @@
+/* Rough B: ゲームの中の画面 (the mod's own UI: dark panels, pixel frames, slots, tooltips) */
+:root {
+  --bg: #0b0f16;
+  --bg-2: #0f141e;
+  --panel: #161d29;
+  --panel-2: #1d2634;
+  --panel-in: #101622;
+  --edge-dark: #04060a;
+  --edge: #566a84;
+  --edge-hi: #8ea3bb;
+  --gold: #f2c14e;
+  --gold-dim: #9c7b2c;
+  --cyan: #7fe3e0;
+  --text: #d6dee8;
+  --muted: #8798ab;
+  --ember: #e0653f;
+  --slot: #3a3f4a;
+  --slot-hi: #6b7280;
+  --pixel: "DotGothic16", "BIZ UDGothic", "Yu Gothic", sans-serif;
+  --title: "Zen Antique", "DotGothic16", "Yu Mincho", serif;
+}
+* { box-sizing: border-box; }
+html { background: var(--bg); }
+body {
+  margin: 0;
+  color: var(--text);
+  font-family: var(--pixel);
+  font-size: 17px;
+  line-height: 1.95;
+  letter-spacing: .02em;
+  background:
+    linear-gradient(var(--bg-2) 50%, var(--bg) 50%) 0 0 / 100% 4px;
+  -webkit-font-smoothing: none;
+}
+a { color: var(--cyan); text-decoration: none; }
+a:hover { color: var(--gold); }
+img { display: block; max-width: 100%; }
+img.px { image-rendering: pixelated; }
+.en { display: none; }
+html[data-lang="en"] .ja { display: none; }
+html[data-lang="en"] .en { display: inline; }
+html[data-lang="en"] .en.blk { display: block; }
+
+.wrap { max-width: 1040px; margin: 0 auto; padding: 0 22px; }
+
+/* the mod's frame: stepped pixel border, built from shadows */
+.frame {
+  background: var(--panel);
+  box-shadow:
+    0 0 0 3px var(--edge-dark),
+    inset 0 0 0 2px var(--edge),
+    inset 0 0 0 4px var(--panel-2),
+    inset 0 0 0 5px var(--edge-dark);
+  padding: 18px 20px;
+  position: relative;
+}
+.frame.tight { padding: 12px 14px; }
+.frame.gold { box-shadow: 0 0 0 3px var(--edge-dark), inset 0 0 0 2px var(--gold-dim), inset 0 0 0 4px var(--panel-2), inset 0 0 0 5px var(--edge-dark); }
+.frame.inset { background: var(--panel-in); box-shadow: 0 0 0 3px var(--edge-dark), inset 0 0 0 2px #0a0e16, inset 0 0 0 3px #26324a; }
+
+/* top: the game's tab row */
+.topbar {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px;
+  padding: 14px 0 0; border-bottom: 0;
+}
+.brand { display: flex; align-items: center; gap: 10px; color: var(--gold); font-family: var(--title); font-size: 19px; }
+.brand img { width: 32px; height: 32px; }
+.tabs { display: flex; flex-wrap: wrap; gap: 6px; margin-left: auto; }
+.tabs a, .tabs button {
+  font: inherit; font-size: 15px; color: var(--muted); background: var(--panel);
+  border: 0; padding: 6px 12px 7px; cursor: pointer;
+  box-shadow: 0 0 0 2px var(--edge-dark), inset 0 0 0 1px var(--edge);
+}
+.tabs a[aria-current="page"] { color: var(--gold); box-shadow: 0 0 0 2px var(--edge-dark), inset 0 0 0 2px var(--gold), inset 0 -4px 0 var(--gold-dim); background: var(--panel-2); }
+.tabs button[aria-pressed="true"] { color: var(--gold); }
+.tabs a:hover { color: var(--text); }
+
+/* title screen */
+.title-screen { display: grid; grid-template-columns: 1.15fr 0.85fr; gap: 26px; padding: 30px 0 34px; align-items: stretch; }
+.title-screen .art { padding: 0; overflow: hidden; }
+.title-screen .art img { width: 100%; height: auto; image-rendering: pixelated; }
+.title-screen h1 { font-family: var(--title); font-weight: 400; color: var(--gold); font-size: 44px; line-height: 1.25; margin: 0 0 8px; text-shadow: 3px 3px 0 var(--edge-dark); }
+.title-screen .caps { font-size: 13px; color: var(--cyan); letter-spacing: .14em; margin: 0 0 16px; }
+.title-screen .lead { font-size: 17px; margin: 0 0 14px; }
+.meta-line { font-size: 14px; color: var(--muted); }
+.menu { display: grid; gap: 10px; margin-top: 4px; }
+.btn {
+  display: grid; grid-template-columns: 1fr auto; gap: 2px 12px; align-items: center;
+  background: var(--slot); color: var(--text); padding: 12px 16px 13px;
+  box-shadow: inset 0 0 0 2px var(--slot-hi), inset -3px -3px 0 #1d2026, inset 3px 3px 0 #5c616b, 0 0 0 3px var(--edge-dark);
+  font-size: 18px; text-align: left;
+}
+.btn small { font-size: 13px; color: #aab4c2; grid-column: 1 / -1; }
+.btn:hover { color: #fff; background: #434956; }
+.btn.hot { color: var(--gold); }
+.btn.hot::before { content: "▶ "; color: var(--gold); }
+
+/* the stat strip: like the HUD bars */
+.hud { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 26px 0 0; }
+.hud .frame { padding: 12px 14px; }
+.hud b { display: block; color: var(--cyan); font-family: var(--title); font-weight: 400; font-size: 34px; line-height: 1.1; }
+.hud span { font-size: 14px; color: var(--muted); }
+.bar { height: 10px; margin-top: 8px; background: var(--panel-in); box-shadow: inset 0 0 0 1px var(--edge-dark); }
+.bar i { display: block; height: 100%; background: linear-gradient(90deg, #2fa6a3, var(--cyan)); }
+
+/* section headers: a panel title on a bar */
+.section { margin-top: 42px; }
+.ptitle { display: flex; align-items: center; gap: 12px; margin: 0 0 14px; }
+.ptitle h2 { font-family: var(--title); font-weight: 400; font-size: 26px; margin: 0; color: var(--gold); text-shadow: 2px 2px 0 var(--edge-dark); }
+.ptitle small { color: var(--muted); font-size: 14px; }
+.ptitle::after { content: ""; flex: 1; height: 4px; background: repeating-linear-gradient(90deg, var(--edge) 0 4px, transparent 4px 8px); }
+
+/* the chapter board: like the raid reward board rows */
+.board { display: grid; gap: 10px; }
+.row {
+  display: grid; grid-template-columns: 56px 1fr auto; gap: 14px; align-items: center;
+  padding: 12px 16px;
+}
+.row .emb { width: 48px; height: 48px; background: var(--panel-in); box-shadow: inset 0 0 0 2px var(--edge-dark), inset 0 0 0 3px #26324a; display: grid; place-items: center; }
+.row .emb img { width: 40px; height: 40px; image-rendering: pixelated; }
+.row h3 { margin: 0; font-family: var(--title); font-weight: 400; font-size: 20px; color: var(--gold); line-height: 1.3; }
+.row p { margin: 2px 0 0; font-size: 15px; color: var(--text); }
+.tag { display: inline-block; font-size: 13px; padding: 1px 8px; background: var(--panel-in); color: var(--cyan); box-shadow: 0 0 0 1px var(--edge-dark), inset 0 0 0 1px #2c5a5a; margin-left: 8px; vertical-align: 2px; }
+.tag.new { color: var(--ember); box-shadow: 0 0 0 1px var(--edge-dark), inset 0 0 0 1px #6b2c1d; }
+.row .rt { font-size: 14px; color: var(--muted); text-align: right; white-space: nowrap; }
+
+/* book text: the long-read panel, keeps line length and contrast */
+.book { padding: 22px 26px; max-width: 42em; }
+.book p { margin: 0 0 1.1em; font-size: 17px; line-height: 2; }
+.book p:last-child { margin-bottom: 0; }
+.book .lead { font-size: 18px; color: #eef3f8; }
+
+/* tooltip, styled like the mod's item and skill tooltips */
+.tip {
+  background: #0d0a1c; color: #eee6ff; padding: 12px 16px 14px; max-width: 460px;
+  box-shadow: 0 0 0 2px #1a0b33, inset 0 0 0 2px #3b1d7a, inset 0 0 0 3px #1a0b33, inset 0 0 0 4px #5a33b0;
+}
+.tip .t { font-family: var(--title); font-size: 19px; color: var(--cyan); display: block; }
+.tip .k { font-size: 13px; color: #b7a6e8; display: block; margin: 2px 0 8px; }
+.tip p { margin: 0 0 6px; font-size: 15px; line-height: 1.85; }
+.tip .gray { color: #8c86a0; font-size: 13px; }
+.tip .ok { color: var(--gold); }
+
+/* inventory-style skill slots */
+.slots { display: grid; grid-template-columns: repeat(6, 64px); gap: 6px; justify-content: start; }
+.slot {
+  width: 64px; height: 64px; display: grid; place-items: center; position: relative;
+  background: var(--slot); box-shadow: inset 0 0 0 2px var(--slot-hi), inset -3px -3px 0 #1d2026, inset 3px 3px 0 #5c616b;
+}
+.slot img { width: 32px; height: 32px; image-rendering: pixelated; }
+.slot.sel { box-shadow: inset 0 0 0 2px var(--gold), inset -3px -3px 0 #6b531a, inset 3px 3px 0 #ffe08a; }
+.slot .lv { position: absolute; right: 4px; bottom: 2px; font-size: 12px; color: #fff; text-shadow: 1px 1px 0 #000; }
+.tree-lines { font-size: 14px; color: var(--muted); }
+.tree { display: grid; grid-template-columns: 1fr; gap: 14px; }
+.tree-head { display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: baseline; margin-bottom: 12px; }
+.tree-head h3 { font-family: var(--title); font-weight: 400; font-size: 21px; color: var(--gold); margin: 0; }
+.tree-head span { color: var(--muted); font-size: 14px; }
+.tree-head .pts { margin-left: auto; color: var(--cyan); font-size: 15px; }
+.tree-body { display: grid; grid-template-columns: auto 1fr; gap: 20px; align-items: start; }
+.legend { font-size: 13px; color: var(--muted); display: flex; flex-wrap: wrap; gap: 4px 14px; margin-top: 8px; }
+.legend i { display: inline-block; width: 10px; height: 10px; margin-right: 6px; vertical-align: 0; box-shadow: inset 0 0 0 2px var(--slot-hi); }
+
+/* skill expansion uses the same frame as the tooltip */
+details.skill { margin: 0 0 10px; }
+details.skill > summary {
+  list-style: none; cursor: pointer; display: grid; grid-template-columns: 40px 1fr auto; gap: 12px; align-items: center;
+  background: var(--panel-2); padding: 10px 14px; box-shadow: 0 0 0 2px var(--edge-dark), inset 0 0 0 1px var(--edge);
+}
+details.skill > summary::-webkit-details-marker { display: none; }
+details.skill > summary:hover { box-shadow: 0 0 0 2px var(--edge-dark), inset 0 0 0 2px var(--gold-dim); }
+details.skill > summary .ic { width: 32px; height: 32px; image-rendering: pixelated; background: var(--slot); box-shadow: inset 0 0 0 2px var(--slot-hi); padding: 0; }
+details.skill > summary .nm { font-family: var(--title); font-size: 19px; color: var(--text); }
+details.skill > summary .nm small { font-family: var(--pixel); font-size: 13px; color: var(--muted); margin-left: 8px; }
+details.skill > summary .st { font-size: 14px; color: var(--cyan); }
+details.skill[open] > summary { color: var(--gold); }
+details.skill[open] > summary .nm { color: var(--gold); }
+details.skill .sk-body { margin-top: 6px; }
+.viewer { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 12px; }
+.viewer figure { margin: 0; }
+.viewer .vscreen { background: #05070c; box-shadow: 0 0 0 2px var(--edge-dark), inset 0 0 0 2px #26324a; padding: 4px; }
+.viewer img { width: 100%; height: auto; aspect-ratio: 16 / 9; object-fit: cover; image-rendering: pixelated; }
+.viewer figcaption { font-size: 13px; color: var(--muted); margin-top: 6px; }
+.viewer figcaption b { font-weight: 400; color: var(--gold); }
+
+.foot { color: var(--muted); font-size: 13px; padding: 40px 0 56px; line-height: 1.9; }
+
+@media (max-width: 760px) {
+  body { font-size: 16px; line-height: 1.9; }
+  .wrap { padding: 0 14px; }
+  .topbar { padding-top: 10px; }
+  .tabs { margin-left: 0; width: 100%; }
+  .tabs a, .tabs button { font-size: 14px; padding: 5px 9px 6px; }
+  .title-screen { grid-template-columns: minmax(0, 1fr); gap: 20px; padding: 20px 0 24px; }
+  .title-screen h1 { font-size: 34px; }
+  .hud { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .hud b { font-size: 28px; }
+  .row { grid-template-columns: 48px minmax(0, 1fr); }
+  .row .rt { grid-column: 2; text-align: left; }
+  .row .emb { width: 44px; height: 44px; }
+  .row .emb img { width: 36px; height: 36px; }
+  .book { padding: 18px 16px; }
+  .tree-body { grid-template-columns: minmax(0, 1fr); }
+  .slots { grid-template-columns: repeat(6, 52px); gap: 5px; }
+  .slot { width: 52px; height: 52px; }
+  .slot img { width: 28px; height: 28px; }
+  .viewer { grid-template-columns: minmax(0, 1fr); }
+  .tip { max-width: none; }
+  details.skill > summary { grid-template-columns: 34px minmax(0, 1fr); }
+  details.skill > summary .st { grid-column: 2; }
+  .ptitle { flex-wrap: wrap; gap: 4px 10px; }
+  .ptitle h2 { font-size: 21px; white-space: nowrap; }
+  .ptitle small { flex-basis: 100%; }
+  .ptitle::after { display: none; }
+}

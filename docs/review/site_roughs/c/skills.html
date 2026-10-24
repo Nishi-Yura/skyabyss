@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="ja" data-lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>スキルとビルド（案C 図鑑・雑誌）</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DotGothic16&family=Shippori+Mincho+B1:wght@400;700&family=Zen+Antique&display=swap">
+<link rel="stylesheet" href="style.css">
+<script>
+  (function () {
+    var q = new URLSearchParams(location.search);
+    if (q.get("theme")) document.documentElement.setAttribute("data-theme", q.get("theme"));
+  })();
+</script>
+</head>
+<body>
+
+<header class="mast">
+  <span class="issue"><span class="ja">図鑑 第一集</span><span class="en">Field Guide, Vol. 1</span></span>
+  <nav aria-label="頁">
+    <a href="index.html"><span class="ja">表紙</span><span class="en">Cover</span></a>
+    <a href="skills.html" aria-current="page"><span class="ja">技典</span><span class="en">Skills</span></a>
+    <a href="#"><span class="ja">転生</span><span class="en">Rebirth</span></a>
+    <a href="#"><span class="ja">装備</span><span class="en">Gear</span></a>
+    <a href="#"><span class="ja">物語</span><span class="en">Story</span></a>
+  </nav>
+  <span class="lang"><button type="button" data-set="ja" aria-pressed="true">日本語</button> / <button type="button" data-set="en" aria-pressed="false">English</button></span>
+</header>
+<div class="rule" aria-hidden="true"></div>
+
+<div class="skill-layout">
+  <aside class="index-col">
+    <h2><span class="ja">五つの木と旅人</span><span class="en">Trees</span></h2>
+    <ol>
+      <li><a href="#rock"><span><span class="ja">岩守り</span><span class="en">Rockwarden</span></span><em>I</em></a></li>
+      <li><a href="#wind"><span><span class="ja">風読み</span><span class="en">Windreader</span></span><em>II</em></a></li>
+      <li><a href="#tide"><span><span class="ja">潮歌い</span><span class="en">Tidesinger</span></span><em>III</em></a></li>
+      <li><a href="#ash"><span><span class="ja">灰の鍛え人</span><span class="en">Ashsmith</span></span><em>IV</em></a></li>
+      <li><a href="#bone"><span><span class="ja">骨の射手</span><span class="en">Boneshooter</span></span><em>V</em></a></li>
+      <li><a href="#way"><span><span class="ja">旅人</span><span class="en">Wayfarer</span></span><em>VI</em></a></li>
+    </ol>
+    <p style="font-size:13px;color:var(--ink-3);margin:18px 0 0;line-height:1.8"><span class="ja">技は 36。天職と刻印、要、型は次の頁。</span><span class="en">36 skills. Callings, runes, keystones and loadouts follow.</span></p>
+  </aside>
+
+  <main class="skill-main">
+    <h1><span class="ja">技典</span><span class="en">The skill book</span></h1>
+    <p class="dek"><span class="ja">五つの木と旅人、36 の技、天職、刻印、要、型。選ぶほど、遊び方が変わります。レベルが上がると、力の振り分けと技の点が増えます。</span><span class="en">Five trees, the Wayfarer, 36 skills, callings, runes, keystones and loadouts. What you choose changes how you play.</span></p>
+
+    <div class="tree-title" id="rock">
+      <span class="no">I</span>
+      <h2><span class="ja">岩守り</span><span class="en">Rockwarden</span><small><span class="ja">筋力・耐久 ／ 壁・近接</span><span class="en">Strength, vitality, tank</span></small></h2>
+      <p><span class="ja">行 1 ・ 2 は入口<br>奥義は行 3、要は行 4</span><span class="en">Rows 1 and 2 are entry<br>signature row 3, keystone row 4</span></p>
+    </div>
+
+    <details class="entry" open>
+      <summary>
+        <img class="ic px" src="../../../../site/img/skill/00.png" width="32" height="32" alt="">
+        <span class="nm"><span class="ja">巨神斬り</span><span class="en">Titan Cleave</span><small><span class="ja">使う ・ 岩属性 ・ 最大 3 段</span><span class="en">Active · Rock · Max rank 3</span></small></span>
+        <span class="tg"><span class="ja">使う</span><span class="en">Active</span></span>
+      </summary>
+      <div class="body">
+        <p class="desc"><span class="ja">前方の扇を斬る。大きな相手に強い。</span><span class="en">Cone slash ahead; hits big foes harder.</span></p>
+        <p class="meta"><span class="ja">属性: 岩 ・ 最大 3 段</span><span class="en">Element: Rock · Max rank 3</span></p>
+        <div class="strip">
+          <figure><img src="../../../../site/img/skill_fx/titan_cleave_release.webp" width="256" height="144" alt="" data-alt-ja="巨神斬り の放った瞬間" data-alt-en="Titan Cleave: Release" loading="lazy"><figcaption><b>図 2-1</b><span class="ja">放った瞬間</span><span class="en">Release</span></figcaption></figure>
+          <figure><img src="../../../../site/img/skill_fx/titan_cleave_impact.webp" width="256" height="144" alt="" data-alt-ja="巨神斬り の当たった瞬間" data-alt-en="Titan Cleave: Impact" loading="lazy"><figcaption><b>図 2-2</b><span class="ja">当たった瞬間</span><span class="en">Impact</span></figcaption></figure>
+          <figure><img src="../../../../site/img/skill_fx/titan_cleave_linger.webp" width="256" height="144" alt="" data-alt-ja="巨神斬り の余韻" data-alt-en="Titan Cleave: Linger" loading="lazy"><figcaption><b>図 2-3</b><span class="ja">余韻</span><span class="en">Linger</span></figcaption></figure>
+        </div>
+      </div>
+    </details>
+
+    <details class="entry">
+      <summary>
+        <img class="ic px" src="../../../../site/img/skill/01.png" width="32" height="32" alt="">
+        <span class="nm"><span class="ja">返し刃</span><span class="en">Riposte</span><small><span class="ja">常に効く ・ 岩属性</span><span class="en">Passive · Rock</span></small></span>
+        <span class="tg"><span class="ja">常に効く</span><span class="en">Passive</span></span>
+      </summary>
+      <div class="body"><p class="desc"><span class="ja">傷を受けた直後の近接が強くなる。</span><span class="en">Your next melee hit after taking damage is stronger.</span></p><p class="meta"><span class="ja">常に効く技なので、画面に出る見た目はありません。</span><span class="en">Always on, so there is no on-screen visual.</span></p></div>
+    </details>
+
+    <details class="entry">
+      <summary>
+        <img class="ic px" src="../../../../site/img/skill/02.png" width="32" height="32" alt="">
+        <span class="nm"><span class="ja">岩呼び</span><span class="en">Rock Call</span><small><span class="ja">使う ・ 岩属性 ・ 最大 2 段</span><span class="en">Active · Rock · Max rank 2</span></small></span>
+        <span class="tg"><span class="ja">使う</span><span class="en">Active</span></span>
+      </summary>
+      <div class="body"><p class="desc"><span class="ja">周りの敵の狙いを自分へ引く。</span><span class="en">Pulls nearby foes' aggression onto you.</span></p></div>
+    </details>
+
+    <details class="entry">
+      <summary>
+        <img class="ic px" src="../../../../site/img/skill/03.png" width="32" height="32" alt="">
+        <span class="nm"><span class="ja">岩の構え</span><span class="en">Stone Stance</span><small><span class="ja">常に効く ・ 岩属性 ・ 最大 3 段</span><span class="en">Passive · Rock · Max rank 3</span></small></span>
+        <span class="tg"><span class="ja">常に効く</span><span class="en">Passive</span></span>
+      </summary>
+      <div class="body"><p class="desc"><span class="ja">防具と押されにくさが上がる。</span><span class="en">Armor and resistance to knockback go up.</span></p></div>
+    </details>
+
+    <div class="tree-title" id="wind">
+      <span class="no">II</span>
+      <h2><span class="ja">風読み</span><span class="en">Windreader</span><small><span class="ja">敏捷 ／ 機動・短い間合いの攻め</span><span class="en">Agility, mobility, close offense</span></small></h2>
+      <p><span class="ja">踏み込み ・ 軽業 ・ 跳び退き</span><span class="en">Lunge · Nimble · Backstep</span></p>
+    </div>
+    <details class="entry">
+      <summary>
+        <img class="ic px" src="../../../../site/img/skill/06.png" width="32" height="32" alt="">
+        <span class="nm"><span class="ja">踏み込み</span><span class="en">Lunge</span></span>
+        <span class="tg"><span class="ja">使う</span><span class="en">Active</span></span>
+      </summary>
+      <div class="body"><p class="desc"><span class="ja">見ている敵の手前まで詰めて斬る。</span><span class="en">Dash to the foe you look at and cut.</span></p></div>
+    </details>
+
+    <div class="tree-title" id="way">
+      <span class="no">VI</span>
+      <h2><span class="ja">旅人</span><span class="en">Wayfarer</span><small><span class="ja">全員 ／ 共通の木（旅の便利）</span><span class="en">Everyone · shared utility tree</span></small></h2>
+      <p><span class="ja">標を打つ ・ 備えの報い ・ 野営の手</span><span class="en">Mark Target · Readiness Reward · Camp Hand</span></p>
+    </div>
+  </main>
+</div>
+
+<footer class="colophon">
+  <span class="ja">天と淵のあいだ v0.5.5（ベータ版）。作 Nishi-Yura。</span><span class="en">Between the Sky and the Abyss v0.5.5 (beta) by Nishi-Yura.</span>
+</footer>
+
+<script>
+  (function () {
+    var root = document.documentElement;
+    document.querySelectorAll("[data-set]").forEach(function (b) {
+      b.addEventListener("click", function () {
+        root.setAttribute("data-lang", b.dataset.set);
+        root.lang = b.dataset.set;
+        document.querySelectorAll("[data-set]").forEach(function (x) { x.setAttribute("aria-pressed", String(x === b)); });
+      });
+    });
+  })();
+</script>
+</body>
+</html>
