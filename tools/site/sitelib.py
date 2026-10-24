@@ -196,18 +196,13 @@ def page_head(h1_ja, h1_en, sub_ja, sub_en):
 # 頁の頭に置く、ゲームの中で撮った全幅の絵 (site/img/shot/<名>.webp・元は tools/sources/site/shots/)。
 # (絵の名, 日本語の説明, 英語の説明)。説明は絵に写っているものだけ書く。
 SHOTS = {
-    "index.html": ("index", "海に浮かぶ巨神の背。島のような、階段状の背中。", "A titan's back afloat on the sea, a stepped island of stone."),
-    "play.html": ("play", "最初の一時間の景色。雪の地表と、遠くの空。", "The first hour: snowy ground and a far sky."),
-    "rebirth.html": ("rebirth", "転生の画面。魂盤で、ビルドを組み直す。", "The rebirth screen: rebuild the build on the soul board."),
-    "gear.html": ("gear", "平らな草原に立つ、余燼の鎧の一式。", "A set of ember armor standing on open grass."),
+    "index.html": ("titans", "空を渡る巨神。夕暮れ、雲の上を泳いでいく。", "A titan crossing the sky at dusk, above the clouds."),
+    "titans.html": ("index", "潮殻の背。島のような、段になった岩の背中。", "The back of the Tide Shell, a stepped island of stone."),
     "pouch.html": ("pouch", "市の広場。布の屋根の屋台と、並んだ品物。", "The market square, with striped stalls and goods laid out."),
-    "party.html": ("party", "巨神の背の広場に並ぶ、三人の仲間。", "Three companions standing together on a titan's back."),
-    "story.html": ("story", "語り部。話しかけると、言葉を選ばずに話してくれます。", "The storyteller, who will talk when you approach."),
     "faq.html": ("faq", "夕暮れの大通り。灯りが並ぶ。", "Dusk on the main street, with lanterns lining the way."),
     "changelog.html": ("changelog", "夕暮れの都を上から。", "The town at dusk, seen from above."),
-    "titans.html": ("titans", "巨神の背の島。雲の海の上に、階段状の岩の背が伸びる。", "A titan's back over a sea of clouds, a stepped island of stone."),
-    "skills.html": ("skills", "技を放つ瞬間。青白い光の柱が立つ。", "A skill being cast, a pale column of light rising."),
 }
+# 遊び方・転生・装備・仲間・物語・技の頁は、よい絵が撮れるまで絵を置かない (弱い絵は出さない)
 
 
 def shot_figure(name, ja, en):
