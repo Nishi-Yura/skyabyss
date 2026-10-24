@@ -34,7 +34,7 @@
   "gui.skyabyss.trial.state.all": "修飾をそろえた",
   "gui.skyabyss.trial.codex.cleared": "済み %s 回",
   "gui.skyabyss.trial.codex.empty": "まだ見ていない試練は、名前が伏せてある",
-  "gui.skyabyss.trial.titles": "称号",
+  "gui.skyabyss.trial.titles": "称号: ",
   "gui.skyabyss.trial.titles_none": "まだない",
   "gui.skyabyss.trial.help": "試練は周回ごとに、歩・智・闘から一つずつ引かれる",
   "message.skyabyss.trial.board_far": "祠が遠い。碑のそばで開く",
@@ -341,5 +341,17 @@
   "message.skyabyss.raid_lore.ER5.1": "弁の輪は、手の脂で擦り減っている。同じ手が、何度も回したのだ。",
   "message.skyabyss.raid_lore.ER5.2": "四つの息をひとつに合わせる。巨神たちの四つの拍も、もとは一つの息だったのだろうか。",
   "message.skyabyss.raid_lore.ER6.1": "壁の四つの灯は、弟子の数だろうか。あの鍛え手も、ここで鍛えられたのかもしれない。",
-  "message.skyabyss.raid_lore.ER6.2": "どの弟子も、同じ師の癖で構えている。倒すほどに、師の顔が近づいてくる。"
+  "message.skyabyss.raid_lore.ER6.2": "どの弟子も、同じ師の癖で構えている。倒すほどに、師の顔が近づいてくる。",
+  "trial.skyabyss.title.raid.full.stone_whale": "岩鯨の順路を越えた者",
+  "trial.skyabyss.title.raid.full.tide_shell": "潮殻の順路を越えた者",
+  "trial.skyabyss.title.raid.full.thunder_wing": "雷翼の順路を越えた者",
+  "trial.skyabyss.title.raid.full.ember": "余燼の順路を越えた者",
+  "trial.skyabyss.title.raid.rooms.stone_whale": "岩鯨の六つの部屋を見届けた者",
+  "trial.skyabyss.title.raid.rooms.tide_shell": "潮殻の六つの部屋を見届けた者",
+  "trial.skyabyss.title.raid.rooms.thunder_wing": "雷翼の六つの部屋を見届けた者",
+  "trial.skyabyss.title.raid.rooms.ember": "余燼の六つの部屋を見届けた者",
+  "trial.skyabyss.title.raid.nowipe.stone_whale": "岩鯨を崩さずに越えた者",
+  "trial.skyabyss.title.raid.nowipe.tide_shell": "潮殻を崩さずに越えた者",
+  "trial.skyabyss.title.raid.nowipe.thunder_wing": "雷翼を崩さずに越えた者",
+  "trial.skyabyss.title.raid.nowipe.ember": "余燼を崩さずに越えた者"
 }

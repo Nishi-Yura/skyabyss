@@ -356,6 +356,8 @@ public final class SelfTestRunner {
         steps.addAll(jp.revati.skyabyss.trial.raid.RaidSoloSelfTest.steps());
         // レイドの部屋の碑と心の声と伝承 (十二の部屋)。SKYABYSS_SELFTEST_ONLY="raid lore"
         steps.add(Step.once("raid lore", jp.revati.skyabyss.trial.raid.RaidLoreSelfTest::run));
+        // レイドの部屋の報い (素材・共鳴の欠片の人ごとの満額・仲間の割合・預かり・称号の一度だけ・崩れなし・周回の割合・保存)。SKYABYSS_SELFTEST_ONLY="raid rewards"
+        steps.add(Step.once("raid rewards", jp.revati.skyabyss.trial.raid.RaidRewardsSelfTest::run));
         // 岩鯨のレイドの部屋の飾り (仕掛けを上書きしない・閉じている・費用の上限・床の明るさ)。docs/design/39。SKYABYSS_SELFTEST_ONLY="raid decor whale"
         steps.addAll(jp.revati.skyabyss.trial.raid.WhaleDecorSelfTest.steps());
         // 全部の部屋の床の明るさ (二十四の部屋と四体の中ボスの間。夜でも読める床か)。SKYABYSS_SELFTEST_ONLY="raid light"

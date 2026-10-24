@@ -13,8 +13,13 @@ public final class UiFit {
 
     // 論理の大きさを、画面の中央へ。縁に 6 画素ずつ余白を残す
     public void fit(int screenW, int screenH, int logicalW, int logicalH, float cap) {
+        fit(screenW, screenH, logicalW, logicalH, cap, 1f);
+    }
+
+    // floor は一番小さい倍率 (1 より小さくして、窓の低い GUI の大きさにも入れる。文字は小さくなる)
+    public void fit(int screenW, int screenH, int logicalW, int logicalH, float cap, float floor) {
         float s = Math.min((screenW - 12f) / Math.max(1, logicalW), (screenH - 12f) / Math.max(1, logicalH));
-        scale = Mth.clamp(s, 1f, cap);
+        scale = Mth.clamp(s, floor, cap);
         ox = Math.round((screenW - logicalW * scale) / 2f);
         oy = Math.round((screenH - logicalH * scale) / 2f);
     }

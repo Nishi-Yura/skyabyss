@@ -31,6 +31,9 @@ public final class TrialCodex extends SavedData {
     private final Map<UUID, Set<String>> titles = new HashMap<>();
     // 順路: 人 → 巨神 → {越えた回数, 最速の tick}
     private final Map<UUID, Map<String, long[]>> routes = new HashMap<>();
+    // レイドの部屋の報い (docs/design/32 の 9.4): 越えた部屋の id (人ごと。称号「部屋を全て」の数え)・その日に回した replay の部屋の数 {日, 数}
+    private final Map<UUID, Set<String>> raidRooms = new HashMap<>();
+    private final Map<UUID, long[]> replayDay = new HashMap<>();
 
     public static TrialCodex get(MinecraftServer server) {
         return server.overworld().getDataStorage().computeIfAbsent(new SavedData.Factory<>(TrialCodex::new, TrialCodex::load), NAME);
@@ -89,6 +92,44 @@ public final class TrialCodex extends SavedData {
         return titles.getOrDefault(player, Set.of());
     }
 
+    // 称号を得る。初めてなら true (二度目以降は何もしない)
+    public boolean grantTitle(UUID player, String title) {
+        if (titles.computeIfAbsent(player, k -> new LinkedHashSet<>()).add(title)) {
+            setDirty();
+            return true;
+        }
+        return false;
+    }
+
+    // レイドの部屋を越えた (人ごと)。新しく越えた id なら true
+    public boolean addRaidRoom(UUID player, String room) {
+        if (raidRooms.computeIfAbsent(player, k -> new LinkedHashSet<>()).add(room)) {
+            setDirty();
+            return true;
+        }
+        return false;
+    }
+
+    public Set<String> raidRooms(UUID player) {
+        return raidRooms.getOrDefault(player, Set.of());
+    }
+
+    // その日 (日の番号) に replay の部屋の報いを受けた数。日が変われば 0
+    public int replayRoomsOn(UUID player, long day) {
+        long[] d = replayDay.get(player);
+        return d == null || d[0] != day ? 0 : (int) d[1];
+    }
+
+    public void countReplayRoom(UUID player, long day) {
+        long[] d = replayDay.get(player);
+        if (d == null || d[0] != day) {
+            replayDay.put(player, new long[] {day, 1});
+        } else {
+            d[1]++;
+        }
+        setDirty();
+    }
+
     public int routeClears(UUID player, String titan) {
         long[] r = routes.getOrDefault(player, Map.of()).get(titan);
         return r == null ? 0 : (int) r[0];
@@ -116,12 +157,15 @@ public final class TrialCodex extends SavedData {
         boolean any = entries.remove(player) != null;
         any |= titles.remove(player) != null;
         any |= routes.remove(player) != null;
+        any |= raidRooms.remove(player) != null;
+        any |= replayDay.remove(player) != null;
         if (any) {
             setDirty();
         }
     }
 
-    private static TrialCodex load(CompoundTag tag, HolderLookup.Provider registries) {
+    // 読み込み (保存の中身をそのまま戻す。自己テストが保存と読み直しを確かめる)
+    public static TrialCodex load(CompoundTag tag, HolderLookup.Provider registries) {
         TrialCodex data = new TrialCodex();
         CompoundTag all = tag.getCompound("entries");
         for (String pid : all.getAllKeys()) {
@@ -152,6 +196,27 @@ public final class TrialCodex extends SavedData {
                 set.add(t.getAsString());
             }
             data.titles.put(uuid, set);
+        }
+        CompoundTag rr = tag.getCompound("raidRooms");
+        for (String pid : rr.getAllKeys()) {
+            UUID uuid = parse(pid);
+            if (uuid == null) {
+                continue;
+            }
+            Set<String> set = new LinkedHashSet<>();
+            for (Tag t : rr.getList(pid, Tag.TAG_STRING)) {
+                set.add(t.getAsString());
+            }
+            data.raidRooms.put(uuid, set);
+        }
+        CompoundTag rd = tag.getCompound("replayDay");
+        for (String pid : rd.getAllKeys()) {
+            UUID uuid = parse(pid);
+            if (uuid == null) {
+                continue;
+            }
+            CompoundTag c = rd.getCompound(pid);
+            data.replayDay.put(uuid, new long[] {c.getLong("day"), c.getLong("n")});
         }
         CompoundTag rt = tag.getCompound("routes");
         for (String pid : rt.getAllKeys()) {
@@ -215,6 +280,21 @@ public final class TrialCodex extends SavedData {
             rt.put(uuid.toString(), p);
         });
         tag.put("routes", rt);
+        CompoundTag rr = new CompoundTag();
+        raidRooms.forEach((uuid, set) -> {
+            ListTag l = new ListTag();
+            set.forEach(s -> l.add(StringTag.valueOf(s)));
+            rr.put(uuid.toString(), l);
+        });
+        tag.put("raidRooms", rr);
+        CompoundTag rd = new CompoundTag();
+        replayDay.forEach((uuid, d) -> {
+            CompoundTag c = new CompoundTag();
+            c.putLong("day", d[0]);
+            c.putLong("n", d[1]);
+            rd.put(uuid.toString(), c);
+        });
+        tag.put("replayDay", rd);
         return tag;
     }
 }

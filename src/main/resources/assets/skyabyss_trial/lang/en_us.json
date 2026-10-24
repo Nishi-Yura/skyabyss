@@ -34,7 +34,7 @@
   "gui.skyabyss.trial.state.all": "All variants",
   "gui.skyabyss.trial.codex.cleared": "Cleared x%s",
   "gui.skyabyss.trial.codex.empty": "Trials you have not seen keep their names hidden",
-  "gui.skyabyss.trial.titles": "Titles",
+  "gui.skyabyss.trial.titles": "Titles: ",
   "gui.skyabyss.trial.titles_none": "None yet",
   "gui.skyabyss.trial.help": "Each cycle draws one trial from Walk, Wit and Fight",
   "message.skyabyss.trial.board_far": "The shrine is too far. Open it beside the stone",
@@ -341,5 +341,17 @@
   "message.skyabyss.raid_lore.ER5.1": "The valve wheels are worn smooth where hands turned them, again and again.",
   "message.skyabyss.raid_lore.ER5.2": "Four breaths made into one. Were the four titans' beats once a single breath as well?",
   "message.skyabyss.raid_lore.ER6.1": "Four lamps on the wall. Is that how many pupils were taught here? Maybe the smith was one of them.",
-  "message.skyabyss.raid_lore.ER6.2": "Every pupil stands with the same master's habits. The more you cut down, the closer the master's face comes."
+  "message.skyabyss.raid_lore.ER6.2": "Every pupil stands with the same master's habits. The more you cut down, the closer the master's face comes.",
+  "trial.skyabyss.title.raid.full.stone_whale": "Passed the Whale's Route",
+  "trial.skyabyss.title.raid.full.tide_shell": "Passed the Shell's Route",
+  "trial.skyabyss.title.raid.full.thunder_wing": "Passed the Wing's Route",
+  "trial.skyabyss.title.raid.full.ember": "Passed the Ember's Route",
+  "trial.skyabyss.title.raid.rooms.stone_whale": "Walked the Whale's Six Rooms",
+  "trial.skyabyss.title.raid.rooms.tide_shell": "Walked the Shell's Six Rooms",
+  "trial.skyabyss.title.raid.rooms.thunder_wing": "Walked the Wing's Six Rooms",
+  "trial.skyabyss.title.raid.rooms.ember": "Walked the Ember's Six Rooms",
+  "trial.skyabyss.title.raid.nowipe.stone_whale": "Passed the Whale Unbroken",
+  "trial.skyabyss.title.raid.nowipe.tide_shell": "Passed the Shell Unbroken",
+  "trial.skyabyss.title.raid.nowipe.thunder_wing": "Passed the Wing Unbroken",
+  "trial.skyabyss.title.raid.nowipe.ember": "Passed the Ember Unbroken"
 }
