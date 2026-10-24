@@ -111,7 +111,12 @@ public final class Ch1BackMobsSelfTest {
         Difficulty before = server.getWorldData().getDifficulty();
         try {
             server.setDifficulty(Difficulty.NORMAL, true);
+            // 夜の足場には自然の敵が湧き、老番兵の突進を止めたり狙いを取ったりする (全部の確かめを流したあとの夜に一度だけ失敗した)。
+            // 確かめの間は湧かせず、足場にいる自然の敵を先に除く
+            spawning = level.getGameRules().getBoolean(net.minecraft.world.level.GameRules.RULE_DOMOBSPAWNING);
+            level.getGameRules().getRule(net.minecraft.world.level.GameRules.RULE_DOMOBSPAWNING).set(false, server);
             platform(level);
+            clearStrays(level);
             mortar(level, f, notes);
             gull(level, f, notes);
             elder(level, f, notes);
@@ -123,6 +128,7 @@ public final class Ch1BackMobsSelfTest {
             Telegraph.probe(null);
             Telegraph.record(null);
             server.setDifficulty(before, true);
+            level.getGameRules().getRule(net.minecraft.world.level.GameRules.RULE_DOMOBSPAWNING).set(spawning, server);
             force(level, false);
         }
         notes.forEach(n -> SkyAbyss.LOGGER.info("SELFTEST ch1 back mobs note: {}", n));
@@ -152,6 +158,16 @@ public final class Ch1BackMobsSelfTest {
                     }
                 }
             }
+        }
+    }
+
+    private static boolean spawning = true;
+
+    // 足場 (90〜130) の上にいる自然の敵を除く。確かめが置いた敵 (持続の印つき) は残す
+    private static void clearStrays(ServerLevel level) {
+        net.minecraft.world.phys.AABB box = new net.minecraft.world.phys.AABB(88, FLOOR - 4, 88, 133, FLOOR + 16, 133);
+        for (Mob m : level.getEntitiesOfClass(Mob.class, box, m -> m instanceof net.minecraft.world.entity.monster.Enemy && !m.isPersistenceRequired())) {
+            m.discard();
         }
     }
 
@@ -429,6 +445,7 @@ public final class Ch1BackMobsSelfTest {
     }
 
     private static void elder(ServerLevel level, List<String> f, List<String> notes) {
+        clearStrays(level);
         List<FakePlayer> ps = new ArrayList<>();
         // 盾の突進: 前 7 に狙われた人 (線の中)、前 10.8 は線の先の外、横 3 は外
         ElderSentinel e = spawnElder(level, 0f);
@@ -444,18 +461,21 @@ public final class Ch1BackMobsSelfTest {
             e.forceAction("RUSH");
             tick(level, e, 1);
             Telegraph.record(null);
+            // 失敗したときに分かるよう、突進を始めたときの位置・向き・狙い・線の外枠を残す (新しい世界で一度だけ、線の長さが違う失敗があった)
+            String at = "elder " + e.position() + " yaw " + e.getYRot() + " target " + (e.getTarget() == null ? "none" : e.getTarget().getName().getString())
+                    + " line " + (shapes.isEmpty() ? "none" : java.util.Arrays.toString(shapes.get(0).bounds()));
             check(Telegraph.damagingCreated() == 1 && Telegraph.activeWarns(level).stream().allMatch(w -> w >= Telegraph.MIN_WARN_TICKS && w == ElderSentinel.RUSH_WARN),
                     "the elder rush mark is wrong " + Telegraph.activeWarns(level), f);
             if (!shapes.isEmpty()) {
                 TelegraphShape line = shapes.get(0);
                 check(line.contains(SX, SZ + 9.5) && !line.contains(SX, SZ + 10.5) && line.contains(SX + 1.1, SZ + 5) && !line.contains(SX + 1.3, SZ + 5),
-                        "the rush line is not the marked line", f);
+                        "the rush line is not the marked line (" + at + ")", f);
             }
             int first = firstHurt(level, e, a, 40);
             check(first >= Telegraph.MIN_WARN_TICKS && first <= ElderSentinel.RUSH_WARN + 3, "the elder rush hit at tick " + first, f);
             check(lost(a) >= ElderSentinel.RUSH_DAMAGE * 0.7f && lost(a) <= ElderSentinel.RUSH_DAMAGE * 1.1f, "the elder rush damage " + lost(a), f);
             check(lost(beyond) == 0 && lost(side) == 0, "the elder rush hurt a player outside the line", f);
-            check(Math.abs(e.getZ() - (SZ + 10)) < 1.5, "the elder ended the rush at z " + (e.getZ() - SZ), f);
+            check(Math.abs(e.getZ() - (SZ + 10)) < 1.5, "the elder ended the rush at z " + (e.getZ() - SZ) + " (" + at + ")", f);
             notes.add("elder rush warns " + first + " ticks, damage " + Math.round(lost(a)));
         } finally {
             Telegraph.record(null);
