@@ -53,8 +53,7 @@ docs/design/32 の 9.4 の数を、部屋と中ボスの間を越えたときに
 
 - `compileJava`: 成功 (警告のみ、既存)。
 - `SKYABYSS_SELFTEST_ONLY="raid rewards"` (新しい世界): `SELFTEST raid rewards PASSED` (1 回目の失敗だった no-wipe の欠片は、偽の人がサーバーの一覧に居ない問題。直したあとの再実行で通った)。
-- 全体の自己テスト (新しい世界、カードと知らせの変更の前): 174 件 `PASSED`、`FAILED` 0 件。`SELFTEST runner: all steps done in 1552 s`。プロセスは exit 0。
-- 知らせと試練の板の変更のあとは、全体の自己テストは回していない (撮影と目視だけ)。
+- 全体の自己テスト (新しい世界、すべての変更のあと、最後の板の修正を含む): 174 件 `PASSED`、`FAILED` 0 件。`SELFTEST runner: all steps done in 1608 s`。`BUILD SUCCESSFUL`、プロセスは exit 0。
 - `check_lang_keys.py`: 2095 キー、不足 0。
 - `check_text_fit.py`: 8970 件、問題 0 (知らせと板の変更のあと、再実行で 0)。
 - `check_generators.py` (`PYTHONPATH=tools/lib`、Python 3.9.10、numpy 1.26.4 / PIL 11.1.0 あり): 全生成スクリプトが走り、ドリフト 0、失敗 0。
