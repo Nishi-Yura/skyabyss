@@ -685,7 +685,7 @@ def texts():
     # 碑 (4 行)
     for key, lines_ja, lines_en in (
             ('sign.skyabyss.ch2_salt_vault', ['塩の蔵', '潮が引けば 歩いて', '満ちれば 潜って', '番人は 眠らない'],
-             ['The Salt Vault', 'At low tide, walk', 'At high tide, dive', 'The warden does not sleep']),
+             ['The Salt Vault', 'At low tide, walk', 'At high tide, dive', 'The warden is awake']),
             ('sign.skyabyss.ch2_salt_wall', ['潮は 読める', '待て', '', ''],
              ['The tide can be read', 'Wait', '', '']),
             ('sign.skyabyss.ch2_ebb_stakes', ['潮の杭', '刻みを 数えよ', '大きく引くのは', '夜の はじめ'],

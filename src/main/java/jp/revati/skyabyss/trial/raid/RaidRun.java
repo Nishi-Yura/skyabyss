@@ -133,8 +133,9 @@ public final class RaidRun {
         RUNS.put(group, run);
         Component name = Component.translatable(d.nameKey());
         float yaw = 180f;
+        int idx = 0;
         for (ServerPlayer p : TrialRoute.members(back, group)) {
-            TrialRoute.move(back, p, ctx.cell().rest(), yaw);
+            TrialRoute.move(back, p, restSpot(ctx, idx++), yaw);
             Notice.narrate(p, "message.skyabyss.route.step" + step, name);
             RaidLore.voice(p, d.id());
             RouteCard.show(p, back, group, titan, draw, step, false);
@@ -182,8 +183,9 @@ public final class RaidRun {
         RUNS.put(group, run);
         TrialDraw.Draw draw = TrialData.current(back, group);
         Component name = jp.revati.skyabyss.trial.TrialMidBoss.name(titan);
+        int idx = 0;
         for (ServerPlayer p : TrialRoute.members(back, group)) {
-            TrialRoute.move(back, p, ctx.cell().rest(), 180f);
+            TrialRoute.move(back, p, restSpot(ctx, idx++), 180f);
             Notice.narrate(p, "message.skyabyss.route.mid", name);
             RouteCard.show(p, back, group, titan, draw, 3, true);
         }
@@ -256,7 +258,7 @@ public final class RaidRun {
         }
     }
 
-    private static void tickRun(Run run, long now) {
+    static void tickRun(Run run, long now) {
         RaidCtx ctx = run.ctx;
         switch (run.phase) {
             case COUNTDOWN -> {
@@ -301,6 +303,56 @@ public final class RaidRun {
         }
         if (run.phase == Phase.ACTIVE && now % GUIDE_EVERY == 0) {
             guidePillar(run);
+        }
+        if (run.phase != Phase.COMPLETE && now % GATHER_EVERY == 0) {
+            gather(run, now);
+        }
+    }
+
+    // 休み場の立つ所: i 番目の人は休み場から少しずらす (二人が同じ所に重なって、互いの体で前が見えなくならないように)。
+    // 足と頭が空いていて床がある所だけ。空いていなければ休み場そのもの
+    private static final int[][] SPREAD = {{0, 0}, {1, 0}, {-1, 0}, {0, 1}, {1, 1}, {-1, 1}, {2, 0}, {-2, 0}};
+
+    public static BlockPos restSpot(RaidCtx ctx, int i) {
+        BlockPos rest = ctx.cell().rest();
+        int[] d = SPREAD[Math.floorMod(i, SPREAD.length)];
+        BlockPos at = rest.offset(d[0], 0, d[1]);
+        ServerLevel level = ctx.level();
+        boolean free = level.getBlockState(at).getCollisionShape(level, at).isEmpty()
+                && level.getBlockState(at.above()).getCollisionShape(level, at.above()).isEmpty()
+                && level.getBlockState(at.below()).isFaceSturdy(level, at.below(), net.minecraft.core.Direction.UP)
+                && ctx.cell().bounds().contains(at.getX() + 0.5, at.getY() + 0.5, at.getZ() + 0.5);
+        return free ? at : rest;
+    }
+
+    // 部屋の外にいる参加者を部屋へ戻す間隔と、戻すまでの猶予 (tick)。
+    // 途中で抜けて入り直した人・背中で倒れて休み場で目を覚ました人が、前の部屋や外に取り残されないように。
+    // 外に立つ人は「立っている参加者」に数えられ、中の仲間が倒れても全滅にならないので、そのままにしない
+    public static final int GATHER_EVERY = 20;
+    public static final int STRAY_GRACE = 60;
+    private static final Map<UUID, Long> STRAY = new HashMap<>();
+
+    static void gather(Run run, long now) {
+        RaidCtx ctx = run.ctx;
+        AABB box = ctx.cell().bounds();
+        for (ServerPlayer p : ctx.players()) {
+            if (box.contains(p.position())) {
+                STRAY.remove(p.getUUID());
+                continue;
+            }
+            Long since = STRAY.get(p.getUUID());
+            if (since == null || since > now) {
+                STRAY.put(p.getUUID(), now);
+                continue;
+            }
+            if (now - since < STRAY_GRACE) {
+                continue;
+            }
+            STRAY.remove(p.getUUID());
+            TrialRoute.move(ctx.level(), p, restSpot(ctx, ctx.players().indexOf(p)), 180f);
+            Notice.narrate(p, "message.skyabyss.raid.rejoin");
+            sendTo(p, run.lastHud == null ? RaidHudNet.Hud.OFF : run.lastHud);
+            SkyAbyss.LOGGER.info("Raid: {} was outside room {} and was carried back to its rest", p.getGameProfile().getName(), ctx.roomId());
         }
     }
 
@@ -358,12 +410,13 @@ public final class RaidRun {
         RaidCtx ctx = run.ctx;
         run.wipes++;
         RaidRewards.onWipe(ctx.level(), ctx.group());
+        int idx = 0;
         for (ServerPlayer p : ctx.players()) {
             Downed.reviveFull(p);
             p.setHealth(p.getMaxHealth());
             p.removeAllEffects();
             p.getFoodData().setFoodLevel(20);
-            TrialRoute.move(ctx.level(), p, ctx.cell().rest(), 180f);
+            TrialRoute.move(ctx.level(), p, restSpot(ctx, idx++), 180f);
             if (reasonKey != null) {
                 Notice.warn(p, reasonKey);
             }
@@ -549,6 +602,7 @@ public final class RaidRun {
     public static void clearAll() {
         RUNS.clear();
         BUILT.clear();
+        STRAY.clear();
         RaidKit.clearAll();
     }
 }

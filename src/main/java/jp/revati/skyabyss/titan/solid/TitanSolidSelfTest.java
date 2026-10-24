@@ -258,6 +258,14 @@ public final class TitanSolidSelfTest {
         whale.moveTo(cx, 120, cz, 90f, 0f);
         TitanSolids.track(whale);
         FakePlayer p = FakePlayerFactory.get(level, new GameProfile(UUID.fromString("7e5a0e0d-0000-4000-8000-0000000f0001"), "[titan_solid]"));
+        // 前の回の残り (この人が岩鯨を止めた記録) があると、巨神が見えない人として押されない。先に消す
+        jp.revati.skyabyss.progress.ProgressData.get(level.getServer()).clearPersonal(p.getUUID(), jp.revati.skyabyss.progress.Titans.STONE_WHALE);
+        jp.revati.skyabyss.loot.TitanMemoryData.Record mem = jp.revati.skyabyss.loot.TitanMemoryData.get(level.getServer()).peek(p.getUUID(), jp.revati.skyabyss.progress.Titans.STONE_WHALE);
+        if (mem != null && mem.clears > 0) {
+            SkyAbyss.LOGGER.info("SELFTEST titan solid: cleared a stale stone whale record of the test player ({} clears)", mem.clears);
+            mem.clears = 0;
+        }
+        jp.revati.skyabyss.titan.TitanVisibility.clearCache();
         float yaw = whale.getYRot();
         // 体の中 (体の外寄り 横 12、上 22): いちばん近い外へ向かう速さをもらう
         Vec3 inside = new Vec3(cx, 120, cz).add(TitanSolids.toWorldDelta(yaw, new Vec3(17.2, 20, 0)));

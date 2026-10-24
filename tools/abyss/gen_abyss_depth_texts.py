@@ -46,11 +46,11 @@ KING_REVEAL = {
 }
 NOTES = {
     'bone': (('前の私の手記', 'ここで王に会った', 'あれは心臓の写し', '鯨の拍が骨を着る'),
-             ('My past self\'s note', 'I met the king here', 'It is a copy of a heart', 'The whale\'s beat in bone')),
+             ('My past self\'s note', 'I met the king here', 'It copies a heart', 'Whale\'s beat in bone')),
     'salt': (('前の私の手記', '塩の王も 写しだ', '潮殻の拍が漏れて', '塩に固まった'),
-             ('My past self\'s note', 'The salt king too', 'is the tide shell\'s beat', 'hardened into salt')),
+             ('My past self\'s note', 'The salt king too is', 'the tide shell\'s beat', 'hardened into salt')),
     'storm': (('前の私の手記', '雷の王は 雷翼の', '拍の写しだ', '錨はまだ漏れる'),
-              ('My past self\'s note', 'The storm king copies', 'the thunder wing\'s beat', 'The anchor still leaks')),
+              ('My past self\'s note', 'The storm king copies', 'thunder wing\'s beat', 'The anchor still leaks')),
     'ember': (('前の私の手記', '灰の王は 余燼の', '拍の写しだ', '倒しても また湧く'),
               ('My past self\'s note', 'The ember king copies', 'the ember\'s beat', 'It returns when slain')),
     'shadow': (('前の私の手記', '影の王は 私だ', '漏れた拍が', '私の形をなぞる'),

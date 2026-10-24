@@ -281,9 +281,9 @@ def texts():
     # 碑 (4 行。空の行は飛ばす)
     for key, lines_ja, lines_en in (
             ('sign.skyabyss.ch1_bone_pit', ['骨の坑', '鉄は ここに眠る', '下る者は 灯りを', '戻らぬ者は 数えない'],
-             ['The Bone Pit', 'Iron sleeps here', 'Who goes down, bring light', 'Who stays down, we do not count']),
+             ['The Bone Pit', 'Iron sleeps here', 'Bring light below', 'The lost go uncounted']),
             ('sign.skyabyss.ch1_cold_door', ['背の風は 冷たい', '骨まで 届く', '鉄を着て 上れ', '鉄は 冷えを覚える'],
-             ['The wind on the back is cold', 'It reaches the bone', 'Climb wearing iron', 'Iron remembers the cold'])):
+             ['Wind on the back: cold', 'It reaches the bone', 'Climb wearing iron', 'Iron remembers cold'])):
         for i in range(4):
             put('%s.%d' % (key, i + 1), lines_ja[i], lines_en[i])
     put('item.skyabyss.whale_chaser_mark', '鯨追いの印', 'Whale Chaser\'s Mark')

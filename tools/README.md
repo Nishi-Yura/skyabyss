@@ -114,6 +114,7 @@ python tools/install/install_lowpoly.py bone_sentinel --gear docs/review/lowpoly
 | `open <名前>` | mod の画面を開く: `lore` `quests` `growth` `skills` `party` `inventory` `grave`（語り部の墓の一覧の見本）、`travel_map_demo` / `travel_map_voyage_demo`（旅の地図の見本の印。子の海図を重ねた姿）、または引数なしで作れる画面のクラスの完全な名前 |
 | `key <キーの名前>` | そのキーを押したことにする (KeyMapping。OS の入力ではない)。サーバーから中身を受け取る画面に使う。例 `key key.skyabyss_record.open` (控え帳) |
 | `close` | 画面を閉じる |
+| `respawn` | 死んだ画面なら起き上がる (前の回で倒れたまま入った人)。生きていれば何もしない |
 | `mapstyle slate\|parchment\|ink`、`mapscale near\|far` | 旅の地図の見た目 (設定 `mapStyle`) と縮尺。開いている地図にもすぐ効く |
 | `chat clear` | チャット欄と右上の通知 (トースト) を消す |
 | `shot <名前>` | 次に描いた絵を `<名前>.png` に保存 |

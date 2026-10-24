@@ -860,6 +860,14 @@ public final class ShotRunner {
                 mc.setScreen(null);
                 return true;
             }
+            case "respawn" -> {
+                // respawn : 死んだ画面なら起き上がる (前の回で倒れたまま入った人)。生きていれば何もしない
+                if (mc.player != null && !mc.player.isAlive()) {
+                    mc.player.respawn();
+                    mc.setScreen(null);
+                }
+                return true;
+            }
             case "shot" -> {
                 if (first) {
                     shotName = line.arg(0).replaceAll("[^A-Za-z0-9_.-]", "_");

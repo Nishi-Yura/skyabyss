@@ -1322,6 +1322,7 @@
   "item.skyabyss.abyss_bone_chip": "骨のかけら",
   "item.skyabyss.abyss_salt_crystal": "塩の結晶",
   "item.skyabyss.abyss_storm_copper": "雷の銅片",
+  "message.skyabyss.raid.rejoin": "仲間のいる部屋へ戻った",
   "message.skyabyss.raid.wipe": "全員が倒れた。部屋の入口へ戻る",
   "raid.skyabyss.hud.ready": "準備しよう",
   "trial.skyabyss.cell.WRM": "番兵長の広間",
@@ -1485,5 +1486,8 @@
   "sign.skyabyss.abyss_gate.1": "深淵の門",
   "sign.skyabyss.abyss_gate.2": "天の鍵で格子は溶ける",
   "sign.skyabyss.abyss_gate.3": "帰りは骨の野営の白い石",
-  "raid.skyabyss.hud.here": "ここ"
+  "raid.skyabyss.hud.here": "ここ",
+  "sign.skyabyss.abyss_route.ash_1.3": "",
+  "sign.skyabyss.abyss_shaft.4": "",
+  "sign.skyabyss.abyss_gate.4": ""
 }

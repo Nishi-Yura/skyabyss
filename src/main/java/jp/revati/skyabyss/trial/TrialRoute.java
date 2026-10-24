@@ -660,7 +660,7 @@ public final class TrialRoute {
             at = jp.revati.skyabyss.trial.raid.InstanceArenas.heartEntry(titan);
             yaw = jp.revati.skyabyss.trial.raid.InstanceArenas.heartEntryYaw(titan);
         } else if (run != null && run.mid == mid && (mid || run.step == step)) {
-            at = run.ctx.cell().rest();
+            at = jp.revati.skyabyss.trial.raid.RaidRun.restSpot(run.ctx, Math.max(0, members(back, group).indexOf(p)));
         }
         if (at == null) {
             return false;
