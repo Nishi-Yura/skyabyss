@@ -58,6 +58,7 @@ public final class BuildAuditSelfTest {
         for (String kind : System.getenv("SKYABYSS_AUDIT_STRICT") != null ? new String[0] : new String[] {"STAIR_BURIED", "STAIR_RUN", "STAIR_UPSIDE", "STAIR_GAP", "STAIR_REVERSED"}) {
             ALLOW.add(new Allow("built:shelter", kind, null, "capital trim stairs (cornices, sills, roofs); walk paths and doors are checked by tools/capital/audit.py"));
         }
+        ALLOW.add(new Allow("site:ribs", "HEAD_DENT", null, "terrain-following arched bones: where the trial ground dips, a rib can hang at head height between two others (no corridor; 2026-10-26)"));
         ALLOW.add(new Allow("built:ribs", "FLOAT_BLOCK", null, "terrain-following anchor site: a rib tip can end up one step above a dip in the ground; reported in docs/review/build_audit_report.md"));
         // 火口の縁の段の最後: 縁の高さで終わる見晴らしの段 (その先にしかけは無い。13 の火口の縁を切って外を見られる所)
         for (String kind : new String[] {"STAIR_REVERSED", "STAIR_DROP"}) {

@@ -194,7 +194,7 @@ public final class SelfTestRunner {
         // NPC v2 (人ごとの形・持ち物・動き)。docs/review/npc_quality_2026-10-23.md。SKYABYSS_SELFTEST_ONLY="lowpoly npc"
         steps.addAll(jp.revati.skyabyss.npc.NpcModelSelfTest.steps());
         // 倒れたときの決まりと墓 (docs/design/11 の 6 章)
-        steps.add(Step.once("grave (load)", jp.revati.skyabyss.grave.GraveSelfTest::load));
+        steps.add(Step.until("grave (load)", jp.revati.skyabyss.grave.GraveSelfTest::loaded));
         steps.add(Step.once("grave", 40, jp.revati.skyabyss.grave.GraveSelfTest::runSelfTest));
         // 留め袋 (登録の表・保存と同期・入れる/出す・拾う・掃除・倒れても残る・読む側・移し替え)。docs/design/22 の 13 章
         steps.add(Step.once("pouch", jp.revati.skyabyss.pouch.PouchSelfTest::runSelfTest));
@@ -495,7 +495,7 @@ public final class SelfTestRunner {
             all.stream().filter(kept::contains).forEach(QUEUE::add);
         }
         // 天と淵の大陸: 出現地点ははじまりの島へ動いたばかりで、まわりのチャンクがまだ動いていないことがある。
-        // 出現地点を中心に 5 × 5 チャンクを読み込み、生き物が動くまで待ってから始める (多くの試しは出現地点の上空で敵を立てる。30 秒で諦めて進む)
+        // 出現地点を中心に 5 × 5 チャンクを読み込み、生き物が動くまで、始まりに建てる物が建ち終わるまで待ってから始める (2 分で諦めて進む)
         if (!QUEUE.isEmpty() && jp.revati.skyabyss.world.continent.ContinentInfo.isContinent(event.getServer())) {
             int[] warm = {0};
             QUEUE.addFirst(Step.until("continent spawn (wait)", server -> {
@@ -508,7 +508,10 @@ public final class SelfTestRunner {
                         ready &= over.isPositionEntityTicking(spawn.offset(dx * 16, 0, dz * 16));
                     }
                 }
-                return ready || ++warm[0] > 600;
+                // 始まりに建てる物 (町・島・桟橋など) が建ち終わるまでも待つ (建てている最中は重く、時間で見る試しが揺れる。2026-10-26)
+                boolean built = !jp.revati.skyabyss.opening.site.SiteBuilds.busy();
+                ++warm[0];
+                return ready && (built || warm[0] > 2400) || warm[0] > 2400;
             }));
         }
         if (QUEUE.isEmpty()) {

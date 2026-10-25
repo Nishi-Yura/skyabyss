@@ -110,7 +110,8 @@ public final class ContinentAreas {
             if (markVisited(p, t)) {
                 // 初めて着いた町: 広場を見渡す短い場面 (2026-10-26 「演出を増やしたい」。Scenes.townFirst)
                 BlockPos c = ContinentLayout.get().town(t);
-                if (c != null) {
+                // 自己テストの偽の人には見せない (場面の間は無敵で動けず、終わりの返事も来ない)
+                if (c != null && !(p instanceof net.neoforged.neoforge.common.util.FakePlayer)) {
                     jp.revati.skyabyss.cinematic.Cinematics.startOnce(p, jp.revati.skyabyss.cinematic.Scenes.TOWN_PREFIX + t, null,
                             net.minecraft.world.phys.Vec3.atCenterOf(c));
                 }
