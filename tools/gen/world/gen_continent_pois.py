@@ -668,6 +668,48 @@ def signpost(rng):
 BUILDERS['signpost'] = signpost
 
 
+def hamlet(region):
+    """小さな集落: 家三つ (土地の作り)・井戸・畑・薪の山。町より小さく、人はいない (のちに頼みの人を置く)"""
+    from gen_region_towns import PALETTES, house, tree
+    pal = dict(PALETTES['whale' if region == 'meadow' else region])
+    if region == 'meadow':
+        pal.update({'wall': 'minecraft:oak_planks', 'frame': 'minecraft:stripped_oak_log[axis=y]', 'roof': 'minecraft:dark_oak_stairs',
+                    'ridge': 'minecraft:dark_oak_slab[type=bottom,waterlogged=false]', 'door': 'minecraft:oak_door', 'fence': 'minecraft:oak_fence'})
+
+    def build(rng):
+        bp = BP('poi_hamlet_' + region)
+        ground(bp, 13, 'minecraft:grass_block[snowy=false]' if region in ('meadow', 'whale') else 'minecraft:coarse_dirt', rng, pal['road'], 0.3)
+        for i in range(-12, 13):
+            bp.set(0, -1, i, pal['road'])
+        house(bp, -9, -9, -3, -4, 4, (-6, -4, 'south'), pal, beds=1)
+        house(bp, 3, -10, 10, -4, 4, (6, -4, 'south'), pal, beds=1)
+        house(bp, 3, 4, 9, 9, 3, (6, 4, 'north'), pal, beds=1)
+        bp.fill(-3, 0, 2, -1, 0, 4, pal['well'])
+        bp.set(-2, 0, 3, 'minecraft:water[level=0]')
+        bp.set(-2, -1, 3, pal['well'])
+        for x0 in (-11,):
+            for x in range(x0, x0 + 5):
+                for z in range(4, 10):
+                    if x in (x0, x0 + 4) or z in (4, 9):
+                        bp.set(x, 0, z, pal['fence'])
+                    else:
+                        bp.set(x, -1, z, 'minecraft:farmland[moisture=7]')
+                        bp.set(x, 0, z, 'minecraft:wheat[age=7]' if region != 'ember' else 'minecraft:dead_bush')
+        for x in range(5, 9):
+            bp.set(x, 0, -2, 'minecraft:spruce_log[axis=x]')
+        tree(bp, 11, 2, region if region != 'meadow' else 'whale')
+        bp.set(1, 0, -3, 'minecraft:lantern[hanging=false,waterlogged=false]')
+        bp.mark('loot', 7, 0, -8)
+        return bp
+    return build
+
+
+for _r in ('meadow', 'whale', 'tide', 'storm', 'ember'):
+    BUILDERS['hamlet_' + _r] = hamlet(_r)
+for _r, _k in (('meadow', 'hamlet_meadow'), ('whale', 'hamlet_whale'), ('tide', 'hamlet_tide'), ('storm', 'hamlet_storm'), ('ember', 'hamlet_ember')):
+    BY_REGION[_r] = BY_REGION[_r] + [_k]
+
+
 def signposts(lay):
     """道しるべ: 道の中ほど (道のりの半分) の脇に一本。行き先は道の両端 (都・町・跡地・船着き場)"""
     def name_of(p):
