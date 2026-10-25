@@ -104,7 +104,7 @@ public final class ContinentChunkGenerator extends ChunkGenerator {
                     return n > 0.1 ? Blocks.GRAVEL.defaultBlockState() : Blocks.SAND.defaultBlockState();
                 }
             }
-            case ContinentBiomes.BEACH -> {
+            case ContinentBiomes.BEACH, ContinentBiomes.DESERT -> {
                 if (depth < 4) {
                     return Blocks.SAND.defaultBlockState();
                 }
@@ -125,7 +125,7 @@ public final class ContinentChunkGenerator extends ChunkGenerator {
                     return Blocks.SNOW_BLOCK.defaultBlockState();
                 }
             }
-            case ContinentBiomes.BADLANDS -> {
+            case ContinentBiomes.BADLANDS, ContinentBiomes.WOODED_BADLANDS -> {
                 if (depth == 0 && !steep) {
                     return Blocks.RED_SAND.defaultBlockState();
                 }

@@ -60,6 +60,23 @@ cmd tp @s 60 150 -1150 160 35
 waitchunks 900
 wait 60
 shot river_whale
+# 土地の中のムラ (C1)
+cmd tp @s -260 140 -1020 135 30
+waitchunks 900
+wait 60
+shot sub_birch
+cmd tp @s 1290 110 580 135 30
+waitchunks 900
+wait 60
+shot sub_marsh
+cmd tp @s -1060 160 320 135 30
+waitchunks 900
+wait 60
+shot sub_pine
+cmd tp @s -580 110 -200 135 30
+waitchunks 900
+wait 60
+shot sub_flowers
 # 旅の地図 (描いた大陸の絵)
 cmd gamemode adventure
 cmd tp @s -450 80 0

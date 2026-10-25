@@ -30,7 +30,8 @@ SEA_LEVEL = 63   # 水面は 62 まで
 
 # 土地の番号 (ContinentBiomeSource の並び)
 BIOME_NAMES = ['deep_ocean', 'ocean', 'lukewarm_ocean', 'beach', 'plains', 'forest', 'meadow', 'windswept_hills', 'taiga',
-               'savanna', 'windswept_gravelly_hills', 'stony_peaks', 'snowy_slopes', 'badlands', 'eroded_badlands', 'river']
+               'savanna', 'windswept_gravelly_hills', 'stony_peaks', 'snowy_slopes', 'badlands', 'eroded_badlands', 'river',
+               'birch_forest', 'swamp', 'desert', 'old_growth_pine_taiga', 'wooded_badlands', 'flower_forest']
 B = {n: i for i, n in enumerate(BIOME_NAMES)}
 
 # 土地 (見取り図の regions の種類) の番号。region.bin の値。world/continent/ContinentMap.region と同じ並び
@@ -57,12 +58,15 @@ PREVIEW = {
     'plains': (130, 170, 90), 'forest': (80, 130, 70), 'meadow': (150, 190, 110), 'windswept_hills': (130, 140, 120),
     'taiga': (90, 120, 90), 'savanna': (180, 175, 100), 'windswept_gravelly_hills': (140, 140, 140), 'stony_peaks': (170, 170, 170),
     'snowy_slopes': (240, 240, 245), 'badlands': (190, 110, 70), 'eroded_badlands': (90, 60, 60), 'river': (70, 120, 170),
+    'birch_forest': (170, 200, 120), 'swamp': (90, 120, 90), 'desert': (230, 215, 160), 'old_growth_pine_taiga': (70, 100, 70),
+    'wooded_badlands': (170, 120, 80), 'flower_forest': (190, 200, 110),
 }
 
 
 # 川の種 (見取り図の案ごと)。近くの、ふもとの高さ (RIVER_SOURCE_Y) の所から下り始める
 RIVER_SEEDS = {
     'c': [(200, -1000), (-200, -950), (-150, -450), (-950, 450), (1150, -450), (600, 700)],
+    'c1': [(200, -1000), (-200, -950), (-150, -450), (-950, 450), (1150, -450), (600, 700)],
 }
 RIVER_SOURCE_Y = (84, 112)
 RIVER_KEEP_OUT = 150  # 都・町・はじまりのまわり (ブロック) は削らない
@@ -227,6 +231,14 @@ def build(key=CHOSEN, seed=7):
     border = set(np.unique(np.concatenate([labels[0], labels[-1], labels[:, 0], labels[:, -1]]))) - {0}
     outer = np.isin(labels, list(border))
     inland = inner & ~outer
+    # 小さな水 (湖) は淡水: 川と同じ土地
+    small = np.zeros(y.shape, dtype=bool)
+    lab_in, n_in = ndimage.label(inland)
+    if n_in:
+        sizes = ndimage.sum(inland, lab_in, range(1, n_in + 1))
+        for idx, sz in enumerate(sizes, start=1):
+            if sz < 3000:
+                small |= lab_in == idx
     depth = np.clip(px_from_land * SCALE / 5.0, 1, 30)
     depth = np.where(inland, np.minimum(depth, 20), depth)
     y = np.where(land, np.maximum(y, SEA_LEVEL + 1), SEA_LEVEL - 1 - depth)
@@ -264,9 +276,16 @@ def build(key=CHOSEN, seed=7):
     beach = land & near_water & (height <= SEA_LEVEL + 3)
     keep = np.isin(biome, [B['badlands'], B['eroded_badlands'], B['stony_peaks'], B['snowy_slopes']])
     biome[beach & ~keep] = B['beach']
+    # 土地の中のムラ (見取り図の subs)。岸と水の上は除く
+    SUB_BIOMES = {'birch': 'birch_forest', 'marsh': 'swamp', 'dunes': 'desert', 'pine': 'old_growth_pine_taiga',
+                  'basalt': 'eroded_badlands', 'ashwood': 'wooded_badlands', 'flowers': 'flower_forest'}
+    for kind, m in ex.get('subs', []):
+        mm = m & land & ~beach & (height >= SEA_LEVEL) & (height < 170)
+        biome[mm] = B[SUB_BIOMES[kind]]
     biome[river & land & (height < SEA_LEVEL)] = B['river']
     sea = ~land
     biome[sea] = np.where(inland[sea], B['lukewarm_ocean'], np.where(depth[sea] > 18, B['deep_ocean'], B['ocean']))
+    biome[small] = B['river']
     # 土地の番号 (敵の強さ): REGION_IDS の並び。海も近い土地の番号
     reg = np.zeros((SIZE, SIZE), dtype=np.uint8)
     for i, k in enumerate(kinds):
@@ -326,6 +345,8 @@ MAP_COLORS = {
     'plains': (176, 186, 124), 'forest': (150, 168, 108), 'meadow': (184, 194, 130), 'windswept_hills': (164, 166, 132),
     'taiga': (140, 154, 108), 'savanna': (204, 194, 138), 'windswept_gravelly_hills': (170, 168, 150), 'stony_peaks': (186, 182, 168),
     'snowy_slopes': (230, 228, 220), 'badlands': (200, 140, 100), 'eroded_badlands': (120, 92, 84), 'river': (150, 184, 186),
+    'birch_forest': (190, 200, 140), 'swamp': (120, 140, 110), 'desert': (232, 216, 168), 'old_growth_pine_taiga': (120, 140, 100),
+    'wooded_badlands': (190, 140, 100), 'flower_forest': (196, 196, 130),
 }
 PAPER = np.array((232, 220, 190), dtype=float)
 INK = (66, 52, 40)

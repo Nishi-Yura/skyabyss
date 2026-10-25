@@ -22,7 +22,13 @@
             "minecraft:snowy_slopes",
             "minecraft:badlands",
             "minecraft:eroded_badlands",
-            "minecraft:river"
+            "minecraft:river",
+            "minecraft:birch_forest",
+            "minecraft:swamp",
+            "minecraft:desert",
+            "minecraft:old_growth_pine_taiga",
+            "minecraft:wooded_badlands",
+            "minecraft:flower_forest"
           ]
         }
       }

@@ -9,8 +9,8 @@ from PIL import Image
 HALF = 2000
 N = 500          # 案の絵の升目 (1 升 = 8 ブロック)
 PX = 1100        # 案の絵の一辺
-# いま作り進めている案 (00 の 274 の答えが出るまで C)
-CHOSEN = 'c'
+# 作る案 (00 の 274: C に決まり、形は C1 入り江と岬)
+CHOSEN = 'c1'
 
 # 土地の色 (低い所, 高い所)
 BIOMES = {
@@ -113,6 +113,7 @@ LAYOUTS.update({
     # ---- C の形の工夫 (2026-10-25 の朝。00 の 274 で C に決まったあとの三つの形)
     'c1': dict(LAYOUT_C_BASE, **{
         'title': '案 C1　入り江と岬',
+        'wavy': True,
         'lead': 'C のまま、岸に岬と湾と小島。土地の中に湖・林・湿地・砂丘。北と東の海は空けておく',
         'land': LAYOUT_C_BASE['land'] + [((1350, -950), 450, 0.55), ((-1250, 950), 420, 0.5), ((1720, 650), 170, 1.0), ((-1650, -1150), 150, 1.0),
                                          ((900, 1500), 160, 1.0)],
@@ -208,8 +209,9 @@ def terrain(lay, seed, n=N, out=None):
     for (cx, cz), r, w in lay['sea']:
         field -= w * np.clip(1 - np.hypot(WX - cx, WZ - cz) / r, 0, None) ** 0.7
     # 湖 (陸の中の小さな水)。揺らぎを小さくして形を保つ
+    lake_noise = fbm(seed + 41, octaves=4, base=24, n=n)
     for (cx, cz), r in lay.get('lakes', []):
-        d = np.hypot(X + warp * 0.15 - cx, Z + warp2 * 0.15 - cz) / r
+        d = np.hypot(X + warp * 0.15 - cx, Z + warp2 * 0.15 - cz) / r + lake_noise * 0.9
         field -= np.clip(1.15 - d, 0, None) * 2.5
     field += fbm(seed + 3, octaves=5, base=5, n=n) * 0.35
     edge = np.clip((np.maximum(abs(X), abs(Z)) - 1600) / 400, 0, 1)
@@ -226,9 +228,14 @@ def terrain(lay, seed, n=N, out=None):
     best = np.full(X.shape, 1e9)
     region = np.zeros(X.shape, dtype=int)
     dists = []
+    # 土地の境を波打たせる (C1 から。A〜C の案の絵は前のまま)
+    if lay.get('wavy'):
+        border_noise = [fbm(seed + 50 + k, octaves=4, base=8, n=n) for k in range(3)]
+    else:
+        border_noise = [np.zeros_like(X)] * 3
     for i, (_, (cx, cz)) in enumerate(lay['regions']):
         scale = 0.55 if lay['regions'][i][0] == 'start' else 1.0
-        d = np.hypot(WX * 0.6 + X * 0.4 - cx, WZ * 0.6 + Z * 0.4 - cz) / (scale if scale else 1)
+        d = np.hypot(WX * 0.6 + X * 0.4 - cx, WZ * 0.6 + Z * 0.4 - cz) / (scale if scale else 1) + border_noise[i % 3] * 260
         dists.append(d)
         m = d < best
         best[m] = d[m]
@@ -240,8 +247,9 @@ def terrain(lay, seed, n=N, out=None):
             height = np.where(region == i, height + 0.1, height)
     # 土地の中のムラ (湖のまわりの林・湿地・砂丘など)。ゆがめた円の中。種類ごとの印 (subs: [(種類, 印の配列)])
     subs = []
+    sub_noise = fbm(seed + 42, octaves=5, base=10, n=n)
     for kind, (cx, cz), r in lay.get('subs', []):
-        d = np.hypot(X + warp * 0.35 - cx, Z + warp2 * 0.35 - cz) / r
+        d = np.hypot(X + warp * 0.35 - cx, Z + warp2 * 0.35 - cz) / r + sub_noise * 1.4
         subs.append((kind, (d < 1) & land))
     if out is not None:
         out.update(X=X, Z=Z, field=field, ridge=ridge, dists=dists, subs=subs)

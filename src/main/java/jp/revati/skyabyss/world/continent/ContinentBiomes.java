@@ -30,6 +30,13 @@ public final class ContinentBiomes extends BiomeSource {
     public static final int BADLANDS = 13;
     public static final int ERODED_BADLANDS = 14;
     public static final int RIVER = 15;
+    // 土地の中のムラ (2026-10-25 の C1)
+    public static final int BIRCH_FOREST = 16;
+    public static final int SWAMP = 17;
+    public static final int DESERT = 18;
+    public static final int PINE_TAIGA = 19;
+    public static final int WOODED_BADLANDS = 20;
+    public static final int FLOWER_FOREST = 21;
 
     public static final MapCodec<ContinentBiomes> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
             Biome.CODEC.listOf().fieldOf("biomes").forGetter(s -> s.biomes)).apply(i, ContinentBiomes::new));

@@ -106,7 +106,7 @@ public final class ContinentMap {
         int b = biome(x, z);
         double amp = switch (b) {
             case ContinentBiomes.STONY_PEAKS, ContinentBiomes.SNOWY_SLOPES, ContinentBiomes.ERODED_BADLANDS -> 3.0;
-            case ContinentBiomes.WINDSWEPT_HILLS, ContinentBiomes.GRAVELLY_HILLS, ContinentBiomes.BADLANDS -> 2.0;
+            case ContinentBiomes.WINDSWEPT_HILLS, ContinentBiomes.GRAVELLY_HILLS, ContinentBiomes.BADLANDS, ContinentBiomes.WOODED_BADLANDS -> 2.0;
             default -> 1.2;
         };
         amp *= Math.max(0.0, Math.min(1.0, range[0] / 3.0));
