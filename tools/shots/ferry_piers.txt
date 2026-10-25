@@ -1,0 +1,26 @@
+# 内海の渡し船の桟橋 (都の側と汐守の側)
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/ferry_piers.txt -PshotsName=ferry_piers
+world continent_piers continent
+size 1600 900
+timeout 1200
+render 8
+guiscale 2
+wait 100
+cmd skyabyss cinematic stop
+cmd time set 5000
+cmd skyabyss dev opening build
+wait 400
+hud off
+cmd gamemode spectator
+cmd skyabyss dev grounds mark ferry 0 pos
+waitchunks 300
+wait 100
+cmd execute at @s run tp @s ~ ~30 ~ 0 80
+wait 60
+shot capital_side
+cmd skyabyss dev grounds mark ferry 1 pos
+waitchunks 300
+wait 100
+cmd execute at @s run tp @s ~ ~30 ~ 0 80
+wait 60
+shot tide_side
