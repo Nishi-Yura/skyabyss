@@ -1,4 +1,7 @@
 {
+  "map.skyabyss.poi.undiscovered": "%s（未発見）",
+  "message.skyabyss.poi.discovered": "見どころを見つけた（%s / %s）",
+  "growth.skyabyss.reason.discovery": "発見",
   "map.skyabyss.poi.cave": "岩の口の洞窟",
   "sign.skyabyss.poi_cave.1": "下へ行くほど",
   "sign.skyabyss.poi_cave.2": "骨が増える",

@@ -726,7 +726,8 @@ public class TravelMapScreen extends Screen {
             }
             int[] at = project(m.x(), m.z());
             int rim = m.color() == 0 ? p.rim() : 0xFF000000 | m.color();
-            boolean poi = m.kind() == MapMarks.Kind.WAYMARK && m.extra().startsWith("poi:");
+            boolean unfound = m.kind() == MapMarks.Kind.WAYMARK && m.extra().startsWith("poi~:");
+            boolean poi = unfound || m.kind() == MapMarks.Kind.WAYMARK && m.extra().startsWith("poi:");
             if (poi && at[2] == 1) {
                 continue; // 見どころは数が多いので、枠の外のものは縁に寄せない
             }
@@ -741,7 +742,7 @@ public class TravelMapScreen extends Screen {
                 sprite(g, S_RUMOR, at[0], at[1], 0, 0.85f);
             } else {
                 backing(g, at[0], at[1], at[2] == 1 ? 0.45f : 0.75f);
-                sprite(g, poi ? poiSprite(m.extra().substring(4)) : sprite(m.kind()), at[0], at[1], rim, at[2] == 1 ? 0.6f : 1f);
+                sprite(g, poi ? poiSprite(m.extra().substring(m.extra().indexOf(':') + 1)) : sprite(m.kind()), at[0], at[1], rim, at[2] == 1 || unfound ? 0.5f : 1f);
                 icons.add(new int[] {at[0] - 8, at[1] - 8, 16, 16});
                 int pr = labelPriority(m);
                 if (pr > 0 && at[2] == 0) {

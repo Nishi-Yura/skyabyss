@@ -43,6 +43,11 @@ public final class ContinentPois {
     static final int FOES_RADIUS = 28;
     static final long FOES_COOLDOWN = 20 * 60 * 8;
     static final int CHECK = 40;
+    // 発見 (Wynncraft の Discovery): この距離まで近づいたら見つけたことにする
+    static final int DISCOVER_RADIUS = 20;
+    static final String FOUND_TAG = "skyabyss_poi_found";
+    // 土地ごとの発見の経験値 (野・島・岩鯨・潮殻・雷翼・余燼。ContinentMap の土地の番号の順)
+    static final int[] DISCOVER_XP = {20, 10, 30, 45, 65, 85};
 
     // a・b = 道しるべの行き先 (signpost.skyabyss.<id>)、da・db = そこまでのおおよその道のり
     public record Poi(String kind, int x, int z, String a, int da, String b, int db) {
@@ -104,11 +109,48 @@ public final class ContinentPois {
                     if (!SiteBuilds.queued(e)) {
                         SiteBuilds.enqueue(job(over, data, e));
                     }
-                } else if (e.extra("foes") != null && d2 <= (double) FOES_RADIUS * FOES_RADIUS) {
-                    foes(over, e, list.get(i).kind());
+                } else {
+                    if (!poi.kind().equals("signpost") && d2 <= (double) DISCOVER_RADIUS * DISCOVER_RADIUS) {
+                        discover(p, i, poi);
+                    }
+                    if (e.extra("foes") != null && d2 <= (double) FOES_RADIUS * FOES_RADIUS) {
+                        foes(over, e, list.get(i).kind());
+                    }
                 }
             }
         }
+    }
+
+    // 見つけた見どころの番号 (死んでも消えない所に覚える)
+    public static java.util.Set<Integer> discovered(net.minecraft.world.entity.player.Player p) {
+        java.util.Set<Integer> out = new java.util.HashSet<>();
+        for (int i : persisted(p).getIntArray(FOUND_TAG)) {
+            out.add(i);
+        }
+        return out;
+    }
+
+    static net.minecraft.nbt.CompoundTag persisted(net.minecraft.world.entity.player.Player p) {
+        net.minecraft.nbt.CompoundTag root = p.getPersistentData();
+        if (!root.contains(net.minecraft.world.entity.player.Player.PERSISTED_NBT_TAG)) {
+            root.put(net.minecraft.world.entity.player.Player.PERSISTED_NBT_TAG, new net.minecraft.nbt.CompoundTag());
+        }
+        return root.getCompound(net.minecraft.world.entity.player.Player.PERSISTED_NBT_TAG);
+    }
+
+    // 初めてなら覚えて、名前の札 (「発見」と見どころの名前) と土地の経験値
+    static boolean discover(ServerPlayer p, int index, Poi poi) {
+        java.util.Set<Integer> found = discovered(p);
+        if (!found.add(index)) {
+            return false;
+        }
+        persisted(p).putIntArray(FOUND_TAG, found.stream().mapToInt(Integer::intValue).sorted().toArray());
+        jp.revati.skyabyss.notice.Notice.place(p, net.minecraft.network.chat.Component.translatable("map.skyabyss.poi." + poi.kind()),
+                net.minecraft.network.chat.Component.translatable("message.skyabyss.poi.discovered", found.size(), all().stream().filter(q -> !q.kind().equals("signpost")).count()));
+        int region = ContinentMap.get().region(poi.x(), poi.z());
+        jp.revati.skyabyss.rpg.Growth.addXp(p, DISCOVER_XP[Math.max(0, Math.min(DISCOVER_XP.length - 1, region))], "growth.skyabyss.reason.discovery");
+        p.serverLevel().playSound(null, p.blockPosition(), net.minecraft.sounds.SoundEvents.PLAYER_LEVELUP, net.minecraft.sounds.SoundSource.PLAYERS, 0.4f, 1.6f);
+        return true;
     }
 
     static SiteData.Entry entry(SiteData data, int index) {

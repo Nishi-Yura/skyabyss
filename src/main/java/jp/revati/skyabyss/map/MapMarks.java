@@ -58,7 +58,8 @@ public final class MapMarks {
     }
 
     // 送る印の上限 (仲間・墓・目的はクライアントの分で、ここには入らない)
-    public static final int MAX = 96;
+    // 印の数の上限 (見どころ 100 と町・跡地・巨神などが入る数)
+    public static final int MAX = 256;
     // 「近くに来た」とみなす距離 (町を見た)
     static final int SEEN_NEAR = 64;
 
@@ -92,9 +93,35 @@ public final class MapMarks {
             BlockPos s = over.getSharedSpawnPos();
             out.add(new Mark(Kind.SPAWN, "spawn", "spawn", "", s.getX(), s.getZ(), false, 0));
         }
+        // 天と淵の大陸の見どころは最後に (多いので、上限で切れるならここから切れる)
+        poiMarks(player, spots, out);
         BlockPos center = town != null ? town : over.getSharedSpawnPos();
         boolean townKnown = out.stream().anyMatch(m -> m.kind() == Kind.TOWN && !m.rumor());
         return new Sheet(center.getX(), center.getZ(), townKnown, out.size() > MAX ? List.copyOf(out.subList(0, MAX)) : List.copyOf(out));
+    }
+
+    // 天と淵の大陸の見どころ (Wynncraft の地図のように、行く前から全部出す。建ったものは建った位置)。碑などの印で、指すと名前。
+    // まだ見つけていない見どころは extra を "poi~:<種類>" にして、画面で薄く描く (ContinentPois.discovered)
+    static void poiMarks(ServerPlayer player, List<Spot> entries, List<Mark> out) {
+        if (entries.stream().noneMatch(e -> e.kind().equals(jp.revati.skyabyss.world.continent.ContinentTowns.KIND))) {
+            return;
+        }
+        List<jp.revati.skyabyss.world.continent.ContinentPois.Poi> all = jp.revati.skyabyss.world.continent.ContinentPois.all();
+        java.util.Map<Integer, BlockPos> built = new java.util.HashMap<>();
+        for (Spot e : entries) {
+            if (e.kind().equals(jp.revati.skyabyss.world.continent.ContinentPois.KIND)) {
+                built.put(e.index(), e.pos());
+            }
+        }
+        java.util.Set<Integer> found = jp.revati.skyabyss.world.continent.ContinentPois.discovered(player);
+        for (int i = 0; i < all.size(); i++) {
+            jp.revati.skyabyss.world.continent.ContinentPois.Poi poi = all.get(i);
+            if (poi.kind().equals("signpost")) {
+                continue;
+            }
+            BlockPos at = built.getOrDefault(i, new BlockPos(poi.x(), 0, poi.z()));
+            out.add(new Mark(Kind.WAYMARK, "poi" + i, "", (found.contains(i) ? "poi:" : "poi~:") + poi.kind(), at.getX(), at.getZ(), false, 0));
+        }
     }
 
     // 序盤の拍子から読む「知っていること」(純粋。自己テスト向けに分けてある)
@@ -149,24 +176,6 @@ public final class MapMarks {
             if (e.kind().equals(jp.revati.skyabyss.world.continent.ContinentTowns.KIND)) {
                 String region = jp.revati.skyabyss.world.continent.ContinentTowns.region(e.index());
                 out.add(new Mark(Kind.TOWN, "town_" + region, "town", region, e.pos().getX(), e.pos().getZ(), false, 0));
-            }
-        }
-        // 天と淵の大陸の見どころ (Wynncraft の地図のように、行く前から全部出す。建ったものは建った位置)。碑の印で、指すと名前 (map.skyabyss.poi.<種類>)
-        if (entries.stream().anyMatch(e -> e.kind().equals(jp.revati.skyabyss.world.continent.ContinentTowns.KIND))) {
-            List<jp.revati.skyabyss.world.continent.ContinentPois.Poi> all = jp.revati.skyabyss.world.continent.ContinentPois.all();
-            java.util.Map<Integer, BlockPos> built = new java.util.HashMap<>();
-            for (Spot e : entries) {
-                if (e.kind().equals(jp.revati.skyabyss.world.continent.ContinentPois.KIND)) {
-                    built.put(e.index(), e.pos());
-                }
-            }
-            for (int i = 0; i < all.size(); i++) {
-                jp.revati.skyabyss.world.continent.ContinentPois.Poi poi = all.get(i);
-                if (poi.kind().equals("signpost")) {
-                    continue;
-                }
-                BlockPos at = built.getOrDefault(i, new BlockPos(poi.x(), 0, poi.z()));
-                out.add(new Mark(Kind.WAYMARK, "poi" + i, "", "poi:" + poi.kind(), at.getX(), at.getZ(), false, 0));
             }
         }
         Spot ribsSpot = first(entries, "ribs");

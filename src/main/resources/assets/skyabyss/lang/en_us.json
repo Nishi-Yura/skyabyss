@@ -1,4 +1,7 @@
 {
+  "map.skyabyss.poi.undiscovered": "%s (undiscovered)",
+  "message.skyabyss.poi.discovered": "Discovery found (%s / %s)",
+  "growth.skyabyss.reason.discovery": "Discovery",
   "map.skyabyss.poi.cave": "Rock Mouth Cave",
   "sign.skyabyss.poi_cave.1": "The deeper you go",
   "sign.skyabyss.poi_cave.2": "the more bones",

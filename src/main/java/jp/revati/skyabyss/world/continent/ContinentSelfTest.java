@@ -54,6 +54,19 @@ public final class ContinentSelfTest {
                 f.add("the western ridge peaks at only Y " + peak);
             }
             ServerLevel level = server.overworld();
+            // 発見: 一度目だけ数えて経験値、二度目は何もしない。覚えた番号は持ち物と同じく死んでも残る所 (PlayerPersisted)
+            net.neoforged.neoforge.common.util.FakePlayer probe = new net.neoforged.neoforge.common.util.FakePlayer(level,
+                    new com.mojang.authlib.GameProfile(java.util.UUID.randomUUID(), "poi_probe"));
+            ContinentPois.Poi first = ContinentPois.all().get(0);
+            boolean once = ContinentPois.discover(probe, 0, first);
+            boolean twice = ContinentPois.discover(probe, 0, first);
+            if (!once || twice || !ContinentPois.discovered(probe).contains(0)
+                    || !probe.getPersistentData().getCompound(net.minecraft.world.entity.player.Player.PERSISTED_NBT_TAG).contains(ContinentPois.FOUND_TAG)) {
+                f.add("discovery: first " + once + " second " + twice + " found " + ContinentPois.discovered(probe));
+            }
+            if (jp.revati.skyabyss.map.MapMarks.MAX < ContinentPois.all().size() + 60) {
+                f.add("map mark cap " + jp.revati.skyabyss.map.MapMarks.MAX + " is too small for " + ContinentPois.all().size() + " POIs");
+            }
             // 地面に四角い穴が無い: 野・浜・荒野のいくつかの所で、まわり (±3) のどれよりも 2 以上低い所を数える
             int pits = 0;
             String firstPit = "";
@@ -127,7 +140,7 @@ public final class ContinentSelfTest {
             f.add("crashed: " + e);
         }
         if (f.isEmpty()) {
-            SkyAbyss.LOGGER.info("SELFTEST continent PASSED (map loads; flat capital at Y 72, inland sea, outer deep sea, western peaks; regional enemy strength; no square pits; outskirts stops avoid footprints; real chunks match when the world is a continent)");
+            SkyAbyss.LOGGER.info("SELFTEST continent PASSED (map loads; flat capital at Y 72, inland sea, outer deep sea, western peaks; regional enemy strength; no square pits; outskirts stops avoid footprints; discovery once per POI; map mark cap fits the POIs; real chunks match when the world is a continent)");
         } else {
             for (String s : f) {
                 SkyAbyss.LOGGER.error("SELFTEST continent FAILED: {}", s);
