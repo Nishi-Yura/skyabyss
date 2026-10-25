@@ -29,7 +29,7 @@ STYLES = {
     },
     'tide': {  # 東の浜の港町: 白い壁、青い屋根、砂岩の土台
         'base': 'minecraft:cut_sandstone', 'base2': 'minecraft:smooth_sandstone',
-        'wall': 'minecraft:white_terracotta', 'wall2': 'minecraft:calcite',
+        'wall': 'minecraft:calcite', 'wall2': 'minecraft:white_terracotta',
         'frame': 'minecraft:stripped_birch_log', 'beam': 'minecraft:birch_log',
         'roof': 'minecraft:dark_prismarine_stairs', 'roofslab': 'minecraft:dark_prismarine_slab', 'roofblock': 'minecraft:dark_prismarine',
         'floor': 'minecraft:birch_planks', 'door': 'minecraft:birch_door', 'trap': 'minecraft:birch_trapdoor',
