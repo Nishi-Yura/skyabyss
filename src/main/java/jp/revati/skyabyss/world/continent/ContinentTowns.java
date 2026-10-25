@@ -56,6 +56,24 @@ public final class ContinentTowns {
                 be.setChanged();
                 level.sendBlockUpdated(sign, be.getBlockState(), be.getBlockState(), 3);
             }
+            // 町の気配: 広場のまわりに猫二匹と鶏三羽 (建てたときに一度だけ。消えない)
+            BlockPos stand = job.mark("stand");
+            if (stand != null) {
+                net.minecraft.world.entity.EntityType<?>[] kinds = {net.minecraft.world.entity.EntityType.CAT, net.minecraft.world.entity.EntityType.CAT,
+                        net.minecraft.world.entity.EntityType.CHICKEN, net.minecraft.world.entity.EntityType.CHICKEN, net.minecraft.world.entity.EntityType.CHICKEN};
+                for (int k = 0; k < kinds.length; k++) {
+                    double a = k * 1.3 + 0.4;
+                    int x = stand.getX() + (int) Math.round(Math.cos(a) * 7);
+                    int z = stand.getZ() + (int) Math.round(Math.sin(a) * 7);
+                    int y = level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z);
+                    if (kinds[k].create(level) instanceof net.minecraft.world.entity.Mob m) {
+                        m.moveTo(x + 0.5, y, z + 0.5, level.random.nextFloat() * 360f, 0f);
+                        m.finalizeSpawn(level, level.getCurrentDifficultyAt(m.blockPosition()), net.minecraft.world.entity.MobSpawnType.STRUCTURE, null);
+                        m.setPersistenceRequired();
+                        level.addFreshEntity(m);
+                    }
+                }
+            }
             // 宿と道具屋の戸の上の看板
             for (String kind : new String[] {"inn", "shop"}) {
                 BlockPos at = job.mark("sign_" + kind);
