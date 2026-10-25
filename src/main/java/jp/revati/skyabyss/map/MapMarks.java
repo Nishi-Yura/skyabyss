@@ -151,6 +151,15 @@ public final class MapMarks {
                 out.add(new Mark(Kind.TOWN, "town_" + region, "town", region, e.pos().getX(), e.pos().getZ(), false, 0));
             }
         }
+        // 天と淵の大陸の見どころ (誰かが近くまで来て建ったもの)。碑の印で、指すと名前 (map.skyabyss.poi.<種類>)
+        for (Spot e : entries) {
+            if (e.kind().equals(jp.revati.skyabyss.world.continent.ContinentPois.KIND)) {
+                List<jp.revati.skyabyss.world.continent.ContinentPois.Poi> all = jp.revati.skyabyss.world.continent.ContinentPois.all();
+                if (e.index() >= 0 && e.index() < all.size()) {
+                    out.add(new Mark(Kind.WAYMARK, "poi" + e.index(), "", "poi:" + all.get(e.index()).kind(), e.pos().getX(), e.pos().getZ(), false, 0));
+                }
+            }
+        }
         Spot ribsSpot = first(entries, "ribs");
         BlockPos ribs = ribsSpot == null ? null : ribsSpot.pos();
         if (ribs != null) {

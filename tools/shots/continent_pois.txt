@@ -1,8 +1,8 @@
-# 天と淵の大陸の見どころ (gen_continent_pois.py)。種類ごとに一つずつ撮る
+# 天と淵の大陸の見どころ (gen_continent_pois.py)。種類ごとに一つずつ撮る (近くに立って建てさせてから、観戦者で空から)
 # bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/continent_pois.txt -PshotsName=continent_pois
 world continent_pois continent
 size 1600 900
-timeout 2400
+timeout 3000
 render 8
 clouds off
 guiscale 2
@@ -14,77 +14,148 @@ cmd gamerule doDaylightCycle false
 cmd gamerule doMobSpawning false
 cmd skyabyss dev opening build
 wait 200
-cmd gamemode creative
 hud off
-cmd tp @s -2 113 -522 135 30
+cmd gamemode creative
+cmd tp @s -482 92 842
 waitchunks 600
-wait 240
+wait 300
+cmd gamemode spectator
+cmd tp @s -492 108 832 135 32
+wait 60
 shot windmill
-cmd tp @s -470 95 334 135 30
+cmd gamemode creative
+cmd tp @s -90 87 610
 waitchunks 600
-wait 240
+wait 300
+cmd gamemode spectator
+cmd tp @s -100 103 600 135 32
+wait 60
 shot farm
-cmd tp @s -574 96 638 135 30
+cmd gamemode creative
+cmd tp @s -354 91 -414
 waitchunks 600
-wait 240
+wait 300
+cmd gamemode spectator
+cmd tp @s -364 107 -424 135 32
+wait 60
 shot watchtower
-cmd tp @s 42 98 -286 135 30
+cmd gamemode creative
+cmd tp @s -146 87 -226
 waitchunks 600
-wait 240
+wait 300
+cmd gamemode spectator
+cmd tp @s -156 103 -236 135 32
+wait 60
 shot roadside_shrine
-cmd tp @s -254 98 730 135 30
+cmd gamemode creative
+cmd tp @s -294 83 474
 waitchunks 600
-wait 240
+wait 300
+cmd gamemode spectator
+cmd tp @s -304 99 464 135 32
+wait 60
 shot bandit_camp
-cmd tp @s -254 93 -174 135 30
+cmd gamemode creative
+cmd tp @s -670 119 -418
 waitchunks 600
-wait 240
+wait 300
+cmd gamemode spectator
+cmd tp @s -680 135 -428 135 32
+wait 60
 shot ruined_house
-cmd tp @s -290 127 -846 135 30
+cmd gamemode creative
+cmd tp @s -182 111 -818
 waitchunks 600
-wait 240
+wait 300
+cmd gamemode spectator
+cmd tp @s -192 127 -828 135 32
+wait 60
 shot titan_ribs
-cmd tp @s 190 122 -666 135 30
+cmd gamemode creative
+cmd tp @s 386 106 -850
 waitchunks 600
-wait 240
+wait 300
+cmd gamemode spectator
+cmd tp @s 376 122 -860 135 32
+wait 60
 shot monastery
-cmd tp @s 366 124 -1118 135 30
+cmd gamemode creative
+cmd tp @s 274 120 -1314
 waitchunks 600
-wait 240
+wait 300
+cmd gamemode spectator
+cmd tp @s 264 136 -1324 135 32
+wait 60
 shot stone_circle
-cmd tp @s 1014 83 334 135 30
+cmd gamemode creative
+cmd tp @s 1214 70 254
 waitchunks 600
-wait 240
+wait 300
+cmd gamemode spectator
+cmd tp @s 1204 86 244 135 32
+wait 60
 shot lighthouse
-cmd tp @s 1574 84 422 135 30
+cmd gamemode creative
+cmd tp @s 1606 70 -10
 waitchunks 600
-wait 240
+wait 300
+cmd gamemode spectator
+cmd tp @s 1596 86 -20 135 32
+wait 60
 shot beached_wreck
-cmd tp @s 1146 84 -126 135 30
+cmd gamemode creative
+cmd tp @s 1638 80 454
 waitchunks 600
-wait 240
+wait 300
+cmd gamemode spectator
+cmd tp @s 1628 96 444 135 32
+wait 60
 shot fishing_huts
-cmd tp @s -1230 178 290 135 30
+cmd gamemode creative
+cmd tp @s -1114 174 162
 waitchunks 600
-wait 240
+wait 300
+cmd gamemode spectator
+cmd tp @s -1124 190 152 135 32
+wait 60
 shot wind_gate
-cmd tp @s -1082 181 -178 135 30
+cmd gamemode creative
+cmd tp @s -1070 171 -182
 waitchunks 600
-wait 240
+wait 300
+cmd gamemode spectator
+cmd tp @s -1080 187 -192 135 32
+wait 60
 shot rod_tower
-cmd tp @s -1274 163 2 135 30
+cmd gamemode creative
+cmd tp @s -1294 132 -6
 waitchunks 600
-wait 240
+wait 300
+cmd gamemode spectator
+cmd tp @s -1304 148 -16 135 32
+wait 60
 shot mountain_hut
-cmd tp @s -526 103 1030 135 30
+cmd gamemode creative
+cmd tp @s -54 102 858
 waitchunks 600
-wait 240
+wait 300
+cmd gamemode spectator
+cmd tp @s -64 118 848 135 32
+wait 60
 shot burnt_fort
-cmd tp @s 222 116 902 135 30
+cmd gamemode creative
+cmd tp @s -398 88 1150
 waitchunks 600
-wait 240
+wait 300
+cmd gamemode spectator
+cmd tp @s -408 104 1140 135 32
+wait 60
 shot forge_ruin
-cmd tp @s -270 95 1334 135 30
+cmd gamemode creative
+cmd tp @s 458 102 978
 waitchunks 600
-wait 240
+wait 300
+cmd gamemode spectator
+cmd tp @s 448 118 968 135 32
+wait 60
 shot basalt_gate
