@@ -29,6 +29,8 @@ import net.minecraft.world.phys.Vec3;
 //  - 光る敵を放っておくと、いずれ過負荷で自分の足もとに赤い輪を出す (人に当たる。そのあと帯電は最初から)。光ったら集めて倒すのが早い
 //  - 三つの波 (蛾 → 雷乞い混じり → 羽守混じり) のあと、帯電しきった精鋭の羽守。精鋭は連鎖の雷を倍で受け、ときどき光る雷蛾を従える
 //  - 雷は敵にだけ跳ぶ (人には当たらない)
+//  - 闘の試練では (32 の 9.5) 三つの波のあと、精鋭の代わりに雷獣が現れる (部屋に避雷の柱と栓が建つ)。雷蛾がときどき湧き続け、
+//    光る敵を雷獣のそばで倒すと、跳んだ雷が雷獣に BOSS_FACTOR 倍で当たる (雷獣は雷を受けないので、柱を渡っていないときだけ、雷でない傷として)
 public final class ChargeChain extends RaidRoom {
     static final int HX = 14;
     static final int HZ = 14;
@@ -44,6 +46,10 @@ public final class ChargeChain extends RaidRoom {
     static final double OVERLOAD_R = 3.4;
     static final float OVERLOAD_DAMAGE = 5f;
     static final int ADDS_EVERY = 240;
+    static final float BOSS_FACTOR = 2f;
+    // 中ボスの段で雷蛾を足す間 (tick)・数の上限
+    static final int BOSS_ADDS_EVERY = 200;
+    static final int BOSS_ADDS_CAP = 5;
 
     private final Map<Mob, Integer> charge = new IdentityHashMap<>();
     private int wave;
@@ -55,6 +61,8 @@ public final class ChargeChain extends RaidRoom {
     private boolean done;
     private long nextAdds;
     private boolean started;
+    // 中ボスの段の雷獣 (連鎖の雷の当たり先)
+    private Mob boss;
 
     @Override
     public void build(RaidCtx ctx) {
@@ -104,8 +112,45 @@ public final class ChargeChain extends RaidRoom {
 
     @Override
     public void tick(RaidCtx ctx) {
-        ServerLevel level = ctx.level();
         age++;
+        charges(ctx);
+        waves(ctx);
+    }
+
+    @Override
+    public void bossBegin(RaidCtx ctx, Mob boss) {
+        this.boss = boss;
+        nextAdds = age + 120;
+        ctx.say(Component.translatable("message.skyabyss.raid.SR3.raiju"));
+    }
+
+    @Override
+    public void bossTick(RaidCtx ctx, Mob boss) {
+        this.boss = boss;
+        age++;
+        charges(ctx);
+        if (age >= nextAdds) {
+            nextAdds = age + BOSS_ADDS_EVERY;
+            int n = 0;
+            for (Mob m : ctx.aliveMobs()) {
+                if (m != boss) {
+                    n++;
+                }
+            }
+            for (int i = 0; i < 2 && n + i < BOSS_ADDS_CAP; i++) {
+                enter(ctx, StormMobSetup.STATIC_MOTH.get());
+            }
+        }
+    }
+
+    @Override
+    public void bossDone(RaidCtx ctx) {
+        StormRoomDeco.exitLit(ctx, true);
+    }
+
+    // 倒れた敵の連鎖と帯電
+    private void charges(RaidCtx ctx) {
+        ServerLevel level = ctx.level();
         // 倒れた敵: 光っていたら連鎖
         List<Mob> dead = new ArrayList<>();
         for (Map.Entry<Mob, Integer> e : charge.entrySet()) {
@@ -139,7 +184,10 @@ public final class ChargeChain extends RaidRoom {
                 m.setGlowingTag(false);
             }
         }
-        // 波
+    }
+
+    // 波と精鋭
+    private void waves(RaidCtx ctx) {
         List<Mob> alive = ctx.aliveMobs();
         if (done) {
             return;
@@ -175,6 +223,9 @@ public final class ChargeChain extends RaidRoom {
                 spawnWave(ctx, wave);
                 ctx.say(Component.translatable("message.skyabyss.raid.SR3.wave", wave));
                 nextWaveAt = age + WAVE_GAP;
+            } else if (bossFollows) {
+                // 精鋭の代わりに雷獣 (FightBossRoom が出す)
+                done = true;
             } else {
                 spawnElite(ctx);
             }
@@ -193,6 +244,7 @@ public final class ChargeChain extends RaidRoom {
         cleared = 0;
         age = 0;
         elite = null;
+        boss = null;
         eliteSpawned = false;
         done = false;
         started = false;
@@ -328,10 +380,16 @@ public final class ChargeChain extends RaidRoom {
             if (hit >= CHAIN_MAX) {
                 break;
             }
-            float dmg = CHAIN_DAMAGE * (m == elite ? ELITE_FACTOR : 1f);
             Vec3 to = m.position().add(0, m.getBbHeight() / 2, 0);
             arc(level, from, to);
-            m.hurt(level.damageSources().lightningBolt(), dmg);
+            if (m == boss) {
+                // 雷獣は雷では傷つかないので、跳んだ雷は雷でない傷 (柱を渡っている間は当たらない)
+                m.invulnerableTime = 0;
+                m.hurt(level.damageSources().magic(), CHAIN_DAMAGE * BOSS_FACTOR);
+                level.sendParticles(ParticleTypes.ELECTRIC_SPARK, to.x, to.y, to.z, 30, 0.6, 0.8, 0.6, 0.2);
+            } else {
+                m.hurt(level.damageSources().lightningBolt(), CHAIN_DAMAGE * (m == elite ? ELITE_FACTOR : 1f));
+            }
             hit++;
         }
         StormRaid.zap(level, BlockPos.containing(from), 1.0f, hit > 0 ? 1.4f : 1.0f);
@@ -363,6 +421,11 @@ public final class ChargeChain extends RaidRoom {
 
     public Mob elite() {
         return elite;
+    }
+
+    @javax.annotation.Nullable
+    public Mob boss() {
+        return boss;
     }
 
     public boolean eliteSpawned() {

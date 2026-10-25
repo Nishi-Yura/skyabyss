@@ -23,6 +23,8 @@ import net.minecraft.world.phys.Vec3;
 //   2. 中ボスの段: 元の部屋を越えたら、部屋のその時の姿を控え、中ボスの間の仕掛け (砂の床と岩の小島・避雷の柱と栓・焼き入れの槽と炉の扉) を
 //      部屋に建てて (MidRoom.fitInto)、中ボスを部屋に出す。中ボスは段なし (怒りの段に入らない) で体力 7 割
 //   中ボスを倒すと越える。中ボスの段で全員が倒れたら、控えから部屋を戻して波の段から最初から
+//   3. 部屋ごとの出方 (RaidRoom.bossFit / bossBegin / bossTick / bossDone): 番兵長が核を狙う・輪の外で削れる・苗の台が招き潮の逃げ場・
+//      影の潮招き・帯電の連鎖が雷獣へ跳ぶ・突風は吹き続ける・鍛え手が炉の火を消しに来る・四人目の弟子の代わりに師
 // 中ボスの技・報い (中ボスの落とし物) は中ボスの間 (MidRoom) のまま。順路の報い (RaidRewards) は闘の部屋と中ボスの間の両方 (RaidRun.complete)
 public final class FightBossRoom extends RaidRoom {
     // 中ボスの体力の割合
@@ -36,12 +38,15 @@ public final class FightBossRoom extends RaidRoom {
     @Nullable
     private MidRoom mid;
     private boolean bossStage;
+    // 中ボスを倒したことを元の部屋に知らせた
+    private boolean doneTold;
     // 中ボスの段に入る前の部屋の姿 (位置 → ブロック)
     private final Map<BlockPos, BlockState> before = new HashMap<>();
 
     public FightBossRoom(String titan, RaidRoom inner) {
         this.titan = titan;
         this.inner = inner;
+        inner.followBoss();
     }
 
     public RaidRoom inner() {
@@ -112,24 +117,38 @@ public final class FightBossRoom extends RaidRoom {
         if (mid != null) {
             mid.tick(ctx);
             keepInside(ctx);
+            if (mid.isComplete()) {
+                if (!doneTold) {
+                    doneTold = true;
+                    inner.bossDone(ctx);
+                }
+            } else if (mid.boss != null && mid.boss.isAlive()) {
+                inner.bossTick(ctx, mid.boss);
+            }
         }
     }
 
     // 波を越えた: 部屋を控えて、中ボスの仕掛けを建て、中ボスを出す
     void beginBoss(RaidCtx ctx) {
         bossStage = true;
+        doneTold = false;
         ctx.clearMobs();
-        snapshot(ctx);
         mid = MidRooms.create(titan) instanceof MidRoom m ? m : null;
         if (mid == null) {
+            snapshot(ctx);
             SkyAbyss.LOGGER.warn("Fight room {}: no mid-boss for {}", ctx.roomId(), titan);
             return;
         }
         mid.inRoom = true;
+        inner.bossFit(ctx, mid);
+        snapshot(ctx);
         mid.fitInto(ctx);
         mid.start(ctx);
         tame(mid.boss);
         keepInside(ctx);
+        if (mid.boss != null) {
+            inner.bossBegin(ctx, mid.boss);
+        }
         SkyAbyss.LOGGER.info("Fight room {}: waves cleared, the mid-boss appears in the room", ctx.roomId());
     }
 
@@ -199,6 +218,7 @@ public final class FightBossRoom extends RaidRoom {
             restore(ctx);
         }
         bossStage = false;
+        doneTold = false;
         inner.reset(ctx);
     }
 
@@ -240,24 +260,30 @@ public final class FightBossRoom extends RaidRoom {
         return shown().counterMax();
     }
 
+    // 二つ目の数: 核・炉の体力のように中ボスの段でも元の部屋の数が要る部屋は元の部屋のもの
+    private RaidRoom second() {
+        return inner.bossKeepsSecondary() ? inner : shown();
+    }
+
     @Override
     public String secondaryKey() {
-        return shown().secondaryKey();
+        return second().secondaryKey();
     }
 
     @Override
     public int secondary() {
-        return shown().secondary();
+        return second().secondary();
     }
 
     @Override
     public int secondaryMax() {
-        return shown().secondaryMax();
+        return second().secondaryMax();
     }
 
     @Override
     public int timerTicks() {
-        return shown().timerTicks();
+        int t = shown().timerTicks();
+        return t < 0 && bossStage ? inner.bossTimerTicks() : t;
     }
 
     @Override

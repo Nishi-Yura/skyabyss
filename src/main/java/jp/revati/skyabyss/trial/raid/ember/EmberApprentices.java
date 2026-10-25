@@ -26,6 +26,8 @@ import net.minecraft.world.level.block.Blocks;
 //      一 鎚打ち (前方の帯・赤い予告 1 秒)   二 + 火花散らし (足もとへ円が三つ)   三 + 鞴の息 (前方の扇)   四 + 焼き入れ (自分のまわりの大きな円)
 //  - 傷のある技は、すべて赤い予告のあとに当たる。人数が増えると、弟子の体力と火花の数が増える。一人でも、印を見れば傷なしで避けられる
 //  - 一人が倒れると、少し間があって次が出る。四人とも倒せば越える。全員が倒れると部屋は最初から (弟子は消える)
+//  - 闘の試練では (32 の 9.5) 三人の弟子のあと、四人目の代わりに師の灰の鍛え手が炉の前に立つ (部屋に焼き入れの槽・灰溜まり・炉の扉が建つ)。
+//    四つ目の灯は師を倒すと点く
 public final class EmberApprentices extends EmberRoom {
     public static final String ID = "ER6";
     public static final int COUNT = 4;
@@ -188,6 +190,9 @@ public final class EmberApprentices extends EmberRoom {
         particles(ctx, ParticleTypes.LAVA, m.getX(), m.getY() + 1, m.getZ(), 20, 0.6, 0.2);
         ctx.level().playSound(null, m.blockPosition(), SoundEvents.BLAZE_SHOOT, SoundSource.HOSTILE, 1.2f, 0.5f);
         bar(ctx, Component.translatable("raid.skyabyss.ER6.enter", i + 1, COUNT));
+        if (bossFollows && i + 1 == count()) {
+            bar(ctx, Component.translatable("raid.skyabyss.ER6.last", i + 1));
+        }
     }
 
     @Nullable
@@ -306,15 +311,17 @@ public final class EmberApprentices extends EmberRoom {
             defeated++;
             lamps(ctx);
             ctx.level().playSound(null, ctx.local(0, 2, 0), SoundEvents.ANVIL_DESTROY, SoundSource.HOSTILE, 1f, 0.7f);
-            if (defeated >= COUNT) {
+            if (defeated >= count()) {
                 done = true;
-                opened(ctx);
+                if (!bossFollows) {
+                    opened(ctx);
+                }
                 particles(ctx, ParticleTypes.LAVA, ctx.origin().getX() + 0.5, ctx.origin().getY() + 3, ctx.origin().getZ() + 0.5, 30, 1.5, 0.2);
                 return;
             }
             nextSpawn = t + GAP;
         }
-        if (current == null && spawned < COUNT && t >= nextSpawn) {
+        if (current == null && spawned < count() && t >= nextSpawn) {
             spawnApprentice(ctx);
         }
         if (current != null && !ps.isEmpty() && t >= nextMove) {
@@ -337,6 +344,25 @@ public final class EmberApprentices extends EmberRoom {
         if (current != null && ctx.cell() != null && !ctx.cell().inArena(current.getX(), current.getZ())) {
             current.moveTo(ctx.origin().getX() + 0.5, ctx.origin().getY() + 1, ctx.origin().getZ() + 0.5);
         }
+    }
+
+    // 闘の試練では三人 (四人目は師)
+    int count() {
+        return bossFollows ? COUNT - 1 : COUNT;
+    }
+
+    @Override
+    public void bossBegin(RaidCtx ctx, Mob boss) {
+        boss.setCustomName(Component.translatable("raid.skyabyss.ER6.master"));
+        bar(ctx, Component.translatable("raid.skyabyss.ER6.master_enter"));
+    }
+
+    @Override
+    public void bossDone(RaidCtx ctx) {
+        defeated = COUNT;
+        lamps(ctx);
+        opened(ctx);
+        particles(ctx, ParticleTypes.LAVA, ctx.origin().getX() + 0.5, ctx.origin().getY() + 3, ctx.origin().getZ() + 0.5, 30, 1.5, 0.2);
     }
 
     @Override

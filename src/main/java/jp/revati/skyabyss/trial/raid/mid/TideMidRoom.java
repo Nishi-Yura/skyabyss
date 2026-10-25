@@ -60,6 +60,18 @@ public final class TideMidRoom extends MidRoom implements TideBeckoner.Flats {
     private int hx = HX;
     private int hz = HZ;
     private int[][] rocks = ROCKS;
+    // 闘の部屋の台 (苗の台など) を小島の代わりにする (真ん中の柱 = 苗は残す)。null なら四隅と奥に岩の小島
+    @Nullable
+    private int[][] beds;
+
+    // 闘の部屋から: この台 (3 × 3。真ん中の柱は残す) を招き潮の逃げ場にする (fitInto の前に)
+    public void useBeds(int[][] at) {
+        beds = at;
+    }
+
+    public boolean usesBeds() {
+        return beds != null;
+    }
 
     // 闘の部屋に: 床を砂にして (砂紋)、四隅と奥に岩の小島。招き潮のあいだ立つ所
     @Override
@@ -67,7 +79,7 @@ public final class TideMidRoom extends MidRoom implements TideBeckoner.Flats {
         this.ctx = ctx;
         hx = ctx.cell().hx() - 1;
         hz = ctx.cell().hz() - 1;
-        rocks = new int[][] {{-hx + 3, -hz + 3}, {hx - 3, -hz + 3}, {-hx + 3, hz - 4}, {hx - 3, hz - 4}, {0, -hz + 4}};
+        rocks = beds != null ? beds : new int[][] {{-hx + 3, -hz + 3}, {hx - 3, -hz + 3}, {-hx + 3, hz - 4}, {hx - 3, hz - 4}, {0, -hz + 4}};
         ServerLevel level = ctx.level();
         BlockState sand = Blocks.SAND.defaultBlockState();
         for (int x = -hx; x <= hx; x++) {
@@ -84,7 +96,13 @@ public final class TideMidRoom extends MidRoom implements TideBeckoner.Flats {
         for (int[] r : rocks) {
             for (int dx = -1; dx <= 1; dx++) {
                 for (int dz = -1; dz <= 1; dz++) {
+                    if (beds != null && dx == 0 && dz == 0) {
+                        continue;
+                    }
                     for (int y = 1; y <= FLOOD; y++) {
+                        if (beds != null && y < FLOOD) {
+                            continue;
+                        }
                         BlockState st = y < FLOOD ? Blocks.DEAD_BRAIN_CORAL_BLOCK.defaultBlockState()
                                 : dx == 0 && dz == 0 ? Blocks.CHERRY_PLANKS.defaultBlockState() : Blocks.CALCITE.defaultBlockState();
                         RaidKit.set(level, ctx.local(r[0] + dx, y, r[1] + dz), st);
@@ -230,7 +248,7 @@ public final class TideMidRoom extends MidRoom implements TideBeckoner.Flats {
     public void warnBeckon(ServerLevel level, int ticks) {
         warn = ticks;
         if (ctx != null) {
-            WhaleMidRoom.say(ctx, "raid.skyabyss.TRM.beckon");
+            WhaleMidRoom.say(ctx, beds != null ? "raid.skyabyss.TRM.beckon_beds" : "raid.skyabyss.TRM.beckon");
         }
     }
 
@@ -342,7 +360,7 @@ public final class TideMidRoom extends MidRoom implements TideBeckoner.Flats {
 
     @Override
     public String objectiveKey() {
-        return flood > 0 || warn > 0 ? "raid.skyabyss.TRM.rocks" : "raid.skyabyss.TRM.defeat";
+        return flood > 0 || warn > 0 ? (beds != null ? "raid.skyabyss.TRM.beds" : "raid.skyabyss.TRM.rocks") : "raid.skyabyss.TRM.defeat";
     }
 
     @Override

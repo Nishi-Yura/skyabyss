@@ -1,0 +1,55 @@
+{
+  "category": "sub",
+  "order": 305,
+  "giver": "skyabyss:guest_ember_watch",
+  "chapter": "titan_ember",
+  "min_stage": 3,
+  "stages": [
+    {
+      "id": "kill",
+      "objectives": [
+        {
+          "id": "kill",
+          "type": "kill",
+          "target": "minecraft:pillager",
+          "count": 3
+        }
+      ]
+    },
+    {
+      "id": "go",
+      "objectives": [
+        {
+          "id": "go",
+          "type": "signal",
+          "target": "poi:burnt_fort",
+          "party": false
+        }
+      ]
+    },
+    {
+      "id": "back",
+      "objectives": [
+        {
+          "id": "back",
+          "type": "signal",
+          "target": "town_hand:guest_ember_watch",
+          "party": false
+        }
+      ]
+    }
+  ],
+  "reward": {
+    "xp": 100,
+    "items": [
+      {
+        "item": "skyabyss:bell_coin",
+        "count": 30
+      },
+      {
+        "item": "skyabyss:road_hardtack",
+        "count": 2
+      }
+    ]
+  }
+}

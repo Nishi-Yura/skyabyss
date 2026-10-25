@@ -601,7 +601,7 @@ public final class WhaleRaid2SelfTest {
             check(level.getBlockState(ctx.origin().offset(14, 0, 14)).is(Blocks.RED_NETHER_BRICKS), "WR6: the corner outside the ring is not red");
             check(!level.getBlockState(ctx.origin().offset(5, 0, 5)).is(Blocks.RED_NETHER_BRICKS) && !level.getBlockState(ctx.origin().offset(5, 0, 5)).is(Blocks.REDSTONE_BLOCK),
                     "WR6: the floor inside the ring is painted");
-            check(room.objectiveKey().startsWith(KEY_HEAD + "WR6") && room.counterMax() == 3 && room.secondaryMax() > 0 && !room.secondaryKey().isEmpty(), "WR6: HUD values are empty");
+            check(room.objectiveKey().startsWith(KEY_HEAD + "WR6") && room.counterMax() == 2 && room.secondaryMax() > 0 && !room.secondaryKey().isEmpty(), "WR6: HUD values are empty");
             snap("WR6a");
             put(p1, ctx.origin().offset(12, 1, 12));
             healAll();
@@ -671,10 +671,10 @@ public final class WhaleRaid2SelfTest {
                 }
             }
             healAll();
-            return waitFor(() -> jp.revati.skyabyss.trial.raid.mid.FightBossRoom.finishBoss(room, null) && false || room.isComplete(), 1500, "WR6 complete (three waves)");
+            return waitFor(() -> jp.revati.skyabyss.trial.raid.mid.FightBossRoom.finishBoss(room, null) && false || room.isComplete(), 1500, "WR6 complete (two waves)");
         });
         STAGES.add(() -> {
-            check(ringRoom().wave() == 3, "WR6: completed with wave " + ringRoom().wave());
+            check(ringRoom().wave() == 2, "WR6: completed with wave " + ringRoom().wave());
             // リセット: 輪も床も最初へ
             ctx.clearMobs();
             room.reset(ctx);

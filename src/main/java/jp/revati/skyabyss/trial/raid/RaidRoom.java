@@ -86,4 +86,38 @@ public abstract class RaidRoom {
     // 片付け (任意)
     public void end(RaidCtx ctx) {
     }
+
+    // ---- 闘の部屋の中ボス (mid/FightBossRoom、docs/design/32 の 9.5 の表)。元の部屋の仕掛けを中ボス戦にも効かせる (どれも任意)
+    // 波のあとに中ボスが出る (闘の部屋として包まれたとき true。中ボスと重なる最後の波・精鋭を出さない部屋がある)
+    protected boolean bossFollows;
+
+    public void followBoss() {
+        bossFollows = true;
+    }
+
+    // 中ボスの仕掛けを建てる前 (部屋の姿を控える前)。中ボスの間に部屋の形を渡す (潮招きの小島を苗の台に など)
+    public void bossFit(RaidCtx ctx, jp.revati.skyabyss.trial.raid.mid.MidRoom mid) {
+    }
+
+    // 中ボスが出た直後
+    public void bossBegin(RaidCtx ctx, net.minecraft.world.entity.Mob boss) {
+    }
+
+    // 中ボスの段の 1 tick ごと (中ボスの間の tick のあと)
+    public void bossTick(RaidCtx ctx, net.minecraft.world.entity.Mob boss) {
+    }
+
+    // 中ボスを倒した (出口の灯りなど)
+    public void bossDone(RaidCtx ctx) {
+    }
+
+    // 中ボスの段でも、帯の二つ目の数 (核・炉の体力など) を元の部屋のものにする
+    public boolean bossKeepsSecondary() {
+        return false;
+    }
+
+    // 中ボスの段の残り tick (突風までなど)。中ボスの間が残り tick を出さないときに出す。負なら出さない
+    public int bossTimerTicks() {
+        return -1;
+    }
 }

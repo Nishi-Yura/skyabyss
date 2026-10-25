@@ -24,6 +24,8 @@ import net.minecraft.world.level.block.Blocks;
 //  - 敵 (灰被り・蛾・転がり) は、近くに人がいなければ大炉へ向かい、炉の近くで毎秒 (灰被り 2・蛾 1・転がり 3) 炉の体力を削る
 //  - 四隅の火鉢が灯っている間、その近く (7 ブロック) の敵は遅くなる。敵が近づくと火鉢は消える。人が側に立つと (1.2 秒) 灯し直せる
 //  - 炉の体力が尽きたら、部屋は最初からやり直し (ctx.fail)。三つの波をすべて倒せば越える
+//  - 闘の試練では (32 の 9.5) 二つの波のあと、灰の鍛え手が炉の火を消しに来る (部屋に焼き入れの槽・灰溜まり・炉の扉が建つ)。
+//    鍛え手は人が近くにいないと大炉へ歩き、炉のそばで一秒に SMITH_DOUSE 削る。火鉢のそばでは遅くなる。炉が尽きたら部屋をやり直す
 public final class EmberForgeDefense extends EmberRoom {
     public static final String ID = "ER3";
     public static final int FORGE_MAX = 100;
@@ -36,6 +38,9 @@ public final class EmberForgeDefense extends EmberRoom {
     public static final int RELIGHT_TICKS = 25;
     // 一人のとき、炉の火を削る間隔 (tick。仲間がいれば 20)
     public static final int SOLO_DOUSE_EVERY = 40;
+    // 鍛え手が炉を削る量 (一度に)・人が近いと炉より人を相手にする距離
+    public static final int SMITH_DOUSE = 4;
+    public static final double SMITH_ENGAGE = 6;
     private static final int[][] BRAZIERS = {{-9, -9}, {9, -9}, {-9, 9}, {9, 9}};
     private static final int[][] SPAWNS = {{-11, -3}, {11, -3}, {-11, 3}, {11, 3}, {-4, -11}, {4, -11}, {-6, 11}, {6, 11}};
 
@@ -208,7 +213,7 @@ public final class EmberForgeDefense extends EmberRoom {
         }
         wavesSpawned++;
         ctx.level().playSound(null, forge, SoundEvents.RAVAGER_ROAR, SoundSource.HOSTILE, 1.2f, 0.5f);
-        bar(ctx, Component.translatable("raid.skyabyss.ER3.wave", wavesSpawned, WAVES));
+        bar(ctx, Component.translatable("raid.skyabyss.ER3.wave", wavesSpawned, waves()));
     }
 
     private static int douseRate(Mob m) {
@@ -232,15 +237,68 @@ public final class EmberForgeDefense extends EmberRoom {
         double fx = forge.getX() + 0.5;
         double fz = forge.getZ() + 0.5;
         // 波
-        if (wavesSpawned < WAVES && mobs.isEmpty() && t >= nextWave) {
+        if (wavesSpawned < waves() && mobs.isEmpty() && t >= nextWave) {
             spawnWave(ctx);
             mobs = new ArrayList<>(ctx.aliveMobs());
         }
-        // 敵: 炉へ向かう・火を消す
+        press(ctx, mobs, ps, null);
+        // 結果
+        if (hp <= 0) {
+            fail(ctx, "raid.skyabyss.ER3.lost");
+            return;
+        }
+        if (wavesSpawned > wavesCleared && mobs.isEmpty()) {
+            wavesCleared = wavesSpawned;
+            nextWave = t + WAVE_GAP;
+            if (wavesCleared >= waves()) {
+                done = true;
+                if (!bossFollows) {
+                    opened(ctx);
+                }
+                particles(ctx, ParticleTypes.LAVA, fx, forge.getY() + 5, fz, 30, 1.0, 0.2);
+                ctx.level().playSound(null, forge, SoundEvents.BLASTFURNACE_FIRE_CRACKLE, SoundSource.BLOCKS, 1.5f, 0.6f);
+            }
+        }
+    }
+
+    // 闘の試練では二つ (三つ目の代わりに鍛え手)
+    int waves() {
+        return bossFollows ? WAVES - 1 : WAVES;
+    }
+
+    @Override
+    public void bossBegin(RaidCtx ctx, Mob boss) {
+        bar(ctx, Component.translatable("raid.skyabyss.ER3.smith"));
+    }
+
+    @Override
+    public void bossTick(RaidCtx ctx, Mob boss) {
+        t++;
+        press(ctx, new ArrayList<>(ctx.aliveMobs()), who(ctx), boss);
+        if (hp <= 0) {
+            fail(ctx, "raid.skyabyss.ER3.lost");
+        }
+    }
+
+    @Override
+    public void bossDone(RaidCtx ctx) {
+        opened(ctx);
+    }
+
+    @Override
+    public boolean bossKeepsSecondary() {
+        return true;
+    }
+
+    // 敵が炉へ向かい火を消す・火鉢を消す・人が火鉢を灯し直す (smith = 中ボスの段の鍛え手)
+    private void press(RaidCtx ctx, List<Mob> mobs, List<ServerPlayer> ps, @javax.annotation.Nullable Mob smith) {
+        double fx = forge.getX() + 0.5;
+        double fz = forge.getZ() + 0.5;
         for (Mob m : mobs) {
             boolean playerNear = false;
+            double engage = m == smith ? SMITH_ENGAGE : 6;
             for (ServerPlayer p : ps) {
-                if (p.distanceToSqr(m) < 36) {
+                if (p.distanceToSqr(m) < engage * engage) {
                     playerNear = true;
                     break;
                 }
@@ -255,7 +313,7 @@ public final class EmberForgeDefense extends EmberRoom {
             // 一人のときは守る手が一つなので、炉の消え方を半分にする (2 秒に一度。仲間がいれば毎秒)
             int every = scale(ctx) <= 1 ? SOLO_DOUSE_EVERY : 20;
             if (t % every == m.getId() % every && flat(m.position(), fx, fz) <= DOUSE_RANGE && Math.abs(m.getY() - forge.getY()) < 7) {
-                hp = Math.max(0, hp - douseRate(m));
+                hp = Math.max(0, hp - (m == smith ? SMITH_DOUSE : douseRate(m)));
                 particles(ctx, ParticleTypes.SMOKE, fx, forge.getY() + 4, fz, 10, 0.8, 0.03);
                 ctx.level().playSound(null, forge, SoundEvents.FIRE_EXTINGUISH, SoundSource.BLOCKS, 0.8f, 0.7f);
             }
@@ -303,21 +361,6 @@ public final class EmberForgeDefense extends EmberRoom {
                 relight[i] = Math.max(0, relight[i] - 1);
             }
         }
-        // 結果
-        if (hp <= 0) {
-            fail(ctx, "raid.skyabyss.ER3.lost");
-            return;
-        }
-        if (wavesSpawned > wavesCleared && mobs.isEmpty()) {
-            wavesCleared = wavesSpawned;
-            nextWave = t + WAVE_GAP;
-            if (wavesCleared >= WAVES) {
-                done = true;
-                opened(ctx);
-                particles(ctx, ParticleTypes.LAVA, fx, forge.getY() + 5, fz, 30, 1.0, 0.2);
-                ctx.level().playSound(null, forge, SoundEvents.BLASTFURNACE_FIRE_CRACKLE, SoundSource.BLOCKS, 1.5f, 0.6f);
-            }
-        }
     }
 
     @Override
@@ -337,7 +380,7 @@ public final class EmberForgeDefense extends EmberRoom {
 
     @Override
     public int counterMax() {
-        return WAVES;
+        return waves();
     }
 
     @Override
@@ -356,7 +399,7 @@ public final class EmberForgeDefense extends EmberRoom {
     }
 
     // 自己テスト用の窓
-    int forgeHp() {
+    public int forgeHp() {
         return hp;
     }
 
@@ -376,7 +419,7 @@ public final class EmberForgeDefense extends EmberRoom {
         return ctx.local(BRAZIERS[i][0], 0, BRAZIERS[i][1]);
     }
 
-    BlockPos forgePos() {
+    public BlockPos forgePos() {
         return forge;
     }
 }

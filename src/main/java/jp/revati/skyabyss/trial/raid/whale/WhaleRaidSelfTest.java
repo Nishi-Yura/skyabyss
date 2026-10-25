@@ -308,7 +308,7 @@ public final class WhaleRaidSelfTest {
         STAGES.add(() -> {
             RaidRun.Run r = run();
             var hud = r.lastHud;
-            check(hud != null && hud.cellId().equals("WR3") && hud.secMax() > 0 && hud.max() == 3, "WR3: the objective strip lacks the core bar / wave counter: " + hud);
+            check(hud != null && hud.cellId().equals("WR3") && hud.secMax() > 0 && hud.max() == 2, "WR3: the objective strip lacks the core bar / wave counter: " + hud);
             check(r.ctx.cell().bounds().contains(player.position()), "WR3: the player is not inside the room's cell");
             // 核が壊れる → 全滅と同じ (入口へ・部屋は戻る)
             ((WhaleCoreRoom) jp.revati.skyabyss.trial.raid.mid.FightBossRoom.unwrap(r.room)).damageCore(1000);
@@ -428,7 +428,7 @@ public final class WhaleRaidSelfTest {
         STAGES.add(() -> {
             RaidRun.Run r = run();
             var hud = r.lastHud;
-            check(hud != null && hud.cellId().equals("WR6") && hud.secMax() > 0 && hud.max() == 3, "WR6: the objective strip lacks the ring size / wave counter: " + hud);
+            check(hud != null && hud.cellId().equals("WR6") && hud.secMax() > 0 && hud.max() == 2, "WR6: the objective strip lacks the ring size / wave counter: " + hud);
             check(r.ctx.cell().bounds().contains(player.position()), "WR6: the player is not inside the room's cell");
             ((WhaleRingRoom) jp.revati.skyabyss.trial.raid.mid.FightBossRoom.unwrap(r.room)).rewindShrink(1000);
             RaidRun.wipe(r, null);

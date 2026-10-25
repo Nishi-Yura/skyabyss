@@ -1,0 +1,55 @@
+{
+  "category": "sub",
+  "order": 302,
+  "giver": "skyabyss:guest_storm_elder",
+  "chapter": "titan_storm",
+  "min_stage": 2,
+  "stages": [
+    {
+      "id": "go",
+      "objectives": [
+        {
+          "id": "go",
+          "type": "signal",
+          "target": "poi:rod_tower",
+          "party": false
+        }
+      ]
+    },
+    {
+      "id": "get",
+      "objectives": [
+        {
+          "id": "get",
+          "type": "collect",
+          "target": "minecraft:copper_ingot",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "id": "back",
+      "objectives": [
+        {
+          "id": "back",
+          "type": "signal",
+          "target": "town_hand:guest_storm_elder",
+          "party": false
+        }
+      ]
+    }
+  ],
+  "reward": {
+    "xp": 80,
+    "items": [
+      {
+        "item": "skyabyss:bell_coin",
+        "count": 20
+      },
+      {
+        "item": "skyabyss:socket_shard_wind",
+        "count": 1
+      }
+    ]
+  }
+}

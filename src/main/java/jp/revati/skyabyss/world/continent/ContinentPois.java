@@ -112,6 +112,8 @@ public final class ContinentPois {
                 } else {
                     if (!poi.kind().equals("signpost") && d2 <= (double) DISCOVER_RADIUS * DISCOVER_RADIUS) {
                         discover(p, i, poi);
+                        // 見どころに着いた (土地の町の人の頼み「〜を見てこよう」。初めてでなくても毎回)
+                        jp.revati.skyabyss.quest.Quests.signal(p, "poi:" + poi.kind());
                     }
                     if (e.extra("foes") != null && d2 <= (double) FOES_RADIUS * FOES_RADIUS) {
                         foes(over, e, list.get(i).kind());

@@ -2,6 +2,23 @@
   "npc": "skyabyss:guest_storm_elder",
   "entries": [
     {
+      "node": "q_back",
+      "if": {
+        "type": "quest",
+        "quest": "town/storm_rods",
+        "is": "active",
+        "stage": "back"
+      }
+    },
+    {
+      "node": "q_wait",
+      "if": {
+        "type": "quest",
+        "quest": "town/storm_rods",
+        "is": "active"
+      }
+    },
+    {
       "node": "after",
       "if": {
         "type": "stilled",
@@ -22,13 +39,163 @@
   ],
   "nodes": {
     "idle": {
-      "face": "neutral"
+      "face": "neutral",
+      "options": [
+        {
+          "id": "ask",
+          "goto": "q_ask",
+          "kind": "quest",
+          "if": {
+            "type": "all",
+            "of": [
+              {
+                "type": "stage",
+                "min": 2
+              },
+              {
+                "type": "quest",
+                "quest": "town/storm_rods",
+                "is": "none"
+              }
+            ]
+          },
+          "do": [
+            {
+              "type": "quest_start",
+              "quest": "town/storm_rods"
+            }
+          ]
+        },
+        {
+          "id": "bye",
+          "goto": "end",
+          "kind": "leave"
+        }
+      ]
     },
     "hint": {
-      "face": "grave"
+      "face": "grave",
+      "options": [
+        {
+          "id": "ask",
+          "goto": "q_ask",
+          "kind": "quest",
+          "if": {
+            "type": "all",
+            "of": [
+              {
+                "type": "stage",
+                "min": 2
+              },
+              {
+                "type": "quest",
+                "quest": "town/storm_rods",
+                "is": "none"
+              }
+            ]
+          },
+          "do": [
+            {
+              "type": "quest_start",
+              "quest": "town/storm_rods"
+            }
+          ]
+        },
+        {
+          "id": "bye",
+          "goto": "end",
+          "kind": "leave"
+        }
+      ]
     },
     "after": {
-      "face": "smile"
+      "face": "smile",
+      "options": [
+        {
+          "id": "ask",
+          "goto": "q_ask",
+          "kind": "quest",
+          "if": {
+            "type": "all",
+            "of": [
+              {
+                "type": "stage",
+                "min": 2
+              },
+              {
+                "type": "quest",
+                "quest": "town/storm_rods",
+                "is": "none"
+              }
+            ]
+          },
+          "do": [
+            {
+              "type": "quest_start",
+              "quest": "town/storm_rods"
+            }
+          ]
+        },
+        {
+          "id": "bye",
+          "goto": "end",
+          "kind": "leave"
+        }
+      ]
+    },
+    "q_ask": {
+      "face": "grave",
+      "options": [
+        {
+          "id": "ok",
+          "goto": "end",
+          "kind": "talk"
+        }
+      ]
+    },
+    "q_wait": {
+      "face": "neutral"
+    },
+    "q_back": {
+      "face": "neutral",
+      "options": [
+        {
+          "id": "give",
+          "goto": "q_done",
+          "kind": "give",
+          "do": [
+            {
+              "type": "take",
+              "item": "minecraft:copper_ingot",
+              "count": 1
+            },
+            {
+              "type": "signal",
+              "signal": "town_hand:guest_storm_elder"
+            }
+          ],
+          "if": {
+            "type": "item",
+            "item": "minecraft:copper_ingot",
+            "count": 1
+          }
+        },
+        {
+          "id": "later",
+          "goto": "end",
+          "kind": "leave"
+        }
+      ]
+    },
+    "q_done": {
+      "face": "smile",
+      "options": [
+        {
+          "id": "ok",
+          "goto": "end",
+          "kind": "talk"
+        }
+      ]
     }
   }
 }

@@ -1,0 +1,44 @@
+{
+  "category": "sub",
+  "order": 300,
+  "giver": "skyabyss:guest_tide_ferryman",
+  "chapter": "titan_tide",
+  "min_stage": 1,
+  "stages": [
+    {
+      "id": "go",
+      "objectives": [
+        {
+          "id": "go",
+          "type": "signal",
+          "target": "poi:beached_wreck",
+          "party": false
+        }
+      ]
+    },
+    {
+      "id": "back",
+      "objectives": [
+        {
+          "id": "back",
+          "type": "signal",
+          "target": "town_hand:guest_tide_ferryman",
+          "party": false
+        }
+      ]
+    }
+  ],
+  "reward": {
+    "xp": 60,
+    "items": [
+      {
+        "item": "skyabyss:bell_coin",
+        "count": 15
+      },
+      {
+        "item": "minecraft:cooked_cod",
+        "count": 3
+      }
+    ]
+  }
+}

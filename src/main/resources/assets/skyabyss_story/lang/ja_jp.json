@@ -145,8 +145,7 @@
   "quest.skyabyss.sub_old_map.watch.storm": "雷雨のときに、空の見える高い所（高さ 100 以上）に立とう",
   "quest.skyabyss.sub_warm_coal.done": "灰の底から出てきた炭は、いつまでも温かい。",
   "quest.skyabyss.sub_warm_coal.fetch.cream": "マグマクリームを集めよう",
-  "quest.skyabyss.sub_warm_coal.fetch.go": "ネザーへ行こう",
-  "quest.skyabyss.sub_warm_coal.fetch.journal": "語り部の炉の火が、七日目の夜までもたないという。昔は、灰の底に「地の底の火」のかけらがあったそうだ。\n冷めない火のかけら（マグマクリーム）は、灰炉の村や都の道具屋が火の国から仕入れている。四つ集めよう。",
+  "quest.skyabyss.sub_warm_coal.fetch.journal": "語り部の炉の火が、七日目の夜までもたないという。昔は、灰の底に「地の底の火」のかけらがあったそうだ。\n冷めない火のかけら（マグマクリーム）は、灰炉の村や都の道具屋が灰の荒野から仕入れている。四つ集めよう。",
   "quest.skyabyss.sub_warm_coal.summary": "地の底の火のかけらを持ち帰り、語り部の炉に入れる。",
   "quest.skyabyss.sub_warm_coal.tell.journal": "冷めない火のかけらが、四つそろった。\n語り部の炉へ持っていこう。",
   "quest.skyabyss.sub_warm_coal.tell.talk": "語り部に、火のかけらを渡そう",
@@ -170,7 +169,7 @@
   "subtitles.skyabyss_story.key_form": "欠片が触れ合う",
   "chapter.skyabyss.aftermath.head": "%s　完",
   "chapter.skyabyss.aftermath.preview": "この鼓動は、地の底から預かったもの。",
-  "quest.skyabyss.main_ember.prepare.journal": "イサナは言った。燃える山へ行くなら、火に負けない支度をしろ、と。\n職人は火除けの薬の作り方を、語り部は灰の民の炉跡のことを知っているらしい。",
+  "quest.skyabyss.main_ember.prepare.journal": "イサナは言った。燃える山へ行くなら、火に負けない支度をしろ、と。\n火除けの薬は薬師の店に、灰の民の炉跡のことは語り部が知っているらしい。",
   "quest.skyabyss.main_ember.prepare.lead": "イサナ「燃える山へ行くなら、まず火に負けない支度だ。職人と語り部を訪ねてみろ」",
   "quest.skyabyss.main_ember.prepare.ready": "火除けの薬と炉跡で、火の山への支度をしよう"
 }

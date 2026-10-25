@@ -1,0 +1,55 @@
+{
+  "category": "sub",
+  "order": 303,
+  "giver": "skyabyss:guest_storm_hutkeeper",
+  "chapter": "titan_storm",
+  "min_stage": 2,
+  "stages": [
+    {
+      "id": "get",
+      "objectives": [
+        {
+          "id": "get",
+          "type": "collect",
+          "target": "minecraft:bread",
+          "count": 3
+        }
+      ]
+    },
+    {
+      "id": "go",
+      "objectives": [
+        {
+          "id": "go",
+          "type": "signal",
+          "target": "poi:wind_gate",
+          "party": false
+        }
+      ]
+    },
+    {
+      "id": "back",
+      "objectives": [
+        {
+          "id": "back",
+          "type": "signal",
+          "target": "town_hand:guest_storm_hutkeeper",
+          "party": false
+        }
+      ]
+    }
+  ],
+  "reward": {
+    "xp": 80,
+    "items": [
+      {
+        "item": "skyabyss:bell_coin",
+        "count": 20
+      },
+      {
+        "item": "skyabyss:road_hardtack",
+        "count": 2
+      }
+    ]
+  }
+}

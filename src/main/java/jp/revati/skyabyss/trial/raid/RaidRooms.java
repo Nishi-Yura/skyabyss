@@ -29,6 +29,8 @@ public final class RaidRooms {
 
     private static final Map<String, Map<Slot, List<Entry>>> BY_TITAN = new LinkedHashMap<>();
     private static final Map<String, Entry> BY_ID = new HashMap<>();
+    // 自己テスト用: 枠の引きを決める (巨神 + ":" + 枠 → 部屋の id)。空なら引く
+    public static final Map<String, String> DEV_DRAW = new HashMap<>();
     private static boolean booted;
 
     private static void ensure() {
@@ -105,6 +107,10 @@ public final class RaidRooms {
         List<String> ids = idsOf(titan, slot);
         if (ids.isEmpty()) {
             return null;
+        }
+        String forced = DEV_DRAW.get(titan + ":" + slot.name());
+        if (forced != null && ids.contains(forced)) {
+            return forced;
         }
         long z = seed ^ (slot.ordinal() * 0x9E3779B97F4A7C15L);
         z = (z ^ (z >>> 30)) * 0xBF58476D1CE4E5B9L;

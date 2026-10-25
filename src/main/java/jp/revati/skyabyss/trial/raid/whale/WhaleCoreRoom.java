@@ -21,6 +21,8 @@ import net.minecraft.world.phys.Vec3;
 //    (2026-10-25 の試遊: 骨守りが難しすぎた・三つ目に番兵長が出て、次の段の中ボスとかぶっていた)
 //  - 敵の組・出る角度・数は挑戦ごとに少し変わる
 //  - 一人のときは核の削れが SOLO_DRAIN 倍 (一人でも越えられる。docs/design/32 の 9 章)
+//  - 闘の試練では (bossFollows) 二つの波のあと、番兵長が核を狙って現れる (32 の 9.5)。番兵長は人が近くにいないと核へ歩き、
+//    核のそばでは一秒に CAPTAIN_DPS 削る。核は中ボスの段では戻らない。核が壊れたら部屋をやり直す
 public final class WhaleCoreRoom extends RaidRoom {
     static final int HX = 16;
     static final int HZ = 16;
@@ -35,6 +37,9 @@ public final class WhaleCoreRoom extends RaidRoom {
     static final int WAVE_GAP = 80;
     // 一人のときの核の削れの倍率
     static final double SOLO_DRAIN = 0.45;
+    // 番兵長が核を削る速さ (一秒)・人が近いと核より人を相手にする距離
+    static final double CAPTAIN_DPS = 2.5;
+    static final double CAPTAIN_ENGAGE = 6;
 
     private double hp = CORE_MAX;
     private int wave;
@@ -88,16 +93,71 @@ public final class WhaleCoreRoom extends RaidRoom {
             }
         } else if (ctx.aliveMobs().isEmpty()) {
             waveOut = false;
-            if (wave >= WAVES) {
+            if (wave >= waves()) {
                 cleared = true;
-                WhaleDecor.exitLamps(ctx, true);
+                if (!bossFollows) {
+                    WhaleDecor.exitLamps(ctx, true);
+                }
                 return;
             }
             nextWave = now + WAVE_GAP;
         }
+        pressCore(ctx, now, null);
+    }
+
+    // 闘の試練では二つ (三つ目の老番兵の代わりに番兵長)
+    int waves() {
+        return bossFollows ? WAVES - 1 : WAVES;
+    }
+
+    @Override
+    public void bossBegin(RaidCtx ctx, Mob boss) {
+        ctx.say(net.minecraft.network.chat.Component.translatable("message.skyabyss.raid.WR3.captain"));
+    }
+
+    @Override
+    public void bossTick(RaidCtx ctx, Mob boss) {
+        pressCore(ctx, ctx.now(), boss);
+    }
+
+    @Override
+    public void bossDone(RaidCtx ctx) {
+        WhaleDecor.exitLamps(ctx, true);
+    }
+
+    @Override
+    public boolean bossKeepsSecondary() {
+        return true;
+    }
+
+    // 敵が核を削る (captain = 中ボスの段の番兵長。null なら波の段)
+    private void pressCore(RaidCtx ctx, long now, @javax.annotation.Nullable Mob captain) {
         Vec3 core = corePos(ctx);
         double dmg = 0;
         for (Mob m : ctx.aliveMobs()) {
+            if (m == captain) {
+                double d = Math.hypot(m.getX() - core.x, m.getZ() - core.z);
+                if (d <= MELEE_RANGE + 0.8) {
+                    dmg += CAPTAIN_DPS;
+                    if (now % 20 == 0) {
+                        m.swing(net.minecraft.world.InteractionHand.MAIN_HAND);
+                    }
+                }
+                // 人が近くにいなければ核へ (人が寄れば人を相手にする)
+                if (now % 20 == 0) {
+                    boolean near = false;
+                    for (ServerPlayer p : ctx.standing()) {
+                        if (p.distanceTo(m) < CAPTAIN_ENGAGE) {
+                            near = true;
+                        }
+                    }
+                    if (!near && d > MELEE_RANGE) {
+                        m.setTarget(null);
+                        m.getNavigation().moveTo(core.x, ctx.origin().getY() + 1, core.z, 1.0);
+                    }
+                }
+                continue;
+            }
             double dx = m.getX() - core.x;
             double dz = m.getZ() - core.z;
             double d = Math.sqrt(dx * dx + dz * dz);
@@ -124,7 +184,7 @@ public final class WhaleCoreRoom extends RaidRoom {
                 level.sendParticles(ParticleTypes.CRIT, core.x, core.y + 1.5, core.z, 8, 0.8, 0.8, 0.8, 0.1);
                 level.playSound(null, BlockPos.containing(core), SoundEvents.STONE_BREAK, SoundSource.HOSTILE, 1.2f, 0.6f);
             }
-        } else if (hp > 0 && hp < CORE_MAX && waveOut) {
+        } else if (hp > 0 && hp < CORE_MAX && waveOut && captain == null) {
             hp = Math.min(CORE_MAX, hp + REGEN_DPS / 20.0);
         }
         setStage(ctx);
@@ -153,7 +213,7 @@ public final class WhaleCoreRoom extends RaidRoom {
 
     private void spawnWave(RaidCtx ctx, int w) {
         int scale = ctx.scale();
-        if (w == WAVES) {
+        if (w == WAVES && !bossFollows) {
             // 三つ目: 老番兵 (盾の突進・足踏み・笛で射手を呼ぶ) 一体だけ。人数で体力が増える
             Mob elder = ctx.spawnGuard("elder", ctx.cell().floor(0, -HZ + 3));
             if (elder != null) {
@@ -210,7 +270,7 @@ public final class WhaleCoreRoom extends RaidRoom {
 
     @Override
     public int counterMax() {
-        return WAVES;
+        return waves();
     }
 
     @Override

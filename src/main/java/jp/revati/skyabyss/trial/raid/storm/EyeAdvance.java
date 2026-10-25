@@ -30,6 +30,8 @@ import net.minecraft.world.phys.Vec3;
 //    吹いている間、広間の人は中央から外へ押される。柱の陰 (中央との間にブロックがある) は押されない
 //  - 凪の間 (突風と突風の間) に柱から柱へ進む。突風が来るたびに、雷蛾が二体ずつ湧く (四体まで)。守り手と取り巻きの傷には、赤い予告が付く (敵の側)
 //  - 守り手は中央の台のまわりから離れすぎない。倒すと越える。全滅・やり直しで敵は消え、突風は最初から
+//  - 闘の試練では (32 の 9.5) 守り手は軽く (体力の倍率なし)、倒すと中央に雷獣が降りる (部屋に避雷の柱と栓が建つ)。
+//    突風は雷獣との戦いのあいだも吹き続け (雷蛾も湧く)、柱の陰が身を守る所のまま
 public final class EyeAdvance extends RaidRoom {
     static final int HX = 14;
     static final int HZ = 14;
@@ -149,7 +151,7 @@ public final class EyeAdvance extends RaidRoom {
         }
         AttributeInstance hp = keeper.getAttribute(Attributes.MAX_HEALTH);
         if (hp != null) {
-            hp.setBaseValue(hp.getBaseValue() * (1.6 + 0.4 * (ctx.scale() - 1)));
+            hp.setBaseValue(hp.getBaseValue() * ((bossFollows ? 1.0 : 1.6) + 0.4 * (ctx.scale() - 1)));
             keeper.setHealth(keeper.getMaxHealth());
         }
         keeper.setGlowingTag(true);
@@ -179,8 +181,34 @@ public final class EyeAdvance extends RaidRoom {
             }
         } else if (keeperSpawned && keeper != null) {
             done = true;
-            StormRoomDeco.exitLit(ctx, true);
+            if (!bossFollows) {
+                StormRoomDeco.exitLit(ctx, true);
+            }
         }
+    }
+
+    @Override
+    public void bossBegin(RaidCtx ctx, Mob boss) {
+        ctx.say(Component.translatable("message.skyabyss.raid.SR6.raiju"));
+    }
+
+    // 中ボスの段も突風は吹き続ける (柱の陰に隠れながら雷獣と戦う)
+    @Override
+    public void bossTick(RaidCtx ctx, Mob boss) {
+        age++;
+        if (age >= FIRST_GUST && (age - FIRST_GUST) % GUST_PERIOD == 0) {
+            announce(ctx);
+        }
+        wind(ctx);
+    }
+
+    @Override
+    public void bossDone(RaidCtx ctx) {
+        for (Telegraph t : gusts) {
+            t.cancel();
+        }
+        gusts.clear();
+        StormRoomDeco.exitLit(ctx, true);
     }
 
     // 突風の予告: 灰色の押しの印 (広間いっぱい。傷なし)・唸り
@@ -315,6 +343,11 @@ public final class EyeAdvance extends RaidRoom {
         if (!started || done) {
             return -1;
         }
+        return untilGust(age);
+    }
+
+    @Override
+    public int bossTimerTicks() {
         return untilGust(age);
     }
 

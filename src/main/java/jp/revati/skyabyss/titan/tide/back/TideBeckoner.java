@@ -156,6 +156,19 @@ public class TideBeckoner extends TideMob {
     public void bindFlats(@Nullable Flats flats) {
         this.flats = flats;
     }
+
+    // 影 (順路の闘 TR7「本物の群れの母」の偽物の潮招き。docs/design/32 の 9.5): 技を出さず、ボスバーも出さず、人のほうへ歩くだけ
+    private boolean shadow;
+
+    public void makeShadow(List<ServerPlayer> fighters) {
+        shadow = true;
+        holdAttacks = true;
+        devFighters = fighters;
+    }
+
+    public boolean isShadow() {
+        return shadow;
+    }
     private int partyOverride;
     private boolean holdAttacks;
 
@@ -228,7 +241,11 @@ public class TideBeckoner extends TideMob {
         }
         bossBar.setProgress(getHealth() / getMaxHealth());
         if (tickCount % 10 == 0) {
-            updateBossBar(server);
+            if (shadow) {
+                bossBar.removeAllPlayers();
+            } else {
+                updateBossBar(server);
+            }
         }
         if (invulnerable > 0) {
             invulnerable--;
@@ -257,6 +274,13 @@ public class TideBeckoner extends TideMob {
         }
         getLookControl().setLookAt(target, 20f, 20f);
         if (holdAttacks) {
+            if (shadow) {
+                if (distanceToSqr(target) > 3.0 * 3.0) {
+                    getNavigation().moveTo(target, 0.9);
+                } else {
+                    getNavigation().stop();
+                }
+            }
             return;
         }
         double dist = Math.sqrt(distanceToSqr(target));
@@ -744,6 +768,10 @@ public class TideBeckoner extends TideMob {
         }
         if (source.is(net.minecraft.world.damagesource.DamageTypes.GENERIC_KILL)) {
             return super.hurt(source, amount);
+        }
+        // 影は壁・押しつぶしでは弾けない (人に叩かれたときだけ)
+        if (shadow && !(source.getEntity() instanceof net.minecraft.world.entity.player.Player)) {
+            return false;
         }
         if (invulnerable > 0 || mode() == MODE_BURROWED || source.is(net.minecraft.tags.DamageTypeTags.IS_DROWNING)
                 || source.is(net.minecraft.tags.DamageTypeTags.IS_FALL)) {
