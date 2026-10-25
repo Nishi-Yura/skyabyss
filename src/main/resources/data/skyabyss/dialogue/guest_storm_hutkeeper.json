@@ -1,0 +1,34 @@
+{
+  "npc": "skyabyss:guest_storm_hutkeeper",
+  "entries": [
+    {
+      "node": "after",
+      "if": {
+        "type": "stilled",
+        "titan": "thunder_wing"
+      }
+    },
+    {
+      "node": "hint",
+      "if": {
+        "type": "quest",
+        "quest": "main_thunder",
+        "is": "active"
+      }
+    },
+    {
+      "node": "idle"
+    }
+  ],
+  "nodes": {
+    "idle": {
+      "face": "neutral"
+    },
+    "hint": {
+      "face": "grave"
+    },
+    "after": {
+      "face": "smile"
+    }
+  }
+}

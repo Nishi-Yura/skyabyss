@@ -1,0 +1,33 @@
+# 土地の町の人 (汐守・風待・灰炉の広場)
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/town_folk.txt -PshotsName=continent_towns
+world continent_towns2 continent
+size 1600 900
+timeout 1500
+render 8
+guiscale 2
+wait 100
+cmd skyabyss cinematic stop
+cmd time set 5000
+cmd gamerule doDaylightCycle false
+cmd skyabyss dev opening build
+wait 200
+hud off
+cmd gamemode creative
+cmd skyabyss dev grounds mark town 1 stand
+waitchunks 300
+wait 200
+cmd execute at @s run tp @s ~ ~2 ~-1 180 15
+wait 40
+shot folk_tide
+cmd skyabyss dev grounds mark town 2 stand
+waitchunks 300
+wait 200
+cmd execute at @s run tp @s ~ ~2 ~-1 180 15
+wait 40
+shot folk_storm
+cmd skyabyss dev grounds mark town 3 stand
+waitchunks 300
+wait 200
+cmd execute at @s run tp @s ~ ~2 ~-1 180 15
+wait 40
+shot folk_ember

@@ -1,0 +1,34 @@
+{
+  "npc": "skyabyss:guest_ember_survivor",
+  "entries": [
+    {
+      "node": "after",
+      "if": {
+        "type": "stilled",
+        "titan": "ember"
+      }
+    },
+    {
+      "node": "hint",
+      "if": {
+        "type": "quest",
+        "quest": "main_ember",
+        "is": "active"
+      }
+    },
+    {
+      "node": "idle"
+    }
+  ],
+  "nodes": {
+    "idle": {
+      "face": "neutral"
+    },
+    "hint": {
+      "face": "grave"
+    },
+    "after": {
+      "face": "smile"
+    }
+  }
+}

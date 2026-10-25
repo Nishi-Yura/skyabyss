@@ -389,6 +389,9 @@ def plaza(bp, s, region, rng):
         bp.set(x, 0, 9, stairs(s['roof'], 'south'))
     bp.mark('rest', 4, 0, 6)
     bp.mark('stand', 0, 0, 6)
+    # 土地の町の人の立つ所 (広場の北東と南西。town/RegionFolk)
+    bp.mark('folk_a', 3, 0, -6)
+    bp.mark('folk_b', -3, 0, 6)
 
 
 def monument(bp, s, region):

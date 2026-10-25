@@ -27,7 +27,7 @@ public final class ContinentTowns {
     public static final String[] REGIONS = {"whale", "tide", "storm", "ember"};
     // 鯨追いの立つ所 (鯨見の町だけ。00 の 278)
     public static final String CHASER_MARK = "npc_chaser";
-    static final String[] MARKS = {"rest", "board", "inn", "shop", "stand", CHASER_MARK, Attendants.INN_BED, AttendantRole.INNKEEPER.mark(), AttendantRole.TOOL_MERCHANT.mark()};
+    static final String[] MARKS = {"rest", "board", "inn", "shop", "stand", CHASER_MARK, "folk_a", "folk_b", Attendants.INN_BED, AttendantRole.INNKEEPER.mark(), AttendantRole.TOOL_MERCHANT.mark()};
     static final int KEEP_RADIUS = 96;
     static final int CHECK_INTERVAL = 100;
 
@@ -122,6 +122,13 @@ public final class ContinentTowns {
                 }
             }
             Attendants.ensureAll(level, marks);
+            // 土地の町の人 (town/RegionFolk。二〜四章の町に二人ずつ)
+            for (String fm : new String[] {"folk_a", "folk_b"}) {
+                BlockPos at = e.extra(fm);
+                if (at != null) {
+                    jp.revati.skyabyss.town.RegionFolk.ensure(level, region(e.index), fm, at);
+                }
+            }
             BlockPos chaser = e.extra(CHASER_MARK);
             if (chaser != null) {
                 jp.revati.skyabyss.npc.NpcSpawner.keepTownChaser(level, chaser, player);

@@ -1,0 +1,34 @@
+{
+  "npc": "skyabyss:guest_tide_lightkeeper",
+  "entries": [
+    {
+      "node": "after",
+      "if": {
+        "type": "stilled",
+        "titan": "tide_shell"
+      }
+    },
+    {
+      "node": "hint",
+      "if": {
+        "type": "quest",
+        "quest": "main_tide",
+        "is": "active"
+      }
+    },
+    {
+      "node": "idle"
+    }
+  ],
+  "nodes": {
+    "idle": {
+      "face": "neutral"
+    },
+    "hint": {
+      "face": "grave"
+    },
+    "after": {
+      "face": "smile"
+    }
+  }
+}

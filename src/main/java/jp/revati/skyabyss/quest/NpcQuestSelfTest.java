@@ -137,7 +137,9 @@ public final class NpcQuestSelfTest {
                     || (d.role().startsWith(jp.revati.skyabyss.facility.AttendantRole.DIALOGUE_PREFIX)
                     && jp.revati.skyabyss.facility.AttendantEntity.extraRole(d.role().substring(jp.revati.skyabyss.facility.AttendantRole.DIALOGUE_PREFIX.length())))
                     || (d.role().startsWith(jp.revati.skyabyss.town.TownGuests.ROLE_PREFIX)
-                    && jp.revati.skyabyss.town.TownGuests.byId(d.role().substring(jp.revati.skyabyss.town.TownGuests.ROLE_PREFIX.length())) != null);
+                    && (jp.revati.skyabyss.town.TownGuests.byId(d.role().substring(jp.revati.skyabyss.town.TownGuests.ROLE_PREFIX.length())) != null
+                    // 土地の町の人 (town/RegionFolk。都の町の人の絵を借りる)
+                    || jp.revati.skyabyss.town.RegionFolk.byId(d.role().substring(jp.revati.skyabyss.town.TownGuests.ROLE_PREFIX.length())) != null));
             check(known, "dialogue for unknown entity " + d.role(), failures);
             d.entries().forEach(e -> conditions.add(e.condition()));
             for (Dialogue.Node n : d.nodes().values()) {
