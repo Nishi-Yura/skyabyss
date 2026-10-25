@@ -746,7 +746,9 @@ public class TravelMapScreen extends Screen {
                 icons.add(new int[] {at[0] - 8, at[1] - 8, 16, 16});
                 int pr = labelPriority(m);
                 if (pr > 0 && at[2] == 0) {
-                    labels.add(new Label(at[0], at[1], MapText.name(m), m.kind() == MapMarks.Kind.TITAN || m.color() != 0 ? rim : p.text(), pr));
+                    // 見つけていない見どころの札は名前だけ (「未発見」は薄い印と指したときの説明でわかる)
+                    Component name = unfound ? Component.translatable("map.skyabyss.poi." + m.extra().substring(5)) : MapText.name(m);
+                    labels.add(new Label(at[0], at[1], name, m.kind() == MapMarks.Kind.TITAN || m.color() != 0 ? rim : p.text(), pr));
                 }
             }
             List<Component> lines = new ArrayList<>();
@@ -852,6 +854,8 @@ public class TravelMapScreen extends Screen {
             case SITE -> 65;
             case CAMP -> view <= 1200 ? 40 : 0;
             case SPAWN -> view <= 1200 ? 35 : 0;
+            // 見どころは寄せたときだけ名前 (見つけたものを先に。重なる所には置かない)
+            case WAYMARK -> !m.extra().startsWith("poi") || view > 320 ? 0 : m.extra().startsWith("poi:") ? 20 : 12;
             default -> 0;
         };
     }
