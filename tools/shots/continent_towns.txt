@@ -1,6 +1,6 @@
 # 天と淵の大陸の土地の町 (docs/design/40 の 3 章)
 # bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/continent_towns.txt -PshotsName=continent_towns
-world continent_towns continent
+world continent_towns2 continent
 size 1600 900
 timeout 1800
 render 12
@@ -16,23 +16,43 @@ cmd skyabyss dev opening build
 wait 200
 cmd gamemode spectator
 hud off
-cmd tp @s -92 132 -732 135 38
+cmd skyabyss dev grounds mark town 0 pos
 waitchunks 900
 wait 200
+cmd execute at @s positioned ~42 ~ ~42 positioned over motion_blocking_no_leaves run tp @s ~ ~26 ~ 135 32
+wait 60
 shot town_whale
-cmd tp @s 1358 97 188 135 38
+cmd skyabyss dev grounds mark town 0 stand
+cmd execute at @s run tp @s ~ ~2 ~ 180 8
+wait 60
+shot town_whale_in
+cmd skyabyss dev grounds mark town 1 pos
 waitchunks 900
 wait 200
+cmd execute at @s positioned ~42 ~ ~42 positioned over motion_blocking_no_leaves run tp @s ~ ~26 ~ 135 32
+wait 60
 shot town_tide
-cmd tp @s -1152 199 -72 135 38
+cmd skyabyss dev grounds mark town 1 stand
+cmd execute at @s run tp @s ~ ~2 ~ 180 8
+wait 60
+shot town_tide_in
+cmd skyabyss dev grounds mark town 2 pos
 waitchunks 900
 wait 200
+cmd execute at @s positioned ~42 ~ ~42 positioned over motion_blocking_no_leaves run tp @s ~ ~26 ~ 135 32
+wait 60
 shot town_storm
-cmd tp @s -272 128 1128 135 38
+cmd skyabyss dev grounds mark town 2 stand
+cmd execute at @s run tp @s ~ ~2 ~ 180 8
+wait 60
+shot town_storm_in
+cmd skyabyss dev grounds mark town 3 pos
 waitchunks 900
 wait 200
+cmd execute at @s positioned ~42 ~ ~42 positioned over motion_blocking_no_leaves run tp @s ~ ~26 ~ 135 32
+wait 60
 shot town_ember
-cmd tp @s -470 110 40 150 30
-waitchunks 900
-wait 100
-shot capital
+cmd skyabyss dev grounds mark town 3 stand
+cmd execute at @s run tp @s ~ ~2 ~ 180 8
+wait 60
+shot town_ember_in

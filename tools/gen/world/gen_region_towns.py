@@ -43,7 +43,7 @@ PALETTES = {
     },
 }
 
-HALF = 20
+HALF = 28
 
 
 class BP:
@@ -237,10 +237,12 @@ def town(region):
         for i in range(4):
             bp.set(x0 + i, -1, -6, 'minecraft:grass_block[snowy=false]')
             bp.set(x0 + i, 0, -6, FLOWERS[i % len(FLOWERS)])
-    # 町の入口の門 (四つの道の、広場から 19。柱二本と梁、吊り灯り二つ)
-    for d in (19, -19):
+    # 町の入口の門 (四つの道の、広場から 27。柱二本と梁、吊り灯り二つ)
+    for d in (27, -27):
         town_gate(bp, 0, d, 'x', pal)
         town_gate(bp, d, 0, 'z', pal)
+    # 外の輪の家と、土地ごとの名物
+    outer_ring(bp, region, pal)
     # 宿の二階 (床と梯子と窓)。宿の屋根は二階の上へ上げる
     inn_upper(bp, -14, -15, -4, -8, pal)
     # 煙突 (宿・店・南の家二つ)
@@ -249,7 +251,7 @@ def town(region):
         bp.fill(x, 0, z, x, top, z, 'minecraft:cobblestone' if region != 'ember' else 'minecraft:polished_blackstone_bricks')
         bp.set(x, top + 1, z, 'minecraft:campfire[facing=north,lit=true,signal_fire=false,waterlogged=false]')
     # 木 (土地の木) と、外の家の脇の畑
-    for x, z in ((16, -12), (-16, 12), (-9, 15), (9, -17)):
+    for x, z in ((16, -12), (-16, 12), (-9, 15), (9, -17), (-25, -12), (25, 12), (-12, 25), (12, -25)):
         tree(bp, x, z, region)
     for (gx0, gz0, gx1, gz1) in ((15, 8, 19, 12), (-19, -12, -15, -8)):
         for x in range(gx0, gx1 + 1):
@@ -262,6 +264,191 @@ def town(region):
         bp.set((gx0 + gx1) // 2, 0, gz0, f"{pal['fence']}_gate[facing=north,in_wall=false,open=false,powered=false]")
     bp.mark('stand', 0, 0, 3)
     return bp
+
+
+# 外の輪の家 (どの町にも。名物と重なる所は名物を建てる)
+OUTER = {
+    'nw': ((-24, -24, -17, -18), (-20, -18, 'south')),
+    'ne': ((17, -25, 24, -19), (20, -19, 'south')),
+    'sw': ((-25, 17, -18, 23), (-21, 17, 'north')),
+    'se': ((16, 18, 23, 24), (19, 18, 'north')),
+    'w': ((-26, 4, -20, 9), (-23, 4, 'north')),
+    'e': ((20, -9, 26, -4), (23, -4, 'south')),
+    'n': ((-9, -26, -3, -21), (-6, -21, 'south')),
+    's': ((4, 21, 10, 26), (7, 21, 'north')),
+}
+# 名物が使う区画
+LANDMARK_SLOTS = {'whale': ('ne',), 'tide': ('se',), 'storm': ('nw', 'se'), 'ember': ('e',)}
+
+
+def outer_ring(bp, region, pal):
+    used = LANDMARK_SLOTS[region]
+    for k, ((x0, z0, x1, z1), door_at) in OUTER.items():
+        if k in used:
+            continue
+        house(bp, x0, z0, x1, z1, 3 + (1 if k in ('n', 's') else 0), door_at, pal, beds=1)
+        dx, dz, facing = door_at
+        step = {'south': (0, 1), 'north': (0, -1), 'east': (1, 0), 'west': (-1, 0)}[facing]
+        bp.set(dx + step[0], -1, dz + step[1], pal['plaza'])
+        # 戸の脇の樽か花の鉢
+        side = (dx + 2 * (1 if step[1] else 0), dz + 2 * (1 if step[0] else 0))
+        bp.set(side[0] + step[0], 0, side[1] + step[1], 'minecraft:barrel[facing=up,open=false]' if (x0 + z0) % 2 else 'minecraft:potted_red_tulip')
+    {'whale': whale_landmark, 'tide': tide_landmark, 'storm': storm_landmark, 'ember': ember_landmark}[region](bp, pal)
+
+
+def whale_landmark(bp, pal):
+    """鯨見の町: 鯨を見張る高い塔 (北東) と、北の門の上の鯨の骨のアーチ"""
+    cx, cz = 20, -22
+    for y in range(0, 16):
+        for x in range(cx - 2, cx + 3):
+            for z in range(cz - 2, cz + 3):
+                edge = max(abs(x - cx), abs(z - cz)) == 2
+                if edge:
+                    corner = abs(x - cx) == 2 and abs(z - cz) == 2
+                    bp.set(x, y, z, pal['frame'] if corner else ('minecraft:cobblestone' if y < 5 else pal['wall']))
+                else:
+                    bp.set(x, y, z, AIR_STATE)
+    for y in range(0, 16):
+        bp.set(cx, y, cz - 1, 'minecraft:ladder[facing=south,waterlogged=false]')
+    bp.set(cx, 0, cz + 2, door(pal['door'], 'south', 'lower'))
+    bp.set(cx, 1, cz + 2, door(pal['door'], 'south', 'upper'))
+    for y in (5, 9, 13):
+        bp.set(cx + 2, y, cz, 'minecraft:glass_pane[east=false,north=false,south=false,waterlogged=false,west=false]')
+        bp.set(cx - 2, y, cz, 'minecraft:glass_pane[east=false,north=false,south=false,waterlogged=false,west=false]')
+    # 見張りの床と屋根 (四本柱の上に寄棟の小屋根)。鐘
+    for x in range(cx - 3, cx + 4):
+        for z in range(cz - 3, cz + 4):
+            bp.set(x, 16, z, 'minecraft:spruce_planks')
+            if max(abs(x - cx), abs(z - cz)) == 3:
+                bp.set(x, 17, z, pal['fence'])
+    bp.set(cx, 16, cz - 1, 'minecraft:spruce_trapdoor[facing=south,half=top,open=false,powered=false,waterlogged=false]')
+    for x, z in ((cx - 3, cz - 3), (cx + 3, cz - 3), (cx - 3, cz + 3), (cx + 3, cz + 3)):
+        bp.fill(x, 17, z, x, 19, z, pal['frame'])
+    for k in range(4):
+        for x in range(cx - 4 + k, cx + 5 - k):
+            for z in range(cz - 4 + k, cz + 5 - k):
+                if max(abs(x - cx), abs(z - cz)) == 4 - k:
+                    bp.set(x, 20 + k, z, pal['ridge'] if k == 3 else 'minecraft:spruce_planks' if k == 0 else pal['ridge'])
+    bp.set(cx, 19, cz, 'minecraft:bell[attachment=ceiling,facing=north,powered=false]')
+    bp.set(cx, 20, cz, 'minecraft:spruce_planks')
+    bp.set(cx + 2, 19, cz + 2, 'minecraft:lantern[hanging=true,waterlogged=false]')
+    # 鯨の骨のアーチ (北の門のすぐ内側。肋骨二本が道をまたぐ)
+    for z in (-24, -22):
+        for x, y in ((-3, 0), (-3, 1), (-3, 2), (-3, 3), (-2, 4), (-2, 5), (-1, 6), (0, 6), (1, 6), (2, 5), (2, 4), (3, 3), (3, 2), (3, 1), (3, 0)):
+            bp.set(x, y, z, 'minecraft:bone_block[axis=y]')
+    bp.set(0, 7, -23, 'minecraft:bone_block[axis=z]')
+
+
+def tide_landmark(bp, pal):
+    """汐守の港: 白と青の灯台 (南東) と、網を干す棚"""
+    cx, cz = 20, 21
+    for y in range(0, 18):
+        for x in range(cx - 3, cx + 4):
+            for z in range(cz - 3, cz + 4):
+                d = (x - cx) ** 2 + (z - cz) ** 2
+                r = 3
+                if d <= r * r + 1:
+                    edge = d > (r - 1) ** 2 + 1
+                    if edge:
+                        bp.set(x, y, z, 'minecraft:white_terracotta' if (y // 3) % 2 == 0 else 'minecraft:light_blue_terracotta')
+                    else:
+                        bp.set(x, y, z, AIR_STATE)
+    for y in range(0, 18):
+        bp.set(cx, y, cz - 2, 'minecraft:ladder[facing=south,waterlogged=false]')
+    bp.set(cx, 0, cz + 3, door(pal['door'], 'south', 'lower'))
+    bp.set(cx, 1, cz + 3, door(pal['door'], 'south', 'upper'))
+    for x in range(cx - 3, cx + 4):
+        for z in range(cz - 3, cz + 4):
+            d = (x - cx) ** 2 + (z - cz) ** 2
+            if d <= 10:
+                bp.set(x, 18, z, 'minecraft:smooth_sandstone')
+                if d >= 7:
+                    bp.set(x, 19, z, pal['fence'])
+    bp.set(cx, 18, cz - 2, 'minecraft:birch_trapdoor[facing=south,half=top,open=false,powered=false,waterlogged=false]')
+    bp.set(cx, 19, cz, 'minecraft:sea_lantern')
+    for x, z in ((cx - 1, cz - 1), (cx + 1, cz - 1), (cx - 1, cz + 1), (cx + 1, cz + 1)):
+        bp.set(x, 20, z, 'minecraft:glass')
+    bp.fill(cx - 1, 21, cz - 1, cx + 1, 21, cz + 1, pal['ridge'])
+    # 網を干す棚 (柵の柱と、垂れた網 = 蜘蛛の巣でなく紐の代わりに鎖)
+    for (x0, z0) in ((-26, 12), (-26, 16)):
+        for x in (x0, x0 + 5):
+            bp.fill(x, 0, z0, x, 2, z0, pal['fence'])
+        for x in range(x0, x0 + 6):
+            bp.set(x, 3, z0, 'minecraft:birch_slab[type=bottom,waterlogged=false]')
+            if 0 < x - x0 < 5:
+                bp.set(x, 2, z0, 'minecraft:chain[axis=y,waterlogged=false]')
+    bp.set(-23, 0, 14, 'minecraft:barrel[facing=up,open=false]')
+    bp.set(-22, 0, 14, 'minecraft:barrel[facing=up,open=false]')
+    bp.set(-24, 0, 14, 'minecraft:hay_block[axis=y]')
+
+
+def windmill_at(bp, cx, cz, pal):
+    for y in range(0, 9):
+        for x in range(cx - 2, cx + 3):
+            for z in range(cz - 2, cz + 3):
+                if max(abs(x - cx), abs(z - cz)) == 2:
+                    corner = abs(x - cx) == 2 and abs(z - cz) == 2
+                    bp.set(x, y, z, pal['frame'] if corner else pal['wall'])
+                else:
+                    bp.set(x, y, z, AIR_STATE)
+    bp.set(cx, 0, cz + 2, door(pal['door'], 'south', 'lower'))
+    bp.set(cx, 1, cz + 2, door(pal['door'], 'south', 'upper'))
+    for k in range(3):
+        for x in range(cx - 3 + k, cx + 4 - k):
+            for z in range(cz - 3 + k, cz + 4 - k):
+                if max(abs(x - cx), abs(z - cz)) == 3 - k:
+                    bp.set(x, 9 + k, z, pal['ridge'] if k < 2 else 'minecraft:dark_oak_planks')
+    # 羽根 (南の面。軸と四枚の帆)
+    bp.set(cx, 6, cz + 3, 'minecraft:dark_oak_log[axis=z]')
+    for i in range(1, 6):
+        for (dx, dy) in ((0, i), (0, -i), (i, 0), (-i, 0)):
+            bp.set(cx + dx, 6 + dy, cz + 4, 'minecraft:white_wool' if i > 1 else 'minecraft:dark_oak_planks')
+            if i > 1:
+                ox, oy = (1, 0) if dx == 0 else (0, 1)
+                sgn = 1 if (dx > 0 or dy > 0) else -1
+                bp.set(cx + dx + ox * sgn, 6 + dy + oy * -sgn, cz + 4, 'minecraft:white_wool')
+
+
+def storm_landmark(bp, pal):
+    """風待の里: 風車二基 (北西と南東) と、風の向きを見る旗の柱"""
+    windmill_at(bp, -21, -21, pal)
+    windmill_at(bp, 20, 21, pal)
+    for x, z, wool in ((-2, -18, 'minecraft:yellow_wool'), (-3, 14, 'minecraft:light_gray_wool')):
+        bp.fill(x, 0, z, x, 6, z, pal['fence'])
+        for k in range(3):
+            bp.set(x + 1 + k, 6 - (k // 2), z, wool)
+
+
+def ember_landmark(bp, pal):
+    """灰炉の村: 黒い石の低い囲い (道の所は開く)・門の篝火・村の東の鍛冶場"""
+    R = 27
+    for i in range(-R, R + 1):
+        for (x, z) in ((i, -R), (i, R), (-R, i), (R, i)):
+            if abs(i) <= 4:
+                continue
+            bp.fill(x, 0, z, x, 1, z, 'minecraft:polished_blackstone_bricks')
+            bp.set(x, 2, z, 'minecraft:polished_blackstone_brick_wall[east=none,north=none,south=none,up=true,waterlogged=false,west=none]' if i % 4 == 0 else AIR_STATE)
+    for d in (R, -R):
+        for (x, z) in ((5, d), (-5, d), (d, 5), (d, -5)):
+            bp.fill(x, 0, z, x, 2, z, 'minecraft:polished_blackstone_bricks')
+            bp.set(x, 3, z, 'minecraft:campfire[facing=north,lit=true,signal_fire=false,waterlogged=false]')
+    # 鍛冶場 (東。屋根だけで三方が開く。炉・金床・溶岩の大釜)
+    x0, z0, x1, z1 = 19, -10, 25, -3
+    bp.fill(x0, -1, z0, x1, -1, z1, pal['floor'])
+    for x, z in ((x0, z0), (x1, z0), (x0, z1), (x1, z1)):
+        bp.fill(x, 0, z, x, 3, z, pal['frame'])
+    for x in range(x0, x1 + 1):
+        bp.fill(x, 0, z0, x, 3, z0, pal['wall'])
+    for x in range(x0 - 1, x1 + 2):
+        for z in range(z0 - 1, z1 + 2):
+            bp.set(x, 4, z, pal['ridge'])
+    bp.fill(x1 - 1, 0, z0 + 1, x1 - 1, 0, z0 + 2, 'minecraft:blast_furnace[facing=west,lit=true]')
+    bp.set(x0 + 2, 0, z0 + 3, 'minecraft:anvil[facing=north]')
+    bp.set(x0 + 1, 0, z0 + 1, 'minecraft:lava_cauldron')
+    bp.set(x0 + 4, 0, z0 + 1, 'minecraft:grindstone[face=floor,facing=north]')
+    bp.set(x0 + 3, 3, z0 + 3, 'minecraft:lantern[hanging=true,waterlogged=false]')
+    bp.fill(x1 - 1, 1, z0 + 1, x1 - 1, 7, z0 + 1, 'minecraft:polished_blackstone_bricks')
+    bp.set(x1 - 1, 8, z0 + 1, 'minecraft:campfire[facing=north,lit=true,signal_fire=false,waterlogged=false]')
 
 
 def town_gate(bp, cx, cz, along, pal):
@@ -303,8 +490,8 @@ def inn_upper(bp, x0, z0, x1, z1, pal):
             bp.set(x, 4, z, 'minecraft:glass_pane[east=false,north=false,south=false,waterlogged=false,west=false]')
     # 二階の寝台
     for i, x in enumerate(range(x0 + 1, x1 - 2, 2)):
-        bp.set(x, 4, z1 - 1, 'minecraft:red_bed[facing=north,occupied=false,part=head]')
-        bp.set(x, 4, z1 - 2, 'minecraft:red_bed[facing=north,occupied=false,part=foot]') if False else None
+        bp.set(x, 4, z1 - 2, 'minecraft:red_bed[facing=north,occupied=false,part=head]')
+        bp.set(x, 4, z1 - 1, 'minecraft:red_bed[facing=north,occupied=false,part=foot]')
     bp.set((x0 + x1) // 2, 6, (z0 + z1) // 2, 'minecraft:lantern[hanging=true,waterlogged=false]')
     # 屋根 (y 7 から)
     a, b, layer = z0 - 1, z1 + 1, 0
