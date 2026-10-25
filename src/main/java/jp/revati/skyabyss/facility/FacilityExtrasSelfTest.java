@@ -274,8 +274,8 @@ public final class FacilityExtrasSelfTest {
         jp.revati.skyabyss.facility.Coins.take(p, jp.revati.skyabyss.facility.Coins.count(p));
         check(f, !FacilityActions.brewLesson(p) && !FacilityMarks.has(p, FacilityMarks.BREW_LESSON), "no brewing lesson before chapter 4");
         p.setGameMode(GameType.CREATIVE);
-        check(f, FacilityActions.brewLesson(p) && p.getInventory().countItem(Items.BREWING_STAND) == 1, "brewing lesson gives the kit");
-        check(f, !FacilityActions.brewLesson(p) && p.getInventory().countItem(Items.BREWING_STAND) == 1, "brewing kit only once");
+        check(f, FacilityActions.brewLesson(p) && p.getInventory().countItem(Items.POTION) == 2, "the fire-chapter gift gives a fire ward and a healing potion");
+        check(f, !FacilityActions.brewLesson(p) && p.getInventory().countItem(Items.POTION) == 2, "the fire-chapter gift only once");
         p.setGameMode(GameType.SURVIVAL);
         p.getInventory().clearContent();
         jp.revati.skyabyss.facility.Coins.take(p, jp.revati.skyabyss.facility.Coins.count(p));

@@ -234,7 +234,7 @@ public final class FacilityActions {
     // ---------------------------------------------------------------- 醸造の手ほどき (四章)
     public static final int BREW_CHAPTER_STAGE = 3;
 
-    // 四章 (心臓を三つ止めた) から。手ほどきの品 (醸造台・ブレイズパウダー・ネザーウォート 2・ガラス瓶 3) は一度だけ
+    // 四章 (心臓を三つ止めた) から。火の地への差し入れ (火除けの薬と傷薬を一本ずつ) を一度だけ
     public static boolean brewLesson(ServerPlayer player) {
         if (jp.revati.skyabyss.progress.Progression.stage(player) < BREW_CHAPTER_STAGE && !player.isCreative()) {
             Notice.hint(player, "message.skyabyss.apothecary.not_yet");
@@ -251,9 +251,10 @@ public final class FacilityActions {
         return true;
     }
 
+    // 火の地への差し入れ (2026-10-25: 醸造台は冒険の決まりで置けないので、手ほどきの品の代わりに薬を一本ずつ。00 の 278)
     public static List<ItemStack> brewKit() {
-        return List.of(new ItemStack(net.minecraft.world.item.Items.BREWING_STAND), new ItemStack(net.minecraft.world.item.Items.BLAZE_POWDER),
-                new ItemStack(net.minecraft.world.item.Items.NETHER_WART, 2), new ItemStack(net.minecraft.world.item.Items.GLASS_BOTTLE, 3));
+        return List.of(net.minecraft.world.item.alchemy.PotionContents.createItemStack(net.minecraft.world.item.Items.POTION, net.minecraft.world.item.alchemy.Potions.FIRE_RESISTANCE),
+                net.minecraft.world.item.alchemy.PotionContents.createItemStack(net.minecraft.world.item.Items.POTION, net.minecraft.world.item.alchemy.Potions.HEALING));
     }
 
     // ---------------------------------------------------------------- 修理
