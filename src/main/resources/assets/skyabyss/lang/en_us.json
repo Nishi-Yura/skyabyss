@@ -1,4 +1,6 @@
 {
+  "entity.skyabyss.island_bandit_leader": "Pass Bandit Chief",
+  "message.skyabyss.island.leader_down": "The pass bandit chief is down. %s bell coins",
   "sign.skyabyss.island.prints": "Footprint Hollow",
   "sign.skyabyss.island.bandits": "Bandit Camp",
   "sign.skyabyss.island.fire": "Rest Stop",

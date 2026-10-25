@@ -48,6 +48,8 @@ OPENING = {
 }
 
 MAIN = {
+    'entity.skyabyss.island_bandit_leader': ('峠の頭目', 'Pass Bandit Chief'),
+    'message.skyabyss.island.leader_down': ('峠の頭目を退けた。鐘銭 %s', 'The pass bandit chief is down. %s bell coins'),
     # 島の道の分かれ目の札 (IslandTrail.buildSigns)
     'sign.skyabyss.island.prints': ('足跡の窪地', 'Footprint Hollow'),
     'sign.skyabyss.island.bandits': ('野盗の野営', 'Bandit Camp'),

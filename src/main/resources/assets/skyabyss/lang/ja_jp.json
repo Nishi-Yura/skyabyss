@@ -1,4 +1,6 @@
 {
+  "entity.skyabyss.island_bandit_leader": "峠の頭目",
+  "message.skyabyss.island.leader_down": "峠の頭目を退けた。鐘銭 %s",
   "sign.skyabyss.island.prints": "足跡の窪地",
   "sign.skyabyss.island.bandits": "野盗の野営",
   "sign.skyabyss.island.fire": "旅の休み場",

@@ -67,6 +67,9 @@ public final class IslandTrail {
     static final double REST_NEAR = 6;
     static final double SHRINE_NEAR = 5;
     static final double BANDIT_NEAR = 36;
+    static final String LEADER_TAG = "skyabyss_island_leader";
+    static final net.minecraft.resources.ResourceLocation LEADER_HP = net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "island_leader_hp");
+    static final int LEADER_COINS = 5;
     static final int GATE_HALF = 14;
     // 渡りの場面: 島の船着き場から都の向きへ、この先の海の上
     static final int SEA_AHEAD = 90;
@@ -234,6 +237,18 @@ public final class IslandTrail {
             m.moveTo(x + 0.5, y, z + 0.5, level.random.nextFloat() * 360f, 0f);
             m.finalizeSpawn(level, level.getCurrentDifficultyAt(m.blockPosition()), MobSpawnType.EVENT, null);
             m.setPersistenceRequired();
+            if (i == 1) {
+                // 峠の頭目 (Wynncraft の最初の戦いの小さな頭のように。名札つき・体力 2 倍・倒すと鐘銭)
+                m.setCustomName(Component.translatable("entity.skyabyss.island_bandit_leader"));
+                m.setCustomNameVisible(true);
+                m.addTag(LEADER_TAG);
+                var hp = m.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.MAX_HEALTH);
+                if (hp != null) {
+                    hp.addPermanentModifier(new net.minecraft.world.entity.ai.attributes.AttributeModifier(LEADER_HP, 1.0,
+                            net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
+                    m.setHealth(m.getMaxHealth());
+                }
+            }
             level.addFreshEntity(m);
         }
     }
@@ -247,6 +262,10 @@ public final class IslandTrail {
         BlockPos b = ContinentLayout.get().island("bandits");
         if (Math.hypot(event.getEntity().getX() - b.getX(), event.getEntity().getZ() - b.getZ()) > BANDIT_NEAR + 30) {
             return;
+        }
+        if (event.getEntity().getTags().contains(LEADER_TAG)) {
+            jp.revati.skyabyss.facility.Coins.give(p, LEADER_COINS);
+            Notice.hint(p, "message.skyabyss.island.leader_down", LEADER_COINS);
         }
         int n = p.getPersistentData().getInt(KILLS) + 1;
         p.getPersistentData().putInt(KILLS, n);
