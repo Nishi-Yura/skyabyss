@@ -1,0 +1,45 @@
+# 野の眺め (木立・岩・茂み)
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/continent_fields.txt -PshotsName=continent_fields
+world continent_fields continent
+size 1600 900
+timeout 1500
+render 12
+guiscale 2
+wait 100
+cmd skyabyss cinematic stop
+cmd time set 5000
+cmd weather clear
+cmd gamerule doDaylightCycle false
+hud off
+cmd gamemode creative
+cmd tp @s -450 140 -300
+waitchunks 700
+wait 200
+cmd gamemode spectator
+cmd execute positioned -450 0 -300 positioned over motion_blocking_no_leaves run tp @s ~ ~30 ~ 135 22
+wait 60
+shot meadow_n
+cmd gamemode creative
+cmd tp @s -500 140 450
+waitchunks 700
+wait 200
+cmd gamemode spectator
+cmd execute positioned -500 0 450 positioned over motion_blocking_no_leaves run tp @s ~ ~30 ~ 135 22
+wait 60
+shot meadow_s
+cmd gamemode creative
+cmd tp @s 100 140 -200
+waitchunks 700
+wait 200
+cmd gamemode spectator
+cmd execute positioned 100 0 -200 positioned over motion_blocking_no_leaves run tp @s ~ ~30 ~ 135 22
+wait 60
+shot meadow_e
+cmd gamemode creative
+cmd tp @s 1100 140 300
+waitchunks 700
+wait 200
+cmd gamemode spectator
+cmd execute positioned 1100 0 300 positioned over motion_blocking_no_leaves run tp @s ~ ~30 ~ 135 22
+wait 60
+shot savanna

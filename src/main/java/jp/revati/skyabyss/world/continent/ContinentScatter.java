@@ -87,6 +87,10 @@ final class ContinentScatter {
                 if (r.nextFloat() < 0.035f) {
                     wall(level, r, roads, x0, z0);
                 }
+                // 木立 (平原に木のかたまり。野がのっぺりしないように)
+                if (r.nextFloat() < (biome == ContinentBiomes.SAVANNA ? 0.06f : 0.12f)) {
+                    grove(level, r, roads, x0, z0, biome == ContinentBiomes.SAVANNA);
+                }
             }
             case ContinentBiomes.FOREST, ContinentBiomes.BIRCH_FOREST, ContinentBiomes.FLOWER_FOREST, ContinentBiomes.TAIGA, ContinentBiomes.PINE_TAIGA -> {
                 Block wood = biome == ContinentBiomes.BIRCH_FOREST ? Blocks.BIRCH_LOG
@@ -266,6 +270,47 @@ final class ContinentScatter {
                     put(level, p, ((dy / 2 + dx + dz) % 3 == 0 ? alt : main).defaultBlockState());
                 }
             }
+        }
+    }
+
+    // 木立: 3〜6 本の小さな木 (幹 4〜6 と丸い葉。サバンナはアカシア)。白樺をまぜる
+    static void grove(WorldGenLevel level, RandomSource r, List<int[]> roads, int x0, int z0, boolean savanna) {
+        int n = 3 + r.nextInt(4);
+        for (int i = 0; i < n; i++) {
+            BlockPos c = spot(level, r, roads, x0, z0, 2);
+            if (c == null || !level.getBlockState(c).is(Blocks.GRASS_BLOCK)) {
+                continue;
+            }
+            boolean birch = !savanna && r.nextFloat() < 0.3f;
+            Block log = savanna ? Blocks.ACACIA_LOG : birch ? Blocks.BIRCH_LOG : Blocks.OAK_LOG;
+            Block leaves = savanna ? Blocks.ACACIA_LEAVES : birch ? Blocks.BIRCH_LEAVES : Blocks.OAK_LEAVES;
+            tree(level, r, c.above(), log, leaves, 4 + r.nextInt(3));
+        }
+    }
+
+    static void tree(WorldGenLevel level, RandomSource r, BlockPos base, Block log, Block leaves, int h) {
+        for (int y = 0; y < h; y++) {
+            if (!free(level.getBlockState(base.above(y)))) {
+                return;
+            }
+        }
+        BlockState leaf = leaves.defaultBlockState().setValue(net.minecraft.world.level.block.LeavesBlock.PERSISTENT, true);
+        for (int dx = -2; dx <= 2; dx++) {
+            for (int dz = -2; dz <= 2; dz++) {
+                for (int dy = h - 3; dy <= h; dy++) {
+                    int d = dx * dx + dz * dz + (dy - h + 1) * (dy - h + 1) * 2;
+                    if (d > 5 || d == 5 && r.nextBoolean()) {
+                        continue;
+                    }
+                    BlockPos p = base.offset(dx, dy, dz);
+                    if (free(level.getBlockState(p))) {
+                        put(level, p, leaf);
+                    }
+                }
+            }
+        }
+        for (int y = 0; y < h; y++) {
+            put(level, base.above(y), log.defaultBlockState().setValue(RotatedPillarBlock.AXIS, Direction.Axis.Y));
         }
     }
 
