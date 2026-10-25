@@ -1102,37 +1102,65 @@ BY_REGION['ember'] = BY_REGION['ember'] + ['mine', 'traveler_camp', 'graveyard']
 
 
 def signposts(lay):
-    """道しるべ: 道の中ほど (道のりの半分) の脇に一本。行き先は道の両端 (都・町・跡地・船着き場)"""
-    def name_of(p):
-        if tuple(p) == tuple(lay['capital']):
-            return 'capital'
-        for n, q in lay['towns']:
-            if tuple(q) == tuple(p):
-                return 'town_' + {'鯨見': 'whale', '汐守': 'tide', '風待': 'storm', '灰炉': 'ember'}[n]
-        for n, q in lay['sites']:
-            if tuple(q) == tuple(p):
-                return 'site_' + {'岩鯨の跡地': 'whale', '潮殻の跡地': 'tide', '雷翼の跡地': 'storm', '余燼の跡地': 'ember'}[n]
-        return None
+    """道しるべ: 道の上の決まった所 (都・町・跡地) を節にして、節を出たところと、長い区間の中ほどの脇に一本ずつ。
+    札は「この先の節と道のり / 来た節と道のり」 (道の途中の町も節に数える)"""
+    towns = {'鯨見': 'whale', '汐守': 'tide', '風待': 'storm', '灰炉': 'ember'}
+    sites = {'岩鯨の跡地': 'whale', '潮殻の跡地': 'tide', '雷翼の跡地': 'storm', '余燼の跡地': 'ember'}
+    named = [('capital', lay['capital'])] + [('town_' + towns[n], q) for n, q in lay['towns']] + [('site_' + sites[n], q) for n, q in lay['sites']]
+
+    def leave(name):
+        # 節を出たところ (都は大きいので遠め。町は壁の外。跡地は整えた場所の外)
+        return 150 if name == 'capital' else 64 if name.startswith('town_') else 190
+
+    def r10(v):
+        return int(round(v / 10) * 10)
     out = []
     for r in lay['roads']:
-        a, b = name_of(r[0]), name_of(r[-1])
-        if a is None or b is None or len(r) < 2:
+        cum = [0.0]
+        for k in range(len(r) - 1):
+            cum.append(cum[-1] + math.dist(r[k], r[k + 1]))
+        total = cum[-1]
+        # 節: 道の点のうち、決まった所から 5 以内のもの
+        nodes = []
+        for k, pt in enumerate(r):
+            for name, q in named:
+                if math.dist(pt, q) < 5 and (not nodes or nodes[-1][0] != name):
+                    nodes.append((name, cum[k]))
+        if len(nodes) < 2:
             continue
-        seg = [math.dist(r[i], r[i + 1]) for i in range(len(r) - 1)]
-        total = sum(seg)
-        if total < 250:
-            continue
-        want = total / 2
-        for i, L in enumerate(seg):
-            if want <= L:
-                (ax, az), (bx, bz) = r[i], r[i + 1]
-                t = want / L
-                x, z = ax + (bx - ax) * t, az + (bz - az) * t
-                nx, nz = -(bz - az) / L, (bx - ax) / L
-                out.append({'kind': 'signpost', 'x': int(round(x + nx * 6)), 'z': int(round(z + nz * 6)),
-                            'a': a, 'da': int(round(total / 2 / 10) * 10), 'b': b, 'db': int(round(total / 2 / 10) * 10)})
-                break
-            want -= L
+
+        def point_at(want):
+            for k in range(len(r) - 1):
+                L = cum[k + 1] - cum[k]
+                if want <= cum[k + 1] and L > 0:
+                    (ax, az), (bx, bz) = r[k], r[k + 1]
+                    t = (want - cum[k]) / L
+                    x, z = ax + (bx - ax) * t, az + (bz - az) * t
+                    nx, nz = -(bz - az) / L, (bx - ax) / L
+                    return int(round(x + nx * 6)), int(round(z + nz * 6))
+            return None
+        for (na, da), (nb, db) in zip(nodes, nodes[1:]):
+            span = db - da
+            stops = []
+            if span >= leave(na) + 120:
+                stops.append((da + leave(na), True))
+            if span >= 250:
+                stops.append(((da + db) / 2, True))
+            if span >= leave(nb) + 120:
+                stops.append((db - leave(nb), False))
+            # 近すぎる札は一本に (120 より近いものは先の一本だけ)
+            kept = []
+            for d, forward in sorted(stops):
+                if not kept or d - kept[-1][0] >= 120:
+                    kept.append((d, forward))
+            for d, forward in kept:
+                at = point_at(d)
+                if at is None:
+                    continue
+                if forward:
+                    out.append({'kind': 'signpost', 'x': at[0], 'z': at[1], 'a': nb, 'da': r10(db - d), 'b': na, 'db': r10(d - da)})
+                else:
+                    out.append({'kind': 'signpost', 'x': at[0], 'z': at[1], 'a': na, 'da': r10(d - da), 'b': nb, 'db': r10(db - d)})
     return out
 
 
