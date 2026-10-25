@@ -508,23 +508,18 @@ public final class StorySelfTest {
         if ("rumor".equals(stage(p, "main_abyss"))) {
             Quests.forceStage(p, "main_abyss");
         }
-        // 冷めない炭: ネザーへ行き、マグマクリーム 4 つ → 語り部
+        // 冷めない炭: マグマクリーム 4 つ (道具屋で買える。ネザーへは行かない。00 の 278) → 語り部
         DialogueService.open(p, st);
         pick(p, ST, "errands", f);
         pick(p, ST, "coal", f);
         next(p);
         pick(p, ST, "accept", f);
         check(stage(p, "sub_warm_coal").equals("fetch"), "sub_warm_coal did not start", f);
+        Quests.poll(p, true);
+        check(stage(p, "sub_warm_coal").equals("fetch"), "the coal quest passed without the magma cream", f);
         p.getInventory().add(new ItemStack(Items.MAGMA_CREAM, 4));
         Quests.poll(p, true);
-        check(stage(p, "sub_warm_coal").equals("fetch"), "the coal quest passed without the Nether", f);
-        ServerLevel nether = server.getLevel(Level.NETHER);
-        if (nether != null) {
-            p.setServerLevel(nether);
-            Quests.poll(p, true);
-            p.setServerLevel(level);
-        }
-        check(stage(p, "sub_warm_coal").equals("tell"), "visiting the Nether with magma cream did not advance: " + stage(p, "sub_warm_coal"), f);
+        check(stage(p, "sub_warm_coal").equals("tell"), "four magma creams did not advance: " + stage(p, "sub_warm_coal"), f);
         talk(p, st, "ms_coal_done", f);
         next(p);
         check(stage(p, "sub_warm_coal").equals("done") && p.getInventory().countItem(Items.MAGMA_CREAM) == 0

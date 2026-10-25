@@ -9,11 +9,6 @@
       "id": "fetch",
       "objectives": [
         {
-          "id": "go",
-          "type": "visit",
-          "target": "minecraft:the_nether"
-        },
-        {
           "id": "cream",
           "type": "collect",
           "target": "minecraft:magma_cream",

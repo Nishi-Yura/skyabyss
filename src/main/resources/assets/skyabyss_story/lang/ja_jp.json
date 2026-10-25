@@ -146,7 +146,7 @@
   "quest.skyabyss.sub_warm_coal.done": "灰の底から出てきた炭は、いつまでも温かい。",
   "quest.skyabyss.sub_warm_coal.fetch.cream": "マグマクリームを集めよう",
   "quest.skyabyss.sub_warm_coal.fetch.go": "ネザーへ行こう",
-  "quest.skyabyss.sub_warm_coal.fetch.journal": "語り部の炉の火が、七日目の夜までもたないという。昔は、灰の底に「地の底の火」のかけらがあったそうだ。\n地の底へ……ネザーへ行けば、冷めない火が見つかるかもしれない。",
+  "quest.skyabyss.sub_warm_coal.fetch.journal": "語り部の炉の火が、七日目の夜までもたないという。昔は、灰の底に「地の底の火」のかけらがあったそうだ。\n冷めない火のかけら（マグマクリーム）は、灰炉の村や都の道具屋が火の国から仕入れている。四つ集めよう。",
   "quest.skyabyss.sub_warm_coal.summary": "地の底の火のかけらを持ち帰り、語り部の炉に入れる。",
   "quest.skyabyss.sub_warm_coal.tell.journal": "冷めない火のかけらが、四つそろった。\n語り部の炉へ持っていこう。",
   "quest.skyabyss.sub_warm_coal.tell.talk": "語り部に、火のかけらを渡そう",
