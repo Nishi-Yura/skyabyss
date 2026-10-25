@@ -1812,7 +1812,8 @@ class Town(Facilities):
         self.drop_floaters()
         self.polish_final()
         self.fix_stairs()
-        self.street_light()
+        # 明るさで足す灯りの柱 (street_light) はやめた (2026-10-25「フェンスとランタンが適当に置かれている」)。都は敵が湧かないので、
+        # 灯りは大通りの決まった並び (street_lamps) と戸の上 (house_lights) だけ
         self.house_lights()
         self.fix_gates()
         self.drop_unsupported()

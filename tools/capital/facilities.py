@@ -405,27 +405,12 @@ class Facilities(FurnishBig, FurnishShops2, FurnishShops, Furnish, Interiors, Ba
 
     # ---------------------------------------------------------------- 鍛冶場: 西の口と鍛冶師の机
     def smithy_front(self):
-        """鍛冶場の西の面 (南の大通りに面する) に口を開ける。入ってすぐ北に鍛冶師の机"""
+        """鍛冶場の口は南の正面 (大きく開いた庇の下)。名札と吊り看板も正面に (2026-10-25: 横の口は、正面が開いているのにおかしい)。入って北に鍛冶師の机"""
         st, v = self.st, self.v
-        for z in range(16, 19):
-            for yy in range(0, 4):
-                v.set(8, yy, z, 'air')
-                v.set(9, yy, z, 'air')
-            v.set(8, -1, z, st.trim.full)
-            v.set(9, -1, z, st.trim.full)
-            v.set(7, 0, z, 'air')
-            v.set(7, -1, z, st.trim.full)
-        for x in (8, 9):
-            v.set(x, 3, 16, st.trim.stairs('north', 'top'))
-            v.set(x, 3, 18, st.trim.stairs('south', 'top'))
-            v.set(x, 4, 17, st.trim2)
-        for z in (15, 19):
-            v.fill(7, 0, z, 7, 3, z, st.pilaster)
-            v.set(7, 4, z, st.trim.stairs('east', 'top'))
-        hanging_sign(v, st, 8, 4, 17, 'west')
-        self.mark('label_smithy', 6, 6, 17)
-        v.set(7, 2, 14, 'lantern[hanging=false,waterlogged=false]') if False else None
-        self.openings.append((8, 17, 'west'))
+        cx = (8 + 26) // 2
+        hanging_sign(v, st, cx, 4, 21, 'south')
+        self.mark('label_smithy', cx, 6, 24)
+        self.openings.append((cx, 21, 'south'))
         # 鍛冶師の机 (z 14、x 10..15) と横 (x 15)
         self.counter([(x, 14) for x in range(10, 16)] + [(15, z) for z in (13, 12, 10)],
                      tops=((11, 14, 'lantern[hanging=false,waterlogged=false]'), (14, 14, 'anvil[facing=west]') if False else (14, 14, 'candle[candles=2,lit=true,waterlogged=false]')))

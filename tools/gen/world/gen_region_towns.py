@@ -237,9 +237,9 @@ def town(region):
         for i in range(4):
             bp.set(x0 + i, -1, -6, 'minecraft:grass_block[snowy=false]')
             bp.set(x0 + i, 0, -6, FLOWERS[i % len(FLOWERS)])
-    # 道の街灯 (広場の外、8 ごと)
-    for d in (10, 18):
-        for x, z in ((2, -d), (-2, d), (d, -2), (-d, 2)):
+    # 道の街灯: 町の入口 (四つの道の、広場から 18) に、道の両わきで一対ずつ
+    for d in (18,):
+        for x, z in ((2, -d), (-2, -d), (2, d), (-2, d), (d, 2), (d, -2), (-d, 2), (-d, -2)):
             fence_post_lantern(bp, x, z, pal)
     bp.mark('stand', 0, 0, 3)
     return bp

@@ -95,6 +95,8 @@ public class TravelMapScreen extends Screen {
 
     // 配置 (init で決める)
     private int fx, fy, fw, fh;
+    // 天と淵の大陸: 丸く切らず、地図の枠いっぱいの四角に描く (2026-10-25「円の範囲にのみうつさなくていい」)
+    private int rx0, ry0, rx1, ry1;
     private int cx, cy, radius;
     private int listX, listY, listRows, btnY;
 
@@ -244,6 +246,10 @@ public class TravelMapScreen extends Screen {
         cx = inX + inW / 2;
         cy = inY + inH / 2;
         radius = Math.max(40, Math.min(inW, inH) / 2 - 10);
+        rx0 = inX;
+        ry0 = inY;
+        rx1 = inX + inW;
+        ry1 = inY + inH;
     }
 
     @Override
@@ -322,7 +328,7 @@ public class TravelMapScreen extends Screen {
 
     @Override
     public boolean mouseDragged(double mx, double my, int button, double dx, double dy) {
-        if (button == 0 && radius > 0 && Math.hypot(mx - cx, my - cy) <= radius + 8) {
+        if (button == 0 && radius > 0 && inMap(mx, my)) {
             double k = view / radius;
             panX -= dx * k;
             panZ -= dy * k;
@@ -340,6 +346,21 @@ public class TravelMapScreen extends Screen {
         double d = Math.hypot(dx, dz);
         double max = radius - 5;
         int beyond = 0;
+        if (rect()) {
+            double hx = (rx1 - rx0) / 2.0 - 5;
+            double hy = (ry1 - ry0) / 2.0 - 5;
+            double ox = (rx0 + rx1) / 2.0 - cx;
+            double oy = (ry0 + ry1) / 2.0 - cy;
+            double ux = dx - ox;
+            double uy = dz - oy;
+            double f = Math.max(Math.abs(ux) / hx, Math.abs(uy) / hy);
+            if (f > 1) {
+                ux /= f;
+                uy /= f;
+                beyond = 1;
+            }
+            return new int[]{cx + (int) Math.round(ux + ox), cy + (int) Math.round(uy + oy), beyond};
+        }
         if (d > max) {
             dx *= max / d;
             dz *= max / d;
@@ -395,8 +416,24 @@ public class TravelMapScreen extends Screen {
         }
     }
 
+    static boolean rect() {
+        return jp.revati.skyabyss.world.continent.ContinentInfo.clientContinent;
+    }
+
+    private boolean inMap(double mx, double my) {
+        return rect() ? mx >= rx0 && mx < rx1 && my >= ry0 && my < ry1 : Math.hypot(mx - cx, my - cy) <= radius + 8;
+    }
+
     private void drawSheet(GuiGraphics g, Palette p) {
         Config.MapStyle st = style();
+        if (rect() && st == Config.MapStyle.SLATE) {
+            tile(g, 0, fx, fy, fw, fh);
+            frame(g, fx, fy, fw, fh, false);
+            if (chart != null) {
+                recess(g, listX - 4, fy + 14, LIST_W, fh - 28);
+            }
+            return;
+        }
         switch (st) {
             case SLATE -> {
                 tile(g, 0, fx, fy, fw, fh);
@@ -447,6 +484,8 @@ public class TravelMapScreen extends Screen {
     // 大陸の世界では、丸い盤の中に描いた大陸の絵 (continent.png。tools/gen/world/gen_continent.py) を敷き、引いたときは土地の名前と目安のレベルを書く
     static final ResourceLocation CONTINENT = ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "textures/gui/map/continent.png");
     static final int CONTINENT_HALF = 2000;
+    // 外の海の色 (continent.png の海と同じ。gen_continent.py の deep_ocean と紙の色を混ぜたもの)
+    static final int SEA_COLOR = 0xFFA4B7B6;
     // 土地の名前を出す縮尺 (この間。引きすぎると重なる)
     static final double NAMES_FROM = 700;
     static final double NAMES_TO = 3200;
@@ -459,18 +498,13 @@ public class TravelMapScreen extends Screen {
         int x0 = cx + (int) Math.round((-CONTINENT_HALF - centerX()) * k);
         int y0 = cy + (int) Math.round((-CONTINENT_HALF - centerZ()) * k);
         int size = (int) Math.round(CONTINENT_HALF * 2 * k);
-        // 丸い盤の形に切る (一行ずつ切って、絵全体を置く)。外の海は透けて盤の地になじむ
+        // 枠いっぱいの四角に描く。外の海は透けて、下に敷いた海の色になじむ
+        g.fill(rx0 - 1, ry0 - 1, rx1 + 1, ry1 + 1, 0xFF4A3E2E);
+        g.fill(rx0, ry0, rx1, ry1, SEA_COLOR);
         com.mojang.blaze3d.systems.RenderSystem.enableBlend();
-        for (int y = cy - radius; y < cy + radius; y++) {
-            double dy = y + 0.5 - cy;
-            int w = (int) Math.floor(Math.sqrt(Math.max(0, (double) radius * radius - dy * dy)));
-            if (w <= 0) {
-                continue;
-            }
-            g.enableScissor(cx - w, y, cx + w, y + 1);
-            g.blit(CONTINENT, x0, y0, size, size, 0, 0, 1024, 1024, 1024, 1024);
-            g.disableScissor();
-        }
+        g.enableScissor(rx0, ry0, rx1, ry1);
+        g.blit(CONTINENT, x0, y0, size, size, 0, 0, 1024, 1024, 1024, 1024);
+        g.disableScissor();
         com.mojang.blaze3d.systems.RenderSystem.disableBlend();
         if (view < NAMES_FROM || view > NAMES_TO) {
             return;
@@ -506,6 +540,9 @@ public class TravelMapScreen extends Screen {
 
     // 距離の輪 (2〜4 本。縮尺に合わせた切りのよい数) と、その距離の数字 (輪の南の内側)
     private void drawRings(GuiGraphics g, Palette p) {
+        if (rect()) {
+            return;
+        }
         int step = ringStep(view);
         boolean shadow = style() != Config.MapStyle.PARCHMENT;
         for (int d = step; d < view * 0.97; d += step) {
@@ -530,6 +567,16 @@ public class TravelMapScreen extends Screen {
 
     // 方位の刻みと N E S W (印の上に描く)
     private void drawCompass(GuiGraphics g, Palette p) {
+        if (rect()) {
+            int lc = p.accent();
+            int mx = (rx0 + rx1) / 2;
+            int my = (ry0 + ry1) / 2;
+            g.drawCenteredString(font, Component.translatable("gui.skyabyss.travel.dir.n"), mx, ry0 - 11, lc);
+            drawCentered(g, Component.translatable("gui.skyabyss.travel.dir.s"), mx, ry1 + 3, lc);
+            drawCentered(g, Component.translatable("gui.skyabyss.travel.dir.w"), rx0 - 7, my - 4, lc);
+            drawCentered(g, Component.translatable("gui.skyabyss.travel.dir.e"), rx1 + 7, my - 4, lc);
+            return;
+        }
         for (int k = 0; k < 32; k++) {
             double a = k / 32.0 * Math.PI * 2;
             int len = k % 8 == 0 ? 6 : k % 4 == 0 ? 4 : 2;
@@ -1085,7 +1132,7 @@ public class TravelMapScreen extends Screen {
             zoomBy(1, cx, cy);
             return true;
         }
-        if (button == 1 && radius > 0 && Math.hypot(mx - cx, my - cy) <= radius + 8) {
+        if (button == 1 && radius > 0 && inMap(mx, my)) {
             panX = 0;
             panZ = 0;
             return true;
