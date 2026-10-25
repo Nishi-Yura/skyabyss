@@ -278,7 +278,13 @@ public final class SiteFinder {
             pathYaw = Math.atan2(shelter.pos().getZ() - camp.getZ(), shelter.pos().getX() - camp.getX());
             // 天と淵の大陸: 野営地ははじまりの島。足跡は島の道ぞい (野営地から船着き場へ)
             BlockPos printsTo = p.continent() ? jp.revati.skyabyss.world.continent.ContinentLayout.get().dock() : shelter.pos();
-            planFootprints(p, out, camp, printsTo);
+            List<BlockPos> fixed = p.continent() ? jp.revati.skyabyss.world.continent.ContinentLayout.get().islandPrints() : List.of();
+            if (!fixed.isEmpty()) {
+                // はじまりの島: 足跡は道の脇の窪地の決まった所 (道にかからない。2026-10-26)。向きは並びの向き
+                planFixedPrints(p, out, fixed);
+            } else {
+                planFootprints(p, out, camp, printsTo);
+            }
         } else {
             SkyAbyss.LOGGER.error("Opening sites: no land for the shelter near {}", camp);
             // 宿りがなくても足跡は要る (足跡の頁の目印): 野営地から東 180 ブロックの仮の宿りを道の向きに使う (first_hour_log B-6)
@@ -593,6 +599,19 @@ public final class SiteFinder {
             }
         }
         SkyAbyss.LOGGER.error("Opening sites: no place for the footprints");
+    }
+
+    static void planFixedPrints(Probe p, List<Planned> out, List<BlockPos> at) {
+        BlockPos a = at.get(0);
+        BlockPos b = at.get(at.size() - 1);
+        int dx = b.getX() - a.getX();
+        int dz = b.getZ() - a.getZ();
+        int[] dir = Math.abs(dx) >= Math.abs(dz) ? new int[] {Integer.signum(dx), 0} : new int[] {0, Integer.signum(dz)};
+        List<BlockPos> prints = new ArrayList<>();
+        for (BlockPos q : at) {
+            prints.add(new BlockPos(q.getX(), p.top(q.getX(), q.getZ()) + 1, q.getZ()));
+        }
+        addTrail(out, prints, dir);
     }
 
     private static void addTrail(List<Planned> out, List<BlockPos> prints, int[] dir) {

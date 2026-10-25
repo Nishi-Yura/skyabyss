@@ -111,9 +111,10 @@ public final class CinematicClient {
     // ---------------------------------------------------------------- 受信
     public static void receive(StartPayload payload) {
         Minecraft.getInstance().execute(() -> {
-            if (run != null || Scenes.get(payload.scene()) == null) {
+            if (Scenes.get(payload.scene()) == null) {
                 return;
             }
+            // 前の場面の終わり (暗転の戻り) の最中に次の場面が来たら、終わるのを待って始める (捨てるとサーバーが場面の最中のまま人を止め続ける)
             pending = payload;
         });
     }
@@ -285,7 +286,7 @@ public final class CinematicClient {
             }
             return;
         }
-        if (pending != null) {
+        if (pending != null && run == null) {
             if (!Config.CINEMATIC_SCENES.get()) {
                 // 見ない設定: 物語の効果だけ適用して、すぐ操作へ
                 PacketDistributor.sendToServer(new EndPayload(pending.scene(), true));

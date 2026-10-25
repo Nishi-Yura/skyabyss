@@ -190,6 +190,7 @@ public final class SelfTestRunner {
         // 町のクエスト (限定の人・噂・墓守・酔いどれ・地図屋・古井戸)。docs/design/35 の 3.3・3.5。SKYABYSS_SELFTEST_ONLY=town
         steps.addAll(jp.revati.skyabyss.town.TownSelfTest.steps());
         steps.addAll(jp.revati.skyabyss.town.RegionFolkSelfTest.steps());
+        steps.addAll(jp.revati.skyabyss.world.continent.IslandTrailSelfTest.steps());
         // NPC v2 (人ごとの形・持ち物・動き)。docs/review/npc_quality_2026-10-23.md。SKYABYSS_SELFTEST_ONLY="lowpoly npc"
         steps.addAll(jp.revati.skyabyss.npc.NpcModelSelfTest.steps());
         // 倒れたときの決まりと墓 (docs/design/11 の 6 章)

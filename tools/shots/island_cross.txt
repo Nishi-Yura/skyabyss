@@ -1,0 +1,35 @@
+# 渡りの場面と都を見上げる場面だけ (island_story の世界を使い回す)
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/island_cross.txt -PshotsName=island_story
+world opening_island_story continent
+size 1600 900
+timeout 1500
+render 12
+guiscale 2
+waitchunks 300
+wait 60
+cmd weather clear
+cmd time set 3000
+cmd skyabyss island reset
+cmd tp @s -1600 80 1722 -80 10
+waitchunks 300
+wait 60
+shot dock_again
+cmd skyabyss island cross
+wait 40
+shot x_02
+wait 100
+shot x_07
+wait 120
+shot x_13
+wait 140
+shot x_20
+wait 60
+waitchunks 200
+wait 60
+shot a_00
+wait 60
+shot a_03
+wait 80
+shot a_07
+wait 80
+shot a_after

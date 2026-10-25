@@ -22,7 +22,9 @@ public final class RegionFolk {
             new Folk("storm_elder", "weaver", "storm", "folk_a"),
             new Folk("storm_hutkeeper", "apprentice", "storm", "folk_b"),
             new Folk("ember_survivor", "ash_apprentice", "ember", "folk_a"),
-            new Folk("ember_watch", "bard", "ember", "folk_b"));
+            new Folk("ember_watch", "bard", "ember", "folk_b"),
+            // はじまりの島の船着き場の渡し守 (汐守の渡し守と同じ絵。同じ人かどうかは語らない。world/continent/IslandTrail)
+            new Folk("island_ferryman", "sailor", "island", "dock"));
 
     private RegionFolk() {
     }

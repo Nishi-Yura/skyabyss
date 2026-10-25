@@ -55,8 +55,8 @@ public final class ContinentChunkGenerator extends ChunkGenerator {
         super(biomeSource, net.minecraft.Util.memoize(ContinentChunkGenerator::features));
     }
 
-    // 生物群系の飾り (木・草・鉱石など) から、地上の溶岩の池・溶岩の湧き口を抜く (RPG の野にいきなり溶岩は置かない)
-    static final List<String> DROPPED = List.of("lake_lava", "spring_lava");
+    // 生物群系の飾り (木・草・鉱石など) から、地上の溶岩の池・溶岩の湧き口・水の湧き口を抜く (RPG の野にいきなり溶岩は置かない。崖から水が垂れない。2026-10-26)
+    static final List<String> DROPPED = List.of("lake_lava", "spring_lava", "spring_water");
 
     static net.minecraft.world.level.biome.BiomeGenerationSettings features(net.minecraft.core.Holder<net.minecraft.world.level.biome.Biome> biome) {
         net.minecraft.world.level.biome.BiomeGenerationSettings src = biome.value().getGenerationSettings();
@@ -160,6 +160,20 @@ public final class ContinentChunkGenerator extends ChunkGenerator {
                         return biome == ContinentBiomes.TAIGA && n > 0.5 ? Blocks.PODZOL.defaultBlockState() : Blocks.GRASS_BLOCK.defaultBlockState();
                     }
                     return Blocks.DIRT.defaultBlockState();
+                }
+                // 崖の面 (2026-10-26): 石一色にせず、安山岩の筋と、林の崖には苔のまだら
+                if (rocky && depth < 2) {
+                    double h = ContinentMap.hash(x, y, z ^ 0x51C7);
+                    double band = ContinentMap.value(y / 2.5, (x + z) / 11.0, 0x7A31);
+                    if ((biome == ContinentBiomes.FOREST || biome == ContinentBiomes.BIRCH_FOREST) && h > 0.55 && depth == 0) {
+                        return Blocks.MOSS_BLOCK.defaultBlockState();
+                    }
+                    if (band > 0.35) {
+                        return Blocks.ANDESITE.defaultBlockState();
+                    }
+                    if (band < -0.5) {
+                        return Blocks.TUFF.defaultBlockState();
+                    }
                 }
             }
         }

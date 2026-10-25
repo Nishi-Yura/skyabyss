@@ -1,0 +1,70 @@
+# はじまりの島の谷 (2026-10-26 の作り直し): 空から・道の上から・道の脇の開けた所
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/island_v2.txt -PshotsName=island_v2
+world opening_island_v2 continent
+size 1600 900
+timeout 2400
+render 12
+guiscale 2
+wait 200
+waitchunks 600
+wait 200
+cmd skyabyss cinematic stop
+cmd time set 3000
+cmd weather clear
+wait 40
+shot camp_road
+cmd gamemode spectator
+hud off
+cmd tp @s -1780 210 1900 180 50
+waitchunks 900
+wait 200
+shot aerial_south
+cmd tp @s -1500 200 1760 90 40
+waitchunks 600
+wait 100
+shot aerial_east
+hud on
+cmd gamemode creative
+cmd tp @s -1882 ~ 1786 -119 5
+waitchunks 300
+cmd execute at @s run tp @s ~ ~ ~ ~ 5
+wait 60
+cmd skyabyss dev grounds mark footprint 0 pos
+waitchunks 300
+wait 100
+cmd tp @s -1832 90 1752 160 20
+waitchunks 300
+wait 60
+shot prints_view
+cmd skyabyss dev grounds mark poi 0 pos
+waitchunks 300
+wait 200
+cmd execute at @s run tp @s ~8 ~4 ~8 135 20
+wait 40
+shot bandits
+cmd tp @s -1774 90 1768 -70 10
+waitchunks 300
+wait 60
+shot road_045
+cmd tp @s -1720 92 1777 -93 10
+waitchunks 300
+wait 60
+shot road_060
+cmd skyabyss dev grounds mark outskirts 0 pos
+waitchunks 300
+wait 100
+cmd execute at @s run tp @s ~6 ~3 ~6 135 20
+wait 40
+shot rest_fire
+cmd skyabyss dev grounds mark outskirts 1 pos
+waitchunks 300
+wait 100
+cmd execute at @s run tp @s ~6 ~3 ~6 135 20
+wait 40
+shot rest_shrine
+cmd skyabyss dev grounds mark outskirts 2 pos
+waitchunks 300
+wait 100
+cmd execute at @s run tp @s ~6 ~3 ~6 135 20
+wait 40
+shot dock

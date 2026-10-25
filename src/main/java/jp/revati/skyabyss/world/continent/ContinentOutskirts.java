@@ -71,6 +71,14 @@ public final class ContinentOutskirts {
 
     public static List<int[]> spots(List<BlockPos> avoid) {
         List<int[]> out = new ArrayList<>();
+        // はじまりの島の谷 (2026-10-26): 休み場と祠は道の脇の開けた所の決まった所
+        BlockPos fire = ContinentLayout.get().island("fire");
+        BlockPos shrine = ContinentLayout.get().island("shrine");
+        if (fire != null && shrine != null) {
+            out.add(new int[] {fire.getX(), fire.getZ()});
+            out.add(new int[] {shrine.getX(), shrine.getZ()});
+            return out;
+        }
         List<List<BlockPos>> roads = ContinentLayout.get().roads();
         if (roads.isEmpty()) {
             return out;
@@ -172,7 +180,8 @@ public final class ContinentOutskirts {
                 || (p.tickCount + p.getId()) % 10 != 0) {
             return;
         }
-        if (!ferried(p)) {
+        // 島の谷の図のある世界は、渡し守と話して渡る (IslandTrail)。古い図の世界だけ、桟橋の先に立つと渡る
+        if (!ferried(p) && !IslandTrail.active(p.serverLevel())) {
             for (SiteData.Entry e : SiteData.get(p.serverLevel()).entries(KIND)) {
                 BlockPos f = e.extra("ferry");
                 if (e.built && f != null && Math.hypot(p.getX() - (f.getX() + 0.5), p.getZ() - (f.getZ() + 0.5)) <= FERRY_RADIUS && Math.abs(p.getY() - f.getY()) < 4) {

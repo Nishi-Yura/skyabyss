@@ -99,8 +99,34 @@ public final class ContinentMap {
         return top + (bottom - top) * tz;
     }
 
-    // 地面の上面の Y
+    // 道の均し (ContinentRoads)。初めて要ったときに作る
+    private volatile ContinentRoads roads;
+
+    private ContinentRoads roads() {
+        ContinentRoads r = roads;
+        if (r == null) {
+            synchronized (this) {
+                r = roads;
+                if (r == null) {
+                    r = ContinentRoads.build(ContinentLayout.get().roads(), (px, pz) -> raw(px, pz));
+                    roads = r;
+                }
+            }
+        }
+        return r;
+    }
+
+    // 地面の上面の Y (道のそばは道の高さへならす)
     public int surface(int x, int z) {
+        return (int) Math.floor(roads().grade(x, z, rawSurface(x, z)));
+    }
+
+    // ならす前の高さ (点 (x, z) の揺らぎを足した値)
+    private double raw(double x, double z) {
+        return rawSurface((int) Math.floor(x), (int) Math.floor(z));
+    }
+
+    double rawSurface(int x, int z) {
         double h = smooth(x + 0.5, z + 0.5, null);
         // 揺らぎの大きさは、まわりの傾き (升の値をつないだ高さの、±4 ブロックの差) からなめらかに決める。
         // 升ごと・土地ごとに切り替えると、升の四角の形の段ができる (2026-10-25 に見つけた「四角い穴」)
@@ -108,7 +134,7 @@ public final class ContinentMap {
         double gz = smooth(x + 0.5, z + 4.5, null) - smooth(x + 0.5, z - 3.5, null);
         double g = Math.abs(gx) + Math.abs(gz);
         double amp = Math.min(1.0, g / 3.0) * (1.2 + 1.8 * Math.max(0.0, Math.min(1.0, (g - 3.0) / 12.0)));
-        return (int) Math.floor(h + amp * detail(x, z));
+        return h + amp * detail(x, z);
     }
 
     // 土地の番号 (近い升)

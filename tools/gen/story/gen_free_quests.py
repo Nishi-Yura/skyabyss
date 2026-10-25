@@ -468,7 +468,7 @@ quest(SHADOW, 40, ("空の影の帳面", "The Shadow Tally"),
 quest(PARCEL_Q, 41, ("火のそばへ", "To the Fireside"),
       ("語り部の包みを外れのイサナへ届け、預かりものを持ち帰る。", "Take the storyteller's bundle to the whale chaser, and bring back what he sends."),
       ("留め具は、小さな鯨の形をしていた。", "The clasp was carved in the shape of a small whale."),
-      [stage("deliver", ("語り部から、イサナへの包みを預かった。干した肉と、古い肩掛けが入っている。\n村の外れの火のところへ持っていこう。",
+      [stage("deliver", ("語り部から、イサナへの包みを預かった。干した肉と、古い肩掛けが入っている。\n鯨見の町の見張り台の火のところへ持っていこう。",
                          "The storyteller gave me a bundle for the whale chaser: dried meat and an old shawl.\n"
                          "I'll take it to his fire at the edge of the village."),
              [ob("give", "talk", "イサナに、包みを届けよう", "Deliver the bundle to the whale chaser", target=WC, topic="fq_c_parcel2")]),

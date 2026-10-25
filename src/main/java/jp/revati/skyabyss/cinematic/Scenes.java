@@ -30,6 +30,8 @@ public final class Scenes {
 
     static {
         add(opening());
+        add(ferryCrossing());
+        add(capitalArrival());
         add(whaleFirstSight());
         for (String titan : FIRST_SIGHT_TITANS) {
             add(titanFirstSight(titan));
@@ -99,6 +101,36 @@ public final class Scenes {
                 .line(21.0f, 4.6f, Speaker.HEAVEN, "cinematic.skyabyss.opening.heaven1")
                 .line(26.2f, 2.8f, Speaker.HERO, "cinematic.skyabyss.opening.hero3")
                 .line(30.0f, 5.0f, Speaker.HEAVEN, "cinematic.skyabyss.opening.heaven2")
+                .build();
+    }
+
+    // はじまりの島から鐘の都への渡り (22 秒。world/continent/IslandTrail)。人は海の上の舟の上 (渡し守と二人)、前 = 鐘の都の向き。
+    // 舟と渡し守を後ろから → 横から水平線 (大陸の岸) → 高く上がって行く手。台詞は渡し守・主人公・天の声。終わると都の南の門の外へ
+    private static Scene ferryCrossing() {
+        return Scene.of(jp.revati.skyabyss.world.continent.IslandTrail.CROSSING)
+                .shot(Shot.of(7f).pos(3.2, 3.2, -5.5).posTo(2.2, 3.8, -3.5)
+                        .look(Look.frame(0, 1.6, 0)).lookTo(Look.frame(0, 3.5, 30)).fov(62f, 66f).sway(0.5f).build())
+                .shot(Shot.of(8f).pos(2.2, 3.8, -3.5).posTo(-7.0, 6.0, 10.0)
+                        .look(Look.frame(0, 3.5, 30)).lookTo(Look.frame(0, 6, 140)).fov(66f, 58f).ease(Ease.SMOOTHER).sway(0.3f).build())
+                .shot(Shot.of(7f).pos(-7.0, 6.0, 10.0).posTo(0.0, 14.0, 22.0)
+                        .look(Look.frame(0, 6, 140)).lookTo(Look.frame(0, 10, 220)).fov(58f, 70f).ease(Ease.SMOOTH).sway(0.2f).build())
+                .npcLine(0.8f, 4.4f, "cinematic.skyabyss.speaker.ferryman", "cinematic.skyabyss.ferry.f1")
+                .line(5.6f, 3.6f, Speaker.HERO, "cinematic.skyabyss.ferry.hero1")
+                .npcLine(9.8f, 4.6f, "cinematic.skyabyss.speaker.ferryman", "cinematic.skyabyss.ferry.f2")
+                .line(14.8f, 3.8f, Speaker.HEAVEN, "cinematic.skyabyss.ferry.heaven1")
+                .npcLine(18.8f, 3.2f, "cinematic.skyabyss.speaker.ferryman", "cinematic.skyabyss.ferry.f3")
+                .build();
+    }
+
+    // 鐘の都に着いて、南の門の外から都を見上げる (8 秒)。前 = 都の真ん中 (大鐘楼)。見上げて大鐘楼 → 本人の目に戻って操作へ
+    private static Scene capitalArrival() {
+        return Scene.of(jp.revati.skyabyss.world.continent.IslandTrail.ARRIVAL).handBack().seamless()
+                .shot(Shot.of(4f).pos(0, CameraMath.EYE, 0).posTo(0.0, 6.0, -4.0)
+                        .look(Look.frame(0, 3, 20)).lookTo(Look.frame(0, 22, 90)).fov(70f, 64f).ease(Ease.SMOOTHER).sway(0.2f).build())
+                .shot(Shot.of(4f).pos(0.0, 6.0, -4.0).posTo(0, CameraMath.EYE, 0)
+                        .look(Look.frame(0, 22, 90)).lookTo(Look.frame(0, 2, 20)).fov(64f, 70f).ease(Ease.SMOOTH).build())
+                .line(0.4f, 3.2f, Speaker.HERO, "cinematic.skyabyss.arrival.hero1")
+                .line(4.0f, 3.6f, Speaker.HEAVEN, "cinematic.skyabyss.arrival.heaven1")
                 .build();
     }
 

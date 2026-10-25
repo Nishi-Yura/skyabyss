@@ -187,6 +187,95 @@ def flatten(y, X, Z, center, spec, land):
     return np.where(land | (d < r0), y * t + target * (1 - t), y)
 
 
+
+# ---------------------------------------------------------------- はじまりの島の谷 (見取り図の island_plan。2026-10-26)
+# 道は尾根に挟まれた谷を通る (谷底の半幅 VALLEY_HALF)。道の脇の開けた所 (pockets) と首 (necks) は床の高さ。そのほかの島の陸は、
+# 開けた所から WALL_RUN で尾根 (谷底 + RIDGE_LOW..RIDGE_HIGH) まで上がる (崖)。海ぎわも尾根のまま海へ落ちる (歩ける浜は野営地と船着き場だけ)。
+# 北の尾根は高い山並み、南はやや低い丘。尾根には林 (木が道の外を塞ぐ)
+VALLEY_HALF = 7.0
+WALL_RUN = 8.0
+RIDGE_LOW = 12.0
+RIDGE_HIGH = 24.0
+
+
+def _polyline_dist(X, Z, pts):
+    """各点から折れ線までの距離と、いちばん近い所の道のり"""
+    best = np.full(X.shape, 1e9)
+    along = np.zeros(X.shape)
+    s0 = 0.0
+    for (ax, az), (bx, bz) in zip(pts[:-1], pts[1:]):
+        dx, dz = bx - ax, bz - az
+        L2 = dx * dx + dz * dz
+        L = math.sqrt(L2)
+        u = np.clip(((X - ax) * dx + (Z - az) * dz) / max(L2, 1e-9), 0, 1)
+        d = np.hypot(X - (ax + u * dx), Z - (az + u * dz))
+        m = d < best
+        best = np.where(m, d, best)
+        along = np.where(m, s0 + u * L, along)
+        s0 += L
+    return best, along, s0
+
+
+def _seg_dist(X, Z, a, b):
+    ax, az = a
+    bx, bz = b
+    dx, dz = bx - ax, bz - az
+    L2 = dx * dx + dz * dz
+    u = np.clip(((X - ax) * dx + (Z - az) * dz) / max(L2, 1e-9), 0, 1)
+    return np.hypot(X - (ax + u * dx), Z - (az + u * dz))
+
+
+def shape_island(y, X, Z, lay, land, region, kinds, seed=7):
+    plan = lay.get('island_plan')
+    if not plan:
+        return y, None
+    # 島の陸 (見取り図の island の楕円の中。土地の番号の境で段ができないように)
+    (icx, icz), ir, _ = lay['island']
+    isl = land & (np.hypot(X - icx, Z - icz) < ir * 1.6)
+    if not isl.any():
+        return y, None
+    road = curve(lay['roads'][0])
+    dR, along, total = _polyline_dist(X, Z, road)
+    prof = plan['profile']
+    ps = np.array([a for a, _ in prof], dtype=float) * (total / prof[-1][0])
+    floor_road = np.interp(along, ps, [h for _, h in prof])
+    # 開けた所までの距離 (内側は負) と、その床の高さ
+    open_d = dR - VALLEY_HALF
+    floor = floor_road.copy()
+    for name, (cx, cz), r, fl in plan['pockets']:
+        rx, rz = (r, r) if not isinstance(r, tuple) else r
+        q = np.hypot((X - cx) / rx, (Z - cz) / rz)
+        d = (q - 1) * min(rx, rz)
+        if fl is None:
+            # 道の高さ (中心にいちばん近い道の点)
+            k = np.argmin(np.hypot(X - cx, Z - cz) + np.where(isl, 0, 1e9))
+            fh = floor_road.flat[k]
+        elif isinstance(fl, str):
+            k = np.argmin(np.hypot(X - cx, Z - cz) + np.where(isl, 0, 1e9))
+            fh = floor_road.flat[k] + float(fl)
+        else:
+            fh = float(fl)
+        w = np.clip(-d / 6.0, 0, 1)
+        floor = np.where(d < open_d, floor * (1 - w) + fh * w, floor)
+        open_d = np.minimum(open_d, d)
+    for a, b, half in plan['necks']:
+        open_d = np.minimum(open_d, _seg_dist(X, Z, a, b) - half)
+    # 尾根: 北ほど高い (島の中心より北)。揺らぎで峰と鞍部
+    cz_isl = float(Z[isl].mean())
+    north = np.clip((cz_isl - Z) / 140.0, -1, 1) * 0.5 + 0.5
+    n1 = fbm(seed + 71, octaves=4, base=60, n=SIZE)
+    n2 = fbm(seed + 72, octaves=3, base=140, n=SIZE)
+    ridge = RIDGE_LOW + (RIDGE_HIGH - RIDGE_LOW) * np.clip(north * 0.75 + n1 * 0.9 + 0.2, 0, 1)
+    t = np.clip(open_d / WALL_RUN, 0, 1)
+    t = t * t * (3 - 2 * t)
+    rock = 1.0 + n2 * 0.7
+    new = floor + t * ridge * rock + np.clip(open_d - WALL_RUN, 0, 40) * 0.15 + n1 * 3 * t
+    # 床の小さな起伏 (開けた所の中)
+    new = new + (1 - t) * n2 * 1.5
+    y = np.where(isl, new, y)
+    ridge_mask = isl & (open_d > WALL_RUN * 0.6)
+    return y, ridge_mask
+
 def build(key=CHOSEN, seed=7):
     lay = LAYOUTS[key]
     ex = {}
@@ -255,7 +344,9 @@ def build(key=CHOSEN, seed=7):
         y = flatten(y, X, Z, p, FLAT_TOWN, land)
     for _, p in lay['sites']:
         y = flatten(y, X, Z, p, FLAT_SITE, land)
-    y = flatten(y, X, Z, lay['start'], FLAT_START, land)
+    if 'island_plan' not in lay:
+        y = flatten(y, X, Z, lay['start'], FLAT_START, land)
+    y, island_ridge = shape_island(y, X, Z, lay, land, region, kinds, seed)
     height = np.clip(np.round(y), 1, 250).astype(np.uint8)
 
     # 土地の番号
@@ -278,6 +369,9 @@ def build(key=CHOSEN, seed=7):
                                          np.where(patch[m] > 0, B['windswept_gravelly_hills'], B['windswept_hills'])))
         elif k == 'ember':
             biome[m] = np.where(height[m] > 120, B['eroded_badlands'], B['badlands'])
+    if island_ridge is not None:
+        # 島の尾根は林 (道の外を木が塞ぐ)。高い所は白樺まじり
+        biome[island_ridge] = np.where(patch[island_ridge] > 0.0, B['forest'], B['birch_forest'])
     beach = land & near_water & (height <= SEA_LEVEL + 3)
     keep = np.isin(biome, [B['badlands'], B['eroded_badlands'], B['stony_peaks'], B['snowy_slopes']])
     biome[beach & ~keep] = B['beach']
@@ -465,6 +559,11 @@ def write_layout(lay, height=None):
     }
     if height is not None:
         out['ferry_docks'] = [ferry_docks(f, height) for f in lay['ferries']]
+    plan = lay.get('island_plan')
+    if plan:
+        pk = {n: pt(c) for n, c, _, _ in plan['pockets']}
+        out['island'] = {'gate': pt(plan['gate']), 'prints': [pt(p) for p in plan['prints']], 'fire': pk['fire'], 'shrine': pk['shrine'],
+                         'bandits': pk['bandits'], 'prints_view': pt(plan['necks'][0][0])}
     with open(os.path.join(OUT, 'layout.json'), 'w', encoding='utf8', newline='\n') as f:
         json.dump(out, f, ensure_ascii=False, separators=(',', ':'))
         f.write('\n')

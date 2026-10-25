@@ -123,10 +123,10 @@ OPENING = {
 OBJECTIVES = [
     # (ID, 日本語, 英語, いつ出すか)
     ("examine_camp", "野営地の跡を調べてみよう", "Search the abandoned camp", "B0 目覚めてから、帳面を拾うまで"),
-    ("follow_smoke", "煙の立つ方へ向かおう", "Head toward the rising smoke", "B1 帳面を拾ってから、鐘の宿りの語り部と話すまで (メインの段 follow_smoke)"),
+    ("follow_smoke", "大鐘楼の語り部を訪ねよう", "Find the storyteller", "B1 帳面を拾ってから、鐘の都の語り部と話すまで (メインの段 follow_smoke)"),
     ("watch_sky", "晴れた昼に、空を見上げてみよう", "Look up at the sky on a clear midday", "B2〜B4 語り部と話してから、最初の影を見るまで (メインの段 watch_sky)"),
     ("read_page", "破れた頁を拾って、読んでみよう", "Take the torn page, and read it", "B4 影が去ってから、落ちてきた破れた頁を読むまで (メインの段 watch_sky のまま。OpeningLogic.objective)"),
-    ("ask_storyteller", "宿りの語り部に話しかけよう", "Talk to the lodge storyteller", "B4 影を見てから、語り部に尋ねるまで (メインの段 ask_storyteller)"),
+    ("ask_storyteller", "大鐘楼の語り部に話しかけよう", "Talk to the storyteller", "B4 影を見てから、語り部に尋ねるまで (メインの段 ask_storyteller)"),
     ("find_isana", "外れの焚き火の旅人に話しかけよう", "Talk to the traveler at the fire", "B5 語り部のあと、イサナと話すまで (メインの段 find_chaser)"),
     ("wait_steps", "夜は、灯りのそばで過ごそう", "Spend the night near a light", "B7 イサナと話してから、夜の足音 (B6) を聞くまで (メインの段 see_whale。夜 1 に来るのは足音だけなので歌とは言わない。first_hour_log B-1)"),
     ("see_whale", "夜空に耳をすませよう（灯りのそばで）", "Listen to the night sky (near a light)", "B7〜B10 足音のあと、歌 (B9) を聞くまで (メインの段 see_whale)"),

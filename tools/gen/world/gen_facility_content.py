@@ -170,8 +170,8 @@ ROLES = {
                         "Blow once and it comes; blow again and it goes home. It can't follow you onto a titan's back, down into the abyss, or into a heart chamber. It also leaves if you wander far or log off. New looks arrive as you clear chapters; stats you polish with bell coins.")]),
     # 都の案内人 (門と広場。docs/design/35 の 6.12)。行き先を選ぶと、その戸まで色つきの灯りが地面に灯る (facility/TownGuide)
     "guide": ("都の案内人", "Town Guide",
-              ("ようこそ、鐘の宿りへ。広い都でしょう。行きたい所を言ってくれれば、足もとに灯りをともして戸口まで案内しますよ。",
-               "Welcome to the Bell's Rest. It's a big town. Tell me where you want to go, and I'll light the way to the door at your feet."),
+              ("ようこそ、鐘の都へ。広い都でしょう。行きたい所を言ってくれれば、足もとに灯りをともして戸口まで案内しますよ。",
+               "Welcome to the Bell Capital. It's a big city. Tell me where you want to go, and I'll light the way to the door at your feet."),
               [("way", "talk", [fac("guide")], None, "行き先を選ぶ (灯りで案内)", "Pick a destination (lanterns show the way)", None, None),
                ("colors", "talk", None, "colors", "灯りの色のこと", "What do the colours mean?",
                 "灯りの色は施設の種類です。金は買う・預ける所、青は休む・旅立つ所、赤は鍛える・戦う所、紫は物語と祈りの所。灰は裏通り。着けば灯りは消えます。別の行き先を選べば、灯りはそちらへ移りますよ。",

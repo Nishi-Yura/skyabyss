@@ -1,4 +1,13 @@
 {
+  "entity.skyabyss.guest_island_ferryman": "渡し守",
+  "dialogue.skyabyss.guest_island_ferryman.early": "都へ渡りたいのかい。……まだだ。島の道を歩いてからにしな。\n峠の野盗、窪地の足跡、休み場の火、それから宿り木の祠。祠に祈ってから来な。",
+  "dialogue.skyabyss.guest_island_ferryman.early.why": "どうして？",
+  "dialogue.skyabyss.guest_island_ferryman.early.bye": "わかった",
+  "dialogue.skyabyss.guest_island_ferryman.early2": "目が覚めたばかりの者は、たいてい自分の名前も忘れてる。島の道を歩くうちに、少しずつ戻る。\n……戻らないものも、あるがね。",
+  "dialogue.skyabyss.guest_island_ferryman.early2.ok": "歩いてくる",
+  "dialogue.skyabyss.guest_island_ferryman.ready": "祠の匂いがするな。……島の道は歩いたらしい。\n乗りな。鐘の都まで漕いでやる。",
+  "dialogue.skyabyss.guest_island_ferryman.ready.cross": "鐘の都へ渡る",
+  "dialogue.skyabyss.guest_island_ferryman.ready.later": "まだ島にいる",
   "quest.skyabyss.town.tide_ferry.title": "流れ着いた舟",
   "quest.skyabyss.town.tide_ferry.summary": "渡し守に頼まれて、浜に打ち上がった難破船を見てくる。",
   "quest.skyabyss.town.tide_ferry.done": "難破船は空だった。渡し守は、あれを「帰り舟」と呼んだ。",

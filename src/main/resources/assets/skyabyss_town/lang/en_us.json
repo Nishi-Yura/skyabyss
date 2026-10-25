@@ -1,4 +1,13 @@
 {
+  "entity.skyabyss.guest_island_ferryman": "Ferryman",
+  "dialogue.skyabyss.guest_island_ferryman.early": "Want to cross to the capital? ...Not yet. Walk the island road first.\nThe bandits at the pass, the footprints in the hollow, the fire at the rest stop, then the mistletoe shrine. Come back once you've prayed there.",
+  "dialogue.skyabyss.guest_island_ferryman.early.why": "Why?",
+  "dialogue.skyabyss.guest_island_ferryman.early.bye": "All right",
+  "dialogue.skyabyss.guest_island_ferryman.early2": "Those who've only just woken usually can't even remember their own name. It comes back, bit by bit, as they walk the island road.\n...Some things don't come back.",
+  "dialogue.skyabyss.guest_island_ferryman.early2.ok": "I'll walk it",
+  "dialogue.skyabyss.guest_island_ferryman.ready": "You smell of the shrine. ...So you've walked the island road.\nGet in. I'll row you to the Bell Capital.",
+  "dialogue.skyabyss.guest_island_ferryman.ready.cross": "Cross to the Bell Capital",
+  "dialogue.skyabyss.guest_island_ferryman.ready.later": "I'll stay a while",
   "quest.skyabyss.town.tide_ferry.title": "The Drifted Boat",
   "quest.skyabyss.town.tide_ferry.summary": "For the ferryman, go and look at the wreck washed up on the beach.",
   "quest.skyabyss.town.tide_ferry.done": "The wreck was empty. The ferryman called it a \"return boat\".",

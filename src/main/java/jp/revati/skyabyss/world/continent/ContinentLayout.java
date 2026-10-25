@@ -33,6 +33,9 @@ public final class ContinentLayout {
     private final List<List<BlockPos>> ferryDocks = new ArrayList<>();
     private final Map<String, BlockPos> names = new java.util.LinkedHashMap<>();
     private final Map<String, Level> levels = new java.util.LinkedHashMap<>();
+    // はじまりの島の谷の場所 (gate・fire・shrine・bandits・prints_view と、足跡 prints)。古い図には無い (空)
+    private final Map<String, BlockPos> island = new HashMap<>();
+    private final List<BlockPos> islandPrints = new ArrayList<>();
 
     // 地図に書く目安のレベル ("4-12") とその場所
     public record Level(String text, BlockPos pos) {
@@ -56,6 +59,17 @@ public final class ContinentLayout {
         if (o.has("names")) {
             for (Map.Entry<String, JsonElement> e : o.getAsJsonObject("names").entrySet()) {
                 names.put(e.getKey(), pos(e.getValue().getAsJsonArray()));
+            }
+        }
+        if (o.has("island")) {
+            for (Map.Entry<String, JsonElement> e : o.getAsJsonObject("island").entrySet()) {
+                if (e.getKey().equals("prints")) {
+                    for (JsonElement p : e.getValue().getAsJsonArray()) {
+                        islandPrints.add(pos(p.getAsJsonArray()));
+                    }
+                } else {
+                    island.put(e.getKey(), pos(e.getValue().getAsJsonArray()));
+                }
             }
         }
         if (o.has("levels")) {
@@ -129,6 +143,17 @@ public final class ContinentLayout {
 
     public List<List<BlockPos>> ferryDocks() {
         return ferryDocks;
+    }
+
+    // はじまりの島の谷の場所 (gate・fire・shrine・bandits・prints_view)。無ければ null
+    @Nullable
+    public BlockPos island(String name) {
+        return island.get(name);
+    }
+
+    // はじまりの島の足跡の置き場 (空なら探す)
+    public List<BlockPos> islandPrints() {
+        return islandPrints;
     }
 
     // 土地の名前 (lang の map.skyabyss.continent.<id>) の場所

@@ -111,7 +111,16 @@ public final class ContinentSelfTest {
             } else {
                 BlockPos block = new BlockPos(stops.get(0)[0], 0, stops.get(0)[1]);
                 int[] moved = ContinentOutskirts.spots(List.of(block)).get(0);
-                if (Math.hypot(moved[0] - block.getX(), moved[1] - block.getZ()) < ContinentOutskirts.AVOID) {
+                if (ContinentLayout.get().island("fire") != null) {
+                    // 島の谷の図: 休み場と祠は道の脇の決まった所。足跡の窪地から離れていること
+                    for (int[] st : stops) {
+                        for (BlockPos pr : ContinentLayout.get().islandPrints()) {
+                            if (Math.hypot(st[0] - pr.getX(), st[1] - pr.getZ()) < ContinentOutskirts.AVOID) {
+                                f.add("the rest stop at " + st[0] + "," + st[1] + " is next to a footprint");
+                            }
+                        }
+                    }
+                } else if (Math.hypot(moved[0] - block.getX(), moved[1] - block.getZ()) < ContinentOutskirts.AVOID) {
                     f.add("the rest stop did not move away from a footprint");
                 }
             }

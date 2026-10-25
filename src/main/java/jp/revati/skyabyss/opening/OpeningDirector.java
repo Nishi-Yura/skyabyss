@@ -308,8 +308,13 @@ public final class OpeningDirector {
         // 天と淵の大陸: はじまりの島にいるあいだ (渡し船に乗る前)、都の側を指す目的は船着き場を指す (帳面を拾う前の目的はそのまま)
         if (!id.isEmpty() && !id.equals("examine_camp") && !jp.revati.skyabyss.world.continent.ContinentOutskirts.ferried(player)
                 && level.getChunkSource().getGenerator() instanceof jp.revati.skyabyss.world.continent.ContinentChunkGenerator) {
+            // はじまりの島の谷の道 (足跡 → 峠の野盗 → 休み場 → 祠 → 渡し守。world/continent/IslandTrail)
+            Object[] island = jp.revati.skyabyss.world.continent.IslandTrail.objective(player);
             BlockPos ferry = jp.revati.skyabyss.world.continent.ContinentOutskirts.ferryPos(level);
-            if (ferry != null) {
+            if (island != null) {
+                id = (String) island[0];
+                target = (BlockPos) island[1];
+            } else if (ferry != null) {
                 id = "take_ferry";
                 target = ferry;
             }

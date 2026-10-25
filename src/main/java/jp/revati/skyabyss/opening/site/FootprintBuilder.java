@@ -26,7 +26,22 @@ public final class FootprintBuilder {
     }
 
     public static String blueprintName(SiteData data, SiteData.Entry entry) {
+        // はじまりの島 (決まった置き場のある大陸の世界) は、古く草に覆われた浅い足跡 (2026-10-26)
+        if (!jp.revati.skyabyss.world.continent.ContinentLayout.get().islandPrints().isEmpty()
+                && jp.revati.skyabyss.world.continent.ContinentLayout.get().island("gate") != null && near(entry)) {
+            return "footprint_island";
+        }
         return isLast(data, entry) ? "footprint_end" : "footprint";
+    }
+
+    // 足跡が島の決まった置き場のそばか (大陸の世界の足跡)
+    static boolean near(SiteData.Entry entry) {
+        for (BlockPos p : jp.revati.skyabyss.world.continent.ContinentLayout.get().islandPrints()) {
+            if (Math.abs(p.getX() - entry.pos.getX()) <= 4 && Math.abs(p.getZ() - entry.pos.getZ()) <= 4) {
+                return true;
+            }
+        }
+        return false;
     }
 
     // 底 (floor) と縁の外 (rim) の立つ場所を書く (構造の検査: 落ちても登って出られるか)

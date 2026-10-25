@@ -44,6 +44,69 @@
       }
     ]
   },
+  "voice.ferry_crossing.l0": {
+    "subtitle": "subtitles.skyabyss_cinematic.voice.hero",
+    "sounds": [
+      {
+        "name": "skyabyss_cinematic:voice/ferry_crossing/l0",
+        "stream": false
+      }
+    ]
+  },
+  "voice.ferry_crossing.l1": {
+    "subtitle": "subtitles.skyabyss_cinematic.voice.hero",
+    "sounds": [
+      {
+        "name": "skyabyss_cinematic:voice/ferry_crossing/l1",
+        "stream": false
+      }
+    ]
+  },
+  "voice.ferry_crossing.l2": {
+    "subtitle": "subtitles.skyabyss_cinematic.voice.hero",
+    "sounds": [
+      {
+        "name": "skyabyss_cinematic:voice/ferry_crossing/l2",
+        "stream": false
+      }
+    ]
+  },
+  "voice.ferry_crossing.l3": {
+    "subtitle": "subtitles.skyabyss_cinematic.voice.heaven",
+    "sounds": [
+      {
+        "name": "skyabyss_cinematic:voice/ferry_crossing/l3",
+        "stream": false
+      }
+    ]
+  },
+  "voice.ferry_crossing.l4": {
+    "subtitle": "subtitles.skyabyss_cinematic.voice.hero",
+    "sounds": [
+      {
+        "name": "skyabyss_cinematic:voice/ferry_crossing/l4",
+        "stream": false
+      }
+    ]
+  },
+  "voice.capital_arrival.l0": {
+    "subtitle": "subtitles.skyabyss_cinematic.voice.hero",
+    "sounds": [
+      {
+        "name": "skyabyss_cinematic:voice/capital_arrival/l0",
+        "stream": false
+      }
+    ]
+  },
+  "voice.capital_arrival.l1": {
+    "subtitle": "subtitles.skyabyss_cinematic.voice.heaven",
+    "sounds": [
+      {
+        "name": "skyabyss_cinematic:voice/capital_arrival/l1",
+        "stream": false
+      }
+    ]
+  },
   "voice.whale_first_sight.l0": {
     "subtitle": "subtitles.skyabyss_cinematic.voice.hero",
     "sounds": [
