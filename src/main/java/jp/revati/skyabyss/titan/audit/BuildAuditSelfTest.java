@@ -157,8 +157,10 @@ public final class BuildAuditSelfTest {
             steps.add(Step.once("build audit (site " + name + ")", server -> {
                 // 向きは 8 通りを順に、場所は新しい世界の地形が毎回違う所を散らす
                 int k = siteIndex++;
-                int x = 900 + (k % 8) * 170;
-                int z = -700 + (k / 8) * 170;
+                // 天と淵の大陸では東は海なので、都の南の野 (x -1000〜190、z 300 から南) に並べる
+                boolean continent = jp.revati.skyabyss.world.continent.ContinentInfo.isContinent(server);
+                int x = (continent ? -1000 : 900) + (k % 8) * 170;
+                int z = (continent ? 300 : -700) + (k / 8) * 170;
                 ALL.addAll(SiteAudit.placeAndAudit(server.overworld(), name, x, z, k & 7));
             }));
         }

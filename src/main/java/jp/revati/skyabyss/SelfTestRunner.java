@@ -492,6 +492,23 @@ public final class SelfTestRunner {
             QUEUE.clear();
             all.stream().filter(kept::contains).forEach(QUEUE::add);
         }
+        // 天と淵の大陸: 出現地点ははじまりの島へ動いたばかりで、まわりのチャンクがまだ動いていないことがある。
+        // 出現地点を中心に 5 × 5 チャンクを読み込み、生き物が動くまで待ってから始める (多くの試しは出現地点の上空で敵を立てる。30 秒で諦めて進む)
+        if (!QUEUE.isEmpty() && jp.revati.skyabyss.world.continent.ContinentInfo.isContinent(event.getServer())) {
+            int[] warm = {0};
+            QUEUE.addFirst(Step.until("continent spawn (wait)", server -> {
+                var over = server.overworld();
+                var spawn = over.getSharedSpawnPos();
+                boolean ready = true;
+                for (int dx = -2; dx <= 2; dx++) {
+                    for (int dz = -2; dz <= 2; dz++) {
+                        over.setChunkForced((spawn.getX() >> 4) + dx, (spawn.getZ() >> 4) + dz, true);
+                        ready &= over.isPositionEntityTicking(spawn.offset(dx * 16, 0, dz * 16));
+                    }
+                }
+                return ready || ++warm[0] > 600;
+            }));
+        }
         if (QUEUE.isEmpty()) {
             SkyAbyss.LOGGER.error("SELFTEST FAILED: no step matches \"{}\". Available steps and groups:", only);
             printCatalog(steps());

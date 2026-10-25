@@ -1368,6 +1368,12 @@ public final class SiteJob {
                         if (s.isAir() || !s.getFluidState().isEmpty() || ours.contains(p.asLong()) || s.canSurvive(level, p)) {
                             continue;
                         }
+                        // 土の道・耕地は上に物が載ると残れない。消すと穴になる (部品の床が道に掛かったとき浮いた) ので、ただの土に戻す
+                        if (s.is(Blocks.DIRT_PATH) || s.is(Blocks.FARMLAND)) {
+                            level.setBlock(p, Blocks.DIRT.defaultBlockState(), FLAGS);
+                            n++;
+                            continue;
+                        }
                         level.setBlock(p, Blocks.AIR.defaultBlockState(), FLAGS);
                         n++;
                     }

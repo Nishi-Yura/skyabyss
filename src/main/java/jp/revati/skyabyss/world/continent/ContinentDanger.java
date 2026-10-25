@@ -42,6 +42,10 @@ public final class ContinentDanger {
                 || !(level.getChunkSource().getGenerator() instanceof ContinentChunkGenerator)) {
             return;
         }
+        // 空の高い所 (Y 250 より上) と地の底 (Y 0 より下。大陸に洞窟は無い) には自然には湧かない。試し (自己テスト) の敵が土地の強さで変わらないように
+        if (mob.getY() > 250 || mob.getY() < 0) {
+            return;
+        }
         apply(mob, ContinentMap.get().region(mob.getBlockX(), mob.getBlockZ()));
     }
 

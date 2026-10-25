@@ -65,11 +65,33 @@ final class ContinentScatter {
         return false;
     }
 
+    // はじまりの島の道 (野営地から船着き場) から 90 以内: 道の脇に足跡が並ぶので飾りを置かない
+    static boolean nearIslandRoad(int x, int z) {
+        ContinentLayout lay = ContinentLayout.get();
+        for (List<BlockPos> line : lay.roads()) {
+            if (line.isEmpty() || line.get(0).distSqr(lay.start()) > 40 * 40) {
+                continue;
+            }
+            for (int i = 0; i + 1 < line.size(); i++) {
+                BlockPos a = line.get(i);
+                BlockPos b = line.get(i + 1);
+                double dx = b.getX() - a.getX();
+                double dz = b.getZ() - a.getZ();
+                double len2 = dx * dx + dz * dz;
+                double u = len2 == 0 ? 0 : Math.max(0, Math.min(1, ((x - a.getX()) * dx + (z - a.getZ()) * dz) / len2));
+                if (Math.hypot(x - (a.getX() + u * dx), z - (a.getZ() + u * dz)) < 90) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     static void decorate(WorldGenLevel level, ChunkAccess chunk) {
         ContinentMap map = ContinentMap.get();
         int x0 = chunk.getPos().getMinBlockX();
         int z0 = chunk.getPos().getMinBlockZ();
-        if (kept(x0 + 8, z0 + 8)) {
+        if (kept(x0 + 8, z0 + 8) || nearIslandRoad(x0 + 8, z0 + 8)) {
             return;
         }
         RandomSource r = RandomSource.create(chunk.getPos().toLong() * 0x9E3779B97F4A7C15L + 0x5CA77E2L);

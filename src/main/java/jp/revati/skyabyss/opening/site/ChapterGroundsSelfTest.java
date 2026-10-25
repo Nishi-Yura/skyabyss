@@ -304,7 +304,9 @@ public final class ChapterGroundsSelfTest {
                 }
                 Shape shape = ChapterGrounds.shapeOf(g);
                 BlockPos where = shape == Shape.COVE ? g.shapeCenter : g.center;
-                check(inSector(cap, where, s, 6, 24), s.chapter() + ": the ground " + where + " is outside the sector or band");
+                // 天と淵の大陸では跡地は図の決まった所 (layout.json) なので、方位と距離の帯は見ない
+                check(jp.revati.skyabyss.world.continent.ContinentInfo.isContinent(server) || inSector(cap, where, s, 6, 24),
+                        s.chapter() + ": the ground " + where + " is outside the sector or band");
                 check(g.shaped, s.chapter() + ": the ground was not shaped");
                 check(g.shrine != null && ChapterSites.horizontal(g.shrine, g.center) <= 160, s.chapter() + ": shrine spot missing or far: " + g.shrine);
                 check(ChapterSites.horizontal(g.center, camp) >= ChapterGrounds.CAMP_GAP - 2 || s.chapter() != Chapters.WHALE, "the whale ground is too near the camp");
