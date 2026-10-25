@@ -1,8 +1,8 @@
-"""装備の自由度の品の絵を作る (欠片 5 種、アスペクトの芯、技の修飾ルーン)。32x32、暗い縁取りと 3 段の面。
+"""装備の自由度の品の絵を作る (巨神の粉 5 種、アスペクトの芯、技の修飾ルーン)。32x32、暗い縁取りと 3 段の面。
 
 使い方: python tools/gen/items/gen_gear_freedom_assets.py
 出力先: src/main/resources/assets/skyabyss/textures/item/{socket_shard_<属性>,aspect_core,skill_rune}.png
-欠片は角のある石の形に、属性の色と小さな印 (岩=四角、風=三本線、潮=波、灰=炎、骨=十字)。
+粉 (前の欠片) は小さな粉の盛りに光る粒 (属性の色)。
 芯は金の八角に渦、ルーンは暗い板に紫の刻み。何度実行しても同じ物ができる。
 """
 from pathlib import Path
@@ -66,14 +66,16 @@ ELEMENTS = {
 
 
 def shard(kind, base):
+    """巨神の粉 (docs/design/41。2026-10-25 に絵は B 粉の山に決まった): 小さな粉の盛りに、光る粒。左上が明るく右が暗い"""
     img = Image.new("RGBA", (32, 32), (0, 0, 0, 0))
-    # 欠片: 少し傾いた六角の石。穴に差す形なので、上に小さな切り欠き
-    pts = [(10, 6), (21, 4), (28, 12), (26, 25), (14, 28), (5, 19)]
-    facet(img, pts, base)
     d = ImageDraw.Draw(img)
-    d.line([(12, 8), (20, 6)], fill=shade(base, 1.6))
-    d.point((8, 17), fill=shade(base, 1.5))
-    symbol(img, kind, shade(base, 0.38))
+    d.polygon([(3, 27), (9, 17), (14, 11), (18, 10), (23, 15), (29, 27)], fill=OUTLINE)
+    d.polygon([(5, 26), (10, 18), (14, 12), (18, 11), (22, 16), (27, 26)], fill=shade(base, 1.0))
+    d.polygon([(10, 18), (14, 12), (16, 12), (12, 22)], fill=shade(base, 1.35))
+    d.polygon([(18, 11), (22, 16), (27, 26), (19, 26)], fill=shade(base, 0.7))
+    for x, y in ((13, 16), (17, 20), (21, 23), (9, 23), (15, 24), (19, 15)):
+        d.point((x, y), fill=shade(base, 1.7))
+    d.line([(4, 28), (28, 28)], fill=shade(base, 0.45))
     return img
 
 
@@ -114,8 +116,11 @@ def main():
     OUT.mkdir(parents=True, exist_ok=True)
     for kind, base in ELEMENTS.items():
         shard(kind, base).save(OUT / f"socket_shard_{kind}.png")
-    core().save(OUT / "aspect_core.png")
-    rune().save(OUT / "skill_rune.png")
+    # 芯とルーンは、あとで描き直した絵が採用されている (上書きしない。SKYABYSS_ALLOW_REGEN=1 のときだけ書く)
+    import os
+    if os.environ.get("SKYABYSS_ALLOW_REGEN") == "1":
+        core().save(OUT / "aspect_core.png")
+        rune().save(OUT / "skill_rune.png")
     print("wrote 7 textures to", OUT)
 
 
