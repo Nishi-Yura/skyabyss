@@ -3,7 +3,7 @@
 使い方: python tools/gen/world/gen_travel_map_assets.py
 
 出力 (src/main/resources/assets/skyabyss/textures/gui/map/ 以下。どれも 2 倍密度):
-    - marks.png  512x64   印 32x32 (画面では 16x16)。0 行目 = 印の体、32 行目 = 縁取りの型 (白。画面で巨神の色に染める)
+    - marks.png  1024x64  印 32x32 (画面では 16x16)。0 行目 = 印の体、32 行目 = 縁取りの型 (白。画面で巨神の色に染める)
                           並び (MapSprites.java と同じ): 町・野営地・足跡・骨・碑・章の場所・巨神・墓・仲間・目的・噂・自分・はじまりの地・祠・光の輪・積み石
     - paper.png  384x128  地の模様 128x128 を 3 つ (A 石板の粒・B 羊皮紙・C 墨の紙)。画面では繰り返して貼る
     - disc_a.png 512x512  A の丸い海図 (海図の画面 chart.png と同じ雲の海のまだら。縁の外は透明)
@@ -261,13 +261,56 @@ def glow():
     return Image.fromarray(a, "RGBA")
 
 
-SPRITES = [town, camp, footprint, ribs, waymark, site, titan, grave, party, objective, rumor, self_arrow, spawn, shrine, glow]
+def poi_fight():
+    """見どころ (戦いの場): 交差した二本の刀 (野盗の野営・塚・坑道・墓所・洞窟・焼けた砦)"""
+    img, d = canvas()
+    for flip in (False, True):
+        pts = [(7, 7), (24, 24)] if not flip else [(25, 7), (8, 24)]
+        d.line(pts, fill=STONE_HI, width=3)
+        (x0, y0), (x1, y1) = pts
+        d.line([x0, y0, x0 + (x1 - x0) // 3, y0 + (y1 - y0) // 3], fill=WHITE, width=1)
+    for (hx, hy) in ((22, 22), (10, 22)):
+        d.rectangle([hx - 1, hy - 1, hx + 2, hy + 2], fill=EMBER)
+    d.line([18, 25, 25, 18], fill=BONE_DARK, width=2)
+    d.line([7, 18, 14, 25], fill=BONE_DARK, width=2)
+    return outline(img)
+
+
+def poi_hamlet():
+    """見どころ (集落): 煙突のある小さな家二つ"""
+    img, d = canvas()
+    for (x, w, h, roof) in ((5, 11, 9, BONE_DARK), (15, 12, 12, TEAL_DIM)):
+        y = 27 - h
+        d.rectangle([x, y, x + w, 27], fill=BONE)
+        d.rectangle([x, y, x + 1, 27], fill=BONE_LIGHT)
+        d.polygon([(x - 2, y + 1), (x + w // 2, y - 6), (x + w + 2, y + 1)], fill=roof)
+        d.rectangle([x + w // 2 - 1, 22, x + w // 2 + 1, 27], fill=SLATE_DARK)
+    d.rectangle([22, 6, 23, 11], fill=STONE_LO)
+    return outline(img)
+
+
+def poi_tower():
+    """見どころ (塔): 細い石の塔と見張りの台 (見張りの塔・灯台・避雷の塔・崩れた塔・風車)"""
+    img, d = canvas()
+    d.rectangle([12, 10, 19, 27], fill=STONE)
+    d.rectangle([12, 10, 13, 27], fill=STONE_HI)
+    d.rectangle([18, 10, 19, 27], fill=STONE_LO)
+    d.rectangle([10, 7, 21, 9], fill=BONE_DARK)
+    d.polygon([(10, 7), (16, 2), (21, 7)], fill=BONE_MID)
+    d.rectangle([15, 13, 16, 15], fill=EMBER_HI)
+    d.rectangle([15, 22, 16, 27], fill=SLATE_DARK)
+    d.rectangle([8, 26, 23, 27], fill=STONE_LO)
+    return outline(img)
+
+
+SPRITES = [town, camp, footprint, ribs, waymark, site, titan, grave, party, objective, rumor, self_arrow, spawn, shrine, glow,
+           poi_fight, poi_hamlet, poi_tower]
 # 縁取りを付けない印 (光の輪・噂は縁なし)
 NO_RIM = {"glow", "rumor"}
 
 
 def marks():
-    img = Image.new("RGBA", (512, 64), (0, 0, 0, 0))
+    img = Image.new("RGBA", (1024, 64), (0, 0, 0, 0))
     for i, fn in enumerate(SPRITES):
         s = fn()
         img.alpha_composite(s, (i * 32, 0))
@@ -343,8 +386,9 @@ def disc_a():
 
 def preview(m):
     """確かめ用: 印を 4 倍で並べた絵 (docs/review/map_roughs/marks_preview.png)"""
-    out = Image.new("RGBA", (16 * 36 * 2, 2 * 36 * 2), (28, 32, 41, 255))
-    for i in range(16):
+    n = len(SPRITES)
+    out = Image.new("RGBA", (n * 36 * 2, 2 * 36 * 2), (28, 32, 41, 255))
+    for i in range(n):
         body = m.crop((i * 32, 0, i * 32 + 32, 32))
         r = m.crop((i * 32, 32, i * 32 + 32, 64))
         tinted = Image.new("RGBA", (32, 32), (127, 244, 255, 255))

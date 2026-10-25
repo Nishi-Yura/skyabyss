@@ -48,7 +48,11 @@ public class TravelMapScreen extends Screen {
 
     // 印の絵の番号 (marks.png の並び。tools/gen/world/gen_travel_map_assets.py の SPRITES と同じ)
     static final int S_TOWN = 0, S_CAMP = 1, S_FOOTPRINT = 2, S_RIBS = 3, S_WAYMARK = 4, S_SITE = 5, S_TITAN = 6, S_GRAVE = 7,
-            S_PARTY = 8, S_OBJECTIVE = 9, S_RUMOR = 10, S_SELF = 11, S_SPAWN = 12, S_SHRINE = 13, S_GLOW = 14;
+            S_PARTY = 8, S_OBJECTIVE = 9, S_RUMOR = 10, S_SELF = 11, S_SPAWN = 12, S_SHRINE = 13, S_GLOW = 14,
+            S_POI_FIGHT = 15, S_POI_HAMLET = 16, S_POI_TOWER = 17;
+    // 見どころの種類ごとの印 (それ以外の見どころは碑)
+    static final java.util.Set<String> POI_FIGHT = java.util.Set.of("bandit_camp", "barrow", "mine", "graveyard", "cave", "burnt_fort");
+    static final java.util.Set<String> POI_TOWER = java.util.Set.of("watchtower", "lighthouse", "rod_tower", "ruined_tower", "windmill");
 
     // 縮尺 (中心から縁までのブロック): いちばん寄せた / いちばん引いた / 開いたとき (町のまわり・世界)。ホイール一目盛りで 1.25 倍
     static final double MIN_RANGE = 96;
@@ -737,7 +741,7 @@ public class TravelMapScreen extends Screen {
                 sprite(g, S_RUMOR, at[0], at[1], 0, 0.85f);
             } else {
                 backing(g, at[0], at[1], at[2] == 1 ? 0.45f : 0.75f);
-                sprite(g, sprite(m.kind()), at[0], at[1], rim, at[2] == 1 ? 0.6f : 1f);
+                sprite(g, poi ? poiSprite(m.extra().substring(4)) : sprite(m.kind()), at[0], at[1], rim, at[2] == 1 ? 0.6f : 1f);
                 icons.add(new int[] {at[0] - 8, at[1] - 8, 16, 16});
                 int pr = labelPriority(m);
                 if (pr > 0 && at[2] == 0) {
@@ -929,6 +933,16 @@ public class TravelMapScreen extends Screen {
             case TOWN -> 35;
             case TITAN -> 40;
         };
+    }
+
+    static int poiSprite(String kind) {
+        if (POI_FIGHT.contains(kind)) {
+            return S_POI_FIGHT;
+        }
+        if (POI_TOWER.contains(kind)) {
+            return S_POI_TOWER;
+        }
+        return kind.startsWith("hamlet_") ? S_POI_HAMLET : S_WAYMARK;
     }
 
     static int sprite(MapMarks.Kind kind) {
@@ -1230,16 +1244,16 @@ public class TravelMapScreen extends Screen {
         com.mojang.blaze3d.systems.RenderSystem.enableBlend();
         if (tint != 0) {
             g.setColor(((tint >> 16) & 0xFF) / 255f, ((tint >> 8) & 0xFF) / 255f, (tint & 0xFF) / 255f, tintAlpha);
-            g.blit(MARKS, x - 8, y - 8, 16, 16, index * 32, 0, 32, 32, 512, 64);
+            g.blit(MARKS, x - 8, y - 8, 16, 16, index * 32, 0, 32, 32, 1024, 64);
             g.setColor(1f, 1f, 1f, 1f);
             return;
         }
         if (rim != 0) {
             g.setColor(((rim >> 16) & 0xFF) / 255f, ((rim >> 8) & 0xFF) / 255f, (rim & 0xFF) / 255f, alpha);
-            g.blit(MARKS, x - 8, y - 8, 16, 16, index * 32, 32, 32, 32, 512, 64);
+            g.blit(MARKS, x - 8, y - 8, 16, 16, index * 32, 32, 32, 32, 1024, 64);
         }
         g.setColor(1f, 1f, 1f, alpha);
-        g.blit(MARKS, x - 8, y - 8, 16, 16, index * 32, 0, 32, 32, 512, 64);
+        g.blit(MARKS, x - 8, y - 8, 16, 16, index * 32, 0, 32, 32, 1024, 64);
         g.setColor(1f, 1f, 1f, 1f);
     }
 
