@@ -1,0 +1,36 @@
+# 洞窟の小さな迷宮
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/poi_cave.txt -PshotsName=poi_cave
+world continent_cave2 continent
+size 1600 900
+timeout 1200
+render 8
+guiscale 2
+wait 100
+cmd skyabyss cinematic stop
+cmd time set 5000
+cmd gamerule doMobSpawning false
+cmd skyabyss dev opening build
+wait 200
+cmd gamemode creative
+hud off
+cmd tp @s -604 120 -244
+waitchunks 300
+wait 300
+cmd skyabyss dev grounds mark poi 30 pos
+wait 40
+cmd execute at @s run tp @s ~ ~4 ~12 180 15
+wait 40
+shot cave_mouth
+cmd skyabyss dev grounds mark poi 30 foes
+cmd execute at @s run tp @s ~ ~1 ~ 0 10
+wait 60
+shot cave_room_a
+cmd execute at @s run tp @s ~ ~ ~ 90 10
+wait 20
+shot cave_room_b
+cmd execute at @s run tp @s ~ ~ ~ 180 10
+wait 20
+shot cave_room_c
+cmd execute at @s run tp @s ~ ~ ~ -90 10
+wait 20
+shot cave_room_d

@@ -1,4 +1,8 @@
 {
+  "map.skyabyss.poi.cave": "岩の口の洞窟",
+  "sign.skyabyss.poi_cave.1": "下へ行くほど",
+  "sign.skyabyss.poi_cave.2": "骨が増える",
+  "sign.skyabyss.poi_cave.3": "戻る道を覚えよ",
   "sign.skyabyss.town_inn": "旅の宿",
   "sign.skyabyss.town_shop": "道具屋",
   "sign.skyabyss.poi_mine.1": "掘るほどに",

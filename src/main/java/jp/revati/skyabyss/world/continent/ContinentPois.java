@@ -183,9 +183,9 @@ public final class ContinentPois {
         }
         e.extra("foes_at", new BlockPos((int) Math.min(Integer.MAX_VALUE, now), 0, 0));
         SiteData.get(level).setDirty();
-        // 塚・坑道・墓所は骨の兵、野営は野盗。塚と坑道は地の下 (印の高さ) に出す
-        boolean undead = kind.equals("barrow") || kind.equals("mine") || kind.equals("graveyard");
-        boolean below = kind.equals("barrow") || kind.equals("mine");
+        // 塚・坑道・墓所・洞窟は骨の兵、野営は野盗。塚・坑道・洞窟は地の下 (印の高さ) に出す
+        boolean undead = kind.equals("barrow") || kind.equals("mine") || kind.equals("graveyard") || kind.equals("cave");
+        boolean below = kind.equals("barrow") || kind.equals("mine") || kind.equals("cave");
         EntityType<?>[] kinds = undead ? new EntityType<?>[] {EntityType.SKELETON, EntityType.SKELETON, EntityType.ZOMBIE}
                 : new EntityType<?>[] {EntityType.PILLAGER, EntityType.PILLAGER, EntityType.VINDICATOR};
         for (int k = 0; k < kinds.length; k++) {

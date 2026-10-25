@@ -1026,11 +1026,78 @@ def great_tree(rng):
     return bp
 
 
-BUILDERS.update({'mine': mine, 'ruined_tower': ruined_tower, 'traveler_camp': traveler_camp, 'graveyard': graveyard, 'great_tree': great_tree})
-BY_REGION['meadow'] = BY_REGION['meadow'] + ['traveler_camp', 'great_tree', 'ruined_tower', 'graveyard']
-BY_REGION['whale'] = BY_REGION['whale'] + ['mine', 'graveyard', 'great_tree', 'ruined_tower']
+def cave(rng):
+    """洞窟の小さな迷宮: 岩の口から階段で下り、地下の広間三つを細い通路でつなぐ。奥の広間に宝箱、中ほどに骨の兵 (foes は地下)"""
+    bp = BP('poi_cave')
+    # 岩の口 (地上の小山。南が開く)
+    for x in range(-5, 6):
+        for z in range(-5, 6):
+            d = math.hypot(x, z * 1.2)
+            h = int(round(4.5 - d * 0.9 + rng.random() * 0.8))
+            for y in range(0, max(0, h)):
+                bp.set(x, y, z, rng.choice(['minecraft:stone', 'minecraft:stone', 'minecraft:andesite', 'minecraft:mossy_cobblestone', 'minecraft:cobblestone']))
+    for z in range(-1, 6):
+        for x in (-1, 0, 1):
+            for y in range(0, 4):
+                bp.set(x, y, z, AIR)
+    # 下る階段 (北へ。口の奥から)
+    for k in range(11):
+        z = -1 - k
+        y = -1 - k
+        for x in (-1, 0, 1):
+            for yy in range(y, y + 4):
+                bp.set(x, yy, z, AIR)
+            bp.set(x, y - 1, z, 'minecraft:cobblestone')
+            bp.set(x, y, z, 'minecraft:stone_stairs[facing=south,half=bottom,shape=straight,waterlogged=false]' if rng.random() > 0.25 else 'minecraft:mossy_cobblestone_stairs[facing=south,half=bottom,shape=straight,waterlogged=false]')
+    fy = -11
+
+    def room(cx, cz, rx, rz, h):
+        for x in range(cx - rx - 1, cx + rx + 2):
+            for z in range(cz - rz - 1, cz + rz + 2):
+                d = ((x - cx) / (rx + 0.5)) ** 2 + ((z - cz) / (rz + 0.5)) ** 2
+                if d > 1.0:
+                    continue
+                hh = int(round(h * (1 - d * 0.6) + rng.random()))
+                bp.set(x, fy - 1, z, rng.choice(['minecraft:gravel', 'minecraft:stone', 'minecraft:moss_block', 'minecraft:tuff']))
+                for y in range(fy, fy + hh):
+                    bp.set(x, y, z, AIR)
+                if rng.random() < 0.06:
+                    bp.set(x, fy, z, rng.choice(['minecraft:brown_mushroom', 'minecraft:cobweb', 'minecraft:moss_carpet', 'minecraft:pointed_dripstone[thickness=tip,vertical_direction=up,waterlogged=false]']))
+
+    def tunnel(ax, az, bx, bz):
+        n = max(abs(bx - ax), abs(bz - az))
+        for i in range(n + 1):
+            x = int(round(ax + (bx - ax) * i / n))
+            z = int(round(az + (bz - az) * i / n))
+            wob = int(round(math.sin(i / 3.0) * 1.2))
+            for dx in (-1, 0, 1):
+                for y in range(fy, fy + 3):
+                    bp.set(x + dx + (wob if abs(bz - az) > abs(bx - ax) else 0), y, z + (wob if abs(bx - ax) >= abs(bz - az) else 0), AIR)
+                bp.set(x + dx, fy - 1, z, 'minecraft:gravel')
+    # 広間: 入口 (階段の下)・東の広間 (骨の兵)・北西の奥の広間 (宝箱)
+    room(0, -15, 3, 3, 4)
+    room(10, -20, 4, 3, 5)
+    room(-4, -29, 5, 4, 6)
+    tunnel(2, -16, 8, -20)
+    tunnel(8, -22, -1, -27)
+    # 灯り: 広間ごとに一つ (床の蝋燭か、壁ぎわの灯り)
+    bp.set(2, fy, -14, 'minecraft:candle[candles=3,lit=true,waterlogged=false]')
+    bp.set(12, fy, -19, 'minecraft:lantern[hanging=false,waterlogged=false]')
+    bp.set(-6, fy, -28, 'minecraft:lantern[hanging=false,waterlogged=false]')
+    # 奥の広間: 骨と宝箱
+    bp.set(-4, fy, -32, 'minecraft:chest[facing=south,type=single,waterlogged=false]')
+    for x, z in ((-6, -31), (-2, -31), (-3, -29)):
+        bp.set(x, fy, z, 'minecraft:bone_block[axis=x]' if (x + z) % 2 else 'minecraft:skeleton_skull[rotation=6]')
+    bp.mark('loot', -4, fy, -32)
+    bp.mark('foes', 10, fy, -20)
+    return bp
+
+
+BUILDERS.update({'cave': cave, 'mine': mine, 'ruined_tower': ruined_tower, 'traveler_camp': traveler_camp, 'graveyard': graveyard, 'great_tree': great_tree})
+BY_REGION['meadow'] = BY_REGION['meadow'] + ['traveler_camp', 'great_tree', 'ruined_tower', 'graveyard', 'cave']
+BY_REGION['whale'] = BY_REGION['whale'] + ['mine', 'graveyard', 'great_tree', 'ruined_tower', 'cave']
 BY_REGION['tide'] = BY_REGION['tide'] + ['traveler_camp', 'great_tree', 'ruined_tower']
-BY_REGION['storm'] = BY_REGION['storm'] + ['mine', 'graveyard', 'ruined_tower']
+BY_REGION['storm'] = BY_REGION['storm'] + ['mine', 'graveyard', 'ruined_tower', 'cave']
 BY_REGION['ember'] = BY_REGION['ember'] + ['mine', 'traveler_camp', 'graveyard']
 
 
@@ -1073,7 +1140,7 @@ def signposts(lay):
 TABLETS = {
     'titan_ribs': (0, 10), 'monastery': (0, 8), 'stone_circle': (0, 3), 'lighthouse': (2, 5), 'wind_gate': (0, 4),
     'basalt_gate': (0, 3), 'burnt_fort': (3, 12), 'rod_tower': (2, 4), 'forge_ruin': (0, 6),
-    'mine': (4, 3), 'ruined_tower': (0, 6), 'graveyard': (3, 6), 'great_tree': (0, 6), 'traveler_camp': (3, 6),
+    'cave': (3, 6), 'mine': (4, 3), 'ruined_tower': (0, 6), 'graveyard': (3, 6), 'great_tree': (0, 6), 'traveler_camp': (3, 6),
 }
 
 
