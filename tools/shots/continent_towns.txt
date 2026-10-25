@@ -19,40 +19,40 @@ hud off
 cmd skyabyss dev grounds mark town 0 pos
 waitchunks 900
 wait 200
-cmd execute at @s positioned ~42 ~ ~42 positioned over motion_blocking_no_leaves run tp @s ~ ~26 ~ 135 32
+cmd execute at @s positioned ~55 ~ ~55 positioned over motion_blocking_no_leaves run tp @s ~ ~34 ~ 135 32
 wait 60
 shot town_whale
 cmd skyabyss dev grounds mark town 0 stand
-cmd execute at @s run tp @s ~ ~2 ~ 180 8
+cmd execute at @s run tp @s ~ ~3 ~ 180 10
 wait 60
 shot town_whale_in
 cmd skyabyss dev grounds mark town 1 pos
 waitchunks 900
 wait 200
-cmd execute at @s positioned ~42 ~ ~42 positioned over motion_blocking_no_leaves run tp @s ~ ~26 ~ 135 32
+cmd execute at @s positioned ~55 ~ ~55 positioned over motion_blocking_no_leaves run tp @s ~ ~34 ~ 135 32
 wait 60
 shot town_tide
 cmd skyabyss dev grounds mark town 1 stand
-cmd execute at @s run tp @s ~ ~2 ~ 180 8
+cmd execute at @s run tp @s ~ ~3 ~ 180 10
 wait 60
 shot town_tide_in
 cmd skyabyss dev grounds mark town 2 pos
 waitchunks 900
 wait 200
-cmd execute at @s positioned ~42 ~ ~42 positioned over motion_blocking_no_leaves run tp @s ~ ~26 ~ 135 32
+cmd execute at @s positioned ~55 ~ ~55 positioned over motion_blocking_no_leaves run tp @s ~ ~34 ~ 135 32
 wait 60
 shot town_storm
 cmd skyabyss dev grounds mark town 2 stand
-cmd execute at @s run tp @s ~ ~2 ~ 180 8
+cmd execute at @s run tp @s ~ ~3 ~ 180 10
 wait 60
 shot town_storm_in
 cmd skyabyss dev grounds mark town 3 pos
 waitchunks 900
 wait 200
-cmd execute at @s positioned ~42 ~ ~42 positioned over motion_blocking_no_leaves run tp @s ~ ~26 ~ 135 32
+cmd execute at @s positioned ~55 ~ ~55 positioned over motion_blocking_no_leaves run tp @s ~ ~34 ~ 135 32
 wait 60
 shot town_ember
 cmd skyabyss dev grounds mark town 3 stand
-cmd execute at @s run tp @s ~ ~2 ~ 180 8
+cmd execute at @s run tp @s ~ ~3 ~ 180 10
 wait 60
 shot town_ember_in

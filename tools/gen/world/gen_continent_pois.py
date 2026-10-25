@@ -1073,6 +1073,7 @@ def signposts(lay):
 TABLETS = {
     'titan_ribs': (0, 10), 'monastery': (0, 8), 'stone_circle': (0, 3), 'lighthouse': (2, 5), 'wind_gate': (0, 4),
     'basalt_gate': (0, 3), 'burnt_fort': (3, 12), 'rod_tower': (2, 4), 'forge_ruin': (0, 6),
+    'mine': (4, 3), 'ruined_tower': (0, 6), 'graveyard': (3, 6), 'great_tree': (0, 6), 'traveler_camp': (3, 6),
 }
 
 

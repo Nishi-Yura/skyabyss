@@ -25,7 +25,7 @@ import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 public final class ContinentTowns {
     public static final String KIND = "town";
     public static final String[] REGIONS = {"whale", "tide", "storm", "ember"};
-    static final String[] MARKS = {"rest", "board", "inn", "shop", Attendants.INN_BED, AttendantRole.INNKEEPER.mark(), AttendantRole.TOOL_MERCHANT.mark()};
+    static final String[] MARKS = {"rest", "board", "inn", "shop", "stand", Attendants.INN_BED, AttendantRole.INNKEEPER.mark(), AttendantRole.TOOL_MERCHANT.mark()};
     static final int KEEP_RADIUS = 96;
     static final int CHECK_INTERVAL = 100;
 

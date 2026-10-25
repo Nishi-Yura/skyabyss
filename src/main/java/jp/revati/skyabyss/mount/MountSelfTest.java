@@ -32,7 +32,9 @@ public final class MountSelfTest {
     }
 
     private static BlockPos base(ServerLevel level) {
-        return level.getSharedSpawnPos().offset(512, 0, 512);
+        // 世界の真ん中の側へ 512 (大陸の世界は出現地点が南西の島なので、外へ向けると世界の縁の外に出る)
+        BlockPos spawn = level.getSharedSpawnPos();
+        return spawn.offset(spawn.getX() > 0 ? -512 : 512, 0, spawn.getZ() > 0 ? -512 : 512);
     }
 
     private static void load(MinecraftServer server) {

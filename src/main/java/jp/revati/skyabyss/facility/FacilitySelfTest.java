@@ -46,7 +46,9 @@ public final class FacilitySelfTest {
     }
 
     static BlockPos testBase(ServerLevel level) {
-        return level.getSharedSpawnPos().offset(512, 0, 512);
+        // 世界の真ん中の側へ 512 (大陸の世界は出現地点が南西の島なので、外へ向けると世界の縁の外に出る)
+        BlockPos spawn = level.getSharedSpawnPos();
+        return spawn.offset(spawn.getX() > 0 ? -512 : 512, 0, spawn.getZ() > 0 ? -512 : 512);
     }
 
     static void load(net.minecraft.server.MinecraftServer server) {
@@ -61,8 +63,11 @@ public final class FacilitySelfTest {
 
     public static List<SelfTestRunner.Step> steps() {
         // 先に試しの場所 (出現地点から 512 離れた所。都の本物の係の人と混ざらない) のチャンクを読み込み、生き物が動くまで待つ
+        // (大陸の世界は試しの場所が海の上の新しいチャンクで、作るのに時間がかかる。生き物が動くまで待つ。30 秒で諦めて進む)
+        int[] waited = {0};
         return List.of(SelfTestRunner.Step.once("facility (load)", FacilitySelfTest::load),
-                SelfTestRunner.Step.once("facility", 60, FacilitySelfTest::run),
+                SelfTestRunner.Step.until("facility (wait)", server -> server.overworld().isPositionEntityTicking(testBase(server.overworld())) || ++waited[0] > 600),
+                SelfTestRunner.Step.once("facility", 20, FacilitySelfTest::run),
                 SelfTestRunner.Step.once("facility guild", GuildSelfTest::run),
                 SelfTestRunner.Step.once("facility extras", FacilityExtrasSelfTest::run),
                 SelfTestRunner.Step.once("facility trade", jp.revati.skyabyss.facility.trade.TradeSelfTest::run));
