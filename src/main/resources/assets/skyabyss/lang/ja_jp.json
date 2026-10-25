@@ -1,4 +1,9 @@
 {
+  "sign.skyabyss.ferry.to_tide.1": "渡し船",
+  "sign.skyabyss.ferry.to_tide.2": "汐守の港へ",
+  "sign.skyabyss.ferry.to_capital.1": "渡し船",
+  "sign.skyabyss.ferry.to_capital.2": "都の岸へ",
+  "message.skyabyss.ferry.crossed": "渡し船で内海を渡った",
   "sign.skyabyss.poi_titan_ribs.1": "鯨は空で死なない",
   "sign.skyabyss.poi_titan_ribs.2": "骨だけが落ちて",
   "sign.skyabyss.poi_titan_ribs.3": "歌は上に残った",

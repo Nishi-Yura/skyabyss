@@ -29,6 +29,8 @@ public final class ContinentLayout {
     private final Map<String, BlockPos> sites = new HashMap<>();
     private final List<List<BlockPos>> roads = new ArrayList<>();
     private final List<List<BlockPos>> ferries = new ArrayList<>();
+    // 渡し船の両端の船着き場 ([都の側, 向こう岸])
+    private final List<List<BlockPos>> ferryDocks = new ArrayList<>();
     private final Map<String, BlockPos> names = new java.util.LinkedHashMap<>();
     private final Map<String, Level> levels = new java.util.LinkedHashMap<>();
 
@@ -48,6 +50,9 @@ public final class ContinentLayout {
         }
         lines(o.getAsJsonArray("roads"), roads);
         lines(o.getAsJsonArray("ferries"), ferries);
+        if (o.has("ferry_docks")) {
+            lines(o.getAsJsonArray("ferry_docks"), ferryDocks);
+        }
         if (o.has("names")) {
             for (Map.Entry<String, JsonElement> e : o.getAsJsonObject("names").entrySet()) {
                 names.put(e.getKey(), pos(e.getValue().getAsJsonArray()));
@@ -120,6 +125,10 @@ public final class ContinentLayout {
 
     public List<List<BlockPos>> ferries() {
         return ferries;
+    }
+
+    public List<List<BlockPos>> ferryDocks() {
+        return ferryDocks;
     }
 
     // 土地の名前 (lang の map.skyabyss.continent.<id>) の場所

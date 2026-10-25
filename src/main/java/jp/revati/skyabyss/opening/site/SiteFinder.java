@@ -336,6 +336,15 @@ public final class SiteFinder {
                 int[] q = stops.get(i);
                 out.add(new Planned(jp.revati.skyabyss.world.continent.ContinentOutskirts.KIND, i, new BlockPos(q[0], p.top(q[0], q[1]) + 1, q[1]), 0));
             }
+            // 内海の渡し船の両岸の船着き場 (向こう岸は向きを返す)
+            List<List<BlockPos>> fd = jp.revati.skyabyss.world.continent.ContinentLayout.get().ferryDocks();
+            for (int i = 0; i < fd.size(); i++) {
+                for (int j = 0; j < 2 && j < fd.get(i).size(); j++) {
+                    BlockPos q = fd.get(i).get(j);
+                    out.add(new Planned(jp.revati.skyabyss.world.continent.ContinentFerries.KIND, i * 2 + j,
+                            new BlockPos(q.getX(), p.top(q.getX(), q.getZ()) + 1, q.getZ()), encode(j == 0 ? 0 : 2, false)));
+                }
+            }
             // 船着き場 (島の道の終わり。ここから鐘の都へ渡る)
             BlockPos dock = jp.revati.skyabyss.world.continent.ContinentLayout.get().dock();
             out.add(new Planned(jp.revati.skyabyss.world.continent.ContinentOutskirts.KIND, jp.revati.skyabyss.world.continent.ContinentOutskirts.DOCK,

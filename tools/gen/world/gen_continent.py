@@ -9,6 +9,7 @@
 # 土地の番号は ContinentBiomeSource の biomes の並び (data/skyabyss/worldgen/world_preset/continent.json) と同じ
 import gzip
 import json
+import math
 import os
 import struct
 import sys
@@ -421,7 +422,31 @@ def paint_map(lay, height, biome, path):
     img.save(path, optimize=True)
 
 
-def write_layout(lay):
+# 渡し船の両端の船着き場: 渡し船の線の端から、もう一方の端へ向かって歩き、水に出る手前 (岸から 6 ブロック陸の側) の点
+def ferry_docks(line, height):
+    def land(x, z):
+        i, j = int((x + HALF) / SCALE), int((z + HALF) / SCALE)
+        return 0 <= i < SIZE and 0 <= j < SIZE and height[j, i] >= SEA_LEVEL
+
+    def dock(a, b):
+        ax, az = a
+        bx, bz = b
+        L = math.hypot(bx - ax, bz - az)
+        last = None
+        for k in range(0, int(L), 2):
+            x, z = ax + (bx - ax) * k / L, az + (bz - az) * k / L
+            if land(x, z):
+                last = (x, z)
+            elif last is not None:
+                break
+        if last is None:
+            last = (ax, az)
+        ux, uz = (bx - ax) / L, (bz - az) / L
+        return [int(round(last[0] - ux * 6)), int(round(last[1] - uz * 6))]
+    return [dock(line[0], line[1]), dock(line[-1], line[-2])]
+
+
+def write_layout(lay, height=None):
     def pt(p):
         return [int(p[0]), int(p[1])]
     kinds = {'岩鯨の跡地': 'whale', '潮殻の跡地': 'tide', '雷翼の跡地': 'storm', '余燼の跡地': 'ember'}
@@ -438,6 +463,8 @@ def write_layout(lay):
         'names': {REGION_NAMES[n]: pt(p) for n, p in lay['names']},
         'levels': {k: [lv.replace('Lv ', '').replace('–', '-'), pt(p)] for k, (lv, p) in zip(LEVEL_REGIONS, lay['levels'])},
     }
+    if height is not None:
+        out['ferry_docks'] = [ferry_docks(f, height) for f in lay['ferries']]
     with open(os.path.join(OUT, 'layout.json'), 'w', encoding='utf8', newline='\n') as f:
         json.dump(out, f, ensure_ascii=False, separators=(',', ':'))
         f.write('\n')
@@ -449,7 +476,7 @@ def main():
     write_bin(os.path.join(OUT, 'biome.bin'), biome)
     write_bin(os.path.join(OUT, 'region.bin'), reg)
     preview(CHOSEN, height, biome)
-    write_layout(lay)
+    write_layout(lay, height)
     paint_map(lay, height, biome, os.path.join(ROOT, 'src', 'main', 'resources', 'assets', 'skyabyss', 'textures', 'gui', 'map', 'continent.png'))
     land = height >= SEA_LEVEL
     print(f'layout {CHOSEN}: land {land.mean() * 100:.0f}%, max Y {height.max()}, capital Y {height[SIZE // 2, int((lay["capital"][0] + HALF) / SCALE)]}')
