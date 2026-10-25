@@ -62,7 +62,7 @@ public final class EmberRaidSelfTest {
             server.setDifficulty(Difficulty.NORMAL, true);
             check(f, "registered ER1", RaidRooms.create(EmberCarry.ID) instanceof EmberCarry);
             check(f, "registered ER2", RaidRooms.create(EmberForgeOrder.ID) instanceof EmberForgeOrder);
-            check(f, "registered ER3", RaidRooms.create(EmberForgeDefense.ID) instanceof EmberForgeDefense);
+            check(f, "registered ER3", jp.revati.skyabyss.trial.raid.mid.FightBossRoom.unwrap(RaidRooms.create(EmberForgeDefense.ID)) instanceof EmberForgeDefense);
             StringBuilder dump = new StringBuilder("{");
             carry(level, f, fakes, dump);
             order(level, f, fakes, dump);

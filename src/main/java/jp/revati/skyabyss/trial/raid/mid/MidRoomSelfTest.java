@@ -28,10 +28,10 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.world.level.block.Blocks;
 import net.neoforged.neoforge.common.util.FakePlayerFactory;
 
-// 順路の中ボスの間 (trial/raid/mid) の検査。SKYABYSS_SELFTEST_ONLY="raid mid"。四体の巨神ごとに、一人の偽の人で:
-//   順路を始める → 部屋 1〜3 を越えたことにする → 区画の段 4 の中ボスの間の中へ運ばれる (前室を歩かない)
-//   → 準備のあと中ボスが現れる (番兵長は手下の波のあと)・体力の倍率は一人で 1 倍・一人の攻撃で削れる
-//   → (潮殻だけ) 招き潮の水と、全滅のやり直しで水が引き中ボスが湧き直す
+// 闘の部屋の中ボス (trial/raid/mid/FightBossRoom、00 の 277) の検査。SKYABYSS_SELFTEST_ONLY="raid mid"。四体の巨神ごとに、一人の偽の人で:
+//   順路を始める → 部屋 1・2 を越えたことにする → 三つ目の闘の部屋 (中ボスだけの段は無い)
+//   → 波を越えたことにすると中ボスが部屋に現れる (段なし・体力 7 割)・一人の攻撃で削れる
+//   → (潮殻だけ) 招き潮で部屋の砂に水、全滅で水が引き部屋が波の段へ戻る
 //   → 倒すと越え、順路が心臓の段 (LAST_STEP) へ進む
 public final class MidRoomSelfTest {
     private MidRoomSelfTest() {
@@ -77,8 +77,8 @@ public final class MidRoomSelfTest {
     private static void report() {
         TrialRoute.PLAYERS = l -> jp.revati.skyabyss.util.Players.snapshot(l.players());
         if (FAILS.isEmpty()) {
-            SkyAbyss.LOGGER.info("SELFTEST raid mid PASSED ({}: carried into the slot's mid-boss arena after room 3, boss appears, solo scale 1x, "
-                    + "damage lands, tide flood + wipe reset, defeat moves the route to the heart)", DONE);
+            SkyAbyss.LOGGER.info("SELFTEST raid mid PASSED ({}: no separate mid-boss step; in the fight room the boss appears after the waves, single-stage at 70% health, "
+                    + "solo damage lands, tide flood in the room + wipe back to the waves, defeat moves the route to the heart)", DONE);
         } else {
             for (String f : FAILS) {
                 SkyAbyss.LOGGER.error("SELFTEST raid mid FAILED: {}", f);
@@ -151,9 +151,9 @@ public final class MidRoomSelfTest {
                 check(TrialRoute.step(back, group) == 1, "the route did not start");
                 stage = 1;
             }
-            case 1, 2, 3 -> {
+            case 1, 2 -> {
                 // 部屋 stage を越えたことにして、次へすぐ運ぶ
-                if (TrialRoute.step(back, group) != stage || TrialRoute.mid(back, group)) {
+                if (TrialRoute.step(back, group) != stage) {
                     check(false, "unexpected step " + TrialRoute.step(back, group) + " before passing room " + stage);
                     return true;
                 }
@@ -161,42 +161,39 @@ public final class MidRoomSelfTest {
                 TrialRoute.flushPending();
                 TrialRoute.tick(back, titan, List.of(player), back.getGameTime());
                 stage++;
+                waited = 0;
             }
-            case 4 -> {
-                check(TrialRoute.mid(back, group), "after room 3 the route is not on the mid-boss step");
-                check(run != null && run.mid && MidRooms.idOf(titan).equals(run.ctx.roomId()), "no mid-boss room run (" + (run == null ? null : run.ctx.roomId()) + ")");
-                if (run == null || !run.mid) {
+            case 3 -> {
+                // 三つ目 = 闘の部屋。中ボスの段を包んだ部屋で、準備のあと始まる
+                if (run == null || run.step != 3 || run.phase != RaidRun.Phase.ACTIVE) {
+                    return timeout(400, "the fight room (step 3) to start");
+                }
+                check(!TrialRoute.mid(back, group), "the route still has a separate mid-boss step");
+                check(run.room instanceof FightBossRoom, "the fight room is not wrapped with its mid-boss (" + run.room.getClass().getSimpleName() + ")");
+                if (!(run.room instanceof FightBossRoom fb)) {
                     return true;
                 }
-                BlockPos o = run.ctx.origin();
-                check(o.equals(RaidRun.originOf(TrialSlot.of(BackGroupData.get(back).peek(group)), RaidRun.MID_STEP)), "the arena is not at the slot's step-4 origin: " + o);
-                check(run.ctx.cell().inner().contains(player.position()), "the player was not carried INTO the arena (at " + player.blockPosition().toShortString()
-                        + ", arena " + run.ctx.cell().inner() + ")");
-                check(back.getBlockState(player.blockPosition().below()).isSolid(), "no floor under the carried player");
+                check(!fb.bossStage() && fb.boss() == null, "the mid-boss is out before the waves");
+                // 波を越えたことにする → 中ボスが部屋に現れる
+                fb.devBeginBoss(run.ctx);
                 stage = 5;
                 waited = 0;
             }
             case 5 -> {
-                // 準備のあと始まる。番兵長は手下を倒すと出る
-                if (run == null || run.phase != RaidRun.Phase.ACTIVE) {
-                    return timeout(200, "the mid room to start");
+                FightBossRoom fb = (FightBossRoom) run.room;
+                Mob boss = fb.boss();
+                if (boss == null) {
+                    return timeout(200, "the boss to appear in the fight room");
                 }
-                MidRoom room = (MidRoom) run.room;
-                if (room.boss == null) {
-                    for (Mob m : new ArrayList<>(run.ctx.aliveMobs())) {
-                        m.kill();
-                    }
-                    return timeout(200, "the boss to appear");
-                }
-                Mob boss = room.boss;
-                check(boss.isAlive() && run.ctx.cell().inner().inflate(0.5, 8, 0.5).contains(boss.position()), "the boss is not inside the arena: " + boss.position());
-                check(run.lastHud != null && !run.lastHud.objKey().isEmpty(), "no objective strip for the mid room");
+                check(boss.isAlive() && run.ctx.cell().inner().inflate(0.5, 8, 0.5).contains(boss.position()), "the boss is not inside the fight room: " + boss.position());
+                check(boss.getTags().contains(FightBossRoom.SINGLE_STAGE), "the boss is not single-stage");
+                check(run.lastHud != null && !run.lastHud.objKey().isEmpty(), "no objective strip in the boss stage");
                 stage = 6;
                 waited = 0;
             }
             case 6 -> {
-                MidRoom room = (MidRoom) run.room;
-                Mob boss = room.boss;
+                FightBossRoom fb = (FightBossRoom) run.room;
+                Mob boss = fb.boss();
                 if (boss == null) {
                     return timeout(100, "the boss");
                 }
@@ -208,40 +205,38 @@ public final class MidRoomSelfTest {
                 if (boss.getHealth() >= before) {
                     return timeout(400, "a solo hit to damage the boss"); // 潮招きは潜る・守りの間 (数秒) は傷が通らない
                 }
-                check(scaleOk(boss), "the boss is scaled for more than one player");
+                check(scaleOk(boss), "the boss is not 70% of the one-player health");
                 stage = Titans.TIDE_SHELL.equals(titan) && !wiped ? 7 : 9;
                 waited = 0;
             }
             case 7 -> {
-                // 潮殻: 招き潮で砂の上に水 → 全滅で水が引き、中ボスが湧き直す
-                TideMidRoom room = (TideMidRoom) run.room;
+                // 潮殻: 招き潮で部屋の砂の上に水 → 全滅で水が引き、部屋が波の段へ戻る (中ボスは消える)
+                FightBossRoom fb = (FightBossRoom) run.room;
+                TideMidRoom room = (TideMidRoom) fb.midRoom();
                 room.beckon(back, 100);
-                BlockPos w = run.ctx.local(10, 1, 0);
-                check(back.getBlockState(w).is(Blocks.WATER), "the beckoning tide did not flood the sand");
                 check(room.flooded(back), "flooded() is false during the flood");
-                Mob old = room.boss;
+                int fy = run.ctx.cell().floor(0, 0).getY();
+                net.minecraft.world.phys.AABB in = run.ctx.cell().inner();
+                check(waterAt(in, fy), "the beckoning tide did not flood the fight room's sand");
+                Mob old = fb.boss();
                 RaidRun.wipe(run, null);
-                check(!back.getBlockState(w).is(Blocks.WATER), "the wipe did not drain the tide");
                 check(old == null || old.isRemoved(), "the wipe did not remove the boss");
-                check(run.ctx.cell().inner().contains(player.position()), "after the wipe the player is not back inside the arena");
+                check(!fb.bossStage(), "the wipe did not take the room back to the waves");
+                check(!waterAt(in, fy), "the wipe did not drain the tide");
                 wiped = true;
-                stage = 5;
+                stage = 3;
                 waited = 0;
             }
             case 9 -> {
-                MidRoom room = (MidRoom) run.room;
-                if (room.boss != null && room.boss.isAlive()) {
-                    room.boss.kill();
-                }
+                FightBossRoom.finishBoss(run.room, player);
                 stage = 10;
                 waited = 0;
             }
             case 10 -> {
-                if (!(RaidRun.midCleared(group) && !TrialRoute.mid(back, group) && TrialRoute.step(back, group) == TrialRoute.LAST_STEP)) {
-                    return timeout(100, "the route to move to the heart after the defeat (step " + TrialRoute.step(back, group) + ", mid "
-                            + TrialRoute.mid(back, group) + ", cleared " + RaidRun.midCleared(group) + ")");
+                if (TrialRoute.step(back, group) != TrialRoute.LAST_STEP) {
+                    return timeout(200, "the route to move to the heart after the defeat (step " + TrialRoute.step(back, group) + ")");
                 }
-                check(run.ctx.aliveMobs().isEmpty(), "mobs left in the arena after the defeat");
+                check(!TrialRoute.mid(back, group), "a mid-boss step appeared after the fight room");
                 DONE.add(titan);
                 return true;
             }
@@ -252,10 +247,22 @@ public final class MidRoomSelfTest {
         return false;
     }
 
+    // 部屋の床の上 (fy) に水があるか
+    private static boolean waterAt(net.minecraft.world.phys.AABB in, int fy) {
+        for (int x = (int) Math.floor(in.minX); x < in.maxX; x++) {
+            for (int z = (int) Math.floor(in.minZ); z < in.maxZ; z++) {
+                if (back.getBlockState(new BlockPos(x, fy, z)).is(Blocks.WATER)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     // 一人の体力の倍率 (傷を割る倍率が 1、または体力が 1 人の基準)
     private static boolean scaleOk(Mob boss) {
         if (boss instanceof TideBeckoner) {
-            return boss.getMaxHealth() <= TideBeckoner.HEALTH + 0.5f;
+            return boss.getMaxHealth() <= TideBeckoner.HEALTH * FightBossRoom.HEALTH + 0.5f;
         }
         if (boss instanceof jp.revati.skyabyss.titan.storm.raiju.Raiju) {
             return jp.revati.skyabyss.titan.storm.raiju.Raiju.scaleFor(1) == 1f;
@@ -265,7 +272,7 @@ public final class MidRoomSelfTest {
         }
         LivingEntity l = boss;
         var base = l.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.MAX_HEALTH);
-        return base != null && l.getMaxHealth() <= 280.5f;
+        return base != null && l.getMaxHealth() <= 280 * FightBossRoom.HEALTH + 0.5f;
     }
 
     private static void teardown() {

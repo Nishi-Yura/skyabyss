@@ -457,6 +457,10 @@ public final class RaidRun {
         if (def != null) {
             RaidRewards.onRoomCleared(ctx.level(), ctx.group(), ctx.titan(), ctx.roomId(), def.slot());
         }
+        if (run.room instanceof jp.revati.skyabyss.trial.raid.mid.FightBossRoom) {
+            // 闘の部屋の中で中ボスを倒した: 中ボスの間の報い (素材・共鳴の欠片・結晶) と順路の「中ボス」の印
+            RaidRewards.onMidCleared(ctx.level(), ctx.group(), ctx.titan());
+        }
         SkyAbyss.LOGGER.info("Raid: room {} cleared by group {} (wipes {})", ctx.roomId(), ctx.group(), run.wipes);
         if (key != null) {
             TrialRoute.onCleared(ctx.level(), ctx.group(), ctx.titan(), key, null, true);

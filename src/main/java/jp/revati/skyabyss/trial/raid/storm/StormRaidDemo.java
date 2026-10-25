@@ -95,7 +95,7 @@ public final class StormRaidDemo {
         };
         room.build(ctx);
         jp.revati.skyabyss.trial.raid.RaidKit.setGate(ctx, ctx.cell().entryGate(), true);
-        if (!(room instanceof ChargeChain) && !"SRM".equals(id)) {
+        if (!(jp.revati.skyabyss.trial.raid.mid.FightBossRoom.unwrap(room) instanceof ChargeChain) && !"SRM".equals(id)) {
             room.start(ctx);
         }
         ticks = 0;
@@ -112,7 +112,7 @@ public final class StormRaidDemo {
             c.update(ctx, List.of(new double[] {ctx.origin().getX() + 0.5 + Math.cos(a) * 9, ctx.origin().getZ() + 0.5 + Math.sin(a) * 6}));
         } else if (room instanceof BeatTiles b) {
             b.advance(ctx, new boolean[BeatTiles.N * BeatTiles.N]);
-        } else if (room instanceof EyeAdvance) {
+        } else if (jp.revati.skyabyss.trial.raid.mid.FightBossRoom.unwrap(room) instanceof EyeAdvance) {
             room.tick(ctx);
         }
     }

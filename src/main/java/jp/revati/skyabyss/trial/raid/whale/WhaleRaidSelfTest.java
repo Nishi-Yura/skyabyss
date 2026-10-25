@@ -93,7 +93,7 @@ public final class WhaleRaidSelfTest {
 
     private static boolean active(Class<? extends RaidRoom> type) {
         RaidRun.Run r = run();
-        return r != null && type.isInstance(r.room) && r.phase == RaidRun.Phase.ACTIVE;
+        return r != null && type.isInstance(jp.revati.skyabyss.trial.raid.mid.FightBossRoom.unwrap(r.room)) && r.phase == RaidRun.Phase.ACTIVE;
     }
 
     private static boolean tick(MinecraftServer server) {
@@ -248,7 +248,7 @@ public final class WhaleRaidSelfTest {
             });
             STAGES.add(() -> waitFor(() -> ((WhaleCarryRoom) run().room).delivered() >= idx + 1, 80, "orb " + idx + " delivered"));
         }
-        STAGES.add(() -> waitFor(() -> run().phase == RaidRun.Phase.COMPLETE, 40, "WR1 complete"));
+        STAGES.add(() -> waitFor(() -> run() != null && jp.revati.skyabyss.trial.raid.mid.FightBossRoom.finishBoss(run().room, null) && false || run().phase == RaidRun.Phase.COMPLETE, 40, "WR1 complete"));
 
         }
         // ---- WR2 智「共鳴の骨」 (WR5 が引かれたらそちら)
@@ -294,30 +294,30 @@ public final class WhaleRaidSelfTest {
             check(room.isComplete(), "WR2: striking the whole sequence in order did not finish the room");
             return true;
         });
-        STAGES.add(() -> waitFor(() -> run().phase == RaidRun.Phase.COMPLETE, 40, "WR2 complete"));
+        STAGES.add(() -> waitFor(() -> run() != null && jp.revati.skyabyss.trial.raid.mid.FightBossRoom.finishBoss(run().room, null) && false || run().phase == RaidRun.Phase.COMPLETE, 40, "WR2 complete"));
 
         }
         // ---- WR3 闘「鯨の核を守る」 (WR6 が引かれたらそちら)
         if (!WhaleRaid.FIGHT.equals(DRAWN[2])) {
             fight2();
         } else {
-        STAGES.add(() -> waitFor(() -> run() != null && run().step == 3 && run().room instanceof WhaleCoreRoom, 400, "carried to WR3"));
+        STAGES.add(() -> waitFor(() -> run() != null && run().step == 3 && jp.revati.skyabyss.trial.raid.mid.FightBossRoom.unwrap(run().room) instanceof WhaleCoreRoom, 400, "carried to WR3"));
         STAGES.add(() -> waitFor(() -> active(WhaleCoreRoom.class), 400, "WR3 active"));
         STAGES.add(() -> waitFor(() -> hudLive("WR3"), 60, "WR3 objective strip"));
-        STAGES.add(() -> waitFor(() -> ((WhaleCoreRoom) run().room).wave() >= 1 && !run().ctx.aliveMobs().isEmpty(), 400, "WR3 wave 1"));
+        STAGES.add(() -> waitFor(() -> ((WhaleCoreRoom) jp.revati.skyabyss.trial.raid.mid.FightBossRoom.unwrap(run().room)).wave() >= 1 && !run().ctx.aliveMobs().isEmpty(), 400, "WR3 wave 1"));
         STAGES.add(() -> {
             RaidRun.Run r = run();
             var hud = r.lastHud;
             check(hud != null && hud.cellId().equals("WR3") && hud.secMax() > 0 && hud.max() == 3, "WR3: the objective strip lacks the core bar / wave counter: " + hud);
             check(r.ctx.cell().bounds().contains(player.position()), "WR3: the player is not inside the room's cell");
             // 核が壊れる → 全滅と同じ (入口へ・部屋は戻る)
-            ((WhaleCoreRoom) r.room).damageCore(1000);
+            ((WhaleCoreRoom) jp.revati.skyabyss.trial.raid.mid.FightBossRoom.unwrap(r.room)).damageCore(1000);
             return true;
         });
         STAGES.add(() -> waitFor(() -> run().phase == RaidRun.Phase.COUNTDOWN, 40, "WR3 reset after the core broke"));
         STAGES.add(() -> {
             RaidRun.Run r = run();
-            WhaleCoreRoom room = (WhaleCoreRoom) r.room;
+            WhaleCoreRoom room = (WhaleCoreRoom) jp.revati.skyabyss.trial.raid.mid.FightBossRoom.unwrap(r.room);
             check(room.wave() == 0 && room.coreHp() >= WhaleCoreRoom.CORE_MAX - 0.01 && r.ctx.aliveMobs().isEmpty(),
                     "WR3: the room was not reset (wave " + room.wave() + ", core " + room.coreHp() + ")");
             check(r.wipes == 1, "WR3: the wipe was not counted");
@@ -327,10 +327,13 @@ public final class WhaleRaidSelfTest {
         STAGES.add(() -> {
             // 敵を片付けつづけて三つの波を越える
             RaidRun.Run r = run();
-            for (Mob m : new ArrayList<>(r.ctx.aliveMobs())) {
-                m.discard();
+            // 波の敵は片付ける (中ボスの段では中ボスを倒す。片付けると湧き直すので)
+            if (!(r.room instanceof jp.revati.skyabyss.trial.raid.mid.FightBossRoom fb && fb.bossStage())) {
+                for (Mob m : new ArrayList<>(r.ctx.aliveMobs())) {
+                    m.discard();
+                }
             }
-            return waitFor(() -> r.phase == RaidRun.Phase.COMPLETE, 2400, "WR3 complete (waves)");
+            return waitFor(() -> jp.revati.skyabyss.trial.raid.mid.FightBossRoom.finishBoss(r.room, null) && false || r.phase == RaidRun.Phase.COMPLETE, 2400, "WR3 complete (waves)");
         });
         }
     }
@@ -369,7 +372,7 @@ public final class WhaleRaidSelfTest {
             player.setPos(top.getX() + 0.5, top.getY(), top.getZ() + 0.5);
             return true;
         });
-        STAGES.add(() -> waitFor(() -> run().phase == RaidRun.Phase.COMPLETE, 40, "WR4 complete"));
+        STAGES.add(() -> waitFor(() -> run() != null && jp.revati.skyabyss.trial.raid.mid.FightBossRoom.finishBoss(run().room, null) && false || run().phase == RaidRun.Phase.COMPLETE, 40, "WR4 complete"));
     }
 
     private static void wit2() {
@@ -414,22 +417,22 @@ public final class WhaleRaidSelfTest {
             }
             return true;
         });
-        STAGES.add(() -> waitFor(() -> run().phase == RaidRun.Phase.COMPLETE, 40, "WR5 complete"));
+        STAGES.add(() -> waitFor(() -> run() != null && jp.revati.skyabyss.trial.raid.mid.FightBossRoom.finishBoss(run().room, null) && false || run().phase == RaidRun.Phase.COMPLETE, 40, "WR5 complete"));
     }
 
     private static void fight2() {
-        STAGES.add(() -> waitFor(() -> run() != null && run().step == 3 && run().room instanceof WhaleRingRoom, 400, "carried to WR6"));
+        STAGES.add(() -> waitFor(() -> run() != null && run().step == 3 && jp.revati.skyabyss.trial.raid.mid.FightBossRoom.unwrap(run().room) instanceof WhaleRingRoom, 400, "carried to WR6"));
         STAGES.add(() -> waitFor(() -> active(WhaleRingRoom.class), 400, "WR6 active"));
         STAGES.add(() -> waitFor(() -> hudLive("WR6"), 60, "WR6 objective strip"));
-        STAGES.add(() -> waitFor(() -> ((WhaleRingRoom) run().room).wave() >= 1 && !run().ctx.aliveMobs().isEmpty(), 400, "WR6 wave 1"));
+        STAGES.add(() -> waitFor(() -> ((WhaleRingRoom) jp.revati.skyabyss.trial.raid.mid.FightBossRoom.unwrap(run().room)).wave() >= 1 && !run().ctx.aliveMobs().isEmpty(), 400, "WR6 wave 1"));
         STAGES.add(() -> {
             RaidRun.Run r = run();
             var hud = r.lastHud;
             check(hud != null && hud.cellId().equals("WR6") && hud.secMax() > 0 && hud.max() == 3, "WR6: the objective strip lacks the ring size / wave counter: " + hud);
             check(r.ctx.cell().bounds().contains(player.position()), "WR6: the player is not inside the room's cell");
-            ((WhaleRingRoom) r.room).rewindShrink(1000);
+            ((WhaleRingRoom) jp.revati.skyabyss.trial.raid.mid.FightBossRoom.unwrap(r.room)).rewindShrink(1000);
             RaidRun.wipe(r, null);
-            WhaleRingRoom room = (WhaleRingRoom) r.room;
+            WhaleRingRoom room = (WhaleRingRoom) jp.revati.skyabyss.trial.raid.mid.FightBossRoom.unwrap(r.room);
             check(r.phase == RaidRun.Phase.COUNTDOWN && room.wave() == 0 && room.radius() >= WhaleRingRoom.R0 - 0.01 && r.ctx.aliveMobs().isEmpty(),
                     "WR6: a wipe did not reset the room (wave " + room.wave() + ", ring " + room.radius() + ")");
             check(player.position().distanceTo(Vec3.atBottomCenterOf(r.ctx.cell().rest())) < 2.5, "WR6: a wipe did not bring the player back to the room's entrance");
@@ -441,10 +444,13 @@ public final class WhaleRaidSelfTest {
             // 輪の中へ立たせ、敵を片付けつづけて三つの波を越える
             BlockPos mid = r.ctx.cell().floor(0, 0);
             player.setPos(mid.getX() + 0.5, mid.getY(), mid.getZ() + 0.5);
-            for (Mob m : new ArrayList<>(r.ctx.aliveMobs())) {
-                m.discard();
+            // 波の敵は片付ける (中ボスの段では中ボスを倒す。片付けると湧き直すので)
+            if (!(r.room instanceof jp.revati.skyabyss.trial.raid.mid.FightBossRoom fb && fb.bossStage())) {
+                for (Mob m : new ArrayList<>(r.ctx.aliveMobs())) {
+                    m.discard();
+                }
             }
-            return waitFor(() -> r.phase == RaidRun.Phase.COMPLETE, 2400, "WR6 complete (waves)");
+            return waitFor(() -> jp.revati.skyabyss.trial.raid.mid.FightBossRoom.finishBoss(r.room, null) && false || r.phase == RaidRun.Phase.COMPLETE, 2400, "WR6 complete (waves)");
         });
     }
 

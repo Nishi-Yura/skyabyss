@@ -59,7 +59,22 @@ public final class StormMidRoom extends MidRoom {
                 }
             }
         }
-        // 避雷の柱と栓
+        placeRods(ctx);
+        RaidKit.restInArena(ctx, 0, R - 3);
+        // 建築 (docs/design/39 の 4.3): 壁の銅の帯と羽の段・雲の天井と稲妻・中央の吊りの尖塔と雲の床
+        jp.revati.skyabyss.trial.raid.storm.StormRoomDeco.dressSRM(ctx);
+    }
+
+    // 闘の部屋に: 避雷の柱 6 本と接地の栓 (間と同じ形。部屋の真ん中のまわり)
+    @Override
+    protected void fitInto(RaidCtx ctx) {
+        placeRods(ctx);
+    }
+
+    // 避雷の柱と栓
+    private void placeRods(RaidCtx ctx) {
+        ServerLevel level = ctx.level();
+        RaijuNest.Site s = site(ctx);
         for (int i = 0; i < RaijuNest.RODS; i++) {
             BlockPos r = s.rodBase(i);
             RaidKit.set(level, r, StormBackSetup.ROD_BASE.get().defaultBlockState());
@@ -77,9 +92,6 @@ public final class StormMidRoom extends MidRoom {
             RaidKit.set(level, lever, Blocks.WAXED_CUT_COPPER.defaultBlockState());
         }
         registerRods(ctx);
-        RaidKit.restInArena(ctx, 0, R - 3);
-        // 建築 (docs/design/39 の 4.3): 壁の銅の帯と羽の段・雲の天井と稲妻・中央の吊りの尖塔と雲の床
-        jp.revati.skyabyss.trial.raid.storm.StormRoomDeco.dressSRM(ctx);
     }
 
     private void registerRods(RaidCtx ctx) {
@@ -157,7 +169,9 @@ public final class StormMidRoom extends MidRoom {
     @Override
     protected void resetFixtures(RaidCtx ctx) {
         registerRods(ctx);
-        jp.revati.skyabyss.trial.raid.storm.StormRoomDeco.exitLit(ctx, false);
+        if (!inRoom) {
+            jp.revati.skyabyss.trial.raid.storm.StormRoomDeco.exitLit(ctx, false);
+        }
     }
 
     @Override
@@ -172,7 +186,9 @@ public final class StormMidRoom extends MidRoom {
     @Override
     protected void reward(RaidCtx ctx, Set<UUID> ids) {
         RaijuLoot.onDefeat(ctx.level(), ids);
-        jp.revati.skyabyss.trial.raid.storm.StormRoomDeco.exitLit(ctx, true);
+        if (!inRoom) {
+            jp.revati.skyabyss.trial.raid.storm.StormRoomDeco.exitLit(ctx, true);
+        }
         jp.revati.skyabyss.titan.group.FightBadges.onVictory(ctx.level(), boss, ids, 0);
     }
 

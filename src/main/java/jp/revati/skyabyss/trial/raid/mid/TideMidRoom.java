@@ -56,6 +56,43 @@ public final class TideMidRoom extends MidRoom implements TideBeckoner.Flats {
     private RaidCtx ctx;
     private int warn;
     private int flood;
+    // 間の大きさと岩の小島 (闘の部屋に入るときはその部屋の大きさに合わせる。fitInto)
+    private int hx = HX;
+    private int hz = HZ;
+    private int[][] rocks = ROCKS;
+
+    // 闘の部屋に: 床を砂にして (砂紋)、四隅と奥に岩の小島。招き潮のあいだ立つ所
+    @Override
+    protected void fitInto(RaidCtx ctx) {
+        this.ctx = ctx;
+        hx = ctx.cell().hx() - 1;
+        hz = ctx.cell().hz() - 1;
+        rocks = new int[][] {{-hx + 3, -hz + 3}, {hx - 3, -hz + 3}, {-hx + 3, hz - 4}, {hx - 3, hz - 4}, {0, -hz + 4}};
+        ServerLevel level = ctx.level();
+        BlockState sand = Blocks.SAND.defaultBlockState();
+        for (int x = -hx; x <= hx; x++) {
+            for (int z = -hz; z <= hz; z++) {
+                BlockPos p = ctx.local(x, 0, z);
+                if (level.getBlockState(p).isAir() || !level.getBlockState(p.above()).isAir()) {
+                    continue;
+                }
+                double w = z + 1.6 * Math.sin(x * 0.33) + 0.8 * Math.sin(x * 0.11 + z * 0.2);
+                boolean ripple = Math.floorMod((int) Math.floor(w), 4) == 0;
+                RaidKit.set(level, p, ripple ? Blocks.SANDSTONE.defaultBlockState() : sand);
+            }
+        }
+        for (int[] r : rocks) {
+            for (int dx = -1; dx <= 1; dx++) {
+                for (int dz = -1; dz <= 1; dz++) {
+                    for (int y = 1; y <= FLOOD; y++) {
+                        BlockState st = y < FLOOD ? Blocks.DEAD_BRAIN_CORAL_BLOCK.defaultBlockState()
+                                : dx == 0 && dz == 0 ? Blocks.CHERRY_PLANKS.defaultBlockState() : Blocks.CALCITE.defaultBlockState();
+                        RaidKit.set(level, ctx.local(r[0] + dx, y, r[1] + dz), st);
+                    }
+                }
+            }
+        }
+    }
 
     @Override
     public void build(RaidCtx ctx) {
@@ -153,8 +190,8 @@ public final class TideMidRoom extends MidRoom implements TideBeckoner.Flats {
         ServerLevel level = ctx.level();
         BlockState water = Blocks.WATER.defaultBlockState();
         BlockState air = Blocks.AIR.defaultBlockState();
-        for (int x = -HX; x <= HX; x++) {
-            for (int z = -HZ; z <= HZ; z++) {
+        for (int x = -hx; x <= hx; x++) {
+            for (int z = -hz; z <= hz; z++) {
                 if (rock(x, z)) {
                     continue;
                 }
@@ -169,8 +206,8 @@ public final class TideMidRoom extends MidRoom implements TideBeckoner.Flats {
         }
     }
 
-    private static boolean rock(int x, int z) {
-        for (int[] r : ROCKS) {
+    private boolean rock(int x, int z) {
+        for (int[] r : rocks) {
             if (Math.abs(x - r[0]) <= 1 && Math.abs(z - r[1]) <= 1) {
                 return true;
             }
@@ -226,7 +263,7 @@ public final class TideMidRoom extends MidRoom implements TideBeckoner.Flats {
         if (ctx == null) {
             return;
         }
-        int[][] corners = {{-HX + 3, -HZ + 3}, {HX - 3, -HZ + 3}, {-HX + 3, HZ - 3}, {HX - 3, HZ - 3}};
+        int[][] corners = {{-hx + 2, -hz + 2}, {hx - 2, -hz + 2}, {-hx + 2, hz - 2}, {hx - 2, hz - 2}};
         for (int[] c : corners) {
             Mob m = TideMobSetup.REEF_SCUTTLER.get().create(level);
             if (m == null) {

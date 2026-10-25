@@ -250,7 +250,7 @@ public final class WhaleRaid2SelfTest {
             check(drawn.size() == 2, "the per-run draw does not pick both rooms of slot " + slot + ": " + drawn);
             check(RaidRooms.create(pairs[i][1]) != null && RaidRooms.create(pairs[i][1]) != RaidRooms.create(pairs[i][1]), "WR" + (4 + i) + " factory does not make a new instance each time");
         }
-        check(RaidRooms.create("WR4") instanceof WhaleShaftRoom && RaidRooms.create("WR5") instanceof WhaleTilesRoom && RaidRooms.create("WR6") instanceof WhaleRingRoom,
+        check(jp.revati.skyabyss.trial.raid.mid.FightBossRoom.unwrap(RaidRooms.create("WR4")) instanceof WhaleShaftRoom && jp.revati.skyabyss.trial.raid.mid.FightBossRoom.unwrap(RaidRooms.create("WR5")) instanceof WhaleTilesRoom && jp.revati.skyabyss.trial.raid.mid.FightBossRoom.unwrap(RaidRooms.create("WR6")) instanceof WhaleRingRoom,
                 "WR4-WR6 are not the expected room classes");
         p1 = fake("a");
         p2 = fake("b");
@@ -582,7 +582,7 @@ public final class WhaleRaid2SelfTest {
 
     // ---- WR6
     private static WhaleRingRoom ringRoom() {
-        return (WhaleRingRoom) room;
+        return (WhaleRingRoom) jp.revati.skyabyss.trial.raid.mid.FightBossRoom.unwrap(room);
     }
 
     private static final List<BlockPos> SAMPLES = new ArrayList<>();
@@ -665,11 +665,13 @@ public final class WhaleRaid2SelfTest {
             return true;
         });
         STAGES.add(() -> {
-            for (Mob m : new ArrayList<>(ctx.aliveMobs())) {
-                m.discard();
+            if (!(room instanceof jp.revati.skyabyss.trial.raid.mid.FightBossRoom fb && fb.bossStage())) {
+                for (Mob m : new ArrayList<>(ctx.aliveMobs())) {
+                    m.discard();
+                }
             }
             healAll();
-            return waitFor(() -> room.isComplete(), 1500, "WR6 complete (three waves)");
+            return waitFor(() -> jp.revati.skyabyss.trial.raid.mid.FightBossRoom.finishBoss(room, null) && false || room.isComplete(), 1500, "WR6 complete (three waves)");
         });
         STAGES.add(() -> {
             check(ringRoom().wave() == 3, "WR6: completed with wave " + ringRoom().wave());

@@ -376,7 +376,9 @@ public class AshSmith extends EmberMob {
         quenchCooldown--;
         sparksCooldown--;
         target = pickTarget(server);
-        if (!raged && getHealth() < getMaxHealth() * 0.5f && action == Action.NONE) {
+        // 闘の部屋の中ボス (段なし。trial/raid/mid/FightBossRoom) は怒らない
+        if (!raged && getHealth() < getMaxHealth() * 0.5f && action == Action.NONE
+                && !getTags().contains(jp.revati.skyabyss.trial.raid.mid.FightBossRoom.SINGLE_STAGE)) {
             begin(server, Action.RAGE);
         }
         if (action != Action.NONE) {

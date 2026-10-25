@@ -126,8 +126,8 @@ public final class TrialRouteSelfTest {
         check(f, TrialRoute.keysOf(titan).equals(java.util.Arrays.asList(TrialRoute.keyOf(titan, first, 1), TrialRoute.keyOf(titan, first, 2), TrialRoute.keyOf(titan, first, 3))),
                 titan + ": the first route order is not walk, wit, fight: " + keys);
         check(f, TrialRoute.defOf(first, 0) == null && TrialRoute.defOf(first, 4) == null, titan + ": defOf bounds");
-        // 中ボス: 四体とも、三つ目の部屋のあとに中ボスの段がある
-        check(f, TrialMidBoss.needed(titan, first), titan + ": the route has no mid-boss step");
+        // 中ボスは闘の部屋の中で出る (00 の 277)。中ボスだけの段は無い
+        check(f, !TrialMidBoss.needed(titan, first), titan + ": the route still has a separate mid-boss step");
         AABB entry = TrialRoute.entryBox(titan);
         check(f, entry != null && entry.getXsize() >= 3 && entry.getYsize() >= 3 && entry.getZsize() >= 3, titan + ": entry box missing or tiny: " + entry);
     }

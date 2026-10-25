@@ -39,7 +39,10 @@ public final class RaidRooms {
     }
 
     // 登録する。同じ巨神・枠に複数登録すると、周ごとに一つ引く (drawOf。枠ごと 2 案)。同じ id は上書き。試練の定義 (TrialCatalog) にも原型として入る
-    public static void register(String titan, Slot slot, String id, Supplier<RaidRoom> factory) {
+    public static void register(String titan, Slot slot, String id, Supplier<RaidRoom> raw) {
+        // 闘の部屋は、波のあと中ボスが部屋に現れる (docs/design/32 の 9.5、00 の 277)
+        Supplier<RaidRoom> factory = slot == Slot.FIGHT && jp.revati.skyabyss.trial.raid.mid.MidRooms.idOf(titan) != null
+                ? () -> new jp.revati.skyabyss.trial.raid.mid.FightBossRoom(titan, raw.get()) : raw;
         Entry e = new Entry(id, factory);
         List<Entry> list = BY_TITAN.computeIfAbsent(titan, k -> new EnumMap<>(Slot.class)).computeIfAbsent(slot, k -> new ArrayList<>());
         list.removeIf(x -> x.id().equals(id));

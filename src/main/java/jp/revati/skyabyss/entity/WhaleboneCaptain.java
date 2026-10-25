@@ -121,7 +121,7 @@ public class WhaleboneCaptain extends GuardMob {
                 return;
             }
             double dist = distanceTo(target);
-            boolean enraged = getHealth() < getMaxHealth() * 0.5f;
+            boolean enraged = enraged();
             if (enraged && !roared) {
                 begin(Action.ROAR, "roar");
             } else if (eruptCooldown == 0 && dist < 18 && random.nextFloat() < 0.4f) {
@@ -186,6 +186,10 @@ public class WhaleboneCaptain extends GuardMob {
     }
 
     private boolean enraged() {
+        // 闘の部屋の中ボス (段なし。trial/raid/mid/FightBossRoom) は怒らない
+        if (getTags().contains(jp.revati.skyabyss.trial.raid.mid.FightBossRoom.SINGLE_STAGE)) {
+            return false;
+        }
         return getHealth() < getMaxHealth() * 0.5f;
     }
 

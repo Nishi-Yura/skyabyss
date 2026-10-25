@@ -111,7 +111,7 @@ public final class TideRaidCommands {
                     r.onUse(shotCtx, p, r.dialPos(d), false);
                 }
             }
-        } else if (shotRoom instanceof TideBroodRoom r && r.mother() != null) {
+        } else if (jp.revati.skyabyss.trial.raid.mid.FightBossRoom.unwrap(shotRoom) instanceof TideBroodRoom r && r.mother() != null) {
             net.minecraft.world.entity.Mob m = r.mother();
             p.teleportTo(m.getX(), m.getY(), m.getZ() + 7);
         }
@@ -152,7 +152,7 @@ public final class TideRaidCommands {
     private static int hurt(CommandContext<CommandSourceStack> ctx) throws com.mojang.brigadier.exceptions.CommandSyntaxException {
         ServerPlayer p = ctx.getSource().getPlayerOrException();
         RaidRun.Run run = RaidRun.of(Groups.keyOf(p));
-        if (run == null || !(run.room instanceof TideSaplingRoom r)) {
+        if (run == null || !(jp.revati.skyabyss.trial.raid.mid.FightBossRoom.unwrap(run.room) instanceof TideSaplingRoom r)) {
             return 0;
         }
         r.damage(run.ctx, 0, 12);
