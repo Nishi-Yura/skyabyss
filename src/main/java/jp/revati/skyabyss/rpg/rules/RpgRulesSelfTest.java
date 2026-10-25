@@ -68,6 +68,22 @@ public final class RpgRulesSelfTest {
             if (DeathRules.mode(server) != DeathRules.Mode.KEEP) {
                 f.add("death mode default should be keep, got " + DeathRules.mode(server));
             }
+            // 一度きりの印は倒れても残る (はじめの持ち物を二度もらえた・渡し船で渡ったのが消えた不具合)
+            if (!jp.revati.skyabyss.util.LifeKeep.KEYS.contains(RpgRules.KIT_TAG)
+                    || !jp.revati.skyabyss.util.LifeKeep.KEYS.contains(jp.revati.skyabyss.world.continent.ContinentOutskirts.FERRIED)) {
+                f.add("the starter-kit / ferried flags are not kept across death");
+            }
+            FakePlayer dead = new FakePlayer(level, new GameProfile(UUID.randomUUID(), "life_dead"));
+            FakePlayer fresh = new FakePlayer(level, new GameProfile(dead.getUUID(), "life_dead"));
+            dead.getPersistentData().putBoolean(RpgRules.KIT_TAG, true);
+            dead.getPersistentData().putBoolean(jp.revati.skyabyss.world.continent.ContinentOutskirts.FERRIED, true);
+            dead.getPersistentData().putLong("skyabyss_some_cooldown", 5L);
+            net.neoforged.neoforge.common.NeoForge.EVENT_BUS.post(new net.neoforged.neoforge.event.entity.player.PlayerEvent.Clone(fresh, dead, true));
+            if (!fresh.getPersistentData().getBoolean(RpgRules.KIT_TAG) || !fresh.getPersistentData().getBoolean(jp.revati.skyabyss.world.continent.ContinentOutskirts.FERRIED)
+                    || fresh.getPersistentData().contains("skyabyss_some_cooldown")) {
+                f.add("death clone: kit " + fresh.getPersistentData().getBoolean(RpgRules.KIT_TAG) + " ferried "
+                        + fresh.getPersistentData().getBoolean(jp.revati.skyabyss.world.continent.ContinentOutskirts.FERRIED) + " (cooldowns must not carry over)");
+            }
             if (c == null) {
                 f.add("no place outside the capital to test gathering");
                 return;
