@@ -1,0 +1,41 @@
+# 土地の町の宿と店の中
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/town_inside.txt -PshotsName=town_inside
+world continent_inside continent
+size 1600 900
+timeout 1500
+render 8
+guiscale 2
+wait 100
+cmd skyabyss cinematic stop
+cmd time set 5000
+cmd skyabyss dev opening build
+wait 200
+cmd gamemode creative
+hud off
+cmd skyabyss dev grounds mark town 0 npc_innkeeper
+waitchunks 300
+wait 200
+cmd execute at @s run tp @s ~ ~ ~ 90 10
+wait 40
+shot inn_in
+cmd execute at @s run tp @s ~ ~ ~ -90 10
+wait 20
+shot inn_in2
+cmd skyabyss dev grounds mark town 0 npc_tool_merchant
+wait 60
+cmd execute at @s run tp @s ~ ~ ~ -90 10
+wait 20
+shot shop_in
+cmd execute at @s run tp @s ~ ~ ~ 90 10
+wait 20
+shot shop_in2
+cmd skyabyss dev grounds mark town 2 inn
+wait 60
+cmd execute at @s run tp @s ~ ~1 ~ 0 5
+wait 20
+shot storm_street
+cmd skyabyss dev grounds mark town 3 shop
+wait 60
+cmd execute at @s run tp @s ~ ~1 ~ 0 5
+wait 20
+shot ember_street

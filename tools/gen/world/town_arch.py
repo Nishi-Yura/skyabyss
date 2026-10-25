@@ -777,6 +777,11 @@ def build_town(bp, region):
             building(bp, s, x0, z0, x1, z1, floors, door, rng, chimney=rng.random() < 0.6 or kind == 'inn', flat=flat, kind=kind)
             dx, dz, facing = door
             fx, fz = FACE[facing]
+            if kind in ('inn', 'shop'):
+                # 戸の上の看板 (字は ContinentTowns が書く)
+                wood = s['door'].split(':')[1].replace('_door', '')
+                bp.set(dx + fx, 2, dz + fz, f'minecraft:{wood}_wall_sign[facing={facing},waterlogged=false]')
+                bp.mark('sign_' + kind, dx + fx, 2, dz + fz)
             if kind == 'inn':
                 bp.mark('inn', dx + fx, 0, dz + fz)
                 bp.mark('npc_innkeeper', dx - fx * 2, 0, dz - fz * 2)

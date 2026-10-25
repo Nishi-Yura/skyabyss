@@ -56,6 +56,17 @@ public final class ContinentTowns {
                 be.setChanged();
                 level.sendBlockUpdated(sign, be.getBlockState(), be.getBlockState(), 3);
             }
+            // 宿と道具屋の戸の上の看板
+            for (String kind : new String[] {"inn", "shop"}) {
+                BlockPos at = job.mark("sign_" + kind);
+                if (at != null && level.getBlockEntity(at) instanceof net.minecraft.world.level.block.entity.SignBlockEntity be) {
+                    be.setText(new net.minecraft.world.level.block.entity.SignText()
+                            .setMessage(1, net.minecraft.network.chat.Component.translatable("sign.skyabyss.town_" + kind)), true);
+                    be.setWaxed(true);
+                    be.setChanged();
+                    level.sendBlockUpdated(at, be.getBlockState(), be.getBlockState(), 3);
+                }
+            }
         });
     }
 
