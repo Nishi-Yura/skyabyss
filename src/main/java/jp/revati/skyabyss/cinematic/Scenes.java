@@ -143,10 +143,10 @@ public final class Scenes {
     // 鐘の都に着いて、南の門の外から都を見上げる (8 秒)。前 = 都の真ん中 (大鐘楼)。見上げて大鐘楼 → 本人の目に戻って操作へ
     private static Scene capitalArrival() {
         return Scene.of(jp.revati.skyabyss.world.continent.IslandTrail.ARRIVAL).handBack().seamless()
-                .shot(Shot.of(4f).pos(0, CameraMath.EYE, 0).posTo(0.0, 6.0, -4.0)
-                        .look(Look.frame(0, 3, 20)).lookTo(Look.frame(0, 22, 90)).fov(70f, 64f).ease(Ease.SMOOTHER).sway(0.2f).build())
-                .shot(Shot.of(4f).pos(0.0, 6.0, -4.0).posTo(0, CameraMath.EYE, 0)
-                        .look(Look.frame(0, 22, 90)).lookTo(Look.frame(0, 2, 20)).fov(64f, 70f).ease(Ease.SMOOTH).build())
+                .shot(Shot.of(4f).pos(0, CameraMath.EYE, 0).posTo(0.0, 18.0, -6.0)
+                        .look(Look.frame(0, 3, 20)).lookTo(Look.frame(0, 26, 110)).fov(70f, 66f).ease(Ease.SMOOTHER).sway(0.2f).build())
+                .shot(Shot.of(4f).pos(0.0, 18.0, -6.0).posTo(0, CameraMath.EYE, 0)
+                        .look(Look.frame(0, 26, 110)).lookTo(Look.frame(0, 2, 20)).fov(66f, 70f).ease(Ease.SMOOTH).build())
                 .line(0.4f, 3.2f, Speaker.HERO, "cinematic.skyabyss.arrival.hero1")
                 .line(4.0f, 3.6f, Speaker.HEAVEN, "cinematic.skyabyss.arrival.heaven1")
                 .build();
