@@ -57,6 +57,7 @@ public final class NpcSpawner {
         // 語り部と鯨追いは都の大鐘楼にだけ立つ (2026-10-25 の試遊: 野の村・野営に立つ語り部はいらない)。
         // 前の版で野に立った二人は、近くを通ったときに消す
         removeWild(level, player);
+        // 天と淵の大陸: 鯨追いは鯨見の町に立つ (ContinentTowns が keepTownChaser を呼ぶ)。都の鐘では語り部だけ
         Optional<BlockPos> bell = level.getPoiManager().findClosest(h -> h.is(PoiTypes.MEETING), player.blockPosition(), VILLAGE_RADIUS,
                 PoiManager.Occupancy.ANY);
         if (bell.isPresent() && jp.revati.skyabyss.opening.site.SiteGuard.inCapital(level, bell.get())) {
@@ -68,7 +69,8 @@ public final class NpcSpawner {
         net.minecraft.world.phys.AABB box = player.getBoundingBox().inflate(SEARCH);
         for (NpcEntity npc : level.getEntitiesOfClass(NpcEntity.class, box,
                 n -> (n.getType() == NpcSetup.STORYTELLER.get() || n.getType() == NpcSetup.WHALE_CHASER.get())
-                        && !jp.revati.skyabyss.opening.site.SiteGuard.inCapital(level, n.blockPosition()))) {
+                        && !jp.revati.skyabyss.opening.site.SiteGuard.inCapital(level, n.blockPosition())
+                        && !townChaser(level, n))) {
             SkyAbyss.LOGGER.info("[npc] removed a wild {} at {} (only the capital's bell tower keeps them)", npc.getType().toShortString(), npc.blockPosition());
             npc.discard();
         }
@@ -143,13 +145,46 @@ public final class NpcSpawner {
                 data.markSpawned(bell.asLong(), NpcSetup.STORYTELLER_ID, now);
             }
         }
-        if (needsChaser(player) && find(level, bell, NpcSetup.WHALE_CHASER.get()) == null
+        if (needsChaser(player) && !jp.revati.skyabyss.world.continent.ContinentPois.in(level) && find(level, bell, NpcSetup.WHALE_CHASER.get()) == null
                 && canRespawn(data, bell, NpcSetup.WHALE_CHASER_ID, now)) {
             NpcEntity npc = spawnChaser(level, bell, level.random);
             if (npc != null) {
                 data.markSpawned(bell.asLong(), NpcSetup.WHALE_CHASER_ID, now);
                 data.markChaserFire(bell.asLong(), npc.home().asLong());
             }
+        }
+    }
+
+    // 天と淵の大陸の鯨見の町の鯨追い (立つ所 spot の近く)。野に立つ二人を消すときに残す
+    static boolean townChaser(ServerLevel level, NpcEntity n) {
+        if (n.getType() != NpcSetup.WHALE_CHASER.get() || !jp.revati.skyabyss.world.continent.ContinentPois.in(level)) {
+            return false;
+        }
+        BlockPos spot = jp.revati.skyabyss.world.continent.ContinentTowns.chaserSpot(level.getServer());
+        return spot != null && n.blockPosition().distSqr(spot) <= SEARCH * SEARCH;
+    }
+
+    // 鯨見の町の鯨追い: 要る人が近くにいて、立っていなければ立たせる (一日おき)。離れていたら戻す
+    public static void keepTownChaser(ServerLevel level, BlockPos spot, ServerPlayer player) {
+        if (!entitiesLoaded(level, spot)) {
+            return;
+        }
+        NpcEntity live = find(level, spot, NpcSetup.WHALE_CHASER.get());
+        if (live != null) {
+            if (live.distanceToSqr(spot.getX() + 0.5, spot.getY(), spot.getZ() + 0.5) > 64) {
+                live.teleportTo(spot.getX() + 0.5, spot.getY(), spot.getZ() + 0.5);
+            }
+            return;
+        }
+        NpcWorldData data = NpcWorldData.get(level.getServer().overworld());
+        long now = level.getGameTime();
+        if (!needsChaser(player) || !canRespawn(data, spot, NpcSetup.WHALE_CHASER_ID, now)) {
+            return;
+        }
+        NpcEntity npc = place(level, NpcSetup.WHALE_CHASER.get(), spot, spot);
+        if (npc != null) {
+            data.markSpawned(spot.asLong(), NpcSetup.WHALE_CHASER_ID, now);
+            data.markChaserFire(spot.asLong(), spot.asLong());
         }
     }
 

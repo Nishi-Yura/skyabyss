@@ -61,7 +61,11 @@ public final class SiteNetwork {
         // 話す相手の居場所 (道しるべの目印): 語り部は宿りの鐘のそば、鯨追いは外れの焚き火
         OpeningSites.bell(server).or(() -> OpeningSites.shelter(server)).ifPresent(bell -> {
             m.put(SiteTargets.NPC_PREFIX + "storyteller", bell);
-            if (server.overworld() != null) {
+            BlockPos town = server.overworld() != null && jp.revati.skyabyss.world.continent.ContinentPois.in(server.overworld())
+                    ? jp.revati.skyabyss.world.continent.ContinentTowns.chaserSpot(server) : null;
+            if (town != null) {
+                m.put(SiteTargets.NPC_PREFIX + "whale_chaser", town);
+            } else if (server.overworld() != null) {
                 BlockPos chaser = jp.revati.skyabyss.npc.NpcSpawner.chaserSpot(server.overworld(), bell);
                 if (chaser != null) {
                     m.put(SiteTargets.NPC_PREFIX + "whale_chaser", chaser);

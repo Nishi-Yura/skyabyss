@@ -314,6 +314,12 @@ public final class OpeningDirector {
                 target = ferry;
             }
         }
+        // 天と淵の大陸: 鯨追いは鯨見の町の見張り台のそば (00 の 278)
+        if (id.equals("find_isana") && level.getChunkSource().getGenerator() instanceof jp.revati.skyabyss.world.continent.ContinentChunkGenerator) {
+            id = "find_isana_town";
+            BlockPos spot = jp.revati.skyabyss.world.continent.ContinentTowns.chaserSpot(level.getServer());
+            target = spot != null ? spot : jp.revati.skyabyss.world.continent.ContinentLayout.get().town("whale");
+        }
         long tl = target == null ? Long.MIN_VALUE : target.asLong();
         if (id.equals(st.sentObjective) && tl == st.sentTarget && now - st.sentAt < RESEND) {
             return;

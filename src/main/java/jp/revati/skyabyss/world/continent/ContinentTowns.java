@@ -25,7 +25,9 @@ import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 public final class ContinentTowns {
     public static final String KIND = "town";
     public static final String[] REGIONS = {"whale", "tide", "storm", "ember"};
-    static final String[] MARKS = {"rest", "board", "inn", "shop", "stand", Attendants.INN_BED, AttendantRole.INNKEEPER.mark(), AttendantRole.TOOL_MERCHANT.mark()};
+    // 鯨追いの立つ所 (鯨見の町だけ。00 の 278)
+    public static final String CHASER_MARK = "npc_chaser";
+    static final String[] MARKS = {"rest", "board", "inn", "shop", "stand", CHASER_MARK, Attendants.INN_BED, AttendantRole.INNKEEPER.mark(), AttendantRole.TOOL_MERCHANT.mark()};
     static final int KEEP_RADIUS = 96;
     static final int CHECK_INTERVAL = 100;
 
@@ -120,6 +122,22 @@ public final class ContinentTowns {
                 }
             }
             Attendants.ensureAll(level, marks);
+            BlockPos chaser = e.extra(CHASER_MARK);
+            if (chaser != null) {
+                jp.revati.skyabyss.npc.NpcSpawner.keepTownChaser(level, chaser, player);
+            }
         }
+    }
+
+    // 鯨見の町の鯨追いの立つ所 (建っていなければ null)
+    @org.jetbrains.annotations.Nullable
+    public static BlockPos chaserSpot(net.minecraft.server.MinecraftServer server) {
+        for (SiteData.Entry e : SiteData.get(server.overworld()).entries(KIND)) {
+            BlockPos at = e.extra(CHASER_MARK);
+            if (e.built && at != null) {
+                return at;
+            }
+        }
+        return null;
     }
 }

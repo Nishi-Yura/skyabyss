@@ -563,6 +563,11 @@ def landmark(bp, s, region, q, rng):
         garden(bp, s, region, x0, z0, x1, z1, rng)
     elif kind == 'lookout':
         lookout(bp, s, cx, cz)
+        # 鯨追い (イサナ) の立つ所と、その焚き火 (塔の戸の前。00 の 278 = A: 一章の入口は鯨見の町)
+        bp.set(cx + 3, 0, cz + 5, 'minecraft:campfire[facing=north,lit=true,signal_fire=false,waterlogged=false]')
+        for dx, dz in ((4, 5), (3, 6)):
+            bp.set(cx + dx, 0, cz + dz, 'minecraft:spruce_log[axis=x]')
+        bp.mark('npc_chaser', cx + 1, 0, cz + 5)
     elif kind == 'lighthouse':
         lighthouse(bp, s, cx, cz)
     elif kind == 'nets':
