@@ -1,4 +1,6 @@
 {
+  "entity.skyabyss.poi_leader_bandit": "野盗の頭",
+  "entity.skyabyss.poi_leader_bone": "骨の番人",
   "map.skyabyss.continent.meadow": "鐘の野",
   "message.skyabyss.area.capital": "旅の始まりの都",
   "message.skyabyss.area.level": "目安 Lv %s",

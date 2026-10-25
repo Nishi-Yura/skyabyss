@@ -121,6 +121,26 @@ public final class ContinentPois {
         }
     }
 
+    static final String LEADER_TAG = "skyabyss_poi_leader";
+    static final net.minecraft.resources.ResourceLocation LEADER_HP = net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "poi_leader_hp");
+    static final jp.revati.skyabyss.item.extra.Element[] LEADER_POWDER = {jp.revati.skyabyss.item.extra.Element.STONE, jp.revati.skyabyss.item.extra.Element.STONE,
+            jp.revati.skyabyss.item.extra.Element.STONE, jp.revati.skyabyss.item.extra.Element.TIDE, jp.revati.skyabyss.item.extra.Element.WIND, jp.revati.skyabyss.item.extra.Element.ASH};
+
+    // 頭を倒したら: 土地の粉 (野と島は岩) 一つと鐘銭 4〜8 を必ず落とす
+    @SubscribeEvent
+    static void onLeaderDrops(net.neoforged.neoforge.event.entity.living.LivingDropsEvent event) {
+        var dead = event.getEntity();
+        if (!dead.getTags().contains(LEADER_TAG) || !(dead.level() instanceof ServerLevel level) || !(event.getSource().getEntity() instanceof ServerPlayer)) {
+            return;
+        }
+        int r = ContinentMap.get().region(dead.getBlockX(), dead.getBlockZ());
+        var e = LEADER_POWDER[Math.max(0, Math.min(LEADER_POWDER.length - 1, r))];
+        event.getDrops().add(new net.minecraft.world.entity.item.ItemEntity(level, dead.getX(), dead.getY() + 0.3, dead.getZ(),
+                new ItemStack(jp.revati.skyabyss.registry.ModItems.socketShard(e).get())));
+        event.getDrops().add(new net.minecraft.world.entity.item.ItemEntity(level, dead.getX(), dead.getY() + 0.3, dead.getZ(),
+                new ItemStack(jp.revati.skyabyss.facility.FacilitySetup.BELL_COIN.get(), 4 + level.random.nextInt(5))));
+    }
+
     // 見つけた見どころの番号 (死んでも消えない所に覚える)
     public static java.util.Set<Integer> discovered(net.minecraft.world.entity.player.Player p) {
         java.util.Set<Integer> out = new java.util.HashSet<>();
@@ -215,7 +235,7 @@ public final class ContinentPois {
         chest.setChanged();
     }
 
-    // 野盗: 弓の野盗二人と斧の野盗一人 (土地の強さは ContinentDanger が掛ける)。前に出てから FOES_COOLDOWN たつまで出さない
+    // 野盗: 弓の野盗二人と斧の野盗一人と頭 (土地の強さは ContinentDanger が掛ける)。前に出てから FOES_COOLDOWN たつまで出さない
     static void foes(ServerLevel level, SiteData.Entry e, String kind) {
         long now = level.getGameTime();
         BlockPos at = e.extra("foes");
@@ -230,6 +250,31 @@ public final class ContinentPois {
         boolean below = kind.equals("barrow") || kind.equals("mine") || kind.equals("cave");
         EntityType<?>[] kinds = undead ? new EntityType<?>[] {EntityType.SKELETON, EntityType.SKELETON, EntityType.ZOMBIE}
                 : new EntityType<?>[] {EntityType.PILLAGER, EntityType.PILLAGER, EntityType.VINDICATOR};
+        // 頭 (一体。名前つき、体力は 2.5 倍、倒すと土地の粉と鐘銭。onLeaderDrops)
+        // はじまりの島 (最初の戦い) には頭を出さない
+        EntityType<?> leaderType = undead ? EntityType.SKELETON : EntityType.VINDICATOR;
+        if (ContinentMap.get().region(at.getX(), at.getZ()) != ContinentMap.OUTSKIRTS && leaderType.create(level) instanceof Mob leader) {
+            int y = below ? at.getY() : level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, at.getX(), at.getZ());
+            leader.moveTo(at.getX() + 0.5, y, at.getZ() + 0.5, level.random.nextFloat() * 360f, 0f);
+            leader.finalizeSpawn(level, level.getCurrentDifficultyAt(leader.blockPosition()), MobSpawnType.EVENT, null);
+            var hp = leader.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.MAX_HEALTH);
+            if (hp != null) {
+                hp.addPermanentModifier(new net.minecraft.world.entity.ai.attributes.AttributeModifier(LEADER_HP, 1.5,
+                        net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
+                leader.setHealth(leader.getMaxHealth());
+            }
+            if (undead) {
+                leader.setItemSlot(net.minecraft.world.entity.EquipmentSlot.HEAD, new ItemStack(Items.IRON_HELMET));
+                leader.setItemSlot(net.minecraft.world.entity.EquipmentSlot.MAINHAND, new ItemStack(Items.IRON_SWORD));
+                leader.setDropChance(net.minecraft.world.entity.EquipmentSlot.HEAD, 0f);
+                leader.setDropChance(net.minecraft.world.entity.EquipmentSlot.MAINHAND, 0f);
+            }
+            leader.setCustomName(net.minecraft.network.chat.Component.translatable(undead ? "entity.skyabyss.poi_leader_bone" : "entity.skyabyss.poi_leader_bandit"));
+            leader.setCustomNameVisible(true);
+            leader.addTag(LEADER_TAG);
+            leader.setPersistenceRequired();
+            level.addFreshEntity(leader);
+        }
         for (int k = 0; k < kinds.length; k++) {
             double a = k * 2.1;
             int x = at.getX() + (int) Math.round(Math.cos(a) * (below ? 2 : 3));

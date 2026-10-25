@@ -1,0 +1,25 @@
+# 見どころの頭 (野盗の頭)
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/poi_leader.txt -PshotsName=poi_leader
+world continent_leader continent
+size 1600 900
+timeout 1200
+render 8
+guiscale 2
+wait 100
+cmd skyabyss cinematic stop
+cmd time set 5000
+cmd gamerule doMobSpawning false
+cmd skyabyss dev opening build
+wait 200
+cmd gamemode creative
+cmd tp @s -268 120 660
+waitchunks 300
+wait 300
+cmd skyabyss dev grounds mark poi 5 pos
+cmd gamemode adventure
+cmd effect give @s minecraft:resistance 60 4 true
+wait 80
+cmd gamemode spectator
+cmd execute at @s run tp @s ~8 ~5 ~8 135 25
+wait 20
+shot leader

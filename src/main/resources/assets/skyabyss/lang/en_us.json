@@ -1,4 +1,6 @@
 {
+  "entity.skyabyss.poi_leader_bandit": "Bandit Chief",
+  "entity.skyabyss.poi_leader_bone": "Bone Warden",
   "map.skyabyss.continent.meadow": "Bell Fields",
   "message.skyabyss.area.capital": "Where every journey starts",
   "message.skyabyss.area.level": "Suggested Lv %s",
