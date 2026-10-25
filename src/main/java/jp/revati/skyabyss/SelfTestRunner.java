@@ -163,6 +163,14 @@ public final class SelfTestRunner {
         steps.add(Step.once("ember gear", jp.revati.skyabyss.titan.ember.gear.EmberGearSelfTest::runSelfTest));
         steps.add(Step.once("abyss gear", jp.revati.skyabyss.abyss.gear.AbyssGearSelfTest::runSelfTest));
         steps.add(Step.once("ember lore", jp.revati.skyabyss.titan.ember.lore.EmberLoreSelfTest::runSelfTest));
+        // (大陸の世界は出現地点がはじまりの島へ動いたばかりで、そこのチャンクがまだ動いていないことがある。30 秒で諦めて進む)
+        int[] recordWait = {0};
+        steps.add(Step.until("record (wait)", server -> {
+            var over = server.overworld();
+            var spawn = over.getSharedSpawnPos();
+            over.setChunkForced(spawn.getX() >> 4, spawn.getZ() >> 4, true);
+            return over.isPositionEntityTicking(spawn) || ++recordWait[0] > 600;
+        }));
         steps.add(Step.once("record", RecordSelfTest::runSelfTest));
         // 備えの三灯 (式・色の境目・乗り込みの確認の流れ・前室の囁き・控え帳の行)。docs/design/21 の 1.2、11 の 9 章
         steps.add(Step.once("readiness", jp.revati.skyabyss.readiness.ReadinessSelfTest::runSelfTest));

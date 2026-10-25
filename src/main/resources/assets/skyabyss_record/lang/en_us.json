@@ -1,4 +1,6 @@
 {
+  "skyabyss_record.r.discoveries": "Discoveries",
+  "skyabyss_record.d.discoveries": "Places on the continent you have visited. Unvisited ones are faint on the map.",
   "key.skyabyss_record.open": "Ledger",
   "skyabyss_record.title": "The Stayer's Ledger",
   "skyabyss_record.tab.keepsakes": "Keepsakes",

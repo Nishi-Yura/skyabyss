@@ -475,6 +475,12 @@ public final class RecordBuilder {
         }
         rows.add(value("waymarks", t("r.waymarks"), t("v.of", travel.waymarks.size(), TravelState.MAX_WAYMARKS), RecordSnapshot.MARK_NONE, marks));
         rows.add(value("voyages", t("r.voyages"), t("v.times", travel.voyages), RecordSnapshot.MARK_NONE, List.of(t("d.voyages"))));
+        // 天と淵の大陸の見どころの発見 (ContinentPois.discover)
+        if (jp.revati.skyabyss.world.continent.ContinentPois.in(p.level())) {
+            long total = jp.revati.skyabyss.world.continent.ContinentPois.all().stream().filter(q -> !q.kind().equals("signpost")).count();
+            rows.add(value("discoveries", t("r.discoveries"), t("v.of", jp.revati.skyabyss.world.continent.ContinentPois.discovered(p).size(), total),
+                    RecordSnapshot.MARK_NONE, List.of(t("d.discoveries"))));
+        }
         long left = Voyages.cooldownLeft(p);
         rows.add(value("cooldown", t("r.cooldown"), left <= 0 ? t("v.ready") : t("v.seconds", (left + 19) / 20), RecordSnapshot.MARK_NONE,
                 List.of(t("d.cooldown"))));
