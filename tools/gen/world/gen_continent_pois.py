@@ -704,6 +704,58 @@ def hamlet(region):
     return build
 
 
+def barrow(rng):
+    """古い塚 (小さな迷宮): 土と石の小山に南から入る通路、奥の石室に宝箱。近づくと骨の兵 (foes)"""
+    bp = BP('poi_barrow')
+    R = 9
+    for x in range(-R, R + 1):
+        for z in range(-R, R + 1):
+            d = math.hypot(x, z)
+            if d > R:
+                continue
+            h = int(round((1 - (d / R) ** 2) * 8))
+            for y in range(0, h):
+                outer = y == h - 1 or d > R - 1.5
+                bp.set(x, y, z, ('minecraft:grass_block[snowy=false]' if y == h - 1 else 'minecraft:dirt') if outer else
+                       rng.choice(['minecraft:cobblestone', 'minecraft:mossy_cobblestone', 'minecraft:stone']))
+    # 通路 (南から北へ、幅 3・高さ 3) と石室 (7 × 7、高さ 4)
+    for z in range(-1, R + 1):
+        for x in (-1, 0, 1):
+            for y in range(0, 3):
+                bp.set(x, y, z, AIR)
+        for x in (-2, 2):
+            for y in range(0, 3):
+                if bp.get(x, y, z):
+                    bp.set(x, y, z, 'minecraft:stone_bricks' if (z + y) % 3 else 'minecraft:mossy_stone_bricks')
+        bp.set(0, -1, z, 'minecraft:stone_bricks')
+    for x in range(-3, 4):
+        for z in range(-5, 0):
+            for y in range(0, 4):
+                bp.set(x, y, z, AIR)
+            bp.set(x, -1, z, 'minecraft:polished_andesite' if (x + z) % 2 else 'minecraft:andesite')
+    for x, z in ((-3, -5), (3, -5), (-3, -1), (3, -1)):
+        bp.fill(x, 0, z, x, 3, z, 'minecraft:stone_brick_wall[east=none,north=none,south=none,up=true,waterlogged=false,west=none]')
+    bp.set(0, 0, -5, 'minecraft:chest[facing=south,type=single,waterlogged=false]')
+    for x, z in ((-2, -4), (2, -4)):
+        bp.set(x, 3, z, 'minecraft:lantern[hanging=true,waterlogged=false]')
+    bp.set(0, 3, -3, 'minecraft:chain[axis=y,waterlogged=false]')
+    for x, z in ((-2, -2), (2, -2), (-1, -4)):
+        bp.set(x, 0, z, 'minecraft:skeleton_skull[rotation=%d]' % int(rng.integers(0, 16)))
+    # 入口の門石
+    for x in (-2, 2):
+        bp.fill(x, 0, R, x, 3, R, 'minecraft:chiseled_stone_bricks')
+    for x in range(-2, 3):
+        bp.set(x, 3, R, 'minecraft:stone_brick_slab[type=bottom,waterlogged=false]')
+    bp.mark('loot', 0, 0, -5)
+    bp.mark('foes', 0, 0, -2)
+    return bp
+
+
+BUILDERS['barrow'] = barrow
+BY_REGION['meadow'] = BY_REGION['meadow'] + ['barrow']
+BY_REGION['whale'] = BY_REGION['whale'] + ['barrow']
+BY_REGION['storm'] = BY_REGION['storm'] + ['barrow']
+
 for _r in ('meadow', 'whale', 'tide', 'storm', 'ember'):
     BUILDERS['hamlet_' + _r] = hamlet(_r)
 for _r, _k in (('meadow', 'hamlet_meadow'), ('whale', 'hamlet_whale'), ('tide', 'hamlet_tide'), ('storm', 'hamlet_storm'), ('ember', 'hamlet_ember')):

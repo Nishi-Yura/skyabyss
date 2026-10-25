@@ -35,7 +35,7 @@ import net.neoforged.neoforge.event.tick.ServerTickEvent;
 // 天と淵の大陸の見どころ (風車・灯台・巨神の肋骨・焼けた砦・野盗の野営など。docs/design/40 の 3 章)。
 // 置き場は data/skyabyss/continent/pois.json、部品は data/skyabyss/opening/poi_<種類>.json (どちらも tools/gen/world/gen_continent_pois.py)。
 //   世界が始まったときには建てない。人が BUILD_RADIUS まで近づいたら、その一つを SiteData (種類 "poi"、番号 = pois.json の並び) に足して建てる
-//   建てたら、印 loot に宝箱 (鐘銭・糧・その土地の巨神の粉) を置く。野盗の野営 (印 foes) は、人が近くに来ると野盗が出る (間を置いて何度でも)
+//   建てたら、印 loot に宝箱 (鐘銭・糧・その土地の巨神の粉) を置く。野盗の野営・古い塚 (印 foes) は、人が近くに来ると野盗・骨の兵が出る (間を置いて何度でも)
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class ContinentPois {
     public static final String KIND = "poi";
@@ -105,7 +105,7 @@ public final class ContinentPois {
                         SiteBuilds.enqueue(job(over, data, e));
                     }
                 } else if (e.extra("foes") != null && d2 <= (double) FOES_RADIUS * FOES_RADIUS) {
-                    foes(over, e);
+                    foes(over, e, list.get(i).kind());
                 }
             }
         }
@@ -170,7 +170,7 @@ public final class ContinentPois {
     }
 
     // 野盗: 弓の野盗二人と斧の野盗一人 (土地の強さは ContinentDanger が掛ける)。前に出てから FOES_COOLDOWN たつまで出さない
-    static void foes(ServerLevel level, SiteData.Entry e) {
+    static void foes(ServerLevel level, SiteData.Entry e, String kind) {
         long now = level.getGameTime();
         BlockPos at = e.extra("foes");
         BlockPos last = e.extra("foes_at");
@@ -179,7 +179,9 @@ public final class ContinentPois {
         }
         e.extra("foes_at", new BlockPos((int) Math.min(Integer.MAX_VALUE, now), 0, 0));
         SiteData.get(level).setDirty();
-        EntityType<?>[] kinds = {EntityType.PILLAGER, EntityType.PILLAGER, EntityType.VINDICATOR};
+        // 塚は骨の兵、野営は野盗
+        EntityType<?>[] kinds = kind.equals("barrow") ? new EntityType<?>[] {EntityType.SKELETON, EntityType.SKELETON, EntityType.ZOMBIE}
+                : new EntityType<?>[] {EntityType.PILLAGER, EntityType.PILLAGER, EntityType.VINDICATOR};
         for (int k = 0; k < kinds.length; k++) {
             double a = k * 2.1;
             int x = at.getX() + (int) Math.round(Math.cos(a) * 3);
