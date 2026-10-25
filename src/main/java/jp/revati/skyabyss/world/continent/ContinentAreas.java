@@ -92,11 +92,14 @@ public final class ContinentAreas {
         return java.util.Arrays.asList(p.getPersistentData().getString(TOWNS_TAG).split(",")).contains(town);
     }
 
-    static void markVisited(ServerPlayer p, String town) {
+    // 初めて着いたら true
+    static boolean markVisited(ServerPlayer p, String town) {
         if (!visited(p, town)) {
             String now = p.getPersistentData().getString(TOWNS_TAG);
             p.getPersistentData().putString(TOWNS_TAG, now.isEmpty() ? town : now + "," + town);
+            return true;
         }
+        return false;
     }
 
     static void announce(ServerPlayer p, String area) {
@@ -104,7 +107,14 @@ public final class ContinentAreas {
         Component sub;
         if (area.startsWith("town:")) {
             String t = area.substring(5);
-            markVisited(p, t);
+            if (markVisited(p, t)) {
+                // 初めて着いた町: 広場を見渡す短い場面 (2026-10-26 「演出を増やしたい」。Scenes.townFirst)
+                BlockPos c = ContinentLayout.get().town(t);
+                if (c != null) {
+                    jp.revati.skyabyss.cinematic.Cinematics.startOnce(p, jp.revati.skyabyss.cinematic.Scenes.TOWN_PREFIX + t, null,
+                            net.minecraft.world.phys.Vec3.atCenterOf(c));
+                }
+            }
             title = Component.translatable("map.skyabyss.town." + t);
             sub = Component.translatable("map.skyabyss.continent." + t);
         } else if (area.equals("capital")) {

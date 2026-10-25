@@ -1,0 +1,22 @@
+# 土地の町に初めて着く場面 (汐守の港)
+world opening_island_story continent
+size 1600 900
+timeout 1500
+render 12
+guiscale 2
+waitchunks 300
+wait 40
+cmd time set 3000
+cmd weather clear
+cmd tp @s 1250 140 160 -90 0
+waitchunks 600
+wait 100
+cmd spreadplayers 1292 160 0 1 false @s
+wait 40
+shot t_00
+wait 50
+shot t_03
+wait 60
+shot t_06
+wait 70
+shot t_after

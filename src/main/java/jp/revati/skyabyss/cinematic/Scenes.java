@@ -19,6 +19,9 @@ public final class Scenes {
     public static final String FIRST_PREFIX = "titan_first_";
     public static final String HEART_PREFIX = "heart_";
     public static final String END_PREFIX = "titan_end_";
+    // 土地の町に初めて着いたとき (9 秒)。ContinentAreas が起こす
+    public static final String TOWN_PREFIX = "town_first_";
+    public static final String[] TOWNS = {"whale", "tide", "storm", "ember"};
     // 試練を越えて真ん中へ戻ったとき、光った碑を見せる (約 3.4 秒。docs/design/29 の 4.6)。前 = 碑の方。台詞なし
     // 設定の視野 (度)。撮影の fov はこの値との比で効かせる
     public static final float BASE_FOV = 70f;
@@ -32,6 +35,9 @@ public final class Scenes {
         add(opening());
         add(ferryCrossing());
         add(capitalArrival());
+        for (String t : TOWNS) {
+            add(townFirst(t));
+        }
         add(whaleFirstSight());
         for (String titan : FIRST_SIGHT_TITANS) {
             add(titanFirstSight(titan));
@@ -119,6 +125,18 @@ public final class Scenes {
                 .npcLine(9.8f, 4.6f, "cinematic.skyabyss.speaker.ferryman", "cinematic.skyabyss.ferry.f2")
                 .line(14.8f, 3.8f, Speaker.HEAVEN, "cinematic.skyabyss.ferry.heaven1")
                 .npcLine(18.8f, 3.2f, "cinematic.skyabyss.speaker.ferryman", "cinematic.skyabyss.ferry.f3")
+                .build();
+    }
+
+    // 土地の町に初めて着く (9 秒)。前 = 町の真ん中 (広場)。高く上がって広場と町の名物を見渡し、本人の目に戻る。台詞は主人公と天の声
+    private static Scene townFirst(String town) {
+        return Scene.of(TOWN_PREFIX + town).handBack().seamless()
+                .shot(Shot.of(4.5f).pos(0, CameraMath.EYE, 0).posTo(2.0, 14.0, -6.0)
+                        .look(Look.frame(0, 2, 20)).lookTo(Look.frame(0, 4, 45)).fov(70f, 74f).ease(Ease.SMOOTHER).sway(0.2f).build())
+                .shot(Shot.of(4.5f).pos(2.0, 14.0, -6.0).posTo(0, CameraMath.EYE, 0)
+                        .look(Look.frame(0, 4, 45)).lookTo(Look.frame(0, 2, 30)).fov(74f, 70f).ease(Ease.SMOOTH).build())
+                .line(0.4f, 3.8f, Speaker.HERO, "cinematic.skyabyss.town." + town + ".hero")
+                .line(4.6f, 3.8f, Speaker.HEAVEN, "cinematic.skyabyss.town." + town + ".heaven")
                 .build();
     }
 

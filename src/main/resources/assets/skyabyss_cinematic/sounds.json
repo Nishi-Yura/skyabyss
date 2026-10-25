@@ -107,6 +107,78 @@
       }
     ]
   },
+  "voice.town_first_whale.l0": {
+    "subtitle": "subtitles.skyabyss_cinematic.voice.hero",
+    "sounds": [
+      {
+        "name": "skyabyss_cinematic:voice/town_first_whale/l0",
+        "stream": false
+      }
+    ]
+  },
+  "voice.town_first_whale.l1": {
+    "subtitle": "subtitles.skyabyss_cinematic.voice.heaven",
+    "sounds": [
+      {
+        "name": "skyabyss_cinematic:voice/town_first_whale/l1",
+        "stream": false
+      }
+    ]
+  },
+  "voice.town_first_tide.l0": {
+    "subtitle": "subtitles.skyabyss_cinematic.voice.hero",
+    "sounds": [
+      {
+        "name": "skyabyss_cinematic:voice/town_first_tide/l0",
+        "stream": false
+      }
+    ]
+  },
+  "voice.town_first_tide.l1": {
+    "subtitle": "subtitles.skyabyss_cinematic.voice.heaven",
+    "sounds": [
+      {
+        "name": "skyabyss_cinematic:voice/town_first_tide/l1",
+        "stream": false
+      }
+    ]
+  },
+  "voice.town_first_storm.l0": {
+    "subtitle": "subtitles.skyabyss_cinematic.voice.hero",
+    "sounds": [
+      {
+        "name": "skyabyss_cinematic:voice/town_first_storm/l0",
+        "stream": false
+      }
+    ]
+  },
+  "voice.town_first_storm.l1": {
+    "subtitle": "subtitles.skyabyss_cinematic.voice.heaven",
+    "sounds": [
+      {
+        "name": "skyabyss_cinematic:voice/town_first_storm/l1",
+        "stream": false
+      }
+    ]
+  },
+  "voice.town_first_ember.l0": {
+    "subtitle": "subtitles.skyabyss_cinematic.voice.hero",
+    "sounds": [
+      {
+        "name": "skyabyss_cinematic:voice/town_first_ember/l0",
+        "stream": false
+      }
+    ]
+  },
+  "voice.town_first_ember.l1": {
+    "subtitle": "subtitles.skyabyss_cinematic.voice.heaven",
+    "sounds": [
+      {
+        "name": "skyabyss_cinematic:voice/town_first_ember/l1",
+        "stream": false
+      }
+    ]
+  },
   "voice.whale_first_sight.l0": {
     "subtitle": "subtitles.skyabyss_cinematic.voice.hero",
     "sounds": [

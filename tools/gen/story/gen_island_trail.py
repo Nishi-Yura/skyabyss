@@ -64,6 +64,15 @@ MAIN = {
 # 渡りの場面 (ferry_crossing) と、都を見上げる場面 (capital_arrival)。場面の文は skyabyss_cinematic (CinematicSelfTest が見る)
 CINEMATIC = {
     'cinematic.skyabyss.speaker.ferryman': ('渡し守', 'Ferryman'),
+    # 土地の町に初めて着いたとき (Scenes.townFirst)
+    'cinematic.skyabyss.town.whale.hero': ('丘の上の町。……空ばかり見上げている人が多い。', 'A town on the hills. ...So many people here keep looking at the sky.'),
+    'cinematic.skyabyss.town.whale.heaven': ('歌を追う者が、この町の見張り台にいる。', "The one who chases the song is at this town's lookout."),
+    'cinematic.skyabyss.town.tide.hero': ('潮の匂い。灯台が、沖の何かを照らしている。', 'The smell of the tide. The lighthouse shines on something offshore.'),
+    'cinematic.skyabyss.town.tide.heaven': ('潮の引く日を待ちなさい。島は、寄ってくる。', 'Wait for the ebb tide. The island will come in.'),
+    'cinematic.skyabyss.town.storm.hero': ('風が止まない。風車が、ずっと回っている。', 'The wind never stops. The windmills keep turning.'),
+    'cinematic.skyabyss.town.storm.heaven': ('雷の鳴る峰へ。翼は、高い所へ降りる。', 'To the thundering peaks. The wings come down to the heights.'),
+    'cinematic.skyabyss.town.ember.hero': ('灰が降っている。……どこかで、火が息をしている。', 'Ash is falling. ...Somewhere, a fire is breathing.'),
+    'cinematic.skyabyss.town.ember.heaven': ('山は眠っていない。息をしている。', 'The mountain is not asleep. It is breathing.'),
     'cinematic.skyabyss.ferry.f1': ('目が覚めたら島にいた、か。……そういう客は、ときどき乗せる。', "Woke up on the island, did you. ...I get passengers like that, now and then."),
     'cinematic.skyabyss.ferry.hero1': ('前にも、この海を渡った気がする。', "I feel like I've crossed this sea before."),
     'cinematic.skyabyss.ferry.f2': ('この海の向こうが鐘の都だ。鐘が鳴るうちは、都は落ちない。……そう言われてる。', "Past this sea is the Bell Capital. While the bells ring, it won't fall. ...So they say."),
