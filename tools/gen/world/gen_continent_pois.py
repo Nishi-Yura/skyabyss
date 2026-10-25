@@ -143,44 +143,35 @@ def windmill(rng):
 
 
 def farm(rng):
+    """畑と納屋: 木組みの二階の納屋 (都のまわりの作り)・二枚の畑・かかし・干し草・水桶・牧場の柵"""
+    import town_arch as ta
+    st = ta.STYLES['meadow']
     bp = BP('poi_farm')
-    ground(bp, 11, 'minecraft:grass_block[snowy=false]', rng)
-    # 畑 (二枚、水の溝)
-    for (x0, x1) in ((-10, -2), (2, 10)):
-        for x in range(x0, x1 + 1):
-            for z in range(-9, 0):
-                if x in (x0, x1) or z in (-9, -1):
-                    bp.set(x, -1, z, 'minecraft:spruce_log[axis=y]' if (x in (x0, x1) and z in (-9, -1)) else 'minecraft:oak_log[axis=x]' if z in (-9, -1) else 'minecraft:oak_log[axis=z]')
-                elif x == (x0 + x1) // 2:
-                    bp.set(x, -1, z, 'minecraft:water[level=0]')
-                else:
-                    bp.set(x, -1, z, 'minecraft:farmland[moisture=7]')
-                    crop = rng.choice(['minecraft:wheat[age=7]', 'minecraft:carrots[age=7]', 'minecraft:potatoes[age=7]', 'minecraft:wheat[age=5]'])
-                    bp.set(x, 0, z, crop)
+    ground(bp, 13, 'minecraft:grass_block[snowy=false]', rng, 'minecraft:coarse_dirt', 0.15)
+    ta.farm(bp, st, -12, -11, -2, -1, rng)
+    ta.farm(bp, st, 2, -11, 12, -1, rng)
     # かかし
-    bp.fill(0, 0, -5, 0, 1, -5, 'minecraft:oak_fence')
-    bp.set(0, 2, -5, 'minecraft:carved_pumpkin[facing=south]')
-    bp.set(-1, 1, -5, 'minecraft:oak_fence')
-    bp.set(1, 1, -5, 'minecraft:oak_fence')
-    # 納屋 (南)
-    walls(bp, -5, 3, 5, 9, 4, 'minecraft:spruce_planks', 'minecraft:stripped_spruce_log[axis=y]')
-    for x in range(-4, 5):
-        for z in range(4, 9):
-            bp.set(x, -1, z, 'minecraft:coarse_dirt')
-    for x in (-1, 0, 1):
+    bp.fill(-7, 0, -6, -7, 1, -6, 'minecraft:oak_fence')
+    bp.set(-7, 2, -6, 'minecraft:carved_pumpkin[facing=south]')
+    bp.set(-8, 1, -6, 'minecraft:oak_fence')
+    bp.set(-6, 1, -6, 'minecraft:oak_fence')
+    # 納屋 (南。二階、大きな戸口)
+    ta.building(bp, st, -5, 3, 5, 10, 2, (0, 3, 'north'), rng, chimney=False, kind='hall')
+    for x in (-1, 1):
         for y in range(0, 3):
             bp.set(x, y, 3, AIR)
-    top = gable(bp, -5, 3, 5, 9, 4, 'minecraft:dark_oak_stairs', slab('minecraft:dark_oak'))
-    for x, z in ((-3, 7), (-3, 8), (3, 7), (3, 8), (2, 8)):
+    for x, z in ((-4, 8), (-4, 9), (4, 8), (4, 9), (3, 9)):
         bp.set(x, 0, z, 'minecraft:hay_block[axis=y]')
-    bp.set(-3, 1, 8, 'minecraft:hay_block[axis=y]')
-    bp.set(0, 3, 6, lantern(True))
-    # 柵 (畑の外まわり、一部)
-    for x in range(-11, 12):
-        if x % 5 != 0:
-            bp.set(x, 0, -11, 'minecraft:oak_fence')
-    bp.set(-11, 0, -5, 'minecraft:composter[level=4]')
-    bp.set(9, 0, 2, 'minecraft:water_cauldron[level=3]')
+    bp.set(-4, 1, 9, 'minecraft:hay_block[axis=y]')
+    # 牧場 (東。柵と水桶)
+    for x in range(7, 13):
+        for z in range(2, 9):
+            if x in (7, 12) or z in (2, 8):
+                bp.set(x, 0, z, 'minecraft:oak_fence')
+    bp.set(7, 0, 5, 'minecraft:oak_fence_gate[facing=east,in_wall=false,open=false,powered=false]')
+    bp.set(10, 0, 5, 'minecraft:water_cauldron[level=3]')
+    bp.set(-9, 0, 4, 'minecraft:composter[level=4]')
+    ta.lamp(bp, st, 0, 0)
     return bp
 
 
@@ -222,16 +213,29 @@ def watchtower(rng):
 
 
 def roadside_shrine(rng):
+    """道ばたの祠: 苔むした石の台に小さな屋根の祠・供え物・二つの灯籠・腰かけ"""
     bp = BP('poi_roadside_shrine')
-    ground(bp, 3, 'minecraft:moss_block', rng, 'minecraft:grass_block[snowy=false]', 0.4)
-    bp.fill(-1, 0, -1, 1, 0, 1, 'minecraft:mossy_stone_bricks')
-    bp.set(0, 1, 0, 'minecraft:chiseled_stone_bricks')
-    bp.set(0, 2, 0, 'minecraft:stone_brick_wall[east=none,north=none,south=none,up=true,waterlogged=false,west=none]')
-    bp.set(0, 3, 0, lantern())
-    for x, z in ((-1, 1), (1, 1)):
-        bp.set(x, 1, z, 'minecraft:flower_pot')
-    bp.set(0, 0, 2, stairs('minecraft:mossy_stone_brick_stairs', 'north'))
-    for x, z in ((-2, -2), (2, -2)):
+    ground(bp, 5, 'minecraft:moss_block', rng, 'minecraft:grass_block[snowy=false]', 0.4)
+    bp.fill(-2, -1, -2, 2, -1, 2, 'minecraft:mossy_stone_bricks')
+    bp.fill(-1, 0, -2, 1, 0, -1, 'minecraft:mossy_stone_bricks')
+    bp.set(0, 1, -2, 'minecraft:chiseled_stone_bricks')
+    bp.set(0, 2, -2, 'minecraft:candle[candles=3,lit=true,waterlogged=false]')
+    for x in (-1, 1):
+        bp.set(x, 1, -1, 'minecraft:flower_pot' if x < 0 else 'minecraft:potted_red_tulip')
+        bp.fill(x * 2, 0, -2, x * 2, 2, -2, 'minecraft:spruce_log[axis=y]')
+    for x in range(-3, 4):
+        for z in range(-3, 0):
+            bp.set(x, 3, z, 'minecraft:spruce_slab[type=bottom,waterlogged=false]' if abs(x) == 3 or z == -3 else 'minecraft:spruce_planks')
+    bp.set(0, 4, -2, 'minecraft:spruce_slab[type=bottom,waterlogged=false]')
+    # 灯籠 (石の柱と灯り)
+    for x in (-3, 3):
+        bp.set(x, 0, 2, 'minecraft:stone_bricks')
+        bp.set(x, 1, 2, 'minecraft:stone_brick_wall[east=none,north=none,south=none,up=true,waterlogged=false,west=none]')
+        bp.set(x, 2, 2, 'minecraft:lantern[hanging=false,waterlogged=false]')
+    bp.set(0, 0, 3, stairs('minecraft:mossy_stone_brick_stairs', 'north'))
+    for x in (-1, 1):
+        bp.set(x, 0, 4, stairs('minecraft:spruce_stairs', 'south'))
+    for x, z in ((-4, -3), (4, -3)):
         bp.set(x, 0, z, 'minecraft:azalea')
     return bp
 
@@ -393,22 +397,32 @@ def shipwreck(rng):
 
 
 def fishing_huts(rng):
+    """漁師の小屋: 汐守の作りの小さな家二つ・網を干す棚・陸に上げた小舟・焚き火と樽"""
+    import town_arch as ta
+    st = ta.STYLES['tide']
     bp = BP('poi_fishing_huts')
-    ground(bp, 10, 'minecraft:sand', rng, 'minecraft:coarse_dirt', 0.25)
-    for (ox, oz) in ((-6, -3), (5, -2)):
-        walls(bp, ox - 2, oz - 2, ox + 2, oz + 2, 3, 'minecraft:birch_planks', 'minecraft:stripped_birch_log[axis=y]')
-        door(bp, ox, oz + 2, 'south', 'birch')
-        gable(bp, ox - 2, oz - 2, ox + 2, oz + 2, 3, 'minecraft:dark_prismarine_stairs', slab('minecraft:dark_prismarine'))
-        bp.set(ox, 2, oz, lantern(True))
-    # 干し網 (柵とクモの巣) と干し魚
-    for x in range(-3, 3):
-        bp.set(x, 0, 6, 'minecraft:birch_fence')
-        bp.set(x, 1, 6, 'minecraft:birch_fence')
-        if x % 2 == 0:
-            bp.set(x, 2, 6, 'minecraft:cobweb')
-    for x, z in ((-1, 3), (1, 3), (8, 4)):
+    ground(bp, 11, 'minecraft:sand', rng, 'minecraft:coarse_dirt', 0.25)
+    ta.building(bp, st, -9, -6, -3, 0, 1, (-6, 0, 'south'), rng, chimney=True)
+    ta.building(bp, st, 3, -7, 9, -1, 2, (6, -1, 'south'), rng, chimney=False)
+    # 網を干す棚
+    for zz in (4, 7):
+        for x in (-6, 0):
+            bp.fill(x, 0, zz, x, 2, zz, 'minecraft:birch_fence')
+        for x in range(-6, 1):
+            bp.set(x, 3, zz, 'minecraft:birch_slab[type=bottom,waterlogged=false]')
+            if -6 < x < 0:
+                bp.set(x, 2, zz, 'minecraft:chain[axis=y,waterlogged=false]')
+    # 小舟 (伏せて置いた舟の形)
+    for x in range(4, 10):
+        bp.set(x, 0, 5, 'minecraft:spruce_slab[type=top,waterlogged=false]')
+        if 4 < x < 9:
+            bp.set(x, 0, 4, 'minecraft:spruce_stairs[facing=south,half=bottom,shape=straight,waterlogged=false]')
+            bp.set(x, 0, 6, 'minecraft:spruce_stairs[facing=north,half=bottom,shape=straight,waterlogged=false]')
+    for x, z in ((2, 1), (3, 1), (-1, 1)):
         bp.set(x, 0, z, 'minecraft:barrel[facing=up,open=false]')
-    bp.set(0, 0, 8, 'minecraft:campfire[facing=north,lit=true,signal_fire=false,waterlogged=false]')
+    bp.set(0, 0, 9, 'minecraft:campfire[facing=north,lit=true,signal_fire=false,waterlogged=false]')
+    for x, z in ((-1, 9), (1, 9)):
+        bp.set(x, 0, z, 'minecraft:spruce_log[axis=z]')
     return bp
 
 
@@ -457,18 +471,25 @@ def rod_tower(rng):
 
 
 def mountain_hut(rng):
+    """山小屋: 風待の作りの二階の小屋・薪の山・囲った物置・石の暖炉の煙突・道しるべの杭"""
+    import town_arch as ta
+    st = ta.STYLES['storm']
     bp = BP('poi_mountain_hut')
-    ground(bp, 7, 'minecraft:gravel', rng, 'minecraft:snow_block', 0.3)
-    walls(bp, -3, -3, 3, 3, 3, 'minecraft:spruce_planks', 'minecraft:spruce_log[axis=y]')
-    door(bp, 0, 3, 'south', 'spruce')
-    gable(bp, -3, -3, 3, 3, 3, 'minecraft:deepslate_tile_stairs', 'minecraft:deepslate_tile_slab[type=bottom,waterlogged=false]')
-    bp.set(-2, 0, -2, 'minecraft:red_bed[facing=south,occupied=false,part=head]')
-    bp.set(-2, 0, -1, 'minecraft:red_bed[facing=south,occupied=false,part=foot]')
-    bp.set(2, 0, -2, 'minecraft:furnace[facing=south,lit=false]')
-    bp.fill(1, 3, -2, 1, 7, -2, 'minecraft:cobblestone')
-    bp.set(0, 2, 0, lantern(True))
-    for x, z in ((5, 1), (5, 2), (5, 3)):
-        bp.set(x, 0, z, 'minecraft:spruce_log[axis=z]')
+    ground(bp, 9, 'minecraft:gravel', rng, 'minecraft:snow_block', 0.3)
+    ta.building(bp, st, -4, -4, 4, 3, 2, (0, 3, 'south'), rng, chimney=True)
+    for x in range(5, 9):
+        bp.set(x, 0, 1, 'minecraft:spruce_log[axis=x]')
+        bp.set(x, 0, 2, 'minecraft:spruce_log[axis=x]')
+        if x < 8:
+            bp.set(x, 1, 1, 'minecraft:spruce_log[axis=x]')
+    for x, z in ((5, 0), (8, 0), (5, 3), (8, 3)):
+        bp.fill(x, 0, z, x, 2, z, st['fence'])
+    for x in range(5, 9):
+        for z in range(0, 4):
+            bp.set(x, 3, z, 'minecraft:dark_oak_slab[type=bottom,waterlogged=false]')
+    bp.set(-6, 0, 2, 'minecraft:barrel[facing=up,open=false]')
+    bp.set(-6, 0, 3, 'minecraft:barrel[facing=up,open=false]')
+    ta.lamp(bp, st, 2, 6)
     return bp
 
 
@@ -498,20 +519,35 @@ def burnt_fort(rng):
 
 
 def forge_ruin(rng):
+    """炉の跡: 崩れた黒い石の鍛冶場 (壁は上ほど欠ける)・冷えた大きな炉と煙突・金床・溶けかけた鉄の塊・崩れた石"""
     bp = BP('poi_forge_ruin')
-    ground(bp, 8, 'minecraft:blackstone', rng, 'minecraft:basalt[axis=y]', 0.3)
-    bp.fill(-2, 0, -2, 2, 2, 2, 'minecraft:bricks')
-    bp.fill(-1, 1, -1, 1, 2, 1, AIR)
-    bp.set(0, 0, 0, 'minecraft:magma_block')
-    bp.fill(0, 3, 0, 0, 8, 0, 'minecraft:bricks')
-    for x, z in ((4, 0), (-4, 1)):
-        bp.set(x, 0, z, 'minecraft:anvil[facing=north]' if x > 0 else 'minecraft:chipped_anvil[facing=east]')
-    for x, z in ((3, 3), (-3, -3), (4, -2)):
-        bp.set(x, 0, z, 'minecraft:blast_furnace[facing=south,lit=false]' if x > 0 else 'minecraft:cauldron')
+    ground(bp, 10, 'minecraft:blackstone', rng, 'minecraft:basalt[axis=y]', 0.3)
+    walls(bp, -6, -6, 6, 4, 5, 'minecraft:polished_blackstone_bricks', 'minecraft:polished_blackstone', broken=0.75, rng=rng, windows=False)
     for x in range(-5, 6):
-        if rng.random() < 0.5:
-            bp.set(x, 0, 5, 'minecraft:polished_blackstone_brick_wall[east=low,north=none,south=none,up=true,waterlogged=false,west=low]')
-    bp.mark('loot', 0, 0, -4)
+        for z in range(-5, 4):
+            bp.set(x, -1, z, 'minecraft:polished_blackstone_bricks' if rng.random() > 0.3 else 'minecraft:cracked_polished_blackstone_bricks')
+    for x in (-1, 0, 1):
+        for y in range(0, 3):
+            bp.set(x, y, 4, AIR)
+    # 大きな炉 (奥。煉瓦の箱と、高い煙突)
+    bp.fill(-2, 0, -5, 2, 2, -3, 'minecraft:bricks')
+    bp.fill(-1, 0, -4, 1, 1, -4, AIR)
+    bp.set(0, 0, -4, 'minecraft:magma_block')
+    bp.fill(0, 3, -4, 0, 11, -4, 'minecraft:bricks')
+    bp.set(0, 12, -4, 'minecraft:cracked_stone_bricks')
+    for x, z in ((-4, -1), (4, -1)):
+        bp.set(x, 0, z, 'minecraft:anvil[facing=north]' if x > 0 else 'minecraft:chipped_anvil[facing=east]')
+    bp.set(-4, 0, -4, 'minecraft:blast_furnace[facing=south,lit=false]')
+    bp.set(4, 0, -4, 'minecraft:cauldron')
+    for x, z in ((2, 1), (-2, 2)):
+        bp.set(x, 0, z, 'minecraft:raw_iron_block')
+    # 崩れた石 (まわり)
+    for k in range(16):
+        a = rng.random() * 2 * math.pi
+        r = 7 + rng.random() * 3
+        x, z = int(round(math.cos(a) * r)), int(round(math.sin(a) * r))
+        bp.set(x, 0, z, rng.choice(['minecraft:blackstone', 'minecraft:polished_blackstone_brick_slab[type=bottom,waterlogged=false]', 'minecraft:basalt[axis=y]']))
+    bp.mark('loot', 0, 0, -2)
     return bp
 
 

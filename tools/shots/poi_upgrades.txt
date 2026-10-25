@@ -1,0 +1,59 @@
+# 作り直した見どころ (農場・漁師の小屋・山小屋・炉の跡・道ばたの祠)
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/poi_upgrades.txt -PshotsName=poi_upgrades
+world continent_upgrades continent
+size 1600 900
+timeout 1800
+render 8
+guiscale 2
+wait 100
+cmd skyabyss cinematic stop
+cmd time set 5000
+cmd gamerule doMobSpawning false
+cmd skyabyss dev opening build
+wait 200
+hud off
+cmd gamemode creative
+cmd tp @s -120 120 580
+waitchunks 400
+wait 300
+cmd gamemode spectator
+cmd skyabyss dev grounds mark poi 2 pos
+cmd execute at @s run tp @s ~18 ~13 ~18 135 30
+wait 60
+shot farm
+cmd gamemode creative
+cmd tp @s 1576 120 -40
+waitchunks 400
+wait 300
+cmd gamemode spectator
+cmd skyabyss dev grounds mark poi 54 pos
+cmd execute at @s run tp @s ~18 ~13 ~18 135 30
+wait 60
+shot fishing_huts
+cmd gamemode creative
+cmd tp @s -428 120 1120
+waitchunks 400
+wait 300
+cmd gamemode spectator
+cmd skyabyss dev grounds mark poi 81 pos
+cmd execute at @s run tp @s ~18 ~13 ~18 135 30
+wait 60
+shot forge_ruin
+cmd gamemode creative
+cmd tp @s -1360 120 88
+waitchunks 400
+wait 300
+cmd gamemode spectator
+cmd skyabyss dev grounds mark poi 74 pos
+cmd execute at @s run tp @s ~18 ~13 ~18 135 30
+wait 60
+shot mountain_hut
+cmd gamemode creative
+cmd tp @s -564 120 -388
+waitchunks 400
+wait 300
+cmd gamemode spectator
+cmd skyabyss dev grounds mark poi 4 pos
+cmd execute at @s run tp @s ~10 ~7 ~10 135 30
+wait 60
+shot roadside_shrine
