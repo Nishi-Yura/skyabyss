@@ -17,8 +17,16 @@ OUT = os.path.join(ROOT, 'docs', 'review', 'continent_roughs')
 FONT_TITLE = 'C:/Windows/Fonts/yumin.ttf'
 FONT_BODY = 'C:/Windows/Fonts/YuGothB.ttc'
 
+# 土地の中のムラの色
+SUB_COLORS = {
+    'birch': (196, 204, 150), 'marsh': (120, 150, 120), 'dunes': (236, 222, 170), 'pine': (100, 128, 96),
+    'basalt': (96, 88, 92), 'ashwood': (130, 110, 96), 'flowers': (200, 186, 120),
+}
+
+
 def render_map(key, lay, seed=7):
-    land, height, region = terrain(lay, seed)
+    ex = {}
+    land, height, region = terrain(lay, seed, out=ex)
     img = np.zeros((N, N, 3))
     # 陰影 (北西から)
     gz, gx = np.gradient(height)
@@ -29,6 +37,9 @@ def render_map(key, lay, seed=7):
         m = region == i
         for c in range(3):
             img[..., c] = np.where(m, (lo[c] * (1 - hn) + hi[c] * hn) * shade, img[..., c])
+    for kind, m in ex.get('subs', []):
+        col = np.array(SUB_COLORS[kind], dtype=float)
+        img = np.where(m[..., None], img * 0.35 + col * 0.65 * shade[..., None], img)
     # 海: 岸からの遠さで深く
     from scipy import ndimage
     dist = ndimage.distance_transform_edt(~land)
@@ -129,6 +140,11 @@ def draw_layer(base, d, lay):
         w = d.textlength(lv, font=f_lv)
         d.rounded_rectangle([x - w / 2 - 8, y - 14, x + w / 2 + 8, y + 14], 6, fill=(250, 240, 214), outline=(120, 90, 60), width=2)
         d.text((x, y), lv, font=f_lv, fill=(120, 60, 30), anchor='mm')
+    # のちの土地 (空けておく海)
+    for label, p in lay.get('future', []):
+        x, y = to_px(*p)
+        d.ellipse([x - 40, y - 22, x + 40, y + 22], outline=(90, 110, 130), width=2)
+        text((x, y), label, f_site, fill=(60, 80, 100))
     # 方位と縮尺
     cx, cy = PX - 80, 90
     d.line([(cx, cy - 46), (cx, cy + 46)], fill=INK, width=2)
@@ -179,8 +195,11 @@ def card(key, lay, mapimg):
 
 def main():
     os.makedirs(OUT, exist_ok=True)
+    keys = sys.argv[1:] or ['a', 'b', 'c']
+    sheet_name = 'sheet.png' if not sys.argv[1:] else 'sheet_' + '_'.join(keys) + '.png'
     cards = []
-    for key, lay in LAYOUTS.items():
+    for key in keys:
+        lay = LAYOUTS[key]
         base, d = render_map(key, lay)
         draw_layer(base, d, lay)
         c = card(key, lay, frame(base))
@@ -194,8 +213,8 @@ def main():
     for s in small:
         sheet.paste(s, (x, 40))
         x += s.width + 40
-    sheet.save(os.path.join(OUT, 'sheet.png'))
-    print('wrote sheet.png')
+    sheet.save(os.path.join(OUT, sheet_name))
+    print('wrote', sheet_name)
 
 
 if __name__ == '__main__':
