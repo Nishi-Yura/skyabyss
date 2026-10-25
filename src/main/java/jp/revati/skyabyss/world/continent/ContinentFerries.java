@@ -34,11 +34,14 @@ public final class ContinentFerries {
     public static SiteJob create(ServerLevel level, SiteData data, SiteData.Entry entry) {
         boolean far = (entry.index & 1) == 1;
         return new SiteJob(level, data, entry, Blueprint.get("outskirts_dock"), "ferry " + entry.index, job -> {
-            for (String m : new String[] {"ferry", "stand"}) {
-                BlockPos at = job.mark(m);
-                if (at != null) {
-                    job.entry.extra(m, at);
-                }
+            BlockPos ferry = job.mark("ferry");
+            BlockPos stand = job.mark("stand");
+            if (stand != null) {
+                job.entry.extra("stand", stand);
+            }
+            if (ferry != null) {
+                // 桟橋を水の上まで延ばし、その先を渡し船に乗る所にする
+                job.entry.extra("ferry", stand == null ? ferry : ContinentPiers.extend(level, ferry, stand));
             }
             BlockPos sign = job.mark("sign");
             if (sign != null && level.getBlockEntity(sign) instanceof SignBlockEntity be) {

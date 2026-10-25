@@ -103,7 +103,9 @@ public final class ContinentOutskirts {
         return new SiteJob(level, data, entry, Blueprint.get(BLUEPRINTS[i]), BLUEPRINTS[i], job -> {
             BlockPos ferry = job.mark("ferry");
             if (ferry != null) {
-                job.entry.extra("ferry", ferry);
+                // 桟橋を水の上まで延ばし、その先を渡し船に乗る所にする
+                BlockPos stand = job.mark("stand");
+                job.entry.extra("ferry", stand == null ? ferry : ContinentPiers.extend(level, ferry, stand));
             }
             BlockPos heal = job.mark("heal");
             if (heal != null) {

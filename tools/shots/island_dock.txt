@@ -1,0 +1,28 @@
+# はじまりの島の船着き場を上から
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/island_dock.txt -PshotsName=island_walk
+world opening_island_dock2 continent
+size 1600 900
+timeout 900
+render 10
+guiscale 2
+wait 100
+cmd skyabyss cinematic stop
+cmd gamemode creative
+cmd tp @s -1578 90 1716
+waitchunks 300
+wait 400
+cmd skyabyss dev grounds mark outskirts 2 pos
+wait 40
+cmd gamemode spectator
+hud off
+cmd execute at @s run tp @s ~ ~30 ~ 0 80
+wait 60
+shot dock_above
+cmd execute at @s run tp @s ~-25 ~-15 ~-25 -45 25
+wait 40
+shot dock_side
+cmd gamemode adventure
+hud on
+cmd skyabyss dev grounds mark outskirts 2 ferry
+wait 100
+shot after_ferry

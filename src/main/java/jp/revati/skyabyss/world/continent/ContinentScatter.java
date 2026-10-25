@@ -15,7 +15,7 @@ import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.levelgen.Heightmap;
 
 // 野の小さな飾り (docs/design/40 の 6 章)。生物群系の木や草のあとに、チャンクごとに決まった乱数で
-// 岩・倒木・茂み・岩の柱・崩れた石垣を置く。町・跡地・見どころ・道・はじまりの島には置かない
+// 岩・倒木・茂み・岩の柱・崩れた石垣を置く。町・跡地・見どころ・道・はじまりの島の野営地と船着き場には置かない
 final class ContinentScatter {
     private ContinentScatter() {
     }
@@ -28,6 +28,9 @@ final class ContinentScatter {
             ContinentLayout lay = ContinentLayout.get();
             List<int[]> out = new ArrayList<>();
             out.add(new int[] {lay.capital().getX(), lay.capital().getZ(), 300});
+            // はじまりの島の野営地と船着き場 (島のほかの所には飾りを置く)
+            out.add(new int[] {lay.start().getX(), lay.start().getZ(), 48});
+            out.add(new int[] {lay.dock().getX(), lay.dock().getZ(), 48});
             for (String t : new String[] {"whale", "tide", "storm", "ember"}) {
                 BlockPos town = lay.town(t);
                 if (town != null) {
@@ -66,8 +69,7 @@ final class ContinentScatter {
         ContinentMap map = ContinentMap.get();
         int x0 = chunk.getPos().getMinBlockX();
         int z0 = chunk.getPos().getMinBlockZ();
-        int region = map.region(x0 + 8, z0 + 8);
-        if (region == ContinentMap.OUTSKIRTS || kept(x0 + 8, z0 + 8)) {
+        if (kept(x0 + 8, z0 + 8)) {
             return;
         }
         RandomSource r = RandomSource.create(chunk.getPos().toLong() * 0x9E3779B97F4A7C15L + 0x5CA77E2L);

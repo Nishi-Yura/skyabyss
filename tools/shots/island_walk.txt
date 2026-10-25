@@ -1,0 +1,57 @@
+# はじまりの島を人の目で歩く (2026-10-25 夕方の見直し)
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/island_walk.txt -PshotsName=island_walk
+world opening_island_walk continent
+size 1600 900
+timeout 2000
+render 10
+guiscale 2
+wait 200
+waitchunks 600
+wait 200
+shot spawn_first
+cmd skyabyss cinematic stop
+wait 40
+shot spawn_after_cine
+cmd execute at @s run tp @s ~ ~ ~ 90 5
+wait 40
+shot spawn_look_west
+cmd execute at @s run tp @s ~ ~ ~ -90 5
+wait 40
+shot spawn_look_east
+cmd gamemode spectator
+hud off
+cmd execute at @s run tp @s ~ ~40 ~ 0 60
+wait 60
+shot spawn_above
+cmd gamemode creative
+hud on
+cmd skyabyss dev grounds mark footprint 1 pos
+waitchunks 300
+wait 100
+cmd execute at @s run tp @s ~ ~2 ~ 45 15
+wait 40
+shot footprint
+cmd skyabyss dev grounds mark poi 0 pos
+waitchunks 300
+wait 200
+cmd execute at @s run tp @s ~8 ~4 ~8 135 20
+wait 40
+shot island_bandits
+cmd skyabyss dev grounds mark outskirts 0 pos
+waitchunks 300
+wait 100
+cmd execute at @s run tp @s ~6 ~3 ~6 135 20
+wait 40
+shot rest_fire
+cmd skyabyss dev grounds mark outskirts 1 pos
+waitchunks 300
+wait 100
+cmd execute at @s run tp @s ~6 ~3 ~6 135 20
+wait 40
+shot rest_shrine
+cmd skyabyss dev grounds mark outskirts 2 pos
+waitchunks 300
+wait 100
+cmd execute at @s run tp @s ~6 ~3 ~6 135 20
+wait 40
+shot dock
