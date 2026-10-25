@@ -85,11 +85,26 @@ public final class ContinentAreas {
         announce(p, now);
     }
 
+    // 行ったことのある土地の町 (倒れても残る。util/LifeKeep)。地図の跡地の噂は、その町に着いたら本当の位置になる (MapMarks)
+    public static final String TOWNS_TAG = "skyabyss_towns_visited";
+
+    public static boolean visited(net.minecraft.world.entity.player.Player p, String town) {
+        return java.util.Arrays.asList(p.getPersistentData().getString(TOWNS_TAG).split(",")).contains(town);
+    }
+
+    static void markVisited(ServerPlayer p, String town) {
+        if (!visited(p, town)) {
+            String now = p.getPersistentData().getString(TOWNS_TAG);
+            p.getPersistentData().putString(TOWNS_TAG, now.isEmpty() ? town : now + "," + town);
+        }
+    }
+
     static void announce(ServerPlayer p, String area) {
         Component title;
         Component sub;
         if (area.startsWith("town:")) {
             String t = area.substring(5);
+            markVisited(p, t);
             title = Component.translatable("map.skyabyss.town." + t);
             sub = Component.translatable("map.skyabyss.continent." + t);
         } else if (area.equals("capital")) {

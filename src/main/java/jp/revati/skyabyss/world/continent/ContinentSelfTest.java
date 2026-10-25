@@ -64,6 +64,14 @@ public final class ContinentSelfTest {
                     || !probe.getPersistentData().getCompound(net.minecraft.world.entity.player.Player.PERSISTED_NBT_TAG).contains(ContinentPois.FOUND_TAG)) {
                 f.add("discovery: first " + once + " second " + twice + " found " + ContinentPois.discovered(probe));
             }
+            // 行った町の記録 (地図の跡地の噂が本当の位置になる)
+            ContinentAreas.markVisited(probe, "tide");
+            ContinentAreas.markVisited(probe, "tide");
+            ContinentAreas.markVisited(probe, "whale");
+            if (!ContinentAreas.visited(probe, "tide") || !ContinentAreas.visited(probe, "whale") || ContinentAreas.visited(probe, "ember")
+                    || !probe.getPersistentData().getString(ContinentAreas.TOWNS_TAG).equals("tide,whale")) {
+                f.add("towns visited: " + probe.getPersistentData().getString(ContinentAreas.TOWNS_TAG));
+            }
             if (jp.revati.skyabyss.map.MapMarks.MAX < ContinentPois.all().size() + 60) {
                 f.add("map mark cap " + jp.revati.skyabyss.map.MapMarks.MAX + " is too small for " + ContinentPois.all().size() + " POIs");
             }

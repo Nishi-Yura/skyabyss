@@ -28,7 +28,8 @@ public final class LifeKeep {
             "skyabyss_ch2_salt_seen",                 // 塩の標を見た (SaltVault)
             "skyabyss_ch2_salt_counted",              // 塩の標を数えた (SaltVault)
             "skyabyss_abyss_max_depth",               // 深淵のいちばん深い所 (AbyssPressure)
-            "skyabyss_ember_end");                    // 四章の後日談の進み (EmberAftermath)
+            "skyabyss_ember_end",                     // 四章の後日談の進み (EmberAftermath)
+            "skyabyss_towns_visited");                // 行ったことのある土地の町 (ContinentAreas。地図の跡地の噂が本当の位置に)
 
     private LifeKeep() {
     }

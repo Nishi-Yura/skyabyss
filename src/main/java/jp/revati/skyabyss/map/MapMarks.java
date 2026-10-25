@@ -82,6 +82,7 @@ public final class MapMarks {
         }
         BlockPos town = openingMarks(spots, k, out);
         groundMarks(data.grounds(), player.getUUID(), Chapters.of(player), here, town, out);
+        townRumors(player, data.grounds(), out);
         chapterMarks(data, player.getUUID(), out);
         waymarkMarks(Voyages.state(player), TravelWorldData.get(player.server), out);
         titanMarks(player, over, out);
@@ -208,6 +209,33 @@ public final class MapMarks {
             } else if (town != null) {
                 BlockPos r = rumor(town, g.center, name.hashCode());
                 out.add(new Mark(Kind.SITE, "ground:" + ch.id(), name, ch.id(), r.getX(), r.getZ(), true, color));
+            }
+        }
+    }
+
+    // 天と淵の大陸: 章の土地の町に着いたら、その章の跡地の噂を本当の位置に (00 の 278 = A: 町が章の入口。42 の 1.4)
+    static void townRumors(ServerPlayer player, List<SiteData.Ground> grounds, List<Mark> out) {
+        if (!jp.revati.skyabyss.world.continent.ContinentPois.in(player.serverLevel())) {
+            return;
+        }
+        for (SiteData.Ground g : grounds) {
+            Chapters ch = Chapters.byId(g.chapter);
+            String town = ch == null || ch.titan() == null ? null : switch (ch.titan()) {
+                case Titans.STONE_WHALE -> "whale";
+                case Titans.TIDE_SHELL -> "tide";
+                case Titans.THUNDER_WING -> "storm";
+                case Titans.EMBER -> "ember";
+                default -> null;
+            };
+            if (town == null || !jp.revati.skyabyss.world.continent.ContinentAreas.visited(player, town)) {
+                continue;
+            }
+            String id = "ground:" + ch.id();
+            for (int i = 0; i < out.size(); i++) {
+                Mark m = out.get(i);
+                if (m.id().equals(id) && m.rumor()) {
+                    out.set(i, new Mark(m.kind(), m.id(), m.name(), m.extra(), g.center.getX(), g.center.getZ(), false, m.color()));
+                }
             }
         }
     }
