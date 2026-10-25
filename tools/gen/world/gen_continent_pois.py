@@ -821,7 +821,7 @@ def main():
     sys.path.insert(0, HERE)
     import gen_continent as gc
     lay, height, biome, reg = gc.build()
-    pois = place(height, reg, lay)
+    pois = [(k, int(x), int(z)) for k, (x, z) in lay.get('fixed_pois', [])] + place(height, reg, lay)
     with open(os.path.join(CONT, 'pois.json'), 'w', encoding='utf-8', newline='\n') as f:
         json.dump([{'kind': k, 'x': x, 'z': z} for k, x, z in pois] + signposts(lay), f, ensure_ascii=False, separators=(',', ':'))
         f.write('\n')
