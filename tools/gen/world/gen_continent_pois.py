@@ -445,6 +445,16 @@ def wind_gate(rng):
     bp.set(-4, 12, 0, 'minecraft:lightning_rod[facing=up,powered=false,waterlogged=false]')
     for x, z in ((-7, 4), (7, -5), (-2, -7)):
         bp.set(x, 0, z, 'minecraft:weathered_cut_copper_slab[type=bottom,waterlogged=false]')
+    # 門から左右へ延びていた低い壁の名残と、落ちた梁 (地面に横たわる)
+    for x in list(range(-12, -5)) + list(range(6, 13)):
+        h = int(rng.integers(0, 3))
+        for y in range(0, h):
+            bp.set(x, y, 0, 'minecraft:deepslate_bricks' if rng.random() > 0.3 else 'minecraft:cracked_deepslate_bricks')
+    for x in range(2, 8):
+        bp.set(x, 0, -3, 'minecraft:deepslate_brick_slab[type=bottom,waterlogged=false]' if x % 2 else 'minecraft:deepslate_bricks')
+    # 風の民の旗 (残った柱に色あせた布)
+    for y in (7, 8, 9):
+        bp.set(-3, y, 1, 'minecraft:light_gray_wool' if y != 8 else 'minecraft:light_blue_wool')
     bp.mark('loot', 0, 0, 2)
     return bp
 
