@@ -337,7 +337,7 @@ def curve(points, step=24.0, seed=31):
 
 
 # 土地の名前 (地図に出す。lang の map.skyabyss.continent.<id>)
-REGION_NAMES = {'岩鯨の丘陵': 'whale', '潮の浜': 'tide', '嵐の高地': 'storm', '灰の荒野': 'ember', '外れの谷': 'outskirts', '内海': 'inland_sea'}
+REGION_NAMES = {'岩鯨の丘陵': 'whale', '潮の浜': 'tide', '嵐の高地': 'storm', '灰の荒野': 'ember', '外れの谷': 'outskirts', 'はじまりの島': 'outskirts', '内海': 'inland_sea'}
 LEVEL_REGIONS = ['capital', 'whale', 'tide', 'storm', 'ember']
 MAP_PX = 1024
 MAP_COLORS = {
@@ -426,6 +426,7 @@ def write_layout(lay):
         'layout': CHOSEN,
         'capital': pt(lay['capital']),
         'start': pt(lay['start']),
+        'dock': pt(lay.get('dock', lay['start'])),
         'towns': {towns[n]: pt(p) for n, p in lay['towns']},
         'sites': {kinds[n]: pt(p) for n, p in lay['sites']},
         'roads': [curve(r) for r in lay['roads']],

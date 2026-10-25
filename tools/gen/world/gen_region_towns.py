@@ -301,12 +301,49 @@ def outskirts_shrine():
     return bp
 
 
+def outskirts_dock():
+    """はじまりの島の船着き場: 板の桟橋・小さな屋根・吊り鐘・渡し舟の飾り・札。桟橋の先 (印 ferry) に立つと鐘の都へ渡る (ContinentOutskirts)"""
+    bp = BP('outskirts_dock')
+    for x in range(-5, 6):
+        for z in range(-4, 5):
+            bp.set(x, -1, z, 'minecraft:coarse_dirt' if (x * z) % 3 else 'minecraft:gravel')
+    # 桟橋 (東へ)
+    for x in range(-1, 6):
+        for z in (-1, 0, 1):
+            bp.set(x, -1, z, 'minecraft:spruce_planks')
+    for x in (0, 3, 5):
+        for z in (-2, 2):
+            bp.fill(x, 0, z, x, 1, z, 'minecraft:spruce_fence')
+    # 渡し舟 (桟橋の北の脇に、板と階段の舟の形)
+    for x in range(1, 6):
+        bp.set(x, -1, -3, 'minecraft:spruce_slab[type=top,waterlogged=false]')
+    bp.set(0, -1, -3, stairs('minecraft:spruce_stairs', 'east'))
+    bp.set(6, -1, -3, stairs('minecraft:spruce_stairs', 'west'))
+    # 小さな屋根と吊り鐘
+    for x, z in ((-4, -3), (-4, 3), (-1, -3), (-1, 3)):
+        bp.fill(x, 0, z, x, 2, z, 'minecraft:spruce_log[axis=y]')
+    for x in range(-5, 1):
+        for z in range(-4, 5):
+            bp.set(x, 3, z, 'minecraft:spruce_slab[type=bottom,waterlogged=false]')
+    bp.set(-2, 2, 0, 'minecraft:bell[attachment=ceiling,facing=east,powered=false]')
+    bp.set(-3, 0, -2, 'minecraft:barrel[facing=up,open=false]')
+    bp.set(-3, 0, 2, 'minecraft:barrel[facing=up,open=false]')
+    bp.set(5, 2, 2, 'minecraft:lantern[hanging=false,waterlogged=false]')
+    bp.set(5, 2, -2, 'minecraft:lantern[hanging=false,waterlogged=false]')
+    bp.set(1, 0, 2, 'minecraft:oak_sign[rotation=4,waterlogged=false]')
+    bp.mark('sign', 1, 0, 2)
+    bp.mark('ferry', 4, 0, 0)
+    bp.mark('stand', -2, 0, 0)
+    bp.meta_rect = 6
+    return bp
+
+
 def main():
     os.makedirs(OUT, exist_ok=True)
     for region in PALETTES:
         n = town(region).save()
         print(f'town_{region}: {n} blocks')
-    for bp in (outskirts_fire(), outskirts_shrine()):
+    for bp in (outskirts_fire(), outskirts_shrine(), outskirts_dock()):
         print(f'{bp.name}: {bp.save()} blocks')
 
 

@@ -34,12 +34,30 @@ public final class ContinentRespawn {
                 out.add(r);
             }
         }
-        for (String kind : new String[] {"shelter", "camp"}) {
+        for (String kind : new String[] {"shelter"}) {
             for (SiteData.Entry e : data.entries(kind)) {
                 if (e.built) {
                     BlockPos stand = e.extra("stand");
                     out.add(stand != null ? stand : e.pos);
                 }
+            }
+        }
+        return out;
+    }
+
+    // はじまりの島の休み場 (野営地と、道ぞいの祠)
+    public static List<BlockPos> islandRests(ServerLevel over) {
+        SiteData data = SiteData.get(over);
+        List<BlockPos> out = new ArrayList<>();
+        for (SiteData.Entry e : data.entries("camp")) {
+            if (e.built) {
+                BlockPos stand = e.extra("stand");
+                out.add(stand != null ? stand : e.pos);
+            }
+        }
+        for (SiteData.Entry e : data.entries(ContinentOutskirts.KIND)) {
+            if (e.built && e.index == 1) {
+                out.add(e.pos);
             }
         }
         return out;
@@ -70,7 +88,9 @@ public final class ContinentRespawn {
         if (death == null || death.dimension() != Level.OVERWORLD) {
             return;
         }
-        BlockPos at = nearest(rests(over), death.pos());
+        // 島を出た人は、島の休み場 (野営地・道ぞいの祠) では目覚めない。まだの人は島の中だけ
+        List<BlockPos> rests = ContinentOutskirts.ferried(player) ? rests(over) : islandRests(over);
+        BlockPos at = nearest(rests, death.pos());
         if (at != null) {
             player.teleportTo(over, at.getX() + 0.5, at.getY(), at.getZ() + 0.5, player.getYRot(), player.getXRot());
         }

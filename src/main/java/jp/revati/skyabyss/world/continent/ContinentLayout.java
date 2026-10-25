@@ -24,6 +24,7 @@ public final class ContinentLayout {
 
     private final BlockPos capital;
     private final BlockPos start;
+    private final BlockPos dock;
     private final Map<String, BlockPos> towns = new HashMap<>();
     private final Map<String, BlockPos> sites = new HashMap<>();
     private final List<List<BlockPos>> roads = new ArrayList<>();
@@ -38,6 +39,7 @@ public final class ContinentLayout {
     private ContinentLayout(JsonObject o) {
         capital = pos(o.getAsJsonArray("capital"));
         start = pos(o.getAsJsonArray("start"));
+        dock = o.has("dock") ? pos(o.getAsJsonArray("dock")) : start;
         for (Map.Entry<String, JsonElement> e : o.getAsJsonObject("towns").entrySet()) {
             towns.put(e.getKey(), pos(e.getValue().getAsJsonArray()));
         }
@@ -94,6 +96,11 @@ public final class ContinentLayout {
 
     public BlockPos start() {
         return start;
+    }
+
+    // はじまりの島の船着き場 (ここから鐘の都へ渡る)
+    public BlockPos dock() {
+        return dock;
     }
 
     // 章の id ("titan_whale" など。Chapters.id()) か、"whale" などの短い名前

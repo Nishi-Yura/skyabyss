@@ -66,8 +66,12 @@ public final class ContinentSelfTest {
                 }
             }
             // 土地ごとの敵の強さ: 都のまわりのゾンビは体力 11・攻撃 1.5、灰の荒野は 42・5.4。二度かけても変わらない
-            if (map.region(-450, 0) != ContinentMap.MEADOW || map.region(-760, 560) != ContinentMap.OUTSKIRTS) {
-                f.add("regions: capital " + map.region(-450, 0) + " start " + map.region(-760, 560));
+            // はじまりの島 (野営地のそば) は外れの土地で陸。大陸とは海で離れている (島と都のあいだの中ほどは海)
+            BlockPos start = ContinentLayout.get().start();
+            if (map.region(-450, 0) != ContinentMap.MEADOW || map.region(start.getX(), start.getZ()) != ContinentMap.OUTSKIRTS
+                    || map.surface(start.getX(), start.getZ()) < ContinentChunkGenerator.SEA_LEVEL || map.surface(-1465, 1420) >= ContinentChunkGenerator.SEA_LEVEL - 1) {
+                f.add("regions: capital " + map.region(-450, 0) + " start " + map.region(start.getX(), start.getZ()) + " Y " + map.surface(start.getX(), start.getZ())
+                        + " strait Y " + map.surface(-1465, 1420));
             }
             for (int[] r : new int[][] {{ContinentMap.MEADOW, 11, 15}, {ContinentMap.EMBER, 42, 54}}) {
                 net.minecraft.world.entity.monster.Zombie z = new net.minecraft.world.entity.monster.Zombie(level);

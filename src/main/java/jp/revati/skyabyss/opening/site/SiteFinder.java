@@ -276,7 +276,9 @@ public final class SiteFinder {
         if (shelter != null) {
             out.add(new Planned(Kind.SHELTER.id, 0, shelter.pos(), encode(shelter.rot(), shelter.mirror())));
             pathYaw = Math.atan2(shelter.pos().getZ() - camp.getZ(), shelter.pos().getX() - camp.getX());
-            planFootprints(p, out, camp, shelter.pos());
+            // 天と淵の大陸: 野営地ははじまりの島。足跡は島の道ぞい (野営地から船着き場へ)
+            BlockPos printsTo = p.continent() ? jp.revati.skyabyss.world.continent.ContinentLayout.get().dock() : shelter.pos();
+            planFootprints(p, out, camp, printsTo);
         } else {
             SkyAbyss.LOGGER.error("Opening sites: no land for the shelter near {}", camp);
             // 宿りがなくても足跡は要る (足跡の頁の目印): 野営地から東 180 ブロックの仮の宿りを道の向きに使う (first_hour_log B-6)
@@ -334,6 +336,10 @@ public final class SiteFinder {
                 int[] q = stops.get(i);
                 out.add(new Planned(jp.revati.skyabyss.world.continent.ContinentOutskirts.KIND, i, new BlockPos(q[0], p.top(q[0], q[1]) + 1, q[1]), 0));
             }
+            // 船着き場 (島の道の終わり。ここから鐘の都へ渡る)
+            BlockPos dock = jp.revati.skyabyss.world.continent.ContinentLayout.get().dock();
+            out.add(new Planned(jp.revati.skyabyss.world.continent.ContinentOutskirts.KIND, jp.revati.skyabyss.world.continent.ContinentOutskirts.DOCK,
+                    new BlockPos(dock.getX(), p.top(dock.getX(), dock.getZ()) + 1, dock.getZ()), 0));
         }
         SkyAbyss.LOGGER.info("Opening sites planned in {} ms ({} height queries, {} ms): camp {} shelter {} ribs {} ({} entries)", (System.nanoTime() - t0) / 1_000_000L,
                 p.queries, p.nanos / 1_000_000L, camp, shelter == null ? "-" : shelter.pos(), ribs == null ? "-" : ribs.pos(), out.size());
