@@ -21,6 +21,7 @@ ROOT = Path(__file__).resolve().parents[2]
 GENERATORS = """
 tools/gen/world/gen_continent.py
 tools/gen/world/gen_region_towns.py
+tools/gen/world/gen_continent_pois.py
 tools/gen/story/gen_story_quests.py
 tools/gen/story/gen_free_quests.py
 tools/gen/story/gen_town_quests.py

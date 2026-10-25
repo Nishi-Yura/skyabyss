@@ -1,0 +1,90 @@
+# 天と淵の大陸の見どころ (gen_continent_pois.py)。種類ごとに一つずつ撮る
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/continent_pois.txt -PshotsName=continent_pois
+world continent_pois continent
+size 1600 900
+timeout 2400
+render 8
+clouds off
+guiscale 2
+wait 100
+cmd skyabyss cinematic stop
+cmd time set 5000
+cmd weather clear
+cmd gamerule doDaylightCycle false
+cmd gamerule doMobSpawning false
+cmd skyabyss dev opening build
+wait 200
+cmd gamemode creative
+hud off
+cmd tp @s -2 113 -522 135 30
+waitchunks 600
+wait 240
+shot windmill
+cmd tp @s -470 95 334 135 30
+waitchunks 600
+wait 240
+shot farm
+cmd tp @s -574 96 638 135 30
+waitchunks 600
+wait 240
+shot watchtower
+cmd tp @s 42 98 -286 135 30
+waitchunks 600
+wait 240
+shot roadside_shrine
+cmd tp @s -254 98 730 135 30
+waitchunks 600
+wait 240
+shot bandit_camp
+cmd tp @s -254 93 -174 135 30
+waitchunks 600
+wait 240
+shot ruined_house
+cmd tp @s -290 127 -846 135 30
+waitchunks 600
+wait 240
+shot titan_ribs
+cmd tp @s 190 122 -666 135 30
+waitchunks 600
+wait 240
+shot monastery
+cmd tp @s 366 124 -1118 135 30
+waitchunks 600
+wait 240
+shot stone_circle
+cmd tp @s 1014 83 334 135 30
+waitchunks 600
+wait 240
+shot lighthouse
+cmd tp @s 1574 84 422 135 30
+waitchunks 600
+wait 240
+shot beached_wreck
+cmd tp @s 1146 84 -126 135 30
+waitchunks 600
+wait 240
+shot fishing_huts
+cmd tp @s -1230 178 290 135 30
+waitchunks 600
+wait 240
+shot wind_gate
+cmd tp @s -1082 181 -178 135 30
+waitchunks 600
+wait 240
+shot rod_tower
+cmd tp @s -1274 163 2 135 30
+waitchunks 600
+wait 240
+shot mountain_hut
+cmd tp @s -526 103 1030 135 30
+waitchunks 600
+wait 240
+shot burnt_fort
+cmd tp @s 222 116 902 135 30
+waitchunks 600
+wait 240
+shot forge_ruin
+cmd tp @s -270 95 1334 135 30
+waitchunks 600
+wait 240
+shot basalt_gate

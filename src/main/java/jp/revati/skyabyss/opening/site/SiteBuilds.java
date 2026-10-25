@@ -73,6 +73,26 @@ public final class SiteBuilds {
         return QUEUE.size();
     }
 
+    // ほかの仕組み (大陸の見どころ) が建てる物を足す。同じ場所をもう待っていれば足さない
+    public static synchronized boolean enqueue(SiteJob job) {
+        for (SiteJob j : QUEUE) {
+            if (j.entry == job.entry) {
+                return false;
+            }
+        }
+        QUEUE.add(job);
+        return true;
+    }
+
+    public static synchronized boolean queued(SiteData.Entry e) {
+        for (SiteJob j : QUEUE) {
+            if (j.entry == e) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     // ---------------------------------------------------------------- 起動
     @SubscribeEvent
     static void onServerStarted(ServerStartedEvent event) {

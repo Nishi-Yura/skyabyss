@@ -39,10 +39,10 @@ REGION_IDS = ['meadow', 'start', 'whale', 'tide', 'storm', 'ember']
 
 # 土地ごとの (なだらかな高さ, 起伏)。ブロック
 SHAPE = {
-    'meadow': (8, 7),
+    'meadow': (10, 15),
     'start': (10, 9),
-    'whale': (26, 26),
-    'tide': (4, 5),
+    'whale': (28, 30),
+    'tide': (5, 9),
     'storm': (55, 45),
     'ember': (18, 16),
 }
@@ -208,6 +208,10 @@ def build(key=CHOSEN, seed=7):
     mountain = wk.get('storm', 0) * 1.0 + wk.get('whale', 0) * 0.35
     y = (65 + c ** 0.6 * base + hills * rough * c ** 0.5 + ridge * 95 + fine * 3 * c
          + mid * rough * 0.6 * c + ridged * mountain * 38 * c + ridge * ridged * 30)
+    # 岩の小山 (野・丘陵・浜に、ところどころ。2026-10-25「平原ばかりで何もない」)。とがった岩肌は段差で石になる
+    knoll = np.clip((fbm(seed + 60, octaves=3, base=70, n=SIZE) - 0.16) * 7, 0, 1) ** 2
+    lowland = wk.get('meadow', 0) + wk.get('whale', 0) * 0.7 + wk.get('tide', 0) * 0.5
+    y = y + knoll * 14 * lowland * c
     # 灰の荒野: 段の付いた台地 (メサ)。ところどころに高い台
     ember = wk.get('ember', 0)
     mesa = np.clip(fbm(seed + 15, octaves=4, base=22, n=SIZE) * 3 - 0.2, 0, 1) * 26
