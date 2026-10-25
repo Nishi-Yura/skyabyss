@@ -305,6 +305,15 @@ public final class OpeningDirector {
         String id = OpeningLogic.objective(st, facts, env);
         // 目印は人ごと・今の目的ごとに決める (宿りの鐘と鯨追いの焚き火を取り違えない)。目印が変わったら送り直す
         BlockPos target = target(level, id);
+        // 天と淵の大陸: はじまりの島にいるあいだ (渡し船に乗る前)、都の側を指す目的は船着き場を指す (帳面を拾う前の目的はそのまま)
+        if (!id.isEmpty() && !id.equals("examine_camp") && !jp.revati.skyabyss.world.continent.ContinentOutskirts.ferried(player)
+                && level.getChunkSource().getGenerator() instanceof jp.revati.skyabyss.world.continent.ContinentChunkGenerator) {
+            BlockPos ferry = jp.revati.skyabyss.world.continent.ContinentOutskirts.ferryPos(level);
+            if (ferry != null) {
+                id = "take_ferry";
+                target = ferry;
+            }
+        }
         long tl = target == null ? Long.MIN_VALUE : target.asLong();
         if (id.equals(st.sentObjective) && tl == st.sentTarget && now - st.sentAt < RESEND) {
             return;

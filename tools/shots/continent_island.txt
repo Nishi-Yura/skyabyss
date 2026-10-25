@@ -1,0 +1,41 @@
+# はじまりの島 → 渡し船 → 鐘の都 (docs/design/40 の 4 章)
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/continent_island.txt -PshotsName=continent_island
+world continent_island continent
+size 1600 900
+timeout 2000
+render 10
+guiscale 2
+wait 100
+cmd skyabyss cinematic stop
+cmd time set 4000
+cmd weather clear
+cmd gamerule doDaylightCycle false
+cmd skyabyss dev opening build
+wait 300
+cmd gamemode spectator
+hud off
+cmd tp @s -1940 102 1860 200 40
+waitchunks 600
+wait 200
+shot island_camp
+cmd tp @s -1745 140 1830 180 50
+waitchunks 600
+wait 200
+shot island_path
+cmd tp @s -1574 78 1734 225 30
+waitchunks 600
+wait 200
+shot island_dock
+cmd gamemode adventure
+hud on
+cmd tp @s -1574 76 1716
+wait 100
+shot after_ferry
+open travel_map
+wait 40
+mapscale 2400
+wait 20
+shot map_rect
+mapscale 600
+wait 20
+shot map_rect_near

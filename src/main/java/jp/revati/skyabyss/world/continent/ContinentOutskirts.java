@@ -33,7 +33,7 @@ public final class ContinentOutskirts {
     // 番号 2 は船着き場 (道の割合ではなく、layout.json の dock)
     public static final int DOCK = 2;
     public static final String FERRIED = "skyabyss_ferried";
-    static final double FERRY_RADIUS = 2.5;
+    static final double FERRY_RADIUS = 3.5;
     static final double[] AT = {0.4, 0.7};
     static final int OFFSET = 8;
     static final double HEAL_RADIUS = 4.5;
@@ -125,6 +125,18 @@ public final class ContinentOutskirts {
         });
     }
 
+    // 船着き場の桟橋の先 (建っていなければ図の船着き場)
+    @org.jetbrains.annotations.Nullable
+    public static BlockPos ferryPos(ServerLevel over) {
+        for (SiteData.Entry e : SiteData.get(over).entries(KIND)) {
+            if (e.index == DOCK) {
+                BlockPos f = e.extra("ferry");
+                return f != null ? f : e.pos;
+            }
+        }
+        return null;
+    }
+
     public static boolean ferried(ServerPlayer p) {
         return p.getPersistentData().getBoolean(FERRIED);
     }
@@ -161,7 +173,7 @@ public final class ContinentOutskirts {
         if (!ferried(p)) {
             for (SiteData.Entry e : SiteData.get(p.serverLevel()).entries(KIND)) {
                 BlockPos f = e.extra("ferry");
-                if (e.built && f != null && f.distToCenterSqr(p.position()) <= FERRY_RADIUS * FERRY_RADIUS) {
+                if (e.built && f != null && Math.hypot(p.getX() - (f.getX() + 0.5), p.getZ() - (f.getZ() + 0.5)) <= FERRY_RADIUS && Math.abs(p.getY() - f.getY()) < 4) {
                     ferry(p);
                     return;
                 }

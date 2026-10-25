@@ -211,7 +211,7 @@ public final class ContinentChunkGenerator extends ChunkGenerator {
                     int upto = Math.max(top, SEA_LEVEL - 1);
                     BlockState road = road(roads, x, z);
                     // 道が川を渡る所は、水面に板の橋
-                    boolean bridge = road != null && top < SEA_LEVEL - 1;
+                    boolean bridge = road != null && top < SEA_LEVEL - 1 && biome == ContinentBiomes.RIVER;
                     for (int y = minY; y <= upto; y++) {
                         BlockState st = y <= top ? (y == top && road != null && !bridge ? road : solid(x, y, z, top, sl, biome))
                                 : bridge && y == SEA_LEVEL - 1 ? BRIDGE : WATER;
