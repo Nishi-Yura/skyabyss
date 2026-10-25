@@ -1,0 +1,29 @@
+# 都の確かめ (鍛冶場の正面の口・大通りの灯り)。2026-10-25
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/capital_check.txt -PshotsName=capital_check
+world capital_check normal
+size 1600 900
+timeout 1500
+render 8
+guiscale 2
+wait 100
+cmd skyabyss cinematic stop
+cmd time set 5000
+cmd weather clear
+cmd gamerule doDaylightCycle false
+cmd skyabyss dev opening build
+wait 300
+cmd gamemode spectator
+hud off
+cmd skyabyss dev opening at shelter 0 17 3 34 180 8
+waitchunks 400
+wait 100
+shot smithy_front
+cmd skyabyss dev opening at shelter 0 -2 3 70 180 6
+wait 60
+shot avenue_south
+cmd skyabyss dev opening at shelter 0 60 4 -2 90 6
+wait 60
+shot avenue_east
+cmd time set 18000
+wait 40
+shot avenue_east_night
