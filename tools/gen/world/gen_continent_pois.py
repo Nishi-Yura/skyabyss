@@ -669,36 +669,32 @@ BUILDERS['signpost'] = signpost
 
 
 def hamlet(region):
-    """小さな集落: 家三つ (土地の作り)・井戸・畑・薪の山。町より小さく、人はいない (のちに頼みの人を置く)"""
-    from gen_region_towns import PALETTES, house, tree
-    pal = dict(PALETTES['whale' if region == 'meadow' else region])
-    if region == 'meadow':
-        pal.update({'wall': 'minecraft:oak_planks', 'frame': 'minecraft:stripped_oak_log[axis=y]', 'roof': 'minecraft:dark_oak_stairs',
-                    'ridge': 'minecraft:dark_oak_slab[type=bottom,waterlogged=false]', 'door': 'minecraft:oak_door', 'fence': 'minecraft:oak_fence'})
+    """小さな集落: 木組みの家三つ (町と同じ作り。土地の色)・井戸・畑・薪の山・街灯一つ。町より小さく、人はいない (のちに頼みの人を置く)"""
+    import town_arch as ta
+    s = ta.STYLES[region]
 
     def build(rng):
         bp = BP('poi_hamlet_' + region)
-        ground(bp, 13, 'minecraft:grass_block[snowy=false]' if region in ('meadow', 'whale') else 'minecraft:coarse_dirt', rng, pal['road'], 0.3)
+        ground(bp, 13, 'minecraft:grass_block[snowy=false]' if region in ('meadow', 'whale') else 'minecraft:coarse_dirt', rng, s['road2'], 0.3)
         for i in range(-12, 13):
-            bp.set(0, -1, i, pal['road'])
-        house(bp, -9, -9, -3, -4, 4, (-6, -4, 'south'), pal, beds=1)
-        house(bp, 3, -10, 10, -4, 4, (6, -4, 'south'), pal, beds=1)
-        house(bp, 3, 4, 9, 9, 3, (6, 4, 'north'), pal, beds=1)
-        bp.fill(-3, 0, 2, -1, 0, 4, pal['well'])
-        bp.set(-2, 0, 3, 'minecraft:water[level=0]')
-        bp.set(-2, -1, 3, pal['well'])
-        for x0 in (-11,):
-            for x in range(x0, x0 + 5):
-                for z in range(4, 10):
-                    if x in (x0, x0 + 4) or z in (4, 9):
-                        bp.set(x, 0, z, pal['fence'])
-                    else:
-                        bp.set(x, -1, z, 'minecraft:farmland[moisture=7]')
-                        bp.set(x, 0, z, 'minecraft:wheat[age=7]' if region != 'ember' else 'minecraft:dead_bush')
-        for x in range(5, 9):
+            for w in (-1, 0, 1):
+                bp.set(w, -1, i, s['road'] if w == 0 or rng.random() < 0.6 else s['road2'])
+        ta.building(bp, s, -10, -10, -3, -4, 2, (-6, -4, 'south'), rng, chimney=True)
+        ta.building(bp, s, 3, -11, 10, -4, 2, (6, -4, 'south'), rng, chimney=True)
+        ta.building(bp, s, 3, 4, 9, 10, 1, (6, 4, 'north'), rng, chimney=False)
+        # 井戸 (屋根付き)
+        bp.fill(-4, 0, 2, -2, 0, 4, s['base2'])
+        bp.set(-3, 0, 3, 'minecraft:water[level=0]')
+        bp.set(-3, -1, 3, s['base2'])
+        for x, z in ((-4, 2), (-2, 2), (-4, 4), (-2, 4)):
+            bp.fill(x, 1, z, x, 2, z, s['fence'])
+        bp.fill(-4, 3, 2, -2, 3, 4, ta.slab(s['roofslab']))
+        ta.farm(bp, s, -12, 6, -6, 11, rng)
+        for x in range(4, 8):
             bp.set(x, 0, -2, 'minecraft:spruce_log[axis=x]')
-        tree(bp, 11, 2, region if region != 'meadow' else 'whale')
-        bp.set(1, 0, -3, 'minecraft:lantern[hanging=false,waterlogged=false]')
+        bp.set(5, 1, -2, 'minecraft:spruce_log[axis=x]')
+        ta.tree(bp, region, 12, 2)
+        ta.lamp(bp, s, 2, -1)
         bp.mark('loot', 7, 0, -8)
         return bp
     return build

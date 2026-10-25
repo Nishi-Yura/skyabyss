@@ -27,6 +27,15 @@ STYLES = {
         'fence': 'minecraft:spruce_fence', 'road': 'minecraft:dirt_path', 'road2': 'minecraft:coarse_dirt', 'pave': 'minecraft:cobblestone',
         'pave2': 'minecraft:stone_bricks', 'lamp': 'minecraft:spruce_fence', 'flat': False, 'bed': 'minecraft:red_bed',
     },
+    'meadow': {  # 都のまわりの野 (小さな集落だけが使う): 丸石の土台、樫の木組み、黒樫の屋根
+        'base': 'minecraft:cobblestone', 'base2': 'minecraft:mossy_cobblestone',
+        'wall': 'minecraft:oak_planks', 'wall2': 'minecraft:stripped_oak_wood[axis=y]',
+        'frame': 'minecraft:stripped_oak_log', 'beam': 'minecraft:oak_log',
+        'roof': 'minecraft:dark_oak_stairs', 'roofslab': 'minecraft:dark_oak_slab', 'roofblock': 'minecraft:dark_oak_planks',
+        'floor': 'minecraft:oak_planks', 'door': 'minecraft:oak_door', 'trap': 'minecraft:oak_trapdoor',
+        'fence': 'minecraft:oak_fence', 'road': 'minecraft:dirt_path', 'road2': 'minecraft:coarse_dirt', 'pave': 'minecraft:cobblestone',
+        'pave2': 'minecraft:stone_bricks', 'lamp': 'minecraft:oak_fence', 'flat': False, 'bed': 'minecraft:green_bed',
+    },
     'tide': {  # 東の浜の港町: 白い壁、青い屋根、砂岩の土台
         'base': 'minecraft:cut_sandstone', 'base2': 'minecraft:smooth_sandstone',
         'wall': 'minecraft:calcite', 'wall2': 'minecraft:white_terracotta',
@@ -596,6 +605,7 @@ def farm(bp, s, x0, z0, x1, z1, rng):
 
 
 TREES = {
+    'meadow': ('minecraft:oak_log[axis=y]', 'minecraft:oak_leaves[distance=1,persistent=true,waterlogged=false]'),
     'whale': ('minecraft:spruce_log[axis=y]', 'minecraft:spruce_leaves[distance=1,persistent=true,waterlogged=false]'),
     'tide': ('minecraft:birch_log[axis=y]', 'minecraft:birch_leaves[distance=1,persistent=true,waterlogged=false]'),
     'storm': ('minecraft:spruce_log[axis=y]', 'minecraft:spruce_leaves[distance=1,persistent=true,waterlogged=false]'),
