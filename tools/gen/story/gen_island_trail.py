@@ -48,6 +48,11 @@ OPENING = {
 }
 
 MAIN = {
+    # 島の道の分かれ目の札 (IslandTrail.buildSigns)
+    'sign.skyabyss.island.prints': ('足跡の窪地', 'Footprint Hollow'),
+    'sign.skyabyss.island.bandits': ('野盗の野営', 'Bandit Camp'),
+    'sign.skyabyss.island.fire': ('旅の休み場', 'Rest Stop'),
+    'sign.skyabyss.island.shrine': ('宿り木の祠', 'Mistletoe Shrine'),
     'message.skyabyss.island.bandit_count': ('野盗を退けた %s / %s', 'Bandits driven off %s / %s'),
     'message.skyabyss.island.bandits_done': ('峠の野盗を退けた。柵が開いた', 'The bandits at the pass are gone. The barricade is open'),
     'message.skyabyss.island.gate_open': ('峠の柵が開いた', 'The barricade at the pass is open'),

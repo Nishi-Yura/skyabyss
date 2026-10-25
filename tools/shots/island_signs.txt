@@ -1,0 +1,35 @@
+# 島の道の分かれ目の札
+world opening_island_story continent
+size 1600 900
+timeout 1500
+render 12
+guiscale 2
+waitchunks 300
+wait 40
+cmd skyabyss island reset
+cmd time set 3000
+cmd weather clear
+cmd tp @s -1830.2 100 1754.4 143 15
+waitchunks 200
+wait 60
+cmd execute at @s run tp @s ~ ~ ~ ~ 15
+wait 40
+shot sign_prints
+cmd tp @s -1748.4 100 1775.0 -7 15
+waitchunks 200
+wait 60
+cmd execute at @s run tp @s ~ ~ ~ ~ 15
+wait 40
+shot sign_bandits
+cmd tp @s -1672.3 100 1755.0 -174 15
+waitchunks 200
+wait 60
+cmd execute at @s run tp @s ~ ~ ~ ~ 15
+wait 40
+shot sign_fire
+cmd tp @s -1638.1 100 1737.9 -45 15
+waitchunks 200
+wait 60
+cmd execute at @s run tp @s ~ ~ ~ ~ 15
+wait 40
+shot sign_shrine

@@ -85,17 +85,17 @@ public final class Scenes {
     }
 
     // 開幕 (36 秒)。0〜10 秒: 暗闇からまぶたが開き、地面に寝た目線で空を見上げる。10〜20 秒: 起き上がるように空へ昇って主人公を見下ろす
-    // (題字)。20〜29 秒: 地平と空の高さを見渡す。29〜36 秒: 主人公の目に戻り、最初の目的 (煙の立つ方) を向いて操作へ
+    // (題字)。20〜29 秒: 高く引いて、はじまりの島の谷と道の先を見渡す (2026-10-26)。29〜36 秒: 主人公の目に戻り、最初の目的を向いて操作へ
     private static Scene opening() {
         return Scene.of(OPENING).intro().handBack().seamless()
                 .shot(Shot.of(10f).pos(1.1, 0.3, 0.8).posTo(1.4, 0.5, 1.0)
                         .look(Look.frame(0, 45, 10)).lookTo(Look.frame(0, 40, 24)).fov(62f, 66f).sway(0.5f).build())
                 .shot(Shot.of(10f).pos(1.4, 0.5, 1.0).posTo(4.0, 6.0, -8.0)
                         .look(Look.frame(0, 40, 24)).lookTo(Look.frame(0, 1.3, 0)).fov(66f, 70f).ease(Ease.SMOOTHER).sway(0.2f).build())
-                .shot(Shot.of(9f).pos(4.0, 6.0, -8.0).posTo(-5.0, 11.0, -14.0)
-                        .look(Look.frame(0, 1.3, 0)).lookTo(Look.frame(0, 26, 180)).fov(70f, 78f).sway(0.2f).build())
-                .shot(Shot.of(7f).pos(-5.0, 11.0, -14.0).posTo(0.0, CameraMath.EYE, 0.0)
-                        .look(Look.frame(0, 26, 180)).lookTo(Look.frame(0, 8, 100)).fov(78f, 70f).ease(Ease.SMOOTH).build())
+                .shot(Shot.of(9f).pos(4.0, 6.0, -8.0).posTo(-16.0, 30.0, -24.0)
+                        .look(Look.frame(0, 1.3, 0)).lookTo(Look.frame(0, 6, 160)).fov(70f, 80f).ease(Ease.SMOOTHER).sway(0.2f).build())
+                .shot(Shot.of(7f).pos(-16.0, 30.0, -24.0).posTo(0.0, CameraMath.EYE, 0.0)
+                        .look(Look.frame(0, 6, 160)).lookTo(Look.frame(0, 8, 100)).fov(80f, 70f).ease(Ease.SMOOTH).build())
                 .line(10.5f, 4.2f, Speaker.HERO, "opening.skyabyss.line")
                 .line(15.2f, 4.6f, Speaker.HERO, "cinematic.skyabyss.opening.hero2")
                 .line(21.0f, 4.6f, Speaker.HEAVEN, "cinematic.skyabyss.opening.heaven1")

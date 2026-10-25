@@ -1,4 +1,8 @@
 {
+  "sign.skyabyss.island.prints": "足跡の窪地",
+  "sign.skyabyss.island.bandits": "野盗の野営",
+  "sign.skyabyss.island.fire": "旅の休み場",
+  "sign.skyabyss.island.shrine": "宿り木の祠",
   "message.skyabyss.island.bandit_count": "野盗を退けた %s / %s",
   "message.skyabyss.island.bandits_done": "峠の野盗を退けた。柵が開いた",
   "message.skyabyss.island.gate_open": "峠の柵が開いた",

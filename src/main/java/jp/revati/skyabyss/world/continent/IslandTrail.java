@@ -197,6 +197,7 @@ public final class IslandTrail {
             setReady(p, true);
         }
         buildGate(level);
+        buildSigns(level);
         BlockPos ferry = ContinentOutskirts.ferryPos(level);
         if (ferry != null && ferry.distToCenterSqr(p.position()) < 80 * 80) {
             jp.revati.skyabyss.town.RegionFolk.ensure(level, "island", "dock", ferry);
@@ -357,6 +358,69 @@ public final class IslandTrail {
                 Notice.hint(q, "message.skyabyss.island.gate_open");
             }
         }
+    }
+
+    // ---------------------------------------------------------------- 道の分かれ目の札 (Wynncraft の道しるべのように。首の入口から 5 入った所に、道の方を向けて)
+    static final String SIGNS_KIND = "island_signs";
+
+    static void buildSigns(ServerLevel level) {
+        SiteData data = SiteData.get(level);
+        SiteData.Entry e = data.first(SIGNS_KIND);
+        if (e == null) {
+            BlockPos g = ContinentLayout.get().island("gate");
+            if (g == null) {
+                return;
+            }
+            e = data.add(SIGNS_KIND, 0, g, 0);
+            e.built = true;
+            data.setDirty();
+        }
+        int i = 0;
+        for (Map.Entry<BlockPos, String> s : ContinentLayout.get().islandSigns().entrySet()) {
+            String done = "s" + i++;
+            if (e.extra(done) != null) {
+                continue;
+            }
+            BlockPos at = s.getKey();
+            BlockPos to = signTarget(s.getValue());
+            if (to == null || !level.isLoaded(at)) {
+                continue;
+            }
+            double dx = to.getX() - at.getX();
+            double dz = to.getZ() - at.getZ();
+            double len = Math.max(1, Math.hypot(dx, dz));
+            int x = (int) Math.round(at.getX() + dx / len * 5);
+            int z = (int) Math.round(at.getZ() + dz / len * 5);
+            int y = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z);
+            BlockPos p = new BlockPos(x, y, z);
+            if (!level.getBlockState(p).canBeReplaced()) {
+                e.extra(done, p);
+                continue;
+            }
+            // 札の表は道の方 (行き先と逆の向き)。回転 0 = 南向き、16 段
+            double face = Math.toDegrees(Math.atan2(dx / len, -dz / len));
+            int rot = Math.floorMod((int) Math.round(face / 22.5), 16);
+            level.setBlock(p, Blocks.SPRUCE_SIGN.defaultBlockState().setValue(net.minecraft.world.level.block.StandingSignBlock.ROTATION, rot), 3);
+            if (level.getBlockEntity(p) instanceof net.minecraft.world.level.block.entity.SignBlockEntity be) {
+                be.setText(new net.minecraft.world.level.block.entity.SignText()
+                        .setMessage(1, Component.translatable("sign.skyabyss.island." + s.getValue()))
+                        .setMessage(2, Component.literal("→")), true);
+                be.setWaxed(true);
+                be.setChanged();
+                level.sendBlockUpdated(p, be.getBlockState(), be.getBlockState(), 3);
+            }
+            e.extra(done, p);
+            data.setDirty();
+        }
+    }
+
+    @Nullable
+    static BlockPos signTarget(String name) {
+        ContinentLayout lay = ContinentLayout.get();
+        return switch (name) {
+            case "prints" -> lay.islandPrints().isEmpty() ? null : lay.islandPrints().get(0);
+            default -> lay.island(name);
+        };
     }
 
     public static boolean gateOpen(ServerLevel level) {

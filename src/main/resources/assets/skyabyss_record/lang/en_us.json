@@ -149,7 +149,7 @@
   "skyabyss_record.d.slot_empty": "(empty)",
   "skyabyss_record.d.respecs": "Respecs at the Resonance Forge. The first is free; later ones cost resonance crystals.",
   "skyabyss_record.d.quest_missing": "This quest's definition is missing (a datapack was removed?).",
-  "skyabyss_record.d.quests_none": "Talk to a village storyteller to begin.",
+  "skyabyss_record.d.quests_none": "Talk to the storyteller in the capital to begin.",
   "skyabyss_record.d.affinity": "Affinity ranges %s to %s. Talking raises it a little.",
   "skyabyss_record.d.talks": "Times talked: %s",
   "skyabyss_record.d.lore_total": "Written by reading carvings and torn pages, witnessing events and listening.",

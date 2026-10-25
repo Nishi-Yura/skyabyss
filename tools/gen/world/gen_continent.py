@@ -563,7 +563,9 @@ def write_layout(lay, height=None):
     if plan:
         pk = {n: pt(c) for n, c, _, _ in plan['pockets']}
         out['island'] = {'gate': pt(plan['gate']), 'prints': [pt(p) for p in plan['prints']], 'fire': pk['fire'], 'shrine': pk['shrine'],
-                         'bandits': pk['bandits'], 'prints_view': pt(plan['necks'][0][0])}
+                         'bandits': pk['bandits'], 'prints_view': pt(plan['necks'][0][0]),
+                         # 道の分かれ目の札 (首の道の側の端。[x, z, 行き先])。行き先は lang の sign.skyabyss.island.<行き先>
+                         'signs': [pt(a) + [name] for (a, _, _), name in zip(plan['necks'], ['prints', 'bandits', 'fire', 'shrine'])]}
     with open(os.path.join(OUT, 'layout.json'), 'w', encoding='utf8', newline='\n') as f:
         json.dump(out, f, ensure_ascii=False, separators=(',', ':'))
         f.write('\n')

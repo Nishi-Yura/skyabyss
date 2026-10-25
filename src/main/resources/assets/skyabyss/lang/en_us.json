@@ -1,4 +1,8 @@
 {
+  "sign.skyabyss.island.prints": "Footprint Hollow",
+  "sign.skyabyss.island.bandits": "Bandit Camp",
+  "sign.skyabyss.island.fire": "Rest Stop",
+  "sign.skyabyss.island.shrine": "Mistletoe Shrine",
   "message.skyabyss.island.bandit_count": "Bandits driven off %s / %s",
   "message.skyabyss.island.bandits_done": "The bandits at the pass are gone. The barricade is open",
   "message.skyabyss.island.gate_open": "The barricade at the pass is open",

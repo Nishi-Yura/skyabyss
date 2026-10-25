@@ -149,7 +149,7 @@
   "skyabyss_record.d.slot_empty": "（空き）",
   "skyabyss_record.d.respecs": "共鳴の炉のそばで振り直した回数。初回は無料で、以後は共鳴の結晶が要る。",
   "skyabyss_record.d.quest_missing": "このクエストの定義が見つからない（データパックを外したなど）。",
-  "skyabyss_record.d.quests_none": "村の語り部に話を聞くと始まる。",
+  "skyabyss_record.d.quests_none": "都の語り部に話を聞くと始まる。",
   "skyabyss_record.d.affinity": "好感度は %s〜%s。話すと少しずつ上がる。",
   "skyabyss_record.d.talks": "話した回数：%s",
   "skyabyss_record.d.lore_total": "碑文を読む、破れた頁を読む、出来事に立ち会う、話を聞くと記される。",
