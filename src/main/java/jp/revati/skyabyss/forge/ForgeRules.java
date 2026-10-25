@@ -95,7 +95,8 @@ public final class ForgeRules {
     // 材料の枠に置かれたものが穴へ差せるものなら、その中身 (欠片・ルーン)。差せないものは null
     public static jp.revati.skyabyss.item.extra.Gem gemOf(ItemStack material) {
         if (material.getItem() instanceof jp.revati.skyabyss.item.extra.GearFreedomItems.ElementShard shard) {
-            return new jp.revati.skyabyss.item.extra.Gem(jp.revati.skyabyss.item.extra.Gem.SHARD, shard.element.id, 0);
+            return new jp.revati.skyabyss.item.extra.Gem(jp.revati.skyabyss.item.extra.Gem.SHARD, shard.element.id,
+                    jp.revati.skyabyss.item.extra.Powder.tier(material));
         }
         jp.revati.skyabyss.item.extra.RuneData d = jp.revati.skyabyss.item.extra.GearFreedomItems.runeOf(material);
         if (material.is(ModItems.SKILL_RUNE.get()) && d != null && d.valid()) {
@@ -108,7 +109,8 @@ public final class ForgeRules {
     public static ItemStack gemItem(jp.revati.skyabyss.item.extra.Gem gem) {
         if (gem.isShard()) {
             jp.revati.skyabyss.item.extra.Element e = jp.revati.skyabyss.item.extra.Element.byId(gem.arg());
-            return e == null ? ItemStack.EMPTY : new ItemStack(ModItems.socketShard(e).get());
+            return e == null ? ItemStack.EMPTY
+                    : jp.revati.skyabyss.item.extra.Powder.withTier(new ItemStack(ModItems.socketShard(e).get()), jp.revati.skyabyss.item.extra.Powder.tier(gem));
         }
         return jp.revati.skyabyss.item.extra.GearFreedomItems.rune(jp.revati.skyabyss.item.extra.RuneData.fromGem(gem));
     }

@@ -139,6 +139,27 @@ public final class GearFreedomSelfTest {
         ItemStack back = ForgeRules.removeGem(p, s2, 0);
         check(f, back.is(ModItems.SOCKET_SHARD_STONE.get()) && GearFreedom.freeSockets(s2) == 1, "unsocket failed");
         check(f, ForgeRules.count(p, ModItems.RESONANCE_CRYSTAL.get()) == before - 1, "unsocket did not cost a crystal");
+        // ---- 巨神の粉 (docs/design/41): 段は数字に掛かる・外すと段のまま戻る・段の和 4 で粉の技・三つで一つ上の段
+        ItemStack ps = rolled(ModItems.WHALEBONE_GREATSWORD.get(), 2);
+        double sharpBase = AffixRules.value(ps, AffixType.SHARP);
+        ForgeRules.insertGem(ps, Powder.withTier(new ItemStack(ModItems.SOCKET_SHARD_STONE.get()), 2));
+        check(f, Math.abs(AffixRules.value(ps, AffixType.SHARP) - (sharpBase + 0.04)) < 1e-9, "a tier II powder should add twice the attack");
+        check(f, Powder.art(ps) == null, "one tier II powder should not wake the powder art");
+        ForgeRules.insertGem(ps, Powder.withTier(new ItemStack(ModItems.SOCKET_SHARD_STONE.get()), 2));
+        check(f, Powder.art(ps) == Element.STONE, "two tier II stone powders should wake the stone art");
+        p.getInventory().setItem(20, new ItemStack(ModItems.RESONANCE_CRYSTAL.get(), 60));
+        ItemStack out = ForgeRules.removeGem(p, ps, 0);
+        check(f, out.is(ModItems.SOCKET_SHARD_STONE.get()) && Powder.tier(out) == 2, "unsocketed powder lost its tier: " + Powder.tier(out));
+        ItemStack three = new ItemStack(ModItems.SOCKET_SHARD_WIND.get(), 3);
+        p.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, three);
+        three.getItem().use(level, p, net.minecraft.world.InteractionHand.MAIN_HAND);
+        boolean gotII = false;
+        for (int i = 0; i < p.getInventory().getContainerSize(); i++) {
+            ItemStack it = p.getInventory().getItem(i);
+            gotII |= it.is(ModItems.SOCKET_SHARD_WIND.get()) && Powder.tier(it) == 2;
+        }
+        check(f, three.isEmpty() && gotII, "three tier I wind powders did not make one tier II");
+        p.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, ItemStack.EMPTY);
         // 打ち直しで穴を足す: 必ず付き、2 で止まる
         ItemStack none = rolled(ModItems.WHALEBONE_GREATSWORD.get(), 0);
         p.getInventory().setItem(21, new ItemStack(ForgeRules.shardItem(none), 40));

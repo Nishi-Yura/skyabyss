@@ -180,7 +180,8 @@ public final class GearFreedom {
         for (Gem g : x.gems()) {
             Element e = g.isShard() ? Element.byId(g.arg()) : null;
             if (e != null) {
-                out.add(slot == AffixType.Slot.WEAPON ? new Affix(e.weapon, e.weaponValue) : new Affix(e.armor, e.armorValue));
+                int t = Powder.tier(g);
+                out.add(slot == AffixType.Slot.WEAPON ? new Affix(e.weapon, e.weaponValue * t) : new Affix(e.armor, e.armorValue * t));
             }
         }
         out.addAll(x.traits());
@@ -418,8 +419,9 @@ public final class GearFreedom {
                 return Component.translatable("affix.skyabyss.unknown").withStyle(ChatFormatting.GRAY);
             }
             AffixType.Slot slot = AffixRules.slotOf(stack.getItem());
-            Affix a = slot == AffixType.Slot.ARMOR ? new Affix(e.armor, e.armorValue) : new Affix(e.weapon, e.weaponValue);
-            return Component.translatable(e.nameKey()).withStyle(s -> s.withColor(TAG_COLOR))
+            int t = Powder.tier(g);
+            Affix a = slot == AffixType.Slot.ARMOR ? new Affix(e.armor, e.armorValue * t) : new Affix(e.weapon, e.weaponValue * t);
+            return Component.translatable(e.nameKey()).append(" " + Powder.roman(t)).withStyle(s -> s.withColor(TAG_COLOR))
                     .append(Component.literal(" ─ ").withStyle(ChatFormatting.DARK_GRAY))
                     .append(AffixRules.describe(a).withStyle(s -> s.withColor(AffixRules.LINE_COLOR)));
         }
