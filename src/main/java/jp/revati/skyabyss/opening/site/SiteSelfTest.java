@@ -236,7 +236,9 @@ public final class SiteSelfTest {
         // 距離
         double ds = OpeningSites.horizontal(camp, shelter);
         double dr = OpeningSites.horizontal(camp, ribs);
-        check(f, ds >= 100 && ds <= 480, "shelter distance " + ds);  // 都: 260〜340、見つからなければ 240〜480 (SiteFinder.findShelter)
+        // 天と淵の大陸: 野営地ははじまりの島、宿り (都) は海の向こう。足跡は島の道 (野営地 → 船着き場) に沿う
+        boolean continent = jp.revati.skyabyss.world.continent.ContinentPois.in(level);
+        check(f, continent || ds >= 100 && ds <= 480, "shelter distance " + ds);  // 都: 260〜340、見つからなければ 240〜480 (SiteFinder.findShelter)
         // 骨: 一章の跡地 (北の丘。docs/design/33 の 3 章) があればその中、なければ野営地から 250〜350 (宿りと違う方角)
         SiteData.Ground whale = SiteData.get(level).ground(jp.revati.skyabyss.story.Chapters.WHALE.id());
         if (whale != null) {
@@ -250,9 +252,12 @@ public final class SiteSelfTest {
         ang = ang > 180 ? 360 - ang : ang;
         check(f, whale != null || ang >= 80, "ribs and shelter are only " + (int) ang + " degrees apart");
         // 足跡: 道から 30〜60 (余裕を見て 24〜70)
+        BlockPos to = continent ? jp.revati.skyabyss.world.continent.ContinentLayout.get().dock() : shelter;
+        double dt = OpeningSites.horizontal(camp, to);
         for (BlockPos p : prints) {
-            double d = SiteFinder.distToPath(p.getX(), p.getZ(), camp, (shelter.getX() - camp.getX()) / ds, (shelter.getZ() - camp.getZ()) / ds, ds);
-            check(f, d >= 20 && d <= 160, "footprint " + p + " is " + (int) d + " from the road");
+            double d = SiteFinder.distToPath(p.getX(), p.getZ(), camp, (to.getX() - camp.getX()) / dt, (to.getZ() - camp.getZ()) / dt, dt);
+            // 大陸の島の道は曲がっているので、まっすぐな線からは近いことも遠いこともある (0〜160)
+            check(f, (continent ? d >= 0 : d >= 20) && d <= 160, "footprint " + p + " is " + (int) d + " from the road");
             // くぼみ: 中心の列の、いちばん上の固い地面 (木の葉は数えない) が、場所の高さ (地面の中央値) より 2 以上低い
             int surfaceY = level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, p.getX(), p.getZ()) - 1;
             check(f, surfaceY <= p.getY() - 2, "footprint " + p + " is not a pit (the surface is at " + surfaceY + ")");
