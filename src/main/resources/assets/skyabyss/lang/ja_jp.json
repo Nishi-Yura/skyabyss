@@ -1,4 +1,7 @@
 {
+  "map.skyabyss.continent.meadow": "鐘の野",
+  "message.skyabyss.area.capital": "旅の始まりの都",
+  "message.skyabyss.area.level": "目安 Lv %s",
   "map.skyabyss.poi.undiscovered": "%s（未発見）",
   "message.skyabyss.poi.discovered": "見どころを見つけた（%s / %s）",
   "growth.skyabyss.reason.discovery": "発見",

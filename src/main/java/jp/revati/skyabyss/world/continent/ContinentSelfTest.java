@@ -67,6 +67,15 @@ public final class ContinentSelfTest {
             if (jp.revati.skyabyss.map.MapMarks.MAX < ContinentPois.all().size() + 60) {
                 f.add("map mark cap " + jp.revati.skyabyss.map.MapMarks.MAX + " is too small for " + ContinentPois.all().size() + " POIs");
             }
+            // 土地と町の名前の札: 町の中・都・土地。町を出るときは少し外まで町のまま (境目で何度も出ない)
+            BlockPos wt = ContinentLayout.get().town("whale");
+            String inTown = ContinentAreas.area(wt.getX(), wt.getZ(), "");
+            String edge = ContinentAreas.area(wt.getX() + 52, wt.getZ(), "town:whale");
+            String edgeFresh = ContinentAreas.area(wt.getX() + 52, wt.getZ(), "region:2");
+            String capArea = ContinentAreas.area(-450, 0, "");
+            if (!inTown.equals("town:whale") || !edge.equals("town:whale") || edgeFresh.startsWith("town") || !capArea.equals("capital")) {
+                f.add("areas: town " + inTown + " edge " + edge + " edge from outside " + edgeFresh + " capital " + capArea);
+            }
             // 地面に四角い穴が無い: 野・浜・荒野のいくつかの所で、まわり (±3) のどれよりも 2 以上低い所を数える
             int pits = 0;
             String firstPit = "";
@@ -140,7 +149,7 @@ public final class ContinentSelfTest {
             f.add("crashed: " + e);
         }
         if (f.isEmpty()) {
-            SkyAbyss.LOGGER.info("SELFTEST continent PASSED (map loads; flat capital at Y 72, inland sea, outer deep sea, western peaks; regional enemy strength; no square pits; outskirts stops avoid footprints; discovery once per POI; map mark cap fits the POIs; real chunks match when the world is a continent)");
+            SkyAbyss.LOGGER.info("SELFTEST continent PASSED (map loads; flat capital at Y 72, inland sea, outer deep sea, western peaks; regional enemy strength; no square pits; outskirts stops avoid footprints; discovery once per POI; area names with town hysteresis; map mark cap fits the POIs; real chunks match when the world is a continent)");
         } else {
             for (String s : f) {
                 SkyAbyss.LOGGER.error("SELFTEST continent FAILED: {}", s);

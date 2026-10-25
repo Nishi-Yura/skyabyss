@@ -1,4 +1,7 @@
 {
+  "map.skyabyss.continent.meadow": "Bell Fields",
+  "message.skyabyss.area.capital": "Where every journey starts",
+  "message.skyabyss.area.level": "Suggested Lv %s",
   "map.skyabyss.poi.undiscovered": "%s (undiscovered)",
   "message.skyabyss.poi.discovered": "Discovery found (%s / %s)",
   "growth.skyabyss.reason.discovery": "Discovery",
