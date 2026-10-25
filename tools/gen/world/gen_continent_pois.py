@@ -629,6 +629,7 @@ def place(height, region, lay, seed=11):
         rid = region_ids.index(rname)
         cand = np.argwhere((region == rid) & land & (slope < 1.6) & (height < 175))
         rng.shuffle(cand)
+        kinds = kinds + kinds  # 二巡 (2026-10-25: まだ寂しい。間は 170 まで詰める)
         placed = 0
         for j, i in cand:
             if placed >= len(kinds):
@@ -642,7 +643,7 @@ def place(height, region, lay, seed=11):
                 continue
             if any(math.hypot(x - p[0], z - p[1]) < r for p, r in avoid):
                 continue
-            if any(math.hypot(x - ox, z - oz) < 230 for _, ox, oz in out):
+            if any(math.hypot(x - ox, z - oz) < 170 for _, ox, oz in out):
                 continue
             if near_road(x, z, 28):
                 continue
@@ -651,6 +652,54 @@ def place(height, region, lay, seed=11):
                 continue
             out.append((kind, int(round(x)), int(round(z))))
             placed += 1
+    return out
+
+
+def signpost(rng):
+    bp = BP('poi_signpost')
+    bp.fill(0, 0, 0, 0, 2, 0, 'minecraft:spruce_fence')
+    bp.set(0, 3, 0, 'minecraft:spruce_fence')
+    bp.set(0, 0, 1, 'minecraft:oak_sign[rotation=0,waterlogged=false]')
+    bp.set(0, 4, 0, 'minecraft:lantern[hanging=false,waterlogged=false]')
+    bp.mark('sign', 0, 0, 1)
+    return bp
+
+
+BUILDERS['signpost'] = signpost
+
+
+def signposts(lay):
+    """道しるべ: 道の中ほど (道のりの半分) の脇に一本。行き先は道の両端 (都・町・跡地・船着き場)"""
+    def name_of(p):
+        if tuple(p) == tuple(lay['capital']):
+            return 'capital'
+        for n, q in lay['towns']:
+            if tuple(q) == tuple(p):
+                return 'town_' + {'鯨見': 'whale', '汐守': 'tide', '風待': 'storm', '灰炉': 'ember'}[n]
+        for n, q in lay['sites']:
+            if tuple(q) == tuple(p):
+                return 'site_' + {'岩鯨の跡地': 'whale', '潮殻の跡地': 'tide', '雷翼の跡地': 'storm', '余燼の跡地': 'ember'}[n]
+        return None
+    out = []
+    for r in lay['roads']:
+        a, b = name_of(r[0]), name_of(r[-1])
+        if a is None or b is None or len(r) < 2:
+            continue
+        seg = [math.dist(r[i], r[i + 1]) for i in range(len(r) - 1)]
+        total = sum(seg)
+        if total < 250:
+            continue
+        want = total / 2
+        for i, L in enumerate(seg):
+            if want <= L:
+                (ax, az), (bx, bz) = r[i], r[i + 1]
+                t = want / L
+                x, z = ax + (bx - ax) * t, az + (bz - az) * t
+                nx, nz = -(bz - az) / L, (bx - ax) / L
+                out.append({'kind': 'signpost', 'x': int(round(x + nx * 6)), 'z': int(round(z + nz * 6)),
+                            'a': a, 'da': int(round(total / 2 / 10) * 10), 'b': b, 'db': int(round(total / 2 / 10) * 10)})
+                break
+            want -= L
     return out
 
 
@@ -669,7 +718,7 @@ def main():
     lay, height, biome, reg = gc.build()
     pois = place(height, reg, lay)
     with open(os.path.join(CONT, 'pois.json'), 'w', encoding='utf-8', newline='\n') as f:
-        json.dump([{'kind': k, 'x': x, 'z': z} for k, x, z in pois], f, ensure_ascii=False, separators=(',', ':'))
+        json.dump([{'kind': k, 'x': x, 'z': z} for k, x, z in pois] + signposts(lay), f, ensure_ascii=False, separators=(',', ':'))
         f.write('\n')
     print(len(pois), 'pois placed')
 

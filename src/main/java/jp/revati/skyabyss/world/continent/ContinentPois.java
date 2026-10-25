@@ -44,7 +44,8 @@ public final class ContinentPois {
     static final long FOES_COOLDOWN = 20 * 60 * 8;
     static final int CHECK = 40;
 
-    public record Poi(String kind, int x, int z) {
+    // a・b = 道しるべの行き先 (signpost.skyabyss.<id>)、da・db = そこまでのおおよその道のり
+    public record Poi(String kind, int x, int z, String a, int da, String b, int db) {
     }
 
     private static List<Poi> pois;
@@ -60,7 +61,9 @@ public final class ContinentPois {
                 if (in != null) {
                     for (JsonElement e : JsonParser.parseReader(new InputStreamReader(in, StandardCharsets.UTF_8)).getAsJsonArray()) {
                         JsonObject o = e.getAsJsonObject();
-                        out.add(new Poi(o.get("kind").getAsString(), o.get("x").getAsInt(), o.get("z").getAsInt()));
+                        out.add(new Poi(o.get("kind").getAsString(), o.get("x").getAsInt(), o.get("z").getAsInt(),
+                                o.has("a") ? o.get("a").getAsString() : "", o.has("da") ? o.get("da").getAsInt() : 0,
+                                o.has("b") ? o.get("b").getAsString() : "", o.has("db") ? o.get("db").getAsInt() : 0));
                     }
                 }
             } catch (java.io.IOException ex) {
@@ -123,6 +126,17 @@ public final class ContinentPois {
             BlockPos foes = job.mark("foes");
             if (foes != null) {
                 job.entry.extra("foes", foes);
+            }
+            BlockPos sign = job.mark("sign");
+            if (sign != null && !poi.a().isEmpty() && level.getBlockEntity(sign) instanceof net.minecraft.world.level.block.entity.SignBlockEntity be) {
+                be.setText(new net.minecraft.world.level.block.entity.SignText()
+                        .setMessage(0, net.minecraft.network.chat.Component.translatable("signpost.skyabyss." + poi.a()))
+                        .setMessage(1, net.minecraft.network.chat.Component.literal(poi.da() + " m"))
+                        .setMessage(2, net.minecraft.network.chat.Component.translatable("signpost.skyabyss." + poi.b()))
+                        .setMessage(3, net.minecraft.network.chat.Component.literal(poi.db() + " m")), true);
+                be.setWaxed(true);
+                be.setChanged();
+                level.sendBlockUpdated(sign, be.getBlockState(), be.getBlockState(), 3);
             }
             BlockPos loot = job.mark("loot");
             if (loot != null) {
