@@ -237,12 +237,124 @@ def town(region):
         for i in range(4):
             bp.set(x0 + i, -1, -6, 'minecraft:grass_block[snowy=false]')
             bp.set(x0 + i, 0, -6, FLOWERS[i % len(FLOWERS)])
-    # 道の街灯: 町の入口 (四つの道の、広場から 18) に、道の両わきで一対ずつ
-    for d in (18,):
-        for x, z in ((2, -d), (-2, -d), (2, d), (-2, d), (d, 2), (d, -2), (-d, 2), (-d, -2)):
-            fence_post_lantern(bp, x, z, pal)
+    # 町の入口の門 (四つの道の、広場から 19。柱二本と梁、吊り灯り二つ)
+    for d in (19, -19):
+        town_gate(bp, 0, d, 'x', pal)
+        town_gate(bp, d, 0, 'z', pal)
+    # 宿の二階 (床と梯子と窓)。宿の屋根は二階の上へ上げる
+    inn_upper(bp, -14, -15, -4, -8, pal)
+    # 煙突 (宿・店・南の家二つ)
+    for x, z in ((-13, -14), (11, -13), (-12, 10), (12, 10)):
+        top = 9 if x == -13 else 6
+        bp.fill(x, 0, z, x, top, z, 'minecraft:cobblestone' if region != 'ember' else 'minecraft:polished_blackstone_bricks')
+        bp.set(x, top + 1, z, 'minecraft:campfire[facing=north,lit=true,signal_fire=false,waterlogged=false]')
+    # 木 (土地の木) と、外の家の脇の畑
+    for x, z in ((16, -12), (-16, 12), (-9, 15), (9, -17)):
+        tree(bp, x, z, region)
+    for (gx0, gz0, gx1, gz1) in ((15, 8, 19, 12), (-19, -12, -15, -8)):
+        for x in range(gx0, gx1 + 1):
+            for z in range(gz0, gz1 + 1):
+                if x in (gx0, gx1) or z in (gz0, gz1):
+                    bp.set(x, 0, z, pal['fence'])
+                else:
+                    bp.set(x, -1, z, 'minecraft:farmland[moisture=7]')
+                    bp.set(x, 0, z, 'minecraft:wheat[age=7]' if (x + z) % 2 else 'minecraft:carrots[age=7]')
+        bp.set((gx0 + gx1) // 2, 0, gz0, f"{pal['fence']}_gate[facing=north,in_wall=false,open=false,powered=false]")
     bp.mark('stand', 0, 0, 3)
     return bp
+
+
+def town_gate(bp, cx, cz, along, pal):
+    """道をまたぐ門。along = 'x' なら道は z に沿う (柱は x に並ぶ)"""
+    for s in (-3, 3):
+        x, z = (cx + s, cz) if along == 'x' else (cx, cz + s)
+        bp.fill(x, 0, z, x, 4, z, pal['frame'] if 'log' in pal['frame'] else pal['frame'])
+    for s in range(-3, 4):
+        x, z = (cx + s, cz) if along == 'x' else (cx, cz + s)
+        bp.set(x, 5, z, pal['wall'])
+        bp.set(x, 6, z, pal['ridge'])
+    for s in (-2, 2):
+        x, z = (cx + s, cz) if along == 'x' else (cx, cz + s)
+        bp.set(x, 4, z, 'minecraft:lantern[hanging=true,waterlogged=false]')
+
+
+def inn_upper(bp, x0, z0, x1, z1, pal):
+    """宿を二階建てに: 一階の壁の上に二階の壁 (y 4..6)、床 (y 3)、梯子、窓。屋根は y 7 から"""
+    # 一階の屋根 (y 4 から) を消す
+    for x in range(x0 - 1, x1 + 2):
+        for z in range(z0 - 1, z1 + 2):
+            for y in range(4, 10):
+                bp.set(x, y, z, AIR_STATE)
+    for x in range(x0, x1 + 1):
+        for z in range(z0, z1 + 1):
+            edge = x in (x0, x1) or z in (z0, z1)
+            corner = x in (x0, x1) and z in (z0, z1)
+            for y in range(3, 7):
+                if edge:
+                    bp.set(x, y, z, pal['frame'] if corner else pal['wall'])
+                elif y == 3:
+                    bp.set(x, y, z, 'minecraft:spruce_planks')
+    # 梯子 (北東の角の内側)
+    for y in range(0, 4):
+        bp.set(x1 - 1, y, z0 + 1, 'minecraft:ladder[facing=south,waterlogged=false]')
+    bp.set(x1 - 1, 3, z0 + 1, 'minecraft:ladder[facing=south,waterlogged=false]')
+    for x in range(x0 + 2, x1 - 1, 3):
+        for z in (z0, z1):
+            bp.set(x, 4, z, 'minecraft:glass_pane[east=false,north=false,south=false,waterlogged=false,west=false]')
+    # 二階の寝台
+    for i, x in enumerate(range(x0 + 1, x1 - 2, 2)):
+        bp.set(x, 4, z1 - 1, 'minecraft:red_bed[facing=north,occupied=false,part=head]')
+        bp.set(x, 4, z1 - 2, 'minecraft:red_bed[facing=north,occupied=false,part=foot]') if False else None
+    bp.set((x0 + x1) // 2, 6, (z0 + z1) // 2, 'minecraft:lantern[hanging=true,waterlogged=false]')
+    # 屋根 (y 7 から)
+    a, b, layer = z0 - 1, z1 + 1, 0
+    while a < b:
+        y = 7 + layer
+        for x in range(x0 - 1, x1 + 2):
+            bp.set(x, y, a, stairs(pal['roof'], 'south'))
+            bp.set(x, y, b, stairs(pal['roof'], 'north'))
+        if layer > 0:
+            for z in range(a + 1, b):
+                bp.set(x0, y - 1, z, pal['wall'])
+                bp.set(x1, y - 1, z, pal['wall'])
+        a += 1
+        b -= 1
+        layer += 1
+    if a == b:
+        for x in range(x0 - 1, x1 + 2):
+            bp.set(x, 7 + layer, a, pal['ridge'])
+
+
+AIR_STATE = 'minecraft:air'
+TREES = {
+    'whale': ('minecraft:spruce_log[axis=y]', 'minecraft:spruce_leaves[distance=1,persistent=true,waterlogged=false]', 'cone'),
+    'tide': ('minecraft:birch_log[axis=y]', 'minecraft:birch_leaves[distance=1,persistent=true,waterlogged=false]', 'round'),
+    'storm': ('minecraft:spruce_log[axis=y]', 'minecraft:spruce_leaves[distance=1,persistent=true,waterlogged=false]', 'cone'),
+    'ember': ('minecraft:dark_oak_log[axis=y]', None, 'dead'),
+}
+
+
+def tree(bp, x, z, region):
+    trunk, leaves, shape = TREES[region]
+    h = 6
+    bp.fill(x, 0, z, x, h - 1, z, trunk)
+    if shape == 'cone':
+        for k, r in enumerate((2, 2, 1, 1, 0)):
+            y = 2 + k
+            for dx in range(-r, r + 1):
+                for dz in range(-r, r + 1):
+                    if abs(dx) + abs(dz) <= r + 1 and (dx or dz):
+                        bp.set(x + dx, y, z + dz, leaves)
+        bp.set(x, h, z, leaves)
+    elif shape == 'round':
+        for dx in range(-2, 3):
+            for dz in range(-2, 3):
+                for dy in range(3, 7):
+                    if dx * dx + dz * dz + (dy - 5) ** 2 <= 5 and not (dx == 0 and dz == 0 and dy < h):
+                        bp.set(x + dx, dy, z + dz, leaves)
+    else:
+        for dx, dy, dz in ((1, 4, 0), (2, 5, 0), (-1, 3, 0), (-2, 4, 1), (0, 5, -1), (0, 6, -2)):
+            bp.set(x + dx, dy, z + dz, 'minecraft:dark_oak_log[axis=x]' if dz == 0 else 'minecraft:dark_oak_log[axis=z]')
 
 
 AWNING = {

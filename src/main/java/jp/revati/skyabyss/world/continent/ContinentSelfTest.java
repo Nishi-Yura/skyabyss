@@ -54,6 +54,26 @@ public final class ContinentSelfTest {
                 f.add("the western ridge peaks at only Y " + peak);
             }
             ServerLevel level = server.overworld();
+            // 地面に四角い穴が無い: 野・浜・荒野のいくつかの所で、まわり (±3) のどれよりも 2 以上低い所を数える
+            int pits = 0;
+            String firstPit = "";
+            for (int[] c : new int[][] {{-324, 444}, {1184, 224}, {-512, 812}, {300, 1100}, {-100, -600}}) {
+                for (int x = c[0] - 48; x < c[0] + 48; x++) {
+                    for (int z = c[1] - 48; z < c[1] + 48; z++) {
+                        int h = map.surface(x, z);
+                        if (h < ContinentChunkGenerator.SEA_LEVEL) {
+                            continue;
+                        }
+                        int around = Math.min(Math.min(map.surface(x + 3, z), map.surface(x - 3, z)), Math.min(map.surface(x, z + 3), map.surface(x, z - 3)));
+                        if (h <= around - 2 && pits++ == 0) {
+                            firstPit = x + "," + z + " Y " + h + " around " + around;
+                        }
+                    }
+                }
+            }
+            if (pits > 0) {
+                f.add(pits + " pit columns (first " + firstPit + ")");
+            }
             // 外れの一本道の休み場と祠: 二つ。足跡のそばは避ける
             List<int[]> stops = ContinentOutskirts.spots(List.of());
             if (stops.size() != 2) {
@@ -107,7 +127,7 @@ public final class ContinentSelfTest {
             f.add("crashed: " + e);
         }
         if (f.isEmpty()) {
-            SkyAbyss.LOGGER.info("SELFTEST continent PASSED (map loads; flat capital at Y 72, inland sea, outer deep sea, western peaks; regional enemy strength; outskirts stops avoid footprints; real chunks match when the world is a continent)");
+            SkyAbyss.LOGGER.info("SELFTEST continent PASSED (map loads; flat capital at Y 72, inland sea, outer deep sea, western peaks; regional enemy strength; no square pits; outskirts stops avoid footprints; real chunks match when the world is a continent)");
         } else {
             for (String s : f) {
                 SkyAbyss.LOGGER.error("SELFTEST continent FAILED: {}", s);

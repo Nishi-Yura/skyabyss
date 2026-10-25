@@ -101,15 +101,13 @@ public final class ContinentMap {
 
     // 地面の上面の Y
     public int surface(int x, int z) {
-        double[] range = new double[1];
-        double h = smooth(x + 0.5, z + 0.5, range);
-        int b = biome(x, z);
-        double amp = switch (b) {
-            case ContinentBiomes.STONY_PEAKS, ContinentBiomes.SNOWY_SLOPES, ContinentBiomes.ERODED_BADLANDS -> 3.0;
-            case ContinentBiomes.WINDSWEPT_HILLS, ContinentBiomes.GRAVELLY_HILLS, ContinentBiomes.BADLANDS, ContinentBiomes.WOODED_BADLANDS -> 2.0;
-            default -> 1.2;
-        };
-        amp *= Math.max(0.0, Math.min(1.0, range[0] / 3.0));
+        double h = smooth(x + 0.5, z + 0.5, null);
+        // 揺らぎの大きさは、まわりの傾き (升の値をつないだ高さの、±4 ブロックの差) からなめらかに決める。
+        // 升ごと・土地ごとに切り替えると、升の四角の形の段ができる (2026-10-25 に見つけた「四角い穴」)
+        double gx = smooth(x + 4.5, z + 0.5, null) - smooth(x - 3.5, z + 0.5, null);
+        double gz = smooth(x + 0.5, z + 4.5, null) - smooth(x + 0.5, z - 3.5, null);
+        double g = Math.abs(gx) + Math.abs(gz);
+        double amp = Math.min(1.0, g / 3.0) * (1.2 + 1.8 * Math.max(0.0, Math.min(1.0, (g - 3.0) / 12.0)));
         return (int) Math.floor(h + amp * detail(x, z));
     }
 
