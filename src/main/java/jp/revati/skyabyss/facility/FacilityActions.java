@@ -90,13 +90,16 @@ public final class FacilityActions {
     }
 
     // ---------------------------------------------------------------- 宿
-    // 宿の寝台の印 (いちばん近いもの)。印がなければ宿の女将の足もと
+    // 宿の寝台の印 (いちばん近いもの。都と土地の町)。印がなければ宿の女将の足もと
     @Nullable
     public static BlockPos innBed(ServerPlayer player, @Nullable NpcEntity npc) {
         Map<String, BlockPos> beds = OpeningSites.shelterExtras(player.server, Attendants.INN_BED);
         BlockPos from = npc != null ? npc.blockPosition() : player.blockPosition();
         BlockPos best = null;
-        for (BlockPos b : beds.values()) {
+        // 都の宿と、天と淵の大陸の土地の町の宿 (話している宿の主人にいちばん近い寝台)
+        List<BlockPos> all = new java.util.ArrayList<>(beds.values());
+        all.addAll(jp.revati.skyabyss.world.continent.ContinentTowns.innBeds(player.server));
+        for (BlockPos b : all) {
             if (best == null || b.distSqr(from) < best.distSqr(from)) {
                 best = b;
             }

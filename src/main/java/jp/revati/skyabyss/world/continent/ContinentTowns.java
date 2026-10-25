@@ -25,7 +25,7 @@ import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 public final class ContinentTowns {
     public static final String KIND = "town";
     public static final String[] REGIONS = {"whale", "tide", "storm", "ember"};
-    static final String[] MARKS = {"rest", "board", "inn", "shop", AttendantRole.INNKEEPER.mark(), AttendantRole.TOOL_MERCHANT.mark()};
+    static final String[] MARKS = {"rest", "board", "inn", "shop", Attendants.INN_BED, AttendantRole.INNKEEPER.mark(), AttendantRole.TOOL_MERCHANT.mark()};
     static final int KEEP_RADIUS = 96;
     static final int CHECK_INTERVAL = 100;
 
@@ -57,6 +57,18 @@ public final class ContinentTowns {
                 level.sendBlockUpdated(sign, be.getBlockState(), be.getBlockState(), 3);
             }
         });
+    }
+
+    // 土地の町の宿の寝台 (建ってあるもの)。宿の主人に「休む」と言うと、いちばん近い宿の寝台で目覚めるようになる (FacilityActions.innBed)
+    public static java.util.List<BlockPos> innBeds(net.minecraft.server.MinecraftServer server) {
+        java.util.List<BlockPos> out = new java.util.ArrayList<>();
+        for (SiteData.Entry e : SiteData.get(server.overworld()).entries(KIND)) {
+            BlockPos b = e.extra(Attendants.INN_BED);
+            if (e.built && b != null) {
+                out.add(b);
+            }
+        }
+        return out;
     }
 
     @SubscribeEvent

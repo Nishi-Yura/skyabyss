@@ -8,7 +8,7 @@
 座標は町の広場の中心が (0, 0)、y=0 が地面の一つ上 (地面の上面は y=-1)。北 (-z) 向きで書き、置く向きは SiteJob が回す。
 町の並び: 広場 (井戸・依頼の板・街灯 4) を真ん中に、北西に宿、北東に店、南西と南東に家。十字の道が町の外まで。
 土地ごとに色を変える (岩鯨 = 針葉樹と丸石、潮殻 = 白樺と砂岩、雷翼 = 石煉瓦と錆びた銅、余燼 = 泥煉瓦と黒い石)。
-印: rest (休み場。広場の井戸の脇)、board (依頼の板)、sign (町の名前と目安のレベルの札)、inn / shop (戸の前)、npc_innkeeper / npc_tool_merchant (宿の主人と道具屋の立つ所。facility/Attendants の役の印)
+印: rest (休み場。広場の井戸の脇)、board (依頼の板)、sign (町の名前と目安のレベルの札)、inn / shop (戸の前)、npc_innkeeper / npc_tool_merchant (宿の主人と道具屋の立つ所。facility/Attendants の役の印)、inn_bed (宿で休むと目覚める寝台)
 """
 import json
 import os
@@ -209,6 +209,7 @@ def town(region):
     house(bp, -14, -15, -4, -8, 4, (-9, -8, 'south'), pal, beds=4)
     bp.mark('inn', -9, 0, -7)
     bp.mark('npc_innkeeper', -6, 0, -10)
+    bp.mark('inn_bed', -13, 0, -14)
     house(bp, 4, -14, 12, -8, 4, (8, -8, 'south'), pal, counter=True)
     bp.mark('shop', 8, 0, -7)
     bp.mark('npc_tool_merchant', 8, 0, -11)
