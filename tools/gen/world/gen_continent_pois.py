@@ -797,11 +797,22 @@ def signposts(lay):
     return out
 
 
+# 伝承の碑 (見どころの由来を三行で。文は lang の sign.skyabyss.poi_<種類>.1〜3。ContinentPois が建てたあとに書く)
+TABLETS = {
+    'titan_ribs': (0, 10), 'monastery': (0, 8), 'stone_circle': (0, 3), 'lighthouse': (2, 5), 'wind_gate': (0, 4),
+    'basalt_gate': (0, 3), 'burnt_fort': (3, 12), 'rod_tower': (2, 4), 'forge_ruin': (0, 6),
+}
+
+
 def main():
     os.makedirs(OUT, exist_ok=True)
     rng = np.random.default_rng(5)
     for kind, fn in BUILDERS.items():
         bp = fn(np.random.default_rng(abs(hash(kind)) % (2 ** 31) if False else len(kind) * 7919))
+        if kind in TABLETS:
+            tx, tz = TABLETS[kind]
+            bp.set(tx, 0, tz, 'skyabyss:tablet[facing=south,standing=true]')
+            bp.mark('tablet', tx, 0, tz)
         bp.name = 'poi_' + kind
         r = max(max(abs(x), abs(z)) for (x, _, z) in bp.cells) + 1
         bp.meta_rect = r

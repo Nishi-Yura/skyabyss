@@ -138,6 +138,10 @@ public final class ContinentPois {
                 be.setChanged();
                 level.sendBlockUpdated(sign, be.getBlockState(), be.getBlockState(), 3);
             }
+            BlockPos tablet = job.mark("tablet");
+            if (tablet != null) {
+                jp.revati.skyabyss.tablet.Tablets.write(level, tablet, "sign.skyabyss.poi_" + poi.kind());
+            }
             BlockPos loot = job.mark("loot");
             if (loot != null) {
                 fillLoot(level, loot, poi);
