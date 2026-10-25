@@ -162,7 +162,7 @@
         {
           "id": "give",
           "goto": "q_done",
-          "kind": "talk",
+          "kind": "quest",
           "do": [
             {
               "type": "signal",

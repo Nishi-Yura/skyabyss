@@ -203,7 +203,7 @@ def dialogue_json(fid, f, base):
     nodes['q_ask'] = {'face': 'grave', 'options': [{'id': 'ok', 'goto': 'end', 'kind': 'talk'}]}
     nodes['q_wait'] = {'face': 'neutral'}
     do = [{'type': 'take', 'item': i, 'count': n} for i, n in f['give']] + [{'type': 'signal', 'signal': 'town_hand:guest_' + fid}]
-    give = {'id': 'give', 'goto': 'q_done', 'kind': 'give' if f['give'] else 'talk', 'do': do}
+    give = {'id': 'give', 'goto': 'q_done', 'kind': 'give' if f['give'] else 'quest', 'do': do}
     if f['give']:
         conds = [{'type': 'item', 'item': i, 'count': n} for i, n in f['give']]
         give['if'] = conds[0] if len(conds) == 1 else {'type': 'all', 'of': conds}

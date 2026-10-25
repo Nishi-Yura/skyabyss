@@ -16,7 +16,7 @@ DIALOGUE = {
             {'id': 'bye', 'goto': 'end', 'kind': 'leave'}]},
         'early2': {'face': 'neutral', 'options': [{'id': 'ok', 'goto': 'end', 'kind': 'talk'}]},
         'ready': {'face': 'neutral', 'options': [
-            {'id': 'cross', 'goto': 'end', 'kind': 'talk', 'do': [{'type': 'town', 'act': 'island_cross'}]},
+            {'id': 'cross', 'goto': 'end', 'kind': 'quest', 'do': [{'type': 'town', 'act': 'island_cross'}]},
             {'id': 'later', 'goto': 'end', 'kind': 'leave'}]},
     },
 }

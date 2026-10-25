@@ -44,7 +44,7 @@
         {
           "id": "cross",
           "goto": "end",
-          "kind": "talk",
+          "kind": "quest",
           "do": [
             {
               "type": "town",
