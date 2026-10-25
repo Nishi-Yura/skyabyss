@@ -1,0 +1,21 @@
+# 土地と町に入ったときの名前の札
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/area_names.txt -PshotsName=area_names
+world continent_areas continent
+size 1600 900
+timeout 1200
+render 8
+guiscale 2
+wait 100
+cmd skyabyss cinematic stop
+cmd time set 5000
+cmd gamerule doMobSpawning false
+cmd skyabyss dev opening build
+wait 200
+cmd gamemode adventure
+cmd tp @s -120 120 -600
+waitchunks 300
+wait 120
+shot region_whale
+cmd skyabyss dev grounds mark town 0 stand
+wait 70
+shot town_whale
