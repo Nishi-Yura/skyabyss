@@ -23,6 +23,7 @@ import net.neoforged.neoforge.event.RegisterCommandsEvent;
 // 章の跡地の開発コマンド (本番の jar では登録されない)。撮影の台本 (tools/shots/chapter_grounds.txt) が使う。
 //   /skyabyss dev grounds info                       四つの跡地 (中心・形・祠・道しるべの数)
 //   /skyabyss dev grounds prepare <章>               その章の跡地を整え、小要素と道しるべを置いて、その場で建て終える (チャンクを読む)
+//   /skyabyss dev grounds mark <種類> <番号> <印>     建った場所の印 (pos か extra の名前) の上へ立つ
 //   /skyabyss dev grounds go <章> <何> <距離> <高さ> <yaw> <pitch>
 //        何 = center (跡地の中心) | shape (整えた形の中心) | shrine (祠の置き場) | sea (潮殻の休む場所) | road (道しるべのまんなか)。
 //        その点から yaw の向きを見る位置へ (距離だけ手前、地面から高さ) 体ごと置く
@@ -40,6 +41,8 @@ public final class ChapterGroundsCommands {
                 .then(Commands.literal("dev").then(Commands.literal("grounds")
                         .then(Commands.literal("info").executes(ChapterGroundsCommands::info))
                         .then(Commands.literal("sites").executes(ChapterGroundsCommands::sites))
+                        .then(Commands.literal("mark").then(Commands.argument("kind", StringArgumentType.word()).then(Commands.argument("index", com.mojang.brigadier.arguments.IntegerArgumentType.integer(0))
+                                .then(Commands.argument("mark", StringArgumentType.word()).executes(ChapterGroundsCommands::mark)))))
                         .then(Commands.literal("prepare").then(Commands.argument("chapter", StringArgumentType.word()).executes(ChapterGroundsCommands::prepare)))
                         .then(Commands.literal("shrine").then(Commands.argument("chapter", StringArgumentType.word()).executes(ChapterGroundsCommands::shrine)))
                         .then(Commands.literal("go").then(Commands.argument("chapter", StringArgumentType.word()).then(Commands.argument("what", StringArgumentType.word())
@@ -108,6 +111,24 @@ public final class ChapterGroundsCommands {
         long ms = (System.nanoTime() - t0) / 1_000_000L;
         ctx.getSource().sendSuccess(() -> Component.literal("prepared " + ch.id() + " in " + ms + " ms"), false);
         return 1;
+    }
+
+    // 建った場所の印 (pos か SiteData の extra) の上へ人を置く。建てるときに場所がずれても、台本から本当の位置へ行ける
+    private static int mark(CommandContext<CommandSourceStack> ctx) {
+        ServerPlayer p = ctx.getSource().getPlayer();
+        String kind = StringArgumentType.getString(ctx, "kind");
+        int index = com.mojang.brigadier.arguments.IntegerArgumentType.getInteger(ctx, "index");
+        String name = StringArgumentType.getString(ctx, "mark");
+        for (SiteData.Entry e : SiteData.get(ctx.getSource().getServer().overworld()).entries(kind)) {
+            BlockPos at = e.index == index ? (name.equals("pos") ? e.pos : e.extra(name)) : null;
+            if (at != null && p != null) {
+                p.teleportTo(p.serverLevel(), at.getX() + 0.5, at.getY(), at.getZ() + 0.5, p.getYRot(), p.getXRot());
+                ctx.getSource().sendSuccess(() -> Component.literal(kind + index + " " + name + " at " + at.toShortString()), false);
+                return 1;
+            }
+        }
+        ctx.getSource().sendFailure(Component.literal("no mark " + name + " on " + kind + index));
+        return 0;
     }
 
     // 建った場所の一覧 (種類・番号・部品・位置) をログへ。撮影の台本を書くとき用

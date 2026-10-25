@@ -1,4 +1,9 @@
 {
+  "map.skyabyss.poi.mine": "Old Mine",
+  "map.skyabyss.poi.ruined_tower": "Ruined Tower",
+  "map.skyabyss.poi.traveler_camp": "Travelers' Camp",
+  "map.skyabyss.poi.graveyard": "Hill Graveyard",
+  "map.skyabyss.poi.great_tree": "Great Tree Hut",
   "sign.skyabyss.ferry.to_tide.1": "Ferry",
   "sign.skyabyss.ferry.to_tide.2": "to Shiomori",
   "sign.skyabyss.ferry.to_capital.1": "Ferry",

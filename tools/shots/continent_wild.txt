@@ -1,0 +1,110 @@
+# 新しい見どころと野の飾り (2026-10-25)
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/continent_wild.txt -PshotsName=continent_wild
+world continent_wild continent
+size 1600 900
+timeout 2400
+render 10
+guiscale 2
+wait 100
+cmd skyabyss cinematic stop
+cmd time set 5000
+cmd weather clear
+cmd gamerule doDaylightCycle false
+cmd gamerule doMobSpawning false
+cmd skyabyss dev opening build
+wait 300
+hud off
+cmd gamemode creative
+cmd tp @s 224 120 64
+waitchunks 500
+wait 300
+cmd gamemode spectator
+cmd execute positioned 240 0 80 positioned over motion_blocking_no_leaves run tp @s ~ ~16 ~ 135 35
+wait 60
+shot barrow
+cmd gamemode creative
+cmd tp @s -700 120 -448
+waitchunks 500
+wait 300
+cmd gamemode spectator
+cmd execute positioned -684 0 -432 positioned over motion_blocking_no_leaves run tp @s ~ ~16 ~ 135 35
+wait 60
+shot traveler_camp
+cmd gamemode creative
+cmd tp @s -752 120 948
+waitchunks 500
+wait 300
+cmd gamemode spectator
+cmd execute positioned -736 0 964 positioned over motion_blocking_no_leaves run tp @s ~ ~16 ~ 135 35
+wait 60
+shot great_tree
+cmd gamemode creative
+cmd tp @s -492 120 332
+waitchunks 500
+wait 300
+cmd gamemode spectator
+cmd execute positioned -476 0 348 positioned over motion_blocking_no_leaves run tp @s ~ ~16 ~ 135 35
+wait 60
+shot ruined_tower
+cmd gamemode creative
+cmd tp @s -176 120 -572
+waitchunks 500
+wait 300
+cmd gamemode spectator
+cmd execute positioned -160 0 -556 positioned over motion_blocking_no_leaves run tp @s ~ ~16 ~ 135 35
+wait 60
+shot graveyard
+cmd gamemode creative
+cmd tp @s -288 120 -1124
+waitchunks 500
+wait 300
+cmd gamemode spectator
+cmd execute positioned -272 0 -1108 positioned over motion_blocking_no_leaves run tp @s ~ ~16 ~ 135 35
+wait 60
+shot mine
+cmd gamemode creative
+cmd tp @s -450 140 -300
+waitchunks 500
+wait 200
+cmd gamemode spectator
+cmd execute positioned -450 0 -300 positioned over motion_blocking_no_leaves run tp @s ~ ~24 ~ 135 20
+wait 60
+shot wild_meadow
+cmd gamemode creative
+cmd tp @s -300 140 -900
+waitchunks 500
+wait 200
+cmd gamemode spectator
+cmd execute positioned -300 0 -900 positioned over motion_blocking_no_leaves run tp @s ~ ~24 ~ 135 20
+wait 60
+shot wild_whale
+cmd gamemode creative
+cmd tp @s -200 140 1300
+waitchunks 500
+wait 200
+cmd gamemode spectator
+cmd execute positioned -200 0 1300 positioned over motion_blocking_no_leaves run tp @s ~ ~24 ~ 135 20
+wait 60
+shot wild_ember
+cmd gamemode creative
+cmd tp @s -1000 140 -300
+waitchunks 500
+wait 200
+cmd gamemode spectator
+cmd execute positioned -1000 0 -300 positioned over motion_blocking_no_leaves run tp @s ~ ~24 ~ 135 20
+wait 60
+shot wild_storm
+cmd gamemode adventure
+hud on
+cmd tp @s -450 80 40
+waitchunks 300
+wait 100
+open travel_map
+wait 60
+shot map_full
+wheel 400 225 -3
+wait 60
+shot map_mid
+wheel 400 225 -5
+wait 60
+shot map_far

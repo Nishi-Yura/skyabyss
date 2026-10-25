@@ -84,7 +84,7 @@ class BP:
             'palette': self.palette,
             'blocks': blocks,
             'marks': self.marks,
-            'meta': {'rect': [-self.meta_rect, -self.meta_rect, self.meta_rect, self.meta_rect], 'level': True, 'ring': 5 if self.meta_rect >= HALF else 3},
+            'meta': {'rect': [-self.meta_rect, -self.meta_rect, self.meta_rect, self.meta_rect], 'level': True, **({'round': True} if getattr(self, 'meta_round', False) else {}), 'ring': getattr(self, 'meta_ring', None) or (5 if self.meta_rect >= HALF else 3)},
         }
         with open(os.path.join(OUT, self.name + '.json'), 'w', encoding='utf-8', newline='\n') as f:
             json.dump(data, f, ensure_ascii=False, separators=(',', ':'))

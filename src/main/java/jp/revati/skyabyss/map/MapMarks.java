@@ -151,13 +151,22 @@ public final class MapMarks {
                 out.add(new Mark(Kind.TOWN, "town_" + region, "town", region, e.pos().getX(), e.pos().getZ(), false, 0));
             }
         }
-        // 天と淵の大陸の見どころ (誰かが近くまで来て建ったもの)。碑の印で、指すと名前 (map.skyabyss.poi.<種類>)
-        for (Spot e : entries) {
-            if (e.kind().equals(jp.revati.skyabyss.world.continent.ContinentPois.KIND)) {
-                List<jp.revati.skyabyss.world.continent.ContinentPois.Poi> all = jp.revati.skyabyss.world.continent.ContinentPois.all();
-                if (e.index() >= 0 && e.index() < all.size()) {
-                    out.add(new Mark(Kind.WAYMARK, "poi" + e.index(), "", "poi:" + all.get(e.index()).kind(), e.pos().getX(), e.pos().getZ(), false, 0));
+        // 天と淵の大陸の見どころ (Wynncraft の地図のように、行く前から全部出す。建ったものは建った位置)。碑の印で、指すと名前 (map.skyabyss.poi.<種類>)
+        if (entries.stream().anyMatch(e -> e.kind().equals(jp.revati.skyabyss.world.continent.ContinentTowns.KIND))) {
+            List<jp.revati.skyabyss.world.continent.ContinentPois.Poi> all = jp.revati.skyabyss.world.continent.ContinentPois.all();
+            java.util.Map<Integer, BlockPos> built = new java.util.HashMap<>();
+            for (Spot e : entries) {
+                if (e.kind().equals(jp.revati.skyabyss.world.continent.ContinentPois.KIND)) {
+                    built.put(e.index(), e.pos());
                 }
+            }
+            for (int i = 0; i < all.size(); i++) {
+                jp.revati.skyabyss.world.continent.ContinentPois.Poi poi = all.get(i);
+                if (poi.kind().equals("signpost")) {
+                    continue;
+                }
+                BlockPos at = built.getOrDefault(i, new BlockPos(poi.x(), 0, poi.z()));
+                out.add(new Mark(Kind.WAYMARK, "poi" + i, "", "poi:" + poi.kind(), at.getX(), at.getZ(), false, 0));
             }
         }
         Spot ribsSpot = first(entries, "ribs");

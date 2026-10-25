@@ -314,6 +314,13 @@ public final class ContinentChunkGenerator extends ChunkGenerator {
     public void buildSurface(WorldGenRegion level, StructureManager structureManager, RandomState random, ChunkAccess chunk) {
     }
 
+    // 生物群系の木や草のあとに、野の小さな飾り (岩・倒木・茂みなど)
+    @Override
+    public void applyBiomeDecoration(net.minecraft.world.level.WorldGenLevel level, ChunkAccess chunk, StructureManager structureManager) {
+        super.applyBiomeDecoration(level, chunk, structureManager);
+        ContinentScatter.decorate(level, chunk);
+    }
+
     // 生まれたときの動物 (羊・牛など。生物群系のとおり。羊を連れ戻す頼みなどに要る)
     @Override
     public void spawnOriginalMobs(WorldGenRegion level) {

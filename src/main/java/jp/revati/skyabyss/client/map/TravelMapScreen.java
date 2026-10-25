@@ -722,6 +722,17 @@ public class TravelMapScreen extends Screen {
             }
             int[] at = project(m.x(), m.z());
             int rim = m.color() == 0 ? p.rim() : 0xFF000000 | m.color();
+            boolean poi = m.kind() == MapMarks.Kind.WAYMARK && m.extra().startsWith("poi:");
+            if (poi && at[2] == 1) {
+                continue; // 見どころは数が多いので、枠の外のものは縁に寄せない
+            }
+            if (poi && view > 650) {
+                // 大きく引いたときは小さな点だけ (指すと名前)
+                g.fill(at[0] - 2, at[1] - 2, at[0] + 2, at[1] + 2, 0xFF3A3328);
+                g.fill(at[0] - 1, at[1] - 1, at[0] + 1, at[1] + 1, 0xFFE8DCC0);
+                hits.add(hit(at, layer(m), List.of(MapText.name(m), MapText.where(me, m.x(), m.z())), null));
+                continue;
+            }
             if (m.rumor()) {
                 sprite(g, S_RUMOR, at[0], at[1], 0, 0.85f);
             } else {

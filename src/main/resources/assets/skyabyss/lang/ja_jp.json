@@ -1,4 +1,9 @@
 {
+  "map.skyabyss.poi.mine": "古い坑道",
+  "map.skyabyss.poi.ruined_tower": "崩れた塔",
+  "map.skyabyss.poi.traveler_camp": "旅の一座の野営",
+  "map.skyabyss.poi.graveyard": "丘の墓所",
+  "map.skyabyss.poi.great_tree": "大樹の小屋",
   "sign.skyabyss.ferry.to_tide.1": "渡し船",
   "sign.skyabyss.ferry.to_tide.2": "汐守の港へ",
   "sign.skyabyss.ferry.to_capital.1": "渡し船",

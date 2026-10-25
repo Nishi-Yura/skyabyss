@@ -483,6 +483,14 @@ public final class SiteJob {
                 int g = groundCache[(x - x0) + (z - z0) * w];
                 boolean in = x >= inner[0] && x <= inner[2] && z >= inner[1] && z <= inner[3];
                 int dist = Math.max(Math.max(inner[0] - x, x - inner[2]), Math.max(inner[1] - z, z - inner[3]));
+                if (bp.round) {
+                    double cx = (inner[0] + inner[2]) / 2.0;
+                    double cz = (inner[1] + inner[3]) / 2.0;
+                    double rad = (inner[2] - inner[0]) / 2.0 + 0.5;
+                    double d = Math.hypot(x - cx, z - cz) - rad;
+                    in = d <= 0;
+                    dist = (int) Math.ceil(d);
+                }
                 int target;
                 if (in) {
                     target = bp.level ? groundH : g;

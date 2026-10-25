@@ -183,14 +183,16 @@ public final class ContinentPois {
         }
         e.extra("foes_at", new BlockPos((int) Math.min(Integer.MAX_VALUE, now), 0, 0));
         SiteData.get(level).setDirty();
-        // 塚は骨の兵、野営は野盗
-        EntityType<?>[] kinds = kind.equals("barrow") ? new EntityType<?>[] {EntityType.SKELETON, EntityType.SKELETON, EntityType.ZOMBIE}
+        // 塚・坑道・墓所は骨の兵、野営は野盗。塚と坑道は地の下 (印の高さ) に出す
+        boolean undead = kind.equals("barrow") || kind.equals("mine") || kind.equals("graveyard");
+        boolean below = kind.equals("barrow") || kind.equals("mine");
+        EntityType<?>[] kinds = undead ? new EntityType<?>[] {EntityType.SKELETON, EntityType.SKELETON, EntityType.ZOMBIE}
                 : new EntityType<?>[] {EntityType.PILLAGER, EntityType.PILLAGER, EntityType.VINDICATOR};
         for (int k = 0; k < kinds.length; k++) {
             double a = k * 2.1;
-            int x = at.getX() + (int) Math.round(Math.cos(a) * 3);
-            int z = at.getZ() + (int) Math.round(Math.sin(a) * 3);
-            int y = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z);
+            int x = at.getX() + (int) Math.round(Math.cos(a) * (below ? 2 : 3));
+            int z = at.getZ() + (int) Math.round(Math.sin(a) * (below ? 2 : 3));
+            int y = below ? at.getY() : level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z);
             if (kinds[k].create(level) instanceof Mob m) {
                 m.moveTo(x + 0.5, y, z + 0.5, level.random.nextFloat() * 360f, 0f);
                 m.finalizeSpawn(level, level.getCurrentDifficultyAt(m.blockPosition()), MobSpawnType.EVENT, null);

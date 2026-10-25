@@ -643,7 +643,7 @@ def place(height, region, lay, seed=11):
                 continue
             if any(math.hypot(x - p[0], z - p[1]) < r for p, r in avoid):
                 continue
-            if any(math.hypot(x - ox, z - oz) < 170 for _, ox, oz in out):
+            if any(math.hypot(x - ox, z - oz) < 140 for _, ox, oz in out):
                 continue
             if near_road(x, z, 28):
                 continue
@@ -746,6 +746,16 @@ def barrow(rng):
         bp.fill(x, 0, R, x, 3, R, 'minecraft:chiseled_stone_bricks')
     for x in range(-2, 3):
         bp.set(x, 3, R, 'minecraft:stone_brick_slab[type=bottom,waterlogged=false]')
+    # まわりの立石 (遠くから塚とわかるように) と、入口へ続く踏み跡
+    for k in range(7):
+        a = (k + 0.5) / 7 * 2 * math.pi
+        x, z = int(round(math.sin(a) * 12)), int(round(-math.cos(a) * 12))
+        h = 2 + int(rng.integers(0, 2))
+        bp.fill(x, 0, z, x, h - 1, z, 'minecraft:mossy_cobblestone' if k % 2 else 'minecraft:cobblestone')
+        bp.set(x, h, z, 'minecraft:mossy_cobblestone_wall[east=none,north=none,south=none,up=true,waterlogged=false,west=none]' if k % 3 == 0 else AIR)
+    for z in range(R + 1, R + 5):
+        for x in (-1, 0, 1):
+            bp.set(x, -1, z, 'minecraft:coarse_dirt' if rng.random() > 0.4 else 'minecraft:gravel')
     bp.mark('loot', 0, 0, -5)
     bp.mark('foes', 0, 0, -2)
     return bp
@@ -760,6 +770,268 @@ for _r in ('meadow', 'whale', 'tide', 'storm', 'ember'):
     BUILDERS['hamlet_' + _r] = hamlet(_r)
 for _r, _k in (('meadow', 'hamlet_meadow'), ('whale', 'hamlet_whale'), ('tide', 'hamlet_tide'), ('storm', 'hamlet_storm'), ('ember', 'hamlet_ember')):
     BY_REGION[_r] = BY_REGION[_r] + [_k]
+
+
+def mine(rng):
+    """古い坑道: 木枠の入口から階段で下り、線路の残る掘り場に宝箱。中に骨の兵 (foes は地下)"""
+    bp = BP('poi_mine')
+    ground(bp, 6, 'minecraft:coarse_dirt', rng, 'minecraft:gravel', 0.35)
+    # 入口の小屋 (北を背に、南が口)
+    for x in (-2, 2):
+        bp.fill(x, 0, 2, x, 3, 2, 'minecraft:spruce_log[axis=y]')
+        bp.fill(x, 0, -2, x, 3, -2, 'minecraft:spruce_log[axis=y]')
+    for x in range(-3, 4):
+        for z in range(-3, 4):
+            bp.set(x, 4, z, slab('minecraft:spruce'))
+    for x in range(-2, 3):
+        bp.set(x, 3, 2, 'minecraft:spruce_planks')
+    bp.set(1, 3, 3, 'minecraft:lantern[hanging=true,waterlogged=false]')
+    # 階段 (北へ下る。幅 3。地面より上には壁も天井も出さない)
+    depth = 8
+    for k in range(depth):
+        z = 1 - k
+        y = -1 - k
+        for x in (-1, 0, 1):
+            for yy in range(y, y + 4):
+                bp.set(x, yy, z, AIR)
+            bp.set(x, y - 1, z, 'minecraft:cobblestone')
+            bp.set(x, y, z, 'minecraft:cobblestone_stairs[facing=south,half=bottom,shape=straight,waterlogged=false]')
+        for x in (-2, 2):
+            for yy in range(y, min(y + 4, 0)):
+                bp.set(x, yy, z, 'minecraft:stone' if rng.random() > 0.2 else 'minecraft:andesite')
+        if y + 3 < 0:
+            for x in (-1, 0, 1):
+                bp.set(x, y + 3, z, 'minecraft:spruce_planks' if k % 3 == 0 else 'minecraft:stone')
+    # 掘り場 (9 × 9、高さ 4)
+    fy = -depth - 1
+    for x in range(-5, 6):
+        for z in range(-depth - 10, -depth + 2):
+            edge = abs(x) == 5 or z in (-depth - 10, -depth + 1)
+            for y in range(fy - 1, fy + 5):
+                if y == fy - 1 or y == fy + 4 or edge:
+                    if not (edge and z == -depth + 1 and abs(x) <= 1 and fy <= y < fy + 4):
+                        bp.set(x, y, z, rng.choice(['minecraft:stone', 'minecraft:stone', 'minecraft:andesite', 'minecraft:tuff']))
+                else:
+                    bp.set(x, y, z, AIR)
+    for z in range(-depth - 9, -depth):
+        bp.set(-3, fy, z, 'minecraft:rail[shape=north_south,waterlogged=false]' if rng.random() > 0.2 else AIR)
+    for x, z in ((-4, -depth - 1), (4, -depth - 1), (-4, -depth - 9), (4, -depth - 9)):
+        bp.fill(x, fy, z, x, fy + 3, z, 'minecraft:spruce_log[axis=y]')
+    for x in range(-4, 5):
+        bp.set(x, fy + 3, -depth - 5, 'minecraft:spruce_planks')
+    bp.set(2, fy + 3, -depth - 3, 'minecraft:chain[axis=y,waterlogged=false]')
+    bp.set(2, fy + 2, -depth - 3, 'minecraft:lantern[hanging=true,waterlogged=false]')
+    bp.set(-2, fy + 3, -depth - 7, 'minecraft:chain[axis=y,waterlogged=false]')
+    bp.set(-2, fy + 2, -depth - 7, 'minecraft:lantern[hanging=true,waterlogged=false]')
+    for (x, z, ore) in ((5, -depth - 3, 'minecraft:iron_ore'), (-5, -depth - 6, 'minecraft:coal_ore'), (4, -depth - 10, 'minecraft:copper_ore')):
+        bp.set(x, fy + 1, z, ore)
+    for x, z in ((3, -depth - 8), (1, -depth - 2)):
+        bp.set(x, fy, z, 'minecraft:barrel[facing=up,open=false]')
+    bp.set(-4, fy, -depth - 5, 'minecraft:cobweb')
+    bp.set(4, fy + 2, -depth - 6, 'minecraft:cobweb')
+    bp.set(0, fy, -depth - 9, 'minecraft:chest[facing=south,type=single,waterlogged=false]')
+    bp.mark('loot', 0, fy, -depth - 9)
+    bp.mark('foes', 0, fy, -depth - 5)
+    return bp
+
+
+def ruined_tower(rng):
+    """崩れた見張り塔 (丸い石の塔。上が欠け、内のはしごで上の床に宝箱)"""
+    bp = BP('poi_ruined_tower')
+    ground(bp, 7, 'minecraft:grass_block[snowy=false]', rng, 'minecraft:mossy_cobblestone', 0.2)
+    R = 4
+    H = 18
+    for y in range(0, H):
+        for x in range(-R, R + 1):
+            for z in range(-R, R + 1):
+                d = math.hypot(x, z)
+                if d > R + 0.4:
+                    continue
+                wall = d > R - 0.8
+                if not wall:
+                    bp.set(x, y, z, AIR)
+                    continue
+                # 上ほど欠ける (東の側が大きく崩れる)
+                if y > 9 and rng.random() < (y - 9) / (H - 9) * (0.9 if x > 0 else 0.35):
+                    continue
+                bp.set(x, y, z, rng.choice(['minecraft:stone_bricks', 'minecraft:stone_bricks', 'minecraft:mossy_stone_bricks', 'minecraft:cracked_stone_bricks']))
+    for y in range(0, 12):
+        bp.set(0, y, -R + 1, 'minecraft:ladder[facing=south,waterlogged=false]')
+    # 入口 (南) と窓
+    for y in (0, 1):
+        bp.set(0, y, R, AIR)
+    bp.set(0, 2, R, 'minecraft:stone_brick_stairs[facing=north,half=top,shape=straight,waterlogged=false]')
+    for y in (5, 9):
+        for x, z in ((-R, 0), (R, 0), (0, R)):
+            bp.set(x, y, z, AIR)
+    # 中ほどの床 (半分抜けている)
+    for x in range(-R + 1, R):
+        for z in range(-R + 1, R):
+            if math.hypot(x, z) < R - 0.8 and (x < 1 or rng.random() < 0.3) and not (x == 0 and z == -R + 1):
+                bp.set(x, 12, z, 'minecraft:spruce_planks' if rng.random() > 0.15 else 'minecraft:spruce_slab[type=bottom,waterlogged=false]')
+    bp.set(0, 12, -R + 1, 'minecraft:spruce_trapdoor[facing=south,half=top,open=false,powered=false,waterlogged=false]')
+    bp.set(-2, 13, 0, 'minecraft:chest[facing=east,type=single,waterlogged=false]')
+    bp.set(-2, 13, 1, 'minecraft:skeleton_skull[rotation=4]')
+    # 崩れた石 (まわり)
+    for k in range(14):
+        a = rng.random() * 2 * math.pi
+        r = R + 1 + rng.random() * 3
+        x, z = int(round(math.cos(a) * r)), int(round(math.sin(a) * r))
+        if x > -1:
+            bp.set(x, 0, z, rng.choice(['minecraft:cobblestone', 'minecraft:mossy_cobblestone', 'minecraft:stone_brick_slab[type=bottom,waterlogged=false]']))
+    bp.mark('loot', -2, 13, 0)
+    return bp
+
+
+def traveler_camp(rng):
+    """旅の一座の野営 (幌馬車・天幕・焚き火。誰もいない。荷に宝箱)"""
+    bp = BP('poi_traveler_camp')
+    ground(bp, 8, 'minecraft:grass_block[snowy=false]', rng, 'minecraft:coarse_dirt', 0.35)
+    # 幌馬車 (x に沿う。車輪・荷台・白い幌)
+    for x in range(-6, 1):
+        for z in (-4, -2):
+            bp.set(x, 1, z, 'minecraft:spruce_slab[type=top,waterlogged=false]')
+        bp.set(x, 1, -3, 'minecraft:spruce_slab[type=top,waterlogged=false]')
+    for x in (-6, 0):
+        for z in (-5, -1):
+            bp.set(x, 0, z, 'minecraft:stripped_spruce_wood[axis=z]')
+    for x in range(-5, 0):
+        for (z, y) in ((-5, 2), (-5, 3), (-1, 2), (-1, 3)):
+            bp.set(x, y, z, 'minecraft:white_wool')
+        for z in (-4, -3, -2):
+            bp.set(x, 4, z, 'minecraft:white_wool')
+    bp.set(-3, 2, -3, 'minecraft:barrel[facing=up,open=false]')
+    bp.set(-4, 2, -3, 'minecraft:chest[facing=east,type=single,waterlogged=false]')
+    bp.set(1, 0, -3, 'minecraft:spruce_fence')
+    bp.set(2, 0, -3, 'minecraft:spruce_fence')
+    # 天幕 (青と黄)
+    for (ox, oz, wool) in ((4, 2, 'minecraft:blue_wool'), (-3, 4, 'minecraft:yellow_wool')):
+        for k in range(0, 3):
+            for z in range(oz - 1, oz + 2):
+                bp.set(ox - 2 + k, k, z, wool)
+                bp.set(ox + 2 - k, k, z, wool)
+        for z in range(oz - 1, oz + 2):
+            bp.set(ox, 2, z, wool)
+        bp.set(ox, 0, oz, 'minecraft:hay_block[axis=y]')
+    bp.set(1, 0, 1, 'minecraft:campfire[facing=north,lit=true,signal_fire=false,waterlogged=false]')
+    for x, z in ((0, 3), (3, -0)):
+        bp.set(x, 0, z, 'minecraft:spruce_log[axis=x]')
+    bp.set(-1, 0, 0, 'minecraft:cauldron')
+    bp.set(6, 0, -2, 'minecraft:note_block[instrument=harp,note=0,powered=false]')
+    bp.set(6, 0, -3, 'minecraft:jukebox[has_record=false]')
+    # 立て札の灯り
+    bp.fill(-1, 0, 6, -1, 1, 6, 'minecraft:spruce_fence')
+    bp.set(-1, 2, 6, lantern())
+    bp.mark('loot', -4, 2, -3)
+    return bp
+
+
+def graveyard(rng):
+    """丘の墓所 (石の柵の中に墓石。奥に小さな礼拝堂の跡。夜でなくても骨が起きる)"""
+    bp = BP('poi_graveyard')
+    ground(bp, 9, 'minecraft:grass_block[snowy=false]', rng, 'minecraft:podzol', 0.3)
+    for x in range(-8, 9):
+        for z in range(-8, 9):
+            if max(abs(x), abs(z)) == 8 and not (abs(x) <= 1 and z == 8) and rng.random() > 0.15:
+                bp.set(x, 0, z, 'minecraft:cobblestone_wall[east=none,north=none,south=none,up=true,waterlogged=false,west=none]' if rng.random() > 0.3 else 'minecraft:mossy_cobblestone_wall[east=none,north=none,south=none,up=true,waterlogged=false,west=none]')
+    for x in (-2, 2):
+        bp.fill(x, 0, 8, x, 2, 8, 'minecraft:stone_bricks')
+        bp.set(x, 3, 8, lantern())
+    # 墓石 (三列)
+    for row, z in enumerate((4, 1, -2)):
+        for x in (-6, -4, 4, 6):
+            if rng.random() < 0.2:
+                continue
+            bp.set(x, 0, z, rng.choice(['minecraft:andesite_wall[east=none,north=none,south=none,up=true,waterlogged=false,west=none]',
+                                        'minecraft:stone_brick_wall[east=none,north=none,south=none,up=true,waterlogged=false,west=none]']))
+            bp.set(x, -1, z + 1, 'minecraft:coarse_dirt')
+            if rng.random() < 0.4:
+                bp.set(x, 0, z + 1, rng.choice(['minecraft:poppy', 'minecraft:oxeye_daisy', 'minecraft:dead_bush']))
+    for z in range(-3, 8):
+        bp.set(0, -1, z, 'minecraft:gravel' if rng.random() > 0.3 else 'minecraft:coarse_dirt')
+        bp.set(-1, -1, z, 'minecraft:gravel' if rng.random() > 0.5 else 'minecraft:coarse_dirt')
+    # 礼拝堂の跡 (北)
+    walls(bp, -3, -8, 3, -4, 5, 'minecraft:stone_bricks', 'minecraft:chiseled_stone_bricks', broken=0.6, rng=rng, windows=False)
+    for y in (0, 1, 2):
+        bp.set(0, y, -4, AIR)
+    for x in range(-2, 3):
+        for z in range(-7, -4):
+            bp.set(x, -1, z, 'minecraft:polished_andesite' if (x + z) % 2 else 'minecraft:mossy_stone_bricks')
+    bp.set(0, 0, -7, 'minecraft:chest[facing=south,type=single,waterlogged=false]')
+    for x in (-2, 2):
+        bp.set(x, 0, -7, 'minecraft:candle[candles=3,lit=true,waterlogged=false]')
+    bp.set(0, 1, -8, 'minecraft:chiseled_stone_bricks')
+    # 枯れ木
+    bp.fill(6, 0, -6, 6, 4, -6, 'minecraft:dark_oak_log[axis=y]')
+    bp.set(5, 4, -6, 'minecraft:dark_oak_log[axis=x]')
+    bp.set(7, 3, -6, 'minecraft:dark_oak_log[axis=x]')
+    bp.mark('loot', 0, 0, -7)
+    bp.mark('foes', 0, 0, 2)
+    return bp
+
+
+def great_tree(rng):
+    """大樹と樹上の小屋 (太い幹にはしご、枝の上に板の床と小屋。上に宝箱)"""
+    bp = BP('poi_great_tree')
+    ground(bp, 8, 'minecraft:grass_block[snowy=false]', rng, 'minecraft:moss_block', 0.3)
+    H = 22
+    for y in range(-1, H):
+        r = 2.2 if y < 3 else 1.6 if y < 14 else 1.0
+        for x in range(-3, 4):
+            for z in range(-3, 4):
+                if math.hypot(x, z) <= r:
+                    bp.set(x, y, z, 'minecraft:oak_wood[axis=y]' if y < 3 else 'minecraft:oak_log[axis=y]')
+    # 根
+    for (dx, dz) in ((1, 0), (-1, 0), (0, 1), (0, -1), (1, 1), (-1, -1)):
+        for k in range(3, 6):
+            if rng.random() < 0.8:
+                bp.set(dx * k, 0 if k < 5 else -1, dz * k, 'minecraft:oak_wood[axis=y]' if k < 5 else 'minecraft:rooted_dirt')
+    # はしご (南の面)
+    for y in range(0, 13):
+        bp.set(0, y, 2, 'minecraft:ladder[facing=south,waterlogged=false]')
+    # 樹上の床と小屋
+    fy = 13
+    for x in range(-5, 6):
+        for z in range(-5, 6):
+            if math.hypot(x, z) <= 5.3 and not (math.hypot(x, z) <= 1.6):
+                bp.set(x, fy, z, 'minecraft:spruce_planks')
+                if math.hypot(x, z) > 4.4:
+                    bp.set(x, fy + 1, z, 'minecraft:spruce_fence')
+    bp.set(0, fy, 2, 'minecraft:spruce_trapdoor[facing=south,half=top,open=false,powered=false,waterlogged=false]')
+    bp.set(0, fy + 1, 2, AIR)
+    # 小屋 (北東)
+    for x in range(1, 5):
+        for z in range(-5, -1):
+            if x in (1, 4) or z in (-5, -2):
+                bp.fill(x, fy + 1, z, x, fy + 3, z, 'minecraft:spruce_planks' if not (x in (1, 4) and z in (-5, -2)) else 'minecraft:stripped_spruce_log[axis=y]')
+            else:
+                bp.fill(x, fy + 1, z, x, fy + 3, z, AIR)
+            bp.set(x, fy + 4, z, slab('minecraft:spruce'))
+    bp.set(2, fy + 1, -2, AIR)
+    bp.set(2, fy + 2, -2, AIR)
+    bp.set(3, fy + 1, -4, 'minecraft:chest[facing=south,type=single,waterlogged=false]')
+    bp.set(2, fy + 3, -3, lantern(True))
+    # 枝と葉
+    for y in range(fy + 2, H + 6):
+        rr = 7 - abs(y - (H + 1)) * 0.6
+        for x in range(-8, 9):
+            for z in range(-8, 9):
+                d = math.hypot(x, z)
+                if d <= rr and rng.random() < 0.85 and bp.get(x, y, z) is None:
+                    bp.set(x, y, z, 'minecraft:oak_leaves[distance=1,persistent=true,waterlogged=false]')
+    for (dx, dz) in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+        for k in range(2, 6):
+            bp.set(dx * k, fy + 5 + k // 2, dz * k, 'minecraft:oak_log[axis=%s]' % ('x' if dx else 'z'))
+    bp.mark('loot', 3, fy + 1, -4)
+    return bp
+
+
+BUILDERS.update({'mine': mine, 'ruined_tower': ruined_tower, 'traveler_camp': traveler_camp, 'graveyard': graveyard, 'great_tree': great_tree})
+BY_REGION['meadow'] = BY_REGION['meadow'] + ['traveler_camp', 'great_tree', 'ruined_tower', 'graveyard']
+BY_REGION['whale'] = BY_REGION['whale'] + ['mine', 'graveyard', 'great_tree', 'ruined_tower']
+BY_REGION['tide'] = BY_REGION['tide'] + ['traveler_camp', 'great_tree', 'ruined_tower']
+BY_REGION['storm'] = BY_REGION['storm'] + ['mine', 'graveyard', 'ruined_tower']
+BY_REGION['ember'] = BY_REGION['ember'] + ['mine', 'traveler_camp', 'graveyard']
 
 
 def signposts(lay):
@@ -814,8 +1086,11 @@ def main():
             bp.set(tx, 0, tz, 'skyabyss:tablet[facing=south,standing=true]')
             bp.mark('tablet', tx, 0, tz)
         bp.name = 'poi_' + kind
-        r = max(max(abs(x), abs(z)) for (x, _, z) in bp.cells) + 1
+        # 均す範囲は地上に出る所だけ (坑道の掘り場のような地の下は数えない)。まわりは広めになじませる
+        r = max(max(abs(x), abs(z)) for (x, y, z) in bp.cells if y >= -1) + 1
         bp.meta_rect = r
+        bp.meta_ring = 6
+        bp.meta_round = True
         print(f'poi_{kind}: {bp.save()} blocks (rect {r})')
     # 置き場
     sys.path.insert(0, HERE)
