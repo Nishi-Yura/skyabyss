@@ -1,0 +1,77 @@
+{
+  "_comment": "docs/design/44 の湧きの表。entity / weight / time (day|night|any) / biomes (ContinentBiomes の名前、省くとどこでも) / group [少, 多]",
+  "entries": [
+    {
+      "entity": "skyabyss:spine_hare",
+      "weight": 5,
+      "time": "day",
+      "group": [
+        1,
+        2
+      ]
+    },
+    {
+      "entity": "skyabyss:rock_shell_beetle",
+      "weight": 5,
+      "time": "day",
+      "group": [
+        1,
+        1
+      ]
+    },
+    {
+      "entity": "skyabyss:moss_crawler",
+      "weight": 4,
+      "time": "day",
+      "biomes": [
+        "taiga",
+        "plains",
+        "birch_forest"
+      ],
+      "group": [
+        1,
+        2
+      ]
+    },
+    {
+      "entity": "skyabyss:bone_gull",
+      "weight": 3,
+      "time": "day",
+      "biomes": [
+        "windswept_hills",
+        "gravelly_hills"
+      ],
+      "group": [
+        1,
+        2
+      ]
+    },
+    {
+      "entity": "skyabyss:rib_archer",
+      "weight": 3,
+      "time": "night",
+      "group": [
+        1,
+        1
+      ]
+    },
+    {
+      "entity": "skyabyss:bone_hauler",
+      "weight": 2,
+      "time": "night",
+      "group": [
+        1,
+        1
+      ]
+    },
+    {
+      "entity": "skyabyss:moss_crawler",
+      "weight": 2,
+      "time": "night",
+      "group": [
+        1,
+        1
+      ]
+    }
+  ]
+}

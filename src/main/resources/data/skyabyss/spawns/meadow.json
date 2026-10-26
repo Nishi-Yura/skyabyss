@@ -1,0 +1,4 @@
+{
+  "_comment": "docs/design/44 の湧きの表。entity / weight / time (day|night|any) / biomes (ContinentBiomes の名前、省くとどこでも) / group [少, 多]",
+  "entries": []
+}

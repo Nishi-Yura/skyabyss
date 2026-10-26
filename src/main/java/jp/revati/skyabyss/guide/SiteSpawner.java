@@ -460,7 +460,8 @@ public final class SiteSpawner {
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     static void onJoin(EntityJoinLevelEvent event) {
         Entity e = event.getEntity();
-        if (!event.getLevel().isClientSide && e.getTags().contains(TAG) && !LIVE.contains(e.getUUID()) && !ChapterMobSpawner.isLive(e.getUUID())) {
+        if (!event.getLevel().isClientSide && e.getTags().contains(TAG) && !LIVE.contains(e.getUUID()) && !ChapterMobSpawner.isLive(e.getUUID())
+                && !jp.revati.skyabyss.world.continent.RegionSpawner.isLive(e.getUUID())) {
             event.setCanceled(true);
         }
     }
