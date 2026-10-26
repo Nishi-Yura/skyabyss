@@ -9,7 +9,6 @@ import jp.revati.skyabyss.item.affix.AffixRules;
 import jp.revati.skyabyss.loot.TitanLoot;
 import jp.revati.skyabyss.loot.TitanMemoryData;
 import jp.revati.skyabyss.notice.Notice;
-import jp.revati.skyabyss.rpg.skill.Job;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -20,7 +19,7 @@ import net.minecraft.world.item.ItemStack;
 // 伝説の装備の出どころ (2026-10-26 の声「伝説は巨神では出ずに、深淵以降やエンドコンテンツで」)。巨神の心臓 (深淵の心臓も) からは出ない。
 //  - 心臓の番人 (五章の本戦): WARDEN_CHANCE。悪夢の段: 段が上がるほど (NIGHTMARE_BASE + 段 × NIGHTMARE_STEP)。PITY 回続けて出なければ次で必ず
 //  - 果てない深みの王の褒美の箱: 深いほど (CHEST_PER_FLOOR × 階、CHEST_MAX まで)
-// どの伝説が出るか: まだ持っていない品を先に。半分は今の職 (持った武器・祠で選んだ職) の伝説から。持っている品だけなら共鳴の欠片に替わる
+// どの伝説が出るか: 一覧から同じ割合で (かぶりあり・今の職にも寄せない。ほかの職の伝説は交換に回す。2026-10-26 の声「トレードの必要性を高めたい」)
 public final class LegendLoot {
     public static final String KEY = "legend";
     public static final float WARDEN_CHANCE = 0.10f;
@@ -30,7 +29,6 @@ public final class LegendLoot {
     public static final double CHEST_PER_FLOOR = 0.002;
     public static final double CHEST_MAX = 0.12;
     public static final int CHEST_FLOOR = 20;
-    public static final int DUPE_SHARDS = 10;
 
     private LegendLoot() {
     }
@@ -53,17 +51,9 @@ public final class LegendLoot {
         return tier <= 0 ? WARDEN_CHANCE : Math.min(0.5f, NIGHTMARE_BASE + tier * NIGHTMARE_STEP);
     }
 
-    // どの伝説か (まだ持っていない品を先に。job があれば半分はその職の品から)。純粋な部分 (自己テストが呼ぶ)
-    public static String pick(List<String> pool, java.util.Set<String> owned, Job job, java.util.function.DoubleSupplier rnd) {
-        List<String> fresh = pool.stream().filter(id -> !owned.contains(id)).toList();
-        List<String> from = fresh.isEmpty() ? pool : fresh;
-        if (job != null && rnd.getAsDouble() < 0.5) {
-            List<String> mine = from.stream().filter(id -> Job.of(item(id)) == job).toList();
-            if (!mine.isEmpty()) {
-                from = mine;
-            }
-        }
-        return from.get((int) Math.min(from.size() - 1, Math.floor(rnd.getAsDouble() * from.size())));
+    // どの伝説か (一覧から同じ割合で。かぶりあり)。純粋な部分 (自己テストが呼ぶ)
+    public static String pick(List<String> pool, java.util.function.DoubleSupplier rnd) {
+        return pool.get((int) Math.min(pool.size() - 1, Math.floor(rnd.getAsDouble() * pool.size())));
     }
 
     // 番人・悪夢を倒した一人へ。出たら手渡して知らせる
@@ -76,23 +66,13 @@ public final class LegendLoot {
             return;
         }
         r.memory = 0;
-        Job job = Job.held(p) != null ? Job.held(p) : jp.revati.skyabyss.rpg.skill.JobChoice.chosen(p);
-        String id = pick(pool(), r.owned, job, random::nextDouble);
+        String id = pick(pool(), random::nextDouble);
+        r.owned.add(id);
+        ItemStack legend = AffixRules.withAffixes(new ItemStack(item(id)), random);
         List<ItemStack> items = new ArrayList<>();
-        boolean dupe = !r.owned.add(id);
-        ItemStack legend = ItemStack.EMPTY;
-        if (dupe) {
-            items.add(new ItemStack(jp.revati.skyabyss.abyss.gear.AbyssGearSetup.RESONANCE_SHARD.get(), DUPE_SHARDS));
-        } else {
-            legend = AffixRules.withAffixes(new ItemStack(item(id)), random);
-            items.add(legend);
-        }
+        items.add(legend);
         TitanLoot.handOver(p.getServer(), p.getUUID(), p, items, 0);
-        if (!legend.isEmpty()) {
-            Notice.alert(p, "message.skyabyss.abyss.legend_new", TitanLoot.itemLink(legend));
-        } else {
-            Notice.hint(p, "message.skyabyss.abyss.legend_dupe");
-        }
+        Notice.alert(p, "message.skyabyss.abyss.legend_new", TitanLoot.itemLink(legend));
     }
 
     // 果てない深みの王の褒美の箱 (tier 3)。深いほど出やすい。箱の中なので誰のものでもない (職の寄りは無し)
