@@ -168,6 +168,24 @@ public final class JobSelfTest {
         for (Job j : Job.values()) {
             check(f, Job.ofTree(j.tree) == j, "tree of " + j + " does not map back");
         }
+        // 木の印は、その武器の職の木の印だけ (魔法使いの杖には出ない)
+        net.minecraft.util.RandomSource rnd = net.minecraft.util.RandomSource.create(5);
+        java.util.Set<jp.revati.skyabyss.item.affix.AffixType> marks = new java.util.HashSet<>();
+        java.util.Set<jp.revati.skyabyss.item.affix.AffixType> staffMarks = new java.util.HashSet<>();
+        for (int i = 0; i < 400; i++) {
+            for (jp.revati.skyabyss.item.affix.Affix a : jp.revati.skyabyss.item.affix.AffixRules.roll(new ItemStack(item("skyabyss:whalebone_greatsword")), rnd)) {
+                if (a.kind().isMark()) {
+                    marks.add(a.kind());
+                }
+            }
+            for (jp.revati.skyabyss.item.affix.Affix a : jp.revati.skyabyss.item.affix.AffixRules.roll(new ItemStack(item("skyabyss:whale_staff")), rnd)) {
+                if (a.kind().isMark()) {
+                    staffMarks.add(a.kind());
+                }
+            }
+        }
+        check(f, marks.equals(java.util.Set.of(jp.revati.skyabyss.item.affix.AffixType.MARK_STONE)) && staffMarks.isEmpty(),
+                "tree marks should follow the weapon's job: greatsword " + marks + ", staff " + staffMarks);
         // ---- 職ごとの点・枠・使う
         FakePlayer p = new FakePlayer(server.overworld(), new GameProfile(UUID.randomUUID(), "jobs_t"));
         SkillData d = SkillManager.get(p);

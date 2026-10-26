@@ -63,6 +63,10 @@ public interface ModGear {
     // 由来の一行のキー。武器は「〇〇の専用武器」(origin_weapon)、防具・装身具は「専用装備」。武器の版がない由来は装備のまま
     static String originKey(ItemStack stack) {
         String dungeon = stack.getItem() instanceof ModGear g ? g.dungeon() : "stone_whale";
+        // 島の祠の始めの武器 (rpg/skill/JobChoice。強化の燃料は岩鯨のまま、由来の文だけ祠)
+        if (net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(stack.getItem()).getPath().startsWith("shrine_")) {
+            dungeon = "island_shrine";
+        }
         boolean weapon = !(stack.getItem() instanceof net.minecraft.world.item.ArmorItem)
                 && !(stack.getItem() instanceof jp.revati.skyabyss.item.accessory.Accessory);
         String weaponKey = "gear.skyabyss.origin_weapon." + dungeon;

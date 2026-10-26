@@ -80,10 +80,20 @@ public final class AffixRules {
     }
 
     // ---------------------------------------------------------------- 抽選
+    // 品を問わない抽選 (どの木の印も出る。分布の検査用)
     public static List<Affix> roll(AffixType.Slot slot, GearTier tier, RandomSource random) {
+        return roll(slot, tier, random, true, null);
+    }
+
+    // anyMark = どの木の印も出してよい。false なら own (その武器の職の木の印) だけ。null なら木の印は出ない
+    // (docs/design/43 の 3 節: 木の印は職の武器の特性へ。魔法使いの杖に「風読みの技の力」が付かない)
+    public static List<Affix> roll(AffixType.Slot slot, GearTier tier, RandomSource random, boolean anyMark, AffixType own) {
         int count = random.nextFloat() < tier.fewerChance ? minCount(tier) : maxCount(tier);
         boolean legendary = tier.wideAffixes;
         List<AffixType> pool = pool(slot);
+        if (!anyMark) {
+            pool.removeIf(t -> t.isMark() && t != own);
+        }
         List<Affix> out = new ArrayList<>();
         for (int i = 0; i < count && !pool.isEmpty(); i++) {
             AffixType pick = weighted(pool, random);
@@ -102,7 +112,9 @@ public final class AffixRules {
         if (slot == null) {
             return List.of();
         }
-        return roll(slot, ((ModGear) stack.getItem()).tier(), random);
+        jp.revati.skyabyss.rpg.skill.Job job = jp.revati.skyabyss.rpg.skill.Job.of(stack);
+        AffixType own = job == null ? null : jp.revati.skyabyss.rpg.skill.SkillMarks.typeOf(job.tree);
+        return roll(slot, ((ModGear) stack.getItem()).tier(), random, job == null, own);
     }
 
     private static AffixType weighted(List<AffixType> pool, RandomSource random) {
