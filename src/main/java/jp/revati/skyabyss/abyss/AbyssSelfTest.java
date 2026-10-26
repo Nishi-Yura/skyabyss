@@ -88,10 +88,16 @@ public final class AbyssSelfTest {
 
     public static List<Step> steps() {
         return List.of(
-                Step.once("abyss load", AbyssSelfTest::load),
+                Step.once("abyss load", server -> {
+                    jp.revati.skyabyss.rpg.skill.SkillManager.IGNORE_JOBS = true;
+                    load(server);
+                }),
                 Step.once("abyss (sync)", 20, AbyssSelfTest::syncPart),
                 new Step("abyss (rewrites)", 0, AbyssSelfTest::rewrites),
-                Step.once("abyss (unload)", server -> hold(server, false)));
+                Step.once("abyss (unload)", server -> {
+                    jp.revati.skyabyss.rpg.skill.SkillManager.IGNORE_JOBS = false;
+                    hold(server, false);
+                }));
     }
 
     // ---------------------------------------------------------------- 同期の部分

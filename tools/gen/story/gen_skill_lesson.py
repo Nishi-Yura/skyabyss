@@ -114,10 +114,6 @@ quest("skills", "titan_whale", 205,
                    "Circle behind a dummy and strike. Hits from behind grow much stronger with skills like Wind Rend."),
         [sig("back", "skill_lesson:behind", "木偶の背後から打とう", "Strike a dummy from behind")], 10,
         [say("behind", "それだ。背の上の獣も、背中は見ていない。", "That's it. The beasts on a back don't watch their own backs either.")]),
-       ("stance", ("構えを切り替える。守は硬く、疾は速く、歌はマナの戻りが早い。戦う前に選んでおく。",
-                   "Switch your stance. Guard is sturdy, Swift is fast, Song recovers mana faster. Pick one before a fight."),
-        [sig("stance", "skill_lesson:stance", "構えを切り替えよう", "Switch your stance")], 10,
-        [say("stance", "構えは一つだけだ。替えるたびに少し待つ。", "One stance at a time, and each swap takes a moment.")]),
        ("reset", ("最後に、振り直しのことを師範に聞いておく。覚えた技は、あとから選び直せる。",
                   "Last, ask the master about respecs. The skills you learn can be chosen again later."),
         [talk("reset", "lesson_respec", "師範に振り直しのことを聞こう", "Ask the master about respecs")], 10,
@@ -227,8 +223,8 @@ menu("lesson_again", ("もう一度、稽古を", "Another lesson, please"), "le
 menu("lesson_skip", ("稽古を切り上げる", "End the lesson"), "lesson_skip",
      {"type": "all", "of": [{"type": "quest", "quest": LESSON, "is": "active"}, {"type": "not", "of": at(LESSON, "meet")}]}, kind="talk")
 
-node("lesson_offer", ("背に上がる気か。なら、木偶を相手に型を見せてみろ。覚える、置く、当てる、回り込む、構える。それだけだ。",
-                      "Going up a back? Then show me your forms on the dummies. Learn, slot, hit, circle, stance. That's all."),
+node("lesson_offer", ("背に上がる気か。なら、木偶を相手に型を見せてみろ。覚える、置く、当てる、回り込む。それだけだ。",
+                      "Going up a back? Then show me your forms on the dummies. Learn, slot, hit, circle. That's all."),
      do=[{"type": "lesson", "act": "track"}],
      options=[("ok", ("頼む", "Teach me"), "end"),
               ("skip", ("今はいい (飛ばす)", "Not now (skip)"), "lesson_skip")])

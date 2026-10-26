@@ -159,6 +159,15 @@ final class DeepSkillsSelfTest {
     // ---------------------------------------------------------------- 橋 (A09)
     private static void bridges(MinecraftServer server, FakePlayer p, List<String> f) {
         SkillData d = SkillManager.get(p);
+        // 橋は 43 (6 職) で削った: 開かない
+        SkillManager.forgetAll(p);
+        d.bonusPoints = 60;
+        for (Skill s : Skill.inTree(SkillTree.HYBRID)) {
+            check(f, d.canLearn(s, 50) == SkillData.LearnResult.SEALED, "the bridge " + s.id + " can still be learned");
+        }
+        if (true) {
+            return;
+        }
         SkillManager.forgetAll(p);
         d.bonusPoints = 60;
         // 岩 3 つ・風 2 つでは開かない。風が 3 つになると開く

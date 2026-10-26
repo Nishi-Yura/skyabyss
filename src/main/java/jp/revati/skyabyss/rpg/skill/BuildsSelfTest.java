@@ -201,6 +201,11 @@ final class BuildsSelfTest {
 
     // ---------------------------------------------------------------- 天職の層 (docs/design/27 の 10 節)
     private static void callings(MinecraftServer server, List<String> f) {
+        // 天職は 43 (6 職) で削った: 選べない・要も割引もない
+        if (!SkillRules.CALLINGS) {
+            check(f, true, "");
+            return;
+        }
         ServerLevel level = server.overworld();
         BlockPos spawn = level.getSharedSpawnPos();
         FakePlayer p = new FakePlayer(level, new GameProfile(UUID.randomUUID(), "builds_test_c"));
@@ -402,34 +407,7 @@ final class BuildsSelfTest {
             SkillManager.syncBar(p);
             check(f, d.bar == 1, "an empty hand changed the bar");
             d.cooldowns.clear();
-            // ---- A10: 連鎖 (枠の隣どうし・3 本まで・2 秒以内)
-            d.calling2 = "wind";
-            d.calling = "rock";
-            d.chainMask = 0;
-            check(f, SkillManager.toggleChain(p, 0) == SkillManager.ChainResult.OK && SkillManager.toggleChain(p, 1) == SkillManager.ChainResult.OK
-                    && SkillManager.toggleChain(p, 2) == SkillManager.ChainResult.OK, "chains could not be set");
-            check(f, SkillManager.toggleChain(p, 3) == SkillManager.ChainResult.TOO_MANY, "a fourth chain was allowed");
-            check(f, SkillManager.toggleChain(p, 7) == SkillManager.ChainResult.BAD_SLOT, "a bad chain slot was allowed");
-            SkillManager.forceRank(p, Skill.TEMPER, 1);
-            d.slots[0] = Skill.TITAN_CLEAVE.id;
-            d.slots[1] = Skill.TEMPER.id;
-            d.mana = 100;
-            d.cooldowns.clear();
-            d.globalCooldown = 0;
-            p.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, new ItemStack(Items.IRON_SWORD));
-            d.bar = 0;
-            check(f, SkillManager.cast(p, 0) == SkillManager.CastResult.OK, "the first chain skill failed");
-            d.globalCooldown = 0;
-            SkillManager.CastResult second = SkillManager.cast(p, 1);
-            check(f, second == SkillManager.CastResult.OK && SkillBuild.chained(p, Skill.TEMPER)
-                    && SkillBuild.skillPower(p, Skill.TEMPER) >= SkillRules.CHAIN_POWER, "the chain did not boost the second skill: " + second + " " + d.chainSkill + " " + d.lastCastSlot + " mask " + d.chainMask + " power " + SkillBuild.skillPower(p, Skill.TEMPER));
-            d.cooldowns.clear();
-            d.globalCooldown = 0;
-            d.lastCastTick = level.getGameTime() - SkillRules.CHAIN_WINDOW - 5;
-            d.lastCastSlot = 0;
-            d.mana = 100;
-            SkillManager.cast(p, 1);
-            check(f, !SkillBuild.chained(p, Skill.TEMPER), "a chain worked after the window");
+            // ---- A10: 連鎖は 43 (6 職) で削った
             // ---- A13: 熟練 (使う・当てる・予告をよけて当てる。3 で 4 つ目の刻印、転生でも残る)
             SkillManager.forgetAll(p);
             d.bonusPoints = 40;
@@ -510,7 +488,8 @@ final class BuildsSelfTest {
             CompoundTag nbt = d.serializeNBT(server.registryAccess());
             SkillData back = new SkillData();
             back.deserializeNBT(server.registryAccess(), nbt);
-            check(f, back.chainMask == 1 && back.stance == 2 && back.mastery.equals(d.mastery) && back.keystones.contains("bulwark") && back.loadouts[3].saved,
+            // 構え・連鎖・キーストーンは 43 (6 職) で削った (読み直すと外れる)。熟練と型の保存は残る
+            check(f, back.chainMask == 0 && back.stance == 0 && back.mastery.equals(d.mastery) && back.keystones.isEmpty() && back.loadouts[3].saved,
                     "new fields did not survive the save");
             net.minecraft.network.RegistryFriendlyByteBuf buf = new net.minecraft.network.RegistryFriendlyByteBuf(io.netty.buffer.Unpooled.buffer(), server.registryAccess());
             SkillData.STREAM_CODEC.encode(buf, d);
@@ -535,8 +514,9 @@ final class BuildsSelfTest {
             old.putString("calling", "rock");
             SkillData m = new SkillData();
             m.deserializeNBT(server.registryAccess(), old);
-            check(f, m.version == SkillData.VERSION && m.knows(Skill.STONE_OATH) && !m.ranks.containsKey("stone_oath") && m.rank(Skill.WHALE_SWEEP) == 2
-                    && m.spentPoints() == 4, "a v2 record with a calling did not migrate: " + m.ranks + " spent " + m.spentPoints());
+            // 天職は削ったので、要は授からず自分で取った分のまま (点も戻らない)
+            check(f, m.version == SkillData.VERSION && m.knows(Skill.STONE_OATH) && m.rank(Skill.WHALE_SWEEP) == 2
+                    && m.jobSpent(SkillTree.ROCK) == 8 && m.calling.isEmpty(), "a v2 record with a calling did not migrate: " + m.ranks + " spent " + m.jobSpent(SkillTree.ROCK));
             check(f, m.loadouts.length == 4 && !m.loadouts[3].saved, "a v2 record did not get four loadouts");
         } finally {
             SkillRules.CALLINGS = before;
@@ -569,7 +549,7 @@ final class BuildsSelfTest {
         check(f, d.slots[0].isEmpty() && d.slots[1].equals("cloud_pierce") && d.slots[2].equals("titan_cleave"), "migration slots are wrong: " + String.join(",", d.slots));
         check(f, d.respecs == 2 && d.mana == 12f && d.runes.isEmpty() && !d.loadouts[0].saved && d.calling.isEmpty(), "migration lost the plain fields");
         // 点は戻る (使った点が減る)
-        check(f, d.spentPoints() == 5, "migration points: " + d.spentPoints());
+        check(f, d.spentPointsAllTrees() == 5 && d.spentPoints() == 3, "migration points: " + d.spentPointsAllTrees() + " / " + d.spentPoints());
         // 新しい記録は往復できる
         d.runes.clear();
         CompoundTag again = d.serializeNBT(server.registryAccess());
@@ -728,12 +708,13 @@ final class BuildsSelfTest {
                 "nimble did not add a speed modifier");
         Growth.get(p).stats[GrowthRules.Stat.VITALITY.ordinal()] = 15;
         SkillManager.applyModifiers(p);
-        check(f, p.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.KNOCKBACK_RESISTANCE).getModifier(SkillManager.MOD_BP_KNOCKBACK) != null, "vitality 15 gave no knockback resistance");
+        // ステータスの刻み目は 43 (6 職) で削った
+        check(f, p.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.KNOCKBACK_RESISTANCE).getModifier(SkillManager.MOD_BP_KNOCKBACK) == null, "vitality 15 still gave the breakpoint knockback resistance");
         Growth.get(p).stats[GrowthRules.Stat.VITALITY.ordinal()] = 14;
         SkillManager.applyModifiers(p);
         check(f, p.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.KNOCKBACK_RESISTANCE).getModifier(SkillManager.MOD_BP_KNOCKBACK) == null, "vitality 14 gave knockback resistance");
         Growth.get(p).stats[GrowthRules.Stat.VITALITY.ordinal()] = 0;
-        check(f, Breakpoints.reached(15, 15) && !Breakpoints.reached(14, 15) && Breakpoints.Mark.values().length == 8, "breakpoints");
+        check(f, !Breakpoints.reached(15, 15) && !Breakpoints.reached(50, 15), "breakpoints are still reached");
 
         // ---- 技を使う
         SkillManager.forgetAll(p);

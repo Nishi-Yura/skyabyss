@@ -158,14 +158,24 @@ public final class SkillManager {
         if (!skill.active || !d.knows(skill)) {
             return;
         }
-        for (String id : d.slots) {
+        // ほかの職の木の技は、その職の枠へ (docs/design/43)
+        Job own = Job.ofTree(skill.tree);
+        String[] bar = d.slots;
+        if (own != null && !own.id.equals(d.curJob) && !IGNORE_JOBS) {
+            bar = d.jobBars.computeIfAbsent(own.id, k -> {
+                String[] v = new String[SkillRules.SLOTS];
+                java.util.Arrays.fill(v, "");
+                return v;
+            });
+        }
+        for (String id : bar) {
             if (skill.id.equals(id)) {
                 return;
             }
         }
         for (int i = 0; i < d.slotCount(); i++) {
-            if (d.slots[i].isEmpty()) {
-                d.slots[i] = skill.id;
+            if (bar[i] == null || bar[i].isEmpty()) {
+                bar[i] = skill.id;
                 return;
             }
         }
@@ -184,6 +194,13 @@ public final class SkillManager {
             return true;
         }
         if (!skill.active || !d.knows(skill)) {
+            return false;
+        }
+        Job job = IGNORE_JOBS ? null : Job.held(player);
+        if (!IGNORE_JOBS && d.useJob(job)) {
+            sync(player);
+        }
+        if (!SkillData.usableBy(job, skill)) {
             return false;
         }
         for (int i = 0; i < d.slots.length; i++) {
@@ -440,6 +457,9 @@ public final class SkillManager {
         OK, EMPTY, NOT_LEARNED, COOLDOWN, NO_MANA, FAILED
     }
 
+    // 自己テスト用: 職 (持った武器) を見ずに枠の技を使う (職の前の技ごとの検査が、木をまたいだ枠で技を試すため)
+    public static boolean IGNORE_JOBS = false;
+
     // 枠の技を使う。正しければマナを払い、クールダウンを始め、同期する
     public static CastResult cast(ServerPlayer player, int slot) {
         // 倒れている間は技も使えない (2026-10-23 の試遊)
@@ -447,8 +467,18 @@ public final class SkillManager {
             return CastResult.FAILED;
         }
         SkillData d = get(player);
+        // 持った武器の職の木の技 (docs/design/43)。職の武器を持っていなければ使えない
+        Job job = IGNORE_JOBS ? null : Job.held(player);
+        if (job == null && !IGNORE_JOBS) {
+            Notice.bar(player, ModText.deny("message.skyabyss.skill.no_job_weapon"));
+            sendResult(player, slot, false);
+            return CastResult.EMPTY;
+        }
+        if (!IGNORE_JOBS && d.useJob(job)) {
+            sync(player);
+        }
         Skill skill = d.slot(slot);
-        if (skill == null) {
+        if (skill == null || !SkillData.usableBy(job, skill)) {
             return CastResult.EMPTY;
         }
         int rank = d.rank(skill);
@@ -469,7 +499,8 @@ public final class SkillManager {
         SkillActions.cooldownScale = 1;
         long now = player.level().getGameTime();
         // 連鎖: 直前の枠の技から 2 秒以内で、連鎖の印が立っていれば、この技の力が増す
-        boolean chain = slot > 0 && d.lastCastSlot == slot - 1 && now - d.lastCastTick <= SkillRules.CHAIN_WINDOW && (d.chainMask & (1 << (slot - 1))) != 0;
+        // 連鎖は 43 (6 職) で削った
+        boolean chain = false;
         if (chain) {
             d.chainSkill = skill.id;
             d.chainUntil = now + SkillRules.CHAIN_WINDOW;

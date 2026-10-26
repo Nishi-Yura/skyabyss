@@ -31,12 +31,13 @@ public final class Breakpoints {
     private Breakpoints() {
     }
 
+    // ステータスの刻み目は 43 (6 職) で削った (2026-10-26)。どこでも届いていないことにする
     public static boolean reached(int stat, int at) {
-        return stat >= at;
+        return false;
     }
 
     public static boolean reached(Player player, Stat stat, int at) {
-        return Growth.get(player).stat(stat) >= at;
+        return false;
     }
 
     // 8 つの刻み目 (id は lang の breakpoint.skyabyss.<id> と一対一)

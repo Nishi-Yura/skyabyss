@@ -92,6 +92,11 @@ public final class SkillSelfTest {
                 d.ranks.put(r.id, 1);
             }
             d.bonusPoints = 10;
+            // 旅人と橋の木は 43 (6 職) で閉じた: 覚えられない
+            if (s.tree == SkillTree.TRAVELER || s.tree == SkillTree.HYBRID) {
+                check(f, d.canLearn(s, 50) == SkillData.LearnResult.SEALED, s.id + " (a closed tree) can still be learned");
+                continue;
+            }
             check(f, d.canLearn(s, 50) == SkillData.LearnResult.OK, s.id + " cannot be learned with its requirements");
             d.ranks.put(s.id, 1);
             SkillManager.autoSlot(d, s);

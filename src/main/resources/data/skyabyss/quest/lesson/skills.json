@@ -75,25 +75,6 @@
       ]
     },
     {
-      "id": "stance",
-      "objectives": [
-        {
-          "id": "stance",
-          "type": "signal",
-          "target": "skill_lesson:stance",
-          "party": false
-        }
-      ],
-      "xp": 10,
-      "do": [
-        {
-          "type": "lesson",
-          "act": "say",
-          "line": "stance"
-        }
-      ]
-    },
-    {
       "id": "reset",
       "objectives": [
         {

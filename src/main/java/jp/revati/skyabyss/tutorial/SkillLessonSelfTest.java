@@ -48,7 +48,7 @@ public final class SkillLessonSelfTest {
             f.add("crashed: " + e);
         }
         if (f.isEmpty()) {
-            SkyAbyss.LOGGER.info("SELFTEST skill lesson PASSED (meet, learn+slot, two casts on a dummy, behind, stance, respec talk, reward once, replay, skip, tree lesson, data, ja/en)");
+            SkyAbyss.LOGGER.info("SELFTEST skill lesson PASSED (meet, learn+slot, two casts on a dummy, behind, respec talk, reward once, replay, skip, tree lesson, data, ja/en)");
         } else {
             f.forEach(m -> SkyAbyss.LOGGER.error("SELFTEST skill lesson FAILED: {}", m));
         }
@@ -93,7 +93,7 @@ public final class SkillLessonSelfTest {
             JsonObject lang = lang(code);
             check(f, lang != null, code + ": no lesson lang");
             if (lang != null) {
-                for (String k : List.of("lesson.skyabyss.hint.learn", "lesson.skyabyss.hint.cast", "lesson.skyabyss.hint.behind", "lesson.skyabyss.hint.stance",
+                for (String k : List.of("lesson.skyabyss.hint.learn", "lesson.skyabyss.hint.cast", "lesson.skyabyss.hint.behind", 
                         "lesson.skyabyss.hint.reset", "lesson.skyabyss.screen.learn", "message.skyabyss.lesson.reward", "message.skyabyss.lesson.behind",
                         "message.skyabyss.lesson.say.finish", "message.skyabyss.lesson.skipped")) {
                     check(f, lang.has(k), code + ": missing " + k);
@@ -146,13 +146,8 @@ public final class SkillLessonSelfTest {
             check(f, SkillLesson.behind(dummy, p), "behind the dummy was not behind");
             dummy.invulnerableTime = 0;
             dummy.hurt(p.damageSources().playerAttack(p), 1f);
-            check(f, stage(p).equals("stance"), "a plain hit from behind should move to stance: " + stage(p));
-            // 構えを変える
-            SkillLesson.poll(p);
-            check(f, stage(p).equals("stance"), "stance passed without a change");
-            check(f, SkillManager.setStance(p, SkillStance.GUARD) == SkillManager.StanceResult.OK, "could not take the guard stance");
-            SkillLesson.poll(p);
-            check(f, stage(p).equals("reset"), "a stance change should move to reset: " + stage(p));
+            // 構えの段は 43 (6 職) で削った: 背後のあとは振り直し
+            check(f, stage(p).equals("reset"), "a plain hit from behind should move to reset: " + stage(p));
             // 振り直しを聞く → 済む・鐘銭
             int before = coins(p);
             Quests.onTalk(p, SkillLesson.MASTER, "lesson_respec");

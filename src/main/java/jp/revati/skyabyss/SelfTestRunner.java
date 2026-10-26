@@ -119,14 +119,30 @@ public final class SelfTestRunner {
         steps.add(Step.once("growth", GrowthSelfTest::runSelfTest));
         // 転生 (戻る・残る範囲、上限 20、代価、恩恵、余白の枠、導きの欠片、共闘の合わせ)。docs/design/31。SKYABYSS_SELFTEST_ONLY="soul"
         steps.add(Step.once("soul", jp.revati.skyabyss.rebirth.SoulSelfTest::runSelfTest));
-        steps.add(Step.once("skills", SkillSelfTest::runSelfTest));
+        // 職の前の技ごとの検査 (木をまたいだ枠で技を試す) は、職 (持った武器) を見ずに。職の検査は "jobs"
+        steps.addAll(jp.revati.skyabyss.rpg.skill.JobSelfTest.steps());
+        steps.add(Step.once("skills", server -> {
+            jp.revati.skyabyss.rpg.skill.SkillManager.IGNORE_JOBS = true;
+            try {
+                SkillSelfTest.runSelfTest(server);
+            } finally {
+                jp.revati.skyabyss.rpg.skill.SkillManager.IGNORE_JOBS = false;
+            }
+        }));
         // 画面の知らせ (種類分け・順番待ち)。docs/design/18_notices.md
         steps.add(Step.once("notice", jp.revati.skyabyss.notice.NoticeSelfTest::runSelfTest));
         // HUD の置き場の計算 (倍率 1〜4 × 代表的な窓で重ならない)。docs/design/18 の 14 章
         steps.add(Step.once("hud layout", jp.revati.skyabyss.hud.HudLayoutSelfTest::runSelfTest));
         steps.add(Step.once("tutorial", jp.revati.skyabyss.tutorial.TutorialSelfTest::runSelfTest));
         // 技の稽古 (師範の手ほどき: 覚える・置く・木偶に当てる・背後・構え・振り直し・後の章の一段)。SKYABYSS_SELFTEST_ONLY="skill lesson"
-        steps.add(Step.once("skill lesson", jp.revati.skyabyss.tutorial.SkillLessonSelfTest::runSelfTest));
+        steps.add(Step.once("skill lesson", server -> {
+            jp.revati.skyabyss.rpg.skill.SkillManager.IGNORE_JOBS = true;
+            try {
+                jp.revati.skyabyss.tutorial.SkillLessonSelfTest.runSelfTest(server);
+            } finally {
+                jp.revati.skyabyss.rpg.skill.SkillManager.IGNORE_JOBS = false;
+            }
+        }));
         // 転生の見せ方 (色の段・記号・称号・順位表・同期・記録・墓の飾り)。docs/design/31
         steps.add(Step.once("rebirth load", jp.revati.skyabyss.rebirth.RebirthSelfTest::load));
         steps.add(Step.once("rebirth", 40, jp.revati.skyabyss.rebirth.RebirthSelfTest::runSelfTest));

@@ -68,6 +68,9 @@ public final class SkillData implements INBTSerializable<CompoundTag> {
     public int chainMask;
     // 武器の持ち替えで入れ替わる枠の組 (0 = 近接など、1 = 弓)。いま使っている枠は slots、使っていないほうがここ
     public final String[][] bars = new String[2][SkillRules.SLOTS];
+    // 職ごとの枠 (docs/design/43)。slots はいま持っている職 (curJob) の枠。持ち替えると useJob が入れ替える
+    public final Map<String, String[]> jobBars = new java.util.HashMap<>();
+    public String curJob = "";
     public final boolean[] barUsed = new boolean[2];
     public int bar;
     // 技の変異 (A08。技の id → 変異の id)。一度選んだら外せない。転生しても残る
@@ -293,7 +296,13 @@ public final class SkillData implements INBTSerializable<CompoundTag> {
         return runes.getOrDefault(skill.id, 0);
     }
 
+    // 使った点 (職ごとの点になったので「共有の分 + いちばん使っている職の分」。docs/design/43)。PAST は別枠
     public int spentPoints() {
+        return sharedSpent() + maxJobSpent();
+    }
+
+    // 前の版の数え方 (全部の木の合計。記録の移し替えの検査用)
+    public int spentPointsAllTrees() {
         int sum = 0;
         for (Map.Entry<String, Integer> e : ranks.entrySet()) {
             Skill sk = Skill.byId(e.getKey());
@@ -313,6 +322,99 @@ public final class SkillData implements INBTSerializable<CompoundTag> {
 
     public int totalPoints(int level) {
         return SkillRules.pointsForLevel(level) + bonusPoints;
+    }
+
+    // ---------------------------------------------------------------- 職ごとの点 (docs/design/43)
+    // 職の木の点はその職だけのもの。深淵の術 (artPoints) と淵の木は職をまたいで使う (どの職の残りからも引く)
+    public int jobSpent(SkillTree tree) {
+        int sum = 0;
+        for (Map.Entry<String, Integer> e : ranks.entrySet()) {
+            Skill sk = Skill.byId(e.getKey());
+            if (sk != null && sk.tree == tree) {
+                sum += e.getValue();
+            }
+        }
+        for (String id : runes.keySet()) {
+            Skill sk = Skill.byId(id);
+            if (sk != null && sk.tree == tree) {
+                sum += 1;
+            }
+        }
+        return sum;
+    }
+
+    public int sharedSpent() {
+        return artPoints + jobSpent(SkillTree.DEEP);
+    }
+
+    // いちばん点を使っている職の分
+    public int maxJobSpent() {
+        int max = 0;
+        for (Job j : Job.values()) {
+            max = Math.max(max, jobSpent(j.tree));
+        }
+        return max;
+    }
+
+    // その木の技を覚えるのに使える残り (職の木 = その職の残り、淵 = どの職でも足りる残り)
+    public int unspentFor(SkillTree tree, int level) {
+        Job job = Job.ofTree(tree);
+        int own = job != null ? jobSpent(tree) : maxJobSpent();
+        return totalPoints(level) - sharedSpent() - own;
+    }
+
+    // 持った武器の職へ枠を入れ替える。替わったら true。初めての職は、覚えている使う技を行の順に並べる
+    public boolean useJob(Job job) {
+        String key = job == null ? "" : job.id;
+        if (key.equals(curJob)) {
+            return false;
+        }
+        jobBars.put(curJob, slots.clone());
+        String[] next = jobBars.get(key);
+        Arrays.fill(slots, "");
+        if (next != null) {
+            System.arraycopy(next, 0, slots, 0, Math.min(next.length, slots.length));
+        } else if (job != null) {
+            int i = 0;
+            for (Skill s : jobActives(job)) {
+                if (knows(s) && i < slotCount()) {
+                    slots[i++] = s.id;
+                }
+            }
+        }
+        curJob = key;
+        return true;
+    }
+
+    // その職で枠に置ける技か (その職の木か、職をまたぐ木 = 淵・前世・深淵の術)
+    public static boolean usableBy(Job job, Skill skill) {
+        Job own = Job.ofTree(skill.tree);
+        return job == null || own == null || own == job;
+    }
+
+    // 職の枠: その職の木の使う技を、行の順 (同じ行は列の順) に。覚えていなければ空 (null)
+    public Skill jobSlot(Job job, int i) {
+        if (job == null || i < 0) {
+            return null;
+        }
+        java.util.List<Skill> list = jobActives(job);
+        if (i >= list.size()) {
+            return null;
+        }
+        Skill s = list.get(i);
+        return knows(s) ? s : null;
+    }
+
+    // 職の木で、枠に入る使う技の並び
+    public static java.util.List<Skill> jobActives(Job job) {
+        java.util.List<Skill> out = new java.util.ArrayList<>();
+        for (Skill s : Skill.values()) {
+            if (job != null && s.tree == job.tree && s.active) {
+                out.add(s);
+            }
+        }
+        out.sort(java.util.Comparator.comparingInt((Skill s) -> s.tier).thenComparingInt(s -> s.column));
+        return out;
     }
 
     public int unspentPoints(int level) {
@@ -372,7 +474,7 @@ public final class SkillData implements INBTSerializable<CompoundTag> {
         if (skill == null) {
             return LearnResult.UNKNOWN;
         }
-        if (!treeOpen(skill.tree)) {
+        if (!treeOpen(skill.tree) || skill.tree == SkillTree.TRAVELER || skill.tree == SkillTree.HYBRID) {
             return LearnResult.SEALED;
         }
         if (skill.rebirthAt() > rebirth) {
@@ -393,7 +495,7 @@ public final class SkillData implements INBTSerializable<CompoundTag> {
         if (!callingAllows(skill)) {
             return LearnResult.CALLING;
         }
-        if (skill.tree == SkillTree.PAST ? pastLeft() < 1 : unspentPoints(level) < 1) {
+        if (skill.tree == SkillTree.PAST ? pastLeft() < 1 : unspentFor(skill.tree, level) < 1) {
             return LearnResult.NO_POINTS;
         }
         return LearnResult.OK;
@@ -483,6 +585,16 @@ public final class SkillData implements INBTSerializable<CompoundTag> {
                 || calling2.equals(calling)) {
             calling2 = "";
         }
+        // 43 (6 職) で削った仕組み: 天職・旅人と橋の木・キーストーン (鍵石)・構え・連鎖。覚えていた分は外して点を戻す
+        calling = "";
+        calling2 = "";
+        ranks.keySet().removeIf(id -> {
+            Skill sk = Skill.byId(id);
+            return sk != null && (sk.tree == SkillTree.TRAVELER || sk.tree == SkillTree.HYBRID);
+        });
+        keystones.clear();
+        stance = 0;
+        chainMask = 0;
         // 天職の木の要は授かるので、自分で取っていた分は外す (点が戻る)
         ranks.keySet().removeIf(id -> granted(Skill.byId(id)));
         // キーストーン: 知らないものは外し、2 つまで
@@ -511,7 +623,7 @@ public final class SkillData implements INBTSerializable<CompoundTag> {
         });
         // 点を使いすぎている (レベルを下げられた) か、前提が崩れていたら、すべて戻して振り直してもらう。
         // 要るレベル (minLevel) は覚えるときだけの条件で、あとから下がっても消さない
-        boolean broken = spentPoints() > totalPoints(level);
+        boolean broken = sharedSpent() + maxJobSpent() > totalPoints(level);
         // キーストーンは、点が足りなくなったか木の点が足りなくなったら全部外す (技はそのまま)
         if (!broken) {
             keystones.removeIf(id -> !keystoneReachable(SkillKeystone.byId(id)));
@@ -527,9 +639,10 @@ public final class SkillData implements INBTSerializable<CompoundTag> {
             runes.clear();
             keystones.clear();
         }
+        Job cur = Job.byId(curJob);
         for (int i = 0; i < slots.length; i++) {
             Skill s = Skill.byId(slots[i]);
-            if (s == null || !s.active || !knows(s) || i >= slotCount()) {
+            if (s == null || !s.active || !knows(s) || i >= slotCount() || !usableBy(cur, s)) {
                 slots[i] = "";
             }
             // 同じ技が二つの枠にあれば、後のほうを空ける
@@ -668,6 +781,16 @@ public final class SkillData implements INBTSerializable<CompoundTag> {
         tag.putInt("stance", stance);
         tag.putInt("chain", chainMask);
         tag.putInt("bar", bar);
+        CompoundTag jb = new CompoundTag();
+        jobBars.forEach((k, v) -> {
+            ListTag l = new ListTag();
+            for (String id : v) {
+                l.add(StringTag.valueOf(id == null ? "" : id));
+            }
+            jb.put(k.isEmpty() ? "_" : k, l);
+        });
+        tag.put("jobBars", jb);
+        tag.putString("curJob", curJob);
         for (int b = 0; b < 2; b++) {
             ListTag bl = new ListTag();
             for (String id : bars[b]) {
@@ -732,6 +855,18 @@ public final class SkillData implements INBTSerializable<CompoundTag> {
         for (int i = 0; i < Math.min(s.size(), slots.length); i++) {
             slots[i] = s.getString(i);
         }
+        jobBars.clear();
+        CompoundTag jb = tag.getCompound("jobBars");
+        for (String k : jb.getAllKeys()) {
+            ListTag l = jb.getList(k, Tag.TAG_STRING);
+            String[] v = new String[SkillRules.SLOTS];
+            Arrays.fill(v, "");
+            for (int i = 0; i < Math.min(l.size(), v.length); i++) {
+                v[i] = l.getString(i);
+            }
+            jobBars.put(k.equals("_") ? "" : k, v);
+        }
+        curJob = tag.getString("curJob");
         for (Loadout l : loadouts) {
             l.copyFrom(new Loadout());
         }

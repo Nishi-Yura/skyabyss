@@ -9,7 +9,8 @@ public final class SkillRules {
     public static final int BASE_SLOTS = 4;
     public static final int SLOTS = 5;
     // 天職の層 (docs/design/27 の C 案)。false なら、5 つの木が最初から全部開いている (A 案)
-    public static boolean CALLINGS = true;
+    // 天職は 43 (6 職) で削った。職がその役 (2026-10-26)
+    public static boolean CALLINGS = false;
     // 天性 (一つ目の天職だけ。docs/design/27 の 9.1)
     public static final double TRAIT_ROCK_TOUGHNESS = 0.5;
     public static final double TRAIT_ROCK_KNOCKBACK = 0.10;

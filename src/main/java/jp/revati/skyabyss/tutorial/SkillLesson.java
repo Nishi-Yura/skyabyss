@@ -215,6 +215,15 @@ public final class SkillLesson {
                 return true;
             }
         }
+        // 職ごとの枠 (docs/design/43): ほかの職の枠に置いてあってもよい
+        for (String[] bar : d.jobBars.values()) {
+            for (String id : bar) {
+                Skill s = Skill.byId(id);
+                if (s != null && s.active && d.knows(s)) {
+                    return true;
+                }
+            }
+        }
         return false;
     }
 

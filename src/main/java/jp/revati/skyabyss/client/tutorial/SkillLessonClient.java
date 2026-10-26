@@ -52,7 +52,6 @@ public final class SkillLessonClient {
                 yield Component.translatable("lesson.skyabyss.hint.cast", SkillClientSetup.SLOT_KEYS[slot].getTranslatedKeyMessage());
             }
             case "behind" -> Component.translatable("lesson.skyabyss.hint.behind");
-            case "stance" -> Component.translatable("lesson.skyabyss.hint.stance", SkillClientSetup.STANCE_KEY.getTranslatedKeyMessage());
             case "reset" -> Component.translatable("lesson.skyabyss.hint.reset");
             default -> null;
         };

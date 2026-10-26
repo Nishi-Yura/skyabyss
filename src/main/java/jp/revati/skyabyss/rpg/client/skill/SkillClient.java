@@ -115,17 +115,9 @@ public final class SkillClient {
                 mc.setScreen(new SkillScreen());
             }
         }
+        // 構えは 43 (6 職) で削った。キーは押されても何もしない
         while (SkillClientSetup.STANCE_KEY.consumeClick()) {
-            if (mc.screen == null && mc.player.isAlive() && !mc.player.isSpectator()) {
-                SkillData sd = SkillManager.get(mc.player);
-                if (sd.stanceCd > 0 && !mc.player.isCreative()) {
-                    mc.player.displayClientMessage(ModText.deny("message.skyabyss.skill.stance_cooldown"), true);
-                } else {
-                    int next = (sd.stance + 1) % SkillStance.values().length;
-                    PacketDistributor.sendToServer(new SkillStancePayload(next));
-                    mc.player.displayClientMessage(ModText.hint("message.skyabyss.skill.stance_set", Component.translatable(SkillStance.of(next).nameKey())), true);
-                }
-            }
+            continue;
         }
         for (int i = 0; i < SkillClientSetup.SLOT_KEYS.length; i++) {
             while (SkillClientSetup.SLOT_KEYS[i].consumeClick()) {
