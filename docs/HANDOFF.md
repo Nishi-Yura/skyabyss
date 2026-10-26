@@ -82,7 +82,11 @@
     前の開幕の進捗 (野営の跡・鐘の宿り・語り部・イサナ・骨の丘など) は大陸では起きないので消し、島 → 渡し → 都めぐり → 土地の町 と名のある強敵の記しを足した
     (合図は Beats の job:chosen / island:* / town:tour / town:visit:* / named:*)。撮影は tools/shots/deeds.txt。
 
+  - 語りの紙芝居 (Undertale 風のドット絵): 開幕の 9 枚を描いて入れた (docs/design/20 の「語りの紙芝居」。tools/story/pixel/、story/reel/StoryReels、client/story/StoryReelScreen)。
+    目を覚ます前に流れ、見終わると今の開幕へ。ユーザーが絵柄と文を選んだ。撮影は tools/shots/story_reel.txt。
+
 ## 次にやること
+0. 章の変わり目の語り (一〜四章の前に 4〜6 枚 → 章の題字。ChapterCards の題字の前に StoryReels.play)。
 2. 伝説 20 本の技の書き換え (Rune の 4 番目)。
 1. 職ごとの技の見た目（手元の Fx）は、新しい技 12 本はサーバーの粒だけ。試遊で寂しければ Fx を足す。
 2. 試遊: 島の道（新しい世界で）、渡りの場面、大陸の道、闘の部屋の中ボス戦、土地の町の人の頼み。

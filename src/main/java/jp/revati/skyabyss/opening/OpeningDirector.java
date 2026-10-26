@@ -473,6 +473,21 @@ public final class OpeningDirector {
         }
     }
 
+    // 目を覚ます: まぶたの開く合図と、開幕のカメラの場面 (36 秒。スキップできる)。最初の目的 (煙の立つ方) へ向きを合わせて、その向きで操作へ戻す。
+    // docs/design/20_cinematics.md。開幕の語りのあと (StoryReels.onDone)
+    static void wakeUp(ServerPlayer player) {
+        ServerLevel level = player.serverLevel();
+        state(player).cueUntil = level.getGameTime() + 300;
+        PacketDistributor.sendToPlayer(player, new CuePayload(OpeningNetwork.CUE_AWAKE, level.getGameTime(), 0f));
+        BlockPos goal = target(level, "follow_smoke");
+        jp.revati.skyabyss.cinematic.Cinematics.start(player, jp.revati.skyabyss.cinematic.Scenes.OPENING, null,
+                goal == null ? null : Vec3.atBottomCenterOf(goal));
+    }
+
+    static {
+        jp.revati.skyabyss.story.reel.StoryReels.onDone(jp.revati.skyabyss.story.reel.StoryReels.OPENING, OpeningDirector::wakeUp);
+    }
+
     // ---------------------------------------------------------------- 本物の働きかけ
     static final class Live implements Fx {
         private final ServerLevel level;
@@ -487,12 +502,8 @@ public final class OpeningDirector {
 
         @Override
         public void awake() {
-            st.cueUntil = level.getGameTime() + 300;
-            PacketDistributor.sendToPlayer(player, new CuePayload(OpeningNetwork.CUE_AWAKE, level.getGameTime(), 0f));
-            // 開幕はカメラの場面 (36 秒。スキップできる)。最初の目的 (煙の立つ方) へ向きを合わせて、その向きで操作へ戻す。docs/design/20_cinematics.md
-            BlockPos goal = target(level, "follow_smoke");
-            jp.revati.skyabyss.cinematic.Cinematics.start(player, jp.revati.skyabyss.cinematic.Scenes.OPENING, null,
-                    goal == null ? null : Vec3.atBottomCenterOf(goal));
+            // 目を覚ます前に、開幕の語り (ドット絵の紙芝居) を流す。見終わる (飛ばす) と wakeUp が走る。流さない場合はすぐ wakeUp
+            jp.revati.skyabyss.story.reel.StoryReels.play(player, jp.revati.skyabyss.story.reel.StoryReels.OPENING);
         }
 
         @Override

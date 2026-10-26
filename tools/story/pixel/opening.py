@@ -234,8 +234,11 @@ SCENES = {"p2": p2, "p5": p5, "p8": p8}
 
 
 def main():
+    import opening_more
     OUT.mkdir(parents=True, exist_ok=True)
-    for key, fn in SCENES.items():
+    scenes = dict(SCENES)
+    scenes.update(opening_more.SCENES)
+    for key, fn in sorted(scenes.items()):
         img = fn()
         img.save(OUT / f"opening_{key}.png")
         img.resize((img.width * 4, img.height * 4), 0).save(OUT / f"opening_{key}_x4.png")

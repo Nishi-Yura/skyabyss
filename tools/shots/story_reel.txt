@@ -1,0 +1,24 @@
+# 語りの紙芝居 (開幕) の画面の確認: 1・2・5・9 枚目の、語りが出た所。/skyabyss reel opening で流す
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/story_reel.txt -PshotsName=story_reel
+world story_reel flat
+size 1280 720
+timeout 1500
+render 6
+clouds off
+waitchunks 300
+wait 40
+cmd skyabyss cinematic stop
+close
+wait 20
+chat clear
+cmd skyabyss reel opening
+wait 70
+shot reel_p1
+wait 60
+shot reel_p2_mid
+wait 50
+shot reel_p2
+wait 300
+shot reel_p5
+wait 400
+shot reel_p9
