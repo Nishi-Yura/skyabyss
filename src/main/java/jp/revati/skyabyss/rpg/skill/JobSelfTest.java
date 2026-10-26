@@ -39,6 +39,102 @@ public final class JobSelfTest {
         return BuiltInRegistries.ITEM.get(ResourceLocation.parse(id));
     }
 
+    // ---- 新しい技を実際に使う (docs/design/43 の 4 段目): 魔法の傷が当たる・玉が飛んで弾ける・鈍足・転移・誓い・心得・踏み・霧・呪い・灯
+    private static void spells(MinecraftServer server, List<String> f) {
+        net.minecraft.server.level.ServerLevel level = server.overworld();
+        net.minecraft.core.BlockPos spawn = level.getSharedSpawnPos();
+        // 出現点の近く (いつも読み込まれている。遠いとゾンビが世界に入らない)
+        double px = spawn.getX() + 6.5;
+        double py = 300;
+        double pz = spawn.getZ() + 0.5;
+        FakePlayer p = new FakePlayer(level, new GameProfile(UUID.randomUUID(), "jobs_mage_t"));
+        p.moveTo(px, py, pz, 0f, 0f); // 南 (+Z) を向く
+        SkillManager.forgetAll(p);
+        Growth.get(p).level = 30;
+        SkillData d = SkillManager.get(p);
+        p.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(JobChoice.STAFF.get()));
+        check(f, Job.held(p) == Job.MAGE && JobChoice.firstSkill(Job.MAGE) == Skill.THUNDER_BOLT, "the staff is not a mage weapon, or the mage's first skill is wrong");
+        for (Job j : Job.values()) {
+            long n = Skill.inTree(j.tree).stream().filter(sk -> sk.active).count();
+            check(f, n >= 4, j + " has fewer than 4 active skills: " + n);
+        }
+        long actives = Skill.inTree(SkillTree.STAR).stream().filter(sk -> sk.active).count();
+        check(f, actives == 4 && d.canLearn(Skill.THUNDER_BOLT, 30) == SkillData.LearnResult.OK, "the mage tree should have 4 open active skills: " + actives);
+        net.minecraft.world.entity.monster.Zombie z = new net.minecraft.world.entity.monster.Zombie(net.minecraft.world.entity.EntityType.ZOMBIE, level);
+        z.moveTo(px, py, pz + 6, 180f, 0f);
+        z.setNoAi(true);
+        z.setNoGravity(true);
+        level.addFreshEntity(z);
+        try {
+            // 魔法の傷: 杖の攻撃力 5 × 倍率。精神で伸びる
+            float plain = JobActions.spell(p, 1.0);
+            check(f, Math.abs(plain - 5.0f) < 0.01f, "spell base with the shrine staff should be 5: " + plain);
+            Growth.get(p).stats[jp.revati.skyabyss.rpg.GrowthRules.Stat.SPIRIT.ordinal()] = 50;
+            check(f, JobActions.spell(p, 1.0) > plain * 1.29f, "spirit does not raise spell damage");
+            Growth.get(p).stats[jp.revati.skyabyss.rpg.GrowthRules.Stat.SPIRIT.ordinal()] = 0;
+            // 雷の矢
+            z.setHealth(z.getMaxHealth());
+            JobActions.perform(p, Skill.THUNDER_BOLT, 1);
+            check(f, z.getHealth() < z.getMaxHealth(), "thunder bolt did not hit the zombie ahead");
+            // 熾火の玉: 飛んで、当たって弾ける (燃える)
+            z.setHealth(z.getMaxHealth());
+            z.clearFire();
+            JobActions.perform(p, Skill.EMBER_ORB, 1);
+            for (int i = 0; i < 40 && JobActions.orbsInFlight() > 0; i++) {
+                JobActions.tick(server);
+            }
+            check(f, JobActions.orbsInFlight() == 0 && z.getHealth() < z.getMaxHealth() && z.getRemainingFireTicks() > 0,
+                    "the ember orb did not fly, burst and burn: hp " + z.getHealth() + " fire " + z.getRemainingFireTicks());
+            // 凍て潮: 近くの敵に傷と鈍足
+            z.moveTo(px, py, pz + 3, 180f, 0f);
+            z.setHealth(z.getMaxHealth());
+            double speed = z.getAttributeValue(net.minecraft.world.entity.ai.attributes.Attributes.MOVEMENT_SPEED);
+            JobActions.perform(p, Skill.FROST_TIDE, 1);
+            check(f, z.getHealth() < z.getMaxHealth() && z.getAttributeValue(net.minecraft.world.entity.ai.attributes.Attributes.MOVEMENT_SPEED) < speed * 0.6,
+                    "frost tide did not hurt and slow the zombie");
+            // 呪いの印: 見ている敵に印
+            JobActions.perform(p, Skill.CURSE_MARK, 1);
+            check(f, SkillEvents.marked(z, level.getGameTime()), "curse mark did not mark the zombie");
+            // 炉の踏み: まわりの敵に傷と炎
+            z.setHealth(z.getMaxHealth());
+            z.clearFire();
+            z.moveTo(px + 1.5, py, pz, 180f, 0f);
+            JobActions.perform(p, Skill.FORGE_STOMP, 1);
+            check(f, z.getRemainingFireTicks() > 0, "forge stomp did not burn the zombie beside");
+            // 星の誓い: 星読みの技のマナ +25%
+            int cost = SkillManager.manaCostFor(p, Skill.THUNDER_BOLT);
+            SkillManager.forceRank(p, Skill.STAR_OATH, 1);
+            check(f, SkillManager.manaCostFor(p, Skill.THUNDER_BOLT) == Math.round(cost * 1.25f) && JobActions.spell(p, 1.0) > plain * 1.2f,
+                    "star oath did not raise the star cost and power");
+            // 星読みの心得: 杖を持つとマナの戻りが速い
+            SkillManager.forceRank(p, Skill.STAR_READING, 3);
+            d.mana = 0;
+            d.lastCombat = level.getGameTime();
+            for (int i = 0; i < 20; i++) {
+                SkillManager.regenTick(p, d, level.getGameTime());
+            }
+            check(f, d.mana > 0.8f * 1.4f, "star reading did not speed mana up with a staff: " + d.mana);
+            // 霧隠れ: 消える
+            JobActions.perform(p, Skill.MIST_VEIL, 1);
+            check(f, JobActions.veiled(p) && p.hasEffect(net.minecraft.world.effect.MobEffects.INVISIBILITY), "mist veil did not hide the player");
+            // 灯の守り札: 自分に護りの体力
+            p.setAbsorptionAmount(0);
+            JobActions.perform(p, Skill.LAMP_CHARM, 1);
+            check(f, p.getAbsorptionAmount() >= SkillRules.lampAbsorb(1) - 0.01f, "lamp charm gave no ward HP: " + p.getAbsorptionAmount());
+            // 転移: 前へ跳ぶ
+            z.discard();
+            double before = p.getZ();
+            String r = JobActions.perform(p, Skill.BLINK, 1);
+            check(f, r == null && p.getZ() - before > SkillRules.blinkRange(1) - 1.5, "blink did not move the player forward: " + r + " moved " + (p.getZ() - before));
+        } finally {
+            z.discard();
+            JobActions.clear();
+            SkillEffects.clear();
+            SkillManager.forgetAll(p);
+            p.discard();
+        }
+    }
+
     private static void run(MinecraftServer server) {
         List<String> f = new ArrayList<>();
         // ---- 武器 → 職
@@ -112,8 +208,9 @@ public final class JobSelfTest {
         check(f, SkillData.loadoutIndex(Job.ARCHER, 1) == 7 && d.loadouts.length == 12, "job loadouts are not two per job");
         SkillManager.forgetAll(p);
         p.discard();
+        spells(server, f);
         if (f.isEmpty()) {
-            SkyAbyss.LOGGER.info("SELFTEST jobs PASSED (weapon to job for {} items, per-job points, bar swap on weapon change, no skills without a job weapon, closed trees, save)", table.length);
+            SkyAbyss.LOGGER.info("SELFTEST jobs PASSED (weapon to job for {} items, per-job points, bar swap on weapon change, no skills without a job weapon, closed trees, save, mage tree and the four new job skills cast)", table.length);
         } else {
             f.forEach(s -> SkyAbyss.LOGGER.error("SELFTEST jobs FAILED: {}", s));
         }

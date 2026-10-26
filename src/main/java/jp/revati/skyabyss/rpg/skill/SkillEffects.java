@@ -353,7 +353,7 @@ public final class SkillEffects {
 
     // ================================================================ 地面の領域
     public enum ZoneKind {
-        EMBER, WHIRL, TRAP, SIGNAL
+        EMBER, WHIRL, TRAP, SIGNAL, LAMP
     }
 
     public static final class Zone {
@@ -474,6 +474,14 @@ public final class SkillEffects {
                 }
                 case SIGNAL -> {
                     // 光の柱は手元の SkillFx (FxDraw の柱) が描く。ここでは何もしない (粒の重複を避ける)
+                }
+                case LAMP -> {
+                    // 灯の守り札 (呪術師): 2 秒ごとに、そばの自分と仲間の吸収を満たす。灯の光は毎秒
+                    if ((z.until - now) % SkillRules.LAMP_PULSE == 0) {
+                        JobActions.lampPulse(owner, z.center, z.rank);
+                    } else if (now % 20 == 0) {
+                        z.level.sendParticles(net.minecraft.core.particles.ParticleTypes.GLOW, z.center.x, z.center.y + 0.8, z.center.z, 2, 0.15, 0.2, 0.15, 0.0);
+                    }
                 }
             }
         }

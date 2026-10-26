@@ -12,8 +12,8 @@ public enum SkillTree {
     BONE("bone", Stat.AGILITY, false, "bow"),
     // 共通の木。誰でも取れる。天職の対象にはならない
     TRAVELER("traveler", null, false, "traveler"),
-    // 3 章 (月) で目覚める
-    STAR("star", Stat.SPIRIT, true, "star"),
+    // 魔法使いの木 (docs/design/43)。はじめから開いている
+    STAR("star", Stat.SPIRIT, false, "star"),
     // 2 章 (深淵) で目覚める
     ABYSS("abyss", Stat.SPIRIT, true, "abyss"),
     // 橋 (A09)・淵 (B09。転生者だけ)・前世の技 (B08。転生者だけ。点は別枠)。封じではなく、画面の出し分けは転生の回数で

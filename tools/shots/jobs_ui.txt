@@ -46,3 +46,29 @@ shot jobs_5_staff_hand
 cmd item replace entity @p weapon.mainhand with skyabyss:shrine_dagger
 wait 20
 shot jobs_6_dagger_hand
+# 魔法使いの木 (杖を持つと星読みの木から開く) と、潮歌いの木 (3 行目に 3 つ)
+cmd skyabyss skill forget @p
+cmd item replace entity @p weapon.mainhand with skyabyss:shrine_staff
+cmd skyabyss skill learn @p thunder_bolt 3
+cmd skyabyss skill learn @p star_reading 2
+cmd skyabyss skill learn @p ember_orb 1
+cmd skyabyss skill learn @p frost_tide 1
+cmd skyabyss skill learn @p blink 1
+wait 20
+open skills
+wait 20
+shot jobs_7_mage_tree
+close
+wait 10
+cmd item replace entity @p weapon.mainhand with skyabyss:shrine_bell_staff
+cmd skyabyss skill learn @p ward_song 1
+cmd skyabyss skill learn @p ebb_tide 1
+cmd skyabyss skill learn @p curse_mark 1
+cmd skyabyss skill learn @p calm_heart 1
+cmd skyabyss skill learn @p ripple 1
+cmd skyabyss skill learn @p lamp_charm 1
+wait 20
+open skills
+wait 20
+shot jobs_8_shaman_tree
+close

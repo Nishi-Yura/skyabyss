@@ -72,7 +72,22 @@ public enum Skill {
     GRAVE_BELL("grave_bell", SkillTree.PAST, Kind.ACTIVE, 2, 1, 0),
     MEMORY_EDGE("memory_edge", SkillTree.PAST, Kind.PASSIVE, 2, 1, 1),
     FINAL_LIGHT("final_light", SkillTree.PAST, Kind.ACTIVE, 2, 2, 2),
-    SOUL_THREAD("soul_thread", SkillTree.PAST, Kind.KEYSTONE, 1, 3, 2);
+    SOUL_THREAD("soul_thread", SkillTree.PAST, Kind.KEYSTONE, 1, 3, 2),
+    // ---------------------------------------------------------------- 星読み (魔法使い。精神 ／ 遠い魔法の攻め。docs/design/43)
+    THUNDER_BOLT("thunder_bolt", SkillTree.STAR, Kind.ACTIVE, 3, 0, 0),
+    STAR_READING("star_reading", SkillTree.STAR, Kind.PASSIVE, 3, 0, 1),
+    EMBER_ORB("ember_orb", SkillTree.STAR, Kind.ACTIVE, 2, 1, 0, "thunder_bolt"),
+    FROST_TIDE("frost_tide", SkillTree.STAR, Kind.ACTIVE, 2, 1, 1, "star_reading"),
+    BLINK("blink", SkillTree.STAR, Kind.ACTIVE, 2, 2, 2, "ember_orb", "frost_tide"),
+    STAR_OATH("star_oath", SkillTree.STAR, Kind.KEYSTONE, 1, 3, 2, "blink"),
+    // ---------------------------------------------------------------- 職の 4 つ目の技 (3 行目の左右。docs/design/43 の 2 節)
+    FORGE_STOMP("forge_stomp", SkillTree.ASH, Kind.ACTIVE, 2, 2, 1, "forge_memory"),
+    MIST_VEIL("mist_veil", SkillTree.WIND, Kind.ACTIVE, 2, 2, 1, "foresight"),
+    CURSE_MARK("curse_mark", SkillTree.TIDE, Kind.ACTIVE, 2, 2, 0, "ebb_tide"),
+    LAMP_CHARM("lamp_charm", SkillTree.TIDE, Kind.ACTIVE, 2, 2, 1, "ripple"),
+    // 戦士・弓使いの 4 つ目は、風読みの踏み込み・跳び退きと同じ動き (刻印は付かない)
+    SHIELD_RUSH("shield_rush", SkillTree.ROCK, Kind.ACTIVE, 2, 2, 1, "stone_stance"),
+    ARCHER_LEAP("archer_leap", SkillTree.BONE, Kind.ACTIVE, 2, 2, 1, "hawk_eye");
 
     public enum Kind {
         ACTIVE, PASSIVE, KEYSTONE
@@ -139,9 +154,11 @@ public enum Skill {
         return "skill.skyabyss." + id + ".type";
     }
 
-    // アイコンの位置 (gui/skill/icons.png の 32px の升目。並びは宣言の順)。新しい 17 本は icons2.png (番号 100 から)
+    // アイコンの位置 (gui/skill/icons.png の 32px の升目。並びは宣言の順)。橋・淵・前世の 17 本は icons2.png (番号 100 から)、
+    // 職の新しい技 (星読みから) は icons2.png の 25 番から (17〜24 は木の印と紋。tools/gen/ui/gen_deep_skill_assets.py)
     public int iconIndex() {
-        return ordinal() < 36 ? ordinal() : 100 + (ordinal() - 36);
+        int o = ordinal();
+        return o < 36 ? o : o < THUNDER_BOLT.ordinal() ? 100 + (o - 36) : 125 + (o - THUNDER_BOLT.ordinal());
     }
 
     // 転生の回数がこれ以上で取れる (淵・前世の技。ほかは 0)

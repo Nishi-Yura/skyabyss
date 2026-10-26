@@ -180,6 +180,17 @@ public final class SkillRules {
             case ECHO_STRIKE -> 10;
             case GRAVE_BELL -> 12;
             case FINAL_LIGHT -> 18;
+            // 職の新しい技 (docs/design/43。星読みの木と、鍛冶師・暗殺者・呪術師の 4 つ目)
+            case THUNDER_BOLT -> 8;
+            case EMBER_ORB -> 14;
+            case FROST_TIDE -> 12;
+            case BLINK -> 10;
+            case FORGE_STOMP -> 12;
+            case MIST_VEIL -> 10;
+            case CURSE_MARK -> 8;
+            case LAMP_CHARM -> 14;
+            case SHIELD_RUSH -> 6;
+            case ARCHER_LEAP -> 4;
             default -> 0;
         };
     }
@@ -213,6 +224,16 @@ public final class SkillRules {
             case ECHO_STRIKE -> 12 * SECOND;
             case GRAVE_BELL -> 14 * SECOND;
             case FINAL_LIGHT -> (r >= 2 ? 18 : 22) * SECOND;
+            case THUNDER_BOLT -> 50;
+            case EMBER_ORB -> 8 * SECOND;
+            case FROST_TIDE -> 10 * SECOND;
+            case BLINK -> (r >= 2 ? 7 : 9) * SECOND;
+            case FORGE_STOMP -> 10 * SECOND;
+            case MIST_VEIL -> 14 * SECOND;
+            case CURSE_MARK -> 9 * SECOND;
+            case LAMP_CHARM -> 18 * SECOND;
+            case SHIELD_RUSH -> (r >= 2 ? 4 : 6) * SECOND;
+            case ARCHER_LEAP -> (r >= 2 ? 3 : 5) * SECOND;
             default -> 0;
         };
     }
@@ -631,6 +652,97 @@ public final class SkillRules {
         return 0.04 + 0.04 * rank;
     }
 
+    // ---------------------------------------------------------------- 職の新しい技 (docs/design/43)
+    // 魔法の傷 = 手の武器の攻撃力 × 倍率 × (1 + 精神 × GrowthRules.SPIRIT_SPELL)。星読みの技 (JobActions.spell)
+    // 雷の矢: 見ている向きへ 24 ブロックの稲妻。最初の敵に当たる。3 段で近くの敵へ 50% で跳ねる
+    public static final double BOLT_RANGE = 24;
+    public static final double BOLT_CHAIN = 0.5;
+    public static final double BOLT_CHAIN_RANGE = 5;
+
+    public static double boltMultiplier(int rank) {
+        return 1.2 + 0.4 * Math.max(1, rank);
+    }
+
+    // 星読みの心得: 星読みの木の武器 (杖) を持っている間、マナの戻りが増える
+    public static double starReadingRegen(int rank) {
+        return 0.15 * Math.max(1, rank);
+    }
+
+    // 熾火の玉: ゆっくり飛ぶ火の玉。当たる (敵か壁) と 3 ブロックに弾け、燃やす
+    public static final double ORB_RADIUS = 3;
+    public static final double ORB_SPEED = 1.0;
+    public static final int ORB_LIFE = 30;
+    public static final int ORB_BURN = 3 * SECOND;
+
+    public static double orbMultiplier(int rank) {
+        return rank >= 2 ? 2.8 : 2.2;
+    }
+
+    // 凍て潮: 自分のまわりに冷たい潮。傷と、強い鈍足 (大きな相手は半分)
+    public static final double FROST_SLOW = 0.5;
+
+    public static double frostRadius(int rank) {
+        return rank >= 2 ? 6 : 5;
+    }
+
+    public static double frostMultiplier(int rank) {
+        return rank >= 2 ? 1.3 : 1.0;
+    }
+
+    public static int frostTicks(int rank) {
+        return (rank >= 2 ? 4 : 3) * SECOND;
+    }
+
+    // 転移: 見ている向きへ跳ぶ (壁の手前まで)。落ちる傷は消える
+    public static double blinkRange(int rank) {
+        return rank >= 2 ? 11 : 8;
+    }
+
+    // 星の誓い (要): 星読みの技の傷 +25%、そのマナ +25%
+    public static final double STAR_OATH_POWER = 0.25;
+    public static final double STAR_OATH_MANA = 0.25;
+
+    // 炉の踏み (鍛冶師): 足もとを踏み鳴らして 3.5 ブロックに火の波。浮かせて燃やす
+    public static final double STOMP_RADIUS = 3.5;
+    public static final int STOMP_BURN = 2 * SECOND;
+
+    public static double stompMultiplier(int rank) {
+        return rank >= 2 ? 1.2 : 0.9;
+    }
+
+    // 霧隠れ (暗殺者): 姿を消し、速くなる。狙っていた敵は見失う。消えている間の最初の一撃 +50%
+    public static final double VEIL_SPEED = 0.2;
+    public static final double VEIL_STRIKE = 1.5;
+    public static final double VEIL_LOSE_RANGE = 16;
+
+    public static int veilTicks(int rank) {
+        return (rank >= 2 ? 4 : 3) * SECOND;
+    }
+
+    // 呪いの印 (呪術師): 見ている敵に印。受ける傷が増え、攻撃が弱る
+    public static final double CURSE_RANGE = 16;
+    public static final double CURSE_WEAKEN = 0.2;
+
+    public static double curseBonus(int rank) {
+        return rank >= 2 ? 0.2 : 0.15;
+    }
+
+    public static int curseTicks(int rank) {
+        return (rank >= 2 ? 8 : 6) * SECOND;
+    }
+
+    // 灯の守り札 (呪術師): 足もとに灯を置く。そばの自分と仲間に、2 秒ごとに吸収 (黄ハート) を足す (回復はしない)
+    public static final double LAMP_RADIUS = 4;
+    public static final int LAMP_PULSE = 2 * SECOND;
+
+    public static int lampTicks(int rank) {
+        return (rank >= 2 ? 10 : 8) * SECOND;
+    }
+
+    public static float lampAbsorb(int rank) {
+        return rank >= 2 ? 3f : 2f;
+    }
+
     // ---------------------------------------------------------------- 画面の説明に渡す値
     // 翻訳の %s に入れる値 (段ごと)。lang の skill.skyabyss.<id>.effect と順をそろえる
     public static Object[] describeArgs(Skill skill, int rank) {
@@ -642,9 +754,9 @@ public final class SkillRules {
             case STONE_STANCE -> new Object[] {fmt(stanceArmor(r)), fmt(stanceKnockback(r) * 100)};
             case WHALE_SWEEP -> new Object[] {fmt(SWEEP_RADIUS), pct(sweepMultiplier(r)), fmtSeconds(cooldownTicks(skill, r))};
             case STONE_OATH -> new Object[] {pct(OATH_SHARE), 2, fmt(ALLY_RANGE)};
-            case LUNGE -> new Object[] {fmt(LUNGE_RANGE), pct(LUNGE_MULTIPLIER), fmtSeconds(cooldownTicks(skill, r))};
+            case LUNGE, SHIELD_RUSH -> new Object[] {fmt(LUNGE_RANGE), pct(LUNGE_MULTIPLIER), fmtSeconds(cooldownTicks(skill, r))};
             case NIMBLE -> new Object[] {fmt(nimbleMove(r) * 100), fmt(nimbleFall(r))};
-            case BACKSTEP -> new Object[] {fmt(BACKSTEP_ENEMY_RANGE), fmtSeconds(cooldownTicks(skill, r))};
+            case BACKSTEP, ARCHER_LEAP -> new Object[] {fmt(BACKSTEP_ENEMY_RANGE), fmtSeconds(cooldownTicks(skill, r))};
             case FORESIGHT -> new Object[] {fmt(foresightBonus(r) * 100), FORESIGHT_TICKS / SECOND};
             case WIND_REND -> new Object[] {pct(rendBack(r)), pct(rendFront(r))};
             case LONE_WIND -> new Object[] {pct(LONE_ATTACK), pct(LONE_MOVE), fmt(LONE_RANGE)};
@@ -689,6 +801,16 @@ public final class SkillRules {
             case MEMORY_EDGE -> new Object[] {fmt(memoryPower(r, 6) * 100), fmt(MEMORY_PER_REBIRTH * 100), MEMORY_REBIRTH_MAX};
             case FINAL_LIGHT -> new Object[] {fmt(LIGHT_RADIUS), pct(lightMultiplier(r)), fmtSeconds(cooldownTicks(skill, r))};
             case SOUL_THREAD -> new Object[] {fmt(-THREAD_COOLDOWN * 100)};
+            case THUNDER_BOLT -> new Object[] {fmt(BOLT_RANGE), pct(boltMultiplier(r)), r >= 3 ? pct(BOLT_CHAIN) : "0%", fmt(BOLT_CHAIN_RANGE)};
+            case STAR_READING -> new Object[] {fmt(starReadingRegen(r) * 100)};
+            case EMBER_ORB -> new Object[] {fmt(ORB_RADIUS), pct(orbMultiplier(r)), ORB_BURN / SECOND};
+            case FROST_TIDE -> new Object[] {fmt(frostRadius(r)), pct(frostMultiplier(r)), fmt(FROST_SLOW * 100), frostTicks(r) / SECOND};
+            case BLINK -> new Object[] {fmt(blinkRange(r)), fmtSeconds(cooldownTicks(skill, r))};
+            case STAR_OATH -> new Object[] {fmt(STAR_OATH_POWER * 100), fmt(STAR_OATH_MANA * 100)};
+            case FORGE_STOMP -> new Object[] {fmt(STOMP_RADIUS), pct(stompMultiplier(r)), STOMP_BURN / SECOND};
+            case MIST_VEIL -> new Object[] {veilTicks(r) / SECOND, fmt(VEIL_SPEED * 100), pct(VEIL_STRIKE)};
+            case CURSE_MARK -> new Object[] {fmt(CURSE_RANGE), fmt(curseBonus(r) * 100), curseTicks(r) / SECOND};
+            case LAMP_CHARM -> new Object[] {fmt(LAMP_RADIUS), lampTicks(r) / SECOND, fmt(lampAbsorb(r)), LAMP_PULSE / SECOND};
         };
     }
 

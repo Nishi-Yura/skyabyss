@@ -12,7 +12,7 @@ import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.neoforged.neoforge.common.SimpleTier;
 
-// 島の祠で職を選ぶと受け取る始めの武器 (docs/design/43 の 4 節)。ふつうの階級、必要 Lv なし。強さは鉄の剣ほど。
+// 島の祠で職を選ぶと受け取る始めの武器 (docs/design/43 の 4 節)。ふつうの階級、必要 Lv 1。強さは鉄の剣ほど。
 // 強化と特性は SwordItem なので GearEvents・AffixEvents がそのまま扱う
 public class StarterWeaponItem extends SwordItem implements ModGear {
     // 品の素の攻撃力の上乗せ 2 (鉄の剣と同じ)。鉄で直す
@@ -33,7 +33,7 @@ public class StarterWeaponItem extends SwordItem implements ModGear {
 
     @Override
     public int requiredLevel() {
-        return 0;
+        return 1;
     }
 
     @Override

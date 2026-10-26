@@ -18,7 +18,7 @@ KV = {
     'job.skyabyss.subtitle': ('%s（%s）', '%s (%s)'),
     'message.skyabyss.skill.no_job_weapon': ('技を使うには、職の武器を持とう（剣・鎚・杖・弓・短剣・鈴の杖）', 'Hold a job weapon to use skills (sword, hammer, staff, bow, dagger, bell staff)'),
     'message.skyabyss.skill.job_now': ('職: %s', 'Job: %s'),
-    'gui.skyabyss.skill.job_held': ('（いまの職）', '(current job)'),
+    'gui.skyabyss.skill.job_held': ('（いま）', '(now)'),
     'gui.skyabyss.skill.bar_nojob': ('職なし', 'No job'),
     # 島の祠の職選び (rpg/skill/JobChoice・JobChoiceScreen)
     'gui.skyabyss.job_choice.title': ('職を選ぶ', 'Choose a Job'),

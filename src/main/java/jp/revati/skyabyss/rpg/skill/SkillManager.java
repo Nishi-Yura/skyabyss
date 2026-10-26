@@ -123,6 +123,11 @@ public final class SkillManager {
         if (d.mana < max) {
             boolean calm = gameTime - d.lastCombat >= SkillRules.CALM_AFTER_TICKS;
             double scale = d.regenScale + (gameTime < d.regenBoostUntil ? d.regenBoost : 0);
+            // 星読みの心得: 魔法使いの武器 (杖) を持っている間、戻りが増える
+            int reading = d.rank(Skill.STAR_READING);
+            if (reading > 0 && Job.held(player) == Job.MAGE) {
+                scale += SkillRules.starReadingRegen(reading);
+            }
             d.mana = (float) Math.min(max, d.mana + SkillRules.regenPerSecond(max, calm) * scale / SkillRules.SECOND);
         }
     }
@@ -405,7 +410,9 @@ public final class SkillManager {
     // 技のマナ (構え・キーストーン・外の修飾を入れた値。画面も同じ計算)
     public static int manaCostFor(Player player, Skill skill) {
         int base = SkillRules.manaCost(skill, get(player).rank(skill));
-        return base == 0 ? 0 : Math.max(1, (int) Math.round(base * SkillBuild.manaScale(player, skill)));
+        // 星の誓い (要): 星読みの技のマナ +25%
+        double oath = skill.tree == SkillTree.STAR && get(player).knows(Skill.STAR_OATH) ? 1 + SkillRules.STAR_OATH_MANA : 1;
+        return base == 0 ? 0 : Math.max(1, (int) Math.round(base * oath * SkillBuild.manaScale(player, skill)));
     }
 
     public static boolean nearForge(Player player) {

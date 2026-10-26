@@ -110,8 +110,8 @@ public final class SkillActions {
             case TITAN_CLEAVE -> cleave(player, rank);
             case ROCK_CALL -> rockCall(player, rank);
             case WHALE_SWEEP -> sweep(player, rank);
-            case LUNGE -> lunge(player, rank);
-            case BACKSTEP -> backstep(player, rank);
+            case LUNGE, SHIELD_RUSH -> lunge(player, rank);
+            case BACKSTEP, ARCHER_LEAP -> backstep(player, rank);
             case WIND_REND -> rend(player, rank);
             case WARD_SONG -> wardSong(player, rank);
             case EBB_TIDE -> ebbTide(player, rank);
@@ -123,6 +123,8 @@ public final class SkillActions {
             case BONE_TRAP -> boneTrap(player, rank);
             case SKY_RAIN -> rain(player, rank);
             case SIGNAL -> signal(player, rank);
+            // 職の新しい技 (docs/design/43)
+            case THUNDER_BOLT, EMBER_ORB, FROST_TIDE, BLINK, FORGE_STOMP, MIST_VEIL, CURSE_MARK, LAMP_CHARM -> JobActions.perform(player, skill, rank);
             default -> ExtActions.perform(player, skill, rank);
         };
     }
@@ -1193,6 +1195,7 @@ public final class SkillActions {
     // ---------------------------------------------------------------- 毎 tick (SkillEvents から)
     public static void tick(MinecraftServer server) {
         SkillEffects.tick(server);
+        JobActions.tick(server);
         for (Iterator<TrackedArrow> it = ARROWS.iterator(); it.hasNext();) {
             TrackedArrow t = it.next();
             AbstractArrow a = t.arrow();
@@ -1274,6 +1277,7 @@ public final class SkillActions {
         ARROWS.clear();
         RAINS.clear();
         SkillEffects.clear();
+        JobActions.clear();
     }
 
     // 自己テスト用: 降っている途中の驟雨の数

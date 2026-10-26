@@ -1,4 +1,4 @@
-"""橋・淵・前世の技・紋の絵 (icons2.png、256x128、32x32 の升目 8x4) を書く。docs/design/31 の A09・A14・B08・B09。
+"""橋・淵・前世の技・紋・職の新しい技の絵 (icons2.png、256x192、32x32 の升目 8x6) を書く。docs/design/31 の A09・A14・B08・B09、43。
 
 番号 (Skill.iconIndex は 100 + n、SkillTree.iconIndex は 117 + n):
   0..4   橋 (砂塵の盾突き・潮風の唄・蒸気の鐘・熾の矢雨・狙い石)
@@ -6,6 +6,7 @@
   11..16 前世の技 (遺響の一撃・旧き見張り・墓鐘・記憶の刃・最期の光・魂の糸)
   17..19 木の印 (橋・淵・前世)
   20..24 紋 (岩・風・潮・灰・骨)
+  25..36 職の新しい技 (星読み: 雷の矢・星読みの心得・熾火の玉・凍て潮・転移・星の誓い / 炉の踏み・霧隠れ・呪いの印・灯の守り札・盾の踏み込み・射手の跳び退き)
 既存の icons.png と同じ丸い楯の形。縁の色で系統を分ける (橋 = 2 つのタグの二色、淵 = 紫黒、前世 = 淡い金)。
 """
 import math
@@ -259,6 +260,127 @@ def tree_past(i):
     line(i, [(8, 26), (24, 26)], WHITE, 1)
 
 
+# ---------------------------------------------------------------- 職の新しい技 (docs/design/43)。星読みは夜の藍の縁
+S = (150, 160, 240)
+SD = (70, 70, 150)
+Y = (255, 236, 140)
+
+
+def thunder_bolt(i):
+    put(i, [(19, 4), (10, 17), (15, 17), (12, 28), (23, 13), (17, 13), (21, 4)], rgba(Y))
+    line(i, [(19, 5), (12, 16)], WHITE)
+    dot(i, 12, 27, WHITE)
+
+
+def star_reading(i):
+    put(i, [(16, 5), (18, 14), (27, 16), (18, 18), (16, 27), (14, 18), (5, 16), (14, 14)], rgba(S))
+    put(i, [(16, 9), (17, 15), (16, 16), (15, 15)], WHITE)
+    for x, y in ((8, 8), (24, 9), (23, 24)):
+        i.putpixel((x, y), WHITE)
+
+
+def ember_orb(i):
+    for k in range(5):
+        dot(i, 9 + k * 2, 22 - k * 2, rgba((255, 120 + k * 20, 40), 120 + k * 25), 1)
+    dot(i, 19, 13, rgba((255, 150, 50)), 6)
+    dot(i, 19, 13, rgba((255, 210, 110)), 4)
+    dot(i, 18, 12, WHITE, 1)
+
+
+def frost_tide(i):
+    c = (190, 230, 255)
+    for k in range(6):
+        a = k * math.pi / 3
+        x1, y1 = 16 + math.cos(a) * 11, 16 + math.sin(a) * 11
+        line(i, [(16, 16), (x1, y1)], rgba(c), 2)
+        bx, by = 16 + math.cos(a) * 7, 16 + math.sin(a) * 7
+        for s_ in (-1, 1):
+            b = a + s_ * 0.7
+            line(i, [(bx, by), (bx + math.cos(b) * 3, by + math.sin(b) * 3)], rgba(c))
+    dot(i, 16, 16, WHITE, 1)
+
+
+def blink(i):
+    ring(i, (5, 18, 13, 26), rgba(SD), 1)
+    dot(i, 9, 22, rgba(S), 2)
+    for k in range(4):
+        x = 12 + k * 3
+        y = 20 - k * 3
+        i.putpixel((x, y), rgba(S))
+        i.putpixel((x + 1, y - 1), rgba(S, 160))
+    dot(i, 23, 9, WHITE, 3)
+    dot(i, 23, 9, rgba(S), 1)
+
+
+def star_oath(i):
+    ring(i, (6, 6, 26, 26), rgba(S), 2)
+    pts = []
+    for k in range(10):
+        a = -math.pi / 2 + k * math.pi / 5
+        r = 8 if k % 2 == 0 else 3.5
+        pts.append((16 + math.cos(a) * r, 16 + math.sin(a) * r))
+    put(i, pts, rgba(Y))
+    dot(i, 16, 16, WHITE, 1)
+
+
+def forge_stomp(i):
+    a = TAG["ash"]
+    put(i, [(11, 6), (17, 6), (17, 16), (22, 16), (22, 20), (10, 20)], rgba(shade(a, 0.6)))
+    line(i, [(11, 6), (17, 6)], rgba(a))
+    line(i, [(5, 23), (27, 23)], rgba(shade(a, 0.8)), 2)
+    for k, x in enumerate((6, 12, 20, 26)):
+        put(i, [(x - 2, 27), (x, 22 - (k % 2) * 2), (x + 2, 27)], rgba((255, 170, 70)))
+
+
+def mist_veil(i):
+    w = TAG["wind"]
+    for k, y in enumerate((10, 16, 22)):
+        pts = [(5 + t, y + math.sin((t + k * 3) / 3.0) * 2) for t in range(0, 23)]
+        for j in range(len(pts) - 1):
+            line(i, [pts[j], pts[j + 1]], rgba(w, 230 - k * 50), 2)
+    dot(i, 22, 16, WHITE, 1)
+
+
+def curse_mark(i):
+    c = (190, 110, 230)
+    pts = []
+    for k in range(40):
+        t = k / 39 * 3.2 * math.pi
+        r = 1 + t * 1.0
+        pts.append((16 + math.cos(t) * r, 16 + math.sin(t) * r))
+    for j in range(len(pts) - 1):
+        line(i, [pts[j], pts[j + 1]], rgba(c), 2)
+    dot(i, 16, 16, WHITE, 1)
+
+
+def lamp_charm(i):
+    t = TAG["tide"]
+    line(i, [(16, 4), (16, 8)], rgba(shade(t, 0.8)))
+    put(i, [(11, 9), (21, 9), (22, 23), (10, 23)], rgba(shade(t, 0.55)))
+    put(i, [(13, 11), (19, 11), (19, 21), (13, 21)], rgba((255, 224, 150)))
+    dot(i, 16, 16, WHITE, 2)
+    line(i, [(9, 24), (23, 24)], rgba(t), 2)
+    ring(i, (4, 6, 28, 30), rgba((255, 224, 150), 90), 1)
+
+
+def shield_rush(i):
+    r = TAG["rock"]
+    for k, y in enumerate((11, 16, 21)):
+        line(i, [(4 + k, y), (11, y)], rgba(r, 200 - k * 50))
+    put(i, [(13, 7), (25, 7), (25, 17), (19, 26), (13, 17)], rgba(shade(r, 0.7)))
+    put(i, [(15, 9), (23, 9), (23, 16), (19, 23), (15, 16)], rgba(r))
+    line(i, [(19, 9), (19, 22)], rgba(shade(r, 0.5)))
+    dot(i, 21, 12, WHITE)
+
+
+def archer_leap(i):
+    b = TAG["bone"]
+    put(i, [(5, 16), (13, 9), (13, 13), (24, 13), (24, 19), (13, 19), (13, 23)], rgba(b))
+    for k, x in enumerate((26, 28)):
+        line(i, [(x, 12 + k), (x, 20 - k)], rgba(b, 180 - k * 60))
+    dot(i, 8, 16, WHITE)
+
+
 # ---------------------------------------------------------------- 紋
 def glyph(tag):
     def draw(i):
@@ -282,10 +404,16 @@ ICONS = [
     (tree_hybrid, TAG["bone"], TAG["bone"]), (tree_deep, V, VD), (tree_past, G, GD),
 ]
 GLYPHS = [glyph(t) for t in ("rock", "wind", "tide", "ash", "bone")]
+# 25 番から: 職の新しい技 (Skill.iconIndex の 125 + n)
+JOB_ICONS = [
+    (thunder_bolt, S, SD), (star_reading, S, SD), (ember_orb, S, SD), (frost_tide, S, SD), (blink, S, SD), (star_oath, S, SD),
+    (forge_stomp, TAG["ash"], TAG["ash"]), (mist_veil, TAG["wind"], TAG["wind"]), (curse_mark, TAG["tide"], TAG["tide"]),
+    (lamp_charm, TAG["tide"], TAG["tide"]), (shield_rush, TAG["rock"], TAG["rock"]), (archer_leap, TAG["bone"], TAG["bone"]),
+]
 
 
 def sheet():
-    img = Image.new("RGBA", (256, 128), (0, 0, 0, 0))
+    img = Image.new("RGBA", (256, 192), (0, 0, 0, 0))
     for n, (fn, a, b) in enumerate(ICONS):
         m = medallion(a, b, disc=(38, 30, 54) if fn.__name__.startswith(("deep", "tree_deep")) else (30, 36, 48))
         fn(m)
@@ -295,6 +423,11 @@ def sheet():
         g = Image.new("RGBA", (32, 32), (0, 0, 0, 0))
         fn(g)
         img.paste(g, ((n % 8) * 32, (n // 8) * 32))
+    for k, (fn, a, b) in enumerate(JOB_ICONS):
+        n = 25 + k
+        m = medallion(a, b, disc=(28, 30, 58) if a == S else (30, 36, 48))
+        fn(m)
+        img.paste(m, ((n % 8) * 32, (n // 8) * 32))
     return img
 
 

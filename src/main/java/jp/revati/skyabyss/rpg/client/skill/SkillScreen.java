@@ -140,6 +140,12 @@ public class SkillScreen extends Screen implements jp.revati.skyabyss.client.ui.
 
     public SkillScreen() {
         super(Component.translatable("gui.skyabyss.skill.title"));
+        // 職の武器を持っていれば、その職の木から開く (docs/design/43)
+        net.minecraft.client.player.LocalPlayer me = net.minecraft.client.Minecraft.getInstance().player;
+        jp.revati.skyabyss.rpg.skill.Job held = me == null ? null : jp.revati.skyabyss.rpg.skill.Job.held(me);
+        if (held != null) {
+            tree = held.tree;
+        }
     }
 
     @Override

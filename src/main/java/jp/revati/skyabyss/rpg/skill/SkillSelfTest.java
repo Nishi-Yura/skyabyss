@@ -110,7 +110,8 @@ public final class SkillSelfTest {
                 && SkillRules.pointsForLevel(9) == 5 && SkillRules.pointsForLevel(10) == 5 && SkillRules.pointsForLevel(12) == 7
                 && SkillRules.pointsForLevel(15) == 10 && SkillRules.pointsForLevel(21) == 16 && SkillRules.pointsForLevel(33) == 28
                 && SkillRules.pointsForLevel(50) == 45, "skill points per level are wrong");
-        check(f, Skill.values().length == 53 && Rune.values().length == 42, "skill / rune counts are wrong");
+        // 53 本 + 職の新しい技 10 本 (docs/design/43: 星読みの 6 と、鍛冶師・暗殺者・呪術師 2 の 4 つ目)
+        check(f, Skill.values().length == 65 && Rune.values().length == 42, "skill / rune counts are wrong");
         int[] perTree = new int[SkillTree.values().length];
         for (Skill s : Skill.values()) {
             perTree[s.tree.ordinal()]++;
@@ -118,7 +119,8 @@ public final class SkillSelfTest {
             check(f, !linked || (s.tier == 0 ? s.requires().isEmpty() : !s.requires().isEmpty()), s.id + " requirement shape is wrong");
             check(f, s.active == (SkillRules.cooldownTicks(s, 1) > 0), s.id + " cooldown does not match its kind");
             check(f, s.keystone() == (s.tier == 3) && (!s.keystone() || s.maxRank == 1), s.id + " keystone shape is wrong");
-            check(f, s.ordinal() < 36 ? s.iconIndex() == s.ordinal() : s.iconIndex() >= 100 && s.iconIndex() < 132, s.id + " icon index");
+            check(f, s.ordinal() < 36 ? s.iconIndex() == s.ordinal() : s.iconIndex() >= 100 && s.iconIndex() < 148 && (s.iconIndex() < 117 || s.iconIndex() >= 125),
+                    s.id + " icon index");
             if (s.active && s != Skill.SIGNAL) {
                 check(f, SkillRules.manaCost(s, 1) > 0, s.id + " has no mana cost");
             }
@@ -127,7 +129,10 @@ public final class SkillSelfTest {
             }
         }
         for (SkillTree t : SkillTree.values()) {
-            check(f, t.sealed || perTree[t.ordinal()] == (t == SkillTree.HYBRID ? 5 : 6), t.id + " does not have the right number of skills");
+            // 3 行目の左右に職の 4 つ目の技: 岩守り・風読み・灰の鍛え人・骨の射手 +1、潮歌い +2
+            int want = t == SkillTree.HYBRID ? 5 : t == SkillTree.ROCK || t == SkillTree.WIND || t == SkillTree.ASH || t == SkillTree.BONE ? 7
+                    : t == SkillTree.TIDE ? 8 : 6;
+            check(f, t.sealed || perTree[t.ordinal()] == want, t.id + " does not have the right number of skills: " + perTree[t.ordinal()]);
         }
         // 1 本の木の総点 (段 + 刻印 1 点ずつ)。Lv 50 の 45 点では 3 本は極められない
         int[] treePoints = new int[SkillTree.values().length];
@@ -157,9 +162,11 @@ public final class SkillSelfTest {
         d.ranks.put(Skill.WHALE_SWEEP.id, 1);
         check(f, d.canLearn(Skill.STONE_OATH, 19) == SkillData.LearnResult.LEVEL && d.canLearn(Skill.STONE_OATH, 20) == SkillData.LearnResult.NO_POINTS
                 || d.canLearn(Skill.STONE_OATH, 20) == SkillData.LearnResult.OK, "the keystone level gate is wrong");
-        check(f, !d.treeOpen(SkillTree.STAR) && !d.treeOpen(SkillTree.ABYSS) && d.treeOpen(SkillTree.ROCK), "sealed trees are open");
-        d.unlockedTrees.add(SkillTree.STAR.id);
-        check(f, d.treeOpen(SkillTree.STAR), "an unlocked tree stayed sealed");
+        // 星読みは魔法使いの木 (docs/design/43) になり、はじめから開いている
+        check(f, d.treeOpen(SkillTree.STAR) && !d.treeOpen(SkillTree.ABYSS) && d.treeOpen(SkillTree.ROCK), "sealed trees are open (or the mage tree is closed)");
+        d.unlockedTrees.add(SkillTree.ABYSS.id);
+        check(f, d.treeOpen(SkillTree.ABYSS), "an unlocked tree stayed sealed");
+        d.unlockedTrees.remove(SkillTree.ABYSS.id);
 
         // ---------------------------------------------------------------- 記録の検め
         d = new SkillData();
