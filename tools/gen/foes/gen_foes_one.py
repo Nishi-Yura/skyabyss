@@ -23,7 +23,8 @@ A = os.path.join(ROOT, "src", "main", "resources", "assets", "skyabyss")
 R = os.path.join(ROOT, "docs", "review", "foes_one")
 sys.path.insert(0, os.path.join(ROOT, "tools", "rough", "lowpoly", "foes"))
 MOBS = ["bandit", "bandit_archer", "bandit_chief", "bone_footman", "bone_bowman", "bone_standard", "grain_rat", "stray_wisp",
-        "feral_dog", "moss_dead", "mist_angler", "thunder_wolf"]
+        "feral_dog", "moss_dead", "mist_angler", "thunder_wolf",
+        "rock_boar", "tide_crab", "storm_ram", "ash_lizard"]
 
 
 def wjson(path, data):
@@ -355,6 +356,123 @@ def mist_angler():
             p + "hurt": once(0.3, hurt), p + "death": once(0.8, death, True)}
 
 
+# ---------------------------------------------------------------- 名のある強敵 (岩背の大猪・潮招きの大蟹・雷角の大羊・灰被りの大蜥蜴)
+def beast_base(prefix, P, step, legs=("fore_l", "fore_r", "hind_l", "hind_r"), swing=26, fall=8.0, splay=False):
+    """四つ足の大物の待機・歩き・のけぞり・倒れ。splay = 脚が横へ張り出す (蜥蜴: 脚は縦軸のまわりに振る)"""
+    p = "animation.%s." % prefix
+    ip = P["idle"]
+    idle = {"body": bone(wobble(ip.get("body", (0, 0, 0)), "0"), ["0", S(0, 0.3, 90), "0"])}
+    for b in ("head", "tail", "tail2"):
+        if b in ip or b == "head":
+            base = ip.get(b, (0, 0, 0))
+            idle[b] = bone([neg("%s + %s" % (base[0], S(0 if b == "head" else 90, 2.5, 80))), neg("%s + %s" % (base[1], S(40, 4 if b != "head" else 2, 60))), "0"])
+    fl, fr, hl, hr = legs
+    walk = {"body": bone(wobble(ip.get("body", (0, 0, 0)), S(0, 2)), ["0", "math.abs(" + S(0, 0.6) + ")", "0"]),
+            "head": bone(wobble(ip.get("head", (0, 0, 0)), S(180, 3)))}
+    for b, ph in ((fl, 0), (hr, 0), (fr, 180), (hl, 180)):
+        walk[b] = bone(["0", neg(S(ph, swing)), "0"] if splay else [neg(S(ph, swing)), "0", "0"])
+    if "tail" in BONES_OF.get(prefix, ()):
+        walk["tail"] = bone(["0", neg(S(90, 14)), "0"])
+    hurt = {"body": bone(kf({0: (0, 0, 0), 0.08: (-5, 0, 0), 0.3: (0, 0, 0)})), "head": bone(kf({0: (0, 0, 0), 0.08: (12, 0, 0), 0.3: (0, 0, 0)}))}
+    death = {"body": bone(kf({0: (0, 0, 0), 0.7: (0, 0, 90)}), kf({0: (0, 0, 0), 0.7: (0, -fall, 0)}, False)),
+             "head": bone(kf({0: (0, 0, 0), 0.7: (-20, 0, 0)}))}
+    for b in legs:
+        death[b] = bone(kf({0: (0, 0, 0), 0.7: (30 if b.startswith("fore") else -30, 0, 0)}))
+    return {p + "idle": loop(4.0, idle), p + "walk": loop(step, walk), p + "hurt": once(0.3, hurt), p + "death": once(1.0, death, True)}
+
+
+BONES_OF = {"rock_boar": ("tail",), "storm_ram": ("tail",), "ash_lizard": ("tail", "tail2")}
+
+
+def rock_boar():
+    import rock_boar as M
+    P = M.POSES
+    a = beast_base("rock_boar", P, 0.9, fall=9.0)
+    run = {"body": (-10, 0, 0), "head": (-30, 0, 0), "fore_l": (-40, 0, 0), "fore_r": (30, 0, 0), "hind_l": (30, 0, 0), "hind_r": (-40, 0, 0), "tail": (40, 0, 0)}
+    run2 = merge(run, {"fore_l": (30, 0, 0), "fore_r": (-40, 0, 0), "hind_l": (-40, 0, 0), "hind_r": (30, 0, 0)})
+    paw_up, paw_dn = P["telegraph"], merge(P["telegraph"], {"fore_r": (5, 0, 0)})
+    # 突進 (予告 1.2 秒): 頭を下げて前脚で地を掻く (三度) -> 1.2 で駆ける
+    a["animation.rock_boar.charge"] = once(2.1, seq([(0, P["idle"]), (0.3, paw_up), (0.5, paw_dn), (0.7, paw_up), (0.9, paw_dn), (1.1, paw_up), (1.2, run), (1.35, run2),
+                                                      (1.5, run), (1.65, run2), (2.1, P["idle"])]))
+    # 背を震わせる (予告 1.0 秒): 前を持ち上げて岩の背を揺すり、1.0 で前脚を叩きつける
+    slam = {"body": (-6, 0, 0), "head": (-14, 0, 0), "fore_l": (20, 0, 0), "fore_r": (20, 0, 0)}
+    q = seq([(0, P["idle"]), (0.7, P["quake"]), (0.8, merge(P["quake"], {"body": (16, 0, 4)})), (0.9, merge(P["quake"], {"body": (16, 0, -4)})), (1.0, P["quake"]),
+             (1.1, slam), (1.4, slam), (1.8, P["idle"])])
+    a["animation.rock_boar.quake"] = once(1.8, q)
+    # 牙で薙ぐ (予告 0.6 秒): 頭を横へ引き、反対へ振り抜く
+    a["animation.rock_boar.gore"] = once(1.1, seq([(0, P["idle"]), (0.5, {"head": (-24, 34, 0), "body": (0, 10, 0)}), (0.6, {"head": (-24, 34, 0), "body": (0, 10, 0)}),
+                                                    (0.72, {"head": (10, -40, 0), "body": (0, -12, 0)}), (1.1, P["idle"])]))
+    return a
+
+
+def tide_crab():
+    import tide_crab as M
+    P = M.POSES
+    p = "animation.tide_crab."
+    ip = P["idle"]
+    idle = {"body": bone(position=["0", S(0, 0.3, 80), "0"]), "claw_big": bone(wobble(ip["claw_big"], S(0, 3, 70))), "pincer": bone(wobble(ip["pincer"], S(60, 6, 120))),
+            "claw_small": bone([neg(S(90, 8, 140)), "0", "0"]), "eye_l": bone([neg(S(0, 6, 90)), "0", "0"]), "eye_r": bone([neg(S(120, 6, 90)), "0", "0"])}
+    walk = {"body": bone(["0", "0", S(0, 3)], ["0", "math.abs(" + S(0, 0.5) + ")", "0"]), "claw_big": bone(wobble(ip["claw_big"], S(0, 4))),
+            "pincer": bone(wobble(ip["pincer"], "0"))}
+    for b, ph, sx in (("leg_la", 0, 1), ("leg_rb", 0, -1), ("leg_lb", 180, 1), ("leg_ra", 180, -1)):
+        walk[b] = bone(["0", neg(S(ph, 16)), "%d * (%s)" % (sx, S(ph + 90, 14))])
+    slam = {"body": (-8, 0, 0), "claw_big": (-24, 0, -10), "pincer": (0, 0, 0), "claw_small": (-10, 0, 0)}
+    # 大ばさみの叩きつけ (予告 1.0 秒)
+    slam_a = seq([(0, ip), (0.85, P["telegraph"]), (1.0, P["telegraph"]), (1.1, slam), (1.5, slam), (2.0, ip)])
+    # 泡 (予告 1.2 秒): 体を前へ傾けて、1.2 から泡を吹き続ける (はさみを打ち鳴らす)
+    spray = seq([(0, ip), (0.9, P["spray"]), (1.2, P["spray"]), (1.35, merge(P["spray"], {"body": (-14, 0, 0)})), (1.5, P["spray"]), (1.65, merge(P["spray"], {"body": (-14, 0, 0)})),
+                 (1.8, P["spray"]), (2.2, ip)])
+    hurt = {"body": bone(kf({0: (0, 0, 0), 0.08: (6, 0, 0), 0.3: (0, 0, 0)})), "eye_l": bone(kf({0: (0, 0, 0), 0.08: (40, 0, 0), 0.3: (0, 0, 0)})),
+            "eye_r": bone(kf({0: (0, 0, 0), 0.08: (40, 0, 0), 0.3: (0, 0, 0)}))}
+    # 倒れる: 脚を縮めて腹を落とし、大ばさみが落ちる
+    death = {"body": bone(kf({0: (0, 0, 0), 0.6: (6, 0, 8)}), kf({0: (0, 0, 0), 0.6: (0, -7, 0)}, False)), "claw_big": bone(kf({0: (0, 0, 0), 0.6: (-20, 0, -20)})),
+             "eye_l": bone(kf({0: (0, 0, 0), 0.6: (60, 0, 0)})), "eye_r": bone(kf({0: (0, 0, 0), 0.6: (60, 0, 0)}))}
+    for b, sx in (("leg_la", 1), ("leg_lb", 1), ("leg_ra", -1), ("leg_rb", -1)):
+        death[b] = bone(kf({0: (0, 0, 0), 0.6: (0, 0, sx * 40)}))
+    return {p + "idle": loop(6.0, idle), p + "walk": loop(0.8, walk), p + "slam": once(2.0, slam_a), p + "spray": once(2.2, spray),
+            p + "hurt": once(0.3, hurt), p + "death": once(0.8, death, True)}
+
+
+def storm_ram():
+    import storm_ram as M
+    P = M.POSES
+    a = beast_base("storm_ram", P, 0.8, fall=10.0)
+    run = {"body": (-8, 0, 0), "head": (-40, 0, 0), "fore_l": (-40, 0, 0), "fore_r": (30, 0, 0), "hind_l": (30, 0, 0), "hind_r": (-40, 0, 0)}
+    run2 = merge(run, {"fore_l": (30, 0, 0), "fore_r": (-40, 0, 0), "hind_l": (-40, 0, 0), "hind_r": (30, 0, 0)})
+    # 角の突進 (予告 1.2 秒): 頭を下げて角を前へ -> 1.2 で駆ける
+    a["animation.storm_ram.charge"] = once(2.1, seq([(0, P["idle"]), (0.9, P["telegraph"]), (1.2, P["telegraph"]), (1.3, run), (1.45, run2), (1.6, run), (1.75, run2), (2.1, P["idle"])]))
+    # 立ち上がって蹄を打ち下ろす (予告 1.2 秒)
+    stomp = {"body": (-6, 0, 0), "head": (-20, 0, 0), "fore_l": (30, 0, 0), "fore_r": (30, 0, 0)}
+    rear = seq([(0, P["idle"]), (0.9, P["rear"]), (1.2, P["rear"]), (1.32, stomp), (1.6, stomp), (2.0, P["idle"])])
+    rear["body"]["position"] = kf({0: (0, 0, 0), 0.9: (0, 4, 4), 1.2: (0, 4, 4), 1.32: (0, 0, 0)}, False)
+    a["animation.storm_ram.rear"] = once(2.0, rear)
+    # 頭突き (予告 0.6 秒)
+    a["animation.storm_ram.butt"] = once(1.0, seq([(0, P["idle"]), (0.5, {"head": (-40, 0, 0), "body": (-6, 0, 0)}), (0.6, {"head": (-40, 0, 0), "body": (-6, 0, 0)}),
+                                                    (0.7, {"head": (14, 0, 0), "body": (4, 0, 0)}), (1.0, P["idle"])]))
+    return a
+
+
+def ash_lizard():
+    import ash_lizard as M
+    P = M.POSES
+    a = beast_base("ash_lizard", P, 1.0, swing=22, fall=6.0, splay=True)
+    a["animation.ash_lizard.walk"]["bones"]["tail"] = bone(["0", neg(S(90, 14)), "0"])
+    a["animation.ash_lizard.walk"]["bones"]["tail2"] = bone(["0", neg(S(140, 18)), "0"])
+    a["animation.ash_lizard.walk"]["bones"]["body"] = bone(["0", neg(S(0, 6)), "0"], ["0", S(0, 0.3, 720), "0"])
+    breath = {"body": (8, 0, 0), "head": (6, 0, 0), "jaw": (-34, 0, 0), "fore_l": (-10, 0, 0), "fore_r": (-10, 0, 0)}
+    # 吐く (予告 1.2 秒): 頭を持ち上げて口を開け -> 1.2 から吐き続け、首を左右に振る
+    a["animation.ash_lizard.breath"] = once(2.4, seq([(0, P["idle"]), (1.0, P["telegraph"]), (1.2, P["telegraph"]), (1.3, breath), (1.6, merge(breath, {"head": (6, 14, 0)})),
+                                                       (1.9, merge(breath, {"head": (6, -14, 0)})), (2.1, breath), (2.4, P["idle"])]))
+    # 尾の薙ぎ (予告 0.8 秒): 体をひねって尾を振りかぶる -> 0.8 で反対へ振り抜く
+    through = {"body": (0, -30, 0), "head": (0, -20, 0), "tail": (0, -60, 0), "tail2": (0, -50, 0)}
+    a["animation.ash_lizard.sweep"] = once(1.6, seq([(0, P["idle"]), (0.65, P["coil"]), (0.8, P["coil"]), (0.95, through), (1.2, through), (1.6, P["idle"])]))
+    # 噛みつき (予告 0.5 秒)
+    a["animation.ash_lizard.bite"] = once(0.9, seq([(0, P["idle"]), (0.4, {"head": (12, 0, 0), "jaw": (-30, 0, 0), "body": (4, 0, 0)}),
+                                                     (0.5, {"head": (12, 0, 0), "jaw": (-30, 0, 0), "body": (4, 0, 0)}), (0.6, {"head": (-12, 0, 0), "jaw": (0, 0, 0), "body": (-4, 0, 0)}),
+                                                     (0.9, P["idle"])]))
+    return a
+
+
 # ---------------------------------------------------------------- 音 (既存の音源・バニラの音の別名。"type": "event" = その音の出来事をそのまま鳴らす)
 M = "skyabyss:mobs/"
 
@@ -411,6 +529,27 @@ SOUNDS = {
     "thunder_wolf_hurt": [ev("minecraft:entity.wolf.hurt", 0.75, 1.0)],
     "thunder_wolf_death": [ev("minecraft:entity.wolf.death", 0.7, 1.0)],
     "thunder_wolf_howl": [ev("minecraft:entity.wolf.howl", 0.8, 1.6)],
+    "rock_boar_ambient": [ev("minecraft:entity.hoglin.ambient", 0.75, 1.0)],
+    "rock_boar_hurt": [ev("minecraft:entity.hoglin.hurt", 0.75, 1.0)],
+    "rock_boar_death": [ev("minecraft:entity.hoglin.death", 0.7, 1.2)],
+    "rock_boar_step": [ev("minecraft:entity.hoglin.step", 0.7, 0.8)],
+    "rock_boar_charge": [ev("minecraft:entity.hoglin.angry", 0.7, 1.6)],
+    "rock_boar_quake": [(M + "stone_heart_slam", 0.9, 1.4)],
+    "tide_crab_ambient": [ev("minecraft:entity.turtle.ambient_land", 0.5, 1.0)],
+    "tide_crab_hurt": [ev("minecraft:entity.turtle.hurt", 0.6, 1.0)],
+    "tide_crab_death": [ev("minecraft:entity.turtle.death", 0.55, 1.2)],
+    "tide_crab_slam": [(M + "stone_heart_slam", 1.15, 1.3)],
+    "tide_crab_spray": [ev("minecraft:block.bubble_column.upwards_inside", 0.9, 1.6)],
+    "storm_ram_ambient": [ev("minecraft:entity.goat.screaming.ambient", 0.7, 1.0)],
+    "storm_ram_hurt": [ev("minecraft:entity.goat.hurt", 0.7, 1.0)],
+    "storm_ram_death": [ev("minecraft:entity.goat.death", 0.6, 1.2)],
+    "storm_ram_charge": [ev("minecraft:entity.goat.prepare_ram", 0.7, 1.5)],
+    "storm_ram_stomp": [ev("minecraft:entity.goat.ram_impact", 0.6, 1.5)],
+    "ash_lizard_ambient": [ev("minecraft:entity.strider.ambient", 0.55, 1.0)],
+    "ash_lizard_hurt": [ev("minecraft:entity.strider.hurt", 0.6, 1.0)],
+    "ash_lizard_death": [ev("minecraft:entity.strider.death", 0.5, 1.2)],
+    "ash_lizard_breath": [ev("minecraft:entity.blaze.shoot", 0.6, 1.4)],
+    "ash_lizard_sweep": [ev("minecraft:entity.player.attack.sweep", 0.5, 1.4)],
 }
 SUBTITLES = {
     "bandit_ambient": ("Bandit mutters", "野盗がつぶやく"), "bandit_hurt": ("Bandit hurts", "野盗がうめく"), "bandit_death": ("Bandit falls", "野盗が倒れる"),
@@ -435,6 +574,14 @@ SUBTITLES = {
     "mist_angler_sway": ("Lantern sways", "漁り火が揺れる"),
     "thunder_wolf_ambient": ("Thunder wolf growls", "雷狼がうなる"), "thunder_wolf_hurt": ("Thunder wolf yelps", "雷狼が鳴く"),
     "thunder_wolf_death": ("Thunder wolf dies", "雷狼が倒れる"), "thunder_wolf_howl": ("Thunder wolf howls", "雷狼が吠える"),
+    "rock_boar_ambient": ("Great boar grunts", "大猪がうなる"), "rock_boar_hurt": ("Great boar squeals", "大猪が鳴く"), "rock_boar_death": ("Great boar falls", "大猪が倒れる"),
+    "rock_boar_step": ("Heavy hooves", "重い蹄の音"), "rock_boar_charge": ("Great boar snorts", "大猪が鼻を鳴らす"), "rock_boar_quake": ("Rock plates shake", "岩の背が震える"),
+    "tide_crab_ambient": ("Great crab clicks", "大蟹がはさみを鳴らす"), "tide_crab_hurt": ("Shell cracks", "甲羅がきしむ"), "tide_crab_death": ("Great crab falls", "大蟹が倒れる"),
+    "tide_crab_slam": ("Great claw slams", "大ばさみが叩きつけられる"), "tide_crab_spray": ("Bubbles gush", "泡が噴き出す"),
+    "storm_ram_ambient": ("Great ram bleats", "大羊が鳴く"), "storm_ram_hurt": ("Great ram cries", "大羊が叫ぶ"), "storm_ram_death": ("Great ram falls", "大羊が倒れる"),
+    "storm_ram_charge": ("Great ram lowers its horns", "大羊が角を下げる"), "storm_ram_stomp": ("Hooves strike", "蹄が打ち下ろされる"),
+    "ash_lizard_ambient": ("Great lizard hisses", "大蜥蜴が息を漏らす"), "ash_lizard_hurt": ("Great lizard shrieks", "大蜥蜴が叫ぶ"),
+    "ash_lizard_death": ("Great lizard falls", "大蜥蜴が倒れる"), "ash_lizard_breath": ("Embers pour out", "熾火が吐かれる"), "ash_lizard_sweep": ("Tail sweeps", "尾が薙ぐ"),
 }
 NAMES = {
     "bandit": ("Bandit", "野盗", 0x5A4632, 0x8C2E22), "bandit_archer": ("Bandit Archer", "野盗の弓手", 0x6B7040, 0x5A4632),
@@ -443,6 +590,8 @@ NAMES = {
     "grain_rat": ("Grain Rat", "穂かじり鼠", 0x8A6A40, 0xD8B470), "stray_wisp": ("Stray Wisp", "迷い灯", 0x9ACAEE, 0x2A2E3A),
     "feral_dog": ("Feral Dog", "野犬", 0x6E6050, 0x8A6A40), "moss_dead": ("Moss Dead", "苔の亡者", 0x3E5A2A, 0xA8F082),
     "mist_angler": ("Mist Angler", "霧の漁り火", 0x54523A, 0x78F0D2), "thunder_wolf": ("Thunder Wolf", "雷狼", 0x3E4862, 0x8CD2FF),
+    "rock_boar": ("Rockback Boar", "岩背の大猪", 0x4A3C2E, 0x7A8696), "tide_crab": ("Tidecaller Crab", "潮招きの大蟹", 0x22424A, 0xBA4A26),
+    "storm_ram": ("Thunderhorn Ram", "雷角の大羊", 0xC4C8D0, 0x2A2C34), "ash_lizard": ("Ashcloak Lizard", "灰被りの大蜥蜴", 0x1E1A18, 0xE05A30),
 }
 
 

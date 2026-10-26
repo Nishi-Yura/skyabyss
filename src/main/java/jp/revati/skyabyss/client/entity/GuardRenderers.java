@@ -87,6 +87,10 @@ public final class GuardRenderers {
         event.registerEntityRenderer(ModEntities.MOSS_DEAD.get(), ctx -> noTilt(ctx, "moss_dead"));
         event.registerEntityRenderer(ModEntities.MIST_ANGLER.get(), ctx -> noTilt(ctx, "mist_angler"));
         event.registerEntityRenderer(ModEntities.THUNDER_WOLF.get(), ctx -> noTiltStillHead(ctx, "thunder_wolf"));
+        event.registerEntityRenderer(ModEntities.ROCK_BOAR.get(), ctx -> noTiltStillHead(ctx, "rock_boar"));
+        event.registerEntityRenderer(ModEntities.TIDE_CRAB.get(), ctx -> noTiltStillHead(ctx, "tide_crab"));
+        event.registerEntityRenderer(ModEntities.STORM_RAM.get(), ctx -> noTiltStillHead(ctx, "storm_ram"));
+        event.registerEntityRenderer(ModEntities.ASH_LIZARD.get(), ctx -> noTiltStillHead(ctx, "ash_lizard"));
         event.registerEntityRenderer(ModEntities.STONE_WHALE_HEART.get(), StoneWhaleHeartRenderer::new);
         event.registerEntityRenderer(ModEntities.BONE_SPIKE.get(), ctx -> new ArrowRenderer<BoneSpike>(ctx) {
             @Override

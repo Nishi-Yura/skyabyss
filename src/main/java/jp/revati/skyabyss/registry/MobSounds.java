@@ -177,6 +177,27 @@ public final class MobSounds {
     public static final DeferredHolder<SoundEvent, SoundEvent> THUNDER_WOLF_HURT = register("thunder_wolf_hurt");
     public static final DeferredHolder<SoundEvent, SoundEvent> THUNDER_WOLF_DEATH = register("thunder_wolf_death");
     public static final DeferredHolder<SoundEvent, SoundEvent> THUNDER_WOLF_HOWL = register("thunder_wolf_howl");
+    public static final DeferredHolder<SoundEvent, SoundEvent> ROCK_BOAR_AMBIENT = register("rock_boar_ambient");
+    public static final DeferredHolder<SoundEvent, SoundEvent> ROCK_BOAR_HURT = register("rock_boar_hurt");
+    public static final DeferredHolder<SoundEvent, SoundEvent> ROCK_BOAR_DEATH = register("rock_boar_death");
+    public static final DeferredHolder<SoundEvent, SoundEvent> ROCK_BOAR_STEP = register("rock_boar_step");
+    public static final DeferredHolder<SoundEvent, SoundEvent> ROCK_BOAR_CHARGE = register("rock_boar_charge");
+    public static final DeferredHolder<SoundEvent, SoundEvent> ROCK_BOAR_QUAKE = register("rock_boar_quake");
+    public static final DeferredHolder<SoundEvent, SoundEvent> TIDE_CRAB_AMBIENT = register("tide_crab_ambient");
+    public static final DeferredHolder<SoundEvent, SoundEvent> TIDE_CRAB_HURT = register("tide_crab_hurt");
+    public static final DeferredHolder<SoundEvent, SoundEvent> TIDE_CRAB_DEATH = register("tide_crab_death");
+    public static final DeferredHolder<SoundEvent, SoundEvent> TIDE_CRAB_SLAM = register("tide_crab_slam");
+    public static final DeferredHolder<SoundEvent, SoundEvent> TIDE_CRAB_SPRAY = register("tide_crab_spray");
+    public static final DeferredHolder<SoundEvent, SoundEvent> STORM_RAM_AMBIENT = register("storm_ram_ambient");
+    public static final DeferredHolder<SoundEvent, SoundEvent> STORM_RAM_HURT = register("storm_ram_hurt");
+    public static final DeferredHolder<SoundEvent, SoundEvent> STORM_RAM_DEATH = register("storm_ram_death");
+    public static final DeferredHolder<SoundEvent, SoundEvent> STORM_RAM_CHARGE = register("storm_ram_charge");
+    public static final DeferredHolder<SoundEvent, SoundEvent> STORM_RAM_STOMP = register("storm_ram_stomp");
+    public static final DeferredHolder<SoundEvent, SoundEvent> ASH_LIZARD_AMBIENT = register("ash_lizard_ambient");
+    public static final DeferredHolder<SoundEvent, SoundEvent> ASH_LIZARD_HURT = register("ash_lizard_hurt");
+    public static final DeferredHolder<SoundEvent, SoundEvent> ASH_LIZARD_DEATH = register("ash_lizard_death");
+    public static final DeferredHolder<SoundEvent, SoundEvent> ASH_LIZARD_BREATH = register("ash_lizard_breath");
+    public static final DeferredHolder<SoundEvent, SoundEvent> ASH_LIZARD_SWEEP = register("ash_lizard_sweep");
 
     private MobSounds() {
     }

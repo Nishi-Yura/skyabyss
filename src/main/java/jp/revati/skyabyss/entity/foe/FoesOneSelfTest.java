@@ -45,7 +45,7 @@ public final class FoesOneSelfTest {
     private static final int FLOOR = 200;
     private static final float HEALTH = 1000f;
     static final String[] IDS = {"bandit", "bandit_archer", "bandit_chief", "bone_footman", "bone_bowman", "bone_standard", "grain_rat", "stray_wisp",
-        "feral_dog", "moss_dead", "mist_angler", "thunder_wolf"};
+        "feral_dog", "moss_dead", "mist_angler", "thunder_wolf", "rock_boar", "tide_crab", "storm_ram", "ash_lizard"};
 
     private FoesOneSelfTest() {
     }
@@ -104,7 +104,7 @@ public final class FoesOneSelfTest {
             unload(level);
         }
         if (f.isEmpty()) {
-            SkyAbyss.LOGGER.info("SELFTEST new foes PASSED (12 foes registered with eggs/xp/animations/spawn rows; every telegraph matches its hit; "
+            SkyAbyss.LOGGER.info("SELFTEST new foes PASSED (16 foes registered with eggs/xp/animations/spawn rows; every telegraph matches its hit; "
                     + "footman shield 30% from the front; banner ward revives once; chief shout hastes the crew; dog howl sends the pack, wolf howl marks the target; named foe tag, health, bar, coins, cooldown)");
         } else {
             f.forEach(m -> SkyAbyss.LOGGER.error("SELFTEST new foes FAILED: {}", m));
@@ -127,7 +127,7 @@ public final class FoesOneSelfTest {
             EntityType<?> type = BuiltInRegistries.ENTITY_TYPE.get(key);
             List<String> need = new ArrayList<>(List.of("idle", "walk"));
             if (type.create(level) instanceof GuardMob g) {
-                for (String act : new String[] {"swing", "shoot", "sweep", "shout", "thrust", "block", "bash", "plant", "rise", "bite", "pulse", "howl", "slam", "spores", "net", "sway", "hurt", "death"}) {
+                for (String act : new String[] {"swing", "shoot", "sweep", "shout", "thrust", "block", "bash", "plant", "rise", "bite", "pulse", "howl", "slam", "spores", "net", "sway", "charge", "quake", "gore", "spray", "rear", "butt", "breath", "hurt", "death"}) {
                     if (g.hasAction(act)) {
                         need.add(act);
                     }
@@ -137,6 +137,10 @@ public final class FoesOneSelfTest {
             for (String n : need) {
                 check(a.has("animation." + id + "." + n), id + " misses animation " + n, f);
             }
+        }
+        for (int r = 0; r < 6; r++) {
+            var d = jp.revati.skyabyss.world.continent.NamedFoes.def(r);
+            check(d != null && BuiltInRegistries.ENTITY_TYPE.containsKey(net.minecraft.resources.ResourceLocation.parse(d.entity())), "region " + r + " has no named foe", f);
         }
         for (String region : new String[] {"island", "meadow"}) {
             JsonObject t = json("/data/skyabyss/spawns/" + region + ".json");
@@ -178,7 +182,11 @@ public final class FoesOneSelfTest {
                 new Case("feral_dog", ModEntities.FERAL_DOG::get, 2.0, PackBeast.BITE_WARN),
                 new Case("moss_dead", ModEntities.MOSS_DEAD::get, 2.4, MossDead.SLAM_WARN),
                 new Case("mist_angler", ModEntities.MIST_ANGLER::get, 9.0, MistAngler.NET_WARN),
-                new Case("thunder_wolf", ModEntities.THUNDER_WOLF::get, 2.0, PackBeast.BITE_WARN));
+                new Case("thunder_wolf", ModEntities.THUNDER_WOLF::get, 2.0, PackBeast.BITE_WARN),
+                new Case("rock_boar", ModEntities.ROCK_BOAR::get, 8.0, RockBoar.CHARGE_WARN),
+                new Case("tide_crab", ModEntities.TIDE_CRAB::get, 4.0, TideCrab.SLAM_WARN),
+                new Case("storm_ram", ModEntities.STORM_RAM::get, 8.0, StormRam.CHARGE_WARN),
+                new Case("ash_lizard", ModEntities.ASH_LIZARD::get, 6.0, AshLizard.BREATH_WARN));
         for (Case c : cases) {
             ContinentFoe m = spawn(lv, c.type().get(), SX, SZ, 0f);
             FakePlayer in = fake(lv, c.name() + "_in", SX, SZ + c.dist());

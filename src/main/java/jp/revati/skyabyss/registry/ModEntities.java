@@ -135,6 +135,19 @@ public final class ModEntities {
     public static final DeferredHolder<EntityType<?>, EntityType<jp.revati.skyabyss.entity.foe.ThunderWolf>> THUNDER_WOLF = ENTITIES.register("thunder_wolf",
             () -> EntityType.Builder.of(jp.revati.skyabyss.entity.foe.ThunderWolf::new, MobCategory.MONSTER)
                     .sized(0.9f, 1.1f).eyeHeight(0.9f).clientTrackingRange(8).build(SkyAbyss.MODID + ":thunder_wolf"));
+    // 名のある強敵の大物 (docs/design/44 の 5。world/continent/NamedFoes が湧かせる)
+    public static final DeferredHolder<EntityType<?>, EntityType<jp.revati.skyabyss.entity.foe.RockBoar>> ROCK_BOAR = ENTITIES.register("rock_boar",
+            () -> EntityType.Builder.of(jp.revati.skyabyss.entity.foe.RockBoar::new, MobCategory.MONSTER)
+                    .sized(1.8f, 2.0f).clientTrackingRange(10).build(SkyAbyss.MODID + ":rock_boar"));
+    public static final DeferredHolder<EntityType<?>, EntityType<jp.revati.skyabyss.entity.foe.TideCrab>> TIDE_CRAB = ENTITIES.register("tide_crab",
+            () -> EntityType.Builder.of(jp.revati.skyabyss.entity.foe.TideCrab::new, MobCategory.MONSTER)
+                    .sized(2.4f, 1.4f).clientTrackingRange(10).build(SkyAbyss.MODID + ":tide_crab"));
+    public static final DeferredHolder<EntityType<?>, EntityType<jp.revati.skyabyss.entity.foe.StormRam>> STORM_RAM = ENTITIES.register("storm_ram",
+            () -> EntityType.Builder.of(jp.revati.skyabyss.entity.foe.StormRam::new, MobCategory.MONSTER)
+                    .sized(1.4f, 2.3f).clientTrackingRange(10).build(SkyAbyss.MODID + ":storm_ram"));
+    public static final DeferredHolder<EntityType<?>, EntityType<jp.revati.skyabyss.entity.foe.AshLizard>> ASH_LIZARD = ENTITIES.register("ash_lizard",
+            () -> EntityType.Builder.of(jp.revati.skyabyss.entity.foe.AshLizard::new, MobCategory.MONSTER)
+                    .sized(2.0f, 1.6f).clientTrackingRange(10).build(SkyAbyss.MODID + ":ash_lizard"));
 
     private static <T extends net.minecraft.world.entity.Mob> DeferredHolder<EntityType<?>, EntityType<T>> monster(
             String name, EntityType.EntityFactory<T> factory, float width, float height) {
@@ -169,6 +182,10 @@ public final class ModEntities {
         event.put(MOSS_DEAD.get(), jp.revati.skyabyss.entity.foe.MossDead.createAttributes().build());
         event.put(MIST_ANGLER.get(), jp.revati.skyabyss.entity.foe.MistAngler.createAttributes().build());
         event.put(THUNDER_WOLF.get(), jp.revati.skyabyss.entity.foe.ThunderWolf.createAttributes().build());
+        event.put(ROCK_BOAR.get(), jp.revati.skyabyss.entity.foe.RockBoar.createAttributes().build());
+        event.put(TIDE_CRAB.get(), jp.revati.skyabyss.entity.foe.TideCrab.createAttributes().build());
+        event.put(STORM_RAM.get(), jp.revati.skyabyss.entity.foe.StormRam.createAttributes().build());
+        event.put(ASH_LIZARD.get(), jp.revati.skyabyss.entity.foe.AshLizard.createAttributes().build());
     }
 
     private ModEntities() {

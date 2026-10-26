@@ -3417,5 +3417,234 @@
         "type": "event"
       }
     ]
+  },
+  "rock_boar_ambient": {
+    "subtitle": "subtitles.skyabyss.rock_boar_ambient",
+    "sounds": [
+      {
+        "name": "minecraft:entity.hoglin.ambient",
+        "pitch": 0.75,
+        "volume": 1.0,
+        "type": "event"
+      }
+    ]
+  },
+  "rock_boar_hurt": {
+    "subtitle": "subtitles.skyabyss.rock_boar_hurt",
+    "sounds": [
+      {
+        "name": "minecraft:entity.hoglin.hurt",
+        "pitch": 0.75,
+        "volume": 1.0,
+        "type": "event"
+      }
+    ]
+  },
+  "rock_boar_death": {
+    "subtitle": "subtitles.skyabyss.rock_boar_death",
+    "sounds": [
+      {
+        "name": "minecraft:entity.hoglin.death",
+        "pitch": 0.7,
+        "volume": 1.2,
+        "type": "event"
+      }
+    ]
+  },
+  "rock_boar_step": {
+    "subtitle": "subtitles.skyabyss.rock_boar_step",
+    "sounds": [
+      {
+        "name": "minecraft:entity.hoglin.step",
+        "pitch": 0.7,
+        "volume": 0.8,
+        "type": "event"
+      }
+    ]
+  },
+  "rock_boar_charge": {
+    "subtitle": "subtitles.skyabyss.rock_boar_charge",
+    "sounds": [
+      {
+        "name": "minecraft:entity.hoglin.angry",
+        "pitch": 0.7,
+        "volume": 1.6,
+        "type": "event"
+      }
+    ]
+  },
+  "rock_boar_quake": {
+    "subtitle": "subtitles.skyabyss.rock_boar_quake",
+    "sounds": [
+      {
+        "name": "skyabyss:mobs/stone_heart_slam",
+        "pitch": 0.9,
+        "volume": 1.4
+      }
+    ]
+  },
+  "tide_crab_ambient": {
+    "subtitle": "subtitles.skyabyss.tide_crab_ambient",
+    "sounds": [
+      {
+        "name": "minecraft:entity.turtle.ambient_land",
+        "pitch": 0.5,
+        "volume": 1.0,
+        "type": "event"
+      }
+    ]
+  },
+  "tide_crab_hurt": {
+    "subtitle": "subtitles.skyabyss.tide_crab_hurt",
+    "sounds": [
+      {
+        "name": "minecraft:entity.turtle.hurt",
+        "pitch": 0.6,
+        "volume": 1.0,
+        "type": "event"
+      }
+    ]
+  },
+  "tide_crab_death": {
+    "subtitle": "subtitles.skyabyss.tide_crab_death",
+    "sounds": [
+      {
+        "name": "minecraft:entity.turtle.death",
+        "pitch": 0.55,
+        "volume": 1.2,
+        "type": "event"
+      }
+    ]
+  },
+  "tide_crab_slam": {
+    "subtitle": "subtitles.skyabyss.tide_crab_slam",
+    "sounds": [
+      {
+        "name": "skyabyss:mobs/stone_heart_slam",
+        "pitch": 1.15,
+        "volume": 1.3
+      }
+    ]
+  },
+  "tide_crab_spray": {
+    "subtitle": "subtitles.skyabyss.tide_crab_spray",
+    "sounds": [
+      {
+        "name": "minecraft:block.bubble_column.upwards_inside",
+        "pitch": 0.9,
+        "volume": 1.6,
+        "type": "event"
+      }
+    ]
+  },
+  "storm_ram_ambient": {
+    "subtitle": "subtitles.skyabyss.storm_ram_ambient",
+    "sounds": [
+      {
+        "name": "minecraft:entity.goat.screaming.ambient",
+        "pitch": 0.7,
+        "volume": 1.0,
+        "type": "event"
+      }
+    ]
+  },
+  "storm_ram_hurt": {
+    "subtitle": "subtitles.skyabyss.storm_ram_hurt",
+    "sounds": [
+      {
+        "name": "minecraft:entity.goat.hurt",
+        "pitch": 0.7,
+        "volume": 1.0,
+        "type": "event"
+      }
+    ]
+  },
+  "storm_ram_death": {
+    "subtitle": "subtitles.skyabyss.storm_ram_death",
+    "sounds": [
+      {
+        "name": "minecraft:entity.goat.death",
+        "pitch": 0.6,
+        "volume": 1.2,
+        "type": "event"
+      }
+    ]
+  },
+  "storm_ram_charge": {
+    "subtitle": "subtitles.skyabyss.storm_ram_charge",
+    "sounds": [
+      {
+        "name": "minecraft:entity.goat.prepare_ram",
+        "pitch": 0.7,
+        "volume": 1.5,
+        "type": "event"
+      }
+    ]
+  },
+  "storm_ram_stomp": {
+    "subtitle": "subtitles.skyabyss.storm_ram_stomp",
+    "sounds": [
+      {
+        "name": "minecraft:entity.goat.ram_impact",
+        "pitch": 0.6,
+        "volume": 1.5,
+        "type": "event"
+      }
+    ]
+  },
+  "ash_lizard_ambient": {
+    "subtitle": "subtitles.skyabyss.ash_lizard_ambient",
+    "sounds": [
+      {
+        "name": "minecraft:entity.strider.ambient",
+        "pitch": 0.55,
+        "volume": 1.0,
+        "type": "event"
+      }
+    ]
+  },
+  "ash_lizard_hurt": {
+    "subtitle": "subtitles.skyabyss.ash_lizard_hurt",
+    "sounds": [
+      {
+        "name": "minecraft:entity.strider.hurt",
+        "pitch": 0.6,
+        "volume": 1.0,
+        "type": "event"
+      }
+    ]
+  },
+  "ash_lizard_death": {
+    "subtitle": "subtitles.skyabyss.ash_lizard_death",
+    "sounds": [
+      {
+        "name": "minecraft:entity.strider.death",
+        "pitch": 0.5,
+        "volume": 1.2,
+        "type": "event"
+      }
+    ]
+  },
+  "ash_lizard_breath": {
+    "subtitle": "subtitles.skyabyss.ash_lizard_breath",
+    "sounds": [
+      {
+        "name": "minecraft:entity.blaze.shoot",
+        "pitch": 0.6,
+        "volume": 1.4,
+        "type": "event"
+      }
+    ]
+  },
+  "ash_lizard_sweep": {
+    "subtitle": "subtitles.skyabyss.ash_lizard_sweep",
+    "sounds": [
+      {
+        "name": "minecraft:entity.player.attack.sweep",
+        "pitch": 0.5,
+        "volume": 1.4,
+        "type": "event"
+      }
+    ]
   }
 }

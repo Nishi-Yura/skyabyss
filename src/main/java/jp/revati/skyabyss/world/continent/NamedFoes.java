@@ -49,11 +49,14 @@ public final class NamedFoes {
     public record Def(String entity, String name, boolean night, double health, int coins) {
     }
 
-    // 土地の番号 (ContinentMap: MEADOW, OUTSKIRTS, WHALE, TIDE, STORM, EMBER) ごと。まだ無い敵の土地は null
+    // 土地の番号 (ContinentMap: MEADOW, OUTSKIRTS, WHALE, TIDE, STORM, EMBER) ごと
     static final Def[] DEFS = {
         new Def("skyabyss:bone_standard", "entity.skyabyss.named.meadow", true, 2.0, 40),
         new Def("skyabyss:bandit_chief", "entity.skyabyss.named.island", false, 1.8, 25),
-        null, null, null, null,
+        new Def("skyabyss:rock_boar", "entity.skyabyss.rock_boar", false, 1.0, 80),
+        new Def("skyabyss:tide_crab", "entity.skyabyss.tide_crab", false, 1.0, 120),
+        new Def("skyabyss:storm_ram", "entity.skyabyss.storm_ram", false, 1.0, 160),
+        new Def("skyabyss:ash_lizard", "entity.skyabyss.ash_lizard", false, 1.0, 220),
     };
 
     private static final Map<Integer, UUID> ALIVE = new HashMap<>();

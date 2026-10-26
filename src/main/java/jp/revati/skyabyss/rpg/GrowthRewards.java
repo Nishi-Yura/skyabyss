@@ -79,6 +79,10 @@ public final class GrowthRewards {
         MOD_ENEMIES.put(SkyAbyss.MODID + ":moss_dead", new Source(12, 12));
         MOD_ENEMIES.put(SkyAbyss.MODID + ":mist_angler", new Source(14, 18));
         MOD_ENEMIES.put(SkyAbyss.MODID + ":thunder_wolf", new Source(12, 24));
+        MOD_ENEMIES.put(SkyAbyss.MODID + ":rock_boar", new Source(120, 12));
+        MOD_ENEMIES.put(SkyAbyss.MODID + ":tide_crab", new Source(160, 18));
+        MOD_ENEMIES.put(SkyAbyss.MODID + ":storm_ram", new Source(200, 24));
+        MOD_ENEMIES.put(SkyAbyss.MODID + ":ash_lizard", new Source(260, 30));
         // 試練の外で呼ばれた番兵長・心臓 (コマンドなど) は、ふつうの敵として分ける
         MOD_ENEMIES.put(SkyAbyss.MODID + ":whalebone_captain", new Source(100, STONE_WHALE_LEVEL));
         MOD_ENEMIES.put(SkyAbyss.MODID + ":stone_whale_heart", new Source(300, STONE_WHALE_LEVEL));

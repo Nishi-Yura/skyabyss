@@ -1,0 +1,81 @@
+# 名のある強敵の大物 4 体 (docs/design/44 の 5) のゲーム内の確認: 待機・予告の姿。平らな世界、モブは原点で南 (+z) を向く
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/foes_named.txt -PshotsName=foes_named
+world foes_named flat
+size 1280 720
+timeout 1200
+render 8
+cmd gamemode spectator
+cmd time set 6000
+cmd gamerule doDaylightCycle false
+cmd gamerule doMobSpawning false
+waitchunks 300
+wait 40
+cmd skyabyss cinematic stop
+close
+wait 20
+hud off
+clouds off
+chat clear
+# --- 岩背の大猪 (待機 / 地を掻く / 背を震わせる)
+cmd kill @e[type=!minecraft:player,distance=..80]
+cmd summon skyabyss:rock_boar 0 -60 0 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b,Invulnerable:1b,Tags:["m"]}
+camera minecraft:overworld 3.6 -58.4 4.2 140 12
+wait 40
+chat clear
+shot boar_rest
+cmd skyabyss dev anim @e[tag=m] charge
+wait 14
+shot boar_paw
+cmd skyabyss dev anim @e[tag=m] quake
+wait 15
+shot boar_quake
+# --- 潮招きの大蟹 (待機 / 振り上げ / 泡)
+cmd kill @e[type=!minecraft:player,distance=..80]
+cmd summon skyabyss:tide_crab 0 -60 0 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b,Invulnerable:1b,Tags:["m"]}
+camera minecraft:overworld 3.4 -58.4 4.6 145 18
+wait 30
+chat clear
+shot crab_rest
+cmd skyabyss dev anim @e[tag=m] slam
+wait 18
+shot crab_raise
+cmd skyabyss dev anim @e[tag=m] spray
+wait 20
+shot crab_spray
+# --- 雷角の大羊 (待機 / 角を下げる / 立ち上がる)
+cmd kill @e[type=!minecraft:player,distance=..80]
+cmd summon skyabyss:storm_ram 0 -60 0 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b,Invulnerable:1b,Tags:["m"]}
+camera minecraft:overworld 3.4 -58.2 4.0 140 10
+wait 30
+chat clear
+shot ram_rest
+cmd skyabyss dev anim @e[tag=m] charge
+wait 20
+shot ram_lower
+cmd skyabyss dev anim @e[tag=m] rear
+wait 20
+shot ram_rear
+# --- 灰被りの大蜥蜴 (待機 / 吐く構え / 尾の構え)
+cmd kill @e[type=!minecraft:player,distance=..80]
+cmd summon skyabyss:ash_lizard 0 -60 0 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b,Invulnerable:1b,Tags:["m"]}
+camera minecraft:overworld 4.4 -58.2 5.0 140 16
+wait 30
+chat clear
+shot lizard_rest
+cmd skyabyss dev anim @e[tag=m] breath
+wait 20
+shot lizard_breath
+cmd skyabyss dev anim @e[tag=m] sweep
+wait 13
+shot lizard_coil
+# --- 並び (人の大きさと比べる。左端に野盗)
+cmd kill @e[type=!minecraft:player,distance=..80]
+cmd summon skyabyss:bandit -7 -60 0 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b,Invulnerable:1b}
+cmd summon skyabyss:rock_boar -4 -60 0 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b,Invulnerable:1b}
+cmd summon skyabyss:tide_crab 0.5 -60 0 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b,Invulnerable:1b}
+cmd summon skyabyss:storm_ram 5 -60 0 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b,Invulnerable:1b}
+cmd summon skyabyss:ash_lizard 9.5 -60 0 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b,Invulnerable:1b}
+camera minecraft:overworld 1.2 -57.6 11.0 180 10
+wait 40
+chat clear
+shot lineup
