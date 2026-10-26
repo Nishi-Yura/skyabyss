@@ -70,20 +70,34 @@ public final class StoryReels {
         return true;
     }
 
-    // 見終えた・飛ばした (クライアントから)。待っていた語りなら、記録してあとの出来事へ
+    // 流さずに済ませたとき: 見たことにして、すぐあとの出来事へ
     static void finish(ServerPlayer p, String reel) {
+        markSeen(p, reel);
+        runAfter(p, reel);
+    }
+
+    // 見終えた・飛ばした (クライアントから)。ゲームが流した (待っていた) 語りのときだけ、記録してあとの出来事へ。命令で見直したときは何もしない
+    static void done(ServerPlayer p, String reel) {
         CompoundTag d = data(p);
-        boolean waited = reel.equals(d.getString("pending"));
+        if (!reel.equals(d.getString("pending"))) {
+            return;
+        }
         d.remove("pending");
+        markSeen(p, reel);
+        runAfter(p, reel);
+    }
+
+    static void markSeen(ServerPlayer p, String reel) {
+        CompoundTag d = data(p);
         CompoundTag seen = d.getCompound("seen");
-        boolean first = !seen.getBoolean(reel);
         seen.putBoolean(reel, true);
         d.put("seen", seen);
-        if (waited || first) {
-            Consumer<ServerPlayer> after = AFTER.get(reel);
-            if (after != null) {
-                after.accept(p);
-            }
+    }
+
+    static void runAfter(ServerPlayer p, String reel) {
+        Consumer<ServerPlayer> after = AFTER.get(reel);
+        if (after != null) {
+            after.accept(p);
         }
     }
 
@@ -147,7 +161,7 @@ public final class StoryReels {
                             (payload, context) -> jp.revati.skyabyss.client.story.StoryReelClient.play(payload.reel()))
                     .playToServer(DonePayload.TYPE, DonePayload.STREAM_CODEC, (payload, context) -> {
                         if (context.player() instanceof ServerPlayer p) {
-                            context.enqueueWork(() -> finish(p, payload.reel()));
+                            context.enqueueWork(() -> done(p, payload.reel()));
                         }
                     });
         }

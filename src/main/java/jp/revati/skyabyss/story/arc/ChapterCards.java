@@ -178,8 +178,22 @@ public final class ChapterCards {
         data.markTitle(chapter);
         TITLE_SINCE.remove(id);
         TITLE_FOR.remove(id);
-        Notice.chapter(player, chapter.label(), titleLine(chapter));
+        // 題字の前に、その章の語り (ドット絵の紙芝居) を流す。見終わる (飛ばす) と題字。流さない場合はすぐ題字 (StoryReels.onDone)
+        jp.revati.skyabyss.story.reel.StoryReels.play(player, reel(chapter));
         return true;
+    }
+
+    // 章の変わり目の語りの名前 (assets/skyabyss/story_reels/chapter_<章の ID>.json)
+    public static String reel(Chapters chapter) {
+        return "chapter_" + chapter.id();
+    }
+
+    static {
+        for (Chapters c : Chapters.values()) {
+            if (c.titanChapter()) {
+                jp.revati.skyabyss.story.reel.StoryReels.onDone(reel(c), p -> Notice.chapter(p, c.label(), titleLine(c)));
+            }
+        }
     }
 
     // 章の終わりの語りや歌が続く間、次の章の題字を待たせる (ticks 後まで)

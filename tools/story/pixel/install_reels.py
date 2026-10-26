@@ -32,7 +32,17 @@ REELS = {
 HINT = ("クリックで進む ・ Esc で飛ばす", "Click to continue · Esc to skip")
 
 
+def chapter_reels():
+    """章の変わり目の語り (chapters.py の CHAPTERS) を REELS の形に"""
+    import chapters
+    out = {}
+    for ch, panels in chapters.CHAPTERS.items():
+        out[f"chapter_{ch}"] = [(pid, motion, 2.4, sound, ja, en) for pid, fn, motion, sound, ja, en in panels]
+    return out
+
+
 def main():
+    REELS.update(chapter_reels())
     lang = {"ja_jp": {"story.skyabyss.reel.hint": HINT[0]}, "en_us": {"story.skyabyss.reel.hint": HINT[1]}}
     for reel, panels in REELS.items():
         tex = A / "skyabyss/textures/gui/story" / reel

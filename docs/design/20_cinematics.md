@@ -214,5 +214,5 @@
 - 開幕: ワールドに入って目を覚ます前に 9 枚（およそ 45 秒）→ 見終わる（飛ばす）と今の開幕（まぶた・題字・カメラの場面）。途中で抜けた人には次に入ったとき流し直す。自己テストと撮影の台本では流さない。
 - 仕組み: サーバー `story/reel/StoryReels`（流す・見た記録・あとの出来事 `onDone`・`/skyabyss reel <id>`）、クライアント `client/story/StoryReelScreen`。中身は `assets/skyabyss/story_reels/<id>.json`（絵の動き・待つ秒・鳴らす音）、絵は `textures/gui/story/<id>/`、文は `skyabyss_story_reel` の lang。
 - 絵の作り方: `tools/story/pixel/`（`pxkit.py` = 描く道具。ゲームの低ポリの形を小さく描き、一枚 10 色ほどの表に網目で落とす。`opening.py`・`opening_more.py` = 開幕の 9 枚。`install_reels.py` = ゲームへ入れる）。選んだ頁 https://claude.ai/artifact/N55M3A1Hwh8127tLLPqggq
-- 次: 章の変わり目（一〜四章の前に 4〜6 枚: 前の章で何が起きたか・次の巨神・なぜ行くのか → 章の題字）。
+- 章の変わり目: 一〜四章の題字の前に 5 枚ずつ（前の章で何が起きたか → 次の巨神 → なぜ行くのか）。`ChapterCards` が題字を出す代わりに `chapter_<章の ID>` を流し、見終わると題字（`StoryReels.onDone`）。絵は `tools/story/pixel/chapters.py`（部品は `parts.py`）。命令で見直したときは題字を出さない。頁 https://claude.ai/artifact/PY2HadDQ291LSqozdhC16X
 
