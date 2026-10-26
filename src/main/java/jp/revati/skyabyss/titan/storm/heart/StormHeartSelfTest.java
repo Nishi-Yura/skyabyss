@@ -486,7 +486,7 @@ public final class StormHeartSelfTest {
         check(first.draws().stream().anyMatch(d -> d.id().equals(StormLoot.CORE)), "first clear has no core", failures);
         check(first.draws().stream().anyMatch(d -> d.id().equals(StormLoot.SHARD) && d.count() >= 4 && d.count() <= 7), "shards not 4-7", failures);
         check(first.draws().stream().anyMatch(d -> d.id().equals(StormLoot.RESONANCE_SHARD) && d.count() >= 1 && d.count() <= 3), "resonance shards not 1-3", failures);
-        check(StormLoot.collection().size() == 10, "collection should have 10 items", failures);
+        check(StormLoot.collection().size() == 10 + jp.revati.skyabyss.item.ChapterGear.STORM.size(), "collection should have 10 items + the job weapons", failures);
         TitanMemoryData.Record p = new TitanMemoryData.Record();
         p.memory = TitanLoot.HARD_PITY - 1;
         StormLoot.Roll pity = StormLoot.rollHeart(p, random, id -> true);

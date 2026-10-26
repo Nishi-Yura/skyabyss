@@ -73,6 +73,26 @@ LINES = [
     ("shrine_staff", "「流れ着いた木にも、星は宿る。」", "\"Even driftwood can hold a star.\""),
     ("shrine_bell_staff", "「祭りの鈴は、潮が来ると先に鳴る。」", "\"The festival bells ring before the tide arrives.\""),
     ("shrine_dagger", "「もとは、宿り木の枝を払う刃だった。」", "\"It was once a blade for pruning mistletoe.\""),
+    # ---- 章の杖と鈴杖 (43 の 5 段目。巨神の声)
+    ("whale_staff", "「肋は、空の星を数えるためにある。」", "\"Ribs are for counting the stars of the sky.\""),
+    ("whale_bell_staff", "「鯨の歌は、苔の下でも鳴りやまない。」", "\"The whale's song keeps ringing under the moss.\""),
+    ("tide_staff", "「真珠は、潮が覚えた月の形。」", "\"A pearl is the moon as the tide remembers it.\""),
+    ("tide_bell_staff", "「満ち潮は、鐘より先に来る。」", "\"The flood tide arrives before the bell.\""),
+    ("storm_staff", "「雷は、羽の先から生まれる。」", "\"Lightning is born at the tip of a feather.\""),
+    ("storm_bell_staff", "「雷鳴は、空の鐘の音。」", "\"Thunder is the sound of the sky's bell.\""),
+    ("ember_staff", "「熾火は、眠った山の心臓のかけら。」", "\"An ember is a shard of a sleeping mountain's heart.\""),
+    ("ember_censer", "「灰の煙は、火の残した祈り。」", "\"Ash smoke is the prayer the fire leaves behind.\""),
+    ("shrine_sword", "「まっすぐな刃は、迷う手を嫌う。」", "\"A straight blade dislikes a hesitant hand.\""),
+    ("shrine_hammer", "「祠の杭は、この鎚で打たれてきた。」", "\"The shrine's stakes were driven with this hammer.\""),
+    ("shrine_bow", "「流木は、海の上でしなりを覚えた。」", "\"Driftwood learned to bend upon the sea.\""),
+    ("whale_hammer", "「石は、打たれるたびに鯨を思い出す。」", "\"Each blow reminds the stone of the whale.\""),
+    ("whale_bow", "「肋は、息のたびにしなっていた。」", "\"The ribs bent with every breath.\""),
+    ("tide_hammer", "「殻は、波に打たれて固くなる。」", "\"A shell grows hard from the waves' blows.\""),
+    ("tide_bow", "「珊瑚は、潮の向きに枝を伸ばす。」", "\"Coral grows its branches toward the tide.\""),
+    ("storm_hammer", "「打つたび、遠くで雷が答える。」", "\"With every blow, thunder answers far away.\""),
+    ("ember_greatsword", "「眠った山も、刃の中では燃えている。」", "\"Even a sleeping mountain burns inside the blade.\""),
+    ("ember_bow", "「鉄は冷えても、熱を忘れない。」", "\"Iron cools, but never forgets the heat.\""),
+    ("ember_dagger", "「火箸は、熾火のいちばん近くにいた。」", "\"The tongs stood closest to the embers.\""),
 ]
 
 

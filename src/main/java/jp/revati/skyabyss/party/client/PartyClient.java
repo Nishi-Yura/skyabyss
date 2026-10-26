@@ -132,7 +132,7 @@ public final class PartyClient {
                     ? net.minecraft.network.chat.Component.translatable("gui.skyabyss.party.route_step", jp.revati.skyabyss.client.trial.TrialBoardClient.route().step()).getString()
                     : "";
             String name = step + (m.leader() ? "★" : "") + m.name();
-            g.drawString(font, font.plainSubstrByWidth(name, W - 28), x, y, color, true);
+            jp.revati.skyabyss.client.ui.FitText.draw(g, font, net.minecraft.network.chat.Component.literal(name), x, y, W - 28, color, true);
             if (m.online()) {
                 String lv = "Lv" + m.level();
                 g.drawString(font, lv, x + W - font.width(lv), y, 0x9FE8FF, true);

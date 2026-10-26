@@ -128,6 +128,7 @@ ROLES = {
                         ("訓練場だ。木偶を打てば、与えた量が出る。技や力の振り直しも、ここで引き受ける。炉まで行かなくていい。",
                          "The training yard. Strike the dummies to see how much you deal. I'll also reset your skills or stats here, no forge needed."),
                         [("respec", "talk", None, None, "振り直し (技・力)", "Reset (skills, stats)", None, None, {"goto": "respec"}),
+                         ("weapons", "talk", None, None, "ほかの職の武器", "Another job's weapon", None, None, {"goto": "weapons"}),
                          ("dummy", "talk", None, "dummy", "木偶のこと", "About the dummies",
                           "わらの木偶を打てば、頭の上に与えた量が浮かぶ。五秒の合計と、一秒あたりも教えてやる。技でも矢でもいい。",
                           "Strike a straw dummy and the damage floats above its head. I'll tell you the five-second total and the rate per second too. Skills and arrows count.")]),
@@ -192,14 +193,25 @@ BACK = ("戻る", "Back")
 
 NODES = {
     "training_master": {
-        "respec": {"text": ("振り直すと、覚えた技・刻印・鍵石 (技)、または振った力 (力) がすべて戻る。代価は共鳴の結晶。なければ鐘銭でもいい (結晶一つにつき三十枚)。Lv 15 までの技は、ただだ。",
-                            "A reset returns every learned skill, rune and keystone (skills), or every stat point (stats). The price is resonance crystals; bell coins will do instead (thirty a crystal). Skills are free until level 15."),
+        "respec": {"text": ("振り直すと、覚えた技と刻印 (技)、または振った力 (力) がすべて戻る。代価は共鳴の結晶。なければ鐘銭でもいい (結晶一つにつき三十枚)。Lv 15 までの技は、ただだ。",
+                            "A reset returns every learned skill and rune (skills), or every stat point (stats). The price is resonance crystals; bell coins will do instead (thirty a crystal). Skills are free until level 15."),
                    "do": [fac("respec_quote")],
                    "options": [("skills", "end", [fac("respec_skills")], ("技を振り直す (結晶)", "Reset skills (crystals)")),
                                ("skills_coins", "end", [fac("respec_skills_coins")], ("技を振り直す (鐘銭)", "Reset skills (bell coins)")),
                                ("stats", "end", [fac("respec_stats")], ("力を振り直す (結晶)", "Reset stats (crystals)")),
                                ("stats_coins", "end", [fac("respec_stats_coins")], ("力を振り直す (鐘銭)", "Reset stats (bell coins)")),
                                ("back", "menu", None, BACK)]},
+        # ほかの職の始めの武器 (docs/design/43 の 4 節)。一つの職につき一度、ただ
+        "weapons": {"text": ("持つ武器が職を決める。ほかの職も試したいなら、始めの得物を一つずつ貸してやる。返さなくていい。ただし、一つの職につき一度だ。",
+                             "The weapon you hold decides your job. If you want to try another, I'll lend you its first weapon, one per job. Keep it. But only once each."),
+                    "options": [
+                                ("warrior", "end", [fac("starter_warrior")], ("戦士 (祠の剣)", "Warrior (shrine sword)")),
+                                ("smith", "end", [fac("starter_smith")], ("鍛冶師 (祠の鎚)", "Smith (shrine hammer)")),
+                                ("mage", "end", [fac("starter_mage")], ("魔法使い (宿り木の杖)", "Mage (mistletoe staff)")),
+                                ("archer", "end", [fac("starter_archer")], ("弓使い (祠の弓と矢)", "Archer (shrine bow and arrows)")),
+                                ("assassin", "end", [fac("starter_assassin")], ("暗殺者 (宿り木の短剣)", "Assassin (mistletoe dagger)")),
+                                ("shaman", "end", [fac("starter_shaman")], ("呪術師 (祠の鈴杖)", "Shaman (shrine bell staff)")),
+                                ("back", "menu", None, BACK)]},
     },
     "shrine_priest": dict(
         [("vow", {"text": ("誓いは周回の縛りです。心臓を一度止めた巨神の祠のそばで、乗る前に三つまで立てられる。重い誓いほど、素材が増え、共鳴の欠片が出やすく、称号も付く。どの誓いを聞きますか。",

@@ -102,7 +102,8 @@ public final class StormGearSelfTest {
     private static void table(List<String> f) {
         check(f, TitanGearSets.get(StormGear.TITAN) == StormGear.SET, "storm set is not registered in TitanGearSets");
         check(f, TitanGearSets.all().get(0) == TitanGearSets.STONE_WHALE, "stone whale should be the first gear set");
-        check(f, StormGear.SET.collection().size() == 10 && StormGear.SET.exclusives().size() == 3, "storm collection should be 10 with 3 exclusives");
+        check(f, StormGear.SET.collection().size() == 10 + jp.revati.skyabyss.item.ChapterGear.STORM.size() && StormGear.SET.exclusives().size() == 3,
+                "storm collection should be 10 + the job weapons, with 3 exclusives");
         for (String id : StormGear.SET.collection()) {
             check(f, TitanGearSet.registered(id), id + " is not registered");
             Item it = item(id);
@@ -438,7 +439,7 @@ public final class StormGearSelfTest {
             TitanMemoryData.Record r = new TitanMemoryData.Record();
             r.owned.add(StormGear.EYE_FEATHER);
             int n = 0;
-            while (StormGear.SET.collected(r) < 10 && n < 200) {
+            while (StormGear.SET.collected(r) < StormGear.SET.collection().size() && n < 200) {
                 n++;
                 if (random.nextFloat() < StormGear.RAIJU_CLAW_CHANCE) {
                     StormGear.SET.record(r, List.of(StormGear.CLAW));
@@ -462,10 +463,10 @@ public final class StormGearSelfTest {
             gear += got.pieces().size();
             StormGear.SET.record(r, got.pieces());
         }
-        check(f, gear > 400 && r.owned.size() == 10, "heart rolls gave " + gear + " gear and recorded " + r.owned.size());
+        check(f, gear > 400 && r.owned.size() == StormGear.SET.collection().size(), "heart rolls gave " + gear + " gear and recorded " + r.owned.size());
         double mean = meanClearsToComplete(4000, 11);
         notes.add(String.format(Locale.ROOT, "heart: collection in %.1f clears on average (12 6.4 says 13.9)", mean));
-        check(f, mean > 10 && mean < 18, "mean clears " + mean);
+        check(f, mean > 10 && mean < 18 + 2 * jp.revati.skyabyss.item.ChapterGear.STORM.size(), "mean clears " + mean);
         int warden = 0;
         int raiju = 0;
         for (int i = 0; i < 20000; i++) {

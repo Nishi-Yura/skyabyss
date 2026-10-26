@@ -167,7 +167,7 @@ public final class RebirthScreen extends Screen implements jp.revati.skyabyss.cl
                 tip = has ? Component.translatable("title.skyabyss_rebirth." + ti.id() + ".how") : Component.translatable("skyabyss_rebirth.gui.locked_how", Component.translatable("title.skyabyss_rebirth." + ti.id() + ".how"));
             }
             String shown = has ? name.getString() : "？ " + "・".repeat(Math.min(6, name.getString().length()));
-            g.drawString(font, font.plainSubstrByWidth((sel ? "▶ " : "  ") + shown, 156), left, y + 3, sel ? GOLD : has ? TEXT : LOCKED, false);
+            jp.revati.skyabyss.client.ui.FitText.draw(g, font, net.minecraft.network.chat.Component.literal((sel ? "▶ " : "  ") + shown), left, y + 3, 156, sel ? GOLD : has ? TEXT : LOCKED, false);
         }
         if (total > ROWS) {
             int barH = ROWS * ROW;

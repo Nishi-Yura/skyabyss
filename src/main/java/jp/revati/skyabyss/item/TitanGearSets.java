@@ -28,6 +28,11 @@ public final class TitanGearSets {
             TitanGearSet.piece(id("stone_whale_boots"), TitanLoot.ARMOR_CHANCE),
             TitanGearSet.piece(id("whalebone_greatsword"), TitanLoot.GREATSWORD_CHANCE),
             TitanGearSet.piece(id("resonance_charm"), TitanLoot.CHARM_CHANCE),
+            // 章の杖と鈴杖 (docs/design/43 の 5 段目)
+            TitanGearSet.piece(ChapterGear.WHALE_STAFF, ChapterGear.CHANCE),
+            TitanGearSet.piece(ChapterGear.WHALE_BELL, ChapterGear.CHANCE),
+            TitanGearSet.piece(ChapterGear.WHALE_HAMMER, ChapterGear.CHANCE),
+            TitanGearSet.piece(ChapterGear.WHALE_BOW, ChapterGear.CHANCE),
             TitanGearSet.exclusive(id("captain_pike"), TitanLoot.PIKE_CHANCE),
             TitanGearSet.exclusive(id("waterway_fang"), TitanLoot.FANG_CHANCE),
             TitanGearSet.exclusive(id("stone_whale_plating"), TitanLoot.PLATING_CHANCE)));

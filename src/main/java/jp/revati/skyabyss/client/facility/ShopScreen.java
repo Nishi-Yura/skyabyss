@@ -146,14 +146,20 @@ public class ShopScreen extends Screen {
         boolean hover = mx >= x && mx < x + w && my >= y && my < y + 13;
         g.fill(x, y, x + w, y + 13, on ? 0xFF2A5E6A : hover ? 0xFF243440 : 0xFF161B22);
         g.renderOutline(x, y, w, 13, on ? FacilityUi.TEAL : FacilityUi.LINE);
-        g.drawCenteredString(font, label, x + w / 2, y + 3, on ? 0xFFFFFFFF : FacilityUi.DIM);
+        jp.revati.skyabyss.client.ui.FitText.drawCentered(g, font, label, x + w / 2, y + 3, w - 4, on ? 0xFFFFFFFF : FacilityUi.DIM, true);
     }
 
     private ItemStack goodRow(GuiGraphics g, Font font, FacilityNetwork.GoodView v, int x, int y, int w) {
         g.renderItem(v.stack(), x + 4, y + 3);
         g.renderItemDecorations(font, v.stack(), x + 4, y + 3);
         Component name = v.locked() ? Component.translatable("gui.skyabyss.shop.locked", v.chapter()) : v.stack().getHoverName();
-        g.drawString(font, name, x + 26, y + 3, v.locked() ? FacilityUi.DIM : FacilityUi.TEXT, false);
+        // 値段の札の幅 (名前はその手前まで。長い名前が札に重ならないように)
+        int tw = 6 + (v.coins() > 0 ? 18 + font.width(Integer.toString(v.coins())) + 4 : 0);
+        for (ItemStack m : v.materials()) {
+            tw += 18 + font.width(Integer.toString(m.getCount())) + 4;
+        }
+        int textW = (v.locked() ? w - 8 : w - 6 - tw - 4) - 26;
+        jp.revati.skyabyss.client.ui.FitText.draw(g, font, name, x + 26, y + 3, textW, v.locked() ? FacilityUi.DIM : FacilityUi.TEXT, false);
         // 下の段: 日替わり・残り
         StringBuilder sub = new StringBuilder();
         if (v.rotating()) {
@@ -166,16 +172,12 @@ public class ShopScreen extends Screen {
             sub.append(Component.translatable("gui.skyabyss.shop.left", v.left()).getString());
         }
         if (!sub.isEmpty()) {
-            g.drawString(font, sub.toString(), x + 26, y + 12, v.left() == 0 ? FacilityUi.LACK : FacilityUi.TEAL, false);
+            jp.revati.skyabyss.client.ui.FitText.draw(g, font, Component.literal(sub.toString()), x + 26, y + 12, textW, v.left() == 0 ? FacilityUi.LACK : FacilityUi.TEAL, false);
         }
         if (v.locked()) {
             return ItemStack.EMPTY;
         }
         // 値段の札 (右寄せ): 銭 n、素材 n (足りなければ赤)
-        int tw = 6 + (v.coins() > 0 ? 18 + font.width(Integer.toString(v.coins())) + 4 : 0);
-        for (ItemStack m : v.materials()) {
-            tw += 18 + font.width(Integer.toString(m.getCount())) + 4;
-        }
         int tx = x + w - 6 - tw;
         FacilityUi.tag(g, tx, y + 2, tw, ROW_H - 4);
         int px = tx + 3;
@@ -198,11 +200,12 @@ public class ShopScreen extends Screen {
     private ItemStack sellRow(GuiGraphics g, Font font, FacilityNetwork.SellView v, int x, int y, int w) {
         g.renderItem(v.item(), x + 4, y + 3);
         g.renderItemDecorations(font, v.item(), x + 4, y + 3);
-        g.drawString(font, v.item().getHoverName(), x + 26, y + 3, FacilityUi.TEXT, false);
-        g.drawString(font, Component.translatable("gui.skyabyss.shop.have", v.have()), x + 26, y + 12,
-                v.have() >= v.item().getCount() ? FacilityUi.TEAL : FacilityUi.LACK, false);
         String s = Integer.toString(v.coins());
         int tw = 6 + 18 + font.width(s) + 4;
+        int textW = w - 6 - tw - 4 - 26;
+        jp.revati.skyabyss.client.ui.FitText.draw(g, font, v.item().getHoverName(), x + 26, y + 3, textW, FacilityUi.TEXT, false);
+        jp.revati.skyabyss.client.ui.FitText.draw(g, font, Component.translatable("gui.skyabyss.shop.have", v.have()), x + 26, y + 12, textW,
+                v.have() >= v.item().getCount() ? FacilityUi.TEAL : FacilityUi.LACK, false);
         int tx = x + w - 6 - tw;
         FacilityUi.tag(g, tx, y + 2, tw, ROW_H - 4);
         g.renderItem(new ItemStack(FacilitySetup.BELL_COIN.get()), tx + 3, y + 3);

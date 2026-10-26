@@ -88,7 +88,8 @@ public final class TideGearSelfTest {
     private static void table(List<String> f) {
         check(f, TitanGearSets.get(TideGear.TITAN) == TideGear.SET, "tide set is not registered in TitanGearSets");
         check(f, TitanGearSets.all().get(0) == TitanGearSets.STONE_WHALE, "stone whale should be the first gear set");
-        check(f, TideGear.SET.collection().size() == 10 && TideGear.SET.exclusives().size() == 3, "tide collection should be 10 with 3 exclusives");
+        check(f, TideGear.SET.collection().size() == 10 + jp.revati.skyabyss.item.ChapterGear.TIDE.size() && TideGear.SET.exclusives().size() == 3,
+                "tide collection should be 10 + the job weapons, with 3 exclusives");
         check(f, TideLoot.collection().equals(TideGear.SET.collection()), "TideLoot does not read the tide gear table");
         for (String id : TideGear.SET.collection()) {
             check(f, TitanGearSet.registered(id) && TideLoot.registered(id), id + " is not registered");
@@ -364,10 +365,10 @@ public final class TideGearSelfTest {
             TideLoot.Roll roll = TideLoot.rollHeart(r, random, TideLoot::registered);
             gear += (int) roll.draws().stream().filter(TideLoot.Draw::gear).count();
         }
-        check(f, gear > 400 && r.owned.size() == 10, "heart rolls gave " + gear + " gear and recorded " + r.owned.size());
+        check(f, gear > 400 && r.owned.size() == TideGear.SET.collection().size(), "heart rolls gave " + gear + " gear and recorded " + r.owned.size());
         double mean = TideLoot.meanClearsToComplete(4000, 11, TideLoot::registered);
         notes.add(String.format("heart: collection in %.1f clears on average (08 6.4 says 15.9)", mean));
-        check(f, mean > 13 && mean < 20, "mean clears " + mean);
+        check(f, mean > 13 && mean < 20 + 2 * jp.revati.skyabyss.item.ChapterGear.TIDE.size(), "mean clears " + mean);
         // 道中 1%、潮招き 5%
         int thrall = 0;
         int beckoner = 0;

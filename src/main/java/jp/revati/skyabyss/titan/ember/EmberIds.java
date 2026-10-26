@@ -93,7 +93,7 @@ public final class EmberIds {
     public static final String EMBER_LANTERN = "ember_lantern";     // → G 余燼の灯 (専用の逸品、装飾の枠)
     // 図鑑の並び (EmberLoot・記録の画面・自己テストが使う。順は 6.3節の表)
     public static final List<String> CODEX = List.of(EMBER_HELMET, EMBER_CHESTPLATE, EMBER_LEGGINGS, EMBER_BOOTS, EMBER_WAR_AXE, EMBER_MANTLE,
-            KINDLING_CHARM, SMITH_HAMMER, THRALL_POKER, EMBER_LANTERN);
+            KINDLING_CHARM, "ember_staff", "ember_censer", "ember_greatsword", "ember_bow", "ember_dagger", SMITH_HAMMER, THRALL_POKER, EMBER_LANTERN);
     // 初回の選択の専用の逸品三つ
     public static final List<String> FIRST_CLEAR_CHOICES = List.of(SMITH_HAMMER, THRALL_POKER, EMBER_LANTERN);
     // 天の鍵の欠片は共通の ModItems.SKY_KEY_FRAGMENT (四つ目)。天の鍵は story.SkyKey がそろえる (14 の 4章)

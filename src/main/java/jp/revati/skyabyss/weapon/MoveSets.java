@@ -15,11 +15,13 @@ import jp.revati.skyabyss.SkyAbyss;
 // 武器ごとの動きの読み込み口。assets/skyabyss/weapon_moves/<品の id>.json を jar (クラスパス) から読むので、
 // クライアントも専用サーバーも同じ内容を見る (サーバーは当たる tick、クライアントは絵)。tools/gen/items/gen_weapon_moves.py が JSON を作る
 public final class MoveSets {
-    // 動きを持つ品 (剣型の武器 17 点 + 弓 2 点 + 盾 + 島の祠の始めの武器 3 点)
+    // 動きを持つ品 (剣型の武器 17 点 + 弓 2 点 + 盾 + 島の祠の始めの武器 3 点 + 章の杖と鈴杖 8 点)
     public static final List<String> ITEMS = List.of("whalebone_greatsword", "captain_pike", "tide_shell_trident", "coral_harpoon", "warden_glaive",
             "waterway_fang", "raiju_claw", "tidecaller_claw", "ember_war_axe", "smith_hammer", "thrall_poker", "abyss_greatsword", "abyss_bell_staff",
             "abyss_ash_scythe", "abyss_lamp_sword", "abyss_sinking_anchor", "abyss_pulse_dagger", "thunder_wing_bow", "abyss_storm_bow", "coral_shield",
-            "shrine_staff", "shrine_bell_staff", "shrine_dagger");
+            "shrine_staff", "shrine_bell_staff", "shrine_dagger", "whale_staff", "whale_bell_staff", "tide_staff", "tide_bell_staff",
+            "storm_staff", "storm_bell_staff", "ember_staff", "ember_censer", "whale_hammer", "tide_hammer", "storm_hammer", "ember_greatsword",
+            "ember_dagger", "shrine_sword", "shrine_hammer");
 
     private static Map<String, MoveSet> all;
 

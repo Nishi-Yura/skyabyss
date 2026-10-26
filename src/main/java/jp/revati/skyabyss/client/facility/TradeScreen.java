@@ -425,7 +425,7 @@ public class TradeScreen extends Screen {
             int wx = Math.max(ex, lx + 78) + 10;
             stacks(g, r.give(), wx, ry + 4, 18, 5, mx, my);
             int nx = lx + 190;
-            g.drawString(font, font.plainSubstrByWidth(r.seller(), 64), nx, ry + 3, FacilityUi.TEXT, false);
+            jp.revati.skyabyss.client.ui.FitText.draw(g, font, net.minecraft.network.chat.Component.literal(r.seller()), nx, ry + 3, 64, FacilityUi.TEXT, false);
             g.drawString(font, left(r.left()), nx, ry + 13, FacilityUi.DIM, false);
             int bx = lx + lw - 70;
             if (r.applied()) {
@@ -662,7 +662,7 @@ public class TradeScreen extends Screen {
             int col = !a.online() ? FacilityUi.DIM : a.ok() ? FacilityUi.TEXT : FacilityUi.LACK;
             String state = Component.translatable(!a.online() ? "gui.skyabyss.trade.away" : a.ok() ? "gui.skyabyss.trade.ready" : "gui.skyabyss.trade.short")
                     .getString();
-            g.drawString(font, font.plainSubstrByWidth(a.name(), aw - 80) + " " + state, ax + 9, ry + 2, col, false);
+            jp.revati.skyabyss.client.ui.FitText.draw(g, font, net.minecraft.network.chat.Component.literal(a.name()), ax + 9, ry + 2, aw - 80, col, false);
             stacks(g, a.offer(), ax + 9, ry + 10, 17, 5, mx, my);
             int okx = ax + aw - 34;
             g.fill(okx, ry + 2, okx + 15, ry + 14, a.online() ? 0xFF1E3A40 : 0xFF1A1E24);
@@ -704,7 +704,7 @@ public class TradeScreen extends Screen {
             int wx = Math.max(ex, lx + 78) + 10;
             stacks(g, r.give(), wx, ry + 4, 18, 5, mx, my);
             int nx = lx + 190;
-            g.drawString(font, font.plainSubstrByWidth(r.seller(), 64), nx, ry + 3, FacilityUi.TEXT, false);
+            jp.revati.skyabyss.client.ui.FitText.draw(g, font, net.minecraft.network.chat.Component.literal(r.seller()), nx, ry + 3, 64, FacilityUi.TEXT, false);
             g.drawString(font, Component.translatable(r.canPay() ? "gui.skyabyss.trade.ready" : "gui.skyabyss.trade.short"), nx, ry + 13,
                     r.canPay() ? FacilityUi.TEAL : FacilityUi.LACK, false);
             button(g, lx + lw - 52, ry + 5, 48, Component.translatable("gui.skyabyss.trade.withdraw"), 0xFF2A1C22, FacilityUi.LACK, mx, my,

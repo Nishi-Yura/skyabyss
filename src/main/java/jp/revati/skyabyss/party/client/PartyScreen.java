@@ -141,7 +141,7 @@ public final class PartyScreen extends Screen implements jp.revati.skyabyss.clie
             if (frame > 0) {
                 jp.revati.skyabyss.client.rebirth.RebirthClient.drawFrame(g, left - 3, y - 3, 66, 13, m.rebirths());
             }
-            g.drawString(font, font.plainSubstrByWidth(line, 60), left, y, m.online() ? TEXT : 0x707070, false);
+            jp.revati.skyabyss.client.ui.FitText.draw(g, font, net.minecraft.network.chat.Component.literal(line), left, y, 60, m.online() ? TEXT : 0x707070, false);
             if (m.online()) {
                 if (m.rebirths() > 0) {
                     long t = jp.revati.skyabyss.client.rebirth.RebirthClient.timeMs();
@@ -172,7 +172,7 @@ public final class PartyScreen extends Screen implements jp.revati.skyabyss.clie
             if (oy + 16 < candPanel.y() || oy > candPanel.y() + CAND_H) {
                 continue;
             }
-            g.drawString(font, font.plainSubstrByWidth(others.get(i), 82), left + 180, oy, TEXT, false);
+            jp.revati.skyabyss.client.ui.FitText.draw(g, font, net.minecraft.network.chat.Component.literal(others.get(i)), left + 180, oy, 82, TEXT, false);
         }
         candPanel.end(g);
         candPanel.drawBar(g, 0x30FFFFFF, 0x90F2C14E);

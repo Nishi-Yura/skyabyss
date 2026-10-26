@@ -22,7 +22,7 @@ import net.neoforged.neoforge.registries.DeferredRegister;
 
 // 島の祠で職を選ぶ (docs/design/43 の 4 節)。祠のそばに来ると選ぶ画面が開き、選ぶとその職の始めの武器を受け取って、
 // 職の木の 1 行目の技を一つ覚える (Lv 1 の 1 点)。選んだ職は人の永続データの KEY (倒れても残る。util/LifeKeep)。
-// 戦士・鍛冶師・弓使いはバニラの鉄の品、魔法使い・暗殺者・呪術師は祠の品 (宿り木の杖・宿り木の短剣・祠の鈴杖)
+// 始めの武器はどれも祠の品 (祠の剣・祠の鎚・宿り木の杖・祠の弓・宿り木の短剣・祠の鈴杖)
 public final class JobChoice {
     public static final String KEY = "skyabyss_first_job";
     private static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(SkyAbyss.MODID);
@@ -34,6 +34,14 @@ public final class JobChoice {
             () -> new StarterWeaponItem(new Item.Properties(), 1, 1.4f, "item.skyabyss.shrine_bell_staff.desc"));
     public static final DeferredItem<Item> DAGGER = ITEMS.register("shrine_dagger",
             () -> new StarterWeaponItem(new Item.Properties(), 1, 2.0f, "item.skyabyss.shrine_dagger.desc"));
+    // 剣: 攻撃力 5、速さ 1.6 / 鎚: 攻撃力 8、速さ 1.0 (どちらも 1 秒あたり 8。一章のエピックの武器を上回らない) / 弓: 矢の傷はふつうの弓と同じ
+    public static final DeferredItem<Item> SWORD = ITEMS.register("shrine_sword",
+            () -> new StarterWeaponItem(new Item.Properties(), 2, 1.6f, "item.skyabyss.shrine_sword.desc"));
+    public static final DeferredItem<Item> HAMMER = ITEMS.register("shrine_hammer",
+            () -> new StarterWeaponItem(new Item.Properties(), 5, 1.0f, "item.skyabyss.shrine_hammer.desc"));
+    public static final DeferredItem<Item> BOW = ITEMS.register("shrine_bow",
+            () -> new jp.revati.skyabyss.item.ChapterBowItem(new Item.Properties().durability(384), "stone_whale", 1.0, jp.revati.skyabyss.item.GearTier.COMMON,
+                    "item.skyabyss.shrine_bow.desc"));
 
     // 祠のそばで画面を一度開いた人 (離れると消える。また近づくともう一度開く)
     private static final Set<UUID> PROMPTED = new HashSet<>();
@@ -69,7 +77,7 @@ public final class JobChoice {
 
     private static void onCreativeTab(BuildCreativeModeTabContentsEvent event) {
         if (event.getTabKey().equals(ModItems.TAB.getKey())) {
-            for (DeferredItem<Item> item : List.of(STAFF, BELL_STAFF, DAGGER)) {
+            for (DeferredItem<Item> item : List.of(SWORD, HAMMER, STAFF, BOW, DAGGER, BELL_STAFF)) {
                 event.accept(item.get());
             }
         }
@@ -77,10 +85,10 @@ public final class JobChoice {
 
     public static ItemStack starter(Job job) {
         return switch (job) {
-            case WARRIOR -> new ItemStack(Items.IRON_SWORD);
-            case SMITH -> new ItemStack(Items.IRON_AXE);
+            case WARRIOR -> new ItemStack(SWORD.get());
+            case SMITH -> new ItemStack(HAMMER.get());
             case MAGE -> new ItemStack(STAFF.get());
-            case ARCHER -> new ItemStack(Items.BOW);
+            case ARCHER -> new ItemStack(BOW.get());
             case ASSASSIN -> new ItemStack(DAGGER.get());
             case SHAMAN -> new ItemStack(BELL_STAFF.get());
         };
@@ -136,9 +144,33 @@ public final class JobChoice {
         return true;
     }
 
+    // 訓練場の師範が、ほかの職の始めの武器を貸す (一つの職につき一度、ただ。43 の 4 節)。祠で選んだ職の分は、もう受け取ったものとして数える
+    public static final String LENT = "skyabyss_starter_lent";
+
+    public static boolean lend(ServerPlayer p, Job job) {
+        if (job == null) {
+            return false;
+        }
+        net.minecraft.nbt.CompoundTag tag = p.getPersistentData().getCompound(LENT);
+        if (tag.getBoolean(job.id) || job == chosen(p)) {
+            Notice.hint(p, "message.skyabyss.job.lent_already", Component.translatable(job.nameKey()));
+            return false;
+        }
+        tag.putBoolean(job.id, true);
+        p.getPersistentData().put(LENT, tag);
+        ItemStack weapon = starter(job);
+        jp.revati.skyabyss.quest.Quests.give(p, weapon.copy());
+        if (job == Job.ARCHER) {
+            jp.revati.skyabyss.quest.Quests.give(p, new ItemStack(Items.ARROW, 32));
+        }
+        Notice.objective(p, "message.skyabyss.job.lent", Component.translatable(job.nameKey()), weapon.getHoverName());
+        return true;
+    }
+
     // 開発・自己テスト用: 選んだ職を消す (武器と技はそのまま)
     public static void reset(ServerPlayer p) {
         p.getPersistentData().remove(KEY);
+        p.getPersistentData().remove(LENT);
         PROMPTED.remove(p.getUUID());
     }
 }

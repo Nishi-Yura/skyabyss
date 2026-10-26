@@ -92,8 +92,7 @@ public class TownGuideScreen extends Screen {
         Font font = this.font;
         FacilityUi.gem(g, x0 + 12, y0 + 13);
         g.drawString(font, title, x0 + 18, y0 + 9, FacilityUi.TEXT, false);
-        g.drawString(font, font.plainSubstrByWidth(Component.translatable("gui.skyabyss.town_guide.hint").getString(), w - 30), x0 + 14, y0 + 23,
-                FacilityUi.DIM, false);
+        jp.revati.skyabyss.client.ui.FitText.draw(g, font, net.minecraft.network.chat.Component.literal(Component.translatable("gui.skyabyss.town_guide.hint").getString()), x0 + 14, y0 + 23, w - 30, FacilityUi.DIM, false);
         FacilityUi.well(g, listX, listY, listW, listH);
         String current = TownGuideClient.currentId();
         Minecraft mc = Minecraft.getInstance();
@@ -125,7 +124,7 @@ public class TownGuideScreen extends Screen {
                     g.fill(lx - 3, y + 6, lx + 4, y + 7, (c & 0x00FFFFFF) | 0x80000000);
                     Component name = Component.translatable("gui.skyabyss.town_guide.place." + e.id());
                     int nx = rows.x() + 14;
-                    g.drawString(font, name, nx, y + 3, on ? FacilityUi.GOLD : FacilityUi.TEXT, false);
+                    jp.revati.skyabyss.client.ui.FitText.draw(g, font, name, nx, y + 3, right - 10 - nx - 40, on ? FacilityUi.GOLD : FacilityUi.TEXT, false);
                     // 距離 (右寄せ) と、案内中の印
                     String far = "";
                     if (mc.player != null) {
@@ -140,8 +139,8 @@ public class TownGuideScreen extends Screen {
                     int dx = nx + Math.max(78, font.width(name) + 8);
                     int room = right - 10 - fw - dx;
                     if (room > 30) {
-                        String desc = font.plainSubstrByWidth(Component.translatable("gui.skyabyss.town_guide.place." + e.id() + ".desc").getString(), room);
-                        g.drawString(font, desc, dx, y + 3, FacilityUi.DIM, false);
+                        jp.revati.skyabyss.client.ui.FitText.draw(g, font, Component.translatable("gui.skyabyss.town_guide.place." + e.id() + ".desc"), dx, y + 3, room,
+                                FacilityUi.DIM, false);
                     }
                 }
             }

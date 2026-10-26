@@ -61,31 +61,31 @@ public final class GearTierSelfTest {
         // 一章 岩鯨
         row(1, C, "heartbeat_ward_stone_whale");
         // 島の祠の始めの武器 (rpg/skill/JobChoice。docs/design/43 の 4 節)
-        row(1, C, "shrine_staff", "shrine_bell_staff", "shrine_dagger");
+        row(1, C, "shrine_staff", "shrine_bell_staff", "shrine_dagger", "shrine_sword", "shrine_hammer", "shrine_bow");
         row(1, U, "whale_road_helmet", "whale_road_chestplate", "whale_road_leggings", "whale_road_boots");
         row(1, R, "stone_whale_helmet", "stone_whale_chestplate", "stone_whale_leggings", "stone_whale_boots", "moss_talisman");
-        row(1, E, "whalebone_greatsword", "resonance_charm");
+        row(1, E, "whalebone_greatsword", "resonance_charm", "whale_staff", "whale_bell_staff", "whale_hammer", "whale_bow");
         row(1, H, "captain_pike", "waterway_fang", "stone_whale_plating");
         row(1, A, "abyss_greatsword");
         // 二章 潮殻
         row(2, C, "heartbeat_ward_tide_shell");
         row(2, U, "tide_wader_helmet", "tide_wader_chestplate", "tide_wader_leggings", "tide_wader_boots");
         row(2, R, "tide_shell_helmet", "tide_shell_chestplate", "tide_shell_leggings", "tide_shell_boots");
-        row(2, E, "tide_shell_trident", "coral_shield", "tide_chime_charm");
+        row(2, E, "tide_shell_trident", "coral_shield", "tide_chime_charm", "tide_staff", "tide_bell_staff", "tide_hammer", "tide_bow");
         row(2, H, "tidecaller_claw", "coral_harpoon", "moontide_pearl");
         row(2, A, "abyss_bell_staff");
         // 三章 雷翼
         row(3, C, "heartbeat_ward_thunder_wing");
         row(3, U, "peak_crossing_helmet", "peak_crossing_chestplate", "peak_crossing_leggings", "peak_crossing_boots");
         row(3, R, "thunder_wing_helmet", "thunder_wing_chestplate", "thunder_wing_leggings", "thunder_wing_boots");
-        row(3, E, "thunder_wing_bow", "storm_anklet", "storm_charm");
+        row(3, E, "thunder_wing_bow", "storm_anklet", "storm_charm", "storm_staff", "storm_bell_staff", "storm_hammer");
         row(3, H, "raiju_claw", "warden_glaive", "storm_eye_feather");
         row(3, A, "abyss_storm_bow");
         // 四章 余燼
         row(4, C, "heartbeat_ward_ember");
         row(4, U, "ash_walking_helmet", "ash_walking_chestplate", "ash_walking_leggings", "ash_walking_boots");
         row(4, R, "ember_helmet", "ember_chestplate", "ember_leggings", "ember_boots");
-        row(4, E, "ember_war_axe", "ember_mantle", "kindling_charm");
+        row(4, E, "ember_war_axe", "ember_mantle", "kindling_charm", "ember_staff", "ember_censer", "ember_greatsword", "ember_bow", "ember_dagger");
         row(4, H, "smith_hammer", "thrall_poker", "ember_lantern");
         row(4, A, "abyss_ash_scythe");
         // 五章 深淵
@@ -236,6 +236,7 @@ public final class GearTierSelfTest {
             case "abyss_lamp_sword" -> AbyssGear.swordDps(e);
             case "abyss_sinking_anchor" -> AbyssGear.anchorDps(e);
             case "abyss_pulse_dagger" -> AbyssGear.daggerDps(e);
+            case "whale_bow", "tide_bow", "ember_bow", "shrine_bow" -> ((jp.revati.skyabyss.item.ChapterBowItem) item(path)).dps(e) / RANGED;
             default -> plain(path, e);
         };
     }

@@ -72,6 +72,8 @@ public final class FacilityActions {
             case "repair" -> repair(player);
             case "guild_storage" -> jp.revati.skyabyss.facility.guild.GuildStorage.open(player, npc);
             case "respec_quote" -> TrainingMaster.quote(player);
+            case "starter_warrior", "starter_smith", "starter_mage", "starter_archer", "starter_assassin", "starter_shaman" ->
+                    jp.revati.skyabyss.rpg.skill.JobChoice.lend(player, jp.revati.skyabyss.rpg.skill.Job.byId(open.substring("starter_".length())));
             case "respec_skills" -> TrainingMaster.respec(player, false, false);
             case "respec_skills_coins" -> TrainingMaster.respec(player, false, true);
             case "respec_stats" -> TrainingMaster.respec(player, true, false);

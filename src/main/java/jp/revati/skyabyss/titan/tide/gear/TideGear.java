@@ -48,7 +48,7 @@ public final class TideGear {
     public static final float THRALL_ARMOR_CHANCE = 0.01f;
     public static final float BECKONER_CLAW_CHANCE = 0.05f;
 
-    // 図鑑 (10 品)。並びは図鑑の並び
+    // 図鑑 (14 品。職の章の武器 4 つを足した。item/ChapterGear)。並びは図鑑の並び
     public static final TitanGearSet SET = new TitanGearSet(TITAN, SHARD, CORE, List.of(
             TitanGearSet.piece(HELMET, ARMOR_CHANCE),
             TitanGearSet.piece(CHESTPLATE, ARMOR_CHANCE),
@@ -57,6 +57,10 @@ public final class TideGear {
             TitanGearSet.piece(TRIDENT, TRIDENT_CHANCE),
             TitanGearSet.piece(SHIELD, SHIELD_CHANCE),
             TitanGearSet.piece(CHARM, CHARM_CHANCE),
+            TitanGearSet.piece(jp.revati.skyabyss.item.ChapterGear.TIDE_STAFF, jp.revati.skyabyss.item.ChapterGear.CHANCE),
+            TitanGearSet.piece(jp.revati.skyabyss.item.ChapterGear.TIDE_BELL, jp.revati.skyabyss.item.ChapterGear.CHANCE),
+            TitanGearSet.piece(jp.revati.skyabyss.item.ChapterGear.TIDE_HAMMER, jp.revati.skyabyss.item.ChapterGear.CHANCE),
+            TitanGearSet.piece(jp.revati.skyabyss.item.ChapterGear.TIDE_BOW, jp.revati.skyabyss.item.ChapterGear.CHANCE),
             TitanGearSet.exclusive(CLAW, CLAW_CHANCE),
             TitanGearSet.exclusive(HARPOON, HARPOON_CHANCE),
             TitanGearSet.exclusive(PEARL, PEARL_CHANCE)));

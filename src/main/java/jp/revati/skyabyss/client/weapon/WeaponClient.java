@@ -58,6 +58,10 @@ public final class WeaponClient {
         }
         event.registerItem(new BowExtension("thunder_wing_bow"), jp.revati.skyabyss.item.storm.StormGearSetup.BOW.get());
         event.registerItem(new BowExtension("abyss_storm_bow"), jp.revati.skyabyss.abyss.AbyssSetup.STORM_BOW_ITEM.get());
+        // 職の章の弓と祠の弓 (item/ChapterGear・rpg/skill/JobChoice)
+        for (String id : java.util.List.of("whale_bow", "tide_bow", "ember_bow", "shrine_bow")) {
+            event.registerItem(new BowExtension(id), BuiltInRegistries.ITEM.get(ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, id)));
+        }
         // 珊瑚の盾: バニラの構え (構えている間)。見た目 (低ポリのメッシュ) と、殴りつける動き・副の手での小さな押し出しだけ足す
         event.registerItem(new ShieldExtension(), BuiltInRegistries.ITEM.get(ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "coral_shield")));
     }

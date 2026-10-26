@@ -95,6 +95,82 @@
         }
       ]
     },
+    "weapons": {
+      "face": "neutral",
+      "options": [
+        {
+          "id": "warrior",
+          "kind": "talk",
+          "goto": "end",
+          "do": [
+            {
+              "type": "facility",
+              "open": "starter_warrior"
+            }
+          ]
+        },
+        {
+          "id": "smith",
+          "kind": "talk",
+          "goto": "end",
+          "do": [
+            {
+              "type": "facility",
+              "open": "starter_smith"
+            }
+          ]
+        },
+        {
+          "id": "mage",
+          "kind": "talk",
+          "goto": "end",
+          "do": [
+            {
+              "type": "facility",
+              "open": "starter_mage"
+            }
+          ]
+        },
+        {
+          "id": "archer",
+          "kind": "talk",
+          "goto": "end",
+          "do": [
+            {
+              "type": "facility",
+              "open": "starter_archer"
+            }
+          ]
+        },
+        {
+          "id": "assassin",
+          "kind": "talk",
+          "goto": "end",
+          "do": [
+            {
+              "type": "facility",
+              "open": "starter_assassin"
+            }
+          ]
+        },
+        {
+          "id": "shaman",
+          "kind": "talk",
+          "goto": "end",
+          "do": [
+            {
+              "type": "facility",
+              "open": "starter_shaman"
+            }
+          ]
+        },
+        {
+          "id": "back",
+          "kind": "talk",
+          "goto": "menu"
+        }
+      ]
+    },
     "menu": {
       "face": "neutral",
       "options": [
@@ -102,6 +178,11 @@
           "id": "respec",
           "kind": "talk",
           "goto": "respec"
+        },
+        {
+          "id": "weapons",
+          "kind": "talk",
+          "goto": "weapons"
         },
         {
           "id": "dummy",

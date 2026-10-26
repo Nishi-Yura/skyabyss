@@ -52,7 +52,7 @@ public final class EmberGear {
     public static final float THRALL_ARMOR_CHANCE = 0.01f;
     public static final float SMITH_HAMMER_CHANCE = 0.05f;
 
-    // 図鑑 (10 品)。並びは EmberIds.CODEX (13 の 6.3節の表) と同じ
+    // 図鑑 (15 品。職の章の武器 5 つを足した。item/ChapterGear)。並びは EmberIds.CODEX (13 の 6.3節の表) と同じ
     public static final TitanGearSet SET = new TitanGearSet(TITAN, SHARD, CORE, List.of(
             TitanGearSet.piece(HELMET, ARMOR_CHANCE),
             TitanGearSet.piece(CHESTPLATE, ARMOR_CHANCE),
@@ -61,6 +61,11 @@ public final class EmberGear {
             TitanGearSet.piece(WAR_AXE, WAR_AXE_CHANCE),
             TitanGearSet.piece(MANTLE, MANTLE_CHANCE),
             TitanGearSet.piece(CHARM, CHARM_CHANCE),
+            TitanGearSet.piece(jp.revati.skyabyss.item.ChapterGear.EMBER_STAFF, jp.revati.skyabyss.item.ChapterGear.CHANCE),
+            TitanGearSet.piece(jp.revati.skyabyss.item.ChapterGear.EMBER_CENSER, jp.revati.skyabyss.item.ChapterGear.CHANCE),
+            TitanGearSet.piece(jp.revati.skyabyss.item.ChapterGear.EMBER_GREATSWORD, jp.revati.skyabyss.item.ChapterGear.CHANCE),
+            TitanGearSet.piece(jp.revati.skyabyss.item.ChapterGear.EMBER_BOW, jp.revati.skyabyss.item.ChapterGear.CHANCE),
+            TitanGearSet.piece(jp.revati.skyabyss.item.ChapterGear.EMBER_DAGGER, jp.revati.skyabyss.item.ChapterGear.CHANCE),
             TitanGearSet.exclusive(HAMMER, HAMMER_CHANCE),
             TitanGearSet.exclusive(POKER, POKER_CHANCE),
             TitanGearSet.exclusive(LANTERN, LANTERN_CHANCE)));

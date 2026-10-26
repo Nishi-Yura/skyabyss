@@ -303,7 +303,7 @@ public class GuildScreen extends Screen {
             FacilityNetwork.GuildRow r = view.guilds().get(i + listScroll);
             int ry = ly + i * ROW_H;
             int bx = drawBadge(g, font, x + 3, ry + 3, r.tag(), r.color(), r.accent(), r.plate());
-            g.drawString(font, font.plainSubstrByWidth(r.name(), w - (bx - x) - 64), bx + 2, ry + 3, FacilityUi.TEXT, false);
+            jp.revati.skyabyss.client.ui.FitText.draw(g, font, net.minecraft.network.chat.Component.literal(r.name()), bx + 2, ry + 3, w - (bx - x) - 64, FacilityUi.TEXT, false);
             g.drawString(font, r.members() + "/" + view.max(), x + w - 58, ry + 3, FacilityUi.DIM, false);
             Component act = Component.translatable(r.applied() ? "gui.skyabyss.guild.applied" : r.open() ? "gui.skyabyss.guild.join" : "gui.skyabyss.guild.apply");
             int aw = font.width(act) + 6;
@@ -325,7 +325,7 @@ public class GuildScreen extends Screen {
         int x = x0 + 16;
         bannerItem(g, x - 3, y0 + 22, 1.7f, view.pattern(), me.color(), me.accent());
         int bx = drawBadge(g, font, x + 28, y0 + 26, me.tag(), me.color(), me.accent(), me.plate());
-        g.drawString(font, font.plainSubstrByWidth(me.name(), 100), bx + 4, y0 + 26, FacilityUi.TEXT, false);
+        jp.revati.skyabyss.client.ui.FitText.draw(g, font, net.minecraft.network.chat.Component.literal(me.name()), bx + 4, y0 + 26, 100, FacilityUi.TEXT, false);
         g.drawString(font, Component.translatable("gui.skyabyss.guild.members", view.members().size(), view.max()), x + 28, y0 + 40, FacilityUi.DIM, false);
         // つまみ
         String[] tabs = {"gui.skyabyss.guild.tab.members", "gui.skyabyss.guild.tab.request", "gui.skyabyss.guild.tab.banner",
@@ -392,8 +392,7 @@ public class GuildScreen extends Screen {
             int ry = ly + i * ROW_H;
             g.fill(x + 3, ry + 5, x + 6, ry + 8, m.online() ? FacilityUi.TEAL : 0xFF3A3F48);
             String mark = m.rank() == 2 ? "★ " : m.rank() == 1 ? "☆ " : "";
-            g.drawString(font, font.plainSubstrByWidth(mark + m.name(), view.leader() ? lw - 98 : lw - 14), x + 10, ry + 3,
-                    m.rank() >= 1 ? FacilityUi.GOLD : FacilityUi.TEXT, false);
+            jp.revati.skyabyss.client.ui.FitText.draw(g, font, net.minecraft.network.chat.Component.literal(mark + m.name()), x + 10, ry + 3, view.leader() ? lw - 98 : lw - 14, m.rank() >= 1 ? FacilityUi.GOLD : FacilityUi.TEXT, false);
             if (view.leader() && m.rank() < 2) {
                 Component k = Component.translatable("gui.skyabyss.guild.kick");
                 int kw = font.width(k) + 6;
@@ -439,7 +438,7 @@ public class GuildScreen extends Screen {
             for (int i = 0; i < view.applicants().size() && i < 8; i++) {
                 FacilityNetwork.MemberRow m = view.applicants().get(i);
                 int ry = ly + i * ROW_H;
-                g.drawString(font, font.plainSubstrByWidth(m.name(), aw - 40), ax + 4, ry + 3, FacilityUi.TEXT, false);
+                jp.revati.skyabyss.client.ui.FitText.draw(g, font, net.minecraft.network.chat.Component.literal(m.name()), ax + 4, ry + 3, aw - 40, FacilityUi.TEXT, false);
                 int okx = ax + aw - 34;
                 g.fill(okx, ry + 1, okx + 15, ry + ROW_H - 1, 0xFF1E3A40);
                 g.drawString(font, "✔", okx + 4, ry + 3, FacilityUi.TEAL, false);
@@ -478,8 +477,7 @@ public class GuildScreen extends Screen {
         g.drawString(font, Component.translatable("gui.skyabyss.guild.req_mine", r.mine()), x + w / 2, by + 10, FacilityUi.DIM, false);
         g.drawString(font, Component.translatable("gui.skyabyss.guild.req_top"), x + 4, by + 24, FacilityUi.TEAL, false);
         for (int i = 0; i < r.topNames().size(); i++) {
-            g.drawString(font, font.plainSubstrByWidth((i + 1) + ". " + r.topNames().get(i) + "  " + r.topCounts().get(i), w / 2 - 8),
-                    x + 8 + (i / 3) * (w / 2), by + 35 + (i % 3) * 10, FacilityUi.TEXT, false);
+            jp.revati.skyabyss.client.ui.FitText.draw(g, font, net.minecraft.network.chat.Component.literal((i + 1) + ". " + r.topNames().get(i) + "  " + r.topCounts().get(i)), x + 8 + (i / 3) * (w / 2), by + 35 + (i % 3) * 10, w / 2 - 8, FacilityUi.TEXT, false);
         }
         g.drawString(font, Component.translatable("gui.skyabyss.guild.req_reward"), x + 4, y + 122 - 11, FacilityUi.DIM, false);
     }
@@ -512,7 +510,7 @@ public class GuildScreen extends Screen {
             arrow(g, px + pw - 12, y0 + 68, "▶", mx, my, () -> cyclePattern(1));
             g.drawCenteredString(font, font.plainSubstrByWidth(pname, pw - 28), px + pw / 2, y0 + 70, locked ? FacilityUi.DIM : FacilityUi.TEXT);
         } else {
-            g.drawString(font, font.plainSubstrByWidth(pname, pw), px, y0 + 70, FacilityUi.TEXT, false);
+            jp.revati.skyabyss.client.ui.FitText.draw(g, font, net.minecraft.network.chat.Component.literal(pname), px, y0 + 70, pw, FacilityUi.TEXT, false);
         }
         if (locked) {
             List<net.minecraft.util.FormattedCharSequence> lines = jp.revati.skyabyss.client.ui.JpWrap.split(font, Component.translatable("gui.skyabyss.guild.locked_by",
@@ -587,8 +585,7 @@ public class GuildScreen extends Screen {
             boolean done = view.unlocked().contains(a.id());
             int v = Math.min(a.target(), st.get(a.kind().ordinal()));
             g.drawString(font, done ? "✔" : "・", x + 3, ry, done ? FacilityUi.GOLD : FacilityUi.DIM, false);
-            g.drawString(font, font.plainSubstrByWidth(Component.translatable(a.nameKey()).getString(), 86), x + 13, ry,
-                    done ? FacilityUi.TEXT : FacilityUi.DIM, false);
+            jp.revati.skyabyss.client.ui.FitText.draw(g, font, net.minecraft.network.chat.Component.literal(Component.translatable(a.nameKey()).getString()), x + 13, ry, 86, done ? FacilityUi.TEXT : FacilityUi.DIM, false);
             StringBuilder rw = new StringBuilder();
             for (Component r : GuildAchievements.rewards(a.id())) {
                 if (!rw.isEmpty()) {
@@ -596,7 +593,7 @@ public class GuildScreen extends Screen {
                 }
                 rw.append(r.getString());
             }
-            g.drawString(font, font.plainSubstrByWidth(rw.toString(), w - 146), x + 100, ry, done ? FacilityUi.GOLD : FacilityUi.DIM, false);
+            jp.revati.skyabyss.client.ui.FitText.draw(g, font, net.minecraft.network.chat.Component.literal(rw.toString()), x + 100, ry, w - 146, done ? FacilityUi.GOLD : FacilityUi.DIM, false);
             String prog = v + "/" + a.target();
             g.drawString(font, prog, x + w - 4 - font.width(prog), ry, done ? FacilityUi.TEAL : FacilityUi.TEXT, false);
         }

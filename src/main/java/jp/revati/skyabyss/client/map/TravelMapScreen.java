@@ -1063,7 +1063,7 @@ public class TravelMapScreen extends Screen {
             if (d.kind() == 2 && d.valid() && reachable(d)) {
                 color = 0xFF000000 | TravelDest.titanColor(d.name());
             }
-            g.drawString(font, font.plainSubstrByWidth(TravelDest.destName(d).getString(), ROW_W - 18), x + 5, y + 3, color, false);
+            jp.revati.skyabyss.client.ui.FitText.draw(g, font, net.minecraft.network.chat.Component.literal(TravelDest.destName(d).getString()), x + 5, y + 3, ROW_W - 18, color, false);
             g.drawString(font, destDetail(d), x + 5, y + 12, d.valid() ? SLATE.dim() : SLATE.lost(), false);
             if (d.kind() == 1 && d.valid() && chart.leader() && hover) {
                 chartBlit(g, x + ROW_W - 11, y + 3, 464, 432, 16, 16);

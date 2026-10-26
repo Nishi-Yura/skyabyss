@@ -57,7 +57,7 @@ public final class StormGear {
     public static final float WARDEN_ARMOR_CHANCE = 0.01f;
     public static final float RAIJU_CLAW_CHANCE = 0.05f;
 
-    // 図鑑 (10 品)。並びは図鑑の並び
+    // 図鑑 (13 品。職の章の武器 3 つを足した。item/ChapterGear)。並びは図鑑の並び
     public static final TitanGearSet SET = new TitanGearSet(TITAN, SHARD, CORE, List.of(
             TitanGearSet.piece(HELMET, ARMOR_CHANCE),
             TitanGearSet.piece(CHESTPLATE, ARMOR_CHANCE),
@@ -66,6 +66,9 @@ public final class StormGear {
             TitanGearSet.piece(BOW, BOW_CHANCE),
             TitanGearSet.piece(ANKLET, ANKLET_CHANCE),
             TitanGearSet.piece(CHARM, CHARM_CHANCE),
+            TitanGearSet.piece(jp.revati.skyabyss.item.ChapterGear.STORM_STAFF, jp.revati.skyabyss.item.ChapterGear.CHANCE),
+            TitanGearSet.piece(jp.revati.skyabyss.item.ChapterGear.STORM_BELL, jp.revati.skyabyss.item.ChapterGear.CHANCE),
+            TitanGearSet.piece(jp.revati.skyabyss.item.ChapterGear.STORM_HAMMER, jp.revati.skyabyss.item.ChapterGear.CHANCE),
             TitanGearSet.exclusive(CLAW, CLAW_CHANCE),
             TitanGearSet.exclusive(GLAIVE, GLAIVE_CHANCE),
             TitanGearSet.exclusive(EYE_FEATHER, EYE_FEATHER_CHANCE)));

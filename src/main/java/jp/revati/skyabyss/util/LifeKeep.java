@@ -32,7 +32,8 @@ public final class LifeKeep {
             "skyabyss_towns_visited",                 // 行ったことのある土地の町 (ContinentAreas。地図の跡地の噂が本当の位置に)
             "skyabyss_island",                        // はじまりの島の道の進み (IslandTrail)
             "skyabyss_island_kills",                  // 島の峠で退けた野盗の数 (IslandTrail)
-            "skyabyss_first_job");                    // 島の祠で選んだ職 (JobChoice)
+            "skyabyss_first_job",                     // 島の祠で選んだ職 (JobChoice)
+            "skyabyss_starter_lent");                 // 師範に借りた、ほかの職の始めの武器 (JobChoice)
 
     private LifeKeep() {
     }

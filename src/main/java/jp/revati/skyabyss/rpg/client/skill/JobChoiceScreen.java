@@ -175,8 +175,8 @@ public class JobChoiceScreen extends Screen implements jp.revati.skyabyss.client
                 g.fill(x, y, x + 2, y + ROW_H - 2, 0xFF000000 | SkillScreen.GOLD);
             }
             g.renderItem(JobChoice.starter(j), x + 4, y + 3);
-            g.drawString(font, Component.translatable(j.nameKey()), x + 24, y + 2, isPicked ? SkillScreen.GOLD : SkillScreen.TEXT, false);
-            g.drawString(font, Component.translatable(j.tree.nameKey()), x + 24, y + 12, SkillScreen.DIM, false);
+            jp.revati.skyabyss.client.ui.FitText.draw(g, font, Component.translatable(j.nameKey()), x + 24, y + 2, LIST_W - 28, isPicked ? SkillScreen.GOLD : SkillScreen.TEXT, false);
+            jp.revati.skyabyss.client.ui.FitText.draw(g, font, Component.translatable(j.tree.nameKey()), x + 24, y + 12, LIST_W - 28, SkillScreen.DIM, false);
         }
         int rx = left + LIST_W + 16;
         int rw = w - LIST_W - 24;

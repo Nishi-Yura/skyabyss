@@ -17,7 +17,8 @@
     "ToastAddMixin",
     "AdvancementToastAccessor",
     "ContainerLabelMixin",
-    "MountRiderLegsMixin"
+    "MountRiderLegsMixin",
+    "StringSplitterMixin"
   ],
   "injectors": {
     "defaultRequire": 1

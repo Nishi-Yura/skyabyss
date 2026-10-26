@@ -1147,8 +1147,8 @@ public final class EmberHeartSelfTest {
         check(first.draws().stream().anyMatch(d -> d.id().equals(EmberLoot.CORE)), "first clear has no core", f);
         check(first.draws().stream().anyMatch(d -> d.id().equals(EmberLoot.SHARD) && d.count() >= 4 && d.count() <= 7), "shards not 4-7", f);
         check(first.draws().stream().anyMatch(d -> d.id().equals(EmberLoot.RESONANCE_SHARD) && d.count() >= 1 && d.count() <= 3), "resonance shards not 1-3", f);
-        check(EmberLoot.collection().size() == 10 && EmberLoot.collection().equals(EmberIds.CODEX.stream().map(EmberIds::id).map(Object::toString).toList()),
-                "collection should be the 10 pieces of EmberIds.CODEX", f);
+        check(EmberLoot.collection().size() == 10 + jp.revati.skyabyss.item.ChapterGear.EMBER.size() && EmberLoot.collection().equals(EmberIds.CODEX.stream().map(EmberIds::id).map(Object::toString).toList()),
+                "collection should be the pieces of EmberIds.CODEX", f);
         check(EmberLoot.EXCLUSIVES.size() == 3 && EmberLoot.chance(EmberGear.HAMMER) == 0.04f && EmberLoot.chance(EmberGear.LANTERN) == 0.02f
                 && EmberLoot.chance(EmberGear.HELMET) == 0.25f && EmberLoot.chance(EmberGear.WAR_AXE) == 0.20f, "chances differ from 6.3節", f);
         // 天の鍵の欠片以外の確率: 心核 初回必ず・以後 25%、共鳴の結晶 40%、角杯 50%

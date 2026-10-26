@@ -217,10 +217,10 @@ public class DialogueScreen extends Screen {
         g.pose().popPose();
         // 名前と親しさ
         Component name = Component.translatable("entity." + show.role().replace(':', '.'));
-        g.drawCenteredString(font, name, fx + face / 2, fy + face + 7, NAME);
+        jp.revati.skyabyss.client.ui.FitText.drawCentered(g, font, name, fx + face / 2, fy + face + 7, face + 18, NAME, true);
         int affinity = Minecraft.getInstance().player == null ? 0 : NpcBonds.of(Minecraft.getInstance().player).affinity(show.role());
         int tier = Affinity.tier(affinity);
-        g.drawCenteredString(font, Component.translatable("gui.skyabyss.npc.tier." + tier), fx + face / 2, fy + face + 18, SOFT);
+        jp.revati.skyabyss.client.ui.FitText.drawCentered(g, font, Component.translatable("gui.skyabyss.npc.tier." + tier), fx + face / 2, fy + face + 18, face + 18, SOFT, true);
         drawMarks(g, fx + face / 2, fy + face + 29, tier);
         // 本文 (一字ずつ)
         int tx = x + textX;

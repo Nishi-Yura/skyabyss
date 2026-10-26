@@ -383,7 +383,7 @@ public class QuestLogScreen extends Screen implements jp.revati.skyabyss.client.
             Row r = rows.get(ri);
             if (r.quest() == null) {
                 boolean hover = r.jump() != null && inList(mouseX, mouseY) && mouseY >= y && mouseY < y + ROW_H;
-                g.drawString(font, font.plainSubstrByWidth(r.label().getString(), listTextW()), left + 10, y + 2, hover ? TEXT : r.color(), false);
+                jp.revati.skyabyss.client.ui.FitText.draw(g, font, net.minecraft.network.chat.Component.literal(r.label().getString()), left + 10, y + 2, listTextW(), hover ? TEXT : r.color(), false);
             } else {
                 boolean sel = r.quest().equals(selected);
                 boolean hover = inList(mouseX, mouseY) && mouseY >= y && mouseY < y + ROW_H;

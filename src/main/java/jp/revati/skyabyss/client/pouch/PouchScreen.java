@@ -252,7 +252,7 @@ public class PouchScreen extends AbstractContainerScreen<PouchMenu> implements j
         if (menu.rebuildView) {
             g.drawString(font, Component.translatable("skyabyss_pouch.screen.rebuild_title"), 8, 20, TEXT, false);
             Component hint = Component.translatable("skyabyss_pouch.screen.rebuild_hint");
-            g.drawString(font, font.plainSubstrByWidth(hint.getString(), PouchLayout.W - 70), 56, 20, DIM, false);
+            jp.revati.skyabyss.client.ui.FitText.draw(g, font, net.minecraft.network.chat.Component.literal(hint.getString()), 56, 20, PouchLayout.W - 70, DIM, false);
             return;
         }
         for (PouchLayout.Label label : menu.layout().labels()) {
@@ -298,10 +298,10 @@ public class PouchScreen extends AbstractContainerScreen<PouchMenu> implements j
         } else {
             hint = Component.translatable("skyabyss_pouch.screen.kept");
         }
-        g.drawString(font, font.plainSubstrByWidth(hint.getString(), PouchLayout.W - 24), 12, y2, color, false);
+        jp.revati.skyabyss.client.ui.FitText.draw(g, font, net.minecraft.network.chat.Component.literal(hint.getString()), 12, y2, PouchLayout.W - 24, color, false);
         if (n > 0 && e.item() instanceof PouchUsable) {
             Component pin = Component.translatable(QuickCard.isPinned(e.id()) ? "skyabyss_pouch.screen.unpin" : "skyabyss_pouch.screen.pin");
-            g.drawString(font, font.plainSubstrByWidth(pin.getString(), PouchLayout.W - 24), 12, y2 + 10, DIM, false);
+            jp.revati.skyabyss.client.ui.FitText.draw(g, font, net.minecraft.network.chat.Component.literal(pin.getString()), 12, y2 + 10, PouchLayout.W - 24, DIM, false);
         }
     }
 

@@ -267,3 +267,171 @@ WEAPONS = {
             b=(dg_b, None, (), "葉の刃。宿り木の葉の形の両刃と小さな真鍮の鍔。「短剣」と一目で読める。"),
             c=(dg_c, None, (), "鉤の牙。内へ巻く鉤の刃と指の輪。牙・爪の仲間らしい暗殺者の得物。"))),
 }
+
+
+# ================================================================== 戦士・鍛冶師・弓使いの始めの武器 (2026-10-26 の声「全職に専用の武器」)
+import d_thunder  # noqa: E402
+
+CY = d_thunder.CY
+TIP_PULL = d_thunder.TIP_PULL
+
+
+def sw_hilt(pommel=True):
+    f = []
+    f += prism("grip", (0, -2.0, 0), (0, 0.4, 0), 0.95, 0.85, sides=6, caps=(False, False))
+    for y in (-1.6, -0.6, 0.4, 1.4):
+        f += prism("cord", (0, y, 0), (0, y + 0.55, 0), 1.05, 1.05, sides=6, caps=(True, True))
+    f += prism("grip", (0, 0.4, 0), (0, 3.0, 0), 0.9, 0.85, sides=6, caps=(False, False))
+    if pommel:
+        f += berry((0, -2.8, 0), 0.9)
+    return f
+
+
+def ssw_a(stage=0):
+    """A 祠の直剣: まっすぐな両刃と真鍮の十字鍔。柄頭に宿り木の実、鍔に小枝。"""
+    f = sw_hilt()
+    st = [(3.4, -1.6, 1.6, 0.7, 0.7), (9.0, -1.6, 1.6, 0.7, 0.7), (15.0, -1.4, 1.4, 0.6, 0.6), (17.6, -0.8, 0.8, 0.45, 0.45), (19.4, 0, 0, 0, 0)]
+    f += blade("main", st)
+    f += block("trim", (0, 3.2, 0), (7.0, 1.0, 1.8), taper=(0.85, 0.9))
+    f += sprig((1.6, 3.6, -0.8), s=1, size=0.8)
+    return f
+
+
+def ssw_b(stage=0):
+    """B 山刀: 背が厚く、先が広がる片刃 (藪を払う刃)。鍔は鉄の小さな板、柄は縄巻き。"""
+    f = sw_hilt(pommel=False)
+    st = [(3.2, -1.2, 1.4, 0.8, 0.8), (8.0, -1.4, 1.9, 0.8, 0.8), (13.0, -1.4, 2.6, 0.75, 0.75), (16.0, -1.4, 2.4, 0.6, 0.6), (17.4, -0.4, 0.6, 0.3, 0.3)]
+    f += blade("main", st)
+    f += block("spine", (-1.2, 9.5, 0), (0.6, 12.0, 1.0))
+    f += block("guard", (0, 3.0, 0), (3.6, 0.9, 2.2))
+    f += prism("spine", (0, -2.9, 0), (0, -1.9, 0), 1.2, 1.1, sides=6, caps=(True, False))
+    return f
+
+
+def ssw_c(stage=0):
+    """C 葉の長剣: 宿り木の葉の形の長い刃。鍔は鯨骨の二本の牙、柄頭に実。"""
+    f = sw_hilt()
+    st = [(3.4, -0.8, 0.8, 0.6, 0.6), (7.0, -1.9, 1.9, 0.7, 0.7), (12.0, -2.1, 2.1, 0.7, 0.7), (17.0, -1.2, 1.2, 0.5, 0.5), (20.2, 0, 0, 0, 0)]
+    f += blade("main", st)
+    for s_ in (1, -1):
+        f += curve("bone", [(s_ * 0.6, 3.0, 0), (s_ * 2.6, 3.2, 0), (s_ * 3.6, 4.4, 0)], [0.6, 0.5, 0.2], [0.7, 0.6, 0.25], sides=4, caps=(False, True))
+    f += block("leaf", (0, 5.4, -0.4), (0.8, 2.2, 0.3), taper=(0.4, 0.9))
+    return f
+
+
+def hm_haft(top=13.0):
+    f = []
+    f += prism("grip", (0, -2.6, 0), (0, top, 0), 0.95, 0.9, sides=6, caps=(True, True))
+    f += prism("wrap", (0, -1.8, 0), (0, 2.6, 0), 1.1, 1.1, sides=6, caps=(False, False))
+    f += prism("spine", (0, -3.2, 0), (0, -2.4, 0), 1.2, 1.1, sides=6, caps=(True, False))
+    return f
+
+
+def shm_a(stage=0):
+    """A 鍛冶の片手鎚: 鉄の四角い頭 (片側は平ら、片側はすぼむ)。流木の柄に布。"""
+    f = hm_haft(13.2)
+    f += block("spine", (1.6, 13.4, 0), (4.4, 3.0, 2.8), taper=(1.0, 1.0))
+    f += block("spine", (-2.4, 13.4, 0), (3.2, 2.2, 2.2), taper=(0.6, 0.7), rot=rot_z(90))
+    f += block("trim", (0, 13.4, 0), (1.6, 3.4, 3.2))
+    return f
+
+
+def shm_b(stage=0):
+    """B 木槌: 太い丸太の頭の両口に鉄の輪。祠の杭を打つ槌。"""
+    f = hm_haft(13.0)
+    f += prism("grip", (-3.6, 13.4, 0), (3.6, 13.4, 0), 2.0, 2.0, sides=8, caps=(True, True), hint=(0, 1, 0))
+    for x in (-3.0, 3.0):
+        f += prism("spine", (x - 0.4, 13.4, 0), (x + 0.4, 13.4, 0), 2.15, 2.15, sides=8, caps=(True, True), hint=(0, 1, 0))
+    f += rope(11.0, 1.15)
+    return f
+
+
+def shm_c(stage=0):
+    """C 鎚と鉤: 片側が鎚、反対が鳶の嘴のように反った鉤 (山の道具)。鉤の根に紙垂。"""
+    f = hm_haft(13.4)
+    f += block("spine", (1.4, 13.6, 0), (3.2, 2.4, 2.4))
+    f += curve("edge", [(-0.6, 13.6, 0), (-2.8, 13.8, 0), (-4.6, 12.8, 0), (-5.4, 11.0, 0)], [1.0, 0.8, 0.5, 0.15], [1.0, 0.8, 0.5, 0.15], sides=4, caps=(False, True))
+    f += block("trim", (0, 13.6, 0), (1.4, 2.8, 2.8))
+    f += shide((0.8, 12.0, -1.2), n=2, s=1)
+    return f
+
+
+def sbow_grip():
+    f = []
+    f += prism("grip", (5.0, CY - 2.6, 0), (5.0, CY + 2.6, 0), 1.0, 1.0, sides=6, caps=(False, False), hint=(0, 0, 1))
+    for y in (-1.6, -0.5, 0.6, 1.7):
+        f += prism("cord", (5.0, CY + y - 0.25, 0), (5.0, CY + y + 0.25, 0), 1.15, 1.15, sides=6, caps=(True, True), hint=(0, 0, 1))
+    return f
+
+
+def bow_limbs(up, ra, rb, mat="grip"):
+    lo = [(x, 2 * CY - y, z) for x, y, z in up]
+    f = []
+    for path in (up, lo):
+        f += curve(mat, path, ra, rb, sides=4, caps=(False, True), hint=(0, 0, 1))
+    return f, lo
+
+
+def sbw_a(stage=0):
+    """A 流木の弓: 一本の流木を削った素朴な弓。腕の中ほどに縄の巻き、先に宿り木の実。"""
+    f = sbow_grip()
+    p = TIP_PULL[stage]
+    up = [(5.0, CY + 2.4, 0), (4.4, CY + 5.0, 0), (2.8, CY + 7.6, 0), (0.6 - p * 0.6, CY + 9.4, 0), (-1.6 - p, CY + 10.2, 0)]
+    g, lo = bow_limbs(up, [1.0, 0.95, 0.8, 0.6, 0.4], [1.1, 1.0, 0.85, 0.65, 0.45])
+    f += g
+    for path in (up, lo):
+        x, y, _ = path[2]
+        f += prism("cord", (x, y - 0.4, 0), (x, y + 0.4, 0), 1.0, 1.0, sides=6, caps=(True, True), hint=(0, 0, 1))
+    f += berry((up[-1][0], up[-1][1] + 0.4, 0), 0.6)
+    f += berry((lo[-1][0], lo[-1][1] - 0.4, 0), 0.6)
+    f += d_thunder.string_and_arrow(stage, "common", ((up[-1][0], up[-1][1]), (lo[-1][0], lo[-1][1])))
+    return f
+
+
+def sbw_b(stage=0):
+    """B 鯨骨の小弓: 短めの腕を鯨骨で作り、先が外へ反る (反り弓)。握りに藍の布。"""
+    f = sbow_grip()
+    f += prism("wrap", (5.0, CY - 1.0, 0), (5.0, CY + 1.0, 0), 1.25, 1.25, sides=6, caps=(True, True), hint=(0, 0, 1))
+    p = TIP_PULL[stage]
+    up = [(5.0, CY + 2.4, 0), (3.4, CY + 5.2, 0), (2.4 - p * 0.4, CY + 7.6, 0), (2.8 - p * 0.8, CY + 9.2, 0), (1.6 - p, CY + 10.0, 0)]
+    g, lo = bow_limbs(up, [1.0, 0.9, 0.75, 0.6, 0.45], [1.15, 1.0, 0.85, 0.7, 0.5], mat="bone")
+    f += g
+    f += d_thunder.string_and_arrow(stage, "common", ((up[-1][0], up[-1][1]), (lo[-1][0], lo[-1][1])))
+    return f
+
+
+def sbw_c(stage=0):
+    """C 枝の弓: 先が二股の小枝に分かれ、葉が付く。宿り木の枝そのままの弓。"""
+    f = sbow_grip()
+    p = TIP_PULL[stage]
+    up = [(5.0, CY + 2.4, 0), (4.0, CY + 5.4, 0), (2.0, CY + 8.0, 0), (-0.4 - p * 0.6, CY + 9.6, 0), (-2.2 - p, CY + 10.2, 0)]
+    g, lo = bow_limbs(up, [1.05, 0.95, 0.8, 0.6, 0.4], [1.15, 1.0, 0.85, 0.65, 0.45])
+    f += g
+    for path, s_ in ((up, 1), (lo, -1)):
+        x, y, _ = path[2]
+        f += curve("grip", [(x, y, 0), (x + 1.6, y + s_ * 1.6, 0), (x + 2.2, y + s_ * 3.0, 0)], [0.45, 0.35, 0.15], [0.45, 0.35, 0.15], sides=4, caps=(False, True))
+        f += block("leaf", (x + 2.4, y + s_ * 3.3, -0.2), (1.6, 0.8, 0.4), rot=rot_z(s_ * 50), taper=(0.5, 0.8))
+    f += d_thunder.string_and_arrow(stage, "common", ((up[-1][0], up[-1][1]), (lo[-1][0], lo[-1][1])))
+    return f
+
+
+WEAPONS.update({
+    "shrine_sword": dict(
+        jp="祠の剣", tier="common", glow="wind", pose="whale", grip=(0.0, 0.6, 0.0), cen=(0.0, 8.5, 0.0), scale=11.0,
+        opts=dict(
+            a=(ssw_a, None, (), "祠の直剣。まっすぐな両刃と真鍮の十字鍔、柄頭に宿り木の実。いちばん「剣」らしい。"),
+            b=(ssw_b, None, (), "山刀。背が厚く先が広がる片刃。島の暮らしの刃。"),
+            c=(ssw_c, None, (), "葉の長剣。宿り木の葉の形の長い刃と、鯨骨の牙の鍔。"))),
+    "shrine_hammer": dict(
+        jp="祠の鎚", tier="common", glow="star", pose="ember", grip=(0.0, 0.0, 0.0), cen=(0.0, 6.5, 0.0), scale=12.0,
+        opts=dict(
+            a=(shm_a, None, (), "鍛冶の片手鎚。鉄の四角い頭と流木の柄。鍛冶師らしい。"),
+            b=(shm_b, None, (), "木槌。太い丸太の頭の両口に鉄の輪。祠の杭を打つ槌。"),
+            c=(shm_c, None, (), "鎚と鉤。片側が鎚、反対が反った鉤。山の道具。"))),
+    "shrine_bow": dict(
+        jp="祠の弓", tier="common", glow="wind", pose="thunder", grip=(5.0, 8.0, 0.0), cen=(2.0, 8.0, 0.0), scale=12.0, stages=4,
+        opts=dict(
+            a=(sbw_a, None, (), "流木の弓。一本の流木の素朴な弓、腕に縄、先に実。"),
+            b=(sbw_b, None, (), "鯨骨の小弓。先が外へ反る短い骨の弓。"),
+            c=(sbw_c, None, (), "枝の弓。先が二股の小枝に分かれ、葉が付く。"))),
+})

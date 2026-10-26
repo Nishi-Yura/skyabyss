@@ -18,6 +18,8 @@ import d_starter  # noqa: E402
 import paint_starter  # noqa: E402
 
 B.D = d_starter
+import staged  # noqa: E402
+staged.install(B)
 B.PG = paint_starter
 B.OUT = B.ROOT / "docs/review/roughs_starter"
 B.RAW = B.OUT / "raw"

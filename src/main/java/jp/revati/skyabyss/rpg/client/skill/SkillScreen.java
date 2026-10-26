@@ -905,7 +905,7 @@ public class SkillScreen extends Screen implements jp.revati.skyabyss.client.ui.
         if (tryon != null) {
             head = Component.empty();
         }
-        g.drawString(font, head, left + 38, top + 25, headColor, false);
+        jp.revati.skyabyss.client.ui.FitText.draw(g, font, head, left + 38, top + 25, BOARD_VX + BOARD_VW - 38 - 2, headColor, false);
         if (false && tryon == null && SkillTag.of(tree) != null && tree != SkillTree.TRAVELER) {
             int tier = SkillBuild.setTier(d, tree);
             int hx = left + 38 + font.width(head) + 8;

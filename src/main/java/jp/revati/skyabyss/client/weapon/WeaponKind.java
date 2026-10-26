@@ -44,7 +44,13 @@ public enum WeaponKind {
             // 島の祠の始めの武器 (rpg/skill/JobChoice)
             Map.entry("shrine_staff", POKER),
             Map.entry("shrine_bell_staff", POKER),
-            Map.entry("shrine_dagger", FANG));
+            Map.entry("shrine_dagger", FANG),
+            // 章の杖と鈴杖 (item/ChapterGear)
+            Map.entry("whale_staff", POKER), Map.entry("whale_bell_staff", POKER), Map.entry("tide_staff", POKER), Map.entry("tide_bell_staff", POKER),
+            Map.entry("storm_staff", POKER), Map.entry("storm_bell_staff", POKER), Map.entry("ember_staff", POKER), Map.entry("ember_censer", POKER),
+            // 職の章の武器と祠の始めの武器 (弓は WeaponClient が BowExtension で登録する)
+            Map.entry("whale_hammer", HAMMER), Map.entry("tide_hammer", HAMMER), Map.entry("storm_hammer", HAMMER), Map.entry("ember_greatsword", GREATSWORD),
+            Map.entry("ember_dagger", FANG), Map.entry("shrine_sword", GREATSWORD), Map.entry("shrine_hammer", HAMMER));
 
     public static Iterable<Map.Entry<String, WeaponKind>> items() {
         return BY_ITEM.entrySet();

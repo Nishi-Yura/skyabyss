@@ -612,7 +612,22 @@ W["abyss_pulse_dagger"] = weapon(
 import copy as _copy  # noqa: E402
 for _item, _src, _label in (("shrine_staff", "abyss_bell_staff", "宿り木の杖: 掲げて溜め、地を突いて星の石を光らせる"),
                             ("shrine_bell_staff", "abyss_bell_staff", "祠の鈴杖: 掲げて溜め、地を突いて鈴を鳴らす"),
-                            ("shrine_dagger", "waterway_fang", "宿り木の短剣: 右上から左下へ、返して X、突き抜ける")):
+                            ("shrine_dagger", "waterway_fang", "宿り木の短剣: 右上から左下へ、返して X、突き抜ける"),
+                            ("whale_staff", "abyss_bell_staff", "鯨骨の星杖: 掲げて溜め、地を突いて石を光らせる"),
+                            ("whale_bell_staff", "abyss_bell_staff", "鯨歌いの鈴杖: 掲げて溜め、地を突いて鐘を鳴らす"),
+                            ("tide_staff", "abyss_bell_staff", "潮殻の真珠杖: 掲げて溜め、地を突いて真珠を光らせる"),
+                            ("tide_bell_staff", "abyss_bell_staff", "潮鳴りの鈴杖: 掲げて溜め、地を突いて鐘を鳴らす"),
+                            ("storm_staff", "abyss_bell_staff", "雷羽の杖: 掲げて溜め、地を突いて雷を呼ぶ"),
+                            ("storm_bell_staff", "abyss_bell_staff", "雷鳴りの鈴杖: 掲げて溜め、地を突いて鐘を鳴らす"),
+                            ("ember_staff", "abyss_bell_staff", "熾火の杖: 掲げて溜め、地を突いて熾火を散らす"),
+                            ("ember_censer", "abyss_bell_staff", "灰の香炉: 掲げて溜め、地を突いて灰を撒く"),
+                            ("shrine_sword", "abyss_lamp_sword", "祠の剣: 斬り下ろし、返し、突く"),
+                            ("shrine_hammer", "smith_hammer", "祠の鎚: 振りかぶって打ち下ろす"),
+                            ("whale_hammer", "smith_hammer", "鯨骨の鎚: 振りかぶって打ち下ろす"),
+                            ("tide_hammer", "smith_hammer", "潮殻の鎚: 振りかぶって打ち下ろす"),
+                            ("storm_hammer", "smith_hammer", "雷の鎚: 振りかぶって打ち下ろす"),
+                            ("ember_greatsword", "whalebone_greatsword", "熾火の大剣: 大きく薙ぎ、振り下ろす"),
+                            ("ember_dagger", "waterway_fang", "熾の短剣: 右上から左下へ、返して X、突き抜ける")):
     W[_item] = _copy.deepcopy(W[_src])
     W[_item]["item"] = _item
     W[_item]["label"] = _label
@@ -732,7 +747,13 @@ def polish():
 
 def main():
     polish()
-    for _item, _src in (("shrine_staff", "abyss_bell_staff"), ("shrine_bell_staff", "abyss_bell_staff"), ("shrine_dagger", "waterway_fang")):
+    for _item, _src in (("shrine_staff", "abyss_bell_staff"), ("shrine_bell_staff", "abyss_bell_staff"), ("shrine_dagger", "waterway_fang"),
+                        ("whale_staff", "abyss_bell_staff"), ("whale_bell_staff", "abyss_bell_staff"), ("tide_staff", "abyss_bell_staff"),
+                        ("tide_bell_staff", "abyss_bell_staff"), ("storm_staff", "abyss_bell_staff"), ("storm_bell_staff", "abyss_bell_staff"),
+                        ("ember_staff", "abyss_bell_staff"), ("ember_censer", "abyss_bell_staff"),
+                        ("shrine_sword", "abyss_lamp_sword"), ("shrine_hammer", "smith_hammer"), ("whale_hammer", "smith_hammer"),
+                        ("tide_hammer", "smith_hammer"), ("storm_hammer", "smith_hammer"), ("ember_greatsword", "whalebone_greatsword"),
+                        ("ember_dagger", "waterway_fang")):
         label = W[_item]["label"]
         W[_item] = _copy.deepcopy(W[_src])
         W[_item]["item"] = _item
