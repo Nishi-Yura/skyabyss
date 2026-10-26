@@ -1,0 +1,87 @@
+# 道と町のつながり (真上から)。2026-10-27 の声「道が町とつながってない・道の上に人工物・急に途切れる」
+world roads_check continent
+size 1600 900
+timeout 2400
+render 16
+clouds off
+guiscale 2
+wait 100
+cmd skyabyss cinematic stop
+wait 10
+cmd time set 6000
+cmd weather clear
+cmd gamerule doDaylightCycle false
+cmd skyabyss dev opening build
+wait 200
+cmd gamemode spectator
+hud off
+cmd skyabyss dev grounds mark town 0 pos
+waitchunks 900
+wait 300
+cmd execute at @s positioned over motion_blocking_no_leaves run tp @s ~ ~110 ~ 0 90
+waitchunks 900
+wait 200
+shot top_town_whale
+cmd skyabyss dev grounds mark town 1 pos
+waitchunks 900
+wait 300
+cmd execute at @s positioned over motion_blocking_no_leaves run tp @s ~ ~110 ~ 0 90
+waitchunks 900
+wait 200
+shot top_town_tide
+cmd skyabyss dev grounds mark town 2 pos
+waitchunks 900
+wait 300
+cmd execute at @s positioned over motion_blocking_no_leaves run tp @s ~ ~110 ~ 0 90
+waitchunks 900
+wait 200
+shot top_town_storm
+cmd skyabyss dev grounds mark town 3 pos
+waitchunks 900
+wait 300
+cmd execute at @s positioned over motion_blocking_no_leaves run tp @s ~ ~110 ~ 0 90
+waitchunks 900
+wait 200
+shot top_town_ember
+cmd tp @s -450 200 0 0 90
+waitchunks 900
+wait 300
+cmd execute at @s positioned -450 0 0 positioned over motion_blocking_no_leaves run tp @s ~ ~110 ~ 0 90
+waitchunks 900
+wait 150
+shot top_capital
+cmd tp @s -180 200 -500 0 90
+waitchunks 900
+wait 300
+cmd execute at @s positioned -180 0 -500 positioned over motion_blocking_no_leaves run tp @s ~ ~110 ~ 0 90
+waitchunks 900
+wait 150
+shot top_r1_mid
+cmd tp @s -350 200 600 0 90
+waitchunks 900
+wait 300
+cmd execute at @s positioned -350 0 600 positioned over motion_blocking_no_leaves run tp @s ~ ~110 ~ 0 90
+waitchunks 900
+wait 150
+shot top_r3_mid
+cmd tp @s -850 200 -200 0 90
+waitchunks 900
+wait 300
+cmd execute at @s positioned -850 0 -200 positioned over motion_blocking_no_leaves run tp @s ~ ~110 ~ 0 90
+waitchunks 900
+wait 150
+shot top_r2_mid
+cmd tp @s 240 200 121 0 90
+waitchunks 900
+wait 300
+cmd execute at @s positioned 240 0 121 positioned over motion_blocking_no_leaves run tp @s ~ ~110 ~ 0 90
+waitchunks 900
+wait 150
+shot top_r5_ferry
+cmd tp @s 1250 200 155 0 90
+waitchunks 900
+wait 300
+cmd execute at @s positioned 1250 0 155 positioned over motion_blocking_no_leaves run tp @s ~ ~110 ~ 0 90
+waitchunks 900
+wait 150
+shot top_r6_tide

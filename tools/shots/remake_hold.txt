@@ -1,0 +1,150 @@
+# 作り直した 12 本の持ち姿
+world shots flat
+size 960 540
+timeout 3000
+render 6
+cmd time set noon
+cmd weather clear
+cmd gamemode creative
+camera 0 -60 8 180 0
+waitchunks
+hud on
+wait 350
+cmd skyabyss cinematic stop
+close
+wait 20
+swingpose off
+mainhand right
+hud off
+cmd item replace entity @s weapon.mainhand with skyabyss:waterway_fang
+perspective first
+close
+wait 25
+chat clear
+shot fp_waterway_fang
+perspective front
+bodyyaw 40
+close
+wait 10
+shot tp_waterway_fang
+cmd item replace entity @s weapon.mainhand with skyabyss:captain_pike
+perspective first
+close
+wait 25
+chat clear
+shot fp_captain_pike
+perspective front
+bodyyaw 40
+close
+wait 10
+shot tp_captain_pike
+cmd item replace entity @s weapon.mainhand with skyabyss:whalebone_greatsword
+perspective first
+close
+wait 25
+chat clear
+shot fp_whalebone_greatsword
+perspective front
+bodyyaw 40
+close
+wait 10
+shot tp_whalebone_greatsword
+cmd item replace entity @s weapon.mainhand with skyabyss:abyss_greatsword
+perspective first
+close
+wait 25
+chat clear
+shot fp_abyss_greatsword
+perspective front
+bodyyaw 40
+close
+wait 10
+shot tp_abyss_greatsword
+cmd item replace entity @s weapon.mainhand with skyabyss:tidecaller_claw
+perspective first
+close
+wait 25
+chat clear
+shot fp_tidecaller_claw
+perspective front
+bodyyaw 40
+close
+wait 10
+shot tp_tidecaller_claw
+cmd item replace entity @s weapon.mainhand with skyabyss:coral_harpoon
+perspective first
+close
+wait 25
+chat clear
+shot fp_coral_harpoon
+perspective front
+bodyyaw 40
+close
+wait 10
+shot tp_coral_harpoon
+cmd item replace entity @s weapon.mainhand with skyabyss:raiju_claw
+perspective first
+close
+wait 25
+chat clear
+shot fp_raiju_claw
+perspective front
+bodyyaw 40
+close
+wait 10
+shot tp_raiju_claw
+cmd item replace entity @s weapon.mainhand with skyabyss:warden_glaive
+perspective first
+close
+wait 25
+chat clear
+shot fp_warden_glaive
+perspective front
+bodyyaw 40
+close
+wait 10
+shot tp_warden_glaive
+cmd item replace entity @s weapon.mainhand with skyabyss:abyss_storm_bow
+perspective first
+close
+wait 25
+chat clear
+shot fp_abyss_storm_bow
+perspective front
+bodyyaw 40
+close
+wait 10
+shot tp_abyss_storm_bow
+cmd item replace entity @s weapon.mainhand with skyabyss:smith_hammer
+perspective first
+close
+wait 25
+chat clear
+shot fp_smith_hammer
+perspective front
+bodyyaw 40
+close
+wait 10
+shot tp_smith_hammer
+cmd item replace entity @s weapon.mainhand with skyabyss:ember_war_axe
+perspective first
+close
+wait 25
+chat clear
+shot fp_ember_war_axe
+perspective front
+bodyyaw 40
+close
+wait 10
+shot tp_ember_war_axe
+cmd item replace entity @s weapon.mainhand with skyabyss:abyss_ash_scythe
+perspective first
+close
+wait 25
+chat clear
+shot fp_abyss_ash_scythe
+perspective front
+bodyyaw 40
+close
+wait 10
+shot tp_abyss_ash_scythe
