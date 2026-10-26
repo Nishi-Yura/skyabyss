@@ -56,6 +56,13 @@ public final class SkillClient {
     // 天職を選べる (サーバーが知らせた) 段。0 = まだ。K の画面のボタンを出す
     public static int callingReady;
 
+    public static void onJobChoiceOpen() {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.player != null && !(mc.screen instanceof JobChoiceScreen)) {
+            mc.setScreen(new JobChoiceScreen());
+        }
+    }
+
     public static void onCallingOpen(jp.revati.skyabyss.rpg.skill.net.CallingOpenPayload payload) {
         callingReady = payload.which();
         Minecraft mc = Minecraft.getInstance();

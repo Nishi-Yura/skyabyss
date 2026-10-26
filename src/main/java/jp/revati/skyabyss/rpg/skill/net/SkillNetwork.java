@@ -25,7 +25,8 @@ import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class SkillNetwork {
     // 2: 技の見た目の合図に当たりの点 (SkillFxPayload.target)
-    private static final String PROTOCOL_VERSION = "2";
+    // 3: 島の祠の職選び (JobChoiceOpenPayload・JobChoosePayload)
+    private static final String PROTOCOL_VERSION = "3";
 
     private SkillNetwork() {
     }
@@ -38,6 +39,13 @@ public final class SkillNetwork {
                 .playToClient(SkillCastResultPayload.TYPE, SkillCastResultPayload.STREAM_CODEC, (payload, context) -> SkillClient.onCastResult(payload))
                 .playToClient(SkillFxPayload.TYPE, SkillFxPayload.STREAM_CODEC, (payload, context) -> context.enqueueWork(() -> SkillFx.onCast(payload)))
                 .playToClient(CallingOpenPayload.TYPE, CallingOpenPayload.STREAM_CODEC, (payload, context) -> SkillClient.onCallingOpen(payload))
+                // 島の祠で職を選ぶ (docs/design/43 の 4 節)。選び直しはできない (サーバーが検める)
+                .playToClient(JobChoiceOpenPayload.TYPE, JobChoiceOpenPayload.STREAM_CODEC, (payload, context) -> context.enqueueWork(SkillClient::onJobChoiceOpen))
+                .playToServer(JobChoosePayload.TYPE, JobChoosePayload.STREAM_CODEC, (payload, context) -> {
+                    if (context.player() instanceof ServerPlayer player) {
+                        jp.revati.skyabyss.rpg.skill.JobChoice.choose(player, jp.revati.skyabyss.rpg.skill.Job.byId(payload.job()));
+                    }
+                })
                 .playToServer(CallingChoosePayload.TYPE, CallingChoosePayload.STREAM_CODEC, (payload, context) -> {
                     if (context.player() instanceof ServerPlayer player) {
                         SkillCalling.Result r = SkillCalling.choose(player, payload.tree());

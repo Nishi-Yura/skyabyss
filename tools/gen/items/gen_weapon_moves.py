@@ -608,6 +608,15 @@ W["abyss_pulse_dagger"] = weapon(
     inspect("短剣の鼓動を聞く", 0.22, -0.1, -18.0, "RZ", 1.0, -0.9, side=-0.05),
 )
 
+# 島の祠の始めの武器 (docs/design/43 の 4 節)。杖と鈴杖は深淵の鈴杖、短剣は水路の牙の動きを借りる (名前の一行だけ替える)
+import copy as _copy  # noqa: E402
+for _item, _src, _label in (("shrine_staff", "abyss_bell_staff", "宿り木の杖: 掲げて溜め、地を突いて星の石を光らせる"),
+                            ("shrine_bell_staff", "abyss_bell_staff", "祠の鈴杖: 掲げて溜め、地を突いて鈴を鳴らす"),
+                            ("shrine_dagger", "waterway_fang", "宿り木の短剣: 右上から左下へ、返して X、突き抜ける")):
+    W[_item] = _copy.deepcopy(W[_src])
+    W[_item]["item"] = _item
+    W[_item]["label"] = _label
+
 # 盾・弓は strike = 0 (サーバーは何も預けない)。盾は盾殴りの hit の key だけ持つ
 
 
@@ -723,6 +732,11 @@ def polish():
 
 def main():
     polish()
+    for _item, _src in (("shrine_staff", "abyss_bell_staff"), ("shrine_bell_staff", "abyss_bell_staff"), ("shrine_dagger", "waterway_fang")):
+        label = W[_item]["label"]
+        W[_item] = _copy.deepcopy(W[_src])
+        W[_item]["item"] = _item
+        W[_item]["label"] = label
     os.makedirs(OUT, exist_ok=True)
     for item, d in W.items():
         with open(os.path.join(OUT, item + ".json"), "w", encoding="utf-8", newline="\n") as f:

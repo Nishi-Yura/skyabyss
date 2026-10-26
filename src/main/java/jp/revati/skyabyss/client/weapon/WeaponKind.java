@@ -40,7 +40,11 @@ public enum WeaponKind {
             Map.entry("abyss_lamp_sword", GREATSWORD),
             Map.entry("abyss_sinking_anchor", HAMMER),
             Map.entry("abyss_pulse_dagger", FANG),
-            Map.entry("abyss_ash_scythe", AXE));
+            Map.entry("abyss_ash_scythe", AXE),
+            // 島の祠の始めの武器 (rpg/skill/JobChoice)
+            Map.entry("shrine_staff", POKER),
+            Map.entry("shrine_bell_staff", POKER),
+            Map.entry("shrine_dagger", FANG));
 
     public static Iterable<Map.Entry<String, WeaponKind>> items() {
         return BY_ITEM.entrySet();

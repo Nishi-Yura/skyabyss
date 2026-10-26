@@ -32,7 +32,7 @@
   "message.skyabyss.lesson.say.tree_hybrid": "Learn three skills in each of two trees and the bridge between them opens. Find it on the ring of the skill screen.",
   "message.skyabyss.lesson.say.tree_keystone": "Keystones open at Lv 20. They sit at the bottom of each tree and define a build. Pick one.",
   "message.skyabyss.lesson.say.tree_past": "Past-life skills have opened. Past-life points are spent separately from your usual points.",
-  "message.skyabyss.lesson.say.tree_star": "The sealed Astromancer tree has opened. There's a new tab on the skill screen.",
+  "message.skyabyss.lesson.say.tree_star": "The sealed Stargazer tree has opened. There's a new tab on the skill screen.",
   "message.skyabyss.lesson.skipped": "Lesson skipped. Ask the training master any time to take it.",
   "quest.skyabyss.lesson.skills.behind.back": "Strike a dummy from behind",
   "quest.skyabyss.lesson.skills.behind.journal": "Circle behind a dummy and strike. Hits from behind grow much stronger with skills like Wind Rend.",
@@ -73,8 +73,8 @@
   "quest.skyabyss.lesson.tree_past.try.journal": "Past-life skills have opened. Past-life points are spent separately from your usual points. A training dummy or a real foe will do.",
   "quest.skyabyss.lesson.tree_past.try.try": "Land a past-life skill on a dummy or foe",
   "quest.skyabyss.lesson.tree_star.done": "You tried out the new skills.",
-  "quest.skyabyss.lesson.tree_star.summary": "The sealed Astromancer tree has opened. There's a new tab on the skill screen.",
+  "quest.skyabyss.lesson.tree_star.summary": "The sealed Stargazer tree has opened. There's a new tab on the skill screen.",
   "quest.skyabyss.lesson.tree_star.title": "Astromancy",
-  "quest.skyabyss.lesson.tree_star.try.journal": "The sealed Astromancer tree has opened. There's a new tab on the skill screen. A training dummy or a real foe will do.",
+  "quest.skyabyss.lesson.tree_star.try.journal": "The sealed Stargazer tree has opened. There's a new tab on the skill screen. A training dummy or a real foe will do.",
   "quest.skyabyss.lesson.tree_star.try.try": "Land a Star skill on a dummy or foe"
 }

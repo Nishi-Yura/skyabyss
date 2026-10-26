@@ -60,6 +60,8 @@ public final class GearTierSelfTest {
         GearTier C = GearTier.COMMON, U = GearTier.UNCOMMON, R = GearTier.RARE, E = GearTier.EPIC, H = GearTier.HEROIC, A = GearTier.ARTIFACT;
         // 一章 岩鯨
         row(1, C, "heartbeat_ward_stone_whale");
+        // 島の祠の始めの武器 (rpg/skill/JobChoice。docs/design/43 の 4 節)
+        row(1, C, "shrine_staff", "shrine_bell_staff", "shrine_dagger");
         row(1, U, "whale_road_helmet", "whale_road_chestplate", "whale_road_leggings", "whale_road_boots");
         row(1, R, "stone_whale_helmet", "stone_whale_chestplate", "stone_whale_leggings", "stone_whale_boots", "moss_talisman");
         row(1, E, "whalebone_greatsword", "resonance_charm");

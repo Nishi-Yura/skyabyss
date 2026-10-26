@@ -32,7 +32,7 @@
   "message.skyabyss.lesson.say.tree_hybrid": "二つの木の技を三つずつ覚えると、そのあいだの橋が開く。技の画面の輪で選べる。",
   "message.skyabyss.lesson.say.tree_keystone": "Lv 20 で要が開いた。木の一番下にある、型を決める技だ。一つ選んでみろ。",
   "message.skyabyss.lesson.say.tree_past": "前世の技が開いた。前世の点は、ふだんの点とは別に使える。",
-  "message.skyabyss.lesson.say.tree_star": "封じられていた星術師の木が開いた。技の画面に新しい札がある。",
+  "message.skyabyss.lesson.say.tree_star": "封じられていた星読みの木が開いた。技の画面に新しい札がある。",
   "message.skyabyss.lesson.skipped": "稽古を飛ばした。訓練場の師範に頼めば、いつでも受けられる。",
   "quest.skyabyss.lesson.skills.behind.back": "木偶の背後から打とう",
   "quest.skyabyss.lesson.skills.behind.journal": "木偶の背後へ回って打つ。背後からの一撃は、風裂きなどの技で大きく伸びる。",
@@ -73,8 +73,8 @@
   "quest.skyabyss.lesson.tree_past.try.journal": "前世の技が開いた。前世の点は、ふだんの点とは別に使える。訓練場の木偶でも、背の上の敵でもいい。",
   "quest.skyabyss.lesson.tree_past.try.try": "前世の技を木偶か敵に当てよう",
   "quest.skyabyss.lesson.tree_star.done": "新しい技を試した。",
-  "quest.skyabyss.lesson.tree_star.summary": "封じられていた星術師の木が開いた。技の画面に新しい札がある。",
-  "quest.skyabyss.lesson.tree_star.title": "星術師の技",
-  "quest.skyabyss.lesson.tree_star.try.journal": "封じられていた星術師の木が開いた。技の画面に新しい札がある。訓練場の木偶でも、背の上の敵でもいい。",
-  "quest.skyabyss.lesson.tree_star.try.try": "星術師の技を木偶か敵に当てよう"
+  "quest.skyabyss.lesson.tree_star.summary": "封じられていた星読みの木が開いた。技の画面に新しい札がある。",
+  "quest.skyabyss.lesson.tree_star.title": "星読みの技",
+  "quest.skyabyss.lesson.tree_star.try.journal": "封じられていた星読みの木が開いた。技の画面に新しい札がある。訓練場の木偶でも、背の上の敵でもいい。",
+  "quest.skyabyss.lesson.tree_star.try.try": "星読みの技を木偶か敵に当てよう"
 }

@@ -33,7 +33,7 @@ public final class IslandTrailSelfTest {
             trail(f, level);
         }
         if (f.isEmpty()) {
-            SkyAbyss.LOGGER.info("SELFTEST island trail PASSED (road grade{})", island ? ", island order, bandits open the barricade, shrine readies the ferryman, crossing" : "; no island here");
+            SkyAbyss.LOGGER.info("SELFTEST island trail PASSED (road grade{})", island ? ", island order, bandits open the barricade, job choice at the shrine readies the ferryman, crossing" : "; no island here");
         } else {
             f.forEach(s -> SkyAbyss.LOGGER.error("SELFTEST island trail FAILED: {}", s));
         }
@@ -113,6 +113,21 @@ public final class IslandTrailSelfTest {
         }
         BlockPos s = IslandTrail.restPos(level, 1);
         p.setPos(s.getX() + 0.5, s.getY(), s.getZ() + 0.5);
+        // 祠に立つだけでは済まない: 職を選ぶと済む (始めの武器と、職の木の 1 行目の技)
+        jp.revati.skyabyss.rpg.skill.JobChoice.reset(p);
+        IslandTrail.update(level, p);
+        expect(f, p, "island_shrine");
+        jp.revati.skyabyss.rpg.skill.Job job = jp.revati.skyabyss.rpg.skill.Job.SHAMAN;
+        if (!jp.revati.skyabyss.rpg.skill.JobChoice.choose(p, job) || jp.revati.skyabyss.rpg.skill.JobChoice.choose(p, jp.revati.skyabyss.rpg.skill.Job.WARRIOR)) {
+            f.add("choosing a job at the shrine did not work once (and only once)");
+        }
+        if (!p.getInventory().contains(new net.minecraft.world.item.ItemStack(jp.revati.skyabyss.rpg.skill.JobChoice.BELL_STAFF.get()))) {
+            f.add("the shaman did not get the bell staff");
+        }
+        jp.revati.skyabyss.rpg.skill.Skill first = jp.revati.skyabyss.rpg.skill.JobChoice.firstSkill(job);
+        if (first == null || !jp.revati.skyabyss.rpg.skill.SkillManager.get(p).knows(first)) {
+            f.add("the first job skill was not learned: " + first);
+        }
         IslandTrail.update(level, p);
         expect(f, p, "take_ferry");
         if (!jp.revati.skyabyss.npc.NpcBonds.of(p).hasFlag(IslandTrail.FERRYMAN_ROLE, IslandTrail.READY_FLAG)) {

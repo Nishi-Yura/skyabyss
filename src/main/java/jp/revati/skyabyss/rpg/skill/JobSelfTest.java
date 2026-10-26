@@ -49,6 +49,7 @@ public final class JobSelfTest {
                 {"skyabyss:waterway_fang", Job.ASSASSIN}, {"skyabyss:tidecaller_claw", Job.ASSASSIN}, {"skyabyss:raiju_claw", Job.ASSASSIN},
                 {"skyabyss:abyss_pulse_dagger", Job.ASSASSIN}, {"skyabyss:thunder_wing_bow", Job.ARCHER}, {"skyabyss:abyss_storm_bow", Job.ARCHER},
                 {"skyabyss:abyss_bell_staff", Job.SHAMAN},
+                {"skyabyss:shrine_staff", Job.MAGE}, {"skyabyss:shrine_bell_staff", Job.SHAMAN}, {"skyabyss:shrine_dagger", Job.ASSASSIN},
                 {"minecraft:iron_sword", Job.WARRIOR}, {"minecraft:trident", Job.WARRIOR}, {"minecraft:iron_axe", Job.SMITH},
                 {"minecraft:bow", Job.ARCHER}, {"minecraft:crossbow", Job.ARCHER},
                 {"skyabyss:bell_coin", null}, {"skyabyss:storm_charm", null}, {"minecraft:lightning_rod", null}, {"minecraft:blaze_rod", null},

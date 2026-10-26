@@ -1084,6 +1084,8 @@ public final class ShotRunner {
                 return c;
             };
             case "skills_build" -> () -> new jp.revati.skyabyss.rpg.client.skill.SkillScreen().buildPage();
+            case "job_choice" -> jp.revati.skyabyss.rpg.client.skill.JobChoiceScreen::new;
+            case "job_choice_shaman" -> () -> new jp.revati.skyabyss.rpg.client.skill.JobChoiceScreen().pick(jp.revati.skyabyss.rpg.skill.Job.SHAMAN);
             case "skills_tryon" -> () -> new jp.revati.skyabyss.rpg.client.skill.SkillScreen().select(jp.revati.skyabyss.rpg.skill.Skill.WHALE_SWEEP)
                     .tryOn(jp.revati.skyabyss.rpg.skill.Skill.ROCK_CALL, jp.revati.skyabyss.rpg.skill.Skill.WHALE_SWEEP);
             case "skills_cleave" -> () -> new jp.revati.skyabyss.rpg.client.skill.SkillScreen().select(jp.revati.skyabyss.rpg.skill.Skill.TITAN_CLEAVE);

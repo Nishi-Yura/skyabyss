@@ -69,6 +69,10 @@ LINES = [
     ("whale_road_chestplate", "「肩の殻は、誰かの雨を受けてきた。」", "\"The shell on the shoulder has taken someone else's rain.\""),
     ("whale_road_leggings", "「歩いた道の数だけ、裾が薄くなる。」", "\"The hem wears thin by the count of roads walked.\""),
     ("whale_road_boots", "「靴底は、道の石を覚えている。」", "\"A sole remembers the stones of the road.\""),
+    # ---- 島の祠の始めの武器 (43 の 4 節。rpg/skill/JobChoice。祠の守りの声)
+    ("shrine_staff", "「流れ着いた木にも、星は宿る。」", "\"Even driftwood can hold a star.\""),
+    ("shrine_bell_staff", "「祭りの鈴は、潮が来ると先に鳴る。」", "\"The festival bells ring before the tide arrives.\""),
+    ("shrine_dagger", "「もとは、宿り木の枝を払う刃だった。」", "\"It was once a blade for pruning mistletoe.\""),
 ]
 
 

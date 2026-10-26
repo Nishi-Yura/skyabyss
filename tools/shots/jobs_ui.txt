@@ -1,4 +1,4 @@
-# 職 (docs/design/43) の K 画面: 剣を持った戦士の木と、弓使いの木
+# 職 (docs/design/43) の画面: K 画面 (剣を持った戦士の木)・変異・島の祠の職選び・始めの武器を持った姿
 # bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/jobs_ui.txt -PshotsName=jobs_ui
 world shots flat
 size 1280 720
@@ -27,7 +27,22 @@ wait 20
 shot jobs_1_warrior
 close
 wait 10
-open skills_ext
+open job_choice
 wait 20
-shot jobs_2_ext
+shot jobs_2_choice
 close
+wait 10
+open job_choice_shaman
+wait 20
+shot jobs_3_choice_shaman
+close
+wait 10
+cmd item replace entity @p weapon.mainhand with skyabyss:shrine_bell_staff
+wait 20
+shot jobs_4_bell_hand
+cmd item replace entity @p weapon.mainhand with skyabyss:shrine_staff
+wait 20
+shot jobs_5_staff_hand
+cmd item replace entity @p weapon.mainhand with skyabyss:shrine_dagger
+wait 20
+shot jobs_6_dagger_hand

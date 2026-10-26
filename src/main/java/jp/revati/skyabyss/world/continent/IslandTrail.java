@@ -42,7 +42,7 @@ import net.neoforged.neoforge.event.tick.ServerTickEvent;
 //   2. 足跡の窪地を見る (island_prints。窪地の足跡の 40 以内か、足跡の伝承)
 //   3. 峠の野盗を退ける (island_bandits。島で野盗を 3 人。足りなければ野営に出る)。峠の柵は、誰かが退けると開く (世界に一つ)
 //   4. 旅の休み場の焚き火で休む (island_rest。そばに 3 秒)
-//   5. 宿り木の祠に祈る (island_shrine。そばに立つ。ここで目覚めるようになり、技の画面 (K) の手がかり)
+//   5. 宿り木の祠に祈る (island_shrine。そばに立つと職を選ぶ画面 (rpg/skill/JobChoice)。選ぶと始めの武器と 1 行目の技。ここで目覚めるようになり、技の画面 (K) の手がかり)
 //   6. 船着き場の渡し守と話す (take_ferry)。渡し守は 1〜5 を済ませた人だけを乗せる (会話の印 island_ready)。乗ると渡りの場面 (ferry_crossing) →
 //      鐘の都の南の門の外で、都を見上げる場面 (capital_arrival)
 // 印は人の永続データの KEY (倒れても残る。util/LifeKeep)
@@ -191,10 +191,18 @@ public final class IslandTrail {
             mark(p, REST);
             Notice.hint(p, "message.skyabyss.island.rested");
         }
-        if (has(p, REST) && !has(p, SHRINE) && restPos(level, 1).distToCenterSqr(p.position()) < SHRINE_NEAR * SHRINE_NEAR) {
-            mark(p, SHRINE);
-            Notice.objective(p, "message.skyabyss.island.prayed");
-            Notice.hint(p, "message.skyabyss.island.skill_hint");
+        // 祠に祈る = 職を選ぶ (docs/design/43 の 4 節)。そばに来ると選ぶ画面が開き (離れるまで一度)、選び終えると済む
+        double shrine = restPos(level, 1).distToCenterSqr(p.position());
+        if (has(p, REST) && shrine < SHRINE_NEAR * SHRINE_NEAR) {
+            if (jp.revati.skyabyss.rpg.skill.JobChoice.chosen(p) == null) {
+                jp.revati.skyabyss.rpg.skill.JobChoice.prompt(p);
+            } else if (!has(p, SHRINE)) {
+                mark(p, SHRINE);
+                Notice.objective(p, "message.skyabyss.island.prayed");
+                Notice.hint(p, "message.skyabyss.island.skill_hint");
+            }
+        } else if (shrine > (SHRINE_NEAR + 4) * (SHRINE_NEAR + 4)) {
+            jp.revati.skyabyss.rpg.skill.JobChoice.away(p);
         }
         if ((done(p) & ALL) == ALL) {
             setReady(p, true);
