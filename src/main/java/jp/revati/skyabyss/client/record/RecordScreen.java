@@ -83,7 +83,8 @@ public class RecordScreen extends Screen implements jp.revati.skyabyss.client.ui
     static final int BW = 304;
     static final int BH = 192;
     static final int TAB_W = 64;
-    static final int TAB_STEP = 68;
+    // つまみ 5 つ (大事な品・巨神・成長・縁と頁・記し) が書の幅に収まる間隔 (絵は 64 幅、少し重ねる)
+    static final int TAB_STEP = 54;
     static final int TAB_X0 = 14;
     static final int LX = 18;
     static final int LW = 128;

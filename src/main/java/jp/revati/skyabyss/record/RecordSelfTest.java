@@ -70,8 +70,8 @@ public final class RecordSelfTest {
 
         // ---------------------------------------------------------------- 中身と符号化
         RecordSnapshot snap = RecordBuilder.build(a, true);
-        int pages = RecordSnapshot.TAB_IDS.size() + jp.revati.skyabyss.progress.Titans.all().size();
-        check(f, snap.tabs().size() == pages, "snapshot should have " + pages + " tabs (4 and a page per titan), got " + snap.tabs().size());
+        int pages = RecordSnapshot.TAB_IDS.size() + jp.revati.skyabyss.progress.Titans.all().size() + DeedPages.GROUPS.size();
+        check(f, snap.tabs().size() == pages, "snapshot should have " + pages + " tabs (5, a page per titan and a page per deed group), got " + snap.tabs().size());
         for (String id : RecordSnapshot.TAB_IDS) {
             RecordSnapshot.Tab t = snap.tab(id);
             check(f, t != null && !t.rows().isEmpty(), "tab " + id + " is empty");

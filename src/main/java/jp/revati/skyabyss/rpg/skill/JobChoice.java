@@ -140,6 +140,7 @@ public final class JobChoice {
             SkillManager.forceRank(p, first, 1);
         }
         SkillManager.sync(p);
+        jp.revati.skyabyss.advancement.Beats.fire(p, "job:chosen");
         Notice.objective(p, "message.skyabyss.job.chosen", Component.translatable(job.nameKey()), weapon.getHoverName());
         return true;
     }

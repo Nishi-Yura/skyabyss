@@ -1,0 +1,81 @@
+{
+  "_comment": "控え帳の記しのつまみ (tools/gen/story/gen_advancements.py)",
+  "pages": {
+    "journey": [
+      "island_job",
+      "island_prints",
+      "island_bandits",
+      "island_ferry",
+      "capital_tour",
+      "lore_book",
+      "town_whale",
+      "town_tide",
+      "town_storm",
+      "town_ember",
+      "bone_pit",
+      "whale_trail",
+      "voyage",
+      "salt_vault",
+      "tide_trail",
+      "scorched_watch",
+      "storm_trail",
+      "dead_forge_pit",
+      "ember_trail",
+      "sky_key"
+    ],
+    "titans": [
+      "stone_whale_board",
+      "tablet",
+      "stone_whale_trial",
+      "stone_whale_heart",
+      "tide_shell_board",
+      "tide_shell_trial",
+      "tide_shell_heart",
+      "thunder_wing_board",
+      "thunder_wing_trial",
+      "thunder_wing_heart",
+      "ember_board",
+      "ember_trial",
+      "ember_heart"
+    ],
+    "foes": [
+      "named_any",
+      "named_island",
+      "named_meadow",
+      "named_whale",
+      "named_tide",
+      "named_storm",
+      "named_ember",
+      "named_all"
+    ],
+    "growth": [
+      "level_5",
+      "level_10",
+      "level_20",
+      "level_30",
+      "level_40",
+      "level_50",
+      "skill",
+      "tree_sword",
+      "tree_bow",
+      "forge",
+      "forge_enhance",
+      "forge_dismantle",
+      "rebirth_1",
+      "rebirth_5",
+      "rebirth_10",
+      "rebirth_20",
+      "rebirth_flawless"
+    ],
+    "town": [
+      "achievement/shop",
+      "achievement/trade",
+      "achievement/quest",
+      "achievement/board",
+      "achievement/town",
+      "achievement/guild",
+      "achievement/respec",
+      "achievement/grave"
+    ]
+  }
+}

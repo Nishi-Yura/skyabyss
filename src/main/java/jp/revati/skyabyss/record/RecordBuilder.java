@@ -69,6 +69,7 @@ public final class RecordBuilder {
         tabs.addAll(titanTabs(target));
         tabs.add(new Tab(RecordSnapshot.GROWTH, growth(target)));
         tabs.add(new Tab(RecordSnapshot.BONDS, bonds(target)));
+        tabs.addAll(DeedPages.tabs(target));
         return new RecordSnapshot(target.getUUID(), target.getDisplayName().copy(), self, tabs);
     }
 

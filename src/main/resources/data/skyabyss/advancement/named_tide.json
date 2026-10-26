@@ -1,25 +1,25 @@
 {
-  "parent": "skyabyss:root",
+  "parent": "skyabyss:named_any",
   "display": {
     "icon": {
-      "id": "minecraft:campfire"
+      "id": "skyabyss:tide_crab_spawn_egg"
     },
     "title": {
-      "translate": "advancement.skyabyss.camp.title"
+      "translate": "advancement.skyabyss.named_tide.title"
     },
     "description": {
-      "translate": "advancement.skyabyss.camp.description"
+      "translate": "advancement.skyabyss.named_tide.description"
     },
-    "frame": "task",
+    "frame": "challenge",
     "show_toast": true,
     "announce_to_chat": false,
-    "hidden": false
+    "hidden": true
   },
   "criteria": {
     "done": {
       "trigger": "skyabyss:beat",
       "conditions": {
-        "event": "place:camp"
+        "event": "named:tide"
       }
     }
   },
@@ -29,6 +29,6 @@
     ]
   ],
   "rewards": {
-    "function": "skyabyss:reward/coins_3"
+    "function": "skyabyss:reward/coins_25"
   }
 }

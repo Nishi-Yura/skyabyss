@@ -1,0 +1,79 @@
+{
+  "parent": "skyabyss:named_any",
+  "display": {
+    "icon": {
+      "id": "minecraft:nether_star"
+    },
+    "title": {
+      "translate": "advancement.skyabyss.named_all.title"
+    },
+    "description": {
+      "translate": "advancement.skyabyss.named_all.description"
+    },
+    "frame": "challenge",
+    "show_toast": true,
+    "announce_to_chat": false,
+    "hidden": true
+  },
+  "criteria": {
+    "named_island": {
+      "trigger": "skyabyss:beat",
+      "conditions": {
+        "event": "named:island"
+      }
+    },
+    "named_meadow": {
+      "trigger": "skyabyss:beat",
+      "conditions": {
+        "event": "named:meadow"
+      }
+    },
+    "named_whale": {
+      "trigger": "skyabyss:beat",
+      "conditions": {
+        "event": "named:whale"
+      }
+    },
+    "named_tide": {
+      "trigger": "skyabyss:beat",
+      "conditions": {
+        "event": "named:tide"
+      }
+    },
+    "named_storm": {
+      "trigger": "skyabyss:beat",
+      "conditions": {
+        "event": "named:storm"
+      }
+    },
+    "named_ember": {
+      "trigger": "skyabyss:beat",
+      "conditions": {
+        "event": "named:ember"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "named_island"
+    ],
+    [
+      "named_meadow"
+    ],
+    [
+      "named_whale"
+    ],
+    [
+      "named_tide"
+    ],
+    [
+      "named_storm"
+    ],
+    [
+      "named_ember"
+    ]
+  ],
+  "rewards": {
+    "function": "skyabyss:reward/coins_50"
+  }
+}

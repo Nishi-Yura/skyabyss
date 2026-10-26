@@ -1,25 +1,25 @@
 {
-  "parent": "skyabyss:camp",
+  "parent": "skyabyss:named_any",
   "display": {
     "icon": {
-      "id": "minecraft:bell"
+      "id": "skyabyss:rock_boar_spawn_egg"
     },
     "title": {
-      "translate": "advancement.skyabyss.bell_lodge.title"
+      "translate": "advancement.skyabyss.named_whale.title"
     },
     "description": {
-      "translate": "advancement.skyabyss.bell_lodge.description"
+      "translate": "advancement.skyabyss.named_whale.description"
     },
-    "frame": "task",
+    "frame": "challenge",
     "show_toast": true,
     "announce_to_chat": false,
-    "hidden": false
+    "hidden": true
   },
   "criteria": {
     "done": {
       "trigger": "skyabyss:beat",
       "conditions": {
-        "event": "place:shelter"
+        "event": "named:whale"
       }
     }
   },
@@ -29,6 +29,6 @@
     ]
   ],
   "rewards": {
-    "function": "skyabyss:reward/coins_3"
+    "function": "skyabyss:reward/coins_25"
   }
 }

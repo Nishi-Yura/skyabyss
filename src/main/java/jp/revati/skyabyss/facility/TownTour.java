@@ -88,6 +88,7 @@ public final class TownTour {
         setStep(p, next);
         if (next >= DONE) {
             TownGuide.pick(p, "");
+            jp.revati.skyabyss.advancement.Beats.fire(p, "town:tour");
             Notice.hint(p, "message.skyabyss.tour.done");
         } else {
             show(p, next);

@@ -1,25 +1,25 @@
 {
-  "parent": "skyabyss:camp",
+  "parent": "skyabyss:island_bandits",
   "display": {
     "icon": {
-      "id": "minecraft:podzol"
+      "id": "minecraft:oak_boat"
     },
     "title": {
-      "translate": "advancement.skyabyss.footprint.title"
+      "translate": "advancement.skyabyss.island_ferry.title"
     },
     "description": {
-      "translate": "advancement.skyabyss.footprint.description"
+      "translate": "advancement.skyabyss.island_ferry.description"
     },
-    "frame": "task",
+    "frame": "goal",
     "show_toast": true,
     "announce_to_chat": false,
-    "hidden": true
+    "hidden": false
   },
   "criteria": {
     "done": {
       "trigger": "skyabyss:beat",
       "conditions": {
-        "event": "place:footprint"
+        "event": "island:ferry"
       }
     }
   },
@@ -29,6 +29,6 @@
     ]
   ],
   "rewards": {
-    "function": "skyabyss:reward/coins_3"
+    "function": "skyabyss:reward/coins_10"
   }
 }

@@ -1,5 +1,5 @@
 {
-  "parent": "skyabyss:storyteller",
+  "parent": "skyabyss:capital_tour",
   "display": {
     "icon": {
       "id": "skyabyss:lore_book"

@@ -61,30 +61,31 @@ def add(id_, parent, icon, frame, criterion, ja, en, hidden=False, coins=None):
 # ---------------------------------------------------------------- 序盤 (17 の拍子の順)
 add("root", None, "skyabyss:sky_key_fragment", "task", {"trigger": "minecraft:tick"},
     ("天と淵のあいだ", "空の下で、目を覚ました。"), ("Between Sky and Abyss", "You woke beneath the sky."))
-add("camp", "root", "minecraft:campfire", "task", beat("place:camp"),
-    ("消えた火の跡", "誰かの野営の跡。火はもう冷えている。"), ("Cold Embers", "Someone camped here. The fire has gone cold."))
-add("footprint", "camp", "minecraft:podzol", "task", beat("place:footprint"),
-    ("巨大な足跡", "人のものではない足跡が、地面に深く残っている。"), ("A Giant's Footprint", "A footprint pressed deep into the ground. Not a person's."), hidden=True)
-add("sky_shadow", "camp", "minecraft:phantom_membrane", "task", beat("signal:sky_shadow_seen"),
-    ("空を渡る影", "空を、何か大きなものが横切った。"), ("The Shadow Overhead", "Something huge crossed the sky."), hidden=True)
-add("bell_lodge", "camp", "minecraft:bell", "task", beat("place:shelter"),
-    ("鐘の宿り", "小さく鳴る鐘をたどって、人のいる場所へ。"), ("Bell Lodge", "You followed a faint bell to where people live."))
-add("storyteller", "bell_lodge", "minecraft:written_book", "task", beat("talk:skyabyss:storyteller"),
-    ("語り部", "宿りの語り部と言葉を交わした。"), ("The Storyteller", "You spoke with the lodge's storyteller."))
-add("lore_book", "storyteller", "skyabyss:lore_book", "task", has("skyabyss:lore_book"),
+# 2026-10-27: 大陸の RPG の流れ (はじまりの島 → 渡し → 都 → 土地の町) に合わせて作り直した。前の開幕 (野営の跡・鐘の宿り・語り部・イサナ・骨の丘) は大陸では起きないので消した
+add("island_job", "root", "minecraft:iron_sword", "task", beat("job:chosen"),
+    ("戦い方を選ぶ", "島の野営地で、自分の戦い方を決めた。"), ("Choosing a Way to Fight", "At the island camp, you chose how you fight."))
+add("island_prints", "island_job", "minecraft:podzol", "task", beat("island:prints"),
+    ("足あとを追う", "島の道に残った足あとをたどった。"), ("Following the Prints", "You followed the prints along the island road."))
+add("island_bandits", "island_job", "minecraft:iron_axe", "task", beat("island:bandits"),
+    ("峠を越える", "峠に居座る野盗を退けた。"), ("Over the Pass", "You drove off the bandits holding the pass."))
+add("island_ferry", "island_bandits", "minecraft:oak_boat", "goal", beat("island:ferry"),
+    ("海を渡る", "渡し守の舟で、大陸へ渡った。"), ("Across the Water", "The ferryman rowed you to the continent."))
+add("capital_tour", "island_ferry", "minecraft:bell", "goal", beat("town:tour"),
+    ("都をめぐる", "案内に連れられて、都の宿・鍛冶場・店をひと回りした。"), ("A Turn Around the Capital", "You were shown the capital's inn, smithy and shops."))
+add("lore_book", "capital_tour", "skyabyss:lore_book", "task", has("skyabyss:lore_book"),
     ("伝承の書", "読むたびに、頁が増えていく本を手に入れた。"), ("The Book of Lore", "You hold a book whose pages grow as you learn."))
-add("isana", "storyteller", "minecraft:spyglass", "task", beat("talk:skyabyss:whale_chaser"),
-    ("鯨を追う人", "イサナと出会った。"), ("The Whale Chaser", "You met Isana."))
-add("bone_hill", "isana", "minecraft:bone_block", "task", beat("place:ribs"),
-    ("骨の丘", "丘の下に、巨大な骨が埋まっている。"), ("Bone Hill", "Enormous bones lie buried beneath the hill."), hidden=True)
+for _r, _icon, _ja, _en in (("whale", "skyabyss:stone_whale_plating", "鯨見の町", "Kujirami"), ("tide", "skyabyss:tide_dried_shell", "汐守の港", "Shiomori Harbor"),
+                            ("storm", "skyabyss:thunder_wing_shard", "風待の里", "Kazamachi"), ("ember", "skyabyss:ember_shard", "灰炉の村", "Hairo")):
+    add(f"town_{_r}", "capital_tour", _icon, "task", beat(f"town:visit:{_r}"),
+        (_ja, f"{_ja}の門をくぐった。"), (_en, f"You passed through the gates of {_en}."), hidden=_r != "whale")
 # 一章の支度の段 (34 の 4.2)。骨の坑の荷で前の旅人の頁を見つける → 三本 (鉄・剣・盾と糧) をそろえる
-add("bone_pit", "isana", "minecraft:iron_ore", "task", beat("lore:ch1/trail_iron"),
+add("bone_pit", "town_whale", "minecraft:iron_ore", "task", beat("lore:ch1/trail_iron"),
     ("骨の坑", "坑の奥に、誰かの荷が残っていた。"), ("The Bone Pit", "Deep in the pit, someone's pack was left behind."))
 add("whale_trail", "bone_pit", "skyabyss:whale_chaser_mark", "goal", beat("signal:ch1_ready"),
     ("鯨追いの支度", "鉄を着て、剣を研ぎ、盾と糧を背負った。"), ("Ready to Chase the Whale", "Iron on, blade honed, shield and provisions on your back."))
 
 # ---------------------------------------------------------------- 巨神 (背に乗る → 試練 → 心臓)
-add("stone_whale_board", "isana", "skyabyss:stone_whale_plating", "goal", dimension("titan_back"),
+add("stone_whale_board", "capital_tour", "skyabyss:stone_whale_plating", "goal", dimension("titan_back"),
     ("岩鯨の背", "岩の鯨の背に乗った。"), ("On the Stone Whale", "You climbed onto the stone whale's back."))
 add("tablet", "stone_whale_board", "minecraft:chiseled_stone_bricks", "task", beat("tablet:read"),
     ("刻まれた言葉", "石の碑に目を向けると、昔の言葉が聞こえる。"), ("Carved Words", "Look at a stone tablet, and old words speak."))
@@ -154,6 +155,21 @@ add("achievement/grave", "achievement/root", "minecraft:skeleton_skull", "task",
     ("置いてきたもの", "自分の墓から、品を取り戻した。"), ("What Was Left Behind", "Took your things back from your grave."), coins=3)
 
 
+# ---------------------------------------------------------------- 名のある強敵 (docs/design/44 の 5。world/continent/NamedFoes が倒した人に beat を流す)
+add("named_any", "root", "minecraft:golden_sword", "goal", beat("named:any"),
+    ("名のある強敵", "名札を下げた強敵を、はじめて倒した。"), ("A Name Brought Down", "You felled a named foe for the first time."))
+NAMED = (("island", "skyabyss:bandit_chief_spawn_egg", "goal", "峠の頭目 赤帯", "島の峠を荒らす赤帯の頭目を倒した。", "Redsash, Chief of the Pass", "You felled Redsash, who ruled the island pass."),
+         ("meadow", "skyabyss:bone_standard_spawn_egg", "goal", "最後の旗手", "夜の草原をさまよう最後の旗手を倒した。", "The Last Standard-Bearer", "You felled the last standard-bearer wandering the night meadow."),
+         ("whale", "skyabyss:rock_boar_spawn_egg", "challenge", "岩背の大猪", "岩鯨の丘の大猪を倒した。", "Rockback Boar", "You felled the great boar of the whale hills."),
+         ("tide", "skyabyss:tide_crab_spawn_egg", "challenge", "潮招きの大蟹", "潮の浜の大蟹を倒した。", "Tidecaller Crab", "You felled the great crab of the tide shore."),
+         ("storm", "skyabyss:storm_ram_spawn_egg", "challenge", "雷角の大羊", "嵐の高地の大羊を倒した。", "Thunderhorn Ram", "You felled the great ram of the storm heights."),
+         ("ember", "skyabyss:ash_lizard_spawn_egg", "challenge", "灰被りの大蜥蜴", "灰の荒野の大蜥蜴を倒した。", "Ashcloak Lizard", "You felled the great lizard of the ash wastes."))
+for _r, _icon, _frame, _ja, _jd, _en, _ed in NAMED:
+    add(f"named_{_r}", "named_any", _icon, _frame, beat(f"named:{_r}"), (_ja, _jd), (_en, _ed), hidden=_r not in ("island", "meadow"))
+add("named_all", "named_any", "minecraft:nether_star", "challenge", {f"named_{r[0]}": beat(f"named:{r[0]}") for r in NAMED},
+    ("六つの名", "六つの土地の名のある強敵を、すべて倒した。"), ("Six Names", "You felled the named foe of every land."), hidden=True, coins=50)
+
+
 # ---------------------------------------------------------------- 成長と鍛え
 add("skill", "root", "minecraft:enchanted_book", "task", beat("skill:learned"),
     ("最初の技", "技を一つ覚えた。"), ("A First Skill", "You learned a skill."))
@@ -179,9 +195,9 @@ add("forge_dismantle", "forge_enhance", "minecraft:grindstone", "task", beat("fo
 # 章 (docs/design/05 の 2 章、story/Chapters.java)。進捗の id は変えず、文の頭に章の名前を付けて枝を章ごとに読めるようにする。
 # 序章 = B0〜B6 (野営地から足音まで)、一章 = イサナ (B7) から岩鯨の心臓まで。巨神の背・試練・心臓はその巨神の章。天の鍵は四章の終わり
 CHAPTER_OF = {}
-for _id in ("camp", "footprint", "sky_shadow", "bell_lodge", "storyteller", "lore_book"):
+for _id in ("island_job", "island_prints", "island_bandits", "island_ferry"):
     CHAPTER_OF[_id] = "prologue"
-for _id in ("isana", "bone_hill", "bone_pit", "whale_trail", "stone_whale_board", "tablet", "stone_whale_trial", "stone_whale_heart", "voyage"):
+for _id in ("bone_pit", "whale_trail", "stone_whale_board", "tablet", "stone_whale_trial", "stone_whale_heart", "voyage"):
     CHAPTER_OF[_id] = "titan_whale"
 for _id in ("salt_vault", "tide_trail"):
     CHAPTER_OF[_id] = "titan_tide"
@@ -224,8 +240,13 @@ def build():
         if a["parent"] is None:
             display["background"] = "skyabyss:textures/gui/advancements/backgrounds/skyabyss.png"
         d["display"] = display
-        d["criteria"] = {"done": a["criterion"]}
-        d["requirements"] = [["done"]]
+        if "trigger" in a["criterion"]:
+            d["criteria"] = {"done": a["criterion"]}
+            d["requirements"] = [["done"]]
+        else:
+            # いくつもの条件をすべて満たす (六つの名など)
+            d["criteria"] = dict(a["criterion"])
+            d["requirements"] = [[k] for k in a["criterion"]]
         if a["coins"] > 0:
             d["rewards"] = {"function": f"skyabyss:reward/coins_{a['coins']}"}
         out[a["id"]] = d
@@ -246,8 +267,33 @@ def background():
     Image.fromarray(np.clip(img, 0, 255).astype(np.uint8)).save(BG)
 
 
+# 控え帳の「記し」のつまみ (record/DeedPages) の分け方と並び。根 (root・achievement/root) はひとりでに済むので載せない。
+# 転生 (rebirth_*) はほかの道具が書く進捗だが、ここで成長の頁に並べる
+DEED_PAGES = {
+    "journey": ["island_job", "island_prints", "island_bandits", "island_ferry", "capital_tour", "lore_book", "town_whale", "town_tide", "town_storm", "town_ember",
+                "bone_pit", "whale_trail", "voyage", "salt_vault", "tide_trail", "scorched_watch", "storm_trail", "dead_forge_pit", "ember_trail", "sky_key"],
+    "titans": ["stone_whale_board", "tablet", "stone_whale_trial", "stone_whale_heart", "tide_shell_board", "tide_shell_trial", "tide_shell_heart",
+               "thunder_wing_board", "thunder_wing_trial", "thunder_wing_heart", "ember_board", "ember_trial", "ember_heart"],
+    "foes": ["named_any"] + [f"named_{r[0]}" for r in NAMED] + ["named_all"],
+    "growth": ["level_5", "level_10", "level_20", "level_30", "level_40", "level_50", "skill", "tree_sword", "tree_bow", "forge", "forge_enhance", "forge_dismantle",
+               "rebirth_1", "rebirth_5", "rebirth_10", "rebirth_20", "rebirth_flawless"],
+    "town": ["achievement/shop", "achievement/trade", "achievement/quest", "achievement/board", "achievement/town", "achievement/guild", "achievement/respec",
+             "achievement/grave"],
+}
+# 大陸の流れに合わなくなって消した進捗 (残っていれば消す)
+RETIRED = ["camp", "footprint", "sky_shadow", "bell_lodge", "storyteller", "isana", "bone_hill"]
+
+
 def main():
     ADV.mkdir(parents=True, exist_ok=True)
+    for id_ in RETIRED:
+        (ADV / f"{id_}.json").unlink(missing_ok=True)
+    known = {a["id"] for a in A} | {f"rebirth_{n}" for n in ("1", "5", "10", "20", "flawless")}
+    listed = [i for ids in DEED_PAGES.values() for i in ids]
+    assert set(listed) <= known, set(listed) - known
+    assert known - set(listed) == {"root", "achievement/root"}, known - set(listed)
+    (ROOT / "data/skyabyss/deeds.json").write_text(json.dumps({"_comment": "控え帳の記しのつまみ (tools/gen/story/gen_advancements.py)", "pages": DEED_PAGES},
+                                                                ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     # ほかの道具が書く進捗 (転生の rebirth_* など) は消さない。ここで持つ id だけを書き直す
     for id_, d in build().items():
         f = ADV / f"{id_}.json"
@@ -261,6 +307,9 @@ def main():
     for code, idx in (("ja_jp", "ja"), ("en_us", "en")):
         p = LANG / f"{code}.json"
         lang = json.loads(p.read_text(encoding="utf-8"))
+        for id_ in RETIRED:
+            lang.pop(f"advancement.skyabyss.{id_}.title", None)
+            lang.pop(f"advancement.skyabyss.{id_}.description", None)
         for a in A:
             title, desc = chaptered(a, 0 if idx == "ja" else 1)
             if a["coins"] > 0:

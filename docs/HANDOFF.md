@@ -76,9 +76,13 @@
     島・草原の湧きの表 (data/skyabyss/spawns/island|meadow.json)、島の峠と見どころの野営はバニラの略奪者・骸骨から新しい敵へ。新しい敵だけ ContinentDanger で土地の強さが掛かる。
   - 二組目 4 体 (野犬・苔の亡者・霧の漁り火・雷狼) も選ばれて入れた (同じ手順。湧きは草原の森・岩鯨の夜・潮の夜・嵐の夜。撮影 tools/shots/foes_two.txt)。
 
+  - 名のある強敵 6 体 (world/continent/NamedFoes。島・草原は野営の頭の形、岩鯨・潮・嵐・灰は新しい大物 entity/foe/RockBoar ほか)。ユーザーが全部選んだ。
+  - 進捗の画面を作り直した: L キー (バニラの進捗の画面) を控え帳の「記し」のつまみに差し替え (record/DeedPages、client/record/RecordClient)。
+    一覧と 旅・巨神・強敵・成長・町 の頁。分け方は data/skyabyss/deeds.json (tools/gen/story/gen_advancements.py が書く)。
+    前の開幕の進捗 (野営の跡・鐘の宿り・語り部・イサナ・骨の丘など) は大陸では起きないので消し、島 → 渡し → 都めぐり → 土地の町 と名のある強敵の記しを足した
+    (合図は Beats の job:chosen / island:* / town:tour / town:visit:* / named:*)。撮影は tools/shots/deeds.txt。
+
 ## 次にやること
-0. 名のある強敵 6 体は入った (頁の選びがまだ。直しが来たらラフを直して gen_foes_one.py で入れ直すだけ)。次は進捗の画面の作り直し。
-1. 進捗の画面を見やすく作り直す (ユーザー「進捗 UI 変えてもいい。みにくいので」)。
 2. 伝説 20 本の技の書き換え (Rune の 4 番目)。
 1. 職ごとの技の見た目（手元の Fx）は、新しい技 12 本はサーバーの粒だけ。試遊で寂しければ Fx を足す。
 2. 試遊: 島の道（新しい世界で）、渡りの場面、大陸の道、闘の部屋の中ボス戦、土地の町の人の頼み。

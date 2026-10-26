@@ -1,25 +1,25 @@
 {
-  "parent": "skyabyss:camp",
+  "parent": "skyabyss:named_any",
   "display": {
     "icon": {
-      "id": "minecraft:phantom_membrane"
+      "id": "skyabyss:bandit_chief_spawn_egg"
     },
     "title": {
-      "translate": "advancement.skyabyss.sky_shadow.title"
+      "translate": "advancement.skyabyss.named_island.title"
     },
     "description": {
-      "translate": "advancement.skyabyss.sky_shadow.description"
+      "translate": "advancement.skyabyss.named_island.description"
     },
-    "frame": "task",
+    "frame": "goal",
     "show_toast": true,
     "announce_to_chat": false,
-    "hidden": true
+    "hidden": false
   },
   "criteria": {
     "done": {
       "trigger": "skyabyss:beat",
       "conditions": {
-        "event": "signal:sky_shadow_seen"
+        "event": "named:island"
       }
     }
   },
@@ -29,6 +29,6 @@
     ]
   ],
   "rewards": {
-    "function": "skyabyss:reward/coins_3"
+    "function": "skyabyss:reward/coins_10"
   }
 }

@@ -1,5 +1,5 @@
 {
-  "parent": "skyabyss:isana",
+  "parent": "skyabyss:town_whale",
   "display": {
     "icon": {
       "id": "minecraft:iron_ore"

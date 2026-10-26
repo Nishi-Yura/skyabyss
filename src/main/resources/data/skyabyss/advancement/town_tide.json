@@ -1,14 +1,14 @@
 {
-  "parent": "skyabyss:isana",
+  "parent": "skyabyss:capital_tour",
   "display": {
     "icon": {
-      "id": "minecraft:bone_block"
+      "id": "skyabyss:tide_dried_shell"
     },
     "title": {
-      "translate": "advancement.skyabyss.bone_hill.title"
+      "translate": "advancement.skyabyss.town_tide.title"
     },
     "description": {
-      "translate": "advancement.skyabyss.bone_hill.description"
+      "translate": "advancement.skyabyss.town_tide.description"
     },
     "frame": "task",
     "show_toast": true,
@@ -19,7 +19,7 @@
     "done": {
       "trigger": "skyabyss:beat",
       "conditions": {
-        "event": "place:ribs"
+        "event": "town:visit:tide"
       }
     }
   },

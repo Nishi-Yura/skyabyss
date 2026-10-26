@@ -1,14 +1,14 @@
 {
-  "parent": "skyabyss:storyteller",
+  "parent": "skyabyss:island_job",
   "display": {
     "icon": {
-      "id": "minecraft:spyglass"
+      "id": "minecraft:iron_axe"
     },
     "title": {
-      "translate": "advancement.skyabyss.isana.title"
+      "translate": "advancement.skyabyss.island_bandits.title"
     },
     "description": {
-      "translate": "advancement.skyabyss.isana.description"
+      "translate": "advancement.skyabyss.island_bandits.description"
     },
     "frame": "task",
     "show_toast": true,
@@ -19,7 +19,7 @@
     "done": {
       "trigger": "skyabyss:beat",
       "conditions": {
-        "event": "talk:skyabyss:whale_chaser"
+        "event": "island:bandits"
       }
     }
   },

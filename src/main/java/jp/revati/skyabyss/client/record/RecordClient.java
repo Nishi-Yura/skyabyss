@@ -41,6 +41,16 @@ public final class RecordClient {
         }
     }
 
+    // バニラの進捗の画面 (L キー・ポーズ画面の「進捗」) の代わりに、控え帳の「記し」を開く (2026-10-26 の声「進捗の UI 変えてもいい。みにくいので」)
+    @SubscribeEvent
+    static void onScreenOpening(net.neoforged.neoforge.client.event.ScreenEvent.Opening event) {
+        Minecraft mc = Minecraft.getInstance();
+        if (event.getNewScreen() instanceof net.minecraft.client.gui.screens.advancements.AdvancementsScreen && mc.player != null) {
+            event.setCanceled(true);
+            mc.player.connection.sendCommand(RecordCommands.COMMAND + " " + RecordSnapshot.DEEDS);
+        }
+    }
+
     // サーバーから: open なら画面を開き、そうでなければ同じ人の画面が開いているときだけ差し替える
     public static void receive(RecordSnapshot snapshot, boolean open, String tab) {
         Minecraft mc = Minecraft.getInstance();

@@ -104,6 +104,10 @@ public final class IslandTrail {
             return;
         }
         p.getPersistentData().putInt(KEY, now | bit);
+        String beat = bit == PRINTS ? "prints" : bit == BANDITS ? "bandits" : bit == SHRINE ? "shrine" : null;
+        if (beat != null) {
+            jp.revati.skyabyss.advancement.Beats.fire(p, "island:" + beat);
+        }
         if ((now | bit) == ALL) {
             setReady(p, true);
         }
@@ -533,6 +537,7 @@ public final class IslandTrail {
             c.boat().discard();
         }
         ContinentOutskirts.ferry(p);
+        jp.revati.skyabyss.advancement.Beats.fire(p, "island:ferry");
         ARRIVE_AT.put(p.getUUID(), p.serverLevel().getGameTime() + 70);
     }
 

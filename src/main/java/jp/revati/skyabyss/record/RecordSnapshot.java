@@ -24,7 +24,8 @@ public record RecordSnapshot(UUID target, Component targetName, boolean self, Li
     public static final String TITANS = "titans";
     public static final String GROWTH = "growth";
     public static final String BONDS = "bonds";
-    public static final List<String> TAB_IDS = List.of(KEEPSAKES, TITANS, GROWTH, BONDS);
+    public static final String DEEDS = "deeds";
+    public static final List<String> TAB_IDS = List.of(KEEPSAKES, TITANS, GROWTH, BONDS, DEEDS);
 
     // 行の種類: 見出し、品 (左に絵)、値
     public enum Kind {
