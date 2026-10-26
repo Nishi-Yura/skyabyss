@@ -151,7 +151,7 @@ public final class JobSelfTest {
                 {"skyabyss:ember_staff", Job.MAGE}, {"skyabyss:ember_censer", Job.SHAMAN},
                 {"skyabyss:whale_hammer", Job.SMITH}, {"skyabyss:whale_bow", Job.ARCHER}, {"skyabyss:tide_hammer", Job.SMITH}, {"skyabyss:tide_bow", Job.ARCHER},
                 {"skyabyss:storm_hammer", Job.SMITH}, {"skyabyss:ember_greatsword", Job.WARRIOR}, {"skyabyss:ember_bow", Job.ARCHER},
-                {"skyabyss:ember_dagger", Job.ASSASSIN}, {"skyabyss:shrine_sword", Job.WARRIOR}, {"skyabyss:shrine_hammer", Job.SMITH},
+                {"skyabyss:ember_dagger", Job.ASSASSIN}, {"skyabyss:whale_dagger", Job.ASSASSIN}, {"skyabyss:tide_dagger", Job.ASSASSIN}, {"skyabyss:storm_sword", Job.WARRIOR}, {"skyabyss:storm_dagger", Job.ASSASSIN}, {"skyabyss:shrine_sword", Job.WARRIOR}, {"skyabyss:shrine_hammer", Job.SMITH},
                 {"skyabyss:shrine_bow", Job.ARCHER},
                 {"skyabyss:abyss_sinking_anchor", Job.SMITH}, {"skyabyss:abyss_ash_scythe", Job.SMITH},
                 {"minecraft:iron_sword", Job.WARRIOR}, {"minecraft:trident", Job.WARRIOR}, {"minecraft:iron_axe", Job.SMITH},

@@ -1836,5 +1836,13 @@
   "itemGroup.skyabyss.weapons": "天と淵のあいだ：武器",
   "itemGroup.skyabyss.gear": "天と淵のあいだ：防具と飾り",
   "itemGroup.skyabyss.eggs": "天と淵のあいだ：敵の卵",
-  "itemGroup.skyabyss.blocks": "天と淵のあいだ：ブロック"
+  "itemGroup.skyabyss.blocks": "天と淵のあいだ：ブロック",
+  "item.skyabyss.whale_dagger": "鯨歯の短剣",
+  "item.skyabyss.whale_dagger.desc": "岩鯨の歯をそのまま刃にした短剣。",
+  "item.skyabyss.tide_dagger": "馬刀貝の短剣",
+  "item.skyabyss.tide_dagger.desc": "細長い馬刀貝の殻を刃にした短剣。",
+  "item.skyabyss.storm_sword": "雷翼の剣",
+  "item.skyabyss.storm_sword.desc": "樋に銅の稲妻が走る鋼の長剣。鍔は雷翼の風切羽。",
+  "item.skyabyss.storm_dagger": "稲妻の短剣",
+  "item.skyabyss.storm_dagger.desc": "刃そのものが折れた稲妻の形をした銅の短剣。"
 }

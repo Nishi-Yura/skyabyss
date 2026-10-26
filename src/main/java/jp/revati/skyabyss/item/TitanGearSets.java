@@ -33,6 +33,7 @@ public final class TitanGearSets {
             TitanGearSet.piece(ChapterGear.WHALE_BELL, ChapterGear.CHANCE),
             TitanGearSet.piece(ChapterGear.WHALE_HAMMER, ChapterGear.CHANCE),
             TitanGearSet.piece(ChapterGear.WHALE_BOW, ChapterGear.CHANCE),
+            TitanGearSet.piece(ChapterGear.WHALE_DAGGER, ChapterGear.CHANCE),
             TitanGearSet.exclusive(id("captain_pike"), TitanLoot.PIKE_CHANCE),
             TitanGearSet.exclusive(id("waterway_fang"), TitanLoot.FANG_CHANCE),
             TitanGearSet.exclusive(id("stone_whale_plating"), TitanLoot.PLATING_CHANCE)));

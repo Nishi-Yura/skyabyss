@@ -69,6 +69,8 @@ public final class StormGear {
             TitanGearSet.piece(jp.revati.skyabyss.item.ChapterGear.STORM_STAFF, jp.revati.skyabyss.item.ChapterGear.CHANCE),
             TitanGearSet.piece(jp.revati.skyabyss.item.ChapterGear.STORM_BELL, jp.revati.skyabyss.item.ChapterGear.CHANCE),
             TitanGearSet.piece(jp.revati.skyabyss.item.ChapterGear.STORM_HAMMER, jp.revati.skyabyss.item.ChapterGear.CHANCE),
+            TitanGearSet.piece(jp.revati.skyabyss.item.ChapterGear.STORM_SWORD, jp.revati.skyabyss.item.ChapterGear.CHANCE),
+            TitanGearSet.piece(jp.revati.skyabyss.item.ChapterGear.STORM_DAGGER, jp.revati.skyabyss.item.ChapterGear.CHANCE),
             TitanGearSet.exclusive(CLAW, CLAW_CHANCE),
             TitanGearSet.exclusive(GLAIVE, GLAIVE_CHANCE),
             TitanGearSet.exclusive(EYE_FEATHER, EYE_FEATHER_CHANCE)));

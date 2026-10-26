@@ -108,6 +108,13 @@ public final class WeaponItemRenderer extends BlockEntityWithoutLevelRenderer {
         pose.scale(-1f, 1f, 1f);
         // 短剣・爪・火かき棒は小さく見えるので、階級が上がるほど大きくする (握りの位置 = メッシュの原点を中心に)
         float grow = daggerGrow(id, tier);
+        // 一人称の短剣・爪は手に隠れるので、手元だけ一回り大きく見せる
+        if (context.firstPerson()) {
+            WeaponKind k = WeaponKind.of(id);
+            if (k == WeaponKind.FANG || k == WeaponKind.CLAW) {
+                grow *= 1.18f;
+            }
+        }
         if (grow != 1f) {
             pose.scale(grow, grow, grow);
         }

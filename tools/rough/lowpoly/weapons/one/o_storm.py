@@ -264,6 +264,53 @@ def abyss_storm_bell_staff(stage=0):
     return f
 
 
+def storm_sword(stage=0):
+    """雷翼の剣: まっすぐな鋼の長剣。樋 (刃の溝) を銅の稲妻が走り、根は銅の巻き線。鍔は左右へ開いた雷翼の風切羽二枚、柄頭は銅の玉に光"""
+    f = steel_haft(-4.0, 3.2, r=0.92, wrap=(-3.4, 2.6))
+    f += ell("main", (0, -4.7, 0), (1.05, 1.0, 1.05), segs=6, rings=2)
+    f += gem((0, -4.7, -0.95), 0.4, 0.4, 0.25, segs=5, rings=1)
+    # 鍔: 鋼の台と、左右へ上向きに開く風切羽 (羽の根を銅の輪で留める)
+    f += block("guard", (0, 3.8, 0), (2.8, 1.4, 1.9), taper=(0.9, 0.9))
+    for s in (1, -1):
+        f += feather("acc", (s * 1.0, 3.8, 0), (s * 7.0, 6.6, 0), 1.25, 0.45, big=False)
+        f += feather("acc", (s * 1.0, 3.3, 0.3), (s * 5.6, 3.9, 0.3), 1.0, 0.4, big=False)
+        f += curve("spine", [(s * 1.2, 3.9, -0.3), (s * 6.4, 6.3, -0.3)], [0.14, 0.08], [0.14, 0.08], sides=3, caps=(True, True))
+        f += prism("main", (s * 1.2, 3.75, -0.5), (s * 1.2, 3.75, 0.5), 0.55, 0.55, sides=6, caps=(True, True), hint=(1, 0, 0))
+    # 刃: まっすぐな鋼の長剣
+    f += blade("spine", [(4.4, -1.55, 1.55, 0.6, 0.6), (11.0, -1.45, 1.45, 0.58, 0.58), (17.0, -1.2, 1.2, 0.52, 0.52),
+                         (20.0, -0.75, 0.75, 0.4, 0.4), (21.8, 0, 0, 0, 0)], colmats=["edge", "spine", "edge", "edge", "spine", "edge"])
+    # 根の銅の巻き線と、樋を走る稲妻 (前と後ろ)
+    f += coil(4.4, 6.0, 1.15, 2.5, w=0.24)
+    bolt_pts = [(0.0, 6.4), (0.55, 9.0), (-0.45, 10.0), (0.5, 13.0), (-0.4, 14.0), (0.3, 17.2), (0.0, 18.6)]
+    for z in (-0.6, 0.6):
+        f += zig([(x, y, z) for x, y in bolt_pts], w=0.36, th=0.2, mat="gem")
+    return f
+
+
+def storm_dagger(stage=0):
+    """稲妻の短剣: 刃そのものが三度折れた稲妻の形の銅の短剣。刃の芯を青白い光が走り、鍔は鋼の碍子 (重ねた皿)。柄尻から焦げた風切羽が一枚下がる"""
+    f = steel_haft(-3.2, 3.0, r=0.8, wrap=(-2.6, 2.2))
+    f += ell("guard", (0, -3.6, 0), (0.95, 0.6, 0.95), segs=6, rings=1)
+    # 鍔: 碍子 (大きさの違う鋼の皿を三枚重ねる)
+    for y, r in ((3.0, 1.2), (3.6, 1.7), (4.2, 1.35)):
+        f += prism("guard", (0, y - 0.18, 0), (0, y + 0.18, 0), r, r, sides=8, caps=(True, True))
+    # 刃: 折れ線をたどる銅の板 (先ほど細い)
+    pts = [(0.0, 4.2), (0.9, 7.2), (-0.6, 8.0), (0.7, 10.8), (-0.4, 11.5), (0.35, 13.6), (0.1, 14.6)]
+    ws = [1.45, 1.3, 1.15, 1.0, 0.8, 0.55]
+    for (a, b, w) in zip(pts, pts[1:], ws):
+        f += curve("main", [(a[0], a[1], 0), (b[0], b[1], 0)], [w, w * 0.92], [0.42, 0.4], sides=4, caps=(True, True), hint=(0, 0, 1))
+    # 折れ目の継ぎ (角を埋める)
+    for (x, y), w in zip(pts[1:-1], ws[1:]):
+        f += ell("main", (x, y, 0), (w * 0.95, w * 0.75, 0.42), segs=6, rings=1)
+    f += spike(BONE, "edge", (0.1, 14.4, 0), (0.05, 1, 0), 1.2, 0.3, sides=4, rings=1, hint=(0, 0, 1))
+    for z in (-0.3, 0.3):
+        f += zig([(x * 0.85, y, z) for x, y in pts[:-1]], w=0.22, th=0.14, mat="gem")
+    # 柄尻の焦げた風切羽と紐
+    f += curve("cord", [(0.3, -3.9, 0), (0.6, -4.8, 0)], [0.14, 0.14], [0.14, 0.14], sides=4, caps=(True, True))
+    f += feather("soot", (0.6, -4.6, 0), (1.6, -8.2, 0), 0.7, 0.3, big=False)
+    return f
+
+
 # ================================================================== 一覧
 def _w(fn, jp, tier, pose, grip, cen, scale, inlay, stages=1):
     if tier == "legend":
@@ -282,6 +329,8 @@ HM = dict(pose="ember", grip=(0.0, 0.0, 0.0), cen=(0.0, 7.5, 0.0), scale=10.5)
 DG = dict(pose="whale", grip=(0.0, 0.6, 0.0), cen=(0.0, 4.8, 0.0), scale=16.0)
 SW = dict(pose="whale", grip=(0.0, 1.0, 0.0), cen=(0.0, 9.0, 0.0), scale=10.0)
 WEAPONS = {
+    "storm_sword": _w(storm_sword, "雷翼の剣", "rare", inlay=inlay_line(["spine"], 5.0, 19.0), **SW),
+    "storm_dagger": _w(storm_dagger, "稲妻の短剣", "rare", inlay=inlay_line(["main"], 99.0, 99.5), **DG),
     "storm_staff": _w(storm_staff, "雷羽の杖", "rare", inlay=inlay_line(["main"], 15.0, 17.0), **ST),
     "storm_bell_staff": _w(storm_bell_staff, "雷鳴りの鈴杖", "rare", inlay=inlay_line(["main"], 15.5, 19.5), **ST),
     "storm_hammer": _w(storm_hammer, "雷の鎚", "rare", inlay=inlay_line(["main"], 11.0, 14.0), **HM),

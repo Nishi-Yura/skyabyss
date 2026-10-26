@@ -113,7 +113,7 @@ public final class TitanLoot {
                 ModItems.STONE_WHALE_LEGGINGS.get(), ModItems.STONE_WHALE_BOOTS.get());
     }
 
-    // 図鑑: 天井が数える装備 (甲殻4部位・大剣・護符・職の章の武器 4 つ・専用の逸品3つ)
+    // 図鑑: 天井が数える装備 (甲殻4部位・大剣・護符・職の章の武器 5 つ・専用の逸品3つ)
     public static List<Item> collection() {
         List<Item> all = new ArrayList<>(armorSet());
         all.add(ModItems.WHALEBONE_GREATSWORD.get());
@@ -123,6 +123,7 @@ public final class TitanLoot {
         all.add(jp.revati.skyabyss.item.ChapterGear.WHALE_BELL_ITEM.get());
         all.add(jp.revati.skyabyss.item.ChapterGear.WHALE_HAMMER_ITEM.get());
         all.add(jp.revati.skyabyss.item.ChapterGear.WHALE_BOW_ITEM.get());
+        all.add(jp.revati.skyabyss.item.ChapterGear.WHALE_DAGGER_ITEM.get());
         all.addAll(exclusives());
         return all;
     }

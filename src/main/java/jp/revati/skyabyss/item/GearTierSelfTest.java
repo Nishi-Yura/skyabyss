@@ -64,21 +64,21 @@ public final class GearTierSelfTest {
         row(1, C, "shrine_staff", "shrine_bell_staff", "shrine_dagger", "shrine_sword", "shrine_hammer", "shrine_bow");
         row(1, U, "whale_road_helmet", "whale_road_chestplate", "whale_road_leggings", "whale_road_boots");
         row(1, R, "stone_whale_helmet", "stone_whale_chestplate", "stone_whale_leggings", "stone_whale_boots", "moss_talisman");
-        row(1, E, "whalebone_greatsword", "resonance_charm", "whale_staff", "whale_bell_staff", "whale_hammer", "whale_bow");
+        row(1, E, "whalebone_greatsword", "resonance_charm", "whale_staff", "whale_bell_staff", "whale_hammer", "whale_bow", "whale_dagger");
         row(1, H, "captain_pike", "waterway_fang", "stone_whale_plating");
         row(1, A, "abyss_greatsword", "abyss_whale_hammer", "abyss_whale_staff", "abyss_whale_bow", "abyss_whale_fang", "abyss_whale_bell_staff");
         // 二章 潮殻
         row(2, C, "heartbeat_ward_tide_shell");
         row(2, U, "tide_wader_helmet", "tide_wader_chestplate", "tide_wader_leggings", "tide_wader_boots");
         row(2, R, "tide_shell_helmet", "tide_shell_chestplate", "tide_shell_leggings", "tide_shell_boots");
-        row(2, E, "tide_shell_trident", "coral_shield", "tide_chime_charm", "tide_staff", "tide_bell_staff", "tide_hammer", "tide_bow");
+        row(2, E, "tide_shell_trident", "coral_shield", "tide_chime_charm", "tide_staff", "tide_bell_staff", "tide_hammer", "tide_bow", "tide_dagger");
         row(2, H, "tidecaller_claw", "coral_harpoon", "moontide_pearl");
         row(2, A, "abyss_bell_staff", "abyss_tide_sword", "abyss_tide_hammer", "abyss_tide_staff", "abyss_tide_bow", "abyss_tide_dagger");
         // 三章 雷翼
         row(3, C, "heartbeat_ward_thunder_wing");
         row(3, U, "peak_crossing_helmet", "peak_crossing_chestplate", "peak_crossing_leggings", "peak_crossing_boots");
         row(3, R, "thunder_wing_helmet", "thunder_wing_chestplate", "thunder_wing_leggings", "thunder_wing_boots");
-        row(3, E, "thunder_wing_bow", "storm_anklet", "storm_charm", "storm_staff", "storm_bell_staff", "storm_hammer");
+        row(3, E, "thunder_wing_bow", "storm_anklet", "storm_charm", "storm_staff", "storm_bell_staff", "storm_hammer", "storm_sword", "storm_dagger");
         row(3, H, "raiju_claw", "warden_glaive", "storm_eye_feather");
         row(3, A, "abyss_storm_bow", "abyss_storm_sword", "abyss_storm_hammer", "abyss_storm_staff", "abyss_storm_dagger", "abyss_storm_bell_staff");
         // 四章 余燼

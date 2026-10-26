@@ -348,6 +348,29 @@ def abyss_tide_dagger(stage=0):
     return f
 
 
+def tide_dagger(stage=0):
+    """馬刀貝の短剣: 細長い馬刀貝の殻を刃にした短剣。真珠色の殻に育ちの筋が並び、根を小さな帆立の殻が受けて鍔になる。柄は昆布巻き、柄頭は真珠"""
+    f = prism("grip", (0, -3.2, 0), (0, 3.0, 0), 0.8, 0.8, sides=6, caps=(True, True))
+    f += kelp_grip(-2.6, 2.4, r=0.95, n=3)
+    f += ringy("spine", -2.9, 1.05, 0.35)
+    f += pearl((0, -3.9, 0), 0.85, mat="main")
+    f += gem((0, -3.9, -0.7), 0.3, 0.3, 0.2, segs=5, rings=1)
+    # 鍔: 上へ開いた小さな帆立の殻 (刃の後ろ)、根に珊瑚の小枝
+    f += shell_fan((0, 2.6), 2.7, 15, 165, 0.5, ribs=5, z=0.45)
+    f += prism("guard", (0, 2.6, 0), (0, 4.0, 0), 1.0, 0.9, sides=6, caps=(True, True))
+    f += curve("acc", [(-0.8, 3.4, -0.5), (-1.6, 4.6, -0.6), (-1.9, 5.6, -0.6)], [0.26, 0.2, 0.1], [0.26, 0.2, 0.1], sides=4, caps=(True, True))
+    f += curve("acc", [(-1.5, 4.4, -0.6), (-2.4, 4.9, -0.6)], [0.16, 0.08], [0.16, 0.08], sides=4, caps=(True, True))
+    # 刃: 馬刀貝 (細長い板、少し反って先は丸く尖る)
+    f += blade("main", [(3.8, -0.95, 0.95, 0.5, 0.5), (7.0, -1.0, 0.9, 0.5, 0.5, 0.1), (10.4, -0.95, 0.8, 0.45, 0.45, 0.25),
+                        (12.8, -0.75, 0.6, 0.38, 0.38, 0.4), (14.0, -0.35, 0.25, 0.25, 0.25, 0.45), (14.6, 0, 0, 0, 0, 0.45)])
+    # 育ちの筋 (殻を横切る細い帯、前の面)
+    for y, cx in ((5.4, 0.0), (7.2, 0.1), (9.0, 0.18), (10.8, 0.27), (12.4, 0.37)):
+        hw = 0.62 if y < 11 else 0.45
+        f += curve("spine", [(cx - hw, y, -0.47), (cx + hw, y + 0.2, -0.47)], [0.11, 0.11], [0.09, 0.09], sides=3, caps=(True, True))
+    f += gbar([(0.0, 4.6, -0.48), (0.15, 8.4, -0.46), (0.35, 12.0, -0.38)], r=0.15)
+    return f
+
+
 # ================================================================== 一覧
 def _w(fn, jp, tier, pose, grip, cen, scale, inlay, stages=1):
     if tier == "legend":
@@ -367,6 +390,7 @@ BW = dict(pose="thunder", grip=(5.0, 8.0, 0.0), cen=(2.0, 8.0, 0.0), scale=12.0,
 DG = dict(pose="whale", grip=(0.0, 0.6, 0.0), cen=(0.0, 4.8, 0.0), scale=16.0)
 SW = dict(pose="whale", grip=(0.0, 1.0, 0.0), cen=(0.0, 9.0, 0.0), scale=10.0)
 WEAPONS = {
+    "tide_dagger": _w(tide_dagger, "馬刀貝の短剣", "rare", inlay=inlay_line(["main"], 4.5, 13.0), **DG),
     "tide_staff": _w(tide_staff, "潮殻の真珠杖", "rare", inlay=inlay_line(["main"], 15.0, 21.0), **ST),
     "tide_bell_staff": _w(tide_bell_staff, "潮鳴りの鈴杖", "rare", inlay=inlay_line(["main"], 10.0, 17.0), **ST),
     "tide_hammer": _w(tide_hammer, "潮殻の鎚", "rare", inlay=inlay_line(["spine"], 10.5, 14.5), **HM),

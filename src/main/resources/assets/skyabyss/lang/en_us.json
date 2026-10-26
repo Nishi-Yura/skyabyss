@@ -1836,5 +1836,13 @@
   "itemGroup.skyabyss.weapons": "Between Sky and Abyss: Weapons",
   "itemGroup.skyabyss.gear": "Between Sky and Abyss: Armor & Trinkets",
   "itemGroup.skyabyss.eggs": "Between Sky and Abyss: Spawn Eggs",
-  "itemGroup.skyabyss.blocks": "Between Sky and Abyss: Blocks"
+  "itemGroup.skyabyss.blocks": "Between Sky and Abyss: Blocks",
+  "item.skyabyss.whale_dagger": "Whale Tooth Dagger",
+  "item.skyabyss.whale_dagger.desc": "A dagger whose blade is one of the stone whale's teeth.",
+  "item.skyabyss.tide_dagger": "Razor Clam Dagger",
+  "item.skyabyss.tide_dagger.desc": "A dagger whose blade is a long razor clam shell.",
+  "item.skyabyss.storm_sword": "Thunderwing Sword",
+  "item.skyabyss.storm_sword.desc": "A steel longsword with copper lightning in its fuller and thunderwing feathers for a guard.",
+  "item.skyabyss.storm_dagger": "Lightning Dagger",
+  "item.skyabyss.storm_dagger.desc": "A copper dagger whose blade is a forked bolt of lightning."
 }

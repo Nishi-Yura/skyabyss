@@ -106,6 +106,22 @@ public final class WeaponClient {
         WeaponFeel.fpGlow = st.get(MoveSet.GLOW, t, 0f) * a.w();
     }
 
+    // 一人称の見せ方 (2026-10-27 の声「一人称で武器をもう少し見せて。邪魔にならない程度に」): 待機の間だけ、型ごとに手元をずらす。
+    // 短剣・爪は画面の右下に隠れるので内へ上げ、杖は少し内へ、大剣・鎚は画面をふさがないよう少し下げる。振っている間は w (動きの混ぜ具合) の分だけ戻す
+    static void show(PoseStack pose, int i, WeaponKind kind, float k) {
+        if (kind == null || k <= 0.001f) {
+            return;
+        }
+        switch (kind) {
+            case FANG, CLAW -> pose.translate(i * -0.09f * k, 0.13f * k, 0.02f * k);
+            case POKER -> pose.translate(i * -0.05f * k, 0.05f * k, 0f);
+            case GREATSWORD -> pose.translate(0f, -0.04f * k, 0.03f * k);
+            case HAMMER, AXE -> pose.translate(i * 0.02f * k, -0.03f * k, 0.02f * k);
+            default -> {
+            }
+        }
+    }
+
     // 一人称: 待機のゆれ (呼吸)
     private static void applyIdle(PoseStack pose, int i, MoveSet ms, LocalPlayer player, float partialTick) {
         float ph = (player.tickCount + partialTick) / 20f * ms.swayHz * Mth.TWO_PI;
@@ -145,10 +161,12 @@ public final class WeaponClient {
             }
             float r = BowRecoil.amount(player);
             float fl = BowRecoil.flourish(player);
-            if (r <= 0f && fl < 0f) {
-                return false;
-            }
             baseTransform(pose, i, equipProcess);
+            // 待機の弓は画面の端で切れるので、少し内へ上げる
+            pose.translate(i * -0.07f, 0.06f, 0f);
+            if (r <= 0f && fl < 0f) {
+                return true;
+            }
             // 手元が前へ弾けて、戻る
             // 放した弓は前へ押し出される (矢の向きへ): 手元が前へ出て、少しだけ上へ
             pose.translate(0f, 0.025f * r, -0.1f * r);
@@ -274,6 +292,7 @@ public final class WeaponClient {
             baseTransform(pose, i, equipProcess);
             MoveSet ms = MoveSets.get(id);
             SwingClock.Active a = stack == player.getMainHandItem() ? SwingClock.current(player, partialTick) : null;
+            show(pose, i, kind, a == null ? 1f : 1f - Mth.clamp(a.w(), 0f, 1f));
             if (a != null) {
                 applyStep(pose, i, a, SwingClock.frozen(player), player.tickCount, fpDamp(id));
             } else if (ms != null) {

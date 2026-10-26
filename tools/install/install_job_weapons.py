@@ -38,6 +38,11 @@ ITEMS = {
     "ember_greatsword": ("roughs_jobgear", "rare", "whalebone_greatsword", 1),
     "ember_bow": ("roughs_jobgear", "rare", "thunder_wing_bow", 4),
     "ember_dagger": ("roughs_jobgear", "rare", "waterway_fang", 1),
+    # 職の空きを埋めた章の武器 (2026-10-27。一品一案だけ)
+    "whale_dagger": ("roughs_one", "rare", "waterway_fang", 1),
+    "tide_dagger": ("roughs_one", "rare", "waterway_fang", 1),
+    "storm_sword": ("roughs_one", "rare", "whalebone_greatsword", 1),
+    "storm_dagger": ("roughs_one", "rare", "waterway_fang", 1),
 }
 # 伝説 20 本 (形の段 legend) と五章の 3 本 (rare)。abyss/LegendGear。作り方: tools/rough/lowpoly/weapons/legends/build_legends.py
 _HOLD = {"sword": ("whalebone_greatsword", 1), "hammer": ("ember_war_axe", 1), "staff": ("abyss_bell_staff", 1),

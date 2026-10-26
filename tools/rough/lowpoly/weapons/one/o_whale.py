@@ -309,6 +309,30 @@ def abyss_whale_bell_staff(stage=0):
     return f
 
 
+def whale_dagger(stage=0):
+    """鯨歯の短剣: 岩鯨の大きな歯をそのまま刃にした短剣。根元は顎の骨の欠片が鍔になって小さな歯が下を向き、歯の内側の溝が水色に光る。柄は石に苔の縄、柄頭は椎骨"""
+    f = []
+    f += prism("grip", (0, -3.4, 0), (0, 3.2, 0), 0.85, 0.8, sides=6, caps=(True, True))
+    f += prism("wrap", (0, -2.6, 0), (0, 2.4, 0), 0.98, 0.98, sides=6, caps=(False, False))
+    for y in (-1.8, -0.4, 1.0, 2.2):
+        f += ringy("cord", y, 1.06, 0.3)
+    f += vertebra("guard", (0, -3.9, 0), 1.0, 0.7, procs=4, plen=0.6)
+    # 鍔: 顎の骨の欠片 (横に長い塊) と、下を向く小さな歯
+    f += lump("spine", (0, 3.7, 0), (2.5, 1.0, 1.3), seed=41, segs=7, rings=2)
+    for s in (1, -1):
+        for x in (1.0, 2.0):
+            f += spike(BONE, "edge", (s * x, 3.2, 0), (s * 0.25, -1, 0), 1.0 - 0.2 * (x - 1.0), 0.32, sides=4, rings=1, hint=(0, 0, 1))
+    f += barnacles((-1.6, 4.1, -0.9), n=3, spread=0.35, r=0.22, h=0.35, mat="guard")
+    # 刃: 歯 (+x へゆるく反る円錐)。根は太く、先は鋭い
+    tooth = [(0, 4.0, 0), (0.25, 7.0, 0), (0.7, 10.0, 0), (1.3, 12.4, 0), (1.9, 13.8, 0)]
+    f += curve("main", tooth, [1.3, 1.2, 0.95, 0.6, 0.12], [0.9, 0.85, 0.7, 0.45, 0.1], sides=6, caps=(False, True), hint=(0, 0, 1))
+    # 内側の溝の光と、歯の根の筋
+    f += gbar([(-0.55, 5.0, -0.78), (-0.35, 8.0, -0.74), (0.2, 11.0, -0.55)], r=0.17)
+    f += ringy("edge", 4.6, 1.32, 0.35)
+    f += strand("acc", (1.2, 3.4, 0.7), 1.8, 0.3, r=0.24)
+    return f
+
+
 # ================================================================== 一覧
 def _w(fn, jp, tier, pose, grip, cen, scale, inlay, stages=1):
     if tier == "legend":
@@ -328,6 +352,7 @@ BW = dict(pose="thunder", grip=(5.0, 8.0, 0.0), cen=(2.0, 8.0, 0.0), scale=12.0,
 DG = dict(pose="whale", grip=(0.0, 0.6, 0.0), cen=(0.0, 4.8, 0.0), scale=16.0)
 ln_staff = inlay_line(["main"], 4.0, 13.0)
 WEAPONS = {
+    "whale_dagger": _w(whale_dagger, "鯨歯の短剣", "rare", inlay=inlay_line(["main"], 5.0, 12.0), **DG),
     "whale_staff": _w(whale_staff, "鯨骨の星杖", "rare", inlay=inlay_line(["edge"], 15.5, 22.0), **ST),
     "whale_bell_staff": _w(whale_bell_staff, "鯨歌いの鈴杖", "rare", inlay=inlay_line(["main"], 15.0, 20.0), **ST),
     "whale_hammer": _w(whale_hammer, "岩鯨の石鎚", "rare", inlay=inlay_line(["guard"], 10.5, 14.0), **HM),

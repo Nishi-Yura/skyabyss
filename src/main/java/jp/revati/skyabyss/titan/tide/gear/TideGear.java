@@ -61,6 +61,7 @@ public final class TideGear {
             TitanGearSet.piece(jp.revati.skyabyss.item.ChapterGear.TIDE_BELL, jp.revati.skyabyss.item.ChapterGear.CHANCE),
             TitanGearSet.piece(jp.revati.skyabyss.item.ChapterGear.TIDE_HAMMER, jp.revati.skyabyss.item.ChapterGear.CHANCE),
             TitanGearSet.piece(jp.revati.skyabyss.item.ChapterGear.TIDE_BOW, jp.revati.skyabyss.item.ChapterGear.CHANCE),
+            TitanGearSet.piece(jp.revati.skyabyss.item.ChapterGear.TIDE_DAGGER, jp.revati.skyabyss.item.ChapterGear.CHANCE),
             TitanGearSet.exclusive(CLAW, CLAW_CHANCE),
             TitanGearSet.exclusive(HARPOON, HARPOON_CHANCE),
             TitanGearSet.exclusive(PEARL, PEARL_CHANCE)));

@@ -32,6 +32,10 @@ import net.neoforged.neoforge.registries.DeferredRegister;
 // | 熾火の大剣       | 余燼 | 戦士     | 15.5   | 1.0  | 15.5 |
 // | 灰の弓           | 余燼 | 弓使い   | 矢 ×1.85 | —  | 近接の目安 15.4 |
 // | 熾の短剣         | 余燼 | 暗殺者   | 7.8    | 2.0  | 15.6 |
+// | 鯨歯の短剣       | 岩鯨 | 暗殺者   | 4.9    | 2.0  | 9.8  |
+// | 馬刀貝の短剣     | 潮殻 | 暗殺者   | 6.2    | 2.0  | 12.4 |
+// | 雷翼の剣         | 雷翼 | 戦士     | 14.5   | 1.0  | 14.5 |
+// | 稲妻の短剣       | 雷翼 | 暗殺者   | 7.2    | 2.0  | 14.4 |
 public final class ChapterGear {
     private static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(SkyAbyss.MODID);
 
@@ -51,12 +55,16 @@ public final class ChapterGear {
     public static final String EMBER_GREATSWORD = SkyAbyss.MODID + ":ember_greatsword";
     public static final String EMBER_BOW = SkyAbyss.MODID + ":ember_bow";
     public static final String EMBER_DAGGER = SkyAbyss.MODID + ":ember_dagger";
+    public static final String WHALE_DAGGER = SkyAbyss.MODID + ":whale_dagger";
+    public static final String TIDE_DAGGER = SkyAbyss.MODID + ":tide_dagger";
+    public static final String STORM_SWORD = SkyAbyss.MODID + ":storm_sword";
+    public static final String STORM_DAGGER = SkyAbyss.MODID + ":storm_dagger";
     // 心臓での確率 (章のエピックの武器と同じ 20%)
     public static final float CHANCE = 0.20f;
     // 巨神ごとに足した品 (図鑑の数の検査が使う)
-    public static final List<String> WHALE = List.of(WHALE_STAFF, WHALE_BELL, WHALE_HAMMER, WHALE_BOW);
-    public static final List<String> TIDE = List.of(TIDE_STAFF, TIDE_BELL, TIDE_HAMMER, TIDE_BOW);
-    public static final List<String> STORM = List.of(STORM_STAFF, STORM_BELL, STORM_HAMMER);
+    public static final List<String> WHALE = List.of(WHALE_STAFF, WHALE_BELL, WHALE_HAMMER, WHALE_BOW, WHALE_DAGGER);
+    public static final List<String> TIDE = List.of(TIDE_STAFF, TIDE_BELL, TIDE_HAMMER, TIDE_BOW, TIDE_DAGGER);
+    public static final List<String> STORM = List.of(STORM_STAFF, STORM_BELL, STORM_HAMMER, STORM_SWORD, STORM_DAGGER);
     public static final List<String> EMBER = List.of(EMBER_STAFF, EMBER_CENSER, EMBER_GREATSWORD, EMBER_BOW, EMBER_DAGGER);
 
     public static final DeferredItem<Item> WHALE_STAFF_ITEM = melee("whale_staff", "stone_whale", 8, 1.2);
@@ -75,6 +83,11 @@ public final class ChapterGear {
     public static final DeferredItem<Item> EMBER_GREATSWORD_ITEM = melee("ember_greatsword", "ember", 15.5, 1.0);
     public static final DeferredItem<Item> EMBER_BOW_ITEM = bow("ember_bow", "ember", 1.85);
     public static final DeferredItem<Item> EMBER_DAGGER_ITEM = melee("ember_dagger", "ember", 7.8, 2.0);
+    // 職の空きを埋めた章の武器 (2026-10-27): 岩鯨・潮殻の暗殺者、雷翼の戦士と暗殺者
+    public static final DeferredItem<Item> WHALE_DAGGER_ITEM = melee("whale_dagger", "stone_whale", 4.9, 2.0);
+    public static final DeferredItem<Item> TIDE_DAGGER_ITEM = melee("tide_dagger", "tide_shell", 6.2, 2.0);
+    public static final DeferredItem<Item> STORM_SWORD_ITEM = melee("storm_sword", "thunder_wing", 14.5, 1.0);
+    public static final DeferredItem<Item> STORM_DAGGER_ITEM = melee("storm_dagger", "thunder_wing", 7.2, 2.0);
 
     private ChapterGear() {
     }
@@ -95,7 +108,8 @@ public final class ChapterGear {
 
     public static List<DeferredItem<Item>> all() {
         return List.of(WHALE_STAFF_ITEM, WHALE_BELL_ITEM, WHALE_HAMMER_ITEM, WHALE_BOW_ITEM, TIDE_STAFF_ITEM, TIDE_BELL_ITEM, TIDE_HAMMER_ITEM, TIDE_BOW_ITEM,
-                STORM_STAFF_ITEM, STORM_BELL_ITEM, STORM_HAMMER_ITEM, EMBER_STAFF_ITEM, EMBER_CENSER_ITEM, EMBER_GREATSWORD_ITEM, EMBER_BOW_ITEM, EMBER_DAGGER_ITEM);
+                STORM_STAFF_ITEM, STORM_BELL_ITEM, STORM_HAMMER_ITEM, EMBER_STAFF_ITEM, EMBER_CENSER_ITEM, EMBER_GREATSWORD_ITEM, EMBER_BOW_ITEM, EMBER_DAGGER_ITEM,
+                WHALE_DAGGER_ITEM, TIDE_DAGGER_ITEM, STORM_SWORD_ITEM, STORM_DAGGER_ITEM);
     }
 
     public static List<String> forTitan(String titan) {

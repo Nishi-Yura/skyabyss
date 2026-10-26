@@ -80,6 +80,10 @@ public enum Job {
     // 品の職。品の名前の語で見分ける (この作品の武器は名前に種類が入っている)。バニラの品は種類で
     @Nullable
     public static Job of(Item item) {
+        // 素材は名前に武器の語があっても武器ではない (淵の錨鉄 abyss_anchor_iron など)
+        if (item instanceof jp.revati.skyabyss.item.MaterialItem) {
+            return null;
+        }
         String path = BuiltInRegistries.ITEM.getKey(item).getPath();
         // 呪術師の鈴の杖・祭具 (鈴だけ・お守り (charm) は武器ではない: 鐘銭・遺物の鈴・装身具)
         if (word(path, "rite", "totem", "censer") || word(path, "bell") && word(path, "staff", "wand")) {
