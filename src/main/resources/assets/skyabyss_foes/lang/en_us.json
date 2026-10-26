@@ -14,5 +14,13 @@
   "entity.skyabyss.grain_rat": "Grain Rat",
   "item.skyabyss.grain_rat_spawn_egg": "Grain Rat Spawn Egg",
   "entity.skyabyss.stray_wisp": "Stray Wisp",
-  "item.skyabyss.stray_wisp_spawn_egg": "Stray Wisp Spawn Egg"
+  "item.skyabyss.stray_wisp_spawn_egg": "Stray Wisp Spawn Egg",
+  "entity.skyabyss.feral_dog": "Feral Dog",
+  "item.skyabyss.feral_dog_spawn_egg": "Feral Dog Spawn Egg",
+  "entity.skyabyss.moss_dead": "Moss Dead",
+  "item.skyabyss.moss_dead_spawn_egg": "Moss Dead Spawn Egg",
+  "entity.skyabyss.mist_angler": "Mist Angler",
+  "item.skyabyss.mist_angler_spawn_egg": "Mist Angler Spawn Egg",
+  "entity.skyabyss.thunder_wolf": "Thunder Wolf",
+  "item.skyabyss.thunder_wolf_spawn_egg": "Thunder Wolf Spawn Egg"
 }

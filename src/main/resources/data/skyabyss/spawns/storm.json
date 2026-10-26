@@ -45,6 +45,15 @@
         2,
         3
       ]
+    },
+    {
+      "entity": "skyabyss:thunder_wolf",
+      "weight": 4,
+      "time": "night",
+      "group": [
+        2,
+        3
+      ]
     }
   ]
 }

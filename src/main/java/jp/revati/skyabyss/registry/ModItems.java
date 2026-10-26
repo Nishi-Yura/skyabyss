@@ -180,6 +180,14 @@ public final class ModItems {
             () -> new DeferredSpawnEggItem(ModEntities.GRAIN_RAT, 0x8A6A40, 0xD8B470, new Item.Properties()));
     public static final DeferredItem<Item> STRAY_WISP_EGG = ITEMS.register("stray_wisp_spawn_egg",
             () -> new DeferredSpawnEggItem(ModEntities.STRAY_WISP, 0x9ACAEE, 0x2A2E3A, new Item.Properties()));
+    public static final DeferredItem<Item> FERAL_DOG_EGG = ITEMS.register("feral_dog_spawn_egg",
+            () -> new DeferredSpawnEggItem(ModEntities.FERAL_DOG, 0x6E6050, 0x8A6A40, new Item.Properties()));
+    public static final DeferredItem<Item> MOSS_DEAD_EGG = ITEMS.register("moss_dead_spawn_egg",
+            () -> new DeferredSpawnEggItem(ModEntities.MOSS_DEAD, 0x3E5A2A, 0xA8F082, new Item.Properties()));
+    public static final DeferredItem<Item> MIST_ANGLER_EGG = ITEMS.register("mist_angler_spawn_egg",
+            () -> new DeferredSpawnEggItem(ModEntities.MIST_ANGLER, 0x54523A, 0x78F0D2, new Item.Properties()));
+    public static final DeferredItem<Item> THUNDER_WOLF_EGG = ITEMS.register("thunder_wolf_spawn_egg",
+            () -> new DeferredSpawnEggItem(ModEntities.THUNDER_WOLF, 0x3E4862, 0x8CD2FF, new Item.Properties()));
     public static final DeferredItem<Item> WHALEBONE_CAPTAIN_EGG = ITEMS.register("whalebone_captain_spawn_egg",
             () -> new DeferredSpawnEggItem(ModEntities.WHALEBONE_CAPTAIN, 0xE2D8C0, 0x3C8CAA, new Item.Properties()));
     public static final DeferredItem<Item> STONE_WHALE_HEART_EGG = ITEMS.register("stone_whale_heart_spawn_egg",
@@ -264,6 +272,10 @@ public final class ModItems {
                 output.accept(BONE_STANDARD_EGG.get());
                 output.accept(GRAIN_RAT_EGG.get());
                 output.accept(STRAY_WISP_EGG.get());
+                output.accept(FERAL_DOG_EGG.get());
+                output.accept(MOSS_DEAD_EGG.get());
+                output.accept(MIST_ANGLER_EGG.get());
+                output.accept(THUNDER_WOLF_EGG.get());
                 output.accept(WHALEBONE_CAPTAIN_EGG.get());
                 output.accept(STONE_WHALE_HEART_EGG.get());
                 output.accept(SEALED_GATE.get());

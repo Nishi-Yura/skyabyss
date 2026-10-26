@@ -73,6 +73,19 @@
         2,
         3
       ]
+    },
+    {
+      "entity": "skyabyss:mist_angler",
+      "weight": 3,
+      "time": "night",
+      "biomes": [
+        "beach",
+        "swamp"
+      ],
+      "group": [
+        1,
+        1
+      ]
     }
   ]
 }

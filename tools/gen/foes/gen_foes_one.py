@@ -22,7 +22,8 @@ ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.a
 A = os.path.join(ROOT, "src", "main", "resources", "assets", "skyabyss")
 R = os.path.join(ROOT, "docs", "review", "foes_one")
 sys.path.insert(0, os.path.join(ROOT, "tools", "rough", "lowpoly", "foes"))
-MOBS = ["bandit", "bandit_archer", "bandit_chief", "bone_footman", "bone_bowman", "bone_standard", "grain_rat", "stray_wisp"]
+MOBS = ["bandit", "bandit_archer", "bandit_chief", "bone_footman", "bone_bowman", "bone_standard", "grain_rat", "stray_wisp",
+        "feral_dog", "moss_dead", "mist_angler", "thunder_wolf"]
 
 
 def wjson(path, data):
@@ -263,6 +264,97 @@ def stray_wisp():
     return {p + "idle": loop(12.0, idle), p + "walk": loop(12.0, move), p + "pulse": once(1.0, pulse), p + "hurt": once(0.3, hurt), p + "death": once(0.6, death, True)}
 
 
+# ---------------------------------------------------------------- 二組目 (野犬・苔の亡者・霧の漁り火・雷狼)
+def pack_beast(prefix, P, step=0.5):
+    """野犬・雷狼: 四つ足の待機・駆け足・跳びかかり・吠える・のけぞり・倒れ。予告の姿勢はラフの POSES (howl / telegraph)"""
+    p = "animation.%s." % prefix
+    idle_p = P["idle"]
+    idle = {"body": bone(position=["0", S(0, 0.25, 120), "0"]),
+            "head": bone(wobble(idle_p.get("head", (0, 0, 0)), S(0, 3, 100))),
+            "jaw": bone([neg(S(0, 2, 200) + " - 2"), "0", "0"]),
+            "tail": bone([neg(S(0, 4, 80) + " + %s" % idle_p.get("tail", (0, 0, 0))[0]), neg(S(90, 10, 80)), "0"]),
+            "ear_l": bone([neg(S(0, 4, 90)), "0", "0"]), "ear_r": bone([neg(S(140, 4, 90)), "0", "0"])}
+    walk = {"body": bone([neg(S(0, 4)), "0", "0"], ["0", "math.abs(" + S(0, 1.0) + ")", "0"]),
+            "head": bone([neg(S(180, 5) + " - 6"), "0", "0"]),
+            "fore_l": bone([neg(S(0, 34)), "0", "0"]), "fore_r": bone([neg(S(40, 34)), "0", "0"]),
+            "hind_l": bone([neg(S(180, 34)), "0", "0"]), "hind_r": bone([neg(S(220, 34)), "0", "0"]),
+            "tail": bone([neg(S(90, 8) + " - 4"), neg(S(0, 12)), "0"])}
+    leap = {"body": (12, 0, 0), "head": (6, 0, 0), "jaw": (-30, 0, 0), "fore_l": (-60, 0, 0), "fore_r": (-60, 0, 0), "hind_l": (50, 0, 0), "hind_r": (50, 0, 0),
+            "tail": (-10, 0, 0), "ear_l": (-30, 0, 0), "ear_r": (-30, 0, 0)}
+    bite = merge(leap, {"head": (-14, 0, 0), "jaw": (0, 0, 0), "body": (-4, 0, 0)})
+    # 跳びかかり (予告 0.4 秒): 身を沈める -> 跳ぶ -> 噛む
+    act = seq([(0, idle_p), (0.32, P["telegraph"]), (0.4, P["telegraph"]), (0.5, leap), (0.62, bite), (0.8, bite), (1.1, idle_p)])
+    # 吠える (予告 1.0〜1.2 秒): 天を仰いで吠え続け、戻る
+    howl = seq([(0, idle_p), (0.4, P["howl"]), (1.2, P["howl"]), (1.5, idle_p)])
+    j = P["howl"]["jaw"]
+    howl["jaw"] = bone(kf({0: (0, 0, 0), 0.4: j, 0.6: (-18, 0, 0), 0.8: j, 1.0: (-20, 0, 0), 1.2: j, 1.5: (0, 0, 0)}))
+    hurt = {"body": bone(kf({0: (0, 0, 0), 0.08: (-8, 0, 0), 0.3: (0, 0, 0)})), "head": bone(kf({0: (0, 0, 0), 0.08: (14, 0, 0), 0.3: (0, 0, 0)}))}
+    # 倒れる: 横倒しになり、脚が開く
+    death = {"body": bone(kf({0: (0, 0, 0), 0.45: (0, 0, 90)}), kf({0: (0, 0, 0), 0.45: (0, -4.5, 0)}, False)),
+             "head": bone(kf({0: (0, 0, 0), 0.45: (-20, 0, 0)})),
+             "fore_l": bone(kf({0: (0, 0, 0), 0.45: (30, 0, 0)})), "fore_r": bone(kf({0: (0, 0, 0), 0.45: (30, 0, 0)})),
+             "hind_l": bone(kf({0: (0, 0, 0), 0.45: (-30, 0, 0)})), "hind_r": bone(kf({0: (0, 0, 0), 0.45: (-30, 0, 0)})),
+             "tail": bone(kf({0: (0, 0, 0), 0.45: (-30, 30, 0)}))}
+    return {p + "idle": loop(3.0, idle), p + "walk": loop(step, walk), p + "bite": once(1.1, act), p + "howl": once(1.5, howl),
+            p + "hurt": once(0.3, hurt), p + "death": once(0.6, death, True)}
+
+
+def feral_dog():
+    import feral_dog as M
+    return pack_beast("feral_dog", M.POSES, 0.45)
+
+
+def thunder_wolf():
+    import thunder_wolf as M
+    return pack_beast("thunder_wolf", M.POSES, 0.5)
+
+
+def moss_dead():
+    import moss_dead as M
+    P = M.POSES
+    a = human_set("moss_dead", P, 1.4, fall=10.5)
+    slam = merge(P["idle"], {"body": (-34, 10, 0), "right_arm": (20, 0, -4), "right_forearm": (-4, 0, 0), "leg_r": (24, 0, 0), "leg_l": (-6, 0, 0)})
+    # 叩きつけ (予告 1.0 秒): 太い右腕を頭の上へ振りかぶる -> 1.0 で前へ叩きつける
+    a["animation.moss_dead.slam"] = once(1.8, seq([(0, P["idle"]), (0.85, P["telegraph"]), (1.0, P["telegraph"]), (1.12, slam), (1.45, slam), (1.8, P["idle"])]))
+    # 胞子 (予告 1.2 秒): 背を丸めて荷を突き出す -> 1.2 で撒く
+    a["animation.moss_dead.spores"] = once(2.1, seq([(0, P["idle"]), (0.9, P["spores"]), (1.2, P["spores"]),
+                                                      (1.3, merge(P["spores"], {"body": (-40, 0, 0), "pack": (6, 0, 0)})), (1.7, P["spores"]), (2.1, P["idle"])]))
+    a["animation.moss_dead.idle"]["bones"]["pack"] = bone([neg(S(0, 1.5, 100)), "0", S(90, 1.5, 80)])
+    return a
+
+
+def mist_angler():
+    import mist_angler as M
+    P = M.POSES
+    p = "animation.mist_angler."
+    ip = P["idle"]
+    # 脚がないので、体ごとゆらゆら浮き、霧の尾がなびき、提げた灯が揺れる
+    idle = {"body": bone(wobble(ip["body"], S(0, 2, 90)), ["0", S(0, 0.8, 90), "0"]),
+            "head": bone(wobble(ip["head"], S(60, 3, 70))),
+            "right_arm": bone(wobble(ip["right_arm"], S(30, 2, 90))), "right_forearm": bone(wobble(ip["right_forearm"], "0")),
+            "weapon": bone(wobble(ip["weapon"], S(0, 2, 90))),
+            "lantern": bone([neg(S(200, 8, 90) + " + %s" % ip["lantern"][0]), "0", S(0, 6, 70)]),
+            "left_arm": bone(wobble(ip["left_arm"], S(-40, 2, 90))), "left_forearm": bone(wobble(ip["left_forearm"], "0")),
+            "tail": bone([neg(S(0, 8, 120) + " + %s" % ip["tail"][0]), "0", S(90, 6, 100)])}
+    move = {k: dict(v) for k, v in idle.items()}
+    move["tail"] = bone([neg("-30 + " + S(0, 10, 200)), "0", S(90, 6, 160)])
+    move["body"] = bone(wobble((-18, 0, 0), S(0, 2, 160)), ["0", S(0, 0.6, 160), "0"])
+    throw = {"body": (-12, -30, 0), "head": (0, 10, 0), "left_arm": (70, 30, -10), "left_forearm": (-6, 0, 0), "right_arm": (20, 0, -10), "weapon": (-30, 0, 0),
+             "lantern": (14, 0, 0), "tail": (-20, 0, -10)}
+    # 網を投げる (予告 1.0 秒): 左手の網を後ろへ振りかぶる -> 1.0 で投げる
+    net = seq([(0, ip), (0.85, P["telegraph"]), (1.0, P["telegraph"]), (1.1, throw), (1.4, throw), (1.8, ip)])
+    # 灯を揺らす (予告 0.8 秒): 竿を高く掲げて大きく振る
+    up = merge(ip, {"right_arm": (120, 0, -10), "right_forearm": (-10, 0, 0), "weapon": (10, 0, 0), "lantern": (-50, 0, 0), "head": (20, 0, 0)})
+    sway = seq([(0, ip), (0.4, up), (0.6, merge(up, {"lantern": (-20, 0, 30)})), (0.8, merge(up, {"lantern": (-60, 0, -30)})),
+                (1.0, merge(up, {"lantern": (-40, 0, 20)})), (1.4, ip)])
+    hurt = {"body": bone(kf({0: ip["body"], 0.08: (-20, 0, 0), 0.3: ip["body"]})), "head": bone(kf({0: ip["head"], 0.08: (18, 0, 0), 0.3: ip["head"]}))}
+    # 消える: 霧へほどけて沈む
+    death = {"body": bone(kf({0: (0, 0, 0), 0.8: (-40, 0, 20)}), kf({0: (0, 0, 0), 0.8: (0, -10, 0)}, False),
+                          kf({0: (1, 1, 1), 0.5: (1.1, 0.9, 1.1), 0.8: (0.1, 0.1, 0.1)}, False))}
+    return {p + "idle": loop(12.0, idle), p + "walk": loop(12.0, move), p + "net": once(1.8, net), p + "sway": once(1.4, sway),
+            p + "hurt": once(0.3, hurt), p + "death": once(0.8, death, True)}
+
+
 # ---------------------------------------------------------------- 音 (既存の音源・バニラの音の別名。"type": "event" = その音の出来事をそのまま鳴らす)
 M = "skyabyss:mobs/"
 
@@ -299,6 +391,26 @@ SOUNDS = {
     "stray_wisp_hurt": [ev("minecraft:entity.allay.hurt", 0.6, 0.9)],
     "stray_wisp_death": [ev("minecraft:entity.allay.death", 0.5, 1.0)],
     "stray_wisp_pulse": [ev("minecraft:block.beacon.deactivate", 1.6, 0.9)],
+    "feral_dog_ambient": [ev("minecraft:entity.wolf.growl", 1.1, 0.7)],
+    "feral_dog_hurt": [ev("minecraft:entity.wolf.hurt", 1.0, 0.9)],
+    "feral_dog_death": [ev("minecraft:entity.wolf.death", 1.0, 1.0)],
+    "feral_dog_howl": [ev("minecraft:entity.wolf.howl", 1.1, 1.4)],
+    "feral_dog_bite": [ev("minecraft:entity.fox.bite", 0.8, 1.0)],
+    "moss_dead_ambient": [ev("minecraft:entity.zombie.ambient", 0.55, 0.8)],
+    "moss_dead_hurt": [ev("minecraft:block.moss.break", 0.7, 1.0), ev("minecraft:entity.zombie.hurt", 0.6, 0.8)],
+    "moss_dead_death": [ev("minecraft:entity.zombie.death", 0.5, 1.0)],
+    "moss_dead_step": [ev("minecraft:block.moss.step", 0.7, 0.6)],
+    "moss_dead_slam": [(M + "stone_heart_slam", 1.3, 1.0)],
+    "moss_dead_spores": [ev("minecraft:block.sculk_sensor.clicking", 0.6, 1.2)],
+    "mist_angler_ambient": [ev("minecraft:entity.drowned.ambient_water", 0.7, 0.7)],
+    "mist_angler_hurt": [ev("minecraft:entity.drowned.hurt_water", 0.8, 1.0)],
+    "mist_angler_death": [ev("minecraft:entity.drowned.death_water", 0.7, 1.0)],
+    "mist_angler_net": [ev("minecraft:entity.fishing_bobber.throw", 0.6, 1.2)],
+    "mist_angler_sway": [ev("minecraft:block.bell.resonate", 1.6, 0.6)],
+    "thunder_wolf_ambient": [ev("minecraft:entity.wolf.growl", 0.75, 0.9)],
+    "thunder_wolf_hurt": [ev("minecraft:entity.wolf.hurt", 0.75, 1.0)],
+    "thunder_wolf_death": [ev("minecraft:entity.wolf.death", 0.7, 1.0)],
+    "thunder_wolf_howl": [ev("minecraft:entity.wolf.howl", 0.8, 1.6)],
 }
 SUBTITLES = {
     "bandit_ambient": ("Bandit mutters", "野盗がつぶやく"), "bandit_hurt": ("Bandit hurts", "野盗がうめく"), "bandit_death": ("Bandit falls", "野盗が倒れる"),
@@ -313,12 +425,24 @@ SUBTITLES = {
     "grain_rat_bite": ("Rat bites", "鼠が噛む"),
     "stray_wisp_ambient": ("Wisp hums", "迷い灯がささやく"), "stray_wisp_hurt": ("Wisp flickers", "迷い灯がゆらぐ"), "stray_wisp_death": ("Wisp fades", "迷い灯が消える"),
     "stray_wisp_pulse": ("Wisp pulses", "迷い灯が明滅する"),
+    "feral_dog_ambient": ("Feral dog growls", "野犬がうなる"), "feral_dog_hurt": ("Feral dog yelps", "野犬が鳴く"), "feral_dog_death": ("Feral dog dies", "野犬が倒れる"),
+    "feral_dog_howl": ("Feral dog howls", "野犬が吠える"), "feral_dog_bite": ("Feral dog bites", "野犬が噛む"),
+    "moss_dead_ambient": ("Moss dead groans", "苔の亡者がうめく"), "moss_dead_hurt": ("Moss tears", "苔がちぎれる"),
+    "moss_dead_death": ("Moss dead collapses", "苔の亡者が崩れる"), "moss_dead_step": ("Heavy mossy steps", "苔の重い足音"),
+    "moss_dead_slam": ("Moss dead slams", "苔の亡者が叩きつける"), "moss_dead_spores": ("Spores swell", "胞子が膨らむ"),
+    "mist_angler_ambient": ("Water drips", "水がしたたる"), "mist_angler_hurt": ("Mist angler wails", "霧の漁り火が鳴く"),
+    "mist_angler_death": ("Mist angler fades", "霧の漁り火が消える"), "mist_angler_net": ("Net is cast", "網が投げられる"),
+    "mist_angler_sway": ("Lantern sways", "漁り火が揺れる"),
+    "thunder_wolf_ambient": ("Thunder wolf growls", "雷狼がうなる"), "thunder_wolf_hurt": ("Thunder wolf yelps", "雷狼が鳴く"),
+    "thunder_wolf_death": ("Thunder wolf dies", "雷狼が倒れる"), "thunder_wolf_howl": ("Thunder wolf howls", "雷狼が吠える"),
 }
 NAMES = {
     "bandit": ("Bandit", "野盗", 0x5A4632, 0x8C2E22), "bandit_archer": ("Bandit Archer", "野盗の弓手", 0x6B7040, 0x5A4632),
     "bandit_chief": ("Bandit Chief", "野盗の頭目", 0x4A3A2C, 0xB0302A), "bone_footman": ("Bone Footman", "骸の歩兵", 0xD8CDB2, 0x7A5A3A),
     "bone_bowman": ("Bone Bowman", "骸の弓兵", 0xD8CDB2, 0x4A5A3A), "bone_standard": ("Bone Standard-Bearer", "骸の旗手", 0xD8CDB2, 0x2E3E6A),
     "grain_rat": ("Grain Rat", "穂かじり鼠", 0x8A6A40, 0xD8B470), "stray_wisp": ("Stray Wisp", "迷い灯", 0x9ACAEE, 0x2A2E3A),
+    "feral_dog": ("Feral Dog", "野犬", 0x6E6050, 0x8A6A40), "moss_dead": ("Moss Dead", "苔の亡者", 0x3E5A2A, 0xA8F082),
+    "mist_angler": ("Mist Angler", "霧の漁り火", 0x54523A, 0x78F0D2), "thunder_wolf": ("Thunder Wolf", "雷狼", 0x3E4862, 0x8CD2FF),
 }
 
 

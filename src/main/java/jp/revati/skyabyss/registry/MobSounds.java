@@ -157,6 +157,26 @@ public final class MobSounds {
     public static final DeferredHolder<SoundEvent, SoundEvent> STRAY_WISP_HURT = register("stray_wisp_hurt");
     public static final DeferredHolder<SoundEvent, SoundEvent> STRAY_WISP_DEATH = register("stray_wisp_death");
     public static final DeferredHolder<SoundEvent, SoundEvent> STRAY_WISP_PULSE = register("stray_wisp_pulse");
+    public static final DeferredHolder<SoundEvent, SoundEvent> FERAL_DOG_AMBIENT = register("feral_dog_ambient");
+    public static final DeferredHolder<SoundEvent, SoundEvent> FERAL_DOG_HURT = register("feral_dog_hurt");
+    public static final DeferredHolder<SoundEvent, SoundEvent> FERAL_DOG_DEATH = register("feral_dog_death");
+    public static final DeferredHolder<SoundEvent, SoundEvent> FERAL_DOG_HOWL = register("feral_dog_howl");
+    public static final DeferredHolder<SoundEvent, SoundEvent> FERAL_DOG_BITE = register("feral_dog_bite");
+    public static final DeferredHolder<SoundEvent, SoundEvent> MOSS_DEAD_AMBIENT = register("moss_dead_ambient");
+    public static final DeferredHolder<SoundEvent, SoundEvent> MOSS_DEAD_HURT = register("moss_dead_hurt");
+    public static final DeferredHolder<SoundEvent, SoundEvent> MOSS_DEAD_DEATH = register("moss_dead_death");
+    public static final DeferredHolder<SoundEvent, SoundEvent> MOSS_DEAD_STEP = register("moss_dead_step");
+    public static final DeferredHolder<SoundEvent, SoundEvent> MOSS_DEAD_SLAM = register("moss_dead_slam");
+    public static final DeferredHolder<SoundEvent, SoundEvent> MOSS_DEAD_SPORES = register("moss_dead_spores");
+    public static final DeferredHolder<SoundEvent, SoundEvent> MIST_ANGLER_AMBIENT = register("mist_angler_ambient");
+    public static final DeferredHolder<SoundEvent, SoundEvent> MIST_ANGLER_HURT = register("mist_angler_hurt");
+    public static final DeferredHolder<SoundEvent, SoundEvent> MIST_ANGLER_DEATH = register("mist_angler_death");
+    public static final DeferredHolder<SoundEvent, SoundEvent> MIST_ANGLER_NET = register("mist_angler_net");
+    public static final DeferredHolder<SoundEvent, SoundEvent> MIST_ANGLER_SWAY = register("mist_angler_sway");
+    public static final DeferredHolder<SoundEvent, SoundEvent> THUNDER_WOLF_AMBIENT = register("thunder_wolf_ambient");
+    public static final DeferredHolder<SoundEvent, SoundEvent> THUNDER_WOLF_HURT = register("thunder_wolf_hurt");
+    public static final DeferredHolder<SoundEvent, SoundEvent> THUNDER_WOLF_DEATH = register("thunder_wolf_death");
+    public static final DeferredHolder<SoundEvent, SoundEvent> THUNDER_WOLF_HOWL = register("thunder_wolf_howl");
 
     private MobSounds() {
     }

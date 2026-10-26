@@ -123,6 +123,18 @@ public final class ModEntities {
     public static final DeferredHolder<EntityType<?>, EntityType<jp.revati.skyabyss.entity.foe.StrayWisp>> STRAY_WISP = ENTITIES.register("stray_wisp",
             () -> EntityType.Builder.of(jp.revati.skyabyss.entity.foe.StrayWisp::new, MobCategory.MONSTER)
                     .sized(0.6f, 1.5f).eyeHeight(1.1f).clientTrackingRange(8).build(SkyAbyss.MODID + ":stray_wisp"));
+    public static final DeferredHolder<EntityType<?>, EntityType<jp.revati.skyabyss.entity.foe.FeralDog>> FERAL_DOG = ENTITIES.register("feral_dog",
+            () -> EntityType.Builder.of(jp.revati.skyabyss.entity.foe.FeralDog::new, MobCategory.MONSTER)
+                    .sized(0.7f, 0.9f).eyeHeight(0.75f).clientTrackingRange(8).build(SkyAbyss.MODID + ":feral_dog"));
+    public static final DeferredHolder<EntityType<?>, EntityType<jp.revati.skyabyss.entity.foe.MossDead>> MOSS_DEAD = ENTITIES.register("moss_dead",
+            () -> EntityType.Builder.of(jp.revati.skyabyss.entity.foe.MossDead::new, MobCategory.MONSTER)
+                    .sized(0.8f, 2.0f).clientTrackingRange(8).build(SkyAbyss.MODID + ":moss_dead"));
+    public static final DeferredHolder<EntityType<?>, EntityType<jp.revati.skyabyss.entity.foe.MistAngler>> MIST_ANGLER = ENTITIES.register("mist_angler",
+            () -> EntityType.Builder.of(jp.revati.skyabyss.entity.foe.MistAngler::new, MobCategory.MONSTER)
+                    .sized(0.7f, 2.0f).clientTrackingRange(8).build(SkyAbyss.MODID + ":mist_angler"));
+    public static final DeferredHolder<EntityType<?>, EntityType<jp.revati.skyabyss.entity.foe.ThunderWolf>> THUNDER_WOLF = ENTITIES.register("thunder_wolf",
+            () -> EntityType.Builder.of(jp.revati.skyabyss.entity.foe.ThunderWolf::new, MobCategory.MONSTER)
+                    .sized(0.9f, 1.1f).eyeHeight(0.9f).clientTrackingRange(8).build(SkyAbyss.MODID + ":thunder_wolf"));
 
     private static <T extends net.minecraft.world.entity.Mob> DeferredHolder<EntityType<?>, EntityType<T>> monster(
             String name, EntityType.EntityFactory<T> factory, float width, float height) {
@@ -153,6 +165,10 @@ public final class ModEntities {
         event.put(BONE_STANDARD.get(), jp.revati.skyabyss.entity.foe.BoneStandard.createAttributes().build());
         event.put(GRAIN_RAT.get(), jp.revati.skyabyss.entity.foe.GrainRat.createAttributes().build());
         event.put(STRAY_WISP.get(), jp.revati.skyabyss.entity.foe.StrayWisp.createAttributes().build());
+        event.put(FERAL_DOG.get(), jp.revati.skyabyss.entity.foe.FeralDog.createAttributes().build());
+        event.put(MOSS_DEAD.get(), jp.revati.skyabyss.entity.foe.MossDead.createAttributes().build());
+        event.put(MIST_ANGLER.get(), jp.revati.skyabyss.entity.foe.MistAngler.createAttributes().build());
+        event.put(THUNDER_WOLF.get(), jp.revati.skyabyss.entity.foe.ThunderWolf.createAttributes().build());
     }
 
     private ModEntities() {

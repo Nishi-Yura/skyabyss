@@ -74,11 +74,10 @@
   - バニラの進捗を読まない (mixin/AdvancementManagerMixin)。バニラの敵とさまよう商人は自然・巡回・湧き台・構造物で湧かない (RpgRules.onFinalizeSpawn)。動物は残す。
   - 新しい敵 8 体をゲームに入れた (docs/design/44 の 4.1。entity/foe、入れるのは tools/gen/foes/gen_foes_one.py、撮影は tools/shots/foes_one.txt、自己テスト new foes)。
     島・草原の湧きの表 (data/skyabyss/spawns/island|meadow.json)、島の峠と見どころの野営はバニラの略奪者・骸骨から新しい敵へ。新しい敵だけ ContinentDanger で土地の強さが掛かる。
-  - 二組目 4 体 (野犬・苔の亡者・霧の漁り火・雷狼) の形を作って頁に出した (https://claude.ai/artifact/DxHMN1yBdjLfNVxnZ6FFtj、tools/rough/lowpoly/foes/)。選ばれたら一組目と同じ手順で入れる。
+  - 二組目 4 体 (野犬・苔の亡者・霧の漁り火・雷狼) も選ばれて入れた (同じ手順。湧きは草原の森・岩鯨の夜・潮の夜・嵐の夜。撮影 tools/shots/foes_two.txt)。
 
 ## 次にやること
-0. 敵の二組目 (野犬・苔の亡者・霧の漁り火・雷狼): 頁の選びを見て、gen_foes_one.py に足して入れ、湧きの表 (草原の森・岩鯨の夜・潮の夜・嵐の夜) に足す。
-   そのあと土地ごとの名のある強敵 (docs/design/44 の 5)。
+0. 土地ごとの名のある強敵 (docs/design/44 の 5。島 = 峠の頭目の強い姿、草原 = 骸の旗手、ほか 4 土地は決める)。一体一案の頁 → 入れる。
 1. 進捗の画面を見やすく作り直す (ユーザー「進捗 UI 変えてもいい。みにくいので」)。
 2. 伝説 20 本の技の書き換え (Rune の 4 番目)。
 1. 職ごとの技の見た目（手元の Fx）は、新しい技 12 本はサーバーの粒だけ。試遊で寂しければ Fx を足す。

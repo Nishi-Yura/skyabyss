@@ -36,6 +36,20 @@
         1,
         1
       ]
+    },
+    {
+      "entity": "skyabyss:feral_dog",
+      "weight": 3,
+      "time": "any",
+      "biomes": [
+        "forest",
+        "birch_forest",
+        "flower_forest"
+      ],
+      "group": [
+        2,
+        3
+      ]
     }
   ]
 }

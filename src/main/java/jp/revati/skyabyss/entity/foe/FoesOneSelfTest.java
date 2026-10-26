@@ -33,9 +33,9 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.AABB;
 import net.neoforged.neoforge.common.util.FakePlayer;
 
-// 大陸の新しい敵 8 体 (docs/design/44) の自己テスト。SKYABYSS_SELFTEST=1 SKYABYSS_SELFTEST_ONLY="new foes" ./gradlew runServer。
+// 大陸の新しい敵 12 体 (docs/design/44) の自己テスト。SKYABYSS_SELFTEST=1 SKYABYSS_SELFTEST_ONLY="new foes" ./gradlew runServer。
 //   登録   エンティティ・スポーンエッグ・経験値の表・動き (idle / walk / hurt / death と技の名前が animation.json にある)・島と草原の湧きの表
-//   技     8 体それぞれ: 予告の形と当たりが同じ (形の外の人は傷つかない)・予告の長さのあとに当たる
+//   技     12 体それぞれ: 予告の形と当たりが同じ (形の外の人は傷つかない)・予告の長さのあとに当たる
 //   盾     骸の歩兵は前からの傷が 3 割、後ろからは素通し
 //   旗     骸の旗手が旗を突き立てると、そばの骸に守りが付き、倒れるはずの一撃で一度だけ起き上がる (二度目は倒れる)
 //   叫び   野盗の頭目が吠えると、そばの野盗が速くなる
@@ -44,7 +44,8 @@ public final class FoesOneSelfTest {
     private static final int SZ = 6600;
     private static final int FLOOR = 200;
     private static final float HEALTH = 1000f;
-    static final String[] IDS = {"bandit", "bandit_archer", "bandit_chief", "bone_footman", "bone_bowman", "bone_standard", "grain_rat", "stray_wisp"};
+    static final String[] IDS = {"bandit", "bandit_archer", "bandit_chief", "bone_footman", "bone_bowman", "bone_standard", "grain_rat", "stray_wisp",
+        "feral_dog", "moss_dead", "mist_angler", "thunder_wolf"};
 
     private FoesOneSelfTest() {
     }
@@ -90,6 +91,7 @@ public final class FoesOneSelfTest {
             shield(level, f);
             banner(level, f);
             shout(level, f);
+            howls(level, f);
         } catch (RuntimeException e) {
             SkyAbyss.LOGGER.error("SELFTEST new foes crashed", e);
             f.add("crashed: " + e);
@@ -101,8 +103,8 @@ public final class FoesOneSelfTest {
             unload(level);
         }
         if (f.isEmpty()) {
-            SkyAbyss.LOGGER.info("SELFTEST new foes PASSED (8 foes registered with eggs/xp/animations/spawn rows; every telegraph matches its hit; "
-                    + "footman shield 30% from the front; banner ward revives once; chief shout hastes the crew)");
+            SkyAbyss.LOGGER.info("SELFTEST new foes PASSED (12 foes registered with eggs/xp/animations/spawn rows; every telegraph matches its hit; "
+                    + "footman shield 30% from the front; banner ward revives once; chief shout hastes the crew; dog howl sends the pack, wolf howl marks the target)");
         } else {
             f.forEach(m -> SkyAbyss.LOGGER.error("SELFTEST new foes FAILED: {}", m));
         }
@@ -124,7 +126,7 @@ public final class FoesOneSelfTest {
             EntityType<?> type = BuiltInRegistries.ENTITY_TYPE.get(key);
             List<String> need = new ArrayList<>(List.of("idle", "walk"));
             if (type.create(level) instanceof GuardMob g) {
-                for (String act : new String[] {"swing", "shoot", "sweep", "shout", "thrust", "block", "bash", "plant", "rise", "bite", "pulse", "hurt", "death"}) {
+                for (String act : new String[] {"swing", "shoot", "sweep", "shout", "thrust", "block", "bash", "plant", "rise", "bite", "pulse", "howl", "slam", "spores", "net", "sway", "hurt", "death"}) {
                     if (g.hasAction(act)) {
                         need.add(act);
                     }
@@ -171,7 +173,11 @@ public final class FoesOneSelfTest {
                 new Case("bone_bowman", ModEntities.BONE_BOWMAN::get, 9.0, BoneBowman.SHOOT_WARN),
                 new Case("bone_standard", ModEntities.BONE_STANDARD::get, 2.6, BoneStandard.SWEEP_WARN),
                 new Case("grain_rat", ModEntities.GRAIN_RAT::get, 1.8, GrainRat.WARN),
-                new Case("stray_wisp", ModEntities.STRAY_WISP::get, 2.0, StrayWisp.WARN));
+                new Case("stray_wisp", ModEntities.STRAY_WISP::get, 2.0, StrayWisp.WARN),
+                new Case("feral_dog", ModEntities.FERAL_DOG::get, 2.0, PackBeast.BITE_WARN),
+                new Case("moss_dead", ModEntities.MOSS_DEAD::get, 2.4, MossDead.SLAM_WARN),
+                new Case("mist_angler", ModEntities.MIST_ANGLER::get, 9.0, MistAngler.NET_WARN),
+                new Case("thunder_wolf", ModEntities.THUNDER_WOLF::get, 2.0, PackBeast.BITE_WARN));
         for (Case c : cases) {
             ContinentFoe m = spawn(lv, c.type().get(), SX, SZ, 0f);
             FakePlayer in = fake(lv, c.name() + "_in", SX, SZ + c.dist());
@@ -257,6 +263,36 @@ public final class FoesOneSelfTest {
         check(crew.hasEffect(MobEffects.MOVEMENT_SPEED), "the chief's shout did not haste the nearby bandit", f);
         c.discard();
         crew.discard();
+        p.discard();
+    }
+
+    // ---------------------------------------------------------------- 群れの吠え: 野犬は仲間が一斉に跳びかかる、雷狼は狙った人の足もとに円
+    private static void howls(ServerLevel lv, List<String> f) {
+        FeralDog dog = spawn(lv, ModEntities.FERAL_DOG.get(), SX, SZ, 0f);
+        FeralDog mate = spawn(lv, ModEntities.FERAL_DOG.get(), SX + 2, SZ, 0f);
+        FakePlayer p = fake(lv, "howl", SX, SZ + 6);
+        dog.setTarget(p);
+        mate.setTarget(p);
+        dog.tickCount = 1000;
+        for (int i = 0; i < 24 && !mate.busy(); i++) {
+            tick(lv, dog, 1);
+        }
+        check(mate.busy(), "the feral dog's howl did not send its packmate leaping", f);
+        dog.discard();
+        mate.discard();
+        ThunderWolf wolf = spawn(lv, ModEntities.THUNDER_WOLF.get(), SX, SZ, 0f);
+        ThunderWolf wmate = spawn(lv, ModEntities.THUNDER_WOLF.get(), SX + 2, SZ, 0f);
+        wolf.setTarget(p);
+        wolf.tickCount = 1000;
+        List<TelegraphShape> shapes = new ArrayList<>();
+        Telegraph.record(shapes);
+        for (int i = 0; i < 4; i++) {
+            tick(lv, wolf, 1);
+        }
+        Telegraph.record(null);
+        check(shapes.stream().anyMatch(s -> s.contains(SX, SZ + 6) && !s.contains(SX, SZ)), "the thunder wolf's howl did not mark the target's feet", f);
+        wolf.discard();
+        wmate.discard();
         p.discard();
     }
 

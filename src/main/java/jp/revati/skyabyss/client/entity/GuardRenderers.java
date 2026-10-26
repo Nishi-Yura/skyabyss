@@ -83,6 +83,10 @@ public final class GuardRenderers {
         event.registerEntityRenderer(ModEntities.BONE_STANDARD.get(), ctx -> noTilt(ctx, "bone_standard"));
         event.registerEntityRenderer(ModEntities.GRAIN_RAT.get(), ctx -> noTilt(ctx, "grain_rat"));
         event.registerEntityRenderer(ModEntities.STRAY_WISP.get(), ctx -> noTilt(ctx, "stray_wisp"));
+        event.registerEntityRenderer(ModEntities.FERAL_DOG.get(), ctx -> noTiltStillHead(ctx, "feral_dog"));
+        event.registerEntityRenderer(ModEntities.MOSS_DEAD.get(), ctx -> noTilt(ctx, "moss_dead"));
+        event.registerEntityRenderer(ModEntities.MIST_ANGLER.get(), ctx -> noTilt(ctx, "mist_angler"));
+        event.registerEntityRenderer(ModEntities.THUNDER_WOLF.get(), ctx -> noTiltStillHead(ctx, "thunder_wolf"));
         event.registerEntityRenderer(ModEntities.STONE_WHALE_HEART.get(), StoneWhaleHeartRenderer::new);
         event.registerEntityRenderer(ModEntities.BONE_SPIKE.get(), ctx -> new ArrowRenderer<BoneSpike>(ctx) {
             @Override
@@ -94,6 +98,16 @@ public final class GuardRenderers {
 
     private static <T extends net.minecraft.world.entity.Entity & GeoAnimatable> GeoEntityRenderer<T> noTilt(EntityRendererProvider.Context ctx, String name) {
         return new LowPolyGeoRenderer<T>(ctx, name, 1.0f) {
+            @Override
+            protected float getDeathMaxRotation(T animatable) {
+                return 0f;
+            }
+        };
+    }
+
+    // 頭の骨を人の方へ向けない (GeckoLib の首振りは head の回転を上書きするので、吠えて天を仰ぐ動きが消える。野犬・雷狼)
+    private static <T extends net.minecraft.world.entity.Entity & GeoAnimatable> GeoEntityRenderer<T> noTiltStillHead(EntityRendererProvider.Context ctx, String name) {
+        return new LowPolyGeoRenderer<T>(ctx, new LowPolyGeoRenderer.Model<T>(name, false), e -> name, 1.0f) {
             @Override
             protected float getDeathMaxRotation(T animatable) {
                 return 0f;
