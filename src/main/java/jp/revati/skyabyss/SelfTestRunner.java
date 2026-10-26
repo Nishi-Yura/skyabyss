@@ -206,6 +206,7 @@ public final class SelfTestRunner {
         // 都の町めぐり (docs/design/40 の 4 章)。SKYABYSS_SELFTEST_ONLY="town tour"
         steps.addAll(jp.revati.skyabyss.facility.TownTourSelfTest.steps());
         steps.addAll(jp.revati.skyabyss.world.continent.RegionSpawnerSelfTest.steps());
+        steps.addAll(jp.revati.skyabyss.entity.foe.FoesOneSelfTest.steps());
         // 乗り物 (見た目と性能の買い物・呼ぶ/帰す・背中と深淵の禁止)。docs/design/38。SKYABYSS_SELFTEST_ONLY=mount
         steps.addAll(jp.revati.skyabyss.mount.MountSelfTest.steps());
         // 町のクエスト (限定の人・噂・墓守・酔いどれ・地図屋・古井戸)。docs/design/35 の 3.3・3.5。SKYABYSS_SELFTEST_ONLY=town

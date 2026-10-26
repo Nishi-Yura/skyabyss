@@ -74,6 +74,15 @@ public final class GuardRenderers {
             r.addRenderLayer(GearLayer.lowPoly(r, "socket_main", "shore_harpoon"));
             return r;
         });
+        // 大陸の新しい敵 (docs/design/44)
+        event.registerEntityRenderer(ModEntities.BANDIT.get(), ctx -> noTilt(ctx, "bandit"));
+        event.registerEntityRenderer(ModEntities.BANDIT_ARCHER.get(), ctx -> noTilt(ctx, "bandit_archer"));
+        event.registerEntityRenderer(ModEntities.BANDIT_CHIEF.get(), ctx -> noTilt(ctx, "bandit_chief"));
+        event.registerEntityRenderer(ModEntities.BONE_FOOTMAN.get(), ctx -> noTilt(ctx, "bone_footman"));
+        event.registerEntityRenderer(ModEntities.BONE_BOWMAN.get(), ctx -> noTilt(ctx, "bone_bowman"));
+        event.registerEntityRenderer(ModEntities.BONE_STANDARD.get(), ctx -> noTilt(ctx, "bone_standard"));
+        event.registerEntityRenderer(ModEntities.GRAIN_RAT.get(), ctx -> noTilt(ctx, "grain_rat"));
+        event.registerEntityRenderer(ModEntities.STRAY_WISP.get(), ctx -> noTilt(ctx, "stray_wisp"));
         event.registerEntityRenderer(ModEntities.STONE_WHALE_HEART.get(), StoneWhaleHeartRenderer::new);
         event.registerEntityRenderer(ModEntities.BONE_SPIKE.get(), ctx -> new ArrowRenderer<BoneSpike>(ctx) {
             @Override

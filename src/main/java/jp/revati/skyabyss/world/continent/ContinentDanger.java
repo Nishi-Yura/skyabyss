@@ -17,7 +17,7 @@ import net.neoforged.neoforge.event.entity.EntityJoinLevelEvent;
 // 土地ごとの敵の強さ (docs/design/40 の 4 章「都のまわりと最初の土地の敵は弱い」と、地図の目安のレベル)。
 // 天と淵の大陸の地上で、マインクラフトの敵 (ゾンビ・クモなど) が現れたとき、その場所の土地で体力と攻撃を変える。
 //   都のまわり ×0.55 / ×0.5 (二〜三回で倒れる)、外れの谷 ×0.45 / ×0.4、岩鯨の丘陵 ×1、潮の浜 ×1.3 / ×1.25、嵐の高地 ×1.7 / ×1.5、灰の荒野 ×2.1 / ×1.8
-// この作品の敵 (skyabyss:) は章ごとに釣り合いを取ってあるので変えない
+// この作品の敵 (skyabyss:) は章ごとに釣り合いを取ってあるので変えない。ただし大陸の新しい敵 (entity/foe の ContinentFoe) は岩鯨を 1 とした素の値なので掛ける
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class ContinentDanger {
     static final ResourceLocation HEALTH_ID = ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "continent_region_health");
@@ -38,7 +38,7 @@ public final class ContinentDanger {
     static void onJoin(EntityJoinLevelEvent event) {
         if (event.loadedFromDisk() || !(event.getLevel() instanceof ServerLevel level) || level.dimension() != Level.OVERWORLD
                 || !(event.getEntity() instanceof Mob mob) || !(mob instanceof Enemy)
-                || !"minecraft".equals(BuiltInRegistries.ENTITY_TYPE.getKey(mob.getType()).getNamespace())
+                || !("minecraft".equals(BuiltInRegistries.ENTITY_TYPE.getKey(mob.getType()).getNamespace()) || mob instanceof jp.revati.skyabyss.entity.foe.ContinentFoe)
                 || !(level.getChunkSource().getGenerator() instanceof ContinentChunkGenerator)) {
             return;
         }

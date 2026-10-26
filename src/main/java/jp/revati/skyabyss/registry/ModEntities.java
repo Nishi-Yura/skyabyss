@@ -98,6 +98,32 @@ public final class ModEntities {
             () -> EntityType.Builder.of(jp.revati.skyabyss.entity.ShoreWarden::new, MobCategory.MONSTER)
                     .sized(0.8f, 2.7f).eyeHeight(2.35f).clientTrackingRange(10).build(SkyAbyss.MODID + ":shore_warden"));
 
+    // 大陸の新しい敵 (docs/design/44。tools/gen/foes/gen_foes_one.py)
+    public static final DeferredHolder<EntityType<?>, EntityType<jp.revati.skyabyss.entity.foe.Bandit>> BANDIT = ENTITIES.register("bandit",
+            () -> EntityType.Builder.of(jp.revati.skyabyss.entity.foe.Bandit::new, MobCategory.MONSTER)
+                    .sized(0.6f, 1.85f).clientTrackingRange(8).build(SkyAbyss.MODID + ":bandit"));
+    public static final DeferredHolder<EntityType<?>, EntityType<jp.revati.skyabyss.entity.foe.BanditArcher>> BANDIT_ARCHER = ENTITIES.register("bandit_archer",
+            () -> EntityType.Builder.of(jp.revati.skyabyss.entity.foe.BanditArcher::new, MobCategory.MONSTER)
+                    .sized(0.6f, 1.85f).clientTrackingRange(8).build(SkyAbyss.MODID + ":bandit_archer"));
+    public static final DeferredHolder<EntityType<?>, EntityType<jp.revati.skyabyss.entity.foe.BanditChief>> BANDIT_CHIEF = ENTITIES.register("bandit_chief",
+            () -> EntityType.Builder.of(jp.revati.skyabyss.entity.foe.BanditChief::new, MobCategory.MONSTER)
+                    .sized(0.75f, 2.2f).clientTrackingRange(8).build(SkyAbyss.MODID + ":bandit_chief"));
+    public static final DeferredHolder<EntityType<?>, EntityType<jp.revati.skyabyss.entity.foe.BoneFootman>> BONE_FOOTMAN = ENTITIES.register("bone_footman",
+            () -> EntityType.Builder.of(jp.revati.skyabyss.entity.foe.BoneFootman::new, MobCategory.MONSTER)
+                    .sized(0.6f, 1.85f).clientTrackingRange(8).build(SkyAbyss.MODID + ":bone_footman"));
+    public static final DeferredHolder<EntityType<?>, EntityType<jp.revati.skyabyss.entity.foe.BoneBowman>> BONE_BOWMAN = ENTITIES.register("bone_bowman",
+            () -> EntityType.Builder.of(jp.revati.skyabyss.entity.foe.BoneBowman::new, MobCategory.MONSTER)
+                    .sized(0.6f, 1.85f).clientTrackingRange(8).build(SkyAbyss.MODID + ":bone_bowman"));
+    public static final DeferredHolder<EntityType<?>, EntityType<jp.revati.skyabyss.entity.foe.BoneStandard>> BONE_STANDARD = ENTITIES.register("bone_standard",
+            () -> EntityType.Builder.of(jp.revati.skyabyss.entity.foe.BoneStandard::new, MobCategory.MONSTER)
+                    .sized(0.7f, 2.15f).clientTrackingRange(8).build(SkyAbyss.MODID + ":bone_standard"));
+    public static final DeferredHolder<EntityType<?>, EntityType<jp.revati.skyabyss.entity.foe.GrainRat>> GRAIN_RAT = ENTITIES.register("grain_rat",
+            () -> EntityType.Builder.of(jp.revati.skyabyss.entity.foe.GrainRat::new, MobCategory.MONSTER)
+                    .sized(0.6f, 0.45f).eyeHeight(0.35f).clientTrackingRange(8).build(SkyAbyss.MODID + ":grain_rat"));
+    public static final DeferredHolder<EntityType<?>, EntityType<jp.revati.skyabyss.entity.foe.StrayWisp>> STRAY_WISP = ENTITIES.register("stray_wisp",
+            () -> EntityType.Builder.of(jp.revati.skyabyss.entity.foe.StrayWisp::new, MobCategory.MONSTER)
+                    .sized(0.6f, 1.5f).eyeHeight(1.1f).clientTrackingRange(8).build(SkyAbyss.MODID + ":stray_wisp"));
+
     private static <T extends net.minecraft.world.entity.Mob> DeferredHolder<EntityType<?>, EntityType<T>> monster(
             String name, EntityType.EntityFactory<T> factory, float width, float height) {
         return ENTITIES.register(name, () -> EntityType.Builder.of(factory, MobCategory.MONSTER)
@@ -119,6 +145,14 @@ public final class ModEntities {
         event.put(SAND_BURROWER.get(), jp.revati.skyabyss.entity.SandBurrower.createAttributes().build());
         event.put(DRIFT_HERMIT.get(), jp.revati.skyabyss.entity.DriftHermit.createAttributes().build());
         event.put(SHORE_WARDEN.get(), jp.revati.skyabyss.entity.ShoreWarden.createAttributes().build());
+        event.put(BANDIT.get(), jp.revati.skyabyss.entity.foe.Bandit.createAttributes().build());
+        event.put(BANDIT_ARCHER.get(), jp.revati.skyabyss.entity.foe.BanditArcher.createAttributes().build());
+        event.put(BANDIT_CHIEF.get(), jp.revati.skyabyss.entity.foe.BanditChief.createAttributes().build());
+        event.put(BONE_FOOTMAN.get(), jp.revati.skyabyss.entity.foe.BoneFootman.createAttributes().build());
+        event.put(BONE_BOWMAN.get(), jp.revati.skyabyss.entity.foe.BoneBowman.createAttributes().build());
+        event.put(BONE_STANDARD.get(), jp.revati.skyabyss.entity.foe.BoneStandard.createAttributes().build());
+        event.put(GRAIN_RAT.get(), jp.revati.skyabyss.entity.foe.GrainRat.createAttributes().build());
+        event.put(STRAY_WISP.get(), jp.revati.skyabyss.entity.foe.StrayWisp.createAttributes().build());
     }
 
     private ModEntities() {

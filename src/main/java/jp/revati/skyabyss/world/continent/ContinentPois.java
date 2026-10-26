@@ -124,7 +124,6 @@ public final class ContinentPois {
     }
 
     static final String LEADER_TAG = "skyabyss_poi_leader";
-    static final net.minecraft.resources.ResourceLocation LEADER_HP = net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "poi_leader_hp");
     static final jp.revati.skyabyss.item.extra.Element[] LEADER_POWDER = {jp.revati.skyabyss.item.extra.Element.STONE, jp.revati.skyabyss.item.extra.Element.STONE,
             jp.revati.skyabyss.item.extra.Element.STONE, jp.revati.skyabyss.item.extra.Element.TIDE, jp.revati.skyabyss.item.extra.Element.WIND, jp.revati.skyabyss.item.extra.Element.ASH};
 
@@ -250,27 +249,18 @@ public final class ContinentPois {
         // 塚・坑道・墓所・洞窟は骨の兵、野営は野盗。塚・坑道・洞窟は地の下 (印の高さ) に出す
         boolean undead = kind.equals("barrow") || kind.equals("mine") || kind.equals("graveyard") || kind.equals("cave");
         boolean below = kind.equals("barrow") || kind.equals("mine") || kind.equals("cave");
-        EntityType<?>[] kinds = undead ? new EntityType<?>[] {EntityType.SKELETON, EntityType.SKELETON, EntityType.ZOMBIE}
-                : new EntityType<?>[] {EntityType.PILLAGER, EntityType.PILLAGER, EntityType.VINDICATOR};
-        // 頭 (一体。名前つき、体力は 2.5 倍、倒すと土地の粉と鐘銭。onLeaderDrops)
+        // 骸の歩兵・弓兵と、野盗・弓手 (docs/design/44。土地の強さは ContinentDanger が掛ける)
+        EntityType<?>[] kinds = undead ? new EntityType<?>[] {jp.revati.skyabyss.registry.ModEntities.BONE_FOOTMAN.get(), jp.revati.skyabyss.registry.ModEntities.BONE_BOWMAN.get(),
+                jp.revati.skyabyss.registry.ModEntities.BONE_FOOTMAN.get()}
+                : new EntityType<?>[] {jp.revati.skyabyss.registry.ModEntities.BANDIT_ARCHER.get(), jp.revati.skyabyss.registry.ModEntities.BANDIT_ARCHER.get(),
+                jp.revati.skyabyss.registry.ModEntities.BANDIT.get()};
+        // 頭 (一体。骸の旗手か野盗の頭目、名前つき、倒すと土地の粉と鐘銭。onLeaderDrops)
         // はじまりの島 (最初の戦い) には頭を出さない
-        EntityType<?> leaderType = undead ? EntityType.SKELETON : EntityType.VINDICATOR;
+        EntityType<?> leaderType = undead ? jp.revati.skyabyss.registry.ModEntities.BONE_STANDARD.get() : jp.revati.skyabyss.registry.ModEntities.BANDIT_CHIEF.get();
         if (ContinentMap.get().region(at.getX(), at.getZ()) != ContinentMap.OUTSKIRTS && leaderType.create(level) instanceof Mob leader) {
             int y = below ? at.getY() : level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, at.getX(), at.getZ());
             leader.moveTo(at.getX() + 0.5, y, at.getZ() + 0.5, level.random.nextFloat() * 360f, 0f);
             leader.finalizeSpawn(level, level.getCurrentDifficultyAt(leader.blockPosition()), MobSpawnType.EVENT, null);
-            var hp = leader.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.MAX_HEALTH);
-            if (hp != null) {
-                hp.addPermanentModifier(new net.minecraft.world.entity.ai.attributes.AttributeModifier(LEADER_HP, 1.5,
-                        net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
-                leader.setHealth(leader.getMaxHealth());
-            }
-            if (undead) {
-                leader.setItemSlot(net.minecraft.world.entity.EquipmentSlot.HEAD, new ItemStack(Items.IRON_HELMET));
-                leader.setItemSlot(net.minecraft.world.entity.EquipmentSlot.MAINHAND, new ItemStack(Items.IRON_SWORD));
-                leader.setDropChance(net.minecraft.world.entity.EquipmentSlot.HEAD, 0f);
-                leader.setDropChance(net.minecraft.world.entity.EquipmentSlot.MAINHAND, 0f);
-            }
             leader.setCustomName(net.minecraft.network.chat.Component.translatable(undead ? "entity.skyabyss.poi_leader_bone" : "entity.skyabyss.poi_leader_bandit"));
             leader.setCustomNameVisible(true);
             leader.addTag(LEADER_TAG);

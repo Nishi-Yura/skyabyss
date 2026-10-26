@@ -72,16 +72,13 @@
   - 防具 8 組を一品一案で入れた (巨神 4 = tools/rough/lowpoly/armor/titan_one.py、旅装 4 = travel_one.py と塗り tpaint.py、見本と入れる元は build_one.py、
     入れるのは tools/install/install_armor_one.py。アイコンも 3D から)。ユーザーが全部選んだ。
   - バニラの進捗を読まない (mixin/AdvancementManagerMixin)。バニラの敵とさまよう商人は自然・巡回・湧き台・構造物で湧かない (RpgRules.onFinalizeSpawn)。動物は残す。
+  - 新しい敵 8 体をゲームに入れた (docs/design/44 の 4.1。entity/foe、入れるのは tools/gen/foes/gen_foes_one.py、撮影は tools/shots/foes_one.txt、自己テスト new foes)。
+    島・草原の湧きの表 (data/skyabyss/spawns/island|meadow.json)、島の峠と見どころの野営はバニラの略奪者・骸骨から新しい敵へ。新しい敵だけ ContinentDanger で土地の強さが掛かる。
+  - 二組目 4 体 (野犬・苔の亡者・霧の漁り火・雷狼) の形を作って頁に出した (https://claude.ai/artifact/DxHMN1yBdjLfNVxnZ6FFtj、tools/rough/lowpoly/foes/)。選ばれたら一組目と同じ手順で入れる。
 
 ## 次にやること
-0. 敵の作り込み (2026-10-26 の声「全敵 mod の敵。種類を増やし、どこに何が湧くかも決める」。docs/design/44 として書く予定):
-   - 大陸の土地 (ContinentMap: MEADOW 都のまわり Lv1-4 / OUTSKIRTS 島 / WHALE 4-12 / TIDE 12-18 / STORM 18-24 / EMBER 24-30) ごとに、
-     昼夜・地形 (ContinentBiomes)・群れの数・レベルの湧きの表を data にし、土地の湧き (新しい RegionSpawner。今の ChapterMobSpawner の章の歩き物も表へ移す) で湧かせる。
-     今は島と都のまわりに敵がいない (バニラの敵を止めたため)。ContinentDanger (バニラの敵の土地の強さ) は役目が終わる。
-   - 新しい敵の候補: 野盗・野盗の弓手・峠の頭目 (島の IslandTrail と見どころの野盗の野営 ContinentPois が今はバニラの略奪者と骸骨)、
-     骸の歩兵・骸の弓兵 (見どころの亡者の野営)、都のまわりの小物 (穂かじり鼠・迷い灯 (夜))、浜の砂蟹、土地ごとの夜の敵と名づき。形は一品一案で頁を出して選んでもらう。
-   - 今の土地の敵: 岩鯨 = 苔這い・棘うさぎ・岩殻虫・骨鳥・骨棘の射手・骨負い・骨の砲手 / 潮 = 潮だまり貝・砂潜り・宿借り・潮の番人・磯走り /
-     雷 = 帯電毛玉・峰の雛・雷拾い・焼けた羽守 / 灰 = 熾り蟲・灰の屑・灰ひきずり・古い灰の番人。
+0. 敵の二組目 (野犬・苔の亡者・霧の漁り火・雷狼): 頁の選びを見て、gen_foes_one.py に足して入れ、湧きの表 (草原の森・岩鯨の夜・潮の夜・嵐の夜) に足す。
+   そのあと土地ごとの名のある強敵 (docs/design/44 の 5)。
 1. 進捗の画面を見やすく作り直す (ユーザー「進捗 UI 変えてもいい。みにくいので」)。
 2. 伝説 20 本の技の書き換え (Rune の 4 番目)。
 1. 職ごとの技の見た目（手元の Fx）は、新しい技 12 本はサーバーの粒だけ。試遊で寂しければ Fx を足す。

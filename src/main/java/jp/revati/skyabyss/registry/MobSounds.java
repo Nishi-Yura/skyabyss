@@ -129,6 +129,35 @@ public final class MobSounds {
     public static final DeferredHolder<SoundEvent, SoundEvent> SHORE_WARDEN_RING = register("shore_warden_ring");
     public static final DeferredHolder<SoundEvent, SoundEvent> SHORE_WARDEN_FLOOD = register("shore_warden_flood");
 
+    // 大陸の新しい敵 (docs/design/44。tools/gen/foes/gen_foes_one.py)
+    public static final DeferredHolder<SoundEvent, SoundEvent> BANDIT_AMBIENT = register("bandit_ambient");
+    public static final DeferredHolder<SoundEvent, SoundEvent> BANDIT_HURT = register("bandit_hurt");
+    public static final DeferredHolder<SoundEvent, SoundEvent> BANDIT_DEATH = register("bandit_death");
+    public static final DeferredHolder<SoundEvent, SoundEvent> BANDIT_SWING = register("bandit_swing");
+    public static final DeferredHolder<SoundEvent, SoundEvent> BANDIT_ARCHER_DRAW = register("bandit_archer_draw");
+    public static final DeferredHolder<SoundEvent, SoundEvent> BANDIT_ARCHER_SHOOT = register("bandit_archer_shoot");
+    public static final DeferredHolder<SoundEvent, SoundEvent> BANDIT_CHIEF_AMBIENT = register("bandit_chief_ambient");
+    public static final DeferredHolder<SoundEvent, SoundEvent> BANDIT_CHIEF_HURT = register("bandit_chief_hurt");
+    public static final DeferredHolder<SoundEvent, SoundEvent> BANDIT_CHIEF_DEATH = register("bandit_chief_death");
+    public static final DeferredHolder<SoundEvent, SoundEvent> BANDIT_CHIEF_SHOUT = register("bandit_chief_shout");
+    public static final DeferredHolder<SoundEvent, SoundEvent> BONE_SOLDIER_AMBIENT = register("bone_soldier_ambient");
+    public static final DeferredHolder<SoundEvent, SoundEvent> BONE_SOLDIER_HURT = register("bone_soldier_hurt");
+    public static final DeferredHolder<SoundEvent, SoundEvent> BONE_SOLDIER_DEATH = register("bone_soldier_death");
+    public static final DeferredHolder<SoundEvent, SoundEvent> BONE_SOLDIER_STEP = register("bone_soldier_step");
+    public static final DeferredHolder<SoundEvent, SoundEvent> BONE_SOLDIER_BLOCK = register("bone_soldier_block");
+    public static final DeferredHolder<SoundEvent, SoundEvent> BONE_SOLDIER_RISE = register("bone_soldier_rise");
+    public static final DeferredHolder<SoundEvent, SoundEvent> BONE_BOWMAN_SHOOT = register("bone_bowman_shoot");
+    public static final DeferredHolder<SoundEvent, SoundEvent> BONE_STANDARD_PLANT = register("bone_standard_plant");
+    public static final DeferredHolder<SoundEvent, SoundEvent> BONE_STANDARD_HORN = register("bone_standard_horn");
+    public static final DeferredHolder<SoundEvent, SoundEvent> GRAIN_RAT_AMBIENT = register("grain_rat_ambient");
+    public static final DeferredHolder<SoundEvent, SoundEvent> GRAIN_RAT_HURT = register("grain_rat_hurt");
+    public static final DeferredHolder<SoundEvent, SoundEvent> GRAIN_RAT_DEATH = register("grain_rat_death");
+    public static final DeferredHolder<SoundEvent, SoundEvent> GRAIN_RAT_BITE = register("grain_rat_bite");
+    public static final DeferredHolder<SoundEvent, SoundEvent> STRAY_WISP_AMBIENT = register("stray_wisp_ambient");
+    public static final DeferredHolder<SoundEvent, SoundEvent> STRAY_WISP_HURT = register("stray_wisp_hurt");
+    public static final DeferredHolder<SoundEvent, SoundEvent> STRAY_WISP_DEATH = register("stray_wisp_death");
+    public static final DeferredHolder<SoundEvent, SoundEvent> STRAY_WISP_PULSE = register("stray_wisp_pulse");
+
     private MobSounds() {
     }
 

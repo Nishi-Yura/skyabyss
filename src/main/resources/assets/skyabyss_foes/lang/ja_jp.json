@@ -1,0 +1,18 @@
+{
+  "entity.skyabyss.bandit": "野盗",
+  "item.skyabyss.bandit_spawn_egg": "野盗のスポーンエッグ",
+  "entity.skyabyss.bandit_archer": "野盗の弓手",
+  "item.skyabyss.bandit_archer_spawn_egg": "野盗の弓手のスポーンエッグ",
+  "entity.skyabyss.bandit_chief": "野盗の頭目",
+  "item.skyabyss.bandit_chief_spawn_egg": "野盗の頭目のスポーンエッグ",
+  "entity.skyabyss.bone_footman": "骸の歩兵",
+  "item.skyabyss.bone_footman_spawn_egg": "骸の歩兵のスポーンエッグ",
+  "entity.skyabyss.bone_bowman": "骸の弓兵",
+  "item.skyabyss.bone_bowman_spawn_egg": "骸の弓兵のスポーンエッグ",
+  "entity.skyabyss.bone_standard": "骸の旗手",
+  "item.skyabyss.bone_standard_spawn_egg": "骸の旗手のスポーンエッグ",
+  "entity.skyabyss.grain_rat": "穂かじり鼠",
+  "item.skyabyss.grain_rat_spawn_egg": "穂かじり鼠のスポーンエッグ",
+  "entity.skyabyss.stray_wisp": "迷い灯",
+  "item.skyabyss.stray_wisp_spawn_egg": "迷い灯のスポーンエッグ"
+}

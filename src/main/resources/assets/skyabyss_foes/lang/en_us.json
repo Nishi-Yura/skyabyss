@@ -1,0 +1,18 @@
+{
+  "entity.skyabyss.bandit": "Bandit",
+  "item.skyabyss.bandit_spawn_egg": "Bandit Spawn Egg",
+  "entity.skyabyss.bandit_archer": "Bandit Archer",
+  "item.skyabyss.bandit_archer_spawn_egg": "Bandit Archer Spawn Egg",
+  "entity.skyabyss.bandit_chief": "Bandit Chief",
+  "item.skyabyss.bandit_chief_spawn_egg": "Bandit Chief Spawn Egg",
+  "entity.skyabyss.bone_footman": "Bone Footman",
+  "item.skyabyss.bone_footman_spawn_egg": "Bone Footman Spawn Egg",
+  "entity.skyabyss.bone_bowman": "Bone Bowman",
+  "item.skyabyss.bone_bowman_spawn_egg": "Bone Bowman Spawn Egg",
+  "entity.skyabyss.bone_standard": "Bone Standard-Bearer",
+  "item.skyabyss.bone_standard_spawn_egg": "Bone Standard-Bearer Spawn Egg",
+  "entity.skyabyss.grain_rat": "Grain Rat",
+  "item.skyabyss.grain_rat_spawn_egg": "Grain Rat Spawn Egg",
+  "entity.skyabyss.stray_wisp": "Stray Wisp",
+  "item.skyabyss.stray_wisp_spawn_egg": "Stray Wisp Spawn Egg"
+}

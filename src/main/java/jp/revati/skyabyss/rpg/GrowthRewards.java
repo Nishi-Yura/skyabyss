@@ -66,6 +66,15 @@ public final class GrowthRewards {
         MOD_ENEMIES.put(SkyAbyss.MODID + ":spine_hare", new Source(5, STONE_WHALE_LEVEL));
         MOD_ENEMIES.put(SkyAbyss.MODID + ":bone_hauler", new Source(2, STONE_WHALE_LEVEL));
         MOD_ENEMIES.put(SkyAbyss.MODID + ":elder_sentry", new Source(40, STONE_WHALE_LEVEL));
+        // 大陸の新しい敵 (docs/design/44。推奨は島・草原のレベル)
+        MOD_ENEMIES.put(SkyAbyss.MODID + ":bandit", new Source(8, 3));
+        MOD_ENEMIES.put(SkyAbyss.MODID + ":bandit_archer", new Source(7, 3));
+        MOD_ENEMIES.put(SkyAbyss.MODID + ":bandit_chief", new Source(30, 4));
+        MOD_ENEMIES.put(SkyAbyss.MODID + ":bone_footman", new Source(9, 5));
+        MOD_ENEMIES.put(SkyAbyss.MODID + ":bone_bowman", new Source(8, 5));
+        MOD_ENEMIES.put(SkyAbyss.MODID + ":bone_standard", new Source(40, 5));
+        MOD_ENEMIES.put(SkyAbyss.MODID + ":grain_rat", new Source(3, 3));
+        MOD_ENEMIES.put(SkyAbyss.MODID + ":stray_wisp", new Source(4, 4));
         // 試練の外で呼ばれた番兵長・心臓 (コマンドなど) は、ふつうの敵として分ける
         MOD_ENEMIES.put(SkyAbyss.MODID + ":whalebone_captain", new Source(100, STONE_WHALE_LEVEL));
         MOD_ENEMIES.put(SkyAbyss.MODID + ":stone_whale_heart", new Source(300, STONE_WHALE_LEVEL));

@@ -1,5 +1,7 @@
 package jp.revati.skyabyss.world.continent;
 
+import jp.revati.skyabyss.registry.ModEntities;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -72,7 +74,6 @@ public final class IslandTrail {
     static final double CAMP_NEAR = 10;
     static final double BANDIT_NEAR = 36;
     static final String LEADER_TAG = "skyabyss_island_leader";
-    static final net.minecraft.resources.ResourceLocation LEADER_HP = net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "island_leader_hp");
     static final int LEADER_COINS = 5;
     static final int GATE_HALF = 14;
     // 渡りの場面: 島の船着き場から都の向きへ、この先の海の上
@@ -233,7 +234,8 @@ public final class IslandTrail {
     }
 
     static boolean bandit(Entity e) {
-        return e.getType() == EntityType.PILLAGER || e.getType() == EntityType.VINDICATOR;
+        return e instanceof jp.revati.skyabyss.entity.foe.Bandit || e instanceof jp.revati.skyabyss.entity.foe.BanditArcher
+                || e instanceof jp.revati.skyabyss.entity.foe.BanditChief;
     }
 
     // 退ける数に足りない人が野営の近くにいれば、足りない分の野盗を野営に立たせる (ほかの人がすでに退けていても、その人の分)
@@ -245,7 +247,8 @@ public final class IslandTrail {
         int need = BANDITS_NEEDED - p.getPersistentData().getInt(KILLS);
         int alive = level.getEntitiesOfClass(Mob.class, banditBox(), m -> m.isAlive() && bandit(m)).size();
         for (int i = alive; i < Math.min(need, 3); i++) {
-            EntityType<? extends Mob> type = i == 2 ? EntityType.PILLAGER : EntityType.VINDICATOR;
+            // 野盗・頭目・弓手 (docs/design/44)
+            EntityType<? extends Mob> type = i == 2 ? ModEntities.BANDIT_ARCHER.get() : i == 1 ? ModEntities.BANDIT_CHIEF.get() : ModEntities.BANDIT.get();
             Mob m = type.create(level);
             if (m == null) {
                 continue;
@@ -257,16 +260,10 @@ public final class IslandTrail {
             m.finalizeSpawn(level, level.getCurrentDifficultyAt(m.blockPosition()), MobSpawnType.EVENT, null);
             m.setPersistenceRequired();
             if (i == 1) {
-                // 峠の頭目 (Wynncraft の最初の戦いの小さな頭のように。名札つき・体力 2 倍・倒すと鐘銭)
+                // 峠の頭目 (Wynncraft の最初の戦いの小さな頭のように。名札つき・倒すと鐘銭。体の強さは野盗の頭目そのもの)
                 m.setCustomName(Component.translatable("entity.skyabyss.island_bandit_leader"));
                 m.setCustomNameVisible(true);
                 m.addTag(LEADER_TAG);
-                var hp = m.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.MAX_HEALTH);
-                if (hp != null) {
-                    hp.addPermanentModifier(new net.minecraft.world.entity.ai.attributes.AttributeModifier(LEADER_HP, 1.0,
-                            net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
-                    m.setHealth(m.getMaxHealth());
-                }
             }
             level.addFreshEntity(m);
         }

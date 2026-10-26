@@ -1,0 +1,135 @@
+# 大陸の新しい敵 8 体 (docs/design/44、tools/gen/foes/gen_foes_one.py) のゲーム内の確認: 待機・予告・技の姿。平らな世界、モブは原点で南 (+z) を向く
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/foes_one.txt -PshotsName=foes_one
+world foes_one flat
+size 1280 720
+timeout 1200
+render 8
+cmd gamemode spectator
+cmd time set 6000
+cmd gamerule doDaylightCycle false
+cmd gamerule doMobSpawning false
+waitchunks 300
+wait 40
+cmd skyabyss cinematic stop
+close
+wait 20
+hud off
+clouds off
+chat clear
+# --- 野盗 (待機 / 振りかぶり / 斬り下ろし)
+cmd kill @e[type=!minecraft:player,distance=..80]
+cmd summon skyabyss:bandit 0 -60 0 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b,Invulnerable:1b,Tags:["m"]}
+camera minecraft:overworld 2.2 -59.1 2.4 137 10
+waitchunks
+wait 60
+chat clear
+shot bandit_rest
+cmd skyabyss dev anim @e[tag=m] swing
+wait 11
+shot bandit_windup
+wait 4
+shot bandit_slash
+# --- 野盗の弓手 (待機 / 引き)
+cmd kill @e[type=!minecraft:player,distance=..80]
+cmd summon skyabyss:bandit_archer 0 -60 0 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b,Invulnerable:1b,Tags:["m"]}
+wait 30
+chat clear
+shot archer_rest
+cmd skyabyss dev anim @e[tag=m] shoot
+wait 15
+shot archer_draw
+# --- 野盗の頭目 (待機 / 引き / 叫び)
+cmd kill @e[type=!minecraft:player,distance=..80]
+cmd summon skyabyss:bandit_chief 0 -60 0 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b,Invulnerable:1b,Tags:["m"]}
+camera minecraft:overworld 2.6 -58.9 2.8 137 10
+wait 30
+chat clear
+shot chief_rest
+cmd skyabyss dev anim @e[tag=m] sweep
+wait 15
+shot chief_windup
+wait 4
+shot chief_sweep
+cmd skyabyss dev anim @e[tag=m] shout
+wait 14
+shot chief_shout
+# --- 骸の三体と迷い灯は夜 (灯の光)
+cmd time set 18000
+# --- 骸の歩兵 (待機 / 突き)
+cmd kill @e[type=!minecraft:player,distance=..80]
+cmd summon skyabyss:bone_footman 0 -60 0 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b,Invulnerable:1b,Tags:["m"]}
+camera minecraft:overworld 2.2 -59.1 2.4 137 10
+wait 30
+chat clear
+shot footman_rest
+cmd skyabyss dev anim @e[tag=m] thrust
+wait 15
+shot footman_thrust
+# --- 骸の弓兵 (待機 / 引き / 弓で殴る)
+cmd kill @e[type=!minecraft:player,distance=..80]
+cmd summon skyabyss:bone_bowman 0 -60 0 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b,Invulnerable:1b,Tags:["m"]}
+wait 30
+chat clear
+shot bowman_rest
+cmd skyabyss dev anim @e[tag=m] shoot
+wait 15
+shot bowman_draw
+cmd skyabyss dev anim @e[tag=m] bash
+wait 11
+shot bowman_bash
+# --- 骸の旗手 (待機 / 薙ぎ / 旗)
+cmd kill @e[type=!minecraft:player,distance=..80]
+cmd summon skyabyss:bone_standard 0 -60 0 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b,Invulnerable:1b,Tags:["m"]}
+camera minecraft:overworld 2.9 -58.6 3.2 137 12
+wait 30
+chat clear
+shot standard_rest
+camera minecraft:overworld -2.6 -58.6 -3.0 -40 10
+wait 10
+shot standard_back
+camera minecraft:overworld 2.9 -58.6 3.2 137 12
+cmd skyabyss dev anim @e[tag=m] sweep
+wait 13
+shot standard_windup
+cmd skyabyss dev anim @e[tag=m] plant
+wait 22
+shot standard_plant_raise
+wait 4
+shot standard_plant_down
+# --- 迷い灯 (浮く / 明滅)
+cmd kill @e[type=!minecraft:player,distance=..80]
+cmd summon skyabyss:stray_wisp 0 -59 0 {NoAI:1b,NoGravity:1b,Rotation:[0f,0f],PersistenceRequired:1b,Invulnerable:1b,Tags:["m"]}
+camera minecraft:overworld 1.8 -58.4 2.0 137 6
+wait 30
+chat clear
+shot wisp_rest
+cmd skyabyss dev anim @e[tag=m] pulse
+wait 11
+shot wisp_pulse
+# --- 穂かじり鼠 (昼。待機 / 構え / 跳び)
+cmd time set 6000
+cmd kill @e[type=!minecraft:player,distance=..80]
+cmd summon skyabyss:grain_rat 0 -60 0 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b,Invulnerable:1b,Tags:["m"]}
+camera minecraft:overworld 1.0 -59.9 1.1 137 14
+wait 30
+chat clear
+shot rat_rest
+cmd skyabyss dev anim @e[tag=m] bite
+wait 5
+shot rat_crouch
+wait 4
+shot rat_leap
+# --- 全員の並び (昼)
+cmd kill @e[type=!minecraft:player,distance=..80]
+cmd summon skyabyss:grain_rat -6 -60 0 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b,Invulnerable:1b}
+cmd summon skyabyss:bandit_archer -4.2 -60 0 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b,Invulnerable:1b}
+cmd summon skyabyss:bandit -2.6 -60 0 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b,Invulnerable:1b}
+cmd summon skyabyss:bandit_chief -0.8 -60 0 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b,Invulnerable:1b}
+cmd summon skyabyss:bone_standard 1.1 -60 0 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b,Invulnerable:1b}
+cmd summon skyabyss:bone_footman 2.9 -60 0 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b,Invulnerable:1b}
+cmd summon skyabyss:bone_bowman 4.5 -60 0 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b,Invulnerable:1b}
+cmd summon skyabyss:stray_wisp 6.2 -59 0 {NoAI:1b,NoGravity:1b,Rotation:[0f,0f],PersistenceRequired:1b,Invulnerable:1b}
+camera minecraft:overworld 0.0 -58.6 7.6 180 8
+wait 40
+chat clear
+shot lineup

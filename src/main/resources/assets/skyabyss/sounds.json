@@ -2272,7 +2272,6 @@
       }
     ]
   },
-
   "quest_main": {
     "sounds": [
       {
@@ -2287,7 +2286,6 @@
       }
     ]
   },
-
   "domain_stone_sea": {
     "subtitle": "subtitles.skyabyss.domain_stone_sea",
     "sounds": [
@@ -2321,60 +2319,878 @@
       {
         "name": "skyabyss:mobs/domain_hearth_core",
         "attenuation_distance": 64
-
       }
     ]
   },
-  "tidepool_clam_ambient": {"subtitle": "subtitles.skyabyss.tidepool_clam_ambient", "sounds": [{"name": "skyabyss:bubble_pop", "type": "event", "pitch": 0.7, "volume": 0.35}]},
-  "tidepool_clam_open": {"subtitle": "subtitles.skyabyss.tidepool_clam_open", "sounds": [{"name": "skyabyss:reef_nest_open", "type": "event", "pitch": 1.2, "volume": 1.0}]},
-  "tidepool_clam_snap": {"subtitle": "subtitles.skyabyss.tidepool_clam_snap", "sounds": [{"name": "skyabyss:reef_nest_close", "type": "event", "pitch": 1.5, "volume": 1.0}]},
-  "tidepool_clam_close": {"subtitle": "subtitles.skyabyss.tidepool_clam_close", "sounds": [{"name": "skyabyss:reef_nest_close", "type": "event", "pitch": 1.1, "volume": 0.6}]},
-  "tidepool_clam_hurt": {"subtitle": "subtitles.skyabyss.tidepool_clam_hurt", "sounds": [{"name": "skyabyss:reef_scuttler_hurt", "type": "event", "pitch": 0.8, "volume": 0.8}]},
-  "tidepool_clam_death": {"subtitle": "subtitles.skyabyss.tidepool_clam_death", "sounds": [{"name": "skyabyss:reef_nest_break", "type": "event", "pitch": 1.3, "volume": 0.9}]},
-  "sand_burrower_ambient": {"subtitle": "subtitles.skyabyss.sand_burrower_ambient", "sounds": [{"name": "skyabyss:tide_beckoner_breath", "type": "event", "pitch": 1.8, "volume": 0.3}]},
-  "sand_burrower_bulge": {"subtitle": "subtitles.skyabyss.sand_burrower_bulge", "sounds": [{"name": "skyabyss:tide_beckoner_burrow", "type": "event", "pitch": 1.6, "volume": 0.9}]},
-  "sand_burrower_emerge": {"subtitle": "subtitles.skyabyss.sand_burrower_emerge", "sounds": [{"name": "skyabyss:tide_beckoner_emerge", "type": "event", "pitch": 1.7, "volume": 1.0}]},
-  "sand_burrower_bite": {"subtitle": "subtitles.skyabyss.sand_burrower_bite", "sounds": [{"name": "minecraft:entity.fox.bite", "type": "event", "pitch": 0.7, "volume": 1.0}]},
-  "sand_burrower_hurt": {"subtitle": "subtitles.skyabyss.sand_burrower_hurt", "sounds": [{"name": "skyabyss:reef_scuttler_hurt", "type": "event", "pitch": 1.3, "volume": 0.8}]},
-  "sand_burrower_death": {"subtitle": "subtitles.skyabyss.sand_burrower_death", "sounds": [{"name": "skyabyss:reef_scuttler_death", "type": "event", "pitch": 1.2, "volume": 0.8}]},
-  "sand_burrower_step": {"subtitle": "subtitles.skyabyss.sand_burrower_step", "sounds": [{"name": "minecraft:block.sand.step", "type": "event", "pitch": 1.4, "volume": 0.3}]},
-  "drift_hermit_ambient": {"subtitle": "subtitles.skyabyss.drift_hermit_ambient", "sounds": [{"name": "skyabyss:reef_scuttler_ambient", "type": "event", "pitch": 1.5, "volume": 0.45}]},
-  "drift_hermit_hurt": {"subtitle": "subtitles.skyabyss.drift_hermit_hurt", "sounds": [{"name": "skyabyss:reef_scuttler_hurt", "type": "event", "pitch": 1.6, "volume": 0.7}]},
-  "drift_hermit_death": {"subtitle": "subtitles.skyabyss.drift_hermit_death", "sounds": [{"name": "skyabyss:reef_scuttler_death", "type": "event", "pitch": 1.6, "volume": 0.7}]},
-  "drift_hermit_step": {"subtitle": "subtitles.skyabyss.drift_hermit_step", "sounds": [{"name": "skyabyss:reef_scuttler_step", "type": "event", "pitch": 1.4, "volume": 0.25}]},
-  "drift_hermit_hide": {"subtitle": "subtitles.skyabyss.drift_hermit_hide", "sounds": [{"name": "skyabyss:reef_nest_close", "type": "event", "pitch": 1.8, "volume": 0.6}]},
-  "drift_hermit_spit": {"subtitle": "subtitles.skyabyss.drift_hermit_spit", "sounds": [{"name": "skyabyss:bubble_pop", "type": "event", "pitch": 0.9, "volume": 0.8}]},
-  "shore_warden_ambient": {"subtitle": "subtitles.skyabyss.shore_warden_ambient", "sounds": [{"name": "skyabyss:coral_thrall_ambient", "type": "event", "pitch": 0.75, "volume": 1.0}]},
-  "shore_warden_hurt": {"subtitle": "subtitles.skyabyss.shore_warden_hurt", "sounds": [{"name": "skyabyss:coral_thrall_hurt", "type": "event", "pitch": 0.8, "volume": 1.0}]},
-  "shore_warden_death": {"subtitle": "subtitles.skyabyss.shore_warden_death", "sounds": [{"name": "skyabyss:coral_thrall_death", "type": "event", "pitch": 0.7, "volume": 1.0}]},
-  "shore_warden_step": {"subtitle": "subtitles.skyabyss.shore_warden_step", "sounds": [{"name": "skyabyss:coral_thrall_step", "type": "event", "pitch": 0.75, "volume": 0.6}]},
-  "shore_warden_stance": {"subtitle": "subtitles.skyabyss.shore_warden_stance", "sounds": [{"name": "skyabyss:tide_beckoner_raise", "type": "event", "pitch": 1.1, "volume": 1.2}]},
-  "shore_warden_thrust": {"subtitle": "subtitles.skyabyss.shore_warden_thrust", "sounds": [{"name": "skyabyss:coral_thrall_thrust", "type": "event", "pitch": 0.8, "volume": 1.4}]},
-  "shore_warden_ring": {"subtitle": "subtitles.skyabyss.shore_warden_ring", "sounds": [{"name": "skyabyss:tide_heart_flood", "type": "event", "pitch": 1.3, "volume": 1.0}]},
-  "shore_warden_flood": {"subtitle": "subtitles.skyabyss.shore_warden_flood", "sounds": [{"name": "skyabyss:tide_heart_wave", "type": "event", "pitch": 1.4, "volume": 1.2}]},
-  "static_puff_ambient": {"subtitle": "subtitles.skyabyss.static_puff_ambient", "sounds": [{"name": "skyabyss:static_moth_ambient", "type": "event", "pitch": 1.6, "volume": 0.4}]},
-  "static_puff_charge": {"subtitle": "subtitles.skyabyss.static_puff_charge", "sounds": [{"name": "skyabyss:static_moth_charge", "type": "event", "pitch": 1.3, "volume": 0.9}]},
-  "static_puff_discharge": {"subtitle": "subtitles.skyabyss.static_puff_discharge", "sounds": [{"name": "skyabyss:static_moth_discharge", "type": "event", "pitch": 1.4, "volume": 1.0}]},
-  "static_puff_hurt": {"subtitle": "subtitles.skyabyss.static_puff_hurt", "sounds": [{"name": "minecraft:block.wool.hit", "type": "event", "pitch": 1.2, "volume": 0.9}]},
-  "static_puff_death": {"subtitle": "subtitles.skyabyss.static_puff_death", "sounds": [{"name": "skyabyss:static_moth_burst", "type": "event", "pitch": 1.5, "volume": 0.8}]},
-  "peak_fledgling_ambient": {"subtitle": "subtitles.skyabyss.peak_fledgling_ambient", "sounds": [{"name": "minecraft:entity.parrot.ambient", "type": "event", "pitch": 0.8, "volume": 0.6}]},
-  "peak_fledgling_cry": {"subtitle": "subtitles.skyabyss.peak_fledgling_cry", "sounds": [{"name": "minecraft:entity.parrot.fly", "type": "event", "pitch": 0.9, "volume": 1.0}]},
-  "peak_fledgling_dive": {"subtitle": "subtitles.skyabyss.peak_fledgling_dive", "sounds": [{"name": "skyabyss:feather_warden_dive", "type": "event", "pitch": 1.6, "volume": 1.0}]},
-  "peak_fledgling_thud": {"subtitle": "subtitles.skyabyss.peak_fledgling_thud", "sounds": [{"name": "minecraft:block.stone.hit", "type": "event", "pitch": 0.7, "volume": 1.2}]},
-  "peak_fledgling_hurt": {"subtitle": "subtitles.skyabyss.peak_fledgling_hurt", "sounds": [{"name": "minecraft:entity.parrot.hurt", "type": "event", "pitch": 0.8, "volume": 0.9}]},
-  "peak_fledgling_death": {"subtitle": "subtitles.skyabyss.peak_fledgling_death", "sounds": [{"name": "minecraft:entity.parrot.death", "type": "event", "pitch": 0.8, "volume": 0.9}]},
-  "lightning_gleaner_ambient": {"subtitle": "subtitles.skyabyss.lightning_gleaner_ambient", "sounds": [{"name": "minecraft:entity.parrot.ambient", "type": "event", "pitch": 0.6, "volume": 0.5}]},
-  "lightning_gleaner_flap": {"subtitle": "subtitles.skyabyss.lightning_gleaner_flap", "sounds": [{"name": "minecraft:entity.parrot.fly", "type": "event", "pitch": 0.7, "volume": 1.0}]},
-  "lightning_gleaner_drop": {"subtitle": "subtitles.skyabyss.lightning_gleaner_drop", "sounds": [{"name": "minecraft:block.chain.fall", "type": "event", "pitch": 1.4, "volume": 0.9}]},
-  "lightning_gleaner_hurt": {"subtitle": "subtitles.skyabyss.lightning_gleaner_hurt", "sounds": [{"name": "minecraft:entity.parrot.hurt", "type": "event", "pitch": 0.6, "volume": 0.9}]},
-  "lightning_gleaner_death": {"subtitle": "subtitles.skyabyss.lightning_gleaner_death", "sounds": [{"name": "minecraft:entity.parrot.death", "type": "event", "pitch": 0.6, "volume": 0.9}]},
-  "lightning_gleaner_step": {"subtitle": "subtitles.skyabyss.lightning_gleaner_step", "sounds": [{"name": "minecraft:block.copper.step", "type": "event", "pitch": 1.4, "volume": 0.3}]},
-  "scorched_warden_ambient": {"subtitle": "subtitles.skyabyss.scorched_warden_ambient", "sounds": [{"name": "skyabyss:feather_warden_ambient", "type": "event", "pitch": 0.8, "volume": 1.0}]},
-  "scorched_warden_hurt": {"subtitle": "subtitles.skyabyss.scorched_warden_hurt", "sounds": [{"name": "skyabyss:feather_warden_hurt", "type": "event", "pitch": 0.85, "volume": 1.0}]},
-  "scorched_warden_death": {"subtitle": "subtitles.skyabyss.scorched_warden_death", "sounds": [{"name": "skyabyss:feather_warden_death", "type": "event", "pitch": 0.75, "volume": 1.0}]},
-  "scorched_warden_ring": {"subtitle": "subtitles.skyabyss.scorched_warden_ring", "sounds": [{"name": "skyabyss:static_moth_charge", "type": "event", "pitch": 0.7, "volume": 1.3}]},
-  "scorched_warden_ring_burst": {"subtitle": "subtitles.skyabyss.scorched_warden_ring_burst", "sounds": [{"name": "minecraft:entity.lightning_bolt.impact", "type": "event", "pitch": 1.2, "volume": 1.0}]},
-  "scorched_warden_leap": {"subtitle": "subtitles.skyabyss.scorched_warden_leap", "sounds": [{"name": "skyabyss:feather_warden_crouch", "type": "event", "pitch": 0.9, "volume": 1.2}]},
-  "scorched_warden_land": {"subtitle": "subtitles.skyabyss.scorched_warden_land", "sounds": [{"name": "skyabyss:feather_warden_land", "type": "event", "pitch": 0.8, "volume": 1.3}]},
-  "scorched_warden_struck": {"subtitle": "subtitles.skyabyss.scorched_warden_struck", "sounds": [{"name": "minecraft:entity.lightning_bolt.thunder", "type": "event", "pitch": 1.6, "volume": 0.8}]}
+  "tidepool_clam_ambient": {
+    "subtitle": "subtitles.skyabyss.tidepool_clam_ambient",
+    "sounds": [
+      {
+        "name": "skyabyss:bubble_pop",
+        "type": "event",
+        "pitch": 0.7,
+        "volume": 0.35
+      }
+    ]
+  },
+  "tidepool_clam_open": {
+    "subtitle": "subtitles.skyabyss.tidepool_clam_open",
+    "sounds": [
+      {
+        "name": "skyabyss:reef_nest_open",
+        "type": "event",
+        "pitch": 1.2,
+        "volume": 1.0
+      }
+    ]
+  },
+  "tidepool_clam_snap": {
+    "subtitle": "subtitles.skyabyss.tidepool_clam_snap",
+    "sounds": [
+      {
+        "name": "skyabyss:reef_nest_close",
+        "type": "event",
+        "pitch": 1.5,
+        "volume": 1.0
+      }
+    ]
+  },
+  "tidepool_clam_close": {
+    "subtitle": "subtitles.skyabyss.tidepool_clam_close",
+    "sounds": [
+      {
+        "name": "skyabyss:reef_nest_close",
+        "type": "event",
+        "pitch": 1.1,
+        "volume": 0.6
+      }
+    ]
+  },
+  "tidepool_clam_hurt": {
+    "subtitle": "subtitles.skyabyss.tidepool_clam_hurt",
+    "sounds": [
+      {
+        "name": "skyabyss:reef_scuttler_hurt",
+        "type": "event",
+        "pitch": 0.8,
+        "volume": 0.8
+      }
+    ]
+  },
+  "tidepool_clam_death": {
+    "subtitle": "subtitles.skyabyss.tidepool_clam_death",
+    "sounds": [
+      {
+        "name": "skyabyss:reef_nest_break",
+        "type": "event",
+        "pitch": 1.3,
+        "volume": 0.9
+      }
+    ]
+  },
+  "sand_burrower_ambient": {
+    "subtitle": "subtitles.skyabyss.sand_burrower_ambient",
+    "sounds": [
+      {
+        "name": "skyabyss:tide_beckoner_breath",
+        "type": "event",
+        "pitch": 1.8,
+        "volume": 0.3
+      }
+    ]
+  },
+  "sand_burrower_bulge": {
+    "subtitle": "subtitles.skyabyss.sand_burrower_bulge",
+    "sounds": [
+      {
+        "name": "skyabyss:tide_beckoner_burrow",
+        "type": "event",
+        "pitch": 1.6,
+        "volume": 0.9
+      }
+    ]
+  },
+  "sand_burrower_emerge": {
+    "subtitle": "subtitles.skyabyss.sand_burrower_emerge",
+    "sounds": [
+      {
+        "name": "skyabyss:tide_beckoner_emerge",
+        "type": "event",
+        "pitch": 1.7,
+        "volume": 1.0
+      }
+    ]
+  },
+  "sand_burrower_bite": {
+    "subtitle": "subtitles.skyabyss.sand_burrower_bite",
+    "sounds": [
+      {
+        "name": "minecraft:entity.fox.bite",
+        "type": "event",
+        "pitch": 0.7,
+        "volume": 1.0
+      }
+    ]
+  },
+  "sand_burrower_hurt": {
+    "subtitle": "subtitles.skyabyss.sand_burrower_hurt",
+    "sounds": [
+      {
+        "name": "skyabyss:reef_scuttler_hurt",
+        "type": "event",
+        "pitch": 1.3,
+        "volume": 0.8
+      }
+    ]
+  },
+  "sand_burrower_death": {
+    "subtitle": "subtitles.skyabyss.sand_burrower_death",
+    "sounds": [
+      {
+        "name": "skyabyss:reef_scuttler_death",
+        "type": "event",
+        "pitch": 1.2,
+        "volume": 0.8
+      }
+    ]
+  },
+  "sand_burrower_step": {
+    "subtitle": "subtitles.skyabyss.sand_burrower_step",
+    "sounds": [
+      {
+        "name": "minecraft:block.sand.step",
+        "type": "event",
+        "pitch": 1.4,
+        "volume": 0.3
+      }
+    ]
+  },
+  "drift_hermit_ambient": {
+    "subtitle": "subtitles.skyabyss.drift_hermit_ambient",
+    "sounds": [
+      {
+        "name": "skyabyss:reef_scuttler_ambient",
+        "type": "event",
+        "pitch": 1.5,
+        "volume": 0.45
+      }
+    ]
+  },
+  "drift_hermit_hurt": {
+    "subtitle": "subtitles.skyabyss.drift_hermit_hurt",
+    "sounds": [
+      {
+        "name": "skyabyss:reef_scuttler_hurt",
+        "type": "event",
+        "pitch": 1.6,
+        "volume": 0.7
+      }
+    ]
+  },
+  "drift_hermit_death": {
+    "subtitle": "subtitles.skyabyss.drift_hermit_death",
+    "sounds": [
+      {
+        "name": "skyabyss:reef_scuttler_death",
+        "type": "event",
+        "pitch": 1.6,
+        "volume": 0.7
+      }
+    ]
+  },
+  "drift_hermit_step": {
+    "subtitle": "subtitles.skyabyss.drift_hermit_step",
+    "sounds": [
+      {
+        "name": "skyabyss:reef_scuttler_step",
+        "type": "event",
+        "pitch": 1.4,
+        "volume": 0.25
+      }
+    ]
+  },
+  "drift_hermit_hide": {
+    "subtitle": "subtitles.skyabyss.drift_hermit_hide",
+    "sounds": [
+      {
+        "name": "skyabyss:reef_nest_close",
+        "type": "event",
+        "pitch": 1.8,
+        "volume": 0.6
+      }
+    ]
+  },
+  "drift_hermit_spit": {
+    "subtitle": "subtitles.skyabyss.drift_hermit_spit",
+    "sounds": [
+      {
+        "name": "skyabyss:bubble_pop",
+        "type": "event",
+        "pitch": 0.9,
+        "volume": 0.8
+      }
+    ]
+  },
+  "shore_warden_ambient": {
+    "subtitle": "subtitles.skyabyss.shore_warden_ambient",
+    "sounds": [
+      {
+        "name": "skyabyss:coral_thrall_ambient",
+        "type": "event",
+        "pitch": 0.75,
+        "volume": 1.0
+      }
+    ]
+  },
+  "shore_warden_hurt": {
+    "subtitle": "subtitles.skyabyss.shore_warden_hurt",
+    "sounds": [
+      {
+        "name": "skyabyss:coral_thrall_hurt",
+        "type": "event",
+        "pitch": 0.8,
+        "volume": 1.0
+      }
+    ]
+  },
+  "shore_warden_death": {
+    "subtitle": "subtitles.skyabyss.shore_warden_death",
+    "sounds": [
+      {
+        "name": "skyabyss:coral_thrall_death",
+        "type": "event",
+        "pitch": 0.7,
+        "volume": 1.0
+      }
+    ]
+  },
+  "shore_warden_step": {
+    "subtitle": "subtitles.skyabyss.shore_warden_step",
+    "sounds": [
+      {
+        "name": "skyabyss:coral_thrall_step",
+        "type": "event",
+        "pitch": 0.75,
+        "volume": 0.6
+      }
+    ]
+  },
+  "shore_warden_stance": {
+    "subtitle": "subtitles.skyabyss.shore_warden_stance",
+    "sounds": [
+      {
+        "name": "skyabyss:tide_beckoner_raise",
+        "type": "event",
+        "pitch": 1.1,
+        "volume": 1.2
+      }
+    ]
+  },
+  "shore_warden_thrust": {
+    "subtitle": "subtitles.skyabyss.shore_warden_thrust",
+    "sounds": [
+      {
+        "name": "skyabyss:coral_thrall_thrust",
+        "type": "event",
+        "pitch": 0.8,
+        "volume": 1.4
+      }
+    ]
+  },
+  "shore_warden_ring": {
+    "subtitle": "subtitles.skyabyss.shore_warden_ring",
+    "sounds": [
+      {
+        "name": "skyabyss:tide_heart_flood",
+        "type": "event",
+        "pitch": 1.3,
+        "volume": 1.0
+      }
+    ]
+  },
+  "shore_warden_flood": {
+    "subtitle": "subtitles.skyabyss.shore_warden_flood",
+    "sounds": [
+      {
+        "name": "skyabyss:tide_heart_wave",
+        "type": "event",
+        "pitch": 1.4,
+        "volume": 1.2
+      }
+    ]
+  },
+  "static_puff_ambient": {
+    "subtitle": "subtitles.skyabyss.static_puff_ambient",
+    "sounds": [
+      {
+        "name": "skyabyss:static_moth_ambient",
+        "type": "event",
+        "pitch": 1.6,
+        "volume": 0.4
+      }
+    ]
+  },
+  "static_puff_charge": {
+    "subtitle": "subtitles.skyabyss.static_puff_charge",
+    "sounds": [
+      {
+        "name": "skyabyss:static_moth_charge",
+        "type": "event",
+        "pitch": 1.3,
+        "volume": 0.9
+      }
+    ]
+  },
+  "static_puff_discharge": {
+    "subtitle": "subtitles.skyabyss.static_puff_discharge",
+    "sounds": [
+      {
+        "name": "skyabyss:static_moth_discharge",
+        "type": "event",
+        "pitch": 1.4,
+        "volume": 1.0
+      }
+    ]
+  },
+  "static_puff_hurt": {
+    "subtitle": "subtitles.skyabyss.static_puff_hurt",
+    "sounds": [
+      {
+        "name": "minecraft:block.wool.hit",
+        "type": "event",
+        "pitch": 1.2,
+        "volume": 0.9
+      }
+    ]
+  },
+  "static_puff_death": {
+    "subtitle": "subtitles.skyabyss.static_puff_death",
+    "sounds": [
+      {
+        "name": "skyabyss:static_moth_burst",
+        "type": "event",
+        "pitch": 1.5,
+        "volume": 0.8
+      }
+    ]
+  },
+  "peak_fledgling_ambient": {
+    "subtitle": "subtitles.skyabyss.peak_fledgling_ambient",
+    "sounds": [
+      {
+        "name": "minecraft:entity.parrot.ambient",
+        "type": "event",
+        "pitch": 0.8,
+        "volume": 0.6
+      }
+    ]
+  },
+  "peak_fledgling_cry": {
+    "subtitle": "subtitles.skyabyss.peak_fledgling_cry",
+    "sounds": [
+      {
+        "name": "minecraft:entity.parrot.fly",
+        "type": "event",
+        "pitch": 0.9,
+        "volume": 1.0
+      }
+    ]
+  },
+  "peak_fledgling_dive": {
+    "subtitle": "subtitles.skyabyss.peak_fledgling_dive",
+    "sounds": [
+      {
+        "name": "skyabyss:feather_warden_dive",
+        "type": "event",
+        "pitch": 1.6,
+        "volume": 1.0
+      }
+    ]
+  },
+  "peak_fledgling_thud": {
+    "subtitle": "subtitles.skyabyss.peak_fledgling_thud",
+    "sounds": [
+      {
+        "name": "minecraft:block.stone.hit",
+        "type": "event",
+        "pitch": 0.7,
+        "volume": 1.2
+      }
+    ]
+  },
+  "peak_fledgling_hurt": {
+    "subtitle": "subtitles.skyabyss.peak_fledgling_hurt",
+    "sounds": [
+      {
+        "name": "minecraft:entity.parrot.hurt",
+        "type": "event",
+        "pitch": 0.8,
+        "volume": 0.9
+      }
+    ]
+  },
+  "peak_fledgling_death": {
+    "subtitle": "subtitles.skyabyss.peak_fledgling_death",
+    "sounds": [
+      {
+        "name": "minecraft:entity.parrot.death",
+        "type": "event",
+        "pitch": 0.8,
+        "volume": 0.9
+      }
+    ]
+  },
+  "lightning_gleaner_ambient": {
+    "subtitle": "subtitles.skyabyss.lightning_gleaner_ambient",
+    "sounds": [
+      {
+        "name": "minecraft:entity.parrot.ambient",
+        "type": "event",
+        "pitch": 0.6,
+        "volume": 0.5
+      }
+    ]
+  },
+  "lightning_gleaner_flap": {
+    "subtitle": "subtitles.skyabyss.lightning_gleaner_flap",
+    "sounds": [
+      {
+        "name": "minecraft:entity.parrot.fly",
+        "type": "event",
+        "pitch": 0.7,
+        "volume": 1.0
+      }
+    ]
+  },
+  "lightning_gleaner_drop": {
+    "subtitle": "subtitles.skyabyss.lightning_gleaner_drop",
+    "sounds": [
+      {
+        "name": "minecraft:block.chain.fall",
+        "type": "event",
+        "pitch": 1.4,
+        "volume": 0.9
+      }
+    ]
+  },
+  "lightning_gleaner_hurt": {
+    "subtitle": "subtitles.skyabyss.lightning_gleaner_hurt",
+    "sounds": [
+      {
+        "name": "minecraft:entity.parrot.hurt",
+        "type": "event",
+        "pitch": 0.6,
+        "volume": 0.9
+      }
+    ]
+  },
+  "lightning_gleaner_death": {
+    "subtitle": "subtitles.skyabyss.lightning_gleaner_death",
+    "sounds": [
+      {
+        "name": "minecraft:entity.parrot.death",
+        "type": "event",
+        "pitch": 0.6,
+        "volume": 0.9
+      }
+    ]
+  },
+  "lightning_gleaner_step": {
+    "subtitle": "subtitles.skyabyss.lightning_gleaner_step",
+    "sounds": [
+      {
+        "name": "minecraft:block.copper.step",
+        "type": "event",
+        "pitch": 1.4,
+        "volume": 0.3
+      }
+    ]
+  },
+  "scorched_warden_ambient": {
+    "subtitle": "subtitles.skyabyss.scorched_warden_ambient",
+    "sounds": [
+      {
+        "name": "skyabyss:feather_warden_ambient",
+        "type": "event",
+        "pitch": 0.8,
+        "volume": 1.0
+      }
+    ]
+  },
+  "scorched_warden_hurt": {
+    "subtitle": "subtitles.skyabyss.scorched_warden_hurt",
+    "sounds": [
+      {
+        "name": "skyabyss:feather_warden_hurt",
+        "type": "event",
+        "pitch": 0.85,
+        "volume": 1.0
+      }
+    ]
+  },
+  "scorched_warden_death": {
+    "subtitle": "subtitles.skyabyss.scorched_warden_death",
+    "sounds": [
+      {
+        "name": "skyabyss:feather_warden_death",
+        "type": "event",
+        "pitch": 0.75,
+        "volume": 1.0
+      }
+    ]
+  },
+  "scorched_warden_ring": {
+    "subtitle": "subtitles.skyabyss.scorched_warden_ring",
+    "sounds": [
+      {
+        "name": "skyabyss:static_moth_charge",
+        "type": "event",
+        "pitch": 0.7,
+        "volume": 1.3
+      }
+    ]
+  },
+  "scorched_warden_ring_burst": {
+    "subtitle": "subtitles.skyabyss.scorched_warden_ring_burst",
+    "sounds": [
+      {
+        "name": "minecraft:entity.lightning_bolt.impact",
+        "type": "event",
+        "pitch": 1.2,
+        "volume": 1.0
+      }
+    ]
+  },
+  "scorched_warden_leap": {
+    "subtitle": "subtitles.skyabyss.scorched_warden_leap",
+    "sounds": [
+      {
+        "name": "skyabyss:feather_warden_crouch",
+        "type": "event",
+        "pitch": 0.9,
+        "volume": 1.2
+      }
+    ]
+  },
+  "scorched_warden_land": {
+    "subtitle": "subtitles.skyabyss.scorched_warden_land",
+    "sounds": [
+      {
+        "name": "skyabyss:feather_warden_land",
+        "type": "event",
+        "pitch": 0.8,
+        "volume": 1.3
+      }
+    ]
+  },
+  "scorched_warden_struck": {
+    "subtitle": "subtitles.skyabyss.scorched_warden_struck",
+    "sounds": [
+      {
+        "name": "minecraft:entity.lightning_bolt.thunder",
+        "type": "event",
+        "pitch": 1.6,
+        "volume": 0.8
+      }
+    ]
+  },
+  "bandit_ambient": {
+    "subtitle": "subtitles.skyabyss.bandit_ambient",
+    "sounds": [
+      {
+        "name": "minecraft:entity.pillager.ambient",
+        "pitch": 0.95,
+        "volume": 0.7,
+        "type": "event"
+      }
+    ]
+  },
+  "bandit_hurt": {
+    "subtitle": "subtitles.skyabyss.bandit_hurt",
+    "sounds": [
+      {
+        "name": "minecraft:entity.pillager.hurt",
+        "pitch": 1.0,
+        "volume": 1.0,
+        "type": "event"
+      }
+    ]
+  },
+  "bandit_death": {
+    "subtitle": "subtitles.skyabyss.bandit_death",
+    "sounds": [
+      {
+        "name": "minecraft:entity.pillager.death",
+        "pitch": 1.0,
+        "volume": 1.0,
+        "type": "event"
+      }
+    ]
+  },
+  "bandit_swing": {
+    "subtitle": "subtitles.skyabyss.bandit_swing",
+    "sounds": [
+      {
+        "name": "minecraft:entity.player.attack.sweep",
+        "pitch": 0.75,
+        "volume": 0.9,
+        "type": "event"
+      }
+    ]
+  },
+  "bandit_archer_draw": {
+    "subtitle": "subtitles.skyabyss.bandit_archer_draw",
+    "sounds": [
+      {
+        "name": "minecraft:item.crossbow.loading_middle",
+        "pitch": 0.8,
+        "volume": 0.9,
+        "type": "event"
+      }
+    ]
+  },
+  "bandit_archer_shoot": {
+    "subtitle": "subtitles.skyabyss.bandit_archer_shoot",
+    "sounds": [
+      {
+        "name": "minecraft:entity.arrow.shoot",
+        "pitch": 0.9,
+        "volume": 1.0,
+        "type": "event"
+      }
+    ]
+  },
+  "bandit_chief_ambient": {
+    "subtitle": "subtitles.skyabyss.bandit_chief_ambient",
+    "sounds": [
+      {
+        "name": "minecraft:entity.vindicator.ambient",
+        "pitch": 0.8,
+        "volume": 0.9,
+        "type": "event"
+      }
+    ]
+  },
+  "bandit_chief_hurt": {
+    "subtitle": "subtitles.skyabyss.bandit_chief_hurt",
+    "sounds": [
+      {
+        "name": "minecraft:entity.vindicator.hurt",
+        "pitch": 0.8,
+        "volume": 1.0,
+        "type": "event"
+      }
+    ]
+  },
+  "bandit_chief_death": {
+    "subtitle": "subtitles.skyabyss.bandit_chief_death",
+    "sounds": [
+      {
+        "name": "minecraft:entity.vindicator.death",
+        "pitch": 0.75,
+        "volume": 1.0,
+        "type": "event"
+      }
+    ]
+  },
+  "bandit_chief_shout": {
+    "subtitle": "subtitles.skyabyss.bandit_chief_shout",
+    "sounds": [
+      {
+        "name": "minecraft:entity.vindicator.celebrate",
+        "pitch": 0.7,
+        "volume": 1.4,
+        "type": "event"
+      }
+    ]
+  },
+  "bone_soldier_ambient": {
+    "subtitle": "subtitles.skyabyss.bone_soldier_ambient",
+    "sounds": [
+      {
+        "name": "skyabyss:mobs/bone_sentinel_ambient",
+        "pitch": 1.15,
+        "volume": 0.7
+      }
+    ]
+  },
+  "bone_soldier_hurt": {
+    "subtitle": "subtitles.skyabyss.bone_soldier_hurt",
+    "sounds": [
+      {
+        "name": "skyabyss:mobs/bone_sentinel_hurt_1",
+        "pitch": 1.15,
+        "volume": 0.9
+      },
+      {
+        "name": "skyabyss:mobs/bone_sentinel_hurt_2",
+        "pitch": 1.15,
+        "volume": 0.9
+      }
+    ]
+  },
+  "bone_soldier_death": {
+    "subtitle": "subtitles.skyabyss.bone_soldier_death",
+    "sounds": [
+      {
+        "name": "skyabyss:mobs/bone_sentinel_death",
+        "pitch": 1.1,
+        "volume": 1.0
+      }
+    ]
+  },
+  "bone_soldier_step": {
+    "subtitle": "subtitles.skyabyss.bone_soldier_step",
+    "sounds": [
+      {
+        "name": "skyabyss:mobs/bone_sentinel_step_1",
+        "pitch": 1.2,
+        "volume": 0.4
+      },
+      {
+        "name": "skyabyss:mobs/bone_sentinel_step_2",
+        "pitch": 1.2,
+        "volume": 0.4
+      }
+    ]
+  },
+  "bone_soldier_block": {
+    "subtitle": "subtitles.skyabyss.bone_soldier_block",
+    "sounds": [
+      {
+        "name": "skyabyss:mobs/bone_sentinel_guard",
+        "pitch": 1.2,
+        "volume": 0.9
+      }
+    ]
+  },
+  "bone_soldier_rise": {
+    "subtitle": "subtitles.skyabyss.bone_soldier_rise",
+    "sounds": [
+      {
+        "name": "minecraft:entity.skeleton_horse.ambient",
+        "pitch": 0.6,
+        "volume": 0.9,
+        "type": "event"
+      }
+    ]
+  },
+  "bone_bowman_shoot": {
+    "subtitle": "subtitles.skyabyss.bone_bowman_shoot",
+    "sounds": [
+      {
+        "name": "skyabyss:mobs/rib_archer_shoot",
+        "pitch": 0.85,
+        "volume": 1.0
+      }
+    ]
+  },
+  "bone_standard_plant": {
+    "subtitle": "subtitles.skyabyss.bone_standard_plant",
+    "sounds": [
+      {
+        "name": "skyabyss:mobs/stone_heart_slam",
+        "pitch": 1.4,
+        "volume": 1.0
+      }
+    ]
+  },
+  "bone_standard_horn": {
+    "subtitle": "subtitles.skyabyss.bone_standard_horn",
+    "sounds": [
+      {
+        "name": "skyabyss:mobs/captain_roar",
+        "pitch": 1.3,
+        "volume": 0.8
+      }
+    ]
+  },
+  "grain_rat_ambient": {
+    "subtitle": "subtitles.skyabyss.grain_rat_ambient",
+    "sounds": [
+      {
+        "name": "minecraft:entity.silverfish.ambient",
+        "pitch": 0.7,
+        "volume": 0.6,
+        "type": "event"
+      }
+    ]
+  },
+  "grain_rat_hurt": {
+    "subtitle": "subtitles.skyabyss.grain_rat_hurt",
+    "sounds": [
+      {
+        "name": "minecraft:entity.silverfish.hurt",
+        "pitch": 0.75,
+        "volume": 0.9,
+        "type": "event"
+      }
+    ]
+  },
+  "grain_rat_death": {
+    "subtitle": "subtitles.skyabyss.grain_rat_death",
+    "sounds": [
+      {
+        "name": "minecraft:entity.silverfish.death",
+        "pitch": 0.7,
+        "volume": 0.9,
+        "type": "event"
+      }
+    ]
+  },
+  "grain_rat_bite": {
+    "subtitle": "subtitles.skyabyss.grain_rat_bite",
+    "sounds": [
+      {
+        "name": "minecraft:entity.fox.bite",
+        "pitch": 1.3,
+        "volume": 0.9,
+        "type": "event"
+      }
+    ]
+  },
+  "stray_wisp_ambient": {
+    "subtitle": "subtitles.skyabyss.stray_wisp_ambient",
+    "sounds": [
+      {
+        "name": "minecraft:entity.allay.ambient_without_item",
+        "pitch": 0.55,
+        "volume": 0.5,
+        "type": "event"
+      }
+    ]
+  },
+  "stray_wisp_hurt": {
+    "subtitle": "subtitles.skyabyss.stray_wisp_hurt",
+    "sounds": [
+      {
+        "name": "minecraft:entity.allay.hurt",
+        "pitch": 0.6,
+        "volume": 0.9,
+        "type": "event"
+      }
+    ]
+  },
+  "stray_wisp_death": {
+    "subtitle": "subtitles.skyabyss.stray_wisp_death",
+    "sounds": [
+      {
+        "name": "minecraft:entity.allay.death",
+        "pitch": 0.5,
+        "volume": 1.0,
+        "type": "event"
+      }
+    ]
+  },
+  "stray_wisp_pulse": {
+    "subtitle": "subtitles.skyabyss.stray_wisp_pulse",
+    "sounds": [
+      {
+        "name": "minecraft:block.beacon.deactivate",
+        "pitch": 1.6,
+        "volume": 0.9,
+        "type": "event"
+      }
+    ]
+  }
 }

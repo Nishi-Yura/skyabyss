@@ -164,6 +164,22 @@ public final class ModItems {
             () -> new DeferredSpawnEggItem(ModEntities.DRIFT_HERMIT, 0x6C5C4C, 0xE48070, new Item.Properties()));
     public static final DeferredItem<Item> SHORE_WARDEN_EGG = ITEMS.register("shore_warden_spawn_egg",
             () -> new DeferredSpawnEggItem(ModEntities.SHORE_WARDEN, 0x3A6470, 0xF0F0EC, new Item.Properties()));
+    public static final DeferredItem<Item> BANDIT_EGG = ITEMS.register("bandit_spawn_egg",
+            () -> new DeferredSpawnEggItem(ModEntities.BANDIT, 0x5A4632, 0x8C2E22, new Item.Properties()));
+    public static final DeferredItem<Item> BANDIT_ARCHER_EGG = ITEMS.register("bandit_archer_spawn_egg",
+            () -> new DeferredSpawnEggItem(ModEntities.BANDIT_ARCHER, 0x6B7040, 0x5A4632, new Item.Properties()));
+    public static final DeferredItem<Item> BANDIT_CHIEF_EGG = ITEMS.register("bandit_chief_spawn_egg",
+            () -> new DeferredSpawnEggItem(ModEntities.BANDIT_CHIEF, 0x4A3A2C, 0xB0302A, new Item.Properties()));
+    public static final DeferredItem<Item> BONE_FOOTMAN_EGG = ITEMS.register("bone_footman_spawn_egg",
+            () -> new DeferredSpawnEggItem(ModEntities.BONE_FOOTMAN, 0xD8CDB2, 0x7A5A3A, new Item.Properties()));
+    public static final DeferredItem<Item> BONE_BOWMAN_EGG = ITEMS.register("bone_bowman_spawn_egg",
+            () -> new DeferredSpawnEggItem(ModEntities.BONE_BOWMAN, 0xD8CDB2, 0x4A5A3A, new Item.Properties()));
+    public static final DeferredItem<Item> BONE_STANDARD_EGG = ITEMS.register("bone_standard_spawn_egg",
+            () -> new DeferredSpawnEggItem(ModEntities.BONE_STANDARD, 0xD8CDB2, 0x2E3E6A, new Item.Properties()));
+    public static final DeferredItem<Item> GRAIN_RAT_EGG = ITEMS.register("grain_rat_spawn_egg",
+            () -> new DeferredSpawnEggItem(ModEntities.GRAIN_RAT, 0x8A6A40, 0xD8B470, new Item.Properties()));
+    public static final DeferredItem<Item> STRAY_WISP_EGG = ITEMS.register("stray_wisp_spawn_egg",
+            () -> new DeferredSpawnEggItem(ModEntities.STRAY_WISP, 0x9ACAEE, 0x2A2E3A, new Item.Properties()));
     public static final DeferredItem<Item> WHALEBONE_CAPTAIN_EGG = ITEMS.register("whalebone_captain_spawn_egg",
             () -> new DeferredSpawnEggItem(ModEntities.WHALEBONE_CAPTAIN, 0xE2D8C0, 0x3C8CAA, new Item.Properties()));
     public static final DeferredItem<Item> STONE_WHALE_HEART_EGG = ITEMS.register("stone_whale_heart_spawn_egg",
@@ -240,6 +256,14 @@ public final class ModItems {
                 output.accept(SAND_BURROWER_EGG.get());
                 output.accept(DRIFT_HERMIT_EGG.get());
                 output.accept(SHORE_WARDEN_EGG.get());
+                output.accept(BANDIT_EGG.get());
+                output.accept(BANDIT_ARCHER_EGG.get());
+                output.accept(BANDIT_CHIEF_EGG.get());
+                output.accept(BONE_FOOTMAN_EGG.get());
+                output.accept(BONE_BOWMAN_EGG.get());
+                output.accept(BONE_STANDARD_EGG.get());
+                output.accept(GRAIN_RAT_EGG.get());
+                output.accept(STRAY_WISP_EGG.get());
                 output.accept(WHALEBONE_CAPTAIN_EGG.get());
                 output.accept(STONE_WHALE_HEART_EGG.get());
                 output.accept(SEALED_GATE.get());
