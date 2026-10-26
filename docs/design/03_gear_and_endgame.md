@@ -81,7 +81,7 @@
 | 五章 深淵（44） | 0 | 0 | 4 | 3 | 3 | 0 | 10 |
 | 計 | 4 | 16 | 21 | 14 | 15 | 4 | 74 |
 
-- 五章のコモン・アンコモンは四章の旅装と鼓動守がそのまま橋になる。深淵のアーティファクトは巨神ごとの深淵の心臓から出るので、一〜四章の行に数えた（由来の巨神の段で必要 Lv が決まる）。
+- 五章のコモン・アンコモンは四章の旅装と鼓動守がそのまま橋になる。上の数と下の章ごとの表は、職の武器（祠の 6 本・章の武器・伝説。[43](43_jobs.md) の 7〜8 節）を含まない。職の武器は 1.4.1 節。深淵のアーティファクトは巨神ごとの深淵の心臓から出るので、一〜四章の行に数えた（由来の巨神の段で必要 Lv が決まる）。
 
 **一章 岩鯨**
 
@@ -156,6 +156,48 @@
 | 測量士の錘（`abyss_surveyor_plumb`） | 装飾 | ヒロイック | 42 | 深いほど傷 +（最大 12%） | — | 番人 2%、番人の悪夢、王の褒美、交換 |
 
 - 階級の付かない品（矢・食べ物・素材・心核・鍵）は表に入れない。骨棘の矢だけは名前と行をアンコモンの色で出す（`BoneSpikeArrowItem`）。
+
+### 1.4.1 職の武器の表（章ごと・職ごと）
+
+どの章にも 6 職の武器がそろう（祠の始めの 6 本はコモン）。数値は `item/ChapterGear`（エピック）・`abyss/LegendGear`（アーティファクト）と各巨神の装備の表。2026-10-27 に空いていた 4 か所（岩鯨・潮殻の暗殺者、雷翼の戦士と暗殺者）を足した: 鯨歯の短剣・馬刀貝の短剣・雷翼の剣・稲妻の短剣（どれもエピック、心臓での確率 20%）。
+
+| 由来 | 職 | エピック | ヒロイック | アーティファクト |
+|---|---|---|---|---|
+| 一章 岩鯨 | 戦士 | 鯨骨の大剣（`whalebone_greatsword`） | 番兵長の鉾（`captain_pike`） | 底なしの大剣（`abyss_greatsword`） |
+| 一章 岩鯨 | 鍛冶師 | 鯨骨の鎚（`whale_hammer`） | — | 背骨打ちの鎚（`abyss_whale_hammer`） |
+| 一章 岩鯨 | 魔法使い | 鯨骨の星杖（`whale_staff`） | — | 鯨眼の杖（`abyss_whale_staff`） |
+| 一章 岩鯨 | 弓使い | 鯨肋の弓（`whale_bow`） | — | 鯨ひげの弓（`abyss_whale_bow`） |
+| 一章 岩鯨 | 暗殺者 | 鯨歯の短剣（`whale_dagger`） | 水路の顎牙（`waterway_fang`） | 古銛の牙（`abyss_whale_fang`） |
+| 一章 岩鯨 | 呪術師 | 鯨歌いの鈴杖（`whale_bell_staff`） | — | 耳骨の鈴杖（`abyss_whale_bell_staff`） |
+| 二章 潮殻 | 戦士 | 珊瑚の盾（`coral_shield`）・潮殻の三叉槍（`tide_shell_trident`） | 珊瑚憑きの銛（`coral_harpoon`） | 螺旋貝の大剣（`abyss_tide_sword`） |
+| 二章 潮殻 | 鍛冶師 | 潮殻の鎚（`tide_hammer`） | — | 大蛤の鎚（`abyss_tide_hammer`） |
+| 二章 潮殻 | 魔法使い | 潮殻の真珠杖（`tide_staff`） | — | 渦潮の杖（`abyss_tide_staff`） |
+| 二章 潮殻 | 弓使い | 珊瑚の弓（`tide_bow`） | — | 鰭の弓（`abyss_tide_bow`） |
+| 二章 潮殻 | 暗殺者 | 馬刀貝の短剣（`tide_dagger`） | 潮招きの大鋏（`tidecaller_claw`） | 海胆の針（`abyss_tide_dagger`） |
+| 二章 潮殻 | 呪術師 | 潮鳴りの鈴杖（`tide_bell_staff`） | — | 沈み鐘の杖（`abyss_bell_staff`） |
+| 三章 雷翼 | 戦士 | 雷翼の剣（`storm_sword`） | 羽守の鉤槍（`warden_glaive`） | 避雷の大剣（`abyss_storm_sword`） |
+| 三章 雷翼 | 鍛冶師 | 雷の鎚（`storm_hammer`） | — | 雷鼓の鎚（`abyss_storm_hammer`） |
+| 三章 雷翼 | 魔法使い | 雷羽の杖（`storm_staff`） | — | 雲籠の杖（`abyss_storm_staff`） |
+| 三章 雷翼 | 弓使い | 雷翼の弓（`thunder_wing_bow`） | — | 雷淵の弓（`abyss_storm_bow`） |
+| 三章 雷翼 | 暗殺者 | 稲妻の短剣（`storm_dagger`） | 雷獣の爪（`raiju_claw`） | 雷翼の鉤爪（`abyss_storm_dagger`） |
+| 三章 雷翼 | 呪術師 | 雷鳴りの鈴杖（`storm_bell_staff`） | — | 風鈴の鈴杖（`abyss_storm_bell_staff`） |
+| 四章 余燼 | 戦士 | 熾火の大剣（`ember_greatsword`） | — | 溶岩流の大剣（`abyss_ember_sword`） |
+| 四章 余燼 | 鍛冶師 | 余燼の戦斧（`ember_war_axe`） | 鍛え手の大鎚（`smith_hammer`）・灰の番人の火掻き（`thrall_poker`） | 灰喰いの鎌（`abyss_ash_scythe`） |
+| 四章 余燼 | 魔法使い | 熾火の杖（`ember_staff`） | — | 火山弾の杖（`abyss_ember_staff`） |
+| 四章 余燼 | 弓使い | 灰の弓（`ember_bow`） | — | 黒曜の弓（`abyss_ember_bow`） |
+| 四章 余燼 | 暗殺者 | 熾の短剣（`ember_dagger`） | — | 熔け滴の短剣（`abyss_ember_dagger`） |
+| 四章 余燼 | 呪術師 | 灰の香炉（`ember_censer`） | — | 坩堝の鈴杖（`abyss_ember_bell_staff`） |
+| 五章 深淵 | 戦士 | 灯り番の剣（`abyss_lamp_sword`） | — | — |
+| 五章 深淵 | 鍛冶師 | — | 沈め錨（`abyss_sinking_anchor`） | — |
+| 五章 深淵 | 魔法使い | 灯籠の杖（`abyss_lamp_staff`） | — | — |
+| 五章 深淵 | 弓使い | 測鉛の弓（`abyss_depth_bow`） | — | — |
+| 五章 深淵 | 暗殺者 | — | 鼓動の短剣（`abyss_pulse_dagger`） | — |
+| 五章 深淵 | 呪術師 | 弔鐘の鈴杖（`abyss_toll_bell_staff`） | — | — |
+
+- **階級の床**（`item/TierFloor`。2026-10-27 の声「元からあったやつがヒロイックになって変に見える」）: 近接の武器の 1 秒あたり = (1 + 攻撃の上乗せ) × (4 + 速さの差)。ヒロイックは同じ由来のエピックの最強 × 1.08 以上、アーティファクトは 19.5 以上になるよう、足りない分の攻撃の上乗せを足す（品の素の値は変えず、手の武器の表示ごと変わる）。自己テスト `item audit` が、ヒロイックがエピックより弱い品・弱いアーティファクトを見つけると落ちる。
+- **名前の色**: 装備はどれも名前を階級の色にする（自分で名前を組む品はそのまま。組まない品は `mixin/ItemNameMixin` が `ModGear.name` を当てる）。
+- **クリエイティブの欄**（`registry/CreativeTabs`）: 武器（職 → 由来 → 階級）・防具と飾り（由来 → 階級 → 部位）・敵の卵・ブロック・素材と品の五つ。品ごとの登録の担当は欄に入れない（`ModItems.LEGACY_TAB`）。素材（`MaterialItem`）は名前に武器の語があっても職を持たない。
+- **作り直した元からの武器**（15 の 4.6.2）: 水路の顎牙・番兵長の鉾・鯨骨の大剣・底なしの大剣・潮招きの大鋏・珊瑚憑きの銛・雷獣の爪・羽守の鉤槍・雷淵の弓・鍛え手の大鎚・余燼の戦斧・灰喰いの鎌は、一品一案の段で形を描き直した（形の段は階級のもの一つだけ）。
 
 ### 1.5 階級の決め方（2026-10-24）
 

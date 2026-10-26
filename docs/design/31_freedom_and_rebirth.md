@@ -2,7 +2,7 @@
 
 - 文書番号: 31
 - 範囲: 技の木をもっと自由に混ぜられるようにする案（A）、Lv 50 で転生して「Lv 50+n」になる仕組みと何度も転生する理由（B）、他の人から見て自慢になる見せ方（C）。それぞれの案の価値・リスク・作業量（S/M/L）と、3 つの組み合わせ（軽い／釣り合い／深い）、推薦。
-- 状態: **転生の本体（B01・B03・B05・B06・B07・B10・B12〜B15・B21）・深淵（B04）・前世の技と淵（B08・B09）・C の選定済み案は実装済み**（B は 10 章、C は 5.2 節、深淵は 4.3 節と 29 の 2.9）。**A 案も A01〜A15・A18・A20 まで実装済み**（技の側は [27](27_builds_and_classes.md) の 17〜18 節、装備の側 A02・A06・A07 は [03](03_gear_and_endgame.md) の 3.6）。残りの案は 3〜5 章に残してある（採るなら 10 章へ足す）。選んだ案は [review/rebirth/index.html](../review/rebirth/index.html)。実装は `jp.revati.skyabyss.rebirth`（本体は `Rebirth`、画面は `client.rebirth.SoulScreen`、見せ方は `Rebirths`・`RebirthView`）
+- 状態: **転生の本体（B01・B03・B05・B06・B07・B10・B12〜B15・B21）・深淵（B04）・前世の技と淵（B08・B09）・C の選定済み案は実装済み**（B は 10 章、C は 5.2 節、深淵は 4.3 節と 29 の 2.9）。**A 案も A01〜A15・A18・A20 まで実装済み**（技の側は [27](27_builds_and_classes.md) の 17〜18 節、装備の側 A02・A06・A07 は [03](03_gear_and_endgame.md) の 3.6）。残りの案は 3〜5 章に残してある（採るなら 10 章へ足す）。実装は `jp.revati.skyabyss.rebirth`（本体は `Rebirth`、画面は `client.rebirth.SoulScreen`、見せ方は `Rebirths`・`RebirthView`）
 - 関連: [03](03_gear_and_endgame.md)、[04](04_growth_and_skills.md)、[10](10_progression_multiplayer.md)、[11](11_record_screen.md)、[19](19_advancements_and_tablets.md)、[22](22_mod_pouch.md)、[27](27_builds_and_classes.md)、[28](28_titan_young_carriers.md)、[29](29_trial_pool.md)
 
 試遊の声: 「スキルだけど、Diablo みたいにしたい。もっと自由度がある感じ。Lv 50 になったら転生できるようにしよう。内部的には Lv 50+… にして、使える防具や武器はそのまま。天性や振るポイントはリセット（0 から）して、レベル上げでまた開放できるように。ビルドを作り直せる以外にも、何回も転生するメリットが欲しい。レベルの色が変わる、記号が付くなど、他の人から見て自慢できる要素や、何か能力が付くのも…」

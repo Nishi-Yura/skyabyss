@@ -153,7 +153,7 @@
 - 面を増やさずに効くのは塗りと AO の焼き直し。回転した骨（岩鯨の板）は削るだけにして、周りとぶつからないようにする。
 - 段階 2・3 を実機で撮るには、アリーナの戦闘か `/skyabyss <心臓> phase <n>` が要る（NoAI の召喚だけでは段階 1 のまま。`tools/shots/hp_hearts.txt` は 4 体の段階 1）。
 
-動きの仕上げ（`docs/review/boss_quality_2026-10-23.md`）: `python tools/gen/world/polish_boss_anims.py` が、心臓四体と巨神の animation.json に上書き・追加する（心臓や巨神の install を流し直したら、これも流す。足すぶれの元は `tools/sources/anim_base/`）。
+動きの仕上げ: `python tools/gen/world/polish_boss_anims.py` が、心臓四体と巨神の animation.json に上書き・追加する（心臓や巨神の install を流し直したら、これも流す。足すぶれの元は `tools/sources/anim_base/`）。
 - 技の当たりの形は予告が終わる tick に置く（予告は動きと同じ tick に出る）。岩鯨の心臓の棘の薙ぎ・地割れ・骨の棘の投射を合わせ、潮殻・雷翼・余燼の心臓の技には当たりの 0.45 秒前からの溜めの震えと当たりの押し出しを足した（全部の骨に同じずれ。部品が離れない）。
 - ひるみ `stagger`（2 秒）: 領域を解いて砕けた瞬間に流す（`HeartDomain.end`）。HeartBoss の動きの名前に自動で足される。
 - 眠る巨神: 岩鯨は `sleep`、潮殻は休みの姿と `head_sleep`（`isDormantNow`）。雷翼はすくむ、余燼は眠りの動き。
@@ -285,6 +285,8 @@ gear の作り（`tools/rough/hp_gear.py`、取り込み `tools/install/install_
 - 輝き（foil）: `stack.hasFoil()`（エンチャント・品の `foil`）のとき、本体のメッシュを `ItemRenderer.getFoilBuffer`（glint の描画型）へもう一度流す。光る画素（emissive）の層はそのまま。大剣・弓・盾の手（一人称・三人称）で紫の輝きを確認（`weapon_lp_extra_foil.png`）。地面の item・額縁は小さく輝きは見分けにくい
 - 盾の三人称の構え（構えていないとき）: 盾の display の平行移動は [2,-2,4]（左右とも）。メッシュ・元のボクセルは中心が原点なので、バニラの値 [10,6,-4]（盾の板の中心が原点から -8 ずれる前提）では盾が腕から 1 枚ぶん横に浮く（`models/item/coral_shield.json`・`item_voxel/coral_shield.json`）
 - 他の生き物の弓の引き絵: 引きの段は `holder`（`RenderLivingEvent` の間の生き物）の `isUsingItem` と使っている品の種類で決める。スケルトンに弓を持たせた三人称は撮ったが、横向きで弦の段までは見分けられなかった。未確認: ほかのプレイヤーの手の弓の引き絵の段（実機マルチ）、専用サーバーのマルチ
+
+- **作り込みをそろえる**（2026-10-27 の声「モデルのクオリティ、ちゃんと統一されてる?」）: 入っている武器を種類ごとに並べる `tools/rough/lowpoly/gear_style/installed_sheet.py`（環境変数 `SKYABYSS_ITEMS_TSV` に自己テスト `item audit` の記録を渡すと、品の階級で見える形の段を描き、面の数を書く）で見比べ、はじめのころの作り（大きな平たい棘の面）が残っていた 12 本を一品一案の段（`tools/rough/lowpoly/weapons/one/o_remake.py`）で描き直した。持ち方は品の今の item モデルのまま（`install_job_weapons.py` の `REMAKE`。借りる品 = 自分）。目安: エピック 350〜650 面、ヒロイック 380〜550 面、アーティファクト 480〜1300 面（金の縁・淵の欠片・浮く欠片）。
 
 #### 4.6.3 立体防具の低ポリメッシュ（C 骨組み）
 

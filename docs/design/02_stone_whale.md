@@ -355,7 +355,7 @@
 | 憤怒 | 跳躍の叩きつけ（輪が三重）+ 殻の落下（1.5 秒後、4 秒） | 輪は安全な筋か跳躍、円は離れる |
 
 **憤怒（新しい技の形）**: 憤怒の「輪が三重の跳躍」は、段階 1 の跳躍の輪（人数 3 人から二重）を、人数によらず三重（0.7 秒おき）にしたもの。跳ぶタイミングが三度続き、安全な筋に立ち続けるか、輪ごとに跳ぶ。そこへ足元の円が遅れて加わる。
-- 予告は色の粒と音で出す。パーティクルを「最小」にすると予告が見えにくくなる（`docs/review/dungeon_design_review.md`）。
+- 予告は色の粒と音で出す。パーティクルを「最小」にすると予告が見えにくくなる。
 - **技の音は専用の合成音**（バニラの音は使わない）。生成元は `tools/gen/sound/gen_boss_skill_sounds.py`（`sounds/mobs/stone_heart_*.ogg` 22 本。`sounds.json` と字幕 `skyabyss_mobsounds` の行も書く。登録は `MobSounds`）。材質は石の心臓: 深い石の共鳴（低い倍音の和）・重なった板の軋み・鎖・骨と石の棘が割れる音・核の共鳴。使い分け: 咆哮 `roar`、輪 `shockwave`（咆哮の中ほど・跳躍の着地）、段階が進む `phase`、突きの予告と殻の落下の予告 `grind`、突きの当たり・殻の落下 `slam`、殻の再閉・登場の板 `plate_lock`、石棘の掃射の予告 `spike_charge`（骨の棘の投射の予告は音程を上げて同じ音）、棘の当たり `spike_burst`、跳躍の予告 `pulse`、亀裂の予告 `flame_charge`・炎 `flame_burst`、鎖 `chain`、骨の棘を放つ `volley_shot`、光線の溜め `beam_charge`・光線 `beam_fire`、咆哮中に傷を弾く `guard`。登場は `emerge`・`plate_lock` 八枚・`resonance`。倒れるは `plate_fall`・`chain_break`・`core_shatter`・`shard`。
 - **倒れるときの音の重なり**: 倒した一撃では各心臓とも、被弾の音（`MobSounds` の `*_HEART_HURT`）だけを鳴らす（`getDeathSound`）。倒れる演出の音は `deathEffects` が時刻どおりに流すので、別の死の音を重ねない。`stone_whale_heart_death` は使わなくなった（登録だけ残す）。
 - 番兵の召喚と、体力 50% 未満の装甲と露出の繰り返しは廃止した。
