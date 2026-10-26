@@ -1,0 +1,27 @@
+# バニラの敵が大陸の世界に入れないことの確認 (RpgRules.onJoin)。呼んでも数が 0 のまま、Mod の敵は入る
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/no_vanilla_mobs.txt -PshotsName=no_vanilla_mobs
+world no_vanilla continent
+size 1280 720
+timeout 900
+render 6
+waitchunks 300
+wait 60
+cmd skyabyss cinematic stop
+close
+wait 20
+cmd gamemode creative
+chat clear
+cmd summon minecraft:zombie ~3 ~ ~
+cmd summon minecraft:creeper ~4 ~ ~
+cmd summon minecraft:phantom ~3 ~4 ~
+cmd summon skyabyss:bandit ~-3 ~ ~
+wait 20
+cmd execute store result score @s skyabyss_dbg run execute if entity @e[type=minecraft:zombie]
+cmd say vanilla zombie/creeper/phantom near me:
+cmd execute if entity @e[type=minecraft:zombie,distance=..20] run say ZOMBIE PRESENT
+cmd execute unless entity @e[type=minecraft:zombie,distance=..20] run say no zombie
+cmd execute unless entity @e[type=minecraft:creeper,distance=..20] run say no creeper
+cmd execute unless entity @e[type=minecraft:phantom,distance=..20] run say no phantom
+cmd execute if entity @e[type=skyabyss:bandit,distance=..20] run say bandit present
+wait 20
+shot chat

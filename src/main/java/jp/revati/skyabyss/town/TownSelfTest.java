@@ -195,7 +195,7 @@ public final class TownSelfTest {
         Quests.onTalk(p, "skyabyss:attendant_guild_clerk", "town_test");
         check(f, "hunt".equals(TownGuests.stageOf(p, qid)), "clerk -> hunt");
         for (int i = 0; i < 4; i++) {
-            Quests.onKill(p, "minecraft:zombie", true, 0);
+            Quests.onKill(p, "skyabyss:bone_footman", true, 0);
         }
         p.getInventory().add(new ItemStack(Items.BONE, 3));
         Quests.poll(p, true);

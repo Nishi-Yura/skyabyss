@@ -11,15 +11,15 @@
           "id": "kill",
           "type": "kill",
           "targets": [
-            "minecraft:zombie",
-            "minecraft:skeleton",
-            "minecraft:spider",
-            "minecraft:creeper",
-            "minecraft:husk",
-            "minecraft:stray",
-            "minecraft:drowned",
-            "minecraft:zombie_villager",
-            "minecraft:witch"
+            "skyabyss:bone_footman",
+            "skyabyss:bone_bowman",
+            "skyabyss:bone_standard",
+            "skyabyss:stray_wisp",
+            "skyabyss:feral_dog",
+            "skyabyss:moss_dead",
+            "skyabyss:mist_angler",
+            "skyabyss:thunder_wolf",
+            "skyabyss:bandit"
           ],
           "count": 6
         }

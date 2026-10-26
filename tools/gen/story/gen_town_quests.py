@@ -34,8 +34,9 @@ def t(key, ja, en):
 
 CHAPTER_ID = {1: "titan_whale", 2: "titan_tide", 3: "titan_storm", 4: "titan_ember"}
 COIN = "skyabyss:bell_coin"
-HOSTILE = ["minecraft:zombie", "minecraft:husk", "minecraft:skeleton", "minecraft:stray", "minecraft:spider",
-           "minecraft:cave_spider", "minecraft:creeper", "minecraft:drowned"]
+# 野の敵 (docs/design/44。バニラの敵は出ない)
+HOSTILE = ["skyabyss:bone_footman", "skyabyss:bone_bowman", "skyabyss:bone_standard", "skyabyss:stray_wisp", "skyabyss:feral_dog",
+           "skyabyss:moss_dead", "skyabyss:bandit", "skyabyss:bandit_archer", "skyabyss:grain_rat"]
 
 
 # ====================================================================== 条件・結果の小道具

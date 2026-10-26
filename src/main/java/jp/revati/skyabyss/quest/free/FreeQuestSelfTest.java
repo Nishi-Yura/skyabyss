@@ -562,7 +562,7 @@ public final class FreeQuestSelfTest {
         }
         check(stage(p, "daily_lost_flock").equals("done"), "three sheep by the board did not finish the flock", failures);
         for (int i = 0; i < 6; i++) {
-            Quests.onKill(p, "minecraft:zombie", true, 3);
+            Quests.onKill(p, "skyabyss:bone_footman", true, 3);
         }
         check(stage(p, "daily_night_watch").equals("done"), "six night kills did not finish the watch", failures);
         p.getInventory().add(new ItemStack(Items.OAK_LOG, 15));
@@ -584,7 +584,7 @@ public final class FreeQuestSelfTest {
         Quests.forget(p, "daily_night_watch");
         Quests.start(p, "daily_night_watch");
         for (int i = 0; i < 6; i++) {
-            Quests.onKill(p, "minecraft:zombie", true, 3);
+            Quests.onKill(p, "skyabyss:bone_footman", true, 3);
         }
         check(totalXp(p) == before, "a daily paid twice in one day", failures);
 
@@ -603,7 +603,7 @@ public final class FreeQuestSelfTest {
         before = totalXp(p);
         check(acceptOrStart(server, p, "daily_night_watch"), "a daily could not be taken again on a new day", failures);
         for (int i = 0; i < 6; i++) {
-            Quests.onKill(p, "minecraft:zombie", true, 3);
+            Quests.onKill(p, "skyabyss:bone_footman", true, 3);
         }
         check(totalXp(p) > before, "a daily on a new day did not pay", failures);
 
@@ -676,7 +676,7 @@ public final class FreeQuestSelfTest {
         c.moveTo(at.getX() - 50, at.getY(), at.getZ());
         Zombie z = EntityType.ZOMBIE.create(level);
         z.moveTo(at.getX() + 1, at.getY(), at.getZ());
-        QuestEvents.credit(level, z, "minecraft:zombie", a, online::get);
+        QuestEvents.credit(level, z, "skyabyss:bone_footman", a, online::get);
         check(QuestLog.of(a).entry("daily_night_watch").progress(0) == 1, "the killer got no credit", failures);
         check(QuestLog.of(b).entry("daily_night_watch").progress(0) == 1, "a party member 50 blocks away got no credit", failures);
         check(QuestLog.of(c).entry("daily_night_watch").progress(0) == 0, "a stranger 50 blocks away got credit", failures);

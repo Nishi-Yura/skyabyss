@@ -34,14 +34,15 @@
           "id": "beasts",
           "type": "kill",
           "targets": [
-            "minecraft:zombie",
-            "minecraft:husk",
-            "minecraft:skeleton",
-            "minecraft:stray",
-            "minecraft:spider",
-            "minecraft:cave_spider",
-            "minecraft:creeper",
-            "minecraft:drowned"
+            "skyabyss:bone_footman",
+            "skyabyss:bone_bowman",
+            "skyabyss:bone_standard",
+            "skyabyss:stray_wisp",
+            "skyabyss:feral_dog",
+            "skyabyss:moss_dead",
+            "skyabyss:bandit",
+            "skyabyss:bandit_archer",
+            "skyabyss:grain_rat"
           ],
           "count": 4
         },

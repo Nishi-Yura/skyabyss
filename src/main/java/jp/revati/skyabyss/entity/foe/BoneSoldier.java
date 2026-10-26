@@ -42,6 +42,14 @@ public abstract class BoneSoldier extends ContinentFoe {
         return super.hurt(source, amount);
     }
 
+    // 骨を落とす (6 割。倒した人がいるときだけ。都の頼み「鍛冶見習いの試験」の骨)
+    @Override
+    protected void dropCustomDeathLoot(net.minecraft.server.level.ServerLevel level, DamageSource source, boolean recentlyHit) {
+        if (recentlyHit && random.nextFloat() < 0.6f) {
+            spawnAtLocation(new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.BONE));
+        }
+    }
+
     @Override
     protected void playStepSound(net.minecraft.core.BlockPos pos, net.minecraft.world.level.block.state.BlockState state) {
         modStep(MobSounds.BONE_SOLDIER_STEP.get(), 0.35f);

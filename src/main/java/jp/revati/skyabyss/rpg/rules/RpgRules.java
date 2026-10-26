@@ -233,6 +233,16 @@ public final class RpgRules {
         }
     }
 
+    // どんな湧き方でも (村への襲撃・ファントム・変身・湧き台・前の世界に残っていた分も)、バニラの敵とさまよう商人は世界に入れない。
+    // 決まりの入った世界か大陸の世界のとき。試遊の確かめ (自己テスト) はバニラのゾンビを使うので、そのあいだは入れる
+    @SubscribeEvent
+    static void onJoin(net.neoforged.neoforge.event.entity.EntityJoinLevelEvent event) {
+        if (event.getLevel() instanceof ServerLevel level && vanillaEnemy(event.getEntity()) && !jp.revati.skyabyss.SelfTestRunner.enabled()
+                && (adventure(level) || level.getChunkSource().getGenerator() instanceof jp.revati.skyabyss.world.continent.ContinentChunkGenerator)) {
+            event.setCanceled(true);
+        }
+    }
+
     // 敵もブロックを壊さない・持ち去らない (エンダーマン・ラヴェジャー・ゾンビの戸破り…)
     @SubscribeEvent
     static void onGriefing(net.neoforged.neoforge.event.entity.EntityMobGriefingEvent event) {
