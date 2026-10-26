@@ -375,7 +375,7 @@ final class BuildsSelfTest {
             check(f, SkillBuild.skillPower(p, Skill.LUNGE) <= SkillRules.POWER_CAP + 1e-9 && SkillBuild.tagCount(p, SkillTag.BONE) == 2, "a skill modifier did not apply or was not capped");
             testModOn = false;
             // ---- A05: 振り直しは結晶 1 (目利きで無料)・型は 4 つ
-            check(f, SkillRules.LOADOUTS == 4 && d.loadouts.length == 4, "loadout count is wrong");
+            check(f, SkillRules.LOADOUTS == 12 && d.loadouts.length == 12, "loadout count is wrong (two per job)");
             check(f, SkillRules.respecCost(9, 30, false) == 1 && SkillRules.respecCost(9, 30, true) == 0 && SkillRules.respecCost(9, 10, false) == 0, "respec cost is wrong");
             // ---- A12: 武器の持ち替えで枠が入れ替わる (待ちは共有)
             SkillManager.forgetAll(p);
@@ -517,7 +517,7 @@ final class BuildsSelfTest {
             // 天職は削ったので、要は授からず自分で取った分のまま (点も戻らない)
             check(f, m.version == SkillData.VERSION && m.knows(Skill.STONE_OATH) && m.rank(Skill.WHALE_SWEEP) == 2
                     && m.jobSpent(SkillTree.ROCK) == 8 && m.calling.isEmpty(), "a v2 record with a calling did not migrate: " + m.ranks + " spent " + m.jobSpent(SkillTree.ROCK));
-            check(f, m.loadouts.length == 4 && !m.loadouts[3].saved, "a v2 record did not get four loadouts");
+            check(f, m.loadouts.length == 12 && !m.loadouts[3].saved, "a v2 record did not get the job loadouts");
         } finally {
             SkillRules.CALLINGS = before;
             testModOn = false;

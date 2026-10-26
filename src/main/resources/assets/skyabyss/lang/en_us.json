@@ -1,4 +1,6 @@
 {
+  "gui.skyabyss.skill.bar_nojob": "No job",
+  "gui.skyabyss.skill.job_held": "(current job)",
   "job.skyabyss.warrior": "Warrior",
   "job.skyabyss.warrior.role": "Stands in front with sword and shield. The wall that draws the enemy",
   "job.skyabyss.smith": "Smith",

@@ -18,6 +18,8 @@ KV = {
     'job.skyabyss.subtitle': ('%s（%s）', '%s (%s)'),
     'message.skyabyss.skill.no_job_weapon': ('技を使うには、職の武器を持とう（剣・鎚・杖・弓・短剣・鈴の杖）', 'Hold a job weapon to use skills (sword, hammer, staff, bow, dagger, bell staff)'),
     'message.skyabyss.skill.job_now': ('職: %s', 'Job: %s'),
+    'gui.skyabyss.skill.job_held': ('（いまの職）', '(current job)'),
+    'gui.skyabyss.skill.bar_nojob': ('職なし', 'No job'),
 }
 for lang, i in (('ja_jp', 0), ('en_us', 1)):
     p = f'src/main/resources/assets/skyabyss/lang/{lang}.json'

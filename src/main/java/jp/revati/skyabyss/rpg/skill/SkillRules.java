@@ -134,7 +134,9 @@ public final class SkillRules {
     // 刻印の付け替え (別の刻印に変える) の費用。初回は無料
     public static final int RUNE_SWAP_COST = 1;
     // 型の保存の数 (A05 で 2 から 4)
-    public static final int LOADOUTS = 4;
+    // 型の保存は職ごとに 2 つ (docs/design/43)。箱は職の順に 2 つずつ並ぶ
+    public static final int LOADOUTS_PER_JOB = 2;
+    public static final int LOADOUTS = LOADOUTS_PER_JOB * 6;
     // 刻印の付け替え・型の切り替えは、この間 (30 秒) 傷を受けも与えもしていないときだけ
     public static final int QUIET_TICKS = 30 * SECOND;
 

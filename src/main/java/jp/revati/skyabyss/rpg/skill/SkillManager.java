@@ -368,10 +368,11 @@ public final class SkillManager {
             return LoadoutResult.NO_PLACE;
         }
         SkillData.Loadout l = d.loadouts[index];
+        Job job = Job.byId(d.curJob);
         java.util.Arrays.fill(d.slots, "");
         for (int i = 0; i < Math.min(d.slotCount(), l.slots.length); i++) {
             Skill s = Skill.byId(l.slots[i]);
-            if (s != null && s.active && d.knows(s) && !java.util.Arrays.asList(d.slots).contains(s.id)) {
+            if (s != null && s.active && d.knows(s) && d.usableBy(job, s) && !java.util.Arrays.asList(d.slots).contains(s.id)) {
                 d.slots[i] = s.id;
             }
         }

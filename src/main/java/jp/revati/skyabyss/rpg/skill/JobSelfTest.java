@@ -104,6 +104,11 @@ public final class JobSelfTest {
         SkillData back = new SkillData();
         back.deserializeNBT(server.registryAccess(), nbt);
         check(f, back.jobBars.containsKey("warrior") && back.jobBars.containsKey("archer"), "job bars were not saved: " + back.jobBars.keySet());
+        // 画面 (K) はいまの職を送られた中身で見る。型の箱は職ごとに 2 つ
+        net.minecraft.network.RegistryFriendlyByteBuf buf = new net.minecraft.network.RegistryFriendlyByteBuf(io.netty.buffer.Unpooled.buffer(), server.registryAccess());
+        SkillData.STREAM_CODEC.encode(buf, d);
+        check(f, "warrior".equals(SkillData.STREAM_CODEC.decode(buf).curJob), "the current job was not sent to the client");
+        check(f, SkillData.loadoutIndex(Job.ARCHER, 1) == 7 && d.loadouts.length == 12, "job loadouts are not two per job");
         SkillManager.forgetAll(p);
         p.discard();
         if (f.isEmpty()) {

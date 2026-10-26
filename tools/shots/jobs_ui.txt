@@ -1,0 +1,33 @@
+# 職 (docs/design/43) の K 画面: 剣を持った戦士の木と、弓使いの木
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/jobs_ui.txt -PshotsName=jobs_ui
+world shots flat
+size 1280 720
+timeout 300
+render 6
+clouds off
+guiscale 3
+
+cmd time set noon
+cmd weather clear
+cmd gamemode survival
+cmd skyabyss level set @p 20
+cmd skyabyss skill forget @p
+cmd item replace entity @p weapon.mainhand with minecraft:iron_sword
+hud on
+camera 0 -60 8 180 0
+waitchunks
+chat clear
+wait 40
+cmd skyabyss skill learn @p titan_cleave 3
+cmd skyabyss skill learn @p riposte 2
+cmd skyabyss skill learn @p far_shot 2
+wait 20
+open skills
+wait 20
+shot jobs_1_warrior
+close
+wait 10
+open skills_ext
+wait 20
+shot jobs_2_ext
+close

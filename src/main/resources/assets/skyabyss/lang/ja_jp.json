@@ -1,4 +1,6 @@
 {
+  "gui.skyabyss.skill.bar_nojob": "職なし",
+  "gui.skyabyss.skill.job_held": "（いまの職）",
   "job.skyabyss.warrior": "戦士",
   "job.skyabyss.warrior.role": "剣と盾で前に立つ。敵の狙いを引く壁",
   "job.skyabyss.smith": "鍛冶師",

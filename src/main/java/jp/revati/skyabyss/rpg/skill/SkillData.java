@@ -421,6 +421,11 @@ public final class SkillData implements INBTSerializable<CompoundTag> {
         return totalPoints(level) - spentPoints();
     }
 
+    // 職 job の i 番目の型の箱
+    public static int loadoutIndex(Job job, int i) {
+        return job.ordinal() * SkillRules.LOADOUTS_PER_JOB + i;
+    }
+
     // いま使える枠の数 (2 つ目の天職を迎えると 5)
     public int slotCount() {
         return calling2.isEmpty() ? SkillRules.BASE_SLOTS : SkillRules.SLOTS;
@@ -769,7 +774,7 @@ public final class SkillData implements INBTSerializable<CompoundTag> {
             lt.putInt("chain", l.chainMask);
             ld.add(lt);
         }
-        tag.put("loadouts", ld);
+        tag.put("jobLoadouts", ld);
         ListTag ks = new ListTag();
         for (String id : keystones) {
             ks.add(StringTag.valueOf(id));
@@ -870,7 +875,7 @@ public final class SkillData implements INBTSerializable<CompoundTag> {
         for (Loadout l : loadouts) {
             l.copyFrom(new Loadout());
         }
-        ListTag ld = tag.getList("loadouts", Tag.TAG_COMPOUND);
+        ListTag ld = tag.getList("jobLoadouts", Tag.TAG_COMPOUND);
         for (int i = 0; i < Math.min(ld.size(), loadouts.length); i++) {
             CompoundTag lt = ld.getCompound(i);
             Loadout l = loadouts[i];
@@ -1021,6 +1026,7 @@ public final class SkillData implements INBTSerializable<CompoundTag> {
                 for (String g : d.glyphSockets) {
                     buf.writeUtf(g, 96);
                 }
+                buf.writeUtf(d.curJob, 32);
             },
             buf -> {
                 SkillData d = new SkillData();
@@ -1092,6 +1098,7 @@ public final class SkillData implements INBTSerializable<CompoundTag> {
                 for (int i = 0; i < d.glyphSockets.length; i++) {
                     d.glyphSockets[i] = buf.readUtf(96);
                 }
+                d.curJob = buf.readUtf(32);
                 return d;
             });
 }
