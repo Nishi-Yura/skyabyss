@@ -1844,5 +1844,10 @@
   "item.skyabyss.storm_sword": "雷翼の剣",
   "item.skyabyss.storm_sword.desc": "樋に銅の稲妻が走る鋼の長剣。鍔は雷翼の風切羽。",
   "item.skyabyss.storm_dagger": "稲妻の短剣",
-  "item.skyabyss.storm_dagger.desc": "刃そのものが折れた稲妻の形をした銅の短剣。"
+  "item.skyabyss.storm_dagger.desc": "刃そのものが折れた稲妻の形をした銅の短剣。",
+  "sign.skyabyss.island.lookout": "見張り塔の跡",
+  "sign.skyabyss.island.cave": "丘の洞窟",
+  "sign.skyabyss.island.huts": "浜の漁師小屋",
+  "sign.skyabyss.island.camp_west": "旅人の野営",
+  "sign.skyabyss.island.tree": "島の大樹"
 }

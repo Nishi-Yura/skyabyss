@@ -1844,5 +1844,10 @@
   "item.skyabyss.storm_sword": "Thunderwing Sword",
   "item.skyabyss.storm_sword.desc": "A steel longsword with copper lightning in its fuller and thunderwing feathers for a guard.",
   "item.skyabyss.storm_dagger": "Lightning Dagger",
-  "item.skyabyss.storm_dagger.desc": "A copper dagger whose blade is a forked bolt of lightning."
+  "item.skyabyss.storm_dagger.desc": "A copper dagger whose blade is a forked bolt of lightning.",
+  "sign.skyabyss.island.lookout": "Old Lookout",
+  "sign.skyabyss.island.cave": "Hill Cave",
+  "sign.skyabyss.island.huts": "Fishing Huts",
+  "sign.skyabyss.island.camp_west": "Travelers' Camp",
+  "sign.skyabyss.island.tree": "Great Tree"
 }

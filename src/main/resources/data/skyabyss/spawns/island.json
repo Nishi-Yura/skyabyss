@@ -18,6 +18,40 @@
         1,
         2
       ]
+    },
+    {
+      "entity": "skyabyss:reef_scuttler",
+      "weight": 3,
+      "time": "day",
+      "biomes": [
+        "beach"
+      ],
+      "group": [
+        1,
+        2
+      ]
+    },
+    {
+      "entity": "skyabyss:feral_dog",
+      "weight": 2,
+      "time": "any",
+      "biomes": [
+        "forest",
+        "birch_forest"
+      ],
+      "group": [
+        1,
+        2
+      ]
+    },
+    {
+      "entity": "skyabyss:spine_hare",
+      "weight": 3,
+      "time": "day",
+      "group": [
+        1,
+        3
+      ]
     }
   ]
 }

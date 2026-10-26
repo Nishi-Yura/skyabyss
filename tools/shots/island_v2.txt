@@ -1,70 +1,63 @@
-# はじまりの島の谷 (2026-10-26 の作り直し): 空から・道の上から・道の脇の開けた所
-# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/island_v2.txt -PshotsName=island_v2
-world opening_island_v2 continent
+# はじまりの島 v2 (2026-10-27): 広い谷・低い丘・寄り道 5 か所
+world island_v2 continent
 size 1600 900
 timeout 2400
 render 12
 guiscale 2
-wait 200
-waitchunks 600
-wait 200
+clouds off
+wait 100
 cmd skyabyss cinematic stop
-cmd time set 3000
+cmd time set 4000
 cmd weather clear
-wait 40
-shot camp_road
+cmd gamerule doDaylightCycle false
+cmd skyabyss dev opening build
+wait 300
 cmd gamemode spectator
 hud off
-cmd tp @s -1780 210 1900 180 50
+cmd tp @s -1770 120 1770 0 90
+waitchunks 900
+wait 900
+cmd tp @s -1770 230 1775 0 90
 waitchunks 900
 wait 200
-shot aerial_south
-cmd tp @s -1500 200 1760 90 40
-waitchunks 600
-wait 100
-shot aerial_east
-hud on
-cmd gamemode creative
-cmd tp @s -1882 ~ 1786 -119 5
-waitchunks 300
-cmd execute at @s run tp @s ~ ~ ~ ~ 5
-wait 60
-cmd skyabyss dev grounds mark footprint 0 pos
-waitchunks 300
-wait 100
-cmd tp @s -1832 90 1752 160 20
-waitchunks 300
-wait 60
-shot prints_view
-cmd skyabyss dev grounds mark poi 0 pos
-waitchunks 300
+shot top
+cmd tp @s -1990 110 1960 -40 25
+waitchunks 900
 wait 200
-cmd execute at @s run tp @s ~8 ~4 ~8 135 20
-wait 40
-shot bandits
-cmd tp @s -1774 90 1768 -70 10
-waitchunks 300
+shot over_sw
+cmd tp @s -1560 112 1600 135 25
+waitchunks 900
+wait 200
+shot over_ne
+cmd gamemode creative
+cmd effect give @s invisibility 9999 0 true
+cmd tp @s -1725 120 1680
+waitchunks 600
+wait 900
+cmd execute positioned -1745 0 1660 positioned over motion_blocking_no_leaves run tp @s ~18 ~13 ~18 facing ~ ~2 ~
 wait 60
-shot road_045
-cmd tp @s -1720 92 1777 -93 10
-waitchunks 300
+shot spot_lookout
+cmd tp @s -1612 120 1684
+waitchunks 600
+wait 900
+cmd execute positioned -1632 0 1664 positioned over motion_blocking_no_leaves run tp @s ~18 ~13 ~18 facing ~ ~2 ~
 wait 60
-shot road_060
-cmd skyabyss dev grounds mark outskirts 0 pos
-waitchunks 300
-wait 100
-cmd execute at @s run tp @s ~6 ~3 ~6 135 20
-wait 40
-shot rest_fire
-cmd skyabyss dev grounds mark outskirts 1 pos
-waitchunks 300
-wait 100
-cmd execute at @s run tp @s ~6 ~3 ~6 135 20
-wait 40
-shot rest_shrine
-cmd skyabyss dev grounds mark outskirts 2 pos
-waitchunks 300
-wait 100
-cmd execute at @s run tp @s ~6 ~3 ~6 135 20
-wait 40
-shot dock
+shot spot_cave
+cmd tp @s -1795 120 1913
+waitchunks 600
+wait 900
+cmd execute positioned -1815 0 1893 positioned over motion_blocking_no_leaves run tp @s ~18 ~13 ~18 facing ~ ~2 ~
+wait 60
+shot spot_huts
+cmd tp @s -1876 120 1884
+waitchunks 600
+wait 900
+cmd execute positioned -1896 0 1864 positioned over motion_blocking_no_leaves run tp @s ~18 ~13 ~18 facing ~ ~2 ~
+wait 60
+shot spot_camp_west
+cmd tp @s -1640 120 1860
+waitchunks 600
+wait 900
+cmd execute positioned -1660 0 1840 positioned over motion_blocking_no_leaves run tp @s ~18 ~13 ~18 facing ~ ~2 ~
+wait 60
+shot spot_tree

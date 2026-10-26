@@ -428,8 +428,9 @@ public final class IslandTrail {
             double dx = to.getX() - at.getX();
             double dz = to.getZ() - at.getZ();
             double len = Math.max(1, Math.hypot(dx, dz));
-            int x = (int) Math.round(at.getX() + dx / len * 5);
-            int z = (int) Math.round(at.getZ() + dz / len * 5);
+            // 行き先へ 5、横へ 6 (脇道の上に立てない)
+            int x = (int) Math.round(at.getX() + dx / len * 5 - dz / len * 6);
+            int z = (int) Math.round(at.getZ() + dz / len * 5 + dx / len * 6);
             int y = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z);
             BlockPos p = new BlockPos(x, y, z);
             if (!level.getBlockState(p).canBeReplaced()) {

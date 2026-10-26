@@ -192,10 +192,11 @@ def flatten(y, X, Z, center, spec, land):
 # 道は尾根に挟まれた谷を通る (谷底の半幅 VALLEY_HALF)。道の脇の開けた所 (pockets) と首 (necks) は床の高さ。そのほかの島の陸は、
 # 開けた所から WALL_RUN で尾根 (谷底 + RIDGE_LOW..RIDGE_HIGH) まで上がる (崖)。海ぎわも尾根のまま海へ落ちる (歩ける浜は野営地と船着き場だけ)。
 # 北の尾根は高い山並み、南はやや低い丘。尾根には林 (木が道の外を塞ぐ)
-VALLEY_HALF = 7.0
-WALL_RUN = 8.0
-RIDGE_LOW = 12.0
-RIDGE_HIGH = 24.0
+# 2026-10-27 の声「道からそらしすぎなくていい」: 谷を広く、壁を低くなだらかに (道の外の丘も歩ける。道は谷底の目印のまま)
+VALLEY_HALF = 11.0
+WALL_RUN = 18.0
+RIDGE_LOW = 6.0
+RIDGE_HIGH = 14.0
 
 
 def _polyline_dist(X, Z, pts):
@@ -564,8 +565,10 @@ def write_layout(lay, height=None):
         pk = {n: pt(c) for n, c, _, _ in plan['pockets']}
         out['island'] = {'gate': pt(plan['gate']), 'prints': [pt(p) for p in plan['prints']], 'fire': pk['fire'], 'shrine': pk['shrine'],
                          'bandits': pk['bandits'], 'prints_view': pt(plan['necks'][0][0]),
+                         # 寄り道 (札の行き先)
+                         **{n: pk[n] for n in ('lookout', 'cave', 'huts', 'camp_west', 'tree') if n in pk},
                          # 道の分かれ目の札 (首の道の側の端。[x, z, 行き先])。行き先は lang の sign.skyabyss.island.<行き先>
-                         'signs': [pt(a) + [name] for (a, _, _), name in zip(plan['necks'], ['prints', 'bandits', 'fire', 'shrine'])]}
+                         'signs': [pt(a) + [name] for (a, _, _), name in zip(plan['necks'], ['prints', 'bandits', 'fire', 'shrine', 'lookout', 'cave', 'huts', 'camp_west', 'tree'])]}
     with open(os.path.join(OUT, 'layout.json'), 'w', encoding='utf8', newline='\n') as f:
         json.dump(out, f, ensure_ascii=False, separators=(',', ':'))
         f.write('\n')
