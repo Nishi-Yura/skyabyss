@@ -22,5 +22,9 @@
   "entity.skyabyss.mist_angler": "Mist Angler",
   "item.skyabyss.mist_angler_spawn_egg": "Mist Angler Spawn Egg",
   "entity.skyabyss.thunder_wolf": "Thunder Wolf",
-  "item.skyabyss.thunder_wolf_spawn_egg": "Thunder Wolf Spawn Egg"
+  "item.skyabyss.thunder_wolf_spawn_egg": "Thunder Wolf Spawn Egg",
+  "entity.skyabyss.named.island": "Redsash, Chief of the Pass",
+  "entity.skyabyss.named.meadow": "The Last Standard-Bearer",
+  "message.skyabyss.named.appear": "Something named stirs nearby: %s",
+  "message.skyabyss.named.down": "%s has fallen. %s bell coins"
 }

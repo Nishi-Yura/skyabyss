@@ -92,6 +92,7 @@ public final class FoesOneSelfTest {
             banner(level, f);
             shout(level, f);
             howls(level, f);
+            named(level, f);
         } catch (RuntimeException e) {
             SkyAbyss.LOGGER.error("SELFTEST new foes crashed", e);
             f.add("crashed: " + e);
@@ -104,7 +105,7 @@ public final class FoesOneSelfTest {
         }
         if (f.isEmpty()) {
             SkyAbyss.LOGGER.info("SELFTEST new foes PASSED (12 foes registered with eggs/xp/animations/spawn rows; every telegraph matches its hit; "
-                    + "footman shield 30% from the front; banner ward revives once; chief shout hastes the crew; dog howl sends the pack, wolf howl marks the target)");
+                    + "footman shield 30% from the front; banner ward revives once; chief shout hastes the crew; dog howl sends the pack, wolf howl marks the target; named foe tag, health, bar, coins, cooldown)");
         } else {
             f.forEach(m -> SkyAbyss.LOGGER.error("SELFTEST new foes FAILED: {}", m));
         }
@@ -293,6 +294,37 @@ public final class FoesOneSelfTest {
         check(shapes.stream().anyMatch(s -> s.contains(SX, SZ + 6) && !s.contains(SX, SZ)), "the thunder wolf's howl did not mark the target's feet", f);
         wolf.discard();
         wmate.discard();
+        p.discard();
+    }
+
+    // ---------------------------------------------------------------- 名のある強敵: 名札・体力の倍率・帯・倒すと鐘銭と次までの間
+    private static void named(ServerLevel lv, List<String> f) {
+        jp.revati.skyabyss.world.continent.NamedFoes.reset(lv);
+        FakePlayer p = fake(lv, "named", SX, SZ + 4);
+        BanditChief plain = spawn(lv, ModEntities.BANDIT_CHIEF.get(), SX + 6, SZ, 0f);
+        int island = jp.revati.skyabyss.world.continent.ContinentMap.OUTSKIRTS;
+        Mob m = jp.revati.skyabyss.world.continent.NamedFoes.spawnAt(lv, island, new BlockPos(SX, FLOOR, SZ), p);
+        if (m == null) {
+            f.add("the island's named foe could not be spawned");
+            p.discard();
+            plain.discard();
+            return;
+        }
+        check(m instanceof BanditChief && m.hasCustomName() && m.isCustomNameVisible() && jp.revati.skyabyss.world.continent.NamedFoes.named(m),
+                "the named foe has no name tag / tag: " + m, f);
+        check(m.getMaxHealth() > plain.getMaxHealth() * 1.7f, "named health " + m.getMaxHealth() + " vs plain " + plain.getMaxHealth(), f);
+        check(jp.revati.skyabyss.world.continent.NamedFoes.bar(m.getUUID()) != null, "the named foe has no health bar", f);
+        int before = jp.revati.skyabyss.facility.Coins.count(p);
+        m.invulnerableTime = 0;
+        m.hurt(lv.damageSources().playerAttack(p), 100000f);
+        check(!m.isAlive(), "the named foe did not die", f);
+        int got = jp.revati.skyabyss.facility.Coins.count(p) - before;
+        check(got == jp.revati.skyabyss.world.continent.NamedFoes.def(island).coins(), "the nearby player got " + got + " coins for the named foe", f);
+        check(jp.revati.skyabyss.world.continent.NamedFoes.nextAt(island) > lv.getGameTime(), "no cooldown after the named foe fell", f);
+        check(jp.revati.skyabyss.world.continent.NamedFoes.bar(m.getUUID()) == null, "the health bar was left after death", f);
+        jp.revati.skyabyss.world.continent.NamedFoes.reset(lv);
+        m.discard();
+        plain.discard();
         p.discard();
     }
 

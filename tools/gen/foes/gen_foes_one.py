@@ -446,6 +446,15 @@ NAMES = {
 }
 
 
+# 名のある強敵 (world/continent/NamedFoes) の名札と知らせ
+NAMED_LANG = {
+    "entity.skyabyss.named.island": ("Redsash, Chief of the Pass", "峠の頭目 赤帯"),
+    "entity.skyabyss.named.meadow": ("The Last Standard-Bearer", "最後の旗手"),
+    "message.skyabyss.named.appear": ("Something named stirs nearby: %s", "近くに名のある強敵が現れた: %s"),
+    "message.skyabyss.named.down": ("%s has fallen. %s bell coins", "%s を倒した。鐘銭 %s 枚"),
+}
+
+
 def sounds():
     p = os.path.join(A, "sounds.json")
     data = json.load(open(p, encoding="utf-8"))
@@ -473,6 +482,8 @@ def lang():
             name = (en, ja)[i]
             d["entity.skyabyss." + mob] = name
             d["item.skyabyss." + mob + "_spawn_egg"] = name + " Spawn Egg" if i == 0 else name + "のスポーンエッグ"
+        for key, texts in NAMED_LANG.items():
+            d[key] = texts[i]
         wjson(os.path.join(ROOT, "src", "main", "resources", "assets", "skyabyss_foes", "lang", lang_ + ".json"), d)
     for mob in MOBS:
         wjson(os.path.join(A, "models", "item", mob + "_spawn_egg.json"), {"parent": "minecraft:item/template_spawn_egg"})

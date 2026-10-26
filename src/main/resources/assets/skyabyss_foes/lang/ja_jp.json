@@ -22,5 +22,9 @@
   "entity.skyabyss.mist_angler": "霧の漁り火",
   "item.skyabyss.mist_angler_spawn_egg": "霧の漁り火のスポーンエッグ",
   "entity.skyabyss.thunder_wolf": "雷狼",
-  "item.skyabyss.thunder_wolf_spawn_egg": "雷狼のスポーンエッグ"
+  "item.skyabyss.thunder_wolf_spawn_egg": "雷狼のスポーンエッグ",
+  "entity.skyabyss.named.island": "峠の頭目 赤帯",
+  "entity.skyabyss.named.meadow": "最後の旗手",
+  "message.skyabyss.named.appear": "近くに名のある強敵が現れた: %s",
+  "message.skyabyss.named.down": "%s を倒した。鐘銭 %s 枚"
 }
