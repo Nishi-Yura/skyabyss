@@ -3,7 +3,7 @@
   "dialogue.skyabyss.artisan.a_menu.ward3": "Reweave the Thunder Wing ward (8 charged cotton)",
   "dialogue.skyabyss.artisan.ch3a_first": "We meet again, traveller. ...The peak wind makes wire sing. Listen to it.\nThese are notes for the peaks. I wrote down how to handle scorched feathers and charged cotton.",
   "dialogue.skyabyss.artisan.ch3a_ward": "The ward came undone? You brought the charged cotton. ...There, rewoven. One a day, no more.",
-  "dialogue.skyabyss.artisan.ch3p_teach": "You want the patterns. ...Scorched feathers are light. Pack charged cotton into the seams and the lightning stays off your skin. Wind copper wire round the hems.\nThe whetstone, the dumplings and the oil are in the notes. The streamer is for reading the wind.",
+  "dialogue.skyabyss.artisan.ch3p_teach": "The materials? ...Scorched feathers are light. Pack charged cotton into the seams and the lightning stays off your skin. Copper wire goes round the hems.\nThe whetstone, the dumplings and the oil are in the notes. Take them to the smithy and the apothecary. The streamer is for reading the wind.",
   "dialogue.skyabyss.artisan.ch3t_ward_weave": "Thunder ward thread. ...It numbs the fingers. A living thread.\nI will weave it into a heartbeat ward. When the beat quickens inside the wing, hold it.",
   "effect.skyabyss.grounded": "Grounded",
   "effect.skyabyss.thunder_whetted": "Thunder Edge",
@@ -56,5 +56,5 @@
   "wayfarer_notes.ch3.line.4": "The scorched warden is hard to cut. Let the pillar's lightning strike it and your blade bites for a while. When a ring appears at its feet, get out.",
   "wayfarer_notes.ch3.line.5": "Lightning falls on high copper. Do not stand by the pillar. Drink lightning oil and shocks hurt half as much.",
   "wayfarer_notes.ch3.line.6": "Plant a wind streamer to learn the wind and how long until the next storm. Read the storm beat on the wing the same way.",
-  "wayfarer_notes.ch3.line.7": "Scorched feathers, charged cotton and copper wire make travel gear, thunder whetstones, oil and streamers. Open these notes and the recipes appear at the table."
+  "wayfarer_notes.ch3.line.7": "Scorched feathers, charged cotton and copper wire make travel gear, thunder whetstones, oil and streamers. The smithy and the apothecary make them."
 }

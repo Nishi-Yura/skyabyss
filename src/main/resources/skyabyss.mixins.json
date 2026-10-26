@@ -7,7 +7,9 @@
     "EnemyPickMixin",
     "InventoryMixin",
     "ItemStackDurabilityMixin",
-    "ServerPlaceRecipeMixin"
+    "ServerPlaceRecipeMixin",
+    "FallingBlockMixin",
+    "RecipeManagerMixin"
   ],
   "client": [
     "GuiGraphicsMixin",

@@ -314,11 +314,12 @@ public final class Ch4GroundSelfTest {
         p.setItemSlot(net.minecraft.world.entity.EquipmentSlot.CHEST, ItemStack.EMPTY);
         p.setItemSlot(net.minecraft.world.entity.EquipmentSlot.FEET, ItemStack.EMPTY);
         check(f, Ch4Gear.ASH_BAKED_BREAD.get().components().get(net.minecraft.core.component.DataComponents.FOOD) != null, "the ash-baked bread is not food");
-        // レシピ (旅の覚書の四章)
+        // 誂え (旅の覚書の四章の品は、四章から鍛冶場・薬師で)
         check(f, jp.revati.skyabyss.guide.WayfarerNotes.recipes(4).size() == Ch4Setup.RECIPES.size()
-                && server.getRecipeManager().byKey(net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "soot_whetstone")).isPresent()
-                && Ch4Setup.RECIPES.stream().allMatch(r -> server.getRecipeManager().byKey(net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, r)).isPresent()),
-                "the chapter-4 recipes are missing or not on the notes");
+                && Ch4Setup.RECIPES.stream().allMatch(r -> {
+                    jp.revati.skyabyss.facility.MadeToOrder.Entry e = jp.revati.skyabyss.facility.MadeToOrder.find(r);
+                    return e != null && e.good().chapter() == 4;
+                }), "the chapter-4 items are not made to order from chapter 4 or not on the notes");
     }
 
     // ---------------------------------------------------------------- 敵

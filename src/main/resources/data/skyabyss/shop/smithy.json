@@ -1,0 +1,726 @@
+{
+  "title": "gui.skyabyss.shop.smithy",
+  "goods": [
+    {
+      "id": "made_message_board",
+      "item": "skyabyss:message_board",
+      "count": 1,
+      "coins": 6,
+      "chapter": 1,
+      "made": true
+    },
+    {
+      "id": "made_resonance_forge",
+      "item": "skyabyss:resonance_forge",
+      "count": 1,
+      "coins": 11,
+      "materials": [
+        {
+          "item": "skyabyss:resonance_crystal",
+          "count": 1
+        },
+        {
+          "item": "skyabyss:stone_whale_shard",
+          "count": 1
+        }
+      ],
+      "chapter": 1,
+      "made": true
+    },
+    {
+      "id": "made_rock_whetstone",
+      "item": "skyabyss:rock_whetstone",
+      "count": 2,
+      "coins": 3,
+      "materials": [
+        {
+          "item": "skyabyss:rock_shell_scrap",
+          "count": 2
+        },
+        {
+          "item": "skyabyss:bone_chip",
+          "count": 1
+        }
+      ],
+      "chapter": 1,
+      "made": true
+    },
+    {
+      "id": "made_socket_shard_bone",
+      "item": "skyabyss:socket_shard_bone",
+      "count": 1,
+      "coins": 2,
+      "materials": [
+        {
+          "item": "skyabyss:bone_chip",
+          "count": 4
+        },
+        {
+          "item": "skyabyss:resonance_crystal",
+          "count": 1
+        }
+      ],
+      "chapter": 1,
+      "made": true
+    },
+    {
+      "id": "made_socket_shard_stone",
+      "item": "skyabyss:socket_shard_stone",
+      "count": 1,
+      "coins": 2,
+      "materials": [
+        {
+          "item": "skyabyss:stone_whale_shard",
+          "count": 4
+        },
+        {
+          "item": "skyabyss:resonance_crystal",
+          "count": 1
+        }
+      ],
+      "chapter": 1,
+      "made": true
+    },
+    {
+      "id": "made_stone_whale_call",
+      "item": "skyabyss:stone_whale_call",
+      "count": 1,
+      "coins": 3,
+      "materials": [
+        {
+          "item": "skyabyss:stone_whale_core",
+          "count": 1
+        },
+        {
+          "item": "skyabyss:stone_whale_shard",
+          "count": 1
+        }
+      ],
+      "chapter": 1,
+      "made": true
+    },
+    {
+      "id": "made_titan_waymark",
+      "item": "skyabyss:titan_waymark",
+      "count": 2,
+      "coins": 5,
+      "materials": [
+        {
+          "item": "skyabyss:stone_whale_shard",
+          "count": 1
+        }
+      ],
+      "chapter": 1,
+      "made": true
+    },
+    {
+      "id": "made_whale_road_boots",
+      "item": "skyabyss:whale_road_boots",
+      "count": 1,
+      "coins": 2,
+      "materials": [
+        {
+          "item": "skyabyss:rock_shell_scrap",
+          "count": 2
+        },
+        {
+          "item": "skyabyss:bone_chip",
+          "count": 2
+        }
+      ],
+      "chapter": 1,
+      "made": true
+    },
+    {
+      "id": "made_whale_road_chestplate",
+      "item": "skyabyss:whale_road_chestplate",
+      "count": 1,
+      "coins": 10,
+      "materials": [
+        {
+          "item": "skyabyss:rock_shell_scrap",
+          "count": 5
+        }
+      ],
+      "chapter": 1,
+      "made": true
+    },
+    {
+      "id": "made_whale_road_helmet",
+      "item": "skyabyss:whale_road_helmet",
+      "count": 1,
+      "coins": 8,
+      "materials": [
+        {
+          "item": "skyabyss:rock_shell_scrap",
+          "count": 3
+        }
+      ],
+      "chapter": 1,
+      "made": true
+    },
+    {
+      "id": "made_whale_road_leggings",
+      "item": "skyabyss:whale_road_leggings",
+      "count": 1,
+      "coins": 15,
+      "materials": [
+        {
+          "item": "skyabyss:rock_shell_scrap",
+          "count": 2
+        }
+      ],
+      "chapter": 1,
+      "made": true
+    },
+    {
+      "id": "made_salt_whetstone",
+      "item": "skyabyss:salt_whetstone",
+      "count": 2,
+      "coins": 4,
+      "materials": [
+        {
+          "item": "skyabyss:salt_crystal",
+          "count": 2
+        },
+        {
+          "item": "skyabyss:shell_chip",
+          "count": 1
+        }
+      ],
+      "chapter": 2,
+      "made": true
+    },
+    {
+      "id": "made_socket_shard_tide",
+      "item": "skyabyss:socket_shard_tide",
+      "count": 1,
+      "coins": 3,
+      "materials": [
+        {
+          "item": "skyabyss:tide_shell_shard",
+          "count": 4
+        },
+        {
+          "item": "skyabyss:resonance_crystal",
+          "count": 1
+        }
+      ],
+      "chapter": 2,
+      "made": true
+    },
+    {
+      "id": "made_tide_hourglass",
+      "item": "skyabyss:tide_hourglass",
+      "count": 1,
+      "coins": 5,
+      "materials": [
+        {
+          "item": "skyabyss:salt_crystal",
+          "count": 4
+        },
+        {
+          "item": "skyabyss:small_pearl",
+          "count": 1
+        }
+      ],
+      "chapter": 2,
+      "made": true
+    },
+    {
+      "id": "made_tide_shell_call",
+      "item": "skyabyss:tide_shell_call",
+      "count": 1,
+      "coins": 35,
+      "materials": [
+        {
+          "item": "skyabyss:tide_shell_shard",
+          "count": 1
+        }
+      ],
+      "chapter": 2,
+      "made": true
+    },
+    {
+      "id": "made_tide_wader_boots",
+      "item": "skyabyss:tide_wader_boots",
+      "count": 1,
+      "coins": 3,
+      "materials": [
+        {
+          "item": "skyabyss:salt_crystal",
+          "count": 2
+        },
+        {
+          "item": "skyabyss:small_pearl",
+          "count": 3
+        },
+        {
+          "item": "skyabyss:stone_whale_shard",
+          "count": 1
+        }
+      ],
+      "chapter": 2,
+      "made": true
+    },
+    {
+      "id": "made_tide_wader_chestplate",
+      "item": "skyabyss:tide_wader_chestplate",
+      "count": 1,
+      "coins": 5,
+      "materials": [
+        {
+          "item": "skyabyss:salt_crystal",
+          "count": 5
+        },
+        {
+          "item": "skyabyss:small_pearl",
+          "count": 2
+        },
+        {
+          "item": "skyabyss:stone_whale_shard",
+          "count": 1
+        }
+      ],
+      "chapter": 2,
+      "made": true
+    },
+    {
+      "id": "made_tide_wader_helmet",
+      "item": "skyabyss:tide_wader_helmet",
+      "count": 1,
+      "coins": 3,
+      "materials": [
+        {
+          "item": "skyabyss:small_pearl",
+          "count": 2
+        },
+        {
+          "item": "skyabyss:salt_crystal",
+          "count": 3
+        },
+        {
+          "item": "skyabyss:stone_whale_shard",
+          "count": 1
+        }
+      ],
+      "chapter": 2,
+      "made": true
+    },
+    {
+      "id": "made_tide_wader_leggings",
+      "item": "skyabyss:tide_wader_leggings",
+      "count": 1,
+      "coins": 7,
+      "materials": [
+        {
+          "item": "skyabyss:small_pearl",
+          "count": 3
+        },
+        {
+          "item": "skyabyss:stone_whale_shard",
+          "count": 1
+        },
+        {
+          "item": "skyabyss:salt_crystal",
+          "count": 2
+        }
+      ],
+      "chapter": 2,
+      "made": true
+    },
+    {
+      "id": "made_copper_wire",
+      "item": "skyabyss:copper_wire",
+      "count": 3,
+      "coins": 6,
+      "chapter": 3,
+      "made": true
+    },
+    {
+      "id": "made_lightning_oil",
+      "item": "skyabyss:lightning_oil",
+      "count": 2,
+      "coins": 6,
+      "materials": [
+        {
+          "item": "skyabyss:static_cotton",
+          "count": 1
+        },
+        {
+          "item": "skyabyss:copper_wire",
+          "count": 1
+        }
+      ],
+      "chapter": 3,
+      "made": true
+    },
+    {
+      "id": "made_peak_crossing_boots",
+      "item": "skyabyss:peak_crossing_boots",
+      "count": 1,
+      "coins": 4,
+      "materials": [
+        {
+          "item": "skyabyss:scorched_feather",
+          "count": 3
+        },
+        {
+          "item": "skyabyss:tide_shell_shard",
+          "count": 1
+        },
+        {
+          "item": "skyabyss:copper_wire",
+          "count": 2
+        }
+      ],
+      "chapter": 3,
+      "made": true
+    },
+    {
+      "id": "made_peak_crossing_chestplate",
+      "item": "skyabyss:peak_crossing_chestplate",
+      "count": 1,
+      "coins": 4,
+      "materials": [
+        {
+          "item": "skyabyss:scorched_feather",
+          "count": 5
+        },
+        {
+          "item": "skyabyss:copper_wire",
+          "count": 2
+        },
+        {
+          "item": "skyabyss:tide_shell_shard",
+          "count": 1
+        },
+        {
+          "item": "skyabyss:static_cotton",
+          "count": 1
+        }
+      ],
+      "chapter": 3,
+      "made": true
+    },
+    {
+      "id": "made_peak_crossing_helmet",
+      "item": "skyabyss:peak_crossing_helmet",
+      "count": 1,
+      "coins": 4,
+      "materials": [
+        {
+          "item": "skyabyss:scorched_feather",
+          "count": 2
+        },
+        {
+          "item": "skyabyss:static_cotton",
+          "count": 3
+        },
+        {
+          "item": "skyabyss:tide_shell_shard",
+          "count": 1
+        }
+      ],
+      "chapter": 3,
+      "made": true
+    },
+    {
+      "id": "made_peak_crossing_leggings",
+      "item": "skyabyss:peak_crossing_leggings",
+      "count": 1,
+      "coins": 4,
+      "materials": [
+        {
+          "item": "skyabyss:scorched_feather",
+          "count": 2
+        },
+        {
+          "item": "skyabyss:tide_shell_shard",
+          "count": 1
+        },
+        {
+          "item": "skyabyss:copper_wire",
+          "count": 2
+        },
+        {
+          "item": "skyabyss:static_cotton",
+          "count": 2
+        }
+      ],
+      "chapter": 3,
+      "made": true
+    },
+    {
+      "id": "made_socket_shard_wind",
+      "item": "skyabyss:socket_shard_wind",
+      "count": 1,
+      "coins": 4,
+      "materials": [
+        {
+          "item": "skyabyss:thunder_wing_shard",
+          "count": 4
+        },
+        {
+          "item": "skyabyss:resonance_crystal",
+          "count": 1
+        }
+      ],
+      "chapter": 3,
+      "made": true
+    },
+    {
+      "id": "made_thunder_whetstone",
+      "item": "skyabyss:thunder_whetstone",
+      "count": 2,
+      "coins": 5,
+      "materials": [
+        {
+          "item": "skyabyss:copper_wire",
+          "count": 2
+        },
+        {
+          "item": "skyabyss:static_cotton",
+          "count": 1
+        }
+      ],
+      "chapter": 3,
+      "made": true
+    },
+    {
+      "id": "made_thunder_wing_call",
+      "item": "skyabyss:thunder_wing_call",
+      "count": 1,
+      "coins": 7,
+      "materials": [
+        {
+          "item": "skyabyss:thunder_wing_shard",
+          "count": 1
+        }
+      ],
+      "chapter": 3,
+      "made": true
+    },
+    {
+      "id": "made_wind_streamer",
+      "item": "skyabyss:wind_streamer",
+      "count": 1,
+      "coins": 4,
+      "materials": [
+        {
+          "item": "skyabyss:scorched_feather",
+          "count": 2
+        },
+        {
+          "item": "skyabyss:static_cotton",
+          "count": 1
+        },
+        {
+          "item": "skyabyss:copper_wire",
+          "count": 2
+        }
+      ],
+      "chapter": 3,
+      "made": true
+    },
+    {
+      "id": "made_ash_walking_boots",
+      "item": "skyabyss:ash_walking_boots",
+      "count": 1,
+      "coins": 5,
+      "materials": [
+        {
+          "item": "skyabyss:soot_iron",
+          "count": 4
+        },
+        {
+          "item": "skyabyss:thunder_wing_shard",
+          "count": 1
+        },
+        {
+          "item": "skyabyss:ash_hemp",
+          "count": 1
+        }
+      ],
+      "chapter": 4,
+      "made": true
+    },
+    {
+      "id": "made_ash_walking_chestplate",
+      "item": "skyabyss:ash_walking_chestplate",
+      "count": 1,
+      "coins": 5,
+      "materials": [
+        {
+          "item": "skyabyss:soot_iron",
+          "count": 6
+        },
+        {
+          "item": "skyabyss:thunder_wing_shard",
+          "count": 1
+        },
+        {
+          "item": "skyabyss:ash_hemp",
+          "count": 2
+        }
+      ],
+      "chapter": 4,
+      "made": true
+    },
+    {
+      "id": "made_ash_walking_helmet",
+      "item": "skyabyss:ash_walking_helmet",
+      "count": 1,
+      "coins": 5,
+      "materials": [
+        {
+          "item": "skyabyss:soot_iron",
+          "count": 2
+        },
+        {
+          "item": "skyabyss:ash_hemp",
+          "count": 3
+        },
+        {
+          "item": "skyabyss:thunder_wing_shard",
+          "count": 1
+        }
+      ],
+      "chapter": 4,
+      "made": true
+    },
+    {
+      "id": "made_ash_walking_leggings",
+      "item": "skyabyss:ash_walking_leggings",
+      "count": 1,
+      "coins": 5,
+      "materials": [
+        {
+          "item": "skyabyss:ash_hemp",
+          "count": 4
+        },
+        {
+          "item": "skyabyss:thunder_wing_shard",
+          "count": 1
+        },
+        {
+          "item": "skyabyss:soot_iron",
+          "count": 2
+        }
+      ],
+      "chapter": 4,
+      "made": true
+    },
+    {
+      "id": "made_cinder_lamp",
+      "item": "skyabyss:cinder_lamp",
+      "count": 1,
+      "coins": 9,
+      "materials": [
+        {
+          "item": "skyabyss:cinder_husk",
+          "count": 1
+        }
+      ],
+      "chapter": 4,
+      "made": true
+    },
+    {
+      "id": "made_ember_call",
+      "item": "skyabyss:ember_call",
+      "count": 1,
+      "coins": 7,
+      "materials": [
+        {
+          "item": "skyabyss:ember_shard",
+          "count": 1
+        }
+      ],
+      "chapter": 4,
+      "made": true
+    },
+    {
+      "id": "made_socket_shard_ash",
+      "item": "skyabyss:socket_shard_ash",
+      "count": 1,
+      "coins": 5,
+      "materials": [
+        {
+          "item": "skyabyss:ember_shard",
+          "count": 4
+        },
+        {
+          "item": "skyabyss:resonance_crystal",
+          "count": 1
+        }
+      ],
+      "chapter": 4,
+      "made": true
+    },
+    {
+      "id": "made_soot_whetstone",
+      "item": "skyabyss:soot_whetstone",
+      "count": 1,
+      "coins": 6,
+      "materials": [
+        {
+          "item": "skyabyss:soot_iron",
+          "count": 2
+        }
+      ],
+      "chapter": 4,
+      "made": true
+    },
+    {
+      "id": "made_warm_stone",
+      "item": "skyabyss:warm_stone",
+      "count": 1,
+      "coins": 9,
+      "materials": [
+        {
+          "item": "skyabyss:ember_shard",
+          "count": 1
+        }
+      ],
+      "chapter": 4,
+      "made": true
+    },
+    {
+      "id": "made_abyss_lantern_charm",
+      "item": "skyabyss:abyss_lantern_charm",
+      "count": 1,
+      "coins": 12,
+      "materials": [
+        {
+          "item": "skyabyss:abyss_relic_bone_2",
+          "count": 1
+        },
+        {
+          "item": "skyabyss:abyss_anchor_iron",
+          "count": 3
+        }
+      ],
+      "chapter": 5,
+      "made": true
+    },
+    {
+      "id": "made_abyss_pulse_listener",
+      "item": "skyabyss:abyss_pulse_listener",
+      "count": 1,
+      "coins": 11,
+      "materials": [
+        {
+          "item": "skyabyss:abyss_anchor_iron",
+          "count": 5
+        },
+        {
+          "item": "skyabyss:abyss_relic_ash_3",
+          "count": 1
+        }
+      ],
+      "chapter": 5,
+      "made": true
+    }
+  ],
+  "buys": []
+}

@@ -273,19 +273,11 @@ public final class GuideSelfTest {
             ItemStack notes = WayfarerNotes.make(2);
             check(f, WayfarerNotes.chapterOf(notes) == 2 && notes.is(GuideSetup.WAYFARER_NOTES.get()) && WayfarerNotes.chapterOf(WayfarerNotes.make(9)) == 4
                     && WayfarerNotes.chapterOf(new ItemStack(Items.PAPER)) == 0, "the notes did not keep their chapter");
-            var holder = server.getRecipeManager().byKey(recipe);
-            check(f, holder.isPresent(), "the vanilla recipe used by the test is missing");
+            // 覚書の章の品の ID (誂えの品の目録)。レシピは読まない (作業台はない) ので、解いても数えるものはない
             WayfarerNotes.registerRecipes(2, recipe, ResourceLocation.fromNamespaceAndPath("skyabyss", "no_such_recipe"));
             check(f, WayfarerNotes.recipes(2).size() == 2 && WayfarerNotes.recipes(3).isEmpty(), "registerRecipes did not keep the ids per chapter");
-            if (holder.isPresent()) {
-                a.getRecipeBook().remove(holder.get());
-                check(f, !a.getRecipeBook().contains(holder.get()), "the test recipe was already unlocked");
-                check(f, WayfarerNotes.unlockRecipes(a, 3) == 0 && !a.getRecipeBook().contains(holder.get()), "another chapter's notes unlocked the recipe");
-                WayfarerNotes.onOpen(a, 2);
-                check(f, a.getRecipeBook().contains(holder.get()), "opening the notes did not unlock the recipe");
-                check(f, WayfarerNotes.unlockRecipes(a, 2) == 0, "an unlocked recipe was counted again or a missing recipe was counted");
-                a.getRecipeBook().remove(holder.get());
-            }
+            WayfarerNotes.onOpen(a, 2);
+            check(f, WayfarerNotes.unlockRecipes(a, 2) == 0, "notes counted recipes that are not loaded");
             // 渡す: 人ごとに一度。渡し直しは持っていないときだけ
             check(f, WayfarerNotes.give(a, 2) && !WayfarerNotes.give(a, 2) && countNotes(a, 2) == 1, "give did not hand over once");
             check(f, !WayfarerNotes.give(a, 2, true) && countNotes(a, 2) == 1, "a reissue duplicated the notes");

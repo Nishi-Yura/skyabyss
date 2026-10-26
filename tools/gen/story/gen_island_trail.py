@@ -40,6 +40,7 @@ TOWN = {
 }
 
 OPENING = {
+    'objective.skyabyss.island_job': ('野営地で、自分の戦い方を選ぼう', 'Choose how you fight, at the camp'),
     'objective.skyabyss.island_prints': ('道の先の窪地を見に行こう', 'Look at the hollow up the road'),
     'objective.skyabyss.island_bandits': ('峠の野盗を退けよう', 'Drive off the bandits at the pass'),
     'objective.skyabyss.island_rest': ('旅の休み場の焚き火で休もう', 'Rest by the fire at the rest stop'),

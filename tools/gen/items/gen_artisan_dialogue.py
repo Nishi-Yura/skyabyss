@@ -158,11 +158,11 @@ def ch1():
         'ああ、荷のそばにいた人か。……いや、違う。前にも会った気がするだけだ。@@道具は覚えている。持ち主は、そうでもない。覚書を渡しておく。写しておけ。',
         'Ah, you were by the pack. ...No. I only feel I have met you before.@@The tools remember. The owner, less so. Take these notes; copy what matters.')
     put(CH1, B + 'ch1t_blade_show',
-        '折れた剣を見たのか。台座の。……柄の巻き方を、覚えているか。@@あれは、俺が教えた巻き方だ。……いや、教えた気がするだけだ。手が、そう言っている。@@鉄の剣なら、作業台で作れる。研ぐのは岩の砥石だ。岩殻片と骨片と火打ち石。作り方は、覚書に写しておいた。研がずに振るな。',
+        '折れた剣を見たのか。台座の。……柄の巻き方を、覚えているか。@@あれは、俺が教えた巻き方だ。……いや、教えた気がするだけだ。手が、そう言っている。@@鉄の剣なら、道具屋に並んでいる。研ぐのは岩の砥石だ。岩殻片と骨片を、鍛冶場へ持っていけ。研がずに振るな。',
         'You saw the broken sword. On the plinth. ...Do you remember how the grip was wound?@@That is the way I teach it. ...No. I only feel I taught it. My hands say so.@@An iron sword you can make at a workbench. Hone it on a rock whetstone: shell scraps, a bone chip and flint. I copied the way into your notes. Do not swing it unhoned.')
     put(CH1, B + 'ch1t_blade_tell',
-        '刃か。……折れた剣を見た。割れ殻の洞の奥だ。いつ見たのかは、覚えていない。@@台座の上に、横たえてあった。誰かが、また取りに来ると思ったんだろう。見てくるといい。刃の作り方は、それから教える。',
-        'A blade? ...I saw a broken sword. Deep in the Cleft Shell. When, I do not remember.@@It lay on a plinth. Someone meant to come back for it, I suppose. Go and look. I will teach you the making after.')
+        '刃か。……折れた剣を見た。割れ殻の洞の奥だ。いつ見たのかは、覚えていない。@@台座の上に、横たえてあった。誰かが、また取りに来ると思ったんだろう。見てくるといい。刃の話は、それからだ。',
+        'A blade? ...I saw a broken sword. Deep in the Cleft Shell. When, I do not remember.@@It lay on a plinth. Someone meant to come back for it, I suppose. Go and look. We will talk blades after.')
     put(CH1, B + 'ch1t_ward_weave',
         '殻の護り糸か。いい糸だ。鼓動に合わせて、ゆるむようにできている。@@編んでおこう。倒れかけた一度だけ、これが肩で受けてくれる。使えば、ほどけて消える。ほどけたら、また持っておいで。手間は、岩殻片でいい。',
         'Shell-ward thread. A good one. It is made to slacken in time with a beat.@@I will weave it. Once, when you would fall, it will take the blow on your shoulder. Used, it unravels and is gone. When it does, bring it back. Shell scraps will do for my trouble.')
@@ -173,8 +173,8 @@ def ch1():
         '支度は、まだ途中といったところか。急がなくていい。鯨は、まだ遠い。@@足りないものは、たいてい手の届くところにある。道の脇に、割れ殻の洞に、骨の山に。',
         'Partway ready, by the look. No need to hurry. The whale is still far off.@@What you lack is usually within reach: beside the road, in the Cleft Shell, under the bones.')
     put(CH1, B + 'ch1p_teach',
-        '作り方か。……岩殻片は、骨片と合わせて砥石にもなる。固焼きも、軟膏もだ。覚書に書いてある。@@手が思い出すまで、作業台で何度でも広げろ。',
-        'The way of it? ...Shell scraps, with bone chips, make whetstones too. Hardtack and salve as well. It is in your notes.@@Lay it out on a workbench as often as it takes for your hands to remember.')
+        '素材のことか。……岩殻片は、骨片と合わせて砥石にもなる。固焼きも、軟膏もだ。覚書に書いてある。@@素材を持って、都の鍛冶場か薬師へ行け。誂えてくれる。',
+        'The materials? ...Shell scraps, with bone chips, make whetstones too. Hardtack and salve as well. It is in your notes.@@Take the materials to the smithy or the apothecary in town. They will make it for you.')
     put(CH1, B + 'ch1a_notes',
         'なくしたのか。……荷のどこかに、もう一冊挟んであったはずだ。ほら。@@道具は、なくなる。覚書も、なくなる。写しは、いくつあってもいい。',
         'Lost them? ...There should be another copy tucked in the pack somewhere. Here.@@Tools get lost. Notes get lost. There is no harm in more copies.')
@@ -184,7 +184,7 @@ def ch1():
     put(CH1, B + 'ch1a_ward_ask',
         '護りを編み直すなら、岩殻片が要る。手間の分だ。道の脇か、洞か、骨の山に落ちている。',
         'To weave a ward again I need shell scraps, for the trouble. They lie beside the road, in the cave, under the bones.@@And one a day at most. If you are in a hurry, count your thread first.')
-    put(CH1, B + 'a_menu.teach', '作り方を、もう一度教えてほしい。', 'Teach me how to make things again.')
+    put(CH1, B + 'a_menu.teach', '素材のことを、もう一度教えてほしい。', 'Tell me about the materials again.')
     put(CH1, B + 'a_menu.notes', '旅の覚書を、なくした。', 'I lost my wayfarer\'s notes.')
     put(CH1, B + 'a_menu.ward', '鼓動守を、編み直してほしい。（岩殻片 8 つ）', 'Weave my heartbeat ward again. (eight shell scraps)')
     put(CH1, B + 'a_menu.ward_ask', '鼓動守を、編み直してほしい。', 'Weave my heartbeat ward again.')

@@ -354,50 +354,47 @@ public final class Ch3GearSelfTest {
     }
 
     private static void recipes(List<String> f, MinecraftServer server, ServerLevel level, FakePlayer a) {
-        var manager = server.getRecipeManager();
-        Map<Item, Integer> total = new HashMap<>();
-        for (String piece : List.of("peak_crossing_helmet", "peak_crossing_chestplate", "peak_crossing_leggings", "peak_crossing_boots")) {
-            var holder = manager.byKey(id(piece));
-            check(f, holder.isPresent(), "the recipe " + piece + " is missing");
-            holder.ifPresent(h -> {
-                check(f, h.value().getResultItem(server.registryAccess()).is(BuiltInRegistries.ITEM.get(id(piece))), piece + " makes the wrong item");
-                for (Ingredient ing : h.value().getIngredients()) {
-                    if (!ing.isEmpty()) {
-                        total.merge(ing.getItems()[0].getItem(), 1, Integer::sum);
-                    }
-                }
-            });
-        }
         Item shard = BuiltInRegistries.ITEM.get(id("tide_shell_shard"));
-        check(f, shard != Items.AIR && total.getOrDefault(Ch3Gear.SCORCHED_FEATHER.get(), 0) == 12 && total.getOrDefault(Ch3Gear.STATIC_COTTON.get(), 0) == 6
-                && total.getOrDefault(Ch3Gear.COPPER_WIRE.get(), 0) == 6 && total.getOrDefault(shard, 0) == 4,
-                "the peak crossing set costs " + total + " (want feather 12, cotton 6, wire 6, tide shell shard 4)");
-        check(f, Ch3Gear.RECIPES.size() == 9 && WayfarerNotes.recipes(3).size() == 9, "the chapter-3 notes should hold 9 recipes, got " + WayfarerNotes.recipes(3));
-        for (ResourceLocation r : WayfarerNotes.recipes(3)) {
-            check(f, manager.byKey(r).isPresent(), "the recipe " + r + " is missing");
-            check(f, RecipeLock.locked(r), r + " is not locked");
+        madeSet(f, List.of("peak_crossing_helmet", "peak_crossing_chestplate", "peak_crossing_leggings", "peak_crossing_boots"), "smithy", 3,
+                Map.of(Ch3Gear.SCORCHED_FEATHER.get(), 12, Ch3Gear.STATIC_COTTON.get(), 6, Ch3Gear.COPPER_WIRE.get(), 6, shard, 4), "peak crossing set");
+        check(f, Ch3Gear.RECIPES.size() == 9 && WayfarerNotes.recipes(3).size() == 9, "the chapter-3 notes should hold 9 items, got " + WayfarerNotes.recipes(3));
+        madeChapter(f, 3);
+        noCrafting(f, server, level, a);
+    }
+
+    // 誂え (作業台はない。2026-10-26)。部位がその店のその章の誂えで、素材の合計が want
+    private static void madeSet(List<String> f, List<String> pieces, String shop, int chapter, Map<Item, Integer> want, String what) {
+        Map<Item, Integer> total = new HashMap<>();
+        for (String piece : pieces) {
+            jp.revati.skyabyss.facility.MadeToOrder.Entry e = jp.revati.skyabyss.facility.MadeToOrder.find(piece);
+            check(f, e != null && e.good().made() && e.shop().id().equals(shop) && e.good().chapter() == chapter,
+                    piece + " is not made to order at the " + shop + " from chapter " + chapter);
+            if (e != null) {
+                e.materials().forEach((k, v) -> total.merge(k, v, Integer::sum));
+            }
         }
-        var helmet = manager.byKey(id("peak_crossing_helmet"));
-        if (helmet.isEmpty()) {
-            return;
+        check(f, total.equals(want), "the " + what + " costs " + total + " (want " + want + ")");
+    }
+
+    // 覚書の章の品は、みなその章から誂えられる (並ぶ品も可)
+    private static void madeChapter(List<String> f, int chapter) {
+        for (ResourceLocation r : WayfarerNotes.recipes(chapter)) {
+            jp.revati.skyabyss.facility.MadeToOrder.Entry e = jp.revati.skyabyss.facility.MadeToOrder.find(r.toString());
+            if (r.getPath().equals("hare_quill_arrow")) {
+                continue;
+            }
+            check(f, e != null && (!e.good().made() || e.good().chapter() == chapter), r + " is not made to order from chapter " + chapter);
         }
-        for (ResourceLocation r : WayfarerNotes.recipes(3)) {
-            manager.byKey(r).ifPresent(h -> a.getRecipeBook().remove(h));
-        }
-        a.getInventory().clearContent();
-        CraftingMenu menu = new CraftingMenu(9, a.getInventory(), ContainerLevelAccess.create(level, BlockPos.ZERO));
+    }
+
+    // 作業台では何も作れない (レシピを一つも読まない)
+    private static void noCrafting(List<String> f, MinecraftServer server, ServerLevel level, FakePlayer a) {
+        check(f, server.getRecipeManager().getRecipes().isEmpty(), "recipes are still loaded (" + server.getRecipeManager().getRecipes().size() + ")");
+        CraftingMenu menu = new CraftingMenu(7, a.getInventory(), ContainerLevelAccess.create(level, BlockPos.ZERO));
         a.containerMenu = menu;
-        Item fe = Ch3Gear.SCORCHED_FEATHER.get();
-        Item co = Ch3Gear.STATIC_COTTON.get();
-        Item[] grid = {fe, co, fe, co, shard, co};
-        for (int i = 0; i < 6; i++) {
-            menu.getSlot(1 + i).set(new ItemStack(grid[i]));
-        }
-        check(f, menu.getSlot(0).getItem().is(Ch3Gear.HELMET.get()), "the crafting grid did not show the peak crossing hood");
-        check(f, RecipeLock.sweep(a) && !menu.getSlot(0).hasItem(), "the locked peak crossing result was not cleared");
-        check(f, WayfarerNotes.unlockRecipes(a, 3) == 9, "the chapter-3 notes did not unlock all nine recipes");
-        menu.getSlot(1).set(new ItemStack(fe));
-        check(f, menu.getSlot(0).getItem().is(Ch3Gear.HELMET.get()) && !RecipeLock.sweep(a), "an unlocked peak crossing recipe was cleared");
+        menu.getSlot(1).set(new ItemStack(Items.OAK_PLANKS));
+        menu.getSlot(4).set(new ItemStack(Items.OAK_PLANKS));
+        check(f, !menu.getSlot(0).hasItem(), "the crafting grid still makes something from planks");
         for (int i = 1; i <= 9; i++) {
             menu.getSlot(i).set(ItemStack.EMPTY);
         }

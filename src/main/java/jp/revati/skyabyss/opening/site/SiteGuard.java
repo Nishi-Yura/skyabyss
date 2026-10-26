@@ -133,6 +133,56 @@ public final class SiteGuard {
         return a != null && a.contains(pos);
     }
 
+    // 土地の町 (大陸の世界の鯨見・潮・風・灰の町。world/continent/ContinentTowns) の範囲。建った町だけ
+    private static final List<Area> TOWNS = new ArrayList<>();
+    private static long townsStamp = Long.MIN_VALUE;
+
+    public static List<Area> towns(MinecraftServer server) {
+        List<SiteData.Entry> list = SiteData.get(server.overworld()).entries(jp.revati.skyabyss.world.continent.ContinentTowns.KIND);
+        long stamp = 17;
+        for (SiteData.Entry e : list) {
+            if (e.built) {
+                stamp = stamp * 31 + e.pos.asLong() * 7 + e.yaw + e.blueprint.hashCode();
+            }
+        }
+        if (stamp == townsStamp) {
+            return TOWNS;
+        }
+        TOWNS.clear();
+        for (SiteData.Entry e : list) {
+            Blueprint bp = e.built ? Blueprint.get(e.blueprint.isEmpty() ? "town_" + jp.revati.skyabyss.world.continent.ContinentTowns.region(e.index) : e.blueprint) : null;
+            if (bp == null) {
+                continue;
+            }
+            int rot = SiteFinder.rot(e.yaw);
+            boolean mirror = SiteFinder.mirror(e.yaw);
+            BlockPos origin = originOf(e, bp, rot, mirror);
+            if (origin == null) {
+                origin = e.pos.below();
+            }
+            int[] r = bp.worldRect(rot, mirror, origin);
+            TOWNS.add(new Area(r[0], origin.getY() - 24, r[1], r[2], origin.getY() + 64, r[3]));
+        }
+        townsStamp = stamp;
+        return TOWNS;
+    }
+
+    // 都か土地の町の中か (守り・安全・敵の湧きと見回りは、都と町で同じ)
+    public static boolean inTown(Level level, BlockPos pos) {
+        if (inCapital(level, pos)) {
+            return true;
+        }
+        if (level.isClientSide || level.dimension() != Level.OVERWORLD || level.getServer() == null) {
+            return false;
+        }
+        for (Area a : towns(level.getServer())) {
+            if (a.contains(pos)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     // 小要素の守るブロックか
     static boolean siteBlock(ServerLevel level, BlockPos pos) {
         refreshSites(level);
@@ -224,7 +274,7 @@ public final class SiteGuard {
 
     // 都の中で、この人がここのブロックを変えてはいけないか (都に空き区画はない。35 の 7 章)
     private static boolean capitalLocked(Level level, @Nullable Player p, BlockPos pos) {
-        return !bypass(p) && inCapital(level, pos);
+        return !bypass(p) && inTown(level, pos);
     }
 
     @SubscribeEvent(priority = EventPriority.HIGH)
@@ -247,7 +297,7 @@ public final class SiteGuard {
         Player p = event.getEntity() instanceof Player pl ? pl : null;
         if (p == null) {
             // 人でない物 (エンダーマン・雪だるま…) は都の中に置かない
-            if (inCapital(level, event.getPos())) {
+            if (inTown(level, event.getPos())) {
                 event.setCanceled(true);
             }
             return;
@@ -262,7 +312,7 @@ public final class SiteGuard {
     // バニラの畑の踏み荒らし
     @SubscribeEvent
     static void onTrample(BlockEvent.FarmlandTrampleEvent event) {
-        if (event.getLevel() instanceof Level level && inCapital(level, event.getPos())) {
+        if (event.getLevel() instanceof Level level && inTown(level, event.getPos())) {
             event.setCanceled(true);
         }
     }
@@ -295,7 +345,7 @@ public final class SiteGuard {
             return;
         }
         // 液体へ向けたバケツ (水を汲む・流す) も
-        if (event.getItemStack().getItem() instanceof BucketItem && inCapital(level, event.getEntity().blockPosition())
+        if (event.getItemStack().getItem() instanceof BucketItem && inTown(level, event.getEntity().blockPosition())
                 && capitalLocked(level, event.getEntity(), event.getEntity().blockPosition())) {
             event.setCanceled(true);
             Notice.hint(event.getEntity(), "message.skyabyss.guard.block");
@@ -308,14 +358,14 @@ public final class SiteGuard {
         if (!(event.getLevel() instanceof ServerLevel level) || level.dimension() != Level.OVERWORLD) {
             return;
         }
-        event.getAffectedBlocks().removeIf(p -> inCapital(level, p) || siteBlock(level, p));
+        event.getAffectedBlocks().removeIf(p -> inTown(level, p) || siteBlock(level, p));
     }
 
     // 敵がブロックを持ち去る・壊す (エンダーマン・ラヴェジャー…)
     @SubscribeEvent
     static void onGriefing(EntityMobGriefingEvent event) {
         Entity e = event.getEntity();
-        if (e.level() instanceof ServerLevel level && inCapital(level, e.blockPosition())) {
+        if (e.level() instanceof ServerLevel level && inTown(level, e.blockPosition())) {
             event.setCanGrief(false);
         }
     }
@@ -329,7 +379,7 @@ public final class SiteGuard {
         if (event.getSource().is(DamageTypeTags.BYPASSES_INVULNERABILITY) || event.getSource().is(DamageTypes.FELL_OUT_OF_WORLD)) {
             return;
         }
-        if (inCapital(p.level(), p.blockPosition())) {
+        if (inTown(p.level(), p.blockPosition())) {
             event.setCanceled(true);
         }
     }
@@ -340,12 +390,12 @@ public final class SiteGuard {
         if (safetyOff()) {
             return;
         }
-        if (mob instanceof Enemy && mob.level() instanceof ServerLevel level && inCapital(level, BlockPos.containing(event.getX(), event.getY(), event.getZ()))) {
+        if (mob instanceof Enemy && mob.level() instanceof ServerLevel level && inTown(level, BlockPos.containing(event.getX(), event.getY(), event.getZ()))) {
             event.setSpawnCancelled(true);
         }
     }
 
-    // 1 秒ごと: 都の中に入った敵を消す (外から歩いて来た物・湧き台から来た物)。名札の付いた物は外へ押し出す
+    // 1 秒ごと: 都と土地の町の中に入った敵を消す (外から歩いて来た物・湧き台から来た物)。名札の付いた物は外へ押し出す
     @SubscribeEvent
     static void onTick(ServerTickEvent.Post event) {
         MinecraftServer server = event.getServer();
@@ -358,11 +408,19 @@ public final class SiteGuard {
         if (server.getTickCount() % 20 != 7 || safetyOff()) {
             return;
         }
-        Area a = capital(server);
-        if (a == null) {
-            return;
+        List<Area> areas = new ArrayList<>(towns(server));
+        Area cap = capital(server);
+        if (cap != null) {
+            areas.add(cap);
         }
         ServerLevel level = server.overworld();
+        for (Area a : areas) {
+            sweepEnemies(level, a);
+        }
+    }
+
+    // 範囲の中の敵を消す (名札の付いた物は外へ押し出す)
+    private static void sweepEnemies(ServerLevel level, Area a) {
         for (Entity e : level.getEntitiesOfClass(Mob.class, a.box(), m -> m instanceof Enemy && m.isAlive())) {
             if (e.hasCustomName()) {
                 double cx = (a.x0() + a.x1()) / 2.0;
@@ -381,6 +439,8 @@ public final class SiteGuard {
     // 開発・自己テスト用: 覚えた範囲を捨てる
     public static void reset() {
         capital = null;
+        TOWNS.clear();
+        townsStamp = Long.MIN_VALUE;
         capitalKey = Long.MIN_VALUE;
         SITE_CELLS.clear();
         SITE_LIST.clear();
@@ -389,6 +449,6 @@ public final class SiteGuard {
     }
 
     static boolean levelAccessorInCapital(LevelAccessor l, BlockPos p) {
-        return l instanceof Level level && inCapital(level, p);
+        return l instanceof Level level && inTown(level, p);
     }
 }

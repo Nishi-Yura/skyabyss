@@ -164,7 +164,7 @@ public final class RpgRules {
     }
 
     // ---------------------------------------------------------------- はじめの持ち物 (docs/design/40 の 4 章)
-    // 初めて入った人に一度だけ: 最初の武器 (石の剣)・軽い防具 (革の四つ。空いている所は身に着ける)・食べ物 10。
+    // 初めて入った人に一度だけ: 軽い防具 (革の四つ。空いている所は身に着ける)・食べ物 10。武器は渡さない (職を選ぶと始めの武器。2026-10-26 の声「職業選んでから戦い」)。
     // 決まり (skyabyssAdventure) が切れている世界では渡さない
     static final String KIT_TAG = "skyabyss_rpg_kit";
 
@@ -173,7 +173,6 @@ public final class RpgRules {
             return;
         }
         player.getPersistentData().putBoolean(KIT_TAG, true);
-        jp.revati.skyabyss.quest.Quests.give(player, new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.STONE_SWORD));
         net.minecraft.world.item.Item[] armor = {net.minecraft.world.item.Items.LEATHER_HELMET, net.minecraft.world.item.Items.LEATHER_CHESTPLATE,
             net.minecraft.world.item.Items.LEATHER_LEGGINGS, net.minecraft.world.item.Items.LEATHER_BOOTS};
         net.minecraft.world.entity.EquipmentSlot[] slots = {net.minecraft.world.entity.EquipmentSlot.HEAD, net.minecraft.world.entity.EquipmentSlot.CHEST,
@@ -200,6 +199,23 @@ public final class RpgRules {
     static void onDimension(PlayerEvent.PlayerChangedDimensionEvent event) {
         if (event.getEntity() instanceof ServerPlayer player) {
             enforce(player);
+        }
+    }
+
+    // ---------------------------------------------------------------- 地形は壊れない (2026-10-26 の声「爆発で地形壊れるよ」)
+    // 決まりが入っていれば、どの世界でも爆発 (クリーパー・TNT・敵の技) はブロックを壊さない。人や敵への傷はそのまま
+    @SubscribeEvent
+    static void onExplosion(net.neoforged.neoforge.event.level.ExplosionEvent.Detonate event) {
+        if (event.getLevel() instanceof ServerLevel level && adventure(level)) {
+            event.getAffectedBlocks().clear();
+        }
+    }
+
+    // 敵もブロックを壊さない・持ち去らない (エンダーマン・ラヴェジャー・ゾンビの戸破り…)
+    @SubscribeEvent
+    static void onGriefing(net.neoforged.neoforge.event.entity.EntityMobGriefingEvent event) {
+        if (event.getEntity().level() instanceof ServerLevel level && adventure(level) && !(event.getEntity() instanceof Player)) {
+            event.setCanGrief(false);
         }
     }
 

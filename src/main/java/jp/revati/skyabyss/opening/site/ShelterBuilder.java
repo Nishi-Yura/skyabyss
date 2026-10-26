@@ -63,7 +63,7 @@ public final class ShelterBuilder {
     }
 
     // 5 秒ごと (SiteGuard の見回りから): 都の施設の名の表示が無ければ置き直す (生き物の動いているチャンクだけ)
-    static void keepLabels(net.minecraft.server.level.ServerLevel level, SiteData.Entry e) {
+    public static void keepLabels(net.minecraft.server.level.ServerLevel level, SiteData.Entry e) {
         for (int i = 0; i < e.extraNames.size(); i++) {
             String key = e.extraNames.get(i);
             if (!key.startsWith("label_") || LABEL_HIDDEN.contains(key.substring(6))) {

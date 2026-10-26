@@ -3,7 +3,7 @@
   "dialogue.skyabyss.artisan.a_menu.ward3": "雷翼の鼓動守を編み直してほしい（帯電綿 8 つ）",
   "dialogue.skyabyss.artisan.ch3a_first": "また会ったな、旅の人。……峰の風は、針金をよく鳴らす。耳を澄ますといい。\nこれは峰の覚書だ。焦げた羽と、帯電した綿の扱いを書いておいた。",
   "dialogue.skyabyss.artisan.ch3a_ward": "護りがほどけたか。帯電綿があるな。峰に浮く毛玉が落とすやつだ。……編み直しておいた。",
-  "dialogue.skyabyss.artisan.ch3p_teach": "作り方か。……焦げ羽は軽い。帯電綿は縫い目に詰めると、雷が肌まで来ない。銅線は縁に巻け。\n砥石も、団子も、油も、覚書に写しておいた。小旗は風の向きを見るためのものだ。",
+  "dialogue.skyabyss.artisan.ch3p_teach": "素材のことか。……焦げ羽は軽い。帯電綿は縫い目に詰めると、雷が肌まで来ない。銅線は縁に巻く。\n砥石も、団子も、油も、覚書に写しておいた。鍛冶場と薬師へ持っていけ。小旗は風の向きを見るためのものだ。",
   "dialogue.skyabyss.artisan.ch3t_ward_weave": "雷の護り糸か。……指がしびれる。生きている糸だ。\n鼓動守に編もう。翼の中で鼓動が速くなったら、これを握れ。",
   "effect.skyabyss.grounded": "避雷",
   "effect.skyabyss.thunder_whetted": "雷の刃",
@@ -56,5 +56,5 @@
   "wayfarer_notes.ch3.line.4": "焼けた羽守は硬い。頂の柱の雷を浴びせると、しばらく刃が通る。足もとに輪が出たら、外へ。",
   "wayfarer_notes.ch3.line.5": "雷は高い銅へ落ちる。柱のそばに立たない。避雷の油を飲めば、感電は半分で済む。",
   "wayfarer_notes.ch3.line.6": "風読みの小旗を立てれば、風の向きと、次の嵐までの目安が分かる。背の嵐の拍も、同じように読む。",
-  "wayfarer_notes.ch3.line.7": "焦げ羽と帯電綿と銅線は、旅装にも、雷の砥石にも、油にも小旗にもなる。この覚書を開くと、作り方が作業台に出る。"
+  "wayfarer_notes.ch3.line.7": "焦げ羽と帯電綿と銅線は、旅装にも、雷の砥石にも、油にも小旗にもなる。鍛冶場と薬師が誂えてくれる。"
 }

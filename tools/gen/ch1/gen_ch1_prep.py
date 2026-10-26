@@ -157,7 +157,7 @@ def texts():
     put('wayfarer_notes.ch1.line.4', '予告の線や輪が出たら、跳ぶか、走るか、物の陰に入れば避けられる。立ち止まらない。', 'When a line or ring is marked on the floor, jump, run or take cover. Do not stand still.')
     put('wayfarer_notes.ch1.line.5', '歌石は、積み石の低い順に叩く。洞の鳴り石も、ろうそくの数の少ない順に。', 'Strike the song stones from the lowest cairn up. In the cave, strike the ringing stones from the fewest candles up.')
     put('wayfarer_notes.ch1.line.6', '背の奥へ進む前に、身と刃と糧がそろっているか確かめる。足りなくても進める。ただ、重くなる。', 'Before going deep into the back, check your body, blade and provisions. You can go on without them. It will only be heavier.')
-    put('wayfarer_notes.ch1.line.7', '岩殻片と骨片は、旅装にも、岩の砥石にも、道の固焼きにもなる。この覚書を開くと、作り方が作業台に出る。', 'Shell scraps and bone chips make road gear, rock whetstones and road hardtack. Open these notes and the recipes appear at the workbench.')
+    put('wayfarer_notes.ch1.line.7', '岩殻片と骨片は、旅装にも、岩の砥石にも、道の固焼きにもなる。鍛冶場と薬師へ持っていけば誂えてくれる。', 'Shell scraps and bone chips make road gear, rock whetstones and road hardtack. The smithy and the apothecary will make them for you.')
 
 
 # ---------------------------------------------------------------- 仮の絵 (素材 4 つ)

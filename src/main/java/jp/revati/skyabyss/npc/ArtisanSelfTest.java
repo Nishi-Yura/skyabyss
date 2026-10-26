@@ -383,13 +383,10 @@ public final class ArtisanSelfTest {
         jp.revati.skyabyss.lore.Lore.unlock(p, Ch1Prep.PAGE_BLADE, false);
         Quests.poll(p, true);
         check(f, entry(d, c).equals("ch1t_blade_show"), "the show stage should open ch1t_blade_show, got " + entry(d, c));
-        var whetHolder = level.getServer().getRecipeManager().byKey(ResourceLocation.fromNamespaceAndPath("skyabyss", "rock_whetstone"));
-        check(f, whetHolder.isPresent(), "the whetstone recipe is missing");
-        whetHolder.ifPresent(h -> p.getRecipeBook().remove(h));
+        check(f, jp.revati.skyabyss.facility.MadeToOrder.find("rock_whetstone") != null, "the rock whetstone is not made to order");
         for (Action a : d.nodes().get("ch1t_blade_show").actions()) {
             a.run(c);
         }
-        check(f, whetHolder.isPresent() && p.getRecipeBook().contains(whetHolder.get()), "the artisan did not teach the recipes");
         Quests.onTalk(p, ROLE, "ch1t_blade_show");
         check(f, !entry(d, c).equals("ch1t_blade_show"), "the show entry came again after the talk");
         // 鍛えの段: 鉄の剣と砥石 (どちらが先でもよい)

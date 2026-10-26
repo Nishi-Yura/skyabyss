@@ -168,7 +168,7 @@ def quests():
         'The plinth said: "Swung it unhoned. So it broke." Make an iron sword and a rock whetstone at a workbench. Carrying the whetstone keeps the blade honed. The recipe is in your wayfarer\'s notes.')
     put(b + 'forge.lead', '職人「研がずに振るな。あの剣は、それで折れた」', 'The artisan: "Do not swing it unhoned. That sword broke because it was."')
     put(b + 'forge.sword', '鉄の剣を作ろう', 'Make an iron sword')
-    put(b + 'forge.whet', '岩の砥石を作ろう', 'Make a rock whetstone')
+    put(b + 'forge.whet', '鍛冶場で岩の砥石を誂えて使おう', 'Get a rock whetstone from the smithy')
     put(b + 'done', '「刃は、研いだぶんだけ軽くなる。……今度は、折るなよ」\n盾のことなら、語り部が昔の旅人の話を知っている。',
         '"A blade lightens as you hone it. ...Do not break this one."\nFor a shield, the storyteller knows a tale of the traveller long ago.')
 

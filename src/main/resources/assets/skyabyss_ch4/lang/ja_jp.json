@@ -6,7 +6,7 @@
   "commands.skyabyss.playtest.now.ch4_forge_tell": "炉跡の頁を、語り部に見せた扱いにした",
   "commands.skyabyss.playtest.now.ch4_pit": "消えた炉の坑の口へ運んだ。奥の古い灰の番人を倒そう",
   "commands.skyabyss.playtest.now.ch4_rumor": "イサナの灰の山の話を聞いた扱いにした。支度の段が出る",
-  "dialogue.skyabyss.artisan.ch4a_first": "灰の地まで来たか。……ここの道具は、煤けて重い。\n覚書を渡しておく。灰の地の虫の見分け方と、煤の砥石、灰の冷やし水の作り方だ。",
+  "dialogue.skyabyss.artisan.ch4a_first": "灰の地まで来たか。……ここの道具は、煤けて重い。\n覚書を渡しておく。灰の地の虫の見分け方と、煤の砥石・灰の冷やし水の素材だ。鍛冶場と薬師が誂えてくれる。",
   "dialogue.skyabyss.artisan.ch4a_ward": "煤鉄で編み直した。……今度は、溶かすなよ。",
   "dialogue.skyabyss.artisan.ch4a_ward_offer": "余燼の鼓動守を、なくしたのか。煤鉄が八つあれば、編み直せるが。",
   "dialogue.skyabyss.artisan.ch4a_ward_offer.no": "今はいい",

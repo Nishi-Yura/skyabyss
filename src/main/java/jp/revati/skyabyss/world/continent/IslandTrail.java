@@ -38,11 +38,13 @@ import net.neoforged.neoforge.event.tick.ServerTickEvent;
 
 // はじまりの島の道 (2026-10-26 の試遊「島が雑」「道をそれても行けてしまう」「島から都へ急に行って話がない」。Wynncraft の King's Recruit を手本に)。
 // 谷の一本道 (地形は gen_continent.shape_island) を、人ごとの目的の順で歩く:
+//   0. 野営地で職を選ぶ (island_job。野営地のそばに立つと職を選ぶ画面 (rpg/skill/JobChoice)。選ぶと始めの武器と 1 行目の技)。
+//      2026-10-26 の声「職業選んでから戦いでしょ」: 選ぶまでは島の目的が進まず、峠の野盗も立たない
 //   1. 野営地の帳面 (今までどおり examine_camp)
 //   2. 足跡の窪地を見る (island_prints。窪地の足跡の 40 以内か、足跡の伝承)
 //   3. 峠の野盗を退ける (island_bandits。島で野盗を 3 人。足りなければ野営に出る)。峠の柵は、誰かが退けると開く (世界に一つ)
 //   4. 旅の休み場の焚き火で休む (island_rest。そばに 3 秒)
-//   5. 宿り木の祠に祈る (island_shrine。そばに立つと職を選ぶ画面 (rpg/skill/JobChoice)。選ぶと始めの武器と 1 行目の技。ここで目覚めるようになり、技の画面 (K) の手がかり)
+//   5. 宿り木の祠に祈る (island_shrine。そばに立つと済む。ここで目覚めるようになり、技の画面 (K) の手がかり)
 //   6. 船着き場の渡し守と話す (take_ferry)。渡し守は 1〜5 を済ませた人だけを乗せる (会話の印 island_ready)。乗ると渡りの場面 (ferry_crossing) →
 //      鐘の都の南の門の外で、都を見上げる場面 (capital_arrival)
 // 印は人の永続データの KEY (倒れても残る。util/LifeKeep)
@@ -66,6 +68,8 @@ public final class IslandTrail {
     static final double PRINTS_NEAR = 40;
     static final double REST_NEAR = 6;
     static final double SHRINE_NEAR = 5;
+    // 野営地で職を選ぶ画面が開く近さ (離れると閉じる)
+    static final double CAMP_NEAR = 10;
     static final double BANDIT_NEAR = 36;
     static final String LEADER_TAG = "skyabyss_island_leader";
     static final net.minecraft.resources.ResourceLocation LEADER_HP = net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "island_leader_hp");
@@ -125,6 +129,9 @@ public final class IslandTrail {
             return null;
         }
         ContinentLayout lay = ContinentLayout.get();
+        if (jp.revati.skyabyss.rpg.skill.JobChoice.chosen(p) == null) {
+            return new Object[] {"island_job", ground(p.serverLevel(), lay.start())};
+        }
         if (!has(p, PRINTS)) {
             BlockPos v = lay.islandPrints().isEmpty() ? lay.island("prints_view") : lay.islandPrints().get(0);
             return new Object[] {"island_prints", ground(p.serverLevel(), v)};
@@ -169,6 +176,18 @@ public final class IslandTrail {
     // 一人の進みを見る (自己テストからも)
     static void update(ServerLevel level, ServerPlayer p) {
         ContinentLayout lay = ContinentLayout.get();
+        buildGate(level);
+        buildSigns(level);
+        // 職を選ぶまでは、ほかの目的は進まない (野営地のそばで選ぶ画面が開く)
+        if (jp.revati.skyabyss.rpg.skill.JobChoice.chosen(p) == null) {
+            double camp = Math.hypot(p.getX() - lay.start().getX(), p.getZ() - lay.start().getZ());
+            if (camp < CAMP_NEAR) {
+                jp.revati.skyabyss.rpg.skill.JobChoice.prompt(p);
+            } else if (camp > CAMP_NEAR + 4) {
+                jp.revati.skyabyss.rpg.skill.JobChoice.away(p);
+            }
+            return;
+        }
         if (!has(p, PRINTS)) {
             boolean near = jp.revati.skyabyss.lore.Lore.state(p).has("prologue/footprints");
             for (BlockPos q : lay.islandPrints()) {
@@ -191,24 +210,16 @@ public final class IslandTrail {
             mark(p, REST);
             Notice.hint(p, "message.skyabyss.island.rested");
         }
-        // 祠に祈る = 職を選ぶ (docs/design/43 の 4 節)。そばに来ると選ぶ画面が開き (離れるまで一度)、選び終えると済む
+        // 祠に祈る (職は野営地で選んである)
         double shrine = restPos(level, 1).distToCenterSqr(p.position());
-        if (has(p, REST) && shrine < SHRINE_NEAR * SHRINE_NEAR) {
-            if (jp.revati.skyabyss.rpg.skill.JobChoice.chosen(p) == null) {
-                jp.revati.skyabyss.rpg.skill.JobChoice.prompt(p);
-            } else if (!has(p, SHRINE)) {
-                mark(p, SHRINE);
-                Notice.objective(p, "message.skyabyss.island.prayed");
-                Notice.hint(p, "message.skyabyss.island.skill_hint");
-            }
-        } else if (shrine > (SHRINE_NEAR + 4) * (SHRINE_NEAR + 4)) {
-            jp.revati.skyabyss.rpg.skill.JobChoice.away(p);
+        if (has(p, REST) && shrine < SHRINE_NEAR * SHRINE_NEAR && !has(p, SHRINE)) {
+            mark(p, SHRINE);
+            Notice.objective(p, "message.skyabyss.island.prayed");
+            Notice.hint(p, "message.skyabyss.island.skill_hint");
         }
         if ((done(p) & ALL) == ALL) {
             setReady(p, true);
         }
-        buildGate(level);
-        buildSigns(level);
         BlockPos ferry = ContinentOutskirts.ferryPos(level);
         if (ferry != null && ferry.distToCenterSqr(p.position()) < 80 * 80) {
             jp.revati.skyabyss.town.RegionFolk.ensure(level, "island", "dock", ferry);

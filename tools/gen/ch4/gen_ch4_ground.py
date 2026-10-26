@@ -642,8 +642,8 @@ def dialogue():
     })
     a = 'dialogue.skyabyss.artisan.'
     put(a + 'ch4a_first',
-        '灰の地まで来たか。……ここの道具は、煤けて重い。\n覚書を渡しておく。灰の地の虫の見分け方と、煤の砥石、灰の冷やし水の作り方だ。',
-        'So you came as far as the ash. ...Tools here are sooty and heavy.\nTake these notes: how to tell the ash bugs apart, and how to make a soot whetstone and an ash cooler.')
+        '灰の地まで来たか。……ここの道具は、煤けて重い。\n覚書を渡しておく。灰の地の虫の見分け方と、煤の砥石・灰の冷やし水の素材だ。鍛冶場と薬師が誂えてくれる。',
+        'So you came as far as the ash. ...Tools here are sooty and heavy.\nTake these notes: how to tell the ash bugs apart, and what goes into a soot whetstone and an ash cooler. The smithy and the apothecary will make them.')
     put(a + 'ch4g_draught_tell',
         '灰の民は、火の薬を飲んでから炉に入った。火を飲んで、火の中へ、だ。\n醸造台で作れる。都の薬師が手ほどきをしてくれる。マグマクリームはネザーにある。……二つ作っておけ。炉は一度じゃ済まない。',
         'The ash people drank a fire draught before they went into the forge. Drink fire, walk into fire.\nYou can brew it at a stand. The apothecary in the capital will teach you. Magma cream is in the Nether. ...Make two. One forge is never enough.')

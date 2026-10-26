@@ -87,6 +87,27 @@ public final class IslandTrailSelfTest {
         FakePlayer p = new FakePlayer(level, new GameProfile(UUID.randomUUID(), "island_t"));
         BlockPos start = ContinentLayout.get().start();
         p.setPos(start.getX() + 0.5, level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, start.getX(), start.getZ()), start.getZ() + 0.5);
+        // 職を選ぶまでは、ほかの目的は進まない (足跡の窪地に立っても)
+        jp.revati.skyabyss.rpg.skill.JobChoice.reset(p);
+        expect(f, p, "island_job");
+        BlockPos pr0 = ContinentLayout.get().islandPrints().get(0);
+        p.setPos(pr0.getX() + 0.5, p.getY(), pr0.getZ() + 0.5);
+        IslandTrail.update(level, p);
+        if (IslandTrail.has(p, IslandTrail.PRINTS)) {
+            f.add("the trail moved on before a job was chosen");
+        }
+        jp.revati.skyabyss.rpg.skill.Job job = jp.revati.skyabyss.rpg.skill.Job.SHAMAN;
+        if (!jp.revati.skyabyss.rpg.skill.JobChoice.choose(p, job) || jp.revati.skyabyss.rpg.skill.JobChoice.choose(p, jp.revati.skyabyss.rpg.skill.Job.WARRIOR)) {
+            f.add("choosing a job at the camp did not work once (and only once)");
+        }
+        if (!p.getInventory().contains(new net.minecraft.world.item.ItemStack(jp.revati.skyabyss.rpg.skill.JobChoice.BELL_STAFF.get()))) {
+            f.add("the shaman did not get the bell staff");
+        }
+        jp.revati.skyabyss.rpg.skill.Skill first = jp.revati.skyabyss.rpg.skill.JobChoice.firstSkill(job);
+        if (first == null || !jp.revati.skyabyss.rpg.skill.SkillManager.get(p).knows(first)) {
+            f.add("the first job skill was not learned: " + first);
+        }
+        p.setPos(start.getX() + 0.5, p.getY(), start.getZ() + 0.5);
         expect(f, p, "island_prints");
         BlockPos pr = ContinentLayout.get().islandPrints().get(0);
         p.setPos(pr.getX() + 0.5, p.getY(), pr.getZ() + 0.5);
@@ -113,21 +134,7 @@ public final class IslandTrailSelfTest {
         }
         BlockPos s = IslandTrail.restPos(level, 1);
         p.setPos(s.getX() + 0.5, s.getY(), s.getZ() + 0.5);
-        // 祠に立つだけでは済まない: 職を選ぶと済む (始めの武器と、職の木の 1 行目の技)
-        jp.revati.skyabyss.rpg.skill.JobChoice.reset(p);
-        IslandTrail.update(level, p);
-        expect(f, p, "island_shrine");
-        jp.revati.skyabyss.rpg.skill.Job job = jp.revati.skyabyss.rpg.skill.Job.SHAMAN;
-        if (!jp.revati.skyabyss.rpg.skill.JobChoice.choose(p, job) || jp.revati.skyabyss.rpg.skill.JobChoice.choose(p, jp.revati.skyabyss.rpg.skill.Job.WARRIOR)) {
-            f.add("choosing a job at the shrine did not work once (and only once)");
-        }
-        if (!p.getInventory().contains(new net.minecraft.world.item.ItemStack(jp.revati.skyabyss.rpg.skill.JobChoice.BELL_STAFF.get()))) {
-            f.add("the shaman did not get the bell staff");
-        }
-        jp.revati.skyabyss.rpg.skill.Skill first = jp.revati.skyabyss.rpg.skill.JobChoice.firstSkill(job);
-        if (first == null || !jp.revati.skyabyss.rpg.skill.SkillManager.get(p).knows(first)) {
-            f.add("the first job skill was not learned: " + first);
-        }
+        // 祠に立つと済む (職は野営地で選んである)
         IslandTrail.update(level, p);
         expect(f, p, "take_ferry");
         if (!jp.revati.skyabyss.npc.NpcBonds.of(p).hasFlag(IslandTrail.FERRYMAN_ROLE, IslandTrail.READY_FLAG)) {

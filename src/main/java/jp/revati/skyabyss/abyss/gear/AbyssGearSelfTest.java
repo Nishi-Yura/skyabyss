@@ -295,11 +295,11 @@ public final class AbyssGearSelfTest {
 
     // ---------------------------------------------------------------- レシピと荷運び
     private static void recipes(MinecraftServer server, List<String> f) {
+        // 灯籠の護符・鼓動の聴き筒は鍛冶場の誂え (五章から)
         for (String r : List.of("abyss_lantern_charm", "abyss_pulse_listener")) {
-            check(f, server.getRecipeManager().byKey(ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, r)).isPresent(), "recipe " + r + " does not resolve");
+            jp.revati.skyabyss.facility.MadeToOrder.Entry e = jp.revati.skyabyss.facility.MadeToOrder.find(r);
+            check(f, e != null && e.good().made() && e.shop().id().equals("smithy") && e.good().chapter() == 5, r + " is not made to order at the smithy from chapter 5");
         }
-        ItemStack relic = new ItemStack(net.minecraft.core.registries.BuiltInRegistries.ITEM.get(ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "abyss_relic_bone_2")));
-        check(f, relic.hasCraftingRemainingItem() && relic.getCraftingRemainingItem().getItem() == relic.getItem(), "the relic should stay when traced at a crafting table");
         JsonObject porter = json("/data/skyabyss/dialogue/ch5/attendant_abyss_porter.json", f);
         if (porter != null) {
             String text = porter.toString();

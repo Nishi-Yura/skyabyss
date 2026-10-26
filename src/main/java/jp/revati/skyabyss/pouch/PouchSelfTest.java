@@ -496,7 +496,6 @@ public final class PouchSelfTest {
         runScreen(server, f, level);
         runUse(server, f, level);
         runRebuild(server, f, level);
-        runCraftTable(server, f, level);
         runDefaults(server, f);
     }
 
@@ -733,49 +732,9 @@ public final class PouchSelfTest {
 
     // ---------------------------------------------------------------- 作り直し・修理
     private static void runRebuild(MinecraftServer server, List<String> f, ServerLevel level) {
-        Item core = ModItems.STONE_WHALE_CORE.get();
-        Item shard = ModItems.STONE_WHALE_SHARD.get();
-        Item call = TravelSetup.STONE_WHALE_CALL.get();
-        var all = PouchRebuild.recipes(server.getRecipeManager(), server.registryAccess());
-        ResourceLocation callId = ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "stone_whale_call");
-        int index = -1;
-        for (int i = 0; i < all.size(); i++) {
-            if (all.get(i).id().equals(callId)) {
-                index = i;
-            }
-        }
-        check(f, index >= 0, "the whistle recipe is not in the rebuild list (" + all.size() + " recipes)");
-        // 材料に袋の品を使う作業台のレシピは、全部ここに並ぶ (袋の品を一つも使わないレシピは並ばない)
-        for (String name : new String[]{"stone_whale_call", "tide_shell_call", "titan_waymark", "resonance_forge", "cinder_lamp", "firework_rocket_from_spark_dust"}) {
-            ResourceLocation id = ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, name);
-            check(f, all.stream().anyMatch(h -> h.id().equals(id)), "a recipe that needs pouch items is missing from the rebuild list: " + name);
-        }
-        check(f, all.stream().noneMatch(h -> h.id().equals(ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "message_board"))),
-                "a recipe without pouch items is in the rebuild list");
-        List<String> ids = all.stream().map(h -> h.id().toString()).toList();
-        check(f, ids.equals(ids.stream().sorted().toList()), "the rebuild list is not in id order (client and server must agree)");
-        if (index < 0) {
-            return;
-        }
+        // 作り直し (袋の品で作業台のレシピを作る) は、レシピを読まなくなって一覧が空 (画面の切り替えも出さない。2026-10-26)
+        check(f, PouchRebuild.recipes(server.getRecipeManager(), server.registryAccess()).isEmpty(), "the rebuild list is not empty without recipes");
         FakePlayer p = player(level, "[pouch_rebuild]");
-        var recipe = all.get(index).value();
-        // まだ手に入れていない品の作り直しは見せない・作れない
-        check(f, !PouchRebuild.visible(p, all.get(index)) && !PouchRebuild.rebuild(p, index), "a recipe for items never obtained was visible or built");
-        Pouch.add(p, new ItemStack(core));
-        Pouch.add(p, new ItemStack(shard, 5));
-        check(f, PouchRebuild.visible(p, all.get(index)), "the recipe stayed hidden after obtaining the items");
-        // 骨 (持ち物の品) が足りない
-        check(f, PouchRebuild.plan(p, recipe) == null && !PouchRebuild.rebuild(p, index) && Pouch.count(p, core) == 1 && Pouch.count(p, shard) == 5,
-                "a rebuild without the bone consumed something");
-        p.getInventory().add(new ItemStack(Items.BONE, 2));
-        PouchMenu menu = new PouchMenu(9, p.getInventory());
-        p.containerMenu = menu;
-        check(f, menu.clickMenuButton(p, PouchRebuild.BUTTON_RECIPE_BASE + index), "the menu button did not accept the rebuild");
-        check(f, Pouch.count(p, call) == 1 && Pouch.count(p, core) == 0 && Pouch.count(p, shard) == 4 && inv(p, Items.BONE) == 1 && inv(p, call) == 0,
-                "the rebuilt whistle or the payment is wrong: call " + Pouch.count(p, call) + " core " + Pouch.count(p, core) + " shard " + Pouch.count(p, shard)
-                        + " bone " + inv(p, Items.BONE));
-        check(f, !PouchRebuild.rebuild(p, index) && !PouchRebuild.rebuild(p, -1) && !PouchRebuild.rebuild(p, 9999), "a rebuild with no core or a bad index went through");
-        Pouch.clear(p);
         // 修理: 手に持った壊れた品を、袋の素材で直す
         ItemStack tool = ItemStack.EMPTY;
         PouchEntries.Entry material = null;

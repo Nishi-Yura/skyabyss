@@ -49,7 +49,11 @@ public final class TownTourSelfTest {
                 f.add("no door for " + TownTour.STOPS.get(i));
                 break;
             }
-            p.moveTo(d.getX() + 0.5, d.getY(), d.getZ() + 0.5);
+            // 人が実際に立ち止まる所 = 案内の灯りの道の終わり (戸の印は壁の高い看板なので、そこへは立てない)
+            TownGuide.Place place = TownGuide.place(TownTour.STOPS.get(i));
+            List<BlockPos> nodes = TownGuide.plan(new jp.revati.skyabyss.guide.nav.LevelTerrain(server.overworld(), true), center, place, d).nodes();
+            BlockPos end = nodes.isEmpty() ? d : nodes.get(nodes.size() - 1);
+            p.moveTo(end.getX() + 0.5, end.getY(), end.getZ() + 0.5);
             TownTour.tick(p);
             coins += TownTour.COINS[i];
             if (TownTour.step(p) != i + 2 || Coins.count(p) != coins) {
@@ -67,7 +71,7 @@ public final class TownTourSelfTest {
         p.getInventory().clearContent();
         Coins.take(p, Coins.count(p));
         if (f.isEmpty()) {
-            SkyAbyss.LOGGER.info("SELFTEST town tour PASSED (starts in the capital, four stops in order with coins, bread at the inn, done stays done)");
+            SkyAbyss.LOGGER.info("SELFTEST town tour PASSED (starts in the capital, four stops reached where the guide path ends, coins, bread at the inn, done stays done)");
         } else {
             for (String s : f) {
                 SkyAbyss.LOGGER.error("SELFTEST town tour FAILED: {}", s);

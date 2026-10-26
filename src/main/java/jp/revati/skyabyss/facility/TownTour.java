@@ -27,7 +27,7 @@ public final class TownTour {
     static final String TAG = "skyabyss_town_tour";
     static final List<String> STOPS = List.of("smithy", "inn", "tool_shop", "guild");
     static final int[] COINS = {3, 3, 5, 5};
-    static final double ARRIVE = 4.5;
+    static final double ARRIVE = 5.0;
     static final int CHECK = 20;
     public static final int DONE = STOPS.size() + 1;
 
@@ -76,7 +76,7 @@ public final class TownTour {
             setStep(p, DONE);
             return;
         }
-        if (p.distanceToSqr(door.getX() + 0.5, door.getY(), door.getZ() + 0.5) > ARRIVE * ARRIVE) {
+        if (!arrived(p.getX(), p.getY(), p.getZ(), door)) {
             return;
         }
         Coins.give(p, COINS[s - 1]);
@@ -92,6 +92,14 @@ public final class TownTour {
         } else {
             show(p, next);
         }
+    }
+
+    // 戸に着いたか。戸の印は壁の看板 (地面から 4〜7 段上) なので、横の近さと、看板より下 (下がり 9 段まで) で見る
+    public static boolean arrived(double x, double y, double z, BlockPos door) {
+        double dx = x - (door.getX() + 0.5);
+        double dz = z - (door.getZ() + 0.5);
+        double dy = y - door.getY();
+        return dx * dx + dz * dz <= ARRIVE * ARRIVE && dy <= 2.0 && dy >= -9.0;
     }
 
     static void show(ServerPlayer p, int s) {

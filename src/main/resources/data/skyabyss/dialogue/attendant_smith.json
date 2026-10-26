@@ -50,6 +50,18 @@
           "goto": "end"
         },
         {
+          "id": "made",
+          "kind": "talk",
+          "do": [
+            {
+              "type": "facility",
+              "open": "shop",
+              "shop": "smithy"
+            }
+          ],
+          "goto": "end"
+        },
+        {
           "id": "forge",
           "kind": "talk",
           "goto": "forge"

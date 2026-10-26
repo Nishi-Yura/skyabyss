@@ -30,6 +30,9 @@ import net.minecraft.world.item.crafting.RecipeHolder;
 //   作り直し: 右上の「作り直し」で一覧に切り替わる。材料に袋の品を使う作業台のレシピを、袋の画面から作る (PouchRebuild)。
 //       「修理」は手に持った品を袋の素材で直す。作るのはサーバーが決める (メニューのボタン)
 public class PouchScreen extends AbstractContainerScreen<PouchMenu> implements jp.revati.skyabyss.client.ui.TextBounded {
+    // 作り直し (袋の品で作業台のレシピを作る) の切り替え。レシピを読まなくなった (mixin/RecipeManagerMixin。2026-10-26) ので出さない
+    static final boolean REBUILD = false;
+
     static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "textures/gui/pouch/pouch.png");
     static final int TEX = 512;
     private static final int TEXT = 0xFFD8DCE6;
@@ -236,9 +239,11 @@ public class PouchScreen extends AbstractContainerScreen<PouchMenu> implements j
         int mx = mouseX - leftPos;
         int my = mouseY - topPos;
         g.drawString(font, title, 8, 5, GOLD, false);
-        boolean toggleHover = hit(mx, my, TOGGLE_X, TOGGLE_Y, BTN_W, BTN_H);
-        drawButton(g, TOGGLE_X, TOGGLE_Y, BTN_W, BTN_H, toggleHover ? 1 : 0,
-                Component.translatable(menu.rebuildView ? "skyabyss_pouch.screen.back_btn" : "skyabyss_pouch.screen.rebuild_btn"));
+        if (REBUILD) {
+            boolean toggleHover = hit(mx, my, TOGGLE_X, TOGGLE_Y, BTN_W, BTN_H);
+            drawButton(g, TOGGLE_X, TOGGLE_Y, BTN_W, BTN_H, toggleHover ? 1 : 0,
+                    Component.translatable(menu.rebuildView ? "skyabyss_pouch.screen.back_btn" : "skyabyss_pouch.screen.rebuild_btn"));
+        }
         if (!menu.rebuildView && jp.revati.skyabyss.client.reward.HeartRewardClient.pending()) {
             // 心臓の遺物: 金の縁のボタン (ゆっくり点る)
             boolean relicHover = hit(mx, my, RELIC_X, TOGGLE_Y, BTN_W, BTN_H);
@@ -386,7 +391,7 @@ public class PouchScreen extends AbstractContainerScreen<PouchMenu> implements j
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         int mx = (int) mouseX - leftPos;
         int my = (int) mouseY - topPos;
-        if (button == 0 && hit(mx, my, TOGGLE_X, TOGGLE_Y, BTN_W, BTN_H)) {
+        if (REBUILD && button == 0 && hit(mx, my, TOGGLE_X, TOGGLE_Y, BTN_W, BTN_H)) {
             menu.rebuildView = !menu.rebuildView;
             scroll = 0;
             refreshRows();

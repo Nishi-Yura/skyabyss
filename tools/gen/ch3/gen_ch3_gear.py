@@ -109,8 +109,8 @@ def dialogue():
     d = 'dialogue.skyabyss.artisan.'
     put(d + 'ch3a_first', 'また会ったな、旅の人。……峰の風は、針金をよく鳴らす。耳を澄ますといい。\nこれは峰の覚書だ。焦げた羽と、帯電した綿の扱いを書いておいた。',
         'We meet again, traveller. ...The peak wind makes wire sing. Listen to it.\nThese are notes for the peaks. I wrote down how to handle scorched feathers and charged cotton.')
-    put(d + 'ch3p_teach', '作り方か。……焦げ羽は軽い。帯電綿は縫い目に詰めると、雷が肌まで来ない。銅線は縁に巻け。\n砥石も、団子も、油も、覚書に写しておいた。小旗は風の向きを見るためのものだ。',
-        'You want the patterns. ...Scorched feathers are light. Pack charged cotton into the seams and the lightning stays off your skin. Wind copper wire round the hems.\nThe whetstone, the dumplings and the oil are in the notes. The streamer is for reading the wind.')
+    put(d + 'ch3p_teach', '素材のことか。……焦げ羽は軽い。帯電綿は縫い目に詰めると、雷が肌まで来ない。銅線は縁に巻く。\n砥石も、団子も、油も、覚書に写しておいた。鍛冶場と薬師へ持っていけ。小旗は風の向きを見るためのものだ。',
+        'The materials? ...Scorched feathers are light. Pack charged cotton into the seams and the lightning stays off your skin. Copper wire goes round the hems.\nThe whetstone, the dumplings and the oil are in the notes. Take them to the smithy and the apothecary. The streamer is for reading the wind.')
     put(d + 'ch3t_ward_weave', '雷の護り糸か。……指がしびれる。生きている糸だ。\n鼓動守に編もう。翼の中で鼓動が速くなったら、これを握れ。',
         'Thunder ward thread. ...It numbs the fingers. A living thread.\nI will weave it into a heartbeat ward. When the beat quickens inside the wing, hold it.')
     put(d + 'ch3a_ward', '護りがほどけたか。帯電綿があるな。峰に浮く毛玉が落とすやつだ。……編み直しておいた。',
@@ -179,8 +179,8 @@ def texts():
          'Lightning falls on high copper. Do not stand by the pillar. Drink lightning oil and shocks hurt half as much.'),
         ('風読みの小旗を立てれば、風の向きと、次の嵐までの目安が分かる。背の嵐の拍も、同じように読む。',
          'Plant a wind streamer to learn the wind and how long until the next storm. Read the storm beat on the wing the same way.'),
-        ('焦げ羽と帯電綿と銅線は、旅装にも、雷の砥石にも、油にも小旗にもなる。この覚書を開くと、作り方が作業台に出る。',
-         'Scorched feathers, charged cotton and copper wire make travel gear, thunder whetstones, oil and streamers. Open these notes and the recipes appear at the table.'),
+        ('焦げ羽と帯電綿と銅線は、旅装にも、雷の砥石にも、油にも小旗にもなる。鍛冶場と薬師が誂えてくれる。',
+         'Scorched feathers, charged cotton and copper wire make travel gear, thunder whetstones, oil and streamers. The smithy and the apothecary make them.'),
     ]
     for i, (j, e) in enumerate(lines, 1):
         put('wayfarer_notes.ch3.line.%d' % i, j, e)

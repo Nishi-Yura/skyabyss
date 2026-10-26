@@ -91,7 +91,7 @@ public final class TravelSelfTest {
             a.removeAllEffects();
         }
         if (f.isEmpty()) {
-            SkyAbyss.LOGGER.info("SELFTEST travel gear PASSED (armor values, GearCurve table, whetstone, hardtack and salve, recipes, recipe lock, gear-made signal)");
+            SkyAbyss.LOGGER.info("SELFTEST travel gear PASSED (armor values, GearCurve table, whetstone, hardtack and salve, made to order at the smithy, no crafting, gear-made signal)");
         } else {
             f.forEach(m -> SkyAbyss.LOGGER.error("SELFTEST travel gear FAILED: {}", m));
         }
@@ -267,44 +267,60 @@ public final class TravelSelfTest {
     }
 
     private static void recipes(List<String> f, MinecraftServer server) {
-        var manager = server.getRecipeManager();
-        Map<Item, Integer> total = new HashMap<>();
-        for (String piece : List.of("whale_road_helmet", "whale_road_chestplate", "whale_road_leggings", "whale_road_boots")) {
-            var holder = manager.byKey(id(piece));
-            check(f, holder.isPresent(), "the recipe " + piece + " is missing");
-            holder.ifPresent(h -> {
-                check(f, h.value().getResultItem(server.registryAccess()).is(BuiltInRegistriesItem.of(piece)), piece + " does not make the " + piece);
-                for (Ingredient ing : h.value().getIngredients()) {
-                    if (!ing.isEmpty()) {
-                        total.merge(ing.getItems()[0].getItem(), 1, Integer::sum);
-                    }
-                }
-            });
-        }
-        // 4 部位の合計 (岩殻片 12・鉄 7・革 3・骨片 2)。旅装は任意 (支度の段の鉄の跡はバニラの鉄の防具)
+        // 旅装 4 部位は鍛冶場の誂え (一章から)。素材は岩殻片 12・骨片 2 (鉄・革は掘れないので鐘銭で払う)
         check(f, jp.revati.skyabyss.quest.QuestManager.quest("ch1/prep_gear") == null, "the old prep_gear quest should be absorbed into the trail steps");
-        check(f, total.getOrDefault(GuideSetup.ROCK_SHELL_SCRAP.get(), 0) == 12 && total.getOrDefault(Items.IRON_INGOT, 0) == 7
-                && total.getOrDefault(Items.LEATHER, 0) == 3 && total.getOrDefault(GuideSetup.BONE_CHIP.get(), 0) == 2, "the set costs " + total + " (want scrap 12, iron 7, leather 3, bone chip 2)");
+        madeSet(f, List.of("whale_road_helmet", "whale_road_chestplate", "whale_road_leggings", "whale_road_boots"), "smithy", 1,
+                Map.of(GuideSetup.ROCK_SHELL_SCRAP.get(), 12, GuideSetup.BONE_CHIP.get(), 2), "whale road set");
         for (String other : List.of("rock_whetstone", "road_hardtack", "moss_salve")) {
-            check(f, manager.byKey(id(other)).isPresent(), "the recipe " + other + " is missing");
+            check(f, jp.revati.skyabyss.facility.MadeToOrder.find(other) != null, other + " cannot be had in town");
         }
-        // 覚書に登録した ID (鍵) と、あるレシピ (一章の予約のうち存在しない棘針の矢は無視される)
-        int existing = 0;
-        for (ResourceLocation r : WayfarerNotes.recipes(1)) {
-            if (manager.byKey(r).isPresent()) {
-                existing++;
-                check(f, RecipeLock.locked(r), r + " is registered but not locked");
-            }
-        }
-        // 序盤の素材 (岩殻片・骨片) は旅嚢の品。作業台はレシピブックの「置く」と「旅嚢から」の帯で旅嚢の中の分を使う (PouchCraft。22 の 17 章。自己テスト pouch で通しで確かめる)。
-        // 鉄・革・砥石は袋の品ではなく、今までどおり持ち物
+        madeChapter(f, 1);
+        // 序盤の素材 (岩殻片・骨片) は旅嚢の品 (誂えは旅嚢の中の分も払いに使う)。鉄・革・砥石は袋の品ではない
         for (Item mat : List.of(GuideSetup.ROCK_SHELL_SCRAP.get(), GuideSetup.BONE_CHIP.get())) {
             check(f, jp.revati.skyabyss.pouch.PouchEntries.entry(mat) != null, mat + " is not a pouch item");
         }
         for (Item mat : List.of(Items.IRON_INGOT, Items.LEATHER, TravelGear.ROCK_WHETSTONE.get())) {
             check(f, jp.revati.skyabyss.pouch.PouchEntries.entry(mat) == null, mat + " is a pouch item");
         }
-        check(f, existing == 7, "the chapter-1 notes unlock " + existing + " recipes (want 7)");
+    }
+
+    // 誂え (作業台はない。2026-10-26)。部位がその店のその章の誂えで、素材の合計が want
+    private static void madeSet(List<String> f, List<String> pieces, String shop, int chapter, Map<Item, Integer> want, String what) {
+        Map<Item, Integer> total = new HashMap<>();
+        for (String piece : pieces) {
+            jp.revati.skyabyss.facility.MadeToOrder.Entry e = jp.revati.skyabyss.facility.MadeToOrder.find(piece);
+            check(f, e != null && e.good().made() && e.shop().id().equals(shop) && e.good().chapter() == chapter,
+                    piece + " is not made to order at the " + shop + " from chapter " + chapter);
+            if (e != null) {
+                e.materials().forEach((k, v) -> total.merge(k, v, Integer::sum));
+            }
+        }
+        check(f, total.equals(want), "the " + what + " costs " + total + " (want " + want + ")");
+    }
+
+    // 覚書の章の品は、みなその章から誂えられる (並ぶ品も可)
+    private static void madeChapter(List<String> f, int chapter) {
+        for (ResourceLocation r : WayfarerNotes.recipes(chapter)) {
+            jp.revati.skyabyss.facility.MadeToOrder.Entry e = jp.revati.skyabyss.facility.MadeToOrder.find(r.toString());
+            if (r.getPath().equals("hare_quill_arrow")) {
+                continue;
+            }
+            check(f, e != null && (!e.good().made() || e.good().chapter() == chapter), r + " is not made to order from chapter " + chapter);
+        }
+    }
+
+    // 作業台では何も作れない (レシピを一つも読まない)
+    private static void noCrafting(List<String> f, MinecraftServer server, ServerLevel level, FakePlayer a) {
+        check(f, server.getRecipeManager().getRecipes().isEmpty(), "recipes are still loaded (" + server.getRecipeManager().getRecipes().size() + ")");
+        CraftingMenu menu = new CraftingMenu(7, a.getInventory(), ContainerLevelAccess.create(level, BlockPos.ZERO));
+        a.containerMenu = menu;
+        menu.getSlot(1).set(new ItemStack(Items.OAK_PLANKS));
+        menu.getSlot(4).set(new ItemStack(Items.OAK_PLANKS));
+        check(f, !menu.getSlot(0).hasItem(), "the crafting grid still makes something from planks");
+        for (int i = 1; i <= 9; i++) {
+            menu.getSlot(i).set(ItemStack.EMPTY);
+        }
+        a.containerMenu = a.inventoryMenu;
     }
 
     // item の ID から (旅装の名前)
@@ -317,55 +333,18 @@ public final class TravelSelfTest {
     // ---------------------------------------------------------------- 鍵 (覚書か職人に教わるまで作れない)
     private static void lock(List<String> f, MinecraftServer server, ServerLevel level, FakePlayer a) {
         a.getInventory().clearContent();
-        var manager = server.getRecipeManager();
-        var helmet = manager.byKey(id("whale_road_helmet"));
-        var stick = manager.byKey(ResourceLocation.withDefaultNamespace("stick"));
-        if (helmet.isEmpty() || stick.isEmpty()) {
-            f.add("a recipe used by the lock test is missing");
-            return;
-        }
-        a.getRecipeBook().remove(helmet.get());
-        // 鍵のかかったレシピ: 完成品が出ても空にされる
-        CraftingMenu menu = new CraftingMenu(7, a.getInventory(), ContainerLevelAccess.create(level, BlockPos.ZERO));
-        a.containerMenu = menu;
-        fillHelmet(menu);
-        check(f, menu.getSlot(0).hasItem() && menu.getSlot(0).getItem().is(TravelGear.HELMET.get()), "the crafting grid did not show the helmet");
-        check(f, !RecipeLock.mayCraft(a, helmet.get()), "a locked recipe was craftable");
-        check(f, RecipeLock.sweep(a) && !menu.getSlot(0).hasItem(), "the locked result was not cleared");
-        // 取りこぼし (同じ tick に取り出された): 品は消え、材料 (岩殻片 3・鉄 2) は返る
-        a.getInventory().clearContent();
-        ItemStack taken = new ItemStack(TravelGear.HELMET.get());
-        net.neoforged.neoforge.common.NeoForge.EVENT_BUS.post(new net.neoforged.neoforge.event.entity.player.PlayerEvent.ItemCraftedEvent(a, taken, new net.minecraft.world.SimpleContainer(9)));
-        check(f, taken.isEmpty(), "a locked result taken in the same tick was kept");
-        check(f, a.getInventory().countItem(GuideSetup.ROCK_SHELL_SCRAP.get()) == 3 && a.getInventory().countItem(Items.IRON_INGOT) == 2, "the materials of a blocked craft were not refunded");
-        a.getInventory().clearContent();
+        noCrafting(f, server, level, a);
         check(f, !ForgeRules.accepts(new ItemStack(TravelGear.HELMET.get())) && ForgeRules.accepts(new ItemStack(jp.revati.skyabyss.registry.ModItems.STONE_WHALE_HELMET.get())),
                 "the forge must refuse the road gear (no farming whale fragments) and still take titan gear");
-        // 教わる (覚書を開く) と作れる
-        WayfarerNotes.onOpen(a, 1);
-        check(f, a.getRecipeBook().contains(helmet.get()) && RecipeLock.mayCraft(a, helmet.get()), "opening the notes did not unlock the recipe");
-        clearGrid(menu);
-        fillHelmet(menu);
-        check(f, menu.getSlot(0).hasItem() && !RecipeLock.sweep(a) && menu.getSlot(0).hasItem(), "an unlocked recipe was cleared");
-        // 鍵のないバニラのレシピは触らない
-        clearGrid(menu);
-        menu.getSlot(1).set(new ItemStack(Items.OAK_PLANKS));
-        menu.getSlot(4).set(new ItemStack(Items.OAK_PLANKS));
-        check(f, menu.getSlot(0).getItem().is(Items.STICK) && !RecipeLock.sweep(a), "a vanilla recipe was blocked");
-        // 創造モードは問わない
-        clearGrid(menu);
-        a.getRecipeBook().remove(helmet.get());
-        a.setGameMode(net.minecraft.world.level.GameType.CREATIVE);
-        fillHelmet(menu);
-        check(f, RecipeLock.mayCraft(a, helmet.get()), "a creative player was locked out");
-        a.setGameMode(net.minecraft.world.level.GameType.SURVIVAL);
-        a.containerMenu = a.inventoryMenu;
-        for (ResourceLocation r : WayfarerNotes.recipes(1)) {
-            server.getRecipeManager().byKey(r).ifPresent(h -> a.getRecipeBook().remove(h));
-        }
-        // 解く口: 一章の覚書は 7 本 (棘針の矢は無視)
-        check(f, WayfarerNotes.unlockRecipes(a, 1) == 7, "the chapter-1 notes did not unlock all seven recipes");
-        check(f, WayfarerNotes.unlockRecipes(a, 1) == 0, "the recipes were counted twice");
+        // 誂え: 素材と鐘銭を払うと、鍛冶場が兜を作る
+        jp.revati.skyabyss.facility.ShopDef smithy = jp.revati.skyabyss.facility.ShopManager.shop("smithy");
+        jp.revati.skyabyss.facility.Coins.give(a, 40);
+        a.getInventory().add(new ItemStack(GuideSetup.ROCK_SHELL_SCRAP.get(), 3));
+        check(f, smithy != null && jp.revati.skyabyss.facility.ShopService.buy(a, smithy, "made_whale_road_helmet", 1) == jp.revati.skyabyss.facility.ShopService.Result.OK
+                && a.getInventory().countItem(TravelGear.HELMET.get()) == 1 && a.getInventory().countItem(GuideSetup.ROCK_SHELL_SCRAP.get()) == 0,
+                "the smithy did not make the whale road hood from the scraps");
+        jp.revati.skyabyss.facility.Coins.take(a, jp.revati.skyabyss.facility.Coins.count(a));
+        a.getInventory().clearContent();
     }
 
     private static void fillHelmet(AbstractContainerMenu menu) {

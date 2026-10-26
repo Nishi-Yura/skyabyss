@@ -163,7 +163,13 @@ public final class ShopService {
             QuestItems.take(player, BuiltInRegistries.ITEM.getKey(p.item()).toString(), null, p.count() * n);
         }
         for (int i = 0; i < n; i++) {
-            Quests.give(player, g.stack());
+            ItemStack made = g.stack();
+            // 誂えの品は「作った」合図を流す (旅装を一式そろえた・砥石を作ったなどの章の合図が、作業台のときと同じに動く)
+            if (g.made()) {
+                net.neoforged.neoforge.common.NeoForge.EVENT_BUS.post(new net.neoforged.neoforge.event.entity.player.PlayerEvent.ItemCraftedEvent(player, made.copy(),
+                        new net.minecraft.world.SimpleContainer(1)));
+            }
+            Quests.give(player, made);
         }
         if (g.limit() > 0) {
             ledger.add(shop.id(), g.id(), day, n);

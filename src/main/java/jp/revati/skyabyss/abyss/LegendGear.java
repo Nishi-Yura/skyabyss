@@ -19,7 +19,7 @@ import net.neoforged.neoforge.registries.DeferredRegister;
 // 伝説の武器を巨神ごとに 6 職ぶんへ (2026-10-26)。深淵の専用伝説 (AbyssSetup の 4 本) に、足りない職の 20 本を足す。
 // 出どころは伝説と同じ (abyss/LegendLoot。五章の番人・悪夢・深みの王の褒美。巨神の心臓からは出ない)。
 // あわせて五章 (深淵) の装備に、無かった職の武器 3 本 (魔法使い・弓使い・呪術師。エピック。AbyssGear.SET の図鑑)。
-// 強さは今の伝説と同じ 1 秒あたり 19 前後 (剣 19.9・鎚 20・杖 20.4・短剣 20・鈴杖 19.6・弓 近接の目安 19.3。四章の英雄の 1.05 倍より上)。五章の 3 本は灯り番の剣 (19.4) の少し下
+// 強さは今の伝説と同じ 1 秒あたり 19 前後 (剣 19.9・鎚 20・杖 20.4・短剣 20・鈴杖 19.6・弓 近接の目安 20.1。四章の英雄の 1.05 倍より上)。五章の 3 本は灯り番の剣 (19.4) の少し下
 public final class LegendGear {
     private static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(SkyAbyss.MODID);
     private static final List<DeferredItem<Item>> LEGENDS = new ArrayList<>();
@@ -73,7 +73,7 @@ public final class LegendGear {
             case "staff" -> new AbyssWeaponItem(props, titan, 11, -2.8f, desc);
             case "dagger" -> new AbyssWeaponItem(props, titan, 4, -2.0f, desc);
             case "bell" -> new AbyssWeaponItem(props, titan, 8, -2.6f, desc);
-            default -> new ChapterBowItem(props.durability(900), titan, 2.3, GearTier.ARTIFACT, desc);
+            default -> new ChapterBowItem(props.durability(900), titan, 2.4, GearTier.ARTIFACT, desc);
         }));
     }
 

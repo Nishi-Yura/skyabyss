@@ -1,0 +1,95 @@
+# 土地の町 (都と同じ作りに建て直した四つの町) を上から・門の内・広場で撮る。2026-10-26
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/region_towns.txt -PshotsName=region_towns
+world region_towns_v2 continent
+size 1600 900
+timeout 6000
+render 12
+guiscale 2
+clouds off
+waitchunks 300
+wait 40
+cmd time set 3000
+cmd weather clear
+cmd skyabyss cinematic stop
+close
+cmd skyabyss dev opening build
+wait 200
+cmd gamemode spectator
+hud off
+chat clear
+cmd skyabyss dev opening view town 0 100 55 0 30
+waitchunks 600
+wait 120
+chat clear
+shot whale_air
+cmd skyabyss dev opening at town 0 0 2 46 180 -4
+waitchunks 300
+wait 60
+chat clear
+shot whale_gate
+cmd skyabyss dev opening at town 0 0 2 20 180 -6
+waitchunks 200
+wait 40
+chat clear
+shot whale_plaza
+cmd skyabyss dev opening at town 0 -20 2 -6 0 -5
+wait 30
+chat clear
+shot whale_inn
+cmd skyabyss dev opening view town 1 100 55 0 30
+waitchunks 600
+wait 120
+chat clear
+shot tide_air
+cmd skyabyss dev opening at town 1 0 2 46 180 -4
+waitchunks 300
+wait 60
+chat clear
+shot tide_gate
+cmd skyabyss dev opening at town 1 0 2 20 180 -6
+waitchunks 200
+wait 40
+chat clear
+shot tide_plaza
+cmd skyabyss dev opening at town 1 -20 2 -6 0 -5
+wait 30
+chat clear
+shot tide_inn
+cmd skyabyss dev opening view town 2 100 55 0 30
+waitchunks 600
+wait 120
+chat clear
+shot storm_air
+cmd skyabyss dev opening at town 2 0 2 46 180 -4
+waitchunks 300
+wait 60
+chat clear
+shot storm_gate
+cmd skyabyss dev opening at town 2 0 2 20 180 -6
+waitchunks 200
+wait 40
+chat clear
+shot storm_plaza
+cmd skyabyss dev opening at town 2 -20 2 -6 0 -5
+wait 30
+chat clear
+shot storm_inn
+cmd skyabyss dev opening view town 3 100 55 0 30
+waitchunks 600
+wait 120
+chat clear
+shot ember_air
+cmd skyabyss dev opening at town 3 0 2 46 180 -4
+waitchunks 300
+wait 60
+chat clear
+shot ember_gate
+cmd skyabyss dev opening at town 3 0 2 20 180 -6
+waitchunks 200
+wait 40
+chat clear
+shot ember_plaza
+cmd skyabyss dev opening at town 3 -20 2 -6 0 -5
+wait 30
+chat clear
+shot ember_inn

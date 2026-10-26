@@ -129,8 +129,8 @@ def texts():
          'The Sunken Salt Vault can be walked into at low tide, or entered by diving with a held breath at high tide. Read the tide with the tide-watching shell and the hourglass before you go.'),
         ('塩の砥石の刃は、水の中でも鈍らない。潮の背では、水に浸かった相手ほど深く切れる。',
          'A salt-honed edge does not dull in water. On the tide\'s back, it cuts deeper the wetter the foe.'),
-        ('小真珠と塩結晶は、旅装にも、塩の砥石にも、塩漬けにも粉薬にもなる。この覚書を開くと、作り方が作業台に出る。',
-         'Small pearls and salt crystals make travel gear, salt whetstones, pickles and powder. Open these notes and the recipes appear at the table.'),
+        ('小真珠と塩結晶は、旅装にも、塩の砥石にも、塩漬けにも粉薬にもなる。鍛冶場と薬師が誂えてくれる。',
+         'Small pearls and salt crystals make travel gear, salt whetstones, pickles and powder. The smithy and the apothecary make them.'),
     ]
     for i, (j, e) in enumerate(lines, 1):
         put('wayfarer_notes.ch2.line.%d' % i, j, e)

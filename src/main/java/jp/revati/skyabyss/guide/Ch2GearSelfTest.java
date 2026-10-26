@@ -307,62 +307,55 @@ public final class Ch2GearSelfTest {
     }
 
     private static void recipes(List<String> f, MinecraftServer server, ServerLevel level, FakePlayer a) {
-        var manager = server.getRecipeManager();
-        Map<Item, Integer> total = new HashMap<>();
-        for (String piece : List.of("tide_wader_helmet", "tide_wader_chestplate", "tide_wader_leggings", "tide_wader_boots")) {
-            var holder = manager.byKey(id(piece));
-            check(f, holder.isPresent(), "the recipe " + piece + " is missing");
-            holder.ifPresent(h -> {
-                check(f, h.value().getResultItem(server.registryAccess()).is(BuiltInRegistries.ITEM.get(id(piece))), piece + " makes the wrong item");
-                for (Ingredient ing : h.value().getIngredients()) {
-                    if (!ing.isEmpty()) {
-                        total.merge(ing.getItems()[0].getItem(), 1, Integer::sum);
-                    }
-                }
-            });
-        }
         Item shard = BuiltInRegistries.ITEM.get(id("stone_whale_shard"));
-        check(f, total.getOrDefault(Ch2Gear.SMALL_PEARL.get(), 0) == 10 && total.getOrDefault(Ch2Gear.SALT_CRYSTAL.get(), 0) == 12
-                && total.getOrDefault(shard, 0) == 4 && total.getOrDefault(Items.LEATHER, 0) == 3, "the tide wader set costs " + total + " (want pearl 10, salt 12, whale shard 4, leather 3)");
-        check(f, Ch2Gear.RECIPES.size() == 8 && WayfarerNotes.recipes(2).size() == 8, "the chapter-2 notes should hold 8 recipes, got " + WayfarerNotes.recipes(2));
-        for (ResourceLocation r : WayfarerNotes.recipes(2)) {
-            check(f, manager.byKey(r).isPresent(), "the recipe " + r + " is missing");
-            check(f, RecipeLock.locked(r), r + " is not locked");
-        }
+        madeSet(f, List.of("tide_wader_helmet", "tide_wader_chestplate", "tide_wader_leggings", "tide_wader_boots"), "smithy", 2,
+                Map.of(Ch2Gear.SMALL_PEARL.get(), 10, Ch2Gear.SALT_CRYSTAL.get(), 12, shard, 4), "tide wader set");
+        check(f, Ch2Gear.RECIPES.size() == 8 && WayfarerNotes.recipes(2).size() == 8, "the chapter-2 notes should hold 8 items, got " + WayfarerNotes.recipes(2));
+        madeChapter(f, 2);
         // 二章の素材は旅嚢の品ではない (旅嚢の画面の枠が埋まっている。足すなら画面の並びから直す)。持ち物のまま
         for (Item mat : List.of(Ch2Gear.SMALL_PEARL.get(), Ch2Gear.SALT_CRYSTAL.get(), Ch2Gear.PEARL_WARD_THREAD.get(), Ch2Gear.SHELL_CHIP.get())) {
             check(f, jp.revati.skyabyss.pouch.PouchEntries.entry(mat) == null, mat + " became a pouch item (check the pouch layout first)");
         }
-        // 鍵: 教わる前は完成品が空になる、覚書 (二章) を開くと作れる
-        var helmet = manager.byKey(id("tide_wader_helmet"));
-        if (helmet.isEmpty()) {
-            return;
+        noCrafting(f, server, level, a);
+    }
+
+    // 誂え (作業台はない。2026-10-26)。部位がその店のその章の誂えで、素材の合計が want
+    private static void madeSet(List<String> f, List<String> pieces, String shop, int chapter, Map<Item, Integer> want, String what) {
+        Map<Item, Integer> total = new HashMap<>();
+        for (String piece : pieces) {
+            jp.revati.skyabyss.facility.MadeToOrder.Entry e = jp.revati.skyabyss.facility.MadeToOrder.find(piece);
+            check(f, e != null && e.good().made() && e.shop().id().equals(shop) && e.good().chapter() == chapter,
+                    piece + " is not made to order at the " + shop + " from chapter " + chapter);
+            if (e != null) {
+                e.materials().forEach((k, v) -> total.merge(k, v, Integer::sum));
+            }
         }
-        for (ResourceLocation r : WayfarerNotes.recipes(2)) {
-            manager.byKey(r).ifPresent(h -> a.getRecipeBook().remove(h));
+        check(f, total.equals(want), "the " + what + " costs " + total + " (want " + want + ")");
+    }
+
+    // 覚書の章の品は、みなその章から誂えられる (並ぶ品も可)
+    private static void madeChapter(List<String> f, int chapter) {
+        for (ResourceLocation r : WayfarerNotes.recipes(chapter)) {
+            jp.revati.skyabyss.facility.MadeToOrder.Entry e = jp.revati.skyabyss.facility.MadeToOrder.find(r.toString());
+            if (r.getPath().equals("hare_quill_arrow")) {
+                continue;
+            }
+            check(f, e != null && (!e.good().made() || e.good().chapter() == chapter), r + " is not made to order from chapter " + chapter);
         }
-        a.getInventory().clearContent();
-        CraftingMenu menu = new CraftingMenu(8, a.getInventory(), ContainerLevelAccess.create(level, BlockPos.ZERO));
+    }
+
+    // 作業台では何も作れない (レシピを一つも読まない)
+    private static void noCrafting(List<String> f, MinecraftServer server, ServerLevel level, FakePlayer a) {
+        check(f, server.getRecipeManager().getRecipes().isEmpty(), "recipes are still loaded (" + server.getRecipeManager().getRecipes().size() + ")");
+        CraftingMenu menu = new CraftingMenu(7, a.getInventory(), ContainerLevelAccess.create(level, BlockPos.ZERO));
         a.containerMenu = menu;
-        Item p = Ch2Gear.SMALL_PEARL.get();
-        Item s = Ch2Gear.SALT_CRYSTAL.get();
-        Item[] grid = {p, s, p, s, shard, s};
-        for (int i = 0; i < 6; i++) {
-            menu.getSlot(1 + i).set(new ItemStack(grid[i]));
-        }
-        check(f, menu.getSlot(0).getItem().is(Ch2Gear.HELMET.get()), "the crafting grid did not show the tide wader hood");
-        check(f, RecipeLock.sweep(a) && !menu.getSlot(0).hasItem(), "the locked tide wader result was not cleared");
-        check(f, WayfarerNotes.unlockRecipes(a, 2) == 8, "the chapter-2 notes did not unlock all eight recipes");
-        check(f, WayfarerNotes.unlockRecipes(a, 2) == 0, "the chapter-2 recipes were counted twice");
-        menu.getSlot(1).set(new ItemStack(p));
-        check(f, menu.getSlot(0).getItem().is(Ch2Gear.HELMET.get()) && !RecipeLock.sweep(a), "an unlocked tide wader recipe was cleared");
+        menu.getSlot(1).set(new ItemStack(Items.OAK_PLANKS));
+        menu.getSlot(4).set(new ItemStack(Items.OAK_PLANKS));
+        check(f, !menu.getSlot(0).hasItem(), "the crafting grid still makes something from planks");
         for (int i = 1; i <= 9; i++) {
             menu.getSlot(i).set(ItemStack.EMPTY);
         }
         a.containerMenu = a.inventoryMenu;
-        for (ResourceLocation r : WayfarerNotes.recipes(2)) {
-            manager.byKey(r).ifPresent(h -> a.getRecipeBook().remove(h));
-        }
     }
 
     // ---------------------------------------------------------------- 砂時計

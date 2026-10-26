@@ -26,7 +26,7 @@
   "item.skyabyss.cloudgap_fruit": "Cloudgap Dried Fruit",
   "item.skyabyss.cloudgap_fruit.desc": "Fruit dried in a gap of the clouds. For 30 seconds after eating, you hold no static (moth discharges will not leap to you)",
   "item.skyabyss.moth_dust": "Moth Dust",
-  "item.skyabyss.moth_dust.desc": "Powder from a static moth's wing. Craft it with arrows to make spectral arrows",
+  "item.skyabyss.moth_dust.desc": "Powder from a static moth's wing. The tool shop will coat arrows with it to make spectral arrows",
   "effect.skyabyss.static_ward": "Static Ward",
   "message.skyabyss.storm_charm.armed": "Lightning coils around your arm (%s left)",
   "gui.skyabyss.forge.exchange_no_clear.thunder_wing": "Defeat the Thunder Wing heart to choose",

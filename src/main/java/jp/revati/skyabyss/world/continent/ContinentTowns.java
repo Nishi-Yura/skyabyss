@@ -27,7 +27,11 @@ public final class ContinentTowns {
     public static final String[] REGIONS = {"whale", "tide", "storm", "ember"};
     // 鯨追いの立つ所 (鯨見の町だけ。00 の 278)
     public static final String CHASER_MARK = "npc_chaser";
-    static final String[] MARKS = {"rest", "board", "inn", "shop", "stand", CHASER_MARK, "folk_a", "folk_b", Attendants.INN_BED, AttendantRole.INNKEEPER.mark(), AttendantRole.TOOL_MERCHANT.mark()};
+    static final String[] MARKS = {"rest", "board", "inn", "shop", "stand", CHASER_MARK, "folk_a", "folk_b", Attendants.INN_BED, AttendantRole.INNKEEPER.mark(), AttendantRole.TOOL_MERCHANT.mark(),
+            AttendantRole.SMITH.mark(), AttendantRole.APOTHECARY.mark()};
+    // 町の作りの版。2 = 都と同じ作りの壁のある町 (tools/capital/region_town.py。2026-10-26 の声「始まりの町とそれ以外の町はクオリティ違いすぎる」)。
+    // 前の版で建った町は、建て直す (建てたら付属の点 VERSION_MARK を書く)
+    public static final String VERSION_MARK = "town_v2";
     static final int KEEP_RADIUS = 96;
     static final int CHECK_INTERVAL = 100;
 
@@ -40,13 +44,26 @@ public final class ContinentTowns {
 
     public static SiteJob create(ServerLevel level, SiteData data, SiteData.Entry entry) {
         String region = region(entry.index);
-        return new SiteJob(level, data, entry, Blueprint.get("town_" + region), "town " + region, job -> {
+        Blueprint bp = Blueprint.get("town_" + region);
+        return new SiteJob(level, data, entry, bp, "town " + region, job -> {
             for (String m : MARKS) {
                 BlockPos at = job.mark(m);
                 if (at != null) {
                     job.entry.extra(m, at);
                 }
             }
+            // 施設の浮く名札 (都と同じ。opening/site/ShelterBuilder.keepLabels が近くの人のために置き直す)
+            if (bp != null) {
+                for (String m : bp.marks.keySet()) {
+                    if (m.startsWith("label_")) {
+                        BlockPos at = job.mark(m);
+                        if (at != null) {
+                            job.entry.extra(m, at);
+                        }
+                    }
+                }
+            }
+            job.entry.extra(VERSION_MARK, job.entry.pos);
             BlockPos sign = job.mark("sign");
             if (sign != null && level.getBlockEntity(sign) instanceof net.minecraft.world.level.block.entity.SignBlockEntity be) {
                 ContinentLayout.Level lv = ContinentLayout.get().levels().get(region);
@@ -90,6 +107,27 @@ public final class ContinentTowns {
         });
     }
 
+    // 前の版 (広場と宿と店と家二つの小さな町) で建った町を、建て直しの列に戻す。建て直しは SiteBuilds が近くに人が来たときに進める
+    @SubscribeEvent
+    static void onStarted(net.neoforged.neoforge.event.server.ServerStartedEvent event) {
+        ServerLevel over = event.getServer().overworld();
+        SiteData data = SiteData.get(over);
+        int n = 0;
+        for (SiteData.Entry e : data.entries(KIND)) {
+            if (e.built && e.extra(VERSION_MARK) == null) {
+                e.built = false;
+                e.started = false;
+                e.extraNames.clear();
+                e.extraPos.clear();
+                n++;
+            }
+        }
+        if (n > 0) {
+            data.setDirty();
+            SkyAbyss.LOGGER.info("Region towns: {} town(s) from the old plan will be rebuilt", n);
+        }
+    }
+
     // 土地の町の宿の寝台 (建ってあるもの)。宿の主人に「休む」と言うと、いちばん近い宿の寝台で目覚めるようになる (FacilityActions.innBed)
     public static java.util.List<BlockPos> innBeds(net.minecraft.server.MinecraftServer server) {
         java.util.List<BlockPos> out = new java.util.ArrayList<>();
@@ -122,6 +160,7 @@ public final class ContinentTowns {
                 }
             }
             Attendants.ensureAll(level, marks);
+            jp.revati.skyabyss.opening.site.ShelterBuilder.keepLabels(level, e);
             // 土地の町の人 (town/RegionFolk。二〜四章の町に二人ずつ)
             for (String fm : new String[] {"folk_a", "folk_b"}) {
                 BlockPos at = e.extra(fm);

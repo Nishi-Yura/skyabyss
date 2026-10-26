@@ -288,6 +288,34 @@
       "count": 1,
       "coins": 8,
       "chapter": 5
+    },
+    {
+      "id": "made_firework_rocket",
+      "item": "minecraft:firework_rocket",
+      "count": 3,
+      "coins": 5,
+      "materials": [
+        {
+          "item": "skyabyss:spark_dust",
+          "count": 1
+        }
+      ],
+      "chapter": 3,
+      "made": true
+    },
+    {
+      "id": "made_spectral_arrow",
+      "item": "minecraft:spectral_arrow",
+      "count": 2,
+      "coins": 6,
+      "materials": [
+        {
+          "item": "skyabyss:moth_dust",
+          "count": 1
+        }
+      ],
+      "chapter": 4,
+      "made": true
     }
   ],
   "buys": [

@@ -510,11 +510,11 @@ def quests():
 
     b = 'quest.skyabyss.ch2.wader_gear.'
     put(b + 'title', '潮渡りの旅装', 'Tide-Wader Garb')
-    put(b + 'summary', '旅の職人に潮渡りの旅装の作り方を教わり、一式そろえる（任意）。', 'Learn the tide-wader garb from the traveling artisan and make the full set (optional).')
+    put(b + 'summary', '潮渡りの旅装を鍛冶場で誂え、一式そろえる（任意）。', 'Have the tide-wader garb made at the smithy and complete the set (optional).')
     put(b + 'learn.journal', '職人の前掛けは塩で白い。「水の中で足が重いなら、それ用の旅装がある。教えようか」',
         'The artisan\'s apron is white with salt. "If water drags at your legs, there is garb for that. Shall I show you?"')
     put(b + 'learn.talk', '旅の職人に、潮渡りの旅装を教わろう', 'Learn the tide-wader garb from the artisan')
-    put(b + 'make.journal', '小真珠と塩結晶と、前の巨神の鱗片。作り方は旅の覚書に。', 'Small pearls, salt crystals and scales from the last titan. The patterns are in your wayfarer\'s notes.')
+    put(b + 'make.journal', '小真珠と塩結晶と、前の巨神の鱗片を鍛冶場へ。', 'Small pearls, salt crystals and scales from the last titan, to the smithy.')
     put(b + 'make.made', '潮渡りの旅装を一式そろえよう', 'Make the full tide-wader set')
     put(b + 'done', '「道具は覚えている。……着ているうちに、あんたの歩き方を覚えるよ」', '"Tools remember. ...Wear it a while and it will learn the way you walk."')
 
