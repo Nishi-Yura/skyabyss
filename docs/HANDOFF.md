@@ -85,6 +85,9 @@
   - 語りの紙芝居 (Undertale 風のドット絵): 開幕の 9 枚を描いて入れた (docs/design/20 の「語りの紙芝居」。tools/story/pixel/、story/reel/StoryReels、client/story/StoryReelScreen)。
     目を覚ます前に流れ、見終わると今の開幕へ。ユーザーが絵柄と文を選んだ。撮影は tools/shots/story_reel.txt。
 
+  - 0.7.0 にした (試遊の確かめ順 docs/review/playtest_0.7.0.md、マルチ向け)。大陸の世界で全部の自己テスト 185 通過 (落ちた 1 件 = 岩鯨の旅装の三角形の数の固定を幅に直した)。jar を作り直した (build/libs/skyabyss-0.7.0.jar)。
+    紙芝居を見ている人は傷を受けず、まわりに敵が湧かない。試遊の命令 /skyabyss dev named。
+
 ## 次にやること
 0. 章の変わり目の語り 20 枚は入った (頁の選びを待つ。直しは chapters.py を直して install_reels.py)。控え帳から語りを見直す口はまだ無い (/skyabyss reel <id> だけ)。
 2. 伝説 20 本の技の書き換え (Rune の 4 番目)。

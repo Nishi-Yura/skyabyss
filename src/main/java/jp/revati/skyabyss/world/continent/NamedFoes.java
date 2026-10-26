@@ -87,7 +87,7 @@ public final class NamedFoes {
         }
         forget(level);
         for (ServerPlayer p : level.players()) {
-            if (p.isAlive() && !p.isSpectator() && level.random.nextInt(CHANCE) == 0) {
+            if (p.isAlive() && !p.isSpectator() && !jp.revati.skyabyss.story.reel.StoryReels.watching(p) && level.random.nextInt(CHANCE) == 0) {
                 trySpawn(level, p);
             }
         }
@@ -223,6 +223,34 @@ public final class NamedFoes {
             jp.revati.skyabyss.advancement.Beats.fire(p, "named:" + RegionSpawner.REGIONS[region]);
             Notice.gain(p, "message.skyabyss.named.down", e.getDisplayName(), d.coins());
         }
+    }
+
+    // 試遊用: /skyabyss dev named = 今いる土地の名づきを、確率・間・昼夜を問わずそばに出す (権限 2)。その土地に生きている名づきがいれば出さない
+    @SubscribeEvent
+    static void onCommands(net.neoforged.neoforge.event.RegisterCommandsEvent event) {
+        event.getDispatcher().register(net.minecraft.commands.Commands.literal(SkyAbyss.MODID).then(net.minecraft.commands.Commands.literal("dev")
+                .requires(s -> s.hasPermission(2))
+                .then(net.minecraft.commands.Commands.literal("named").executes(ctx -> {
+                    ServerPlayer p = ctx.getSource().getPlayerOrException();
+                    ServerLevel level = p.serverLevel();
+                    int region = ContinentMap.get().region(p.getBlockX(), p.getBlockZ());
+                    Def d = def(region);
+                    if (d == null || ALIVE.containsKey(region)) {
+                        ctx.getSource().sendFailure(Component.literal(d == null ? "no named foe for this land" : "a named foe of this land is already alive"));
+                        return 0;
+                    }
+                    double a = level.random.nextDouble() * Math.PI * 2;
+                    for (int tries = 0; tries < 12; tries++) {
+                        int x = (int) Math.floor(p.getX() + Math.cos(a + tries) * 12);
+                        int z = (int) Math.floor(p.getZ() + Math.sin(a + tries) * 12);
+                        BlockPos at = RegionSpawner.ground(level, x, z);
+                        if (at != null && spawnAt(level, region, at, p) != null) {
+                            return 1;
+                        }
+                    }
+                    ctx.getSource().sendFailure(Component.literal("no open ground nearby"));
+                    return 0;
+                }))));
     }
 
     // 自己テスト用: 記録を空にする

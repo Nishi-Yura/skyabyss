@@ -162,7 +162,7 @@ public final class RegionSpawner {
         }
         sweep(level);
         for (ServerPlayer p : level.players()) {
-            if (p.isAlive() && !p.isSpectator() && p.getY() > 30 && p.getY() < 260) {
+            if (p.isAlive() && !p.isSpectator() && p.getY() > 30 && p.getY() < 260 && !jp.revati.skyabyss.story.reel.StoryReels.watching(p)) {
                 trySpawn(level, p);
             }
         }

@@ -48,6 +48,18 @@ public final class StoryReels {
         return root.getCompound(KEY);
     }
 
+    // いま語りを見ている (流している途中。抜けて入り直した人も、流し直しが終わるまで)。見ている間は傷を受けず、まわりに敵を湧かせない
+    public static boolean watching(ServerPlayer p) {
+        return !data(p).getString("pending").isEmpty();
+    }
+
+    @SubscribeEvent
+    static void onHurt(net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent event) {
+        if (event.getEntity() instanceof ServerPlayer p && !(p instanceof FakePlayer) && watching(p)) {
+            event.setCanceled(true);
+        }
+    }
+
     public static boolean seen(ServerPlayer p, String reel) {
         return data(p).getCompound("seen").getBoolean(reel);
     }
