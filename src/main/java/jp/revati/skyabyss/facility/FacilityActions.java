@@ -47,7 +47,9 @@ import net.minecraft.world.level.block.BedBlock;
 public final class FacilityActions {
     public static final java.util.Set<String> OPENS = java.util.Set.of("shop", "stash", "inn_rest", "rumor", "perch", "map", "guild", "repair",
             "guild_storage", "respec_quote", "respec_skills", "respec_skills_coins", "respec_stats", "respec_stats_coins", "lore_book", "map_copy",
-            "key_offer", "key_return", "records", "brew_lesson", "trade", "mount_shop", "guide");
+            "key_offer", "key_return", "records", "brew_lesson", "trade", "mount_shop", "guide",
+            // 訓練場の師範が、ほかの職の始めの武器を貸す (rpg/skill/JobChoice.lend)
+            "starter_warrior", "starter_smith", "starter_mage", "starter_archer", "starter_assassin", "starter_shaman");
 
     private FacilityActions() {
     }

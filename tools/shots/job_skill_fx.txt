@@ -1,0 +1,147 @@
+# 職の新しい技の見た目 (静止画)。bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/job_skill_fx.txt -PshotsName=job_skill_fx
+world shots flat
+size 1280 720
+timeout 1500
+render 6
+clouds off
+guiscale 2
+cmd time set noon
+cmd weather clear
+cmd gamemode survival
+cmd skyabyss level set @p 30
+camera 0 -60 0 0 0
+hud off
+cmd skyabyss cinematic stop
+waitchunks
+chat clear
+wait 200
+perspective back
+fov 60
+# ---- thunder_bolt
+cmd tp @s 0.5 -60 0.5 0 0
+cmd skyabyss skill forget @s
+cmd item replace entity @s weapon.mainhand with skyabyss:shrine_staff
+wait 10
+cmd skyabyss skill learn @s thunder_bolt 2
+cmd skyabyss skill slot @s 1 thunder_bolt
+cmd skyabyss skill cooldowns @s
+cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
+cmd summon minecraft:husk 0.5 -60 6.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
+wait 10
+cmd skyabyss skill mana @s full
+cmd skyabyss skill cast @s 1
+wait 3
+shot fx_thunder_bolt
+wait 30
+# ---- ember_orb
+cmd tp @s 0.5 -60 0.5 0 0
+cmd skyabyss skill forget @s
+cmd item replace entity @s weapon.mainhand with skyabyss:shrine_staff
+wait 10
+cmd skyabyss skill learn @s ember_orb 2
+cmd skyabyss skill slot @s 1 ember_orb
+cmd skyabyss skill cooldowns @s
+cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
+cmd summon minecraft:husk 0.5 -60 6.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
+wait 10
+cmd skyabyss skill mana @s full
+cmd skyabyss skill cast @s 1
+wait 2
+shot fx_ember_orb
+wait 30
+# ---- frost_tide
+cmd tp @s 0.5 -60 0.5 0 0
+cmd skyabyss skill forget @s
+cmd item replace entity @s weapon.mainhand with skyabyss:shrine_staff
+wait 10
+cmd skyabyss skill learn @s frost_tide 2
+cmd skyabyss skill slot @s 1 frost_tide
+cmd skyabyss skill cooldowns @s
+cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
+cmd summon minecraft:husk 0.5 -60 6.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
+wait 10
+cmd skyabyss skill mana @s full
+cmd skyabyss skill cast @s 1
+wait 4
+shot fx_frost_tide
+wait 30
+# ---- blink
+cmd tp @s 0.5 -60 0.5 0 0
+cmd skyabyss skill forget @s
+cmd item replace entity @s weapon.mainhand with skyabyss:shrine_staff
+wait 10
+cmd skyabyss skill learn @s blink 2
+cmd skyabyss skill slot @s 1 blink
+cmd skyabyss skill cooldowns @s
+cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
+cmd summon minecraft:husk 0.5 -60 6.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
+wait 10
+cmd skyabyss skill mana @s full
+cmd skyabyss skill cast @s 1
+wait 2
+shot fx_blink
+wait 30
+# ---- forge_stomp
+cmd tp @s 0.5 -60 0.5 0 0
+cmd skyabyss skill forget @s
+cmd item replace entity @s weapon.mainhand with skyabyss:shrine_hammer
+wait 10
+cmd skyabyss skill learn @s forge_stomp 2
+cmd skyabyss skill slot @s 1 forge_stomp
+cmd skyabyss skill cooldowns @s
+cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
+cmd summon minecraft:husk 0.5 -60 6.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
+wait 10
+cmd skyabyss skill mana @s full
+cmd skyabyss skill cast @s 1
+wait 3
+shot fx_forge_stomp
+wait 30
+# ---- mist_veil
+cmd tp @s 0.5 -60 0.5 0 0
+cmd skyabyss skill forget @s
+cmd item replace entity @s weapon.mainhand with skyabyss:shrine_dagger
+wait 10
+cmd skyabyss skill learn @s mist_veil 2
+cmd skyabyss skill slot @s 1 mist_veil
+cmd skyabyss skill cooldowns @s
+cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
+cmd summon minecraft:husk 0.5 -60 6.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
+wait 10
+cmd skyabyss skill mana @s full
+cmd skyabyss skill cast @s 1
+wait 3
+shot fx_mist_veil
+wait 30
+# ---- curse_mark
+cmd tp @s 0.5 -60 0.5 0 0
+cmd skyabyss skill forget @s
+cmd item replace entity @s weapon.mainhand with skyabyss:shrine_bell_staff
+wait 10
+cmd skyabyss skill learn @s curse_mark 2
+cmd skyabyss skill slot @s 1 curse_mark
+cmd skyabyss skill cooldowns @s
+cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
+cmd summon minecraft:husk 0.5 -60 6.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
+wait 10
+cmd skyabyss skill mana @s full
+cmd skyabyss skill cast @s 1
+wait 3
+shot fx_curse_mark
+wait 30
+# ---- lamp_charm
+cmd tp @s 0.5 -60 0.5 0 0
+cmd skyabyss skill forget @s
+cmd item replace entity @s weapon.mainhand with skyabyss:shrine_bell_staff
+wait 10
+cmd skyabyss skill learn @s lamp_charm 2
+cmd skyabyss skill slot @s 1 lamp_charm
+cmd skyabyss skill cooldowns @s
+cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
+cmd summon minecraft:husk 0.5 -60 6.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
+wait 10
+cmd skyabyss skill mana @s full
+cmd skyabyss skill cast @s 1
+wait 4
+shot fx_lamp_charm
+wait 30
