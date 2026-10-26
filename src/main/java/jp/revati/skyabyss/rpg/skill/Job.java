@@ -94,7 +94,8 @@ public enum Job {
         if (word(path, "fang", "dagger", "claw", "shears", "pincer", "knife")) {
             return ASSASSIN;
         }
-        if (word(path, "hammer", "warhammer", "axe", "waraxe", "battleaxe", "greataxe", "poker", "mace", "maul")) {
+        // 鍛冶師: 鎚・斧・火掻き・錨 (重く打ち下ろす)・大鎌 (余燼の灰の刈り手)
+        if (word(path, "hammer", "warhammer", "axe", "waraxe", "battleaxe", "greataxe", "poker", "mace", "maul", "anchor", "scythe")) {
             return SMITH;
         }
         if (word(path, "sword", "greatsword", "blade", "pike", "spear", "lance", "glaive", "halberd", "harpoon", "trident", "shield")) {

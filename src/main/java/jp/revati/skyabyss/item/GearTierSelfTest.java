@@ -302,6 +302,21 @@ public final class GearTierSelfTest {
             check(f, travel > 0 && titan > travel, "chapter " + ch + ": travel armor " + travel + " is not below the titan armor " + titan);
         }
         check(f, armorSum(5, GearTier.RARE) > armorSum(4, GearTier.RARE), "abyss armor is not above the ember armor");
+        // 巨神の鎧は章ごとに上がる (旅装も)
+        StringBuilder line = new StringBuilder("armor sums by chapter (travel / titan):");
+        for (int ch = 1; ch <= 5; ch++) {
+            line.append(String.format(Locale.ROOT, " ch%d %.1f/%.1f", ch, armorSum(ch, GearTier.UNCOMMON), armorSum(ch, GearTier.RARE)));
+            if (ch >= 2 && ch <= 4) {
+                check(f, armorSum(ch, GearTier.UNCOMMON) > armorSum(ch - 1, GearTier.UNCOMMON), "chapter " + ch + " travel armor is not above chapter " + (ch - 1));
+            }
+        }
+        // 巨神の鎧は 2 部位のセットの強靭 (+3) を入れた曲線 (GearCurve.STAGES) で上がる: 防御 + 強靭が章ごとに上がる
+        for (int i = 1; i < GearCurve.STAGES.size(); i++) {
+            GearCurve.Stage a0 = GearCurve.STAGES.get(i - 1);
+            GearCurve.Stage a1 = GearCurve.STAGES.get(i);
+            check(f, a1.armor() + a1.toughness() > a0.armor() + a0.toughness(), a1.id() + " armor curve is not above " + a0.id());
+        }
+        SkyAbyss.LOGGER.info("[selftest] gear tiers {}", line);
     }
 
     // ---------------------------------------------------------------- 落とし表

@@ -153,6 +153,7 @@ public final class JobSelfTest {
                 {"skyabyss:storm_hammer", Job.SMITH}, {"skyabyss:ember_greatsword", Job.WARRIOR}, {"skyabyss:ember_bow", Job.ARCHER},
                 {"skyabyss:ember_dagger", Job.ASSASSIN}, {"skyabyss:shrine_sword", Job.WARRIOR}, {"skyabyss:shrine_hammer", Job.SMITH},
                 {"skyabyss:shrine_bow", Job.ARCHER},
+                {"skyabyss:abyss_sinking_anchor", Job.SMITH}, {"skyabyss:abyss_ash_scythe", Job.SMITH},
                 {"minecraft:iron_sword", Job.WARRIOR}, {"minecraft:trident", Job.WARRIOR}, {"minecraft:iron_axe", Job.SMITH},
                 {"minecraft:bow", Job.ARCHER}, {"minecraft:crossbow", Job.ARCHER},
                 {"skyabyss:bell_coin", null}, {"skyabyss:storm_charm", null}, {"minecraft:lightning_rod", null}, {"minecraft:blaze_rod", null},
@@ -186,6 +187,34 @@ public final class JobSelfTest {
         }
         check(f, marks.equals(java.util.Set.of(jp.revati.skyabyss.item.affix.AffixType.MARK_STONE)) && staffMarks.isEmpty(),
                 "tree marks should follow the weapon's job: greatsword " + marks + ", staff " + staffMarks);
+        // ---- 全部の品: 武器はどれも一つの職 (持つとその職)。防具・装飾品・素材は職と関係ない (誰でも着られる)
+        java.util.Map<String, java.util.EnumSet<Job>> byOrigin = new java.util.TreeMap<>();
+        for (Item it : BuiltInRegistries.ITEM) {
+            ResourceLocation key = BuiltInRegistries.ITEM.getKey(it);
+            if (!key.getNamespace().equals(SkyAbyss.MODID)) {
+                continue;
+            }
+            boolean weapon = it instanceof net.minecraft.world.item.SwordItem || it instanceof net.minecraft.world.item.BowItem
+                    || it instanceof net.minecraft.world.item.CrossbowItem || it instanceof net.minecraft.world.item.TridentItem
+                    || it instanceof net.minecraft.world.item.ShieldItem;
+            boolean wearable = it instanceof net.minecraft.world.item.ArmorItem || it instanceof jp.revati.skyabyss.item.accessory.Accessory;
+            Job job = Job.of(it);
+            if (weapon) {
+                check(f, job != null, "weapon " + key + " belongs to no job");
+                if (job != null && it instanceof jp.revati.skyabyss.item.ModGear g) {
+                    String origin = key.getPath().startsWith("shrine_") ? "island_shrine" : g.dungeon();
+                    byOrigin.computeIfAbsent(origin, o -> java.util.EnumSet.noneOf(Job.class)).add(job);
+                }
+            } else if (wearable) {
+                check(f, job == null, "wearable " + key + " was mapped to a job (" + job + ")");
+            }
+        }
+        // 祠と一〜四章は 6 職すべてに専用の武器 (43 の 8 節)
+        for (String origin : List.of("island_shrine", "stone_whale", "tide_shell", "thunder_wing", "ember")) {
+            java.util.EnumSet<Job> got = byOrigin.getOrDefault(origin, java.util.EnumSet.noneOf(Job.class));
+            check(f, got.size() == Job.values().length, origin + " lacks weapons for " + java.util.EnumSet.complementOf(got));
+        }
+        byOrigin.forEach((o, js) -> SkyAbyss.LOGGER.info("[selftest] jobs: {} weapons cover {}", o, js));
         // ---- 職ごとの点・枠・使う
         FakePlayer p = new FakePlayer(server.overworld(), new GameProfile(UUID.randomUUID(), "jobs_t"));
         SkillData d = SkillManager.get(p);
