@@ -176,7 +176,7 @@ public final class Ch2Gear {
     }
 
     private static void onCreativeTab(BuildCreativeModeTabContentsEvent event) {
-        if (event.getTabKey().equals(ModItems.TAB.getKey())) {
+        if (event.getTabKey().equals(ModItems.LEGACY_TAB)) {
             for (DeferredItem<Item> item : List.of(SMALL_PEARL, SALT_CRYSTAL, PEARL_WARD_THREAD, SHELL_CHIP, HELMET, CHESTPLATE, LEGGINGS, BOOTS,
                     SALT_WHETSTONE, TIDE_PICKLE, PEARL_POWDER, TIDE_HOURGLASS)) {
                 event.accept(item.get());

@@ -338,7 +338,7 @@
   "subtitles.skyabyss.sky_wingbeat": "Something vast beats its wings overhead",
   "subtitles.skyabyss.sky_drone": "The sky groans",
   "subtitles.skyabyss.sky_call": "A voice falls from above the clouds",
-  "itemGroup.skyabyss": "Between Sky and Abyss",
+  "itemGroup.skyabyss": "Between Sky and Abyss: Materials & Items",
   "entity.skyabyss.stone_whale": "Stone Whale",
   "item.skyabyss.sky_key_fragment": "Sky Key Fragment",
   "item.skyabyss.sky_key_fragment.desc": "Warm, faintly beating. Four together, they say, open a way above the clouds",
@@ -1832,5 +1832,9 @@
   "advancement.skyabyss.named_ember.title": "Ashcloak Lizard",
   "advancement.skyabyss.named_ember.description": "You felled the great lizard of the ash wastes.\nReward: 25 bell coins",
   "advancement.skyabyss.named_all.title": "Six Names",
-  "advancement.skyabyss.named_all.description": "You felled the named foe of every land.\nReward: 50 bell coins"
+  "advancement.skyabyss.named_all.description": "You felled the named foe of every land.\nReward: 50 bell coins",
+  "itemGroup.skyabyss.weapons": "Between Sky and Abyss: Weapons",
+  "itemGroup.skyabyss.gear": "Between Sky and Abyss: Armor & Trinkets",
+  "itemGroup.skyabyss.eggs": "Between Sky and Abyss: Spawn Eggs",
+  "itemGroup.skyabyss.blocks": "Between Sky and Abyss: Blocks"
 }

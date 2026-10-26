@@ -137,7 +137,7 @@ public final class TravelGear {
     }
 
     private static void onCreativeTab(BuildCreativeModeTabContentsEvent event) {
-        if (event.getTabKey().equals(ModItems.TAB.getKey())) {
+        if (event.getTabKey().equals(ModItems.LEGACY_TAB)) {
             event.accept(HELMET.get());
             event.accept(CHESTPLATE.get());
             event.accept(LEGGINGS.get());

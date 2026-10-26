@@ -134,7 +134,7 @@ public final class Ch4Gear {
     }
 
     private static void onCreativeTab(BuildCreativeModeTabContentsEvent event) {
-        if (event.getTabKey().equals(ModItems.TAB.getKey())) {
+        if (event.getTabKey().equals(ModItems.LEGACY_TAB)) {
             for (DeferredItem<Item> i : List.of(HELMET, CHESTPLATE, LEGGINGS, BOOTS, ASH_BAKED_BREAD)) {
                 event.accept(i.get());
             }

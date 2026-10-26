@@ -52,7 +52,7 @@ public final class LoreSetup {
 
     // Mod のタブの末尾に並べる (ModItems の一覧には手を入れない)
     private static void onCreativeTab(BuildCreativeModeTabContentsEvent event) {
-        if (event.getTabKey().equals(ModItems.TAB.getKey())) {
+        if (event.getTabKey().equals(ModItems.LEGACY_TAB)) {
             event.accept(LORE_BOOK.get());
             event.accept(LORE_PAGE.get());
         }

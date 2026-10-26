@@ -91,7 +91,7 @@ public final class AbyssRelics {
     }
 
     private static void onCreativeTab(BuildCreativeModeTabContentsEvent event) {
-        if (event.getTabKey().equals(ModItems.TAB.getKey())) {
+        if (event.getTabKey().equals(ModItems.LEGACY_TAB)) {
             for (Relic r : RELICS) {
                 event.accept(r.item().get());
             }

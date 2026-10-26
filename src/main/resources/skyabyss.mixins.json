@@ -10,7 +10,8 @@
     "ServerPlaceRecipeMixin",
     "FallingBlockMixin",
     "RecipeManagerMixin",
-    "AdvancementManagerMixin"
+    "AdvancementManagerMixin",
+    "ItemNameMixin"
   ],
   "client": [
     "GuiGraphicsMixin",

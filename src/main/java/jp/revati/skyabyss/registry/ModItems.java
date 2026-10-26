@@ -217,83 +217,37 @@ public final class ModItems {
     public static final DeferredItem<BlockItem> RELIC_PLATE = ITEMS.registerSimpleBlockItem(ModBlocks.RELIC_PLATE);
     public static final DeferredItem<BlockItem> RELIC_BELL = ITEMS.registerSimpleBlockItem(ModBlocks.RELIC_BELL);
 
+    // クリエイティブの欄 (registry/CreativeTabs が全部の品を分けて並べる。2026-10-27)。ほかの担当が「main」へ入れていた分は LEGACY_TAB へ向けて止めた
+    public static final net.minecraft.resources.ResourceKey<CreativeModeTab> LEGACY_TAB = net.minecraft.resources.ResourceKey.create(Registries.CREATIVE_MODE_TAB,
+            net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "legacy_unused"));
     public static final DeferredHolder<CreativeModeTab, CreativeModeTab> TAB = TABS.register("main", () -> CreativeModeTab.builder()
             .title(Component.translatable("itemGroup.skyabyss"))
             .icon(() -> SKY_KEY_FRAGMENT.get().getDefaultInstance())
-            .displayItems((params, output) -> {
-                output.accept(SKY_KEY_FRAGMENT.get());
-                output.accept(WHALEBONE_GREATSWORD.get());
-                output.accept(STONE_WHALE_HELMET.get());
-                output.accept(STONE_WHALE_CHESTPLATE.get());
-                output.accept(STONE_WHALE_LEGGINGS.get());
-                output.accept(STONE_WHALE_BOOTS.get());
-                output.accept(RESONANCE_CHARM.get());
-                output.accept(CLOUD_JERKY.get());
-                output.accept(CAPTAIN_PIKE.get());
-                output.accept(WATERWAY_FANG.get());
-                output.accept(STONE_WHALE_PLATING.get());
-                output.accept(MOSS_TALISMAN.get());
-                output.accept(BONE_SPIKE_ARROW.get());
-                output.accept(STONE_WHALE_SHARD.get());
-                output.accept(RESONANCE_CRYSTAL.get());
-                output.accept(RESONANCE_SHARD_STONE_WHALE.get());
-                output.accept(RESONANCE_SHARD_TIDE_SHELL.get());
-                output.accept(RESONANCE_SHARD_THUNDER_WING.get());
-                output.accept(RESONANCE_SHARD_EMBER.get());
-                output.accept(SONG_SHARD_STONE_WHALE.get());
-                output.accept(SONG_SHARD_TIDE_SHELL.get());
-                output.accept(SONG_SHARD_THUNDER_WING.get());
-                output.accept(SONG_SHARD_EMBER.get());
-                for (jp.revati.skyabyss.item.extra.Element e : jp.revati.skyabyss.item.extra.Element.values()) {
-                    output.accept(socketShard(e).get());
-                }
-                for (jp.revati.skyabyss.rpg.skill.Rune r : jp.revati.skyabyss.rpg.skill.Rune.values()) {
-                    if (r.legendary()) {
-                        output.accept(jp.revati.skyabyss.item.extra.GearFreedom.core(r));
-                    }
-                }
-                for (jp.revati.skyabyss.rpg.skill.Skill s : jp.revati.skyabyss.item.extra.RuneData.skills()) {
-                    output.accept(jp.revati.skyabyss.item.extra.GearFreedomItems.rune(new jp.revati.skyabyss.item.extra.RuneData(s.id, false, 1200)));
-                }
-                output.accept(RESONANCE_SHARD.get());
-                output.accept(STONE_WHALE_CORE.get());
-                output.accept(RESONANCE_FORGE.get());
-                output.accept(BONE_SENTINEL_EGG.get());
-                output.accept(RIB_ARCHER_EGG.get());
-                output.accept(Ch1BackEntities.BONE_MORTAR_EGG.get());
-                output.accept(Ch1BackEntities.BONE_GULL_EGG.get());
-                output.accept(Ch1BackEntities.ELDER_SENTINEL_EGG.get());
-                output.accept(MOSS_CRAWLER_EGG.get());
-                output.accept(ROCK_SHELL_BEETLE_EGG.get());
-                output.accept(SPINE_HARE_EGG.get());
-                output.accept(BONE_HAULER_EGG.get());
-                output.accept(ELDER_SENTRY_EGG.get());
-                output.accept(TIDEPOOL_CLAM_EGG.get());
-                output.accept(SAND_BURROWER_EGG.get());
-                output.accept(DRIFT_HERMIT_EGG.get());
-                output.accept(SHORE_WARDEN_EGG.get());
-                output.accept(BANDIT_EGG.get());
-                output.accept(BANDIT_ARCHER_EGG.get());
-                output.accept(BANDIT_CHIEF_EGG.get());
-                output.accept(BONE_FOOTMAN_EGG.get());
-                output.accept(BONE_BOWMAN_EGG.get());
-                output.accept(BONE_STANDARD_EGG.get());
-                output.accept(GRAIN_RAT_EGG.get());
-                output.accept(STRAY_WISP_EGG.get());
-                output.accept(FERAL_DOG_EGG.get());
-                output.accept(MOSS_DEAD_EGG.get());
-                output.accept(MIST_ANGLER_EGG.get());
-                output.accept(THUNDER_WOLF_EGG.get());
-                output.accept(ROCK_BOAR_EGG.get());
-                output.accept(TIDE_CRAB_EGG.get());
-                output.accept(STORM_RAM_EGG.get());
-                output.accept(ASH_LIZARD_EGG.get());
-                output.accept(WHALEBONE_CAPTAIN_EGG.get());
-                output.accept(STONE_WHALE_HEART_EGG.get());
-                output.accept(SEALED_GATE.get());
-                output.accept(CRUMBLING_BONE.get());
-                output.accept(GLOW_ANEMONE.get());
-            })
+            .displayItems((params, output) -> CreativeTabs.fill(CreativeTabs.Kind.MISC, output))
+            .build());
+    public static final DeferredHolder<CreativeModeTab, CreativeModeTab> TAB_WEAPONS = TABS.register("weapons", () -> CreativeModeTab.builder()
+            .title(Component.translatable("itemGroup.skyabyss.weapons"))
+            .icon(() -> WHALEBONE_GREATSWORD.get().getDefaultInstance())
+            .withTabsBefore(TAB.getKey())
+            .displayItems((params, output) -> CreativeTabs.fill(CreativeTabs.Kind.WEAPON, output))
+            .build());
+    public static final DeferredHolder<CreativeModeTab, CreativeModeTab> TAB_GEAR = TABS.register("gear", () -> CreativeModeTab.builder()
+            .title(Component.translatable("itemGroup.skyabyss.gear"))
+            .icon(() -> STONE_WHALE_HELMET.get().getDefaultInstance())
+            .withTabsBefore(TAB_WEAPONS.getKey())
+            .displayItems((params, output) -> CreativeTabs.fill(CreativeTabs.Kind.GEAR, output))
+            .build());
+    public static final DeferredHolder<CreativeModeTab, CreativeModeTab> TAB_EGGS = TABS.register("eggs", () -> CreativeModeTab.builder()
+            .title(Component.translatable("itemGroup.skyabyss.eggs"))
+            .icon(() -> ROCK_SHELL_BEETLE_EGG.get().getDefaultInstance())
+            .withTabsBefore(TAB_GEAR.getKey())
+            .displayItems((params, output) -> CreativeTabs.fill(CreativeTabs.Kind.EGG, output))
+            .build());
+    public static final DeferredHolder<CreativeModeTab, CreativeModeTab> TAB_BLOCKS = TABS.register("blocks", () -> CreativeModeTab.builder()
+            .title(Component.translatable("itemGroup.skyabyss.blocks"))
+            .icon(() -> RESONANCE_FORGE.get().getDefaultInstance())
+            .withTabsBefore(TAB_EGGS.getKey())
+            .displayItems((params, output) -> CreativeTabs.fill(CreativeTabs.Kind.BLOCK, output))
             .build());
 
     private ModItems() {

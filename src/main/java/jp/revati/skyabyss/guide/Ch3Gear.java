@@ -207,7 +207,7 @@ public final class Ch3Gear {
     }
 
     private static void onCreativeTab(BuildCreativeModeTabContentsEvent event) {
-        if (event.getTabKey().equals(ModItems.TAB.getKey())) {
+        if (event.getTabKey().equals(ModItems.LEGACY_TAB)) {
             for (DeferredItem<Item> item : List.of(SCORCHED_FEATHER, STATIC_COTTON, COPPER_WIRE, THUNDER_WARD_THREAD, HELMET, CHESTPLATE, LEGGINGS, BOOTS,
                     THUNDER_WHETSTONE, WIND_DUMPLING, LIGHTNING_OIL, WIND_STREAMER)) {
                 event.accept(item.get());

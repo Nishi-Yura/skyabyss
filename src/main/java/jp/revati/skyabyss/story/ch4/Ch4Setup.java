@@ -117,7 +117,7 @@ public final class Ch4Setup {
     }
 
     private static void onCreativeTab(BuildCreativeModeTabContentsEvent event) {
-        if (event.getTabKey().equals(ModItems.TAB.getKey())) {
+        if (event.getTabKey().equals(ModItems.LEGACY_TAB)) {
             for (DeferredItem<Item> i : List.of(CINDER_MITE_EGG, ASH_HUSK_EGG, ASH_DRAGGER_EGG, ELDER_THRALL_EGG, SOOT_IRON, ASH_HEMP, ASH_WARD_THREAD,
                     SOOT_WHETSTONE, ASH_COOLER)) {
                 event.accept(i.get());

@@ -338,7 +338,7 @@
   "subtitles.skyabyss.sky_wingbeat": "頭上で巨大な何かが羽ばたく",
   "subtitles.skyabyss.sky_drone": "空が低く唸る",
   "subtitles.skyabyss.sky_call": "雲の上から声が降ってくる",
-  "itemGroup.skyabyss": "天と淵のあいだ",
+  "itemGroup.skyabyss": "天と淵のあいだ：素材と品",
   "entity.skyabyss.stone_whale": "岩鯨",
   "item.skyabyss.sky_key_fragment": "天の鍵の欠片",
   "item.skyabyss.sky_key_fragment.desc": "ほのかに温かく、かすかに脈打つ。四つそろえば、雲の上へ続く扉が開くという",
@@ -1832,5 +1832,9 @@
   "advancement.skyabyss.named_ember.title": "灰被りの大蜥蜴",
   "advancement.skyabyss.named_ember.description": "灰の荒野の大蜥蜴を倒した。\n報酬: 鐘銭 25",
   "advancement.skyabyss.named_all.title": "六つの名",
-  "advancement.skyabyss.named_all.description": "六つの土地の名のある強敵を、すべて倒した。\n報酬: 鐘銭 50"
+  "advancement.skyabyss.named_all.description": "六つの土地の名のある強敵を、すべて倒した。\n報酬: 鐘銭 50",
+  "itemGroup.skyabyss.weapons": "天と淵のあいだ：武器",
+  "itemGroup.skyabyss.gear": "天と淵のあいだ：防具と飾り",
+  "itemGroup.skyabyss.eggs": "天と淵のあいだ：敵の卵",
+  "itemGroup.skyabyss.blocks": "天と淵のあいだ：ブロック"
 }

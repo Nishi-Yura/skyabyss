@@ -63,7 +63,7 @@ public final class GuideSetup {
     }
 
     private static void onCreativeTab(BuildCreativeModeTabContentsEvent event) {
-        if (event.getTabKey().equals(ModItems.TAB.getKey())) {
+        if (event.getTabKey().equals(ModItems.LEGACY_TAB)) {
             for (int c = 0; c <= WayfarerNotes.MAX_CHAPTER; c++) {
                 event.accept(WayfarerNotes.make(c));
             }

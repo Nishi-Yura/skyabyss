@@ -134,7 +134,7 @@ public final class AbyssMobsBSetup {
     }
 
     private static void onCreativeTab(BuildCreativeModeTabContentsEvent event) {
-        if (event.getTabKey().equals(ModItems.TAB.getKey())) {
+        if (event.getTabKey().equals(ModItems.LEGACY_TAB)) {
             for (DeferredItem<Item> i : List.of(ASH_TRAIL_EGG, EMBER_KEEPER_EGG, SOOT_CHILD_EGG, PAST_SHADOW_EGG, NAMELESS_SHAPE_EGG,
                     LAMP_EATER_EGG, CEILING_WALKER_EGG, HEARTBEAT_MIMIC_EGG, ROPE_HANGER_EGG, LAMP_ASH, SOOT_CLUMP, ROPE_KNOT, ECHO_SHARD,
                     PULSE_MEMBRANE)) {

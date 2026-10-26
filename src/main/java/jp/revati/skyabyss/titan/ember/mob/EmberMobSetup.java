@@ -99,7 +99,7 @@ public final class EmberMobSetup {
     }
 
     private static void onCreativeTab(BuildCreativeModeTabContentsEvent event) {
-        if (event.getTabKey().equals(ModItems.TAB.getKey())) {
+        if (event.getTabKey().equals(ModItems.LEGACY_TAB)) {
             event.accept(ASH_THRALL_EGG.get());
             event.accept(EMBER_MOTH_EGG.get());
             event.accept(CINDER_ROLLER_EGG.get());

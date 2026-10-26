@@ -1064,6 +1064,21 @@ public final class ShotRunner {
 
     // 開ける画面の名前。足りなければ、画面のクラスの完全な名前 (引数なしで作れるもの) でもよい
     private static Screen screen(Minecraft mc, String name) {
+        // creative_<つまみの名前>: クリエイティブの欄をその Mod のつまみで開く (main / weapons / gear / eggs / blocks)
+        if (name.toLowerCase(Locale.ROOT).startsWith("creative_")) {
+            String tab = name.substring("creative_".length());
+            var key = net.minecraft.resources.ResourceKey.create(net.minecraft.core.registries.Registries.CREATIVE_MODE_TAB,
+                    net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(jp.revati.skyabyss.SkyAbyss.MODID, tab));
+            var t = net.minecraft.core.registries.BuiltInRegistries.CREATIVE_MODE_TAB.get(key);
+            try {
+                var f = net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen.class.getDeclaredField("selectedTab");
+                f.setAccessible(true);
+                f.set(null, t);
+            } catch (ReflectiveOperationException e) {
+                jp.revati.skyabyss.SkyAbyss.LOGGER.warn("could not select the creative tab {}", tab, e);
+            }
+            return new net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen(mc.player, mc.player.connection.enabledFeatures(), true);
+        }
         Supplier<Screen> s = switch (name.toLowerCase(Locale.ROOT)) {
             case "inventory" -> () -> new InventoryScreen(mc.player);
             case "travel_map_demo" -> () -> jp.revati.skyabyss.client.map.TravelMapScreen.demo(false);

@@ -80,7 +80,7 @@ public final class TravelSetup {
 
     // Mod のタブの末尾に並べる (ModItems の一覧には手を入れない)
     private static void onCreativeTab(BuildCreativeModeTabContentsEvent event) {
-        if (event.getTabKey().equals(ModItems.TAB.getKey())) {
+        if (event.getTabKey().equals(ModItems.LEGACY_TAB)) {
             event.accept(STONE_WHALE_CALL.get());
             event.accept(TIDE_SHELL_CALL.get());
             event.accept(THUNDER_WING_CALL.get());

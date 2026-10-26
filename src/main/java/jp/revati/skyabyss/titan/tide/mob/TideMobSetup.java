@@ -100,7 +100,7 @@ public final class TideMobSetup {
 
     // Mod のタブの末尾に並べる (ModItems の一覧には手を入れない)
     private static void onCreativeTab(BuildCreativeModeTabContentsEvent event) {
-        if (event.getTabKey().equals(ModItems.TAB.getKey())) {
+        if (event.getTabKey().equals(ModItems.LEGACY_TAB)) {
             event.accept(TIDE_SHELL_SHARD.get());
             event.accept(TIDE_DRIED_SHELL.get());
             event.accept(BUBBLE_SAC.get());

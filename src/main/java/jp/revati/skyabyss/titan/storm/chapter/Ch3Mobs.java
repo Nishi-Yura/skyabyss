@@ -156,7 +156,7 @@ public final class Ch3Mobs {
     }
 
     private static void onCreativeTab(BuildCreativeModeTabContentsEvent event) {
-        if (event.getTabKey().equals(ModItems.TAB.getKey())) {
+        if (event.getTabKey().equals(ModItems.LEGACY_TAB)) {
             event.accept(STATIC_PUFF_EGG.get());
             event.accept(PEAK_FLEDGLING_EGG.get());
             event.accept(LIGHTNING_GLEANER_EGG.get());

@@ -76,7 +76,7 @@ public final class JobChoice {
     }
 
     private static void onCreativeTab(BuildCreativeModeTabContentsEvent event) {
-        if (event.getTabKey().equals(ModItems.TAB.getKey())) {
+        if (event.getTabKey().equals(ModItems.LEGACY_TAB)) {
             for (DeferredItem<Item> item : List.of(SWORD, HAMMER, STAFF, BOW, DAGGER, BELL_STAFF)) {
                 event.accept(item.get());
             }

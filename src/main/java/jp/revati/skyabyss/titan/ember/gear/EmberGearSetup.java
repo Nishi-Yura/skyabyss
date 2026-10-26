@@ -100,7 +100,7 @@ public final class EmberGearSetup {
     }
 
     private static void onCreativeTab(BuildCreativeModeTabContentsEvent event) {
-        if (event.getTabKey().equals(ModItems.TAB.getKey())) {
+        if (event.getTabKey().equals(ModItems.LEGACY_TAB)) {
             for (DeferredHolder<Item, Item> item : List.of(HELMET, CHESTPLATE, LEGGINGS, BOOTS, WAR_AXE, MANTLE, CHARM, HAMMER, POKER, LANTERN,
                     HORN, SHARD, CORE, SPARK_DUST, CINDER_HUSK)) {
                 event.accept(item.get());
