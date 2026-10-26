@@ -59,6 +59,12 @@ for _id, _kind in (("abyss_lamp_staff", "staff"), ("abyss_depth_bow", "bow"), ("
 # 一品一案 (2026-10-26。tools/rough/lowpoly/weapons/one/build_one.py の docs/review/roughs_one/raw/<id>/a/)。章の杖と鈴杖 8 本もここから入れる
 for _id in ("whale_staff", "whale_bell_staff", "tide_staff", "tide_bell_staff", "storm_staff", "storm_bell_staff", "ember_staff", "ember_censer"):
     ITEMS[_id] = ("roughs_one", "rare") + _HOLD["staff"]
+# 元からの品の作り直し (2026-10-27。tools/rough/lowpoly/weapons/one/o_remake.py)。持ち方は品のいまのモデルのまま (借りる品 = 自分)
+REMAKE = {"waterway_fang": ("legend", 1), "captain_pike": ("legend", 1), "whalebone_greatsword": ("rare", 1), "abyss_greatsword": ("legend", 1),
+          "tidecaller_claw": ("legend", 1), "coral_harpoon": ("legend", 1), "raiju_claw": ("legend", 1), "warden_glaive": ("legend", 1),
+          "abyss_storm_bow": ("legend", 4), "smith_hammer": ("legend", 1), "ember_war_axe": ("rare", 1), "abyss_ash_scythe": ("legend", 1)}
+for _id, (_tier, _st) in REMAKE.items():
+    ITEMS[_id] = ("roughs_one", _tier, _id, _st)
 ONE = [i for i in ITEMS if (ROOT / "docs/review/roughs_one/raw" / i / "a").is_dir()]
 for _id in ONE:
     _src, _tier, _analog, _st = ITEMS[_id]

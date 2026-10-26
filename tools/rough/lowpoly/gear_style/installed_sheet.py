@@ -22,11 +22,22 @@ def font(sz):
     return ImageFont.load_default()
 
 
+# 品の階級 → 見える形の段 (item/GearTier の meshTier)。環境変数 SKYABYSS_ITEMS_TSV (ItemAuditSelfTest の ITEMAUDIT 行) があれば使う
+MESH_TIER = {"common": "common", "uncommon": "common", "rare": "rare", "epic": "rare", "heroic": "legend", "artifact": "legend"}
+TIERS = {}
+if __import__("os").environ.get("SKYABYSS_ITEMS_TSV"):
+    for _l in open(__import__("os").environ["SKYABYSS_ITEMS_TSV"], encoding="utf-8"):
+        _p = _l.rstrip(chr(10)).split(chr(9))
+        if len(_p) > 3 and "/" in _p[3]:
+            TIERS[_p[0]] = _p[3].split("/")[0]
+
+
 def load(item):
     d = ASSETS / "lowpoly/items" / item
     files = sorted(d.glob("*.json"))
     pick = [f for f in files if "pull" not in f.stem]
-    f = pick[-1]
+    want = MESH_TIER.get(TIERS.get(item, ""))
+    f = next((x for x in pick if x.stem == want), pick[-1])
     m = json.loads(f.read_text(encoding="utf-8"))
     tex = Image.open(ASSETS / "textures/lowpoly" / (m["texture"] + ".png")).convert("RGBA")
     return m, np.array(tex), f.stem
@@ -94,7 +105,7 @@ def render(m, tex, yaw, size=(220, 300)):
 
 
 GROUPS = {
-    "大剣・剣": ["shrine_sword", "whalebone_greatsword", "ember_greatsword", "abyss_lamp_sword", "abyss_greatsword", "abyss_tide_sword",
+    "大剣・剣": ["storm_sword", "shrine_sword", "whalebone_greatsword", "ember_greatsword", "abyss_lamp_sword", "abyss_greatsword", "abyss_tide_sword",
               "abyss_storm_sword", "abyss_ember_sword"],
     "鎚・斧": ["shrine_hammer", "whale_hammer", "tide_hammer", "storm_hammer", "ember_war_axe", "smith_hammer", "abyss_whale_hammer",
              "abyss_tide_hammer", "abyss_storm_hammer", "abyss_sinking_anchor"],
@@ -104,7 +115,7 @@ GROUPS = {
            "abyss_toll_bell_staff", "abyss_whale_bell_staff", "abyss_storm_bell_staff", "abyss_ember_bell_staff"],
     "弓": ["shrine_bow", "whale_bow", "tide_bow", "thunder_wing_bow", "ember_bow", "abyss_storm_bow", "abyss_depth_bow", "abyss_whale_bow",
           "abyss_tide_bow", "abyss_ember_bow"],
-    "短剣・爪": ["shrine_dagger", "waterway_fang", "tidecaller_claw", "raiju_claw", "ember_dagger", "abyss_pulse_dagger", "abyss_whale_fang",
+    "短剣・爪": ["whale_dagger", "tide_dagger", "storm_dagger", "shrine_dagger", "waterway_fang", "tidecaller_claw", "raiju_claw", "ember_dagger", "abyss_pulse_dagger", "abyss_whale_fang",
              "abyss_tide_dagger", "abyss_storm_dagger", "abyss_ember_dagger"],
     "長柄・ほか": ["captain_pike", "coral_harpoon", "tide_shell_trident", "warden_glaive", "thrall_poker", "abyss_ash_scythe",
               "abyss_surveyor_plumb", "coral_shield"],
@@ -128,7 +139,7 @@ def sheet(title, ids, out):
         for j, yaw in enumerate((0, 40)):
             im = render(m, tex, yaw, (cw, ch))
             S.paste(im, (x + j * cw, y), im)
-        D.text((x + 6, y + ch + 4), f"{i} ({stem})", fill=(200, 190, 170), font=font(15))
+        D.text((x + 6, y + ch + 4), f"{i}  {TIERS.get(i, '?')} ({stem}) {m.get('triangle_count', '?')}面", fill=(200, 190, 170), font=font(15))
     S.save(out)
 
 
