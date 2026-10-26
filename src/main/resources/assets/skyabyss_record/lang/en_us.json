@@ -119,7 +119,7 @@
   "skyabyss_record.d.guard_call": "Protection: on the ground it never despawns, burns or breaks. If it falls into the void it comes back to you.",
   "skyabyss_record.d.guard_book": "Protection: none needed. It comes back with the next entry.",
   "skyabyss_record.d.recover_fragment": "If lost: \"Call back\" returns the ones you no longer have. Stilling that titan's heart again also finds it by the heartbeat. Either way the old fragment crumbles to sand wherever it is found (one per person).",
-  "skyabyss_record.d.recover_core": "If lost: each heart has a 25%% chance to drop another. It's an artifact material and is used to remake the whistle.",
+  "skyabyss_record.d.recover_core": "If lost: each heart has a 25%% chance to drop another. It's a legendary material and is used to remake the whistle.",
   "skyabyss_record.d.recover_call": "If lost: craft it again from a bone, a Stone Whale Core and a Stone Whale Scale placed diagonally.",
   "skyabyss_record.d.recover_book": "If lost: the next time something is written, it returns to your pack if it's not in your inventory or ender chest.",
   "skyabyss_record.d.memory": "Counts heart clears that gave no new piece. At %s or more, collection gear chances double. At %s you are guaranteed a missing piece. Resets to 0 when the collection grows.",

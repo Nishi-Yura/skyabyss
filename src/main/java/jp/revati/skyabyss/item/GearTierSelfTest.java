@@ -351,8 +351,8 @@ public final class GearTierSelfTest {
     private static void display(List<String> f) {
         Map<String, String> ja = GearCurveSelfTest.lang("/assets/skyabyss/lang/ja_jp.json", f);
         Map<String, String> en = GearCurveSelfTest.lang("/assets/skyabyss/lang/en_us.json", f);
-        String[] jaNames = {"コモン", "アンコモン", "レア", "エピック", "ヒロイック", "★ アーティファクト"};
-        String[] enNames = {"Common", "Uncommon", "Rare", "Epic", "Heroic", "★ Artifact"};
+        String[] jaNames = {"コモン", "アンコモン", "レア", "エピック", "ヒロイック", "★ 伝説"};
+        String[] enNames = {"Common", "Uncommon", "Rare", "Epic", "Heroic", "★ Legendary"};
         for (GearTier t : GearTier.values()) {
             check(f, jaNames[t.ordinal()].equals(ja.get(t.translationKey())), "ja tier name of " + t + " is " + ja.get(t.translationKey()));
             check(f, enNames[t.ordinal()].equals(en.get(t.translationKey())), "en tier name of " + t + " is " + en.get(t.translationKey()));

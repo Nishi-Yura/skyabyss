@@ -119,6 +119,8 @@ public final class SelfTestRunner {
         steps.add(Step.once("growth", GrowthSelfTest::runSelfTest));
         // 日本語の折り返しの切れ目 (util/JpBreak)。SKYABYSS_SELFTEST_ONLY="text wrap"
         steps.add(Step.once("text wrap", jp.revati.skyabyss.util.JpBreakSelfTest::run));
+        // 伝説の装備の出どころ (abyss/LegendLoot)。SKYABYSS_SELFTEST_ONLY="legend loot"
+        steps.add(Step.once("legend loot", jp.revati.skyabyss.abyss.LegendLootSelfTest::run));
         // 転生 (戻る・残る範囲、上限 20、代価、恩恵、余白の枠、導きの欠片、共闘の合わせ)。docs/design/31。SKYABYSS_SELFTEST_ONLY="soul"
         steps.add(Step.once("soul", jp.revati.skyabyss.rebirth.SoulSelfTest::runSelfTest));
         // 職の前の技ごとの検査 (木をまたいだ枠で技を試す) は、職 (持った武器) を見ずに。職の検査は "jobs"

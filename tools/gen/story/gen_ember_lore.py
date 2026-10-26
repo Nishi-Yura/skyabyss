@@ -252,7 +252,7 @@ GEAR = [
      "余燼の巨神から欠けた、まだ温かい殻。余燼の装備を鍛える",
      "A still-warm flake of the ember titan's shell. Used to temper ember gear"),
     ("ember_core", "余燼の心核", "Ember Core",
-     "余燼の心臓から取れた、消えない熾。いつかアーティファクトの材料になる",
+     "余燼の心臓から取れた、消えない熾。いつか伝説の装備の材料になる",
      "An ember from the ember heart that will not go out. One day it will become part of an artifact"),
     ("spark_dust", "火の粉の粉", "Spark Dust",
      "火の粉蛾の翅から落ちた粉。火薬の代わりに花火に使える",

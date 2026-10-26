@@ -20,7 +20,7 @@
   "item.skyabyss.abyss_pulse_dagger.desc": "同じ敵を続けて刺すと拍が数えられ、4 度目ごと（+5 から 3 度目ごと）に追い打ちの拍が入り、体力が少し戻る",
   "item.skyabyss.abyss_surveyor_plumb.desc": "装飾の枠に付けていると、深いほど与える傷が増える（深淵では深さ 40 ごとに +1%、最大 +12%。地上では y 64 から 16 下がるごとに +1%、最大 +8%）。落下の傷 −30%",
   "item.skyabyss.abyss_anchor_iron.desc": "深淵の底から上がってきた、重く冷たい鉄。深淵の装備を鍛え、直す",
-  "item.skyabyss.abyss_core.desc": "心臓の番人の胸に残っていた、まだ脈を打つ核。アーティファクトの材料",
+  "item.skyabyss.abyss_core.desc": "心臓の番人の胸に残っていた、まだ脈を打つ核。伝説の装備の材料",
   "item.skyabyss.resonance_shard_abyss.desc": "深淵の共鳴の欠片。深淵の専用の逸品との交換に 30 個。心臓の番人・層の主が落とし、深淵のヒロイックの品を分解しても得られる",
   "item.skyabyss.abyss_diver_helmet.story": "「灯りは額に。目は闇に慣らすな。」",
   "item.skyabyss.abyss_diver_chestplate.story": "「重いのは鎧ではない。帰り道だ。」",
