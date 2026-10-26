@@ -1,4 +1,7 @@
 {
+  "gear.skyabyss.affix_range": "（%s〜%s）",
+  "gear.skyabyss.affix_shift_hint": "Shift: 特性の出来",
+  "gui.skyabyss.forge.sockets_of": "穴 %1$s/%2$s（最大 %3$s）",
   "gear.skyabyss.origin.island_shrine": "島の祠の品",
   "gear.skyabyss.origin_weapon.island_shrine": "島の祠の武器",
   "item.skyabyss.whale_hammer.desc": "岩鯨の背の石を打ち固めた鎚。",

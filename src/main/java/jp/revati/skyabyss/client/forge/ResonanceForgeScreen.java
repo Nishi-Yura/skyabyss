@@ -481,7 +481,8 @@ public class ResonanceForgeScreen extends AbstractContainerScreen<ResonanceForge
                         minecraft.player.isCreative() || crystals >= jp.revati.skyabyss.item.extra.GearFreedom.IMPRINT_CRYSTALS ? OK : LACK, false);
             }
             case SOCKET -> {
-                g.drawString(font, Component.translatable("gui.skyabyss.forge.sockets", ex.gems().size(), ex.sockets()), x, 40, TEXT, false);
+                g.drawString(font, Component.translatable("gui.skyabyss.forge.sockets_of", ex.gems().size(), ex.sockets(),
+                        jp.revati.skyabyss.item.extra.GearFreedom.maxSockets(gear)), x, 40, TEXT, false);
                 for (int i = 0; i < ex.sockets(); i++) {
                     int y = SOCKET_ROW_Y + i * SOCKET_ROW_STEP;
                     if (i < ex.gems().size()) {
@@ -506,7 +507,8 @@ public class ResonanceForgeScreen extends AbstractContainerScreen<ResonanceForge
                     hint = Component.translatable(ex.gems().size() >= ex.sockets() ? "gui.skyabyss.forge.insert_full" : "gui.skyabyss.forge.insert_dup");
                     color = LACK;
                 }
-                drawWrapped(g, hint, x, 80, 132, 2, color);
+                // 穴が三つのときは三つ目の行の下へ
+                drawWrapped(g, hint, x, Math.max(80, SOCKET_ROW_Y + ex.sockets() * SOCKET_ROW_STEP + 2), 132, 2, color);
                 if (jp.revati.skyabyss.item.extra.GearFreedom.canAddSocket(gear)) {
                     int need = ForgeRules.addSocketMaterial(gear);
                     Item shard = ForgeRules.shardItem(gear);
@@ -544,7 +546,7 @@ public class ResonanceForgeScreen extends AbstractContainerScreen<ResonanceForge
             return;
         }
         for (Affix a : AffixRules.affixes(gear)) {
-            drawWrapped(g, AffixRules.line(a), INFO_X - 4, y, 98, 1, TEXT);
+            drawWrapped(g, AffixRules.line(a, AffixRules.wide(gear)), INFO_X - 4, y, 98, 1, TEXT);
             y += 10;
         }
     }

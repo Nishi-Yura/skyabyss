@@ -282,4 +282,38 @@ public final class AffixRules {
         return Component.literal(" ◇ ").withStyle(s -> s.withColor(MARK_COLOR))
                 .append(describe(affix).withStyle(s -> s.withColor(LINE_COLOR)));
     }
+
+    // 画面で Shift を押しているか (手元が入れる。サーバーでは false のまま)。押していれば特性の出来を添える
+    public static java.util.function.BooleanSupplier showRoll = () -> false;
+
+    // 特性の出来: その階級の幅 (最小〜最大) の中のどこか。0 = 最小、100 = 最大 (2026-10-26 の声「トレードで役に立つ」)
+    public static int rollPercent(Affix affix, boolean wide) {
+        AffixType t = affix.kind();
+        if (t == null) {
+            return 0;
+        }
+        double min = t.min(wide);
+        double max = t.max(wide);
+        if (max - min < 1e-9) {
+            return 100;
+        }
+        return (int) Math.round(Math.max(0, Math.min(1, (affix.value() - min) / (max - min))) * 100);
+    }
+
+    public static int rollColor(int pct) {
+        return pct >= 100 ? 0x7FE8FF : pct >= 67 ? 0x8FE08F : pct >= 34 ? 0xE8D27A : 0xD08A7A;
+    }
+
+    // 階級の幅つきの一行。Shift を押しているあいだは「 ◇ 攻撃速度 +7%  75%（5〜9）」
+    public static MutableComponent line(Affix affix, boolean wide) {
+        MutableComponent out = line(affix);
+        AffixType t = affix.kind();
+        if (t != null && showRoll.getAsBoolean()) {
+            int pct = rollPercent(affix, wide);
+            out.append(Component.literal("  " + pct + "%").withStyle(s -> s.withColor(rollColor(pct))))
+                    .append(Component.translatable("gear.skyabyss.affix_range", number(t, t.min(wide)), number(t, t.max(wide)))
+                            .withStyle(s -> s.withColor(0x7C8794)));
+        }
+        return out;
+    }
 }

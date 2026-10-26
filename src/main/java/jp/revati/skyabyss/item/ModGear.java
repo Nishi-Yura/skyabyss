@@ -90,7 +90,10 @@ public interface ModGear {
                 tooltip.add(Component.translatable("gear.skyabyss.affix_unrolled").withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC));
             } else {
                 for (Affix affix : AffixRules.affixes(stack)) {
-                    tooltip.add(AffixRules.line(affix));
+                    tooltip.add(AffixRules.line(affix, tier.wideAffixes));
+                }
+                if (!AffixRules.affixes(stack).isEmpty() && !AffixRules.showRoll.getAsBoolean()) {
+                    tooltip.add(Component.translatable("gear.skyabyss.affix_shift_hint").withStyle(ChatFormatting.DARK_GRAY));
                 }
             }
             jp.revati.skyabyss.item.extra.GearFreedom.tooltip(stack, tooltip);

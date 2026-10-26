@@ -47,7 +47,8 @@ public class ResonanceForgeMenu extends AbstractContainerMenu {
     public static final int BUTTON_INSERT = 103;
     // 外す: 穴 0・1 (104・105)
     public static final int BUTTON_REMOVE = 104;
-    public static final int BUTTON_ADD_SOCKET = 106;
+    // 外す (BUTTON_REMOVE + 穴の番号 0〜2) と重ならないように
+    public static final int BUTTON_ADD_SOCKET = 108;
     public static final int GEAR_X = 44;
     public static final int GEAR_Y = 35;
     // 材料の枠 (欠片・ルーン・アスペクトの芯)

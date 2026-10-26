@@ -38,7 +38,7 @@ public final class GearFreedom {
     public static final int UNSOCKET_CRYSTALS = 1;
     // 穴を足す (打ち直し): 結晶 + 由来の巨神の素材。2 つ目のほうが高い
     public static final int ADD_SOCKET_CRYSTALS = 2;
-    public static final int[] ADD_SOCKET_MATERIAL = {8, 16};
+    public static final int[] ADD_SOCKET_MATERIAL = {8, 16, 24};
 
     public static final int TAG_COLOR = 0x8FD1C9;
     public static final int ASPECT_COLOR = 0xF2D78A;
@@ -88,10 +88,15 @@ public final class GearFreedom {
         for (int i = 0; i < odds.length; i++) {
             r -= odds[i];
             if (r < 0) {
-                return i;
+                return Math.min(i, tier.maxSockets());
             }
         }
         return 0;
+    }
+
+    // その装備に開けられる穴の数の上限 (階級で決まる)
+    public static int maxSockets(ItemStack stack) {
+        return stack.getItem() instanceof ModGear g ? Math.min(GearExtras.MAX_SOCKETS, g.tier().maxSockets()) : 0;
     }
 
     // 付いていなければ穴を抽選して付ける (新しい装備も古いセーブの装備も、手にしたときに一度)。付けたら true
@@ -156,7 +161,7 @@ public final class GearFreedom {
     }
 
     public static boolean canAddSocket(ItemStack stack) {
-        return eligible(stack) && sockets(stack) < GearExtras.MAX_SOCKETS;
+        return eligible(stack) && sockets(stack) < maxSockets(stack);
     }
 
     // 打ち直しで穴を足す (抽選の運に頼らず、必ず付けられる道)。費用は ForgeRules が払う

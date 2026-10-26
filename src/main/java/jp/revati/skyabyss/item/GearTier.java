@@ -62,6 +62,16 @@ public enum GearTier {
         return socketOdds.clone();
     }
 
+    // 穴 (サブ効果の欠片・ルーンを差す所) を開けられる数の上限 (2026-10-26 の声)。抽選も打ち直しもこの数まで
+    public int maxSockets() {
+        return switch (this) {
+            case COMMON, UNCOMMON -> 0;
+            case RARE -> 1;
+            case EPIC -> 2;
+            case HEROIC, ARTIFACT -> 3;
+        };
+    }
+
     public boolean atLeast(GearTier other) {
         return ordinal() >= other.ordinal();
     }

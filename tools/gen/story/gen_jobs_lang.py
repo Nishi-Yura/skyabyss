@@ -35,6 +35,10 @@ KV = {
     'gui.skyabyss.job_choice.switch': ('ほかの職の武器を持てば、いつでもその職になれる。', "Hold another job's weapon to switch to that job at any time."),
     'message.skyabyss.job.chosen': ('%sになった。%sを受け取った', 'You are now a %s. Received: %s'),
     'gui.skyabyss.job.tooltip': ('職: %s', 'Job: %s'),
+    # 特性の出来 (Shift) と穴の上限
+    'gear.skyabyss.affix_range': ('（%s〜%s）', ' (%s to %s)'),
+    'gear.skyabyss.affix_shift_hint': ('Shift: 特性の出来', 'Shift: roll quality'),
+    'gui.skyabyss.forge.sockets_of': ('穴 %1$s/%2$s（最大 %3$s）', 'Sockets %1$s/%2$s (max %3$s)'),
     'gear.skyabyss.origin.island_shrine': ('島の祠の品', 'From the island shrine'),
     'gear.skyabyss.origin_weapon.island_shrine': ('島の祠の武器', 'Island shrine weapon'),
     'message.skyabyss.job.lent': ('%sの始めの武器、%sを受け取った', "Received the %s's first weapon: %s"),

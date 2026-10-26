@@ -1,4 +1,7 @@
 {
+  "gear.skyabyss.affix_range": " (%s to %s)",
+  "gear.skyabyss.affix_shift_hint": "Shift: roll quality",
+  "gui.skyabyss.forge.sockets_of": "Sockets %1$s/%2$s (max %3$s)",
   "gear.skyabyss.origin.island_shrine": "From the island shrine",
   "gear.skyabyss.origin_weapon.island_shrine": "Island shrine weapon",
   "item.skyabyss.whale_hammer.desc": "A hammer of stone from the stone whale's back.",
