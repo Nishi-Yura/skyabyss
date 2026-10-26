@@ -280,8 +280,21 @@ public final class SkillManager {
         if (r <= 0 || !d.runeUsable(skill, r)) {
             return 0;
         }
-        // 逸品の書き換えは、その武器を持つあいだだけ
+        // 逸品の書き換えは、その武器を持つあいだだけ。番号は持っている武器の書き換えのもの (4 か 6)
+        if (r == 4) {
+            Rune held = Rune.heldLegend(skill, player);
+            return held == null ? 0 : held.index;
+        }
         return Rune.valid(skill, r) && Rune.heldOf(skill, r, player) ? r : 0;
+    }
+
+    // いま効いている伝説の書き換え (選んでいて、その武器を持っている。なければ null)
+    public static Rune legendRune(Player player, Skill skill) {
+        SkillData d = get(player);
+        if (d.rune(skill) != 4 || !d.runeUsable(skill, 4)) {
+            return null;
+        }
+        return Rune.heldLegend(skill, player);
     }
 
     public enum RuneResult {

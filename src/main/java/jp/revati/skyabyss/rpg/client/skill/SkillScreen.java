@@ -1214,8 +1214,8 @@ public class SkillScreen extends Screen implements jp.revati.skyabyss.client.ui.
 
     // 逸品の書き換えの行を出すか (その武器を主の手に持っているか、もう選んでいるとき)
     private boolean legendShown(SkillData d, Skill s) {
-        Rune legend = Rune.legendaryOf(s);
-        return legend != null && (legend.held(minecraft.player) || d.rune(s) == legend.index);
+        Rune legend = Rune.legendFor(s, minecraft.player);
+        return legend != null && (legend.held(minecraft.player) || d.rune(s) == 4);
     }
 
     // 狭い箱に名前を収める: 幅が足りなければ 0.7 倍まで縮め、それでも足りなければ「…」で切る (中心 cx、上端 y)
@@ -1287,23 +1287,23 @@ public class SkillScreen extends Screen implements jp.revati.skyabyss.client.ui.
         // 逸品の書き換え: 全幅の行 (その武器を持つあいだ)
         boolean legendRow = legendShown(d, s);
         if (legendRow) {
-            Rune r = Rune.legendaryOf(s);
+            Rune r = Rune.legendFor(s, minecraft.player);
             int ly = ry + 14;
-            boolean mine = current == r.index;
+            boolean mine = current == 4;
             boolean usable = available && r.held(minecraft.player);
             boolean hover = in(mx, my, x, ly, w - 4, 12) && usable;
-            g.fill(x, ly, x + w - 4, ly + 12, mine ? 0xFF000000 | GOLD : runeArmed == r.index ? 0xFF000000 | DENY : usable ? 0xFF9A7A2E : 0xFF2A2E38);
+            g.fill(x, ly, x + w - 4, ly + 12, mine ? 0xFF000000 | GOLD : runeArmed == 4 ? 0xFF000000 | DENY : usable ? 0xFF9A7A2E : 0xFF2A2E38);
             g.fill(x + 1, ly + 1, x + w - 5, ly + 11, mine ? 0xFF2A3A40 : hover ? 0xFF2E2A20 : 0xFF1C1A16);
             Component name = Component.translatable("gui.skyabyss.skill.rune_legend", Component.translatable(r.nameKey()));
             g.drawString(font, name, x + (w - 4 - font.width(name)) / 2, ly + 2, mine ? GOLD : usable ? 0xF2D78A : DIM, false);
-            runeRows.add(new int[] {x, ly, w - 4, 12, r.index});
+            runeRows.add(new int[] {x, ly, w - 4, 12, 4});
             if (hover) {
-                hoverRune = r.index;
+                hoverRune = 4;
             }
         }
         // 見ている (選んでいる) 刻印の効果
         int shown = hoverRune != 0 ? hoverRune : current;
-        Rune shownRune = shown == 0 ? null : Rune.of(s, shown);
+        Rune shownRune = shown == 0 ? null : shown == 4 ? Rune.legendFor(s, minecraft.player) : Rune.of(s, shown);
         int ty = ry + (legendRow ? 28 : 14);
         if (shown == Rune.MASTERY) {
             for (FormattedCharSequence line : TextWrap.split(font, Component.translatable("rune.skyabyss.mastery.effect", SkillRules.MASTERY_RUNE_LEVEL,

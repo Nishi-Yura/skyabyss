@@ -58,17 +58,23 @@ final class BuildsSelfTest {
         SkillData d = SkillManager.get(p);
         d.bonusPoints = 60;
         d.calling = "";
-        // 書き換えは 12 つ (従来 8 + 深淵のアーティファクト 4。abyss/AbyssSelfTest)。武器の品は実在し、書き換える技は使う技
+        // 書き換えは 32 (従来 8 + 深淵のアーティファクト 4 + 巨神ごとの 6 職の伝説 20)。武器の品は実在し、書き換える技は使う技。同じ武器に二つはない
         int count = 0;
         for (Rune r : Rune.values()) {
             if (!r.legendary()) {
                 continue;
             }
             count++;
-            check(f, r.index == 4 && r.skill.active && !legendStack(r.weapon).isEmpty(), "legendary rune " + r.id + " points at nothing");
+            check(f, (r.index == 4 || r.index == 6) && r.skill.active && !legendStack(r.weapon).isEmpty(), "legendary rune " + r.id + " points at nothing");
             check(f, Rune.of(r.skill).stream().noneMatch(Rune::legendary), "ordinary rune list holds a legendary rune for " + r.skill.id);
         }
-        check(f, count == 12, "legendary rune count is " + count);
+        check(f, count == 32, "legendary rune count is " + count);
+        java.util.Set<String> weapons = new java.util.HashSet<>();
+        for (Rune r : Rune.values()) {
+            if (r.legendary()) {
+                check(f, weapons.add(r.weapon), "two legendary rewrites on the weapon " + r.weapon);
+            }
+        }
         // 持っていなければ選べない・持てば選べる・外せば効かない (記録には残る)
         SkillManager.forceRank(p, Skill.TITAN_CLEAVE, 3);
         SkillManager.forceRank(p, Skill.LUNGE, 2);
@@ -103,7 +109,57 @@ final class BuildsSelfTest {
         check(f, SkillManager.cast(p, 0) == SkillManager.CastResult.OK && d.temperUntil > level.getGameTime(), "the poker temper did not work");
         SkillEffects.clear();
         abyssLegends(p, f);
+        titanLegends(p, f);
         SkillManager.forgetAll(p);
+    }
+
+    // 巨神ごとの 6 職の伝説 (20)。持てばその書き換えが効き (番号は 4 か 6)、同じ技の別の伝説を持てばそちらに替わる。技を出せる
+    private static void titanLegends(FakePlayer p, List<String> f) {
+        SkillData d = SkillManager.get(p);
+        ServerLevel level = p.serverLevel();
+        net.minecraft.world.entity.monster.Zombie foe = new net.minecraft.world.entity.monster.Zombie(net.minecraft.world.entity.EntityType.ZOMBIE, level);
+        int cast = 0;
+        for (Rune r : Rune.values()) {
+            if (!r.legendary() || !jp.revati.skyabyss.abyss.LegendGear.legendIds().contains(jp.revati.skyabyss.SkyAbyss.MODID + ":" + r.weapon)) {
+                continue;
+            }
+            SkillManager.forceRank(p, r.skill, r.skill.maxRank);
+            d.runes.put(r.skill.id, 4);
+            p.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, legendStack(r.weapon));
+            check(f, SkillManager.runeOf(p, r.skill) == r.index && SkillManager.legendRune(p, r.skill) == r, "the rewrite " + r.id + " does not follow its weapon");
+            foe.moveTo(p.getX(), p.getY(), p.getZ() + 2.5, 0, 0);
+            if (level.getEntity(foe.getUUID()) == null) {
+                level.addFreshEntity(foe);
+            }
+            foe.setHealth(foe.getMaxHealth());
+            p.setYRot(0);
+            p.setXRot(10);
+            p.setOnGround(true);
+            d.mana = 100;
+            d.cooldowns.clear();
+            d.globalCooldown = 0;
+            d.slots[0] = r.skill.id;
+            try {
+                if (SkillManager.cast(p, 0) == SkillManager.CastResult.OK) {
+                    cast++;
+                } else {
+                    String why = SkillActions.perform(p, r.skill, r.skill.maxRank);
+                    jp.revati.skyabyss.SkyAbyss.LOGGER.info("SELFTEST builds note: rewrite {} on {} not cast: {}", r.id, r.skill.id, why);
+                }
+            } catch (RuntimeException e) {
+                f.add("the rewrite " + r.id + " crashed: " + e);
+            }
+            SkillEffects.clear();
+        }
+        check(f, cast == 20, "only " + cast + " of 20 titan legend rewrites could be cast");
+        // 同じ技の二つの書き換え: 持っている武器のほうが効く (巨神斬り = 奈落断ち 4 / 雷断ち 6)
+        d.runes.put(Skill.TITAN_CLEAVE.id, 4);
+        p.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, legendStack("abyss_greatsword"));
+        boolean abyss = SkillManager.runeOf(p, Skill.TITAN_CLEAVE) == 4;
+        p.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, legendStack("abyss_storm_sword"));
+        check(f, abyss && SkillManager.runeOf(p, Skill.TITAN_CLEAVE) == 6 && SkillManager.legendRune(p, Skill.TITAN_CLEAVE) == Rune.STORM_CLEAVE,
+                "two rewrites of one skill do not follow the held weapon");
+        foe.discard();
     }
 
     // 深淵の心臓の四つのアーティファクト (灰喰い・雷淵・沈み鐘・底なし)。持つと、その一つの書き換えだけが選べて、書き換えた技が出る

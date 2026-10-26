@@ -60,7 +60,29 @@ public enum Rune {
     ABYSS_CLEAVE("abyss_cleave", Skill.TITAN_CLEAVE, 4, "abyss_greatsword"),
     SUNK_SONG("sunk_song", Skill.WARD_SONG, 4, "abyss_bell_staff"),
     SKY_FALL("sky_fall", Skill.CLOUD_PIERCE, 4, "abyss_storm_bow"),
-    CREEPING_ASH("creeping_ash", Skill.ASH_SCATTER, 4, "abyss_ash_scythe");
+    CREEPING_ASH("creeping_ash", Skill.ASH_SCATTER, 4, "abyss_ash_scythe"),
+    // ---- 巨神ごとの 6 職の伝説 (abyss/LegendGear の 20 本。2026-10-27)。技の中身はそのままに、巨神の色の上乗せが続く (rpg/skill/LegendRewrites)。
+    // 書き換えのない技は 4、すでに書き換えのある技は 6 (その武器を持っているほうが効く。選ぶ番号は 4 のまま)
+    TIDE_WALL("tide_wall", Skill.SHIELD_RUSH, 4, "abyss_tide_sword"),
+    STORM_CLEAVE("storm_cleave", Skill.TITAN_CLEAVE, 6, "abyss_storm_sword"),
+    EMBER_SWEEP("ember_sweep", Skill.WHALE_SWEEP, 6, "abyss_ember_sword"),
+    WHALE_STOMP("whale_stomp", Skill.FORGE_STOMP, 4, "abyss_whale_hammer"),
+    TIDE_HAMMER("tide_hammer", Skill.EMBER_HAMMER, 6, "abyss_tide_hammer"),
+    STORM_ASH("storm_ash", Skill.ASH_SCATTER, 6, "abyss_storm_hammer"),
+    STORM_BOLT("storm_bolt", Skill.THUNDER_BOLT, 4, "abyss_storm_staff"),
+    SPLIT_EMBER("split_ember", Skill.EMBER_ORB, 4, "abyss_ember_staff"),
+    HIGH_TIDE("high_tide", Skill.FROST_TIDE, 4, "abyss_tide_staff"),
+    STONE_DOUBLE("stone_double", Skill.BLINK, 4, "abyss_whale_staff"),
+    WHALE_CAGE("whale_cage", Skill.BONE_TRAP, 4, "abyss_whale_bow"),
+    TIDE_RAIN("tide_rain", Skill.SKY_RAIN, 4, "abyss_tide_bow"),
+    FIRE_LEAP("fire_leap", Skill.ARCHER_LEAP, 4, "abyss_ember_bow"),
+    TIDE_VEIL("tide_veil", Skill.MIST_VEIL, 4, "abyss_tide_dagger"),
+    WHALE_FANG("whale_fang", Skill.LUNGE, 6, "abyss_whale_fang"),
+    STORM_MARK("storm_mark", Skill.BACKSTEP, 6, "abyss_storm_dagger"),
+    EMBER_REND("ember_rend", Skill.WIND_REND, 6, "abyss_ember_dagger"),
+    ROCK_SONG("rock_song", Skill.CYCLE_SONG, 4, "abyss_whale_bell_staff"),
+    STORM_CURSE("storm_curse", Skill.CURSE_MARK, 4, "abyss_storm_bell_staff"),
+    EMBER_LAMP("ember_lamp", Skill.LAMP_CHARM, 4, "abyss_ember_bell_staff");
 
     // 熟練 3 で開く 4 つ目の刻印 (熟練の刻印)。どの使う技にもあり、番号は 5 (4 は逸品の書き換え)。docs/design/31 の A13
     public static final int MASTERY = 5;
@@ -69,10 +91,29 @@ public enum Rune {
         return of(skill, index) != null || index == MASTERY && skill.active;
     }
 
-    // その刻印を今選べる手の状態か (熟練の刻印は常に。逸品の書き換えは武器を持っているとき)
+    // その刻印を今選べる手の状態か (熟練の刻印は常に。逸品の書き換えはその技のどれかの書き換えの武器を持っているとき)
     public static boolean heldOf(Skill skill, int index, net.minecraft.world.entity.player.Player player) {
+        if (index == 4) {
+            return heldLegend(skill, player) != null;
+        }
         Rune r = of(skill, index);
         return r == null ? index == MASTERY : r.held(player);
+    }
+
+    // その技の書き換えのうち、いま持っている (刻んだ) 武器のもの。一つの技に書き換えの武器が二つあっても、持っているほうが効く
+    public static Rune heldLegend(Skill skill, net.minecraft.world.entity.player.Player player) {
+        for (Rune r : values()) {
+            if (r.skill == skill && r.legendary() && r.held(player)) {
+                return r;
+            }
+        }
+        return null;
+    }
+
+    // 画面に出す書き換え: 持っているものがあればそれ、なければその技の最初の書き換え
+    public static Rune legendFor(Skill skill, net.minecraft.world.entity.player.Player player) {
+        Rune held = player == null ? null : heldLegend(skill, player);
+        return held != null ? held : legendaryOf(skill);
     }
 
     public final String id;

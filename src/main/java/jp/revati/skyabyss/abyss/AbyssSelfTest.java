@@ -318,16 +318,16 @@ public final class AbyssSelfTest {
         check(ids.equals(new HashSet<>(AbyssSetup.legends())), "legends() differs from legendOf()");
         check(AbyssLoot.titanOf("whale").equals(Titans.STONE_WHALE) && AbyssLoot.titanOf("tide").equals(Titans.TIDE_SHELL)
                 && AbyssLoot.titanOf("storm").equals(Titans.THUNDER_WING) && AbyssLoot.titanOf("ember").equals(Titans.EMBER), "theme -> titan mapping");
-        // 12 の書き換え (従来 8 + 深淵 4)。同じ技に二つはない
+        // 32 の書き換え (従来 8 + 深淵 4 + 巨神ごとの 6 職の伝説 20)。同じ武器に二つはない (同じ技に二つは、持っている武器のほうが効く)
         int legends = 0;
-        Set<Skill> skills = new HashSet<>();
+        Set<String> weapons = new HashSet<>();
         for (Rune r : Rune.values()) {
             if (r.legendary()) {
                 legends++;
-                check(skills.add(r.skill), "two legendary rewrites on " + r.skill.id);
+                check(weapons.add(r.weapon), "two legendary rewrites on " + r.weapon);
             }
         }
-        check(legends == 12, "legendary rewrites: " + legends + " (expected 12)");
+        check(legends == 32, "legendary rewrites: " + legends + " (expected 32)");
         // 抽選: 天井 (LEGEND_PITY 回続けて出なければ保証)・確率・重複は欠片へ
         RandomSource rng = RandomSource.create(4242);
         int rolls = 20000;

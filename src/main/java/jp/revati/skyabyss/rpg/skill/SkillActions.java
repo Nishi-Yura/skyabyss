@@ -106,6 +106,16 @@ public final class SkillActions {
         if (mutation != null) {
             return ExtActions.mutated(player, mutation, rank);
         }
+        Vec3 from = player.position();
+        String failure = base(player, skill, rank);
+        if (failure == null) {
+            // 伝説の書き換え (巨神の色の上乗せ。rpg/skill/LegendRewrites)
+            LegendRewrites.after(player, skill, rank, from);
+        }
+        return failure;
+    }
+
+    private static String base(ServerPlayer player, Skill skill, int rank) {
         return switch (skill) {
             case TITAN_CLEAVE -> cleave(player, rank);
             case ROCK_CALL -> rockCall(player, rank);
