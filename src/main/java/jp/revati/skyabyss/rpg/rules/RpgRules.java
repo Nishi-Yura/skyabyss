@@ -211,6 +211,28 @@ public final class RpgRules {
         }
     }
 
+    // ---------------------------------------------------------------- バニラの敵は湧かない (2026-10-26 の声「通常モブはもう出ないようにして。全敵 mod の敵」)
+    // 決まりが入っていれば、バニラの敵 (ゾンビ・骸骨・クリーパー・ファントム・略奪隊…) とさまよう商人は、自然・巡回・湧き台・構造物・増援では湧かない。
+    // 牛や羊などの動物はそのまま。Mod が場面のために呼ぶ物 (EVENT・COMMAND) は止めない (島の野盗などは Mod の敵へ置き換えていく)
+    static final java.util.Set<net.minecraft.world.entity.MobSpawnType> NATURAL_KINDS = java.util.EnumSet.of(
+            net.minecraft.world.entity.MobSpawnType.NATURAL, net.minecraft.world.entity.MobSpawnType.CHUNK_GENERATION,
+            net.minecraft.world.entity.MobSpawnType.PATROL, net.minecraft.world.entity.MobSpawnType.SPAWNER,
+            net.minecraft.world.entity.MobSpawnType.STRUCTURE, net.minecraft.world.entity.MobSpawnType.REINFORCEMENT,
+            net.minecraft.world.entity.MobSpawnType.JOCKEY, net.minecraft.world.entity.MobSpawnType.TRIAL_SPAWNER);
+
+    public static boolean vanillaEnemy(net.minecraft.world.entity.Entity e) {
+        return net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE.getKey(e.getType()).getNamespace().equals("minecraft")
+                && (e instanceof net.minecraft.world.entity.monster.Enemy || e instanceof net.minecraft.world.entity.npc.WanderingTrader);
+    }
+
+    @SubscribeEvent
+    static void onFinalizeSpawn(net.neoforged.neoforge.event.entity.living.FinalizeSpawnEvent event) {
+        if (event.getLevel().getLevel() instanceof ServerLevel level && adventure(level) && NATURAL_KINDS.contains(event.getSpawnType())
+                && vanillaEnemy(event.getEntity())) {
+            event.setSpawnCancelled(true);
+        }
+    }
+
     // 敵もブロックを壊さない・持ち去らない (エンダーマン・ラヴェジャー・ゾンビの戸破り…)
     @SubscribeEvent
     static void onGriefing(net.neoforged.neoforge.event.entity.EntityMobGriefingEvent event) {

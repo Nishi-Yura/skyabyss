@@ -9,7 +9,8 @@
     "ItemStackDurabilityMixin",
     "ServerPlaceRecipeMixin",
     "FallingBlockMixin",
-    "RecipeManagerMixin"
+    "RecipeManagerMixin",
+    "AdvancementManagerMixin"
   ],
   "client": [
     "GuiGraphicsMixin",
