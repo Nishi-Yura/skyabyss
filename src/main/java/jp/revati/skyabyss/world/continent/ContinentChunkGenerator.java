@@ -264,6 +264,24 @@ public final class ContinentChunkGenerator extends ChunkGenerator {
         return out;
     }
 
+    // その場所の道の上面 (道でなければ null)。建物の地均し (opening/site/SiteJob) が、道の上を草で塗らないために使う
+    public static BlockState roadAt(int x, int z) {
+        return road(roadSegments(x & ~15, z & ~15), x, z);
+    }
+
+    // 道の芯からの距離 (道が無ければ大きな値)。置き物を道から離すのに使う
+    static double roadDistance(List<int[]> segs, int x, int z) {
+        double best = 1e9;
+        for (int[] g : segs) {
+            double dx = g[2] - g[0];
+            double dz = g[3] - g[1];
+            double len2 = dx * dx + dz * dz;
+            double u = len2 == 0 ? 0 : Math.max(0, Math.min(1, ((x - g[0]) * dx + (z - g[1]) * dz) / len2));
+            best = Math.min(best, Math.hypot(x - (g[0] + u * dx), z - (g[1] + u * dz)));
+        }
+        return best;
+    }
+
     // 道の上面の石 (道でなければ null)。幅を少し揺らす
     static BlockState road(List<int[]> segs, int x, int z) {
         if (segs.isEmpty()) {

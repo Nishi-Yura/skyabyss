@@ -53,7 +53,9 @@ public final class ContinentLayout {
         for (Map.Entry<String, JsonElement> e : o.getAsJsonObject("sites").entrySet()) {
             sites.put(e.getKey(), pos(e.getValue().getAsJsonArray()));
         }
-        lines(o.getAsJsonArray("roads"), roads);
+        List<List<BlockPos>> raw = new ArrayList<>();
+        lines(o.getAsJsonArray("roads"), raw);
+        roads.addAll(toGates(raw));
         lines(o.getAsJsonArray("ferries"), ferries);
         if (o.has("ferry_docks")) {
             lines(o.getAsJsonArray("ferry_docks"), ferryDocks);
@@ -85,6 +87,79 @@ public final class ContinentLayout {
                 levels.put(e.getKey(), new Level(a.get(0).getAsString(), pos(a.get(1).getAsJsonArray())));
             }
         }
+    }
+
+    // 町と都の門 (2026-10-27 の声「道が町とつながってない」): 図の道は町の真ん中を通るが、町は均した台に建ち、門は十字の四方 (町は芯から 55、都は 100)。
+    // 道を町の手前 (APPROACH。均す輪の外) で切り、いちばん近い門の向きへ: 輪の外の点 → 門の前 の二点を足す。町を抜けて続く道は二本に分かれる
+    static final int TOWN_GATE = 56;
+    static final int TOWN_APPROACH = 92;
+    static final int CAPITAL_GATE = 101;
+    static final int CAPITAL_APPROACH = 156;
+
+    private record Zone(BlockPos c, int gate, int approach) {
+        boolean inside(BlockPos p) {
+            return Math.max(Math.abs(p.getX() - c.getX()), Math.abs(p.getZ() - c.getZ())) < approach;
+        }
+
+        // p の向きにいちばん近い門の、輪の外の点と門の前の点
+        BlockPos[] gateFor(BlockPos p) {
+            int dx = p.getX() - c.getX();
+            int dz = p.getZ() - c.getZ();
+            int sx = 0;
+            int sz = 0;
+            if (Math.abs(dx) >= Math.abs(dz)) {
+                sx = dx >= 0 ? 1 : -1;
+            } else {
+                sz = dz >= 0 ? 1 : -1;
+            }
+            return new BlockPos[] {c.offset(sx * approach, 0, sz * approach), c.offset(sx * gate, 0, sz * gate)};
+        }
+    }
+
+    private List<List<BlockPos>> toGates(List<List<BlockPos>> raw) {
+        List<Zone> zones = new ArrayList<>();
+        zones.add(new Zone(capital, CAPITAL_GATE, CAPITAL_APPROACH));
+        for (BlockPos t : towns.values()) {
+            zones.add(new Zone(t, TOWN_GATE, TOWN_APPROACH));
+        }
+        List<List<BlockPos>> out = new ArrayList<>();
+        for (List<BlockPos> line : raw) {
+            List<BlockPos> cur = new ArrayList<>();
+            Zone lastZone = null;
+            for (BlockPos p : line) {
+                Zone z = null;
+                for (Zone zz : zones) {
+                    if (zz.inside(p)) {
+                        z = zz;
+                        break;
+                    }
+                }
+                if (z != null) {
+                    lastZone = z;
+                    if (!cur.isEmpty()) {
+                        // 町へ入る: 門へ向けて閉じる
+                        BlockPos[] g = z.gateFor(cur.get(cur.size() - 1));
+                        cur.add(g[0]);
+                        cur.add(g[1]);
+                        out.add(List.copyOf(cur));
+                        cur = new ArrayList<>();
+                    }
+                    continue;
+                }
+                if (cur.isEmpty() && lastZone != null) {
+                    // 町から出る: 門から始める
+                    BlockPos[] g = lastZone.gateFor(p);
+                    cur.add(g[1]);
+                    cur.add(g[0]);
+                }
+                cur.add(p);
+                lastZone = null;
+            }
+            if (cur.size() >= 2) {
+                out.add(List.copyOf(cur));
+            }
+        }
+        return out;
     }
 
     private static BlockPos pos(JsonArray a) {

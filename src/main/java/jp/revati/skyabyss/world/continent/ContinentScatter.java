@@ -91,6 +91,7 @@ final class ContinentScatter {
         ContinentMap map = ContinentMap.get();
         int x0 = chunk.getPos().getMinBlockX();
         int z0 = chunk.getPos().getMinBlockZ();
+        clearRoad(level, ContinentChunkGenerator.roadSegments(x0, z0), x0, z0);
         if (kept(x0 + 8, z0 + 8) || nearIslandRoad(x0 + 8, z0 + 8)) {
             return;
         }
@@ -157,16 +158,77 @@ final class ContinentScatter {
         }
     }
 
-    // 置き場 (チャンクの内側。端から 3 あける)。草か土の上で、道から離れた所。だめなら null
+    // 道の上を片付ける (2026-10-27 の声「道の上に人工物」「急に途切れる」): 雪の国で道に積もった雪 (バニラの凍り) と、道に生えた草花・木 (幹と葉ごと) を取る
+    static void clearRoad(WorldGenLevel level, List<int[]> roads, int x0, int z0) {
+        if (roads.isEmpty()) {
+            return;
+        }
+        BlockPos.MutableBlockPos m = new BlockPos.MutableBlockPos();
+        for (int dx = 0; dx < 16; dx++) {
+            for (int dz = 0; dz < 16; dz++) {
+                int x = x0 + dx;
+                int z = z0 + dz;
+                if (ContinentChunkGenerator.road(roads, x, z) == null) {
+                    continue;
+                }
+                int top = level.getHeight(Heightmap.Types.OCEAN_FLOOR_WG, x, z) - 1;
+                // 上から道の面 (土の道・荒れた土・砂利) を探し、その上の雪・草花・木を取る
+                for (int y = top; y > top - 24; y--) {
+                    BlockState s = level.getBlockState(m.set(x, y, z));
+                    if (s.is(Blocks.DIRT_PATH) || s.is(Blocks.COARSE_DIRT) || s.is(Blocks.GRAVEL)) {
+                        BlockState a = level.getBlockState(m.set(x, y + 1, z));
+                        if (a.is(net.minecraft.tags.BlockTags.LOGS)) {
+                            removeTree(level, m.immutable());
+                        } else if (!a.isAir() && a.getFluidState().isEmpty() && (a.canBeReplaced() || a.is(Blocks.SNOW))) {
+                            level.setBlock(m, Blocks.AIR.defaultBlockState(), 2);
+                            if (level.getBlockState(m.move(Direction.UP)).canBeReplaced() && level.getBlockState(m).getFluidState().isEmpty()) {
+                                level.setBlock(m, Blocks.AIR.defaultBlockState(), 2);
+                            }
+                        }
+                        break;
+                    }
+                    if (!s.isAir() && !s.is(Blocks.SNOW) && !s.canBeReplaced() && !s.is(net.minecraft.tags.BlockTags.LOGS) && !s.is(net.minecraft.tags.BlockTags.LEAVES)) {
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    // 道の上に生えた木を、つながった幹と葉ごと取る (幹の根から横 6・上 14 まで、多くて 400 個)
+    static void removeTree(WorldGenLevel level, BlockPos root) {
+        java.util.ArrayDeque<BlockPos> q = new java.util.ArrayDeque<>();
+        java.util.HashSet<Long> seen = new java.util.HashSet<>();
+        q.add(root);
+        seen.add(root.asLong());
+        int n = 0;
+        while (!q.isEmpty() && n < 400) {
+            BlockPos p = q.poll();
+            BlockState s = level.getBlockState(p);
+            if (!s.is(net.minecraft.tags.BlockTags.LOGS) && !s.is(net.minecraft.tags.BlockTags.LEAVES)) {
+                continue;
+            }
+            level.setBlock(p, Blocks.AIR.defaultBlockState(), 2);
+            n++;
+            for (Direction d : Direction.values()) {
+                BlockPos o = p.relative(d);
+                if (Math.abs(o.getX() - root.getX()) > 6 || Math.abs(o.getZ() - root.getZ()) > 6 || o.getY() < root.getY() || o.getY() > root.getY() + 14) {
+                    continue;
+                }
+                if (seen.add(o.asLong())) {
+                    q.add(o);
+                }
+            }
+        }
+    }
+
+    // 置き場 (チャンクの内側。端から 3 あける)。草か土の上で、道の縁から離れた所。だめなら null
     static BlockPos spot(WorldGenLevel level, RandomSource r, List<int[]> roads, int x0, int z0, int pad) {
         int x = x0 + pad + r.nextInt(16 - 2 * pad);
         int z = z0 + pad + r.nextInt(16 - 2 * pad);
-        for (int dx = -4; dx <= 4; dx += 4) {
-            for (int dz = -4; dz <= 4; dz += 4) {
-                if (ContinentChunkGenerator.road(roads, x + dx, z + dz) != null) {
-                    return null;
-                }
-            }
+        // 置き物の広がり (pad) と道の縁 (ROAD_EDGE + 揺らぎ) のあいだに 2 あける
+        if (ContinentChunkGenerator.roadDistance(roads, x, z) < ContinentChunkGenerator.ROAD_EDGE + 1.0 + pad + 2) {
+            return null;
         }
         int y = level.getHeight(Heightmap.Types.WORLD_SURFACE_WG, x, z) - 1;
         BlockState top = level.getBlockState(new BlockPos(x, y, z));

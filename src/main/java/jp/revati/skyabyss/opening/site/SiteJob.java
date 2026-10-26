@@ -509,6 +509,20 @@ public final class SiteJob {
         }
     }
 
+    // 列の上面: 大陸の道の上なら道の石、それ以外は topState
+    private Boolean continent;
+
+    private BlockState roadTop(int x, int z) {
+        if (continent == null) {
+            continent = level.getChunkSource().getGenerator() instanceof jp.revati.skyabyss.world.continent.ContinentChunkGenerator;
+        }
+        if (!continent) {
+            return topState;
+        }
+        BlockState r = jp.revati.skyabyss.world.continent.ContinentChunkGenerator.roadAt(x, z);
+        return r == null ? topState : r;
+    }
+
     // ---------------------------------------------------------------- TERRAIN
     private void terrain(long deadline) {
         BlockPos.MutableBlockPos p = new BlockPos.MutableBlockPos();
@@ -546,18 +560,20 @@ public final class SiteJob {
                 // 変えない列 (輪の外、または変えない部品)。木だけ片付ける
                 clearAbove(p, x, z, g + 1, clear, false);
             } else {
+                // 大陸の道が通る列は、上面を道のままにする (町の台・見どころの輪で道が草に塗られて途切れない。2026-10-27)
+                BlockState top = roadTop(x, z);
                 if (target > g) {
                     for (int y = g + 1; y <= target; y++) {
-                        set(p.set(x, y, z), y == target ? topState : fillState);
+                        set(p.set(x, y, z), y == target ? top : fillState);
                     }
                 } else if (target < g) {
                     for (int y = g; y > target; y--) {
                         set(p.set(x, y, z), Blocks.AIR.defaultBlockState());
                     }
-                    set(p.set(x, target, z), topState);
-                } else if (in && !level.getBlockState(p.set(x, g, z)).equals(topState) && bp.level) {
+                    set(p.set(x, target, z), top);
+                } else if ((in || top != topState) && !level.getBlockState(p.set(x, g, z)).equals(top) && bp.level) {
                     // 同じ高さでも上面を揃える (部品の下は同じ地面に)
-                    set(p.set(x, g, z), topState);
+                    set(p.set(x, g, z), top);
                 }
                 clearAbove(p, x, z, Math.max(target, g) + 1, clear, true);
             }

@@ -1152,7 +1152,7 @@ def signposts(lay):
 
     def leave(name):
         # 節を出たところ (都は大きいので遠め。町は壁の外。跡地は整えた場所の外)
-        return 150 if name == 'capital' else 64 if name.startswith('town_') else 190
+        return 150 if name == 'capital' else 100 if name.startswith('town_') else 190
 
     def r10(v):
         return int(round(v / 10) * 10)
@@ -1206,6 +1206,46 @@ def signposts(lay):
     return out
 
 
+def keep_off_roads(items, lay):
+    """見どころを道から離す (2026-10-27 の声「道の上に人工物」)。道の芯から 道の縁 (4.2) + 見どころの半径 + 2 以上。
+    足りない物は、いちばん近い道の点から離れる向きへ 1 ずつ押す。道しるべは半径 2.5 で 8 以上"""
+    segs = [(a, b) for r in lay['roads'] for a, b in zip(r, r[1:])]
+
+    def nearest(x, z):
+        best = (1e9, 0.0, 0.0)
+        for (ax, az), (bx, bz) in segs:
+            dx, dz = bx - ax, bz - az
+            L = dx * dx + dz * dz
+            t = 0 if L == 0 else max(0, min(1, ((x - ax) * dx + (z - az) * dz) / L))
+            px, pz = ax + t * dx, az + t * dz
+            d = math.hypot(x - px, z - pz)
+            if d < best[0]:
+                best = (d, px, pz)
+        return best
+    moved = 0
+    for o in items:
+        if o['kind'] == 'signpost':
+            need = 8.0
+        else:
+            meta = json.load(open(os.path.join(OUT, 'poi_' + o['kind'] + '.json'), encoding='utf-8'))['meta']
+            need = max(abs(v) for v in meta['rect']) + 0.5 + 4.2 + 2
+        d, px, pz = nearest(o['x'], o['z'])
+        if d >= need:
+            continue
+        ux, uz = (o['x'] - px, o['z'] - pz) if d > 1e-6 else (1.0, 0.0)
+        n = math.hypot(ux, uz)
+        ux, uz = ux / n, uz / n
+        x, z = float(o['x']), float(o['z'])
+        for _ in range(60):
+            x += ux
+            z += uz
+            if nearest(x, z)[0] >= need:
+                break
+        o['x'], o['z'] = int(round(x)), int(round(z))
+        moved += 1
+    return moved
+
+
 # 伝承の碑 (見どころの由来を三行で。文は lang の sign.skyabyss.poi_<種類>.1〜3。ContinentPois が建てたあとに書く)
 TABLETS = {
     'titan_ribs': (0, 10), 'monastery': (0, 8), 'stone_circle': (0, 3), 'lighthouse': (2, 5), 'wind_gate': (0, 4),
@@ -1215,6 +1255,16 @@ TABLETS = {
 
 
 def main():
+    if '--fix-only' in sys.argv:
+        # 置き場はそのまま、道にかかる物だけ離す (手で直した置き場を作り直さない)
+        lay = json.load(open(os.path.join(CONT, 'layout.json'), encoding='utf-8'))
+        path = os.path.join(CONT, 'pois.json')
+        items = json.load(open(path, encoding='utf-8'))
+        n = keep_off_roads(items, lay)
+        with open(path, 'w', encoding='utf-8', newline='\n') as f:
+            json.dump(items, f, ensure_ascii=False, separators=(',', ':'))
+        print(n, 'pois moved off the roads')
+        return
     os.makedirs(OUT, exist_ok=True)
     rng = np.random.default_rng(5)
     for kind, fn in BUILDERS.items():
@@ -1236,7 +1286,9 @@ def main():
     lay, height, biome, reg = gc.build()
     pois = [(k, int(x), int(z)) for k, (x, z) in lay.get('fixed_pois', [])] + place(height, reg, lay)
     with open(os.path.join(CONT, 'pois.json'), 'w', encoding='utf-8', newline='\n') as f:
-        json.dump([{'kind': k, 'x': x, 'z': z} for k, x, z in pois] + signposts(lay), f, ensure_ascii=False, separators=(',', ':'))
+        items = [{'kind': k, 'x': x, 'z': z} for k, x, z in pois] + signposts(lay)
+        keep_off_roads(items, lay)
+        json.dump(items, f, ensure_ascii=False, separators=(',', ':'))
         f.write('\n')
     print(len(pois), 'pois placed')
 
