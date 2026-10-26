@@ -97,7 +97,7 @@ public final class AbyssGearSelfTest {
     private static void table(List<String> f) {
         check(f, TitanGearSets.get(AbyssGear.DUNGEON) == AbyssGear.SET, "abyss set is not registered in TitanGearSets");
         check(f, TitanGearSets.all().get(0) == TitanGearSets.STONE_WHALE, "stone whale should be the first gear set");
-        check(f, AbyssGear.SET.collection().size() == 10 && AbyssGear.SET.exclusives().equals(List.of(AbyssGear.ANCHOR, AbyssGear.DAGGER, AbyssGear.PLUMB)),
+        check(f, AbyssGear.SET.collection().size() == 13 && AbyssGear.SET.exclusives().equals(List.of(AbyssGear.ANCHOR, AbyssGear.DAGGER, AbyssGear.PLUMB)),
                 "abyss codex should hold 10 items with 3 exclusives: " + AbyssGear.SET.collection());
         for (String id : AbyssGear.SET.collection()) {
             check(f, TitanGearSet.registered(id), id + " is not registered");
@@ -369,9 +369,12 @@ public final class AbyssGearSelfTest {
 
     private static Map<String, String> lang(String locale, List<String> f) {
         Map<String, String> map = new java.util.HashMap<>();
-        JsonObject o = json("/assets/skyabyss_abyss_gear/lang/" + locale + ".json", f);
-        if (o != null) {
-            o.entrySet().forEach(e -> map.put(e.getKey(), e.getValue().getAsString()));
+        // 深淵の装備の言葉と、五章の職の武器 (abyss/LegendGear。主の言葉) の両方
+        for (String ns : List.of("skyabyss_abyss_gear", "skyabyss")) {
+            JsonObject o = json("/assets/" + ns + "/lang/" + locale + ".json", f);
+            if (o != null) {
+                o.entrySet().forEach(e -> map.put(e.getKey(), e.getValue().getAsString()));
+            }
         }
         return map;
     }

@@ -39,6 +39,7 @@ public final class LegendLoot {
         for (String id : AbyssSetup.legends()) {
             out.add(SkyAbyss.MODID + ":" + id);
         }
+        out.addAll(LegendGear.legendIds());
         return out;
     }
 

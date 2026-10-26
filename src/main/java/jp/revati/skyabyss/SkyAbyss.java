@@ -124,6 +124,7 @@ public class SkyAbyss {
         jp.revati.skyabyss.abyss.gear.AbyssGearSetup.register(modEventBus);
         jp.revati.skyabyss.rpg.skill.JobChoice.register(modEventBus);
         jp.revati.skyabyss.item.ChapterGear.register(modEventBus);
+        jp.revati.skyabyss.abyss.LegendGear.register(modEventBus);
         // 前の私の落とし物 (深淵の墓の遺品 12。docs/design/36 の 9 章)
         jp.revati.skyabyss.story.ch5.AbyssRelics.register(modEventBus);
         jp.revati.skyabyss.abyss.mobs.AbyssMobsBSetup.register(modEventBus);

@@ -627,7 +627,26 @@ for _item, _src, _label in (("shrine_staff", "abyss_bell_staff", "宿り木の�
                             ("tide_hammer", "smith_hammer", "潮殻の鎚: 振りかぶって打ち下ろす"),
                             ("storm_hammer", "smith_hammer", "雷の鎚: 振りかぶって打ち下ろす"),
                             ("ember_greatsword", "whalebone_greatsword", "熾火の大剣: 大きく薙ぎ、振り下ろす"),
-                            ("ember_dagger", "waterway_fang", "熾の短剣: 右上から左下へ、返して X、突き抜ける")):
+                            ("ember_dagger", "waterway_fang", "熾の短剣: 右上から左下へ、返して X、突き抜ける"),
+                            ("abyss_whale_hammer", "smith_hammer", "abyss_whale_hammer: 振りかぶって打ち下ろす"),
+                            ("abyss_whale_staff", "abyss_bell_staff", "abyss_whale_staff: 掲げて溜め、地を突く"),
+                            ("abyss_whale_fang", "waterway_fang", "abyss_whale_fang: 右上から左下へ、返して X、突き抜ける"),
+                            ("abyss_whale_bell_staff", "abyss_bell_staff", "abyss_whale_bell_staff: 掲げて溜め、地を突いて鐘を鳴らす"),
+                            ("abyss_tide_sword", "whalebone_greatsword", "abyss_tide_sword: 大きく薙ぎ、振り下ろす"),
+                            ("abyss_tide_hammer", "smith_hammer", "abyss_tide_hammer: 振りかぶって打ち下ろす"),
+                            ("abyss_tide_staff", "abyss_bell_staff", "abyss_tide_staff: 掲げて溜め、地を突く"),
+                            ("abyss_tide_dagger", "waterway_fang", "abyss_tide_dagger: 右上から左下へ、返して X、突き抜ける"),
+                            ("abyss_storm_sword", "whalebone_greatsword", "abyss_storm_sword: 大きく薙ぎ、振り下ろす"),
+                            ("abyss_storm_hammer", "smith_hammer", "abyss_storm_hammer: 振りかぶって打ち下ろす"),
+                            ("abyss_storm_staff", "abyss_bell_staff", "abyss_storm_staff: 掲げて溜め、地を突く"),
+                            ("abyss_storm_dagger", "waterway_fang", "abyss_storm_dagger: 右上から左下へ、返して X、突き抜ける"),
+                            ("abyss_storm_bell_staff", "abyss_bell_staff", "abyss_storm_bell_staff: 掲げて溜め、地を突いて鐘を鳴らす"),
+                            ("abyss_ember_sword", "whalebone_greatsword", "abyss_ember_sword: 大きく薙ぎ、振り下ろす"),
+                            ("abyss_ember_staff", "abyss_bell_staff", "abyss_ember_staff: 掲げて溜め、地を突く"),
+                            ("abyss_ember_dagger", "waterway_fang", "abyss_ember_dagger: 右上から左下へ、返して X、突き抜ける"),
+                            ("abyss_ember_bell_staff", "abyss_bell_staff", "abyss_ember_bell_staff: 掲げて溜め、地を突いて鐘を鳴らす"),
+                            ("abyss_lamp_staff", "abyss_bell_staff", "abyss_lamp_staff: 掲げて溜め、地を突く"),
+                            ("abyss_toll_bell_staff", "abyss_bell_staff", "abyss_toll_bell_staff: 掲げて溜め、地を突いて鐘を鳴らす")):
     W[_item] = _copy.deepcopy(W[_src])
     W[_item]["item"] = _item
     W[_item]["label"] = _label
@@ -753,7 +772,26 @@ def main():
                         ("ember_staff", "abyss_bell_staff"), ("ember_censer", "abyss_bell_staff"),
                         ("shrine_sword", "abyss_lamp_sword"), ("shrine_hammer", "smith_hammer"), ("whale_hammer", "smith_hammer"),
                         ("tide_hammer", "smith_hammer"), ("storm_hammer", "smith_hammer"), ("ember_greatsword", "whalebone_greatsword"),
-                        ("ember_dagger", "waterway_fang")):
+                        ("ember_dagger", "waterway_fang"),
+                        ("abyss_whale_hammer", "smith_hammer"),
+                        ("abyss_whale_staff", "abyss_bell_staff"),
+                        ("abyss_whale_fang", "waterway_fang"),
+                        ("abyss_whale_bell_staff", "abyss_bell_staff"),
+                        ("abyss_tide_sword", "whalebone_greatsword"),
+                        ("abyss_tide_hammer", "smith_hammer"),
+                        ("abyss_tide_staff", "abyss_bell_staff"),
+                        ("abyss_tide_dagger", "waterway_fang"),
+                        ("abyss_storm_sword", "whalebone_greatsword"),
+                        ("abyss_storm_hammer", "smith_hammer"),
+                        ("abyss_storm_staff", "abyss_bell_staff"),
+                        ("abyss_storm_dagger", "waterway_fang"),
+                        ("abyss_storm_bell_staff", "abyss_bell_staff"),
+                        ("abyss_ember_sword", "whalebone_greatsword"),
+                        ("abyss_ember_staff", "abyss_bell_staff"),
+                        ("abyss_ember_dagger", "waterway_fang"),
+                        ("abyss_ember_bell_staff", "abyss_bell_staff"),
+                        ("abyss_lamp_staff", "abyss_bell_staff"),
+                        ("abyss_toll_bell_staff", "abyss_bell_staff")):
         label = W[_item]["label"]
         W[_item] = _copy.deepcopy(W[_src])
         W[_item]["item"] = _item

@@ -21,7 +21,8 @@ public final class MoveSets {
             "abyss_ash_scythe", "abyss_lamp_sword", "abyss_sinking_anchor", "abyss_pulse_dagger", "thunder_wing_bow", "abyss_storm_bow", "coral_shield",
             "shrine_staff", "shrine_bell_staff", "shrine_dagger", "whale_staff", "whale_bell_staff", "tide_staff", "tide_bell_staff",
             "storm_staff", "storm_bell_staff", "ember_staff", "ember_censer", "whale_hammer", "tide_hammer", "storm_hammer", "ember_greatsword",
-            "ember_dagger", "shrine_sword", "shrine_hammer");
+            "ember_dagger", "shrine_sword", "shrine_hammer",
+            "abyss_whale_hammer", "abyss_whale_staff", "abyss_whale_fang", "abyss_whale_bell_staff", "abyss_tide_sword", "abyss_tide_hammer", "abyss_tide_staff", "abyss_tide_dagger", "abyss_storm_sword", "abyss_storm_hammer", "abyss_storm_staff", "abyss_storm_dagger", "abyss_storm_bell_staff", "abyss_ember_sword", "abyss_ember_staff", "abyss_ember_dagger", "abyss_ember_bell_staff", "abyss_lamp_staff", "abyss_toll_bell_staff");
 
     private static Map<String, MoveSet> all;
 

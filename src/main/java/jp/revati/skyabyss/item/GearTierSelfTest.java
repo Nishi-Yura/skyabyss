@@ -66,31 +66,31 @@ public final class GearTierSelfTest {
         row(1, R, "stone_whale_helmet", "stone_whale_chestplate", "stone_whale_leggings", "stone_whale_boots", "moss_talisman");
         row(1, E, "whalebone_greatsword", "resonance_charm", "whale_staff", "whale_bell_staff", "whale_hammer", "whale_bow");
         row(1, H, "captain_pike", "waterway_fang", "stone_whale_plating");
-        row(1, A, "abyss_greatsword");
+        row(1, A, "abyss_greatsword", "abyss_whale_hammer", "abyss_whale_staff", "abyss_whale_bow", "abyss_whale_fang", "abyss_whale_bell_staff");
         // 二章 潮殻
         row(2, C, "heartbeat_ward_tide_shell");
         row(2, U, "tide_wader_helmet", "tide_wader_chestplate", "tide_wader_leggings", "tide_wader_boots");
         row(2, R, "tide_shell_helmet", "tide_shell_chestplate", "tide_shell_leggings", "tide_shell_boots");
         row(2, E, "tide_shell_trident", "coral_shield", "tide_chime_charm", "tide_staff", "tide_bell_staff", "tide_hammer", "tide_bow");
         row(2, H, "tidecaller_claw", "coral_harpoon", "moontide_pearl");
-        row(2, A, "abyss_bell_staff");
+        row(2, A, "abyss_bell_staff", "abyss_tide_sword", "abyss_tide_hammer", "abyss_tide_staff", "abyss_tide_bow", "abyss_tide_dagger");
         // 三章 雷翼
         row(3, C, "heartbeat_ward_thunder_wing");
         row(3, U, "peak_crossing_helmet", "peak_crossing_chestplate", "peak_crossing_leggings", "peak_crossing_boots");
         row(3, R, "thunder_wing_helmet", "thunder_wing_chestplate", "thunder_wing_leggings", "thunder_wing_boots");
         row(3, E, "thunder_wing_bow", "storm_anklet", "storm_charm", "storm_staff", "storm_bell_staff", "storm_hammer");
         row(3, H, "raiju_claw", "warden_glaive", "storm_eye_feather");
-        row(3, A, "abyss_storm_bow");
+        row(3, A, "abyss_storm_bow", "abyss_storm_sword", "abyss_storm_hammer", "abyss_storm_staff", "abyss_storm_dagger", "abyss_storm_bell_staff");
         // 四章 余燼
         row(4, C, "heartbeat_ward_ember");
         row(4, U, "ash_walking_helmet", "ash_walking_chestplate", "ash_walking_leggings", "ash_walking_boots");
         row(4, R, "ember_helmet", "ember_chestplate", "ember_leggings", "ember_boots");
         row(4, E, "ember_war_axe", "ember_mantle", "kindling_charm", "ember_staff", "ember_censer", "ember_greatsword", "ember_bow", "ember_dagger");
         row(4, H, "smith_hammer", "thrall_poker", "ember_lantern");
-        row(4, A, "abyss_ash_scythe");
+        row(4, A, "abyss_ash_scythe", "abyss_ember_sword", "abyss_ember_staff", "abyss_ember_bow", "abyss_ember_dagger", "abyss_ember_bell_staff");
         // 五章 深淵
         row(5, R, "abyss_diver_helmet", "abyss_diver_chestplate", "abyss_diver_leggings", "abyss_diver_boots");
-        row(5, E, "abyss_lamp_sword", "abyss_pulse_listener", "abyss_lantern_charm");
+        row(5, E, "abyss_lamp_sword", "abyss_pulse_listener", "abyss_lantern_charm", "abyss_lamp_staff", "abyss_depth_bow", "abyss_toll_bell_staff");
         row(5, H, "abyss_sinking_anchor", "abyss_pulse_dagger", "abyss_surveyor_plumb");
     }
 
@@ -237,7 +237,7 @@ public final class GearTierSelfTest {
             case "abyss_sinking_anchor" -> AbyssGear.anchorDps(e);
             case "abyss_pulse_dagger" -> AbyssGear.daggerDps(e);
             case "whale_bow", "tide_bow", "ember_bow", "shrine_bow" -> ((jp.revati.skyabyss.item.ChapterBowItem) item(path)).dps(e) / RANGED;
-            default -> plain(path, e);
+            default -> item(path) instanceof jp.revati.skyabyss.item.ChapterBowItem b ? b.dps(e) / RANGED : plain(path, e);
         };
     }
 

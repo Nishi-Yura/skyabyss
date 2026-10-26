@@ -50,7 +50,27 @@ public enum WeaponKind {
             Map.entry("storm_staff", POKER), Map.entry("storm_bell_staff", POKER), Map.entry("ember_staff", POKER), Map.entry("ember_censer", POKER),
             // 職の章の武器と祠の始めの武器 (弓は WeaponClient が BowExtension で登録する)
             Map.entry("whale_hammer", HAMMER), Map.entry("tide_hammer", HAMMER), Map.entry("storm_hammer", HAMMER), Map.entry("ember_greatsword", GREATSWORD),
-            Map.entry("ember_dagger", FANG), Map.entry("shrine_sword", GREATSWORD), Map.entry("shrine_hammer", HAMMER));
+            Map.entry("ember_dagger", FANG), Map.entry("shrine_sword", GREATSWORD), Map.entry("shrine_hammer", HAMMER),
+            // 伝説の武器と五章の武器 (abyss/LegendGear)
+            Map.entry("abyss_whale_hammer", HAMMER),
+            Map.entry("abyss_whale_staff", POKER),
+            Map.entry("abyss_whale_fang", FANG),
+            Map.entry("abyss_whale_bell_staff", POKER),
+            Map.entry("abyss_tide_sword", GREATSWORD),
+            Map.entry("abyss_tide_hammer", HAMMER),
+            Map.entry("abyss_tide_staff", POKER),
+            Map.entry("abyss_tide_dagger", FANG),
+            Map.entry("abyss_storm_sword", GREATSWORD),
+            Map.entry("abyss_storm_hammer", HAMMER),
+            Map.entry("abyss_storm_staff", POKER),
+            Map.entry("abyss_storm_dagger", FANG),
+            Map.entry("abyss_storm_bell_staff", POKER),
+            Map.entry("abyss_ember_sword", GREATSWORD),
+            Map.entry("abyss_ember_staff", POKER),
+            Map.entry("abyss_ember_dagger", FANG),
+            Map.entry("abyss_ember_bell_staff", POKER),
+            Map.entry("abyss_lamp_staff", POKER),
+            Map.entry("abyss_toll_bell_staff", POKER));
 
     public static Iterable<Map.Entry<String, WeaponKind>> items() {
         return BY_ITEM.entrySet();

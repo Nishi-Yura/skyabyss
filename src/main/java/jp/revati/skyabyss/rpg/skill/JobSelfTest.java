@@ -210,7 +210,7 @@ public final class JobSelfTest {
             }
         }
         // 祠と一〜四章は 6 職すべてに専用の武器 (43 の 8 節)
-        for (String origin : List.of("island_shrine", "stone_whale", "tide_shell", "thunder_wing", "ember")) {
+        for (String origin : List.of("island_shrine", "stone_whale", "tide_shell", "thunder_wing", "ember", "abyss")) {
             java.util.EnumSet<Job> got = byOrigin.getOrDefault(origin, java.util.EnumSet.noneOf(Job.class));
             check(f, got.size() == Job.values().length, origin + " lacks weapons for " + java.util.EnumSet.complementOf(got));
         }

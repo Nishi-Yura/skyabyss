@@ -5,7 +5,8 @@
        (作り方: tools/rough/lowpoly/weapons/starter/build_starter.py ・ chapter_gear/build_gear.py)
 出力は install_lowpoly_abyss_weapons.py と同じ形 (弓は引き絵の段ごとのメッシュとモデル <id>_pulling_N)。持ち方は似た武器のモデルを写す。
 
-使い方: python tools/install/install_job_weapons.py [--option whale_bow=b ...]   (省くと全部 A 案。何度流してもよい)
+使い方: python tools/install/install_job_weapons.py [品 id ...] [--option whale_bow=b ...]   (省くと全部 A 案。何度流してもよい。
+       docs/review/roughs_one/raw/<id>/a がある品は一品一案のほうを入れる)
 """
 from __future__ import annotations
 import os as _os
@@ -38,6 +39,25 @@ ITEMS = {
     "ember_bow": ("roughs_jobgear", "rare", "thunder_wing_bow", 4),
     "ember_dagger": ("roughs_jobgear", "rare", "waterway_fang", 1),
 }
+# 伝説 20 本 (形の段 legend) と五章の 3 本 (rare)。abyss/LegendGear。作り方: tools/rough/lowpoly/weapons/legends/build_legends.py
+_HOLD = {"sword": ("whalebone_greatsword", 1), "hammer": ("ember_war_axe", 1), "staff": ("abyss_bell_staff", 1),
+         "bell": ("abyss_bell_staff", 1), "dagger": ("waterway_fang", 1), "bow": ("thunder_wing_bow", 4)}
+for _id, _kind in (("abyss_whale_hammer", "hammer"), ("abyss_whale_staff", "staff"), ("abyss_whale_bow", "bow"), ("abyss_whale_fang", "dagger"),
+                   ("abyss_whale_bell_staff", "bell"), ("abyss_tide_sword", "sword"), ("abyss_tide_hammer", "hammer"),
+                   ("abyss_tide_staff", "staff"), ("abyss_tide_bow", "bow"), ("abyss_tide_dagger", "dagger"), ("abyss_storm_sword", "sword"),
+                   ("abyss_storm_hammer", "hammer"), ("abyss_storm_staff", "staff"), ("abyss_storm_dagger", "dagger"),
+                   ("abyss_storm_bell_staff", "bell"), ("abyss_ember_sword", "sword"), ("abyss_ember_staff", "staff"),
+                   ("abyss_ember_bow", "bow"), ("abyss_ember_dagger", "dagger"), ("abyss_ember_bell_staff", "bell")):
+    ITEMS[_id] = ("roughs_legends", "legend") + _HOLD[_kind]
+for _id, _kind in (("abyss_lamp_staff", "staff"), ("abyss_depth_bow", "bow"), ("abyss_toll_bell_staff", "bell")):
+    ITEMS[_id] = ("roughs_ch5", "rare") + _HOLD[_kind]
+# 一品一案 (2026-10-26。tools/rough/lowpoly/weapons/one/build_one.py の docs/review/roughs_one/raw/<id>/a/)。章の杖と鈴杖 8 本もここから入れる
+for _id in ("whale_staff", "whale_bell_staff", "tide_staff", "tide_bell_staff", "storm_staff", "storm_bell_staff", "ember_staff", "ember_censer"):
+    ITEMS[_id] = ("roughs_one", "rare") + _HOLD["staff"]
+ONE = [i for i in ITEMS if (ROOT / "docs/review/roughs_one/raw" / i / "a").is_dir()]
+for _id in ONE:
+    _src, _tier, _analog, _st = ITEMS[_id]
+    ITEMS[_id] = ("roughs_one", _tier, _analog, _st)
 
 
 def bake_glow(atlas: Path, mask: Path):
@@ -94,8 +114,10 @@ def main():
             if "=" in kv:
                 k, v = kv.split("=")
                 choice[k] = v
+    only = [a for a in args if not a.startswith("--") and "=" not in a]
     for item in ITEMS:
-        install(item, choice[item])
+        if not only or item in only:
+            install(item, choice[item])
 
 
 if __name__ == "__main__":

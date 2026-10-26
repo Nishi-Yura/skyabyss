@@ -46,6 +46,10 @@ public final class GearLevel {
 
     // 巨神の推奨 Lv (知らない由来は 0 = 要件なし)
     public static int stageLevel(String dungeon) {
+        // 五章 (深淵) は巨神の段の外 (abyss/gear/AbyssGear.STAGE)
+        if (jp.revati.skyabyss.abyss.gear.AbyssGear.DUNGEON.equals(dungeon)) {
+            return jp.revati.skyabyss.abyss.gear.AbyssGear.STAGE.level();
+        }
         for (GearCurve.Stage s : GearCurve.STAGES) {
             if (s.id().equals(dungeon)) {
                 return s.level();

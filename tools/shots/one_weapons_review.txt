@@ -1,0 +1,408 @@
+# 一品一案の 39 本を手に持った姿で撮る (一人称と三人称の正面)。2026-10-26
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/one_weapons_review.txt -PshotsName=one_weapons_review
+world shots flat
+size 960 540
+timeout 3000
+render 6
+clouds off
+cmd time set noon
+cmd weather clear
+cmd gamemode creative
+camera 0 -60 8 180 0
+waitchunks
+hud off
+wait 350
+cmd skyabyss cinematic stop
+close
+wait 20
+swingpose off
+cmd item replace entity @s weapon.mainhand with skyabyss:whale_hammer
+mainhand right
+wait 30
+perspective first
+wait 6
+chat clear
+shot fp_whale_hammer
+perspective front
+wait 6
+shot tp_whale_hammer
+cmd item replace entity @s weapon.mainhand with skyabyss:whale_bow
+mainhand right
+wait 30
+perspective first
+wait 6
+chat clear
+shot fp_whale_bow
+perspective front
+wait 6
+shot tp_whale_bow
+cmd item replace entity @s weapon.mainhand with skyabyss:tide_hammer
+mainhand right
+wait 30
+perspective first
+wait 6
+chat clear
+shot fp_tide_hammer
+perspective front
+wait 6
+shot tp_tide_hammer
+cmd item replace entity @s weapon.mainhand with skyabyss:tide_bow
+mainhand right
+wait 30
+perspective first
+wait 6
+chat clear
+shot fp_tide_bow
+perspective front
+wait 6
+shot tp_tide_bow
+cmd item replace entity @s weapon.mainhand with skyabyss:storm_hammer
+mainhand right
+wait 30
+perspective first
+wait 6
+chat clear
+shot fp_storm_hammer
+perspective front
+wait 6
+shot tp_storm_hammer
+cmd item replace entity @s weapon.mainhand with skyabyss:ember_greatsword
+mainhand right
+wait 30
+perspective first
+wait 6
+chat clear
+shot fp_ember_greatsword
+perspective front
+wait 6
+shot tp_ember_greatsword
+cmd item replace entity @s weapon.mainhand with skyabyss:ember_bow
+mainhand right
+wait 30
+perspective first
+wait 6
+chat clear
+shot fp_ember_bow
+perspective front
+wait 6
+shot tp_ember_bow
+cmd item replace entity @s weapon.mainhand with skyabyss:ember_dagger
+mainhand right
+wait 30
+perspective first
+wait 6
+chat clear
+shot fp_ember_dagger
+perspective front
+wait 6
+shot tp_ember_dagger
+cmd item replace entity @s weapon.mainhand with skyabyss:abyss_whale_hammer
+mainhand right
+wait 30
+perspective first
+wait 6
+chat clear
+shot fp_abyss_whale_hammer
+perspective front
+wait 6
+shot tp_abyss_whale_hammer
+cmd item replace entity @s weapon.mainhand with skyabyss:abyss_whale_staff
+mainhand right
+wait 30
+perspective first
+wait 6
+chat clear
+shot fp_abyss_whale_staff
+perspective front
+wait 6
+shot tp_abyss_whale_staff
+cmd item replace entity @s weapon.mainhand with skyabyss:abyss_whale_bow
+mainhand right
+wait 30
+perspective first
+wait 6
+chat clear
+shot fp_abyss_whale_bow
+perspective front
+wait 6
+shot tp_abyss_whale_bow
+cmd item replace entity @s weapon.mainhand with skyabyss:abyss_whale_fang
+mainhand right
+wait 30
+perspective first
+wait 6
+chat clear
+shot fp_abyss_whale_fang
+perspective front
+wait 6
+shot tp_abyss_whale_fang
+cmd item replace entity @s weapon.mainhand with skyabyss:abyss_whale_bell_staff
+mainhand right
+wait 30
+perspective first
+wait 6
+chat clear
+shot fp_abyss_whale_bell_staff
+perspective front
+wait 6
+shot tp_abyss_whale_bell_staff
+cmd item replace entity @s weapon.mainhand with skyabyss:abyss_tide_sword
+mainhand right
+wait 30
+perspective first
+wait 6
+chat clear
+shot fp_abyss_tide_sword
+perspective front
+wait 6
+shot tp_abyss_tide_sword
+cmd item replace entity @s weapon.mainhand with skyabyss:abyss_tide_hammer
+mainhand right
+wait 30
+perspective first
+wait 6
+chat clear
+shot fp_abyss_tide_hammer
+perspective front
+wait 6
+shot tp_abyss_tide_hammer
+cmd item replace entity @s weapon.mainhand with skyabyss:abyss_tide_staff
+mainhand right
+wait 30
+perspective first
+wait 6
+chat clear
+shot fp_abyss_tide_staff
+perspective front
+wait 6
+shot tp_abyss_tide_staff
+cmd item replace entity @s weapon.mainhand with skyabyss:abyss_tide_bow
+mainhand right
+wait 30
+perspective first
+wait 6
+chat clear
+shot fp_abyss_tide_bow
+perspective front
+wait 6
+shot tp_abyss_tide_bow
+cmd item replace entity @s weapon.mainhand with skyabyss:abyss_tide_dagger
+mainhand right
+wait 30
+perspective first
+wait 6
+chat clear
+shot fp_abyss_tide_dagger
+perspective front
+wait 6
+shot tp_abyss_tide_dagger
+cmd item replace entity @s weapon.mainhand with skyabyss:abyss_storm_sword
+mainhand right
+wait 30
+perspective first
+wait 6
+chat clear
+shot fp_abyss_storm_sword
+perspective front
+wait 6
+shot tp_abyss_storm_sword
+cmd item replace entity @s weapon.mainhand with skyabyss:abyss_storm_hammer
+mainhand right
+wait 30
+perspective first
+wait 6
+chat clear
+shot fp_abyss_storm_hammer
+perspective front
+wait 6
+shot tp_abyss_storm_hammer
+cmd item replace entity @s weapon.mainhand with skyabyss:abyss_storm_staff
+mainhand right
+wait 30
+perspective first
+wait 6
+chat clear
+shot fp_abyss_storm_staff
+perspective front
+wait 6
+shot tp_abyss_storm_staff
+cmd item replace entity @s weapon.mainhand with skyabyss:abyss_storm_dagger
+mainhand right
+wait 30
+perspective first
+wait 6
+chat clear
+shot fp_abyss_storm_dagger
+perspective front
+wait 6
+shot tp_abyss_storm_dagger
+cmd item replace entity @s weapon.mainhand with skyabyss:abyss_storm_bell_staff
+mainhand right
+wait 30
+perspective first
+wait 6
+chat clear
+shot fp_abyss_storm_bell_staff
+perspective front
+wait 6
+shot tp_abyss_storm_bell_staff
+cmd item replace entity @s weapon.mainhand with skyabyss:abyss_ember_sword
+mainhand right
+wait 30
+perspective first
+wait 6
+chat clear
+shot fp_abyss_ember_sword
+perspective front
+wait 6
+shot tp_abyss_ember_sword
+cmd item replace entity @s weapon.mainhand with skyabyss:abyss_ember_staff
+mainhand right
+wait 30
+perspective first
+wait 6
+chat clear
+shot fp_abyss_ember_staff
+perspective front
+wait 6
+shot tp_abyss_ember_staff
+cmd item replace entity @s weapon.mainhand with skyabyss:abyss_ember_bow
+mainhand right
+wait 30
+perspective first
+wait 6
+chat clear
+shot fp_abyss_ember_bow
+perspective front
+wait 6
+shot tp_abyss_ember_bow
+cmd item replace entity @s weapon.mainhand with skyabyss:abyss_ember_dagger
+mainhand right
+wait 30
+perspective first
+wait 6
+chat clear
+shot fp_abyss_ember_dagger
+perspective front
+wait 6
+shot tp_abyss_ember_dagger
+cmd item replace entity @s weapon.mainhand with skyabyss:abyss_ember_bell_staff
+mainhand right
+wait 30
+perspective first
+wait 6
+chat clear
+shot fp_abyss_ember_bell_staff
+perspective front
+wait 6
+shot tp_abyss_ember_bell_staff
+cmd item replace entity @s weapon.mainhand with skyabyss:abyss_lamp_staff
+mainhand right
+wait 30
+perspective first
+wait 6
+chat clear
+shot fp_abyss_lamp_staff
+perspective front
+wait 6
+shot tp_abyss_lamp_staff
+cmd item replace entity @s weapon.mainhand with skyabyss:abyss_depth_bow
+mainhand right
+wait 30
+perspective first
+wait 6
+chat clear
+shot fp_abyss_depth_bow
+perspective front
+wait 6
+shot tp_abyss_depth_bow
+cmd item replace entity @s weapon.mainhand with skyabyss:abyss_toll_bell_staff
+mainhand right
+wait 30
+perspective first
+wait 6
+chat clear
+shot fp_abyss_toll_bell_staff
+perspective front
+wait 6
+shot tp_abyss_toll_bell_staff
+cmd item replace entity @s weapon.mainhand with skyabyss:whale_staff
+mainhand right
+wait 30
+perspective first
+wait 6
+chat clear
+shot fp_whale_staff
+perspective front
+wait 6
+shot tp_whale_staff
+cmd item replace entity @s weapon.mainhand with skyabyss:whale_bell_staff
+mainhand right
+wait 30
+perspective first
+wait 6
+chat clear
+shot fp_whale_bell_staff
+perspective front
+wait 6
+shot tp_whale_bell_staff
+cmd item replace entity @s weapon.mainhand with skyabyss:tide_staff
+mainhand right
+wait 30
+perspective first
+wait 6
+chat clear
+shot fp_tide_staff
+perspective front
+wait 6
+shot tp_tide_staff
+cmd item replace entity @s weapon.mainhand with skyabyss:tide_bell_staff
+mainhand right
+wait 30
+perspective first
+wait 6
+chat clear
+shot fp_tide_bell_staff
+perspective front
+wait 6
+shot tp_tide_bell_staff
+cmd item replace entity @s weapon.mainhand with skyabyss:storm_staff
+mainhand right
+wait 30
+perspective first
+wait 6
+chat clear
+shot fp_storm_staff
+perspective front
+wait 6
+shot tp_storm_staff
+cmd item replace entity @s weapon.mainhand with skyabyss:storm_bell_staff
+mainhand right
+wait 30
+perspective first
+wait 6
+chat clear
+shot fp_storm_bell_staff
+perspective front
+wait 6
+shot tp_storm_bell_staff
+cmd item replace entity @s weapon.mainhand with skyabyss:ember_staff
+mainhand right
+wait 30
+perspective first
+wait 6
+chat clear
+shot fp_ember_staff
+perspective front
+wait 6
+shot tp_ember_staff
+cmd item replace entity @s weapon.mainhand with skyabyss:ember_censer
+mainhand right
+wait 30
+perspective first
+wait 6
+chat clear
+shot fp_ember_censer
+perspective front
+wait 6
+shot tp_ember_censer
