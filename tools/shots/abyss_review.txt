@@ -1,6 +1,6 @@
 # 深淵の見直し (2026-10-28 夜): 層ごとの印へ行って前と後ろを撮る (印の名は abyss_layers.json。座標を書かないので作り直しても古くならない)
 # bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/abyss_review.txt -PshotsName=abyss_review
-world abyss_review flat
+world abyss_review2 flat
 size 1280 720
 timeout 5400
 render 10
