@@ -949,7 +949,12 @@ BUILDERS = {
 
 
 def main(names):
-    for name, fn in BUILDERS.items():
+    import build_pois_dress
+    builders = dict(BUILDERS)
+    # 細部を足すだけのもの (build_pois_dress) は、名前を書いたときだけ (二度目は重ねがけになるので止まる)
+    if names:
+        builders.update(build_pois_dress.BUILDERS)
+    for name, fn in builders.items():
         if names and name not in names:
             continue
         bp = fn()
