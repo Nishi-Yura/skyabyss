@@ -63,6 +63,9 @@ public final class TownTourSelfTest {
         if (p.getInventory().countItem(Items.BREAD) + jp.revati.skyabyss.pouch.Pouch.count(p, Items.BREAD) != 3) {
             f.add("the inn did not give 3 bread");
         }
+        if (!jp.revati.skyabyss.mount.MountService.hasWhistle(p)) {
+            f.add("the stable did not give the mount whistle");
+        }
         TownTour.tick(p);
         if (TownTour.step(p) != TownTour.DONE || Coins.count(p) != coins) {
             f.add("a finished tour moved again");
@@ -71,7 +74,7 @@ public final class TownTourSelfTest {
         p.getInventory().clearContent();
         Coins.take(p, Coins.count(p));
         if (f.isEmpty()) {
-            SkyAbyss.LOGGER.info("SELFTEST town tour PASSED (starts in the capital, four stops reached where the guide path ends, coins, bread at the inn, done stays done)");
+            SkyAbyss.LOGGER.info("SELFTEST town tour PASSED (starts in the capital, five stops reached where the guide path ends, coins, bread at the inn, the whistle at the stable, done stays done)");
         } else {
             for (String s : f) {
                 SkyAbyss.LOGGER.error("SELFTEST town tour FAILED: {}", s);

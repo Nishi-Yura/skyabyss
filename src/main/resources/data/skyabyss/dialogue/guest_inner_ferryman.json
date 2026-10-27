@@ -1,0 +1,40 @@
+{
+  "npc": "skyabyss:guest_inner_ferryman",
+  "entries": [
+    {
+      "node": "ask"
+    }
+  ],
+  "nodes": {
+    "ask": {
+      "face": "neutral",
+      "options": [
+        {
+          "id": "cross",
+          "goto": "end",
+          "kind": "talk",
+          "do": [
+            {
+              "type": "town",
+              "act": "inner_cross"
+            }
+          ]
+        },
+        {
+          "id": "sea",
+          "goto": "sea",
+          "kind": "talk"
+        },
+        {
+          "id": "bye",
+          "goto": "end",
+          "kind": "leave"
+        }
+      ]
+    },
+    "sea": {
+      "face": "smile",
+      "next": "ask"
+    }
+  }
+}

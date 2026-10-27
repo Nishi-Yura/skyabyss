@@ -1849,5 +1849,6 @@
   "sign.skyabyss.island.cave": "Hill Cave",
   "sign.skyabyss.island.huts": "Fishing Huts",
   "sign.skyabyss.island.camp_west": "Travelers' Camp",
-  "sign.skyabyss.island.tree": "Great Tree"
+  "sign.skyabyss.island.tree": "Great Tree",
+  "message.skyabyss.tour.whistle": "The stable keeper gave you a mount whistle. Press Y to call your mount."
 }

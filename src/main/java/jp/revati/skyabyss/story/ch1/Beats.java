@@ -150,9 +150,8 @@ public final class Beats {
             if (player.isRemoved() || player.serverLevel() != level) {
                 return;
             }
-            Vec3 look = player.getLookAngle().multiply(1, 0, 1);
-            look = look.lengthSqr() < 1.0e-4 ? new Vec3(0, 0, 1) : look.normalize();
-            Vec3 at = player.position().add(look.scale(3.0)).add(0, 8.0, 0);
+            // その人の頭の上から落とす (目線の先だとブロックの奥に落ちることがあった。2026-10-27 の声)
+            Vec3 at = player.position().add(0, 6.0, 0);
             ItemStack link = new ItemStack(Items.CHAIN);
             link.set(DataComponents.CUSTOM_NAME, Component.translatable("item.skyabyss.ch1.whale_link").withStyle(s -> s.withItalic(false)));
             link.set(DataComponents.LORE, new ItemLore(List.of(Component.translatable("item.skyabyss.ch1.whale_link.lore"))));

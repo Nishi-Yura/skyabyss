@@ -243,13 +243,17 @@ public final class ContinentChunkGenerator extends ChunkGenerator {
     }
 
     // ---------------------------------------------------------------- 道 (layout.json の道。幅 5 の土の道、縁は荒れた土と砂利)
+    // 大陸の街道 (はじまりの島の外の道) は幅 7 (芯からの距離を WIDE だけ縮めて測る。2026-10-27 の声「道の横幅もっと広くていい」)
     static final double ROAD_HALF = 2.2;
     static final double ROAD_EDGE = 3.2;
+    static final double WIDE = 0.9;
 
     // このチャンク (と縁 4) にかかる道の線分 {x0, z0, x1, z1}
     static List<int[]> roadSegments(int x0, int z0) {
         List<int[]> out = new java.util.ArrayList<>();
         for (List<BlockPos> line : ContinentLayout.get().roads()) {
+            // 島の道 (はじまりの島の中) は細いまま
+            int wide = line.isEmpty() || ContinentMap.get().region(line.get(0).getX(), line.get(0).getZ()) == ContinentMap.OUTSKIRTS ? 0 : 1;
             for (int i = 0; i + 1 < line.size(); i++) {
                 BlockPos a = line.get(i);
                 BlockPos b = line.get(i + 1);
@@ -258,7 +262,7 @@ public final class ContinentChunkGenerator extends ChunkGenerator {
                         || Math.max(a.getZ(), b.getZ()) < z0 - pad || Math.min(a.getZ(), b.getZ()) > z0 + 15 + pad) {
                     continue;
                 }
-                out.add(new int[] {a.getX(), a.getZ(), b.getX(), b.getZ()});
+                out.add(new int[] {a.getX(), a.getZ(), b.getX(), b.getZ(), wide});
             }
         }
         return out;
@@ -277,7 +281,7 @@ public final class ContinentChunkGenerator extends ChunkGenerator {
             double dz = g[3] - g[1];
             double len2 = dx * dx + dz * dz;
             double u = len2 == 0 ? 0 : Math.max(0, Math.min(1, ((x - g[0]) * dx + (z - g[1]) * dz) / len2));
-            best = Math.min(best, Math.hypot(x - (g[0] + u * dx), z - (g[1] + u * dz)));
+            best = Math.min(best, Math.hypot(x - (g[0] + u * dx), z - (g[1] + u * dz)) - (g.length > 4 && g[4] == 1 ? WIDE : 0));
         }
         return best;
     }
@@ -293,7 +297,7 @@ public final class ContinentChunkGenerator extends ChunkGenerator {
             double dz = g[3] - g[1];
             double len2 = dx * dx + dz * dz;
             double u = len2 == 0 ? 0 : Math.max(0, Math.min(1, ((x - g[0]) * dx + (z - g[1]) * dz) / len2));
-            double d = Math.hypot(x - (g[0] + u * dx), z - (g[1] + u * dz));
+            double d = Math.hypot(x - (g[0] + u * dx), z - (g[1] + u * dz)) - (g.length > 4 && g[4] == 1 ? WIDE : 0);
             best = Math.min(best, d);
         }
         double d = best - ContinentMap.value(x / 23.0, z / 23.0, 0x0AD5) * 0.9;

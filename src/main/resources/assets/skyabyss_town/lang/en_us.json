@@ -621,5 +621,11 @@
   "quest.skyabyss.town.grave_4.rumor": "The gravekeeper wants to light a candle at the nameless grave.",
   "quest.skyabyss.town.grave_4.summary": "Light a single candle before the nameless grave.",
   "quest.skyabyss.town.grave_4.title": "A Candle",
-  "quest.skyabyss.town.grave_tbc": "The gravekeeper's tale continues in chapter six."
+  "quest.skyabyss.town.grave_tbc": "The gravekeeper's tale continues in chapter six.",
+  "entity.skyabyss.guest_inner_ferryman": "Inner Sea Ferryman",
+  "dialogue.skyabyss.guest_inner_ferryman.ask": "Crossing the inner sea? When it is calm, the far shore is no time at all.\nClimb in.",
+  "dialogue.skyabyss.guest_inner_ferryman.ask.cross": "Cross to the far shore",
+  "dialogue.skyabyss.guest_inner_ferryman.ask.sea": "About the inner sea",
+  "dialogue.skyabyss.guest_inner_ferryman.ask.bye": "Another time",
+  "dialogue.skyabyss.guest_inner_ferryman.sea": "This sea is warm. Now and then something deep down turns over in its sleep.\n...The tide folk say the shelled one slept here once."
 }

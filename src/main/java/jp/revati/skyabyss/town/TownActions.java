@@ -23,7 +23,7 @@ import net.minecraft.server.level.ServerPlayer;
 //   mapmaker      : 地図屋の噂。まだ見ていない跡地 (ChapterGrounds) と、まだ着いていない章の場所の、都からの方角とおおよその距離
 //   mapmaker_draw : 地図屋に描き足してもらう (鐘銭 DRAW_COST)。まだ見ていない跡地のうち都にいちばん近いものを、M の地図に「見た」で載せる
 public final class TownActions {
-    public static final Set<String> ACTS = Set.of("open_cellar", "mapmaker", "mapmaker_draw", "accept_offer", "decline_offer", "island_cross");
+    public static final Set<String> ACTS = Set.of("open_cellar", "mapmaker", "mapmaker_draw", "accept_offer", "decline_offer", "island_cross", "inner_cross");
     public static final int DRAW_COST = 5;
     // 噂に並べる数の上限
     static final int RUMOR_MAX = 3;
@@ -39,6 +39,7 @@ public final class TownActions {
             case "accept_offer" -> TownQuests.acceptOffer(player);
             case "decline_offer" -> TownQuests.declineOffer(player);
             case "island_cross" -> jp.revati.skyabyss.world.continent.IslandTrail.cross(player);
+            case "inner_cross" -> jp.revati.skyabyss.world.continent.ContinentFerries.cross(player);
             default -> SkyAbyss.LOGGER.warn("[town] unknown act {}", act);
         }
     }

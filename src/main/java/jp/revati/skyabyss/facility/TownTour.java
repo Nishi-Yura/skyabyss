@@ -20,13 +20,14 @@ import net.neoforged.neoforge.common.util.FakePlayer;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 
 // 都の町めぐり (docs/design/40 の 4 章「はじめの一時間」の 2)。初めて都に入った人を、案内の灯りの道 (TownGuide) で
-// 鍛冶屋 → 宿 → 道具屋 → 組合 の順に連れて回る。戸に着くたびに小さな報い (鐘銭、宿ではパン)。終わると「門の外の弱い敵で腕を試そう」。
+// 鍛冶屋 → 宿 → 厩舎 → 道具屋 → 組合 の順に連れて回る。戸に着くたびに小さな報い (鐘銭、宿ではパン、厩舎では乗り笛)。終わると「門の外の弱い敵で腕を試そう」。
 // 一章より先へ進んでいる人は、めぐらずに済んだことにする。帯の文は一行
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class TownTour {
     static final String TAG = "skyabyss_town_tour";
-    static final List<String> STOPS = List.of("smithy", "inn", "tool_shop", "guild");
-    static final int[] COINS = {3, 3, 5, 5};
+    // 厩舎では必ず乗り笛を受け取る (2026-10-27 の声「都をめぐる際、絶対に乗り笛は手に入れに行かせて」)
+    static final List<String> STOPS = List.of("smithy", "inn", "stable", "tool_shop", "guild");
+    static final int[] COINS = {3, 3, 3, 5, 5};
     static final double ARRIVE = 5.0;
     static final int CHECK = 20;
     public static final int DONE = STOPS.size() + 1;
@@ -34,7 +35,7 @@ public final class TownTour {
     private TownTour() {
     }
 
-    // 0 = まだ、1..4 = その番号の所へ向かっている、DONE = 済み
+    // 0 = まだ、1..5 = その番号の所へ向かっている、DONE = 済み
     public static int step(ServerPlayer p) {
         return p.getPersistentData().getInt(TAG);
     }
@@ -82,6 +83,10 @@ public final class TownTour {
         Coins.give(p, COINS[s - 1]);
         if (id.equals("inn")) {
             jp.revati.skyabyss.quest.Quests.give(p, new ItemStack(Items.BREAD, 3));
+        }
+        if (id.equals("stable")) {
+            jp.revati.skyabyss.mount.MountService.giveWhistle(p);
+            Notice.hint(p, "message.skyabyss.tour.whistle");
         }
         p.level().playSound(null, p.blockPosition(), SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS, 0.4f, 1.4f);
         int next = s + 1;

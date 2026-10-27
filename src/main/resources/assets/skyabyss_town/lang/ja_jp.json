@@ -621,5 +621,11 @@
   "quest.skyabyss.town.grave_4.rumor": "墓守が、名のない墓に蝋燭を灯したいってさ。",
   "quest.skyabyss.town.grave_4.summary": "名のない墓の前に、蝋燭を一本灯す。",
   "quest.skyabyss.town.grave_4.title": "蝋燭",
-  "quest.skyabyss.town.grave_tbc": "墓守の話は、六章で続く。"
+  "quest.skyabyss.town.grave_tbc": "墓守の話は、六章で続く。",
+  "entity.skyabyss.guest_inner_ferryman": "内海の渡し守",
+  "dialogue.skyabyss.guest_inner_ferryman.ask": "内海を渡るかい。凪いでいれば、向こう岸まですぐだ。\n乗りな。",
+  "dialogue.skyabyss.guest_inner_ferryman.ask.cross": "向こう岸へ渡る",
+  "dialogue.skyabyss.guest_inner_ferryman.ask.sea": "内海のこと",
+  "dialogue.skyabyss.guest_inner_ferryman.ask.bye": "またにする",
+  "dialogue.skyabyss.guest_inner_ferryman.sea": "この海はぬるい。底のほうで、ときどき何かが寝返りを打つ。\n……潮の町の者は、甲羅の亀が昔ここで眠ったと言うがね。"
 }

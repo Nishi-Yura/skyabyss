@@ -274,11 +274,8 @@ public final class LoreEvents {
         LoreState state = Lore.state(player);
         state.bookGiven = true;
         state.bookDropAt = -1;
-        Vec3 look = player.getLookAngle().multiply(1, 0, 1);
-        if (look.lengthSqr() < 1.0e-4) {
-            look = new Vec3(0, 0, 1);
-        }
-        Vec3 at = player.position().add(look.normalize().scale(2.0)).add(0, 4.0, 0);
+        // その人の頭の上から落とす (目線の先だとブロックの奥に落ちて拾えないことがあった。2026-10-27 の声)
+        Vec3 at = player.position().add(0, 3.0, 0);
         // 天井があれば、その下に出す
         BlockPos head = BlockPos.containing(at);
         while (head.getY() > player.getBlockY() + 1 && !level.getBlockState(head).getCollisionShape(level, head).isEmpty()) {

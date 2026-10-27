@@ -1849,5 +1849,6 @@
   "sign.skyabyss.island.cave": "丘の洞窟",
   "sign.skyabyss.island.huts": "浜の漁師小屋",
   "sign.skyabyss.island.camp_west": "旅人の野営",
-  "sign.skyabyss.island.tree": "島の大樹"
+  "sign.skyabyss.island.tree": "島の大樹",
+  "message.skyabyss.tour.whistle": "厩舎の番から乗り笛をもらった。Y で乗り物を呼べる"
 }
