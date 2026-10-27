@@ -209,13 +209,13 @@
 | --- | --- | --- | --- | --- |
 | 語り部 storyteller | 688 / 1,981 | 10 | `tools/install/install_smooth_npcs.py`（ラフ `rough/smooth_npc.py` の B 頭巾の語り部） | 滑らか版。頭は 1 つの丸い塊（0.25 の段の球）で、目・眉・口・頬を塊の表面に描く。鼻と眉の張りは同じ肌の塊の出っぱり。頭巾は頭にかぶさる殻（`hair`・`hair2`）で、前に生え際の窓を開ける。首と襟があり頭が体の軸に載る。肩掛け、帯、結び紐、組んだ手。床の高さの骨の pivot は新しい（アニメの骨名は同じ） |
 | イサナ whale_chaser | 690 / 2,362 | 9 | `tools/install/install_smooth_npcs.py`（ラフ `rough/smooth_npc.py` の A つば広帽の旅人） | 滑らか版。頭は 1 つの丸い塊で、顔は表面に描く（太い眉・目・口）。つば広の帽子は頭にかぶさる殻、マフラー、ボタンつきのコート、手袋、ブーツ、背負い袋（丸めた地図）。`hair`・`hood2` の骨は箱なしの空 |
-| 見る者 watcher | 226 / 1,290 | 7 | `tools/gen/mobs/gen_npc_content.py`（ラフ `watcher_v2.py`） | **人らしくしすぎない**（鼻・眉・指・口は作らない）。頭を丸め首との間に隙間を残し、外套の長い襞、裾と袖口のほつれ、埃の粒。目（`eyes` 骨）はそのままで、まわりに暗い縁取りを置いて切れ込みに見せる。元の glowmask をそのまま保つ |
+| 見る者 watcher | 226 / 1,290 | 7 | データを直接直す（生成スクリプトはない） | **人らしくしすぎない**（鼻・眉・指・口は作らない）。頭を丸め首との間に隙間を残し、外套の長い襞、裾と袖口のほつれ、埃の粒。目（`eyes` 骨）はそのままで、まわりに暗い縁取りを置いて切れ込みに見せる。元の glowmask をそのまま保つ |
 
 - 語り部・イサナ・見る者は低ポリのメッシュ（9.6）。下の滑らか版の記述は、`LowPoly.enabled = false` のときの箱の描画の話になる。
 - 語り部とイサナの滑らか版（顔が頭の塊に収まる作り）は、`LowPoly.enabled = false` の箱の描画として assets に残る。比較シートは `docs/review/smooth_npc_roughs/{storyteller,whale_chaser}.png`、ゲーム内は `docs/review/previews/smooth_*.png`（台本 `tools/shots/smooth_npcs.txt`）。`tools/install/install_smooth_npcs.py` は入力のラフ（9.6）を消したので回らない。以下の `hp_npc.py` の記述は見る者にだけ当てはまる。
 - 作り方は `tools/rough/hp_npc.py`（`python tools/rough/hp_npc.py` でシート、`--install C` でゲームの assets へ）。NPC は発光層なし。小道具 `band`（巻き帯）・`vstrips`/`hstrips`（襞と縫い目）・`round_one`（小さな箱の 0.25 面取り）は `hp_npc.py` の中にあり、他でも写して使える。`add_box(safe=True)` が落とした数: 語り部 32、イサナ 43、見る者 11。
 - 語り部とイサナの顔のアイコン（`gui/face`）は絵なのでそのまま。
-- `npc.py`（ラフ）と `tools/gen/mobs/gen_npc_content.py` の geo 出力は古い箱のままなので、**再生成すると取り込みが戻る**。geo を再生成するときは先に `hp_npc.py --install C` を後ろに回す。
+- `npc.py`（ラフ）の geo 出力は古い箱のままなので、**再生成すると取り込みが戻る**。geo を再生成するときは先に `hp_npc.py --install C` を後ろに回す。
 - 見る者はクライアントだけの存在で遠くに立つ（`/skyabyss watcher show`）ので、ゲーム内では遠景しか撮れない。
 - 戻し方: `tools/sources/hp_base/entity/` の geo・png（見る者は glowmask も）を assets に戻す。
 

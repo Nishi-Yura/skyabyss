@@ -8,7 +8,7 @@ import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import jp.revati.skyabyss.SkyAbyss;
 
-// この Mod の進捗 (data/skyabyss/advancement/、生成は tools/gen/story/gen_advancements.py) に物語の区切りを伝える窓口。
+// この Mod の進捗 (data/skyabyss/advancement/、データを直接直す（生成スクリプトはない）) に物語の区切りを伝える窓口。
 // 既存の物語・成長のコードから、区切りごとに一行 Beats.fire(player, "<名前>") を呼ぶ (呼んだ先は何も変えない)。
 //
 // 名前の一覧:

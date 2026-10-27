@@ -17,7 +17,7 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
 
-// 深淵の層の大縦穴を建てる (docs/design/36 の A2)。設計図 abyss_layers (tools/abyss/gen_abyss_layers.py。原点 = 縦穴の中心、y はそのまま)。
+// 深淵の層の大縦穴を建てる (docs/design/36 の A2)。設計図 abyss_layers (データを直接直す（生成スクリプトはない）。原点 = 縦穴の中心、y はそのまま)。
 //   一度に建てず、1 tick に BUDGET_MS だけ進める (約 27 万ブロック)。何もない空間なので、置くだけ (隣への知らせは出さない)
 //   建て終えたら版 (VERSION) を記録する。版を上げると建て直す。建てている途中で止まったら、次の起動で最初から (置くのは変わるブロックだけ)
 //   始まるのは、だれかが深淵に入ったとき (AbyssWorld.enter) か、開発用 /skyabyss abyss build

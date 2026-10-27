@@ -33,7 +33,7 @@ import net.neoforged.neoforge.registries.DeferredRegister;
 //   墓を弔うと、その墓の遺品を一つ渡す (一度だけ。前に弔った人も、次にその墓を弔ったとき受け取る)
 //   遺品は持ち物にあるあいだ効く。種類の数で効果が増える (表は docs/design/36 の 9 章)
 //   十二の墓をすべて弔うと、伝承の頁 ch5/graves_all が記される (六章の手がかり)
-//   墓の印と文は AbyssFinds・tools/gen/ch5/gen_ch5_entrance.py。遺品の絵は tools/abyss/gen_abyss_relic_art.py、文は tools/abyss/gen_abyss_relic_texts.py
+//   墓の印と文は AbyssFinds・データを直接直す（生成スクリプトはない）。遺品の絵は tools/abyss/gen_abyss_relic_art.py、文は 
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class AbyssRelics {
     private static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(SkyAbyss.MODID);

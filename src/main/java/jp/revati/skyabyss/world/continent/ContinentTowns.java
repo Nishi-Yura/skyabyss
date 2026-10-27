@@ -19,7 +19,7 @@ import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 
 // 天と淵の大陸の、土地ごとの小さな町 (docs/design/40 の 3 章「作る順」の 4)。広場 (井戸・依頼の板・街灯)・宿・店・家二つ。
 // 場所は layout.json の towns。大陸の世界でだけ、場所を決めるとき (SiteFinder.planRestAll) に足し、野営地や都と同じく少しずつ建てる。
-// 部品は data/skyabyss/opening/town_<土地>.json (tools/gen/world/gen_region_towns.py)。SiteData の種類は "town"、番号は REGIONS の並び。
+// 部品は data/skyabyss/opening/town_<土地>.json (データを直接直す（生成スクリプトはない）)。SiteData の種類は "town"、番号は REGIONS の並び。
 // 建てたら部品の印 (rest・board・npc_<役>) を場所の付属の点に写し、札に町の名前と目安のレベルを書く。近く (KEEP_RADIUS) に人がいれば、宿の主人と道具屋を立たせ続ける
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class ContinentTowns {

@@ -29,7 +29,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 
-// 消えた炉の坑 (四章の小さなダンジョン、支度の段 ch4/forge_ruins の舞台)。部品は ch4_dead_forge_pit (tools/gen/ch4/gen_ch4_ground.py)。
+// 消えた炉の坑 (四章の小さなダンジョン、支度の段 ch4/forge_ruins の舞台)。部品は ch4_dead_forge_pit (データを直接直す（生成スクリプトはない）)。
 //
 //   場所   四章の跡地 (都の南の灰の地) の中心から 60〜150、高台 (丘の斜面のつもり)。地表に黒石の枠の坑口と崩れた煙突、坑口の碑 (sign.skyabyss.ch4_forge_pit)、
 //          南西の外に旅の職人の野営 (印 artisan。ArtisanSpawner の四章の立つ所)。階段で地下 13 へ。部屋は荒い黒石で包む

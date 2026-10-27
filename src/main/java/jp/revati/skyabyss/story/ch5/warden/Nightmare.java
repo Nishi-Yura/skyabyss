@@ -107,7 +107,7 @@ public final class Nightmare {
         return NightmareTier.of(Math.min(NightmareTier.MAX, groupBest(server, group) + 1));
     }
 
-    // 段の名前・決まりの文の鍵 (ja/en の文は tools/abyss/gen_abyss_nightmare_texts.py)
+    // 段の名前・決まりの文の鍵 (ja/en のデータを直接直す（生成スクリプトはない）)
     public static String nameKey(int n) {
         return "message.skyabyss.abyss_nm.tier." + n + ".name";
     }

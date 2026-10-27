@@ -143,7 +143,7 @@
 | `quest/free/Board.DRAW` | 板に出す日替わりは 5 本 |
 | `record/Keepsakes` | 天の鍵を守る品・捨てられない品に |
 | `progress/ProgressCommands` | `/story` に天の鍵の行 |
-| データ | メインとサブのクエスト、会話の足し書き、伝承の項目。`tools/gen/story/gen_story_quests.py` が書く（07 の 2.1・8.4・9.5 節）。固有名は同ファイルの `NAMES`、伝承の本文は `LORE` |
+| データ | メインとサブのクエスト、会話の足し書き、伝承の項目。データを直接直す（生成スクリプトはない） |
 | 文・絵・音 | `assets/skyabyss_story/lang`、`textures/item/sky_key.png`、`sounds/{key_form,deep_beat}.ogg`（`tools/gen/story/gen_story_assets.py`） |
 
 ### 3.7 自己テスト（`SELFTEST story`）
@@ -173,7 +173,7 @@
 | 5 | 欠片を一人一つ | `TitanMemoryData` の `record.fragment` で一人一回、`ModItems.SKY_KEY_FRAGMENT` を 1 つ。四つ目で天の鍵は自動でそろう |
 | 6 | 巨神を見つけたら、伝承を記す | `Lore.unlock(player, "chapter1/thunder_wing", true)`（余燼は `"chapter1/ember"`）。メインクエストはこの項目で「見つけた」を数える |
 | 7 | 心臓の伝承（「〜の鼓動が止まった」） | 各担当が自分の項目を足してよい（`chapter1/thunder_heart_stilled` など）。メインは `stilled` の条件で数えるので項目名は自由 |
-| 8 | 自分の背中の周回のサブクエスト | 07 の 7 章の型。`tools/gen/story/gen_story_quests.py` の「言伝ての板」の節に足す。`min_stage` は 3（雷翼）・4（余燼） |
+| 8 | 自分の背中の周回のサブクエスト | 07 の 7 章の型。データを直接直す（生成スクリプトはない） の「言伝ての板」の節に足す。`min_stage` は 3（雷翼）・4（余燼） |
 
 ## 5. 試遊の手順と確認表
 

@@ -603,7 +603,7 @@
 
 ## 9. 碑文と伝承
 
-05 の型で書く。答えは書かず、ほのめかしだけにする。碑文は 4 行、光る文字の看板。**1 行は日本語 8 字まで、英語は看板の 90 px に収まる長さ**（`SignFit` の自己テスト。`SignFit` は `skyabyss_storm` の lang も読む）。lang は `assets/skyabyss_storm/lang/{ja_jp,en_us}.json`。各担当の断片 `lang/parts/<名前>.json`（`{"鍵": "英文"}` か `{"鍵": {"en","ja"}}`）を `python tools/gen/story/gen_storm_lore.py` がまとめる（日本語のない鍵と、使われていない鍵を一覧に出す）。実装: `titan/storm/lore/` の `StormLore`・`StormLoreSelfTest`。
+05 の型で書く。答えは書かず、ほのめかしだけにする。碑文は 4 行、光る文字の看板。**1 行は日本語 8 字まで、英語は看板の 90 px に収まる長さ**（`SignFit` の自己テスト。`SignFit` は `skyabyss_storm` の lang も読む）。lang は `assets/skyabyss_storm/lang/{ja_jp,en_us}.json`。各担当の断片 `lang/parts/<名前>.json`（`{"鍵": "英文"}` か `{"鍵": {"en","ja"}}`）を データを直接直す（生成スクリプトはない） がまとめる（日本語のない鍵と、使われていない鍵を一覧に出す）。実装: `titan/storm/lore/` の `StormLore`・`StormLoreSelfTest`。
 
 ### 9.1 風の民（設定。プレイヤーには直接見せない）
 
@@ -652,7 +652,7 @@ ID は `chapter1/*`。自動で記すものは条件が項目の JSON（`data/sk
 
 ### 9.5 クエスト
 
-実装: `tools/gen/story/gen_story_quests.py`（名前は "the Thunder Wing Titan"）、`data/skyabyss/quest/`。
+データを直接直す（生成スクリプトはない）、`data/skyabyss/quest/`。
 
 | クエスト | 中身 |
 |---|---|
@@ -767,7 +767,7 @@ ID は `chapter1/*`。自動で記すものは条件が項目の JSON（`data/sk
 
 ## 12. 三章「風に逆らう嵐」の中身
 
-三章（段階 2。潮殻の心臓を止めてから雷翼の心臓を止めるまで）を遊んでいる人の、巨神の外の話。実装は `titan/storm/chapter/`、データは `tools/gen/ch3/gen_ch3_content.py` が書く（青図 `data/skyabyss/opening/ch3_*.json`、伝承 3、クエスト `quest/ch3/`、会話 `dialogue/ch3/`、文 `assets/skyabyss_ch3/lang`）。共通の部品は [01 の 4.1](01_overview.md)（章・予兆・空の段）、[18 の 9 章](18_notices.md)（題字と余韻の札）、17 の 3.8（小要素の置き方）、[10 の 3.6](10_progression_multiplayer.md)（章の数え方）。
+三章（段階 2。潮殻の心臓を止めてから雷翼の心臓を止めるまで）を遊んでいる人の、巨神の外の話。実装は `titan/storm/chapter/`、データは直接直す（生成スクリプトはない。青図 `data/skyabyss/opening/ch3_*.json`、伝承 3、クエスト `quest/ch3/`、会話 `dialogue/ch3/`、文 `assets/skyabyss_ch3/lang`）。共通の部品は [01 の 4.1](01_overview.md)（章・予兆・空の段）、[18 の 9 章](18_notices.md)（題字と余韻の札）、17 の 3.8（小要素の置き方）、[10 の 3.6](10_progression_multiplayer.md)（章の数え方）。
 
 主題は**見誤り**。「あれは空の影か」（1.2）。風の民は嵐の鳥を空の影と取り違え、影を神と呼んだ。軸は、物語が先・静かな心理ホラー・足し算より引き算・チャットに流さない・敵もダンジョンも足さない。新しい敵・モデルはない（既存の避雷針・碑・黒石・玄武岩・稲妻・音だけ）。
 

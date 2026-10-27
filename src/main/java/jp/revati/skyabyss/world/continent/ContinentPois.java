@@ -33,7 +33,7 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
 
 // 天と淵の大陸の見どころ (風車・灯台・巨神の肋骨・焼けた砦・野盗の野営など。docs/design/40 の 3 章)。
-// 置き場は data/skyabyss/continent/pois.json、部品は data/skyabyss/opening/poi_<種類>.json (どちらも tools/gen/world/gen_continent_pois.py)。
+// 置き場は data/skyabyss/continent/pois.json、部品は data/skyabyss/opening/poi_<種類>.json (どちらも データを直接直す（生成スクリプトはない）)。
 //   世界が始まったときには建てない。人が BUILD_RADIUS まで近づいたら、その一つを SiteData (種類 "poi"、番号 = pois.json の並び) に足して建てる
 //   建てたら、印 loot に宝箱 (鐘銭・糧・その土地の巨神の粉) を置く。野盗の野営・古い塚 (印 foes) は、人が近くに来ると野盗・骨の兵が出る (間を置いて何度でも)
 @EventBusSubscriber(modid = SkyAbyss.MODID)

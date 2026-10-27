@@ -43,7 +43,7 @@ import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 //     漂着の筏の跡 ch2_drift_raft (30〜110、水辺)    人ごとに一度の抽選と頁 ch2/drift_raft、合図 ch2_raft。旅の職人 (二章の装い) が立つ
 //     引き潮の観測の杭 ch2_ebb_stakes (50〜140、水辺) 杭を触ると次の引き潮・満ち潮までの分と、大干潮は夜の前半という一行
 //     沖の難破船 (Wreck。場所の表ではなく、跡地の海の向きの浅い沖に、人が近づいたとき一度だけ置く)
-//   文は assets/skyabyss_ch2/lang、部品・クエスト・会話・伝承は tools/gen/ch2/gen_ch2_ground.py
+//   文は assets/skyabyss_ch2/lang、部品・クエスト・会話・伝承は データを直接直す（生成スクリプトはない）
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class Ch2Ground {
     // 支度の段 (PrepQuests.ids(2) と同じ並び)

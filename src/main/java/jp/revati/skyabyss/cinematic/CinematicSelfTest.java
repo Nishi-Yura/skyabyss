@@ -309,7 +309,7 @@ public final class CinematicSelfTest {
         }
     }
 
-    // 場面の文は skyabyss_cinematic。深淵の区切りの場面 (SectionScenes) の文は、五章の層の文といっしょに skyabyss_abyss_v2 (tools/gen/ch5/gen_ch5_layers.py)
+    // 場面の文は skyabyss_cinematic。深淵の区切りの場面 (SectionScenes) の文は、五章の層の文といっしょに skyabyss_abyss_v2 (データを直接直す（生成スクリプトはない）)
     private static JsonObject loadLang(String locale, List<String> f) {
         JsonObject json = loadLangFile("skyabyss_cinematic", locale, f);
         JsonObject extra = loadLangFile("skyabyss_abyss_v2", locale, f);

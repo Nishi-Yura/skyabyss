@@ -22,10 +22,10 @@ import net.minecraft.server.level.ServerPlayer;
 //
 // ---------------------------------------------------------------- 章ごとの 3 本
 //   一章     支度の段 (メインの段 = category main): ch1/trail_iron (鉄の跡)・ch1/trail_blade (折れた剣)・ch1/trail_shield (盾と糧)。
-//            tools/gen/ch1/gen_ch1_trails.py が書く。旧い備えの頼み ch1/prep_* は、この 3 本に吸収した (置くと読み込みの警告)
-//   二章     支度の段 2 本: ch2/salt_road (塩の道)・ch2/ebb_boat (船と貝)。tools/gen/ch2/gen_ch2_ground.py。旅装は任意のサブ ch2/wader_gear
-//   三章     支度の段: ch3/lightning_pillars (避雷の柱)・ch3/scorched_watch (焼けた見張り塔)・ch3/sky_stone (空の石)。tools/gen/ch3/gen_ch3_ground.py
-//   四章     支度の段 2 本: ch4/fire_draught (火除けの薬) → ch4/forge_ruins (炉跡)。tools/gen/ch4/gen_ch4_ground.py
+//            データを直接直す（生成スクリプトはない）。旧い備えの頼み ch1/prep_* は、この 3 本に吸収した (置くと読み込みの警告)
+//   二章     支度の段 2 本: ch2/salt_road (塩の道)・ch2/ebb_boat (船と貝)。データを直接直す（生成スクリプトはない）。旅装は任意のサブ ch2/wader_gear
+//   三章     支度の段: ch3/lightning_pillars (避雷の柱)・ch3/scorched_watch (焼けた見張り塔)・ch3/sky_stone (空の石)。データを直接直す（生成スクリプトはない）
+//   四章     支度の段 2 本: ch4/fire_draught (火除けの薬) → ch4/forge_ruins (炉跡)。データを直接直す（生成スクリプトはない）
 //   既定の形 (今はどの章も使っていない。仕組みと自己テストのために残す): data/skyabyss/quest/ch<n>/prep_gear.json (身ごしらえ) / prep_blade.json (刃を研ぐ) /
 //            prep_pulse.json (鼓動を聞く)。ID は ch<n>/prep_<kind>、文のキーは quest.skyabyss.ch<n>.prep_<kind>.title など (QuestDef.keyBase)。
 //            章の担当が 34 の段の名前に替えるときは、下の CHAPTER_IDS に一行足す
@@ -47,11 +47,11 @@ public final class PrepQuests {
     // 既定の形 (ch<n>/prep_<kind>) でない章の 3 本 (章 → ID の並び。kind は ID の最後の「_」より後ろ)
     private static final Map<Integer, List<String>> CHAPTER_IDS = new ConcurrentHashMap<>(Map.of(
             1, List.of("ch1/trail_iron", "ch1/trail_blade", "ch1/trail_shield"),
-            // 二章は 2 本 (塩の道・船と貝。tools/gen/ch2/gen_ch2_ground.py)
+            // 二章は 2 本 (塩の道・船と貝。データを直接直す（生成スクリプトはない）)
             2, List.of("ch2/salt_road", "ch2/ebb_boat"),
-            // 三章の支度の段 (避雷の柱・焼けた見張り塔・空の石。tools/gen/ch3/gen_ch3_ground.py)
+            // 三章の支度の段 (避雷の柱・焼けた見張り塔・空の石。データを直接直す（生成スクリプトはない）)
             3, List.of("ch3/lightning_pillars", "ch3/scorched_watch", "ch3/sky_stone"),
-            // 四章の支度の段 (火除けの薬・炉跡。tools/gen/ch4/gen_ch4_ground.py)
+            // 四章の支度の段 (火除けの薬・炉跡。データを直接直す（生成スクリプトはない）)
             4, List.of("ch4/fire_draught", "ch4/forge_ruins")));
     // 三本そろったときの章ごとの仕上げ
     private static final Map<Integer, Consumer<ServerPlayer>> ON_READY = new ConcurrentHashMap<>();

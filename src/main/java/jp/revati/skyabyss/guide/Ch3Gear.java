@@ -77,7 +77,7 @@ import org.joml.Vector3f;
 //  - 風干しの団子 (吸収 II 60 秒 + 落下速度低下 20 秒)・避雷の油 (飲むと 90 秒「避雷」= 感電と雷の傷 −50%)
 //  - 風読みの小旗 (消耗しない): 使うと、そこに 30 秒、風下へ細い光の筋を立て、次の嵐までの目安を画面の帯に出す。クールダウン 30 秒
 // 感電の傷 (isShock): 雷 (lightning_bolt の傷) と、雷を使う敵 (SHOCK_MOBS) の傷。品は鍛冶場・薬師の誂え (MADE)。
-// 生成は tools/gen/ch3/gen_ch3_gear.py (レシピと文)、絵は tools/install/install_ch3_gear_assets.py
+// データを直接直す（生成スクリプトはない）、絵は tools/install/install_ch3_gear_assets.py
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class Ch3Gear {
     private static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(SkyAbyss.MODID);

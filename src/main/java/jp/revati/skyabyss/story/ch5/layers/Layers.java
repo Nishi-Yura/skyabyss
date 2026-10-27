@@ -11,7 +11,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.phys.AABB;
 
-// 深淵の四つの層の決まり (docs/design/36 の 8 章。設計図は tools/abyss/gen_abyss_layers.py)。
+// 深淵の四つの層の決まり (docs/design/36 の 8 章。設計図は データを直接直す（生成スクリプトはない）)。
 //   層 = 章の区切り: 五章の一「骨の層」… 五章の四「灰の層」、五章の終わり「心臓」(section 0〜4)
 //   層ごとに 野営 (camp_<層>) → 三本の道 → 印 (mark_<層>_<1..3>) → 門 (gate_<層>) → 主の間 (arena_<層>) → 下りの鎖 (descend_<層>) → 次の野営 (arrive_<次>)
 //   メインの段 (main_abyss): <層>_camp (生き残りと話す) → <層>_marks (印を三つ) → <層>_lord (主を倒す)。灰の次は descend (心臓の間へ)

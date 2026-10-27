@@ -27,7 +27,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.phys.AABB;
 
-// 焼けた見張り塔 (三章の小さなダンジョン、支度の段 ch3/scorched_watch の舞台)。部品は ch3_scorched_watch (tools/gen/ch3/gen_ch3_ground.py)。
+// 焼けた見張り塔 (三章の小さなダンジョン、支度の段 ch3/scorched_watch の舞台)。部品は ch3_scorched_watch (データを直接直す（生成スクリプトはない）)。
 //
 //   場所   跡地 (西の峰) の中心から 60〜150、高台。外 9x9 の三階: 入口の間 (立つ高さ 0)・中の間 (6)・頂の間 (12。まんなかに柱)。北東の隅の梯子で上る。
 //          入口の脇に碑 (sign.skyabyss.ch3_watch)、南西の外に旅の職人の野営 (印 artisan。ArtisanSpawner の三章の立つ所)

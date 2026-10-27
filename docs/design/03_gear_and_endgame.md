@@ -383,7 +383,7 @@
 | 再鍛造の途中 | 「鍛え直しの途中（候補 2/3）。共鳴の炉で選ぶ」 | 淡い紫 |
 | 強化 | 「共鳴の強化 +3 / +10」、+5 から「◆ 覚醒」 | — |
 
-- **物語の一行**: 説明のすぐ下に、巨神の声で短く（28 字まで）、「」でくくった一行（灰色の斜体）。装備 40 点（岩鯨・潮殻・雷翼・余燼 各 10。防具は部位ごと）。文は `assets/skyabyss_gear_story/lang/`（生成元 `tools/gen/story/gen_gear_story.py`）の `item.skyabyss.<id>.story`。キーがない品には出さない。自己テスト `SELFTEST gear curve` が、登録された装備のすべてに日英であること、長さ、重複なしを確かめる。例: 鯨骨の大剣「重いのは、背負ったものの数だ。」／ 潮殻の三叉槍「突いた水は、同じ形に戻る。」／ 雷翼の弓「矢は、翼の骨から生まれた。」／ 余燼の戦斧「燃やすのではない。くすぶらせるのだ。」
+- **物語の一行**: 説明のすぐ下に、巨神の声で短く（28 字まで）、「」でくくった一行（灰色の斜体）。装備 40 点（岩鯨・潮殻・雷翼・余燼 各 10。防具は部位ごと）。文は `assets/skyabyss_gear_story/lang/` の `item.skyabyss.<id>.story`。キーがない品には出さない。自己テスト `SELFTEST gear curve` が、登録された装備のすべてに日英であること、長さ、重複なしを確かめる。例: 鯨骨の大剣「重いのは、背負ったものの数だ。」／ 潮殻の三叉槍「突いた水は、同じ形に戻る。」／ 雷翼の弓「矢は、翼の骨から生まれた。」／ 余燼の戦斧「燃やすのではない。くすぶらせるのだ。」
 
 - 実装: `item/GearTier`、`ModGear`、`GearEvents`。
 
@@ -1093,7 +1093,7 @@ Lv 12・体力 22・一人。「一撃の傷 / 耐える回数」。ダメージ
 | `KindlingCharmItem`、`EmberTrinketItem`、`EmberHornItem` | 護符、外套と灯、角杯 |
 | `EmberGearEvents` | 一式・くすぶり・亀裂・灰・外套・灯 |
 | `EmberGearLoot`、`EmberGearSelfTest` | 灰被り・鍛え手の図鑑の品、自己テスト |
-| 名前と説明 | `assets/skyabyss_ember/lang` の「__ember.G」の下（生成元 `tools/gen/story/gen_ember_lore.py`） |
+| 名前と説明 | `assets/skyabyss_ember/lang` の「__ember.G」の下（データを直接直す（生成スクリプトはない）） |
 
 ---
 
@@ -1140,7 +1140,7 @@ Lv 12・体力 22・一人。「一撃の傷 / 耐える回数」。ダメージ
 | 層の主（骨・塩・雷・灰） | 一人ずつ: 錨鉄 3〜5、共鳴の欠片（深淵）1。その層の鎧の一部位（骨 = 兜・塩 = 胴・雷 = すね当て・灰 = 靴）をまだ持っていなければ必ず（持っていれば錨鉄 +4） | `AbyssLords.defeat` → `AbyssGearLoot.lord` |
 | 心臓の番人・番人の悪夢 | 一人ずつ: 錨鉄 4〜7（悪夢は段 ÷ 2 を足す）、共鳴の欠片（深淵）2（段 5 から 3）、心核（初回必ず・以後 25%）、結晶 40%、図鑑 10 品（鎧 部位ごと 25%、剣・聴き筒・護符 20%、錨・短剣 4%、錘 2%。天井は 2.4節） | `WardenArena.fallen`・`Nightmare.won` → `AbyssGearLoot.warden` |
 | 果てない深みの箱（36 の 9.2） | 錨鉄（ふつうの箱 60%、ほかは必ず。1〜2 + 階 ÷ 6 + 箱の段）。図鑑の品: 宝の間 4%・敵の巣 6%・王の褒美 15%（王の褒美だけ 5 回に 1 回は専用の逸品も） | `DepthLoot.roll` → `AbyssGearLoot.chest` |
-| 荷運びのロク（塩の野営） | 骨のかけら 8 → 錨鉄 2、錨鉄 20 → 灯り番の剣、錨鉄 16 → 鼓動の聴き筒 | `dialogue/ch5/attendant_abyss_porter.json`（生成 `tools/gen/ch5/gen_ch5_layers.py` の `TRADES`） |
+| 荷運びのロク（塩の野営） | 骨のかけら 8 → 錨鉄 2、錨鉄 20 → 灯り番の剣、錨鉄 16 → 鼓動の聴き筒 | `dialogue/ch5/attendant_abyss_porter.json`（データを直接直す（生成スクリプトはない）） |
 | 鍛冶場の誂え（遺品をなぞる。`made_abyss_lantern_charm`・`made_abyss_pulse_listener`） | 空の手燭 + 錨鉄 3 + 魂のランタン → 灯籠の護符。心臓の形の石 + 錨鉄 5 + アメジストの欠片 → 鼓動の聴き筒。遺品は減らずに残る（`AbyssRelicItem` の作業台の残り） | `recipe/abyss_lantern_charm.json`・`abyss_pulse_listener.json`（生成 `tools/gen/abyss_gear/gen_abyss_gear.py`） |
 
 **見た目と実装**

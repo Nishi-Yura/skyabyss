@@ -48,7 +48,7 @@
 
 ### 2.2 序盤の語り（序 1・序 2 と見聞）
 
-序盤の拍子（野営地・足跡・足音・骨の丘・空の歌）の全文と順番は 17 の 11 章。ここには仕組みだけ。生成は `tools/gen/mobs/gen_npc_content.py`（会話・メイン）と `tools/gen/story/gen_opening_text.py`（伝承・17-10 の閉じ方）。
+序盤の拍子（野営地・足跡・足音・骨の丘・空の歌）の全文と順番は 17 の 11 章。ここには仕組みだけ。データを直接直す（生成スクリプトはない。伝承・17-10 の閉じ方）。
 
 - **語り部の入口**: `shadow0`（メインが `follow_smoke`）、`shadow_first`（影のあとの初対面。`shadow2`→`shadow3` へ続く）、`shadow_wait`（影を待つ間、一度だけ。印 `wait_told`）。ループの「覚えているような」入口（`deja_vu*`）のあと、`first` の前。
 - **道すがらの見聞**: 語り部の話題に「道すがら、気になるものを見た。」（`seen_menu`）、イサナに「道中で、妙なものを見た。」（`c_seen_menu`）。伝承が記されていて、まだ話していないものだけ並ぶ（印 `<話題>_told`）。語り部の話題の節は枠の高さの上限（210）のため、もとの「岩鯨を見た」「背中に町の跡」の話題も `seen_menu` に置く。
@@ -137,7 +137,7 @@
 | 出し方 | `npc/ArtisanSpawner`。**章ごとの「立つ所」の表**（`Spot(章, 場所の ID, 印, 条件)`）で決める。一章 = 失せ物の荷車（`ch1_lost_cart`）の傍らの道の印 `artisan`、条件はイサナと会ったあと（伝承 `chapter1/whale_chaser`。「日 2 の朝、イサナの話のあとに職人の荷が見つかる」）。その場所の 48 ブロック以内に条件を満たす人が来て、5 秒おきの見回りで、まだいなければ立たせる（家 = その印、まわり 3 ブロックを歩く）。いなくなったら 1 日で立て直す。マルチでは場所は拠点ごと、近くの人が同じ職人に会う。二〜四章の担当（P11・P15・P19）は、地上の部品に印を付けて場所の記録の `extra` に残し、`ArtisanSpawner.register(new Spot(…))` を足すだけ（装い = `NpcEntity.variant` = 章） |
 | 保存 | `NpcEntity` の `Variant`（章の装い）。好感度・印は人ごと（`NpcBonds`、役 `skyabyss:artisan`） |
 
-**会話**（`dialogue/artisan.json` = 全章の共通 + `dialogue/ch1/artisan.json` = 一章の足し書き。生成は `tools/gen/items/gen_artisan_dialogue.py`。二〜四章は `ch<n>/artisan.json` を同じ形で足す。足し書きの入口は共通の最後の入口 `a_menu` の手前に入る）:
+**会話**（`dialogue/artisan.json` = 全章の共通 + `dialogue/ch1/artisan.json` = 一章の足し書き。データを直接直す（生成スクリプトはない）。二〜四章は `ch<n>/artisan.json` を同じ形で足す。足し書きの入口は共通の最後の入口 `a_menu` の手前に入る）:
 
 | 入口（上から） | 条件 | 中身 |
 | --- | --- | --- |
@@ -236,8 +236,8 @@ assets/skyabyss_npc/lang/{ja_jp,en_us}.json   会話・クエスト・画面の�
 | 選択肢の `if` / `do` / `goto` / `kind` | 出す条件、選んだときの結果、行き先、印（talk / quest / give / leave） |
 | `text` | 文のキーを上書き（省略すると `dialogue.<名前空間>.<役>.<節>`、選択肢は `.<節>.<選択肢>`） |
 
-- 文と構造の正本は `tools/gen/mobs/gen_npc_content.py`。会話の JSON、クエストの JSON、lang（日本語・英語）、この書類の 9 章の表を一度に書き出す（キーの書き間違いと、片方の言語だけ直し忘れるのを防ぐ）。文は別の名前空間 `skyabyss_npc` に置く（本体の lang と並行作業でぶつからないため。ゲームで読まれることは確かめた）。
-- **足し書き**: 元のファイルに手を入れず、`"extends": true` のファイルで混ぜる。`DialogueManager` が読み込むときに、節を足し、入口を元の最後の入口（条件なし）の手前に足し、元の節の選択肢を指定の選択肢の手前に足す（`add_options`）。自由なモードの文は `assets/skyabyss_quest/lang`、1 章の続きは `assets/skyabyss_story/lang`。生成元は `tools/gen/story/gen_free_quests.py`、`tools/gen/story/gen_story_quests.py`。**この 2 つは書き出したあとの手直しと食い違っているので、再実行しない**（17-10 の閉じ方は `tools/gen/story/gen_opening_text.py` がデータを直接直す）。
+- 文と構造のデータを直接直す（生成スクリプトはない）。会話の JSON、クエストの JSON、lang（日本語・英語）、この書類の 9 章の表を一度に書き出す（キーの書き間違いと、片方の言語だけ直し忘れるのを防ぐ）。文は別の名前空間 `skyabyss_npc` に置く（本体の lang と並行作業でぶつからないため。ゲームで読まれることは確かめた）。
+- **足し書き**: 元のファイルに手を入れず、`"extends": true` のファイルで混ぜる。`DialogueManager` が読み込むときに、節を足し、入口を元の最後の入口（条件なし）の手前に足し、元の節の選択肢を指定の選択肢の手前に足す（`add_options`）。自由なモードの文は `assets/skyabyss_quest/lang`、1 章の続きは `assets/skyabyss_story/lang`。データを直接直す（生成スクリプトはない）。**この 2 つは書き出したあとの手直しと食い違っているので、再実行しない**（17-10 の閉じ方は  がデータを直接直す）。
 - **章ごとの追加ファイル**: `dialogue/` の下ならどのファイル名・サブフォルダでも、`"npc"` と `"extends": true` を書けば同じ役に混ざる（`storyteller.json` のような大きな元には足さない）。例: `data/skyabyss/dialogue/ch2/storyteller.json`。複数の足し書きは場所の名前順に混ぜる。元（`extends` なし）の会話がないと「足し書きの元がない」と警告し、節の名前が元と重なっても警告して足さない。節の名前は `ch2_` のように章の頭を付けて重ならないようにする。自己テスト `SELFTEST arc` が合成した元と足し書きで、節・入口・`add_options` の混ざり方を確かめる。
 - 話題の節の選択肢は、枠の高さ上限（210）を越えないよう、足すときは一つだけにして残りは別の節に分ける。
 
@@ -434,7 +434,7 @@ data/<名前空間>/quest/<名前>.json
 - 手帳の中身: 文のキー `wayfarer_notes.ch<n>.line.<i>`（`i` = 1, 2, …。途切れるまで）が画面に 1 行ずつ並ぶ。中身がなければ「まだ、何も書かれていない。」。敵の見分け方・備えの一行は、章の担当が日英の lang に足す。
 - 渡す: `WayfarerNotes.give(player, 章)`（人ごとに一度。`Growth.discover` の鍵 `notes:ch<n>`）。
 
-**一章の支度の段（34 の 4.2、C1。実装済み）**: 一章だけは 3 本が**メインの段**（`PrepQuests` の章の表。`category` = `main`。**鉄の跡 → 折れた剣 → 盾と糧の順に一本ずつ**出る）。`quest/ch1/trail_iron`（鉄の跡。イサナ。100）・`trail_blade`（折れた剣。職人。100）・`trail_shield`（盾と糧。語り部。50）、生成は `tools/gen/ch1/gen_ch1_trails.py`。開始の条件は、鉄の跡が「一章（段階 0）で、イサナの鯨の話を聞いた（印 `c_whale_heard`）か岩鯨を見た」、折れた剣が「鉄の跡を終えた」、盾と糧が「折れた剣を終えた」。最初の一本を受けると覚書（一章）が渡る。メイン「雲の下の歌」は鯨追いの話のあと段 `prepare`（目的 `condition`: 支度 3 本）で待ち、三本そろうと岩鯨が初めて現れる（17 の 2.8）。各段の書き出しの一言は `quest.skyabyss.ch1.trail_*.<段>.lead`。
+**一章の支度の段（34 の 4.2、C1。実装済み）**: 一章だけは 3 本が**メインの段**（`PrepQuests` の章の表。`category` = `main`。**鉄の跡 → 折れた剣 → 盾と糧の順に一本ずつ**出る）。`quest/ch1/trail_iron`（鉄の跡。イサナ。100）・`trail_blade`（折れた剣。職人。100）・`trail_shield`（盾と糧。語り部。50）、データを直接直す（生成スクリプトはない）。開始の条件は、鉄の跡が「一章（段階 0）で、イサナの鯨の話を聞いた（印 `c_whale_heard`）か岩鯨を見た」、折れた剣が「鉄の跡を終えた」、盾と糧が「折れた剣を終えた」。最初の一本を受けると覚書（一章）が渡る。メイン「雲の下の歌」は鯨追いの話のあと段 `prepare`（目的 `condition`: 支度 3 本）で待ち、三本そろうと岩鯨が初めて現れる（17 の 2.8）。各段の書き出しの一言は `quest.skyabyss.ch1.trail_*.<段>.lead`。
   - **鉄の跡**: 段 `pit`（骨の坑の前の私の荷で頁 `ch1/trail_iron`。`story/ch1/BonePit.openPack`。経験値 30）→ 段 `armor`（目的 `wear`: 鉄張りの旅装の兜・鎖帷子・腰当て・靴のうち着ている種類の数。帯は「鉄張りの旅装を身につけよう（市の武具屋）」）。報酬 70、イサナの好感度 +3。理由はイサナの `c_whale_iron`（「鎖は、素手では上れない。……前にここへ来た旅人は、鉄を着ていた。丘を越えていく石標が、その人の道だ」）と `c_whale3`（「鯨が降りてくる前に、支度をしておけ。まずは鉄だ」）。頁のあとのイサナの一言 `ch1t_c_page`（市の武具屋で買えば足りる）、着たあとの `ch1t_c_iron`（次は刃。職人を指す。`dialogue/ch1/whale_chaser_trail.json`）。
   - **折れた剣**: 段 `hear`（職人に刃のことを聞く。入口 `ch1t_blade_tell`。初めて会う人は名乗りの `ch1a_first_blade` から続けて）→ 段 `cave`（割れ殻の洞をクリアすると台座の頁 `ch1/trail_blade`。`story/ch1/Ch1Trails` が `SiteSpawner.onCleared` で記す。先に洞を抜けた人もさかのぼって済む。30）→ 段 `show`（職人の入口 `ch1t_blade_show`。作り方を教わる）→ 段 `forge`（`all`: 鉄の剣を持つ・岩の砥石を使う `ch1_whetstone_used`）。報酬 70、職人 +3。終わりの一言で語り部を指す。
   - **盾と糧**: 段 `tale`（語り部の入口 `ch1t_shield_tale`。足音の晩の話。結果で頁 `ch1/trail_shield`。`dialogue/ch1/storyteller_trail.json`）→ 段 `pack`（`all`: 盾 1・道の固焼き 8）。報酬 50、語り部 +3。鼓動守（護り糸を職人に）と鯨道の旅装は任意。
@@ -505,7 +505,7 @@ data/<名前空間>/quest/<名前>.json
 
 ### 8.3 自由なモードの一度きり・日替わり・週替わり
 
-全クエストの表は 9.4 節。板の日替わり・週替わりには、ほかに雷翼の背の周回（`daily_storm_rounds`、`weekly_storm_heart`）があり、文は 12 の担当（`tools/gen/story/gen_storm_lore.py`、文は `skyabyss_storm` など）。
+全クエストの表は 9.4 節。板の日替わり・週替わりには、ほかに雷翼の背の周回（`daily_storm_rounds`、`weekly_storm_heart`）があり、文は 12 の担当（データを直接直す（生成スクリプトはない）、文は `skyabyss_storm` など）。
 
 ### 8.4 1 章の続き（メイン 4 本、サブ 4 本）
 
@@ -519,7 +519,7 @@ data/<名前空間>/quest/<名前>.json
 | 天の鍵 `main_key` | 語り部 | 灰の昇る山を終えた（か、天の鍵がそろった） | 鍵は下を向いて打つ。語り部が数え歌のいつつめを思い出す。ベータの終わり |
 
 - **順番を外しても詰まらない。** 目的は伝承（見た・渡った・碑文）と、物語の段階（`stilled`）で数える。噂の段は、もう巨神を見ていれば飛ばす（`skip_if`）。碑文・背・試練の段は、心臓を先に止めていれば飛ばす。
-- 雷翼・余燼を「見た」は伝承 `chapter1/thunder_wing`・`chapter1/ember`。名前は `tools/gen/story/gen_story_quests.py` の `NAMES`。
+- 雷翼・余燼を「見た」は伝承 `chapter1/thunder_wing`・`chapter1/ember`。名前はデータのまま。
 - 語り部とイサナが交互に導く（語り部 = 地上に残る人の言い伝え、イサナ = 空へ惹かれる人の旅の話）。報告はどちらか一人でよい（潮殻・雷翼）。天の鍵がそろったあと、イサナは一度だけ「下を向いているな」と言う（入口、印 `c_key_seen`）。
 
 | サブ | 依頼 | 段階 | 中身 | ほのめかし |
@@ -608,11 +608,11 @@ data/<名前空間>/quest/<名前>.json
 | `npc/NpcMarkers`、`client/npc/NpcMarkerClient` | 頭の上の印（8.5 節。版 `npcmark-1`） |
 | `client/npc/DialogueScreen`、`NpcClient`、`NpcRenderer` | 会話の画面、受け口、描画 |
 | `client/quest/QuestLogScreen`、`QuestHud`、`QuestToast`、`QuestClient` | ログ、追跡表示、札、キー（U） |
-| `tools/gen/mobs/gen_npc_content.py` | 会話・クエスト・文・この書類の表 |
+| データを直接直す（生成スクリプトはない） | 会話・クエスト・文・この書類の表 |
 | `tools/rough/npc.py`、`npc_ui_mock.py` | モデルのラフと書き出し、画面の見本 |
 
 - 共有ファイルへの変更は最小: `SkyAbyss.java` のコンストラクタに登録 2 行（`NpcSetup`、`QuestSetup`）。本体の lang、`sounds.json`、`ModEntities`、`Config`、伝承の JSON には触れていない。
-- 自由なモード: `quest/free/`（7.2 節）、`tools/gen/story/gen_free_quests.py`、`tools/gen/story/gen_message_board.py`。1 章の続き: `story/`（`StoryData`、`StorySelfTest` ほか）、`tools/gen/story/gen_story_quests.py`。序盤: `opening/`、`story/OpeningStorySelfTest`。
+- 自由なモード: `quest/free/`（7.2 節）、データを直接直す（生成スクリプトはない）、`tools/gen/story/gen_message_board.py`。1 章の続き: `story/`（`StoryData`、`StorySelfTest` ほか）。序盤: `opening/`、`story/OpeningStorySelfTest`。
 
 **ほかの担当が使う入口**
 
@@ -675,7 +675,7 @@ WorldLoop.advance(server);                          // M4: 月が落ちたとき
 | NPC は傷つかない | クエストの相手が死ぬと進めなくなる。叩いたときは嫌がって好感度が下がる（反応はある）。倒せるが翌朝同じ場所に戻る案は見送った |
 | 目的を伝承の書の記録で数える | 伝承の書がすでに碑文・心臓・欠片・岩鯨を拾っており、記録は消えない。順番を外しても詰まらない |
 | 会話はサーバーが進める | 条件（クエスト・持ち物）を画面側で判定すると、改造で飛ばせる・同期がずれる |
-| 会話とクエストはデータが正 | 最初は生成スクリプトから書き出したが、そのあとデータを直接直してきたので、生成元（`tools/gen/mobs/gen_npc_content.py` など）は再実行しない（書類にも書き写さない） |
+| 会話とクエストはデータが正 | 最初は生成スクリプトから書き出したが、そのあとデータを直接直してきたので、生成スクリプトは消した（書類にも書き写さない） |
 | 文は言い切らない | 01 の「1 章ではつながりを説明しない」。語り部は話をそらし、鯨追いは自分の感覚しか言わない（欠片を見て「心臓」とは言い当てない）。核心（巡礼者・心臓・留まる者）は名前すら出さない |
 | ループの記憶を「印が記憶へ移る」形にした | 4.5 節 |
 | 経験値と報酬は一人一回 | 会話のくり返し、コマンドでのやり直し、ループで稼げないように |

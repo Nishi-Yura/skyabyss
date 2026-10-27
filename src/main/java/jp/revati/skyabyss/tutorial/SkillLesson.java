@@ -44,7 +44,7 @@ import net.neoforged.neoforge.event.entity.living.LivingDamageEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 
-// 技の稽古 (都の訓練場の師範。クエストと会話は tools/gen/story/gen_skill_lesson.py)。
+// 技の稽古 (都の訓練場の師範。クエストと会話は データを直接直す（生成スクリプトはない）)。
 //   一章: lesson/skills (会う → 覚えて枠に置く → 木偶に技を二度 → 背後から → 構え → 振り直しを聞く)。段ごとに師範の一言と少しの経験。
 //         最後に一度だけ鐘銭。飛ばせる (師範の印 lesson_skip。自動では始まらなくなる)。済んだら師範に頼めば何度でも (報酬は初回だけ)
 //   後の章: 新しい木・要が開いたら一段だけの稽古 (lesson/tree_*) を始め、一言を出す。その木の技を木偶か敵に当てれば済む

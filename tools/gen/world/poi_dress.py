@@ -1,4 +1,4 @@
-"""大陸の見どころ (gen_continent_pois.py の部品) に、土地の町と同じ家の型と仕上げを使う (docs/design/45)。
+"""大陸の見どころ (データを直接直す（生成スクリプトはない） の部品) に、土地の町と同じ家の型と仕上げを使う (docs/design/45)。
 
 - hamlet_houses(bp, region, houses): 集落の家を家の型 (tools/capital/massing.build_house) で建てて、部品 (BP) に写す
 - dress_bp(bp, region): 部品に仕上げ (風化の斑・窓の鎧戸と花の箱・蔦) を掛ける。建物ごとの柱は、地面の上のブロックのつながりで分ける

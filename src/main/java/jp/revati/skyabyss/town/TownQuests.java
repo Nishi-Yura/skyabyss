@@ -28,7 +28,7 @@ import net.neoforged.neoforge.common.util.FakePlayer;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 
 // 町のクエスト (docs/design/35 の 3.5) と裏通りの頼み (3.3) の入口と、クエストの外から来る合図。
-//   一覧   : ALL (章・種類・前のクエスト)。中身 (段・目的・報酬) はデータ data/skyabyss/quest/town/*.json (tools/gen/story/gen_town_quests.py)
+//   一覧   : ALL (章・種類・前のクエスト)。中身 (段・目的・報酬) はデータ data/skyabyss/quest/town/*.json (データを直接直す（生成スクリプトはない）)
 //   入口   : 限定の人のクエスト (kind GUEST) は宿の女将の噂 (rumor) で始まる。墓守・酔いどれの頼みは、その人の会話で始まる
 //            (会話の足し書き attendant_<役>_town.json)。噂は、まだ始めていない頼みのことも話す (始めはしない)
 //   合図   : town_tower_bell (大鐘楼の頂の鐘を鳴らした)、town_at:<印> (印の近くに立った)、

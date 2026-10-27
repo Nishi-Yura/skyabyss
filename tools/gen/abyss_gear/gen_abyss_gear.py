@@ -4,7 +4,7 @@
   src/main/resources/assets/skyabyss_abyss_gear/lang/{ja_jp,en_us}.json   名前・説明・物語の一行・由来・炉・記録・知らせ
   src/main/resources/data/skyabyss/recipe/abyss_lantern_charm.json         遺品「空の手燭」をなぞる (遺品は残る: AbyssRelicItem)
   src/main/resources/data/skyabyss/recipe/abyss_pulse_listener.json        遺品「心臓の形の石」をなぞる
-荷運びのロクの取り替えは tools/gen/ch5/gen_ch5_layers.py の TRADES。
+荷運びのロクの取り替えは データを直接直す（生成スクリプトはない） の TRADES。
 使い方: python -I tools/gen/abyss_gear/gen_abyss_gear.py   (何度流してもよい)
 """
 from __future__ import annotations

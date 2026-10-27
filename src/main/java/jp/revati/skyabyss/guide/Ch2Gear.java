@@ -52,7 +52,7 @@ import net.neoforged.neoforge.registries.DeferredRegister;
 //  - 塩の砥石: 「塩の刃」(攻撃 +1.8、20 分)。水の中 (自分か相手が水に浸かっている) で当てると塩が散って +1 (SALT_WET_BONUS)。使うと合図 SIGNAL_WHETSTONE_USED
 //  - 潮の塩漬け (水中呼吸 60 秒 + 満腹)・真珠の粉薬 (即時に 3❤ 回復、浮遊と鈍足を治す)
 //  - 潮の刻みの砂時計 (消耗しない。次の干潮・満潮までの秒数を画面の帯に一度。クールダウン 30 秒)
-// 品は鍛冶場・薬師の誂え (MADE)。生成は tools/gen/ch2/gen_ch2_gear.py
+// 品は鍛冶場・薬師の誂え (MADE)。データを直接直す（生成スクリプトはない）
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class Ch2Gear {
     private static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(SkyAbyss.MODID);

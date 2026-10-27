@@ -26,7 +26,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 
 // 控え帳の「記し」のつまみ (バニラの進捗の画面の代わり。2026-10-26 の声「進捗の UI 変えてもいい。みにくいので」)。
-// 中身はこの Mod の進捗そのもの (data/skyabyss/advancement、tools/gen/story/gen_advancements.py)。分け方と並びは data/skyabyss/deeds.json。
+// 中身はこの Mod の進捗そのもの (data/skyabyss/advancement、データを直接直す（生成スクリプトはない）)。分け方と並びは data/skyabyss/deeds.json。
 //   deeds          一覧: 分けごとの済んだ数と帯、ぜんぶの数
 //   deeds.<分け>   旅・巨神・名のある強敵・成長・町: 一つの記しが一行 (絵・題・済/途中/まだ)。まだ見えない記し (hidden で済んでいない) は「？？？」
 public final class DeedPages {

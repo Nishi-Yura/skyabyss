@@ -379,7 +379,7 @@
 | 火の粉蛾 | 5%、1 | 1%、1 | — | 火の粉の粉 15%（薬師の誂えの材料） |
 | 燠虫 | 25%、1〜2 | 5%、1 | 3%、1 | 燠の殻 20%（鍛冶場の誂えで「燠の灯」。6.4 の末尾） |
 
-- **燠の灯**（`cinder_lamp`。`EmberBackSetup`、`CinderLampBlock`）: 燠の殻から鍛冶場で誂えてもらう吊り灯。光 12。鎖で吊るし（`hanging`）、床にも置ける（バニラの角灯と同じ挙動）。形は鉄と黒石の籠の中に赤く熾る炭、上に鎖の輪。ときどき火の粉と灰がこぼれる（明るさは変えない）。レシピは `data/skyabyss/recipe/cinder_lamp.json`: 上段 鎖、中段 鉄の粒・燠の殻・鉄の粒、下段 石炭。壊すとつるはしで自分が落ちる。創造メニューにある。モデルと 32x32 の絵は `tools/gen/items/gen_back_blocks.py`、確認の台本は `tools/shots/back_blocks.txt`。燠の背の中には置かない（拾った人が好きな所に置く）。
+- **燠の灯**（`cinder_lamp`。`EmberBackSetup`、`CinderLampBlock`）: 燠の殻から鍛冶場で誂えてもらう吊り灯。光 12。鎖で吊るし（`hanging`）、床にも置ける（バニラの角灯と同じ挙動）。形は鉄と黒石の籠の中に赤く熾る炭、上に鎖の輪。ときどき火の粉と灰がこぼれる（明るさは変えない）。レシピは `data/skyabyss/recipe/cinder_lamp.json`: 上段 鎖、中段 鉄の粒・燠の殻・鉄の粒、下段 石炭。壊すとつるはしで自分が落ちる。創造メニューにある。モデルと 32x32 のデータを直接直す（生成スクリプトはない）、確認の台本は `tools/shots/back_blocks.txt`。燠の背の中には置かない（拾った人が好きな所に置く）。
 - 鎧の 1% は図鑑に記さない（記すなら `EmberLoot` の記録を `EmberMobLoot.onDrops` の鎧の行から呼ぶ）。
 - 経験値は 9.7。登録は `EmberMobSetup`（`Xp`、`CONTENT_LEVEL = 30`）、`GrowthRewards.MOD_ENEMIES` に一行。
 
@@ -894,7 +894,7 @@
 
 ### 12.5 文の鍵の一覧（ほかの担当が使う）
 
-文はすべて `assets/skyabyss_ember/lang` の「__ember.G」の区切りの下にある。生成元は `tools/gen/story/gen_ember_lore.py`（直すときはここを直して実行する。ほかの担当の行は触らない）。Java の鍵は `titan/ember/lore/EmberLore`。**ほかの担当は同じ文を自分で書かずに、この鍵を使う**（同じファイルで鍵が二重にならないように。未決 127）。
+文はすべて `assets/skyabyss_ember/lang` の「__ember.G」の区切りの下にある。データを直接直す（生成スクリプトはない）。Java の鍵は `titan/ember/lore/EmberLore`。**ほかの担当は同じ文を自分で書かずに、この鍵を使う**（同じファイルで鍵が二重にならないように。未決 127）。
 
 | 使う場所 | 鍵（`EmberLore` の名前） | 文（日本語） |
 |---|---|---|
@@ -907,7 +907,7 @@
 | 破れた頁 | `LorePageItem.of(EmberLore.PAGE_SOURCE)`（`ember_back`） | 読むと「鍛えの帳」。頁の説明「余燼の背で拾った。煤けた字で、数がびっしり並んでいる」 |
 | 伝承 | `chapter1/ember_titan` は近づく・背中に入ると自動、`ash_smith`・`ember_stilled` は倒れると自動（`kill`）。どれも `manual` でも記せる | 12.3 |
 
-- 書き方: 雷翼の文（`tools/gen/story/gen_storm_lore.py`）と言い回しをかぶらせない。看板の 1 行は 8 字まで。声に出して読み、主語の抜けと語尾のそろいを確かめる。
+- 書き方: 雷翼の文（データを直接直す（生成スクリプトはない））と言い回しをかぶらせない。看板の 1 行は 8 字まで。声に出して読み、主語の抜けと語尾のそろいを確かめる。
 - 言いすぎない: 正体の名（見る者・留まる者・深淵）は出さない（自己テストで見る）。「なぜ分けたか」「下にいる者は何か」は書かない。ほのめかしの濃さは、ER3 の碑文（眠るたびに下へ沈む）・鍛えの帳の最後の行（下へ）・夜明けの寝返り、の順に積む。
 
 ### 12.6 実装（`titan/ember/lore`）
@@ -915,7 +915,7 @@
 | 作ったもの | ファイル |
 |---|---|
 | 伝承の項目（地を泳ぐもの、灰の民の炉、鍛えの帳、灰の鍛え手、消えた火、碑文） | `data/skyabyss/lore/entry/chapter1/{ember_titan,ember_ruins,forge_ledger,ash_smith,ember_stilled,inscription_ember_*}.json`。並びは 177〜179（story の「余燼の巨神」176 と「天の鍵」180 のあいだ） |
-| 文（伝承・碑文・入口・語り・品） | `assets/skyabyss_ember/lang/{ja_jp,en_us}.json` の「__ember.G」の下。生成元 `tools/gen/story/gen_ember_lore.py` |
+| 文（伝承・碑文・入口・語り・品） | `assets/skyabyss_ember/lang/{ja_jp,en_us}.json` の「__ember.G」の下。データを直接直す（生成スクリプトはない） |
 | 鍵の約束 | `EmberLore`（12.5） |
 | 夜明けの地鳴り（12.4） | `EmberFinale`・`client/EmberFinaleClient`。余燼の心臓を自分で止めた人が、地上へ出て 10 秒たったあとの最初の夜明け（日の時刻 22800〜1200）に一度だけ: 遠い地鳴り（地上の `ember_world_turn`、まだなければバニラの低い鼓動）と 3 秒のごく小さな揺れ（画面の揺れの設定を切っていれば出さない）、チャットに語りの色で一行。記録は持ち主の永続データ（死んでも消えない）。パケットの版 `ember-lore-1` |
 | 天の鍵の締め | 新しいクラスは作らない。`SignFit` に `skyabyss_ember` の lang を読ませ、`LoreSelfTest` に余燼の碑文・頁・待っている ID（`ember_titan`・`ash_smith`・`ember_heart`）と文の名前空間を足す |
@@ -1129,7 +1129,7 @@
 - **前の私の頁**: 樽の頁を読むと伝承「炉跡の頁」（`chapter1/ember_prev_page`）が書に移る。「足の下が温かい日は、丘を見ない。見ると、目が合う気がするから」。筆跡は自分に似ている、で終える（語り部の「この字、どこかで見た気がする」と同じ方向）。
 - **灰降り観測点**の「灰の濃さの地図が控え帳に出る」案は入れていない（引き算。灰の降る範囲は 2.3 の灰の降りが、遠くから探す手がかりをすでに担っている）。
 - **暮らしの変化（足もとの温かさ）**: 段階 3 の人が寝床（復活地点）の 12 ブロック以内にいると、足もとに白い灰が舞う。初めてのときだけ一行「寝床のまわりだけ、地面が温かい。」建築は触らない。
-- 部品（ブロックの配置）は `data/skyabyss/opening/ember_{hearth_ruin,ash_post,warm_ledge}.json`。生成元は `tools/gen/ch4/gen_ch4_content.py`。バニラのブロックだけで組み、新しいテクスチャは足していない。
+- 部品（ブロックの配置）は `data/skyabyss/opening/ember_{hearth_ruin,ash_post,warm_ledge}.json`。データを直接直す（生成スクリプトはない）。バニラのブロックだけで組み、新しいテクスチャは足していない。
 
 ### 17.4 中盤の出来事「夜の浮上」
 

@@ -32,7 +32,7 @@ import net.neoforged.neoforge.registries.RegisterEvent;
 //   余韻 (Aftermath)         心臓を止めたあと、章の終わりの札と語り部の一言、欠けた歌
 //
 // 経験値: 小要素の経験値は一章全体で 1〜1.5 レベル分まで (01 の 4.1)。頁 6〜15、お使い 20、失せ物 40 (合計で約 270)。LORE_XP に足す
-// 文は assets/skyabyss_ch1/lang (tools/gen/ch1/gen_ch1_content.py)。部品は tools/gen/ch1/gen_ch1_blueprints.py
+// 文は assets/skyabyss_ch1/lang (データを直接直す（生成スクリプトはない）)。部品は 
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class Ch1 {
     // ---------------------------------------------------------------- 伝承 (12 項目。lore/entry/ch1/)

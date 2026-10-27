@@ -151,7 +151,7 @@
 ### 6.1 係の人（`facility/AttendantEntity`・`AttendantRole`・`Attendants`）
 
 - エンティティは一つ（`skyabyss:attendant`）。役（下の表）を持ち、保存する。会話の役の ID は `skyabyss:attendant_<役>`（会話 `data/skyabyss/dialogue/attendant_<役>.json`、好感度・会話の印は役ごと）。語り部と同じく傷つかず、受付の前の 2 ブロックだけを歩き、話す間は相手を見る。
-- 会話: 初めては一言の説明（「ここでは何ができるか」）、二度目からは**できることの選択肢**と「ここは何をする所」（説明をもう一度）・「また来る」。生成は `python tools/gen/world/gen_facility_content.py`（会話・店の品ぞろえ・文 `assets/skyabyss_fac/lang`）。町のクエストは会話の足し書き（`"extends": true`）で話題を足せる。
+- 会話: 初めては一言の説明（「ここでは何ができるか」）、二度目からは**できることの選択肢**と「ここは何をする所」（説明をもう一度）・「また来る」。データを直接直す（生成スクリプトはない）。町のクエストは会話の足し書き（`"extends": true`）で話題を足せる。
 - 頭の上に**施設の印**（16×24 の淡い骨の色のドット絵 `textures/gui/npc_marker/fac_<役>.png`、`tools/gen/ui/gen_facility_icons.py`）。誰にでも同じに見え、32 ブロックまで。クエストの印（07 の 8.5）は施設の印の上に出る。
 - 見た目: 低ポリの人（語り部・イサナ・旅の職人と同じ作り。骨も旅の職人と同じ）。形は案ごとに一つで、役ごとに絵（色）だけ替える。3 案（A 上着と前掛け・B 長い衣と帯・C 短い上着と肩掛け）は `docs/review/npc_roughs/`。**既定は A**（いまの NPC にいちばん近い。`AttendantLook.DEFAULT`）。肖像（会話の顔）は役ごとに 3 表情（`tools/gen/mobs/gen_attendant_portraits.py`）。入れ直しは `python tools/install/install_attendants.py`。
 - 立つ所: 都の設計図の**印 `npc_<役>`**（下の表）。建てたとき `ShelterBuilder.finish` が印を場所の付属の点（`SiteData.Entry.extra`）に写して立たせ、そのあとは都から 160 ブロック以内に人がいる間、5 秒ごとに見回って、いなければ立たせ直し、4 ブロックより離れていれば戻す。一つの役は都に一人。**印がなければその係の人は出ない**（エラーにしない）。
@@ -287,7 +287,7 @@
 
 ### 6.10 町のクエストの仕組み（F5・F6。`town/`・`client/town/`・`client/npc/TownGuestRenderer`）
 
-- **クエスト**: 中身はふつうのクエスト（`data/skyabyss/quest/town/*.json`。人ごとの記録・ログ・目的の帯・保存は quest の仕組みのまま）。一覧と章・入口の種類・前のクエストは `town/TownQuests.ALL`。生成は `python tools/gen/story/gen_town_quests.py`（クエスト・会話・足し書き・伝承・文 `assets/skyabyss_town/lang`）。
+- **クエスト**: 中身はふつうのクエスト（`data/skyabyss/quest/town/*.json`。人ごとの記録・ログ・目的の帯・保存は quest の仕組みのまま）。一覧と章・入口の種類・前のクエストは `town/TownQuests.ALL`。データを直接直す（生成スクリプトはない）。
 - **受けられる**: 人の章（止めた心臓の数 + 1）がその章以上で、前のクエスト（墓守・酔いどれの二段目から）を終えていて、まだ始めていない。限定の人のクエストは**宿の噂**で始まる（`FacilityActions.addRumorSource`。章の早い順、限定の人のクエストが先）。墓守・酔いどれの頼みは、その人の会話の選択肢で始まり、噂はその頼みのことを話すだけ。ほかになければ古井戸の噂、それもなければ章ごとの決まった噂。
 - **限定の人**（`TownGuestEntity`。エンティティ `skyabyss:town_guest` 一つに人の id、会話 `guest_<id>`）: 都（160 ブロック）にいる人のうち、そのクエストが進行中の人がいれば、立つ印（`TownGuests.ALL`。段ごとの印も書ける）に 5 秒ごとの見回りで立たせ、要らなくなれば帰す（消す）。**保存しない**（記録から毎回立たせ直す）。見た目は係の人の案 A の形に人ごとの絵（`python tools/gen/mobs/gen_town_guests.py`。一覧 `docs/review/town_quests/guests.png`）、子どもは 0.72 倍。印がなければ出ない。
 - **合図**: `town_hand:<相手>`（会話で品を渡した。選択肢の do が品を受け取って送る）、`town_at:<印>`（印から 3.5 以内に立った。1 秒ごと）、`town_tower_bell`（印 `bell` より 25 以上上・横 8 以内の鐘を手で鳴らした = 大鐘楼の頂の鐘）、`town_child_inn`（付いて歩く子が印 `npc_innkeeper` の 7 以内に着いた）。

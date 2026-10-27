@@ -20,53 +20,6 @@ ROOT = Path(__file__).resolve().parents[2]
 # 出力が src/main/resources のデータ・lang に及ぶ生成スクリプト (ROOT からの相対パス)。
 GENERATORS = """
 tools/gen/world/gen_continent.py
-tools/gen/world/gen_region_towns.py
-tools/gen/world/gen_continent_pois.py
-tools/gen/story/gen_story_quests.py
-tools/gen/story/gen_free_quests.py
-tools/gen/story/gen_town_quests.py
-tools/gen/story/gen_skill_lesson.py
-tools/gen/story/gen_advancements.py
-tools/gen/story/gen_ember_lore.py
-tools/gen/story/gen_storm_lore.py
-tools/gen/story/gen_gear_story.py
-tools/gen/story/gen_trial_lang.py
-tools/gen/story/gen_tablet_texture.py
-tools/gen/story/gen_opening_text.py
-tools/gen/mobs/gen_npc_content.py
-tools/gen/ch1/gen_ch1_blueprints.py
-tools/gen/ch1/gen_ch1_sites.py
-tools/gen/ch1/gen_ch1_content.py
-tools/gen/ch1/gen_ch1_prep.py
-tools/gen/ch1/gen_ch1_trails.py
-tools/gen/ch1/gen_ch1_travel.py
-tools/gen/ch1/gen_ch1_back_mob_sounds.py
-tools/gen/items/gen_artisan_dialogue.py
-tools/gen/ch2/gen_ch2_assets.py
-tools/gen/ch2/gen_ch2_data.py
-tools/gen/ch2/gen_ch2_ground.py
-tools/gen/ch2/gen_ch2_gear.py
-tools/gen/ch3/gen_ch3_content.py
-tools/gen/ch3/gen_ch3_ground.py
-tools/gen/ch3/gen_ch3_gear.py
-tools/gen/ch4/gen_ch4_content.py
-tools/gen/ch4/gen_ch4_ground.py
-tools/gen/ch5/gen_ch5_entrance.py
-tools/gen/ch5/gen_ch5_layers.py
-tools/gen/ui/gen_deep_skill_lang.py
-tools/gen/fx/gen_fx_textures.py
-tools/gen/ui/gen_trial_icons.py
-tools/gen/world/gen_facility_content.py
-tools/gen/world/gen_grave_assets.py
-tools/gen/items/gen_back_blocks.py
-tools/gen/sound/gen_boss_skill_sounds.py
-tools/gen/sound/gen_heart_domain_stings.py
-tools/abyss/gen_abyss_layers.py
-tools/abyss/gen_abyss_depth_texts.py
-tools/abyss/gen_abyss_layer_texts_a.py
-tools/abyss/gen_abyss_layer_texts_b.py
-tools/abyss/gen_abyss_nightmare_texts.py
-tools/abyss/gen_abyss_relic_texts.py
 """.split()
 
 COPY = ["tools", "src/main/resources", "docs/design"]

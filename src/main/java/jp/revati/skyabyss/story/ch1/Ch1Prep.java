@@ -11,7 +11,7 @@ import net.minecraft.resources.ResourceLocation;
 
 // 一章の支度の名前と、職人 (P4)・旅装と砥石 (P5)・地上の敵 (P7)・岩鯨の背 (P8) との差し込み口の一覧。
 //
-// 支度の段 3 本 (メインの段。順不同) は data/skyabyss/quest/ch1/trail_iron|trail_blade|trail_shield.json (tools/gen/ch1/gen_ch1_trails.py)。型の決まりは 07 の 6.8。
+// 支度の段 3 本 (メインの段。順不同) は data/skyabyss/quest/ch1/trail_iron|trail_blade|trail_shield.json (データを直接直す（生成スクリプトはない）)。型の決まりは 07 の 6.8。
 // イサナの「鯨の話」(印 c_whale_heard) のあと、一章の人に三本とも出る。旧い備えの頼み (prep_gear・prep_blade・prep_pulse) はこの三本に吸収した。
 //   trail_iron   (鉄の跡。イサナ。100)   骨の坑 (BonePit) の奥の前の私の荷で頁 ch1/trail_iron → 鉄の防具 4 部位を着る (目的 wear)
 //   trail_blade  (折れた剣。職人。100)  割れ殻の洞 (CleftCave) を抜けると台座に折れた剣 = 頁 ch1/trail_blade → 職人に話す (作り方を教わる) →
@@ -21,7 +21,7 @@ import net.minecraft.resources.ResourceLocation;
 //
 // ---------------------------------------------------------------- 差し込み口の状況
 //   [P4 職人 済]  旅の職人 (skyabyss:artisan) が trail_blade の依頼主。立つ所は荷車の傍らの道 (印 "artisan") = npc/ArtisanSpawner の Spot。
-//              会話は dialogue/artisan.json (全章の共通) + dialogue/ch1/artisan.json (一章の足し書き。tools/gen/items/gen_artisan_dialogue.py)。
+//              会話は dialogue/artisan.json (全章の共通) + dialogue/ch1/artisan.json (一章の足し書き。データを直接直す（生成スクリプトはない）)。
 //              護り糸から最初の鼓動守を編む (入口 ch1t_ward_weave)・編み直し (選択肢 ward。岩殻片 8 つ・1 日 1 つ。Action remake_ward / Condition ward_ok)
 //   [P5 旅装など 済] 鯨道の旅装 (guide/TravelGear)・岩の砥石・道の固焼き・苔の軟膏は鍛冶場・薬師の誂え (MADE)。
 //             旅装は任意 (一式で合図 SIGNAL_GEAR_MADE。今はどの段も読まない)

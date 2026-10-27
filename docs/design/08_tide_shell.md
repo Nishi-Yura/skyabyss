@@ -132,7 +132,7 @@
 
 ### 2.8 二章「引く海」の中身
 
-二章（段階 1。潮殻の心臓を止めるまで）の部品。仕様は [01 の 4.2](01_overview.md)、共通の部品は 01 の 4.1。実装は `titan/tide/chapter/`（`TideChapter` が予兆・小要素・空の段・余韻を登録、`TideEbb` が大干潮、`TideConchItem` が貝、`TideChapterSetup` が登録、`TideChapterCommands` が OP のコマンド）。共有のファイルには手を入れず、予兆は `ForeshadowRegisterEvent`、小要素は `ChapterSites`、空は `ChapterSky.setStage` へ登録するだけ。文は `assets/skyabyss_ch2/lang`、素材は `tools/gen/ch2/gen_ch2_assets.py`（部品・貝の絵・sounds.json）・`tools/gen/ch2/gen_ch2_sounds.py`・`tools/gen/ch2/gen_ch2_data.py`（伝承・クエスト・会話）。
+二章（段階 1。潮殻の心臓を止めるまで）の部品。仕様は [01 の 4.2](01_overview.md)、共通の部品は 01 の 4.1。実装は `titan/tide/chapter/`（`TideChapter` が予兆・小要素・空の段・余韻を登録、`TideEbb` が大干潮、`TideConchItem` が貝、`TideChapterSetup` が登録、`TideChapterCommands` が OP のコマンド）。共有のファイルには手を入れず、予兆は `ForeshadowRegisterEvent`、小要素は `ChapterSites`、空は `ChapterSky.setStage` へ登録するだけ。文は `assets/skyabyss_ch2/lang`、素材は データを直接直す（生成スクリプトはない）・`tools/gen/ch2/gen_ch2_sounds.py`（伝承・クエスト・会話）。
 
 | 部品 | 中身 |
 | --- | --- |

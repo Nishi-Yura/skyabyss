@@ -119,7 +119,7 @@ Keepsakes.registerHolder("accessory", (player, item) -> /* その枠にある it
 
 ## 6. 倒れたとき（墓）
 
-巨神の背中の外（地上・ネザー・エンドなど）で倒れたときの持ち物と経験値の扱い。背中の死は 02 の 7 章のまま（持ち物と経験値を預かり、休み場から再開。ここは何もしない）。倒れたときは「装備は残し、残りは消えない墓」（Core Keeper・Valheim 型）。実装は `jp.revati.skyabyss.grave`（`DeathRules`・`DeathEvents`・`Graves`・`GraveData`・`GraveBlock`・`GraveRescue`）。絵とモデルと会話は `tools/gen/world/gen_grave_assets.py`。
+巨神の背中の外（地上・ネザー・エンドなど）で倒れたときの持ち物と経験値の扱い。背中の死は 02 の 7 章のまま（持ち物と経験値を預かり、休み場から再開。ここは何もしない）。倒れたときは「装備は残し、残りは消えない墓」（Core Keeper・Valheim 型）。実装は `jp.revati.skyabyss.grave`（`DeathRules`・`DeathEvents`・`Graves`・`GraveData`・`GraveBlock`・`GraveRescue`）。絵とモデルと会話は データを直接直す（生成スクリプトはない）。
 
 ### 6.1 型とゲームルール
 
