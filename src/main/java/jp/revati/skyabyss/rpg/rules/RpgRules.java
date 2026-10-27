@@ -135,9 +135,6 @@ public final class RpgRules {
 
     static void continentBorder(net.minecraft.server.MinecraftServer server) {
         net.minecraft.server.level.ServerLevel level = server.overworld();
-        if (!(level.getChunkSource().getGenerator() instanceof jp.revati.skyabyss.world.continent.ContinentChunkGenerator)) {
-            return;
-        }
         net.minecraft.world.level.border.WorldBorder border = level.getWorldBorder();
         if (Math.abs(border.getSize() - OLD_CONTINENT_BORDER) < 0.5 && border.getCenterX() == 0 && border.getCenterZ() == 0) {
             border.setSize(net.minecraft.world.level.border.WorldBorder.MAX_SIZE);
@@ -246,11 +243,11 @@ public final class RpgRules {
     }
 
     // どんな湧き方でも (村への襲撃・ファントム・変身・湧き台・前の世界に残っていた分も)、バニラの敵とさまよう商人は世界に入れない。
-    // 決まりの入った世界か大陸の世界のとき。試遊の確かめ (自己テスト) はバニラのゾンビを使うので、そのあいだは入れる
+    // 決まりの入った世界か地上のとき。試遊の確かめ (自己テスト) はバニラのゾンビを使うので、そのあいだは入れる
     @SubscribeEvent
     static void onJoin(net.neoforged.neoforge.event.entity.EntityJoinLevelEvent event) {
         if (event.getLevel() instanceof ServerLevel level && vanillaEnemy(event.getEntity()) && !jp.revati.skyabyss.SelfTestRunner.enabled()
-                && (adventure(level) || level.getChunkSource().getGenerator() instanceof jp.revati.skyabyss.world.continent.ContinentChunkGenerator)) {
+                && (adventure(level) || level.dimension() == net.minecraft.world.level.Level.OVERWORLD)) {
             event.setCanceled(true);
         }
     }

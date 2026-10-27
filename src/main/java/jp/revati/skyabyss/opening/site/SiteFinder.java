@@ -20,13 +20,11 @@ import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.RandomState;
 
-// 序盤の構造物の場所探し (docs/design/17 の 4 章)。チャンクを作らずに、地形生成の高さと群系だけで決める
-// (ワールドを始める瞬間に重くならない。木や人の建物は、建てる直前に実際のブロックを見て確かめる: SiteJob)。
-// 陸の判定: 水面と海底の高さが同じ (水がない)、群系が海・川・沼・ジャングル・暗い森・きのこ島でない、
-// 範囲の高さの差が小さい (険しい斜面を避ける)。
-// 配置: 野営地 = スポーン地点 (だめなら近い陸)、宿り = 野営地から 140〜220 (東を優先)、
-//       足跡 = 道から 30〜60 ブロック外れた所に、一方向へ歩いた 4 歩 (96 ブロックおき、左右の足が交互。大きな足跡 = 長さ 50・幅 45)、
-//       骨 = 野営地から 250〜350 の丘 (宿りと違う方角。長さ 100・幅 47 の大きな骨)
+// 序盤の構造物の場所 (docs/design/40 の 3 章)。天と淵の大陸の図 (ContinentLayout) に描いた場所に、地形生成の高さだけで合わせる
+// (チャンクを作らない。木や人の建物は、建てる直前に実際のブロックを見て確かめる: SiteJob)。
+// 陸の判定: 水面と海底の高さが同じ (水がない)、群系が海・川・沼などでない、範囲の高さの差が小さい。
+// 野営地 = はじまりの島の谷のはじまりの場所のそば、宿り = 鐘の都、足跡 = 島の道の脇の決まった所、骨 = 一章の跡地の中、
+// ほかに土地ごとの町・外れの休み場と祠・渡し船の船着き場
 public final class SiteFinder {
     // 一つの場所の候補 (中心の高さは地面の上面 + 1)
     public record Spot(BlockPos pos, int rot, boolean mirror) {
@@ -51,10 +49,6 @@ public final class SiteFinder {
             return false;
         }
 
-        // (x, z) から r ブロック以内に、バニラの村・構造物 (地上の大きなもの) が出るチャンクがあるか (跡地はそれを避ける)
-        default boolean structureNear(int x, int z, int r) {
-            return false;
-        }
     }
 
     // 「地形の高さ」を問い合わせる道具 (チャンクを作らない)
@@ -76,11 +70,6 @@ public final class SiteFinder {
             this.sampler = random.sampler();
             this.seaLevel = gen.getSeaLevel();
             tops.defaultReturnValue(Integer.MIN_VALUE);
-        }
-
-        // 天と淵の大陸 (場所は図に描いたとおり。docs/design/40 の 3 章)
-        public boolean continent() {
-            return gen instanceof jp.revati.skyabyss.world.continent.ContinentChunkGenerator;
         }
 
         // 地面の一番上のブロックの高さ (海底を含む。木は数えない)
@@ -128,53 +117,6 @@ public final class SiteFinder {
         public boolean dryBiome(int x, int z) {
             Holder<Biome> b = biome(x, z);
             return b.is(BiomeTags.IS_BADLANDS) || b.is(BiomeTags.IS_SAVANNA) || b.is(Biomes.DESERT) || b.is(Biomes.DARK_FOREST);
-        }
-
-        // 調べる構造物の組 (地上の村・神殿・館・海底神殿など。難破船・遺跡は避けない = 二章の浜に要る)
-        private static final List<net.minecraft.resources.ResourceKey<net.minecraft.world.level.levelgen.structure.StructureSet>> AVOID_SETS = List.of(
-                net.minecraft.world.level.levelgen.structure.BuiltinStructureSets.VILLAGES,
-                net.minecraft.world.level.levelgen.structure.BuiltinStructureSets.DESERT_PYRAMIDS,
-                net.minecraft.world.level.levelgen.structure.BuiltinStructureSets.IGLOOS,
-                net.minecraft.world.level.levelgen.structure.BuiltinStructureSets.JUNGLE_TEMPLES,
-                net.minecraft.world.level.levelgen.structure.BuiltinStructureSets.SWAMP_HUTS,
-                net.minecraft.world.level.levelgen.structure.BuiltinStructureSets.PILLAGER_OUTPOSTS,
-                net.minecraft.world.level.levelgen.structure.BuiltinStructureSets.OCEAN_MONUMENTS,
-                net.minecraft.world.level.levelgen.structure.BuiltinStructureSets.WOODLAND_MANSIONS);
-        private List<net.minecraft.world.level.levelgen.structure.StructureSet> avoid;
-
-        // 構造物の置き場の候補のチャンクで、そのチャンクの群系 (海面の高さ) に構造物が出られるか。地形の高さは問い合わせないので軽い
-        @Override
-        public boolean structureNear(int x, int z, int r) {
-            if (avoid == null) {
-                List<net.minecraft.world.level.levelgen.structure.StructureSet> sets = new ArrayList<>();
-                var reg = level.registryAccess().registryOrThrow(net.minecraft.core.registries.Registries.STRUCTURE_SET);
-                for (var key : AVOID_SETS) {
-                    reg.getHolder(key).ifPresent(h -> sets.add(h.value()));
-                }
-                avoid = sets;
-            }
-            var state = level.getChunkSource().getGeneratorState();
-            int c = r >> 4;
-            int cx0 = x >> 4;
-            int cz0 = z >> 4;
-            for (var set : avoid) {
-                for (int dx = -c; dx <= c; dx++) {
-                    for (int dz = -c; dz <= c; dz++) {
-                        if (!set.placement().isStructureChunk(state, cx0 + dx, cz0 + dz)) {
-                            continue;
-                        }
-                        int bx = ((cx0 + dx) << 4) + 8;
-                        int bz = ((cz0 + dz) << 4) + 8;
-                        Holder<Biome> b = gen.getBiomeSource().getNoiseBiome(bx >> 2, seaLevel >> 2, bz >> 2, sampler);
-                        for (var entry : set.structures()) {
-                            if (entry.structure().value().biomes().contains(b)) {
-                                return true;
-                            }
-                        }
-                    }
-                }
-            }
-            return false;
         }
 
         @Override
@@ -272,23 +214,13 @@ public final class SiteFinder {
         List<Planned> out = new ArrayList<>();
         List<ChapterGrounds.Found> grounds = new ArrayList<>();
         Spot shelter = findShelter(p, camp);
-        double pathYaw = 0;
         if (shelter != null) {
             out.add(new Planned(Kind.SHELTER.id, 0, shelter.pos(), encode(shelter.rot(), shelter.mirror())));
-            pathYaw = Math.atan2(shelter.pos().getZ() - camp.getZ(), shelter.pos().getX() - camp.getX());
-            // 天と淵の大陸: 野営地ははじまりの島。足跡は島の道ぞい (野営地から船着き場へ)
-            BlockPos printsTo = p.continent() ? jp.revati.skyabyss.world.continent.ContinentLayout.get().dock() : shelter.pos();
-            List<BlockPos> fixed = p.continent() ? jp.revati.skyabyss.world.continent.ContinentLayout.get().islandPrints() : List.of();
+            // はじまりの島: 足跡は道の脇の窪地の決まった所 (道にかからない。2026-10-26)。向きは並びの向き
+            List<BlockPos> fixed = jp.revati.skyabyss.world.continent.ContinentLayout.get().islandPrints();
             if (!fixed.isEmpty()) {
-                // はじまりの島: 足跡は道の脇の窪地の決まった所 (道にかからない。2026-10-26)。向きは並びの向き
                 planFixedPrints(p, out, fixed);
-            } else {
-                planFootprints(p, out, camp, printsTo);
             }
-        } else {
-            SkyAbyss.LOGGER.error("Opening sites: no land for the shelter near {}", camp);
-            // 宿りがなくても足跡は要る (足跡の頁の目印): 野営地から東 180 ブロックの仮の宿りを道の向きに使う (first_hour_log B-6)
-            planFootprints(p, out, camp, camp.offset(180, 0, 0));
         }
         // 章の跡地 (都から方位と距離で)。野営地と足跡は避ける
         if (shelter != null) {
@@ -314,16 +246,13 @@ public final class SiteFinder {
                         whale.sea(), whale.restYaw(), whale.fixedRest(), shrine, whale.road(), whale.dist(), whale.deg()));
             }
         }
-        if (ribs == null) {
-            ribs = findRibs(p, camp, shelter == null ? 0 : pathYaw);
-        }
         if (ribs != null) {
             out.add(new Planned(Kind.RIBS.id, 0, ribs.pos(), encode(ribs.rot(), ribs.mirror())));
         } else {
             SkyAbyss.LOGGER.error("Opening sites: no hill for the rib bones near {}", camp);
         }
-        // 天と淵の大陸: 土地ごとの町 (図に描いた場所。docs/design/40 の 3 章)
-        if (p.continent()) {
+        // 土地ごとの町 (図に描いた場所。docs/design/40 の 3 章)
+        {
             for (int i = 0; i < jp.revati.skyabyss.world.continent.ContinentTowns.REGIONS.length; i++) {
                 BlockPos t = jp.revati.skyabyss.world.continent.ContinentLayout.get().town(jp.revati.skyabyss.world.continent.ContinentTowns.REGIONS[i]);
                 if (t != null) {
@@ -414,10 +343,8 @@ public final class SiteFinder {
     // ---------------------------------------------------------------- 野営地: スポーン地点。だめなら近い陸 (半径 160 まで)
     @Nullable
     static BlockPos findCamp(Probe p, BlockPos spawn) {
-        if (p.continent()) {
-            // 天と淵の大陸: 外れの谷の、図に描いたはじまりの場所のそば
-            spawn = jp.revati.skyabyss.world.continent.ContinentLayout.get().start();
-        }
+        // 外れの谷の、図に描いたはじまりの場所のそば
+        spawn = jp.revati.skyabyss.world.continent.ContinentLayout.get().start();
         for (int range : new int[] {3, 6, 12}) {
             for (int r = 0; r <= 160; r += (r == 0 ? 6 : 6)) {
                 int n = r == 0 ? 1 : Math.max(8, (int) (Math.PI * 2 * r / 7));
@@ -451,75 +378,10 @@ public final class SiteFinder {
         return null;
     }
 
-    // ---------------------------------------------------------------- 宿り: 野営地から 140〜220 (東を優先)。庭の入口 (南向き) を野営地の方へ向ける
-    @Nullable
-    // 都の中心から、バニラの村・構造物の出るチャンクまでの最小の距離 (都の矩形の縁 140 + 村の広がり 40)
-    static final int CAPITAL_STRUCTURE_GAP = 176;
-
+    // ---------------------------------------------------------------- 宿り: 鐘の都 (図の場所)。庭の入口 (南向き) を野営地の方へ向ける
     static Spot findShelter(Probe p, BlockPos camp) {
-        if (p.continent()) {
-            BlockPos c = jp.revati.skyabyss.world.continent.ContinentLayout.get().capital();
-            return new Spot(new BlockPos(c.getX(), p.top(c.getX(), c.getZ()) + 1, c.getZ()), rotToward(camp.getX() - c.getX(), camp.getZ() - c.getZ(), true), false);
-        }
-        // 都 (docs/design/33 の 2): 一辺 200 の範囲。野営地から 260〜340 (壁の縁が野営地から 150 以上)。段差は整地で吸収するので広めに許す
-        int[][] passes = {{260, 340, 20}, {260, 340, 32}, {240, 420, 48}, {240, 480, 80}};
-        for (int[] pass : passes) {
-            List<Integer> dists = new ArrayList<>();
-            for (int d = pass[0]; d <= pass[1]; d += 10) {
-                dists.add(d);
-            }
-            dists.sort(Comparator.comparingInt(d -> Math.abs(d - 300)));
-            for (int ai = 0; ai < 24; ai++) {
-                // 東から 0, +15, -15, +30, -30, ... 度
-                int deg = ((ai + 1) / 2) * 15 * (ai % 2 == 1 ? 1 : -1);
-                double a = Math.toRadians(deg);
-                for (int d : dists) {
-                    int x = camp.getX() + (int) Math.round(Math.cos(a) * d);
-                    int z = camp.getZ() + (int) Math.round(Math.sin(a) * d);
-                    Area ar = area(p, x, z, 100, 100, pass[2], false, pass[2] < 48);
-                    // バニラの村・構造物 (ChapterGrounds と同じ表) の上には建てない (都の縁 140 + 村の広がり)
-                    if (ar.ok() && !p.structureNear(x, z, CAPITAL_STRUCTURE_GAP)) {
-                        BlockPos c = new BlockPos(x, ar.median() + 1, z);
-                        return new Spot(c, rotToward(camp.getX() - x, camp.getZ() - z, true), false);
-                    }
-                }
-            }
-        }
-        // 最後の手段: 都は必ず建てる。群系を問わず、水は 1/4 まで許し、段差のいちばん小さい所を選ぶ (整地で吸収する)
-        WET_FRACTION = 4;
-        try {
-            Area best = null;
-            boolean bestClear = false;
-            int bx = 0;
-            int bz = 0;
-            for (int ai = 0; ai < 24; ai++) {
-                int deg = ((ai + 1) / 2) * 15 * (ai % 2 == 1 ? 1 : -1);
-                double a = Math.toRadians(deg);
-                for (int d = 260; d <= 420; d += 40) {
-                    int x = camp.getX() + (int) Math.round(Math.cos(a) * d);
-                    int z = camp.getZ() + (int) Math.round(Math.sin(a) * d);
-                    Area ar = area(p, x, z, 100, 100, 512, false, false);
-                    if (!ar.ok()) {
-                        continue;
-                    }
-                    // 構造物から離れた所を先に (どこも近ければ段差だけで選ぶ)
-                    boolean clear = !p.structureNear(x, z, CAPITAL_STRUCTURE_GAP);
-                    if (best == null || (clear && !bestClear) || (clear == bestClear && ar.max() - ar.min() < best.max() - best.min())) {
-                        bestClear = clear;
-                        best = ar;
-                        bx = x;
-                        bz = z;
-                    }
-                }
-            }
-            if (best != null) {
-                SkyAbyss.LOGGER.warn("Opening sites: the capital takes rough ground near {} {} (height range {})", bx, bz, best.max() - best.min());
-                return new Spot(new BlockPos(bx, best.median() + 1, bz), rotToward(camp.getX() - bx, camp.getZ() - bz, true), false);
-            }
-        } finally {
-            WET_FRACTION = 10;
-        }
-        return null;
+        BlockPos c = jp.revati.skyabyss.world.continent.ContinentLayout.get().capital();
+        return new Spot(new BlockPos(c.getX(), p.top(c.getX(), c.getZ()) + 1, c.getZ()), rotToward(camp.getX() - c.getX(), camp.getZ() - c.getZ(), true), false);
     }
 
     // dx, dz の向きを向く回転 (部品は「南向き」(toSouthFacing = true) か「北向き」(false) が基準)。0..3
@@ -534,71 +396,10 @@ public final class SiteFinder {
         return southBase ? dirIndex : (dirIndex + 2) & 3;
     }
 
-    // ---------------------------------------------------------------- 足跡: 道から 30〜60 ブロック外れた所に、道と同じ向きへ歩いた 4 歩
-    // 足跡は大きい (長さ 50・幅 45)。歩く向きは東西南北のどれか (部品を 90 度ずつ回して置くため)。一歩は 96 ブロックおき、左右の足が道の左右に 14 ずつずれる
-    // (地面が合わなければ、少し前後・左右にずらして探す)。野営地から宿りの側へ向かう向きだけを使う (index が大きいほど野営地から遠い。最後の足跡の先に、地へ潜った穴がある)。
-    // 必ず建つように、条件 (高さの差・本数・道からの距離) を段階的にゆるめる。ただし道からの距離の上限は 150 (道・宿り・野営地に重ならない下限もある)
-    static final int STRIDE = 96;
-    static final int LATERAL = 14;
-    static final int PRINTS = 4;
-    // 足跡の部品の半分の大きさ (ブロック。向きを揃えた北向きで 横 x 前後)
-    static final int FOOT_HALF_X = 27;
-    static final int FOOT_HALF_Z = 33;
-    // 足跡の中心から、道・宿り・野営地までの下限 (足跡の半分の大きさ + 余白)
-    static final int FOOT_ROAD_MIN = 38;
-    static final int FOOT_SITE_MIN = 62;
-    // 都 (鐘の宿り) は大きい (中心から壁まで約 100、墓地まで 140)。足跡は中心から 210 より外に置く。そのほかの場所は 150 より外
-    static final int CAPITAL_FOOT_MIN = 210;
-    static final int CAPITAL_SITE_MIN = 150;
-
+    // ---------------------------------------------------------------- 足跡: 島の道の脇の決まった所 (図)。左右の足が交互
+    // 都の外で旅の跡を見張る範囲を広げるか (SKYABYSS_SMALL_SHELTER で小さな宿りの試し)
     public static boolean capital() {
         return System.getenv("SKYABYSS_SMALL_SHELTER") == null;
-    }
-    // 段階: {高さの差の上限, 道からの下限, 上限, 本数, 向きを全部使うか, 乾いていてほしい範囲 (部品の大きさに対する %。小さい池は水の列を残して建てる)、群系を見るか}
-    static final int[][] FOOT_STAGES = {{10, 38, 85, 4, 0, 100, 1}, {18, 38, 100, 4, 0, 100, 1}, {30, 38, 120, 4, 0, 100, 1}, {46, 36, 135, 4, 0, 100, 1},
-            {70, 36, 140, 4, 0, 100, 1}, {30, 36, 120, 3, 0, 100, 1}, {70, 36, 140, 3, 0, 100, 1}, {60, 34, 140, 3, 1, 100, 1}, {60, 34, 150, 2, 1, 100, 1},
-            {90, 32, 150, 1, 1, 100, 1}, {120, 32, 155, 3, 0, 40, 0}, {200, 30, 155, 2, 1, 40, 0}, {400, 30, 155, 1, 1, 15, 0},
-            // 最後の手段 (first_hour_log B-6): 中心が乾いていれば、高さの差も群系も問わず 1 つ (建てるときに SiteJob が動かす・強行する)
-            {2000, 30, 160, 1, 1, 0, 0}};
-
-    static void planFootprints(Ground p, List<Planned> out, BlockPos camp, BlockPos shelter) {
-        double dx = shelter.getX() - camp.getX();
-        double dz = shelter.getZ() - camp.getZ();
-        double len = Math.sqrt(dx * dx + dz * dz);
-        double ux = dx / len;
-        double uz = dz / len;
-        // 歩く向き: 道にいちばん近い東西南北 (道が斜めなら、その次に近い向きも)。最後の段階は全部
-        int[][] cardinals = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}};
-        List<int[]> sorted = new ArrayList<>(List.of(cardinals));
-        sorted.sort(Comparator.comparingDouble(c -> -(c[0] * ux + c[1] * uz)));
-        List<int[]> along = new ArrayList<>();
-        for (int[] c : sorted) {
-            if (c[0] * ux + c[1] * uz > 0.2) {
-                along.add(c);
-            }
-        }
-        for (int[] st : FOOT_STAGES) {
-            List<int[]> dirs = st[4] == 1 ? sorted : along;
-            for (double frac : new double[] {0.1, 0.2, 0.0, 0.3, 0.4, 0.5, 0.6}) {
-                for (int off : new int[] {46, 40, 54, 62, 72, 84}) {
-                    for (int side : new int[] {1, -1}) {
-                        for (int[] dir : dirs) {
-                            double sx = camp.getX() + ux * len * frac - uz * off * side;
-                            double sz = camp.getZ() + uz * len * frac + ux * off * side;
-                            List<BlockPos> prints = trail(p, sx, sz, dir, st[0], st[3], camp, shelter, ux, uz, len, st[1], st[2], st[5], st[6] == 1);
-                            if (prints != null) {
-                                addTrail(out, prints, dir);
-                                if (st[3] < PRINTS || st[0] > 30) {
-                                    SkyAbyss.LOGGER.info("Opening sites: {} footprints (height range up to {}, road distance {}..{})", prints.size(), st[0], st[1], st[2]);
-                                }
-                                return;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        SkyAbyss.LOGGER.error("Opening sites: no place for the footprints");
     }
 
     static void planFixedPrints(Probe p, List<Planned> out, List<BlockPos> at) {
@@ -621,107 +422,9 @@ public final class SiteFinder {
         }
     }
 
-    // start から dir へ、count 歩の並びを探す (一歩ごとに少し前後・左右へずらして、乾いた所を探す)。見つからなければ null
-    @Nullable
-    private static List<BlockPos> trail(Ground p, double sx, double sz, int[] dir, int maxRange, int count, BlockPos camp, BlockPos shelter, double ux,
-            double uz, double len, int dpMin, int dpMax, int corePercent, boolean biome) {
-        boolean ns = dir[0] == 0;
-        int hx = (ns ? FOOT_HALF_X : FOOT_HALF_Z) * corePercent / 100;
-        int hz = (ns ? FOOT_HALF_Z : FOOT_HALF_X) * corePercent / 100;
-        // 進む向きの右手 (南向きなら西)
-        int rx = -dir[1];
-        int rz = dir[0];
-        List<BlockPos> prints = new ArrayList<>();
-        for (int i = 0; i < count; i++) {
-            boolean found = false;
-            int side = (i % 2 == 0) ? 1 : -1;
-            for (int da : new int[] {0, 10, -10, 20, -20}) {
-                for (int lat : new int[] {0, 10, -10, 20, -20, 32, -32}) {
-                    int x = (int) Math.round(sx + dir[0] * (STRIDE * i + da) + rx * (LATERAL * side + lat));
-                    int z = (int) Math.round(sz + dir[1] * (STRIDE * i + da) + rz * (LATERAL * side + lat));
-                    double dp = distToPath(x, z, camp, ux, uz, len);
-                    if (dp < dpMin || dp > dpMax) {
-                        continue;
-                    }
-                    if (Math.hypot(x - camp.getX(), z - camp.getZ()) < FOOT_SITE_MIN || Math.hypot(x - shelter.getX(), z - shelter.getZ()) < (capital() ? CAPITAL_FOOT_MIN : FOOT_SITE_MIN)) {
-                        continue;
-                    }
-                    // 前の足跡と近すぎない (一歩の間隔の下限)
-                    if (!prints.isEmpty() && Math.hypot(x - prints.get(prints.size() - 1).getX(), z - prints.get(prints.size() - 1).getZ()) < 70) {
-                        continue;
-                    }
-                    Area ar = area(p, x, z, hx, hz, maxRange, false, biome);
-                    if (ar.ok()) {
-                        prints.add(new BlockPos(x, ar.median() + 1, z));
-                        found = true;
-                        break;
-                    }
-                }
-                if (found) {
-                    break;
-                }
-            }
-            if (!found) {
-                return null;
-            }
-        }
-        return prints;
-    }
-
-    static double distToPath(int x, int z, BlockPos camp, double ux, double uz, double len) {
-        double rx = x - camp.getX();
-        double rz = z - camp.getZ();
-        double along = Math.max(0, Math.min(len, rx * ux + rz * uz));
-        double cx = ux * along;
-        double cz = uz * along;
-        return Math.sqrt((rx - cx) * (rx - cx) + (rz - cz) * (rz - cz));
-    }
-
-    // ---------------------------------------------------------------- 骨: 野営地から 250〜350 の丘。宿りと違う方角 (宿りの向きから 90 度以上離す)
-    // 骨は大きい (長さ 100・幅 47)。向きは 東西 か 南北 (部品を 90 度回して置く)。範囲の高さの差が小さい所を選ぶ。
-    // 必ず建つように、高さの差の上限を段階的にゆるめ (18 → 30 → 46 → 70 → 120)、最後は距離 200〜380・宿りと 80 度以上離れた乾いた所ならどこでもよい
+    // ---------------------------------------------------------------- 骨: 一章の跡地の中 (findRibsNear)。骨は大きい (長さ 100・幅 47)。向きは 東西 か 南北
     static final int RIB_HALF_LONG = 52;
     static final int RIB_HALF_SHORT = 25;
     // 段階: {高さの差の上限, 乾いていてほしい範囲 (骨の大きさに対する %。池は水の列を残して建てる)、群系を見るか}
     static final int[][] RIB_PASSES = {{18, 100, 1}, {30, 100, 1}, {46, 100, 1}, {70, 100, 1}, {120, 100, 1}, {80, 50, 1}, {200, 30, 0}, {1000, 8, 0}};
-
-    @Nullable
-    static Spot findRibs(Probe p, BlockPos camp, double shelterAngle) {
-        for (int pass = 0; pass < RIB_PASSES.length; pass++) {
-            Spot best = null;
-            double bestScore = -1e9;
-            boolean last = pass >= 5;
-            int degFrom = last ? 80 : 90;
-            for (int deg = degFrom; deg <= 360 - degFrom; deg += last ? 8 : 10) {
-                double a = shelterAngle + Math.toRadians(deg);
-                int[] dists = last ? new int[] {300, 260, 340, 280, 320, 240, 360, 226, 374, 232, 368} : new int[] {300, 270, 330, 285, 315, 255, 345, 240, 360};
-                for (int d : dists) {
-                    int x = camp.getX() + (int) Math.round(Math.cos(a) * d);
-                    int z = camp.getZ() + (int) Math.round(Math.sin(a) * d);
-                    int rot = Math.abs(x - camp.getX()) > Math.abs(z - camp.getZ()) ? 1 : 0;
-                    int hx = (rot == 1 ? RIB_HALF_SHORT : RIB_HALF_LONG) * RIB_PASSES[pass][1] / 100;
-                    int hz = (rot == 1 ? RIB_HALF_LONG : RIB_HALF_SHORT) * RIB_PASSES[pass][1] / 100;
-                    Area ar = area(p, x, z, hx, hz, RIB_PASSES[pass][0], false, RIB_PASSES[pass][2] == 1);
-                    if (!ar.ok()) {
-                        continue;
-                    }
-                    if (pass == 0 && ar.median() < p.seaLevel + 6) {
-                        continue;
-                    }
-                    double score = ar.median() - p.seaLevel - ar.range() * 0.7 - Math.abs(d - 300) * 0.05;
-                    if (score > bestScore) {
-                        bestScore = score;
-                        best = new Spot(new BlockPos(x, ar.median() + 1, z), rot, false);
-                    }
-                }
-            }
-            if (best != null) {
-                if (pass > 0) {
-                    SkyAbyss.LOGGER.info("Opening sites: the rib bones need a height range of up to {} (dry core {}%)", RIB_PASSES[pass][0], RIB_PASSES[pass][1]);
-                }
-                return best;
-            }
-        }
-        return null;
-    }
 }

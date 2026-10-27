@@ -23,7 +23,7 @@ import net.minecraft.world.phys.AABB;
 //  - 新しいワールドの最初の空の影は、初日の正午に予定される
 //  - 書は、最初の影が済んだ人に必ず予定される
 //  - 岩鯨は、最初の影から半日たつまで自然には現れない
-//  - 語り部に会える保証: 案内の手順の判定と、鐘のない所に野営 (焚き火と語り部) が立つこと
+//  - 方角の 8 方位
 public final class OpeningBeatsSelfTest {
     private static final int X = 6000;
     private static final int Z = 6000;
@@ -49,8 +49,7 @@ public final class OpeningBeatsSelfTest {
             firstShadow(level, failures);
             bookGuarantee(failures);
             whaleGate(failures);
-            guideSteps(failures);
-            camp(level, failures);
+            compassSteps(failures);
         } catch (RuntimeException e) {
             SkyAbyss.LOGGER.error("SELFTEST opening beats exception", e);
             failures.add("exception " + e);
@@ -158,52 +157,8 @@ public final class OpeningBeatsSelfTest {
         }
     }
 
-    // ---- 案内の手順
-    private static void guideSteps(List<String> failures) {
-        OpeningBeats.Move m;
-        // 会った人は何もしない
-        if ((m = OpeningBeats.decide(true, false, 2, 999999, 0, -1, 0, -1)) != OpeningBeats.Move.DONE) {
-            failures.add("met player: " + m);
-        }
-        // 村 (鐘か野営) が近ければ任せる
-        if ((m = OpeningBeats.decide(false, true, 0, 999999, 0, -1, 0, -1)) != OpeningBeats.Move.WAIT) {
-            failures.add("near a base: " + m);
-        }
-        // 影が去って 1 分: 村を探す
-        if (OpeningBeats.decide(false, false, 0, OpeningBeats.HINT_AFTER - 1, 0, -1, 0, -1) != OpeningBeats.Move.WAIT
-                || OpeningBeats.decide(false, false, 0, OpeningBeats.HINT_AFTER, 0, -1, 0, -1) != OpeningBeats.Move.SEARCH) {
-            failures.add("the village search is not planned at 1 minute");
-        }
-        // 近くに村が無い: すぐ野営
-        if ((m = OpeningBeats.decide(false, false, 2, 1300, 0, -1, 0, -1)) != OpeningBeats.Move.CAMP) {
-            failures.add("no village nearby but no camp: " + m);
-        }
-        // 村が見つかった: 知らせ直し (半日おき、3 回まで)、それでも会えなければ野営
-        long hinted = 1300;
-        if (OpeningBeats.decide(false, false, 1, hinted + OpeningBeats.REHINT - 1, 0, hinted, 1, -1) != OpeningBeats.Move.WAIT
-                || OpeningBeats.decide(false, false, 1, hinted + OpeningBeats.REHINT, 0, hinted, 1, -1) != OpeningBeats.Move.HINT) {
-            failures.add("the village hint is not repeated after half a day");
-        }
-        if ((m = OpeningBeats.decide(false, false, 1, hinted + OpeningBeats.REHINT + OpeningBeats.REHINT / 2, 0, hinted, OpeningBeats.MAX_HINTS, -1)) != OpeningBeats.Move.WAIT) {
-            failures.add("hints go past the maximum: " + m);
-        }
-        if ((m = OpeningBeats.decide(false, false, 1, OpeningBeats.HINT_AFTER + OpeningBeats.CAMP_AFTER, 0, hinted, OpeningBeats.MAX_HINTS, -1))
-                != OpeningBeats.Move.CAMP) {
-            failures.add("still unmet after the village hints but no camp: " + m);
-        }
-        // 野営を作ったあとは、1 日待ってから作り直す
-        if (OpeningBeats.decide(false, false, 2, 5000 + OpeningBeats.CAMP_AFTER - 1, 0, -1, 0, 5000) != OpeningBeats.Move.WAIT
-                || OpeningBeats.decide(false, false, 2, 5000 + OpeningBeats.CAMP_AFTER, 0, -1, 0, 5000) != OpeningBeats.Move.CAMP) {
-            failures.add("the camp is not rebuilt after a day");
-        }
-        // 案内は、最初の影が済んでから (影を起こさない設定なら最初から)
-        SkyEventData none = new SkyEventData();
-        SkyEventData seen = new SkyEventData();
-        seen.countPass(0);
-        if (OpeningBeats.started(none, false, 1.0) || !OpeningBeats.started(seen, false, 1.0) || OpeningBeats.started(seen, true, 1.0)
-                || !OpeningBeats.started(none, false, 0.0)) {
-            failures.add("the guide starts at the wrong time");
-        }
+    // ---- 方角
+    private static void compassSteps(List<String> failures) {
         // 方角: 北は -z、東は +x
         BlockPos o = BlockPos.ZERO;
         if (OpeningBeats.compass(o, new BlockPos(0, 0, -100)) != 0 || OpeningBeats.compass(o, new BlockPos(100, 0, 0)) != 2
@@ -211,50 +166,5 @@ public final class OpeningBeatsSelfTest {
                 || OpeningBeats.compass(o, new BlockPos(100, 0, -100)) != 1) {
             failures.add("the compass directions are off");
         }
-    }
-
-    // ---- 鐘のない所に野営が立つ
-    private static void camp(ServerLevel level, List<String> failures) {
-        // 平らな草地を作る (地形に左右されないように)。半径 44 ブロック、その上は空
-        for (int x = X - 44; x <= X + 44; x++) {
-            for (int z = Z - 44; z <= Z + 44; z++) {
-                level.setBlock(new BlockPos(x, Y, z), Blocks.GRASS_BLOCK.defaultBlockState(), 2);
-                for (int y = Y + 1; y <= Y + 14; y++) {
-                    level.setBlock(new BlockPos(x, y, z), Blocks.AIR.defaultBlockState(), 2);
-                }
-            }
-        }
-        BlockPos center = new BlockPos(X, Y + 1, Z);
-        NpcWorldData data = NpcWorldData.get(level.getServer().overworld());
-        BlockPos fire = NpcSpawner.buildCamp(level, center, level.random);
-        if (fire == null) {
-            failures.add("no camp could be built on flat grass");
-            return;
-        }
-        double distance = Math.sqrt(fire.distSqr(new BlockPos(X, fire.getY(), Z)));
-        // 置き場所は半径 16〜36 の輪をブロックへ丸めたもの。丸めで 36 をわずかに超える (36.06 など) ことがある
-        if (distance < 15.25 || distance > 36.75 ||!level.getBlockState(fire).is(Blocks.CAMPFIRE)) {
-            failures.add("the campfire is at a strange place: " + fire + " (" + distance + ")");
-        }
-        if (NpcSpawner.nearestCamp(data, center, 48) == null) {
-            failures.add("the camp is not recorded");
-        }
-        NpcEntity storyteller = NpcSpawner.spawnStoryteller(level, fire);
-        if (storyteller == null) {
-            failures.add("no storyteller stood by the camp");
-        } else {
-            double d = storyteller.distanceToSqr(fire.getX() + 0.5, fire.getY(), fire.getZ() + 0.5);
-            if (d > 100 || !storyteller.role().equals(NpcSetup.STORYTELLER_ID)) {
-                failures.add("the storyteller is not by the fire: " + d);
-            }
-            if (level.getEntitiesOfClass(NpcEntity.class, new AABB(fire).inflate(12)).isEmpty()) {
-                failures.add("the storyteller cannot be found near the camp");
-            }
-            storyteller.discard();
-        }
-        // 片付け
-        level.setBlock(fire, Blocks.AIR.defaultBlockState(), 3);
-        data.camps.remove(fire.asLong());
-        data.setDirty();
     }
 }

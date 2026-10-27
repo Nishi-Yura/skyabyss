@@ -130,7 +130,7 @@ public final class SkyEvents {
         }
         // 天と淵の大陸: 最初の通過は、外れの一本道の終わり (都の門の前) に人が着いたとき (docs/design/40 の 4 章)。
         // 誰も来ないまま予定より一日遅れたら、いつもどおり (下の時刻の決まり) に起こす
-        if (first && level.getChunkSource().getGenerator() instanceof jp.revati.skyabyss.world.continent.ContinentChunkGenerator) {
+        if (first) {
             ServerPlayer atGate = atCapitalGate(level);
             if (atGate != null) {
                 start(level, atGate, true);

@@ -510,15 +510,7 @@ public final class SiteJob {
     }
 
     // 列の上面: 大陸の道の上なら道の石、それ以外は topState
-    private Boolean continent;
-
     private BlockState roadTop(int x, int z) {
-        if (continent == null) {
-            continent = level.getChunkSource().getGenerator() instanceof jp.revati.skyabyss.world.continent.ContinentChunkGenerator;
-        }
-        if (!continent) {
-            return topState;
-        }
         BlockState r = jp.revati.skyabyss.world.continent.ContinentChunkGenerator.roadAt(x, z);
         return r == null ? topState : r;
     }
@@ -905,7 +897,7 @@ public final class SiteJob {
         return switch (kind) {
             case "camp" -> 12;
             case "shelter" -> 110;
-            case "footprint" -> SiteFinder.FOOT_HALF_Z;
+            case "footprint" -> 33;
             case "ribs" -> SiteFinder.RIB_HALF_LONG;
             default -> 3;
         };
@@ -988,28 +980,18 @@ public final class SiteJob {
         int coreX = bp.wetOk ? hx / 2 : hx;
         int coreZ = bp.wetOk ? hz / 2 : hz;
         int k = relocations;
-        SiteData.Entry campE = data.first("camp");
         SiteData.Entry shelterE = data.first("shelter");
         String kind = entry.kind;
-        // 一章の骨は一章の跡地 (docs/design/33 の 3 章) の中に置くので、野営地からの距離ではなく、跡地の中心から 150 以内で動かす
+        // 一章の骨は一章の跡地の中に置くので、跡地の中心から 150 以内で動かす
         SiteData.Ground whaleGround = kind.equals("ribs") ? data.ground(jp.revati.skyabyss.story.Chapters.WHALE.id()) : null;
         // 一章の骨は、跡地が取っておいた岩鯨の祠の台座 (ChapterGrounds.shrineSpot) の上へ動かさない (祠は骨の脇。台座 9×9)
         if (whaleGround != null && whaleGround.shrine != null) {
             others.add(whaleGround.shrine);
             radii.add(5);
         }
-        BlockPos campPos = campE == null || whaleGround != null ? null : campE.pos;
         BlockPos shelterPos = shelterE == null ? null : shelterE.pos;
         BlockPos anchor = whaleGround != null ? whaleGround.center : entry.anchor;
         int maxDist = whaleGround != null ? ChapterPlanner.MAX_DIST : entry.maxDist;
-        List<BlockPos> otherPrints = new ArrayList<>();
-        if (kind.equals("footprint")) {
-            for (SiteData.Entry o : data.entries("footprint")) {
-                if (o != entry && Math.abs(o.index - entry.index) == 1) {
-                    otherPrints.add(o.pos);
-                }
-            }
-        }
         SiteFinder.Probe probe = new SiteFinder.Probe(level);
         java.util.function.Supplier<BlockPos> search = () -> {
             for (int attempt = 0; attempt < 12; attempt++) {
@@ -1023,7 +1005,7 @@ public final class SiteJob {
                         break;
                     }
                 }
-                if (!clear || !withinLimits(kind, x, z, campPos, shelterPos, otherPrints) || (anchor != null && Math.hypot(x - anchor.getX(), z - anchor.getZ()) > maxDist)) {
+                if (!clear || !withinLimits(kind, x, z, shelterPos) || (anchor != null && Math.hypot(x - anchor.getX(), z - anchor.getZ()) > maxDist)) {
                     continue;
                 }
                 SiteFinder.Area ar = SiteFinder.area(probe, x, z, coreX, coreZ, range);
@@ -1040,48 +1022,9 @@ public final class SiteJob {
         }
     }
 
-    // 動かしても守る距離 (骨は野営地から、足跡は道から)
-    private static boolean withinLimits(String kind, int x, int z, @Nullable BlockPos camp, @Nullable BlockPos shelter, List<BlockPos> footprints) {
-        if (camp == null) {
-            return true;
-        }
-        if (kind.equals("ribs")) {
-            double d = Math.hypot(x - camp.getX(), z - camp.getZ());
-            if (d < 205 || d > 375) {
-                return false;
-            }
-            // 宿りとは違う方角 (82 度以上離す)
-            if (shelter != null) {
-                double a1 = Math.atan2(z - camp.getZ(), x - camp.getX());
-                double a2 = Math.atan2(shelter.getZ() - camp.getZ(), shelter.getX() - camp.getX());
-                double diff = Math.abs(Math.toDegrees(a1 - a2));
-                diff = diff > 180 ? 360 - diff : diff;
-                return diff >= 82;
-            }
-            return true;
-        }
-        if (shelter != null && !kind.equals("shelter") && SiteFinder.capital()
-                && Math.hypot(x - shelter.getX(), z - shelter.getZ()) < (kind.equals("footprint") ? SiteFinder.CAPITAL_FOOT_MIN : SiteFinder.CAPITAL_SITE_MIN)) {
-            return false;
-        }
-        if (kind.equals("footprint") && shelter != null) {
-            double dx = shelter.getX() - camp.getX();
-            double dz = shelter.getZ() - camp.getZ();
-            double len = Math.sqrt(dx * dx + dz * dz);
-            double dp = SiteFinder.distToPath(x, z, camp, dx / len, dz / len, len);
-            if (dp < 30 || dp > 155) {
-                return false;
-            }
-            // 隣の足跡との一歩の間隔 (66〜135)
-            for (BlockPos o : footprints) {
-                double dd = Math.hypot(x - o.getX(), z - o.getZ());
-                if (dd < 66 || dd > 135) {
-                    return false;
-                }
-            }
-            return true;
-        }
-        return true;
+    // 動かしても都の中へは入れない (都は中心から壁まで約 100、墓地まで 140。都のほかの物は中心から 150 より外)
+    private static boolean withinLimits(String kind, int x, int z, @Nullable BlockPos shelter) {
+        return shelter == null || kind.equals("shelter") || !SiteFinder.capital() || Math.hypot(x - shelter.getX(), z - shelter.getZ()) >= 150;
     }
 
     private void applyRelocation(@Nullable BlockPos found) {

@@ -2,7 +2,7 @@
 
 - 文書番号: 07
 - 範囲: 村の NPC（語り部・イサナ）、会話画面、好感度、クエストとクエストログ、言伝ての板、メインとサブの全クエストと全セリフ。
-- 関連: [01](01_overview.md)、[02](02_stone_whale.md)、[04](04_growth_and_skills.md)、[05](05_lore_npc_quest.md)（伝承の書）、[06](06_prologue.md)、[08](08_tide_shell.md)、[12](12_thunder_wing.md)、[14](14_beta.md)、[17](17_opening_and_rpg_feel.md)（序盤の体験）
+- 関連: [01](01_overview.md)、[02](02_stone_whale.md)、[04](04_growth_and_skills.md)、[05](05_lore_npc_quest.md)（伝承の書）、06、[08](08_tide_shell.md)、[12](12_thunder_wing.md)、[14](14_beta.md)、17（序盤の体験）
 
 ---
 
@@ -48,7 +48,7 @@
 
 ### 2.2 序盤の語り（序 1・序 2 と見聞）
 
-序盤の拍子（野営地・足跡・足音・骨の丘・空の歌）の全文と順番は [17](17_opening_and_rpg_feel.md) の 11 章。ここには仕組みだけ。生成は `tools/gen/mobs/gen_npc_content.py`（会話・メイン）と `tools/gen/story/gen_opening_text.py`（伝承・17-10 の閉じ方）。
+序盤の拍子（野営地・足跡・足音・骨の丘・空の歌）の全文と順番は 17 の 11 章。ここには仕組みだけ。生成は `tools/gen/mobs/gen_npc_content.py`（会話・メイン）と `tools/gen/story/gen_opening_text.py`（伝承・17-10 の閉じ方）。
 
 - **語り部の入口**: `shadow0`（メインが `follow_smoke`）、`shadow_first`（影のあとの初対面。`shadow2`→`shadow3` へ続く）、`shadow_wait`（影を待つ間、一度だけ。印 `wait_told`）。ループの「覚えているような」入口（`deja_vu*`）のあと、`first` の前。
 - **道すがらの見聞**: 語り部の話題に「道すがら、気になるものを見た。」（`seen_menu`）、イサナに「道中で、妙なものを見た。」（`c_seen_menu`）。伝承が記されていて、まだ話していないものだけ並ぶ（印 `<話題>_told`）。語り部の話題の節は枠の高さの上限（210）のため、もとの「岩鯨を見た」「背中に町の跡」の話題も `seen_menu` に置く。

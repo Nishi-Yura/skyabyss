@@ -767,7 +767,7 @@ ID は `chapter1/*`。自動で記すものは条件が項目の JSON（`data/sk
 
 ## 12. 三章「風に逆らう嵐」の中身
 
-三章（段階 2。潮殻の心臓を止めてから雷翼の心臓を止めるまで）を遊んでいる人の、巨神の外の話。実装は `titan/storm/chapter/`、データは `tools/gen/ch3/gen_ch3_content.py` が書く（青図 `data/skyabyss/opening/ch3_*.json`、伝承 3、クエスト `quest/ch3/`、会話 `dialogue/ch3/`、文 `assets/skyabyss_ch3/lang`）。共通の部品は [01 の 4.1](01_overview.md)（章・予兆・空の段）、[18 の 9 章](18_notices.md)（題字と余韻の札）、[17 の 3.8](17_opening_and_rpg_feel.md)（小要素の置き方）、[10 の 3.6](10_progression_multiplayer.md)（章の数え方）。
+三章（段階 2。潮殻の心臓を止めてから雷翼の心臓を止めるまで）を遊んでいる人の、巨神の外の話。実装は `titan/storm/chapter/`、データは `tools/gen/ch3/gen_ch3_content.py` が書く（青図 `data/skyabyss/opening/ch3_*.json`、伝承 3、クエスト `quest/ch3/`、会話 `dialogue/ch3/`、文 `assets/skyabyss_ch3/lang`）。共通の部品は [01 の 4.1](01_overview.md)（章・予兆・空の段）、[18 の 9 章](18_notices.md)（題字と余韻の札）、17 の 3.8（小要素の置き方）、[10 の 3.6](10_progression_multiplayer.md)（章の数え方）。
 
 主題は**見誤り**。「あれは空の影か」（1.2）。風の民は嵐の鳥を空の影と取り違え、影を神と呼んだ。軸は、物語が先・静かな心理ホラー・足し算より引き算・チャットに流さない・敵もダンジョンも足さない。新しい敵・モデルはない（既存の避雷針・碑・黒石・玄武岩・稲妻・音だけ）。
 

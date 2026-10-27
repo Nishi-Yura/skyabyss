@@ -306,8 +306,7 @@ public final class OpeningDirector {
         // 目印は人ごと・今の目的ごとに決める (宿りの鐘と鯨追いの焚き火を取り違えない)。目印が変わったら送り直す
         BlockPos target = target(level, id);
         // 天と淵の大陸: はじまりの島にいるあいだ (渡し船に乗る前)、都の側を指す目的は船着き場を指す (帳面を拾う前の目的はそのまま)
-        if (!id.isEmpty() && !id.equals("examine_camp") && !jp.revati.skyabyss.world.continent.ContinentOutskirts.ferried(player)
-                && level.getChunkSource().getGenerator() instanceof jp.revati.skyabyss.world.continent.ContinentChunkGenerator) {
+        if (!id.isEmpty() && !id.equals("examine_camp") && !jp.revati.skyabyss.world.continent.ContinentOutskirts.ferried(player)) {
             // はじまりの島の谷の道 (足跡 → 峠の野盗 → 休み場 → 祠 → 渡し守。world/continent/IslandTrail)
             Object[] island = jp.revati.skyabyss.world.continent.IslandTrail.objective(player);
             BlockPos ferry = jp.revati.skyabyss.world.continent.ContinentOutskirts.ferryPos(level);
@@ -320,7 +319,7 @@ public final class OpeningDirector {
             }
         }
         // 天と淵の大陸: 鯨追いは鯨見の町の見張り台のそば (00 の 278)
-        if (id.equals("find_isana") && level.getChunkSource().getGenerator() instanceof jp.revati.skyabyss.world.continent.ContinentChunkGenerator) {
+        if (id.equals("find_isana")) {
             id = "find_isana_town";
             BlockPos spot = jp.revati.skyabyss.world.continent.ContinentTowns.chaserSpot(level.getServer());
             target = spot != null ? spot : jp.revati.skyabyss.world.continent.ContinentLayout.get().town("whale");
@@ -346,9 +345,6 @@ public final class OpeningDirector {
             case "examine_camp" -> OpeningSites.notebook(server).or(() -> OpeningSites.camp(server)).orElse(null);
             case "follow_smoke" -> OpeningSites.smoke(server).or(() -> OpeningSites.shelter(server)).orElse(null);
             case "ask_storyteller" -> OpeningSites.bell(server).or(() -> OpeningSites.shelter(server)).orElse(null);
-            // 鯨追いは宿りの鐘から 18〜34 ブロック離れた焚き火のそばにいる。鐘の位置ではなく、その焚き火 (まだ立っていなければ目印なし)
-            case "find_isana" -> OpeningSites.bell(server).or(() -> OpeningSites.shelter(server))
-                    .map(bell -> NpcSpawner.chaserSpot(server.overworld(), bell)).orElse(null);
             case "bone_hill" -> OpeningSites.ribs(server).orElse(null);
             default -> null;
         };

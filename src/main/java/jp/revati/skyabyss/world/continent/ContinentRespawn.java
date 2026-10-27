@@ -80,8 +80,7 @@ public final class ContinentRespawn {
     @SubscribeEvent(priority = EventPriority.LOW)
     static void onRespawn(PlayerEvent.PlayerRespawnEvent event) {
         if (!(event.getEntity() instanceof ServerPlayer player) || event.isEndConquered() || player.getRespawnPosition() != null
-                || player.level().dimension() != Level.OVERWORLD || !(player.level() instanceof ServerLevel over)
-                || !(over.getChunkSource().getGenerator() instanceof ContinentChunkGenerator)) {
+                || player.level().dimension() != Level.OVERWORLD || !(player.level() instanceof ServerLevel over)) {
             return;
         }
         GlobalPos death = player.getLastDeathLocation().orElse(null);

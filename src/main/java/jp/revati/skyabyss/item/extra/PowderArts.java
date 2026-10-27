@@ -120,7 +120,7 @@ public final class PowderArts {
         }
         Element e = null;
         float chance = 0;
-        if (level.dimension() == Level.OVERWORLD && level.getChunkSource().getGenerator() instanceof jp.revati.skyabyss.world.continent.ContinentChunkGenerator) {
+        if (level.dimension() == Level.OVERWORLD) {
             int r = jp.revati.skyabyss.world.continent.ContinentMap.get().region(dead.getBlockX(), dead.getBlockZ());
             if (r >= 0 && r < DROP_ELEMENT.length) {
                 e = DROP_ELEMENT[r];

@@ -196,7 +196,7 @@ public final class RegionSpawner {
             return;
         }
         ServerLevel level = server.overworld();
-        if (!(level.getChunkSource().getGenerator() instanceof ContinentChunkGenerator) || !jp.revati.skyabyss.rpg.rules.RpgRules.adventure(level)) {
+        if (!jp.revati.skyabyss.rpg.rules.RpgRules.adventure(level)) {
             return;
         }
         sweep(level);
