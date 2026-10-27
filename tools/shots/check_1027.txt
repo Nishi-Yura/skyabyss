@@ -1,0 +1,54 @@
+# 2026-10-27 の確認: 旅の地図 (名のある強敵の棲み家・太い道)、名のある強敵の光と柱、町の使っていない門から出る脇道
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/check_1027.txt -PshotsName=check_1027
+world opening_check1027 continent
+size 1600 900
+timeout 3000
+render 12
+guiscale 2
+clouds off
+waitchunks 300
+wait 40
+cmd time set 3000
+cmd gamerule doDaylightCycle false
+cmd weather clear
+cmd skyabyss cinematic stop
+close
+cmd skyabyss dev opening build
+wait 200
+cmd gamemode spectator
+chat clear
+# --- 旅の地図
+cmd tp @s -450 90 0
+waitchunks 300
+wait 30
+open travel_map
+wait 40
+mapscale 2400
+wait 20
+shot map_far
+mapscale 1200
+wait 20
+shot map_near
+close
+wait 10
+# --- 鯨見の町を上から (北の門・西の門から見どころへ出る脇道)
+hud off
+cmd skyabyss dev opening view town 0 0 80 0 89
+waitchunks 600
+wait 120
+chat clear
+shot whale_town_top
+# --- 名のある強敵 (野の最後の旗手): 光る縁取りと空への柱
+hud on
+cmd gamemode creative
+cmd tp @s -300 100 260
+waitchunks 300
+wait 40
+cmd tp @s -300 ~ 260
+cmd skyabyss dev named
+wait 30
+cmd gamemode spectator
+cmd tp @s ~ ~6 ~-18 0 15
+wait 30
+chat clear
+shot named_glow
