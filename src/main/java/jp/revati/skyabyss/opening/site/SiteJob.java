@@ -495,7 +495,9 @@ public final class SiteJob {
                 if (in) {
                     target = bp.level ? groundH : g;
                 } else if (bp.level && bp.ring > 0 && dist <= bp.ring) {
+                    // なめらかにつなぐ (台の縁で折れず、まわりの地面へ寝かせて入る。2026-10-28)
                     double t = dist / (double) (bp.ring + 1);
+                    t = t * t * (3 - 2 * t);
                     target = (int) Math.round(groundH + (g - groundH) * t);
                 } else {
                     target = g;

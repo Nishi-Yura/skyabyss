@@ -31,8 +31,9 @@ public final class ContinentTowns {
             AttendantRole.SMITH.mark(), AttendantRole.APOTHECARY.mark()};
     // 町の作りの版。2 = 都と同じ作りの壁のある町 (tools/capital/region_town.py。2026-10-26 の声「始まりの町とそれ以外の町はクオリティ違いすぎる」)。
     // 3 = 街道と市場の町・上の町・都と同じ施設 (tools/capital/town_plans.py。docs/design/45)。
+    // 4 = 壁の外の地面をまわりの土地へ (tools/gen/world/town_outskirts.py) と、台の縁を広く寝かせる (輪 14)。
     // 前の版で建った町は、建て直す (建てたら付属の点 VERSION_MARK を書く)
-    public static final String VERSION_MARK = "town_v3";
+    public static final String VERSION_MARK = "town_v4";
     // 土地の町の施設の碑 (設計図の sign_<建物>)。文は lang の sign.skyabyss.town_fac.<建物>.1〜4
     static final java.util.Set<String> TOWN_SIGNS = java.util.Set.of("inn", "smithy", "tool_shop", "apothecary", "market", "guild_hall", "travel", "training", "shrine");
     static final int KEEP_RADIUS = 96;

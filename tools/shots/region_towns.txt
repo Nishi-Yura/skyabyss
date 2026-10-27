@@ -1,6 +1,6 @@
 # 土地の町 (都と同じ作りに建て直した四つの町) を上から・門の内・広場で撮る。2026-10-26
 # bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/region_towns.txt -PshotsName=region_towns
-world region_towns_v2 continent
+world region_towns_v5 continent
 size 1600 900
 timeout 6000
 render 12
