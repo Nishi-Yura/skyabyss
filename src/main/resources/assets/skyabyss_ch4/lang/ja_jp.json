@@ -89,7 +89,7 @@
   "message.skyabyss.ch4g.marks.last": "五つ目の杭の灰だけが、まだ温かい。灰の降る円の縁に着いた。",
   "message.skyabyss.ch4g.mite.drawn": "熾り蟲の群れが、手の中の温石へ向きを変えた。",
   "message.skyabyss.ch4g.pit.crack": "床の亀裂が、赤く脈を打ちはじめた。",
-  "message.skyabyss.ch4g.pit.pack": "冷えた炉の脇に、誰かの荷が残っていた。ブレイズパウダーが一つと、松明。",
+  "message.skyabyss.ch4g.pit.pack": "冷えた炉の脇に、誰かの荷が残っていた。熾の雫が一つと、松明。",
   "message.skyabyss.ch4g.pit.pack_empty": "荷はもう空だ。",
   "message.skyabyss.ch4g.pit.page": "冷えた金床の上に、破れた頁が一枚のっている。",
   "message.skyabyss.ch4g.pit.stand": "台の上の玄武岩がくぼんでいる。温かいものを置く場所らしい。",
@@ -195,6 +195,6 @@
   "wayfarer_notes.ch4.line.3": "灰ひきずり: 敵意はない。追うと丸まって転がる。行き先は窯の跡。",
   "wayfarer_notes.ch4.line.4": "古い灰の番人: 床の亀裂が赤く脈を打ったら離れる（1.5 秒後に噴く）。殻が割れると熱の波。",
   "wayfarer_notes.ch4.line.5": "火除けの薬: 灰炉の村や都の薬師で買える。",
-  "wayfarer_notes.ch4.line.6": "煤の砥石（煤鉄 2・火打ち石）と灰の冷やし水（灰麻 2・ガラス瓶）。冷やし水は背の熱を下げる。",
-  "wayfarer_notes.ch4.line.7": "灰歩きの旅装（煤鉄・灰麻・雷翼の羽軸）は、背の熱がたまりにくい。灰焼きのパン（小麦 3・灰麻）は吸収と熱の引き。"
+  "wayfarer_notes.ch4.line.6": "煤の砥石と灰の冷やし水は、鍛冶場と薬師が誂えてくれる（煤鉄・灰麻を持っていく）。冷やし水は背の熱を下げる。",
+  "wayfarer_notes.ch4.line.7": "灰歩きの旅装は背の熱がたまりにくい（鍛冶場の誂え）。灰焼きのパンは吸収と熱の引き（市の食料屋）。"
 }

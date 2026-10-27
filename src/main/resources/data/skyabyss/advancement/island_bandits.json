@@ -2,7 +2,7 @@
   "parent": "skyabyss:island_job",
   "display": {
     "icon": {
-      "id": "minecraft:iron_axe"
+      "id": "skyabyss:gather_axe"
     },
     "title": {
       "translate": "advancement.skyabyss.island_bandits.title"

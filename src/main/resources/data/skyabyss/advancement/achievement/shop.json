@@ -2,7 +2,7 @@
   "parent": "skyabyss:achievement/root",
   "display": {
     "icon": {
-      "id": "minecraft:emerald"
+      "id": "skyabyss:bell_coin"
     },
     "title": {
       "translate": "advancement.skyabyss.achievement.shop.title"

@@ -1141,7 +1141,7 @@ Lv 12・体力 22・一人。「一撃の傷 / 耐える回数」。ダメージ
 | 心臓の番人・番人の悪夢 | 一人ずつ: 錨鉄 4〜7（悪夢は段 ÷ 2 を足す）、共鳴の欠片（深淵）2（段 5 から 3）、心核（初回必ず・以後 25%）、結晶 40%、図鑑 10 品（鎧 部位ごと 25%、剣・聴き筒・護符 20%、錨・短剣 4%、錘 2%。天井は 2.4節） | `WardenArena.fallen`・`Nightmare.won` → `AbyssGearLoot.warden` |
 | 果てない深みの箱（36 の 9.2） | 錨鉄（ふつうの箱 60%、ほかは必ず。1〜2 + 階 ÷ 6 + 箱の段）。図鑑の品: 宝の間 4%・敵の巣 6%・王の褒美 15%（王の褒美だけ 5 回に 1 回は専用の逸品も） | `DepthLoot.roll` → `AbyssGearLoot.chest` |
 | 荷運びのロク（塩の野営） | 骨のかけら 8 → 錨鉄 2、錨鉄 20 → 灯り番の剣、錨鉄 16 → 鼓動の聴き筒 | `dialogue/ch5/attendant_abyss_porter.json`（生成 `tools/gen/ch5/gen_ch5_layers.py` の `TRADES`） |
-| 作業台（遺品をなぞる） | 空の手燭 + 錨鉄 3 + 魂のランタン → 灯籠の護符。心臓の形の石 + 錨鉄 5 + アメジストの欠片 → 鼓動の聴き筒。遺品は減らずに残る（`AbyssRelicItem` の作業台の残り） | `recipe/abyss_lantern_charm.json`・`abyss_pulse_listener.json`（生成 `tools/gen/abyss_gear/gen_abyss_gear.py`） |
+| 鍛冶場の誂え（遺品をなぞる。`made_abyss_lantern_charm`・`made_abyss_pulse_listener`） | 空の手燭 + 錨鉄 3 + 魂のランタン → 灯籠の護符。心臓の形の石 + 錨鉄 5 + アメジストの欠片 → 鼓動の聴き筒。遺品は減らずに残る（`AbyssRelicItem` の作業台の残り） | `recipe/abyss_lantern_charm.json`・`abyss_pulse_listener.json`（生成 `tools/gen/abyss_gear/gen_abyss_gear.py`） |
 
 **見た目と実装**
 

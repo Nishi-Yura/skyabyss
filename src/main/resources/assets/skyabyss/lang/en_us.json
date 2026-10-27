@@ -1076,7 +1076,7 @@
   "skill.skyabyss.readiness_reward.effect": "While all three lamps (body, blade, provisions) are blue: max mana +%1$s, attack +%2$s%%.",
   "skill.skyabyss.camp_hand": "Camp Hand",
   "skill.skyabyss.camp_hand.flavor": "Hands work well beside a fire.",
-  "skill.skyabyss.camp_hand.effect": "Near a campfire or resonance forge, mana regenerates x%1$s and hunger drains %2$s%% less.",
+  "skill.skyabyss.camp_hand.effect": "Near a campfire or resonance forge, mana recovers %1$s times faster.",
   "skill.skyabyss.appraiser": "Appraiser",
   "skill.skyabyss.appraiser.flavor": "An eye for worth helps the purse too.",
   "skill.skyabyss.appraiser.effect": "Respecs at the resonance forge cost 1 fewer crystal (when 2 or more). Affix tooltips show the value range.",

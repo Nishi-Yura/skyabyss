@@ -554,7 +554,15 @@ public class TideShellEntity extends Entity implements GeoEntity, TravelTitan, j
         }
     }
 
+    // いまの休みが始まったゲーム時刻 (保存しない。読み込み直したら 0。干潮を見る頼みが「休みごとに一度」数える。quest/free/FreeQuestEvents)
+    private long restStart;
+
+    public long restStart() {
+        return restStart;
+    }
+
     private void startRest(ServerLevel level) {
+        restStart = level.getGameTime();
         setMode(Mode.REST);
         // 座る体のなかに食い込む浜・岩・木を取り除く (めり込まない)
         jp.revati.skyabyss.titan.TitanClearing.carve(level, volumeName(), getX(), level.getSeaLevel() - REST_DRAFT, getZ(), getYRot());

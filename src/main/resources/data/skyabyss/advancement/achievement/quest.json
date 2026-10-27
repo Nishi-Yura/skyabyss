@@ -2,7 +2,7 @@
   "parent": "skyabyss:achievement/root",
   "display": {
     "icon": {
-      "id": "minecraft:writable_book"
+      "id": "skyabyss:lore_book"
     },
     "title": {
       "translate": "advancement.skyabyss.achievement.quest.title"

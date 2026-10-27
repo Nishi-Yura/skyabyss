@@ -1076,7 +1076,7 @@
   "skill.skyabyss.readiness_reward.effect": "備えの三灯（身・刃・糧）がすべて青のあいだ、最大マナ +%1$s、攻撃力 +%2$s%%。",
   "skill.skyabyss.camp_hand": "野営の手",
   "skill.skyabyss.camp_hand.flavor": "火の傍では、手がよく動く。",
-  "skill.skyabyss.camp_hand.effect": "焚き火・共鳴の炉の近くで、マナの回復が %1$s 倍、満腹度の減りが %2$s%% 小さくなる。",
+  "skill.skyabyss.camp_hand.effect": "焚き火・共鳴の炉の近くで、マナの回復が %1$s 倍になる。",
   "skill.skyabyss.appraiser": "目利き",
   "skill.skyabyss.appraiser.flavor": "値打ちを見る目は、財布にも効く。",
   "skill.skyabyss.appraiser.effect": "共鳴の炉での振り直しの結晶が 1 つ減る（2 つ以上のとき）。特性の説明に、値の幅が出る。",

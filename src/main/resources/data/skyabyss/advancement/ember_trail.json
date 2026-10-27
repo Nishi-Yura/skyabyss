@@ -2,7 +2,7 @@
   "parent": "skyabyss:dead_forge_pit",
   "display": {
     "icon": {
-      "id": "minecraft:magma_cream"
+      "id": "skyabyss:ember_drop"
     },
     "title": {
       "translate": "advancement.skyabyss.ember_trail.title"

@@ -2,7 +2,7 @@
   "parent": "skyabyss:named_any",
   "display": {
     "icon": {
-      "id": "minecraft:nether_star"
+      "id": "skyabyss:sky_key"
     },
     "title": {
       "translate": "advancement.skyabyss.named_all.title"

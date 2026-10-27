@@ -2,7 +2,7 @@
   "parent": "skyabyss:skill",
   "display": {
     "icon": {
-      "id": "minecraft:bow"
+      "id": "skyabyss:shrine_bow"
     },
     "title": {
       "translate": "advancement.skyabyss.tree_bow.title"

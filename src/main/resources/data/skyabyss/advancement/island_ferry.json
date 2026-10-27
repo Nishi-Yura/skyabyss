@@ -2,7 +2,7 @@
   "parent": "skyabyss:island_bandits",
   "display": {
     "icon": {
-      "id": "minecraft:oak_boat"
+      "id": "skyabyss:skiff"
     },
     "title": {
       "translate": "advancement.skyabyss.island_ferry.title"

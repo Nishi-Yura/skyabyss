@@ -2,7 +2,7 @@
   "parent": "skyabyss:level_20",
   "display": {
     "icon": {
-      "id": "minecraft:experience_bottle"
+      "id": "skyabyss:resonance_crystal"
     },
     "title": {
       "translate": "advancement.skyabyss.level_30.title"

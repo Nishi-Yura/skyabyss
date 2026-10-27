@@ -2,7 +2,7 @@
   "parent": "skyabyss:rebirth_5",
   "display": {
     "icon": {
-      "id": "minecraft:amethyst_shard"
+      "id": "skyabyss:glint_shard"
     },
     "title": {
       "translate": "advancement.skyabyss.rebirth_10.title"

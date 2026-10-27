@@ -2,7 +2,7 @@
   "parent": "skyabyss:root",
   "display": {
     "icon": {
-      "id": "minecraft:golden_sword"
+      "id": "skyabyss:shrine_sword"
     },
     "title": {
       "translate": "advancement.skyabyss.named_any.title"
