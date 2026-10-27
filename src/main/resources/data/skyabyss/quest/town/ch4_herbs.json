@@ -22,7 +22,7 @@
         {
           "id": "potion",
           "type": "collect",
-          "target": "minecraft:potion",
+          "target": "skyabyss:healing_draught",
           "count": 2
         }
       ]

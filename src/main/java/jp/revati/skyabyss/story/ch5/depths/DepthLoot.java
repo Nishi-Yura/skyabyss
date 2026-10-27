@@ -32,10 +32,10 @@ public final class DepthLoot {
             out.add(new ItemStack(material(r), 1 + r.nextInt(2) + floor / 20));
         }
         if (r.nextDouble() < 0.30 + 0.15 * tier) {
-            out.add(new ItemStack(Items.GOLDEN_APPLE, 1));
+            out.add(new ItemStack(jp.revati.skyabyss.guide.Ch2Gear.PEARL_POWDER.get(), 1));
         }
         if (r.nextDouble() < 0.5) {
-            out.add(new ItemStack(Items.EXPERIENCE_BOTTLE, 1 + r.nextInt(3)));
+            out.add(new ItemStack(jp.revati.skyabyss.item.outfit.ConsumableGear.STRONG_HEALING.get(), 1 + r.nextInt(2)));
         }
         double relic = switch (tier) {
             case 1 -> 0.5;
@@ -47,7 +47,7 @@ public final class DepthLoot {
             out.add(new ItemStack(AbyssRelics.RELICS.get(r.nextInt(AbyssRelics.RELICS.size())).item().get()));
         }
         if (tier >= 1 && floor >= 10 && r.nextDouble() < 0.25) {
-            out.add(new ItemStack(Items.TOTEM_OF_UNDYING));
+            out.add(new ItemStack(jp.revati.skyabyss.registry.ModItems.RESONANCE_CHARM.get()));
         }
         // 深淵の装備: 錨鉄と、図鑑の品の機会 (abyss/gear/AbyssGearLoot)
         jp.revati.skyabyss.abyss.gear.AbyssGearLoot.chest(out, floor, tier, r);
@@ -80,11 +80,11 @@ public final class DepthLoot {
     public static MerchantOffers offers(int floor) {
         MerchantOffers o = new MerchantOffers();
         int up = floor / 6;
-        ware(o, new ItemStack(Items.GOLDEN_APPLE, 1), 8 + up, 3 + up / 2);
-        ware(o, new ItemStack(Items.EXPERIENCE_BOTTLE, 4), 6 + up, 2 + up / 2);
-        ware(o, new ItemStack(Items.ARROW, 16), 4 + up / 2, 2);
+        ware(o, new ItemStack(jp.revati.skyabyss.guide.Ch2Gear.PEARL_POWDER.get(), 1), 8 + up, 3 + up / 2);
+        ware(o, new ItemStack(jp.revati.skyabyss.item.outfit.ConsumableGear.STRONG_HEALING.get(), 2), 6 + up, 2 + up / 2);
+        ware(o, new ItemStack(jp.revati.skyabyss.item.outfit.ConsumableGear.TRAVEL_ARROW.get(), 16), 4 + up / 2, 2);
         if (floor >= 8) {
-            ware(o, new ItemStack(Items.TOTEM_OF_UNDYING, 1), 48 + up * 2, 14 + up);
+            ware(o, new ItemStack(jp.revati.skyabyss.registry.ModItems.RESONANCE_CHARM.get(), 1), 48 + up * 2, 14 + up);
         }
         return o;
     }

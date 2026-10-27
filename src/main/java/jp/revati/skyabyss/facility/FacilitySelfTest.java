@@ -284,22 +284,22 @@ public final class FacilitySelfTest {
         ShopDef outfit = ShopManager.shop("outfit_shop");
         ShopDef mats = ShopManager.shop("material_shop");
         check(f, toolShop.goods().stream().anyMatch(g -> g.item() == Items.TORCH) && toolShop.goods().stream().anyMatch(g -> g.item() == Items.WHITE_BED), "tool shop sells light and beds");
-        check(f, tools.goods().stream().anyMatch(g -> g.item() == Items.BREAD), "food vendor sells bread");
-        check(f, outfit.goods().stream().anyMatch(g -> g.item() == Items.ARROW), "outfitter sells arrows");
-        check(f, toolShop.goods().stream().noneMatch(g -> g.item() == Items.BREAD || g.item() == Items.IRON_SWORD), "tool shop no longer sells food or swords");
+        check(f, tools.goods().stream().anyMatch(g -> g.item() == jp.revati.skyabyss.item.outfit.ConsumableGear.TOWN_BREAD.get()), "food vendor sells bread");
+        check(f, outfit.goods().stream().anyMatch(g -> g.item() == jp.revati.skyabyss.item.outfit.ConsumableGear.TRAVEL_ARROW.get()), "outfitter sells arrows");
+        check(f, toolShop.goods().stream().noneMatch(g -> g.item() == jp.revati.skyabyss.item.outfit.ConsumableGear.TOWN_BREAD.get() || g.item() == Items.IRON_SWORD), "tool shop no longer sells food or swords");
         ShopDef apo = ShopManager.shop("apothecary");
-        check(f, apo.goods().stream().anyMatch(g -> g.potion() != null && g.potion().getPath().equals("healing")), "apothecary sells healing");
-        check(f, apo.goods().stream().anyMatch(g -> g.potion() != null && g.potion().getPath().equals("night_vision")), "apothecary sells night vision");
-        check(f, apo.goods().stream().anyMatch(g -> g.item() == Items.MILK_BUCKET), "apothecary sells an antidote");
-        ShopDef.Good healing = apo.goods().stream().filter(g -> g.id().equals("healing")).findFirst().orElse(null);
-        check(f, healing != null && healing.stack().has(net.minecraft.core.component.DataComponents.POTION_CONTENTS), "potion goods carry their potion");
+        // 薬は mod の飲み薬 (2026-10-27。バニラのポーションは売らない)
+        check(f, apo.goods().stream().anyMatch(g -> g.item() == jp.revati.skyabyss.item.outfit.ConsumableGear.HEALING.get()), "apothecary sells healing");
+        check(f, apo.goods().stream().anyMatch(g -> g.item() == jp.revati.skyabyss.item.outfit.ConsumableGear.NIGHT_EYE.get()), "apothecary sells night vision");
+        check(f, apo.goods().stream().anyMatch(g -> g.item() == jp.revati.skyabyss.item.outfit.ConsumableGear.ANTIDOTE.get()), "apothecary sells an antidote");
+        check(f, apo.goods().stream().noneMatch(g -> g.item() == Items.POTION || g.item() == Items.MILK_BUCKET), "apothecary still sells vanilla potions");
 
         p.getInventory().clearContent();
 
         jp.revati.skyabyss.facility.Coins.take(p, jp.revati.skyabyss.facility.Coins.count(p));
         Coins.give(p, 30);
         check(f, ShopService.buy(p, tools, "bread", 1) == ShopService.Result.OK, "buy bread");
-        check(f, Coins.count(p) == 27 && p.getInventory().countItem(Items.BREAD) == 3, "bread paid and given");
+        check(f, Coins.count(p) == 27 && p.getInventory().countItem(jp.revati.skyabyss.item.outfit.ConsumableGear.TOWN_BREAD.get()) == 3, "bread paid and given");
         check(f, ShopService.buy(p, toolShop, "bedroll", 3) == ShopService.Result.NO_COINS && Coins.count(p) == 27, "cannot overspend");
         check(f, ShopService.buy(p, tools, "nope", 1) == ShopService.Result.NO_GOOD, "unknown good");
         // 素材の値段

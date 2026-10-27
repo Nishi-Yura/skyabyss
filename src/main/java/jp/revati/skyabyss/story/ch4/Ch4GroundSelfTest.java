@@ -128,7 +128,7 @@ public final class Ch4GroundSelfTest {
     }
 
     static ItemStack firePotion(boolean strong) {
-        return PotionContents.createItemStack(Items.POTION, strong ? Potions.LONG_FIRE_RESISTANCE : Potions.FIRE_RESISTANCE);
+        return new ItemStack(jp.revati.skyabyss.item.outfit.ConsumableGear.FIRE_WARD.get());
     }
 
     // ---------------------------------------------------------------- データと流れ
@@ -230,7 +230,7 @@ public final class Ch4GroundSelfTest {
         check(f, QuestItems.known(Ch4GroundSelfTest.FIRE) && !QuestItems.known("minecraft:potion@minecraft:nope"), "the potion@effect target is not understood");
     }
 
-    static final String FIRE = "minecraft:potion@minecraft:fire_resistance";
+    static final String FIRE = "skyabyss:fire_ward_draught";
 
     private static void trails(MinecraftServer server, FakePlayer p, List<String> f) {
         clean(p);
@@ -238,10 +238,10 @@ public final class Ch4GroundSelfTest {
             Quests.start(p, id);
             check(f, QuestLog.of(p).entry(id) != null, id + " did not start");
         }
-        // 火除けの薬: 耐火 1 では済まない、2 (延長版も数える) で済む。ただの水の瓶・別の薬は数えない
+        // 火除けの薬: 1 では済まない、2 で済む。バニラの耐火のポーション・別の薬は数えない
         p.getInventory().add(firePotion(false));
-        p.getInventory().add(PotionContents.createItemStack(Items.POTION, Potions.WATER));
-        p.getInventory().add(PotionContents.createItemStack(Items.POTION, Potions.SWIFTNESS));
+        p.getInventory().add(PotionContents.createItemStack(Items.POTION, Potions.FIRE_RESISTANCE));
+        p.getInventory().add(new ItemStack(jp.revati.skyabyss.item.outfit.ConsumableGear.HEALING.get()));
         Quests.poll(p, true);
         check(f, "brew".equals(DeadForgePit.stageOf(p, Ch4Ground.Q_DRAUGHT)) && QuestItems.count(p, FIRE, null) == 1, "one fire potion should read 1/2 ("
                 + QuestItems.count(p, FIRE, null) + ")");

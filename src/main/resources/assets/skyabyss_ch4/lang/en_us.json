@@ -1,6 +1,6 @@
 {
   "chapter.skyabyss.aftermath.titan_ember": "The ash has stopped. One beat sounded, a little late.",
-  "commands.skyabyss.playtest.now.ch4_draught": "Gave two fire resistance potions. Show them to the artisan",
+  "commands.skyabyss.playtest.now.ch4_draught": "Gave two fire-ward draughts. Show them to the artisan",
   "commands.skyabyss.playtest.now.ch4_draught_show": "Counted the draughts as shown to the artisan",
   "commands.skyabyss.playtest.now.ch4_forge_page": "Recorded the forge page. Show it to the storyteller",
   "commands.skyabyss.playtest.now.ch4_forge_tell": "Counted the forge page as shown to the storyteller",
@@ -194,7 +194,7 @@
   "wayfarer_notes.ch4.line.2": "Ash husks: half damage until the shell breaks. Then they burn, speed up, and burn out.",
   "wayfarer_notes.ch4.line.3": "Ash draggers: harmless. Chase one and it rolls away, toward the old kiln.",
   "wayfarer_notes.ch4.line.4": "Old thrall: when floor cracks pulse red, step away (they burst 1.5 s later). Breaking its shell sends out a heat wave.",
-  "wayfarer_notes.ch4.line.5": "Fire resistance potion: sold by the apothecaries in Hairo and the capital.",
+  "wayfarer_notes.ch4.line.5": "Fire-ward draught: sold by the apothecaries in Hairo and the capital.",
   "wayfarer_notes.ch4.line.6": "Soot whetstone (2 soot iron, flint) and ash cooler (2 ash hemp, bottle). The cooler lowers the heat on the back.",
   "wayfarer_notes.ch4.line.7": "Ash walking gear (soot iron, ash hemp, thunder wing shafts) slows the heat on the back. Ash-baked bread (3 wheat, ash hemp) gives absorption and cools."
 }

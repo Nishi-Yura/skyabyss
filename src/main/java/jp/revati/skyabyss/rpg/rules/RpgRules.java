@@ -192,7 +192,7 @@ public final class RpgRules {
                 jp.revati.skyabyss.quest.Quests.give(player, stack);
             }
         }
-        jp.revati.skyabyss.quest.Quests.give(player, new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.BREAD, 10));
+        jp.revati.skyabyss.quest.Quests.give(player, new net.minecraft.world.item.ItemStack(jp.revati.skyabyss.item.outfit.ConsumableGear.TOWN_BREAD.get(), 10));
     }
 
     @SubscribeEvent

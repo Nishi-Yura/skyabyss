@@ -82,7 +82,7 @@ public final class TownTour {
         }
         Coins.give(p, COINS[s - 1]);
         if (id.equals("inn")) {
-            jp.revati.skyabyss.quest.Quests.give(p, new ItemStack(Items.BREAD, 3));
+            jp.revati.skyabyss.quest.Quests.give(p, new ItemStack(jp.revati.skyabyss.item.outfit.ConsumableGear.TOWN_BREAD.get(), 3));
         }
         if (id.equals("stable")) {
             jp.revati.skyabyss.mount.MountService.giveWhistle(p);

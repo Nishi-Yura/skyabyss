@@ -85,7 +85,7 @@
               },
               {
                 "type": "item",
-                "item": "minecraft:cod",
+                "item": "skyabyss:dried_fish",
                 "count": 3
               }
             ]
@@ -98,7 +98,7 @@
             },
             {
               "type": "take",
-              "item": "minecraft:cod",
+              "item": "skyabyss:dried_fish",
               "count": 3
             },
             {

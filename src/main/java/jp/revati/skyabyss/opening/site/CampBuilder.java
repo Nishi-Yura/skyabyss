@@ -28,7 +28,7 @@ public final class CampBuilder {
         ServerLevel level = job.level;
         BlockPos barrel = job.mark("barrel");
         if (barrel != null && level.getBlockEntity(barrel) instanceof BarrelBlockEntity be) {
-            be.setItem(0, new ItemStack(Items.BREAD, 4));
+            be.setItem(0, new ItemStack(jp.revati.skyabyss.item.outfit.ConsumableGear.TOWN_BREAD.get(), 4));
             be.setItem(1, new ItemStack(Items.TORCH, 8));
             be.setItem(2, new ItemStack(jp.revati.skyabyss.item.outfit.OutfitGear.GATHER_AXE.get()));
         } else {

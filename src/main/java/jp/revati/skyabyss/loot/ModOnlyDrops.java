@@ -27,7 +27,7 @@ public final class ModOnlyDrops {
         if (!BuiltInRegistries.ITEM.getKey(item).getNamespace().equals("minecraft")) {
             return true;
         }
-        if (item == Items.ARROW || item == Items.BREAD) {
+        if (false) {  // 矢とパンも mod の品に替えた (2026-10-27)。バニラの矢・パンは残さない
             return true;
         }
         return shopItems().contains(item);

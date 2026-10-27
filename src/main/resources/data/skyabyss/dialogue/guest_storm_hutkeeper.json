@@ -166,7 +166,7 @@
           "do": [
             {
               "type": "take",
-              "item": "minecraft:bread",
+              "item": "skyabyss:town_bread",
               "count": 3
             },
             {
@@ -176,7 +176,7 @@
           ],
           "if": {
             "type": "item",
-            "item": "minecraft:bread",
+            "item": "skyabyss:town_bread",
             "count": 3
           }
         },

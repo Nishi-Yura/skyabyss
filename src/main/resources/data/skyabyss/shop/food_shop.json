@@ -8,19 +8,19 @@
     },
     {
       "id": "bread",
-      "item": "minecraft:bread",
+      "item": "skyabyss:town_bread",
       "count": 3,
       "coins": 3
     },
     {
       "id": "cod",
-      "item": "minecraft:cooked_cod",
+      "item": "skyabyss:dried_fish",
       "count": 3,
       "coins": 4
     },
     {
       "id": "honey",
-      "item": "minecraft:honey_bottle",
+      "item": "skyabyss:honey_jar",
       "count": 1,
       "coins": 4
     },

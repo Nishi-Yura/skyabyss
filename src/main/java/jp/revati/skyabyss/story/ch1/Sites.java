@@ -155,7 +155,7 @@ public final class Sites {
             return;
         }
         int slot = 0;
-        box.setItem(slot++, new ItemStack(Items.BREAD, 1 + level.random.nextInt(2)));
+        box.setItem(slot++, new ItemStack(jp.revati.skyabyss.item.outfit.ConsumableGear.TOWN_BREAD.get(), 1 + level.random.nextInt(2)));
         box.setItem(slot++, new ItemStack(Items.TORCH, 2 + level.random.nextInt(3)));
         if (gear) {
             ItemStack low = switch (level.random.nextInt(4)) {

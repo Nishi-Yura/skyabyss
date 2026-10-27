@@ -8,51 +8,46 @@
     },
     {
       "id": "healing",
-      "item": "minecraft:potion",
+      "item": "skyabyss:healing_draught",
       "count": 1,
-      "coins": 8,
-      "potion": "minecraft:healing"
+      "coins": 8
     },
     {
       "id": "antidote",
-      "item": "minecraft:milk_bucket",
+      "item": "skyabyss:antidote",
       "count": 1,
       "coins": 5
     },
     {
       "id": "night_eye",
-      "item": "minecraft:potion",
+      "item": "skyabyss:night_eye_draught",
       "count": 1,
-      "coins": 10,
-      "potion": "minecraft:night_vision"
+      "coins": 10
     },
     {
       "id": "water_breath",
-      "item": "minecraft:potion",
+      "item": "skyabyss:water_breath_draught",
       "count": 1,
       "coins": 12,
-      "potion": "minecraft:water_breathing",
       "chapter": 2
     },
     {
       "id": "regen",
-      "item": "minecraft:potion",
+      "item": "skyabyss:regen_draught",
       "count": 1,
       "coins": 14,
-      "potion": "minecraft:regeneration",
       "chapter": 2
     },
     {
       "id": "fire_res",
-      "item": "minecraft:potion",
+      "item": "skyabyss:fire_ward_draught",
       "count": 1,
       "coins": 14,
-      "potion": "minecraft:fire_resistance",
       "chapter": 4
     },
     {
       "id": "strong_healing",
-      "item": "minecraft:potion",
+      "item": "skyabyss:strong_healing_draught",
       "count": 1,
       "coins": 6,
       "materials": [
@@ -61,7 +56,6 @@
           "count": 2
         }
       ],
-      "potion": "minecraft:strong_healing",
       "chapter": 3
     },
     {

@@ -28,7 +28,7 @@
         {
           "id": "cod",
           "type": "collect",
-          "target": "minecraft:cod",
+          "target": "skyabyss:dried_fish",
           "count": 3
         }
       ]

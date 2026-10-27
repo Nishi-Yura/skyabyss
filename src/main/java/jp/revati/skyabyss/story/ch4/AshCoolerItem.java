@@ -13,13 +13,12 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.item.ItemUtils;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.UseAnim;
 import net.minecraft.world.level.Level;
 
-// 灰の冷やし水 (21 の 6.1)。飲むと余燼の背の熱 (EmberHeat) が 40 下がり、耐火 30 秒。空き瓶が残る
+// 灰の冷やし水 (21 の 6.1)。飲むと余燼の背の熱 (EmberHeat) が 40 下がり、耐火 30 秒
 public class AshCoolerItem extends Item {
     public static final float COOL = 40f;
     public static final int FIRE_TICKS = 600;
@@ -48,12 +47,9 @@ public class AshCoolerItem extends Item {
         if (entity instanceof ServerPlayer sp) {
             drink(sp);
         }
-        if (entity instanceof Player p && !p.isCreative()) {
+        // 空き瓶は残さない (使い道のない品を渡さない。2026-10-27)
+        if (!(entity instanceof Player p) || !p.isCreative()) {
             stack.shrink(1);
-            if (stack.isEmpty()) {
-                return new ItemStack(Items.GLASS_BOTTLE);
-            }
-            p.getInventory().add(new ItemStack(Items.GLASS_BOTTLE));
         }
         return stack;
     }

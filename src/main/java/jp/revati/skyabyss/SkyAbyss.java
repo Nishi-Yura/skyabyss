@@ -141,6 +141,7 @@ public class SkyAbyss {
         // 旅装・砥石・糧と薬 (一章の分。21 の 1.2、P5)
         jp.revati.skyabyss.guide.TravelGear.register(modEventBus);
         jp.revati.skyabyss.item.outfit.OutfitGear.register(modEventBus);
+        jp.revati.skyabyss.item.outfit.ConsumableGear.register(modEventBus);
 
         // クエストの見え方 (章の札・NPC の頭の印・更新の音)。docs/design/18 の 3.5 節
         jp.revati.skyabyss.quest.QuestUx.register(modEventBus);

@@ -222,7 +222,7 @@ public final class ContinentPois {
         }
         var r = level.random;
         chest.setItem(4, new ItemStack(jp.revati.skyabyss.facility.FacilitySetup.BELL_COIN.get(), 3 + r.nextInt(6)));
-        chest.setItem(10, new ItemStack(Items.BREAD, 2 + r.nextInt(4)));
+        chest.setItem(10, new ItemStack(jp.revati.skyabyss.item.outfit.ConsumableGear.TOWN_BREAD.get(), 2 + r.nextInt(4)));
         Element e = switch (ContinentMap.get().region(poi.x(), poi.z())) {
             case ContinentMap.WHALE -> Element.STONE;
             case ContinentMap.TIDE -> Element.TIDE;

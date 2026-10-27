@@ -54,7 +54,7 @@
             },
             {
               "type": "give",
-              "item": "minecraft:cooked_beef",
+              "item": "skyabyss:smoked_meat",
               "count": 4
             }
           ]
@@ -76,7 +76,7 @@
             },
             {
               "type": "give",
-              "item": "minecraft:golden_carrot",
+              "item": "skyabyss:cloud_jerky",
               "count": 3
             }
           ]

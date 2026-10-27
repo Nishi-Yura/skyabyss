@@ -121,8 +121,8 @@ public final class ContinentOutskirts {
             }
             BlockPos barrel = job.mark("barrel");
             if (barrel != null && level.getBlockEntity(barrel) instanceof BarrelBlockEntity be) {
-                be.setItem(0, new ItemStack(Items.BREAD, 16));
-                be.setItem(1, new ItemStack(Items.COOKED_COD, 8));
+                be.setItem(0, new ItemStack(jp.revati.skyabyss.item.outfit.ConsumableGear.TOWN_BREAD.get(), 16));
+                be.setItem(1, new ItemStack(jp.revati.skyabyss.item.outfit.ConsumableGear.DRIED_FISH.get(), 8));
             }
             BlockPos sign = job.mark("sign");
             if (sign != null && level.getBlockEntity(sign) instanceof SignBlockEntity be) {

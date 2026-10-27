@@ -56,7 +56,7 @@
                   },
                   {
                     "type": "item",
-                    "item": "minecraft:honey_bottle",
+                    "item": "skyabyss:honey_jar",
                     "count": 1
                   }
                 ]
@@ -69,12 +69,7 @@
           "do": [
             {
               "type": "take",
-              "item": "minecraft:honey_bottle",
-              "count": 1
-            },
-            {
-              "type": "give",
-              "item": "minecraft:glass_bottle",
+              "item": "skyabyss:honey_jar",
               "count": 1
             },
             {

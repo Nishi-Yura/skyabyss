@@ -1,6 +1,8 @@
 {
   "replace": false,
   "values": [
-    "skyabyss:bone_spike_arrow"
+    "skyabyss:bone_spike_arrow",
+    "skyabyss:travel_arrow",
+    "skyabyss:glow_arrow"
   ]
 }

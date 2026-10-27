@@ -257,8 +257,7 @@ public final class FacilityActions {
 
     // 火の地への差し入れ (2026-10-25: 醸造台は冒険の決まりで置けないので、手ほどきの品の代わりに薬を一本ずつ。00 の 278)
     public static List<ItemStack> brewKit() {
-        return List.of(net.minecraft.world.item.alchemy.PotionContents.createItemStack(net.minecraft.world.item.Items.POTION, net.minecraft.world.item.alchemy.Potions.FIRE_RESISTANCE),
-                net.minecraft.world.item.alchemy.PotionContents.createItemStack(net.minecraft.world.item.Items.POTION, net.minecraft.world.item.alchemy.Potions.HEALING));
+        return List.of(new ItemStack(jp.revati.skyabyss.item.outfit.ConsumableGear.FIRE_WARD.get()), new ItemStack(jp.revati.skyabyss.item.outfit.ConsumableGear.HEALING.get()));
     }
 
     // ---------------------------------------------------------------- 修理

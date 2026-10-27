@@ -64,7 +64,7 @@ public final class GuildRequests {
             new Req("bones", 96, false, Items.BONE, any("bone_chip")),
             new Req("iron", 48, false, Items.IRON_INGOT, s -> s.is(Items.IRON_INGOT)),
             new Req("titan", 24, false, Items.PRISMARINE_SHARD, any("stone_whale_shard", "tide_shell_shard", "thunder_wing_shard", "ember_shard")),
-            new Req("bread", 64, false, Items.BREAD, s -> s.is(Items.BREAD)),
+            new Req("bread", 64, false, Items.HAY_BLOCK, s -> s.is(jp.revati.skyabyss.item.outfit.ConsumableGear.TOWN_BREAD.get())),
             new Req("resonance", 12, false, Items.AMETHYST_SHARD, any("resonance_shard")),
             new Req("hunt", 150, true, Items.SKELETON_SKULL, s -> false));
 

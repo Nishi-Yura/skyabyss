@@ -162,9 +162,9 @@ public final class TideChapter {
         BlockPos chest = job.mark("chest");
         if (chest != null && job.level.getBlockEntity(chest) instanceof ChestBlockEntity be) {
             be.setItem(0, new ItemStack(Items.DRIED_KELP, 6));
-            be.setItem(1, new ItemStack(Items.BREAD, 3));
+            be.setItem(1, new ItemStack(jp.revati.skyabyss.item.outfit.ConsumableGear.TOWN_BREAD.get(), 3));
             be.setItem(2, new ItemStack(Items.TORCH, 6));
-            be.setItem(4, new ItemStack(Items.SALMON, 2));
+            be.setItem(4, new ItemStack(jp.revati.skyabyss.item.outfit.ConsumableGear.DRIED_FISH.get(), 2));
         } else {
             SkyAbyss.LOGGER.error("Tide drift cargo: no chest at {}", chest);
         }

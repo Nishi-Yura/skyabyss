@@ -35,7 +35,7 @@
         {
           "id": "potion",
           "type": "collect",
-          "target": "minecraft:potion@minecraft:fire_resistance",
+          "target": "skyabyss:fire_ward_draught",
           "count": 2,
           "party": false
         }

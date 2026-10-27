@@ -133,7 +133,7 @@ public final class JobChoice {
             jp.revati.skyabyss.quest.Quests.give(p, weapon);
         }
         if (job == Job.ARCHER) {
-            jp.revati.skyabyss.quest.Quests.give(p, new ItemStack(Items.ARROW, 32));
+            jp.revati.skyabyss.quest.Quests.give(p, new ItemStack(jp.revati.skyabyss.item.outfit.ConsumableGear.TRAVEL_ARROW.get(), 32));
         }
         Skill first = firstSkill(job);
         if (first != null && !SkillManager.get(p).knows(first)) {

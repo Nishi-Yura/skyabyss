@@ -60,7 +60,7 @@ public final class TownTourSelfTest {
                 f.add("stop " + TownTour.STOPS.get(i) + ": step " + TownTour.step(p) + " coins " + Coins.count(p) + " (want " + coins + ")");
             }
         }
-        if (p.getInventory().countItem(Items.BREAD) + jp.revati.skyabyss.pouch.Pouch.count(p, Items.BREAD) != 3) {
+        if (p.getInventory().countItem(jp.revati.skyabyss.item.outfit.ConsumableGear.TOWN_BREAD.get()) + jp.revati.skyabyss.pouch.Pouch.count(p, jp.revati.skyabyss.item.outfit.ConsumableGear.TOWN_BREAD.get()) != 3) {
             f.add("the inn did not give 3 bread");
         }
         if (!jp.revati.skyabyss.mount.MountService.hasWhistle(p)) {

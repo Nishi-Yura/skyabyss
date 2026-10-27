@@ -11,7 +11,7 @@
         {
           "id": "bread",
           "type": "collect",
-          "target": "minecraft:bread",
+          "target": "skyabyss:town_bread",
           "count": 12,
           "party": false
         }
