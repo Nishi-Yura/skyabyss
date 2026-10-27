@@ -197,7 +197,7 @@ public final class TownSelfTest {
         for (int i = 0; i < 4; i++) {
             Quests.onKill(p, "skyabyss:bone_footman", true, 0);
         }
-        p.getInventory().add(new ItemStack(Items.BONE, 3));
+        p.getInventory().add(new ItemStack(jp.revati.skyabyss.guide.GuideSetup.BONE_CHIP.get(), 3));
         Quests.poll(p, true);
         check(f, "hand".equals(TownGuests.stageOf(p, qid)), "hunt -> hand (" + TownGuests.stageOf(p, qid) + ")");
         int coins = Coins.count(p);
@@ -303,7 +303,7 @@ public final class TownSelfTest {
         boolean second = TownQuests.claimWell(p);
         check(f, first && !second, "well treasure once per player");
         check(f, Coins.count(p) == coins + TownQuests.WELL_COINS, "well coins");
-        check(f, p.getInventory().countItem(Items.ECHO_SHARD) >= 1, "well shard");
+        check(f, p.getInventory().countItem(jp.revati.skyabyss.item.outfit.MaterialGear.GLINT_SHARD.get()) >= 1, "well shard");
     }
 
     private static void cellar(List<String> f, ServerLevel level, BlockPos gap) {

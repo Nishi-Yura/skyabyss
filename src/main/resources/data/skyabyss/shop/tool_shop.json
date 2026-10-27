@@ -19,12 +19,6 @@
       "coins": 12
     },
     {
-      "id": "rope",
-      "item": "minecraft:lead",
-      "count": 1,
-      "coins": 5
-    },
-    {
       "id": "candle",
       "item": "minecraft:candle",
       "count": 1,
@@ -32,38 +26,24 @@
     },
     {
       "id": "boat",
-      "item": "minecraft:oak_boat",
+      "item": "skyabyss:skiff",
       "count": 1,
       "coins": 8,
       "chapter": 2
     },
     {
       "id": "compass",
-      "item": "minecraft:compass",
+      "item": "skyabyss:wayfinder",
       "count": 1,
       "coins": 10,
       "chapter": 2
     },
     {
       "id": "map",
-      "item": "minecraft:map",
+      "item": "skyabyss:blank_chart",
       "count": 1,
       "coins": 6,
       "chapter": 2
-    },
-    {
-      "id": "made_firework_rocket",
-      "item": "minecraft:firework_rocket",
-      "count": 3,
-      "coins": 5,
-      "materials": [
-        {
-          "item": "skyabyss:spark_dust",
-          "count": 1
-        }
-      ],
-      "chapter": 3,
-      "made": true
     },
     {
       "id": "gather_axe",

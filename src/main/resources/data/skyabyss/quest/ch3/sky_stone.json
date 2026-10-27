@@ -26,7 +26,7 @@
         {
           "id": "diamonds",
           "type": "collect",
-          "target": "minecraft:diamond",
+          "target": "skyabyss:sky_stone",
           "count": 5,
           "party": false
         },

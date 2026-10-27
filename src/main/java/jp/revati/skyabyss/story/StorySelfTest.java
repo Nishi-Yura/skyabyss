@@ -517,13 +517,13 @@ public final class StorySelfTest {
         check(stage(p, "sub_warm_coal").equals("fetch"), "sub_warm_coal did not start", f);
         Quests.poll(p, true);
         check(stage(p, "sub_warm_coal").equals("fetch"), "the coal quest passed without the magma cream", f);
-        p.getInventory().add(new ItemStack(Items.MAGMA_CREAM, 4));
+        p.getInventory().add(new ItemStack(jp.revati.skyabyss.item.outfit.MaterialGear.EMBER_DROP.get(), 4));
         Quests.poll(p, true);
         check(stage(p, "sub_warm_coal").equals("tell"), "four magma creams did not advance: " + stage(p, "sub_warm_coal"), f);
         talk(p, st, "ms_coal_done", f);
         next(p);
-        check(stage(p, "sub_warm_coal").equals("done") && p.getInventory().countItem(Items.MAGMA_CREAM) == 0
-                && p.getInventory().countItem(Items.CHARCOAL) == 1, "sub_warm_coal did not take the cream and give the coal", f);
+        check(stage(p, "sub_warm_coal").equals("done") && p.getInventory().countItem(jp.revati.skyabyss.item.outfit.MaterialGear.EMBER_DROP.get()) == 0
+                && p.getInventory().countItem(jp.revati.skyabyss.item.outfit.MaterialGear.CHARCOAL_LUMP.get()) == 1, "sub_warm_coal did not take the cream and give the coal", f);
         DialogueService.close(p);
         // 段階で開く: 板の日替わり・週替わりは段階 2 から
         check(QuestManager.quest("daily_tide_rounds").minStage() == 2 && QuestManager.quest("weekly_tide_heart").minStage() == 2,

@@ -473,7 +473,7 @@ public final class Ch1SitesSelfTest {
             SiteSpawner.tick(level, List.of(a), now + 40);
             check(progress.cleared(a.getUUID(), BonePit.SITE), "clearing the pit was not recorded");
             check(Growth.get(a).discoveries.contains("site:" + BonePit.SITE), "the pit clear xp was not granted");
-            check(jp.revati.skyabyss.quest.QuestItems.count(a, "minecraft:raw_iron", null) >= 4, "the first pit clear should hand over raw iron");
+            check(jp.revati.skyabyss.quest.QuestItems.count(a, "skyabyss:iron_lump", null) >= 4, "the first pit clear should hand over raw iron");
         } finally {
             SiteSpawner.clearAll(level);
             progress.forget(a.getUUID(), BonePit.SITE);
@@ -528,7 +528,7 @@ public final class Ch1SitesSelfTest {
             check(!BonePit.openPack(p, level, null), "the pack gave its contents twice");
             Tasks.flush();
             check(Lore.state(p).has(Ch1Prep.PAGE_IRON), "the pack did not record the page");
-            check(jp.revati.skyabyss.quest.QuestItems.count(p, "minecraft:iron_ingot", null) == 2 && jp.revati.skyabyss.quest.QuestItems.count(p, "minecraft:torch", null) == 8,
+            check(jp.revati.skyabyss.quest.QuestItems.count(p, "skyabyss:iron_lump", null) == 2 && jp.revati.skyabyss.quest.QuestItems.count(p, "minecraft:torch", null) == 8,
                     "the pack should hold two iron ingots and eight torches");
             Quests.poll(p, true);
             QuestLog.Entry iron = QuestLog.of(p).entry(Ch1Prep.Q_IRON);

@@ -63,7 +63,7 @@
     "xp": 150,
     "items": [
       {
-        "item": "minecraft:blue_dye",
+        "item": "skyabyss:indigo_bookmark",
         "count": 1,
         "name": "item.skyabyss.keepsake.indigo_bookmark",
         "lore": [

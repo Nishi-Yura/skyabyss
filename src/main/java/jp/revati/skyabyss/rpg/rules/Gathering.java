@@ -98,6 +98,25 @@ public final class Gathering {
         return tag == net.minecraft.tags.ItemTags.AXES ? "axe" : tag == net.minecraft.tags.ItemTags.SHOVELS ? "shovel" : "pickaxe";
     }
 
+    // 採った品: ブロックの品はそのまま、バニラの素材は mod の素材へ (置き換えの第 3 段。2026-10-27)、それ以外 (種・野菜など) は出さない
+    static ItemStack modDrop(ItemStack d) {
+        if (d.getItem() instanceof net.minecraft.world.item.BlockItem || !net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(d.getItem()).getNamespace().equals("minecraft")) {
+            return d;
+        }
+        net.minecraft.world.item.Item i = d.getItem();
+        net.minecraft.world.item.Item to = i == net.minecraft.world.item.Items.RAW_IRON ? jp.revati.skyabyss.item.outfit.MaterialGear.IRON_LUMP.get()
+                : i == net.minecraft.world.item.Items.RAW_COPPER ? jp.revati.skyabyss.item.outfit.MaterialGear.COPPER_LUMP.get()
+                : i == net.minecraft.world.item.Items.COAL || i == net.minecraft.world.item.Items.CHARCOAL ? jp.revati.skyabyss.item.outfit.MaterialGear.CHARCOAL_LUMP.get()
+                : i == net.minecraft.world.item.Items.DIAMOND ? jp.revati.skyabyss.item.outfit.MaterialGear.SKY_STONE.get()
+                : i == net.minecraft.world.item.Items.RAW_GOLD || i == net.minecraft.world.item.Items.GOLD_NUGGET ? jp.revati.skyabyss.item.outfit.MaterialGear.GOLD_GRAIN.get()
+                : i == net.minecraft.world.item.Items.LAPIS_LAZULI || i == net.minecraft.world.item.Items.REDSTONE || i == net.minecraft.world.item.Items.AMETHYST_SHARD
+                        || i == net.minecraft.world.item.Items.EMERALD ? jp.revati.skyabyss.item.outfit.MaterialGear.GLINT_SHARD.get()
+                : i == net.minecraft.world.item.Items.FLINT ? jp.revati.skyabyss.item.outfit.MaterialGear.FLINT_STONE.get()
+                : i == net.minecraft.world.item.Items.CLAY_BALL ? jp.revati.skyabyss.item.outfit.MaterialGear.CLAY_LUMP.get()
+                : i == net.minecraft.world.item.Items.WHEAT ? jp.revati.skyabyss.item.outfit.MaterialGear.WHEAT_SHEAF.get() : null;
+        return to == null ? ItemStack.EMPTY : new ItemStack(to, d.getCount());
+    }
+
     static boolean allowedHere(ServerLevel level, BlockPos pos) {
         return !jp.revati.skyabyss.titan.TitanBacks.isBack(level.dimension()) && level.dimension() != jp.revati.skyabyss.story.ch5.AbyssWorld.LEVEL
                 && !jp.revati.skyabyss.opening.site.SiteGuard.inCapital(level, pos)
@@ -143,7 +162,10 @@ public final class Gathering {
         }
         mine.put(pos.asLong(), now + regrow);
         for (ItemStack d : drops) {
-            jp.revati.skyabyss.quest.Quests.give(player, d);
+            ItemStack out = modDrop(d);
+            if (!out.isEmpty()) {
+                jp.revati.skyabyss.quest.Quests.give(player, out);
+            }
         }
         player.swing(InteractionHand.MAIN_HAND, true);
         var sound = state.getSoundType(level, pos, player);

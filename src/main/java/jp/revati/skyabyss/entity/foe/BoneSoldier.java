@@ -46,7 +46,7 @@ public abstract class BoneSoldier extends ContinentFoe {
     @Override
     protected void dropCustomDeathLoot(net.minecraft.server.level.ServerLevel level, DamageSource source, boolean recentlyHit) {
         if (recentlyHit && random.nextFloat() < 0.6f) {
-            spawnAtLocation(new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.BONE));
+            spawnAtLocation(new net.minecraft.world.item.ItemStack(jp.revati.skyabyss.guide.GuideSetup.BONE_CHIP.get()));
         }
     }
 

@@ -79,11 +79,6 @@
   ],
   "buys": [
     {
-      "item": "minecraft:spider_eye",
-      "per": 4,
-      "coins": 1
-    },
-    {
       "item": "skyabyss:glow_anemone",
       "per": 2,
       "coins": 1

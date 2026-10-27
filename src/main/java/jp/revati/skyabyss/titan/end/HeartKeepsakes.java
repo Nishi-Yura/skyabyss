@@ -40,7 +40,7 @@ public final class HeartKeepsakes {
 
     // 潮殻の初回の心臓の報い: 鸚鵡貝と共鳴の欠片 (備えの品と素材だけ)
     private static void tideSummit(ServerPlayer player) {
-        List<ItemStack> items = List.of(new ItemStack(Items.NAUTILUS_SHELL, 2),
+        List<ItemStack> items = List.of(new ItemStack(jp.revati.skyabyss.guide.Ch2Gear.SMALL_PEARL.get(), 2),
                 new ItemStack(ModItems.RESONANCE_SHARD_TIDE_SHELL.get(), 1));
         if (FirstRun.grantKeepsake(player, TIDE_SUMMIT, items)) {
             Notice.unlock(player, "message.skyabyss.tide.keepsake_given");

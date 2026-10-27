@@ -80,7 +80,7 @@
             "of": [
               {
                 "type": "item",
-                "item": "minecraft:string",
+                "item": "skyabyss:thread_spool",
                 "count": 8
               },
               {
@@ -93,7 +93,7 @@
           "do": [
             {
               "type": "take",
-              "item": "minecraft:string",
+              "item": "skyabyss:thread_spool",
               "count": 8
             },
             {

@@ -403,24 +403,24 @@ public final class FreeQuestSelfTest {
             pick(p, ST, "errands", failures);
             pick(p, ST, "parcel", failures);
             pick(p, ST, "accept", failures);
-            check(stage(p, "sub_parcel").equals("deliver") && QuestItems.count(p, "minecraft:leather", "parcel") == 1,
+            check(stage(p, "sub_parcel").equals("deliver") && QuestItems.count(p, "skyabyss:hide", "parcel") == 1,
                     "parcel did not start with a marked bundle for " + p.getName().getString(), failures);
             DialogueService.close(p);
         }
         a.getInventory().clearContent();
-        a.getInventory().add(new ItemStack(Items.LEATHER, 1));
+        a.getInventory().add(new ItemStack(jp.revati.skyabyss.item.outfit.MaterialGear.HIDE.get(), 1));
         talk(a, wc);
         check(!node(a).equals("fq_c_parcel"), "plain leather was taken as the storyteller's bundle", failures);
         DialogueService.close(a);
         talk(a, st);
         pick(a, ST, "errands", failures);
         pick(a, ST, "parcel_lost", failures);
-        check(QuestItems.count(a, "minecraft:leather", "parcel") == 1, "a lost bundle was not replaced", failures);
+        check(QuestItems.count(a, "skyabyss:hide", "parcel") == 1, "a lost bundle was not replaced", failures);
         DialogueService.close(a);
         talk(a, wc);
         check(node(a).equals("fq_c_parcel"), "whale chaser did not take the bundle: " + node(a), failures);
         next(a);
-        check(stage(a, "sub_parcel").equals("return") && QuestItems.count(a, "minecraft:bone", "clasp_return") == 1,
+        check(stage(a, "sub_parcel").equals("return") && QuestItems.count(a, "skyabyss:bone_chip", "clasp_return") == 1,
                 "chaser did not hand back the clasp", failures);
         check(stage(b, "sub_parcel").equals("deliver"), "a's delivery moved b's quest", failures);
         DialogueService.close(a);

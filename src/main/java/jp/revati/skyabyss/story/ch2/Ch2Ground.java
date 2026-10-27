@@ -124,7 +124,7 @@ public final class Ch2Ground {
         // 漂着の筏の跡: 人ごとに一度の抽選と頁。職人が立つ所 (印 artisan)
         SiteTreasure.register(RAFT_TREASURE, SiteTreasure.Table.of(List.of(new SiteTreasure.Entry("skyabyss:small_pearl", 3),
                 new SiteTreasure.Entry("skyabyss:salt_crystal", 2), new SiteTreasure.Entry("skyabyss:shell_chip", 2),
-                new SiteTreasure.Entry("minecraft:dried_kelp", 4))));
+                new SiteTreasure.Entry("skyabyss:dried_fish", 4))));
         ChapterSites.element(RAFT, Chapters.TIDE, RAFT).atGround().dist(30, 110).prefer(Prefer.SHORE).arriveRadius(8)
                 .post(job -> {
                     BlockPos at = job.mark("artisan");

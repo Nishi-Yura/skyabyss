@@ -516,7 +516,7 @@ public final class FeatherCarry extends RaidRoom {
     }
 
     static int featherIndex(ItemStack st) {
-        if (st.isEmpty() || !st.is(Items.FEATHER)) {
+        if (st.isEmpty() || !st.is(jp.revati.skyabyss.guide.Ch3Gear.SCORCHED_FEATHER.get())) {
             return -1;
         }
         CustomData cd = st.get(DataComponents.CUSTOM_DATA);
@@ -550,7 +550,7 @@ public final class FeatherCarry extends RaidRoom {
     }
 
     private void spawnFeather(RaidCtx ctx, int idx) {
-        ItemStack st = new ItemStack(Items.FEATHER);
+        ItemStack st = new ItemStack(jp.revati.skyabyss.guide.Ch3Gear.SCORCHED_FEATHER.get());
         CompoundTag tag = new CompoundTag();
         tag.putInt(FEATHER_TAG, idx);
         st.set(DataComponents.CUSTOM_DATA, CustomData.of(tag));

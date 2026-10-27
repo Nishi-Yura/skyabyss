@@ -22,13 +22,13 @@
         {
           "id": "compass",
           "type": "collect",
-          "target": "minecraft:compass",
+          "target": "skyabyss:wayfinder",
           "count": 1
         },
         {
           "id": "map",
           "type": "collect",
-          "target": "minecraft:map",
+          "target": "skyabyss:blank_chart",
           "count": 1
         }
       ]

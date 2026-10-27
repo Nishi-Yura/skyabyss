@@ -17,7 +17,7 @@
         {
           "id": "rod",
           "type": "collect",
-          "target": "minecraft:blaze_rod",
+          "target": "skyabyss:ember_rod",
           "count": 3,
           "party": false
         },

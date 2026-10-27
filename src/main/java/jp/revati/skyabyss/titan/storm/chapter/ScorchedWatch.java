@@ -69,11 +69,11 @@ public final class ScorchedWatch {
         ChapterSites.element(SITE, Chapters.STORM, SITE).atGround().dist(60, 150).prefer(Prefer.HIGH).arriveRadius(14)
                 .post(ScorchedWatch::finish)
                 .onArrive((p, s) -> Notice.narrate(p, "message.skyabyss.ch3g.arrive." + SITE)).register();
-        SiteTreasure.register(TREASURE, SiteTreasure.Table.of(List.of(new SiteTreasure.Entry("minecraft:copper_ingot", 6),
+        SiteTreasure.register(TREASURE, SiteTreasure.Table.of(List.of(new SiteTreasure.Entry("skyabyss:copper_lump", 6),
                 new SiteTreasure.Entry(Ch3Mobs.SCORCHED_FEATHER, 4), new SiteTreasure.Entry(Ch3Mobs.STATIC_COTTON, 4), new SiteTreasure.Entry(Ch3Mobs.COPPER_WIRE, 4),
                 new SiteTreasure.Entry(Ch3Mobs.THUNDER_WARD_THREAD, 1))));
-        SiteTreasure.register(REPEAT_TREASURE, SiteTreasure.Table.of(List.of(), 1, 2, List.of(new SiteTreasure.Entry("minecraft:copper_ingot", 2, 4, 3),
-                new SiteTreasure.Entry("minecraft:raw_copper", 2, 5, 3),
+        SiteTreasure.register(REPEAT_TREASURE, SiteTreasure.Table.of(List.of(), 1, 2, List.of(new SiteTreasure.Entry("skyabyss:copper_lump", 2, 4, 3),
+                new SiteTreasure.Entry("skyabyss:copper_lump", 2, 5, 3),
                 new SiteTreasure.Entry(Ch3Mobs.SCORCHED_FEATHER, 2, 4, 3), new SiteTreasure.Entry(Ch3Mobs.STATIC_COTTON, 2, 4, 3), new SiteTreasure.Entry(Ch3Mobs.COPPER_WIRE, 1, 3, 2))));
         SiteSpawner.register(new SiteSpawner.Def(SITE, Chapters.STORM, pads(), XP, TREASURE, REPEAT_TREASURE, SiteSpawner.MAX_MOBS, ScorchedWatch::origins, ScorchedWatch::yawAt));
         SiteSpawner.onCleared(SITE, (p, first) -> {

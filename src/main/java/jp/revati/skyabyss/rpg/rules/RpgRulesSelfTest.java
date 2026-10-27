@@ -148,13 +148,13 @@ public final class RpgRulesSelfTest {
             }
             // 鉄鉱石: 斧はだめ、石のつるはしなら
             click(p, ore);
-            if (p.getInventory().countItem(Items.RAW_IRON) != 0) {
+            if (p.getInventory().countItem(jp.revati.skyabyss.item.outfit.MaterialGear.IRON_LUMP.get()) != 0) {
                 f.add("iron ore gave raw iron by hand");
             }
             p.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.STONE_PICKAXE));
             click(p, ore);
-            if (p.getInventory().countItem(Items.RAW_IRON) < 1 || !level.getBlockState(ore).is(Blocks.IRON_ORE)) {
-                f.add("iron ore with a stone pickaxe: raw iron " + p.getInventory().countItem(Items.RAW_IRON) + ", block " + level.getBlockState(ore));
+            if (p.getInventory().countItem(jp.revati.skyabyss.item.outfit.MaterialGear.IRON_LUMP.get()) < 1 || !level.getBlockState(ore).is(Blocks.IRON_ORE)) {
+                f.add("iron ore with a stone pickaxe: raw iron " + p.getInventory().countItem(jp.revati.skyabyss.item.outfit.MaterialGear.IRON_LUMP.get()) + ", block " + level.getBlockState(ore));
             }
             if (p.getMainHandItem().getDamageValue() != 0) {
                 f.add("gathering wore the pickaxe");

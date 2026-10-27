@@ -42,7 +42,7 @@
     "xp": 300,
     "items": [
       {
-        "item": "minecraft:paper",
+        "item": "skyabyss:blank_chart",
         "count": 1,
         "name": "item.skyabyss.keepsake.map_scrap",
         "lore": [

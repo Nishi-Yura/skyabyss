@@ -22,13 +22,13 @@
         {
           "id": "wheat",
           "type": "collect",
-          "target": "minecraft:wheat",
+          "target": "skyabyss:wheat_sheaf",
           "count": 16
         },
         {
           "id": "coal",
           "type": "collect",
-          "target": "minecraft:coal",
+          "target": "skyabyss:charcoal_lump",
           "count": 4
         }
       ]

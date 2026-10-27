@@ -22,7 +22,7 @@
         {
           "id": "copper",
           "type": "collect",
-          "target": "minecraft:copper_ingot",
+          "target": "skyabyss:copper_lump",
           "count": 6
         },
         {

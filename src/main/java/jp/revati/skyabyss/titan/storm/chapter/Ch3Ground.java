@@ -94,7 +94,7 @@ public final class Ch3Ground {
         ChapterSites.element(CLIFF, Chapters.STORM, CLIFF).atGround().dist(60, 150).prefer(Prefer.HIGH).arriveRadius(8)
                 .post(Ch3Ground::finishCliff)
                 .onArrive((p, s) -> Notice.narrate(p, "message.skyabyss.ch3g.arrive." + CLIFF)).register();
-        SiteTreasure.register(FIELD_CACHE, SiteTreasure.Table.of(List.of(new SiteTreasure.Entry("minecraft:raw_copper", 8),
+        SiteTreasure.register(FIELD_CACHE, SiteTreasure.Table.of(List.of(new SiteTreasure.Entry("skyabyss:copper_lump", 8),
                 new SiteTreasure.Entry(Ch3Mobs.COPPER_WIRE, 3), new SiteTreasure.Entry(Ch3Mobs.SCORCHED_FEATHER, 2))));
         LightningPillars.register();
         PrepQuests.onReady(3, p -> Notice.narrate(p, "message.skyabyss.ch3g.ready"));

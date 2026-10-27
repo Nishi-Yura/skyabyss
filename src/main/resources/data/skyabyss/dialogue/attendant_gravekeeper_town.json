@@ -96,7 +96,7 @@
                   },
                   {
                     "type": "item",
-                    "item": "minecraft:water_bucket",
+                    "item": "skyabyss:water_skin_full",
                     "count": 1
                   }
                 ]
@@ -109,12 +109,12 @@
           "do": [
             {
               "type": "take",
-              "item": "minecraft:water_bucket",
+              "item": "skyabyss:water_skin_full",
               "count": 1
             },
             {
               "type": "give",
-              "item": "minecraft:bucket",
+              "item": "skyabyss:water_skin",
               "count": 1
             },
             {

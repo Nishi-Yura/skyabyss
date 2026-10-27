@@ -49,7 +49,7 @@
         {
           "id": "bones",
           "type": "collect",
-          "target": "minecraft:bone",
+          "target": "skyabyss:bone_chip",
           "count": 3
         }
       ]

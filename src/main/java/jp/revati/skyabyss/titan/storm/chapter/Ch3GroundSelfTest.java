@@ -196,10 +196,10 @@ public final class Ch3GroundSelfTest {
             check(f, QuestLog.of(p).entry(id) != null, id + " did not start");
         }
         // 空の石: ダイヤ 4 では済まない、5 で済む (胸当てか剣でも)
-        p.getInventory().add(new ItemStack(Items.DIAMOND, 4));
+        p.getInventory().add(new ItemStack(jp.revati.skyabyss.item.outfit.MaterialGear.SKY_STONE.get(), 4));
         Quests.poll(p, true);
         check(f, !QuestLog.of(p).entry(Ch3Ground.Q_STONE).done, "four diamonds finished the sky stone");
-        p.getInventory().add(new ItemStack(Items.DIAMOND, 1));
+        p.getInventory().add(new ItemStack(jp.revati.skyabyss.item.outfit.MaterialGear.SKY_STONE.get(), 1));
         Quests.poll(p, true);
         check(f, QuestLog.of(p).entry(Ch3Ground.Q_STONE).done, "five diamonds did not finish the sky stone");
         Quests.forget(p, Ch3Ground.Q_STONE);
@@ -231,7 +231,7 @@ public final class Ch3GroundSelfTest {
         Quests.signal(p, Ch3Ground.SIGNAL_PILLAR);
         check(f, "vault".equals(LightningPillars.stageOf(p, Ch3Ground.Q_PILLARS)), "four rods did not open the vault stage");
         check(f, LightningPillars.openVault(p, level, null) && !LightningPillars.openVault(p, level, null), "the vault gave its copper twice or never");
-        check(f, QuestItems.count(p, "minecraft:copper_ingot", null) == 4 && Lore.state(p).has(Ch3Ground.PAGE_STAYER), "the vault should hand over four copper and the page");
+        check(f, QuestItems.count(p, "skyabyss:copper_lump", null) == 4 && Lore.state(p).has(Ch3Ground.PAGE_STAYER), "the vault should hand over four copper and the page");
         Quests.poll(p, true);
         check(f, QuestLog.of(p).entry(Ch3Ground.Q_PILLARS).done, "the page did not finish the pillars quest");
         check(f, PrepQuests.ready(p, 3) && Growth.get(p).discoveries.contains("prep_ready:3"), "the three chapter-3 steps did not raise ch3_ready");
@@ -519,7 +519,7 @@ public final class Ch3GroundSelfTest {
         }
         SiteSpawner.tick(level, List.of(a), now + 40);
         check(f, progress.cleared(a.getUUID(), ScorchedWatch.SITE), "clearing the watch was not recorded");
-        check(f, QuestItems.count(a, "minecraft:copper_ingot", null) >= 6, "the first watch clear should hand over copper");
+        check(f, QuestItems.count(a, "skyabyss:copper_lump", null) >= 6, "the first watch clear should hand over copper");
         laterWait = 0;
     }
 
@@ -549,7 +549,9 @@ public final class Ch3GroundSelfTest {
             if (e.siteId.equals(Ch3Ground.FIELD) && e.built) {
                 BlockPos cache = e.extra("cache");
                 check(f, cache != null && level.getBlockState(cache).is(Blocks.BARREL), "the gleaner field has no cache barrel");
-                check(f, Ch3Ground.openCache(p, level, cache) && !Ch3Ground.openCache(p, level, cache) && QuestItems.count(p, "minecraft:raw_copper", null) == 8,
+                // 生の銅と銅の延べ棒は、どちらも銅の塊になった (置き換えの第 3 段) ので、前からの分を引いて数える
+                int copperBefore = QuestItems.count(p, "skyabyss:copper_lump", null);
+                check(f, Ch3Ground.openCache(p, level, cache) && !Ch3Ground.openCache(p, level, cache) && QuestItems.count(p, "skyabyss:copper_lump", null) - copperBefore == 8,
                         "the cache should give eight raw copper once");
             }
             if (e.siteId.equals(Ch3Ground.CLIFF) && e.built) {

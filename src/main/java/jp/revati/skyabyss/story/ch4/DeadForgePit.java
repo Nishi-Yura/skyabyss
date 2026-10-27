@@ -70,9 +70,9 @@ public final class DeadForgePit {
                         Tasks.later(80, () -> Notice.narrate(p, "message.skyabyss.ch4g.pit.trail"));
                     }
                 }).register();
-        SiteTreasure.register(PACK, SiteTreasure.Table.of(List.of(new SiteTreasure.Entry("minecraft:blaze_powder", 1), new SiteTreasure.Entry("minecraft:torch", 8))));
+        SiteTreasure.register(PACK, SiteTreasure.Table.of(List.of(new SiteTreasure.Entry("skyabyss:ember_drop", 1), new SiteTreasure.Entry("minecraft:torch", 8))));
         SiteTreasure.register(TREASURE, SiteTreasure.Table.of(List.of(new SiteTreasure.Entry("skyabyss:soot_iron", 4), new SiteTreasure.Entry("skyabyss:ash_hemp", 4),
-                new SiteTreasure.Entry("minecraft:coal", 4))));
+                new SiteTreasure.Entry("skyabyss:charcoal_lump", 4))));
         SiteTreasure.register(REPEAT_TREASURE, SiteTreasure.Table.of(List.of(), 1, 2, List.of(new SiteTreasure.Entry("skyabyss:soot_iron", 1, 3, 3),
                 new SiteTreasure.Entry("skyabyss:ash_hemp", 1, 3, 3))));
         SiteSpawner.register(new SiteSpawner.Def(SITE, Chapters.EMBER, pads(), XP, TREASURE, REPEAT_TREASURE, SiteSpawner.MAX_MOBS, DeadForgePit::origins,

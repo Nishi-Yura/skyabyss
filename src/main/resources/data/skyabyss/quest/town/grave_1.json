@@ -39,7 +39,7 @@
         {
           "id": "water",
           "type": "collect",
-          "target": "minecraft:water_bucket",
+          "target": "skyabyss:water_skin_full",
           "count": 1
         }
       ]

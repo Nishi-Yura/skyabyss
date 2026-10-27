@@ -22,7 +22,7 @@
         {
           "id": "string",
           "type": "collect",
-          "target": "minecraft:string",
+          "target": "skyabyss:thread_spool",
           "count": 8
         },
         {

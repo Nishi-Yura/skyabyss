@@ -281,7 +281,7 @@ public final class Ch4GroundSelfTest {
         ServerLevel level = server.overworld();
         // 前の私の荷 (人ごとに一度、ブレイズパウダー 1)・窯の箱 (煤鉄 4・灰麻 3)
         p.getInventory().clearContent();
-        check(f, DeadForgePit.openPack(p, level, null) && !DeadForgePit.openPack(p, level, null) && QuestItems.count(p, "minecraft:blaze_powder", null) == 1,
+        check(f, DeadForgePit.openPack(p, level, null) && !DeadForgePit.openPack(p, level, null) && QuestItems.count(p, "skyabyss:ember_drop", null) == 1,
                 "the pack should hand over one blaze powder, once");
         check(f, Ch4Ground.openCache(p, level, null) && !Ch4Ground.openCache(p, level, null) && QuestItems.count(p, "skyabyss:soot_iron", null) == 4
                 && QuestItems.count(p, "skyabyss:ash_hemp", null) == 3, "the kiln cache should hand over four soot iron and three ash hemp, once");

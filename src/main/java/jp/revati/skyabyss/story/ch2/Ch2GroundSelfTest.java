@@ -391,7 +391,7 @@ public final class Ch2GroundSelfTest {
             Quests.poll(p, false);
             check(QuestLog.of(p).entry(Ch2Ground.Q_BOAT) != null, Ch2Ground.Q_BOAT + " did not start after the salt road");
             // 船と貝: 船 → 難破船の頁 + 貝
-            p.getInventory().add(new ItemStack(Items.OAK_BOAT));
+            p.getInventory().add(new ItemStack(jp.revati.skyabyss.item.outfit.MaterialGear.SKIFF.get()));
             Quests.poll(p, true);
             check("wreck".equals(stageId(p, Ch2Ground.Q_BOAT)), "a boat did not move ebb_boat to the wreck stage");
             Wreck.openChest(p);

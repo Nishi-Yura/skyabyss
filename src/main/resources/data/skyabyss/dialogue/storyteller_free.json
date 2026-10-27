@@ -23,7 +23,7 @@
           },
           {
             "type": "item",
-            "item": "minecraft:bone",
+            "item": "skyabyss:bone_chip",
             "count": 1,
             "token": "clasp_return"
           }
@@ -133,7 +133,7 @@
                 "type": "not",
                 "of": {
                   "type": "item",
-                  "item": "minecraft:leather",
+                  "item": "skyabyss:hide",
                   "count": 1,
                   "token": "parcel"
                 }
@@ -235,7 +235,7 @@
             },
             {
               "type": "give",
-              "item": "minecraft:leather",
+              "item": "skyabyss:hide",
               "count": 1,
               "token": "parcel",
               "name": "item.skyabyss.keepsake.parcel",
@@ -260,7 +260,7 @@
       "do": [
         {
           "type": "give",
-          "item": "minecraft:leather",
+          "item": "skyabyss:hide",
           "count": 1,
           "token": "parcel",
           "name": "item.skyabyss.keepsake.parcel",
@@ -276,7 +276,7 @@
       "do": [
         {
           "type": "take",
-          "item": "minecraft:bone",
+          "item": "skyabyss:bone_chip",
           "count": 1,
           "token": "clasp_return"
         }
