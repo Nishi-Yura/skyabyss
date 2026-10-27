@@ -202,7 +202,8 @@ public final class IslandTrail {
                 mark(p, PRINTS);
             }
         }
-        if (!has(p, BANDITS)) {
+        // 目的は左上の順にしか進まない (2026-10-27 の声「左上のクエスト通りに行かないと先に進めない」): 野盗は足跡を見てから立ち、数える
+        if (has(p, PRINTS) && !has(p, BANDITS)) {
             if (p.getPersistentData().getInt(KILLS) >= BANDITS_NEEDED) {
                 mark(p, BANDITS);
                 openGate(level);
@@ -276,7 +277,7 @@ public final class IslandTrail {
     @SubscribeEvent
     static void onDeath(LivingDeathEvent event) {
         if (!(event.getSource().getEntity() instanceof ServerPlayer p) || !bandit(event.getEntity()) || !(p.level() instanceof ServerLevel level)
-                || !active(level) || ContinentOutskirts.ferried(p) || has(p, BANDITS)) {
+                || !active(level) || ContinentOutskirts.ferried(p) || has(p, BANDITS) || !has(p, PRINTS)) {
             return;
         }
         BlockPos b = ContinentLayout.get().island("bandits");
@@ -286,6 +287,9 @@ public final class IslandTrail {
         if (event.getEntity().getTags().contains(LEADER_TAG)) {
             jp.revati.skyabyss.facility.Coins.give(p, LEADER_COINS);
             Notice.hint(p, "message.skyabyss.island.leader_down", LEADER_COINS);
+            // 島の名のある敵は峠の頭目だけ (島をうろつく名のある敵はもう出さない。NamedFoes)
+            jp.revati.skyabyss.advancement.Beats.fire(p, "named:any");
+            jp.revati.skyabyss.advancement.Beats.fire(p, "named:island");
         }
         int n = p.getPersistentData().getInt(KILLS) + 1;
         p.getPersistentData().putInt(KILLS, n);

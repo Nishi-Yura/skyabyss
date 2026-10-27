@@ -52,7 +52,8 @@ public final class NamedFoes {
     // 土地の番号 (ContinentMap: MEADOW, OUTSKIRTS, WHALE, TIDE, STORM, EMBER) ごと
     static final Def[] DEFS = {
         new Def("skyabyss:bone_standard", "entity.skyabyss.named.meadow", true, 2.0, 40),
-        new Def("skyabyss:bandit_chief", "entity.skyabyss.named.island", false, 1.8, 25),
+        // はじまりの島には名のある強敵を出さない (峠の頭目は峠の野盗の場面だけ。IslandTrail。2026-10-27 の声)
+        null,
         new Def("skyabyss:rock_boar", "entity.skyabyss.rock_boar", false, 1.0, 80),
         new Def("skyabyss:tide_crab", "entity.skyabyss.tide_crab", false, 1.0, 120),
         new Def("skyabyss:storm_ram", "entity.skyabyss.storm_ram", false, 1.0, 160),

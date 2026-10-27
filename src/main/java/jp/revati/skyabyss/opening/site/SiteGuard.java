@@ -395,7 +395,7 @@ public final class SiteGuard {
         }
     }
 
-    // 1 秒ごと: 都と土地の町の中に入った敵を消す (外から歩いて来た物・湧き台から来た物)。名札の付いた物は外へ押し出す
+    // 0.25 秒ごと: 都と土地の町の中に入った敵を、いちばん近い縁の外へ押し戻す (消さない。2026-10-27 の声「町に近づいたら敵が消えるけど、近づけないだけにして」)
     @SubscribeEvent
     static void onTick(ServerTickEvent.Post event) {
         MinecraftServer server = event.getServer();
@@ -405,7 +405,7 @@ public final class SiteGuard {
                 ShelterBuilder.keepLabels(server.overworld(), shelter);
             }
         }
-        if (server.getTickCount() % 20 != 7 || safetyOff()) {
+        if (server.getTickCount() % 5 != 2 || safetyOff()) {
             return;
         }
         List<Area> areas = new ArrayList<>(towns(server));
@@ -419,20 +419,35 @@ public final class SiteGuard {
         }
     }
 
-    // 範囲の中の敵を消す (名札の付いた物は外へ押し出す)
+    // 範囲の中の敵を、いちばん近い縁の外 (縁から 1.5) へ押し戻し、歩みを止める。高さはそこの地面
     private static void sweepEnemies(ServerLevel level, Area a) {
-        for (Entity e : level.getEntitiesOfClass(Mob.class, a.box(), m -> m instanceof Enemy && m.isAlive())) {
-            if (e.hasCustomName()) {
-                double cx = (a.x0() + a.x1()) / 2.0;
-                double cz = (a.z0() + a.z1()) / 2.0;
-                double dx = e.getX() - cx;
-                double dz = e.getZ() - cz;
-                double len = Math.max(1.0, Math.sqrt(dx * dx + dz * dz));
-                double reach = Math.max(a.x1() - a.x0(), a.z1() - a.z0()) / 2.0 + 8;
-                e.teleportTo(cx + dx / len * reach, e.getY(), cz + dz / len * reach);
+        for (Mob m : level.getEntitiesOfClass(Mob.class, a.box(), m -> m instanceof Enemy && m.isAlive())) {
+            double x = m.getX();
+            double z = m.getZ();
+            double west = x - a.x0();
+            double east = a.x1() + 1 - x;
+            double north = z - a.z0();
+            double south = a.z1() + 1 - z;
+            double min = Math.min(Math.min(west, east), Math.min(north, south));
+            double nx = x;
+            double nz = z;
+            if (min == west) {
+                nx = a.x0() - 1.5;
+            } else if (min == east) {
+                nx = a.x1() + 2.5;
+            } else if (min == north) {
+                nz = a.z0() - 1.5;
             } else {
-                e.discard();
+                nz = a.z1() + 2.5;
             }
+            int y = level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, (int) Math.floor(nx), (int) Math.floor(nz));
+            m.getNavigation().stop();
+            // 町の中の人は狙わない (縁で行き来しないように)
+            if (m.getTarget() != null && a.containsXZ(m.getTarget().getX(), m.getTarget().getZ())) {
+                m.setTarget(null);
+            }
+            m.teleportTo(nx, Math.max(y, level.getMinBuildHeight() + 1), nz);
+            m.setDeltaMovement(m.getDeltaMovement().multiply(0, 1, 0));
         }
     }
 

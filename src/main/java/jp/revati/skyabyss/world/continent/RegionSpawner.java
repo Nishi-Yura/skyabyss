@@ -52,9 +52,30 @@ public final class RegionSpawner {
 
     public enum Time { DAY, NIGHT, ANY }
 
-    public record Entry(String entity, int weight, Time time, List<Integer> biomes, int min, int max) {
+    // near: 決まった所のまわりだけに出す ([x, z, 半径] の並び。空ならどこでも)。表では "near": [["島の図の名前", 半径], …]
+    // (はじまりの島は寄り道の場所のまわりだけ。2026-10-27 の声「最初の島に敵が出るのはおかしい。特定の場所以外」)
+    public record Entry(String entity, int weight, Time time, List<Integer> biomes, int min, int max, List<int[]> near) {
+        public Entry(String entity, int weight, Time time, List<Integer> biomes, int min, int max) {
+            this(entity, weight, time, biomes, min, max, List.of());
+        }
+
         public boolean fits(int biome, boolean night) {
             return (time == Time.ANY || (time == Time.NIGHT) == night) && (biomes.isEmpty() || biomes.contains(biome));
+        }
+
+        public boolean fitsAt(int biome, boolean night, int x, int z) {
+            if (!fits(biome, night)) {
+                return false;
+            }
+            if (near.isEmpty()) {
+                return true;
+            }
+            for (int[] c : near) {
+                if ((long) (x - c[0]) * (x - c[0]) + (long) (z - c[1]) * (z - c[1]) <= (long) c[2] * c[2]) {
+                    return true;
+                }
+            }
+            return false;
         }
     }
 
@@ -103,8 +124,21 @@ public final class RegionSpawner {
                     min = j.getAsJsonArray("group").get(0).getAsInt();
                     max = j.getAsJsonArray("group").get(1).getAsInt();
                 }
+                List<int[]> near = new ArrayList<>();
+                if (j.has("near")) {
+                    for (JsonElement n : j.getAsJsonArray("near")) {
+                        var a = n.getAsJsonArray();
+                        net.minecraft.core.BlockPos at = ContinentLayout.get().island(a.get(0).getAsString());
+                        if (at != null) {
+                            near.add(new int[] {at.getX(), at.getZ(), a.get(1).getAsInt()});
+                        } else {
+                            SkyAbyss.LOGGER.warn("[spawns] {}: unknown place {}", region, a.get(0).getAsString());
+                        }
+                    }
+                }
                 out.add(new Entry(j.get("entity").getAsString(), j.get("weight").getAsInt(),
-                        Time.valueOf(j.has("time") ? j.get("time").getAsString().toUpperCase(java.util.Locale.ROOT) : "ANY"), List.copyOf(biomes), min, Math.max(min, max)));
+                        Time.valueOf(j.has("time") ? j.get("time").getAsString().toUpperCase(java.util.Locale.ROOT) : "ANY"), List.copyOf(biomes), min, Math.max(min, max),
+                        List.copyOf(near)));
             }
         } catch (Exception ex) {
             SkyAbyss.LOGGER.error("[spawns] could not read {}", path, ex);
@@ -124,13 +158,18 @@ public final class RegionSpawner {
     // その場所・時刻の候補から重みで選ぶ (r は 0〜999)。候補がなければ null
     @Nullable
     public static Entry pick(int region, int biome, boolean night, int r) {
+        return pick(region, biome, night, r, Integer.MIN_VALUE, Integer.MIN_VALUE);
+    }
+
+    // x, z = 試す所 (MIN_VALUE なら所を見ない)
+    public static Entry pick(int region, int biome, boolean night, int r, int x, int z) {
         List<List<Entry>> t = table();
         if (region < 0 || region >= t.size()) {
             return null;
         }
         int total = 0;
         for (Entry e : t.get(region)) {
-            if (e.fits(biome, night)) {
+            if (x == Integer.MIN_VALUE ? e.fits(biome, night) : e.fitsAt(biome, night, x, z)) {
                 total += e.weight();
             }
         }
@@ -139,7 +178,7 @@ public final class RegionSpawner {
         }
         int k = r % total;
         for (Entry e : t.get(region)) {
-            if (e.fits(biome, night)) {
+            if (x == Integer.MIN_VALUE ? e.fits(biome, night) : e.fitsAt(biome, night, x, z)) {
                 k -= e.weight();
                 if (k < 0) {
                     return e;
@@ -187,7 +226,7 @@ public final class RegionSpawner {
             return 0;
         }
         ContinentMap map = ContinentMap.get();
-        Entry e = pick(map.region(x, z), map.biome(x, z), night(level), level.random.nextInt(1000));
+        Entry e = pick(map.region(x, z), map.biome(x, z), night(level), level.random.nextInt(1000), x, z);
         if (e == null) {
             return 0;
         }

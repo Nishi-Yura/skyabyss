@@ -2,7 +2,7 @@
   "category": "sub",
   "order": 60,
   "repeat": "daily",
-  "board": true,
+  "board": false,
   "stages": [
     {
       "id": "herd",

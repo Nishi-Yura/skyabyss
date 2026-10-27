@@ -1,5 +1,5 @@
 {
-  "_comment": "docs/design/44 の湧きの表。entity / weight / time (day|night|any) / biomes (ContinentBiomes の名前、省くとどこでも) / group [少, 多]",
+  "_comment": "docs/design/44 の湧きの表。entity / weight / time (day|night|any) / biomes (ContinentBiomes の名前、省くとどこでも) / group [少, 多] / near [[島の図の名前, 半径] …] (はじまりの島は寄り道の場所のまわりだけ)",
   "entries": [
     {
       "entity": "skyabyss:grain_rat",
@@ -8,6 +8,12 @@
       "group": [
         2,
         4
+      ],
+      "near": [
+        [
+          "huts",
+          20
+        ]
       ]
     },
     {
@@ -17,31 +23,46 @@
       "group": [
         1,
         2
+      ],
+      "near": [
+        [
+          "cave",
+          20
+        ],
+        [
+          "lookout",
+          16
+        ]
       ]
     },
     {
       "entity": "skyabyss:reef_scuttler",
       "weight": 3,
       "time": "day",
-      "biomes": [
-        "beach"
-      ],
       "group": [
         1,
         2
+      ],
+      "near": [
+        [
+          "huts",
+          24
+        ]
       ]
     },
     {
       "entity": "skyabyss:feral_dog",
       "weight": 2,
       "time": "any",
-      "biomes": [
-        "forest",
-        "birch_forest"
-      ],
       "group": [
         1,
         2
+      ],
+      "near": [
+        [
+          "camp_west",
+          22
+        ]
       ]
     },
     {
@@ -51,6 +72,16 @@
       "group": [
         1,
         3
+      ],
+      "near": [
+        [
+          "tree",
+          22
+        ],
+        [
+          "lookout",
+          18
+        ]
       ]
     }
   ]
