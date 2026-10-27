@@ -41,7 +41,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 
-// 峰の雛 (docs/design/21 の 5.1。三章の地上): 急降下の予習 (羽守の突撃の縮小版)。HP 14、急降下 5。
+// 峰の雛 (三章の地上): 急降下の予習 (羽守の突撃の縮小版)。HP 14、急降下 5。
 //   巣     湧いた所 (岩棚・梁) が巣。ふだんは巣のまわりを歩く
 //   急降下 狙いが DIVE_MIN〜DIVE_MAX にいて見えると、羽ばたいて RISE 上がり (RISE_TICKS)、地面に狙いへの光る線 (Telegraph の帯。WARN = 0.8 秒) を出す。
 //          線が満ちた瞬間、線の上の人に 5。雛は線の先まで一直線に突っ込む。誰にも当たらなかったら、岩に当たってよろめく (STAGGER_TICKS。受ける傷 1.5 倍)

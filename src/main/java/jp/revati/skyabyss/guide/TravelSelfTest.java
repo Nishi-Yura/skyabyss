@@ -45,7 +45,7 @@ import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.neoforged.neoforge.common.util.FakePlayer;
 
-// 旅装・砥石・糧と薬 (docs/design/21 の 1.2、P5。一章の分) の自己テスト。段: "travel gear"。
+// 旅装・砥石・糧と薬 (P5。一章の分) の自己テスト。段: "travel gear"。
 //  - 防具 4 部位の値 (防御 17・強靭 5・踏ん張り 0.1・アンコモン・鍛えない・特性なし・必要 Lv 7) と、GearCurve.TRAVEL の表との照合 (巨神の装備を超えない、段ごとに伸びる、備えの身の灯)
 //  - 砥石 (使うと効き目・攻撃 +1.5・備えの刃に入る・手段の登録)・固焼き・軟膏 (糧の点・鈍足を治す)
 //  - レシピ (7 本。旅装の素材の合計は備えの頼みの集める数と同じ)・鍵 (覚書か職人に教わるまで作業台の完成品が空になる)・旅装を一式作ると合図

@@ -36,7 +36,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import software.bernie.geckolib.animation.RawAnimation;
 
-// 焼けた羽守 (docs/design/21 の 5.1。名づき): 焼けた見張り塔の頂の主。羽守の変種 (外套が焼け、兜と肩に青白い焦げ筋)。HP 190、鉤槍 10。
+// 焼けた羽守 (名づき): 焼けた見張り塔の頂の主。羽守の変種 (外套が焼け、兜と肩に青白い焦げ筋)。HP 190、鉤槍 10。
 // 羽守の技 (鉤槍の薙ぎ・かがみ → 光る帯 → 突撃) は嵐の拍を待たずに使う (地上には背中の拍がない。diveAllowed)。足した技 (予告はどれも 1 秒以上):
 //   雷の輪     近くの人がいると、外套を開いて身を沈め、足もとに半径 RING_RADIUS の輪 (RING_WARN 1.2 秒) → 輪の中の人に雷 6 (感電の傷 = lightning_bolt)
 //   外套の跳躍 4.5〜10 先の人へ、外套を広げて上へ跳ぶ。落ちる先 (狙った人の足もと) に半径 LEAP_RADIUS の輪 (LEAP_TICKS 1.2 秒) → 輪の中の人に 8

@@ -44,7 +44,7 @@ public final class SiteFinder {
 
         int sea();
 
-        // 乾いた群系か (荒野・サバンナ・砂漠・暗い森。四章の灰の地。docs/design/33 の 3 章)
+        // 乾いた群系か (荒野・サバンナ・砂漠・暗い森。四章の灰の地)
         default boolean dryBiome(int x, int z) {
             return false;
         }
@@ -201,7 +201,7 @@ public final class SiteFinder {
         return findCamp(p, spawn);
     }
 
-    // 野営地以外 (宿り・足跡・骨) と、章の跡地 (docs/design/33 の 3 章)。重い (地形生成の高さを何百回も問い合わせる) ので、別のスレッドで呼ぶ
+    // 野営地以外 (宿り・足跡・骨) と、章の跡地。重い (地形生成の高さを何百回も問い合わせる) ので、別のスレッドで呼ぶ
     public record Rest(List<Planned> planned, List<ChapterGrounds.Found> grounds) {
     }
 

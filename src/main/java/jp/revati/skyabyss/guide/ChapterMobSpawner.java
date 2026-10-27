@@ -34,7 +34,7 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.server.ServerStoppedEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
 
-// 地上のひとり歩きの小物 (docs/design/21 の 1.5、P3)。自然の湧きは増やさず、その章の人の近くだけに薄く湧かせる。
+// 地上のひとり歩きの小物 (P3)。自然の湧きは増やさず、その章の人の近くだけに薄く湧かせる。
 //   登録   ChapterMobSpawner.register(new Wanderer(id, chapter, entity, weight, Time))
 //   決まり
 //     湧く     その章 (Chapters.of(人)) の人が、その章の拠点 (ChapterSites の計画) から 300 ブロック以内にいるとき、その人の 24〜64 ブロック先の地面に、

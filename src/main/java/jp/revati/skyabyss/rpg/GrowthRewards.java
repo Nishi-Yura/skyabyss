@@ -57,11 +57,11 @@ public final class GrowthRewards {
         MOD_ENEMIES.put(SkyAbyss.MODID + ":bone_sentinel", new Source(12, STONE_WHALE_LEVEL));
         MOD_ENEMIES.put(SkyAbyss.MODID + ":rib_archer", new Source(10, STONE_WHALE_LEVEL));
         MOD_ENEMIES.put(SkyAbyss.MODID + ":moss_crawler", new Source(9, STONE_WHALE_LEVEL));
-        // 背の新しい敵 (21 の 3.3): 骨の砲手 14、骨鳥 4、老番兵 (名づき) 60
+        // 背の新しい敵: 骨の砲手 14、骨鳥 4、老番兵 (名づき) 60
         MOD_ENEMIES.put(SkyAbyss.MODID + ":bone_mortar", new Source(14, STONE_WHALE_LEVEL));
         MOD_ENEMIES.put(SkyAbyss.MODID + ":bone_gull", new Source(4, STONE_WHALE_LEVEL));
         MOD_ENEMIES.put(SkyAbyss.MODID + ":elder_sentinel", new Source(60, STONE_WHALE_LEVEL));
-        // 一章の地上の敵 (21 の 3.1。章の経験値の枠には数えない小さな分): 岩殻虫 7、棘うさぎ 5、骨負い 2、老いた歩哨 40
+        // 一章の地上の敵 (章の経験値の枠には数えない小さな分): 岩殻虫 7、棘うさぎ 5、骨負い 2、老いた歩哨 40
         MOD_ENEMIES.put(SkyAbyss.MODID + ":rock_shell_beetle", new Source(7, STONE_WHALE_LEVEL));
         MOD_ENEMIES.put(SkyAbyss.MODID + ":spine_hare", new Source(5, STONE_WHALE_LEVEL));
         MOD_ENEMIES.put(SkyAbyss.MODID + ":bone_hauler", new Source(2, STONE_WHALE_LEVEL));
@@ -103,12 +103,12 @@ public final class GrowthRewards {
         // 余燼の中ボス 灰の鍛え手 (13 の 6.6節。推奨レベル 30)。試練の鍛え手は参加者の一覧で配る (AshSmithLoot)。ここは試練の外で呼ばれたもの
         MOD_ENEMIES.put(SkyAbyss.MODID + ":ash_smith", new Source(220, 30));
         MOD_ENEMIES.put(SkyAbyss.MODID + ":thunder_wing_heart", new Source(480, THUNDER_WING_LEVEL)); // 雷翼の心臓 (12 の 6.6節。試練の外で倒したとき)
-        // 二章の地上の敵 (21 の 4.1。章の経験値の枠には数えない小さな分): 潮だまり貝 6、砂潜り 5、宿借り 2、潮の番人 50
+        // 二章の地上の敵 (章の経験値の枠には数えない小さな分): 潮だまり貝 6、砂潜り 5、宿借り 2、潮の番人 50
         MOD_ENEMIES.put(SkyAbyss.MODID + ":tidepool_clam", new Source(6, TIDE_SHELL_LEVEL));
         MOD_ENEMIES.put(SkyAbyss.MODID + ":sand_burrower", new Source(5, TIDE_SHELL_LEVEL));
         MOD_ENEMIES.put(SkyAbyss.MODID + ":drift_hermit", new Source(2, TIDE_SHELL_LEVEL));
         MOD_ENEMIES.put(SkyAbyss.MODID + ":shore_warden", new Source(50, TIDE_SHELL_LEVEL));
-        // 三章の地上の敵 (21 の 5.1、P16。章の経験値の枠には数えない小さな分。推奨レベル 21): 帯電毛玉 5、峰の雛 6、雷拾い 2、焼けた羽守 60
+        // 三章の地上の敵 (P16。章の経験値の枠には数えない小さな分。推奨レベル 21): 帯電毛玉 5、峰の雛 6、雷拾い 2、焼けた羽守 60
         MOD_ENEMIES.put(SkyAbyss.MODID + ":static_puff", new Source(5, 21));
         MOD_ENEMIES.put(SkyAbyss.MODID + ":peak_fledgling", new Source(6, 21));
         MOD_ENEMIES.put(SkyAbyss.MODID + ":lightning_gleaner", new Source(2, 21));
@@ -136,7 +136,7 @@ public final class GrowthRewards {
     public static final int REST_POINT_XP = 30;
     public static final int DIMENSION_XP = 50;
     public static final int BIOME_XP = 10;
-    // 序盤の「はじめて見た物」(伝承の項目が記されたとき。一人一回)。17 の 5.2、04 の 3.2。
+    // 序盤の「はじめて見た物」(伝承の項目が記されたとき。一人一回)04 の 3.2。
     // 最初の 1 時間で Lv2 (鐘の宿り) → Lv3 (最初の夜まで) に届くための配分。足音・骨・歌は、見ただけで一歩ぶんの手ごたえ
     public static final Map<String, Integer> LORE_XP = new LinkedHashMap<>();
     static {

@@ -579,7 +579,7 @@ public class StormWingEntity extends Entity implements GeoEntity, jp.revati.skya
     }
 
     // 640 ブロック以内のプレイヤーを一人選び、その近くの峰を止まり木にする。
-    // 三章の跡地があれば、止まるのはその峰だけ (峰の近くに人がいるとき。docs/design/33 の 3.1。StormPeak)
+    // 三章の跡地があれば、止まるのはその峰だけ (峰の近くに人がいるとき。StormPeak)
     private boolean choosePerch(ServerLevel level) {
         boolean peakOnly = StormPeak.restricted(level.getServer());
         List<ServerPlayer> near = level.players().stream()

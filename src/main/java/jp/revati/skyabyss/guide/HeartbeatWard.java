@@ -20,7 +20,7 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.living.LivingDamageEvent;
 
-// 鼓動守の働き (21 の 1.4)。心臓の戦い (GroupBossRoom.heartFightOf) の参加者が、鼓動守を装飾の枠に付けているとき、
+// 鼓動守の働き。心臓の戦い (GroupBossRoom.heartFightOf) の参加者が、鼓動守を装飾の枠に付けているとき、
 // 致命の一撃を体力 1 で耐える。人ごと・戦い 1 回につき一度。使うと光って消える (枠の品が消える)。補充は職人 (P4)。
 // 心臓以外の戦い・虚空や /kill のような無視できない傷では働かない。備えの糧の灯に 0.2 足す (Readiness.registerCharm)
 @EventBusSubscriber(modid = SkyAbyss.MODID)
@@ -50,7 +50,7 @@ public final class HeartbeatWard {
         return -1;
     }
 
-    // ---------------------------------------------------------------- 章ごとの編み方 (旅の職人の会話が使う品の ID と印。21 の 1.4)
+    // ---------------------------------------------------------------- 章ごとの編み方 (旅の職人の会話が使う品の ID と印)
     // 最初の一つ: 護り糸 (thread) を 1 本渡すと職人が編む。人ごとに一度 (会話の印 wovenFlag)。会話は take thread → give ward → flag wovenFlag
     //   (入口の条件は item thread・not flag wovenFlag・ward_ok titan)。
     // 補充: その章の地上の素材 (refill) を refillCount 個 → remake_ward titan (持っていない人だけ、1 日 1 つ。条件 ward_ok と組)
@@ -74,7 +74,7 @@ public final class HeartbeatWard {
         return null;
     }
 
-    // ---------------------------------------------------------------- 補充 (旅の職人。21 の 1.4・P4)
+    // ---------------------------------------------------------------- 補充 (旅の職人)
     // 使い切った人 (その巨神の鼓動守を持っていない) に、職人が編み直す。1 日に 1 つまで (素材の岩殻片などは会話の側で受け取る)。
     // 最初の一つは備えの頼み「鼓動を聞く」の報酬 (ここを通らない)
     public static boolean remakeable(ServerPlayer player, String titan) {

@@ -29,7 +29,7 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.common.util.FakePlayer;
 import net.neoforged.neoforge.event.tick.LevelTickEvent;
 
-// 一章の中盤の出来事 (docs/design/17 の 1.5、01 の 4.2): 岩鯨が初めて地上へ降りるとき、ちょうど空の影 (雲の上の巡礼者) が通る。
+// 一章の中盤の出来事 (01 の 4.2): 岩鯨が初めて地上へ降りるとき、ちょうど空の影 (雲の上の巡礼者) が通る。
 // **岩鯨が歌をやめ、世界が静かになる**。影が去ると、鎖が降りる。見せるのは「巨神でさえ黙る」こと (引き算の演出。場面のカメラは使わない: 動けるまま空を見上げられる)。
 //
 //   流れ: 岩鯨が降下を終える (StoneWhaleEntity の APPROACH → REST) 瞬間に onArrive が呼ばれる。ワールドで一度だけ (Ch1Data.hushState)。

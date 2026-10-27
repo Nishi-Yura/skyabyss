@@ -21,7 +21,7 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 
-// 休み場 heart (心臓の前室) の碑の囁き (docs/design/21 の 1.2 の 3)。前室に初めて入ったとき、最初の一度だけ、足りない灯を一行。
+// 休み場 heart (心臓の前室) の碑の囁き。前室に初めて入ったとき、最初の一度だけ、足りない灯を一行。
 // 碑文の本文は変えない。全部が緑なら何も言わず、それでも「聞いた」ことにする (二度目に入ったときに言い出さない)。
 // 聞いた印は人の永続 NBT (倒れても残る)。画面の出し方は Notice.narrate (世界の声・囁き、字幕)
 @EventBusSubscriber(modid = SkyAbyss.MODID)

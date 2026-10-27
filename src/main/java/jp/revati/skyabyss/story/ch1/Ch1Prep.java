@@ -9,7 +9,7 @@ import jp.revati.skyabyss.rpg.GrowthRewards;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 
-// 一章の支度 (docs/design/34 の 4.2、21 の 3.1〜3.2) の名前と、職人 (P4)・旅装と砥石 (P5)・地上の敵 (P7)・岩鯨の背 (P8) との差し込み口の一覧。
+// 一章の支度の名前と、職人 (P4)・旅装と砥石 (P5)・地上の敵 (P7)・岩鯨の背 (P8) との差し込み口の一覧。
 //
 // 支度の段 3 本 (メインの段。順不同) は data/skyabyss/quest/ch1/trail_iron|trail_blade|trail_shield.json (tools/gen/ch1/gen_ch1_trails.py)。型の決まりは 07 の 6.8。
 // イサナの「鯨の話」(印 c_whale_heard) のあと、一章の人に三本とも出る。旧い備えの頼み (prep_gear・prep_blade・prep_pulse) はこの三本に吸収した。
@@ -57,7 +57,7 @@ public final class Ch1Prep {
     public static final String ROAD_SHRINE = "ch1/road_shrine";
     public static final String SONG_CHAMBER = "ch1/song_chamber";
     public static final String CLEFT_CAVE_LORE = "ch1/cleft_cave";
-    // 前の私の頁 (支度の段。34 の 5 章) と冷えの戸の碑文
+    // 前の私の頁 (支度の段) と冷えの戸の碑文
     public static final String PAGE_IRON = "ch1/trail_iron";
     public static final String PAGE_BLADE = "ch1/trail_blade";
     public static final String PAGE_SHIELD = "ch1/trail_shield";

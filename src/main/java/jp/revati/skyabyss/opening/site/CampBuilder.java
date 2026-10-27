@@ -12,7 +12,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.entity.BarrelBlockEntity;
 import net.minecraft.world.phys.AABB;
 
-// 旅の野営地 (docs/design/17 の 4.1)。消えた焚き火、倒れた荷車、開いた寝袋、木箱 (パン 4・松明 8・木の斧 1)、切り株の上の古い帳面。
+// 旅の野営地。消えた焚き火、倒れた荷車、開いた寝袋、木箱 (パン 4・松明 8・木の斧 1)、切り株の上の古い帳面。
 // 帳面は伝承の書を ItemEntity にして置く (消えない。タグ NOTEBOOK_TAG)。拾ったときの扱いは拍子 (opening/) の側で決める
 public final class CampBuilder {
     public static final String NOTEBOOK_TAG = "skyabyss_opening_notebook";

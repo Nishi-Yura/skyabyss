@@ -13,7 +13,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
 
-// 跡地の「整える形」を建てる仕事 (docs/design/33 の 3 章。一辺 160 まで)。SiteJob と同じく、1 tick の予算だけ進める。
+// 跡地の「整える形」を建てる仕事 (一辺 160 まで)。SiteJob と同じく、1 tick の予算だけ進める。
 // 形の四角を 16 列ずつの帯に分け、帯のチャンクを読み込ませて (チケット)、列ごとに ChapterGrounds.shapeTop の高さへ盛る・削る・水を張る。
 //   丘   盛るだけ (削らない)。中は土、深い所は石、上は草。盛る列の木と草は片づける
 //   峰   盛るだけ。石・安山岩・凝灰岩の筋、上の方は雪

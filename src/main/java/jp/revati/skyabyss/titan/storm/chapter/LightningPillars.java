@@ -33,7 +33,7 @@ import net.minecraft.world.entity.LightningBolt;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 
-// 避雷の柱 (docs/design/34 の 4.4、支度の段 ch3/lightning_pillars)。舞台は避雷の塔の跡 (StormSites.RUIN、部品 ch3_rod_tower)。
+// 避雷の柱 (支度の段 ch3/lightning_pillars)。舞台は避雷の塔の跡 (StormSites.RUIN、部品 ch3_rod_tower)。
 //
 //   台     塔のまわりの斜めの 4 か所 (印 pedestal0..3 = 針を立てる所。銅の飾り台の上)。バニラの避雷針を立てると、そこへ演出の雷が落ちる
 //   戸     四つの台すべてに針が立つと、塔の根の銅の戸 (印 door0..8) が開く (世界に一つ。一度開けば残る)。

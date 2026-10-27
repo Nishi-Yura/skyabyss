@@ -44,11 +44,11 @@ public final class SkyEvents {
     private static final long MAX_GAP = DAY * 4;
     // 条件が合わなかったときに再判定するまでの時間 (1分)
     private static final long RETRY_DELAY = 1200L;
-    // 最初の通過 (06 の 2.7節): ゲーム開始の昼 (6000 tick = 初日の正午) 以降の、最初の機会に必ず起こす。
+    // 最初の通過: ゲーム開始の昼 (6000 tick = 初日の正午) 以降の、最初の機会に必ず起こす。
     // 条件が合わなければ 10 秒おきに調べ直し、遅れた分だけ条件をゆるめる
     private static final long FIRST_PASS_AT = 6000L;
     private static final long FIRST_PASS_MIN_WAIT = 2400L;
-    // 最初の一回は雨でも起こす (17 の 3.3節)。丸一日遅れたら、空の見えない所にいる人の上にも起こす
+    // 最初の一回は雨でも起こす。丸一日遅れたら、空の見えない所にいる人の上にも起こす
     private static final long FIRST_LOOSEN_SKY = DAY;
     private static final float SPEED = 0.35f;
     // プレイヤーの何ブロック手前から歩いてくるか

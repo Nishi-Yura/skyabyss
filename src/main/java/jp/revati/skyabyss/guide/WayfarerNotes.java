@@ -9,11 +9,11 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 
-// 旅の覚書 (docs/design/21 の 1.4。`wayfarer_notes`)。章ごとに 1 冊の薄い手帳。
+// 旅の覚書 (`wayfarer_notes`)。章ごとに 1 冊の薄い手帳。
 //  - 渡る: 備えの頼み 1 (ch<n>/prep_gear) を受けたとき、人ごとに一度 (PrepQuests.onStarted)。会話の結果 give_notes でも渡せる (なくした人に職人が渡し直す。
 //    渡し直しは give(…, true))
 //  - 開く: 右クリック。手帳の中身 (敵の見分け方・備えの一行ずつ) は、文のキー wayfarer_notes.ch<n>.line.<i> (i = 1, 2, …。途切れるまで) を画面に並べる
-//  - 序章 (0) は野営地の帳面のそば (21 の 2 章、P23)
+//  - 序章 (0) は野営地の帳面のそば (P23)
 public final class WayfarerNotes {
     public static final int MAX_CHAPTER = 4;
 

@@ -25,7 +25,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 
-// 岩殻虫 (docs/design/21 の 3.1): 盾持ちの予習。前の灰青の殻は傷が半分になり、背と腹は通る。
+// 岩殻虫: 盾持ちの予習。前の灰青の殻は傷が半分になり、背と腹は通る。
 // 技は一つ: 立ち上がり (予告 0.8 秒。床の帯) → 体当たり。近づいて来て、帯の外へ回り込めば当たらず、立ち上がったあとの横腹・背を突ける
 public class RockShellBeetle extends GroundFoe {
     public static final int WARN = 16;

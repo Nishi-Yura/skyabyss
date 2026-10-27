@@ -33,7 +33,7 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 
-// 四巨神の社の鍵の間に、天の鍵の欠片を納める (docs/design/35 の 3.2、33 の 2.2)。
+// 四巨神の社の鍵の間に、天の鍵の欠片を納める (docs/design/35 の 3.2)。
 //   納める: 心臓を止めた巨神の石 (CapitalShrine) に触れて一つずつ、または社の祭司の「欠片を納める」でまとめて。巨神ごとに一つまで
 //   納めた欠片は、その人の「手もと」に数える (控え帳の在りか「鍵の間」。Keepsakes の枠 key_room)。だから天の鍵がそろう決まり
 //   (SkyKey: 四つの心臓と四つの欠片) はそのまま効き、そろうときは鍵の間から取られる

@@ -293,7 +293,7 @@ public final class EmberChapterSelfTest {
         }
         expect(titan.mode() == EmberTitanEntity.Mode.SLEEP, "the titan did not finish rising: " + titan.mode(), f);
         List<BlockState> after = snapshot(level);
-        // 伏せる体に食い込む地形 (台の石) は取り除いてよい (titan/TitanClearing。docs/design/33)。人の建物 (板・ガラス・丸石・松明・箱) と空気は変わらない
+        // 伏せる体に食い込む地形 (台の石) は取り除いてよい (titan/TitanClearing)。人の建物 (板・ガラス・丸石・松明・箱) と空気は変わらない
         int changed = 0;
         int carved = 0;
         for (int i = 0; i < Math.min(before.size(), after.size()); i++) {

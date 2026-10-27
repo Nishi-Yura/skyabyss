@@ -495,7 +495,7 @@ public class TideShellEntity extends Entity implements GeoEntity, TravelTitan, j
             }
         }
         java.util.Collections.shuffle(players, new java.util.Random(random.nextLong()));
-        // 二章の跡地があれば、寄るのはその浜だけ (浜の近くに人がいるとき。docs/design/33 の 3.1)
+        // 二章の跡地があれば、寄るのはその浜だけ (浜の近くに人がいるとき)
         boolean beachOnly = TideBeach.restricted(level.getServer());
         for (ServerPlayer player : players) {
             if (beachOnly && !TideBeach.near(player)) {

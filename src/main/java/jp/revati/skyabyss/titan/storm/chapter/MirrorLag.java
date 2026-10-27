@@ -32,7 +32,7 @@ import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 
-// 竜骨の間の入口の遅れた影 (docs/design/34 の 1 章・4.4、12 の 4.3)。三章の人が雷翼の順路の段 4 で竜骨の間 (心臓の間) へ運ばれると、一度だけ、
+// 竜骨の間の入口の遅れた影 (12 の 4.3)。三章の人が雷翼の順路の段 4 で竜骨の間 (心臓の間) へ運ばれると、一度だけ、
 // 入口の内側の羽鏡の壁 (StormHeartArena.mirrorWall) に自分の姿が映り、映った影が少し遅れて動く。説明はしない (正体は三章では言わない。01)。
 //   条件   雷翼の背 (storm_back)、章が三章 (Chapters.STORM)、雷翼の順路の段 4 の参加者 (TrialRoute)、伝承 ch3/mirror_lag をまだ持たない、
 //          竜骨の間の中に 5 秒いる、3〜10 ブロック先に羽鏡があり、その鏡で映した位置が丸い部屋の中に収まる

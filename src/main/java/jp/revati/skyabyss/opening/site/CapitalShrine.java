@@ -15,7 +15,7 @@ import jp.revati.skyabyss.notice.Notice;
 import jp.revati.skyabyss.progress.Progression;
 import jp.revati.skyabyss.progress.Titans;
 
-// 四巨神の社の鍵の間 (docs/design/33 の 2.2、00 の 56): 社が開いたあと、巨神の石 (3×3 の柱) に触れると、
+// 四巨神の社の鍵の間 (00 の 56): 社が開いたあと、巨神の石 (3×3 の柱) に触れると、
 // その巨神の欠片を持っていれば「石のほうへ引かれる」、二つ以上なら一度だけ「互いに引き合う」と語る。持っていなければ冷たい。世界は変えない
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class CapitalShrine {

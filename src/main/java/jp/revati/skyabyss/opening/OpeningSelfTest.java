@@ -28,7 +28,7 @@ import net.minecraft.world.phys.AABB;
 import net.neoforged.neoforge.common.util.FakePlayer;
 import net.neoforged.neoforge.common.util.FakePlayerFactory;
 
-// 序盤の拍子 B0〜B10 (17 の 3 章・8.3 の表) の自己テスト (SKYABYSS_SELFTEST=1)。
+// 序盤の拍子 B0〜B10 (8.3 の表) の自己テスト (SKYABYSS_SELFTEST=1)。
 //  1. 判断 (OpeningLogic) を、時刻と状況の列で流す: 新しいワールド / 雨の日 / 洞窟にこもった人 / 寝た人 / 戦闘中 / 村と宿りのない世界 /
 //     ホラーの強さ 0 / マルチ (二人目) / すでに遊んでいた人。起きた順・回数・後ろへのずらし方・ホラーの決まりを数える
 //  2. 目的の帯の表、岩鯨の門、状態の保存
@@ -366,7 +366,7 @@ public final class OpeningSelfTest {
         Sim sim = run(new Route(), 5);
         String all = listEvents(sim);
         check(!sim.violation, "new world: " + sim.violationText, failures);
-        // 起きた順 (17 の 3.1節): 目覚め → 帳面 → 野営地の頁 → 鐘 → 足跡 → 影のあとの頁 → 足音 → 骨 → 歌
+        // 起きた順: 目覚め → 帳面 → 野営地の頁 → 鐘 → 足跡 → 影のあとの頁 → 足音 → 骨 → 歌
         String[] order = {"awake", "notebook", "campLore", "page", "footsteps", "footstepsLore", "bones", "song", "songLore"};
         long previous = -1;
         for (String name : order) {
@@ -692,7 +692,7 @@ public final class OpeningSelfTest {
                 new Env(0, 0, true, true, true, false, false, false, true, false)).isEmpty(), "legacy: the opening objective was shown", failures);
     }
 
-    // ---- 目的の帯の表 (17 の 11.2節)
+    // ---- 目的の帯の表
     private static void objectives(List<String> failures) {
         OpeningState st = new OpeningState();
         st.awakeAt = 0;
@@ -767,7 +767,7 @@ public final class OpeningSelfTest {
         }
     }
 
-    // ---- 岩鯨の門 (17 の 3.9節): 日 3 でも、影・歌・イサナの前には出ない。日 5 には出る
+    // ---- 岩鯨の門: 日 3 でも、影・歌・イサナの前には出ない。日 5 には出る
     private static void whaleGate(List<String> failures) {
         long day3eve = 2 * 24000L + 11500;
         long day5 = 4 * 24000L + 11500;

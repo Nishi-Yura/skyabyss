@@ -12,7 +12,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import jp.revati.skyabyss.SelfTestRunner.Step;
 import jp.revati.skyabyss.SkyAbyss;
 
-// 都の閉じた施設が章で開く仕組み (CapitalDoors。docs/design/33 の 2.2) の自己テスト。段の名前は "capital doors"。
+// 都の閉じた施設が章で開く仕組み (CapitalDoors) の自己テスト。段の名前は "capital doors"。
 //  - 都が建っていれば、四つの施設の戸の印と碑の印が記録にある
 //  - 建てた直後は鉄の戸・鉄格子が閉じている。force で開けると消え、記録に「開いた」が残り、二度目は何もしない
 public final class CapitalDoorsSelfTest {

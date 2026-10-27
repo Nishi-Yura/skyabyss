@@ -639,10 +639,10 @@ public final class NpcQuestSelfTest {
         check(shown(a, WC, "whale_q") && !shown(a, WC, "whale"), "chaser menu should offer the quest topic", failures);
         pick(a, WC, "whale_q", failures);
         next(a);
-        // 鯨の話のあとは一章の支度 (34 の 4.2。三本そろうまで岩鯨は来ない)
+        // 鯨の話のあとは一章の支度 (三本そろうまで岩鯨は来ない)
         check(stage(a, "main_song").equals("prepare"), "talking to the chaser did not advance to prepare: " + stage(a, "main_song"), failures);
         next(a);
-        // 鉄を着ていた旅人の一言 (一章の支度の段の理由。34 の 4.2)
+        // 鉄を着ていた旅人の一言 (一章の支度の段の理由)
         check(node(a).equals("c_whale_iron"), "the chaser should mention the traveller who wore iron, got " + node(a), failures);
         next(a);
         pick(a, WC, "grab", failures);

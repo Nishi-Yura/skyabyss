@@ -33,7 +33,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
-// 熾り蟲 (docs/design/21 の 6.1): 熱に寄る小さな群れ。背中の火の粉蛾の「いちばん熱いものへ寄る」の予習。HP 6、触れて 3。叩けば一撃。
+// 熾り蟲: 熱に寄る小さな群れ。背中の火の粉蛾の「いちばん熱いものへ寄る」の予習。HP 6、触れて 3。叩けば一撃。
 //   寄る先 (いちばん熱いもの): 1 温石を置いた台 (消えた炉の坑の入口の間。DeadForgePit.warmStandNear。台があれば人より先に台へ寄り、台のまわりを回る)
 //                              2 温石を持つ人 (16 ブロックまで) 3 近くの人 (8 ブロックまで)
 //   触れて傷: 狙いと 0.9 以内で 3 (1 秒に一度)。死ぬと小さな火の粉 (傷なし)

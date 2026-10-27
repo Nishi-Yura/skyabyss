@@ -17,7 +17,7 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
-// 地上の場所の宝 (docs/design/21 の 1.5)。宝箱の中身は置かず、人ごとの一度きりの抽選で、倒した人・踏破した人の持ち物へ直接渡す
+// 地上の場所の宝。宝箱の中身は置かず、人ごとの一度きりの抽選で、倒した人・踏破した人の持ち物へ直接渡す
 // (マルチで取り合いにならない。03 の 2.3 と同じ考え方)。
 //   登録   SiteTreasure.register(id, Table)。Table = 必ず渡す品 (guaranteed) + 重みつきの抽選 (rolls 回、entries から)
 //   受取   SiteTreasure.claim(player, id): その人が初めてなら抽選して渡し、渡した品を返す。受け取り済み・未登録は空。記録は SiteProgressData (人ごと)

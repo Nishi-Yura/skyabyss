@@ -459,7 +459,7 @@ public final class StorySelfTest {
         next(p);
         check(node(p).equals("ms_key4") && stage(p, "main_key").equals("show"), "main_key should wait for Isana's answer: " + node(p) + " / " + stage(p, "main_key"), f);
         pick(p, ST, "ok", f);
-        // イサナは一度だけ鍵の話をする。答え (ms_c_key3) でメイン「天の鍵」が終わる (34 の 4.5: 二人の別々の答え)
+        // イサナは一度だけ鍵の話をする。答え (ms_c_key3) でメイン「天の鍵」が終わる 二人の別々の答え)
         talk(p, wc, "ms_c_key", f);
         next(p);
         next(p);
@@ -502,7 +502,7 @@ public final class StorySelfTest {
 
         // 四章の語り部の話 (ch4/fragments) は、話しかけると先に始まる入口。ここは頼みごとの流れを見るので、あらかじめ済ませておく (13 の 17.5)
         jp.revati.skyabyss.quest.Quests.forget(p, "ch4/fragments");
-        // 五章の入口 (main_abyss。天の鍵のあと) の語り部の噂も、話しかけると先に出る。噂の段だけ越えておく (34 の 4.7。
+        // 五章の入口 (main_abyss。天の鍵のあと) の語り部の噂も、話しかけると先に出る。噂の段だけ越えておく (
         // 外すと条件を満たしたまま始まり直すので、段を進める)
         Quests.start(p, "main_abyss");
         if ("rumor".equals(stage(p, "main_abyss"))) {

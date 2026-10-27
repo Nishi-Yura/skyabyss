@@ -30,7 +30,7 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.RegisterShadersEvent;
 
-// 上から落ちる影 (空の影・巨神の影) の共通の描画。docs/design/06 の 2.4。
+// 上から落ちる影 (空の影・巨神の影) の共通の描画。
 // 地面に影の板を貼る方式は、屋根・木の葉の下 (地面の板が覆われる) と屋内が明るいまま残り、屋根の縁に継ぎ目が出た。
 // ここでは影を「世界の x, z の濃さの地図」にして、画面の画素ごとに、その画素の世界の位置 (深度から戻す) で色に掛ける。
 // 輪郭の中なら、屋根の上も下も屋内も人や動物も同じ濃さで暗くなり、縁は地図の補間でなだらかにつながる。

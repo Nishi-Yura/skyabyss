@@ -43,7 +43,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.neoforged.neoforge.common.util.FakePlayer;
 
-// 二章の備えの品 (guide/Ch2Gear。21 の 1.2・4.1) の自己テスト。段: "ch2 gear" (TravelSelfTest.steps の二つ目)。
+// 二章の備えの品 (guide/Ch2Gear) の自己テスト。段: "ch2 gear" (TravelSelfTest.steps の二つ目)。
 //  - 潮渡りの旅装 4 部位の値 (防御 18・強靭 9・水中移動効率 0.1 × 4・アンコモン・鍛えない・必要 Lv 13) と GearCurve.TRAVEL[1]、備えの身の灯
 //  - 塩の砥石 (+1.8・20 分・岩の砥石と重ねない・備えの刃は大きい方だけ・水の中の +1)、塩漬け (水中呼吸 60 秒)、粉薬 (3❤・浮遊と鈍足を治す)、糧の点
 //  - 手段の名前が章 (巨神) ごとに分かれる

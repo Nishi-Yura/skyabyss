@@ -23,7 +23,7 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 
-// B9 夜の星の欠け (docs/design/17 の 3.7節): 夜空の星が、幅 50 度ほどの帯のかたちで、30 秒かけて西から東へ消えて、また戻る (何かが上を通っている)。月は残る。
+// B9 夜の星の欠け: 夜空の星が、幅 50 度ほどの帯のかたちで、30 秒かけて西から東へ消えて、また戻る (何かが上を通っている)。月は残る。
 // 新しい描画は作らない考え方: 空を描いたあと (AFTER_SKY) に、空の色の帯を重ねるだけ。帯は東西の軸まわりの輪 (西の地平線 → 真上 → 東の地平線へ動く)。
 // 星が回る向きとは関係なく、空の同じ場所を帯が横切る。月の方向の近くは帯の濃さを下げて、月は隠さない。
 // 見た目の強さは、画面の効果の強さ (screenEffectStrength) には従わない (欠けが見えないと歌の意味がないため。ホラーの強さ 0 では、そもそも起こらない)

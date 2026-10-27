@@ -18,7 +18,7 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 
-// 旅の職人 (docs/design/21 の 1.4、P4) をどこに立たせるか。データで決める: 章ごとの「立つ所」の表 (Spot) に、場所の ID と部品の印を書くだけ。
+// 旅の職人 (P4) をどこに立たせるか。データで決める: 章ごとの「立つ所」の表 (Spot) に、場所の ID と部品の印を書くだけ。
 //   章が開いた人の拠点の場所 (SiteData の章の小要素) のうち、siteId が Spot.siteId で、印 Spot.mark が付いているものが立つ所。
 //   その場所の近く (48 ブロック) に Spot.gate を満たす人が来たら、まだいなければ立たせる (家 = その印、まわり 3 ブロックを歩く)。
 //   装いは章 (NpcEntity.variant = 1〜4。client/npc/NpcRenderer が絵を替える)。同じ人 (役) で、前のことは覚えていない (会話は dialogue/artisan.json)。

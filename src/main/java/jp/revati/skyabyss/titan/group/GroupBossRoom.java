@@ -165,7 +165,7 @@ public final class GroupBossRoom {
     private final Set<UUID> died = new LinkedHashSet<>();
     // 倒れた参加者の再入場 (待ち時間・回数)。戦いが終わる・やり直しで消える
     private final Reentry reentry = new Reentry();
-    // この戦いで鼓動守 (guide.HeartbeatWard) が働いた人 (戦いが終わる・やり直しで消える。21 の 1.4: 戦いに一度)
+    // この戦いで鼓動守 (guide.HeartbeatWard) が働いた人 (戦いが終わる・やり直しで消える。戦いに一度)
     private final Set<UUID> wardUsed = new LinkedHashSet<>();
     // この戦いでパーティが倒れた回数 (倒れた状態 + 倒れずに死んだ回数)。勝ったときの札 (FightBadges) に使う
     private int falls;

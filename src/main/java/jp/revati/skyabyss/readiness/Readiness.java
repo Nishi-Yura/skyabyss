@@ -23,7 +23,7 @@ import net.minecraft.world.item.SwordItem;
 import net.minecraft.world.item.alchemy.PotionContents;
 import net.minecraft.world.food.FoodProperties;
 
-// 備えの三灯 (docs/design/21 の 1.2、docs/design/11 の 9 章)。心臓の前に、自分の身・刃・糧が見える。乗ることも戦うことも妨げない。
+// 備えの三灯 (docs/design/11 の 9 章)。心臓の前に、自分の身・刃・糧が見える。乗ることも戦うことも妨げない。
 // ゲームの状態に触れない式 (body / blade / provisions) と、プレイヤーから値を読む入口 (of) を分けてある。
 // 式は 03 の 5.5 (巨神ごとの目安、GearCurve.STAGES) を基準にする。クライアントとサーバーのどちらでも、同じ Player から同じ値が出る。
 //
@@ -44,7 +44,7 @@ public final class Readiness {
     public static final double ARMOR_WEIGHT = 0.6;
     public static final double HEALTH_WEIGHT = 0.4;
 
-    // 目安の体力 (❤): 岩鯨 13、潮殻 15、雷翼 17、余燼 19 (21 の 1.2)。耐久に振った分と体力増強で届く値
+    // 目安の体力 (❤): 岩鯨 13、潮殻 15、雷翼 17、余燼 19。耐久に振った分と体力増強で届く値
     public static double goalHearts(String titan) {
         return switch (titan) {
             case "stone_whale" -> 13;
@@ -166,7 +166,7 @@ public final class Readiness {
         PROVISIONS.add(pointsPerItem);
     }
 
-    // 鼓動守 (21 の 1.4): 持っていれば糧に +0.2
+    // 鼓動守: 持っていれば糧に +0.2
     public static void registerCharm(Predicate<Player> has) {
         CHARMS.add(has);
     }

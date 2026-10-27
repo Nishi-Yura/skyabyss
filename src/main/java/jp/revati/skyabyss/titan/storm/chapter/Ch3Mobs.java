@@ -50,7 +50,7 @@ import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import net.neoforged.neoforge.server.ServerLifecycleHooks;
 
-// 三章の地上の敵 (docs/design/21 の 5.1、P16) の登録と湧かせ方。エンティティ・スポーンエッグ・音はこのクラスだけで閉じる
+// 三章の地上の敵 (P16) の登録と湧かせ方。エンティティ・スポーンエッグ・音はこのクラスだけで閉じる
 // (StormMobSetup.register から register(bus) を呼ぶ。ひとり歩きは FMLCommonSetupEvent で登録)。
 //   帯電毛玉 (static_puff)        ひとり歩き。峰・高台 (山の地形)。昼夜。雨と雷雨のときは多く湧く (晴れた昼はおとなしい = StaticPuff.calm)。焼けた見張り塔の中の間
 //   峰の雛 (peak_fledgling)       ひとり歩き。峰 (尖った峰・岩の峰・雪の斜面)。昼。焼けた見張り塔の入口の間

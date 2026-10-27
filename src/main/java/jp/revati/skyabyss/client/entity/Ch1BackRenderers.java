@@ -11,7 +11,7 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 
-// 岩鯨の背の新しい敵 (骨の砲手・骨鳥・老番兵。docs/design/21 の 3.3) の描画。どれも低ポリのメッシュ (client/lowpoly)。
+// 岩鯨の背の新しい敵 (骨の砲手・骨鳥・老番兵) の描画。どれも低ポリのメッシュ (client/lowpoly)。
 // 武器・盾はメッシュの骨の一部なので GearLayer は無い。発光 (琥珀の目) は textures/lowpoly/<名>_glowmask.png があれば自動で付く
 @EventBusSubscriber(modid = SkyAbyss.MODID, value = Dist.CLIENT)
 public final class Ch1BackRenderers {

@@ -534,7 +534,7 @@ public final class RecordBuilder {
         rows.addAll(fightBadgeRows(p, titan));
         rows.add(stelesRow(p, titan));
         rows.add(routeRow(p, titan));
-        // 誓い (周回の縛り) の最高の段。称号は飾りだけ (docs/design/21 の 1.8)
+        // 誓い (周回の縛り) の最高の段。称号は飾りだけ
         int vowBest = jp.revati.skyabyss.titan.group.FirstRunData.get(p.server).vowBest(p.getUUID(), titan);
         int vowTier = jp.revati.skyabyss.titan.vow.Vows.titleTier(vowBest);
         rows.add(value("vow_best", t("r.vow_best"), vowBest > 0 ? t("v.vow_best", vowBest, Component.translatable(jp.revati.skyabyss.titan.vow.Vows.titleKey(vowTier))) : t("v.vow_none"),
@@ -586,7 +586,7 @@ public final class RecordBuilder {
         return rows;
     }
 
-    // 備えの三灯 (21 の 1.2、11 の 9 章): 身・刃・糧の色と、足りない灯の一言。サーバーの式 (Readiness) を target の持ち物から
+    // 備えの三灯 (11 の 9 章): 身・刃・糧の色と、足りない灯の一言。サーバーの式 (Readiness) を target の持ち物から
     // 倒れた回数の札 (docs/design/10 の 10.14): 心臓・中ボスそれぞれの、倒れた回数の最良と札の名前。文の中に文を入れない (パケットで壊れないように)
     static List<Row> fightBadgeRows(ServerPlayer p, String titan) {
         FightBadgeData d = FightBadgeData.get(p.server);

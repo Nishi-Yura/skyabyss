@@ -42,7 +42,7 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
 
-// 沖の難破船 (docs/design/34 の 4.3 の ebb_boat。「跡地の浜から見える所に一つは出す」)。
+// 沖の難破船 (ebb_boat。「跡地の浜から見える所に一つは出す」)。
 //   置き方  二章の跡地が決まっていて、その中心から 200 以内に人がいるとき、跡地の海の向き (Ground.sea) の沖 40〜120 の、水深 3〜8 の浅瀬
 //           (読み込まれたチャンクだけを見る) に、バニラの難破船の型 (minecraft:shipwreck/with_mast。なければ rightsideup_full) を世界で一度だけ置く。
 //           箱はバニラの難破船と同じ戦利品の表 (地図・宝・食料)。置いた場所は Ch2Data に残し、目的の帯の行き先 (ch2_wreck) として送る

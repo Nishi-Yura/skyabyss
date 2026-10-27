@@ -39,7 +39,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.neoforged.neoforge.common.util.FakePlayer;
 
-// 旅の職人 (docs/design/21 の P4) の自己テスト。段: "artisan"。
+// 旅の職人の自己テスト。段: "artisan"。
 //  - 絵と骨: メッシュ・骨だけの geo・アニメ・章ごとの 4 つの絵・対話の顔・防具の絵が、そろっていて、骨の名前とピボットが合う (root の yaw 180 度は語り部と同じ)
 //  - 立たせる: 章ごとの立つ所の表 (ArtisanSpawner.Spot) が引き、いなければ立たせ、二人目は立たせない。装い (variant) を保存する
 //  - 会話: 入口の順 (初対面・頼み 3 本・乗る前の一言)、選択肢の条件 (好感度・覚書・鼓動守の編み直し)、結果 (作り方・鼓動守)、語り部は一言だけ残る

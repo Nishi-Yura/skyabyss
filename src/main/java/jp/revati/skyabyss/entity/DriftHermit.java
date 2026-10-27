@@ -43,7 +43,7 @@ import software.bernie.geckolib.animation.AnimationController;
 import software.bernie.geckolib.animation.PlayState;
 import software.bernie.geckolib.animation.RawAnimation;
 
-// 宿借り (docs/design/21 の 4.1。二章の地上): 追いかけっこ (敵意なし)。流木の殻を背負った小さな宿借り。攻撃はしない。
+// 宿借り (二章の地上): 追いかけっこ (敵意なし)。流木の殻を背負った小さな宿借り。攻撃はしない。
 //   殻に潜る   人が SCARE の近さに来ると殻に潜って動かない。人が CALM より離れて少したつと出てくる
 //   拾い物     殻を人が叩くと、拾い物 (小真珠 / 貝の欠け) を一つ吐く。一匹に一度だけ (spat。保存する) なので、叩き続けても増えない
 //   行列       浜のひとり歩きで湧いた一匹 (先頭) が、後ろに 2〜4 匹 (TEMP_TAG。保存しない) を連れて歩く。後ろの者は前の者の後ろを追う。

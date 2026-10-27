@@ -43,7 +43,7 @@ import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.common.util.FakePlayer;
 
-// 三章の備えの品 (guide/Ch3Gear。21 の 1.2・5.1) の自己テスト。段: "ch3 gear" (TravelSelfTest.steps の三つ目)。
+// 三章の備えの品 (guide/Ch3Gear) の自己テスト。段: "ch3 gear" (TravelSelfTest.steps の三つ目)。
 //  - 峰越えの旅装 4 部位の値 (防御 19・強靭 11・アンコモン・鍛えない・必要 Lv 19・修理は銅線) と GearCurve.TRAVEL[2]、備えの身の灯
 //  - 感電の傷: 雷と雷を使う敵の傷だけ。旅装の部位 × 6.25%・避雷の油で半分 (着て雷を受けると実際に減る)
 //  - 雷の砥石 (+2.2・20 分・岩/塩の砥石と重ねない・備えの刃は大きい方だけ)、団子 (吸収 II 60 秒・落下速度低下 20 秒)、油 (避雷 90 秒・糧の点 2)

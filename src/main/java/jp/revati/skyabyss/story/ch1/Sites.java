@@ -19,7 +19,7 @@ import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 
-// 序章・一章の小要素の登録 (ChapterSites。docs/design/17 の 3.8)。部品は data/skyabyss/opening/ch1_*.json (tools/gen/ch1/gen_ch1_blueprints.py)。
+// 序章・一章の小要素の登録 (ChapterSites)。部品は data/skyabyss/opening/ch1_*.json (tools/gen/ch1/gen_ch1_blueprints.py)。
 // 章が開いたとき、その人の拠点のまわりに扇形の 3 方向へ置かれる。拠点から 150 ブロック以内に 2 つ以上 (序章は 3 つ)。
 //   序章 (日 1)  旅の跡 3 つ (石の輪・倒れた荷車・小さな祭壇)。どれも箱 (食料・松明・低い装備) と頁 1 枚
 //   一章         旅の跡 2 つ (井戸・置き去りの荷)、見張りの丘、歌石 5 つ、失せ物の荷車、日記の場所
@@ -37,7 +37,7 @@ public final class Sites {
     public static final String DIARY_SPOT = "ch1_diary_spot";
     public static final List<String> WHALE = List.of(TRACE_WELL, TRACE_PACK, LOOKOUT, LOST_CART, DIARY_SPOT,
             songStoneId(1), songStoneId(2), songStoneId(3), songStoneId(4), songStoneId(5));
-    // 一章の地上の新しい場所 (21 の 3.1、P6。34 の 4.2.1): 鯨道の祠・骨の集め場・割れ殻の洞・骨の坑。荷車の傍らの道は失せ物の荷車の隣 (LOST_CART の post)、
+    // 一章の地上の新しい場所 (P6): 鯨道の祠・骨の集め場・割れ殻の洞・骨の坑。荷車の傍らの道は失せ物の荷車の隣 (LOST_CART の post)、
     // 歌の間は宿りの鐘の下 (SongChamber)
     public static final List<String> WHALE_P6 = buildP6();
 
@@ -93,7 +93,7 @@ public final class Sites {
         registerP6();
     }
 
-    // ---------------------------------------------------------------- 21 の 3.1 の新しい場所 (P6)
+    // ---------------------------------------------------------------- 一章の地上の新しい場所 (P6)
     static void registerP6() {
         // 鯨道の祠: 都から一章の跡地 (北の丘) への道の終わり。道しるべの点のうち跡地にいちばん近い点に置く (atRoad)。着くと頁 ch1/road_shrine
         ChapterSites.element(Ch1Prep.ROAD_SHRINE_ID, Chapters.WHALE, Ch1Prep.ROAD_SHRINE_ID).atRoad().dist(132, 148)

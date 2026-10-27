@@ -15,7 +15,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 
-// 歌石 (E4。docs/design/17 の 1.5): 地上に 5 つ。石の傍らの積み石の高さが番号 (1〜5)。
+// 歌石 (E4): 地上に 5 つ。石の傍らの積み石の高さが番号 (1〜5)。
 // 1 → 2 → 3 → 4 → 5 の順に叩くと、5 つ目で鐘の宿りの鐘が遠くで応える (数え歌の先取り。歌の続きの「いつつ」は途中で切れる)。
 // 順番を違えると、石は鳴りかけて黙り、1 番を叩いていれば 1 からやり直し、それ以外は最初に戻る。進みは人ごと (Ch1Data)。
 // 石の番号は音の数でも分かる (n 番の石は n 回鳴る)。
@@ -124,7 +124,7 @@ public final class SongStones {
         }
         Notice.narrate(player, "message.skyabyss.ch1.stone.answer");
         Lore.unlock(player, Ch1.SONG, true);
-        // 鐘の下の戸 (歌の間。21 の 3.1) が開く
+        // 鐘の下の戸 (歌の間) が開く
         if (SongChamber.open(player.serverLevel())) {
             Tasks.later(60, () -> Notice.narrate(player, "message.skyabyss.ch1.stone.chamber"));
         }

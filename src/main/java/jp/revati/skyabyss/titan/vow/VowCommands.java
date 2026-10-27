@@ -28,7 +28,7 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
 
-// /vow : 誓いの選び方 (周回の縛り。docs/design/21 の 1.8)。巨神の祠 (しゃがんで右クリック) で出る一覧の [+] [-] を押して選ぶ。
+// /vow : 誓いの選び方 (周回の縛り)。巨神の祠 (しゃがんで右クリック) で出る一覧の [+] [-] を押して選ぶ。
 // 選び直せるのは、その巨神の祠のそば (docs/design/32 の 3.1。背の中では変えられない) で、順路が動いていないあいだ
 //   /vow                          今いる背中の巨神 (背中の外では、周回の巨神のうち最初の一つ) の一覧
 //   /vow <巨神>                   その巨神の一覧

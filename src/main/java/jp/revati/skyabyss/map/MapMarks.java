@@ -26,14 +26,14 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.phys.Vec3;
 
-// 旅の地図 (M キー。docs/design/33 の 4 章) に載せる印を、サーバーで一人ぶん集める。**印の出どころはここ一か所**。
+// 旅の地図 (M キー) に載せる印を、サーバーで一人ぶん集める。**印の出どころはここ一か所**。
 // 地図の画面 (client/map/TravelMapScreen) はこの一覧と、クライアントがもともと持っている自分・仲間・墓・目的の標だけを描く。
 //
 //   町 (鐘の宿り)   序盤の場所 shelter。語り部に会った (STORYTELLER) か近くに来たら「見た」、それまでは野営地からの方角だけの「噂」
 //   野営地          camp。いつも見た (目覚めの場所)
 //   巨大な足跡      footprint。足跡の拍子 (FOOTPRINTS) のあと
 //   巨神の骨        ribs。骨の拍子 (BONES) のあと見た。イサナ (ISANA) のあとは町からの方角の噂
-//   章の跡地        ChapterGrounds の四つの跡地 (33 の 3 章)。その章が開いた人に、都からの方角だけの「噂」。跡地の近く (96) に来たら「見た」
+//   章の跡地        ChapterGrounds の四つの跡地。その章が開いた人に、都からの方角だけの「噂」。跡地の近く (96) に来たら「見た」
 //                   (SiteData.Ground.seen に残る)。その章を終えた人にはいつも「見た」
 //   章の場所        ChapterSites の小要素。その人が使う拠点 (跡地を含む) の分で、近くに着いた (arrived) ものだけ。
 //   碑              覚えた碑 (TravelState.waymarks)。壊された碑は出さない

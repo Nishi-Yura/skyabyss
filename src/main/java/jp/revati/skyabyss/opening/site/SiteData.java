@@ -17,7 +17,7 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.saveddata.SavedData;
 
-// 序盤の構造物 (野営地・鐘の宿り・巨大な足跡・巨神の骨。docs/design/17 の 4 章) の場所と、建て終わったかの記録 (オーバーワールドに保存)。
+// 序盤の構造物 (野営地・鐘の宿り・巨大な足跡・巨神の骨) の場所と、建て終わったかの記録 (オーバーワールドに保存)。
 // 読む側は opening.OpeningSites を使うこと (この型は建てる側 opening.site の内部)
 public final class SiteData extends SavedData {
     private static final String NAME = "skyabyss_opening_sites";
@@ -91,7 +91,7 @@ public final class SiteData extends SavedData {
         }
     }
 
-    // 章の跡地 (docs/design/33 の 3 章)。都から決まった方位と距離の帯に、章ごとに世界で一つ。ChapterGrounds が決めて整える
+    // 章の跡地。都から決まった方位と距離の帯に、章ごとに世界で一つ。ChapterGrounds が決めて整える
     public static final class Ground {
         public final String chapter;
         // 跡地の中心 (立つ場所。地面の一つ上)。章の小要素はここを拠点にして置く

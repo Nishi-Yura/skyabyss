@@ -46,8 +46,8 @@ import jp.revati.skyabyss.trial.TrialRoute;
 import jp.revati.skyabyss.util.Players;
 
 // 巨神の祠 (docs/design/32 の 3.1)。周回の順路の入口。巨神ごとに世界に一つ、地上に建つ。壊せない (台座 9×9 を守る)。
-//   置き場 (仮): はじまりの都 (鐘) から、その巨神の跡地の方位 (33 の 3 章: 岩鯨 北・潮殻 東・雷翼 西・余燼 南) へ、距離の帯の近い端。
-//     本当の置き場は、地図と地形の生成 (33 の W2) が決まったら差し替える。心臓を初めて止めたとき (誰かが) に建てる (ensure)
+//   置き場 (仮): はじまりの都 (鐘) から、その巨神の跡地の方位 岩鯨 北・潮殻 東・雷翼 西・余燼 南) へ、距離の帯の近い端。
+//     本当の置き場は、地図と地形の生成 が決まったら差し替える。心臓を初めて止めたとき (誰かが) に建てる (ensure)
 //   形: 深層岩の台座 (9×9)・巨神ごとの材質の輪 (半径 3)・中央の碑 (titan_shrine)・台座の東の縁に共鳴の炉。まわりに順位の石と飾り板 (RebirthBoards)
 //   使い方: パーティ全員 (一人なら一人) が輪の中に立ち、その巨神の歌片を持った人が碑を長押し (USE_HOLD tick) → 品が一つ減り、
 //     雲の帳のあいだに輪の中の人をその巨神の背へ運び、順路の段 1 へ (TrialRoute.start)。輪の外の仲間は運ばない
@@ -81,7 +81,7 @@ public final class TitanShrine {
     private static final Map<UUID, long[]> VEILS = new HashMap<>();
 
     // ---------------------------------------------------------------- 置き場
-    // 跡地の方位 (x, z) と距離 (33 の 3 章の帯の近い端)
+    // 跡地の方位 (x, z) と距離 (帯の近い端)
     static int[] bearing(String titan) {
         return switch (titan) {
             case Titans.TIDE_SHELL -> new int[] {1, 0, 800};
@@ -112,7 +112,7 @@ public final class TitanShrine {
             return have;
         }
         ServerLevel level = server.overworld();
-        // 跡地 (33 の 3.2、ChapterGrounds) が取っておいた台座の場所。跡地がまだ決まっていない世界だけ、方位と距離の帯の近い端
+        // 跡地 (ChapterGrounds) が取っておいた台座の場所。跡地がまだ決まっていない世界だけ、方位と距離の帯の近い端
         BlockPos spot = jp.revati.skyabyss.opening.site.ChapterGrounds.shrineSpot(server, titan).orElse(null);
         int x;
         int z;

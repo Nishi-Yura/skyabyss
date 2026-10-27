@@ -97,7 +97,7 @@ public final class SkillEvents {
     // 技の点が増えたら一行で知らせる (レベルアップの知らせのすぐ後に出る)
     static void notifyPoints(ServerPlayer player, SkillData d) {
         int total = d.totalPoints(SkillManager.level(player));
-        // はじめの案内は、開幕の暗転・帳面の知らせと重ならないよう、書を持ち、Lv2 (鐘の宿り) に着くか、20 分たってから (17 の 5.2)
+        // はじめの案内は、開幕の暗転・帳面の知らせと重ならないよう、書を持ち、Lv2 (鐘の宿り) に着くか、20 分たってから
         if (d.notifiedPoints == 0 && total > 0 && !firstHintReady(player)) {
             return;
         }

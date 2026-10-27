@@ -23,7 +23,7 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.tick.LevelTickEvent;
 
-// 歌の間 (docs/design/21 の 3.1。宿りの鐘の下)。歌石 5 つを順に叩いて鐘が応えたあと、鐘の下の地面の石レンガの戸 (一枚) が梯子になる。
+// 歌の間 (宿りの鐘の下)。歌石 5 つを順に叩いて鐘が応えたあと、鐘の下の地面の石レンガの戸 (一枚) が梯子になる。
 // 地下の部屋 (7x7 ほど) に、歌の順番の壁画 (高さ 1〜5 の五本の柱。低い順 = Ch1Prep.BELL_ORDER) と、伝承 ch1/song_chamber。
 //   置く     宿り (shelter) が建ち、炉端 (LodgeNook) のあと、世界に一度 (Ch1Data.chamber)。部品 ch1_song_chamber (鐘を原点にした座標。tools/gen/ch1/gen_ch1_sites.py)。
 //            置く所が自然の地面 (石・土・砂・水・空気) でなければ (人が掘った・建てた) 置かずにあきらめる (人のブロックは壊さない)

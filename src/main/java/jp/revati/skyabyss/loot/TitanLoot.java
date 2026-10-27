@@ -296,7 +296,7 @@ public final class TitanLoot {
         return items;
     }
 
-    // 背の新しい敵 (21 の 3.3): 骨の砲手・骨鳥は欠片と骨片、老番兵 (名づき) は欠片・岩殻片・骨片が必ずいくらか、防具の欠片が低い確率で
+    // 背の新しい敵: 骨の砲手・骨鳥は欠片と骨片、老番兵 (名づき) は欠片・岩殻片・骨片が必ずいくらか、防具の欠片が低い確率で
     public static List<ItemStack> rollNewGuard(LivingEntity mob, @Nullable TitanMemoryData.Record r, RandomSource random) {
         List<ItemStack> items = new ArrayList<>();
         if (mob instanceof ElderSentinel) {

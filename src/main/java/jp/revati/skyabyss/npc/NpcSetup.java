@@ -36,7 +36,7 @@ public final class NpcSetup {
                     .fireImmune()
                     .build(WHALE_CHASER_ID));
 
-    // 旅の職人 (docs/design/21 の 1.4、P4): 荷車の傍らの道に荷を広げている。章ごとに装いが変わる (NpcEntity.variant = 章)。荷のまわり 3 ブロック
+    // 旅の職人 (P4): 荷車の傍らの道に荷を広げている。章ごとに装いが変わる (NpcEntity.variant = 章)。荷のまわり 3 ブロック
     public static final DeferredHolder<EntityType<?>, EntityType<NpcEntity>> ARTISAN = ENTITIES.register("artisan",
             () -> EntityType.Builder.<NpcEntity>of((type, level) -> new NpcEntity(type, level, 3), MobCategory.MISC)
                     .sized(0.6f, 1.95f)

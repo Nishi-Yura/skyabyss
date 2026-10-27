@@ -19,7 +19,7 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.server.ServerStoppingEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
 
-// 潮の番人の「満ち潮の輪」が床に置く一時の水 (docs/design/21 の 4.1)。
+// 潮の番人の「満ち潮の輪」が床に置く一時の水。
 //   flood(level, cx, y, cz, r, ticks)  円の中の柱ごとに、足の高さ y から上の最初の空気 (y か y+1。下が空気でない所) に水源を置く。
 //                                      部屋の 1 段の浅瀬は 2 段に、乾いた床は 1 段になる。空気のマスだけを使い、ほかの物は壊さない
 //   ticks のあとに戻す                  置いたマスがまだ水なら空気に戻す (流れ出た水は源が消えると引く)。

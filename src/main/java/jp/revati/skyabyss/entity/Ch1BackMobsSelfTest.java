@@ -32,7 +32,7 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.common.util.FakePlayer;
 
-// 岩鯨の背の新しい敵 3 体 (骨の砲手・骨鳥・老番兵。docs/design/21 の 3.3) の自己テスト。SKYABYSS_SELFTEST_ONLY="ch1 back mobs"。
+// 岩鯨の背の新しい敵 3 体 (骨の砲手・骨鳥・老番兵) の自己テスト。SKYABYSS_SELFTEST_ONLY="ch1 back mobs"。
 //  A. 骨の砲手: 印の円 (半径 2) = 当たり (内側は傷・外側は無傷・予告 24 tick ≥ 16)、人数で同時に落とす数が増える (最大 3)、正面は半分
 //  B. 骨鳥: 印の線 = 当たり、予告 16 tick 以上、降りたあとのよろめき、1 体ずつ降りる
 //  C. 老番兵: 突進の線 = 当たり、足踏みの円 = 当たり、骨笛 (傷のない円・人数で射手が増える)、一度に呼べる数の上限

@@ -37,7 +37,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
-// 老番兵 (docs/design/21 の 3.3、案 B「石板の守り手」): 骨の番兵の大きな変種。胸と腹に石の板、折れた角、石の盾。HP 220 (人数で増える。
+// 老番兵 (案 B「石板の守り手」): 骨の番兵の大きな変種。胸と腹に石の板、折れた角、石の盾。HP 220 (人数で増える。
 // 番兵長と同じ式 StoneWhaleHeart.scaleFor)、突進 10・足踏み 8。技は三つで、どれも予告 (Telegraph) が先に出る。普通の殴りは持たない。
 //  - 盾の突進: 目標へ向く線 (幅 2.4、最長 12) が 1.2 秒かけて満ち、最後の 12 tick で線に沿って突っ込む。傷は走り終えた瞬間に線の中の人へ。
 //    走り終えたあと 1.2 秒よろめく (反撃の隙)

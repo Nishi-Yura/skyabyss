@@ -21,7 +21,7 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.server.ServerStoppedEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
 
-// 章の跡地 (docs/design/33 の 3 章。W2)。はじまりの都から決まった方位と距離の帯に、章ごとに世界で一つ。
+// 章の跡地 (W2)。はじまりの都から決まった方位と距離の帯に、章ごとに世界で一つ。
 //   一章 岩鯨 = 北 240〜360 の丘、二章 潮殻 = 東 520〜900 の海辺、三章 雷翼 = 西 650〜1,170 の峰 (y 150 以上)、四章 余燼 = 南 780〜1,300 の乾いた低地 (2026-10-23 の試遊でさらに近づけた。約 65%)。
 //   探し方: 方位の扇 (±25 度) の中で、帯の内側から外側へ 32 ブロック刻み (扇は 5 度刻み、まんなかから)。合う地形があればそこ。
 //     バニラの村・構造物の出るチャンクが 192 以内なら、その候補を飛ばす (= 少しずらす。小要素の広がりのぶん 128 より広め。道しるべの点は 48)。一章は野営地・足跡からも離す。
@@ -40,7 +40,7 @@ public final class ChapterGrounds {
         NONE, HILL, COVE, PEAK, BASIN
     }
 
-    // 章ごとの決まり (33 の 3 章の表)。dir = 都から見た向き (x, z。北 = -z)、min〜max = 距離の帯、side = 整える形の一辺
+    // 章ごとの決まり。dir = 都から見た向き (x, z。北 = -z)、min〜max = 距離の帯、side = 整える形の一辺
     public record Spec(Chapters chapter, int dirX, int dirZ, int min, int max, Shape shape, int side) {
         double angle() {
             return Math.atan2(dirZ, dirX);

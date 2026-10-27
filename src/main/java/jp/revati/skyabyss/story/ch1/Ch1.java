@@ -18,7 +18,7 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.neoforged.neoforge.registries.RegisterEvent;
 
-// 序章 (日 1) と一章「空を泳ぐもの」(岩鯨) の中身 (P4a)。docs/design/17 の 1.5・3.8、01 の 4.2、docs/review/chapter_per_titan_plan.md の 1.3〜1.4。
+// 序章 (日 1) と一章「空を泳ぐもの」(岩鯨) の中身 (P4a)01 の 4.2、docs/review/chapter_per_titan_plan.md の 1.3〜1.4。
 // 足すのは「跡・頼み・音・小さな異変」だけ (敵・ダンジョン・ジャンプスケアは足さない)。チャットには流さない (知らせは Notice)。
 //
 //   小要素 (ChapterSites)  序章: 旅の跡 3 (Sites.PROLOGUE)。一章: 旅の跡 2・見張りの丘・歌石 5・失せ物の荷車と日記の場所 (Sites.WHALE)

@@ -13,7 +13,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.monster.Zombie;
 import net.minecraft.world.food.Foods;
 
-// 荒らしよけと都の安全 (SiteGuard。docs/design/33 の 2 章) と、おなかの決まり (NoHunger。17 の 4 章) の自己テスト。段の名前は "site guard"。
+// 荒らしよけと都の安全 (SiteGuard) と、おなかの決まり (NoHunger) の自己テスト。段の名前は "site guard"。
 //  - 都が建っていれば: 鐘は都の範囲の中、都から 400 離れた所は外。都の中に置いたゾンビは、1 秒ごとの見回りで消える
 //  - 章の小要素が建っていれば: その設計図のブロックの一つが守られ、そのすぐ上の空気は守られない
 //  - パンで戻る体力は 8、焼いた牛肉は 14

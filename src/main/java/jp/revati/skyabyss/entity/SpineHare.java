@@ -32,7 +32,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 
-// 棘うさぎ (docs/design/21 の 3.1): 射手の予習。夜の草原に出る。距離をとり、背の骨の棘を立てて (予告 0.8 秒。立った棘と床の帯が予告)、
+// 棘うさぎ: 射手の予習。夜の草原に出る。距離をとり、背の骨の棘を立てて (予告 0.8 秒。立った棘と床の帯が予告)、
 // 直線に 1 本飛ばす。当たると鈍足 I 1.5 秒。撃ったあとは後ろ脚で跳んで離れる。遮蔽 (壁・石柱) の裏には通らない
 public class SpineHare extends GroundFoe {
     public static final int WARN = 16;

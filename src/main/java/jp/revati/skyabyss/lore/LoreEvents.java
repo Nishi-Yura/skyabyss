@@ -172,7 +172,7 @@ public final class LoreEvents {
         Lore.fire(player, "sky_shadow", t -> true);
     }
 
-    // 書は必ず届く (06 の 2.7節): 最初の空の影が済んだのに、書を受け取っていない人 (屋内にいて影を見なかった・
+    // 書は必ず届く: 最初の空の影が済んだのに、書を受け取っていない人 (屋内にいて影を見なかった・
     // 影の途中で参加した・離れていた) にも、影が去った 3 秒後に落ちてくるよう予定を入れる
     private static void guaranteeBook(ServerPlayer player, ServerLevel level, LoreState state, long now) {
         if (level.dimension() != Level.OVERWORLD) {

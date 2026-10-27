@@ -475,7 +475,7 @@ public class EmberTitanEntity extends Entity implements GeoEntity, jp.revati.sky
             players.remove(asked);
             players.add(0, asked);
         }
-        // 四章の跡地があれば、浮かぶのはその灰の地だけ (灰の地の近くに人がいるとき。docs/design/33 の 3.1。EmberBasin)
+        // 四章の跡地があれば、浮かぶのはその灰の地だけ (灰の地の近くに人がいるとき。EmberBasin)
         boolean basinOnly = EmberBasin.restricted(level.getServer());
         for (ServerPlayer player : players) {
             if (basinOnly && !EmberBasin.near(player)) {

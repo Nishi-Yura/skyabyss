@@ -45,7 +45,7 @@ import net.neoforged.neoforge.event.tick.ServerTickEvent;
 //   (借りた区画はそのギルドの人だけ、借りていない区画は誰でも)。中の人は傷を受けない (/kill と奈落は別)。敵は湧かず、入ったら 1 秒ごとの見回りで消える。
 //   章の小要素 (割れ殻の洞・骨の坑など): 設計図で置いたブロックは壊せない (まわりの自然の地面は掘れる。割れ殻の洞は地表の口だけ壊せる)。
 //   小要素の箱の中にはブロックを置けない・バケツ・火も使えない (あとから来た人の道をふさがない。2026-10-22 の二人の試遊)。
-//   OP のクリエイティブは除く。docs/design/33 の 2 章 (保護と安全)
+//   OP のクリエイティブは除く
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class SiteGuard {
     private SiteGuard() {

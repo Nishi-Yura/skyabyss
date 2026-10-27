@@ -22,7 +22,7 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.common.util.FakePlayer;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 
-// 失せ物の旅人 (E2) の下働き (17 の 1.5)。1 秒に 1 回、人ごとに。(初日のお使いは 2026-10-27 に消した)
+// 失せ物の旅人 (E2) の下働き。1 秒に 1 回、人ごとに。(初日のお使いは 2026-10-27 に消した)
 //   足跡のくぼみ:  失せ物の旅人の頼みの「たどる」段の間、荷車から日記の場所へ、粒だけの足跡を近くに描く (建築は触らない)
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class Errands {

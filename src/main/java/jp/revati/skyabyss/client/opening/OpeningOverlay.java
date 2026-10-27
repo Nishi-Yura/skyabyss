@@ -7,7 +7,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 
-// B0 開幕の暗転と題字 (docs/design/17 の 3.1節): 初めてワールドに入ったときだけ。
+// B0 開幕の暗転と題字: 初めてワールドに入ったときだけ。
 // 黒い画面から始まり、鼓動と遠い鐘のあと、まぶたが細く開いて一度まばたきし、ゆっくり視界が戻る。題字「天と淵のあいだ」、その下に一行。
 // 時間は tick。画面の効果の強さ (screenEffectStrength) が 0 のときも、暗転と文字は出す (読めるように。足音の薄い暗がりだけを消す)
 public final class OpeningOverlay {

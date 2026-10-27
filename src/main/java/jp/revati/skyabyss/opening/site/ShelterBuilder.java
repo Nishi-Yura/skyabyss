@@ -7,14 +7,14 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.Blocks;
 
-// 鐘の宿り (17 の 4.2、語り部の家)。小屋 1 つ、柵の庭、バニラの鐘 (POI "meeting" になるので、NpcSpawner が語り部を立たせる)、
+// 鐘の宿り (語り部の家)。小屋 1 つ、柵の庭、バニラの鐘 (POI "meeting" になるので、NpcSpawner が語り部を立たせる)、
 // わら束の上の煙の出る焚き火 (遠くからの目印)。庭の入口 (南向きの部品) は野営地の方へ向く
 public final class ShelterBuilder {
     private ShelterBuilder() {
     }
 
     public static SiteJob create(ServerLevel level, SiteData data, SiteData.Entry entry) {
-        // 鐘の宿りは「絶えかけの国の都」(docs/design/33 の 2)。小屋の設計図 (shelter) は SKYABYSS_SMALL_SHELTER=1 のときだけ (古い台本の撮影向け)
+        // 鐘の宿りは「絶えかけの国の都」。小屋の設計図 (shelter) は SKYABYSS_SMALL_SHELTER=1 のときだけ (古い台本の撮影向け)
         String name = System.getenv("SKYABYSS_SMALL_SHELTER") != null ? "shelter" : "capital";
         return new SiteJob(level, data, entry, Blueprint.get(name), "shelter", ShelterBuilder::finish);
     }
@@ -99,7 +99,7 @@ public final class ShelterBuilder {
         if (door != null) {
             job.entry.extra("door", door);
         }
-        // 都: 門・閉じた施設・空き区画の碑と、市と住まいの村人 (docs/design/33 の 2.2)
+        // 都: 門・閉じた施設・空き区画の碑と、市と住まいの村人
         // 施設の碑 (docs/design/35 の 2.1): 道具屋・薬師・預かり所・宿・止まり木・訓練場・闇市・地図屋・酒場・古井戸
         for (String key : List.of("gate_n", "gate_e", "gate_s", "gate_w", "keep", "hall", "guild", "shrine", "smithy", "lot_1", "lot_2", "lot_3", "lot_4", "lot_5", "graveyard", "guild_roll",
                 "tool_shop", "apothecary", "stable", "storage", "inn", "perch", "training", "black_market", "mapmaker", "tavern", "well", "well_song")) {
@@ -122,7 +122,7 @@ public final class ShelterBuilder {
                 // あとで町のクエスト・裏通りの仕組みが読む置き場 (35 の 3.3・3.5・6.9): 止まり木の台、古井戸の格子と下の迷路、
                 // 酒場の地下の奥の壁と隠し通路 (cellar_gap の 2 マスを空気にすると開く)
                 "perch", "old_well", "well_down", "well_chest", "cellar_wall", "cellar_gap", "cellar_passage", "abyss_hint", "abyss_door",
-                // 五章の大坑道 (34 の 4.7。story/ch5/AbyssEntrance)
+                // 五章の大坑道 (story/ch5/AbyssEntrance)
                 "abyss_landing_1", "abyss_landing_2", "abyss_gate", "abyss_gate_bars")) {
             BlockPos at = job.mark(key);
             if (at != null) {

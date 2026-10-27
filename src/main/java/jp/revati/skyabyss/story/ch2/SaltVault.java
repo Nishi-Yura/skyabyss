@@ -61,7 +61,7 @@ import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
 
-// 沈んだ塩の蔵 (docs/design/21 の 4.1。二章の支度「塩の道」の舞台。12〜16 分の小さなダンジョン)。部品は data/skyabyss/opening/ch2_salt_vault.json (tools/gen/ch2/gen_ch2_ground.py)。
+// 沈んだ塩の蔵 (二章の支度「塩の道」の舞台。12〜16 分の小さなダンジョン)。部品は data/skyabyss/opening/ch2_salt_vault.json (tools/gen/ch2/gen_ch2_ground.py)。
 //
 //   場所   二章の跡地 (都の東の浜) の中心から 90〜150、水辺。地表は塩で白い積み石の低い屋根と坑口の碑 (sign.skyabyss.ch2_salt_vault)。階段で地下 12 へ
 //   潮の喉 階段の先の井戸 → 水の底の抜け道 → 井戸。世界の潮 (TideOcean.isLowTide) が引いていれば乾いて梯子で歩け、満ちていれば水で、息を止めて潜れば抜けられる。

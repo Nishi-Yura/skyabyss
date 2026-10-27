@@ -21,7 +21,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TieredItem;
 import net.minecraft.world.phys.Vec3;
 
-// 初回と周回の共通の部品 (docs/design/21 の 1.7、10 の 10.10)。
+// 初回と周回の共通の部品 (10 の 10.10)。
 //
 //  初回の定義   : そのグループの記録 (BackGroupData.Record) の `keep.first_cleared` が立っていない。心臓を止めた瞬間に立つ
 //                 (TitanEnd.onHeartStopped → onFirstCleared)。"keep." の欄なので試練のリセットで消えず、パーティの記録の引き継ぎでは記録ごと写る

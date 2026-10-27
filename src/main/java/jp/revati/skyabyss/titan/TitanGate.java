@@ -48,7 +48,7 @@ public final class TitanGate {
         if (!checkBoard(player)) {
             return false;
         }
-        // 備えの三灯 (21 の 1.2): 赤があれば一度は渡さず、出て入り直した二度目 (5 秒以内) で渡す
+        // 備えの三灯: 赤があれば一度は渡さず、出て入り直した二度目 (5 秒以内) で渡す
         if (!jp.revati.skyabyss.readiness.BoardReadiness.attempt(player, titan, jp.revati.skyabyss.readiness.BoardReadiness.Mode.WALK_IN)) {
             return false;
         }

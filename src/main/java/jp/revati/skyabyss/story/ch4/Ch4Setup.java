@@ -29,7 +29,7 @@ import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
-// 四章の地上 (docs/design/34 の C4、21 の 6.1) の登録: 敵 4 種 (熾り蟲・灰被りの屑・灰ひきずり・古い灰被り)・スポーンエッグ・品 5 つ・音。
+// 四章の地上の登録: 敵 4 種 (熾り蟲・灰被りの屑・灰ひきずり・古い灰被り)・スポーンエッグ・品 5 つ・音。
 // 敵と品の ID は skyabyss の名前空間。音の出来事だけは skyabyss_ch4 の名前空間 (assets/skyabyss_ch4/sounds.json。ほかの作業の sounds.json と分ける)。
 // 素材と見た目は tools/gen/ch4/gen_ch4_ground_mobs.py、文は tools/gen/ch4/gen_ch4_ground.py。SkyAbyss のコンストラクタから register を呼ぶ
 public final class Ch4Setup {
@@ -38,7 +38,7 @@ public final class Ch4Setup {
     private static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(SkyAbyss.MODID);
     private static final DeferredRegister<SoundEvent> SOUNDS = DeferredRegister.create(Registries.SOUND_EVENT, SOUND_NS);
 
-    // 四章の推奨レベル (34 の 4.5。Lv 24 → 30。成長の経験値の減り方に使う)
+    // 四章の推奨レベル (Lv 24 → 30。成長の経験値の減り方に使う)
     public static final int CONTENT_LEVEL = 27;
 
     // ---------------------------------------------------------------- 敵
@@ -64,7 +64,7 @@ public final class Ch4Setup {
     public static final DeferredItem<Item> ELDER_THRALL_EGG = ITEMS.register("elder_thrall_spawn_egg",
             () -> new DeferredSpawnEggItem(ELDER_THRALL, 0x5A5654, 0xD2551A, new Item.Properties()));
 
-    // ---------------------------------------------------------------- 品 (21 の 6.1。煤鉄・灰麻・灰の護り糸・煤の砥石・灰の冷やし水)
+    // ---------------------------------------------------------------- 品 (煤鉄・灰麻・灰の護り糸・煤の砥石・灰の冷やし水)
     public static final DeferredItem<Item> SOOT_IRON = ITEMS.register("soot_iron", () -> new Described(new Item.Properties()));
     public static final DeferredItem<Item> ASH_HEMP = ITEMS.register("ash_hemp", () -> new Described(new Item.Properties()));
     public static final DeferredItem<Item> ASH_WARD_THREAD = ITEMS.register("ash_ward_thread",

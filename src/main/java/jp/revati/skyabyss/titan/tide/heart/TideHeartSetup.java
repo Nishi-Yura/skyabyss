@@ -75,7 +75,7 @@ public final class TideHeartSetup {
         event.put(TIDE_HEART.get(), TideHeart.createAttributes().build());
     }
 
-    // 試練の外で呼ばれた心臓 (スポーンエッグ・コマンド) は、ふつうの敵として経験値を分ける (06 の 6.6節の量と推奨レベル)
+    // 試練の外で呼ばれた心臓 (スポーンエッグ・コマンド) は、ふつうの敵として経験値を分ける (推奨レベルの量)
     private static void commonSetup(FMLCommonSetupEvent event) {
         event.enqueueWork(() -> GrowthRewards.MOD_ENEMIES.put(SkyAbyss.MODID + ":tide_heart",
                 new GrowthRewards.Source(TideLoot.HEART_XP, TideLoot.TIDE_LEVEL)));

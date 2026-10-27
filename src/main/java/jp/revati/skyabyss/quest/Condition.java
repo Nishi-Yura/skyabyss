@@ -197,7 +197,7 @@ public final class Condition {
                 yield s >= GsonHelper.getAsInt(json, "min", 0) && s <= GsonHelper.getAsInt(json, "max", Integer.MAX_VALUE);
             }
             case "stilled" -> jp.revati.skyabyss.progress.Progression.stopped(ctx.player().server, ctx.player().getUUID(), str("titan"));
-            // 周回: そのグループが心臓を止めている (first_cleared)。titan を省けばどの巨神でもよい (docs/design/21 の 1.7・1.8)
+            // 周回: そのグループが心臓を止めている (first_cleared)。titan を省けばどの巨神でもよい
             case "repeat_run" -> jp.revati.skyabyss.titan.group.FirstRun.hasCleared(ctx.player().server, jp.revati.skyabyss.titan.group.Groups.keyOf(ctx.player()),
                     optStr("titan"));
             case "world_stage" -> jp.revati.skyabyss.progress.Progression.worldStage(ctx.player().server) >= GsonHelper.getAsInt(json, "min", 0);

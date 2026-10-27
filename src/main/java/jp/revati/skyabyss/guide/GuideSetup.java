@@ -14,7 +14,7 @@ import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
-// 章の導きの基盤 (docs/design/21 の 1.4・1.5、P3) の登録。SkyAbyss のコンストラクタから register を一度だけ呼ぶ。
+// 章の導きの基盤 (P3) の登録。SkyAbyss のコンストラクタから register を一度だけ呼ぶ。
 // 共有の ModItems・ModDataComponents には手を入れず、ここで別に登録する
 public final class GuideSetup {
     private static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(SkyAbyss.MODID);
@@ -33,7 +33,7 @@ public final class GuideSetup {
     public static final DeferredItem<Item> HEARTBEAT_WARD_THUNDER_WING = ward("thunder_wing");
     public static final DeferredItem<Item> HEARTBEAT_WARD_EMBER = ward("ember");
 
-    // 一章の地上の素材 (21 の 3.1、P6 が先に置いた仮の登録。絵は仮 = tools/gen_ch1_materials.py。落とす敵は P7、旅装・砥石のレシピは P5 が足す。
+    // 一章の地上の素材 (P6 が先に置いた仮の登録。絵は仮 = tools/gen_ch1_materials.py。落とす敵は P7、旅装・砥石のレシピは P5 が足す。
     // ID は 21 の表のとおり。P5・P7 は、同じ ID を二重に登録せず、この 4 つを使うこと)
     public static final DeferredItem<Item> ROCK_SHELL_SCRAP = ITEMS.register("rock_shell_scrap", () -> new Item(new Item.Properties()));
     public static final DeferredItem<Item> BONE_CHIP = ITEMS.register("bone_chip", () -> new Item(new Item.Properties()));
@@ -45,7 +45,7 @@ public final class GuideSetup {
     public static final DeferredItem<Item> SENTRY_TALLY = ITEMS.register("sentry_tally",
             () -> new Item(new Item.Properties().stacksTo(1).rarity(Rarity.UNCOMMON)));
 
-    // 鯨追いの印 (一章の支度の段を三本とも終えた記念品。見た目だけ。34 の 4.2。story.ch1.Ch1Trails が渡す)
+    // 鯨追いの印 (一章の支度の段を三本とも終えた記念品。見た目だけ。story.ch1.Ch1Trails が渡す)
     public static final DeferredItem<Item> WHALE_CHASER_MARK = ITEMS.register("whale_chaser_mark",
             () -> new Item(new Item.Properties().stacksTo(1).rarity(Rarity.UNCOMMON)));
 

@@ -19,7 +19,7 @@ import net.minecraft.world.entity.ai.village.poi.PoiTypes;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 
-// 序盤の構造物の自己テスト (docs/design/17 の 4 章)。新しいワールドで 4 つが必ず建つ、スポーンからの距離、陸の上、
+// 序盤の構造物の自己テスト。新しいワールドで 4 つが必ず建つ、スポーンからの距離、陸の上、
 // 宿りに鐘 (POI) があって語り部が立てる (村のない世界でも)、足跡のくぼみ、骨と石板の碑の幅、人の建物があれば場所をずらして壊さない。
 // 結果は SELFTEST opening PASSED / FAILED
 public final class SiteSelfTest {

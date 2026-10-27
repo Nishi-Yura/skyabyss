@@ -29,7 +29,7 @@ import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache;
 import software.bernie.geckolib.animation.AnimatableManager;
 import software.bernie.geckolib.util.GeckoLibUtil;
 
-// 鯨道の旅装 (一章の旅装。21 の 1.2・P5)。防御 17 / 強靭 5 (4 部位の合計)、アンコモン (緑、特性なし、炉で鍛えない)、必要 Lv 7。
+// 鯨道の旅装 (一章の旅装)。防御 17 / 強靭 5 (4 部位の合計)、アンコモン (緑、特性なし、炉で鍛えない)、必要 Lv 7。
 // 鍛冶場の誂えで手に入る。着たときの見た目は低ポリの 3D (client/armor/WhaleRoadArmorRenderer)。
 // 踏ん張り (ノックバック耐性 0.1) は素材 (TravelGear.MATERIAL) の値。二〜四章の旅装は同じ型で足す (GearCurve.TRAVEL の表)
 public class WhaleRoadArmorItem extends ArmorItem implements ModGear, GeoItem {

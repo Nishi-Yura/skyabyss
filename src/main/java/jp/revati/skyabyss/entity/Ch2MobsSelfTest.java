@@ -42,7 +42,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.AABB;
 import net.neoforged.neoforge.common.util.FakePlayer;
 
-// 二章の地上の敵 4 種 (P12。docs/design/21 の 4.1) の自己テスト。SKYABYSS_SELFTEST=1 SKYABYSS_SELFTEST_ONLY="ch2 mobs" ./gradlew runServer。
+// 二章の地上の敵 4 種 (P12) の自己テスト。SKYABYSS_SELFTEST=1 SKYABYSS_SELFTEST_ONLY="ch2 mobs" ./gradlew runServer。
 // 結果は SELFTEST ch2 mobs PASSED / FAILED。
 //   登録     エンティティ・体力・スポーンエッグ・音・経験値の表・ひとり歩き (章・時刻・地形)・群れの形 (GroupOwned)
 //   潮だまり貝 近づくと開く (予告 0.8 秒以上・円と当たりが同じ形)・挟む 5 と鈍足 II 1.5 秒・離れれば挟まずに閉じる・閉じた殻は硬いが倒せる

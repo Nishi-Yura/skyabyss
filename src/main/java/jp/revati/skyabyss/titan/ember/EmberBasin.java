@@ -10,7 +10,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 
-// 余燼が浮上する灰の地 (docs/design/33 の 3.1)。集まりの刻の浮上 (tryGather) と温石の頼み (request) は、四章の跡地 (都の南の灰の地) だけ。
+// 余燼が浮上する灰の地。集まりの刻の浮上 (tryGather) と温石の頼み (request) は、四章の跡地 (都の南の灰の地) だけ。
 // 跡地がまだ決まっていない世界では、今までどおり人の近くの陸 (13 の 2.3)。呼び鈴 (09 の 4.4。心臓のあと) と開発コマンドは灰の地に限らない。
 public final class EmberBasin {
     // 灰の地にいるとみなす距離 (この中の人のために浮かぶ)

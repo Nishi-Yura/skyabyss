@@ -57,7 +57,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.neoforged.neoforge.common.util.FakePlayer;
 import net.neoforged.neoforge.common.util.FakePlayerFactory;
 
-// 四章の地上 (docs/design/34 の C4) の自己テスト。SKYABYSS_SELFTEST_ONLY="ch4"
+// 四章の地上の自己テスト。SKYABYSS_SELFTEST_ONLY="ch4"
 //   ch4 ground          データ (支度の段 2 本とサブ 2・日替わり・会話・伝承・文・経験値の枠・湧き台・職人の立つ所・部品の印・場所の置き方・メインの「乗る」の段と天の鍵の二人の答え・
 //                       鼓動守の編み方)、二本の流れ (耐火の薬 2 = 延長版も数える・頁)、合図 ch4_ready、サブの合図、前の私の荷・窯の箱 (人ごとに一度)、温石の台、砥石と冷やし水
 //   ch4 mobs            敵 4 種: 登録・体力・殻 (屑 15・古い灰被り 40、殻のあいだは傷が半分、煤の砥石は殻へ 1.5 倍)・燃え上がりと燃え尽き (屑は燃え尽き、古い灰被りは燃え尽きない)・

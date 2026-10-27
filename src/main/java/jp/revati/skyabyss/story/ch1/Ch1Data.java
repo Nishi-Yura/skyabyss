@@ -12,7 +12,7 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.saveddata.SavedData;
 
-// 序章・一章 (P4a) の小要素の記録 (オーバーワールドに保存。docs/design/17 の 1.5)。
+// 序章・一章 (P4a) の小要素の記録 (オーバーワールドに保存)。
 //   人ごと (Player): 歌石の進み (song)、小さな異変を起こした日 (oddityDay) と使った種類 (oddityMask) と回数 (oddityCount)、
 //                    見て回った旅の跡の印 (rounds)、旅の跡の見回りの頼みに送った印 (signalled)、足跡の道しるべを描いている頼みの出どころ
 //   世界 (World):  岩鯨が初めて降りたときの「影と静けさ」(hush) の状態、宿りの炉端 (ベッド・かまど・板) を置いたか (nook)

@@ -19,7 +19,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.AABB;
 
-// 序盤の流れが必ず成り立つことの自己テスト (06 の 2.7節、07 の 3.1節):
+// 序盤の流れが必ず成り立つことの自己テスト (07 の 3.1節):
 //  - 新しいワールドの最初の空の影は、初日の正午に予定される
 //  - 書は、最初の影が済んだ人に必ず予定される
 //  - 岩鯨は、最初の影から半日たつまで自然には現れない

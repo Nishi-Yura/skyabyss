@@ -18,7 +18,7 @@ import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.UseAnim;
 import net.minecraft.world.level.Level;
 
-// 灰の冷やし水 (21 の 6.1)。飲むと余燼の背の熱 (EmberHeat) が 40 下がり、耐火 30 秒
+// 灰の冷やし水。飲むと余燼の背の熱 (EmberHeat) が 40 下がり、耐火 30 秒
 public class AshCoolerItem extends Item {
     public static final float COOL = 40f;
     public static final int FIRE_TICKS = 600;

@@ -17,7 +17,7 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.server.MinecraftServer;
 import net.neoforged.neoforge.common.util.FakePlayer;
 
-// 旅の地図の印 (docs/design/33 の 4 章) の自己テスト: 序盤の記録から「噂/見た」を決める・噂は本当の位置を出さない (方角は 16 方位の内、距離は 100 刻み)・
+// 旅の地図の印の自己テスト: 序盤の記録から「噂/見た」を決める・噂は本当の位置を出さない (方角は 16 方位の内、距離は 100 刻み)・
 // すでに遊んでいた人は全部見た・一人ぶんの集めがこわれない・パケットの往復・キー M
 public final class MapMarksSelfTest {
     private MapMarksSelfTest() {

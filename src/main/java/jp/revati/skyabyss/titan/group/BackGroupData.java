@@ -168,7 +168,7 @@ public final class BackGroupData extends SavedData {
             // 保存は急がない (次の保存のときに書かれる)
         }
 
-        // ---- 初回・周回 (docs/design/21 の 1.7)。"keep." の欄なので、試練のリセットでは消えない
+        // ---- 初回・周回。"keep." の欄なので、試練のリセットでは消えない
         // そのグループがこの巨神の心臓を一度でも止めたか (FirstRun.onFirstCleared が立てる。パーティの組む・入る・抜けるでは記録ごと写る)
         public boolean isFirstCleared() {
             return data.getBoolean(FIRST_CLEARED);

@@ -44,7 +44,7 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.neoforged.neoforge.common.util.FakePlayer;
 import net.neoforged.neoforge.common.util.FakePlayerFactory;
 
-// 二章の地上 (C2。docs/design/34 の 4.3、21 の 4.1) の自己テスト。SKYABYSS_SELFTEST_ONLY="ch2 ground"。結果は SELFTEST ch2 ground PASSED / FAILED
+// 二章の地上 (C2) の自己テスト。SKYABYSS_SELFTEST_ONLY="ch2 ground"。結果は SELFTEST ch2 ground PASSED / FAILED
 //   build    空の上 (x 7300) に塩の蔵の部品を開発コマンドと同じ形で置き、浅い水の箱に難破船を置く
 //   vault    碑 2 枚の文・印 (樽 3・棚 3・戸 9・喉)・湧き台の立ち位置 (奥の間は膝の水)・潮の喉 (満潮で水と濡れた梯子、干潮で空気)・塩樽
 //            (抱える・傷で割れて戻る・棚に三つで戸が開く・開いたあとは抱えられない)・湧き台 (グループの分だけ湧き、倒しきるとクリアと宝)
@@ -367,7 +367,7 @@ public final class Ch2GroundSelfTest {
                 Quests.forceStage(p, "main_tide");
             }
             Quests.poll(p, false);
-            // 支度の段は一本ずつ順に (34 の 4.3): 噂のあとは塩の道だけ。メインは「支度」の段で待つ
+            // 支度の段は一本ずつ順に: 噂のあとは塩の道だけ。メインは「支度」の段で待つ
             check(QuestLog.of(p).entry(Ch2Ground.Q_SALT) != null, Ch2Ground.Q_SALT + " did not start after Isana's sea rumor");
             check(QuestLog.of(p).entry(Ch2Ground.Q_BOAT) == null, Ch2Ground.Q_BOAT + " should wait for the salt road");
             check("prepare".equals(stageId(p, "main_tide")), "main_tide should wait on the prepare stage (" + stageId(p, "main_tide") + ")");

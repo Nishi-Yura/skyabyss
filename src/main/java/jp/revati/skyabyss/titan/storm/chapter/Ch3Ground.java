@@ -34,7 +34,7 @@ import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.event.server.ServerStoppedEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
 
-// 三章の地上 (docs/design/34 の 4.4・C3、21 の 5.1)。西の峰の跡地 (33 の 3 章) に、世界で一つずつ置く。部品とデータは tools/gen/ch3/gen_ch3_ground.py。
+// 三章の地上。西の峰の跡地 に、世界で一つずつ置く。部品とデータは tools/gen/ch3/gen_ch3_ground.py。
 //
 // ---------------------------------------------------------------- 場所 (StormSites の 4 種に足す)
 //   ch3_wind_flag      風の道の旗 5   稜線 (高台) に沿って。着くと合図 ch3_flag。五つ目で峰じゅうの旗が一斉に逆を向く (人ごとに一度)

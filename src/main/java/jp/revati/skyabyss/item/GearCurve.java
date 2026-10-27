@@ -53,7 +53,7 @@ public final class GearCurve {
             new Stage("thunder_wing", 24, 15.2, 19.8, 21, 14, 0.8, 15.5, 650),
             new Stage("ember", 30, 17.5, 22.8, 22, 16, 0.8, 18.5, 790));
 
-    // ---------------------------------------------------------------- 旅装 (21 の 1.2。章ごとの橋渡し。アンコモン、特性なし、炉で鍛えない)
+    // ---------------------------------------------------------------- 旅装 (章ごとの橋渡し。アンコモン、特性なし、炉で鍛えない)
     // armor / toughness: 4 部位の合計。level: 必要 Lv。whetstone: 砥石の攻撃の上乗せ。防御は、その段の防具 +0 の 85〜92% (巨神の装備は +0 でも旅装を上回る。
     // 周回の前の橋にとどめる)、強靭は +0 を超えない。一章 (guide/TravelGear) と二章 (guide/Ch2Gear) は実装済み。三〜四章は同じ表で足す
     public record Travel(String id, int chapter, String stage, int level, int armor, int toughness, double whetstone) {

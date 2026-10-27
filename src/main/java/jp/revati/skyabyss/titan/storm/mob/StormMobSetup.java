@@ -74,7 +74,7 @@ public final class StormMobSetup {
         ENTITIES.register(modEventBus);
         ITEMS.register(modEventBus);
         SOUNDS.register(modEventBus);
-        // 三章の地上の敵 (帯電毛玉・峰の雛・雷拾い・焼けた羽守。21 の 5.1、P16)
+        // 三章の地上の敵 (帯電毛玉・峰の雛・雷拾い・焼けた羽守P16)
         jp.revati.skyabyss.titan.storm.chapter.Ch3Mobs.register(modEventBus);
         modEventBus.addListener(StormMobSetup::onAttributes);
         modEventBus.addListener(StormMobSetup::onCreativeTab);

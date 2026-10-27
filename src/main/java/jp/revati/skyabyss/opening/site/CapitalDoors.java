@@ -22,7 +22,7 @@ import jp.revati.skyabyss.registry.ModBlocks;
 import jp.revati.skyabyss.tablet.Tablets;
 import jp.revati.skyabyss.util.Players;
 
-// 都の閉じた施設が、章の進みで開く (docs/design/33 の 2.2「都が目を覚ます順」)。
+// 都の閉じた施設が、章の進みで開く。
 //   組合 = はじめから (2026-10-27。前はイサナと会うと) / 訓練場もはじめから開いている (docs/design/35 の 3.1) /
 //   社と砦の本丸 = 心臓を二つ止めた (三章の始まり) / 館 = 心臓を三つ止めた (四章の始まり)
 // 世界で一度: 誰かが段に着いたとき、鉄の戸と鉄格子を外し、碑の文を「開いた」文にする。記録は宿りの場所の extra ("opened_<施設>")。

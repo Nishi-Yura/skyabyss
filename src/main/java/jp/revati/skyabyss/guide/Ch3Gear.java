@@ -69,7 +69,7 @@ import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import org.joml.Vector3f;
 
-// 三章「風に逆らう嵐」の備えの品 (docs/design/21 の 1.2・5.1)。一章の TravelGear・二章の Ch2Gear と同じ型。
+// 三章「風に逆らう嵐」の備えの品。一章の TravelGear・二章の Ch2Gear と同じ型。
 //  - 素材: 焦げ羽・帯電綿・銅線・雷の護り糸 (鼓動守 雷翼の材料)。落とすのは三章の地上の敵 (titan/storm/chapter/Ch3Mobs が ID で引く)
 //  - 峰越えの旅装 (4 部位): 防御 3/7/6/3 = 19、強靭 2.75 × 4 = 11、感電の傷 −6.25% × 着ている部位 (一式 −25%)、
 //    アンコモン、炉で鍛えない、必要 Lv 19 (GearCurve.TRAVEL[2])。修理は銅線。一式で合図 SIGNAL_GEAR_MADE

@@ -44,7 +44,7 @@ import net.neoforged.neoforge.common.util.FakePlayer;
 import net.neoforged.neoforge.event.entity.living.LivingDamageEvent;
 import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 
-// 章の導きの基盤 (docs/design/21 の P3) の自己テスト。段: "prep chain" (備えの頼みの規則・合図・覚書の受け渡し)、"wayfarer notes" (レシピの解放)、
+// 章の導きの基盤の自己テスト。段: "prep chain" (備えの頼みの規則・合図・覚書の受け渡し)、"wayfarer notes" (覚書の渡し直し)、
 // "heartbeat ward" (鼓動守)、"site cave" (湧き台・クリアの記録・宝・周回・グループごと・章のひとり歩き)、"xp budget" (経験値の枠)。
 // 場所とクエストは、自己テストの中でだけ作る仮のもの (dev 専用。本番のデータには入らない)
 public final class GuideSelfTest {
@@ -801,7 +801,7 @@ public final class GuideSelfTest {
         ServerLevel level = server.overworld();
         Runnable restore = null;
         try {
-            // 表の整合 (21 の 1.5): 既存 + 新しい分の上限 = 合計の上限、合計は 1 レベル分の 1.6 倍まで
+            // 表の整合: 既存 + 新しい分の上限 = 合計の上限、合計は 1 レベル分の 1.6 倍まで
             for (int n = 1; n <= 4; n++) {
                 check(f, ChapterXpBudget.EXISTING[n] + ChapterXpBudget.NEW_CAP[n] == ChapterXpBudget.TOTAL_CAP[n], "chapter " + n + ": the budget table does not add up");
                 check(f, ChapterXpBudget.TOTAL_CAP[n] <= ChapterXpBudget.LEVEL_XP[n] * ChapterXpBudget.MAX_RATIO, "chapter " + n + ": the total is above the per-level ratio");

@@ -29,7 +29,7 @@ import software.bernie.geckolib.animation.AnimationController;
 import software.bernie.geckolib.animation.PlayState;
 import software.bernie.geckolib.animation.RawAnimation;
 
-// 潮だまり貝 (docs/design/21 の 4.1。二章の地上): 待ち伏せ・珊瑚憑きの「像」の予習。動かない。
+// 潮だまり貝 (二章の地上): 待ち伏せ・珊瑚憑きの「像」の予習。動かない。
 //   閉じた貝にしか見えない (前の合わせ目に小真珠がのぞく)。人が NOTICE の近さに来ると、0.8 秒かけて殻を開く (予告。足もとの円)。
 //   開ききった瞬間に円の中の人を挟む (5 と鈍足 II 1.5 秒)。開いている間に全員が LEAVE より離れたら、挟まずに閉じる。
 //   閉じた殻は硬い (傷は CLOSED_TAKEN 倍。倒せなくはない)。挟んだあとはしばらく開いたままで、そこが狙い目。

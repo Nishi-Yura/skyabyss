@@ -14,11 +14,11 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.ItemLore;
 
-// 一章の支度の段 (docs/design/34 の 4.2) の、クエストのデータの外にある仕上げ。
+// 一章の支度の段 の、クエストのデータの外にある仕上げ。
 //   折れた剣   割れ殻の洞をクリアすると (初回も周回も)、その場の人に頁 ch1/trail_blade (奥の台座の折れた鉄の剣) と伝承 ch1/cleft_cave。
 //              trail_blade の最初の段は頁で数えるので、先に洞を抜けた人もさかのぼって済む
 //   鯨追いの印  三本そろったとき (PrepQuests.onReady。人ごとに一度)、記念品を一つ (見た目だけ。説明つき)
-//   岩鯨を呼ぶ  三本そろうと、少しあとに岩鯨が初めて現れる (titan.TitanEvents。callReady)。それまで岩鯨は出ない (34 の 4.2、2026-10-22)
+//   岩鯨を呼ぶ  三本そろうと、少しあとに岩鯨が初めて現れる (titan.TitanEvents。callReady)。それまで岩鯨は出ない (2026-10-22)
 public final class Ch1Trails {
     private Ch1Trails() {
     }
@@ -30,7 +30,7 @@ public final class Ch1Trails {
     // 自己テストが差し替える口 (本番はパーティの誰かが三本を済ませたか)
     static java.util.function.Predicate<ServerPlayer> prepared = p -> PrepQuests.groupAtLeast(p, 1, 3);
 
-    // 岩鯨の初登場を、この人のもとへ呼んでよいか (34 の 4.2: 一章の支度を全部済ませたあと)。
+    // 岩鯨の初登場を、この人のもとへ呼んでよいか 一章の支度を全部済ませたあと)。
     // 一章を過ぎた人・もう岩鯨を見た人・序盤の前から遊んでいた人 (legacy)・支度の段の定義がないデータは、支度を問わない
     public static boolean callReady(ServerPlayer player) {
         if (jp.revati.skyabyss.story.Chapters.of(player).ordinal() > jp.revati.skyabyss.story.Chapters.WHALE.ordinal() || Lore.state(player).has(Ch1Descent.SEEN)

@@ -82,7 +82,7 @@ public class WeathercockItem extends Item implements jp.revati.skyabyss.pouch.Po
             return false;
         }
         StormWingEntity titan = StormKeeper.KEEPER.current(sl);
-        // 三章の跡地があれば、雷翼が止まるのはその峰だけ (docs/design/33 の 3.1)
+        // 三章の跡地があれば、雷翼が止まるのはその峰だけ
         boolean peakOnly = StormPeak.restricted(sl.getServer());
         if (peakOnly && !StormPeak.near(sp)) {
             Notice.bar(sp, ModText.hint("message.skyabyss.weathercock.peak_only"));

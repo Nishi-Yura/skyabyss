@@ -31,7 +31,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
-// 誓い (Vow) の選び方・効き方・報酬 (docs/design/21 の 1.8、10 の 10.12)。周回 (そのグループがその巨神の first_cleared を持つ) だけの縛り。
+// 誓い (Vow) の選び方・効き方・報酬 (10 の 10.12)。周回 (そのグループがその巨神の first_cleared を持つ) だけの縛り。
 //
 //  置き場       : そのグループのその巨神の背中の記録 (BackGroupData.Record) の `keep.vows` (id のコンマ区切り)。パーティの記録ごと写る
 //                 (組む・入る・抜ける。10.7)。"keep." なので試練のリセットでは消えない。心臓を止めたとき (報酬のあと) と clear で消える

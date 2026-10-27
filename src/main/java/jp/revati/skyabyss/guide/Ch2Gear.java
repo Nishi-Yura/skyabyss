@@ -45,7 +45,7 @@ import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
-// 二章「引く海」の備えの品 (docs/design/21 の 1.2・4.1、P5 の二章の分)。一章の TravelGear と同じ型。
+// 二章「引く海」の備えの品 (P5 の二章の分)。一章の TravelGear と同じ型。
 //  - 素材: 小真珠・塩結晶・真珠の護り糸 (鼓動守 潮殻の材料)・貝の欠け。落とす敵は二章の地上の敵 (別の担当が ID の文字列で参照する)
 //  - 潮渡りの旅装 (4 部位): 防御 3/7/5/3 = 18、強靭 2.25 × 4 = 9、水の中の動きの鈍りを軽くする (水中移動効率 +0.1 × 4 = 0.4)、
 //    アンコモン、炉で鍛えない、必要 Lv 13 (GearCurve.TRAVEL[1])。修理は塩結晶。一式で合図 SIGNAL_GEAR_MADE

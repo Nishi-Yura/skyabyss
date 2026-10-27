@@ -34,9 +34,9 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.common.util.FakePlayer;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 
-// 小さな異変の束 (E7。docs/design/17 の 1.5): 序章と一章の間、一日に一つだけ、昼のうちに、ささやかな「違い」を起こす (日 1 から)。
+// 小さな異変の束 (E7): 序章と一章の間、一日に一つだけ、昼のうちに、ささやかな「違い」を起こす (日 1 から)。
 // 鳴き声が一分途切れる／遠い鐘が逆の方向から一度／足跡が一歩多い／昼なのに息が白い。見せるのは音・粒・字幕だけ。ダメージ・拘束・モブの湧きは触らない。
-// 決まり (17 の 5 章): 戦闘中・体力が低い・敵が近い・水中・睡眠中・影の最中・足音や歌の演出の最中・場面の最中は後ろへずらす。予兆の拍と続けて起こさない。
+// 決まり: 戦闘中・体力が低い・敵が近い・水中・睡眠中・影の最中・足音や歌の演出の最中・場面の最中は後ろへずらす。予兆の拍と続けて起こさない。
 //   horrorEventFrequency 0 では起こさない。人ごと・本人にだけ。種類は日ごとに替わり、同じ種類は使い切るまで繰り返さない。3 つ目で「小さな違い」の頁
 public final class Oddities {
     public enum Kind {

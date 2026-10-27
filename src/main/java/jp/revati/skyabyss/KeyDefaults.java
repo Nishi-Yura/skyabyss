@@ -17,7 +17,7 @@ public final class KeyDefaults {
     public static final int QUEST_LOG = 85; // U
     public static final int RECORD = 66; // B
     public static final int PARTY = 79; // O
-    public static final int MAP = 77; // M 旅の地図 (docs/design/33 の 4 章)
+    public static final int MAP = 77; // M 旅の地図
     public static final int PING = 39; // ' 合図 (「ここ」。日本語配列では : の位置)
     public static final int STATUS = 74; // J
     public static final int SKILLS = 75; // K

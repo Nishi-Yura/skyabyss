@@ -18,7 +18,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 
-// 潮の刻みの砂時計 (二章の道具。21 の 4.1。消耗しない)。右クリックで、ワールドの潮 (TideOcean。人ごとの見かけではない) の
+// 潮の刻みの砂時計 (二章の道具。消耗しない)。右クリックで、ワールドの潮 (TideOcean。人ごとの見かけではない) の
 // 次の干潮・満潮までの秒数を画面の帯 (Notice.bar) に一度だけ出す。クールダウン 30 秒。潮見の貝と対にして、背中の潮の時計の予習。
 // 満潮まで = 干潮の刻の終わりまで (今が干潮ならその刻の、そうでなければ次の刻の)。TideOcean の刻の長さは読めないので、isLowTide で一歩ずつ進めて数える
 public class TideHourglassItem extends Item {

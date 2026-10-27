@@ -162,7 +162,7 @@ public final class TideChapterSelfTest {
 
     // ---------------------------------------------------------------- データが読める
     private static void data(List<String> f) {
-        // 小要素 3〜5 つ + 二章の地上 (34 の C2: 塩の蔵・塩の道の標・潮だまり・筏・杭) も同じ表に入るので、合わせて 3〜12。部品が読める
+        // 小要素 3〜5 つ + 二章の地上 塩の蔵・塩の道の標・潮だまり・筏・杭) も同じ表に入るので、合わせて 3〜12。部品が読める
         List<ChapterSites.Element> els = ChapterSites.elements(Chapters.TIDE);
         check(f, els.size() >= 3 && els.size() <= 12, "chapter 2 should have 3-12 chapter elements: " + els.size());
         for (String id : List.of(TideChapter.CAIRN_A, TideChapter.CAIRN_B, TideChapter.CARGO, TideChapter.STELE)) {
@@ -298,7 +298,7 @@ public final class TideChapterSelfTest {
         // 吹く: 刻の 1 分前から。巡航中なら頼みが通り、寄る場所を決めて向かう。一つの刻に一人
         level.setDayTime(10000);
         check(f, titan.saveState().getInt("Mode") == 0, "the titan should start cruising");
-        // 二章の跡地があれば、浜から遠い人の頼みは通らない (FAR。33 の 3.1)。この先の合成の海の検査は、浜に限らずに流す
+        // 二章の跡地があれば、浜から遠い人の頼みは通らない (FAR)。この先の合成の海の検査は、浜に限らずに流す
         if (jp.revati.skyabyss.titan.tide.TideBeach.restricted(server) && !jp.revati.skyabyss.titan.tide.TideBeach.near(p)) {
             check(f, titan.request(p) == TideShellEntity.RequestResult.FAR, "far from the east beach the shell should not call the island");
         }

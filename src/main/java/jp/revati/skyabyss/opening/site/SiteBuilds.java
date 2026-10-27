@@ -31,7 +31,7 @@ import net.neoforged.neoforge.event.server.ServerStartedEvent;
 import net.neoforged.neoforge.event.server.ServerStoppedEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
 
-// 序盤の構造物の建設の起点 (docs/design/17 の 4 章、8.2 の担当 2)。
+// 序盤の構造物の建設の起点 (8.2 の担当 2)。
 //  - サーバーが始まったとき、まだ場所を決めていなければ決める (SiteFinder)。新しいワールドの最初の日なら、スポーン地点を野営地へ動かす (17-11)
 //  - 建て終わっていない物は、BackBuildJobs と同じように、1 tick の予算 (ms) だけ進める (SiteJob)。野営地はプレイヤーが入る前に建て終える
 //  - 環境変数 SKYABYSS_SHOTS (台本の撮影) のときは、ワールド名が "opening" で始まらなければ建てない (ほかの台本の邪魔をしない)。

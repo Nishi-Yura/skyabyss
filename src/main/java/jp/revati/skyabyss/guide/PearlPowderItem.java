@@ -10,7 +10,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 
-// 真珠の粉薬 (二章の薬。21 の 1.2): 飲み下すと即時に 3❤ 回復し、浮遊と鈍足を治す。食べる時間は短い (fast)。
+// 真珠の粉薬 (二章の薬): 飲み下すと即時に 3❤ 回復し、浮遊と鈍足を治す。食べる時間は短い (fast)。
 // 回復は食べ物の効果ではないので、備えの糧の点は Ch2Gear の registerProvision で足す (6 点)
 public class PearlPowderItem extends Item {
     public PearlPowderItem(Properties properties) {

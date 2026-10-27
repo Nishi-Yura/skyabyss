@@ -17,7 +17,7 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.common.util.FakePlayer;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 
-// 一章の余韻 (docs/design/17 の 1.5、01 の 4.2): 岩鯨の心臓を止めると、章の終わりの札「一章　岩鯨　終」(碑文「この鼓動は、地の底から預かったもの」)、
+// 一章の余韻 (01 の 4.2): 岩鯨の心臓を止めると、章の終わりの札「一章　岩鯨　終」(碑文「この鼓動は、地の底から預かったもの」)、
 // 語り部の一言、そして空の歌が一節だけ欠けて鳴る (途中で切れる)。段階が 1 になった (= 二章に入った) 人に、一度だけ。
 // 札は story/arc/ChapterCards.aftermath (場面の間は預かる)。すでに遊んでいた人 (legacy) と、段階がさらに進んだ人には出さない。
 // 引き (二章の予兆 1 拍目) は 二章の担当が Foreshadow に足す

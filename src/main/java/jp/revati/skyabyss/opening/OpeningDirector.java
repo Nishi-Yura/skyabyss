@@ -58,10 +58,10 @@ import net.neoforged.neoforge.event.tick.LevelTickEvent;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
 
-// 序盤の拍子 B0〜B10 (docs/design/17 の 3 章) を、人ごとに必ず起こす。判断は OpeningLogic、ここは世界と人への働きかけ。
+// 序盤の拍子 B0〜B10 を、人ごとに必ず起こす。判断は OpeningLogic、ここは世界と人への働きかけ。
 // 場所は OpeningSites から (まだ建っていない世界でも詰まらない)。最初の影・書・岩鯨の門・語り部の案内は OpeningBeats / SkyEvents /
 // TitanEvents の保証のまま、その上に積む。
-// ホラーの決まり (01、06、17 の 6 章): ジャンプスケアなし (音は 5 秒かけて消す・戻す)、ダメージ・拘束なし、戦闘中・体力が半分以下・
+// ホラーの決まり (01、06): ジャンプスケアなし (音は 5 秒かけて消す・戻す)、ダメージ・拘束なし、戦闘中・体力が半分以下・
 // 敵が 8 ブロック以内・水中・睡眠中は後ろへずらす、足音と歌は一度だけ、horrorEventFrequency 0 では起こさない、本人にだけ。
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class OpeningDirector {
@@ -223,7 +223,7 @@ public final class OpeningDirector {
                 Config.HORROR_EVENT_FREQUENCY.get() > 0, SkyEvents.activePassFor(player) != null);
     }
 
-    // 戦っている・傷が深い・敵が近い (17 の 6 章: 殺さない。拍子は後ろへずらす)
+    // 戦っている・傷が深い・敵が近い 殺さない。拍子は後ろへずらす)
     static boolean danger(ServerLevel level, ServerPlayer player) {
         int hurt = player.getLastHurtByMobTimestamp();
         int hit = player.getLastHurtMobTimestamp();
@@ -350,7 +350,7 @@ public final class OpeningDirector {
         };
     }
 
-    // ---------------------------------------------------------------- 骨の丘の前触れ (17 の 3.5節)
+    // ---------------------------------------------------------------- 骨の丘の前触れ
     // 丘が急に目の前に現れないように、イサナのあとで骨の丘へ近づくにつれて字幕を一度ずつ: 風のにおい (方角) → 遠い稜線の白 → 足もとの欠片 (低い地鳴り) → 風が止む
     static final double BONE_FAR = 220;
     static final double BONE_MID = 130;
@@ -392,13 +392,13 @@ public final class OpeningDirector {
         }
     }
 
-    // ---------------------------------------------------------------- 岩鯨 (17 の 3.9節)
+    // ---------------------------------------------------------------- 岩鯨
     // 岩鯨を迎えられる人 (影・歌・イサナを済ませた人) がオーバーワールドにいるか
     public static boolean anyoneReady(ServerLevel level) {
         return readyPlayer(level) != null;
     }
 
-    // 岩鯨を迎えられる人: 影・歌・イサナを済ませ、一章の支度も済ませた人 (34 の 4.2。仲間が済ませていてもよい)
+    // 岩鯨を迎えられる人: 影・歌・イサナを済ませ、一章の支度も済ませた人 (仲間が済ませていてもよい)
     @Nullable
     public static ServerPlayer readyPlayer(ServerLevel level) {
         return pick(level, true);
@@ -427,7 +427,7 @@ public final class OpeningDirector {
         return any;
     }
 
-    // 見る者を、最初の二晩は出さない (足音と歌を邪魔しないため。17 の 3.8節)
+    // 見る者を、最初の二晩は出さない (足音と歌を邪魔しないため)
     public static boolean quietNight(ServerLevel level, ServerPlayer player) {
         OpeningState st = state(player);
         if (st.legacy() || st.awakeAt() < 0) {
@@ -450,7 +450,7 @@ public final class OpeningDirector {
     }
 
     // ---------------------------------------------------------------- 章の小要素 (story/ch1) 向けの窓口 (追加のみ)
-    // 目覚め・足音・歌の画面の演出の最中か。小さな異変などを重ねないために (「一度に一つ」。17 の 1.2)
+    // 目覚め・足音・歌の画面の演出の最中か。小さな異変などを重ねないために (「一度に一つ」)
     public static boolean cueBusy(ServerPlayer player) {
         OpeningState st = state(player);
         return st.cueUntil > player.level().getGameTime() || FREEZE.getOrDefault(player.getUUID(), -1L) > player.level().getGameTime();

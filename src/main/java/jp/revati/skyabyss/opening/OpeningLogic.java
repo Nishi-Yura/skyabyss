@@ -1,6 +1,6 @@
 package jp.revati.skyabyss.opening;
 
-// 序盤の拍子 B0〜B10 (docs/design/17 の 3 章) を進める判断。世界にも人にも触らない (副作用は Fx に任せる) ので、
+// 序盤の拍子 B0〜B10 を進める判断。世界にも人にも触らない (副作用は Fx に任せる) ので、
 // 自己テストが「新しいワールド」「雨の日」「洞窟」「寝た人」「二人目」を作った時刻と状況の列で流せる。
 // 呼ぶのは人ごと・1 秒に 1 回ほど (OpeningDirector)。偶然には頼らない: 確率は、起きる時刻の幅にだけ使う。
 public final class OpeningLogic {
@@ -153,7 +153,7 @@ public final class OpeningLogic {
     }
 
     // ---------------------------------------------------------------- 目的の帯
-    // 画面左上の帯に出す目的の ID (objective.skyabyss.<ID>。17 の 11.2節)。空なら帯はクエストの目的を出す
+    // 画面左上の帯に出す目的の ID (objective.skyabyss.<ID>)。空なら帯はクエストの目的を出す
     public static String objective(OpeningState st, Facts f, Env env) {
         if (st.legacy() || st.awakeAt < 0) {
             return "";
@@ -403,7 +403,7 @@ public final class OpeningLogic {
         }
     }
 
-    // ---------------------------------------------------------------- 岩鯨の門 (17 の 3.9節)
+    // ---------------------------------------------------------------- 岩鯨の門
     // 詰み止め: 総 tick が 4 日分を過ぎたら (5 日目)、拍子を問わず岩鯨は出てよい
     public static final long WHALE_FALLBACK = 4 * DAY;
 

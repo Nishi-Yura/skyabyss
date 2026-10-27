@@ -108,7 +108,7 @@ public class SkyAbyss {
         jp.revati.skyabyss.titan.ember.back.EmberBackSetup.register(modEventBus);
         // 余燼の背の敵 (灰被り・火の粉蛾・燠虫、スポーンエッグ、音)。13 の 11.2節の担当 D
         jp.revati.skyabyss.titan.ember.mob.EmberMobSetup.register(modEventBus);
-        // 四章の地上の敵・品・音 (docs/design/34 の C4。story/ch4)
+        // 四章の地上の敵・品・音 (story/ch4)
         jp.revati.skyabyss.story.ch4.Ch4Setup.register(modEventBus);
         // 深淵の敵 A (骨・塩・雷の層の 9 種、段ごとの型・素材・経験値)。docs/design/36 の 4 節。abyss/mobs
         jp.revati.skyabyss.abyss.mobs.AbyssMobsA.register(modEventBus);
@@ -131,14 +131,14 @@ public class SkyAbyss {
         // 余燼の心臓 (最終ボス: 熾の底、三段階、灰の礫、報酬、天の鍵の四つ目の欠片)。13 の 11.2節の担当 F
         jp.revati.skyabyss.titan.ember.heart.EmberHeartSetup.register(modEventBus);
 
-        // 序盤の拍子 (プレイヤーごとの状態・音)。docs/design/17 の担当 3
+        // 序盤の拍子 (プレイヤーごとの状態・音)
         jp.revati.skyabyss.opening.OpeningSetup.register(modEventBus);
         // 章の演出の共通部品 (題字・余韻の札、予兆の枠)。docs/design/18 の 3 章、01 の 4.1
         jp.revati.skyabyss.story.arc.ArcSetup.register(modEventBus);
 
-        // 章の導き (備えの頼み・旅の覚書・鼓動守・場所の湧き台と宝・ひとり歩きの湧き・経験値の枠)。docs/design/21 の 1.4・1.5、P3
+        // 章の導き (備えの頼み・旅の覚書・鼓動守・場所の湧き台と宝・ひとり歩きの湧き・経験値の枠)P3
         jp.revati.skyabyss.guide.GuideSetup.register(modEventBus);
-        // 旅装・砥石・糧と薬 (一章の分。21 の 1.2、P5)
+        // 旅装・砥石・糧と薬 (一章の分P5)
         jp.revati.skyabyss.guide.TravelGear.register(modEventBus);
         jp.revati.skyabyss.item.outfit.OutfitGear.register(modEventBus);
         jp.revati.skyabyss.item.outfit.ConsumableGear.register(modEventBus);

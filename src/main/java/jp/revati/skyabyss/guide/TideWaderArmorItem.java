@@ -25,7 +25,7 @@ import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.component.ItemAttributeModifiers;
 import software.bernie.geckolib.animatable.client.GeoRenderProvider;
 
-// 潮渡りの旅装 (二章の旅装。21 の 1.2)。防御 18 / 強靭 9 (4 部位の合計)、アンコモン、炉で鍛えない、必要 Lv 13 (GearCurve.TRAVEL[1])。
+// 潮渡りの旅装 (二章の旅装)。防御 18 / 強靭 9 (4 部位の合計)、アンコモン、炉で鍛えない、必要 Lv 13 (GearCurve.TRAVEL[1])。
 // 一章の鯨道の旅装 (WhaleRoadArmorItem) と同じ型を継ぐ (炉が受け付けない判定 ForgeRules もそのまま効く)。
 // 一式の効果「水中の移動速度の低下を軽くする」は、部位ごとの水中移動効率 +0.1 (4 部位で 0.4)。着たときの見た目は低ポリ (client/armor/TideWaderArmorRenderer)
 public class TideWaderArmorItem extends WhaleRoadArmorItem {

@@ -28,7 +28,7 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.server.ServerStoppedEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
 
-// 章の小要素 (E1〜E12 など。docs/design/17 の 3.8、10 の 3.6) の置き場と登録の口。章ごとの担当 (P4 の各巨神) は、自分のパッケージから
+// 章の小要素 (E1〜E12 など10 の 3.6) の置き場と登録の口。章ごとの担当 (P4 の各巨神) は、自分のパッケージから
 // ここへ要素を登録するだけで、場所探し・建設・保存・二重に置かない仕組みを使える (この package のほかのファイルは触らなくてよい)。
 //
 // ---------------------------------------------------------------- 口 (P4 はここだけを見る)
@@ -39,7 +39,7 @@ import net.neoforged.neoforge.event.tick.ServerTickEvent;
 //              .arriveRadius(int r)              「着いた」とみなす水平の半径 (既定 16)
 //              .post(SiteJob.Post p)             建て終わりの仕上げ (箱の中身・看板・碑。CampBuilder と同じ。job.mark("名前") で部品の印の位置が引ける)
 //              .onArrive(ChapterSites.OnArrive cb)  その章の人が初めて近くに着いたとき、人ごとに一度だけ (サーバースレッド。頁・クエストの開始・字幕など)
-//              .atGround()                       その章の跡地 (docs/design/33 の 3 章。ChapterGrounds) に世界で一つ置く。拠点は跡地の中心 (dist はそこからの距離)
+//              .atGround()                       その章の跡地 (ChapterGrounds) に世界で一つ置く。拠点は跡地の中心 (dist はそこからの距離)
 //              .atRoad()                         都から跡地への道しるべの点に置く (count 個。跡地に近い点から。点が足りなければ跡地に置く)
 //              .register()                       → Element。同じ ID を二度登録すると IllegalStateException
 //            部品は data/skyabyss/opening/<blueprint>.json (Blueprint と同じ形式。tools/rough/opening_sites.py と同じ)。
@@ -80,7 +80,7 @@ public final class ChapterSites {
         ANY, HIGH, SHORE
     }
 
-    // 置き方: BASE = 人の拠点のまわり (17 の 3.8)、GROUND = 章の跡地、ROAD = 都から跡地への道 (番号つき)、ROAD_FILL = 道の残りの点を全部 (道しるべの石標)
+    // 置き方: BASE = 人の拠点のまわり、GROUND = 章の跡地、ROAD = 都から跡地への道 (番号つき)、ROAD_FILL = 道の残りの点を全部 (道しるべの石標)
     public enum Placement {
         BASE, GROUND, ROAD, ROAD_FILL
     }

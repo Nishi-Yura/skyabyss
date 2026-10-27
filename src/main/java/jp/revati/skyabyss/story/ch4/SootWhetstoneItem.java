@@ -15,7 +15,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 
-// 煤の砥石 (四章の砥石。21 の 1.2)。右クリックで使うと「煤の刃」(攻撃 +2.6、20 分。Ch4Gear.applyWhetstone。ほかの砥石の研ぎは替わる)。
+// 煤の砥石 (四章の砥石)。右クリックで使うと「煤の刃」(攻撃 +2.6、20 分。Ch4Gear.applyWhetstone。ほかの砥石の研ぎは替わる)。
 // 煤の刃のあいだ、灰被りの屑・古い灰被りの殻へ入る傷が 1.5 倍 (殻の計算が Ch4Mobs.shellBonus で読む)
 public class SootWhetstoneItem extends Item {
     public SootWhetstoneItem(Properties properties) {

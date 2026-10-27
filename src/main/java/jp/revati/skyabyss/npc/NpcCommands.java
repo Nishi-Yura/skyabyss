@@ -26,7 +26,7 @@ import net.neoforged.neoforge.event.RegisterCommandsEvent;
 
 // NPC のテスト用コマンド (OP)。
 //   /skyabyss npc spawn <storyteller|whale_chaser|artisan> [章]  : 足もとに立たせる (家はその場所)。職人は章 (1〜4) で装いが変わる (省くと 1)
-//   /skyabyss npc village                             : 近くの村 (鐘) に、いなければ語り部を、要るなら鯨追いを立たせる
+//   /skyabyss npc village                             : 近くの都の鐘に、いなければ語り部を立たせる
 //   /skyabyss npc affinity <人> <役> [値]             : 好感度を見る・決める
 //   /skyabyss npc bonds <人>                          : 好感度と会話の印 (このループ / 前のループ) の一覧
 //   /skyabyss npc reset <人>                          : 会話の記録をすべて消す

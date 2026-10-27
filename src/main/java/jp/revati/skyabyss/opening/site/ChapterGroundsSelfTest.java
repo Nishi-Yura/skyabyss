@@ -26,7 +26,7 @@ import net.minecraft.world.level.levelgen.Heightmap;
 import net.neoforged.neoforge.common.util.FakePlayer;
 import net.neoforged.neoforge.common.util.FakePlayerFactory;
 
-// 章の跡地 (docs/design/33 の 3 章。W2) の自己テスト。SKYABYSS_SELFTEST_ONLY="chapter grounds"。結果は SELFTEST chapter grounds PASSED / FAILED
+// 章の跡地 (W2) の自己テスト。SKYABYSS_SELFTEST_ONLY="chapter grounds"。結果は SELFTEST chapter grounds PASSED / FAILED
 //   pure   合成の地形で: 扇の順・合う地形を内側から選ぶ (丘・海辺・峰・灰の地)・合わなければ帯のまんなかに形・構造物を避ける・形を重ねた高さ
 //          (丘 +24・峰 +60・盆地の底・入り江の水と体の箱)・道しるべ (40 ごと・水を飛ばす・一章は 7 つ以上)・祠が平ら・地図の噂と見た
 //   live   本物の世界で: 四つの跡地が方位の扇と帯の中・祠の置き場・一章の骨が北の丘の中・形を整えた地形 (高さ・水・灰)・
@@ -355,7 +355,7 @@ public final class ChapterGroundsSelfTest {
                     check(TideBeach.restSpot(level) != null, "a dug cove gives a rest spot");
                 }
             }
-            // 雷翼の止まり木は西の峰、余燼の浮上は南の灰の地だけ (33 の 3.1)。遠い人は近いとみなさない。峰の頂は中心のそばで、乾いた高い所
+            // 雷翼の止まり木は西の峰、余燼の浮上は南の灰の地だけ。遠い人は近いとみなさない。峰の頂は中心のそばで、乾いた高い所
             FakePlayer far = fake(server);
             far.setPos(cap.getX() + 0.5, 100, cap.getZ() + 0.5);
             SiteData.Ground sg = data.ground(Chapters.STORM.id());

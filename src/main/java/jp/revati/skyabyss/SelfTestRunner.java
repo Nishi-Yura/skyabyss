@@ -89,9 +89,9 @@ public final class SelfTestRunner {
         steps.add(Step.once("camp blocks", jp.revati.skyabyss.titan.dungeon.CampSelfTest::runSelfTest));
         // パーティの石: 誰かが試練のあとの石を鳴らせば、仲間全員 (離れた人・あとから入った人) のクエストが数える。docs/design/10 の 10.9
         steps.add(Step.once("party steles", jp.revati.skyabyss.titan.group.TrialStelesSelfTest::runSelfTest));
-        // 初回と周回の共通部品 (first_cleared・既知の道・場面と追憶の宝の人ごとの記録)。docs/design/21 の 1.7、10 の 10.11
+        // 初回と周回の共通部品 (first_cleared・既知の道・場面と追憶の宝の人ごとの記録)10 の 10.11
         steps.add(Step.once("back first", jp.revati.skyabyss.titan.group.FirstRunSelfTest::runSelfTest));
-        // 周回の誓い (Vow)・周回の言い回し、居座りの早じまい (無人 3 分)。docs/design/21 の 1.8、10 の 10.15、rpg_brushup B4 / B5
+        // 周回の誓い (Vow)・周回の言い回し、居座りの早じまい (無人 3 分)10 の 10.15、rpg_brushup B4 / B5
         steps.add(Step.once("vow (load)", jp.revati.skyabyss.titan.vow.VowSelfTest::load));
         steps.add(Step.once("vow", 40, jp.revati.skyabyss.titan.vow.VowSelfTest::runSelfTest));
         steps.add(Step.once("stay leave", jp.revati.skyabyss.titan.vow.VowSelfTest::runStaySelfTest));
@@ -112,7 +112,7 @@ public final class SelfTestRunner {
         // 目的の道しるべ (矢印の角度・歩ける道の探索・予算・持ち主にだけ・パケット)。docs/design/18 の 8.3 節
         steps.add(Step.once("guide nav", jp.revati.skyabyss.guide.nav.GuideNavSelfTest::runSelfTest));
         steps.add(Step.once("party locator", jp.revati.skyabyss.party.PartyLocatorSelfTest::runSelfTest));
-        // 旅の地図の印 (序盤の記録から噂/見た、噂の位置の丸め、一人ぶんの集め・パケット)。docs/design/33 の 4 章。SKYABYSS_SELFTEST_ONLY="travel map"
+        // 旅の地図の印 (序盤の記録から噂/見た、噂の位置の丸め、一人ぶんの集め・パケット)。SKYABYSS_SELFTEST_ONLY="travel map"
         steps.add(Step.once("travel map", jp.revati.skyabyss.map.MapMarksSelfTest::runSelfTest));
         // 仲間が起こせる仕組み・倒れた回数の札・「ここ」の印。docs/design/10 の 10.12〜10.14
         steps.add(Step.once("party revive", jp.revati.skyabyss.party.ReviveSelfTest::runSelfTest));
@@ -192,11 +192,11 @@ public final class SelfTestRunner {
             return over.isPositionEntityTicking(spawn) || ++recordWait[0] > 600;
         }));
         steps.add(Step.once("record", RecordSelfTest::runSelfTest));
-        // 備えの三灯 (式・色の境目・乗り込みの確認の流れ・前室の囁き・控え帳の行)。docs/design/21 の 1.2、11 の 9 章
+        // 備えの三灯 (式・色の境目・乗り込みの確認の流れ・前室の囁き・控え帳の行)11 の 9 章
         steps.add(Step.once("readiness", jp.revati.skyabyss.readiness.ReadinessSelfTest::runSelfTest));
-        // 章の導きの基盤 (備えの頼み・旅の覚書・鼓動守・場所の湧き台と宝・章のひとり歩き・経験値の枠)。docs/design/21 の P3
+        // 章の導きの基盤 (備えの頼み・旅の覚書・鼓動守・場所の湧き台と宝・章のひとり歩き・経験値の枠)
         steps.addAll(jp.revati.skyabyss.guide.GuideSelfTest.steps());
-        // 旅装・砥石・糧と薬 (P5) と旅の職人 (P4)。docs/design/21 の 1.2・1.4
+        // 旅装・砥石・糧と薬 (P5) と旅の職人 (P4)1.4
         steps.addAll(jp.revati.skyabyss.guide.TravelSelfTest.steps());
         steps.addAll(jp.revati.skyabyss.npc.ArtisanSelfTest.steps());
         // 都の施設 (係の人・鐘銭・店・預かり所・宿・ギルド)。docs/design/35。SKYABYSS_SELFTEST_ONLY=facility
@@ -238,26 +238,26 @@ public final class SelfTestRunner {
         // 1 章を 4 体分で (順番・乗る資格・上限・天の鍵・メインクエストの続き)。docs/design/14_beta.md
         steps.add(Step.until("story (load)", jp.revati.skyabyss.story.StorySelfTest::ready));
         steps.add(Step.once("story", jp.revati.skyabyss.story.StorySelfTest::runSelfTest));
-        // 序盤の語り (17 の 3〜6 章): 野営地の帳面から宿り・空の影・イサナまで、新しい伝承 6 つ、道すがらの見聞
+        // 序盤の語り: 野営地の帳面から宿り・空の影・イサナまで、新しい伝承 6 つ、道すがらの見聞
         steps.add(Step.until("opening story (load)", jp.revati.skyabyss.story.OpeningStorySelfTest::ready));
         steps.add(Step.once("opening story", jp.revati.skyabyss.story.OpeningStorySelfTest::runSelfTest));
-        // 序盤の拍子 B0〜B10 (17 の 3 章): 判断の流し込み (新しいワールド・雨・洞窟・寝た人・戦闘・村なし・マルチ)、本物の人での確認
+        // 序盤の拍子 B0〜B10: 判断の流し込み (新しいワールド・雨・洞窟・寝た人・戦闘・村なし・マルチ)、本物の人での確認
         steps.add(Step.once("opening", jp.revati.skyabyss.opening.OpeningSelfTest::runSelfTest));
         // 雷翼の伝承とクエスト (碑文・囁き・伝承の項目・嵐を渡る翼・背の周回)。docs/design/12_thunder_wing.md の 11.2 節 担当 6
         steps.add(Step.once("storm lore", jp.revati.skyabyss.titan.storm.lore.StormLoreSelfTest::runSelfTest));
         steps.add(Step.once("prologue", PrologueSelfTest::runSelfTest));
-        // 序盤の構造物 (野営地・鐘の宿り・巨大な足跡・巨神の骨)。docs/design/17 の 4 章
+        // 序盤の構造物 (野営地・鐘の宿り・巨大な足跡・巨神の骨)
         steps.addAll(jp.revati.skyabyss.opening.site.SiteSelfTest.steps());
         steps.addAll(jp.revati.skyabyss.opening.site.CapitalDoorsSelfTest.steps());
         steps.addAll(jp.revati.skyabyss.opening.site.SiteGuardSelfTest.steps());
-        // 章の跡地 (方位と距離の帯・四つの形・道しるべ・祠の置き場・潮殻の浜)。docs/design/33 の 3 章 (W2)。SKYABYSS_SELFTEST_ONLY="chapter grounds"
+        // 章の跡地 (方位と距離の帯・四つの形・道しるべ・祠の置き場・潮殻の浜)。SKYABYSS_SELFTEST_ONLY="chapter grounds"
         steps.addAll(jp.revati.skyabyss.opening.site.ChapterGroundsSelfTest.steps());
         steps.addAll(ChapterSkySelfTest.steps());
-        // 序章・一章の中身 (初日のお使い・旅の跡・歌石・見張りの丘・小さな異変・歩哨・岩鯨の影の出来事・予兆 3 拍)。docs/design/17 の 1.5。岩鯨を出す段より前に置く
+        // 序章・一章の中身 (初日のお使い・旅の跡・歌石・見張りの丘・小さな異変・歩哨・岩鯨の影の出来事・予兆 3 拍)。岩鯨を出す段より前に置く
         steps.addAll(jp.revati.skyabyss.story.ch1.Ch1SelfTest.steps());
-        // 一章の地上の敵 (岩殻虫・棘うさぎ・骨負い・老いた歩哨。P7。21 の 3.1)。SKYABYSS_SELFTEST_ONLY="ch1 mobs"
+        // 一章の地上の敵 (岩殻虫・棘うさぎ・骨負い・老いた歩哨。P7)。SKYABYSS_SELFTEST_ONLY="ch1 mobs"
         steps.addAll(jp.revati.skyabyss.story.ch1.Ch1MobsSelfTest.steps());
-        // 二章の地上の敵 (潮だまり貝・砂潜り・宿借り・潮の番人。P12。21 の 4.1)。SKYABYSS_SELFTEST_ONLY="ch2 mobs"
+        // 二章の地上の敵 (潮だまり貝・砂潜り・宿借り・潮の番人。P12)。SKYABYSS_SELFTEST_ONLY="ch2 mobs"
         steps.addAll(jp.revati.skyabyss.entity.Ch2MobsSelfTest.steps());
         // チャンクを読み込んでから、エンティティが入るのを待って試すもの
         // 序盤の流れの保証 (最初の影・書・岩鯨の門・語り部の野営)。平らな草地を作るので、チャンクを読み込んでから
@@ -290,7 +290,7 @@ public final class SelfTestRunner {
         steps.addAll(jp.revati.skyabyss.combat.TelegraphSelfTest.steps());
         // 余燼のレイドの三つの部屋 (熾火運び・鍛冶の手順・炉を守る)。SKYABYSS_SELFTEST_ONLY="ember raid"
         steps.addAll(jp.revati.skyabyss.trial.raid.ember.EmberRaidSelfTest.steps());
-        // 岩鯨の背の新しい敵 (骨の砲手・骨鳥・老番兵)。SKYABYSS_SELFTEST_ONLY="ch1 back mobs"。21 の 3.3
+        // 岩鯨の背の新しい敵 (骨の砲手・骨鳥・老番兵)。SKYABYSS_SELFTEST_ONLY="ch1 back mobs"
         steps.addAll(jp.revati.skyabyss.entity.Ch1BackMobsSelfTest.steps());
         // 巨神の眠りと運び出し (心臓を止めたあと。眠り方・運ぶ人・降ろす場所・初回の場面)。docs/design/01 の 4.3、20 の 3.4
         steps.add(Step.once("titan end (load)", jp.revati.skyabyss.titan.end.TitanEndSelfTest::load));
@@ -319,11 +319,11 @@ public final class SelfTestRunner {
         steps.add(Step.until("storm chapter (wait)", jp.revati.skyabyss.titan.storm.chapter.StormChapterSelfTest::ready));
         steps.add(Step.once("storm chapter", jp.revati.skyabyss.titan.storm.chapter.StormChapterSelfTest::runSelfTest));
         steps.addAll(jp.revati.skyabyss.titan.storm.chapter.StormChapterSelfTest.siteSteps());
-        // 三章の地上 (避雷の柱・焼けた見張り塔・空の石・風の道の旗・雷拾いの原・風読みの崖・竜骨の間の入口の遅れた影)。docs/design/34 の C3。SKYABYSS_SELFTEST_ONLY="ch3 ground"
+        // 三章の地上 (避雷の柱・焼けた見張り塔・空の石・風の道の旗・雷拾いの原・風読みの崖・竜骨の間の入口の遅れた影)。SKYABYSS_SELFTEST_ONLY="ch3 ground"
         steps.addAll(jp.revati.skyabyss.titan.storm.chapter.Ch3GroundSelfTest.steps());
-        // 三章の地上の敵 (帯電毛玉・峰の雛・雷拾い・焼けた羽守。P16。21 の 5.1)。SKYABYSS_SELFTEST_ONLY="ch3 mobs"
+        // 三章の地上の敵 (帯電毛玉・峰の雛・雷拾い・焼けた羽守。P16)。SKYABYSS_SELFTEST_ONLY="ch3 mobs"
         steps.addAll(jp.revati.skyabyss.titan.storm.chapter.mob.Ch3MobsSelfTest.steps());
-        // 四章の地上 (火除けの薬・炉跡・消えた炉の坑・灰の道の標・煤の窯の跡・敵 4 種・四章を心臓と天の鍵まで通す)。docs/design/34 の C4。SKYABYSS_SELFTEST_ONLY="ch4"
+        // 四章の地上 (火除けの薬・炉跡・消えた炉の坑・灰の道の標・煤の窯の跡・敵 4 種・四章を心臓と天の鍵まで通す)。SKYABYSS_SELFTEST_ONLY="ch4"
         steps.addAll(jp.revati.skyabyss.story.ch4.Ch4GroundSelfTest.steps());
         steps.add(Step.once("ch5 entrance (load)", jp.revati.skyabyss.story.ch5.AbyssEntranceSelfTest::load));
         steps.add(Step.once("ch5 entrance", 60, jp.revati.skyabyss.story.ch5.AbyssEntranceSelfTest::run));
@@ -356,7 +356,7 @@ public final class SelfTestRunner {
         steps.add(Step.once("storm raid", 5, jp.revati.skyabyss.trial.raid.storm.StormRaidSelfTest::runSelfTest));
         // 二章「引く海」(予兆・潮見の貝・大干潮・小要素)。SKYABYSS_SELFTEST_ONLY=ch2
         steps.addAll(jp.revati.skyabyss.titan.tide.chapter.TideChapterSelfTest.steps());
-        // 二章の地上 (34 の C2: 塩の蔵・塩の道・難破船・支度の段 2 本)。SKYABYSS_SELFTEST_ONLY="ch2 ground"
+        // 二章の地上 塩の蔵・塩の道・難破船・支度の段 2 本)。SKYABYSS_SELFTEST_ONLY="ch2 ground"
         steps.addAll(jp.revati.skyabyss.story.ch2.Ch2GroundSelfTest.steps());
         // 雷翼の中ボス 雷獣 (背中がまだ無ければ、オーバーワールドの仮の巣で)
         steps.add(Step.once("raiju (load)", jp.revati.skyabyss.titan.storm.raiju.RaijuSelfTest::load));

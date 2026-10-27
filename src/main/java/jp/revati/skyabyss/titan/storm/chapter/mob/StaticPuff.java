@@ -40,7 +40,7 @@ import software.bernie.geckolib.animation.AnimationController;
 import software.bernie.geckolib.animation.PlayState;
 import software.bernie.geckolib.animation.RawAnimation;
 
-// 帯電毛玉 (docs/design/21 の 5.1。三章の地上): 連鎖の予習 (背中の雷蛾)。宙に浮く綿毛の塊。HP 10、放電 4。
+// 帯電毛玉 (三章の地上): 連鎖の予習 (背中の雷蛾)。宙に浮く綿毛の塊。HP 10、放電 4。
 //   帯電     狙いの人が CHARGE_RANGE 以内にいると、CHARGE_TICKS (4 秒) かけて帯電する。予告は「毛が逆立つ」(アニメ charge。翅ではない) と火花
 //   放電     満ちたら、RANGE 以内のいちばん近い人へ 4。そこから CHAIN_RANGE 以内の別の人へ跳ぶ (最大 MAX_CHAIN 人、跳ぶごとに FALLOFF 倍)。
 //            人が固まっていると隣へ渡る (離れて立てば一人で済む)。放電のあと REST だけ休む

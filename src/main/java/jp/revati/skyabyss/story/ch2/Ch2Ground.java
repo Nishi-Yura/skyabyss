@@ -32,7 +32,7 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 
-// 二章の地上 (docs/design/34 の 4.3・C2、21 の 4.1)。二章の跡地 (33 の 3 章。都の東の浜) に世界で一つずつ置く。
+// 二章の地上。二章の跡地 (都の東の浜) に世界で一つずつ置く。
 //   支度の段 (メインの段。順不同。PrepQuests の章の表)
 //     ch2/salt_road (塩の道。語り部)  塩の道の標 5 (SaltVault が蔵から浜へ並べる) → 沈んだ塩の蔵の奥の刻み (伝承 ch2/salt_vault) + 潮の番人 (蔵のクリア)
 //     ch2/ebb_boat  (船と貝。イサナ)  船を作る (#minecraft:boats) → 沖の難破船 (Wreck) の箱で潮の民の頁 (ch2/wreck_page) + 潮見の貝を持つ

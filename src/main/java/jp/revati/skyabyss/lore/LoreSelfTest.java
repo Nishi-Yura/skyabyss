@@ -90,7 +90,7 @@ public final class LoreSelfTest {
         // ---- 条件の先が実在するか
         Set<String> signKeys = new HashSet<>();
         // 体の中の碑文はない。碑はレイドの部屋の入口の間 (RaidLore) と一章・二章の地上の碑だけ
-        // 一章の地上: 骨の坑の冷えの戸の奥の碑 (34 の 4.2.1。BonePit.finish が刻む)
+        // 一章の地上: 骨の坑の冷えの戸の奥の碑 (BonePit.finish が刻む)
         signKeys.add(jp.revati.skyabyss.story.ch1.BonePit.COLD_SIGN);
         // 二章の地上: 沈んだ塩の蔵の奥の刻み (SaltVault.decorate が刻む)
         signKeys.add(jp.revati.skyabyss.story.ch2.SaltVault.WALL_SIGN);
@@ -399,7 +399,7 @@ public final class LoreSelfTest {
         JsonObject storm = json("/assets/skyabyss_storm/lang/" + code + ".json", failures);
         // 余燼の項目 (地を泳ぐもの・灰の民の炉・碑文・鍛え手・消えた火・鍛えの帳) の文は skyabyss_ember にある (13 の 9 章、担当 G)
         JsonObject ember = json("/assets/skyabyss_ember/lang/" + code + ".json", failures);
-        // 序章・一章の旅の跡・歌石などの項目 (17 の 1.5) の文は skyabyss_ch1 にある
+        // 序章・一章の旅の跡・歌石などの項目の文は skyabyss_ch1 にある
         JsonObject ch1 = json("/assets/skyabyss_ch1/lang/" + code + ".json", failures);
         // 二章「引く海」の項目 (漂着の荷の頁・浜の碑・潮の民の頁) の文は skyabyss_ch2 にある (08 の 2.8節)
         JsonObject ch2 = json("/assets/skyabyss_ch2/lang/" + code + ".json", failures);
@@ -407,7 +407,7 @@ public final class LoreSelfTest {
         JsonObject ch3 = json("/assets/skyabyss_ch3/lang/" + code + ".json", failures);
         // 都の町のクエストと裏通りの項目 (35 の 3.3・3.5) の文は skyabyss_town にある
         JsonObject town = json("/assets/skyabyss_town/lang/" + code + ".json", failures);
-        // 四章の地上の項目 (灰の民の薬・炉跡の頁・返しに来たか・煤の窯の跡) の文は skyabyss_ch4 にある (34 の 4.5.1)
+        // 四章の地上の項目 (灰の民の薬・炉跡の頁・返しに来たか・煤の窯の跡) の文は skyabyss_ch4 にある
         JsonObject ch4 = json("/assets/skyabyss_ch4/lang/" + code + ".json", failures);
         // 五章「深淵」の刻み・墓 (skyabyss_ch5) と遺品の項目 (skyabyss_abyss_rl)
         JsonObject ch5 = json("/assets/skyabyss_ch5/lang/" + code + ".json", failures);

@@ -14,7 +14,7 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.saveddata.SavedData;
 
-// 地上の場所 (小さなダンジョンなど。21 の 1.5) の、人ごとの記録 (オーバーワールドに一つ。死んでも・パーティが変わっても残る)。
+// 地上の場所 (小さなダンジョンなど) の、人ごとの記録 (オーバーワールドに一つ。死んでも・パーティが変わっても残る)。
 //   cleared  : クリアした場所の ID (`site_clear.<id>`)。初回の経験値・宝はこれが立つとき一度だけ
 //   repeatAt : 周回の素材を最後に受け取ったゲーム内の時刻 (1 日 = 24000 tick ごとに最後の部屋が戻る)
 //   treasure : 一度きりの宝 (SiteTreasure) を受け取った印

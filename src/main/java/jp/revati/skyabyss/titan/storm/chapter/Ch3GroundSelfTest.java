@@ -54,7 +54,7 @@ import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.common.util.FakePlayer;
 import net.neoforged.neoforge.common.util.FakePlayerFactory;
 
-// 三章の地上 (docs/design/34 の C3) の自己テスト。SKYABYSS_SELFTEST_ONLY="ch3 ground"
+// 三章の地上の自己テスト。SKYABYSS_SELFTEST_ONLY="ch3 ground"
 //   ch3 ground            データ (支度の段 3 本とサブ・会話・伝承・文・経験値の枠・湧き台・職人の立つ所)、三本の流れ (空の石・焼けた見張り塔・避雷の柱の合図)、
 //                         合図 ch3_ready、イサナの決意で温石、旗の向き、眼の間の鏡の面 (折り返し・距離・眼の間の外は映さない・偽の人には出さない)
 //   ch3 ground (sites)    本物の世界で西の峰の跡地に建ったもの: 塔の跡の台 4・戸 9・石の箱と碑・見本の柱、針を立てると数えて戸が開き書と銅、
