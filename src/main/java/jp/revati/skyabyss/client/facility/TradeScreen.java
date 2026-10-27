@@ -120,7 +120,7 @@ public class TradeScreen extends Screen {
             case 1 -> {
                 int rx = x0 + 186;
                 coinsBox = new EditBox(font, rx + 18, y0 + 54, 50, 14, Component.translatable("gui.skyabyss.trade.coins"));
-                coinsBox.setMaxLength(4);
+                coinsBox.setMaxLength(7);
                 coinsBox.setFilter(s -> s.chars().allMatch(Character::isDigit));
                 coinsBox.setValue(coinsText);
                 coinsBox.setResponder(s -> coinsText = s);

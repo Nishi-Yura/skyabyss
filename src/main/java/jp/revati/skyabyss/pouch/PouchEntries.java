@@ -154,7 +154,8 @@ public final class PouchEntries {
         add(list, jp.revati.skyabyss.guide.GuideSetup.BONE_CHIP.get(), Category.SMALL, 999, false, false);
         add(list, jp.revati.skyabyss.guide.GuideSetup.HARE_QUILL.get(), Category.SMALL, 999, false, false);
         // 鐘銭も袋へ (2026-10-25 の試遊。支払いは袋と持ち物の両方から: Coins)。共鳴の列に足すと袋の枠が一行あふれるので、小さな素材の列の端に
-        add(list, jp.revati.skyabyss.facility.FacilitySetup.BELL_COIN.get(), Category.SMALL, 9999, false, false);
+        // 上限は 9,999,999 (2026-10-27 の声「お金の上限 999 万」。Coins.MAX)
+        add(list, jp.revati.skyabyss.facility.FacilitySetup.BELL_COIN.get(), Category.SMALL, jp.revati.skyabyss.facility.Coins.MAX, false, false);
         // 乗り笛 (Y の短押しで呼ぶ・帰す)。登録の末尾に足して既存の枠の位置を動かさない。区分は鍵の列 (使う道具の列に足すと袋の枠が一行あふれる)
         add(list, jp.revati.skyabyss.mount.MountSetup.WHISTLE.get(), Category.KEY, 1, true, false);
         return list;

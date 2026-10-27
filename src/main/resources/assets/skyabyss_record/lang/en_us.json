@@ -298,5 +298,19 @@
   "skyabyss_record.deeds.chip.titans": "Titans",
   "skyabyss_record.deeds.chip.foes": "Foes",
   "skyabyss_record.deeds.chip.growth": "Growth",
-  "skyabyss_record.deeds.chip.town": "Town"
+  "skyabyss_record.deeds.chip.town": "Town",
+  "skyabyss_record.h.reels": "Tales",
+  "skyabyss_record.v.reel": "Seen",
+  "skyabyss_record.gui.replay": "Watch again",
+  "skyabyss_record.d.reel": "Press \"Watch again\" to play it once more. Watching again does not change your story.",
+  "skyabyss_record.r.reel.opening": "The opening tale",
+  "skyabyss_record.d.reel.opening": "\"Long ago, the sky and the earth kept a promise.\"",
+  "skyabyss_record.r.reel.chapter_titan_whale": "Before chapter I",
+  "skyabyss_record.d.reel.chapter_titan_whale": "\"The capital's storyteller remembered the titans' old songs.\"",
+  "skyabyss_record.r.reel.chapter_titan_tide": "Before chapter II",
+  "skyabyss_record.d.reel.chapter_titan_tide": "\"When its heart stopped, the stone whale fell into a deep sleep. It is not dead.\"",
+  "skyabyss_record.r.reel.chapter_titan_storm": "Before chapter III",
+  "skyabyss_record.d.reel.chapter_titan_storm": "\"The tide shell, too, sank into sleep beneath the sea.\"",
+  "skyabyss_record.r.reel.chapter_titan_ember": "Before chapter IV",
+  "skyabyss_record.d.reel.chapter_titan_ember": "\"The thunder wing, too, folded its wings and slept.\""
 }

@@ -92,6 +92,14 @@ public final class RecordService {
         send(player, player, false, "");
     }
 
+    // 控え帳から、見た語りをもう一度流す (見ていない語りは流さない。見直しなので、あとの出来事 (題字など) は起こさない)
+    static void replay(ServerPlayer player, String reel) {
+        if (throttled(LAST_CLAIM, player) || !jp.revati.skyabyss.story.reel.StoryReels.seen(player, reel)) {
+            return;
+        }
+        jp.revati.skyabyss.story.reel.StoryReels.replay(player, reel);
+    }
+
     @SubscribeEvent
     static void onLogout(PlayerEvent.PlayerLoggedOutEvent event) {
         LAST_REQUEST.remove(event.getEntity().getUUID());

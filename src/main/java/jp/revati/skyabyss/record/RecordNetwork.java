@@ -43,6 +43,11 @@ public final class RecordNetwork {
                     if (context.player() instanceof ServerPlayer player) {
                         RecordService.recall(player, payload.key());
                     }
+                })
+                .playToServer(Replay.TYPE, Replay.STREAM_CODEC, (payload, context) -> {
+                    if (context.player() instanceof ServerPlayer player) {
+                        RecordService.replay(player, payload.reel());
+                    }
                 });
     }
 
@@ -86,6 +91,18 @@ public final class RecordNetwork {
     }
 
     // 本人 → サーバー: なくした天の鍵の欠片 (key = false)・天の鍵 (key = true) を呼び戻す
+    // 見る人 → サーバー: 見た語りをもう一度流す
+    public record Replay(String reel) implements CustomPacketPayload {
+        public static final Type<Replay> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "record_replay"));
+        public static final StreamCodec<RegistryFriendlyByteBuf, Replay> STREAM_CODEC = StreamCodec.composite(
+                ByteBufCodecs.STRING_UTF8, Replay::reel, Replay::new);
+
+        @Override
+        public Type<? extends CustomPacketPayload> type() {
+            return TYPE;
+        }
+    }
+
     public record Recall(boolean key) implements CustomPacketPayload {
         public static final Type<Recall> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "record_recall"));
         public static final StreamCodec<RegistryFriendlyByteBuf, Recall> STREAM_CODEC = StreamCodec.composite(

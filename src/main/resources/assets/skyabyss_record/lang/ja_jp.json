@@ -298,5 +298,19 @@
   "skyabyss_record.deeds.chip.titans": "巨神",
   "skyabyss_record.deeds.chip.foes": "強敵",
   "skyabyss_record.deeds.chip.growth": "成長",
-  "skyabyss_record.deeds.chip.town": "町"
+  "skyabyss_record.deeds.chip.town": "町",
+  "skyabyss_record.h.reels": "語り",
+  "skyabyss_record.v.reel": "見た",
+  "skyabyss_record.gui.replay": "見直す",
+  "skyabyss_record.d.reel": "下の「見直す」で、もう一度流れます。見直しても、話の進みは変わりません。",
+  "skyabyss_record.r.reel.opening": "開幕の語り",
+  "skyabyss_record.d.reel.opening": "「むかし、空と地のあいだに、ひとつの約束があった。」",
+  "skyabyss_record.r.reel.chapter_titan_whale": "一章の前の語り",
+  "skyabyss_record.d.reel.chapter_titan_whale": "「都の語り部は、巨神の古い歌を覚えていた。」",
+  "skyabyss_record.r.reel.chapter_titan_tide": "二章の前の語り",
+  "skyabyss_record.d.reel.chapter_titan_tide": "「心臓が止まると、岩鯨は深い眠りに落ちた。死んではいない。」",
+  "skyabyss_record.r.reel.chapter_titan_storm": "三章の前の語り",
+  "skyabyss_record.d.reel.chapter_titan_storm": "「潮殻もまた、海の底へ眠りについた。」",
+  "skyabyss_record.r.reel.chapter_titan_ember": "四章の前の語り",
+  "skyabyss_record.d.reel.chapter_titan_ember": "「雷翼も、羽をたたんで眠った。」"
 }

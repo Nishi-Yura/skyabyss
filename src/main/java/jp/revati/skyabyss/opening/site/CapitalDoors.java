@@ -17,15 +17,13 @@ import net.neoforged.neoforge.event.tick.ServerTickEvent;
 
 import jp.revati.skyabyss.SkyAbyss;
 import jp.revati.skyabyss.notice.Notice;
-import jp.revati.skyabyss.npc.NpcBonds;
-import jp.revati.skyabyss.npc.NpcSetup;
 import jp.revati.skyabyss.progress.Progression;
 import jp.revati.skyabyss.registry.ModBlocks;
 import jp.revati.skyabyss.tablet.Tablets;
 import jp.revati.skyabyss.util.Players;
 
 // 都の閉じた施設が、章の進みで開く (docs/design/33 の 2.2「都が目を覚ます順」)。
-//   組合 = イサナと会う (訓練場ははじめから開いている。docs/design/35 の 3.1) /
+//   組合 = はじめから (2026-10-27。前はイサナと会うと) / 訓練場もはじめから開いている (docs/design/35 の 3.1) /
 //   社と砦の本丸 = 心臓を二つ止めた (三章の始まり) / 館 = 心臓を三つ止めた (四章の始まり)
 // 世界で一度: 誰かが段に着いたとき、鉄の戸と鉄格子を外し、碑の文を「開いた」文にする。記録は宿りの場所の extra ("opened_<施設>")。
 // (章は人ごとだが、都は一つの共有の場所なので、最初に着いた人が開ける。閉じたままの人にだけ閉じて見せる上書きは背の仕組みに
@@ -39,7 +37,8 @@ public final class CapitalDoors {
     }
 
     public static final List<Facility> ALL = List.of(
-            new Facility("guild", List.of("open_guild"), CapitalDoors::metIsana),
+            // 組合ははじめから開ける (町めぐりで連れて行く。土地の町の組合会館もはじめから開いている。2026-10-27 の声)
+            new Facility("guild", List.of("open_guild"), p -> true),
             new Facility("shrine", List.of("open_shrine"), p -> Progression.stage(p) >= 2),
             new Facility("keep", List.of("open_keep", "open_keep2"), p -> Progression.stage(p) >= 2),
             new Facility("hall", List.of("open_hall"), p -> Progression.stage(p) >= 3));
@@ -47,11 +46,6 @@ public final class CapitalDoors {
     // 戸のまわりを探す範囲 (印から水平 ±4、上 6)
     private static final int REACH = 4;
     private static final int HEIGHT = 6;
-
-    static boolean metIsana(ServerPlayer p) {
-        NpcBonds.Bond bond = NpcBonds.of(p).bonds().get(NpcSetup.WHALE_CHASER_ID);
-        return bond != null && (bond.talks() > 0 || bond.flags().contains("met") || bond.echoes().contains("met"));
-    }
 
     public static boolean opened(MinecraftServer server, String id) {
         SiteData.Entry e = SiteData.get(server.overworld()).first("shelter");

@@ -124,7 +124,7 @@ public final class FacilityCommands {
                             StashMenu.open(c.getSource().getPlayerOrException(), null);
                             return 1;
                         }))
-                        .then(Commands.literal("coins").then(Commands.argument("n", IntegerArgumentType.integer(1, 9999))
+                        .then(Commands.literal("coins").then(Commands.argument("n", IntegerArgumentType.integer(1, Coins.MAX))
                                 .executes(c -> {
                                     Coins.give(c.getSource().getPlayerOrException(), IntegerArgumentType.getInteger(c, "n"));
                                     return 1;

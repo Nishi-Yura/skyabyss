@@ -48,6 +48,9 @@ public record RecordSnapshot(UUID target, Component targetName, boolean self, Li
     // なくした天の鍵の欠片・天の鍵を呼び戻す (KeepsakeBonds.recall。本人だけ)
     public static final int ACTION_RECALL_FRAGMENT = 3;
     public static final int ACTION_RECALL_KEY = 4;
+    // 見た語り (紙芝居) をもう一度流す (行の key = "reel.<語りの名前>"。本人だけ。story/reel/StoryReels)
+    public static final int ACTION_REPLAY = 5;
+    public static final String REEL_ROW = "reel.";
 
     // 中のつまみ: 「巨神」のつまみの中に、一覧と巨神ごとの頁を並べる (id は「titans.巨神の名前」)。
     // 巨神の一覧 (progress.Titans) の順に、サーバーが頁を作る。巨神が増えれば頁も自動で増える

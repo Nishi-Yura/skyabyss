@@ -186,8 +186,9 @@ def dress_facades(town):
                     n_sh += 1
         if box and 'pane' not in (v.b.get((run[0][0], y - 1, run[0][1])) or ''):
             cells = [(a + dx, b + dz) for (a, b) in run]
-            if all(_air(v, X, y - 1, Z) and town.occ.get((X, Z)) not in ('road', 'plaza') or y - 1 >= 2 for (X, Z) in cells) \
-                    and all(_air(v, X, y - 1, Z) for (X, Z) in cells):
+            # 花の箱は窓の下。地面の高さでは道と広場の上に置かない。town.box_min = 地面から何段より上だけか (都は上の階だけ)
+            if y - 1 - town.h.get(run[0], 0) >= getattr(town, 'box_min', 0) \
+                    and all(_air(v, X, y - 1, Z) and (y - 1 >= 2 or town.occ.get((X, Z)) not in ('road', 'plaza')) for (X, Z) in cells):
                 for (X, Z) in cells:
                     v.set(X, y - 1, Z, '%s[distance=1,persistent=true,waterlogged=false]' % leaf)
                     n_box += 1
@@ -233,9 +234,12 @@ def door_lamps(town):
         f0 = s.split('facing=')[1].split(',')[0].split(']')[0]
         doors.append((x, y, z, (f0, OPP[f0])))
     for (x, y, z, face) in getattr(v, 'fake_doors', []):
-        doors.append((x, y, z, (face,)))
+        doors.append((x, y, z, (face, None)))
     for (x, y, z, outs) in doors:
         found = None
+        # 張りぼての戸は外の向きが分かっている (outs の二つ目が None)。前の空いた所を探すだけ
+        known = len(outs) == 2 and outs[1] is None
+        outs = tuple(o for o in outs if o)
         for out in outs:
             dx, dz = DX[out]
             k = 1
@@ -243,7 +247,7 @@ def door_lamps(town):
                 k += 1
             c = (x + dx * k, z + dz * k)
             # 外 = 戸の前の柱が家の中でない (持ち主がない、あるいは道の上の軒)
-            if k < 4 and (town.owner.get(c) is None or town.occ.get(c) in ('road', 'plaza')):
+            if k < 4 and (known or town.owner.get(c) is None or town.occ.get(c) in ('road', 'plaza')):
                 found = (out, k)
                 break
         if not found:
@@ -256,9 +260,17 @@ def door_lamps(town):
         for j in (2, 1, 3, 4):
             for sg in (1, -1):
                 X, Z = fx + ax * j * sg, fz + az * j * sg
-                if all(_air(v, X, y + h, Z) for h in (0, 1, 2)) and _solid(v.b.get((X - dx, y + 2, Z - dz)))                         and v.b.get((X, y + 3, Z)) in (None, 'air') or False:
-                    v.set(X, y + 2, Z, fence)
-                    v.set(X, y + 1, Z, 'lantern[hanging=true,waterlogged=false]')
+                low = all(_air(v, X, y + h, Z) for h in (1, 2))   # 足もと (y) は壁の台石でもよい
+                if low and _air(v, X, y + 3, Z) and not _air(v, X - dx, y + 3, Z - dz) and not _air(v, X - dx, y + 1, Z - dz):
+                    # 頭の上 (歩く人がぶつからない): 腕木は y + 3、灯りは y + 2
+                    v.set(X, y + 3, Z, fence)
+                    v.set(X, y + 2, Z, 'lantern[hanging=true,waterlogged=false]')
+                elif low and not _air(v, X, y + 3, Z) and not _air(v, X - dx, y + 1, Z - dz):
+                    # 軒の下: 軒から直に吊る
+                    v.set(X, y + 2, Z, 'lantern[hanging=true,waterlogged=false]')
+                else:
+                    continue
+                if True:
                     n += 1
                     done = True
                     break
@@ -351,6 +363,39 @@ def lane_chains(town, every=9):
     return n
 
 
+def dress_capital(town, terrace, ter_h):
+    """都 (town.Town) に仕上げを: 建物ごとの柱 (owner) は建物の範囲 (parts) から、地面の段 (h) は北の段の範囲から、
+    道 (occ) は建物のない舗装の柱から作って、土地の町と同じ仕上げを掛ける。花の箱は上の階の窓だけ (狭い路地をふさがない)"""
+    v = town.v
+    pave = {p if isinstance(p, str) else p[0] for p in town.st.pave}
+    pave = {p.split('[')[0] for p in pave}
+    tx0, tz0, tx1, tz1 = terrace
+    town.h = {}
+    for x in range(tx0, tx1 + 1):
+        for z in range(tz0, tz1 + 1):
+            town.h[(x, z)] = ter_h
+    cols = {}
+    for (x, y, z), s in v.b.items():
+        if s not in ('air', 'cave_air') and y >= town.h.get((x, z), 0):
+            cols.setdefault((x, z), True)
+    town.owner = {}
+    for i, part in enumerate(town.parts):
+        _n, x0, z0, x1, z1 = part
+        for x in range(x0, x1 + 1):
+            for z in range(z0, z1 + 1):
+                if (x, z) in cols:
+                    town.owner.setdefault((x, z), i + 1)
+    town.occ = {}
+    for (x, y, z), s in v.b.items():
+        if y == town.h.get((x, z), 0) - 1 and (x, z) not in town.owner and s.split('[')[0] in pave:
+            town.occ[(x, z)] = 'road'
+    for c in town.owner:
+        town.occ.setdefault(c, 'bld')
+    town.box_min = 2
+    town.rocks = False   # 都のまわりは石畳と畑。岩は置かない (外の道の段差になる)
+    return dress(town)
+
+
 def dress(town):
     r = {}
     r['weather'] = weather(town.v, getattr(town, 'region_ix', 0))
@@ -399,7 +444,7 @@ def ground(town):
         elif k > 0.7 and _hash(x, 0, z, 8) < 0.8:
             v.set(x, y, z, patch[int(_hash(x, 2, z, 9) * len(patch))])
             n += 1
-        elif occ.get((x, z)) is None and k < 0.18 and _hash(x, 0, z, 10) < 0.02 and all(abs(x - a) + abs(z - b) > 10 for (a, b) in rocks) \
+        elif getattr(town, 'rocks', True) and occ.get((x, z)) is None and k < 0.18 and _hash(x, 0, z, 10) < 0.02 and all(abs(x - a) + abs(z - b) > 10 for (a, b) in rocks) \
                 and all(occ.get((x + a, z + b)) is None for a in range(-2, 3) for b in range(-2, 3)):
             rocks.append((x, z))
             _boulder(v, x, y0, z, rock, _hash(x, 3, z, 12))

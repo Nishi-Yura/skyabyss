@@ -24,6 +24,9 @@ import net.neoforged.neoforge.event.entity.living.LivingDropsEvent;
 //   使う: 店 (ShopService)、鍛冶師の修理 (FacilityActions)
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class Coins {
+    // 持てる鐘銭の上限 (旅嚢の枠。2026-10-27 の声「お金の上限 999 万」)
+    public static final int MAX = 9_999_999;
+
     private Coins() {
     }
 

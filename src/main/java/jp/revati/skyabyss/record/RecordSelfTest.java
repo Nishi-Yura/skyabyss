@@ -368,6 +368,11 @@ public final class RecordSelfTest {
             jp.revati.skyabyss.story.StoryData.get(server).mark(a.getUUID(), "[record_test_a]", 0);
             check(f, KeepsakeBonds.expected(a, KeepsakeBonds.Kind.FRAGMENT) == 0, "fragments are not expected after the key is made");
             check(f, KeepsakeBonds.missing(a, KeepsakeBonds.Kind.KEY) == 1, "a missing key should be noticed");
+            // 語りの見直し: 見た語りだけ、巨神の一覧の頁に「見直す」の行が出る
+            String reelKey = RecordSnapshot.REEL_ROW + jp.revati.skyabyss.story.reel.StoryReels.OPENING;
+            jp.revati.skyabyss.story.reel.StoryReels.markSeen(a, jp.revati.skyabyss.story.reel.StoryReels.OPENING);
+            RecordSnapshot.Row reelRow = RecordBuilder.build(a, true).tab(RecordSnapshot.TITANS).row(reelKey);
+            check(f, reelRow != null && reelRow.action() == RecordSnapshot.ACTION_REPLAY, "a seen tale should offer a replay row");
             RecordSnapshot.Row keyRow = RecordBuilder.build(a, true).tab(RecordSnapshot.KEEPSAKES).row("sky_key");
             check(f, keyRow != null && keyRow.action() == RecordSnapshot.ACTION_RECALL_KEY, "the key row should offer a recall");
             KeepsakeBonds.recall(a, KeepsakeBonds.Kind.KEY);

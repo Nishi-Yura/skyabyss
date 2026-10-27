@@ -416,6 +416,15 @@ public final class RecordBuilder {
         return tabs;
     }
 
+    // 見た語りを見直す行 (見ていなければ出さない)。detail は語りの最初の一文
+    static Row reelRow(ServerPlayer p, String reel) {
+        if (!jp.revati.skyabyss.story.reel.StoryReels.seen(p, reel)) {
+            return null;
+        }
+        return new Row(RecordSnapshot.REEL_ROW + reel, Kind.VALUE, ItemStack.EMPTY, t("r.reel." + reel), t("v.reel"), RecordSnapshot.MARK_NONE, -1,
+                List.of(t("d.reel." + reel), t("d.reel")), RecordSnapshot.ACTION_REPLAY);
+    }
+
     private static List<Row> titanOverview(ServerPlayer p) {
         List<Row> rows = new ArrayList<>();
         rows.add(header("progress"));
@@ -485,6 +494,11 @@ public final class RecordBuilder {
         long left = Voyages.cooldownLeft(p);
         rows.add(value("cooldown", t("r.cooldown"), left <= 0 ? t("v.ready") : t("v.seconds", (left + 19) / 20), RecordSnapshot.MARK_NONE,
                 List.of(t("d.cooldown"))));
+        Row opening = reelRow(p, jp.revati.skyabyss.story.reel.StoryReels.OPENING);
+        if (opening != null) {
+            rows.add(header("reels"));
+            rows.add(opening);
+        }
         return rows;
     }
 
@@ -559,6 +573,15 @@ public final class RecordBuilder {
         }
         if (collection.isEmpty()) {
             rows.add(value("collection_none", t("r.collection_none"), Component.empty(), RecordSnapshot.MARK_LOCKED, List.of(t("d.collection_none"))));
+        }
+        for (jp.revati.skyabyss.story.Chapters c : jp.revati.skyabyss.story.Chapters.values()) {
+            if (titan.equals(c.titan())) {
+                Row reel = reelRow(p, jp.revati.skyabyss.story.arc.ChapterCards.reel(c));
+                if (reel != null) {
+                    rows.add(header("reels"));
+                    rows.add(reel);
+                }
+            }
         }
         return rows;
     }

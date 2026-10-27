@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """天と淵の大陸の見どころ (docs/design/40 の 3 章。2026-10-25「大きな地図が平原ばかりで何もない。Wynncraft を手本に作り込む」)。
 
-  python tools/gen/world/gen_continent_pois.py
+  python tools/gen/world/gen_continent_pois.py [--parts-only | --fix-only]
   -> src/main/resources/data/skyabyss/opening/poi_<種類>.json (部品)
      src/main/resources/data/skyabyss/continent/pois.json (置き場: 種類と x, z。world/continent/ContinentPois が近くに人が来たら建てる)
 
@@ -725,9 +725,11 @@ def hamlet(region):
         for i in range(-12, 13):
             for w in (-1, 0, 1):
                 bp.set(w, -1, i, s['road'] if w == 0 or rng.random() < 0.6 else s['road2'])
-        ta.building(bp, s, -10, -10, -3, -4, 2, (-6, -4, 'south'), rng, chimney=True)
-        ta.building(bp, s, 3, -11, 10, -4, 2, (6, -4, 'south'), rng, chimney=True)
-        ta.building(bp, s, 3, 4, 9, 10, 1, (6, 4, 'north'), rng, chimney=False)
+        # 家は土地の町と同じ家の型 (docs/design/45。tools/capital/massing)。並びと戸の向きは前のまま
+        import poi_dress
+        poi_dress.hamlet_houses(bp, region, [((-10, -10, -3, -4), 'south', 2, 'gable', 'half_hip'),
+                                             ((3, -11, 10, -4), 'south', 2, 'row', 'kick'),
+                                             ((3, 4, 9, 10), 'north', 1, 'cottage', 'low')])
         # 井戸 (屋根付き)
         bp.fill(-4, 0, 2, -2, 0, 4, s['base2'])
         bp.set(-3, 0, 3, 'minecraft:water[level=0]')
@@ -741,7 +743,7 @@ def hamlet(region):
         bp.set(5, 1, -2, 'minecraft:spruce_log[axis=x]')
         ta.tree(bp, region, 12, 2)
         ta.lamp(bp, s, 2, -1)
-        bp.mark('loot', 7, 0, -8)
+        bp.mark('loot', 8, 0, -2)   # 薪の山の端 (家の型の入れない家は中を埋めるので、外に)
         return bp
     return build
 
@@ -1254,6 +1256,20 @@ TABLETS = {
 }
 
 
+# 仕上げを掛けない見どころ (地の下)
+UNDERGROUND = {'cave', 'mine', 'barrow'}
+
+
+def region_of(kind):
+    """見どころの土地 (作風を選ぶため)。どこにでも出るもの・決まった所のものは都のまわりの野"""
+    if kind.startswith('hamlet_'):
+        return kind[len('hamlet_'):]
+    for r in ('whale', 'tide', 'storm', 'ember'):
+        if kind in BY_REGION[r] and kind != 'bandit_camp':
+            return r
+    return 'meadow'
+
+
 def main():
     if '--fix-only' in sys.argv:
         # 置き場はそのまま、道にかかる物だけ離す (手で直した置き場を作り直さない)
@@ -1274,12 +1290,19 @@ def main():
             bp.set(tx, 0, tz, 'skyabyss:tablet[facing=south,standing=true]')
             bp.mark('tablet', tx, 0, tz)
         bp.name = 'poi_' + kind
+        # 仕上げ (風化の斑・鎧戸と花の箱・蔦。docs/design/45 の 4 章)。地の下の見どころは除く
+        if kind not in UNDERGROUND:
+            import poi_dress
+            poi_dress.dress_bp(bp, region_of(kind))
         # 均す範囲は地上に出る所だけ (坑道の掘り場のような地の下は数えない)。まわりは広めになじませる
         r = max(max(abs(x), abs(z)) for (x, y, z) in bp.cells if y >= -1) + 1
         bp.meta_rect = r
         bp.meta_ring = 6
         bp.meta_round = True
         print(f'poi_{kind}: {bp.save()} blocks (rect {r})')
+    if '--parts-only' in sys.argv:
+        # 部品だけ書き直す (置き場 pois.json はそのまま)
+        return
     # 置き場
     sys.path.insert(0, HERE)
     import gen_continent as gc

@@ -43,7 +43,7 @@ public final class Trades {
     public static final int MAX_WANT = 4;
     public static final int MAX_APPS_PER_LISTING = 16;
     public static final int MAX_APPS_PER_PLAYER = 10;
-    public static final int MAX_COINS = 9999;
+    public static final int MAX_COINS = jp.revati.skyabyss.facility.Coins.MAX;
     public static final int MAX_WANT_COUNT = 999;
     public static final long EXPIRE_MS = 7L * 24 * 60 * 60 * 1000;
     // 持ち物の本体 (ホットバーを含む 36 枠) だけを使う

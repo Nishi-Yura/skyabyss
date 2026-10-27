@@ -82,6 +82,13 @@ public final class StoryReels {
         return true;
     }
 
+    // 見直し (控え帳・命令): 流すだけ。見た記録もあとの出来事 (題字など) も変えない
+    public static void replay(ServerPlayer p, String reel) {
+        if (!(p instanceof FakePlayer)) {
+            PacketDistributor.sendToPlayer(p, new PlayPayload(reel));
+        }
+    }
+
     // 流さずに済ませたとき: 見たことにして、すぐあとの出来事へ
     static void finish(ServerPlayer p, String reel) {
         markSeen(p, reel);
@@ -99,7 +106,7 @@ public final class StoryReels {
         runAfter(p, reel);
     }
 
-    static void markSeen(ServerPlayer p, String reel) {
+    public static void markSeen(ServerPlayer p, String reel) {
         CompoundTag d = data(p);
         CompoundTag seen = d.getCompound("seen");
         seen.putBoolean(reel, true);
