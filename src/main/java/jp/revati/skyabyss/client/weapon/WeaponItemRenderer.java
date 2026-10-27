@@ -98,7 +98,7 @@ public final class WeaponItemRenderer extends BlockEntityWithoutLevelRenderer {
         ResourceLocation[] tex = variant(mesh.texture, level);
         pose.pushPose();
         // 元のボクセルは盾以外、全部の要素を z 軸まわりに -45 度 (中心 8,8,8) 傾けていて、display (持ち方) はその傾きを前提にしている。メッシュは刃を立てて作ってあるので、同じだけ傾ける
-        if (!id.equals("coral_shield")) {
+        if (!id.equals("coral_shield") && !id.equals("travel_shield")) {
             pose.translate(0.5f, 0.5f, 0.5f);
             pose.mulPose(com.mojang.math.Axis.ZP.rotationDegrees(-45f));
             pose.translate(-0.5f, -0.5f, -0.5f);

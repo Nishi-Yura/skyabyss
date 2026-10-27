@@ -33,14 +33,7 @@
         {
           "id": "chest",
           "type": "collect",
-          "target": "minecraft:diamond_chestplate",
-          "count": 1,
-          "party": false
-        },
-        {
-          "id": "sword",
-          "type": "collect",
-          "target": "minecraft:diamond_sword",
+          "target": "skyabyss:sky_stone_chestplate",
           "count": 1,
           "party": false
         }

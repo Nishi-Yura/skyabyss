@@ -66,7 +66,7 @@ public final class GuildRequests {
             new Req("titan", 24, false, Items.PRISMARINE_SHARD, any("stone_whale_shard", "tide_shell_shard", "thunder_wing_shard", "ember_shard")),
             new Req("bread", 64, false, Items.BREAD, s -> s.is(Items.BREAD)),
             new Req("resonance", 12, false, Items.AMETHYST_SHARD, any("resonance_shard")),
-            new Req("hunt", 150, true, Items.IRON_SWORD, s -> false));
+            new Req("hunt", 150, true, Items.SKELETON_SKULL, s -> false));
 
     // 報い (一人ぶん)
     public static final int REWARD_COINS = 20;

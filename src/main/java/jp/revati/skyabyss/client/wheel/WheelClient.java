@@ -39,7 +39,7 @@ public final class WheelClient {
                     new Entry("quest", jp.revati.skyabyss.client.quest.QuestClient.LOG_KEY, new ItemStack(Items.WRITABLE_BOOK)),
                     new Entry("pouch", jp.revati.skyabyss.client.pouch.PouchClient.OPEN_KEY, new ItemStack(Items.BUNDLE)),
                     new Entry("skills", jp.revati.skyabyss.rpg.client.skill.SkillClientSetup.SKILLS_KEY, new ItemStack(Items.ENCHANTED_BOOK)),
-                    new Entry("status", jp.revati.skyabyss.rpg.client.GrowthClientSetup.STATUS_KEY, new ItemStack(Items.IRON_CHESTPLATE)),
+                    new Entry("status", jp.revati.skyabyss.rpg.client.GrowthClientSetup.STATUS_KEY, new ItemStack(jp.revati.skyabyss.item.outfit.OutfitGear.IRONCLAD_CHESTPLATE.get())),
                     new Entry("map", jp.revati.skyabyss.client.map.MapClient.MAP_KEY, new ItemStack(Items.FILLED_MAP)),
                     new Entry("record", jp.revati.skyabyss.client.record.RecordClient.OPEN_KEY, new ItemStack(Items.BOOK)),
                     new Entry("party", jp.revati.skyabyss.party.client.PartyClient.PARTY_KEY, new ItemStack(Items.PLAYER_HEAD)),

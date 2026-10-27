@@ -171,7 +171,7 @@ public final class RpgRules {
     }
 
     // ---------------------------------------------------------------- はじめの持ち物 (docs/design/40 の 4 章)
-    // 初めて入った人に一度だけ: 軽い防具 (革の四つ。空いている所は身に着ける)・食べ物 10。武器は渡さない (職を選ぶと始めの武器。2026-10-26 の声「職業選んでから戦い」)。
+    // 初めて入った人に一度だけ: 軽い防具 (初めの旅装の四つ。空いている所は身に着ける)・食べ物 10。武器は渡さない (職を選ぶと始めの武器。2026-10-26 の声「職業選んでから戦い」)。
     // 決まり (skyabyssAdventure) が切れている世界では渡さない
     static final String KIT_TAG = "skyabyss_rpg_kit";
 
@@ -180,8 +180,8 @@ public final class RpgRules {
             return;
         }
         player.getPersistentData().putBoolean(KIT_TAG, true);
-        net.minecraft.world.item.Item[] armor = {net.minecraft.world.item.Items.LEATHER_HELMET, net.minecraft.world.item.Items.LEATHER_CHESTPLATE,
-            net.minecraft.world.item.Items.LEATHER_LEGGINGS, net.minecraft.world.item.Items.LEATHER_BOOTS};
+        net.minecraft.world.item.Item[] armor = {jp.revati.skyabyss.item.outfit.OutfitGear.WAYFARER_HELMET.get(), jp.revati.skyabyss.item.outfit.OutfitGear.WAYFARER_CHESTPLATE.get(),
+            jp.revati.skyabyss.item.outfit.OutfitGear.WAYFARER_LEGGINGS.get(), jp.revati.skyabyss.item.outfit.OutfitGear.WAYFARER_BOOTS.get()};
         net.minecraft.world.entity.EquipmentSlot[] slots = {net.minecraft.world.entity.EquipmentSlot.HEAD, net.minecraft.world.entity.EquipmentSlot.CHEST,
             net.minecraft.world.entity.EquipmentSlot.LEGS, net.minecraft.world.entity.EquipmentSlot.FEET};
         for (int i = 0; i < armor.length; i++) {

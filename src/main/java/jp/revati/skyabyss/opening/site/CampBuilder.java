@@ -30,7 +30,7 @@ public final class CampBuilder {
         if (barrel != null && level.getBlockEntity(barrel) instanceof BarrelBlockEntity be) {
             be.setItem(0, new ItemStack(Items.BREAD, 4));
             be.setItem(1, new ItemStack(Items.TORCH, 8));
-            be.setItem(2, new ItemStack(Items.WOODEN_AXE));
+            be.setItem(2, new ItemStack(jp.revati.skyabyss.item.outfit.OutfitGear.GATHER_AXE.get()));
         } else {
             SkyAbyss.LOGGER.error("Opening camp: no barrel at {}", barrel);
         }

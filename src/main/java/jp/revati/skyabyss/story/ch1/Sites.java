@@ -159,10 +159,10 @@ public final class Sites {
         box.setItem(slot++, new ItemStack(Items.TORCH, 2 + level.random.nextInt(3)));
         if (gear) {
             ItemStack low = switch (level.random.nextInt(4)) {
-                case 0 -> new ItemStack(Items.WOODEN_SWORD);
-                case 1 -> new ItemStack(Items.LEATHER_HELMET);
-                case 2 -> new ItemStack(Items.STONE_PICKAXE);
-                default -> new ItemStack(Items.LEATHER_BOOTS);
+                case 0 -> new ItemStack(jp.revati.skyabyss.item.outfit.OutfitGear.WAYFARER_LEGGINGS.get());
+                case 1 -> new ItemStack(jp.revati.skyabyss.item.outfit.OutfitGear.WAYFARER_HELMET.get());
+                case 2 -> new ItemStack(jp.revati.skyabyss.item.outfit.OutfitGear.GATHER_PICKAXE.get());
+                default -> new ItemStack(jp.revati.skyabyss.item.outfit.OutfitGear.WAYFARER_BOOTS.get());
             };
             box.setItem(slot++, low);
         }

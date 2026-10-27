@@ -2,7 +2,7 @@
   "parent": "skyabyss:root",
   "display": {
     "icon": {
-      "id": "minecraft:iron_sword"
+      "id": "skyabyss:shrine_sword"
     },
     "title": {
       "translate": "advancement.skyabyss.island_job.title"

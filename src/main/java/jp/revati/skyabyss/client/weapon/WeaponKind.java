@@ -70,7 +70,9 @@ public enum WeaponKind {
             Map.entry("abyss_ember_dagger", FANG),
             Map.entry("abyss_ember_bell_staff", POKER),
             Map.entry("abyss_lamp_staff", POKER),
-            Map.entry("abyss_toll_bell_staff", POKER));
+            Map.entry("abyss_toll_bell_staff", POKER),
+            // 市の採集の道具 (item/outfit。振りの動きは持たない。持ち方と描き方だけ)
+            Map.entry("gather_axe", AXE), Map.entry("gather_pickaxe", HAMMER), Map.entry("gather_shovel", HAMMER));
 
     public static Iterable<Map.Entry<String, WeaponKind>> items() {
         return BY_ITEM.entrySet();

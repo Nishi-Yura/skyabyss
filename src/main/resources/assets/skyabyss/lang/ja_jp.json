@@ -1856,5 +1856,22 @@
   "map.skyabyss.foe.away": "近づくと現れる (倒すとしばらく出ない)",
   "message.skyabyss.gather.need.axe": "丸太は斧で採る（市の道具屋）",
   "message.skyabyss.gather.need.pickaxe": "石や鉱石はつるはしで採る（市の道具屋）",
-  "message.skyabyss.gather.need.shovel": "土や砂はシャベルで採る（市の道具屋）"
+  "message.skyabyss.gather.need.shovel": "土や砂はシャベルで採る（市の道具屋）",
+  "item.skyabyss.travel_shield": "旅の盾",
+  "item.skyabyss.travel_shield.desc": "木の板を鉄の縁と帯で留めた丸盾。構えると正面の傷を防ぐ",
+  "item.skyabyss.gather_axe": "伐り斧",
+  "item.skyabyss.gather_pickaxe": "鶴嘴",
+  "item.skyabyss.gather_shovel": "土掘り",
+  "item.skyabyss.wayfarer_helmet": "旅の革帽子",
+  "item.skyabyss.wayfarer_chestplate": "旅の革胴着",
+  "item.skyabyss.wayfarer_leggings": "旅の脚衣",
+  "item.skyabyss.wayfarer_boots": "旅の革靴",
+  "item.skyabyss.wayfarer_armor.desc": "初めの旅装。紐で締める革の胴着と、耳当ての帽子",
+  "item.skyabyss.ironclad_helmet": "鉄の鉢の兜",
+  "item.skyabyss.ironclad_chestplate": "鎖帷子",
+  "item.skyabyss.ironclad_leggings": "鎖の腰当てと膝当て",
+  "item.skyabyss.ironclad_boots": "鉄の爪先の靴",
+  "item.skyabyss.ironclad_armor.desc": "鉄張りの旅装。鯨の背の鎖を上る前に、市の武具屋でそろえる",
+  "item.skyabyss.sky_stone_chestplate": "空石の鱗の胴",
+  "item.skyabyss.sky_stone_armor.desc": "雷を通さない空石を鱗に割って縫い付けた胴。雷が鱗の上を流れる"
 }

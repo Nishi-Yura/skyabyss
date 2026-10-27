@@ -248,11 +248,11 @@ public final class BonePit {
         return first;
     }
 
-    // 着ている鉄の防具の部位の数
+    // 着ている鉄張りの旅装 (市の武具屋。バニラの鉄の防具の代わり) の部位の数
     public static int ironWorn(Player player) {
         int n = 0;
         for (ItemStack s : player.getInventory().armor) {
-            if (s.is(Items.IRON_HELMET) || s.is(Items.IRON_CHESTPLATE) || s.is(Items.IRON_LEGGINGS) || s.is(Items.IRON_BOOTS)) {
+            if (s.getItem() instanceof jp.revati.skyabyss.item.outfit.OutfitArmorItem a && a.set().equals("ironclad")) {
                 n++;
             }
         }

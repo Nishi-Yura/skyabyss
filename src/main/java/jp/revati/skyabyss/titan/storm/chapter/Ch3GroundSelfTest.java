@@ -205,7 +205,7 @@ public final class Ch3GroundSelfTest {
         Quests.forget(p, Ch3Ground.Q_STONE);
         p.getInventory().clearContent();
         Quests.start(p, Ch3Ground.Q_STONE);
-        p.setItemSlot(net.minecraft.world.entity.EquipmentSlot.CHEST, new ItemStack(Items.DIAMOND_CHESTPLATE));
+        p.setItemSlot(net.minecraft.world.entity.EquipmentSlot.CHEST, new ItemStack(jp.revati.skyabyss.item.outfit.OutfitGear.SKY_STONE_CHESTPLATE.get()));
         Quests.poll(p, true);
         check(f, QuestLog.of(p).entry(Ch3Ground.Q_STONE).done, "a worn diamond chestplate did not finish the sky stone");
         p.setItemSlot(net.minecraft.world.entity.EquipmentSlot.CHEST, ItemStack.EMPTY);

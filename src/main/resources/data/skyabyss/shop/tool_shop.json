@@ -67,27 +67,21 @@
     },
     {
       "id": "gather_axe",
-      "item": "minecraft:stone_axe",
+      "item": "skyabyss:gather_axe",
       "count": 1,
       "coins": 6
     },
     {
       "id": "gather_pickaxe",
-      "item": "minecraft:stone_pickaxe",
+      "item": "skyabyss:gather_pickaxe",
       "count": 1,
-      "coins": 6
+      "coins": 8
     },
     {
       "id": "gather_shovel",
-      "item": "minecraft:stone_shovel",
+      "item": "skyabyss:gather_shovel",
       "count": 1,
       "coins": 4
-    },
-    {
-      "id": "gather_iron_pickaxe",
-      "item": "minecraft:iron_pickaxe",
-      "count": 1,
-      "coins": 30
     }
   ],
   "buys": []

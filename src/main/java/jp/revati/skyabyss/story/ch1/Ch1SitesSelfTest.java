@@ -452,7 +452,7 @@ public final class Ch1SitesSelfTest {
             // 冷えの戸: 鉄なしでは開かない、鉄の兜一つで開く (世界に一つ。前の実行で開いていれば確かめない)
             if (!BonePit.doorOpen(level, pit)) {
                 check(!BonePit.touchDoor(a, level, pit) && !BonePit.doorOpen(level, pit), "the cold door opened for a player without iron");
-                a.setItemSlot(net.minecraft.world.entity.EquipmentSlot.HEAD, new ItemStack(Items.IRON_HELMET));
+                a.setItemSlot(net.minecraft.world.entity.EquipmentSlot.HEAD, new ItemStack(jp.revati.skyabyss.item.outfit.OutfitGear.IRONCLAD_HELMET.get()));
                 check(BonePit.ironWorn(a) == 1 && BonePit.touchDoor(a, level, pit) && BonePit.doorOpen(level, pit), "the cold door did not open for a player wearing an iron helmet");
                 a.setItemSlot(net.minecraft.world.entity.EquipmentSlot.HEAD, ItemStack.EMPTY);
             }
@@ -533,18 +533,18 @@ public final class Ch1SitesSelfTest {
             Quests.poll(p, true);
             QuestLog.Entry iron = QuestLog.of(p).entry(Ch1Prep.Q_IRON);
             check(iron.stage == 1 && !iron.done, "the page did not move the iron trail to the armor stage");
-            for (var it : List.of(Items.IRON_HELMET, Items.IRON_CHESTPLATE, Items.IRON_LEGGINGS, Items.IRON_BOOTS)) {
+            for (var it : List.of(jp.revati.skyabyss.item.outfit.OutfitGear.IRONCLAD_HELMET.get(), jp.revati.skyabyss.item.outfit.OutfitGear.IRONCLAD_CHESTPLATE.get(), jp.revati.skyabyss.item.outfit.OutfitGear.IRONCLAD_LEGGINGS.get(), jp.revati.skyabyss.item.outfit.OutfitGear.IRONCLAD_BOOTS.get())) {
                 p.getInventory().add(new ItemStack(it));
             }
             Quests.poll(p, true);
             check(!QuestLog.of(p).entry(Ch1Prep.Q_IRON).done && QuestLog.of(p).entry(Ch1Prep.Q_IRON).progress(0) == 0, "carried (not worn) armor counted");
             p.getInventory().clearContent();
-            p.setItemSlot(net.minecraft.world.entity.EquipmentSlot.CHEST, new ItemStack(Items.IRON_CHESTPLATE));
-            p.setItemSlot(net.minecraft.world.entity.EquipmentSlot.LEGS, new ItemStack(Items.IRON_LEGGINGS));
+            p.setItemSlot(net.minecraft.world.entity.EquipmentSlot.CHEST, new ItemStack(jp.revati.skyabyss.item.outfit.OutfitGear.IRONCLAD_CHESTPLATE.get()));
+            p.setItemSlot(net.minecraft.world.entity.EquipmentSlot.LEGS, new ItemStack(jp.revati.skyabyss.item.outfit.OutfitGear.IRONCLAD_LEGGINGS.get()));
             Quests.poll(p, true);
             check(QuestLog.of(p).entry(Ch1Prep.Q_IRON).progress(0) == 2, "two worn pieces should read 2/4 (" + QuestLog.of(p).entry(Ch1Prep.Q_IRON).progress(0) + ")");
-            p.setItemSlot(net.minecraft.world.entity.EquipmentSlot.HEAD, new ItemStack(Items.IRON_HELMET));
-            p.setItemSlot(net.minecraft.world.entity.EquipmentSlot.FEET, new ItemStack(Items.IRON_BOOTS));
+            p.setItemSlot(net.minecraft.world.entity.EquipmentSlot.HEAD, new ItemStack(jp.revati.skyabyss.item.outfit.OutfitGear.IRONCLAD_HELMET.get()));
+            p.setItemSlot(net.minecraft.world.entity.EquipmentSlot.FEET, new ItemStack(jp.revati.skyabyss.item.outfit.OutfitGear.IRONCLAD_BOOTS.get()));
             Quests.poll(p, true);
             check(QuestLog.of(p).entry(Ch1Prep.Q_IRON).done, "four worn iron pieces did not finish the iron trail");
             check(PrepQuests.done(p, 1) == 1 && !PrepQuests.ready(p, 1), "one trail step should count as one");
@@ -577,7 +577,7 @@ public final class Ch1SitesSelfTest {
             }
             Quests.onTalk(p, "skyabyss:storyteller", "ch1t_shield_tale");
             check(QuestLog.of(p).entry(Ch1Prep.Q_SHIELD).stage == 1, "the tale did not move trail_shield to the pack stage");
-            p.getInventory().add(new ItemStack(Items.SHIELD));
+            p.getInventory().add(new ItemStack(jp.revati.skyabyss.item.outfit.OutfitGear.TRAVEL_SHIELD.get()));
             p.getInventory().add(new ItemStack(jp.revati.skyabyss.guide.TravelGear.ROAD_HARDTACK.get(), 7));
             Quests.poll(p, true);
             check(!QuestLog.of(p).entry(Ch1Prep.Q_SHIELD).done, "seven hardtack finished trail_shield");

@@ -65,6 +65,8 @@ public final class WeaponClient {
         }
         // 珊瑚の盾: バニラの構え (構えている間)。見た目 (低ポリのメッシュ) と、殴りつける動き・副の手での小さな押し出しだけ足す
         event.registerItem(new ShieldExtension(), BuiltInRegistries.ITEM.get(ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "coral_shield")));
+        // 市の旅の盾 (item/outfit) も同じ
+        event.registerItem(new ShieldExtension(), BuiltInRegistries.ITEM.get(ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "travel_shield")));
     }
 
     // 一人称の手元を、バニラの置き方 (applyItemArmTransform) と同じ位置へ

@@ -1856,5 +1856,22 @@
   "map.skyabyss.foe.away": "Appears when you come close (gone a while after it falls)",
   "message.skyabyss.gather.need.axe": "Logs need an axe (market tool stall)",
   "message.skyabyss.gather.need.pickaxe": "Stone and ore need a pickaxe (market tool stall)",
-  "message.skyabyss.gather.need.shovel": "Dirt and sand need a shovel (market tool stall)"
+  "message.skyabyss.gather.need.shovel": "Dirt and sand need a shovel (market tool stall)",
+  "item.skyabyss.travel_shield": "Travel Shield",
+  "item.skyabyss.travel_shield.desc": "A round board shield bound with an iron rim and bands. Raise it to block blows from the front",
+  "item.skyabyss.gather_axe": "Felling Axe",
+  "item.skyabyss.gather_pickaxe": "Crane-Bill Pick",
+  "item.skyabyss.gather_shovel": "Digging Spade",
+  "item.skyabyss.wayfarer_helmet": "Wayfarer's Leather Cap",
+  "item.skyabyss.wayfarer_chestplate": "Wayfarer's Leather Jerkin",
+  "item.skyabyss.wayfarer_leggings": "Wayfarer's Breeches",
+  "item.skyabyss.wayfarer_boots": "Wayfarer's Shoes",
+  "item.skyabyss.wayfarer_armor.desc": "The first travelling clothes. A laced leather jerkin and an ear-flapped cap",
+  "item.skyabyss.ironclad_helmet": "Iron Bowl Helm",
+  "item.skyabyss.ironclad_chestplate": "Mail Shirt",
+  "item.skyabyss.ironclad_leggings": "Mail Skirt and Knee Plates",
+  "item.skyabyss.ironclad_boots": "Iron-Toed Boots",
+  "item.skyabyss.ironclad_armor.desc": "Iron-faced travel gear. Buy it at the market outfitter before climbing the whale's chains",
+  "item.skyabyss.sky_stone_chestplate": "Sky-Stone Scale Coat",
+  "item.skyabyss.sky_stone_armor.desc": "Sky stone that lightning cannot pass, split into scales and sewn on. Lightning runs off the scales"
 }

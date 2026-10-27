@@ -20,10 +20,6 @@
     "xp": 30,
     "items": [
       {
-        "item": "skyabyss:bell_coin",
-        "count": 6
-      },
-      {
         "item": "skyabyss:road_hardtack",
         "count": 2
       }

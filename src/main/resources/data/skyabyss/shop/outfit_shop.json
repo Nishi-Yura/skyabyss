@@ -27,54 +27,46 @@
       "coins": 6
     },
     {
-      "id": "iron_sword",
-      "item": "minecraft:iron_sword",
-      "count": 1,
-      "coins": 18
-    },
-    {
-      "id": "shield",
-      "item": "minecraft:shield",
+      "id": "travel_shield",
+      "item": "skyabyss:travel_shield",
       "count": 1,
       "coins": 12
     },
     {
-      "id": "iron_helmet",
-      "item": "minecraft:iron_helmet",
+      "id": "ironclad_helmet",
+      "item": "skyabyss:ironclad_helmet",
       "count": 1,
       "coins": 10
     },
     {
-      "id": "iron_chestplate",
-      "item": "minecraft:iron_chestplate",
+      "id": "ironclad_chestplate",
+      "item": "skyabyss:ironclad_chestplate",
       "count": 1,
       "coins": 16
     },
     {
-      "id": "iron_leggings",
-      "item": "minecraft:iron_leggings",
+      "id": "ironclad_leggings",
+      "item": "skyabyss:ironclad_leggings",
       "count": 1,
       "coins": 14
     },
     {
-      "id": "iron_boots",
-      "item": "minecraft:iron_boots",
+      "id": "ironclad_boots",
+      "item": "skyabyss:ironclad_boots",
       "count": 1,
       "coins": 8
     },
     {
-      "id": "diamond_sword",
-      "item": "minecraft:diamond_sword",
+      "id": "wayfarer_chestplate",
+      "item": "skyabyss:wayfarer_chestplate",
       "count": 1,
-      "coins": 50,
-      "chapter": 3
+      "coins": 4
     },
     {
-      "id": "diamond_chestplate",
-      "item": "minecraft:diamond_chestplate",
+      "id": "sky_stone_chestplate",
+      "item": "skyabyss:sky_stone_chestplate",
       "count": 1,
-      "coins": 70,
-      "chapter": 3
+      "coins": 70
     }
   ],
   "buys": []

@@ -1,0 +1,109 @@
+# 市の品 (旅の盾・採集の道具・初めの旅装・鉄張りの旅装・空石の胸当て) の持ち姿と着た姿 (2026-10-27)
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/outfit_check.txt -PshotsName=outfit_check
+world shots flat
+size 960 540
+timeout 3000
+render 6
+cmd time set noon
+cmd weather clear
+cmd gamemode creative
+camera 0 -60 8 180 0
+waitchunks
+hud on
+wait 350
+cmd skyabyss cinematic stop
+close
+wait 20
+swingpose off
+mainhand right
+hud off
+cmd item replace entity @s weapon.mainhand with skyabyss:gather_axe
+perspective first
+close
+wait 25
+chat clear
+shot fp_gather_axe
+perspective front
+bodyyaw 40
+close
+wait 10
+shot tp_gather_axe
+cmd item replace entity @s weapon.mainhand with skyabyss:gather_pickaxe
+perspective first
+close
+wait 25
+chat clear
+shot fp_gather_pickaxe
+perspective front
+bodyyaw 40
+close
+wait 10
+shot tp_gather_pickaxe
+cmd item replace entity @s weapon.mainhand with skyabyss:gather_shovel
+perspective first
+close
+wait 25
+chat clear
+shot fp_gather_shovel
+perspective front
+bodyyaw 40
+close
+wait 10
+shot tp_gather_shovel
+cmd item replace entity @s weapon.mainhand with air
+cmd item replace entity @s weapon.offhand with skyabyss:travel_shield
+perspective first
+close
+wait 25
+chat clear
+shot fp_shield
+perspective front
+bodyyaw 40
+close
+wait 10
+shot tp_shield
+cmd item replace entity @s armor.head with air
+cmd item replace entity @s armor.chest with air
+cmd item replace entity @s armor.legs with air
+cmd item replace entity @s armor.feet with air
+cmd item replace entity @s armor.head with skyabyss:wayfarer_helmet
+cmd item replace entity @s armor.chest with skyabyss:wayfarer_chestplate
+cmd item replace entity @s armor.legs with skyabyss:wayfarer_leggings
+cmd item replace entity @s armor.feet with skyabyss:wayfarer_boots
+perspective front
+bodyyaw 20
+close
+wait 15
+shot wear_wayfarer
+bodyyaw 200
+wait 10
+shot wear_wayfarer_back
+cmd item replace entity @s armor.head with air
+cmd item replace entity @s armor.chest with air
+cmd item replace entity @s armor.legs with air
+cmd item replace entity @s armor.feet with air
+cmd item replace entity @s armor.head with skyabyss:ironclad_helmet
+cmd item replace entity @s armor.chest with skyabyss:ironclad_chestplate
+cmd item replace entity @s armor.legs with skyabyss:ironclad_leggings
+cmd item replace entity @s armor.feet with skyabyss:ironclad_boots
+perspective front
+bodyyaw 20
+close
+wait 15
+shot wear_ironclad
+bodyyaw 200
+wait 10
+shot wear_ironclad_back
+cmd item replace entity @s armor.head with air
+cmd item replace entity @s armor.chest with air
+cmd item replace entity @s armor.legs with air
+cmd item replace entity @s armor.feet with air
+cmd item replace entity @s armor.chest with skyabyss:sky_stone_chestplate
+perspective front
+bodyyaw 20
+close
+wait 15
+shot wear_sky_stone
+bodyyaw 200
+wait 10
+shot wear_sky_stone_back
