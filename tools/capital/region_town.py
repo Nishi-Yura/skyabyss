@@ -50,7 +50,7 @@ STYLES = {
                     infill='stone_bricks', infill_mix=['mossy_stone_bricks', 'cracked_stone_bricks', 'andesite'], infill_var=0.18,
                     band='polished_andesite', pilaster='bone_block[axis=y]', corner='polished_andesite', shutter_wood='spruce', awning='spruce',
                     house_infills=['stone_bricks', 'calcite', 'mossy_stone_bricks', 'polished_andesite'],
-                    roof_alts=[Mat('mossy_cobblestone', 'mossy_cobblestone', 'mossy_cobblestone_wall'), Mat('dark_oak_planks', 'dark_oak')],
+                    roof_alts=[Mat('mossy_cobblestone', 'mossy_cobblestone', 'mossy_cobblestone_wall'), Mat('dark_oak_planks', 'dark_oak'), Mat('spruce_planks', 'spruce')],
                     wall_main='stone_bricks', wall_mix2=['mossy_stone_bricks', 'cracked_stone_bricks', 'mossy_cobblestone'],
                     pave=[('stone_bricks', 3), ('mossy_stone_bricks', 3), ('andesite', 2), ('mossy_cobblestone', 2), ('moss_block', 1)],
                     pave_trim='polished_andesite', pave_inlay=['bone_block[axis=y]', 'calcite'],
@@ -562,7 +562,7 @@ class RegionTown(T.Town):
     def landmark_whale(self):
         """鯨見の町: 見張りの塔 (北東の角。登れない高い石の塔、頂に鐘の間) と、広場の上を渡る鯨骨の門二つ、真ん中の古井戸。塔の足もとに鯨追い"""
         st, v = self.st, self.v
-        cx, cz = 30, -26
+        cx, cz = getattr(self, "lm", (30, -26))
         tower(v, st, cx, cz, half=4, y0=0, h=26, belfry=True, spire_rise=3, pinnacles=True, sealed=True, door_side='south')
         self.claim(cx - 5, cz - 5, cx + 5, cz + 5, 'lookout')
         self.mark('npc_chaser', cx, 0, cz + 7)
@@ -598,7 +598,7 @@ class RegionTown(T.Town):
     def landmark_tide(self):
         """潮の町: 灯台 (北東の角。白と青緑の帯の塔、頂の灯りの間に海の灯り) と、広場の噴水、通りの魚の市の屋台"""
         st, v = self.st, self.v
-        cx, cz = 30, -26
+        cx, cz = getattr(self, "lm", (30, -26))
         for y in range(0, 26):
             r = 4.2 - y * 0.06
             band = 'white_terracotta' if (y // 4) % 2 == 0 else 'cyan_terracotta'
@@ -638,7 +638,7 @@ class RegionTown(T.Town):
     def landmark_storm(self):
         """風の町: 風車 (北東の角。石の胴に四枚の帆) と避雷の塔 (南西の角の手前)、広場の真ん中の銅の避雷の柱"""
         st, v = self.st, self.v
-        cx, cz = 30, -26
+        cx, cz = getattr(self, "lm", (30, -26))
         tower(v, st, cx, cz, half=3, y0=0, h=14, belfry=False, spire_rise=2, pinnacles=False, sealed=True)
         self.claim(cx - 4, cz - 4, cx + 4, cz + 4, 'windmill')
         hub = (cx, 14, cz + 4)
@@ -654,7 +654,7 @@ class RegionTown(T.Town):
                     py = int(round(math.cos(a)))
                     v.set(x + px, y + py, hub[2], 'white_wool')
         # 避雷の塔 (細い石の塔、頂に避雷針)
-        rx, rz = -30, -26
+        rx, rz = getattr(self, "lm2", (-30, -26))
         tower(v, st, rx, rz, half=2, y0=0, h=20, belfry=False, spire_rise=3, pinnacles=False, sealed=True)
         v.set(rx, 26, rz, 'lightning_rod[facing=up,powered=false,waterlogged=false]')
         self.claim(rx - 3, rz - 3, rx + 3, rz + 3, 'rod_tower')
@@ -668,7 +668,7 @@ class RegionTown(T.Town):
     def landmark_ember(self):
         """灰の町: 溶鉱の煙突 (北東の角。煉瓦の太い塔と、頂の煙の焚き火)、広場の真ん中の熾火の炉 (黒い石の台に火)"""
         st, v = self.st, self.v
-        cx, cz = 30, -26
+        cx, cz = getattr(self, "lm", (30, -26))
         for y in range(0, 28):
             r = 4 if y < 6 else 3
             for x in range(-r, r + 1):
