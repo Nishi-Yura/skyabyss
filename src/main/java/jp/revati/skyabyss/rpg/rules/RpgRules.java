@@ -128,8 +128,10 @@ public final class RpgRules {
         continentBorder(event.getServer());
     }
 
-    // 天と淵の大陸: 世界の縁は大陸の図の外の海の中 (一辺 4,400)。広いまま (既定) のときだけ狭める。人が変えた縁はそのまま
-    static final double CONTINENT_BORDER = 4400;
+    // 天と淵の大陸の世界の縁は狭めない (2026-10-27 の声「試練入った瞬間死ぬ」)。前は一辺 4,400 に狭めていたが、ほかの次元の縁も地上の縁に
+    // ついて動くため、巨神の背の試練の部屋 (x 5,000 あたり。RaidRun.originOf) が縁の外になり、入った瞬間に縁の外の傷で倒れていた。
+    // 大陸のまわりは深い海なので縁は要らない。前の版で狭めた世界 (中心 0, 0・一辺 4,400 のまま) は、元の広さに戻す
+    static final double OLD_CONTINENT_BORDER = 4400;
 
     static void continentBorder(net.minecraft.server.MinecraftServer server) {
         net.minecraft.server.level.ServerLevel level = server.overworld();
@@ -137,9 +139,9 @@ public final class RpgRules {
             return;
         }
         net.minecraft.world.level.border.WorldBorder border = level.getWorldBorder();
-        if (border.getSize() > 1.0e6) {
-            border.setCenter(0, 0);
-            border.setSize(CONTINENT_BORDER);
+        if (Math.abs(border.getSize() - OLD_CONTINENT_BORDER) < 0.5 && border.getCenterX() == 0 && border.getCenterZ() == 0) {
+            border.setSize(net.minecraft.world.level.border.WorldBorder.MAX_SIZE);
+            SkyAbyss.LOGGER.info("RPG rules: the continent world border is widened again (titan-back trial rooms lie outside 4,400)");
         }
     }
 

@@ -65,6 +65,22 @@ public final class RpgRulesSelfTest {
             if (RpgRules.ADVENTURE == null || RpgRules.NO_WEAR == null) {
                 f.add("rpg game rules were not registered");
             }
+            // 巨神の背の試練の部屋 (前の 8 枠 x 全段) が、どの背の次元でも世界の縁の内にある (縁の外だと入った瞬間に倒れる。2026-10-27)
+            for (ServerLevel back : server.getAllLevels()) {
+                var dim = back.dimension();
+                if (!dim.location().getNamespace().equals(SkyAbyss.MODID) || !dim.location().getPath().endsWith("_back")) {
+                    continue;
+                }
+                for (int slot = 1; slot <= 8; slot++) {
+                    for (int step = 1; step <= 5; step++) {
+                        BlockPos o = jp.revati.skyabyss.trial.raid.RaidRun.originOf(slot, step);
+                        if (!back.getWorldBorder().isWithinBounds(o.offset(-60, 0, -60)) || !back.getWorldBorder().isWithinBounds(o.offset(60, 0, 60))) {
+                            f.add("trial room " + slot + "/" + step + " at " + o.toShortString() + " lies outside the world border of " + dim.location());
+                            break;
+                        }
+                    }
+                }
+            }
             if (DeathRules.mode(server) != DeathRules.Mode.KEEP) {
                 f.add("death mode default should be keep, got " + DeathRules.mode(server));
             }
