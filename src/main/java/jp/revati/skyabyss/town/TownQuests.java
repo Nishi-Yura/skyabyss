@@ -59,11 +59,9 @@ public final class TownQuests {
             new TownQuest("town/ch2_sailor", 2, Kind.GUEST, null),
             new TownQuest("town/ch3_lanterns", 3, Kind.GUEST, null),
             new TownQuest("town/ch4_baker", 4, Kind.GUEST, null),
-            // 墓守の名のない墓 (六章まで続く。ここは一〜四章の 4 段)
+            // 墓守の名のない墓 (六章まで続く。ここは一章 (花と水) と三章 (足跡と蝋燭) の 2 段。2026-10-27 に 4 段から縮めた)
             new TownQuest("town/grave_1", 1, Kind.GRAVE, null),
-            new TownQuest("town/grave_2", 2, Kind.GRAVE, "town/grave_1"),
-            new TownQuest("town/grave_3", 3, Kind.GRAVE, "town/grave_2"),
-            new TownQuest("town/grave_4", 4, Kind.GRAVE, "town/grave_3"),
+            new TownQuest("town/grave_3", 3, Kind.GRAVE, "town/grave_1"),
             // 酒場の地下の酔いどれ (深淵の手がかり。三つ目で地下の奥の壁が開く)
             new TownQuest("town/cellar_1", 1, Kind.CELLAR, null),
             new TownQuest("town/cellar_2", 3, Kind.CELLAR, "town/cellar_1"),

@@ -79,44 +79,6 @@
           ]
         },
         {
-          "id": "town_grave2",
-          "goto": "town_g2_ask",
-          "kind": "quest",
-          "if": {
-            "type": "all",
-            "of": [
-              {
-                "type": "all",
-                "of": [
-                  {
-                    "type": "stage",
-                    "min": 1
-                  },
-                  {
-                    "type": "quest",
-                    "quest": "town/grave_2",
-                    "is": "none"
-                  },
-                  {
-                    "type": "quest",
-                    "quest": "town/grave_1",
-                    "is": "done"
-                  }
-                ]
-              },
-              {
-                "type": "in_capital"
-              }
-            ]
-          },
-          "do": [
-            {
-              "type": "quest_start",
-              "quest": "town/grave_2"
-            }
-          ]
-        },
-        {
           "id": "town_g2_hand",
           "goto": "town_g2_done",
           "kind": "give",
@@ -128,7 +90,7 @@
                 "of": [
                   {
                     "type": "quest",
-                    "quest": "town/grave_2",
+                    "quest": "town/grave_1",
                     "is": "active",
                     "stage": "wash"
                   },
@@ -182,7 +144,7 @@
                   },
                   {
                     "type": "quest",
-                    "quest": "town/grave_2",
+                    "quest": "town/grave_1",
                     "is": "done"
                   }
                 ]
@@ -219,44 +181,6 @@
           }
         },
         {
-          "id": "town_grave4",
-          "goto": "town_g4_ask",
-          "kind": "quest",
-          "if": {
-            "type": "all",
-            "of": [
-              {
-                "type": "all",
-                "of": [
-                  {
-                    "type": "stage",
-                    "min": 3
-                  },
-                  {
-                    "type": "quest",
-                    "quest": "town/grave_4",
-                    "is": "none"
-                  },
-                  {
-                    "type": "quest",
-                    "quest": "town/grave_3",
-                    "is": "done"
-                  }
-                ]
-              },
-              {
-                "type": "in_capital"
-              }
-            ]
-          },
-          "do": [
-            {
-              "type": "quest_start",
-              "quest": "town/grave_4"
-            }
-          ]
-        },
-        {
           "id": "town_g4_hand",
           "goto": "town_g4_done",
           "kind": "give",
@@ -268,7 +192,7 @@
                 "of": [
                   {
                     "type": "quest",
-                    "quest": "town/grave_4",
+                    "quest": "town/grave_3",
                     "is": "active",
                     "stage": "light"
                   },
@@ -323,7 +247,7 @@
       "options": [
         {
           "id": "ok",
-          "goto": "end",
+          "goto": "town_g2_ask",
           "kind": "talk"
         }
       ]
@@ -379,7 +303,7 @@
       "options": [
         {
           "id": "ok",
-          "goto": "end",
+          "goto": "town_g4_ask",
           "kind": "talk"
         }
       ]

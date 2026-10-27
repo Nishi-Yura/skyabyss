@@ -405,9 +405,9 @@ public final class TideChapterSelfTest {
         data.restoreSlot(TideKeeper.SLOT, new CompoundTag(), level.registryAccess());
         check(f, !TideEbb.mayBegin(level, d), "the great ebb must wait for the titan to appear");
         TideKeeper.KEEPER.spawn(level, SHORE + 100, Z + 64, null);
-        check(f, TideEbb.mayBegin(level, d), "the great ebb should be possible at night once the titan has appeared");
+        check(f, TideEbb.mayBegin(level, d), "the great ebb should be possible once the titan has appeared");
         level.setDayTime(6000);
-        check(f, !TideEbb.mayBegin(level, d), "the great ebb must not begin in daylight");
+        check(f, TideEbb.mayBegin(level, d), "the great ebb must not wait for the night (no state gating)");
         level.setDayTime(15000);
         // 二章の人 (段階 1) だけが引き金: 段階 0 の人 (と FakePlayer) では始まらない
         TideEbb.tryTrigger(level, d);

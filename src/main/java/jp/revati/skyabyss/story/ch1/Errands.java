@@ -22,9 +22,7 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.common.util.FakePlayer;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 
-// 初日のお使い (E3+E8) と失せ物の旅人 (E2) の下働き (17 の 1.5)。1 秒に 1 回、人ごとに。
-//   旅の跡の見回り: 旅の跡 (序章 3・一章 2。Sites.trace) の近くに初めて着いたら「見て回った」印を付ける (頼みを受ける前の分も数える。印は Sites が付ける)。
-//                  頼みが進んでいる間、まだ送っていない印のぶんだけ合図 ch1_trace_round を送る。頼みが済んだら送った印は忘れる (次の週にまた数える)
+// 失せ物の旅人 (E2) の下働き (17 の 1.5)。1 秒に 1 回、人ごとに。(初日のお使いは 2026-10-27 に消した)
 //   足跡のくぼみ:  失せ物の旅人の頼みの「たどる」段の間、荷車から日記の場所へ、粒だけの足跡を近くに描く (建築は触らない)
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class Errands {
@@ -48,36 +46,7 @@ public final class Errands {
         if (!(player.level() instanceof ServerLevel level) || level.dimension() != Level.OVERWORLD) {
             return;
         }
-        round(player, level);
         trail(player, level);
-    }
-
-    // ---------------------------------------------------------------- 旅の跡の見回り
-    static void round(ServerPlayer player, ServerLevel level) {
-        Ch1Data data = Ch1Data.get(level.getServer().overworld());
-        Ch1Data.Player st = data.player(player.getUUID());
-        syncSignals(player, st, data);
-    }
-
-    // 頼みが進んでいるなら、まだ送っていない見回りの合図を送る。進んでいなければ送った印を忘れる (自己テストからも呼ぶ)
-    static int syncSignals(ServerPlayer player, Ch1Data.Player st, Ch1Data data) {
-        QuestLog.Entry entry = QuestLog.of(player).entry(Ch1.Q_ROUNDS);
-        if (entry == null || entry.done) {
-            if (!st.signalled.isEmpty()) {
-                st.signalled.clear();
-                data.setDirty();
-            }
-            return 0;
-        }
-        int sent = 0;
-        for (String key : List.copyOf(st.rounds)) {
-            if (key.startsWith("s:") && st.signalled.add(key)) {
-                data.setDirty();
-                Quests.signal(player, Ch1.SIGNAL_ROUND);
-                sent++;
-            }
-        }
-        return sent;
     }
 
     // ---------------------------------------------------------------- 足跡のくぼみ

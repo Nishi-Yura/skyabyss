@@ -127,7 +127,7 @@ public final class Ch3GroundSelfTest {
         } finally {
             clean(p);
         }
-        report("ch3 ground", f, "3 trail steps + wind flags quest, dialogue, lore, ja/en text, xp budget, trail flow and ch3_ready, warm stone, mirror plane, flag bearings");
+        report("ch3 ground", f, "3 trail steps, dialogue, lore, ja/en text, xp budget, trail flow and ch3_ready, warm stone, mirror plane, flag bearings");
     }
 
     private static void data(List<String> f) {
@@ -138,8 +138,6 @@ public final class Ch3GroundSelfTest {
             check(f, def != null && def.main() && def.startWhen() != null && !def.repeats() && !def.board() && def.chapter().equals(Chapters.STORM.id()),
                     id + ": needs to be a main quest with start_when, chapter titan_storm, no repeat or board");
         }
-        QuestDef flags = QuestManager.quest(Ch3Ground.Q_FLAGS);
-        check(f, flags != null && !flags.main() && flags.chapter().equals(Chapters.STORM.id()), "ch3/wind_flags should be a chapter-3 side quest");
         check(f, QuestManager.loadErrors().stream().noneMatch(s -> s.contains("ch3/")), "chapter-3 quests were flagged: " + QuestManager.loadErrors());
         check(f, DialogueManager.loadErrors().stream().noneMatch(s -> s.contains("ch3g")), "chapter-3 ground dialogue was flagged: " + DialogueManager.loadErrors());
         for (String[] n : new String[][] {{"skyabyss:storyteller", "ch3g_pillars_tale"}, {"skyabyss:storyteller", "ch3g_s_verse"},
@@ -151,7 +149,7 @@ public final class Ch3GroundSelfTest {
         // 文 (日英)
         List<String> keys = new ArrayList<>(List.of("quest.skyabyss.ch3.lightning_pillars.raise.rods", "quest.skyabyss.ch3.lightning_pillars.vault.page",
                 "quest.skyabyss.ch3.scorched_watch.clear.page", "quest.skyabyss.ch3.scorched_watch.show.talk", "quest.skyabyss.ch3.sky_stone.dig.diamonds",
-                "quest.skyabyss.ch3.wind_flags.trace.flags", "message.skyabyss.ch3g.ruin.open", "message.skyabyss.ch3g.mirror.2",
+                "message.skyabyss.ch3g.ruin.open", "message.skyabyss.ch3g.mirror.2",
                 "message.skyabyss.ch3g.flags.turn", "message.skyabyss.ch3g.arrive.ch3_scorched_watch", "entity.skyabyss.scorched_warden",
                 "dialogue.skyabyss.whale_chaser.ch3g_c_stay", "dialogue.skyabyss.storyteller.ch3g_s_verse", "dialogue.skyabyss.artisan.ch3g_watch_show",
                 "advancement.skyabyss.storm_trail.title", "advancement.skyabyss.scorched_watch.description"));
@@ -169,7 +167,7 @@ public final class Ch3GroundSelfTest {
         }
         // 経験値の枠 (三章の新しい分 900・合計 1,700)
         int fresh = ChapterXpBudget.newXp(QuestManager.all(), 3);
-        check(f, fresh >= 570 && fresh <= ChapterXpBudget.NEW_CAP[3], "chapter 3 new xp " + fresh + " should count the trail steps, the flags and the watch, within " + ChapterXpBudget.NEW_CAP[3]);
+        check(f, fresh >= 400 && fresh <= ChapterXpBudget.NEW_CAP[3], "chapter 3 new xp " + fresh + " should count the trail steps and the watch, within " + ChapterXpBudget.NEW_CAP[3]);
         check(f, ChapterXpBudget.overruns(QuestManager.all(), 3).isEmpty(), "chapter 3 is over its xp budget: " + ChapterXpBudget.overruns(QuestManager.all(), 3));
         // 湧き台・職人の立つ所・部品の印
         SiteSpawner.Def def = SiteSpawner.def(ScorchedWatch.SITE);

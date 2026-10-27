@@ -36,15 +36,15 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.tick.LevelTickEvent;
 
-// 大干潮 (二章の中盤の出来事。01 の 4.2、08 の 2.8節)。巨神が現れたあとの夜、海がいつもより遠くまで引き、浅い海底に遺跡の道が現れる。
+// 大干潮 (二章の中盤の出来事。01 の 4.2、08 の 2.8節)。巨神が現れたあと、海がいつもより遠くまで引き、浅い海底に遺跡の道が現れる。
 // 人ごとに一度ずつ (自分の大干潮)。安全に歩ける (水は膝まで。道の両側は壁で、海は元のまま。溺れず、敵も入らない)。道の先に潮の民の頁。
 //
-//   始まり   巨神が現れていて (TideKeeper の記録)、夜の前半 (時刻 13500〜18500) に、まだ自分の大干潮を迎えていない二章 (段階 1) の人が海から 96 ブロック以内にいて、
+//   始まり   巨神が現れていて (TideKeeper の記録)、まだ自分の大干潮を迎えていない二章 (段階 1) の人が海から 96 ブロック以内にいて (時刻では閉じない。2026-10-27)、
 //            近くで途中の大干潮があればそれを共有し (道の枠から 128 ブロック以内)、なければその近くに道が通せる海があるとき (途中の道と重ならない所だけ)。道は岸の最初の水から沖へまっすぐ (北南東西のどれか) 24〜56 ブロック、幅 3、
 //            海底に沿って (一歩の差は 1 まで、水深 1〜10)。海底の高さに床 (遺跡の石)、両側と先に壁 (海面まで。上の段は窓)、
 //            中は膝まで (床の上 1 ブロック) だけ水を残し、上は空気。岸の側は陸を削って床へつなぐ
 //   途中     壁の中から敵を除く。道の先 (台) に 3 ブロック以内まで来た人に、潮の民の頁 (伝承 chapter1/ch2_ebb_page) と合図 ch2_ebb_walked
-//   終わり   夜明け (23000)、または始まりから 8000 tick で、水が戻る。壁と中の水は元の海へ (床と壁の根もとは海の底の遺跡の道として残る)。
+//   終わり   始まりから MAX_TICKS で、水が戻る。壁と中の水は元の海へ (床と壁の根もとは海の底の遺跡の道として残る)。
 //            中にいる人は岸へ戻す (水中呼吸つき)。終わる 400 tick 前に語りで知らせる
 //   保存     EbbData (オーバーワールド。途中の大干潮の列と、自分の大干潮を迎えた人の UUID)。再起動をまたぐ。途中で止まっても、次に動いたとき時刻が過ぎていれば水を戻す
 @EventBusSubscriber(modid = SkyAbyss.MODID)
@@ -59,9 +59,6 @@ public final class TideEbb {
     public static final int LEN_MIN = 24;
     public static final int LEN_MAX = 56;
     // 始められる時刻 (dayTime % 24000)
-    static final long START_FROM = 13500;
-    static final long START_TO = 18500;
-    static final long END_AT = 23000;
     static final long MAX_TICKS = 8000;
     static final long WARN_BEFORE = 400;
     static final int SEARCH = 96;
@@ -383,13 +380,9 @@ public final class TideEbb {
     }
 
     // ---------------------------------------------------------------- 始める・終える
-    // 始められる状態か (巨神が現れていて、夜の前半)。人ごとの大干潮なので、前に起きたかどうかは見ない
+    // 始められる状態か (巨神が現れていれば、時刻を問わない)。人ごとの大干潮なので、前に起きたかどうかは見ない
     static boolean mayBegin(ServerLevel level, EbbData data) {
-        if (!TideKeeper.KEEPER.slot(level).spawned) {
-            return false;
-        }
-        long t = Math.floorMod(level.getDayTime(), 24000L);
-        return t >= START_FROM && t <= START_TO;
+        return TideKeeper.KEEPER.slot(level).spawned;
     }
 
     // 自己テスト用: 二章の人とみなす条件を差し替える (FakePlayer を二章の人にする)
@@ -448,9 +441,7 @@ public final class TideEbb {
             }
         }
         long now = level.getGameTime();
-        long day = level.getDayTime();
-        long toDawn = Math.floorMod(END_AT - Math.floorMod(day, 24000L), 24000L);
-        Run run = new Run(plan, now, now + Math.min(MAX_TICKS, toDawn));
+        Run run = new Run(plan, now, now + MAX_TICKS);
         data.runs.add(run);
         data.setDirty();
         int n = build(level, plan);

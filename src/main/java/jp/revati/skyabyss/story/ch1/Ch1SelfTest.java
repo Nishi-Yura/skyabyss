@@ -108,7 +108,7 @@ public final class Ch1SelfTest {
 
     private static void end(MinecraftServer server) {
         if (F.isEmpty()) {
-            SkyAbyss.LOGGER.info("SELFTEST ch1 PASSED (12 lore entries reachable at stage 0, xp within the chapter cap, day-1 errands on the board from day 1, "
+            SkyAbyss.LOGGER.info("SELFTEST ch1 PASSED (11 lore entries reachable at stage 0, xp within the chapter cap, "
                     + "song stone order, rounds and trail, small oddities once a day, sentry only at night, whale hush once, 3 foreshadowing beats, sites built)");
         } else {
             F.forEach(m -> SkyAbyss.LOGGER.error("SELFTEST ch1 FAILED: {}", m));
@@ -150,7 +150,7 @@ public final class Ch1SelfTest {
         Set<String> pageSources = Set.of(Ch1.PAGE_TRACE, Ch1.PAGE_DIARY);
         List<String> tracePool = new ArrayList<>();
         List<String> diaryPool = new ArrayList<>();
-        check(Ch1.ALL_LORE.size() == 12, "there should be 12 lore entries (" + Ch1.ALL_LORE.size() + ")");
+        check(Ch1.ALL_LORE.size() == 11, "there should be 11 lore entries (" + Ch1.ALL_LORE.size() + ")");
         for (String id : Ch1.ALL_LORE) {
             LoreEntry entry = catalog.entry(id);
             check(entry != null && entry.unlockable(), id + " is missing or cannot be unlocked");
@@ -201,7 +201,7 @@ public final class Ch1SelfTest {
         }
         int questXp = 0;
         int prologueQuestXp = 0;
-        for (String q : List.of(Ch1.Q_ROUNDS, Ch1.Q_FIREWOOD, Ch1.Q_TRAVELLER)) {
+        for (String q : List.of(Ch1.Q_TRAVELLER)) {
             QuestDef def = QuestManager.quest(q);
             if (def == null) {
                 continue;
@@ -219,7 +219,7 @@ public final class Ch1SelfTest {
     }
 
     private static void quests(MinecraftServer server) {
-        for (String id : List.of(Ch1.Q_ROUNDS, Ch1.Q_FIREWOOD, Ch1.Q_TRAVELLER)) {
+        for (String id : List.of(Ch1.Q_TRAVELLER)) {
             QuestDef def = QuestManager.quest(id);
             check(def != null, "quest " + id + " is missing");
             if (def == null) {
@@ -238,17 +238,6 @@ public final class Ch1SelfTest {
                     }
                 }
             }
-        }
-        QuestDef traces = QuestManager.quest(Ch1.Q_ROUNDS);
-        QuestDef wood = QuestManager.quest(Ch1.Q_FIREWOOD);
-        if (traces != null && wood != null) {
-            check(traces.board() && wood.board() && traces.repeats() && wood.repeats(), "the day-1 errands belong on the board as repeating errands");
-            check(traces.chapter().equals("prologue") && wood.chapter().equals("prologue"), "day-1 errands belong to the prologue");
-            // 日 1 から板に 2 本ある (週替わりの欄は抽選に関わらず常に並ぶ)
-            List<QuestDef> today = Board.todays(server);
-            check(today.contains(traces) && today.contains(wood), "both day-1 errands should be on the board today");
-            FakePlayer p = fake(server, "board");
-            check(Board.canAccept(p, traces) && Board.canAccept(p, wood), "a new player (stage 0) should be able to take both errands");
         }
         QuestDef lost = QuestManager.quest(Ch1.Q_TRAVELLER);
         if (lost != null) {
@@ -292,11 +281,10 @@ public final class Ch1SelfTest {
         }
         // 本物の会話に混ざっている
         var st = DialogueManager.dialogue("skyabyss:storyteller");
-        check(st != null && st.nodes().containsKey("ch1_errand_offer") && st.nodes().containsKey("ch1_diary_tell"), "storyteller extension not merged");
+        check(st != null && st.nodes().containsKey("ch1_diary_tell"), "storyteller extension not merged");
         if (st != null) {
             var nodes = st.entries().stream().map(e -> e.node()).toList();
             check(nodes.contains("ch1_diary_tell") && nodes.indexOf("ch1_diary_tell") < nodes.indexOf("menu"), "the diary entry should come before the catch-all entry: " + nodes);
-            check(st.nodes().get("shadow0_b").options().stream().anyMatch(o -> o.id().equals("ch1_help")), "the first talk offers the day-1 errands");
             check(st.entries().get(st.entries().size() - 1).node().equals("menu"), "the catch-all entry must stay last");
         }
         var wc = DialogueManager.dialogue("skyabyss:whale_chaser");
@@ -403,27 +391,6 @@ public final class Ch1SelfTest {
         Quests.forgetAll(p);
         Ch1Data data = Ch1Data.get(server.overworld());
         Ch1Data.Player st = data.player(p.getUUID());
-        st.rounds.clear();
-        st.signalled.clear();
-        // 頼みを受ける前に見て回った分も、受けたあとの最初の見回りで数える
-        st.rounds.add("c:10,10"); // 古いセーブの積み石の印は数えない
-        st.rounds.add("s:ch1_trace_camp#0");
-        st.rounds.add("s:ch1_trace_cart#0");
-        check(Errands.syncSignals(p, st, data) == 0, "no signal should be sent while the errand is not taken");
-        check(Quests.start(p, Ch1.Q_ROUNDS), "could not take the trace rounds");
-        check(Errands.syncSignals(p, st, data) == 2, "the two visits made before should count");
-        QuestLog.Entry e = QuestLog.of(p).entry(Ch1.Q_ROUNDS);
-        check(e != null && e.done, "the trace rounds should be done after two visits");
-        check(Lore.state(p).has(Ch1.TRACE_ROUNDS), "finishing the rounds should write the trace_rounds page");
-        check(Errands.syncSignals(p, st, data) == 0 && st.signalled.isEmpty(), "after the errand is done the sent marks are forgotten");
-        check(!Quests.start(p, Ch1.Q_ROUNDS), "a weekly errand must not be taken twice in the same week");
-        // 薪: 原木 8 本を板で納める
-        check(Quests.start(p, Ch1.Q_FIREWOOD), "could not take the firewood errand");
-        p.getInventory().add(new ItemStack(Items.OAK_LOG, 8));
-        List<String> handed = Quests.turnIn(p, null);
-        check(handed.contains(Ch1.Q_FIREWOOD), "the board should take the eight logs: " + handed);
-        QuestLog.Entry w = QuestLog.of(p).entry(Ch1.Q_FIREWOOD);
-        check(w != null && w.done, "the firewood errand should be done");
         // 足跡のくぼみ
         BlockPos at = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, level.getSharedSpawnPos());
         p.setPos(at.getX() + 0.5, at.getY(), at.getZ() + 0.5);

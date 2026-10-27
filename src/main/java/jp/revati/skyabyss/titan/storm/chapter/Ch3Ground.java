@@ -37,7 +37,7 @@ import net.neoforged.neoforge.event.tick.ServerTickEvent;
 // 三章の地上 (docs/design/34 の 4.4・C3、21 の 5.1)。西の峰の跡地 (33 の 3 章) に、世界で一つずつ置く。部品とデータは tools/gen/ch3/gen_ch3_ground.py。
 //
 // ---------------------------------------------------------------- 場所 (StormSites の 4 種に足す)
-//   ch3_wind_flag      風の道の旗 5   稜線 (高台) に沿って。着くと合図 ch3_flag (サブ ch3/wind_flags)。五つ目で峰じゅうの旗が一斉に逆を向く (人ごとに一度)
+//   ch3_wind_flag      風の道の旗 5   稜線 (高台) に沿って。着くと合図 ch3_flag。五つ目で峰じゅうの旗が一斉に逆を向く (人ごとに一度)
 //   ch3_scorched_watch 焼けた見張り塔 小さなダンジョン (ScorchedWatch)。旅の職人の三章の立つ所 (印 artisan)
 //   ch3_gleaner_field  雷拾いの原     焼けた荷と、硝子のように固まった砂。拾い残しの箱 (人ごとに一度、粗銅 8・銅線 3・焦げ羽 2)。雷拾い (P16) が 2 羽まで荷をついばむ (Ch3Mobs)
 //   ch3_wind_cliff     風読みの崖     岩の舞台と碑 (sign.skyabyss.ch3_cliff)、樽に遠眼鏡 (世界に一つ)
@@ -60,7 +60,6 @@ public final class Ch3Ground {
     public static final String Q_PILLARS = "ch3/lightning_pillars";
     public static final String Q_WATCH = "ch3/scorched_watch";
     public static final String Q_STONE = "ch3/sky_stone";
-    public static final String Q_FLAGS = "ch3/wind_flags";
     public static final List<String> TRAILS = List.of(Q_PILLARS, Q_WATCH, Q_STONE);
 
     public static final String PAGE_PILLARS = "ch3/pillars";

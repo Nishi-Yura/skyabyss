@@ -12,46 +12,7 @@
       }
     }
   ],
-  "add_options": {
-    "shadow0_b": {
-      "options": [
-        {
-          "id": "ch1_help",
-          "goto": "ch1_errand_offer",
-          "kind": "quest"
-        }
-      ]
-    }
-  },
   "nodes": {
-    "ch1_errand_offer": {
-      "face": "smile",
-      "options": [
-        {
-          "id": "yes",
-          "goto": "ch1_errand_ok",
-          "kind": "quest",
-          "do": [
-            {
-              "type": "quest_start",
-              "quest": "ch1/day1_traces"
-            },
-            {
-              "type": "quest_start",
-              "quest": "ch1/day1_firewood"
-            }
-          ]
-        },
-        {
-          "id": "later",
-          "goto": "menu"
-        }
-      ]
-    },
-    "ch1_errand_ok": {
-      "face": "neutral",
-      "next": "menu"
-    },
     "ch1_diary_tell": {
       "face": "grave",
       "options": [

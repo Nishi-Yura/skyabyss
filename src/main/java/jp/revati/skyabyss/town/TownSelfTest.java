@@ -158,9 +158,9 @@ public final class TownSelfTest {
         QuestLog log = QuestLog.of(p);
         TownQuests.TownQuest ch1 = TownQuests.byId("town/ch1_apprentice");
         TownQuests.TownQuest ch2 = TownQuests.byId("town/ch2_net");
-        TownQuests.TownQuest g2 = TownQuests.byId("town/grave_2");
+        TownQuests.TownQuest g3 = TownQuests.byId("town/grave_3");
         check(f, TownQuests.available(ch1, 1, log) && !TownQuests.available(ch2, 1, log) && TownQuests.available(ch2, 2, log), "chapter gate");
-        check(f, !TownQuests.available(g2, 4, log), "grave_2 needs grave_1 done");
+        check(f, !TownQuests.available(g3, 4, log), "grave_3 needs grave_1 done");
         TownQuests.TownQuest first = TownQuests.nextRumor(1, log);
         check(f, first != null && first.kind() == TownQuests.Kind.GUEST && first.chapter() == 1, "first rumor is a chapter-1 guest quest");
         // 宿の噂で始まる (FakePlayer の章は 1)
