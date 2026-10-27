@@ -559,8 +559,13 @@ public final class FreeQuestSelfTest {
 
         // 枠: 三つ目 (一段目の日替わり) までは受けられ、4 つ目は受けられない。同じ日に同じものは受け直せない
         stilled(server, p);
-        check(acceptOrStartBoard(server, p, "daily_pool_sweep") && Board.usedToday(p) == 3, "a third daily could not be taken at stage 1 (" + Board.usedToday(p) + ")", failures);
-        check(!acceptOrStartBoard(server, p, "daily_bone_sentry"), "a fourth daily was accepted the same day", failures);
+        // 今日の顔ぶれは日と世界の段で変わる (全部の自己テストを続けて回すと段が上がる)。今日引かれた、まだ受けていない一段目までの日替わりを使う
+        // 三つ目は見張りの巡り以外 (あとで日が替わってから受ける)。板に無ければ直に始める (枠の数え方は同じ)
+        List<String> free = drawnDailies(server, p);
+        String third = free.stream().filter(q -> !q.equals("daily_bone_sentry")).findFirst().orElse("daily_mite_clear");
+        check(acceptOrStart(server, p, third) && Board.usedToday(p) == 3, "a third daily could not be taken at stage 1 (" + third + ", " + Board.usedToday(p) + ")", failures);
+        free.remove(third);
+        check(free.isEmpty() || !acceptOrStartBoard(server, p, free.get(0)), "a fourth daily was accepted the same day", failures);
         check(!Board.accept(p, "daily_night_watch") && stage(p, "daily_night_watch").equals("done"), "a finished daily was taken again the same day", failures);
         // 記録を消して同じ日に受け直しても、報酬は二度出ない
         long before = totalXp(p);
@@ -571,8 +576,11 @@ public final class FreeQuestSelfTest {
         }
         check(totalXp(p) == before, "a daily paid twice in one day", failures);
 
-        // 受けたまま日が替わっても残る。日が替わると、また受けられる
+        // 受けたまま日が替わっても残る。日が替わると、また受けられる (見張りの巡りが板に出る日まで進める)
         level.setDayTime(level.getDayTime() + Repeats.DAY);
+        for (int i = 0; i < 40 && !onBoard(server, "daily_bone_sentry"); i++) {
+            level.setDayTime(level.getDayTime() + Repeats.DAY);
+        }
         check(acceptOrStart(server, p, "daily_bone_sentry"), "could not take the sentry rounds on a new day at stage 1", failures);
         level.setDayTime(level.getDayTime() + Repeats.DAY);
         check(stage(p, "daily_bone_sentry").equals("rounds"), "an unfinished daily vanished at dawn", failures);
@@ -630,6 +638,16 @@ public final class FreeQuestSelfTest {
             return Board.accept(p, quest);
         }
         return Quests.start(p, quest, p.blockPosition());
+    }
+
+    private static List<String> drawnDailies(MinecraftServer server, ServerPlayer p) {
+        List<String> out = new java.util.ArrayList<>();
+        for (jp.revati.skyabyss.quest.QuestDef d : Board.todays(server)) {
+            if (d.repeat().equals("daily") && d.minStage() <= 1 && !QuestLog.of(p).quests().containsKey(d.id())) {
+                out.add(d.id());
+            }
+        }
+        return out;
     }
 
     private static boolean acceptOrStartBoard(MinecraftServer server, ServerPlayer p, String quest) {

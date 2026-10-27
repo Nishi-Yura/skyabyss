@@ -220,7 +220,7 @@ public final class VowSelfTest {
                 LivingIncomingDamageEvent ev2 = new LivingIncomingDamageEvent(b, new DamageContainer(back.damageSources().generic(), 4f));
                 NeoForge.EVENT_BUS.post(ev2);
                 check(f, near(ev2.getAmount(), 4f), "another group's damage was changed");
-                check(f, VowEvents.noCamp(Vows.activeFor(a)) && !VowEvents.noCamp(Vows.activeFor(b)) && CampBlocks.isCamp(Blocks.CRAFTING_TABLE.defaultBlockState())
+                check(f, VowEvents.noCamp(Vows.activeFor(a)) && !VowEvents.noCamp(Vows.activeFor(b)) && CampBlocks.isCamp(Blocks.CAMPFIRE.defaultBlockState())
                         && !CampBlocks.isCamp(Blocks.STONE.defaultBlockState()), "the bare vow does not forbid camp tools for exactly that group");
                 Vows.clear(server, ga, WHALE);
 
