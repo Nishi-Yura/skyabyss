@@ -49,6 +49,8 @@
   - 施設は、戸の前が道か広場に面する所と向きを探し、回して建てる（`facilities_at` / `build_fac`）。
   - 空き地への小路（`auto_lanes`）、奥の家と路地（`infill`）、裏庭（`yards`）、門の外の畑と小屋（`outskirts`）。
   - 多角形の壁（`poly_wall`）。
+  - 壁の外の地面（`tools/gen/world/town_outskirts.py`。設計図に直接書く。二度は塗らない）: 設計図の縁から、柔らかい地面で上に何も無い列をたどり（道・壁・家・畑は越えない）、まわりの土地の地面へ斑で塗る（炎は赤い砂とテラコッタ、潮は砂、雷は石・砂利・雪、鯨は苔とポドゾル、都は草に少しの土）。小物（枯れ草・草・羊歯・花・小岩）は道・壁・家・畑・印の 1 まわりに置かない。大陸の道（`continent/layout.json`。設計図には入っていない）の芯から 5.5 は塗らない。都は壁の外が空なので、門のそばの畑（11 × 7、柵と水路と干し草）と木立（樫と白樺）も置く。
+  - 均した台の縁: 輪 14 で、まわりの地面へなめらか（smoothstep）につなぐ（`SiteJob.buildColumns`。見どころの輪も同じつなぎ方）。
   - ラフは `python -I tools/capital/town_plans.py rough whale` で作る（設計図 `town_rough_<a|b|c>.json`、上から見た図 `docs/review/town_roughs/plan_<a|b|c>.png`）。
   - 撮影は `tools/shots/town_plans.txt`。
 - 家の型の見本: `tools/capital/house_sheet.py`（`town_rough_houses.json`、撮影は `tools/shots/town_houses.txt`）。

@@ -6,7 +6,7 @@
   - 小物 (枯れ草・草・羊歯・小岩・雪)。道・壁・家・畑と印の 1 まわりには置かない (通り道をふさがない)
 に塗り直す。二度は塗らない (note に town_outskirts があればやめる)。
 
-  python -I tools/gen/world/town_outskirts.py [whale tide storm ember]
+  python -I tools/gen/world/town_outskirts.py [whale tide storm ember capital]   (都は壁の外の畑と木立も)
 """
 from __future__ import annotations
 
@@ -34,6 +34,8 @@ MIX = {
                  edge=[("minecraft:sand", 5), (G, 3), ("minecraft:coarse_dirt", 1)]),
     "storm": dict(inner=[(G, 6), ("minecraft:coarse_dirt", 2), ("minecraft:gravel", 1)],
                   edge=[("minecraft:stone", 4), (G, 3), ("minecraft:gravel", 2), ("minecraft:andesite", 2), ("minecraft:snow_block", 1)]),
+    "capital": dict(inner=[(G, 24), ("minecraft:coarse_dirt", 1), ("minecraft:rooted_dirt", 1)],
+                    edge=[(G, 16), ("minecraft:moss_block", 1), ("minecraft:coarse_dirt", 1)]),
     "whale": dict(inner=[(G, 7), ("minecraft:coarse_dirt", 1), ("minecraft:podzol[snowy=false]", 1)],
                   edge=[(G, 5), ("minecraft:podzol[snowy=false]", 2), ("minecraft:moss_block", 2), ("minecraft:coarse_dirt", 1)]),
 }
@@ -43,9 +45,41 @@ PROPS = {
     "tide": dict(any=[("minecraft:dead_bush", 0.01)], grass=[("minecraft:short_grass", 0.14), ("minecraft:dandelion", 0.01)], rock=("minecraft:sandstone", "minecraft:smooth_sandstone", 0.004)),
     "storm": dict(any=[], grass=[("minecraft:short_grass", 0.1), ("minecraft:fern", 0.05)], rock=("minecraft:cobblestone", "minecraft:mossy_cobblestone", 0.006),
                   snow=("minecraft:snow[layers=1]", 0.25)),
+    "capital": dict(any=[], grass=[("minecraft:short_grass", 0.16), ("minecraft:fern", 0.02), ("minecraft:dandelion", 0.012), ("minecraft:poppy", 0.01),
+                                   ("minecraft:oxeye_daisy", 0.01), ("minecraft:cornflower", 0.008), ("minecraft:tall_grass[half=lower]", 0.0)],
+                    rock=("minecraft:mossy_cobblestone", "minecraft:cobblestone", 0.0015)),
     "whale": dict(any=[], grass=[("minecraft:short_grass", 0.14), ("minecraft:fern", 0.06), ("minecraft:sweet_berry_bush[age=1]", 0.006)],
                   rock=("minecraft:mossy_cobblestone", "minecraft:cobblestone", 0.006)),
 }
+
+
+LAYOUT = os.path.join(ROOT, "src", "main", "resources", "data", "skyabyss", "continent", "layout.json")
+ROAD_KEEP = 5.5   # 大陸の道 (芯からこの距離まで) は塗らない (幅 7 の道と荒れた縁。設計図に道は入っていないので、上書きすると道が消える)
+
+
+def origin_of(name):
+    lay = json.load(open(LAYOUT, encoding="utf-8"))
+    return tuple(lay["capital"]) if name == "capital" else tuple(lay["towns"][name])
+
+
+def road_distance(name):
+    """設計図の座標 (回さない。町も都も南向きのまま置く) での大陸の道の芯からの距離"""
+    ox, oz = origin_of(name)
+    segs = []
+    for line in json.load(open(LAYOUT, encoding="utf-8"))["roads"]:
+        for a, b in zip(line, line[1:]):
+            if min(a[0], b[0]) - ox < 200 and max(a[0], b[0]) - ox > -200 and min(a[1], b[1]) - oz < 200 and max(a[1], b[1]) - oz > -200:
+                segs.append((a[0] - ox, a[1] - oz, b[0] - ox, b[1] - oz))
+
+    def f(x, z):
+        best = 1e9
+        for x0, z0, x1, z1 in segs:
+            dx, dz = x1 - x0, z1 - z0
+            l2 = dx * dx + dz * dz
+            u = 0 if l2 == 0 else max(0.0, min(1.0, ((x - x0) * dx + (z - z0) * dz) / l2))
+            best = min(best, math.hypot(x - (x0 + u * dx), z - (z0 + u * dz)))
+        return best
+    return f
 
 
 def load(path):
@@ -139,7 +173,7 @@ def pick(mix, r):
 
 
 def outskirts(name):
-    path = os.path.join(DIR, f"town_{name}.json")
+    path = os.path.join(DIR, "capital.json" if name == "capital" else f"town_{name}.json")
     d, cells = load(path)
     if TAG in (d.get("note") or ""):
         print(f"{name}: already done")
@@ -183,7 +217,10 @@ def outskirts(name):
     span = max(x1, z1)
     changed = placed = 0
     rocks = []
-    seen = {(x, z) for (x, z) in seen if (x, -1, z) in cells}   # 何も無い列 (縁の自然の地面) はたどるだけで塗らない
+    # 何も無い列: 町では縁の自然の地面 (たどるだけで塗らない)。都は壁の外が全部何も無いので、そこも塗る (均した平らな芝のままだった)
+    fill = name == "capital"
+    rd = road_distance(name)
+    seen = {(x, z) for (x, z) in seen if (fill or (x, -1, z) in cells) and rd(x, z) > ROAD_KEEP}
     for (x, z) in sorted(seen):
         cheb = max(abs(x), abs(z))
         edge = min(1.0, max(0.0, (cheb - (span - 26)) / 22.0))
@@ -226,11 +263,85 @@ def outskirts(name):
                     cells[(x + dx, 0, z + dz)] = a if rnd.random() < 0.6 else b
         if rnd.random() < 0.5:
             cells[(x, 1, z)] = b
-    d["note"] = (d.get("note") or "") + f" / {TAG}: 壁の外 {len(seen)} 列の地面をまわりの土地へ ({changed} 塗り、小物 {placed}、小岩 {len(rocks)})"
+    extra = capital_extras(cells, seen, rd, rnd) if fill else ""
+    d["note"] = (d.get("note") or "") + f" / {TAG}{extra}: 壁の外 {len(seen)} 列の地面をまわりの土地へ ({changed} 塗り、小物 {placed}、小岩 {len(rocks)})"
     save(path, d, cells)
     print(f"{name}: {len(seen)} outside columns, {changed} repainted, {placed} props, {len(rocks)} rocks")
 
 
+def capital_extras(cells, seen, rd, rnd):
+    """都の壁の外: 門のそばの畑 (柵・水路・干し草) と、四隅の木立"""
+    def free(x0, z0, x1, z1, gap):
+        return all((x, z) in seen and rd(x, z) > ROAD_KEEP + 1 for x in range(x0 - gap, x1 + gap + 1) for z in range(z0 - gap, z1 + gap + 1))
+
+    crops = ["minecraft:wheat[age=7]", "minecraft:carrots[age=7]", "minecraft:potatoes[age=7]", "minecraft:beetroots[age=3]", "minecraft:wheat[age=5]"]
+    fields = []
+    xs = sorted({x for x, _ in seen})
+    zs = sorted({z for _, z in seen})
+    # 畑 11 × 7 (縁は柵、まんなかの列は水)。壁から離れすぎない所 (まわり 2 があいていて、たどった地面の中)
+    for z0 in range(zs[0] + 2, zs[-1] - 9, 3):
+        for x0 in range(xs[0] + 2, xs[-1] - 13, 3):
+            if len(fields) >= 10:
+                break
+            if any(abs(x0 - fx) < 16 and abs(z0 - fz) < 11 for fx, fz in fields):
+                continue
+            if rnd.random() < 0.5 or not free(x0, z0, x0 + 10, z0 + 6, 2):
+                continue
+            fields.append((x0, z0))
+    for x0, z0 in fields:
+        crop = rnd.choice(crops)
+        for x in range(x0, x0 + 11):
+            for z in range(z0, z0 + 7):
+                edge = x in (x0, x0 + 10) or z in (z0, z0 + 6)
+                if edge:
+                    cells[(x, -1, z)] = "minecraft:coarse_dirt" if rnd.random() < 0.4 else G
+                    gate = (z == z0 + 6 and x == x0 + 5)
+                    cells[(x, 0, z)] = "minecraft:air" if gate else "minecraft:oak_fence"
+                elif z == z0 + 3:
+                    cells[(x, -1, z)] = "minecraft:water"
+                    cells[(x, 0, z)] = "minecraft:air"
+                else:
+                    cells[(x, -1, z)] = "minecraft:farmland[moisture=7]"
+                    cells[(x, 0, z)] = crop
+        # 柵の角の柱に灯りは置かない (灯りは都の決まった所だけ)。干し草と樽を柵の外の一角に
+        hx, hz = x0 + 11 + 1, z0 + rnd.randint(1, 4)
+        if (hx, hz) in seen:
+            cells[(hx, 0, hz)] = "minecraft:hay_block[axis=y]"
+            if (hx, hz + 1) in seen and rnd.random() < 0.6:
+                cells[(hx, 0, hz + 1)] = "minecraft:hay_block[axis=x]"
+            if rnd.random() < 0.5:
+                cells[(hx, 1, hz)] = "minecraft:hay_block[axis=z]"
+    # 木立: 3〜5 本の樫と白樺 (畑と道から離れて)
+    taken = {(x, z) for fx, fz in fields for x in range(fx - 3, fx + 15) for z in range(fz - 3, fz + 10)}
+    groves = 0
+    for _ in range(400):
+        if groves >= 9:
+            break
+        cx, cz = rnd.choice(sorted(seen))
+        if (cx, cz) in taken or not free(cx - 5, cz - 5, cx + 5, cz + 5, 0):
+            continue
+        groves += 1
+        for _t in range(rnd.randint(3, 5)):
+            tx, tz = cx + rnd.randint(-2, 2), cz + rnd.randint(-2, 2)
+            birch = rnd.random() < 0.35
+            log = "minecraft:birch_log[axis=y]" if birch else "minecraft:oak_log[axis=y]"
+            leaf = "minecraft:birch_leaves[distance=1,persistent=true,waterlogged=false]" if birch else "minecraft:oak_leaves[distance=1,persistent=true,waterlogged=false]"
+            h = rnd.randint(5, 7)
+            for y in range(0, h):
+                cells[(tx, y, tz)] = log
+            for y in range(h - 3, h + 2):
+                r = 2.6 if y < h else (1.6 if y == h else 1.0)
+                for dx in range(-3, 4):
+                    for dz in range(-3, 4):
+                        if dx * dx + dz * dz <= r * r + rnd.random() * 0.8 and (tx + dx, y, tz + dz) not in cells or cells.get((tx + dx, y, tz + dz), "").endswith("air"):
+                            if dx * dx + dz * dz <= r * r + 0.4 and not (dx == 0 and dz == 0 and y < h):
+                                cells[(tx + dx, y, tz + dz)] = leaf
+        for x in range(cx - 5, cx + 6):
+            for z in range(cz - 5, cz + 6):
+                taken.add((x, z))
+    return f"、畑 {len(fields)}、木立 {groves}"
+
+
 if __name__ == "__main__":
-    for n in sys.argv[1:] or ["whale", "tide", "storm", "ember"]:
+    for n in sys.argv[1:] or ["whale", "tide", "storm", "ember", "capital"]:
         outskirts(n)
