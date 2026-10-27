@@ -60,6 +60,10 @@
 
 ## 次にやること
 
+0. **見直しの片付け（2026-10-27 のユーザー回答）**: 1 作る仕組みの残骸を消す・2 野営は焚き火/灯り/箱だけ・4 七日目の夜の台詞を消す、は済み（m1-sky-pass）。残り:
+   - 3 **大陸でない世界の仕組みを消す（途中）**: 途中の変更は `wip/continent-only`（コンパイル未確認）。済み: 見張りの条件（ContinentDanger/Pois/Respawn/IslandTrail/NamedFoes/RegionSpawner/TownVisits・PowderArts・RpgRules・SkyEvents・OpeningDirector・SiteJob）、野の村への案内と野営の語り部（OpeningBeats は語り部に会ったかと方角だけ）、焚き火の鯨追いの記録（NpcSpawner/NpcWorldData）。残り: SiteFinder（findShelter の探索・planFootprints・findRibs・structureNear・Probe.continent）、ChapterGrounds.find（方位の探索 → 図の場所だけ）、SiteSelfTest/ChapterGroundsSelfTest の合成地形のテスト、ContinentInfo（地図は常に大陸）、世界の種類を大陸だけに（`data/minecraft/tags/worldgen/world_preset/normal.json` を replace true）、言語の `message.skyabyss.guide.village/camp`、大陸より前の docs（06・17・21・33・34）の削除と README・参照の書き換え。済んだらコンパイルと自己テスト。
+   - 5 `docs/review` の使っていない見本を消す（ユーザー「使っていないものは消して」。選ばれなかった案も消してよい）。
+   - 気づいたこと: docs/07 の会話の書き写しの表（`tools/gen/mobs/gen_npc_content.py` などが出した）は古い（村・ネザー・マグマクリーム・エメラルド）。
 1. 試遊 0.7.2（`docs/review/playtest_0.7.2.md`）の声を待つ。バニラの品の置き換えは三段とも済み（飛ぶ矢も mod の絵。小舟の形だけバニラの舟で、絵は mod）
 2. クエストの見直しは済んだ（初日のお使いと風の道の旗を消し、墓守を 2 段に、大干潮と峰の足もとを時刻で閉じない形に、折れた剣は自分の得物を研ぐ形に）。
 3. 試遊 0.7.1 の声の直しの確かめと、都・見どころの仕上げの撮影（`tools/shots/capital_dress.txt`・`poi_dress.txt`）。
