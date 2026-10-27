@@ -1,0 +1,188 @@
+# all POI and outskirts pieces on flat ground for a quality audit (2026-10-28)
+world poiaudit flat
+size 1600 900
+timeout 2400
+render 12
+guiscale 2
+clouds off
+wait 100
+cmd skyabyss cinematic stop
+wait 10
+cmd time set 4000
+cmd weather clear
+cmd gamerule doDaylightCycle false
+cmd gamemode spectator
+hud off
+cmd forceload add -30 -30 288 30
+cmd forceload add -30 18 288 78
+cmd forceload add -30 66 288 126
+cmd forceload add -30 114 288 174
+cmd forceload add -30 162 288 222
+cmd forceload add -30 210 288 270
+cmd skyabyss dev ch1 place outskirts_dock 0 -61 0 0
+cmd skyabyss dev ch1 place outskirts_fire 48 -61 0 0
+cmd skyabyss dev ch1 place outskirts_shrine 96 -61 0 0
+cmd skyabyss dev ch1 place poi_bandit_camp 144 -61 0 0
+cmd skyabyss dev ch1 place poi_barrow 192 -61 0 0
+cmd skyabyss dev ch1 place poi_basalt_gate 240 -61 0 0
+cmd skyabyss dev ch1 place poi_beached_wreck 0 -61 48 0
+cmd skyabyss dev ch1 place poi_burnt_fort 48 -61 48 0
+cmd skyabyss dev ch1 place poi_cave 96 -61 48 0
+cmd skyabyss dev ch1 place poi_farm 144 -61 48 0
+cmd skyabyss dev ch1 place poi_fishing_huts 192 -61 48 0
+cmd skyabyss dev ch1 place poi_forge_ruin 240 -61 48 0
+cmd skyabyss dev ch1 place poi_graveyard 0 -61 96 0
+cmd skyabyss dev ch1 place poi_great_tree 48 -61 96 0
+cmd skyabyss dev ch1 place poi_hamlet_ember 96 -61 96 0
+cmd skyabyss dev ch1 place poi_hamlet_meadow 144 -61 96 0
+cmd skyabyss dev ch1 place poi_hamlet_storm 192 -61 96 0
+cmd skyabyss dev ch1 place poi_hamlet_tide 240 -61 96 0
+cmd skyabyss dev ch1 place poi_hamlet_whale 0 -61 144 0
+cmd skyabyss dev ch1 place poi_lighthouse 48 -61 144 0
+cmd skyabyss dev ch1 place poi_mine 96 -61 144 0
+cmd skyabyss dev ch1 place poi_monastery 144 -61 144 0
+cmd skyabyss dev ch1 place poi_mountain_hut 192 -61 144 0
+cmd skyabyss dev ch1 place poi_roadside_shrine 240 -61 144 0
+cmd skyabyss dev ch1 place poi_rod_tower 0 -61 192 0
+cmd skyabyss dev ch1 place poi_ruined_house 48 -61 192 0
+cmd skyabyss dev ch1 place poi_ruined_tower 96 -61 192 0
+cmd skyabyss dev ch1 place poi_stone_circle 144 -61 192 0
+cmd skyabyss dev ch1 place poi_titan_ribs 192 -61 192 0
+cmd skyabyss dev ch1 place poi_traveler_camp 240 -61 192 0
+cmd skyabyss dev ch1 place poi_watchtower 0 -61 240 0
+cmd skyabyss dev ch1 place poi_wind_gate 48 -61 240 0
+cmd skyabyss dev ch1 place poi_windmill 96 -61 240 0
+wait 300
+chat clear
+cmd tp @s 11.1 -51.1 11.1 135 22
+waitchunks
+wait 30
+shot outskirts_dock
+cmd tp @s 57.2 -54.1 9.2 135 22
+waitchunks
+wait 30
+shot outskirts_fire
+cmd tp @s 104.3 -52.8 8.3 135 22
+waitchunks
+wait 30
+shot outskirts_shrine
+cmd tp @s 157.8 -49.9 13.8 135 22
+waitchunks
+wait 30
+shot poi_bandit_camp
+cmd tp @s 209.4 -44.6 17.4 135 22
+waitchunks
+wait 30
+shot poi_barrow
+cmd tp @s 253.8 -43.3 13.8 135 22
+waitchunks
+wait 30
+shot poi_basalt_gate
+cmd tp @s 16.5 -44.6 64.5 135 22
+waitchunks
+wait 30
+shot poi_beached_wreck
+cmd tp @s 64.5 -44.6 64.5 135 22
+waitchunks
+wait 30
+shot poi_burnt_fort
+cmd tp @s 131.6 -34.7 83.6 135 22
+waitchunks
+wait 30
+shot poi_cave
+cmd tp @s 161.4 -41.6 65.4 135 22
+waitchunks
+wait 30
+shot poi_farm
+cmd tp @s 207.6 -42.8 63.6 135 22
+waitchunks
+wait 30
+shot poi_fishing_huts
+cmd tp @s 254.7 -43.3 62.7 135 22
+waitchunks
+wait 30
+shot poi_forge_ruin
+cmd tp @s 13.8 -48.7 109.8 135 22
+waitchunks
+wait 30
+shot poi_graveyard
+cmd tp @s 60.9 -35.5 108.9 135 22
+waitchunks
+wait 30
+shot poi_great_tree
+cmd tp @s 114.3 -34.4 114.3 135 22
+waitchunks
+wait 30
+shot poi_hamlet_ember
+cmd tp @s 162.3 -34.4 114.3 135 22
+waitchunks
+wait 30
+shot poi_hamlet_meadow
+cmd tp @s 210.3 -34.4 114.3 135 22
+waitchunks
+wait 30
+shot poi_hamlet_storm
+cmd tp @s 258.3 -34.4 114.3 135 22
+waitchunks
+wait 30
+shot poi_hamlet_tide
+cmd tp @s 18.3 -34.4 162.3 135 22
+waitchunks
+wait 30
+shot poi_hamlet_whale
+cmd tp @s 60.0 -37.9 156.0 135 22
+waitchunks
+wait 30
+shot poi_lighthouse
+cmd tp @s 118.0 -43.5 166.0 135 22
+waitchunks
+wait 30
+shot poi_mine
+cmd tp @s 160.5 -42.2 160.5 135 22
+waitchunks
+wait 30
+shot poi_monastery
+cmd tp @s 205.8 -42.1 157.8 135 22
+waitchunks
+wait 30
+shot poi_mountain_hut
+cmd tp @s 250.2 -51.1 154.2 135 22
+waitchunks
+wait 30
+shot poi_roadside_shrine
+cmd tp @s 11.1 -40.3 203.1 135 22
+waitchunks
+wait 30
+shot poi_rod_tower
+cmd tp @s 60.0 -50.5 204.0 135 22
+waitchunks
+wait 30
+shot poi_ruined_house
+cmd tp @s 108.0 -42.1 204.0 135 22
+waitchunks
+wait 30
+shot poi_ruined_tower
+cmd tp @s 158.7 -47.5 206.7 135 22
+waitchunks
+wait 30
+shot poi_stone_circle
+cmd tp @s 209.4 -44.0 209.4 135 22
+waitchunks
+wait 30
+shot poi_titan_ribs
+cmd tp @s 252.9 -49.3 204.9 135 22
+waitchunks
+wait 30
+shot poi_traveler_camp
+cmd tp @s 11.1 -42.1 251.1 135 22
+waitchunks
+wait 30
+shot poi_watchtower
+cmd tp @s 64.5 -42.2 256.5 135 22
+waitchunks
+wait 30
+shot poi_wind_gate
+cmd tp @s 108.9 -40.9 252.9 135 22
+waitchunks
+wait 30
+shot poi_windmill
