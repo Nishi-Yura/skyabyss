@@ -254,7 +254,7 @@ python tools/structure/check.py run/shots/dump_backs/dumps/titan_back.sbd --out 
 台詞の「声のようなもの」(言葉にならないつぶやき。自前の合成) を作る。仕様は `docs/design/20_cinematics.md` の 5 章。
 
 ```
-python tools/gen/sound/gen_cinematic_voice.py --install [--style a|b|c]   # 全台詞の .ogg と sounds.json を src に書く (既定 a。選んだ様式への切り替えはこの一語)
+python tools/gen/sound/gen_cinematic_voice.py --install [--style a|b|c]   # 全台詞の .ogg と sounds.json を src に書く (既定 a。いまの様式は voice_style.txt (l2)。足すときは必ず --style l2 を付ける)
 python tools/gen/sound/gen_cinematic_voice.py --check                      # 全台詞にクリップ・音の登録があるか、長さが表示時間に収まるか
 python tools/gen/sound/gen_cinematic_voice.py --review                     # 3 様式の見本を docs/review/voice/ に (選定ページ。テンプレートは tools/sheets/voice_review_template.html)
 ```

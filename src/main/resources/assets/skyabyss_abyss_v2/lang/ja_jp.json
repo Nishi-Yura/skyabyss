@@ -386,5 +386,7 @@
   "dialogue.skyabyss.attendant_abyss_porter.menu.anchor": "骨のかけら 8 → 錨鉄 2",
   "dialogue.skyabyss.attendant_abyss_porter.menu.lamp_sword": "錨鉄 20 → 灯り番の剣",
   "dialogue.skyabyss.attendant_abyss_porter.menu.listener": "錨鉄 16 → 鼓動の聴き筒",
-  "dialogue.skyabyss.attendant_abyss_porter.menu.bye": "行く"
+  "dialogue.skyabyss.attendant_abyss_porter.menu.bye": "行く",
+  "cinematic.skyabyss.abyss_v2.warden.hero1": "番人が崩れていく。……それでも、心臓は打っている。",
+  "cinematic.skyabyss.abyss_v2.warden.hero2": "見上げると、肋の骨。ここは、大きな何かの胸の中だった。"
 }

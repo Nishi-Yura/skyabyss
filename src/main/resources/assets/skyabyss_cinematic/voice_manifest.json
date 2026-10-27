@@ -64,5 +64,7 @@
 {"scene":"abyss_section_ash","idx":0,"at":0.6,"duration":3.4,"speaker":"HERO","label":"","text":"cinematic.skyabyss.abyss_v2.ash.hero1"},
 {"scene":"abyss_section_ash","idx":1,"at":4.4,"duration":3.6,"speaker":"HERO","label":"","text":"cinematic.skyabyss.abyss_v2.ash.hero2"},
 {"scene":"abyss_section_heart","idx":0,"at":0.6,"duration":3.4,"speaker":"HERO","label":"","text":"cinematic.skyabyss.abyss_v2.heart.hero1"},
-{"scene":"abyss_section_heart","idx":1,"at":4.4,"duration":3.6,"speaker":"HERO","label":"","text":"cinematic.skyabyss.abyss_v2.heart.hero2"}
+{"scene":"abyss_section_heart","idx":1,"at":4.4,"duration":3.6,"speaker":"HERO","label":"","text":"cinematic.skyabyss.abyss_v2.heart.hero2"},
+{"scene":"abyss_warden_fallen","idx":0,"at":0.8,"duration":3.4,"speaker":"HERO","label":"","text":"cinematic.skyabyss.abyss_v2.warden.hero1"},
+{"scene":"abyss_warden_fallen","idx":1,"at":5.0,"duration":3.8,"speaker":"HERO","label":"","text":"cinematic.skyabyss.abyss_v2.warden.hero2"}
 ]}

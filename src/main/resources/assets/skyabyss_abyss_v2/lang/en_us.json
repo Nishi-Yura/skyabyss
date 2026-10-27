@@ -386,5 +386,7 @@
   "dialogue.skyabyss.attendant_abyss_porter.menu.anchor": "Bone chips ×8 → Anchor iron ×2",
   "dialogue.skyabyss.attendant_abyss_porter.menu.lamp_sword": "Anchor iron ×20 → Lamp-Keeper's Sword",
   "dialogue.skyabyss.attendant_abyss_porter.menu.listener": "Anchor iron ×16 → Pulse Listener",
-  "dialogue.skyabyss.attendant_abyss_porter.menu.bye": "Leave"
+  "dialogue.skyabyss.attendant_abyss_porter.menu.bye": "Leave",
+  "cinematic.skyabyss.abyss_v2.warden.hero1": "The warden is coming apart. ... And still, the heart beats.",
+  "cinematic.skyabyss.abyss_v2.warden.hero2": "Above me, ribs. All this time I was inside the chest of something vast."
 }

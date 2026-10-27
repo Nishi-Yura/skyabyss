@@ -592,5 +592,23 @@
         "stream": false
       }
     ]
+  },
+  "voice.abyss_warden_fallen.l0": {
+    "subtitle": "subtitles.skyabyss_cinematic.voice.hero",
+    "sounds": [
+      {
+        "name": "skyabyss_cinematic:voice/abyss_warden_fallen/l0",
+        "stream": false
+      }
+    ]
+  },
+  "voice.abyss_warden_fallen.l1": {
+    "subtitle": "subtitles.skyabyss_cinematic.voice.hero",
+    "sounds": [
+      {
+        "name": "skyabyss_cinematic:voice/abyss_warden_fallen/l1",
+        "stream": false
+      }
+    ]
   }
 }

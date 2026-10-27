@@ -176,6 +176,14 @@ public final class WardenArena {
         Quests.signalWithParty(level, inside(level), SIGNAL_HEART);
         // 深淵の装備 (図鑑・天井・心核。abyss/gear/AbyssGearLoot)
         jp.revati.skyabyss.abyss.gear.AbyssGearLoot.warden(level, inside(level), 0);
+        // 倒れたあとの場面 (一人に一度。心臓の台を狙う)
+        BlockPos heart = AbyssBuild.mark("heart");
+        if (heart != null) {
+            for (ServerPlayer p : inside(level)) {
+                jp.revati.skyabyss.cinematic.Cinematics.startOnce(p, jp.revati.skyabyss.story.ch5.layers.SectionScenes.WARDEN_FALLEN, null,
+                        net.minecraft.world.phys.Vec3.atBottomCenterOf(heart));
+            }
+        }
     }
 
     @SubscribeEvent
