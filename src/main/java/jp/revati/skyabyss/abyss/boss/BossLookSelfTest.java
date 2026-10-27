@@ -19,6 +19,9 @@ import net.minecraft.world.entity.Entity;
 //   体の敵が自分で流す動きの名前 (鼓動もどき・灯喰い・燠の番人・前の私の影)、体に look を入れると同期の値に入り、技の溜め・当たりが act に入ること。
 public final class BossLookSelfTest {
     private static final List<String> F = new ArrayList<>();
+    // 主ごとに、決め技のほかで使う型 (story/ch5/layers/LordMoves の技 → abyss/boss/BossLookHook の型)
+    static final String[][] LORD_MOVES = {{"sweep", "slam", "bolts"}, {"slam", "bolts", "sweep", "charge"}, {"charge", "bolts", "sweep"},
+            {"sweep", "bolts", "slam", "charge"}};
 
     private BossLookSelfTest() {
     }
@@ -70,6 +73,19 @@ public final class BossLookSelfTest {
                     check(a.contains("\"animation." + lords[i] + "." + c + "\""), lords[i] + " lacks " + c);
                 }
                 check(a.contains("\"animation." + lords[i] + ".strike_" + lordAct[i] + "\""), lords[i] + " lacks strike_" + lordAct[i]);
+                // 決め技のほかの技も、型 (BossLookHook) ごとに溜めと当たりがある (tools/gen/abyss/gen_lord_moves.py)
+                for (String m : LORD_MOVES[i]) {
+                    check(a.contains("\"animation." + lords[i] + ".windup_" + m + "\"") && a.contains("\"animation." + lords[i] + ".strike_" + m + "\""),
+                            lords[i] + " lacks the windup/strike of " + m);
+                }
+            }
+        }
+        // 心臓の番人: 技・段・被弾・倒れるの動きが、HeartWarden.ACTIONS のぶん全部ある
+        String warden = text("assets/skyabyss/animations/entity/heart_warden.animation.json");
+        check(warden != null, "animation missing: heart_warden");
+        if (warden != null) {
+            for (String act : jp.revati.skyabyss.story.ch5.warden.HeartWarden.ACTIONS) {
+                check(warden.contains("\"animation.heart_warden." + act + "\""), "heart_warden lacks " + act);
             }
         }
         String salt = text("assets/skyabyss/animations/entity/lord_salt.animation.json");

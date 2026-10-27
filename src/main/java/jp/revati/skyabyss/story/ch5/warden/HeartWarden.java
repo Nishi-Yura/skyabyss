@@ -40,19 +40,24 @@ import net.minecraft.world.phys.Vec3;
 // 心臓の番人 (docs/design/36 の 6)。心臓の間で、点いた灯籠の光の中と光の術の灯りの中でだけ姿が見える。
 //   見え方   LIT (同期): 灯籠の 7 以内か、光の術の灯りの中。闇の中では見えない (描かない)。鼓動の術の輪郭 (光る効き目) は見える
 //   傷       光の中 100%・輪郭だけ 60%・闇 25%
-//   段       体力 60% で二段目 (影の写し二つ・灯籠の持ち 30 秒)、30% で三段目 (一度だけ闇の波・灯籠の持ち 20 秒)
-//   技       爪 (前の扇 r4.5、予告 18)・踏み込み (直線 10×2、予告 22)・吹き消し (灯籠へ寄り 60 tick、輪の予告。傷 40 で止まる)。灯籠が全部消えると傷 ×1.25
-//   体力     人数で増える (1 人 600、1 人ごとに +60%)
-//   見た目   案 B (肋の獣) の本番モデル (client/WardenRenderer)。動きは playAction で全員に流す (claw・lunge・snuff・phase・hurt・death)
+//   段       体力 60% で二段目 (影の写し・重さの輪・灯籠の持ち 30 秒)、30% で三段目 (一度だけ闇の波・灯籠の持ち 20 秒)。段ごとに技が増え、間隔が詰まる
+//   技       一段目: 爪 (前の扇 r4.5、予告 18)・踏み込み (直線 10×2、予告 22)・回し払い (自分のまわり r5.5、予告 26)・叩きつけ (前の円 r3.5、予告 28。重い)
+//            二段目: + 肋の棘 (相手へ向かう棘の列、順に予告 20〜40)・鼓動の波 (内と外の輪が二度、予告 24 / 38)・影の挟み撃ち (相手の左右から扇、予告 26)
+//            三段目: + 闇からの飛びかかり (消えて相手の足もとの円へ落ちる、予告 26)・連撃 (向きを変える扇が三度、予告 16 / 24 / 32)
+//            ほかに吹き消し (灯籠へ寄り 60 tick、輪の予告。傷 40 で止まる)。灯籠が全部消えると傷 ×1.25
+//   体力     1,000 (属性の上限 1024 の下。巨神の心臓と同じ)。受ける傷は TOUGH (0.3) 倍で、人数 (1 人ごとに +60%) と悪夢の段の倍率 (bulk) で割る。
+//            実質の体力は一人で約 3,300 (灰の主の約 3 倍)。一撃 30 (層の主の重い技と同じ)
+//   見た目   案 B (肋の獣) の本番モデル (client/WardenRenderer)。動きは playAction で全員に流す (ACTIONS。tools/gen/world/gen_heart_warden_moves.py)
 public class HeartWarden extends Monster implements GeoEntity {
     static final String ANIM = "animation.heart_warden.";
-    static final String[] ACTIONS = {"claw", "lunge", "snuff", "phase", "hurt", "death"};
+    public static final String[] ACTIONS = {"claw", "lunge", "snuff", "phase", "hurt", "death", "sweep", "slam", "spikes", "pulse", "pincer", "leap", "frenzy"};
     private static final RawAnimation IDLE = RawAnimation.begin().thenLoop(ANIM + "idle");
     private static final RawAnimation WALK = RawAnimation.begin().thenLoop(ANIM + "walk");
     private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
     static final EntityDataAccessor<Boolean> LIT = SynchedEntityData.defineId(HeartWarden.class, EntityDataSerializers.BOOLEAN);
     static final EntityDataAccessor<Boolean> DECOY = SynchedEntityData.defineId(HeartWarden.class, EntityDataSerializers.BOOLEAN);
-    static final double BASE_HP = 600;
+    static final double BASE_HP = 1000;
+    static final float TOUGH = 0.3f;
     static final float DARK_SHARE = 0.25f;
     static final float OUTLINE_SHARE = 0.6f;
     static final float DARK_FURY = 1.25f;
@@ -95,7 +100,7 @@ public class HeartWarden extends Monster implements GeoEntity {
         return Monster.createMonsterAttributes()
                 .add(Attributes.MAX_HEALTH, BASE_HP)
                 .add(Attributes.ARMOR, 6)
-                .add(Attributes.ATTACK_DAMAGE, 10)
+                .add(Attributes.ATTACK_DAMAGE, 30)
                 .add(Attributes.MOVEMENT_SPEED, 0.26)
                 .add(Attributes.FOLLOW_RANGE, 48)
                 .add(Attributes.KNOCKBACK_RESISTANCE, 1.0);
@@ -131,11 +136,17 @@ public class HeartWarden extends Monster implements GeoEntity {
         tier = t;
     }
 
-    // 人数で体力を合わせる (出たときに一度)。段の体力の倍率を先にかける (普通の戦いは 1 倍)
+    // 人数で硬さを合わせる (出たときに一度)。体力は属性の上限で止まるので、段の体力の倍率と人数は受ける傷を割る (普通の一人は 1)
     public void scaleFor(int players) {
-        double hp = BASE_HP * tier.hp() * (1 + 0.6 * Math.max(0, players - 1));
-        getAttribute(Attributes.MAX_HEALTH).setBaseValue(hp);
-        setHealth((float) hp);
+        bulk = tier.hp() * (1 + 0.6 * Math.max(0, players - 1));
+        getAttribute(Attributes.MAX_HEALTH).setBaseValue(BASE_HP);
+        setHealth((float) BASE_HP);
+    }
+
+    private double bulk = 1;
+
+    public double bulk() {
+        return bulk;
     }
 
     public int phase() {
@@ -163,7 +174,7 @@ public class HeartWarden extends Monster implements GeoEntity {
             }
             return true;
         }
-        float a = amount * share();
+        float a = (float) (amount * share() * TOUGH / bulk);
         lastHitAt = life;
         if (snuffing >= 0) {
             snuffDamage += a;
@@ -425,7 +436,172 @@ public class HeartWarden extends Monster implements GeoEntity {
                 return;
             }
         }
-        strike(level, t);
+        Move m = pick(t);
+        lastMove = m;
+        switch (m) {
+            case SWEEP -> sweep(level);
+            case SLAM -> slam(level, t);
+            case SPIKES -> spikes(level, t);
+            case PULSE -> pulse(level);
+            case PINCER -> pincer(level, t);
+            case LEAP -> leap(level, t);
+            case FRENZY -> frenzy(level, t);
+            default -> {
+                strike(level, t);
+                return;
+            }
+        }
+        // 技の長さ (動きの終わり) のあと、段ごとに詰まる間
+        cooldown = m.ticks + (phase == 1 ? 24 : phase == 2 ? 16 : 10);
+    }
+
+    // ---------------------------------------------------------------- 技の表 (段で増える)
+    enum Move {
+        BASIC(1, 0), SWEEP(1, 36), SLAM(1, 38), SPIKES(2, 44), PULSE(2, 44), PINCER(2, 32), LEAP(3, 36), FRENZY(3, 44);
+
+        final int minPhase;
+        final int ticks;
+
+        Move(int minPhase, int ticks) {
+            this.minPhase = minPhase;
+            this.ticks = ticks;
+        }
+    }
+
+    private Move lastMove = Move.BASIC;
+
+    // 次の技: 今の段で使えるもののうち、前と同じ技は続けない。近ければ近い技、遠ければ遠くへ届く技を多めに
+    private Move pick(ServerPlayer t) {
+        double d = Math.sqrt(t.distanceToSqr(this));
+        List<Move> pool = new java.util.ArrayList<>();
+        for (Move m : Move.values()) {
+            if (m.minPhase > phase || (m == lastMove && m != Move.BASIC)) {
+                continue;
+            }
+            int w = switch (m) {
+                case BASIC -> 3;
+                case SWEEP, FRENZY -> d < 5 ? 3 : 1;
+                case SLAM -> d < 7 ? 3 : 1;
+                case SPIKES, LEAP -> d > 6 ? 3 : 1;
+                default -> 2;
+            };
+            for (int k = 0; k < w; k++) {
+                pool.add(m);
+            }
+        }
+        return pool.get(random.nextInt(pool.size()));
+    }
+
+    private Telegraph.Hit hit(double mult) {
+        float d = (float) (dmg() * mult);
+        return (lvl, p) -> p.hurt(damageSources().mobAttack(this), d);
+    }
+
+    private void boom(ServerLevel level, double x, double y, double z, double r) {
+        level.playSound(null, x, y, z, SoundEvents.WARDEN_ATTACK_IMPACT, SoundSource.HOSTILE, 1.6f, 0.6f);
+        level.sendParticles(ParticleTypes.SCULK_SOUL, x, y + 0.3, z, (int) (8 + r * 4), r * 0.4, 0.2, r * 0.4, 0.02);
+        level.sendParticles(ParticleTypes.LARGE_SMOKE, x, y + 0.2, z, (int) (6 + r * 3), r * 0.4, 0.1, r * 0.4, 0.01);
+    }
+
+    // 回し払い: 自分のまわりの円。腕を広げて一回り
+    private void sweep(ServerLevel level) {
+        double x = getX();
+        double z = getZ();
+        Telegraph.in(level, TelegraphShape.circle(x, z, 5.5)).floor(getY()).warn(26).danger().owner(this)
+                .onImpact(lvl -> boom(lvl, x, getY(), z, 5.5)).onHit(hit(1.0)).start();
+        playAction("sweep");
+    }
+
+    // 叩きつけ: 相手の側の円 (前 3.5)。両腕を振り上げて落とす。重い
+    private void slam(ServerLevel level, ServerPlayer t) {
+        double ang = Math.atan2(t.getZ() - getZ(), t.getX() - getX());
+        double x = getX() + Math.cos(ang) * 3.5;
+        double z = getZ() + Math.sin(ang) * 3.5;
+        double y = getY();
+        Telegraph.in(level, TelegraphShape.circle(x, z, 3.5)).floor(y).warn(28).danger().owner(this)
+                .onImpact(lvl -> boom(lvl, x, y, z, 3.5)).onHit(hit(1.6)).start();
+        getNavigation().stop();
+        playAction("slam");
+    }
+
+    // 肋の棘: 相手へ向かう棘の列。近い所から順に突き出る
+    private void spikes(ServerLevel level, ServerPlayer t) {
+        double ang = Math.atan2(t.getZ() - getZ(), t.getX() - getX());
+        double y = getY();
+        for (int k = 0; k < 6; k++) {
+            double r = 2.5 + k * 2.2;
+            double x = getX() + Math.cos(ang) * r;
+            double z = getZ() + Math.sin(ang) * r;
+            Telegraph.in(level, TelegraphShape.circle(x, z, 1.8)).floor(y).warn(20 + k * 4).danger().owner(this)
+                    .onImpact(lvl -> {
+                        lvl.playSound(null, x, y, z, SoundEvents.BONE_BLOCK_BREAK, SoundSource.HOSTILE, 1.4f, 0.5f);
+                        lvl.sendParticles(new net.minecraft.core.particles.BlockParticleOption(ParticleTypes.BLOCK,
+                                net.minecraft.world.level.block.Blocks.BONE_BLOCK.defaultBlockState()), x, y + 0.6, z, 16, 0.4, 0.6, 0.4, 0.1);
+                    }).onHit(hit(0.9)).start();
+        }
+        getNavigation().stop();
+        playAction("spikes");
+    }
+
+    // 鼓動の波: 内の輪のあと外の輪。心臓が二度強く打つ
+    private void pulse(ServerLevel level) {
+        double x = getX();
+        double z = getZ();
+        double y = getY();
+        Telegraph.in(level, TelegraphShape.ring(x, z, 2, 5.5)).floor(y).warn(24).danger().owner(this)
+                .onImpact(lvl -> lvl.playSound(null, x, y, z, SoundEvents.WARDEN_HEARTBEAT, SoundSource.HOSTILE, 3f, 0.4f)).onHit(hit(1.0)).start();
+        Telegraph.in(level, TelegraphShape.ring(x, z, 5.5, 9.5)).floor(y).warn(38).danger().owner(this)
+                .onImpact(lvl -> {
+                    lvl.playSound(null, x, y, z, SoundEvents.WARDEN_HEARTBEAT, SoundSource.HOSTILE, 3f, 0.3f);
+                    lvl.sendParticles(ParticleTypes.SONIC_BOOM, x, y + 1, z, 1, 0, 0, 0, 0);
+                }).onHit(hit(1.0)).start();
+        getNavigation().stop();
+        playAction("pulse");
+    }
+
+    // 影の挟み撃ち: 相手の左右に影が立ち、両側から爪の扇
+    private void pincer(ServerLevel level, ServerPlayer t) {
+        double ang = Math.atan2(t.getZ() - getZ(), t.getX() - getX());
+        for (int s = -1; s <= 1; s += 2) {
+            double a = ang + s * Math.PI / 2;
+            double x = t.getX() + Math.cos(a) * 4.5;
+            double z = t.getZ() + Math.sin(a) * 4.5;
+            double face = Telegraph.angleOf(t.getX() - x, t.getZ() - z);
+            level.sendParticles(ParticleTypes.SCULK_SOUL, x, t.getY() + 1, z, 20, 0.3, 0.8, 0.3, 0.01);
+            Telegraph.in(level, TelegraphShape.cone(x, z, face, 6, Math.toRadians(40))).floor(t.getY()).warn(26).danger().owner(this)
+                    .onImpact(lvl -> lvl.sendParticles(ParticleTypes.SWEEP_ATTACK, x, t.getY() + 1, z, 3, 0.5, 0.3, 0.5, 0)).onHit(hit(1.0)).start();
+        }
+        playAction("pincer");
+    }
+
+    // 闇からの飛びかかり: 姿を消し、相手の足もとの円へ落ちてくる
+    private void leap(ServerLevel level, ServerPlayer t) {
+        double x = t.getX();
+        double z = t.getZ();
+        double y = t.getY();
+        addEffect(new net.minecraft.world.effect.MobEffectInstance(MobEffects.INVISIBILITY, 26, 0, false, false));
+        level.sendParticles(ParticleTypes.LARGE_SMOKE, getX(), getY() + 1, getZ(), 30, 0.6, 1, 0.6, 0.02);
+        Telegraph.in(level, TelegraphShape.circle(x, z, 3)).floor(y).warn(26).danger().owner(this)
+                .onImpact(lvl -> {
+                    teleportTo(x, y, z);
+                    removeEffect(MobEffects.INVISIBILITY);
+                    boom(lvl, x, y, z, 3);
+                }).onHit(hit(1.5)).start();
+        getNavigation().stop();
+        playAction("leap");
+    }
+
+    // 連撃: 向きを変えながら三度の扇 (最後は広い)
+    private void frenzy(ServerLevel level, ServerPlayer t) {
+        double ang = Telegraph.angleOf(t.getX() - getX(), t.getZ() - getZ());
+        double[] off = {Math.toRadians(-28), Math.toRadians(28), 0};
+        double[] half = {Math.toRadians(40), Math.toRadians(40), Math.toRadians(70)};
+        for (int k = 0; k < 3; k++) {
+            Telegraph.in(level, TelegraphShape.cone(getX(), getZ(), ang + off[k], 5, half[k])).floor(getY()).warn(16 + k * 8).danger().owner(this)
+                    .onHit(hit(k == 2 ? 1.1 : 0.8)).start();
+        }
+        getNavigation().stop();
+        playAction("frenzy");
     }
 
     // 爪か踏み込みを一つ出す (本物も写しも同じ)。近ければ爪、遠ければ踏み込み
@@ -513,12 +689,19 @@ public class HeartWarden extends Monster implements GeoEntity {
     // 動き: 歩きと待機は自動で切り替え、技と被弾・死は playAction でサーバーから流す (全員の画面に同期される)
     public void playAction(String name) {
         triggerAnim("action", name);
-        // 技の動きが終わる tick (動きの長さ。gen_heart_warden.py の claw 1.3・lunge 1.6・snuff 3.0・phase 2.0 秒)
+        // 技の動きが終わる tick (動きの長さ。claw 1.3・lunge 1.6・snuff 3.0・phase 2.0 秒、新しい技は Move.ticks)
         int len = switch (name) {
             case "claw" -> 26;
             case "lunge" -> 32;
             case "snuff" -> 60;
             case "phase" -> 40;
+            case "sweep" -> Move.SWEEP.ticks;
+            case "slam" -> Move.SLAM.ticks;
+            case "spikes" -> Move.SPIKES.ticks;
+            case "pulse" -> Move.PULSE.ticks;
+            case "pincer" -> Move.PINCER.ticks;
+            case "leap" -> Move.LEAP.ticks;
+            case "frenzy" -> Move.FRENZY.ticks;
             default -> 0;
         };
         actionEndTick = Math.max(actionEndTick, tickCount + len);

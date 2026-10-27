@@ -68,21 +68,21 @@ public final class WardenSelfTest {
                 report(f);
                 return;
             }
-            check(f, Math.abs(w.getMaxHealth() - HeartWarden.BASE_HP) < 1, "one player should face 600 HP: " + w.getMaxHealth());
+            check(f, Math.abs(w.getMaxHealth() - HeartWarden.BASE_HP) < 1 && Math.abs(w.bulk() - 1) < 1e-6, "one player should face BASE_HP: " + w.getMaxHealth() + " bulk " + w.bulk());
             check(f, AbyssBeacons.litCount() == 0, "waking should put every lantern out");
             BlockPos b0 = AbyssBeacons.pos(0);
             check(f, level.getBlockState(b0).is(Blocks.SOUL_CAMPFIRE) && !level.getBlockState(b0).getValue(CampfireBlock.LIT), "the lantern is not an unlit soul campfire");
-            // 闇の中の傷は 25%
+            // 闇の中の傷は 25% (硬さ TOUGH もかかる)
             w.invulnerableTime = 0;
             float hp = w.getHealth();
             w.hurt(level.damageSources().generic(), 100);
-            check(f, Math.abs(hp - w.getHealth() - 25) < 0.5, "a dark hit should deal 25: " + (hp - w.getHealth()));
+            check(f, Math.abs(hp - w.getHealth() - 100 * HeartWarden.DARK_SHARE * HeartWarden.TOUGH) < 0.5, "a dark hit should deal 25% x tough: " + (hp - w.getHealth()));
             // 光の中は 100%
             w.getEntityData().set(HeartWarden.LIT, true);
             w.invulnerableTime = 0;
             hp = w.getHealth();
             w.hurt(level.damageSources().generic(), 40);
-            check(f, Math.abs(hp - w.getHealth() - 40) < 0.5, "a lit hit should deal 40: " + (hp - w.getHealth()));
+            check(f, Math.abs(hp - w.getHealth() - 40 * HeartWarden.TOUGH) < 0.5, "a lit hit should deal 40 x tough: " + (hp - w.getHealth()));
             w.getEntityData().set(HeartWarden.LIT, false);
             // 灯籠: 一段目は 40 秒
             long now = level.getGameTime();
