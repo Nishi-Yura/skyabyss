@@ -71,6 +71,16 @@
           "goto": "end"
         },
         {
+          "id": "runs",
+          "kind": "talk",
+          "do": [
+            {
+              "type": "runs"
+            }
+          ],
+          "goto": "end"
+        },
+        {
           "id": "what",
           "kind": "talk",
           "goto": "what"

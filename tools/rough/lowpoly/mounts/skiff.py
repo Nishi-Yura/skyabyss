@@ -19,6 +19,8 @@ BLUE = [(30, 52, 86), (46, 78, 122), (70, 108, 156), (110, 146, 190)]
 SAIL = [(150, 140, 116), (190, 180, 154), (220, 212, 188), (238, 232, 212)]
 
 L = 14.0  # 半分の長さ
+import os
+RIDER = os.environ.get("SKIFF_NO_RIDER") is None   # 入れるときは人を外す (SKIFF_NO_RIDER=1)
 
 
 def hull(m, half_w, depth, sheer=2.2, flat=0.0, transom=0.0, top=6.0, n=13):
@@ -90,7 +92,7 @@ def a(k):
         F += part(f"oar{s}", T("woodl", [(s * 6.9, rings[6][0][1] + 1.2, -2), (s * 8.4, rings[6][0][1] + 0.6, 6), (s * 9.6, rings[6][0][1] - 0.6, 12)], [0.45, 0.45, 0.45], sides=4))
         F += part(f"blade{s}", ER("woodl", (s * 9.8, rings[6][0][1] - 0.8, 13.4), (0.4, 0.7, 2.2), segs=6, rings=2))
     F += part("prow", C("woodd", (0, rings[0][0][1] - 0.6, -L), (0, 0.5, -1), 2.4, 0.7, sides=4, rings=2))
-    F += rider((0, 7.4, 3.2), 0.0)
+    F += rider((0, 7.4, 3.2), 0.0) if RIDER else []
     return F, []
 
 
@@ -113,7 +115,7 @@ def b(k):
     F += part("stem", T("bonec", [(0, rings[0][0][1] - 1.5, -L + 0.2), (0, rings[0][0][1] + 1.8, -L - 1.2), (0, rings[0][0][1] + 3.2, -L - 0.4)], [0.8, 0.6, 0.45], sides=4))
     F += part("sternp", T("bonec", [(0, rings[-1][0][1] - 1.5, L - 0.2), (0, rings[-1][0][1] + 1.6, L + 1.0)], [0.8, 0.5], sides=4))
     F += part("coil", E("rope", (2.8, rings[8][0][1] - 0.2, 8.4), (1.6, 0.6, 1.6), segs=8, rings=2))
-    F += rider((0, 7.4, 3.2), 0.0)
+    F += rider((0, 7.4, 3.2), 0.0) if RIDER else []
     return F, []
 
 
@@ -144,7 +146,7 @@ def c(k):
     F += part("prow", T("woodd", [(0, rings[0][0][1] - 1.4, -L + 0.3), (0, rings[0][0][1] + 1.2, -L - 1.4)], [0.8, 0.6], sides=4))
     F += part("bird", ER("brass", (0, rings[0][0][1] + 1.8, -L - 1.8), (0.6, 0.9, 1.4), segs=6, rings=2))
     F += part("beak", C("brass", (0, rings[0][0][1] + 2.0, -L - 3.0), (0, 0, -1), 1.0, 0.3, sides=4, rings=2))
-    F += rider((0, 7.4, 3.2), 0.0)
+    F += rider((0, 7.4, 3.2), 0.0) if RIDER else []
     return F, []
 
 

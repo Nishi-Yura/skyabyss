@@ -587,5 +587,16 @@
   "dialogue.skyabyss.attendant_material_trader.menu": "...What have you got for me?",
   "dialogue.skyabyss.attendant_material_trader.menu.shop": "Browse and sell",
   "dialogue.skyabyss.attendant_material_trader.menu.about": "What is this place?",
-  "dialogue.skyabyss.attendant_material_trader.menu.bye": "Later"
+  "dialogue.skyabyss.attendant_material_trader.menu.bye": "Later",
+  "dialogue.skyabyss.attendant_guild_clerk.menu.runs": "Show me the back-run records.",
+  "message.skyabyss.runs.title": "- Back-run records -",
+  "message.skyabyss.runs.line": "%1$s (%2$s) #%3$s %4$s  %5$s  [%6$s]",
+  "message.skyabyss.runs.none": "%1$s (%2$s) no record yet",
+  "message.skyabyss.runs.bracket.1": "solo",
+  "message.skyabyss.runs.bracket.2": "two",
+  "message.skyabyss.runs.bracket.3": "three",
+  "message.skyabyss.runs.bracket.4": "four or more",
+  "message.skyabyss.runs.week": "This week's hearts #%1$s  %2$s  %3$s",
+  "message.skyabyss.runs.week_none": "No guild has stopped a heart this week yet",
+  "message.skyabyss.runs.ranked": "You made the run records (#%1$s, %2$s). The guild clerk can show you the board"
 }

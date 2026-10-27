@@ -1,0 +1,33 @@
+# skiff A (low-poly, beside a vanilla boat with the same yaw to check the heading) and the weathercock A held (2026-10-28)
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/skiff_weathercock.txt -PshotsName=skiff_weathercock
+world skiffwc flat
+size 1280 720
+timeout 1500
+render 6
+cmd time set noon
+cmd weather clear
+cmd gamemode creative
+camera 0 -60 8 180 0
+waitchunks
+hud off
+wait 300
+cmd skyabyss cinematic stop
+close
+hud off
+wait 20
+cmd summon skyabyss:skiff 0 -60 3 {Rotation:[90f,0f]}
+cmd summon minecraft:boat 0 -60 7 {Type:"oak",Rotation:[90f,0f]}
+cmd summon minecraft:armor_stand 4 -60 3 {Rotation:[90f,0f],ShowArms:1b,NoBasePlate:1b,HandItems:[{id:"skyabyss:weathercock",count:1},{}]}
+camera 2 -57.5 11 180 22
+wait 30
+chat clear
+shot side
+camera 8 -57.5 5 90 28
+wait 20
+shot front
+camera 5.6 -58.6 1.6 40 8
+wait 20
+shot weathercock_stand
+camera 0 -58.3 0.2 0 30
+wait 20
+shot top

@@ -865,6 +865,20 @@ public final class TrialRoute {
                 Notice.hint(p, "message.skyabyss.route.best", String.format("%d:%02d", t / 20 / 60, t / 20 % 60));
             }
         }
+        // ワールドの踏破の記録 (巨神ごと・人数の部ごとの最速 10 件とギルドの週の数。docs/design/10 の 7.2)
+        List<ServerPlayer> online = new ArrayList<>();
+        for (UUID id : party(r)) {
+            ServerPlayer p = back.getServer().getPlayerList().getPlayer(id);
+            if (p != null) {
+                online.add(p);
+            }
+        }
+        int rank = jp.revati.skyabyss.facility.guild.TitanRunData.get(back.getServer()).record(back.getServer(), titan, t, online, back.getGameTime());
+        if (rank > 0) {
+            for (ServerPlayer p : online) {
+                Notice.gain(p, "message.skyabyss.runs.ranked", rank, jp.revati.skyabyss.facility.guild.TitanRunData.clock(t));
+            }
+        }
         TrialSlot.release(back, r);
     }
 

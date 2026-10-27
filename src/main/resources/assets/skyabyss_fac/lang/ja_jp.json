@@ -587,5 +587,16 @@
   "dialogue.skyabyss.attendant_material_trader.menu": "……何を見せてくれるんだい。",
   "dialogue.skyabyss.attendant_material_trader.menu.shop": "品を見る・売る",
   "dialogue.skyabyss.attendant_material_trader.menu.about": "ここは何をする所？",
-  "dialogue.skyabyss.attendant_material_trader.menu.bye": "また来る"
+  "dialogue.skyabyss.attendant_material_trader.menu.bye": "また来る",
+  "dialogue.skyabyss.attendant_guild_clerk.menu.runs": "背中の踏破の記録を見せて",
+  "message.skyabyss.runs.title": "― 背中の踏破の記録 ―",
+  "message.skyabyss.runs.line": "%1$s（%2$s） %3$s 位 %4$s　%5$s　［%6$s］",
+  "message.skyabyss.runs.none": "%1$s（%2$s） まだ記録がない",
+  "message.skyabyss.runs.bracket.1": "一人",
+  "message.skyabyss.runs.bracket.2": "二人",
+  "message.skyabyss.runs.bracket.3": "三人",
+  "message.skyabyss.runs.bracket.4": "四人以上",
+  "message.skyabyss.runs.week": "今週の心臓 %1$s 位　%2$s　%3$s 回",
+  "message.skyabyss.runs.week_none": "今週、心臓を止めたギルドはまだない",
+  "message.skyabyss.runs.ranked": "踏破の記録に載った（%1$s 位　%2$s）。組合の書記に記録を見せてもらえる"
 }

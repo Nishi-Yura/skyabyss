@@ -26,6 +26,17 @@ public final class RouteCommands {
         event.getDispatcher().register(Commands.literal("skyroute")
                 .then(Commands.literal("yes").executes(ctx -> reply(ctx, true)))
                 .then(Commands.literal("no").executes(ctx -> reply(ctx, false)))
+                // 踏破の記録 (巨神ごと・人数の部ごとの最速と、今週のギルドの心臓の数)。だれでも見られる
+                .then(Commands.literal("runs").executes(ctx -> {
+                    jp.revati.skyabyss.facility.guild.TitanRunData.show(ctx.getSource().getPlayerOrException(), null);
+                    return 1;
+                }).then(Commands.argument("titan", com.mojang.brigadier.arguments.StringArgumentType.word())
+                        .suggests((c, b) -> net.minecraft.commands.SharedSuggestionProvider.suggest(Titans.all(), b))
+                        .executes(ctx -> {
+                            jp.revati.skyabyss.facility.guild.TitanRunData.show(ctx.getSource().getPlayerOrException(),
+                                    com.mojang.brigadier.arguments.StringArgumentType.getString(ctx, "titan"));
+                            return 1;
+                        })))
                 .then(Commands.literal("status").requires(s -> s.hasPermission(2)).executes(RouteCommands::status))
                 .then(Commands.literal("start").requires(s -> s.hasPermission(2)).executes(RouteCommands::start))
                 .then(Commands.literal("enter").requires(s -> s.hasPermission(2)).executes(RouteCommands::enter))
