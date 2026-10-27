@@ -1,0 +1,33 @@
+# 深淵の心臓の間と控えの間を広く撮る (2026-10-28 夜の見直し)
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/abyss_review.txt -PshotsName=abyss_review
+world abyss_heart4 flat
+size 1280 720
+timeout 5400
+render 10
+clouds off
+
+wait 80
+cmd skyabyss cinematic stop
+cmd gamemode creative
+cmd effect give @s night_vision 99999 0 true
+hud off
+cmd skyabyss abyss enter
+wait 40
+cmd skyabyss abyss build
+wait 1200
+cmd skyabyss abyss layer go heart 180
+wait 5
+cmd skyabyss cinematic stop
+cmd tp @s ~ ~3 ~ 180 90
+wait 30
+shot z1_down
+cmd tp @s 12 -297 12 135 45
+wait 30
+shot z2_side
+cmd tp @s -20 -296 -10 -60 -20
+wait 10
+shot z3_nonv
+cmd gamemode spectator
+cmd tp @s 0 -293 22 180 -8
+wait 30
+shot z4_high
