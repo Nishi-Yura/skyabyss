@@ -20,7 +20,12 @@ import town_outskirts as T  # noqa: E402  (設計図の読み書き)
 PATH = os.path.join(T.DIR, "abyss_layers.json")
 TAG = "room_props"
 BAND = {"bone": (150, 215), "storm": (-90, -30)}
+# 形 B (塩・灰) の待ち場と下り道は二度目の仕上げ (room_props_b)。python -I tools/abyss/dress_rooms.py b
+TAG_B = "room_props_b"
+BAND_B = {"salt": (25, 85), "ash": (-215, -155)}
 ROCK = {"bone": {"minecraft:calcite", "minecraft:diorite", "minecraft:bone_block[axis=y]", "minecraft:dripstone_block", "minecraft:tuff"},
+        "salt": {"minecraft:calcite", "minecraft:white_terracotta", "minecraft:snow_block", "minecraft:diorite", "minecraft:smooth_quartz"},
+        "ash": {"minecraft:blackstone", "minecraft:basalt[axis=y]", "minecraft:smooth_basalt", "minecraft:cobbled_deepslate"},
         "storm": {"minecraft:tuff", "minecraft:deepslate", "minecraft:cobbled_deepslate", "minecraft:deepslate_copper_ore", "minecraft:copper_ore",
                   "minecraft:oxidized_copper", "minecraft:weathered_copper"}}
 FLOOR = {
@@ -31,11 +36,20 @@ FLOOR = {
               ("minecraft:cobbled_deepslate_slab[type=bottom,waterlogged=false]", 3), ("minecraft:exposed_cut_copper_slab[type=bottom,waterlogged=false]", 2),
               ("minecraft:weathered_copper", 1)],
 }
+FLOOR["salt"] = [("minecraft:amethyst_cluster[facing=up,waterlogged=false]", 2), ("minecraft:calcite", 2), ("minecraft:smooth_quartz_slab[type=bottom,waterlogged=false]", 3),
+                 ("minecraft:barrel[facing=up,open=false]", 1), ("minecraft:white_carpet", 2), ("minecraft:small_amethyst_bud[facing=up,waterlogged=false]", 2)]
+FLOOR["ash"] = [("minecraft:basalt[axis=y]", 3), ("minecraft:blackstone_slab[type=bottom,waterlogged=false]", 3), ("minecraft:skeleton_skull[powered=false,rotation={r}]", 1),
+                ("minecraft:polished_blackstone_button[face=floor,facing=north,powered=false]", 2), ("minecraft:gray_carpet", 2)]
 HANG = {"bone": "minecraft:pointed_dripstone[thickness={t},vertical_direction=down,waterlogged=false]",
+        "salt": "minecraft:pointed_dripstone[thickness={t},vertical_direction=down,waterlogged=false]",
+        "ash": "minecraft:chain[axis=y,waterlogged=false]",
         "storm": "minecraft:chain[axis=y,waterlogged=false]"}
 
 
-def main():
+def main(second=False):
+    global TAG, BAND
+    if second:
+        TAG, BAND = TAG_B, BAND_B
     d, c = T.load(PATH)
     if TAG in d.get("dress", []):
         print("already done")
@@ -47,7 +61,14 @@ def main():
             a, b = m[k], m[k[:-2] + "_b"]
             boxes.append((min(a[0], b[0]) - 2, min(a[1], b[1]) - 2, min(a[2], b[2]) - 2, max(a[0], b[0]) + 2, max(a[1], b[1]) + 2, max(a[2], b[2]) + 2))
     far = [v for k, v in m.items() if k.startswith(("camp_", "arena_", "arrive_", "arrival", "lord_", "descend_", "gate_", "pool_", "survivor_", "rest_"))]
-    near = list(m.values())
+    near = [v for k, v in m.items() if not k.startswith("esc_")]   # 下り道の芯の点 (数百) は除く。壁ぎわ 4 マスの空きで道は残る
+
+    trail = {}
+    for k, v in m.items():
+        if k.startswith("esc_"):
+            for dx in range(-2, 3):
+                for dz in range(-2, 3):
+                    trail.setdefault((v[0] + dx, v[2] + dz), []).append((v[1] - 3, v[1] + 4))
 
     def air(p):
         s = c.get(p)
@@ -58,11 +79,14 @@ def main():
             return True
         if any(abs(x - f[0]) <= 14 and abs(y - f[1]) <= 8 and abs(z - f[2]) <= 14 for f in far):
             return True
-        return any(abs(x - n[0]) <= 3 and abs(y - n[1]) <= 3 and abs(z - n[2]) <= 3 for n in near)
+        if any(abs(x - n[0]) <= 3 and abs(y - n[1]) <= 3 and abs(z - n[2]) <= 3 for n in near):
+            return True
+        # 下り道の芯 (護りの人が歩く所) から 2 以内には置かない (2026-10-28: 灰の芯の 3 マスが歩けなくなった)
+        return (x, z) in trail and any(lo <= y <= hi for lo, hi in trail[(x, z)])
 
     rnd = random.Random("abyss-room-props")
-    placed = {"bone": 0, "storm": 0}
-    hung = {"bone": 0, "storm": 0}
+    placed = {k: 0 for k in BAND}
+    hung = {k: 0 for k in BAND}
     cells = list(c.items())
     for layer, (lo, hi) in BAND.items():
         rock = ROCK[layer]
@@ -85,7 +109,7 @@ def main():
             below = (x, y - 1, z)
             if air(below) and all(air((x, y - k, z)) for k in range(1, 5)) and not blocked(x, y - 2, z) and rnd.random() < 0.035:
                 n = 1 if rnd.random() < 0.6 else 2
-                if layer == "bone":
+                if layer in ("bone", "salt"):
                     if n == 1:
                         c[below] = HANG["bone"].format(t="tip")
                     else:
@@ -111,4 +135,4 @@ def pick(table, rnd):
 
 
 if __name__ == "__main__":
-    main()
+    main(len(sys.argv) > 1 and sys.argv[1] == "b")
