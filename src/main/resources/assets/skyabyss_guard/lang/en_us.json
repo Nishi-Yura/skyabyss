@@ -9,5 +9,10 @@
   "label.skyabyss.facility.perch": "Young Perch",
   "label.skyabyss.facility.tavern": "Tavern: The Deep Cup",
   "label.skyabyss.facility.smithy": "Smithy",
-  "label.skyabyss.facility.guild": "Whale Chasers' Guild"
+  "label.skyabyss.facility.guild": "Whale Chasers' Guild",
+  "label.skyabyss.facility.guild_hall": "Guild Hall (guild, exchange, storage)",
+  "label.skyabyss.facility.travel": "Travel House (stables, perch, maps)",
+  "label.skyabyss.facility.training": "Training Hall",
+  "label.skyabyss.facility.shrine": "Shrine (key room, archive)",
+  "label.skyabyss.facility.market": "Market (tools, apothecary)"
 }

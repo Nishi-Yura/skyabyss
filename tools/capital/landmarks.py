@@ -125,52 +125,65 @@ def ring_deck(v, cx, cz, y, r, wood, fence, lantern=True):
 
 
 # ---------------------------------------------------------------- A 鯨の肋の塔
-def lm_ribs(v, st, cx, cz):
-    """低い見張りの塔の上に、鯨の骨 (背骨と 4 対の肋) が覆いかぶさる"""
+def lm_ribs(v, st, cx, cz, k=1.0, axis='z'):
+    """低い見張りの塔の上に、鯨の骨 (背骨と 4 対の肋) が覆いかぶさる。k = 大きさ、axis = 背骨の向き"""
     tower(v, st, cx, cz, half=3, y0=0, h=13, belfry=True, spire_rise=2, pinnacles=True, sealed=True, door_side='south')
     bone = 'bone_block[axis=y]'
-    TOP = 26
+    TOP = int(round(26 * k))
+    put = (lambda x, y, z, s_: v.set(x, y, z, s_)) if axis == 'z' else (lambda x, y, z, s_: v.set(cx + (z - cz), y, cz + (x - cx), _swap_axis(s_)))
+    class V2:
+        b = v.b
+        set = staticmethod(put)
+    vv = V2()
     for dz in (-7, -2, 3, 8):
-        span = 10.5 - abs(dz - 0.5) * 0.25
+        dz = int(round(dz * k))
+        span = (10.5 - abs(dz - 0.5) * 0.25) * k
         top = TOP - 1 - abs(dz - 0.5) * 0.35
-        for s in (1, -1):
+        for s_ in (1, -1):
             pts = []
-            for k in range(0, 17):
-                t = k / 16
+            for i in range(0, 17):
+                t = i / 16
                 ang = t * math.pi * 0.5
-                # 下は外へふくらみ、上で背骨へ寄る (肋の弓)
-                x = cx + s * span * math.cos(ang) * (1.0 + 0.18 * math.sin(t * math.pi))
+                x = cx + s_ * span * math.cos(ang) * (1.0 + 0.18 * math.sin(t * math.pi))
                 y = -1 + top * math.sin(ang)
                 pts.append((x, y, cz + dz - 1.2 * math.sin(t * math.pi)))
-            arc(v, pts[:7], bone, thick=2)
-            arc(v, pts[6:], bone, thick=1)
-            bx, bz = int(round(cx + s * span)), cz + dz
-            for (a, b) in ((0, 0), (s, 0), (0, 1), (0, -1), (s, 1)):
-                v.set(bx + a, -1, bz + b, 'mossy_cobblestone')
-            v.set(bx + s, 0, bz, 'mossy_cobblestone_wall')
-            v.set(bx + s, 0, bz + 1, 'moss_carpet')
-    # 背骨: 南北に、椎骨の棘と横の突起。北の端は頭骨のように太く
-    for z in range(cz - 11, cz + 12):
-        v.set(cx, TOP, z, 'bone_block[axis=z]')
+            arc(vv, pts[:7], bone, thick=2)
+            arc(vv, pts[6:], bone, thick=1)
+            bx, bz = int(round(cx + s_ * span)), cz + dz
+            for (p, q) in ((0, 0), (s_, 0), (0, 1), (0, -1), (s_, 1)):
+                put(bx + p, -1, bz + q, 'mossy_cobblestone')
+            put(bx + s_, 0, bz, 'mossy_cobblestone_wall')
+            put(bx + s_, 0, bz + 1, 'moss_carpet')
+    L = int(round(11 * k))
+    for z in range(cz - L, cz + L + 1):
+        put(cx, TOP, z, 'bone_block[axis=z]')
         if z % 2 == 0:
-            v.set(cx, TOP + 1, z, bone)
+            put(cx, TOP + 1, z, bone)
             if z % 4 == 0:
-                v.set(cx, TOP + 2, z, 'bone_block[axis=y]')
-            v.set(cx + 1, TOP, z, 'bone_block[axis=x]')
-            v.set(cx - 1, TOP, z, 'bone_block[axis=x]')
-    for z in range(cz - 15, cz - 11):
+                put(cx, TOP + 2, z, 'bone_block[axis=y]')
+            put(cx + 1, TOP, z, 'bone_block[axis=x]')
+            put(cx - 1, TOP, z, 'bone_block[axis=x]')
+    for z in range(cz - L - 4, cz - L):
         for x in range(cx - 2, cx + 3):
             for y in range(TOP - 2, TOP + 2):
-                if abs(x - cx) + abs(y - TOP + 0.5) <= 3 - (cz - 11 - z) * 0.4:
-                    v.set(x, y, z, 'bone_block[axis=z]')
-    v.set(cx - 1, TOP, cz - 14, 'black_concrete')
-    v.set(cx + 1, TOP, cz - 14, 'black_concrete')
-    # 肋の間から吊った灯り
+                if abs(x - cx) + abs(y - TOP + 0.5) <= 3 - (cz - L - z) * 0.4:
+                    put(x, y, z, 'bone_block[axis=z]')
+    put(cx - 1, TOP, cz - L - 3, 'black_concrete')
+    put(cx + 1, TOP, cz - L - 3, 'black_concrete')
     for dz in (-7, -2, 3, 8):
+        dz = int(round(dz * k))
         for y in range(TOP - 4, TOP):
-            v.set(cx, y, cz + dz, 'chain[axis=y,waterlogged=false]')
-        v.set(cx, TOP - 5, cz + dz, 'lantern[hanging=true,waterlogged=false]')
-    return 12
+            put(cx, y, cz + dz, 'chain[axis=y,waterlogged=false]')
+        put(cx, TOP - 5, cz + dz, 'lantern[hanging=true,waterlogged=false]')
+    return int(round(12 * k)) + 1
+
+
+def _swap_axis(s_):
+    if 'axis=x' in s_:
+        return s_.replace('axis=x', 'axis=z')
+    if 'axis=z' in s_:
+        return s_.replace('axis=z', 'axis=x')
+    return s_
 
 
 # ---------------------------------------------------------------- B 岩の上の見張り
@@ -248,7 +261,7 @@ def lm_rock(v, st, cx, cz):
 
 
 # ---------------------------------------------------------------- C 鐘の大樹
-def lm_tree(v, st, cx, cz):
+def lm_tree(v, st, cx, cz, lean=0.0):
     trunk = 'spruce_log' if 'spruce' in st.trunk else st.trunk.split('[')[0]
     wood_bark = trunk.replace('_log', '_wood') if trunk.endswith('_log') else trunk
     # 根の張り出し (8 方へ、地を這って沈む)
@@ -261,7 +274,7 @@ def lm_tree(v, st, cx, cz):
     path = []
     for y in range(0, 25):
         t = y / 24
-        ox = 2.2 * math.sin(t * 3.4)
+        ox = 2.2 * math.sin(t * 3.4) - lean * t * t
         oz = 1.6 * math.sin(t * 2.3 + 1.0)
         path.append((cx + ox, y, cz + oz, 2.8 - 1.4 * t))
     for (x, y, z, r) in path:
@@ -299,7 +312,85 @@ def lm_tree(v, st, cx, cz):
     return 11
 
 
+def lm_lighthouse(v, st, cx, cz):
+    """潮の町: 白い砂岩と海の石の岩の上に、白と青緑の帯の灯台。頂の灯りの間に海の灯り"""
+    pal = ['smooth_sandstone', 'sandstone', 'calcite', 'prismarine', 'cut_sandstone', 'smooth_sandstone']
+    top = rock_pillar(v, cx, cz, 6.5, 9, pal, moss='moss_block', seed=11, lip_every=3)
+    y0 = top + 1
+    for y in range(y0, y0 + 16):
+        r = 3.6 - (y - y0) * 0.05
+        band = 'calcite' if ((y - y0) // 3) % 2 == 0 else 'dark_prismarine'
+        for x in range(-5, 6):
+            for z in range(-5, 6):
+                d = math.hypot(x, z)
+                if r - 1.0 <= d <= r:
+                    v.set(cx + x, y, cz + z, band)
+                elif d < r - 1.0:
+                    v.set(cx + x, y, cz + z, 'black_concrete')
+    yt = y0 + 16
+    for x in range(-4, 5):
+        for z in range(-4, 5):
+            d = math.hypot(x, z)
+            if d <= 4.4:
+                v.set(cx + x, yt, cz + z, 'smooth_quartz')
+                if d > 3.6:
+                    v.set(cx + x, yt + 1, cz + z, 'prismarine_wall')
+            if 1.6 <= d <= 2.6:
+                for y in (yt + 1, yt + 2, yt + 3):
+                    v.set(cx + x, y, cz + z, 'light_blue_stained_glass')
+            elif d < 1.6:
+                v.set(cx + x, yt + 1, cz + z, 'sea_lantern')
+            if d <= 3.0:
+                v.set(cx + x, yt + 4, cz + z, 'dark_prismarine_slab[type=bottom,waterlogged=false]')
+    v.set(cx, yt + 5, cz, 'lightning_rod[facing=up,powered=false,waterlogged=false]')
+    # 岩を巻く階段の跡と、波の泡 (下の縁の白い石)
+    for y in range(0, y0):
+        ang = y * 0.55
+        x = int(round(cx + 7.2 * math.cos(ang)))
+        z = int(round(cz + 7.2 * math.sin(ang)))
+        if v.b.get((x, y, z)) in (None, 'air'):
+            v.set(x, y, z, 'smooth_sandstone_slab[type=top,waterlogged=false]')
+    return 9
+
+
+def lm_wind_tree(v, st, cx, cz):
+    """風の町: 風に傾いた鐘の大樹 (東から吹く風で西へ傾き、葉は風下へ流れる)"""
+    return lm_tree(v, st, cx, cz, lean=4.0)
+
+
+def lm_crag(v, st, cx, cz):
+    """灰の町: 黒い玄武の岩の上に篝火の台。岩の割れ目に熾火、四隅の柱から鎖の灯り"""
+    pal = ['blackstone', 'basalt[axis=y]', 'polished_basalt[axis=y]', 'tuff', 'blackstone', 'basalt[axis=y]']
+    top = rock_pillar(v, cx, cz, 7.0, 19, pal, moss='coarse_dirt', seed=21, lip_every=4)
+    # 割れ目の熾火
+    for (x, y, z), s_ in list(v.b.items()):
+        if s_.startswith('basalt') and noise(x, y, z, 2.0, 22) > 0.8:
+            v.set(x, y, z, 'magma_block')
+    y0 = top + 1
+    for x in range(cx - 3, cx + 4):
+        for z in range(cz - 3, cz + 4):
+            edge = max(abs(x - cx), abs(z - cz)) == 3
+            v.set(x, y0, z, 'polished_blackstone_bricks' if edge else 'magma_block')
+            if edge:
+                v.set(x, y0 + 1, z, 'polished_blackstone_wall' if (x + z) % 2 else 'air')
+    for (a, b) in ((0, 0), (1, 1), (-1, -1), (1, -1), (-1, 1)):
+        v.set(cx + a, y0 + 1, cz + b, 'campfire[facing=north,lit=true,signal_fire=true,waterlogged=false]')
+    for (x, z) in ((cx - 3, cz - 3), (cx + 3, cz - 3), (cx - 3, cz + 3), (cx + 3, cz + 3)):
+        for y in range(y0 + 1, y0 + 6):
+            v.set(x, y, z, 'polished_blackstone_bricks' if y < y0 + 5 else 'chiseled_polished_blackstone')
+        v.set(x, y0 + 6, z, 'lantern[hanging=false,waterlogged=false]')
+    # 岩を上る切り通しの段
+    for y in range(0, y0):
+        ang = y * 0.5 + 1.0
+        x = int(round(cx + 6.8 * math.cos(ang)))
+        z = int(round(cz + 6.8 * math.sin(ang)))
+        v.set(x, y, z, 'polished_blackstone_brick_slab[type=top,waterlogged=false]')
+    return 9
+
+
 DESIGNS = {'a': lm_ribs, 'b': lm_rock, 'c': lm_tree}
+# 町ごとの目印 (2026-10-27 に決めた: 町ごとに一つの象徴)
+TOWN = {'whale': (lm_ribs, {'k': 0.8, 'axis': 'x'}), 'tide': (lm_lighthouse, {}), 'storm': (lm_wind_tree, {}), 'ember': (lm_crag, {})}
 
 
 def main():

@@ -9,5 +9,10 @@
   "label.skyabyss.facility.perch": "子の止まり木",
   "label.skyabyss.facility.tavern": "酒場「深い杯」",
   "label.skyabyss.facility.smithy": "鍛冶場",
-  "label.skyabyss.facility.guild": "鯨追いの組合"
+  "label.skyabyss.facility.guild": "鯨追いの組合",
+  "label.skyabyss.facility.guild_hall": "組合会館（組合・取引所・預かり所）",
+  "label.skyabyss.facility.travel": "旅の館（厩舎・止まり木・地図屋）",
+  "label.skyabyss.facility.training": "訓練所",
+  "label.skyabyss.facility.shrine": "社（鍵の間・書庫）",
+  "label.skyabyss.facility.market": "市の店（道具屋・薬師）"
 }

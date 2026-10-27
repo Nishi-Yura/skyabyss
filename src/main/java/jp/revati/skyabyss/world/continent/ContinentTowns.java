@@ -30,8 +30,11 @@ public final class ContinentTowns {
     static final String[] MARKS = {"rest", "board", "inn", "shop", "stand", CHASER_MARK, "folk_a", "folk_b", Attendants.INN_BED, AttendantRole.INNKEEPER.mark(), AttendantRole.TOOL_MERCHANT.mark(),
             AttendantRole.SMITH.mark(), AttendantRole.APOTHECARY.mark()};
     // 町の作りの版。2 = 都と同じ作りの壁のある町 (tools/capital/region_town.py。2026-10-26 の声「始まりの町とそれ以外の町はクオリティ違いすぎる」)。
+    // 3 = 街道と市場の町・上の町・都と同じ施設 (tools/capital/town_plans.py。docs/design/45)。
     // 前の版で建った町は、建て直す (建てたら付属の点 VERSION_MARK を書く)
-    public static final String VERSION_MARK = "town_v2";
+    public static final String VERSION_MARK = "town_v3";
+    // 土地の町の施設の碑 (設計図の sign_<建物>)。文は lang の sign.skyabyss.town_fac.<建物>.1〜4
+    static final java.util.Set<String> TOWN_SIGNS = java.util.Set.of("inn", "smithy", "tool_shop", "apothecary", "market", "guild_hall", "travel", "training", "shrine");
     static final int KEEP_RADIUS = 96;
     static final int CHECK_INTERVAL = 100;
 
@@ -52,9 +55,23 @@ public final class ContinentTowns {
                     job.entry.extra(m, at);
                 }
             }
-            // 施設の浮く名札 (都と同じ。opening/site/ShelterBuilder.keepLabels が近くの人のために置き直す)
+            // 施設の浮く名札 (都と同じ。opening/site/ShelterBuilder.keepLabels が近くの人のために置き直す)。
+            // 係の人の印 npc_<役> と宿の寝台 inn_bed_<n> は、設計図にあるものを全部 (土地の町にも都と同じ施設。2026-10-27)。
+            // 施設の碑 sign_<建物> には、その町の施設の札を書く (sign.skyabyss.town_fac.<建物>)
             if (bp != null) {
                 for (String m : bp.marks.keySet()) {
+                    if (m.startsWith(AttendantRole.MARK_PREFIX) || m.startsWith(Attendants.INN_BED)) {
+                        BlockPos at = job.mark(m);
+                        if (at != null) {
+                            job.entry.extra(m, at);
+                        }
+                    }
+                    if (m.startsWith("sign_") && TOWN_SIGNS.contains(m.substring(5))) {
+                        BlockPos at = job.mark(m);
+                        if (at != null && level.getBlockState(at).is(jp.revati.skyabyss.registry.ModBlocks.TABLET.get())) {
+                            jp.revati.skyabyss.tablet.Tablets.write(level, at, "sign.skyabyss.town_fac." + m.substring(5));
+                        }
+                    }
                     if (m.startsWith("label_")) {
                         BlockPos at = job.mark(m);
                         if (at != null) {

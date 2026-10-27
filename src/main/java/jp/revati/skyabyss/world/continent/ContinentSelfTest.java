@@ -53,6 +53,23 @@ public final class ContinentSelfTest {
             if (peak < 150) {
                 f.add("the western ridge peaks at only Y " + peak);
             }
+            // 土地の町にも都と同じ施設 (2026-10-27): 四つの町の設計図に、施設の係の人の印がそろう (案内人・墓守・酔っ払いは都だけ)
+            for (String region : ContinentTowns.REGIONS) {
+                jp.revati.skyabyss.opening.site.Blueprint bp = jp.revati.skyabyss.opening.site.Blueprint.get("town_" + region);
+                if (bp == null) {
+                    f.add("town_" + region + " blueprint missing");
+                    continue;
+                }
+                for (jp.revati.skyabyss.facility.AttendantRole role : jp.revati.skyabyss.facility.AttendantRole.values()) {
+                    if (role == jp.revati.skyabyss.facility.AttendantRole.GUIDE || role == jp.revati.skyabyss.facility.AttendantRole.GRAVEKEEPER
+                            || role == jp.revati.skyabyss.facility.AttendantRole.DRUNKARD) {
+                        continue;
+                    }
+                    if (!bp.marks.containsKey(role.mark())) {
+                        f.add("town_" + region + " has no " + role.mark());
+                    }
+                }
+            }
             ServerLevel level = server.overworld();
             // 発見: 一度目だけ数えて経験値、二度目は何もしない。覚えた番号は持ち物と同じく死んでも残る所 (PlayerPersisted)
             net.neoforged.neoforge.common.util.FakePlayer probe = new net.neoforged.neoforge.common.util.FakePlayer(level,
@@ -166,7 +183,7 @@ public final class ContinentSelfTest {
             f.add("crashed: " + e);
         }
         if (f.isEmpty()) {
-            SkyAbyss.LOGGER.info("SELFTEST continent PASSED (map loads; flat capital at Y 72, inland sea, outer deep sea, western peaks; regional enemy strength; no square pits; outskirts stops avoid footprints; discovery once per POI; area names with town hysteresis; map mark cap fits the POIs; real chunks match when the world is a continent)");
+            SkyAbyss.LOGGER.info("SELFTEST continent PASSED (map loads; flat capital at Y 72, inland sea, outer deep sea, western peaks; regional towns carry every facility; regional enemy strength; no square pits; outskirts stops avoid footprints; discovery once per POI; area names with town hysteresis; map mark cap fits the POIs; real chunks match when the world is a continent)");
         } else {
             for (String s : f) {
                 SkyAbyss.LOGGER.error("SELFTEST continent FAILED: {}", s);

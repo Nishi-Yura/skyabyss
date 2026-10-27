@@ -410,11 +410,81 @@ class RegionTown(T.Town):
             v.set(x, 5, (az0 + cz) // 2, 'chain[axis=y,waterlogged=false]')
             v.set(x, 4, (az0 + cz) // 2, 'lantern[hanging=true,waterlogged=false]')
 
+    # ---------------------------------------------------------------- 都と同じ施設を土地の町にも (2026-10-27 の声「始まりの町に戻らなくてもいいように」)
+    # 一つの建物に係の人を何人か並べる (受付の机の向こうに、役ごとの棚)。戸は北
+    STATION = {
+        'guild_clerk': ['lectern[facing=north,has_book=false,powered=false]', 'bookshelf', 'bookshelf'],
+        'trade_keeper': ['chest[facing=north,type=single,waterlogged=false]', 'barrel[facing=north,open=false]', 'decorated_pot[cracked=false,facing=north,waterlogged=false]'],
+        'storage_keeper': ['barrel[facing=north,open=false]', 'chest[facing=north,type=single,waterlogged=false]', 'barrel[facing=up,open=false]'],
+        'stable_keeper': ['hay_block[axis=y]', 'hay_block[axis=x]', 'composter[level=6]'],
+        'perch_keeper': ['bone_block[axis=y]', 'hay_block[axis=y]', 'bone_block[axis=y]'],
+        'mapmaker': ['cartography_table', 'bookshelf', 'lectern[facing=north,has_book=false,powered=false]'],
+        'training_master': ['target[power=0]', 'grindstone[face=floor,facing=north]', 'smithing_table'],
+        'keep_veteran': ['lectern[facing=north,has_book=false,powered=false]', 'bookshelf', 'bookshelf'],
+        'black_marketeer': ['barrel[facing=north,open=false]', 'cobweb', 'chest[facing=north,type=single,waterlogged=false]'],
+    }
+
+    def hall(self, name, label, roles, x0, z0, x1, z1, floors=2, roof=None, timber=False):
+        """係の人の並ぶ建物 (戸は北)。受付の机は奥の壁の手前に一本、役ごとの持ち場の後ろに棚"""
+        st, v = self.st, self.v
+        b, ridge = self.fac_body(name, x0, z0, x1, z1, 'north', floors=floors, fh=6, ground='shop',
+                                 axis='x' if (x1 - x0) >= (z1 - z0) else 'z', roof=roof)
+        if timber and floors >= 2:
+            vox.timber_upper(v, st, b)
+        self.fac_front(b, label)
+        ax0, az0, ax1, az1 = x0 + 2, z0 + 2, x1 - 2, z1 - 2
+        self.room(ax0, az0, ax1, az1, 0, 6, rug=True)
+        if floors >= 2:
+            self.room(ax0, az0, ax1, az1, 7, 5, rug=False)
+        cz = az1 - 3
+        n = len(roles)
+        xs = [int(round(ax0 + (ax1 - ax0) * (i + 0.5) / n)) for i in range(n)]
+        self.counter([(x, cz) for x in range(ax0, ax1 + 1)],
+                     tops=tuple((x + 1, cz, 'lantern[hanging=false,waterlogged=false]') for x in xs if x + 1 <= ax1))
+        for x in range(ax0, ax1 + 1):
+            for z in (cz + 1, cz + 2):
+                v.set(x, 0, z, 'air')
+                v.set(x, 1, z, 'air')
+        for i, (role, x) in enumerate(zip(roles, xs)):
+            items = self.STATION.get(role, ['bookshelf', 'barrel[facing=north,open=false]', 'bookshelf'])
+            for k, dx in enumerate((-1, 0, 1)):
+                if ax0 <= x + dx <= ax1:
+                    v.set(x + dx, 0, az1, items[k % len(items)])
+            if i > 0:
+                px = (xs[i - 1] + x) // 2
+                v.set(px, 0, cz + 1, st.fence)
+                v.set(px, 1, cz + 1, st.fence)
+            v.set(x, 4, cz + 1, 'lantern[hanging=true,waterlogged=false]')
+            self.attendant(role, x, 0, cz + 1)
+        return b
+
+    def town_market(self, x0, z0, x1, z1):
+        """市の店: 道具屋と薬師が一つの机に並ぶ"""
+        b = self.hall('market', 'market', ['tool_merchant', 'apothecary'], x0, z0, x1, z1, floors=2, timber=True)
+        dx_, _, dz_, _ = b.doors[0]
+        self.mark('shop', dx_, 0, dz_ - 1)
+
+    def town_guild(self, x0, z0, x1, z1):
+        """組合会館: 組合の受付・取引所・預かり所が一つの机に並ぶ"""
+        self.hall('guild', 'guild_hall', ['guild_clerk', 'trade_keeper', 'storage_keeper'], x0, z0, x1, z1, floors=2, timber=True)
+
+    def town_travel(self, x0, z0, x1, z1):
+        """旅の館 (門の外): 厩舎の番・子の止まり木の番・地図屋"""
+        self.hall('travel', 'travel', ['stable_keeper', 'perch_keeper', 'mapmaker'], x0, z0, x1, z1, floors=1)
+
+    def town_training(self, x0, z0, x1, z1):
+        """訓練所 (門の外): 師範と砦の古兵"""
+        self.hall('training', 'training', ['training_master', 'keep_veteran'], x0, z0, x1, z1, floors=1)
+
+    def town_stall(self, x0, z0, x1, z1):
+        """裏の店 (闇市。名は浮かべない)"""
+        self.hall('stall', '', ['black_marketeer'], x0, z0, x1, z1, floors=1)
+
     def town_chapel(self, x0, z0, x1, z1):
         """小さな社 (戸は北)。祭壇の蝋燭と書見台、腰掛けの列、小さな鐘の塔"""
         st, v = self.st, self.v
         b, ridge = self.fac_body('chapel', x0, z0, x1, z1, 'north', floors=1, fh=8, ground='window', axis='z', dormers=0)
-        self.fac_front(b, '', banners=True)
+        self.fac_front(b, 'shrine', banners=True)
         dx_, _, dz_, _ = b.doors[0]
         ax0, az0, ax1, az1 = x0 + 2, z0 + 2, x1 - 2, z1 - 2
         self.room(ax0, az0, ax1, az1, 0, 8, rug=False, shelves=False)
@@ -429,6 +499,13 @@ class RegionTown(T.Town):
             v.set(x, 1, az1, 'candle[candles=4,lit=true,waterlogged=false]')
         v.set(dx_, 3, az1, st.trim2)
         tower(v, st, x1, z0, half=2, y0=0, h=14, belfry=True, spire_rise=2, pinnacles=False, sealed=True)
+        # 社の守り (鍵の間の頼み) と書庫番 (伝承の書・地図の写し)。祭壇の両わき
+        self.attendant('shrine_priest', dx_ - 3, 0, az1 - 1)
+        self.attendant('archivist', dx_ + 3, 0, az1 - 1)
+        for x in (dx_ - 4, dx_ + 4):
+            if ax0 <= x <= ax1:
+                v.set(x, 0, az1, 'bookshelf')
+                v.set(x, 1, az1, 'bookshelf')
 
     # ---------------------------------------------------------------- 街区
     def free(self, x0, z0, x1, z1, gap=1):
@@ -566,6 +643,12 @@ class RegionTown(T.Town):
         tower(v, st, cx, cz, half=4, y0=0, h=26, belfry=True, spire_rise=3, pinnacles=True, sealed=True, door_side='south')
         self.claim(cx - 5, cz - 5, cx + 5, cz + 5, 'lookout')
         self.mark('npc_chaser', cx, 0, cz + 7)
+        if getattr(self, 'symbol_only', False):
+            return
+        self.plaza_whale()
+
+    def plaza_whale(self):
+        st, v = self.st, self.v
         # 鯨骨の門 (広場の南北と東西の入口に、肋の弧)
         for axis in ('x', 'z'):
             for s in (1, -1):
@@ -624,6 +707,12 @@ class RegionTown(T.Town):
                     v.set(cx + x, 30, cz + z, 'dark_prismarine_slab[type=bottom,waterlogged=false]')
         v.set(cx, 31, cz, 'lightning_rod[facing=up,powered=false,waterlogged=false]')
         self.claim(cx - 5, cz - 5, cx + 5, cz + 5, 'lighthouse')
+        if getattr(self, 'symbol_only', False):
+            return
+        self.plaza_tide()
+
+    def plaza_tide(self):
+        st, v = self.st, self.v
         fountain(v, st, 0, 0, r=4, y=0)
         # 魚の市の屋台 (広場の東西の通りぞい)
         for (sx, sz) in ((-16, -6), (-22, -6), (16, 6), (22, 6)):
@@ -658,6 +747,12 @@ class RegionTown(T.Town):
         tower(v, st, rx, rz, half=2, y0=0, h=20, belfry=False, spire_rise=3, pinnacles=False, sealed=True)
         v.set(rx, 26, rz, 'lightning_rod[facing=up,powered=false,waterlogged=false]')
         self.claim(rx - 3, rz - 3, rx + 3, rz + 3, 'rod_tower')
+        if getattr(self, 'symbol_only', False):
+            return
+        self.plaza_storm()
+
+    def plaza_storm(self):
+        st, v = self.st, self.v
         # 広場の真ん中の銅の柱
         for y in range(0, 6):
             v.set(0, y, 0, 'cut_copper' if y < 5 else 'oxidized_cut_copper')
@@ -686,6 +781,12 @@ class RegionTown(T.Town):
                 for z in (-4, 4):
                     v.set(cx + x, y, cz + z, 'polished_blackstone_bricks')
         self.claim(cx - 5, cz - 5, cx + 5, cz + 5, 'smelter')
+        if getattr(self, 'symbol_only', False):
+            return
+        self.plaza_ember()
+
+    def plaza_ember(self):
+        st, v = self.st, self.v
         # 熾火の炉 (広場の真ん中)
         for x in range(-2, 3):
             for z in range(-2, 3):

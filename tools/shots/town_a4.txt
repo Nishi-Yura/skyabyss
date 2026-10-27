@@ -1,5 +1,5 @@
 # 土地の町 (A 案 + 段 + 仕上げ)。カメラは cams.py が町のデータから決める。2026-10-27
-world towna4c flat
+world towna4e flat
 size 1600 900
 timeout 1800
 render 16
@@ -28,7 +28,7 @@ cmd tp @s 75 12 75 135 35
 waitchunks
 wait 80
 shot whale_air
-cmd tp @s 25.0 -31.0 9.2 150.9 27.7
+cmd tp @s 25.3 -31.0 9.4 150.9 27.7
 wait 40
 shot whale_air_upper
 cmd tp @s -12.5 -59.4 -23.5 -90.0 -5.0
@@ -40,17 +40,41 @@ shot whale_ramp_side
 cmd tp @s 7.5 -56.4 -23.5 90.0 11.3
 wait 40
 shot whale_from_upper
-cmd tp @s 15.5 -59.3 -20.5 110.6 1.3
+cmd tp @s 0.5 -59.3 -43.5 110.6 1.3
 wait 40
 shot whale_wall
 cmd tp @s -14.0 -57.5 -18.0 -37.9 6.3
 wait 40
 shot whale_market
+cmd tp @s 3.5 -49.0 -1.2 -163.6 -3.1
+wait 40
+shot whale_symbol
+cmd tp @s 48.0 -38.0 -7.0 131.4 12.4
+wait 40
+shot whale_symbol_far
+cmd tp @s 31.5 -57.0 -4.5 -14.5 3.6
+wait 40
+shot whale_market
+cmd tp @s -27.5 -57.0 25.5 -76.0 3.5
+wait 40
+shot whale_chapel
+cmd tp @s -16.5 -57.0 22.5 104.5 3.6
+wait 40
+shot whale_guild
+cmd tp @s -0.5 -57.0 68.5 105.4 3.8
+wait 40
+shot whale_travel
+cmd tp @s 58.5 -57.0 2.5 -15.4 3.8
+wait 40
+shot whale_training
+cmd tp @s -57.5 -57.0 -0.5 166.8 3.3
+wait 40
+shot whale_smithy
 cmd tp @s 295 12 75 135 35
 waitchunks
 wait 80
 shot tide_air
-cmd tp @s 244.0 -31.0 9.0 150.9 27.7
+cmd tp @s 243.1 -31.0 9.8 150.9 27.7
 wait 40
 shot tide_air_upper
 cmd tp @s 210.5 -59.4 -20.5 -90.0 -5.0
@@ -62,17 +86,41 @@ shot tide_ramp_side
 cmd tp @s 230.5 -56.4 -20.5 90.0 11.3
 wait 40
 shot tide_from_upper
-cmd tp @s 212.5 -59.3 -28.5 -69.4 1.3
+cmd tp @s 215.5 -59.3 -15.5 159.4 1.3
 wait 40
 shot tide_wall
 cmd tp @s 206.0 -57.5 -18.0 -37.9 6.3
 wait 40
 shot tide_market
+cmd tp @s 216.5 -49.0 -1.2 163.6 -3.1
+wait 40
+shot tide_symbol
+cmd tp @s 240.0 -38.0 -7.0 131.4 12.4
+wait 40
+shot tide_symbol_far
+cmd tp @s 247.5 -57.0 33.5 104.5 3.6
+wait 40
+shot tide_market
+cmd tp @s 236.5 -57.0 12.5 -76.0 3.5
+wait 40
+shot tide_chapel
+cmd tp @s 202.5 -57.0 18.5 104.5 3.6
+wait 40
+shot tide_guild
+cmd tp @s 219.5 -57.0 68.5 105.4 3.8
+wait 40
+shot tide_travel
+cmd tp @s 155.5 -57.0 2.5 -15.4 3.8
+wait 40
+shot tide_training
+cmd tp @s 287.5 -57.0 -0.5 166.8 3.3
+wait 40
+shot tide_smithy
 cmd tp @s 515 12 75 135 35
 waitchunks
 wait 80
 shot storm_air
-cmd tp @s 463.5 -31.0 -9.5 29.1 27.7
+cmd tp @s 463.8 -31.0 -9.7 29.1 27.7
 wait 40
 shot storm_air_upper
 cmd tp @s 427.5 -59.4 24.5 -90.0 -5.0
@@ -84,17 +132,41 @@ shot storm_ramp_side
 cmd tp @s 447.5 -56.4 24.5 90.0 11.3
 wait 40
 shot storm_from_upper
-cmd tp @s 455.5 -59.3 27.5 110.6 1.3
+cmd tp @s 441.5 -59.3 20.5 -69.4 1.3
 wait 40
 shot storm_wall
 cmd tp @s 426.0 -57.5 -18.0 -37.9 6.3
 wait 40
 shot storm_market
+cmd tp @s 443.5 -49.0 1.2 -16.4 -3.1
+wait 40
+shot storm_symbol
+cmd tp @s 488.0 -38.0 7.0 48.6 12.4
+wait 40
+shot storm_symbol_far
+cmd tp @s 469.5 -57.0 -1.5 -14.5 3.6
+wait 40
+shot storm_market
+cmd tp @s 412.5 -57.0 -33.5 -76.0 3.5
+wait 40
+shot storm_chapel
+cmd tp @s 458.5 -57.0 -17.5 -75.5 3.6
+wait 40
+shot storm_guild
+cmd tp @s 439.5 -57.0 -58.5 105.4 3.8
+wait 40
+shot storm_travel
+cmd tp @s 498.5 -57.0 2.5 -15.4 3.8
+wait 40
+shot storm_training
+cmd tp @s 382.5 -57.0 -0.5 166.8 3.3
+wait 40
+shot storm_smithy
 cmd tp @s 735 12 75 135 35
 waitchunks
 wait 80
 shot ember_air
-cmd tp @s 684.6 -31.0 -9.2 29.1 27.7
+cmd tp @s 683.7 -31.0 -9.9 29.1 27.7
 wait 40
 shot ember_air_upper
 cmd tp @s 650.5 -59.4 21.5 -90.0 -5.0
@@ -106,9 +178,33 @@ shot ember_ramp_side
 cmd tp @s 670.5 -56.4 21.5 90.0 11.3
 wait 40
 shot ember_from_upper
-cmd tp @s 650.5 -59.3 25.5 -69.4 1.3
+cmd tp @s 655.5 -59.3 20.5 -20.6 1.3
 wait 40
 shot ember_wall
 cmd tp @s 646.0 -57.5 -18.0 -37.9 6.3
 wait 40
 shot ember_market
+cmd tp @s 656.5 -49.0 1.2 16.4 -3.1
+wait 40
+shot ember_symbol
+cmd tp @s 680.0 -38.0 7.0 48.6 12.4
+wait 40
+shot ember_symbol_far
+cmd tp @s 642.5 -57.0 -13.5 104.5 3.6
+wait 40
+shot ember_market
+cmd tp @s 688.5 -57.0 -25.5 104.0 3.5
+wait 40
+shot ember_chapel
+cmd tp @s 676.5 -57.0 -21.5 -75.5 3.6
+wait 40
+shot ember_guild
+cmd tp @s 659.5 -57.0 -58.5 105.4 3.8
+wait 40
+shot ember_travel
+cmd tp @s 595.5 -57.0 2.5 -15.4 3.8
+wait 40
+shot ember_training
+cmd tp @s 727.5 -57.0 -0.5 166.8 3.3
+wait 40
+shot ember_smithy

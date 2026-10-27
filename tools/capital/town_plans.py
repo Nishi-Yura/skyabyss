@@ -26,6 +26,8 @@ from region_town import RegionTown, STYLES, W, H, _check_blocks  # noqa: E402
 
 GATES = {'north': (0, -W), 'south': (0, W), 'west': (-W, 0), 'east': (W, 0)}
 EDGE = W + 17   # 設計図の縁 (門の外の家と畑まで)
+ROLES = ['innkeeper', 'tool_merchant', 'smith', 'apothecary', 'guild_clerk', 'trade_keeper', 'storage_keeper', 'stable_keeper', 'perch_keeper',
+         'mapmaker', 'training_master', 'keep_veteran', 'black_marketeer', 'shrine_priest', 'archivist']   # 土地の町の係の人 (都と同じ施設)
 AIR = {'core': 1, 'mid': 1, 'edge': 2}   # 家と家の間に必ずあける空気のマス (軒の先から測る)
 EAVE = 1        # 壁の線から軒の先まで
 
@@ -651,6 +653,8 @@ class PlanTown(RegionTown):
                     zs = (off - (11 if off < 0 else -1), off + (1 if off < 0 else 11))
                     x0, x1 = xs
                     z0, z1 = sorted(zs)
+                if any(self.occ.get((x, z)) is not None for x in range(x0 - 1, x1 + 2) for z in range(z0 - 1, z1 + 2)):
+                    continue
                 if (self.region_ix + k + len(side)) % 3 == 0:
                     M.build_house(self, 'cottage', (x0 + 1, z0 + 1, min(x1 - 2, x0 + 7), min(z1 - 2, z0 + 6)), _face_road(side, off), 1,
                                   self.rng.choice(['low', 'half_hip', 'hip_low']), mat=self.rng.choice([st.roof] + list(st.roof_alts)))
@@ -703,7 +707,8 @@ class PlanTown(RegionTown):
 
     # ---------------------------------------------------------------- 施設 (市場のまわり)
     FAC = {'inn': ((20, 14), 'south'), 'smithy': ((14, 16), 'south'), 'tool_shop': ((12, 14), 'north'),
-           'apothecary': ((12, 14), 'north'), 'chapel': ((14, 14), 'north')}
+           'apothecary': ((12, 14), 'north'), 'chapel': ((16, 14), 'north'), 'guild': ((20, 13), 'north'),
+           'stall': ((8, 9), 'north'), 'market': ((16, 13), 'north'), 'travel': ((16, 11), 'north'), 'training': ((12, 11), 'north')}
     TURN = ['north', 'east', 'south', 'west']
 
     def facilities_at(self, spots):
@@ -726,10 +731,56 @@ class PlanTown(RegionTown):
                 self.occ[c] = 'road'
                 self.roadw[c] = 3
 
+    def landmark(self):
+        """町ごとの目印 (landmarks.TOWN) を上の町に建て、広場の飾りは土地の町のまま"""
+        import landmarks as LM
+        fn, kw = LM.TOWN[self.region]
+        cx, cz = self.lm
+        r = fn(self.v, self.st, cx, cz, **kw)
+        self.claim(cx - r, cz - r, cx + r, cz + r, 'landmark')
+        if self.region == 'whale':
+            self.mark('npc_chaser', cx, 0, cz + r + 2)
+        getattr(self, 'plaza_' + self.region)()
+
+    def outside_fac(self, name, side, s):
+        """門の外、門から出る道の脇 (s = 道のどちら側) に、道へ戸を向けて建てる。戸から道まで小道"""
+        (w, d), f0 = self.FAC[name]
+        L, B = w, d          # 道に沿う長さ = 間口、道から離れる向き = 奥行き
+        a0, b0 = 3, 11       # 壁から 3、道の中心から 11
+        if side in ('north', 'south'):
+            sz = 1 if side == 'south' else -1
+            zs = sorted((sz * (W + a0), sz * (W + a0 + L - 1)))
+            xs = sorted((s * b0, s * (b0 + B - 1)))
+            front = 'east' if s < 0 else 'west'
+        else:
+            sx = 1 if side == 'east' else -1
+            xs = sorted((sx * (W + a0), sx * (W + a0 + L - 1)))
+            zs = sorted((s * b0, s * (b0 + B - 1)))
+            front = 'south' if s < 0 else 'north'
+        k = (self.TURN.index(front) - self.TURN.index(f0)) % 4
+        self.build_fac(name, xs[0], zs[0], front, k)
+        # 小道: 戸の前から道 (中心から 3) まで、幅 3
+        if side in ('north', 'south'):
+            cz = (zs[0] + zs[1]) // 2
+            xf = xs[1] + 1 if s < 0 else xs[0] - 1
+            for x in range(min(xf, 0), max(xf, 0) + 1):
+                if abs(x) >= 3:
+                    for zz in (cz - 1, cz, cz + 1):
+                        self.occ[(x, zz)] = 'road'
+                        self.roadw[(x, zz)] = 3
+        else:
+            cx = (xs[0] + xs[1]) // 2
+            zf = zs[1] + 1 if s < 0 else zs[0] - 1
+            for z in range(min(zf, 0), max(zf, 0) + 1):
+                if abs(z) >= 3:
+                    for xx in (cx - 1, cx, cx + 1):
+                        self.occ[(xx, z)] = 'road'
+                        self.roadw[(xx, z)] = 3
+
     def _fac_spot(self, name, nx, nz, w, d, f0, ring):
         best = None
         if True:
-            for r in range(0, 100):
+            for r in range(0, 70):
                 for x0 in range(nx - r, nx + r + 1):
                     for z0 in range(nz - r, nz + r + 1):
                         if max(abs(x0 - nx), abs(z0 - nz)) != r:
@@ -738,6 +789,11 @@ class PlanTown(RegionTown):
                             k = (self.TURN.index(front) - self.TURN.index(f0)) % 4
                             ww, dd = (w, d) if k % 2 == 0 else (d, w)
                             x1, z1 = x0 + ww, z0 + dd
+                            # 先に角と真ん中だけ見る (速くするため)
+                            if any(self.occ.get(c) is not None for c in ((x0, z0), (x1, z0), (x0, z1), (x1, z1), ((x0 + x1) // 2, (z0 + z1) // 2))):
+                                continue
+                            if abs(x0) > W or abs(z0) > W or abs(x1) > W or abs(z1) > W:
+                                continue
                             if not self.rect_free(x0 - 1, z0 - 1, x1 + 1, z1 + 1, 0) or not self.rect_free(x0, z0, x1, z1, ring):
                                 continue
                             if self._faces_road(x0, z0, x1, z1, front):
@@ -847,7 +903,8 @@ class PlanTown(RegionTown):
         mp = lambda p: (p[0] * fx, p[1] * fz)
         poly = _jitter_poly(m([(0, -W), (22, -49), (40, -38), (W, 0), (44, 34), (20, 50), (0, W), (-24, 48), (-44, 30), (-W, 0), (-42, -36), (-20, -50)]))
         self.poly_wall(poly)
-        self.set_upper(lambda x, z: z * fz < -27 + 4 * math.sin(x / 7.0) + 2 * math.sin(x / 3.1 + 1))
+        LMC = mp((14, -37))
+        self.set_upper(lambda x, z: z * fz < -27 + 4 * math.sin(x / 7.0) + 2 * math.sin(x / 3.1 + 1) or math.hypot(x - LMC[0], z - LMC[1]) < 15)
         main = m([(0, W - 4), (0, 40), (5, 24), (5, 12), (0, 0), (-4, -14), (-4, -30), (0, -40), (0, -W + 4)])
         market = m([(-8, -14), (8, -14), (13, 0), (12, 14), (5, 20), (-5, 20), (-12, 12), (-12, -2)])
         self.plaza_poly(market)
@@ -861,14 +918,18 @@ class PlanTown(RegionTown):
         self.street(m([(24, 12), (24, 40)]), 3, 'lane')
         self.street(m([(4, 30), (24, 30)]), 3, 'lane')
         # 目印 (見張りの塔 = 北の大通りの曲がりの先を閉じる)
-        self.lm = mp((19, -34))
+        self.lm = LMC
         self.lm2 = mp((-30, 20))
-        self.keep_out(self.lm[0] - 5, self.lm[1] - 5, self.lm[0] + 5, self.lm[1] + 5)
+        self.keep_out(self.lm[0] - 12, self.lm[1] - 12, self.lm[0] + 12, self.lm[1] + 12)
         self.landmark()
         # 施設: 市場を囲む
-        self.facilities_at({k_: mp(p_) for k_, p_ in {'inn': (-42, -20), 'chapel': (-6, 24), 'smithy': (16, -26), 'tool_shop': (14, 6), 'apothecary': (-28, 8)}.items()})
+        self.facilities_at({k_: mp(p_) for k_, p_ in {'inn': (-42, -20), 'market': (14, 6), 'chapel': (-6, 24), 'guild': (20, 14), 'stall': (-30, 30)}.items()})
         if getattr(self, 'no_fac', False):
             return
+        # 門の外: 旅の館 (上の町と反対の門) と訓練所 (東か西の門)
+        self.outside_fac('travel', 'south' if fz == 1 else 'north', -1)
+        self.outside_fac('training', 'east' if fx == 1 else 'west', 1)
+        self.outside_fac('smithy', 'west' if fx == 1 else 'east', -1)
         self.frontage(main, 7, quest_every=1)
         self.frontage(m([(-W + 4, 0), (-36, 0), (-24, 4), (-12, 4)]), 5, quest_every=1)
         self.frontage(m([(12, -3), (24, -3), (36, 0), (W - 4, 0)]), 5, quest_every=1)
@@ -1156,7 +1217,7 @@ def main():
             _check_blocks(data, region)
             path = os.path.join(T.DATA, 'town_%s.json' % region)
             vox.save(path, data)
-            need = {'board', 'inn', 'shop', 'stand', 'sign', 'rest', 'inn_bed', 'npc_innkeeper', 'npc_tool_merchant', 'npc_smith', 'npc_apothecary', 'folk_a', 'folk_b'}
+            need = {'board', 'inn', 'shop', 'stand', 'sign', 'rest', 'inn_bed', 'folk_a', 'folk_b'} | {'npc_' + r_ for r_ in ROLES}
             print('wrote', region, os.path.getsize(path) // 1024, 'KB', 'houses', len(t.plots), 'quests', t.quests,
                   'missing', sorted(need - set(v.marks)), 'touching', len(t.check_gaps()))
             plan_png(t, os.path.join(T.ROOT, 'docs', 'review', 'town_roughs', 'town_%s_plan.png' % region))
