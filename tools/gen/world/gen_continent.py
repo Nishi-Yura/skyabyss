@@ -498,8 +498,9 @@ def paint_map(lay, height, biome, path):
     # 道と渡し船
     for road in lay['roads']:
         pts = [px(q) for q in curve(road)]
-        d.line(pts, fill=(240, 228, 200), width=4, joint='curve')
-        d.line(pts, fill=(126, 82, 46), width=2, joint='curve')
+        # 2026-10-27 の声「マップもっと見やすく」: 道を太く濃く (縁の明るい線 + 濃い茶の芯)
+        d.line(pts, fill=(246, 236, 210), width=7, joint='curve')
+        d.line(pts, fill=(98, 60, 32), width=4, joint='curve')
     for ferry in lay['ferries']:
         pts = [px(q) for q in ferry]
         for (x0, y0), (x1, y1) in zip(pts, pts[1:]):

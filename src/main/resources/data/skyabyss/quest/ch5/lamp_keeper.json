@@ -34,8 +34,8 @@
     "xp": 300,
     "items": [
       {
-        "item": "minecraft:soul_lantern",
-        "count": 2
+        "item": "skyabyss:resonance_shard_abyss",
+        "count": 3
       }
     ],
     "affinity": {

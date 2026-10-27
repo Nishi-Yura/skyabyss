@@ -46,7 +46,7 @@
     "xp": 200,
     "items": [
       {
-        "item": "minecraft:netherite_upgrade_smithing_template",
+        "item": "skyabyss:resonance_crystal",
         "count": 1
       }
     ],

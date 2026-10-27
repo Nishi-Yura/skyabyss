@@ -50,8 +50,8 @@
     "xp": 300,
     "items": [
       {
-        "item": "minecraft:golden_carrot",
-        "count": 8
+        "item": "skyabyss:cloud_jerky",
+        "count": 4
       }
     ],
     "affinity": {

@@ -22,8 +22,8 @@
     "xp": 20,
     "items": [
       {
-        "item": "minecraft:bread",
-        "count": 2
+        "item": "skyabyss:moss_salve",
+        "count": 1
       }
     ],
     "do": [

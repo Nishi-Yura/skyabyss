@@ -51,8 +51,8 @@
     "xp": 400,
     "items": [
       {
-        "item": "minecraft:lantern",
-        "count": 3
+        "item": "skyabyss:socket_shard_bone",
+        "count": 1
       }
     ],
     "affinity": {

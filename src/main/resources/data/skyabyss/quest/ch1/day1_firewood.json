@@ -21,8 +21,8 @@
     "xp": 20,
     "items": [
       {
-        "item": "minecraft:torch",
-        "count": 4
+        "item": "skyabyss:road_hardtack",
+        "count": 2
       }
     ]
   }
