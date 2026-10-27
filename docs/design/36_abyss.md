@@ -338,7 +338,7 @@
 
 - 手記: 野営の帳面と、道ごとの書見台（層ごとに 4）。文は層を下りる順に話がつながる。
 - 荷運びのロク（塩の野営）: 深淵の素材と食べ物・灯りを取り替える。
-- 会話・頼みごと・手記のデータを直接直す（生成スクリプトはない）。人の形は一人ずつ作った NPC v2（`tools/rough/lowpoly/npc2/cast.py` の survivor_<層>・abyss_porter。持ち物とその人の動きつき。`client/npc/NpcModels`）。v2 のメッシュが無いときだけ係の人の絵の写し（`tools/gen/ch5/gen_ch5_survivor_art.py`）。
+- 会話・頼みごと・手記のデータを直接直す（生成スクリプトはない）。人の形は一人ずつ作った NPC v2（`tools/rough/lowpoly/npc2/cast.py` の survivor_<層>・abyss_porter。持ち物とその人の動きつき。`client/npc/NpcModels`）。v2 のメッシュが無いときだけ係の人の絵の写し（`tools/gen/ch5/gen_ch5_survivor_art.py`）。 手記と地図を集めきった頼み（ch5/captain_pages・ch5/surveyor_map）の報酬で、伝承の書に「隊長トウヤの手記」「ハヤセの割れた地図」。
 
 ### 8.4 遊び（道と待ち場の中身）
 
@@ -406,7 +406,6 @@
 ### 8.8 まだ
 
 - 番人と層の主の強さの調整は試遊のあと（層の主の技は全部、型ごとの溜めと当たりの動きがある。`tools/gen/abyss/gen_lord_moves.py`）。
-- 手記を集めきったときの伝承の書（lore）の項目。
 
 ## 9. クリア後
 

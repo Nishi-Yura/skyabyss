@@ -56,6 +56,12 @@
     ],
     "affinity": {
       "skyabyss:attendant_survivor_ash": 3
-    }
+    },
+    "do": [
+      {
+        "type": "lore",
+        "entry": "ch5/captain_notes"
+      }
+    ]
   }
 }

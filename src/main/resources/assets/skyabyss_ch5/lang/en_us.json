@@ -182,5 +182,9 @@
   "quest.skyabyss.weekly_abyss_haul.haul.salt": "Deliver salt crystals",
   "quest.skyabyss.weekly_abyss_haul.unlock_hint": "Available once you have passed the abyss gate",
   "growth.skyabyss.reason.abyss_mark": "Abyss mark",
-  "growth.skyabyss.reason.abyss_lord": "Layer lord defeated"
+  "growth.skyabyss.reason.abyss_lord": "Layer lord defeated",
+  "lore.skyabyss.ch5.captain_notes.title": "Captain Touya's Notes",
+  "lore.skyabyss.ch5.captain_notes.body": "Three notebooks lay scattered along the ash descent, left so that no one would follow.\n\n\"Through the ash maze. Only in the light could I see the ember trail. Someone had cut the way before me.\"\n\n\"The warden was not guarding the heart. It was watching so the world would not unravel from it.\"\n\n\"The warden said: 'Not enough yet.' That voice was not mine. ... It was yours.\"",
+  "lore.skyabyss.ch5.surveyor_map.title": "Hayase's Broken Map",
+  "lore.skyabyss.ch5.surveyor_map.body": "The surveyor's map, split on the salt crust. Pieced together, the three fragments mark the descent.\n\nUnder the crust: \"Shallow pit. The crust breaks under weight.\" By the well: \"Wind, upward. Make yourself light.\" On the white-shell ground, in heavy strokes: \"Do not go.\"\n\nAt the edge, one thin line: \"Going up weighs far more than coming down.\""
 }

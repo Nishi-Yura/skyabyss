@@ -182,5 +182,9 @@
   "quest.skyabyss.weekly_abyss_haul.haul.salt": "塩の結晶を納めよう",
   "quest.skyabyss.weekly_abyss_haul.unlock_hint": "深淵の門をくぐると、受けられる",
   "growth.skyabyss.reason.abyss_mark": "深淵の印",
-  "growth.skyabyss.reason.abyss_lord": "層の主を倒した"
+  "growth.skyabyss.reason.abyss_lord": "層の主を倒した",
+  "lore.skyabyss.ch5.captain_notes.title": "隊長トウヤの手記",
+  "lore.skyabyss.ch5.captain_notes.body": "灰の層の下り道に、三冊の手記が散らしてあった。誰もついてこないように、と。\n\n「灰の迷路を抜けた。灯りの中にだけ、燠の跡が見えた。誰かが、先に道をつけていた」\n\n「番人は心臓を守っていたんじゃない。心臓から世界がほどけないように、見張っていたんだ」\n\n「番人は言った。『まだ足りない』。その声は、俺の声じゃなかった。……お前の声だった」",
+  "lore.skyabyss.ch5.surveyor_map.title": "ハヤセの割れた地図",
+  "lore.skyabyss.ch5.surveyor_map.body": "塩の殻の床で割れた測量士の地図。三枚の切れ端をつなぐと、下り道の印が読めた。\n\n殻の床の下に「穴、浅い。殻は重いと割れる」。井戸の横に「風、上へ。体を軽く」。白殻の縄張りには、太い字で「行くな」。\n\n地図の端に、細い字が一行。「上るのは、下りるよりずっと重い」。"
 }
