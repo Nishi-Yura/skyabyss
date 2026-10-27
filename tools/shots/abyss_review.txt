@@ -1,0 +1,513 @@
+# 深淵の見直し (2026-10-28 夜): 層ごとの印へ行って前と後ろを撮る (印の名は abyss_layers.json。座標を書かないので作り直しても古くならない)
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/abyss_review.txt -PshotsName=abyss_review
+world abyss_review flat
+size 1280 720
+timeout 5400
+render 10
+clouds off
+
+wait 80
+cmd skyabyss cinematic stop
+cmd gamemode creative
+cmd effect give @s night_vision 99999 0 true
+hud off
+cmd skyabyss abyss enter
+wait 40
+cmd skyabyss abyss build
+wait 1200
+cmd skyabyss abyss layer go camp_bone 180
+cmd tp @s ~ ~0.2 ~ ~ 12
+wait 30
+shot 001_camp_bone_n
+cmd skyabyss abyss layer go camp_bone 0
+cmd tp @s ~ ~0.2 ~ ~ 12
+wait 30
+shot 002_camp_bone_s
+cmd skyabyss abyss layer go watch_bone 180
+cmd tp @s ~ ~0.2 ~ ~ 12
+wait 30
+shot 003_watch_bone_n
+cmd skyabyss abyss layer go watch_bone 0
+cmd tp @s ~ ~0.2 ~ ~ 12
+wait 30
+shot 004_watch_bone_s
+cmd skyabyss abyss layer go routesign_bone_1 180
+cmd tp @s ~ ~0.2 ~ ~ 12
+wait 30
+shot 005_routesign_bone_1_n
+cmd skyabyss abyss layer go routesign_bone_1 0
+cmd tp @s ~ ~0.2 ~ ~ 12
+wait 30
+shot 006_routesign_bone_1_s
+cmd skyabyss abyss layer go bridge_bone_a 180
+cmd tp @s ~ ~0.2 ~ ~ 12
+wait 30
+shot 007_bridge_bone_a_n
+cmd skyabyss abyss layer go bridge_bone_a 0
+cmd tp @s ~ ~0.2 ~ ~ 12
+wait 30
+shot 008_bridge_bone_a_s
+cmd skyabyss abyss layer go hid_bone_a 180
+cmd tp @s ~ ~0.2 ~ ~ 12
+wait 30
+shot 009_hid_bone_a_n
+cmd skyabyss abyss layer go hid_bone_a 0
+cmd tp @s ~ ~0.2 ~ ~ 12
+wait 30
+shot 010_hid_bone_a_s
+cmd skyabyss abyss layer go door_bone_a 180
+cmd tp @s ~ ~0.2 ~ ~ 12
+wait 30
+shot 011_door_bone_a_n
+cmd skyabyss abyss layer go door_bone_a 0
+cmd tp @s ~ ~0.2 ~ ~ 12
+wait 30
+shot 012_door_bone_a_s
+cmd skyabyss abyss layer go nest_bone 180
+cmd tp @s ~ ~0.2 ~ ~ 12
+wait 30
+shot 013_nest_bone_n
+cmd skyabyss abyss layer go nest_bone 0
+cmd tp @s ~ ~0.2 ~ ~ 12
+wait 30
+shot 014_nest_bone_s
+cmd skyabyss abyss layer go pit_bone 180
+cmd tp @s ~ ~0.2 ~ ~ 12
+wait 30
+shot 015_pit_bone_n
+cmd skyabyss abyss layer go pit_bone 0
+cmd tp @s ~ ~0.2 ~ ~ 12
+wait 30
+shot 016_pit_bone_s
+cmd skyabyss abyss layer go puzzle_bone 180
+cmd tp @s ~ ~0.2 ~ ~ 12
+wait 30
+shot 017_puzzle_bone_n
+cmd skyabyss abyss layer go puzzle_bone 0
+cmd tp @s ~ ~0.2 ~ ~ 12
+wait 30
+shot 018_puzzle_bone_s
+cmd skyabyss abyss layer go markroom_bone_1 180
+cmd tp @s ~ ~0.2 ~ ~ 12
+wait 30
+shot 019_markroom_bone_1_n
+cmd skyabyss abyss layer go markroom_bone_1 0
+cmd tp @s ~ ~0.2 ~ ~ 12
+wait 30
+shot 020_markroom_bone_1_s
+cmd skyabyss abyss layer go markroom_bone_2 180
+cmd tp @s ~ ~0.2 ~ ~ 12
+wait 30
+shot 021_markroom_bone_2_n
+cmd skyabyss abyss layer go markroom_bone_2 0
+cmd tp @s ~ ~0.2 ~ ~ 12
+wait 30
+shot 022_markroom_bone_2_s
+cmd skyabyss abyss layer go markroom_bone_3 180
+cmd tp @s ~ ~0.2 ~ ~ 12
+wait 30
+shot 023_markroom_bone_3_n
+cmd skyabyss abyss layer go markroom_bone_3 0
+cmd tp @s ~ ~0.2 ~ ~ 12
+wait 30
+shot 024_markroom_bone_3_s
+cmd skyabyss abyss layer go scut_bone_1_a 180
+cmd tp @s ~ ~0.2 ~ ~ 12
+wait 30
+shot 025_scut_bone_1_a_n
+cmd skyabyss abyss layer go scut_bone_1_a 0
+cmd tp @s ~ ~0.2 ~ ~ 12
+wait 30
+shot 026_scut_bone_1_a_s
+cmd skyabyss abyss layer go gate_bone_out 180
+cmd tp @s ~ ~0.2 ~ ~ 12
+wait 30
+shot 027_gate_bone_out_n
+cmd skyabyss abyss layer go gate_bone_out 0
+cmd tp @s ~ ~0.2 ~ ~ 12
+wait 30
+shot 028_gate_bone_out_s
+cmd skyabyss abyss layer go arena_bone 180
+cmd tp @s ~ ~0.2 ~ ~ 12
+wait 30
+shot 029_arena_bone_n
+cmd skyabyss abyss layer go arena_bone 0
+cmd tp @s ~ ~0.2 ~ ~ 12
+wait 30
+shot 030_arena_bone_s
+cmd skyabyss abyss layer go descend_bone 180
+cmd tp @s ~ ~0.2 ~ ~ 12
+wait 30
+shot 031_descend_bone_n
+cmd skyabyss abyss layer go descend_bone 0
+cmd tp @s ~ ~0.2 ~ ~ 12
+wait 30
+shot 032_descend_bone_s
+cmd skyabyss abyss layer go camp_salt 180
+cmd tp @s ~ ~0.2 ~ ~ 12
+wait 30
+shot 033_camp_salt_n
+cmd skyabyss abyss layer go camp_salt 0
+cmd tp @s ~ ~0.2 ~ ~ 12
+wait 30
+shot 034_camp_salt_s
+cmd skyabyss abyss layer go escstart_salt 180
+cmd tp @s ~ ~0.2 ~ ~ 12
+wait 30
+shot 035_escstart_salt_n
+cmd skyabyss abyss layer go escstart_salt 0
+cmd tp @s ~ ~0.2 ~ ~ 12
+wait 30
+shot 036_escstart_salt_s
+cmd skyabyss abyss layer go escwait_salt_1 180
+cmd tp @s ~ ~0.2 ~ ~ 12
+wait 30
+shot 037_escwait_salt_1_n
+cmd skyabyss abyss layer go escwait_salt_1 0
+cmd tp @s ~ ~0.2 ~ ~ 12
+wait 30
+shot 038_escwait_salt_1_s
+cmd skyabyss abyss layer go escwait_salt_2 180
+cmd tp @s ~ ~0.2 ~ ~ 12
+wait 30
+shot 039_escwait_salt_2_n
+cmd skyabyss abyss layer go escwait_salt_2 0
+cmd tp @s ~ ~0.2 ~ ~ 12
+wait 30
+shot 040_escwait_salt_2_s
+cmd skyabyss abyss layer go escwait_salt_3 180
+cmd tp @s ~ ~0.2 ~ ~ 12
+wait 30
+shot 041_escwait_salt_3_n
+cmd skyabyss abyss layer go escwait_salt_3 0
+cmd tp @s ~ ~0.2 ~ ~ 12
+wait 30
+shot 042_escwait_salt_3_s
+cmd skyabyss abyss layer go brittle_salt_a 180
+cmd tp @s ~ ~0.2 ~ ~ 12
+wait 30
+shot 043_brittle_salt_a_n
+cmd skyabyss abyss layer go brittle_salt_a 0
+cmd tp @s ~ ~0.2 ~ ~ 12
+wait 30
+shot 044_brittle_salt_a_s
+cmd skyabyss abyss layer go bridge_salt_a 180
+cmd tp @s ~ ~0.2 ~ ~ 12
+wait 30
+shot 045_bridge_salt_a_n
+cmd skyabyss abyss layer go bridge_salt_a 0
+cmd tp @s ~ ~0.2 ~ ~ 12
+wait 30
+shot 046_bridge_salt_a_s
+cmd skyabyss abyss layer go well_salt 180
+cmd tp @s ~ ~0.2 ~ ~ 12
+wait 30
+shot 047_well_salt_n
+cmd skyabyss abyss layer go well_salt 0
+cmd tp @s ~ ~0.2 ~ ~ 12
+wait 30
+shot 048_well_salt_s
+cmd skyabyss abyss layer go ladder_salt_a 180
+cmd tp @s ~ ~0.2 ~ ~ 12
+wait 30
+shot 049_ladder_salt_a_n
+cmd skyabyss abyss layer go ladder_salt_a 0
+cmd tp @s ~ ~0.2 ~ ~ 12
+wait 30
+shot 050_ladder_salt_a_s
+cmd skyabyss abyss layer go stake_salt 180
+cmd tp @s ~ ~0.2 ~ ~ 12
+wait 30
+shot 051_stake_salt_n
+cmd skyabyss abyss layer go stake_salt 0
+cmd tp @s ~ ~0.2 ~ ~ 12
+wait 30
+shot 052_stake_salt_s
+cmd skyabyss abyss layer go markroom_salt_1 180
+cmd tp @s ~ ~0.2 ~ ~ 12
+wait 30
+shot 053_markroom_salt_1_n
+cmd skyabyss abyss layer go markroom_salt_1 0
+cmd tp @s ~ ~0.2 ~ ~ 12
+wait 30
+shot 054_markroom_salt_1_s
+cmd skyabyss abyss layer go puzzle_salt 180
+cmd tp @s ~ ~0.2 ~ ~ 12
+wait 30
+shot 055_puzzle_salt_n
+cmd skyabyss abyss layer go puzzle_salt 0
+cmd tp @s ~ ~0.2 ~ ~ 12
+wait 30
+shot 056_puzzle_salt_s
+cmd skyabyss abyss layer go gate_salt_out 180
+cmd tp @s ~ ~0.2 ~ ~ 12
+wait 30
+shot 057_gate_salt_out_n
+cmd skyabyss abyss layer go gate_salt_out 0
+cmd tp @s ~ ~0.2 ~ ~ 12
+wait 30
+shot 058_gate_salt_out_s
+cmd skyabyss abyss layer go arena_salt 180
+cmd tp @s ~ ~0.2 ~ ~ 12
+wait 30
+shot 059_arena_salt_n
+cmd skyabyss abyss layer go arena_salt 0
+cmd tp @s ~ ~0.2 ~ ~ 12
+wait 30
+shot 060_arena_salt_s
+cmd skyabyss abyss layer go descend_salt 180
+cmd tp @s ~ ~0.2 ~ ~ 12
+wait 30
+shot 061_descend_salt_n
+cmd skyabyss abyss layer go descend_salt 0
+cmd tp @s ~ ~0.2 ~ ~ 12
+wait 30
+shot 062_descend_salt_s
+cmd skyabyss abyss layer go escrun_salt 180
+cmd tp @s ~ ~0.2 ~ ~ 12
+wait 30
+shot 063_escrun_salt_n
+cmd skyabyss abyss layer go escrun_salt 0
+cmd tp @s ~ ~0.2 ~ ~ 12
+wait 30
+shot 064_escrun_salt_s
+cmd skyabyss abyss layer go camp_storm 180
+cmd tp @s ~ ~0.2 ~ ~ 12
+wait 30
+shot 065_camp_storm_n
+cmd skyabyss abyss layer go camp_storm 0
+cmd tp @s ~ ~0.2 ~ ~ 12
+wait 30
+shot 066_camp_storm_s
+cmd skyabyss abyss layer go watch_storm 180
+cmd tp @s ~ ~0.2 ~ ~ 12
+wait 30
+shot 067_watch_storm_n
+cmd skyabyss abyss layer go watch_storm 0
+cmd tp @s ~ ~0.2 ~ ~ 12
+wait 30
+shot 068_watch_storm_s
+cmd skyabyss abyss layer go door_storm_0 180
+cmd tp @s ~ ~0.2 ~ ~ 12
+wait 30
+shot 069_door_storm_0_n
+cmd skyabyss abyss layer go door_storm_0 0
+cmd tp @s ~ ~0.2 ~ ~ 12
+wait 30
+shot 070_door_storm_0_s
+cmd skyabyss abyss layer go closet_storm_0 180
+cmd tp @s ~ ~0.2 ~ ~ 12
+wait 30
+shot 071_closet_storm_0_n
+cmd skyabyss abyss layer go closet_storm_0 0
+cmd tp @s ~ ~0.2 ~ ~ 12
+wait 30
+shot 072_closet_storm_0_s
+cmd skyabyss abyss layer go bolt_storm_a 180
+cmd tp @s ~ ~0.2 ~ ~ 12
+wait 30
+shot 073_bolt_storm_a_n
+cmd skyabyss abyss layer go bolt_storm_a 0
+cmd tp @s ~ ~0.2 ~ ~ 12
+wait 30
+shot 074_bolt_storm_a_s
+cmd skyabyss abyss layer go nest_storm 180
+cmd tp @s ~ ~0.2 ~ ~ 12
+wait 30
+shot 075_nest_storm_n
+cmd skyabyss abyss layer go nest_storm 0
+cmd tp @s ~ ~0.2 ~ ~ 12
+wait 30
+shot 076_nest_storm_s
+cmd skyabyss abyss layer go puzzle_storm 180
+cmd tp @s ~ ~0.2 ~ ~ 12
+wait 30
+shot 077_puzzle_storm_n
+cmd skyabyss abyss layer go puzzle_storm 0
+cmd tp @s ~ ~0.2 ~ ~ 12
+wait 30
+shot 078_puzzle_storm_s
+cmd skyabyss abyss layer go markroom_storm_1 180
+cmd tp @s ~ ~0.2 ~ ~ 12
+wait 30
+shot 079_markroom_storm_1_n
+cmd skyabyss abyss layer go markroom_storm_1 0
+cmd tp @s ~ ~0.2 ~ ~ 12
+wait 30
+shot 080_markroom_storm_1_s
+cmd skyabyss abyss layer go markroom_storm_2 180
+cmd tp @s ~ ~0.2 ~ ~ 12
+wait 30
+shot 081_markroom_storm_2_n
+cmd skyabyss abyss layer go markroom_storm_2 0
+cmd tp @s ~ ~0.2 ~ ~ 12
+wait 30
+shot 082_markroom_storm_2_s
+cmd skyabyss abyss layer go scut_storm_1_a 180
+cmd tp @s ~ ~0.2 ~ ~ 12
+wait 30
+shot 083_scut_storm_1_a_n
+cmd skyabyss abyss layer go scut_storm_1_a 0
+cmd tp @s ~ ~0.2 ~ ~ 12
+wait 30
+shot 084_scut_storm_1_a_s
+cmd skyabyss abyss layer go gate_storm_out 180
+cmd tp @s ~ ~0.2 ~ ~ 12
+wait 30
+shot 085_gate_storm_out_n
+cmd skyabyss abyss layer go gate_storm_out 0
+cmd tp @s ~ ~0.2 ~ ~ 12
+wait 30
+shot 086_gate_storm_out_s
+cmd skyabyss abyss layer go arena_storm 180
+cmd tp @s ~ ~0.2 ~ ~ 12
+wait 30
+shot 087_arena_storm_n
+cmd skyabyss abyss layer go arena_storm 0
+cmd tp @s ~ ~0.2 ~ ~ 12
+wait 30
+shot 088_arena_storm_s
+cmd skyabyss abyss layer go descend_storm 180
+cmd tp @s ~ ~0.2 ~ ~ 12
+wait 30
+shot 089_descend_storm_n
+cmd skyabyss abyss layer go descend_storm 0
+cmd tp @s ~ ~0.2 ~ ~ 12
+wait 30
+shot 090_descend_storm_s
+cmd skyabyss abyss layer go camp_ash 180
+cmd tp @s ~ ~0.2 ~ ~ 12
+wait 30
+shot 091_camp_ash_n
+cmd skyabyss abyss layer go camp_ash 0
+cmd tp @s ~ ~0.2 ~ ~ 12
+wait 30
+shot 092_camp_ash_s
+cmd skyabyss abyss layer go escstart_ash 180
+cmd tp @s ~ ~0.2 ~ ~ 12
+wait 30
+shot 093_escstart_ash_n
+cmd skyabyss abyss layer go escstart_ash 0
+cmd tp @s ~ ~0.2 ~ ~ 12
+wait 30
+shot 094_escstart_ash_s
+cmd skyabyss abyss layer go escwait_ash_1 180
+cmd tp @s ~ ~0.2 ~ ~ 12
+wait 30
+shot 095_escwait_ash_1_n
+cmd skyabyss abyss layer go escwait_ash_1 0
+cmd tp @s ~ ~0.2 ~ ~ 12
+wait 30
+shot 096_escwait_ash_1_s
+cmd skyabyss abyss layer go escwait_ash_2 180
+cmd tp @s ~ ~0.2 ~ ~ 12
+wait 30
+shot 097_escwait_ash_2_n
+cmd skyabyss abyss layer go escwait_ash_2 0
+cmd tp @s ~ ~0.2 ~ ~ 12
+wait 30
+shot 098_escwait_ash_2_s
+cmd skyabyss abyss layer go maze_ash_in 180
+cmd tp @s ~ ~0.2 ~ ~ 12
+wait 30
+shot 099_maze_ash_in_n
+cmd skyabyss abyss layer go maze_ash_in 0
+cmd tp @s ~ ~0.2 ~ ~ 12
+wait 30
+shot 100_maze_ash_in_s
+cmd skyabyss abyss layer go maze_ash_a 180
+cmd tp @s ~ ~0.2 ~ ~ 12
+wait 30
+shot 101_maze_ash_a_n
+cmd skyabyss abyss layer go maze_ash_a 0
+cmd tp @s ~ ~0.2 ~ ~ 12
+wait 30
+shot 102_maze_ash_a_s
+cmd skyabyss abyss layer go maze_ash_b 180
+cmd tp @s ~ ~0.2 ~ ~ 12
+wait 30
+shot 103_maze_ash_b_n
+cmd skyabyss abyss layer go maze_ash_b 0
+cmd tp @s ~ ~0.2 ~ ~ 12
+wait 30
+shot 104_maze_ash_b_s
+cmd skyabyss abyss layer go seal_ash 180
+cmd tp @s ~ ~0.2 ~ ~ 12
+wait 30
+shot 105_seal_ash_n
+cmd skyabyss abyss layer go seal_ash 0
+cmd tp @s ~ ~0.2 ~ ~ 12
+wait 30
+shot 106_seal_ash_s
+cmd skyabyss abyss layer go puzzle_ash 180
+cmd tp @s ~ ~0.2 ~ ~ 12
+wait 30
+shot 107_puzzle_ash_n
+cmd skyabyss abyss layer go puzzle_ash 0
+cmd tp @s ~ ~0.2 ~ ~ 12
+wait 30
+shot 108_puzzle_ash_s
+cmd skyabyss abyss layer go markroom_ash_1 180
+cmd tp @s ~ ~0.2 ~ ~ 12
+wait 30
+shot 109_markroom_ash_1_n
+cmd skyabyss abyss layer go markroom_ash_1 0
+cmd tp @s ~ ~0.2 ~ ~ 12
+wait 30
+shot 110_markroom_ash_1_s
+cmd skyabyss abyss layer go gate_ash_out 180
+cmd tp @s ~ ~0.2 ~ ~ 12
+wait 30
+shot 111_gate_ash_out_n
+cmd skyabyss abyss layer go gate_ash_out 0
+cmd tp @s ~ ~0.2 ~ ~ 12
+wait 30
+shot 112_gate_ash_out_s
+cmd skyabyss abyss layer go arena_ash 180
+cmd tp @s ~ ~0.2 ~ ~ 12
+wait 30
+shot 113_arena_ash_n
+cmd skyabyss abyss layer go arena_ash 0
+cmd tp @s ~ ~0.2 ~ ~ 12
+wait 30
+shot 114_arena_ash_s
+cmd skyabyss abyss layer go descend_ash 180
+cmd tp @s ~ ~0.2 ~ ~ 12
+wait 30
+shot 115_descend_ash_n
+cmd skyabyss abyss layer go descend_ash 0
+cmd tp @s ~ ~0.2 ~ ~ 12
+wait 30
+shot 116_descend_ash_s
+cmd skyabyss abyss layer go escrun_ash 180
+cmd tp @s ~ ~0.2 ~ ~ 12
+wait 30
+shot 117_escrun_ash_n
+cmd skyabyss abyss layer go escrun_ash 0
+cmd tp @s ~ ~0.2 ~ ~ 12
+wait 30
+shot 118_escrun_ash_s
+cmd skyabyss abyss layer go heart_in 180
+cmd tp @s ~ ~0.2 ~ ~ 12
+wait 30
+shot 119_heart_in_n
+cmd skyabyss abyss layer go heart_in 0
+cmd tp @s ~ ~0.2 ~ ~ 12
+wait 30
+shot 120_heart_in_s
+cmd skyabyss abyss layer go heart 180
+cmd tp @s ~ ~0.2 ~ ~ 12
+wait 30
+shot 121_heart_n
+cmd skyabyss abyss layer go heart 0
+cmd tp @s ~ ~0.2 ~ ~ 12
+wait 30
+shot 122_heart_s
+cmd skyabyss abyss layer go ascend_heart 180
+cmd tp @s ~ ~0.2 ~ ~ 12
+wait 30
+shot 123_ascend_heart_n
+cmd skyabyss abyss layer go ascend_heart 0
+cmd tp @s ~ ~0.2 ~ ~ 12
+wait 30
+shot 124_ascend_heart_s

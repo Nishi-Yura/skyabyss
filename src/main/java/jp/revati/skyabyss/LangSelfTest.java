@@ -300,6 +300,15 @@ public final class LangSelfTest {
             if (dialogueKeys < 100) {
                 f.add("only " + dialogueKeys + " dialogue keys were checked (no dialogues loaded?)");
             }
+            // mod のバイオームの名前 (入ったときの「+10 <場所>」と F3 に出る。2026-10-28 に深淵と熾の背が抜けていた)
+            for (net.minecraft.resources.ResourceLocation id : server.registryAccess().registryOrThrow(net.minecraft.core.registries.Registries.BIOME).keySet()) {
+                if (id.getNamespace().equals(SkyAbyss.MODID)) {
+                    String k = "biome." + id.getNamespace() + "." + id.getPath();
+                    if (!jaT.containsKey(k) || !enT.containsKey(k)) {
+                        f.add("biome name " + k + " is missing from " + (jaT.containsKey(k) ? "en_us" : enT.containsKey(k) ? "ja_jp" : "both"));
+                    }
+                }
+            }
             // 検査の部品そのものが動くこと
             if (specs("%s と %1$s と %% と %d") != 3) {
                 f.add("the placeholder counter is wrong");

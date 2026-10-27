@@ -2,7 +2,7 @@
 # bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/abyss_v3.txt -PshotsName=abyss_v3   (設計図を変えたら run/shots/abyss_v3/saves を消す)
 #   → 絵は run/shots/abyss_v3/shots/abyss_v3/ (docs/review/abyss_v3/ へ縮めて写す)
 # at shelter 0 <x> <y> <z> <yaw> <pitch>: 都の設計図の座標と向き (yaw 0 = 南、180 = 北、90 = 西、-90 = 東)
-world opening_abyss_v3 normal
+world opening_abyss_v3c continent
 size 1280 720
 timeout 3600
 render 10
@@ -99,21 +99,21 @@ wait 50
 shot a08_lord_bone_move2
 cmd skyabyss abyss layer go arena_salt 180
 wait 20
-cmd tp @s 0 54 -40 180 5
+cmd tp @s ~ ~ ~ 180 5
 wait 40
 cmd skyabyss abyss layer lord salt
 wait 110
 shot a09_lord_salt_move
 cmd skyabyss abyss layer go arena_storm 180
 wait 20
-cmd tp @s 0 -66 -40 180 5
+cmd tp @s ~ ~ ~ 180 5
 wait 40
 cmd skyabyss abyss layer lord storm
 wait 110
 shot a10_lord_storm_move
 cmd skyabyss abyss layer go arena_ash 180
 wait 20
-cmd tp @s 0 -186 -40 180 5
+cmd tp @s ~ ~ ~ 180 5
 wait 40
 cmd skyabyss abyss layer lord ash
 wait 110

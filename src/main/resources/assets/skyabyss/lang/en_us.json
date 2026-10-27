@@ -1934,5 +1934,7 @@
   "item.skyabyss.water_skin_full": "Gourd Flask (Full)",
   "item.skyabyss.water_skin_full.desc": "A flask full of water",
   "item.skyabyss.indigo_bookmark": "Indigo Bookmark",
-  "item.skyabyss.indigo_bookmark.desc": "A bookmark with a pressed indigo flower"
+  "item.skyabyss.indigo_bookmark.desc": "A bookmark with a pressed indigo flower",
+  "biome.skyabyss.abyss": "The Abyss",
+  "biome.skyabyss.ember_back": "The Ember Back"
 }

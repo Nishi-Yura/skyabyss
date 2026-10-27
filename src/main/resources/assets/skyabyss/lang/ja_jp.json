@@ -1934,5 +1934,7 @@
   "item.skyabyss.water_skin_full": "瓢箪の水筒（水入り）",
   "item.skyabyss.water_skin_full.desc": "水を汲んだ水筒",
   "item.skyabyss.indigo_bookmark": "藍の栞",
-  "item.skyabyss.indigo_bookmark.desc": "藍の押し花の栞"
+  "item.skyabyss.indigo_bookmark.desc": "藍の押し花の栞",
+  "biome.skyabyss.abyss": "深淵",
+  "biome.skyabyss.ember_back": "余燼の背"
 }
