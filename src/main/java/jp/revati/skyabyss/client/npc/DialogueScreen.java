@@ -287,6 +287,10 @@ public class DialogueScreen extends Screen {
 
     private ResourceLocation faceTexture() {
         String path = show.role().substring(show.role().indexOf(':') + 1);
+        // 土地の町の人 (はじまりの島の渡し守も) は、体と同じく都の町の人の肖像を借りる (town/RegionFolk)
+        if (path.startsWith("guest_")) {
+            path = "guest_" + jp.revati.skyabyss.town.RegionFolk.lookOf(path.substring(6));
+        }
         return ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "textures/gui/npc/face/" + path + "_" + show.face() + ".png");
     }
 

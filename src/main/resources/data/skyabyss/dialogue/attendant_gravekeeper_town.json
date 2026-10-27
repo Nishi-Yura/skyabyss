@@ -13,13 +13,21 @@
             "type": "all",
             "of": [
               {
-                "type": "stage",
-                "min": 0
+                "type": "all",
+                "of": [
+                  {
+                    "type": "stage",
+                    "min": 0
+                  },
+                  {
+                    "type": "quest",
+                    "quest": "town/grave_1",
+                    "is": "none"
+                  }
+                ]
               },
               {
-                "type": "quest",
-                "quest": "town/grave_1",
-                "is": "none"
+                "type": "in_capital"
               }
             ]
           },
@@ -38,15 +46,23 @@
             "type": "all",
             "of": [
               {
-                "type": "quest",
-                "quest": "town/grave_1",
-                "is": "active",
-                "stage": "lay"
+                "type": "all",
+                "of": [
+                  {
+                    "type": "quest",
+                    "quest": "town/grave_1",
+                    "is": "active",
+                    "stage": "lay"
+                  },
+                  {
+                    "type": "item",
+                    "item": "#minecraft:small_flowers",
+                    "count": 1
+                  }
+                ]
               },
               {
-                "type": "item",
-                "item": "#minecraft:small_flowers",
-                "count": 1
+                "type": "in_capital"
               }
             ]
           },
@@ -70,18 +86,26 @@
             "type": "all",
             "of": [
               {
-                "type": "stage",
-                "min": 1
+                "type": "all",
+                "of": [
+                  {
+                    "type": "stage",
+                    "min": 1
+                  },
+                  {
+                    "type": "quest",
+                    "quest": "town/grave_2",
+                    "is": "none"
+                  },
+                  {
+                    "type": "quest",
+                    "quest": "town/grave_1",
+                    "is": "done"
+                  }
+                ]
               },
               {
-                "type": "quest",
-                "quest": "town/grave_2",
-                "is": "none"
-              },
-              {
-                "type": "quest",
-                "quest": "town/grave_1",
-                "is": "done"
+                "type": "in_capital"
               }
             ]
           },
@@ -100,15 +124,23 @@
             "type": "all",
             "of": [
               {
-                "type": "quest",
-                "quest": "town/grave_2",
-                "is": "active",
-                "stage": "wash"
+                "type": "all",
+                "of": [
+                  {
+                    "type": "quest",
+                    "quest": "town/grave_2",
+                    "is": "active",
+                    "stage": "wash"
+                  },
+                  {
+                    "type": "item",
+                    "item": "minecraft:water_bucket",
+                    "count": 1
+                  }
+                ]
               },
               {
-                "type": "item",
-                "item": "minecraft:water_bucket",
-                "count": 1
+                "type": "in_capital"
               }
             ]
           },
@@ -137,18 +169,26 @@
             "type": "all",
             "of": [
               {
-                "type": "stage",
-                "min": 2
+                "type": "all",
+                "of": [
+                  {
+                    "type": "stage",
+                    "min": 2
+                  },
+                  {
+                    "type": "quest",
+                    "quest": "town/grave_3",
+                    "is": "none"
+                  },
+                  {
+                    "type": "quest",
+                    "quest": "town/grave_2",
+                    "is": "done"
+                  }
+                ]
               },
               {
-                "type": "quest",
-                "quest": "town/grave_3",
-                "is": "none"
-              },
-              {
-                "type": "quest",
-                "quest": "town/grave_2",
-                "is": "done"
+                "type": "in_capital"
               }
             ]
           },
@@ -164,10 +204,18 @@
           "goto": "town_g3_back",
           "kind": "quest",
           "if": {
-            "type": "quest",
-            "quest": "town/grave_3",
-            "is": "active",
-            "stage": "back"
+            "type": "all",
+            "of": [
+              {
+                "type": "quest",
+                "quest": "town/grave_3",
+                "is": "active",
+                "stage": "back"
+              },
+              {
+                "type": "in_capital"
+              }
+            ]
           }
         },
         {
@@ -178,18 +226,26 @@
             "type": "all",
             "of": [
               {
-                "type": "stage",
-                "min": 3
+                "type": "all",
+                "of": [
+                  {
+                    "type": "stage",
+                    "min": 3
+                  },
+                  {
+                    "type": "quest",
+                    "quest": "town/grave_4",
+                    "is": "none"
+                  },
+                  {
+                    "type": "quest",
+                    "quest": "town/grave_3",
+                    "is": "done"
+                  }
+                ]
               },
               {
-                "type": "quest",
-                "quest": "town/grave_4",
-                "is": "none"
-              },
-              {
-                "type": "quest",
-                "quest": "town/grave_3",
-                "is": "done"
+                "type": "in_capital"
               }
             ]
           },
@@ -208,15 +264,23 @@
             "type": "all",
             "of": [
               {
-                "type": "quest",
-                "quest": "town/grave_4",
-                "is": "active",
-                "stage": "light"
+                "type": "all",
+                "of": [
+                  {
+                    "type": "quest",
+                    "quest": "town/grave_4",
+                    "is": "active",
+                    "stage": "light"
+                  },
+                  {
+                    "type": "item",
+                    "item": "minecraft:candle",
+                    "count": 1
+                  }
+                ]
               },
               {
-                "type": "item",
-                "item": "minecraft:candle",
-                "count": 1
+                "type": "in_capital"
               }
             ]
           },

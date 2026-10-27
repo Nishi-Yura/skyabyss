@@ -10,10 +10,18 @@
           "goto": "town_market",
           "kind": "quest",
           "if": {
-            "type": "quest",
-            "quest": "town/ch2_net",
-            "is": "active",
-            "stage": "market"
+            "type": "all",
+            "of": [
+              {
+                "type": "quest",
+                "quest": "town/ch2_net",
+                "is": "active",
+                "stage": "market"
+              },
+              {
+                "type": "in_capital"
+              }
+            ]
           }
         }
       ]

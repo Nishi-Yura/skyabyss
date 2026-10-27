@@ -3,6 +3,27 @@
   "entries": [
     {
       "if": {
+        "type": "all",
+        "of": [
+          {
+            "type": "not",
+            "of": {
+              "type": "flag",
+              "flag": "intro"
+            }
+          },
+          {
+            "type": "not",
+            "of": {
+              "type": "in_capital"
+            }
+          }
+        ]
+      },
+      "node": "intro_town"
+    },
+    {
+      "if": {
         "type": "not",
         "of": {
           "type": "flag",
@@ -110,7 +131,22 @@
         {
           "id": "rebirth",
           "kind": "talk",
-          "goto": "rebirth"
+          "goto": "rebirth",
+          "if": {
+            "type": "in_capital"
+          }
+        },
+        {
+          "id": "rebirth_town",
+          "kind": "talk",
+          "goto": "rebirth_town",
+          "text": "dialogue.skyabyss.attendant_shrine_priest.menu.rebirth",
+          "if": {
+            "type": "not",
+            "of": {
+              "type": "in_capital"
+            }
+          }
         },
         {
           "id": "vow",
@@ -146,12 +182,42 @@
         {
           "id": "keys",
           "kind": "talk",
-          "goto": "keys"
+          "goto": "keys",
+          "if": {
+            "type": "in_capital"
+          }
+        },
+        {
+          "id": "keys_town",
+          "kind": "talk",
+          "goto": "keys_town",
+          "text": "dialogue.skyabyss.attendant_shrine_priest.menu.keys",
+          "if": {
+            "type": "not",
+            "of": {
+              "type": "in_capital"
+            }
+          }
         },
         {
           "id": "about",
           "kind": "talk",
-          "goto": "again"
+          "goto": "again",
+          "if": {
+            "type": "in_capital"
+          }
+        },
+        {
+          "id": "about_town",
+          "kind": "talk",
+          "goto": "again_town",
+          "text": "dialogue.skyabyss.attendant_shrine_priest.menu.about",
+          "if": {
+            "type": "not",
+            "of": {
+              "type": "in_capital"
+            }
+          }
         },
         {
           "id": "bye",
@@ -159,6 +225,32 @@
           "goto": "end"
         }
       ]
+    },
+    "intro_town": {
+      "face": "smile",
+      "do": [
+        {
+          "type": "flag",
+          "flag": "intro"
+        }
+      ],
+      "next": "menu",
+      "text": "dialogue.skyabyss.attendant_shrine_priest.intro_town"
+    },
+    "again_town": {
+      "face": "neutral",
+      "next": "menu",
+      "text": "dialogue.skyabyss.attendant_shrine_priest.intro_town"
+    },
+    "rebirth_town": {
+      "face": "neutral",
+      "next": "menu",
+      "text": "dialogue.skyabyss.attendant_shrine_priest.rebirth_town"
+    },
+    "keys_town": {
+      "face": "neutral",
+      "next": "menu",
+      "text": "dialogue.skyabyss.attendant_shrine_priest.keys_town"
     }
   }
 }

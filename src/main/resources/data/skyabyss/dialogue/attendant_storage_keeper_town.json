@@ -10,10 +10,18 @@
           "goto": "town_sea",
           "kind": "quest",
           "if": {
-            "type": "quest",
-            "quest": "town/ch2_bard",
-            "is": "active",
-            "stage": "listen"
+            "type": "all",
+            "of": [
+              {
+                "type": "quest",
+                "quest": "town/ch2_bard",
+                "is": "active",
+                "stage": "listen"
+              },
+              {
+                "type": "in_capital"
+              }
+            ]
           }
         }
       ]

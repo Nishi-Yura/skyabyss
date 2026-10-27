@@ -10,10 +10,18 @@
           "goto": "town_forge",
           "kind": "quest",
           "if": {
-            "type": "quest",
-            "quest": "town/ch4_ash",
-            "is": "active",
-            "stage": "smith"
+            "type": "all",
+            "of": [
+              {
+                "type": "quest",
+                "quest": "town/ch4_ash",
+                "is": "active",
+                "stage": "smith"
+              },
+              {
+                "type": "in_capital"
+              }
+            ]
           }
         }
       ]

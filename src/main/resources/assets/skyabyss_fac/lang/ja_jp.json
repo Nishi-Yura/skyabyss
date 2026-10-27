@@ -556,5 +556,12 @@
   "message.skyabyss.training.nothing_stats": "振った力がない",
   "message.skyabyss.training.quote": "振り直しの代価: 技 結晶 %s (鐘銭 %s) ・ 力 結晶 %s (鐘銭 %s)",
   "objective.skyabyss.town_guide": "%sへ向かおう",
-  "skyabyss_record.d.place_key_room": "・鍵の間 ×%s"
+  "skyabyss_record.d.place_key_room": "・鍵の間 ×%s",
+  "dialogue.skyabyss.attendant_innkeeper.intro_town": "旅の宿へようこそ。寝台を取れば、倒れても目覚めるのはこの宿。噂話なら、いくらでもあるよ。",
+  "dialogue.skyabyss.attendant_keep_veteran.intro_town": "砦の古兵だ。都の空見の砦から、記録の写しを預かってきた。巨神の背での働きは、ここでも見られる。",
+  "dialogue.skyabyss.attendant_keep_veteran.records_town": "写しには今週の順位と、各巨神の速さが出る。試練の図鑑の写しも、わしが預かっている。仲間と並んで名が残るのも悪くない。",
+  "dialogue.skyabyss.attendant_shrine_priest.intro_town": "四巨神の社の分けの祠です。天の鍵の欠片は、ここでも納められます。",
+  "dialogue.skyabyss.attendant_shrine_priest.keys_town": "欠片は、ここで預かれば都の社の四つの石に刻まれます。四つそろえば、鍵は形になる。預けた欠片は失くさないし、いつでも返します。",
+  "dialogue.skyabyss.attendant_shrine_priest.rebirth_town": "転生の台座は、都の社の奥にあります。Lv 50 を越え、共鳴の結晶を五つ納めれば、台座に触れてもう一度歩き直せます。",
+  "dialogue.skyabyss.attendant_archivist.intro_town": "書庫の写しを預かる者です。伝承の写しと、地図の写しは、ここでも渡せます。"
 }

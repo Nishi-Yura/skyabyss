@@ -37,6 +37,19 @@ public final class RegionFolkSelfTest {
 
     private static void run(MinecraftServer server) {
         List<String> f = new ArrayList<>();
+        // 会話の肖像: 町の人 (はじまりの島の渡し守も) は借りる見た目の肖像がある (無いと会話の顔が出ない。2026-10-27)
+        for (RegionFolk.Folk rf : RegionFolk.ALL) {
+            for (String face : new String[] {"neutral", "smile", "grave"}) {
+                String path = "/assets/skyabyss/textures/gui/npc/face/guest_" + RegionFolk.lookOf(rf.id()) + "_" + face + ".png";
+                try (java.io.InputStream in = RegionFolkSelfTest.class.getResourceAsStream(path)) {
+                    if (in == null) {
+                        f.add(rf.id() + ": no portrait " + path);
+                    }
+                } catch (java.io.IOException ex) {
+                    f.add(rf.id() + ": " + ex);
+                }
+            }
+        }
         for (String[] e : ERRANDS) {
             String folk = e[0];
             String qid = e[1];

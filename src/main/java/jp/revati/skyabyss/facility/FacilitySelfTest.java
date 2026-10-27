@@ -160,7 +160,8 @@ public final class FacilitySelfTest {
             NpcBonds.of(p).bond(r.dialogueRole()).flags().remove("intro");
             StoryContext ctx = new StoryContext(p, r.dialogueRole(), null);
             Dialogue.Node first = d.entryNode(ctx);
-            check(f, first != null && first.id().equals("intro"), r.id + ": first talk opens intro");
+            // 都の外 (土地の町) では intro_town (都にしかない物の名を出さない。45 の 5 章)
+            check(f, first != null && (first.id().equals("intro") || first.id().equals("intro_town")), r.id + ": first talk opens intro");
             NpcBonds.of(p).bond(r.dialogueRole()).flags().add("intro");
             Dialogue.Node menu = d.entryNode(ctx);
             check(f, menu != null && menu.id().equals("menu") && menu.options().size() >= 3, r.id + ": then the menu");

@@ -3,6 +3,27 @@
   "entries": [
     {
       "if": {
+        "type": "all",
+        "of": [
+          {
+            "type": "not",
+            "of": {
+              "type": "flag",
+              "flag": "intro"
+            }
+          },
+          {
+            "type": "not",
+            "of": {
+              "type": "in_capital"
+            }
+          }
+        ]
+      },
+      "node": "intro_town"
+    },
+    {
+      "if": {
         "type": "not",
         "of": {
           "type": "flag",
@@ -68,7 +89,22 @@
         {
           "id": "about",
           "kind": "talk",
-          "goto": "again"
+          "goto": "again",
+          "if": {
+            "type": "in_capital"
+          }
+        },
+        {
+          "id": "about_town",
+          "kind": "talk",
+          "goto": "again_town",
+          "text": "dialogue.skyabyss.attendant_innkeeper.menu.about",
+          "if": {
+            "type": "not",
+            "of": {
+              "type": "in_capital"
+            }
+          }
         },
         {
           "id": "bye",
@@ -76,6 +112,22 @@
           "goto": "end"
         }
       ]
+    },
+    "intro_town": {
+      "face": "smile",
+      "do": [
+        {
+          "type": "flag",
+          "flag": "intro"
+        }
+      ],
+      "next": "menu",
+      "text": "dialogue.skyabyss.attendant_innkeeper.intro_town"
+    },
+    "again_town": {
+      "face": "neutral",
+      "next": "menu",
+      "text": "dialogue.skyabyss.attendant_innkeeper.intro_town"
     }
   }
 }

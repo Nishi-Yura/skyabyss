@@ -1,5 +1,5 @@
 # 町ごとの目印を壁の外の高い所から。2026-10-27
-world townsym flat
+world townsym2 flat
 size 1600 900
 timeout 900
 render 16

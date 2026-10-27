@@ -708,7 +708,7 @@ class PlanTown(RegionTown):
     # ---------------------------------------------------------------- 施設 (市場のまわり)
     FAC = {'inn': ((20, 14), 'south'), 'smithy': ((14, 16), 'south'), 'tool_shop': ((12, 14), 'north'),
            'apothecary': ((12, 14), 'north'), 'chapel': ((16, 14), 'north'), 'guild': ((20, 13), 'north'),
-           'stall': ((8, 9), 'north'), 'market': ((16, 13), 'north'), 'travel': ((16, 11), 'north'), 'training': ((12, 11), 'north')}
+           'stall': ((8, 9), 'north'), 'market': ((16, 13), 'north'), 'travel': ((14, 11), 'north'), 'training': ((12, 11), 'north')}
     TURN = ['north', 'east', 'south', 'west']
 
     def facilities_at(self, spots):
@@ -746,7 +746,7 @@ class PlanTown(RegionTown):
         """門の外、門から出る道の脇 (s = 道のどちら側) に、道へ戸を向けて建てる。戸から道まで小道"""
         (w, d), f0 = self.FAC[name]
         L, B = w, d          # 道に沿う長さ = 間口、道から離れる向き = 奥行き
-        a0, b0 = 3, 11       # 壁から 3、道の中心から 11
+        a0, b0 = 2, 11       # 壁から 2、道の中心から 11 (設計図の縁 EDGE の内に収める)
         if side in ('north', 'south'):
             sz = 1 if side == 'south' else -1
             zs = sorted((sz * (W + a0), sz * (W + a0 + L - 1)))
@@ -1212,6 +1212,9 @@ def main():
             t = PlanTown(region, 'a')
             v = t.build()
             meta = {'rect': [-W - 18, -W - 18, W + 18, W + 18], 'level': True, 'ring': 8, 'fillWater': True, 'height': 40}
+            out = [(x, z) for (x, y, z), b_ in v.b.items() if b_ != 'air' and max(abs(x), abs(z)) > W + 18]
+            if out:
+                raise SystemExit('town_%s: %d blocks outside the site rect, e.g. %s' % (region, len(out), out[:3]))
             data = v.runs(meta)
             data['site'] = 'town_' + region
             _check_blocks(data, region)

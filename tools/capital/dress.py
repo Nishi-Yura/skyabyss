@@ -368,10 +368,10 @@ def dress(town):
 # ---------------------------------------------------------------- 地面
 GROUND = {
     # 土地ごと: (斑の地, 道の脇のすり減り, 岩)
-    'whale': (['moss_block', 'podzol', 'coarse_dirt'], ['coarse_dirt', 'rooted_dirt', 'dirt_path'], ['mossy_cobblestone', 'andesite', 'stone']),
-    'tide': (['sand', 'coarse_dirt', 'gravel'], ['sand', 'dirt_path', 'coarse_dirt'], ['sandstone', 'smooth_sandstone', 'calcite']),
-    'storm': (['coarse_dirt', 'gravel', 'stone'], ['gravel', 'dirt_path', 'coarse_dirt'], ['tuff', 'andesite', 'stone']),
-    'ember': (['coarse_dirt', 'rooted_dirt', 'blackstone'], ['coarse_dirt', 'dirt_path', 'blackstone'], ['blackstone', 'basalt[axis=y]', 'tuff']),
+    'whale': (['moss_block', 'podzol', 'coarse_dirt'], ['coarse_dirt', 'rooted_dirt', 'coarse_dirt'], ['mossy_cobblestone', 'andesite', 'stone']),
+    'tide': (['sand', 'coarse_dirt', 'gravel'], ['sand', 'coarse_dirt', 'sand'], ['sandstone', 'smooth_sandstone', 'calcite']),
+    'storm': (['coarse_dirt', 'gravel', 'stone'], ['gravel', 'coarse_dirt', 'gravel'], ['tuff', 'andesite', 'stone']),
+    'ember': (['coarse_dirt', 'rooted_dirt', 'blackstone'], ['coarse_dirt', 'rooted_dirt', 'blackstone'], ['blackstone', 'basalt[axis=y]', 'tuff']),
 }
 
 

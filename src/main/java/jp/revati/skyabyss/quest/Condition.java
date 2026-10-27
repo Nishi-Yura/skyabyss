@@ -47,7 +47,7 @@ import net.minecraft.world.item.Item;
 //   item は token を書くと、その印の品だけを数える (QuestItems)。optional を書くと、まだ登録されていない品でも読み込める (数は 0)
 public final class Condition {
     public static final Set<String> TYPES = Set.of("all", "any", "not", "quest", "lore", "affinity", "flag", "remembers", "loop",
-            "item", "watcher", "day", "level", "night", "true", "stage", "stilled", "world_stage", "weather", "height", "grave", "no_keepsake", "prep", "ward_ok", "repeat_run");
+            "item", "watcher", "day", "level", "night", "true", "stage", "stilled", "world_stage", "weather", "height", "grave", "no_keepsake", "prep", "ward_ok", "repeat_run", "in_capital");
     public static final Condition ALWAYS = new Condition("true", new JsonObject(), List.of());
 
     private final String type;
@@ -222,6 +222,9 @@ public final class Condition {
                     >= GsonHelper.getAsInt(json, "min", 1);
             case "day" -> ctx.player().server.overworld().getGameTime() / 24000L >= GsonHelper.getAsInt(json, "min", 0);
             case "level" -> jp.revati.skyabyss.rebirth.Rebirth.gearLevel(ctx.player()) >= GsonHelper.getAsInt(json, "min", 1);
+            // 都 (はじまりの町) の中か。土地の町の係の人が、都の名を出さないように (docs/design/45 の 5 章)
+            case "in_capital" -> jp.revati.skyabyss.opening.OpeningSites.shelter(ctx.player().server)
+                    .map(c -> c.distSqr(ctx.player().blockPosition()) <= 200.0 * 200.0).orElse(false);
             case "night" -> {
                 long t = ctx.player().server.overworld().getDayTime() % 24000L;
                 yield t >= 13000 && t < 23000;

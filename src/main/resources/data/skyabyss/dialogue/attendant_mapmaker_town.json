@@ -8,12 +8,18 @@
         {
           "id": "town_rumor",
           "goto": "town_rumor",
-          "kind": "talk"
+          "kind": "talk",
+          "if": {
+            "type": "in_capital"
+          }
         },
         {
           "id": "town_draw",
           "goto": "town_draw",
-          "kind": "talk"
+          "kind": "talk",
+          "if": {
+            "type": "in_capital"
+          }
         }
       ]
     }

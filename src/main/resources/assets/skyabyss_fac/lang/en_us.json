@@ -556,5 +556,12 @@
   "message.skyabyss.training.nothing_stats": "No stat points to reset",
   "message.skyabyss.training.quote": "Reset price: skills %s crystals (%s coins) · stats %s crystals (%s coins)",
   "objective.skyabyss.town_guide": "Head to %s",
-  "skyabyss_record.d.place_key_room": "- Key chamber x%s"
+  "skyabyss_record.d.place_key_room": "- Key chamber x%s",
+  "dialogue.skyabyss.attendant_innkeeper.intro_town": "Welcome to the inn. Take a bed and this is where you wake if you fall. And I have rumours to spare.",
+  "dialogue.skyabyss.attendant_keep_veteran.intro_town": "An old hand of the keep. I carry copies of the records from the capital's Skywatch Keep. Your deeds on the titans' backs can be read here too.",
+  "dialogue.skyabyss.attendant_keep_veteran.records_town": "The copies show this week's ranking and each titan's fastest times. I keep a copy of the trial codex as well. Not bad, seeing your name beside your friends'.",
+  "dialogue.skyabyss.attendant_shrine_priest.intro_town": "A branch shrine of the Four Titans. You can offer the sky key's shards here too.",
+  "dialogue.skyabyss.attendant_shrine_priest.keys_town": "Shards left here are carved into the four stones of the capital's shrine. When all four are set, the key takes shape. Nothing you leave is lost, and I return them whenever you ask.",
+  "dialogue.skyabyss.attendant_shrine_priest.rebirth_town": "The rebirth altar stands at the back of the capital's shrine. Past Lv 50, with five resonance crystals offered, touch it to walk the road again.",
+  "dialogue.skyabyss.attendant_archivist.intro_town": "I keep copies from the archive. Lore and map copies can be had here as well."
 }

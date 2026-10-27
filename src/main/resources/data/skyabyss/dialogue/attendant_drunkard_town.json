@@ -13,13 +13,21 @@
             "type": "all",
             "of": [
               {
-                "type": "stage",
-                "min": 0
+                "type": "all",
+                "of": [
+                  {
+                    "type": "stage",
+                    "min": 0
+                  },
+                  {
+                    "type": "quest",
+                    "quest": "town/cellar_1",
+                    "is": "none"
+                  }
+                ]
               },
               {
-                "type": "quest",
-                "quest": "town/cellar_1",
-                "is": "none"
+                "type": "in_capital"
               }
             ]
           },
@@ -38,15 +46,23 @@
             "type": "all",
             "of": [
               {
-                "type": "quest",
-                "quest": "town/cellar_1",
-                "is": "active",
-                "stage": "hand"
+                "type": "all",
+                "of": [
+                  {
+                    "type": "quest",
+                    "quest": "town/cellar_1",
+                    "is": "active",
+                    "stage": "hand"
+                  },
+                  {
+                    "type": "item",
+                    "item": "minecraft:honey_bottle",
+                    "count": 1
+                  }
+                ]
               },
               {
-                "type": "item",
-                "item": "minecraft:honey_bottle",
-                "count": 1
+                "type": "in_capital"
               }
             ]
           },
@@ -75,18 +91,26 @@
             "type": "all",
             "of": [
               {
-                "type": "stage",
-                "min": 2
+                "type": "all",
+                "of": [
+                  {
+                    "type": "stage",
+                    "min": 2
+                  },
+                  {
+                    "type": "quest",
+                    "quest": "town/cellar_2",
+                    "is": "none"
+                  },
+                  {
+                    "type": "quest",
+                    "quest": "town/cellar_1",
+                    "is": "done"
+                  }
+                ]
               },
               {
-                "type": "quest",
-                "quest": "town/cellar_2",
-                "is": "none"
-              },
-              {
-                "type": "quest",
-                "quest": "town/cellar_1",
-                "is": "done"
+                "type": "in_capital"
               }
             ]
           },
@@ -102,10 +126,18 @@
           "goto": "town_c2_back",
           "kind": "quest",
           "if": {
-            "type": "quest",
-            "quest": "town/cellar_2",
-            "is": "active",
-            "stage": "back"
+            "type": "all",
+            "of": [
+              {
+                "type": "quest",
+                "quest": "town/cellar_2",
+                "is": "active",
+                "stage": "back"
+              },
+              {
+                "type": "in_capital"
+              }
+            ]
           }
         },
         {
@@ -116,18 +148,26 @@
             "type": "all",
             "of": [
               {
-                "type": "stage",
-                "min": 3
+                "type": "all",
+                "of": [
+                  {
+                    "type": "stage",
+                    "min": 3
+                  },
+                  {
+                    "type": "quest",
+                    "quest": "town/cellar_3",
+                    "is": "none"
+                  },
+                  {
+                    "type": "quest",
+                    "quest": "town/cellar_2",
+                    "is": "done"
+                  }
+                ]
               },
               {
-                "type": "quest",
-                "quest": "town/cellar_3",
-                "is": "none"
-              },
-              {
-                "type": "quest",
-                "quest": "town/cellar_2",
-                "is": "done"
+                "type": "in_capital"
               }
             ]
           },
@@ -143,10 +183,18 @@
           "goto": "town_c3_open",
           "kind": "quest",
           "if": {
-            "type": "quest",
-            "quest": "town/cellar_3",
-            "is": "active",
-            "stage": "open"
+            "type": "all",
+            "of": [
+              {
+                "type": "quest",
+                "quest": "town/cellar_3",
+                "is": "active",
+                "stage": "open"
+              },
+              {
+                "type": "in_capital"
+              }
+            ]
           },
           "do": [
             {
@@ -164,10 +212,18 @@
           "goto": "town_c3_back",
           "kind": "quest",
           "if": {
-            "type": "quest",
-            "quest": "town/cellar_3",
-            "is": "active",
-            "stage": "back"
+            "type": "all",
+            "of": [
+              {
+                "type": "quest",
+                "quest": "town/cellar_3",
+                "is": "active",
+                "stage": "back"
+              },
+              {
+                "type": "in_capital"
+              }
+            ]
           }
         }
       ]
