@@ -61,7 +61,6 @@ public class TravelMapScreen extends Screen {
     static final double FAR = 2400;
     static final double ZOOM_STEP = 1.25;
     // 輪の間の候補 (半径の中に輪が 2〜4 本になるものを選ぶ)
-    static final int[] RING_STEPS = {25, 50, 100, 200, 250, 500, 1000, 2000, 2500, 5000};
     // 都の壁 (真ん中から壁の外の面まで。tools/capital/town.py の W)
     static final int TOWN_HALF = 100;
 
@@ -347,30 +346,20 @@ public class TravelMapScreen extends Screen {
         double k = radius / view;
         double dx = (x - centerX()) * k;
         double dz = (z - centerZ()) * k;
-        double d = Math.hypot(dx, dz);
-        double max = radius - 5;
         int beyond = 0;
-        if (rect()) {
-            double hx = (rx1 - rx0) / 2.0 - 5;
-            double hy = (ry1 - ry0) / 2.0 - 5;
-            double ox = (rx0 + rx1) / 2.0 - cx;
-            double oy = (ry0 + ry1) / 2.0 - cy;
-            double ux = dx - ox;
-            double uy = dz - oy;
-            double f = Math.max(Math.abs(ux) / hx, Math.abs(uy) / hy);
-            if (f > 1) {
-                ux /= f;
-                uy /= f;
-                beyond = 1;
-            }
-            return new int[]{cx + (int) Math.round(ux + ox), cy + (int) Math.round(uy + oy), beyond};
-        }
-        if (d > max) {
-            dx *= max / d;
-            dz *= max / d;
+        double hx = (rx1 - rx0) / 2.0 - 5;
+        double hy = (ry1 - ry0) / 2.0 - 5;
+        double ox = (rx0 + rx1) / 2.0 - cx;
+        double oy = (ry0 + ry1) / 2.0 - cy;
+        double ux = dx - ox;
+        double uy = dz - oy;
+        double f = Math.max(Math.abs(ux) / hx, Math.abs(uy) / hy);
+        if (f > 1) {
+            ux /= f;
+            uy /= f;
             beyond = 1;
         }
-        return new int[]{cx + (int) Math.round(dx), cy + (int) Math.round(dz), beyond};
+        return new int[]{cx + (int) Math.round(ux + ox), cy + (int) Math.round(uy + oy), beyond};
     }
 
     @Nullable
@@ -404,7 +393,6 @@ public class TravelMapScreen extends Screen {
         Palette p = palette();
         drawSheet(g, p);
         drawContinent(g);
-        drawRings(g, p);
         drawTown(g, p);
         List<Hit> hits = new ArrayList<>();
         drawMarks(g, p, hits, mouseX, mouseY);
@@ -420,17 +408,13 @@ public class TravelMapScreen extends Screen {
         }
     }
 
-    static boolean rect() {
-        return jp.revati.skyabyss.world.continent.ContinentInfo.clientContinent;
-    }
-
     private boolean inMap(double mx, double my) {
-        return rect() ? mx >= rx0 && mx < rx1 && my >= ry0 && my < ry1 : Math.hypot(mx - cx, my - cy) <= radius + 8;
+        return mx >= rx0 && mx < rx1 && my >= ry0 && my < ry1;
     }
 
     private void drawSheet(GuiGraphics g, Palette p) {
         Config.MapStyle st = style();
-        if (rect() && st == Config.MapStyle.SLATE) {
+        if (st == Config.MapStyle.SLATE) {
             tile(g, 0, fx, fy, fw, fh);
             frame(g, fx, fy, fw, fh, false);
             if (chart != null) {
@@ -495,7 +479,7 @@ public class TravelMapScreen extends Screen {
     static final double NAMES_TO = 3200;
 
     private void drawContinent(GuiGraphics g) {
-        if (!jp.revati.skyabyss.world.continent.ContinentInfo.clientContinent || radius <= 0) {
+        if (radius <= 0) {
             return;
         }
         double k = radius / view;
@@ -533,70 +517,15 @@ public class TravelMapScreen extends Screen {
         }
     }
 
-    static int ringStep(double range) {
-        for (int st : RING_STEPS) {
-            if (range / st <= 4.2) {
-                return st;
-            }
-        }
-        return RING_STEPS[RING_STEPS.length - 1];
-    }
-
-    // 距離の輪 (2〜4 本。縮尺に合わせた切りのよい数) と、その距離の数字 (輪の南の内側)
-    private void drawRings(GuiGraphics g, Palette p) {
-        if (rect()) {
-            return;
-        }
-        int step = ringStep(view);
-        boolean shadow = style() != Config.MapStyle.PARCHMENT;
-        for (int d = step; d < view * 0.97; d += step) {
-            int r = (int) Math.round(radius * d / view);
-            if (r < 14) {
-                continue;
-            }
-            circle(g, cx, cy, r, p.ring(), 1, 3);
-            // 数字は南の十字の線の右、輪のすぐ内 (印の多い東西を避ける)
-            String label = String.format("%,d", d);
-            if (r > 20) {
-                g.drawString(font, label, cx + 3, cy + r - 10, (p.dim() & 0x00FFFFFF) | 0xC0000000, shadow);
-            }
-        }
-        if (style() != Config.MapStyle.SLATE) {
-            circle(g, cx, cy, radius, p.ringStrong(), 1, 0);
-        }
-        // 十字の細い線 (方位の輪)
-        dashed(g, cx - radius + 8, cy, cx + radius - 8, cy, p.ring(), 2, 4);
-        dashed(g, cx, cy - radius + 8, cx, cy + radius - 8, p.ring(), 2, 4);
-    }
-
     // 方位の刻みと N E S W (印の上に描く)
     private void drawCompass(GuiGraphics g, Palette p) {
-        if (rect()) {
-            int lc = p.accent();
-            int mx = (rx0 + rx1) / 2;
-            int my = (ry0 + ry1) / 2;
-            g.drawCenteredString(font, Component.translatable("gui.skyabyss.travel.dir.n"), mx, ry0 - 11, lc);
-            drawCentered(g, Component.translatable("gui.skyabyss.travel.dir.s"), mx, ry1 + 3, lc);
-            drawCentered(g, Component.translatable("gui.skyabyss.travel.dir.w"), rx0 - 7, my - 4, lc);
-            drawCentered(g, Component.translatable("gui.skyabyss.travel.dir.e"), rx1 + 7, my - 4, lc);
-            return;
-        }
-        for (int k = 0; k < 32; k++) {
-            double a = k / 32.0 * Math.PI * 2;
-            int len = k % 8 == 0 ? 6 : k % 4 == 0 ? 4 : 2;
-            int c = k % 8 == 0 ? p.accent() : p.ring();
-            for (int s = 0; s < len; s++) {
-                double rr = radius - 1 - s;
-                int x = cx + (int) Math.round(Math.cos(a) * rr);
-                int y = cy + (int) Math.round(Math.sin(a) * rr);
-                g.fill(x, y, x + 1, y + 1, c);
-            }
-        }
         int lc = p.accent();
-        g.drawCenteredString(font, Component.translatable("gui.skyabyss.travel.dir.n"), cx, cy - radius - 13, lc);
-        drawCentered(g, Component.translatable("gui.skyabyss.travel.dir.s"), cx, cy + radius + 6, lc);
-        drawCentered(g, Component.translatable("gui.skyabyss.travel.dir.w"), cx - radius - 10, cy - 4, lc);
-        drawCentered(g, Component.translatable("gui.skyabyss.travel.dir.e"), cx + radius + 10, cy - 4, lc);
+        int mx = (rx0 + rx1) / 2;
+        int my = (ry0 + ry1) / 2;
+        g.drawCenteredString(font, Component.translatable("gui.skyabyss.travel.dir.n"), mx, ry0 - 11, lc);
+        drawCentered(g, Component.translatable("gui.skyabyss.travel.dir.s"), mx, ry1 + 3, lc);
+        drawCentered(g, Component.translatable("gui.skyabyss.travel.dir.w"), rx0 - 7, my - 4, lc);
+        drawCentered(g, Component.translatable("gui.skyabyss.travel.dir.e"), rx1 + 7, my - 4, lc);
     }
 
     // 寄せたとき (半径 400 まで): 都の壁の四角 (点線) と大通りの十字

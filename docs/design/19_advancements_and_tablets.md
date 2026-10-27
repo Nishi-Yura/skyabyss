@@ -2,7 +2,7 @@
 
 - 文書番号: 19
 - 範囲: この Mod 専用の進捗（advancement）の木と、構造物に置く看板の代わりの石の碑（`skyabyss:tablet`）。
-- 関連: [18](18_notices.md)（札・字幕）、[05](05_lore_npc_quest.md)（碑文の条件 `sign`）、[17](17_opening_and_rpg_feel.md)（序盤の拍子）、[10](10_progression_multiplayer.md)
+- 関連: [18](18_notices.md)（札・字幕）、[05](05_lore_npc_quest.md)（碑文の条件 `sign`）、17（序盤の拍子）、[10](10_progression_multiplayer.md)
 
 ---
 

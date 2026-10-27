@@ -3,7 +3,7 @@
 - 文書番号: 26
 - 範囲: 四つの背（岩鯨・潮殻・雷翼・余燼）の外形の大きさ、倍率の決まり、背に建てるものと建てないもの、作り直しと版、グループの占有。
 - 状態: 外形は拡大済み（水平 ×1.6・垂直 ×1.3）。背の中の流れは順路（[32](32_titan_raid_route.md)）。寸法と座標の正は各背の `*Layout`（`TitanBackLayout`・`TideBackLayout`・`StormBackLayout`・`EmberBackLayout`）。測りは `dev backmetrics <巨神>`。
-- 関連: [02 岩鯨](02_stone_whale.md)・[08 潮殻](08_tide_shell.md)・[12 雷翼](12_thunder_wing.md)・[13 余燼](13_ember.md)・[32 順路](32_titan_raid_route.md)・[29 試練の引き方](29_trial_pool.md)・[21 初回の延長](21_content_expansion.md)
+- 関連: [02 岩鯨](02_stone_whale.md)・[08 潮殻](08_tide_shell.md)・[12 雷翼](12_thunder_wing.md)・[13 余燼](13_ember.md)・[32 順路](32_titan_raid_route.md)・[29 試練の引き方](29_trial_pool.md)・21 初回の延長
 
 ---
 

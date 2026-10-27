@@ -65,8 +65,6 @@ public final class ChapterGroundsSelfTest {
     static final class Synth implements SiteFinder.Ground {
         final IntBinaryOperator height;
         boolean dry;
-        int structureX = Integer.MIN_VALUE;
-        int structureZ;
 
         Synth(IntBinaryOperator height) {
             this.height = height;
@@ -106,70 +104,56 @@ public final class ChapterGroundsSelfTest {
         public boolean dryBiome(int x, int z) {
             return dry;
         }
-
-        @Override
-        public boolean structureNear(int x, int z, int r) {
-            return structureX != Integer.MIN_VALUE && Math.hypot(x - structureX, z - structureZ) <= r;
-        }
     }
 
-    // 方位の扇と帯の中か (角度の余白 tol 度、距離の余白 dtol)
-    static boolean inSector(BlockPos capital, BlockPos at, Spec s, double tol, int dtol) {
-        double dx = at.getX() - capital.getX();
-        double dz = at.getZ() - capital.getZ();
-        double d = Math.hypot(dx, dz);
-        double diff = Math.toDegrees(Math.atan2(dz, dx) - s.angle());
-        diff = ((diff % 360) + 540) % 360 - 180;
-        return Math.abs(diff) <= ChapterGrounds.SECTOR + tol && d >= s.min() - dtol && d <= s.max() + dtol;
+    // 合成の地形での図の場所: 都から章の向きへ、帯のまんなか
+    static BlockPos site(BlockPos capital, Spec s) {
+        int d = (s.min() + s.max()) / 2;
+        return capital.offset(s.dirX() * d, 0, s.dirZ() * d);
+    }
+
+    static Found find(SiteFinder.Ground g, BlockPos capital, Spec s) {
+        return ChapterGrounds.findAt(g, capital, s, site(capital, s));
     }
 
     static void pure() {
         F.clear();
         try {
             BlockPos cap = new BlockPos(0, 70, 0);
-            int[] off = ChapterGrounds.offsets();
-            check(off.length == 11 && off[0] == 0 && off[1] == 5 && off[2] == -5 && off[10] == -25, "sector offsets should go 0, +5, -5 ... -25");
             // 平らな草地: 丘・峰・灰の地・海辺はない → 形
             Synth flat = new Synth((x, z) -> 70);
             for (Spec s : ChapterGrounds.SPECS) {
-                Found f = ChapterGrounds.find(flat, cap, s, List.of());
+                Found f = find(flat, cap, s);
                 check(f.shape() == s.shape(), s.chapter() + ": flat land should get the shape " + s.shape() + " (got " + f.shape() + ")");
-                check(inSector(cap, f.shape() == Shape.COVE ? f.shapeCenter() : f.center(), s, 1, 0), s.chapter() + ": the shape is outside the sector or the band: " + f.center());
+                BlockPos at = f.shape() == Shape.COVE ? f.shapeCenter() : f.center();
+                check(ChapterSites.horizontal(at, site(cap, s)) <= 200, s.chapter() + ": the shape is far from the site: " + at);
                 check(f.shrine() != null, s.chapter() + ": no shrine spot");
             }
             // 丘 (北 300 に高さ 30 の丘。跡地は 2026-10-23 に 65% の距離へ) → 形なしで、その丘
             Synth hill = new Synth((x, z) -> 70 + (int) Math.max(0, 30 - Math.hypot(x, z + 300) * 0.4));
-            Found wh = ChapterGrounds.find(hill, cap, ChapterGrounds.spec(Chapters.WHALE), List.of());
+            Found wh = find(hill, cap, ChapterGrounds.spec(Chapters.WHALE));
             check(wh.shape() == Shape.NONE && Math.hypot(wh.center().getX(), wh.center().getZ() + 300) < 48, "the whale ground should take the hill north of the capital: " + wh.center() + " " + wh.shape());
-            // 野営地が丘の上にあれば、そこは避ける
-            Found wh2 = ChapterGrounds.find(hill, cap, ChapterGrounds.spec(Chapters.WHALE), List.of(new ChapterGrounds.Obstacle(new BlockPos(0, 70, -300), 110)));
-            check(Math.hypot(wh2.center().getX(), wh2.center().getZ() + 300) >= 90, "the whale ground should keep away from the camp: " + wh2.center());
-            // 構造物 (村) が丘のそばにあれば、ずらす
-            hill.structureX = 0;
-            hill.structureZ = -320;
-            Found wh3 = ChapterGrounds.find(hill, cap, ChapterGrounds.spec(Chapters.WHALE), List.of());
-            check(Math.hypot(wh3.center().getX(), wh3.center().getZ() + 320) > ChapterGrounds.STRUCTURE_GAP, "the whale ground should move off a village: " + wh3.center());
             // 峰 (西 850 に y 175) → 形なし
             Synth peak = new Synth((x, z) -> 70 + (int) Math.max(0, 105 - Math.hypot(x + 850, z) * 0.6));
-            Found st = ChapterGrounds.find(peak, cap, ChapterGrounds.spec(Chapters.STORM), List.of());
+            Found st = find(peak, cap, ChapterGrounds.spec(Chapters.STORM));
             check(st.shape() == Shape.NONE && st.center().getY() >= ChapterGrounds.PEAK_Y, "the storm ground should take the peak in the west: " + st.center());
-            // 灰の地 (乾いた群系) → 帯の内側の端
+            // 灰の地 (乾いた群系) → 形なしで、その場所
             Synth dry = new Synth((x, z) -> 72);
             dry.dry = true;
-            Found em = ChapterGrounds.find(dry, cap, ChapterGrounds.spec(Chapters.EMBER), List.of());
-            check(em.shape() == Shape.NONE && em.dist() == ChapterGrounds.spec(Chapters.EMBER).min() && em.deg() == 0, "dry lowland: the ember ground should be at the inner edge, due south: " + em.dist() + " " + em.deg());
+            Found em = find(dry, cap, ChapterGrounds.spec(Chapters.EMBER));
+            check(em.shape() == Shape.NONE, "dry lowland: the ember ground should need no shape: " + em.shape());
             // 海辺 (x 650 から東が深さ 20 の海) → 形なし、浜は海の手前
             Synth coast = new Synth((x, z) -> x < 650 ? 66 : 43);
-            Found td = ChapterGrounds.find(coast, cap, ChapterGrounds.spec(Chapters.TIDE), List.of());
+            Found td = find(coast, cap, ChapterGrounds.spec(Chapters.TIDE));
             check(td.shape() == Shape.NONE && td.center().getX() < 650 && td.center().getX() >= 650 - ChapterGrounds.SHORE_REACH - 8 && td.sea() != null && td.sea().getX() > 650,
                     "the tide ground should take the beach before the sea: " + td.center() + " sea " + td.sea());
 
             // 形を重ねた高さ
-            Found fh = ChapterGrounds.find(flat, cap, ChapterGrounds.spec(Chapters.WHALE), List.of());
+            Found fh = find(flat, cap, ChapterGrounds.spec(Chapters.WHALE));
             SiteFinder.Ground ov = ChapterGrounds.overlay(flat, List.of(fh));
             check(ov.top(fh.shapeCenter().getX(), fh.shapeCenter().getZ()) == 70 + ChapterGrounds.HILL_RISE, "the hill should rise 24 at its centre");
             check(ov.top(fh.shapeCenter().getX() + 60, fh.shapeCenter().getZ()) == 70, "outside the hill the ground stays");
-            Found fp = ChapterGrounds.find(flat, cap, ChapterGrounds.spec(Chapters.STORM), List.of());
+            Found fp = find(flat, cap, ChapterGrounds.spec(Chapters.STORM));
             int pt = ChapterGrounds.overlay(flat, List.of(fp)).top(fp.shapeCenter().getX(), fp.shapeCenter().getZ());
             check(pt >= 70 + ChapterGrounds.PEAK_RISE - 8 && pt <= 70 + ChapterGrounds.PEAK_RISE, "the peak should rise about 60: " + pt);
             // 峰の縁は切り立った壁にならない: 元の地面が形の中心より 40 低い列でも、縁 (半径の 98%) の段差は小さい
@@ -179,15 +163,15 @@ public final class ChapterGroundsSelfTest {
             pg.baseY = 110;
             int edge = ChapterGrounds.shapeTop(pg, fp.shapeCenter().getX() + (int) (ChapterGrounds.PEAK_HALF * 0.98), fp.shapeCenter().getZ(), 70, 63);
             check(edge != Integer.MIN_VALUE && edge - 70 <= 6, "the peak skirt should meet the lower ground without a wall: " + edge);
-            Found fb = ChapterGrounds.find(flat, cap, ChapterGrounds.spec(Chapters.EMBER), List.of());
+            Found fb = find(flat, cap, ChapterGrounds.spec(Chapters.EMBER));
             // 盆地の底は 8 下 (ただし海面 + 1 より下へは掘らない)
             int floor = ChapterGrounds.overlay(flat, List.of(fb)).top(fb.shapeCenter().getX(), fb.shapeCenter().getZ());
             check(floor == Math.max(70 - ChapterGrounds.BASIN_DEPTH, 64), "the basin floor is 8 down, not below the sea + 1: " + floor);
             Synth highDry = new Synth((x, z) -> 90);
-            Found fb2 = ChapterGrounds.find(highDry, cap, ChapterGrounds.spec(Chapters.EMBER), List.of());
+            Found fb2 = find(highDry, cap, ChapterGrounds.spec(Chapters.EMBER));
             check(ChapterGrounds.overlay(highDry, List.of(fb2)).top(fb2.shapeCenter().getX(), fb2.shapeCenter().getZ()) == 90 - ChapterGrounds.BASIN_DEPTH,
                     "on high ground the basin is 8 deep");
-            Found fc = ChapterGrounds.find(flat, cap, ChapterGrounds.spec(Chapters.TIDE), List.of());
+            Found fc = find(flat, cap, ChapterGrounds.spec(Chapters.TIDE));
             SiteFinder.Ground ovc = ChapterGrounds.overlay(flat, List.of(fc));
             check(fc.fixedRest() && fc.sea() != null, "a dug cove has a fixed rest spot");
             check(!ovc.wet(fc.center().getX(), fc.center().getZ()), "the beach centre of the cove is dry");
@@ -304,9 +288,9 @@ public final class ChapterGroundsSelfTest {
                 }
                 Shape shape = ChapterGrounds.shapeOf(g);
                 BlockPos where = shape == Shape.COVE ? g.shapeCenter : g.center;
-                // 天と淵の大陸では跡地は図の決まった所 (layout.json) なので、方位と距離の帯は見ない
-                check(jp.revati.skyabyss.world.continent.ContinentInfo.isContinent(server) || inSector(cap, where, s, 6, 24),
-                        s.chapter() + ": the ground " + where + " is outside the sector or band");
+                // 跡地は図の決まった所 (layout.json) のそば
+                BlockPos drawn = jp.revati.skyabyss.world.continent.ContinentLayout.get().site(s.chapter().id());
+                check(drawn != null && ChapterSites.horizontal(where, drawn) <= 200, s.chapter() + ": the ground " + where + " is far from the drawn site " + drawn);
                 check(g.shaped, s.chapter() + ": the ground was not shaped");
                 check(g.shrine != null && ChapterSites.horizontal(g.shrine, g.center) <= 160, s.chapter() + ": shrine spot missing or far: " + g.shrine);
                 check(ChapterSites.horizontal(g.center, camp) >= ChapterGrounds.CAMP_GAP - 2 || s.chapter() != Chapters.WHALE, "the whale ground is too near the camp");
@@ -418,7 +402,7 @@ public final class ChapterGroundsSelfTest {
             F.add("live crashed: " + e);
         }
         if (F.isEmpty()) {
-            SkyAbyss.LOGGER.info("SELFTEST chapter grounds PASSED (bearing and band search, four shapes, overlay heights, road waymarks, shrine spots, ribs in the north hills, "
+            SkyAbyss.LOGGER.info("SELFTEST chapter grounds PASSED (drawn sites, four shapes, overlay heights, road waymarks, shrine spots, ribs in the north hills, "
                     + "ground sites once each within 150, the tide beach, map rumours)");
         } else {
             F.forEach(m -> SkyAbyss.LOGGER.error("SELFTEST chapter grounds FAILED: {}", m));

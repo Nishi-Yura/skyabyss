@@ -366,8 +366,6 @@
   "message.skyabyss.chain_slack": "The chain has not reached the ground yet",
   "message.skyabyss.lifting": "The chain is winding up...",
   "message.skyabyss.arrived_back": "Only the wind. You stand on a ledge outside the anchor stone, on the stone whale's left flank. Past the east wall, the mouth of the route runs on",
-  "message.skyabyss.guide.village": "The village folk must have seen that shadow too. The nearest village lies to the %s, about %s blocks away. Find its storyteller",
-  "message.skyabyss.guide.camp": "Smoke rises from a campfire nearby. A wandering storyteller seems to be resting by it",
   "gui.skyabyss.objective.dir.0": "N",
   "gui.skyabyss.objective.dir.1": "NE",
   "gui.skyabyss.objective.dir.2": "E",

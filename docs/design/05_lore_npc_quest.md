@@ -4,7 +4,7 @@
 
 - 文書番号: 05
 - 範囲: 伝承の書（碑文・破れた頁・出来事・会話で記される、プレイヤーごとの帳面）の仕組み、画面、項目の一覧と本文。NPC・会話・クエストの本体は 07。
-- 関連: [01](01_overview.md)、[02](02_stone_whale.md)、[07](07_npc_quest.md)、[08](08_tide_shell.md)、[12](12_thunder_wing.md)、[13](13_ember.md)、[14](14_beta.md)、[17](17_opening_and_rpg_feel.md)
+- 関連: [01](01_overview.md)、[02](02_stone_whale.md)、[07](07_npc_quest.md)、[08](08_tide_shell.md)、[12](12_thunder_wing.md)、[13](13_ember.md)、[14](14_beta.md)、17
 
 ---
 
@@ -25,7 +25,7 @@
 
 | きっかけ | 何が起きるか |
 | --- | --- |
-| 新しいワールドの目覚め（拍子 B1。[17](17_opening_and_rpg_feel.md)） | 野営地の古い帳面（`CampBuilder` が置いた伝承の書の ItemEntity。消えない）の 2.5 ブロック以内で「拾った」とみなし、人ごとに伝承の書を渡す。帳面そのものは拾えない。野営地へ行かなくても届く: 離れて 1 分・目覚めて 5 分・野営地のない世界は 20 秒後。「荷物の中に、見覚えのない古い帳面が入っていた」 |
+| 新しいワールドの目覚め（拍子 B1。17） | 野営地の古い帳面（`CampBuilder` が置いた伝承の書の ItemEntity。消えない）の 2.5 ブロック以内で「拾った」とみなし、人ごとに伝承の書を渡す。帳面そのものは拾えない。野営地へ行かなくても届く: 離れて 1 分・目覚めて 5 分・野営地のない世界は 20 秒後。「荷物の中に、見覚えのない古い帳面が入っていた」 |
 | 空の影を初めて見る（序章 B4） | 影の項目は書の持ち主には記さず、影が去って 3 秒後に**破れた頁**が頭上から落ちてくる（本人しか拾えない。2 分で荷物へ、14 分読まなければ自動で読む）。頁を読むと `prologue/shadow` が記される（`LoreEvents.watchSky` から `OpeningDirector.deferShadowToPage`） |
 | 書を持たない人が空の影を見る（クリエイティブなどの救済） | 影が去って 3 秒後、本人の頭上 4 ブロックから書が落ちてくる（光の粒と頁の音。本人しか拾えず消えない）。2 分拾わないと荷物へ入る。影が去るまでに地上を離れたら荷物へ入る |
 | 書より先にほかの項目が記された | その場で荷物へ入る |
@@ -189,7 +189,7 @@ assets/skyabyss_lore/lang/{ja_jp,en_us}.json   伝承の文 (題・本文・碑�
 
 - 順は `the_book` 10、`camp` 12、`the_book_margin` 14、`footprints` 15、`shadow` 20、`shadow_heading` 25、`footsteps` 27、`bone_hill` 28、`sky_song` 29。都の碑の 4 項目は 70〜73（村の 4 項目の後）。
 - 都の碑の 4 項目（33 の 2.2）は碑を見ると記される（碑文の写し = 碑の 4 行。文は `assets/skyabyss_opening/lang`）。国の物語の入口で、閉じた施設は章が進むと開く（17 の 3.3）。墓地の「名のない墓」は見る者のほのめかし（六章まで言わない）。
-- 序盤の項目（camp〜sky_song）は `data/skyabyss/lore/entry/prologue/` と lang、生成は `tools/gen/story/gen_opening_text.py`（全文は [17](17_opening_and_rpg_feel.md) の 11 章）。きっかけは 17 の表。本文は 2〜3 段、説明せず、問いか物で終える。巨神・見る者・ループ・天の鍵の意味・ほかの巨神の名前は書かない（`OpeningStorySelfTest` が言葉で確かめる）。
+- 序盤の項目（camp〜sky_song）は `data/skyabyss/lore/entry/prologue/` と lang、生成は `tools/gen/story/gen_opening_text.py`（全文は 17 の 11 章）。きっかけは 17 の表。本文は 2〜3 段、説明せず、問いか物で終える。巨神・見る者・ループ・天の鍵の意味・ほかの巨神の名前は書かない（`OpeningStorySelfTest` が言葉で確かめる）。
 - 序章の村の 4 項目は、破れた頁と NPC の話の両方で記される（頁の運だけに頼らず、サブ「数え歌のつづき」を必ず終えられる。00 の 19 = A）。項目の JSON は変えていない（`Lore.unlock` は条件の種類を問わず記せる）。数え歌は語り部が歌う。
 - 石板の碑の文は `sign.skyabyss.lore_bone_slab.1〜4`（本体の lang。`SignFit` が幅を測る）。
 

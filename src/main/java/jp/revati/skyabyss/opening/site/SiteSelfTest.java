@@ -87,76 +87,6 @@ public final class SiteSelfTest {
         }
     }
 
-    // 足跡の場所探しは、どんな地形でも必ず 1 つは決める (first_hour_log B-6)。合成の地形: 平ら・起伏が激しい・斑の池・ほぼ海の小島。
-    // 宿りがないとき (仮の宿りの向き) も
-    private static void footprintFallback(List<String> f) {
-        String[] names = {"flat", "rugged", "ponds", "islets"};
-        for (int kind = 0; kind < names.length; kind++) {
-            final int k = kind;
-            SiteFinder.Ground g = new SiteFinder.Ground() {
-                int h(int x, int z) {
-                    int cx = Math.floorDiv(x, 8);
-                    int cz = Math.floorDiv(z, 8);
-                    int hash = (cx * 73856093) ^ (cz * 19349663);
-                    hash = (hash ^ (hash >>> 13)) * 1274126177;
-                    int r = Math.floorMod(hash ^ (hash >>> 16), 100);
-                    return switch (k) {
-                        case 0 -> 70;
-                        case 1 -> 64 + r * 3;
-                        case 2 -> (Math.floorMod(cx / 6 + cz / 6, 3) == 0) ? 55 : 70 + r / 20;
-                        default -> (Math.floorMod(cx / 5 + cz / 5, 4) == 0) ? 66 + r / 10 : 40;
-                    };
-                }
-
-                @Override
-                public int top(int x, int z) {
-                    return h(x, z);
-                }
-
-                @Override
-                public int topCoarse(int x, int z) {
-                    return top(Math.floorDiv(x + 4, 8) * 8, Math.floorDiv(z + 4, 8) * 8);
-                }
-
-                @Override
-                public boolean wet(int x, int z) {
-                    return top(x, z) < 62;
-                }
-
-                @Override
-                public boolean wetCoarse(int x, int z) {
-                    return topCoarse(x, z) < 62;
-                }
-
-                @Override
-                public boolean biomeOk(int x, int z) {
-                    return Math.floorMod(Math.floorDiv(x, 64) + Math.floorDiv(z, 64), 5) != 0;
-                }
-
-                @Override
-                public int sea() {
-                    return 62;
-                }
-            };
-            int plans = 0;
-            for (int i = 0; i < 12; i++) {
-                BlockPos camp = new BlockPos(i * 301 - 1500, 80, i * -177 + 400);
-                // 宿りが建った世界と、宿りが見つからなかった世界 (仮の宿り)
-                for (BlockPos shelter : new BlockPos[] {camp.offset(170, 0, 40), camp.offset(180, 0, 0)}) {
-                    List<SiteFinder.Planned> out = new ArrayList<>();
-                    SiteFinder.planFootprints(g, out, camp, shelter);
-                    long n = out.stream().filter(p -> p.kind().equals(OpeningSites.Kind.FOOTPRINT.id)).count();
-                    if (n < 1) {
-                        // 起伏・水が全面でも、中心が乾いた所が一つもない地形ではないはず (どの合成にも乾いた所はある)
-                        f.add("footprint fallback: " + names[k] + " camp " + camp + " shelter " + shelter + ": no footprint planned");
-                    }
-                    plans++;
-                }
-            }
-            check(f, plans == 24, "footprint fallback: " + names[k] + ": " + plans + " plans");
-        }
-    }
-
     private static boolean solidBelow(ServerLevel level, BlockPos stand) {
         BlockState below = level.getBlockState(stand.below());
         return !below.getCollisionShape(level, stand.below()).isEmpty() && below.getFluidState().isEmpty();
@@ -210,7 +140,6 @@ public final class SiteSelfTest {
 
     private static void runChecks(MinecraftServer server, List<String> f) {
         footprintShape(f);
-        footprintFallback(f);
         ServerLevel level = server.overworld();
         check(f, OpeningSites.planned(server), "sites are not planned");
         check(f, OpeningSites.allBuilt(server), "not every site is built: " + OpeningSites.all(server));
@@ -236,28 +165,16 @@ public final class SiteSelfTest {
         // 距離
         double ds = OpeningSites.horizontal(camp, shelter);
         double dr = OpeningSites.horizontal(camp, ribs);
-        // 天と淵の大陸: 野営地ははじまりの島、宿り (都) は海の向こう。足跡は島の道 (野営地 → 船着き場) に沿う
-        boolean continent = jp.revati.skyabyss.world.continent.ContinentPois.in(level);
-        check(f, continent || ds >= 100 && ds <= 480, "shelter distance " + ds);  // 都: 260〜340、見つからなければ 240〜480 (SiteFinder.findShelter)
-        // 骨: 一章の跡地 (北の丘。docs/design/33 の 3 章) があればその中、なければ野営地から 250〜350 (宿りと違う方角)
+        // 野営地ははじまりの島、宿り (都) は海の向こう (図の場所)。骨は一章の跡地 (北の丘) の中
         SiteData.Ground whale = SiteData.get(level).ground(jp.revati.skyabyss.story.Chapters.WHALE.id());
         if (whale != null) {
             check(f, OpeningSites.horizontal(whale.center, ribs) <= 152, "ribs are " + (int) OpeningSites.horizontal(whale.center, ribs) + " from the north hills");
         } else {
-            check(f, dr >= 200 && dr <= 380, "ribs distance " + dr);
+            f.add("no whale ground for the ribs");
         }
         SkyAbyss.LOGGER.info("[opening] camp {} shelter {} ({} blocks) ribs {} ({} blocks) footprints {}", camp, shelter, (int) ds, ribs, (int) dr, prints);
-        double ang = Math.abs(Math.toDegrees(Math.atan2(shelter.getZ() - camp.getZ(), shelter.getX() - camp.getX())
-                - Math.atan2(ribs.getZ() - camp.getZ(), ribs.getX() - camp.getX())));
-        ang = ang > 180 ? 360 - ang : ang;
-        check(f, whale != null || ang >= 80, "ribs and shelter are only " + (int) ang + " degrees apart");
-        // 足跡: 道から 30〜60 (余裕を見て 24〜70)
-        BlockPos to = continent ? jp.revati.skyabyss.world.continent.ContinentLayout.get().dock() : shelter;
-        double dt = OpeningSites.horizontal(camp, to);
+        // 足跡: 図の決まった所 (島の道の脇の窪地)
         for (BlockPos p : prints) {
-            double d = SiteFinder.distToPath(p.getX(), p.getZ(), camp, (to.getX() - camp.getX()) / dt, (to.getZ() - camp.getZ()) / dt, dt);
-            // 大陸の島の道は曲がっているので、まっすぐな線からは近いことも遠いこともある (0〜160)
-            check(f, (continent ? d >= 0 : d >= 20) && d <= 160, "footprint " + p + " is " + (int) d + " from the road");
             // くぼみ: 中心の列の、いちばん上の固い地面 (木の葉は数えない) が、場所の高さ (地面の中央値) より 2 以上低い
             int surfaceY = level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, p.getX(), p.getZ()) - 1;
             check(f, surfaceY <= p.getY() - 2, "footprint " + p + " is not a pit (the surface is at " + surfaceY + ")");

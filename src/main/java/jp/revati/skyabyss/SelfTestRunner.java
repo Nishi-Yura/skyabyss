@@ -518,9 +518,9 @@ public final class SelfTestRunner {
             QUEUE.clear();
             all.stream().filter(kept::contains).forEach(QUEUE::add);
         }
-        // 天と淵の大陸: 出現地点ははじまりの島へ動いたばかりで、まわりのチャンクがまだ動いていないことがある。
+        // 出現地点ははじまりの島へ動いたばかりで、まわりのチャンクがまだ動いていないことがある。
         // 出現地点を中心に 5 × 5 チャンクを読み込み、生き物が動くまで、始まりに建てる物が建ち終わるまで待ってから始める (2 分で諦めて進む)
-        if (!QUEUE.isEmpty() && jp.revati.skyabyss.world.continent.ContinentInfo.isContinent(event.getServer())) {
+        if (!QUEUE.isEmpty()) {
             int[] warm = {0};
             QUEUE.addFirst(Step.until("continent spawn (wait)", server -> {
                 var over = server.overworld();

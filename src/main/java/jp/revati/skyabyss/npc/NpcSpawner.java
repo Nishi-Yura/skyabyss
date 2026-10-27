@@ -131,9 +131,6 @@ public final class NpcSpawner {
         }
     }
 
-        return NpcWorldData.get(level.getServer().overworld()).chaserFire(bell);
-    }
-
     // 都 (鐘の宿り) の鐘なら、語り部の立つ所 = 鐘の 2 下 (一階の床) の、鐘から南へ 2。都でなければ null
     @Nullable
     public static BlockPos capitalStorytellerSpot(ServerLevel level, BlockPos bell) {

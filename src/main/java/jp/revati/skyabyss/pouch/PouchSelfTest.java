@@ -72,7 +72,7 @@ public final class PouchSelfTest {
         }
         if (f.isEmpty()) {
             SkyAbyss.LOGGER.info("SELFTEST pouch PASSED (registry, save/sync round trip, add/take/limit, component refusal, give, pickup, sweep, loan mark, withdraw rules, "
-                    + "death in every mode, copy to the new body, no grave, record holder, sky key count, forge cost, respec cost, quest count, migration, screen menu clicks and layout, wheel/short-press use, quick card pick and pin, rebuild and repair, defaults flip)");
+                    + "death in every mode, copy to the new body, no grave, record holder, sky key count, forge cost, respec cost, quest count, migration, screen menu clicks and layout, wheel/short-press use, quick card pick and pin, defaults flip)");
         } else {
             f.forEach(x -> SkyAbyss.LOGGER.error("SELFTEST pouch FAILED: {}", x));
         }
