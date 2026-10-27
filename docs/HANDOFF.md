@@ -58,7 +58,7 @@
 
 ## 次にやること
 
-1. バニラの品（ブロック以外、72 種）を mod の品に置き換える（2026-10-27 の声「ブロック以外はすべて mod で」）。対応表はユーザーへの返事に出した。装備（盾・旅装二式・空石の胸当て・採集の道具・矢）から、3 案のラフ → 選び → 入れる。そのあと薬と食べ物、素材と道具類。
-2. クエストの見直しの返事（いらない・直す）が来たら、その通りに消す・直す。
+1. バニラの品（ブロック以外、72 種）を mod の品に置き換える（2026-10-27 の声「ブロック以外はすべて mod で」）。第 1 段（装備）のラフ 3 案ずつを選定ページに出した: https://claude.ai/artifact/C8FfDSKsS73HhfwSpB9Xw2（db の answers: travel_shield / gather_axe / gather_pickaxe / gather_shovel / armor_start / armor_iron / armor_sky）。ラフは `tools/rough/lowpoly/weapons/outfit/`（`build_outfit.py`）と `tools/rough/lowpoly/armor/outfit_one.py`（`build_outfit.py`）、絵は `docs/review/roughs_outfit`。選ばれたら品を足し（盾は珊瑚の盾、道具は祠の鎚の持ち方を写す）、店・クエスト・初めの持ち物・採集の道具のタグを差し替える。次の段は矢・薬・食べ物、その次は素材と道具類。
+2. クエストの見直しは済んだ（初日のお使いと風の道の旗を消し、墓守を 2 段に、大干潮と峰の足もとを時刻で閉じない形に、折れた剣は自分の得物を研ぐ形に）。
 3. 試遊 0.7.1 の声の直しの確かめと、都・見どころの仕上げの撮影（`tools/shots/capital_dress.txt`・`poi_dress.txt`）。
 4. 大きく変えたら jar を作り直す。
