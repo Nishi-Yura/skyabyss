@@ -40,8 +40,8 @@
         ]
       },
       {
-        "item": "minecraft:bread",
-        "count": 3
+        "item": "skyabyss:ash_baked_bread",
+        "count": 2
       }
     ],
     "affinity": {

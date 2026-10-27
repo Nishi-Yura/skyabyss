@@ -538,29 +538,11 @@ public final class FreeQuestSelfTest {
         // 同じ日は全員が同じ顔ぶれ
         check(Board.todays(server).equals(Board.todays(server)), "the board draw is not stable within a day", failures);
 
-        // 日替わり 3 つ (地上のもの) を最後まで
+        // 日替わり 2 つ (地上のもの) を最後まで (羊の日課は、バニラの動物がいなくなったので外した。2026-10-27)
         long xp0 = totalXp(p);
-        check(acceptOrStart(server, p, "daily_lost_flock"), "could not take lost flock", failures);
         check(acceptOrStart(server, p, "daily_night_watch"), "could not take night watch", failures);
         check(acceptOrStart(server, p, "daily_firewood"), "could not take firewood", failures);
-        check(Board.usedToday(p) == 3, "quota count is " + Board.usedToday(p), failures);
-        // 羊: 2 頭では済まない、3 頭で済む
-        List<Sheep> sheep = new ArrayList<>();
-        for (int i = 0; i < 3; i++) {
-            Sheep s = EntityType.SHEEP.create(level);
-            s.moveTo(board.getX() + 2 + i, board.getY(), board.getZ() + 2);
-            s.setNoGravity(true);
-            s.setNoAi(true);
-            level.addFreshEntity(s);
-            spawned.add(s);
-            sheep.add(s);
-            Quests.poll(p, true);
-            if (i == 1) {
-                check(stage(p, "daily_lost_flock").equals("herd") && QuestLog.of(p).entry("daily_lost_flock").progress(0) == 2,
-                        "two sheep should show 2/3", failures);
-            }
-        }
-        check(stage(p, "daily_lost_flock").equals("done"), "three sheep by the board did not finish the flock", failures);
+        check(Board.usedToday(p) == 2, "quota count is " + Board.usedToday(p), failures);
         for (int i = 0; i < 6; i++) {
             Quests.onKill(p, "skyabyss:bone_footman", true, 3);
         }
@@ -573,10 +555,11 @@ public final class FreeQuestSelfTest {
         check(stage(p, "daily_firewood").equals("done") && QuestItems.count(p, "#minecraft:logs", null) == 0,
                 "sixteen mixed logs were not handed in", failures);
         long paid = totalXp(p) - xp0;
-        check(paid >= 90, "three dailies paid " + paid, failures);
+        check(paid >= 70, "two dailies paid " + paid, failures);
 
-        // 枠: 4 つ目は受けられない。同じ日に同じものは受け直せない
+        // 枠: 三つ目 (一段目の日替わり) までは受けられ、4 つ目は受けられない。同じ日に同じものは受け直せない
         stilled(server, p);
+        check(acceptOrStartBoard(server, p, "daily_pool_sweep") && Board.usedToday(p) == 3, "a third daily could not be taken at stage 1 (" + Board.usedToday(p) + ")", failures);
         check(!acceptOrStartBoard(server, p, "daily_bone_sentry"), "a fourth daily was accepted the same day", failures);
         check(!Board.accept(p, "daily_night_watch") && stage(p, "daily_night_watch").equals("done"), "a finished daily was taken again the same day", failures);
         // 記録を消して同じ日に受け直しても、報酬は二度出ない
@@ -697,13 +680,13 @@ public final class FreeQuestSelfTest {
     // ---------------------------------------------------------------- 保存
     private static void saving(MinecraftServer server, ServerLevel level, BlockPos at, List<String> failures, List<String> notes) {
         FakePlayer p = player(level, 10, at);
-        Quests.start(p, "daily_lost_flock", at);
+        Quests.start(p, "daily_night_watch", at);
         Quests.start(p, "weekly_heart_again", at);
         QuestLog log = QuestLog.of(p);
         Tag tag = QuestLog.CODEC.encodeStart(NbtOps.INSTANCE, log).getOrThrow();
         QuestLog back = QuestLog.CODEC.parse(NbtOps.INSTANCE, tag).getOrThrow();
         check(back.equals(log), "quest log with cycles and origins did not round-trip", failures);
-        check(back.entry("daily_lost_flock").origin == at.asLong() && back.entry("daily_lost_flock").cycle == Repeats.day(server),
+        check(back.entry("daily_night_watch").origin == at.asLong() && back.entry("daily_night_watch").cycle == Repeats.day(server),
                 "origin or cycle lost on save", failures);
         // ワールドの記録 (板を立てた村、数えた影と潮)
         FreeQuestData d = FreeQuestData.get(level);

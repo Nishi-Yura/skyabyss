@@ -1853,5 +1853,8 @@
   "message.skyabyss.tour.whistle": "The stable keeper gave you a mount whistle. Press Y to call your mount.",
   "map.skyabyss.foe.lair": "Lair of %s",
   "map.skyabyss.foe.alive": "In its lair now",
-  "map.skyabyss.foe.away": "Appears when you come close (gone a while after it falls)"
+  "map.skyabyss.foe.away": "Appears when you come close (gone a while after it falls)",
+  "message.skyabyss.gather.need.axe": "Logs need an axe (market tool stall)",
+  "message.skyabyss.gather.need.pickaxe": "Stone and ore need a pickaxe (market tool stall)",
+  "message.skyabyss.gather.need.shovel": "Dirt and sand need a shovel (market tool stall)"
 }

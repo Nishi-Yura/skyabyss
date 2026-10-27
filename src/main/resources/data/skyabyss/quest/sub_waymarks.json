@@ -42,6 +42,10 @@
         "lore": [
           "item.skyabyss.keepsake.notched_stone.lore"
         ]
+      },
+      {
+        "item": "skyabyss:rock_whetstone",
+        "count": 1
       }
     ],
     "affinity": {

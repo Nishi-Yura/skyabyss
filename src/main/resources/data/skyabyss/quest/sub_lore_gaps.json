@@ -69,6 +69,10 @@
         "lore": [
           "item.skyabyss.keepsake.indigo_bookmark.lore"
         ]
+      },
+      {
+        "item": "skyabyss:resonance_shard",
+        "count": 2
       }
     ],
     "affinity": {

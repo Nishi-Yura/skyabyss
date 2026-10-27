@@ -11,8 +11,12 @@
         {
           "id": "kill",
           "type": "kill",
-          "target": "minecraft:pillager",
-          "count": 3
+          "count": 3,
+          "targets": [
+            "skyabyss:bandit",
+            "skyabyss:bandit_archer",
+            "skyabyss:bandit_chief"
+          ]
         }
       ]
     },

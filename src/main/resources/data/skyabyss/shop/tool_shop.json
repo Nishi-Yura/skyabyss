@@ -64,6 +64,30 @@
       ],
       "chapter": 3,
       "made": true
+    },
+    {
+      "id": "gather_axe",
+      "item": "minecraft:stone_axe",
+      "count": 1,
+      "coins": 6
+    },
+    {
+      "id": "gather_pickaxe",
+      "item": "minecraft:stone_pickaxe",
+      "count": 1,
+      "coins": 6
+    },
+    {
+      "id": "gather_shovel",
+      "item": "minecraft:stone_shovel",
+      "count": 1,
+      "coins": 4
+    },
+    {
+      "id": "gather_iron_pickaxe",
+      "item": "minecraft:iron_pickaxe",
+      "count": 1,
+      "coins": 30
     }
   ],
   "buys": []

@@ -407,8 +407,8 @@ public final class OpeningSelfTest {
         for (OpeningBeat beat : OpeningBeat.values()) {
             check(sim.st.done(beat), "new world: beat " + beat.id + " is not done at the end: " + all, failures);
         }
-        // 目的の帯の移り変わり: 野営地 → 煙 → 空 → 宿り → イサナ → 骨の丘 (寄り道) → 岩鯨
-        List<String> want = List.of("examine_camp", "follow_smoke", "watch_sky", "ask_storyteller", "find_isana", "bone_hill", "see_whale", "wait_whale");
+        // 目的の帯の移り変わり: 野営地 → 煙 → 空 → 宿り → イサナ → 岩鯨 (骨の丘への寄り道は 2026-10-27 に外した)
+        List<String> want = List.of("examine_camp", "follow_smoke", "watch_sky", "ask_storyteller", "find_isana", "see_whale", "wait_whale");
         int at = 0;
         for (String id : sim.objectives) {
             if (at < want.size() && id.equals(want.get(at))) {

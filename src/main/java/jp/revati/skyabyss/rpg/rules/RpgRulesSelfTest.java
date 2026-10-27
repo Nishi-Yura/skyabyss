@@ -27,7 +27,7 @@ import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 
 // 完全な RPG の決まりの自己テスト (docs/design/40 の 2 章)。段の名前は "rpg rules"。
 //  - ゲームルールが入っていて、倒れたときの型の既定が keep
-//  - 採集: 丸太は素手で採れて壊れない・すぐ二度目は採れない・鉄鉱石は素手で採れず石のつるはしで採れる・作った物 (板) は採れない
+//  - 採集: 丸太は素手では採れず斧で採れて壊れない・すぐ二度目は採れない・鉄鉱石は素手・斧で採れず石のつるはしで採れる・作った物 (板) は採れない
 //  - 空のバケツで水源を見て使うと水入りになり、水源は残る
 //  - 偽の人はアドベンチャーへ移さない
 public final class RpgRulesSelfTest {
@@ -115,8 +115,13 @@ public final class RpgRulesSelfTest {
             level.setBlockAndUpdate(water.below(), Blocks.STONE.defaultBlockState());
             level.setBlockAndUpdate(water, Blocks.WATER.defaultBlockState());
 
-            // 丸太: 素手で採れる・壊れない
+            // 丸太: 素手では採れない。斧なら採れる・壊れない
             p.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
+            click(p, log);
+            if (p.getInventory().countItem(Items.OAK_LOG) != 0) {
+                f.add("a log was gathered by hand");
+            }
+            p.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.STONE_AXE));
             if (!click(p, log) || p.getInventory().countItem(Items.OAK_LOG) != 1 || !level.getBlockState(log).is(Blocks.OAK_LOG)) {
                 f.add("log gather: logs " + p.getInventory().countItem(Items.OAK_LOG) + ", block " + level.getBlockState(log));
             }
@@ -125,7 +130,7 @@ public final class RpgRulesSelfTest {
             if (p.getInventory().countItem(Items.OAK_LOG) != 1) {
                 f.add("the log regrow wait did not hold: " + p.getInventory().countItem(Items.OAK_LOG));
             }
-            // 鉄鉱石: 素手はだめ、石のつるはしなら
+            // 鉄鉱石: 斧はだめ、石のつるはしなら
             click(p, ore);
             if (p.getInventory().countItem(Items.RAW_IRON) != 0) {
                 f.add("iron ore gave raw iron by hand");

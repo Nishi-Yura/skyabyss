@@ -208,6 +208,121 @@
       "item": "skyabyss:ember_shard",
       "per": 1,
       "coins": 5
+    },
+    {
+      "item": "minecraft:oak_log",
+      "per": 8,
+      "coins": 1
+    },
+    {
+      "item": "minecraft:birch_log",
+      "per": 8,
+      "coins": 1
+    },
+    {
+      "item": "minecraft:spruce_log",
+      "per": 8,
+      "coins": 1
+    },
+    {
+      "item": "minecraft:dark_oak_log",
+      "per": 8,
+      "coins": 1
+    },
+    {
+      "item": "minecraft:acacia_log",
+      "per": 8,
+      "coins": 1
+    },
+    {
+      "item": "minecraft:cobblestone",
+      "per": 32,
+      "coins": 1
+    },
+    {
+      "item": "minecraft:cobbled_deepslate",
+      "per": 32,
+      "coins": 1
+    },
+    {
+      "item": "minecraft:sand",
+      "per": 32,
+      "coins": 1
+    },
+    {
+      "item": "minecraft:gravel",
+      "per": 32,
+      "coins": 1
+    },
+    {
+      "item": "minecraft:flint",
+      "per": 8,
+      "coins": 1
+    },
+    {
+      "item": "minecraft:clay_ball",
+      "per": 16,
+      "coins": 1
+    },
+    {
+      "item": "minecraft:dirt",
+      "per": 64,
+      "coins": 1
+    },
+    {
+      "item": "minecraft:coal",
+      "per": 4,
+      "coins": 1
+    },
+    {
+      "item": "minecraft:raw_copper",
+      "per": 4,
+      "coins": 1
+    },
+    {
+      "item": "minecraft:raw_iron",
+      "per": 2,
+      "coins": 1
+    },
+    {
+      "item": "minecraft:raw_gold",
+      "per": 1,
+      "coins": 1
+    },
+    {
+      "item": "minecraft:lapis_lazuli",
+      "per": 8,
+      "coins": 1
+    },
+    {
+      "item": "minecraft:redstone",
+      "per": 8,
+      "coins": 1
+    },
+    {
+      "item": "minecraft:amethyst_shard",
+      "per": 2,
+      "coins": 1
+    },
+    {
+      "item": "minecraft:diamond",
+      "per": 1,
+      "coins": 6
+    },
+    {
+      "item": "minecraft:wheat",
+      "per": 8,
+      "coins": 1
+    },
+    {
+      "item": "minecraft:pumpkin",
+      "per": 4,
+      "coins": 1
+    },
+    {
+      "item": "minecraft:melon_slice",
+      "per": 16,
+      "coins": 1
     }
   ]
 }

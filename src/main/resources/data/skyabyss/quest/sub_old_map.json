@@ -53,6 +53,10 @@
         "item": "skyabyss:weathercock",
         "count": 1,
         "optional": true
+      },
+      {
+        "item": "skyabyss:resonance_shard",
+        "count": 1
       }
     ],
     "affinity": {

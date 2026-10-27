@@ -29,7 +29,9 @@ import net.neoforged.neoforge.event.server.ServerStoppedEvent;
 
 // 採集 (docs/design/40 の 2 章)。アドベンチャーではブロックを壊せないので、決まったブロックを右クリックすると、
 // 壊さずに、壊したときと同じ品 (手の道具で掘った分) が手に入る。同じ所は人ごとにしばらく採れない (戻りの時間)。
-//   木 (丸太)・石と土・砂・砂利・粘土・鉱石・実った作物・花・きのこ・溶岩の塊・黒曜石・紫水晶。道具が要るもの (鉱石・石) は、合う道具を持っていないと採れない
+//   木 (丸太)・石と土・砂・砂利・粘土・鉱石・実った作物・花・きのこ・溶岩の塊・黒曜石・紫水晶。
+//   道具ごと (2026-10-27 の声「関連したツールでとれるように」): 丸太は斧、石・鉱石・黒曜石・溶岩の塊・紫水晶はつるはし、
+//   土・砂・砂利・粘土はシャベル。作物・花・きのこは素手でよい。採った物は市の素材屋が買い取る (使い道 = 鐘銭)
 //   都の中・巨神の背・深淵では採れない (作った物は採らせない)。サバイバルの人は今までどおり壊す
 //   水は、空のバケツで水源を見て右クリックすると汲める (水は減らない)
 @EventBusSubscriber(modid = SkyAbyss.MODID)
@@ -73,6 +75,29 @@ public final class Gathering {
         return 0;
     }
 
+    // そのブロックに要る道具 (null = 素手でよい)
+    @javax.annotation.Nullable
+    static net.minecraft.tags.TagKey<net.minecraft.world.item.Item> toolFor(BlockState s) {
+        if (s.is(BlockTags.LOGS)) {
+            return net.minecraft.tags.ItemTags.AXES;
+        }
+        if (s.is(BlockTags.SAND) || s.is(Blocks.GRAVEL) || s.is(Blocks.CLAY) || s.is(Blocks.DIRT) || s.is(Blocks.GRASS_BLOCK)) {
+            return net.minecraft.tags.ItemTags.SHOVELS;
+        }
+        if (s.getBlock() instanceof CropBlock || s.is(BlockTags.SMALL_FLOWERS) || s.is(BlockTags.TALL_FLOWERS) || s.is(Blocks.BROWN_MUSHROOM)
+                || s.is(Blocks.RED_MUSHROOM) || s.is(Blocks.SUGAR_CANE) || s.is(Blocks.COBWEB)) {
+            return null;
+        }
+        if (s.is(Blocks.PUMPKIN) || s.is(Blocks.MELON)) {
+            return net.minecraft.tags.ItemTags.AXES;
+        }
+        return net.minecraft.tags.ItemTags.PICKAXES;
+    }
+
+    static String toolKey(net.minecraft.tags.TagKey<net.minecraft.world.item.Item> tag) {
+        return tag == net.minecraft.tags.ItemTags.AXES ? "axe" : tag == net.minecraft.tags.ItemTags.SHOVELS ? "shovel" : "pickaxe";
+    }
+
     static boolean allowedHere(ServerLevel level, BlockPos pos) {
         return !jp.revati.skyabyss.titan.TitanBacks.isBack(level.dimension()) && level.dimension() != jp.revati.skyabyss.story.ch5.AbyssWorld.LEVEL
                 && !jp.revati.skyabyss.opening.site.SiteGuard.inCapital(level, pos)
@@ -93,6 +118,11 @@ public final class Gathering {
         }
         event.setCanceled(true);
         ItemStack tool = player.getMainHandItem();
+        var need = toolFor(state);
+        if (need != null && !tool.is(need)) {
+            Notice.bar(player, jp.revati.skyabyss.ModText.deny("message.skyabyss.gather.need." + toolKey(need)));
+            return;
+        }
         if (state.requiresCorrectToolForDrops() && !tool.isCorrectToolForDrops(state)) {
             Notice.bar(player, jp.revati.skyabyss.ModText.deny("message.skyabyss.gather.tool"));
             return;

@@ -1853,5 +1853,8 @@
   "message.skyabyss.tour.whistle": "厩舎の番から乗り笛をもらった。Y で乗り物を呼べる",
   "map.skyabyss.foe.lair": "%s の棲み家",
   "map.skyabyss.foe.alive": "今、棲み家にいる",
-  "map.skyabyss.foe.away": "近づくと現れる (倒すとしばらく出ない)"
+  "map.skyabyss.foe.away": "近づくと現れる (倒すとしばらく出ない)",
+  "message.skyabyss.gather.need.axe": "丸太は斧で採る（市の道具屋）",
+  "message.skyabyss.gather.need.pickaxe": "石や鉱石はつるはしで採る（市の道具屋）",
+  "message.skyabyss.gather.need.shovel": "土や砂はシャベルで採る（市の道具屋）"
 }

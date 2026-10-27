@@ -205,7 +205,7 @@ public final class TownSelfTest {
         QuestLog.Entry e = QuestLog.of(p).entry(qid);
         check(f, e != null && e.done, "apprentice quest done");
         check(f, Coins.count(p) == coins + 12, "reward 12 bell coins (" + (Coins.count(p) - coins) + ")");
-        check(f, p.getInventory().countItem(Items.IRON_INGOT) >= 2, "reward iron");
+        check(f, p.getInventory().countItem(jp.revati.skyabyss.guide.TravelGear.ROCK_WHETSTONE.get()) >= 1, "reward whetstone");
         TownGuests.keep(level, capital, List.of(p));
         check(f, TownGuests.find(level, capital, "apprentice").isEmpty(), "apprentice leaves after the quest");
     }

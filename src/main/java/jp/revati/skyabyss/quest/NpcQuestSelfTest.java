@@ -738,7 +738,7 @@ public final class NpcQuestSelfTest {
         check(shown(a, WC, "shards"), "the give option should appear with 3+ shards", failures);
         pick(a, WC, "shards", failures);
         check(a.getInventory().countItem(ModItems.STONE_WHALE_SHARD.get()) == 1, "three shards were not taken", failures);
-        check(stage(a, "sub_shards").equals("done") && a.getInventory().countItem(Items.SPYGLASS) == 1, "sub_shards did not finish with a spyglass", failures);
+        check(stage(a, "sub_shards").equals("done") && a.getInventory().countItem(jp.revati.skyabyss.registry.ModItems.SOCKET_SHARD_STONE.get()) >= 1, "sub_shards did not finish with a socket shard", failures);
         DialogueService.close(a);
 
         // サブ「数え歌のつづき」: 語り部から始め、村の言い伝え 4 つで報告へ
@@ -767,7 +767,7 @@ public final class NpcQuestSelfTest {
         DialogueService.open(a, st);
         check(node(a).equals("song_done"), "the storyteller should open song_done, got " + node(a), failures);
         next(a);
-        check(stage(a, "sub_song").equals("done") && a.getInventory().countItem(Items.CLOCK) == 1, "sub_song did not finish with a clock", failures);
+        check(stage(a, "sub_song").equals("done") && QuestItems.count(a, "skyabyss:resonance_shard", null) >= 2, "sub_song did not finish with resonance shards", failures);
         DialogueService.close(a);
         notes.add("side quests: shards (collect → give → spyglass) and song (4 sayings → report → clock)");
 

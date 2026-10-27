@@ -100,7 +100,8 @@ public final class RpgRules {
     // ---------------------------------------------------------------- 前の世界の決まりを一度だけ移す
     static final class Migrated extends net.minecraft.world.level.saveddata.SavedData {
         static final String NAME = "skyabyss_rpg_rules";
-        static final int VERSION = 1;
+        // 1: 倒れても落とさない・減らない。2: バニラの keepInventory も入れる (2026-10-27 の声「持ち物の保持を on にするだけで落とさないのでは」)
+        static final int VERSION = 2;
         private static final Factory<Migrated> FACTORY = new Factory<>(Migrated::new, Migrated::load);
         int version;
 
@@ -148,8 +149,12 @@ public final class RpgRules {
             return;
         }
         GameRules rules = server.getGameRules();
-        rules.getRule(jp.revati.skyabyss.grave.DeathRules.MODE).set(jp.revati.skyabyss.grave.DeathRules.Mode.KEEP.ordinal(), server);
-        rules.getRule(jp.revati.skyabyss.grave.DeathRules.DURABILITY).set(jp.revati.skyabyss.grave.DeathRules.DEFAULT_DURABILITY, server);
+        if (m.version < 1) {
+            rules.getRule(jp.revati.skyabyss.grave.DeathRules.MODE).set(jp.revati.skyabyss.grave.DeathRules.Mode.KEEP.ordinal(), server);
+            rules.getRule(jp.revati.skyabyss.grave.DeathRules.DURABILITY).set(jp.revati.skyabyss.grave.DeathRules.DEFAULT_DURABILITY, server);
+        }
+        // 持ち物の保持 (バニラ)。入っていれば倒れたときの持ち物はバニラのとおり全部残る (DeathEvents は何もしない)
+        rules.getRule(GameRules.RULE_KEEPINVENTORY).set(true, server);
         m.version = Migrated.VERSION;
         m.setDirty();
         SkyAbyss.LOGGER.info("RPG rules: this world now keeps items on death and has no wear (one-time switch)");

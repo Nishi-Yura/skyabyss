@@ -36,8 +36,8 @@
     "xp": 40,
     "items": [
       {
-        "item": "minecraft:clock",
-        "count": 1
+        "item": "skyabyss:resonance_shard",
+        "count": 2
       }
     ],
     "affinity": {
