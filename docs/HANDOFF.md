@@ -40,6 +40,7 @@
 3. 職ごとの新しい技 12 本の手元の Fx（今はサーバーの粒だけ）。
 4. 大きく変えたら jar を作り直す。
 5. 町を手本の水準へ:
-   - 地面の形（段・石垣・岩の縁）、縦の重なり（露台・橋）、目印の塔を作り直す。
-   - 新しい町の自己テストを、新しい大陸の世界で流す（`fresh_continent.sh`）。
+   - 段（上の町・石垣・階段）・露台は入れた。目印のラフ 3 案を選ぶページ: https://claude.ai/artifact/WjxYtyotW6pBp4awMBCvfk（db の answers: landmark / terrace）。
+   - 選ばれたら四つの町の目印を作り、`lm_rough_*.json` を消す。
+   - 自己テスト（build audit・continent・region folk・facility・site guard・travel map）は新しい町で通った。
    - 都と見どころにも、家の型と仕上げを使う。
