@@ -48,6 +48,8 @@
   - クエストの報酬からバニラのがらくたを外した（mod の品に）。焼けた砦の見回りは野盗（modの敵）を倒す形に直した（前はもう出ないバニラの敵だった）。羊の日課を消した。
   - 採集は道具ごと（斧・つるはし・シャベル）。採った物は素材屋が買う。バニラの「持ち物の保持」を入れた。
 
+- 試練に入った瞬間に死ぬ不具合を直した: 大陸の世界の縁（一辺 4,400）が背の次元にも効き、x 5,000 あたりの試練の部屋が縁の外だった。縁は狭めない（前の版で狭めた世界は広げ直す）。`rpg rules` の自己テストが部屋の枠を見張る。
+
 ## 気をつけること
 
 - 生成スクリプトの文が手直しより古いもの: `gen_town_quests.py`・`gen_free_quests.py`・`gen_npc_content.py`・`gen_facility_content.py`。流したら lang は差分だけ取り込む。
@@ -58,7 +60,7 @@
 
 ## 次にやること
 
-1. バニラの品（ブロック以外、72 種）を mod の品に置き換える（2026-10-27 の声「ブロック以外はすべて mod で」）。第 1 段（装備）のラフ 3 案ずつを選定ページに出した: https://claude.ai/artifact/C8FfDSKsS73HhfwSpB9Xw2（db の answers: travel_shield / gather_axe / gather_pickaxe / gather_shovel / armor_start / armor_iron / armor_sky）。ラフは `tools/rough/lowpoly/weapons/outfit/`（`build_outfit.py`）と `tools/rough/lowpoly/armor/outfit_one.py`（`build_outfit.py`）、絵は `docs/review/roughs_outfit`。選ばれたら品を足し（盾は珊瑚の盾、道具は祠の鎚の持ち方を写す）、店・クエスト・初めの持ち物・採集の道具のタグを差し替える。次の段は矢・薬・食べ物、その次は素材と道具類。
+1. バニラの品（ブロック以外、72 種）を mod の品に置き換える（2026-10-27 の声「ブロック以外はすべて mod で」）。第 1 段（盾・採集の道具 3 つ・初めの旅装・鉄張りの旅装・空石の胸当て）は入れた（`item/outfit`、`tools/install/install_outfit.py`。店・クエスト・初めの持ち物・跡の箱・骨の坑の判定を差し替え）。次は第 2 段（矢・薬・食べ物）のラフ 3 案 → 選定ページ、その次は第 3 段（素材と道具類）。
 2. クエストの見直しは済んだ（初日のお使いと風の道の旗を消し、墓守を 2 段に、大干潮と峰の足もとを時刻で閉じない形に、折れた剣は自分の得物を研ぐ形に）。
 3. 試遊 0.7.1 の声の直しの確かめと、都・見どころの仕上げの撮影（`tools/shots/capital_dress.txt`・`poi_dress.txt`）。
 4. 大きく変えたら jar を作り直す。
