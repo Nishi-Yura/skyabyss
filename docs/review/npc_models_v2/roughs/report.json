@@ -470,5 +470,132 @@
     "atlas": 64
    }
   }
+ },
+ "food_vendor_a": {
+  "tris": 1644,
+  "atlas": 256,
+  "buried": [],
+  "props": {
+   "prop_l": {
+    "tris": 298,
+    "atlas": 64
+   }
+  }
+ },
+ "food_vendor_b": {
+  "tris": 1679,
+  "atlas": 256,
+  "buried": [
+   [
+    "legRt",
+    "skirt",
+    0.48
+   ],
+   [
+    "legLt",
+    "skirt",
+    0.48
+   ]
+  ],
+  "props": {
+   "prop_r": {
+    "tris": 152,
+    "atlas": 64
+   }
+  }
+ },
+ "food_vendor_c": {
+  "tris": 1766,
+  "atlas": 256,
+  "buried": [
+   [
+    "legRt",
+    "skirt",
+    0.45
+   ],
+   [
+    "legLt",
+    "skirt",
+    0.45
+   ]
+  ],
+  "props": {
+   "prop_r": {
+    "tris": 112,
+    "atlas": 64
+   }
+  }
+ },
+ "outfitter_a": {
+  "tris": 1340,
+  "atlas": 256,
+  "buried": [],
+  "props": {
+   "prop_l": {
+    "tris": 220,
+    "atlas": 64
+   }
+  }
+ },
+ "outfitter_b": {
+  "tris": 1499,
+  "atlas": 256,
+  "buried": [],
+  "props": {
+   "prop_r": {
+    "tris": 70,
+    "atlas": 64
+   }
+  }
+ },
+ "outfitter_c": {
+  "tris": 1457,
+  "atlas": 256,
+  "buried": [
+   [
+    "hair",
+    "hood",
+    0.55
+   ]
+  ],
+  "props": {
+   "prop_back": {
+    "tris": 242,
+    "atlas": 64
+   }
+  }
+ },
+ "material_trader_a": {
+  "tris": 1504,
+  "atlas": 256,
+  "buried": [],
+  "props": {
+   "prop_r": {
+    "tris": 60,
+    "atlas": 64
+   }
+  }
+ },
+ "material_trader_b": {
+  "tris": 1597,
+  "atlas": 256,
+  "buried": [],
+  "props": {
+   "prop_r": {
+    "tris": 48,
+    "atlas": 64
+   }
+  }
+ },
+ "material_trader_c": {
+  "tris": 1548,
+  "atlas": 256,
+  "buried": [],
+  "props": {
+   "prop_l": {
+    "tris": 90,
+    "atlas": 64
+   }
+  }
  }
 }

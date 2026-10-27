@@ -6,6 +6,7 @@ from __future__ import annotations
 
 import props as PR
 import props2 as P2
+import props3 as P3
 
 SKIN = {"pale": (232, 192, 160), "mid": (214, 166, 128), "tan": (190, 140, 100), "brown": (150, 102, 70), "ruddy": (222, 160, 128),
         "old": (214, 178, 150)}
@@ -351,6 +352,94 @@ add("guest_baker", ja="パン焼き", anim="hold_l",
     hat=dict(kind="kerchief"), beard="moustache", hairline=27.2, build="stout",
     upper=dict(apron=dict(bottom=4.8, top=18.0, w=3.4), collar=True, collar_mat="shirt"),
     lower="trousers", sleeve="rolled", arms=HOLD_L, props={"prop_l": P2.bread_basket})
+
+
+# ====================================================================== 市の三人 (食料屋・武具屋・素材屋。ラフ 3 案ずつ。2026-10-27)
+# 食料屋 A 腸詰めを提げた肉屋 / B 杓子の汁売り / C 乾酪の輪を抱えた女
+add("food_vendor_a", ja="食料屋 A（腸詰め）", anim="hold_l",
+    pal=dict(skin=SKIN["ruddy"], hair=(90, 60, 40), coat=(150, 74, 58), apron=(226, 214, 190), shirt=(220, 206, 178), trim=(96, 50, 40), hat=(226, 214, 190),
+             metal=(190, 150, 80), trousers=(66, 52, 44), boot=(54, 40, 30)),
+    face=dict(eye="kind", iris=(96, 70, 50), brow="thick", mouth="grin", blush=0.3),
+    hair=dict(style="short", front=27.4, side=24.8, back=23.6, fringe=[]),
+    hat=dict(kind="kerchief"), beard="full", hairline=27.2, build="broad",
+    upper=dict(apron=dict(bottom=4.6, top=18.4, w=3.6), collar=True, collar_mat="shirt"),
+    lower="trousers", sleeve="rolled", arms=HOLD_L_LOW, props={"prop_l": P3.sausages})
+
+add("food_vendor_b", ja="食料屋 B（汁売り）", anim="hold_r",
+    pal=dict(skin=SKIN["mid"], hair=(60, 44, 36), coat=(96, 112, 78), apron=(176, 146, 96), shirt=(214, 200, 166), trim=(70, 82, 54), hat=(96, 112, 78),
+             metal=(160, 150, 130), metal2=(150, 150, 154), trousers=(70, 62, 50), boot=(52, 40, 32)),
+    face=dict(eye="round", iris=(80, 96, 60), brow="soft", mouth="smile"),
+    hair=dict(style="ponytail", front=27.6, side=25.0, back=23.8, fringe=[(-1.4, 27.9, 1.6, 0.7, -0.4)]),
+    hat=dict(kind="band", mat="hat"), hairline=27.6, build="avg",
+    upper=dict(apron=dict(bottom=5.0, top=17.6, w=3.2), scarf=True, scarf_mat="scarf"),
+    pal_extra=dict(scarf=(196, 150, 70)),
+    lower="skirt", sleeve="rolled", arms=STAFF_R, props={"prop_r": P3.ladle})
+
+add("food_vendor_c", ja="食料屋 C（乾酪）", anim="hold2",
+    pal=dict(skin=SKIN["pale"], hair=(196, 150, 96), coat=(120, 88, 120), skirt=(110, 80, 110), apron=(230, 222, 200), shirt=(232, 222, 200), trim=(86, 60, 86),
+             hat=(230, 222, 200), metal=(200, 170, 100), trousers=(70, 56, 66), boot=(70, 50, 40)),
+    face=dict(eye="lady", iris=(110, 90, 130), brow="arched", mouth="lips", blush=0.25, lip=(170, 80, 80)),
+    hair=dict(style="bun", front=27.8, side=24.8, back=23.8, fringe=[(-2.0, 28.0, 1.6, 0.7, -0.5), (1.6, 28.0, 1.4, 0.65, 0.5)]),
+    hat=dict(kind="kerchief"), hairline=27.8, build="lady",
+    upper=dict(apron=dict(bottom=4.8, top=17.2, w=3.2), collar=True, collar_mat="shirt"),
+    lower="skirt", sleeve="puff", arms=HOLD2, props={"prop_r": P3.cheese_wheel})
+
+# 武具屋 A 丸盾の元兵 / B 剣を担いだ女剣士 / C 矢筒を負った弓の職人
+add("outfitter_a", ja="武具屋 A（丸盾）", anim="hold_l",
+    pal=dict(skin=SKIN["tan"], hair=(60, 50, 44), coat=(70, 76, 86), vest=(132, 60, 50), shirt=(150, 140, 120), trim=(48, 50, 56), metal=(170, 174, 182),
+             metal2=(150, 156, 166), trousers=(54, 54, 60), boot=(42, 36, 32), leather=(96, 66, 44)),
+    face=dict(eye="narrow", iris=(80, 90, 100), brow="stern", mouth="neutral", marks=[(["S", "S", "S"], 5, 52, -1)]),
+    hair=dict(style="short", front=28.2, side=25.0, back=24.0, off=0.3, fringe=[]),
+    beard="stubble", hairline=28.0, build="broad",
+    upper=dict(vest=True, pauldron=True, belt=True, collar=True, collar_mat="metal2"),
+    lower="trousers", sleeve="fitted", gloves=True, arms=BIRD_L, props={"prop_l": P3.round_shield})
+
+add("outfitter_b", ja="武具屋 B（担いだ剣）", anim="hold_r",
+    pal=dict(skin=SKIN["mid"], hair=(150, 56, 40), coat=(58, 66, 92), mantle=(140, 40, 40), trim=(196, 160, 80), metal=(196, 160, 80), metal2=(160, 164, 172),
+             trousers=(46, 48, 62), boot=(50, 38, 30), leather=(100, 70, 46)),
+    face=dict(eye="sharp", iris=(100, 140, 90), brow="flat", mouth="smirk"),
+    hair=dict(style="ponytail", front=27.6, side=25.0, back=23.8, fringe=[(1.8, 28.0, 1.8, 0.7, 0.4)]),
+    hairline=27.6, build="slim",
+    upper=dict(mantle=dict(bottom=17.0, clasp=True), belt=True, buttons=[13.0, 15.0]),
+    lower="tails", sleeve="fitted", gloves=True, arms={"r": ((-6.0, 17.6, -0.6), (-4.6, 20.4, -2.2))}, props={"prop_r": P3.shoulder_sword})
+
+add("outfitter_c", ja="武具屋 C（矢筒）", anim="free",
+    pal=dict(skin=SKIN["brown"], hair=(40, 34, 30), coat=(86, 100, 66), vest=(120, 92, 60), shirt=(190, 176, 140), trim=(60, 50, 36), hat=(86, 100, 66),
+             metal=(170, 150, 100), trousers=(66, 60, 48), boot=(56, 42, 30), leather=(116, 80, 48)),
+    face=dict(eye="calm", iris=(60, 50, 40), brow="soft", mouth="neutral"),
+    hair=dict(style="short", front=27.4, side=24.8, back=23.6, fringe=[]),
+    hat=dict(kind="hood"), beard="goatee", hairline=27.2, build="avg",
+    upper=dict(vest=True, bandolier=True, pouches=[(3.6, 10.4, "pouch")]),
+    lower="trousers", sleeve="rolled", props={"prop_back": P3.quiver})
+
+# 素材屋 A 地金を抱えた男 / B つるはしを担いだ山師 / C 鉱石を見る目利きの老女
+add("material_trader_a", ja="素材屋 A（地金）", anim="hold2",
+    pal=dict(skin=SKIN["tan"], hair=(36, 30, 28), coat=(84, 70, 62), apron=(96, 70, 48), shirt=(150, 136, 112), trim=(50, 40, 34), metal=(150, 140, 120),
+             trousers=(52, 46, 42), boot=(40, 32, 28), leather=(96, 70, 48)),
+    face=dict(eye="narrow", iris=(70, 56, 40), brow="thick", mouth="neutral"),
+    hair=dict(style="short", front=27.8, side=25.0, back=23.6, off=0.35, fringe=[]),
+    hat=dict(kind="cap"), beard="moustache", hairline=27.6, build="stout",
+    upper=dict(apron=dict(bottom=6.0, top=19.0, w=3.4, bib=True), collar=False, pouches=[(-3.6, 10.6, "pouch")]),
+    lower="trousers", sleeve="rolled", gloves=True, arms=HOLD2_LOW, props={"prop_r": P3.ingot_stack})
+
+add("material_trader_b", ja="素材屋 B（つるはし）", anim="hold_r",
+    pal=dict(skin=SKIN["ruddy"], hair=(170, 120, 70), coat=(110, 84, 52), vest=(70, 84, 96), shirt=(180, 164, 130), trim=(60, 48, 36), hat=(150, 120, 60),
+             hat2=(80, 60, 40), metal=(190, 170, 110), metal2=(120, 124, 130), trousers=(70, 62, 52), boot=(60, 44, 30), leather=(110, 80, 50)),
+    face=dict(eye="kind", iris=(80, 110, 120), brow="high", mouth="grin", blush=0.2),
+    hair=dict(style="short", front=27.4, side=24.8, back=23.6, fringe=[(-1.6, 27.8, 1.6, 0.7, -0.4)]),
+    hat=dict(kind="brim"), beard="full", hairline=27.4, build="broad",
+    upper=dict(vest=True, scarf=True, scarf_mat="scarf", pouches=[(3.8, 10.4, "pouch"), (-3.8, 10.4, "pouch")]),
+    pal_extra=dict(scarf=(70, 110, 120)),
+    lower="trousers", sleeve="rolled", gloves=True, arms={"r": ((-6.2, 17.4, -0.8), (-4.8, 20.8, -2.6))}, props={"prop_r": P3.shoulder_pick})
+
+add("material_trader_c", ja="素材屋 C（目利き）", anim="hold_l",
+    pal=dict(skin=SKIN["old"], hair=(206, 202, 196), coat=(60, 76, 86), skirt=(56, 70, 80), sash=(176, 140, 70), trim=(150, 120, 60), hat=(60, 76, 86),
+             metal=(190, 160, 90), trousers=(50, 56, 62), boot=(44, 38, 36)),
+    face=dict(eye="old", iris=(100, 130, 140), brow="worried", mouth="small", marks=[(["w"], 4, 47)]),
+    hair=dict(style="bun", front=27.2, side=24.6, back=23.6, fringe=[]),
+    specs=True, hairline=27.0, build="old",
+    upper=dict(sash=True, collar=True, collar_mat="trim", mantle=dict(bottom=17.4, clasp=True)),
+    lower="robe", sleeve="wide", arms=HOLD_L, props={"prop_l": P3.ore_lump})
 
 
 # ====================================================================== 旅の職人 (章ごとに絵だけ替える: variants)
