@@ -38,8 +38,7 @@ public final class ContinentDanger {
     static void onJoin(EntityJoinLevelEvent event) {
         if (event.loadedFromDisk() || !(event.getLevel() instanceof ServerLevel level) || level.dimension() != Level.OVERWORLD
                 || !(event.getEntity() instanceof Mob mob) || !(mob instanceof Enemy)
-                || !("minecraft".equals(BuiltInRegistries.ENTITY_TYPE.getKey(mob.getType()).getNamespace()) || mob instanceof jp.revati.skyabyss.entity.foe.ContinentFoe)
-                || !(level.getChunkSource().getGenerator() instanceof ContinentChunkGenerator)) {
+                || !("minecraft".equals(BuiltInRegistries.ENTITY_TYPE.getKey(mob.getType()).getNamespace()) || mob instanceof jp.revati.skyabyss.entity.foe.ContinentFoe)) {
             return;
         }
         // 空の高い所 (Y 250 より上) と地の底 (Y 0 より下。大陸に洞窟は無い) には自然には湧かない。試し (自己テスト) の敵が土地の強さで変わらないように

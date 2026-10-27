@@ -510,15 +510,7 @@ public final class SiteJob {
     }
 
     // 列の上面: 大陸の道の上なら道の石、それ以外は topState
-    private Boolean continent;
-
     private BlockState roadTop(int x, int z) {
-        if (continent == null) {
-            continent = level.getChunkSource().getGenerator() instanceof jp.revati.skyabyss.world.continent.ContinentChunkGenerator;
-        }
-        if (!continent) {
-            return topState;
-        }
         BlockState r = jp.revati.skyabyss.world.continent.ContinentChunkGenerator.roadAt(x, z);
         return r == null ? topState : r;
     }

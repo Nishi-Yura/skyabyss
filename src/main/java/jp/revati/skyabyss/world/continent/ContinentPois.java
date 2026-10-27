@@ -82,7 +82,7 @@ public final class ContinentPois {
     @SubscribeEvent
     static void onTick(ServerTickEvent.Post event) {
         ServerLevel over = event.getServer().overworld();
-        if (over.getGameTime() % CHECK != 0 || !(over.getChunkSource().getGenerator() instanceof ContinentChunkGenerator) || over.players().isEmpty()) {
+        if (over.getGameTime() % CHECK != 0 || over.players().isEmpty()) {
             return;
         }
         SiteData data = SiteData.get(over);
@@ -281,7 +281,8 @@ public final class ContinentPois {
         }
     }
 
+    // 大陸 (地上) にいるか
     public static boolean in(Level level) {
-        return level instanceof ServerLevel s && s.getChunkSource().getGenerator() instanceof ContinentChunkGenerator;
+        return level instanceof ServerLevel && level.dimension() == Level.OVERWORLD;
     }
 }

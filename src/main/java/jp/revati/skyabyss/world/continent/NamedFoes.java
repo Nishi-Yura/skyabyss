@@ -118,7 +118,7 @@ public final class NamedFoes {
         if (server.getTickCount() % EVERY != 31 || jp.revati.skyabyss.SelfTestRunner.enabled()) {
             return;
         }
-        if (!(level.getChunkSource().getGenerator() instanceof ContinentChunkGenerator) || !jp.revati.skyabyss.rpg.rules.RpgRules.adventure(level)) {
+        if (!jp.revati.skyabyss.rpg.rules.RpgRules.adventure(level)) {
             return;
         }
         forget(level);

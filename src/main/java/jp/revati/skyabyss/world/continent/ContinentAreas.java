@@ -61,7 +61,7 @@ public final class ContinentAreas {
     @SubscribeEvent
     static void onTick(PlayerTickEvent.Post event) {
         if (!(event.getEntity() instanceof ServerPlayer p) || p.isSpectator() || p.level().dimension() != Level.OVERWORLD
-                || (p.tickCount + p.getId()) % CHECK != 0 || !ContinentPois.in(p.level())) {
+                || (p.tickCount + p.getId()) % CHECK != 0) {
             return;
         }
         Seen s = SEEN.get(p.getUUID());

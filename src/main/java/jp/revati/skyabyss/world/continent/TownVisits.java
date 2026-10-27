@@ -24,9 +24,6 @@ public final class TownVisits {
             return;
         }
         ServerLevel level = server.overworld();
-        if (!(level.getChunkSource().getGenerator() instanceof ContinentChunkGenerator)) {
-            return;
-        }
         for (ServerPlayer p : level.players()) {
             visit(level, p);
         }

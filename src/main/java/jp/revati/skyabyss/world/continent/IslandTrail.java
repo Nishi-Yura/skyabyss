@@ -121,10 +121,9 @@ public final class IslandTrail {
         }
     }
 
-    // 島の谷の図がある世界 (天と淵の大陸の今の図) か
+    // 島の谷の図がある (地上で、図に島の門がある) か
     public static boolean active(ServerLevel level) {
-        return level.dimension() == Level.OVERWORLD && level.getChunkSource().getGenerator() instanceof ContinentChunkGenerator
-                && ContinentLayout.get().island("gate") != null;
+        return level.dimension() == Level.OVERWORLD && ContinentLayout.get().island("gate") != null;
     }
 
     // 今の目的 (帯の id と目印)。島の外・渡った人・島の図のない世界は null

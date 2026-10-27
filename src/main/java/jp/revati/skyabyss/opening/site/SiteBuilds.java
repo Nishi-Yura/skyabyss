@@ -439,8 +439,7 @@ public final class SiteBuilds {
             case "bell" -> jp.revati.skyabyss.opening.OpeningSites.bell(server).orElse(null);
             case "smoke" -> jp.revati.skyabyss.opening.OpeningSites.smoke(server).orElse(null);
             case "slab" -> jp.revati.skyabyss.opening.OpeningSites.slab(server).orElse(null);
-            case "chaser" -> jp.revati.skyabyss.opening.OpeningSites.bell(server)
-                    .map(b -> jp.revati.skyabyss.npc.NpcSpawner.chaserSpot(level, b)).orElse(null);
+            case "chaser" -> jp.revati.skyabyss.world.continent.ContinentTowns.chaserSpot(server);
             default -> null;
         };
         if (at == null) {

@@ -287,19 +287,13 @@ public final class SiteSelfTest {
             if (npc != null) {
                 npc.discard();
             }
-            // 目的の帯の目印: 語り部は鐘、鯨追いは鐘から離れた自分の焚き火 (別の場所)。建物ごとに別の目印
+            // 目的の帯の目印: 語り部は鐘
             check(f, bell.equals(jp.revati.skyabyss.opening.OpeningDirector.target(level, "ask_storyteller")), "ask_storyteller target is not the bell");
             NpcEntity chaser = NpcSpawner.spawnChaser(level, bell, level.random);
             check(f, chaser != null, "the whale chaser cannot stand near the lodge");
             if (chaser != null) {
                 chaser.discard();
             }
-            // 鯨追いの焚き火の記録 (立たせたときに残す) が目印になる。鐘の位置にはならない
-            BlockPos fire = bell.offset(20, 0, 5);
-            NpcWorldData.get(server.overworld()).markChaserFire(bell.asLong(), fire.asLong());
-            BlockPos t = jp.revati.skyabyss.opening.OpeningDirector.target(level, "find_isana");
-            check(f, fire.equals(t), "find_isana target " + t + " is not the recorded chaser fire " + fire + " (bell " + bell + ")");
-            check(f, !bell.equals(t) && !bell.equals(jp.revati.skyabyss.opening.OpeningDirector.target(level, "find_isana")), "find_isana points at the bell");
         }
         check(f, OpeningSites.smoke(server).map(p -> level.getBlockState(p).is(Blocks.CAMPFIRE)).orElse(false), "no smoking campfire");
         // 骨: 骨のブロックが十分あり、石板の碑に文がある

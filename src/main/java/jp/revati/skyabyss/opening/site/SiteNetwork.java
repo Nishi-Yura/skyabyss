@@ -58,18 +58,12 @@ public final class SiteNetwork {
             m.put(i == 0 ? "footprint" : "footprint" + i, p);
             i++;
         }
-        // 話す相手の居場所 (道しるべの目印): 語り部は宿りの鐘のそば、鯨追いは外れの焚き火
+        // 話す相手の居場所 (道しるべの目印): 語り部は都の大鐘楼の鐘のそば、鯨追いは鯨見の町
         OpeningSites.bell(server).or(() -> OpeningSites.shelter(server)).ifPresent(bell -> {
             m.put(SiteTargets.NPC_PREFIX + "storyteller", bell);
-            BlockPos town = server.overworld() != null && jp.revati.skyabyss.world.continent.ContinentPois.in(server.overworld())
-                    ? jp.revati.skyabyss.world.continent.ContinentTowns.chaserSpot(server) : null;
+            BlockPos town = server.overworld() != null ? jp.revati.skyabyss.world.continent.ContinentTowns.chaserSpot(server) : null;
             if (town != null) {
                 m.put(SiteTargets.NPC_PREFIX + "whale_chaser", town);
-            } else if (server.overworld() != null) {
-                BlockPos chaser = jp.revati.skyabyss.npc.NpcSpawner.chaserSpot(server.overworld(), bell);
-                if (chaser != null) {
-                    m.put(SiteTargets.NPC_PREFIX + "whale_chaser", chaser);
-                }
             }
         });
         // 旅の職人: 章の立つ所 (ArtisanSpawner.Spot) の印の最初の場所 (拠点が複数あれば先頭。話す目的の道しるべ)
