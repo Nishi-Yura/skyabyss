@@ -22,6 +22,7 @@ public final class MapText {
                     : m.name().isEmpty() ? TravelDest.waymarkName(m.extra()) : Component.literal(m.name());
             case SITE -> siteName(m.name(), m.extra());
             case SPAWN -> Component.translatable("gui.skyabyss.travel.spawn");
+            case FOE -> Component.translatable("map.skyabyss.foe.lair", Component.translatable(m.name()));
             case TOWN -> m.extra().isEmpty() ? Component.translatable("map.skyabyss.mark.town") : Component.translatable("map.skyabyss.town." + m.extra());
             case SHRINE -> m.extra().isEmpty() ? Component.translatable("map.skyabyss.mark.shrine")
                     : Component.translatable("map.skyabyss.shrine_of", Component.translatable("progress.skyabyss.titan." + m.extra()));

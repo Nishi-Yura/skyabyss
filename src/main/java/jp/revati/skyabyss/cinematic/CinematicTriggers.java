@@ -209,7 +209,7 @@ public final class CinematicTriggers {
         return false;
     }
 
-    // 伝承の項目は近づくと記される (岩鯨 160、潮殻 200、雷翼 96)。場面はそれより先に出るので、伝承を根拠にするのは岩鯨 (旧ワールドからの人) だけ。
+    // 伝承の項目は近づくと記される (岩鯨 400 (高く巡るので上下も含めて遠めに)、潮殻 200、雷翼 96)。場面はそれより先に出るので、伝承を根拠にするのは岩鯨 (旧ワールドからの人) だけ。
     // 潮殻・雷翼・余燼は、その巨神の心臓を止めた人 (見たに決まっている) だけを見たことにする
     static boolean alreadyKnows(ServerPlayer player, String titan) {
         if (Titans.STONE_WHALE.equals(titan)) {

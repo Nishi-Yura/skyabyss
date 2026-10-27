@@ -29,43 +29,78 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
 
-// 名のある強敵 (docs/design/44 の 5): 土地ごとに一体、まれに現れる名づきの強敵。
-// 人がその土地にいる間、2 秒ごとに 1/CHANCE で、32〜48 ブロック先に一体だけ現れる (その土地に生きている名づきがいれば出ない)。
-// 名札・体力の帯 (近くの人に)・現れたときの知らせ。倒すと近くの人みなに鐘銭、その土地の次は 20 分後。離れて消えたときは 2 分後
+// 名のある強敵 (docs/design/44 の 5): 土地ごとに一体の名づきの強敵。土地ごとに決まった棲み家 (見どころの一つ。lair) があり、
+// 地図にいつも出る (MapMarks.foeMarks)。人が棲み家の LAIR_NEAR 以内に来ると、その土地に生きている名づきがいなければ、棲み家に一体現れる。
+// 生きている間は光る縁取りと、空へ伸びる光の柱 (遠くから見える)。名札・体力の帯 (近くの人に)・現れたときの知らせ。
+// 倒すと近くの人みなに鐘銭、その土地の次は 20 分後。離れて消えたときは 2 分後。昼夜では閉じない (状態で入口を閉じない決まり)
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class NamedFoes {
     public static final String TAG = "skyabyss_named_foe";
     public static final int EVERY = 40;
-    public static final int CHANCE = 90;
-    public static final int MIN_DIST = 32;
-    public static final int MAX_DIST = 48;
+    // 棲み家に近づいたとみなす距離と、名づきが棲み家から離れてよい距離 (超えたら棲み家へ戻る)
+    public static final int LAIR_NEAR = 72;
+    public static final double LEASH = 36;
+    // 棲み家に選ぶ見どころの種類 (先にあるものほど選ぶ)
+    static final String[] LAIR_KINDS = {"ruined_tower", "burnt_fort", "barrow", "stone_circle", "graveyard", "monastery", "forge_ruin", "mine", "cave",
+            "watchtower", "bandit_camp", "ruined_house", "titan_ribs"};
     public static final double BAR_RANGE = 40;
     public static final double REWARD_RANGE = 32;
     public static final long COOLDOWN_KILLED = 24000;
     public static final long COOLDOWN_LOST = 2400;
     static final ResourceLocation HEALTH_ID = ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "named_foe_health");
 
-    // entity: 名づきにする敵、name: 名札の鍵、night: 夜だけ、health: 体力の倍率 (野営の敵を名づきにするとき)、coins: 倒した人ごとの鐘銭
-    public record Def(String entity, String name, boolean night, double health, int coins) {
+    // entity: 名づきにする敵、name: 名札の鍵、health: 体力の倍率 (野営の敵を名づきにするとき)、coins: 倒した人ごとの鐘銭
+    public record Def(String entity, String name, double health, int coins) {
     }
 
     // 土地の番号 (ContinentMap: MEADOW, OUTSKIRTS, WHALE, TIDE, STORM, EMBER) ごと
     static final Def[] DEFS = {
-        new Def("skyabyss:bone_standard", "entity.skyabyss.named.meadow", true, 2.0, 40),
+        new Def("skyabyss:bone_standard", "entity.skyabyss.named.meadow", 2.0, 40),
         // はじまりの島には名のある強敵を出さない (峠の頭目は峠の野盗の場面だけ。IslandTrail。2026-10-27 の声)
         null,
-        new Def("skyabyss:rock_boar", "entity.skyabyss.rock_boar", false, 1.0, 80),
-        new Def("skyabyss:tide_crab", "entity.skyabyss.tide_crab", false, 1.0, 120),
-        new Def("skyabyss:storm_ram", "entity.skyabyss.storm_ram", false, 1.0, 160),
-        new Def("skyabyss:ash_lizard", "entity.skyabyss.ash_lizard", false, 1.0, 220),
+        new Def("skyabyss:rock_boar", "entity.skyabyss.rock_boar", 1.0, 80),
+        new Def("skyabyss:tide_crab", "entity.skyabyss.tide_crab", 1.0, 120),
+        new Def("skyabyss:storm_ram", "entity.skyabyss.storm_ram", 1.0, 160),
+        new Def("skyabyss:ash_lizard", "entity.skyabyss.ash_lizard", 1.0, 220),
     };
 
     private static final Map<Integer, UUID> ALIVE = new HashMap<>();
     private static final Map<Integer, Long> NEXT = new HashMap<>();
     private static final Map<UUID, ServerBossEvent> BARS = new HashMap<>();
     private static final Map<UUID, Integer> REGION_OF = new HashMap<>();
+    private static BlockPos[] lairs;
 
     private NamedFoes() {
+    }
+
+    // 土地ごとの棲み家 (見どころの位置。y は 0)。名づきのいない土地・見どころのない土地は null
+    @Nullable
+    public static synchronized BlockPos lair(int region) {
+        if (lairs == null) {
+            List<ContinentPois.Poi> all = ContinentPois.all();
+            BlockPos[] out = new BlockPos[DEFS.length];
+            for (int r = 0; r < DEFS.length; r++) {
+                if (DEFS[r] == null) {
+                    continue;
+                }
+                search:
+                for (String kind : LAIR_KINDS) {
+                    for (ContinentPois.Poi poi : all) {
+                        if (poi.kind().equals(kind) && ContinentMap.get().region(poi.x(), poi.z()) == r) {
+                            out[r] = new BlockPos(poi.x(), 0, poi.z());
+                            break search;
+                        }
+                    }
+                }
+            }
+            lairs = out;
+        }
+        return region >= 0 && region < lairs.length ? lairs[region] : null;
+    }
+
+    // 今その土地の名づきが生きているか
+    public static boolean alive(int region) {
+        return ALIVE.containsKey(region);
     }
 
     @Nullable
@@ -88,27 +123,30 @@ public final class NamedFoes {
         }
         forget(level);
         for (ServerPlayer p : level.players()) {
-            if (p.isAlive() && !p.isSpectator() && !jp.revati.skyabyss.story.reel.StoryReels.watching(p) && level.random.nextInt(CHANCE) == 0) {
+            if (p.isAlive() && !p.isSpectator() && !jp.revati.skyabyss.story.reel.StoryReels.watching(p)) {
                 trySpawn(level, p);
             }
         }
+        leash(level);
     }
 
-    // その人の土地に名づきを出せれば出す
+    // その人が棲み家の近くにいれば、その土地の名づきを棲み家に出す
     @Nullable
     public static Mob trySpawn(ServerLevel level, ServerPlayer p) {
         int region = ContinentMap.get().region(p.getBlockX(), p.getBlockZ());
         Def d = def(region);
-        if (d == null || ALIVE.containsKey(region) || level.getGameTime() < NEXT.getOrDefault(region, 0L) || (d.night() && !RegionSpawner.night(level))) {
+        BlockPos lair = lair(region);
+        if (d == null || lair == null || ALIVE.containsKey(region) || level.getGameTime() < NEXT.getOrDefault(region, 0L)
+                || Math.hypot(p.getX() - lair.getX(), p.getZ() - lair.getZ()) > LAIR_NEAR || !level.isLoaded(lair)) {
             return null;
         }
-        for (int tries = 0; tries < 6; tries++) {
+        for (int tries = 0; tries < 8; tries++) {
             double angle = level.random.nextDouble() * Math.PI * 2;
-            double dist = MIN_DIST + level.random.nextDouble() * (MAX_DIST - MIN_DIST);
-            int x = (int) Math.floor(p.getX() + Math.cos(angle) * dist);
-            int z = (int) Math.floor(p.getZ() + Math.sin(angle) * dist);
+            double dist = tries == 0 ? 0 : 3 + level.random.nextDouble() * 8;
+            int x = (int) Math.floor(lair.getX() + Math.cos(angle) * dist);
+            int z = (int) Math.floor(lair.getZ() + Math.sin(angle) * dist);
             BlockPos at = RegionSpawner.ground(level, x, z);
-            if (at == null || ContinentMap.get().region(x, z) != region || jp.revati.skyabyss.opening.site.SiteGuard.inTown(level, at) || ContinentRoads.flattened(x + 0.5, z + 0.5)) {
+            if (at == null || jp.revati.skyabyss.opening.site.SiteGuard.inTown(level, at)) {
                 continue;
             }
             Mob m = spawnAt(level, region, at, p);
@@ -117,6 +155,17 @@ public final class NamedFoes {
             }
         }
         return null;
+    }
+
+    // 棲み家から LEASH より離れた名づきは、狙いを捨てて棲み家へ歩いて戻る (道や町まで追ってこない)
+    static void leash(ServerLevel level) {
+        for (var en : ALIVE.entrySet()) {
+            BlockPos lair = lair(en.getKey());
+            if (lair != null && level.getEntity(en.getValue()) instanceof Mob m && Math.hypot(m.getX() - lair.getX(), m.getZ() - lair.getZ()) > LEASH) {
+                m.setTarget(null);
+                m.getNavigation().moveTo(lair.getX() + 0.5, m.getY(), lair.getZ() + 0.5, 1.2);
+            }
+        }
     }
 
     // 決まった場所に名づきを出す (自己テスト・命令からも使う)
@@ -173,6 +222,12 @@ public final class NamedFoes {
                 continue;
             }
             bar.setProgress(Math.max(0f, le.getHealth() / le.getMaxHealth()));
+            // 遠くから見える目印: 光る縁取り (名づきだけ) と、頭の上から空へ伸びる光の柱 (BEAM_RANGE 以内の人に)
+            var glow = le.getEffect(net.minecraft.world.effect.MobEffects.GLOWING);
+            if (glow == null || glow.getDuration() < 40) {
+                le.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.GLOWING, 200, 0, false, false));
+            }
+            beam(level, le);
             for (ServerPlayer p : level.players()) {
                 boolean near = p.distanceToSqr(le) < BAR_RANGE * BAR_RANGE;
                 if (near && !bar.getPlayers().contains(p)) {
@@ -180,6 +235,21 @@ public final class NamedFoes {
                 } else if (!near && bar.getPlayers().contains(p)) {
                     bar.removePlayer(p);
                 }
+            }
+        }
+    }
+
+    static final double BEAM_RANGE = 160;
+
+    static void beam(ServerLevel level, LivingEntity le) {
+        double top = le.getY() + le.getBbHeight() + 1;
+        for (ServerPlayer p : level.players()) {
+            if (p.distanceToSqr(le) < BEAM_RANGE * BEAM_RANGE) {
+                for (int i = 0; i < 12; i++) {
+                    double y = top + level.random.nextDouble() * 40;
+                    level.sendParticles(p, net.minecraft.core.particles.ParticleTypes.END_ROD, true, le.getX(), y, le.getZ(), 1, 0.08, 0.4, 0.08, 0.0);
+                }
+                level.sendParticles(p, net.minecraft.core.particles.ParticleTypes.SOUL_FIRE_FLAME, true, le.getX(), le.getY() + 0.2, le.getZ(), 3, 0.6, 0.1, 0.6, 0.01);
             }
         }
     }
@@ -226,7 +296,7 @@ public final class NamedFoes {
         }
     }
 
-    // 試遊用: /skyabyss dev named = 今いる土地の名づきを、確率・間・昼夜を問わずそばに出す (権限 2)。その土地に生きている名づきがいれば出さない
+    // 試遊用: /skyabyss dev named = 今いる土地の名づきを、棲み家・間を問わずそばに出す (権限 2)。その土地に生きている名づきがいれば出さない
     @SubscribeEvent
     static void onCommands(net.neoforged.neoforge.event.RegisterCommandsEvent event) {
         event.getDispatcher().register(net.minecraft.commands.Commands.literal(SkyAbyss.MODID).then(net.minecraft.commands.Commands.literal("dev")

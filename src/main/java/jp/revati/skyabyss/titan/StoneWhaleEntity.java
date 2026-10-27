@@ -88,9 +88,9 @@ public class StoneWhaleEntity extends Entity implements GeoEntity, TravelTitan, 
     public static final int DESCENT_RECHECK = 100;
     // 遠い人のもとへ向かうときの速さ: 距離に比例して速く (遠くからは巡航の 2 倍強)、近づくと APPROACH_SPEED まで落とす
     static final float HOMING_MAX_SPEED = 0.45f;
-    // 停泊のあと、次に降りてよくなるまでの待ち (tick)。以前は 6000〜9000 (5〜7.5 分)
-    static final int STAY_COOLDOWN_MIN = 3600;
-    static final int STAY_COOLDOWN_SPREAD = 1200;
+    // 停泊のあと、次に降りてよくなるまでの待ち (tick)。以前は 3600〜4800 (3〜4 分)。2026-10-27 から 30〜60 秒
+    static final int STAY_COOLDOWN_MIN = 600;
+    static final int STAY_COOLDOWN_SPREAD = 600;
 
     private enum Mode { CRUISE, APPROACH, REST }
 
@@ -398,7 +398,7 @@ public class StoneWhaleEntity extends Entity implements GeoEntity, TravelTitan, 
                 // 鼓動が戻った: すぐ巡航に戻り、少ししてから歌う
                 mode = Mode.CRUISE;
                 hasTarget = false;
-                restCooldown = 1800 + random.nextInt(1200);
+                restCooldown = STAY_COOLDOWN_MIN + random.nextInt(STAY_COOLDOWN_SPREAD);
                 songCooldown = 400;
                 jp.revati.skyabyss.titan.TitanVisibility.playSound(level, jp.revati.skyabyss.progress.Titans.STONE_WHALE, getX(), getY(), getZ(), ModSounds.TITAN_SONG.get(), SoundSource.AMBIENT, 16f, 0.8f);
             }

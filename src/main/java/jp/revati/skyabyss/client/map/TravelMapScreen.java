@@ -49,7 +49,7 @@ public class TravelMapScreen extends Screen {
     // 印の絵の番号 (marks.png の並び。tools/gen/world/gen_travel_map_assets.py の SPRITES と同じ)
     static final int S_TOWN = 0, S_CAMP = 1, S_FOOTPRINT = 2, S_RIBS = 3, S_WAYMARK = 4, S_SITE = 5, S_TITAN = 6, S_GRAVE = 7,
             S_PARTY = 8, S_OBJECTIVE = 9, S_RUMOR = 10, S_SELF = 11, S_SPAWN = 12, S_SHRINE = 13, S_GLOW = 14,
-            S_POI_FIGHT = 15, S_POI_HAMLET = 16, S_POI_TOWER = 17;
+            S_POI_FIGHT = 15, S_POI_HAMLET = 16, S_POI_TOWER = 17, S_FOE = 18;
     // 見どころの種類ごとの印 (それ以外の見どころは碑)
     static final java.util.Set<String> POI_FIGHT = java.util.Set.of("bandit_camp", "barrow", "mine", "graveyard", "cave", "burnt_fort");
     static final java.util.Set<String> POI_TOWER = java.util.Set.of("watchtower", "lighthouse", "rod_tower", "ruined_tower", "windmill");
@@ -753,6 +753,9 @@ public class TravelMapScreen extends Screen {
             }
             List<Component> lines = new ArrayList<>();
             lines.add(MapText.name(m));
+            if (m.kind() == MapMarks.Kind.FOE) {
+                lines.add(Component.translatable(m.extra().equals("alive") ? "map.skyabyss.foe.alive" : "map.skyabyss.foe.away"));
+            }
             lines.add(m.rumor() ? MapText.rumor(me, m.x(), m.z()) : MapText.where(me, m.x(), m.z()));
             hits.add(hit(at, layer(m), lines, null));
         }
@@ -852,6 +855,7 @@ public class TravelMapScreen extends Screen {
             case TITAN -> 75;
             case SHRINE -> 70;
             case SITE -> 65;
+            case FOE -> m.extra().equals("alive") ? 72 : view <= 1600 ? 50 : 0;
             case CAMP -> view <= 1200 ? 40 : 0;
             case SPAWN -> view <= 1200 ? 35 : 0;
             // 見どころは寄せたときだけ名前 (見つけたものを先に。重なる所には置かない)
@@ -934,6 +938,7 @@ public class TravelMapScreen extends Screen {
         return switch (m.kind()) {
             case SITE, WAYMARK, SHRINE -> 10;
             case FOOTPRINT, RIBS, SPAWN -> 20;
+            case FOE -> 38;
             case CAMP -> 30;
             case TOWN -> 35;
             case TITAN -> 40;
@@ -961,6 +966,7 @@ public class TravelMapScreen extends Screen {
             case TITAN -> S_TITAN;
             case SHRINE -> S_SHRINE;
             case SPAWN -> S_SPAWN;
+            case FOE -> S_FOE;
         };
     }
 

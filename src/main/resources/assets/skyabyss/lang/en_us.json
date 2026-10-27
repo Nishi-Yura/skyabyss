@@ -1850,5 +1850,8 @@
   "sign.skyabyss.island.huts": "Fishing Huts",
   "sign.skyabyss.island.camp_west": "Travelers' Camp",
   "sign.skyabyss.island.tree": "Great Tree",
-  "message.skyabyss.tour.whistle": "The stable keeper gave you a mount whistle. Press Y to call your mount."
+  "message.skyabyss.tour.whistle": "The stable keeper gave you a mount whistle. Press Y to call your mount.",
+  "map.skyabyss.foe.lair": "Lair of %s",
+  "map.skyabyss.foe.alive": "In its lair now",
+  "map.skyabyss.foe.away": "Appears when you come close (gone a while after it falls)"
 }

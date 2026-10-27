@@ -712,7 +712,8 @@ public final class OpeningSelfTest {
         st.markDone(OpeningBeat.FOOTSTEPS);
         Env day2noon = new Env(30000, 24000 + 6000, true, true, true, false, false, false, true, false);
         Facts seeWhale = new Facts(false, true, true, 5, 5, 100, false, false, true, true, false, false, true, false, false, false, false, 1, 100, "see_whale");
-        check(OpeningLogic.objective(st, seeWhale, day2noon).equals("bone_hill"), "objective: the bone hill was not offered on day 2 noon", failures);
+        // 白く霞む丘の寄り道は出さない (2026-10-27)
+        check(!OpeningLogic.objective(st, seeWhale, day2noon).equals("bone_hill"), "objective: the bone hill detour is offered again", failures);
         check(OpeningLogic.objective(st, seeWhale, day).equals("see_whale"), "objective: the bone hill was offered on day 1", failures);
         Env day2night = new Env(40000, 24000 + 15000, true, true, true, false, false, false, true, false);
         check(OpeningLogic.objective(st, seeWhale, day2night).equals("see_whale"), "objective: the bone hill was offered at night", failures);

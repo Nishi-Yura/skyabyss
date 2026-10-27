@@ -1850,5 +1850,8 @@
   "sign.skyabyss.island.huts": "浜の漁師小屋",
   "sign.skyabyss.island.camp_west": "旅人の野営",
   "sign.skyabyss.island.tree": "島の大樹",
-  "message.skyabyss.tour.whistle": "厩舎の番から乗り笛をもらった。Y で乗り物を呼べる"
+  "message.skyabyss.tour.whistle": "厩舎の番から乗り笛をもらった。Y で乗り物を呼べる",
+  "map.skyabyss.foe.lair": "%s の棲み家",
+  "map.skyabyss.foe.alive": "今、棲み家にいる",
+  "map.skyabyss.foe.away": "近づくと現れる (倒すとしばらく出ない)"
 }

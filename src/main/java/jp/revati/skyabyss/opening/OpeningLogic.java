@@ -179,9 +179,7 @@ public final class OpeningLogic {
             id = !st.done(OpeningBeat.SONG) ? (st.done(OpeningBeat.FOOTSTEPS) ? "see_whale" : "wait_steps")
                     : !st.done(OpeningBeat.ISANA) ? "find_isana" : "wait_whale";
         }
-        if (!id.isEmpty() && boneOffer(st, env) && (stage.equals("find_chaser") || stage.equals("see_whale"))) {
-            return "bone_hill";
-        }
+        // 「白く霞む丘を確かめに行ってみよう」(日 2 の昼の寄り道) は出さない (2026-10-27 の声「いらない。流石に移動させすぎ」)
         return id;
     }
 

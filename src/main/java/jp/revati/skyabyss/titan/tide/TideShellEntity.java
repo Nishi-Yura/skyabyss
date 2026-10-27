@@ -145,6 +145,7 @@ public class TideShellEntity extends Entity implements GeoEntity, TravelTitan, j
     private int forcedTicks;
     // 最後に寄る場所を決めた刻 (同じ刻で二度寄らない)
     private long lastWindow = Long.MIN_VALUE;
+    private final jp.revati.skyabyss.titan.FirstBoardWait shoreWait = new jp.revati.skyabyss.titan.FirstBoardWait();
     // 最後に休んだ場所 (背中から戻るとき、休んでいなければこの岸へ戻す)
     private boolean hasLastRest;
     private double lastRestX;
@@ -461,6 +462,23 @@ public class TideShellEntity extends Entity implements GeoEntity, TravelTitan, j
         }
         if (tickCount % 200 == 0) {
             tryGather(level);
+        }
+        if (tickCount % 20 == 0 && mode == Mode.CRUISE) {
+            answerShoreWait(level);
+        }
+    }
+
+    // 乗りたい人が浜 (跡地のない世界では潮殻の近く) で FirstBoardWait.WAIT 待ったら、干潮の刻を待たずに寄る (雷翼・余燼と同じ)
+    private void answerShoreWait(ServerLevel level) {
+        boolean beachOnly = TideBeach.restricted(level.getServer());
+        net.minecraft.core.BlockPos centre = beachOnly ? TideBeach.beach(level.getServer()) : net.minecraft.core.BlockPos.containing(getX(), getY(), getZ());
+        ServerPlayer p = shoreWait.tick(level, jp.revati.skyabyss.progress.Titans.TIDE_SHELL, centre, 20);
+        if (p == null) {
+            return;
+        }
+        Vec3 spot = beachOnly ? TideBeach.restSpot(level) : TideOcean.findCallSpot(level, p.getX(), p.getZ());
+        if (spot != null) {
+            beginApproach(level, spot, FORCED_REST);
         }
     }
 

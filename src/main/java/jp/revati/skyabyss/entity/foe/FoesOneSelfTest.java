@@ -139,8 +139,14 @@ public final class FoesOneSelfTest {
             }
         }
         for (int r = 0; r < 6; r++) {
+            if (r == jp.revati.skyabyss.world.continent.ContinentMap.OUTSKIRTS) {
+                // はじまりの島には名のある強敵を出さない
+                check(jp.revati.skyabyss.world.continent.NamedFoes.def(r) == null, "the island has a named foe", f);
+                continue;
+            }
             var d = jp.revati.skyabyss.world.continent.NamedFoes.def(r);
             check(d != null && BuiltInRegistries.ENTITY_TYPE.containsKey(net.minecraft.resources.ResourceLocation.parse(d.entity())), "region " + r + " has no named foe", f);
+            check(jp.revati.skyabyss.world.continent.NamedFoes.lair(r) != null, "region " + r + " has no lair for its named foe", f);
         }
         for (String region : new String[] {"island", "meadow"}) {
             JsonObject t = json("/data/skyabyss/spawns/" + region + ".json");
@@ -309,8 +315,8 @@ public final class FoesOneSelfTest {
     private static void named(ServerLevel lv, List<String> f) {
         jp.revati.skyabyss.world.continent.NamedFoes.reset(lv);
         FakePlayer p = fake(lv, "named", SX, SZ + 4);
-        BanditChief plain = spawn(lv, ModEntities.BANDIT_CHIEF.get(), SX + 6, SZ, 0f);
-        int island = jp.revati.skyabyss.world.continent.ContinentMap.OUTSKIRTS;
+        Mob plain = spawn(lv, ModEntities.BONE_STANDARD.get(), SX + 6, SZ, 0f);
+        int island = jp.revati.skyabyss.world.continent.ContinentMap.MEADOW;
         Mob m = jp.revati.skyabyss.world.continent.NamedFoes.spawnAt(lv, island, new BlockPos(SX, FLOOR, SZ), p);
         if (m == null) {
             f.add("the island's named foe could not be spawned");
@@ -318,7 +324,7 @@ public final class FoesOneSelfTest {
             plain.discard();
             return;
         }
-        check(m instanceof BanditChief && m.hasCustomName() && m.isCustomNameVisible() && jp.revati.skyabyss.world.continent.NamedFoes.named(m),
+        check(m instanceof jp.revati.skyabyss.entity.foe.BoneStandard && m.hasCustomName() && m.isCustomNameVisible() && jp.revati.skyabyss.world.continent.NamedFoes.named(m),
                 "the named foe has no name tag / tag: " + m, f);
         check(m.getMaxHealth() > plain.getMaxHealth() * 1.7f, "named health " + m.getMaxHealth() + " vs plain " + plain.getMaxHealth(), f);
         check(jp.revati.skyabyss.world.continent.NamedFoes.bar(m.getUUID()) != null, "the named foe has no health bar", f);

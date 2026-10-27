@@ -41,11 +41,12 @@ import net.minecraft.world.phys.Vec3;
 // すでに遊んでいた人 (OpeningState.legacy) には序盤の場所を全部「見た」で出す。新しい保存は足さない (記録はどれも既存のものを読む)。
 //
 // 32 の祠は kind = SHRINE (建っている祠を、その巨神の心臓を止めた人にだけ。extra = 巨神の名前)。
-// 言伝ての板の依頼の目印も同じ。画面の側は kind を知っていれば描ける (MapSprites)
+// 言伝ての板の依頼の目印も同じ。画面の側は kind を知っていれば描ける (MapSprites)。
+// 名のある強敵の棲み家は kind = FOE (いつも出す。name = 名札の鍵、extra = 今いれば "alive"。world.continent.NamedFoes)
 public final class MapMarks {
     // 印の種類 (画面の絵の番号と同じ順。MapSprites)
     public enum Kind {
-        TOWN, CAMP, FOOTPRINT, RIBS, WAYMARK, SITE, TITAN, SHRINE, SPAWN
+        TOWN, CAMP, FOOTPRINT, RIBS, WAYMARK, SITE, TITAN, SHRINE, SPAWN, FOE
     }
 
     // 一つの印。name は文の鍵の材料 (種類ごと。画面の MapText が文にする)、extra は付け足し (碑の土地の名・章の ID)。
@@ -87,6 +88,7 @@ public final class MapMarks {
         waymarkMarks(Voyages.state(player), TravelWorldData.get(player.server), out);
         titanMarks(player, over, out);
         shrineMarks(player, out);
+        foeMarks(out);
         if (jp.revati.skyabyss.facility.FacilityMarks.has(player, jp.revati.skyabyss.facility.FacilityMarks.MAP_COPY)) {
             archiveMarks(player.server, data.grounds(), Chapters.of(player), out);
         }
@@ -99,6 +101,19 @@ public final class MapMarks {
         BlockPos center = town != null ? town : over.getSharedSpawnPos();
         boolean townKnown = out.stream().anyMatch(m -> m.kind() == Kind.TOWN && !m.rumor());
         return new Sheet(center.getX(), center.getZ(), townKnown, out.size() > MAX ? List.copyOf(out.subList(0, MAX)) : List.copyOf(out));
+    }
+
+    // 名のある強敵の棲み家 (土地ごとに一つ。生きていれば赤く縁取る)
+    static void foeMarks(List<Mark> out) {
+        for (int r = 0; r < jp.revati.skyabyss.world.continent.RegionSpawner.REGIONS.length; r++) {
+            var d = jp.revati.skyabyss.world.continent.NamedFoes.def(r);
+            BlockPos lair = jp.revati.skyabyss.world.continent.NamedFoes.lair(r);
+            if (d == null || lair == null) {
+                continue;
+            }
+            boolean alive = jp.revati.skyabyss.world.continent.NamedFoes.alive(r);
+            out.add(new Mark(Kind.FOE, "foe_" + r, d.name(), alive ? "alive" : "", lair.getX(), lair.getZ(), false, alive ? 0xE8443A : 0x9A7A70));
+        }
     }
 
     // 天と淵の大陸の見どころ (Wynncraft の地図のように、行く前から全部出す。建ったものは建った位置)。碑などの印で、指すと名前。

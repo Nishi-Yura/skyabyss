@@ -303,8 +303,27 @@ def poi_tower():
     return outline(img)
 
 
+def named_foe():
+    """名のある強敵の棲み家: 角のある髑髏、目は熾火 (縁取りは生きていれば赤)"""
+    img, d = canvas()
+    d.polygon([(7, 5), (11, 12), (9, 13)], fill=BONE_MID)
+    d.polygon([(25, 5), (21, 12), (23, 13)], fill=BONE_MID)
+    d.ellipse([8, 8, 24, 23], fill=BONE_LIGHT)
+    d.rectangle([11, 21, 21, 27], fill=BONE)
+    d.rectangle([10, 13, 14, 17], fill=OUTLINE[:3] + (255,))
+    d.rectangle([18, 13, 22, 17], fill=OUTLINE[:3] + (255,))
+    d.rectangle([11, 14, 13, 16], fill=EMBER)
+    d.rectangle([19, 14, 21, 16], fill=EMBER)
+    d.point((12, 14), fill=EMBER_HI)
+    d.point((20, 14), fill=EMBER_HI)
+    d.polygon([(16, 18), (17, 21), (15, 21)], fill=BONE_DARK)
+    for x in (13, 16, 19):
+        d.line([x, 23, x, 27], fill=BONE_DARK)
+    return outline(img)
+
+
 SPRITES = [town, camp, footprint, ribs, waymark, site, titan, grave, party, objective, rumor, self_arrow, spawn, shrine, glow,
-           poi_fight, poi_hamlet, poi_tower]
+           poi_fight, poi_hamlet, poi_tower, named_foe]
 # 縁取りを付けない印 (光の輪・噂は縁なし)
 NO_RIM = {"glow", "rumor"}
 
