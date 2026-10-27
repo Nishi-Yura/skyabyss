@@ -1,0 +1,81 @@
+{
+  "goods": [
+    {
+      "id": "arrow",
+      "item": "minecraft:arrow",
+      "count": 8,
+      "coins": 3
+    },
+    {
+      "id": "made_spectral_arrow",
+      "item": "minecraft:spectral_arrow",
+      "count": 2,
+      "coins": 6,
+      "materials": [
+        {
+          "item": "skyabyss:moth_dust",
+          "count": 1
+        }
+      ],
+      "chapter": 4,
+      "made": true
+    },
+    {
+      "id": "whetstone",
+      "item": "skyabyss:rock_whetstone",
+      "count": 1,
+      "coins": 6
+    },
+    {
+      "id": "iron_sword",
+      "item": "minecraft:iron_sword",
+      "count": 1,
+      "coins": 18
+    },
+    {
+      "id": "shield",
+      "item": "minecraft:shield",
+      "count": 1,
+      "coins": 12
+    },
+    {
+      "id": "iron_helmet",
+      "item": "minecraft:iron_helmet",
+      "count": 1,
+      "coins": 10
+    },
+    {
+      "id": "iron_chestplate",
+      "item": "minecraft:iron_chestplate",
+      "count": 1,
+      "coins": 16
+    },
+    {
+      "id": "iron_leggings",
+      "item": "minecraft:iron_leggings",
+      "count": 1,
+      "coins": 14
+    },
+    {
+      "id": "iron_boots",
+      "item": "minecraft:iron_boots",
+      "count": 1,
+      "coins": 8
+    },
+    {
+      "id": "diamond_sword",
+      "item": "minecraft:diamond_sword",
+      "count": 1,
+      "coins": 50,
+      "chapter": 3
+    },
+    {
+      "id": "diamond_chestplate",
+      "item": "minecraft:diamond_chestplate",
+      "count": 1,
+      "coins": 70,
+      "chapter": 3
+    }
+  ],
+  "buys": []
+}

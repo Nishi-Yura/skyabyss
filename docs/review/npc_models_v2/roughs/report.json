@@ -597,5 +597,33 @@
     "atlas": 64
    }
   }
+ },
+ "outfitter": {
+  "tris": 1506,
+  "atlas": 256,
+  "buried": [],
+  "props": {}
+ },
+ "food_vendor": {
+  "tris": 1644,
+  "atlas": 256,
+  "buried": [],
+  "props": {
+   "prop_l": {
+    "tris": 298,
+    "atlas": 64
+   }
+  }
+ },
+ "material_trader": {
+  "tris": 1548,
+  "atlas": 256,
+  "buried": [],
+  "props": {
+   "prop_l": {
+    "tris": 90,
+    "atlas": 64
+   }
+  }
  }
 }

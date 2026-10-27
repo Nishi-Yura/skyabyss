@@ -422,6 +422,9 @@ class RegionTown(T.Town):
         'training_master': ['target[power=0]', 'grindstone[face=floor,facing=north]', 'smithing_table'],
         'keep_veteran': ['lectern[facing=north,has_book=false,powered=false]', 'bookshelf', 'bookshelf'],
         'black_marketeer': ['barrel[facing=north,open=false]', 'cobweb', 'chest[facing=north,type=single,waterlogged=false]'],
+        'food_vendor': ['hay_block[axis=y]', 'smoker[facing=north,lit=false]', 'barrel[facing=up,open=false]'],
+        'outfitter': ['smithing_table', 'grindstone[face=floor,facing=north]', 'barrel[facing=north,open=false]'],
+        'material_trader': ['iron_block', 'chest[facing=north,type=single,waterlogged=false]', 'copper_block'],
     }
 
     def hall(self, name, label, roles, x0, z0, x1, z1, floors=2, roof=None, timber=False):
@@ -459,8 +462,8 @@ class RegionTown(T.Town):
         return b
 
     def town_market(self, x0, z0, x1, z1):
-        """市の店: 道具屋と薬師が一つの机に並ぶ"""
-        b = self.hall('market', 'market', ['tool_merchant', 'apothecary'], x0, z0, x1, z1, floors=2, timber=True)
+        """市: 道具屋・食料屋・武具屋・素材屋・薬師が一つの机に並ぶ (2026-10-27)"""
+        b = self.hall('market', 'market', ['tool_merchant', 'food_vendor', 'outfitter', 'material_trader', 'apothecary'], x0, z0, x1, z1, floors=2, timber=True)
         dx_, _, dz_, _ = b.doors[0]
         self.mark('shop', dx_, 0, dz_ - 1)
 

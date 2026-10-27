@@ -268,7 +268,7 @@ public final class FacilitySelfTest {
         for (String e : ShopManager.loadErrors()) {
             f.add("shop load error: " + e);
         }
-        for (String id : List.of("tool_shop", "apothecary", "black_market")) {
+        for (String id : List.of("tool_shop", "food_shop", "outfit_shop", "material_shop", "apothecary", "black_market")) {
             ShopDef s = ShopManager.shop(id);
             if (s == null) {
                 f.add("no shop " + id);
@@ -278,10 +278,15 @@ public final class FacilitySelfTest {
                 check(f, item != Items.EMERALD, id + " uses emeralds");
             }
         }
-        ShopDef tools = ShopManager.shop("tool_shop");
-        for (Item need : List.of(Items.BREAD, Items.TORCH, Items.ARROW, Items.WHITE_BED)) {
-            check(f, tools.goods().stream().anyMatch(g -> g.item() == need), "tool shop sells " + BuiltInRegistries.ITEM.getKey(need));
-        }
+        // 市の四人 (2026-10-27): 道具屋 = 灯りと寝袋、食料屋 = パン、武具屋 = 矢、素材屋 = 素材の値段と買い取り
+        ShopDef toolShop = ShopManager.shop("tool_shop");
+        ShopDef tools = ShopManager.shop("food_shop");
+        ShopDef outfit = ShopManager.shop("outfit_shop");
+        ShopDef mats = ShopManager.shop("material_shop");
+        check(f, toolShop.goods().stream().anyMatch(g -> g.item() == Items.TORCH) && toolShop.goods().stream().anyMatch(g -> g.item() == Items.WHITE_BED), "tool shop sells light and beds");
+        check(f, tools.goods().stream().anyMatch(g -> g.item() == Items.BREAD), "food vendor sells bread");
+        check(f, outfit.goods().stream().anyMatch(g -> g.item() == Items.ARROW), "outfitter sells arrows");
+        check(f, toolShop.goods().stream().noneMatch(g -> g.item() == Items.BREAD || g.item() == Items.IRON_SWORD), "tool shop no longer sells food or swords");
         ShopDef apo = ShopManager.shop("apothecary");
         check(f, apo.goods().stream().anyMatch(g -> g.potion() != null && g.potion().getPath().equals("healing")), "apothecary sells healing");
         check(f, apo.goods().stream().anyMatch(g -> g.potion() != null && g.potion().getPath().equals("night_vision")), "apothecary sells night vision");
@@ -295,30 +300,30 @@ public final class FacilitySelfTest {
         Coins.give(p, 30);
         check(f, ShopService.buy(p, tools, "bread", 1) == ShopService.Result.OK, "buy bread");
         check(f, Coins.count(p) == 27 && p.getInventory().countItem(Items.BREAD) == 3, "bread paid and given");
-        check(f, ShopService.buy(p, tools, "bedroll", 3) == ShopService.Result.NO_COINS && Coins.count(p) == 27, "cannot overspend");
+        check(f, ShopService.buy(p, toolShop, "bedroll", 3) == ShopService.Result.NO_COINS && Coins.count(p) == 27, "cannot overspend");
         check(f, ShopService.buy(p, tools, "nope", 1) == ShopService.Result.NO_GOOD, "unknown good");
         // 素材の値段
-        check(f, ShopService.buy(p, tools, "resonance", 1) == ShopService.Result.NO_MATERIALS, "material price needs materials");
+        check(f, ShopService.buy(p, mats, "resonance", 1) == ShopService.Result.NO_MATERIALS, "material price needs materials");
         p.getInventory().add(new ItemStack(ModItems.STONE_WHALE_SHARD.get(), 3));
         int before = jp.revati.skyabyss.quest.QuestItems.count(p, "skyabyss:resonance_shard", null);
-        check(f, ShopService.buy(p, tools, "resonance", 1) == ShopService.Result.OK
+        check(f, ShopService.buy(p, mats, "resonance", 1) == ShopService.Result.OK
                 && jp.revati.skyabyss.quest.QuestItems.count(p, "skyabyss:resonance_shard", null) == before + 1
                 && jp.revati.skyabyss.quest.QuestItems.count(p, "skyabyss:stone_whale_shard", null) == 0, "pay with titan materials");
         // 章の届かない品
-        check(f, ShopService.buy(p, tools, "socket_stone", 1) == ShopService.Result.LOCKED, "chapter-locked goods");
+        check(f, ShopService.buy(p, mats, "socket_stone", 1) == ShopService.Result.LOCKED, "chapter-locked goods");
         // 売る
         p.getInventory().add(new ItemStack(jp.revati.skyabyss.guide.GuideSetup.BONE_CHIP.get(), 9));
         int idx = -1;
-        for (int i = 0; i < tools.buys().size(); i++) {
-            if (tools.buys().get(i).item() == jp.revati.skyabyss.guide.GuideSetup.BONE_CHIP.get()) {
+        for (int i = 0; i < mats.buys().size(); i++) {
+            if (mats.buys().get(i).item() == jp.revati.skyabyss.guide.GuideSetup.BONE_CHIP.get()) {
                 idx = i;
             }
         }
         int coins = Coins.count(p);
-        check(f, idx >= 0 && ShopService.sell(p, tools, idx, 99) == ShopService.Result.OK, "sell bone chips");
+        check(f, idx >= 0 && ShopService.sell(p, mats, idx, 99) == ShopService.Result.OK, "sell bone chips");
         check(f, Coins.count(p) == coins + 2 && p.getInventory().countItem(jp.revati.skyabyss.guide.GuideSetup.BONE_CHIP.get()) == 1,
                 "sold two lots, one chip left");
-        check(f, ShopService.sell(p, tools, idx, 1) == ShopService.Result.NO_MATERIALS, "cannot sell a partial lot");
+        check(f, ShopService.sell(p, mats, idx, 1) == ShopService.Result.NO_MATERIALS, "cannot sell a partial lot");
         ItemStack named = new ItemStack(Items.BONE, 8);
         named.set(net.minecraft.core.component.DataComponents.CUSTOM_NAME, net.minecraft.network.chat.Component.literal("keep"));
         check(f, !ShopService.plain(named), "named items are not sold");

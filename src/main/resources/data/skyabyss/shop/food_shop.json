@@ -1,0 +1,79 @@
+{
+  "goods": [
+    {
+      "id": "hardtack",
+      "item": "skyabyss:road_hardtack",
+      "count": 2,
+      "coins": 4
+    },
+    {
+      "id": "bread",
+      "item": "minecraft:bread",
+      "count": 3,
+      "coins": 3
+    },
+    {
+      "id": "cod",
+      "item": "minecraft:cooked_cod",
+      "count": 3,
+      "coins": 4
+    },
+    {
+      "id": "honey",
+      "item": "minecraft:honey_bottle",
+      "count": 1,
+      "coins": 4
+    },
+    {
+      "id": "made_tide_pickle",
+      "item": "skyabyss:tide_pickle",
+      "count": 3,
+      "coins": 5,
+      "materials": [
+        {
+          "item": "skyabyss:salt_crystal",
+          "count": 1
+        }
+      ],
+      "chapter": 2,
+      "made": true
+    },
+    {
+      "id": "made_wind_dumpling",
+      "item": "skyabyss:wind_dumpling",
+      "count": 3,
+      "coins": 7,
+      "chapter": 3,
+      "made": true
+    },
+    {
+      "id": "made_ash_baked_bread",
+      "item": "skyabyss:ash_baked_bread",
+      "count": 2,
+      "coins": 7,
+      "materials": [
+        {
+          "item": "skyabyss:ash_hemp",
+          "count": 1
+        }
+      ],
+      "chapter": 4,
+      "made": true
+    },
+    {
+      "id": "made_ash_cooler",
+      "item": "skyabyss:ash_cooler",
+      "count": 1,
+      "coins": 6,
+      "materials": [
+        {
+          "item": "skyabyss:ash_hemp",
+          "count": 2
+        }
+      ],
+      "chapter": 4,
+      "made": true
+    }
+  ],
+  "buys": []
+}

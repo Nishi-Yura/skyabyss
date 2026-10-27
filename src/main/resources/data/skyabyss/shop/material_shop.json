@@ -1,0 +1,213 @@
+{
+  "goods": [
+    {
+      "id": "iron_ingot",
+      "item": "minecraft:iron_ingot",
+      "count": 2,
+      "coins": 4
+    },
+    {
+      "id": "copper",
+      "item": "minecraft:copper_ingot",
+      "count": 3,
+      "coins": 4,
+      "chapter": 3
+    },
+    {
+      "id": "coal",
+      "item": "minecraft:coal",
+      "count": 4,
+      "coins": 3,
+      "chapter": 4
+    },
+    {
+      "id": "diamond",
+      "item": "minecraft:diamond",
+      "count": 1,
+      "coins": 14,
+      "chapter": 3
+    },
+    {
+      "id": "bone",
+      "item": "minecraft:bone",
+      "count": 3,
+      "coins": 3
+    },
+    {
+      "id": "string",
+      "item": "minecraft:string",
+      "count": 4,
+      "coins": 4,
+      "chapter": 2
+    },
+    {
+      "id": "wheat",
+      "item": "minecraft:wheat",
+      "count": 8,
+      "coins": 4,
+      "chapter": 4
+    },
+    {
+      "id": "lightning_rod",
+      "item": "minecraft:lightning_rod",
+      "count": 1,
+      "coins": 6,
+      "chapter": 3
+    },
+    {
+      "id": "blast_furnace",
+      "item": "minecraft:blast_furnace",
+      "count": 1,
+      "coins": 16,
+      "chapter": 4
+    },
+    {
+      "id": "magma_block",
+      "item": "minecraft:magma_block",
+      "count": 2,
+      "coins": 4,
+      "chapter": 4
+    },
+    {
+      "id": "magma_cream",
+      "item": "minecraft:magma_cream",
+      "count": 2,
+      "coins": 5,
+      "chapter": 4
+    },
+    {
+      "id": "obsidian",
+      "item": "minecraft:obsidian",
+      "count": 1,
+      "coins": 6,
+      "chapter": 5
+    },
+    {
+      "id": "blaze_rod",
+      "item": "minecraft:blaze_rod",
+      "count": 1,
+      "coins": 8,
+      "chapter": 5
+    },
+    {
+      "id": "resonance",
+      "item": "skyabyss:resonance_shard",
+      "count": 1,
+      "materials": [
+        {
+          "item": "skyabyss:stone_whale_shard",
+          "count": 3
+        }
+      ]
+    },
+    {
+      "id": "socket_stone",
+      "item": "skyabyss:socket_shard_stone",
+      "count": 1,
+      "coins": 10,
+      "materials": [
+        {
+          "item": "skyabyss:stone_whale_shard",
+          "count": 6
+        }
+      ],
+      "chapter": 2
+    },
+    {
+      "id": "socket_tide",
+      "item": "skyabyss:socket_shard_tide",
+      "count": 1,
+      "coins": 10,
+      "materials": [
+        {
+          "item": "skyabyss:tide_shell_shard",
+          "count": 6
+        }
+      ],
+      "chapter": 3
+    },
+    {
+      "id": "socket_wind",
+      "item": "skyabyss:socket_shard_wind",
+      "count": 1,
+      "coins": 10,
+      "materials": [
+        {
+          "item": "skyabyss:thunder_wing_shard",
+          "count": 6
+        }
+      ],
+      "chapter": 4
+    },
+    {
+      "id": "socket_ash",
+      "item": "skyabyss:socket_shard_ash",
+      "count": 1,
+      "coins": 10,
+      "materials": [
+        {
+          "item": "skyabyss:ember_shard",
+          "count": 6
+        }
+      ],
+      "chapter": 5
+    }
+  ],
+  "buys": [
+    {
+      "item": "skyabyss:bone_chip",
+      "per": 4,
+      "coins": 1
+    },
+    {
+      "item": "skyabyss:hare_quill",
+      "per": 4,
+      "coins": 1
+    },
+    {
+      "item": "skyabyss:rock_shell_scrap",
+      "per": 4,
+      "coins": 1
+    },
+    {
+      "item": "minecraft:bone",
+      "per": 8,
+      "coins": 1
+    },
+    {
+      "item": "minecraft:string",
+      "per": 8,
+      "coins": 1
+    },
+    {
+      "item": "minecraft:rotten_flesh",
+      "per": 16,
+      "coins": 1
+    },
+    {
+      "item": "minecraft:gunpowder",
+      "per": 4,
+      "coins": 1
+    },
+    {
+      "item": "skyabyss:stone_whale_shard",
+      "per": 1,
+      "coins": 2
+    },
+    {
+      "item": "skyabyss:tide_shell_shard",
+      "per": 1,
+      "coins": 3
+    },
+    {
+      "item": "skyabyss:thunder_wing_shard",
+      "per": 1,
+      "coins": 4
+    },
+    {
+      "item": "skyabyss:ember_shard",
+      "per": 1,
+      "coins": 5
+    }
+  ]
+}

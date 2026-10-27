@@ -26,7 +26,7 @@
   "item.skyabyss.cloudgap_fruit": "雲間の干し果",
   "item.skyabyss.cloudgap_fruit.desc": "雲の切れ間で干した果実。食べると30秒、静電を帯びない（雷蛾の放電が跳ばない）",
   "item.skyabyss.moth_dust": "鱗粉",
-  "item.skyabyss.moth_dust.desc": "雷蛾の翅の粉。道具屋へ持っていくと、矢に付けて光の矢にしてくれる",
+  "item.skyabyss.moth_dust.desc": "雷蛾の翅の粉。市の武具屋へ持っていくと、矢に付けて光の矢にしてくれる",
   "effect.skyabyss.static_ward": "静電避け",
   "message.skyabyss.storm_charm.armed": "腕に稲妻がまとわりつく（あと %s 回）",
   "gui.skyabyss.forge.exchange_no_clear.thunder_wing": "雷翼の心臓を止めると、選べるようになる",

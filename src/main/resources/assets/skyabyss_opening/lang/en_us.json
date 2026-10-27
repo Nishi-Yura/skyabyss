@@ -100,10 +100,10 @@
   "message.skyabyss.capital.stone.cold": "The stone is cold. You do not yet hold this titan's fragment.",
   "message.skyabyss.capital.stone.pull": "The fragment in your hand is drawn, faintly, toward the stone.",
   "message.skyabyss.capital.stone.pair": "The two fragments pull at each other. ...Where will they point when all four are together?",
-  "sign.skyabyss.capital.tool_shop.1": "Tool Shop",
-  "sign.skyabyss.capital.tool_shop.2": "Rations, torches,",
-  "sign.skyabyss.capital.tool_shop.3": "arrows, bedrolls.",
-  "sign.skyabyss.capital.tool_shop.4": "Coins or titan parts",
+  "sign.skyabyss.capital.tool_shop.1": "Market",
+  "sign.skyabyss.capital.tool_shop.2": "Tools and food",
+  "sign.skyabyss.capital.tool_shop.3": "Arms and materials.",
+  "sign.skyabyss.capital.tool_shop.4": "Materials bought too",
   "sign.skyabyss.capital.stable.1": "Stable",
   "sign.skyabyss.capital.stable.2": "Mounts to ride.",
   "sign.skyabyss.capital.stable.3": "Blow the whistle",
@@ -181,7 +181,7 @@
   "sign.skyabyss.town_fac.shrine.3": "offerings,",
   "sign.skyabyss.town_fac.shrine.4": "archivist",
   "sign.skyabyss.town_fac.market.1": "Market",
-  "sign.skyabyss.town_fac.market.2": "Tools",
-  "sign.skyabyss.town_fac.market.3": "and",
-  "sign.skyabyss.town_fac.market.4": "medicine"
+  "sign.skyabyss.town_fac.market.2": "Tools, food",
+  "sign.skyabyss.town_fac.market.3": "Arms, materials",
+  "sign.skyabyss.town_fac.market.4": "and medicine"
 }

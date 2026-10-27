@@ -1,6 +1,6 @@
 {
   "message.skyabyss.guard.block": "ここは壊せない",
-  "label.skyabyss.facility.tool_shop": "道具屋",
+  "label.skyabyss.facility.tool_shop": "市（道具・食料・武具・素材）",
   "label.skyabyss.facility.storage": "預かり所",
   "label.skyabyss.facility.stable": "厩舎",
   "label.skyabyss.facility.trade": "取引所",
@@ -14,5 +14,5 @@
   "label.skyabyss.facility.travel": "旅の館（厩舎・止まり木・地図屋）",
   "label.skyabyss.facility.training": "訓練所",
   "label.skyabyss.facility.shrine": "社（鍵の間・書庫）",
-  "label.skyabyss.facility.market": "市の店（道具屋・薬師）"
+  "label.skyabyss.facility.market": "市（道具・食料・武具・素材・薬）"
 }

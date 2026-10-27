@@ -179,7 +179,7 @@ class Facilities(FurnishBig, FurnishShops2, FurnishShops, Furnish, Interiors, Ba
 
     # ---------------------------------------------------------------- 東の大通り: 道具屋
     def tool_shop(self):
-        """道具屋 (広場の東の角、x 33..45 z -38..-28)。戸は西 (広場へ)。売り台の向こうに道具屋、奥の壁に樽・箱・棚"""
+        """市 (広場の東の角、x 33..45 z -38..-28。前は道具屋)。戸は西 (広場へ)。売り台の向こうに道具屋・食料屋・武具屋・素材屋、奥の壁に樽・箱・棚"""
         st, v = self.st, self.v
         x0, z0, x1, z1 = 33, -38, 45, -28
         b, ridge = self.fac_body('tool_shop', x0, z0, x1, z1, 'west', floors=2, fh=6, ground='shop', axis='x')
@@ -204,7 +204,19 @@ class Facilities(FurnishBig, FurnishShops2, FurnishShops, Furnish, Interiors, Ba
             v.set(43, 1, z, 'decorated_pot[cracked=false,facing=west,waterlogged=false]' if 'chest' in back[i % len(back)]
                   else 'barrel[facing=west,open=false]' if i % 2 else 'bookshelf')
             v.set(43, 2, z, ['lantern[hanging=false,waterlogged=false]', 'decorated_pot[cracked=false,facing=west,waterlogged=false]', 'potted_red_tulip', 'air'][i % 4])
-        self.attendant('tool_merchant', 42, 0, dz + 1 if dz + 1 <= az1 else dz - 1)
+        # 市の四人 (2026-10-27): 売り台の向こうに 2 おき。北から 道具屋・食料屋・武具屋・素材屋。持ち場の後ろの壁にそれぞれの品
+        stalls = [('tool_merchant', az0), ('food_vendor', az0 + 2), ('outfitter', az0 + 4), ('material_trader', az0 + 6)]
+        wares = {'food_vendor': ['hay_block[axis=y]', 'smoker[facing=west,lit=false]'], 'outfitter': ['smithing_table', 'grindstone[face=floor,facing=west]'],
+                 'material_trader': ['chiseled_bookshelf[facing=west,slot_0_occupied=true,slot_1_occupied=false,slot_2_occupied=true,slot_3_occupied=true,slot_4_occupied=false,slot_5_occupied=true]',
+                                     'iron_block'],
+                 'tool_merchant': ['barrel[facing=west,open=false]', 'fletching_table']}
+        for role, z in stalls:
+            if z > az1:
+                continue
+            self.attendant(role, 42, 0, z)
+            for k, it in enumerate(wares[role]):
+                zz = z + (k if z + k <= az1 else -k)
+                v.set(43, 0, zz, it)
         # 客の側: 北と南の壁の品 (干し糧・松明・矢・寝袋・縄)
         north = ['hay_block[axis=y]', 'barrel[facing=up,open=false]', 'crafting_table', 'chest[facing=south,type=single,waterlogged=false]', 'fletching_table']
         south = ['smoker[facing=north,lit=false]', 'barrel[facing=up,open=false]', 'white_wool', 'hay_block[axis=y]', 'barrel[facing=up,open=false]']

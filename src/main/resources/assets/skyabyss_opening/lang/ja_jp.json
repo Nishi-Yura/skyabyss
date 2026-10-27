@@ -100,10 +100,10 @@
   "message.skyabyss.capital.stone.cold": "石は冷たい。この巨神の欠片は、まだ手の中にない。",
   "message.skyabyss.capital.stone.pull": "手の中の欠片が、石のほうへかすかに引かれた。",
   "message.skyabyss.capital.stone.pair": "二つの欠片が、互いに引き合っている。……四つがそろえば、どこを指すのだろう。",
-  "sign.skyabyss.capital.tool_shop.1": "道具屋",
-  "sign.skyabyss.capital.tool_shop.2": "糧・松明・矢",
-  "sign.skyabyss.capital.tool_shop.3": "寝袋と縄。",
-  "sign.skyabyss.capital.tool_shop.4": "鐘銭か、巨神の素材で",
+  "sign.skyabyss.capital.tool_shop.1": "市",
+  "sign.skyabyss.capital.tool_shop.2": "道具屋と食料屋",
+  "sign.skyabyss.capital.tool_shop.3": "武具屋と素材屋。",
+  "sign.skyabyss.capital.tool_shop.4": "素材の買い取りも",
   "sign.skyabyss.capital.stable.1": "厩舎",
   "sign.skyabyss.capital.stable.2": "乗り物を貸します。",
   "sign.skyabyss.capital.stable.3": "笛を吹けば",
@@ -180,8 +180,8 @@
   "sign.skyabyss.town_fac.shrine.2": "鍵の間の",
   "sign.skyabyss.town_fac.shrine.3": "頼みと",
   "sign.skyabyss.town_fac.shrine.4": "書庫番",
-  "sign.skyabyss.town_fac.market.1": "市の店",
-  "sign.skyabyss.town_fac.market.2": "道具屋と",
-  "sign.skyabyss.town_fac.market.3": "薬師",
-  "sign.skyabyss.town_fac.market.4": "売り買い"
+  "sign.skyabyss.town_fac.market.1": "市",
+  "sign.skyabyss.town_fac.market.2": "道具・食料",
+  "sign.skyabyss.town_fac.market.3": "武具・素材",
+  "sign.skyabyss.town_fac.market.4": "それに薬"
 }

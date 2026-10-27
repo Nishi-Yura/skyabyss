@@ -77,6 +77,9 @@ BG_EXTRA = {
     "survivor_ash": (210, 96, 56),       # 隊長トウヤ: 灰の熾火
     "abyss_porter": (170, 130, 80),      # 荷運びロク: 荷の革
     "artisan": (240, 130, 60),           # 旅の職人 (前の肖像と同じ炉の色)
+    "food_vendor": (210, 120, 80),       # 食料屋: 腸詰めの赤み
+    "outfitter": (150, 160, 176),        # 武具屋: 鉄の灰青
+    "material_trader": (90, 170, 190),   # 素材屋: 鉱石の青い筋
     "guest_apprentice": (90, 150, 180), "guest_bellkeeper": (200, 170, 90), "guest_fisher": (80, 140, 170), "guest_bard": (190, 90, 120),
     "guest_child": (110, 120, 170), "guest_weaver": (150, 110, 180), "guest_ash_apprentice": (230, 110, 50), "guest_herbalist": (120, 170, 100),
     "guest_sailor": (70, 120, 170), "guest_mother": (200, 140, 110), "guest_baker": (220, 170, 100),

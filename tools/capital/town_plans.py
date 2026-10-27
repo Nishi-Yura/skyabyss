@@ -26,7 +26,7 @@ from region_town import RegionTown, STYLES, W, H, _check_blocks  # noqa: E402
 
 GATES = {'north': (0, -W), 'south': (0, W), 'west': (-W, 0), 'east': (W, 0)}
 EDGE = W + 17   # 設計図の縁 (門の外の家と畑まで)
-ROLES = ['innkeeper', 'tool_merchant', 'smith', 'apothecary', 'guild_clerk', 'trade_keeper', 'storage_keeper', 'stable_keeper', 'perch_keeper',
+ROLES = ['innkeeper', 'tool_merchant', 'food_vendor', 'outfitter', 'material_trader', 'smith', 'apothecary', 'guild_clerk', 'trade_keeper', 'storage_keeper', 'stable_keeper', 'perch_keeper',
          'mapmaker', 'training_master', 'keep_veteran', 'black_marketeer', 'shrine_priest', 'archivist']   # 土地の町の係の人 (都と同じ施設)
 AIR = {'core': 1, 'mid': 1, 'edge': 2}   # 家と家の間に必ずあける空気のマス (軒の先から測る)
 EAVE = 1        # 壁の線から軒の先まで
@@ -388,9 +388,35 @@ class PlanTown(RegionTown):
             if yd < 8:
                 kind = 'row'
         self.take(*M.grow(hr, front, 1) if kind == 'jetty' else hr)
-        before = set(self.v.b)
-        bodies, ridge = M.build_house(self, kind, hr, front, floors, roof_kind, mat=mat, sides=sides, quest=quest, extras=extras)
-        self.own_new(before)
+        # 建てたら隣の建物と接していないか確かめる。接していれば元に戻し、袖のない形で建て直す (それでもだめなら建てない)
+        for attempt in range(2):
+            snap = dict(self.v.b)
+            marks = dict(self.v.marks)
+            nparts = len(self.parts)
+            nfake = len(self.v.fake_doors)
+            qn = self.quest_n
+            before = set(self.v.b)
+            bodies, ridge = M.build_house(self, kind, hr, front, floors, roof_kind, mat=mat, sides=sides, quest=quest, extras=extras)
+            new_cols = {(x, z) for (x, y, z) in set(self.v.b) - before if y >= 0}
+            if not any(self.owner.get((x + a_, z + b_)) is not None for (x, z) in new_cols for a_ in (-1, 0, 1) for b_ in (-1, 0, 1)
+                       if (x + a_, z + b_) not in new_cols):
+                self.own_new(before)
+                break
+            self.v.b = snap
+            self.v.marks.clear()
+            self.v.marks.update(marks)
+            del self.parts[nparts:]
+            del self.v.fake_doors[nfake:]
+            self.quest_n = qn
+            if attempt == 0 and kind in ('ell', 'jetty', 'tower', 'merchant'):
+                kind = 'row'
+                if quest:
+                    quest = False
+                    self.quests -= 1
+                continue
+            for c in [c for c, t_ in self.occ.items() if t_ == 'bld' and hr[0] <= c[0] <= hr[2] and hr[1] <= c[1] <= hr[3]]:
+                del self.occ[c]
+            return
         if kind == 'ell':
             self.take(*pr)
         self.plots.append((hr, pr, front, dist, kind))
@@ -708,7 +734,7 @@ class PlanTown(RegionTown):
     # ---------------------------------------------------------------- 施設 (市場のまわり)
     FAC = {'inn': ((20, 14), 'south'), 'smithy': ((14, 16), 'south'), 'tool_shop': ((12, 14), 'north'),
            'apothecary': ((12, 14), 'north'), 'chapel': ((16, 14), 'north'), 'guild': ((20, 13), 'north'),
-           'stall': ((8, 9), 'north'), 'market': ((16, 13), 'north'), 'travel': ((14, 11), 'north'), 'training': ((12, 11), 'north')}
+           'stall': ((8, 9), 'north'), 'market': ((24, 13), 'north'), 'travel': ((14, 11), 'north'), 'training': ((12, 11), 'north')}
     TURN = ['north', 'east', 'south', 'west']
 
     def facilities_at(self, spots):
@@ -923,7 +949,7 @@ class PlanTown(RegionTown):
         self.keep_out(self.lm[0] - 12, self.lm[1] - 12, self.lm[0] + 12, self.lm[1] + 12)
         self.landmark()
         # 施設: 市場を囲む
-        self.facilities_at({k_: mp(p_) for k_, p_ in {'inn': (-42, -20), 'market': (14, 6), 'chapel': (-6, 24), 'guild': (20, 14), 'stall': (-30, 30)}.items()})
+        self.facilities_at({k_: mp(p_) for k_, p_ in {'inn': (-42, -20), 'market': (14, 6), 'guild': (20, 14), 'chapel': (-6, 24), 'stall': (-30, 30)}.items()})
         if getattr(self, 'no_fac', False):
             return
         # 門の外: 旅の館 (上の町と反対の門) と訓練所 (東か西の門)

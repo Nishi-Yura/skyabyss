@@ -1,0 +1,61 @@
+{
+  "npc": "skyabyss:attendant_food_vendor",
+  "entries": [
+    {
+      "if": {
+        "type": "not",
+        "of": {
+          "type": "flag",
+          "flag": "intro"
+        }
+      },
+      "node": "intro"
+    },
+    {
+      "node": "menu"
+    }
+  ],
+  "nodes": {
+    "intro": {
+      "face": "smile",
+      "do": [
+        {
+          "type": "flag",
+          "flag": "intro"
+        }
+      ],
+      "next": "menu"
+    },
+    "again": {
+      "face": "neutral",
+      "next": "menu",
+      "text": "dialogue.skyabyss.attendant_tool_merchant.intro"
+    },
+    "menu": {
+      "face": "neutral",
+      "options": [
+        {
+          "id": "shop",
+          "kind": "talk",
+          "do": [
+            {
+              "type": "facility",
+              "open": "shop"
+            }
+          ],
+          "goto": "end"
+        },
+        {
+          "id": "about",
+          "kind": "talk",
+          "goto": "again"
+        },
+        {
+          "id": "bye",
+          "kind": "leave",
+          "goto": "end"
+        }
+      ]
+    }
+  }
+}

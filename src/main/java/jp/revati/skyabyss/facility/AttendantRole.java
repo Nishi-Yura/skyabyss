@@ -32,7 +32,11 @@ public enum AttendantRole {
     // 厩舎 (乗り物の店。docs/design/38)
     STABLE_KEEPER("stable_keeper", null, 1),
     // 都の案内人 (門と広場に何人も。印は npc_guide_<所>。話すと施設の一覧 → 選んだ戸まで灯りの道。facility/TownGuide、35 の 6.12)
-    GUIDE("guide", null, 1);
+    GUIDE("guide", null, 1),
+    // 市の三人 (2026-10-27 の声「道具屋がパンまで売るのはおかしい。専門の人に」): 食べ物・得物と防具・素材
+    FOOD_VENDOR("food_vendor", "food_shop", 1),
+    OUTFITTER("outfitter", "outfit_shop", 1),
+    MATERIAL_TRADER("material_trader", "material_shop", 1);
 
     // 設計図の印の頭 (npc_<役>)
     public static final String MARK_PREFIX = "npc_";

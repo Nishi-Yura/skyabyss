@@ -1,6 +1,6 @@
 {
   "message.skyabyss.guard.block": "This cannot be broken",
-  "label.skyabyss.facility.tool_shop": "Tool Shop",
+  "label.skyabyss.facility.tool_shop": "Market (tools, food, arms, materials)",
   "label.skyabyss.facility.storage": "Storage",
   "label.skyabyss.facility.stable": "Stable",
   "label.skyabyss.facility.trade": "Trading Post",
@@ -14,5 +14,5 @@
   "label.skyabyss.facility.travel": "Travel House (stables, perch, maps)",
   "label.skyabyss.facility.training": "Training Hall",
   "label.skyabyss.facility.shrine": "Shrine (key room, archive)",
-  "label.skyabyss.facility.market": "Market (tools, apothecary)"
+  "label.skyabyss.facility.market": "Market (tools, food, arms, materials, medicine)"
 }

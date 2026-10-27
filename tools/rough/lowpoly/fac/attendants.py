@@ -40,8 +40,8 @@ BONES = ART.BONES
 
 ROLES = ["guild_clerk", "smith", "tool_merchant", "apothecary", "storage_keeper", "innkeeper", "perch_keeper",
          "shrine_priest", "keep_veteran", "archivist", "training_master", "black_marketeer", "gravekeeper",
-         "mapmaker", "drunkard", "trade_keeper", "stable_keeper", "guide"]
-ROLE_JA = {"guild_clerk": "組合の受付の書記", "smith": "鍛冶師", "tool_merchant": "道具屋", "apothecary": "薬師",
+         "mapmaker", "drunkard", "trade_keeper", "stable_keeper", "guide", "food_vendor", "outfitter", "material_trader"]
+ROLE_JA = {"food_vendor": "食料屋", "outfitter": "武具屋", "material_trader": "素材屋", "guild_clerk": "組合の受付の書記", "smith": "鍛冶師", "tool_merchant": "道具屋", "apothecary": "薬師",
            "storage_keeper": "預かり番", "innkeeper": "宿の女将", "perch_keeper": "止まり木の番", "shrine_priest": "社の祭司",
            "keep_veteran": "砦の老兵", "archivist": "書庫番", "training_master": "師範", "black_marketeer": "顔を隠した商人",
            "gravekeeper": "墓守", "mapmaker": "地図屋", "drunkard": "酔いどれ",
@@ -71,6 +71,10 @@ SKINS = {
 # coat = 上着・衣の地 / role = 役の色 (前掛け・衣・肩掛け) / trim = 縁 / acc = 襟・釦 / hair = 髪 (頭の上の面。頭巾や布にもなる)
 # guard = 前腕 / legs = 脚 / boot = 靴 / sash = 帯 (B・C)
 PAL = {
+    # 市の三人 (2026-10-27。色は NPC v2 の cast.py と揃える)
+    "food_vendor":     dict(coat=(150, 74, 58), role=(226, 214, 190), trim=(96, 50, 40), acc=(190, 150, 80), hair=(90, 60, 40), skin="ruddy", guard=(130, 64, 50), sash=(120, 60, 46)),
+    "outfitter":       dict(coat=(78, 70, 66), role=(104, 70, 44), trim=(48, 42, 40), acc=(112, 114, 120), hair=(52, 42, 36), skin="tan", guard=(90, 62, 42), sash=(70, 52, 40)),
+    "material_trader": dict(coat=(60, 76, 86), role=(176, 140, 70), trim=(150, 120, 60), acc=(190, 160, 90), hair=(206, 202, 196), skin="old", guard=(56, 70, 80), sash=(176, 140, 70), lady=True),
     "guild_clerk":     dict(coat=(70, 84, 104), role=(176, 138, 58), trim=(60, 44, 30), acc=(196, 158, 76), hair=(86, 62, 44), skin="mid", guard=(92, 74, 56), sash=(120, 52, 40)),
     "smith":           dict(coat=(58, 56, 58), role=(122, 74, 46), trim=(30, 26, 24), acc=(170, 98, 52), hair=(32, 28, 28), skin="tan", guard=(46, 40, 38), sash=(90, 50, 30)),
     "tool_merchant":   dict(coat=(86, 96, 62), role=(170, 150, 108), trim=(92, 64, 40), acc=(178, 142, 70), hair=(104, 74, 48), skin="mid", guard=(110, 82, 54), sash=(120, 90, 50)),
