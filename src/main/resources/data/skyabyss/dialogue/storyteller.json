@@ -337,23 +337,6 @@
           "goto": "watcher"
         },
         {
-          "id": "custom",
-          "if": [
-            {
-              "type": "not",
-              "of": {
-                "type": "lore",
-                "entry": "prologue/seventh_night"
-              }
-            },
-            {
-              "type": "affinity",
-              "min": 20
-            }
-          ],
-          "goto": "calendar"
-        },
-        {
           "id": "book",
           "if": [
             {
@@ -700,24 +683,6 @@
       "next": "watcher2"
     },
     "watcher2": {
-      "face": "grave",
-      "next": "@entry"
-    },
-    "calendar": {
-      "face": "grave",
-      "do": [
-        {
-          "type": "lore",
-          "entry": "prologue/seventh_night"
-        },
-        {
-          "type": "flag",
-          "flag": "calendar_told"
-        }
-      ],
-      "next": "calendar2"
-    },
-    "calendar2": {
       "face": "grave",
       "next": "@entry"
     },

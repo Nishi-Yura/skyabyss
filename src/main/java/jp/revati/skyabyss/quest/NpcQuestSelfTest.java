@@ -754,11 +754,6 @@ public final class NpcQuestSelfTest {
         pick(a, ST, "watcher_ask", failures);
         check(Lore.state(a).has("prologue/watcher"), "the watcher topic did not record lore", failures);
         DialogueService.close(a);
-        Affinity.set(a, ST, 22);
-        DialogueService.open(a, st);
-        check(shown(a, ST, "custom"), "the custom (seventh night) topic should appear at affinity 20+", failures);
-        pick(a, ST, "custom", failures);
-        DialogueService.close(a);
         DialogueService.open(a, wc);
         pick(a, WC, "peak", failures);
         DialogueService.close(a);

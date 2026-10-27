@@ -454,7 +454,7 @@ public final class FreeQuestSelfTest {
         pick(a, ST, "gaps", failures);
         pick(a, ST, "accept", failures);
         DialogueService.close(a);
-        for (String e : List.of("prologue/the_book", "prologue/counting_song", "prologue/seventh_night", "prologue/shaved_peak", "prologue/watcher")) {
+        for (String e : List.of("prologue/the_book", "prologue/counting_song", "prologue/shaved_peak", "prologue/watcher")) {
             Lore.unlock(a, e, false);
         }
         Quests.poll(a, true);

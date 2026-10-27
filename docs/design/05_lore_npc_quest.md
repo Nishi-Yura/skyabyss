@@ -180,7 +180,6 @@ assets/skyabyss_lore/lang/{ja_jp,en_us}.json   伝承の文 (題・本文・碑�
 | `prologue/bone_hill` | 骨の丘 | 石板の近く（`manual`） | — |
 | `prologue/sky_song` | 空の歌 | 歌のあと（`manual`） | — |
 | `prologue/counting_song` | 村の数え歌 | 破れた頁（村）／語り部の話 | 雲の上の影、暦の書き込み |
-| `prologue/seventh_night` | 暦の書き込み | 破れた頁（村）／語り部の話（好感度 20 から） | 村の数え歌 |
 | `prologue/shaved_peak` | 平らな峰 | 破れた頁（村）／鯨追いの話 | 雲の上の影 |
 | `prologue/watcher` | 見る者 | 破れた頁（村）／語り部の話（見る者に気づいた人か好感度 10 から） | — |
 | `prologue/capital_skywatch` | 空見の砦 | 都の砦の碑を見る（`inscription_sign` = `sign.skyabyss.capital.keep`） | 白紙の帳面 |
@@ -221,14 +220,6 @@ assets/skyabyss_lore/lang/{ja_jp,en_us}.json   伝承の文 (題・本文・碑�
 村の子どもたちが手まり歌に歌っている。いつつから先は、誰も知らないという。
 
 大人に尋ねると、話をそらされた。
-
-**暦の書き込み**（`prologue/seventh_night`）
-
-> 七日目の夜は、戸を閉めて外へ出ないこと。  
-
-古い暦の余白に、同じ一文が七日おきに書きこまれていた。
-
-村では、ずっと昔からの決まりだという。なぜ七日目なのかは、誰も知らない。
 
 **平らな峰**（`prologue/shaved_peak`）
 

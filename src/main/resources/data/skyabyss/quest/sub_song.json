@@ -10,10 +10,9 @@
         {
           "id": "words",
           "type": "lore",
-          "count": 4,
+          "count": 3,
           "targets": [
             "prologue/counting_song",
-            "prologue/seventh_night",
             "prologue/shaved_peak",
             "prologue/watcher"
           ]

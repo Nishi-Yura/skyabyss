@@ -5,7 +5,7 @@ import net.minecraft.server.MinecraftServer;
 // 繰り返すクエストの周期。
 //   daily  : オーバーワールドのゲーム内の日 (夜明けで替わる。寝て夜を飛ばしても次の日になる。
 //            doDaylightCycle を切っていても、経ったゲーム時間 (24000 tick) ごとに次の日になる)
-//   weekly : 7 日ごと (01 の「七日目の夜」と月のループの長さにそろえた。ループの本体 (M4) ができたら、ループの回数に替えてよい)
+//   weekly : 7 日ごと (週替わり)
 // 受けたときの周期を記録に残し、周期が替わるまで同じクエストは受け直せない。報酬は周期ごとに一度 (QuestLog.claimed)
 public final class Repeats {
     public static final long DAY = 24000L;
