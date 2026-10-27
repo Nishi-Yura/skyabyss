@@ -88,8 +88,8 @@ public final class Ch4Setup {
     public static final int XP_DRAGGER = 3;
     public static final int XP_ELDER = 80;
 
-    // 旅の覚書 (四章) が解くレシピ
-    public static final List<String> RECIPES = List.of("ash_walking_helmet", "ash_walking_chestplate", "ash_walking_leggings", "ash_walking_boots",
+    // この章から鍛冶場・薬師で誂えられる品 (旅の覚書の章の品。自己テストが確かめる)
+    public static final List<String> MADE = List.of("ash_walking_helmet", "ash_walking_chestplate", "ash_walking_leggings", "ash_walking_boots",
             "soot_whetstone", "ash_cooler", "ash_baked_bread");
 
     private Ch4Setup() {
@@ -131,8 +131,6 @@ public final class Ch4Setup {
             GrowthRewards.MOD_ENEMIES.put(SkyAbyss.MODID + ":ash_husk", new GrowthRewards.Source(XP_HUSK, CONTENT_LEVEL));
             GrowthRewards.MOD_ENEMIES.put(SkyAbyss.MODID + ":ash_dragger", new GrowthRewards.Source(XP_DRAGGER, CONTENT_LEVEL));
             GrowthRewards.MOD_ENEMIES.put(SkyAbyss.MODID + ":elder_thrall", new GrowthRewards.Source(XP_ELDER, CONTENT_LEVEL));
-            jp.revati.skyabyss.guide.WayfarerNotes.registerRecipes(4, RECIPES.stream().map(r -> ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, r))
-                    .toArray(ResourceLocation[]::new));
         });
     }
 

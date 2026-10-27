@@ -30,8 +30,6 @@ public class WayfarerNotesItem extends Item {
         int chapter = WayfarerNotes.chapterOf(stack);
         if (level.isClientSide) {
             jp.revati.skyabyss.guide.client.WayfarerNotesClient.open(chapter);
-        } else if (player instanceof ServerPlayer sp) {
-            WayfarerNotes.onOpen(sp, chapter);
         }
         return InteractionResultHolder.sidedSuccess(stack, level.isClientSide);
     }

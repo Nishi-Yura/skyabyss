@@ -18,12 +18,11 @@ import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 
 // 旅嚢のパケット。画面の中の操作 (置く・出す・作り直し) はメニューのクリックとボタンで済むので、ここは画面の外のものだけ。
 //   Use      (持ち主 → サーバー): 輪・短押しで袋の品を使う。品が空なら「前回の道具」(サーバーが覚える)
-//   Grid     (持ち主 → サーバー): 作業台の「旅嚢から」の帯のクリック (材料をカーソルへ取る・戻す。22 の 17 章)
 //   Open     (持ち主 → サーバー): キー I・つまみから旅嚢の画面を開く
 //   OpenBook (サーバー → 持ち主): 旅嚢から伝承の書を使ったとき、書の画面を開かせる
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class PouchNet {
-    private static final String PROTOCOL_VERSION = "pouch-3";
+    private static final String PROTOCOL_VERSION = "pouch-4";
 
     // 最後に使った道具 (サーバーが覚える。短押しはこれを使う)
     private static final Map<UUID, ResourceLocation> LAST = new ConcurrentHashMap<>();
@@ -38,11 +37,6 @@ public final class PouchNet {
                 .playToServer(Use.TYPE, Use.STREAM_CODEC, (payload, context) -> {
                     if (context.player() instanceof ServerPlayer player) {
                         use(player, payload.item());
-                    }
-                })
-                .playToServer(Grid.TYPE, Grid.STREAM_CODEC, (payload, context) -> {
-                    if (context.player() instanceof ServerPlayer player) {
-                        PouchCraft.grid(player, payload.item(), payload.right());
                     }
                 })
                 .playToServer(Open.TYPE, Open.STREAM_CODEC, (payload, context) -> {
@@ -97,18 +91,6 @@ public final class PouchNet {
         public static final Type<Use> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "pouch_use"));
         public static final StreamCodec<RegistryFriendlyByteBuf, Use> STREAM_CODEC = StreamCodec.composite(
                 ByteBufCodecs.optional(ResourceLocation.STREAM_CODEC), Use::item, Use::new);
-
-        @Override
-        public Type<? extends CustomPacketPayload> type() {
-            return TYPE;
-        }
-    }
-
-    // 作業台の「旅嚢から」の帯のクリック (右クリックなら一つ)。決めるのはサーバー (PouchCraft.grid)
-    public record Grid(ResourceLocation item, boolean right) implements CustomPacketPayload {
-        public static final Type<Grid> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "pouch_grid"));
-        public static final StreamCodec<RegistryFriendlyByteBuf, Grid> STREAM_CODEC = StreamCodec.composite(
-                ResourceLocation.STREAM_CODEC, Grid::item, ByteBufCodecs.BOOL, Grid::right, Grid::new);
 
         @Override
         public Type<? extends CustomPacketPayload> type() {

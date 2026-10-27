@@ -6,7 +6,7 @@ package jp.revati.skyabyss.titan.vow;
 //   foeHealth      : 敵 (背中の敵とボス) の体力の上乗せ (0.3 = +30%)。0 なら効かない
 //   telegraphScale : 技の予告の長さの倍率 (0.75 = 25% 短い)。1 なら効かない。最短 0.8 秒 (Telegraph.MIN_WARN_TICKS) は割れない
 //   damageTaken    : 人が受ける傷の上乗せ (0.25 = +25%)
-//   noCamp         : 背中で野営の道具 (作業台・かまど・たいまつ・チェストなど) を置けない
+//   noCamp         : 背中で野営の道具 (焚き火・たいまつ・灯り・箱) を置けない
 //   timerTicks     : 時間制限 (tick)。0 なら無し。背中に入ってから心臓を止めるまでに超えると、この誓いは数えない
 public record Vow(String id, int points, float foeHealth, float telegraphScale, float damageTaken, boolean noCamp, int timerTicks) {
     public Vow {

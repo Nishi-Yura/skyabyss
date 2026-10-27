@@ -24,7 +24,7 @@ public final class EmberBackSetup {
     private static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(SkyAbyss.MODID);
     private static final DeferredRegister<SoundEvent> SOUNDS = DeferredRegister.create(Registries.SOUND_EVENT, SkyAbyss.MODID);
 
-    // 燠の灯 (吊り灯。光 12。燠の殻から作業台で作る。00 の 126)
+    // 燠の灯 (吊り灯。光 12。燠の殻から鍛冶場で誂える。00 の 126)
     public static final DeferredBlock<CinderLampBlock> CINDER_LAMP = BLOCKS.register("cinder_lamp",
             () -> new CinderLampBlock(BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BLACK).forceSolidOn().strength(3.5f)
                     .requiresCorrectToolForDrops().sound(SoundType.LANTERN).noOcclusion().lightLevel(s -> CinderLampBlock.LIGHT)

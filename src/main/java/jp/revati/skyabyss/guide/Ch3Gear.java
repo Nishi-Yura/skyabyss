@@ -76,7 +76,7 @@ import org.joml.Vector3f;
 //  - 雷の砥石: 「雷の刃」(攻撃 +2.2、20 分)。近接で当てると小さな火花が散る (見た目と音だけ)。岩・塩の砥石とは重ねない (替わる)
 //  - 風干しの団子 (吸収 II 60 秒 + 落下速度低下 20 秒)・避雷の油 (飲むと 90 秒「避雷」= 感電と雷の傷 −50%)
 //  - 風読みの小旗 (消耗しない): 使うと、そこに 30 秒、風下へ細い光の筋を立て、次の嵐までの目安を画面の帯に出す。クールダウン 30 秒
-// 感電の傷 (isShock): 雷 (lightning_bolt の傷) と、雷を使う敵 (SHOCK_MOBS) の傷。レシピは旅の覚書 (三章) か職人 (unlock_recipes chapter 3) に教わるまで作れない。
+// 感電の傷 (isShock): 雷 (lightning_bolt の傷) と、雷を使う敵 (SHOCK_MOBS) の傷。品は鍛冶場・薬師の誂え (MADE)。
 // 生成は tools/gen/ch3/gen_ch3_gear.py (レシピと文)、絵は tools/install/install_ch3_gear_assets.py
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class Ch3Gear {
@@ -98,7 +98,8 @@ public final class Ch3Gear {
     public static final String SIGNAL_OIL_USED = "ch3_oil_used";
     public static final String SIGNAL_WIND_READ = "ch3_wind_read";
 
-    public static final List<String> RECIPES = List.of("peak_crossing_helmet", "peak_crossing_chestplate", "peak_crossing_leggings", "peak_crossing_boots",
+    // この章から鍛冶場・薬師で誂えられる品 (旅の覚書の章の品。自己テストが確かめる)
+    public static final List<String> MADE = List.of("peak_crossing_helmet", "peak_crossing_chestplate", "peak_crossing_leggings", "peak_crossing_boots",
             "thunder_whetstone", "wind_dumpling", "lightning_oil", "wind_streamer", "copper_wire");
 
     // ---------------------------------------------------------------- 数値
@@ -180,7 +181,6 @@ public final class Ch3Gear {
         Readiness.registerRemedy(Readiness.Lamp.BLADE, TITAN, () -> Component.translatable("message.skyabyss.readiness.remedy.name.thunder_whetstone"));
         Readiness.registerRemedy(Readiness.Lamp.PROVISIONS, TITAN, () -> Component.translatable("message.skyabyss.readiness.remedy.name.wind_dumpling"));
         Readiness.registerRemedy(Readiness.Lamp.PROVISIONS, TITAN, () -> Component.translatable("message.skyabyss.readiness.remedy.name.lightning_oil"));
-        WayfarerNotes.registerRecipes(CHAPTER, RECIPES.stream().map(n -> ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, n)).toArray(ResourceLocation[]::new));
     }
 
     private Ch3Gear() {

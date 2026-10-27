@@ -357,8 +357,8 @@ public final class Ch3GearSelfTest {
         Item shard = BuiltInRegistries.ITEM.get(id("tide_shell_shard"));
         madeSet(f, List.of("peak_crossing_helmet", "peak_crossing_chestplate", "peak_crossing_leggings", "peak_crossing_boots"), "smithy", 3,
                 Map.of(Ch3Gear.SCORCHED_FEATHER.get(), 12, Ch3Gear.STATIC_COTTON.get(), 6, Ch3Gear.COPPER_WIRE.get(), 6, shard, 4), "peak crossing set");
-        check(f, Ch3Gear.RECIPES.size() == 9 && WayfarerNotes.recipes(3).size() == 9, "the chapter-3 notes should hold 9 items, got " + WayfarerNotes.recipes(3));
-        madeChapter(f, 3);
+        check(f, Ch3Gear.MADE.size() == 9, "the chapter-3 notes should hold 9 items, got " + Ch3Gear.MADE);
+        madeChapter(f, 3, Ch3Gear.MADE);
         noCrafting(f, server, level, a);
     }
 
@@ -377,12 +377,9 @@ public final class Ch3GearSelfTest {
     }
 
     // 覚書の章の品は、みなその章から誂えられる (並ぶ品も可)
-    private static void madeChapter(List<String> f, int chapter) {
-        for (ResourceLocation r : WayfarerNotes.recipes(chapter)) {
-            jp.revati.skyabyss.facility.MadeToOrder.Entry e = jp.revati.skyabyss.facility.MadeToOrder.find(r.toString());
-            if (r.getPath().equals("hare_quill_arrow")) {
-                continue;
-            }
+    private static void madeChapter(List<String> f, int chapter, List<String> items) {
+        for (String r : items) {
+            jp.revati.skyabyss.facility.MadeToOrder.Entry e = jp.revati.skyabyss.facility.MadeToOrder.find(r);
             check(f, e != null && (!e.good().made() || e.good().chapter() == chapter), r + " is not made to order from chapter " + chapter);
         }
     }

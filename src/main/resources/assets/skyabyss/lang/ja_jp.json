@@ -884,7 +884,6 @@
   "item.skyabyss.heartbeat_ward_ember": "余燼の鼓動守",
   "item.skyabyss.heartbeat_ward.desc": "装飾の枠に付けると、心臓との戦いで一度だけ、倒れるはずの一撃を体力 1 で耐える。使うと光って消える",
   "message.skyabyss.notes.given": "旅の覚書（%s）が荷物に入っていた。支度の手引きが書いてある",
-  "message.skyabyss.notes.recipes": "覚書から、誂えられる品を %s つ思い出した",
   "message.skyabyss.prep.ready": "%sの支度がととのった",
   "message.skyabyss.heartbeat_ward.used": "鼓動守が砕けて、倒れかけた体を引き止めた",
   "wayfarer_notes.empty": "まだ、何も書かれていない。",

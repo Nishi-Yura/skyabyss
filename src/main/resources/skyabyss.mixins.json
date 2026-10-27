@@ -5,9 +5,7 @@
   "compatibilityLevel": "JAVA_21",
   "mixins": [
     "EnemyPickMixin",
-    "InventoryMixin",
     "ItemStackDurabilityMixin",
-    "ServerPlaceRecipeMixin",
     "FallingBlockMixin",
     "RecipeManagerMixin",
     "AdvancementManagerMixin",

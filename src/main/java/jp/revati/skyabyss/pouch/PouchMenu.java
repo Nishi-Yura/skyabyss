@@ -19,14 +19,11 @@ import net.minecraft.world.item.ItemStack;
 //   - カーソルが空で枠を左クリック = 一スタック取り出す、右クリック = その半分 (取り出し可のとき。ゲームルール skyabyssPouchWithdraw が 0 なら何も起きない)
 //   - シフトクリック = 取り出して持ち物へ (取り出し可のとき)
 //   - 上限 (999 など) まで。取り出した品には「取り出し済み」の印が付き、掃除が袋へ戻さない。拾い直す・袋へ置くと外れる
-// 「作り直し」と「修理」はボタン (clickMenuButton) で、PouchRebuild が決める
 public class PouchMenu extends AbstractContainerMenu {
     private final Player player;
     private final PouchLayout.Result layout;
     // 取り出せるか (サーバー → クライアント。ゲームルールはクライアントにないので 1 つの値で送る)
     private final DataSlot withdrawFlag = DataSlot.standalone();
-    // 作り直しの一覧を見ているか (クライアントの画面だけの状態。見ている間は枠を隠して押せなくする)
-    public boolean rebuildView;
     // 転生の余白の枠の数 (開いたときの回数で決める。docs/design/31 の B13)。枠の番号は区分の枠のあとに続く
     private final int spare;
 
@@ -175,25 +172,6 @@ public class PouchMenu extends AbstractContainerMenu {
         return moved;
     }
 
-    // 作り直し・修理のボタン
-    @Override
-    public boolean clickMenuButton(Player p, int id) {
-        if (!(p instanceof ServerPlayer sp)) {
-            return false;
-        }
-        if (id == PouchRebuild.BUTTON_REPAIR) {
-            PouchRebuild.repair(sp);
-            broadcastChanges();
-            return true;
-        }
-        if (id >= PouchRebuild.BUTTON_RECIPE_BASE) {
-            PouchRebuild.rebuild(sp, id - PouchRebuild.BUTTON_RECIPE_BASE);
-            broadcastChanges();
-            return true;
-        }
-        return false;
-    }
-
     // シフトクリックは clicked が受ける (枠は袋の品だけで、行き先の枠は無い)
     @Override
     public ItemStack quickMoveStack(Player p, int index) {
@@ -219,11 +197,6 @@ public class PouchMenu extends AbstractContainerMenu {
         @Override
         public boolean mayPickup(Player p) {
             return false;
-        }
-
-        @Override
-        public boolean isActive() {
-            return !rebuildView;
         }
 
         @Override

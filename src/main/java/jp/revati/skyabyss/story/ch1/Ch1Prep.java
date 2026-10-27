@@ -23,8 +23,8 @@ import net.minecraft.resources.ResourceLocation;
 //   [P4 職人 済]  旅の職人 (skyabyss:artisan) が trail_blade の依頼主。立つ所は荷車の傍らの道 (印 "artisan") = npc/ArtisanSpawner の Spot。
 //              会話は dialogue/artisan.json (全章の共通) + dialogue/ch1/artisan.json (一章の足し書き。tools/gen/items/gen_artisan_dialogue.py)。
 //              護り糸から最初の鼓動守を編む (入口 ch1t_ward_weave)・編み直し (選択肢 ward。岩殻片 8 つ・1 日 1 つ。Action remake_ward / Condition ward_ok)
-//   [P5 旅装など 済] 鯨道の旅装 (guide/TravelGear)・岩の砥石・道の固焼き・苔の軟膏のレシピは RECIPES の名前で WayfarerNotes に登録済みで、
-//              覚書を開く・職人に教わる (Action unlock_recipes) までは作れない (guide/RecipeLock)。旅装は任意 (一式で合図 SIGNAL_GEAR_MADE。今はどの段も読まない)
+//   [P5 旅装など 済] 鯨道の旅装 (guide/TravelGear)・岩の砥石・道の固焼き・苔の軟膏は鍛冶場・薬師の誂え (MADE)。
+//             旅装は任意 (一式で合図 SIGNAL_GEAR_MADE。今はどの段も読まない)
 //   [P7 地上の敵] 入った (Ch1Mobs)。割れ殻の洞: 入口の間 岩殻虫 3、棘の間 棘うさぎ 3、奥の間 老いた歩哨 1。骨の坑: 坑口の間 苔這い 3、巣の間 苔這い 2、荷の間 岩殻虫 2
 //   [P8 岩鯨の背] 歌の間の壁画の順 (BELL_ORDER)。歩哨の割符 (SENTRY_TALLY) は老いた歩哨の落とし物。
 public final class Ch1Prep {
@@ -66,9 +66,9 @@ public final class Ch1Prep {
     // 「はじめて見た物」の経験値 (一人一回。章の枠では「既存の小要素」の側に数える小さな分。頁は 0 = 経験値は支度の段が持つ)
     public static final Map<String, Integer> LORE_XP = Map.of(ROAD_SHRINE, 10, SONG_CHAMBER, 10, CLEFT_CAVE_LORE, 0);
 
-    // 旅の覚書 (一章) が解くレシピ (data/skyabyss/recipe。解くまで作れない = guide/RecipeLock。hare_quill_arrow は予約だけ (棘針の矢。まだ無い。存在しない ID は WayfarerNotes が無視する))
-    public static final List<String> RECIPES = List.of("whale_road_helmet", "whale_road_chestplate", "whale_road_leggings", "whale_road_boots",
-            "rock_whetstone", "road_hardtack", "moss_salve", "hare_quill_arrow");
+    // この章から鍛冶場・薬師で誂えられる品 (旅の覚書の章の品。自己テストが確かめる)
+    public static final List<String> MADE = List.of("whale_road_helmet", "whale_road_chestplate", "whale_road_leggings", "whale_road_boots",
+            "rock_whetstone", "road_hardtack", "moss_salve");
 
     private Ch1Prep() {
     }
@@ -78,8 +78,6 @@ public final class Ch1Prep {
         GrowthRewards.LORE_XP.putIfAbsent(ROAD_SHRINE, 10);
         GrowthRewards.LORE_XP.putIfAbsent(SONG_CHAMBER, 10);
         GrowthRewards.LORE_XP.putIfAbsent(CLEFT_CAVE_LORE, 0);
-        ResourceLocation[] ids = RECIPES.stream().map(n -> ResourceLocation.fromNamespaceAndPath("skyabyss", n)).toArray(ResourceLocation[]::new);
-        WayfarerNotes.registerRecipes(1, ids);
     }
 
     // 登録済みの敵か (P7 が入ったか)

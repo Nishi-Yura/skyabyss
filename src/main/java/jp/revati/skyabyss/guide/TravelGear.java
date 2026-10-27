@@ -45,9 +45,9 @@ import net.neoforged.neoforge.registries.DeferredRegister;
 
 // 旅装・砥石・糧と薬 (docs/design/21 の 1.2、P5。一章の分)。各章の地上で、前の巨神の装備がなくても備えを緑まで持っていける品。
 // 登録 (品・防具の素材・砥石の効き目) と、備えの三灯への足し込み (Readiness.registerWhetstone / registerRemedy)、旅装を一式作ったときの合図。
-// 作れるのは、旅の覚書か職人に教わってから (recipe/ と RecipeLock。ID は story/ch1/Ch1Prep.RECIPES で WayfarerNotes に登録済み)。
+// 手に入るのは鍛冶場・薬師の誂え (story/ch1/Ch1Prep.MADE)。
 //
-// 二〜四章の旅装は同じ型 (GearCurve.TRAVEL の表)。素材 (MATERIAL) と品の登録を足し、WayfarerNotes.registerRecipes(章, ...) で鍵をかける。
+// 二〜四章の旅装は同じ型 (GearCurve.TRAVEL の表)。素材 (MATERIAL) と品の登録を足し、誂えの品 (MADE) に並べる。
 // 一章の数値 (GearCurve.TRAVEL[0]): 防御 2/7/5/3 = 17、強靭 1.25 × 4 = 5、ノックバック耐性 0.025 × 4 = 0.1、必要 Lv 7、アンコモン
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class TravelGear {

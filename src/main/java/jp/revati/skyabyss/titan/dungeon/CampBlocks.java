@@ -39,7 +39,6 @@ import net.minecraft.tags.BlockTags;
 import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.AnvilBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -56,7 +55,7 @@ import net.neoforged.neoforge.event.server.ServerStoppingEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
 
 // 背中の「野営の道具」(docs/design/08 の背中の決まり)。サバイバルでもブロックは置けない・壊せないが、
-// 作業台・かまど・金床・たいまつ・チェストなどの決まった道具だけは、野営として置いてよい。
+// 焚き火・たいまつ・灯り・箱 (チェスト・樽) の決まった道具だけは、野営として置いてよい。
 // 置いた道具は持ち主の持ち物の「貸し」で、持ち主が背中を出る (運び出し・倒れる・落ちる・ログアウト・次元の移動・眠り) と、
 // 中身ごと手もとへ戻る (入りきらない分・オフラインの人の分は報酬の預かり TitanLoot.handOver へ)。
 // 置けない場所 (見張り・仕掛けの邪魔・近道・ボスの部屋) は refusal で決まる。記録は ServerPlayer の持ち主の UUID・次元・位置・ブロック
@@ -156,9 +155,7 @@ public final class CampBlocks {
     // ---------------------------------------------------------------- 置ける道具
     public static boolean isCamp(BlockState state) {
         Block b = state.getBlock();
-        return b == Blocks.CRAFTING_TABLE || b == Blocks.FURNACE || b == Blocks.SMOKER || b == Blocks.BLAST_FURNACE
-                || b == Blocks.SMITHING_TABLE || b == Blocks.GRINDSTONE || b == Blocks.STONECUTTER || b instanceof AnvilBlock
-                || b == Blocks.LOOM || b == Blocks.CARTOGRAPHY_TABLE || b == Blocks.CAMPFIRE || b == Blocks.SOUL_CAMPFIRE
+        return b == Blocks.CAMPFIRE || b == Blocks.SOUL_CAMPFIRE
                 || b == Blocks.TORCH || b == Blocks.WALL_TORCH || b == Blocks.SOUL_TORCH || b == Blocks.SOUL_WALL_TORCH
                 || b == Blocks.LANTERN || b == Blocks.SOUL_LANTERN || b == Blocks.CHEST || b == Blocks.BARREL;
     }

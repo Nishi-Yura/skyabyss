@@ -315,11 +315,10 @@ public final class Ch4GroundSelfTest {
         p.setItemSlot(net.minecraft.world.entity.EquipmentSlot.FEET, ItemStack.EMPTY);
         check(f, Ch4Gear.ASH_BAKED_BREAD.get().components().get(net.minecraft.core.component.DataComponents.FOOD) != null, "the ash-baked bread is not food");
         // 誂え (旅の覚書の四章の品は、四章から鍛冶場・薬師で)
-        check(f, jp.revati.skyabyss.guide.WayfarerNotes.recipes(4).size() == Ch4Setup.RECIPES.size()
-                && Ch4Setup.RECIPES.stream().allMatch(r -> {
+        check(f, Ch4Setup.MADE.stream().allMatch(r -> {
                     jp.revati.skyabyss.facility.MadeToOrder.Entry e = jp.revati.skyabyss.facility.MadeToOrder.find(r);
                     return e != null && e.good().chapter() == 4;
-                }), "the chapter-4 items are not made to order from chapter 4 or not on the notes");
+                }), "the chapter-4 items are not made to order from chapter 4");
     }
 
     // ---------------------------------------------------------------- 敵

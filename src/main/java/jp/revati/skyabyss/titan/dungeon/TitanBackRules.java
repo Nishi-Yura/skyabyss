@@ -118,7 +118,7 @@ public final class TitanBackRules {
     @SubscribeEvent
     static void onPlace(BlockEvent.EntityPlaceEvent event) {
         if (event.getEntity() instanceof Player player && noBuilding(event.getLevel(), player)) {
-            // 野営の道具 (作業台・かまど・たいまつ・チェストなど) は、決まりの中で置いてよい (CampBlocks)
+            // 野営の道具 (焚き火・たいまつ・灯り・箱) は、決まりの中で置いてよい (CampBlocks)
             if (player instanceof ServerPlayer sp && event.getLevel() instanceof ServerLevel sl) {
                 CampBlocks.Refusal why = CampBlocks.evaluate(sp, sl, event.getPos(), event.getPlacedBlock());
                 if (why == null) {

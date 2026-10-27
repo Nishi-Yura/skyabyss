@@ -220,7 +220,7 @@ public final class TravelSelfTest {
             for (String key : List.of("item.skyabyss.whale_road_helmet", "item.skyabyss.whale_road_chestplate", "item.skyabyss.whale_road_leggings",
                     "item.skyabyss.whale_road_boots", "item.skyabyss.whale_road_armor.desc", "gear.skyabyss.origin.whale_road", "gear.skyabyss.origin_weapon.stone_whale", "gear.skyabyss.origin_weapon.tide_shell", "gear.skyabyss.origin_weapon.thunder_wing", "item.skyabyss.rock_whetstone",
                     "item.skyabyss.rock_whetstone.desc", "item.skyabyss.road_hardtack", "item.skyabyss.road_hardtack.desc", "item.skyabyss.moss_salve",
-                    "item.skyabyss.moss_salve.desc", "effect.skyabyss.whetted", "message.skyabyss.whetstone.used", "message.skyabyss.recipe.locked",
+                    "item.skyabyss.moss_salve.desc", "effect.skyabyss.whetted", "message.skyabyss.whetstone.used",
                     "message.skyabyss.readiness.remedy.name.travel_gear", "message.skyabyss.readiness.remedy.name.whetstone",
                     "message.skyabyss.readiness.remedy.name.hardtack", "message.skyabyss.readiness.remedy.name.salve", "wayfarer_notes.ch1.line.7",
                     "item.skyabyss.whale_road_helmet.story", "item.skyabyss.whale_road_boots.story")) {
@@ -274,7 +274,7 @@ public final class TravelSelfTest {
         for (String other : List.of("rock_whetstone", "road_hardtack", "moss_salve")) {
             check(f, jp.revati.skyabyss.facility.MadeToOrder.find(other) != null, other + " cannot be had in town");
         }
-        madeChapter(f, 1);
+        madeChapter(f, 1, jp.revati.skyabyss.story.ch1.Ch1Prep.MADE);
         // 序盤の素材 (岩殻片・骨片) は旅嚢の品 (誂えは旅嚢の中の分も払いに使う)。鉄・革・砥石は袋の品ではない
         for (Item mat : List.of(GuideSetup.ROCK_SHELL_SCRAP.get(), GuideSetup.BONE_CHIP.get())) {
             check(f, jp.revati.skyabyss.pouch.PouchEntries.entry(mat) != null, mat + " is not a pouch item");
@@ -299,12 +299,9 @@ public final class TravelSelfTest {
     }
 
     // 覚書の章の品は、みなその章から誂えられる (並ぶ品も可)
-    private static void madeChapter(List<String> f, int chapter) {
-        for (ResourceLocation r : WayfarerNotes.recipes(chapter)) {
-            jp.revati.skyabyss.facility.MadeToOrder.Entry e = jp.revati.skyabyss.facility.MadeToOrder.find(r.toString());
-            if (r.getPath().equals("hare_quill_arrow")) {
-                continue;
-            }
+    private static void madeChapter(List<String> f, int chapter, List<String> items) {
+        for (String r : items) {
+            jp.revati.skyabyss.facility.MadeToOrder.Entry e = jp.revati.skyabyss.facility.MadeToOrder.find(r);
             check(f, e != null && (!e.good().made() || e.good().chapter() == chapter), r + " is not made to order from chapter " + chapter);
         }
     }

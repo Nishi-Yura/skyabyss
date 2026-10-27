@@ -450,8 +450,8 @@ public final class ArtisanSelfTest {
                 && !st.nodes().containsKey("ch1p_blade_report") && !st.nodes().containsKey("ch1p_pulse_weave"), "the storyteller keeps only the pointer line");
         check(f, st != null && st.entries().get(st.entries().size() - 1).node().equals("menu"), "the storyteller catch-all entry must stay last");
 
-        // 参照先: 条件・結果の型 (ward_ok・unlock_recipes・remake_ward が読み込めている)
-        check(f, Condition.TYPES.contains("ward_ok") && Action.TYPES.contains("unlock_recipes") && Action.TYPES.contains("remake_ward"), "the new condition / action types are not registered");
+        // 参照先: 条件・結果の型 (ward_ok・remake_ward が読み込めている)
+        check(f, Condition.TYPES.contains("ward_ok") && Action.TYPES.contains("remake_ward"), "the new condition / action types are not registered");
         npc.discard();
     }
 

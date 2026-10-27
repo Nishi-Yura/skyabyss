@@ -28,7 +28,7 @@ import net.minecraft.world.item.ItemStack;
 //  - 層の主 (AbyssLords.defeat): 錨鉄 3〜5 と、その層の鎧の一部位 (まだ持っていなければ必ず。持っていれば錨鉄 +4)
 //  - 心臓の番人 (WardenArena.fallen) と番人の悪夢 (Nightmare.won): 巨神の心臓と同じ形 (図鑑 10 品の確率・天井・心核・共鳴の欠片)
 //  - 果てない深みの箱 (DepthLoot.roll): 錨鉄と、宝の間・敵の巣・王の褒美に図鑑の品の機会
-//  - 荷運びのロク (会話の取り替え) と作業台 (遺品をなぞる): 品の側は何もしない (data/skyabyss/dialogue/ch5・recipe)
+//  - 荷運びのロク (会話の取り替え) と鍛冶場の誂え (遺品をなぞる): 品の側は何もしない (data/skyabyss/dialogue/ch5・shop/smithy)
 public final class AbyssGearLoot {
     public static final float CRYSTAL_CHANCE = 0.40f;
     // 箱の図鑑の品 (tier: 0 ふつう・1 宝の間・2 敵の巣・3 王の褒美)

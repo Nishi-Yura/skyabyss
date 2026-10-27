@@ -310,8 +310,8 @@ public final class Ch2GearSelfTest {
         Item shard = BuiltInRegistries.ITEM.get(id("stone_whale_shard"));
         madeSet(f, List.of("tide_wader_helmet", "tide_wader_chestplate", "tide_wader_leggings", "tide_wader_boots"), "smithy", 2,
                 Map.of(Ch2Gear.SMALL_PEARL.get(), 10, Ch2Gear.SALT_CRYSTAL.get(), 12, shard, 4), "tide wader set");
-        check(f, Ch2Gear.RECIPES.size() == 8 && WayfarerNotes.recipes(2).size() == 8, "the chapter-2 notes should hold 8 items, got " + WayfarerNotes.recipes(2));
-        madeChapter(f, 2);
+        check(f, Ch2Gear.MADE.size() == 8, "the chapter-2 notes should hold 8 items, got " + Ch2Gear.MADE);
+        madeChapter(f, 2, Ch2Gear.MADE);
         // 二章の素材は旅嚢の品ではない (旅嚢の画面の枠が埋まっている。足すなら画面の並びから直す)。持ち物のまま
         for (Item mat : List.of(Ch2Gear.SMALL_PEARL.get(), Ch2Gear.SALT_CRYSTAL.get(), Ch2Gear.PEARL_WARD_THREAD.get(), Ch2Gear.SHELL_CHIP.get())) {
             check(f, jp.revati.skyabyss.pouch.PouchEntries.entry(mat) == null, mat + " became a pouch item (check the pouch layout first)");
@@ -334,12 +334,9 @@ public final class Ch2GearSelfTest {
     }
 
     // 覚書の章の品は、みなその章から誂えられる (並ぶ品も可)
-    private static void madeChapter(List<String> f, int chapter) {
-        for (ResourceLocation r : WayfarerNotes.recipes(chapter)) {
-            jp.revati.skyabyss.facility.MadeToOrder.Entry e = jp.revati.skyabyss.facility.MadeToOrder.find(r.toString());
-            if (r.getPath().equals("hare_quill_arrow")) {
-                continue;
-            }
+    private static void madeChapter(List<String> f, int chapter, List<String> items) {
+        for (String r : items) {
+            jp.revati.skyabyss.facility.MadeToOrder.Entry e = jp.revati.skyabyss.facility.MadeToOrder.find(r);
             check(f, e != null && (!e.good().made() || e.good().chapter() == chapter), r + " is not made to order from chapter " + chapter);
         }
     }

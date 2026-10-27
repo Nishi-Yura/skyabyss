@@ -263,21 +263,10 @@ public final class GuideSelfTest {
         List<String> f = new ArrayList<>();
         ServerLevel level = server.overworld();
         FakePlayer a = player(level, "notes_a");
-        ResourceLocation recipe = ResourceLocation.withDefaultNamespace("stone_pickaxe");
-        // 二章・三章は本物の旅装のレシピを足している (guide/Ch2Gear・三章の旅装)。試すあいだだけ外し、終わったら戻す
-        List<ResourceLocation> real2 = List.copyOf(WayfarerNotes.recipes(2));
-        List<ResourceLocation> real3 = List.copyOf(WayfarerNotes.recipes(3));
-        WayfarerNotes.clearRecipes(2);
-        WayfarerNotes.clearRecipes(3);
         try {
             ItemStack notes = WayfarerNotes.make(2);
             check(f, WayfarerNotes.chapterOf(notes) == 2 && notes.is(GuideSetup.WAYFARER_NOTES.get()) && WayfarerNotes.chapterOf(WayfarerNotes.make(9)) == 4
                     && WayfarerNotes.chapterOf(new ItemStack(Items.PAPER)) == 0, "the notes did not keep their chapter");
-            // 覚書の章の品の ID (誂えの品の目録)。レシピは読まない (作業台はない) ので、解いても数えるものはない
-            WayfarerNotes.registerRecipes(2, recipe, ResourceLocation.fromNamespaceAndPath("skyabyss", "no_such_recipe"));
-            check(f, WayfarerNotes.recipes(2).size() == 2 && WayfarerNotes.recipes(3).isEmpty(), "registerRecipes did not keep the ids per chapter");
-            WayfarerNotes.onOpen(a, 2);
-            check(f, WayfarerNotes.unlockRecipes(a, 2) == 0, "notes counted recipes that are not loaded");
             // 渡す: 人ごとに一度。渡し直しは持っていないときだけ
             check(f, WayfarerNotes.give(a, 2) && !WayfarerNotes.give(a, 2) && countNotes(a, 2) == 1, "give did not hand over once");
             check(f, !WayfarerNotes.give(a, 2, true) && countNotes(a, 2) == 1, "a reissue duplicated the notes");
@@ -287,7 +276,7 @@ public final class GuideSelfTest {
             for (String lang : List.of("ja_jp", "en_us")) {
                 java.util.Map<?, ?> texts = langFile(lang);
                 for (String key : List.of("item.skyabyss.wayfarer_notes", "item.skyabyss.wayfarer_notes.named", "item.skyabyss.wayfarer_notes.desc",
-                    "message.skyabyss.notes.given", "message.skyabyss.notes.recipes", "message.skyabyss.prep.ready", "wayfarer_notes.empty",
+                    "message.skyabyss.notes.given", "message.skyabyss.prep.ready", "wayfarer_notes.empty",
                     "item.skyabyss.heartbeat_ward_stone_whale", "item.skyabyss.heartbeat_ward_tide_shell", "item.skyabyss.heartbeat_ward_thunder_wing",
                     "item.skyabyss.heartbeat_ward_ember", "item.skyabyss.heartbeat_ward.desc", "message.skyabyss.heartbeat_ward.used",
                         "growth.skyabyss.reason.site")) {
@@ -298,10 +287,6 @@ public final class GuideSelfTest {
             SkyAbyss.LOGGER.error("SELFTEST wayfarer notes crashed", e);
             f.add("crashed: " + e);
         } finally {
-            WayfarerNotes.clearRecipes(2);
-            WayfarerNotes.clearRecipes(3);
-            WayfarerNotes.registerRecipes(2, real2.toArray(ResourceLocation[]::new));
-            WayfarerNotes.registerRecipes(3, real3.toArray(ResourceLocation[]::new));
             Growth.get(a).discoveries.clear();
         }
         report("wayfarer notes", f);
