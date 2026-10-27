@@ -432,8 +432,17 @@ class Vox:
 
 
 def save(path, data):
-    with open(path, 'w', encoding='utf-8') as f:
-        json.dump(data, f, ensure_ascii=False, separators=(',', ':'))
+    import time
+    for i in range(5):
+        try:
+            with open(path, 'w', encoding='utf-8') as f:
+                json.dump(data, f, ensure_ascii=False, separators=(',', ':'))
+            return
+        except OSError:
+            # Windows で他の手 (検索・ウイルス対策) が掴んでいると開けないことがある
+            if i == 4:
+                raise
+            time.sleep(1.0)
 
 
 # ---------------------------------------------------------------- 小物
@@ -1148,6 +1157,9 @@ def _chimney(v, st, x, z, y, ridge):
     top = max(ridge + 1, y + 3)
     v.fill(x, y - 1, z, x, top, z, st.base.full)
     v.set(x, top + 1, z, st.base.slab('bottom'))
+    if not hasattr(v, 'chimneys'):
+        v.chimneys = []
+    v.chimneys.append((x, top, z))
 
 
 def hip_spire(v: Vox, st: Style, x0, z0, x1, z1, y, mat=None, rise=2, finial='lightning_rod', flare=True):
