@@ -161,12 +161,19 @@ def dress_facades(town):
     bb = _bbox(owner)
     wood = getattr(st, 'shutter_wood', None) or st.wood
     style = {}           # 建物ごとに一つの決め (全部の家に同じ飾りを付けない)
-    n_sh = n_box = 0
+    n_sh = n_box = n_bal = 0
+    balconied = set()
     wins = windows(v, owner, bb)
     for (o, y, face, run) in wins:
         if o not in style:
-            style[o] = (rng.random() < 0.55, rng.random() < 0.45, rng.choice(['flowering_azalea_leaves', 'azalea_leaves', 'flowering_azalea_leaves']))
-        shut, box, leaf = style[o]
+            style[o] = (rng.random() < 0.55, rng.random() < 0.45, rng.choice(['flowering_azalea_leaves', 'azalea_leaves', 'flowering_azalea_leaves']),
+                        rng.random() < 0.35)
+        shut, box, leaf, balc = style[o]
+        g = town.h.get(run[0], 0)
+        if balc and y - g >= 5 and o not in balconied and _balcony(town, v, wood, st, y, face, run):
+            balconied.add(o)
+            n_bal += 1
+            continue
         dx, dz = DX[face]
         ax, az = (1, 0) if dz else (0, 1)
         # 二段の窓は上の段だけ数えない (鎧戸は窓の高さぶん)
@@ -184,7 +191,33 @@ def dress_facades(town):
                 for (X, Z) in cells:
                     v.set(X, y - 1, Z, '%s[distance=1,persistent=true,waterlogged=false]' % leaf)
                     n_box += 1
+    town.n_balconies = n_bal
     return n_sh, n_box
+
+
+def _balcony(town, v, wood, st, y, face, run):
+    """上の階の窓の前に、奥行き 2 の露台: 床 (上の半ブロック)・手すり (柵)・両端の持ち送り (逆さの階段)"""
+    dx, dz = DX[face]
+    ax, az = (1, 0) if dz else (0, 1)
+    span = [(run[0][0] - ax, run[0][1] - az)] + list(run) + [(run[-1][0] + ax, run[-1][1] + az)]
+    cells = [(a + dx * k, b + dz * k, k) for (a, b) in span for k in (1, 2)]
+    if not all(_air(v, X, yy, Z) for (X, Z, k) in cells for yy in (y - 2, y - 1, y)):
+        return False
+    if any(_air(v, a, y - 2, b) for (a, b) in span):
+        return False     # 壁の下が空いていたらやめる
+    for i, (X, Z, k) in enumerate(cells):
+        v.set(X, y - 2, Z, '%s_slab[type=top,waterlogged=false]' % wood)
+        end = (X, Z) in ((span[0][0] + dx * k, span[0][1] + dz * k), (span[-1][0] + dx * k, span[-1][1] + dz * k))
+        if k == 2 or end:
+            v.set(X, y - 1, Z, st.fence)
+    for (a, b) in (span[0], span[-1]):
+        X, Z = a + dx, b + dz
+        if _air(v, X, y - 3, Z):
+            v.set(X, y - 3, Z, '%s_stairs[facing=%s,half=top,shape=straight,waterlogged=false]' % (wood, OPP[face]))
+    m = span[len(span) // 2]
+    X, Z = m[0] + dx * 2, m[1] + dz * 2
+    v.set(X, y, Z, 'potted_%s' % town.rng.choice(['red_tulip', 'azure_bluet', 'fern', 'oxeye_daisy']))
+    return True
 
 
 def door_lamps(town):
@@ -195,7 +228,7 @@ def door_lamps(town):
     doors = []
     for (x, y, z), s in list(v.b.items()):
         nm = s.split('[')[0]
-        if not nm.endswith('_door') or 'half=lower' not in s or y > 1 or town.owner.get((x, z)) is None:
+        if not nm.endswith('_door') or 'half=lower' not in s or y > 1 + town.h.get((x, z), 0) or town.owner.get((x, z)) is None:
             continue
         f0 = s.split('facing=')[1].split(',')[0].split(']')[0]
         doors.append((x, y, z, (f0, OPP[f0])))
@@ -292,7 +325,7 @@ def lane_chains(town, every=9):
         if any(abs(x - a) + abs(z - b) < every for (a, b) in used):
             continue
         for (dx, dz) in ((1, 0), (0, 1)):
-            y = 4
+            y = 4 + town.h.get((x, z), 0)
             # 両側へ、家の壁 (この高さで固いブロック) を探す
             ends = []
             for sg in (1, -1):
@@ -322,6 +355,7 @@ def dress(town):
     r = {}
     r['weather'] = weather(town.v, getattr(town, 'region_ix', 0))
     r['shutters'], r['boxes'] = dress_facades(town)
+    r['balconies'] = getattr(town, 'n_balconies', 0)
     r['lamps'] = door_lamps(town)
     r['ivy'] = ivy(town)
     r['smoke'] = chimney_smoke(town)
@@ -349,31 +383,33 @@ def ground(town):
     n = 0
     rocks = []
     for (x, y, z), s in list(v.b.items()):
-        if y != -1 or not s.startswith('grass_block'):
+        g = town.h.get((x, z), 0)
+        if y != g - 1 or not s.startswith('grass_block'):
             continue
-        if v.b.get((x, 0, z)) not in (None, 'air') and 'grass' not in v.b.get((x, 0, z)) and 'flower' not in v.b.get((x, 0, z)):
+        y0 = g
+        if v.b.get((x, y0, z)) not in (None, 'air') and 'grass' not in v.b.get((x, y0, z)) and 'flower' not in v.b.get((x, y0, z)):
             continue
         near = any(occ.get((x + a, z + b)) in ('road', 'plaza') for a in (-1, 0, 1) for b in (-1, 0, 1))
         k = noise(x, 0, z, 4.0, ix + 21)
         if near and _hash(x, 0, z, 5) < 0.55:
-            v.set(x, -1, z, worn[int(_hash(x, 1, z, 6) * len(worn))])
-            if v.b.get((x, 0, z), 'air') != 'air' and 'path' in v.b[(x, -1, z)]:
-                v.set(x, 0, z, 'air')
+            v.set(x, y, z, worn[int(_hash(x, 1, z, 6) * len(worn))])
+            if v.b.get((x, y0, z), 'air') != 'air' and 'path' in v.b[(x, y, z)]:
+                v.set(x, y0, z, 'air')
             n += 1
         elif k > 0.7 and _hash(x, 0, z, 8) < 0.8:
-            v.set(x, -1, z, patch[int(_hash(x, 2, z, 9) * len(patch))])
+            v.set(x, y, z, patch[int(_hash(x, 2, z, 9) * len(patch))])
             n += 1
         elif occ.get((x, z)) is None and k < 0.18 and _hash(x, 0, z, 10) < 0.02 and all(abs(x - a) + abs(z - b) > 10 for (a, b) in rocks) \
                 and all(occ.get((x + a, z + b)) is None for a in range(-2, 3) for b in range(-2, 3)):
             rocks.append((x, z))
-            _boulder(v, x, z, rock, _hash(x, 3, z, 12))
+            _boulder(v, x, y0, z, rock, _hash(x, 3, z, 12))
     return n, len(rocks)
 
 
-def _boulder(v, x, z, rock, r):
+def _boulder(v, x, y0, z, rock, r):
     """小さな岩: 2〜5 個のブロックを低く積み、苔を少し"""
     cells = [(0, 0, 0), (1, 0, 0), (0, 0, 1)] + ([(1, 0, 1), (0, 1, 0)] if r > 0.4 else []) + ([(-1, 0, 0)] if r > 0.7 else [])
     for i, (a, b, c) in enumerate(cells):
-        v.set(x + a, b, z + c, rock[int(_hash(x + a, b, z + c, 13) * len(rock))])
+        v.set(x + a, y0 + b, z + c, rock[int(_hash(x + a, b, z + c, 13) * len(rock))])
     if r > 0.5:
-        v.set(x, 2 if (0, 1, 0) in cells else 1, z, 'moss_carpet')
+        v.set(x, y0 + (2 if (0, 1, 0) in cells else 1), z, 'moss_carpet')

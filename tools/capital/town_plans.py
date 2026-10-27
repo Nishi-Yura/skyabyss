@@ -43,6 +43,9 @@ class PlanTown(RegionTown):
         self.lm = (30, -26)
         self.lm2 = (-30, -26)
         self.wall_poly = []
+        self.upper = set()     # 上の町 (段の上) の柱。建てる前に決め、区画は境をまたがない
+        self.dy = 3
+        self.h = {}
         self.owner = {}        # (x, z) → 建物の番号 (実際にブロックのある柱)
         self.n_bld = 0
 
@@ -108,7 +111,30 @@ class PlanTown(RegionTown):
                 near = x0 - 1 <= x <= x1 + 1 and z0 - 1 <= z <= z1 + 1
                 if t in ('bld', 'keep') or (t == 'wall' and near) or (t in ('road', 'plaza') and inside):
                     return False
+        if self.upper and not self.level(x0 - max(gap, 2), z0 - max(gap, 2), x1 + max(gap, 2), z1 + max(gap, 2)):
+            return False
         return self.inside_wall(x0, z0, x1, z1)
+
+    def level(self, x0, z0, x1, z1):
+        """四角の中がみな同じ段か"""
+        cells = [(x, z) for x in range(x0, x1 + 1) for z in range(z0, z1 + 1) if self.occ.get((x, z)) != 'wall']
+        if not cells:
+            return True
+        u = cells[0] in self.upper
+        return all((c in self.upper) == u for c in cells)
+
+    def set_upper(self, want, gate_r=10):
+        """上の町を決める: 壁の内 (壁から 3 より内)、門のまわり gate_r はあけ、want(x, z) の所"""
+        import terrace
+        R = set()
+        for x in range(-W, W + 1):
+            for z in range(-W, W + 1):
+                if not want(x, z) or any(math.hypot(x - gx, z - gz) < gate_r for (gx, gz) in GATES.values()):
+                    continue
+                if self.occ.get((x, z)) == 'wall' or (self.wall_poly and not _inside(self.wall_poly, x, z)):
+                    continue
+                R.add((x, z))
+        self.upper = terrace._drop_islands(R, 60)
 
     def take(self, x0, z0, x1, z1, tag='bld'):
         for x in range(x0, x1 + 1):
@@ -463,7 +489,7 @@ class PlanTown(RegionTown):
         elif r_ < 0.7:
             # 庭の木と花
             cx, cz = (x0 + x1) // 2, (z0 + z1) // 2
-            if w >= 4 and d >= 4 and self._no_bld(cx - 3, cz - 3, cx + 3, cz + 3):
+            if w >= 4 and d >= 4 and self._no_bld(cx - 3, cz - 3, cx + 3, cz + 3) and self.level(cx - 3, cz - 3, cx + 3, cz + 3):
                 tree(v, cx, 0, cz, st.trunk2 if self.rng.random() < 0.5 else st.trunk, st.leaves2 if self.rng.random() < 0.5 else st.leaves,
                      h=self.rng.choice((4, 5, 6)), r=2)
             for (x, z) in free:
@@ -497,7 +523,7 @@ class PlanTown(RegionTown):
                     continue
                 if self.wall_poly and not _inside(self.wall_poly, x, z):
                     continue
-                if self.rng.random() < 0.012 and all(math.hypot(x - a, z - b) > 6 for (a, b) in trees) and self._clear(x, z, 2) and self._no_bld(x - 4, z - 4, x + 4, z + 4):
+                if self.rng.random() < 0.012 and all(math.hypot(x - a, z - b) > 6 for (a, b) in trees) and self._clear(x, z, 2) and self._no_bld(x - 4, z - 4, x + 4, z + 4) and self.level(x - 3, z - 3, x + 3, z + 3):
                     trees.append((x, z))
                     tree(v, x, 0, z, st.trunk if self.rng.random() < 0.6 else st.trunk2, st.leaves if self.rng.random() < 0.6 else st.leaves2,
                          h=self.rng.choice((5, 6, 7)), r=2)
@@ -687,7 +713,23 @@ class PlanTown(RegionTown):
         for name, (nx, nz) in spots.items():
             (w, d), f0 = self.FAC[name]
             best = None
-            for r in range(0, 60):
+            for ring in (2 + EAVE, 1 + EAVE):
+                best = self._fac_spot(name, nx, nz, w, d, f0, ring)
+                if best:
+                    break
+            if not best:
+                print('  facility', name, 'no spot near', (nx, nz))
+                continue
+            path = self._fac_path
+            self.build_fac(name, *best)
+            for c in path:
+                self.occ[c] = 'road'
+                self.roadw[c] = 3
+
+    def _fac_spot(self, name, nx, nz, w, d, f0, ring):
+        best = None
+        if True:
+            for r in range(0, 100):
                 for x0 in range(nx - r, nx + r + 1):
                     for z0 in range(nz - r, nz + r + 1):
                         if max(abs(x0 - nx), abs(z0 - nz)) != r:
@@ -696,7 +738,7 @@ class PlanTown(RegionTown):
                             k = (self.TURN.index(front) - self.TURN.index(f0)) % 4
                             ww, dd = (w, d) if k % 2 == 0 else (d, w)
                             x1, z1 = x0 + ww, z0 + dd
-                            if not self.rect_free(x0 - 1, z0 - 1, x1 + 1, z1 + 1, 0) or not self.rect_free(x0, z0, x1, z1, 2 + EAVE):
+                            if not self.rect_free(x0 - 1, z0 - 1, x1 + 1, z1 + 1, 0) or not self.rect_free(x0, z0, x1, z1, ring):
                                 continue
                             if self._faces_road(x0, z0, x1, z1, front):
                                 best = (x0, z0, front, k)
@@ -707,27 +749,26 @@ class PlanTown(RegionTown):
                         break
                 if best:
                     break
-            if not best:
-                print('  facility', name, 'no spot near', (nx, nz))
-                continue
-            self.build_fac(name, *best)
+        return best
 
     def _faces_road(self, x0, z0, x1, z1, front):
+        """戸の前 (中ほどの幅 3) が、2〜7 先で道か広場に当たるか。間は空き地 (あとで小道にする: self._fac_path)"""
         dx, dz = DX[front]
         cx, cz = (x0 + x1) // 2, (z0 + z1) // 2
-        for k in (2, 3, 4):
+        path = []
+        for k in range(2, 8):
             if front in ('north', 'south'):
                 zf = (z0 if front == 'north' else z1) + dz * k
                 cells = [(cx + a, zf) for a in (-1, 0, 1)]
-                first = [(cx + a, (z0 if front == 'north' else z1) + dz * 2) for a in (-1, 0, 1)]
             else:
                 xf = (x0 if front == 'west' else x1) + dx * k
                 cells = [(xf, cz + a) for a in (-1, 0, 1)]
-                first = [((x0 if front == 'west' else x1) + dx * 2, cz + a) for a in (-1, 0, 1)]
-            if any(self.occ.get(c) in ('bld', 'keep', 'wall') for c in first):
-                return False
             if all(self.occ.get(c) in ('road', 'plaza') for c in cells):
+                self._fac_path = path
                 return True
+            if any(self.occ.get(c) is not None for c in cells):
+                return False
+            path += cells
         return False
 
     def build_fac(self, name, x0, z0, front, k):
@@ -780,6 +821,9 @@ class PlanTown(RegionTown):
         self.fix_stairs()
         self.house_lights()
         self.drop_unsupported()
+        if self.upper:
+            import terrace
+            print('  terrace', terrace.lift(self, self.upper, self.dy))
         if getattr(self, 'dress', True):
             import dress
             dress.dress(self)
@@ -803,6 +847,7 @@ class PlanTown(RegionTown):
         mp = lambda p: (p[0] * fx, p[1] * fz)
         poly = _jitter_poly(m([(0, -W), (22, -49), (40, -38), (W, 0), (44, 34), (20, 50), (0, W), (-24, 48), (-44, 30), (-W, 0), (-42, -36), (-20, -50)]))
         self.poly_wall(poly)
+        self.set_upper(lambda x, z: z * fz < -27 + 4 * math.sin(x / 7.0) + 2 * math.sin(x / 3.1 + 1))
         main = m([(0, W - 4), (0, 40), (5, 24), (5, 12), (0, 0), (-4, -14), (-4, -30), (0, -40), (0, -W + 4)])
         market = m([(-8, -14), (8, -14), (13, 0), (12, 14), (5, 20), (-5, 20), (-12, 12), (-12, -2)])
         self.plaza_poly(market)
@@ -816,12 +861,12 @@ class PlanTown(RegionTown):
         self.street(m([(24, 12), (24, 40)]), 3, 'lane')
         self.street(m([(4, 30), (24, 30)]), 3, 'lane')
         # 目印 (見張りの塔 = 北の大通りの曲がりの先を閉じる)
-        self.lm = mp((12, -36))
+        self.lm = mp((19, -34))
         self.lm2 = mp((-30, 20))
         self.keep_out(self.lm[0] - 5, self.lm[1] - 5, self.lm[0] + 5, self.lm[1] + 5)
         self.landmark()
         # 施設: 市場を囲む
-        self.facilities_at({k_: mp(p_) for k_, p_ in {'inn': (-42, -20), 'smithy': (16, -26), 'tool_shop': (14, 6), 'apothecary': (-28, 8), 'chapel': (-6, 24)}.items()})
+        self.facilities_at({k_: mp(p_) for k_, p_ in {'inn': (-42, -20), 'chapel': (-6, 24), 'smithy': (16, -26), 'tool_shop': (14, 6), 'apothecary': (-28, 8)}.items()})
         if getattr(self, 'no_fac', False):
             return
         self.frontage(main, 7, quest_every=1)
