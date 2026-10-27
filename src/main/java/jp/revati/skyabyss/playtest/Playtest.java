@@ -370,10 +370,10 @@ public final class Playtest {
         Growth.setLevel(p, tier >= 4 ? 40 : ProgressRules.TITAN_LEVEL[tier]);
         List<ItemStack> give = new ArrayList<>();
         if (tier == 0) {
-            equip(p, new ItemStack(Items.IRON_HELMET), new ItemStack(Items.IRON_CHESTPLATE), new ItemStack(Items.IRON_LEGGINGS),
-                    new ItemStack(Items.IRON_BOOTS));
-            give.add(new ItemStack(Items.IRON_SWORD));
-            give.add(new ItemStack(Items.BOW));
+            equip(p, new ItemStack(jp.revati.skyabyss.item.outfit.OutfitGear.IRONCLAD_HELMET.get()), new ItemStack(jp.revati.skyabyss.item.outfit.OutfitGear.IRONCLAD_CHESTPLATE.get()), new ItemStack(jp.revati.skyabyss.item.outfit.OutfitGear.IRONCLAD_LEGGINGS.get()),
+                    new ItemStack(jp.revati.skyabyss.item.outfit.OutfitGear.IRONCLAD_BOOTS.get()));
+            give.add(new ItemStack(jp.revati.skyabyss.rpg.skill.JobChoice.SWORD.get()));
+            give.add(new ItemStack(jp.revati.skyabyss.rpg.skill.JobChoice.BOW.get()));
         } else {
             TitanGearSet set = TitanGearSets.get(ProgressRules.TITAN_ORDER.get(tier - 1));
             if (set != null) {
@@ -391,11 +391,11 @@ public final class Playtest {
                 equip(p, armor.toArray(new ItemStack[0]));
             }
         }
-        give.add(new ItemStack(Items.ARROW, 64));
-        give.add(new ItemStack(Items.SHIELD));
-        give.add(new ItemStack(Items.COOKED_BEEF, 48));
-        give.add(new ItemStack(Items.GOLDEN_APPLE, 8));
-        give.add(PotionContents.createItemStack(Items.POTION, Potions.STRONG_HEALING).copyWithCount(4));
+        give.add(new ItemStack(jp.revati.skyabyss.item.outfit.ConsumableGear.TRAVEL_ARROW.get(), 64));
+        give.add(new ItemStack(jp.revati.skyabyss.item.outfit.OutfitGear.TRAVEL_SHIELD.get()));
+        give.add(new ItemStack(jp.revati.skyabyss.item.outfit.ConsumableGear.SMOKED_MEAT.get(), 48));
+        give.add(new ItemStack(jp.revati.skyabyss.guide.Ch2Gear.PEARL_POWDER.get(), 8));
+        give.add(new ItemStack(jp.revati.skyabyss.item.outfit.ConsumableGear.STRONG_HEALING.get(), 4));
         for (ItemStack s : give) {
             Quests.give(p, s);
         }

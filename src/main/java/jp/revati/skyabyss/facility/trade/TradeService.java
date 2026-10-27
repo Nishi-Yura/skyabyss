@@ -225,11 +225,11 @@ public final class TradeService {
         TradeData data = TradeData.get(p.server);
         long now = Trades.now();
         String[] names = {"ミナト", "カイ", "シオン"};
-        ItemStack[][] gives = {{new ItemStack(net.minecraft.world.item.Items.DIAMOND, 3)},
-                {new ItemStack(net.minecraft.world.item.Items.ENCHANTED_GOLDEN_APPLE), new ItemStack(net.minecraft.world.item.Items.GOLDEN_CARROT, 16)},
-                {new ItemStack(net.minecraft.world.item.Items.NAME_TAG, 2)}};
-        ItemStack[][] wants = {{Trades.coins(60)}, {new ItemStack(net.minecraft.world.item.Items.IRON_INGOT, 32), Trades.coins(10)},
-                {new ItemStack(net.minecraft.world.item.Items.STRING, 24), new ItemStack(net.minecraft.world.item.Items.BONE, 12)}};
+        ItemStack[][] gives = {{new ItemStack(jp.revati.skyabyss.item.outfit.MaterialGear.SKY_STONE.get(), 3)},
+                {new ItemStack(jp.revati.skyabyss.item.outfit.ConsumableGear.STRONG_HEALING.get()), new ItemStack(jp.revati.skyabyss.item.outfit.ConsumableGear.SMOKED_MEAT.get(), 16)},
+                {new ItemStack(jp.revati.skyabyss.item.outfit.MaterialGear.INDIGO_BOOKMARK.get(), 2)}};
+        ItemStack[][] wants = {{Trades.coins(60)}, {new ItemStack(jp.revati.skyabyss.item.outfit.MaterialGear.IRON_LUMP.get(), 32), Trades.coins(10)},
+                {new ItemStack(jp.revati.skyabyss.item.outfit.MaterialGear.THREAD_SPOOL.get(), 24), new ItemStack(jp.revati.skyabyss.guide.GuideSetup.BONE_CHIP.get(), 12)}};
         for (int i = 0; i < names.length; i++) {
             TradeData.Listing l = data.create(UUID.nameUUIDFromBytes(("trade_demo_" + i).getBytes()), names[i], now, now + Trades.EXPIRE_MS - i * 30L * 3_600_000L);
             l.give.addAll(java.util.Arrays.asList(gives[i]));
@@ -243,18 +243,18 @@ public final class TradeService {
             }
         }
         TradeData.Listing mine = data.create(p.getUUID(), p.getGameProfile().getName(), now, now + Trades.EXPIRE_MS);
-        mine.give.add(new ItemStack(net.minecraft.world.item.Items.IRON_INGOT, 16));
-        mine.want.add(new ItemStack(net.minecraft.world.item.Items.DIAMOND, 2));
+        mine.give.add(new ItemStack(jp.revati.skyabyss.item.outfit.MaterialGear.IRON_LUMP.get(), 16));
+        mine.want.add(new ItemStack(jp.revati.skyabyss.item.outfit.MaterialGear.SKY_STONE.get(), 2));
         TradeData.Application a = new TradeData.Application(UUID.nameUUIDFromBytes("trade_demo_a".getBytes()));
         a.name = "ミナト";
-        a.offer.add(new ItemStack(net.minecraft.world.item.Items.DIAMOND, 2));
+        a.offer.add(new ItemStack(jp.revati.skyabyss.item.outfit.MaterialGear.SKY_STONE.get(), 2));
         mine.apps.put(a.applicant, a);
         TradeData.Application b = new TradeData.Application(UUID.nameUUIDFromBytes("trade_demo_b".getBytes()));
         b.name = "シオン";
-        b.offer.add(new ItemStack(net.minecraft.world.item.Items.EMERALD, 5));
+        b.offer.add(new ItemStack(jp.revati.skyabyss.item.outfit.MaterialGear.GLINT_SHARD.get(), 5));
         b.offer.add(Trades.coins(20));
         mine.apps.put(b.applicant, b);
-        data.addMail(p.getUUID(), new ItemStack(net.minecraft.world.item.Items.COAL, 8));
+        data.addMail(p.getUUID(), new ItemStack(jp.revati.skyabyss.item.outfit.MaterialGear.CHARCOAL_LUMP.get(), 8));
         data.addMail(p.getUUID(), new ItemStack(net.minecraft.world.item.Items.OAK_LOG, 32));
         data.dirty();
         refresh(p);
