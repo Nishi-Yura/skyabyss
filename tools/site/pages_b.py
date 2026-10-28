@@ -1,3 +1,4 @@
+import json
 import os
 """スキルとビルド・装備・旅嚢と道具・パーティとマルチ。"""
 from sitelib import *
@@ -18,25 +19,29 @@ def skills():
     icons = {s["idx"]: s["icon"] for s in sk}
     cards = []
     lists = []
+    lang_ja, lang_en = lang_dicts()
+    skill_icons = {s["id"]: s["icon"] for s in sk}
+    desc = {s["id"]: (s["dja"], s["den"]) for s in sk}
+    tree_dir = os.path.join(ROOT, "src", "main", "resources", "assets", "skyabyss", "skill_tree")
     for t in skilldata.TREES:
         nm = tn[t]
         job = jn[t]
         meta = skilldata.TREE_META[t]
-        nodes = [(s["idx"], s["ja"], s["en"], s["kind"], s["row"], s["col"], [idx[p] for p in s["pre"]]) for s in by[t]]
-        svg = tree_svg(nodes, job[0], job[1], icons)
+        tree_json = json.load(open(os.path.join(tree_dir, skilldata.JOBS[t] + ".json"), encoding="utf8"))
+        svg = tree_v2_svg(skilldata.JOBS[t], tree_json, skill_icons, lang_ja, lang_en, desc)
         cards.append('<div class="panel tree-card" id="job-%s"><h3><img class="px" src="%s" width="32" height="32" alt="" style="vertical-align:middle;margin-right:6px">%s</h3><p class="meta">%s</p><p class="meta">%s</p>%s</div>' % (
             t, meta[4], T("%s（%s）" % (job[0], nm[0]), "%s (%s)" % (job[1], nm[1])),
             T("武器: %s" % meta[0], "Weapons: %s" % meta[2]), T(meta[1], meta[3]), svg))
         lists.append('<h3 id="list-%s">%s</h3><div class="skill-list">%s</div>' % (
             t, T(job[0] + "の技", job[1] + " skills"), "".join(skill_card(s) for s in by[t])))
     legend = '<ul class="legend"><li><i class="a"></i>%s</li><li><i></i>%s</li><li><i class="k"></i>%s</li></ul>' % (
-        T("使う技（枠に置いて使う）", "Active (put in a slot)"), T("パッシブ（覚えるだけで効く）", "Passive (works once learned)"),
-        T("要（かなめ。型の奥の、癖のある常時の技）", "Keystone (quirky always-on skill at the end of a path)"))
+        T("使う技（4 本まで取れる）", "Active (take up to four)"), T("常に効く技・段・刻印・基礎・閾値", "Passives, ranks, runes, stats, thresholds"),
+        T("型の要・変異（型の点 20 で開く／素材で開く）", "Keystones and mutations (20 archetype points / materials)"))
 
     ptable = table([T("レベル", "Level"), "1", "5", "10", "15", "21", "27", "33", "40", "50"],
-                   [[T("技の点（職ごと）", "Skill points (per job)"), "1", "3", "5", "10", "16", "22", "28", "35", "45"]])
+                   [[T("技の点（職ごと）", "Skill points (per job)"), "1", "5", "10", "15", "21", "27", "33", "40", "50"]])
 
-    jobs = table([T("職（世界の呼び名）", "Job (world name)"), T("持つと職になる武器", "Weapons that set the job"), T("役目", "Role")], [
+    jobs = table([T("職（世界の呼び名）", "Job (world name)"), T("職の武器", "Job weapons"), T("役目", "Role")], [
         [T("%s（%s）" % (jn[t][0], tn[t][0]), "%s (%s)" % (jn[t][1], tn[t][1])), T(skilldata.TREE_META[t][0], skilldata.TREE_META[t][2]), T(jn[t][2], jn[t][3])]
         for t in skilldata.TREES])
 
@@ -68,14 +73,13 @@ def skills():
 
     resp = table([T("できること", "Action"), T("決まり", "Rule")], [
         [T("技の振り直し", "Respec skills"), T("Lv 15 まではどこでも無料。そのあとは共鳴の炉のそばでいつでも共鳴の結晶 1", "Free anywhere until Lv 15. After that, near a Resonance Forge at any time for 1 resonance crystal")],
-        [T("戻るもの", "What returns"), T("その職の覚えた技・刻印・要がすべて戻り、技の点は全部戻る。ほかの職の木には触らない", "All learned skills, runes and keystones of that job reset and every point is refunded. Other jobs' trees are untouched")],
-        [T("刻印の付け替え", "Swap runes"), T("戦いの外で、炉か焚き火の近く。初回は無料、以後は結晶 1", "Outside combat near a forge or campfire. First swap free, then 1 crystal")],
-        [T("型の保存", "Loadouts"), T("職ごとに枠と刻印の組を 2 つ保存でき、戦いの外でいつでも切り替えられる", "Save two sets of slots and runes per job and switch outside combat")],
-        [T("ステータスの振り直し", "Respec stats"), T("技と同じ炉・結晶・費用の表。回数は技と別に数える", "Same forge and cost table as skills; counted separately")],
+        [T("戻るもの", "What returns"), T("今の職の木の節がすべて戻り（技・段・刻印・型の要・基礎）、技の点は全部戻る。ほかの職の木、淵・前世の技、熟練、払った変異の素材には触らない", "Every node of the current job's tree returns (skills, ranks, runes, keystones, stats) and all points are refunded. Other jobs' trees, deep and past-life skills, mastery and paid mutation materials are untouched")],
+        [T("刻印の付け替え", "Swap runes"), T("刻印は木の節なので、振り直して取り直す", "Runes are tree nodes: reset and take another")],
+        [T("型の保存", "Loadouts"), T("職ごとに木の取り方・枠・刻印の組を 2 つ保存でき、戦いの外でいつでも切り替えられる（点が足りなければ戻らない）", "Save two builds (tree, slots, runes) per job and switch outside combat; a build that no longer fits your points is refused")],
     ])
 
-    body = page_head("職と技", "Jobs and skills", "6 つの職。持った武器で職が決まり、職ごとに技の木・刻印・型の要があります。",
-                     "Six jobs. The weapon in your hand sets the job; each job has its own skill tree, runes and keystones.") + toc(SKILL_TOC) + """
+    body = page_head("職と技", "Jobs and skills", "6 つの職。職ごとに大きな技の木（型 3 つ・節 60 あまり）があり、使う技は 4 本まで、基礎も木の節で上がります。職は町の職の間で替えます。",
+                     "Six jobs, each with a large ability tree (three archetypes, 60-odd nodes). Up to four active skills; stats also come from nodes. Change jobs at a town's job hall.") + toc(SKILL_TOC) + """
 <section aria-labelledby="grow">
 <div class="wrap">
 <h2 id="grow">%(h_grow)s</h2>
@@ -142,33 +146,33 @@ def skills():
 </section>
 """ % dict(
         h_grow=T("成長の仕組み", "How you grow"),
-        grow=T("レベルは一人に一つ。上がると、力の振り分けと技の点が増えます。技の点は職ごとに別に持つので、職を替えても前の職の木はそのままです。",
-               "You have one level. Leveling grants stat points and skill points. Skill points are kept per job, so switching jobs never touches the other trees."),
-        g1h=T("4 つのステータス", "Four stats"), g1=T("筋力・敏捷・精神・耐久を、ステータス画面（<kbd>J</kbd>）で振り分けます。職ごとに伸ばしたいものが違います。", "Spend points on Strength, Agility, Spirit and Vitality in the status screen (<kbd>J</kbd>). Each job leans on different stats."),
-        g2h=T("技の点", "Skill points"), g2=T("技の画面（<kbd>K</kbd>）で、1 段 1 点。どの技も同じ値段です。Lv 10 までは 1 レベルおきに増え、そのあとは 1 レベルごとに 1 点です。", "Each rank costs 1 point in the skill screen (<kbd>K</kbd>). Points come every other level up to Lv 10, then 1 per level."),
-        ptable=ptable, pnote=T("一つの職の木を全部は取れません。どの型を伸ばすかが、ビルドになります。", "You cannot take a whole job tree. Which path you grow is your build."),
+        grow=T("レベルは一人に一つ。1 レベルにつき技の点が 1 つ。技の点は職ごとに別に持つので、職を替えても前の職の木はそのままです。",
+               "You have one level. Each level grants one skill point. Points are kept per job, so changing jobs never touches the other trees."),
+        g1h=T("4 つの基礎", "Four stats"), g1=T("筋力・敏捷・精神・耐久は、技の木の「基礎の節」（1 節 +4）で上がります。記録の画面（<kbd>J</kbd>）は見るだけ。レア以上の武器には基礎の要求値があり、届かないと攻撃力が半分になります。", "Strength, Agility, Spirit and Vitality come from stat nodes in the tree (+4 each). The record screen (<kbd>J</kbd>) is read-only. Rare and better weapons require a stat; below it your attack is halved."),
+        g2h=T("技の点", "Skill points"), g2=T("技の画面（<kbd>K</kbd>）の木で節を取ります。使う技 2 点（幹の根は 1）、段・基礎・閾値 1 点、常に効く技 2 点、型の要 3 点。線でつながった節から順に。", "Take nodes in the tree on the skill screen (<kbd>K</kbd>): actives 2 points (the root 1), ranks, stats and thresholds 1, passives 2, keystones 3. Nodes open along the lines."),
+        ptable=ptable, pnote=T("1 本の木は 75〜90 点。Lv 50 でも 50 点なので、全部は取れません。型をひとつ深く伸ばすか、二つを浅く混ぜるかがビルドです。", "A tree holds 75-90 points and you have 50 at Lv 50, so you cannot take it all. Go deep into one archetype or mix two shallowly."),
         h_jobs=T("六つの職", "Six jobs"),
-        jobs_lead=T("職は、持った武器で決まります。杖を持てば魔法使い、弓を持てば弓使い。切り替えの画面はありません。",
-                    "Your job is the weapon in your hand: hold a staff and you are a Mage, a bow and you are an Archer. There is no switching screen."),
+        jobs_lead=T("職は、都と四つの町の訓練場にいる師範の「職の間」で替えます。木の取り方と型の保存は職ごとに残ります。",
+                    "Change jobs at the job hall of the training master in the capital and the four towns. Each job keeps its own tree and loadouts."),
         j1=T("最初の職は、はじまりの島の宿り木の祠で選びます。六つの得物から一つ手に取ると、その職の始めの武器と最初の技がもらえます。", "You pick your first job at the island shrine: take one of six weapons and receive that job's starting weapon and first skill."),
         j2=T("ほかの職の武器は、町の店・頼み・敵の落とし物で手に入ります。どの章にも六つの職の武器があります。", "Other jobs' weapons come from shops, requests and enemy drops. Every chapter has weapons for all six jobs."),
-        j3=T("職の武器でない物（素手・道具・鍵）を持っている間は、ふつうの攻撃だけで、技は使えません。前の職の技の帯は薄く残ります。", "While holding something that is not a job weapon (bare hands, tools, keys) you can only attack normally; the previous job's skill bar stays dimmed."),
-        j4=T("持ち替えればその場で職が替わります（技の待ちとマナはそのまま）。目的の帯の下に、今の職の名前が小さく出ます。", "Swap weapons and the job swaps on the spot (cooldowns and mana carry over). The current job's name shows under the objective strip."),
+        j3=T("今の職の武器を持っていない間は、技が使えず、ほかの職の武器なら近接の攻撃力も半分です。技の帯は薄く残ります。", "Without your job's weapon you cannot use skills, and another job's weapon halves your melee damage. The skill bar stays dimmed."),
+        j4=T("初めての職に替えたときは、その職の始めの武器を一度だけ受け取れます。持ち替えだけでは職は替わりません。", "The first time you change to a job you receive its starter weapon once. Swapping weapons alone never changes the job."),
         jobt=jobs,
         h_trees=T("職の木", "Job trees"),
-        trees_lead=T("1 本の木は 6〜7 つの技。1 行目に入口の 2 つ、2 行目に 2 つ、3 行目に奥義の使う技、4 行目に要です。行ごとに必要レベルがあります（1・5・12・20）。線は前提です。",
-                     "Each tree has six or seven skills: two entry skills in row 1, two in row 2, a signature active in row 3 and a keystone in row 4. Rows unlock at levels 1, 5, 12 and 20. Lines show prerequisites."),
+        trees_lead=T("幹（上）から左・中・右の三つの型へ分かれます。線は前提（どれか一つ取っていればよい）。使う技は木に 5〜7 本ありますが、取れるのは 4 本まで。型の要は、その型に 20 点使うと開きます。節に触れると中身が出ます。",
+                     "The trunk at the top splits into three archetypes (left, centre, right). Lines are prerequisites (any one is enough). A tree offers five to seven active skills but you may take only four. Keystones open at 20 points in their archetype. Hover a node for details."),
         legend=legend, cards="".join(cards), h_lists=T("技の一覧", "Skill lists"), lists="".join(lists),
-        h_run=T("刻印（技を変える節）", "Runes (skill-changing nodes)"), run=T("使う技のうち 10 本には 3 択の刻印があり、技の形が変わります。職の木の中の「技を変える節」です。", "Ten active skills each have three runes that reshape the skill. They are the skill-changing nodes inside the job tree."),
+        h_run=T("刻印（技を変える節）", "Runes (skill-changing nodes)"), run=T("使う技のうち 10 本には 3 つの刻印の節があり、技の形が変わります。同じ技の刻印は一つしか取れません。", "Ten active skills each have three rune nodes that reshape the skill. Only one rune per skill can be taken."),
         r1=T("対象: 巨神斬り・鯨尾薙ぎ・岩呼び・踏み込み・跳び退き・風裂き・守りの唄・引き潮・熾火の槌・雲穿ち", "Skills: Titan Cleave, Whale-Tail Sweep, Rock Call, Lunge, Backstep, Wind Rend, Ward Song, Ebb Tide, Ember Hammer, Cloud Piercer"),
-        r2=T("技を極める（最大段）と開きます。最初に選ぶのは 1 点です。", "Maxing a skill unlocks its runes. Choosing the first rune costs 1 point."),
-        r3=T("付け替えは戦いの外で、炉・焚き火の近く。初回は無料、あとは共鳴の結晶 1。同時に効くのは 1 つです。", "Swap outside combat near a forge or campfire. The first swap is free, then 1 resonance crystal. Only one rune is active at a time."),
+        r2=T("刻印は木の節なので、その技の節のすぐ先にあり、1〜2 点で取れます。", "Runes are tree nodes right after their skill, costing 1-2 points."),
+        r3=T("付け替えは振り直しで。変異（技の形を変える節）は型の奥にあり、極めた技に巨神の核 1 と欠片 3 を払って開きます。一度払えば振り直しても ただで取り直せます。", "Change runes by resetting. Mutations (shape-changing nodes) sit deep in a branch: pay 1 titan core and 3 shards for a mastered skill; once paid they are free to retake after a reset."),
         h_leg=T("書き換えの武器（4 番目の刻印）", "Rewrite weapons (the fourth rune)"),
         leg=T("書き換えの武器は、1 つの技を別の形に書き換えます。その武器を主の手に持つあいだだけ選べて効きます。", "Rewrite weapons each change one skill. They can be chosen and work only while held in your main hand."),
         legt=table([T("書き換えの武器", "Rewrite weapon"), T("書き換わる技", "Skill rewritten")], legend_rows),
         heroic=T("このほかに、巨神ごとに職の武器のヒロイック（17 本）があり、それぞれ技の書き換えを一つ持ちます。心臓を止めるたびに一本ずつ低い確率で落ちます。", "Each titan also has heroic job weapons (17 in all), each carrying one skill rewrite. One may drop at a low chance every time a heart is stopped."),
-        h_key=T("要（かなめ）", "Keystones"), key=T("各職の木の 4 行目。得と引き換えに癖のある、パッシブです。段は 1 つだけ。", "Row 4 of each job tree: a quirky always-on skill with a trade-off. One rank only."), keyt=keys,
-        h_types=T("武器の型", "Weapon types"), types=T("職は武器の種類で決まり、型は技との噛み合いです。合う型の武器を持つと、技に小さなおまけが付きます。縛りはありません。", "The weapon kind sets the job; the type describes synergy with skills. Holding a matching type gives a small bonus; nothing is ever required."), typet=types,
+        h_key=T("型の要（かなめ）", "Archetype keystones"), key=T("型の奥。その型に 20 点使うと取れる、得と引き換えに癖のある常時の技（3 点）。職の要の技のほかに、硝子の刃・疾風の舞・満ち潮・灰の契り・独り弦・砦の 6 つの要があります。", "Deep in each archetype: an always-on skill with a trade-off (3 points) that opens at 20 archetype points. Besides the job keystones below there are six traits: Glass Blade, Wind Dance, Full Tide, Ash Pact, Lone String and Bulwark."), keyt=keys,
+        h_types=T("武器の型", "Weapon types"), types=T("武器の種類はどの職の武器かを決め、型は技との噛み合いです。合う型の武器を持つと、技に小さなおまけが付きます。縛りはありません。", "The weapon kind says which job it belongs to; the type describes synergy with skills. Holding a matching type gives a small bonus; nothing is ever required."), typet=types,
         freedom=pages_d.skills_extra(),
         h_resp=T("振り直しと型の保存", "Respec and loadouts"), respt=resp,
         mk=T("装備の「木の印」の特性は、その職の技の力を伸ばします（武器にはその職の印だけが付きます）。", "The \"tree mark\" affixes on gear boost that job's skills (a weapon carries only its own job's mark)."), mk2=T("装備のページへ", "See the gear page"),

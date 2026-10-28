@@ -63,6 +63,10 @@ class Tree:
         self.names[id] = (ja, en, ja_e, en_e)
         return self.n(id, "threshold", x, y, 1, req, arch, stat=stat, at=at, effect=effect)
 
+    # 変異 (素材で開く。技を極めてから)
+    def mutation(self, mutation, x, y, req, arch):
+        return self.n(mutation, "mutation", x, y, 2, req, arch, mutation=mutation)
+
     def keystone(self, skill, x, y, req, arch):
         return self.n(skill, "keystone", x, y, 3, req, arch, skill=skill, arch_points=20)
 
@@ -81,8 +85,46 @@ class Tree:
             for r in nd.get("requires", []) + nd.get("excludes", []):
                 assert r in ids, (self.job, nd["id"], "unknown", r)
 
+    def balance(self):
+        """型の門 (arch_points) の手前で取れる点が「門 + 4」に届くよう、その型の常に効く数・閾値の節 (1 点) を 2 点に上げる。
+        門の先 (その節を前提にする節) は数えない。"""
+        by = {n["id"]: n for n in self.nodes}
+
+        def descendants(gid):
+            out = set()
+            changed = True
+            while changed:
+                changed = False
+                for n in self.nodes:
+                    if n["id"] in out or n["id"] == gid:
+                        continue
+                    reqs = n.get("requires", [])
+                    if reqs and all(r == gid or r in out for r in reqs):
+                        out.add(n["id"])
+                        changed = True
+            return out
+
+        for g in self.nodes:
+            if not g.get("arch_points"):
+                continue
+            desc = descendants(g["id"])
+            pool = [n for n in self.nodes if n.get("arch") == g["arch"] and n["id"] != g["id"] and n["id"] not in desc]
+            pre = sum(n["cost"] for n in pool)
+            for kinds in (("effect", "threshold"), ("rune",), ("rank",)):
+                for n in sorted(pool, key=lambda n: (n["kind"] != "effect", n["y"], n["x"])):
+                    if pre >= g["arch_points"] + 4:
+                        break
+                    if n["kind"] in kinds and n["cost"] == 1:
+                        n["cost"] = 2
+                        pre += 1
+            if pre < g["arch_points"] + 2:
+                # 上げる節が足りない型 (常に効く数の少ない枝) は、門のほうを下げる (16 まで)
+                g["arch_points"] = max(16, pre - 2)
+                print("  gate lowered:", self.job, g["id"], "->", g["arch_points"])
+
     def write(self):
         self.check()
+        self.balance()
         OUT.mkdir(parents=True, exist_ok=True)
         lines = ['{', '  "archetypes": %s,' % json.dumps(self.archetypes), '  "nodes": [']
         for i, nd in enumerate(self.nodes):
@@ -140,6 +182,7 @@ def assassin():
     t.thr("quick_feet", 3, 8, "agility", 24, {"attack_speed": 0.08}, "速い足", "Quick Feet", "攻撃速度 +8%", "Attack speed +8%", "agi_j", a)
     t.stat("agi_k", "agility", 4, 8, "backstep_2", a).stat("agi_l", "agility", 5, 8, "dance_wind", a)
     t.trait("wind_dance", 4, 9, ["quick_feet", "agi_k", "agi_l"], a)
+    t.mutation("lunge_surge", 5, 9, "agi_l", a)
     t.eff("endless_step", 3, 10, {"mana_cost": -0.08}, "尽きない足", "Endless Step", "技のマナの費用 −8%", "Skill mana cost −8%", "wind_dance", a, cost=2)
     t.thr("storm_feet", 5, 10, "agility", 40, {"move": 0.06, "attack_speed": 0.06}, "嵐の足", "Storm Feet", "移動 +6%、攻撃速度 +6%", "Movement +6%, attack speed +6%", "wind_dance", a)
     a = "lone"
@@ -157,6 +200,7 @@ def assassin():
     t.eff("cold_wind", 8, 8, {"damage_taken": -0.04}, "冷たい風", "Cold Wind", "受ける傷 −4%", "Damage taken −4%", "str_e", a)
     t.keystone("lone_wind", 7, 9, ["heavy_hand", "str_f", "cold_wind"], a)
     t.rank("foresight", 3, 8, 9, "cold_wind", a)
+    t.mutation("rend_blade", 6, 9, "heavy_hand", a)
     t.eff("last_breath", 6, 10, {"low_hp_armor": 4}, "最後の息", "Last Breath", "体力が少ないとき、防具 +4", "Armor +4 while low on health", "lone_wind", a, cost=2)
     t.thr("red_wind", 8, 10, "strength", 24, {"lifesteal": 0.03, "attack": 0.04}, "赤い風", "Red Wind", "近接で与えた傷の 3% を吸う、与える傷 +4%", "Heal 3% of melee damage dealt, damage dealt +4%", "lone_wind", a)
     return t
@@ -197,6 +241,7 @@ def shaman():
     t.eff("wide_cycle", 5, 7, {"regen": 0.08}, "広い巡り", "Wide Cycle", "マナの回復 +8%", "Mana regeneration +8%", "cycle_song_2", a)
     t.eff("cold_current", 3, 8, {"attack": 0.05}, "冷たい流れ", "Cold Current", "与える傷 +5%", "Damage dealt +5%", "spi_g", a)
     t.stat("spi_h", "spirit", 4, 8, "tide_mind", a).stat("spi_i", "spirit", 5, 8, "wide_cycle", a)
+    t.mutation("ebb_whirl", 3, 9, "cold_current", a)
     t.keystone("chorus_voice", 4, 9, ["cold_current", "spi_h", "spi_i"], a)
     t.eff("flood", 3, 10, {"skill_power": 0.05, "mana_cost": 0.05}, "満ち潮", "Flood", "技の力 +5%、技のマナの費用 +5%", "Skill power +5%, skill mana cost +5%", "chorus_voice", a, cost=2)
     t.thr("still_water", 5, 10, "spirit", 40, {"cooldown": -0.06, "regen": 0.06}, "静かな水", "Still Water", "技の待ち −6%、マナの回復 +6%", "Skill cooldowns −6%, mana regeneration +6%", "chorus_voice", a)
@@ -243,6 +288,7 @@ def smith():
     t.stat("str_g", "strength", 0, 8, "anvil_weight", a)
     t.eff("big_hammer", 1, 8, {"big_target": 0.1}, "大槌", "Big Hammer", "大きな相手への技の傷 +10%", "Skill damage to large foes +10%", "str_f", a)
     t.eff("cinder", 2, 8, {"skill_power": 0.05}, "燠", "Cinder", "技の力 +5%", "Skill power +5%", "spi_c", a)
+    t.mutation("hammer_meteor", 0, 9, "str_g", a)
     t.trait("ash_pact", 1, 9, ["str_g", "big_hammer", "cinder"], a)
     t.thr("mountain_arm", 0, 10, "strength", 40, {"attack": 0.06, "big_target": 0.06}, "山の腕", "Mountain Arm", "与える傷 +6%、大きな相手への技の傷 +6%", "Damage dealt +6%, skill damage to large foes +6%", "ash_pact", a)
     t.eff("slow_burn", 2, 10, {"regen": 0.08}, "とろ火", "Slow Burn", "マナの回復 +8%", "Mana regeneration +8%", "ash_pact", a, cost=2)
@@ -324,6 +370,7 @@ def archer():
     t.stat("agi_k", "agility", 4, 8, "patient", a).stat("agi_l", "agility", 5, 8, "soft_landing", a)
     t.rank("snare_shot", 2, 3, 9, "hunter_mark", a)
     t.keystone("still_string", 4, 9, ["hunter_mark", "agi_k", "agi_l"], a)
+    t.mutation("trap_mine", 5, 9, "agi_l", a)
     t.eff("bone_cage", 3, 10, {"skill_power": 0.06}, "骨の檻", "Bone Cage", "技の力 +6%", "Skill power +6%", "still_string", a, cost=2)
     t.thr("still_air", 5, 10, "agility", 36, {"damage_taken_still": -0.06, "projectile": 0.04}, "止まった空気", "Still Air", "動かずにいる間、受ける傷 −6%。矢の傷 +4%", "While standing still, damage taken −6%; projectile damage +4%", "still_string", a)
     a = "rain"
@@ -344,6 +391,7 @@ def archer():
     t.rank("far_shot", 3, 6, 9, "str_i", a)
     t.eff("storm_caller", 7, 9, {"skill_power": 0.06, "cooldown": -0.04}, "嵐呼び", "Storm Caller", "技の力 +6%、技の待ち −4%", "Skill power +6%, skill cooldowns −4%", ["str_i", "cloud_break", "str_j"], a, cost=2, arch_points=20)
     t.rank("hawk_eye", 3, 8, 9, "str_j", a)
+    t.mutation("rain_comet", 7, 10, "storm_caller", a)
     t.thr("thunder_arm", 6, 10, "strength", 36, {"projectile": 0.06, "attack": 0.04}, "雷の腕", "Thunder Arm", "矢の傷 +6%、与える傷 +4%", "Projectile damage +6%, damage dealt +4%", "storm_caller", a)
     t.eff("endless_rain", 8, 10, {"mana": 0.1, "regen": 0.06}, "止まぬ雨", "Endless Rain", "最大マナ +10%、マナの回復 +6%", "Max mana +10%, mana regeneration +6%", "storm_caller", a, cost=2)
     return t

@@ -258,6 +258,10 @@ public final class SkillEvents {
                 if (cur != null && held != null && held != cur && !SkillManager.IGNORE_JOBS) {
                     amount *= 0.5f;
                 }
+                // 基礎の要求値に届いていない武器も半分 (GearRequirement)
+                if (!GearRequirement.met(player, player.getMainHandItem())) {
+                    amount *= 0.5f;
+                }
                 double steal = jp.revati.skyabyss.rpg.skill.tree.NodeEffects.sum(player, "lifesteal");
                 if (steal > 0 && amount > 0 && player.isAlive()) {
                     player.heal((float) Math.min(2.0, amount * steal));

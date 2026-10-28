@@ -33,5 +33,17 @@ public final class JobTooltip {
                 Component.translatable("job.skyabyss.subtitle", Component.translatable(job.nameKey()), Component.translatable(job.tree.nameKey())))
                 .withStyle(s -> s.withColor(mine ? 0xF2C14E : 0x9AA4B2));
         event.getToolTip().add(1, line);
+        // 基礎の要求値 (docs/design/48 の 2.2): 届いていれば淡い青、足りなければ赤紫で今の値を添える
+        jp.revati.skyabyss.rpg.skill.GearRequirement.Req req = jp.revati.skyabyss.rpg.skill.GearRequirement.of(event.getItemStack());
+        if (req != null) {
+            int now = event.getEntity() == null ? -1 : jp.revati.skyabyss.rpg.Growth.get(event.getEntity()).stat(req.stat());
+            boolean ok = now < 0 || now >= req.amount() || event.getEntity().isCreative();
+            net.minecraft.network.chat.MutableComponent need = Component.translatable("gui.skyabyss.job.need_stat", Component.translatable(req.stat().nameKey()), req.amount())
+                    .withStyle(s -> s.withColor(ok ? 0x9FE8FF : 0xD9779A));
+            if (!ok) {
+                need.append(Component.translatable("gui.skyabyss.job.need_stat_now", now).withStyle(s -> s.withColor(0xD9779A)));
+            }
+            event.getToolTip().add(2, need);
+        }
     }
 }

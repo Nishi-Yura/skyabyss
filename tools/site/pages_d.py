@@ -26,15 +26,16 @@ def skills_extra():
         '<p class="lead">%s</p>' % T("職の木は型ごとの道に分かれ、どの道を伸ばすかで同じ職でも遊び方が変わります。点の総数（Lv 50 で 45、職ごと）と「回復・無敵は作らない」は変わりません。",
                                     "Each job tree branches into paths; which path you grow changes how the same job plays. The total (45 points at Lv 50, per job) is unchanged, and there is still no healing or invulnerability skill.")
         + table([T("仕掛け", "System"), T("決まり", "Rule")], [
-            [T("持ち替え", "Weapon swap"), T("職は持った武器で決まります。二つの職の武器を持ち歩けば、戦いの中でも持ち替えでその場で職が替わります（待ちとマナはそのまま）。", "The weapon in your hand sets the job. Carry two jobs' weapons and swap mid-fight; cooldowns and mana carry over.")],
-            [T("要（型の奥）", "Keystones"), T("職の木の型ごとに一つ、強い代わりに何かを失う常時の技。戦いの外で無料で外せます。", "One per path in the job tree: a lot of power for a trade-off. Can be removed for free outside combat.")],
+            [T("職の間", "Job hall"), T("職は都と町の訓練場の師範で替えます。木の取り方は職ごとに残り、初めての職には始めの武器が一度だけ付きます。", "Change jobs with the training master in the capital and towns. Each job keeps its tree; a first-time job comes with its starter weapon once.")],
+            [T("型の要（型の奥）", "Keystones"), T("職の木の型ごとに一つ、その型に 20 点使うと取れる、強い代わりに何かを失う常時の技（3 点）。", "One per archetype, opened at 20 archetype points: a lot of power for a trade-off (3 points).")],
+            [T("変異（型の奥の節）", "Mutations"), T("極めた技の枝の奥にある節。巨神の核 1 と欠片 3 を払って取ると、技の形が変わります（力・待ち・マナは同じ）。一度払えば振り直しても ただで取り直せます。", "A node deep in a mastered skill's branch. Pay 1 titan core and 3 shards to change the skill's shape (power, cooldown and mana unchanged). Once paid, retaking after a reset is free.")],
             [T("熟練", "Mastery"), T("技を使う・当てる・予告をよけて当てるごとに育ち、1〜5 段。3 段で 4 つ目の「熟練の刻印」、5 段で足元に光の輪。転生しても残ります。", "Each skill grows by use, hits and dodge-hits, from 1 to 5. Mastery 3 opens a fourth \"mastery rune\"; mastery 5 adds a ring of light at your feet. Survives rebirth.")],
             [T("試着", "Try-on"), T("画面だけの写しに技を仮に振り、効果・マナ・待ちを確かめてから確定できます。", "Preview points on a screen-only copy, check effect, mana and cooldown, then confirm.")],
             [T("型の保存", "Loadouts"), T("職ごとに枠と刻印の組を 2 つ保存し、戦いの外でいつでも切り替えられます。", "Save two sets of slots and runes per job and switch outside combat.")],
         ])
         + _note(T("技の力の合計は +100% で頭打ちです。", "Total skill power is capped at +100%.")))
     deep = _sec("deep", T("深いスキル", "Deep skills"),
-        '<p class="lead">%s</p>' % T("極めた技と、転生した人のための深い仕掛けです。K 画面の「変異・紋」ページと、木のつまみの淵・前世の技から使います。どの職でも使えます。",
+        '<p class="lead">%s</p>' % T("極めた技と、転生した人のための深い仕掛けです。K 画面の「紋の盤」ページと、木のつまみの淵・前世の技から使います。どの職でも使えます。",
                                     "Systems for mastered skills and for reborn players, found on the Mutations and Glyphs page of the skill screen and on the tree selector. They work for every job.")
         + table([T("仕掛け", "System"), T("決まり", "Rule")], [
             [T("変異", "Mutations"), T("8 つの技に 1 つずつ。その技を極め、巨神の素材（核 1 と鱗・欠片 3）を持っていると選べます。技が形を変えます（例: 巨神斬り→断崖、風裂き→飛ぶ刃）。1 技に 1 つで、外せません。", "One per skill for eight skills. Master the skill and hold titan materials (1 core and 3 scales or fragments) to reshape it, for example Titan Cleave into Cliffbreak or Wind Rend into Flying Blade. One per skill, permanent.")],

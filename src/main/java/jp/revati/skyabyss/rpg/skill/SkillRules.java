@@ -10,24 +10,14 @@ public final class SkillRules {
     public static final int SLOTS = 5;
     // 1 秒 = 20 tick
     public static final int SECOND = 20;
-    // ---------------------------------------------------------------- 自由度 (docs/design/31 の A 案)
-    // 木のセット (A04): 同じ木に点を 2・4・6 使うたびの小さな追加
-    public static final int[] SET_AT = {2, 4, 6};
-    // タグ (A03): 数えるのは 10 まで。1 つにつき、そのタグの技の力 +1%。4 と 7 で小さな足し (SkillBuild.tagThreshold)
-    public static final int TAG_COUNT_CAP = 10;
-    public static final double TAG_POWER_PER = 0.01;
-    public static final int TAG_STEP1 = 4;
-    public static final int TAG_STEP2 = 7;
-    // 条件の特性 (A15): そのタグが 3 つ以上あるとき。5 以上で大きいほう
-    public static final int COND_MIN_TAGS = 3;
-    public static final int COND_BIG_TAGS = 5;
+    // ---------------------------------------------------------------- 自由度 (docs/design/31 の A 案 → 48 で木の節へ)
+    // 木のセット・タグの数の足し・条件の特性は 48 で消した (型の点と閾値の節がその役)。よけた印は熟練の数えに残る
     public static final int COND_DODGE_TICKS = 3 * SECOND;
     public static final int COND_PERFECT_TICKS = 4 * SECOND;
     // 無傷のあとにこの間 (5 秒) 傷を受けていなければ、予告をよけたのは「完璧」
     public static final int PERFECT_CLEAN_TICKS = 5 * SECOND;
-    // 「低 HP」は 3❤ (6 点) 以下。回復や無敵は付けない
+    // 「低 HP」は 3❤ (6 点) 以下 (木の節 low_hp_armor の条件)。回復や無敵は付けない
     public static final float COND_LOW_HP = 6f;
-    public static final double COND_FULL_MANA = 0.98;
     // 熟練 (A13): 使う +1、当てる +1、予告をよけた直後 (4 秒) に当てる +3。1〜5 の境
     public static final int[] MASTERY_AT = {15, 45, 100, 180, 300};
     public static final int MASTERY_RUNE_LEVEL = 3;

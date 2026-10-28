@@ -39,17 +39,24 @@ public final class SkillExtOps {
         return d.enforceRebirth();
     }
 
-    // ---------------------------------------------------------------- 変異
-    public enum MutateResult {
-        OK, UNKNOWN, NOT_MASTERED, ALREADY, NO_MATERIAL
-    }
-
-    // 技が今変異して効いているか (極めているあいだだけ)
+    // ---------------------------------------------------------------- 変異 (48 で技の木の節に。素材は節を取るときに一度だけ払う。SkillManager.takeNode)
+    // 技が今変異して効いているか (極めていて、職の木ならその節を取っているあいだ)
     public static Mutation active(Player player, Skill skill) {
         SkillData d = SkillManager.get(player);
         String id = d.mutations.get(skill.id);
         Mutation m = id == null ? null : Mutation.byId(id);
-        return m != null && m.skill == skill && d.rank(skill) >= skill.maxRank ? m : null;
+        if (m == null || m.skill != skill || d.rank(skill) < skill.maxRank) {
+            return null;
+        }
+        Job job = Job.ofTree(skill.tree);
+        jp.revati.skyabyss.rpg.skill.tree.AbilityTree tree = jp.revati.skyabyss.rpg.skill.tree.AbilityTrees.of(job);
+        if (tree != null) {
+            jp.revati.skyabyss.rpg.skill.tree.AbilityNode node = tree.mutationNode(skill);
+            if (node != null && !d.hasNode(job, node.id)) {
+                return null;
+            }
+        }
+        return m;
     }
 
     // 素材は留め袋と持ち物の両方を数える (炉と同じ。拾った素材は袋へ自動で入るので、持ち物だけでは足りないと見えてしまう)
@@ -66,29 +73,15 @@ public final class SkillExtOps {
         jp.revati.skyabyss.pouch.Pouch.takeAny(player, item, amount);
     }
 
-    public static MutateResult mutate(ServerPlayer player, Skill skill) {
-        Mutation m = skill == null ? null : Mutation.of(skill);
-        if (m == null) {
-            return MutateResult.UNKNOWN;
-        }
-        SkillData d = SkillManager.get(player);
-        if (!skill.active || d.rank(skill) < skill.maxRank) {
-            return MutateResult.NOT_MASTERED;
-        }
-        if (d.mutations.containsKey(skill.id)) {
-            return MutateResult.ALREADY;
-        }
-        if (!hasMaterial(player, m)) {
-            return MutateResult.NO_MATERIAL;
-        }
+    // 変異の素材を払って、その技の変異を記録に刻む (木の節を取るとき。一度払えば振り直しても残る)
+    public static void payMutation(ServerPlayer player, Mutation m) {
         take(player, m.coreItem(), Mutation.CORES);
         take(player, m.shardItem(), Mutation.SHARDS);
-        d.mutations.put(skill.id, m.id);
-        SkillManager.sync(player);
+        SkillData d = SkillManager.get(player);
+        d.mutations.put(m.skill.id, m.id);
         player.serverLevel().playSound(null, player.getX(), player.getY(), player.getZ(), Skills.SOUND_LEARN.get(), SoundSource.PLAYERS, 1.0f, 0.6f);
         player.serverLevel().sendParticles(Skills.RUNE_SPARK.get(), player.getX(), player.getY() + 1.0, player.getZ(), 30, 0.5, 0.8, 0.5, 0.06);
-        Notice.send(player, Notice.Kind.LEVEL_UP, ModText.lore("message.skyabyss.skill.mutated", Component.translatable(skill.nameKey()), Component.translatable(m.nameKey())));
-        return MutateResult.OK;
+        Notice.send(player, Notice.Kind.LEVEL_UP, ModText.lore("message.skyabyss.skill.mutated", Component.translatable(m.skill.nameKey()), Component.translatable(m.nameKey())));
     }
 
     // ---------------------------------------------------------------- 紋

@@ -58,6 +58,8 @@ public final class SkillFx {
         FxRanged.register(PLANS);
         // 職の新しい技 (docs/design/43)。踏み込み・跳び退きの段取りを借りるので最後に
         jp.revati.skyabyss.rpg.client.skill.fx.FxJobs.register(PLANS);
+        // 木 v2 で足した技 (docs/design/48)
+        jp.revati.skyabyss.rpg.client.skill.fx.FxTree.register(PLANS);
     }
 
     private static final List<Cast> CASTS = new ArrayList<>();

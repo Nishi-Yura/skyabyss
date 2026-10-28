@@ -14,6 +14,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 import jp.revati.skyabyss.rpg.GrowthRules.Stat;
+import jp.revati.skyabyss.rpg.skill.Mutation;
 import jp.revati.skyabyss.rpg.skill.Rune;
 import jp.revati.skyabyss.rpg.skill.Skill;
 import jp.revati.skyabyss.rpg.skill.SkillKeystone;
@@ -21,7 +22,7 @@ import jp.revati.skyabyss.rpg.skill.SkillKeystone;
 // 技の木 v2 の節 (docs/design/48 の 2.4)。assets/skyabyss/skill_tree/<職>.json の nodes の一つ。
 //   kind      : ACTIVE (使う技。取れるのは 4 本まで) / RANK (その技の段 +1) / PASSIVE (常に効く技) / KEYSTONE (型の要 = 要の技)
 //               RUNE (技を変える節 = 刻印) / STAT (基礎 +amount) / THRESHOLD (基礎が at 以上のとき effect) / EFFECT (常に effect)
-//               TRAIT (古い鍵石をそのまま型の要にしたもの。keystone)
+//               TRAIT (古い鍵石をそのまま型の要にしたもの。keystone) / MUTATION (技の変異。mutation。巨神の素材を払って取る。技を極めてから)
 //   cost      : 技の点
 //   x, y      : 格子の位置 (左上が 0, 0。画面は x * 48, y * 48)
 //   arch      : 型 (枝) の id。幹は null。archPoints = その型の点がこれ以上で取れる
@@ -31,7 +32,7 @@ import jp.revati.skyabyss.rpg.skill.SkillKeystone;
 //               mana_cost・mana・regen・damage_taken・damage_taken_still・fire_resist・big_target・lifesteal・low_hp_armor
 public final class AbilityNode {
     public enum Kind {
-        ACTIVE, RANK, PASSIVE, KEYSTONE, RUNE, STAT, THRESHOLD, EFFECT, TRAIT;
+        ACTIVE, RANK, PASSIVE, KEYSTONE, RUNE, STAT, THRESHOLD, EFFECT, TRAIT, MUTATION;
 
         public static Kind byId(String id) {
             return valueOf(id.toUpperCase(Locale.ROOT));
@@ -62,9 +63,12 @@ public final class AbilityNode {
     public final Map<String, Double> effect;
     @Nullable
     public final SkillKeystone keystone;
+    @Nullable
+    public final Mutation mutation;
 
     AbilityNode(String id, Kind kind, int cost, int x, int y, @Nullable String arch, int archPoints, List<String> requires, List<String> excludes,
-            @Nullable Skill skill, int rune, @Nullable Stat stat, int amount, int at, Map<String, Double> effect, @Nullable SkillKeystone keystone) {
+            @Nullable Skill skill, int rune, @Nullable Stat stat, int amount, int at, Map<String, Double> effect, @Nullable SkillKeystone keystone,
+            @Nullable Mutation mutation) {
         this.id = id;
         this.kind = kind;
         this.cost = cost;
@@ -81,6 +85,7 @@ public final class AbilityNode {
         this.at = at;
         this.effect = Collections.unmodifiableMap(effect);
         this.keystone = keystone;
+        this.mutation = mutation;
     }
 
     static AbilityNode parse(String job, JsonObject o) {
@@ -111,6 +116,14 @@ public final class AbilityNode {
             }
         }
         SkillKeystone keystone = o.has("keystone") ? SkillKeystone.byId(o.get("keystone").getAsString()) : null;
+        Mutation mutation = null;
+        if (o.has("mutation")) {
+            mutation = Mutation.byId(o.get("mutation").getAsString());
+            if (mutation == null) {
+                throw new IllegalArgumentException(job + "/" + id + ": unknown mutation " + o.get("mutation").getAsString());
+            }
+            skill = mutation.skill;
+        }
         // 種類ごとの決まり
         switch (kind) {
             case ACTIVE, RANK, PASSIVE, KEYSTONE -> {
@@ -147,10 +160,15 @@ public final class AbilityNode {
                     throw new IllegalArgumentException(job + "/" + id + ": TRAIT needs keystone");
                 }
             }
+            case MUTATION -> {
+                if (mutation == null) {
+                    throw new IllegalArgumentException(job + "/" + id + ": MUTATION needs mutation");
+                }
+            }
             default -> {
             }
         }
-        return new AbilityNode(id, kind, cost, x, y, arch, archPoints, requires, excludes, skill, rune, stat, amount, at, effect, keystone);
+        return new AbilityNode(id, kind, cost, x, y, arch, archPoints, requires, excludes, skill, rune, stat, amount, at, effect, keystone, mutation);
     }
 
     private static List<String> strings(@Nullable JsonElement e) {
@@ -183,6 +201,7 @@ public final class AbilityNode {
         return switch (kind) {
             case ACTIVE, PASSIVE, KEYSTONE, RANK -> skill.nameKey();
             case RUNE -> Rune.of(skill, rune).nameKey();
+            case MUTATION -> mutation.nameKey();
             case STAT -> stat.nameKey();
             case TRAIT -> keystone.nameKey();
             default -> "node.skyabyss." + job + "." + id;
@@ -192,6 +211,7 @@ public final class AbilityNode {
     public String effectKey(String job) {
         return switch (kind) {
             case RUNE -> Rune.of(skill, rune).effectKey();
+            case MUTATION -> mutation.effectKey();
             case TRAIT -> keystone.effectKey();
             case ACTIVE, PASSIVE, KEYSTONE, RANK -> skill.effectKey();
             default -> "node.skyabyss." + job + "." + id + ".effect";

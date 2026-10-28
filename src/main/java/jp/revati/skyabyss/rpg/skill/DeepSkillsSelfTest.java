@@ -234,9 +234,9 @@ final class DeepSkillsSelfTest {
         double baseNeighbor = SkillBuild.skillPower(p, Skill.ROCK_CALL);
         // 岩の紋 (段 1): 中心 +8%、隣 +4%。巨神斬りの隣は岩呼び (前提の線)
         check(f, SkillExtOps.place(p, 0, 0, Skill.TITAN_CLEAVE) == SkillExtOps.GlyphResult.OK && d.glyphBag.size() == 3, "the rock glyph was not placed");
-        // 中心 +8% に、紋のタグ (岩 +1 つ) の +1%。隣は +4% と +1%
-        check(f, Math.abs(SkillBuild.skillPower(p, Skill.TITAN_CLEAVE) - base - 0.09) < 1e-9, "center power is wrong: " + (SkillBuild.skillPower(p, Skill.TITAN_CLEAVE) - base));
-        check(f, Math.abs(SkillBuild.skillPower(p, Skill.ROCK_CALL) - baseNeighbor - 0.05) < 1e-9, "neighbor power is wrong: " + (SkillBuild.skillPower(p, Skill.ROCK_CALL) - baseNeighbor));
+        // 中心 +8%、隣 +4% (紋のタグの +1% は 48 で消えた)
+        check(f, Math.abs(SkillBuild.skillPower(p, Skill.TITAN_CLEAVE) - base - 0.08) < 1e-9, "center power is wrong: " + (SkillBuild.skillPower(p, Skill.TITAN_CLEAVE) - base));
+        check(f, Math.abs(SkillBuild.skillPower(p, Skill.ROCK_CALL) - baseNeighbor - 0.04) < 1e-9, "neighbor power is wrong: " + (SkillBuild.skillPower(p, Skill.ROCK_CALL) - baseNeighbor));
         check(f, Glyph.neighbors(Skill.TITAN_CLEAVE).contains(Skill.ROCK_CALL) && !Glyph.neighbors(Skill.TITAN_CLEAVE).contains(Skill.LUNGE), "neighbors are wrong");
         // 差した紋は、そのタグを +1 数える (岩の紋 → 岩のタグ)
         int rockTags = SkillBuild.tagCount(p, SkillTag.ROCK);
@@ -315,14 +315,15 @@ final class DeepSkillsSelfTest {
         d.bonusPoints = 80;
         SkillManager.forceRank(p, Skill.WIND_REND, 1);
         Mutation blade = Mutation.REND_BLADE;
-        check(f, SkillExtOps.mutate(p, Skill.WIND_REND) == SkillExtOps.MutateResult.NOT_MASTERED, "an unmastered skill mutated");
+        // 変異は 48 で木の節に (SkillManager.takeNode が極めと素材を見る。木の決まりは自己テスト tree)。ここは素材の数えと払い
         SkillManager.forceRank(p, Skill.WIND_REND, Skill.WIND_REND.maxRank);
-        check(f, SkillExtOps.mutate(p, Skill.WIND_REND) == SkillExtOps.MutateResult.NO_MATERIAL, "a mutation was paid for without materials");
+        check(f, !SkillExtOps.hasMaterial(p, blade), "materials were counted with nothing held");
         give(p, blade, 1, 2);
-        check(f, SkillExtOps.mutate(p, Skill.WIND_REND) == SkillExtOps.MutateResult.NO_MATERIAL && d.mutations.isEmpty(), "a mutation was bought with too few shards");
+        check(f, !SkillExtOps.hasMaterial(p, blade), "too few shards counted as enough");
         give(p, blade, 0, 1);
         check(f, SkillExtOps.hasMaterial(p, blade), "materials were not counted");
-        check(f, SkillExtOps.mutate(p, Skill.WIND_REND) == SkillExtOps.MutateResult.OK && "rend_blade".equals(d.mutations.get("wind_rend")), "the mutation was not chosen");
+        SkillExtOps.payMutation(p, blade);
+        check(f, "rend_blade".equals(d.mutations.get("wind_rend")), "the mutation was not recorded");
         check(f, SkillExtOps.count(p, blade.coreItem()) == 0 && SkillExtOps.count(p, blade.shardItem()) == 0, "materials were not taken");
         // 素材は留め袋に入っていても数える・使える (拾った素材は袋へ自動で入る。持ち物だけを見ると「足りない」と出てしまった)
         Mutation surge = Mutation.LUNGE_SURGE;
@@ -330,12 +331,8 @@ final class DeepSkillsSelfTest {
         jp.revati.skyabyss.pouch.Pouch.add(p, new ItemStack(surge.coreItem(), surge.CORES));
         jp.revati.skyabyss.pouch.Pouch.add(p, new ItemStack(surge.shardItem(), surge.SHARDS));
         check(f, SkillExtOps.hasMaterial(p, surge) && SkillExtOps.count(p, surge.coreItem()) == surge.CORES, "materials in the pouch were not counted");
-        check(f, SkillExtOps.mutate(p, Skill.LUNGE) == SkillExtOps.MutateResult.OK && "lunge_surge".equals(d.mutations.get("lunge")), "the pouch materials did not pay for a mutation");
-        check(f, SkillExtOps.count(p, surge.shardItem()) == 0, "the pouch materials were not taken");
-        // 一度きり
-        give(p, blade, 1, 3);
-        check(f, SkillExtOps.mutate(p, Skill.WIND_REND) == SkillExtOps.MutateResult.ALREADY, "a skill mutated twice");
-        check(f, SkillExtOps.mutate(p, Skill.CALM_HEART) == SkillExtOps.MutateResult.UNKNOWN, "a skill without a mutation mutated");
+        SkillExtOps.payMutation(p, surge);
+        check(f, "lunge_surge".equals(d.mutations.get("lunge")) && SkillExtOps.count(p, surge.shardItem()) == 0, "the pouch materials did not pay for a mutation");
         // 刻印とは別: 刻印も選べる
         check(f, SkillManager.chooseRune(p, Skill.WIND_REND, 1) == SkillManager.RuneResult.OK && d.rune(Skill.WIND_REND) == 1 && d.mutations.containsKey("wind_rend"),
                 "a rune could not coexist with a mutation");
@@ -506,9 +503,9 @@ final class DeepSkillsSelfTest {
         double basic = 1.6;
         double regen = SkillRules.regenPerSecond(20 + GrowthRules.bonusMana(20), false);
         double skillDps = regen * BuildsSelfTest.perMana(Skill.TITAN_CLEAVE, 3);
-        double general = SkillRules.KEY_GLASS_DAMAGE + SkillRules.KEY_ASH_DAMAGE + 0.05 + 0.04 + 0.08 + 0.07;
-        // 技の力: タグ・熟練の刻印 + 紋 + 淵の残響・鏡・誓い + 記憶の刃 (技の力の合計は +100% で頭打ち)
-        double skillPart = SkillRules.TAG_POWER_PER * SkillRules.TAG_COUNT_CAP + SkillRules.MASTERY_RUNE_POWER + SkillRules.GLYPH_POWER_CAP
+        double general = SkillRules.KEY_GLASS_DAMAGE + SkillRules.KEY_DANCE_DAMAGE + 0.25;
+        // 技の力: 木の節・熟練の刻印 + 紋 + 淵の残響・鏡・誓い + 記憶の刃 (技の力の合計は +100% で頭打ち)
+        double skillPart = 0.15 + SkillRules.MASTERY_RUNE_POWER + SkillRules.GLYPH_POWER_CAP
                 + SkillRules.echoPower(2) + SkillRules.mirrorPower(3) + SkillRules.OATH_DEEP_POWER + SkillRules.memoryPower(2, 6);
         skillPart = Math.min(SkillRules.POWER_CAP, skillPart);
         double regenBoost = 1 + SkillRules.OATH_DEEP_REGEN;

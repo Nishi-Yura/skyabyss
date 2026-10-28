@@ -135,6 +135,12 @@ public final class AbilityTreeSelfTest {
         }
         check(f, t.actives().size() > SkillRules.BASE_SLOTS, tag + "only " + t.actives().size() + " active skills (need more than " + SkillRules.BASE_SLOTS + " to choose)");
         check(f, t.totalCost >= 60, tag + "tree is small: " + t.totalCost + " points");
+        // 変異の節: 変異のある技にはその節があり、段の節の先にある
+        for (jp.revati.skyabyss.rpg.skill.Mutation m : jp.revati.skyabyss.rpg.skill.Mutation.values()) {
+            if (m.skill.tree == job.tree) {
+                check(f, t.mutationNode(m.skill) != null, tag + "no mutation node for " + m.id);
+            }
+        }
         // 文: 技でない節は node.skyabyss.<職>.<id> と .effect
         for (AbilityNode n : t.nodes()) {
             if (n.kind == AbilityNode.Kind.EFFECT || n.kind == AbilityNode.Kind.THRESHOLD) {
@@ -249,6 +255,27 @@ public final class AbilityTreeSelfTest {
                 }
                 d.applyNodes();
                 check(f, d.canTake(Job.WARRIOR, fifth, 50) == SkillData.TakeResult.ACTIVES_FULL, "a fifth active skill was allowed: " + fifth.id);
+            }
+            // 変異の節: 極めてから、素材を払って。払えば振り直しのあとも ただ
+            AbilityNode mut = t.mutationNode(Skill.TITAN_CLEAVE);
+            check(f, mut != null && d.rank(Skill.TITAN_CLEAVE) >= Skill.TITAN_CLEAVE.maxRank, "no titan cleave mutation node or not mastered");
+            if (mut != null) {
+                for (AbilityNode n : t.pathTo(mut.id)) {
+                    if (n != mut && !d.hasNode(Job.WARRIOR, n.id)) {
+                        d.nodesOf(Job.WARRIOR).add(n.id);
+                    }
+                }
+                d.applyNodes();
+                check(f, SkillManager.takeNode(p, mut.id) == SkillData.TakeResult.NO_MATERIAL, "a mutation was taken without materials");
+                p.getInventory().add(new net.minecraft.world.item.ItemStack(mut.mutation.coreItem(), 1));
+                p.getInventory().add(new net.minecraft.world.item.ItemStack(mut.mutation.shardItem(), 3));
+                check(f, SkillManager.takeNode(p, mut.id) == SkillData.TakeResult.OK && mut.mutation.id.equals(d.mutations.get(Skill.TITAN_CLEAVE.id))
+                        && jp.revati.skyabyss.rpg.skill.SkillExtOps.active(p, Skill.TITAN_CLEAVE) == mut.mutation
+                        && jp.revati.skyabyss.rpg.skill.SkillExtOps.count(p, mut.mutation.coreItem()) == 0, "taking the mutation node did not pay and mutate");
+                d.nodesOf(Job.WARRIOR).remove(mut.id);
+                d.applyNodes();
+                check(f, jp.revati.skyabyss.rpg.skill.SkillExtOps.active(p, Skill.TITAN_CLEAVE) == null, "a mutation stayed active without its node");
+                check(f, SkillManager.takeNode(p, mut.id) == SkillData.TakeResult.OK, "retaking a paid mutation was not free");
             }
             // 職を替えると基礎も枠もその職のもの
             SkillManager.refreshStats(p);

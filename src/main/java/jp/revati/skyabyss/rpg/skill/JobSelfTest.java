@@ -251,6 +251,17 @@ public final class JobSelfTest {
         check(f, SkillManager.cast(p, 0) == SkillManager.CastResult.EMPTY, "a skill was cast with bread");
         p.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.IRON_SWORD));
         check(f, SkillManager.cast(p, 0) != SkillManager.CastResult.EMPTY, "titan cleave did not fire with a sword");
+        // 武器の基礎の要求値 (48): 鯨骨の大剣は筋力 10。届かなければ木の印が効かない
+        ItemStack great = new ItemStack(item("skyabyss:whalebone_greatsword"));
+        GearRequirement.Req req = GearRequirement.of(great);
+        check(f, req != null && req.stat() == jp.revati.skyabyss.rpg.GrowthRules.Stat.STRENGTH && req.amount() == GearRequirement.STONE_WHALE,
+                "the greatsword requirement is wrong: " + req);
+        check(f, GearRequirement.of(new ItemStack(JobChoice.SWORD.get())) == null && GearRequirement.of(new ItemStack(Items.IRON_SWORD)) == null,
+                "starter or vanilla weapons got a stat requirement");
+        Growth.get(p).stats[jp.revati.skyabyss.rpg.GrowthRules.Stat.STRENGTH.ordinal()] = 0;
+        check(f, !GearRequirement.met(p, great), "the requirement was met with no strength");
+        Growth.get(p).stats[jp.revati.skyabyss.rpg.GrowthRules.Stat.STRENGTH.ordinal()] = GearRequirement.STONE_WHALE;
+        check(f, GearRequirement.met(p, great), "the requirement was not met at the threshold");
         // 保存と読み直しで職の枠が残る
         net.minecraft.nbt.CompoundTag nbt = d.serializeNBT(server.registryAccess());
         SkillData back = new SkillData();

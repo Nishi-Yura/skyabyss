@@ -107,6 +107,17 @@ public final class AbilityTree {
     }
 
     // この技の段を上げる節 (順不同)
+    // その技の変異の節 (無ければ null)
+    @Nullable
+    public AbilityNode mutationNode(Skill skill) {
+        for (AbilityNode n : nodes.values()) {
+            if (n.kind == AbilityNode.Kind.MUTATION && n.skill == skill) {
+                return n;
+            }
+        }
+        return null;
+    }
+
     public List<AbilityNode> rankNodes(Skill skill) {
         List<AbilityNode> out = new ArrayList<>();
         for (AbilityNode n : nodes.values()) {

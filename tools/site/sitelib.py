@@ -44,6 +44,13 @@ def _load_lang():
         _LANG[lg] = d
 
 
+def lang_dicts():
+    """lang の全部 (ja, en)。サイトの技の木が節の文を引く"""
+    if not _LANG:
+        _load_lang()
+    return _LANG["ja_jp"], _LANG["en_us"]
+
+
 def item_name(iid):
     """品の名前 (日, 英) を lang から引く。"""
     if not _LANG:
@@ -230,6 +237,135 @@ def divider():
 
 # ------------------------------------------------------------- 技の木の図
 # (id, 技 ID の並び順, 名前 ja, 名前 en, 種類, 行, 列, 前提, 一言 ja, 一言 en)
+TREE_KIND_RING = {"active": "ring-a", "keystone": "ring-k", "trait": "ring-k", "mutation": "ring-k"}
+TREE_KIND_BADGE = {"active": ("使", "A"), "rank": ("段", "R"), "passive": ("常", "P"), "keystone": ("要", "K"), "rune": ("変", "M"),
+                   "stat": ("基", "S"), "threshold": ("閾", "T"), "effect": ("常", "P"), "trait": ("要", "K"), "mutation": ("変異", "Mu")}
+STAT_ORDER = ["strength", "agility", "spirit", "vitality"]
+
+
+def tree_v2_svg(job, tree, skill_icons, lang_ja, lang_en, desc):
+    """技の木 v2 (assets/skyabyss/skill_tree/<職>.json) を格子の SVG に。skill_icons: 技の id → 絵の番号 (site/img/skill/NN.png)。
+    desc: 技の id → (短い説明 ja, en)。節の文は lang から (node.skyabyss.<職>.<id> など)。"""
+    import json
+    cell = 80
+    nodew = 56
+    nodes = tree["nodes"]
+    by = {n["id"]: n for n in nodes}
+    width = max(n["x"] for n in nodes) + 1
+    height = max(n["y"] for n in nodes) + 1
+    vw = width * cell + 16
+    vh = height * cell + 48
+
+    def pos(n):
+        return 8 + n["x"] * cell + (cell - nodew) // 2, 8 + n["y"] * cell
+
+    def name(n):
+        k = n["kind"]
+        sid = n.get("skill", "")
+        if k in ("active", "passive", "keystone"):
+            return lang_ja.get("skill.skyabyss." + sid, sid), lang_en.get("skill.skyabyss." + sid, sid)
+        if k == "rank":
+            return lang_ja.get("skill.skyabyss." + sid, sid) + " +1", lang_en.get("skill.skyabyss." + sid, sid) + " +1"
+        if k == "rune":
+            return lang_ja.get("rune.skyabyss." + n["id"], n["id"]), lang_en.get("rune.skyabyss." + n["id"], n["id"])
+        if k == "stat":
+            return lang_ja.get("stat.skyabyss." + n["stat"], n["stat"]) + " +%d" % n["amount"], lang_en.get("stat.skyabyss." + n["stat"], n["stat"]) + " +%d" % n["amount"]
+        if k == "trait":
+            return lang_ja.get("keystone.skyabyss." + n["keystone"], n["id"]), lang_en.get("keystone.skyabyss." + n["keystone"], n["id"])
+        if k == "mutation":
+            return lang_ja.get("mutation.skyabyss." + n["mutation"], n["id"]), lang_en.get("mutation.skyabyss." + n["mutation"], n["id"])
+        key = "node.skyabyss.%s.%s" % (job, n["id"])
+        return lang_ja.get(key, n["id"]), lang_en.get(key, n["id"])
+
+    def effect(n):
+        k = n["kind"]
+        sid = n.get("skill", "")
+        if k in ("active", "passive", "keystone", "rank"):
+            d = desc.get(sid)
+            return d if d else ("", "")
+        if k == "rune":
+            key = "rune.skyabyss.%s.effect" % n["id"]
+        elif k == "trait":
+            key = "keystone.skyabyss.%s.effect" % n["keystone"]
+        elif k == "mutation":
+            key = "mutation.skyabyss.%s.effect" % n["mutation"]
+        elif k == "stat":
+            return ("", "")
+        else:
+            key = "node.skyabyss.%s.%s.effect" % (job, n["id"])
+        return lang_ja.get(key, "").replace("%%", "%"), lang_en.get(key, "").replace("%%", "%")
+
+    def icon(n):
+        k = n["kind"]
+        if k == "stat":
+            return 100 + STAT_ORDER.index(n["stat"])
+        if k == "rune":
+            return 104
+        if k == "effect":
+            return 145
+        if k == "threshold":
+            return 146
+        if k == "trait":
+            return 147
+        return skill_icons.get(n.get("skill", ""), None)
+
+    parts = ['<svg class="tree-svg tree-v2" viewBox="0 0 %d %d" role="img" aria-label="%s" data-label-ja="%s" data-label-en="%s">' % (
+        vw, vh, esc(lang_ja.get("job.skyabyss." + job, job) + " の技の木"), esc(lang_ja.get("job.skyabyss." + job, job) + " の技の木"),
+        esc(lang_en.get("job.skyabyss." + job, job) + " ability tree"))]
+    for n in nodes:
+        x, y = pos(n)
+        for r in n.get("requires", []):
+            p = by.get(r)
+            if p is None:
+                continue
+            px, py = pos(p)
+            x1, y1 = px + nodew // 2, py + nodew
+            x2, y2 = x + nodew // 2, y
+            if py == y:
+                parts.append('<path class="ln" d="M%d %d H%d"/>' % (min(px, x) + nodew // 2, py + nodew // 2, max(px, x) + nodew // 2))
+            elif x1 == x2:
+                parts.append('<path class="ln" d="M%d %d V%d"/>' % (x1, y1, y2))
+            else:
+                ym = (y1 + y2) // 2
+                parts.append('<path class="ln" d="M%d %d V%d H%d V%d"/>' % (x1, y1, ym, x2, y2))
+    for n in nodes:
+        x, y = pos(n)
+        cx, cy = x + nodew // 2, y + nodew // 2
+        ja, en = name(n)
+        eja, een = effect(n)
+        ic = icon(n)
+        kind_ja = lang_ja.get("gui.skyabyss.tree.kind." + n["kind"], n["kind"])
+        kind_en = lang_en.get("gui.skyabyss.tree.kind." + n["kind"], n["kind"])
+        req = [name(by[r])[0] for r in n.get("requires", []) if r in by]
+        req_en = [name(by[r])[1] for r in n.get("requires", []) if r in by]
+        tip_ja = "%s（%s・点 %d）%s%s%s" % (ja, kind_ja, n["cost"], "\n" + eja if eja else "", "\n前提: " + " / ".join(req) if req else "",
+                                         "\n型の点 %d" % n["arch_points"] if n.get("arch_points") else "")
+        tip_en = "%s (%s, %d pt)%s%s%s" % (en, kind_en, n["cost"], "\n" + een if een else "", "\nNeeds: " + " / ".join(req_en) if req_en else "",
+                                          "\nArchetype points %d" % n["arch_points"] if n.get("arch_points") else "")
+        parts.append('<g class="node"><title class="ja">%s</title>' % esc(tip_ja))
+        if ic is not None and os.path.exists(os.path.join(ROOT, "site", "img", "skill", "%02d.png" % ic)):
+            parts.append('<image href="img/skill/%02d.png" x="%d" y="%d" width="%d" height="%d"/>' % (ic, x, y, nodew, nodew))
+        parts.append('<circle class="%s" cx="%d" cy="%d" r="%d"/>' % (TREE_KIND_RING.get(n["kind"], "ring-p"), cx, cy, nodew // 2 + 1))
+        b = TREE_KIND_BADGE.get(n["kind"], ("", ""))
+        parts.append('<rect class="badge" x="%d" y="%d" width="%d" height="16"/>' % (x - 4, y - 4, 18 if len(b[0]) <= 1 else 30))
+        parts.append('<text class="badge-t ja" x="%d" y="%d">%s</text><text class="badge-t en" x="%d" y="%d">%s</text>' % (x + 5, y + 8, b[0], x + 5, y + 8, b[1]))
+        parts.append('<text class="cost" x="%d" y="%d" text-anchor="end">%d</text>' % (x + nodew + 4, y + nodew + 2, n["cost"]))
+        parts.append('<text class="tx ja" x="%d" y="%d" text-anchor="middle">%s</text><text class="tx en" x="%d" y="%d" text-anchor="middle">%s</text>' % (
+            cx, y + nodew + 14, esc(ja), cx, y + nodew + 14, esc(en)))
+        parts.append('<desc class="en">%s</desc></g>' % esc(tip_en))
+    for arch in tree.get("archetypes", []):
+        xs = [pos(n)[0] for n in nodes if n.get("arch") == arch]
+        if not xs:
+            continue
+        mid = (min(xs) + max(xs) + nodew) // 2
+        aja = lang_ja.get("arch.skyabyss.%s.%s" % (job, arch), arch)
+        aen = lang_en.get("arch.skyabyss.%s.%s" % (job, arch), arch)
+        parts.append('<text class="lv ja" x="%d" y="%d" text-anchor="middle">%s</text><text class="lv en" x="%d" y="%d" text-anchor="middle">%s</text>' % (
+            mid, vh - 12, esc(aja), mid, vh - 12, esc(aen)))
+    parts.append("</svg>")
+    return "".join(parts)
+
+
 def tree_svg(nodes, name_ja, name_en, icons=None):
     """nodes: [(idx, ja, en, kind, row, col, [prereq idx])] 。kind は A(使う)・P(常に)・K(要)。icons: idx → 絵の番号 (site/img/skill/NN.png。無ければ輪だけ)。"""
     pos = {}

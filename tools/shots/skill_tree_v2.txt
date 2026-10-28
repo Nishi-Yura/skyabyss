@@ -68,6 +68,14 @@ open skills_node:stone_oath
 wait 5
 shot node_keystone_gate
 close
+open skills_node:cleave_cliff
+wait 5
+shot node_mutation
+close
+open skills_ext
+wait 5
+shot ext_glyphs
+close
 
 # 記録 (J) は見るだけ
 open growth

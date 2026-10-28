@@ -6,9 +6,8 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 
-// 持ち主 → サーバー: 変異を選ぶ (MUTATE=skill)、紋を盤の穴へ差す (PLACE=a:socket・b:bag・skill)、紋を外す (REMOVE=a:socket)。サーバーで検める
+// 持ち主 → サーバー: 紋を盤の穴へ差す (PLACE=a:socket・b:bag・skill)、紋を外す (REMOVE=a:socket)。サーバーで検める。変異は木の節 (SkillNodePayload)
 public record SkillExtPayload(int action, String skill, int a, int b) implements CustomPacketPayload {
-    public static final int MUTATE = 0;
     public static final int PLACE = 1;
     public static final int REMOVE = 2;
 

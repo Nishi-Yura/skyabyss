@@ -4,17 +4,18 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import jp.revati.skyabyss.item.accessory.Accessories;
+import jp.revati.skyabyss.rpg.skill.tree.NodeEffects;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 
-// ビルドの数え方: タグ・木のセット・キーストーン・構え・条件の特性・連鎖・熟練の刻印を、技の力・待ち・マナ・属性の修飾へまとめる。
-// 数字はすべて SkillRules の定数と、ここの小さな表 (docs/design/31 の A03・A04・A11・A15・A20)。回復・無敵は作らない。
-// 装備の側 (アスペクト・ソケット・のちの変異や紋の盤) は SkillModifier を register して数字を足す
+// ビルドの数え方: 技の木の節 (docs/design/48。NodeEffects)・型の要 (鍵石)・熟練の刻印・外の修飾 (装備・紋・淵) を、
+// 技の力・待ち・マナ・属性の修飾へまとめる。数字はすべて SkillRules の定数と木の JSON。回復・無敵は作らない。
+// 木のセット・タグの数の足し・条件の特性 (31 の A03・A04・A15) は 48 で消した。タグの数は淵の鏡・誓いと紋の条件にだけ残る
 public final class SkillBuild {
     private static final List<SkillModifier> MODIFIERS = new CopyOnWriteArrayList<>();
 
     static {
-        // 橋・淵・前世の技・紋の盤の数字 (docs/design/31 の A09・A14・B08・B09)
+        // 淵・前世の技・紋の盤の数字 (docs/design/31 の A09・A14・B08・B09)
         MODIFIERS.add(SkillExt.INSTANCE);
     }
 
@@ -25,8 +26,8 @@ public final class SkillBuild {
         MODIFIERS.add(modifier);
     }
 
-    // ---------------------------------------------------------------- タグ
-    // そのタグを数えた数: 覚えている技 (旅人の技も持ち味のタグで) ＋ 付けている装飾 ＋ 手の武器の印 ＋ 外からの足し
+    // ---------------------------------------------------------------- タグ (数えるだけ。淵の鏡・誓い、紋の条件)
+    // そのタグを数えた数: 覚えている技 ＋ 付けている装飾 ＋ 手の武器の印 ＋ 外からの足し
     public static int tagCount(Player player, SkillTag tag) {
         SkillData d = SkillManager.get(player);
         int n = 0;
@@ -60,146 +61,18 @@ public final class SkillBuild {
         return n;
     }
 
-    public static double tagPower(Player player, SkillTag tag) {
-        return tag == null ? 0 : SkillRules.TAG_POWER_PER * Math.min(SkillRules.TAG_COUNT_CAP, tagCount(player, tag));
-    }
-
-    // ---------------------------------------------------------------- 木のセット (A04)
-    public enum SetKind {
-        ARMOR, KNOCKBACK, MOVE, ATTACK_SPEED, MANA, REGEN, DAMAGE, PROJECTILE, COOLDOWN, FIRE
-    }
-
-    public record SetLine(SetKind kind, double value) {
-    }
-
-    private static final SetLine[][] SETS = {
-            // 岩守り: 防ぎ
-            {new SetLine(SetKind.ARMOR, 1), new SetLine(SetKind.KNOCKBACK, 0.10), new SetLine(SetKind.ARMOR, 2)},
-            // 風読み: 足
-            {new SetLine(SetKind.MOVE, 0.02), new SetLine(SetKind.ATTACK_SPEED, 0.03), new SetLine(SetKind.MOVE, 0.03)},
-            // 潮歌い: マナ
-            {new SetLine(SetKind.MANA, 4), new SetLine(SetKind.REGEN, 0.05), new SetLine(SetKind.MANA, 6)},
-            // 灰の鍛え人: 傷と火
-            {new SetLine(SetKind.DAMAGE, 0.02), new SetLine(SetKind.FIRE, 0.10), new SetLine(SetKind.DAMAGE, 0.03)},
-            // 骨の射手: 矢と待ち
-            {new SetLine(SetKind.PROJECTILE, 0.03), new SetLine(SetKind.COOLDOWN, -0.04), new SetLine(SetKind.PROJECTILE, 0.04)}};
-
-    public static SetLine setLine(SkillTree tree, int tier) {
-        SkillTag tag = SkillTag.of(tree);
-        return tag == null || tier < 0 || tier > 2 ? null : SETS[tag.ordinal()][tier];
-    }
-
-    // その木に使った点で届いているセットの段 (0〜3)
-    public static int setTier(SkillData d, SkillTree tree) {
-        int p = d.treePoints(tree);
-        int t = 0;
-        for (int at : SkillRules.SET_AT) {
-            if (p >= at) {
-                t++;
-            }
-        }
-        return t;
-    }
-
-    private static double setSum(SkillData d, SetKind kind) {
-        double v = 0;
-        for (SkillTag tag : SkillTag.values()) {
-            int tier = setTier(d, tag.tree);
-            for (int i = 0; i < tier; i++) {
-                SetLine l = SETS[tag.ordinal()][i];
-                if (l.kind == kind) {
-                    v += l.value;
-                }
-            }
-        }
-        return v;
-    }
-
-    // ---------------------------------------------------------------- タグの 4・7 の足し
-    // 4 つで 1 つ目、7 つで 2 つ目 (同じ値をもう一度)。数字は小さく、種類はタグごとに 1 つ
-    private static SetLine tagStep(SkillTag tag) {
-        return switch (tag) {
-            case ROCK -> new SetLine(SetKind.ARMOR, 1);
-            case WIND -> new SetLine(SetKind.MOVE, 0.02);
-            case TIDE -> new SetLine(SetKind.MANA, 5);
-            case ASH -> new SetLine(SetKind.DAMAGE, 0.02);
-            case BONE -> new SetLine(SetKind.PROJECTILE, 0.03);
-        };
-    }
-
-    public static SetLine tagStepLine(SkillTag tag) {
-        return tagStep(tag);
-    }
-
-    private static double tagStepSum(Player player, SetKind kind) {
-        double v = 0;
-        for (SkillTag tag : SkillTag.values()) {
-            SetLine l = tagStep(tag);
-            if (l.kind != kind) {
-                continue;
-            }
-            int n = tagCount(player, tag);
-            int steps = (n >= SkillRules.TAG_STEP1 ? 1 : 0) + (n >= SkillRules.TAG_STEP2 ? 1 : 0);
-            v += l.value * steps;
-        }
-        return v;
-    }
-
-    // ---------------------------------------------------------------- 条件の特性 (A15)
-    // 岩: HP 3❤ 以下で防具 / 風: 予告をよけた直後 / 潮: マナが満タン / 灰: 無傷で完璧によけた直後 / 骨: HP 3❤ 以下で矢
+    // 「低 HP」(3❤ 以下)。木の節 low_hp_armor の条件
     public static boolean lowHp(Player player) {
         return player.isAlive() && player.getHealth() <= SkillRules.COND_LOW_HP;
     }
 
-    public static boolean fullMana(Player player, SkillData d) {
-        return d.mana >= SkillManager.maxMana(player) * SkillRules.COND_FULL_MANA && d.mana > 0;
-    }
-
-    private static double condValue(Player player, SkillTag tag, double small, double big) {
-        int n = tagCount(player, tag);
-        return n >= SkillRules.COND_BIG_TAGS ? big : n >= SkillRules.COND_MIN_TAGS ? small : 0;
-    }
-
-    // 条件が今満ちているか (表示にも使う)
-    public static boolean condActive(Player player, SkillTag tag) {
-        SkillData d = SkillManager.get(player);
-        long now = player.level().getGameTime();
-        return switch (tag) {
-            case ROCK, BONE -> lowHp(player);
-            case WIND -> d.dodgeUntil >= now;
-            case TIDE -> fullMana(player, d);
-            case ASH -> d.perfectUntil >= now;
-        };
-    }
-
-    public static double condDamage(Player player, boolean projectile) {
-        double v = 0;
-        if (condActive(player, SkillTag.WIND)) {
-            v += condValue(player, SkillTag.WIND, 0.05, 0.08);
-        }
-        if (condActive(player, SkillTag.TIDE)) {
-            v += condValue(player, SkillTag.TIDE, 0.04, 0.07);
-        }
-        if (condActive(player, SkillTag.ASH)) {
-            v += condValue(player, SkillTag.ASH, 0.06, 0.10);
-        }
-        if (projectile && condActive(player, SkillTag.BONE)) {
-            v += condValue(player, SkillTag.BONE, 0.08, 0.12);
-        }
-        return v;
-    }
-
-    private static double condArmor(Player player) {
-        return condActive(player, SkillTag.ROCK) ? condValue(player, SkillTag.ROCK, 3, 4) : 0;
-    }
-
-    // ---------------------------------------------------------------- キーストーン
+    // ---------------------------------------------------------------- 型の要 (鍵石)
     public static boolean has(SkillData d, SkillKeystone k) {
         return d.keystones.contains(k.id);
     }
 
     // ---------------------------------------------------------------- 傷
-    // 近接・飛び道具・技の別なく、自分の与える傷に掛ける割合 (足す)。キーストーン・条件の特性・セット・タグの足し
+    // 近接・飛び道具・技の別なく、自分の与える傷に掛ける割合 (足す)。型の要と木の節
     public static double generalDamage(Player player, boolean projectile) {
         SkillData d = SkillManager.get(player);
         double v = 0;
@@ -215,24 +88,20 @@ public final class SkillBuild {
         if (projectile && has(d, SkillKeystone.LONE_STRING)) {
             v += SkillRules.KEY_STRING_PROJECTILE;
         }
-        v += setSum(d, SetKind.DAMAGE) + tagStepSum(player, SetKind.DAMAGE);
-        v += jp.revati.skyabyss.rpg.skill.tree.NodeEffects.sum(player, "attack");
+        v += NodeEffects.sum(player, "attack");
         if (projectile) {
-            v += setSum(d, SetKind.PROJECTILE) + tagStepSum(player, SetKind.PROJECTILE);
-            v += jp.revati.skyabyss.rpg.skill.tree.NodeEffects.sum(player, "projectile");
+            v += NodeEffects.sum(player, "projectile");
         }
-        v += condDamage(player, projectile);
         return Math.max(-0.5, v);
     }
 
-    // 技 (傷・支えの量) だけに掛かる割合: そのタグの数・熟練の刻印・外の修飾
+    // 技 (傷・支えの量) だけに掛かる割合: 熟練の刻印・木の節・外の修飾
     public static double skillPower(Player player, Skill skill) {
-        SkillData d = SkillManager.get(player);
-        double v = tagPower(player, SkillTag.of(skill));
+        double v = 0;
         if (SkillManager.runeOf(player, skill) == Rune.MASTERY) {
             v += SkillRules.MASTERY_RUNE_POWER;
         }
-        v += jp.revati.skyabyss.rpg.skill.tree.NodeEffects.sum(player, "skill_power");
+        v += NodeEffects.sum(player, "skill_power");
         for (SkillModifier m : MODIFIERS) {
             v += m.power(player, skill);
         }
@@ -244,15 +113,15 @@ public final class SkillBuild {
         return 0;
     }
 
-    // 火の傷を減らす割合 (灰の木のセット)
+    // 火の傷を減らす割合 (木の節)
     public static double fireReduction(Player player) {
-        return setSum(SkillManager.get(player), SetKind.FIRE) + jp.revati.skyabyss.rpg.skill.tree.NodeEffects.sum(player, "fire_resist");
+        return NodeEffects.sum(player, "fire_resist");
     }
 
     // ---------------------------------------------------------------- 待ち・マナ
     public static double cooldownScale(Player player, Skill skill) {
         SkillData d = SkillManager.get(player);
-        double v = setSum(d, SetKind.COOLDOWN);
+        double v = 0;
         if (has(d, SkillKeystone.LONE_STRING)) {
             v += SkillRules.KEY_STRING_COOLDOWN;
         }
@@ -265,7 +134,7 @@ public final class SkillBuild {
         for (SkillModifier m : MODIFIERS) {
             v += m.cooldown(player, skill);
         }
-        v += jp.revati.skyabyss.rpg.skill.tree.NodeEffects.sum(player, "cooldown");
+        v += NodeEffects.sum(player, "cooldown");
         return 1 + Math.max(SkillRules.COOLDOWN_MIN, Math.min(SkillRules.COOLDOWN_MAX, v));
     }
 
@@ -275,18 +144,18 @@ public final class SkillBuild {
         for (SkillModifier m : MODIFIERS) {
             v += m.manaCost(player, skill);
         }
-        v += jp.revati.skyabyss.rpg.skill.tree.NodeEffects.sum(player, "mana_cost");
+        v += NodeEffects.sum(player, "mana_cost");
         return 1 + Math.max(-SkillRules.MANA_COST_CAP, Math.min(SkillRules.MANA_COST_CAP, v));
     }
 
-    // マナの回復に足す割合 (満ち潮・潮のセット)
+    // マナの回復に足す割合 (満ち潮・木の節・淵)
     public static double regenAdd(Player player) {
         SkillData d = SkillManager.get(player);
-        double v = setSum(d, SetKind.REGEN);
+        double v = 0;
         if (has(d, SkillKeystone.FULL_TIDE)) {
             v += SkillRules.KEY_TIDE_REGEN;
         }
-        v += jp.revati.skyabyss.rpg.skill.tree.NodeEffects.sum(player, "regen");
+        v += NodeEffects.sum(player, "regen");
         return v + SkillExt.regenAdd(player);
     }
 
@@ -296,17 +165,12 @@ public final class SkillBuild {
 
     public static Attrs attrs(Player player) {
         SkillData d = SkillManager.get(player);
-        double armor = setSum(d, SetKind.ARMOR) + tagStepSum(player, SetKind.ARMOR) + condArmor(player);
-        double kb = setSum(d, SetKind.KNOCKBACK);
-        double move = setSum(d, SetKind.MOVE) + tagStepSum(player, SetKind.MOVE);
-        double aspeed = setSum(d, SetKind.ATTACK_SPEED);
-        double mana = setSum(d, SetKind.MANA) + tagStepSum(player, SetKind.MANA);
         // 木 v2 の節 (docs/design/48)
-        armor += jp.revati.skyabyss.rpg.skill.tree.NodeEffects.sum(player, "armor") + (lowHp(player) ? jp.revati.skyabyss.rpg.skill.tree.NodeEffects.sum(player, "low_hp_armor") : 0);
-        kb += jp.revati.skyabyss.rpg.skill.tree.NodeEffects.sum(player, "knockback");
-        move += jp.revati.skyabyss.rpg.skill.tree.NodeEffects.sum(player, "move");
-        aspeed += jp.revati.skyabyss.rpg.skill.tree.NodeEffects.sum(player, "attack_speed");
-        mana += jp.revati.skyabyss.rpg.skill.tree.NodeEffects.sum(player, "mana");
+        double armor = NodeEffects.sum(player, "armor") + (lowHp(player) ? NodeEffects.sum(player, "low_hp_armor") : 0);
+        double kb = NodeEffects.sum(player, "knockback");
+        double move = NodeEffects.sum(player, "move");
+        double aspeed = NodeEffects.sum(player, "attack_speed");
+        double mana = NodeEffects.sum(player, "mana");
         double manaMult = 0;
         if (has(d, SkillKeystone.BULWARK)) {
             armor += SkillRules.KEY_BULWARK_ARMOR;

@@ -407,7 +407,7 @@ public final class SkillData implements INBTSerializable<CompoundTag> {
     }
 
     public enum TakeResult {
-        OK, UNKNOWN, TAKEN, NO_POINTS, REQUIRES, EXCLUDED, ARCH_POINTS, ACTIVES_FULL, RANK_MAX, SEALED
+        OK, UNKNOWN, TAKEN, NO_POINTS, REQUIRES, EXCLUDED, ARCH_POINTS, ACTIVES_FULL, RANK_MAX, SEALED, NOT_MASTERED, NO_MATERIAL
     }
 
     // その節を今取れるか
@@ -453,6 +453,10 @@ public final class SkillData implements INBTSerializable<CompoundTag> {
         }
         if (n.kind == jp.revati.skyabyss.rpg.skill.tree.AbilityNode.Kind.RANK && rank(n.skill) >= n.skill.maxRank) {
             return TakeResult.RANK_MAX;
+        }
+        // 変異は技を極めてから (素材はサーバーが取るときに見る)
+        if (n.kind == jp.revati.skyabyss.rpg.skill.tree.AbilityNode.Kind.MUTATION && rank(n.skill) < n.skill.maxRank) {
+            return TakeResult.NOT_MASTERED;
         }
         if (unspentFor(job.tree, level) < n.cost) {
             return TakeResult.NO_POINTS;

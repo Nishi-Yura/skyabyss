@@ -110,7 +110,6 @@ public final class SkillNetwork {
                 .playToServer(SkillExtPayload.TYPE, SkillExtPayload.STREAM_CODEC, (payload, context) -> {
                     if (context.player() instanceof ServerPlayer player) {
                         String result = switch (payload.action()) {
-                            case SkillExtPayload.MUTATE -> SkillExtOps.mutate(player, Skill.byId(payload.skill())).name();
                             case SkillExtPayload.PLACE -> SkillExtOps.place(player, payload.a(), payload.b(), Skill.byId(payload.skill())).name();
                             case SkillExtPayload.REMOVE -> SkillExtOps.remove(player, payload.a()).name();
                             default -> "BAD";

@@ -135,6 +135,13 @@ public final class SkillManager {
         if (r != SkillData.TakeResult.OK) {
             return r;
         }
+        // 変異の節: 巨神の素材を一度だけ払う (払ってあれば、振り直しのあとでもただで取り直せる)
+        if (n.kind == jp.revati.skyabyss.rpg.skill.tree.AbilityNode.Kind.MUTATION && !d.mutations.containsKey(n.skill.id)) {
+            if (!SkillExtOps.hasMaterial(player, n.mutation)) {
+                return SkillData.TakeResult.NO_MATERIAL;
+            }
+            SkillExtOps.payMutation(player, n.mutation);
+        }
         d.nodesOf(job).add(n.id);
         d.applyNodes();
         if (n.skill != null && n.skill.active) {
