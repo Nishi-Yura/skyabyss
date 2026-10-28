@@ -21,6 +21,7 @@ import jp.revati.skyabyss.trial.TrialDraw;
 import jp.revati.skyabyss.trial.TrialFrame;
 import jp.revati.skyabyss.trial.TrialRoute;
 import jp.revati.skyabyss.trial.TrialSlot;
+import jp.revati.skyabyss.util.PlayerMaps;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
@@ -521,7 +522,7 @@ public final class RaidRun {
         return run != null && run.ctx.level() == sp.level() && run.ctx.cell().bounds().contains(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5) ? run : null;
     }
 
-    private static final Map<UUID, Long> LAST_USE = new HashMap<>();
+    private static final Map<UUID, Long> LAST_USE = PlayerMaps.track(new HashMap<>());
 
     private static void handleUse(Player player, BlockPos pos, boolean attack, Runnable cancel) {
         if (!(player instanceof ServerPlayer sp)) {

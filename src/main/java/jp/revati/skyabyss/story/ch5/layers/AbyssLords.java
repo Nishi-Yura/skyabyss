@@ -20,6 +20,7 @@ import jp.revati.skyabyss.notice.Notice;
 import jp.revati.skyabyss.quest.Quests;
 import jp.revati.skyabyss.story.ch5.AbyssBuild;
 import jp.revati.skyabyss.story.ch5.AbyssWorld;
+import jp.revati.skyabyss.util.PlayerMaps;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
@@ -103,7 +104,7 @@ public final class AbyssLords {
     }
 
     private static final Map<String, Fight> FIGHTS = new HashMap<>();
-    private static final Map<UUID, Long> HEARD = new HashMap<>();
+    private static final Map<UUID, Long> HEARD = PlayerMaps.track(new HashMap<>());
     private static boolean listening;
 
     private AbyssLords() {

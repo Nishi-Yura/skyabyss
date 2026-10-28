@@ -8,6 +8,7 @@ import java.util.UUID;
 
 import jp.revati.skyabyss.SkyAbyss;
 import jp.revati.skyabyss.story.ch4.Ch4Mobs;
+import jp.revati.skyabyss.util.PlayerMaps;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
@@ -42,7 +43,7 @@ public class RopeHanger extends AbyssMobB {
     public static final double PUSH = 0.05;
     public static final float FALL_CAP = 6f;
     public static final long FALL_WINDOW = 200;
-    private static final Map<UUID, Long> PULLED = new HashMap<>();
+    private static final Map<UUID, Long> PULLED = PlayerMaps.track(new HashMap<>());
     private final List<UUID> pullers = new ArrayList<>();
     private int tell = -1;
     private int pulling = -1;

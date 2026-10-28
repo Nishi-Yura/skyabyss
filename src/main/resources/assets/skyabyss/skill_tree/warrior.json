@@ -6,6 +6,8 @@
     {"id": "vit_a", "kind": "stat", "stat": "vitality", "amount": 4, "cost": 1, "x": 5, "y": 1, "requires": ["titan_cleave"]},
     {"id": "riposte", "kind": "passive", "skill": "riposte", "cost": 2, "x": 3, "y": 2, "requires": ["str_a"]},
     {"id": "stone_stance", "kind": "passive", "skill": "stone_stance", "cost": 2, "x": 5, "y": 2, "requires": ["vit_a"]},
+    {"id": "str_h", "kind": "stat", "stat": "strength", "amount": 4, "cost": 1, "x": 6, "y": 2, "requires": ["stone_stance"]},
+    {"id": "str_g", "kind": "stat", "stat": "strength", "amount": 4, "cost": 1, "x": 2, "y": 2, "requires": ["riposte"]},
     {"id": "shield_rush", "kind": "active", "skill": "shield_rush", "cost": 2, "x": 4, "y": 2, "requires": ["str_a", "vit_a"]},
     {"id": "vit_b", "kind": "stat", "stat": "vitality", "amount": 4, "cost": 1, "x": 2, "y": 3, "requires": ["stone_stance", "riposte"]},
     {"id": "str_b", "kind": "stat", "stat": "strength", "amount": 4, "cost": 1, "x": 4, "y": 3, "requires": ["shield_rush"]},
@@ -33,6 +35,8 @@
     {"id": "stone_oath", "kind": "keystone", "skill": "stone_oath", "cost": 3, "x": 1, "y": 10, "arch": "shield", "arch_points": 20, "requires": ["vit_e", "vit_f", "wall_voice"]},
     {"id": "fortress", "kind": "effect", "cost": 2, "x": 0, "y": 11, "arch": "shield", "arch_points": 22, "requires": ["stone_oath", "stone_stance_3"], "effect": {"low_hp_armor": 4}},
     {"id": "heavy_shield", "kind": "threshold", "stat": "vitality", "at": 24, "cost": 1, "x": 2, "y": 11, "arch": "shield", "requires": ["stone_oath"], "effect": {"knockback": 0.15, "damage_taken": -0.04}},
+    {"id": "str_j", "kind": "stat", "stat": "strength", "amount": 4, "cost": 1, "x": 3, "y": 11, "arch": "shield", "requires": ["heavy_shield"]},
+    {"id": "str_i", "kind": "stat", "stat": "strength", "amount": 4, "cost": 1, "x": 1, "y": 11, "arch": "shield", "requires": ["stone_oath"]},
     {"id": "wide_blade", "kind": "rune", "skill": "titan_cleave", "rune": 1, "cost": 1, "x": 3, "y": 4, "arch": "cleaver", "requires": ["str_b"]},
     {"id": "deep_blade", "kind": "rune", "skill": "titan_cleave", "rune": 2, "cost": 1, "x": 4, "y": 4, "arch": "cleaver", "requires": ["str_b"]},
     {"id": "titan_cleave_2", "kind": "rank", "skill": "titan_cleave", "cost": 1, "x": 5, "y": 4, "arch": "cleaver", "requires": ["str_b"]},
@@ -53,6 +57,8 @@
     {"id": "bone_swing_2", "kind": "rank", "skill": "bone_swing", "cost": 1, "x": 4, "y": 10, "arch": "cleaver", "requires": ["glass_blade"]},
     {"id": "thirst", "kind": "effect", "cost": 2, "x": 3, "y": 10, "arch": "cleaver", "arch_points": 22, "requires": ["glass_blade"], "effect": {"lifesteal": 0.03}},
     {"id": "mountain_split", "kind": "threshold", "stat": "strength", "at": 24, "cost": 1, "x": 5, "y": 10, "arch": "cleaver", "requires": ["glass_blade"], "effect": {"big_target": 0.12, "attack": 0.04}},
+    {"id": "str_l", "kind": "stat", "stat": "strength", "amount": 4, "cost": 1, "x": 4, "y": 11, "arch": "cleaver", "requires": ["bone_swing_2"]},
+    {"id": "str_k", "kind": "stat", "stat": "strength", "amount": 4, "cost": 1, "x": 3, "y": 9, "arch": "cleaver", "requires": ["str_e"]},
     {"id": "whale_sweep", "kind": "active", "skill": "whale_sweep", "cost": 2, "x": 7, "y": 4, "arch": "tail", "requires": ["agi_a"]},
     {"id": "spin_cut", "kind": "active", "skill": "spin_cut", "cost": 2, "x": 8, "y": 4, "arch": "tail", "requires": ["agi_a"]},
     {"id": "push_tide", "kind": "rune", "skill": "whale_sweep", "rune": 1, "cost": 1, "x": 6, "y": 5, "arch": "tail", "requires": ["whale_sweep", "riposte_2"]},
@@ -71,8 +77,10 @@
     {"id": "agi_e", "kind": "stat", "stat": "agility", "amount": 4, "cost": 1, "x": 6, "y": 9, "arch": "tail", "requires": ["tail_wind"]},
     {"id": "spin_cut_2", "kind": "rank", "skill": "spin_cut", "cost": 1, "x": 6, "y": 10, "arch": "tail", "requires": ["agi_e"]},
     {"id": "circle_guard", "kind": "effect", "cost": 2, "x": 8, "y": 9, "arch": "tail", "arch_points": 14, "requires": ["agi_d"], "effect": {"damage_taken": -0.05, "regen": 0.05}},
+    {"id": "str_m", "kind": "stat", "stat": "strength", "amount": 4, "cost": 1, "x": 8, "y": 10, "arch": "tail", "requires": ["circle_guard"]},
     {"id": "wind_dance", "kind": "trait", "keystone": "wind_dance", "cost": 3, "x": 7, "y": 10, "arch": "tail", "arch_points": 20, "requires": ["agi_e", "double_sweep", "circle_guard"]},
     {"id": "tail_return", "kind": "effect", "cost": 2, "x": 6, "y": 11, "arch": "tail", "arch_points": 22, "requires": ["wind_dance"], "effect": {"attack": 0.05, "cooldown": -0.05}},
+    {"id": "str_n", "kind": "stat", "stat": "strength", "amount": 4, "cost": 1, "x": 7, "y": 11, "arch": "tail", "requires": ["tail_return"]},
     {"id": "blade_storm", "kind": "threshold", "stat": "agility", "at": 20, "cost": 1, "x": 8, "y": 11, "arch": "tail", "requires": ["wind_dance"], "effect": {"attack_speed": 0.1}}
   ]
 }

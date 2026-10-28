@@ -9,6 +9,7 @@ import jp.revati.skyabyss.SkyAbyss;
 import jp.revati.skyabyss.lore.Lore;
 import jp.revati.skyabyss.notice.Notice;
 import jp.revati.skyabyss.registry.ModBlocks;
+import jp.revati.skyabyss.util.PlayerMaps;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
@@ -29,8 +30,8 @@ import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 public final class Tablets {
     private static final double LOOK_DISTANCE = 4.5;
     private static final long REREAD_TICKS = 600;
-    private static final Map<UUID, BlockPos> LAST_POS = new HashMap<>();
-    private static final Map<UUID, Long> LAST_TIME = new HashMap<>();
+    private static final Map<UUID, BlockPos> LAST_POS = PlayerMaps.track(new HashMap<>());
+    private static final Map<UUID, Long> LAST_TIME = PlayerMaps.track(new HashMap<>());
 
     private Tablets() {
     }

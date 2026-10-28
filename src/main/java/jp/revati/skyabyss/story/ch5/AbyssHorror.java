@@ -6,6 +6,7 @@ import java.util.UUID;
 
 import jp.revati.skyabyss.SkyAbyss;
 import jp.revati.skyabyss.prologue.WatcherPayload;
+import jp.revati.skyabyss.util.PlayerMaps;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.nbt.CompoundTag;
@@ -33,7 +34,7 @@ public final class AbyssHorror {
     // 足音の一続き (歩くたびに一歩ずつ、最大 8 歩)
     static final int STEPS = 8;
     private static final Map<UUID, Integer> STEPS_LEFT = new HashMap<>();
-    private static final Map<UUID, Double> LAST_WALK = new HashMap<>();
+    private static final Map<UUID, Double> LAST_WALK = PlayerMaps.track(new HashMap<>());
     private static int watcherId = 1_000_000;
 
     private AbyssHorror() {

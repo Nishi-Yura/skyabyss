@@ -21,6 +21,7 @@ import jp.revati.skyabyss.notice.Notice;
 import jp.revati.skyabyss.quest.Quests;
 import jp.revati.skyabyss.story.ch5.AbyssBuild;
 import jp.revati.skyabyss.story.ch5.AbyssWorld;
+import jp.revati.skyabyss.util.PlayerMaps;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
@@ -182,7 +183,7 @@ public final class AbyssEscort {
     }
 
     private static final Map<String, Run> RUNS = new HashMap<>();
-    private static final Map<UUID, Long> HINTED = new HashMap<>();
+    private static final Map<UUID, Long> HINTED = PlayerMaps.track(new HashMap<>());
     private static boolean listening;
 
     private AbyssEscort() {

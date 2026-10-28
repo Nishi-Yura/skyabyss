@@ -114,12 +114,13 @@ public final class SiteAudit {
         return rep;
     }
 
-    // 中心の 25x25 に、水・木が建物の邪魔をする所が無いか (水面と海底の高さが同じ = 水が無い)
+    // 中心の 25x25 に、水・木が建物の邪魔をする所が無いか (水面と海底の高さが同じ = 水が無い)。
+    // 読み込み済みのチャンクには地形生成用 (_WG) の高さ図が残っていない ("Unprimed heightmap" の ERROR になる) ので、ふつうの高さ図で見る
     private static boolean dry(ServerLevel level, int x, int z) {
         for (int dx = -12; dx <= 12; dx += 6) {
             for (int dz = -12; dz <= 12; dz += 6) {
-                int a = level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.WORLD_SURFACE_WG, x + dx, z + dz);
-                int b = level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.OCEAN_FLOOR_WG, x + dx, z + dz);
+                int a = level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.WORLD_SURFACE, x + dx, z + dz);
+                int b = level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.OCEAN_FLOOR, x + dx, z + dz);
                 if (a != b || a <= level.getSeaLevel()) {
                     return false;
                 }

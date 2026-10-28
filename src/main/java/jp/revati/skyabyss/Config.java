@@ -13,7 +13,7 @@ public final class Config {
             .defineInRange("horrorEventFrequency", 1.0, 0.0, 3.0);
 
     public static final ModConfigSpec.IntValue LOOP_LENGTH_DAYS = SERVER_BUILDER
-            .comment("1ループの長さ (ゲーム内日数)。月はこの日数で落ちる")
+            .comment("空の月の近さ (sky/ChapterSky の仮の計算) の周期 (ゲーム内日数)。日ごとに 1/日数 ずつ近づき、この日数でいちばん近くなって戻る。物語の月の動きがあるときはそちらが優先")
             .defineInRange("loopLengthDays", 7, 3, 30);
 
     // 序章「見る者」(prologue/WatcherEvents)

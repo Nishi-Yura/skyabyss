@@ -36,6 +36,7 @@ import jp.revati.skyabyss.titan.group.GroupProgress;
 import jp.revati.skyabyss.titan.group.Groups;
 import jp.revati.skyabyss.trial.Trial.Def;
 import jp.revati.skyabyss.trial.raid.RaidRewards;
+import jp.revati.skyabyss.util.PlayerMaps;
 import jp.revati.skyabyss.util.Players;
 
 // 巨神の順路 (docs/design/32 の 2 章): 歩 → 智 → 闘 → 中ボス → 心臓。どれも体の外の閉じた部屋 (巨神の中は建てない。32 の 2.5)
@@ -563,7 +564,7 @@ public final class TrialRoute {
 
     // 開発用: 環境変数 SKYABYSS_ROUTE_TRACE があると、入口の箱の判断 (待つ・断る・始める) が変わるたびに記録へ書く (R6 の撮影で、始まらない理由を見る)
     private static final boolean TRACE = System.getenv("SKYABYSS_ROUTE_TRACE") != null;
-    private static final Map<UUID, String> TRACE_LAST = new HashMap<>();
+    private static final Map<UUID, String> TRACE_LAST = PlayerMaps.track(new HashMap<>());
 
     private static void trace(UUID group, String titan, String what) {
         if (TRACE && !what.equals(TRACE_LAST.put(group, what))) {

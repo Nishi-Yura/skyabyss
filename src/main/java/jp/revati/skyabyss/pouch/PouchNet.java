@@ -6,6 +6,7 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 import jp.revati.skyabyss.SkyAbyss;
+import jp.revati.skyabyss.util.PlayerMaps;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
@@ -25,7 +26,7 @@ public final class PouchNet {
     private static final String PROTOCOL_VERSION = "pouch-4";
 
     // 最後に使った道具 (サーバーが覚える。短押しはこれを使う)
-    private static final Map<UUID, ResourceLocation> LAST = new ConcurrentHashMap<>();
+    private static final Map<UUID, ResourceLocation> LAST = PlayerMaps.track(new ConcurrentHashMap<>());
 
     private PouchNet() {
     }

@@ -8,6 +8,15 @@
 - 試遊版: 0.8.0（`build/libs/skyabyss-0.8.0.jar`。確認表 `docs/review/playtest_0.8.0.md`、遊び方 `docs/beta_how_to_play.md`）。
 - 自己テスト: `bash <scratchpad>/fresh_continent.sh "<名前,…>" <世界名>`（空なら全部。大陸の新しい世界で回す）。`abyss escort` はほかと一緒に流すと時間切れで落ちることがある（単独では通る）。
 
+## 2026-10-30 朝（残りの片付け: 戦士の筋力、監査の「低」）
+
+- 戦士の木に筋力の節 8 つ（`str_g`〜`str_n`。幹 2・盾 2・断ち 2・尾 2。筋力 24 → 56、木は 81 節 114 点）。どの型を進んでも深淵の武器の要求値 24（`GearRequirement`）に届く。48 の 2.1・2.2 の数字を直した。ほかの 5 職は生成器が主の基礎を 44〜72 置いているのでそのまま。
+- 「Unprimed heightmap」の ERROR: 建築の監査 `SiteAudit.dry` が読み込み済みのチャンクに地形生成用（`_WG`）の高さ図を求めていた。ふつうの高さ図に。
+- `Config.loopLengthDays` の説明を今の役（`sky/ChapterSky` の仮の月の周期）に。鍵の名前はそのまま。
+- ログアウトで消えなかった UUID の表 11 個（縄の人の引き・旅嚢の最後の道具・淵のほのめかし 4 つ・石板の最後の位置と時刻・試練の足跡・試練の最後の使用・武器の連撃）を `util/PlayerMaps.track` で包んだ（ログアウトで行が消える）。ほかの `static Map<UUID>` は各係が消している。
+- `catch (Exception)` 74 か所は見た: 自己テスト以外は全部が記録するか投げ直す（`VoiceTiming` だけ黙って「時刻なし」にする。意図どおり）。直す所なし。
+- 不安定だった `abyss escort`・`ch4 ground`（sites と later も）を木・技・職・成長・施設の自己テストと一緒に新しい大陸の世界で流して、13 本すべて通った。「Unprimed heightmap」は 0 件。
+
 ## 2026-10-30 未明（48 の残り: 淵・前世の木、紋の寄せ、撮影）
 
 - 淵・前世を職をまたぐ木に（`assets/skyabyss/skill_tree/deep.json`・`past.json`。`AbilityTrees` は SkillTree で引く。`SkillData.nodesOf(SkillTree)` など SkillTree 版を足し、Job 版はその薄い包み。節の `rebirth_at`、`TakeResult.REBIRTH`。前世の点は `pastSpent` が節の点、淵は `sharedSpent` 経由で職の点と分け合う。使う技 4 本は今の職 + 淵 + 前世で数える）。`SkillNodePayload` に木の id。
@@ -58,7 +67,7 @@
 - 片付け: `run/shots`・`run/mp_check`・`run/world_all4`・dump・`config/*.bak`・`build/portraits_v2`・`build/tmp_attendant`・0.8.0 の jar。`docs/review` の古い報告（assets/gear/mod_blocks/weapon_design_base と試遊表 0.7.1〜0.8.0）、決まったラフの案（legends・ch5・voice2・survivor・warden_paint・材料。比較の絵だけ残す）、`tools/once`・`tools/misc` の 4 本・`tools/rough` の v2〜v4 と gallery_v*。消した書類を指していたコメントと README は直した。
 - 残したもの（判断）: `textures/entity/` と `lowpoly/` の同じ絵 35 組は、立方体の geo（`LowPoly.enabled = false` の控え）が残っているのでそのまま。`elder_sentry`（一章の洞窟）と `elder_sentinel`（背の試練）は役が別なので二体のまま（突進・踏みの印は同じ動きなので同じ絵）。メッシュ監査（`tools/audit/mesh_audit.py`）: 開いた辺 0、非多様体の辺 2,028、つぶれた三角 104、関節の離れ 37（主に防具の脚）。直すなら `tools/lib/mesh_close.py` から。
 
-まだ直していない「低」: 「Unprimed heightmap」の ERROR（建築の監査中に 40 件）、不安定な自己テスト（`abyss escort`・`ch4 ground (sites)`）、`Config` の古いコメント（`loopLengthDays`）、`static Map<UUID>` の掃除の口、`catch (Exception)` 74 か所。
+「低」も 2026-10-30 に片付けた（上の「残りの片付け」）。残るのはメッシュ監査の非多様体の辺・つぶれた三角・関節の離れ（直すなら `tools/lib/mesh_close.py` から）。
 
 ## 2026-10-28 夜（0.8.0 の試遊の声 その 2。`memory: skyabyss-080b-feedback`）
 
@@ -167,5 +176,5 @@
 1. 技の木 v2（48）: 試遊で数値を詰める（節の値・点の総量・閾値・要求値）。
 2. 試遊 0.8.0（`docs/review/playtest_0.8.0.md`）の声を待つ。
 3. クエストの見直しは済んだ（初日のお使いと風の道の旗を消し、墓守を 2 段に、大干潮と峰の足もとを時刻で閉じない形に、折れた剣は自分の得物を研ぐ形に）。
-4. 試遊 0.7.1 の声の直しの確かめと、都・見どころの仕上げの撮影（`tools/shots/capital_dress.txt`・`poi_dress.txt`）。
+4. 都・見どころの仕上げの撮影は 2026-10-30 に撮って見た（`docs/review/capital_dress_2026-10-30.jpg`・`poi_dress_2026-10-30.jpg`）。崩れ・抜けなし。見どころは作りが小さめ（崩れた家・見張り台）なので、作り込むなら 45 の仕上げの段で。試遊 0.7.1 の声の直しの確かめは試遊の声待ち。
 5. 大きく変えたら jar を作り直す。
