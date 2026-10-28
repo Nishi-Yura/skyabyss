@@ -371,6 +371,8 @@ public final class TitanLoot {
             items.addAll(roll.items());
             // 属性の欠片・技の修飾ルーン (item/extra/GearFreedomLoot。装備の確率は変えない)
             items.addAll(jp.revati.skyabyss.item.extra.GearFreedomLoot.heartDrops(STONE_WHALE, level.random));
+            // 巨神のヒロイック武器 (図鑑の表の外。一本ずつまれに。item/HeroicGear)
+            items.addAll(jp.revati.skyabyss.item.HeroicGear.heartDrops(STONE_WHALE, level.random));
             int held = handOver(server, uuid, player, items, 0);
             boolean first = !r.firstCleared;
             if (first) {

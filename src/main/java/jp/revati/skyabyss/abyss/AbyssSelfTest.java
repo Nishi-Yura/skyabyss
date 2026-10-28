@@ -327,7 +327,7 @@ public final class AbyssSelfTest {
                 check(weapons.add(r.weapon), "two legendary rewrites on " + r.weapon);
             }
         }
-        check(legends == 32, "legendary rewrites: " + legends + " (expected 32)");
+        check(legends == 49, "legendary rewrites: " + legends + " (expected 49: 32 + the 17 titan heroic weapons)");
         // 抽選: 天井 (LEGEND_PITY 回続けて出なければ保証)・確率・重複は欠片へ
         RandomSource rng = RandomSource.create(4242);
         int rolls = 20000;

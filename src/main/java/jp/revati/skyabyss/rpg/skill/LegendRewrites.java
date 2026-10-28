@@ -265,6 +265,165 @@ public final class LegendRewrites {
                     });
                 }
             }
+            // ---- 巨神のヒロイック武器 (2026-10-28)
+            case WHALE_TEMPER -> {
+                Vec3 c = player.position();
+                ring(level, c, 6.0, new BlockParticleOption(ParticleTypes.BLOCK, Blocks.STONE.defaultBlockState()), 24);
+                level.playSound(null, c.x, c.y, c.z, SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.PLAYERS, 1.2f, 0.6f);
+                for (ServerPlayer ally : level.getEntitiesOfClass(ServerPlayer.class, new AABB(c, c).inflate(6.0), ServerPlayer::isAlive)) {
+                    ally.addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, 100, 0), player);
+                }
+            }
+            case WHALE_STARFALL -> {
+                LivingEntity first = aimFoe(player, SkillRules.BOLT_RANGE);
+                Vec3 c = first != null ? first.position() : aimPoint(player, SkillRules.BOLT_RANGE);
+                SkillEffects.later(level, 20, () -> {
+                    level.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.DEEPSLATE.defaultBlockState()), c.x, c.y + 0.3, c.z, 40, 1.2, 0.3, 1.2, 0.2);
+                    level.playSound(null, c.x, c.y, c.z, SoundEvents.DRIPSTONE_BLOCK_BREAK, SoundSource.PLAYERS, 1.2f, 0.7f);
+                    for (LivingEntity e : around(player, c, 2.5)) {
+                        SkillActions.hit(player, e, JobActions.spell(player, 0.6), skill);
+                        e.setDeltaMovement(e.getDeltaMovement().add(0, 0.5, 0));
+                        e.hurtMarked = true;
+                    }
+                });
+            }
+            case WHALE_RIB_PIERCE -> {
+                for (LivingEntity e : cone(player, player.position(), f, 14.0, 10)) {
+                    level.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.BONE_BLOCK.defaultBlockState()), e.getX(), e.getY() + 0.2, e.getZ(), 14, 0.4, 0.2, 0.4, 0.1);
+                    SkillActions.hit(player, e, (float) (JobActions.weaponDamage(player) * 0.4), skill);
+                    e.setDeltaMovement(e.getDeltaMovement().add(0, 0.45, 0));
+                    e.hurtMarked = true;
+                }
+            }
+            case WHALE_DEEP_WARD -> {
+                Vec3 c = player.position();
+                ring(level, c, 5.0, new BlockParticleOption(ParticleTypes.BLOCK, Blocks.DEEPSLATE.defaultBlockState()), 24);
+                level.playSound(null, c.x, c.y, c.z, SoundEvents.BELL_BLOCK, SoundSource.PLAYERS, 1.2f, 0.5f);
+                for (LivingEntity e : around(player, c, 5.0)) {
+                    e.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 40, 6), player);
+                }
+            }
+            case TIDE_STOMP -> SkillEffects.later(level, 8, () -> {
+                Vec3 c = player.position();
+                level.sendParticles(ParticleTypes.SPLASH, c.x, c.y + 0.3, c.z, 50, 2.5, 0.3, 2.5, 0.1);
+                for (ServerPlayer ally : level.getEntitiesOfClass(ServerPlayer.class, new AABB(c, c).inflate(5.0), ServerPlayer::isAlive)) {
+                    ally.heal((float) (JobActions.weaponDamage(player) * 0.4));
+                }
+            });
+            case TIDE_BUBBLE -> {
+                Vec3 c = aimPoint(player, 20.0);
+                for (int k = 1; k <= 3; k++) {
+                    SkillEffects.later(level, 20 * k, () -> {
+                        level.sendParticles(ParticleTypes.BUBBLE_POP, c.x, c.y + 1.0, c.z, 24, 1.5, 0.6, 1.5, 0.02);
+                        for (ServerPlayer ally : level.getEntitiesOfClass(ServerPlayer.class, new AABB(c, c).inflate(4.0), ServerPlayer::isAlive)) {
+                            ally.heal(JobActions.spell(player, 0.15));
+                        }
+                    });
+                }
+            }
+            case TIDE_CORAL_TRAP -> {
+                Vec3 c = aimPoint(player, 12.0);
+                level.sendParticles(ParticleTypes.SPLASH, c.x, c.y + 0.3, c.z, 30, 2.0, 0.3, 2.0, 0.1);
+                for (LivingEntity e : around(player, c, 4.0)) {
+                    Vec3 d = c.subtract(e.position()).multiply(1, 0, 1);
+                    if (d.lengthSqr() > 0.01) {
+                        e.setDeltaMovement(e.getDeltaMovement().add(d.normalize().scale(0.6)));
+                        e.hurtMarked = true;
+                    }
+                    e.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 60, 2), player);
+                }
+            }
+            case TIDE_SURF_LAMP -> {
+                Vec3 c = player.position();
+                for (int k = 1; k <= 5; k++) {
+                    SkillEffects.later(level, 20 * k, () -> {
+                        ring(level, c, 4.0, ParticleTypes.FALLING_WATER, 20);
+                        for (ServerPlayer ally : level.getEntitiesOfClass(ServerPlayer.class, new AABB(c, c).inflate(4.0), ServerPlayer::isAlive)) {
+                            ally.heal(JobActions.spell(player, 0.12));
+                        }
+                    });
+                }
+            }
+            case STORM_ANVIL -> {
+                Vec3 c = aimPoint(player, 5.0);
+                List<LivingEntity> near = around(player, c, 5.0);
+                near.sort(Comparator.comparingDouble(e -> e.distanceToSqr(c.x, c.y, c.z)));
+                for (LivingEntity e : near.subList(0, Math.min(3, near.size()))) {
+                    bolt(level, e.position());
+                    SkillActions.hit(player, e, (float) (JobActions.weaponDamage(player) * 0.5), skill);
+                }
+            }
+            case STORM_SURGE -> SkillEffects.later(level, 10, () -> {
+                List<LivingEntity> ahead = cone(player, player.position(), flatLook(player), 7.0, 50);
+                ahead.sort(Comparator.comparingDouble(e -> e.distanceToSqr(player)));
+                for (LivingEntity e : ahead.subList(0, Math.min(3, ahead.size()))) {
+                    line(level, player.position().add(0, 1, 0), e.position().add(0, 1, 0), ParticleTypes.ELECTRIC_SPARK);
+                    SkillActions.hit(player, e, JobActions.spell(player, 0.4), skill);
+                }
+            });
+            case STORM_GALE_RAIN -> {
+                Vec3 c = aimPoint(player, 24.0);
+                level.sendParticles(ParticleTypes.CLOUD, c.x, c.y + 0.5, c.z, 40, 3.0, 0.4, 3.0, 0.2);
+                for (LivingEntity e : around(player, c, 5.0)) {
+                    push(e, c, 1.1);
+                }
+                player.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, 60, 1), player);
+            }
+            case STORM_BELL_PULL -> SkillEffects.later(level, 20, () -> {
+                Vec3 c = player.position();
+                for (LivingEntity e : around(player, c, 4.0)) {
+                    bolt(level, e.position());
+                    SkillActions.hit(player, e, JobActions.spell(player, 0.5), skill);
+                }
+            });
+            case EMBER_RUSH -> {
+                Vec3 to = player.position();
+                for (int k = 0; k <= 4; k++) {
+                    Vec3 p = from.lerp(to, k / 4.0);
+                    level.sendParticles(ParticleTypes.FLAME, p.x, p.y + 0.2, p.z, 8, 0.6, 0.1, 0.6, 0.01);
+                    for (LivingEntity e : around(player, p, 2.0)) {
+                        if (e.getRemainingFireTicks() <= 0) {
+                            SkillActions.hit(player, e, (float) (JobActions.weaponDamage(player) * 0.3), skill);
+                        }
+                        e.igniteForSeconds(3);
+                    }
+                }
+            }
+            case EMBER_ASH_VEIL -> {
+                Vec3 c = player.position();
+                level.sendParticles(ParticleTypes.WHITE_ASH, c.x, c.y + 1, c.z, 60, 2.5, 0.8, 2.5, 0.02);
+                for (LivingEntity e : around(player, c, 4.0)) {
+                    e.igniteForSeconds(4);
+                }
+            }
+            case EMBER_KILN_BLINK -> {
+                level.sendParticles(ParticleTypes.FLAME, from.x, from.y + 0.6, from.z, 40, 1.2, 0.5, 1.2, 0.05);
+                level.sendParticles(ParticleTypes.LAVA, from.x, from.y + 0.6, from.z, 6, 0.6, 0.3, 0.6, 0.0);
+                level.playSound(null, from.x, from.y, from.z, SoundEvents.FIRECHARGE_USE, SoundSource.PLAYERS, 1f, 0.7f);
+                for (LivingEntity e : around(player, from, 3.0)) {
+                    SkillActions.hit(player, e, JobActions.spell(player, 0.6), skill);
+                    e.igniteForSeconds(3);
+                }
+            }
+            case EMBER_FLARE -> {
+                LivingEntity first = aimFoe(player, 24.0);
+                if (first != null) {
+                    Vec3 c = first.position();
+                    level.sendParticles(ParticleTypes.FLAME, c.x, c.y + 1, c.z, 24, 1.2, 0.6, 1.2, 0.03);
+                    for (LivingEntity e : around(player, c, 2.5)) {
+                        SkillActions.hit(player, e, (float) (JobActions.weaponDamage(player) * 0.3), skill);
+                        e.igniteForSeconds(4);
+                    }
+                }
+            }
+            case EMBER_CENSER_SONG -> {
+                Vec3 c = player.position();
+                level.sendParticles(ParticleTypes.CAMPFIRE_COSY_SMOKE, c.x, c.y + 1, c.z, 20, 3.0, 0.5, 3.0, 0.01);
+                for (ServerPlayer ally : level.getEntitiesOfClass(ServerPlayer.class, new AABB(c, c).inflate(6.0), ServerPlayer::isAlive)) {
+                    ally.addEffect(new MobEffectInstance(MobEffects.FIRE_RESISTANCE, 160, 0), player);
+                    ally.heal(JobActions.spell(player, 0.2));
+                }
+            }
             default -> {
             }
         }

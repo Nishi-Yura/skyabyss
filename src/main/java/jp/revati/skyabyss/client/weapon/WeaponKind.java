@@ -71,6 +71,12 @@ public enum WeaponKind {
             Map.entry("abyss_ember_bell_staff", POKER),
             Map.entry("abyss_lamp_staff", POKER),
             Map.entry("abyss_toll_bell_staff", POKER),
+            // 巨神のヒロイック武器 (item/HeroicGear。弓は WeaponClient が BowExtension で登録する)
+            Map.entry("whale_choir_hammer", HAMMER), Map.entry("whale_star_staff", POKER), Map.entry("whale_deep_bell_staff", POKER),
+            Map.entry("tide_reef_hammer", HAMMER), Map.entry("tide_pearl_staff", POKER), Map.entry("tide_surf_bell_staff", POKER),
+            Map.entry("storm_anvil_hammer", HAMMER), Map.entry("storm_cloud_staff", POKER), Map.entry("storm_thunder_bell_staff", POKER),
+            Map.entry("ember_cinder_blade", GREATSWORD), Map.entry("ember_ash_knife", FANG), Map.entry("ember_kiln_staff", POKER),
+            Map.entry("ember_censer_bell_staff", POKER),
             // 市の採集の道具 (item/outfit。振りの動きは持たない。持ち方と描き方だけ)
             Map.entry("gather_axe", AXE), Map.entry("gather_pickaxe", HAMMER), Map.entry("gather_shovel", HAMMER),
             // イサナの祖父の風見鶏 (雷翼を指す道具。杖のように持つ)

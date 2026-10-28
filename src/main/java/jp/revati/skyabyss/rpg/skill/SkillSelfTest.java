@@ -111,7 +111,7 @@ public final class SkillSelfTest {
                 && SkillRules.pointsForLevel(15) == 10 && SkillRules.pointsForLevel(21) == 16 && SkillRules.pointsForLevel(33) == 28
                 && SkillRules.pointsForLevel(50) == 45, "skill points per level are wrong");
         // 53 本 + 職の新しい技 10 本 (docs/design/43: 星読みの 6 と、鍛冶師・暗殺者・呪術師 2 の 4 つ目)
-        check(f, Skill.values().length == 65 && Rune.values().length == 62, "skill / rune counts are wrong");
+        check(f, Skill.values().length == 65 && Rune.values().length == 79, "skill / rune counts are wrong");
         int[] perTree = new int[SkillTree.values().length];
         for (Skill s : Skill.values()) {
             perTree[s.tree.ordinal()]++;

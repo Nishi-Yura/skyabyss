@@ -82,7 +82,25 @@ public enum Rune {
     EMBER_REND("ember_rend", Skill.WIND_REND, 6, "abyss_ember_dagger"),
     ROCK_SONG("rock_song", Skill.CYCLE_SONG, 4, "abyss_whale_bell_staff"),
     STORM_CURSE("storm_curse", Skill.CURSE_MARK, 4, "abyss_storm_bell_staff"),
-    EMBER_LAMP("ember_lamp", Skill.LAMP_CHARM, 4, "abyss_ember_bell_staff");
+    EMBER_LAMP("ember_lamp", Skill.LAMP_CHARM, 4, "abyss_ember_bell_staff"),
+    // ---- 巨神のヒロイック武器 (item/HeroicGear の 17 本。2026-10-28)。同じ巨神の伝説と違う技へ。書き換えが一つある技は 6、二つある技は 7
+    WHALE_TEMPER("whale_temper", Skill.TEMPER, 6, "whale_choir_hammer"),
+    WHALE_STARFALL("whale_starfall", Skill.THUNDER_BOLT, 6, "whale_star_staff"),
+    WHALE_RIB_PIERCE("whale_rib_pierce", Skill.CLOUD_PIERCE, 6, "whale_rib_longbow"),
+    WHALE_DEEP_WARD("whale_deep_ward", Skill.WARD_SONG, 6, "whale_deep_bell_staff"),
+    TIDE_STOMP("tide_stomp", Skill.FORGE_STOMP, 6, "tide_reef_hammer"),
+    TIDE_BUBBLE("tide_bubble", Skill.EMBER_ORB, 6, "tide_pearl_staff"),
+    TIDE_CORAL_TRAP("tide_coral_trap", Skill.BONE_TRAP, 6, "tide_coral_bow"),
+    TIDE_SURF_LAMP("tide_surf_lamp", Skill.LAMP_CHARM, 6, "tide_surf_bell_staff"),
+    STORM_ANVIL("storm_anvil", Skill.EMBER_HAMMER, 7, "storm_anvil_hammer"),
+    STORM_SURGE("storm_surge", Skill.FROST_TIDE, 6, "storm_cloud_staff"),
+    STORM_GALE_RAIN("storm_gale_rain", Skill.SKY_RAIN, 6, "storm_gale_bow"),
+    STORM_BELL_PULL("storm_bell_pull", Skill.EBB_TIDE, 6, "storm_thunder_bell_staff"),
+    EMBER_RUSH("ember_rush", Skill.SHIELD_RUSH, 6, "ember_cinder_blade"),
+    EMBER_ASH_VEIL("ember_ash_veil", Skill.MIST_VEIL, 6, "ember_ash_knife"),
+    EMBER_KILN_BLINK("ember_kiln_blink", Skill.BLINK, 6, "ember_kiln_staff"),
+    EMBER_FLARE("ember_flare", Skill.CLOUD_PIERCE, 7, "ember_flare_bow"),
+    EMBER_CENSER_SONG("ember_censer_song", Skill.CYCLE_SONG, 6, "ember_censer_bell_staff");
 
     // 熟練 3 で開く 4 つ目の刻印 (熟練の刻印)。どの使う技にもあり、番号は 5 (4 は逸品の書き換え)。docs/design/31 の A13
     public static final int MASTERY = 5;

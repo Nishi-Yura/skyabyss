@@ -65,10 +65,11 @@ final class BuildsSelfTest {
                 continue;
             }
             count++;
-            check(f, (r.index == 4 || r.index == 6) && r.skill.active && !legendStack(r.weapon).isEmpty(), "legendary rune " + r.id + " points at nothing");
+            check(f, (r.index == 4 || r.index == 6 || r.index == 7) && r.skill.active && !legendStack(r.weapon).isEmpty(), "legendary rune " + r.id + " points at nothing");
             check(f, Rune.of(r.skill).stream().noneMatch(Rune::legendary), "ordinary rune list holds a legendary rune for " + r.skill.id);
         }
-        check(f, count == 32, "legendary rune count is " + count);
+        // 32 = 逸品 8・深淵 4・伝説 20、17 = 巨神のヒロイック武器 (item/HeroicGear)
+        check(f, count == 49, "legendary rune count is " + count);
         java.util.Set<String> weapons = new java.util.HashSet<>();
         for (Rune r : Rune.values()) {
             if (r.legendary()) {

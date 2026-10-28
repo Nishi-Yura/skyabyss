@@ -46,8 +46,12 @@ public final class BossOpenings {
     // 自己テスト用: 主の見分けを差し替える (null なら BossFooting.planted)
     public static java.util.function.Predicate<LivingEntity> plantedForTest;
 
+    // 構える主か。動かない的 (AI のない敵。自己テストの的・訓練の的) は技を出さず隙も来ないので構えない
     static boolean planted(LivingEntity e) {
-        return plantedForTest != null ? plantedForTest.test(e) : BossFooting.planted(e);
+        if (plantedForTest != null) {
+            return plantedForTest.test(e);
+        }
+        return !(e instanceof net.minecraft.world.entity.Mob m && m.isNoAi()) && BossFooting.planted(e);
     }
 
     // Telegraph から: 持ち主の技が当たり終わった
@@ -87,7 +91,7 @@ public final class BossOpenings {
         if (planted(target)) {
             return isOpen(target) ? OPEN : GUARD;
         }
-        if (!(target instanceof Enemy)) {
+        if (!(target instanceof Enemy) || (target instanceof net.minecraft.world.entity.Mob m && m.isNoAi() && plantedForTest == null)) {
             return 1f;
         }
         long now = target.level().getGameTime();

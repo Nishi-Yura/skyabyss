@@ -23,7 +23,7 @@
 - テストの直し: 島の湧きの表は空のまま・freequest は四章の日替わりを数えない・都の掃き出しは外へ押し出せばよい・樽などは道にかかっても置く。
 
 残り（この順）:
-1. ヒロイック武器 17 本 × 3 案のラフ（`tools/rough/lowpoly/weapons/heroic/`、絵は `docs/review/roughs_heroic/`、選ぶページ https://claude.ai/artifact/6QrjTHViWPyXmU2EZaZMWj の db `picks`）。選ばれたら入れる（品の登録・数値・技の書き換え・アイコン・手持ち）。
+1. （済み）ヒロイック武器 17 本: 選んだ案を入れた（`item/HeroicGear`、心臓で一本ずつ 2% の別枠、`Rune` の書き換え 17、`install_job_weapons.py` の HEROIC、手持ちは `WeaponKind`・`WeaponClient`。撮影 `tools/shots/heroic_weapons_review.txt`）。
 2. 潮殻・雷翼・余燼の心臓の部屋を鯨のように大きく作り込む。
 3. 試練の難しさをそろえる（簡単すぎるもの・難しいもの）。
 4. 祠のまわりの作り込み（道からの脇道・目印）を絵で確かめる。

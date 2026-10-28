@@ -65,6 +65,12 @@ REMAKE = {"waterway_fang": ("legend", 1), "captain_pike": ("legend", 1), "whaleb
           "abyss_storm_bow": ("legend", 4), "smith_hammer": ("legend", 1), "ember_war_axe": ("rare", 1), "abyss_ash_scythe": ("legend", 1)}
 for _id, (_tier, _st) in REMAKE.items():
     ITEMS[_id] = ("roughs_one", _tier, _id, _st)
+# 巨神のヒロイック武器 17 本 (2026-10-28。tools/rough/lowpoly/weapons/heroic/build_heroic.py の docs/review/roughs_heroic/raw/<id>/<案>/。形の段 rare)
+HEROIC = {"whale_choir_hammer": ("hammer", "c"), "whale_star_staff": ("staff", "c"), "whale_rib_longbow": ("bow", "c"), "whale_deep_bell_staff": ("bell", "a"),
+          "tide_reef_hammer": ("hammer", "c"), "tide_pearl_staff": ("staff", "b"), "tide_coral_bow": ("bow", "b"), "tide_surf_bell_staff": ("bell", "a"),
+          "storm_anvil_hammer": ("hammer", "b"), "storm_cloud_staff": ("staff", "b"), "storm_gale_bow": ("bow", "b"), "storm_thunder_bell_staff": ("bell", "a"),
+          "ember_cinder_blade": ("sword", "c"), "ember_ash_knife": ("dagger", "a"), "ember_kiln_staff": ("staff", "a"), "ember_flare_bow": ("bow", "b"),
+          "ember_censer_bell_staff": ("bell", "a")}
 ONE = [i for i in ITEMS if (ROOT / "docs/review/roughs_one/raw" / i / "a").is_dir()]
 for _id in ONE:
     _src, _tier, _analog, _st = ITEMS[_id]
@@ -93,19 +99,23 @@ def install(item: str, opt: str):
     tex_dir.mkdir(parents=True, exist_ok=True)
     for f in list(mesh_dir.glob("*.json")) + list(tex_dir.glob("*.png")):
         f.unlink()
+    # 描く側は品の階級の名 (GearTier.meshTier) で探す。ヒロイックは legend の名で置く (絵は描いた rare の塗りのまま)
+    dest = "legend" if item in HEROIC else tier
     for stg in range(stages):
         st = tier if stg == 0 else f"{tier}_pull{stg - 1}"
+        dt = st.replace(tier, dest, 1)
         mesh = json.loads((src / f"{st}_mesh.json").read_text(encoding="utf-8"))
-        mesh["texture"] = f"items/{item}/{st}_atlas"
+        mesh["texture"] = f"items/{item}/{dt}_atlas"
         mesh.pop("glowmask", None)
         mesh, _ = mesh_close.close_mesh(mesh)
-        (mesh_dir / f"{st}.json").write_text(json.dumps(mesh, separators=(",", ":")), encoding="utf-8")
+        (mesh_dir / f"{dt}.json").write_text(json.dumps(mesh, separators=(",", ":")), encoding="utf-8")
         for lv in LEVELS:
             name = f"{st}{lv}_atlas"
-            shutil.copyfile(src / (name + ".png"), tex_dir / (name + ".png"))
+            dname = f"{dt}{lv}_atlas"
+            shutil.copyfile(src / (name + ".png"), tex_dir / (dname + ".png"))
             glow, lit = bake_glow(src / (name + ".png"), src / f"{st}{lv}_glowmask.png")
             if lit > 0:
-                glow.save(tex_dir / (name + "_glow.png"))
+                glow.save(tex_dir / (dname + "_glow.png"))
     models = ASSETS / "models/item"
     names = [item] + [f"{item}_pulling_{i}" for i in range(stages - 1)]
     for k, name in enumerate(names):
@@ -116,8 +126,14 @@ def install(item: str, opt: str):
     print(item, "option", opt, "installed")
 
 
+for _id, (_kind, _opt) in HEROIC.items():
+    ITEMS[_id] = ("roughs_heroic", "rare") + _HOLD[_kind]
+
+
 def main():
     choice = {i: "a" for i in ITEMS}
+    for _id, (_kind, _opt) in HEROIC.items():
+        choice[_id] = _opt
     args = sys.argv[1:]
     if "--option" in args:
         i = args.index("--option")

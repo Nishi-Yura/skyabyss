@@ -141,7 +141,7 @@ HELD = {
 # 弓 (引き絵 3 枚も同じ持ち方。引くときは腕を前へまっすぐ上げる)。弦が射手の側、腹が前、縦に立てる
 # 一人称は 2026-10-28 の試遊「もう少し上でいい」で y を 1.6 上げた。弓は全部同じ持ち方 (メッシュの作りが同じ)
 BOWS = ("thunder_wing_bow", "abyss_storm_bow", "whale_bow", "tide_bow", "ember_bow", "shrine_bow", "abyss_whale_bow", "abyss_tide_bow",
-        "abyss_ember_bow", "abyss_depth_bow")
+        "abyss_ember_bow", "abyss_depth_bow", "whale_rib_longbow", "tide_coral_bow", "storm_gale_bow", "ember_flare_bow")
 for _bow in BOWS:
     HELD[_bow] = (bow_hold("tp", 18, 1.2, BOW_GRIP, (0, 0, 1.0)), bow_hold("fp", 0, 0.7, BOW_GRIP, (0.2, 1.4, 0.0), 30))
     for _n in range(3):
@@ -233,3 +233,11 @@ def main():
 
 if __name__ == "__main__":
     main()
+# 巨神のヒロイック武器 (2026-10-28。item/HeroicGear)。持ち方は同じ型の武器を借りる (tools/install/install_job_weapons.py の _HOLD と同じ)
+for _id, _like in (("whale_choir_hammer", "ember_war_axe"), ("tide_reef_hammer", "ember_war_axe"), ("storm_anvil_hammer", "ember_war_axe"),
+                   ("whale_star_staff", "abyss_bell_staff"), ("tide_pearl_staff", "abyss_bell_staff"), ("storm_cloud_staff", "abyss_bell_staff"),
+                   ("ember_kiln_staff", "abyss_bell_staff"), ("whale_deep_bell_staff", "abyss_bell_staff"), ("tide_surf_bell_staff", "abyss_bell_staff"),
+                   ("storm_thunder_bell_staff", "abyss_bell_staff"), ("ember_censer_bell_staff", "abyss_bell_staff"),
+                   ("ember_cinder_blade", "whalebone_greatsword"), ("ember_ash_knife", "waterway_fang")):
+    if _like in HELD:
+        HELD[_id] = HELD[_like]
