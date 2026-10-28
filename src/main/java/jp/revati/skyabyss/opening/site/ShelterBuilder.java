@@ -87,6 +87,11 @@ public final class ShelterBuilder {
         } else {
             job.entry.extra("bell", bell);
         }
+        // 月への門 (大鐘楼の鐘の間の天然磁石。story/ch6/MoonGate)
+        BlockPos moonGate = job.mark(jp.revati.skyabyss.story.ch6.MoonGate.MARK);
+        if (moonGate != null) {
+            job.entry.extra(jp.revati.skyabyss.story.ch6.MoonGate.MARK, moonGate);
+        }
         BlockPos smoke = job.mark("smoke");
         if (smoke != null) {
             job.entry.extra("smoke", smoke);

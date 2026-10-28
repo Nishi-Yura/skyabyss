@@ -1,0 +1,30 @@
+{
+  "category": "main",
+  "chapter": "chapter3",
+  "order": 70,
+  "giver": "skyabyss:storyteller",
+  "start_when": {
+    "type": "quest",
+    "quest": "main_moon_near",
+    "is": "done"
+  },
+  "stages": [
+    {
+      "id": "gate",
+      "xp": 200,
+      "objectives": [
+        {
+          "id": "gate",
+          "type": "signal",
+          "targets": [
+            "moon_gate"
+          ],
+          "count": 1
+        }
+      ]
+    }
+  ],
+  "reward": {
+    "xp": 300
+  }
+}
