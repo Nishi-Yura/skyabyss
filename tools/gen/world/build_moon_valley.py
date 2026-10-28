@@ -619,6 +619,21 @@ for _ in range(600):
                     if (px / rr) ** 2 + ((dy - 0.2) / ry) ** 2 + (pz / (rr * 0.85)) ** 2 <= 1.0 + jag:
                         top = (px / rr) ** 2 + ((dy + 0.8) / ry) ** 2 + (pz / (rr * 0.85)) ** 2 > 1.0 + jag
                         put(x + dx, fl + dy, z + dz, (POWDER if mat != BASALT else POWDER_G) if top and dy >= 1 else mat)
+# 踏み跡 (通り道の真ん中の幅 3。前のループの自分が何度も歩いた跡。灰の砂と礫で、谷底の薄灰より一段暗い)
+for xi in range(NX):
+    for zi in range(NZ):
+        x, z = X0 + xi, Z0 + zi
+        if not in_valley(x, z) or kept(x, z, -3):
+            continue
+        if z < 70:
+            d = abs(x)
+        else:
+            d = abs(math.hypot(x, (z - MESA_Z) / 2.0) - 21.0) * 1.6
+        if z < 24 or d > 1.6 + 0.6 * N_EDGE[xi, zi]:
+            continue
+        fl = FLOOR[xi, zi]
+        if get(x, fl, z) in (POWDER, POWDER_W, POWDER_G, TUFF, ANDESITE, COBBLED_DS) and get(x, fl + 1, z) == AIR:
+            put(x, fl, z, GRAVEL if hsh(x, 4, z) % 5 == 0 else POWDER_G)
 # 壁の根の砂だまり (崖のすぐ内側の谷底を一段盛る)
 for xi in range(NX):
     for zi in range(NZ):

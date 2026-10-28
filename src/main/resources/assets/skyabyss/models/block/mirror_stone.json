@@ -1,9 +1,9 @@
 {
   "textures": {
-    "stone": "minecraft:block/polished_diorite",
-    "glass": "minecraft:block/white_stained_glass",
-    "frame": "minecraft:block/iron_block",
-    "particle": "minecraft:block/polished_diorite"
+    "stone": "skyabyss:block/moon_mirror_base",
+    "glass": "skyabyss:block/moon_mirror",
+    "frame": "skyabyss:block/moon_mirror_frame",
+    "particle": "skyabyss:block/moon_mirror_base"
   },
   "elements": [
     {

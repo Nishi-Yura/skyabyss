@@ -98,8 +98,8 @@ public final class ValleyPuzzles {
     static String refusal(ServerLevel level, String site, BlockPos pos) {
         return switch (site) {
             case "mirror" -> mirrorsAligned(level) ? null : "message.skyabyss.moon.shard.mirror_dark";
-            case "hole" -> level.getEntitiesOfClass(ShellHare.class, new AABB(pos).inflate(NEST_CLEAR), e -> e.isAlive()).isEmpty() ? null
-                    : "message.skyabyss.moon.shard.hole_guarded";
+            case "hole" -> level.getEntitiesOfClass(ShellHare.class, new AABB(pos).inflate(NEST_CLEAR), e -> e.isAlive()).isEmpty()
+                    && !ValleyTicker.hareNear(level, pos, NEST_CLEAR + 4) ? null : "message.skyabyss.moon.shard.hole_guarded";
             default -> null;
         };
     }

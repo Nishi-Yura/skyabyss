@@ -1,0 +1,39 @@
+# 新月の谷の仕掛けのブロックを着く所の東に並べて撮る (様式のラフの比べ。tools/rough/icons_moon_valley.py --install-blocks <様式> のあとに)
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/moon_valley_blocks.txt -PshotsName=moon_blocks_<様式>
+world moon_blocks1 continent
+size 1600 900
+timeout 1500
+render 6
+clouds off
+waitchunks 300
+wait 80
+cmd skyabyss cinematic stop
+close
+cmd gamemode creative
+cmd skyabyss moonworld enter
+waitchunks 200
+wait 60
+cmd fill 8 12 -6 22 16 -2 minecraft:air
+cmd fill 8 11 -6 22 11 -2 minecraft:smooth_basalt
+cmd setblock 9 12 -4 skyabyss:star_pedestal
+cmd setblock 11 12 -4 skyabyss:mirror_stone[facing=south]
+cmd setblock 13 12 -4 skyabyss:lamp_post
+cmd setblock 15 12 -4 skyabyss:lamp_post[lit=true]
+cmd setblock 17 12 -4 skyabyss:star_pool
+cmd setblock 19 12 -4 skyabyss:star_mark
+cmd fill 9 12 -6 11 14 -6 skyabyss:star_gate
+cmd setblock 10 13 -6 skyabyss:star_gate[core=true]
+cmd fill 14 12 -6 16 12 -6 skyabyss:shadow_bridge
+cmd fill 18 12 -6 20 12 -6 skyabyss:shadow_bridge[solid=false]
+cmd gamemode spectator
+hud off
+cmd tp @s 14.5 14.6 1.5 180 22
+wait 40
+shot b1_row
+cmd tp @s 12 13.2 -1.2 200 12
+wait 20
+shot b2_close
+cmd effect give @s minecraft:night_vision 99999 0 true
+cmd tp @s 14.5 14.6 1.5 180 22
+wait 20
+shot b3_row_bright

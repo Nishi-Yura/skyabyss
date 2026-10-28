@@ -617,6 +617,10 @@ def ch4_warm_rocks():
                  [(0, ["minecraft:smooth_basalt", "minecraft:blackstone"]), (99, ["minecraft:basalt[axis=y]", "minecraft:polished_basalt[axis=y]", "minecraft:blackstone"])],
                  553 + i, 0.35, below=False)
             bp.set(x, -1, z, "minecraft:magma_block")
+    # 岩の張り出しを削る (下が空いた岩のブロックは頭の高さに出る。建築の点検 HEAD_DENT)
+    for (x, y, z), st in sorted(bp.cells.items(), key=lambda kv: kv[0][1]):
+        if y >= 1 and st != "minecraft:air" and bp.get(x, y - 1, z) in (None, "minecraft:air"):
+            del bp.cells[(x, y, z)]
     return sc.done(0.1)
 
 

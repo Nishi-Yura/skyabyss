@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:block/cube_all",
   "textures": {
-    "all": "minecraft:block/amethyst_block"
+    "all": "skyabyss:block/moon_star_gate_core"
   }
 }

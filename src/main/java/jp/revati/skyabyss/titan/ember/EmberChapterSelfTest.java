@@ -163,7 +163,8 @@ public final class EmberChapterSelfTest {
                 "the ember sky stage is not registered", f);
         for (String name : List.of("ember_hearth_ruin", "ember_ash_post", "ember_warm_ledge")) {
             Blueprint bp = Blueprint.get(name);
-            expect(!bp.cells.isEmpty() && bp.rx1 - bp.rx0 <= 6 && bp.rz1 - bp.rz0 <= 6, "blueprint " + name + " is empty or too big", f);
+            // 2026-10-28 に建築の水準へ建て直し、足もとを 3 広げた (tools/gen/world/build_chsites.py)。大陸の上なので一辺 12 まで
+            expect(!bp.cells.isEmpty() && bp.rx1 - bp.rx0 <= 12 && bp.rz1 - bp.rz0 <= 12, "blueprint " + name + " is empty or too big", f);
             if (!name.equals("ember_ash_post")) {
                 expect(bp.marks.containsKey("barrel"), "blueprint " + name + " has no barrel mark", f);
             }

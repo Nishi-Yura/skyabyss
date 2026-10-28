@@ -2,6 +2,6 @@
   "parent": "minecraft:block/cross",
   "render_type": "minecraft:cutout",
   "textures": {
-    "cross": "minecraft:block/amethyst_cluster"
+    "cross": "skyabyss:block/moon_star_mark"
   }
 }

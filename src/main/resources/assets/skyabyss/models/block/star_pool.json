@@ -1,8 +1,8 @@
 {
   "textures": {
-    "rim": "minecraft:block/calcite",
-    "surface": "minecraft:block/amethyst_block",
-    "particle": "minecraft:block/calcite"
+    "rim": "skyabyss:block/moon_pool_rim",
+    "surface": "skyabyss:block/moon_pool",
+    "particle": "skyabyss:block/moon_pool_rim"
   },
   "elements": [
     {

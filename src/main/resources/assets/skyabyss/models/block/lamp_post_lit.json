@@ -1,8 +1,8 @@
 {
   "textures": {
-    "stone": "minecraft:block/polished_blackstone_bricks",
-    "glow": "minecraft:block/sea_lantern",
-    "particle": "minecraft:block/polished_blackstone_bricks"
+    "stone": "skyabyss:block/moon_pedestal",
+    "glow": "skyabyss:block/moon_lamp_lit",
+    "particle": "skyabyss:block/moon_pedestal"
   },
   "elements": [
     {

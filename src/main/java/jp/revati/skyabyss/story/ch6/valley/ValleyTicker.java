@@ -193,7 +193,23 @@ public final class ValleyTicker {
             m.tuneMoon(0, nm, false, ShadowStitcher.HP, ShadowStitcher.DMG);
         }
         level.addFreshEntity(m);
+        if (m instanceof ShellHare h) {
+            HARES.add(h);
+        }
         return m;
+    }
+
+    // 谷で湧かせた兎 (落ちた星の穴の巣の見張り。区画の見え方に依らず数える)
+    static final List<ShellHare> HARES = new ArrayList<>();
+
+    static boolean hareNear(ServerLevel level, BlockPos at, double r) {
+        HARES.removeIf(h -> h.isRemoved() || !h.isAlive());
+        for (ShellHare h : HARES) {
+            if (h.level() == level && h.position().distanceToSqr(at.getCenter()) <= r * r) {
+                return true;
+            }
+        }
+        return false;
     }
 
     // 落ちた星の穴の巣: 近くに来た人がいて、兎が少なく、払われてから 30 秒たっていれば、巣の印に兎を戻す

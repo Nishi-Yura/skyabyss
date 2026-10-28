@@ -1,9 +1,9 @@
 {
   "textures": {
-    "stone": "minecraft:block/polished_blackstone_bricks",
-    "top": "minecraft:block/chiseled_polished_blackstone",
-    "star": "minecraft:block/amethyst_block",
-    "particle": "minecraft:block/polished_blackstone_bricks"
+    "stone": "skyabyss:block/moon_pedestal",
+    "top": "skyabyss:block/moon_pedestal_top",
+    "star": "skyabyss:block/moon_star",
+    "particle": "skyabyss:block/moon_pedestal"
   },
   "elements": [
     {

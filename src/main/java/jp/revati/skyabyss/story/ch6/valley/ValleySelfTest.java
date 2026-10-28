@@ -122,7 +122,7 @@ public final class ValleySelfTest {
             BlockPos hole = MoonValley.mark("shard_hole");
             ShellHare hare = (ShellHare) ValleyTicker.put(moon, MoonMobsSetup.SHELL_HARE.get(), MoonValley.mark("nest_0"));
             spawned.add(hare);
-            check(f, hare != null && ValleyPuzzles.refusal(moon, "hole", hole) != null, "the hole pedestal can be taken while hares guard it");
+            check(f, hare != null && ValleyPuzzles.refusal(moon, "hole", hole) != null, "the hole pedestal can be taken while hares guard it (hare " + (hare == null ? "null" : hare.blockPosition() + " alive " + hare.isAlive() + " added " + hare.isAddedToLevel()) + ")");
             if (hare != null) {
                 hare.discard();
             }
@@ -130,6 +130,24 @@ public final class ValleySelfTest {
             // 門
             FakePlayer p = new FakePlayer(moon, new GameProfile(UUID.randomUUID(), "moon_valley"));
             check(f, !ValleyPuzzles.mayCross(p), "a player without shards may cross the star gate");
+            // 頼みの通し: 会う → 星の溜まり → 欠片 3 → 門 → 主 → 約束
+            String role = jp.revati.skyabyss.town.TownGuests.ROLE_PREFIX + ValleyTicker.PAST_SELF;
+            check(f, jp.revati.skyabyss.quest.Quests.start(p, ValleyPuzzles.QUEST), "main_moon_valley would not start");
+            jp.revati.skyabyss.quest.Quests.onTalk(p, role, "ch6_valley_meet3");
+            check(f, ValleyPuzzles.stage(p) == ValleyPuzzles.stageIndex("pool"), "talking at the camp did not move to pool: " + ValleyPuzzles.stage(p));
+            jp.revati.skyabyss.quest.Quests.signal(p, ValleyPuzzles.POOL);
+            check(f, ValleyPuzzles.stage(p) == ValleyPuzzles.stageIndex("shards") && ValleyPuzzles.shards(p) == 0, "the star pool did not move to shards");
+            jp.revati.skyabyss.quest.Quests.signal(p, ValleyPuzzles.SHARD + "bridge");
+            jp.revati.skyabyss.quest.Quests.signal(p, ValleyPuzzles.SHARD + "hole");
+            check(f, ValleyPuzzles.shards(p) == 2 && !ValleyPuzzles.mayCross(p), "two shards: count " + ValleyPuzzles.shards(p) + ", may cross " + ValleyPuzzles.mayCross(p));
+            jp.revati.skyabyss.quest.Quests.signal(p, ValleyPuzzles.SHARD + "mirror");
+            check(f, ValleyPuzzles.mayCross(p), "three shards did not open the star gate");
+            jp.revati.skyabyss.quest.Quests.signal(p, ValleyPuzzles.GATE);
+            jp.revati.skyabyss.quest.Quests.signal(p, ValleyPuzzles.LORD);
+            check(f, ValleyPuzzles.stage(p) == ValleyPuzzles.stageIndex("promise"), "the lord signal did not move to promise: " + ValleyPuzzles.stage(p));
+            jp.revati.skyabyss.quest.Quests.onTalk(p, role, "ch6_valley_promise3");
+            check(f, jp.revati.skyabyss.quest.QuestLog.of(p).entry(ValleyPuzzles.QUEST) != null && jp.revati.skyabyss.quest.QuestLog.of(p).entry(ValleyPuzzles.QUEST).done,
+                    "the promise did not finish main_moon_valley");
             // 敵の数字
             DustCrawler c = (DustCrawler) ValleyTicker.put(moon, MoonMobsSetup.DUST_CRAWLER.get(), camp.offset(4, 0, 0));
             spawned.add(c);

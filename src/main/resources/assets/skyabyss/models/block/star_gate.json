@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:block/cube_all",
   "textures": {
-    "all": "minecraft:block/crying_obsidian"
+    "all": "skyabyss:block/moon_star_gate"
   }
 }
