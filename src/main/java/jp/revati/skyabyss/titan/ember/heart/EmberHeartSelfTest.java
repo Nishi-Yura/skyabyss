@@ -307,7 +307,7 @@ public final class EmberHeartSelfTest {
                 "the lava pool under a section is not 3 deep", f);
         check(back.getBlockState(new BlockPos(cx + 15, fl, cz)).is(Blocks.LAVA), "moat has no lava", f);
         check(back.getBlockState(new BlockPos(cx + 16, fl + 3, cz)).getBlock() != Blocks.AIR && !back.getBlockState(new BlockPos(cx + 16, fl + 3, cz)).is(Blocks.LAVA), "wall is open", f);
-        check(back.getBlockState(new BlockPos(cx, EmberHeartArena.CEILING, cz + 3)).getBlock() != Blocks.AIR, "chamber has no ceiling", f);
+        check(jp.revati.skyabyss.trial.raid.HeartHall.roofed(back, cx, cz + 3, EmberHeartArena.CEILING, EmberHeartArena.SURFACE), "chamber has no ceiling", f);
         check(back.getBlockState(new BlockPos(cx, fl + 1, cz + 6)).isAir() && back.getBlockState(new BlockPos(cx + 7, EmberHeartArena.CEILING - 1, cz - 7)).isAir(), "interior is not open", f);
         // 入口: 橋 (幅 3、溝の上) と通り道、封印する壁の 1 枚は空いている
         for (int x = -1; x <= 1; x++) {

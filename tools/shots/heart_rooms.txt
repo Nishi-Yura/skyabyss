@@ -1,0 +1,70 @@
+# 心臓の間の大広間 (2026-10-28「鯨以外の巨神の心臓ボスの部屋、鯨みたいに大きくして作り込んで」)
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/heart_rooms.txt -PshotsName=heart_rooms
+world heart_rooms2 continent
+size 1600 900
+timeout 5000
+render 8
+guiscale 2
+waitchunks 200
+wait 60
+cmd skyabyss cinematic stop
+close
+cmd gamemode creative
+cmd difficulty peaceful
+cmd skyabyss play boss tide
+wait 1800
+cmd skyabyss cinematic stop
+close
+cmd gamemode spectator
+hud off
+wait 20
+cmd execute at @s positioned 4352 ~ 4096 run tp @s ~22 ~7 ~ 90 12
+wait 40
+shot tide_1_side
+cmd execute at @s positioned 4352 ~ 4096 run tp @s ~ ~13 ~-24 0 32
+wait 30
+shot tide_2_high
+cmd execute at @s positioned 4352 ~ 4096 run tp @s ~-20 ~-19 ~-6 -110 -18
+wait 30
+shot tide_3_low
+hud on
+cmd gamemode creative
+cmd skyabyss play now
+cmd skyabyss play boss storm
+wait 1800
+cmd skyabyss cinematic stop
+close
+cmd gamemode spectator
+hud off
+wait 20
+cmd execute at @s positioned 4352 ~ 4096 run tp @s ~22 ~7 ~ 90 12
+wait 40
+shot storm_1_side
+cmd execute at @s positioned 4352 ~ 4096 run tp @s ~ ~13 ~-24 0 32
+wait 30
+shot storm_2_high
+cmd execute at @s positioned 4352 ~ 4096 run tp @s ~-20 ~-19 ~-6 -110 -18
+wait 30
+shot storm_3_low
+hud on
+cmd gamemode creative
+cmd skyabyss play now
+cmd skyabyss play boss ember
+wait 1800
+cmd skyabyss cinematic stop
+close
+cmd gamemode spectator
+hud off
+wait 20
+cmd execute at @s positioned 4352 ~ 4096 run tp @s ~22 ~7 ~ 90 12
+wait 40
+shot ember_1_side
+cmd execute at @s positioned 4352 ~ 4096 run tp @s ~ ~13 ~-24 0 32
+wait 30
+shot ember_2_high
+cmd execute at @s positioned 4352 ~ 4096 run tp @s ~-20 ~-19 ~-6 -110 -18
+wait 30
+shot ember_3_low
+hud on
+cmd gamemode creative
+cmd skyabyss play now

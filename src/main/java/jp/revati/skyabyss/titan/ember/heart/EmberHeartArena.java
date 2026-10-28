@@ -283,7 +283,7 @@ public final class EmberHeartArena {
         computeLists();
         return level.getBlockState(new BlockPos(CX, FLOOR, CZ)).is(Blocks.CHISELED_POLISHED_BLACKSTONE)
                 && level.getBlockState(new BlockPos(CX, CEILING - 2, CZ)).isAir()
-                && level.getBlockState(new BlockPos(CX, CEILING, CZ)).getBlock() != Blocks.AIR
+                && jp.revati.skyabyss.trial.raid.HeartHall.roofed(level, CX, CZ, CEILING, SURFACE)
                 && level.getBlockState(new BlockPos(CX, FLOOR - 1, CZ + 8)).is(Blocks.LAVA)
                 && level.getBlockState(new BlockPos(CX + SECTION_R, FLOOR, CZ)).getBlock() != Blocks.AIR
                 && !level.getBlockState(new BlockPos(CX + 7, FLOOR, CZ)).is(Blocks.LAVA)
@@ -356,6 +356,8 @@ public final class EmberHeartArena {
         }
         // 入口の壁の 1 枚 (前室とのあいだ) は、開いた既定の扉 (戦うグループにだけ閉じる)
         GroupGates.place(level, gate(), true);
+        // 大広間の内側 (欄干と天井) を開け直す
+        jp.revati.skyabyss.trial.raid.HeartHall.build(level, jp.revati.skyabyss.trial.raid.HeartHall.Theme.EMBER, CX, CZ, SURFACE, RADIUS, -1, true);
         java.util.Arrays.fill(state, 0);
         java.util.Arrays.fill(timer, 0);
         cold = false;
@@ -586,11 +588,16 @@ public final class EmberHeartArena {
         int flags = 2 | 16;
         BlockState vein = on ? Blocks.BLACKSTONE.defaultBlockState() : Blocks.MAGMA_BLOCK.defaultBlockState();
         BlockState lamp = on ? Blocks.POLISHED_BLACKSTONE_BRICKS.defaultBlockState() : Blocks.SHROOMLIGHT.defaultBlockState();
+        // 大広間 (trial/raid/HeartHall) が取り払った壁と天井の所 (空気) には置かない
         for (BlockPos v : veinCells) {
-            level.setBlock(v, vein, flags);
+            if (!level.getBlockState(v).isAir()) {
+                level.setBlock(v, vein, flags);
+            }
         }
         for (BlockPos l : lampCells) {
-            level.setBlock(l, lamp, flags);
+            if (!level.getBlockState(l).isAir()) {
+                level.setBlock(l, lamp, flags);
+            }
         }
         for (BlockPos m : moatCells) {
             level.setBlock(m, on ? Blocks.BLACKSTONE.defaultBlockState() : LAVA, flags);

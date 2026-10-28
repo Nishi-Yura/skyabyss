@@ -25,7 +25,7 @@ public final class InstanceArenas {
     public static final int HEART_X = TrialSlot.ORIGIN_X + 256;
     public static final int HEART_Z = TrialSlot.ORIGIN_Z;
     // 建てるときに先に読み込む範囲 (中心から)
-    static final int LOAD_R = 64;
+    static final int LOAD_R = 64;  // 大広間 (HeartHall.HALL_R + 3) も入る
 
     // 背を建てる手順に、心臓の間を建てる手順を足す (各巨神の背の建設から一行で呼ぶ)
     public static void addHeartSteps(BackBuildJobs.Steps s, ServerLevel level, String titan) {
@@ -102,7 +102,25 @@ public final class InstanceArenas {
                 return;
             }
         }
+        hall(level, titan);
         SkyAbyss.LOGGER.info("Carved the {} heart arena in the instance area in {} ms", titan, (System.nanoTime() - t0) / 1_000_000L);
+    }
+
+    // 鯨以外の心臓の間のまわりの大広間 (HeartHall。戦う床はそのまま)
+    static void hall(ServerLevel level, String titan) {
+        switch (titan) {
+            case Titans.TIDE_SHELL -> HeartHall.build(level, HeartHall.Theme.TIDE, jp.revati.skyabyss.titan.tide.heart.TideHeartArena.CX,
+                    jp.revati.skyabyss.titan.tide.heart.TideHeartArena.CZ, jp.revati.skyabyss.titan.tide.heart.TideHeartArena.FLOOR,
+                    jp.revati.skyabyss.titan.tide.heart.TideHeartArena.RADIUS, 1);
+            case Titans.THUNDER_WING -> HeartHall.build(level, HeartHall.Theme.STORM, jp.revati.skyabyss.titan.storm.heart.StormHeartArena.CX,
+                    jp.revati.skyabyss.titan.storm.heart.StormHeartArena.CZ, jp.revati.skyabyss.titan.storm.heart.StormHeartArena.FLOOR,
+                    jp.revati.skyabyss.titan.storm.heart.StormHeartArena.RADIUS, -1);
+            case Titans.EMBER -> HeartHall.build(level, HeartHall.Theme.EMBER, jp.revati.skyabyss.titan.ember.heart.EmberHeartArena.CX,
+                    jp.revati.skyabyss.titan.ember.heart.EmberHeartArena.CZ, jp.revati.skyabyss.titan.ember.heart.EmberHeartArena.SURFACE,
+                    jp.revati.skyabyss.titan.ember.heart.EmberHeartArena.RADIUS, -1);
+            default -> {
+            }
+        }
     }
 
     // 心臓の間をその場で建てる (背の建設・開発のコマンド・自己テスト)
@@ -117,6 +135,7 @@ public final class InstanceArenas {
                 return;
             }
         }
+        hall(level, titan);
         SkyAbyss.LOGGER.info("Built the {} heart arena in the instance area in {} ms", titan, (System.nanoTime() - t0) / 1_000_000L);
     }
 
