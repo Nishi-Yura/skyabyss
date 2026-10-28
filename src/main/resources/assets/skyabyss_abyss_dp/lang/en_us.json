@@ -35,8 +35,6 @@
   "message.skyabyss.depths.obj.king_floor": "Defeat the king in the hall to open the way down",
   "message.skyabyss.depths.obj.stairs_open": "Take the opened way down at the back of the hall",
   "message.skyabyss.depths.rank_group": "By party",
-  "message.skyabyss.depths.rank_head": "── Depth Ranking ──",
-  "message.skyabyss.depths.rank_line": "#%1$s  %2$s  depth %3$s",
   "message.skyabyss.depths.rank_none": "No records yet.",
   "message.skyabyss.depths.rank_player": "By player",
   "message.skyabyss.depths.rest": "Holding your hand to the flame, the weight leaves your body.",
@@ -67,5 +65,11 @@
   "sign.skyabyss.depth_note_storm.1": "My past self's note",
   "sign.skyabyss.depth_note_storm.2": "The storm king copies",
   "sign.skyabyss.depth_note_storm.3": "thunder wing's beat",
-  "sign.skyabyss.depth_note_storm.4": "The anchor still leaks"
+  "sign.skyabyss.depth_note_storm.4": "The anchor still leaks",
+  "message.skyabyss.depths.rank_title": "Depth Ranking Stone",
+  "message.skyabyss.depths.rank_depth": "depth %s",
+  "message.skyabyss.depths.rank_mine": "Your group's deepest %1$s  Your deepest %2$s",
+  "message.skyabyss.depths.rank_dash": "-",
+  "message.skyabyss.depths.rank_next": "Next milestone: %s below the heart",
+  "message.skyabyss.depths.rank_next_all": "Every milestone is behind you."
 }

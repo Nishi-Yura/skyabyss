@@ -1,0 +1,28 @@
+# 深みの順位の石の画面 (records)
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/abyss_review.txt -PshotsName=abyss_review
+world abyss_rank2 flat
+size 1280 720
+timeout 5400
+render 10
+clouds off
+
+wait 80
+cmd skyabyss cinematic stop
+cmd gamemode creative
+cmd effect give @s night_vision 99999 0 true
+hud off
+cmd skyabyss abyss enter
+wait 40
+cmd skyabyss abyss build
+wait 1200
+cmd skyabyss abyss layer go heart 180
+wait 5
+cmd skyabyss cinematic stop
+wait 20
+hud on
+cmd skyabyss abyss depth go 37
+wait 60
+cmd skyabyss cinematic stop
+cmd skyabyss abyss depth records
+wait 30
+shot rank_empty

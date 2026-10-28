@@ -35,8 +35,6 @@
   "message.skyabyss.depths.obj.king_floor": "広間の王を倒して、下り口を開ける",
   "message.skyabyss.depths.obj.stairs_open": "広間の奥の下り口から、次の階へ",
   "message.skyabyss.depths.rank_group": "組ごと",
-  "message.skyabyss.depths.rank_head": "── 深みの順位 ──",
-  "message.skyabyss.depths.rank_line": "%1$s位  %2$s  深さ %3$s",
   "message.skyabyss.depths.rank_none": "まだ記録がない。",
   "message.skyabyss.depths.rank_player": "一人ごと",
   "message.skyabyss.depths.rest": "灯りに手をかざすと、体の重さが抜けた。",
@@ -67,5 +65,11 @@
   "sign.skyabyss.depth_note_storm.1": "前の私の手記",
   "sign.skyabyss.depth_note_storm.2": "雷の王は 雷翼の",
   "sign.skyabyss.depth_note_storm.3": "拍の写しだ",
-  "sign.skyabyss.depth_note_storm.4": "錨はまだ漏れる"
+  "sign.skyabyss.depth_note_storm.4": "錨はまだ漏れる",
+  "message.skyabyss.depths.rank_title": "深みの順位の石",
+  "message.skyabyss.depths.rank_depth": "深さ %s",
+  "message.skyabyss.depths.rank_mine": "あなたの組の最深 %1$s　あなたの最深 %2$s",
+  "message.skyabyss.depths.rank_dash": "―",
+  "message.skyabyss.depths.rank_next": "次の節目: 心臓の下 %s",
+  "message.skyabyss.depths.rank_next_all": "節目はすべて越えた。"
 }

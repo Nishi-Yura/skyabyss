@@ -29,10 +29,19 @@ public final class DepthRecords {
         boolean dirty = false;
         if (beyond > d.groupBest.getOrDefault(group, 0)) {
             d.groupBest.put(group, beyond);
+            List<String> who = new ArrayList<>();
+            for (ServerPlayer m : Groups.online(p.serverLevel(), group)) {
+                who.add(m.getGameProfile().getName());
+            }
+            if (who.isEmpty()) {
+                who.add(p.getGameProfile().getName());
+            }
+            d.names.put(group, String.join("・", who));
             dirty = true;
         }
         if (beyond > d.playerBest.getOrDefault(p.getUUID(), 0)) {
             d.playerBest.put(p.getUUID(), beyond);
+            d.names.put(p.getUUID(), p.getGameProfile().getName());
             dirty = true;
         }
         List<Integer> out = new ArrayList<>();
@@ -83,28 +92,27 @@ public final class DepthRecords {
         return DepthData.get(server).playerBest.getOrDefault(player, 0);
     }
 
-    // 順位の石の文字 (組と一人の上位。見る人に送る)
+    // 順位の石の画面 (組と一人の上位 TOP と、見る人の組・人の最深)。client/depths/DepthRankScreen
     public static void show(MinecraftServer server, ServerPlayer p) {
         DepthData d = DepthData.get(server);
-        p.sendSystemMessage(Component.translatable("message.skyabyss.depths.rank_head"));
-        p.sendSystemMessage(Component.translatable("message.skyabyss.depths.rank_group"));
-        int i = 1;
+        List<DepthRankPayload.Line> groups = new ArrayList<>();
         for (Map.Entry<UUID, Integer> e : top(d.groupBest)) {
-            p.sendSystemMessage(Component.translatable("message.skyabyss.depths.rank_line", i++, Component.literal(short_(e.getKey())),
-                    DepthPlan.totalDepth(e.getValue())));
+            groups.add(new DepthRankPayload.Line(d.names.getOrDefault(e.getKey(), short_(e.getKey())), DepthPlan.totalDepth(e.getValue()), e.getValue()));
         }
-        if (d.groupBest.isEmpty()) {
-            p.sendSystemMessage(Component.translatable("message.skyabyss.depths.rank_none"));
-        }
-        p.sendSystemMessage(Component.translatable("message.skyabyss.depths.rank_player"));
-        i = 1;
+        List<DepthRankPayload.Line> players = new ArrayList<>();
         for (Map.Entry<UUID, Integer> e : top(d.playerBest)) {
-            p.sendSystemMessage(Component.translatable("message.skyabyss.depths.rank_line", i++, Component.literal(nameOf(server, e.getKey())),
-                    DepthPlan.totalDepth(e.getValue())));
+            players.add(new DepthRankPayload.Line(d.names.getOrDefault(e.getKey(), nameOf(server, e.getKey())), DepthPlan.totalDepth(e.getValue()), e.getValue()));
         }
-        if (d.playerBest.isEmpty()) {
-            p.sendSystemMessage(Component.translatable("message.skyabyss.depths.rank_none"));
-        }
+        int mine = d.playerBest.getOrDefault(p.getUUID(), 0);
+        int ours = d.groupBest.getOrDefault(Groups.keyOf(p), 0);
+        net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(p, new DepthRankPayload(groups, players,
+                ours == 0 ? 0 : DepthPlan.totalDepth(ours), mine == 0 ? 0 : DepthPlan.totalDepth(mine), nextMilestone(mine)));
+    }
+
+    // 次の節目 (階の数)。全部越えていれば 0
+    static int nextMilestone(int beyond) {
+        int c = milestoneCount(0, beyond);
+        return c < MILESTONES.length ? MILESTONES[c] : 0;
     }
 
     // 上位 TOP。同じ深さは先に記録した方を上にする (値の大きい順、同じなら鍵の文字の順)
