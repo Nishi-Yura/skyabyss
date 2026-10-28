@@ -113,6 +113,51 @@ for _p, _k in PICK.items():
     C.CAST[f"guest_moon_{_p}"] = C.CAST[f"moon_{_p}_{_k}"]
 
 
+# ---------------------------------------------------------------- 前のループの自分 (二人目。上弦の崖。docs/design/46 の 4.4)
+# 一人目より前の巻き戻りの自分。「鉄張りの旅装」(鎖帷子・鉄の鉢の兜・革の帯) が月の砂で色あせた姿。頭巾はなく、面頬で顔を隠す
+IRON = dict(coat=(128, 132, 140), shirt=(160, 160, 158), mantle=(104, 100, 96), trim=(84, 72, 62), hat=(140, 146, 156), hat2=(96, 100, 110),
+            trousers=(96, 94, 96), boot=(78, 70, 64), sash=(110, 92, 72), cord=(140, 128, 108), leather=(108, 90, 72), metal=(150, 156, 168),
+            metal2=(110, 116, 128), glove=(96, 84, 72))
+
+
+def ipal(**kw):
+    p = dict(IRON)
+    p.update(kw)
+    soft = {m: K.cloth(p[k], noise=0.04, streak=0.03, facevar=0.03) for m, k in (("coat", "coat"), ("mantle", "mantle"), ("trousers", "trousers"),
+                                                                                  ("shirt", "shirt"))}
+    # 持ち物の木と布も月の砂で色あせる
+    soft["wood"] = K.cloth((104, 94, 84), base=0.52, lit=0.3, stripe=3, axis="v", streak=0.1)
+    soft["shield"] = K.cloth((112, 100, 88), base=0.52, lit=0.3, stripe=3, axis="v", streak=0.08)
+    soft["shield2"] = K.cloth((88, 80, 72), base=0.52, lit=0.3, stripe=3, axis="v", streak=0.08)
+    soft["brass"] = dict(ramp=[(80, 78, 74), (120, 116, 106), (160, 154, 140), (196, 190, 176)], base=0.6, lit=0.4, noise=0.02, crack=0, min=0)
+    soft["pennant"] = dict(ramp=[(60, 64, 76), (90, 96, 110), (120, 126, 140), (150, 156, 168)], base=0.6, lit=0.3, noise=0.04, crack=0, min=0)
+    p["extra_mats"] = {**STAR_LAMP, **soft}
+    p["glow_mats"] = ["star"]
+    return p
+
+
+import props2 as P2  # noqa: E402
+import props3 as P3  # noqa: E402
+
+moon("past2", "前のループの自分 (二人目)", [
+    # A 面頬の鎖帷子: 膝までの鎖帷子に鉄の兜と面頬、肩当て、左腕に欠けた丸盾。いちばん「戦って残った」姿
+    dict(anim="hold_l", pal=ipal(skin=(196, 170, 150), hair=(80, 74, 70)),
+         face=dict(eye="narrow", iris=(150, 170, 200), brow="stern", mouth="none", mask=(132, 138, 150)), hair=SHORT, hat=dict(kind="helmet"),
+         hairline=27.4, build="broad", upper=dict(pauldron=True, sash=True), lower="coat_long", sleeve="fitted", gloves=True,
+         arms=HOLD_L_LOW, props={"prop_l": P3.round_shield}),
+    # B 古い槍の見張り: 鉄の兜と面頬、肩に色あせた外套、右手に古い槍を杖のように立てる。崖の頂を見張っていた
+    dict(anim="hold_r", pal=ipal(skin=(190, 166, 148), hair=(120, 116, 112)),
+         face=dict(eye="old", iris=(150, 170, 200), brow="flat", mouth="none", mask=(120, 126, 138)), hair=SHORT, hat=dict(kind="helmet"),
+         hairline=27.4, build="slim", upper=dict(mantle=dict(bottom=14.0, clasp=True), sash=True), lower="trousers", sleeve="wide", gloves=True,
+         arms=STAFF_R, props={"prop_r": P2.spear}),
+    # C 綱を担ぐ登り手: 鉄の兜と面頬、鎖帷子は短く、腰に登りの綱の束、背に荷と寝具 (月の砂)。崖で何度も落ちて登り直した
+    dict(anim="hold_l", pal=ipal(skin=(196, 170, 150), hair=(70, 66, 64)),
+         face=dict(eye="calm", iris=(150, 170, 200), brow="worried", mouth="none", mask=(126, 132, 144)), hair=SHORT, hat=dict(kind="helmet"),
+         hairline=27.4, build="avg", upper=dict(pauldron=True, sash=True), lower="trousers", sleeve="rolled", gloves=True,
+         arms=HOLD_L_LOW, props={"prop_l": P2.rope_coil}, extra_body=[pack_dusty]),
+])
+
+
 def sheet(pid):
     out = Path(__file__).resolve().parents[4] / "docs/review/npc_models_v2/roughs"
     ims = [Image.open(out / f"moon_{pid}_{k}.png").convert("RGB") for k in "abc"]
