@@ -1936,5 +1936,9 @@
   "item.skyabyss.indigo_bookmark": "Indigo Bookmark",
   "item.skyabyss.indigo_bookmark.desc": "A bookmark with a pressed indigo flower",
   "biome.skyabyss.abyss": "The Abyss",
-  "biome.skyabyss.ember_back": "The Ember Back"
+  "biome.skyabyss.ember_back": "The Ember Back",
+  "entity.skyabyss.glow_arrow": "Glow Arrow",
+  "entity.skyabyss.travel_arrow": "Travel Arrow",
+  "entity.skyabyss.skiff": "Skiff",
+  "entity.skyabyss.tide_pearl": "Chasing Pearl"
 }

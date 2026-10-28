@@ -1936,5 +1936,9 @@
   "item.skyabyss.indigo_bookmark": "藍の栞",
   "item.skyabyss.indigo_bookmark.desc": "藍の押し花の栞",
   "biome.skyabyss.abyss": "深淵",
-  "biome.skyabyss.ember_back": "余燼の背"
+  "biome.skyabyss.ember_back": "余燼の背",
+  "entity.skyabyss.glow_arrow": "光の矢",
+  "entity.skyabyss.travel_arrow": "旅の矢",
+  "entity.skyabyss.skiff": "小舟",
+  "entity.skyabyss.tide_pearl": "追う真珠"
 }

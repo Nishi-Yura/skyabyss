@@ -309,6 +309,28 @@ public final class LangSelfTest {
                     }
                 }
             }
+            // mod の品・ブロック・効果の名前 (持ち物・クリエイティブの欄・効果の欄に出る)
+            for (net.minecraft.world.item.Item it : net.minecraft.core.registries.BuiltInRegistries.ITEM) {
+                net.minecraft.resources.ResourceLocation id = net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(it);
+                if (id.getNamespace().equals(SkyAbyss.MODID) && !jaT.containsKey(it.getDescriptionId())) {
+                    f.add("item name " + it.getDescriptionId() + " is missing from ja_jp");
+                }
+            }
+            for (net.minecraft.world.effect.MobEffect ef : net.minecraft.core.registries.BuiltInRegistries.MOB_EFFECT) {
+                net.minecraft.resources.ResourceLocation id = net.minecraft.core.registries.BuiltInRegistries.MOB_EFFECT.getKey(ef);
+                if (id.getNamespace().equals(SkyAbyss.MODID) && !jaT.containsKey(ef.getDescriptionId())) {
+                    f.add("effect name " + ef.getDescriptionId() + " is missing from ja_jp");
+                }
+            }
+            // mod の生き物の名前 (倒された知らせ・F3 に出る。2026-10-28 に矢・小舟・真珠が抜けていた)
+            for (net.minecraft.resources.ResourceLocation id : net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE.keySet()) {
+                if (id.getNamespace().equals(SkyAbyss.MODID)) {
+                    String k = "entity." + id.getNamespace() + "." + id.getPath();
+                    if (!jaT.containsKey(k) || !enT.containsKey(k)) {
+                        f.add("entity name " + k + " is missing from " + (jaT.containsKey(k) ? "en_us" : enT.containsKey(k) ? "ja_jp" : "both"));
+                    }
+                }
+            }
             // 検査の部品そのものが動くこと
             if (specs("%s と %1$s と %% と %d") != 3) {
                 f.add("the placeholder counter is wrong");
