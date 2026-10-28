@@ -117,9 +117,35 @@ public final class HeartHall {
         if (inner) {
             return;
         }
+        if (pal.fill.getFluidState().isSource()) {
+            seal(level, pal, cx, cz, bottom, air - 2, flags);
+        }
         pillars(level, pal, cx, cz, bottom, top, r, gateDir, flags);
         details(level, theme, pal, cx, cz, air, bottom, top, r, gateDir, flags);
         SkyAbyss.LOGGER.info("Heart hall ({}) built around {}, {} in {} ms", theme, cx, cz, (System.nanoTime() - t0) / 1_000_000L);
+    }
+
+    // 谷の水・溶岩が横の空気へ流れ出さないよう、横に空気のある縁を台の石で塞ぐ
+    static void seal(ServerLevel level, Palette pal, int cx, int cz, int bottom, int topY, int flags) {
+        BlockPos.MutableBlockPos p = new BlockPos.MutableBlockPos();
+        BlockPos.MutableBlockPos q = new BlockPos.MutableBlockPos();
+        int span = HALL_R + 3;
+        for (int y = bottom; y < topY; y++) {
+            for (int dx = -span; dx <= span; dx++) {
+                for (int dz = -span; dz <= span; dz++) {
+                    p.set(cx + dx, y, cz + dz);
+                    if (!level.getFluidState(p).isSource()) {
+                        continue;
+                    }
+                    for (Direction dir : Direction.Plane.HORIZONTAL) {
+                        q.setWithOffset(p, dir);
+                        if (level.getBlockState(q).isAir()) {
+                            level.setBlock(q, pal.pedestal, flags);
+                        }
+                    }
+                }
+            }
+        }
     }
 
     static boolean ring(double d, double at) {
@@ -183,12 +209,10 @@ public final class HeartHall {
                         case 2 -> Blocks.FIRE_CORAL_BLOCK.defaultBlockState();
                         default -> Blocks.HORN_CORAL_BLOCK.defaultBlockState();
                     };
-                    if (!bridgeAt(x - cx, z - cz, r, gateDir) && level.getBlockState(p.set(x, y, z)).isAir()) {
-                        // 乾いた珊瑚は灰色に枯れるので、水の外は死んだ珊瑚の色を避けて方解石と海の灯りを混ぜる
-                        level.setBlock(p, rnd.nextInt(3) == 0 ? Blocks.SEA_LANTERN.defaultBlockState() : Blocks.CALCITE.defaultBlockState(), flags);
-                    }
-                    if (y < bottom + pal.fillDepth) {
-                        level.setBlock(p, coral, flags);
+                    // 珊瑚は水の中の谷底だけ (乾くと枯れる。浮かせない)
+                    int cy = bottom;
+                    if (!bridgeAt(x - cx, z - cz, r, gateDir)) {
+                        level.setBlock(p.set(x, cy, z), coral, flags);
                     }
                 }
             }
@@ -242,10 +266,13 @@ public final class HeartHall {
         if (bridgeAt(x - cx, z - cz, r, gateDir)) {
             return;
         }
+        // 円天井の下の面から下げる (天井から離れて浮かない)
+        double d = Math.sqrt((double) (x - cx) * (x - cx) + (double) (z - cz) * (z - cz));
+        int from = top + (int) Math.round(DOME * Math.max(0, 1 - (d / HALL_R) * (d / HALL_R))) - 1;
         for (int i = 0; i < len; i++) {
-            level.setBlock(p.set(x, top + 2 - i, z), Blocks.CHAIN.defaultBlockState().setValue(ChainBlock.AXIS, Direction.Axis.Y), flags);
+            level.setBlock(p.set(x, from - i, z), Blocks.CHAIN.defaultBlockState().setValue(ChainBlock.AXIS, Direction.Axis.Y), flags);
         }
-        level.setBlock(p.set(x, top + 2 - len, z), lamp, flags);
+        level.setBlock(p.set(x, from - len, z), lamp, flags);
     }
 
     record Palette(BlockState wall, BlockState band, BlockState ceiling, BlockState light, BlockState floor, BlockState fill, int fillDepth,

@@ -66,6 +66,11 @@ public final class RaidPace {
     // RaidRun.tickRun の ACTIVE から (部屋の tick のあと)
     static void tick(RaidRun.Run run, long now) {
         RaidCtx ctx = run.ctx;
+        // 始まりの時刻を持たないまま動いている部屋 (直に始めた部屋) は、いまを始まりとする
+        if (run.activeSince <= 0) {
+            run.activeSince = now;
+            run.lastHarass = now;
+        }
         int lim = limit(run);
         if (lim >= 0 && now - run.activeSince > lim) {
             ctx.fail("message.skyabyss.raid.timeout");

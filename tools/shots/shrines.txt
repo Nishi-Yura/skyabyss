@@ -1,0 +1,67 @@
+# 巨神の祠 (2026-10-28「祠が地形になじまない、どうやって行けばいい」→ 町を出た道ばたの平らな広場)
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/shrines.txt -PshotsName=shrines
+world shrines1 continent
+size 1600 900
+timeout 4000
+render 10
+guiscale 2
+waitchunks 200
+wait 60
+cmd skyabyss cinematic stop
+close
+cmd gamemode creative
+cmd time set 4000
+cmd weather clear
+cmd gamerule doDaylightCycle false
+cmd skyroute shrine stone_whale
+waitchunks 300
+wait 400
+cmd gamemode spectator
+hud off
+cmd execute at @s run tp @s ~ ~7 ~14 180 22
+wait 30
+shot stone_whale_1_near
+cmd execute at @s run tp @s ~18 ~16 ~10 130 35
+wait 30
+shot stone_whale_2_wide
+hud on
+cmd gamemode creative
+cmd skyroute shrine tide_shell
+waitchunks 300
+wait 400
+cmd gamemode spectator
+hud off
+cmd execute at @s run tp @s ~ ~7 ~14 180 22
+wait 30
+shot tide_shell_1_near
+cmd execute at @s run tp @s ~18 ~16 ~10 130 35
+wait 30
+shot tide_shell_2_wide
+hud on
+cmd gamemode creative
+cmd skyroute shrine thunder_wing
+waitchunks 300
+wait 400
+cmd gamemode spectator
+hud off
+cmd execute at @s run tp @s ~ ~7 ~14 180 22
+wait 30
+shot thunder_wing_1_near
+cmd execute at @s run tp @s ~18 ~16 ~10 130 35
+wait 30
+shot thunder_wing_2_wide
+hud on
+cmd gamemode creative
+cmd skyroute shrine ember
+waitchunks 300
+wait 400
+cmd gamemode spectator
+hud off
+cmd execute at @s run tp @s ~ ~7 ~14 180 22
+wait 30
+shot ember_1_near
+cmd execute at @s run tp @s ~18 ~16 ~10 130 35
+wait 30
+shot ember_2_wide
+hud on
+cmd gamemode creative
