@@ -38,7 +38,7 @@ public record QuestDef(String id, String category, int order, @Nullable String g
     public static final Set<String> CATEGORIES = Set.of("main", "sub");
     public static final Set<String> REPEATS = Set.of("", "daily", "weekly");
     public static final Set<String> OBJECTIVE_TYPES = Set.of("talk", "kill", "collect", "lore", "visit", "near", "signal", "condition",
-            "turn_in", "herd", "wear");
+            "turn_in", "herd", "wear", "run");
 
     // 段階。mode が all なら目的をすべて、any ならどれか一つで次へ。skipIf が真なら、着いたとたんに済ませる
     public record Stage(String id, String mode, List<Objective> objectives, Condition skipIf, int xp, List<Action> actions) {
@@ -51,6 +51,8 @@ public record QuestDef(String id, String category, int order, @Nullable String g
     // near=生き物、signal=合図の名前)。count は必要な数 (lore は「targets のうちいくつ」)
     // party: 倒す・合図の目的を、パーティの仲間 (経験値の分け前と同じ条件) も数える。token: 品の印 (QuestItems。collect / turn_in)
     // turn_in: 品を言伝ての板 (か依頼主の会話) で納める。herd: 受けた場所 (板) の radius 以内に、その生き物を count 頭そろえる
+    // run: 巨神の背の順路を越えて心臓を止めた (targets = 巨神の名か any。under 秒の内なら。radius に秒を入れる。0 なら時間を問わない)。
+    //   一緒に入った仲間は全員が同じ記録 (TitanRunData と同じ回。trial/TrialRoute.onHeartStopped → Quests.onRun)
     // wear: targets の品 (防具) のうち count 種類を着ている (防具の枠。脱げば戻る。既定は全部。一章の鉄の跡「鉄の防具を作ろう（2/4）」)
     public record Objective(String id, String type, List<String> targets, @Nullable String topic, int count, double radius, Condition condition,
                             boolean party, @Nullable String token) {
@@ -244,7 +246,8 @@ public record QuestDef(String id, String category, int order, @Nullable String g
         if (type.equals("condition") && !o.has("if")) {
             errors.add(w + ": condition objective needs 'if'");
         }
-        double radius = GsonHelper.getAsDouble(o, "radius", type.equals("near") ? 48 : type.equals("herd") ? 10 : 32);
+        double radius = type.equals("run") ? GsonHelper.getAsDouble(o, "under", 0)
+                : GsonHelper.getAsDouble(o, "radius", type.equals("near") ? 48 : type.equals("herd") ? 10 : 32);
         return new Objective(id, type, List.copyOf(targets), o.has("topic") ? GsonHelper.getAsString(o, "topic") : null, count,
                 radius, condition, GsonHelper.getAsBoolean(o, "party", type.equals("kill") || type.equals("signal")),
                 o.has("token") ? GsonHelper.getAsString(o, "token") : null);

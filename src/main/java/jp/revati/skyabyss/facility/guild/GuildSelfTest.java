@@ -65,6 +65,16 @@ public final class GuildSelfTest {
             FakePlayer b = fake(server, "run_b");
             check(f, Guilds.create(a, "速足の組", "RUN", 1, 2) == Guilds.Result.OK, "run guild created");
             long now = server.overworld().getGameTime();
+            // 頼みの目的「踏破の時間」(run): 二十分 (24000 tick) を過ぎた回では済まず、内なら済む
+            jp.revati.skyabyss.quest.Quests.forget(b, "weekly_swift_run");
+            jp.revati.skyabyss.quest.Quests.start(b, "weekly_swift_run");
+            jp.revati.skyabyss.quest.Quests.onRun(b, "stone_whale", 30000);
+            jp.revati.skyabyss.quest.QuestLog.Entry qe = jp.revati.skyabyss.quest.QuestLog.of(b).quests().get("weekly_swift_run");
+            check(f, qe != null && !qe.done, "a 25-minute run finished the swift crossing");
+            jp.revati.skyabyss.quest.Quests.onRun(b, "tide_shell", 20000);
+            qe = jp.revati.skyabyss.quest.QuestLog.of(b).quests().get("weekly_swift_run");
+            check(f, qe != null && qe.done, "a 17-minute run did not finish the swift crossing");
+            jp.revati.skyabyss.quest.Quests.forget(b, "weekly_swift_run");
             check(f, d.record(server, "stone_whale", 6000, List.of(a), now) == 1, "first solo run ranks 1");
             check(f, d.record(server, "stone_whale", 4000, List.of(a), now) == 1 && d.top("stone_whale", 1).get(1).ticks() == 6000, "faster run takes 1st");
             check(f, d.record(server, "stone_whale", 5000, List.of(a, b), now) == 1 && d.top("stone_whale", 2).size() == 1 && d.top("stone_whale", 1).size() == 2,

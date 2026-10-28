@@ -174,5 +174,11 @@
   "quest.skyabyss.weekly_route.done": "順路の果てで、心臓が止まった。",
   "quest.skyabyss.weekly_route.route.journal": "板の紙：「祠の歌に呼ばれて、もう一度背を渡ってきてほしい。——鯨追い」",
   "quest.skyabyss.weekly_route.route.route": "順路を心臓まで越えよう",
-  "quest.skyabyss.weekly_route.unlock_hint": "巨神の心臓を一度止めると、受けられる"
+  "quest.skyabyss.weekly_route.unlock_hint": "巨神の心臓を一度止めると、受けられる",
+  "quest.skyabyss.weekly_swift_run.title": "速い踏破",
+  "quest.skyabyss.weekly_swift_run.summary": "巨神の背の順路を、二十分の内に越えて心臓を止める。どの巨神でもよく、一緒に入った仲間も同じ記録で数える。",
+  "quest.skyabyss.weekly_swift_run.done": "二十分の内に心臓を止めた。組合の記録にも載っているかもしれない。",
+  "quest.skyabyss.weekly_swift_run.run.journal": "板の紙：「背中を速く越えた者に。順路の入口から心臓まで、二十分の内に」",
+  "quest.skyabyss.weekly_swift_run.run.swift": "二十分の内に背中を越えよう",
+  "quest.skyabyss.weekly_swift_run.unlock_hint": "岩鯨の背に渡ると、受けられる"
 }

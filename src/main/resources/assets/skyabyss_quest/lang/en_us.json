@@ -174,5 +174,11 @@
   "quest.skyabyss.weekly_route.done": "The heart stilled at the end of the route.",
   "quest.skyabyss.weekly_route.route.journal": "A note on the board: \"Answer a shrine's song and cross a back once more. — the Whale Chaser\"",
   "quest.skyabyss.weekly_route.route.route": "Cross a route to the heart",
-  "quest.skyabyss.weekly_route.unlock_hint": "Available once you have stilled a titan's heart"
+  "quest.skyabyss.weekly_route.unlock_hint": "Available once you have stilled a titan's heart",
+  "quest.skyabyss.weekly_swift_run.title": "Swift Crossing",
+  "quest.skyabyss.weekly_swift_run.summary": "Run a titan's back route and stop its heart within twenty minutes. Any titan will do, and mates who went in with you share the time.",
+  "quest.skyabyss.weekly_swift_run.done": "You stopped a heart within twenty minutes. The guild records may have you too.",
+  "quest.skyabyss.weekly_swift_run.run.journal": "A note on the board: \"For whoever crosses a back fast. From the route's mouth to the heart, within twenty minutes.\"",
+  "quest.skyabyss.weekly_swift_run.run.swift": "Cross a back within twenty minutes",
+  "quest.skyabyss.weekly_swift_run.unlock_hint": "Reach the stone whale's back to take this"
 }

@@ -83,6 +83,12 @@ public final class Quests {
         bump(player, (def, stage, ob) -> ob.type().equals("signal") && ob.targets().contains(signal));
     }
 
+    // 巨神の背の順路を越えた (心臓が止まった)。ticks は順路を始めてから止めるまで
+    public static void onRun(ServerPlayer player, String titan, long ticks) {
+        bump(player, (def, stage, ob) -> ob.type().equals("run") && (ob.targets().contains(titan) || ob.targets().contains("any"))
+                && (ob.radius() <= 0 || ticks <= ob.radius() * 20));
+    }
+
     // 会話でその節 (node) に入った。topic のない talk は、その NPC と話せば何でもよい
     public static void onTalk(ServerPlayer player, String role, String node) {
         jp.revati.skyabyss.advancement.Beats.fire(player, "talk:" + role);

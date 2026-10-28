@@ -879,6 +879,10 @@ public final class TrialRoute {
                 Notice.gain(p, "message.skyabyss.runs.ranked", rank, jp.revati.skyabyss.facility.guild.TitanRunData.clock(t));
             }
         }
+        // 頼みの目的「踏破の時間」(run)。仲間は全員が同じ回の時間で数える
+        for (ServerPlayer p : online) {
+            jp.revati.skyabyss.quest.Quests.onRun(p, titan, t);
+        }
         TrialSlot.release(back, r);
     }
 

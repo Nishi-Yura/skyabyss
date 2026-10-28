@@ -1,0 +1,43 @@
+{
+  "category": "sub",
+  "order": 81,
+  "repeat": "weekly",
+  "board": true,
+  "unlock": {
+    "type": "all",
+    "of": [
+      {
+        "type": "lore",
+        "entry": "chapter1/sky_ruins"
+      },
+      {
+        "type": "flag",
+        "flag": "met",
+        "npc": "skyabyss:whale_chaser"
+      }
+    ]
+  },
+  "stages": [
+    {
+      "id": "run",
+      "objectives": [
+        {
+          "id": "swift",
+          "type": "run",
+          "target": "any",
+          "under": 1200,
+          "count": 1
+        }
+      ]
+    }
+  ],
+  "reward": {
+    "xp": 160,
+    "items": [
+      {
+        "item": "skyabyss:skill_rune",
+        "count": 1
+      }
+    ]
+  }
+}
