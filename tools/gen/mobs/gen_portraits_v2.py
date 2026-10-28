@@ -36,6 +36,7 @@ from gen_portraits import ell, poly, rrect, bez, stroke, taper  # noqa: E402
 import gen_attendant_portraits as GAP  # noqa: E402
 import kit as K  # noqa: E402
 import cast as C  # noqa: E402
+import cast_folk  # noqa: E402,F401  (土地の町の 8 人の選んだ案)
 import build as B  # noqa: E402
 from lpkit import rot_x, rot_y  # noqa: E402
 
@@ -52,7 +53,10 @@ EYE_AT = (64.0, 60.0)          # 両目の中ほどを置く画素
 
 # 肖像の名 (DialogueScreen: textures/gui/npc/face/<役のパス>_<表情>.png)
 GUESTS = {"guest_apprentice", "guest_bellkeeper", "guest_fisher", "guest_bard", "guest_child", "guest_weaver", "guest_ash_apprentice",
-          "guest_herbalist", "guest_sailor", "guest_mother", "guest_baker"}
+          "guest_herbalist", "guest_sailor", "guest_mother", "guest_baker",
+          # 土地の町の 8 人 (2026-10-28 から自分の体。cast_folk)
+          "guest_island_ferryman", "guest_tide_ferryman", "guest_inner_ferryman", "guest_tide_lightkeeper", "guest_storm_elder",
+          "guest_storm_hutkeeper", "guest_ember_survivor", "guest_ember_watch"}
 
 
 def file_stem(name):
@@ -83,6 +87,9 @@ BG_EXTRA = {
     "guest_apprentice": (90, 150, 180), "guest_bellkeeper": (200, 170, 90), "guest_fisher": (80, 140, 170), "guest_bard": (190, 90, 120),
     "guest_child": (110, 120, 170), "guest_weaver": (150, 110, 180), "guest_ash_apprentice": (230, 110, 50), "guest_herbalist": (120, 170, 100),
     "guest_sailor": (70, 120, 170), "guest_mother": (200, 140, 110), "guest_baker": (220, 170, 100),
+    "guest_island_ferryman": (170, 150, 100), "guest_tide_ferryman": (90, 150, 190), "guest_inner_ferryman": (90, 150, 150),
+    "guest_tide_lightkeeper": (230, 200, 110), "guest_storm_elder": (170, 110, 120), "guest_storm_hutkeeper": (170, 110, 80),
+    "guest_ember_survivor": (220, 110, 50), "guest_ember_watch": (200, 80, 60),
 }
 
 

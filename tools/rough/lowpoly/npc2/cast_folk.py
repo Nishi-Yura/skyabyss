@@ -41,10 +41,11 @@ def folk(pid, ja, opts):
 
 # ---------------------------------------------------------------- はじまりの島の渡し守 (年を取った、無口な舟の人)
 folk("island_ferryman", "島の渡し守", [
-    dict(anim="free", pal=dict(skin=SKIN["tan"], hair=(150, 140, 130), coat=(96, 80, 60), mantle=(140, 120, 84), shirt=(200, 190, 160), trim=(60, 48, 36),
+    dict(anim="hold_r", pal=dict(skin=SKIN["tan"], hair=(150, 140, 130), coat=(96, 80, 60), mantle=(140, 120, 84), shirt=(200, 190, 160), trim=(60, 48, 36),
                                hat=(186, 160, 100), trousers=(70, 60, 48), boot=(50, 40, 32), metal=(150, 130, 90)),
          face=dict(eye="narrow", iris=(90, 80, 70), brow="thick", mouth="neutral", marks=[(["w"], 4, 48)]), hair=BALDISH, hat=dict(kind="kasa"),
-         beard="full", hairline=27.0, build="old", upper=dict(mantle=dict(bottom=15.0, clasp=True)), lower="trousers", sleeve="wide", boots="boot"),
+         beard="full", hairline=27.0, build="old", upper=dict(mantle=dict(bottom=15.0, clasp=True)), lower="trousers", sleeve="wide", boots="boot",
+         arms=STAFF_R, props={"prop_r": P2.guide_staff}),
     dict(anim="hold_r", pal=dict(skin=SKIN["ruddy"], hair=(110, 80, 56), coat=(52, 70, 92), vest=(160, 120, 70), shirt=(210, 200, 176), trim=(36, 46, 60),
                                  hat=(52, 70, 92), trousers=(46, 54, 66), boot=(40, 34, 30), metal=(170, 150, 100), scarf=(170, 70, 50)),
          face=dict(eye="kind", iris=(80, 100, 120), brow="flat", mouth="smile"), hair=SHORT, hat=dict(kind="cap"), beard="stubble", hairline=27.4,
@@ -75,10 +76,10 @@ folk("tide_ferryman", "汐守の渡し守", [
 
 # ---------------------------------------------------------------- 内海の渡し守 (両岸に一人ずつ。静かな女の船頭)
 folk("inner_ferryman", "内海の渡し守", [
-    dict(anim="free", pal=dict(skin=SKIN["pale"], hair=(40, 40, 50), coat=(80, 120, 120), mantle=(60, 90, 96), shirt=(220, 220, 210), trim=(40, 66, 70),
+    dict(anim="hold_l", pal=dict(skin=SKIN["pale"], hair=(40, 40, 50), coat=(80, 120, 120), mantle=(60, 90, 96), shirt=(220, 220, 210), trim=(40, 66, 70),
                                hat=(200, 180, 130), skirt=(70, 100, 104), trousers=(50, 60, 60), boot=(60, 50, 40), metal=(190, 170, 110)),
          face=dict(eye="lady", iris=(70, 120, 120), brow="soft", mouth="small", blush=0.15), hair=BRAID, hat=dict(kind="kasa"), hairline=27.8,
-         build="lady", upper=dict(mantle=dict(bottom=16.0, clasp=True)), lower="skirt", sleeve="wide"),
+         build="lady", upper=dict(mantle=dict(bottom=16.0, clasp=True)), lower="skirt", sleeve="wide", arms=HOLD_L_LOW, props={"prop_l": P2.rope_coil}),
     dict(anim="hold_r", pal=dict(skin=SKIN["mid"], hair=(120, 80, 50), coat=(120, 96, 70), vest=(70, 110, 110), shirt=(226, 220, 200), trim=(70, 50, 36),
                                  hat=(70, 110, 110), trousers=(70, 60, 50), boot=(60, 46, 34), metal=(170, 150, 100), scarf=(70, 110, 110)),
          face=dict(eye="lady", iris=(90, 80, 60), brow="flat", mouth="lips", lip=(170, 96, 86)), hair=BUN, hat=dict(kind="kerchief"), hairline=27.6,
@@ -145,10 +146,11 @@ folk("storm_hutkeeper", "山小屋の番", [
 
 # ---------------------------------------------------------------- 灰の民の生き残り (灰炉の町。煤にまみれた)
 folk("ember_survivor", "灰の民の生き残り", [
-    dict(anim="free", pal=dict(skin=SKIN["brown"], hair=(50, 46, 44), coat=(70, 64, 60), mantle=(110, 100, 90), shirt=(150, 140, 126), trim=(160, 70, 30),
+    dict(anim="hold_l", pal=dict(skin=SKIN["brown"], hair=(50, 46, 44), coat=(70, 64, 60), mantle=(110, 100, 90), shirt=(150, 140, 126), trim=(160, 70, 30),
                                hat=(110, 100, 90), trousers=(56, 50, 46), boot=(40, 36, 32), metal=(180, 90, 40)),
          face=dict(eye="sharp", iris=(150, 80, 40), brow="stern", mouth="frown", marks=[(["w"], 4, 47)]), hair=SHORT, hat=dict(kind="hood"),
-         beard="stubble", hairline=27.4, build="slim", upper=dict(mantle=dict(bottom=15.0, clasp=True), sash=True), lower="trousers", sleeve="wide"),
+         beard="stubble", hairline=27.4, build="slim", upper=dict(mantle=dict(bottom=15.0, clasp=True), sash=True), lower="trousers", sleeve="wide",
+         arms=HOLD_L_LOW, props={"prop_l": lantern_l}),
     dict(anim="hold_r", pal=dict(skin=SKIN["tan"], hair=(110, 60, 40), coat=(90, 50, 40), apron=(60, 56, 54), shirt=(170, 150, 120), trim=(40, 34, 30),
                                  hat=(60, 56, 54), trousers=(60, 50, 44), boot=(40, 34, 30), metal=(200, 110, 40)),
          face=dict(eye="lady", iris=(160, 90, 40), brow="worried", mouth="small"), hair=BRAID, hat=dict(kind="kerchief"), hairline=27.8, build="lady",
@@ -179,6 +181,12 @@ folk("ember_watch", "焼けた砦の見張り", [
          build="avg", upper=dict(mantle=dict(bottom=16.0, clasp=True), collar=True, collar_mat="trim"), lower="coat_long", sleeve="fitted",
          gloves=True),
 ])
+
+
+# 選定 (2026-10-28): 8 人とも A。cast の guest_<人> として登録する (install_npc2 が読む。人の動きの型も A のもの)
+PICK = {p: "a" for p in ("island_ferryman", "tide_ferryman", "inner_ferryman", "tide_lightkeeper", "storm_elder", "storm_hutkeeper", "ember_survivor", "ember_watch")}
+for _p, _k in PICK.items():
+    C.CAST[f"guest_{_p}"] = C.CAST[f"guest_{_p}_{_k}"]
 
 
 def sheet(pid):

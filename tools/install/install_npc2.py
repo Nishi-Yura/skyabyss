@@ -140,6 +140,7 @@ def install(name, kind):
 
 def main(names):
     import cast as C
+    import cast_folk  # noqa: F401  (土地の町の 8 人: 選んだ案を guest_<人> として足す)
     names = names or [n for n in C.CAST if os.path.exists(os.path.join(SRC, n, n + "_mesh.json"))]
     for n in names:
         install(n, C.CAST[n].get("anim", "free"))
