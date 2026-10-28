@@ -8,6 +8,27 @@
 - 試遊版: 0.8.0（`build/libs/skyabyss-0.8.0.jar`。確認表 `docs/review/playtest_0.8.0.md`、遊び方 `docs/beta_how_to_play.md`）。
 - 自己テスト: `bash <scratchpad>/fresh_continent.sh "<名前,…>" <世界名>`（空なら全部。大陸の新しい世界で回す）。`abyss escort` はほかと一緒に流すと時間切れで落ちることがある（単独では通る）。
 
+## 2026-10-28 夜（0.8.0 の試遊の声 その 2。`memory: skyabyss-080b-feedback`）
+
+できたこと:
+- 心臓の報酬: 初めて止めたときの選ぶ画面は出さない（`HeartReward.CHOICE_ON_FIRST_CLEAR = false`。30 に記した）。専用の逸品は心臓の周回でまれに落ちるだけ。
+- 武器を持ち替えてもスキルの帯が消えない（武器でない物を持つ間は前の職の帯を薄く出す）。章の表示は進めているメインの頼みの章へ（地上で落ち着いたら札を待たない）。緑の経験値バーは出さない。
+- 主と名のある敵は下がらない（`combat/BossFooting`）。
+- 戦いの手ごたえ（47）: 主の構えと隙（`combat/BossOpenings`: ふだん ×0.3、技が当たり終わって 3 秒 ×1.6、領域を解くと 6 秒）、ふつうの敵の身構え（3 秒に 5 回打たれると 2 秒 ×0.4）、戦いの中の食事は 20 秒に一つ（`combat/FightRations`）。
+- コマンド: 製品版では `/skyabyss` の下は `play` と `inspect` だけ見せる（`dev/CommandGate`。中から流す呼び出しは通る）。`play raid tide …` で潮殻の試練へ行けなかったのは、潮殻を「自分から 120 先の海」に呼ぶ作りで大陸の真ん中に海がなかったため。
+- 巨神の居場所（40 の 3.6、`world/continent/ContinentLairs`、`data/skyabyss/continent/lairs.json`）: 四体は決まった所で休み続ける。体の下の地面は地形の生成で体より低くしてある。休む巨神はブロックを壊さない。自己テストの間は居場所を使わない（古い動きの段のため。`titan lairs` だけが使う）。
+- 祠の場所: 土地の町から跡地への道の、町を出て 90 ほどの道ばた（`lairs.json` の shrines）。地形の生成で台座の広場をならす。
+- 全滅: 心臓の戦いで参加者が全員倒れたら、物語の一度目は地上の巨神の前、周回は祠の前で目覚める（`titan/group/WipeReturn`）。
+- 月の旅の地図（46 の 4.1）: 月にいる間は月の絵（`tools/gen/ch6/gen_moon_map.py` → `textures/gui/map/moon.png`）。
+- テストの直し: 島の湧きの表は空のまま・freequest は四章の日替わりを数えない・都の掃き出しは外へ押し出せばよい・樽などは道にかかっても置く。
+
+残り（この順）:
+1. ヒロイック武器 17 本 × 3 案のラフ（`tools/rough/lowpoly/weapons/heroic/`、絵は `docs/review/roughs_heroic/`、選ぶページ https://claude.ai/artifact/6QrjTHViWPyXmU2EZaZMWj の db `picks`）。選ばれたら入れる（品の登録・数値・技の書き換え・アイコン・手持ち）。
+2. 潮殻・雷翼・余燼の心臓の部屋を鯨のように大きく作り込む。
+3. 試練の難しさをそろえる（簡単すぎるもの・難しいもの）。
+4. 祠のまわりの作り込み（道からの脇道・目印）を絵で確かめる。
+5. 0.8.1 の試遊用の jar。
+
 ## 2026-10-27 にやったこと（0.7.0 の試遊の声）
 
 - 伝説 20 本の技の書き換え（43 の終わり）。

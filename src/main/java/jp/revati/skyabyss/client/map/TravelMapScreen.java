@@ -108,7 +108,7 @@ public class TravelMapScreen extends Screen {
         this.chart = chart;
         this.sheet = sheet;
         // 海図は遠くまで行くので世界の縮尺から
-        this.view = chart != null ? FAR : NEAR;
+        this.view = chart != null ? FAR : onMoon() ? MOON_NEAR : NEAR;
         this.target = view;
         pickDefault();
     }
@@ -300,6 +300,9 @@ public class TravelMapScreen extends Screen {
 
     // 動かせる範囲 (世界の座標の {x0, z0, x1, z1}): 自分・町・載っている印を囲む長方形
     private int[] knownBounds() {
+        if (onMoon()) {
+            return new int[] {MOON_X0 + 64, MOON_Z0 + 64, MOON_X0 + MOON_SIZE - 64, MOON_Z0 + MOON_SIZE - 64};
+        }
         int x0 = baseX();
         int x1 = x0;
         int z0 = baseZ();
@@ -365,10 +368,21 @@ public class TravelMapScreen extends Screen {
     @Nullable
     private double[] self() {
         Minecraft mc = Minecraft.getInstance();
-        if (mc.player == null || mc.level == null || mc.level.dimension() != Level.OVERWORLD) {
+        if (mc.player == null || mc.level == null || (mc.level.dimension() != Level.OVERWORLD && !onMoon())) {
             return null;
         }
         return new double[]{mc.player.getX(), mc.player.getZ(), mc.player.getYRot()};
+    }
+
+    // 地図に描く世界 (月にいれば月、ほかは地上) の名前。墓・仲間の印はこの世界のものだけ
+    static String here() {
+        return (onMoon() ? jp.revati.skyabyss.story.ch6.MoonWorld.LEVEL : Level.OVERWORLD).location().toString();
+    }
+
+    // 月にいる (旅の地図は月の絵に替わる。地上の印は出さない)
+    static boolean onMoon() {
+        Minecraft mc = Minecraft.getInstance();
+        return mc.level != null && mc.level.dimension() == jp.revati.skyabyss.story.ch6.MoonWorld.LEVEL;
     }
 
     private boolean onGround() {
@@ -478,8 +492,49 @@ public class TravelMapScreen extends Screen {
     static final double NAMES_FROM = 700;
     static final double NAMES_TO = 3200;
 
+    // ---------------------------------------------------------------- 月 (docs/design/46 の 3.6。2026-10-28 の試遊「月行ったらマップ変わる様にしてほしい」)
+    // 月にいる間は、月の絵 (moon.png。tools/gen/ch6/gen_moon_map.py。512 x 512 で x -256..256、z -128..384) を敷く
+    static final ResourceLocation MOON = ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "textures/gui/map/moon.png");
+    static final int MOON_X0 = -256;
+    static final int MOON_Z0 = -128;
+    static final int MOON_SIZE = 512;
+    // 月で開いたときの縮尺 (着く所と谷が盤に収まる)
+    static final double MOON_NEAR = 150;
+    // 月の地の色 (絵の外の透けた所)
+    static final int MOON_GROUND = 0xFF2A2C38;
+
+    private void drawMoon(GuiGraphics g) {
+        double k = radius / view;
+        int x0 = cx + (int) Math.round((MOON_X0 - centerX()) * k);
+        int y0 = cy + (int) Math.round((MOON_Z0 - centerZ()) * k);
+        int size = (int) Math.round(MOON_SIZE * k);
+        g.fill(rx0 - 1, ry0 - 1, rx1 + 1, ry1 + 1, 0xFF1A1C24);
+        g.fill(rx0, ry0, rx1, ry1, MOON_GROUND);
+        com.mojang.blaze3d.systems.RenderSystem.enableBlend();
+        g.enableScissor(rx0, ry0, rx1, ry1);
+        g.blit(MOON, x0, y0, size, size, 0, 0, MOON_SIZE, MOON_SIZE, MOON_SIZE, MOON_SIZE);
+        g.disableScissor();
+        com.mojang.blaze3d.systems.RenderSystem.disableBlend();
+        if (view > 600) {
+            return;
+        }
+        // 名前: 着く所・新月の谷
+        int[] land = project(0, -12);
+        if (land[2] == 0) {
+            g.drawCenteredString(font, Component.translatable("map.skyabyss.moon.landing"), land[0], land[1] - 4, 0xFFE6E8F0);
+        }
+        int[] valley = project(-60, 120);
+        if (valley[2] == 0) {
+            g.drawCenteredString(font, Component.translatable("map.skyabyss.moon.valley"), valley[0], valley[1] - 4, 0xFFE6E8F0);
+        }
+    }
+
     private void drawContinent(GuiGraphics g) {
         if (radius <= 0) {
+            return;
+        }
+        if (onMoon()) {
+            drawMoon(g);
             return;
         }
         double k = radius / view;
@@ -530,7 +585,7 @@ public class TravelMapScreen extends Screen {
 
     // 寄せたとき (半径 400 まで): 都の壁の四角 (点線) と大通りの十字
     private void drawTown(GuiGraphics g, Palette p) {
-        if (view > 400 || sheet == null || !sheet.townKnown()) {
+        if (view > 400 || sheet == null || !sheet.townKnown() || onMoon()) {
             return;
         }
         MapMarks.Mark town = null;
@@ -641,7 +696,8 @@ public class TravelMapScreen extends Screen {
     private void drawMarks(GuiGraphics g, Palette p, List<Hit> hits, int mouseX, int mouseY) {
         double[] me = self();
         long time = Minecraft.getInstance().level == null ? 0 : Minecraft.getInstance().level.getGameTime();
-        List<MapMarks.Mark> marks = sheet == null ? List.of() : sheet.marks();
+        // 月にいる間は地上の印を出さない (自分の矢印だけ)
+        List<MapMarks.Mark> marks = sheet == null || onMoon() ? List.of() : sheet.marks();
         List<Label> labels = new ArrayList<>();
         List<int[]> icons = new ArrayList<>();
         // 道 (町から道しるべをつなぐ線) は描かない (2026-10-21 の試遊: ごちゃつく)
@@ -721,7 +777,7 @@ public class TravelMapScreen extends Screen {
         }
         // 墓・仲間・目的・自分 (クライアントが持っているもの)
         for (GraveMarkers.Mark gm : graves()) {
-            if (!gm.dimension().equals(Level.OVERWORLD.location().toString())) {
+            if (!gm.dimension().equals(here())) {
                 continue;
             }
             int[] at = project(gm.x() + 0.5, gm.z() + 0.5);
@@ -734,7 +790,7 @@ public class TravelMapScreen extends Screen {
             hits.add(hit(at, 60, List.of(Component.translatable("map.skyabyss.mark.grave"), MapText.where(me, gm.x() + 0.5, gm.z() + 0.5)), null));
         }
         for (PartyLocator.Entry e : party()) {
-            if (!e.dimension().equals(Level.OVERWORLD.location().toString())) {
+            if (!e.dimension().equals(here())) {
                 continue;
             }
             int[] at = project(e.x() + 0.5, e.z() + 0.5);

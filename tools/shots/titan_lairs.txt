@@ -1,0 +1,41 @@
+# 巨神の居場所 (大陸。world/continent/ContinentLairs): 四体が決まった所で休み、体の下の地面が下げてある
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/titan_lairs.txt -PshotsName=titan_lairs
+world titan_lairs1 continent
+size 1600 900
+timeout 3000
+render 16
+guiscale 2
+waitchunks 200
+wait 60
+cmd skyabyss cinematic stop
+close
+cmd gamemode spectator
+cmd weather clear
+cmd time set 5000
+cmd gamerule doDaylightCycle false
+cmd skyabyss progress world grant stone_whale
+cmd skyabyss progress world grant tide_shell
+cmd skyabyss progress world grant thunder_wing
+hud off
+cmd tp @s 230 150 -830 180 8
+waitchunks 300
+wait 400
+shot l1_whale
+cmd tp @s 1590 85 -250 -90 5
+waitchunks 300
+wait 400
+shot l2_tide
+cmd tp @s 1640 120 -420 -30 20
+wait 60
+shot l2b_tide_high
+cmd tp @s -1330 250 -360 -135 12
+waitchunks 300
+wait 400
+shot l3_storm
+cmd tp @s 360 160 1270 -142 10
+waitchunks 300
+wait 400
+shot l4_ember
+cmd tp @s 600 230 1250 120 35
+wait 60
+shot l4b_ember_high

@@ -113,7 +113,10 @@ public final class TitanShrine {
         }
         ServerLevel level = server.overworld();
         // 跡地 (ChapterGrounds) が取っておいた台座の場所。跡地がまだ決まっていない世界だけ、方位と距離の帯の近い端
-        BlockPos spot = jp.revati.skyabyss.opening.site.ChapterGrounds.shrineSpot(server, titan).orElse(null);
+        // 大陸: 決まった道ばたの広場 (world.continent.ContinentLairs.shrine。2026-10-28 の試遊「祠が地形になじまない、どうやって行けばいい」)
+        int[] fixed = jp.revati.skyabyss.world.continent.ContinentLairs.shrine(server.overworld(), titan);
+        BlockPos spot = fixed != null ? new BlockPos(fixed[0], 0, fixed[1])
+                : jp.revati.skyabyss.opening.site.ChapterGrounds.shrineSpot(server, titan).orElse(null);
         int x;
         int z;
         if (spot != null) {

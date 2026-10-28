@@ -303,7 +303,7 @@ public class StoneWhaleEntity extends Entity implements GeoEntity, TravelTitan, 
 
     private void tickApproach(ServerLevel level) {
         // 遠いあいだは、条件を満たす人の動きを追って目標を直す (1 秒おき。人が 24 ブロック以上動いたときだけ)
-        if (tickCount % 20 == 0 && horizontalDistanceTo(targetX, targetZ) > 60) {
+        if (!anchored && tickCount % 20 == 0 && horizontalDistanceTo(targetX, targetZ) > 60) {
             ServerPlayer player = called ? null : jp.revati.skyabyss.story.ch1.Ch1Descent.pick(level, getX(), getZ(), DESCENT_RANGE);
             if (player != null) {
                 double nx = player.getX() + Math.cos(approachAngle) * 14;
@@ -372,9 +372,12 @@ public class StoneWhaleEntity extends Entity implements GeoEntity, TravelTitan, 
                 hintNearbyPlayers(level);
             }
         }
+        if (anchored) {
+            restTicks = REST_DURATION;
+        }
         stayWarner.tick(level, position(), restTicks, "message.skyabyss.stay_ending.whale");
         // 居座りの早じまい (rpg_brushup B5): 近くにも背中にも誰もいないのが 3 分続いたら去る (戻れば数え直し)
-        if (stayWarner.vacantTooLong(level, position(), jp.revati.skyabyss.progress.Titans.STONE_WHALE)) {
+        if (!anchored && stayWarner.vacantTooLong(level, position(), jp.revati.skyabyss.progress.Titans.STONE_WHALE)) {
             restTicks = 0;
         }
         if (--restTicks <= 0) {
@@ -850,6 +853,31 @@ public class StoneWhaleEntity extends Entity implements GeoEntity, TravelTitan, 
 
     public boolean isCalled() {
         return called;
+    }
+
+    // 大陸の居場所で休み続ける (world.continent.ContinentLairs。見守りが毎秒付け直すので保存しない)。休みの残りは減らず、無人でも去らない
+    private boolean anchored;
+
+    public boolean anchored() {
+        return anchored;
+    }
+
+    // 居場所へ降りて休む (休んでいる・降りている途中なら何もしない)
+    public void settleAt(double x, double z) {
+        anchored = true;
+        if (mode == Mode.REST || (mode == Mode.APPROACH && horizontalDistanceTo(x, z) < 400 && Math.hypot(targetX - x, targetZ - z) < 1)) {
+            return;
+        }
+        targetX = x;
+        targetZ = z;
+        hasTarget = true;
+        called = false;
+        mode = Mode.APPROACH;
+        approachTicks = 0;
+    }
+
+    public boolean settled() {
+        return anchored && (mode == Mode.REST || mode == Mode.APPROACH);
     }
 
     // テスト用: すぐにこのプレイヤーのそばへ降りてくる

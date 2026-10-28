@@ -31,6 +31,9 @@ public final class HeartBalance {
     public static final double[] PHASE_SHARE = {0.34, 0.33, 0.18, 0.15};
     // 心臓の一撃の狙い: 想定の防具の +0 で、最も重い一撃が想定の体力の何割か (3〜4 回で危ない)
     // 2026-10-25: 一撃を重く (前は 0.28・0.22〜0.34)。2〜3 回で危ない
+    // 心臓の技の傷の倍率 (BossOpenings が掛ける)。2026-10-28 に 1.2 を試したが、避けそこね 4 回で体力の 1.5 倍までの公平の決まりを越えたので 1.0 のまま。
+    // ごり押しは、構えと隙 (BossOpenings) と戦いの中の食事の間 (FightRations) で防ぐ (docs/design/47 の 2.3)
+    public static final double HIT_SCALE = 1.0;
     public static final double HEAVY_SHARE = 0.38;
     public static final double HEAVY_SHARE_MIN = 0.30;
     public static final double HEAVY_SHARE_MAX = 0.48;
@@ -116,7 +119,8 @@ public final class HeartBalance {
     // 防具の前の傷 raw を、その章の想定の防具 +0 と耐性 I を通して受ける傷
     public static double taken(String stage, double raw) {
         GearCurve.Stage s = stage(stage);
-        return raw * GearCurve.armorTaken(raw, s.armor(), s.toughness()) * s.setMultiplier();
+        double hit = raw * HIT_SCALE;
+        return hit * GearCurve.armorTaken(hit, s.armor(), s.toughness()) * s.setMultiplier();
     }
 
     // 一撃が想定の体力のどれだけか

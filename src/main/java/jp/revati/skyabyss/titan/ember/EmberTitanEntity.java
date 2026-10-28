@@ -592,9 +592,12 @@ public class EmberTitanEntity extends Entity implements GeoEntity, jp.revati.sky
 
     private void tickSleep(ServerLevel level) {
         setDeltaMovement(Vec3.ZERO);
+        if (anchored) {
+            forcedTicks = TitanStay.TICKS;
+        }
         stayWarner.tick(level, position(), forcedTicks, "message.skyabyss.stay_ending.ember");
         // 居座りの早じまい (20 分の滞在のあいだだけ): 誰もいないのが 3 分続いたら去る
-        if (forcedTicks > 0 && stayWarner.vacantTooLong(level, position(), jp.revati.skyabyss.progress.Titans.EMBER)) {
+        if (!anchored && forcedTicks > 0 && stayWarner.vacantTooLong(level, position(), jp.revati.skyabyss.progress.Titans.EMBER)) {
             forcedTicks = 1;
         }
         boolean done = forcedTicks > 0 ? --forcedTicks <= 0 : !EmberGround.isSleepTime(level.getDayTime());
@@ -1014,6 +1017,34 @@ public class EmberTitanEntity extends Entity implements GeoEntity, jp.revati.sky
         setYRot(spot.yaw());
         startRise(level);
         return true;
+    }
+
+    // 大陸の居場所で休み続ける (world.continent.ContinentLairs。見守りが毎秒付け直すので保存しない)。休みの残りは減らず、無人でも去らない
+    private boolean anchored;
+
+    public boolean anchored() {
+        return anchored;
+    }
+
+    // 居場所で眠る (眠っていれば何もしない)。base = 体の高さ (sleepHeight)
+    public void settleAt(double x, double base, double z, float yaw) {
+        anchored = true;
+        if (mode == Mode.SLEEP) {
+            return;
+        }
+        setYRot(yaw);
+        yRotO = yaw;
+        setPos(x, base, z);
+        restX = x;
+        restZ = z;
+        restYaw = yaw;
+        restGround = base + TONGUE_UP;
+        forcedTicks = TitanStay.TICKS;
+        startSleep((ServerLevel) level());
+    }
+
+    public boolean settled() {
+        return anchored && mode == Mode.SLEEP;
     }
 
     // その場ですぐに眠る (口の前の地面の高さに合わせる)

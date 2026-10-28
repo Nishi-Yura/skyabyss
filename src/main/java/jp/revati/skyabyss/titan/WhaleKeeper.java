@@ -72,6 +72,11 @@ public final class WhaleKeeper {
         }
 
         @Override
+        protected void settle(ServerLevel level, StoneWhaleEntity whale, jp.revati.skyabyss.world.continent.ContinentLairs.Lair lair) {
+            whale.settleAt(lair.x(), lair.z());
+        }
+
+        @Override
         protected void announce(ServerLevel level, StoneWhaleEntity whale) {
             double x = whale.getX();
             double z = whale.getZ();

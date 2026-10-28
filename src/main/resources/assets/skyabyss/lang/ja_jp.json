@@ -1942,5 +1942,8 @@
   "entity.skyabyss.skiff": "小舟",
   "entity.skyabyss.tide_pearl": "追う真珠",
   "message.skyabyss.heart_wipe.titan": "心臓の間で皆が倒れた。気がつくと、眠る巨神の前に横たわっていた",
-  "message.skyabyss.heart_wipe.shrine": "心臓の間で皆が倒れた。気がつくと、祠の石の前にいた"
+  "message.skyabyss.heart_wipe.shrine": "心臓の間で皆が倒れた。気がつくと、祠の石の前にいた",
+  "map.skyabyss.moon.landing": "着く所",
+  "map.skyabyss.moon.valley": "新月の谷",
+  "message.skyabyss.fight_ration_wait": "息が整うまで、口にできない (あと %s 秒)"
 }

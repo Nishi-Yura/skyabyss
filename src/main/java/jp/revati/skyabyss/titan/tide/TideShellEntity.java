@@ -581,9 +581,12 @@ public class TideShellEntity extends Entity implements GeoEntity, TravelTitan, j
     private void tickRest(ServerLevel level) {
         setDeltaMovement(Vec3.ZERO);
         rise(level.getSeaLevel() - REST_DRAFT, REST_RISE);
+        if (anchored) {
+            forcedTicks = TitanStay.TICKS;
+        }
         stayWarner.tick(level, position(), forcedTicks, "message.skyabyss.stay_ending.tide");
         // 居座りの早じまい (20 分の滞在のあいだだけ): 誰もいないのが 3 分続いたら去る
-        if (forcedTicks > 0 && stayWarner.vacantTooLong(level, position(), jp.revati.skyabyss.progress.Titans.TIDE_SHELL)) {
+        if (!anchored && forcedTicks > 0 && stayWarner.vacantTooLong(level, position(), jp.revati.skyabyss.progress.Titans.TIDE_SHELL)) {
             forcedTicks = 1;
         }
         boolean done = forcedTicks > 0 ? --forcedTicks <= 0 : !TideOcean.isLowTide(level.getDayTime());
@@ -969,6 +972,29 @@ public class TideShellEntity extends Entity implements GeoEntity, TravelTitan, j
         targetX = x;
         targetZ = z;
         hasTarget = true;
+    }
+
+    // 大陸の居場所で休み続ける (world.continent.ContinentLairs。見守りが毎秒付け直すので保存しない)。休みの残りは減らず、無人でも去らない
+    private boolean anchored;
+
+    public boolean anchored() {
+        return anchored;
+    }
+
+    // 居場所で休む (休んでいれば何もしない)。位置と向きを合わせてから休む
+    public void settleAt(double x, double z, float yaw) {
+        anchored = true;
+        if (mode == Mode.REST) {
+            return;
+        }
+        setYRot(yaw);
+        yRotO = yaw;
+        setPos(x, level().getSeaLevel() - REST_DRAFT, z);
+        restHere();
+    }
+
+    public boolean settled() {
+        return anchored && mode == Mode.REST;
     }
 
     // テスト用: その場ですぐに休む

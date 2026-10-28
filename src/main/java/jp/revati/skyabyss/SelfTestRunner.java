@@ -227,6 +227,8 @@ public final class SelfTestRunner {
         steps.add(Step.once("playtest play", 40, jp.revati.skyabyss.dev.play.PlaySelfTest::runSelfTest));
         // 製品版で見せるコマンドを絞る (dev/CommandGate)。SKYABYSS_SELFTEST_ONLY="command gate"
         steps.add(Step.once("command gate", jp.revati.skyabyss.dev.CommandGateSelfTest::runSelfTest));
+        // 巨神の居場所 (大陸。world/continent/ContinentLairs)。SKYABYSS_SELFTEST_ONLY="titan lairs"
+        steps.add(Step.once("titan lairs", jp.revati.skyabyss.world.continent.ContinentLairsSelfTest::runSelfTest));
         steps.addAll(jp.revati.skyabyss.dev.play.PlayMultiSelfTest.steps());
         steps.add(Step.once("item glow", jp.revati.skyabyss.glow.ItemGlowSelfTest::runSelfTest));
         steps.add(Step.once("progress", ProgressSelfTest::runSelfTest));

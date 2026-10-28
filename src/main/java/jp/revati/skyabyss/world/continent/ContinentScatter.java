@@ -92,6 +92,7 @@ final class ContinentScatter {
         int x0 = chunk.getPos().getMinBlockX();
         int z0 = chunk.getPos().getMinBlockZ();
         clearRoad(level, ContinentChunkGenerator.roadSegments(x0, z0), x0, z0);
+        clearLair(level, x0, z0);
         if (kept(x0 + 8, z0 + 8) || nearIslandRoad(x0 + 8, z0 + 8)) {
             return;
         }
@@ -159,6 +160,34 @@ final class ContinentScatter {
     }
 
     // 道の上を片付ける (2026-10-27 の声「道の上に人工物」「急に途切れる」): 雪の国で道に積もった雪 (バニラの凍り) と、道に生えた草花・木 (幹と葉ごと) を取る
+    // 巨神の居場所: 地面 (cap 以下) より上に生えた木・草を払う (体にめり込まない)。海面より下は水に戻す
+    static void clearLair(WorldGenLevel level, int x0, int z0) {
+        BlockPos.MutableBlockPos m = new BlockPos.MutableBlockPos();
+        for (int dx = 0; dx < 16; dx++) {
+            for (int dz = 0; dz < 16; dz++) {
+                int x = x0 + dx;
+                int z = z0 + dz;
+                int cap = ContinentLairs.cap(x, z);
+                if (cap == Integer.MAX_VALUE && ContinentLairs.onPad(x, z)) {
+                    // 祠の広場: 地面より上の木・草を払う
+                    cap = ContinentMap.get().surface(x, z);
+                }
+                if (cap == Integer.MAX_VALUE) {
+                    continue;
+                }
+                int top = level.getHeight(Heightmap.Types.WORLD_SURFACE_WG, x, z);
+                for (int y = cap + 1; y <= top; y++) {
+                    m.set(x, y, z);
+                    BlockState s = level.getBlockState(m);
+                    if (s.isAir() || s.is(Blocks.WATER)) {
+                        continue;
+                    }
+                    level.setBlock(m, y < ContinentChunkGenerator.SEA_LEVEL ? Blocks.WATER.defaultBlockState() : Blocks.AIR.defaultBlockState(), 2);
+                }
+            }
+        }
+    }
+
     static void clearRoad(WorldGenLevel level, List<int[]> roads, int x0, int z0) {
         if (roads.isEmpty()) {
             return;
@@ -228,6 +257,10 @@ final class ContinentScatter {
         int z = z0 + pad + r.nextInt(16 - 2 * pad);
         // 置き物の広がり (pad) と道の縁 (ROAD_EDGE + 揺らぎ) のあいだに 2 あける
         if (ContinentChunkGenerator.roadDistance(roads, x, z) < ContinentChunkGenerator.ROAD_EDGE + 1.0 + pad + 2) {
+            return null;
+        }
+        // 巨神の居場所 (体の下となじませの幅) には置かない
+        if (ContinentLairs.inside(x, z)) {
             return null;
         }
         int y = level.getHeight(Heightmap.Types.WORLD_SURFACE_WG, x, z) - 1;

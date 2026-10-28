@@ -263,6 +263,34 @@ public class StormWingEntity extends Entity implements GeoEntity, jp.revati.skya
         return true;
     }
 
+    // 大陸の居場所で休み続ける (world.continent.ContinentLairs。見守りが毎秒付け直すので保存しない)。休みの残りは減らず、無人でも去らない
+    private boolean anchored;
+
+    public boolean anchored() {
+        return anchored;
+    }
+
+    // 居場所の止まり木に止まる (止まっていれば何もしない)。y = 足もとの高さ
+    public void settleAt(double x, double y, double z, float yaw) {
+        anchored = true;
+        if (mode == Mode.PERCH) {
+            return;
+        }
+        setYRot(yaw);
+        yRotO = yaw;
+        setPos(x, y, z);
+        perchX = x;
+        perchY = y;
+        perchZ = z;
+        hasPerch = true;
+        forcedTicks = jp.revati.skyabyss.titan.TitanStay.TICKS;
+        arrive((ServerLevel) level());
+    }
+
+    public boolean settled() {
+        return anchored && mode == Mode.PERCH;
+    }
+
     // その場で止まる (地表の上)。テスト用
     public void restHere(int forced) {
         ServerLevel level = (ServerLevel) level();
@@ -646,10 +674,13 @@ public class StormWingEntity extends Entity implements GeoEntity, jp.revati.skya
         if (tickCount % 10 == 0) {
             updateLook(level);
         }
+        if (anchored) {
+            forcedTicks = jp.revati.skyabyss.titan.TitanStay.TICKS;
+        }
         if (forcedTicks > 0) {
             stayWarner.tick(level, position(), forcedTicks, "message.skyabyss.stay_ending.storm");
             // 居座りの早じまい: 誰もいないのが 3 分続いたら飛び立つ
-            if (stayWarner.vacantTooLong(level, position(), jp.revati.skyabyss.progress.Titans.THUNDER_WING)) {
+            if (!anchored && stayWarner.vacantTooLong(level, position(), jp.revati.skyabyss.progress.Titans.THUNDER_WING)) {
                 forcedTicks = 1;
             }
             if (--forcedTicks <= 0) {

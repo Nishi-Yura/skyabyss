@@ -1942,5 +1942,8 @@
   "entity.skyabyss.skiff": "Skiff",
   "entity.skyabyss.tide_pearl": "Chasing Pearl",
   "message.skyabyss.heart_wipe.titan": "Everyone fell in the heart chamber. You wake on the ground before the titan",
-  "message.skyabyss.heart_wipe.shrine": "Everyone fell in the heart chamber. You wake before the shrine stone"
+  "message.skyabyss.heart_wipe.shrine": "Everyone fell in the heart chamber. You wake before the shrine stone",
+  "map.skyabyss.moon.landing": "Landing",
+  "map.skyabyss.moon.valley": "New-Moon Valley",
+  "message.skyabyss.fight_ration_wait": "Catch your breath first (%s s)"
 }

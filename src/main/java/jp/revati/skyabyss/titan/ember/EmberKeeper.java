@@ -72,6 +72,11 @@ public final class EmberKeeper {
         }
 
         @Override
+        protected void settle(ServerLevel level, EmberTitanEntity titan, jp.revati.skyabyss.world.continent.ContinentLairs.Lair lair) {
+            titan.settleAt(lair.x(), lair.base(), lair.z(), lair.yaw());
+        }
+
+        @Override
         protected void announce(ServerLevel level, EmberTitanEntity titan) {
             // 知らせない。最初の出会いは「丘が動いた」「灰が降る」と自分で気づく形にする (呼び直しも黙って行う)
         }
@@ -87,6 +92,13 @@ public final class EmberKeeper {
         }
         KEEPER.tick(level);
         long now = level.getGameTime();
+        // 大陸: 決まった居場所に出す (日の出は待たない。前の巨神が止まっていれば)
+        if (KEEPER.lair(level) != null) {
+            if (now % 200 == 0) {
+                KEEPER.appearAtLair(level, false);
+            }
+            return;
+        }
         if (now % 200 != 0 || now < nextTry || KEEPER.slot(level).spawned || !canAppear(level)) {
             return;
         }

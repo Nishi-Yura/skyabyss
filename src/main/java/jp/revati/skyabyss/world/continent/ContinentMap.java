@@ -118,7 +118,13 @@ public final class ContinentMap {
 
     // 地面の上面の Y (道のそばは道の高さへならす)
     public int surface(int x, int z) {
-        return (int) Math.floor(roads().grade(x, z, rawSurface(x, z)));
+        // 巨神の居場所では、体の下の地面を体より低くする。祠の広場はならす (ContinentLairs)
+        return Math.min(ContinentLairs.cap(x, z), (int) Math.floor(ContinentLairs.pad(this, x, z, graded(x, z))));
+    }
+
+    // 道のそばをならした高さ (居場所と祠の広場の前)
+    double graded(int x, int z) {
+        return roads().grade(x, z, rawSurface(x, z));
     }
 
     // ならす前の高さ (点 (x, z) の揺らぎを足した値)

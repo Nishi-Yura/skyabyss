@@ -543,6 +543,7 @@ public final class Telegraph {
                 strike(shape.at(1.0));
                 done = true;
                 reportDodges();
+                landed();
             } else {
                 strike(shape.at(0.0));
             }
@@ -561,6 +562,14 @@ public final class Telegraph {
         if (age - warn >= active) {
             done = true;
             reportDodges();
+            landed();
+        }
+    }
+
+    // 傷のある技が当たり終わった: 持ち主 (主) に隙が来る (BossOpenings。docs/design/47 の 2.1)
+    private void landed() {
+        if (onHit != null && owner != null) {
+            BossOpenings.moveEnded(owner);
         }
     }
 

@@ -88,7 +88,7 @@ public final class HeartBalanceSelfTest {
         SkyAbyss.LOGGER.info("[selftest] heart balance {}: heaviest hit {} raw -> {} of {} hp ({} points); 2 hits {} / 4 hits {}", id, fmt(heavy),
                 fmt(heavyShare), fmt(HeartBalance.expectedHealth(id)), fmt(HeartBalance.taken(id, heavy)), fmt(2 * heavyShare), fmt(4 * heavyShare));
         ok(f, heavyShare >= HeartBalance.HEAVY_SHARE_MIN && heavyShare <= HeartBalance.HEAVY_SHARE_MAX,
-                id + " heaviest hit is " + fmt(heavyShare) + " of the expected health (want 0.22-0.34)");
+                id + " heaviest hit is " + fmt(heavyShare) + " of the expected health (want " + HeartBalance.HEAVY_SHARE_MIN + "-" + HeartBalance.HEAVY_SHARE_MAX + ")");
         ok(f, 4 * heavyShare >= 1.0 && 2 * heavyShare < 1.0, id + " four heavy hits must kill and two must not");
 
         // 段階ごとの速さと避けそこね

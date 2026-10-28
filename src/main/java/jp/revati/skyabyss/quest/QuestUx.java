@@ -74,13 +74,32 @@ public final class QuestUx {
                 || player.tickCount % 20 != 7) {
             return;
         }
-        // 札 (題字) を出すまでは前の章のまま: 章が終わりきる前に次の章の表示を出さない
+        // 前の章が終わりきるまで (場面・背の上・報酬の画面。ChapterCards.settled) は、札 (題字) を出すまで前の章のまま。
+        // 地上で落ち着いたら、札を待たずに今の章を出す (2026-10-28 の試遊「三章なのに二章と書いてある」)
         Chapters cur = Chapters.of(player);
-        int now = cur.number() > 0 && !jp.revati.skyabyss.story.arc.ArcData.of(player).titleShown(cur) ? cur.number() - 1 : cur.number();
+        boolean lag = cur.number() > 0 && !jp.revati.skyabyss.story.arc.ArcData.of(player).titleShown(cur) && finishingPrevious(player, cur);
+        int now = lag ? cur.number() - 1 : cur.number();
         Integer before = SENT.put(player.getUUID(), now);
         if (before == null || before != now) {
             PacketDistributor.sendToPlayer(player, new ChapterPayload(now));
         }
+    }
+
+    // 前の章をまだ終えきっていない (場面の最中か、前の章の巨神の背の上)
+    static boolean finishingPrevious(ServerPlayer player, Chapters cur) {
+        if (jp.revati.skyabyss.cinematic.Cinematics.active(player)) {
+            return true;
+        }
+        String back = jp.revati.skyabyss.progress.Titans.titanOfBack(player.level().dimension());
+        if (back == null) {
+            return false;
+        }
+        for (Chapters c : Chapters.values()) {
+            if (back.equals(c.titan())) {
+                return c.number() < cur.number();
+            }
+        }
+        return false;
     }
 
     @SubscribeEvent

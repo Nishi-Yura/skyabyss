@@ -47,6 +47,11 @@ public final class TitanEvents {
         if (level.getGameTime() % 200 != 0) {
             return;
         }
+        // 大陸: 岩鯨ははじめから決まった居場所の空に休む (章の支度・日数は待たない)
+        if (WhaleKeeper.keeper().lair(level) != null) {
+            WhaleKeeper.keeper().appearAtLair(level, false);
+            return;
+        }
         TitanWorldData.Slot data = TitanWorldData.get(level).whale();
         // 経過日数は、時刻の操作 (/time set や昼夜の停止) に左右されないゲーム内の総 tick で数える
         if (data.spawned || level.getGameTime() / 24000L < FIRST_APPEARANCE_DAY) {

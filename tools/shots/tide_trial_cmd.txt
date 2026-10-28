@@ -1,6 +1,6 @@
 # 潮殻 (亀) の試練へコマンドで行けるか (2026-10-28 の試遊「コマンドで亀の試練いけない」)
 # bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/tide_trial_cmd.txt -PshotsName=tide_trial_cmd
-world tide_trial_cmd1 continent
+world tide_trial_cmd5 continent
 size 1280 720
 timeout 1500
 render 8
@@ -10,7 +10,7 @@ cmd skyabyss cinematic stop
 close
 cmd gamemode creative
 cmd skyabyss play raid tide 1
-wait 600
+wait 1500
 shot t1_after_raid_cmd
 cmd skyabyss play trials tide
 wait 100
