@@ -22,7 +22,8 @@ import install_armor_one as IA  # noqa: E402
 
 HELD = {"travel_shield": ("a", "coral_shield"), "gather_axe": ("a", "ember_war_axe"), "gather_pickaxe": ("a", "ember_war_axe"),
         "gather_shovel": ("a", "ember_war_axe")}
-ARMOR = {"wayfarer": "start_b", "ironclad": "iron_a", "sky_stone": "sky_c"}
+# 初めの旅装と鉄張りの旅装は 2026-10-28 の作り直しの選定 (outfit_two の start2_a 旅の外套・iron2_a 鎖帷子と陣羽織)
+ARMOR = {"wayfarer": "start2_a", "ironclad": "iron2_a", "sky_stone": "sky_c"}
 
 
 def held():
@@ -37,6 +38,7 @@ def held():
 
 def armor():
     import build_outfit  # noqa: F401  (旅装の表に組を足す)
+    import build_outfit2  # noqa: F401  (作り直しの組 start2_* / iron2_*)
     import build_one
     import aview
     aview.SS = 2
@@ -56,5 +58,6 @@ def armor():
 
 
 if __name__ == "__main__":
-    held()
+    if "armor" not in sys.argv[1:]:
+        held()
     armor()

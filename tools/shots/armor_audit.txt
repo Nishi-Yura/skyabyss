@@ -1,5 +1,5 @@
 # 防具の一式を並べて見比べる (2026-10-28 のクオリティ点検)
-world armor_audit flat
+world armor_audit2 flat
 size 1600 900
 timeout 1500
 render 8
