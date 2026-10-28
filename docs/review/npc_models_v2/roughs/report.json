@@ -625,5 +625,304 @@
     "atlas": 64
    }
   }
+ },
+ "guest_island_ferryman_a": {
+  "tris": 1524,
+  "atlas": 256,
+  "buried": [],
+  "props": {
+   "prop_r": {
+    "tris": 320,
+    "atlas": 64
+   }
+  }
+ },
+ "guest_island_ferryman_b": {
+  "tris": 1494,
+  "atlas": 256,
+  "buried": [],
+  "props": {
+   "prop_r": {
+    "tris": 60,
+    "atlas": 64
+   }
+  }
+ },
+ "guest_island_ferryman_c": {
+  "tris": 1468,
+  "atlas": 256,
+  "buried": [],
+  "props": {
+   "prop_l": {
+    "tris": 232,
+    "atlas": 64
+   }
+  }
+ },
+ "guest_tide_ferryman_a": {
+  "tris": 1514,
+  "atlas": 256,
+  "buried": [],
+  "props": {
+   "prop_r": {
+    "tris": 60,
+    "atlas": 64
+   }
+  }
+ },
+ "guest_tide_ferryman_b": {
+  "tris": 1668,
+  "atlas": 256,
+  "buried": [],
+  "props": {}
+ },
+ "guest_tide_ferryman_c": {
+  "tris": 1644,
+  "atlas": 256,
+  "buried": [],
+  "props": {
+   "prop_l": {
+    "tris": 84,
+    "atlas": 64
+   }
+  }
+ },
+ "guest_inner_ferryman_a": {
+  "tris": 1706,
+  "atlas": 256,
+  "buried": [
+   [
+    "fr0",
+    "kasa",
+    0.5
+   ],
+   [
+    "fr1",
+    "kasa",
+    0.58
+   ],
+   [
+    "legRt",
+    "skirt",
+    0.45
+   ],
+   [
+    "legLt",
+    "skirt",
+    0.45
+   ]
+  ],
+  "props": {
+   "prop_l": {
+    "tris": 232,
+    "atlas": 64
+   }
+  }
+ },
+ "guest_inner_ferryman_b": {
+  "tris": 1607,
+  "atlas": 256,
+  "buried": [],
+  "props": {
+   "prop_r": {
+    "tris": 320,
+    "atlas": 64
+   }
+  }
+ },
+ "guest_inner_ferryman_c": {
+  "tris": 1552,
+  "atlas": 256,
+  "buried": [],
+  "props": {
+   "prop_l": {
+    "tris": 232,
+    "atlas": 64
+   }
+  }
+ },
+ "guest_tide_lightkeeper_a": {
+  "tris": 1694,
+  "atlas": 256,
+  "buried": [],
+  "props": {
+   "prop_l": {
+    "tris": 160,
+    "atlas": 64
+   }
+  }
+ },
+ "guest_tide_lightkeeper_b": {
+  "tris": 1466,
+  "atlas": 256,
+  "buried": [],
+  "props": {}
+ },
+ "guest_tide_lightkeeper_c": {
+  "tris": 1470,
+  "atlas": 256,
+  "buried": [],
+  "props": {
+   "prop_r": {
+    "tris": 108,
+    "atlas": 64
+   }
+  }
+ },
+ "guest_storm_elder_a": {
+  "tris": 1516,
+  "atlas": 256,
+  "buried": [
+   [
+    "hair",
+    "hood",
+    0.55
+   ],
+   [
+    "bun_tie",
+    "hood",
+    0.75
+   ]
+  ],
+  "props": {
+   "prop_r": {
+    "tris": 320,
+    "atlas": 64
+   }
+  }
+ },
+ "guest_storm_elder_b": {
+  "tris": 1790,
+  "atlas": 256,
+  "buried": [
+   [
+    "legRt",
+    "skirt",
+    0.47
+   ],
+   [
+    "legLt",
+    "skirt",
+    0.48
+   ]
+  ],
+  "props": {
+   "prop_l": {
+    "tris": 89,
+    "atlas": 64
+   }
+  }
+ },
+ "guest_storm_elder_c": {
+  "tris": 1544,
+  "atlas": 256,
+  "buried": [],
+  "props": {}
+ },
+ "guest_storm_hutkeeper_a": {
+  "tris": 1488,
+  "atlas": 256,
+  "buried": [],
+  "props": {
+   "prop_r": {
+    "tris": 76,
+    "atlas": 64
+   }
+  }
+ },
+ "guest_storm_hutkeeper_b": {
+  "tris": 1484,
+  "atlas": 256,
+  "buried": [],
+  "props": {}
+ },
+ "guest_storm_hutkeeper_c": {
+  "tris": 1688,
+  "atlas": 256,
+  "buried": [],
+  "props": {
+   "prop_l": {
+    "tris": 160,
+    "atlas": 64
+   }
+  }
+ },
+ "guest_ember_survivor_a": {
+  "tris": 1497,
+  "atlas": 256,
+  "buried": [
+   [
+    "hair",
+    "hood",
+    0.55
+   ]
+  ],
+  "props": {
+   "prop_l": {
+    "tris": 160,
+    "atlas": 64
+   }
+  }
+ },
+ "guest_ember_survivor_b": {
+  "tris": 1802,
+  "atlas": 256,
+  "buried": [
+   [
+    "legRt",
+    "skirt",
+    0.45
+   ],
+   [
+    "legLt",
+    "skirt",
+    0.45
+   ]
+  ],
+  "props": {
+   "prop_r": {
+    "tris": 108,
+    "atlas": 64
+   }
+  }
+ },
+ "guest_ember_survivor_c": {
+  "tris": 1510,
+  "atlas": 256,
+  "buried": [],
+  "props": {
+   "prop_l": {
+    "tris": 232,
+    "atlas": 64
+   }
+  }
+ },
+ "guest_ember_watch_a": {
+  "tris": 1500,
+  "atlas": 256,
+  "buried": [],
+  "props": {
+   "prop_r": {
+    "tris": 86,
+    "atlas": 64
+   }
+  }
+ },
+ "guest_ember_watch_b": {
+  "tris": 1488,
+  "atlas": 256,
+  "buried": [],
+  "props": {
+   "prop_l": {
+    "tris": 160,
+    "atlas": 64
+   }
+  }
+ },
+ "guest_ember_watch_c": {
+  "tris": 1670,
+  "atlas": 256,
+  "buried": [],
+  "props": {}
  }
 }
