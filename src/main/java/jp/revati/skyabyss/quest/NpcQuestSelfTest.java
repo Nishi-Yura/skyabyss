@@ -139,7 +139,9 @@ public final class NpcQuestSelfTest {
                     || (d.role().startsWith(jp.revati.skyabyss.town.TownGuests.ROLE_PREFIX)
                     && (jp.revati.skyabyss.town.TownGuests.byId(d.role().substring(jp.revati.skyabyss.town.TownGuests.ROLE_PREFIX.length())) != null
                     // 土地の町の人 (town/RegionFolk。都の町の人の絵を借りる)
-                    || jp.revati.skyabyss.town.RegionFolk.byId(d.role().substring(jp.revati.skyabyss.town.TownGuests.ROLE_PREFIX.length())) != null));
+                    || jp.revati.skyabyss.town.RegionFolk.byId(d.role().substring(jp.revati.skyabyss.town.TownGuests.ROLE_PREFIX.length())) != null
+                    // 六章の前のループの自分 (月の谷の野営。story/ch6/valley/ValleyTicker)
+                    || d.role().equals(jp.revati.skyabyss.town.TownGuests.ROLE_PREFIX + jp.revati.skyabyss.story.ch6.valley.ValleyTicker.PAST_SELF)));
             check(known, "dialogue for unknown entity " + d.role(), failures);
             d.entries().forEach(e -> conditions.add(e.condition()));
             for (Dialogue.Node n : d.nodes().values()) {
@@ -357,7 +359,7 @@ public final class NpcQuestSelfTest {
             // 語り部の墓の救いの文は skyabyss_grave にある (11 の 6 章)
             // 深淵の層の生き残りの会話の文は skyabyss_abyss_v2 (データを直接直す（生成スクリプトはない）)
             // 章ごとのクエスト・追加の会話の文は skyabyss_ch1〜ch4 にある (三章の職人の覚書・鼓動守の会話は skyabyss_ch3gear)
-            for (String ns : List.of("skyabyss_quest", "skyabyss_story", "skyabyss_storm", "skyabyss_grave", "skyabyss_ch1", "skyabyss_ch2", "skyabyss_ch3", "skyabyss_ch3gear", "skyabyss_ch4", "skyabyss_ch5", "skyabyss_abyss_v2", "skyabyss_vow", "skyabyss_fac", "skyabyss_town", "skyabyss_lesson")) {
+            for (String ns : List.of("skyabyss_quest", "skyabyss_story", "skyabyss_storm", "skyabyss_grave", "skyabyss_ch1", "skyabyss_ch2", "skyabyss_ch3", "skyabyss_ch3gear", "skyabyss_ch4", "skyabyss_ch5", "skyabyss_abyss_v2", "skyabyss_vow", "skyabyss_fac", "skyabyss_town", "skyabyss_lesson", "skyabyss_moon")) {
                 JsonObject extra = json("/assets/" + ns + "/lang/" + code + ".json", failures);
                 if (extra != null) {
                     extra.entrySet().forEach(e -> {

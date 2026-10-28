@@ -924,5 +924,73 @@
   "atlas": 256,
   "buried": [],
   "props": {}
+ },
+ "moon_past1_a": {
+  "tris": 1489,
+  "atlas": 256,
+  "buried": [
+   [
+    "hair",
+    "hood",
+    0.55
+   ]
+  ],
+  "props": {
+   "prop_l": {
+    "tris": 160,
+    "atlas": 64
+   }
+  }
+ },
+ "moon_past1_b": {
+  "tris": 1497,
+  "atlas": 256,
+  "buried": [
+   [
+    "hair",
+    "hood",
+    0.55
+   ]
+  ],
+  "props": {
+   "prop_r": {
+    "tris": 120,
+    "atlas": 64
+   }
+  }
+ },
+ "moon_past1_c": {
+  "tris": 1777,
+  "atlas": 256,
+  "buried": [
+   [
+    "hair",
+    "hood",
+    0.55
+   ]
+  ],
+  "props": {
+   "prop_l": {
+    "tris": 160,
+    "atlas": 64
+   }
+  }
+ },
+ "guest_moon_past1": {
+  "tris": 1777,
+  "atlas": 256,
+  "buried": [
+   [
+    "hair",
+    "hood",
+    0.55
+   ]
+  ],
+  "props": {
+   "prop_l": {
+    "tris": 160,
+    "atlas": 64
+   }
+  }
  }
 }

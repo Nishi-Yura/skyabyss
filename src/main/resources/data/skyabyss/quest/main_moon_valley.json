@@ -1,0 +1,60 @@
+{
+  "category": "main",
+  "chapter": "chapter3",
+  "order": 71,
+  "giver": "skyabyss:storyteller",
+  "start_when": {
+    "type": "quest",
+    "quest": "main_moon",
+    "is": "done"
+  },
+  "stages": [
+    {
+      "id": "meet",
+      "xp": 120,
+      "objectives": [
+        {"id": "talk", "type": "talk", "target": "skyabyss:guest_moon_past1", "topic": "ch6_valley_meet3"}
+      ]
+    },
+    {
+      "id": "pool",
+      "xp": 80,
+      "objectives": [
+        {"id": "pool", "type": "signal", "targets": ["moon_star_pool"], "count": 1}
+      ]
+    },
+    {
+      "id": "shards",
+      "xp": 360,
+      "objectives": [
+        {"id": "bridge", "type": "signal", "targets": ["moon_shard_bridge"], "count": 1},
+        {"id": "mirror", "type": "signal", "targets": ["moon_shard_mirror"], "count": 1},
+        {"id": "hole", "type": "signal", "targets": ["moon_shard_hole"], "count": 1}
+      ]
+    },
+    {
+      "id": "gate",
+      "xp": 80,
+      "objectives": [
+        {"id": "cross", "type": "signal", "targets": ["moon_valley_gate"], "count": 1}
+      ]
+    },
+    {
+      "id": "lord",
+      "xp": 600,
+      "objectives": [
+        {"id": "defeat", "type": "signal", "targets": ["moon_lord_new"], "count": 1}
+      ]
+    },
+    {
+      "id": "promise",
+      "xp": 120,
+      "objectives": [
+        {"id": "talk", "type": "talk", "target": "skyabyss:guest_moon_past1", "topic": "ch6_valley_promise3"}
+      ]
+    }
+  ],
+  "reward": {
+    "xp": 800
+  }
+}

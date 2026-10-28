@@ -22,11 +22,13 @@ import net.minecraft.world.level.saveddata.SavedData;
 //   空      黒く、星と、空に浮かぶ地上の大陸 (client/MoonClient)。時刻は夜に止める。月の位相は MoonClock
 //   重さ    軽い (MoonGravity)
 //   行き来  都の大鐘楼の上の門 (MoonGate)。着く所の帰りの台 (天然磁石) を右クリックで都へ
+//   谷      着く所の南に区画 1「新月の谷」(valley.MoonValley。版 2 で一度だけ流し込む)
 public final class MoonWorld {
     public static final ResourceKey<Level> LEVEL = ResourceKey.create(Registries.DIMENSION, ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "moon"));
     public static final int SURFACE = 11;
     public static final BlockPos ARRIVAL = new BlockPos(0, SURFACE + 1, 0);
-    static final int VERSION = 1;
+    // 1 = 着く所とクレーター、2 = 新月の谷 (valley.MoonValley)
+    static final int VERSION = 2;
 
     private MoonWorld() {
     }
@@ -66,6 +68,23 @@ public final class MoonWorld {
         if (d.version >= VERSION) {
             return;
         }
+        if (d.version < 1) {
+            landing(level);
+        }
+        if (d.version < 2) {
+            jp.revati.skyabyss.story.ch6.valley.MoonValley.build(level);
+        }
+        d.version = VERSION;
+        d.setDirty();
+    }
+
+    // 新月の谷ができているか
+    public static boolean valleyBuilt(MinecraftServer server) {
+        return Data.get(server).version >= 2;
+    }
+
+    // 着く所とクレーター (版 1)
+    static void landing(ServerLevel level) {
         RandomSource r = RandomSource.create(0x4D4F4F4EL);
         // クレーター: 着く所 (半径 10) を避けて、大小 26
         for (int i = 0; i < 26; i++) {
@@ -74,6 +93,10 @@ public final class MoonWorld {
             int cx = (int) Math.round(Math.cos(a) * dist);
             int cz = (int) Math.round(Math.sin(a) * dist);
             int rad = 3 + r.nextInt(i < 4 ? 9 : 5);
+            // 谷 (着く所の南 z 14〜182、x -46〜46) には掘らない
+            if (cz + rad + 4 >= 14 && Math.abs(cx) - rad - 4 <= 46) {
+                continue;
+            }
             crater(level, cx, cz, rad, r);
         }
         // 着く所: 磨いた石の円い台、銀の縁、帰りの台 (天然磁石) と四つの灯り
@@ -96,8 +119,6 @@ public final class MoonWorld {
             level.setBlock(p, Blocks.DIORITE_WALL.defaultBlockState(), 3);
             level.setBlock(p.above(), Blocks.SOUL_LANTERN.defaultBlockState(), 3);
         }
-        d.version = VERSION;
-        d.setDirty();
         SkyAbyss.LOGGER.info("[moon] landing site built");
     }
 

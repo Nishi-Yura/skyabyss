@@ -107,6 +107,12 @@ moon("past1", "前のループの自分 (一人目)", [
 ])
 
 
+# 選定 (2026-10-28): 前のループの自分 (一人目) は C。cast の guest_moon_past1 として登録する (TownGuestEntity の guestId = moon_past1)
+PICK = {"past1": "c"}
+for _p, _k in PICK.items():
+    C.CAST[f"guest_moon_{_p}"] = C.CAST[f"moon_{_p}_{_k}"]
+
+
 def sheet(pid):
     out = Path(__file__).resolve().parents[4] / "docs/review/npc_models_v2/roughs"
     ims = [Image.open(out / f"moon_{pid}_{k}.png").convert("RGB") for k in "abc"]

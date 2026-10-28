@@ -1,0 +1,123 @@
+package jp.revati.skyabyss.story.ch6.mob;
+
+import java.util.List;
+import java.util.function.Supplier;
+
+import jp.revati.skyabyss.SkyAbyss;
+import jp.revati.skyabyss.registry.ModItems;
+import jp.revati.skyabyss.rpg.GrowthRewards;
+import jp.revati.skyabyss.story.ch4.Ch4Setup;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.MobCategory;
+import net.minecraft.world.item.Item;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.neoforged.neoforge.common.DeferredSpawnEggItem;
+import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
+import net.neoforged.neoforge.event.entity.EntityAttributeCreationEvent;
+import net.neoforged.neoforge.registries.DeferredHolder;
+import net.neoforged.neoforge.registries.DeferredItem;
+import net.neoforged.neoforge.registries.DeferredRegister;
+
+// 六章 区画 1「新月の谷」の敵と主の登録 (docs/design/46 の 4.3)。素材は tools/gen/ch6/gen_moon_mobs.py。音は skyabyss_moon の名前空間。
+// ValleyBlocks.register から呼ぶ
+public final class MoonMobsSetup {
+    public static final String SOUND_NS = "skyabyss_moon";
+    private static final DeferredRegister<EntityType<?>> ENTITIES = DeferredRegister.create(Registries.ENTITY_TYPE, SkyAbyss.MODID);
+    private static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(SkyAbyss.MODID);
+    private static final DeferredRegister<SoundEvent> SOUNDS = DeferredRegister.create(Registries.SOUND_EVENT, SOUND_NS);
+
+    public static final DeferredHolder<EntityType<?>, EntityType<DustCrawler>> DUST_CRAWLER = ENTITIES.register(DustCrawler.ID,
+            () -> EntityType.Builder.of(DustCrawler::new, MobCategory.MONSTER).sized(1.0f, 0.6f).eyeHeight(0.4f)
+                    .clientTrackingRange(10).build(SkyAbyss.MODID + ":" + DustCrawler.ID));
+    public static final DeferredHolder<EntityType<?>, EntityType<ShellHare>> SHELL_HARE = ENTITIES.register(ShellHare.ID,
+            () -> EntityType.Builder.of(ShellHare::new, MobCategory.MONSTER).sized(0.7f, 0.75f).eyeHeight(0.55f)
+                    .clientTrackingRange(10).build(SkyAbyss.MODID + ":" + ShellHare.ID));
+    public static final DeferredHolder<EntityType<?>, EntityType<ShadowStitcher>> SHADOW_STITCHER = ENTITIES.register(ShadowStitcher.ID,
+            () -> EntityType.Builder.of(ShadowStitcher::new, MobCategory.MONSTER).sized(0.7f, 2.4f).eyeHeight(2.1f)
+                    .clientTrackingRange(10).build(SkyAbyss.MODID + ":" + ShadowStitcher.ID));
+    public static final DeferredHolder<EntityType<?>, EntityType<ShadowEmbracer>> SHADOW_EMBRACER = ENTITIES.register(ShadowEmbracer.ID,
+            () -> EntityType.Builder.of(ShadowEmbracer::new, MobCategory.MONSTER).sized(1.6f, 4.3f).eyeHeight(3.6f).fireImmune()
+                    .clientTrackingRange(12).build(SkyAbyss.MODID + ":" + ShadowEmbracer.ID));
+
+    public static final DeferredItem<Item> DUST_CRAWLER_EGG = egg("dust_crawler_spawn_egg", DUST_CRAWLER, 0x1E2230, 0xA0A6B4);
+    public static final DeferredItem<Item> SHELL_HARE_EGG = egg("shell_hare_spawn_egg", SHELL_HARE, 0x9AA0AE, 0xD8E4FF);
+    public static final DeferredItem<Item> SHADOW_STITCHER_EGG = egg("shadow_stitcher_spawn_egg", SHADOW_STITCHER, 0x06060E, 0xBCD8FF);
+    public static final DeferredItem<Item> SHADOW_EMBRACER_EGG = egg("shadow_embracer_spawn_egg", SHADOW_EMBRACER, 0x14162A, 0x8C96B0);
+
+    // 落とし物 (月の材料。説明の一行は item.skyabyss.<id>.desc)
+    public static final DeferredItem<Item> MOON_DUST = ITEMS.register("moon_dust", () -> new Ch4Setup.Described(new Item.Properties()));
+    public static final DeferredItem<Item> CRESCENT_SHELL = ITEMS.register("crescent_shell", () -> new Ch4Setup.Described(new Item.Properties()));
+    public static final DeferredItem<Item> SHADOW_THREAD = ITEMS.register("shadow_thread", () -> new Ch4Setup.Described(new Item.Properties()));
+
+    public static final DeferredHolder<SoundEvent, SoundEvent> CRAWLER_DIG = sound("crawler_dig");
+    public static final DeferredHolder<SoundEvent, SoundEvent> CRAWLER_BURST = sound("crawler_burst");
+    public static final DeferredHolder<SoundEvent, SoundEvent> CRAWLER_BITE = sound("crawler_bite");
+    public static final DeferredHolder<SoundEvent, SoundEvent> HARE_HOP = sound("hare_hop");
+    public static final DeferredHolder<SoundEvent, SoundEvent> HARE_SLAM = sound("hare_slam");
+    public static final DeferredHolder<SoundEvent, SoundEvent> HARE_IDLE = sound("hare_idle");
+    public static final DeferredHolder<SoundEvent, SoundEvent> STITCHER_WHISPER = sound("stitcher_whisper");
+    public static final DeferredHolder<SoundEvent, SoundEvent> STITCHER_REACH = sound("stitcher_reach");
+    public static final DeferredHolder<SoundEvent, SoundEvent> STITCHER_EXPOSED = sound("stitcher_exposed");
+    public static final DeferredHolder<SoundEvent, SoundEvent> EMBRACER_HUM = sound("embracer_hum");
+    public static final DeferredHolder<SoundEvent, SoundEvent> EMBRACER_SINK = sound("embracer_sink");
+    public static final DeferredHolder<SoundEvent, SoundEvent> EMBRACER_GRAB = sound("embracer_grab");
+    public static final DeferredHolder<SoundEvent, SoundEvent> EMBRACER_THROW = sound("embracer_throw");
+    public static final DeferredHolder<SoundEvent, SoundEvent> EMBRACER_WAVE = sound("embracer_wave");
+    public static final DeferredHolder<SoundEvent, SoundEvent> EMBRACER_FROZEN = sound("embracer_frozen");
+    public static final DeferredHolder<SoundEvent, SoundEvent> EMBRACER_ROAR = sound("embracer_roar");
+
+    private MoonMobsSetup() {
+    }
+
+    private static <T extends Mob> DeferredItem<Item> egg(String name, Supplier<? extends EntityType<T>> type, int bg, int fg) {
+        return ITEMS.register(name, () -> new DeferredSpawnEggItem(type, bg, fg, new Item.Properties()));
+    }
+
+    private static DeferredHolder<SoundEvent, SoundEvent> sound(String name) {
+        return SOUNDS.register(name, () -> SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath(SOUND_NS, name)));
+    }
+
+    public static void register(IEventBus modEventBus) {
+        ENTITIES.register(modEventBus);
+        ITEMS.register(modEventBus);
+        SOUNDS.register(modEventBus);
+        modEventBus.addListener(MoonMobsSetup::onAttributes);
+        modEventBus.addListener(MoonMobsSetup::onCreativeTab);
+        modEventBus.addListener(MoonMobsSetup::onCommonSetup);
+    }
+
+    private static void onAttributes(EntityAttributeCreationEvent event) {
+        event.put(DUST_CRAWLER.get(), DustCrawler.createAttributes().build());
+        event.put(SHELL_HARE.get(), ShellHare.createAttributes().build());
+        event.put(SHADOW_STITCHER.get(), ShadowStitcher.createAttributes().build());
+        event.put(SHADOW_EMBRACER.get(), ShadowEmbracer.createAttributes().build());
+    }
+
+    private static void onCreativeTab(BuildCreativeModeTabContentsEvent event) {
+        if (event.getTabKey().equals(ModItems.LEGACY_TAB)) {
+            for (DeferredItem<Item> i : List.of(DUST_CRAWLER_EGG, SHELL_HARE_EGG, SHADOW_STITCHER_EGG, SHADOW_EMBRACER_EGG, MOON_DUST, CRESCENT_SHELL,
+                    SHADOW_THREAD)) {
+                event.accept(i.get());
+            }
+        }
+    }
+
+    // 成長の経験値 (六章の帯の推奨の段 MoonMob.MOON_LEVEL)
+    private static void onCommonSetup(FMLCommonSetupEvent event) {
+        event.enqueueWork(() -> {
+            put(DustCrawler.ID, 14);
+            put(ShellHare.ID, 14);
+            put(ShadowStitcher.ID, 20);
+            put(ShadowEmbracer.ID, 400);
+        });
+    }
+
+    private static void put(String id, int xp) {
+        GrowthRewards.MOD_ENEMIES.put(SkyAbyss.MODID + ":" + id, new GrowthRewards.Source(xp, MoonMob.MOON_LEVEL));
+    }
+}

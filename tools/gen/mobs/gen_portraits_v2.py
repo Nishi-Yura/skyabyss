@@ -37,6 +37,7 @@ import gen_attendant_portraits as GAP  # noqa: E402
 import kit as K  # noqa: E402
 import cast as C  # noqa: E402
 import cast_folk  # noqa: E402,F401  (土地の町の 8 人の選んだ案)
+import cast_moon  # noqa: E402,F401  (六章の人の選んだ案)
 import build as B  # noqa: E402
 from lpkit import rot_x, rot_y  # noqa: E402
 
@@ -56,7 +57,9 @@ GUESTS = {"guest_apprentice", "guest_bellkeeper", "guest_fisher", "guest_bard", 
           "guest_herbalist", "guest_sailor", "guest_mother", "guest_baker",
           # 土地の町の 8 人 (2026-10-28 から自分の体。cast_folk)
           "guest_island_ferryman", "guest_tide_ferryman", "guest_inner_ferryman", "guest_tide_lightkeeper", "guest_storm_elder",
-          "guest_storm_hutkeeper", "guest_ember_survivor", "guest_ember_watch"}
+          "guest_storm_hutkeeper", "guest_ember_survivor", "guest_ember_watch",
+          # 六章の人 (cast_moon)
+          "guest_moon_past1"}
 
 
 def file_stem(name):
@@ -90,6 +93,7 @@ BG_EXTRA = {
     "guest_island_ferryman": (170, 150, 100), "guest_tide_ferryman": (90, 150, 190), "guest_inner_ferryman": (90, 150, 150),
     "guest_tide_lightkeeper": (230, 200, 110), "guest_storm_elder": (170, 110, 120), "guest_storm_hutkeeper": (170, 110, 80),
     "guest_ember_survivor": (220, 110, 50), "guest_ember_watch": (200, 80, 60),
+    "guest_moon_past1": (130, 170, 230),     # 前のループの自分: 星の角灯の青白
 }
 
 

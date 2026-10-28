@@ -1,0 +1,385 @@
+{
+  "format_version": "1.8.0",
+  "animations": {
+    "animation.shadow_stitcher.idle": {
+      "loop": true,
+      "animation_length": 4.0,
+      "bones": {
+        "body": {
+          "rotation": [
+            "0",
+            "0",
+            "math.sin(query.anim_time * 60 + 0) * 4"
+          ],
+          "position": [
+            0,
+            "math.sin(query.anim_time * 60 + 0) * 0.4",
+            0
+          ]
+        },
+        "head": {
+          "rotation": [
+            "math.sin(query.anim_time * 45 + 0) * 4",
+            "math.sin(query.anim_time * 45 + 90) * 10",
+            "0"
+          ]
+        },
+        "arm_l": {
+          "rotation": [
+            "math.sin(query.anim_time * 60 + 0) * 6",
+            "0",
+            "math.sin(query.anim_time * 45 + 30) * 4"
+          ]
+        },
+        "arm_r": {
+          "rotation": [
+            "math.sin(query.anim_time * 60 + 180) * 6",
+            "0",
+            "math.sin(query.anim_time * 45 + 210) * 4"
+          ]
+        }
+      }
+    },
+    "animation.shadow_stitcher.walk": {
+      "loop": true,
+      "animation_length": 1.8,
+      "bones": {
+        "body": {
+          "rotation": [
+            "8",
+            "0",
+            "math.sin(query.anim_time * 200 + 0) * 4"
+          ],
+          "position": [
+            0,
+            "math.sin(query.anim_time * 200 + 0) * 0.5",
+            0
+          ]
+        },
+        "arm_l": {
+          "rotation": [
+            "-12",
+            "0",
+            "math.sin(query.anim_time * 200 + 0) * 6"
+          ]
+        },
+        "arm_r": {
+          "rotation": [
+            "-12",
+            "0",
+            "math.sin(query.anim_time * 200 + 180) * 6"
+          ]
+        },
+        "head": {
+          "rotation": [
+            "-6",
+            "0",
+            "0"
+          ]
+        }
+      }
+    },
+    "animation.shadow_stitcher.reach": {
+      "animation_length": 1.3,
+      "bones": {
+        "arm_r": {
+          "rotation": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "0.50": [
+              95,
+              0,
+              -8
+            ],
+            "0.70": [
+              100,
+              0,
+              -8
+            ],
+            "1.10": [
+              20,
+              0,
+              0
+            ],
+            "1.30": [
+              0,
+              0,
+              0
+            ]
+          },
+          "position": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "0.50": [
+              0,
+              0,
+              -3.0
+            ],
+            "0.70": [
+              0,
+              0,
+              -5.0
+            ],
+            "1.10": [
+              0,
+              0,
+              0
+            ]
+          }
+        },
+        "body": {
+          "rotation": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "0.50": [
+              15,
+              0,
+              0
+            ],
+            "1.10": [
+              -6,
+              0,
+              0
+            ],
+            "1.30": [
+              0,
+              0,
+              0
+            ]
+          }
+        },
+        "head": {
+          "rotation": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "0.50": [
+              -8,
+              0,
+              0
+            ],
+            "1.30": [
+              0,
+              0,
+              0
+            ]
+          }
+        }
+      }
+    },
+    "animation.shadow_stitcher.attack": {
+      "animation_length": 0.5,
+      "bones": {
+        "arm_l": {
+          "rotation": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "0.15": [
+              110,
+              0,
+              20
+            ],
+            "0.35": [
+              20,
+              0,
+              -30
+            ],
+            "0.50": [
+              0,
+              0,
+              0
+            ]
+          }
+        },
+        "body": {
+          "rotation": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "0.15": [
+              0,
+              -15,
+              0
+            ],
+            "0.35": [
+              0,
+              15,
+              0
+            ],
+            "0.50": [
+              0,
+              0,
+              0
+            ]
+          }
+        }
+      }
+    },
+    "animation.shadow_stitcher.exposed": {
+      "animation_length": 0.6,
+      "bones": {
+        "body": {
+          "rotation": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "0.15": [
+              -15,
+              0,
+              0
+            ],
+            "0.60": [
+              -5,
+              0,
+              0
+            ]
+          },
+          "position": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "0.15": [
+              0,
+              -1.5,
+              0
+            ],
+            "0.60": [
+              0,
+              -0.5,
+              0
+            ]
+          }
+        },
+        "arm_l": {
+          "rotation": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "0.15": [
+              70,
+              0,
+              35
+            ]
+          }
+        },
+        "arm_r": {
+          "rotation": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "0.15": [
+              70,
+              0,
+              -35
+            ]
+          }
+        },
+        "head": {
+          "rotation": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "0.15": [
+              20,
+              0,
+              0
+            ]
+          }
+        }
+      },
+      "loop": "hold_on_last_frame"
+    },
+    "animation.shadow_stitcher.hurt": {
+      "animation_length": 0.22,
+      "bones": {
+        "body": {
+          "rotation": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "0.06": [
+              0,
+              0,
+              10
+            ],
+            "0.22": [
+              0,
+              0,
+              0
+            ]
+          }
+        }
+      }
+    },
+    "animation.shadow_stitcher.death": {
+      "animation_length": 1.0,
+      "bones": {
+        "body": {
+          "rotation": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "0.50": [
+              0,
+              0,
+              90
+            ],
+            "1.00": [
+              0,
+              0,
+              100
+            ]
+          },
+          "position": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "0.50": [
+              0,
+              -2.5,
+              0
+            ],
+            "1.00": [
+              0,
+              -3.0,
+              0
+            ]
+          }
+        }
+      },
+      "loop": "hold_on_last_frame"
+    }
+  }
+}

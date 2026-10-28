@@ -334,6 +334,7 @@ public final class SelfTestRunner {
         steps.add(Step.once("moon near", jp.revati.skyabyss.story.ch5.MoonNearSelfTest::run));
         // 六章の月の入口 (story/ch6)
         steps.add(Step.once("moon world", jp.revati.skyabyss.story.ch6.MoonSelfTest::run));
+        steps.add(Step.once("moon valley", jp.revati.skyabyss.story.ch6.valley.ValleySelfTest::run));
         steps.add(Step.once("abyss depths", 20, jp.revati.skyabyss.story.ch5.depths.DepthsV2SelfTest::run));
         steps.add(Step.once("abyss finds (load)", jp.revati.skyabyss.story.ch5.AbyssFindsSelfTest::load));
         steps.add(Step.once("abyss finds", 60, jp.revati.skyabyss.story.ch5.AbyssFindsSelfTest::run));

@@ -1,0 +1,74 @@
+# 六章 区画 1「新月の谷」(docs/design/46 の 4.3): 谷の見下ろし、入口、野営と前の自分、台地と門、裂け目と影の橋、鏡の窪、落ちた星の穴、主の間、敵と主
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/moon_valley.txt -PshotsName=moon_valley
+# 観戦モードで撮る (月は軽いので、ふつうのモードだと宙で落ちていく)。暗い谷は暗視をかけた絵と、かけない絵の両方
+world moon_valley3 continent
+size 1600 900
+timeout 2400
+render 12
+clouds off
+waitchunks 300
+wait 100
+cmd skyabyss cinematic stop
+close
+cmd gamemode creative
+cmd skyabyss moonworld enter
+waitchunks 200
+wait 100
+cmd skyabyss moonworld phase 0
+cmd gamemode spectator
+hud off
+cmd tp @s 0 70 14 0 45
+waitchunks 200
+wait 60
+shot v01_overview
+cmd tp @s 0 15 18 0 18
+wait 40
+shot v02_entrance
+cmd tp @s -1 2 45 59 12
+wait 60
+shot v03_camp
+cmd gamemode creative
+cmd tp @s -9.5 -1 46.5 40 6
+wait 60
+shot v04_past_self
+cmd gamemode spectator
+cmd tp @s 0 0 70 0 4
+wait 30
+shot v05_mesa_dark
+cmd effect give @s minecraft:night_vision 99999 0 true
+wait 10
+shot v06_mesa_gate
+cmd tp @s -5 4 124 63 35
+wait 40
+shot v07_bridge
+cmd tp @s -18 -4.5 127 0 0
+cmd skyabyss moonworld lamp
+cmd tp @s -5 4 124 63 35
+wait 30
+shot v08_bridge_lit
+cmd tp @s 21 2 79 0 42
+wait 30
+shot v09_mirror
+cmd tp @s 0 3 147 0 55
+wait 30
+shot v10_hole
+cmd tp @s 0 34 92 0 30
+wait 30
+shot v11_arena
+cmd summon skyabyss:dust_crawler 0 -6 76
+cmd summon skyabyss:shell_hare 3 -6 77
+cmd summon skyabyss:shadow_stitcher 6 -6 76
+wait 30
+cmd tp @s 3 -3 70 0 18
+wait 20
+shot v12_mobs
+cmd tp @s 6 -5 74
+cmd skyabyss moonworld lamp
+cmd tp @s 3 -3 70 0 18
+wait 40
+shot v13_mobs_lit
+cmd skyabyss moonworld lord
+wait 80
+cmd tp @s 0 25 104 0 12
+wait 40
+shot v14_lord
