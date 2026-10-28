@@ -330,6 +330,8 @@ public final class SelfTestRunner {
         steps.add(Step.once("abyss pressure", jp.revati.skyabyss.story.ch5.AbyssPressureSelfTest::run));
         steps.add(Step.once("abyss warden (load)", jp.revati.skyabyss.story.ch5.warden.WardenSelfTest::load));
         steps.add(Step.once("abyss warden", 60, jp.revati.skyabyss.story.ch5.warden.WardenSelfTest::run));
+        // 五章から六章への引き「近づく月」 (story/ch5/MoonNear)
+        steps.add(Step.once("moon near", jp.revati.skyabyss.story.ch5.MoonNearSelfTest::run));
         steps.add(Step.once("abyss depths", 20, jp.revati.skyabyss.story.ch5.depths.DepthsV2SelfTest::run));
         steps.add(Step.once("abyss finds (load)", jp.revati.skyabyss.story.ch5.AbyssFindsSelfTest::load));
         steps.add(Step.once("abyss finds", 60, jp.revati.skyabyss.story.ch5.AbyssFindsSelfTest::run));

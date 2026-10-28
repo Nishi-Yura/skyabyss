@@ -19,6 +19,15 @@
         "is": "active",
         "stage": "report"
       }
+    },
+    {
+      "node": "ch6_moon",
+      "if": {
+        "type": "quest",
+        "quest": "main_moon_near",
+        "is": "active",
+        "stage": "tell"
+      }
     }
   ],
   "nodes": {
@@ -45,6 +54,20 @@
       "next": "ch5_report2"
     },
     "ch5_report2": {
+      "face": "neutral",
+      "options": [
+        {
+          "id": "ok",
+          "goto": "end",
+          "kind": "talk"
+        }
+      ]
+    },
+    "ch6_moon": {
+      "face": "grave",
+      "next": "ch6_moon2"
+    },
+    "ch6_moon2": {
       "face": "neutral",
       "options": [
         {

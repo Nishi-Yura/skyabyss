@@ -388,5 +388,16 @@
   "dialogue.skyabyss.attendant_abyss_porter.menu.listener": "錨鉄 16 → 鼓動の聴き筒",
   "dialogue.skyabyss.attendant_abyss_porter.menu.bye": "行く",
   "cinematic.skyabyss.abyss_v2.warden.hero1": "番人が崩れていく。……それでも、心臓は打っている。",
-  "cinematic.skyabyss.abyss_v2.warden.hero2": "見上げると、肋の骨。ここは、大きな何かの胸の中だった。"
+  "cinematic.skyabyss.abyss_v2.warden.hero2": "見上げると、肋の骨。ここは、大きな何かの胸の中だった。",
+  "quest.skyabyss.main_moon_near.title": "近づく月",
+  "quest.skyabyss.main_moon_near.summary": "錨は緩んだまま。夜、空の月を見上げてみる。",
+  "quest.skyabyss.main_moon_near.done": "月の話は、六章で続く。",
+  "quest.skyabyss.main_moon_near.look.journal": "深淵の底で、錨は緩んだままだと知った。月が近づいている、と語り部は言っていた。夜、外で月を見上げてみよう。",
+  "quest.skyabyss.main_moon_near.look.moon": "夜、外で月を見上げよう",
+  "quest.skyabyss.main_moon_near.tell.journal": "月は、前に見たときより大きかった。表の模様が、目で数えられるほどに。語り部に話そう。",
+  "quest.skyabyss.main_moon_near.tell.talk": "見た月のことを、語り部に話そう",
+  "message.skyabyss.moon_near.seen": "月が大きい。……前に見上げたときより、ずっと近い。表の模様まで、数えられそうだ。",
+  "dialogue.skyabyss.storyteller.ch6_moon": "大きかったろう。……あたしの目にも、そう見える。\n錨が緩めば、月は寄ってくる。数え歌の、むっつめ。「そらの　まるい　ふた」。",
+  "dialogue.skyabyss.storyteller.ch6_moon2": "空の歌は、あたしも最後まで聞いたことがない。……けれど、知っている人がいるとしたら、月のほうだろうね。\n支度をしておおき。次は、空へ行く話になる。",
+  "dialogue.skyabyss.storyteller.ch6_moon2.ok": "支度をする"
 }

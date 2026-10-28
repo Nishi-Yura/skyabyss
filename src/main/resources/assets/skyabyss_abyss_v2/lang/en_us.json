@@ -388,5 +388,16 @@
   "dialogue.skyabyss.attendant_abyss_porter.menu.listener": "Anchor iron ×16 → Pulse Listener",
   "dialogue.skyabyss.attendant_abyss_porter.menu.bye": "Leave",
   "cinematic.skyabyss.abyss_v2.warden.hero1": "The warden is coming apart. ... And still, the heart beats.",
-  "cinematic.skyabyss.abyss_v2.warden.hero2": "Above me, ribs. All this time I was inside the chest of something vast."
+  "cinematic.skyabyss.abyss_v2.warden.hero2": "Above me, ribs. All this time I was inside the chest of something vast.",
+  "quest.skyabyss.main_moon_near.title": "The Moon Draws Near",
+  "quest.skyabyss.main_moon_near.summary": "The anchor is still loose. Look up at the moon at night.",
+  "quest.skyabyss.main_moon_near.done": "The moon's tale continues in chapter six.",
+  "quest.skyabyss.main_moon_near.look.journal": "At the bottom of the abyss you learned the anchor is still loose. The storyteller said the moon is coming closer. Go outside at night and look up at it.",
+  "quest.skyabyss.main_moon_near.look.moon": "Look up at the moon outside at night",
+  "quest.skyabyss.main_moon_near.tell.journal": "The moon was bigger than the last time you looked, close enough to count the marks on its face. Tell the storyteller.",
+  "quest.skyabyss.main_moon_near.tell.talk": "Tell the storyteller about the moon",
+  "message.skyabyss.moon_near.seen": "The moon is big. ... Much nearer than the last time you looked. You could almost count the marks on its face.",
+  "dialogue.skyabyss.storyteller.ch6_moon": "Big, wasn't it. ... My eyes say so too.\nWhen the anchor slackens, the moon leans in. The counting song's sixth verse: \"the round lid of the sky.\"",
+  "dialogue.skyabyss.storyteller.ch6_moon2": "I never heard the sky song to its end. ... But if anyone knows it, it would be the moon.\nGet ready. The next tale goes up into the sky.",
+  "dialogue.skyabyss.storyteller.ch6_moon2.ok": "I'll get ready"
 }
