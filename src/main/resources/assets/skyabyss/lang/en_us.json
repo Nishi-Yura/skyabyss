@@ -2030,5 +2030,6 @@
   "item.skyabyss.ember_flare_bow": "Flare Bow",
   "item.skyabyss.ember_flare_bow.desc": "Charred branch limbs, orange light leaking from their cracks.",
   "item.skyabyss.ember_censer_bell_staff": "Censer Bell Staff",
-  "item.skyabyss.ember_censer_bell_staff.desc": "A pierced censer hangs from an iron hook."
+  "item.skyabyss.ember_censer_bell_staff.desc": "A pierced censer hangs from an iron hook.",
+  "message.skyabyss.raid.timeout": "Time ran out. Back to the room entrance (a little more time next try)"
 }

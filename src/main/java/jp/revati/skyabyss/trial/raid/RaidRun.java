@@ -65,6 +65,9 @@ public final class RaidRun {
         public Phase phase = Phase.COUNTDOWN;
         public long until;
         public int wipes;
+        // 部屋が始まった時刻と、最後に邪魔の敵を出した時刻 (RaidPace)
+        public long activeSince;
+        public long lastHarass;
         public RaidHudNet.Hud lastHud;
         public boolean hudOff;
 
@@ -264,6 +267,8 @@ public final class RaidRun {
             case COUNTDOWN -> {
                 if (now >= run.until) {
                     run.phase = Phase.ACTIVE;
+                    run.activeSince = now;
+                    run.lastHarass = now;
                     RaidKit.setGate(ctx, ctx.cell().entryGate(), true);
                     try {
                         run.room.start(ctx);
@@ -278,6 +283,8 @@ public final class RaidRun {
                 } catch (RuntimeException e) {
                     SkyAbyss.LOGGER.warn("Raid room {} tick failed: {}", ctx.roomId(), e.toString());
                 }
+                // 部屋をそろえる共通の決まり (時間切れ・邪魔の敵)
+                RaidPace.tick(run, now);
                 String fail = ctx.takeFail();
                 if (fail != null) {
                     wipe(run, fail.isEmpty() ? null : fail);
@@ -409,6 +416,7 @@ public final class RaidRun {
     public static void wipe(Run run, @Nullable String reasonKey) {
         RaidCtx ctx = run.ctx;
         run.wipes++;
+        ctx.assistWipes = run.wipes;
         RaidRewards.onWipe(ctx.level(), ctx.group());
         int idx = 0;
         for (ServerPlayer p : ctx.players()) {
@@ -577,7 +585,7 @@ public final class RaidRun {
             boolean fin = done || run.phase == Phase.COMPLETE;
             BlockPos g = fin ? null : guideOf(run);
             hud = new RaidHudNet.Hud(run.ctx.roomId(), room.objectiveKey(), args, room.counter(), room.counterMax(), room.secondaryKey(), room.secondary(),
-                    room.secondaryMax(), room.timerTicks(), fin, g != null, g == null ? 0 : g.getX(), g == null ? 0 : g.getY(), g == null ? 0 : g.getZ());
+                    room.secondaryMax(), RaidPace.timerTicks(run, run.ctx.now()), fin, g != null, g == null ? 0 : g.getX(), g == null ? 0 : g.getY(), g == null ? 0 : g.getZ());
         }
         run.lastHud = hud;
         for (ServerPlayer p : run.ctx.players()) {

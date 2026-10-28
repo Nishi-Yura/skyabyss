@@ -2030,5 +2030,6 @@
   "item.skyabyss.ember_flare_bow": "火の粉の弓",
   "item.skyabyss.ember_flare_bow.desc": "焼けた枝の腕の裂け目から、橙の光が漏れる弓。",
   "item.skyabyss.ember_censer_bell_staff": "香炉の鈴杖",
-  "item.skyabyss.ember_censer_bell_staff.desc": "鉄の鉤から穴の開いた香炉が下がる。"
+  "item.skyabyss.ember_censer_bell_staff.desc": "鉄の鉤から穴の開いた香炉が下がる。",
+  "message.skyabyss.raid.timeout": "時が尽きた。部屋の入口へ戻る (次は少し長く待ってくれる)"
 }
