@@ -63,7 +63,6 @@ public final class SkillLesson {
     public static final String SIG_SLOTTED = "skill_lesson:slotted";
     public static final String SIG_DUMMY = "skill_lesson:dummy";
     public static final String SIG_BEHIND = "skill_lesson:behind";
-    public static final String SIG_STANCE = "skill_lesson:stance";
     public static final String SIG_KEYSTONE = "skill_lesson:keystone";
     public static final String SIG_TREE = "skill_lesson:tree:";
     public static final int REWARD_COINS = 15;
@@ -71,7 +70,6 @@ public final class SkillLesson {
 
     // 後の章の一段だけの稽古 (名前・木。KEYSTONE は木でなく要)
     public enum Unlock {
-        HYBRID("tree_hybrid", SkillTree.HYBRID),
         KEYSTONE("tree_keystone", null),
         STAR("tree_star", SkillTree.STAR),
         ABYSS("tree_abyss", SkillTree.ABYSS),
@@ -94,7 +92,6 @@ public final class SkillLesson {
         // 開いたか (今の技の記録で)
         public boolean open(SkillData d, int level) {
             return switch (this) {
-                case HYBRID -> Skill.inTree(SkillTree.HYBRID).stream().anyMatch(d::bridgeOpen);
                 case KEYSTONE -> level >= Skill.STONE_OATH.minLevel;
                 case STAR, ABYSS -> d.unlockedTrees.contains(tree.id);
                 case DEEP, PAST -> d.rebirth >= 1;
@@ -102,8 +99,7 @@ public final class SkillLesson {
         }
     }
 
-    // 構えの覚え (変わったら合図) と、合図を送った最後の使用 (一回の使用で二度数えない)
-    private static final Map<UUID, Integer> STANCE = new HashMap<>();
+    // 合図を送った最後の使用 (一回の使用で二度数えない)
     private static final Map<UUID, Long> LAST_CAST = new HashMap<>();
 
     // ---------------------------------------------------------------- 今の段
@@ -188,10 +184,6 @@ public final class SkillLesson {
         UUID id = player.getUUID();
         if ("learn".equals(st) && anySlotted(d)) {
             Quests.signal(player, SIG_SLOTTED);
-        }
-        Integer before = STANCE.put(id, d.stance);
-        if ("stance".equals(st) && before != null && before != d.stance) {
-            Quests.signal(player, SIG_STANCE);
         }
         if (stageOf(player, Unlock.KEYSTONE.quest()) != null && knowsKeystone(d)) {
             Quests.signal(player, SIG_KEYSTONE);
@@ -319,7 +311,6 @@ public final class SkillLesson {
 
     @SubscribeEvent
     static void onLogout(PlayerEvent.PlayerLoggedOutEvent event) {
-        STANCE.remove(event.getEntity().getUUID());
         LAST_CAST.remove(event.getEntity().getUUID());
     }
 }

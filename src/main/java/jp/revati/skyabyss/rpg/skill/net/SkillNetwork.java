@@ -6,10 +6,8 @@ import jp.revati.skyabyss.SkyAbyss;
 import jp.revati.skyabyss.rpg.client.skill.SkillClient;
 import jp.revati.skyabyss.rpg.client.skill.SkillFx;
 import jp.revati.skyabyss.rpg.skill.Skill;
-import jp.revati.skyabyss.rpg.skill.SkillCalling;
 import jp.revati.skyabyss.rpg.skill.SkillData;
 import jp.revati.skyabyss.rpg.skill.SkillKeystone;
-import jp.revati.skyabyss.rpg.skill.SkillStance;
 import jp.revati.skyabyss.rpg.skill.SkillExtOps;
 import jp.revati.skyabyss.rpg.skill.SkillManager;
 import jp.revati.skyabyss.rpg.skill.SkillRules;
@@ -38,21 +36,11 @@ public final class SkillNetwork {
                 .playToClient(ManaPayload.TYPE, ManaPayload.STREAM_CODEC, (payload, context) -> SkillClient.onMana(payload))
                 .playToClient(SkillCastResultPayload.TYPE, SkillCastResultPayload.STREAM_CODEC, (payload, context) -> SkillClient.onCastResult(payload))
                 .playToClient(SkillFxPayload.TYPE, SkillFxPayload.STREAM_CODEC, (payload, context) -> context.enqueueWork(() -> SkillFx.onCast(payload)))
-                .playToClient(CallingOpenPayload.TYPE, CallingOpenPayload.STREAM_CODEC, (payload, context) -> SkillClient.onCallingOpen(payload))
                 // 島の祠で職を選ぶ (docs/design/43 の 4 節)。選び直しはできない (サーバーが検める)
                 .playToClient(JobChoiceOpenPayload.TYPE, JobChoiceOpenPayload.STREAM_CODEC, (payload, context) -> context.enqueueWork(SkillClient::onJobChoiceOpen))
                 .playToServer(JobChoosePayload.TYPE, JobChoosePayload.STREAM_CODEC, (payload, context) -> {
                     if (context.player() instanceof ServerPlayer player) {
                         jp.revati.skyabyss.rpg.skill.JobChoice.choose(player, jp.revati.skyabyss.rpg.skill.Job.byId(payload.job()));
-                    }
-                })
-                .playToServer(CallingChoosePayload.TYPE, CallingChoosePayload.STREAM_CODEC, (payload, context) -> {
-                    if (context.player() instanceof ServerPlayer player) {
-                        SkillCalling.Result r = SkillCalling.choose(player, payload.tree());
-                        if (r != SkillCalling.Result.OK) {
-                            SkillManager.sync(player);
-                            Notice.bar(player, ModText.deny("message.skyabyss.calling.failed"));
-                        }
                     }
                 })
                 .playToServer(SkillCastPayload.TYPE, SkillCastPayload.STREAM_CODEC, (payload, context) -> {
@@ -97,24 +85,6 @@ public final class SkillNetwork {
                                 SkillManager.sync(player);
                                 Notice.bar(player, ModText.deny("message.skyabyss.skill.loadout_failed." + r.name().toLowerCase()));
                             }
-                        }
-                    }
-                })
-                .playToServer(SkillStancePayload.TYPE, SkillStancePayload.STREAM_CODEC, (payload, context) -> {
-                    if (context.player() instanceof ServerPlayer player) {
-                        SkillManager.StanceResult r = SkillManager.setStance(player, SkillStance.of(payload.stance()));
-                        if (r == SkillManager.StanceResult.COOLDOWN) {
-                            SkillManager.sync(player);
-                            Notice.bar(player, ModText.deny("message.skyabyss.skill.stance_cooldown"));
-                        }
-                    }
-                })
-                .playToServer(SkillChainPayload.TYPE, SkillChainPayload.STREAM_CODEC, (payload, context) -> {
-                    if (context.player() instanceof ServerPlayer player) {
-                        SkillManager.ChainResult r = SkillManager.toggleChain(player, payload.slot());
-                        if (r != SkillManager.ChainResult.OK) {
-                            SkillManager.sync(player);
-                            Notice.bar(player, ModText.deny("message.skyabyss.skill.chain_failed." + r.name().toLowerCase()));
                         }
                     }
                 })

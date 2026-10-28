@@ -228,9 +228,7 @@ public final class JobSelfTest {
         SkillManager.forceRank(p, Skill.CLOUD_PIERCE, 1);
         check(f, d.unspentFor(SkillTree.BONE, 10) == total - 1 && d.unspentFor(SkillTree.ROCK, 10) == total - 5, "job points mixed: total " + total
                 + " bone " + d.unspentFor(SkillTree.BONE, 10) + " rock " + d.unspentFor(SkillTree.ROCK, 10) + " ranks " + d.ranks + " runes " + d.runes);
-        check(f, d.canLearn(Skill.SIGNAL, 50) == SkillData.LearnResult.SEALED && d.canLearn(Skill.DUST_CHARGE, 50) == SkillData.LearnResult.SEALED,
-                "the traveler / bridge trees are still open");
-        check(f, !SkillRules.CALLINGS && !Breakpoints.reached(30, 15), "callings or breakpoints are still on");
+        check(f, Skill.byId("signal") == null && Skill.byId("dust_charge") == null && SkillTree.byId("traveler") == null, "the traveler / bridge trees still exist");
         // 持ち替え: 剣 → 戦士の枠、弓 → 弓使いの枠
         d.useJob(null);
         p.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.IRON_SWORD));

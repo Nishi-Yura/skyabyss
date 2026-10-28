@@ -66,16 +66,70 @@ ELEMENTS = {
 
 
 def shard(kind, base):
-    """巨神の粉 (docs/design/41。2026-10-25 に絵は B 粉の山に決まった): 小さな粉の盛りに、光る粒。左上が明るく右が暗い"""
+    """巨神の粉 (docs/design/41)。2026-10-29: 5 枚が同じ山の色替えだったので、土地ごとに別の形に (一品一案)。
+    stone = 砕けた石の薄片と粉、wind = 風に流れる羽毛のような粉、tide = 濡れた砂に残る真珠の粒、
+    ash = 割れ目が熾る炭、bone = 折れた骨の欠片。どれも左上が明るく右下が暗い。"""
     img = Image.new("RGBA", (32, 32), (0, 0, 0, 0))
     d = ImageDraw.Draw(img)
-    d.polygon([(3, 27), (9, 17), (14, 11), (18, 10), (23, 15), (29, 27)], fill=OUTLINE)
-    d.polygon([(5, 26), (10, 18), (14, 12), (18, 11), (22, 16), (27, 26)], fill=shade(base, 1.0))
-    d.polygon([(10, 18), (14, 12), (16, 12), (12, 22)], fill=shade(base, 1.35))
-    d.polygon([(18, 11), (22, 16), (27, 26), (19, 26)], fill=shade(base, 0.7))
-    for x, y in ((13, 16), (17, 20), (21, 23), (9, 23), (15, 24), (19, 15)):
-        d.point((x, y), fill=shade(base, 1.7))
-    d.line([(4, 28), (28, 28)], fill=shade(base, 0.45))
+    hi, lo, glow = shade(base, 1.35), shade(base, 0.7), shade(base, 1.7)
+    if kind == "stone":
+        # 斜めに割れた薄い石の片 (二枚) と、下にこぼれた粉
+        facet(img, [(6, 8), (19, 5), (23, 12), (12, 17)], base, 1.3, 0.65)
+        facet(img, [(13, 17), (24, 13), (27, 20), (18, 25)], base, 1.25, 0.6)
+        d.line([(9, 11), (18, 8)], fill=glow)
+        for x, y in ((6, 26), (9, 27), (13, 28), (22, 27), (26, 25), (5, 23)):
+            d.point((x, y), fill=lo)
+        d.point((16, 10), fill=(255, 255, 255, 255))
+    elif kind == "wind":
+        # 右上へ吹き上がる三筋の粉 (羽毛のような弧)
+        for k, (x0, y0) in enumerate(((5, 24), (8, 27), (13, 28))):
+            pts = [(x0 + t * 1.6, y0 - t * t * 0.42 - t * 0.6) for t in range(0, 12)]
+            for n, (x, y) in enumerate(pts):
+                c = glow if n > 8 else hi if n > 4 else base + (255,)
+                d.point((round(x), round(y)), fill=c)
+                d.point((round(x) + 1, round(y)), fill=OUTLINE if n < 9 else c)
+        for x, y in ((24, 6), (27, 9), (22, 4), (26, 13), (20, 9)):
+            d.point((x, y), fill=glow)
+        d.ellipse([3, 27, 15, 30], fill=OUTLINE)
+        d.ellipse([4, 28, 14, 29], fill=lo)
+    elif kind == "tide":
+        # 濡れた砂の盛りに、真珠の粒が三つ (丸く光る)
+        d.polygon([(2, 27), (8, 20), (16, 18), (24, 20), (30, 27)], fill=OUTLINE)
+        d.polygon([(4, 26), (9, 21), (16, 19), (23, 21), (28, 26)], fill=lo)
+        d.polygon([(4, 26), (9, 21), (16, 19), (12, 26)], fill=base + (255,))
+        d.line([(3, 28), (29, 28)], fill=shade(base, 0.45))
+        for cx, cy, r in ((10, 15, 3), (19, 12, 4), (24, 18, 2)):
+            d.ellipse([cx - r - 1, cy - r - 1, cx + r + 1, cy + r + 1], fill=OUTLINE)
+            d.ellipse([cx - r, cy - r, cx + r, cy + r], fill=hi)
+            d.ellipse([cx - r + 1, cy - r + 1, cx + r - 1, cy + r - 1], fill=glow)
+            d.point((cx - 1, cy - 1), fill=(255, 255, 255, 255))
+            d.ellipse([cx, cy, cx + r, cy + r], fill=hi) if r > 2 else None
+    elif kind == "ash":
+        # 黒い炭の塊の割れ目が熾る
+        facet(img, [(5, 12), (14, 6), (26, 9), (28, 20), (18, 27), (7, 24)], shade((60, 44, 40), 1.0), 1.25, 0.6)
+        for a, b in (((10, 19), (17, 11)), ((17, 11), (23, 15)), ((14, 22), (20, 19)), ((17, 11), (16, 8))):
+            d.line([a, b], fill=OUTLINE)
+        for a, b in (((11, 19), (17, 12)), ((17, 12), (22, 15)), ((15, 22), (20, 20))):
+            d.line([a, b], fill=glow)
+        d.point((17, 12), fill=(255, 240, 200, 255))
+        d.point((19, 14), fill=(255, 240, 200, 255))
+        for x, y in ((8, 28), (12, 29), (24, 27), (27, 24)):
+            d.point((x, y), fill=lo)
+    else:
+        # 折れた骨: 太い骨の片 (両端の瘤) と、細い破片
+        d.line([(6, 24), (22, 8)], fill=OUTLINE, width=7)
+        d.line([(7, 23), (21, 9)], fill=base + (255,), width=5)
+        d.line([(8, 21), (20, 9)], fill=hi, width=1)
+        d.line([(10, 24), (22, 12)], fill=lo, width=1)
+        for cx, cy in ((7, 23), (21, 9)):
+            d.ellipse([cx - 4, cy - 3, cx + 3, cy + 4], fill=OUTLINE)
+            d.ellipse([cx - 3, cy - 2, cx + 2, cy + 3], fill=base + (255,))
+            d.point((cx - 2, cy - 1), fill=hi)
+        # 折れ口 (ぎざぎざ) と破片
+        d.polygon([(22, 8), (25, 5), (24, 9), (27, 8), (24, 12)], fill=OUTLINE)
+        d.polygon([(23, 8), (25, 6), (24, 9), (25, 9), (23, 11)], fill=hi)
+        d.polygon([(24, 22), (29, 18), (29, 24), (25, 27)], fill=OUTLINE)
+        d.polygon([(25, 22), (28, 19), (28, 23), (26, 26)], fill=base + (255,))
     return img
 
 

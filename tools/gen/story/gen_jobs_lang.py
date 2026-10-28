@@ -62,7 +62,7 @@ KV = {
     'item.skyabyss.whale_bow.desc': ('岩鯨の肋を腕にした弓。', "A bow whose limbs are the stone whale's ribs."),
     'item.skyabyss.tide_hammer': ('潮殻の鎚', 'Tideshell Hammer'),
     'item.skyabyss.tide_hammer.desc': ('潮殻の殻を打ち付けた鎚。', "A hammer faced with tide shell."),
-    'item.skyabyss.tide_bow': ('珊瑚の弓', 'Coral Bow'),
+    'item.skyabyss.tide_bow': ('潮殻の弓', 'Tideshell Bow'),
     'item.skyabyss.tide_bow.desc': ('潮殻の珊瑚が腕になった弓。', "A bow grown from the tide shell's coral."),
     'item.skyabyss.storm_hammer': ('雷の鎚', 'Thunder Hammer'),
     'item.skyabyss.storm_hammer.desc': ('雷翼の銅を打った鎚。', "A hammer of the thunder wing's copper."),

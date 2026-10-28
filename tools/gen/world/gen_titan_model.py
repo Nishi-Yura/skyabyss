@@ -13,7 +13,7 @@
 """
 
 # ---------------------------------------------------------------------------
-# 上書き防止 (docs/review/assets_audit.md の S1): 実行すると採用済みの素材を古い版で上書きする。
+# 上書き防止: 実行すると採用済みの素材を古い版で上書きする。
 #   上書きするもの: 岩鯨の geo (近景) / stone_whale.png / _glowmask.png / animation
 #   採用版の生成元: tools/install/install_stone_whale.py
 # どうしても動かすときだけ、環境変数 SKYABYSS_ALLOW_REGEN=1 を付ける。一覧は tools/README.md。

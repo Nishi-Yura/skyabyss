@@ -365,7 +365,8 @@ storm_eye_feather ember_mantle ember_lantern heartbeat_ward
 stone_whale_call tide_shell_call thunder_wing_call ember_call tide_watching_shell gale_feather warm_stone
 sky_key sky_key_fragment stone_whale_core tide_shell_core thunder_wing_core ember_core
 resonance_crystal resonance_shard_stone_whale resonance_shard_tide_shell resonance_shard_thunder_wing resonance_shard_ember
-abyss_greatsword abyss_bell_staff abyss_storm_bow abyss_ash_scythe aspect_core skill_rune socket_shard_stone socket_shard_wind socket_shard_tide socket_shard_ash socket_shard_bone
+abyss_greatsword abyss_bell_staff abyss_storm_bow abyss_ash_scythe aspect_core skill_rune
+shrine_sword shrine_hammer shrine_staff shrine_bow shrine_dagger shrine_bell_staff socket_shard_stone socket_shard_wind socket_shard_tide socket_shard_ash socket_shard_bone
 lore_book lore_page wayfarer_notes weathercock tide_pearl cloud_jerky cloudgap_fruit ember_horn moss_salve rock_whetstone road_hardtack rock_shell_scrap rock_shell_thread stone_whale_shard tide_shell_shard thunder_wing_shard ember_shard bone_chip""".split()
 
 BOSS = """stone_whale_heart_icon_p1 stone_whale_heart_icon_p2 stone_whale_heart_icon_p3
@@ -394,6 +395,11 @@ def copy_assets():
     for i in range(36):
         x, y = (i % 8) * 32, (i // 8) * 32
         sheet.crop((x, y, x + 32, y + 32)).save(os.path.join(OUT, "skill", "%02d.png" % i), optimize=True)
+    # 職の新しい技 (星読みから) は icons2.png の 25 番から。番号は Skill.iconIndex() と同じ 125〜 (skilldata.load の icon)
+    sheet2 = Image.open(os.path.join(TEX, "gui", "skill", "icons2.png")).convert("RGBA")
+    for i in range(25, 37):
+        x, y = (i % 8) * 32, (i // 8) * 32
+        sheet2.crop((x, y, x + 32, y + 32)).save(os.path.join(OUT, "skill", "%02d.png" % (100 + i)), optimize=True)
     rd = os.path.join(ROOT, "docs", "readme")
     for n in ("plate_title", "plate_chapters", "plate_end", "plate_tagline", "plate_keys"):
         shutil.copy(os.path.join(rd, n + ".png"), os.path.join(OUT, n + ".png"))

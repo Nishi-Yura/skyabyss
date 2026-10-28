@@ -106,5 +106,7 @@
   "dialogue.skyabyss.guest_moon_past1.ch6_valley_promise3": "月の真ん中に、時を戻す芯がある。そこで会おう。\n今度は、二人で止めよう。……この灯りは、預けておくよ。",
   "dialogue.skyabyss.guest_moon_past1.ch6_valley_promise3.ok": "約束する",
   "dialogue.skyabyss.guest_moon_past1.ch6_valley_idle": "月の上では、急いでも夜は明けない。……少し休んでいくといい。",
-  "dialogue.skyabyss.guest_moon_past1.ch6_valley_idle.ok": "また来る"
+  "dialogue.skyabyss.guest_moon_past1.ch6_valley_idle.ok": "また来る",
+  "chapter.skyabyss.aftermath.chapter3": "谷の影はほどけた。月の真ん中は、まだ遠い。",
+  "message.skyabyss.moon_end.todo": "月の旅は、この版ではここまで。上弦の崖から先は、次の版で続く。"
 }

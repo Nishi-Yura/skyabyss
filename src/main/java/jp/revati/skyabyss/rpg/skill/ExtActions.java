@@ -29,9 +29,6 @@ final class ExtActions {
     // ================================================================ 入口
     static String perform(ServerPlayer player, Skill skill, int rank) {
         return switch (skill) {
-            case DUST_CHARGE -> dustCharge(player, rank);
-            case STEAM_BELL -> steamBell(player, rank);
-            case CINDER_VOLLEY -> cinderVolley(player, rank);
             case DEEP_PULL -> deepPull(player, rank);
             case DEEP_ECHO -> deepEcho(player, rank);
             case DEEP_MAW -> deepMaw(player, rank);
@@ -162,82 +159,6 @@ final class ExtActions {
         // 見た目の合図にも同じ点を載せる (手元の向きからでは、敵の足もと・壁の手前が同じ点にならない)
         SkillActions.fxTarget = center;
         return center;
-    }
-
-    // ================================================================ 橋 (A09)
-    // 砂塵の盾突き (岩 + 風): 前へ 6 ブロック駆け抜け、通り道の敵を押しのける (×0.9 / ×1.2)
-    static String dustCharge(ServerPlayer player, int rank) {
-        if (!player.onGround() || player.isPassenger()) {
-            return "message.skyabyss.skill.need_ground";
-        }
-        Vec3 dir = SkillActions.flatLook(player);
-        Vec3 from = player.position();
-        Vec3 end = dashEnd(player, dir, SkillRules.DUST_LENGTH);
-        if (end.distanceToSqr(from) > 0.01) {
-            teleport(player, end);
-        }
-        float amount = atk(player, SkillRules.dustMultiplier(rank));
-        for (LivingEntity e : along(player, from, end.add(dir.scale(1.2)), SkillRules.DUST_WIDTH / 2 + 0.3)) {
-            if (SkillActions.hit(player, e, amount, Skill.DUST_CHARGE)) {
-                Vec3 side = new Vec3(-dir.z, 0, dir.x);
-                double sgn = Math.signum(e.position().subtract(from).dot(side));
-                e.setDeltaMovement(side.scale(0.7 * (sgn == 0 ? 1 : sgn)).add(dir.scale(0.3)).add(0, 0.2, 0));
-                e.hurtMarked = true;
-            }
-        }
-        player.swing(InteractionHand.MAIN_HAND, true);
-        SkillActions.sound(player, Skills.SOUND_LUNGE.get(), 0.9f, 0.7f);
-        return null;
-    }
-
-    // 蒸気の鐘 (潮 + 灰): 足もとから熱い蒸気を吹き出し、周り (半径 4) の敵を打って足を鈍らせる
-    static String steamBell(ServerPlayer player, int rank) {
-        Vec3 c = player.position();
-        List<LivingEntity> foes = within(player, c, SkillRules.STEAM_RADIUS);
-        float amount = atk(player, SkillRules.steamMultiplier(rank));
-        for (LivingEntity e : foes) {
-            if (SkillActions.hit(player, e, amount, Skill.STEAM_BELL)) {
-                SkillEffects.slow(e, SkillRules.STEAM_SLOW * (SkillActions.isLarge(e) ? 0.5 : 1.0), SkillRules.STEAM_TICKS);
-            }
-        }
-        SkillActions.sound(player, SoundEvents.BELL_BLOCK, 0.9f, 0.6f);
-        SkillActions.sound(player, SoundEvents.FIRE_EXTINGUISH, 0.7f, 1.2f);
-        player.swing(InteractionHand.MAIN_HAND, true);
-        return null;
-    }
-
-    // 熾の矢雨 (灰 + 骨): 前方の扇へ、火の矢を 5 本放つ。矢ごとに手前の 2 体までを射抜き、3 秒燃える
-    static String cinderVolley(ServerPlayer player, int rank) {
-        ServerLevel level = player.serverLevel();
-        Vec3 eye = player.getEyePosition();
-        Vec3 look = player.getLookAngle();
-        Vec3 flat = SkillActions.flatLook(player);
-        float amount = atk(player, SkillRules.volleyMultiplier(rank));
-        boolean any = false;
-        for (int i = 0; i < SkillRules.VOLLEY_BOLTS; i++) {
-            double yaw = Math.toRadians((i - (SkillRules.VOLLEY_BOLTS - 1) / 2.0) * 9.0);
-            Vec3 dir = new Vec3(look.x * Math.cos(yaw) - look.z * Math.sin(yaw), look.y, look.x * Math.sin(yaw) + look.z * Math.cos(yaw)).normalize();
-            Vec3 end = eye.add(dir.scale(SkillRules.VOLLEY_RANGE));
-            BlockHitResult block = level.clip(new ClipContext(eye, end, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, player));
-            if (block.getType() != HitResult.Type.MISS) {
-                end = block.getLocation();
-            }
-            List<LivingEntity> foes = along(player, eye, end, 0.6);
-            for (int k = 0; k < Math.min(2, foes.size()); k++) {
-                LivingEntity e = foes.get(k);
-                if (SkillActions.hit(player, e, amount, Skill.CINDER_VOLLEY)) {
-                    e.igniteForSeconds(SkillRules.VOLLEY_BURN / SkillRules.SECOND);
-                    any = true;
-                }
-            }
-        }
-        if (flat.lengthSqr() < 0.0001) {
-            any = false;
-        }
-        player.swing(InteractionHand.MAIN_HAND, true);
-        SkillActions.sound(player, Skills.SOUND_PIERCE.get(), 0.8f, 1.3f);
-        SkillActions.sound(player, SoundEvents.FIRECHARGE_USE, 0.6f, 1.4f);
-        return null;
     }
 
     // ================================================================ 淵 (B09)

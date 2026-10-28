@@ -8,24 +8,9 @@ public final class SkillRules {
     // 枠の数: はじめは 4、2 つ目の天職を迎えると 5 (記録の配列は最大の 5)
     public static final int BASE_SLOTS = 4;
     public static final int SLOTS = 5;
-    // 天職の層 (docs/design/27 の C 案)。false なら、5 つの木が最初から全部開いている (A 案)
-    // 天職は 43 (6 職) で削った。職がその役 (2026-10-26)
-    public static boolean CALLINGS = false;
-    // 天性 (一つ目の天職だけ。docs/design/27 の 9.1)
-    public static final double TRAIT_ROCK_TOUGHNESS = 0.5;
-    public static final double TRAIT_ROCK_KNOCKBACK = 0.10;
-    public static final double TRAIT_WIND_MOVE = 0.03;
-    public static final double TRAIT_TIDE_MANA = 10;
-    public static final double TRAIT_TIDE_RANGE = 1;
-    public static final double TRAIT_ASH_ENHANCE = 0.10;
-    public static final double TRAIT_ASH_FIRE = 0.10;
-    public static final double TRAIT_BONE_DAMAGE = 0.05;
-    public static final double TRAIT_BONE_KEEP = 0.25;
     // 1 秒 = 20 tick
     public static final int SECOND = 20;
     // ---------------------------------------------------------------- 自由度 (docs/design/31 の A 案)
-    // 天職の割引: 天職の木の段 3 つぶんを 1 点ずつ安くする (A01)
-    public static final int CALLING_DISCOUNT_MAX = 3;
     // 木のセット (A04): 同じ木に点を 2・4・6 使うたびの小さな追加
     public static final int[] SET_AT = {2, 4, 6};
     // タグ (A03): 数えるのは 10 まで。1 つにつき、そのタグの技の力 +1%。4 と 7 で小さな足し (SkillBuild.tagThreshold)
@@ -43,21 +28,6 @@ public final class SkillRules {
     // 「低 HP」は 3❤ (6 点) 以下。回復や無敵は付けない
     public static final float COND_LOW_HP = 6f;
     public static final double COND_FULL_MANA = 0.98;
-    // 構え (A11): 切り替えの待ち 3 秒
-    public static final int STANCE_SWAP_TICKS = 3 * SECOND;
-    public static final double STANCE_GUARD_ARMOR = 3;
-    public static final double STANCE_GUARD_KNOCKBACK = 0.15;
-    public static final double STANCE_GUARD_DAMAGE = -0.10;
-    public static final double STANCE_SWIFT_MOVE = 0.08;
-    public static final double STANCE_SWIFT_COOLDOWN = -0.08;
-    public static final double STANCE_SWIFT_ARMOR = -2;
-    public static final double STANCE_SONG_REGEN = 0.35;
-    public static final double STANCE_SONG_SUPPORT = 0.15;
-    public static final double STANCE_SONG_DAMAGE = -0.10;
-    // 連鎖 (A10): 直前の枠の技から 2 秒以内に続けると、あとの技の力 +15%。立てられるのは 3 つ
-    public static final int CHAIN_MAX = 3;
-    public static final int CHAIN_WINDOW = 2 * SECOND;
-    public static final double CHAIN_POWER = 0.15;
     // 熟練 (A13): 使う +1、当てる +1、予告をよけた直後 (4 秒) に当てる +3。1〜5 の境
     public static final int[] MASTERY_AT = {15, 45, 100, 180, 300};
     public static final int MASTERY_RUNE_LEVEL = 3;
@@ -146,8 +116,8 @@ public final class SkillRules {
     }
 
     // レベルと「目利き」を見た全振り直しの費用 (結晶の数)。Lv 15 になるまでと、目利きがあるときは 0
-    public static int respecCost(int respecsSoFar, int level, boolean appraiser) {
-        if (level < FREE_RESPEC_LEVEL || appraiser) {
+    public static int respecCost(int respecsSoFar, int level) {
+        if (level < FREE_RESPEC_LEVEL) {
             return 0;
         }
         return RESPEC_COST;
@@ -171,9 +141,6 @@ public final class SkillRules {
             case CLOUD_PIERCE -> 10;
             case BONE_TRAP -> 6;
             case SKY_RAIN -> 16;
-            case DUST_CHARGE -> 12;
-            case STEAM_BELL -> 14;
-            case CINDER_VOLLEY -> 12;
             case DEEP_PULL -> 12;
             case DEEP_ECHO -> 14;
             case DEEP_MAW -> 18;
@@ -214,10 +181,6 @@ public final class SkillRules {
             case CLOUD_PIERCE -> 6 * SECOND;
             case BONE_TRAP -> 9 * SECOND;
             case SKY_RAIN -> (r >= 2 ? 11 : 15) * SECOND;
-            case SIGNAL -> 6 * SECOND;
-            case DUST_CHARGE -> 10 * SECOND;
-            case STEAM_BELL -> 12 * SECOND;
-            case CINDER_VOLLEY -> 11 * SECOND;
             case DEEP_PULL -> 14 * SECOND;
             case DEEP_ECHO -> 20 * SECOND;
             case DEEP_MAW -> (r >= 2 ? 14 : 17) * SECOND;
@@ -612,46 +575,6 @@ public final class SkillRules {
         return rank >= 2 ? 4.5 : 3.0;
     }
 
-    // ---------------------------------------------------------------- 旅人
-    // 合図: 見ている先 (32 ブロック) に 20 秒の光の標。敵に当てると 5 秒の印 (鷹の目と同じ。高いほう) 5% / 8%
-    public static final double SIGNAL_RANGE = 32;
-    public static final int SIGNAL_TICKS = 20 * SECOND;
-
-    public static final int SIGNAL_MARK_TICKS = 8 * SECOND;
-
-    public static double signalMark(int rank) {
-        return rank >= 2 ? 0.15 : 0.10;
-    }
-
-    // 備えの報い: 備えの三灯がすべて青 (緑) のとき、最大マナ +4 / 8 / 12、攻撃力 +1 / 2 / 3%
-    public static double readinessMana(int rank) {
-        return 4.0 * rank;
-    }
-
-    public static double readinessAttack(int rank) {
-        return 0.01 * rank;
-    }
-
-    // 野営の手: 焚き火・休み場・共鳴の炉の 6 ブロック以内で、マナの回復 ×1.5 / ×2、満腹度の減り −15% / −25%
-    public static final double CAMP_RANGE = 6;
-
-    public static double campRegen(int rank) {
-        return rank >= 2 ? 2.0 : 1.5;
-    }
-
-    public static double campHunger(int rank) {
-        return rank >= 2 ? 0.25 : 0.15;
-    }
-
-    // 逃げ足: 体力が 3❤ (6 点) 以下になったとき、移動 +8 / 12 / 16% (2 秒)。20 秒に 1 度
-    public static final float FLEET_HEALTH = 6f;
-    public static final int FLEET_TICKS = 2 * SECOND;
-    public static final int FLEET_COOLDOWN = 20 * SECOND;
-
-    public static double fleetBonus(int rank) {
-        return 0.04 + 0.04 * rank;
-    }
-
     // ---------------------------------------------------------------- 職の新しい技 (docs/design/43)
     // 魔法の傷 = 手の武器の攻撃力 × 倍率 × (1 + 精神 × GrowthRules.SPIRIT_SPELL)。星読みの技 (JobActions.spell)
     // 雷の矢: 見ている向きへ 24 ブロックの稲妻。最初の敵に当たる。3 段で近くの敵へ 50% で跳ねる
@@ -778,17 +701,6 @@ public final class SkillRules {
             case HAWK_EYE -> new Object[] {fmt(markBonus(r) * 100), MARK_TICKS / SECOND};
             case SKY_RAIN -> new Object[] {fmt(RAIN_RADIUS), RAIN_PULSES, fmt(rainDamage(r)), fmtSeconds(cooldownTicks(skill, r))};
             case STILL_STRING -> new Object[] {pct(STILL_BONUS), STILL_TICKS / SECOND};
-            case SIGNAL -> new Object[] {fmt(SIGNAL_RANGE), SIGNAL_TICKS / SECOND, fmt(signalMark(r) * 100), SIGNAL_MARK_TICKS / SECOND};
-            case READINESS_REWARD -> new Object[] {fmt(readinessMana(r)), fmt(readinessAttack(r) * 100)};
-            case CAMP_HAND -> new Object[] {fmt(campRegen(r)), fmt(campHunger(r) * 100)};
-            case APPRAISER -> new Object[] {1};
-            case FLEET_FOOT -> new Object[] {6, fmt(fleetBonus(r) * 100), FLEET_TICKS / SECOND, FLEET_COOLDOWN / SECOND};
-            case JOURNAL -> new Object[] {1};
-            case DUST_CHARGE -> new Object[] {fmt(DUST_LENGTH), pct(dustMultiplier(r)), fmtSeconds(cooldownTicks(skill, r))};
-            case SEA_BREEZE -> new Object[] {fmt(seaMove(r) * 100), fmt(seaRegen(r) * 100)};
-            case STEAM_BELL -> new Object[] {fmt(STEAM_RADIUS), pct(steamMultiplier(r)), fmt(STEAM_SLOW * 100), STEAM_TICKS / SECOND};
-            case CINDER_VOLLEY -> new Object[] {VOLLEY_BOLTS, pct(volleyMultiplier(r)), fmt(VOLLEY_RANGE), VOLLEY_BURN / SECOND};
-            case STONE_AIM -> new Object[] {fmt(aimPower(r) * 100), AIM_TICKS / SECOND, fmt(aimArmor(r))};
             case DEEP_PULL -> new Object[] {fmt(PULL_RADIUS), pct(pullMultiplier(r)), fmt(PULL_SLOW * 100), PULL_SLOW_TICKS / SECOND};
             case DEEP_MIRROR -> new Object[] {fmt(mirrorPower(r) * 100), MIRROR_TAGS};
             case DEEP_ECHO -> new Object[] {fmt(echoPower(r) * 100), ECHO_TICKS / SECOND, fmtSeconds(cooldownTicks(skill, r))};
@@ -829,49 +741,7 @@ public final class SkillRules {
         return v == Math.floor(v) ? String.valueOf((long) v) : String.format(java.util.Locale.ROOT, "%.1f", v);
     }
 
-    // ---------------------------------------------------------------- 橋・淵・前世の技・紋・変異 (docs/design/31 の A08・A09・A14・B08・B09)
-    // 同格の基準: 段 2 の使う技 = 鯨尾薙ぎ (×0.9 / ×1.2、全員)。単体は巨神斬り段 1 (×1.2) 前後
-    public static final double DUST_LENGTH = 6;
-    public static final double DUST_WIDTH = 1.6;
-
-    public static double dustMultiplier(int rank) {
-        return rank >= 2 ? 1.2 : 0.9;
-    }
-
-    public static double seaMove(int rank) {
-        return rank >= 2 ? 0.05 : 0.03;
-    }
-
-    public static double seaRegen(int rank) {
-        return rank >= 2 ? 0.12 : 0.08;
-    }
-
-    public static final double STEAM_RADIUS = 4;
-    public static final double STEAM_SLOW = 0.30;
-    public static final int STEAM_TICKS = 3 * SECOND;
-
-    public static double steamMultiplier(int rank) {
-        return rank >= 2 ? 0.95 : 0.7;
-    }
-
-    public static final int VOLLEY_BOLTS = 5;
-    public static final double VOLLEY_RANGE = 14;
-    public static final int VOLLEY_BURN = 3 * SECOND;
-
-    public static double volleyMultiplier(int rank) {
-        return rank >= 2 ? 0.42 : 0.30;
-    }
-
-    public static final int AIM_TICKS = SECOND;
-
-    public static double aimPower(int rank) {
-        return rank >= 2 ? 0.09 : 0.06;
-    }
-
-    public static double aimArmor(int rank) {
-        return rank;
-    }
-
+    // ---------------------------------------------------------------- 淵・前世の技・紋・変異 (docs/design/31 の A08・A14・B08・B09)
     public static final double PULL_RADIUS = 7;
     public static final double PULL_SLOW = 0.35;
     public static final int PULL_SLOW_TICKS = 5 * SECOND / 2;

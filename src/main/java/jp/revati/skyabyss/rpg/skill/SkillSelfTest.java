@@ -36,15 +36,11 @@ public final class SkillSelfTest {
     // 呼ぶのは SelfTestRunner (SKYABYSS_SELFTEST=1 のとき、1 tick に 1 系統ずつ)
     public static void runSelfTest(MinecraftServer server) {
         List<String> failures = new ArrayList<>();
-        // 技の規則の検めは、五つの木が全部開いた状態で流す。天職の層は BuildsSelfTest.callings が自分で入れる
-        SkillRules.CALLINGS = false;
         try {
             run(server, failures);
         } catch (Exception e) {
             SkyAbyss.LOGGER.error("skill selftest crashed", e);
             failures.add("crashed: " + e);
-        } finally {
-            SkillRules.CALLINGS = true;
         }
         if (failures.isEmpty()) {
             SkyAbyss.LOGGER.info("SELFTEST skills PASSED (points, learn rules, sanitize, nbt, sync codec, death copy, player save/load, cooldowns, mana, casting, passives)");
@@ -68,20 +64,12 @@ public final class SkillSelfTest {
             for (Skill r : s.requires()) {
                 check(f, r.tree == s.tree && r.tier < s.tier, s.id + " requires a skill that is not in the same tree or an earlier tier: " + r.id);
             }
-            // 前提が空の技は 1 段目だけ。前提のある技は、前提を覚えれば覚えられる (橋と前世の技は前提の線なし)
-            boolean linked = s.tree != SkillTree.HYBRID && s.tree != SkillTree.PAST;
+            // 前提が空の技は 1 段目だけ。前提のある技は、前提を覚えれば覚えられる (前世の技は前提の線なし)
+            boolean linked = s.tree != SkillTree.PAST;
             check(f, !linked || (s.tier == 0) == s.requires().isEmpty(), s.id + " tier and requirements disagree");
             SkillData d = new SkillData();
-            // 淵・前世の技は転生の回数、橋は両隣の木の技 3 つずつ
+            // 淵・前世の技は転生の回数
             d.rebirth = SkillRules.GLYPH_SOCKETS * 3;
-            for (SkillTree parent : s.bridgeTrees()) {
-                int n = 0;
-                for (Skill q : Skill.inTree(parent)) {
-                    if (n++ < SkillData.BRIDGE_SKILLS_PER_TREE) {
-                        d.ranks.put(q.id, 1);
-                    }
-                }
-            }
             for (Skill r : s.requires()) {
                 // 前提の前提も覚えておく (そうでないと検めで全部戻る)
                 for (Skill q : Skill.inTree(s.tree)) {
@@ -92,11 +80,6 @@ public final class SkillSelfTest {
                 d.ranks.put(r.id, 1);
             }
             d.bonusPoints = 10;
-            // 旅人と橋の木は 43 (6 職) で閉じた: 覚えられない
-            if (s.tree == SkillTree.TRAVELER || s.tree == SkillTree.HYBRID) {
-                check(f, d.canLearn(s, 50) == SkillData.LearnResult.SEALED, s.id + " (a closed tree) can still be learned");
-                continue;
-            }
             check(f, d.canLearn(s, 50) == SkillData.LearnResult.OK, s.id + " cannot be learned with its requirements");
             d.ranks.put(s.id, 1);
             SkillManager.autoSlot(d, s);
@@ -110,18 +93,18 @@ public final class SkillSelfTest {
                 && SkillRules.pointsForLevel(9) == 5 && SkillRules.pointsForLevel(10) == 5 && SkillRules.pointsForLevel(12) == 7
                 && SkillRules.pointsForLevel(15) == 10 && SkillRules.pointsForLevel(21) == 16 && SkillRules.pointsForLevel(33) == 28
                 && SkillRules.pointsForLevel(50) == 45, "skill points per level are wrong");
-        // 53 本 + 職の新しい技 10 本 (docs/design/43: 星読みの 6 と、鍛冶師・暗殺者・呪術師 2 の 4 つ目)
-        check(f, Skill.values().length == 65 && Rune.values().length == 79, "skill / rune counts are wrong");
+        // 6 職の木 42 本 + 淵 6 + 前世 6 (旅人の木と橋は 43 で削った)
+        check(f, Skill.values().length == 54 && Rune.values().length == 79, "skill / rune counts are wrong");
         int[] perTree = new int[SkillTree.values().length];
         for (Skill s : Skill.values()) {
             perTree[s.tree.ordinal()]++;
-            boolean linked = s.tree != SkillTree.HYBRID && s.tree != SkillTree.PAST;
+            boolean linked = s.tree != SkillTree.PAST;
             check(f, !linked || (s.tier == 0 ? s.requires().isEmpty() : !s.requires().isEmpty()), s.id + " requirement shape is wrong");
             check(f, s.active == (SkillRules.cooldownTicks(s, 1) > 0), s.id + " cooldown does not match its kind");
             check(f, s.keystone() == (s.tier == 3) && (!s.keystone() || s.maxRank == 1), s.id + " keystone shape is wrong");
-            check(f, s.ordinal() < 36 ? s.iconIndex() == s.ordinal() : s.iconIndex() >= 100 && s.iconIndex() < 148 && (s.iconIndex() < 117 || s.iconIndex() >= 125),
+            check(f, s.ordinal() < 30 ? s.iconIndex() == s.ordinal() : s.iconIndex() >= 105 && s.iconIndex() < 148 && (s.iconIndex() < 117 || s.iconIndex() >= 125),
                     s.id + " icon index");
-            if (s.active && s != Skill.SIGNAL) {
+            if (s.active) {
                 check(f, SkillRules.manaCost(s, 1) > 0, s.id + " has no mana cost");
             }
             for (int r = 1; r <= s.maxRank; r++) {
@@ -130,7 +113,7 @@ public final class SkillSelfTest {
         }
         for (SkillTree t : SkillTree.values()) {
             // 3 行目の左右に職の 4 つ目の技: 岩守り・風読み・灰の鍛え人・骨の射手 +1、潮歌い +2
-            int want = t == SkillTree.HYBRID ? 5 : t == SkillTree.ROCK || t == SkillTree.WIND || t == SkillTree.ASH || t == SkillTree.BONE ? 7
+            int want = t == SkillTree.ROCK || t == SkillTree.WIND || t == SkillTree.ASH || t == SkillTree.BONE ? 7
                     : t == SkillTree.TIDE ? 8 : 6;
             check(f, t.sealed || perTree[t.ordinal()] == want, t.id + " does not have the right number of skills: " + perTree[t.ordinal()]);
         }

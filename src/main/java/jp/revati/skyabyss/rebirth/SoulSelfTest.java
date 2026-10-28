@@ -199,7 +199,6 @@ public final class SoulSelfTest {
         g.discoveries.add("biome:test");
         SkillManager.forceRank(p, Skill.TITAN_CLEAVE, 2);
         SkillManager.forceRank(p, Skill.LUNGE, 1);
-        sd.calling = SkillTree.ROCK.id;
         sd.respecs = 3;
         sd.loadouts[0].saved = true;
         sd.loadouts[0].slots[0] = Skill.LUNGE.id;
@@ -240,7 +239,6 @@ public final class SoulSelfTest {
         check(f, g.rebirths == 1 && g.level == 1 && g.xp == 0, "level did not reset: " + g.level + " rebirths " + g.rebirths);
         check(f, g.spentPoints() == 0 && g.statRespecs == 0, "stat points did not reset");
         check(f, sd.ranks.isEmpty() && sd.runes.isEmpty() && sd.spentPoints() == 0 && sd.respecs == 0, "skills did not reset");
-        check(f, sd.calling.isEmpty() && sd.calling2.isEmpty(), "calling did not reset");
         check(f, SkillManager.countCrystals(p) == 2, "the rebirth did not cost exactly 5 crystals: " + SkillManager.countCrystals(p));
         check(f, rd.nodes.equals(List.of("ash")) && rd.boons.equals(List.of(pick.id)), "the chosen arm/boon were not recorded: " + rd.nodes + rd.boons);
         // 残るもの

@@ -14,7 +14,6 @@ import jp.revati.skyabyss.rpg.Growth;
 import jp.revati.skyabyss.rpg.GrowthData;
 import jp.revati.skyabyss.rpg.GrowthRules;
 import jp.revati.skyabyss.rpg.Rpg;
-import jp.revati.skyabyss.rpg.skill.SkillCalling;
 import jp.revati.skyabyss.rpg.skill.SkillManager;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
@@ -299,14 +298,10 @@ public final class Rebirth {
         return Result.OK;
     }
 
-    // レベル・経験値・ステータスの点・技・刻印・天職だけ戻す (回数・魂盤・恩恵・装備・物語・型の保存は残る)。回数は足さない
+    // レベル・経験値・ステータスの点・技・刻印だけ戻す (回数・魂盤・恩恵・装備・物語・型の保存は残る)。回数は足さない
     public static void reset(ServerPlayer player) {
         Growth.resetForRebirth(player);
         jp.revati.skyabyss.rpg.skill.SkillReset.forRebirth(player);
-        if (!(player instanceof FakePlayer)) {
-            // 天職をもう一度選べるように (選べる段なら画面を開く)
-            SkillCalling.offerSoon(player, 100, true);
-        }
     }
 
     private static void celebrate(ServerPlayer player, int n, SoulArm arm, Boon boon) {

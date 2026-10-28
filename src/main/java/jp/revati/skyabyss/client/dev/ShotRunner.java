@@ -1088,31 +1088,18 @@ public final class ShotRunner {
             case "quests", "questlog" -> jp.revati.skyabyss.client.quest.QuestLogScreen::new;
             case "growth" -> jp.revati.skyabyss.rpg.client.GrowthScreen::new;
             case "skills" -> jp.revati.skyabyss.rpg.client.skill.SkillScreen::new;
-            case "calling" -> () -> {
-                var c = new jp.revati.skyabyss.rpg.client.skill.CallingScreen(1);
-                c.pick(jp.revati.skyabyss.rpg.skill.SkillTree.ROCK);
-                return c;
-            };
-            case "calling2" -> () -> {
-                var c = new jp.revati.skyabyss.rpg.client.skill.CallingScreen(2);
-                c.pick(jp.revati.skyabyss.rpg.skill.SkillTree.WIND);
-                return c;
-            };
             case "skills_build" -> () -> new jp.revati.skyabyss.rpg.client.skill.SkillScreen().buildPage();
             case "job_choice" -> jp.revati.skyabyss.rpg.client.skill.JobChoiceScreen::new;
             case "job_choice_shaman" -> () -> new jp.revati.skyabyss.rpg.client.skill.JobChoiceScreen().pick(jp.revati.skyabyss.rpg.skill.Job.SHAMAN);
             case "skills_tryon" -> () -> new jp.revati.skyabyss.rpg.client.skill.SkillScreen().select(jp.revati.skyabyss.rpg.skill.Skill.WHALE_SWEEP)
                     .tryOn(jp.revati.skyabyss.rpg.skill.Skill.ROCK_CALL, jp.revati.skyabyss.rpg.skill.Skill.WHALE_SWEEP);
             case "skills_cleave" -> () -> new jp.revati.skyabyss.rpg.client.skill.SkillScreen().select(jp.revati.skyabyss.rpg.skill.Skill.TITAN_CLEAVE);
-            // 橋の輪・淵・前世の技・変異と紋のページ (docs/design/31)
-            case "skills_bridge" -> () -> new jp.revati.skyabyss.rpg.client.skill.SkillScreen().showTree(jp.revati.skyabyss.rpg.skill.SkillTree.HYBRID)
-                    .select(jp.revati.skyabyss.rpg.skill.Skill.DUST_CHARGE);
+            // 淵・前世の技・変異と紋のページ (docs/design/31)
             case "skills_deep" -> () -> new jp.revati.skyabyss.rpg.client.skill.SkillScreen().showTree(jp.revati.skyabyss.rpg.skill.SkillTree.DEEP)
                     .select(jp.revati.skyabyss.rpg.skill.Skill.DEEP_MIRROR);
             case "skills_past" -> () -> new jp.revati.skyabyss.rpg.client.skill.SkillScreen().showTree(jp.revati.skyabyss.rpg.skill.SkillTree.PAST)
                     .select(jp.revati.skyabyss.rpg.skill.Skill.ECHO_STRIKE);
             case "skills_ext" -> () -> new jp.revati.skyabyss.rpg.client.skill.SkillScreen().extPage(0, jp.revati.skyabyss.rpg.skill.Skill.TITAN_CLEAVE);
-            case "skills_signal" -> () -> new jp.revati.skyabyss.rpg.client.skill.SkillScreen().select(jp.revati.skyabyss.rpg.skill.Skill.SIGNAL);
             case "skills_rockcall" -> () -> new jp.revati.skyabyss.rpg.client.skill.SkillScreen().select(jp.revati.skyabyss.rpg.skill.Skill.ROCK_CALL);
             case "party" -> jp.revati.skyabyss.party.client.PartyScreen::new;
             // 転生の画面 (魂盤・ビルドを組み直す)。開くまえに cmd skyabyss dev rebirth <n> で転生の数を入れておく

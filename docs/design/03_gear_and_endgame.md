@@ -173,7 +173,7 @@
 | 二章 潮殻 | 戦士 | 珊瑚の盾（`coral_shield`）・潮殻の三叉槍（`tide_shell_trident`） | 珊瑚憑きの銛（`coral_harpoon`） | 螺旋貝の大剣（`abyss_tide_sword`） |
 | 二章 潮殻 | 鍛冶師 | 潮殻の鎚（`tide_hammer`） | — | 大蛤の鎚（`abyss_tide_hammer`） |
 | 二章 潮殻 | 魔法使い | 潮殻の真珠杖（`tide_staff`） | — | 渦潮の杖（`abyss_tide_staff`） |
-| 二章 潮殻 | 弓使い | 珊瑚の弓（`tide_bow`） | — | 鰭の弓（`abyss_tide_bow`） |
+| 二章 潮殻 | 弓使い | 潮殻の弓（`tide_bow`） | — | 鰭の弓（`abyss_tide_bow`） |
 | 二章 潮殻 | 暗殺者 | 馬刀貝の短剣（`tide_dagger`） | 潮招きの大鋏（`tidecaller_claw`） | 海胆の針（`abyss_tide_dagger`） |
 | 二章 潮殻 | 呪術師 | 潮鳴りの鈴杖（`tide_bell_staff`） | — | 沈み鐘の杖（`abyss_bell_staff`） |
 | 三章 雷翼 | 戦士 | 雷翼の剣（`storm_sword`） | 羽守の鉤槍（`warden_glaive`） | 避雷の大剣（`abyss_storm_sword`） |

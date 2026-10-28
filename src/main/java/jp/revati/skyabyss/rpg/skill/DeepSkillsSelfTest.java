@@ -35,7 +35,6 @@ final class DeepSkillsSelfTest {
         model(f);
         migration(f);
         FakePlayer p = player(server, "deep_test");
-        bridges(server, p, f);
         rebirth(p, f);
         glyphs(server, p, f);
         mutations(server, f);
@@ -66,29 +65,18 @@ final class DeepSkillsSelfTest {
 
     // ---------------------------------------------------------------- 形
     private static void model(List<String> f) {
-        int bridges = 0;
         int deep = 0;
         int past = 0;
         java.util.Set<Integer> icons = new java.util.HashSet<>();
         for (Skill s : Skill.values()) {
             check(f, icons.add(s.iconIndex()), "duplicate skill icon " + s.id);
             switch (s.tree) {
-                case HYBRID -> {
-                    bridges++;
-                    SkillTree[] t = s.bridgeTrees();
-                    check(f, t.length == 2 && t[0].callable() && t[1].callable() && t[0] != t[1], "bridge " + s.id + " has bad parents");
-                    // 隣り合う木 (輪の順 岩・風・潮・灰・骨)
-                    int a = t.length == 2 ? t[0].ordinal() : 0;
-                    int b = t.length == 2 ? t[1].ordinal() : 0;
-                    check(f, (a + 1) % 5 == b % 5 && a < 5 && b < 5, "bridge " + s.id + " is not between adjacent trees");
-                }
                 case DEEP -> deep++;
                 case PAST -> past++;
                 default -> {
                 }
             }
         }
-        check(f, bridges == 5, "bridge count " + bridges);
         check(f, deep == 6, "deep tree size " + deep);
         check(f, past == 6 && past <= 6, "past-life skill count " + past);
         // 淵: 転生 1 で入口 (行 0)、5 で全段
@@ -100,7 +88,7 @@ final class DeepSkillsSelfTest {
                 check(f, s.rebirthAt() == 0, "ordinary skill " + s.id + " requires rebirth");
             }
             check(f, SkillTag.of(s) != null, "no tag " + s.id);
-            if (s.active && s != Skill.SIGNAL) {
+            if (s.active) {
                 check(f, SkillRules.manaCost(s, 1) > 0 && SkillRules.cooldownTicks(s, 1) > 0, "active skill without cost: " + s.id);
             }
         }
@@ -156,49 +144,6 @@ final class DeepSkillsSelfTest {
         check(f, again.glyphClaims.contains("ember|a"), "glyph claims were lost");
     }
 
-    // ---------------------------------------------------------------- 橋 (A09)
-    private static void bridges(MinecraftServer server, FakePlayer p, List<String> f) {
-        SkillData d = SkillManager.get(p);
-        // 橋は 43 (6 職) で削った: 開かない
-        SkillManager.forgetAll(p);
-        d.bonusPoints = 60;
-        for (Skill s : Skill.inTree(SkillTree.HYBRID)) {
-            check(f, d.canLearn(s, 50) == SkillData.LearnResult.SEALED, "the bridge " + s.id + " can still be learned");
-        }
-        if (true) {
-            return;
-        }
-        SkillManager.forgetAll(p);
-        d.bonusPoints = 60;
-        // 岩 3 つ・風 2 つでは開かない。風が 3 つになると開く
-        SkillManager.forceRank(p, Skill.TITAN_CLEAVE, 1);
-        SkillManager.forceRank(p, Skill.RIPOSTE, 1);
-        SkillManager.forceRank(p, Skill.ROCK_CALL, 1);
-        SkillManager.forceRank(p, Skill.LUNGE, 1);
-        SkillManager.forceRank(p, Skill.NIMBLE, 1);
-        check(f, d.knownIn(SkillTree.ROCK) == 3 && d.knownIn(SkillTree.WIND) == 2, "knownIn is wrong");
-        check(f, d.canLearn(Skill.DUST_CHARGE, 50) == SkillData.LearnResult.REQUIRES, "a bridge opened with 3 + 2 skills");
-        SkillManager.forceRank(p, Skill.BACKSTEP, 1);
-        check(f, d.canLearn(Skill.DUST_CHARGE, 50) == SkillData.LearnResult.OK, "a bridge did not open with 3 + 3 skills: " + d.canLearn(Skill.DUST_CHARGE, 50));
-        check(f, d.canLearn(Skill.SEA_BREEZE, 50) == SkillData.LearnResult.REQUIRES, "a bridge opened without its other tree");
-        check(f, d.canLearn(Skill.STONE_AIM, 50) == SkillData.LearnResult.REQUIRES, "the bone-rock bridge opened without bone");
-        check(f, SkillManager.learn(p, Skill.DUST_CHARGE) == SkillData.LearnResult.OK && d.rank(Skill.DUST_CHARGE) == 1, "the bridge was not learned");
-        int spent = d.spentPoints();
-        check(f, SkillManager.learn(p, Skill.DUST_CHARGE) == SkillData.LearnResult.OK && d.spentPoints() == spent + 1, "a bridge rank did not cost one point");
-        check(f, d.canLearn(Skill.DUST_CHARGE, 50) == SkillData.LearnResult.MAX_RANK, "a bridge went past its max rank");
-        // 橋は両側のタグを数える
-        check(f, SkillBuild.tagCount(p, SkillTag.ROCK) == 4 && SkillBuild.tagCount(p, SkillTag.WIND) == 3 + 1, "a bridge did not count both tags: rock "
-                + SkillBuild.tagCount(p, SkillTag.ROCK) + " wind " + SkillBuild.tagCount(p, SkillTag.WIND));
-        // 能動の橋は枠に置ける
-        check(f, d.slot(0) != null || java.util.Arrays.asList(d.slots).contains("dust_charge"), "an active bridge was not placed in a slot");
-        // 橋の点は通常の点と同じ (別枠ではない)
-        check(f, d.spentPoints() <= d.totalPoints(50), "points overspent after bridges");
-        // 橋の頂点と同格: 力の倍率が段 2 の使う技 (鯨尾薙ぎ 1.2) 以下、単体で巨神斬り段 3 の 2.7 倍 (大きな相手) を超えない
-        check(f, SkillRules.dustMultiplier(2) <= SkillRules.sweepMultiplier(2) && SkillRules.steamMultiplier(2) <= SkillRules.sweepMultiplier(2), "a bridge is stronger than a capstone");
-        // タグの数が橋の分だけ上がると、そのタグの技の力が +1% ずつ
-        check(f, Math.abs(SkillBuild.tagPower(p, SkillTag.WIND) - 0.04) < 1e-9, "bridge tag did not reach tag power");
-    }
-
     // ---------------------------------------------------------------- 転生 (B08・B09)
     private static void rebirth(FakePlayer p, List<String> f) {
         SkillData d = SkillManager.get(p);
@@ -208,7 +153,7 @@ final class DeepSkillsSelfTest {
         // 未転生の人は淵も前世の技も取れない (画面にも出ない)。点は通常の点から引かれない
         check(f, d.canLearn(Skill.DEEP_PULL, 50) == SkillData.LearnResult.REBIRTH, "the deep opened without a rebirth");
         check(f, d.canLearn(Skill.ECHO_STRIKE, 50) == SkillData.LearnResult.REBIRTH, "a past-life skill opened without a rebirth");
-        check(f, d.pastPool() == 0 && SkillTree.DEEP.rebornOnly() && SkillTree.PAST.rebornOnly() && !SkillTree.HYBRID.rebornOnly(), "reborn-only flags are wrong");
+        check(f, d.pastPool() == 0 && SkillTree.DEEP.rebornOnly() && SkillTree.PAST.rebornOnly() && !SkillTree.ROCK.rebornOnly(), "reborn-only flags are wrong");
         // 転生 1: 淵は入口 (行 0) だけ。前世の技は 2 点 (遺響の一撃・旧き見張り)
         setRebirth(p, 1);
         check(f, d.rebirth == 1 && d.pastPool() == 2, "the rebirth count did not reach the record");
@@ -390,7 +335,7 @@ final class DeepSkillsSelfTest {
         // 一度きり
         give(p, blade, 1, 3);
         check(f, SkillExtOps.mutate(p, Skill.WIND_REND) == SkillExtOps.MutateResult.ALREADY, "a skill mutated twice");
-        check(f, SkillExtOps.mutate(p, Skill.SIGNAL) == SkillExtOps.MutateResult.UNKNOWN, "a skill without a mutation mutated");
+        check(f, SkillExtOps.mutate(p, Skill.CALM_HEART) == SkillExtOps.MutateResult.UNKNOWN, "a skill without a mutation mutated");
         // 刻印とは別: 刻印も選べる
         check(f, SkillManager.chooseRune(p, Skill.WIND_REND, 1) == SkillManager.RuneResult.OK && d.rune(Skill.WIND_REND) == 1 && d.mutations.containsKey("wind_rend"),
                 "a rune could not coexist with a mutation");
@@ -509,8 +454,8 @@ final class DeepSkillsSelfTest {
                 check(f, SkillEffects.pendingLater() >= later, m.id + " lost its reservations");
                 d.mutations.remove(m.skill.id);
             }
-            // ---- 橋・淵・前世の能動 9 本
-            for (Skill s : new Skill[] {Skill.DUST_CHARGE, Skill.STEAM_BELL, Skill.CINDER_VOLLEY, Skill.DEEP_PULL, Skill.DEEP_ECHO, Skill.DEEP_MAW, Skill.ECHO_STRIKE,
+            // ---- 淵・前世の能動 6 本
+            for (Skill s : new Skill[] {Skill.DEEP_PULL, Skill.DEEP_ECHO, Skill.DEEP_MAW, Skill.ECHO_STRIKE,
                     Skill.GRAVE_BELL, Skill.FINAL_LIGHT}) {
                 SkillManager.forceRank(p, s, 2);
                 p.moveTo(px, 300, pz, 0f, 0f);
@@ -524,9 +469,9 @@ final class DeepSkillsSelfTest {
                 if (s == Skill.DEEP_ECHO) {
                     check(f, dn == 0 && d.echoUntil > level.getGameTime(), "deep echo should buff and deal no damage");
                     check(f, SkillBuild.skillPower(p, Skill.TITAN_CLEAVE) >= SkillRules.echoPower(2), "deep echo did not raise skill power");
-                } else if (s == Skill.STEAM_BELL || s == Skill.GRAVE_BELL || s == Skill.FINAL_LIGHT) {
+                } else if (s == Skill.GRAVE_BELL || s == Skill.FINAL_LIGHT) {
                     check(f, dn > 0 && ds > 0, s.id + " did not hit foes all around");
-                } else if (s == Skill.DUST_CHARGE || s == Skill.ECHO_STRIKE || s == Skill.CINDER_VOLLEY) {
+                } else if (s == Skill.ECHO_STRIKE) {
                     check(f, dn > 0, s.id + " did not hit a foe ahead");
                 }
                 p.moveTo(px, 300, pz, 0f, 0f);
@@ -545,12 +490,9 @@ final class DeepSkillsSelfTest {
 
     // ---------------------------------------------------------------- 数のつり合い
     private static void balance(List<String> f) {
-        // 新しい能動 9 本は、マナあたりの力が既存の最大 (巨神斬り段 3 を大きな相手へ) を超えない
+        // 新しい能動 6 本は、マナあたりの力が既存の最大 (巨神斬り段 3 を大きな相手へ) を超えない
         double ceiling = BuildsSelfTest.perMana(Skill.TITAN_CLEAVE, 3);
         double[][] fresh = {
-                {SkillRules.dustMultiplier(2), SkillRules.manaCost(Skill.DUST_CHARGE, 2), SkillRules.cooldownTicks(Skill.DUST_CHARGE, 2)},
-                {SkillRules.steamMultiplier(2), SkillRules.manaCost(Skill.STEAM_BELL, 2), SkillRules.cooldownTicks(Skill.STEAM_BELL, 2)},
-                {SkillRules.volleyMultiplier(2) * SkillRules.VOLLEY_BOLTS, SkillRules.manaCost(Skill.CINDER_VOLLEY, 2), SkillRules.cooldownTicks(Skill.CINDER_VOLLEY, 2)},
                 {SkillRules.pullMultiplier(2), SkillRules.manaCost(Skill.DEEP_PULL, 2), SkillRules.cooldownTicks(Skill.DEEP_PULL, 2)},
                 {SkillRules.mawMultiplier(2) * 1.2, SkillRules.manaCost(Skill.DEEP_MAW, 2), SkillRules.cooldownTicks(Skill.DEEP_MAW, 2)},
                 {SkillRules.echoStrikeMultiplier(2), SkillRules.manaCost(Skill.ECHO_STRIKE, 2), SkillRules.cooldownTicks(Skill.ECHO_STRIKE, 2)},
@@ -560,16 +502,16 @@ final class DeepSkillsSelfTest {
             check(f, row[0] / row[1] <= ceiling, "a new active is stronger per mana than the strongest old one: " + row[0] / row[1] + " vs " + ceiling);
             check(f, row[0] * 20 / row[2] <= 0.45 * 1.6 * 3, "a new active is too strong per second: " + row[0] * 20 / row[2]);
         }
-        // 最強の組み立て (31 の A 案の上限 + 紋・淵・前世・橋の足しを全部): 心臓は 15 秒、番兵長は 5 秒を割らない
+        // 最強の組み立て (31 の A 案の上限 + 紋・淵・前世の足しを全部): 心臓は 15 秒、番兵長は 5 秒を割らない
         double basic = 1.6;
         double regen = SkillRules.regenPerSecond(20 + GrowthRules.bonusMana(20), false);
         double skillDps = regen * BuildsSelfTest.perMana(Skill.TITAN_CLEAVE, 3);
         double general = SkillRules.KEY_GLASS_DAMAGE + SkillRules.KEY_ASH_DAMAGE + 0.05 + 0.04 + 0.08 + 0.07;
-        // 技の力: タグ・熟練の刻印・連鎖 + 紋 + 淵の残響・鏡・誓い + 記憶の刃 (技の力の合計は +100% で頭打ち)
-        double skillPart = SkillRules.TAG_POWER_PER * SkillRules.TAG_COUNT_CAP + SkillRules.MASTERY_RUNE_POWER + SkillRules.CHAIN_POWER + SkillRules.GLYPH_POWER_CAP
+        // 技の力: タグ・熟練の刻印 + 紋 + 淵の残響・鏡・誓い + 記憶の刃 (技の力の合計は +100% で頭打ち)
+        double skillPart = SkillRules.TAG_POWER_PER * SkillRules.TAG_COUNT_CAP + SkillRules.MASTERY_RUNE_POWER + SkillRules.GLYPH_POWER_CAP
                 + SkillRules.echoPower(2) + SkillRules.mirrorPower(3) + SkillRules.OATH_DEEP_POWER + SkillRules.memoryPower(2, 6);
         skillPart = Math.min(SkillRules.POWER_CAP, skillPart);
-        double regenBoost = 1 + SkillRules.seaRegen(2) + SkillRules.OATH_DEEP_REGEN;
+        double regenBoost = 1 + SkillRules.OATH_DEEP_REGEN;
         for (double mana : new double[] {1 + SkillRules.KEY_ASH_MANA_COST - SkillRules.GLYPH_MANA_CAP, 1 - SkillRules.GLYPH_MANA_CAP}) {
             double gen = mana < 1 ? general - SkillRules.KEY_ASH_DAMAGE : general;
             double maxDps = basic * (1 + gen) + skillDps * regenBoost / mana * (1 + gen) * (1 + skillPart);

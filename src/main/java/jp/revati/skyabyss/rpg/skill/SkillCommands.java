@@ -101,8 +101,6 @@ public final class SkillCommands {
                                     ctx.getSource().sendSuccess(() -> Component.literal("cast: " + r.name()), false);
                                     return r == SkillManager.CastResult.OK ? 1 : 0;
                                 }))))
-                        .then(Commands.literal("calling").then(player().then(Commands.argument("tree", StringArgumentType.word())
-                                .executes(ctx -> callingCommand(ctx, "")))))
                         .then(Commands.literal("rune").then(player().then(Commands.argument("skill", StringArgumentType.word())
                                 .then(Commands.argument("index", IntegerArgumentType.integer(0, 5)).executes(ctx -> {
                                     // 開発用: 刻印を選んだことにする (極めている・天職の木のときだけ。点も武器も問わない)
@@ -121,15 +119,7 @@ public final class SkillCommands {
                                     SkillManager.sync(p);
                                     return done(ctx);
                                 })))))
-                        // 開発用 (自由度。docs/design/31): 構え・鍵石・熟練・連鎖・転生の初期化を、条件を問わずに入れる
-                        .then(Commands.literal("stance").then(player().then(Commands.argument("name", StringArgumentType.word()).executes(ctx -> {
-                            ServerPlayer p = target(ctx);
-                            String name = StringArgumentType.getString(ctx, "name");
-                            SkillStance st = java.util.Arrays.stream(SkillStance.values()).filter(x -> x.id.equals(name)).findFirst().orElse(SkillStance.NONE);
-                            SkillManager.get(p).stanceCd = 0;
-                            SkillManager.setStance(p, st);
-                            return done(ctx);
-                        }))))
+                        // 開発用 (自由度。docs/design/31): 鍵石・熟練・転生の初期化を、条件を問わずに入れる
                         .then(Commands.literal("keystone").then(player().then(Commands.argument("id", StringArgumentType.word()).executes(ctx -> {
                             ServerPlayer p = target(ctx);
                             SkillKeystone k = SkillKeystone.byId(StringArgumentType.getString(ctx, "id"));
@@ -153,13 +143,6 @@ public final class SkillCommands {
                                     SkillManager.sync(p);
                                     return done(ctx);
                                 })))))
-                        .then(Commands.literal("chain").then(player().then(Commands.argument("mask", IntegerArgumentType.integer(0, 15)).executes(ctx -> {
-                            ServerPlayer p = target(ctx);
-                            SkillManager.get(p).chainMask = IntegerArgumentType.getInteger(ctx, "mask");
-                            SkillManager.get(p).sanitize(SkillManager.level(p));
-                            SkillManager.sync(p);
-                            return done(ctx);
-                        }))))
                         .then(Commands.literal("rebirth").then(player().executes(ctx -> {
                             SkillReset.forRebirth(target(ctx));
                             return done(ctx);
@@ -201,14 +184,6 @@ public final class SkillCommands {
                             SkillManager.sync(p);
                             return done(ctx);
                         }))))));
-    }
-
-    // 開発用: 進みに関わらず天職を決める (一つ目が空なら一つ目、そうでなければ二つ目)
-    private static int callingCommand(com.mojang.brigadier.context.CommandContext<CommandSourceStack> ctx, String unused) throws com.mojang.brigadier.exceptions.CommandSyntaxException {
-        ServerPlayer p = target(ctx);
-        SkillCalling.Result r = SkillCalling.choose(p, StringArgumentType.getString(ctx, "tree"), true);
-        ctx.getSource().sendSuccess(() -> Component.literal("calling: " + r.name()), false);
-        return r == SkillCalling.Result.OK ? 1 : 0;
     }
 
     private static com.mojang.brigadier.builder.RequiredArgumentBuilder<CommandSourceStack, ?> player() {

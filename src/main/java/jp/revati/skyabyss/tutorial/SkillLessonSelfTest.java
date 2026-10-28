@@ -22,7 +22,6 @@ import jp.revati.skyabyss.rpg.skill.Skill;
 import jp.revati.skyabyss.rpg.skill.SkillActions;
 import jp.revati.skyabyss.rpg.skill.SkillData;
 import jp.revati.skyabyss.rpg.skill.SkillManager;
-import jp.revati.skyabyss.rpg.skill.SkillStance;
 import jp.revati.skyabyss.rpg.skill.SkillTree;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;

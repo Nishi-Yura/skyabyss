@@ -24,21 +24,7 @@ final class SkillPassives {
         d.stillTicks = still ? Math.min(d.stillTicks + 1, 400) : 0;
         d.stillX = x;
         d.stillZ = z;
-        int camp = d.rank(Skill.CAMP_HAND);
-        if (camp > 0) {
-            // 満腹度の減り: 野営の近くでは、その tick に増えた消耗の一部を戻す
-            float ex = player.getFoodData().getExhaustionLevel();
-            if (d.campNear && ex > d.lastExhaustion) {
-                float back = (ex - d.lastExhaustion) * (float) SkillRules.campHunger(camp);
-                player.getFoodData().setExhaustion(Math.max(0f, ex - back));
-            }
-            d.lastExhaustion = player.getFoodData().getExhaustionLevel();
-        }
         if (player.tickCount % 10 == 3) {
-            d.campNear = camp > 0 && campNear(player);
-            if (player.tickCount % 100 == 3 || d.rank(Skill.READINESS_REWARD) == 0) {
-                d.readyBlue = d.rank(Skill.READINESS_REWARD) > 0 && allBlue(player);
-            }
             SkillManager.syncBar(player);
             SkillExtOps.refreshRebirth(player);
             SkillManager.applyModifiers(player);
@@ -46,10 +32,10 @@ final class SkillPassives {
         }
     }
 
-    // 焚き火・共鳴の炉の 6 ブロック以内か
+    // 焚き火・共鳴の炉の 6 ブロック以内か (刻印・型の切り替えの場所)
     static boolean campNear(Player player) {
         BlockPos center = player.blockPosition();
-        int r = (int) SkillRules.CAMP_RANGE;
+        int r = 6;
         if (!jp.revati.skyabyss.util.SectionScan.mayContain(player.level(), center.offset(-r, -r, -r), center.offset(r, r, r),
                 s -> s.is(BlockTags.CAMPFIRES) || s.is(ModBlocks.RESONANCE_FORGE.get()))) {
             return false;
@@ -63,13 +49,6 @@ final class SkillPassives {
         return false;
     }
 
-    // 備えの三灯がすべて青 (緑) か。次に挑む巨神 (まだ初回を終えていない最初の巨神。全部終えていれば最後) で見る
-    static boolean allBlue(ServerPlayer player) {
-        String titan = nextTitan(player);
-        Readiness.Result r = Readiness.of(player, titan);
-        return r.worst() == Readiness.Colour.GREEN;
-    }
-
     static String nextTitan(ServerPlayer player) {
         String[] order = {Titans.STONE_WHALE, Titans.TIDE_SHELL, Titans.THUNDER_WING, Titans.EMBER};
         for (String t : order) {
@@ -81,19 +60,14 @@ final class SkillPassives {
         return order[order.length - 1];
     }
 
-    // マナの回復の倍率 (いつもの分): (1 + 精神 15 + 凪の心得) × 野営の手。巡りの唄の上乗せは regenTick が期限を見て足す
+    // マナの回復の倍率 (いつもの分): 1 + 凪の心得。巡りの唄の上乗せは regenTick が期限を見て足す
     static double regenScale(ServerPlayer player, SkillData d) {
         double add = 1;
-        if (Breakpoints.reached(player, jp.revati.skyabyss.rpg.GrowthRules.Stat.SPIRIT, Breakpoints.FIRST)) {
-            add += Breakpoints.SPIRIT_15_REGEN;
-        }
         double calm = SkillRules.calmHeartBonus(d.rank(Skill.CALM_HEART));
         // 近くの仲間の凪の心得も効く (高いほう。重ならない)
         for (ServerPlayer ally : SkillEffects.allies(player, SkillRules.ALLY_RANGE)) {
             calm = Math.max(calm, SkillRules.calmHeartBonus(SkillManager.get(ally).rank(Skill.CALM_HEART)));
         }
-        add += calm + SkillBuild.regenAdd(player);
-        int camp = d.rank(Skill.CAMP_HAND);
-        return d.campNear && camp > 0 ? add * SkillRules.campRegen(camp) : add;
+        return add + calm + SkillBuild.regenAdd(player);
     }
 }

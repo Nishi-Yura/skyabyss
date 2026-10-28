@@ -148,6 +148,8 @@ public final class ValleySelfTest {
             jp.revati.skyabyss.quest.Quests.onTalk(p, role, "ch6_valley_promise3");
             check(f, jp.revati.skyabyss.quest.QuestLog.of(p).entry(ValleyPuzzles.QUEST) != null && jp.revati.skyabyss.quest.QuestLog.of(p).entry(ValleyPuzzles.QUEST).done,
                     "the promise did not finish main_moon_valley");
+            // 谷を終えた人には「ここまで」の札 (story/ch6/MoonEnd)。札そのものは tick で出る
+            check(f, jp.revati.skyabyss.story.ch6.MoonEnd.due(p), "the moon end card is not due after the valley");
             // 敵の数字
             DustCrawler c = (DustCrawler) ValleyTicker.put(moon, MoonMobsSetup.DUST_CRAWLER.get(), camp.offset(4, 0, 0));
             spawned.add(c);

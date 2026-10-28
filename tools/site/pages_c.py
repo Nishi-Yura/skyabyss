@@ -65,31 +65,32 @@ def faq():
         ["<code>skyabyssHeartReentryLimit</code>", T("戦いで倒れた人が 20 秒後に戻れる回数（既定 3。0 で数えない）", "Re-entries allowed per fight after 20 s (default 3; 0 = uncounted)")],
     ])
     cmds = table([T("コマンド（OP・権限 2）", "Command (op level 2)"), T("働き", "What it does")], [
-        ["<code>/skyabyss opening reset &lt;名前&gt;</code>", T("序章を、もう一度遊べるように戻す", "Reset the prologue so it can be played again")],
-        ["<code>/skyabyss cinematic reset &lt;名前&gt;</code>", T("見た扱いの場面を戻す", "Reset which cutscenes count as seen")],
-        ["<code>/skyabyss titan reset &lt;titan&gt;</code>", T("その巨神の進みを戻す（例: <code>ember</code>）", "Reset that titan's progress (e.g. <code>ember</code>)")],
-        ["<code>/skyabyss playtest now</code> / <code>next</code>", T("今の目的の出来事を起こす／今の目的を済ませて次へ", "Trigger the current objective's event / complete it and move on")],
+        ["<code>/skyabyss play help</code>", T("試遊用の一覧（章・場所・道具・ボス・部屋・頼み・状態）", "Tester commands: chapter, place, kit, boss, room, quest, state")],
+        ["<code>/skyabyss play chapter &lt;番号&gt;</code>", T("その章の始めへ（例: <code>5</code> で深淵）", "Jump to the start of a chapter (e.g. <code>5</code> for the abyss)")],
+        ["<code>/skyabyss play raid &lt;巨神&gt; &lt;部屋&gt;</code>", T("背の順路の部屋へ運ぶ", "Jump to a back room")],
+        ["<code>/skyabyss play now</code> / <code>next</code>", T("今の目的の出来事を起こす／今の目的を済ませて次へ", "Trigger the current objective's event / complete it and move on")],
+        ["<code>/skyabyss inspect …</code>", T("今の状態を読む（進み・頼み・持ち物）", "Read the current state (progress, quests, items)")],
     ])
     qa = [
         ("どの Minecraft で遊べますか。", "Which Minecraft versions work?", "Java 版 %s と NeoForge %s の組み合わせだけです。Forge や Fabric、統合版では動きません。" % (MC, MC),
          "Only Java Edition %s with NeoForge %s. Forge, Fabric and Bedrock are not supported." % (MC, MC)),
-        ("既存のワールドで遊べますか。", "Can I use an existing world?", "新しいワールドをおすすめします。長く遊んでいる世界でも、今の章から始まります。", "A new world is recommended. In a long-running world the mod simply starts from the current chapter."),
+        ("既存のワールドで遊べますか。", "Can I use an existing world?", "いいえ。世界の種類は「天と淵の大陸」だけで、はじまりの島から始まります。新しいワールドを作ってください（専用サーバーは <code>server.properties</code> に <code>level-type=skyabyss\\:continent</code>）。", "No. The only world type is the continent, starting on the island. Create a new world (on a dedicated server set <code>level-type=skyabyss\\:continent</code> in <code>server.properties</code>)."),
         ("世界を開いた直後が重いです。", "The game is heavy right after opening the world.", "巨神の背中の島を裏で少しずつ建てています。数分で落ち着きます。そのあいだに岩鯨の背に乗ろうとすると、一瞬止まることがあります。", "The titan back islands are built in the background. It settles in a few minutes; boarding the Stone Whale in the meantime may freeze briefly."),
         ("ピースフルで遊べますか。", "Can I play on Peaceful?", "いいえ。ピースフルでは巨神の背の部屋が眠ったままです。難易度を上げてください。", "No. On Peaceful the back rooms stay dormant; raise the difficulty."),
         ("怖い演出を減らせますか。", "Can I reduce the scary effects?", "設定ファイルの <code>horrorEventFrequency</code>、<code>watcherFrequency</code>、<code>cloudEyeFrequency</code>（0 で出なくなる）と、クライアント設定で、揺れや暗さを弱められます。", "Lower <code>horrorEventFrequency</code>, <code>watcherFrequency</code> and <code>cloudEyeFrequency</code> in the config (0 disables them); screen shake and darkness can be reduced in client settings."),
         ("キーがほかの mod とぶつかります。", "Keys clash with another mod.", "設定の「操作」にある「天と淵のあいだ」の項目で変えられます。", "Rebind them under Controls in the \"Between the Sky and the Abyss\" category."),
         ("大事な品をなくしました。", "I lost a key item.", "<kbd>B</kbd> の控え帳を開き、品の在りかと「呼び戻す」ボタンを使ってください。", "Open the record book (<kbd>B</kbd>) to see where it is and use the Recall button."),
         ("好きな順に巨神に挑めますか。", "Can I fight the titans in any order?", "既定では順番があります。管理者がゲームルール <code>skyabyssStoryGate</code> を <code>false</code> にすると好きな順に乗れます。", "By default there is an order. An admin can set the game rule <code>skyabyssStoryGate</code> to <code>false</code> to board in any order."),
-        ("他の mod と一緒に使えますか。", "Does it work with other mods?", "ほかの mod との組み合わせは確かめていません。ブロックを壊す・置く mod は背中の中では効きません。", "Combinations with other mods are untested. Mods that break or place blocks do not work inside a titan's back."),
+        ("他の mod と一緒に使えますか。", "Does it work with other mods?", "ほかの mod との組み合わせは確かめていません。ブロックを壊す・置く・作る mod は、アドベンチャーの決まりで効きません。", "Combinations with other mods are untested. Mods that break, place or craft blocks are blocked by the adventure rules."),
+        ("建築や採掘はできますか。", "Can I build or mine?", "できません。この mod は、Minecraft の見た目をした RPG です。アドベンチャーモードで、採集は道具ごとの決まった場所だけです。", "No. This mod is an RPG with Minecraft's look: adventure mode, with gathering only at set spots per tool."),
     ]
     qa_html = "".join("<details><summary>%s</summary><p>%s</p></details>" % (T(a, b), T(c, d)) for a, b, c, d in qa)
     limits = [
+        ("遊べるのは序章から五章「深淵」と、六章「月」の最初の区画「新月の谷」までです。谷を終えると「この版はここまで」の札が出ます。", "You can play from the prologue through chapter 5, the abyss, and the first district of chapter 6, the New Moon Valley. After the valley a card says the version ends there."),
+        ("六章の区画 2〜4、月の核、星術と、終章（雲海）はまだありません。", "Districts 2 to 4 of chapter 6, the moon's core, star arts and the final chapter (the sea of clouds) do not exist yet."),
+        ("0.8.1 の直し（巨神の居場所、戦いの手ごたえ、ヒロイック武器、心臓の間の大広間、試練の時間切れ）は、まだ人の手で試遊していません。", "The 0.8.1 changes (titan lairs, combat feel, heroic weapons, heart halls, trial time limits) have not been playtested by people yet."),
         ("マルチは、まだ人の手で通しの確認をしていません（特に 2 つのパーティが同じ背中にいるとき）。", "Multiplayer has not yet been verified end to end by people (especially with two parties on one back)."),
-        ("0.5.5 と 0.5.6 の部屋の報い・技の見た目・二人の部屋の直しは、まだ人の手で試遊していません。", "The room rewards, skill visuals and two-player room fixes in 0.5.5 and 0.5.6 have not been playtested by people yet."),
-        ("心臓の戦いに勝つまで、台座で転生を実行するまで、順位の石を複数人で見る所は、ゲームの中でまだ通しで確かめていません。", "Winning a heart fight, rebirth at the pedestal, and the rank stone with several players have not yet been confirmed in-game end to end."),
         ("五章「深淵」は、まだ人の手で通しに遊ばれていません（特に番人の戦いと、クリア後の深みを）。", "Chapter 5, the abyss, has not yet been played through end to end by people (especially the warden's fight and the depths after the clear)."),
-        ("乗り物の見た目の一部は、まだ仮のものです。", "Some mount models are still placeholders."),
-        ("潜水服の鎧は、腕を真上に上げたときだけ兜に少し当たります。", "The diver armor touches the helmet slightly when the arms are raised straight up."),
     ]
     lim = "".join("<li>%s</li>" % T(a, b) for a, b in limits)
     body = page_head("導入・FAQ", "Install and FAQ", "必要なもの、入れ方、サーバーの管理、よくある質問、既知の制限。",
@@ -148,7 +149,7 @@ def faq():
         i1=T("NeoForge %s を入れて、一度起動します。" % MC, "Install NeoForge %s and launch it once." % MC),
         i2=T("<code>skyabyss-%s.jar</code> と GeckoLib の jar を、どちらも <code>mods</code> フォルダへ入れます。" % VERSION, "Put <code>skyabyss-%s.jar</code> and the GeckoLib jar into the <code>mods</code> folder." % VERSION),
         i3=T("サーバーで遊ぶときは、サーバーの <code>mods</code> にも同じものを入れます。みんなで同じ jar を使います。", "For a server, put the same files into the server's <code>mods</code> folder. Everyone must use the same jar."),
-        i4=T("新しいワールドを作ります。難易度はピースフル以外にします。", "Create a new world on any difficulty except Peaceful."),
+        i4=T("新しいワールドを作ります（世界の種類は「天と淵の大陸」だけです）。難易度はピースフル以外にします。", "Create a new world (the only world type is the continent) on any difficulty except Peaceful."),
         i5=T("目覚めたら、画面の左上の目的の帯に従って進みます。", "When you wake, follow the objective strip at the top left."),
         dl=T("jar は開発者から受け取るか、ソースから <code>./gradlew build</code> で作ると <code>build/libs/</code> に出ます。", "Get the jar from the developer, or build it from source with <code>./gradlew build</code>; it appears in <code>build/libs/</code>."),
         norel=T("まだ公開リリースはありません。今は、ソースから <code>./gradlew build</code> で jar を作って使います（下のリリースのページは、公開されたときの置き場です）。", "There is no public release yet. For now, build the jar from source with <code>./gradlew build</code> (the Releases page below is where it will appear once published)."),
@@ -164,7 +165,7 @@ def faq():
         h_lim=T("既知の制限", "Known limits"),
         lim_lead=T("これはベータ版です。作ったばかりで、人が通しで遊んでいない所があります。", "This is a beta. Some parts are brand new and have not been played through by people."),
         lim=lim,
-        lim_end=T("噛み合わない所や、おかしな動きを見つけたら、ぜひ教えてください。開いた直後の数分は、背中の島を建てるので少し重くなります。", "If you find something that does not fit or behaves oddly, please tell us. The first few minutes after opening a world are a little heavy while the back islands are built."),
+        lim_end=T("噛み合わない所や、おかしな動きを見つけたら、ぜひ教えてください。開いた直後の数分は、巨神の背の島を建てるので少し重くなります。", "If you find something that does not fit or behaves oddly, please tell us. The first few minutes after opening a world are a little heavy while the back islands are built."),
     )
     # faq 見出しの id を整える
     body = body.replace('aria-labelledby="faq" id="faq"', 'aria-labelledby="faqh" id="faq"')
@@ -176,6 +177,43 @@ def faq():
 def changelog():
     # 版ごとの主な変更（試遊の確かめ順と docs/review の記録から）。古い版は要点だけ残す。
     ver = [
+        ("v0.8.1", "2026-10-28", [
+            ("巨神は四体とも決まった居場所で休み続けます（人のそばへは来ず、20 分で去りもしません）。体の下の地面は地形で下げてあり、巨神がブロックを壊すことはありません。", "All four titans now rest at fixed lairs: they no longer come to you or leave after 20 minutes, and the ground under them is lowered by terrain generation, so they never break blocks."),
+            ("心臓を止めると、土地の町を出た道ばたに祠が建ちます。周回はそこから挑みます。", "Stopping a heart raises a shrine beside the road just outside the regional town; repeat runs start there."),
+            ("戦いの手ごたえ: 主と名のある敵は構えていて硬く、技を出し終えた直後の 3 秒だけ大きく削れます。殴っても下がりません。ふつうの敵は連打されると身構えます。戦いの中の食事は 20 秒に一つ。", "Combat feel: bosses and named foes guard hard and open up for 3 seconds right after a move; they no longer get knocked back. Ordinary foes brace when spammed. Eating mid-fight is limited to one bite per 20 seconds."),
+            ("巨神ごとに職の武器のヒロイック 17 本。心臓を止めるたびに一本ずつ低い確率で落ち、それぞれ技の書き換えを一つ持ちます。心臓の報酬を選ぶ画面はなくなりました。", "17 heroic job weapons across the titans, each with one skill rewrite, dropping at a low chance whenever a heart is stopped. The heart reward choice screen is gone."),
+            ("潮殻・雷翼・余燼の心臓の間が、鯨の間と同じ大広間になりました（深い谷と高い円天井）。", "The Tide Shell, Thunder Wing and Ember heart chambers are now great halls like the whale's, with a deep chasm and a high dome."),
+            ("試練の部屋に時間切れ（歩・智 5 分、闘 6 分、全滅ごとに +1 分）。歩・智の部屋に邪魔の敵。同じ部屋で全滅を重ねると敵が弱まります。", "Trial rooms now have time limits (5 min for traverse and wit, 6 for combat, +1 per wipe), interfering foes in traverse and wit rooms, and foes weaken after repeated wipes in the same room."),
+            ("武器を持ち替えても技の帯が消えません。章の表示は進めている頼みの章に。緑の経験値バーは出ません。月では M の地図が月の絵になります。", "The skill bar no longer vanishes when you swap weapons; the chapter label follows the quest you are on; the green XP bar is hidden; on the moon the M map shows the moon."),
+            ("製品版で見えるコマンドは <code>/skyabyss play</code> と <code>/skyabyss inspect</code> だけです。", "Only <code>/skyabyss play</code> and <code>/skyabyss inspect</code> are visible in release builds."),
+        ]),
+        ("v0.8.0", "2026-10-28", [
+            ("五章の終わりから六章「月」へ。夜に月を見上げると「近づく月」が始まり、都の大鐘楼の上の門から月の面へ渡ります。", "From the end of chapter 5 to chapter 6, the Moon: look up at the moon at night to start \"The Moon Draws Near\", then cross from the gate atop the capital's bell tower."),
+            ("六章の最初の区画「新月の谷」: 谷の地形、星の灯、三つの仕掛け、月の敵と谷の主、前のループの自分との約束。谷を終えると、この版はここまでという札が出ます。", "The first district of chapter 6, the New Moon Valley: terrain, star lamps, three puzzles, moon foes and the valley's lord, and a promise with your past self. After the valley, a card says this is where the version ends."),
+            ("見比べて揃えました: 一章の素材の絵、旅装、土地の町の人の体と肖像、章の小要素 39 か所、仲間と称号の画面。持ち物のクラフト枠は消しました。", "Leveled up to the best: chapter 1 material icons, travel outfits, regional townsfolk models and portraits, 39 chapter sites, the party and title screens. The crafting grid is gone from the inventory."),
+            ("「踏破の時間」の目的と、週替わり「速い踏破」。組合に踏破の記録。", "A run-time objective and the weekly \"swift run\"; the guild keeps run records."),
+        ]),
+        ("v0.7.3", "2026-10-28", [
+            ("深淵の心臓の番人を最後のボスらしく（体力 1000、技 7 つを段で解放）。層の主 4 体に技ごとの構えと打ちの動き。", "The abyss warden is now a proper final boss (1000 health, seven moves unlocked by phase). The four layer lords got per-move stances and strikes."),
+            ("見どころ 24 か所を建築の水準へ建て直し、町と都の壁の外に畑・木立・小物。", "24 points of interest rebuilt to the build standard; fields, groves and props outside town and capital walls."),
+            ("心臓の間の入口は戦いのあいだ閉じます。深みの順位の石を画面に。", "The heart chamber entrance seals during the fight. The depths rank stone has its own screen."),
+        ]),
+        ("v0.7.1", "2026-10-27", [
+            ("市に四人（食料・武具・素材・道具の店）。薬師は薬だけ。名のある強敵は土地ごとの棲み家に出て、旅の地図に髑髏の印。", "Four market stalls (food, arms, materials, tools); the apothecary sells only remedies. Named foes live in one lair per region, marked with a skull on the map."),
+            ("採集は道具ごと（斧・つるはし・シャベル）の決まった場所で。採った物は素材屋が買います。持ち物は倒れても残ります。", "Gathering is per tool (axe, pickaxe, shovel) at set spots; the material trader buys what you gather. Your inventory survives death."),
+            ("巨神が早く休みます。頼みの報酬からバニラのがらくたを外しました。試練に入った瞬間に倒れる不具合（世界の縁）を直しました。", "Titans settle sooner. Vanilla junk removed from quest rewards. Fixed dying on entering a trial (world border)."),
+        ]),
+        ("v0.7.0", "2026-10-27", [
+            ("伝説 20 本に技の書き換え。クリエイティブの欄を五つに分け、装備の名前を階級の色に。どの章にも 6 職の武器がそろいました。", "20 legendary weapons gained skill rewrites. Five creative tabs, gear names in tier colors, and weapons for all six jobs in every chapter."),
+            ("一人称で武器が見えます。古い作りの武器 12 本を描き直しました。", "Weapons show in first person; 12 older weapon models were redrawn."),
+            ("はじまりの島が広くなり、寄り道が五つ。道は町と都の門までつながり、四つの土地の町を街道と市場の並びで建て直しました。土地の町にも都と同じ施設があります。", "A bigger starting island with five side trips. Roads now reach every town and capital gate; the four regional towns were rebuilt around a high street and market, with the same facilities as the capital."),
+        ]),
+        ("v0.6.0", "2026-10-26", [
+            ("完全な RPG へ。世界は手で描いた一枚の大陸（はじまりの島 → 渡し船 → 鐘の都 → 四つの土地の町）。世界の種類は「天と淵の大陸」だけです。", "A full RPG: the world is one hand-drawn continent (starting island, ferry, the bell capital, four regional towns). The only world type is the continent."),
+            ("アドベンチャーモードで、掘らない・建てない・作らない。倒れても落とさず、装備はすり減りません。", "Adventure mode: no mining, building or crafting. Nothing drops on death and gear never wears down."),
+            ("6 職（戦士・鍛冶師・魔法使い・弓使い・暗殺者・呪術師）。持った武器で職が決まり、島の祠で最初の職を選びます。旅人の木・天職・構え・連鎖・刻み目・橋の木はなくなりました。", "Six jobs (Warrior, Smith, Mage, Archer, Assassin, Shaman). The weapon in hand sets the job; the first job is chosen at the island shrine. The Wayfarer tree, callings, stances, chains, breakpoints and bridge trees are gone."),
+            ("敵はこの mod の敵だけ。土地・昼夜・地形ごとの湧き。バニラの敵・動物・進捗・レシピは使いません。", "Only the mod's own enemies spawn, by region, time and terrain. Vanilla mobs, animals, advancements and recipes are not used."),
+        ]),
         ("v0.5.6", "2026-10-24", [
             ("二人で順路の部屋: 部屋の外に出てしまった仲間は、3 秒で部屋の入口へ戻ります。入口では仲間が横に並んで立ちます。", "Raid rooms with friends: a party member left outside the room is brought back to its entrance after 3 seconds, and the party stands side by side at the entrance."),
             ("F1 で、この mod の表示（レベル・目的の帯・技の枠・仲間の札）も消えます。", "F1 now also hides this mod's HUD (level, objective band, skill slots, party cards)."),
@@ -271,4 +309,4 @@ def changelog():
 </div>
 </section>
 """ % (T("更新履歴", "Changelog"), "".join(items), T("細かい変更の一覧は", "The full list of changes is on"), REPO)
-    page("changelog.html", "更新履歴 — 天と淵のあいだ", "Changelog — Between the Sky and the Abyss", "ベータ版の主な変更。最新は 0.5.6。", "Main changes in the beta. Latest: 0.5.6.", body)
+    page("changelog.html", "更新履歴 — 天と淵のあいだ", "Changelog — Between the Sky and the Abyss", "ベータ版の主な変更。最新は %s。" % VERSION, "Main changes in the beta. Latest: %s." % VERSION, body)

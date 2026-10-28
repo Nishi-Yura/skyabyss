@@ -71,10 +71,6 @@ public final class SkillEvents {
             double bonus = SkillRules.foresightBonus(foresight) + (WeaponType.has(player, WeaponType.FAST) ? SkillRules.FORESIGHT_FAST_BONUS : 0);
             SkillEffects.timedMod(player, Attributes.ATTACK_SPEED, "foresight", bonus, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL, SkillRules.FORESIGHT_TICKS);
         }
-        if (Breakpoints.reached(player, jp.revati.skyabyss.rpg.GrowthRules.Stat.AGILITY, Breakpoints.FIRST)) {
-            SkillEffects.timedMod(player, Attributes.MOVEMENT_SPEED, "agility_15", Breakpoints.AGILITY_15_MOVE,
-                    AttributeModifier.Operation.ADD_MULTIPLIED_BASE, Breakpoints.AGILITY_15_TICKS);
-        }
     }
 
     // ---------------------------------------------------------------- 毎 tick
@@ -205,15 +201,6 @@ public final class SkillEvents {
             if (fire) {
                 amount *= (float) (1 - SkillRules.emberHeartReduction(vd.rank(Skill.EMBER_HEART)));
                 amount *= (float) (1 - SkillBuild.fireReduction(hurtPlayer));
-                // 炉の手 (灰の鍛え人の天性)
-                if (vd.callingTree() == SkillTree.ASH) {
-                    amount *= (float) (1 - SkillRules.TRAIT_ASH_FIRE);
-                }
-            }
-            if (fire || poison) {
-                if (Breakpoints.reached(hurtPlayer, jp.revati.skyabyss.rpg.GrowthRules.Stat.VITALITY, Breakpoints.SECOND)) {
-                    amount *= (float) (1 - Breakpoints.VITALITY_30_FIRE);
-                }
             }
             // 重い声: 狙いを引いているあいだ、受ける傷 −10%
             if (vd.tauntRune == 2 && vd.tauntUntil >= now && SkillEffects.taunting(hurtPlayer, 16)) {
@@ -257,17 +244,6 @@ public final class SkillEvents {
                             10, 0.3, 0.3, 0.3, 0.06);
                     level.playSound(null, victim.getX(), victim.getY(), victim.getZ(), Skills.SOUND_RIPOSTE.get(), SoundSource.PLAYERS, 0.9f, 1.0f);
                 }
-            }
-            // 炉の手 (灰の鍛え人の天性): 武器の強化の上乗せが 1 割増える
-            if (melee && d.callingTree() == SkillTree.ASH) {
-                net.minecraft.world.item.ItemStack held = player.getMainHandItem();
-                if (held.getItem() instanceof jp.revati.skyabyss.item.ModGear g && g.enhanceable()) {
-                    amount += (float) (SkillRules.TRAIT_ASH_ENHANCE * jp.revati.skyabyss.item.GearEvents.enhanceAttack(held.getItem(), jp.revati.skyabyss.item.ModGear.enhance(held)));
-                }
-            }
-            // 骨の目 (骨の射手の天性): 飛び道具の傷 +5%
-            if (direct instanceof Projectile && d.callingTree() == SkillTree.BONE) {
-                amount *= (float) (1 + SkillRules.TRAIT_BONE_DAMAGE);
             }
             // 炉の記憶: 溜まった熾を使い切る
             if (melee && d.embers > 0) {
@@ -329,16 +305,6 @@ public final class SkillEvents {
                 // 岩の返り: 狙いを引いた敵の攻撃を受けた
                 if (d.tauntRune == 3 && d.tauntUntil >= now && SkillEffects.tauntedBy(from, player)) {
                     d.rockReturn = SkillRules.ROCK_RETURN_BONUS;
-                }
-            }
-            // 逃げ足: 体力が 3❤ 以下になったとき、少しのあいだ速くなる (20 秒に 1 度)
-            int fleet = d.rank(Skill.FLEET_FOOT);
-            if (fleet > 0 && player.getHealth() - event.getNewDamage() <= SkillRules.FLEET_HEALTH && now >= d.fleetReadyAt && player.isAlive()) {
-                d.fleetReadyAt = now + SkillRules.FLEET_COOLDOWN;
-                SkillEffects.timedMod(player, Attributes.MOVEMENT_SPEED, "fleet_foot", SkillRules.fleetBonus(fleet),
-                        AttributeModifier.Operation.ADD_MULTIPLIED_BASE, SkillRules.FLEET_TICKS);
-                if (player.level() instanceof ServerLevel level) {
-                    level.sendParticles(Skills.SKY_MOTE.get(), player.getX(), player.getY() + 0.3, player.getZ(), 10, 0.4, 0.1, 0.4, 0.03);
                 }
             }
         }
@@ -412,27 +378,6 @@ public final class SkillEvents {
         return m != null && m.until >= now ? m.bonus : 0;
     }
 
-    // 骨の目: 撃った矢の 25% は消えない (弓で撃った 1 本を次の tick に返す)
-    @SubscribeEvent
-    static void onArrowLoose(net.neoforged.neoforge.event.entity.player.ArrowLooseEvent event) {
-        if (!(event.getEntity() instanceof ServerPlayer player) || player.isCreative() || event.getCharge() < 3) {
-            return;
-        }
-        if (SkillManager.get(player).callingTree() != SkillTree.BONE || player.getRandom().nextDouble() >= SkillRules.TRAIT_BONE_KEEP) {
-            return;
-        }
-        net.minecraft.world.item.ItemStack ammo = player.getProjectile(event.getBow());
-        if (ammo.isEmpty()) {
-            return;
-        }
-        net.minecraft.world.item.ItemStack back = ammo.copyWithCount(1);
-        jp.revati.skyabyss.story.ch1.Tasks.later(1, () -> {
-            if (!player.hasDisconnected() && !player.isRemoved() && !player.getInventory().add(back)) {
-                player.drop(back, false);
-            }
-        });
-    }
-
     // ---------------------------------------------------------------- 付け直しと同期
     @SubscribeEvent
     static void onLogin(PlayerEvent.PlayerLoggedInEvent event) {
@@ -453,8 +398,6 @@ public final class SkillEvents {
             }
             SkillManager.sync(player);
             SkillManager.sendMana(player, true);
-            // 天職を選べるのに、まだ選んでいない人 (あとでにした人・古いセーブ)
-            SkillCalling.offerSoon(player, SkillCalling.LOGIN_DELAY, false);
         }
     }
 

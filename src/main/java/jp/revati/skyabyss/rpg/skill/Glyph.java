@@ -106,21 +106,11 @@ public enum Glyph {
         return item == null || center == null ? null : new Placed(item, center);
     }
 
-    // 隣の技: 木の前提の線でつながる技 (上下)、橋とその親の木の頂点 (段 2 の技)
+    // 隣の技: 木の前提の線でつながる技 (上下)
     public static List<Skill> neighbors(Skill center) {
         List<Skill> list = new ArrayList<>(center.requires());
         for (Skill s : Skill.values()) {
             if (s.requires().contains(center)) {
-                list.add(s);
-            }
-        }
-        SkillTree[] parents = center.bridgeTrees();
-        for (Skill s : Skill.values()) {
-            if (parents.length == 2 && s.tier == 2 && s.tree.callable() && (s.tree == parents[0] || s.tree == parents[1])) {
-                list.add(s);
-            }
-            if (center.tier == 2 && center.tree.callable() && s.bridgeTrees().length == 2
-                    && (s.bridgeTrees()[0] == center.tree || s.bridgeTrees()[1] == center.tree)) {
                 list.add(s);
             }
         }

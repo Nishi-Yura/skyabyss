@@ -17,7 +17,7 @@
 """
 
 # ---------------------------------------------------------------------------
-# 上書き防止 (docs/review/assets_audit.md の S1): 実行すると採用済みの素材を古い版で上書きする。
+# 上書き防止: 実行すると採用済みの素材を古い版で上書きする。
 #   上書きするもの: 番兵・射手・苔這い・顎・番兵長の geo / png / glowmask / animation
 #   採用版の生成元: tools/rough/rib_archer_v4.py、tools/rough/captain_v4.py (ほかは今の src/ が正本)
 # どうしても動かすときだけ、環境変数 SKYABYSS_ALLOW_REGEN=1 を付ける。一覧は tools/README.md。

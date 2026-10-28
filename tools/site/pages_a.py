@@ -36,12 +36,12 @@ def index():
     feats = "".join([
         feat("item/stone_whale_call.png", "四体の巨神", "Four titans",
              "空・海・嵐・地の中を行く巨神に、一体ずつ挑みます。", "Take on titans that move through sky, sea, storm and earth, one by one.", "titans.html"),
-        feat("skill/05.png", "36 の技と天職", "36 skills, callings",
-             "5 つの木と旅人。天職を選び、刻印で技の形を変えます。", "Five trees plus the Wayfarer. Choose a calling and reshape skills with runes.", "skills.html"),
+        feat("skill/05.png", "6 つの職", "Six jobs",
+             "戦士・鍛冶師・魔法使い・弓使い・暗殺者・呪術師。持った武器で職が決まり、持ち替えればその場で替わります。", "Warrior, Smith, Mage, Archer, Assassin and Shaman. The weapon in your hand decides the job; swap it and the job swaps.", "skills.html"),
         feat("item/resonance_shard_ember.png", "転生と深淵", "Rebirth and the Abyss",
              "Lv 50 で転生し、魂盤と恩恵でビルドを作り直します。深淵の難度も。", "Rebirth at Lv 50, rebuild with the soul board and boons, then try Abyss difficulty.", "rebirth.html"),
-        feat("item/waterway_fang.png", "13 種の武器", "13 weapons",
-             "型・六段の階級・特性・書き換えの武器。周回で揃えます。", "Types, six tiers, affixes and rewrite weapons. Collect them over repeat runs.", "gear.html"),
+        feat("item/waterway_fang.png", "章ごと、職ごとの武器", "Weapons per chapter and job",
+             "六段の階級・特性・技を書き換える武器。巨神ごとのヒロイック武器は周回で揃えます。", "Six tiers, affixes and skill-rewriting weapons. Each titan's heroic weapons come from repeat runs.", "gear.html"),
         feat("item/resonance_crystal.png", "共鳴の炉", "Resonance Forge",
              "強化・分解・再鍛造・交換。周回の報いを形にします。", "Enhance, dismantle, reforge, trade. Turn runs into gear.", "gear.html#forge"),
         feat("item/sky_key_fragment.png", "旅嚢", "Travel Satchel",
@@ -88,7 +88,7 @@ def index():
 <div class="grid g4">
 <div class="panel stat"><b>4</b><span>%(s1)s</span></div>
 <div class="panel stat"><b>28</b><span>%(s2)s</span></div>
-<div class="panel stat"><b>36</b><span>%(s3)s</span></div>
+<div class="panel stat"><b>6</b><span>%(s3)s</span></div>
 <div class="panel stat"><b>6</b><span>%(s4)s</span></div>
 </div>
 </div>
@@ -119,8 +119,8 @@ def index():
 </div>
 </section>
 """ % dict(
-        pitch=T("空を泳ぐ巨神の背に乗り、世界の底の謎へ。建築も採掘も、いつものままに。",
-                "Climb onto titans that swim through sky, sea, storm and earth. Build and mine as you always do."),
+        pitch=T("一枚の大陸を歩き、空を泳ぐ巨神の背に乗り、世界の底の謎へ。Minecraft の見た目をした、掘らない・建てない RPG。",
+                "Walk one hand-drawn continent, climb onto titans that swim through sky, sea, storm and earth, and descend to the world's deep. An RPG with Minecraft's look, no mining and no building."),
         mc=MC, ver=T("v%s ベータ版" % VERSION, "v%s beta" % VERSION), pl=T("1〜6 人", "1 to 6 players"),
         cta1=T("導入する", "Install"), cta2=T("遊び方を見る", "How to play"), cta3=T("巨神を知る", "Meet the titans"),
         h_diff=T("ほかと違うところ", "What makes it different"),
@@ -131,13 +131,13 @@ def index():
         d2=T("心臓を止めると、巨神は眠りにつきます。次の巨神が現れ、章が進みます。倒れても持ち物は残り、墓が目印になります。",
              "Stop the heart and the titan falls asleep; the next titan appears and the chapter advances. Death never costs your key items."),
         d3h=T("作り込めるビルド", "Builds with depth"),
-        d3=T("5 つの技の木と旅人、36 の技、天職、刻印、要、型。武器との組み合わせで遊びが変わります。",
-             "Five skill trees plus the Wayfarer, 36 skills, callings, runes, keystones and weapon types. Gear changes how you play."),
+        d3=T("6 つの職に、それぞれの技の木・刻印・型の要。職は持った武器で決まるので、武器を集めるほど遊び方が増えます。",
+             "Six jobs, each with its own skill tree, runes and keystones. The weapon in your hand sets the job, so every weapon you collect is a new way to play."),
         d4h=T("静かな怖さと、仲間と", "Quiet dread, and company"),
         d4=T("序盤から、静かな不穏が少しずつ重なります（揺れや暗さは設定で弱められます）。6 人までのパーティで、背中の進みはパーティごとです。",
              "Subtle unease builds from the very first minutes (screen shake and darkness can be turned down). Play in a party of up to six; back progress is kept per party."),
         h_stats=T("数で見る", "By the numbers"),
-        s1=T("巨神", "titans"), s2=T("順路の部屋（4 体分）", "route rooms (four titans)"), s3=T("技", "skills"), s4=T("人まで", "players max"),
+        s1=T("巨神", "titans"), s2=T("順路の部屋（4 体分）", "route rooms (four titans)"), s3=T("職", "jobs"), s4=T("人まで", "players max"),
         h_feat=T("できること", "What you can do"),
         feats=feats,
         h_chap=T("五つの章", "Five chapters"),
@@ -162,7 +162,7 @@ def index():
 def play():
     keys = [
         ("J", "ステータス（レベル、力の振り分け、振り直し）", "Status (level, stat points, respec)"),
-        ("K", "技の画面（技を覚える、四つの枠に置く、天職・刻印・型の保存）", "Skills screen (learn skills, slots, calling, runes, loadouts)"),
+        ("K", "技の画面（職の木で技を覚える、四つの枠に置く、刻印・型の保存）", "Skills screen (learn skills in the job tree, slots, runes, loadouts)"),
         ("U", "クエストログ（メインとサブ、追跡の切り替え）", "Quest log (main and side quests, tracking)"),
         ("B", "控え帳（巨神の進み、墓の場所、大事な品、呼び戻し）。<code>/skyrecord</code> でも開く", "Record book (titan progress, grave locations, key items, recall); also <code>/skyrecord</code>"),
         ("N", "知らせの記録（流れた語り・獲得・場所の名前を読み返す）", "Notice log (re-read narration, rewards, place names)"),
@@ -303,14 +303,14 @@ def play():
         not_note=T("見逃したときは <kbd>N</kbd> の「知らせの記録」で読み返せます（その遊びのあいだの 200 件まで）。設定ファイルの <code>notifyMode</code>（TOAST・CHAT・BOTH）、<code>noticeSpeed</code>、<code>objectiveStrip</code> で見せ方を変えられます。",
                    "If you miss one, re-read it in the notice log with <kbd>N</kbd> (up to 200 entries per session). The config options <code>notifyMode</code> (TOAST, CHAT, BOTH), <code>noticeSpeed</code> and <code>objectiveStrip</code> change how they are shown."),
         h_bars=T("戦いの画面", "Combat HUD"),
-        b1h=T("技の枠", "Skill slots"), b1=T("技は <kbd>R</kbd> <kbd>G</kbd> <kbd>V</kbd> <kbd>Z</kbd> に割り当てた 4 つ（二つ目の天職のあと 5 つ目）の枠から使います。マナを使い、技ごとに待ちがあります。", "Skills are cast from four slots (<kbd>R</kbd> <kbd>G</kbd> <kbd>V</kbd> <kbd>Z</kbd>); a fifth opens after your second calling. They use mana and have cooldowns."),
+        b1h=T("技の枠", "Skill slots"), b1=T("技は <kbd>R</kbd> <kbd>G</kbd> <kbd>V</kbd> <kbd>Z</kbd> に割り当てた 4 つの枠から使います。枠は持っている武器の職のものに替わります。マナを使い、技ごとに待ちがあります。", "Skills are cast from four slots (<kbd>R</kbd> <kbd>G</kbd> <kbd>V</kbd> <kbd>Z</kbd>); the slots follow the job of the weapon you hold. They use mana and have cooldowns."),
         b1alt="技の枠の見本", slots="".join('<div class="slot"><img class="px" src="img/skill/%02d.png" width="48" height="48" alt=""><kbd>%s</kbd></div>' % (i, k) for i, k in ((0, "R"), (12, "G"), (6, "V"), (28, "Z"))),
         b2h=T("床の予告", "Floor telegraphs"), b2=T("敵の技は、床に範囲が出てから来ます。印の外に立てば傷を受けません。", "Enemy attacks show their area on the floor first. Stand outside the mark and you take no damage."),
         b2alt="床の予告の見本", f1=T("傷が出る所（橙〜赤）", "Hurts (orange to red)"), f2=T("安全な筋（青白い破線）", "Safe lane (pale dashed)"), f3=T("押されるだけ（灰）", "Push only (gray)"),
         h_death=T("倒れたとき", "When you fall"),
         d1h=T("地上で倒れる（墓）", "On the ground (grave)"),
-        d1=T("装備中の防具・左手・装飾・ホットバー・大事な品は持ったまま復活します（耐久は 1 割ほど減ります）。残りの持ち物と経験値は、墓に入ります。持ち主だけが開けられ、場所は <kbd>B</kbd> の控え帳に出ます。",
-             "You respawn keeping worn armor, offhand, accessories, hotbar and key items (durability drops about 10%). The rest of your inventory and XP go into a grave that only you can open; its location shows in the record book (<kbd>B</kbd>)."),
+        d1=T("持ち物と装備はすべて持ったまま復活します（装備はすり減りません）。経験値の一部が墓に入り、持ち主だけが開けられます。場所は <kbd>B</kbd> の控え帳に出ます。",
+             "You respawn with everything you carry (gear never wears down). Part of your XP goes into a grave that only you can open; its location shows in the record book (<kbd>B</kbd>)."),
         d2h=T("取りに行けないとき", "If you cannot reach it"),
         d2=T("語り部に「なくしたものがある」→「取りに行けない墓がある」と頼むと、選んだ墓の中身の半分が戻ります（墓は消えます）。", "Ask the storyteller about a lost item and pick an unreachable grave: half of its contents come back (the grave disappears)."),
         d3=T("背の順路では、倒れても持ち物と経験値は残ります。部屋の途中で全員が倒れたら、その部屋の最初から始まります。心臓の戦いで倒れたら、前室で目を覚まし、20 秒後に扉から戻れます（1 つの戦いで 3 回まで）。", "On a titan's back you keep your inventory and XP. If everyone falls in a room, it restarts from the room's beginning. In a heart fight you wake in the antechamber and can re-enter after 20 seconds (up to 3 times per fight)."),
@@ -343,7 +343,7 @@ def _first_steps():
         ("faq.html#install", "導入する", "Install", "jar を mods に入れて、新しいワールドを作ります。", "Put the jar in mods and create a new world."),
         ("play.html", "遊び方を読む", "Read how to play", "最初の 1 時間の流れと、操作キー。", "The first hour and the controls."),
         ("titans.html#whale", "最初の巨神を知る", "Meet the first titan", "岩鯨（一章）。空から垂れる鎖で背に乗ります。", "The Stone Whale (chapter 1). Board by the chain it lowers from the sky."),
-        ("skills.html", "技と装備を選ぶ", "Choose skills and gear", "五つの木と旅人から、自分のビルドを作ります。", "Build your character from five trees and the Wayfarer."),
+        ("skills.html", "職と技を知る", "Learn the jobs and skills", "はじまりの島の祠で最初の職を選びます。六つの職の技の木。", "Pick your first job at the island shrine. The six job trees."),
     ]
     lis = "".join('<li><a href="%s"><strong>%s</strong></a>　%s</li>' % (h, T(a, b), T(c, d)) for h, a, b, c, d in items)
     return ('<section class="alt" aria-labelledby="first"><div class="wrap"><h2 id="first">%s</h2>'
@@ -441,7 +441,7 @@ def titans():
         a3=T("乗れるときは、乗り込み口が遠くからでもほのかに脈打つ光で分かります。", "When you may board, the entrance pulses with a faint glow, visible from afar."),
         a4=T("巨神は止まってから約 20 分のあいだ乗れます（残り 2 分と 30 秒に知らせ）。", "A titan stays boardable for about 20 minutes (warnings at 2 minutes and 30 seconds left)."),
         b_h=T("背中の決まり", "Rules on the back"),
-        b1=T("サバイバルではブロックを壊せず、置けません。作業台・かまど・チェストなどの野営の道具は、離れた地面に一人 8 個まで置けます。", "In survival you cannot break or place blocks. Camp tools such as a crafting table, furnace or chest can be placed on safe ground (up to 8 per player)."),
+        b1=T("ブロックは壊せず、置けません（地上と同じ、アドベンチャーの決まりです）。", "Blocks cannot be broken or placed, the same adventure rule as on the ground."),
         b2=T("エリトラ・エンダーパール・ウィンドチャージ・花火・バケツなど、部屋を飛ばせる物は使えません。", "Elytra, ender pearls, wind charges, fireworks, buckets and anything else that skips a room is blocked."),
         b3=T("倒れても持ち物と経験値は残り、休み場の焚き火から再開します。", "Dying keeps your items and XP; you resume at a rest campfire."),
         b4=T("端から落ちると、それぞれの巨神の決まりで戻されます（岩鯨は滑空、潮殻は潮流、雷翼は嵐、余燼は灰）。", "Falling off sends you back in each titan's own way (glide, tide, storm, ash)."),

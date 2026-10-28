@@ -8,6 +8,24 @@
 - 試遊版: 0.8.0（`build/libs/skyabyss-0.8.0.jar`。確認表 `docs/review/playtest_0.8.0.md`、遊び方 `docs/beta_how_to_play.md`）。
 - 自己テスト: `bash <scratchpad>/fresh_continent.sh "<名前,…>" <世界名>`（空なら全部。大陸の新しい世界で回す）。`abyss escort` はほかと一緒に流すと時間切れで落ちることがある（単独では通る）。
 
+## 2026-10-28 深夜（全体の見直しの「高」の直し）
+
+全体の監査（品質の統一・不要データ・面白さと継続性・不具合）の「高」の 5 つを直した。残りの「中」「低」は監査の一覧（会話の中。要点は下）に残っている。
+
+- 公式サイト（`tools/site` → `site/`）を 0.8.1 と 6 職の仕様に書き直した: 技のページは職ごとの木（`skilldata.py` が `Job`/`Skill.java` から読む。星読みの木と職の新しい技は `icons2.png` の 125〜136）、トップ・遊び方・FAQ・更新履歴（0.6.0〜0.8.1）、旅嚢の「作る」の文を消した。天職・旅人・構え・連鎖・刻み目の説明は消した。`python tools/site/build.py` で作り直す（`gen_art.py` は icons2 と祠の武器も写す）。
+- `README.md`・`docs/beta_how_to_play.md`・`14` を 0.8.1 と完全な RPG の形に。`01` の軸・やらないこと・ループ・RPG の柱（職の表）・ロードマップを今の方針に書き直した。索引の 27 の行と、消した書類（17・33）への参照を直した。
+- 六章の行き止まり: 「新月の谷」のメインを終えた人に「六章　月　完」の札と「この版はここまで」の一言（`story/ch6/MoonEnd`。`moon valley` の自己テストが見張る）。区画 2 のメインができたら置き換える。
+- 名前の重複: 二章の職の弓 `tide_bow` を「潮殻の弓 / Tideshell Bow」に（ヒロイックの `tide_coral_bow` が「珊瑚の弓」）。未登録の `warden_hook_spear` の文を消した。
+
+監査の「中」も直した（2026-10-29 深夜）:
+- 旧スキル制度のコードを消した（43 の 3 章どおり）: 天職（`SkillCalling`・`CallingScreen`・通信 2 本）、構え（`SkillStance`・キー `.`）、連鎖（枠の印）、刻み目（`Breakpoints`）、旅人の木（合図・備えの報い・野営の手・目利き・逃げ足・手帖）と橋の木（5 本）。技は 65 → 54 本、アイコンの番号は `Skill.iconIndex`（淵・前世は icons2 の 5 番から）。技の画面の「ビルド」のページは鍵石だけ。自己テスト `skills`・`jobs`・`soul`・`lang`・`skill lesson` を通した。
+- 絵: 穴の欠片 5 枚を土地ごとに別の形に（`docs/review/socket_shards_2026-10-29.png`。ユーザーの確認待ち）。技の印の同じ絵 4 組を描き分け、潮殻の `shell_slam`・`shell_sweep` の印を足した（`gen_attack_icons.py`）。`gui.skyabyss.attack.pearl_keeper.*` の古い文を消した。
+- 係の人の見た目は A だけ（B・C の 54 枚と 2 体の骨格を消した。`AttendantLook.LOOKS = {"a"}`）。孤児の低ポリの絵 23 枚（`*_flared`・`waterway_maw`・`pearl_keeper`・古い `guest_*`・小道具の `_glow`）を消した。
+- 片付け: `run/shots`・`run/mp_check`・`run/world_all4`・dump・`config/*.bak`・`build/portraits_v2`・`build/tmp_attendant`・0.8.0 の jar。`docs/review` の古い報告（assets/gear/mod_blocks/weapon_design_base と試遊表 0.7.1〜0.8.0）、決まったラフの案（legends・ch5・voice2・survivor・warden_paint・材料。比較の絵だけ残す）、`tools/once`・`tools/misc` の 4 本・`tools/rough` の v2〜v4 と gallery_v*。消した書類を指していたコメントと README は直した。
+- 残したもの（判断）: `textures/entity/` と `lowpoly/` の同じ絵 35 組は、立方体の geo（`LowPoly.enabled = false` の控え）が残っているのでそのまま。`elder_sentry`（一章の洞窟）と `elder_sentinel`（背の試練）は役が別なので二体のまま（突進・踏みの印は同じ動きなので同じ絵）。メッシュ監査（`tools/audit/mesh_audit.py`）: 開いた辺 0、非多様体の辺 2,028、つぶれた三角 104、関節の離れ 37（主に防具の脚）。直すなら `tools/lib/mesh_close.py` から。
+
+まだ直していない「低」: 「Unprimed heightmap」の ERROR（建築の監査中に 40 件）、不安定な自己テスト（`abyss escort`・`ch4 ground (sites)`）、`Config` の古いコメント（`loopLengthDays`）、`static Map<UUID>` の掃除の口、`catch (Exception)` 74 か所。
+
 ## 2026-10-28 夜（0.8.0 の試遊の声 その 2。`memory: skyabyss-080b-feedback`）
 
 できたこと:

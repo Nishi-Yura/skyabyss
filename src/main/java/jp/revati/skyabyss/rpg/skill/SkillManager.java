@@ -35,14 +35,6 @@ public final class SkillManager {
     public static final ResourceLocation MOD_NIMBLE_FALL = id("skill/nimble_fall");
     public static final ResourceLocation MOD_LONE_ATTACK = id("skill/lone_wind_attack");
     public static final ResourceLocation MOD_LONE_MOVE = id("skill/lone_wind_move");
-    public static final ResourceLocation MOD_READY_MANA = id("skill/readiness_mana");
-    public static final ResourceLocation MOD_READY_ATTACK = id("skill/readiness_attack");
-    public static final ResourceLocation MOD_BP_KNOCKBACK = id("skill/bp_vitality_knockback");
-    public static final ResourceLocation MOD_TRAIT_TOUGH = id("skill/trait_rock_toughness");
-    public static final ResourceLocation MOD_TRAIT_KNOCKBACK = id("skill/trait_rock_knockback");
-    public static final ResourceLocation MOD_TRAIT_MOVE = id("skill/trait_wind_move");
-    public static final ResourceLocation MOD_TRAIT_MANA = id("skill/trait_tide_mana");
-    public static final ResourceLocation MOD_BP_SWING = id("skill/bp_strength_swing");
     public static final ResourceLocation MOD_B_ARMOR = id("skill/build_armor");
     public static final ResourceLocation MOD_B_KNOCKBACK = id("skill/build_knockback");
     public static final ResourceLocation MOD_B_MOVE = id("skill/build_move");
@@ -226,7 +218,7 @@ public final class SkillManager {
     // いまの振り直しの費用 (結晶の数)。Lv 15 になるまでは 0、目利きがあれば 2 以上のとき 1 減る
     public static int respecCostFor(Player player) {
         SkillData d = get(player);
-        return SkillRules.respecCost(d.respecs, level(player), d.knows(Skill.APPRAISER));
+        return SkillRules.respecCost(d.respecs, level(player));
     }
 
     // Lv 15 になるまでは、どこでも無料 (炉も結晶も要らない。回数も数えない)
@@ -263,8 +255,6 @@ public final class SkillManager {
         if (!early) {
             d.respecs++;
         }
-        // 構えも外す
-        d.stance = 0;
         sync(player);
         applyModifiers(player);
         player.serverLevel().playSound(null, player.getX(), player.getY(), player.getZ(), Rpg.LEVEL_UP.get(), SoundSource.PLAYERS, 0.6f, 0.7f);
@@ -306,9 +296,9 @@ public final class SkillManager {
         return player.isCreative() || player.level().getGameTime() - get(player).lastCombat >= SkillRules.QUIET_TICKS;
     }
 
-    // 刻印・型を切り替えられる場所か (炉・焚き火の近く。旅の手帖があればどこでも)
+    // 刻印・型を切り替えられる場所か (炉・焚き火の近く)
     public static boolean switchPlace(Player player) {
-        return player.isCreative() || get(player).knows(Skill.JOURNAL) || nearForge(player) || SkillPassives.campNear(player);
+        return player.isCreative() || nearForge(player) || SkillPassives.campNear(player);
     }
 
     // 刻印を選ぶ。はじめて選ぶのは 1 点、別の刻印へ付け替えるのは炉などで結晶 1 (初回は無料)
@@ -363,7 +353,6 @@ public final class SkillManager {
         for (var e : d.runes.entrySet()) {
             l.runes.put(e.getKey(), e.getValue());
         }
-        l.chainMask = d.chainMask;
         l.saved = true;
         sync(player);
         return true;
@@ -394,7 +383,6 @@ public final class SkillManager {
                 d.slots[i] = s.id;
             }
         }
-        d.chainMask = l.chainMask & ((1 << (SkillRules.SLOTS - 1)) - 1);
         for (var e : l.runes.entrySet()) {
             Skill s = Skill.byId(e.getKey());
             if (s != null && d.rune(s) > 0 && d.runeUsable(s, e.getValue()) && Rune.heldOf(s, e.getValue(), player)) {
@@ -407,15 +395,11 @@ public final class SkillManager {
         return LoadoutResult.OK;
     }
 
-    // 技の待ち (tick): 刻印・敏捷 30 の刻み目・手の武器の冴えを入れた長さ。クライアントの枠の表示も同じ計算
+    // 技の待ち (tick): 刻印・手の武器の冴えを入れた長さ。クライアントの枠の表示も同じ計算
     public static int cooldownFor(Player player, Skill skill) {
         SkillData d = get(player);
         int rank = d.rank(skill);
         int ticks = SkillRules.cooldownTicks(skill, rank, runeOf(player, skill));
-        if ((skill == Skill.LUNGE || skill == Skill.BACKSTEP || skill == Skill.WIND_REND)
-                && Breakpoints.reached(player, jp.revati.skyabyss.rpg.GrowthRules.Stat.AGILITY, Breakpoints.SECOND)) {
-            ticks = (int) Math.round(ticks * (1 - Breakpoints.AGILITY_30_COOLDOWN));
-        }
         ticks = (int) Math.round(ticks * SkillBuild.cooldownScale(player, skill));
         return jp.revati.skyabyss.rebirth.Rebirth.scaleCooldown(player, jp.revati.skyabyss.item.affix.AffixEvents.scaleCooldown(player, ticks));
     }
@@ -519,15 +503,6 @@ public final class SkillManager {
         }
         SkillActions.cooldownScale = 1;
         long now = player.level().getGameTime();
-        // 連鎖: 直前の枠の技から 2 秒以内で、連鎖の印が立っていれば、この技の力が増す
-        // 連鎖は 43 (6 職) で削った
-        boolean chain = false;
-        if (chain) {
-            d.chainSkill = skill.id;
-            d.chainUntil = now + SkillRules.CHAIN_WINDOW;
-        } else {
-            d.chainSkill = "";
-        }
         SkillActions.fxTarget = null;
         String failure = SkillActions.perform(player, skill, rank);
         if (failure != null) {
@@ -550,9 +525,6 @@ public final class SkillManager {
         d.lastCastSlot = slot;
         d.lastCastTick = now;
         addMastery(player, skill, 1);
-        if (chain) {
-            player.serverLevel().sendParticles(Skills.RUNE_SPARK.get(), player.getX(), player.getY() + 1.2, player.getZ(), 8, 0.3, 0.4, 0.3, 0.05);
-        }
         if (d.masteryLevel(skill) >= SkillRules.MASTERY_VISUAL_LEVEL) {
             masteryGlow(player);
         }
@@ -560,7 +532,7 @@ public final class SkillManager {
         sendResult(player, slot, true);
         // 見た目の合図 (持ち主と近くの人へ 1 通。段取りは手元で組む)
         if (!(player instanceof FakePlayer) && player.connection != null) {
-            PacketDistributor.sendToPlayersTrackingEntityAndSelf(player, new jp.revati.skyabyss.rpg.skill.net.SkillFxPayload(player.getId(), skill.id, rank, chain, SkillActions.fxTarget));
+            PacketDistributor.sendToPlayersTrackingEntityAndSelf(player, new jp.revati.skyabyss.rpg.skill.net.SkillFxPayload(player.getId(), skill.id, rank, false, SkillActions.fxTarget));
         }
         SkillActions.fxTarget = null;
         return CastResult.OK;
@@ -588,52 +560,6 @@ public final class SkillManager {
             level.sendParticles(net.minecraft.core.particles.ParticleTypes.END_ROD, player.getX() + Math.cos(a) * 0.9, player.getY() + 0.1,
                     player.getZ() + Math.sin(a) * 0.9, 1, 0, 0.05, 0, 0.01);
         }
-    }
-
-    // ---------------------------------------------------------------- 構え (A11)
-    public enum StanceResult {
-        OK, SAME, COOLDOWN
-    }
-
-    public static StanceResult setStance(ServerPlayer player, SkillStance stance) {
-        SkillData d = get(player);
-        if (d.stance == stance.ordinal()) {
-            return StanceResult.SAME;
-        }
-        if (d.stanceCd > 0 && !player.isCreative()) {
-            return StanceResult.COOLDOWN;
-        }
-        d.stance = stance.ordinal();
-        d.stanceCd = SkillRules.STANCE_SWAP_TICKS;
-        sync(player);
-        applyModifiers(player);
-        d.regenScale = SkillPassives.regenScale(player, d);
-        player.level().playSound(null, player.getX(), player.getY(), player.getZ(), Skills.SOUND_LEARN.get(), SoundSource.PLAYERS, 0.6f, 0.8f + 0.2f * stance.ordinal());
-        return StanceResult.OK;
-    }
-
-    // ---------------------------------------------------------------- 連鎖 (A10)
-    public enum ChainResult {
-        OK, BAD_SLOT, TOO_MANY
-    }
-
-    // 枠 slot → slot+1 の連鎖の印を入れる・外す
-    public static ChainResult toggleChain(ServerPlayer player, int slot) {
-        SkillData d = get(player);
-        if (slot < 0 || slot + 1 >= d.slotCount()) {
-            return ChainResult.BAD_SLOT;
-        }
-        int bit = 1 << slot;
-        if ((d.chainMask & bit) != 0) {
-            d.chainMask &= ~bit;
-        } else {
-            if (Integer.bitCount(d.chainMask) >= SkillRules.CHAIN_MAX) {
-                return ChainResult.TOO_MANY;
-            }
-            d.chainMask |= bit;
-        }
-        sync(player);
-        return ChainResult.OK;
     }
 
     // ---------------------------------------------------------------- キーストーン (A20)
@@ -736,9 +662,7 @@ public final class SkillManager {
         int stance = d.rank(Skill.STONE_STANCE);
         double guard = stance > 0 && WeaponType.has(player, WeaponType.GUARD) ? 1 : 0;
         add(player, Attributes.ARMOR, MOD_STANCE_ARMOR, SkillRules.stanceArmor(stance) + guard);
-        double vit15 = Breakpoints.reached(player, jp.revati.skyabyss.rpg.GrowthRules.Stat.VITALITY, Breakpoints.FIRST) ? Breakpoints.VITALITY_15_KNOCKBACK : 0;
         add(player, Attributes.KNOCKBACK_RESISTANCE, MOD_STANCE_KNOCKBACK, SkillRules.stanceKnockback(stance));
-        add(player, Attributes.KNOCKBACK_RESISTANCE, MOD_BP_KNOCKBACK, vit15);
         int nimble = d.rank(Skill.NIMBLE);
         double nimbleMove = SkillRules.nimbleMove(nimble) + (nimble > 0 && WeaponType.has(player, WeaponType.FAST) ? SkillRules.NIMBLE_FAST_BONUS : 0);
         set(player, Attributes.MOVEMENT_SPEED, MOD_NIMBLE_MOVE, nimbleMove, AttributeModifier.Operation.ADD_MULTIPLIED_BASE);
@@ -746,19 +670,7 @@ public final class SkillManager {
         boolean lone = d.knows(Skill.LONE_WIND) && player instanceof ServerPlayer sp && SkillEffects.allies(sp, SkillRules.LONE_RANGE).isEmpty();
         set(player, Attributes.ATTACK_DAMAGE, MOD_LONE_ATTACK, lone ? SkillRules.LONE_ATTACK : 0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
         set(player, Attributes.MOVEMENT_SPEED, MOD_LONE_MOVE, lone ? SkillRules.LONE_MOVE : 0, AttributeModifier.Operation.ADD_MULTIPLIED_BASE);
-        int ready = d.readyBlue ? d.rank(Skill.READINESS_REWARD) : 0;
-        add(player, Rpg.MAX_MANA, MOD_READY_MANA, SkillRules.readinessMana(ready));
-        set(player, Attributes.ATTACK_DAMAGE, MOD_READY_ATTACK, SkillRules.readinessAttack(ready), AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
-        // 天性 (一つ目の天職だけ)
-        SkillTree calling = d.callingTree();
-        add(player, Attributes.ARMOR_TOUGHNESS, MOD_TRAIT_TOUGH, calling == SkillTree.ROCK ? SkillRules.TRAIT_ROCK_TOUGHNESS : 0);
-        add(player, Attributes.KNOCKBACK_RESISTANCE, MOD_TRAIT_KNOCKBACK, calling == SkillTree.ROCK ? SkillRules.TRAIT_ROCK_KNOCKBACK : 0);
-        set(player, Attributes.MOVEMENT_SPEED, MOD_TRAIT_MOVE, calling == SkillTree.WIND ? SkillRules.TRAIT_WIND_MOVE : 0, AttributeModifier.Operation.ADD_MULTIPLIED_BASE);
-        add(player, Rpg.MAX_MANA, MOD_TRAIT_MANA, calling == SkillTree.TIDE ? SkillRules.TRAIT_TIDE_MANA : 0);
-        boolean heavy = WeaponType.isHeld(player.getMainHandItem(), WeaponType.HEAVY)
-                && Breakpoints.reached(player, jp.revati.skyabyss.rpg.GrowthRules.Stat.STRENGTH, Breakpoints.FIRST);
-        set(player, Attributes.ATTACK_SPEED, MOD_BP_SWING, heavy ? Breakpoints.STRENGTH_15_SWING : 0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
-        // ビルド (構え・キーストーン・木のセット・タグ・条件の特性。docs/design/31)
+        // ビルド (キーストーン・木のセット・タグ・条件の特性。docs/design/31)
         SkillBuild.Attrs b = SkillBuild.attrs(player);
         add(player, Attributes.ARMOR, MOD_B_ARMOR, b.armor());
         add(player, Attributes.KNOCKBACK_RESISTANCE, MOD_B_KNOCKBACK, b.knockback());

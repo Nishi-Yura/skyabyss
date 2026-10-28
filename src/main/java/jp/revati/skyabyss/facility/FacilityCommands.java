@@ -24,7 +24,7 @@ import net.neoforged.neoforge.event.RegisterCommandsEvent;
 //   /skyabyss facility shop <店>                  店を開く (どこからでも)
 //   /skyabyss facility stash                      預かり所を開く (どこからでも)
 //   /skyabyss facility coins <枚>                 鐘銭を渡す
-//   /skyabyss facility look <0..3>                近くの係の人の見た目の案を替える (撮影用)
+//   /skyabyss facility look <0..1>                近くの係の人の見た目の案を替える (撮影用)
 //   /skyabyss facility records                    砦の老兵の試練の記録を開く
 //   /skyabyss facility dummy                      足もとのまわり 8 の木偶の柱に的をかぶせる (撮影・試し用)
 //   /skyabyss facility keyroom offer|return       鍵の間に欠片を納める / 返してもらう (祭司と同じ)
@@ -51,7 +51,7 @@ public final class FacilityCommands {
                 .then(Commands.literal("facility")
                         .then(Commands.literal("spawn").then(Commands.argument("role", StringArgumentType.word()).suggests(ROLES)
                                 .executes(c -> spawn(c.getSource(), StringArgumentType.getString(c, "role"), 0))
-                                .then(Commands.argument("look", IntegerArgumentType.integer(0, 3))
+                                .then(Commands.argument("look", IntegerArgumentType.integer(0, 1))
                                         .executes(c -> spawn(c.getSource(), StringArgumentType.getString(c, "role"), IntegerArgumentType.getInteger(c, "look"))))))
                         .then(Commands.literal("mark").then(Commands.argument("name", StringArgumentType.word())
                                 .executes(c -> mark(c.getSource(), StringArgumentType.getString(c, "name")))))
@@ -129,7 +129,7 @@ public final class FacilityCommands {
                                     Coins.give(c.getSource().getPlayerOrException(), IntegerArgumentType.getInteger(c, "n"));
                                     return 1;
                                 })))
-                        .then(Commands.literal("look").then(Commands.argument("look", IntegerArgumentType.integer(0, 3))
+                        .then(Commands.literal("look").then(Commands.argument("look", IntegerArgumentType.integer(0, 1))
                                 .executes(c -> {
                                     ServerPlayer p = c.getSource().getPlayerOrException();
                                     int look = IntegerArgumentType.getInteger(c, "look");

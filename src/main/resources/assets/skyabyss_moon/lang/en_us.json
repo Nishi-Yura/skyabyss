@@ -106,5 +106,7 @@
   "dialogue.skyabyss.guest_moon_past1.ch6_valley_promise3": "At the moon's heart there is a core that turns time back. Let's meet there.\nThis time, we stop it together. ...I'll leave this light with you.",
   "dialogue.skyabyss.guest_moon_past1.ch6_valley_promise3.ok": "I promise",
   "dialogue.skyabyss.guest_moon_past1.ch6_valley_idle": "On the moon, hurrying won't bring the dawn. ...Rest a while.",
-  "dialogue.skyabyss.guest_moon_past1.ch6_valley_idle.ok": "I'll be back"
+  "dialogue.skyabyss.guest_moon_past1.ch6_valley_idle.ok": "I'll be back",
+  "chapter.skyabyss.aftermath.chapter3": "The valley's shadow has come undone. The moon's center is still far.",
+  "message.skyabyss.moon_end.todo": "The journey on the moon ends here in this version. The Waxing Cliffs and beyond follow in the next."
 }

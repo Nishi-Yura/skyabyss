@@ -23,7 +23,7 @@ final class SkillExt implements SkillModifier {
     static int baseTags(SkillData d, SkillTag tag) {
         int n = 0;
         for (Skill s : Skill.values()) {
-            if (d.knows(s) && (SkillTag.of(s) == tag || SkillTag.second(s) == tag)) {
+            if (d.knows(s) && SkillTag.of(s) == tag) {
                 n++;
             }
         }
@@ -73,10 +73,6 @@ final class SkillExt implements SkillModifier {
         if (d.echoUntil > player.level().getGameTime()) {
             v += SkillRules.echoPower(Math.max(1, d.rank(Skill.DEEP_ECHO)));
         }
-        int aim = d.rank(Skill.STONE_AIM);
-        if (aim > 0 && SkillTag.of(skill) == SkillTag.BONE && d.stillTicks >= SkillRules.AIM_TICKS) {
-            v += SkillRules.aimPower(aim);
-        }
         return v;
     }
 
@@ -109,15 +105,12 @@ final class SkillExt implements SkillModifier {
     static Attrs attrs(Player player) {
         SkillData d = SkillManager.get(player);
         int vigil = d.rank(Skill.OLD_VIGIL);
-        int aim = d.rank(Skill.STONE_AIM);
-        double armor = SkillRules.vigilArmor(vigil) + (aim > 0 && d.stillTicks >= SkillRules.AIM_TICKS ? SkillRules.aimArmor(aim) : 0);
-        return new Attrs(armor, SkillRules.seaMove(d.rank(Skill.SEA_BREEZE)) * (d.rank(Skill.SEA_BREEZE) > 0 ? 1 : 0),
-                SkillRules.vigilMana(vigil));
+        return new Attrs(SkillRules.vigilArmor(vigil), 0, SkillRules.vigilMana(vigil));
     }
 
     static double regenAdd(Player player) {
         SkillData d = SkillManager.get(player);
-        double v = d.rank(Skill.SEA_BREEZE) > 0 ? SkillRules.seaRegen(d.rank(Skill.SEA_BREEZE)) : 0;
+        double v = 0;
         if (d.knows(Skill.DEEP_OATH) && distinctTags(player) >= SkillTag.values().length) {
             v += SkillRules.OATH_DEEP_REGEN;
         }

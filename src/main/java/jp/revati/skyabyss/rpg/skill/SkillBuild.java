@@ -31,7 +31,7 @@ public final class SkillBuild {
         SkillData d = SkillManager.get(player);
         int n = 0;
         for (Skill s : Skill.values()) {
-            if (d.knows(s) && (SkillTag.of(s) == tag || SkillTag.second(s) == tag)) {
+            if (d.knows(s) && SkillTag.of(s) == tag) {
                 n++;
             }
         }
@@ -193,17 +193,13 @@ public final class SkillBuild {
         return condActive(player, SkillTag.ROCK) ? condValue(player, SkillTag.ROCK, 3, 4) : 0;
     }
 
-    // ---------------------------------------------------------------- キーストーン・構え
+    // ---------------------------------------------------------------- キーストーン
     public static boolean has(SkillData d, SkillKeystone k) {
         return d.keystones.contains(k.id);
     }
 
-    private static SkillStance stance(SkillData d) {
-        return SkillStance.of(d.stance);
-    }
-
     // ---------------------------------------------------------------- 傷
-    // 近接・飛び道具・技の別なく、自分の与える傷に掛ける割合 (足す)。キーストーン・構え・条件の特性・セット・タグの足し
+    // 近接・飛び道具・技の別なく、自分の与える傷に掛ける割合 (足す)。キーストーン・条件の特性・セット・タグの足し
     public static double generalDamage(Player player, boolean projectile) {
         SkillData d = SkillManager.get(player);
         double v = 0;
@@ -219,12 +215,6 @@ public final class SkillBuild {
         if (projectile && has(d, SkillKeystone.LONE_STRING)) {
             v += SkillRules.KEY_STRING_PROJECTILE;
         }
-        SkillStance st = stance(d);
-        if (st == SkillStance.GUARD) {
-            v += SkillRules.STANCE_GUARD_DAMAGE;
-        } else if (st == SkillStance.SONG) {
-            v += SkillRules.STANCE_SONG_DAMAGE;
-        }
         v += setSum(d, SetKind.DAMAGE) + tagStepSum(player, SetKind.DAMAGE);
         if (projectile) {
             v += setSum(d, SetKind.PROJECTILE) + tagStepSum(player, SetKind.PROJECTILE);
@@ -233,15 +223,12 @@ public final class SkillBuild {
         return Math.max(-0.5, v);
     }
 
-    // 技 (傷・支えの量) だけに掛かる割合: そのタグの数・熟練の刻印・連鎖・外の修飾
+    // 技 (傷・支えの量) だけに掛かる割合: そのタグの数・熟練の刻印・外の修飾
     public static double skillPower(Player player, Skill skill) {
         SkillData d = SkillManager.get(player);
         double v = tagPower(player, SkillTag.of(skill));
         if (SkillManager.runeOf(player, skill) == Rune.MASTERY) {
             v += SkillRules.MASTERY_RUNE_POWER;
-        }
-        if (chained(player, skill)) {
-            v += SkillRules.CHAIN_POWER;
         }
         for (SkillModifier m : MODIFIERS) {
             v += m.power(player, skill);
@@ -249,14 +236,9 @@ public final class SkillBuild {
         return Math.min(SkillRules.POWER_CAP, v);
     }
 
-    // 支えの量にだけ足す割合 (歌の構え)
+    // 支えの量にだけ足す割合 (歌の構えは 43 で削った。今は 0)
     public static double supportExtra(Player player) {
-        return stance(SkillManager.get(player)) == SkillStance.SONG ? SkillRules.STANCE_SONG_SUPPORT : 0;
-    }
-
-    public static boolean chained(Player player, Skill skill) {
-        SkillData d = SkillManager.get(player);
-        return skill.id.equals(d.chainSkill) && player.level().getGameTime() <= d.chainUntil;
+        return 0;
     }
 
     // 火の傷を減らす割合 (灰の木のセット)
@@ -268,10 +250,6 @@ public final class SkillBuild {
     public static double cooldownScale(Player player, Skill skill) {
         SkillData d = SkillManager.get(player);
         double v = setSum(d, SetKind.COOLDOWN);
-        SkillStance st = stance(d);
-        if (st == SkillStance.SWIFT) {
-            v += SkillRules.STANCE_SWIFT_COOLDOWN;
-        }
         if (has(d, SkillKeystone.LONE_STRING)) {
             v += SkillRules.KEY_STRING_COOLDOWN;
         }
@@ -296,13 +274,10 @@ public final class SkillBuild {
         return 1 + Math.max(-SkillRules.MANA_COST_CAP, Math.min(SkillRules.MANA_COST_CAP, v));
     }
 
-    // マナの回復に足す割合 (歌の構え・満ち潮・潮のセット)
+    // マナの回復に足す割合 (満ち潮・潮のセット)
     public static double regenAdd(Player player) {
         SkillData d = SkillManager.get(player);
         double v = setSum(d, SetKind.REGEN);
-        if (stance(d) == SkillStance.SONG) {
-            v += SkillRules.STANCE_SONG_REGEN;
-        }
         if (has(d, SkillKeystone.FULL_TIDE)) {
             v += SkillRules.KEY_TIDE_REGEN;
         }
@@ -315,20 +290,12 @@ public final class SkillBuild {
 
     public static Attrs attrs(Player player) {
         SkillData d = SkillManager.get(player);
-        SkillStance st = stance(d);
         double armor = setSum(d, SetKind.ARMOR) + tagStepSum(player, SetKind.ARMOR) + condArmor(player);
         double kb = setSum(d, SetKind.KNOCKBACK);
         double move = setSum(d, SetKind.MOVE) + tagStepSum(player, SetKind.MOVE);
         double aspeed = setSum(d, SetKind.ATTACK_SPEED);
         double mana = setSum(d, SetKind.MANA) + tagStepSum(player, SetKind.MANA);
         double manaMult = 0;
-        if (st == SkillStance.GUARD) {
-            armor += SkillRules.STANCE_GUARD_ARMOR;
-            kb += SkillRules.STANCE_GUARD_KNOCKBACK;
-        } else if (st == SkillStance.SWIFT) {
-            move += SkillRules.STANCE_SWIFT_MOVE;
-            armor += SkillRules.STANCE_SWIFT_ARMOR;
-        }
         if (has(d, SkillKeystone.BULWARK)) {
             armor += SkillRules.KEY_BULWARK_ARMOR;
             kb += SkillRules.KEY_BULWARK_KNOCKBACK;

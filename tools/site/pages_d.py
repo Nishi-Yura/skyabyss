@@ -22,28 +22,22 @@ def _note(s):
 
 # ------------------------------------------------------------ スキルのページへ
 def skills_extra():
-    free = _sec("freedom", T("自由に混ぜる", "Mixing freely"),
-        '<p class="lead">%s</p>' % T("木は縛りではなく棚です。何本の木から取ってもよく、混ぜるほど効く仕掛けがあります。点の総数（Lv 50 で 45）と「回復・無敵は作らない」は変わりません。",
-                                    "Trees are shelves, not cages. Take from as many trees as you like; several systems reward mixing. The total (45 points at Lv 50) is unchanged, and there is still no healing or invulnerability skill.")
+    free = _sec("freedom", T("職の中の作り込み", "Building within a job"),
+        '<p class="lead">%s</p>' % T("職の木は型ごとの道に分かれ、どの道を伸ばすかで同じ職でも遊び方が変わります。点の総数（Lv 50 で 45、職ごと）と「回復・無敵は作らない」は変わりません。",
+                                    "Each job tree branches into paths; which path you grow changes how the same job plays. The total (45 points at Lv 50, per job) is unchanged, and there is still no healing or invulnerability skill.")
         + table([T("仕掛け", "System"), T("決まり", "Rule")], [
-            [T("タグ", "Tags"), T("全 36 技に岩・風・潮・灰・骨のタグが付きます。装飾や手の武器のタグも数えます（10 まで）。1 つにつきそのタグの技の力 +1%。4 つと 7 つで小さな足し。", "All 36 skills carry a Rock, Wind, Tide, Ash or Bone tag; accessories and your held weapon can add one. Each counts up to 10 for +1% skill power of that tag, with small bonuses at 4 and 7.")],
-            [T("木のセット", "Tree sets"), T("同じ木に使った点が 2・4・6 になるたびに、その木の小さな追加が付きます。", "At 2, 4 and 6 points spent in one tree you gain that tree's small bonus.")],
-            [T("連鎖", "Chains"), T("隣り合う枠に印を立てます（3 本まで）。前の技から 2 秒以内に次の技を使うと、力 +15%。", "Mark adjacent slots (up to three). Use the next skill within 2 s of the previous one for +15% power.")],
-            [T("構え", "Stances"), T("守・疾・歌の 3 つ。得意と引き換えの小さな増減で、<kbd>H</kbd> で順に切り替えます（3 秒あけます）。", "Guard, Swift and Song: small trade-offs, cycled with <kbd>H</kbd> (3 s apart).")],
-            [T("熟練", "Mastery"), T("技を使う・当てる・予告をよけて当てるごとに育ち、1〜5 段。3 段で 4 つ目の「熟練の刻印」、5 段で足元に光の輪。転生しても残ります。", "Each skill grows by use, hits and dodge-hits, from 1 to 5. Mastery 3 opens a fourth rune; mastery 5 adds a light ring at your feet. It survives rebirth.")],
-            [T("条件の特性", "Conditional traits"), T("同じタグが 3 つ（5 つで大）そろうと、体力が少ないとき・予告をよけた直後などに小さな効果が付きます。回復や無敵ではありません。", "With three (five for the greater version) of one tag you gain small conditional bonuses, such as when low on health or just after dodging a telegraph. Never healing or invulnerability.")],
-            [T("キーストーン", "Keystones"), T("1 点で取れる強い代わりに何かを失う 6 つ（不動の砦・硝子の刃・満ち潮・灰の契り・孤高の弦・疾風の舞）。2 つまで、戦いの外で無料で外せます。", "Six one-point picks that give a lot and cost something: Immovable Bastion, Glass Blade, Full Tide, Ash Pact, Lone String and Gale Dance. Hold up to two; remove them free outside combat.")],
+            [T("持ち替え", "Weapon swap"), T("職は持った武器で決まります。二つの職の武器を持ち歩けば、戦いの中でも持ち替えでその場で職が替わります（待ちとマナはそのまま）。", "The weapon in your hand sets the job. Carry two jobs' weapons and swap mid-fight; cooldowns and mana carry over.")],
+            [T("要（型の奥）", "Keystones"), T("職の木の型ごとに一つ、強い代わりに何かを失う常時の技。戦いの外で無料で外せます。", "One per path in the job tree: a lot of power for a trade-off. Can be removed for free outside combat.")],
+            [T("熟練", "Mastery"), T("技を使う・当てる・予告をよけて当てるごとに育ち、1〜5 段。3 段で 4 つ目の「熟練の刻印」、5 段で足元に光の輪。転生しても残ります。", "Each skill grows by use, hits and dodge-hits, from 1 to 5. Mastery 3 opens a fourth \"mastery rune\"; mastery 5 adds a ring of light at your feet. Survives rebirth.")],
             [T("試着", "Try-on"), T("画面だけの写しに技を仮に振り、効果・マナ・待ちを確かめてから確定できます。", "Preview points on a screen-only copy, check effect, mana and cooldown, then confirm.")],
-            [T("武器の持ち替え", "Weapon swap"), T("技の枠は 2 組（近接用と弓用）。主の手に弓を持つと弓の組に入れ替わります。", "Two slot sets (melee and bow); holding a bow swaps to the bow set automatically.")],
-            [T("型の保存", "Loadouts"), T("枠・刻印・連鎖を 4 つ保存し、戦いの外でいつでも切り替えられます。", "Save four sets of slots, runes and chains and switch outside combat.")],
+            [T("型の保存", "Loadouts"), T("職ごとに枠と刻印の組を 2 つ保存し、戦いの外でいつでも切り替えられます。", "Save two sets of slots and runes per job and switch outside combat.")],
         ])
         + _note(T("技の力の合計は +100% で頭打ちです。", "Total skill power is capped at +100%.")))
     deep = _sec("deep", T("深いスキル", "Deep skills"),
-        '<p class="lead">%s</p>' % T("極めた技と、転生した人のための深い仕掛けです。K 画面の「変異・紋」ページと、木のつまみの橋・淵・前世の技から使います。",
-                                    "Systems for mastered skills and for reborn players, found on the Mutations and Glyphs page of the skill screen and on the tree selector.")
+        '<p class="lead">%s</p>' % T("極めた技と、転生した人のための深い仕掛けです。K 画面の「変異・紋」ページと、木のつまみの淵・前世の技から使います。どの職でも使えます。",
+                                    "Systems for mastered skills and for reborn players, found on the Mutations and Glyphs page of the skill screen and on the tree selector. They work for every job.")
         + table([T("仕掛け", "System"), T("決まり", "Rule")], [
             [T("変異", "Mutations"), T("8 つの技に 1 つずつ。その技を極め、巨神の素材（核 1 と鱗・欠片 3）を持っていると選べます。技が形を変えます（例: 巨神斬り→断崖、風裂き→飛ぶ刃）。1 技に 1 つで、外せません。", "One per skill for eight skills. Master the skill and hold titan materials (1 core and 3 scales or fragments) to reshape it, for example Titan Cleave into Cliffbreak or Wind Rend into Flying Blade. One per skill, permanent.")],
-            [T("橋", "Bridges"), T("木の輪（岩―風―潮―灰―骨―岩）の隣り合う 2 本から、技を 3 つずつ覚えると開く 5 つの技。両方のタグを数えます。", "Five skills that open when you know three skills in each of two neighbouring trees on the ring (Rock, Wind, Tide, Ash, Bone). They count both tags.")],
             [T("紋の盤", "Glyph board"), T("部屋を越えると紋（岩・風・潮・灰・骨、段 1〜3）が手に入ります。盤の穴は最初 3 つ、転生ごとに 1 つ開いて最大 6。穴ごとに中心の技を選ぶと、その技と隣の技が強まります。", "Clearing rooms yields glyphs of five kinds and tiers 1 to 3. The board starts with three holes and gains one per rebirth, up to six. Pick a centre skill per hole to strengthen it and its neighbours.")],
             [T("前世の技", "Past-life skills"), T("転生 1 回につき別枠の 2 点（最大 12）で取る 6 つ（遺響の一撃・旧き見張り・墓鐘・記憶の刃・最期の光・魂の糸）。", "Six skills bought with a separate pool of 2 points per rebirth (up to 12): Echo Strike, Old Watch, Grave Bell, Memory Blade, Last Light and Soul Thread.")],
             [T("淵の木", "The Abyss tree"), T("6 本目の木。転生した人にだけ見えます。引き・鏡・残響・貢ぎ・顎・誓いの 6 つ。他の木を混ぜるほど効く作りです。", "A sixth tree visible only to reborn players: Pull, Mirror, Echo, Tribute, Maw and Oath. It rewards mixing other trees.")],
@@ -155,7 +149,7 @@ def rebirth():
         '<p class="lead">%s</p>' % T("表示は「Lv 50+n」。レベルは 50 を超えず、n は転生した回数です。上限は 20 回です。", "Shown as \"Lv 50+n\". The level never exceeds 50; n counts your rebirths, up to 20.")
         + '<ul><li>%s</li><li>%s</li><li>%s</li><li>%s</li></ul>' % (
             T("条件: Lv 50、戦いの外、背中の鼓動の間の台座のそば、%s共鳴の結晶 5。倒れたときの罰や装備の損失はありません。" % crystal, "Requirements: Lv 50, outside combat, near the pedestal in a back's heartbeat chamber, and 5 resonance crystals %s. No death penalty or gear loss." % crystal),
-            T("戻るもの: レベル・技の点・ステータスの点・天職・覚えた技と刻印。", "Resets: level, skill and stat points, calling, learned skills and runes."),
+            T("戻るもの: レベル・技の点・ステータスの点・覚えた技と刻印（どの職も）。", "Resets: level, skill and stat points, learned skills and runes (for every job)."),
             T("残るもの: 装備・旅嚢・結晶・巨神の進み（パーティの背）・称号・熟練・型の保存・魂盤・恩恵。", "Kept: gear, satchel, crystals, titan progress (the party's back), titles, mastery, saved loadouts, the soul board and boons."),
             T("再レベリングは速くなります（必要経験値が転生ごとに −6%、下限 −40%）。", "Re-leveling gets faster: -6% experience needed per rebirth, down to -40%."))
         + _grid([

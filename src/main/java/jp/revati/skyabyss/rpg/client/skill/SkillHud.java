@@ -4,7 +4,6 @@ import jp.revati.skyabyss.SkyAbyss;
 import jp.revati.skyabyss.rpg.skill.Skill;
 import jp.revati.skyabyss.rpg.skill.SkillData;
 import jp.revati.skyabyss.rpg.skill.SkillManager;
-import jp.revati.skyabyss.rpg.skill.SkillStance;
 import jp.revati.skyabyss.rpg.skill.SkillRules;
 import jp.revati.skyabyss.client.hud.HudManager;
 import jp.revati.skyabyss.hud.HudLayout.Id;
@@ -134,7 +133,6 @@ public final class SkillHud {
             return;
         }
         Font font = mc.font;
-        renderStance(g, font, d, o[0] + d.slotCount() * (SLOT + SLOT_GAP) + 1, o[1]);
         for (int i = 0; i < d.slotCount(); i++) {
             int x = o[0] + i * (SLOT + SLOT_GAP);
             int y = o[1];
@@ -160,10 +158,6 @@ public final class SkillHud {
                 } else if (d.globalCooldown > 0) {
                     g.fill(x + 2, y + 2, x + 18, y + 18, 0x50101418);
                 }
-            }
-            // 連鎖の印: 次の枠とのあいだに金の小さな帯
-            if (i + 1 < d.slotCount() && (d.chainMask & (1 << i)) != 0) {
-                g.fill(x + SLOT, y + 5, x + SLOT + SLOT_GAP, y + SLOT - 5, 0xFFF2C14E);
             }
             // 光る: 使えた (白く)・使えなかった (赤紫の縁)
             int f = SkillClient.slotFlash[i];
@@ -193,22 +187,10 @@ public final class SkillHud {
         }
     }
 
-    // 構えの字 (枠の右端。切り替えの待ちのあいだは暗く)
-    private static void renderStance(GuiGraphics g, Font font, SkillData d, int x, int y) {
-        if (d.stance == 0) {
-            return;
-        }
-        SkillStance st = SkillStance.of(d.stance);
-        String letter = Component.translatable(st.nameKey() + ".short").getString();
-        int color = st == SkillStance.GUARD ? 0xC9A66B : st == SkillStance.SWIFT ? 0x8FE3C2 : 0x6FB8FF;
-        g.fill(x, y + 3, x + 9, y + SLOT - 3, 0xA0101418);
-        g.drawString(font, letter, x + 5 - font.width(letter) / 2, y + 6, d.stanceCd > 0 ? 0x6A707C : color, true);
-    }
-
     // 32px の絵を 16 で描く
     static final ResourceLocation ICONS2 = ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "textures/gui/skill/icons2.png");
 
-    // 100 以上は icons2.png (橋・淵・前世の技・木の印・紋。256x128)
+    // 100 以上は icons2.png (淵・前世の技・木の印・紋・職の新しい技。256x192)
     static void drawIcon(GuiGraphics g, int index, int x, int y) {
         drawIcon(g, index, x, y, 16);
     }

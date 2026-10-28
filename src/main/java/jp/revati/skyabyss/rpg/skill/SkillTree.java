@@ -10,14 +10,11 @@ public enum SkillTree {
     TIDE("tide", Stat.SPIRIT, false, "tide"),
     ASH("ash", Stat.STRENGTH, false, "sword"),
     BONE("bone", Stat.AGILITY, false, "bow"),
-    // 共通の木。誰でも取れる。天職の対象にはならない
-    TRAVELER("traveler", null, false, "traveler"),
     // 魔法使いの木 (docs/design/43)。はじめから開いている
     STAR("star", Stat.SPIRIT, false, "star"),
     // 2 章 (深淵) で目覚める
     ABYSS("abyss", Stat.SPIRIT, true, "abyss"),
-    // 橋 (A09)・淵 (B09。転生者だけ)・前世の技 (B08。転生者だけ。点は別枠)。封じではなく、画面の出し分けは転生の回数で
-    HYBRID("hybrid", null, false, "hybrid"),
+    // 淵 (B09。転生者だけ)・前世の技 (B08。転生者だけ。点は別枠)。封じではなく、画面の出し分けは転生の回数で
     DEEP("deep", Stat.SPIRIT, false, "deep"),
     PAST("past", null, false, "past");
 
@@ -54,7 +51,14 @@ public enum SkillTree {
 
     // 画面の木のつまみに出す絵 (icons.png の升目)
     public int iconIndex() {
-        return ordinal() < 8 ? 36 + ordinal() : 100 + 17 + (ordinal() - 8);
+        // 岩・風・潮・灰・骨 = 36〜40、星読み = 42、深淵術師 = 43 (41 は消した旅人の木の絵)。淵・前世の技は icons2.png の 18・19
+        return switch (this) {
+            case STAR -> 42;
+            case ABYSS -> 43;
+            case DEEP -> 118;
+            case PAST -> 119;
+            default -> 36 + ordinal();
+        };
     }
 
     // 転生した人にだけ見える木 (淵・前世の技)

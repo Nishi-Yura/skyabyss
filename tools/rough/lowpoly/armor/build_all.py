@@ -245,7 +245,7 @@ def manifest(results, rar):
         "三角形 (一式 = 兜 + 胸 + 脚 + 靴): "
         + " / ".join(f"{o.upper()}: " + "・".join(f"{TITAN_JP[T]} {tr(T, o)}" for T in TITANS) for o in "abc")
         + f"。予算は一式 900 以下 (伝説 1,100 以下)。★ の C は階級も作った (岩鯨): 通常 {tr('whale', 'c')} → レア {tr('whale', 'c_rare')} → 伝説 {tr('whale', 'c_legend')}。"
-        "階級のつけ方は武器の土台 (docs/review/weapon_design_base.md) と同じ: 通常 = 灰色の鉄の縁 / レア = 部品 +1 (胸の弧 1 段・側頭の飾り・前腕の飾り) + 青みの縁 + 短い光の筋 / "
+        "階級のつけ方は武器の土台 と同じ: 通常 = 灰色の鉄の縁 / レア = 部品 +1 (胸の弧 1 段・側頭の飾り・前腕の飾り) + 青みの縁 + 短い光の筋 / "
         "伝説 = 輪郭を変える大きな一点 (頭の後ろの環と背の布) + 金の縁 + 筋が増える。+5 / +10 はメッシュを変えず、絵と glowmask だけを差し替える (縁が一段ずつ明るい)。"
         "シートの 1 行 = 1 巨神。左から 現在 / A / B / C (それぞれ正面・背面・3/4)。最下段が階級。出力: docs/review/lowpoly_roughs/armor/{a,b,c}/<set>/<部位>_{mesh.json,atlas.png,glowmask.png}"
         " (<set> = stone_whale / tide_shell / thunder_wing / ember。★ の岩鯨はレア・伝説の *_rare_* *_legend_* と +5 / +10 の絵つき)。"

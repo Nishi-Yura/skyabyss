@@ -1,44 +1,44 @@
+import os
 """スキルとビルド・装備・旅嚢と道具・パーティとマルチ。"""
 from sitelib import *
 import skilldata
 import pages_d
 
 
-GEAR_TOC = [("weap", "13 種の武器", "Thirteen weapons"), ("tiers", "階級", "Tiers"), ("affix", "特性", "Affixes"), ("forge", "共鳴の炉", "Resonance Forge"), ("leg", "書き換えの武器", "Rewrite weapons"), ("acc", "装飾品", "Accessories"), ("armor", "防具", "Armor"), ("gearfree", "装備の自由度", "Gear freedom")]
+GEAR_TOC = [("weap", "武器", "Weapons"), ("tiers", "階級", "Tiers"), ("affix", "特性", "Affixes"), ("forge", "共鳴の炉", "Resonance Forge"), ("leg", "書き換えの武器", "Rewrite weapons"), ("acc", "装飾品", "Accessories"), ("armor", "防具", "Armor"), ("gearfree", "装備の自由度", "Gear freedom")]
 POUCH_TOC = [("why", "旅嚢とは", "What is the satchel"), ("what", "入るもの", "What goes in"), ("use", "使い方", "Using it"), ("tools", "そのほかの道具", "Other tools")]
 PARTY_TOC = [("party", "パーティを組む", "Forming a party"), ("shared", "背中の進みはパーティごと", "Per-party progress"), ("scale", "人数による強さ", "Scaling"), ("down", "倒れたとき", "Falling"), ("mark", "仲間の目印", "Party markers"), ("roles", "役目と設定", "Roles and settings")]
-SKILL_TOC = [("grow", "成長", "Growth"), ("trees", "五つの木と技", "Trees and skills"), ("calling", "天職", "Callings"), ("runes", "刻印と書き換え", "Runes and rewrites"), ("keys", "要", "Keystones"), ("bp", "ステータスの刻み目", "Stat breakpoints"), ("types", "武器の型", "Weapon types"), ("freedom", "自由に混ぜる", "Mixing freely"), ("respec", "振り直しと型の保存", "Respec and loadouts")]
+SKILL_TOC = [("grow", "成長", "Growth"), ("jobs", "六つの職と技", "Jobs and skills"), ("runes", "刻印と書き換え", "Runes and rewrites"), ("keys", "要", "Keystones"), ("types", "武器の型", "Weapon types"), ("freedom", "職の中の作り込み", "Building within a job"), ("respec", "振り直しと型の保存", "Respec and loadouts")]
 
 
 def skills():
-    sk, tn = skilldata.load()
+    sk, tn, jn = skilldata.load()
     by = {t: [s for s in sk if s["tree"] == t] for t in skilldata.TREES}
+    idx = {s["id"]: s["idx"] for s in sk}
+    icons = {s["idx"]: s["icon"] for s in sk}
     cards = []
     lists = []
     for t in skilldata.TREES:
         nm = tn[t]
+        job = jn[t]
         meta = skilldata.TREE_META[t]
-        idx = {s["id"]: s["idx"] for s in sk}
         nodes = [(s["idx"], s["ja"], s["en"], s["kind"], s["row"], s["col"], [idx[p] for p in s["pre"]]) for s in by[t]]
-        svg = tree_svg(nodes, nm[0], nm[1])
-        cards.append('<div class="panel tree-card"><h3><img class="px" src="%s" width="32" height="32" alt="" style="vertical-align:middle;margin-right:6px">%s</h3><p class="meta">%s</p>%s</div>' % (
-            meta[4], T(nm[0], nm[1]), T("%s ／ %s" % (meta[0], meta[1]), "%s / %s" % (meta[2], meta[3])), svg))
+        svg = tree_svg(nodes, job[0], job[1], icons)
+        cards.append('<div class="panel tree-card" id="job-%s"><h3><img class="px" src="%s" width="32" height="32" alt="" style="vertical-align:middle;margin-right:6px">%s</h3><p class="meta">%s</p><p class="meta">%s</p>%s</div>' % (
+            t, meta[4], T("%s（%s）" % (job[0], nm[0]), "%s (%s)" % (job[1], nm[1])),
+            T("武器: %s" % meta[0], "Weapons: %s" % meta[2]), T(meta[1], meta[3]), svg))
         lists.append('<h3 id="list-%s">%s</h3><div class="skill-list">%s</div>' % (
-            t, T(nm[0] + "の技", nm[1] + " skills"), "".join(skill_card(s) for s in by[t])))
+            t, T(job[0] + "の技", job[1] + " skills"), "".join(skill_card(s) for s in by[t])))
     legend = '<ul class="legend"><li><i class="a"></i>%s</li><li><i></i>%s</li><li><i class="k"></i>%s</li></ul>' % (
         T("使う技（枠に置いて使う）", "Active (put in a slot)"), T("パッシブ（覚えるだけで効く）", "Passive (works once learned)"),
-        T("要（かなめ。癖のある常時の技）", "Keystone (quirky always-on skill)"))
+        T("要（かなめ。型の奥の、癖のある常時の技）", "Keystone (quirky always-on skill at the end of a path)"))
 
-    ptable = table([T("レベル", "Level"), "1", "5", "10", "15", "21", "27", "33", "40"],
-                   [[T("技の点（合計）", "Skill points (total)"), "1", "3", "5", "10", "16", "22", "28", "35"]])
+    ptable = table([T("レベル", "Level"), "1", "5", "10", "15", "21", "27", "33", "40", "50"],
+                   [[T("技の点（職ごと）", "Skill points (per job)"), "1", "3", "5", "10", "16", "22", "28", "35", "45"]])
 
-    traits = table([T("天職", "Calling"), T("天性（一つ目の天職だけ）", "Innate trait (first calling only)")], [
-        [T("岩守り", "Rockwarden"), T("岩の肌: 強靭 +0.5、ノックバック耐性 +10%", "Stone Skin: +0.5 toughness, +10% knockback resistance")],
-        [T("風読み", "Windreader"), T("移動 +3%", "+3% movement speed")],
-        [T("潮歌い", "Tidesinger"), T("歌い手: 最大マナ +10、仲間に向ける技の範囲 +1 ブロック", "Singer: +10 max mana, +1 block range on skills aimed at allies")],
-        [T("灰の鍛え人", "Ashsmith"), T("炉の手: 武器の強化の上乗せ +10%、火の傷 −10%", "Forge Hand: +10% weapon enhancement bonus, -10% fire damage")],
-        [T("骨の射手", "Boneshooter"), T("骨の目: 飛び道具 +5%、撃った矢の 25% は戻る", "Bone Eye: +5% projectile damage, 25% of arrows return")],
-    ])
+    jobs = table([T("職（世界の呼び名）", "Job (world name)"), T("持つと職になる武器", "Weapons that set the job"), T("役目", "Role")], [
+        [T("%s（%s）" % (jn[t][0], tn[t][0]), "%s (%s)" % (jn[t][1], tn[t][1])), T(skilldata.TREE_META[t][0], skilldata.TREE_META[t][2]), T(jn[t][2], jn[t][3])]
+        for t in skilldata.TREES])
 
     def sname(i):
         s = [x for x in sk if x["id"] == i][0]
@@ -49,40 +49,33 @@ def skills():
                    [item_li_inline("raiju_claw"), sname("backstep")], [item_li_inline("warden_glaive"), sname("rock_call")],
                    [item_li_inline("smith_hammer"), sname("ember_hammer")], [item_li_inline("thrall_poker"), sname("temper")]]
 
-    keys = table([T("木", "Tree"), T("要", "Keystone"), T("働き", "Effect")], [
-        [T("岩守り", "Rockwarden"), sname("stone_oath"), T("8 ブロック以内の仲間が受ける傷の 10% を自分が受ける（1 回 1 ハートまで）", "Take 10% of damage dealt to allies within 8 blocks (max 1 heart at a time)")],
-        [T("風読み", "Windreader"), sname("lone_wind"), T("16 ブロック以内に他のプレイヤーがいない間、攻撃力 +12%・移動 +6%。一人遊びの木", "While no other player is within 16 blocks: +12% attack, +6% speed. The solo tree")],
-        [T("潮歌い", "Tidesinger"), sname("chorus_voice"), T("8 ブロック以内の仲間 1 人につき（最大 5）、技の効果 +4%", "+4% skill effect per ally within 8 blocks (up to 5)")],
-        [T("灰の鍛え人", "Ashsmith"), sname("smith_eye"), T("手の武器の強化段階 1 つにつき技の傷 +1.5%（+10 で +15%）", "+1.5% skill damage per weapon enhancement level (+15% at +10)")],
-        [T("骨の射手", "Boneshooter"), sname("still_string"), T("3 秒動かずに引いた矢の威力 +25%。動くとやり直し", "Arrows drawn after 3 s of standing still deal +25%; moving resets it")],
-        [T("旅人", "Wayfarer"), sname("journal"), T("戦っていないあいだなら、どこでも刻印と型の保存を切り替えられる", "Outside combat you can swap runes and loadouts anywhere")],
-    ])
-
-    bp = table([T("ステータス", "Stat"), T("15 で", "At 15"), T("30 で", "At 30")], [
-        [T("筋力", "Strength"), T("重い武器の振り +8%", "Heavy weapon swings +8%"), T("範囲の技の押し出し ×1.25", "Area skill knockback x1.25")],
-        [T("敏捷", "Agility"), T("予告をよけた直後 2 秒、移動 +8%", "+8% speed for 2 s after dodging a telegraph"), T("踏み込み・跳び退き・風裂きの待ち −10%", "Lunge, Backstep, Wind Rend cooldowns -10%")],
-        [T("精神", "Spirit"), T("マナの回復 +10%", "+10% mana regeneration"), T("仲間に向ける技（唄・合図）の効果 +10%", "+10% effect of ally-targeted skills (songs, signal)")],
-        [T("耐久", "Vitality"), T("ノックバック耐性 +10%", "+10% knockback resistance"), T("火・毒の傷 −15%", "-15% fire and poison damage")],
+    keys = table([T("職", "Job"), T("要", "Keystone"), T("働き", "Effect")], [
+        [T(jn["rock"][0], jn["rock"][1]), sname("stone_oath"), T("8 ブロック以内の仲間が受ける傷の 10% を自分が受ける（1 回 1 ハートまで）", "Take 10% of damage dealt to allies within 8 blocks (max 1 heart at a time)")],
+        [T(jn["ash"][0], jn["ash"][1]), sname("smith_eye"), T("手の武器の強化段階 1 つにつき技の傷 +1.5%（+10 で +15%）", "+1.5% skill damage per weapon enhancement level (+15% at +10)")],
+        [T(jn["star"][0], jn["star"][1]), sname("star_oath"), T("星読みの技の傷が上がる。そのかわり、星読みの技のマナが増える", "Stargazer skills hit harder, but cost more mana")],
+        [T(jn["bone"][0], jn["bone"][1]), sname("still_string"), T("3 秒動かずに引いた矢の威力 +25%。動くとやり直し", "Arrows drawn after 3 s of standing still deal +25%; moving resets it")],
+        [T(jn["wind"][0], jn["wind"][1]), sname("lone_wind"), T("16 ブロック以内に他のプレイヤーがいない間、攻撃力 +12%・移動 +6%。一人遊びの要", "While no other player is within 16 blocks: +12% attack, +6% speed. The solo keystone")],
+        [T(jn["tide"][0], jn["tide"][1]), sname("chorus_voice"), T("8 ブロック以内の仲間 1 人につき（最大 5）、技の効果 +4%", "+4% skill effect per ally within 8 blocks (up to 5)")],
     ])
 
     types = table([T("型", "Type"), T("武器", "Weapons"), T("技との噛み合い（縛りはなし）", "Synergy (never required)")], [
         [T("重", "Heavy"), T("鯨骨の大剣・余燼の戦斧・鍛え手の大鎚", "Whalebone Greatsword, Ember War Axe, Smith's Sledge"), T("巨神斬り・熾火の槌・焼き入れが強くなる", "Boosts Titan Cleave, Ember Hammer, Temper")],
         [T("長", "Long"), T("番兵長の鉾・潮殻の三叉槍・珊瑚憑きの銛・羽守の鉤槍・灰被りの火掻き", "Captain's Glaive, Tide Shell Trident, Coral Thrall's Harpoon, Warden's Hooked Glaive, Thrall's Poker"), T("踏み込み・引き潮の届き +1 ブロック、鯨尾薙ぎの半径 +0.5", "+1 block reach on Lunge and Ebb Tide, +0.5 radius on Whale-Tail Sweep")],
         [T("速", "Fast"), T("水路の顎牙・雷獣の爪・潮招きの大鋏", "Waterway Fang, Raiju Claw, Tidecaller's Claw"), T("風裂きの倍率、見切りの持続など", "Wind Rend multiplier, Foresight duration, and more")],
-        [T("遠", "Ranged"), T("雷翼の弓", "Thunder Wing Bow"), T("骨の射手の技の貫通・印・遠さ", "Piercing, marking and range of Boneshooter skills")],
+        [T("遠", "Ranged"), T("弓", "Bows"), T("骨の射手の技の貫通・印・遠さ", "Piercing, marking and range of Boneshooter skills")],
         [T("守", "Guard"), T("珊瑚の盾", "Coral Shield"), T("岩呼びの持続、岩の構えの防具", "Rock Call duration, Stone Stance armor")],
     ])
 
     resp = table([T("できること", "Action"), T("決まり", "Rule")], [
-        [T("技の振り直し", "Respec skills"), T("Lv 15 まではどこでも無料。そのあとは共鳴の炉のそばでいつでも共鳴の結晶 1（旅人の目利きがあれば無料）", "Free anywhere until Lv 15. After that, near a Resonance Forge at any time for 1 resonance crystal (free with the Wayfarer's Eye)")],
-        [T("戻るもの", "What returns"), T("覚えた技・刻印・要がすべて戻り、技の点は全部戻る。天職は変わらない", "All learned skills, runes and keystones reset and every point is refunded. Your calling stays")],
-        [T("刻印の付け替え", "Swap runes"), T("戦いの外で、炉か焚き火の近く（旅の手帖があればどこでも）。初回は無料、以後は結晶 1", "Outside combat near a forge or campfire (anywhere with the Traveler's Journal). First swap free, then 1 crystal")],
-        [T("型の保存", "Loadouts"), T("枠・刻印・連鎖の組を 4 つ保存でき、戦いの外でいつでも切り替えられる", "Save four sets of slots, runes and chains and switch outside combat")],
+        [T("技の振り直し", "Respec skills"), T("Lv 15 まではどこでも無料。そのあとは共鳴の炉のそばでいつでも共鳴の結晶 1", "Free anywhere until Lv 15. After that, near a Resonance Forge at any time for 1 resonance crystal")],
+        [T("戻るもの", "What returns"), T("その職の覚えた技・刻印・要がすべて戻り、技の点は全部戻る。ほかの職の木には触らない", "All learned skills, runes and keystones of that job reset and every point is refunded. Other jobs' trees are untouched")],
+        [T("刻印の付け替え", "Swap runes"), T("戦いの外で、炉か焚き火の近く。初回は無料、以後は結晶 1", "Outside combat near a forge or campfire. First swap free, then 1 crystal")],
+        [T("型の保存", "Loadouts"), T("職ごとに枠と刻印の組を 2 つ保存でき、戦いの外でいつでも切り替えられる", "Save two sets of slots and runes per job and switch outside combat")],
         [T("ステータスの振り直し", "Respec stats"), T("技と同じ炉・結晶・費用の表。回数は技と別に数える", "Same forge and cost table as skills; counted separately")],
     ])
 
-    body = page_head("スキルとビルド", "Skills and builds", "5 つの木と旅人、36 の技、天職、刻印、要、型。選ぶほど、遊び方が変わります。",
-                     "Five trees plus the Wayfarer, 36 skills, callings, runes, keystones and weapon types. What you choose changes how you play.") + toc(SKILL_TOC) + """
+    body = page_head("職と技", "Jobs and skills", "6 つの職。持った武器で職が決まり、職ごとに技の木・刻印・型の要があります。",
+                     "Six jobs. The weapon in your hand sets the job; each job has its own skill tree, runes and keystones.") + toc(SKILL_TOC) + """
 <section aria-labelledby="grow">
 <div class="wrap">
 <h2 id="grow">%(h_grow)s</h2>
@@ -96,9 +89,13 @@ def skills():
 </div>
 </section>
 
-<section class="alt" aria-labelledby="trees">
+<section class="alt" aria-labelledby="jobs">
 <div class="wrap">
-<h2 id="trees">%(h_trees)s</h2>
+<h2 id="jobs">%(h_jobs)s</h2>
+<p class="lead">%(jobs_lead)s</p>
+<ul><li>%(j1)s</li><li>%(j2)s</li><li>%(j3)s</li><li>%(j4)s</li></ul>
+%(jobt)s
+<h3 style="margin-top:1.4em">%(h_trees)s</h3>
 <p>%(trees_lead)s</p>
 %(legend)s
 <div class="trees">%(cards)s</div>
@@ -107,18 +104,7 @@ def skills():
 </div>
 </section>
 
-<section aria-labelledby="calling">
-<div class="wrap">
-<h2 id="calling">%(h_call)s</h2>
-<p class="lead">%(call)s</p>
-<ul>
-<li>%(c1)s</li><li>%(c2)s</li><li>%(c3)s</li><li>%(c4)s</li>
-</ul>
-%(traits)s
-</div>
-</section>
-
-<section class="alt" aria-labelledby="runes">
+<section aria-labelledby="runes">
 <div class="wrap">
 <h2 id="runes">%(h_run)s</h2>
 <p class="lead">%(run)s</p>
@@ -126,22 +112,15 @@ def skills():
 <h3>%(h_leg)s</h3>
 <p>%(leg)s</p>
 %(legt)s
+<p>%(heroic)s</p>
 </div>
 </section>
 
-<section aria-labelledby="keys">
+<section class="alt" aria-labelledby="keys">
 <div class="wrap">
 <h2 id="keys">%(h_key)s</h2>
 <p>%(key)s</p>
 %(keyt)s
-</div>
-</section>
-
-<section class="alt" aria-labelledby="bp">
-<div class="wrap">
-<h2 id="bp">%(h_bp)s</h2>
-<p>%(bp)s</p>
-%(bpt)s
 </div>
 </section>
 
@@ -163,43 +142,44 @@ def skills():
 </section>
 """ % dict(
         h_grow=T("成長の仕組み", "How you grow"),
-        grow=T("レベルが上がると、力の振り分けと技の点が増えます。5 つの木と旅人は、最初から全部の行が取れます。天職は木を開く鍵ではなく、あなたの専門です。",
-               "Leveling grants stat points and skill points. Every tree and the Wayfarer is open from the start; a calling is not a key but your specialty."),
-        g1h=T("4 つのステータス", "Four stats"), g1=T("筋力・敏捷・精神・耐久を、ステータス画面（<kbd>J</kbd>）で振り分けます。15 と 30 に小さな分かれ目があります。", "Spend points on Strength, Agility, Spirit and Vitality in the status screen (<kbd>J</kbd>). Each has small breakpoints at 15 and 30."),
+        grow=T("レベルは一人に一つ。上がると、力の振り分けと技の点が増えます。技の点は職ごとに別に持つので、職を替えても前の職の木はそのままです。",
+               "You have one level. Leveling grants stat points and skill points. Skill points are kept per job, so switching jobs never touches the other trees."),
+        g1h=T("4 つのステータス", "Four stats"), g1=T("筋力・敏捷・精神・耐久を、ステータス画面（<kbd>J</kbd>）で振り分けます。職ごとに伸ばしたいものが違います。", "Spend points on Strength, Agility, Spirit and Vitality in the status screen (<kbd>J</kbd>). Each job leans on different stats."),
         g2h=T("技の点", "Skill points"), g2=T("技の画面（<kbd>K</kbd>）で、1 段 1 点。どの技も同じ値段です。Lv 10 までは 1 レベルおきに増え、そのあとは 1 レベルごとに 1 点です。", "Each rank costs 1 point in the skill screen (<kbd>K</kbd>). Points come every other level up to Lv 10, then 1 per level."),
-        ptable=ptable, pnote=T("三本の木を極めることはできません。何を選ぶかが、ビルドになります。", "You cannot max out three trees. What you pick is your build."),
-        h_trees=T("五つの木と旅人", "Five trees and the Wayfarer"),
-        trees_lead=T("1 本の木は 6 つの技。1 行目に入口の 2 つ、2 行目に 2 つ、3 行目に奥義の使う技、4 行目に要です。行ごとに必要レベルがあります（1・5・12・20）。線は前提です。",
-                     "Each tree has six skills: two entry skills in row 1, two in row 2, a signature active in row 3 and a keystone in row 4. Rows unlock at levels 1, 5, 12 and 20. Lines show prerequisites."),
+        ptable=ptable, pnote=T("一つの職の木を全部は取れません。どの型を伸ばすかが、ビルドになります。", "You cannot take a whole job tree. Which path you grow is your build."),
+        h_jobs=T("六つの職", "Six jobs"),
+        jobs_lead=T("職は、持った武器で決まります。杖を持てば魔法使い、弓を持てば弓使い。切り替えの画面はありません。",
+                    "Your job is the weapon in your hand: hold a staff and you are a Mage, a bow and you are an Archer. There is no switching screen."),
+        j1=T("最初の職は、はじまりの島の宿り木の祠で選びます。六つの得物から一つ手に取ると、その職の始めの武器と最初の技がもらえます。", "You pick your first job at the island shrine: take one of six weapons and receive that job's starting weapon and first skill."),
+        j2=T("ほかの職の武器は、町の店・頼み・敵の落とし物で手に入ります。どの章にも六つの職の武器があります。", "Other jobs' weapons come from shops, requests and enemy drops. Every chapter has weapons for all six jobs."),
+        j3=T("職の武器でない物（素手・道具・鍵）を持っている間は、ふつうの攻撃だけで、技は使えません。前の職の技の帯は薄く残ります。", "While holding something that is not a job weapon (bare hands, tools, keys) you can only attack normally; the previous job's skill bar stays dimmed."),
+        j4=T("持ち替えればその場で職が替わります（技の待ちとマナはそのまま）。目的の帯の下に、今の職の名前が小さく出ます。", "Swap weapons and the job swaps on the spot (cooldowns and mana carry over). The current job's name shows under the objective strip."),
+        jobt=jobs,
+        h_trees=T("職の木", "Job trees"),
+        trees_lead=T("1 本の木は 6〜7 つの技。1 行目に入口の 2 つ、2 行目に 2 つ、3 行目に奥義の使う技、4 行目に要です。行ごとに必要レベルがあります（1・5・12・20）。線は前提です。",
+                     "Each tree has six or seven skills: two entry skills in row 1, two in row 2, a signature active in row 3 and a keystone in row 4. Rows unlock at levels 1, 5, 12 and 20. Lines show prerequisites."),
         legend=legend, cards="".join(cards), h_lists=T("技の一覧", "Skill lists"), lists="".join(lists),
-        h_call=T("天職", "Callings"),
-        call=T("天職は専門です。木はどれも最初から開いています。選んだ木の要を授かり、天性が付き、その木の技 3 つぶんが 1 点ずつ安くなります。", "A calling is a specialty. Every tree is already open. Choosing one grants that tree's keystone, an innate trait and a one-point discount on three of its skill ranks."),
-        c1=T("岩鯨の心臓を止め、心臓の報酬を選び終えると、天職を選ぶ画面が開きます。「あとで」にしても、技の画面から選べます。", "After you stop the Stone Whale's heart and choose its reward, a calling screen opens. You can postpone it and pick from the skill screen later."),
-        c2=T("一つ目の天職: その木の要を点なし・Lv 条件なしで授かり、天性が付き、その木の技の段（要・刻印は除く）3 つぶんが 1 点ずつ安くなります（戻る点）。", "First calling: you receive the tree's keystone free of points and level, gain the innate trait, and three of its skill ranks (not keystone or runes) cost 1 point less, refunded."),
-        c3=T("二つ目の天職（雷翼の心臓を止めたあと）: その木の要を授かり、5 つ目の技の枠が開きます。天性と割引はありません。", "Second calling (after Thunder Wing's heart): you receive that tree's keystone and a fifth skill slot unlocks. No innate trait or discount."),
-        c4=T("天職は転生で空に戻り、選び直せます。変えるには画面で二度押します。", "Callings reset on rebirth so you can pick again. Confirm a change by pressing twice."),
-        traits=traits,
-        h_run=T("刻印（ルーン）", "Runes"), run=T("使う技のうち 10 本には 3 択の刻印があり、技の形が変わります。", "Ten active skills each have three runes that reshape the skill."),
+        h_run=T("刻印（技を変える節）", "Runes (skill-changing nodes)"), run=T("使う技のうち 10 本には 3 択の刻印があり、技の形が変わります。職の木の中の「技を変える節」です。", "Ten active skills each have three runes that reshape the skill. They are the skill-changing nodes inside the job tree."),
         r1=T("対象: 巨神斬り・鯨尾薙ぎ・岩呼び・踏み込み・跳び退き・風裂き・守りの唄・引き潮・熾火の槌・雲穿ち", "Skills: Titan Cleave, Whale-Tail Sweep, Rock Call, Lunge, Backstep, Wind Rend, Ward Song, Ebb Tide, Ember Hammer, Cloud Piercer"),
-        r2=T("技を極める（最大段）と開きます。天職の前でも、どの木の技でも選べます。最初に選ぶのは 1 点です。", "Maxing a skill unlocks its runes, in any tree and even before choosing a calling. Choosing the first rune costs 1 point."),
+        r2=T("技を極める（最大段）と開きます。最初に選ぶのは 1 点です。", "Maxing a skill unlocks its runes. Choosing the first rune costs 1 point."),
         r3=T("付け替えは戦いの外で、炉・焚き火の近く。初回は無料、あとは共鳴の結晶 1。同時に効くのは 1 つです。", "Swap outside combat near a forge or campfire. The first swap is free, then 1 resonance crystal. Only one rune is active at a time."),
         h_leg=T("書き換えの武器（4 番目の刻印）", "Rewrite weapons (the fourth rune)"),
-        leg=T("8 本の書き換えの武器が、1 つの技を別の形に書き換えます。その武器を主の手に持つあいだだけ選べて効きます。", "Eight rewrite weapons each change one skill. They can be chosen and work only while held in your main hand."),
+        leg=T("書き換えの武器は、1 つの技を別の形に書き換えます。その武器を主の手に持つあいだだけ選べて効きます。", "Rewrite weapons each change one skill. They can be chosen and work only while held in your main hand."),
         legt=table([T("書き換えの武器", "Rewrite weapon"), T("書き換わる技", "Skill rewritten")], legend_rows),
-        h_key=T("要（かなめ）", "Keystones"), key=T("各木の 4 行目。得と引き換えに癖のある、パッシブです。段は 1 つだけ。", "Row 4 of each tree: a quirky always-on skill with a trade-off. One rank only."), keyt=keys,
-        h_bp=T("ステータスの刻み目", "Stat breakpoints"), bp=T("4 つのステータスそれぞれに、15 と 30 で小さな分かれ目があります（計 8 つ）。全部を 30 にするには力が 120 要るので、どこを届かせるかが選びです。", "Each stat has a small breakpoint at 15 and 30 (eight in total). Getting all four to 30 takes 120 points, so where to reach is a choice."), bpt=bp,
-        h_types=T("武器の型", "Weapon types"), types=T("13 種の武器は 5 つの型に分かれます。合う型の武器を持つと、技に小さなおまけが付きます。縛りはありません。", "The 13 weapons fall into five types. Holding a matching type gives a small bonus; nothing is ever required."), typet=types,
+        heroic=T("このほかに、巨神ごとに職の武器のヒロイック（17 本）があり、それぞれ技の書き換えを一つ持ちます。心臓を止めるたびに一本ずつ低い確率で落ちます。", "Each titan also has heroic job weapons (17 in all), each carrying one skill rewrite. One may drop at a low chance every time a heart is stopped."),
+        h_key=T("要（かなめ）", "Keystones"), key=T("各職の木の 4 行目。得と引き換えに癖のある、パッシブです。段は 1 つだけ。", "Row 4 of each job tree: a quirky always-on skill with a trade-off. One rank only."), keyt=keys,
+        h_types=T("武器の型", "Weapon types"), types=T("職は武器の種類で決まり、型は技との噛み合いです。合う型の武器を持つと、技に小さなおまけが付きます。縛りはありません。", "The weapon kind sets the job; the type describes synergy with skills. Holding a matching type gives a small bonus; nothing is ever required."), typet=types,
         freedom=pages_d.skills_extra(),
         h_resp=T("振り直しと型の保存", "Respec and loadouts"), respt=resp,
-        mk=T("装備の「木の印」の特性は、その木の技の力を伸ばします。", "The \"tree mark\" affixes on gear boost the power of that tree's skills."), mk2=T("装備のページへ", "See the gear page"),
+        mk=T("装備の「木の印」の特性は、その職の技の力を伸ばします（武器にはその職の印だけが付きます）。", "The \"tree mark\" affixes on gear boost that job's skills (a weapon carries only its own job's mark)."), mk2=T("装備のページへ", "See the gear page"),
     )
-    page("skills.html", "スキルとビルド — 天と淵のあいだ", "Skills and builds — Between the Sky and the Abyss",
-         "5 つの木と旅人、36 の技、天職、刻印、要、型、振り直し。", "Five trees plus the Wayfarer, 36 skills, callings, runes, keystones, weapon types and respec.", body)
+    page("skills.html", "職と技 — 天と淵のあいだ", "Jobs and skills — Between the Sky and the Abyss",
+         "6 つの職、職ごとの技の木、刻印、要、型、振り直し。", "Six jobs, a skill tree per job, runes, keystones, weapon types and respec.", body)
 
 
 # 技の見た目 (site/img/skill_fx/<技>.webp の動く絵と <技>_poster.webp の止めた絵。tools/site/encode_skill_fx_clips.py が作る)
 ELEMENT = {"rock": ("岩", "Rock"), "wind": ("風", "Wind"), "tide": ("潮", "Tide"), "ash": ("灰", "Ash"),
-           "bone": ("骨", "Bone"), "traveler": ("旅", "Traveler")}
+           "bone": ("骨", "Bone"), "star": ("星", "Star")}
 
 
 def skill_card(s):
@@ -228,14 +208,15 @@ def skill_card(s):
         visual = '<p class="fx-none">%s</p>' % T("パッシブなので、画面に出る見た目はありません。", "This skill is always on, so there is no on-screen visual.")
     return (
         '<details class="skill" id="skill-%(id)s"><summary>'
-        '<img class="ic px" src="img/skill/%(idx)02d.png" width="32" height="32" alt="">'
+        '%(icon)s'
         '<span class="sk-name">%(name)s</span>'
         '<span class="tag">%(kind)s</span><span class="tag tag-el">%(el)s</span>'
         '</summary><div class="sk-body">'
         '<p class="sk-desc">%(desc)s</p>'
         '<p class="sk-meta">%(el_line)s　%(rank)s</p>'
         '%(visual)s</div></details>' % dict(
-            id=sid, idx=s["idx"], name=T(s["ja"], s["en"]), kind=T(*kind), el=T(el[0] + "属性", el[1] + " tree"),
+            id=sid, icon=('<img class="ic px" src="img/skill/%02d.png" width="32" height="32" alt="">' % s["icon"]) if os.path.exists(os.path.join(ROOT, "site", "img", "skill", "%02d.png" % s["icon"])) else '<span class="ic"></span>',
+            name=T(s["ja"], s["en"]), kind=T(*kind), el=T(el[0] + "属性", el[1] + " tree"),
             desc=T(s["dja"], s["den"]),
             el_line=T("属性: %s" % el[0], "Element: %s" % el[1]),
             rank=T("最大 %d 段" % s["rank"], "Max rank %d" % s["rank"]), visual=visual))
@@ -296,8 +277,8 @@ def gear():
     armor = "".join('<li>%s</li>' % item_li_inline(i) for i in ("stone_whale_chestplate", "tide_shell_chestplate", "thunder_wing_chestplate", "ember_chestplate"))
     acc = "".join('<li>%s</li>' % item_li_inline(i) for i in ("resonance_charm", "tide_chime_charm", "storm_charm", "kindling_charm"))
     acc2 = "".join('<li>%s</li>' % item_li_inline(i) for i in ("stone_whale_plating", "moss_talisman", "moontide_pearl", "storm_anklet", "storm_eye_feather", "ember_mantle", "ember_lantern"))
-    body = page_head("装備", "Gear", "13 種の武器、階級と特性、共鳴の炉、装飾品、防具。周回して揃えます。",
-                     "Thirteen weapons, tiers and affixes, the Resonance Forge, accessories and armor. Collect them across repeat runs.") + toc(GEAR_TOC) + """
+    body = page_head("装備", "Gear", "章ごと・職ごとの武器、巨神の武器、階級と特性、共鳴の炉、装飾品、防具。周回して揃えます。",
+                     "Weapons per chapter and job, titan weapons, tiers and affixes, the Resonance Forge, accessories and armor. Collect them across repeat runs.") + toc(GEAR_TOC) + """
 <section aria-labelledby="weap">
 <div class="wrap">
 <h2 id="weap">%(h_weap)s</h2>
@@ -369,8 +350,8 @@ def gear():
 </div>
 </section>
 """ % dict(
-        h_weap=T("13 種の武器", "Thirteen weapons"),
-        weap=T("巨神ごとに、エピックの基本の武器と、ヒロイックの専用武器があります。剣・鉾・短剣・槍・銛・盾・弓・斧・鎚と、形もさまざまです。", "Each titan drops Epic base weapons and Heroic dedicated ones, in many shapes: sword, glaive, dagger, trident, harpoon, shield, bow, axe and hammer."),
+        h_weap=T("武器", "Weapons"),
+        weap=T("どの章にも 6 つの職の武器があり、町の店・頼み・敵の落とし物で手に入ります（職は持った武器で決まります）。そのうえで巨神ごとに、エピックの基本の武器と、ヒロイックの専用武器があります。剣・鉾・短剣・槍・銛・盾・弓・斧・鎚と、形もさまざまです。", "Every chapter has weapons for all six jobs, from shops, requests and enemy drops (the weapon sets the job). On top of that, each titan drops Epic base weapons and Heroic dedicated ones, in many shapes: sword, glaive, dagger, trident, harpoon, shield, bow, axe and hammer."),
         wt=table([T("武器", "Weapon"), T("型", "Type"), T("巨神", "Titan"), T("階級", "Tier")], wrows),
         wnote=T("型は技との噛み合いです。<a href=\"skills.html#types\">スキルのページ</a>を見てください。", "Types describe synergy with skills; see <a href=\"skills.html#types\">the skills page</a>."),
         h_tiers=T("階級", "Tiers"), tt=tiers,
@@ -406,7 +387,7 @@ def gear():
         levels=levels,
     )
     page("gear.html", "装備 — 天と淵のあいだ", "Gear — Between the Sky and the Abyss",
-         "13 種の武器、階級、特性、共鳴の炉、装飾品、防具、必要レベル。", "Thirteen weapons, tiers, affixes, the Resonance Forge, accessories, armor and level requirements.", body)
+         "章ごと・職ごとの武器、巨神の武器、階級、特性、共鳴の炉、装飾品、防具、必要レベル。", "Weapons per chapter and job, titan weapons, tiers, affixes, the Resonance Forge, accessories, armor and level requirements.", body)
 
 
 # ------------------------------------------------------------------ 旅嚢
@@ -479,14 +460,14 @@ def pouch():
         h_use=T("使い方", "Using it"),
         u1=T("<kbd>I</kbd> で旅嚢の画面を直接開きます。持ち物の画面（サバイバル）の右上の「持ち物」「装飾」「旅嚢」のつまみからも開けます。", "Press <kbd>I</kbd> to open the satchel directly, or use the Inventory / Accessories / Satchel tabs at the top right of the survival inventory."),
         u2=T("<kbd>Y</kbd> を長押しすると道具の輪が開きます。マウスの向きで選び、離すと使います。短く押すと、前回の道具をすぐ使います。", "Hold <kbd>Y</kbd> for the tool wheel: aim with the mouse and release to use. Tap it to use the last tool."),
-        u3=T("作業台と持ち物の画面の右に「旅嚢から」の帯が出て、袋の素材で作れます（レシピブックの「置く」も袋から）。", "A \"From satchel\" strip appears beside the crafting table and inventory so you can craft with satchel materials; the recipe book's place action also draws from it."),
+        u3=T("共鳴の炉や店で誂えるときの材料は、旅嚢から直接払えます（袋から出す手間はありません）。", "When the Resonance Forge or a shop asks for materials, they are paid straight from the satchel; no need to take them out first."),
         u4=T("大事な品は倒れても残り、Q キーで投げ捨てられません（人に渡すときは箱を通します）。", "Key items survive death and cannot be thrown away with Q (hand them over through a chest)."),
         h_tools=T("そのほかの道具", "Other tools"),
         r_h=T("控え帳（B）", "Record book (B)"), r=T("巨神の進み、墓の場所、大事な品の在りか、備えの行、呼び戻しのボタン。<code>/skyrecord</code> でも開けます。", "Titan progress, grave locations, where your key items are, the readiness row and a Recall button. Also opens with <code>/skyrecord</code>."),
         l_h=T("伝承の書", "Lore book"), l=T("見たこと、読んだ物、聞いた話が少しずつ記されていきます。持って右クリックで開きます。なくしても戻ります。", "Records what you see, read and hear. Right-click it to open. If you lose it, it returns."),
         t_h=T("知らせの記録（N）", "Notice log (N)"), tt=T("流れた語り・獲得・場所の名前を新しい順に読み返します。", "Re-read narration, rewards and place names, newest first."),
         w_h=T("呼び笛と呼び貝", "Whistles and conches"), w=T("旅のために巨神の「子」を呼ぶ品です。鯨は笛、潮殻は貝。子にはパーティ全員（最大 6 人）が乗れ、海図で行き先を選びます。出発は全員が乗れば約 3 秒後で、乗っていない近くの仲間がいれば最大 30 秒待ちます。成体の巨神はもう動きません（<a href=\"titans.html#travel\">くわしくは巨神のページ</a>）。", "Items that summon a young carrier of the titan for travel: a whistle for the whale, a conch for the shell. The whole party (up to six) rides and picks a destination from a chart. Departure comes about 3 seconds after everyone is aboard, waiting up to 30 seconds for nearby party members who have not boarded. Adult titans no longer move (<a href=\"titans.html#travel\">details on the titans page</a>)."),
-        n_h=T("野営の道具", "Camp tools"), nn=T("背中の中でも、作業台・かまど・金床・チェストなどを、仕掛けや戦いの場所から離れた地面に一人 8 個まで置けます。背中を出ると中身ごと手もとへ戻ります。", "On a titan's back you may place crafting tables, furnaces, anvils and chests (up to 8 per player) away from puzzle areas. They return to you with contents when you leave."),
+        n_h=T("置けるものはない", "Nothing to place"), nn=T("この mod ではブロックを置けず、作業台やチェストも使いません（アドベンチャーの決まり）。背で倒れると、休み場の焚き火から再開します。", "Blocks cannot be placed and there are no crafting tables or chests (the adventure rule). If you fall on a titan's back you resume at the rest campfire."),
         f_h=T("心臓の遺物の選択", "Relic choice"), f=T("心臓を初めて止めたあとに選べる遺物の画面を、旅嚢や控え帳からいつでも開き直せます。", "Reopen the relic choice screen from the satchel or the record book at any time."),
     )
     page("pouch.html", "旅嚢と道具 — 天と淵のあいだ", "Travel Satchel and tools — Between the Sky and the Abyss",
@@ -580,7 +561,7 @@ def party():
         w2=T("仲間が 3.5 ブロック以内で「使う」を 3 秒押し続けると起こせます。体力 3 割で戻り、短い守りが付きます。傷を受ける・離れると中断します。起こされた人は復帰の回数に数えません。ゲームルール <code>skyabyssRevive</code>（既定 true）で切れます。", "A teammate within 3.5 blocks who holds Use for 3 seconds revives you at 30% health with brief protection; taking damage or moving away interrupts it. Being revived does not use a re-entry. The game rule <code>skyabyssRevive</code> (default true) turns it off."),
         w3=T("誰も起こせないまま時間が来たとき（一人遊びや仲間が全員倒れたときを含む）は、そのまま倒れます。心臓の戦いなら前室で目を覚まし、20 秒後に扉から戻れます（1 戦に 3 回まで。戻ると 3 秒の守り）。", "If nobody can revive you in time (including solo play, or when every party member is down) you fall for real. In a heart fight you wake in the antechamber and may re-enter after 20 seconds, up to 3 times per fight, with 3 seconds of protection."),
         h_mark=T("仲間の目印", "Party markers"),
-        mark=T("仲間の位置は、壁の向こうでも頭の上の札（名前と距離）と、画面の端の矢印で分かります。別の背中にいる仲間は右の一覧に「別の場所」と出ます。設定 <code>partyMarkers</code> で消せます。旅人の技「合図」で、見ている先に全員に見える光の標も立てられます。", "Teammates show through walls as overhead tags (name and distance) and edge-of-screen arrows. A teammate on another back appears in the right-hand list as \"elsewhere\". Turn it off with the <code>partyMarkers</code> setting. The Wayfarer skill Signal plants a beacon everyone can see."),
+        mark=T("仲間の位置は、壁の向こうでも頭の上の札（名前と距離）と、画面の端の矢印で分かります。別の背中にいる仲間は右の一覧に「別の場所」と出ます。設定 <code>partyMarkers</code> で消せます。「合図」（誰でも使える基本の操作）で、見ている先に全員に見える光の標も立てられます。", "Teammates show through walls as overhead tags (name and distance) and edge-of-screen arrows. A teammate on another back appears in the right-hand list as \"elsewhere\". Turn it off with the <code>partyMarkers</code> setting. With Signal, a basic action everyone has, you can also plant a light beacon where you look that the whole party sees."),
         mock_alt="仲間の目印の見本", m1=T("Alex　24 m", "Alex  24 m"), m2=T("Steve　58 m ▶", "Steve  58 m ▶"), m3=T("別の場所　Sam", "Elsewhere: Sam"),
         mnote=T("見本です。名前は例です。", "A sample. The names are made up."),
         h_roles=T("役目と管理者向けの設定", "Roles and admin settings"),

@@ -30,7 +30,7 @@
 フォルダの移動にともなう `sys.path` は、各スクリプトの先頭で他グループを足して解決する。
 採用済みの素材を古い版で上書きしてしまうスクリプトは止めてある。
 どうしても動かすときだけ、環境変数 `SKYABYSS_ALLOW_REGEN=1` を付ける。`tools/gen/items/gen_items.py` だけは `SKYABYSS_ALLOW_GEN_ITEMS=1`。
-経緯は `docs/review/assets_audit.md` の S1。
+経緯: 2026-10-16 の素材の監査で、古い生成スクリプトが採用済みの素材を上書きしていたため。
 
 ## ゲームを立ち上げる担当の決まり (並列で動かすとき)
 
@@ -302,7 +302,7 @@ python tools/gen/sound/gen_cinematic_voice.py --review                     # 3 �
 | 町のクエストの限定の人の絵: `textures/lowpoly/guest_<人>.png`、肖像 `textures/gui/npc/face/guest_<人>_<表情>.png`、動き `animations/entity/town_guest.animation.json`、一覧 `docs/review/town_quests/guests.png` | `tools/gen/mobs/gen_town_guests.py` (係の人の案 A の形と描き方 `rough/lowpoly/fac/attendants.py`・`tools/gen/mobs/gen_attendant_portraits.py` を読むだけ。色の表はこのスクリプトが持つ) | 同じ物ができる (決定的) |
 
 `rough/boss_v4.py`、`rough/sentinel_v4.py`、`rough/voxel.py`、`rough/build_gallery.py` は `src/` を読むだけで書かない。
-`rough/` のそのほか (`boss.py`、`mobs_*.py`、`stone_whale*.py`、`weapons*.py`、`captain_v2.py` など) は、片付けた `docs/roughs/` にしか書かない。履歴として残している (ラフの中身は git の 7b69ce9 以前にある)。
+`rough/` のそのほか (`boss.py`、`mobs_*.py`、`stone_whale*.py`、`weapons*.py` など) は、片付けた `docs/roughs/` にしか書かない。履歴として残している (ラフの中身は git の 7b69ce9 以前にある)。
 
 ## 作り直しの元データ (`tools/sources/`)
 
@@ -344,8 +344,6 @@ python tools/gen/sound/gen_cinematic_voice.py --review                     # 3 �
 | `tools/gen/world/gen_titan_model.py` | 岩鯨の近景 geo / png / glowmask / animation | `tools/install/install_stone_whale.py` |
 | `tools/gen/world/gen_heart.py` | 心臓の animation (古い骨名に戻る) | `tools/install/install_heart_v4.py` |
 | `tools/gen/items/gen_weapon_models.py` (v1) | 武器 3 本のモデルを古い押し出しモデルに戻し、途中で止まる | `tools/gen/items/gen_weapon_models_v2.py` |
-| `rough/rib_archer_v3.py` | 射手の geo / animation を v3 に戻す | `rough/rib_archer_v4.py` |
-| `rough/captain_v3.py --install` | 番兵長を v3 に戻す (`--install` なしなら docs にだけ書くので動く) | `rough/captain_v4.py --install` |
 | `tools/gen/sound/gen_sky_sounds.py`、`tools/gen/sound/gen_titan_sounds.py` | `sounds/sky/*.ogg`、`sounds/titan/*.ogg` | なし (今の src が正本) |
 
 `tools/gen/items/gen_weapon_models_v2.py` も止めてある。武器 3 本の `models/item/{whalebone_greatsword,captain_pike,waterway_fang}.json` と

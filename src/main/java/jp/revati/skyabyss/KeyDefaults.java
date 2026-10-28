@@ -21,7 +21,6 @@ public final class KeyDefaults {
     public static final int PING = 39; // ' 合図 (「ここ」。日本語配列では : の位置)
     public static final int STATUS = 74; // J
     public static final int SKILLS = 75; // K
-    public static final int STANCE = 46; // .
     public static final int WEAPON_INSPECT = 91; // [ 武器の点検 (かざして回す)
     public static final int WHEEL = 342; // 左 Alt 長押しで輪の選び画面 (クエスト・旅嚢・技・地図…を選んで開く)
     public static final int[] SLOTS = {82, 71, 86, 90, 44}; // R G V Z ,
@@ -44,7 +43,6 @@ public final class KeyDefaults {
         m.put("ping", PING);
         m.put("status", STATUS);
         m.put("skills", SKILLS);
-        m.put("stance", STANCE);
         m.put("weapon_inspect", WEAPON_INSPECT);
         m.put("wheel", WHEEL);
         for (jp.revati.skyabyss.abyss.arts.AbyssArt art : jp.revati.skyabyss.abyss.arts.AbyssArt.values()) {

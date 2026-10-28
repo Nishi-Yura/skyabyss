@@ -6,8 +6,6 @@ import jp.revati.skyabyss.rpg.skill.Skill;
 import jp.revati.skyabyss.rpg.skill.SkillData;
 import jp.revati.skyabyss.rpg.skill.SkillManager;
 import jp.revati.skyabyss.rpg.skill.SkillRules;
-import jp.revati.skyabyss.rpg.skill.SkillStance;
-import jp.revati.skyabyss.rpg.skill.net.SkillStancePayload;
 import net.minecraft.network.chat.Component;
 import jp.revati.skyabyss.rpg.skill.net.ManaPayload;
 import jp.revati.skyabyss.rpg.skill.net.SkillCastPayload;
@@ -53,21 +51,10 @@ public final class SkillClient {
         }
     }
 
-    // 天職を選べる (サーバーが知らせた) 段。0 = まだ。K の画面のボタンを出す
-    public static int callingReady;
-
     public static void onJobChoiceOpen() {
         Minecraft mc = Minecraft.getInstance();
         if (mc.player != null && !(mc.screen instanceof JobChoiceScreen)) {
             mc.setScreen(new JobChoiceScreen());
-        }
-    }
-
-    public static void onCallingOpen(jp.revati.skyabyss.rpg.skill.net.CallingOpenPayload payload) {
-        callingReady = payload.which();
-        Minecraft mc = Minecraft.getInstance();
-        if (payload.open() && mc.player != null && !(mc.screen instanceof CallingScreen)) {
-            mc.setScreen(new CallingScreen(payload.which()));
         }
     }
 
@@ -121,10 +108,6 @@ public final class SkillClient {
             if (mc.screen == null) {
                 mc.setScreen(new SkillScreen());
             }
-        }
-        // 構えは 43 (6 職) で削った。キーは押されても何もしない
-        while (SkillClientSetup.STANCE_KEY.consumeClick()) {
-            continue;
         }
         for (int i = 0; i < SkillClientSetup.SLOT_KEYS.length; i++) {
             while (SkillClientSetup.SLOT_KEYS[i].consumeClick()) {

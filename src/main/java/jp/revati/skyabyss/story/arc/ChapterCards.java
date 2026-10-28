@@ -209,8 +209,7 @@ public final class ChapterCards {
         if (busy(player) || player.level().dimension() != net.minecraft.world.level.Level.OVERWORLD) {
             return false;
         }
-        boolean screens = jp.revati.skyabyss.loot.reward.HeartReward.hasPending(player)
-                || (jp.revati.skyabyss.rpg.skill.SkillCalling.earned(player) && jp.revati.skyabyss.rpg.skill.SkillCalling.which(player) != 0);
+        boolean screens = jp.revati.skyabyss.loot.reward.HeartReward.hasPending(player);
         UUID id = player.getUUID();
         if (!screens) {
             BLOCKED_SINCE.remove(id);

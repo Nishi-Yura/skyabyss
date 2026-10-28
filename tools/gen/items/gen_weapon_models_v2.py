@@ -231,7 +231,7 @@ def build_model(item: str, target_len: float):
 
 
 def write_palette(item, palette, H):
-    # 高さ 1px の画像は block atlas 全体のミップマップを 0 に落とす (assets_audit.md の M1)。
+    # 高さ 1px の画像は block atlas 全体のミップマップを 0 に落とす。
     # 常に 16x16 で書く。モデルの uv は 16 単位 = 画像全体なので、16x16 なら uv の 1 単位がちょうど 1 画素になる。
     # 使わない行は、パレットの行を繰り返して埋める (H=1 なら 1 行目を 16 回)。
     assert H <= PAL_H, (item, H)

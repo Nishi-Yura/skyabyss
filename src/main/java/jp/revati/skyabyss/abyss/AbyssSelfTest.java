@@ -413,7 +413,6 @@ public final class AbyssSelfTest {
         Growth.get(p).level = 40;
         SkillData d = SkillManager.get(p);
         d.bonusPoints = 80;
-        d.calling = "";
         d.mana = 200;
         p.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(BuiltInRegistries.ITEM.get(ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, weapon))));
         level.addFreshEntity(p);

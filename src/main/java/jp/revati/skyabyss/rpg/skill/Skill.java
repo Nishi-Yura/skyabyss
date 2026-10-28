@@ -46,19 +46,6 @@ public enum Skill {
     HAWK_EYE("hawk_eye", SkillTree.BONE, Kind.PASSIVE, 3, 1, 1, "far_shot"),
     SKY_RAIN("sky_rain", SkillTree.BONE, Kind.ACTIVE, 2, 2, 2, "bone_trap", "hawk_eye"),
     STILL_STRING("still_string", SkillTree.BONE, Kind.KEYSTONE, 1, 3, 2, "sky_rain"),
-    // ---------------------------------------------------------------- 旅人 (共通の木。使う技 1 ＋ 常 4 ＋ 要 1)
-    SIGNAL("signal", SkillTree.TRAVELER, Kind.ACTIVE, 2, 0, 0),
-    READINESS_REWARD("readiness_reward", SkillTree.TRAVELER, Kind.PASSIVE, 3, 0, 1),
-    CAMP_HAND("camp_hand", SkillTree.TRAVELER, Kind.PASSIVE, 2, 1, 0, "signal", "readiness_reward"),
-    APPRAISER("appraiser", SkillTree.TRAVELER, Kind.PASSIVE, 1, 1, 1, "signal", "readiness_reward"),
-    FLEET_FOOT("fleet_foot", SkillTree.TRAVELER, Kind.PASSIVE, 3, 2, 2, "camp_hand", "appraiser"),
-    JOURNAL("journal", SkillTree.TRAVELER, Kind.KEYSTONE, 1, 3, 2, "fleet_foot"),
-    // ---------------------------------------------------------------- 橋 (A09。隣り合う 2 本の木で技を 3 つずつ覚えると開く。列 0〜4 は画面の輪の位置)
-    DUST_CHARGE("dust_charge", SkillTree.HYBRID, Kind.ACTIVE, 2, 2, 0),
-    SEA_BREEZE("sea_breeze", SkillTree.HYBRID, Kind.PASSIVE, 2, 2, 1),
-    STEAM_BELL("steam_bell", SkillTree.HYBRID, Kind.ACTIVE, 2, 2, 2),
-    CINDER_VOLLEY("cinder_volley", SkillTree.HYBRID, Kind.ACTIVE, 2, 2, 3),
-    STONE_AIM("stone_aim", SkillTree.HYBRID, Kind.PASSIVE, 2, 2, 4),
     // ---------------------------------------------------------------- 淵 (B09。転生 1 回で入口、5 回で全段。混ぜる前提の木)
     DEEP_PULL("deep_pull", SkillTree.DEEP, Kind.ACTIVE, 2, 0, 0),
     DEEP_MIRROR("deep_mirror", SkillTree.DEEP, Kind.PASSIVE, 3, 0, 1),
@@ -154,11 +141,12 @@ public enum Skill {
         return "skill.skyabyss." + id + ".type";
     }
 
-    // アイコンの位置 (gui/skill/icons.png の 32px の升目。並びは宣言の順)。橋・淵・前世の 17 本は icons2.png (番号 100 から)、
+    // アイコンの位置 (gui/skill/icons.png の 32px の升目。並びは宣言の順)。淵・前世の 12 本は icons2.png (番号 105 から)、
     // 職の新しい技 (星読みから) は icons2.png の 25 番から (17〜24 は木の印と紋。tools/gen/ui/gen_deep_skill_assets.py)
     public int iconIndex() {
         int o = ordinal();
-        return o < 36 ? o : o < THUNDER_BOLT.ordinal() ? 100 + (o - 36) : 125 + (o - THUNDER_BOLT.ordinal());
+        // 30 未満は icons.png の升目。淵・前世の技 (12 本) は icons2.png の 5 番から (0〜4 は消した橋の技の絵)。職の新しい技は 25 番から
+        return o < 30 ? o : o < THUNDER_BOLT.ordinal() ? 105 + (o - 30) : 125 + (o - THUNDER_BOLT.ordinal());
     }
 
     // 転生の回数がこれ以上で取れる (淵・前世の技。ほかは 0)
@@ -173,18 +161,6 @@ public enum Skill {
                 default -> 5;
             };
             default -> 0;
-        };
-    }
-
-    // 橋の技の親の 2 本の木 (橋でなければ空)。岩-風、風-潮、潮-灰、灰-骨、骨-岩の輪
-    public SkillTree[] bridgeTrees() {
-        return switch (this) {
-            case DUST_CHARGE -> new SkillTree[] {SkillTree.ROCK, SkillTree.WIND};
-            case SEA_BREEZE -> new SkillTree[] {SkillTree.WIND, SkillTree.TIDE};
-            case STEAM_BELL -> new SkillTree[] {SkillTree.TIDE, SkillTree.ASH};
-            case CINDER_VOLLEY -> new SkillTree[] {SkillTree.ASH, SkillTree.BONE};
-            case STONE_AIM -> new SkillTree[] {SkillTree.BONE, SkillTree.ROCK};
-            default -> new SkillTree[0];
         };
     }
 

@@ -132,7 +132,6 @@ public final class SkillActions {
             case CLOUD_PIERCE -> pierce(player, rank);
             case BONE_TRAP -> boneTrap(player, rank);
             case SKY_RAIN -> rain(player, rank);
-            case SIGNAL -> signal(player, rank);
             // 職の新しい技 (docs/design/43)
             case THUNDER_BOLT, EMBER_ORB, FROST_TIDE, BLINK, FORGE_STOMP, MIST_VEIL, CURSE_MARK, LAMP_CHARM -> JobActions.perform(player, skill, rank);
             default -> ExtActions.perform(player, skill, rank);
@@ -264,9 +263,9 @@ public final class SkillActions {
         }
     }
 
-    // 範囲の技の押し出し: 筋力 30 の刻み目で 1.25 倍
+    // 範囲の技の押し出し (筋力の刻み目は 43 で削った。今はそのまま)
     static double push(ServerPlayer player, double base) {
-        return Breakpoints.reached(player, GrowthRules.Stat.STRENGTH, Breakpoints.SECOND) ? base * Breakpoints.STRENGTH_30_PUSH : base;
+        return base;
     }
 
     // ---------------------------------------------------------------- 岩守り
@@ -1146,60 +1145,6 @@ public final class SkillActions {
         level.playSound(null, center.x, center.y, center.z, Skills.SOUND_RAIN.get(), SoundSource.PLAYERS, 1.2f, 1.0f);
         sound(player, Skills.SOUND_PIERCE.get(), 0.5f, 1.4f);
         return null;
-    }
-
-    // ---------------------------------------------------------------- 旅人
-    // 合図: 見ている先に 20 秒の光の標 (仲間全員に見える)。敵に当てると 5 秒の印 (鷹の目と同じ。高いほう)
-    static String signal(ServerPlayer player, int rank) {
-        ServerLevel level = player.serverLevel();
-        Vec3 eye = player.getEyePosition();
-        Vec3 end = eye.add(player.getLookAngle().scale(SkillRules.SIGNAL_RANGE));
-        BlockHitResult block = level.clip(new ClipContext(eye, end, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, player));
-        Vec3 stop = block.getType() == HitResult.Type.MISS ? end : block.getLocation();
-        var entityHit = net.minecraft.world.entity.projectile.ProjectileUtil.getEntityHitResult(player, eye, stop,
-                new AABB(eye, stop).inflate(1.0), e -> e instanceof LivingEntity le && le.isAlive() && e != player && !(e instanceof ArmorStand),
-                eye.distanceToSqr(stop));
-        Vec3 at = stop;
-        if (entityHit != null && entityHit.getEntity() instanceof LivingEntity target) {
-            at = target.position();
-            if (isFoe(player, target)) {
-                SkillEvents.mark(target, SkillRules.signalMark(rank), level.getGameTime(), SkillRules.SIGNAL_MARK_TICKS, player);
-                signalTell(player, "message.skyabyss.signal.foe", target.getDisplayName(), (int) Math.round(SkillRules.signalMark(rank) * 100), SkillRules.SIGNAL_MARK_TICKS / 20);
-            } else {
-                SkillEffects.glow(target, SkillRules.MARK_TICKS, player);
-            }
-        } else if (block.getType() == HitResult.Type.MISS) {
-            // 宙を指していたら、真下の地面まで下ろす (16 ブロックまで)
-            BlockHitResult ground = level.clip(new ClipContext(at, at.add(0, -16, 0), ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, player));
-            if (ground.getType() != HitResult.Type.MISS) {
-                at = ground.getLocation();
-            }
-        }
-        if (!(entityHit != null && entityHit.getEntity() instanceof LivingEntity t2 && isFoe(player, t2))) {
-            signalTell(player, "message.skyabyss.signal.place", SkillRules.SIGNAL_TICKS / 20);
-        }
-        SkillEffects.zone(SkillEffects.ZoneKind.SIGNAL, player, at, 0.5, SkillRules.SIGNAL_TICKS, rank);
-        fxTarget = at;
-        player.swing(InteractionHand.MAIN_HAND, true);
-        level.playSound(null, at.x, at.y, at.z, Skills.SOUND_MARK.get(), SoundSource.PLAYERS, 1.0f, 1.3f);
-        return null;
-    }
-
-    // 標を打ったことを、本人とパーティの仲間 (同じ次元) に知らせる
-    private static void signalTell(ServerPlayer player, String key, Object... args) {
-        Object[] a = new Object[args.length + 1];
-        a[0] = player.getDisplayName();
-        System.arraycopy(args, 0, a, 1, args.length);
-        jp.revati.skyabyss.notice.Notice.hint(player, key, a);
-        var party = jp.revati.skyabyss.party.PartyData.get(player.server).of(player.getUUID());
-        if (party != null) {
-            for (java.util.UUID id : party.members) {
-                ServerPlayer m = id.equals(player.getUUID()) ? null : player.server.getPlayerList().getPlayer(id);
-                if (m != null && m.level() == player.level()) {
-                    jp.revati.skyabyss.notice.Notice.hint(m, key, a);
-                }
-            }
-        }
     }
 
     // ---------------------------------------------------------------- 毎 tick (SkillEvents から)

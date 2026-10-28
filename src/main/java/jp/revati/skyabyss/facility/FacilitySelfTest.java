@@ -140,7 +140,7 @@ public final class FacilitySelfTest {
         }
         check(f, resource(a + "textures/item/bell_coin.png"), "bell coin texture");
         check(f, resource(a + "models/item/bell_coin.json"), "bell coin model");
-        check(f, AttendantLook.look(0).equals(AttendantLook.DEFAULT) && AttendantLook.look(2).equals("b"), "look by variant");
+        check(f, AttendantLook.look(0).equals(AttendantLook.DEFAULT) && AttendantLook.look(2).equals(AttendantLook.DEFAULT), "look by variant");
     }
 
     // ---------------------------------------------------------------- 会話

@@ -96,7 +96,7 @@ NAV = [
     ("index.html", "ホーム", "Home"),
     ("play.html", "遊び方", "How to play"),
     ("titans.html", "巨神と背中", "Titans"),
-    ("skills.html", "スキルとビルド", "Skills"),
+    ("skills.html", "職と技", "Jobs"),
     ("rebirth.html", "転生と深淵", "Rebirth"),
     ("gear.html", "装備", "Gear"),
     ("pouch.html", "旅嚢と道具", "Pouch"),
@@ -230,11 +230,11 @@ def divider():
 
 # ------------------------------------------------------------- 技の木の図
 # (id, 技 ID の並び順, 名前 ja, 名前 en, 種類, 行, 列, 前提, 一言 ja, 一言 en)
-def tree_svg(nodes, name_ja, name_en):
-    """nodes: [(idx, ja, en, kind, row, col, [prereq idx])] 。kind は A(使う)・P(常に)・K(要)。"""
+def tree_svg(nodes, name_ja, name_en, icons=None):
+    """nodes: [(idx, ja, en, kind, row, col, [prereq idx])] 。kind は A(使う)・P(常に)・K(要)。icons: idx → 絵の番号 (site/img/skill/NN.png。無ければ輪だけ)。"""
     pos = {}
     nodew = 64
-    xs = {0: 16, 1: 116, 2: 66}
+    xs = {0: 8, 1: 176, 2: 92}
     ys = {0: 22, 1: 128, 2: 234, 3: 340}
     parts = ['<svg class="tree-svg" viewBox="0 0 260 450" role="img" aria-label="%s" data-label-ja="%s" data-label-en="%s">' % (
         esc(name_ja + " の技の木"), esc(name_ja + " の技の木"), esc(name_en + " skill tree"))]
@@ -254,7 +254,9 @@ def tree_svg(nodes, name_ja, name_en):
     for (i, ja, en, kind, row, col, pre) in nodes:
         cx, cy, x, y = pos[i]
         cls = {"A": "ring-a", "P": "ring-p", "K": "ring-k"}[kind]
-        parts.append('<image href="img/skill/%02d.png" x="%d" y="%d" width="64" height="64"/>' % (i, x, y))
+        icon = icons.get(i, i) if icons else i
+        if os.path.exists(os.path.join(ROOT, "site", "img", "skill", "%02d.png" % icon)):
+            parts.append('<image href="img/skill/%02d.png" x="%d" y="%d" width="64" height="64"/>' % (icon, x, y))
         parts.append('<circle class="%s" cx="%d" cy="%d" r="33"/>' % (cls, cx, cy))
         b = {"A": ("使", "A"), "P": ("常", "P"), "K": ("要", "K")}[kind]
         parts.append('<rect class="badge" x="%d" y="%d" width="18" height="16"/>' % (x - 4, y - 4))

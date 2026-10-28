@@ -45,10 +45,6 @@ public final class SkillEffects {
         if (!(player.level() instanceof ServerLevel level)) {
             return out;
         }
-        // 歌い手 (潮歌いの天性): 仲間に向ける技の範囲 +1 ブロック
-        if (SkillManager.get(player).callingTree() == SkillTree.TIDE) {
-            radius += SkillRules.TRAIT_TIDE_RANGE;
-        }
         for (ServerPlayer p : level.players()) {
             if (p != player && p.isAlive() && !p.isSpectator() && p.distanceToSqr(player) <= radius * radius) {
                 out.add(p);
@@ -83,12 +79,9 @@ public final class SkillEffects {
         return v;
     }
 
-    // 支えの量 (吸収・マナの回復) に掛ける倍率: 共鳴の声・木の印・精神 30 の刻み目 (仲間に向ける技 +10%)
+    // 支えの量 (吸収・マナの回復) に掛ける倍率: 共鳴の声・木の印
     public static double supportPower(ServerPlayer player, Skill skill) {
         double v = 1 + chorus(player) + SkillMarks.power(player, skill.tree) + SkillBuild.skillPower(player, skill) + SkillBuild.supportExtra(player);
-        if (Breakpoints.reached(player, jp.revati.skyabyss.rpg.GrowthRules.Stat.SPIRIT, 30)) {
-            v += Breakpoints.SPIRIT_30_ALLY;
-        }
         return v;
     }
 
