@@ -605,7 +605,7 @@ cmd skyabyss skill cooldowns @s
 cmd execute as @e[type=skyabyss:bandit] run tp @s ~ -400 ~
 cmd execute as @e[type=skyabyss:rock_boar] run tp @s ~ -400 ~
 cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
-cmd summon skyabyss:bandit -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
+cmd summon skyabyss:bandit 0.2 -60 6.0 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
 wait 10
 cmd skyabyss skill mana @s full
 record snare_shot 36 30
