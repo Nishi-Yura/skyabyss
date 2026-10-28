@@ -542,6 +542,34 @@ def ferry_docks(line, height):
     return [dock(line[0], line[1]), dock(line[-1], line[-2])]
 
 
+def trim_road_ends(out):
+    """見どころへの脇道は、建物の手前 (部品の範囲 + 3) で止める (2026-10-28 の試遊「道の上には何も乗らないように」。道の幅 8 で建物に食い込んでいた)"""
+    pp = os.path.join(OUT, 'pois.json')
+    if not os.path.exists(pp):
+        return
+    pois = json.load(open(pp, encoding='utf-8'))
+    for r in out['roads']:
+        for end in (0, -1):
+            x, z = r[end]
+            for q in pois:
+                if q['kind'] == 'signpost' or math.hypot(q['x'] - x, q['z'] - z) >= 2:
+                    continue
+                bpp = os.path.join(OUT, '..', 'opening', 'poi_%s.json' % q['kind'])
+                if not os.path.exists(bpp):
+                    continue
+                half = max(abs(v) for v in json.load(open(bpp, encoding='utf-8'))['meta']['rect'])
+                keep = half + 3
+                pts = r if end == -1 else r[::-1]
+                while len(pts) > 2 and math.hypot(pts[-2][0] - x, pts[-2][1] - z) < keep:
+                    pts.pop()
+                ax, az = pts[-2]
+                d = math.hypot(ax - x, az - z)
+                t = (d - keep) / d if d > keep else 0
+                pts[-1] = [round(ax + (x - ax) * t), round(az + (z - az) * t)]
+                if end == 0:
+                    r[:] = pts[::-1]
+
+
 def write_layout(lay, height=None):
     def pt(p):
         return [int(p[0]), int(p[1])]
@@ -570,6 +598,7 @@ def write_layout(lay, height=None):
                          **{n: pk[n] for n in ('lookout', 'cave', 'huts', 'camp_west', 'tree') if n in pk},
                          # 道の分かれ目の札 (首の道の側の端。[x, z, 行き先])。行き先は lang の sign.skyabyss.island.<行き先>
                          'signs': [pt(a) + [name] for (a, _, _), name in zip(plan['necks'], ['prints', 'bandits', 'fire', 'shrine', 'lookout', 'cave', 'huts', 'camp_west', 'tree'])]}
+    trim_road_ends(out)
     with open(os.path.join(OUT, 'layout.json'), 'w', encoding='utf8', newline='\n') as f:
         json.dump(out, f, ensure_ascii=False, separators=(',', ':'))
         f.write('\n')

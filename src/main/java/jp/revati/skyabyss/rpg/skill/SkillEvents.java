@@ -108,11 +108,12 @@ public final class SkillEvents {
             if (first) {
                 // はじめて世界に来たとき: 増えたのではなく、はじめから一つ覚えられることを知らせる
                 Notice.hint(player, "message.skyabyss.skill.first_hint", Component.keybind("key.skyabyss.skills"));
+                jp.revati.skyabyss.tutorial.TutorialHints.start(player, jp.revati.skyabyss.tutorial.TutorialHints.SKILLS);
                 return;
             }
             Notice.levelUp(player, "message.skyabyss.skill.points_gained", gained, d.unspentPoints(SkillManager.level(player)));
             if (d.spentPoints() == 0 || d.unspentPoints(SkillManager.level(player)) >= 3) {
-                Notice.hint(player, "message.skyabyss.skill.open_hint", Component.keybind("key.skyabyss.skills"));
+                jp.revati.skyabyss.tutorial.TutorialHints.start(player, jp.revati.skyabyss.tutorial.TutorialHints.SKILLS);
             }
         } else if (total < d.notifiedPoints) {
             d.notifiedPoints = total;

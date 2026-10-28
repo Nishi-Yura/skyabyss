@@ -108,6 +108,25 @@ public final class IslandTrailSelfTest {
             f.add("the first job skill was not learned: " + first);
         }
         p.setPos(start.getX() + 0.5, p.getY(), start.getZ() + 0.5);
+        // 寄り道も順の目的 (2026-10-28): 西の野営 → 漁師小屋。着くと敵が出て、まわりの敵がいなくなれば済む
+        expect(f, p, "island_camp_west");
+        BlockPos cw = ContinentLayout.get().island("camp_west");
+        p.setPos(cw.getX() + 0.5, level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, cw.getX(), cw.getZ()), cw.getZ() + 0.5);
+        level.getChunk(cw);
+        IslandTrail.update(level, p);
+        java.util.List<net.minecraft.world.entity.Mob> dogs = level.getEntitiesOfClass(net.minecraft.world.entity.Mob.class,
+                new net.minecraft.world.phys.AABB(cw).inflate(24, 40, 24), m -> m.getTags().contains(IslandTrail.SPOT_TAG + "_camp_west"));
+        if (IslandTrail.has(p, IslandTrail.CAMP_WEST) || (p.getPersistentData().getInt(IslandTrail.SPAWNED) & IslandTrail.CAMP_WEST) == 0) {
+            f.add("arriving at the west camp did not set out its dogs (done " + IslandTrail.done(p) + ", seen " + dogs.size() + ")");
+        }
+        dogs.forEach(net.minecraft.world.entity.Entity::discard);
+        IslandTrail.update(level, p);
+        if (!dogs.isEmpty() && !IslandTrail.has(p, IslandTrail.CAMP_WEST)) {
+            f.add("clearing the west camp did not finish it");
+        }
+        IslandTrail.mark(p, IslandTrail.CAMP_WEST);
+        expect(f, p, "island_huts");
+        IslandTrail.mark(p, IslandTrail.HUTS);
         expect(f, p, "island_prints");
         BlockPos pr = ContinentLayout.get().islandPrints().get(0);
         p.setPos(pr.getX() + 0.5, p.getY(), pr.getZ() + 0.5);
@@ -117,6 +136,13 @@ public final class IslandTrailSelfTest {
             f.add("bandits counted before any kill");
         }
         p.getPersistentData().putInt(IslandTrail.KILLS, IslandTrail.BANDITS_NEEDED);
+        IslandTrail.update(level, p);
+        expect(f, p, "island_lookout");
+        IslandTrail.mark(p, IslandTrail.LOOKOUT);
+        expect(f, p, "island_tree");
+        // 大樹は敵がなく、着けば済む
+        BlockPos tr = ContinentLayout.get().island("tree");
+        p.setPos(tr.getX() + 0.5, p.getY(), tr.getZ() + 0.5);
         IslandTrail.update(level, p);
         expect(f, p, "island_rest");
         if (!IslandTrail.gateOpen(level)) {
@@ -128,6 +154,8 @@ public final class IslandTrailSelfTest {
         BlockPos r = IslandTrail.restPos(level, 0);
         p.setPos(r.getX() + 0.5, r.getY(), r.getZ() + 0.5);
         IslandTrail.update(level, p);
+        expect(f, p, "island_cave");
+        IslandTrail.mark(p, IslandTrail.CAVE);
         expect(f, p, "island_shrine");
         if (jp.revati.skyabyss.npc.NpcBonds.of(p).hasFlag(IslandTrail.FERRYMAN_ROLE, IslandTrail.READY_FLAG)) {
             f.add("the ferryman is ready before the shrine");

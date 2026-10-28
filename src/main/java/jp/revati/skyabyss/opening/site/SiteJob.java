@@ -51,6 +51,8 @@ public final class SiteJob {
     public final Blueprint bp;
     private final Post post;
     private final String label;
+    // 道の上に物を置かない部品か (見どころ・章の小要素・足跡・骨)
+    private final boolean keepRoadsClear;
 
     public Phase phase = Phase.LOAD;
     public int rot;
@@ -97,6 +99,8 @@ public final class SiteJob {
         this.entry = entry;
         this.bp = bp;
         this.label = label;
+        this.keepRoadsClear = !(label.equals("shelter") || label.equals("camp") || label.startsWith("town ") || label.startsWith("ferry ")
+                || label.startsWith("audit") || label.startsWith("conflict"));
         this.post = post;
         this.rot = SiteFinder.rot(entry.yaw);
         this.mirror = SiteFinder.mirror(entry.yaw);
@@ -709,6 +713,10 @@ public final class SiteJob {
             Blueprint.Cell c = cells.get(cellIndex++);
             BlockPos at = Blueprint.transform(c.x(), c.y() + 1, c.z(), rot, mirror, origin);
             BlockState state = Blueprint.transform(c.state(), rot, mirror);
+            // 道の上には物を置かない (2026-10-28 の声「道の上にはなにも乗らないように」)。町・都・船着き場・野営地は道とつながるように作ってあるので除く
+            if (keepRoadsClear && !state.isAir() && c.y() >= 0 && jp.revati.skyabyss.world.continent.ContinentChunkGenerator.roadAt(at.getX(), at.getZ()) != null) {
+                continue;
+            }
             if (!state.isAir() || !level.getBlockState(at).isAir()) {
                 set(at, state);
                 if (!state.isAir()) {

@@ -48,10 +48,17 @@ public final class TutorialHints {
     public static final String WHISTLE = "whistle";
     public static final String RECORD = "record";
     public static final String PING = "ping";
+    // 画面のキー (U・J・K。2026-10-28 の試遊「U, J, K キーも Y キーみたいにチェックのやつのところに出して」)。開くと済む (クライアントが Seen を送る)
+    public static final String QUEST_LOG = "quest_log";
+    public static final String STATUS = "status";
+    public static final String SKILLS = "skills";
 
     // 並びが画面の優先 (先のものが上に出る)
     public static final List<Hint> ALL = List.of(
             new Hint(POUCH, null),
+            new Hint(QUEST_LOG, null),
+            new Hint(STATUS, null),
+            new Hint(SKILLS, null),
             new Hint(LORE_BOOK, i -> i instanceof jp.revati.skyabyss.lore.LoreBookItem),
             new Hint(LORE_PAGE, i -> i instanceof jp.revati.skyabyss.lore.LorePageItem),
             // 呼び笛の手引きは出さない (ユーザー判断: 左の札で十分。強制しない)
@@ -214,7 +221,26 @@ public final class TutorialHints {
     @SubscribeEvent
     static void register(RegisterPayloadHandlersEvent event) {
         event.registrar(PROTOCOL_VERSION)
-                .playToClient(Sync.TYPE, Sync.STREAM_CODEC, (payload, context) -> jp.revati.skyabyss.client.tutorial.TutorialClient.receive(payload));
+                .playToClient(Sync.TYPE, Sync.STREAM_CODEC, (payload, context) -> jp.revati.skyabyss.client.tutorial.TutorialClient.receive(payload))
+                .playToServer(Seen.TYPE, Seen.STREAM_CODEC, (payload, context) -> context.enqueueWork(() -> {
+                    if (context.player() instanceof ServerPlayer p && SCREEN_HINTS.contains(payload.id())) {
+                        done(p, payload.id());
+                    }
+                }));
+    }
+
+    // 画面を開くと済む手引き (クライアントが開いたときに Seen を送る)
+    public static final java.util.Set<String> SCREEN_HINTS = java.util.Set.of(QUEST_LOG, STATUS, SKILLS);
+
+    // 持ち主 → サーバー: その画面を開いた
+    public record Seen(String id) implements CustomPacketPayload {
+        public static final Type<Seen> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "tutorial_seen"));
+        public static final StreamCodec<RegistryFriendlyByteBuf, Seen> STREAM_CODEC = StreamCodec.composite(ByteBufCodecs.STRING_UTF8, Seen::id, Seen::new);
+
+        @Override
+        public Type<? extends CustomPacketPayload> type() {
+            return TYPE;
+        }
     }
 
     // サーバー → 持ち主: 今出ている手引きの ID と、いま済んだ ID

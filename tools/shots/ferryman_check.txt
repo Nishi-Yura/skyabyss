@@ -1,0 +1,30 @@
+# 島の渡し守の体: 立った姿と舟に乗った姿 (2026-10-28 の試遊「渡し守のモデルがおかしい」)
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/ferryman_check.txt -PshotsName=ferryman_check
+world ferryman_check4 continent
+size 1280 720
+timeout 900
+render 6
+clouds off
+waitchunks 200
+wait 60
+cmd skyabyss cinematic stop
+close
+cmd gamemode creative
+cmd time set 6000
+wait 20
+cmd execute at @s run fill ~-4 ~-1 ~2 ~6 ~-1 ~10 minecraft:smooth_stone
+cmd execute at @s run fill ~-4 ~ ~2 ~6 ~3 ~10 minecraft:air
+cmd execute at @s run summon skyabyss:town_guest ~ ~ ~5 {Guest:"island_ferryman",NoAI:1b,Rotation:[180f,0f]}
+cmd execute at @s run summon skyabyss:town_guest ~3 ~ ~5 {Guest:"inner_ferryman",NoAI:1b,Rotation:[180f,0f]}
+cmd execute at @s run summon minecraft:oak_boat ~ ~ ~8 {Tags:["fb"]}
+cmd execute at @s run summon skyabyss:town_guest ~ ~ ~8 {Guest:"island_ferryman",NoAI:1b,Tags:["fr"]}
+wait 20
+cmd ride @e[tag=fr,limit=1] mount @e[tag=fb,limit=1]
+cmd gamemode spectator
+cmd execute at @s run tp @s ~1.5 ~1 ~0.5 0 10
+hud off
+wait 40
+shot f1_standing
+cmd execute at @s run tp @s ~ ~0.5 ~11.5 180 10
+wait 20
+shot f2_back_and_boat

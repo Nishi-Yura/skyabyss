@@ -96,6 +96,10 @@ public final class ContinentPois {
             }
             for (int i = 0; i < list.size(); i++) {
                 Poi poi = list.get(i);
+                // 道しるべの看板は建てない (2026-10-28 の試遊「看板の向きや置いてる位置がおかしいときがある。消してもいい」)
+                if (poi.kind().equals("signpost")) {
+                    continue;
+                }
                 double d2 = p.distanceToSqr(poi.x() + 0.5, p.getY(), poi.z() + 0.5);
                 if (d2 > (double) BUILD_RADIUS * BUILD_RADIUS) {
                     continue;
@@ -103,7 +107,8 @@ public final class ContinentPois {
                 SiteData.Entry e = entry(data, i);
                 if (e == null) {
                     int y = ContinentMap.get().surface(poi.x(), poi.z()) + 1;
-                    e = data.add(KIND, i, new BlockPos(poi.x(), y, poi.z()), (i * 37) % 4);
+                    // 正面 (部品は南が入口) を一番近い道へ向ける (2026-10-28 の試遊「建物の向きがおかしい」。前は番号で回していた)
+                    e = data.add(KIND, i, new BlockPos(poi.x(), y, poi.z()), faceRoad(poi.x(), poi.z()));
                 }
                 if (!e.built) {
                     if (!SiteBuilds.queued(e)) {
@@ -115,7 +120,9 @@ public final class ContinentPois {
                         // 見どころに着いた (土地の町の人の頼み「〜を見てこよう」。初めてでなくても毎回)
                         jp.revati.skyabyss.quest.Quests.signal(p, "poi:" + poi.kind());
                     }
-                    if (e.extra("foes") != null && d2 <= (double) FOES_RADIUS * FOES_RADIUS) {
+                    // はじまりの島の見どころは敵を出さない (島の敵は IslandTrail の目的の場所だけ)
+                    if (e.extra("foes") != null && d2 <= (double) FOES_RADIUS * FOES_RADIUS
+                            && ContinentMap.get().region(poi.x(), poi.z()) != ContinentMap.OUTSKIRTS) {
                         foes(over, e, list.get(i).kind());
                     }
                 }
@@ -181,6 +188,35 @@ public final class ContinentPois {
             }
         }
         return null;
+    }
+
+    // 一番近い道の点へ正面 (南) を向ける回し (道がなければ南のまま)
+    static int faceRoad(int x, int z) {
+        double best = Double.MAX_VALUE;
+        int bx = x;
+        int bz = z + 1;
+        for (java.util.List<BlockPos> road : ContinentLayout.get().roads()) {
+            for (int k = 0; k + 1 < road.size(); k++) {
+                BlockPos a = road.get(k);
+                BlockPos b = road.get(k + 1);
+                double dx = b.getX() - a.getX();
+                double dz = b.getZ() - a.getZ();
+                double len2 = Math.max(1e-6, dx * dx + dz * dz);
+                double t = Math.max(0, Math.min(1, ((x - a.getX()) * dx + (z - a.getZ()) * dz) / len2));
+                double px = a.getX() + dx * t;
+                double pz = a.getZ() + dz * t;
+                double d = (px - x) * (px - x) + (pz - z) * (pz - z);
+                if (d < best) {
+                    best = d;
+                    bx = (int) Math.round(px);
+                    bz = (int) Math.round(pz);
+                }
+            }
+        }
+        if (bx == x && bz == z) {
+            return 0;
+        }
+        return jp.revati.skyabyss.opening.site.SiteFinder.rotToward(bx - x, bz - z, true);
     }
 
     public static SiteJob job(ServerLevel level, SiteData data, SiteData.Entry entry) {

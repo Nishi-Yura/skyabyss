@@ -63,6 +63,18 @@ public final class TutorialClient {
         return active;
     }
 
+    // U・J・K の画面を開いたら、その手引きを済ませる (出ているときだけ送る)
+    @SubscribeEvent
+    static void onScreen(net.neoforged.neoforge.client.event.ScreenEvent.Opening event) {
+        var s = event.getNewScreen();
+        String id = s instanceof jp.revati.skyabyss.client.quest.QuestLogScreen ? TutorialHints.QUEST_LOG
+                : s instanceof jp.revati.skyabyss.rpg.client.GrowthScreen ? TutorialHints.STATUS
+                : s instanceof jp.revati.skyabyss.rpg.client.skill.SkillScreen ? TutorialHints.SKILLS : null;
+        if (id != null && active.contains(id) && Minecraft.getInstance().getConnection() != null) {
+            net.neoforged.neoforge.network.PacketDistributor.sendToServer(new TutorialHints.Seen(id));
+        }
+    }
+
     @SubscribeEvent
     static void onLogout(ClientPlayerNetworkEvent.LoggingOut event) {
         active = List.of();
@@ -91,6 +103,9 @@ public final class TutorialClient {
             case TutorialHints.POUCH -> Component.translatable(base, key(PouchClient.OPEN_KEY));
             case TutorialHints.RECORD -> Component.translatable(base, key(RecordClient.OPEN_KEY));
             case TutorialHints.PING -> Component.translatable(base, key(PingClient.PING_KEY));
+            case TutorialHints.QUEST_LOG -> Component.translatable(base, key(jp.revati.skyabyss.client.quest.QuestClient.LOG_KEY));
+            case TutorialHints.STATUS -> Component.translatable(base, key(jp.revati.skyabyss.rpg.client.GrowthClientSetup.STATUS_KEY));
+            case TutorialHints.SKILLS -> Component.translatable(base, key(jp.revati.skyabyss.rpg.client.skill.SkillClientSetup.SKILLS_KEY));
             case TutorialHints.LORE_BOOK -> usable(mc, base, i -> i instanceof jp.revati.skyabyss.lore.LoreBookItem);
             case TutorialHints.LORE_PAGE -> usable(mc, base, i -> i instanceof jp.revati.skyabyss.lore.LorePageItem);
             case TutorialHints.WHISTLE -> usable(mc, base, i -> i instanceof jp.revati.skyabyss.titan.travel.TitanCallItem);

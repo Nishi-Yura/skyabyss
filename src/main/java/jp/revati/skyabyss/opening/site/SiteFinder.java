@@ -385,7 +385,7 @@ public final class SiteFinder {
     }
 
     // dx, dz の向きを向く回転 (部品は「南向き」(toSouthFacing = true) か「北向き」(false) が基準)。0..3
-    static int rotToward(double dx, double dz, boolean southBase) {
+    public static int rotToward(double dx, double dz, boolean southBase) {
         // 部品の基準の向きから時計回りに: 南 → 西 → 北 → 東 / 北 → 東 → 南 → 西
         int dirIndex; // 0 = 南、1 = 西、2 = 北、3 = 東
         if (Math.abs(dx) >= Math.abs(dz)) {

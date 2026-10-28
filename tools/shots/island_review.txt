@@ -1,0 +1,50 @@
+# はじまりの島の見直し (2026-10-28 の試遊の声): 渡し守 (船着き場と渡りの舟の上)、峠の野盗の野営の向き、道の幅 8、寄り道の場所
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/island_review.txt -PshotsName=island_review
+world opening_island_review1 continent
+size 1600 900
+timeout 2000
+render 10
+guiscale 2
+wait 100
+cmd skyabyss cinematic stop
+close
+cmd gamemode creative
+cmd weather clear
+cmd time set 4000
+cmd tp @s -1578 90 1716
+waitchunks 300
+wait 300
+cmd skyabyss dev grounds mark outskirts 2 ferry
+wait 60
+hud off
+cmd execute at @s run tp @s ~ ~ ~ 0 5
+wait 20
+shot i01_dock
+cmd execute at @s run tp @s ~ ~ ~ 90 5
+wait 10
+shot i02_dock_w
+cmd execute at @s run tp @s ~ ~ ~ 180 5
+wait 10
+shot i03_dock_n
+cmd execute at @s run tp @s ~ ~ ~ 270 5
+wait 10
+shot i04_dock_e
+cmd tp @s -1745 95 1780 0 35
+waitchunks 300
+wait 200
+shot i05_bandit_camp
+cmd tp @s -1700 100 1760 160 40
+wait 100
+shot i06_gate_road
+cmd tp @s -1815 95 1875 0 40
+waitchunks 200
+wait 150
+shot i07_huts
+cmd tp @s -1580 82 1716
+waitchunks 200
+wait 60
+cmd skyabyss island cross
+wait 60
+shot i08_cross
+wait 80
+shot i09_cross2

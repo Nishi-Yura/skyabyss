@@ -139,14 +139,17 @@ HELD = {
     "abyss_pulse_dagger": (t((0, -90, 55), (0, 4.0, 0.5), 1.1), t((0, -90, 25), (1.13, 3.2, 1.13), 0.5)),
 }
 # 弓 (引き絵 3 枚も同じ持ち方。引くときは腕を前へまっすぐ上げる)。弦が射手の側、腹が前、縦に立てる
-for _bow in ("thunder_wing_bow", "abyss_storm_bow"):
-    HELD[_bow] = (bow_hold("tp", 18, 1.2, BOW_GRIP, (0, 0, 1.0)), bow_hold("fp", 0, 0.7, BOW_GRIP, (0.2, -0.2, 0.0), 30))
+# 一人称は 2026-10-28 の試遊「もう少し上でいい」で y を 1.6 上げた。弓は全部同じ持ち方 (メッシュの作りが同じ)
+BOWS = ("thunder_wing_bow", "abyss_storm_bow", "whale_bow", "tide_bow", "ember_bow", "shrine_bow", "abyss_whale_bow", "abyss_tide_bow",
+        "abyss_ember_bow", "abyss_depth_bow")
+for _bow in BOWS:
+    HELD[_bow] = (bow_hold("tp", 18, 1.2, BOW_GRIP, (0, 0, 1.0)), bow_hold("fp", 0, 0.7, BOW_GRIP, (0.2, 1.4, 0.0), 30))
     for _n in range(3):
-        HELD[f"{_bow}_pulling_{_n}"] = (bow_hold("tp", 90, 1.2, BOW_GRIP, (0, 0, 1.0)), bow_hold("fp", 0, 0.7, BOW_GRIP, (-0.4, -0.2, 0.0), 20))
+        HELD[f"{_bow}_pulling_{_n}"] = (bow_hold("tp", 90, 1.2, BOW_GRIP, (0, 0, 1.0)), bow_hold("fp", 0, 0.7, BOW_GRIP, (-0.4, 1.4, 0.0), 20))
 
 
-SOLVED = {"captain_pike", "tide_shell_trident", "coral_harpoon", "warden_glaive", "thrall_poker", "abyss_bell_staff", "thunder_wing_bow", "abyss_storm_bow",
-          *(f"{b}_pulling_{n}" for b in ("thunder_wing_bow", "abyss_storm_bow") for n in range(3))}
+SOLVED = {"captain_pike", "tide_shell_trident", "coral_harpoon", "warden_glaive", "thrall_poker", "abyss_bell_staff", *BOWS,
+          *(f"{b}_pulling_{n}" for b in BOWS for n in range(3))}
 
 
 def left_of(d, item=None):

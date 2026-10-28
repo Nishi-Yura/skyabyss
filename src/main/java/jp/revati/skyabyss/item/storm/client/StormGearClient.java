@@ -30,7 +30,14 @@ public final class StormGearClient {
         event.enqueueWork(() -> {
             // 深淵の雷弓 (雷淵の弓) も同じ印を持つ。登録がないと引いている間も持ち方 (display) が引き絵のものに切り替わらず、
             // 弓が引く前の向きのまま引き絵のメッシュだけが描かれて、構えの向きが狂っていた (2026-10-21 の試遊の声)
-            for (net.minecraft.world.item.Item bow : java.util.List.of(StormGearSetup.BOW.get(), jp.revati.skyabyss.abyss.AbyssSetup.STORM_BOW_ITEM.get())) {
+            // 2026-10-28: ほかの弓 (章の弓・深淵の弓・職の弓) も登録がなく、引いている間の向きが狂っていた。この mod の弓は全部登録する
+            java.util.List<net.minecraft.world.item.Item> bows = new java.util.ArrayList<>();
+            for (var e : net.minecraft.core.registries.BuiltInRegistries.ITEM.entrySet()) {
+                if (e.getKey().location().getNamespace().equals(SkyAbyss.MODID) && e.getValue() instanceof net.minecraft.world.item.BowItem) {
+                    bows.add(e.getValue());
+                }
+            }
+            for (net.minecraft.world.item.Item bow : bows) {
                 ItemProperties.register(bow, ResourceLocation.withDefaultNamespace("pull"), (stack, level, entity, seed) -> {
                     if (entity == null || entity.getUseItem() != stack) {
                         return 0f;

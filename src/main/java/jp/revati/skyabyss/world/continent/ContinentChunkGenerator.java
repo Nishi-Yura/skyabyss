@@ -243,10 +243,10 @@ public final class ContinentChunkGenerator extends ChunkGenerator {
     }
 
     // ---------------------------------------------------------------- 道 (layout.json の道。幅 5 の土の道、縁は荒れた土と砂利)
-    // 大陸の街道 (はじまりの島の外の道) は幅 7 (芯からの距離を WIDE だけ縮めて測る。2026-10-27 の声「道の横幅もっと広くていい」)
-    static final double ROAD_HALF = 2.2;
-    static final double ROAD_EDGE = 3.2;
-    static final double WIDE = 0.9;
+    // 道は島も街道も幅 8 (土の道 8、縁 1 の荒れた土と砂利。2026-10-28 の声「基本は道の幅 8 マス」)。WIDE は前の街道の上乗せ (今は 0)
+    static final double ROAD_HALF = 4.0;
+    static final double ROAD_EDGE = 4.9;
+    static final double WIDE = 0.0;
 
     // このチャンク (と縁 4) にかかる道の線分 {x0, z0, x1, z1}
     static List<int[]> roadSegments(int x0, int z0) {
@@ -300,7 +300,8 @@ public final class ContinentChunkGenerator extends ChunkGenerator {
             double d = Math.hypot(x - (g[0] + u * dx), z - (g[1] + u * dz)) - (g.length > 4 && g[4] == 1 ? WIDE : 0);
             best = Math.min(best, d);
         }
-        double d = best - ContinentMap.value(x / 23.0, z / 23.0, 0x0AD5) * 0.9;
+        // 縁は少しだけ揺らす (幅 8 がほぼ保たれる)
+        double d = best - ContinentMap.value(x / 23.0, z / 23.0, 0x0AD5) * 0.4;
         if (d < ROAD_HALF) {
             return Blocks.DIRT_PATH.defaultBlockState();
         }

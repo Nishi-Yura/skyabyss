@@ -132,7 +132,7 @@ public final class Growth {
             Notice.narrate(player, "message.skyabyss.growth.max_level");
         } else if (data.unspentPoints() > 0 && (data.level <= 5 || data.unspentPoints() >= 3 * GrowthRules.POINTS_PER_LEVEL)) {
             // 振り方の手がかりは、はじめのうちと、力をためこんでいるときだけ (毎回は出さない)
-            Notice.hint(player, "message.skyabyss.growth.open_hint", Component.keybind("key.skyabyss.status"));
+            jp.revati.skyabyss.tutorial.TutorialHints.start(player, jp.revati.skyabyss.tutorial.TutorialHints.STATUS);
         }
     }
 

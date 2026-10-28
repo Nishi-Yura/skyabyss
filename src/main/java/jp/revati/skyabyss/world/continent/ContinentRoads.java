@@ -15,9 +15,9 @@ final class ContinentRoads {
     static final double SPACING = 2.0;
     static final int STEPS = 9;
     static final double MAX_GRADE = 0.34;
-    // 街道を幅 7 にしたので、ならす幅も広げた (2026-10-27)
-    static final double CORE = 4.4;
-    static final double FADE = 9.0;
+    // 道を幅 8 にしたので、ならす幅も広げた (2026-10-28)
+    static final double CORE = 5.4;
+    static final double FADE = 10.0;
     static final int CELL = 32;
 
     // 道の点 (x, z, 均した高さ。NaN はならさない点)

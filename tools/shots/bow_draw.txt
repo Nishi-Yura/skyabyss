@@ -1,0 +1,39 @@
+# 弓を引く姿 (三人称の前・横、一人称)。引く前と引いている間 (2026-10-28 の試遊「弓をためている時の向きがおかしい、一人称の場所はもう少し上」)
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/bow_draw.txt -PshotsName=bow_draw
+world bow_draw1 continent
+size 1280 720
+timeout 900
+render 6
+clouds off
+waitchunks 200
+wait 60
+cmd skyabyss cinematic stop
+close
+cmd gamemode survival
+cmd effect give @s minecraft:resistance 9999 4 true
+cmd time set 6000
+cmd tp @s ~ ~ ~ 90 0
+cmd item replace entity @s weapon.mainhand with skyabyss:whale_bow
+cmd clear @s minecraft:arrow
+wait 20
+hud off
+shot b1_first_idle
+use
+wait 20
+shot b2_first_draw
+stopuse
+perspective front
+wait 10
+shot b3_front_idle
+use
+wait 20
+shot b4_front_draw
+stopuse
+perspective back
+wait 10
+cmd tp @s ~ ~ ~ 0 0
+wait 5
+use
+wait 20
+shot b5_back_draw
+stopuse

@@ -60,7 +60,7 @@ public final class Quests {
             log.tracked = questId;
         }
         if (log.quests.size() == 1) {
-            Notice.hint(player, "message.skyabyss.quest.open_hint", Component.keybind("key.skyabyss.quest_log"));
+            jp.revati.skyabyss.tutorial.TutorialHints.start(player, jp.revati.skyabyss.tutorial.TutorialHints.QUEST_LOG);
         }
         notice(player, QuestNetwork.Notice.STARTED, questId);
         jp.revati.skyabyss.guide.PrepQuests.onStarted(player, def);

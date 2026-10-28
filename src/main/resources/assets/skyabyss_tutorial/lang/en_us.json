@@ -11,5 +11,8 @@
   "tutorial.skyabyss.whistle.short": "Tap [%s] to blow the whistle (call) when the left card shows it",
   "tutorial.skyabyss.whistle.wheel": "Hold [%s] for the pouch wheel, pick the whistle, release to call",
   "tutorial.skyabyss.record": "Press [%s] to open the record book",
-  "tutorial.skyabyss.ping": "Press [%s] to point out what you are looking at to your party"
+  "tutorial.skyabyss.ping": "Press [%s] to point out what you are looking at to your party",
+  "tutorial.skyabyss.quest_log": "Press [%s] to open the quest log",
+  "tutorial.skyabyss.status": "Press [%s] to open the stat screen",
+  "tutorial.skyabyss.skills": "Press [%s] to open the skill screen"
 }

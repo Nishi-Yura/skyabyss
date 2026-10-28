@@ -992,5 +992,49 @@
     "atlas": 64
    }
   }
+ },
+ "moon_past2_a": {
+  "tris": 1516,
+  "atlas": 256,
+  "buried": [],
+  "props": {
+   "prop_l": {
+    "tris": 220,
+    "atlas": 64
+   }
+  }
+ },
+ "moon_past2_b": {
+  "tris": 1470,
+  "atlas": 256,
+  "buried": [],
+  "props": {
+   "prop_r": {
+    "tris": 86,
+    "atlas": 64
+   }
+  }
+ },
+ "moon_past2_c": {
+  "tris": 1556,
+  "atlas": 256,
+  "buried": [],
+  "props": {
+   "prop_l": {
+    "tris": 232,
+    "atlas": 64
+   }
+  }
+ },
+ "guest_island_ferryman": {
+  "tris": 1524,
+  "atlas": 256,
+  "buried": [],
+  "props": {
+   "prop_r": {
+    "tris": 320,
+    "atlas": 64
+   }
+  }
  }
 }

@@ -423,7 +423,11 @@ def collar(bones, name, refs, loop=None):
             d = np.linalg.norm(Va[ids].mean(0) - pivot)
             if best is None or d < best[0]:
                 best = (d, ids, tis)
-        _, ids, tis = best
+        d0, ids, tis = best
+        # 根元から遠い開いた輪 (笠の縁・外套の裾など、付け根でない縁) は延ばさない。延ばすと縁が親の中まで引き下ろされる
+        # (2026-10-28: 島の渡し守の笠の縁が首まで下りて、頭を包む細い円錐になっていた)
+        if d0 > 3.0:
+            return 0
     else:
         ids, tis = loop
     P = Va[ids]

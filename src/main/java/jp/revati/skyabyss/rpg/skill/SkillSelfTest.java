@@ -354,7 +354,8 @@ public final class SkillSelfTest {
         p.getInventory().setItem(9, new ItemStack(Items.ARROW, 5));
         r = SkillManager.cast(p, 1);
         check(f, r == SkillManager.CastResult.OK, "casting cloud pierce returned " + r);
-        check(f, p.getInventory().getItem(9).getCount() == 4, "cloud pierce did not use one arrow");
+        // 弓は矢がなくても撃てる (2026-10-28。item/FreeArrows): ふつうの矢は減らない
+        check(f, p.getInventory().getItem(9).getCount() == 5, "cloud pierce used up a plain arrow (bows need no arrows)");
         List<AbstractArrow> arrows = level.getEntitiesOfClass(AbstractArrow.class, new AABB(px - 8, py - 8, pz - 8, px + 8, py + 8, pz + 8),
                 e -> e.getTags().contains(SkillActions.PIERCE_TAG));
         check(f, arrows.size() == 1 && arrows.get(0).getPierceLevel() == SkillRules.piercePierce(2) + 1 && arrows.get(0).isNoGravity()
