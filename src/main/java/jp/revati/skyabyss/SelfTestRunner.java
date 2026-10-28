@@ -225,6 +225,8 @@ public final class SelfTestRunner {
         steps.add(Step.once("playtest", 40, jp.revati.skyabyss.playtest.PlaytestSelfTest::runSelfTest));
         // 試遊コマンド (skyabyss play): 登録・移動先・章の段階・道具・文言。docs/design/37 の 4 節。SKYABYSS_SELFTEST_ONLY="play"
         steps.add(Step.once("playtest play", 40, jp.revati.skyabyss.dev.play.PlaySelfTest::runSelfTest));
+        // 製品版で見せるコマンドを絞る (dev/CommandGate)。SKYABYSS_SELFTEST_ONLY="command gate"
+        steps.add(Step.once("command gate", jp.revati.skyabyss.dev.CommandGateSelfTest::runSelfTest));
         steps.addAll(jp.revati.skyabyss.dev.play.PlayMultiSelfTest.steps());
         steps.add(Step.once("item glow", jp.revati.skyabyss.glow.ItemGlowSelfTest::runSelfTest));
         steps.add(Step.once("progress", ProgressSelfTest::runSelfTest));

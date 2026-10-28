@@ -657,7 +657,8 @@ public final class FreeQuestSelfTest {
     private static List<String> drawnDailies(MinecraftServer server, ServerPlayer p) {
         List<String> out = new java.util.ArrayList<>();
         for (jp.revati.skyabyss.quest.QuestDef d : Board.todays(server)) {
-            if (d.repeat().equals("daily") && d.minStage() <= 1 && !QuestLog.of(p).quests().containsKey(d.id())) {
+            // 四章で閉じる daily_mite_clear は、全部を続けて回して段が上がると板に出ても受けられないので数えない
+            if (d.repeat().equals("daily") && d.minStage() <= 1 && !d.id().equals("daily_mite_clear") && !QuestLog.of(p).quests().containsKey(d.id())) {
                 out.add(d.id());
             }
         }

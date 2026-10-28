@@ -1193,7 +1193,7 @@ public final class EmberHeartSelfTest {
         boolean worldBefore = ProgressData.get(server).worldStopped(EmberLoot.TITAN);
         EmberLoot.onHeartDefeat(back, List.of(), List.of(fake));
         TitanMemoryData.Record rec = memory.peek(fake, EmberLoot.TITAN);
-        check(rec != null && rec.clears == 1 && rec.fragment && rec.firstCleared && rec.choicePending, "defeat record is wrong", f);
+        check(rec != null && rec.clears == 1 && rec.fragment && rec.firstCleared && rec.choicePending == jp.revati.skyabyss.loot.reward.HeartReward.CHOICE_ON_FIRST_CLEAR, "defeat record is wrong", f);
         check(memory.peek(fake, TitanLoot.STONE_WHALE) == null && memory.peek(fake, "tide_shell") == null, "ember defeat wrote to another titan's record", f);
         check(memory.hasPending(fake), "rewards for an absent player were not held", f);
         TitanMemoryData.Pending held = memory.takePending(fake);

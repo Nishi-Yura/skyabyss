@@ -85,7 +85,16 @@ public final class SkillHud {
             renderMana(g, mc, d);
         }
         if (anySlot(d)) {
+            // 職の武器を持っていない間は、直前の職の枠を薄く出す (使えないことが分かるように。消さない)
+            boolean idle = jp.revati.skyabyss.rpg.skill.Job.held(mc.player) == null;
+            if (idle) {
+                g.setColor(1f, 1f, 1f, 0.45f);
+                com.mojang.blaze3d.systems.RenderSystem.enableBlend();
+            }
             renderSlots(g, mc, d);
+            if (idle) {
+                g.setColor(1f, 1f, 1f, 1f);
+            }
         }
     }
 

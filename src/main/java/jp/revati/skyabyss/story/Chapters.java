@@ -165,6 +165,17 @@ public enum Chapters {
 
     public static Chapters of(ServerPlayer player) {
         Chapters c = of(Progression.stage(player), prologueDone(OpeningDirector.state(player)), SkyKey.assembled(player));
+        // 進めているメインの頼みの章の方が先なら、そちら (2026-10-28 の試遊「三章なのに二章と書いてある」。巨神の段階だけで決めていた)
+        for (var e : jp.revati.skyabyss.quest.QuestLog.of(player).quests().entrySet()) {
+            var def = jp.revati.skyabyss.quest.QuestManager.quest(e.getKey());
+            if (def == null || e.getValue().done || !def.main()) {
+                continue;
+            }
+            Chapters q = byId(def.chapter());
+            if (q != null && q.ordinal() > c.ordinal()) {
+                c = q;
+            }
+        }
         // 月へ渡った人 (頼み main_moon を終えた) は六章
         if (c == ABYSS) {
             jp.revati.skyabyss.quest.QuestLog.Entry moon = jp.revati.skyabyss.quest.QuestLog.of(player).entry("main_moon");

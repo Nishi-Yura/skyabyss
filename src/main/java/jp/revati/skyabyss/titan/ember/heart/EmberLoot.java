@@ -192,7 +192,7 @@ public final class EmberLoot {
             boolean first = !r.firstCleared;
             if (first) {
                 r.firstCleared = true;
-                r.choicePending = true;
+                r.choicePending = jp.revati.skyabyss.loot.reward.HeartReward.CHOICE_ON_FIRST_CLEAR;
             }
             if (!unmade.isEmpty()) {
                 SkyAbyss.LOGGER.info("Ember heart reward for {} skipped items that are not made yet: {}", uuid, unmade);

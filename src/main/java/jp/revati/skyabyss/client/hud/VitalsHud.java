@@ -50,6 +50,11 @@ public final class VitalsHud {
 
     static void onLayer0(RenderGuiLayerEvent.Pre event) {
         var name = event.getName();
+        // バニラの緑の経験値のバーと数字は出さない (左上の Lv と成長の帯がある。2026-10-28 の試遊「経験値バーいらない」)
+        if (VanillaGuiLayers.EXPERIENCE_BAR.equals(name) || VanillaGuiLayers.EXPERIENCE_LEVEL.equals(name)) {
+            event.setCanceled(true);
+            return;
+        }
         boolean health = VanillaGuiLayers.PLAYER_HEALTH.equals(name);
         boolean armor = VanillaGuiLayers.ARMOR_LEVEL.equals(name);
         boolean food = VanillaGuiLayers.FOOD_LEVEL.equals(name);

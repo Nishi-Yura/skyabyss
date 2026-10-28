@@ -52,6 +52,10 @@ public final class HeartReward {
     private static final int RETRY_TICKS = 40;
     private static final int RETRY_MAX = 6;
 
+    // 初めて止めたときに専用の逸品を選ばせるか。2026-10-28 の試遊「巨神を倒した後に伝説武器を手に入れられるようにしないで」で切った。
+    // 専用の逸品は心臓の周回でまれに落ちる (TitanGearSet の heartChance)。仕組みは残す (開発用の /titanmemory reward など)
+    public static final boolean CHOICE_ON_FIRST_CLEAR = false;
+
     public enum Result {
         OK, NOT_PENDING, BAD_ITEM, OWNED
     }

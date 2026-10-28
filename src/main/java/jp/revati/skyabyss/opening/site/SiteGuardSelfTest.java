@@ -96,7 +96,10 @@ public final class SiteGuardSelfTest {
     private static void finish(MinecraftServer server) {
         SiteGuard.testing = false;
         if (zombie != null) {
-            check(!zombie.isAlive() || zombie.isRemoved(), "a zombie inside the capital should be removed by the sweep");
+            // 掃き出しは縁の外へ押し戻す。押し戻した先が読み込まれていなければ消える。全部を続けて回すと先が読み込まれていて残るので、外にいればよい
+            SiteGuard.Area a = SiteGuard.capital(server);
+            check(!zombie.isAlive() || zombie.isRemoved() || (a != null && !a.containsXZ(zombie.getX(), zombie.getZ())),
+                    "a zombie inside the capital should be pushed out by the sweep");
             zombie.discard();
         }
         if (FAILS.isEmpty()) {

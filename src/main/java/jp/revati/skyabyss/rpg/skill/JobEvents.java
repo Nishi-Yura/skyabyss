@@ -21,7 +21,8 @@ public final class JobEvents {
         }
         SkillData d = SkillManager.get(p);
         Job job = Job.held(p);
-        if (d.useJob(job)) {
+        // 武器でない物 (食べ物・地図・素手) を持っている間は、直前の職の枠のまま (2026-10-28 の試遊「武器切替の時、スキルが全部消える」)
+        if (job != null && d.useJob(job)) {
             SkillManager.sync(p);
             if (job != null) {
                 Notice.bar(p, Component.translatable("message.skyabyss.skill.job_now", Component.translatable(job.nameKey())));

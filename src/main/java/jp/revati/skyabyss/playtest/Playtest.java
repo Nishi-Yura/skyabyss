@@ -100,9 +100,16 @@ public final class Playtest {
 
     public static int run(ServerPlayer p, String cmd) {
         try {
-            return p.server.getCommands().getDispatcher().execute(cmd, p.createCommandSourceStack().withPermission(4).withSuppressedOutput());
-        } catch (CommandSyntaxException e) {
-            SkyAbyss.LOGGER.warn("playtest: '{}' failed: {}", cmd, e.getMessage());
+            // 製品版で隠した入口 (dev/CommandGate) も、中から流す分は通す
+            return jp.revati.skyabyss.dev.CommandGate.inside(() -> {
+                try {
+                    return p.server.getCommands().getDispatcher().execute(cmd, p.createCommandSourceStack().withPermission(4).withSuppressedOutput());
+                } catch (CommandSyntaxException e) {
+                    throw new IllegalStateException(e);
+                }
+            });
+        } catch (IllegalStateException e) {
+            SkyAbyss.LOGGER.warn("playtest: '{}' failed: {}", cmd, e.getCause() != null ? e.getCause().getMessage() : e.getMessage());
             return 0;
         }
     }

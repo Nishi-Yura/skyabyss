@@ -148,7 +148,10 @@ public final class FoesOneSelfTest {
             check(d != null && BuiltInRegistries.ENTITY_TYPE.containsKey(net.minecraft.resources.ResourceLocation.parse(d.entity())), "region " + r + " has no named foe", f);
             check(jp.revati.skyabyss.world.continent.NamedFoes.lair(r) != null, "region " + r + " has no lair for its named foe", f);
         }
-        for (String region : new String[] {"island", "meadow"}) {
+        // 島は自然には沸かない (敵は IslandTrail の寄り道の場所にだけ出る) ので表は空のまま
+        JsonObject island = json("/data/skyabyss/spawns/island.json");
+        check(island != null && island.getAsJsonArray("entries").isEmpty(), "the island spawn table should stay empty", f);
+        for (String region : new String[] {"meadow"}) {
             JsonObject t = json("/data/skyabyss/spawns/" + region + ".json");
             check(t != null && t.getAsJsonArray("entries").size() >= 2, region + " spawn table is empty", f);
             if (t != null) {

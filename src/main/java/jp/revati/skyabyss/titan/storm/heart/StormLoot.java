@@ -219,7 +219,7 @@ public final class StormLoot {
             boolean first = !r.firstCleared;
             if (first) {
                 r.firstCleared = true;
-                r.choicePending = true;
+                r.choicePending = jp.revati.skyabyss.loot.reward.HeartReward.CHOICE_ON_FIRST_CLEAR;
             }
             memory.setDirty();
             if (!unmade.isEmpty()) {

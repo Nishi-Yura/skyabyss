@@ -292,6 +292,14 @@ public final class GroupBossRoom {
             lastInside.add(player.getUUID());
         }
         if (inside.isEmpty()) {
+            // 心臓の戦いで参加者が全員倒れた: 待たずに戦いを戻し、倒れた人は地上 (物語は巨神の前、周回は祠の前) で目覚める (WipeReturn)
+            if (!participants.isEmpty() && died.containsAll(participants) && boss instanceof jp.revati.skyabyss.entity.HeartBoss) {
+                Set<UUID> fallen = Set.copyOf(died);
+                reset(level, host, false);
+                WipeReturn.wiped(level, group, fallen);
+                cooldown = RETRY_COOLDOWN;
+                return;
+            }
             empty += STEP;
             if (empty >= ABANDON_DELAY) {
                 reset(level, host, true);

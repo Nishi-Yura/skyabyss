@@ -202,7 +202,7 @@ public final class SkillManager {
             return false;
         }
         Job job = IGNORE_JOBS ? null : Job.held(player);
-        if (!IGNORE_JOBS && d.useJob(job)) {
+        if (!IGNORE_JOBS && job != null && d.useJob(job)) {
             sync(player);
         }
         if (!SkillData.usableBy(job, skill)) {
