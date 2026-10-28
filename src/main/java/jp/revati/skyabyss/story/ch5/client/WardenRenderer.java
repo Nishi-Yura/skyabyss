@@ -18,6 +18,8 @@ import software.bernie.geckolib.util.Color;
 // 骨の隠し方は見る者 (AbyssMobsBRenderers の Foe) と同じ: 描かない骨は setHidden で隠す。
 public final class WardenRenderer extends LowPolyGeoRenderer<HeartWarden> {
     static final String NAME = "heart_warden";
+    // 描く大きさ (2026-10-28「もうすこし大きくていい」。当たりの箱は WardenSetup で同じ割合に)
+    static final float SCALE = 1.35f;
     private static final String[] BONES = {"root", "body", "ribs", "heart", "head", "arm_l", "arm_r", "leg_l", "leg_r"};
     private static final String HEART = "heart";
 
@@ -25,8 +27,8 @@ public final class WardenRenderer extends LowPolyGeoRenderer<HeartWarden> {
     private boolean glowOn;
 
     public WardenRenderer(EntityRendererProvider.Context ctx) {
-        super(ctx, new LowPolyGeoRenderer.Model<HeartWarden>(NAME), e -> NAME, 1.0f);
-        this.shadowRadius = 0.9f;
+        super(ctx, new LowPolyGeoRenderer.Model<HeartWarden>(NAME), e -> NAME, SCALE);
+        this.shadowRadius = 1.2f;
     }
 
     private static boolean dark(HeartWarden w) {

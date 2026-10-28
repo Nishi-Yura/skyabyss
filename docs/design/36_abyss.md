@@ -243,12 +243,12 @@
 ### 6.7 作ったもの
 - story/ch5/warden: HeartWarden（番人）・AbyssBeacons（灯籠）・WardenArena（間に入ると目覚める、倒した印、合図 abyss_heart、間が 30 秒空くと戻る）・WardenSetup（登録）。
 - 闇のたまり 2 倍は AbyssPressure.voiceScale（間の中で灯籠が全部消えているとき）。
-- 見た目: 案 B の本番モデル（client/WardenRenderer、生成 tools/rough/lowpoly/abyss/warden_model.py・tools/gen/world/gen_heart_warden.py）。光の中は全部、輪郭だけ（鼓動の術）は体を黒く沈めて光る縁、闇では胸の心臓だけ暗く。写しは暗い色で鼓動の光なし。動きは待ち・歩き・爪・踏み込み・吹き消し・段の変わり・被弾・死。魂の粒は添えだけ。
+- 見た目: 案 B の本番モデル（client/WardenRenderer、生成 tools/rough/lowpoly/abyss/warden_model.py・tools/gen/world/gen_heart_warden.py）。絵は 2026-10-28 の選定 A 古い骨（茶色い古い染み・刻みの線・ひび。warden_paint.py）、背の棘五本と胸の前に出た肋の先六本、描く大きさ 1.35 倍（当たりの箱 1.9 × 4.3）。光の中は全部、輪郭だけ（鼓動の術）は体を黒く沈めて光る縁、闇では胸の心臓だけ暗く。写しは暗い色で鼓動の光なし。動きは待ち・歩き・爪・踏み込み・吹き消し・段の変わり・被弾・死。魂の粒は添えだけ。
 - 開発用: `/skyabyss abyss warden wake`・`/skyabyss abyss warden reset`。自己テスト "abyss warden"。
 - 絵: 光の中だけ見える目（頭蓋の前の二つの光の切れ目）、虚の体に浮かぶ細い筋の網、肋の骨のひびの淡い青緑の光（発光マスク）。爪・踏み込みは予告が終わる瞬間（18・22 tick）に当たる形で、溜めの震えと行き過ぎがある。倒れる動きはのけぞり → 膝が折れる → 沈んで溶ける。
 - 倒したあとの場面 `abyss_warden_fallen`（12 秒。倒れる番人と心臓の台から、肋をなぞって丸天井を見上げる。一人に一度。`SectionScenes`）。報酬は深淵の装備（`AbyssGearLoot.warden`）。
 - 入口: 番人が出ているあいだ、入口の細い通路（印 heart から南へ 31。幅 3・高さ 4）を黒い幕で閉じ、両側に闇の霧（`WardenSeal`）。終わる・間が空いて闇へ戻ると開く。幕の所にいた人は外へ押し出す。
-- まだ: 絵の手描きの仕上げ（今は決まりで描いた絵）。
+
 
 
 ## 7. 五章のメインの深淵の中

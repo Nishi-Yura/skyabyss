@@ -1,6 +1,6 @@
 # 心臓の番人の戦い (HUD あり): 起こして、名乗り・ボスバー・技の予告・ダメージの数字を見る (2026-10-28 夜)
 # bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/abyss_review.txt -PshotsName=abyss_review
-world abyss_fight flat
+world abyss_fight2 flat
 size 1280 720
 timeout 5400
 render 10
@@ -23,7 +23,7 @@ cmd tp @s 0 -298 14 180 5
 wait 20
 cmd skyabyss abyss warden wake
 wait 40
-cmd skyabyss abyss warden dev lamp
+cmd skyabyss abyss dev lamp
 wait 20
 shot f01_wake
 wait 45

@@ -2,7 +2,8 @@
 docs/design/36 の 6・6.6。3 案のラフ (warden.py) から形を借り、次を変える:
   - 骨の組: 肋と核は「ribs」(胸が息をする) の中に、心臓の光は「heart」(鼓動) の中に。腕・脚・頭は今までどおり。
   - UV: 面ごとの島をやめ、同じ向きの面を一つの島にまとめる (部品 × 骨 × 主軸 × 向き)。島を詰めて縞にならないようにする。
-  - 絵: 手で描いたものではなく、材質ごとの決まりで描く (骨は粒と隙間の暗い線、虚は黒、鎖は暗い鉄の縁の光、心臓は青緑の光)。
+  - 絵: 材質ごとの決まりで描き (骨は粒と隙間の暗い線、虚は黒、鎖は暗い鉄の縁の光、心臓は青緑の光)、その上に選定 A の仕上げ (古い染み・刻みの線・ひび。warden_paint.py)。
+  - 前後に出る骨 (spikes): 背の棘五本と胸の前の肋の先六本 (2026-10-28)。
   - 発光: 心臓の画素と、肋の縁の細い筋 (淡い青緑。光の中だけ描く)。虚の体には光の中でだけ浮かぶ筋の網の模様。
 
 出力: docs/review/warden_model/ (heart_warden_mesh.json・heart_warden_atlas.png・heart_warden_glowmask.png・heart_warden_views.png)
@@ -29,7 +30,7 @@ TPU = 4.0                  # 1 単位あたりのテクセル (島の密度)。�
 PAD = 2                    # 島と島のあいだの余白 (テクセル)
 
 # 部品 → 骨 (本番の骨の組)。胸は ribs、心臓は heart (ribs の子)
-PART_BONE = {"rib": "ribs", "spine": "ribs", "core": "ribs", "heart": "heart", "pelvis": "body",
+PART_BONE = {"rib": "ribs", "spine": "ribs", "spike": "ribs", "core": "ribs", "heart": "heart", "pelvis": "body",
              "neck": "head", "skull": "head", "crown": "head"}
 BONES = {
     "root": (None, (0, 0, 0)),
@@ -230,8 +231,21 @@ def paint(faces, size):
     return atlas, glow
 
 
+def spikes():
+    """前後に出る骨 (2026-10-28 の選定 A のとき「前後に骨でててもいい」): 背骨から後ろ上へ五本の棘、胸の前で肋の先が六本前へ。根は背骨・肋の中に沈める"""
+    F = []
+    cz = 2.5
+    for i, y in enumerate((29.0, 32.5, 36.0, 39.5, 43.0)):
+        length = 4.2 + (1.6 if i == 2 else 0.8 if i in (1, 3) else 0.0)
+        F += W.part("spike", W.cone_("body", "bone", np.array([0.0, y, cz + 1.2]), np.array([0.0, 0.35, 1.0]), length, 1.0, sides=6, rings=3, bend=(0, 0.6, 0)))
+    for y in (28.2, 32.6, 37.0):
+        for sx in (-1, 1):
+            F += W.part("spike", W.cone_("body", "bone", np.array([2.4 * sx, y - 1.1, cz - 4.8]), np.array([0.35 * sx, -0.15, -1.0]), 4.6, 0.75, sides=5, rings=2))
+    return F
+
+
 def build():
-    faces = remap(W.build_b(None)[0])
+    faces = remap(W.build_b(None)[0] + spikes())
     for f in faces:
         f.normal = np.asarray(f.normal, float)
     return faces
@@ -248,6 +262,9 @@ def views(faces, atlas, glow, size):
 
 
 def main():
+    # 絵は 2026-10-28 の選定 A 古い骨 (tools/rough/lowpoly/abyss/warden_paint.py の style_a。決まりの絵の上に染み・刻みの線・ひび)
+    import warden_paint as P
+    globals()["paint_face_texels"] = P.style_a
     OUT.mkdir(parents=True, exist_ok=True)
     faces = build()
     size = chart_unwrap(faces)

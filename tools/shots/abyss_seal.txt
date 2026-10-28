@@ -23,7 +23,7 @@ cmd tp @s 0 -298 14 180 5
 wait 20
 cmd skyabyss abyss warden wake
 wait 40
-cmd skyabyss abyss warden dev lamp
+cmd skyabyss abyss dev lamp
 wait 20
 wait 40
 cmd tp @s 0 -298 24 0 5
