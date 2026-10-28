@@ -37,6 +37,7 @@ import net.neoforged.neoforge.event.tick.ServerTickEvent;
 //            体力は、そのとき間にいる人数で合わせる
 //   終わり   倒すと、そのとき間にいる人に合図 abyss_heart。倒した印はワールドに一つ (台の鼓動・再戦は A8 の悪夢)
 //   やり直し 間からだれもいなくなって 30 秒たつと、番人は闇へ戻る (次に入ると最初から)
+//   入口     番人が出ているあいだ、入口の通路を闇の幕で閉じる (WardenSeal。終わると開く)
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class WardenArena {
     public static final String SIGNAL_HEART = "abyss_heart";
@@ -197,6 +198,8 @@ public final class WardenArena {
             return;
         }
         HeartWarden w = current(level);
+        // 番人が出ているあいだ、入口は闇で閉じる (WardenSeal)
+        WardenSeal.update(level, w != null);
         boolean someone = !inside(level).isEmpty();
         if (w == null) {
             warden = null;

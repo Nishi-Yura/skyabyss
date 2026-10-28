@@ -1,0 +1,35 @@
+# 心臓の間の入口の闇の幕 (番人が出ているあいだ) を中と外から撮る
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/abyss_review.txt -PshotsName=abyss_review
+world abyss_seal flat
+size 1280 720
+timeout 5400
+render 10
+clouds off
+
+wait 80
+cmd skyabyss cinematic stop
+cmd effect give @s night_vision 99999 0 true
+cmd gamemode survival
+cmd skyabyss abyss enter
+wait 40
+cmd skyabyss abyss build
+wait 1200
+cmd effect give @s resistance 99999 4 true
+cmd effect give @s regeneration 99999 4 true
+cmd skyabyss abyss layer go heart 180
+wait 5
+cmd skyabyss cinematic stop
+cmd tp @s 0 -298 14 180 5
+wait 20
+cmd skyabyss abyss warden wake
+wait 40
+cmd skyabyss abyss warden dev lamp
+wait 20
+wait 40
+cmd tp @s 0 -298 24 0 5
+wait 30
+shot seal_inside
+cmd gamemode spectator
+cmd tp @s 0 -298 37 180 5
+wait 30
+shot seal_outside

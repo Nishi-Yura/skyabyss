@@ -70,6 +70,11 @@ public final class WardenSelfTest {
             }
             check(f, Math.abs(w.getMaxHealth() - HeartWarden.BASE_HP) < 1 && Math.abs(w.bulk() - 1) < 1e-6, "one player should face BASE_HP: " + w.getMaxHealth() + " bulk " + w.bulk());
             check(f, AbyssBeacons.litCount() == 0, "waking should put every lantern out");
+            // 入口の闇の幕: 出ているあいだ閉じ、いなくなると開く
+            WardenSeal.update(level, true);
+            check(f, WardenSeal.closed(level), "the entrance was not sealed while the warden is out");
+            WardenSeal.update(level, false);
+            check(f, !WardenSeal.closed(level), "the entrance seal did not open");
             BlockPos b0 = AbyssBeacons.pos(0);
             check(f, level.getBlockState(b0).is(Blocks.SOUL_CAMPFIRE) && !level.getBlockState(b0).getValue(CampfireBlock.LIT), "the lantern is not an unlit soul campfire");
             // 闇の中の傷は 25% (硬さ TOUGH もかかる)
