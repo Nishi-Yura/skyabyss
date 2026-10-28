@@ -307,6 +307,20 @@ def nine(w, h, border):
     return {'gui': {'scaling': {'type': 'nine_slice', 'width': w, 'height': h, 'border': border}}}
 
 
+def hide_inventory_craft(im):
+    """持ち物の画面の 2×2 のクラフト枠・矢印・できる物の枠を消す (作る仕組みはない。2026-10-28)。
+    枠の下の無地の帯 (1 倍で y 60〜80) を写して上へ敷き詰める。字「クラフト」は client/InventoryCraftHide が消す"""
+    k = im.size[0] // 256
+    x0, x1 = 95 * k, 173 * k
+    band = im.crop((x0, 60 * k, x1, 80 * k))
+    y = 5 * k
+    while y < 58 * k:
+        h = min(band.size[1], 58 * k - y)
+        im.paste(band.crop((0, 0, x1 - x0, h)), (x0, y))
+        y += h
+    return im
+
+
 def main():
     z = zipfile.ZipFile(JAR)
 
@@ -329,6 +343,8 @@ def main():
         for c in containers:
             src = load(c)
             im, ns, nw = skin_container(src, sk)
+            if c == 'container/inventory.png':
+                im = hide_inventory_craft(im)
             save(im, os.path.join(tex, c))
             report.append('%s: %d slots, %d windows' % (c, ns, nw))
         # 箱の画面と同じ作りの板: レシピの本、進捗の窓、タブの見出しの帯

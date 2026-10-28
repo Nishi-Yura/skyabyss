@@ -116,7 +116,7 @@ public final class PartyScreen extends Screen implements jp.revati.skyabyss.clie
     public void render(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
         super.render(g, mouseX, mouseY, partialTick);
         PartyNetwork.Sync s = PartyClient.state();
-        g.drawCenteredString(font, title, width / 2, top - 2, GOLD);
+        g.drawString(font, title, left, top - 2, GOLD, false);
         // 物語
         Component next = s.nextTitan().isEmpty() ? Component.translatable("gui.skyabyss.party.story_done")
                 : s.nextTitan().equals("?shadow") ? Component.translatable("gui.skyabyss.party.story_next_shadow")
@@ -208,7 +208,11 @@ public final class PartyScreen extends Screen implements jp.revati.skyabyss.clie
     @Override
     public void renderBackground(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
         super.renderBackground(g, mouseX, mouseY, partialTick);
-        g.fill(left - 8, top - 8, left + 328, top + 200, 0x90000000);
+        // ほかの画面 (順位の石・墓・記録) と同じ枠: 濃い板に、上と下の細い明るい線。仲間と招きの間に区切りの線 (2026-10-28 の点検)
+        g.fill(left - 8, top - 8, left + 328, top + 200, 0xC0101418);
+        g.fill(left - 7, top - 7, left + 327, top - 6, 0x60FFFFFF);
+        g.fill(left - 7, top + 198, left + 327, top + 199, 0x60FFFFFF);
+        g.fill(left, top + 84, left + 320, top + 85, 0x30E6B84A);
     }
 
     @Override

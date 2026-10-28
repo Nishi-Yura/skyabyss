@@ -24,7 +24,7 @@ import net.neoforged.neoforge.network.PacketDistributor;
 // 色の段と記号は固定で切れない。記録画面の「称号」から、または /rebirthfx で開く
 public final class RebirthScreen extends Screen implements jp.revati.skyabyss.client.ui.TextBounded {
     private static final int W = 320;
-    private static final int H = 196;
+    private static final int H = 226;   // 切り替え 6 つ・順位表・固定の一行の下に「完了」が重ならない高さ (2026-10-28)
     private static final int ROW = 14;
     private static final int ROWS = 9;
     private static final int TEXT = 0xFFE9EDF0;

@@ -1,0 +1,34 @@
+# 防具の一式を並べて見比べる (2026-10-28 のクオリティ点検)
+world armor_audit flat
+size 1600 900
+timeout 1500
+render 8
+clouds off
+
+wait 80
+cmd skyabyss cinematic stop
+cmd time set noon
+cmd gamerule doDaylightCycle false
+cmd gamemode creative
+hud off
+cmd summon minecraft:armor_stand 0 -60 0 {Rotation:[180f,0f],NoBasePlate:1b,ShowArms:1b,ArmorItems:[{id:"skyabyss:wayfarer_boots",count:1},{id:"skyabyss:wayfarer_leggings",count:1},{id:"skyabyss:wayfarer_chestplate",count:1},{id:"skyabyss:wayfarer_helmet",count:1}]}
+cmd summon minecraft:armor_stand 2 -60 0 {Rotation:[180f,0f],NoBasePlate:1b,ShowArms:1b,ArmorItems:[{id:"skyabyss:ironclad_boots",count:1},{id:"skyabyss:ironclad_leggings",count:1},{id:"skyabyss:ironclad_chestplate",count:1},{id:"skyabyss:ironclad_helmet",count:1}]}
+cmd summon minecraft:armor_stand 4 -60 0 {Rotation:[180f,0f],NoBasePlate:1b,ShowArms:1b,ArmorItems:[{id:"skyabyss:whale_road_boots",count:1},{id:"skyabyss:whale_road_leggings",count:1},{id:"skyabyss:whale_road_chestplate",count:1},{id:"skyabyss:whale_road_helmet",count:1}]}
+cmd summon minecraft:armor_stand 6 -60 0 {Rotation:[180f,0f],NoBasePlate:1b,ShowArms:1b,ArmorItems:[{id:"skyabyss:tide_wader_boots",count:1},{id:"skyabyss:tide_wader_leggings",count:1},{id:"skyabyss:tide_wader_chestplate",count:1},{id:"skyabyss:tide_wader_helmet",count:1}]}
+cmd summon minecraft:armor_stand 8 -60 0 {Rotation:[180f,0f],NoBasePlate:1b,ShowArms:1b,ArmorItems:[{id:"skyabyss:ash_walking_boots",count:1},{id:"skyabyss:ash_walking_leggings",count:1},{id:"skyabyss:ash_walking_chestplate",count:1},{id:"skyabyss:ash_walking_helmet",count:1}]}
+cmd summon minecraft:armor_stand 10 -60 0 {Rotation:[180f,0f],NoBasePlate:1b,ShowArms:1b,ArmorItems:[{id:"skyabyss:peak_crossing_boots",count:1},{id:"skyabyss:peak_crossing_leggings",count:1},{id:"skyabyss:peak_crossing_chestplate",count:1},{id:"skyabyss:peak_crossing_helmet",count:1}]}
+cmd summon minecraft:armor_stand 12 -60 0 {Rotation:[180f,0f],NoBasePlate:1b,ShowArms:1b,ArmorItems:[{id:"skyabyss:stone_whale_boots",count:1},{id:"skyabyss:stone_whale_leggings",count:1},{id:"skyabyss:stone_whale_chestplate",count:1},{id:"skyabyss:stone_whale_helmet",count:1}]}
+cmd summon minecraft:armor_stand 14 -60 0 {Rotation:[180f,0f],NoBasePlate:1b,ShowArms:1b,ArmorItems:[{id:"skyabyss:abyss_diver_boots",count:1},{id:"skyabyss:abyss_diver_leggings",count:1},{id:"skyabyss:abyss_diver_chestplate",count:1},{id:"skyabyss:abyss_diver_helmet",count:1}]}
+wait 40
+camera 7 -58.8 -7.5 0 8
+wait 40
+shot armor_front
+camera 7 -58.8 6.5 180 8
+wait 30
+shot armor_back
+camera 1 -58.6 -2.4 -20 10
+wait 30
+shot armor_close_a
+camera 11 -58.6 -2.4 -20 10
+wait 30
+shot armor_close_b

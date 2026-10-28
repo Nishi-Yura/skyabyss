@@ -1,6 +1,6 @@
 # 深淵の敵 A の 9 種 × 三段 (docs/design/36 の 4・4.2)。tools/gen/shots/gen_abyss_enemies_a_shots.py が書く。
 # 縦穴の真ん中の台の上で、種ごと・段ごとに一枚 (正面寄り・斜め)。段 1 は元の層、段 2・3 は一つ・二つ下の高さ。
-world abyss_enemies_a flat
+world abyss_enemies_a2 flat
 size 1280 720
 timeout 2400
 render 12
@@ -27,10 +27,10 @@ cmd skyabyss abyss mob bone_picker 1
 wait 10
 cmd data merge entity @e[type=skyabyss:bone_picker,limit=1,sort=nearest] {NoAI:1b}
 wait 30
-cmd tp @s -13 200 -12 270 4
+cmd execute at @e[type=skyabyss:bone_picker,limit=1,sort=nearest] run tp @s ^ ^0.6 ^2.6 facing entity @e[type=skyabyss:bone_picker,limit=1,sort=nearest] eyes
 wait 10
 shot bone_picker_s1_front
-cmd tp @s -12 200 -10 180 4
+cmd execute at @e[type=skyabyss:bone_picker,limit=1,sort=nearest] run tp @s ^2.6 ^0.6 ^ facing entity @e[type=skyabyss:bone_picker,limit=1,sort=nearest] eyes
 wait 10
 shot bone_picker_s1_side
 cmd kill @e[type=skyabyss:bone_picker,distance=..30]
@@ -48,10 +48,10 @@ cmd skyabyss abyss mob bone_picker 2
 wait 10
 cmd data merge entity @e[type=skyabyss:bone_picker,limit=1,sort=nearest] {NoAI:1b}
 wait 30
-cmd tp @s -13 80 -12 270 4
+cmd execute at @e[type=skyabyss:bone_picker,limit=1,sort=nearest] run tp @s ^ ^0.6 ^2.6 facing entity @e[type=skyabyss:bone_picker,limit=1,sort=nearest] eyes
 wait 10
 shot bone_picker_s2_front
-cmd tp @s -12 80 -10 180 4
+cmd execute at @e[type=skyabyss:bone_picker,limit=1,sort=nearest] run tp @s ^2.6 ^0.6 ^ facing entity @e[type=skyabyss:bone_picker,limit=1,sort=nearest] eyes
 wait 10
 shot bone_picker_s2_side
 cmd kill @e[type=skyabyss:bone_picker,distance=..30]
@@ -69,10 +69,10 @@ cmd skyabyss abyss mob bone_picker 3
 wait 10
 cmd data merge entity @e[type=skyabyss:bone_picker,limit=1,sort=nearest] {NoAI:1b}
 wait 30
-cmd tp @s -13 -40 -12 270 4
+cmd execute at @e[type=skyabyss:bone_picker,limit=1,sort=nearest] run tp @s ^ ^0.6 ^2.6 facing entity @e[type=skyabyss:bone_picker,limit=1,sort=nearest] eyes
 wait 10
 shot bone_picker_s3_front
-cmd tp @s -12 -40 -10 180 4
+cmd execute at @e[type=skyabyss:bone_picker,limit=1,sort=nearest] run tp @s ^2.6 ^0.6 ^ facing entity @e[type=skyabyss:bone_picker,limit=1,sort=nearest] eyes
 wait 10
 shot bone_picker_s3_side
 cmd kill @e[type=skyabyss:bone_picker,distance=..30]
@@ -90,10 +90,10 @@ cmd skyabyss abyss mob rib_guard 1
 wait 10
 cmd data merge entity @e[type=skyabyss:rib_guard,limit=1,sort=nearest] {NoAI:1b}
 wait 30
-cmd tp @s -1 200 -12 270 4
+cmd execute at @e[type=skyabyss:rib_guard,limit=1,sort=nearest] run tp @s ^ ^0.6 ^2.6 facing entity @e[type=skyabyss:rib_guard,limit=1,sort=nearest] eyes
 wait 10
 shot rib_guard_s1_front
-cmd tp @s 0 200 -10 180 4
+cmd execute at @e[type=skyabyss:rib_guard,limit=1,sort=nearest] run tp @s ^2.6 ^0.6 ^ facing entity @e[type=skyabyss:rib_guard,limit=1,sort=nearest] eyes
 wait 10
 shot rib_guard_s1_side
 cmd kill @e[type=skyabyss:rib_guard,distance=..30]
@@ -111,10 +111,10 @@ cmd skyabyss abyss mob rib_guard 2
 wait 10
 cmd data merge entity @e[type=skyabyss:rib_guard,limit=1,sort=nearest] {NoAI:1b}
 wait 30
-cmd tp @s -1 80 -12 270 4
+cmd execute at @e[type=skyabyss:rib_guard,limit=1,sort=nearest] run tp @s ^ ^0.6 ^2.6 facing entity @e[type=skyabyss:rib_guard,limit=1,sort=nearest] eyes
 wait 10
 shot rib_guard_s2_front
-cmd tp @s 0 80 -10 180 4
+cmd execute at @e[type=skyabyss:rib_guard,limit=1,sort=nearest] run tp @s ^2.6 ^0.6 ^ facing entity @e[type=skyabyss:rib_guard,limit=1,sort=nearest] eyes
 wait 10
 shot rib_guard_s2_side
 cmd kill @e[type=skyabyss:rib_guard,distance=..30]
@@ -132,10 +132,10 @@ cmd skyabyss abyss mob rib_guard 3
 wait 10
 cmd data merge entity @e[type=skyabyss:rib_guard,limit=1,sort=nearest] {NoAI:1b}
 wait 30
-cmd tp @s -1 -40 -12 270 4
+cmd execute at @e[type=skyabyss:rib_guard,limit=1,sort=nearest] run tp @s ^ ^0.6 ^2.6 facing entity @e[type=skyabyss:rib_guard,limit=1,sort=nearest] eyes
 wait 10
 shot rib_guard_s3_front
-cmd tp @s 0 -40 -10 180 4
+cmd execute at @e[type=skyabyss:rib_guard,limit=1,sort=nearest] run tp @s ^2.6 ^0.6 ^ facing entity @e[type=skyabyss:rib_guard,limit=1,sort=nearest] eyes
 wait 10
 shot rib_guard_s3_side
 cmd kill @e[type=skyabyss:rib_guard,distance=..30]
@@ -153,10 +153,10 @@ cmd skyabyss abyss mob bone_flute 1
 wait 10
 cmd data merge entity @e[type=skyabyss:bone_flute,limit=1,sort=nearest] {NoAI:1b}
 wait 30
-cmd tp @s 11 200 -12 270 4
+cmd execute at @e[type=skyabyss:bone_flute,limit=1,sort=nearest] run tp @s ^ ^0.6 ^2.6 facing entity @e[type=skyabyss:bone_flute,limit=1,sort=nearest] eyes
 wait 10
 shot bone_flute_s1_front
-cmd tp @s 12 200 -10 180 4
+cmd execute at @e[type=skyabyss:bone_flute,limit=1,sort=nearest] run tp @s ^2.6 ^0.6 ^ facing entity @e[type=skyabyss:bone_flute,limit=1,sort=nearest] eyes
 wait 10
 shot bone_flute_s1_side
 cmd kill @e[type=skyabyss:bone_flute,distance=..30]
@@ -174,10 +174,10 @@ cmd skyabyss abyss mob bone_flute 2
 wait 10
 cmd data merge entity @e[type=skyabyss:bone_flute,limit=1,sort=nearest] {NoAI:1b}
 wait 30
-cmd tp @s 11 80 -12 270 4
+cmd execute at @e[type=skyabyss:bone_flute,limit=1,sort=nearest] run tp @s ^ ^0.6 ^2.6 facing entity @e[type=skyabyss:bone_flute,limit=1,sort=nearest] eyes
 wait 10
 shot bone_flute_s2_front
-cmd tp @s 12 80 -10 180 4
+cmd execute at @e[type=skyabyss:bone_flute,limit=1,sort=nearest] run tp @s ^2.6 ^0.6 ^ facing entity @e[type=skyabyss:bone_flute,limit=1,sort=nearest] eyes
 wait 10
 shot bone_flute_s2_side
 cmd kill @e[type=skyabyss:bone_flute,distance=..30]
@@ -195,10 +195,10 @@ cmd skyabyss abyss mob bone_flute 3
 wait 10
 cmd data merge entity @e[type=skyabyss:bone_flute,limit=1,sort=nearest] {NoAI:1b}
 wait 30
-cmd tp @s 11 -40 -12 270 4
+cmd execute at @e[type=skyabyss:bone_flute,limit=1,sort=nearest] run tp @s ^ ^0.6 ^2.6 facing entity @e[type=skyabyss:bone_flute,limit=1,sort=nearest] eyes
 wait 10
 shot bone_flute_s3_front
-cmd tp @s 12 -40 -10 180 4
+cmd execute at @e[type=skyabyss:bone_flute,limit=1,sort=nearest] run tp @s ^2.6 ^0.6 ^ facing entity @e[type=skyabyss:bone_flute,limit=1,sort=nearest] eyes
 wait 10
 shot bone_flute_s3_side
 cmd kill @e[type=skyabyss:bone_flute,distance=..30]
@@ -216,10 +216,10 @@ cmd skyabyss abyss mob salt_husk 1
 wait 10
 cmd data merge entity @e[type=skyabyss:salt_husk,limit=1,sort=nearest] {NoAI:1b}
 wait 30
-cmd tp @s -13 80 0 270 4
+cmd execute at @e[type=skyabyss:salt_husk,limit=1,sort=nearest] run tp @s ^ ^0.6 ^2.6 facing entity @e[type=skyabyss:salt_husk,limit=1,sort=nearest] eyes
 wait 10
 shot salt_husk_s1_front
-cmd tp @s -12 80 2 180 4
+cmd execute at @e[type=skyabyss:salt_husk,limit=1,sort=nearest] run tp @s ^2.6 ^0.6 ^ facing entity @e[type=skyabyss:salt_husk,limit=1,sort=nearest] eyes
 wait 10
 shot salt_husk_s1_side
 cmd kill @e[type=skyabyss:salt_husk,distance=..30]
@@ -237,10 +237,10 @@ cmd skyabyss abyss mob salt_husk 2
 wait 10
 cmd data merge entity @e[type=skyabyss:salt_husk,limit=1,sort=nearest] {NoAI:1b}
 wait 30
-cmd tp @s -13 -40 0 270 4
+cmd execute at @e[type=skyabyss:salt_husk,limit=1,sort=nearest] run tp @s ^ ^0.6 ^2.6 facing entity @e[type=skyabyss:salt_husk,limit=1,sort=nearest] eyes
 wait 10
 shot salt_husk_s2_front
-cmd tp @s -12 -40 2 180 4
+cmd execute at @e[type=skyabyss:salt_husk,limit=1,sort=nearest] run tp @s ^2.6 ^0.6 ^ facing entity @e[type=skyabyss:salt_husk,limit=1,sort=nearest] eyes
 wait 10
 shot salt_husk_s2_side
 cmd kill @e[type=skyabyss:salt_husk,distance=..30]
@@ -258,10 +258,10 @@ cmd skyabyss abyss mob salt_husk 3
 wait 10
 cmd data merge entity @e[type=skyabyss:salt_husk,limit=1,sort=nearest] {NoAI:1b}
 wait 30
-cmd tp @s -13 -160 0 270 4
+cmd execute at @e[type=skyabyss:salt_husk,limit=1,sort=nearest] run tp @s ^ ^0.6 ^2.6 facing entity @e[type=skyabyss:salt_husk,limit=1,sort=nearest] eyes
 wait 10
 shot salt_husk_s3_front
-cmd tp @s -12 -160 2 180 4
+cmd execute at @e[type=skyabyss:salt_husk,limit=1,sort=nearest] run tp @s ^2.6 ^0.6 ^ facing entity @e[type=skyabyss:salt_husk,limit=1,sort=nearest] eyes
 wait 10
 shot salt_husk_s3_side
 cmd kill @e[type=skyabyss:salt_husk,distance=..30]
@@ -279,10 +279,10 @@ cmd skyabyss abyss mob tide_hands 1
 wait 10
 cmd data merge entity @e[type=skyabyss:tide_hands,limit=1,sort=nearest] {NoAI:1b}
 wait 30
-cmd tp @s -1 80 0 270 4
+cmd execute at @e[type=skyabyss:tide_hands,limit=1,sort=nearest] run tp @s ^ ^0.6 ^2.6 facing entity @e[type=skyabyss:tide_hands,limit=1,sort=nearest] eyes
 wait 10
 shot tide_hands_s1_front
-cmd tp @s 0 80 2 180 4
+cmd execute at @e[type=skyabyss:tide_hands,limit=1,sort=nearest] run tp @s ^2.6 ^0.6 ^ facing entity @e[type=skyabyss:tide_hands,limit=1,sort=nearest] eyes
 wait 10
 shot tide_hands_s1_side
 cmd kill @e[type=skyabyss:tide_hands,distance=..30]
@@ -300,10 +300,10 @@ cmd skyabyss abyss mob tide_hands 2
 wait 10
 cmd data merge entity @e[type=skyabyss:tide_hands,limit=1,sort=nearest] {NoAI:1b}
 wait 30
-cmd tp @s -1 -40 0 270 4
+cmd execute at @e[type=skyabyss:tide_hands,limit=1,sort=nearest] run tp @s ^ ^0.6 ^2.6 facing entity @e[type=skyabyss:tide_hands,limit=1,sort=nearest] eyes
 wait 10
 shot tide_hands_s2_front
-cmd tp @s 0 -40 2 180 4
+cmd execute at @e[type=skyabyss:tide_hands,limit=1,sort=nearest] run tp @s ^2.6 ^0.6 ^ facing entity @e[type=skyabyss:tide_hands,limit=1,sort=nearest] eyes
 wait 10
 shot tide_hands_s2_side
 cmd kill @e[type=skyabyss:tide_hands,distance=..30]
@@ -321,10 +321,10 @@ cmd skyabyss abyss mob tide_hands 3
 wait 10
 cmd data merge entity @e[type=skyabyss:tide_hands,limit=1,sort=nearest] {NoAI:1b}
 wait 30
-cmd tp @s -1 -160 0 270 4
+cmd execute at @e[type=skyabyss:tide_hands,limit=1,sort=nearest] run tp @s ^ ^0.6 ^2.6 facing entity @e[type=skyabyss:tide_hands,limit=1,sort=nearest] eyes
 wait 10
 shot tide_hands_s3_front
-cmd tp @s 0 -160 2 180 4
+cmd execute at @e[type=skyabyss:tide_hands,limit=1,sort=nearest] run tp @s ^2.6 ^0.6 ^ facing entity @e[type=skyabyss:tide_hands,limit=1,sort=nearest] eyes
 wait 10
 shot tide_hands_s3_side
 cmd kill @e[type=skyabyss:tide_hands,distance=..30]
@@ -342,10 +342,10 @@ cmd skyabyss abyss mob white_shell_keeper 1
 wait 10
 cmd data merge entity @e[type=skyabyss:white_shell_keeper,limit=1,sort=nearest] {NoAI:1b}
 wait 30
-cmd tp @s 11 80 0 270 4
+cmd execute at @e[type=skyabyss:white_shell_keeper,limit=1,sort=nearest] run tp @s ^ ^0.6 ^2.6 facing entity @e[type=skyabyss:white_shell_keeper,limit=1,sort=nearest] eyes
 wait 10
 shot white_shell_keeper_s1_front
-cmd tp @s 12 80 2 180 4
+cmd execute at @e[type=skyabyss:white_shell_keeper,limit=1,sort=nearest] run tp @s ^2.6 ^0.6 ^ facing entity @e[type=skyabyss:white_shell_keeper,limit=1,sort=nearest] eyes
 wait 10
 shot white_shell_keeper_s1_side
 cmd kill @e[type=skyabyss:white_shell_keeper,distance=..30]
@@ -363,10 +363,10 @@ cmd skyabyss abyss mob white_shell_keeper 2
 wait 10
 cmd data merge entity @e[type=skyabyss:white_shell_keeper,limit=1,sort=nearest] {NoAI:1b}
 wait 30
-cmd tp @s 11 -40 0 270 4
+cmd execute at @e[type=skyabyss:white_shell_keeper,limit=1,sort=nearest] run tp @s ^ ^0.6 ^2.6 facing entity @e[type=skyabyss:white_shell_keeper,limit=1,sort=nearest] eyes
 wait 10
 shot white_shell_keeper_s2_front
-cmd tp @s 12 -40 2 180 4
+cmd execute at @e[type=skyabyss:white_shell_keeper,limit=1,sort=nearest] run tp @s ^2.6 ^0.6 ^ facing entity @e[type=skyabyss:white_shell_keeper,limit=1,sort=nearest] eyes
 wait 10
 shot white_shell_keeper_s2_side
 cmd kill @e[type=skyabyss:white_shell_keeper,distance=..30]
@@ -384,10 +384,10 @@ cmd skyabyss abyss mob white_shell_keeper 3
 wait 10
 cmd data merge entity @e[type=skyabyss:white_shell_keeper,limit=1,sort=nearest] {NoAI:1b}
 wait 30
-cmd tp @s 11 -160 0 270 4
+cmd execute at @e[type=skyabyss:white_shell_keeper,limit=1,sort=nearest] run tp @s ^ ^0.6 ^2.6 facing entity @e[type=skyabyss:white_shell_keeper,limit=1,sort=nearest] eyes
 wait 10
 shot white_shell_keeper_s3_front
-cmd tp @s 12 -160 2 180 4
+cmd execute at @e[type=skyabyss:white_shell_keeper,limit=1,sort=nearest] run tp @s ^2.6 ^0.6 ^ facing entity @e[type=skyabyss:white_shell_keeper,limit=1,sort=nearest] eyes
 wait 10
 shot white_shell_keeper_s3_side
 cmd kill @e[type=skyabyss:white_shell_keeper,distance=..30]
@@ -405,10 +405,10 @@ cmd skyabyss abyss mob charged_moth 1
 wait 10
 cmd data merge entity @e[type=skyabyss:charged_moth,limit=1,sort=nearest] {NoAI:1b}
 wait 30
-cmd tp @s -13 -40 12 270 4
+cmd execute at @e[type=skyabyss:charged_moth,limit=1,sort=nearest] run tp @s ^ ^0.6 ^2.6 facing entity @e[type=skyabyss:charged_moth,limit=1,sort=nearest] eyes
 wait 10
 shot charged_moth_s1_front
-cmd tp @s -12 -40 14 180 4
+cmd execute at @e[type=skyabyss:charged_moth,limit=1,sort=nearest] run tp @s ^2.6 ^0.6 ^ facing entity @e[type=skyabyss:charged_moth,limit=1,sort=nearest] eyes
 wait 10
 shot charged_moth_s1_side
 cmd kill @e[type=skyabyss:charged_moth,distance=..30]
@@ -426,10 +426,10 @@ cmd skyabyss abyss mob charged_moth 2
 wait 10
 cmd data merge entity @e[type=skyabyss:charged_moth,limit=1,sort=nearest] {NoAI:1b}
 wait 30
-cmd tp @s -13 -160 12 270 4
+cmd execute at @e[type=skyabyss:charged_moth,limit=1,sort=nearest] run tp @s ^ ^0.6 ^2.6 facing entity @e[type=skyabyss:charged_moth,limit=1,sort=nearest] eyes
 wait 10
 shot charged_moth_s2_front
-cmd tp @s -12 -160 14 180 4
+cmd execute at @e[type=skyabyss:charged_moth,limit=1,sort=nearest] run tp @s ^2.6 ^0.6 ^ facing entity @e[type=skyabyss:charged_moth,limit=1,sort=nearest] eyes
 wait 10
 shot charged_moth_s2_side
 cmd kill @e[type=skyabyss:charged_moth,distance=..30]
@@ -447,10 +447,10 @@ cmd skyabyss abyss mob charged_moth 3
 wait 10
 cmd data merge entity @e[type=skyabyss:charged_moth,limit=1,sort=nearest] {NoAI:1b}
 wait 30
-cmd tp @s -13 -280 12 270 4
+cmd execute at @e[type=skyabyss:charged_moth,limit=1,sort=nearest] run tp @s ^ ^0.6 ^2.6 facing entity @e[type=skyabyss:charged_moth,limit=1,sort=nearest] eyes
 wait 10
 shot charged_moth_s3_front
-cmd tp @s -12 -280 14 180 4
+cmd execute at @e[type=skyabyss:charged_moth,limit=1,sort=nearest] run tp @s ^2.6 ^0.6 ^ facing entity @e[type=skyabyss:charged_moth,limit=1,sort=nearest] eyes
 wait 10
 shot charged_moth_s3_side
 cmd kill @e[type=skyabyss:charged_moth,distance=..30]
@@ -468,10 +468,10 @@ cmd skyabyss abyss mob lightning_idol 1
 wait 10
 cmd data merge entity @e[type=skyabyss:lightning_idol,limit=1,sort=nearest] {NoAI:1b}
 wait 30
-cmd tp @s -1 -40 12 270 4
+cmd execute at @e[type=skyabyss:lightning_idol,limit=1,sort=nearest] run tp @s ^ ^0.6 ^2.6 facing entity @e[type=skyabyss:lightning_idol,limit=1,sort=nearest] eyes
 wait 10
 shot lightning_idol_s1_front
-cmd tp @s 0 -40 14 180 4
+cmd execute at @e[type=skyabyss:lightning_idol,limit=1,sort=nearest] run tp @s ^2.6 ^0.6 ^ facing entity @e[type=skyabyss:lightning_idol,limit=1,sort=nearest] eyes
 wait 10
 shot lightning_idol_s1_side
 cmd kill @e[type=skyabyss:lightning_idol,distance=..30]
@@ -489,10 +489,10 @@ cmd skyabyss abyss mob lightning_idol 2
 wait 10
 cmd data merge entity @e[type=skyabyss:lightning_idol,limit=1,sort=nearest] {NoAI:1b}
 wait 30
-cmd tp @s -1 -160 12 270 4
+cmd execute at @e[type=skyabyss:lightning_idol,limit=1,sort=nearest] run tp @s ^ ^0.6 ^2.6 facing entity @e[type=skyabyss:lightning_idol,limit=1,sort=nearest] eyes
 wait 10
 shot lightning_idol_s2_front
-cmd tp @s 0 -160 14 180 4
+cmd execute at @e[type=skyabyss:lightning_idol,limit=1,sort=nearest] run tp @s ^2.6 ^0.6 ^ facing entity @e[type=skyabyss:lightning_idol,limit=1,sort=nearest] eyes
 wait 10
 shot lightning_idol_s2_side
 cmd kill @e[type=skyabyss:lightning_idol,distance=..30]
@@ -510,10 +510,10 @@ cmd skyabyss abyss mob lightning_idol 3
 wait 10
 cmd data merge entity @e[type=skyabyss:lightning_idol,limit=1,sort=nearest] {NoAI:1b}
 wait 30
-cmd tp @s -1 -280 12 270 4
+cmd execute at @e[type=skyabyss:lightning_idol,limit=1,sort=nearest] run tp @s ^ ^0.6 ^2.6 facing entity @e[type=skyabyss:lightning_idol,limit=1,sort=nearest] eyes
 wait 10
 shot lightning_idol_s3_front
-cmd tp @s 0 -280 14 180 4
+cmd execute at @e[type=skyabyss:lightning_idol,limit=1,sort=nearest] run tp @s ^2.6 ^0.6 ^ facing entity @e[type=skyabyss:lightning_idol,limit=1,sort=nearest] eyes
 wait 10
 shot lightning_idol_s3_side
 cmd kill @e[type=skyabyss:lightning_idol,distance=..30]
@@ -531,10 +531,10 @@ cmd skyabyss abyss mob scorched_bird 1
 wait 10
 cmd data merge entity @e[type=skyabyss:scorched_bird,limit=1,sort=nearest] {NoAI:1b}
 wait 30
-cmd tp @s 11 -40 12 270 4
+cmd execute at @e[type=skyabyss:scorched_bird,limit=1,sort=nearest] run tp @s ^ ^0.6 ^2.6 facing entity @e[type=skyabyss:scorched_bird,limit=1,sort=nearest] eyes
 wait 10
 shot scorched_bird_s1_front
-cmd tp @s 12 -40 14 180 4
+cmd execute at @e[type=skyabyss:scorched_bird,limit=1,sort=nearest] run tp @s ^2.6 ^0.6 ^ facing entity @e[type=skyabyss:scorched_bird,limit=1,sort=nearest] eyes
 wait 10
 shot scorched_bird_s1_side
 cmd kill @e[type=skyabyss:scorched_bird,distance=..30]
@@ -552,10 +552,10 @@ cmd skyabyss abyss mob scorched_bird 2
 wait 10
 cmd data merge entity @e[type=skyabyss:scorched_bird,limit=1,sort=nearest] {NoAI:1b}
 wait 30
-cmd tp @s 11 -160 12 270 4
+cmd execute at @e[type=skyabyss:scorched_bird,limit=1,sort=nearest] run tp @s ^ ^0.6 ^2.6 facing entity @e[type=skyabyss:scorched_bird,limit=1,sort=nearest] eyes
 wait 10
 shot scorched_bird_s2_front
-cmd tp @s 12 -160 14 180 4
+cmd execute at @e[type=skyabyss:scorched_bird,limit=1,sort=nearest] run tp @s ^2.6 ^0.6 ^ facing entity @e[type=skyabyss:scorched_bird,limit=1,sort=nearest] eyes
 wait 10
 shot scorched_bird_s2_side
 cmd kill @e[type=skyabyss:scorched_bird,distance=..30]
@@ -573,10 +573,10 @@ cmd skyabyss abyss mob scorched_bird 3
 wait 10
 cmd data merge entity @e[type=skyabyss:scorched_bird,limit=1,sort=nearest] {NoAI:1b}
 wait 30
-cmd tp @s 11 -280 12 270 4
+cmd execute at @e[type=skyabyss:scorched_bird,limit=1,sort=nearest] run tp @s ^ ^0.6 ^2.6 facing entity @e[type=skyabyss:scorched_bird,limit=1,sort=nearest] eyes
 wait 10
 shot scorched_bird_s3_front
-cmd tp @s 12 -280 14 180 4
+cmd execute at @e[type=skyabyss:scorched_bird,limit=1,sort=nearest] run tp @s ^2.6 ^0.6 ^ facing entity @e[type=skyabyss:scorched_bird,limit=1,sort=nearest] eyes
 wait 10
 shot scorched_bird_s3_side
 cmd kill @e[type=skyabyss:scorched_bird,distance=..30]
