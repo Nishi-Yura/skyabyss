@@ -1,4 +1,5 @@
 """一章の素材 4 つの 32x32 アイコン 3 案 (2026-10-28 のクオリティ点検。仮の絵 (右上の紫の三角) のままだった)。
+選定 (2026-10-28): 骨片 A・野兎の針 A・岩殻の欠片 A・岩殻の糸 B。textures/item/<品>.png へ写した。
 骨片 (bone_chip)・野兎の針 (hare_quill)・岩殻の欠片 (rock_shell_scrap)・岩殻の糸 (rock_shell_thread)。描き方は icons_phase2.Icon。案ごとに形を変える。
 
 実行: python tools/rough/icons_ch1_materials.py
