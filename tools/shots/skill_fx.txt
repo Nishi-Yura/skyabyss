@@ -33,13 +33,15 @@ cmd skyabyss cinematic stop
 huddemo off
 hud off
 wait 30
+cmd skyabyss job choose warrior
+cmd item replace entity @s weapon.mainhand with skyabyss:shrine_sword
 cmd skyabyss skill learn @s titan_cleave 3
 cmd skyabyss skill slot @s 1 titan_cleave
 cmd skyabyss skill cooldowns @s
-cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
-cmd execute as @e[type=minecraft:ravager] run tp @s ~ -400 ~
+cmd execute as @e[type=skyabyss:bandit] run tp @s ~ -400 ~
+cmd execute as @e[type=skyabyss:rock_boar] run tp @s ~ -400 ~
 cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
-cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
+cmd summon skyabyss:bandit -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
 wait 10
 cmd skyabyss skill mana @s full
 record titan_cleave 36 30
@@ -59,13 +61,15 @@ cmd skyabyss cinematic stop
 huddemo off
 hud off
 wait 30
+cmd skyabyss job choose warrior
+cmd item replace entity @s weapon.mainhand with skyabyss:shrine_sword
 cmd skyabyss skill learn @s rock_call 3
 cmd skyabyss skill slot @s 1 rock_call
 cmd skyabyss skill cooldowns @s
-cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
-cmd execute as @e[type=minecraft:ravager] run tp @s ~ -400 ~
+cmd execute as @e[type=skyabyss:bandit] run tp @s ~ -400 ~
+cmd execute as @e[type=skyabyss:rock_boar] run tp @s ~ -400 ~
 cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
-cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
+cmd summon skyabyss:bandit -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
 wait 10
 cmd skyabyss skill mana @s full
 record rock_call 36 30
@@ -85,13 +89,15 @@ cmd skyabyss cinematic stop
 huddemo off
 hud off
 wait 30
+cmd skyabyss job choose warrior
+cmd item replace entity @s weapon.mainhand with skyabyss:shrine_sword
 cmd skyabyss skill learn @s whale_sweep 3
 cmd skyabyss skill slot @s 1 whale_sweep
 cmd skyabyss skill cooldowns @s
-cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
-cmd execute as @e[type=minecraft:ravager] run tp @s ~ -400 ~
+cmd execute as @e[type=skyabyss:bandit] run tp @s ~ -400 ~
+cmd execute as @e[type=skyabyss:rock_boar] run tp @s ~ -400 ~
 cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
-cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
+cmd summon skyabyss:bandit -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
 wait 10
 cmd skyabyss skill mana @s full
 record whale_sweep 36 30
@@ -111,13 +117,15 @@ cmd skyabyss cinematic stop
 huddemo off
 hud off
 wait 30
+cmd skyabyss job choose assassin
+cmd item replace entity @s weapon.mainhand with skyabyss:shrine_dagger
 cmd skyabyss skill learn @s lunge 3
 cmd skyabyss skill slot @s 1 lunge
 cmd skyabyss skill cooldowns @s
-cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
-cmd execute as @e[type=minecraft:ravager] run tp @s ~ -400 ~
+cmd execute as @e[type=skyabyss:bandit] run tp @s ~ -400 ~
+cmd execute as @e[type=skyabyss:rock_boar] run tp @s ~ -400 ~
 cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
-cmd summon minecraft:ravager -1.6 -60 6.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
+cmd summon skyabyss:rock_boar -1.6 -60 6.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
 wait 10
 cmd skyabyss skill mana @s full
 record lunge 36 30
@@ -137,13 +145,15 @@ cmd skyabyss cinematic stop
 huddemo off
 hud off
 wait 30
+cmd skyabyss job choose assassin
+cmd item replace entity @s weapon.mainhand with skyabyss:shrine_dagger
 cmd skyabyss skill learn @s backstep 3
 cmd skyabyss skill slot @s 1 backstep
 cmd skyabyss skill cooldowns @s
-cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
-cmd execute as @e[type=minecraft:ravager] run tp @s ~ -400 ~
+cmd execute as @e[type=skyabyss:bandit] run tp @s ~ -400 ~
+cmd execute as @e[type=skyabyss:rock_boar] run tp @s ~ -400 ~
 cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
-cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
+cmd summon skyabyss:bandit -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
 wait 10
 cmd skyabyss skill mana @s full
 record backstep 36 30
@@ -163,13 +173,15 @@ cmd skyabyss cinematic stop
 huddemo off
 hud off
 wait 30
+cmd skyabyss job choose assassin
+cmd item replace entity @s weapon.mainhand with skyabyss:shrine_dagger
 cmd skyabyss skill learn @s wind_rend 3
 cmd skyabyss skill slot @s 1 wind_rend
 cmd skyabyss skill cooldowns @s
-cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
-cmd execute as @e[type=minecraft:ravager] run tp @s ~ -400 ~
+cmd execute as @e[type=skyabyss:bandit] run tp @s ~ -400 ~
+cmd execute as @e[type=skyabyss:rock_boar] run tp @s ~ -400 ~
 cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
-cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
+cmd summon skyabyss:bandit -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
 wait 10
 cmd skyabyss skill mana @s full
 record wind_rend 36 30
@@ -189,13 +201,15 @@ cmd skyabyss cinematic stop
 huddemo off
 hud off
 wait 30
+cmd skyabyss job choose shaman
+cmd item replace entity @s weapon.mainhand with skyabyss:shrine_bell_staff
 cmd skyabyss skill learn @s ward_song 3
 cmd skyabyss skill slot @s 1 ward_song
 cmd skyabyss skill cooldowns @s
-cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
-cmd execute as @e[type=minecraft:ravager] run tp @s ~ -400 ~
+cmd execute as @e[type=skyabyss:bandit] run tp @s ~ -400 ~
+cmd execute as @e[type=skyabyss:rock_boar] run tp @s ~ -400 ~
 cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
-cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
+cmd summon skyabyss:bandit -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
 wait 10
 cmd skyabyss skill mana @s full
 record ward_song 36 30
@@ -215,13 +229,15 @@ cmd skyabyss cinematic stop
 huddemo off
 hud off
 wait 30
+cmd skyabyss job choose shaman
+cmd item replace entity @s weapon.mainhand with skyabyss:shrine_bell_staff
 cmd skyabyss skill learn @s ebb_tide 3
 cmd skyabyss skill slot @s 1 ebb_tide
 cmd skyabyss skill cooldowns @s
-cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
-cmd execute as @e[type=minecraft:ravager] run tp @s ~ -400 ~
+cmd execute as @e[type=skyabyss:bandit] run tp @s ~ -400 ~
+cmd execute as @e[type=skyabyss:rock_boar] run tp @s ~ -400 ~
 cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
-cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
+cmd summon skyabyss:bandit -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
 wait 10
 cmd skyabyss skill mana @s full
 record ebb_tide 36 30
@@ -241,13 +257,15 @@ cmd skyabyss cinematic stop
 huddemo off
 hud off
 wait 30
+cmd skyabyss job choose shaman
+cmd item replace entity @s weapon.mainhand with skyabyss:shrine_bell_staff
 cmd skyabyss skill learn @s cycle_song 3
 cmd skyabyss skill slot @s 1 cycle_song
 cmd skyabyss skill cooldowns @s
-cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
-cmd execute as @e[type=minecraft:ravager] run tp @s ~ -400 ~
+cmd execute as @e[type=skyabyss:bandit] run tp @s ~ -400 ~
+cmd execute as @e[type=skyabyss:rock_boar] run tp @s ~ -400 ~
 cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
-cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
+cmd summon skyabyss:bandit -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
 wait 10
 cmd skyabyss skill mana @s full
 record cycle_song 36 30
@@ -267,13 +285,15 @@ cmd skyabyss cinematic stop
 huddemo off
 hud off
 wait 30
+cmd skyabyss job choose smith
+cmd item replace entity @s weapon.mainhand with skyabyss:shrine_hammer
 cmd skyabyss skill learn @s temper 3
 cmd skyabyss skill slot @s 1 temper
 cmd skyabyss skill cooldowns @s
-cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
-cmd execute as @e[type=minecraft:ravager] run tp @s ~ -400 ~
+cmd execute as @e[type=skyabyss:bandit] run tp @s ~ -400 ~
+cmd execute as @e[type=skyabyss:rock_boar] run tp @s ~ -400 ~
 cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
-cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
+cmd summon skyabyss:bandit -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
 wait 10
 cmd skyabyss skill mana @s full
 record temper 36 30
@@ -293,13 +313,15 @@ cmd skyabyss cinematic stop
 huddemo off
 hud off
 wait 30
+cmd skyabyss job choose smith
+cmd item replace entity @s weapon.mainhand with skyabyss:shrine_hammer
 cmd skyabyss skill learn @s ember_hammer 3
 cmd skyabyss skill slot @s 1 ember_hammer
 cmd skyabyss skill cooldowns @s
-cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
-cmd execute as @e[type=minecraft:ravager] run tp @s ~ -400 ~
+cmd execute as @e[type=skyabyss:bandit] run tp @s ~ -400 ~
+cmd execute as @e[type=skyabyss:rock_boar] run tp @s ~ -400 ~
 cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
-cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
+cmd summon skyabyss:bandit -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
 wait 10
 cmd skyabyss skill mana @s full
 record ember_hammer 36 30
@@ -319,13 +341,15 @@ cmd skyabyss cinematic stop
 huddemo off
 hud off
 wait 30
+cmd skyabyss job choose smith
+cmd item replace entity @s weapon.mainhand with skyabyss:shrine_hammer
 cmd skyabyss skill learn @s ash_scatter 3
 cmd skyabyss skill slot @s 1 ash_scatter
 cmd skyabyss skill cooldowns @s
-cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
-cmd execute as @e[type=minecraft:ravager] run tp @s ~ -400 ~
+cmd execute as @e[type=skyabyss:bandit] run tp @s ~ -400 ~
+cmd execute as @e[type=skyabyss:rock_boar] run tp @s ~ -400 ~
 cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
-cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
+cmd summon skyabyss:bandit -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
 wait 10
 cmd skyabyss skill mana @s full
 record ash_scatter 36 30
@@ -345,15 +369,16 @@ cmd skyabyss cinematic stop
 huddemo off
 hud off
 wait 30
+cmd skyabyss job choose archer
 cmd item replace entity @s weapon.mainhand with minecraft:bow
 cmd give @s minecraft:arrow 64
 cmd skyabyss skill learn @s cloud_pierce 3
 cmd skyabyss skill slot @s 1 cloud_pierce
 cmd skyabyss skill cooldowns @s
-cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
-cmd execute as @e[type=minecraft:ravager] run tp @s ~ -400 ~
+cmd execute as @e[type=skyabyss:bandit] run tp @s ~ -400 ~
+cmd execute as @e[type=skyabyss:rock_boar] run tp @s ~ -400 ~
 cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
-cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
+cmd summon skyabyss:bandit -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
 wait 10
 cmd skyabyss skill mana @s full
 record cloud_pierce 46 30
@@ -373,13 +398,15 @@ cmd skyabyss cinematic stop
 huddemo off
 hud off
 wait 30
+cmd skyabyss job choose archer
+cmd item replace entity @s weapon.mainhand with skyabyss:shrine_bow
 cmd skyabyss skill learn @s bone_trap 3
 cmd skyabyss skill slot @s 1 bone_trap
 cmd skyabyss skill cooldowns @s
-cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
-cmd execute as @e[type=minecraft:ravager] run tp @s ~ -400 ~
+cmd execute as @e[type=skyabyss:bandit] run tp @s ~ -400 ~
+cmd execute as @e[type=skyabyss:rock_boar] run tp @s ~ -400 ~
 cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
-cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
+cmd summon skyabyss:bandit -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
 wait 10
 cmd skyabyss skill mana @s full
 record bone_trap 36 30
@@ -399,15 +426,16 @@ cmd skyabyss cinematic stop
 huddemo off
 hud off
 wait 30
+cmd skyabyss job choose archer
 cmd item replace entity @s weapon.mainhand with minecraft:bow
 cmd give @s minecraft:arrow 64
 cmd skyabyss skill learn @s sky_rain 3
 cmd skyabyss skill slot @s 1 sky_rain
 cmd skyabyss skill cooldowns @s
-cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
-cmd execute as @e[type=minecraft:ravager] run tp @s ~ -400 ~
+cmd execute as @e[type=skyabyss:bandit] run tp @s ~ -400 ~
+cmd execute as @e[type=skyabyss:rock_boar] run tp @s ~ -400 ~
 cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
-cmd summon minecraft:husk -0.5 -60 7.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
+cmd summon skyabyss:bandit -0.5 -60 7.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
 wait 10
 cmd skyabyss skill mana @s full
 record sky_rain 88 30
@@ -418,33 +446,7 @@ cmd skyabyss skill cooldowns @s
 wait 30
 wait 80
 
-# ---- signal (昼・三人称の背中側。36 tick)
-perspective back
-fov 48
-cmd tp @s 0.5 -60 0.5 0 13
-cmd gamerule doWeatherCycle false
-cmd weather clear
-cmd skyabyss cinematic stop
-huddemo off
-hud off
-wait 30
-cmd skyabyss skill learn @s signal 3
-cmd skyabyss skill slot @s 1 signal
-cmd skyabyss skill cooldowns @s
-cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
-cmd execute as @e[type=minecraft:ravager] run tp @s ~ -400 ~
-cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
-cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
-wait 10
-cmd skyabyss skill mana @s full
-record signal 36 30
-wait 4
-cmd skyabyss skill cast @s 1
-recwait
-cmd skyabyss skill cooldowns @s
-wait 30
-
-# ---- dust_charge (昼・三人称の背中側。36 tick)
+# ---- shield_bash (昼・三人称の背中側。36 tick)
 perspective back
 fov 48
 cmd tp @s 0.5 -60 0.5 0 0
@@ -454,23 +456,25 @@ cmd skyabyss cinematic stop
 huddemo off
 hud off
 wait 30
-cmd skyabyss skill learn @s dust_charge 3
-cmd skyabyss skill slot @s 1 dust_charge
+cmd skyabyss job choose warrior
+cmd item replace entity @s weapon.mainhand with skyabyss:shrine_sword
+cmd skyabyss skill learn @s shield_bash 3
+cmd skyabyss skill slot @s 1 shield_bash
 cmd skyabyss skill cooldowns @s
-cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
-cmd execute as @e[type=minecraft:ravager] run tp @s ~ -400 ~
+cmd execute as @e[type=skyabyss:bandit] run tp @s ~ -400 ~
+cmd execute as @e[type=skyabyss:rock_boar] run tp @s ~ -400 ~
 cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
-cmd summon minecraft:husk -0.7 -60 7.0 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
+cmd summon skyabyss:bandit -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
 wait 10
 cmd skyabyss skill mana @s full
-record dust_charge 36 30
+record shield_bash 36 30
 wait 4
 cmd skyabyss skill cast @s 1
 recwait
 cmd skyabyss skill cooldowns @s
 wait 30
 
-# ---- steam_bell (昼・三人称の背中側。36 tick)
+# ---- bone_swing (昼・三人称の背中側。36 tick)
 perspective back
 fov 48
 cmd tp @s 0.5 -60 0.5 0 0
@@ -480,23 +484,25 @@ cmd skyabyss cinematic stop
 huddemo off
 hud off
 wait 30
-cmd skyabyss skill learn @s steam_bell 3
-cmd skyabyss skill slot @s 1 steam_bell
+cmd skyabyss job choose warrior
+cmd item replace entity @s weapon.mainhand with skyabyss:shrine_sword
+cmd skyabyss skill learn @s bone_swing 3
+cmd skyabyss skill slot @s 1 bone_swing
 cmd skyabyss skill cooldowns @s
-cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
-cmd execute as @e[type=minecraft:ravager] run tp @s ~ -400 ~
+cmd execute as @e[type=skyabyss:bandit] run tp @s ~ -400 ~
+cmd execute as @e[type=skyabyss:rock_boar] run tp @s ~ -400 ~
 cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
-cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
+cmd summon skyabyss:bandit -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
 wait 10
 cmd skyabyss skill mana @s full
-record steam_bell 36 30
+record bone_swing 36 30
 wait 4
 cmd skyabyss skill cast @s 1
 recwait
 cmd skyabyss skill cooldowns @s
 wait 30
 
-# ---- cinder_volley (昼・三人称の背中側。36 tick)
+# ---- spin_cut (昼・三人称の背中側。36 tick)
 perspective back
 fov 48
 cmd tp @s 0.5 -60 0.5 0 0
@@ -506,16 +512,131 @@ cmd skyabyss cinematic stop
 huddemo off
 hud off
 wait 30
-cmd skyabyss skill learn @s cinder_volley 3
-cmd skyabyss skill slot @s 1 cinder_volley
+cmd skyabyss job choose warrior
+cmd item replace entity @s weapon.mainhand with skyabyss:shrine_sword
+cmd skyabyss skill learn @s spin_cut 3
+cmd skyabyss skill slot @s 1 spin_cut
 cmd skyabyss skill cooldowns @s
-cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
-cmd execute as @e[type=minecraft:ravager] run tp @s ~ -400 ~
+cmd execute as @e[type=skyabyss:bandit] run tp @s ~ -400 ~
+cmd execute as @e[type=skyabyss:rock_boar] run tp @s ~ -400 ~
 cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
-cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
+cmd summon skyabyss:bandit -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
 wait 10
 cmd skyabyss skill mana @s full
-record cinder_volley 36 30
+record spin_cut 36 30
+wait 4
+cmd skyabyss skill cast @s 1
+recwait
+cmd skyabyss skill cooldowns @s
+wait 30
+
+# ---- twin_fang (昼・三人称の背中側。36 tick)
+perspective back
+fov 48
+cmd tp @s 0.5 -60 0.5 0 0
+cmd gamerule doWeatherCycle false
+cmd weather clear
+cmd skyabyss cinematic stop
+huddemo off
+hud off
+wait 30
+cmd skyabyss job choose assassin
+cmd item replace entity @s weapon.mainhand with skyabyss:shrine_dagger
+cmd skyabyss skill learn @s twin_fang 3
+cmd skyabyss skill slot @s 1 twin_fang
+cmd skyabyss skill cooldowns @s
+cmd execute as @e[type=skyabyss:bandit] run tp @s ~ -400 ~
+cmd execute as @e[type=skyabyss:rock_boar] run tp @s ~ -400 ~
+cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
+cmd summon skyabyss:bandit -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
+wait 10
+cmd skyabyss skill mana @s full
+record twin_fang 36 30
+wait 4
+cmd skyabyss skill cast @s 1
+recwait
+cmd skyabyss skill cooldowns @s
+wait 30
+
+# ---- spark_burst (昼・三人称の背中側。36 tick)
+perspective back
+fov 48
+cmd tp @s 0.5 -60 0.5 0 0
+cmd gamerule doWeatherCycle false
+cmd weather clear
+cmd skyabyss cinematic stop
+huddemo off
+hud off
+wait 30
+cmd skyabyss job choose smith
+cmd item replace entity @s weapon.mainhand with skyabyss:shrine_hammer
+cmd skyabyss skill learn @s spark_burst 3
+cmd skyabyss skill slot @s 1 spark_burst
+cmd skyabyss skill cooldowns @s
+cmd execute as @e[type=skyabyss:bandit] run tp @s ~ -400 ~
+cmd execute as @e[type=skyabyss:rock_boar] run tp @s ~ -400 ~
+cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
+cmd summon skyabyss:bandit -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
+wait 10
+cmd skyabyss skill mana @s full
+record spark_burst 36 30
+wait 4
+cmd skyabyss skill cast @s 1
+recwait
+cmd skyabyss skill cooldowns @s
+wait 30
+
+# ---- snare_shot (昼・三人称の背中側。36 tick)
+perspective back
+fov 48
+cmd tp @s 0.5 -60 0.5 0 0
+cmd gamerule doWeatherCycle false
+cmd weather clear
+cmd skyabyss cinematic stop
+huddemo off
+hud off
+wait 30
+cmd skyabyss job choose archer
+cmd item replace entity @s weapon.mainhand with minecraft:bow
+cmd give @s minecraft:arrow 64
+cmd skyabyss skill learn @s snare_shot 3
+cmd skyabyss skill slot @s 1 snare_shot
+cmd skyabyss skill cooldowns @s
+cmd execute as @e[type=skyabyss:bandit] run tp @s ~ -400 ~
+cmd execute as @e[type=skyabyss:rock_boar] run tp @s ~ -400 ~
+cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
+cmd summon skyabyss:bandit -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
+wait 10
+cmd skyabyss skill mana @s full
+record snare_shot 36 30
+wait 4
+cmd skyabyss skill cast @s 1
+recwait
+cmd skyabyss skill cooldowns @s
+wait 30
+
+# ---- stardust (昼・三人称の背中側。36 tick)
+perspective back
+fov 48
+cmd tp @s 0.5 -60 0.5 0 0
+cmd gamerule doWeatherCycle false
+cmd weather clear
+cmd skyabyss cinematic stop
+huddemo off
+hud off
+wait 30
+cmd skyabyss job choose mage
+cmd item replace entity @s weapon.mainhand with skyabyss:shrine_staff
+cmd skyabyss skill learn @s stardust 3
+cmd skyabyss skill slot @s 1 stardust
+cmd skyabyss skill cooldowns @s
+cmd execute as @e[type=skyabyss:bandit] run tp @s ~ -400 ~
+cmd execute as @e[type=skyabyss:rock_boar] run tp @s ~ -400 ~
+cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
+cmd summon skyabyss:bandit -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
+wait 10
+cmd skyabyss skill mana @s full
+record stardust 36 30
 wait 4
 cmd skyabyss skill cast @s 1
 recwait
@@ -532,13 +653,15 @@ cmd skyabyss cinematic stop
 huddemo off
 hud off
 wait 30
+cmd skyabyss job choose warrior
+cmd item replace entity @s weapon.mainhand with skyabyss:shrine_sword
 cmd skyabyss skill learn @s deep_pull 3
 cmd skyabyss skill slot @s 1 deep_pull
 cmd skyabyss skill cooldowns @s
-cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
-cmd execute as @e[type=minecraft:ravager] run tp @s ~ -400 ~
+cmd execute as @e[type=skyabyss:bandit] run tp @s ~ -400 ~
+cmd execute as @e[type=skyabyss:rock_boar] run tp @s ~ -400 ~
 cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
-cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
+cmd summon skyabyss:bandit -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
 wait 10
 cmd skyabyss skill mana @s full
 record deep_pull 36 30
@@ -558,13 +681,15 @@ cmd skyabyss cinematic stop
 huddemo off
 hud off
 wait 30
+cmd skyabyss job choose warrior
+cmd item replace entity @s weapon.mainhand with skyabyss:shrine_sword
 cmd skyabyss skill learn @s deep_echo 3
 cmd skyabyss skill slot @s 1 deep_echo
 cmd skyabyss skill cooldowns @s
-cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
-cmd execute as @e[type=minecraft:ravager] run tp @s ~ -400 ~
+cmd execute as @e[type=skyabyss:bandit] run tp @s ~ -400 ~
+cmd execute as @e[type=skyabyss:rock_boar] run tp @s ~ -400 ~
 cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
-cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
+cmd summon skyabyss:bandit -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
 wait 10
 cmd skyabyss skill mana @s full
 record deep_echo 42 30
@@ -584,13 +709,15 @@ cmd skyabyss cinematic stop
 huddemo off
 hud off
 wait 30
+cmd skyabyss job choose warrior
+cmd item replace entity @s weapon.mainhand with skyabyss:shrine_sword
 cmd skyabyss skill learn @s deep_maw 3
 cmd skyabyss skill slot @s 1 deep_maw
 cmd skyabyss skill cooldowns @s
-cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
-cmd execute as @e[type=minecraft:ravager] run tp @s ~ -400 ~
+cmd execute as @e[type=skyabyss:bandit] run tp @s ~ -400 ~
+cmd execute as @e[type=skyabyss:rock_boar] run tp @s ~ -400 ~
 cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
-cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
+cmd summon skyabyss:bandit -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
 wait 10
 cmd skyabyss skill mana @s full
 record deep_maw 36 30
@@ -610,13 +737,15 @@ cmd skyabyss cinematic stop
 huddemo off
 hud off
 wait 30
+cmd skyabyss job choose warrior
+cmd item replace entity @s weapon.mainhand with skyabyss:shrine_sword
 cmd skyabyss skill learn @s echo_strike 3
 cmd skyabyss skill slot @s 1 echo_strike
 cmd skyabyss skill cooldowns @s
-cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
-cmd execute as @e[type=minecraft:ravager] run tp @s ~ -400 ~
+cmd execute as @e[type=skyabyss:bandit] run tp @s ~ -400 ~
+cmd execute as @e[type=skyabyss:rock_boar] run tp @s ~ -400 ~
 cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
-cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
+cmd summon skyabyss:bandit -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
 wait 10
 cmd skyabyss skill mana @s full
 record echo_strike 36 30
@@ -636,13 +765,15 @@ cmd skyabyss cinematic stop
 huddemo off
 hud off
 wait 30
+cmd skyabyss job choose warrior
+cmd item replace entity @s weapon.mainhand with skyabyss:shrine_sword
 cmd skyabyss skill learn @s grave_bell 3
 cmd skyabyss skill slot @s 1 grave_bell
 cmd skyabyss skill cooldowns @s
-cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
-cmd execute as @e[type=minecraft:ravager] run tp @s ~ -400 ~
+cmd execute as @e[type=skyabyss:bandit] run tp @s ~ -400 ~
+cmd execute as @e[type=skyabyss:rock_boar] run tp @s ~ -400 ~
 cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
-cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
+cmd summon skyabyss:bandit -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
 wait 10
 cmd skyabyss skill mana @s full
 record grave_bell 36 30
@@ -662,13 +793,15 @@ cmd skyabyss cinematic stop
 huddemo off
 hud off
 wait 30
+cmd skyabyss job choose warrior
+cmd item replace entity @s weapon.mainhand with skyabyss:shrine_sword
 cmd skyabyss skill learn @s final_light 3
 cmd skyabyss skill slot @s 1 final_light
 cmd skyabyss skill cooldowns @s
-cmd execute as @e[type=minecraft:husk] run tp @s ~ -400 ~
-cmd execute as @e[type=minecraft:ravager] run tp @s ~ -400 ~
+cmd execute as @e[type=skyabyss:bandit] run tp @s ~ -400 ~
+cmd execute as @e[type=skyabyss:rock_boar] run tp @s ~ -400 ~
 cmd execute if entity @e[type=minecraft:item] run kill @e[type=minecraft:item]
-cmd summon minecraft:husk -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
+cmd summon skyabyss:bandit -1.0 -60 3.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
 wait 10
 cmd skyabyss skill mana @s full
 record final_light 36 30

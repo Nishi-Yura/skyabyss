@@ -65,10 +65,12 @@ public final class AbilityNode {
     public final SkillKeystone keystone;
     @Nullable
     public final Mutation mutation;
+    // 取るのに要る転生の回数 (淵・前世の木。職の木は 0)
+    public final int rebirthAt;
 
     AbilityNode(String id, Kind kind, int cost, int x, int y, @Nullable String arch, int archPoints, List<String> requires, List<String> excludes,
             @Nullable Skill skill, int rune, @Nullable Stat stat, int amount, int at, Map<String, Double> effect, @Nullable SkillKeystone keystone,
-            @Nullable Mutation mutation) {
+            @Nullable Mutation mutation, int rebirthAt) {
         this.id = id;
         this.kind = kind;
         this.cost = cost;
@@ -86,6 +88,7 @@ public final class AbilityNode {
         this.effect = Collections.unmodifiableMap(effect);
         this.keystone = keystone;
         this.mutation = mutation;
+        this.rebirthAt = rebirthAt;
     }
 
     static AbilityNode parse(String job, JsonObject o) {
@@ -168,7 +171,8 @@ public final class AbilityNode {
             default -> {
             }
         }
-        return new AbilityNode(id, kind, cost, x, y, arch, archPoints, requires, excludes, skill, rune, stat, amount, at, effect, keystone, mutation);
+        int rebirthAt = o.has("rebirth_at") ? o.get("rebirth_at").getAsInt() : skill != null ? skill.rebirthAt() : 0;
+        return new AbilityNode(id, kind, cost, x, y, arch, archPoints, requires, excludes, skill, rune, stat, amount, at, effect, keystone, mutation, rebirthAt);
     }
 
     private static List<String> strings(@Nullable JsonElement e) {

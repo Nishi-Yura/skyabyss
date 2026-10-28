@@ -107,8 +107,14 @@ public final class SkillCommands {
                         .then(Commands.literal("cast").then(player().then(Commands.argument("slot", IntegerArgumentType.integer(1, SkillRules.SLOTS))
                                 .executes(ctx -> {
                                     ServerPlayer p = target(ctx);
-                                    SkillManager.CastResult r = SkillManager.cast(p, IntegerArgumentType.getInteger(ctx, "slot") - 1);
-                                    ctx.getSource().sendSuccess(() -> Component.literal("cast: " + r.name()), false);
+                                    int slot = IntegerArgumentType.getInteger(ctx, "slot") - 1;
+                                    SkillManager.CastResult r = SkillManager.cast(p, slot);
+                                    // 断られた理由が分かるように、今の職・手の武器の職・枠の技を添える
+                                    SkillData sd = SkillManager.get(p);
+                                    Skill in = sd.slot(slot);
+                                    ctx.getSource().sendSuccess(() -> Component.literal("cast: " + r.name() + " (job " + sd.curJob + ", held " + Job.held(p)
+                                            + ", slot " + (in == null ? "-" : in.id) + ", slots " + String.join(",", sd.slots) + ", bars " + sd.jobBars.keySet()
+                                            + ", data#" + System.identityHashCode(sd) + ")"), false);
                                     return r == SkillManager.CastResult.OK ? 1 : 0;
                                 }))))
                         .then(Commands.literal("rune").then(player().then(Commands.argument("skill", StringArgumentType.word())
@@ -224,8 +230,10 @@ public final class SkillCommands {
     private static MutableComponent summary(ServerPlayer p) {
         SkillData d = SkillManager.get(p);
         int level = SkillManager.level(p);
+        // 開発用なので、職と枠も添える (撮影の台本の記録で読める)
         return Component.translatable("message.skyabyss.skill.summary", p.getDisplayName(), d.spentPoints(), d.totalPoints(level),
-                Math.round(d.mana), Math.round(SkillManager.maxMana(p)), d.ranks.size(), d.respecs);
+                Math.round(d.mana), Math.round(SkillManager.maxMana(p)), d.ranks.size(), d.respecs)
+                .append(Component.literal(" [" + d.curJob + ": " + String.join(",", d.slots) + " data#" + System.identityHashCode(d) + "]"));
     }
 
     private static int show(CommandSourceStack source, ServerPlayer p) {

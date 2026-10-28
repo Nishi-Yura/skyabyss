@@ -125,13 +125,34 @@ public final class SkillManager {
     }
 
     // ---------------------------------------------------------------- 技の木 v2 (docs/design/48)
-    // 今の職の木の節を取る。サーバーが検める
+    // 節を取る (木は今の職の木・淵・前世のうち、その id を持つもの)。開発コマンド・試着の確定用
     public static SkillData.TakeResult takeNode(ServerPlayer player, String nodeId) {
+        SkillData d = get(player);
+        Job job = Job.byId(d.curJob);
+        java.util.List<SkillTree> trees = new java.util.ArrayList<>();
+        if (job != null) {
+            trees.add(job.tree);
+        }
+        trees.addAll(jp.revati.skyabyss.rpg.skill.tree.AbilityTrees.SHARED);
+        for (SkillTree t : trees) {
+            if (jp.revati.skyabyss.rpg.skill.tree.AbilityTrees.node(t, nodeId) != null) {
+                return takeNode(player, t.id, nodeId);
+            }
+        }
+        return SkillData.TakeResult.UNKNOWN;
+    }
+
+    // その木の節を取る。職の木は今の職のものだけ。サーバーが検める
+    public static SkillData.TakeResult takeNode(ServerPlayer player, String treeId, String nodeId) {
         SkillExtOps.refreshRebirth(player);
         SkillData d = get(player);
         Job job = Job.byId(d.curJob);
-        jp.revati.skyabyss.rpg.skill.tree.AbilityNode n = jp.revati.skyabyss.rpg.skill.tree.AbilityTrees.node(job, nodeId);
-        SkillData.TakeResult r = d.canTake(job, n, level(player));
+        SkillTree tree = SkillTree.byId(treeId);
+        if (tree == null || Job.ofTree(tree) != null && Job.ofTree(tree) != job) {
+            return SkillData.TakeResult.UNKNOWN;
+        }
+        jp.revati.skyabyss.rpg.skill.tree.AbilityNode n = jp.revati.skyabyss.rpg.skill.tree.AbilityTrees.node(tree, nodeId);
+        SkillData.TakeResult r = d.canTake(tree, n, level(player));
         if (r != SkillData.TakeResult.OK) {
             return r;
         }
@@ -142,15 +163,15 @@ public final class SkillManager {
             }
             SkillExtOps.payMutation(player, n.mutation);
         }
-        d.nodesOf(job).add(n.id);
+        d.nodesOf(tree).add(n.id);
         d.applyNodes();
         if (n.skill != null && n.skill.active) {
             autoSlot(d, n.skill);
         }
         refreshStats(player);
         jp.revati.skyabyss.advancement.Beats.fire(player, "skill:learned");
-        jp.revati.skyabyss.advancement.Beats.fire(player, "skill:tree:" + job.tree.beat);
-        jp.revati.skyabyss.advancement.Beats.fire(player, "skill:tree:" + job.tree.id);
+        jp.revati.skyabyss.advancement.Beats.fire(player, "skill:tree:" + tree.beat);
+        jp.revati.skyabyss.advancement.Beats.fire(player, "skill:tree:" + tree.id);
         sync(player);
         applyModifiers(player);
         ServerLevel level = player.serverLevel();
@@ -159,7 +180,7 @@ public final class SkillManager {
         if (n.skill != null) {
             Notice.send(player, Notice.Kind.LEVEL_UP, ModText.progress("message.skyabyss.skill.learned", Component.translatable(n.skill.nameKey()), d.rank(n.skill), n.skill.maxRank));
         } else {
-            Notice.send(player, Notice.Kind.LEVEL_UP, ModText.progress("message.skyabyss.skill.node_taken", Component.translatable(n.nameKey(job.id))));
+            Notice.send(player, Notice.Kind.LEVEL_UP, ModText.progress("message.skyabyss.skill.node_taken", Component.translatable(n.nameKey(jp.revati.skyabyss.rpg.skill.tree.AbilityTrees.of(tree).key))));
         }
         return r;
     }
@@ -678,42 +699,13 @@ public final class SkillManager {
         return KeystoneResult.OK;
     }
 
-    // ---------------------------------------------------------------- 武器の持ち替えで枠が入れ替わる (A12)
-    // 近接などの組と弓の組を、手の武器に合わせて入れ替える。待ちは技ごとなので、持ち替えても共有のまま。空手は今の組のまま
-    public static void syncBar(ServerPlayer player) {
-        SkillData d = get(player);
-        int want;
-        if (WeaponType.has(player, WeaponType.RANGED)) {
-            want = 1;
-        } else if (!player.getMainHandItem().isEmpty()) {
-            want = 0;
-        } else {
-            return;
-        }
-        if (want == d.bar) {
-            return;
-        }
-        // いまの枠を元の組へしまい、行き先の組があれば出す (はじめての行き先は、今の枠をそのまま使う)
-        System.arraycopy(d.slots, 0, d.bars[d.bar], 0, d.slots.length);
-        d.barUsed[d.bar] = true;
-        d.bar = want;
-        if (d.barUsed[want]) {
-            for (int i = 0; i < d.slots.length; i++) {
-                Skill s = Skill.byId(d.bars[want][i]);
-                d.slots[i] = s != null && s.active && d.knows(s) && i < d.slotCount() ? s.id : "";
-            }
-        }
-        sync(player);
-        player.level().playSound(null, player.getX(), player.getY(), player.getZ(), Skills.SOUND_LEARN.get(), SoundSource.PLAYERS, 0.4f, 1.6f);
-    }
-
     // ---------------------------------------------------------------- 試着の確定 (A18)
     // 画面で仮に取った順の節 (木 v2) か技 (淵・前世) を、1 つずつ本当に取る。途中で通らなければそこで止める (戻り値は取れた数)
     public static int learnAll(ServerPlayer player, java.util.List<String> ids) {
         int n = 0;
         for (String id : ids) {
             Skill s = Skill.byId(id);
-            boolean ok = s != null && jp.revati.skyabyss.rpg.skill.tree.AbilityTrees.of(Job.ofTree(s.tree)) == null ? learn(player, s) == SkillData.LearnResult.OK
+            boolean ok = s != null && jp.revati.skyabyss.rpg.skill.tree.AbilityTrees.of(s.tree) == null ? learn(player, s) == SkillData.LearnResult.OK
                     : takeNode(player, id) == SkillData.TakeResult.OK;
             if (!ok) {
                 break;
@@ -807,11 +799,10 @@ public final class SkillManager {
     public static void forceRank(ServerPlayer player, Skill skill, int rank) {
         SkillData d = get(player);
         java.util.Set<String> before = new java.util.HashSet<>(d.ranks.keySet());
-        Job owner = Job.ofTree(skill.tree);
-        jp.revati.skyabyss.rpg.skill.tree.AbilityTree tree = jp.revati.skyabyss.rpg.skill.tree.AbilityTrees.of(owner);
+        jp.revati.skyabyss.rpg.skill.tree.AbilityTree tree = jp.revati.skyabyss.rpg.skill.tree.AbilityTrees.of(skill.tree);
         if (tree != null) {
-            // 職の木の技は節で持つ: その技の節 (と幹からの道) と、段の節を rank − 1 だけ入れる
-            java.util.Set<String> mine = d.nodesOf(owner);
+            // 木のある技は節で持つ: その技の節 (と幹からの道) と、段の節を rank − 1 だけ入れる
+            java.util.Set<String> mine = d.nodesOf(skill.tree);
             jp.revati.skyabyss.rpg.skill.tree.AbilityNode base = tree.skillNode(skill);
             if (rank <= 0) {
                 if (base != null) {

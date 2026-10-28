@@ -81,6 +81,18 @@ TREE_META = {
 }
 
 
+def shared_skills():
+    """淵・前世の技 (職をまたぐ木 deep.json・past.json の節) の id → 絵の番号 (Skill.iconIndex と同じ 105〜) と、短い説明"""
+    src = open(JAVA, encoding="utf8").read()
+    pat = re.compile(r'^\s+([A-Z_]+)\("([a-z_]+)",\s*SkillTree\.([A-Z]+),', re.M)
+    icons = {}
+    for ordinal, m in enumerate(pat.finditer(src)):
+        name, sid, tree = m.groups()
+        if tree in ("DEEP", "PAST"):
+            icons[sid] = 105 + (ordinal - 30)
+    return icons
+
+
 def load():
     ja = json.load(open(os.path.join(LANG, "ja_jp.json"), encoding="utf8"))
     en = json.load(open(os.path.join(LANG, "en_us.json"), encoding="utf8"))
@@ -101,8 +113,8 @@ def load():
     for i, s in enumerate(skills):
         s["idx"] = i
         o = s["ordinal"]
-        # Skill.iconIndex() と同じ
-        s["icon"] = o if o < 36 else 125 + (o - first_star)
+        # Skill.iconIndex() と同じ (30 未満は icons.png、淵・前世は icons2 の 5 番から = 105〜、職の新しい技は 125〜)
+        s["icon"] = o if o < 30 else 105 + (o - 30) if o < first_star else 125 + (o - first_star)
         s["ja"] = ja["skill.skyabyss." + s["id"]]
         s["en"] = en["skill.skyabyss." + s["id"]]
         s["dja"], s["den"] = DESC[s["id"]]

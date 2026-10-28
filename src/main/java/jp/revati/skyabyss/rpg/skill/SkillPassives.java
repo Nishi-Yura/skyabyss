@@ -25,7 +25,6 @@ final class SkillPassives {
         d.stillX = x;
         d.stillZ = z;
         if (player.tickCount % 10 == 3) {
-            SkillManager.syncBar(player);
             SkillExtOps.refreshRebirth(player);
             SkillManager.applyModifiers(player);
             d.regenScale = regenScale(player, d);

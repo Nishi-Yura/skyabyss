@@ -397,7 +397,7 @@ def copy_assets():
         sheet.crop((x, y, x + 32, y + 32)).save(os.path.join(OUT, "skill", "%02d.png" % i), optimize=True)
     # 職の新しい技 (星読みから) は icons2.png の 25 番から (番号は Skill.iconIndex() と同じ 125〜)。木 v2 の節の絵は 0〜4 (基礎・刻印) と 45〜47 (常に・閾値・型の要)
     sheet2 = Image.open(os.path.join(TEX, "gui", "skill", "icons2.png")).convert("RGBA")
-    for i in list(range(0, 5)) + list(range(25, 48)):
+    for i in range(48):
         x, y = (i % 8) * 32, (i // 8) * 32
         sheet2.crop((x, y, x + 32, y + 32)).save(os.path.join(OUT, "skill", "%02d.png" % (100 + i)), optimize=True)
     rd = os.path.join(ROOT, "docs", "readme")

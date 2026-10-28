@@ -108,6 +108,24 @@ public enum Glyph {
 
     // 隣の技: 木の前提の線でつながる技 (上下)
     public static List<Skill> neighbors(Skill center) {
+        // 木 v2 (48): 隣は木の線でつながる技の節 (間の基礎・常に効く数の節は一つ飛ばして数えない)
+        jp.revati.skyabyss.rpg.skill.tree.AbilityTree tree = jp.revati.skyabyss.rpg.skill.tree.AbilityTrees.of(center.tree);
+        if (tree != null) {
+            List<Skill> out = new ArrayList<>();
+            jp.revati.skyabyss.rpg.skill.tree.AbilityNode mine = tree.skillNode(center);
+            if (mine == null) {
+                return out;
+            }
+            for (jp.revati.skyabyss.rpg.skill.tree.AbilityNode n : tree.nodes()) {
+                if (n.skill == null || n.skill == center || n == tree.skillNode(n.skill) == false) {
+                    continue;
+                }
+                if (n.requires.contains(mine.id) || mine.requires.contains(n.id)) {
+                    out.add(n.skill);
+                }
+            }
+            return out;
+        }
         List<Skill> list = new ArrayList<>(center.requires());
         for (Skill s : Skill.values()) {
             if (s.requires().contains(center)) {
@@ -115,6 +133,19 @@ public enum Glyph {
             }
         }
         return list;
+    }
+
+    // その技を中心に差している紋 (開いている穴の中。無ければ null)。木の画面の印
+    @javax.annotation.Nullable
+    public static Item centerGlyph(SkillData d, int rebirth, Skill skill) {
+        int open = SkillRules.glyphSockets(rebirth);
+        for (int i = 0; i < Math.min(open, d.glyphSockets.length); i++) {
+            Placed p = parsePlaced(d.glyphSockets[i]);
+            if (p != null && p.center == skill) {
+                return p.item;
+            }
+        }
+        return null;
     }
 
     // 開いている穴の数だけ見て、その技が受ける合計 (上限つき。力は +、待ち・マナは − の割合)

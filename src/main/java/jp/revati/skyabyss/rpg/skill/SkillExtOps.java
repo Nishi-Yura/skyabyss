@@ -48,11 +48,10 @@ public final class SkillExtOps {
         if (m == null || m.skill != skill || d.rank(skill) < skill.maxRank) {
             return null;
         }
-        Job job = Job.ofTree(skill.tree);
-        jp.revati.skyabyss.rpg.skill.tree.AbilityTree tree = jp.revati.skyabyss.rpg.skill.tree.AbilityTrees.of(job);
+        jp.revati.skyabyss.rpg.skill.tree.AbilityTree tree = jp.revati.skyabyss.rpg.skill.tree.AbilityTrees.of(skill.tree);
         if (tree != null) {
             jp.revati.skyabyss.rpg.skill.tree.AbilityNode node = tree.mutationNode(skill);
-            if (node != null && !d.hasNode(job, node.id)) {
+            if (node != null && !d.hasNode(skill.tree, node.id)) {
                 return null;
             }
         }

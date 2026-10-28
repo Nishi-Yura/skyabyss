@@ -1,5 +1,7 @@
 """転生・自由度・深いスキル・装備の自由度・深淵・背の大きさ (日英の対)。"""
+import os
 from sitelib import *
+import skilldata
 
 
 def _item(iid):
@@ -38,12 +40,23 @@ def skills_extra():
         '<p class="lead">%s</p>' % T("極めた技と、転生した人のための深い仕掛けです。K 画面の「紋の盤」ページと、木のつまみの淵・前世の技から使います。どの職でも使えます。",
                                     "Systems for mastered skills and for reborn players, found on the Mutations and Glyphs page of the skill screen and on the tree selector. They work for every job.")
         + table([T("仕掛け", "System"), T("決まり", "Rule")], [
-            [T("変異", "Mutations"), T("8 つの技に 1 つずつ。その技を極め、巨神の素材（核 1 と鱗・欠片 3）を持っていると選べます。技が形を変えます（例: 巨神斬り→断崖、風裂き→飛ぶ刃）。1 技に 1 つで、外せません。", "One per skill for eight skills. Master the skill and hold titan materials (1 core and 3 scales or fragments) to reshape it, for example Titan Cleave into Cliffbreak or Wind Rend into Flying Blade. One per skill, permanent.")],
+            [T("変異", "Mutations"), T("技の木の節。8 つの技に 1 つずつ。その技を極め、巨神の素材（核 1 と鱗・欠片 3）を持っていると選べます。技が形を変えます（例: 巨神斬り→断崖、風裂き→飛ぶ刃）。1 技に 1 つで、外せません。", "One per skill for eight skills. Master the skill and hold titan materials (1 core and 3 scales or fragments) to reshape it, for example Titan Cleave into Cliffbreak or Wind Rend into Flying Blade. One per skill, permanent.")],
             [T("紋の盤", "Glyph board"), T("部屋を越えると紋（岩・風・潮・灰・骨、段 1〜3）が手に入ります。盤の穴は最初 3 つ、転生ごとに 1 つ開いて最大 6。穴ごとに中心の技を選ぶと、その技と隣の技が強まります。", "Clearing rooms yields glyphs of five kinds and tiers 1 to 3. The board starts with three holes and gains one per rebirth, up to six. Pick a centre skill per hole to strengthen it and its neighbours.")],
             [T("前世の技", "Past-life skills"), T("転生 1 回につき別枠の 2 点（最大 12）で取る 6 つ（遺響の一撃・旧き見張り・墓鐘・記憶の刃・最期の光・魂の糸）。", "Six skills bought with a separate pool of 2 points per rebirth (up to 12): Echo Strike, Old Watch, Grave Bell, Memory Blade, Last Light and Soul Thread.")],
             [T("淵の木", "The Abyss tree"), T("6 本目の木。転生した人にだけ見えます。引き・鏡・残響・貢ぎ・顎・誓いの 6 つ。他の木を混ぜるほど効く作りです。", "A sixth tree visible only to reborn players: Pull, Mirror, Echo, Tribute, Maw and Oath. It rewards mixing other trees.")],
         ])
         + _note(T("最強の組み立てでも、心臓や番兵長を倒す速さには下限があり、戦いが崩れないように調整してあります。", "Even the strongest build keeps a floor on how fast the hearts and the Captain can be beaten, so fights never collapse.")), alt=True)
+    # 淵・前世は職をまたぐ木 (assets/skyabyss/skill_tree/deep.json・past.json)。転生の回数で節が開く
+    import json
+    lang_ja, lang_en = lang_dicts()
+    icons = skilldata.shared_skills()
+    tree_dir = os.path.join(ROOT, "src", "main", "resources", "assets", "skyabyss", "skill_tree")
+    shared = ""
+    for key, ja, en in (("deep", "淵の木（転生 1・3・4・5 で開く。点は職の木と分け合う）", "The Deep tree (opens at rebirth 1, 3, 4, 5; shares points with the job tree)"),
+                        ("past", "前世の技（転生 1 回につき別枠の 2 点、最大 12）", "Past-life skills (a separate 2 points per rebirth, up to 12)")):
+        tree_json = json.load(open(os.path.join(tree_dir, key + ".json"), encoding="utf8"))
+        shared += '<div class="panel tree-card" id="tree-%s"><h3>%s</h3>%s</div>' % (key, T(ja, en), tree_v2_svg(key, tree_json, icons, lang_ja, lang_en, {}))
+    deep += '<div class="wrap"><div class="trees">%s</div></div>' % shared
     arts = _sec("abyss-arts", T("深淵術", "Abyss arts"),
         '<p class="lead">%s</p>' % T("深淵の層の溜まりで覚える三つの術です。淵の木と同じ「深淵術師」の木に並び、マナを使い、待ちがあります。段は 3 つまで。",
                                     "Three arts learned at the pools of the abyss layers. They sit in the Abyss Caster tree beside the Abyss tree, use mana and have cooldowns. Each has three ranks.")

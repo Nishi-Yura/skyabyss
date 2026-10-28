@@ -16,17 +16,24 @@ import com.google.gson.JsonObject;
 
 import jp.revati.skyabyss.rpg.skill.Job;
 import jp.revati.skyabyss.rpg.skill.Skill;
+import jp.revati.skyabyss.rpg.skill.SkillTree;
 
-// 職一つぶんの技の木 v2 (docs/design/48)。節の表と、型 (枝) の名前。読むだけ (記録は SkillData.nodes)
+// 木一本ぶんの技の木 v2 (docs/design/48)。職の木 (job あり) と、職をまたぐ木 (淵・前世。job は null)。節の表と、型 (枝) の名前。
+// 読むだけ (記録は SkillData.nodes。鍵 key = 職の id か木の id)
 public final class AbilityTree {
+    @Nullable
     public final Job job;
+    public final SkillTree tree;
+    public final String key;
     public final List<String> archetypes;
     private final Map<String, AbilityNode> nodes = new LinkedHashMap<>();
     public final int width;
     public final int height;
     public final int totalCost;
 
-    AbilityTree(Job job, List<String> archetypes, List<AbilityNode> list) {
+    AbilityTree(String key, SkillTree tree, @Nullable Job job, List<String> archetypes, List<AbilityNode> list) {
+        this.key = key;
+        this.tree = tree;
         this.job = job;
         this.archetypes = Collections.unmodifiableList(archetypes);
         int w = 0;
@@ -34,7 +41,7 @@ public final class AbilityTree {
         int cost = 0;
         for (AbilityNode n : list) {
             if (nodes.put(n.id, n) != null) {
-                throw new IllegalArgumentException(job.id + ": duplicate node " + n.id);
+                throw new IllegalArgumentException(key + ": duplicate node " + n.id);
             }
             w = Math.max(w, n.x + 1);
             h = Math.max(h, n.y + 1);
@@ -43,19 +50,19 @@ public final class AbilityTree {
         for (AbilityNode n : list) {
             for (String r : n.requires) {
                 if (!nodes.containsKey(r)) {
-                    throw new IllegalArgumentException(job.id + "/" + n.id + ": requires unknown node " + r);
+                    throw new IllegalArgumentException(key + "/" + n.id + ": requires unknown node " + r);
                 }
             }
             for (String e : n.excludes) {
                 if (!nodes.containsKey(e)) {
-                    throw new IllegalArgumentException(job.id + "/" + n.id + ": excludes unknown node " + e);
+                    throw new IllegalArgumentException(key + "/" + n.id + ": excludes unknown node " + e);
                 }
             }
             if (n.arch != null && !archetypes.contains(n.arch)) {
-                throw new IllegalArgumentException(job.id + "/" + n.id + ": unknown archetype " + n.arch);
+                throw new IllegalArgumentException(key + "/" + n.id + ": unknown archetype " + n.arch);
             }
-            if (n.skill != null && n.skill.tree != job.tree) {
-                throw new IllegalArgumentException(job.id + "/" + n.id + ": skill " + n.skill.id + " is not in this job's tree");
+            if (n.skill != null && n.skill.tree != tree) {
+                throw new IllegalArgumentException(key + "/" + n.id + ": skill " + n.skill.id + " is not in this tree");
             }
         }
         this.width = w;
@@ -63,16 +70,16 @@ public final class AbilityTree {
         this.totalCost = cost;
     }
 
-    static AbilityTree parse(Job job, JsonObject o) {
+    static AbilityTree parse(String key, SkillTree tree, @Nullable Job job, JsonObject o) {
         List<String> arch = new ArrayList<>();
         for (JsonElement e : o.getAsJsonArray("archetypes")) {
             arch.add(e.getAsString());
         }
         List<AbilityNode> list = new ArrayList<>();
         for (JsonElement e : o.getAsJsonArray("nodes")) {
-            list.add(AbilityNode.parse(job.id, e.getAsJsonObject()));
+            list.add(AbilityNode.parse(key, e.getAsJsonObject()));
         }
-        return new AbilityTree(job, arch, list);
+        return new AbilityTree(key, tree, job, arch, list);
     }
 
     @Nullable
@@ -159,6 +166,6 @@ public final class AbilityTree {
     }
 
     public String archKey(String arch) {
-        return "arch.skyabyss." + job.id + "." + arch;
+        return "arch.skyabyss." + key + "." + arch;
     }
 }

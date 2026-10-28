@@ -13,7 +13,6 @@ public final class SkillReset {
         SkillData d = SkillManager.get(player);
         d.clearSkills();
         d.bonusPoints = 0;
-        d.bar = 0;
         d.respecs = 0;
         d.runeSwaps = 0;
         d.notifiedPoints = 0;

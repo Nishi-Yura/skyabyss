@@ -5,9 +5,10 @@ import jp.revati.skyabyss.rpg.GrowthData;
 import jp.revati.skyabyss.rpg.skill.Job;
 import jp.revati.skyabyss.rpg.skill.SkillData;
 import jp.revati.skyabyss.rpg.skill.SkillManager;
+import jp.revati.skyabyss.rpg.skill.SkillTree;
 import net.minecraft.world.entity.player.Player;
 
-// 取っている節の「常に効く数」(EFFECT・THRESHOLD) を鍵ごとに足す。使う側 (SkillBuild・SkillEvents・SkillActions) が鍵を決める。
+// 取っている節の「常に効く数」(EFFECT・THRESHOLD) を鍵ごとに足す (今の職の木と、淵・前世の木)。使う側 (SkillBuild・SkillEvents・SkillActions) が鍵を決める。
 //   armor / knockback / move / attack_speed / mana        : 属性 (SkillBuild.attrs)
 //   attack / projectile                                  : 与える傷の割合 (SkillBuild.generalDamage)
 //   skill_power / cooldown / mana_cost / regen            : 技の力・待ち・マナの費用・マナの回復 (SkillBuild)
@@ -21,25 +22,32 @@ public final class NodeEffects {
     public static double sum(Player player, String key) {
         SkillData d = SkillManager.get(player);
         Job job = Job.byId(d.curJob);
-        AbilityTree tree = AbilityTrees.of(job);
-        if (tree == null) {
-            return 0;
-        }
         GrowthData g = Growth.get(player);
         double v = 0;
-        for (String id : d.nodesOf(job)) {
-            AbilityNode n = tree.node(id);
-            if (n == null || n.effect.isEmpty()) {
+        java.util.List<SkillTree> trees = new java.util.ArrayList<>();
+        if (job != null) {
+            trees.add(job.tree);
+        }
+        trees.addAll(AbilityTrees.SHARED);
+        for (SkillTree t : trees) {
+            AbilityTree tree = AbilityTrees.of(t);
+            if (tree == null) {
                 continue;
             }
-            Double x = n.effect.get(key);
-            if (x == null) {
-                continue;
+            for (String id : d.nodesOf(t)) {
+                AbilityNode n = tree.node(id);
+                if (n == null || n.effect.isEmpty()) {
+                    continue;
+                }
+                Double x = n.effect.get(key);
+                if (x == null) {
+                    continue;
+                }
+                if (n.kind == AbilityNode.Kind.THRESHOLD && g.stat(n.stat) < n.at) {
+                    continue;
+                }
+                v += x;
             }
-            if (n.kind == AbilityNode.Kind.THRESHOLD && g.stat(n.stat) < n.at) {
-                continue;
-            }
-            v += x;
         }
         return v;
     }

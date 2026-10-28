@@ -25,7 +25,8 @@ public final class SkillNetwork {
     // 2: 技の見た目の合図に当たりの点 (SkillFxPayload.target)
     // 3: 島の祠の職選び (JobChoiceOpenPayload・JobChoosePayload)
     // 4: 技の木 v2 の節 (SkillNodePayload)
-    private static final String PROTOCOL_VERSION = "4";
+    // 5: 節に木の id (淵・前世の木)
+    private static final String PROTOCOL_VERSION = "5";
 
     private SkillNetwork() {
     }
@@ -51,7 +52,7 @@ public final class SkillNetwork {
                 })
                 .playToServer(SkillNodePayload.TYPE, SkillNodePayload.STREAM_CODEC, (payload, context) -> {
                     if (context.player() instanceof ServerPlayer player) {
-                        SkillData.TakeResult r = SkillManager.takeNode(player, payload.node());
+                        SkillData.TakeResult r = SkillManager.takeNode(player, payload.tree(), payload.node());
                         if (r != SkillData.TakeResult.OK) {
                             SkillManager.sync(player);
                             Notice.bar(player, ModText.deny("message.skyabyss.skill.node_failed." + r.name().toLowerCase()));

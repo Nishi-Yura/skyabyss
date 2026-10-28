@@ -44,14 +44,11 @@ public final class AbilityTreeSelfTest {
         JsonObject ja = lang("ja_jp");
         JsonObject en = lang("en_us");
         int trees = 0;
-        for (Job job : Job.values()) {
-            AbilityTree t = AbilityTrees.of(job);
-            if (t == null) {
-                continue;
-            }
+        for (AbilityTree t : AbilityTrees.all()) {
             trees++;
-            shape(f, job, t, ja, en);
+            shape(f, t, ja, en);
         }
+        check(f, AbilityTrees.of(jp.revati.skyabyss.rpg.skill.SkillTree.DEEP) != null && AbilityTrees.of(jp.revati.skyabyss.rpg.skill.SkillTree.PAST) != null, "the deep / past-life trees did not load");
         check(f, trees >= 1, "no ability tree loaded");
         check(f, SkillRules.pointsForLevel(1) == 1 && SkillRules.pointsForLevel(25) == 25 && SkillRules.pointsForLevel(50) == 50, "one point per level is wrong");
         if (AbilityTrees.of(Job.WARRIOR) != null) {
@@ -73,8 +70,9 @@ public final class AbilityTreeSelfTest {
     }
 
     // ---- 木の形
-    private static void shape(List<String> f, Job job, AbilityTree t, JsonObject ja, JsonObject en) {
-        String tag = job.id + ": ";
+    private static void shape(List<String> f, AbilityTree t, JsonObject ja, JsonObject en) {
+        String tag = t.key + ": ";
+        boolean jobTree = t.job != null;
         // 幹からつながる
         Set<String> seen = new HashSet<>();
         ArrayDeque<AbilityNode> queue = new ArrayDeque<>();
@@ -106,12 +104,12 @@ public final class AbilityTreeSelfTest {
                 check(f, rn != null && rn.y <= n.y, tag + n.id + " requires a node below it (" + r + ")");
             }
             check(f, n.cost >= 1 && n.cost <= 3, tag + n.id + " cost out of range");
-            if (n.kind == AbilityNode.Kind.KEYSTONE || n.kind == AbilityNode.Kind.TRAIT) {
+            if (jobTree && (n.kind == AbilityNode.Kind.KEYSTONE || n.kind == AbilityNode.Kind.TRAIT)) {
                 check(f, n.arch != null && n.archPoints >= 10, tag + n.id + " keystone needs an archetype gate");
             }
         }
         // 型: 3 つ以上、どれも使われている
-        check(f, t.archetypes.size() >= 3, tag + "fewer than 3 archetypes");
+        check(f, !jobTree || t.archetypes.size() >= 3, tag + "fewer than 3 archetypes");
         for (String arch : t.archetypes) {
             int pts = 0;
             for (AbilityNode n : t.nodes()) {
@@ -119,11 +117,11 @@ public final class AbilityTreeSelfTest {
                     pts += n.cost;
                 }
             }
-            check(f, pts >= 20, tag + "archetype " + arch + " has only " + pts + " points");
+            check(f, !jobTree || pts >= 20, tag + "archetype " + arch + " has only " + pts + " points");
             check(f, ja.has(t.archKey(arch)) && en.has(t.archKey(arch)), tag + "no lang for archetype " + arch);
         }
         // 職の木の技はみな節にある (使う技は ACTIVE、常に効く技は PASSIVE、要は KEYSTONE)。使う技は 4 本より多い (選べるように)
-        for (Skill s : Skill.inTree(job.tree)) {
+        for (Skill s : Skill.inTree(t.tree)) {
             AbilityNode base = t.skillNode(s);
             check(f, base != null, tag + "skill " + s.id + " has no node");
             if (base != null) {
@@ -133,19 +131,19 @@ public final class AbilityTreeSelfTest {
                 check(f, t.runesOf(s).size() <= 3, tag + s.id + " has more than 3 rune nodes");
             }
         }
-        check(f, t.actives().size() > SkillRules.BASE_SLOTS, tag + "only " + t.actives().size() + " active skills (need more than " + SkillRules.BASE_SLOTS + " to choose)");
-        check(f, t.totalCost >= 60, tag + "tree is small: " + t.totalCost + " points");
+        check(f, !jobTree || t.actives().size() > SkillRules.BASE_SLOTS, tag + "only " + t.actives().size() + " active skills (need more than " + SkillRules.BASE_SLOTS + " to choose)");
+        check(f, !jobTree || t.totalCost >= 60, tag + "tree is small: " + t.totalCost + " points");
         // 変異の節: 変異のある技にはその節があり、段の節の先にある
         for (jp.revati.skyabyss.rpg.skill.Mutation m : jp.revati.skyabyss.rpg.skill.Mutation.values()) {
-            if (m.skill.tree == job.tree) {
+            if (m.skill.tree == t.tree) {
                 check(f, t.mutationNode(m.skill) != null, tag + "no mutation node for " + m.id);
             }
         }
         // 文: 技でない節は node.skyabyss.<職>.<id> と .effect
         for (AbilityNode n : t.nodes()) {
             if (n.kind == AbilityNode.Kind.EFFECT || n.kind == AbilityNode.Kind.THRESHOLD) {
-                check(f, ja.has(n.nameKey(job.id)) && en.has(n.nameKey(job.id)), tag + "no name for node " + n.id);
-                check(f, ja.has(n.effectKey(job.id)) && en.has(n.effectKey(job.id)), tag + "no effect text for node " + n.id);
+                check(f, ja.has(n.nameKey(t.key)) && en.has(n.nameKey(t.key)), tag + "no name for node " + n.id);
+                check(f, ja.has(n.effectKey(t.key)) && en.has(n.effectKey(t.key)), tag + "no effect text for node " + n.id);
             }
         }
     }
@@ -190,7 +188,7 @@ public final class AbilityTreeSelfTest {
             take(p, "riposte", f);
             take(p, "stone_stance", f);
             take(p, "shield_rush", f);
-            check(f, d.activeCount(Job.WARRIOR) == 2 && d.rank(Skill.RIPOSTE) == 1 && d.rank(Skill.STONE_STANCE) == 1, "passive / second active nodes are wrong");
+            check(f, d.activeCount() == 2 && d.rank(Skill.RIPOSTE) == 1 && d.rank(Skill.STONE_STANCE) == 1, "passive / second active nodes are wrong");
             check(f, d.nodeSpent(Job.WARRIOR) == 9 && d.unspentFor(Job.WARRIOR.tree, 10) == 1, "spent points are wrong: " + d.nodeSpent(Job.WARRIOR));
             take(p, "str_b", f);
             check(f, SkillManager.takeNode(p, "agi_a") == SkillData.TakeResult.NO_POINTS, "a node was taken without points");
@@ -228,14 +226,14 @@ public final class AbilityTreeSelfTest {
             check(f, d.archPoints(Job.WARRIOR, "shield") < 20 && SkillManager.takeNode(p, "stone_oath") == SkillData.TakeResult.ARCH_POINTS,
                     "a keystone opened without archetype points: " + d.archPoints(Job.WARRIOR, "shield"));
             // 使う技は 4 本まで
-            int before = d.activeCount(Job.WARRIOR);
+            int before = d.activeCount();
             List<AbilityNode> actives = new ArrayList<>(t.actives());
             AbilityNode fifth = null;
             for (AbilityNode a : actives) {
                 if (d.hasNode(Job.WARRIOR, a.id)) {
                     continue;
                 }
-                if (d.activeCount(Job.WARRIOR) >= SkillRules.BASE_SLOTS) {
+                if (d.activeCount() >= SkillRules.BASE_SLOTS) {
                     fifth = a;
                     break;
                 }
@@ -246,7 +244,7 @@ public final class AbilityTreeSelfTest {
                 }
                 d.applyNodes();
             }
-            check(f, d.activeCount(Job.WARRIOR) == SkillRules.BASE_SLOTS, "could not reach four actives from " + before);
+            check(f, d.activeCount() == SkillRules.BASE_SLOTS, "could not reach four actives from " + before);
             if (fifth != null) {
                 for (AbilityNode n : t.pathTo(fifth.id)) {
                     if (n != fifth && !d.hasNode(Job.WARRIOR, n.id)) {
@@ -276,6 +274,29 @@ public final class AbilityTreeSelfTest {
                 d.applyNodes();
                 check(f, jp.revati.skyabyss.rpg.skill.SkillExtOps.active(p, Skill.TITAN_CLEAVE) == null, "a mutation stayed active without its node");
                 check(f, SkillManager.takeNode(p, mut.id) == SkillData.TakeResult.OK, "retaking a paid mutation was not free");
+            }
+            // 淵・前世の木 (職をまたぐ): 転生の回数で開き、前世は別の点。使う技の 4 本は職の木と合わせて数える
+            AbilityTree deep = AbilityTrees.of(jp.revati.skyabyss.rpg.skill.SkillTree.DEEP);
+            AbilityTree past = AbilityTrees.of(jp.revati.skyabyss.rpg.skill.SkillTree.PAST);
+            if (deep != null && past != null) {
+                // 転生の回数は記録へ写されるので、見せかけの出どころを差し込む (終わったら本物へ戻す)
+                jp.revati.skyabyss.rebirth.RebirthView.useSource(pl -> 0);
+                d.rebirth = 0;
+                check(f, d.canTake(jp.revati.skyabyss.rpg.skill.SkillTree.DEEP, deep.skillNode(Skill.DEEP_PULL), 50) == SkillData.TakeResult.REBIRTH, "the deep opened without a rebirth");
+                jp.revati.skyabyss.rebirth.RebirthView.useSource(pl -> 1);
+                d.rebirth = 1;
+                check(f, d.canTake(jp.revati.skyabyss.rpg.skill.SkillTree.DEEP, deep.skillNode(Skill.DEEP_PULL), 50) == SkillData.TakeResult.ACTIVES_FULL, "a deep active did not count against the four");
+                check(f, d.canTake(jp.revati.skyabyss.rpg.skill.SkillTree.DEEP, deep.skillNode(Skill.DEEP_MIRROR), 50) == SkillData.TakeResult.OK, "the deep passive did not open at rebirth 1");
+                check(f, SkillManager.takeNode(p, "deep", "deep_mirror") == SkillData.TakeResult.OK && d.rank(Skill.DEEP_MIRROR) == 1 && d.sharedSpent() >= 1, "taking a deep node failed");
+                check(f, d.canTake(jp.revati.skyabyss.rpg.skill.SkillTree.PAST, past.skillNode(Skill.OLD_VIGIL), 50) == SkillData.TakeResult.OK, "a past-life passive did not open at rebirth 1");
+                check(f, SkillManager.takeNode(p, "past", "old_vigil") == SkillData.TakeResult.OK && d.pastSpent() == 1 && d.pastLeft() == d.pastPool() - 1, "taking a past node failed");
+                check(f, d.canTake(jp.revati.skyabyss.rpg.skill.SkillTree.PAST, past.skillNode(Skill.GRAVE_BELL), 50) == SkillData.TakeResult.REBIRTH, "grave bell opened at rebirth 1");
+                check(f, SkillManager.takeNode(p, "warrior", "deep_mirror") == SkillData.TakeResult.UNKNOWN, "a deep node was taken through the job tree");
+                d.rebirth = 0;
+                d.enforceRebirth();
+                check(f, d.nodesOf(jp.revati.skyabyss.rpg.skill.SkillTree.DEEP).isEmpty() && d.rank(Skill.DEEP_MIRROR) == 0 && d.nodesOf(jp.revati.skyabyss.rpg.skill.SkillTree.PAST).isEmpty(),
+                        "lowering rebirth did not return deep / past nodes");
+                jp.revati.skyabyss.rebirth.RebirthView.useSource(jp.revati.skyabyss.rebirth.Rebirth::displayCount);
             }
             // 職を替えると基礎も枠もその職のもの
             SkillManager.refreshStats(p);

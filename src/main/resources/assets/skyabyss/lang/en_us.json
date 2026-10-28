@@ -2238,5 +2238,9 @@
   "message.skyabyss.skill.node_failed.not_mastered": "Master that skill first",
   "message.skyabyss.skill.node_failed.no_material": "Not enough titan materials (1 core, 3 shards)",
   "gui.skyabyss.job.need_stat": "Needs %1$s %2$s",
-  "gui.skyabyss.job.need_stat_now": " (now %s: half attack and no tree mark until then)"
+  "gui.skyabyss.job.need_stat_now": " (now %s: half attack and no tree mark until then)",
+  "arch.skyabyss.deep.deep": "The Deep",
+  "arch.skyabyss.past.past": "Past lives",
+  "gui.skyabyss.tree.glyph_line": "Glyph: %1$s (level %2$s)",
+  "message.skyabyss.skill.node_failed.rebirth": "Not enough rebirths"
 }

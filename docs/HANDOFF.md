@@ -8,6 +8,15 @@
 - 試遊版: 0.8.0（`build/libs/skyabyss-0.8.0.jar`。確認表 `docs/review/playtest_0.8.0.md`、遊び方 `docs/beta_how_to_play.md`）。
 - 自己テスト: `bash <scratchpad>/fresh_continent.sh "<名前,…>" <世界名>`（空なら全部。大陸の新しい世界で回す）。`abyss escort` はほかと一緒に流すと時間切れで落ちることがある（単独では通る）。
 
+## 2026-10-30 未明（48 の残り: 淵・前世の木、紋の寄せ、撮影）
+
+- 淵・前世を職をまたぐ木に（`assets/skyabyss/skill_tree/deep.json`・`past.json`。`AbilityTrees` は SkillTree で引く。`SkillData.nodesOf(SkillTree)` など SkillTree 版を足し、Job 版はその薄い包み。節の `rebirth_at`、`TakeResult.REBIRTH`。前世の点は `pastSpent` が節の点、淵は `sharedSpent` 経由で職の点と分け合う。使う技 4 本は今の職 + 淵 + 前世で数える）。`SkillNodePayload` に木の id。
+- 紋: 隣は木の線でつながる技の節（`Glyph.neighbors`）、差している紋は木の節の左下に絵、節の説明に行（`Glyph.centerGlyph`）。
+- 技の見た目の台本 `tools/gen/shots/gen_skill_fx_shots.py`: 消した技を外し、新技 7 本を足し、技ごとに `job choose` と始めの武器を持たせる（持ち替えでは職が替わらないため）。撮影 → `tools/site/encode_skill_fx_clips.py` → `build.py`。
+- 数値の目安を 48 の 2.1 に（使う技 4 本 = 9〜14 点、型の要 = Lv 23〜27）。
+- 不具合: 弓を持つたびに前の版の「近接/弓で枠の組を入れ替える」（31 の A12。`SkillManager.syncBar`・`SkillData.bars`）が古い組を枠へ戻し、職の帯を上書きしていた（撮影で弓使いの技が EMPTY になって発覚）。仕組みごと消した（枠は職の帯 `jobBars` と木 v2 だけ。NBT の `bar*` は読まなくなる）。
+- 撮影の的: バニラの敵は世界に入らない（44）ので、技の見た目の台本の的を野盗（`skyabyss:bandit`。踏み込みは岩猪）にした。`/skyabyss skill cast` と `skill learn` の出力に職・手の武器・枠が出る。
+
 ## 2026-10-29 深夜 その 2（48 の 7 章の残り）
 
 - 内側の木のセット・タグの数の足し・条件の特性を消した（`SkillBuild` は型の要・木の節・外の修飾だけ。タグの数は淵の鏡・誓いと紋の条件にだけ残る）。`SkillRules` の SET_AT・TAG_*・COND_MIN/BIG/FULL_MANA と lang の skillset/tag.step/tag.cond は消した。
@@ -155,7 +164,7 @@
 0. **見直しの片付け（2026-10-27）は済み**: 作る仕組みの残骸・野営の置ける物・七日目の夜・大陸でない世界の仕組み（世界の種類は大陸だけ。場所は図だけ。大陸より前の docs 06・17・21・33・34 は消した）・`docs/review` の見比べの絵（404 → 152 MB）。残りの気づき:
    - 消した docs を指すコメント、docs/07 の古い書き写しは直した。データと食い違った生成スクリプト 47 本（と gen_relic_blocks）は消した。データを直接直す。
    - `docs/review` の選ばれなかった案は、モデルを入れるスクリプトが同じ品の別の案を読むものだけ消した（728 ファイル）。読む案が分からない品（引数で案を選ぶスクリプトなど）は残した。
-1. 技の木 v2（48）: 試遊で数値を詰める（節の値・点の総量・閾値・要求値）。紋を節の強化に、淵・前世を職をまたぐ小さな木に（48 の 7 章 3）。
+1. 技の木 v2（48）: 試遊で数値を詰める（節の値・点の総量・閾値・要求値）。
 2. 試遊 0.8.0（`docs/review/playtest_0.8.0.md`）の声を待つ。
 3. クエストの見直しは済んだ（初日のお使いと風の道の旗を消し、墓守を 2 段に、大干潮と峰の足もとを時刻で閉じない形に、折れた剣は自分の得物を研ぐ形に）。
 4. 試遊 0.7.1 の声の直しの確かめと、都・見どころの仕上げの撮影（`tools/shots/capital_dress.txt`・`poi_dress.txt`）。

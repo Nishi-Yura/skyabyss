@@ -2238,5 +2238,9 @@
   "message.skyabyss.skill.node_failed.not_mastered": "その技を極めてから",
   "message.skyabyss.skill.node_failed.no_material": "巨神の素材が足りない（核 1・欠片 3）",
   "gui.skyabyss.job.need_stat": "要る基礎: %1$s %2$s",
-  "gui.skyabyss.job.need_stat_now": "（いま %s。届くまで攻撃力は半分、木の印は効かない）"
+  "gui.skyabyss.job.need_stat_now": "（いま %s。届くまで攻撃力は半分、木の印は効かない）",
+  "arch.skyabyss.deep.deep": "淵",
+  "arch.skyabyss.past.past": "前世",
+  "gui.skyabyss.tree.glyph_line": "紋: %1$s（段 %2$s）",
+  "message.skyabyss.skill.node_failed.rebirth": "転生の回数が足りない"
 }

@@ -1,0 +1,16 @@
+{
+  "archetypes": ["past"],
+  "nodes": [
+    {"id": "echo_strike", "kind": "active", "skill": "echo_strike", "cost": 1, "x": 0, "y": 0, "arch": "past"},
+    {"id": "old_vigil", "kind": "passive", "skill": "old_vigil", "cost": 1, "x": 2, "y": 0, "arch": "past"},
+    {"id": "echo_strike_2", "kind": "rank", "skill": "echo_strike", "cost": 1, "x": 0, "y": 1, "requires": ["echo_strike"], "arch": "past"},
+    {"id": "old_vigil_2", "kind": "rank", "skill": "old_vigil", "cost": 1, "x": 2, "y": 1, "requires": ["old_vigil"], "arch": "past"},
+    {"id": "grave_bell", "kind": "active", "skill": "grave_bell", "cost": 1, "x": 1, "y": 2, "arch": "past"},
+    {"id": "grave_bell_2", "kind": "rank", "skill": "grave_bell", "cost": 1, "x": 1, "y": 3, "requires": ["grave_bell"], "arch": "past"},
+    {"id": "memory_edge", "kind": "passive", "skill": "memory_edge", "cost": 1, "x": 3, "y": 2, "arch": "past"},
+    {"id": "memory_edge_2", "kind": "rank", "skill": "memory_edge", "cost": 1, "x": 3, "y": 3, "requires": ["memory_edge"], "arch": "past"},
+    {"id": "final_light", "kind": "active", "skill": "final_light", "cost": 1, "x": 1, "y": 4, "arch": "past"},
+    {"id": "final_light_2", "kind": "rank", "skill": "final_light", "cost": 1, "x": 1, "y": 5, "requires": ["final_light"], "arch": "past"},
+    {"id": "soul_thread", "kind": "keystone", "skill": "soul_thread", "cost": 1, "x": 3, "y": 5, "arch": "past"}
+  ]
+}

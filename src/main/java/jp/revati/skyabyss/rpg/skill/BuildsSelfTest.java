@@ -341,34 +341,12 @@ final class BuildsSelfTest {
             // ---- A05: 振り直しは結晶 1・型は職ごとに 2 つ
             check(f, SkillRules.LOADOUTS == 12 && d.loadouts.length == 12, "loadout count is wrong (two per job)");
             check(f, SkillRules.respecCost(9, 30) == 1 && SkillRules.respecCost(9, 10) == 0, "respec cost is wrong");
-            // ---- A12: 武器の持ち替えで枠が入れ替わる (待ちは共有)
             SkillManager.forgetAll(p);
             d.bonusPoints = 40;
             SkillManager.forceRank(p, Skill.LUNGE, 1);
             SkillManager.forceRank(p, Skill.CLOUD_PIERCE, 1);
             SkillManager.forceRank(p, Skill.TITAN_CLEAVE, 1);
-            d.bar = 0;
-            d.slots[0] = Skill.LUNGE.id;
-            d.slots[1] = Skill.TITAN_CLEAVE.id;
-            p.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, new ItemStack(Items.IRON_SWORD));
-            SkillManager.syncBar(p);
-            check(f, d.bar == 0 && d.slots[0].equals("lunge"), "a sword changed the bar");
-            p.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, new ItemStack(Items.BOW));
-            SkillManager.syncBar(p);
-            check(f, d.bar == 1 && d.slots[0].equals("lunge"), "the first bow swap should keep the slots");
-            d.slots[0] = Skill.CLOUD_PIERCE.id;
-            d.slots[1] = "";
-            d.cooldowns.put(Skill.LUNGE.id, 100);
-            p.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, new ItemStack(Items.IRON_SWORD));
-            SkillManager.syncBar(p);
-            check(f, d.bar == 0 && d.slots[0].equals("lunge") && d.slots[1].equals("titan_cleave"), "the melee bar did not come back");
-            check(f, d.cooldown(Skill.LUNGE) == 100, "a bar swap reset a cooldown");
-            p.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, new ItemStack(Items.BOW));
-            SkillManager.syncBar(p);
-            check(f, d.bar == 1 && d.slots[0].equals("cloud_pierce") && d.slots[1].isEmpty(), "the bow bar did not come back");
-            p.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, ItemStack.EMPTY);
-            SkillManager.syncBar(p);
-            check(f, d.bar == 1, "an empty hand changed the bar");
+            // A12 (近接/弓で枠の組を入れ替える) は 48 で消した。枠は職の帯 (useJob) と木 v2 だけ
             d.cooldowns.clear();
             // ---- A10: 連鎖は 43 (6 職) で削った
             // ---- A13: 熟練 (使う・当てる・予告をよけて当てる。3 で 4 つ目の刻印、転生でも残る)
@@ -453,7 +431,7 @@ final class BuildsSelfTest {
             SkillData.STREAM_CODEC.encode(buf, d);
             SkillData synced = SkillData.STREAM_CODEC.decode(buf);
             buf.release();
-            check(f, synced.mastery.equals(d.mastery) && synced.keystones.equals(d.keystones) && synced.bars[0].length == SkillRules.SLOTS,
+            check(f, synced.mastery.equals(d.mastery) && synced.keystones.equals(d.keystones),
                     "new fields did not survive the sync codec");
             SkillReset.forRebirth(p);
             check(f, d.ranks.isEmpty() && d.runes.isEmpty() && d.keystones.isEmpty() && d.bonusPoints == 0
