@@ -180,7 +180,13 @@ public final class MoonValley {
         // 野営: 帰りの台・星の溜まりの印・天幕と寝具と荷・灯り
         BlockPos camp = mark("camp");
         level.setBlock(mark("return_stone"), Blocks.LODESTONE.defaultBlockState(), 3);
-        level.setBlock(mark("star_pool").above(0), ValleyBlocks.STAR_POOL.get().defaultBlockState(), 3);
+        // 星の溜まり: 鉢の真ん中の十字 5 つ (紫水晶の上。遠くからも光る水面に見える)
+        for (int[] o : new int[][] {{0, 0}, {1, 0}, {-1, 0}, {0, 1}, {0, -1}}) {
+            BlockPos sp = mark("star_pool").offset(o[0], 0, o[1]);
+            if (level.getBlockState(sp).isAir()) {
+                level.setBlock(sp, ValleyBlocks.STAR_POOL.get().defaultBlockState(), 3);
+            }
+        }
         tent(level, camp.offset(-6, 0, -4));
         BlockPos bed = camp.offset(-3, 0, -5);
         level.setBlock(bed, Blocks.LIGHT_GRAY_CARPET.defaultBlockState(), 3);

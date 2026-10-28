@@ -217,7 +217,7 @@ for xi in range(NX):
                     n = N_PATCH[xi, zi]
                     # 谷底: 薄灰の砂を基に、灰の砂の流れ・凝灰岩の砕け・礫。白い砂は壁の根の吹き溜まりだけ (下の飾りで盛る)
                     hh = hsh(x, 0, z, 3) % 100
-                    vol[xi, yi, zi] = (POWDER_G if n > 0.5 else TUFF if hh < 5 else GRAVEL if hh < 8 else ANDESITE if hh < 10
+                    vol[xi, yi, zi] = (POWDER_G if n > 0.7 else TUFF if hh < 5 else GRAVEL if hh < 8 else ANDESITE if hh < 10
                                        else COBBLED_DS if hh < 11 else POWDER)
                 elif y >= fl - 3:
                     vol[xi, yi, zi] = TUFF if y > -3 else SBASALT
@@ -633,7 +633,9 @@ for xi in range(NX):
             continue
         fl = FLOOR[xi, zi]
         if get(x, fl, z) in (POWDER, POWDER_W, POWDER_G, TUFF, ANDESITE, COBBLED_DS) and get(x, fl + 1, z) == AIR:
-            put(x, fl, z, GRAVEL if hsh(x, 4, z) % 5 == 0 else POWDER_G)
+            # 真ん中ほど濃い (灰の砂 → 礫)。縁は砂と混ざる
+            hv = hsh(x, 4, z) % 100
+            put(x, fl, z, GRAVEL if (d < 0.7 and hv < 40) or hv < 12 else POWDER_G if d < 1.2 or hv < 70 else POWDER)
 # 壁の根の砂だまり (崖のすぐ内側の谷底を一段盛る)
 for xi in range(NX):
     for zi in range(NZ):

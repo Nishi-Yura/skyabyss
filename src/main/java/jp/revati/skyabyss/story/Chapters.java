@@ -164,6 +164,14 @@ public enum Chapters {
     }
 
     public static Chapters of(ServerPlayer player) {
-        return of(Progression.stage(player), prologueDone(OpeningDirector.state(player)), SkyKey.assembled(player));
+        Chapters c = of(Progression.stage(player), prologueDone(OpeningDirector.state(player)), SkyKey.assembled(player));
+        // 月へ渡った人 (頼み main_moon を終えた) は六章
+        if (c == ABYSS) {
+            jp.revati.skyabyss.quest.QuestLog.Entry moon = jp.revati.skyabyss.quest.QuestLog.of(player).entry("main_moon");
+            if (moon != null && moon.done) {
+                return MOON;
+            }
+        }
+        return c;
     }
 }

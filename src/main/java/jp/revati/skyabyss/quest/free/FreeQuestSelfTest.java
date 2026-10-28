@@ -562,7 +562,19 @@ public final class FreeQuestSelfTest {
         // 今日の顔ぶれは日と世界の段で変わる (全部の自己テストを続けて回すと段が上がる)。今日引かれた、まだ受けていない一段目までの日替わりを使う
         // 三つ目は見張りの巡り以外 (あとで日が替わってから受ける)。板に無ければ直に始める (枠の数え方は同じ)
         List<String> free = drawnDailies(server, p);
-        String third = free.stream().filter(q -> !q.equals("daily_bone_sentry")).findFirst().orElse("daily_mite_clear");
+        // 全部を続けて回すと世界の段が上がり、今日の一段目までの日替わりが尽きることがある。そのときは引かれていない一段目までの日替わりを直に始める
+        // (枠の数え方は同じ。四章で閉じる daily_mite_clear は使わない)
+        if (free.stream().noneMatch(q -> !q.equals("daily_bone_sentry"))) {
+            for (jp.revati.skyabyss.quest.QuestDef d : jp.revati.skyabyss.quest.QuestManager.all()) {
+                if (d.repeat().equals("daily") && d.minStage() <= 1 && !d.id().equals("daily_mite_clear") && !QuestLog.of(p).quests().containsKey(d.id())
+                        && !free.contains(d.id())) {
+                    free.add(d.id());
+                }
+            }
+        }
+        // 一段目までの日替わりは見張り・薪・巡りの三つだけ (羊の日課を外したあと)。ほかに無ければ巡りを三つ目にし、日をまたいで残るかを見る
+        String third = free.stream().filter(q -> !q.equals("daily_bone_sentry")).findFirst().orElse("daily_bone_sentry");
+        boolean sentryThird = third.equals("daily_bone_sentry");
         check(acceptOrStart(server, p, third) && Board.usedToday(p) == 3, "a third daily could not be taken at stage 1 (" + third + ", " + Board.usedToday(p) + ")", failures);
         free.remove(third);
         check(free.isEmpty() || !acceptOrStartBoard(server, p, free.get(0)), "a fourth daily was accepted the same day", failures);
@@ -581,7 +593,9 @@ public final class FreeQuestSelfTest {
         for (int i = 0; i < 40 && !onBoard(server, "daily_bone_sentry"); i++) {
             level.setDayTime(level.getDayTime() + Repeats.DAY);
         }
-        check(acceptOrStart(server, p, "daily_bone_sentry"), "could not take the sentry rounds on a new day at stage 1", failures);
+        if (!sentryThird) {
+            check(acceptOrStart(server, p, "daily_bone_sentry"), "could not take the sentry rounds on a new day at stage 1", failures);
+        }
         level.setDayTime(level.getDayTime() + Repeats.DAY);
         check(stage(p, "daily_bone_sentry").equals("rounds"), "an unfinished daily vanished at dawn", failures);
         check(state(Board.lines(p), "daily_bone_sentry") == Board.ACTIVE, "an unfinished daily is not shown as in progress", failures);

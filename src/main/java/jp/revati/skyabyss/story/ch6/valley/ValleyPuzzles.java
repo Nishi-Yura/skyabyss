@@ -168,9 +168,20 @@ public final class ValleyPuzzles {
             Quests.signal(p, GATE);
             ValleyArena.arrive(level, p);
         } else {
-            BlockPos to = MoonValley.mark("valley_gate").offset(0, 0, -5);
+            BlockPos to = standable(level, MoonValley.mark("valley_gate").offset(0, 0, -4));
             p.teleportTo(level, to.getX() + 0.5, to.getY(), to.getZ() + 0.5, 180f, 0f);
         }
+    }
+
+    // 立てる所 (足もとが固く、上に 2 つ空き)。下から上へ 8 まで探す
+    static BlockPos standable(ServerLevel level, BlockPos at) {
+        for (int dy = -2; dy <= 8; dy++) {
+            BlockPos p = at.above(dy);
+            if (level.getBlockState(p).isAir() && level.getBlockState(p.above()).isAir() && !level.getBlockState(p.below()).isAir()) {
+                return p;
+            }
+        }
+        return at;
     }
 
     // 欠片の数 (段 shards の三つの目的のうち済んだ数。段より先なら 3)

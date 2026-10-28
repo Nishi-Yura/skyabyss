@@ -1,7 +1,7 @@
 # 六章 区画 1「新月の谷」(docs/design/46 の 4.3): 谷の見下ろし、入口、野営と前の自分、台地と門、裂け目と影の橋、鏡の窪、落ちた星の穴、主の間、敵と主
 # bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/moon_valley.txt -PshotsName=moon_valley
 # 観戦モードで撮る (月は軽いので、ふつうのモードだと宙で落ちていく)。暗い谷は暗視をかけた絵と、かけない絵の両方
-world moon_valley4 continent
+world moon_valley5 continent
 size 1600 900
 timeout 2400
 render 12

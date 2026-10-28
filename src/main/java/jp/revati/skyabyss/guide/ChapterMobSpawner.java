@@ -66,6 +66,8 @@ public final class ChapterMobSpawner {
 
     private static final List<Wanderer> WANDERERS = new CopyOnWriteArrayList<>();
     private static final Map<UUID, UUID> LIVE = new ConcurrentHashMap<>();
+    // 湧かせた個体そのもの (チャンクの数え。湧かせた直後はまだ区画の見える一覧に入っていないことがあるので、一覧に頼らない)
+    private static final Map<UUID, Mob> MOBS = new ConcurrentHashMap<>();
 
     // 自己テストが差し替える口 (本番は null = 今の章と SiteData の拠点)
     @Nullable
@@ -241,6 +243,7 @@ public final class ChapterMobSpawner {
             LIVE.remove(mob.getUUID());
             return false;
         }
+        MOBS.put(mob.getUUID(), mob);
         return true;
     }
 
@@ -258,7 +261,14 @@ public final class ChapterMobSpawner {
     static int countInChunk(ServerLevel level, ChunkPos chunk) {
         AABB box = new AABB(chunk.getMinBlockX(), level.getMinBuildHeight(), chunk.getMinBlockZ(), chunk.getMaxBlockX() + 1, level.getMaxBuildHeight(),
                 chunk.getMaxBlockZ() + 1);
-        return level.getEntitiesOfClass(Mob.class, box, m -> LIVE.containsKey(m.getUUID())).size();
+        MOBS.entrySet().removeIf(e -> !LIVE.containsKey(e.getKey()) || e.getValue().isRemoved());
+        int known = 0;
+        for (Mob m : MOBS.values()) {
+            if (m.level() == level && m.chunkPosition().equals(chunk)) {
+                known++;
+            }
+        }
+        return Math.max(known, level.getEntitiesOfClass(Mob.class, box, m -> LIVE.containsKey(m.getUUID())).size());
     }
 
     // 死んだ個体の記録を落とし、グループの人が 128 ブロック以内にいなくなった個体を消す
@@ -303,12 +313,15 @@ public final class ChapterMobSpawner {
                 e.discard();
             }
         }
+        MOBS.values().forEach(Entity::discard);
+        MOBS.clear();
         LIVE.clear();
     }
 
     @SubscribeEvent
     static void onStopped(ServerStoppedEvent event) {
         LIVE.clear();
+        MOBS.clear();
         chapterOverride = null;
         anchorOverride = null;
     }

@@ -1,0 +1,84 @@
+# 月の行き来と新月の谷の仕掛けを、本当の右クリック (use) で通す (サバイバル)。鐘楼の門 → 月 → 星の溜まり → 星の灯 → 星の門 → 主の間の灯りの台 → 帰り口
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/moon_flow.txt -PshotsName=moon_flow
+world moon_flow4 continent
+size 1600 900
+timeout 2400
+render 10
+clouds off
+waitchunks 300
+wait 100
+cmd skyabyss cinematic stop
+close
+cmd gamemode creative
+cmd skyabyss dev opening build
+wait 400
+cmd skyabyss story key @s
+wait 60
+close
+wait 20
+close
+cmd skyabyss quest start @s main_moon_near
+cmd skyabyss quest next @s main_moon_near
+cmd skyabyss quest next @s main_moon_near
+cmd skyabyss quest next @s main_moon_near
+cmd skyabyss quest next @s main_moon_near
+cmd effect give @s minecraft:resistance 99999 4 true
+cmd effect give @s minecraft:night_vision 99999 0 true
+cmd gamemode survival
+cmd skyabyss moonworld gate
+waitchunks 200
+wait 40
+cmd tp @s ~ ~ ~ 180 26
+wait 10
+shot f01_gate_before
+use
+wait 4
+stopuse
+wait 20
+shot f02_gate_beam
+wait 80
+waitchunks 200
+wait 40
+shot f03_arrived
+cmd skyabyss quest stage @s main_moon_valley pool
+cmd tp @s -14 -1 52.5 0 24
+wait 30
+use
+wait 4
+stopuse
+wait 20
+shot f04_star_pool
+cmd item replace entity @s weapon.mainhand with skyabyss:star_lamp
+cmd tp @s -10 -1 50 0 10
+wait 10
+use
+wait 4
+stopuse
+wait 20
+shot f05_star_mark
+cmd skyabyss quest stage @s main_moon_valley gate
+cmd tp @s 0 -5 86.5 0 8
+wait 30
+shot f06_valley_gate
+use
+wait 4
+stopuse
+wait 40
+waitchunks 100
+shot f07_arena_arrived
+wait 60
+cmd tp @s 5.5 21 113.5 -31 -6
+wait 10
+use
+wait 4
+stopuse
+wait 20
+shot f08_lamp_lit
+cmd gamemode creative
+cmd tp @s 0 23 97 180 20
+wait 10
+use
+wait 4
+stopuse
+wait 40
+shot f09_back_down

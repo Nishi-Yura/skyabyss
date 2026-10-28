@@ -27,8 +27,8 @@ public final class MoonWorld {
     public static final ResourceKey<Level> LEVEL = ResourceKey.create(Registries.DIMENSION, ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "moon"));
     public static final int SURFACE = 11;
     public static final BlockPos ARRIVAL = new BlockPos(0, SURFACE + 1, 0);
-    // 1 = 着く所とクレーター、2 = 新月の谷 (valley.MoonValley)
-    static final int VERSION = 2;
+    // 1 = 着く所とクレーター、2 = 新月の谷 (valley.MoonValley)、3 = 谷の踏み跡・星の溜まりの十字 (谷を流し込み直す)
+    static final int VERSION = 3;
 
     private MoonWorld() {
     }
@@ -71,7 +71,7 @@ public final class MoonWorld {
         if (d.version < 1) {
             landing(level);
         }
-        if (d.version < 2) {
+        if (d.version < 3) {
             jp.revati.skyabyss.story.ch6.valley.MoonValley.build(level);
         }
         d.version = VERSION;

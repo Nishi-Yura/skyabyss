@@ -451,9 +451,7 @@ public final class Ch1BackMobsSelfTest {
         ElderSentinel e = spawnElder(level, 0f);
         try {
             FakePlayer a = fake(level, "r_a", SX, FLOOR, SZ + 7);
-            FakePlayer beyond = fake(level, "r_b", SX, FLOOR, SZ + 11.2);
-            FakePlayer side = fake(level, "r_s", SX + 3, FLOOR, SZ + 5);
-            ps.addAll(List.of(a, beyond, side));
+            ps.add(a);
             e.setTarget(a);
             List<TelegraphShape> shapes = new ArrayList<>();
             Telegraph.record(shapes);
@@ -461,6 +459,10 @@ public final class Ch1BackMobsSelfTest {
             e.forceAction("RUSH");
             tick(level, e, 1);
             Telegraph.record(null);
+            // 線の外の二人は突進が決まってから置く (先に置くと、近い横の人を狙い直すことがある)
+            FakePlayer beyond = fake(level, "r_b", SX, FLOOR, SZ + 11.2);
+            FakePlayer side = fake(level, "r_s", SX + 3, FLOOR, SZ + 5);
+            ps.addAll(List.of(beyond, side));
             // 失敗したときに分かるよう、突進を始めたときの位置・向き・狙い・線の外枠を残す (新しい世界で一度だけ、線の長さが違う失敗があった)
             String at = "elder " + e.position() + " yaw " + e.getYRot() + " target " + (e.getTarget() == null ? "none" : e.getTarget().getName().getString())
                     + " line " + (shapes.isEmpty() ? "none" : java.util.Arrays.toString(shapes.get(0).bounds()));
