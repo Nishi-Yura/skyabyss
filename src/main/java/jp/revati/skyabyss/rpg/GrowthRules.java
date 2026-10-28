@@ -6,10 +6,10 @@ import net.minecraft.util.Mth;
 // 表と理由は docs/design/04_growth_and_skills.md
 public final class GrowthRules {
     public static final int MAX_LEVEL = 50;
-    // レベルが 1 上がるごとに振り分けられる力
-    public static final int POINTS_PER_LEVEL = 3;
-    // ステータス一つに振れる上限
-    public static final int STAT_CAP = 50;
+    // レベルで振り分けられる力はない。基礎は技の木の節で上がる (docs/design/48)。前の版の記録の検めで使う
+    public static final int POINTS_PER_LEVEL = 0;
+    // ステータス一つの上限 (木の基礎の節の合計がこれを超えることはない)
+    public static final int STAT_CAP = 100;
     // 記憶の断片の器の、はじめの大きさ (03 の E9 で広げる)
     public static final int FRAGMENT_CAPACITY = 12;
 

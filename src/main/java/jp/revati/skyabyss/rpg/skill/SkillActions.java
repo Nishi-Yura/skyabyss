@@ -134,6 +134,8 @@ public final class SkillActions {
             case SKY_RAIN -> rain(player, rank);
             // 職の新しい技 (docs/design/43)
             case THUNDER_BOLT, EMBER_ORB, FROST_TIDE, BLINK, FORGE_STOMP, MIST_VEIL, CURSE_MARK, LAMP_CHARM -> JobActions.perform(player, skill, rank);
+            // 木 v2 で足した技 (docs/design/48)
+            case SHIELD_BASH, BONE_SWING, SPIN_CUT, TWIN_FANG, SPARK_BURST, SNARE_SHOT, STARDUST -> TreeActions.perform(player, skill, rank);
             default -> ExtActions.perform(player, skill, rank);
         };
     }
@@ -199,6 +201,9 @@ public final class SkillActions {
     // 技の傷を入れる。共鳴の声・鍛え人の目・木の印の倍率を掛け、当たった敵には波紋の鈍足が付く
     public static boolean hit(ServerPlayer player, LivingEntity target, float amount, Skill skill) {
         float scaled = amount * (float) SkillEffects.damagePower(player, skill);
+        if (isLarge(target)) {
+            scaled *= (float) (1 + jp.revati.skyabyss.rpg.skill.tree.NodeEffects.sum(player, "big_target"));
+        }
         boolean hurt = deal(player, target, scaled, skill, false);
         if (hurt) {
             int ripple = SkillManager.get(player).rank(Skill.RIPPLE);

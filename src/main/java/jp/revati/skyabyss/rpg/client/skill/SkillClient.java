@@ -51,10 +51,10 @@ public final class SkillClient {
         }
     }
 
-    public static void onJobChoiceOpen() {
+    public static void onJobChoiceOpen(boolean switching) {
         Minecraft mc = Minecraft.getInstance();
         if (mc.player != null && !(mc.screen instanceof JobChoiceScreen)) {
-            mc.setScreen(new JobChoiceScreen());
+            mc.setScreen(new JobChoiceScreen(switching));
         }
     }
 

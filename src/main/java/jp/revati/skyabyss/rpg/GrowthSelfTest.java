@@ -81,8 +81,8 @@ public final class GrowthSelfTest {
         int withSubs = levelAt(clear + subs);
         check(f, withSubs >= 11 && withSubs <= 13, "first clear with the early side quests should be level 11-13, got " + withSubs);
         // 技: Lv1 の 1 点で最初の一つ。Lv3 で 2 つ目、Lv5 で 3 つ目 (二段目の技の必要 Lv も 5)
-        check(f, jp.revati.skyabyss.rpg.skill.SkillRules.pointsForLevel(1) == 1 && jp.revati.skyabyss.rpg.skill.SkillRules.pointsForLevel(3) == 2
-                && jp.revati.skyabyss.rpg.skill.SkillRules.pointsForLevel(5) == 3, "skill points at level 1, 3, 5 are wrong");
+        check(f, jp.revati.skyabyss.rpg.skill.SkillRules.pointsForLevel(1) == 1 && jp.revati.skyabyss.rpg.skill.SkillRules.pointsForLevel(3) == 3
+                && jp.revati.skyabyss.rpg.skill.SkillRules.pointsForLevel(5) == 5, "skill points at level 1, 3, 5 are wrong");
         SkyAbyss.LOGGER.info("[selftest] growth opening pace: lodge Lv{} / storyteller Lv{} / bone hill (about 1 h) Lv{} ({} xp) / whale seen Lv{} / first clear Lv{} ({} xp), with side quests Lv{}",
                 lodge, storyteller, hour, hourXp, whaleSeen, mainOnly, clear, withSubs);
     }
@@ -117,7 +117,8 @@ public final class GrowthSelfTest {
         check(f, GrowthRules.xpToNext(1) == 50, "level 1 needs " + GrowthRules.xpToNext(1));
         check(f, GrowthRules.totalXpFor(10) == 1758, "total to 10 is " + GrowthRules.totalXpFor(10));
         check(f, GrowthRules.totalXpFor(GrowthRules.MAX_LEVEL) == 107898, "total to 50 is " + GrowthRules.totalXpFor(50));
-        check(f, GrowthRules.pointsForLevel(1) == 0 && GrowthRules.pointsForLevel(50) == 147, "points per level are wrong");
+        // 基礎はレベルでは上がらない (技の木の節。docs/design/48)
+        check(f, GrowthRules.pointsForLevel(1) == 0 && GrowthRules.pointsForLevel(50) == 0, "points per level are wrong");
         StringBuilder table = new StringBuilder();
         for (int l : new int[] {1, 5, 10, 15, 20, 25, 30, 35, 40, 45, 49}) {
             table.append(" L").append(l).append('=').append(GrowthRules.xpToNext(l)).append('/').append(GrowthRules.totalXpFor(l + 1));
@@ -130,7 +131,7 @@ public final class GrowthSelfTest {
         check(f, Growth.addXpRaw(d, 1) == 1 && d.level == 2 && d.xp == 0, "50 xp should reach level 2 exactly");
         d = new GrowthData();
         check(f, Growth.addXpRaw(d, GrowthRules.totalXpFor(5) + 7) == 4 && d.level == 5 && d.xp == 7, "multi-level gain is wrong: " + d.level + "/" + d.xp);
-        check(f, d.unspentPoints() == 12, "level 5 should have 12 points, has " + d.unspentPoints());
+        check(f, d.unspentPoints() == 0, "level 5 should have no stat points (stats come from the tree), has " + d.unspentPoints());
         Growth.addXpRaw(d, 10_000_000L);
         check(f, d.level == GrowthRules.MAX_LEVEL && d.xp == 0, "overflow should stop at the cap with an empty bar");
         check(f, Growth.addXpRaw(d, 500) == 0 && d.xp == 0, "xp at the cap should be discarded");
@@ -142,7 +143,7 @@ public final class GrowthSelfTest {
         check(f, !Growth.canAllocate(d, new int[] {-1, 2, 0, 0}), "a negative allocation was accepted");
         check(f, !Growth.canAllocate(d, new int[] {16, 0, 0, 0}), "an allocation over the points was accepted");
         check(f, !Growth.canAllocate(d, new int[] {1, 0}), "a short allocation was accepted");
-        check(f, Growth.canAllocate(d, new int[] {5, 5, 3, 2}), "a valid allocation was refused");
+        check(f, !Growth.canAllocate(d, new int[] {5, 5, 3, 2}), "an allocation was accepted (stats come from the tree)");
         // 巨大な値で int があふれても通らない (受け取るのは改造されうるクライアントの値)
         int keep = d.stats[0];
         d.stats[0] = 1;
@@ -151,10 +152,10 @@ public final class GrowthSelfTest {
         d.level = 50;
         d.stats[0] = GrowthRules.STAT_CAP;
         check(f, !Growth.canAllocate(d, new int[] {1, 0, 0, 0}), "an allocation over the stat cap was accepted");
-        // レベルを下げられて、使った力が持っている力より多い → 全部戻る
+        // 基礎は木から写す値なので、レベルを下げられても検めでは消さない
         d.level = 3;
         d.sanitize();
-        check(f, d.spentPoints() == 0 && d.unspentPoints() == 6, "overspent stats were not refunded");
+        check(f, d.stats[0] == GrowthRules.STAT_CAP, "sanitize wiped stats that come from the tree");
         d.level = 99;
         d.xp = -5;
         d.sanitize();

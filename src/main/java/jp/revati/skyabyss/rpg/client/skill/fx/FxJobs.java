@@ -46,6 +46,14 @@ public final class FxJobs {
         if (plans.containsKey(Skill.BACKSTEP)) {
             plans.put(Skill.ARCHER_LEAP, plans.get(Skill.BACKSTEP));
         }
+        // 木 v2 で足した技 (docs/design/48): 似た技の絵を借りる
+        Skill[][] borrow = {{Skill.SHIELD_BASH, Skill.LUNGE}, {Skill.BONE_SWING, Skill.TITAN_CLEAVE}, {Skill.SPIN_CUT, Skill.WHALE_SWEEP},
+                {Skill.TWIN_FANG, Skill.WIND_REND}, {Skill.SPARK_BURST, Skill.FORGE_STOMP}, {Skill.SNARE_SHOT, Skill.CLOUD_PIERCE}, {Skill.STARDUST, Skill.FROST_TIDE}};
+        for (Skill[] b : borrow) {
+            if (plans.containsKey(b[1])) {
+                plans.put(b[0], plans.get(b[1]));
+            }
+        }
     }
 
     // 雷の矢 [放ち 0 (手元の閃きと、狙いへ折れ曲がる稲妻) / 当たり 1 (当たりの火花) / 残り 10]

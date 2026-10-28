@@ -35,7 +35,8 @@ import net.minecraft.world.level.block.BedBlock;
 //   guild    : ギルドの画面
 //   repair   : 鍛冶師の修理 (手に持った品。傷みに応じた鐘銭)
 //   guild_storage : ギルドの倉庫 (GuildStorage)
-//   respec_quote / respec_skills / respec_skills_coins / respec_stats / respec_stats_coins : 訓練場の師範の振り直し (TrainingMaster)
+//   respec_quote / respec_skills / respec_skills_coins : 訓練場の師範の振り直し (TrainingMaster)
+//   job_room : 職の間 (職を替える画面。JobChoice.openRoom。docs/design/48 の 3 章)
 //   lore_book : 書庫番の伝承の読み返し (伝承の書の画面を開く)
 //   map_copy  : 書庫番の地図の写し (M の地図に祠と跡地のありか。FacilityMarks.MAP_COPY → MapMarks)
 //   key_offer / key_return : 社の祭司。鍵の間に欠片を納める / 返してもらう (KeyRoom)
@@ -46,10 +47,8 @@ import net.minecraft.world.level.block.BedBlock;
 //   guide     : 都の案内人。施設の一覧の画面 → 選んだ施設の戸まで灯りの道 (TownGuide)
 public final class FacilityActions {
     public static final java.util.Set<String> OPENS = java.util.Set.of("shop", "stash", "inn_rest", "rumor", "perch", "map", "guild", "repair",
-            "guild_storage", "respec_quote", "respec_skills", "respec_skills_coins", "respec_stats", "respec_stats_coins", "lore_book", "map_copy",
-            "key_offer", "key_return", "records", "brew_lesson", "trade", "mount_shop", "guide",
-            // 訓練場の師範が、ほかの職の始めの武器を貸す (rpg/skill/JobChoice.lend)
-            "starter_warrior", "starter_smith", "starter_mage", "starter_archer", "starter_assassin", "starter_shaman");
+            "guild_storage", "respec_quote", "respec_skills", "respec_skills_coins", "job_room", "lore_book", "map_copy",
+            "key_offer", "key_return", "records", "brew_lesson", "trade", "mount_shop", "guide");
 
     private FacilityActions() {
     }
@@ -74,12 +73,9 @@ public final class FacilityActions {
             case "repair" -> repair(player);
             case "guild_storage" -> jp.revati.skyabyss.facility.guild.GuildStorage.open(player, npc);
             case "respec_quote" -> TrainingMaster.quote(player);
-            case "starter_warrior", "starter_smith", "starter_mage", "starter_archer", "starter_assassin", "starter_shaman" ->
-                    jp.revati.skyabyss.rpg.skill.JobChoice.lend(player, jp.revati.skyabyss.rpg.skill.Job.byId(open.substring("starter_".length())));
+            case "job_room" -> jp.revati.skyabyss.rpg.skill.JobChoice.openRoom(player);
             case "respec_skills" -> TrainingMaster.respec(player, false, false);
             case "respec_skills_coins" -> TrainingMaster.respec(player, false, true);
-            case "respec_stats" -> TrainingMaster.respec(player, true, false);
-            case "respec_stats_coins" -> TrainingMaster.respec(player, true, true);
             case "lore_book" -> loreBook(player);
             case "map_copy" -> mapCopy(player);
             case "key_offer" -> KeyRoom.offerAll(player);

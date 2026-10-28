@@ -56,6 +56,16 @@ public final class SkillCommands {
                             SkillManager.forgetAll(target(ctx));
                             return done(ctx);
                         })))
+                        // 木 v2 の節を取る (今の職の木。docs/design/48)
+                        .then(Commands.literal("node").then(player().then(Commands.argument("node", StringArgumentType.word()).executes(ctx -> {
+                            ServerPlayer p = target(ctx);
+                            SkillData.TakeResult r = SkillManager.takeNode(p, StringArgumentType.getString(ctx, "node"));
+                            if (r != SkillData.TakeResult.OK) {
+                                ctx.getSource().sendFailure(net.minecraft.network.chat.Component.literal("node: " + r));
+                                return 0;
+                            }
+                            return done(ctx);
+                        }))))
                         .then(Commands.literal("points").then(player().then(Commands.argument("bonus", IntegerArgumentType.integer(0, 100)).executes(ctx -> {
                             ServerPlayer p = target(ctx);
                             SkillManager.get(p).bonusPoints = IntegerArgumentType.getInteger(ctx, "bonus");

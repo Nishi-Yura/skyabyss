@@ -271,7 +271,7 @@ final class BuildsSelfTest {
         try {
             SkillManager.forgetAll(p);
             // ---- A01: 点の総数は 45 のまま
-            check(f, d.totalPoints(50) == 45, "total points changed: " + d.totalPoints(50));
+            check(f, d.totalPoints(50) == 50, "total points changed: " + d.totalPoints(50));
             SkillManager.forceRank(p, Skill.WHALE_SWEEP, 2);
             check(f, d.canLearn(Skill.STONE_OATH, 50) == SkillData.LearnResult.OK, "a keystone row did not open from the start");
             // ---- A03: タグ (全 36 技に付き、旅人は持ち味で。数・力)
@@ -463,7 +463,7 @@ final class BuildsSelfTest {
                     "new fields did not survive the sync codec");
             SkillReset.forRebirth(p);
             check(f, d.ranks.isEmpty() && d.runes.isEmpty() && d.keystones.isEmpty() && d.bonusPoints == 0
-                    && d.unspentPoints(50) == 45, "the rebirth reset left something behind");
+                    && d.unspentPoints(50) == 50, "the rebirth reset left something behind");
             check(f, d.loadouts[3].saved && d.mastery.getOrDefault(Skill.TITAN_CLEAVE.id, 0) == 70, "the rebirth reset removed loadouts or mastery");
             // ---- 前の版 (v2) の記録: 天職の要を自分で取っていた分は点が戻る
             CompoundTag old = new CompoundTag();

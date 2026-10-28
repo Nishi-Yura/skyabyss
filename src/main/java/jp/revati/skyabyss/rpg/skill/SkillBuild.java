@@ -216,8 +216,10 @@ public final class SkillBuild {
             v += SkillRules.KEY_STRING_PROJECTILE;
         }
         v += setSum(d, SetKind.DAMAGE) + tagStepSum(player, SetKind.DAMAGE);
+        v += jp.revati.skyabyss.rpg.skill.tree.NodeEffects.sum(player, "attack");
         if (projectile) {
             v += setSum(d, SetKind.PROJECTILE) + tagStepSum(player, SetKind.PROJECTILE);
+            v += jp.revati.skyabyss.rpg.skill.tree.NodeEffects.sum(player, "projectile");
         }
         v += condDamage(player, projectile);
         return Math.max(-0.5, v);
@@ -230,6 +232,7 @@ public final class SkillBuild {
         if (SkillManager.runeOf(player, skill) == Rune.MASTERY) {
             v += SkillRules.MASTERY_RUNE_POWER;
         }
+        v += jp.revati.skyabyss.rpg.skill.tree.NodeEffects.sum(player, "skill_power");
         for (SkillModifier m : MODIFIERS) {
             v += m.power(player, skill);
         }
@@ -243,7 +246,7 @@ public final class SkillBuild {
 
     // 火の傷を減らす割合 (灰の木のセット)
     public static double fireReduction(Player player) {
-        return setSum(SkillManager.get(player), SetKind.FIRE);
+        return setSum(SkillManager.get(player), SetKind.FIRE) + jp.revati.skyabyss.rpg.skill.tree.NodeEffects.sum(player, "fire_resist");
     }
 
     // ---------------------------------------------------------------- 待ち・マナ
@@ -262,6 +265,7 @@ public final class SkillBuild {
         for (SkillModifier m : MODIFIERS) {
             v += m.cooldown(player, skill);
         }
+        v += jp.revati.skyabyss.rpg.skill.tree.NodeEffects.sum(player, "cooldown");
         return 1 + Math.max(SkillRules.COOLDOWN_MIN, Math.min(SkillRules.COOLDOWN_MAX, v));
     }
 
@@ -271,6 +275,7 @@ public final class SkillBuild {
         for (SkillModifier m : MODIFIERS) {
             v += m.manaCost(player, skill);
         }
+        v += jp.revati.skyabyss.rpg.skill.tree.NodeEffects.sum(player, "mana_cost");
         return 1 + Math.max(-SkillRules.MANA_COST_CAP, Math.min(SkillRules.MANA_COST_CAP, v));
     }
 
@@ -281,6 +286,7 @@ public final class SkillBuild {
         if (has(d, SkillKeystone.FULL_TIDE)) {
             v += SkillRules.KEY_TIDE_REGEN;
         }
+        v += jp.revati.skyabyss.rpg.skill.tree.NodeEffects.sum(player, "regen");
         return v + SkillExt.regenAdd(player);
     }
 
@@ -295,6 +301,12 @@ public final class SkillBuild {
         double move = setSum(d, SetKind.MOVE) + tagStepSum(player, SetKind.MOVE);
         double aspeed = setSum(d, SetKind.ATTACK_SPEED);
         double mana = setSum(d, SetKind.MANA) + tagStepSum(player, SetKind.MANA);
+        // 木 v2 の節 (docs/design/48)
+        armor += jp.revati.skyabyss.rpg.skill.tree.NodeEffects.sum(player, "armor") + (lowHp(player) ? jp.revati.skyabyss.rpg.skill.tree.NodeEffects.sum(player, "low_hp_armor") : 0);
+        kb += jp.revati.skyabyss.rpg.skill.tree.NodeEffects.sum(player, "knockback");
+        move += jp.revati.skyabyss.rpg.skill.tree.NodeEffects.sum(player, "move");
+        aspeed += jp.revati.skyabyss.rpg.skill.tree.NodeEffects.sum(player, "attack_speed");
+        mana += jp.revati.skyabyss.rpg.skill.tree.NodeEffects.sum(player, "mana");
         double manaMult = 0;
         if (has(d, SkillKeystone.BULWARK)) {
             armor += SkillRules.KEY_BULWARK_ARMOR;

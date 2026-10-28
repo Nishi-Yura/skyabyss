@@ -117,6 +117,8 @@ public final class SelfTestRunner {
         // 仲間が起こせる仕組み・倒れた回数の札・「ここ」の印。docs/design/10 の 10.12〜10.14
         steps.add(Step.once("party revive", jp.revati.skyabyss.party.ReviveSelfTest::runSelfTest));
         steps.add(Step.once("growth", GrowthSelfTest::runSelfTest));
+        // 技の木 v2 (docs/design/48): 木の読み込み・節の決まり・点・4 本の上限・基礎・保存。SKYABYSS_SELFTEST_ONLY="tree"
+        steps.add(Step.once("tree", jp.revati.skyabyss.rpg.skill.tree.AbilityTreeSelfTest::runSelfTest));
         // 日本語の折り返しの切れ目 (util/JpBreak)。SKYABYSS_SELFTEST_ONLY="text wrap"
         steps.add(Step.once("text wrap", jp.revati.skyabyss.util.JpBreakSelfTest::run));
         // 伝説の装備の出どころ (abyss/LegendLoot)。SKYABYSS_SELFTEST_ONLY="legend loot"
@@ -125,12 +127,15 @@ public final class SelfTestRunner {
         steps.add(Step.once("soul", jp.revati.skyabyss.rebirth.SoulSelfTest::runSelfTest));
         // 職の前の技ごとの検査 (木をまたいだ枠で技を試す) は、職 (持った武器) を見ずに。職の検査は "jobs"
         steps.addAll(jp.revati.skyabyss.rpg.skill.JobSelfTest.steps());
+        // 木 v2 (48) は外して、前の覚え方 (技の段を直接) で技の仕組みだけを検める。木の決まりは "tree"
         steps.add(Step.once("skills", server -> {
             jp.revati.skyabyss.rpg.skill.SkillManager.IGNORE_JOBS = true;
+            jp.revati.skyabyss.rpg.skill.tree.AbilityTrees.setEnabled(false);
             try {
                 SkillSelfTest.runSelfTest(server);
             } finally {
                 jp.revati.skyabyss.rpg.skill.SkillManager.IGNORE_JOBS = false;
+                jp.revati.skyabyss.rpg.skill.tree.AbilityTrees.setEnabled(true);
             }
         }));
         // 画面の知らせ (種類分け・順番待ち)。docs/design/18_notices.md
@@ -141,10 +146,12 @@ public final class SelfTestRunner {
         // 技の稽古 (師範の手ほどき: 覚える・置く・木偶に当てる・背後・構え・振り直し・後の章の一段)。SKYABYSS_SELFTEST_ONLY="skill lesson"
         steps.add(Step.once("skill lesson", server -> {
             jp.revati.skyabyss.rpg.skill.SkillManager.IGNORE_JOBS = true;
+            jp.revati.skyabyss.rpg.skill.tree.AbilityTrees.setEnabled(false);
             try {
                 jp.revati.skyabyss.tutorial.SkillLessonSelfTest.runSelfTest(server);
             } finally {
                 jp.revati.skyabyss.rpg.skill.SkillManager.IGNORE_JOBS = false;
+                jp.revati.skyabyss.rpg.skill.tree.AbilityTrees.setEnabled(true);
             }
         }));
         // 転生の見せ方 (色の段・記号・称号・順位表・同期・記録・墓の飾り)。docs/design/31

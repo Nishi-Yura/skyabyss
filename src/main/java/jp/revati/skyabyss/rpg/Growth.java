@@ -139,6 +139,10 @@ public final class Growth {
     // ---------------------------------------------------------------- ステータス
     // 力を振り分ける。add は 4 つのステータスへの追加量。正しくなければ何もせず false
     public static boolean allocate(ServerPlayer player, int[] add) {
+        // 基礎は技の木の節で上がる (docs/design/48)。振り分けは受け付けない
+        if (true) {
+            return false;
+        }
         GrowthData data = get(player);
         if (!canAllocate(data, add)) {
             return false;

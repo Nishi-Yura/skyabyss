@@ -74,7 +74,15 @@ public enum Skill {
     LAMP_CHARM("lamp_charm", SkillTree.TIDE, Kind.ACTIVE, 2, 2, 1, "ripple"),
     // 戦士・弓使いの 4 つ目は、風読みの踏み込み・跳び退きと同じ動き (刻印は付かない)
     SHIELD_RUSH("shield_rush", SkillTree.ROCK, Kind.ACTIVE, 2, 2, 1, "stone_stance"),
-    ARCHER_LEAP("archer_leap", SkillTree.BONE, Kind.ACTIVE, 2, 2, 1, "hawk_eye");
+    ARCHER_LEAP("archer_leap", SkillTree.BONE, Kind.ACTIVE, 2, 2, 1, "hawk_eye"),
+    // 技の木 v2 (docs/design/48) で足した使う技 (4 本の枠から選ぶための増やし)。絵は icons2.png の 37 番から
+    SHIELD_BASH("shield_bash", SkillTree.ROCK, Kind.ACTIVE, 2, 1, 2, "titan_cleave"),
+    BONE_SWING("bone_swing", SkillTree.ROCK, Kind.ACTIVE, 2, 2, 0, "titan_cleave"),
+    SPIN_CUT("spin_cut", SkillTree.ROCK, Kind.ACTIVE, 2, 2, 2, "titan_cleave"),
+    TWIN_FANG("twin_fang", SkillTree.WIND, Kind.ACTIVE, 2, 1, 2, "lunge"),
+    SPARK_BURST("spark_burst", SkillTree.ASH, Kind.ACTIVE, 2, 1, 2, "temper"),
+    SNARE_SHOT("snare_shot", SkillTree.BONE, Kind.ACTIVE, 2, 1, 2, "cloud_pierce"),
+    STARDUST("stardust", SkillTree.STAR, Kind.ACTIVE, 2, 1, 2, "thunder_bolt");
 
     public enum Kind {
         ACTIVE, PASSIVE, KEYSTONE

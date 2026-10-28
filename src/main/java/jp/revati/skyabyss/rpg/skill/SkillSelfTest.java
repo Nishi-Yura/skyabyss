@@ -89,12 +89,13 @@ public final class SkillSelfTest {
             check(f, java.util.Arrays.asList(d.slots).contains(s.id) == s.active, s.id + " slot changed by sanitize");
         }
         // ---------------------------------------------------------------- 技の点・木の形
-        check(f, SkillRules.pointsForLevel(1) == 1 && SkillRules.pointsForLevel(2) == 1 && SkillRules.pointsForLevel(3) == 2
-                && SkillRules.pointsForLevel(9) == 5 && SkillRules.pointsForLevel(10) == 5 && SkillRules.pointsForLevel(12) == 7
-                && SkillRules.pointsForLevel(15) == 10 && SkillRules.pointsForLevel(21) == 16 && SkillRules.pointsForLevel(33) == 28
-                && SkillRules.pointsForLevel(50) == 45, "skill points per level are wrong");
-        // 6 職の木 42 本 + 淵 6 + 前世 6 (旅人の木と橋は 43 で削った)
-        check(f, Skill.values().length == 54 && Rune.values().length == 79, "skill / rune counts are wrong");
+        // 1 レベル 1 点 (docs/design/48)
+        check(f, SkillRules.pointsForLevel(1) == 1 && SkillRules.pointsForLevel(2) == 2 && SkillRules.pointsForLevel(3) == 3
+                && SkillRules.pointsForLevel(9) == 9 && SkillRules.pointsForLevel(10) == 10 && SkillRules.pointsForLevel(12) == 12
+                && SkillRules.pointsForLevel(15) == 15 && SkillRules.pointsForLevel(21) == 21 && SkillRules.pointsForLevel(33) == 33
+                && SkillRules.pointsForLevel(50) == 50, "skill points per level are wrong");
+        // 6 職の木 42 本 + 木 v2 で足した 7 本 + 淵 6 + 前世 6 (旅人の木と橋は 43 で削った)
+        check(f, Skill.values().length == 61 && Rune.values().length == 79, "skill / rune counts are wrong");
         int[] perTree = new int[SkillTree.values().length];
         for (Skill s : Skill.values()) {
             perTree[s.tree.ordinal()]++;
@@ -112,9 +113,9 @@ public final class SkillSelfTest {
             }
         }
         for (SkillTree t : SkillTree.values()) {
-            // 3 行目の左右に職の 4 つ目の技: 岩守り・風読み・灰の鍛え人・骨の射手 +1、潮歌い +2
-            int want = t == SkillTree.ROCK || t == SkillTree.WIND || t == SkillTree.ASH || t == SkillTree.BONE ? 7
-                    : t == SkillTree.TIDE ? 8 : 6;
+            // 3 行目の左右に職の 4 つ目の技: 岩守り・風読み・灰の鍛え人・骨の射手 +1、潮歌い +2。木 v2 (48) で戦士 +3、風・灰・骨・星 +1
+            int want = t == SkillTree.ROCK ? 10 : t == SkillTree.WIND || t == SkillTree.ASH || t == SkillTree.BONE || t == SkillTree.TIDE ? 8
+                    : t == SkillTree.STAR ? 7 : 6;
             check(f, t.sealed || perTree[t.ordinal()] == want, t.id + " does not have the right number of skills: " + perTree[t.ordinal()]);
         }
         // 1 本の木の総点 (段 + 刻印 1 点ずつ)。Lv 50 の 45 点では 3 本は極められない
@@ -123,7 +124,7 @@ public final class SkillSelfTest {
             treePoints[s.tree.ordinal()] += s.maxRank + (s.runes().isEmpty() ? 0 : 1);
         }
         int rockPts = treePoints[SkillTree.ROCK.ordinal()];
-        check(f, rockPts >= 12 && rockPts <= 20 && rockPts * 3 > SkillRules.pointsForLevel(50), "tree points out of range: " + rockPts);
+        check(f, rockPts >= 12 && rockPts <= 30 && rockPts * 3 > SkillRules.pointsForLevel(50), "tree points out of range: " + rockPts);
         SkyAbyss.LOGGER.info("[selftest] skills: points per tree {}, points at 50: {}", java.util.Arrays.toString(treePoints), SkillRules.pointsForLevel(50));
 
         // ---------------------------------------------------------------- 習得の条件
@@ -164,7 +165,7 @@ public final class SkillSelfTest {
         check(f, d.ranks.size() == 2 && !d.ranks.containsKey("skyabyss:gone"), "unknown skills were not dropped");
         check(f, d.slots[0].equals(Skill.LUNGE.id) && d.slots[1].isEmpty() && d.slots[2].isEmpty() && d.slots[3].isEmpty(),
                 "bad slots were not cleared: " + String.join(",", d.slots));
-        d.sanitize(3); // 2 点しかない → 全部戻る
+        d.sanitize(1); // 1 点しかない → 全部戻る
         check(f, d.ranks.isEmpty() && d.slots[0].isEmpty(), "overspent skills were not refunded");
         d = new SkillData();
         d.ranks.put(Skill.BACKSTEP.id, 1); // 前提なし

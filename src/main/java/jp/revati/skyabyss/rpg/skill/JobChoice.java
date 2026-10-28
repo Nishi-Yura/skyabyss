@@ -13,15 +13,16 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
-// 島の祠で職を選ぶ (docs/design/43 の 4 節)。祠のそばに来ると選ぶ画面が開き、選ぶとその職の始めの武器を受け取って、
-// 職の木の 1 行目の技を一つ覚える (Lv 1 の 1 点)。選んだ職は人の永続データの KEY (倒れても残る。util/LifeKeep)。
+// 島の祠で職を選ぶ (docs/design/43 の 4 節) と、街の職の間で職を替える (docs/design/48 の 3 章)。
+// 祠のそばに来ると選ぶ画面が開き、選ぶとその職の始めの武器を受け取って、職の木の幹の技を一つ取る (Lv 1 の 1 点)。
+// 職の間 (訓練場の師範の「職を替える」) は同じ画面を替えるために開く。職は持ち替えでは替わらない。木の取り方は職ごとに残る。
+// 選んだ職は人の永続データの KEY (倒れても残る。util/LifeKeep)。
 // 始めの武器はどれも祠の品 (祠の剣・祠の鎚・宿り木の杖・祠の弓・宿り木の短剣・祠の鈴杖)
 public final class JobChoice {
     public static final String KEY = "skyabyss_first_job";
@@ -45,6 +46,8 @@ public final class JobChoice {
 
     // 祠のそばで画面を一度開いた人 (離れると消える。また近づくともう一度開く)
     private static final Set<UUID> PROMPTED = new HashSet<>();
+    // 職の間の画面を開いている人 (替える返事は、この画面からだけ受ける)
+    private static final Set<UUID> SWITCHING = new HashSet<>();
 
     private JobChoice() {
     }
@@ -55,13 +58,12 @@ public final class JobChoice {
         net.neoforged.neoforge.common.NeoForge.EVENT_BUS.addListener(JobChoice::onCommands);
     }
 
-    // 開発用: /skyabyss job open (選ぶ画面) | choose <職> | reset (選んだ職を消す)
+    // 開発用: /skyabyss job open (選ぶ画面か職の間) | choose <職> (選ぶ・替える) | reset (選んだ職を消す)
     private static void onCommands(net.neoforged.neoforge.event.RegisterCommandsEvent event) {
         var job = net.minecraft.commands.Commands.literal("job")
                 .then(net.minecraft.commands.Commands.literal("open").executes(c -> {
-                    ServerPlayer p = c.getSource().getPlayerOrException();
-                    PROMPTED.remove(p.getUUID());
-                    prompt(p);
+                    // まだ選んでいなければ祠の選び、選んでいれば職の間
+                    openRoom(c.getSource().getPlayerOrException());
                     return 1;
                 }))
                 .then(net.minecraft.commands.Commands.literal("reset").executes(c -> {
@@ -70,7 +72,10 @@ public final class JobChoice {
                 }));
         var choose = net.minecraft.commands.Commands.literal("choose");
         for (Job j : Job.values()) {
-            choose.then(net.minecraft.commands.Commands.literal(j.id).executes(c -> choose(c.getSource().getPlayerOrException(), j) ? 1 : 0));
+            choose.then(net.minecraft.commands.Commands.literal(j.id).executes(c -> {
+                ServerPlayer p = c.getSource().getPlayerOrException();
+                return (chosen(p) == null ? choose(p, j) : switchTo(p, j)) ? 1 : 0;
+            }));
         }
         event.getDispatcher().register(net.minecraft.commands.Commands.literal(SkyAbyss.MODID).requires(src -> src.hasPermission(2)).then(job.then(choose)));
     }
@@ -112,7 +117,7 @@ public final class JobChoice {
     // 選ぶ画面を開く (祠のそばに来たとき。離れるまでは一度だけ)
     public static void prompt(ServerPlayer p) {
         if (!(p instanceof net.neoforged.neoforge.common.util.FakePlayer) && PROMPTED.add(p.getUUID())) {
-            PacketDistributor.sendToPlayer(p, new JobChoiceOpenPayload());
+            PacketDistributor.sendToPlayer(p, new JobChoiceOpenPayload(false));
         }
     }
 
@@ -135,36 +140,85 @@ public final class JobChoice {
         if (job == Job.ARCHER) {
             jp.revati.skyabyss.quest.Quests.give(p, new ItemStack(jp.revati.skyabyss.item.outfit.ConsumableGear.TRAVEL_ARROW.get(), 32));
         }
+        SkillData d = SkillManager.get(p);
+        d.useJob(job);
         Skill first = firstSkill(job);
-        if (first != null && !SkillManager.get(p).knows(first)) {
-            SkillManager.forceRank(p, first, 1);
+        if (first != null && !d.knows(first)) {
+            // 幹の 1 つ目の技 (1 点) を取る。木がなければ段を直接
+            jp.revati.skyabyss.rpg.skill.tree.AbilityTree tree = jp.revati.skyabyss.rpg.skill.tree.AbilityTrees.of(job);
+            jp.revati.skyabyss.rpg.skill.tree.AbilityNode base = tree == null ? null : tree.skillNode(first);
+            if (base == null || SkillManager.takeNode(p, base.id) != SkillData.TakeResult.OK) {
+                SkillManager.forceRank(p, first, 1);
+            }
         }
+        SkillManager.refreshStats(p);
         SkillManager.sync(p);
         jp.revati.skyabyss.advancement.Beats.fire(p, "job:chosen");
         Notice.objective(p, "message.skyabyss.job.chosen", Component.translatable(job.nameKey()), weapon.getHoverName());
         return true;
     }
 
-    // 訓練場の師範が、ほかの職の始めの武器を貸す (一つの職につき一度、ただ。43 の 4 節)。祠で選んだ職の分は、もう受け取ったものとして数える
+    // 始めの武器を渡した職 (一つの職につき一度。祠で選んだ職の分は、もう受け取ったものとして数える)
     public static final String LENT = "skyabyss_starter_lent";
 
-    public static boolean lend(ServerPlayer p, Job job) {
+    // 職の間を開く (訓練場の師範の「職を替える」。FacilityActions の job_room)
+    public static void openRoom(ServerPlayer p) {
+        if (chosen(p) == null) {
+            PROMPTED.remove(p.getUUID());
+            prompt(p);
+            return;
+        }
+        SWITCHING.add(p.getUUID());
+        PacketDistributor.sendToPlayer(p, new JobChoiceOpenPayload(true));
+    }
+
+    // 画面からの返事: まだ選んでいなければ祠の選び、選んでいれば職の間で替える (職の間を開いた人からだけ)
+    public static boolean pick(ServerPlayer p, Job job) {
+        if (chosen(p) == null) {
+            return choose(p, job);
+        }
+        if (!SWITCHING.remove(p.getUUID()) && !p.isCreative()) {
+            return false;
+        }
+        return switchTo(p, job);
+    }
+
+    // 職を替える (docs/design/48 の 3 章)。枠はその職の帯へ、基礎はその職の木から。初めての職には始めの武器を一度だけ渡す
+    public static boolean switchTo(ServerPlayer p, Job job) {
         if (job == null) {
             return false;
         }
-        net.minecraft.nbt.CompoundTag tag = p.getPersistentData().getCompound(LENT);
-        if (tag.getBoolean(job.id) || job == chosen(p)) {
-            Notice.hint(p, "message.skyabyss.job.lent_already", Component.translatable(job.nameKey()));
+        SkillData d = SkillManager.get(p);
+        if (job.id.equals(d.curJob)) {
+            Notice.hint(p, "message.skyabyss.job.already", Component.translatable(job.nameKey()));
             return false;
         }
-        tag.putBoolean(job.id, true);
-        p.getPersistentData().put(LENT, tag);
-        ItemStack weapon = starter(job);
-        jp.revati.skyabyss.quest.Quests.give(p, weapon.copy());
-        if (job == Job.ARCHER) {
-            jp.revati.skyabyss.quest.Quests.give(p, new ItemStack(Items.ARROW, 32));
+        d.useJob(job);
+        d.applyNodes();
+        net.minecraft.nbt.CompoundTag tag = p.getPersistentData().getCompound(LENT);
+        if (!tag.getBoolean(job.id) && job != chosen(p)) {
+            tag.putBoolean(job.id, true);
+            p.getPersistentData().put(LENT, tag);
+            ItemStack weapon = starter(job);
+            jp.revati.skyabyss.quest.Quests.give(p, weapon.copy());
+            if (job == Job.ARCHER) {
+                jp.revati.skyabyss.quest.Quests.give(p, new ItemStack(jp.revati.skyabyss.item.outfit.ConsumableGear.TRAVEL_ARROW.get(), 32));
+            }
+            Notice.objective(p, "message.skyabyss.job.lent", Component.translatable(job.nameKey()), weapon.getHoverName());
         }
-        Notice.objective(p, "message.skyabyss.job.lent", Component.translatable(job.nameKey()), weapon.getHoverName());
+        Skill first = firstSkill(job);
+        if (first != null && !d.knows(first)) {
+            jp.revati.skyabyss.rpg.skill.tree.AbilityTree tree = jp.revati.skyabyss.rpg.skill.tree.AbilityTrees.of(job);
+            jp.revati.skyabyss.rpg.skill.tree.AbilityNode base = tree == null ? null : tree.skillNode(first);
+            if (base != null) {
+                SkillManager.takeNode(p, base.id);
+            }
+        }
+        SkillManager.refreshStats(p);
+        SkillManager.sync(p);
+        SkillManager.applyModifiers(p);
+        jp.revati.skyabyss.advancement.Beats.fire(p, "job:switched");
+        Notice.objective(p, "message.skyabyss.job.switched", Component.translatable(job.nameKey()));
         return true;
     }
 
@@ -173,5 +227,6 @@ public final class JobChoice {
         p.getPersistentData().remove(KEY);
         p.getPersistentData().remove(LENT);
         PROMPTED.remove(p.getUUID());
+        SWITCHING.remove(p.getUUID());
     }
 }

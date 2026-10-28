@@ -124,7 +124,53 @@ public final class SkillManager {
         }
     }
 
-    // ---------------------------------------------------------------- 習得
+    // ---------------------------------------------------------------- 技の木 v2 (docs/design/48)
+    // 今の職の木の節を取る。サーバーが検める
+    public static SkillData.TakeResult takeNode(ServerPlayer player, String nodeId) {
+        SkillExtOps.refreshRebirth(player);
+        SkillData d = get(player);
+        Job job = Job.byId(d.curJob);
+        jp.revati.skyabyss.rpg.skill.tree.AbilityNode n = jp.revati.skyabyss.rpg.skill.tree.AbilityTrees.node(job, nodeId);
+        SkillData.TakeResult r = d.canTake(job, n, level(player));
+        if (r != SkillData.TakeResult.OK) {
+            return r;
+        }
+        d.nodesOf(job).add(n.id);
+        d.applyNodes();
+        if (n.skill != null && n.skill.active) {
+            autoSlot(d, n.skill);
+        }
+        refreshStats(player);
+        jp.revati.skyabyss.advancement.Beats.fire(player, "skill:learned");
+        jp.revati.skyabyss.advancement.Beats.fire(player, "skill:tree:" + job.tree.beat);
+        jp.revati.skyabyss.advancement.Beats.fire(player, "skill:tree:" + job.tree.id);
+        sync(player);
+        applyModifiers(player);
+        ServerLevel level = player.serverLevel();
+        level.playSound(null, player.getX(), player.getY(), player.getZ(), Skills.SOUND_LEARN.get(), SoundSource.PLAYERS, 0.8f, 1f);
+        level.sendParticles(Skills.RUNE_SPARK.get(), player.getX(), player.getY() + 1.0, player.getZ(), 18, 0.4, 0.6, 0.4, 0.02);
+        if (n.skill != null) {
+            Notice.send(player, Notice.Kind.LEVEL_UP, ModText.progress("message.skyabyss.skill.learned", Component.translatable(n.skill.nameKey()), d.rank(n.skill), n.skill.maxRank));
+        } else {
+            Notice.send(player, Notice.Kind.LEVEL_UP, ModText.progress("message.skyabyss.skill.node_taken", Component.translatable(n.nameKey(job.id))));
+        }
+        return r;
+    }
+
+    // 今の職の木から導いた基礎を成長の記録へ写す (節を変えたあと・職を替えたあと・ログインのとき)
+    public static void refreshStats(Player player) {
+        SkillData d = get(player);
+        jp.revati.skyabyss.rpg.GrowthData g = jp.revati.skyabyss.rpg.Growth.get(player);
+        int[] s = d.statsFromNodes(Job.byId(d.curJob));
+        boolean changed = !java.util.Arrays.equals(s, g.stats);
+        System.arraycopy(s, 0, g.stats, 0, Math.min(s.length, g.stats.length));
+        if (changed) {
+            jp.revati.skyabyss.rpg.Growth.applyModifiers(player);
+            jp.revati.skyabyss.rpg.Growth.sync(player);
+        }
+    }
+
+    // ---------------------------------------------------------------- 習得 (淵・前世の技。職の木は takeNode)
     public static SkillData.LearnResult learn(ServerPlayer player, Skill skill) {
         SkillExtOps.refreshRebirth(player);
         SkillData d = get(player);
@@ -193,10 +239,7 @@ public final class SkillManager {
         if (!skill.active || !d.knows(skill)) {
             return false;
         }
-        Job job = IGNORE_JOBS ? null : Job.held(player);
-        if (!IGNORE_JOBS && job != null && d.useJob(job)) {
-            sync(player);
-        }
+        Job job = IGNORE_JOBS ? null : Job.byId(d.curJob);
         if (!SkillData.usableBy(job, skill)) {
             return false;
         }
@@ -236,7 +279,9 @@ public final class SkillManager {
     // (false なら結晶を取らない。代わりの代価 (鐘銭) は呼ぶ側が先に確かめて、OK のあとで取る)
     public static RespecResult respec(ServerPlayer player, boolean atPlace, boolean crystals) {
         SkillData d = get(player);
-        if (d.ranks.isEmpty()) {
+        Job job = Job.byId(d.curJob);
+        boolean nothing = job != null && jp.revati.skyabyss.rpg.skill.tree.AbilityTrees.of(job) != null ? d.nodesOf(job).isEmpty() : d.ranks.isEmpty();
+        if (nothing) {
             return RespecResult.NOTHING;
         }
         boolean early = freeRespec(player);
@@ -251,7 +296,19 @@ public final class SkillManager {
         if (!free && crystals) {
             removeCrystals(player, cost);
         }
-        d.clearSkills();
+        if (job != null && jp.revati.skyabyss.rpg.skill.tree.AbilityTrees.of(job) != null) {
+            // 今の職の木だけ戻す (ほかの職の木・淵・前世はそのまま)。枠は覚えていない技を空ける
+            d.clearJob(job);
+            for (int i = 0; i < d.slots.length; i++) {
+                Skill s = Skill.byId(d.slots[i]);
+                if (s != null && !d.knows(s)) {
+                    d.slots[i] = "";
+                }
+            }
+        } else {
+            d.clearSkills();
+        }
+        refreshStats(player);
         if (!early) {
             d.respecs++;
         }
@@ -353,13 +410,15 @@ public final class SkillManager {
         for (var e : d.runes.entrySet()) {
             l.runes.put(e.getKey(), e.getValue());
         }
+        l.nodes.clear();
+        l.nodes.addAll(d.nodesOf(Job.byId(d.curJob)));
         l.saved = true;
         sync(player);
         return true;
     }
 
     public enum LoadoutResult {
-        OK, EMPTY, NOT_QUIET, NO_PLACE
+        OK, EMPTY, NOT_QUIET, NO_PLACE, NO_POINTS
     }
 
     // 型を切り替える (点は変わらない)。枠は覚えている使う技だけを置き、刻印はすでに 1 つ選んである技だけ付け替える
@@ -376,6 +435,20 @@ public final class SkillManager {
         }
         SkillData.Loadout l = d.loadouts[index];
         Job job = Job.byId(d.curJob);
+        if (job != null && !l.nodes.isEmpty()) {
+            // 木の取り方ごと戻す (点が足りなければ戻さない)
+            java.util.Set<String> keep = new java.util.LinkedHashSet<>(d.nodesOf(job));
+            d.nodesOf(job).clear();
+            d.nodesOf(job).addAll(l.nodes);
+            d.sanitizeNodes(level(player));
+            if (d.nodeSpent(job) > d.totalPoints(level(player)) - d.sharedSpent()) {
+                d.nodesOf(job).clear();
+                d.nodesOf(job).addAll(keep);
+                d.applyNodes();
+                return LoadoutResult.NO_POINTS;
+            }
+            refreshStats(player);
+        }
         java.util.Arrays.fill(d.slots, "");
         for (int i = 0; i < Math.min(d.slotCount(), l.slots.length); i++) {
             Skill s = Skill.byId(l.slots[i]);
@@ -472,15 +545,17 @@ public final class SkillManager {
             return CastResult.FAILED;
         }
         SkillData d = get(player);
-        // 持った武器の職の木の技 (docs/design/43)。職の武器を持っていなければ使えない
-        Job job = IGNORE_JOBS ? null : Job.held(player);
-        if (job == null && !IGNORE_JOBS) {
-            Notice.bar(player, ModText.deny("message.skyabyss.skill.no_job_weapon"));
+        // 今の職 (職の間で替える。docs/design/48 の 3 章)。手の武器がその職のものでなければ技は使えない
+        Job job = IGNORE_JOBS ? null : Job.byId(d.curJob);
+        if (!IGNORE_JOBS && job == null) {
+            Notice.bar(player, ModText.deny("message.skyabyss.skill.no_job"));
             sendResult(player, slot, false);
             return CastResult.EMPTY;
         }
-        if (!IGNORE_JOBS && d.useJob(job)) {
-            sync(player);
+        if (!IGNORE_JOBS && Job.held(player) != job) {
+            Notice.bar(player, ModText.deny("message.skyabyss.skill.wrong_job_weapon", Component.translatable(job.nameKey())));
+            sendResult(player, slot, false);
+            return CastResult.EMPTY;
         }
         Skill skill = d.slot(slot);
         if (skill == null || !SkillData.usableBy(job, skill)) {
@@ -626,12 +701,14 @@ public final class SkillManager {
     }
 
     // ---------------------------------------------------------------- 試着の確定 (A18)
-    // 画面で仮に振った順の技を、1 つずつ本当に覚える。途中で通らなければそこで止める (戻り値は覚えた数)
-    public static int learnAll(ServerPlayer player, java.util.List<String> skills) {
+    // 画面で仮に取った順の節 (木 v2) か技 (淵・前世) を、1 つずつ本当に取る。途中で通らなければそこで止める (戻り値は取れた数)
+    public static int learnAll(ServerPlayer player, java.util.List<String> ids) {
         int n = 0;
-        for (String id : skills) {
+        for (String id : ids) {
             Skill s = Skill.byId(id);
-            if (s == null || learn(player, s) != SkillData.LearnResult.OK) {
+            boolean ok = s != null && jp.revati.skyabyss.rpg.skill.tree.AbilityTrees.of(Job.ofTree(s.tree)) == null ? learn(player, s) == SkillData.LearnResult.OK
+                    : takeNode(player, id) == SkillData.TakeResult.OK;
+            if (!ok) {
                 break;
             }
             n++;
@@ -713,6 +790,7 @@ public final class SkillManager {
     // 管理者・テスト用: 技をすべて忘れる (振り直しの回数は数えない)
     public static void forgetAll(ServerPlayer player) {
         get(player).clearSkills();
+        refreshStats(player);
         sync(player);
         applyModifiers(player);
     }
@@ -722,6 +800,55 @@ public final class SkillManager {
     public static void forceRank(ServerPlayer player, Skill skill, int rank) {
         SkillData d = get(player);
         java.util.Set<String> before = new java.util.HashSet<>(d.ranks.keySet());
+        Job owner = Job.ofTree(skill.tree);
+        jp.revati.skyabyss.rpg.skill.tree.AbilityTree tree = jp.revati.skyabyss.rpg.skill.tree.AbilityTrees.of(owner);
+        if (tree != null) {
+            // 職の木の技は節で持つ: その技の節 (と幹からの道) と、段の節を rank − 1 だけ入れる
+            java.util.Set<String> mine = d.nodesOf(owner);
+            jp.revati.skyabyss.rpg.skill.tree.AbilityNode base = tree.skillNode(skill);
+            if (rank <= 0) {
+                if (base != null) {
+                    mine.remove(base.id);
+                }
+                for (jp.revati.skyabyss.rpg.skill.tree.AbilityNode rn : tree.rankNodes(skill)) {
+                    mine.remove(rn.id);
+                }
+            } else if (base != null) {
+                for (jp.revati.skyabyss.rpg.skill.tree.AbilityNode n : tree.pathTo(base.id)) {
+                    mine.add(n.id);
+                }
+                int extra = Math.min(rank, skill.maxRank) - 1;
+                for (jp.revati.skyabyss.rpg.skill.tree.AbilityNode rn : tree.rankNodes(skill)) {
+                    if (extra <= 0) {
+                        break;
+                    }
+                    for (jp.revati.skyabyss.rpg.skill.tree.AbilityNode n : tree.pathTo(rn.id)) {
+                        mine.add(n.id);
+                    }
+                    extra--;
+                }
+            }
+            d.applyNodes();
+            for (Skill s : Skill.values()) {
+                if (!before.contains(s.id) && d.knows(s)) {
+                    autoSlot(d, s);
+                }
+            }
+            int over = d.sharedSpent() + d.maxJobSpent() - d.totalPoints(level(player));
+            if (over > 0) {
+                d.bonusPoints += over;
+            }
+            for (int i = 0; i < d.slots.length; i++) {
+                Skill s = d.slot(i);
+                if (s != null && !d.knows(s)) {
+                    d.slots[i] = "";
+                }
+            }
+            refreshStats(player);
+            sync(player);
+            applyModifiers(player);
+            return;
+        }
         if (rank <= 0) {
             d.ranks.remove(skill.id);
         } else {

@@ -774,6 +774,15 @@ public final class ShotRunner {
                 }
                 return true;
             }
+            case "click" -> {
+                // click <GUI 座標 x> <GUI 座標 y> [ボタン] : 開いている画面を押す (押して離す)
+                if (mc.screen != null) {
+                    int b = line.args().length > 2 ? line.intArg(2) : 0;
+                    mc.screen.mouseClicked(line.doubleArg(0), line.doubleArg(1), b);
+                    mc.screen.mouseReleased(line.doubleArg(0), line.doubleArg(1), b);
+                }
+                return true;
+            }
             case "drag" -> {
                 // drag <x0> <y0> <x1> <y1> [段] : 左のボタンを押して、(x0,y0) から (x1,y1) へ引く (段ごとに動かす。既定 8)。盤や一覧を動かす確認用
                 if (mc.screen != null) {
@@ -1078,6 +1087,11 @@ public final class ShotRunner {
                 jp.revati.skyabyss.SkyAbyss.LOGGER.warn("could not select the creative tab {}", tab, e);
             }
             return new net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen(mc.player, mc.player.connection.enabledFeatures(), true);
+        }
+        // skills_node:<節の id> : 技の木 v2 で、その節を選んだ状態で開く
+        if (name.startsWith("skills_node:")) {
+            String id = name.substring("skills_node:".length());
+            return new jp.revati.skyabyss.rpg.client.skill.SkillScreen().selectNode(id);
         }
         Supplier<Screen> s = switch (name.toLowerCase(Locale.ROOT)) {
             case "inventory" -> () -> new InventoryScreen(mc.player);

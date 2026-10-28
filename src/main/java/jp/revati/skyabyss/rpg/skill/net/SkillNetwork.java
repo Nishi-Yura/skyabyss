@@ -24,7 +24,8 @@ import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 public final class SkillNetwork {
     // 2: 技の見た目の合図に当たりの点 (SkillFxPayload.target)
     // 3: 島の祠の職選び (JobChoiceOpenPayload・JobChoosePayload)
-    private static final String PROTOCOL_VERSION = "3";
+    // 4: 技の木 v2 の節 (SkillNodePayload)
+    private static final String PROTOCOL_VERSION = "4";
 
     private SkillNetwork() {
     }
@@ -37,15 +38,24 @@ public final class SkillNetwork {
                 .playToClient(SkillCastResultPayload.TYPE, SkillCastResultPayload.STREAM_CODEC, (payload, context) -> SkillClient.onCastResult(payload))
                 .playToClient(SkillFxPayload.TYPE, SkillFxPayload.STREAM_CODEC, (payload, context) -> context.enqueueWork(() -> SkillFx.onCast(payload)))
                 // 島の祠で職を選ぶ (docs/design/43 の 4 節)。選び直しはできない (サーバーが検める)
-                .playToClient(JobChoiceOpenPayload.TYPE, JobChoiceOpenPayload.STREAM_CODEC, (payload, context) -> context.enqueueWork(SkillClient::onJobChoiceOpen))
+                .playToClient(JobChoiceOpenPayload.TYPE, JobChoiceOpenPayload.STREAM_CODEC, (payload, context) -> context.enqueueWork(() -> SkillClient.onJobChoiceOpen(payload.switching())))
                 .playToServer(JobChoosePayload.TYPE, JobChoosePayload.STREAM_CODEC, (payload, context) -> {
                     if (context.player() instanceof ServerPlayer player) {
-                        jp.revati.skyabyss.rpg.skill.JobChoice.choose(player, jp.revati.skyabyss.rpg.skill.Job.byId(payload.job()));
+                        jp.revati.skyabyss.rpg.skill.JobChoice.pick(player, jp.revati.skyabyss.rpg.skill.Job.byId(payload.job()));
                     }
                 })
                 .playToServer(SkillCastPayload.TYPE, SkillCastPayload.STREAM_CODEC, (payload, context) -> {
                     if (context.player() instanceof ServerPlayer player) {
                         SkillManager.cast(player, payload.slot());
+                    }
+                })
+                .playToServer(SkillNodePayload.TYPE, SkillNodePayload.STREAM_CODEC, (payload, context) -> {
+                    if (context.player() instanceof ServerPlayer player) {
+                        SkillData.TakeResult r = SkillManager.takeNode(player, payload.node());
+                        if (r != SkillData.TakeResult.OK) {
+                            SkillManager.sync(player);
+                            Notice.bar(player, ModText.deny("message.skyabyss.skill.node_failed." + r.name().toLowerCase()));
+                        }
                     }
                 })
                 .playToServer(SkillLearnPayload.TYPE, SkillLearnPayload.STREAM_CODEC, (payload, context) -> {

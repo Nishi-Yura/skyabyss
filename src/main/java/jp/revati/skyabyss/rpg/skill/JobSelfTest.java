@@ -20,7 +20,7 @@ import net.neoforged.neoforge.common.util.FakePlayer;
 
 // 職 (docs/design/43) の検査。SKYABYSS_SELFTEST_ONLY="jobs"。
 //   武器 → 職 (この作品の武器とバニラの品。鐘銭・お守りは職にならない)・職ごとの点 (ほかの職の木の点は数えない)・
-//   持ち替えで枠が入れ替わる・職の武器を持たないと技は使えない・旅人と橋の木は閉じた・天職と刻み目は削った
+//   職を替えると枠が入れ替わる (持ち替えでは替わらない。48)・職の武器を持たないと技は使えない・旅人と橋の木は閉じた・天職と刻み目は削った
 public final class JobSelfTest {
     private JobSelfTest() {
     }
@@ -59,7 +59,10 @@ public final class JobSelfTest {
             check(f, n >= 4, j + " has fewer than 4 active skills: " + n);
         }
         long actives = Skill.inTree(SkillTree.STAR).stream().filter(sk -> sk.active).count();
-        check(f, actives == 4 && d.canLearn(Skill.THUNDER_BOLT, 30) == SkillData.LearnResult.OK, "the mage tree should have 4 open active skills: " + actives);
+        d.useJob(Job.MAGE);
+        jp.revati.skyabyss.rpg.skill.tree.AbilityTree mageTree = jp.revati.skyabyss.rpg.skill.tree.AbilityTrees.of(Job.MAGE);
+        check(f, actives == 5 && mageTree != null && d.canTake(Job.MAGE, mageTree.skillNode(Skill.THUNDER_BOLT), 30) == SkillData.TakeResult.OK,
+                "the mage tree should have 5 active skills with the root takeable: " + actives);
         net.minecraft.world.entity.monster.Zombie z = new net.minecraft.world.entity.monster.Zombie(net.minecraft.world.entity.EntityType.ZOMBIE, level);
         z.moveTo(px, py, pz + 6, 180f, 0f);
         z.setNoAi(true);
@@ -215,39 +218,39 @@ public final class JobSelfTest {
             check(f, got.size() == Job.values().length, origin + " lacks weapons for " + java.util.EnumSet.complementOf(got));
         }
         byOrigin.forEach((o, js) -> SkyAbyss.LOGGER.info("[selftest] jobs: {} weapons cover {}", o, js));
-        // ---- 職ごとの点・枠・使う
+        // ---- 職ごとの点・枠・使う (木 v2: 節で取る。docs/design/48)
         FakePlayer p = new FakePlayer(server.overworld(), new GameProfile(UUID.randomUUID(), "jobs_t"));
         SkillData d = SkillManager.get(p);
         SkillManager.forgetAll(p);
         Growth.get(p).level = 10;
         int total = d.totalPoints(10);
-        SkillManager.forceRank(p, Skill.TITAN_CLEAVE, 3);
-        SkillManager.forceRank(p, Skill.RIPOSTE, 2);
+        d.useJob(Job.WARRIOR);
+        for (String id : List.of("titan_cleave", "str_a", "vit_a", "riposte")) {
+            check(f, SkillManager.takeNode(p, id) == SkillData.TakeResult.OK, "warrior node " + id + " was refused");
+        }
         check(f, d.unspentFor(SkillTree.ROCK, 10) == total - 5, "warrior points are wrong: " + d.unspentFor(SkillTree.ROCK, 10));
         check(f, d.unspentFor(SkillTree.BONE, 10) == total, "the warrior's points were taken from the archer: " + d.unspentFor(SkillTree.BONE, 10));
-        SkillManager.forceRank(p, Skill.CLOUD_PIERCE, 1);
+        d.useJob(Job.ARCHER);
+        check(f, SkillManager.takeNode(p, "cloud_pierce") == SkillData.TakeResult.OK, "the archer root was refused");
         check(f, d.unspentFor(SkillTree.BONE, 10) == total - 1 && d.unspentFor(SkillTree.ROCK, 10) == total - 5, "job points mixed: total " + total
-                + " bone " + d.unspentFor(SkillTree.BONE, 10) + " rock " + d.unspentFor(SkillTree.ROCK, 10) + " ranks " + d.ranks + " runes " + d.runes);
+                + " bone " + d.unspentFor(SkillTree.BONE, 10) + " rock " + d.unspentFor(SkillTree.ROCK, 10) + " nodes " + d.nodes);
         check(f, Skill.byId("signal") == null && Skill.byId("dust_charge") == null && SkillTree.byId("traveler") == null, "the traveler / bridge trees still exist");
-        // 持ち替え: 剣 → 戦士の枠、弓 → 弓使いの枠
-        d.useJob(null);
-        p.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.IRON_SWORD));
-        check(f, Job.held(p) == Job.WARRIOR, "holding a sword is not a warrior");
-        d.useJob(Job.held(p));
-        check(f, Skill.TITAN_CLEAVE.id.equals(d.slots[0]), "the warrior bar did not fill: " + String.join(",", d.slots));
-        p.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.BOW));
-        d.useJob(Job.held(p));
+        // 職を替えると枠が入れ替わる (職の間。持ち替えでは替わらない)
         check(f, Skill.CLOUD_PIERCE.id.equals(d.slots[0]) && !java.util.Arrays.asList(d.slots).contains(Skill.TITAN_CLEAVE.id),
                 "the archer bar is wrong: " + String.join(",", d.slots));
-        p.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.IRON_SWORD));
-        d.useJob(Job.held(p));
+        d.useJob(Job.WARRIOR);
         check(f, Skill.TITAN_CLEAVE.id.equals(d.slots[0]), "the warrior bar was not restored");
-        // 職の武器を持たないと使えない
-        p.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.BREAD));
+        p.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.BOW));
+        check(f, Job.held(p) == Job.ARCHER && "warrior".equals(d.curJob), "holding a bow changed the job");
+        // 今の職の武器を持たないと使えない
         d.mana = 100;
         d.cooldowns.clear();
         d.globalCooldown = 0;
-        check(f, SkillManager.cast(p, 0) == SkillManager.CastResult.EMPTY, "a skill was cast without a job weapon");
+        check(f, SkillManager.cast(p, 0) == SkillManager.CastResult.EMPTY, "a skill was cast without the job's weapon");
+        p.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.BREAD));
+        check(f, SkillManager.cast(p, 0) == SkillManager.CastResult.EMPTY, "a skill was cast with bread");
+        p.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.IRON_SWORD));
+        check(f, SkillManager.cast(p, 0) != SkillManager.CastResult.EMPTY, "titan cleave did not fire with a sword");
         // 保存と読み直しで職の枠が残る
         net.minecraft.nbt.CompoundTag nbt = d.serializeNBT(server.registryAccess());
         SkillData back = new SkillData();
@@ -262,7 +265,7 @@ public final class JobSelfTest {
         p.discard();
         spells(server, f);
         if (f.isEmpty()) {
-            SkyAbyss.LOGGER.info("SELFTEST jobs PASSED (weapon to job for {} items, per-job points, bar swap on weapon change, no skills without a job weapon, closed trees, save, mage tree and the four new job skills cast)", table.length);
+            SkyAbyss.LOGGER.info("SELFTEST jobs PASSED (weapon to job for {} items, per-job tree points, bar swap on job change, no skills without the job's weapon, closed trees, save, mage tree and the four new job skills cast)", table.length);
         } else {
             f.forEach(s -> SkyAbyss.LOGGER.error("SELFTEST jobs FAILED: {}", s));
         }

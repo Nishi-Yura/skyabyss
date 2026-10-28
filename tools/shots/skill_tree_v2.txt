@@ -1,0 +1,83 @@
+# 技の木 v2 (docs/design/48) の K 画面と職の間の確認。
+# ./gradlew runShots -Pscript=tools/shots/skill_tree_v2.txt
+world shots flat
+size 1280 720
+timeout 400
+render 6
+clouds off
+guiscale 3
+
+cmd time set noon
+cmd weather clear
+cmd gamemode survival
+cmd skyabyss level set @p 20
+cmd skyabyss skill forget @p
+cmd skyabyss job reset
+cmd skyabyss job choose warrior
+hud on
+camera 0 -60 8 180 0
+waitchunks
+chat clear
+wait 20
+
+# 幹だけ取った状態
+open skills
+wait 10
+shot tree_root
+close
+
+# 盾の枝を進める
+cmd skyabyss skill node @p str_a
+cmd skyabyss skill node @p vit_a
+cmd skyabyss skill node @p stone_stance
+cmd skyabyss skill node @p riposte
+cmd skyabyss skill node @p shield_rush
+cmd skyabyss skill node @p vit_b
+cmd skyabyss skill node @p rock_call
+cmd skyabyss skill node @p heavy_voice
+cmd skyabyss skill node @p vit_c
+cmd skyabyss skill node @p rock_skin
+cmd skyabyss skill node @p dull_iron
+wait 10
+open skills
+wait 10
+shot tree_shield
+hover 150 120
+wait 2
+shot tree_hover
+close
+
+# 節を選んだ説明 (常に効く節・閾値・刻印・段)
+open skills_node:dull_iron
+wait 5
+shot node_effect
+close
+open skills_node:rock_skin
+wait 5
+shot node_threshold
+close
+open skills_node:long_voice
+wait 5
+shot node_rune_excluded
+close
+open skills_node:titan_cleave_2
+wait 5
+shot node_rank
+close
+open skills_node:stone_oath
+wait 5
+shot node_keystone_gate
+close
+
+# 記録 (J) は見るだけ
+open growth
+wait 5
+shot growth_readonly
+close
+
+# 職の間
+cmd skyabyss job open
+wait 10
+shot job_room_open
+close
+quit

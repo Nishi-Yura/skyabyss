@@ -75,9 +75,9 @@ public final class SkillRules {
 
     // ---------------------------------------------------------------- 技の点
     // Lv 10 までは (L + 1) / 2 (Lv 1 で 1、Lv 10 で 5)、そのあとは 1 レベルごとに 1。Lv 50 で 45
+    // 1 レベルにつき 1 点 (Lv 1 で 1、Lv 50 で 50。docs/design/48 の 2.1)。職ごとに別に数える
     public static int pointsForLevel(int level) {
-        int l = Mth.clamp(level, 1, 50);
-        return l <= 10 ? (l + 1) / 2 : l - 5;
+        return Mth.clamp(level, 1, 50);
     }
 
     // ---------------------------------------------------------------- マナ
@@ -158,6 +158,14 @@ public final class SkillRules {
             case LAMP_CHARM -> 14;
             case SHIELD_RUSH -> 6;
             case ARCHER_LEAP -> 4;
+            // 木 v2 で足した技 (docs/design/48)
+            case SHIELD_BASH -> 8;
+            case BONE_SWING -> 14;
+            case SPIN_CUT -> 10;
+            case TWIN_FANG -> 7;
+            case SPARK_BURST -> 10;
+            case SNARE_SHOT -> 8;
+            case STARDUST -> 12;
             default -> 0;
         };
     }
@@ -197,6 +205,13 @@ public final class SkillRules {
             case LAMP_CHARM -> 18 * SECOND;
             case SHIELD_RUSH -> (r >= 2 ? 4 : 6) * SECOND;
             case ARCHER_LEAP -> (r >= 2 ? 3 : 5) * SECOND;
+            case SHIELD_BASH -> (r >= 2 ? 6 : 7) * SECOND;
+            case BONE_SWING -> 12 * SECOND;
+            case SPIN_CUT -> (r >= 2 ? 8 : 9) * SECOND;
+            case TWIN_FANG -> (r >= 2 ? 5 : 6) * SECOND;
+            case SPARK_BURST -> 9 * SECOND;
+            case SNARE_SHOT -> 8 * SECOND;
+            case STARDUST -> 9 * SECOND;
             default -> 0;
         };
     }
@@ -229,6 +244,69 @@ public final class SkillRules {
 
     // 巨神斬りの「重で +10%」(威力)
     public static final double CLEAVE_HEAVY_BONUS = 0.10;
+
+    // ---------------------------------------------------------------- 木 v2 で足した技 (docs/design/48。TreeActions)
+    // 盾殴り: 前 3 ブロック・80 度の扇、3 体まで。押し出して 2 秒の鈍足
+    public static final double BASH_RANGE = 3.0;
+    public static final double BASH_HALF_ANGLE = 40;
+    public static final int BASH_MAX_TARGETS = 3;
+    public static final double BASH_SLOW = 0.6;
+    public static final int BASH_SLOW_TICKS = 2 * SECOND;
+    public static final double BASH_PUSH = 0.8;
+
+    public static double bashMultiplier(int rank) {
+        return rank >= 2 ? 1.0 : 0.9;
+    }
+
+    // 鯨骨の振り: 見ている 4 ブロック以内の 1 体に ×2.2 (段 2 で ×2.5)。大きな相手には ×1.3
+    public static final double SWING_RANGE = 4.0;
+    public static final double SWING_LARGE = 1.3;
+
+    public static double swingMultiplier(int rank) {
+        return rank >= 2 ? 2.5 : 2.2;
+    }
+
+    // 回し斬り: まわり 2.5 ブロックを ×0.8 で薙ぎ、前へ 3 ブロックほど進む
+    public static final double SPIN_RADIUS = 2.5;
+    public static final double SPIN_PUSH = 0.4;
+    public static final double SPIN_DASH = 0.9;
+    public static final double SPIN_LIFT = 0.15;
+    public static final int SPIN_DASH_BLOCKS = 3;
+
+    public static double spinMultiplier(int rank) {
+        return rank >= 2 ? 0.9 : 0.8;
+    }
+
+    // 二連牙: 見ている 3.5 ブロック以内の敵に ×0.7 を二度。背後なら ×1.5
+    public static final double FANG_RANGE = 3.5;
+    public static final double FANG_MULTIPLIER = 0.7;
+    public static final double FANG_BACK = 1.5;
+    public static final int FANG_GAP = 4;
+
+    // 火花散らし: まわり 3 ブロックに ×0.8 と 2 秒の炎
+    public static final double SPARK_RADIUS = 3.0;
+    public static final int SPARK_BURN = 2 * SECOND;
+
+    public static double sparkMultiplier(int rank) {
+        return rank >= 2 ? 0.9 : 0.8;
+    }
+
+    // 足止めの矢: 見ている 12 ブロック以内の 1 体に矢の傷 (雲穿ちと同じ) と 50% の鈍足 3 秒 (段 2 で 4 秒)
+    public static final double SNARE_RANGE = 12;
+    public static final double SNARE_MULTIPLIER = 1.0;
+    public static final double SNARE_SLOW = 0.5;
+
+    public static int snareTicks(int rank) {
+        return (rank >= 2 ? 4 : 3) * SECOND;
+    }
+
+    // 星屑: まわり 4 ブロックに魔法の傷 ×0.9 (段 2 で ×1.0)
+    public static final double DUST_RADIUS = 4.0;
+    public static final double DUST_PUSH = 0.4;
+
+    public static double dustMultiplier(int rank) {
+        return rank >= 2 ? 1.0 : 0.9;
+    }
 
     // ---------------------------------------------------------------- 力 (傷・量に掛ける倍率) の部品
     // 潮歌いの要・共鳴の声: 近くの仲間 1 人につき +4% (最大 5 人)
@@ -720,6 +798,13 @@ public final class SkillRules {
             case BLINK -> new Object[] {fmt(blinkRange(r)), fmtSeconds(cooldownTicks(skill, r))};
             case STAR_OATH -> new Object[] {fmt(STAR_OATH_POWER * 100), fmt(STAR_OATH_MANA * 100)};
             case FORGE_STOMP -> new Object[] {fmt(STOMP_RADIUS), pct(stompMultiplier(r)), STOMP_BURN / SECOND};
+            case SHIELD_BASH -> new Object[] {fmt(BASH_RANGE), pct(bashMultiplier(r)), BASH_SLOW_TICKS / SECOND};
+            case BONE_SWING -> new Object[] {fmt(SWING_RANGE), pct(swingMultiplier(r)), fmt(SWING_LARGE)};
+            case SPIN_CUT -> new Object[] {fmt(SPIN_RADIUS), pct(spinMultiplier(r)), SPIN_DASH_BLOCKS};
+            case TWIN_FANG -> new Object[] {pct(FANG_MULTIPLIER), fmt(FANG_BACK)};
+            case SPARK_BURST -> new Object[] {fmt(SPARK_RADIUS), pct(sparkMultiplier(r)), SPARK_BURN / SECOND};
+            case SNARE_SHOT -> new Object[] {fmt(SNARE_RANGE), fmt(pierceDamage(r) * SNARE_MULTIPLIER), fmt(SNARE_SLOW * 100), snareTicks(r) / SECOND};
+            case STARDUST -> new Object[] {fmt(DUST_RADIUS), pct(dustMultiplier(r))};
             case MIST_VEIL -> new Object[] {veilTicks(r) / SECOND, fmt(VEIL_SPEED * 100), pct(VEIL_STRIKE)};
             case CURSE_MARK -> new Object[] {fmt(CURSE_RANGE), fmt(curseBonus(r) * 100), curseTicks(r) / SECOND};
             case LAMP_CHARM -> new Object[] {fmt(LAMP_RADIUS), lampTicks(r) / SECOND, fmt(lampAbsorb(r)), LAMP_PULSE / SECOND};

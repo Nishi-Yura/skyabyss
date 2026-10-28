@@ -202,6 +202,12 @@ public final class SkillEvents {
                 amount *= (float) (1 - SkillRules.emberHeartReduction(vd.rank(Skill.EMBER_HEART)));
                 amount *= (float) (1 - SkillBuild.fireReduction(hurtPlayer));
             }
+            // 木 v2 の節: 受ける傷 (動かずにいる間の分は 1 秒止まってから)
+            double taken = jp.revati.skyabyss.rpg.skill.tree.NodeEffects.sum(hurtPlayer, "damage_taken")
+                    + (vd.stillTicks >= 20 ? jp.revati.skyabyss.rpg.skill.tree.NodeEffects.sum(hurtPlayer, "damage_taken_still") : 0);
+            if (taken != 0) {
+                amount *= (float) Math.max(0.2, 1 + taken);
+            }
             // 重い声: 狙いを引いているあいだ、受ける傷 −10%
             if (vd.tauntRune == 2 && vd.tauntUntil >= now && SkillEffects.taunting(hurtPlayer, 16)) {
                 amount *= (float) (1 - SkillRules.HEAVY_VOICE_REDUCTION);
@@ -243,6 +249,18 @@ public final class SkillEvents {
                     level.sendParticles(Skills.RUNE_SPARK.get(), victim.getX(), victim.getY() + victim.getBbHeight() * 0.6, victim.getZ(),
                             10, 0.3, 0.3, 0.3, 0.06);
                     level.playSound(null, victim.getX(), victim.getY(), victim.getZ(), Skills.SOUND_RIPOSTE.get(), SoundSource.PLAYERS, 0.9f, 1.0f);
+                }
+            }
+            // 木 v2 の節: 吸い (近接。1 回 2 点まで)。職の武器でない武器なら攻撃力は半分 (docs/design/48 の 3 章)
+            if (melee) {
+                Job cur = Job.byId(d.curJob);
+                Job held = Job.of(player.getMainHandItem());
+                if (cur != null && held != null && held != cur && !SkillManager.IGNORE_JOBS) {
+                    amount *= 0.5f;
+                }
+                double steal = jp.revati.skyabyss.rpg.skill.tree.NodeEffects.sum(player, "lifesteal");
+                if (steal > 0 && amount > 0 && player.isAlive()) {
+                    player.heal((float) Math.min(2.0, amount * steal));
                 }
             }
             // 炉の記憶: 溜まった熾を使い切る
@@ -387,6 +405,7 @@ public final class SkillEvents {
             // 転生の回数を写し、足りなくなった淵・前世の技を戻す (版 3 以前の記録はそのまま通る)
             d.rebirth = jp.revati.skyabyss.rebirth.RebirthView.count(player);
             d.enforceRebirth();
+            SkillManager.refreshStats(player);
             SkillManager.applyModifiers(player);
             // ここではまだ上限まで切り詰めない。装備の特性 (共鳴・静心) の最大マナは最初の tick で付くので、
             // 上限を超えていれば regenTick がそのとき収める

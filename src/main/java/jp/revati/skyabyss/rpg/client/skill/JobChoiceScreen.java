@@ -20,8 +20,9 @@ import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.network.PacketDistributor;
 
-// 島の宿り木の祠で職を選ぶ画面 (docs/design/43 の 4 節)。左に六つの職 (始めの武器の絵・名前・副題)、右に役目・受け取る武器・使う技・最初に覚える技。
-// 「この職で始める」は二度押し。ほかの職も、あとでその職の武器を持てばなれる (都の訓練場の師範から始めの武器をもらえる)。作りは天職の画面 (CallingScreen) と同じ
+// 島の宿り木の祠で職を選ぶ画面 (docs/design/43 の 4 節) と、街の職の間で職を替える画面 (switching。docs/design/48 の 3 章)。
+// 左に六つの職 (始めの武器の絵・名前・副題)、右に役目・受け取る武器・使う技・最初に覚える技。「この職で始める」「この職に替える」は二度押し。
+// 職の間では、いまの職に（いま）を添え、その職の木に使った点を見せる (替えても残る)
 public class JobChoiceScreen extends Screen implements jp.revati.skyabyss.client.ui.TextBounded {
     private static final int MAX_W = 340;
     private static final int MAX_H = 200;
@@ -40,9 +41,20 @@ public class JobChoiceScreen extends Screen implements jp.revati.skyabyss.client
     private Button start;
     private Button later;
     private final ScrollPanel right = new ScrollPanel(LINE_H * 2);
+    private final boolean switching;
 
     public JobChoiceScreen() {
-        super(Component.translatable("gui.skyabyss.job_choice.title"));
+        this(false);
+    }
+
+    public JobChoiceScreen(boolean switching) {
+        super(Component.translatable(switching ? "gui.skyabyss.job_room.title" : "gui.skyabyss.job_choice.title"));
+        this.switching = switching;
+    }
+
+    private Job current() {
+        Minecraft mc = Minecraft.getInstance();
+        return mc.player == null ? null : Job.byId(jp.revati.skyabyss.rpg.skill.SkillManager.get(mc.player).curJob);
     }
 
     public JobChoiceScreen pick(Job job) {
@@ -65,16 +77,17 @@ public class JobChoiceScreen extends Screen implements jp.revati.skyabyss.client
     @Override
     protected void init() {
         layout();
-        start = addRenderableWidget(Button.builder(Component.translatable("gui.skyabyss.job_choice.start"), b -> press())
+        start = addRenderableWidget(Button.builder(Component.translatable(switching ? "gui.skyabyss.job_room.switch_btn" : "gui.skyabyss.job_choice.start"), b -> press())
                 .bounds(left + LIST_W + 16, top + h - 22, 96, 14).build());
-        later = addRenderableWidget(Button.builder(Component.translatable("gui.skyabyss.job_choice.later"), b -> onClose())
+        later = addRenderableWidget(Button.builder(Component.translatable(switching ? "gui.skyabyss.job_room.later" : "gui.skyabyss.job_choice.later"), b -> onClose())
                 .bounds(left + LIST_W + 116, top + h - 22, w - LIST_W - 124, 14).build());
         update();
     }
 
     private void update() {
-        start.active = picked != null;
-        start.setMessage(Component.translatable(armed ? "gui.skyabyss.job_choice.confirm" : "gui.skyabyss.job_choice.start"));
+        start.active = picked != null && !(switching && picked == current());
+        start.setMessage(Component.translatable(armed ? (switching ? "gui.skyabyss.job_room.confirm" : "gui.skyabyss.job_choice.confirm")
+                : switching ? "gui.skyabyss.job_room.switch_btn" : "gui.skyabyss.job_choice.start"));
     }
 
     private void press() {
@@ -162,7 +175,8 @@ public class JobChoiceScreen extends Screen implements jp.revati.skyabyss.client
     public void render(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
         super.render(g, mouseX, mouseY, partialTick);
         g.drawCenteredString(font, title, left + w / 2, top + 7, SkillScreen.TITLE);
-        g.drawCenteredString(font, Component.translatable("gui.skyabyss.job_choice.lead"), left + w / 2, top + 18, SkillScreen.SOFT);
+        g.drawCenteredString(font, Component.translatable(switching ? "gui.skyabyss.job_room.lead" : "gui.skyabyss.job_choice.lead"), left + w / 2, top + 18, SkillScreen.SOFT);
+        Job cur = switching ? current() : null;
         Job[] jobs = Job.values();
         for (int i = 0; i < jobs.length; i++) {
             Job j = jobs[i];
@@ -175,7 +189,11 @@ public class JobChoiceScreen extends Screen implements jp.revati.skyabyss.client
                 g.fill(x, y, x + 2, y + ROW_H - 2, 0xFF000000 | SkillScreen.GOLD);
             }
             g.renderItem(JobChoice.starter(j), x + 4, y + 3);
-            jp.revati.skyabyss.client.ui.FitText.draw(g, font, Component.translatable(j.nameKey()), x + 24, y + 2, LIST_W - 28, isPicked ? SkillScreen.GOLD : SkillScreen.TEXT, false);
+            MutableComponent rowName = Component.translatable(j.nameKey());
+            if (j == cur) {
+                rowName.append(Component.translatable("gui.skyabyss.job_room.current"));
+            }
+            jp.revati.skyabyss.client.ui.FitText.draw(g, font, rowName, x + 24, y + 2, LIST_W - 28, isPicked ? SkillScreen.GOLD : j == cur ? SkillScreen.PALE : SkillScreen.TEXT, false);
             jp.revati.skyabyss.client.ui.FitText.draw(g, font, Component.translatable(j.tree.nameKey()), x + 24, y + 12, LIST_W - 28, SkillScreen.DIM, false);
         }
         int rx = left + LIST_W + 16;
@@ -183,7 +201,7 @@ public class JobChoiceScreen extends Screen implements jp.revati.skyabyss.client
         right.setViewport(rx, top + ROW_Y, rw, h - ROW_Y - 28);
         if (picked == null) {
             right.begin(g);
-            int y = block(g, Component.translatable("gui.skyabyss.job_choice.pick"), rx, right.top(), right.width(), SkillScreen.SOFT);
+            int y = block(g, Component.translatable(switching ? "gui.skyabyss.job_room.pick" : "gui.skyabyss.job_choice.pick"), rx, right.top(), right.width(), SkillScreen.SOFT);
             right.end(g);
             right.setContentHeight(y - right.top());
             return;
@@ -221,7 +239,14 @@ public class JobChoiceScreen extends Screen implements jp.revati.skyabyss.client
             }
         }
         y += 4;
-        y = block(g, Component.translatable("gui.skyabyss.job_choice.switch"), rx, y, tw, SkillScreen.SOFT);
+        if (switching) {
+            Minecraft mc = Minecraft.getInstance();
+            int spent = mc.player == null ? 0 : jp.revati.skyabyss.rpg.skill.SkillManager.get(mc.player).nodeSpent(picked);
+            y = block(g, Component.translatable("gui.skyabyss.job_room.points", spent), rx, y, tw, SkillScreen.PALE);
+            y = block(g, Component.translatable("gui.skyabyss.job_room.note"), rx, y, tw, SkillScreen.SOFT);
+        } else {
+            y = block(g, Component.translatable("gui.skyabyss.job_choice.switch"), rx, y, tw, SkillScreen.SOFT);
+        }
         right.end(g);
         right.setContentHeight(y - right.top());
         right.drawBar(g, 0xFF10151D, 0xAA3E5A6B);

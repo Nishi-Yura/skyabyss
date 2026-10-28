@@ -97,10 +97,7 @@ public final class GrowthData implements INBTSerializable<CompoundTag> {
         for (int i = 0; i < stats.length; i++) {
             stats[i] = Mth.clamp(stats[i], 0, GrowthRules.STAT_CAP);
         }
-        // 力を使いすぎている (レベルを下げられたなど) ときは、すべて戻して振り直してもらう
-        if (spentPoints() > totalPoints()) {
-            java.util.Arrays.fill(stats, 0);
-        }
+        // 基礎は技の木から導く (SkillManager.refreshStats が上書きする) ので、ここでは使いすぎを見ない
         fragmentCapacity = Math.max(0, fragmentCapacity);
         statRespecs = Math.max(0, statRespecs);
         fragments.values().removeIf(v -> v == null || v <= 0);

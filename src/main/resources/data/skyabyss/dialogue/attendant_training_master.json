@@ -67,104 +67,6 @@
           ]
         },
         {
-          "id": "stats",
-          "kind": "talk",
-          "goto": "end",
-          "do": [
-            {
-              "type": "facility",
-              "open": "respec_stats"
-            }
-          ]
-        },
-        {
-          "id": "stats_coins",
-          "kind": "talk",
-          "goto": "end",
-          "do": [
-            {
-              "type": "facility",
-              "open": "respec_stats_coins"
-            }
-          ]
-        },
-        {
-          "id": "back",
-          "kind": "talk",
-          "goto": "menu"
-        }
-      ]
-    },
-    "weapons": {
-      "face": "neutral",
-      "options": [
-        {
-          "id": "warrior",
-          "kind": "talk",
-          "goto": "end",
-          "do": [
-            {
-              "type": "facility",
-              "open": "starter_warrior"
-            }
-          ]
-        },
-        {
-          "id": "smith",
-          "kind": "talk",
-          "goto": "end",
-          "do": [
-            {
-              "type": "facility",
-              "open": "starter_smith"
-            }
-          ]
-        },
-        {
-          "id": "mage",
-          "kind": "talk",
-          "goto": "end",
-          "do": [
-            {
-              "type": "facility",
-              "open": "starter_mage"
-            }
-          ]
-        },
-        {
-          "id": "archer",
-          "kind": "talk",
-          "goto": "end",
-          "do": [
-            {
-              "type": "facility",
-              "open": "starter_archer"
-            }
-          ]
-        },
-        {
-          "id": "assassin",
-          "kind": "talk",
-          "goto": "end",
-          "do": [
-            {
-              "type": "facility",
-              "open": "starter_assassin"
-            }
-          ]
-        },
-        {
-          "id": "shaman",
-          "kind": "talk",
-          "goto": "end",
-          "do": [
-            {
-              "type": "facility",
-              "open": "starter_shaman"
-            }
-          ]
-        },
-        {
           "id": "back",
           "kind": "talk",
           "goto": "menu"
@@ -180,9 +82,9 @@
           "goto": "respec"
         },
         {
-          "id": "weapons",
+          "id": "job_room",
           "kind": "talk",
-          "goto": "weapons"
+          "goto": "job_room"
         },
         {
           "id": "dummy",
@@ -198,6 +100,27 @@
           "id": "bye",
           "kind": "leave",
           "goto": "end"
+        }
+      ]
+    },
+    "job_room": {
+      "face": "neutral",
+      "options": [
+        {
+          "id": "go",
+          "kind": "talk",
+          "goto": "end",
+          "do": [
+            {
+              "type": "facility",
+              "open": "job_room"
+            }
+          ]
+        },
+        {
+          "id": "back",
+          "kind": "talk",
+          "goto": "menu"
         }
       ]
     }

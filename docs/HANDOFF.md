@@ -1,12 +1,23 @@
-# 引き継ぎ（2026-10-28）
+# 引き継ぎ（2026-10-29）
 
-ブランチ `m1-sky-pass`（push 済み）。設計書の入口は `docs/design/README.md`。00 の未決は空。
+ブランチ `m1-sky-pass`（push 済み）と、技の木 v2 の作業ブランチ `wip/skill-tree-v2`。設計書の入口は `docs/design/README.md`。00 の未決は空。
 
 ## 今の形（要点）
 
-- 世界: 天と淵の大陸（40）。はじまりの島 → 渡し船 → 鐘の都の町めぐり → 土地の町から各章（42）。6 職は持った武器で決まる（43）。敵は Mod の敵だけ（44。バニラの敵はどの湧き方でも入らない）。
+- 世界: 天と淵の大陸（40）。はじまりの島 → 渡し船 → 鐘の都の町めぐり → 土地の町から各章（42）。6 職は島の祠で選び、町の職の間（訓練場の師範）で替える（48）。技は職ごとの木 v2（Wynncraft 型。使う技は 4 本まで、基礎は木の節）。敵は Mod の敵だけ（44。バニラの敵はどの湧き方でも入らない）。
 - 試遊版: 0.8.0（`build/libs/skyabyss-0.8.0.jar`。確認表 `docs/review/playtest_0.8.0.md`、遊び方 `docs/beta_how_to_play.md`）。
 - 自己テスト: `bash <scratchpad>/fresh_continent.sh "<名前,…>" <世界名>`（空なら全部。大陸の新しい世界で回す）。`abyss escort` はほかと一緒に流すと時間切れで落ちることがある（単独では通る）。
+
+## 2026-10-29 深夜（技の木 v2 を実装。ブランチ `wip/skill-tree-v2`）
+
+- 設計 [48](design/48_skill_tree_v2.md) の 7 章 1〜5 を一気に作った。要点:
+  - 木のデータ: `assets/skyabyss/skill_tree/<職>.json`（戦士は手書き、ほかは `tools/gen/skill_tree/gen_trees.py` が JSON と lang の節の文を書く）。読み込み・決まりは `rpg/skill/tree/`（`AbilityNode`・`AbilityTree`・`AbilityTrees`・`NodeEffects`・自己テスト `AbilityTreeSelfTest`）。壊れた木は起動で止まる。
+  - 記録: `SkillData.nodes`（職 → 取った節）。技の段・刻印・鍵石は `applyNodes` が節から導く。点は 1 レベル 1 点、職ごと。`canTake` が決まりを検める（前提・排他・型の点・使う技 4 本・点）。基礎は `SkillManager.refreshStats` が木から `GrowthData.stats` へ写す。J の振り分けと力の振り直しは消した。
+  - 画面: K は今の職の木を格子で出す（`SkillScreen` の v2 の部分。`SkillNodePayload`）。節の絵は icons2 の 0〜4・45〜47（基礎・刻印・常に・閾値・型の要）。J は読むだけ。
+  - 職の間: 師範の会話「職を替える」→ `job_room` → `JobChoice.openRoom` → `JobChoiceScreen(true)`。`JobEvents`（持ち替えの切り替え）は消した。職の武器でなければ技が使えず近接半分、HUD の枠が薄い。
+  - 新しい使う技 7 本（`TreeActions`）: 盾殴り・鯨骨の振り・回し斬り（戦士）、二連牙（暗殺者）、火花散らし（鍛冶師）、足止めの矢（弓使い）、星屑（魔法使い）。絵は icons2 の 37〜43（`gen_deep_skill_assets.py`）。FX は似た技のものを借りている。
+- 確かめ方: `SKYABYSS_SELFTEST_ONLY="tree,jobs,skills,growth,skill lesson,~facility,~deep"`。撮影 `./gradlew runShots -Pscript=tools/shots/skill_tree_v2.txt`。開発コマンド `/skyabyss skill node @p <節>`、`/skyabyss job open|choose <職>`。
+- 残り: 48 の 7 章（数値の試遊、専用の絵と FX、装備の要求値、変異を節へ、内側のセット・タグの削除、サイトの技のページを木の形に）。
 
 ## 2026-10-29（技の木 v2 の方向）
 
@@ -134,7 +145,8 @@
 0. **見直しの片付け（2026-10-27）は済み**: 作る仕組みの残骸・野営の置ける物・七日目の夜・大陸でない世界の仕組み（世界の種類は大陸だけ。場所は図だけ。大陸より前の docs 06・17・21・33・34 は消した）・`docs/review` の見比べの絵（404 → 152 MB）。残りの気づき:
    - 消した docs を指すコメント、docs/07 の古い書き写しは直した。データと食い違った生成スクリプト 47 本（と gen_relic_blocks）は消した。データを直接直す。
    - `docs/review` の選ばれなかった案は、モデルを入れるスクリプトが同じ品の別の案を読むものだけ消した（728 ファイル）。読む案が分からない品（引数で案を選ぶスクリプトなど）は残した。
-1. 試遊 0.8.0（`docs/review/playtest_0.8.0.md`）の声を待つ。
-2. クエストの見直しは済んだ（初日のお使いと風の道の旗を消し、墓守を 2 段に、大干潮と峰の足もとを時刻で閉じない形に、折れた剣は自分の得物を研ぐ形に）。
-3. 試遊 0.7.1 の声の直しの確かめと、都・見どころの仕上げの撮影（`tools/shots/capital_dress.txt`・`poi_dress.txt`）。
-4. 大きく変えたら jar を作り直す。
+1. 技の木 v2（`wip/skill-tree-v2`。48 の 7 章）: 試遊で数値を詰め、新しい技 7 本の絵と FX を専用に、装備の要求値、変異を節へ、内側のセット・タグを消す、サイトの技のページを木の形に。
+2. 試遊 0.8.0（`docs/review/playtest_0.8.0.md`）の声を待つ。
+3. クエストの見直しは済んだ（初日のお使いと風の道の旗を消し、墓守を 2 段に、大干潮と峰の足もとを時刻で閉じない形に、折れた剣は自分の得物を研ぐ形に）。
+4. 試遊 0.7.1 の声の直しの確かめと、都・見どころの仕上げの撮影（`tools/shots/capital_dress.txt`・`poi_dress.txt`）。
+5. 大きく変えたら jar を作り直す。
