@@ -24,10 +24,10 @@
 
 残り（この順）:
 1. （済み）ヒロイック武器 17 本: 選んだ案を入れた（`item/HeroicGear`、心臓で一本ずつ 2% の別枠、`Rune` の書き換え 17、`install_job_weapons.py` の HEROIC、手持ちは `WeaponKind`・`WeaponClient`。撮影 `tools/shots/heroic_weapons_review.txt`）。
-2. 潮殻・雷翼・余燼の心臓の部屋を鯨のように大きく作り込む。
-3. 試練の難しさをそろえる（簡単すぎるもの・難しいもの）。
+2. （済み）心臓の間の大広間（`trial/raid/HeartHall`、32 の 10 章、撮影 `tools/shots/heart_rooms.txt`）。
+3. （済み）試練をそろえる共通の決まり（`trial/raid/RaidPace`、32 の 9.6）。試遊で部屋ごとの声を聞いて、部屋の数値を詰める。
 4. 祠のまわりの作り込み（道からの脇道・目印）を絵で確かめる。
-5. 0.8.1 の試遊用の jar。
+5. 0.8.1 の試遊用の jar（版は gradle.properties で 0.8.1 にした。全体の自己テストを回してから `./gradlew build`。確かめ表 `docs/review/playtest_0.8.1.md`）。再起動の前に全体テストを回していたが途中で止めた。
 
 ## 2026-10-27 にやったこと（0.7.0 の試遊の声）
 
