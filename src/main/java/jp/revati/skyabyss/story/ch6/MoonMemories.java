@@ -127,6 +127,10 @@ public final class MoonMemories {
 
     static void place(ServerLevel level) {
         for (int s = 0; s < SECTIONS.size(); s++) {
+            // 流し直さなかった区画には前の石が残っている (二つ目を置かない)
+            if (stoneAt(level, s) != null) {
+                continue;
+            }
             BlockPos p = spot(level, s);
             if (p != null) {
                 level.setBlock(p, jp.revati.skyabyss.story.ch6.rift.RiftBlocks.MEMORY_STONE.get().defaultBlockState()

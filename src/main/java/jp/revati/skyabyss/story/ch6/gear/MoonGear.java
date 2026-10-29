@@ -8,7 +8,7 @@ import jp.revati.skyabyss.item.GearTier;
 import jp.revati.skyabyss.item.TitanGearSet;
 
 // 六章「月」の装備の表と数値 (docs/design/03 の 12.2)。深淵のあとの段 (推奨 Lv 54、武器 +0 は 1 秒あたり 23.1・+10 で 30.1、
-// 防具 26 / 強靭 20)。必要 Lv はエピック以下 50・ヒロイック以上 52。段は巨神の段の表に入れず、ここの STAGE に置く (深淵と同じ)。
+// 防具 26 / 強靭 20)。必要 Lv はどれも 50 (レベルの上限。ヒロイックも 52 にしない)。段は巨神の段の表に入れず、ここの STAGE に置く (深淵と同じ)。
 //
 // 職の武器は 6 職それぞれにレア一本とヒロイック一本 (2026-10-31 の声「全部レアとヒロイックでそれぞれひとつずつ」)。
 // レア 6 本と残月の太刀は図鑑 (SET)、ほかのヒロイック 5 本は巨神のヒロイック武器と同じく月の核の別枠 (HEROICS。一本ずつ HEROIC_CHANCE)。
@@ -163,8 +163,9 @@ public final class MoonGear {
         return SkyAbyss.MODID + ":" + path;
     }
 
+    // レベルの上限は 50 (GrowthRules.MAX_LEVEL。その先は転生)。段の推奨 Lv 54 から引くとヒロイックが 52 になり着けないので、上限で止める
     public static int requiredLevel(GearTier tier) {
-        return STAGE.level() - tier.levelMargin;
+        return Math.min(jp.revati.skyabyss.rpg.GrowthRules.MAX_LEVEL, STAGE.level() - tier.levelMargin);
     }
 
     // ---------------------------------------------------------------- 一体への 1 秒あたり (固有効果の上乗せ込み。自己テストと 03 の表)

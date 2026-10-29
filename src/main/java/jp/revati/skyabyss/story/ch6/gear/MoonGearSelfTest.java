@@ -40,7 +40,7 @@ import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.common.util.FakePlayer;
 
 // 六章「月」の装備の自己テスト (SKYABYSS_SELFTEST=1、段 "moon gear")。docs/design/03 の 12.2。6 職それぞれにレアとヒロイック
-//  - 表: 図鑑 11 品と涙・素材 3 つが登録され、由来が月、階級と必要 Lv (エピック以下 50・ヒロイック以上 52)、強化の燃料が月の欠片
+//  - 表: 図鑑 11 品と涙・素材 3 つが登録され、由来が月、階級と必要 Lv (どれも 50。レベルの上限)、強化の燃料が月の欠片
 //  - 強さの曲線: 武器の攻撃力・速さ、+0 / +10 が月の目安 ±5% (ヒロイックは 1.10 倍まで)、深淵の段から逆転しない。鎧 26 / 16 (+4 で 20)
 //  - 一式・固有効果: 4 部位の落下 ×0.5、天秤の向き、背の向き
 //  - 報酬: 区画の主の鎧の一部位 (初回)・段の上乗せ、核の初回の心核、図鑑が埋まるまでの回数
@@ -93,12 +93,12 @@ public final class MoonGearSelfTest {
         check(f, TitanGearSets.get(MoonGear.DUNGEON) == MoonGear.SET, "moon set is not registered in TitanGearSets");
         check(f, MoonGear.SET.collection().size() == 12 && MoonGear.SET.exclusives().equals(List.of(MoonGear.BLADE, MoonGear.RING)),
                 "moon codex should hold 12 items with 2 exclusives: " + MoonGear.SET.collection());
-        // 別枠のヒロイック 5 本: 図鑑に入れず、ヒロイック・Lv 52
+        // 別枠のヒロイック 5 本: 図鑑に入れず、ヒロイック・Lv 50
         for (String id : MoonGear.HEROICS) {
             check(f, TitanGearSet.registered(id) && !MoonGear.SET.collection().contains(id), id + " should be registered and outside the codex");
             Item it = item(id);
-            check(f, it instanceof ModGear g && g.tier() == GearTier.HEROIC && g.dungeon().equals(MoonGear.DUNGEON) && GearLevel.required(it) == 52,
-                    id + " should be a Lv 52 heroic moon weapon");
+            check(f, it instanceof ModGear g && g.tier() == GearTier.HEROIC && g.dungeon().equals(MoonGear.DUNGEON) && GearLevel.required(it) == 50,
+                    id + " should be a Lv 50 heroic moon weapon");
         }
         for (String id : MoonGear.SET.collection()) {
             check(f, TitanGearSet.registered(id), id + " is not registered");
@@ -107,7 +107,7 @@ public final class MoonGearSelfTest {
             boolean ex = MoonGear.SET.isExclusive(id);
             GearTier want = ex ? GearTier.HEROIC : GearTier.RARE;
             check(f, it instanceof ModGear g && g.tier() == want, id + " has the wrong tier (want " + want.key + ")");
-            int lv = ex ? 52 : 50;
+            int lv = 50;
             check(f, GearLevel.required(it) == lv, id + " requires Lv " + GearLevel.required(it) + " (want " + lv + ")");
             check(f, TitanGearSets.of(it) == MoonGear.SET, id + " does not map to the moon set");
         }

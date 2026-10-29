@@ -113,6 +113,14 @@ public final class MoonWorld {
         if (d.version < 12) {
             MoonMemories.place(level);
         }
+        // 前の版の世界で区画を流し直したとき、もう月にいる人 (ほかの人が門から入った) が岩に埋まらないよう着く所へ
+        if (d.version >= 3) {
+            for (net.minecraft.server.level.ServerPlayer p : level.players()) {
+                if (!level.noCollision(p, p.getBoundingBox())) {
+                    p.teleportTo(level, ARRIVAL.getX() + 0.5, ARRIVAL.getY(), ARRIVAL.getZ() + 2.5, p.getYRot(), 0f);
+                }
+            }
+        }
         d.version = VERSION;
         d.setDirty();
     }
