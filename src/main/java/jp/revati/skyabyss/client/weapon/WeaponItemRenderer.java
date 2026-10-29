@@ -106,6 +106,10 @@ public final class WeaponItemRenderer extends BlockEntityWithoutLevelRenderer {
         // item モデルの原点は block の角 (この時点で -0.5 ずみ)。メッシュは x = 0, z = 0 が中心で、LowPolyMesh は geo (GeckoLib) 向けに x を反転して焼くので、ここで戻す
         pose.translate(0.5f, 0f, 0.5f);
         pose.scale(-1f, 1f, 1f);
+        // 刃の向きが逆に作ってあるメッシュは、柄の軸で半回転 (2026-10-29 の試遊「短剣や斧、持ち方逆」: 一人称で刃が後ろを向いていた)
+        if (EDGE_FLIP.contains(id)) {
+            pose.mulPose(com.mojang.math.Axis.YP.rotationDegrees(180f));
+        }
         // 短剣・爪・火かき棒は小さく見えるので、階級が上がるほど大きくする (握りの位置 = メッシュの原点を中心に)
         float grow = daggerGrow(id, tier);
         // 一人称の短剣・爪は手に隠れるので、手元だけ一回り大きく見せる
@@ -133,6 +137,8 @@ public final class WeaponItemRenderer extends BlockEntityWithoutLevelRenderer {
         WeaponTrail.draw(pose, buffers, mesh, id, context.firstPerson() ? -1 : holder == null ? -2 : holder.getId(), !context.firstPerson(), fx[0]);
         pose.popPose();
     }
+
+    static final java.util.Set<String> EDGE_FLIP = java.util.Set.of("shrine_dagger", "gather_axe");
 
     private static float daggerGrow(String id, String tier) {
         boolean dagger = id.equals("waterway_fang") || id.equals("raiju_claw") || id.equals("tidecaller_claw");
