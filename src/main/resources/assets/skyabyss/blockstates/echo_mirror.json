@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "mode=idle": {
+      "model": "skyabyss:block/echo_mirror"
+    },
+    "mode=recording": {
+      "model": "skyabyss:block/echo_mirror_recording"
+    },
+    "mode=waiting": {
+      "model": "skyabyss:block/echo_mirror_waiting"
+    }
+  }
+}

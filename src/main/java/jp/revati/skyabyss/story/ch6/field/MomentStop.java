@@ -27,7 +27,7 @@ import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 import net.neoforged.neoforge.event.tick.EntityTickEvent;
 
 // 星術「一瞬止め」(満月の野の月の溜まりで覚える。docs/design/46 の 4.2・4.5)。月の砂時計 (MoonHourglassItem) を右クリックで、
-//   まわり 10 の内の敵と飛び物を 2 秒止める (止まった敵は傷 ×1.25)。まわり 10 の内の満ち引きの石は 2 秒、今の状態のまま (FieldTide.hold)。
+//   まわり 10 の内の敵と飛び物を 2 秒止める (止まった敵は傷 ×1.25。下弦の淵の自分の残像は 5 秒、残月の剣守の残像は止まらない)。まわり 10 の内の満ち引きの石は 2 秒、今の状態のまま (FieldTide.hold)。
 //   望の灯守が光放ちの予告のあいだに止まると、放ちが崩れる (FullKeeper.stopped)。使い直しは 12 秒。月の上でだけ。
 //   止まったものは tick を飛ばす (動かない・考えない)。飛び物は速さを 0 にして、解けたら戻す (見る側の先読みで動かないように)。
 //   覚えた印は倒れても残す (util/LifeKeep)
@@ -37,6 +37,7 @@ public final class MomentStop {
     public static final double RADIUS = 10;
     public static final int DURATION = 40;
     public static final int COOLDOWN = 240;
+    public static final int ECHO_DURATION = 100;
     public static final float FROZEN_TAKEN = 1.25f;
     // 止めたもの: 生き物の番号 -> 解ける tick。飛び物の元の速さと重さ
     private static final Map<Integer, Long> FROZEN = new HashMap<>();
@@ -74,7 +75,8 @@ public final class MomentStop {
         int n = 0;
         AABB box = p.getBoundingBox().inflate(RADIUS, 6, RADIUS);
         for (Entity e : level.getEntities((Entity) null, box, e -> e != p && e.isAlive() && e.distanceTo(p) <= RADIUS + 1 && stoppable(e))) {
-            freeze(e, until);
+            // 自分の残像 (下弦の淵) は長く止まる (足場にする)
+            freeze(e, e instanceof jp.revati.skyabyss.story.ch6.rift.EchoShade ? level.getGameTime() + ECHO_DURATION : until);
             n++;
         }
         if (MoonField.inside(p.blockPosition()) && jp.revati.skyabyss.story.ch6.MoonWorld.fieldBuilt(level.getServer())) {
@@ -100,7 +102,11 @@ public final class MomentStop {
         if (e instanceof Player || e instanceof TownGuestEntity) {
             return false;
         }
-        return e instanceof Enemy || e instanceof Projectile || e instanceof FallingLight;
+        // 残月の剣守の残像は止まらない (主を止めても、残像は過ぎた 3 秒をなぞり続ける)
+        if (e instanceof jp.revati.skyabyss.story.ch6.mob.WaningBlade b && b.echo()) {
+            return false;
+        }
+        return e instanceof Enemy || e instanceof Projectile || e instanceof FallingLight || e instanceof jp.revati.skyabyss.story.ch6.rift.EchoShade;
     }
 
     public static void freeze(Entity e, long until) {

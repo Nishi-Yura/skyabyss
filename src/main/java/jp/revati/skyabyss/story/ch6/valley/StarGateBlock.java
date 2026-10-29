@@ -41,6 +41,8 @@ public class StarGateBlock extends Block {
                 jp.revati.skyabyss.story.ch6.cliff.CliffPuzzles.gate(sp, pos);
             } else if (jp.revati.skyabyss.story.ch6.field.MoonField.inside(pos)) {
                 jp.revati.skyabyss.story.ch6.field.FieldPuzzles.gate(sp, pos);
+            } else if (jp.revati.skyabyss.story.ch6.rift.MoonRift.inside(pos)) {
+                jp.revati.skyabyss.story.ch6.rift.RiftPuzzles.gate(sp, pos);
             } else {
                 ValleyPuzzles.gate(sp, pos);
             }

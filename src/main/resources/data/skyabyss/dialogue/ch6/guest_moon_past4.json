@@ -1,0 +1,209 @@
+{
+  "npc": "skyabyss:guest_moon_past4",
+  "entries": [
+    {
+      "node": "ch6_rift_promise",
+      "if": {
+        "type": "quest",
+        "quest": "main_moon_rift",
+        "is": "active",
+        "stage": "promise"
+      }
+    },
+    {
+      "node": "ch6_rift_lord",
+      "if": {
+        "type": "quest",
+        "quest": "main_moon_rift",
+        "is": "active",
+        "stage": "lord"
+      }
+    },
+    {
+      "node": "ch6_rift_gate",
+      "if": {
+        "type": "quest",
+        "quest": "main_moon_rift",
+        "is": "active",
+        "stage": "gate"
+      }
+    },
+    {
+      "node": "ch6_rift_shards",
+      "if": {
+        "type": "quest",
+        "quest": "main_moon_rift",
+        "is": "active",
+        "stage": "shards"
+      }
+    },
+    {
+      "node": "ch6_rift_pool",
+      "if": {
+        "type": "quest",
+        "quest": "main_moon_rift",
+        "is": "active",
+        "stage": "pool"
+      }
+    },
+    {
+      "node": "ch6_rift_meet",
+      "if": {
+        "type": "quest",
+        "quest": "main_moon_rift",
+        "is": "active",
+        "stage": "meet"
+      }
+    },
+    {
+      "node": "ch6_rift_idle"
+    }
+  ],
+  "nodes": {
+    "ch6_rift_meet": {
+      "face": "neutral",
+      "next": "ch6_rift_meet2"
+    },
+    "ch6_rift_meet2": {
+      "face": "grave",
+      "options": [
+        {
+          "id": "who",
+          "goto": "ch6_rift_meet3",
+          "kind": "talk"
+        },
+        {
+          "id": "faded",
+          "goto": "ch6_rift_meet3",
+          "kind": "talk"
+        }
+      ]
+    },
+    "ch6_rift_meet3": {
+      "face": "grave",
+      "next": "ch6_rift_meet4"
+    },
+    "ch6_rift_meet4": {
+      "face": "neutral",
+      "options": [
+        {
+          "id": "ok",
+          "goto": "end",
+          "kind": "talk"
+        }
+      ]
+    },
+    "ch6_rift_pool": {
+      "face": "neutral",
+      "options": [
+        {
+          "id": "ok",
+          "goto": "end",
+          "kind": "talk"
+        }
+      ]
+    },
+    "ch6_rift_shards": {
+      "face": "neutral",
+      "next": "ch6_rift_shards2"
+    },
+    "ch6_rift_shards2": {
+      "face": "grave",
+      "options": [
+        {
+          "id": "mirror",
+          "goto": "ch6_rift_tip_mirror",
+          "kind": "talk"
+        },
+        {
+          "id": "door",
+          "goto": "ch6_rift_tip_door",
+          "kind": "talk"
+        },
+        {
+          "id": "leap",
+          "goto": "ch6_rift_tip_leap",
+          "kind": "talk"
+        },
+        {
+          "id": "hall",
+          "goto": "ch6_rift_tip_hall",
+          "kind": "talk"
+        },
+        {
+          "id": "bye",
+          "goto": "end",
+          "kind": "leave"
+        }
+      ]
+    },
+    "ch6_rift_tip_mirror": {
+      "face": "neutral",
+      "next": "ch6_rift_shards2"
+    },
+    "ch6_rift_tip_door": {
+      "face": "neutral",
+      "next": "ch6_rift_shards2"
+    },
+    "ch6_rift_tip_leap": {
+      "face": "grave",
+      "next": "ch6_rift_shards2"
+    },
+    "ch6_rift_tip_hall": {
+      "face": "neutral",
+      "next": "ch6_rift_shards2"
+    },
+    "ch6_rift_gate": {
+      "face": "neutral",
+      "options": [
+        {
+          "id": "ok",
+          "goto": "end",
+          "kind": "talk"
+        }
+      ]
+    },
+    "ch6_rift_lord": {
+      "face": "grave",
+      "next": "ch6_rift_lord2"
+    },
+    "ch6_rift_lord2": {
+      "face": "neutral",
+      "options": [
+        {
+          "id": "ok",
+          "goto": "end",
+          "kind": "talk"
+        }
+      ]
+    },
+    "ch6_rift_promise": {
+      "face": "neutral",
+      "next": "ch6_rift_promise2"
+    },
+    "ch6_rift_promise2": {
+      "face": "grave",
+      "next": "ch6_rift_promise3"
+    },
+    "ch6_rift_promise3": {
+      "face": "smile",
+      "options": [
+        {
+          "id": "ok",
+          "goto": "end",
+          "kind": "talk"
+        }
+      ]
+    },
+    "ch6_rift_idle": {
+      "face": "neutral",
+      "options": [
+        {
+          "id": "ok",
+          "goto": "end",
+          "kind": "leave"
+        }
+      ]
+    }
+  }
+}

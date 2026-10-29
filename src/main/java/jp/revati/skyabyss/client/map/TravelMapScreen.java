@@ -518,7 +518,7 @@ public class TravelMapScreen extends Screen {
         if (view > 600) {
             return;
         }
-        // 名前: 着く所・新月の谷・上弦の崖・満月の野
+        // 名前: 着く所・新月の谷・上弦の崖・満月の野・下弦の淵
         int[] land = project(0, -12);
         if (land[2] == 0) {
             g.drawCenteredString(font, Component.translatable("map.skyabyss.moon.landing"), land[0], land[1] - 4, 0xFFE6E8F0);
@@ -534,6 +534,10 @@ public class TravelMapScreen extends Screen {
         int[] field = project(-170, 30);
         if (field[2] == 0) {
             g.drawCenteredString(font, Component.translatable("map.skyabyss.moon.field"), field[0], field[1] - 4, 0xFFE6E8F0);
+        }
+        int[] rift = project(150, 300);
+        if (rift[2] == 0) {
+            g.drawCenteredString(font, Component.translatable("map.skyabyss.moon.rift"), rift[0], rift[1] - 4, 0xFFE6E8F0);
         }
     }
 

@@ -1,0 +1,41 @@
+{
+  "render_type": "minecraft:cutout",
+  "textures": {
+    "top": "skyabyss:block/echo_plate_pressed",
+    "particle": "skyabyss:block/echo_plate_pressed"
+  },
+  "elements": [
+    {
+      "from": [
+        0,
+        0,
+        0
+      ],
+      "to": [
+        16,
+        0.5,
+        16
+      ],
+      "faces": {
+        "up": {
+          "texture": "#top",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ]
+        },
+        "down": {
+          "texture": "#top",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ]
+        }
+      }
+    }
+  ]
+}

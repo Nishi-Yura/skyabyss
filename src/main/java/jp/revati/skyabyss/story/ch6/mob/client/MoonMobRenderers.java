@@ -52,6 +52,11 @@ public final class MoonMobRenderers {
         event.registerEntityRenderer(MoonMobsSetup.MIRROR_BEARER.get(), ctx -> new Foe<>(ctx, jp.revati.skyabyss.story.ch6.mob.MirrorBearer.ID, 0.7f));
         event.registerEntityRenderer(MoonMobsSetup.FULL_KEEPER.get(), ctx -> new Foe<>(ctx, jp.revati.skyabyss.story.ch6.mob.FullKeeper.ID, 1.1f, 1.1f));
         event.registerEntityRenderer(jp.revati.skyabyss.story.ch6.field.FieldBlocks.FALLING_LIGHT.get(), net.minecraft.client.renderer.entity.NoopRenderer::new);
+        event.registerEntityRenderer(MoonMobsSetup.RIFT_WING.get(), ctx -> new Foe<>(ctx, jp.revati.skyabyss.story.ch6.mob.RiftWing.ID, 0.0f));
+        event.registerEntityRenderer(MoonMobsSetup.RIFT_ARMOR.get(), ctx -> new Foe<>(ctx, jp.revati.skyabyss.story.ch6.mob.RiftArmor.ID, 0.5f));
+        event.registerEntityRenderer(MoonMobsSetup.RIFT_SERPENT.get(), ctx -> new Foe<>(ctx, jp.revati.skyabyss.story.ch6.mob.RiftSerpent.ID, 0.6f));
+        event.registerEntityRenderer(MoonMobsSetup.WANING_BLADE.get(), ctx -> new Foe<>(ctx, jp.revati.skyabyss.story.ch6.mob.WaningBlade.ID, 0.8f));
+        event.registerEntityRenderer(jp.revati.skyabyss.story.ch6.rift.RiftBlocks.ECHO_SHADE.get(), jp.revati.skyabyss.story.ch6.rift.client.EchoShadeRenderer::new);
     }
 
     static final class Model<T extends MoonMob> extends LowPolyGeoRenderer.Model<T> {
@@ -86,9 +91,34 @@ public final class MoonMobRenderers {
             this.shadow = shadow;
         }
 
+        // 下弦の淵の残像 (倒れて立ち上がった敵・剣守の残像) は青白く透かす
+        static boolean ghost(MoonMob m) {
+            return m instanceof jp.revati.skyabyss.story.ch6.mob.RiftMob r && r.echo()
+                    || m instanceof jp.revati.skyabyss.story.ch6.mob.WaningBlade b && b.echo();
+        }
+
+        @Override
+        public net.minecraft.client.renderer.RenderType getRenderType(T a, ResourceLocation texture, MultiBufferSource buf, float pt) {
+            if (ghost(a)) {
+                return net.minecraft.client.renderer.RenderType.entityTranslucent(texture);
+            }
+            return super.getRenderType(a, texture, buf, pt);
+        }
+
+        @Override
+        public software.bernie.geckolib.util.Color getRenderColor(T a, float pt, int light) {
+            if (ghost(a)) {
+                return software.bernie.geckolib.util.Color.ofARGB(120, 176, 204, 255);
+            }
+            return super.getRenderColor(a, pt, light);
+        }
+
         @Override
         public void render(T e, float yaw, float pt, PoseStack pose, MultiBufferSource buf, int light) {
             if (e instanceof ShadowEmbracer lord && lord.sunk()) {
+                return;
+            }
+            if (e instanceof jp.revati.skyabyss.story.ch6.mob.WaningBlade b && b.hiddenEcho()) {
                 return;
             }
             super.render(e, yaw, pt, pose, buf, light);

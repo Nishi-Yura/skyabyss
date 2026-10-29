@@ -161,7 +161,7 @@ public final class FieldSelfTest {
             Quests.onTalk(p, role, "ch6_field_promise3");
             QuestLog.Entry done = QuestLog.of(p).entry(FieldPuzzles.QUEST);
             check(f, done != null && done.done, "the promise did not finish main_moon_field");
-            check(f, MoonEnd.due(p), "the moon end card is not due after the field");
+            check(f, !MoonEnd.due(p), "the moon end card came after the field (it waits for the rift)");
             // 敵の数字 (満月は合った位相) と満ち引きの振る舞い
             MoonClock.skipTo(moon, 2);
             BlockPos near = MoonField.mark("camp").offset(-24, 0, 0);
@@ -259,7 +259,7 @@ public final class FieldSelfTest {
     private static void report(List<String> f) {
         if (f.isEmpty()) {
             SkyAbyss.LOGGER.info("SELFTEST moon field PASSED (field terrain, camp, pond, gully, tower, mesa, puzzle blocks, tide swell/ebb/turn and full moon, "
-                    + "moment stop hold and freeze, pond and tower reach, falls and mesa guard, main_moon_field and the end card, mob numbers and tide behaviour, "
+                    + "moment stop hold and freeze, pond and tower reach, falls and mesa guard, main_moon_field (no end card yet), mob numbers and tide behaviour, "
                     + "keeper summon, charge guard and kneel)");
         } else {
             f.forEach(m -> SkyAbyss.LOGGER.error("SELFTEST moon field FAILED: {}", m));

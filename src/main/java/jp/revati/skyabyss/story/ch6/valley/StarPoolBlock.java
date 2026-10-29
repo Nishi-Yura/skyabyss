@@ -40,6 +40,8 @@ public class StarPoolBlock extends Block {
                 jp.revati.skyabyss.story.ch6.cliff.CliffPuzzles.pool(sp, pos);
             } else if (jp.revati.skyabyss.story.ch6.field.MoonField.inside(pos)) {
                 jp.revati.skyabyss.story.ch6.field.FieldPuzzles.pool(sp, pos);
+            } else if (jp.revati.skyabyss.story.ch6.rift.MoonRift.inside(pos)) {
+                jp.revati.skyabyss.story.ch6.rift.RiftPuzzles.pool(sp, pos);
             } else {
                 ValleyPuzzles.pool(sp, pos);
             }

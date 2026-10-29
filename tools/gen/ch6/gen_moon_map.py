@@ -19,6 +19,7 @@ ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..')
 VALLEY = os.path.join(ROOT, 'src', 'main', 'resources', 'data', 'skyabyss', 'moon', 'valley.json')
 CLIFF = os.path.join(ROOT, 'src', 'main', 'resources', 'data', 'skyabyss', 'moon', 'cliff.json')
 FIELD = os.path.join(ROOT, 'src', 'main', 'resources', 'data', 'skyabyss', 'moon', 'field.json')
+RIFT = os.path.join(ROOT, 'src', 'main', 'resources', 'data', 'skyabyss', 'moon', 'rift.json')
 OUT = os.path.join(ROOT, 'src', 'main', 'resources', 'assets', 'skyabyss', 'textures', 'gui', 'map', 'moon.png')
 
 X0, Z0, SIZE = -256, -128, 512
@@ -35,9 +36,10 @@ def tops():
     d = json.load(open(VALLEY, encoding='utf-8'))
     c = json.load(open(CLIFF, encoding='utf-8'))
     fd = json.load(open(FIELD, encoding='utf-8'))
+    rf = json.load(open(RIFT, encoding='utf-8'))
     low_air = np.full((SIZE, SIZE), 10 ** 6)
     top = np.full((SIZE, SIZE), -10 ** 6)
-    for src in (d, c, fd):
+    for src in (d, c, fd, rf):
         read_runs(src, low_air, top)
     h = np.full((SIZE, SIZE), float(SURFACE))
     h = np.where(top > -10 ** 6, top, h)
@@ -46,7 +48,8 @@ def tops():
     cliff = {'cliff_' + k: v for k, v in c['marks'].items()}
     marks.update(cliff)
     marks.update({'field_' + k: v for k, v in fd['marks'].items()})
-    return h.astype(float), marks, d['rect'], c['rect'], fd['rect']
+    marks.update({'rift_' + k: v for k, v in rf['marks'].items()})
+    return h.astype(float), marks, d['rect'], c['rect'], fd['rect'], rf['rect']
 
 
 def read_runs(d, low_air, top):
@@ -89,6 +92,8 @@ def craters(h):
             continue
         if -240 < x < -84 and -116 < z < 96:
             continue
+        if 48 < x < 254 and 112 < z < 320:
+            continue
         out.append((x, z, rng.integers(3, 12)))
     yy, xx = np.mgrid[0:SIZE, 0:SIZE]
     for cx, cz, rad in out:
@@ -101,7 +106,7 @@ def craters(h):
 
 
 def main():
-    h, marks, rect, crect, frect = tops()
+    h, marks, rect, crect, frect, rrect = tops()
     rings = craters(h)
     # 色: 高い所は砂、低い所 (谷) ほど深い青
     t = np.clip((SURFACE + 2 - h) / 30, 0, 1)[..., None]
@@ -150,13 +155,22 @@ def main():
         for i in range(0, n, 2):
             a0, a1 = i / n, min(1, (i + 1) / n)
             d.line([(x0 + (x1 - x0) * a0, y0 + (y1 - y0) * a0), (x0 + (x1 - x0) * a1, y0 + (y1 - y0) * a1)], fill=INK, width=2)
+    # 着く所 → 淵の野営の踏み跡 (点線。谷の東を回る)
+    camp4 = marks.get('rift_camp', [112, 12, 216])
+    pts = [px(4, 4), px(50, 40), px(58, 120), px(80, 190), px(camp4[0], camp4[2])]
+    for (x0, y0), (x1, y1) in zip(pts, pts[1:]):
+        n = max(1, int(math.hypot(x1 - x0, y1 - y0) / 4))
+        for i in range(0, n, 2):
+            a0, a1 = i / n, min(1, (i + 1) / n)
+            d.line([(x0 + (x1 - x0) * a0, y0 + (y1 - y0) * a0), (x0 + (x1 - x0) * a1, y0 + (y1 - y0) * a1)], fill=INK, width=2)
     # 印: 着く所 (二重の輪)、野営の跡、谷の門、主の間
     a, b = px(0, 0)
     d.ellipse([a - 5, b - 5, a + 5, b + 5], outline=INK, width=2)
     d.ellipse([a - 2, b - 2, a + 2, b + 2], fill=INK)
     for key, r in (('camp', 3), ('valley_gate', 3), ('arena_center', 6), ('cliff_camp', 3), ('cliff_cliff_gate', 3), ('cliff_arena_center', 7),
                    ('field_camp', 3), ('field_field_gate', 3), ('field_arena_center', 8), ('field_shard_pond', 3), ('field_shard_gully', 3),
-                   ('field_shard_tower', 3)):
+                   ('field_shard_tower', 3), ('rift_camp', 3), ('rift_rift_gate', 3), ('rift_arena_center', 8), ('rift_shard_door', 3),
+                   ('rift_shard_leap', 3), ('rift_shard_hall', 3)):
         if key in marks:
             a, b = px(marks[key][0], marks[key][2])
             d.ellipse([a - r, b - r, a + r, b + r], outline=(250, 236, 180), width=2)
@@ -167,6 +181,7 @@ def main():
     # 崖の範囲のまわりも見せる
     near = np.minimum(near, np.hypot(np.maximum(0, np.maximum(crect[0] - wx, wx - crect[2])), np.maximum(0, np.maximum(crect[1] - wz, wz - crect[3]))) - 30)
     near = np.minimum(near, np.hypot(np.maximum(0, np.maximum(frect[0] - wx, wx - frect[2])), np.maximum(0, np.maximum(frect[1] - wz, wz - frect[3]))) - 20)
+    near = np.minimum(near, np.hypot(np.maximum(0, np.maximum(rrect[0] - wx, wx - rrect[2])), np.maximum(0, np.maximum(rrect[1] - wz, wz - rrect[3]))) - 20)
     alpha = np.clip(1 - near / 90, 0, 1)
     a = Image.fromarray((alpha * 255).astype(np.uint8)).filter(ImageFilter.GaussianBlur(3))
     img = img.convert('RGBA')

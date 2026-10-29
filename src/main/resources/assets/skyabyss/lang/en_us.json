@@ -2244,5 +2244,6 @@
   "gui.skyabyss.tree.glyph_line": "Glyph: %1$s (level %2$s)",
   "message.skyabyss.skill.node_failed.rebirth": "Not enough rebirths",
   "map.skyabyss.moon.cliff": "Waxing Cliffs",
-  "map.skyabyss.moon.field": "Full-Moon Fields"
+  "map.skyabyss.moon.field": "Full-Moon Fields",
+  "map.skyabyss.moon.rift": "Waning Rift"
 }

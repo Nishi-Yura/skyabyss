@@ -1,0 +1,287 @@
+{
+  "format_version": "1.8.0",
+  "animations": {
+    "animation.rift_armor.idle": {
+      "loop": true,
+      "animation_length": 5.0,
+      "bones": {
+        "chest": {
+          "rotation": [
+            "math.sin(query.anim_time * 40 + 0) * 2",
+            "math.sin(query.anim_time * 30 + 90) * 3",
+            "0"
+          ]
+        },
+        "head": {
+          "rotation": [
+            "math.sin(query.anim_time * 30 + 90) * 4",
+            "math.sin(query.anim_time * 20 + 0) * 8",
+            "0"
+          ]
+        },
+        "arm_r": {
+          "rotation": [
+            "math.sin(query.anim_time * 40 + 0) * 2",
+            "0",
+            "0"
+          ]
+        },
+        "arm_l": {
+          "rotation": [
+            "math.sin(query.anim_time * 40 + 180) * 2",
+            "0",
+            "0"
+          ]
+        }
+      }
+    },
+    "animation.rift_armor.walk": {
+      "loop": true,
+      "animation_length": 1.5,
+      "bones": {
+        "leg_l": {
+          "rotation": [
+            "math.sin(query.anim_time * 240 + 0) * 26",
+            "0",
+            "0"
+          ]
+        },
+        "leg_r": {
+          "rotation": [
+            "math.sin(query.anim_time * 240 + 180) * 26",
+            "0",
+            "0"
+          ]
+        },
+        "shin_l": {
+          "rotation": [
+            "math.max(0, math.sin(query.anim_time * 240 + 90) * 24)",
+            "0",
+            "0"
+          ]
+        },
+        "shin_r": {
+          "rotation": [
+            "math.max(0, math.sin(query.anim_time * 240 + 270) * 24)",
+            "0",
+            "0"
+          ]
+        },
+        "chest": {
+          "rotation": [
+            "0",
+            "math.sin(query.anim_time * 240 + 0) * 5",
+            "0"
+          ]
+        },
+        "body": {
+          "position": [
+            0,
+            "math.abs(math.sin(query.anim_time * 240 + 0) * 0.6)",
+            0
+          ]
+        }
+      }
+    },
+    "animation.rift_armor.swing": {
+      "animation_length": 1.4,
+      "bones": {
+        "chest": {
+          "rotation": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "0.90": [
+              0,
+              35,
+              0
+            ],
+            "1.00": [
+              0,
+              -40,
+              0
+            ],
+            "1.40": [
+              0,
+              0,
+              0
+            ]
+          }
+        },
+        "arm_r": {
+          "rotation": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "0.90": [
+              70,
+              0,
+              30
+            ],
+            "1.00": [
+              80,
+              0,
+              -20
+            ],
+            "1.40": [
+              0,
+              0,
+              0
+            ]
+          }
+        },
+        "fore_r": {
+          "rotation": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "0.90": [
+              40,
+              0,
+              0
+            ],
+            "1.00": [
+              10,
+              0,
+              0
+            ],
+            "1.40": [
+              0,
+              0,
+              0
+            ]
+          }
+        },
+        "arm_l": {
+          "rotation": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "0.90": [
+              50,
+              0,
+              -10
+            ],
+            "1.00": [
+              55,
+              0,
+              10
+            ],
+            "1.40": [
+              0,
+              0,
+              0
+            ]
+          }
+        },
+        "head": {
+          "rotation": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "0.90": [
+              0,
+              -15,
+              0
+            ],
+            "1.00": [
+              0,
+              15,
+              0
+            ],
+            "1.40": [
+              0,
+              0,
+              0
+            ]
+          }
+        }
+      }
+    },
+    "animation.rift_armor.hurt": {
+      "animation_length": 0.22,
+      "bones": {
+        "chest": {
+          "rotation": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "0.06": [
+              0,
+              0,
+              10
+            ],
+            "0.22": [
+              0,
+              0,
+              0
+            ]
+          }
+        }
+      }
+    },
+    "animation.rift_armor.death": {
+      "animation_length": 1.2,
+      "bones": {
+        "body": {
+          "rotation": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "0.50": [
+              -15,
+              0,
+              0
+            ],
+            "1.20": [
+              -80,
+              0,
+              10
+            ]
+          },
+          "position": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "1.20": [
+              0,
+              -10,
+              0
+            ]
+          }
+        },
+        "head": {
+          "rotation": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "0.80": [
+              -40,
+              0,
+              30
+            ]
+          }
+        }
+      },
+      "loop": "hold_on_last_frame"
+    }
+  }
+}

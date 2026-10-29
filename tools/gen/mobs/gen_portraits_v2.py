@@ -59,7 +59,7 @@ GUESTS = {"guest_apprentice", "guest_bellkeeper", "guest_fisher", "guest_bard", 
           "guest_island_ferryman", "guest_tide_ferryman", "guest_inner_ferryman", "guest_tide_lightkeeper", "guest_storm_elder",
           "guest_storm_hutkeeper", "guest_ember_survivor", "guest_ember_watch",
           # 六章の人 (cast_moon)
-          "guest_moon_past1", "guest_moon_past2", "guest_moon_past3"}
+          "guest_moon_past1", "guest_moon_past2", "guest_moon_past3", "guest_moon_past4"}
 
 
 def file_stem(name):
@@ -96,6 +96,7 @@ BG_EXTRA = {
     "guest_moon_past1": (130, 170, 230),     # 前のループの自分: 星の角灯の青白
     "guest_moon_past2": (150, 160, 180),     # 前のループの自分 (二人目): 色あせた鉄の灰青
     "guest_moon_past3": (160, 190, 235),     # 前のループの自分 (三人目): 月の砂時計の青白
+    "guest_moon_past4": (176, 200, 240),     # 前のループの自分 (四人目): 割れた手鏡の青白
 }
 
 

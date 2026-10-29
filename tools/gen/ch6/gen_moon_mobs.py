@@ -15,6 +15,7 @@
 選んだ案 (2026-10-28): 砂這い A 甲殻の掘り手・殻背の兎 B 欠けた三日月・影の綴じ手 C 裂けた帯・影抱き B 影の母。
   区画 2: 月跳ね A 岩の跳び虫・押し石 A 目のある輪石・崖這い B 岩背負いの蟹・月秤 A 天秤を担ぐ巨人。
   区画 3 (一品一案。2026-10-30): 光の群れ・影の竹馬・鏡背負い・望の灯守。
+  区画 4 (一品一案。2026-10-30): 淵の羽影・残り鎧・逆さ砂の蛇・残月の剣守。
 回転の約束: kf の値で書き、ファイルへは (-x, -y, z)。kf の x が負 = 前へ傾く (垂れた腕なら前へ上がる、前を向いた顎なら先が上がる。
   深淵の前の私の影の「手を上げる」= -110 と同じ)。bone([...]) に直接書く文字の式はファイルの値なので逆 (正 = 前へ傾く)。位置はそのまま (y が上)。
 """
@@ -32,7 +33,8 @@ ROUGH = os.path.join(ROOT, "docs", "review", "moon_roughs")
 
 CHOICE = {"dust_crawler": "a", "shell_hare": "b", "shadow_stitcher": "c", "shadow_embracer": "b",
           "moon_leaper": "a", "push_stone": "a", "cliff_creeper": "b", "moon_scale": "a",
-          "light_swarm": "a", "shade_strider": "a", "mirror_bearer": "a", "full_keeper": "a"}
+          "light_swarm": "a", "shade_strider": "a", "mirror_bearer": "a", "full_keeper": "a",
+          "rift_wing": "a", "rift_armor": "a", "rift_serpent": "a", "waning_blade": "a"}
 
 
 def wjson(path, data, indent=2):
@@ -470,9 +472,114 @@ def full_keeper():
             p + "hurt": once(0.22, hurt_bones("chest")), p + "death": once(2.0, death, True)}
 
 
+# ---------------------------------------------------------------- 区画 4「下弦の淵」
+# 淵の羽影 (翼で漂う・急降下)
+def rift_wing():
+    p = "animation.rift_wing."
+    idle = {"wing_l": bone(["0", "0", S(0, 14, 160)]), "wing_r": bone(["0", "0", S(180, 14, 160)]), "tail": bone([S(0, 8, 90), S(90, 10, 70), "0"]),
+            "body": bone([S(0, 3, 80), "0", "0"], [0, S(0, 0.5, 80), 0]), "head": bone([S(90, 4, 60), "0", "0"])}
+    walk = {"wing_l": bone(["0", "0", S(0, 22, 260)]), "wing_r": bone(["0", "0", S(180, 22, 260)]), "tail": bone([S(0, 12, 160), "0", "0"])}
+    # 急降下 (0.8): 翼を後ろへ畳み、体を前へ倒して突っ込む
+    dive = {"body": bone(kf({0: (0, 0, 0), 0.1: (-35, 0, 0), 0.7: (-35, 0, 0), 0.8: (0, 0, 0)})),
+            "wing_l": bone(kf({0: (0, 0, 0), 0.1: (0, -55, -10), 0.7: (0, -55, -10), 0.8: (0, 0, 0)})),
+            "wing_r": bone(kf({0: (0, 0, 0), 0.1: (0, 55, 10), 0.7: (0, 55, 10), 0.8: (0, 0, 0)})),
+            "head": bone(kf({0: (0, 0, 0), 0.1: (20, 0, 0), 0.8: (0, 0, 0)})), "tail": bone(kf({0: (0, 0, 0), 0.1: (-15, 0, 0), 0.8: (0, 0, 0)}))}
+    death = {"body": bone(kf({0: (0, 0, 0), 0.6: (60, 0, 120), 1.0: (90, 0, 180)}), kf({0: (0, 0, 0), 1.0: (0, -18, 0)}, False)),
+             "wing_l": bone(kf({0: (0, 0, 0), 0.6: (0, 0, 50)})), "wing_r": bone(kf({0: (0, 0, 0), 0.6: (0, 0, -50)}))}
+    return {p + "idle": loop(4.0, idle), p + "walk": loop(2.0, walk), p + "dive": once(0.8, dive), p + "hurt": once(0.22, hurt_bones()),
+            p + "death": once(1.0, death, True)}
+
+
+# 残り鎧 (歩く・長柄の大振り)
+def rift_armor():
+    p = "animation.rift_armor."
+    idle = {"chest": bone([S(0, 2, 40), S(90, 3, 30), "0"]), "head": bone([S(90, 4, 30), S(0, 8, 20), "0"]),
+            "arm_r": bone([S(0, 2, 40), "0", "0"]), "arm_l": bone([S(180, 2, 40), "0", "0"])}
+    walk = {"leg_l": bone([S(0, 26, 240), "0", "0"]), "leg_r": bone([S(180, 26, 240), "0", "0"]),
+            "shin_l": bone(["math.max(0, %s)" % S(90, 24, 240), "0", "0"]), "shin_r": bone(["math.max(0, %s)" % S(270, 24, 240), "0", "0"]),
+            "chest": bone(["0", S(0, 5, 240), "0"]), "body": bone(None, [0, "math.abs(%s)" % S(0, 0.6, 240), 0])}
+    # 大振り (1.4): 右へ振りかぶって (0.9) 左へ薙ぐ
+    swing = {"chest": bone(kf({0: (0, 0, 0), 0.9: (0, -35, 0), 1.0: (0, 40, 0), 1.4: (0, 0, 0)})),
+             "arm_r": bone(kf({0: (0, 0, 0), 0.9: (-70, 0, 30), 1.0: (-80, 0, -20), 1.4: (0, 0, 0)})),
+             "fore_r": bone(kf({0: (0, 0, 0), 0.9: (-40, 0, 0), 1.0: (-10, 0, 0), 1.4: (0, 0, 0)})),
+             "arm_l": bone(kf({0: (0, 0, 0), 0.9: (-50, 0, -10), 1.0: (-55, 0, 10), 1.4: (0, 0, 0)})),
+             "head": bone(kf({0: (0, 0, 0), 0.9: (0, 15, 0), 1.0: (0, -15, 0), 1.4: (0, 0, 0)}))}
+    death = {"body": bone(kf({0: (0, 0, 0), 0.5: (15, 0, 0), 1.2: (80, 0, 10)}), kf({0: (0, 0, 0), 1.2: (0, -10, 0)}, False)),
+             "head": bone(kf({0: (0, 0, 0), 0.8: (40, 0, 30)}))}
+    return {p + "idle": loop(5.0, idle), p + "walk": loop(1.5, walk), p + "swing": once(1.4, swing), p + "hurt": once(0.22, hurt_bones("chest")),
+            p + "death": once(1.2, death, True)}
+
+
+# 逆さ砂の蛇 (揺れる・礫を吐く・潜る)
+def rift_serpent():
+    p = "animation.rift_serpent."
+    idle = {"seg1": bone([S(0, 3, 60), S(90, 5, 45), "0"]), "seg2": bone([S(60, 5, 60), S(150, 6, 45), "0"]),
+            "seg3": bone([S(120, 6, 60), S(210, 8, 45), "0"]), "head": bone([S(180, 5, 60), "0", "0"]), "jaw": bone([S(0, 3, 90), "0", "0"])}
+    # 礫を吐く (1.8): 首を後ろへ引いて (0.6) 前へ三度突き出す
+    spit = {"seg2": bone(kf({0: (0, 0, 0), 0.6: (12, 0, 0), 0.7: (-12, 0, 0), 1.0: (-8, 0, 0), 1.3: (-12, 0, 0), 1.8: (0, 0, 0)})),
+            "seg3": bone(kf({0: (0, 0, 0), 0.6: (15, 0, 0), 0.7: (-15, 0, 0), 1.0: (-10, 0, 0), 1.3: (-15, 0, 0), 1.8: (0, 0, 0)})),
+            "jaw": bone(kf({0: (0, 0, 0), 0.5: (25, 0, 0), 0.7: (35, 0, 0), 1.0: (20, 0, 0), 1.3: (35, 0, 0), 1.8: (0, 0, 0)}))}
+    # 潜る (0.8): 胴が砂時計の中へ崩れ落ちる (縮んで下がる)。出る: 戻す
+    sink = {"seg1": dict(bone(kf({0: (0, 0, 0), 0.8: (40, 0, 0)}), kf({0: (0, 0, 0), 0.8: (0, -10, 0)}, False)),
+                         scale=scale({0: (1, 1, 1), 0.8: (0.6, 0.3, 0.6)}))}
+    rise = {"seg1": dict(bone(kf({0: (40, 0, 0), 0.4: (0, 0, 0)}), kf({0: (0, -10, 0), 0.4: (0, 0, 0)}, False)),
+                         scale=scale({0: (0.6, 0.3, 0.6), 0.4: (1, 1, 1)}))}
+    death = {"seg1": dict(bone(kf({0: (0, 0, 0), 1.0: (60, 0, 0)}), kf({0: (0, 0, 0), 1.0: (0, -12, 0)}, False)),
+                          scale=scale({0: (1, 1, 1), 1.0: (0.5, 0.2, 0.5)}))}
+    return {p + "idle": loop(5.0, idle), p + "walk": loop(5.0, idle), p + "spit": once(1.8, spit), p + "sink": once(0.8, sink, True),
+            p + "rise": once(0.4, rise), p + "hurt": once(0.22, hurt_bones("seg2")), p + "death": once(1.0, death, True)}
+
+
+# 残月の剣守 (歩く・薙ぎ・突き・飛ぶ刃・膝をつく・咆哮)
+def waning_blade():
+    p = "animation.waning_blade."
+    idle = {"chest": bone([S(0, 1.5, 40), "0", "0"]), "head": bone([S(90, 3, 25), S(0, 6, 18), "0"]), "cape": bone([S(0, 6, 50), "0", S(90, 4, 40)]),
+            "arm_r": bone([S(0, 2, 40), "0", "0"]), "arm_l": bone([S(180, 2, 40), "0", "0"])}
+    walk = {"leg_l": bone([S(0, 24, 220), "0", "0"]), "leg_r": bone([S(180, 24, 220), "0", "0"]),
+            "shin_l": bone(["math.max(0, %s)" % S(90, 22, 220), "0", "0"]), "shin_r": bone(["math.max(0, %s)" % S(270, 22, 220), "0", "0"]),
+            "arm_l": bone([S(180, 14, 220), "0", "0"]), "cape": bone([S(0, 10, 220), "0", "0"]), "chest": bone(["0", S(0, 4, 220), "0"])}
+    # 三日月の薙ぎ (1.4): 刀を右後ろへ引いて (0.8) 左へ大きく薙ぐ
+    slash = {"chest": bone(kf({0: (0, 0, 0), 0.8: (0, -35, 0), 0.9: (0, 45, 0), 1.4: (0, 0, 0)})),
+             "arm_r": bone(kf({0: (0, 0, 0), 0.8: (-30, 0, 60), 0.9: (-80, 0, -30), 1.4: (0, 0, 0)})),
+             "fore_r": bone(kf({0: (0, 0, 0), 0.8: (-60, 0, 0), 0.9: (-10, 0, 0), 1.4: (0, 0, 0)})),
+             "head": bone(kf({0: (0, 0, 0), 0.8: (0, 20, 0), 0.9: (0, -20, 0), 1.4: (0, 0, 0)})),
+             "cape": bone(kf({0: (0, 0, 0), 0.9: (0, -20, 15), 1.4: (0, 0, 0)}))}
+    # 踏み込みの突き (1.8): 刀を胸の前に引き絞り (1.0)、前へ大きく踏み込んで突く
+    thrust = {"chest": bone(kf({0: (0, 0, 0), 1.0: (0, -25, 0), 1.1: (0, 20, 0), 1.8: (0, 0, 0)})),
+              "arm_r": bone(kf({0: (0, 0, 0), 1.0: (-60, 0, 20), 1.1: (-90, 0, 0), 1.5: (-90, 0, 0), 1.8: (0, 0, 0)})),
+              "fore_r": bone(kf({0: (0, 0, 0), 1.0: (-70, 0, 0), 1.1: (0, 0, 0), 1.8: (0, 0, 0)})),
+              "leg_r": bone(kf({0: (0, 0, 0), 1.0: (15, 0, 0), 1.1: (-30, 0, 0), 1.5: (-30, 0, 0), 1.8: (0, 0, 0)})),
+              "shin_r": bone(kf({0: (0, 0, 0), 1.1: (20, 0, 0), 1.5: (20, 0, 0), 1.8: (0, 0, 0)})),
+              "leg_l": bone(kf({0: (0, 0, 0), 1.1: (25, 0, 0), 1.5: (25, 0, 0), 1.8: (0, 0, 0)}))}
+    # 飛ぶ刃 (1.4): 刀を上へ振り上げ (0.7)、振り下ろして刃を飛ばす
+    wave = {"arm_r": bone(kf({0: (0, 0, 0), 0.7: (-170, 0, 10), 0.8: (-40, 0, 0), 1.4: (0, 0, 0)})),
+            "fore_r": bone(kf({0: (0, 0, 0), 0.7: (-20, 0, 0), 0.8: (0, 0, 0), 1.4: (0, 0, 0)})),
+            "chest": bone(kf({0: (0, 0, 0), 0.7: (-10, 0, 0), 0.8: (15, 0, 0), 1.4: (0, 0, 0)}))}
+    # 膝をつく (5.0): 片膝をつき、刀を床に立てて俯く
+    kneel = {"body": bone(None, kf({0: (0, 0, 0), 0.4: (0, -7, 0), 4.6: (0, -7, 0), 5.0: (0, 0, 0)}, False)),
+             "leg_r": bone(kf({0: (0, 0, 0), 0.4: (-80, 0, 0), 4.6: (-80, 0, 0), 5.0: (0, 0, 0)})),
+             "shin_r": bone(kf({0: (0, 0, 0), 0.4: (80, 0, 0), 4.6: (80, 0, 0), 5.0: (0, 0, 0)})),
+             "leg_l": bone(kf({0: (0, 0, 0), 0.4: (20, 0, 0), 4.6: (20, 0, 0), 5.0: (0, 0, 0)})),
+             "shin_l": bone(kf({0: (0, 0, 0), 0.4: (90, 0, 0), 4.6: (90, 0, 0), 5.0: (0, 0, 0)})),
+             "chest": bone(kf({0: (0, 0, 0), 0.4: (25, 0, 0), 4.6: (25, 0, 0), 5.0: (0, 0, 0)})),
+             "head": bone(kf({0: (0, 0, 0), 0.4: (25, 0, 0), 4.6: (25, 0, 0), 5.0: (0, 0, 0)})),
+             "arm_r": bone(kf({0: (0, 0, 0), 0.4: (-40, 0, 0), 4.6: (-40, 0, 0), 5.0: (0, 0, 0)}))}
+    roar = {"chest": bone(kf({0: (0, 0, 0), 0.5: (-20, 0, 0), 1.6: (-20, 0, 0), 2.0: (0, 0, 0)})),
+            "head": bone(kf({0: (0, 0, 0), 0.5: (-30, 0, 0), 1.6: (-30, 0, 0), 2.0: (0, 0, 0)})),
+            "arm_r": bone(kf({0: (0, 0, 0), 0.5: (-30, 0, 70), 1.6: (-30, 0, 70), 2.0: (0, 0, 0)})),
+            "arm_l": bone(kf({0: (0, 0, 0), 0.5: (-20, 0, -50), 1.6: (-20, 0, -50), 2.0: (0, 0, 0)})),
+            "cape": bone(kf({0: (0, 0, 0), 0.5: (-30, 0, 10), 1.6: (-30, 0, 10), 2.0: (0, 0, 0)}))}
+    death = {"body": bone(kf({0: (0, 0, 0), 1.0: (10, 0, 0), 2.0: (75, 0, 10)}), kf({0: (0, 0, 0), 1.0: (0, -6, 0), 2.0: (0, -18, 0)}, False)),
+             "leg_r": bone(kf({0: (0, 0, 0), 1.0: (-70, 0, 0)})), "shin_r": bone(kf({0: (0, 0, 0), 1.0: (80, 0, 0)}))}
+    return {p + "idle": loop(6.0, idle), p + "walk": loop(1.6, walk), p + "slash": once(1.4, slash), p + "thrust": once(1.8, thrust),
+            p + "wave": once(1.4, wave), p + "kneel": once(5.0, kneel), p + "roar": once(2.0, roar), p + "hurt": once(0.22, hurt_bones("chest")),
+            p + "death": once(2.0, death, True)}
+
+
 ANIMS = {"dust_crawler": dust_crawler, "shell_hare": shell_hare, "shadow_stitcher": shadow_stitcher, "shadow_embracer": shadow_embracer,
          "moon_leaper": moon_leaper, "push_stone": push_stone, "cliff_creeper": cliff_creeper, "moon_scale": moon_scale,
-         "light_swarm": light_swarm, "shade_strider": shade_strider, "mirror_bearer": mirror_bearer, "full_keeper": full_keeper}
+         "light_swarm": light_swarm, "shade_strider": shade_strider, "mirror_bearer": mirror_bearer, "full_keeper": full_keeper,
+         "rift_wing": rift_wing, "rift_armor": rift_armor, "rift_serpent": rift_serpent, "waning_blade": waning_blade}
 
 
 # ---------------------------------------------------------------- 素材を入れる
@@ -614,6 +721,30 @@ SOUNDS = {
     "keeper_sweep": [ev("entity.player.attack.sweep", 0.7, 1.0)],
     "keeper_orb": [ev("entity.blaze.shoot", 1.6, 0.8)],
     "keeper_roar": [ev("block.bell.use", 0.5, 1.4)],
+    # 区画 4「下弦の淵」
+    "wing_tell": [ev("entity.phantom.ambient", 1.4, 0.7)],
+    "wing_dive": [ev("entity.phantom.swoop", 0.8, 1.0)],
+    "armor_guard": [ev("item.shield.block", 0.8, 0.8)],
+    "serpent_tell": [ev("block.suspicious_sand.step", 0.7, 0.9)],
+    "serpent_spit": [ev("entity.llama.spit", 0.6, 1.0)],
+    "serpent_sink": [ev("block.sand.break", 0.5, 1.0)],
+    "blade_tell": [ev("item.trident.return", 1.4, 0.9)],
+    "blade_slash": [ev("entity.player.attack.sweep", 0.7, 1.2)],
+    "blade_thrust": [ev("item.trident.throw", 0.8, 1.1)],
+    "blade_wave": [ev("entity.breeze.shoot", 1.2, 1.0)],
+    "blade_stagger": [ev("block.glass.break", 0.6, 1.3)],
+    "blade_roar": [ev("block.bell.resonate", 0.5, 1.4)],
+    "blade_echo_fade": [ev("block.amethyst_block.resonate", 1.8, 0.8)],
+    "echo_record": [ev("block.beacon.power_select", 1.8, 0.8)],
+    "echo_tick": [ev("block.note_block.hat", 1.4, 0.4)],
+    "echo_stored": [ev("block.amethyst_block.chime", 0.8, 1.0)],
+    "echo_release": [ev("block.respawn_anchor.charge", 1.6, 0.9)],
+    "echo_fade": [ev("block.amethyst_cluster.break", 1.4, 0.7)],
+    "plate_on": [ev("block.stone_pressure_plate.click_on", 0.8, 0.8)],
+    "door_open": [ev("block.iron_door.open", 0.7, 1.0)],
+    "door_close": [ev("block.iron_door.close", 0.7, 1.0)],
+    "remnant_mark": [ev("particle.soul_escape", 0.8, 1.0)],
+    "remnant_rise": [ev("entity.vex.charge", 0.6, 1.0)],
 }
 
 

@@ -40,6 +40,8 @@ public class StarPedestalBlock extends Block {
                 jp.revati.skyabyss.story.ch6.cliff.CliffPuzzles.claim(sp, pos);
             } else if (jp.revati.skyabyss.story.ch6.field.MoonField.inside(pos)) {
                 jp.revati.skyabyss.story.ch6.field.FieldPuzzles.claim(sp, pos);
+            } else if (jp.revati.skyabyss.story.ch6.rift.MoonRift.inside(pos)) {
+                jp.revati.skyabyss.story.ch6.rift.RiftPuzzles.claim(sp, pos);
             } else {
                 ValleyPuzzles.claim(sp, pos);
             }

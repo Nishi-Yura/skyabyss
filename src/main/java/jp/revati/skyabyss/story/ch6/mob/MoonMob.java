@@ -15,10 +15,11 @@ public abstract class MoonMob extends AbyssMobB {
     public static final double[] SECTION_HP = {1.6, 1.85, 2.1, 2.35};
     public static final double[] SECTION_DMG = {1.3, 1.4, 1.5, 1.6};
     public static final double MATCHED = 1.2;
-    // 成長の経験値の推奨の段 (六章の帯 Lv 50〜。区画 1 / 区画 2 / 区画 3)
+    // 成長の経験値の推奨の段 (六章の帯 Lv 50〜。区画 1 / 区画 2 / 区画 3 / 区画 4)
     public static final int MOON_LEVEL = 52;
     public static final int MOON_LEVEL_2 = 54;
     public static final int MOON_LEVEL_3 = 56;
+    public static final int MOON_LEVEL_4 = 58;
     private double moonDmg;
 
     protected MoonMob(EntityType<? extends Monster> type, Level level, String prefix, String... actions) {
@@ -49,6 +50,11 @@ public abstract class MoonMob extends AbyssMobB {
     // 区画 3 の位相 (満月) が合っているか
     public static boolean fullMoon(ServerLevel level) {
         return MoonClock.phase(level) == 2;
+    }
+
+    // 区画 4 の位相 (下弦) が合っているか
+    public static boolean waningMoon(ServerLevel level) {
+        return MoonClock.phase(level) == 3;
     }
 
     @Override

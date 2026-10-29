@@ -20,6 +20,8 @@ import net.minecraft.world.phys.Vec3;
 //   降る光 (fall)   降る光の溝に降る。落ちる所に光の円 (予告 TELL tick) → 上から真っすぐ落ち、当たった所 (地面か影の窪の屋根) の半径 2.5 に傷。
 //                   屋根の下にいる人には当たらない (当たった高さより下の人は数えない)
 //   光の球 (shot)   望の灯守が遠くの人へ放つ。まっすぐ飛び、人に触れるか何かに当たると弾ける
+//   砂の礫 (sand)   逆さ砂の蛇の礫 (光の球と同じ飛び方、粒が月の砂)
+//   三日月の刃 (blade) 残月の剣守の飛ぶ刃 (光の球と同じ飛び方、当たりが広い 1.2、粒が刃の弧)
 //   保存しない (読み込み直すと消える)
 public class FallingLight extends Entity {
     public static final String ID = "falling_light";
@@ -27,6 +29,8 @@ public class FallingLight extends Entity {
     public static final double HEIGHT = 16;
     public static final double RADIUS = 2.5;
     private boolean shot;
+    // 見た目と当たりの幅: 0 光・1 砂・2 刃
+    private int look;
     private float damage = 6f;
     private int age;
     private double groundY;
@@ -66,6 +70,28 @@ public class FallingLight extends Entity {
         e.setDeltaMovement(dir.normalize().scale(speed));
         level.addFreshEntity(e);
         return e;
+    }
+
+    // 砂の礫
+    public static FallingLight shootSand(ServerLevel level, @Nullable Entity owner, Vec3 from, Vec3 dir, double speed, float damage) {
+        FallingLight e = shoot(level, owner, from, dir, speed, damage);
+        if (e != null) {
+            e.look = 1;
+        }
+        return e;
+    }
+
+    // 三日月の刃
+    public static FallingLight shootBlade(ServerLevel level, @Nullable Entity owner, Vec3 from, Vec3 dir, double speed, float damage) {
+        FallingLight e = shoot(level, owner, from, dir, speed, damage);
+        if (e != null) {
+            e.look = 2;
+        }
+        return e;
+    }
+
+    public int look() {
+        return look;
     }
 
     public boolean isShot() {
@@ -126,8 +152,8 @@ public class FallingLight extends Entity {
         Vec3 v = getDeltaMovement();
         Vec3 next = position().add(v);
         BlockPos at = BlockPos.containing(next);
-        sl.sendParticles(ParticleTypes.END_ROD, getX(), getY(), getZ(), 3, 0.15, 0.15, 0.15, 0.0);
-        for (Player p : sl.getEntitiesOfClass(Player.class, new AABB(position(), next).inflate(0.7), e -> e.isAlive() && !e.isSpectator())) {
+        trail(sl);
+        for (Player p : sl.getEntitiesOfClass(Player.class, new AABB(position(), next).inflate(look == 2 ? 1.2 : 0.7), e -> e.isAlive() && !e.isSpectator())) {
             p.hurt(damageSources().indirectMagic(this, owner instanceof LivingEntity le ? le : null), damage);
             burst(sl, position());
             return;
@@ -139,11 +165,37 @@ public class FallingLight extends Entity {
         setPos(next);
     }
 
+    private void trail(ServerLevel sl) {
+        if (look == 1) {
+            sl.sendParticles(new net.minecraft.core.particles.BlockParticleOption(ParticleTypes.FALLING_DUST,
+                    net.minecraft.world.level.block.Blocks.LIGHT_GRAY_CONCRETE_POWDER.defaultBlockState()), getX(), getY(), getZ(), 4, 0.12, 0.12, 0.12, 0.0);
+            sl.sendParticles(ParticleTypes.WHITE_ASH, getX(), getY(), getZ(), 3, 0.1, 0.1, 0.1, 0.0);
+        } else if (look == 2) {
+            Vec3 v = getDeltaMovement().normalize();
+            Vec3 side = new Vec3(-v.z, 0, v.x);
+            for (int i = -3; i <= 3; i++) {
+                Vec3 p = position().add(side.scale(i * 0.35)).add(v.scale(-Math.abs(i) * 0.15));
+                sl.sendParticles(ParticleTypes.END_ROD, p.x, p.y, p.z, 1, 0, 0, 0, 0);
+            }
+            if (age % 3 == 0) {
+                sl.sendParticles(ParticleTypes.SWEEP_ATTACK, getX(), getY(), getZ(), 1, 0, 0, 0, 0);
+            }
+        } else {
+            sl.sendParticles(ParticleTypes.END_ROD, getX(), getY(), getZ(), 3, 0.15, 0.15, 0.15, 0.0);
+        }
+    }
+
     // 弾ける: 半径 RADIUS (光の球は 1.5) の人に傷。当たった高さより下 (屋根の下) の人は数えない
     private void burst(ServerLevel sl, Vec3 c) {
         double r = shot ? 1.5 : RADIUS;
-        sl.sendParticles(ParticleTypes.END_ROD, c.x, c.y + 0.3, c.z, 30, r * 0.4, 0.4, r * 0.4, 0.12);
-        sl.sendParticles(ParticleTypes.FLASH, c.x, c.y + 0.3, c.z, 1, 0, 0, 0, 0);
+        if (look == 1) {
+            sl.sendParticles(new net.minecraft.core.particles.BlockParticleOption(ParticleTypes.FALLING_DUST,
+                    net.minecraft.world.level.block.Blocks.LIGHT_GRAY_CONCRETE_POWDER.defaultBlockState()), c.x, c.y + 0.3, c.z, 24, 0.5, 0.4, 0.5, 0.0);
+            sl.sendParticles(ParticleTypes.CLOUD, c.x, c.y + 0.3, c.z, 6, 0.3, 0.2, 0.3, 0.02);
+        } else {
+            sl.sendParticles(ParticleTypes.END_ROD, c.x, c.y + 0.3, c.z, 30, r * 0.4, 0.4, r * 0.4, 0.12);
+            sl.sendParticles(ParticleTypes.FLASH, c.x, c.y + 0.3, c.z, 1, 0, 0, 0, 0);
+        }
         sl.playSound(null, c.x, c.y, c.z, FieldBlocks.LIGHT_IMPACT.get(), SoundSource.HOSTILE, 1.0f, shot ? 1.4f : 1.0f);
         if (!shot) {
             for (Player p : sl.getEntitiesOfClass(Player.class, new AABB(c, c).inflate(r, 3, r), e -> e.isAlive() && !e.isSpectator())) {

@@ -53,6 +53,8 @@ public final class GrowthRewards {
 
     // Mod の敵 (エンティティ ID → 経験値と推奨レベル)。倒したとき近くにいた人で分ける
     public static final Map<String, Source> MOD_ENEMIES = new LinkedHashMap<>();
+    // この札のある敵は倒しても経験値を出さない (残像など)
+    public static final String NO_REWARD = "skyabyss_no_reward";
     static {
         MOD_ENEMIES.put(SkyAbyss.MODID + ":bone_sentinel", new Source(12, STONE_WHALE_LEVEL));
         MOD_ENEMIES.put(SkyAbyss.MODID + ":rib_archer", new Source(10, STONE_WHALE_LEVEL));
@@ -211,6 +213,10 @@ public final class GrowthRewards {
         }
         if (mob.getTags().contains(TitanBackTrials.HEART_TAG)
                 || (mob.getTags().contains(TitanBackTrials.MOB_TAG) && mob.getType() == jp.revati.skyabyss.registry.ModEntities.WHALEBONE_CAPTAIN.get())) {
+            return;
+        }
+        // 残像 (下弦の淵の敵が倒れて立ち上がったもの) は経験値を出さない
+        if (mob.getTags().contains(NO_REWARD)) {
             return;
         }
         ServerPlayer killer = killer(event.getSource(), mob);

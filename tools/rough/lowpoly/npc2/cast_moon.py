@@ -16,7 +16,7 @@ from PIL import Image, ImageDraw
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import cast as C  # noqa: E402
-from cast import HOLD_L_LOW, STAFF_R, add  # noqa: E402
+from cast import HOLD_L, HOLD_L_LOW, STAFF_R, add  # noqa: E402
 import kit as K  # noqa: E402
 import props as PR  # noqa: E402
 from kit import V, part, rod, box, disc  # noqa: E402
@@ -202,6 +202,44 @@ moon("past3", "前のループの自分 (三人目)", [
 ])
 
 
+# ---------------------------------------------------------------- 前のループの自分 (四人目。下弦の淵。docs/design/46 の 4.6。一品一案)
+# いちばん古い巻き戻りの自分。色あせた初めの旅装が青白く薄れ、残像のように透けかけた姿。左手で胸の前に割れた手鏡を持つ
+GHOST = dict(coat=(176, 186, 206), shirt=(206, 214, 230), mantle=(150, 162, 188), trim=(120, 130, 156), hat=(170, 180, 200), hat2=(140, 150, 172),
+             trousers=(136, 146, 170), boot=(96, 102, 124), sash=(120, 140, 190), cord=(170, 178, 196), leather=(116, 122, 142), metal=(186, 194, 210),
+             metal2=(140, 148, 166), glove=(150, 158, 178))
+
+
+def gpal(**kw):
+    p = dict(GHOST)
+    p.update(kw)
+    soft = {m: K.cloth(p[k], noise=0.03, streak=0.05, facevar=0.03) for m, k in (("coat", "coat"), ("mantle", "mantle"), ("trousers", "trousers"),
+                                                                                  ("shirt", "shirt"))}
+    mirror = dict(ramp=[(110, 150, 210), (170, 206, 246), (220, 236, 255), (250, 252, 255)], base=0.62, lit=0.3, noise=0.03, crack=0, min=1)
+    p["extra_mats"] = {**STAR_LAMP, **soft, "mirror": mirror}
+    p["glow_mats"] = ["star", "mirror"]
+    return p
+
+
+def hand_mirror_l(c):
+    """左手で胸の前に持つ割れた手鏡: 銀の丸い枠に光る鏡の面、斜めの割れ目、下に短い柄"""
+    h = PR.hand(c, 1)
+    cx, cy, cz = h[0] - 0.6, h[1] + 3.0, h[2] - 0.9
+    F = part("mr_frame", disc("prop_l", "metal", V(cx, cy, cz), 2.1, 0.45, n=12, axis="z"))
+    F += part("mr_glass", disc("prop_l", "mirror", V(cx, cy, cz - 0.3), 1.75, 0.2, n=12, axis="z"))
+    F += part("mr_crack", rod("prop_l", "trim", V(cx - 1.2, cy + 1.0, cz - 0.45), V(cx + 0.9, cy - 1.1, cz - 0.45), 0.12, sides=3))
+    F += part("mr_handle", rod("prop_l", "metal2", V(cx, cy - 2.0, cz), V(h[0], h[1] - 0.6, h[2] - 0.4), 0.3, sides=5))
+    return F
+
+
+moon("past4", "前のループの自分 (四人目)", [
+    # 鏡の写し手: 青白く薄れた初めの旅装に短い外套と頭巾 (下ろしている)、白い髪、星の色の目。左手で胸の前に割れた手鏡
+    dict(anim="hold_l", pal=gpal(skin=(196, 200, 214), hair=(214, 220, 234)),
+         face=dict(eye="calm", iris=(170, 200, 250), brow="worried", mouth="none"), hair=SHORT, hat=None,
+         hairline=27.4, build="slim", upper=dict(mantle=dict(bottom=14.0, clasp=True), sash=True), lower="trousers", sleeve="rolled",
+         arms=HOLD_L, props={"prop_l": hand_mirror_l}),
+])
+
+
 def sheet(pid):
     out = Path(__file__).resolve().parents[4] / "docs/review/npc_models_v2/roughs"
     keys = [k for k in "abc" if f"moon_{pid}_{k}" in C.CAST]
@@ -236,3 +274,5 @@ if __name__ == "__main__":
 C.CAST["guest_moon_past2"] = C.CAST["moon_past2_c"]
 # 三人目は一品一案 (2026-10-30)。guestId = moon_past3
 C.CAST["guest_moon_past3"] = C.CAST["moon_past3_a"]
+# 四人目も一品一案 (2026-10-30)。guestId = moon_past4
+C.CAST["guest_moon_past4"] = C.CAST["moon_past4_a"]
