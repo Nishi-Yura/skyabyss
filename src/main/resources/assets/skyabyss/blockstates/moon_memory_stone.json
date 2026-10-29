@@ -1,0 +1,16 @@
+{
+  "variants": {
+    "section=0": {
+      "model": "skyabyss:block/moon_memory_stone"
+    },
+    "section=1": {
+      "model": "skyabyss:block/moon_memory_stone"
+    },
+    "section=2": {
+      "model": "skyabyss:block/moon_memory_stone"
+    },
+    "section=3": {
+      "model": "skyabyss:block/moon_memory_stone"
+    }
+  }
+}

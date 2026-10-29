@@ -40,7 +40,10 @@ public final class CoreArena {
     private static int empty;
 
     static {
-        StoryReels.onDone(CorePuzzles.REEL, p -> Quests.signal(p, CorePuzzles.END));
+        StoryReels.onDone(CorePuzzles.REEL, p -> {
+            Quests.signal(p, CorePuzzles.END);
+            jp.revati.skyabyss.story.ch6.MoonMemories.onCore(p);
+        });
     }
 
     private CoreArena() {

@@ -37,6 +37,21 @@ public abstract class MoonMob extends AbyssMobB {
         moonDmg = dmg * SECTION_DMG[section] * m;
     }
 
+    // 位相の挑戦の段 (docs/design/46 の 4.8。挑戦の主でなければ 0)
+    public int trialTier() {
+        return getTags().contains(jp.revati.skyabyss.story.ch6.MoonTrial.TAG) ? getPersistentData().getInt(jp.revati.skyabyss.story.ch6.MoonTrial.TIER) : 0;
+    }
+
+    // 段 3 から技の間が三分の二
+    public int paced(int ticks) {
+        return trialTier() >= 3 ? Math.max(1, ticks * 2 / 3) : ticks;
+    }
+
+    // 段 5 の「位相の重ね」: 主が倒れるまで、その区画の決まりが強くなる
+    public boolean overlaid() {
+        return trialTier() >= 5;
+    }
+
     // 区画 1 の位相 (新月) が合っているか
     public static boolean newMoon(ServerLevel level) {
         return MoonClock.phase(level) == 0;

@@ -234,7 +234,9 @@ public class MoonScale extends MoonMob {
             if (!onPlate(p.position()) || side(p.position()) < 1.0 || !p.onGround()) {
                 continue;
             }
-            p.push(w.x * TILT_PUSH, 0, w.z * TILT_PUSH);
+            // 段 5 の位相の重ね (崖): 皿の傾きが速い (押しが 1.6 倍)
+            double push = overlaid() ? TILT_PUSH * 1.6 : TILT_PUSH;
+            p.push(w.x * push, 0, w.z * push);
             p.hurtMarked = true;
         }
         if (tiltFor % 4 == 0) {
@@ -435,7 +437,7 @@ public class MoonScale extends MoonMob {
         private void end(int restTicks) {
             move = "";
             t = 0;
-            rest = phase >= 2 ? restTicks * 2 / 3 : restTicks;
+            rest = paced(phase >= 2 ? restTicks * 2 / 3 : restTicks);
         }
 
         // 錘落とし: 人の足もとに影の円 (26 tick)、錘が落ちる。段 3 は二人 (二つ)

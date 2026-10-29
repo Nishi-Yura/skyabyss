@@ -10,6 +10,7 @@
   moon_full_ring    銀の環。頂に満月の円盤 (月の石) を抱き、両脇に小さな三日月の留め
   moon_tear         涙の形の硝子の小瓶に青白く光る月の雫、銀の三日月の栓
   block/moon_calendar_top・_side   月の暦: 磨いた黒石の円盤に銀の縁、四方に四つの位相 (新月・上弦・満月・下弦)、真ん中に星
+  block/moon_memory_stone(_top)    記憶の石: 月の石の小さな碑、面に銀の三日月の刻みと、青白く光る筋 (46 の 4.9)
 """
 import colorsys
 import json
@@ -229,6 +230,40 @@ def calendar_side():
     return im
 
 
+def memory_stone():
+    """碑の面 (4 面とも): 上が丸い月の石の板に、銀の三日月と光る縦の筋"""
+    im = Image.new("RGBA", (N, N), (0, 0, 0, 0))
+    px = im.load()
+    for y in range(N):
+        for x in range(N):
+            l = 0.55 + 0.25 * (1 - y / N) + (0.08 if (x * 5 + y * 3) % 13 == 0 else 0) - (0.12 if (x * 7 + y * 11) % 17 == 0 else 0)
+            k = 4 if l > 0.78 else 3 if l > 0.62 else 2 if l > 0.48 else 1
+            if x in (0, 31) or y == 31:
+                k = 0
+            px[x, y] = STONE[k] + (255,)
+    # 三日月の刻み (銀) と光る筋
+    for a in range(200, 341, 4):
+        for r in (6.0, 6.8):
+            xx = int(round(15.5 + r * math.cos(math.radians(a))))
+            yy = int(round(11.0 + r * math.sin(math.radians(a)) * -1))
+            if 0 <= xx < N and 0 <= yy < N:
+                px[xx, yy] = SIL[4] + (255,)
+    for y in range(16, 29):
+        px[15, y] = GLOW[2 if y % 3 else 3] + (255,)
+        px[16, y] = GLOW[1] + (255,)
+    return im
+
+
+def stone_top():
+    im = Image.new("RGBA", (N, N), STONE[3] + (255,))
+    px = im.load()
+    for y in range(N):
+        for x in range(N):
+            if (x * 3 + y * 5) % 11 == 0:
+                px[x, y] = STONE[2] + (255,)
+    return im
+
+
 def main():
     recolor("ember_shard", "moon_fragment")
     recolor("resonance_shard_ember", "resonance_shard_moon")
@@ -250,6 +285,20 @@ def main():
              | {"up": {"texture": "#top", "uv": [0, 0, 16, 16]}, "down": {"texture": "#side", "uv": [0, 0, 16, 16]}}},
         ]})
     w("blockstates/moon_calendar.json", {"variants": {"": {"model": "skyabyss:block/moon_calendar"}}})
+    memory_stone().save(os.path.join(BLOCK, "moon_memory_stone.png"))
+    stone_top().save(os.path.join(BLOCK, "moon_memory_stone_top.png"))
+    w("models/block/moon_memory_stone.json", {
+        "textures": {"face": "skyabyss:block/moon_memory_stone", "top": "skyabyss:block/moon_memory_stone_top", "particle": "skyabyss:block/moon_memory_stone_top"},
+        "elements": [
+            {"from": [4, 0, 5], "to": [12, 14, 11],
+             "faces": {"north": {"texture": "#face", "uv": [4, 0, 12, 14]}, "south": {"texture": "#face", "uv": [4, 0, 12, 14]},
+                       "east": {"texture": "#face", "uv": [5, 0, 11, 14]}, "west": {"texture": "#face", "uv": [5, 0, 11, 14]},
+                       "up": {"texture": "#top", "uv": [4, 5, 12, 11]}, "down": {"texture": "#top", "uv": [4, 5, 12, 11]}}},
+            {"from": [3, 0, 4], "to": [13, 2, 12],
+             "faces": {d: {"texture": "#top", "uv": [3, 4, 13, 12] if d in ("up", "down") else [3, 14, 13, 16]}
+                       for d in ("north", "south", "east", "west", "up", "down")}},
+        ]})
+    w("blockstates/moon_memory_stone.json", {"variants": {"section=%d" % i: {"model": "skyabyss:block/moon_memory_stone"} for i in range(4)}})
     print("done")
 
 

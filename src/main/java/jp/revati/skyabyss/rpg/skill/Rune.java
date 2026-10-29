@@ -100,7 +100,14 @@ public enum Rune {
     EMBER_ASH_VEIL("ember_ash_veil", Skill.MIST_VEIL, 6, "ember_ash_knife"),
     EMBER_KILN_BLINK("ember_kiln_blink", Skill.BLINK, 6, "ember_kiln_staff"),
     EMBER_FLARE("ember_flare", Skill.CLOUD_PIERCE, 7, "ember_flare_bow"),
-    EMBER_CENSER_SONG("ember_censer_song", Skill.CYCLE_SONG, 6, "ember_censer_bell_staff");
+    EMBER_CENSER_SONG("ember_censer_song", Skill.CYCLE_SONG, 6, "ember_censer_bell_staff"),
+    // ---- 六章「月」のヒロイック武器 (story/ch6/gear の 6 本。2026-10-31)。まだ書き換えのない技へ (呪いの印だけはすでに一つあるので 6、ほかは 4)
+    MOON_WANING_SPIN("moon_waning_spin", Skill.SPIN_CUT, 4, "moon_waning_blade"),
+    MOON_FULL_BURST("moon_full_burst", Skill.SPARK_BURST, 4, "moon_full_hammer"),
+    MOON_NEW_DUST("moon_new_dust", Skill.STARDUST, 4, "moon_new_staff"),
+    MOON_STARFALL_SNARE("moon_starfall_snare", Skill.SNARE_SHOT, 4, "moon_starfall_bow"),
+    MOON_UMBRA_TWIN("moon_umbra_twin", Skill.TWIN_FANG, 4, "moon_umbra_dagger"),
+    MOON_HALO_CURSE("moon_halo_curse", Skill.CURSE_MARK, 6, "moon_halo_bell_staff");
 
     // 熟練 3 で開く 4 つ目の刻印 (熟練の刻印)。どの使う技にもあり、番号は 5 (4 は逸品の書き換え)。docs/design/31 の A13
     public static final int MASTERY = 5;

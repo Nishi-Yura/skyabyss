@@ -148,6 +148,12 @@ VALLEY = ndimage.binary_opening(VALLEY, iterations=1)
 t = np.clip((ZZ - 24) / 40.0, 0, 1)
 t = t * t * (3 - 2 * t)
 FLOOR = (10 - 16 * t) - np.clip((ZZ - 90) / 80.0, 0, 1) * 3 + 1.3 * N_FLOOR
+# 作り込みの二回目 (46 の 4.3.3): 入口の谷 (z < 66) は段々の下り。脇は 2 ずつ落ちる段、真ん中 (|x| < 3) は 1 ずつの段
+_ramp = 10 - 16 * t
+_terr = np.floor((_ramp + 0.5 * N_FLOOR) / 2.0) * 2.0
+_mid = np.abs(XX) < 3.0 + 0.6 * N_EDGE
+_entr = ZZ < 66
+FLOOR = np.where(_entr, np.where(_mid, np.round(_ramp), _terr), FLOOR)
 FLOOR = np.round(FLOOR).astype(int)
 
 # 谷の中から縁までの距離 (崖を彫る)
@@ -256,18 +262,7 @@ for xi in range(NX):
                 else:
                     vol[xi, yi, zi] = wall_mat(y - 6, xi, zi, hsh(x, y, z))
 
-# 台地の上の岩の突き出し (縁に沿って 9 つ)
-for i in range(9):
-    a = i / 9 * 2 * math.pi + 0.3
-    cx, cz = math.cos(a) * 9.5, MESA_Z + math.sin(a) * 19.5
-    h = 2 + hsh(i, 1, 2) % 4
-    for xi in range(NX):
-        for zi in range(NZ):
-            x, z = X0 + xi, Z0 + zi
-            dd = math.hypot(x - cx, (z - cz) / 1.4)
-            if dd < 2.2:
-                for y in range(MESA_TOP + 1, MESA_TOP + 1 + int(h * (1 - dd / 2.4)) + 1):
-                    vol[xi, y - Y0, zi] = TUFF if (y + x) % 3 else ANDESITE
+# 台地の上の立ち石 (主の間を囲む崩れかけた輪。作り込みの二回目)。下の主の間を彫ったあとに立てる (STONES)
 
 
 def put(x, y, z, s):
@@ -338,6 +333,45 @@ for x in range(-2, 3):
             put(x, y, z, AIR)
 MARKS["arena_entry"] = [0, MESA_TOP + 1, MESA_Z - 15]
 MARKS["lord_spawn"] = [0, 21, MESA_Z + 3]
+
+# 立ち石: 台地は南北に長いので、主の間の北と南の張り出しに並べる (北の着く所の道 |x| <= 2 はあける)。高いもの・折れたもの・倒れて横たわるもの
+STONES_SET = []
+STONE_AT = [(-5, -12), (4, -12), (-6, 11), (5, 11), (-3, 14), (2, 14), (-1, 16)]
+for i, (ox, oz) in enumerate(STONE_AT):
+    sx, sz = ox, MESA_Z + oz
+    if not all(get(sx + dx, MESA_TOP, sz + dz) != AIR and get(sx + dx, MESA_TOP + 1, sz + dz) == AIR for dx in (0, 1) for dz in (0, 1)):
+        continue
+    a = math.atan2(oz, ox)
+    STONES_SET.append((sx, sz))
+    kind = hsh(i, 3, 5) % 3
+    h = 6 if kind == 0 else 3 if kind == 1 else 1
+    for dx in (0, 1):
+        for dz in (0, 1):
+            put(sx + dx, MESA_TOP, sz + dz, PB_BRICKS)
+            for y in range(MESA_TOP + 1, MESA_TOP + 1 + h):
+                cut = kind == 1 and y == MESA_TOP + h and (dx + dz) % 2
+                if not cut:
+                    put(sx + dx, y, sz + dz, PBASALT if (y - MESA_TOP) % 3 else BASALT)
+    if kind == 0:
+        put(sx, MESA_TOP + 7, sz, CH_PB)
+        put(sx + 1, MESA_TOP + 7, sz + 1, CALCITE)
+    elif kind == 2:
+        # 倒れた石: 外へ向けて横たわる
+        ox, oz = (1 if math.cos(a) > 0 else -1), (1 if math.sin(a) > 0 else -1)
+        for k in range(2, 6):
+            tx, tz = sx + ox * k, sz + oz * (k // 2)
+            if get(tx, MESA_TOP, tz) != AIR:
+                put(tx, MESA_TOP + 1, tz, PBASALT if k % 2 else BASALT)
+    # 根の砂だまり
+    for dx, dz in ((-1, 0), (2, 1), (0, 2), (1, -1)):
+        if get(sx + dx, MESA_TOP + 1, sz + dz) == AIR and get(sx + dx, MESA_TOP, sz + dz) != AIR:
+            put(sx + dx, MESA_TOP + 1, sz + dz, POWDER_W if (dx + dz) % 2 else POWDER)
+# 主の間の縁の銀の筋 (方解石の細い輪)
+for x in range(-12, 13):
+    for z in range(MESA_Z - 12, MESA_Z + 13):
+        d = math.hypot(x - AC[0], z - AC[1])
+        if 10.55 <= d < 11.2 and get(x, MESA_TOP, z) not in (AIR,) and get(x, MESA_TOP + 1, z) == AIR and not (abs(x) <= 2 and z < MESA_Z):
+            put(x, MESA_TOP, z, CALCITE)
 
 # ---------------------------------------------------------------- 奥の門 (台地の北の根元)
 gz = MESA_Z - 22
@@ -516,6 +550,89 @@ for x in range(CX - 8, CX - 2):
                 put(x, cfl + 1, z, CALCITE)
 keep(CAMP[0] - 3, CAMP[1], 9)
 
+# ---------------------------------------------------------------- 入口の頭の崩れた斜面 (作り込みの二回目)
+# 平らな月の面から急に切れ落ちないよう、入口の谷の頭 (z < 40) の両の壁の根に、礫と砂の斜面を盛る (壁から離れるほど低い)
+for xi in range(NX):
+    for zi in range(NZ):
+        x, z = X0 + xi, Z0 + zi
+        if not VALLEY[xi, zi] or z >= 40 or kept(x, z) or abs(x) < 4:
+            continue
+        di = D_IN[xi, zi]
+        if di > 7:
+            continue
+        fl = FLOOR[xi, zi]
+        top = min(SURFACE, int(round(fl + (7 - di) * 1.5 * (1.0 - (z - 22) / 30.0) + 0.8 * N_FLOOR[xi, zi])))
+        for y in range(fl + 1, top + 1):
+            if get(x, y, z) == AIR:
+                put(x, y, z, GRAVEL if (y == top and hsh(x, y, z, 2) % 3 == 0) else POWDER_G if y == top else TUFF if (x + y) % 4 else ANDESITE)
+
+# 入口の石柱: 谷の頭の両の縁に、着く所から見える月の石柱を一対 (下りる所の目印)
+for sx in (-15, 15):
+    sz = 27
+    gy = SURFACE
+    for k in range(13):
+        r = 1.6 - k * 0.07
+        for dx in range(-2, 3):
+            for dz in range(-2, 3):
+                if math.hypot(dx, dz) <= r:
+                    put(sx + dx, gy + 1 + k, sz + dz, PBASALT if k % 4 else BASALT)
+    for dx, dz in ((0, 0), (1, 0), (0, 1)):
+        put(sx + dx, gy + 14, sz + dz, CALCITE)
+    put(sx, gy + 15, sz, CH_PB)
+    for dx in range(-3, 4):
+        for dz in range(-3, 4):
+            if 1.8 < math.hypot(dx, dz) <= 3.2 and get(sx + dx, gy + 1, sz + dz) == AIR:
+                put(sx + dx, gy + 1, sz + dz, POWDER_W if (dx + dz) % 2 else POWDER_G)
+    keep(sx, sz, 4)
+
+# 崖の張り出し: 輪の外の壁と入口の谷の壁から、内へ 3〜5 突き出す岩棚。下に玄武岩の垂れ (台地の壁には付けない: 主の間へ登る足場になるので)
+SHELVES = []
+
+
+def _path(x, z):
+    """通り道 (下の on_path と同じ帯)。岩棚は道の上に出さない"""
+    if z < 70 and abs(x) < 5:
+        return True
+    return z >= 60 and abs(math.hypot(x, (z - MESA_Z) / 2.0) - 21.0) < 3.5
+
+
+for i in range(11):
+    a = i / 11 * 2 * math.pi + 0.25
+    ca, sa = math.cos(a), math.sin(a)
+    r = 22.0
+    while r < 40 and in_valley(round(ca * r), round(MESA_Z + sa * r * 2.0)):
+        r += 0.5
+    SHELVES.append((ca * r, MESA_Z + sa * r * 2.0, -ca, -sa * 0.5))
+for z0, side in ((44, -1), (56, 1), (62, -1)):
+    x = 0
+    while in_valley(x + side, z0) and abs(x) < 20:
+        x += side
+    SHELVES.append((x + side, z0, -side, 0.0))
+for k, (wx, wz, ix, iz) in enumerate(SHELVES):
+    n = math.hypot(ix, iz) or 1.0
+    ix, iz = ix / n, iz / n
+    tx, tz = -iz, ix
+    fl = floor_at(round(wx + ix * 4), round(wz + iz * 4)) if in_valley(round(wx + ix * 4), round(wz + iz * 4)) else 0
+    ys = min(SURFACE - 2, fl + 7 + hsh(k, 1, 1) % 3)
+    depth = 3.0 + (hsh(k, 2, 2) % 3)
+    width = 3.0 + (hsh(k, 3, 3) % 3)
+    for u in range(-1, int(depth) + 1):
+        for v in range(-int(width) - 1, int(width) + 2):
+            if abs(v) > width - 0.6 * u / depth * width * 0.5 + 0.5 * ((hsh(k, u, v) % 100) / 100):
+                continue
+            x, z = round(wx + ix * u + tx * v), round(wz + iz * u + tz * v)
+            if kept(x, z, 2) or (in_valley(x, z) and _path(x, z)):
+                continue
+            for y in (ys, ys + 1):
+                put(x, y, z, BASALT if y == ys else (TUFF if (x + z) % 3 else ANDESITE))
+            if get(x, ys + 2, z) == AIR and hsh(x, ys, z) % 4 == 0:
+                put(x, ys + 2, z, POWDER)
+            # 下の垂れ (先ほど細い)
+            if u >= 1 and hsh(x, 7, z, k) % 3 == 0:
+                for dy in range(1, 1 + 1 + hsh(x, 8, z) % 3):
+                    if get(x, ys - dy, z) == AIR:
+                        put(x, ys - dy, z, PBASALT if dy == 1 else BASALT)
+
 # ---------------------------------------------------------------- 谷底の飾り (割れた岩の尖り・転がる岩・壁の根の砂だまり・紫水晶の芽)
 def free_floor(x, z):
     return in_valley(x, z) and not kept(x, z) and get(x, floor_at(x, z) + 1, z) == AIR and get(x, floor_at(x, z), z) != AIR
@@ -538,7 +655,7 @@ dimples = 0
 for _ in range(400):
     x = int(rng.integers(-34, 35))
     z = int(rng.integers(28, 174))
-    if dimples >= 22 or not free_floor(x, z) or D_IN[x - X0, z - Z0] < 4:
+    if dimples >= 22 or not free_floor(x, z) or D_IN[x - X0, z - Z0] < 4 or z < 66:
         continue
     dimples += 1
     fl = floor_at(x, z)
@@ -702,7 +819,7 @@ data = {"note": "build_moon_valley.py が書く。手で直さない", "palette"
 os.makedirs(os.path.dirname(OUT), exist_ok=True)
 with open(OUT, "w", encoding="utf-8", newline="\n") as f:
     json.dump(data, f, ensure_ascii=False, separators=(",", ":"))
-print("valley", os.path.getsize(OUT) // 1024, "KB", len(runs), "runs", cols, "columns", "spires", spires, "boulders", boulders, "buds", buds)
+print("valley", os.path.getsize(OUT) // 1024, "KB", len(runs), "runs", cols, "columns", "spires", spires, "boulders", boulders, "buds", buds, "stones", len(STONES_SET))
 print("marks", {k: v for k, v in MARKS.items()})
 
 # ---------------------------------------------------------------- 見る絵 (上から・断面)

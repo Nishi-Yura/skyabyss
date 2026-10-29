@@ -114,6 +114,11 @@ public class WaningBlade extends MoonMob {
         return staggerFor > 0;
     }
 
+    // 位相の重ねが始まったとき、もう立っている残像の遅れを縮める
+    public void quicken() {
+        delay = delay * 2 / 3;
+    }
+
     public int delay() {
         return delay;
     }
@@ -126,7 +131,8 @@ public class WaningBlade extends MoonMob {
         }
         e.entityData.set(ECHO, true);
         e.masterId = master.getId();
-        e.delay = delay;
+        // 段 5 の位相の重ね (淵): 残像の遅れが 3 秒から 2 秒に
+        e.delay = master.overlaid() ? delay * 2 / 3 : delay;
         e.setNoAi(true);
         e.setNoGravity(true);
         e.noPhysics = true;
@@ -541,7 +547,7 @@ public class WaningBlade extends MoonMob {
         private void end(int restTicks) {
             move = "";
             t = 0;
-            rest = phase >= 2 ? restTicks * 2 / 3 : restTicks;
+            rest = paced(phase >= 2 ? restTicks * 2 / 3 : restTicks);
         }
 
         @Override

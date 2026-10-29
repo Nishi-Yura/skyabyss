@@ -1,0 +1,145 @@
+{
+  "textures": {
+    "face": "skyabyss:block/moon_memory_stone",
+    "top": "skyabyss:block/moon_memory_stone_top",
+    "particle": "skyabyss:block/moon_memory_stone_top"
+  },
+  "elements": [
+    {
+      "from": [
+        4,
+        0,
+        5
+      ],
+      "to": [
+        12,
+        14,
+        11
+      ],
+      "faces": {
+        "north": {
+          "texture": "#face",
+          "uv": [
+            4,
+            0,
+            12,
+            14
+          ]
+        },
+        "south": {
+          "texture": "#face",
+          "uv": [
+            4,
+            0,
+            12,
+            14
+          ]
+        },
+        "east": {
+          "texture": "#face",
+          "uv": [
+            5,
+            0,
+            11,
+            14
+          ]
+        },
+        "west": {
+          "texture": "#face",
+          "uv": [
+            5,
+            0,
+            11,
+            14
+          ]
+        },
+        "up": {
+          "texture": "#top",
+          "uv": [
+            4,
+            5,
+            12,
+            11
+          ]
+        },
+        "down": {
+          "texture": "#top",
+          "uv": [
+            4,
+            5,
+            12,
+            11
+          ]
+        }
+      }
+    },
+    {
+      "from": [
+        3,
+        0,
+        4
+      ],
+      "to": [
+        13,
+        2,
+        12
+      ],
+      "faces": {
+        "north": {
+          "texture": "#top",
+          "uv": [
+            3,
+            14,
+            13,
+            16
+          ]
+        },
+        "south": {
+          "texture": "#top",
+          "uv": [
+            3,
+            14,
+            13,
+            16
+          ]
+        },
+        "east": {
+          "texture": "#top",
+          "uv": [
+            3,
+            14,
+            13,
+            16
+          ]
+        },
+        "west": {
+          "texture": "#top",
+          "uv": [
+            3,
+            14,
+            13,
+            16
+          ]
+        },
+        "up": {
+          "texture": "#top",
+          "uv": [
+            3,
+            4,
+            13,
+            12
+          ]
+        },
+        "down": {
+          "texture": "#top",
+          "uv": [
+            3,
+            4,
+            13,
+            12
+          ]
+        }
+      }
+    }
+  ]
+}

@@ -359,6 +359,7 @@ public final class SelfTestRunner {
         steps.add(Step.once("moon core (load)", jp.revati.skyabyss.story.ch6.core.CoreSelfTest::load));
         steps.add(Step.once("moon core", 40, jp.revati.skyabyss.story.ch6.core.CoreSelfTest::run));
         steps.add(Step.once("moon trial", jp.revati.skyabyss.story.ch6.MoonTrialSelfTest::run));
+        steps.add(Step.once("moon memories", jp.revati.skyabyss.story.ch6.MoonMemoriesSelfTest::run));
         steps.add(Step.once("moon (unload)", jp.revati.skyabyss.story.ch6.MoonTestLoad::unload));
         steps.add(Step.once("abyss depths", 20, jp.revati.skyabyss.story.ch5.depths.DepthsV2SelfTest::run));
         steps.add(Step.once("abyss finds (load)", jp.revati.skyabyss.story.ch5.AbyssFindsSelfTest::load));

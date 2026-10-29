@@ -67,7 +67,7 @@ final class BuildsSelfTest {
             check(f, Rune.of(r.skill).stream().noneMatch(Rune::legendary), "ordinary rune list holds a legendary rune for " + r.skill.id);
         }
         // 32 = 逸品 8・深淵 4・伝説 20、17 = 巨神のヒロイック武器 (item/HeroicGear)
-        check(f, count == 49, "legendary rune count is " + count);
+        check(f, count == 55, "legendary rune count is " + count);
         java.util.Set<String> weapons = new java.util.HashSet<>();
         for (Rune r : Rune.values()) {
             if (r.legendary()) {

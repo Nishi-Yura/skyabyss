@@ -157,6 +157,9 @@ public class ShadowEmbracer extends MoonMob {
                 clones(sl, 2);
             }
         }
+        if (overlaid() && tickCount % 40 == 20 && level() instanceof ServerLevel osl) {
+            shadowHands(osl);
+        }
         if (tickCount % 60 == 0 && !sunk()) {
             playSound(MoonMobsSetup.EMBRACER_HUM.get(), 1.0f, 0.8f);
         }
@@ -201,6 +204,19 @@ public class ShadowEmbracer extends MoonMob {
             s.addTag(jp.revati.skyabyss.story.ch6.valley.ValleyArena.TAG);
             sl.addFreshEntity(s);
             sl.sendParticles(ParticleTypes.SQUID_INK, at.x, at.y + 1, at.z, 30, 0.4, 1.0, 0.4, 0.02);
+        }
+    }
+
+    // 段 5 の位相の重ね (谷): 灯りの外の暗がりに立つ人を、影の手がつかむ (遅くして、傷 ×0.25)
+    void shadowHands(ServerLevel sl) {
+        Vec3 c = MoonValley.mark("arena_center").getCenter();
+        for (Player p : sl.getEntitiesOfClass(Player.class, new net.minecraft.world.phys.AABB(c, c).inflate(14, 6, 14), q -> q.isAlive() && !q.isSpectator())) {
+            if (StarLamps.inLight(sl, p.position().add(0, 1, 0))) {
+                continue;
+            }
+            p.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.MOVEMENT_SLOWDOWN, 30, 2, true, false));
+            p.hurt(damageSources().mobAttack(this), dmg(0.25));
+            sl.sendParticles(ParticleTypes.SQUID_INK, p.getX(), p.getY() + 0.2, p.getZ(), 14, 0.4, 0.1, 0.4, 0.02);
         }
     }
 
@@ -313,7 +329,7 @@ public class ShadowEmbracer extends MoonMob {
         private void end(int restTicks) {
             move = "";
             t = 0;
-            rest = phase >= 2 ? restTicks / 2 : restTicks;
+            rest = paced(phase >= 2 ? restTicks / 2 : restTicks);
         }
 
         // 潜る (18 tick) → 床の影が獲物のそばへ走る (30 tick) → 出る → 掴む

@@ -202,10 +202,10 @@ public class MoonCoreBoss extends MoonMob {
         if (roarFor > 0) {
             return;
         }
-        if (clock % RAIN_EVERY == 0) {
+        if (clock % paced(RAIN_EVERY) == 0) {
             rain(sl);
         }
-        if (phase < 2 && sweep < 0 && clock % SWEEP_EVERY == SWEEP_EVERY / 2) {
+        if (phase < 2 && sweep < 0 && clock % paced(SWEEP_EVERY) == paced(SWEEP_EVERY) / 2) {
             sweep = 0;
             sweptHit.clear();
             playAction("sweep");
@@ -309,7 +309,8 @@ public class MoonCoreBoss extends MoonMob {
                 }
             }
         } else {
-            shardAngle = (shardAngle + (phase == 0 ? 1.2 : 1.8)) % 360;
+            // 段 5 の位相の重ね (核): 欠片が速く回る
+            shardAngle = (shardAngle + (phase == 0 ? 1.2 : 1.8) * (overlaid() ? 1.6 : 1.0)) % 360;
         }
         List<Double> angles = shardAngles();
         for (int i = 0; i < shards.size() && i < angles.size(); i++) {

@@ -424,6 +424,67 @@ public final class LegendRewrites {
                     ally.heal(JobActions.spell(player, 0.2));
                 }
             }
+            // ---- 六章「月」のヒロイック武器 (2026-10-31)。月の決まり (残像・満月・新月・星・影・月暈) の上乗せ
+            case MOON_WANING_SPIN -> {
+                Vec3 c = player.position();
+                SkillEffects.later(level, 30, () -> {
+                    ring(level, c, 3.5, ParticleTypes.END_ROD, 24);
+                    level.playSound(null, c.x, c.y, c.z, SoundEvents.AMETHYST_BLOCK_HIT, SoundSource.PLAYERS, 1f, 0.8f);
+                    for (LivingEntity e : around(player, c, 3.5)) {
+                        SkillActions.hit(player, e, (float) (JobActions.weaponDamage(player) * 0.5), skill);
+                    }
+                });
+            }
+            case MOON_FULL_BURST -> SkillEffects.later(level, 6, () -> {
+                Vec3 c = player.position();
+                ring(level, c, 5.0, ParticleTypes.END_ROD, 32);
+                level.sendParticles(ParticleTypes.FLASH, c.x, c.y + 1, c.z, 1, 0, 0, 0, 0);
+                level.playSound(null, c.x, c.y, c.z, SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.PLAYERS, 1.2f, 0.6f);
+                for (LivingEntity e : around(player, c, 5.0)) {
+                    SkillActions.hit(player, e, (float) (JobActions.weaponDamage(player) * 0.4), skill);
+                    push(e, c, 1.0);
+                }
+            });
+            case MOON_NEW_DUST -> {
+                Vec3 c = aimPoint(player, 20.0);
+                level.sendParticles(ParticleTypes.SQUID_INK, c.x, c.y + 0.2, c.z, 40, 2.0, 0.1, 2.0, 0.01);
+                for (LivingEntity e : around(player, c, 4.0)) {
+                    SkillActions.hit(player, e, JobActions.spell(player, 0.3), skill);
+                    e.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 60, 3), player);
+                }
+            }
+            case MOON_STARFALL_SNARE -> {
+                LivingEntity first = aimFoe(player, 24.0);
+                Vec3 c = first != null ? first.position() : aimPoint(player, 24.0);
+                level.sendParticles(ParticleTypes.END_ROD, c.x, c.y + 6, c.z, 8, 0.2, 0.5, 0.2, 0.01);
+                SkillEffects.later(level, 16, () -> {
+                    level.sendParticles(ParticleTypes.FIREWORK, c.x, c.y + 0.3, c.z, 30, 1.0, 0.2, 1.0, 0.06);
+                    level.playSound(null, c.x, c.y, c.z, SoundEvents.AMETHYST_CLUSTER_BREAK, SoundSource.PLAYERS, 1f, 1.2f);
+                    for (LivingEntity e : around(player, c, 2.5)) {
+                        SkillActions.hit(player, e, (float) (JobActions.weaponDamage(player) * 0.5), skill);
+                    }
+                });
+            }
+            case MOON_UMBRA_TWIN -> SkillEffects.later(level, 10, () -> {
+                List<LivingEntity> ahead = cone(player, player.position(), flatLook(player), 4.0, 60);
+                ahead.sort(Comparator.comparingDouble(e -> e.distanceToSqr(player)));
+                if (!ahead.isEmpty()) {
+                    LivingEntity e = ahead.get(0);
+                    level.sendParticles(ParticleTypes.SMOKE, e.getX(), e.getY(0.5), e.getZ(), 16, 0.3, 0.4, 0.3, 0.02);
+                    SkillActions.hit(player, e, (float) (JobActions.weaponDamage(player) * 0.6), skill);
+                }
+            });
+            case MOON_HALO_CURSE -> {
+                Vec3 c = player.position();
+                for (int k = 1; k <= 4; k++) {
+                    SkillEffects.later(level, 20 * k, () -> {
+                        ring(level, c, 6.0, ParticleTypes.END_ROD, 20);
+                        for (ServerPlayer ally : level.getEntitiesOfClass(ServerPlayer.class, new AABB(c, c).inflate(6.0), ServerPlayer::isAlive)) {
+                            ally.heal(JobActions.spell(player, 0.15));
+                        }
+                    });
+                }
+            }
             default -> {
             }
         }

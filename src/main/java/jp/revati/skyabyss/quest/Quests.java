@@ -92,6 +92,8 @@ public final class Quests {
     // 会話でその節 (node) に入った。topic のない talk は、その NPC と話せば何でもよい
     public static void onTalk(ServerPlayer player, String role, String node) {
         jp.revati.skyabyss.advancement.Beats.fire(player, "talk:" + role);
+        // 六章: 前の自分と話し終えると記憶の断片 (story/ch6/MoonMemories)
+        jp.revati.skyabyss.story.ch6.MoonMemories.onTalk(player, node);
         // 聞いた話題を覚える。今の段階でなくても (先に聞いても、途中で閉じても)、その段に着いたとき・ログイン時の measure が済ませる
         // (始めたあとの、そのクエストのどこかの段の話題だけ。始める前に聞いた話では済まない)
         QuestLog hlog = QuestLog.of(player);

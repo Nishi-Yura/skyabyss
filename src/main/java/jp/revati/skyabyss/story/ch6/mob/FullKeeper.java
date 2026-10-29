@@ -163,6 +163,10 @@ public class FullKeeper extends MoonMob {
     @Override
     public void tick() {
         super.tick();
+        // 段 5 の位相の重ね (野): 主が立っているあいだ、満ち引きが 2 倍の速さ
+        if (!level().isClientSide && overlaid() && !jp.revati.skyabyss.story.ch6.field.FieldTide.fast()) {
+            jp.revati.skyabyss.story.ch6.field.FieldTide.setFast(true);
+        }
         if (level().isClientSide || !(level() instanceof ServerLevel sl)) {
             return;
         }
@@ -295,6 +299,9 @@ public class FullKeeper extends MoonMob {
 
     @Override
     public void remove(RemovalReason reason) {
+        if (!level().isClientSide && overlaid()) {
+            jp.revati.skyabyss.story.ch6.field.FieldTide.setFast(false);
+        }
         super.remove(reason);
         bar.removeAllPlayers();
     }
@@ -372,7 +379,7 @@ public class FullKeeper extends MoonMob {
         private void end(int restTicks) {
             move = "";
             t = 0;
-            rest = phase >= 2 ? restTicks * 2 / 3 : restTicks;
+            rest = paced(phase >= 2 ? restTicks * 2 / 3 : restTicks);
         }
 
         // 灯の薙ぎ: 前の 140 度・6 の内 (18 tick の予告)

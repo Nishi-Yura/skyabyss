@@ -193,6 +193,16 @@ public final class MoonTrial {
         m.setHealth((float) max);
         m.addTag(TAG);
         m.getPersistentData().putInt(TIER, tier);
+        if (m.overlaid() && m.level() instanceof ServerLevel sl) {
+            if (m instanceof WaningBlade b) {
+                for (WaningBlade e : sl.getEntitiesOfClass(WaningBlade.class, b.getBoundingBox().inflate(48), WaningBlade::echo)) {
+                    e.quicken();
+                }
+            }
+            for (ServerPlayer p : sl.getEntitiesOfClass(ServerPlayer.class, m.getBoundingBox().inflate(48), q -> q.isAlive())) {
+                Notice.alert(p, "message.skyabyss.moon_trial.overlay." + lordOf(m));
+            }
+        }
     }
 
     // ---------------------------------------------------------------- 倒れた: 報酬と段の記録 (ふだんの主も報酬だけ)
@@ -234,10 +244,14 @@ public final class MoonTrial {
         boolean trial = e.getTags().contains(TAG);
         int tier = trial ? e.getPersistentData().getInt(TIER) : 0;
         reward(level, lord, tier, near);
+        MoonMemories.onLord(near, lord);
         if (trial) {
             for (ServerPlayer p : near) {
                 if (tier > best(p, lord)) {
                     p.getPersistentData().putInt(RECORD + lord, tier);
+                }
+                if (tier >= MAX_TIER) {
+                    MoonMemories.onKeepsake(p, lord);
                 }
                 Notice.narrate(p, "message.skyabyss.moon_trial.cleared", Component.translatable("moon_trial.skyabyss." + lord), tier);
             }

@@ -41,6 +41,11 @@ public final class RiftBlocks {
             () -> new jp.revati.skyabyss.story.ch6.MoonCalendarBlock(BlockBehaviour.Properties.of().mapColor(MapColor.METAL).strength(-1.0f, 3600000.0f)
                     .noLootTable().sound(SoundType.AMETHYST).pushReaction(PushReaction.BLOCK).noOcclusion().lightLevel(s -> 9)));
 
+    // 記憶の石 (前の自分の記憶の断片。区画ごとに一つ。story/ch6/MoonMemories)
+    public static final DeferredBlock<jp.revati.skyabyss.story.ch6.MoonMemoryStoneBlock> MEMORY_STONE = BLOCKS.register("moon_memory_stone",
+            () -> new jp.revati.skyabyss.story.ch6.MoonMemoryStoneBlock(BlockBehaviour.Properties.of().mapColor(MapColor.METAL).strength(-1.0f, 3600000.0f)
+                    .noLootTable().sound(SoundType.AMETHYST).pushReaction(PushReaction.BLOCK).noOcclusion().lightLevel(s -> 7)));
+
     public static final DeferredHolder<EntityType<?>, EntityType<EchoShade>> ECHO_SHADE = ENTITIES.register(EchoShade.ID,
             () -> EntityType.Builder.<EchoShade>of(EchoShade::new, MobCategory.MISC).sized(0.6f, 1.8f).clientTrackingRange(10).updateInterval(1)
                     .noSave().build(SkyAbyss.MODID + ":" + EchoShade.ID));
