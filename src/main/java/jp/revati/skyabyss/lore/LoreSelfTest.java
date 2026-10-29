@@ -62,10 +62,21 @@ public final class LoreSelfTest {
         }
     }
 
+    // 章 → その章の「前の私の足取り」の頁 (筆跡が自分に似る頁)
+    static final String[][] FOOTSTEPS = {{"titan_whale", "ch1/trail_blade"}, {"titan_tide", "chapter1/ch2_drift_log"},
+            {"titan_storm", "chapter1/storm_burnt_pack"}, {"titan_ember", "chapter1/ember_prev_page"}};
+
     private static void run(MinecraftServer server, List<String> failures) {
         LoreCatalog catalog = LoreManager.catalog();
         // ---- 読み込み
         LoreManager.loadErrors().forEach(e -> failures.add("load: " + e));
+        // 前の私の足取り (01 の 4.2): 巨神編の章ごとに、筆跡が自分に似る頁が一枚ずつある
+        for (String[] fs : FOOTSTEPS) {
+            LoreEntry e = catalog.entry(fs[1]);
+            if (e == null || !e.chapter().equals(fs[0]) || !e.unlockable()) {
+                failures.add("footstep page for " + fs[0] + " missing or not unlockable: " + fs[1]);
+            }
+        }
         long unlockable = catalog.entries().stream().filter(LoreEntry::unlockable).count();
         // 五章 (chapter2「深淵」) は 2026-10-22 に中身が入った (刻み・墓・遺品の項目)
         long early = catalog.entries().stream().filter(e -> e.unlockable() && (e.chapter().equals("prologue") || e.chapter().startsWith("titan_") || e.chapter().equals("chapter2")

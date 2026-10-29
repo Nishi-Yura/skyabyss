@@ -2318,5 +2318,8 @@
   "legend.skyabyss.moon_umbra_twin.skill": "二連牙",
   "legend.skyabyss.moon_halo_curse": "月暈の印",
   "legend.skyabyss.moon_halo_curse.effect": "印を付けた所に月暈が 4 秒残り、まわり 6 の仲間を毎秒癒す (呪文の ×0.15)。",
-  "legend.skyabyss.moon_halo_curse.skill": "呪いの印"
+  "legend.skyabyss.moon_halo_curse.skill": "呪いの印",
+  "message.skyabyss.life.titan_whale": "鐘楼の鐘が、ときどき低く鳴る。鯨の歌と、同じ高さで。",
+  "message.skyabyss.life.titan_tide": "都の風に、塩の粒が混じっている。海は、まだ遠いのに。",
+  "message.skyabyss.life.titan_storm": "都の路地で、小さなつむじ風が、風に逆らって回っている。"
 }

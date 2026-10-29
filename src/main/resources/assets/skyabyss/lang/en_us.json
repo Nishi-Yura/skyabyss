@@ -2318,5 +2318,8 @@
   "legend.skyabyss.moon_umbra_twin.skill": "Twin Fang",
   "legend.skyabyss.moon_halo_curse": "Halo Mark",
   "legend.skyabyss.moon_halo_curse.effect": "A moon halo lingers 4 seconds where you mark, healing allies within 6 each second (x0.15 spell).",
-  "legend.skyabyss.moon_halo_curse.skill": "Curse Mark"
+  "legend.skyabyss.moon_halo_curse.skill": "Curse Mark",
+  "message.skyabyss.life.titan_whale": "Now and then the bell tower hums low, at the pitch of the whale's song.",
+  "message.skyabyss.life.titan_tide": "Salt rides the city wind, though the sea is still far away.",
+  "message.skyabyss.life.titan_storm": "In the city lanes, small whirls of wind turn against the wind."
 }

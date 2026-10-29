@@ -132,5 +132,11 @@
   "lore.skyabyss.chapter1.shrine_storm.title": "雷翼の祠",
   "lore.skyabyss.chapter1.shrine_storm.body": "巨神は、自分を止めた者を覚えている。石の輪に立ち、歌のかけらを差し出すと、眠りの底から歌が返ってきて、背へ呼ばれた。もう一度あの背を渡れ、ということらしい。",
   "lore.skyabyss.chapter1.shrine_ember.title": "余燼の祠",
-  "lore.skyabyss.chapter1.shrine_ember.body": "巨神は、自分を止めた者を覚えている。石の輪に立ち、歌のかけらを差し出すと、眠りの底から歌が返ってきて、背へ呼ばれた。もう一度あの背を渡れ、ということらしい。"
+  "lore.skyabyss.chapter1.shrine_ember.body": "巨神は、自分を止めた者を覚えている。石の輪に立ち、歌のかけらを差し出すと、眠りの底から歌が返ってきて、背へ呼ばれた。もう一度あの背を渡れ、ということらしい。",
+  "lore.skyabyss.chapter1.whale_tablets.title": "鯨の碑",
+  "lore.skyabyss.chapter1.whale_tablets.body": "丘のあちこちに、苔むした碑が三枚、間をおいて立っていた。\n\n一枚目は、山が動いたと言って笑われた者のこと。次の朝には、誰も笑っていなかった。\n\n二枚目は、歌の聞き方。耳で聞かず、胸の骨で数えよ、と。三枚目は、鯨が地に降りるのは、眠るときか、終わるときだけだ、と。",
+  "lore.skyabyss.chapter1.ember_tablets.title": "灰の碑",
+  "lore.skyabyss.chapter1.ember_tablets.body": "焼けた地に、黒い石の碑が三枚、灰をかぶって立っていた。\n\n一枚目は、灰が空からでなく、足の下から昇ってくること。\n\n二枚目は、灰の民が火を借り、返す日を誰も決めないまま打ち続けたこと。三枚目は、山は眠らず、息をひそめて、鍛え手の名を数えている、と。",
+  "message.skyabyss.tablets.ch1_whale": "苔むした碑だ。丘のどこかに、あと二枚あるらしい。",
+  "message.skyabyss.tablets.ch4_ash": "灰をかぶった碑だ。焼けた地のどこかに、あと二枚あるらしい。"
 }

@@ -116,6 +116,8 @@ public final class Sites {
         Ch1Trails.register();
         Ch1Prep.register();
         Ch1Mobs.registerWanderers();
+        // 鯨の碑 3 枚 (背の外の探索の碑。story/ChapterTablets)
+        jp.revati.skyabyss.story.ChapterTablets.register(jp.revati.skyabyss.story.ChapterTablets.WHALE);
     }
 
     // 荷車の傍らの道: 失せ物の荷車の隣 (東へ 10) に轍と荷を置く。印 "artisan" (職人が立つ所) を記録に残す

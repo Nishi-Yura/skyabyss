@@ -20,14 +20,51 @@ public final class ChaptersSelfTest {
         List<String> failures = new ArrayList<>();
         try {
             run(failures);
+            tablets(failures);
         } catch (Exception e) {
             SkyAbyss.LOGGER.error("chapters selftest crashed", e);
             failures.add("crashed: " + e);
         }
         if (failures.isEmpty()) {
-            SkyAbyss.LOGGER.info("SELFTEST chapters PASSED (stage x prologue mapping, levels, titans, lore chapters)");
+            SkyAbyss.LOGGER.info("SELFTEST chapters PASSED (stage x prologue mapping, levels, titans, lore chapters, edge sounds, life changes, chapter tablets)");
         } else {
             failures.forEach(f -> SkyAbyss.LOGGER.error("SELFTEST chapters FAILED: {}", f));
+        }
+    }
+
+    static boolean soundsHas(net.minecraft.resources.ResourceLocation id) {
+        try (java.io.InputStream in = ChaptersSelfTest.class.getResourceAsStream("/assets/" + id.getNamespace() + "/sounds.json")) {
+            return in != null && com.google.gson.JsonParser.parseReader(new java.io.InputStreamReader(in, java.nio.charset.StandardCharsets.UTF_8))
+                    .getAsJsonObject().has(id.getPath());
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    static boolean langHas(String key) {
+        for (String lang : List.of("ja_jp", "en_us")) {
+            try (java.io.InputStream in = ChaptersSelfTest.class.getResourceAsStream("/assets/skyabyss/lang/" + lang + ".json")) {
+                if (in == null || !com.google.gson.JsonParser.parseReader(new java.io.InputStreamReader(in, java.nio.charset.StandardCharsets.UTF_8))
+                        .getAsJsonObject().has(key)) {
+                    return false;
+                }
+            } catch (Exception e) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    static void tablets(List<String> failures) {
+        for (ChapterTablets.Set t : List.of(ChapterTablets.WHALE, ChapterTablets.EMBER)) {
+            check(jp.revati.skyabyss.opening.site.Blueprint.get(t.blueprint()) != null, "tablet blueprint " + t.blueprint(), failures);
+            for (int n = 0; n < ChapterTablets.COUNT; n++) {
+                for (int line = 1; line <= 4; line++) {
+                    String key = t.signKey(n) + "." + line;
+                    check(jp.revati.skyabyss.SignFit.lang("ja_jp").containsKey(key) && jp.revati.skyabyss.SignFit.lang("en_us").containsKey(key),
+                            "tablet text " + key, failures);
+                }
+            }
         }
     }
 
@@ -70,6 +107,16 @@ public final class ChaptersSelfTest {
             check(Chapters.byId(all[i].id()) == all[i], all[i] + " byId", failures);
             check((i + 1 < all.length ? all[i + 1] : null) == all[i].next(), all[i] + " next", failures);
             check(all[i].reserved() == (i >= 7), all[i] + " reserved (終章だけ)", failures);
+            // 縁の音と暮らしの変化 (ChapterOmens)・背の外の碑 (ChapterTablets) の部品がそろう
+            if (all[i].titanChapter()) {
+                net.minecraft.resources.ResourceLocation snd = ChapterOmens.omenSound(all[i]);
+                check(snd != null && ChaptersSelfTest.class.getResource("/assets/" + snd.getNamespace() + "/sounds.json") != null
+                        && soundsHas(snd), all[i] + " edge sound " + snd, failures);
+                if (all[i].ordinal() <= Chapters.STORM.ordinal()) {
+                    check(jp.revati.skyabyss.SignFit.lang("ja_jp").containsKey("message.skyabyss.life." + all[i].id())
+                            || langHas("message.skyabyss.life." + all[i].id()), all[i] + " life change line", failures);
+                }
+            }
         }
         check(Chapters.PROLOGUE.id().equals("prologue") && Chapters.ABYSS.id().equals("chapter2") && Chapters.MOON.id().equals("chapter3")
                 && Chapters.FINALE.id().equals("finale"), "ids of the prologue and the later chapters", failures);

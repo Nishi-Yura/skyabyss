@@ -235,5 +235,17 @@
   "wayfarer_notes.ch1.line.6": "背の奥へ進む前に、身と刃と糧がそろっているか確かめる。足りなくても進める。ただ、重くなる。",
   "wayfarer_notes.ch1.line.7": "岩殻片と骨片は、旅装にも、岩の砥石にも、道の固焼きにもなる。鍛冶場と薬師へ持っていけば誂えてくれる。",
   "message.skyabyss.ch1.plate.gate_hint": "鉄格子は壊せない。棘の間の東の壁ぎわの「鳴り石」で開く",
-  "message.skyabyss.ch1.plate.tap_hint": "光る「鳴り石」を右クリックで叩こう。上のろうそくの少ない順に"
+  "message.skyabyss.ch1.plate.tap_hint": "光る「鳴り石」を右クリックで叩こう。上のろうそくの少ない順に",
+  "sign.skyabyss.ch1_whale_1.1": "山が動いた",
+  "sign.skyabyss.ch1_whale_1.2": "と言った者は",
+  "sign.skyabyss.ch1_whale_1.3": "笑われた",
+  "sign.skyabyss.ch1_whale_1.4": "次の朝まで",
+  "sign.skyabyss.ch1_whale_2.1": "歌は低く",
+  "sign.skyabyss.ch1_whale_2.2": "骨に響く",
+  "sign.skyabyss.ch1_whale_2.3": "耳で聞くな",
+  "sign.skyabyss.ch1_whale_2.4": "胸で数えよ",
+  "sign.skyabyss.ch1_whale_3.1": "鯨は降りぬ",
+  "sign.skyabyss.ch1_whale_3.2": "降りる時は",
+  "sign.skyabyss.ch1_whale_3.3": "眠る時か",
+  "sign.skyabyss.ch1_whale_3.4": "終わる時だ"
 }

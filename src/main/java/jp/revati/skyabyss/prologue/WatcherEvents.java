@@ -130,7 +130,10 @@ public final class WatcherEvents {
                 continue;
             }
             if (level.random.nextFloat() < CHANCE_PER_SECOND) {
-                start(level, player, false);
+                // 章ごとに一度は、その章の巨神の方角を向いて立つ (01 の 4.2「見る者の向き」)
+                if (titanPending(player) == null || startTitan(level, player).isEmpty()) {
+                    start(level, player, false);
+                }
             }
         }
     }
@@ -190,6 +193,53 @@ public final class WatcherEvents {
     }
 
     // 人影が立っている間、本人の近くの動物は、少したってからそちらを向いて固まる
+    // ---------------------------------------------------------------- 章の見る者 (巨神の方角を向く)
+    // stage の上位の印。画面はこの印のとき、こちらへ振り向かず巨神の方角を向いたまま立つ (目を合わせると消えるのは同じ)
+    public static final int TITAN_FACING = 0x100;
+    static final String TITAN_SEEN = "skyabyss_watcher_titan_";
+
+    // まだ見せていない今の章 (巨神編で、居場所の分かる巨神)。なければ null
+    @Nullable
+    static jp.revati.skyabyss.story.Chapters titanPending(ServerPlayer player) {
+        jp.revati.skyabyss.story.Chapters c = jp.revati.skyabyss.story.Chapters.of(player);
+        if (c.titan() == null || player.getPersistentData().getBoolean(TITAN_SEEN + c.id())
+                || jp.revati.skyabyss.world.continent.ContinentLairs.all().get(c.titan()) == null) {
+            return null;
+        }
+        return c;
+    }
+
+    // 巨神の居場所の方角 (左右 70 度) の 28〜48 先に、巨神の方を向いて立たせる
+    static Optional<WatcherSpot> startTitan(ServerLevel level, ServerPlayer player) {
+        jp.revati.skyabyss.story.Chapters c = titanPending(player);
+        if (c == null) {
+            return Optional.empty();
+        }
+        var lair = jp.revati.skyabyss.world.continent.ContinentLairs.all().get(c.titan());
+        Vec3 eye = player.getEyePosition();
+        float toward = (float) (Math.atan2(-(lair.x() - eye.x), lair.z() - eye.z) * (180.0 / Math.PI));
+        Optional<WatcherSpot> spot = WatcherSpot.find(level, eye, toward, 28, 48, level.random, false, 140f);
+        if (spot.isEmpty()) {
+            return spot;
+        }
+        WatcherSpot s = spot.get();
+        float face = (float) (Math.atan2(-(lair.x() - s.feet().x), lair.z() - s.feet().z) * (180.0 / Math.PI));
+        PrologueData data = PrologueData.get(level);
+        PrologueData.Entry entry = data.entry(player.getUUID());
+        WatcherStage stage = WatcherStage.of(entry.sightings, moonNearness(level), 1);
+        long now = level.getGameTime();
+        int id = nextId++;
+        ACTIVE.put(player.getUUID(), new Active(id, s.feet(), now, now + stage.lifetimeTicks() * 2L + SERVER_GRACE));
+        double frequency = frequency();
+        if (frequency > 0) {
+            entry.nextWatcher = now + gap(level, frequency, moonNearness(level));
+        }
+        data.changed();
+        player.getPersistentData().putBoolean(TITAN_SEEN + c.id(), true);
+        PacketDistributor.sendToPlayer(player, new WatcherPayload(id, s.feet().x, s.feet().y, s.feet().z, face, stage.index() | TITAN_FACING));
+        return spot;
+    }
+
     private static void tickActive(ServerLevel level, long now) {
         Iterator<Map.Entry<UUID, Active>> it = ACTIVE.entrySet().iterator();
         while (it.hasNext()) {

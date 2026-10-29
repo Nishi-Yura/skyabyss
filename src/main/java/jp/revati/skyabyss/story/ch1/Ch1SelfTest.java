@@ -310,6 +310,8 @@ public final class Ch1SelfTest {
                 "prologue elements are not registered as expected");
         List<String> whaleIds = new ArrayList<>(Sites.WHALE);
         whaleIds.addAll(Sites.WHALE_P6);
+        // 鯨の碑 3 枚 (story/ChapterTablets。印は tablet だけ)
+        whaleIds.add(jp.revati.skyabyss.story.ChapterTablets.WHALE.element());
         check(ChapterSites.elements(Chapters.WHALE).stream().map(ChapterSites.Element::id)
                 .sorted().toList().equals(whaleIds.stream().sorted().toList()),
                 "chapter 1 elements are not registered as expected");

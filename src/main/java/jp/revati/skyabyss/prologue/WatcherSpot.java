@@ -33,10 +33,17 @@ public record WatcherSpot(Vec3 feet, float yaw, double distance, boolean skyline
 
     public static Optional<WatcherSpot> find(ServerLevel level, Vec3 eye, float viewYaw, int minDistance, int maxDistance,
                                              RandomSource random, boolean avoidView) {
+        return find(level, eye, viewYaw, minDistance, maxDistance, random, avoidView, 0f);
+    }
+
+    // cone > 0 なら、viewYaw の向きを中心に幅 cone 度の中だけを探す (章の見る者を巨神の方角に立たせる)
+    public static Optional<WatcherSpot> find(ServerLevel level, Vec3 eye, float viewYaw, int minDistance, int maxDistance,
+                                             RandomSource random, boolean avoidView, float cone) {
         WatcherSpot best = null;
         double bestScore = Double.NEGATIVE_INFINITY;
         for (int i = 0; i < TRIES; i++) {
-            float rel = avoidView
+            float rel = cone > 0f ? (random.nextFloat() - 0.5f) * cone
+                    : avoidView
                     ? VIEW_HALF_ANGLE + random.nextFloat() * (360f - 2f * VIEW_HALF_ANGLE)
                     : random.nextFloat() * 360f;
             float yaw = viewYaw + rel;

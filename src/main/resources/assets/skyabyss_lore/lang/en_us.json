@@ -132,5 +132,11 @@
   "lore.skyabyss.chapter1.shrine_storm.title": "The Thunder Wing Shrine",
   "lore.skyabyss.chapter1.shrine_storm.body": "A titan remembers the one who stilled it. Standing in the stone ring and offering a shard of its song, the song came back from the depths of its sleep and called us onto its back. It seems it wants us to cross that back again.",
   "lore.skyabyss.chapter1.shrine_ember.title": "The Ember Shrine",
-  "lore.skyabyss.chapter1.shrine_ember.body": "A titan remembers the one who stilled it. Standing in the stone ring and offering a shard of its song, the song came back from the depths of its sleep and called us onto its back. It seems it wants us to cross that back again."
+  "lore.skyabyss.chapter1.shrine_ember.body": "A titan remembers the one who stilled it. Standing in the stone ring and offering a shard of its song, the song came back from the depths of its sleep and called us onto its back. It seems it wants us to cross that back again.",
+  "lore.skyabyss.chapter1.whale_tablets.title": "The Whale Tablets",
+  "lore.skyabyss.chapter1.whale_tablets.body": "Three mossy tablets stood apart across the hills.\n\nThe first told of one who was laughed at for saying a mountain moved. By the next morning, no one was laughing.\n\nThe second, how to hear the song: not with the ears, but counted in the bones of the chest. The third: the whale comes down to earth only to sleep, or to end.",
+  "lore.skyabyss.chapter1.ember_tablets.title": "The Ash Tablets",
+  "lore.skyabyss.chapter1.ember_tablets.body": "Three black stone tablets stood in the burnt land, dusted with ash.\n\nThe first said the ash does not fall from the sky, but rises from beneath your feet.\n\nThe second, that the ash folk borrowed fire and kept forging without ever setting a day to return it. The third: the mountain does not sleep. It holds its breath, and counts the names of the smiths.",
+  "message.skyabyss.tablets.ch1_whale": "A mossy tablet. There seem to be two more somewhere in the hills.",
+  "message.skyabyss.tablets.ch4_ash": "An ash-covered tablet. There seem to be two more in the burnt land."
 }

@@ -62,7 +62,7 @@ GROW = 3   # 範囲を各辺 GROW だけ広げる (場面の岩と木を範囲�
 
 
 # 三章の雷の小要素のうち、仕掛けが「小さな設計図」(幅 8 まで) を求めるもの (StormChapterSelfTest)
-SMALL = {"ch3_pack": 1, "ch3_tablet": 1, "ch3_vane": 1}
+SMALL = {"ch3_pack": 1, "ch3_tablet": 1, "ch3_vane": 1, "ch1_tablet": 1, "ch4_tablet": 1}
 
 
 def newbp(name, grow=GROW):
@@ -654,6 +654,9 @@ BUILDERS = {
     "ch3_ruin": marker("ch3_ruin", 581, "storm", ("cobblestone", "minecraft:mossy_cobblestone")),
     "ch3_tablet": marker("ch3_tablet", 582, "storm", ("stone_brick", "minecraft:cracked_stone_bricks")),
     "ch3_vane": marker("ch3_vane", 583, "storm", ("cobblestone", "minecraft:cobblestone")),
+    # 一章の鯨の碑・四章の灰の碑 (2026-10-30。三章の風の碑と同じ形。台の種は data の ch1_tablet / ch4_tablet)
+    "ch1_tablet": marker("ch1_tablet", 567, "whale", ("stone_brick", "minecraft:mossy_stone_bricks")),
+    "ch4_tablet": marker("ch4_tablet", 595, "ember", ("polished_blackstone_brick", "minecraft:polished_blackstone_bricks")),
     "ch3_wind_flag": marker("ch3_wind_flag", 584, "storm", ("stone_brick", "minecraft:stone_bricks")),
     "ch4_ash_watch": ch4_ash_watch, "ch4_soot_kiln": ch4_soot_kiln, "ch4_warm_rocks": ch4_warm_rocks,
     "ch4_ash_mark": marker("ch4_ash_mark", 591, "ember", ("polished_blackstone", "minecraft:blackstone")),
