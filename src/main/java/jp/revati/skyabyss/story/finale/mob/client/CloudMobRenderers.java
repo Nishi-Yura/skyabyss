@@ -29,6 +29,9 @@ public final class CloudMobRenderers {
         event.registerEntityRenderer(CloudMobsSetup.BELL_MOURNER.get(), ctx -> new Foe<>(ctx, BellMourner.ID, 0.45f, 1.0f));
         event.registerEntityRenderer(CloudMobsSetup.MIST_BIRD.get(), ctx -> new Foe<>(ctx, MistBird.ID, 0.0f, 1.0f));
         event.registerEntityRenderer(CloudMobsSetup.LAST_BELLKEEPER.get(), ctx -> new Foe<>(ctx, LastBellkeeper.ID, 1.1f, 1.0f));
+        event.registerEntityRenderer(CloudMobsSetup.NET_CASTER.get(), ctx -> new Foe<>(ctx, jp.revati.skyabyss.story.finale.mob.NetCaster.ID, 0.45f, 1.0f));
+        event.registerEntityRenderer(CloudMobsSetup.LAMP_MOTH.get(), ctx -> new Foe<>(ctx, jp.revati.skyabyss.story.finale.mob.LampMoth.ID, 0.0f, 1.0f));
+        event.registerEntityRenderer(CloudMobsSetup.LAMP_EYE.get(), ctx -> new Foe<>(ctx, jp.revati.skyabyss.story.finale.mob.LampEye.ID, 0.0f, 1.0f));
     }
 
     static final class Model<T extends CloudMob> extends LowPolyGeoRenderer.Model<T> {

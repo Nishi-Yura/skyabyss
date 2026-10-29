@@ -12,7 +12,7 @@
   animations/entity/<id>.animation.json, models/item/<id>_spawn_egg.json
   assets/skyabyss_finale/sounds.json            音の出来事 (既存の音の別名。字幕は lang)
 
-島 1「鐘の島」(2026-10-30): 鐘の亡者・霞鳥・最後の鐘守。
+島 1「鐘の島」(2026-10-30): 鐘の亡者・霞鳥・最後の鐘守。島 2「灯の島」(2026-10-30): 網打ち・灯蛾・灯守の目。
 回転の約束は gen_moon_mobs と同じ (kf の x が負 = 前へ傾く)。
 """
 import importlib.util
@@ -34,7 +34,7 @@ A = os.path.join(ROOT, "src", "main", "resources", "assets", "skyabyss")
 AF = os.path.join(ROOT, "src", "main", "resources", "assets", "skyabyss_finale")
 ROUGH = os.path.join(ROOT, "docs", "review", "cloud_roughs")
 
-CHOICE = {"bell_mourner": "a", "mist_bird": "a", "last_bellkeeper": "a"}
+CHOICE = {"bell_mourner": "a", "mist_bird": "a", "last_bellkeeper": "a", "net_caster": "a", "lamp_moth": "a", "lamp_eye": "a"}
 
 
 # ---------------------------------------------------------------- 鐘の亡者 (よろよろ歩く・鐘を振り上げて鳴らす)
@@ -123,7 +123,79 @@ def last_bellkeeper():
             p + "death": once(2.4, death, True)}
 
 
-ANIMS = {"bell_mourner": bell_mourner, "mist_bird": mist_bird, "last_bellkeeper": last_bellkeeper}
+# ---------------------------------------------------------------- 網打ち (歩く・網を振り回して投げる)
+def net_caster():
+    p = "animation.net_caster."
+    idle = {"body": bone([S(0, 2, 40), "0", S(90, 2, 30)]), "head": bone([S(90, 4, 30), S(0, 8, 20), "0"]),
+            "net": bone([S(0, 4, 60), "0", S(90, 3, 50)])}
+    walk = {"leg_l": bone([S(0, 22, 220), "0", "0"]), "leg_r": bone([S(180, 22, 220), "0", "0"]),
+            "body": bone(["0", "0", S(0, 3, 220)], [0, S(0, 0.4, 440), 0]), "net": bone([S(90, 8, 220), "0", "0"])}
+    # 投げる (1.4): 0.8 まで網を頭上で振り回す (予告)、0.9 で前へ投げる
+    cast = {"arm_l": bone(kf({0: (0, 0, 0), 0.3: (-150, 0, -15), 0.55: (-150, 30, -15), 0.8: (-150, -30, -15), 0.9: (-60, 0, -5), 1.4: (0, 0, 0)})),
+            "arm_r": bone(kf({0: (0, 0, 0), 0.3: (-150, 0, 15), 0.55: (-150, 30, 15), 0.8: (-150, -30, 15), 0.9: (-60, 0, 5), 1.4: (0, 0, 0)})),
+            "net": bone(kf({0: (0, 0, 0), 0.3: (-40, 0, 0), 0.55: (-40, 120, 0), 0.8: (-40, 240, 0), 0.9: (-80, 360, 0), 1.0: (-90, 360, 0), 1.4: (0, 360, 0)}),
+                        kf({0: (0, 0, 0), 0.8: (0, 4, 0), 0.9: (0, 2, -6), 1.1: (0, 0, -4), 1.4: (0, 0, 0)}, False)),
+            "body": bone(kf({0: (0, 0, 0), 0.8: (-8, 0, 0), 0.9: (14, 0, 0), 1.4: (0, 0, 0)})),
+            "head": bone(kf({0: (0, 0, 0), 0.8: (-12, 0, 0), 0.9: (6, 0, 0), 1.4: (0, 0, 0)}))}
+    strike = {"arm_l": bone(kf({0: (0, 0, 0), 0.35: (-70, 0, 0), 0.5: (10, 0, 0), 0.8: (0, 0, 0)})),
+              "arm_r": bone(kf({0: (0, 0, 0), 0.35: (-70, 0, 0), 0.5: (10, 0, 0), 0.8: (0, 0, 0)})),
+              "body": bone(kf({0: (0, 0, 0), 0.35: (-6, 0, 0), 0.5: (12, 0, 0), 0.8: (0, 0, 0)}))}
+    death = {"body": bone(kf({0: (0, 0, 0), 0.6: (30, 0, 0), 1.2: (85, 0, -5)}), kf({0: (0, 0, 0), 1.2: (0, -8, 0)}, False)),
+             "net": bone(kf({0: (0, 0, 0), 0.6: (30, 0, 0)}))}
+    return {p + "idle": loop(6.0, idle), p + "walk": loop(1.6, walk), p + "cast": once(1.4, cast), p + "strike": once(0.8, strike),
+            p + "hurt": once(0.22, hurt_bones()), p + "death": once(1.2, death, True)}
+
+
+# ---------------------------------------------------------------- 灯蛾 (舞う・強く光って触れる)
+def lamp_moth():
+    p = "animation.lamp_moth."
+    idle = {"wing_l": bone(["0", "0", S(0, 30, 420)]), "wing_r": bone(["0", "0", S(180, 30, 420)]),
+            "body": bone([S(0, 6, 120), S(90, 8, 90), "0"], [0, S(0, 0.8, 120), 0]), "head": bone([S(90, 6, 80), "0", "0"])}
+    walk = {"wing_l": bone(["0", "0", S(0, 38, 560)]), "wing_r": bone(["0", "0", S(180, 38, 560)]), "body": bone([S(0, 8, 280), "0", "0"])}
+    # 光る (1.2): 翅を大きく開いて震わせる (予告)、1.0 で前へ突っ込む
+    flap_l = {0: (0, 0, 0), 1.0: (0, -30, -20), 1.2: (0, 0, 0)}
+    flap_r = {0: (0, 0, 0), 1.0: (0, 30, 20), 1.2: (0, 0, 0)}
+    for i in range(8):
+        t = 0.2 + i * 0.1
+        flap_l[t] = (0, 0, 40 if i % 2 == 0 else 30)
+        flap_r[t] = (0, 0, -40 if i % 2 == 0 else -30)
+    flare = {"wing_l": bone(kf(dict(sorted(flap_l.items())))), "wing_r": bone(kf(dict(sorted(flap_r.items())))),
+             "body": bone(kf({0: (0, 0, 0), 0.2: (15, 0, 0), 1.0: (-25, 0, 0), 1.2: (0, 0, 0)}))}
+    death = {"body": bone(kf({0: (0, 0, 0), 0.6: (60, 0, 160), 1.0: (90, 0, 200)}), kf({0: (0, 0, 0), 1.0: (0, -10, 0)}, False)),
+             "wing_l": bone(kf({0: (0, 0, 0), 0.5: (0, 0, 60)})), "wing_r": bone(kf({0: (0, 0, 0), 0.5: (0, 0, -60)}))}
+    return {p + "idle": loop(1.0, idle), p + "walk": loop(1.0, walk), p + "flare": once(1.2, flare), p + "hurt": once(0.22, hurt_bones()),
+            p + "death": once(1.0, death, True)}
+
+
+# ---------------------------------------------------------------- 灯守の目 (主)
+def lamp_eye():
+    p = "animation.lamp_eye."
+    idle = {"cage": bone([S(0, 3, 40), "0", S(90, 3, 30)], [0, S(0, 1.0, 40), 0]), "eye": bone([S(90, 6, 30), S(0, 10, 22), "0"])}
+    walk = {"cage": bone([S(0, 4, 80), "0", S(90, 4, 60)], [0, S(0, 1.0, 80), 0])}
+    # 凝視 (1.5 保つ): 目が見開き (前へ寄る)、鎧戸が少し開く
+    stare = {"eye": dict(bone(kf({0: (0, 0, 0), 0.4: (6, 0, 0)}), kf({0: (0, 0, 0), 0.4: (0, 0, -1.2)}, False)),
+                         scale=M.scale({0: (1, 1, 1), 0.4: (1.08, 1.08, 1.08), 1.4: (1.12, 1.12, 1.12), 1.5: (1, 1, 1)})),
+             "shutter_l": bone(kf({0: (0, 0, 0), 0.4: (0, 18, 0), 1.5: (0, 18, 0)})), "shutter_r": bone(kf({0: (0, 0, 0), 0.4: (0, -18, 0), 1.5: (0, -18, 0)})),
+             "cage": bone(kf({0: (0, 0, 0), 0.4: (-6, 0, 0), 1.5: (-6, 0, 0)}))}
+    # 目を閉じる (3.0): 鎧戸が前へ回って目を隠し、籠が少し沈む
+    closed = {"shutter_l": bone(kf({0: (0, 0, 0), 0.3: (0, -100, 0), 2.7: (0, -100, 0), 3.0: (0, 0, 0)})),
+              "shutter_r": bone(kf({0: (0, 0, 0), 0.3: (0, 100, 0), 2.7: (0, 100, 0), 3.0: (0, 0, 0)})),
+              "cage": bone(kf({0: (0, 0, 0), 0.3: (8, 0, 0), 2.7: (8, 0, 0), 3.0: (0, 0, 0)}),
+                           kf({0: (0, 0, 0), 0.3: (0, -3, 0), 2.7: (0, -3, 0), 3.0: (0, 0, 0)}, False))}
+    # 灯の雨 (1.2): 目を上へ向けて光を撒く
+    rain = {"eye": bone(kf({0: (0, 0, 0), 0.4: (-40, 0, 0), 1.0: (-40, 0, 0), 1.2: (0, 0, 0)})),
+            "cage": bone(kf({0: (0, 0, 0), 0.4: (0, 0, 0), 0.6: (0, 0, 6), 0.8: (0, 0, -6), 1.0: (0, 0, 0)}))}
+    # 呼ぶ (2.0): 籠が揺れ、目が四方を見る
+    call = {"eye": bone(kf({0: (0, 0, 0), 0.4: (0, 60, 0), 0.8: (0, -60, 0), 1.2: (-20, 0, 0), 2.0: (0, 0, 0)})),
+            "cage": bone(kf({0: (0, 0, 0), 0.4: (0, 0, 10), 0.8: (0, 0, -10), 1.2: (0, 0, 0)}))}
+    death = {"cage": bone(kf({0: (0, 0, 0), 1.0: (20, 0, 15), 2.4: (60, 0, 40)}), kf({0: (0, 0, 0), 1.0: (0, -6, 0), 2.4: (0, -24, 0)}, False)),
+             "shutter_l": bone(kf({0: (0, 0, 0), 0.6: (0, -100, 0)})), "shutter_r": bone(kf({0: (0, 0, 0), 0.6: (0, 100, 0)}))}
+    return {p + "idle": loop(8.0, idle), p + "walk": loop(4.0, walk), p + "stare": once(1.5, stare, True), p + "closed": once(3.0, closed),
+            p + "rain": once(1.2, rain), p + "call": once(2.0, call), p + "hurt": once(0.22, hurt_bones("cage")), p + "death": once(2.4, death, True)}
+
+
+ANIMS = {"bell_mourner": bell_mourner, "mist_bird": mist_bird, "last_bellkeeper": last_bellkeeper,
+         "net_caster": net_caster, "lamp_moth": lamp_moth, "lamp_eye": lamp_eye}
 
 
 # ---------------------------------------------------------------- 素材を入れる
@@ -195,6 +267,22 @@ SOUNDS = {
     "keeper_silence": [ev("block.sculk_shrieker.shriek", 1.6, 0.6)],
     "keeper_call": [ev("block.bell.resonate", 0.5, 1.4)],
     "keeper_roar": [ev("block.bell.use", 0.3, 1.8)],
+    # 島 2「灯の島」
+    "beam_caught": [ev("block.beacon.power_select", 0.7, 0.8)],
+    "lamp_lit": [ev("block.respawn_anchor.charge", 1.6, 0.9)],
+    "lamp_out": [ev("block.respawn_anchor.deplete", 1.4, 0.6)],
+    "caster_tell": [ev("entity.fishing_bobber.throw", 0.6, 1.0)],
+    "caster_cast": [ev("entity.fishing_bobber.splash", 0.7, 1.2)],
+    "caster_idle": [ev("entity.drowned.ambient", 0.6, 0.5)],
+    "moth_flare": [ev("block.amethyst_block.chime", 1.8, 1.0)],
+    "moth_mark": [ev("block.beacon.activate", 1.8, 0.8)],
+    "eye_stare": [ev("entity.elder_guardian.curse", 1.4, 0.9)],
+    "eye_beam": [ev("entity.guardian.attack", 0.8, 1.4)],
+    "eye_close": [ev("block.iron_door.close", 0.6, 1.2)],
+    "eye_rain_tell": [ev("block.beacon.power_select", 1.6, 1.0)],
+    "eye_rain": [ev("entity.firework_rocket.blast", 1.2, 0.9)],
+    "eye_call": [ev("block.respawn_anchor.set_spawn", 1.2, 1.2)],
+    "eye_roar": [ev("entity.elder_guardian.ambient", 0.6, 1.6)],
 }
 
 

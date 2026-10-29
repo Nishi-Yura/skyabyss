@@ -67,6 +67,28 @@ def bell_cloud_tex(solid, fade):
     return img
 
 
+def light_path_tex():
+    """光の橋: 白金の板。縁に金の細い枠、面に斜めの淡い光の筋 (32x32)"""
+    N = 32
+    img = Image.new("RGBA", (N, N))
+    for y in range(N):
+        for x in range(N):
+            edge = x in (0, N - 1) or y in (0, N - 1)
+            inner = x in (1, N - 2) or y in (1, N - 2)
+            streak = ((x + y) % 11) in (0, 1)
+            v = 0.9 + 0.05 * (hsh(x, y, 9) - 0.5)
+            if edge:
+                c = (232, 196, 110)
+            elif inner:
+                c = (255, 238, 196)
+            elif streak:
+                c = (255, 250, 232)
+            else:
+                c = (int(250 * v), int(240 * v), int(214 * v))
+            img.putpixel((x, y), c + (255,))
+    return img
+
+
 def main():
     (A / "textures/block").mkdir(parents=True, exist_ok=True)
     cloud_tex().save(A / "textures/block/cloud.png")
@@ -84,6 +106,16 @@ def main():
                 "textures": {"all": "skyabyss:block/" + name, "particle": "skyabyss:block/" + name}}, indent=2), encoding="utf-8")
             variants["fade=%s,solid=%s" % (str(fade).lower(), str(solid).lower())] = {"model": "skyabyss:block/" + name}
     (A / "blockstates/bell_cloud.json").write_text(json.dumps({"variants": variants}, indent=2), encoding="utf-8")
+    light_path_tex().save(A / "textures/block/light_path.png")
+    tex = {"all": "skyabyss:block/light_path", "particle": "skyabyss:block/light_path"}
+    (A / "models/block/light_path.json").write_text(json.dumps({"parent": "minecraft:block/cube_all", "textures": tex}, indent=2), encoding="utf-8")
+    (A / "blockstates/light_path.json").write_text(json.dumps({"variants": {"": {"model": "skyabyss:block/light_path"}}}, indent=2), encoding="utf-8")
+    st = {"bottom": "skyabyss:block/light_path", "top": "skyabyss:block/light_path", "side": "skyabyss:block/light_path"}
+    (A / "models/block/light_path_slab.json").write_text(json.dumps({"parent": "minecraft:block/slab", "textures": st}, indent=2), encoding="utf-8")
+    (A / "models/block/light_path_slab_top.json").write_text(json.dumps({"parent": "minecraft:block/slab_top", "textures": st}, indent=2), encoding="utf-8")
+    (A / "blockstates/light_path_slab.json").write_text(json.dumps({"variants": {
+        "type=bottom": {"model": "skyabyss:block/light_path_slab"}, "type=top": {"model": "skyabyss:block/light_path_slab_top"},
+        "type=double": {"model": "skyabyss:block/light_path"}}}, indent=2), encoding="utf-8")
     print("cloud assets written")
 
 

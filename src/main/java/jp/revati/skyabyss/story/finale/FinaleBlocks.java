@@ -24,6 +24,14 @@ public final class FinaleBlocks {
                     .sound(SoundType.WOOL).pushReaction(PushReaction.BLOCK).noOcclusion().isViewBlocking((s, l, p) -> false)
                     .lightLevel(s -> s.getValue(BellCloudBlock.SOLID) ? 9 : 0)));
 
+    // 光の橋 (島と島をつなぐ白金の板。主を倒した人だけが渡れる。IsleBridges)
+    public static final DeferredBlock<net.minecraft.world.level.block.Block> LIGHT_PATH = BLOCKS.register("light_path",
+            () -> new net.minecraft.world.level.block.Block(BlockBehaviour.Properties.of().mapColor(MapColor.GOLD).strength(-1.0f, 3600000.0f).noLootTable()
+                    .sound(SoundType.AMETHYST).pushReaction(PushReaction.BLOCK).lightLevel(s -> 11)));
+    public static final DeferredBlock<net.minecraft.world.level.block.SlabBlock> LIGHT_PATH_SLAB = BLOCKS.register("light_path_slab",
+            () -> new net.minecraft.world.level.block.SlabBlock(BlockBehaviour.Properties.of().mapColor(MapColor.GOLD).strength(-1.0f, 3600000.0f).noLootTable()
+                    .sound(SoundType.AMETHYST).pushReaction(PushReaction.BLOCK).lightLevel(s -> 11)));
+
     private FinaleBlocks() {
     }
 

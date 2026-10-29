@@ -1,0 +1,51 @@
+# 終章の雲海 島 2「灯の島」(docs/design/50 の 4.2.2): 光の橋・島と灯台・浜と陰・光の筋・漁の灯・敵 2 種・主の間と灯守の目
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/cloudsea_isle2.txt -PshotsName=cloudsea_isle2
+world cloudsea_isle2_a
+size 1280 720
+timeout 3000
+render 12
+cmd gamemode spectator
+camera 0 -55 0 180 0
+waitchunks
+hud off
+wait 300
+cmd skyabyss cinematic stop
+close
+wait 20
+cmd skyabyss cloudsea enter
+wait 200
+cmd tp @s 0 110 -260
+waitchunks 200
+wait 100
+camera 0 108 -191 180 10
+wait 60
+shot k01_light_bridge
+camera 72 142 -248 140 30
+wait 60
+shot k02_overview
+cmd tp @s 0 95 -285
+wait 40
+camera 0 93.5 -268 180 4
+wait 60
+shot k03_beach_lighthouse
+camera -14 93 -292 200 6
+wait 40
+shot k04_huts_and_stacks
+cmd skyabyss cloudsea lamp w
+camera -33 94 -297 100 12
+wait 30
+shot k05_west_lamp_lit
+cmd summon skyabyss:net_caster 1 92 -284 {NoAI:1b,Rotation:[160f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:lamp_moth -2 93.5 -284 {NoAI:1b,Rotation:[200f,0f],PersistenceRequired:1b}
+wait 20
+camera 0 93 -279.5 180 8
+wait 30
+shot k06_foes
+cmd skyabyss cloudsea eye
+wait 60
+camera 3 133 -305 180 36
+wait 40
+shot k07_arena
+camera 3 122.5 -313 180 2
+wait 30
+shot k08_eye

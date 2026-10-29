@@ -1,0 +1,16 @@
+{
+ "id": "moon_net_caster",
+ "short": "網打ち",
+ "kind": "灯の島の敵 一品一案 (50 の 4.2.2)",
+ "title": "網打ち (net_caster) — 濡れた網を抱える前の浜の漁師の抜け殻・低ポリ + ドット絵 一案",
+ "sheets": [
+  "moon_roughs/net_caster.png"
+ ],
+ "extra": "灯の島の言葉 (油引きの緑灰・縄の茶・海藻・朝の光)。骨 8 本。光るのは目だけ。 三角形 1176 (目安 中の敵 600〜1200)。埋まった部品: toggle2-coat:0.5, leg-1-coat:0.6, leg1-coat:0.6, hatband-hat:0.82。生成: tools/rough/lowpoly/moon/net_caster.py。三段の姿: 二段目 = 網の結び目が朝の光にともる。",
+ "options": {
+  "a": {
+   "name": "網を垂らす漁師の抜け殻 (1176 三角形)",
+   "desc": "油引きの外套と雨帽、空ろな顔、肩から胸の前へ垂れる縄の網と浮き、海藻。"
+  }
+ }
+}

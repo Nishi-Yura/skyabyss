@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "type=bottom": {
+      "model": "skyabyss:block/light_path_slab"
+    },
+    "type=top": {
+      "model": "skyabyss:block/light_path_slab_top"
+    },
+    "type=double": {
+      "model": "skyabyss:block/light_path"
+    }
+  }
+}

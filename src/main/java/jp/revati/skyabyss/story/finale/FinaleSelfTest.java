@@ -80,6 +80,7 @@ public final class FinaleSelfTest {
             Quests.forgetAll(p);
             check(f, FinaleSelfTest.class.getResource("/assets/skyabyss/story_reels/" + FinaleGate.REEL + ".json") != null, "reel " + FinaleGate.REEL + " is missing");
             isle1(cloud, p, f);
+            isle2(cloud, p, f);
         } catch (RuntimeException ex) {
             SkyAbyss.LOGGER.error("SELFTEST cloudsea crashed", ex);
             f.add("crashed: " + ex);
@@ -172,9 +173,85 @@ public final class FinaleSelfTest {
         }
     }
 
+    // 島 2「灯の島」(50 の 4.2.2): 光の橋が途切れない・関所 / 漁の灯 3・扉 / 光の筋 (見えていれば重い、陰で外れる、灯されれば陰でも) / 主の間の主
+    static void isle2(ServerLevel cloud, FakePlayer p, List<String> f) {
+        check(f, FinaleWorld.version(cloud.getServer()) >= 3, "island 2 was not poured (version " + FinaleWorld.version(cloud.getServer()) + ")");
+        FinaleTerrain t = LampIsle.terrain();
+        BlockPos s = t.mark("bridge_gate");
+        BlockPos e = t.mark("arrive");
+        int gaps = 0;
+        for (int z = s.getZ(); z >= e.getZ(); z--) {
+            boolean floor = false;
+            for (int y = 110; y >= 80; y--) {
+                BlockPos q = new BlockPos(0, y, z);
+                cloud.getChunk(q);
+                if (!cloud.getBlockState(q).getCollisionShape(cloud, q).isEmpty()) {
+                    floor = cloud.getBlockState(q.above()).getCollisionShape(cloud, q.above()).isEmpty()
+                            && cloud.getBlockState(q.above(2)).getCollisionShape(cloud, q.above(2)).isEmpty();
+                    break;
+                }
+            }
+            gaps += floor ? 0 : 1;
+        }
+        check(f, gaps == 0, "the light bridge has " + gaps + " gaps between the bell tower and island 2");
+        for (String k : List.of("w", "e", "s")) {
+            check(f, cloud.getBlockState(t.mark("lamp_" + k)).getBlock() instanceof net.minecraft.world.level.block.RedstoneLampBlock, "fishing lamp " + k + " is missing");
+        }
+        for (String k : List.of("arena_entry", "door_front", "arrive", "frag_w", "frag_e", "frag_s")) {
+            BlockPos q = t.mark(k);
+            check(f, cloud.getBlockState(q.below()).isFaceSturdy(cloud, q.below(), net.minecraft.core.Direction.UP) && cloud.getBlockState(q).isAir(), k + " is not standable");
+        }
+        // 関所: 鐘の島を終えていない人は主の間の入口へ戻る
+        Quests.forgetAll(p);
+        p.moveTo(s.getX() + 0.5, s.getY(), s.getZ() - 3 + 0.5, 0f, 0f);
+        LampIsle.gate(p);
+        check(f, p.blockPosition().closerThan(BellIsle.mark("arena_entry"), 2), "the light bridge let someone through before the bell lord");
+        // 扉
+        check(f, !LampIsle.doorOpen(p), "the lighthouse door opened without the quest");
+        Quests.start(p, LampIsle.QUEST);
+        QuestLog.Entry qe = QuestLog.of(p).entry(LampIsle.QUEST);
+        check(f, qe != null && !LampIsle.doorOpen(p), "the lighthouse door opened before the three lamps");
+        if (qe != null) {
+            qe.stage = 2;
+            check(f, LampIsle.doorOpen(p), "the lighthouse door did not open at the door stage");
+        }
+        Quests.forgetAll(p);
+        // 光の筋 (主の間で: 目から入口の人は見える、石柱の陰の人は見えない)
+        LampIsle.reset(p);
+        net.minecraft.world.phys.Vec3 eye = t.mark("lord_spawn").getCenter().add(0, 0.9, 0);
+        BlockPos en = t.mark("arena_entry");
+        p.moveTo(en.getX() + 0.5, en.getY(), en.getZ() + 0.5, 0f, 0f);
+        double toEntry = Math.atan2(p.getEyePosition().z - eye.z, p.getEyePosition().x - eye.x);
+        check(f, LampIsle.inBeam(cloud, eye, toEntry, 0.2, 13, p), "the eye cannot see someone at the arena entry");
+        check(f, !LampIsle.inBeam(cloud, eye, toEntry + Math.PI, 0.2, 13, p), "the beam pointing away still caught someone");
+        BlockPos pil = t.mark("pillar_1");
+        net.minecraft.world.phys.Vec3 pc = new net.minecraft.world.phys.Vec3(pil.getX() + 1.0, pil.getY(), pil.getZ() + 1.0);
+        net.minecraft.world.phys.Vec3 out = pc.subtract(eye.x, pc.y, eye.z).multiply(1, 0, 1).normalize();
+        net.minecraft.world.phys.Vec3 behind = pc.add(out.scale(1.8));
+        p.moveTo(behind.x, pil.getY(), behind.z, 0f, 0f);
+        double toBehind = Math.atan2(p.getEyePosition().z - eye.z, p.getEyePosition().x - eye.x);
+        check(f, !LampIsle.inBeam(cloud, eye, toBehind, 0.2, 13, p), "a pillar did not shade someone from the eye");
+        jp.revati.skyabyss.story.finale.mob.LampMoth.mark(p);
+        check(f, LampIsle.inBeam(cloud, eye, toBehind, 0.2, 13, p), "a lit (moth-marked) person was shaded by a pillar");
+        LampIsle.gaze(p, true, LampIsle.HOLD, 0, null);
+        check(f, LampIsle.heavy(p) && p.getAttributeValue(net.minecraft.world.entity.ai.attributes.Attributes.JUMP_STRENGTH) < 0.01, "the beam did not make someone heavy");
+        LampIsle.gaze(p, false, LampIsle.HOLD, 0, null);
+        check(f, !LampIsle.heavy(p), "leaving the beam did not lift the weight");
+        LampIsle.reset(p);
+        // 素材と主
+        for (String id : List.of("net_caster", "lamp_moth", "lamp_eye")) {
+            check(f, FinaleSelfTest.class.getResource("/assets/skyabyss/animations/entity/" + id + ".animation.json") != null
+                    && FinaleSelfTest.class.getResource("/assets/skyabyss/textures/lowpoly/" + id + "_s2.png") != null, "assets of " + id + " are missing");
+        }
+        jp.revati.skyabyss.story.finale.mob.LampEye lord = LampArena.summon(cloud);
+        check(f, lord != null && lord.blockPosition().closerThan(t.mark("lord_spawn"), 2.5) && lord.getMaxHealth() > 900, "the lamp-keeper's eye did not appear at its spot");
+        LampArena.clear(cloud);
+        check(f, LampArena.lords(cloud).isEmpty(), "clearing the lighthouse arena left the eye");
+    }
+
     static void report(List<String> f) {
         if (f.isEmpty()) {
-            SkyAbyss.LOGGER.info("SELFTEST cloudsea PASSED (dimension, arrival island and marks, cloud layer, fall rescue, gate condition, quest and reel; island 1 bridge, bells, bell clouds ring/silence, tower door, foes, lord and arena floor)");
+            SkyAbyss.LOGGER.info("SELFTEST cloudsea PASSED (dimension, arrival island and marks, cloud layer, fall rescue, gate condition, quest and reel; island 1 bridge, bells, bell clouds ring/silence, tower door, foes, lord and arena floor; island 2 light bridge and gate, lamps, door, beam and shade, moth light, eye)");
         } else {
             f.forEach(m -> SkyAbyss.LOGGER.error("SELFTEST cloudsea FAILED: {}", m));
         }

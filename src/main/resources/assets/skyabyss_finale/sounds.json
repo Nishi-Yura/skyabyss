@@ -152,5 +152,170 @@
         "volume": 1.8
       }
     ]
+  },
+  "beam_caught": {
+    "subtitle": "subtitles.skyabyss_finale.beam_caught",
+    "sounds": [
+      {
+        "name": "minecraft:block.beacon.power_select",
+        "type": "event",
+        "pitch": 0.7,
+        "volume": 0.8
+      }
+    ]
+  },
+  "lamp_lit": {
+    "subtitle": "subtitles.skyabyss_finale.lamp_lit",
+    "sounds": [
+      {
+        "name": "minecraft:block.respawn_anchor.charge",
+        "type": "event",
+        "pitch": 1.6,
+        "volume": 0.9
+      }
+    ]
+  },
+  "lamp_out": {
+    "subtitle": "subtitles.skyabyss_finale.lamp_out",
+    "sounds": [
+      {
+        "name": "minecraft:block.respawn_anchor.deplete",
+        "type": "event",
+        "pitch": 1.4,
+        "volume": 0.6
+      }
+    ]
+  },
+  "caster_tell": {
+    "subtitle": "subtitles.skyabyss_finale.caster_tell",
+    "sounds": [
+      {
+        "name": "minecraft:entity.fishing_bobber.throw",
+        "type": "event",
+        "pitch": 0.6,
+        "volume": 1.0
+      }
+    ]
+  },
+  "caster_cast": {
+    "subtitle": "subtitles.skyabyss_finale.caster_cast",
+    "sounds": [
+      {
+        "name": "minecraft:entity.fishing_bobber.splash",
+        "type": "event",
+        "pitch": 0.7,
+        "volume": 1.2
+      }
+    ]
+  },
+  "caster_idle": {
+    "subtitle": "subtitles.skyabyss_finale.caster_idle",
+    "sounds": [
+      {
+        "name": "minecraft:entity.drowned.ambient",
+        "type": "event",
+        "pitch": 0.6,
+        "volume": 0.5
+      }
+    ]
+  },
+  "moth_flare": {
+    "subtitle": "subtitles.skyabyss_finale.moth_flare",
+    "sounds": [
+      {
+        "name": "minecraft:block.amethyst_block.chime",
+        "type": "event",
+        "pitch": 1.8,
+        "volume": 1.0
+      }
+    ]
+  },
+  "moth_mark": {
+    "subtitle": "subtitles.skyabyss_finale.moth_mark",
+    "sounds": [
+      {
+        "name": "minecraft:block.beacon.activate",
+        "type": "event",
+        "pitch": 1.8,
+        "volume": 0.8
+      }
+    ]
+  },
+  "eye_stare": {
+    "subtitle": "subtitles.skyabyss_finale.eye_stare",
+    "sounds": [
+      {
+        "name": "minecraft:entity.elder_guardian.curse",
+        "type": "event",
+        "pitch": 1.4,
+        "volume": 0.9
+      }
+    ]
+  },
+  "eye_beam": {
+    "subtitle": "subtitles.skyabyss_finale.eye_beam",
+    "sounds": [
+      {
+        "name": "minecraft:entity.guardian.attack",
+        "type": "event",
+        "pitch": 0.8,
+        "volume": 1.4
+      }
+    ]
+  },
+  "eye_close": {
+    "subtitle": "subtitles.skyabyss_finale.eye_close",
+    "sounds": [
+      {
+        "name": "minecraft:block.iron_door.close",
+        "type": "event",
+        "pitch": 0.6,
+        "volume": 1.2
+      }
+    ]
+  },
+  "eye_rain_tell": {
+    "subtitle": "subtitles.skyabyss_finale.eye_rain_tell",
+    "sounds": [
+      {
+        "name": "minecraft:block.beacon.power_select",
+        "type": "event",
+        "pitch": 1.6,
+        "volume": 1.0
+      }
+    ]
+  },
+  "eye_rain": {
+    "subtitle": "subtitles.skyabyss_finale.eye_rain",
+    "sounds": [
+      {
+        "name": "minecraft:entity.firework_rocket.blast",
+        "type": "event",
+        "pitch": 1.2,
+        "volume": 0.9
+      }
+    ]
+  },
+  "eye_call": {
+    "subtitle": "subtitles.skyabyss_finale.eye_call",
+    "sounds": [
+      {
+        "name": "minecraft:block.respawn_anchor.set_spawn",
+        "type": "event",
+        "pitch": 1.2,
+        "volume": 1.2
+      }
+    ]
+  },
+  "eye_roar": {
+    "subtitle": "subtitles.skyabyss_finale.eye_roar",
+    "sounds": [
+      {
+        "name": "minecraft:entity.elder_guardian.ambient",
+        "type": "event",
+        "pitch": 0.6,
+        "volume": 1.6
+      }
+    ]
   }
 }

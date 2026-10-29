@@ -1,0 +1,25 @@
+# 島 2 の追い撮り: 網打ちと灯蛾を主の間の平らな床で近くから
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/cloudsea_isle2_b.txt -PshotsName=cloudsea_isle2_b
+world cloudsea_isle2_b
+size 1280 720
+timeout 3000
+render 10
+cmd gamemode spectator
+camera 0 -55 0 180 0
+waitchunks
+hud off
+wait 300
+cmd skyabyss cinematic stop
+close
+wait 20
+cmd skyabyss cloudsea enter
+wait 200
+cmd tp @s 3 125 -315
+waitchunks 200
+wait 60
+cmd summon skyabyss:net_caster 1.5 121 -318 {NoAI:1b,Rotation:[200f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:lamp_moth 4.5 122.5 -318 {NoAI:1b,Rotation:[160f,0f],PersistenceRequired:1b}
+wait 20
+camera 3 122.8 -313.5 180 8
+wait 30
+shot l01_foes_close
