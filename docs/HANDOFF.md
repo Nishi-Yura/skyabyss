@@ -5,8 +5,17 @@
 ## 今の形（要点）
 
 - 世界: 天と淵の大陸（40）。はじまりの島 → 渡し船 → 鐘の都の町めぐり → 土地の町から各章（42）。6 職は島の祠で選び、町の職の間（訓練場の師範）で替える（48）。技は職ごとの木 v2（Wynncraft 型。使う技は 4 本まで、基礎は木の節）。敵は Mod の敵だけ（44。バニラの敵はどの湧き方でも入らない）。
-- 試遊版: 0.9.3（`build/libs/skyabyss-0.9.7.jar`。確認表 `docs/review/playtest_0.9.4.md`（0.9.5〜0.9.7 は点検の直し・章の小要素・終章の入口）、月は `playtest_0.9.1.md`、遊び方 `docs/beta_how_to_play.md`）。
+- 試遊版: 0.9.8（`build/libs/skyabyss-0.9.8.jar`。確認表 `docs/review/playtest_0.9.4.md`（0.9.5〜0.9.8 は点検の直し・章の小要素・終章の入口と島 1）、月は `playtest_0.9.1.md`、遊び方 `docs/beta_how_to_play.md`）。
 - 自己テスト: `bash <scratchpad>/fresh_continent.sh "<名前,…>" <世界名>`（空なら全部。大陸の新しい世界で回す）。`abyss escort` はほかと一緒に流すと時間切れで落ちることがある（単独では通る）。
+
+## 終章「雲海」その 2: 島 1「鐘の島」（0.9.8。設計 [50](design/50_finale.md) の 4.2・4.2.1）
+
+- 四つの島はそれぞれ座の決まりを一つずつ教える（鐘で雲が固まる・視線・巻き戻り・前の自分たちと並ぶ）。島 1 を通しで作った（地形・仕掛け・敵 2 種・主・頼み・伝承 3 頁）。島 2〜4 はまだ。
+- 地形 `isle1.json`（`FinaleWorld` の版 2）: 着く所から北へ白い橋（地面 64 → 島の南の端の大通りの高さ）、前の都の大通り・広場・崩れた家 6、北の端の折れた鐘楼（扉 → 上の主の間）、まわりのかけら 3（西・東・北西）と鐘雲の道。
+- 鐘雲 `skyabyss:bell_cloud`: 鐘（半径 16）が鳴ると 20 秒固まる（終わりの 4 秒は薄く）。亡者と主の無音でほどける（`BellIsle.silence`）。かけらの鐘 3 つで扉が開く（頼み `main_finale_bell` の段 door）。
+- 敵: 鐘の亡者（割れた鐘を振り上げて近くの鐘の固まりを消す）・霞鳥（影の円 0.8 秒 → 急降下と押し戻し）。主: 最後の鐘守（振り下ろし・鐘の波・無音・亡者を呼ぶ・段 3 で床の半分が鐘雲）。模型は一品一案（`docs/review/cloud_roughs/`）。
+- 確かめ: 自己テスト `cloudsea`（橋・鐘・鐘雲・扉・敵の素材・主の出る所・床の崩れと戻り）。撮影 `tools/shots/cloudsea_isle1.txt`。戦いの難しさ・手ざわりは試遊で。
+- 次: 島 2「灯の島」（視線）。
 
 ## 終章「雲海」その 1: 舞台と行き方（0.9.7。設計 [50](design/50_finale.md) の 4.1）
 
@@ -14,7 +23,7 @@
 - ディメンション `skyabyss:cloudsea`（雲の海 y 36〜39 = `story/finale/CloudBlock`、夜明けに止めた空と霧 `client/CloudSkyClient`）。雲の下へ落ちると最後に立っていた所へ戻り体力 2 割（`FinaleWorld.rescueCheck`）。
 - 着く所「巡礼の門の島」（`tools/gen/world/build_cloud_arrival.py` → `data/skyabyss/finale/arrival.json`、流し込みは `FinaleTerrain`）: 白い広場・崩れた巡礼の門と門の鐘（合図 `finale_gate`）・四体の記念の台・帰りの台・北の橋の台（印 `bridge_n`）・まわりの雲のうねり。
 - 行き方: メイン「雲の上へ」`main_finale_ascend`（月の核のあと。語り部の数え歌のななつめ → 大鐘楼の門 → 鐘）。初めての門は紙芝居「巨神の昇り」`finale_ascend`（`tools/story/pixel/finale_ascend.py`）、二度目からは月／雲海のチャットの二択（`story/finale/FinaleGate`、`/skyabyss_gate`）。開発用 `/skyabyss cloudsea enter|leave`。撮影 `tools/shots/cloudsea_arrival.txt`。自己テスト `cloudsea`。
-- 次: 作る順 2（雲の島 1〜4 と敵）。
+- 次: 作る順 2（雲の島 1〜4 と敵）。島 1 はその 2 で済み。
 
 ## 終章の前の残り（0.9.6）
 

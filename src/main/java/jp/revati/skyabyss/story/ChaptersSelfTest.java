@@ -106,7 +106,7 @@ public final class ChaptersSelfTest {
             check(all[i].number() == i, all[i] + " number", failures);
             check(Chapters.byId(all[i].id()) == all[i], all[i] + " byId", failures);
             check((i + 1 < all.length ? all[i + 1] : null) == all[i].next(), all[i] + " next", failures);
-            check(all[i].reserved() == (i >= 7), all[i] + " reserved (終章だけ)", failures);
+            check(!all[i].reserved(), all[i] + " reserved (名前だけの章はもうない)", failures);
             // 縁の音と暮らしの変化 (ChapterOmens)・背の外の碑 (ChapterTablets) の部品がそろう
             if (all[i].titanChapter()) {
                 net.minecraft.resources.ResourceLocation snd = ChapterOmens.omenSound(all[i]);
@@ -184,7 +184,7 @@ public final class ChaptersSelfTest {
                 {"chapter1/tide_shell", "titan_tide"}, {"chapter1/tide_hours", "titan_tide"},
                 {"chapter1/thunder_wing", "titan_storm"}, {"chapter1/storm_path", "titan_storm"},
                 {"chapter1/ember", "titan_ember"}, {"chapter1/fifth_verse", "titan_ember"}, {"chapter1/sky_key_whole", "titan_ember"},
-                {"prologue/camp", "prologue"}, {"chapter2/unknown_1", "chapter2"}, {"finale/unknown_1", "finale"}};
+                {"prologue/camp", "prologue"}, {"chapter2/unknown_1", "chapter2"}, {"finale/bell_echo_1", "finale"}};
         for (String[] p : pinned) {
             LoreEntry e = catalog.entry(p[0]);
             check(e != null && e.chapter().equals(p[1]), p[0] + " should sit in " + p[1] + " (" + (e == null ? "missing" : e.chapter()) + ")", failures);

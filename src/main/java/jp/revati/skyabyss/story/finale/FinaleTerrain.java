@@ -78,6 +78,36 @@ public final class FinaleTerrain {
         }
     }
 
+    // ある種類のブロック (palette の文字列が prefix で始まるもの) の位置 (仕掛けのブロックの一覧に使う)
+    public List<BlockPos> positionsOf(String prefix) {
+        JsonObject json = read(name);
+        JsonArray pal = json.getAsJsonArray("palette");
+        java.util.Set<Integer> want = new java.util.HashSet<>();
+        for (int i = 0; i < pal.size(); i++) {
+            if (pal.get(i).getAsString().startsWith(prefix)) {
+                want.add(i);
+            }
+        }
+        List<BlockPos> out = new ArrayList<>();
+        for (JsonElement e : json.getAsJsonArray("runs")) {
+            JsonArray a = e.getAsJsonArray();
+            int y = a.get(0).getAsInt();
+            int z = a.get(1).getAsInt();
+            int x = a.get(2).getAsInt();
+            for (int i = 3; i + 1 < a.size(); i += 2) {
+                int idx = a.get(i).getAsInt();
+                int len = a.get(i + 1).getAsInt();
+                if (want.contains(idx)) {
+                    for (int k = 0; k < len; k++) {
+                        out.add(new BlockPos(x + k, y, z));
+                    }
+                }
+                x += len;
+            }
+        }
+        return out;
+    }
+
     // 流し込む (下の段から)。置いた数
     public int pour(ServerLevel level) {
         long t0 = System.currentTimeMillis();

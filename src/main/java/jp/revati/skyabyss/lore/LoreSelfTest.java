@@ -80,7 +80,7 @@ public final class LoreSelfTest {
         long unlockable = catalog.entries().stream().filter(LoreEntry::unlockable).count();
         // 五章 (chapter2「深淵」) は 2026-10-22 に中身が入った (刻み・墓・遺品の項目)
         long early = catalog.entries().stream().filter(e -> e.unlockable() && (e.chapter().equals("prologue") || e.chapter().startsWith("titan_") || e.chapter().equals("chapter2")
-                || e.chapter().equals("chapter3"))).count();
+                || e.chapter().equals("chapter3") || e.chapter().equals("finale"))).count();
         // 12〜20 に、自由なモードのサブクエストが記す 2 項目 (07 の 15 章) と、その先の余裕を足した
         // 都の町のクエストと裏通りの頼み (35 の 3.3・3.5) の 9 項目も足した
         // 一〜四章 (旧 1 章) は巨神ごとに碑文と項目が増える (岩鯨・潮殻で 30 前後、雷翼の 11 を足して 50 前後。余燼の分も見込む)
@@ -89,14 +89,9 @@ public final class LoreSelfTest {
             failures.add("prologue + chapters 1-6 should have 12-180 entries, found " + early);
         }
         if (unlockable != early) {
-            failures.add("only the prologue and chapters 1-6 may be written yet (" + unlockable + " unlockable)");
+            failures.add("only the prologue, chapters 1-6 and the finale may be written (" + unlockable + " unlockable)");
         }
-        for (String later : List.of("finale")) {
-            List<LoreEntry> list = catalog.inChapter(later);
-            if (list.isEmpty() || list.stream().anyMatch(e -> !e.placeholder())) {
-                failures.add("chapter " + later + " should hold placeholders only (" + list.size() + ")");
-            }
-        }
+        // 終章 (finale「雲海」) は 2026-10-30 に中身が入りはじめた (鐘の島の最後の言葉 3)。仮の項目 (unknown_*) は書いた分だけ減らす
         if (catalog.entry(Lore.BOOK_ENTRY) == null) {
             failures.add("the book's own entry " + Lore.BOOK_ENTRY + " is missing");
         }
@@ -429,7 +424,9 @@ public final class LoreSelfTest {
         JsonObject trial = json("/assets/skyabyss_trial/lang/" + code + ".json", failures);
         // 六章「月」の記憶の断片・見る者・月の核・記念の札 (46 の 4.9) の文は skyabyss_moon にある
         JsonObject moon = json("/assets/skyabyss_moon/lang/" + code + ".json", failures);
-        for (JsonObject extra : java.util.Arrays.asList(quest, tide, story, storm, ember, ch1, ch2, ch3, ch4, town, ch5, relics, trial, moon)) {
+        // 終章「雲海」の文は skyabyss_finale にある
+        JsonObject finale = json("/assets/skyabyss_finale/lang/" + code + ".json", failures);
+        for (JsonObject extra : java.util.Arrays.asList(quest, tide, story, storm, ember, ch1, ch2, ch3, ch4, town, ch5, relics, trial, moon, finale)) {
             if (lang != null && extra != null) {
                 extra.entrySet().forEach(e -> {
                     if (!lang.has(e.getKey())) {

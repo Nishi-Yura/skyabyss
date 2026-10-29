@@ -18,10 +18,17 @@ public final class FinaleBlocks {
             () -> new CloudBlock(BlockBehaviour.Properties.of().mapColor(MapColor.SNOW).strength(-1.0f, 3600000.0f).noLootTable()
                     .sound(SoundType.WOOL).pushReaction(PushReaction.BLOCK).noOcclusion().noCollission().isViewBlocking((s, l, p) -> false)));
 
+    // 鐘雲 (近くの鐘が鳴ると 20 秒固まる。BellIsle)
+    public static final DeferredBlock<BellCloudBlock> BELL_CLOUD = BLOCKS.register("bell_cloud",
+            () -> new BellCloudBlock(BlockBehaviour.Properties.of().mapColor(MapColor.SNOW).strength(-1.0f, 3600000.0f).noLootTable()
+                    .sound(SoundType.WOOL).pushReaction(PushReaction.BLOCK).noOcclusion().isViewBlocking((s, l, p) -> false)
+                    .lightLevel(s -> s.getValue(BellCloudBlock.SOLID) ? 9 : 0)));
+
     private FinaleBlocks() {
     }
 
     public static void register(IEventBus modEventBus) {
         BLOCKS.register(modEventBus);
+        jp.revati.skyabyss.story.finale.mob.CloudMobsSetup.register(modEventBus);
     }
 }

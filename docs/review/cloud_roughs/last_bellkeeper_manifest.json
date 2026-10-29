@@ -1,0 +1,16 @@
+{
+ "id": "moon_last_bellkeeper",
+ "short": "最後の鐘守",
+ "kind": "鐘の島の主 一品一案 (50 の 4.2.1)",
+ "title": "最後の鐘守 (last_bellkeeper) — 背に大鐘、手に舌の槌・低ポリ + ドット絵 一案",
+ "sheets": [
+  "moon_roughs/last_bellkeeper.png"
+ ],
+ "extra": "雲海の言葉 (鐘の青銅・金・朝の光)。骨 9 本。光るのは面の切れ目だけ。 三角形 2416 (目安 主 1500〜3000)。埋まった部品: waist-robe:0.75。生成: tools/rough/lowpoly/moon/last_bellkeeper.py。三段の姿: 二段目 = 背の鐘の割れ目から朝の光。面の割れが広がる。",
+ "options": {
+  "a": {
+   "name": "大鐘を背負う鐘守 (2416 三角形)",
+   "desc": "暗い外套に金の縁、漆喰の面、背に青銅の大鐘 (緑青の帯・金の口縁)、右手に舌の槌。"
+  }
+ }
+}

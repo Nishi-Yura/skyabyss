@@ -1,0 +1,418 @@
+{
+  "format_version": "1.8.0",
+  "animations": {
+    "animation.bell_mourner.idle": {
+      "loop": true,
+      "animation_length": 6.0,
+      "bones": {
+        "body": {
+          "rotation": [
+            "math.sin(query.anim_time * 40 + 0) * 2",
+            "0",
+            "math.sin(query.anim_time * 30 + 90) * 2"
+          ]
+        },
+        "head": {
+          "rotation": [
+            "math.sin(query.anim_time * 30 + 90) * 4",
+            "math.sin(query.anim_time * 20 + 0) * 10",
+            "0"
+          ]
+        },
+        "bell": {
+          "rotation": [
+            "math.sin(query.anim_time * 50 + 0) * 3",
+            "0",
+            "math.sin(query.anim_time * 40 + 90) * 3"
+          ]
+        }
+      }
+    },
+    "animation.bell_mourner.walk": {
+      "loop": true,
+      "animation_length": 1.8,
+      "bones": {
+        "leg_l": {
+          "rotation": [
+            "math.sin(query.anim_time * 200 + 0) * 20",
+            "0",
+            "0"
+          ]
+        },
+        "leg_r": {
+          "rotation": [
+            "math.sin(query.anim_time * 200 + 180) * 20",
+            "0",
+            "0"
+          ]
+        },
+        "body": {
+          "rotation": [
+            "0",
+            "0",
+            "math.sin(query.anim_time * 200 + 0) * 4"
+          ],
+          "position": [
+            0,
+            "math.sin(query.anim_time * 400 + 0) * 0.4",
+            0
+          ]
+        },
+        "bell": {
+          "rotation": [
+            "math.sin(query.anim_time * 200 + 90) * 6",
+            "0",
+            "0"
+          ]
+        },
+        "head": {
+          "rotation": [
+            "math.sin(query.anim_time * 200 + 0) * 4",
+            "0",
+            "0"
+          ]
+        }
+      }
+    },
+    "animation.bell_mourner.ring": {
+      "animation_length": 1.6,
+      "bones": {
+        "arm_l": {
+          "rotation": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "1.00": [
+              120,
+              0,
+              -10
+            ],
+            "1.15": [
+              40,
+              0,
+              -5
+            ],
+            "1.60": [
+              0,
+              0,
+              0
+            ]
+          }
+        },
+        "arm_r": {
+          "rotation": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "1.00": [
+              120,
+              0,
+              10
+            ],
+            "1.15": [
+              40,
+              0,
+              5
+            ],
+            "1.60": [
+              0,
+              0,
+              0
+            ]
+          }
+        },
+        "bell": {
+          "rotation": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "1.00": [
+              20,
+              0,
+              0
+            ],
+            "1.15": [
+              -25,
+              0,
+              0
+            ],
+            "1.30": [
+              10,
+              0,
+              0
+            ],
+            "1.60": [
+              0,
+              0,
+              0
+            ]
+          },
+          "position": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "1.00": [
+              0,
+              7,
+              2
+            ],
+            "1.15": [
+              0,
+              2,
+              0
+            ],
+            "1.60": [
+              0,
+              0,
+              0
+            ]
+          }
+        },
+        "body": {
+          "rotation": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "1.00": [
+              8,
+              0,
+              0
+            ],
+            "1.15": [
+              -10,
+              0,
+              0
+            ],
+            "1.60": [
+              0,
+              0,
+              0
+            ]
+          }
+        },
+        "head": {
+          "rotation": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "1.00": [
+              15,
+              0,
+              0
+            ],
+            "1.15": [
+              -5,
+              0,
+              0
+            ],
+            "1.60": [
+              0,
+              0,
+              0
+            ]
+          }
+        }
+      }
+    },
+    "animation.bell_mourner.strike": {
+      "animation_length": 0.8,
+      "bones": {
+        "arm_l": {
+          "rotation": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "0.35": [
+              60,
+              0,
+              0
+            ],
+            "0.50": [
+              -20,
+              0,
+              0
+            ],
+            "0.80": [
+              0,
+              0,
+              0
+            ]
+          }
+        },
+        "arm_r": {
+          "rotation": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "0.35": [
+              60,
+              0,
+              0
+            ],
+            "0.50": [
+              -20,
+              0,
+              0
+            ],
+            "0.80": [
+              0,
+              0,
+              0
+            ]
+          }
+        },
+        "bell": {
+          "rotation": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "0.35": [
+              30,
+              0,
+              0
+            ],
+            "0.50": [
+              -30,
+              0,
+              0
+            ],
+            "0.80": [
+              0,
+              0,
+              0
+            ]
+          }
+        },
+        "body": {
+          "rotation": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "0.35": [
+              6,
+              0,
+              0
+            ],
+            "0.50": [
+              -14,
+              0,
+              0
+            ],
+            "0.80": [
+              0,
+              0,
+              0
+            ]
+          }
+        }
+      }
+    },
+    "animation.bell_mourner.hurt": {
+      "animation_length": 0.22,
+      "bones": {
+        "body": {
+          "rotation": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "0.06": [
+              0,
+              0,
+              10
+            ],
+            "0.22": [
+              0,
+              0,
+              0
+            ]
+          }
+        }
+      }
+    },
+    "animation.bell_mourner.death": {
+      "animation_length": 1.2,
+      "bones": {
+        "body": {
+          "rotation": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "0.60": [
+              -30,
+              0,
+              0
+            ],
+            "1.20": [
+              -85,
+              0,
+              5
+            ]
+          },
+          "position": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "1.20": [
+              0,
+              -8,
+              0
+            ]
+          }
+        },
+        "bell": {
+          "rotation": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "0.60": [
+              -40,
+              0,
+              0
+            ]
+          },
+          "position": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "0.60": [
+              0,
+              -3,
+              -2
+            ]
+          }
+        }
+      },
+      "loop": "hold_on_last_frame"
+    }
+  }
+}

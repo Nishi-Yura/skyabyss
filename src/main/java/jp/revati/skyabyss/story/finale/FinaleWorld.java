@@ -30,6 +30,7 @@ import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 //   雲の海  y 36〜39 の雲 (CloudBlock)。雲の下 (FALL_Y より下) へ落ちた人は、最後に島に立っていた所へ戻し、体力の 2 割を失う
 //   空      夜明けに止めた金の空と朝日、西に止まった月 (client/CloudSkyClient)
 //   着く所  巡礼の門の島 (data/skyabyss/finale/arrival.json。tools/gen/world/build_cloud_arrival.py。版 1 で一度だけ流し込む)
+//   島 1    鐘の島と着く所からの白い橋 (data/skyabyss/finale/isle1.json。build_cloud_isle1.py。版 2。BellIsle)
 //   行き来  都の大鐘楼の門 (story/ch6/MoonGate が行き先を選ばせる。FinaleGate)。着く所の帰りの台 (天然磁石) を右クリックで都へ
 //   門の鐘  巡礼の門の下の鐘を右クリック → 合図 finale_gate (作る順 2 で雲の島 1 への橋を架ける)
 @EventBusSubscriber(modid = SkyAbyss.MODID)
@@ -40,8 +41,8 @@ public final class FinaleWorld {
     public static final float FALL_COST = 0.2f;
     public static final String GATE_SIGNAL = "finale_gate";
     static final String ARRIVAL = "arrival";
-    // 1 = 巡礼の門の島
-    static final int VERSION = 1;
+    // 1 = 巡礼の門の島、2 = 島 1「鐘の島」と着く所からの白い橋 (BellIsle)
+    static final int VERSION = 2;
     // 人ごとの最後に立っていた島の所 (保存しない。なければ着く所)
     private static final Map<UUID, BlockPos> SAFE = new HashMap<>();
 
@@ -86,12 +87,19 @@ public final class FinaleWorld {
         if (d.version < 1) {
             arrival().pour(level);
         }
+        if (d.version < 2) {
+            BellIsle.terrain().pour(level);
+        }
         d.version = VERSION;
         d.setDirty();
     }
 
     public static boolean built(MinecraftServer server) {
         return Data.get(server).version >= 1;
+    }
+
+    public static int version(MinecraftServer server) {
+        return Data.get(server).version;
     }
 
     // ---------------------------------------------------------------- 雲の下へ落ちた人を戻す
@@ -105,7 +113,8 @@ public final class FinaleWorld {
 
     // 一人の見回り (自己テストからも)。戻したら true
     public static boolean rescueCheck(ServerPlayer p) {
-        if (p.onGround() && p.getY() > CLOUD_TOP + 2) {
+        // 固まった鐘雲の上は戻す所にしない (ほどけると、また落ちる)
+        if (p.onGround() && p.getY() > CLOUD_TOP + 2 && !(p.level().getBlockState(p.blockPosition().below()).getBlock() instanceof BellCloudBlock)) {
             SAFE.put(p.getUUID(), p.blockPosition());
             return false;
         }
@@ -152,7 +161,7 @@ public final class FinaleWorld {
         Notice.narrate(p, "message.skyabyss.cloudsea.gate");
     }
 
-    // 開発用: /skyabyss cloudsea enter | leave (権限 2)
+    // 開発用: /skyabyss cloudsea enter | leave | ring <鐘の印> | lord | crumble (権限 2)
     @SubscribeEvent
     static void onCommands(net.neoforged.neoforge.event.RegisterCommandsEvent event) {
         event.getDispatcher().register(net.minecraft.commands.Commands.literal(SkyAbyss.MODID).requires(s -> s.hasPermission(2))
@@ -160,6 +169,17 @@ public final class FinaleWorld {
                         .then(net.minecraft.commands.Commands.literal("enter").executes(c -> enter(c.getSource().getPlayerOrException()) ? 1 : 0))
                         .then(net.minecraft.commands.Commands.literal("leave").executes(c -> {
                             leave(c.getSource().getPlayerOrException());
+                            return 1;
+                        }))
+                        .then(net.minecraft.commands.Commands.literal("ring")
+                                .then(net.minecraft.commands.Commands.argument("mark", com.mojang.brigadier.arguments.StringArgumentType.word()).executes(c -> {
+                                    ServerLevel l = c.getSource().getServer().getLevel(LEVEL);
+                                    BellIsle.ring(l, BellIsle.mark(com.mojang.brigadier.arguments.StringArgumentType.getString(c, "mark")));
+                                    return 1;
+                                })))
+                        .then(net.minecraft.commands.Commands.literal("lord").executes(c -> BellArena.summon(c.getSource().getServer().getLevel(LEVEL)) != null ? 1 : 0))
+                        .then(net.minecraft.commands.Commands.literal("crumble").executes(c -> {
+                            BellArena.crumble(c.getSource().getServer().getLevel(LEVEL));
                             return 1;
                         }))));
     }

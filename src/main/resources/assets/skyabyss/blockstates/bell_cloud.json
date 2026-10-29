@@ -1,0 +1,16 @@
+{
+  "variants": {
+    "fade=false,solid=false": {
+      "model": "skyabyss:block/bell_cloud"
+    },
+    "fade=true,solid=false": {
+      "model": "skyabyss:block/bell_cloud"
+    },
+    "fade=false,solid=true": {
+      "model": "skyabyss:block/bell_cloud_solid"
+    },
+    "fade=true,solid=true": {
+      "model": "skyabyss:block/bell_cloud_solid_fade"
+    }
+  }
+}

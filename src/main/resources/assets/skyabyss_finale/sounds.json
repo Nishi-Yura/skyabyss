@@ -1,0 +1,156 @@
+{
+  "mourner_idle": {
+    "subtitle": "subtitles.skyabyss_finale.mourner_idle",
+    "sounds": [
+      {
+        "name": "minecraft:entity.allay.ambient_without_item",
+        "type": "event",
+        "pitch": 0.4,
+        "volume": 0.4
+      }
+    ]
+  },
+  "mourner_tell": {
+    "subtitle": "subtitles.skyabyss_finale.mourner_tell",
+    "sounds": [
+      {
+        "name": "minecraft:block.bell.resonate",
+        "type": "event",
+        "pitch": 1.4,
+        "volume": 0.7
+      }
+    ]
+  },
+  "mourner_ring": {
+    "subtitle": "subtitles.skyabyss_finale.mourner_ring",
+    "sounds": [
+      {
+        "name": "minecraft:block.bell.use",
+        "type": "event",
+        "pitch": 0.5,
+        "volume": 1.2
+      }
+    ]
+  },
+  "mourner_strike": {
+    "subtitle": "subtitles.skyabyss_finale.mourner_strike",
+    "sounds": [
+      {
+        "name": "minecraft:block.anvil.land",
+        "type": "event",
+        "pitch": 1.4,
+        "volume": 0.6
+      }
+    ]
+  },
+  "bird_cry": {
+    "subtitle": "subtitles.skyabyss_finale.bird_cry",
+    "sounds": [
+      {
+        "name": "minecraft:entity.parrot.ambient",
+        "type": "event",
+        "pitch": 0.6,
+        "volume": 0.6
+      }
+    ]
+  },
+  "bird_tell": {
+    "subtitle": "subtitles.skyabyss_finale.bird_tell",
+    "sounds": [
+      {
+        "name": "minecraft:entity.phantom.flap",
+        "type": "event",
+        "pitch": 1.2,
+        "volume": 0.9
+      }
+    ]
+  },
+  "bird_dive": {
+    "subtitle": "subtitles.skyabyss_finale.bird_dive",
+    "sounds": [
+      {
+        "name": "minecraft:entity.phantom.swoop",
+        "type": "event",
+        "pitch": 1.2,
+        "volume": 1.0
+      }
+    ]
+  },
+  "keeper_slam_tell": {
+    "subtitle": "subtitles.skyabyss_finale.keeper_slam_tell",
+    "sounds": [
+      {
+        "name": "minecraft:block.bell.resonate",
+        "type": "event",
+        "pitch": 0.7,
+        "volume": 1.2
+      }
+    ]
+  },
+  "keeper_slam": {
+    "subtitle": "subtitles.skyabyss_finale.keeper_slam",
+    "sounds": [
+      {
+        "name": "minecraft:entity.warden.attack_impact",
+        "type": "event",
+        "pitch": 0.7,
+        "volume": 1.3
+      }
+    ]
+  },
+  "keeper_wave_tell": {
+    "subtitle": "subtitles.skyabyss_finale.keeper_wave_tell",
+    "sounds": [
+      {
+        "name": "minecraft:block.respawn_anchor.charge",
+        "type": "event",
+        "pitch": 0.7,
+        "volume": 1.0
+      }
+    ]
+  },
+  "keeper_wave": {
+    "subtitle": "subtitles.skyabyss_finale.keeper_wave",
+    "sounds": [
+      {
+        "name": "minecraft:block.bell.use",
+        "type": "event",
+        "pitch": 0.4,
+        "volume": 1.6
+      }
+    ]
+  },
+  "keeper_silence": {
+    "subtitle": "subtitles.skyabyss_finale.keeper_silence",
+    "sounds": [
+      {
+        "name": "minecraft:block.sculk_shrieker.shriek",
+        "type": "event",
+        "pitch": 1.6,
+        "volume": 0.6
+      }
+    ]
+  },
+  "keeper_call": {
+    "subtitle": "subtitles.skyabyss_finale.keeper_call",
+    "sounds": [
+      {
+        "name": "minecraft:block.bell.resonate",
+        "type": "event",
+        "pitch": 0.5,
+        "volume": 1.4
+      }
+    ]
+  },
+  "keeper_roar": {
+    "subtitle": "subtitles.skyabyss_finale.keeper_roar",
+    "sounds": [
+      {
+        "name": "minecraft:block.bell.use",
+        "type": "event",
+        "pitch": 0.3,
+        "volume": 1.8
+      }
+    ]
+  }
+}

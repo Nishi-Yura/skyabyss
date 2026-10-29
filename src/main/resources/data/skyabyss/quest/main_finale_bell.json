@@ -1,0 +1,86 @@
+{
+  "category": "main",
+  "chapter": "finale",
+  "order": 91,
+  "giver": "skyabyss:storyteller",
+  "start_when": {
+    "type": "quest",
+    "quest": "main_finale_ascend",
+    "is": "done"
+  },
+  "stages": [
+    {
+      "id": "walk",
+      "xp": 80,
+      "objectives": [
+        {
+          "id": "arrive",
+          "type": "signal",
+          "targets": [
+            "finale_isle1_arrive"
+          ],
+          "count": 1
+        }
+      ]
+    },
+    {
+      "id": "bells",
+      "xp": 240,
+      "objectives": [
+        {
+          "id": "w",
+          "type": "signal",
+          "targets": [
+            "finale_bell_w"
+          ],
+          "count": 1
+        },
+        {
+          "id": "e",
+          "type": "signal",
+          "targets": [
+            "finale_bell_e"
+          ],
+          "count": 1
+        },
+        {
+          "id": "n",
+          "type": "signal",
+          "targets": [
+            "finale_bell_n"
+          ],
+          "count": 1
+        }
+      ]
+    },
+    {
+      "id": "door",
+      "objectives": [
+        {
+          "id": "door",
+          "type": "signal",
+          "targets": [
+            "finale_bell_door"
+          ],
+          "count": 1
+        }
+      ]
+    },
+    {
+      "id": "lord",
+      "objectives": [
+        {
+          "id": "lord",
+          "type": "signal",
+          "targets": [
+            "finale_lord_bell"
+          ],
+          "count": 1
+        }
+      ]
+    }
+  ],
+  "reward": {
+    "xp": 600
+  }
+}

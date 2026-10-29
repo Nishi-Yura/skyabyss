@@ -87,8 +87,8 @@ public enum Chapters {
 
     // 中身が未着手の章 (六章・終章)。五章「深淵」は 2026-10-22 に中身が入った
     public boolean reserved() {
-        // 六章 (月) は中身ができた (docs/design/46)。名前だけなのは終章
-        return ordinal() >= FINALE.ordinal();
+        // 六章 (月) は中身ができ、終章 (雲海) も作りはじめた (docs/design/46・50)。名前だけの章はもうない
+        return false;
     }
 
     // 巨神編 (一〜四章。旧「1 章」、内部名 chapter1)

@@ -48,6 +48,25 @@ def cloud_tex():
     return img
 
 
+def bell_cloud_tex(solid, fade):
+    """鐘雲: ふだんは雲より薄く透ける。固まると白く光り、縁に淡い金の筋 (鐘の音の輪)。終わりの 4 秒は少し薄い"""
+    img = cloud_tex()
+    N = img.size[0]
+    for y in range(N):
+        for x in range(N):
+            r, g, b, a = img.getpixel((x, y))
+            if not solid:
+                img.putpixel((x, y), (r, g, min(255, b + 6), int(a * 0.62)))
+                continue
+            ring = abs(math.hypot(x - 15.5, y - 15.5) - 11) < 0.9 or abs(math.hypot(x - 15.5, y - 15.5) - 5.5) < 0.7
+            if ring:
+                r, g, b = 255, 236, 176
+            else:
+                r, g, b = min(255, r + 8), min(255, g + 8), min(255, b + 4)
+            img.putpixel((x, y), (r, g, b, 190 if fade else 250))
+    return img
+
+
 def main():
     (A / "textures/block").mkdir(parents=True, exist_ok=True)
     cloud_tex().save(A / "textures/block/cloud.png")
@@ -55,6 +74,16 @@ def main():
         "parent": "minecraft:block/cube_all", "render_type": "minecraft:translucent",
         "textures": {"all": "skyabyss:block/cloud", "particle": "skyabyss:block/cloud"}}, indent=2), encoding="utf-8")
     (A / "blockstates/cloud.json").write_text(json.dumps({"variants": {"": {"model": "skyabyss:block/cloud"}}}, indent=2), encoding="utf-8")
+    variants = {}
+    for solid in (False, True):
+        for fade in (False, True):
+            name = "bell_cloud" + ("_solid" if solid else "") + ("_fade" if fade and solid else "")
+            bell_cloud_tex(solid, fade).save(A / ("textures/block/%s.png" % name))
+            (A / ("models/block/%s.json" % name)).write_text(json.dumps({
+                "parent": "minecraft:block/cube_all", "render_type": "minecraft:translucent",
+                "textures": {"all": "skyabyss:block/" + name, "particle": "skyabyss:block/" + name}}, indent=2), encoding="utf-8")
+            variants["fade=%s,solid=%s" % (str(fade).lower(), str(solid).lower())] = {"model": "skyabyss:block/" + name}
+    (A / "blockstates/bell_cloud.json").write_text(json.dumps({"variants": variants}, indent=2), encoding="utf-8")
     print("cloud assets written")
 
 
