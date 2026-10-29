@@ -1,0 +1,469 @@
+{
+  "format_version": "1.8.0",
+  "animations": {
+    "animation.moon_core.idle": {
+      "loop": true,
+      "animation_length": 12.0,
+      "bones": {
+        "ring_a": {
+          "rotation": [
+            "0",
+            "query.anim_time * 40",
+            "0"
+          ]
+        },
+        "ring_b": {
+          "rotation": [
+            "query.anim_time * 25",
+            "query.anim_time * 30",
+            "0"
+          ]
+        },
+        "ring_c": {
+          "rotation": [
+            "0",
+            "-query.anim_time * 35",
+            "query.anim_time * 15"
+          ]
+        },
+        "core": {
+          "position": [
+            0,
+            "math.sin(query.anim_time * 40 + 0) * 0.8",
+            0
+          ]
+        },
+        "eye": {
+          "rotation": [
+            "0",
+            "0",
+            "query.anim_time * 30"
+          ]
+        },
+        "spire_b": {
+          "rotation": [
+            "math.sin(query.anim_time * 50 + 0) * 4",
+            "0",
+            "math.sin(query.anim_time * 40 + 90) * 4"
+          ]
+        }
+      }
+    },
+    "animation.moon_core.walk": {
+      "loop": true,
+      "animation_length": 12.0,
+      "bones": {
+        "ring_a": {
+          "rotation": [
+            "0",
+            "query.anim_time * 40",
+            "0"
+          ]
+        },
+        "ring_b": {
+          "rotation": [
+            "query.anim_time * 25",
+            "query.anim_time * 30",
+            "0"
+          ]
+        },
+        "ring_c": {
+          "rotation": [
+            "0",
+            "-query.anim_time * 35",
+            "query.anim_time * 15"
+          ]
+        },
+        "core": {
+          "position": [
+            0,
+            "math.sin(query.anim_time * 40 + 0) * 0.8",
+            0
+          ]
+        },
+        "eye": {
+          "rotation": [
+            "0",
+            "0",
+            "query.anim_time * 30"
+          ]
+        },
+        "spire_b": {
+          "rotation": [
+            "math.sin(query.anim_time * 50 + 0) * 4",
+            "0",
+            "math.sin(query.anim_time * 40 + 90) * 4"
+          ]
+        }
+      }
+    },
+    "animation.moon_core.sweep": {
+      "animation_length": 2.0,
+      "bones": {
+        "ring_a": {
+          "rotation": [
+            "0",
+            "query.anim_time * 240",
+            "0"
+          ]
+        },
+        "ring_b": {
+          "rotation": [
+            "query.anim_time * 160",
+            "0",
+            "0"
+          ]
+        },
+        "core": {
+          "scale": {
+            "0.00": [
+              1,
+              1,
+              1
+            ],
+            "1.00": [
+              1.15,
+              1.15,
+              1.15
+            ],
+            "1.10": [
+              0.95,
+              0.95,
+              0.95
+            ],
+            "2.00": [
+              1,
+              1,
+              1
+            ]
+          }
+        }
+      }
+    },
+    "animation.moon_core.rewind": {
+      "animation_length": 5.0,
+      "bones": {
+        "ring_a": {
+          "rotation": [
+            "0",
+            "-query.anim_time * 160",
+            "0"
+          ]
+        },
+        "ring_b": {
+          "rotation": [
+            "-query.anim_time * 110",
+            "0",
+            "0"
+          ]
+        },
+        "ring_c": {
+          "rotation": [
+            "0",
+            "query.anim_time * 140",
+            "-query.anim_time * 60"
+          ]
+        },
+        "eye": {
+          "rotation": [
+            "0",
+            "0",
+            "-query.anim_time * 360"
+          ]
+        }
+      }
+    },
+    "animation.moon_core.stagger": {
+      "animation_length": 5.0,
+      "bones": {
+        "core": {
+          "rotation": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "0.40": [
+              -20,
+              0,
+              15
+            ],
+            "4.60": [
+              -20,
+              0,
+              15
+            ],
+            "5.00": [
+              0,
+              0,
+              0
+            ]
+          },
+          "position": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "0.40": [
+              0,
+              -10,
+              0
+            ],
+            "4.60": [
+              0,
+              -10,
+              0
+            ],
+            "5.00": [
+              0,
+              0,
+              0
+            ]
+          }
+        },
+        "ring_a": {
+          "rotation": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "0.40": [
+              -35,
+              0,
+              0
+            ],
+            "4.60": [
+              -35,
+              0,
+              0
+            ],
+            "5.00": [
+              0,
+              0,
+              0
+            ]
+          }
+        },
+        "ring_b": {
+          "rotation": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "0.40": [
+              30,
+              0,
+              20
+            ],
+            "4.60": [
+              30,
+              0,
+              20
+            ],
+            "5.00": [
+              0,
+              0,
+              0
+            ]
+          }
+        }
+      }
+    },
+    "animation.moon_core.drop": {
+      "animation_length": 5.0,
+      "bones": {
+        "core": {
+          "position": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "1.00": [
+              0,
+              8,
+              0
+            ]
+          },
+          "scale": {
+            "0.00": [
+              1,
+              1,
+              1
+            ],
+            "5.00": [
+              1.35,
+              1.35,
+              1.35
+            ]
+          }
+        },
+        "ring_a": {
+          "rotation": [
+            "0",
+            "query.anim_time * 90",
+            "0"
+          ],
+          "scale": {
+            "0.00": [
+              1,
+              1,
+              1
+            ],
+            "1.00": [
+              1.4,
+              1.4,
+              1.4
+            ]
+          }
+        },
+        "ring_c": {
+          "rotation": [
+            "query.anim_time * 70",
+            "0",
+            "0"
+          ],
+          "scale": {
+            "0.00": [
+              1,
+              1,
+              1
+            ],
+            "1.00": [
+              1.5,
+              1.5,
+              1.5
+            ]
+          }
+        }
+      },
+      "loop": "hold_on_last_frame"
+    },
+    "animation.moon_core.roar": {
+      "animation_length": 2.0,
+      "bones": {
+        "core": {
+          "scale": {
+            "0.00": [
+              1,
+              1,
+              1
+            ],
+            "0.50": [
+              1.3,
+              1.3,
+              1.3
+            ],
+            "1.60": [
+              1.3,
+              1.3,
+              1.3
+            ],
+            "2.00": [
+              1,
+              1,
+              1
+            ]
+          }
+        },
+        "ring_a": {
+          "rotation": [
+            "0",
+            "query.anim_time * 300",
+            "0"
+          ]
+        },
+        "ring_b": {
+          "rotation": [
+            "query.anim_time * 260",
+            "0",
+            "0"
+          ]
+        },
+        "ring_c": {
+          "rotation": [
+            "0",
+            "0",
+            "query.anim_time * 280"
+          ]
+        }
+      }
+    },
+    "animation.moon_core.hurt": {
+      "animation_length": 0.22,
+      "bones": {
+        "core": {
+          "rotation": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "0.06": [
+              0,
+              0,
+              6
+            ],
+            "0.22": [
+              0,
+              0,
+              0
+            ]
+          }
+        }
+      }
+    },
+    "animation.moon_core.death": {
+      "animation_length": 2.0,
+      "bones": {
+        "core": {
+          "rotation": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "2.00": [
+              0,
+              -360,
+              0
+            ]
+          },
+          "position": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "2.00": [
+              0,
+              -20,
+              0
+            ]
+          },
+          "scale": {
+            "0.00": [
+              1,
+              1,
+              1
+            ],
+            "1.00": [
+              1.4,
+              1.4,
+              1.4
+            ],
+            "2.00": [
+              0.1,
+              0.1,
+              0.1
+            ]
+          }
+        }
+      },
+      "loop": "hold_on_last_frame"
+    }
+  }
+}

@@ -17,6 +17,7 @@ import net.neoforged.neoforge.event.RegisterCommandsEvent;
 //             field_clear (主の間を片付ける) | stop [off] (星術「一瞬止め」を覚えて砂時計をもらう / 忘れる) | tide <bright|to_dim|dim|to_bright> (満ち引きの頭へ)
 //   下弦の淵: rift <印> (淵の印へ行く。camp・door_entry・leap_entry・hall_entry・gate_front・arena_entry…) | rift_lord (主の間に残月の剣守) |
 //             rift_clear (主の間を片付ける) | echo (鏡の中で待つ自分の残像を放つ)
+//   月の核: core <印> (core_gate・gate_front・arena_entry・arena_center…) | core_lord (核を呼ぶ) | core_allies (四人を立たせる) | core_clear
 //   撮影: pose <動き> (まわり 24 の月の敵を止めて、その動きを流す。向きは今の向きのまま)
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class MoonCommands {
@@ -96,6 +97,35 @@ public final class MoonCommands {
                             p.teleportTo(moon, m.getX() + 0.5, m.getY(), m.getZ() + 0.5, p.getYRot(), p.getXRot());
                             return 1;
                         })))
+                        .then(Commands.literal("core").then(Commands.argument("mark", com.mojang.brigadier.arguments.StringArgumentType.word()).executes(c -> {
+                            net.minecraft.server.level.ServerPlayer p = c.getSource().getPlayerOrException();
+                            ServerLevel moon = c.getSource().getServer().getLevel(MoonWorld.LEVEL);
+                            if (moon == null) {
+                                return 0;
+                            }
+                            MoonWorld.build(moon);
+                            BlockPos m = jp.revati.skyabyss.story.ch6.core.MoonCore.mark(com.mojang.brigadier.arguments.StringArgumentType.getString(c, "mark"));
+                            p.teleportTo(moon, m.getX() + 0.5, m.getY(), m.getZ() + 0.5, p.getYRot(), p.getXRot());
+                            return 1;
+                        })))
+                        .then(Commands.literal("core_lord").executes(c -> {
+                            ServerLevel moon = c.getSource().getServer().getLevel(MoonWorld.LEVEL);
+                            return moon != null && jp.revati.skyabyss.story.ch6.core.CoreArena.summon(moon) != null ? 1 : 0;
+                        }))
+                        .then(Commands.literal("core_allies").executes(c -> {
+                            ServerLevel moon = c.getSource().getServer().getLevel(MoonWorld.LEVEL);
+                            if (moon != null) {
+                                jp.revati.skyabyss.story.ch6.core.CoreArena.allies(moon);
+                            }
+                            return 1;
+                        }))
+                        .then(Commands.literal("core_clear").executes(c -> {
+                            ServerLevel moon = c.getSource().getServer().getLevel(MoonWorld.LEVEL);
+                            if (moon != null) {
+                                jp.revati.skyabyss.story.ch6.core.CoreArena.clear(moon);
+                            }
+                            return 1;
+                        }))
                         .then(Commands.literal("rift_lord").executes(c -> {
                             ServerLevel moon = c.getSource().getServer().getLevel(MoonWorld.LEVEL);
                             return moon != null && jp.revati.skyabyss.story.ch6.rift.RiftArena.summon(moon) != null ? 1 : 0;

@@ -1,0 +1,16 @@
+{
+ "id": "moon_core_shard",
+ "short": "月の欠片の盾",
+ "kind": "月の核の盾 一品一案 (46 の 4.7)",
+ "title": "月の欠片の盾 (core_shard) — 核を守って回る三日月の岩・低ポリ + ドット絵 一案",
+ "sheets": [
+  "moon_roughs/core_shard.png"
+ ],
+ "extra": "月の言葉 (月の砂・玄武岩・銀・星の光)。骨 1 本。 三角形 808 (目安 付きもの 300〜700)。埋まった部品: knob0-rock:0.56, knob3-rock:0.57, knob5-rock:0.83, star2-rock:0.57, star3-rock:0.57。生成: tools/rough/lowpoly/moon/core_shard.py。三段の姿: 段 2 で砕けて二つになる (同じ模型)。",
+ "options": {
+  "a": {
+   "name": "三日月の岩 (808 三角形)",
+   "desc": "外は月の砂と玄武岩の岩肌、内は銀の鏡に星の刻み。"
+  }
+ }
+}

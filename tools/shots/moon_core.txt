@@ -1,0 +1,43 @@
+# 六章 月の核 (docs/design/46 の 4.7): 着く所の北の核の門、核の間 (床と四つの台)、月の核と欠片、四人の加勢
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/moon_core.txt -PshotsName=moon_core
+# 観戦モードで撮る (月は軽いので、ふつうのモードだと宙で落ちていく)。見やすさのため暗視
+world moon_core1 continent
+size 1600 900
+timeout 2400
+render 14
+clouds off
+waitchunks 300
+wait 100
+cmd skyabyss cinematic stop
+close
+cmd gamemode creative
+cmd skyabyss moonworld enter
+waitchunks 200
+wait 100
+cmd skyabyss moonworld phase 2
+cmd gamemode spectator
+hud off
+cmd effect give @s minecraft:night_vision 99999 0 true
+cmd tp @s 0 18 6 180 25
+waitchunks 200
+wait 80
+shot c01_gate
+cmd tp @s 0 -20 -12 180 30
+waitchunks 200
+wait 80
+shot c02_chamber
+cmd tp @s -6 -38 -26 160 14
+wait 20
+cmd skyabyss moonworld core_lord
+wait 60
+shot c03_core
+cmd skyabyss moonworld core_allies
+wait 25
+cmd tp @s 0 -30 -18 180 40
+wait 20
+shot c04_allies
+cmd tp @s 8 -40 -34 130 0
+wait 15
+shot c05_core_close
+cmd skyabyss moonworld core_clear
+close

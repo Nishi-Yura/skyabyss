@@ -37,7 +37,9 @@ public class StarGateBlock extends Block {
     @Override
     protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
         if (!level.isClientSide && player instanceof ServerPlayer sp) {
-            if (jp.revati.skyabyss.story.ch6.cliff.MoonCliff.inside(pos)) {
+            if (jp.revati.skyabyss.story.ch6.core.MoonCore.isLandingGate(pos) || jp.revati.skyabyss.story.ch6.core.MoonCore.isBackGate(pos)) {
+                jp.revati.skyabyss.story.ch6.core.CorePuzzles.gate(sp, pos);
+            } else if (jp.revati.skyabyss.story.ch6.cliff.MoonCliff.inside(pos)) {
                 jp.revati.skyabyss.story.ch6.cliff.CliffPuzzles.gate(sp, pos);
             } else if (jp.revati.skyabyss.story.ch6.field.MoonField.inside(pos)) {
                 jp.revati.skyabyss.story.ch6.field.FieldPuzzles.gate(sp, pos);

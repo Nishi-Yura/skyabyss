@@ -86,6 +86,14 @@ public final class MoonMobsSetup {
             () -> EntityType.Builder.of(WaningBlade::new, MobCategory.MONSTER).sized(1.2f, 3.5f).eyeHeight(3.1f).fireImmune()
                     .clientTrackingRange(12).build(SkyAbyss.MODID + ":" + WaningBlade.ID));
 
+    // 月の核 (docs/design/46 の 4.7)
+    public static final DeferredHolder<EntityType<?>, EntityType<MoonCoreBoss>> MOON_CORE = ENTITIES.register(MoonCoreBoss.ID,
+            () -> EntityType.Builder.of(MoonCoreBoss::new, MobCategory.MONSTER).sized(2.4f, 3.6f).eyeHeight(2.5f).fireImmune()
+                    .clientTrackingRange(12).build(SkyAbyss.MODID + ":" + MoonCoreBoss.ID));
+    public static final DeferredHolder<EntityType<?>, EntityType<CoreShard>> CORE_SHARD = ENTITIES.register(CoreShard.ID,
+            () -> EntityType.Builder.<CoreShard>of(CoreShard::new, MobCategory.MISC).sized(1.2f, 3.0f).clientTrackingRange(12).updateInterval(1)
+                    .noSave().build(SkyAbyss.MODID + ":" + CoreShard.ID));
+
     public static final DeferredItem<Item> DUST_CRAWLER_EGG = egg("dust_crawler_spawn_egg", DUST_CRAWLER, 0x1E2230, 0xA0A6B4);
     public static final DeferredItem<Item> SHELL_HARE_EGG = egg("shell_hare_spawn_egg", SHELL_HARE, 0x9AA0AE, 0xD8E4FF);
     public static final DeferredItem<Item> SHADOW_STITCHER_EGG = egg("shadow_stitcher_spawn_egg", SHADOW_STITCHER, 0x06060E, 0xBCD8FF);
@@ -102,6 +110,7 @@ public final class MoonMobsSetup {
     public static final DeferredItem<Item> RIFT_ARMOR_EGG = egg("rift_armor_spawn_egg", RIFT_ARMOR, 0x5A606E, 0xB8A888);
     public static final DeferredItem<Item> RIFT_SERPENT_EGG = egg("rift_serpent_spawn_egg", RIFT_SERPENT, 0xB0BCD2, 0xE8EEFA);
     public static final DeferredItem<Item> WANING_BLADE_EGG = egg("waning_blade_spawn_egg", WANING_BLADE, 0x161A2C, 0xD8E8FF);
+    public static final DeferredItem<Item> MOON_CORE_EGG = egg("moon_core_spawn_egg", MOON_CORE, 0xDCE8FF, 0x8C96B0);
 
     // 落とし物 (月の材料。説明の一行は item.skyabyss.<id>.desc)
     public static final DeferredItem<Item> MOON_DUST = ITEMS.register("moon_dust", () -> new Ch4Setup.Described(new Item.Properties()));
@@ -165,6 +174,17 @@ public final class MoonMobsSetup {
     public static final DeferredHolder<SoundEvent, SoundEvent> BLADE_STAGGER = sound("blade_stagger");
     public static final DeferredHolder<SoundEvent, SoundEvent> BLADE_ROAR = sound("blade_roar");
     public static final DeferredHolder<SoundEvent, SoundEvent> BLADE_ECHO_FADE = sound("blade_echo_fade");
+    public static final DeferredHolder<SoundEvent, SoundEvent> CORE_TELL = sound("core_tell");
+    public static final DeferredHolder<SoundEvent, SoundEvent> CORE_SWEEP = sound("core_sweep");
+    public static final DeferredHolder<SoundEvent, SoundEvent> CORE_BLOCK = sound("core_block");
+    public static final DeferredHolder<SoundEvent, SoundEvent> CORE_CLOCK = sound("core_clock");
+    public static final DeferredHolder<SoundEvent, SoundEvent> CORE_REWIND = sound("core_rewind");
+    public static final DeferredHolder<SoundEvent, SoundEvent> CORE_BREAK = sound("core_break");
+    public static final DeferredHolder<SoundEvent, SoundEvent> CORE_SHATTER = sound("core_shatter");
+    public static final DeferredHolder<SoundEvent, SoundEvent> CORE_DROP_TELL = sound("core_drop_tell");
+    public static final DeferredHolder<SoundEvent, SoundEvent> CORE_DROP = sound("core_drop");
+    public static final DeferredHolder<SoundEvent, SoundEvent> CORE_ALLIES = sound("core_allies");
+    public static final DeferredHolder<SoundEvent, SoundEvent> CORE_ROAR = sound("core_roar");
 
     private MoonMobsSetup() {
     }
@@ -203,12 +223,13 @@ public final class MoonMobsSetup {
         event.put(RIFT_ARMOR.get(), RiftArmor.createAttributes().build());
         event.put(RIFT_SERPENT.get(), RiftSerpent.createAttributes().build());
         event.put(WANING_BLADE.get(), WaningBlade.createAttributes().build());
+        event.put(MOON_CORE.get(), MoonCoreBoss.createAttributes().build());
     }
 
     private static void onCreativeTab(BuildCreativeModeTabContentsEvent event) {
         if (event.getTabKey().equals(ModItems.LEGACY_TAB)) {
             for (DeferredItem<Item> i : List.of(DUST_CRAWLER_EGG, SHELL_HARE_EGG, SHADOW_STITCHER_EGG, SHADOW_EMBRACER_EGG, MOON_LEAPER_EGG, PUSH_STONE_EGG,
-                    CLIFF_CREEPER_EGG, MOON_SCALE_EGG, LIGHT_SWARM_EGG, SHADE_STRIDER_EGG, MIRROR_BEARER_EGG, FULL_KEEPER_EGG, RIFT_WING_EGG, RIFT_ARMOR_EGG, RIFT_SERPENT_EGG, WANING_BLADE_EGG, MOON_DUST, CRESCENT_SHELL,
+                    CLIFF_CREEPER_EGG, MOON_SCALE_EGG, LIGHT_SWARM_EGG, SHADE_STRIDER_EGG, MIRROR_BEARER_EGG, FULL_KEEPER_EGG, RIFT_WING_EGG, RIFT_ARMOR_EGG, RIFT_SERPENT_EGG, WANING_BLADE_EGG, MOON_CORE_EGG, MOON_DUST, CRESCENT_SHELL,
                     SHADOW_THREAD)) {
                 event.accept(i.get());
             }
@@ -234,6 +255,7 @@ public final class MoonMobsSetup {
             put4(RiftArmor.ID, 22);
             put4(RiftSerpent.ID, 20);
             put4(WaningBlade.ID, 640);
+            put4(MoonCoreBoss.ID, 900);
         });
     }
 

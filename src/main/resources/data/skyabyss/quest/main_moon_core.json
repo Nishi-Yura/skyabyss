@@ -1,0 +1,72 @@
+{
+  "category": "main",
+  "chapter": "chapter3",
+  "order": 75,
+  "giver": "skyabyss:storyteller",
+  "start_when": {
+    "type": "quest",
+    "quest": "main_moon_rift",
+    "is": "done"
+  },
+  "stages": [
+    {
+      "id": "gather",
+      "xp": 120,
+      "objectives": [
+        {
+          "id": "gather",
+          "type": "signal",
+          "targets": [
+            "moon_core_gather"
+          ],
+          "count": 1
+        }
+      ]
+    },
+    {
+      "id": "descend",
+      "xp": 120,
+      "objectives": [
+        {
+          "id": "cross",
+          "type": "signal",
+          "targets": [
+            "moon_core_gate"
+          ],
+          "count": 1
+        }
+      ]
+    },
+    {
+      "id": "core",
+      "xp": 1200,
+      "objectives": [
+        {
+          "id": "defeat",
+          "type": "signal",
+          "targets": [
+            "moon_lord_core"
+          ],
+          "count": 1
+        }
+      ]
+    },
+    {
+      "id": "end",
+      "xp": 200,
+      "objectives": [
+        {
+          "id": "watch",
+          "type": "signal",
+          "targets": [
+            "moon_core_end"
+          ],
+          "count": 1
+        }
+      ]
+    }
+  ],
+  "reward": {
+    "xp": 1600
+  }
+}

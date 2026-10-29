@@ -40,6 +40,27 @@ public final class FieldSelfTest {
     private FieldSelfTest() {
     }
 
+    private static final List<int[]> PRELOADED = new ArrayList<>();
+
+    // 先の段: 野を流し込み、使う所の塊を読み込んでおく (加えたばかりの生き物が、同じ tick の内に探しても見つからないため)
+    public static void load(MinecraftServer server) {
+        ServerLevel moon = server.getLevel(MoonWorld.LEVEL);
+        if (moon == null) {
+            return;
+        }
+        moon.getChunk(MoonWorld.ARRIVAL);
+        MoonWorld.build(moon);
+        for (String k : new String[] {"camp", "shard_pond", "arena_center", "gate_front"}) {
+            BlockPos m = MoonField.mark(k);
+            for (int dx = -3; dx <= 3; dx++) {
+                for (int dz = -3; dz <= 3; dz++) {
+                    moon.setChunkForced((m.getX() >> 4) + dx, (m.getZ() >> 4) + dz, true);
+                    PRELOADED.add(new int[] {(m.getX() >> 4) + dx, (m.getZ() >> 4) + dz});
+                }
+            }
+        }
+    }
+
     public static void run(MinecraftServer server) {
         List<String> f = new ArrayList<>();
         List<Entity> spawned = new ArrayList<>();
@@ -232,6 +253,10 @@ public final class FieldSelfTest {
                 for (int[] c : forced) {
                     moon.setChunkForced(c[0], c[1], false);
                 }
+                for (int[] c : PRELOADED) {
+                    moon.setChunkForced(c[0], c[1], false);
+                }
+                PRELOADED.clear();
             }
         }
         report(f);

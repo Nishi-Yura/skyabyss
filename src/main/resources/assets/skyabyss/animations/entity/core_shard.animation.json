@@ -1,0 +1,23 @@
+{
+  "format_version": "1.8.0",
+  "animations": {
+    "animation.core_shard.idle": {
+      "loop": true,
+      "animation_length": 9.0,
+      "bones": {
+        "shard": {
+          "rotation": [
+            "math.sin(query.anim_time * 40 + 0) * 3",
+            "0",
+            "math.sin(query.anim_time * 30 + 90) * 4"
+          ],
+          "position": [
+            0,
+            "math.sin(query.anim_time * 50 + 0) * 0.6",
+            0
+          ]
+        }
+      }
+    }
+  }
+}

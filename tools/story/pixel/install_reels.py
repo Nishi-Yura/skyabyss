@@ -1,6 +1,6 @@
 """語りの紙芝居をゲームへ入れる (client/story/StoryReelScreen が流す)。
 
-  python tools/story/pixel/install_reels.py
+  python tools/story/pixel/install_reels.py [語りの名前 ...]   (名前を並べると、その語りの絵と並びだけ入れ直す。文は全部)
 
   絵: docs/review/story_pixel/<reel>_<panel>.png (240x135。opening.py ほかが描く) → assets/skyabyss/textures/gui/story/<reel>/<panel>.png
   並び: assets/skyabyss/story_reels/<reel>.json (絵の動き・語りを出し切ってから待つ秒・鳴らす音)
@@ -41,17 +41,28 @@ def chapter_reels():
     return out
 
 
+def moon_end_reel():
+    """六章の終わりの語り (moon_end.py の PANELS)"""
+    import moon_end
+    return {"moon_core_end": [(pid, motion, 2.6, sound, ja, en) for pid, fn, motion, sound, ja, en in moon_end.PANELS]}
+
+
 def main():
     REELS.update(chapter_reels())
+    REELS.update(moon_end_reel())
+    # 語りの名前を並べると、その語りの絵と並びだけを入れ直す (文はいつも全部書く。絵の元を消した語りを壊さないため)
+    only = set(sys.argv[1:])
     lang = {"ja_jp": {"story.skyabyss.reel.hint": HINT[0]}, "en_us": {"story.skyabyss.reel.hint": HINT[1]}}
     for reel, panels in REELS.items():
+        copy = not only or reel in only
         tex = A / "skyabyss/textures/gui/story" / reel
         tex.mkdir(parents=True, exist_ok=True)
         out = []
         for pid, motion, hold, sound, ja, en in panels:
             src = SRC / f"{reel}_{pid}.png"
-            assert src.exists(), src
-            shutil.copyfile(src, tex / f"{pid}.png")
+            if copy:
+                assert src.exists(), src
+                shutil.copyfile(src, tex / f"{pid}.png")
             d = {"id": pid, "motion": motion, "hold": hold}
             if sound:
                 d["sound"] = sound
@@ -60,7 +71,8 @@ def main():
             lang["en_us"][f"story.skyabyss.{reel}.{pid}"] = en
         j = A / "skyabyss/story_reels" / f"{reel}.json"
         j.parent.mkdir(parents=True, exist_ok=True)
-        j.write_text(json.dumps({"_comment": "語りの紙芝居 (tools/story/pixel/install_reels.py)", "panels": out}, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+        if copy:
+            j.write_text(json.dumps({"_comment": "語りの紙芝居 (tools/story/pixel/install_reels.py)", "panels": out}, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     for code, d in lang.items():
         p = A / "skyabyss_story_reel/lang" / f"{code}.json"
         p.parent.mkdir(parents=True, exist_ok=True)

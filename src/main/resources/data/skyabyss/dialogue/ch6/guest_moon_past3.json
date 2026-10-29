@@ -2,6 +2,33 @@
   "npc": "skyabyss:guest_moon_past3",
   "entries": [
     {
+      "node": "ch6_core_wait3",
+      "if": {
+        "type": "quest",
+        "quest": "main_moon_core",
+        "is": "active",
+        "stage": "gather"
+      }
+    },
+    {
+      "node": "ch6_core_wait3",
+      "if": {
+        "type": "quest",
+        "quest": "main_moon_core",
+        "is": "active",
+        "stage": "descend"
+      }
+    },
+    {
+      "node": "ch6_core_wait3",
+      "if": {
+        "type": "quest",
+        "quest": "main_moon_core",
+        "is": "active",
+        "stage": "core"
+      }
+    },
+    {
       "node": "ch6_field_promise",
       "if": {
         "type": "quest",
@@ -188,6 +215,16 @@
     },
     "ch6_field_idle": {
       "face": "neutral",
+      "options": [
+        {
+          "id": "ok",
+          "goto": "end",
+          "kind": "leave"
+        }
+      ]
+    },
+    "ch6_core_wait3": {
+      "face": "smile",
       "options": [
         {
           "id": "ok",

@@ -57,6 +57,8 @@ public final class MoonMobRenderers {
         event.registerEntityRenderer(MoonMobsSetup.RIFT_SERPENT.get(), ctx -> new Foe<>(ctx, jp.revati.skyabyss.story.ch6.mob.RiftSerpent.ID, 0.6f));
         event.registerEntityRenderer(MoonMobsSetup.WANING_BLADE.get(), ctx -> new Foe<>(ctx, jp.revati.skyabyss.story.ch6.mob.WaningBlade.ID, 0.8f));
         event.registerEntityRenderer(jp.revati.skyabyss.story.ch6.rift.RiftBlocks.ECHO_SHADE.get(), jp.revati.skyabyss.story.ch6.rift.client.EchoShadeRenderer::new);
+        event.registerEntityRenderer(MoonMobsSetup.MOON_CORE.get(), ctx -> new Foe<>(ctx, jp.revati.skyabyss.story.ch6.mob.MoonCoreBoss.ID, 0.0f, 1.2f));
+        event.registerEntityRenderer(MoonMobsSetup.CORE_SHARD.get(), ctx -> new LowPolyGeoRenderer<>(ctx, jp.revati.skyabyss.story.ch6.mob.CoreShard.ID, 1.2f));
     }
 
     static final class Model<T extends MoonMob> extends LowPolyGeoRenderer.Model<T> {

@@ -174,6 +174,10 @@ def main():
         if key in marks:
             a, b = px(marks[key][0], marks[key][2])
             d.ellipse([a - r, b - r, a + r, b + r], outline=(250, 236, 180), width=2)
+    # 核の門 (着く所の北 8。月の奥の核の間への門): 小さな二重の四角
+    a, b = px(0, -8)
+    d.rectangle([a - 4, b - 3, a + 4, b + 3], outline=(250, 236, 180), width=2)
+    d.rectangle([a - 1, b - 1, a + 1, b + 1], fill=(250, 236, 180))
     # 外は透かす (着く所と谷から離れるほど)
     yy, xx = np.mgrid[0:SIZE, 0:SIZE]
     wx, wz = xx + X0, yy + Z0

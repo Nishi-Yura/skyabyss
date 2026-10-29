@@ -204,7 +204,7 @@ public final class RiftSelfTest {
             Quests.onTalk(p, role, "ch6_rift_promise3");
             QuestLog.Entry done = QuestLog.of(p).entry(RiftPuzzles.QUEST);
             check(f, done != null && done.done, "the promise did not finish main_moon_rift");
-            check(f, MoonEnd.due(p), "the moon end card is not due after the rift");
+            check(f, !MoonEnd.due(p), "the moon end card came after the rift (it waits for the core)");
             // 敵の数字 (下弦でない位相) と残り鎧の前の守り
             MoonClock.skipTo(moon, 0);
             BlockPos near = MoonRift.mark("camp").offset(30, 0, -20);
@@ -316,7 +316,7 @@ public final class RiftSelfTest {
     private static void report(List<String> f) {
         if (f.isEmpty()) {
             SkyAbyss.LOGGER.info("SELFTEST moon rift PASSED (rift terrain, camp, door, leap, gallery, hall, puzzle blocks, leap reach, afterimage replay/stand/plate/"
-                    + "freeze/starlight, two-plate door, shadow bridges, falls and hall guard, main_moon_rift and the end card, mob numbers, armor front guard, "
+                    + "freeze/starlight, two-plate door, shadow bridges, falls and hall guard, main_moon_rift (no end card yet), mob numbers, armor front guard, "
                     + "remnants rise at 40% once and not in light, blade summon, its afterimage (no damage, no freeze), stagger by its own afterimage, floor crumble)");
         } else {
             f.forEach(m -> SkyAbyss.LOGGER.error("SELFTEST moon rift FAILED: {}", m));

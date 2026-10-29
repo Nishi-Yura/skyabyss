@@ -348,11 +348,16 @@ public final class SelfTestRunner {
         steps.add(Step.once("moon near", jp.revati.skyabyss.story.ch5.MoonNearSelfTest::run));
         // 六章の月の入口 (story/ch6)
         steps.add(Step.once("moon world", jp.revati.skyabyss.story.ch6.MoonSelfTest::run));
-        steps.add(Step.once("moon valley", jp.revati.skyabyss.story.ch6.valley.ValleySelfTest::run));
+        steps.add(Step.once("moon (load)", jp.revati.skyabyss.story.ch6.MoonTestLoad::load));
+        steps.add(Step.once("moon valley", 40, jp.revati.skyabyss.story.ch6.valley.ValleySelfTest::run));
         steps.add(Step.once("moon cliff", jp.revati.skyabyss.story.ch6.cliff.CliffSelfTest::run));
-        steps.add(Step.once("moon field", jp.revati.skyabyss.story.ch6.field.FieldSelfTest::run));
+        steps.add(Step.once("moon field (load)", jp.revati.skyabyss.story.ch6.field.FieldSelfTest::load));
+        steps.add(Step.once("moon field", 40, jp.revati.skyabyss.story.ch6.field.FieldSelfTest::run));
         steps.add(Step.once("moon rift (load)", jp.revati.skyabyss.story.ch6.rift.RiftSelfTest::load));
         steps.add(Step.once("moon rift", 40, jp.revati.skyabyss.story.ch6.rift.RiftSelfTest::run));
+        steps.add(Step.once("moon core (load)", jp.revati.skyabyss.story.ch6.core.CoreSelfTest::load));
+        steps.add(Step.once("moon core", 40, jp.revati.skyabyss.story.ch6.core.CoreSelfTest::run));
+        steps.add(Step.once("moon (unload)", jp.revati.skyabyss.story.ch6.MoonTestLoad::unload));
         steps.add(Step.once("abyss depths", 20, jp.revati.skyabyss.story.ch5.depths.DepthsV2SelfTest::run));
         steps.add(Step.once("abyss finds (load)", jp.revati.skyabyss.story.ch5.AbyssFindsSelfTest::load));
         steps.add(Step.once("abyss finds", 60, jp.revati.skyabyss.story.ch5.AbyssFindsSelfTest::run));

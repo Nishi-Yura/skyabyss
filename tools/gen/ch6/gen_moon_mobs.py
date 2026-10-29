@@ -16,6 +16,7 @@
   区画 2: 月跳ね A 岩の跳び虫・押し石 A 目のある輪石・崖這い B 岩背負いの蟹・月秤 A 天秤を担ぐ巨人。
   区画 3 (一品一案。2026-10-30): 光の群れ・影の竹馬・鏡背負い・望の灯守。
   区画 4 (一品一案。2026-10-30): 淵の羽影・残り鎧・逆さ砂の蛇・残月の剣守。
+  月の核 (一品一案。2026-10-30): 月の核・月の欠片の盾。
 回転の約束: kf の値で書き、ファイルへは (-x, -y, z)。kf の x が負 = 前へ傾く (垂れた腕なら前へ上がる、前を向いた顎なら先が上がる。
   深淵の前の私の影の「手を上げる」= -110 と同じ)。bone([...]) に直接書く文字の式はファイルの値なので逆 (正 = 前へ傾く)。位置はそのまま (y が上)。
 """
@@ -34,7 +35,7 @@ ROUGH = os.path.join(ROOT, "docs", "review", "moon_roughs")
 CHOICE = {"dust_crawler": "a", "shell_hare": "b", "shadow_stitcher": "c", "shadow_embracer": "b",
           "moon_leaper": "a", "push_stone": "a", "cliff_creeper": "b", "moon_scale": "a",
           "light_swarm": "a", "shade_strider": "a", "mirror_bearer": "a", "full_keeper": "a",
-          "rift_wing": "a", "rift_armor": "a", "rift_serpent": "a", "waning_blade": "a"}
+          "rift_wing": "a", "rift_armor": "a", "rift_serpent": "a", "waning_blade": "a", "moon_core": "a", "core_shard": "a"}
 
 
 def wjson(path, data, indent=2):
@@ -576,10 +577,49 @@ def waning_blade():
             p + "death": once(2.0, death, True)}
 
 
+# ---------------------------------------------------------------- 月の核 (輪が回る・欠片の薙ぎ・巻き戻し・崩れ・満月落とし・咆哮)
+def moon_core():
+    p = "animation.moon_core."
+    idle = {"ring_a": bone(["0", "query.anim_time * 40", "0"]), "ring_b": bone(["query.anim_time * 25", "query.anim_time * 30", "0"]),
+            "ring_c": bone(["0", "-query.anim_time * 35", "query.anim_time * 15"]), "core": bone(None, [0, S(0, 0.8, 40), 0]),
+            "eye": bone(["0", "0", "query.anim_time * 30"]), "spire_b": bone([S(0, 4, 50), "0", S(90, 4, 40)])}
+    # 欠片の薙ぎ (2.0): 輪が速く回り、珠が脈打つ
+    sweep = {"ring_a": bone(["0", "query.anim_time * 240", "0"]), "ring_b": bone(["query.anim_time * 160", "0", "0"]),
+             "core": dict(bone(None), scale=scale({0: (1, 1, 1), 1.0: (1.15, 1.15, 1.15), 1.1: (0.95, 0.95, 0.95), 2.0: (1, 1, 1)}))}
+    # 巻き戻し (5.0): 輪と針が逆に回る
+    rewind = {"ring_a": bone(["0", "-query.anim_time * 160", "0"]), "ring_b": bone(["-query.anim_time * 110", "0", "0"]),
+              "ring_c": bone(["0", "query.anim_time * 140", "-query.anim_time * 60"]), "eye": bone(["0", "0", "-query.anim_time * 360"])}
+    # 崩れ (5.0): 輪が止まって傾き、珠が沈む
+    stagger = {"core": bone(kf({0: (0, 0, 0), 0.4: (20, 0, 15), 4.6: (20, 0, 15), 5.0: (0, 0, 0)}),
+                            kf({0: (0, 0, 0), 0.4: (0, -10, 0), 4.6: (0, -10, 0), 5.0: (0, 0, 0)}, False)),
+               "ring_a": bone(kf({0: (0, 0, 0), 0.4: (35, 0, 0), 4.6: (35, 0, 0), 5.0: (0, 0, 0)})),
+               "ring_b": bone(kf({0: (0, 0, 0), 0.4: (-30, 0, 20), 4.6: (-30, 0, 20), 5.0: (0, 0, 0)}))}
+    # 満月落とし (保つ): 珠が膨らみ、輪が大きく開く
+    drop = {"core": dict(bone(None, kf({0: (0, 0, 0), 1.0: (0, 8, 0)}, False)), scale=scale({0: (1, 1, 1), 5.0: (1.35, 1.35, 1.35)})),
+            "ring_a": dict(bone(["0", "query.anim_time * 90", "0"]), scale=scale({0: (1, 1, 1), 1.0: (1.4, 1.4, 1.4)})),
+            "ring_c": dict(bone(["query.anim_time * 70", "0", "0"]), scale=scale({0: (1, 1, 1), 1.0: (1.5, 1.5, 1.5)}))}
+    roar = {"core": dict(bone(None), scale=scale({0: (1, 1, 1), 0.5: (1.3, 1.3, 1.3), 1.6: (1.3, 1.3, 1.3), 2.0: (1, 1, 1)})),
+            "ring_a": bone(["0", "query.anim_time * 300", "0"]), "ring_b": bone(["query.anim_time * 260", "0", "0"]),
+            "ring_c": bone(["0", "0", "query.anim_time * 280"])}
+    death = {"core": dict(bone(kf({0: (0, 0, 0), 2.0: (0, 360, 0)}), kf({0: (0, 0, 0), 2.0: (0, -20, 0)}, False)),
+                          scale=scale({0: (1, 1, 1), 1.0: (1.4, 1.4, 1.4), 2.0: (0.1, 0.1, 0.1)}))}
+    return {p + "idle": loop(12.0, idle), p + "walk": loop(12.0, idle), p + "sweep": once(2.0, sweep), p + "rewind": once(5.0, rewind),
+            p + "stagger": once(5.0, stagger), p + "drop": once(5.0, drop, True), p + "roar": once(2.0, roar),
+            p + "hurt": once(0.22, {"core": bone(kf({0: (0, 0, 0), 0.06: (0, 0, 6), 0.22: (0, 0, 0)}))}), p + "death": once(2.0, death, True)}
+
+
+# 月の欠片の盾 (ゆっくり揺れるだけ。位置と向きは核が決める)
+def core_shard():
+    p = "animation.core_shard."
+    idle = {"shard": bone([S(0, 3, 40), "0", S(90, 4, 30)], [0, S(0, 0.6, 50), 0])}
+    return {p + "idle": loop(9.0, idle)}
+
+
 ANIMS = {"dust_crawler": dust_crawler, "shell_hare": shell_hare, "shadow_stitcher": shadow_stitcher, "shadow_embracer": shadow_embracer,
          "moon_leaper": moon_leaper, "push_stone": push_stone, "cliff_creeper": cliff_creeper, "moon_scale": moon_scale,
          "light_swarm": light_swarm, "shade_strider": shade_strider, "mirror_bearer": mirror_bearer, "full_keeper": full_keeper,
-         "rift_wing": rift_wing, "rift_armor": rift_armor, "rift_serpent": rift_serpent, "waning_blade": waning_blade}
+         "rift_wing": rift_wing, "rift_armor": rift_armor, "rift_serpent": rift_serpent, "waning_blade": waning_blade,
+         "moon_core": moon_core, "core_shard": core_shard}
 
 
 # ---------------------------------------------------------------- 素材を入れる
@@ -745,6 +785,18 @@ SOUNDS = {
     "door_close": [ev("block.iron_door.close", 0.7, 1.0)],
     "remnant_mark": [ev("particle.soul_escape", 0.8, 1.0)],
     "remnant_rise": [ev("entity.vex.charge", 0.6, 1.0)],
+    # 月の核
+    "core_tell": [ev("block.beacon.ambient", 0.6, 1.2)],
+    "core_sweep": [ev("entity.breeze.wind_burst", 0.6, 1.2)],
+    "core_block": [ev("block.amethyst_block.hit", 0.6, 1.0)],
+    "core_clock": [ev("block.note_block.basedrum", 0.5, 1.0)],
+    "core_rewind": [ev("block.portal.travel", 2.0, 0.6)],
+    "core_break": [ev("block.glass.break", 0.5, 1.5)],
+    "core_shatter": [ev("block.amethyst_cluster.break", 0.5, 1.5)],
+    "core_drop_tell": [ev("block.beacon.deactivate", 0.5, 1.4)],
+    "core_drop": [ev("entity.generic.explode", 0.6, 1.4)],
+    "core_allies": [ev("block.amethyst_block.resonate", 1.2, 1.2)],
+    "core_roar": [ev("block.bell.resonate", 0.4, 1.6)],
 }
 
 
