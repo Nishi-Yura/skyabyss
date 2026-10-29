@@ -50,6 +50,10 @@ public final class GearLevel {
         if (jp.revati.skyabyss.abyss.gear.AbyssGear.DUNGEON.equals(dungeon)) {
             return jp.revati.skyabyss.abyss.gear.AbyssGear.STAGE.level();
         }
+        // 六章 (月) も巨神の段の外 (story/ch6/gear/MoonGear.STAGE)
+        if (jp.revati.skyabyss.story.ch6.gear.MoonGear.DUNGEON.equals(dungeon)) {
+            return jp.revati.skyabyss.story.ch6.gear.MoonGear.STAGE.level();
+        }
         for (GearCurve.Stage s : GearCurve.STAGES) {
             if (s.id().equals(dungeon)) {
                 return s.level();

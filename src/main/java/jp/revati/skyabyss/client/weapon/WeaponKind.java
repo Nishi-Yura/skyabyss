@@ -80,7 +80,10 @@ public enum WeaponKind {
             // 市の採集の道具 (item/outfit。振りの動きは持たない。持ち方と描き方だけ)
             Map.entry("gather_axe", AXE), Map.entry("gather_pickaxe", HAMMER), Map.entry("gather_shovel", HAMMER),
             // イサナの祖父の風見鶏 (雷翼を指す道具。杖のように持つ)
-            Map.entry("weathercock", POKER));
+            Map.entry("weathercock", POKER),
+            // 六章「月」の武器 (story/ch6/gear。弓は WeaponClient が BowExtension で登録する)
+            Map.entry("moon_scale_hammer", HAMMER), Map.entry("moon_tide_staff", POKER), Map.entry("moon_crescent_dagger", FANG),
+            Map.entry("moon_starlight_bell_staff", POKER), Map.entry("moon_waning_blade", GREATSWORD));
 
     public static Iterable<Map.Entry<String, WeaponKind>> items() {
         return BY_ITEM.entrySet();

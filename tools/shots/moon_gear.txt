@@ -1,0 +1,140 @@
+# 六章「月」の装備 (docs/design/03 の 12.2): 武器 6 本の一人称と三人称の正面、月渡りの装束を着た姿、月の暦のブロック
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/moon_gear.txt -PshotsName=moon_gear
+world shots flat
+size 960 540
+timeout 3000
+render 6
+cmd time set noon
+cmd weather clear
+cmd gamemode creative
+cmd fill -20 -61 -20 20 -61 20 minecraft:smooth_basalt destroy
+camera 0 -60 8 180 0
+waitchunks
+hud on
+wait 400
+cmd skyabyss cinematic stop
+close
+wait 20
+swingpose off
+mainhand right
+perspective first
+hud on
+cmd item replace entity @s weapon.mainhand with skyabyss:moon_scale_hammer
+close
+wait 30
+chat clear
+shot fp_moon_scale_hammer
+perspective front
+hud off
+wait 8
+shot tp_moon_scale_hammer
+bodyyaw 70
+wait 6
+shot side_moon_scale_hammer
+bodyyaw 0
+perspective first
+hud on
+cmd item replace entity @s weapon.mainhand with skyabyss:moon_tide_staff
+close
+wait 30
+chat clear
+shot fp_moon_tide_staff
+perspective front
+hud off
+wait 8
+shot tp_moon_tide_staff
+bodyyaw 70
+wait 6
+shot side_moon_tide_staff
+bodyyaw 0
+perspective first
+hud on
+cmd item replace entity @s weapon.mainhand with skyabyss:moon_waning_bow
+close
+wait 30
+chat clear
+shot fp_moon_waning_bow
+perspective front
+hud off
+wait 8
+shot tp_moon_waning_bow
+bodyyaw 70
+wait 6
+shot side_moon_waning_bow
+bodyyaw 0
+perspective first
+hud on
+cmd item replace entity @s weapon.mainhand with skyabyss:moon_crescent_dagger
+close
+wait 30
+chat clear
+shot fp_moon_crescent_dagger
+perspective front
+hud off
+wait 8
+shot tp_moon_crescent_dagger
+bodyyaw 70
+wait 6
+shot side_moon_crescent_dagger
+bodyyaw 0
+perspective first
+hud on
+cmd item replace entity @s weapon.mainhand with skyabyss:moon_starlight_bell_staff
+close
+wait 30
+chat clear
+shot fp_moon_starlight_bell_staff
+perspective front
+hud off
+wait 8
+shot tp_moon_starlight_bell_staff
+bodyyaw 70
+wait 6
+shot side_moon_starlight_bell_staff
+bodyyaw 0
+perspective first
+hud on
+cmd item replace entity @s weapon.mainhand with skyabyss:moon_waning_blade
+close
+wait 30
+chat clear
+shot fp_moon_waning_blade
+perspective front
+hud off
+wait 8
+shot tp_moon_waning_blade
+bodyyaw 70
+wait 6
+shot side_moon_waning_blade
+bodyyaw 0
+cmd clear @s
+armortier rare
+armorlevel 0
+cmd item replace entity @s armor.feet with skyabyss:moon_walker_boots
+cmd item replace entity @s armor.legs with skyabyss:moon_walker_leggings
+cmd item replace entity @s armor.chest with skyabyss:moon_walker_chestplate
+cmd item replace entity @s armor.head with skyabyss:moon_walker_helmet
+hud off
+fov 30
+perspective front
+bodyyaw 0
+wait 20
+shot worn_front
+perspective back
+wait 4
+shot worn_back
+perspective front
+bodyyaw 50
+wait 4
+shot worn_side
+bodyyaw 0
+walk on
+wait 9
+shot worn_walk
+walk off
+fov 70
+cmd setblock 0 -60 3 skyabyss:moon_calendar
+camera 0 -58 6 180 35
+perspective first
+wait 20
+shot calendar

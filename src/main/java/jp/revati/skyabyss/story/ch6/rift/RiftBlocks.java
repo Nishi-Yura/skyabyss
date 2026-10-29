@@ -36,6 +36,11 @@ public final class RiftBlocks {
                     .sound(SoundType.METAL).pushReaction(PushReaction.BLOCK).noOcclusion().noCollission()
                     .lightLevel(s -> s.getValue(EchoPlateBlock.PRESSED) ? 9 : 2)));
 
+    // 月の暦 (クリア後の位相の挑戦の入口。着く所の南。story/ch6/MoonTrial)
+    public static final DeferredBlock<jp.revati.skyabyss.story.ch6.MoonCalendarBlock> MOON_CALENDAR = BLOCKS.register("moon_calendar",
+            () -> new jp.revati.skyabyss.story.ch6.MoonCalendarBlock(BlockBehaviour.Properties.of().mapColor(MapColor.METAL).strength(-1.0f, 3600000.0f)
+                    .noLootTable().sound(SoundType.AMETHYST).pushReaction(PushReaction.BLOCK).noOcclusion().lightLevel(s -> 9)));
+
     public static final DeferredHolder<EntityType<?>, EntityType<EchoShade>> ECHO_SHADE = ENTITIES.register(EchoShade.ID,
             () -> EntityType.Builder.<EchoShade>of(EchoShade::new, MobCategory.MISC).sized(0.6f, 1.8f).clientTrackingRange(10).updateInterval(1)
                     .noSave().build(SkyAbyss.MODID + ":" + EchoShade.ID));

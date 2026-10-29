@@ -33,8 +33,9 @@ public final class MoonWorld {
     public static final BlockPos ARRIVAL = new BlockPos(0, SURFACE + 1, 0);
     // 1 = 着く所とクレーター、2 = 新月の谷 (valley.MoonValley)、3 = 谷の踏み跡・星の溜まりの十字 (谷を流し込み直す)、
     // 4 = 上弦の崖 (cliff.MoonCliff。着く所の東)、5 = 崖の岩山を尾根と谷筋のある形に (崖を流し込み直す)、6 = 満月の野 (field.MoonField。着く所の西)、
-    // 7 = 下弦の淵 (rift.MoonRift。着く所の南東)、8 = 月の核 (core.MoonCore。着く所の北の門と、月の奥の核の間)
-    static final int VERSION = 8;
+    // 7 = 下弦の淵 (rift.MoonRift。着く所の南東)、8 = 月の核 (core.MoonCore。着く所の北の門と、月の奥の核の間)、
+    // 9 = 月の暦 (クリア後の位相の挑戦の入口。着く所の南。MoonTrial)
+    static final int VERSION = 9;
 
     private MoonWorld() {
     }
@@ -92,6 +93,9 @@ public final class MoonWorld {
         if (d.version < 8) {
             jp.revati.skyabyss.story.ch6.core.MoonCore.build(level);
         }
+        if (d.version < 9) {
+            calendar(level);
+        }
         d.version = VERSION;
         d.setDirty();
     }
@@ -119,6 +123,20 @@ public final class MoonWorld {
     // 月の核の間ができているか
     public static boolean coreBuilt(MinecraftServer server) {
         return Data.get(server).version >= 8;
+    }
+
+    // 月の暦 (版 9): 着く所の南 7 に、磨いた黒石の小さな台と暦
+    static void calendar(ServerLevel level) {
+        BlockPos c = MoonTrial.calendar();
+        for (int x = -1; x <= 1; x++) {
+            for (int z = -1; z <= 1; z++) {
+                level.setBlock(c.offset(x, -1, z), (x + z) % 2 == 0 ? Blocks.POLISHED_BLACKSTONE_BRICKS.defaultBlockState() : Blocks.POLISHED_BLACKSTONE.defaultBlockState(), 3);
+                for (int y = 0; y < 3; y++) {
+                    level.setBlock(c.offset(x, y, z), Blocks.AIR.defaultBlockState(), 3);
+                }
+            }
+        }
+        level.setBlock(c, jp.revati.skyabyss.story.ch6.rift.RiftBlocks.MOON_CALENDAR.get().defaultBlockState(), 3);
     }
 
     // 着く所とクレーター (版 1)

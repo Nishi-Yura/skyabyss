@@ -47,7 +47,7 @@ public final class GearTierSelfTest {
     public record Row(String id, GearTier tier, int chapter) {
     }
 
-    // 全装備の表 (03 の 1.4節と同じ。章 = 由来の巨神の章。深淵は 5)
+    // 全装備の表 (03 の 1.4節と同じ。章 = 由来の巨神の章。深淵は 5、月は 6)
     public static final List<Row> TABLE = new ArrayList<>();
 
     private static void row(int chapter, GearTier tier, String... ids) {
@@ -92,6 +92,10 @@ public final class GearTierSelfTest {
         row(5, R, "abyss_diver_helmet", "abyss_diver_chestplate", "abyss_diver_leggings", "abyss_diver_boots");
         row(5, E, "abyss_lamp_sword", "abyss_pulse_listener", "abyss_lantern_charm", "abyss_lamp_staff", "abyss_depth_bow", "abyss_toll_bell_staff");
         row(5, H, "abyss_sinking_anchor", "abyss_pulse_dagger", "abyss_surveyor_plumb");
+        // 六章 月 (story/ch6/gear)
+        row(6, R, "moon_walker_helmet", "moon_walker_chestplate", "moon_walker_leggings", "moon_walker_boots");
+        row(6, E, "moon_scale_hammer", "moon_tide_staff", "moon_waning_bow", "moon_crescent_dagger", "moon_starlight_bell_staff");
+        row(6, H, "moon_waning_blade", "moon_full_ring");
     }
 
     private GearTierSelfTest() {
@@ -145,7 +149,7 @@ public final class GearTierSelfTest {
             }
         }
         // 章ごとの数 (03 の 1.4節の表の数)
-        for (int ch = 1; ch <= 5; ch++) {
+        for (int ch = 1; ch <= 6; ch++) {
             Map<GearTier, Integer> count = new EnumMap<>(GearTier.class);
             for (Row r : TABLE) {
                 if (r.chapter() == ch) {
@@ -236,6 +240,11 @@ public final class GearTierSelfTest {
             case "abyss_lamp_sword" -> AbyssGear.swordDps(e);
             case "abyss_sinking_anchor" -> AbyssGear.anchorDps(e);
             case "abyss_pulse_dagger" -> AbyssGear.daggerDps(e);
+            case "moon_scale_hammer" -> jp.revati.skyabyss.story.ch6.gear.MoonGear.hammerDps(e);
+            case "moon_tide_staff" -> jp.revati.skyabyss.story.ch6.gear.MoonGear.staffDps(e);
+            case "moon_crescent_dagger" -> jp.revati.skyabyss.story.ch6.gear.MoonGear.daggerDps(e);
+            case "moon_starlight_bell_staff" -> jp.revati.skyabyss.story.ch6.gear.MoonGear.bellDps(e);
+            case "moon_waning_blade" -> jp.revati.skyabyss.story.ch6.gear.MoonGear.bladeDps(e);
             case "whale_bow", "tide_bow", "ember_bow", "shrine_bow" -> ((jp.revati.skyabyss.item.ChapterBowItem) item(path)).dps(e) / RANGED;
             default -> item(path) instanceof jp.revati.skyabyss.item.ChapterBowItem b ? b.dps(e) / RANGED : plain(path, e);
         };
@@ -247,7 +256,7 @@ public final class GearTierSelfTest {
 
     private static void weapons(List<String> f, List<String> notes) {
         check(f, TideGear.TRIDENT.endsWith("tide_shell_trident") && EmberGear.HAMMER.endsWith("smith_hammer"), "weapon ids moved");
-        for (int ch = 1; ch <= 5; ch++) {
+        for (int ch = 1; ch <= 6; ch++) {
             Map<GearTier, double[]> lo = new EnumMap<>(GearTier.class);
             Map<GearTier, double[]> hi = new EnumMap<>(GearTier.class);
             StringBuilder line = new StringBuilder("chapter " + ch + " weapons (+0 / +10):");
@@ -302,9 +311,10 @@ public final class GearTierSelfTest {
             check(f, travel > 0 && titan > travel, "chapter " + ch + ": travel armor " + travel + " is not below the titan armor " + titan);
         }
         check(f, armorSum(5, GearTier.RARE) > armorSum(4, GearTier.RARE), "abyss armor is not above the ember armor");
+        check(f, armorSum(6, GearTier.RARE) > armorSum(5, GearTier.RARE), "moon armor is not above the abyss armor");
         // 巨神の鎧は章ごとに上がる (旅装も)
         StringBuilder line = new StringBuilder("armor sums by chapter (travel / titan):");
-        for (int ch = 1; ch <= 5; ch++) {
+        for (int ch = 1; ch <= 6; ch++) {
             line.append(String.format(Locale.ROOT, " ch%d %.1f/%.1f", ch, armorSum(ch, GearTier.UNCOMMON), armorSum(ch, GearTier.RARE)));
             if (ch >= 2 && ch <= 4) {
                 check(f, armorSum(ch, GearTier.UNCOMMON) > armorSum(ch - 1, GearTier.UNCOMMON), "chapter " + ch + " travel armor is not above chapter " + (ch - 1));
@@ -337,7 +347,9 @@ public final class GearTierSelfTest {
                 }
             }
             check(f, maxExclusive < minPiece, set.titan + ": an exclusive drops as often as a codex piece");
-            check(f, set.exclusives().size() == 3, set.titan + " should have three exclusives");
+            // 月は専用の逸品が 2 つ (太刀と環。03 の 12.2)
+            int want = set.titan.equals("moon") ? 2 : 3;
+            check(f, set.exclusives().size() == want, set.titan + " should have " + want + " exclusives");
         }
         for (String id : AbyssSetup.legends()) {
             check(f, item(id) instanceof ModGear g && g.tier() == GearTier.ARTIFACT, "abyss heart item " + id + " is not an artifact");

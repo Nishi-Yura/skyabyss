@@ -18,6 +18,7 @@ import net.neoforged.neoforge.event.RegisterCommandsEvent;
 //   下弦の淵: rift <印> (淵の印へ行く。camp・door_entry・leap_entry・hall_entry・gate_front・arena_entry…) | rift_lord (主の間に残月の剣守) |
 //             rift_clear (主の間を片付ける) | echo (鏡の中で待つ自分の残像を放つ)
 //   月の核: core <印> (core_gate・gate_front・arena_entry・arena_center…) | core_lord (核を呼ぶ) | core_allies (四人を立たせる) | core_clear
+//   位相の挑戦: trial <valley|cliff|field|rift|core> <段> (その主の間へ跳び、段の強さの主を呼ぶ)
 //   撮影: pose <動き> (まわり 24 の月の敵を止めて、その動きを流す。向きは今の向きのまま)
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class MoonCommands {
@@ -108,6 +109,12 @@ public final class MoonCommands {
                             p.teleportTo(moon, m.getX() + 0.5, m.getY(), m.getZ() + 0.5, p.getYRot(), p.getXRot());
                             return 1;
                         })))
+                        .then(Commands.literal("trial").then(Commands.argument("lord", com.mojang.brigadier.arguments.StringArgumentType.word())
+                                .then(Commands.argument("tier", com.mojang.brigadier.arguments.IntegerArgumentType.integer(1, MoonTrial.MAX_TIER)).executes(c -> {
+                                    net.minecraft.server.level.ServerPlayer p = c.getSource().getPlayerOrException();
+                                    return MoonTrial.start(p, com.mojang.brigadier.arguments.StringArgumentType.getString(c, "lord"),
+                                            com.mojang.brigadier.arguments.IntegerArgumentType.getInteger(c, "tier")) != null ? 1 : 0;
+                                }))))
                         .then(Commands.literal("core_lord").executes(c -> {
                             ServerLevel moon = c.getSource().getServer().getLevel(MoonWorld.LEVEL);
                             return moon != null && jp.revati.skyabyss.story.ch6.core.CoreArena.summon(moon) != null ? 1 : 0;

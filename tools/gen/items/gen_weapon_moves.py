@@ -646,7 +646,12 @@ for _item, _src, _label in (("shrine_staff", "abyss_bell_staff", "宿り木の�
                             ("abyss_ember_dagger", "waterway_fang", "abyss_ember_dagger: 右上から左下へ、返して X、突き抜ける"),
                             ("abyss_ember_bell_staff", "abyss_bell_staff", "abyss_ember_bell_staff: 掲げて溜め、地を突いて鐘を鳴らす"),
                             ("abyss_lamp_staff", "abyss_bell_staff", "abyss_lamp_staff: 掲げて溜め、地を突く"),
-                            ("abyss_toll_bell_staff", "abyss_bell_staff", "abyss_toll_bell_staff: 掲げて溜め、地を突いて鐘を鳴らす")):
+                            ("abyss_toll_bell_staff", "abyss_bell_staff", "abyss_toll_bell_staff: 掲げて溜め、地を突いて鐘を鳴らす"),
+                            ("moon_scale_hammer", "smith_hammer", "月秤の鎚: 振りかぶって打ち下ろす"),
+                            ("moon_tide_staff", "abyss_bell_staff", "満ち引きの杖: 掲げて溜め、地を突く"),
+                            ("moon_crescent_dagger", "waterway_fang", "欠け月の短剣: 右上から左下へ、返して X、突き抜ける"),
+                            ("moon_starlight_bell_staff", "abyss_bell_staff", "星灯りの鈴杖: 掲げて溜め、地を突いて鐘を鳴らす"),
+                            ("moon_waning_blade", "whalebone_greatsword", "残月の太刀: 大きく薙ぎ、振り下ろす")):
     W[_item] = _copy.deepcopy(W[_src])
     W[_item]["item"] = _item
     W[_item]["label"] = _label
@@ -791,7 +796,9 @@ def main():
                         ("abyss_ember_dagger", "waterway_fang"),
                         ("abyss_ember_bell_staff", "abyss_bell_staff"),
                         ("abyss_lamp_staff", "abyss_bell_staff"),
-                        ("abyss_toll_bell_staff", "abyss_bell_staff")):
+                        ("abyss_toll_bell_staff", "abyss_bell_staff"),
+                        ("moon_scale_hammer", "smith_hammer"), ("moon_tide_staff", "abyss_bell_staff"), ("moon_crescent_dagger", "waterway_fang"),
+                        ("moon_starlight_bell_staff", "abyss_bell_staff"), ("moon_waning_blade", "whalebone_greatsword")):
         label = W[_item]["label"]
         W[_item] = _copy.deepcopy(W[_src])
         W[_item]["item"] = _item

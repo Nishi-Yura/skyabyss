@@ -190,6 +190,7 @@ public final class SelfTestRunner {
         // 余燼の装備と伝承・天の鍵の締め (13 の 11.2節の担当 G)
         steps.add(Step.once("ember gear", jp.revati.skyabyss.titan.ember.gear.EmberGearSelfTest::runSelfTest));
         steps.add(Step.once("abyss gear", jp.revati.skyabyss.abyss.gear.AbyssGearSelfTest::runSelfTest));
+        steps.add(Step.once("moon gear", jp.revati.skyabyss.story.ch6.gear.MoonGearSelfTest::runSelfTest));
         steps.add(Step.once("ember lore", jp.revati.skyabyss.titan.ember.lore.EmberLoreSelfTest::runSelfTest));
         // (大陸の世界は出現地点がはじまりの島へ動いたばかりで、そこのチャンクがまだ動いていないことがある。30 秒で諦めて進む)
         int[] recordWait = {0};
@@ -357,6 +358,7 @@ public final class SelfTestRunner {
         steps.add(Step.once("moon rift", 40, jp.revati.skyabyss.story.ch6.rift.RiftSelfTest::run));
         steps.add(Step.once("moon core (load)", jp.revati.skyabyss.story.ch6.core.CoreSelfTest::load));
         steps.add(Step.once("moon core", 40, jp.revati.skyabyss.story.ch6.core.CoreSelfTest::run));
+        steps.add(Step.once("moon trial", jp.revati.skyabyss.story.ch6.MoonTrialSelfTest::run));
         steps.add(Step.once("moon (unload)", jp.revati.skyabyss.story.ch6.MoonTestLoad::unload));
         steps.add(Step.once("abyss depths", 20, jp.revati.skyabyss.story.ch5.depths.DepthsV2SelfTest::run));
         steps.add(Step.once("abyss finds (load)", jp.revati.skyabyss.story.ch5.AbyssFindsSelfTest::load));

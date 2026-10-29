@@ -26,7 +26,7 @@ public final class GearRequirement {
     }
 
     public static int amountFor(String dungeon) {
-        if (jp.revati.skyabyss.abyss.gear.AbyssGear.DUNGEON.equals(dungeon)) {
+        if (jp.revati.skyabyss.abyss.gear.AbyssGear.DUNGEON.equals(dungeon) || jp.revati.skyabyss.story.ch6.gear.MoonGear.DUNGEON.equals(dungeon)) {
             return ABYSS;
         }
         return switch (dungeon) {

@@ -8,6 +8,15 @@
 - 試遊版: 0.8.0（`build/libs/skyabyss-0.8.0.jar`。確認表 `docs/review/playtest_0.8.0.md`、遊び方 `docs/beta_how_to_play.md`）。
 - 自己テスト: `bash <scratchpad>/fresh_continent.sh "<名前,…>" <世界名>`（空なら全部。大陸の新しい世界で回す）。`abyss escort` はほかと一緒に流すと時間切れで落ちることがある（単独では通る）。
 
+## 2026-10-31 未明（クリア後の位相の挑戦と月の装備。設計 [46](design/46_moon.md) の 4.8.1・[03](design/03_gear_and_endgame.md) の 12.2）
+
+- 月の装備 12 品と素材 3 つを入れた（`story/ch6/gear/`）: 月渡りの装束 4 部位（低ポリ `lowpoly/armor/moon_walker`）、武器 6 本（鎚・杖・弓・短剣・鈴杖はエピック、残月の太刀はヒロイック）、満月の環、月の涙、月の欠片・月の心核・共鳴の欠片（月）。固有効果は `MoonGearEvents`、報酬は `MoonGearLoot`（区画の主は初回にその主の鎧の一部位、核は初回に心核）。
+- 見た目は一品一案: 武器 `tools/rough/lowpoly/weapons/one/o_moon.py`（塗り `paint_moon.py`。`build_one.py o_moon`）、鎧 `tools/rough/lowpoly/gear_gaps/armor_moon.py`、平らな絵と月の暦 `tools/gen/ch6/gen_moon_gear_assets.py`。入れるのは `tools/install/install_moon_gear.py`。持ち方・振りは同じ型の武器を借りた（`WeaponKind`・`MoveSets`・`gen_weapon_moves.py`・`weapon_display.py`）。
+- 位相の挑戦（`story/ch6/MoonTrial`）: 着く所の南の月の暦（月の世界の版 9）→ チャットで主を選ぶ → 段 1〜5 の強い主。倒すと人ごとの段の記録と報酬（ふだんの主の報酬もここで配る）。段 3 の技の間・段 5 の「位相の重ね」と記念の札はまだ。
+- 確かめ: 自己テスト `moon gear`・`moon trial`・`gear tiers`（表に六章の行を足した。月は専用の逸品が 2 つ）と月の 7 段すべて通る。撮影 `tools/shots/moon_gear.txt`、見直しの絵 `docs/review/moon/gear_weapons_game.jpg`・`gear_armor_game.jpg`。
+- 気づいたこと: 撮影で `armortier` を決め打つ前に初めの旅装を脱がないと、旅装の cube の絵が無くて落ちる（台本で `cmd clear @s` してから）。
+- まだ: 試遊（効果の手ごたえ・暦からの流れ）、記憶の断片と伝承。
+
 ## 2026-10-30 深夜（六章 月の核。設計 [46](design/46_moon.md) の 4.7・4.7.1）
 
 - 月の核を一つ通しで作った: 核の間（`build_moon_core.py` → `core.json`、`story/ch6/core/MoonCore`。月の世界の版 8）、着く所の北の核の門、主「月の核」（欠片の盾 → 巻き戻し → 満月落としと四人の加勢）、頼み `main_moon_core`、前の自分たちの門と核の間での言葉、語りの紙芝居 `moon_core_end`（5 枚）、六章の「完」の札を核のあとへ。
