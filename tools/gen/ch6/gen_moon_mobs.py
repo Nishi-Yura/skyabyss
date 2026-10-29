@@ -375,16 +375,16 @@ def shade_strider():
     for b in ("leg_fl", "leg_fr"):
         stomp[b] = bone(kf({0: (0, 0, 0), 0.9: (-45, 0, 0), 1.0: (12, 0, 0), 1.4: (0, 0, 0)}))
         stomp["shin_" + b[4:]] = bone(kf({0: (0, 0, 0), 0.9: (30, 0, 0), 1.0: (-5, 0, 0), 1.4: (0, 0, 0)}))
-    # 畳む (保つ): 脚を内へ寄せて足先を胴の下で合わせ (一本の尖塔の像)、頭を垂れ、布を下ろす。開く: 戻す
-    fold, unfold = {"head": bone(kf({0: (0, 0, 0), 0.8: (30, 0, 0)})), "cloth": bone(kf({0: (0, 0, 0), 0.8: (0, 0, 0)}))}, {}
+    # 畳む (保つ): 腿はそのまま、脛を内へ倒して足先を胴の真下で合わせる (四本が一点に集まる尖塔の像)。頭を垂れ、胴を少し下げて足先を地に着ける。開く: 戻す
+    fold = {"head": bone(kf({0: (0, 0, 0), 0.8: (30, 0, 0)})), "cloth": bone(kf({0: (0, 0, 0), 0.8: (0, 0, 0)})),
+            "body": bone(None, kf({0: (0, 0, 0), 0.8: (0, -3, 0)}, False))}
+    unfold = {"body": bone(None, kf({0: (0, -3, 0), 0.6: (0, 0, 0)}, False))}
     for b in STRIDER_LEGS:
         sx = -1 if b.endswith("l") else 1
         sz = -1 if b[4] == "f" else 1
-        tgt = (sz * 9, 0, -sx * 11)
-        fold[b] = bone(kf({0: (0, 0, 0), 0.8: tgt}))
-        fold["shin_" + b[4:]] = bone(kf({0: (0, 0, 0), 0.8: (sz * 6, 0, -sx * 6)}))
-        unfold[b] = bone(kf({0: tgt, 0.6: (0, 0, 0)}))
-        unfold["shin_" + b[4:]] = bone(kf({0: (sz * 6, 0, -sx * 6), 0.6: (0, 0, 0)}))
+        tgt = (sz * 14, 0, sx * 17)
+        fold["shin_" + b[4:]] = bone(kf({0: (0, 0, 0), 0.8: tgt}))
+        unfold["shin_" + b[4:]] = bone(kf({0: tgt, 0.6: (0, 0, 0)}))
     unfold["head"] = bone(kf({0: (30, 0, 0), 0.6: (0, 0, 0)}))
     death = {"body": bone(kf({0: (0, 0, 0), 0.6: (0, 0, 30), 1.2: (0, 0, 80)}), kf({0: (0, 0, 0), 0.6: (0, -8, 0), 1.2: (0, -34, 0)}, False))}
     for b in STRIDER_LEGS:

@@ -12,6 +12,8 @@
 
 - 区画 3 を一つ通しで作った: 地形（`build_moon_field.py` → `field.json`、`story/ch6/field/MoonField`。月の世界の版 6）、光の満ち引き（`FieldTide`・`TideStoneBlock`）、星術「一瞬止め」（`MomentStop`・月の砂時計）、降る光（`FallingLight`）、敵 3 種と主「望の灯守」、前の自分（三人目「砂時計の数え手」）、頼み `main_moon_field`、会話、文、地図、絵。
 - 模型は一品一案（3 案を並べない）で作り、ラフの絵を送ったうえで入れた。直しの声が来たら `tools/rough/lowpoly/moon/<id>.py` を直して `gen_moon_mobs.py <id>`。
+- 模型の手直し（「模型を直す」）: 灯守に頭巾・一つ目・三枚の肩当て・鐘の袖、影の竹馬の胴と脚を太く、鏡背負いの脚を亀の脚に。ゲームの絵 `docs/review/moon/field_models_2026-10-30.png`、撮影 `tools/shots/moon_field_models.txt`・`moon_strider_fold.txt`。
+- 止めた構えを保つ: `GuardMob.holdsAction`（終わった姿で止める動作）と `hurtAnimBlocked`（被弾の動きで崩さない）。竹馬の像・鏡背負いの殻こもり・光の群れの散り・灯守の光溜めに使う。それまで `thenPlay` は json の hold を無視して戻っていた（ほかの章の hold の動きは今までどおり戻る）。
 - 「ここまで」の札は野を終えた人に出る形に移した（崖のテストも合わせた）。
 - 確かめ: 自己テスト `moon field`（ほか `moon world`・`moon valley`・`moon cliff`）。撮影 `tools/shots/moon_field.txt`。
 

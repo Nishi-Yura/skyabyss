@@ -56,6 +56,16 @@ public class MirrorBearer extends MoonMob {
         targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Player.class, true));
     }
 
+    @Override
+    protected boolean holdsAction(String action) {
+        return action.equals("hide");
+    }
+
+    @Override
+    protected boolean hurtAnimBlocked() {
+        return hidden;
+    }
+
     public boolean hidden() {
         return hidden;
     }

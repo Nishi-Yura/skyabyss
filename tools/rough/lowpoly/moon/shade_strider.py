@@ -17,18 +17,18 @@ LEGS = {"fl": (-1, -1), "fr": (1, -1), "bl": (-1, 1), "br": (1, 1)}
 
 
 def hip(sx, sz):
-    return (sx * 3.2, BY + 0.5, sz * 3.0)
+    return (sx * 4.6, BY + 0.5, sz * 4.4)
 
 
 def knee(sx, sz):
-    return (sx * 9.5, BY + 9.0, sz * 7.5)
+    return (sx * 11.5, BY + 9.5, sz * 9.5)
 
 
 def foot(sx, sz):
-    return (sx * 13.0, 0.4, sz * 11.0)
+    return (sx * 15.0, 0.4, sz * 13.0)
 
 
-BONES = {"root": (None, (0, 0, 0)), "body": ("root", (0, BY, 0)), "head": ("body", (0, BY - 1, -3.5)), "cloth": ("body", (0, BY - 2.5, 0))}
+BONES = {"root": (None, (0, 0, 0)), "body": ("root", (0, BY, 0)), "head": ("body", (0, BY - 1, -5.5)), "cloth": ("body", (0, BY - 2.5, 0))}
 for k, (sx, sz) in LEGS.items():
     BONES["leg_" + k] = ("body", hip(sx, sz))
     BONES["shin_" + k] = ("leg_" + k, knee(sx, sz))
@@ -50,43 +50,43 @@ def lerp(a, b, t):
 def build(k):
     F = []
     # 胴: 平たい影の玉に黒い硝子の甲。上に月の砂が薄く積もる
-    F += part("torso", ellipsoid("body", "shadow", (0, BY, 0), (4.6, 3.2, 4.8), segs=10, rings=4))
-    F += part("shell", ellipsoid("body", "glass", (0, BY + 1.6, 0.4), (4.1, 2.2, 4.3), segs=9, rings=3))
-    F += part("dustcap", ellipsoid("body", "dust", (0, BY + 3.2, 0.8), (2.6, 1.0, 2.8), segs=7, rings=2))
+    F += part("torso", ellipsoid("body", "shadow", (0, BY, 0), (6.6, 4.4, 6.8), segs=12, rings=5))
+    F += part("shell", ellipsoid("body", "glass", (0, BY + 2.4, 0.6), (5.9, 3.0, 6.1), segs=10, rings=3))
+    F += part("dustcap", ellipsoid("body", "dust", (0, BY + 4.6, 1.0), (3.8, 1.3, 4.0), segs=8, rings=2))
     # 仮面: 下を向く三日月の面 (前へ突き出し、角が下へ)
     pts = []
     for i in range(9):
         a = math.radians(-70 + i * 140 / 8)
-        pts.append((math.sin(a) * 3.8, BY - 0.8 - math.cos(a) * 3.2 + 2.2, -5.0 - 0.9 * math.cos(a)))
-    F += part("mask", tube("head", "silver", pts, ra=[0.6, 1.0, 1.3, 1.45, 1.5, 1.45, 1.3, 1.0, 0.6], rb=0.8, sides=5, hint=(0, 0, 1), caps=(True, True)))
-    F += part("face", ellipsoid("head", "shadow", (0, BY - 1.0, -4.0), (2.4, 2.0, 1.4), segs=8, rings=3))
-    F += part("eyeline", tube("head", "star", [(-1.5, BY - 0.8, -5.2), (1.5, BY - 0.8, -5.2)], ra=0.32, rb=0.18, sides=4, hint=(0, 1, 0), caps=(True, True)))
+        pts.append((math.sin(a) * 5.4, BY - 0.8 - math.cos(a) * 4.4 + 3.0, -7.0 - 1.2 * math.cos(a)))
+    F += part("mask", tube("head", "silver", pts, ra=[0.8, 1.4, 1.8, 2.0, 2.1, 2.0, 1.8, 1.4, 0.8], rb=1.0, sides=5, hint=(0, 0, 1), caps=(True, True)))
+    F += part("face", ellipsoid("head", "shadow", (0, BY - 1.0, -5.6), (3.4, 2.8, 2.0), segs=8, rings=3))
+    F += part("eyeline", tube("head", "star", [(-2.0, BY + 1.0, -7.3), (2.0, BY + 1.0, -7.3)], ra=0.5, rb=0.3, sides=4, hint=(0, 1, 0), caps=(True, True)))
     # 胴から垂れる影の布 (裂けた帯 6 本)
     for i in range(6):
         a = math.radians(i * 60 + 30)
-        x, z = math.sin(a) * 3.4, math.cos(a) * 3.4
-        ln = 9.0 + (i % 3) * 3.0
+        x, z = math.sin(a) * 5.0, math.cos(a) * 5.0
+        ln = 12.0 + (i % 3) * 4.0
         F += part(f"tat{i}", tube("cloth", "shadow", [(x, BY - 1.2, z), (x * 1.15, BY - 1.2 - ln * 0.5, z * 1.15), (x * 1.1 + 0.3, BY - 1.2 - ln, z * 1.1)],
-                                  ra=[1.3, 0.9, 0.0], rb=[0.35, 0.25, 0.0], sides=4, hint=(1, 0, 0)))
+                                  ra=[2.0, 1.4, 0.0], rb=[0.5, 0.35, 0.0], sides=4, hint=(1, 0, 0)))
     # 脚: 腿は上へ外へ (膝が胴より高い)、脛は長く下へ。節ごとに銀の環、足先は尖る
     for key, (sx, sz) in LEGS.items():
         h, kn, ft = hip(sx, sz), knee(sx, sz), foot(sx, sz)
-        F += part("th" + key, tube("leg_" + key, "glass", [h, lerp(h, kn, 0.5), kn], ra=[1.35, 1.1, 0.9], sides=5, hint=(0, 1, 0)))
-        F += part("kn" + key, ellipsoid("leg_" + key, "silver", kn, (1.4, 1.4, 1.4), segs=6, rings=3))
+        F += part("th" + key, tube("leg_" + key, "glass", [h, lerp(h, kn, 0.5), kn], ra=[2.1, 1.7, 1.3], sides=6, hint=(0, 1, 0)))
+        F += part("kn" + key, ellipsoid("leg_" + key, "silver", kn, (1.9, 1.9, 1.9), segs=7, rings=3))
         mid = lerp(kn, ft, 0.45)
-        F += part("sh" + key, tube("shin_" + key, "glass", [kn, mid, ft], ra=[0.95, 0.75, 0.0], sides=5, hint=(0, 1, 0)))
-        F += part("ring" + key, tube("shin_" + key, "silver", [lerp(kn, ft, 0.42), lerp(kn, ft, 0.48)], ra=0.95, sides=6, hint=(0, 1, 0),
+        F += part("sh" + key, tube("shin_" + key, "glass", [kn, mid, ft], ra=[1.3, 1.05, 0.0], sides=6, hint=(0, 1, 0)))
+        F += part("ring" + key, tube("shin_" + key, "silver", [lerp(kn, ft, 0.42), lerp(kn, ft, 0.48)], ra=1.35, sides=6, hint=(0, 1, 0),
                                      caps=(True, True)))
     return F, []
 
 
 import os
-FA, FB = [float(v) for v in os.environ.get("FOLD", "40,30").split(",")]
+FL, FS = [float(v) for v in os.environ.get("FOLD", "0,0,14,-17").split(",")[:2]], [float(v) for v in os.environ.get("FOLD", "0,0,14,-17").split(",")[2:]]
 FOLD = {}
 for key, (sx, sz) in LEGS.items():
-    # 腿を立てて膝を胴の真上へ、脛は胴のまわりに縦に揃う (閉じた傘の柱)
-    FOLD["leg_" + key] = (sz * FB, 0, sx * FA)
-    FOLD["shin_" + key] = (-sz * FB * 1.6, 0, -sx * FA * 1.6)
+    # 足先を胴の真下で合わせる (一本の尖塔の像)。腿はそのまま、脛を内へ
+    FOLD["leg_" + key] = (sz * FL[0], 0, sx * FL[1])
+    FOLD["shin_" + key] = (sz * FS[0], 0, sx * FS[1])
 FOLD["head"] = (25, 0, 0)
 FOLD["cloth"] = (0, 0, 0)
 
@@ -103,6 +103,7 @@ SPEC = dict(
     rows=[("前 3/4", "idle", 212, 10, 420, (0, 24, 0), 7.0),
           ("横", "idle", 270, 2, 420, (0, 24, 0), 7.0),
           ("踏みつけ (引き)", "stomp", 222, 10, 420, (0, 24, 0), 7.0),
+          ("像 (満ち)", "fold", 212, 10, 420, (0, 24, 0), 7.0),
           ("後ろ 3/4", "idle", 32, 14, 420, (0, 24, 0), 7.0)],
     options={"a": dict(name="竹馬の影", desc="小さな影の胴を四本のとても長い黒硝子の脚が持ち上げる。下を向く三日月の仮面に星の一筋、胴から裂けた影の布が垂れる。")},
     extra="月の言葉 (黒い硝子・影・銀・月の砂・星の光)。骨 12 本。",

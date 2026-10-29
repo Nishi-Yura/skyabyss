@@ -6,10 +6,10 @@
  "sheets": [
   "moon_roughs/mirror_bearer.png"
  ],
- "extra": "月の言葉 (玄武岩・月の砂・銀・鏡・星の光)。骨 10 本。 三角形 1194 (目安 中の敵 600〜1000)。埋まった部品: knob0-shell:0.95, knob1-shell:0.95, knob2-shell:0.77, knob3-shell:0.77, knob4-shell:0.49。生成: tools/rough/lowpoly/moon/mirror_bearer.py。三段の姿: 二段目 = 甲羅に星の割れ目、鏡の縁に星の粒。三段目 = 鏡が二枚 (左右) になり、甲羅に月の欠片の棘。",
+ "extra": "月の言葉 (玄武岩・月の砂・銀・鏡・星の光)。骨 10 本。 三角形 1486 (目安 中の敵 600〜1000)。埋まった部品: knob0-shell:0.95, knob1-shell:0.95, knob2-shell:0.77, knob3-shell:0.77, knob4-shell:0.49。生成: tools/rough/lowpoly/moon/mirror_bearer.py。三段の姿: 二段目 = 甲羅に星の割れ目、鏡の縁に星の粒。三段目 = 鏡が二枚 (左右) になり、甲羅に月の欠片の棘。",
  "options": {
   "a": {
-   "name": "鏡の皿の亀 (1194 三角形)",
+   "name": "鏡の皿の亀 (1486 三角形)",
    "desc": "平たい玄武岩の甲羅に、前上へ傾いた丸い銀の鏡。鏡の前に細い腕で星の結晶。頭に三日月の銀の冠。"
   }
  }

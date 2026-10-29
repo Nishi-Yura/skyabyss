@@ -57,6 +57,16 @@ public class LightSwarm extends MoonMob {
         targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Player.class, true));
     }
 
+    @Override
+    protected boolean holdsAction(String action) {
+        return action.equals("scatter");
+    }
+
+    @Override
+    protected boolean hurtAnimBlocked() {
+        return scattered;
+    }
+
     public boolean scattered() {
         return scattered;
     }

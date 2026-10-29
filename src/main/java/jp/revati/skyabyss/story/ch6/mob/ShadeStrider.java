@@ -52,6 +52,16 @@ public class ShadeStrider extends MoonMob {
         targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Player.class, true));
     }
 
+    @Override
+    protected boolean holdsAction(String action) {
+        return action.equals("fold");
+    }
+
+    @Override
+    protected boolean hurtAnimBlocked() {
+        return statue;
+    }
+
     public boolean statue() {
         return statue;
     }

@@ -148,6 +148,17 @@ public class FullKeeper extends MoonMob {
         }
     }
 
+    // 光溜めの構えは放つ (か膝をつく) まで保つ。溜めの最中は被弾の動きで構えを崩さない
+    @Override
+    protected boolean holdsAction(String action) {
+        return action.equals("charge");
+    }
+
+    @Override
+    protected boolean hurtAnimBlocked() {
+        return charge > 0 && release < 0;
+    }
+
     // ---------------------------------------------------------------- 毎 tick
     @Override
     public void tick() {
@@ -183,6 +194,10 @@ public class FullKeeper extends MoonMob {
                 playAction("release");
                 playSound(MoonMobsSetup.KEEPER_CHARGE.get(), 2.0f, 0.9f);
             } else if (tide != FieldTide.Tide.BRIGHT) {
+                if (charge > 0) {
+                    // 溜めきらずに引きへ移った: 構えを解く
+                    stopTriggeredAnim("action", "charge");
+                }
                 charge = 0;
             }
         }

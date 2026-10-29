@@ -79,8 +79,12 @@ def build(k):
         b = "leg_" + key
         top = (sx * 6.0, 5.4, sz * 5.0)
         ft = (sx * 7.4, 1.4, sz * 5.8)
-        F += part(b, tube(b, "dust", [top, ft], ra=[2.4, 2.2], sides=6, hint=(0, 0, 1)))
-        F += part(b + "f", ellipsoid(b, "basalt", (ft[0], 1.0, ft[2]), (2.0, 1.0, 2.0), segs=7, rings=2))
+        mid = (sx * 8.2, 3.6, sz * 5.9)
+        # 外へ張り出す太い脚 (肘が殻の縁の外へ出る)、上に鱗の板二枚、下は広い足
+        F += part(b, tube(b, "dust", [top, mid, ft], ra=[2.9, 2.7, 2.4], sides=7, hint=(0, 0, 1), caps=(True, False)))
+        for j, (y, r) in enumerate([(4.4, 2.0), (2.9, 1.7)]):
+            F += part(f"{b}s{j}", ellipsoid(b, "basalt", (sx * (8.4 + 0.8), y, sz * 5.9), (1.0, r * 0.7, r), segs=6, rings=2))
+        F += part(b + "f", ellipsoid(b, "basalt", (ft[0], 1.0, ft[2]), (2.9, 1.1, 2.9), segs=8, rings=2))
         for j in (-1, 0, 1):
             F += part(f"{b}c{j}", spike(b, "silver", (ft[0] + j * 0.9, 1.0, ft[2] - 1.4), (j * 0.3, -0.4, -1), 1.0, 0.35, sides=4, rings=1))
     F += part("tail", spike("tail", "dust", (0, 7.0, 8.6), (0, -0.4, 1), 3.0, 1.0, sides=5, rings=2))
