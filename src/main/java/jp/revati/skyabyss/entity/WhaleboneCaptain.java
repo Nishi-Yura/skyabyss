@@ -61,7 +61,7 @@ public class WhaleboneCaptain extends GuardMob {
     public static final int ROAR_WARN = 20;
     public static final double ROAR_RADIUS = 5.0;
 
-    private final ServerBossEvent bossBar = new ServerBossEvent(getDisplayName(), BossEvent.BossBarColor.BLUE, BossEvent.BossBarOverlay.NOTCHED_10);
+    private final ServerBossEvent bossBar = jp.revati.skyabyss.music.MusicArea.bossBar(new ServerBossEvent(getDisplayName(), BossEvent.BossBarColor.BLUE, BossEvent.BossBarOverlay.NOTCHED_10));
     private Action action = Action.NONE;
     private int actionTicks;
     private int sweepCooldown;

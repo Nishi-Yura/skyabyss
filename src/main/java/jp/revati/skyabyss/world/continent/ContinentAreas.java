@@ -68,6 +68,7 @@ public final class ContinentAreas {
         String now = area(p.getBlockX(), p.getBlockZ(), s == null ? "" : s.area());
         if (s == null) {
             SEEN.put(p.getUUID(), new Seen(now, now, 0));
+            jp.revati.skyabyss.music.MusicArea.send(p, now);
             return;
         }
         if (now.equals(s.area())) {
@@ -82,6 +83,7 @@ public final class ContinentAreas {
             return;
         }
         SEEN.put(p.getUUID(), new Seen(now, now, 0));
+        jp.revati.skyabyss.music.MusicArea.send(p, now);
         announce(p, now);
     }
 

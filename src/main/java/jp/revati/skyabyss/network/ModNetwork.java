@@ -24,6 +24,8 @@ public final class ModNetwork {
         // ラムダの中身はクライアントで受信したときにだけ実行されるので、専用サーバーでも安全
         event.registrar(protocolVersion())
                 .playToClient(SkyPassPayload.TYPE, SkyPassPayload.STREAM_CODEC, (payload, context) -> SkyPassClient.receive(payload.pass()))
+                .playToClient(jp.revati.skyabyss.music.MusicArea.Payload.TYPE, jp.revati.skyabyss.music.MusicArea.Payload.STREAM_CODEC,
+                        (payload, context) -> jp.revati.skyabyss.client.music.MusicDirector.receive(payload.area()))
                 .playToClient(jp.revati.skyabyss.combat.TelegraphStartPayload.TYPE, jp.revati.skyabyss.combat.TelegraphStartPayload.STREAM_CODEC,
                         (payload, context) -> jp.revati.skyabyss.client.combat.TelegraphClient.start(payload))
                 .playToClient(jp.revati.skyabyss.combat.TelegraphCancelPayload.TYPE, jp.revati.skyabyss.combat.TelegraphCancelPayload.STREAM_CODEC,

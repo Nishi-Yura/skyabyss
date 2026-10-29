@@ -97,7 +97,7 @@ public class StoneWhaleHeart extends HeartBoss {
     private static final double BEAM_LENGTH = 24;
     private static final double CHAIN_LENGTH = 14;
 
-    private final ServerBossEvent bossBar = new ServerBossEvent(getDisplayName(), BossEvent.BossBarColor.PURPLE, BossEvent.BossBarOverlay.NOTCHED_10);
+    private final ServerBossEvent bossBar = jp.revati.skyabyss.music.MusicArea.bossBar(new ServerBossEvent(getDisplayName(), BossEvent.BossBarColor.PURPLE, BossEvent.BossBarOverlay.NOTCHED_10));
     private Action action = Action.NONE;
     private Action last = Action.NONE;
     private int actionTicks;

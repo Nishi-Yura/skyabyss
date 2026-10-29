@@ -74,7 +74,7 @@ public class ElderSentry extends GroundFoe {
 
     private enum Kind { NONE, SWING, RUSH, HORN, STOMP }
 
-    private final ServerBossEvent bossBar = new ServerBossEvent(getDisplayName(), BossEvent.BossBarColor.WHITE, BossEvent.BossBarOverlay.NOTCHED_6);
+    private final ServerBossEvent bossBar = jp.revati.skyabyss.music.MusicArea.bossBar(new ServerBossEvent(getDisplayName(), BossEvent.BossBarColor.WHITE, BossEvent.BossBarOverlay.NOTCHED_6));
     private Kind kind = Kind.NONE;
     private int rushCd = 60;
     private int stompCd = 80;

@@ -240,7 +240,7 @@ public class StormHeart extends HeartBoss {
     }
 
 
-    private final ServerBossEvent bossBar = new ServerBossEvent(getDisplayName(), BossEvent.BossBarColor.WHITE, BossEvent.BossBarOverlay.NOTCHED_10);
+    private final ServerBossEvent bossBar = jp.revati.skyabyss.music.MusicArea.bossBar(new ServerBossEvent(getDisplayName(), BossEvent.BossBarColor.WHITE, BossEvent.BossBarOverlay.NOTCHED_10));
     private Action action = Action.NONE;
     private Action last = Action.NONE;
     private int actionTicks;

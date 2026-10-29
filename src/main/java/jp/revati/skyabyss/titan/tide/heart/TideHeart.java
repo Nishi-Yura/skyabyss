@@ -115,7 +115,7 @@ public class TideHeart extends HeartBoss {
     // 組が割り込む割合 (段階 1 / 2 / 3)。最終段階は組だけ
     public static final double[] COMBO_CHANCE = {0, 0.3, 0.5};
 
-    private final ServerBossEvent bossBar = new ServerBossEvent(getDisplayName(), BossEvent.BossBarColor.BLUE, BossEvent.BossBarOverlay.NOTCHED_10);
+    private final ServerBossEvent bossBar = jp.revati.skyabyss.music.MusicArea.bossBar(new ServerBossEvent(getDisplayName(), BossEvent.BossBarColor.BLUE, BossEvent.BossBarOverlay.NOTCHED_10));
     private Action action = Action.NONE;
     private Action last = Action.NONE;
     private int actionTicks;

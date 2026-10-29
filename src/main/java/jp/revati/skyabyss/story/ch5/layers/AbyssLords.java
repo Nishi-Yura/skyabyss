@@ -98,8 +98,8 @@ public final class AbyssLords {
         Fight(String layer) {
             this.layer = layer;
             this.li = Layers.index(layer);
-            this.bar = new ServerBossEvent(Component.translatable("abyss_v2.skyabyss.lord." + layer), BossEvent.BossBarColor.RED,
-                    BossEvent.BossBarOverlay.NOTCHED_10);
+            this.bar = jp.revati.skyabyss.music.MusicArea.bossBar(new ServerBossEvent(Component.translatable("abyss_v2.skyabyss.lord." + layer), BossEvent.BossBarColor.RED,
+                    BossEvent.BossBarOverlay.NOTCHED_10));
         }
     }
 

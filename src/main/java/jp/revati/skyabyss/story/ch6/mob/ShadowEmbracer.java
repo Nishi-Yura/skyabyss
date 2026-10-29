@@ -50,8 +50,8 @@ public class ShadowEmbracer extends MoonMob {
     private static final EntityDataAccessor<Boolean> FROZEN = SynchedEntityData.defineId(ShadowEmbracer.class, EntityDataSerializers.BOOLEAN);
     static final int FREEZE_TICKS = 60;
     static final int ROAR_TICKS = 40;
-    private final ServerBossEvent bar = new ServerBossEvent(Component.translatable("entity.skyabyss.shadow_embracer"), BossEvent.BossBarColor.RED,
-            BossEvent.BossBarOverlay.NOTCHED_10);
+    private final ServerBossEvent bar = jp.revati.skyabyss.music.MusicArea.bossBar(new ServerBossEvent(Component.translatable("entity.skyabyss.shadow_embracer"), BossEvent.BossBarColor.RED,
+            BossEvent.BossBarOverlay.NOTCHED_10));
     private int phase;
     private int frozenFor;
     private int freezeCooldown;

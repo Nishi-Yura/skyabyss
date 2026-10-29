@@ -154,7 +154,7 @@ public class AshSmith extends EmberMob {
     // 試験用: true なら、技を自分では選ばない (forceAction で呼んだ技だけ回す。怒りは体力で自動)
     public boolean passive;
 
-    private final ServerBossEvent bossBar = new ServerBossEvent(getDisplayName(), BossEvent.BossBarColor.RED, BossEvent.BossBarOverlay.NOTCHED_10);
+    private final ServerBossEvent bossBar = jp.revati.skyabyss.music.MusicArea.bossBar(new ServerBossEvent(getDisplayName(), BossEvent.BossBarColor.RED, BossEvent.BossBarOverlay.NOTCHED_10));
     private Action action = Action.NONE;
     private int actionTick;
     private float multiplier = 1f;

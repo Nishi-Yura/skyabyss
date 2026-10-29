@@ -317,6 +317,11 @@ public final class WatcherClient {
         return watcher != null || presence > 0.01f;
     }
 
+    // BGM を止めるか (client/music/MusicDirector。人影が立っている間)
+    public static boolean hushesMusic() {
+        return watcher != null;
+    }
+
     // 人影が立っている間は、音楽・動物の鳴き声・洞窟の環境音が止む (引き算の兆し)。
     // 敵の音は止めない (身を守るための手がかりを奪わない)
     @SubscribeEvent

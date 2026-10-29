@@ -63,7 +63,7 @@ public class ShoreWarden extends GroundFoe {
 
     private enum Kind { NONE, THRUST, RING }
 
-    private final ServerBossEvent bossBar = new ServerBossEvent(getDisplayName(), BossEvent.BossBarColor.BLUE, BossEvent.BossBarOverlay.NOTCHED_6);
+    private final ServerBossEvent bossBar = jp.revati.skyabyss.music.MusicArea.bossBar(new ServerBossEvent(getDisplayName(), BossEvent.BossBarColor.BLUE, BossEvent.BossBarOverlay.NOTCHED_6));
     private Kind kind = Kind.NONE;
     private int ringCd = 80;
     private boolean scaled;

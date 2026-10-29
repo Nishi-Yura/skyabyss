@@ -1,0 +1,67 @@
+# BGM の仕組みの確かめ (docs/design/49): 場所で曲が替わる・ループが 1 周を超えて続く・決め打ちと無音。記録の [shots] music を読む
+# 撮影は全体の音量 0 (本体は鳴らさない) なので、聞こえないほど小さく (0.0001) して鳴らす
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/music_check.txt -PshotsName=music_check
+world music_check continent
+size 960 540
+timeout 900
+render 6
+guiscale 2
+music master 0.0001
+wait 100
+music
+cmd skyabyss cinematic stop
+cmd time set 5000
+cmd gamerule doMobSpawning false
+cmd gamemode creative
+cmd tp @s -450 120 0
+waitchunks 300
+wait 160
+music
+wait 100
+music
+wait 200
+music
+wait 200
+music
+cmd tp @s -120 120 -600
+waitchunks 300
+wait 160
+music
+music set capital
+wait 60
+music
+music set -
+wait 80
+music
+music auto
+wait 80
+music
+# ボスの帯 (ボスの曲) と心臓 (心臓の曲)。都の外 (都は敵を寄せつけない)
+cmd tp @s -120 120 -600
+waitchunks 300
+wait 100
+cmd summon skyabyss:whalebone_captain ~4 ~ ~4 {PersistenceRequired:1b}
+wait 120
+music
+cmd kill @e[type=skyabyss:whalebone_captain]
+wait 100
+music
+cmd summon skyabyss:stone_whale_heart ~4 ~ ~4 {PersistenceRequired:1b}
+wait 120
+music
+cmd kill @e[type=skyabyss:stone_whale_heart]
+wait 100
+# ディメンション: 深淵・月・巨神の背
+cmd execute in skyabyss:abyss run tp @s 0 120 0
+wait 200
+music
+cmd execute in skyabyss:moon run tp @s 0 120 0
+wait 200
+music
+cmd execute in skyabyss:titan_back run tp @s 0 120 0
+wait 200
+music
+cmd execute in minecraft:overworld run tp @s -1700 120 1760
+waitchunks 300
+wait 200
+music

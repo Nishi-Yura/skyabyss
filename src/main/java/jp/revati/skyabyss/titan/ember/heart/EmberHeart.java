@@ -204,7 +204,7 @@ public class EmberHeart extends HeartBoss {
     private record Ember(double x, double z, int startAt, int endAt) {
     }
 
-    private final ServerBossEvent bossBar = new ServerBossEvent(getDisplayName(), BossEvent.BossBarColor.RED, BossEvent.BossBarOverlay.NOTCHED_10);
+    private final ServerBossEvent bossBar = jp.revati.skyabyss.music.MusicArea.bossBar(new ServerBossEvent(getDisplayName(), BossEvent.BossBarColor.RED, BossEvent.BossBarOverlay.NOTCHED_10));
     private Action action = Action.NONE;
     private Action last = Action.NONE;
     private int actionTicks;

@@ -3646,5 +3646,141 @@
         "type": "event"
       }
     ]
+  },
+  "music.capital": {
+    "sounds": [
+      {
+        "name": "skyabyss:music/capital",
+        "stream": true
+      }
+    ]
+  },
+  "music.meadow": {
+    "sounds": [
+      {
+        "name": "skyabyss:music/meadow",
+        "stream": true
+      }
+    ]
+  },
+  "music.island": {
+    "sounds": [
+      {
+        "name": "skyabyss:music/island",
+        "stream": true
+      }
+    ]
+  },
+  "music.town_whale": {
+    "sounds": [
+      {
+        "name": "skyabyss:music/town_whale",
+        "stream": true
+      }
+    ]
+  },
+  "music.town_tide": {
+    "sounds": [
+      {
+        "name": "skyabyss:music/town_tide",
+        "stream": true
+      }
+    ]
+  },
+  "music.town_storm": {
+    "sounds": [
+      {
+        "name": "skyabyss:music/town_storm",
+        "stream": true
+      }
+    ]
+  },
+  "music.town_ember": {
+    "sounds": [
+      {
+        "name": "skyabyss:music/town_ember",
+        "stream": true
+      }
+    ]
+  },
+  "music.field_whale": {
+    "sounds": [
+      {
+        "name": "skyabyss:music/field_whale",
+        "stream": true
+      }
+    ]
+  },
+  "music.field_tide": {
+    "sounds": [
+      {
+        "name": "skyabyss:music/field_tide",
+        "stream": true
+      }
+    ]
+  },
+  "music.field_storm": {
+    "sounds": [
+      {
+        "name": "skyabyss:music/field_storm",
+        "stream": true
+      }
+    ]
+  },
+  "music.field_ember": {
+    "sounds": [
+      {
+        "name": "skyabyss:music/field_ember",
+        "stream": true
+      }
+    ]
+  },
+  "music.back": {
+    "sounds": [
+      {
+        "name": "skyabyss:music/back",
+        "stream": true
+      }
+    ]
+  },
+  "music.boss": {
+    "sounds": [
+      {
+        "name": "skyabyss:music/boss",
+        "stream": true
+      }
+    ]
+  },
+  "music.heart": {
+    "sounds": [
+      {
+        "name": "skyabyss:music/heart",
+        "stream": true
+      }
+    ]
+  },
+  "music.title": {
+    "sounds": [
+      {
+        "name": "skyabyss:music/title",
+        "stream": true
+      }
+    ]
+  },
+  "music.abyss": {
+    "sounds": [
+      {
+        "name": "skyabyss:music/abyss",
+        "stream": true
+      }
+    ]
+  },
+  "music.moon": {
+    "sounds": [
+      {
+        "name": "skyabyss:music/moon",
+        "stream": true
+      }
+    ]
   }
 }

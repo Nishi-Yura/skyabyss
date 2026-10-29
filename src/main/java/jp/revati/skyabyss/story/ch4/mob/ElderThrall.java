@@ -65,8 +65,8 @@ public class ElderThrall extends AshThrall {
     public static final double ROOM = 12;
     public static final int CRACK_COLOR = 0xFF5A20;
 
-    private final ServerBossEvent bossBar = new ServerBossEvent(Component.translatable("entity.skyabyss.elder_thrall"), BossEvent.BossBarColor.RED,
-            BossEvent.BossBarOverlay.NOTCHED_6);
+    private final ServerBossEvent bossBar = jp.revati.skyabyss.music.MusicArea.bossBar(new ServerBossEvent(Component.translatable("entity.skyabyss.elder_thrall"), BossEvent.BossBarColor.RED,
+            BossEvent.BossBarOverlay.NOTCHED_6));
     private boolean scaled;
     private int crackIn = 100;
     // 自己テスト用: 技の始まった数

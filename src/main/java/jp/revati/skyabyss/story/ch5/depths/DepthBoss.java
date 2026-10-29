@@ -158,7 +158,7 @@ public final class DepthBoss {
             this.floor = floor;
             this.bossNo = DepthPlan.bossNo(floor);
             this.def = def;
-            this.bar = new ServerBossEvent(name, BossEvent.BossBarColor.RED, BossEvent.BossBarOverlay.NOTCHED_6);
+            this.bar = jp.revati.skyabyss.music.MusicArea.bossBar(new ServerBossEvent(name, BossEvent.BossBarColor.RED, BossEvent.BossBarOverlay.NOTCHED_6));
             this.rng = new Random(seed);
         }
     }

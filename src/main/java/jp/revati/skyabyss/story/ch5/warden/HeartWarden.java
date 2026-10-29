@@ -75,7 +75,7 @@ public class HeartWarden extends Monster implements GeoEntity {
     static final int RING_WARN = 40;
     static final int RING_EVERY = 240;
 
-    private final ServerBossEvent bar = new ServerBossEvent(Component.translatable("entity.skyabyss.heart_warden"), BossEvent.BossBarColor.PURPLE, BossEvent.BossBarOverlay.NOTCHED_10);
+    private final ServerBossEvent bar = jp.revati.skyabyss.music.MusicArea.bossBar(new ServerBossEvent(Component.translatable("entity.skyabyss.heart_warden"), BossEvent.BossBarColor.PURPLE, BossEvent.BossBarOverlay.NOTCHED_10));
     private int phase = 1;
     private int cooldown = 60;
     private int snuffing = -1;

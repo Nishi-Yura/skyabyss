@@ -378,6 +378,22 @@ public final class ShotRunner {
             case "echo" -> {
                 return true;
             }
+            case "music" -> {
+                // music : 流れている BGM を記録に出す。music master <音量> : 全体の音量。music set <id> : 曲を決め打ち (空の名前 "-" で無音)。music auto : 決め打ちをやめる
+                if (first) {
+                    if (line.args().length > 0 && line.arg(0).equals("master")) {
+                        // 撮影では全体の音量が 0 (本体は 0 だと音を鳴らさない)。聞こえないほど小さくして鳴らす
+                        mc.options.getSoundSourceOptionInstance(net.minecraft.sounds.SoundSource.MASTER).set(line.doubleArg(1));
+                    } else if (line.args().length > 0 && line.arg(0).equals("set")) {
+                        jp.revati.skyabyss.client.music.MusicDirector.override(line.arg(1).equals("-") ? "" : line.arg(1));
+                    } else if (line.args().length > 0 && line.arg(0).equals("auto")) {
+                        jp.revati.skyabyss.client.music.MusicDirector.override(null);
+                    } else {
+                        jp.revati.skyabyss.SkyAbyss.LOGGER.info("[shots] music {}", jp.revati.skyabyss.client.music.MusicDirector.debugLine());
+                    }
+                }
+                return true;
+            }
             case "prof" -> {
                 // prof <場面> : 計測器 (dev/Prof、SKYABYSS_PROF=1) の溜めた数字を [prof] <場面> で書き出して 0 に戻す。垂直同期は切る
                 mc.options.enableVsync().set(false);

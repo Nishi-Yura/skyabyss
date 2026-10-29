@@ -111,7 +111,7 @@ public class TideBeckoner extends TideMob {
         NONE, SLAM, BECKON, BREATH, BURROW, ROAR
     }
 
-    private final ServerBossEvent bossBar = new ServerBossEvent(getDisplayName(), BossEvent.BossBarColor.BLUE, BossEvent.BossBarOverlay.NOTCHED_10);
+    private final ServerBossEvent bossBar = jp.revati.skyabyss.music.MusicArea.bossBar(new ServerBossEvent(getDisplayName(), BossEvent.BossBarColor.BLUE, BossEvent.BossBarOverlay.NOTCHED_10));
     private Action action = Action.NONE;
     private int actionTick;
     private int slamCooldown = 40;

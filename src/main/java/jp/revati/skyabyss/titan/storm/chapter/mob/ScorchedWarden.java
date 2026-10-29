@@ -68,7 +68,7 @@ public class ScorchedWarden extends FeatherWarden {
     private static final EntityDataAccessor<Integer> SKILL = SynchedEntityData.defineId(ScorchedWarden.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Boolean> EXPOSED = SynchedEntityData.defineId(ScorchedWarden.class, EntityDataSerializers.BOOLEAN);
 
-    private final ServerBossEvent bossBar = new ServerBossEvent(getDisplayName(), BossEvent.BossBarColor.BLUE, BossEvent.BossBarOverlay.NOTCHED_6);
+    private final ServerBossEvent bossBar = jp.revati.skyabyss.music.MusicArea.bossBar(new ServerBossEvent(getDisplayName(), BossEvent.BossBarColor.BLUE, BossEvent.BossBarOverlay.NOTCHED_6));
     private boolean scaled;
     private int skillTicks;
     private int ringCd = 60;

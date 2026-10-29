@@ -119,6 +119,7 @@ public final class SelfTestRunner {
         steps.add(Step.once("growth", GrowthSelfTest::runSelfTest));
         // 技の木 v2 (docs/design/48): 木の読み込み・節の決まり・点・4 本の上限・基礎・保存。SKYABYSS_SELFTEST_ONLY="tree"
         steps.add(Step.once("tree", jp.revati.skyabyss.rpg.skill.tree.AbilityTreeSelfTest::runSelfTest));
+        steps.add(Step.once("music", jp.revati.skyabyss.music.MusicSelfTest::run));
         // 日本語の折り返しの切れ目 (util/JpBreak)。SKYABYSS_SELFTEST_ONLY="text wrap"
         steps.add(Step.once("text wrap", jp.revati.skyabyss.util.JpBreakSelfTest::run));
         // 伝説の装備の出どころ (abyss/LegendLoot)。SKYABYSS_SELFTEST_ONLY="legend loot"

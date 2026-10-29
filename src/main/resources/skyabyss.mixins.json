@@ -20,7 +20,8 @@
     "AdvancementToastAccessor",
     "ContainerLabelMixin",
     "MountRiderLegsMixin",
-    "StringSplitterMixin"
+    "StringSplitterMixin",
+    "BossHealthOverlayAccessor"
   ],
   "injectors": {
     "defaultRequire": 1

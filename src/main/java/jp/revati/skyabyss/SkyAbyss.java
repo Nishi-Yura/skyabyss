@@ -31,6 +31,7 @@ public class SkyAbyss {
         SelfTestRunner.listAndExitIfRequested();
         modEventBus.addListener(this::commonSetup);
         ModSounds.register(modEventBus);
+        jp.revati.skyabyss.music.MusicTracks.register(modEventBus);
         MobSounds.register(modEventBus);
         ModEffects.register(modEventBus);
         ModDataComponents.register(modEventBus);
