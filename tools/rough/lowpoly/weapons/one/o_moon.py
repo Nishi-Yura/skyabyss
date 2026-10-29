@@ -1,4 +1,4 @@
-"""六章「月」の職の武器 5 本 (エピック) と残月の太刀 (ヒロイック) の一品一案 (docs/design/03 の 12.2)。月の決まり (秤・満ち引き・残像・欠け・星) を形にする。
+"""六章「月」の職の武器 12 本 (6 職それぞれにレア一本とヒロイック一本) の一品一案 (docs/design/03 の 12.2)。月の決まり (秤・満ち引き・残像・欠け・星) を形にする。
 塗りは月の塗り (paint_moon.py): main = 月の石 (クレーター)、edge/spine/acc/guard = 銀、grip/wrap = 藍、gem = 月の光 (moon) / 星 (star) / 残像 (shade)、trim = 階級の縁。
 豪華さ: 五章の武器と同じ段 (~650 面)、太刀は一段上。
 """
@@ -216,6 +216,147 @@ def moon_waning_blade(stage=0):
     return f
 
 
+# ================================================================== 2026-10-31: 6 職それぞれにレアとヒロイックを一本ずつ
+def moon_light_sword(stage=0):
+    """月光の長剣: まっすぐな銀の長剣。鍔は角を上へ向けた銀の三日月で、真ん中に満月の円盤 (月の石) を抱く。樋に月の光が一筋、柄頭は小さな月の珠"""
+    f = []
+    f += prism("grip", (0, -4.0, 0), (0, 3.2, 0), 0.85, 0.88, sides=8, caps=(True, True))
+    f += prism("wrap", (0, -3.4, 0), (0, 2.6, 0), 1.0, 1.0, sides=8, caps=(False, False))
+    f += ringy("trim", -3.7, 1.08, 0.4)
+    f += ell("main", (0, -4.8, 0), (1.05, 1.0, 1.05), segs=8, rings=3)
+    f += gem((0, -4.8, -0.98), 0.35, 0.35, 0.18, segs=5, rings=1)
+    # 鍔: 三日月 (角が上) と満月の円盤
+    f += crescent_x("acc", (0, 6.4, 0), 4.2, 205, 335, 1.15, n=11)
+    f += block("spine", (0, 3.6, 0), (2.4, 1.0, 1.6), taper=(0.9, 0.9))
+    f += prism("main", (0, 4.4, -0.55), (0, 4.4, 0.55), 1.55, 1.55, sides=12, caps=(True, True), hint=(1, 0, 0))
+    f += torus("trim", (0, 4.4, 0), 1.6, 0.16, 0.6, n=12, k=4, ax="z")
+    f += gem((0, 4.4, -0.62), 0.45, 0.45, 0.16, segs=6, rings=1)
+    # 刃
+    f += blade("spine", [(5.6, -1.45, 1.45, 0.55, 0.55), (12.0, -1.35, 1.35, 0.52, 0.52), (18.0, -1.1, 1.1, 0.48, 0.48),
+                         (21.0, -0.7, 0.7, 0.36, 0.36), (22.8, 0, 0, 0, 0)], colmats=["edge", "spine", "edge", "edge", "spine", "edge"])
+    for z in (-0.5, 0.5):
+        f += gbar([(0, 6.4, z), (0, 12.0, z), (0, 17.5, z)], r=0.16)
+    return f
+
+
+def moon_full_hammer(stage=0):
+    """望月の大鎚: 頭はまるい満月の石 (クレーター) を、金縁の銀の帯二本が十字に締める。両の打つ面は銀の円盤に月の光、頂に三日月の冠と星。首から星の房"""
+    f = indigo_pole(-4.0, 10.2, r=1.0)
+    f += ell("acc", (0, -4.6, 0), (1.2, 0.9, 1.2), segs=8, rings=2)
+    f += prism("spine", (0, 9.8, 0), (0, 11.2, 0), 1.1, 1.6, sides=8, caps=(True, True))
+    C = (0, 13.6, 0)
+    f += ell("main", C, (3.2, 3.0, 3.0), segs=12, rings=6)
+    f += torus("acc", C, 3.15, 0.3, 0.55, n=16, k=4, ax="x")
+    f += torus("acc", C, 3.1, 0.3, 0.55, n=16, k=4, ax="z")
+    f += torus("trim", C, 3.25, 0.12, 0.62, n=16, k=3, ax="x")
+    for s in (1, -1):
+        f += prism("spine", (s * 2.6, 13.6, 0), (s * 3.9, 13.6, 0), 2.0, 2.0, sides=12, caps=(True, True), hint=(0, 1, 0))
+        f += prism("trim", (s * 3.9, 13.6, 0), (s * 4.2, 13.6, 0), 1.7, 1.7, sides=12, caps=(True, True), hint=(0, 1, 0))
+        f += gem((s * 4.25, 13.6, 0), 0.25, 0.9, 0.9, segs=8, rings=2)
+    # 三日月の冠と星
+    f += crescent_x("trim", (0, 18.0, 0), 1.5, 205, 335, 0.55, n=9)
+    f += prism("trim", (0, 16.4, 0), (0, 16.9, 0), 0.4, 0.35, sides=6, caps=(True, True))
+    f += gem((0, 17.6, 0), 0.55, 0.55, 0.55, segs=6, rings=2)
+    for a in (0, 90, 180, 270):
+        d = V(math.cos(math.radians(a)), math.sin(math.radians(a)), 0)
+        f += spike(BONE, "gem", tuple(V(0, 17.6, 0) + d * 0.45), tuple(d), 0.7, 0.2, sides=4, rings=1, hint=(0, 0, 1))
+    # 星の房
+    for s in (1, -1):
+        f += strand("cord", (s * 0.9, 10.6, -0.6), 3.0, sway=s * 0.4, r=0.22, n=3)
+        f += gem((s * 0.9 + s * 0.2, 7.5, -0.6), 0.3, 0.3, 0.3, segs=4, rings=1)
+    return f
+
+
+def moon_new_staff(stage=0):
+    """朔の杖: 柄の先に、光を呑んだ新月の黒い珠。まわりを細い光の冠 (日食の環) がめぐり、四本の銀の三日月の爪が珠を抱く。柄に影の布が巻く"""
+    f = indigo_pole(-4.0, 13.6)
+    f += prism("spine", (0, 13.4, 0), (0, 14.8, 0), 0.9, 1.4, sides=8, caps=(True, True))
+    C = (0, 18.2, 0)
+    f += ell("dark", C, (2.4, 2.4, 2.4), segs=12, rings=6)
+    f += torus("gem", C, 2.75, 0.22, 0.22, n=18, k=4, ax="z")
+    f += torus("trim", C, 2.75, 0.1, 0.32, n=18, k=3, ax="y")
+    for k in range(4):
+        a = 45 + 90 * k
+        P = lambda r, d: (r * math.cos(math.radians(a + d)), 18.2 + r * math.sin(math.radians(a + d)), 0.0)
+        f += curve("acc", [P(2.2, 0), P(3.3, 0), P(3.2, 22), P(2.8, 34)], [0.38, 0.34, 0.25, 0.1], [0.38, 0.34, 0.25, 0.1], sides=5, caps=(True, True), hint=(0, 0, 1))
+    f += spike(BONE, "acc", (0, 20.4, 0), (0, 1, 0), 2.4, 0.4, sides=4, rings=1, hint=(0, 0, 1))
+    # 影の布
+    f += curve("cloth", [(0.95, 12.6, 0), (0.0, 11.8, -1.0), (-0.95, 11.0, 0), (0.0, 10.2, 1.0), (0.95, 9.4, 0)],
+               [0.2] * 5, [0.5] * 5, sides=4, caps=(True, True), hint=(0, 1, 0))
+    f += strand("cloth", (0.95, 9.4, 0), 3.2, sway=0.5, r=0.32, n=4)
+    return f
+
+
+def moon_starfall_bow(stage=0):
+    """星落ちの弓: 銀の腕に月の石を張った大きな弓。両の先は四方へ光る星、腕に沿って星の尾の粒が流れる。握りの外に金縁の星の座"""
+    f = []
+    f += prism("grip", (5.0, CY - 2.8, 0), (5.0, CY + 2.8, 0), 1.0, 1.0, sides=8, caps=(False, False), hint=(0, 0, 1))
+    f += prism("wrap", (5.0, CY - 1.6, 0), (5.0, CY + 1.6, 0), 1.12, 1.12, sides=8, caps=(False, False), hint=(0, 0, 1))
+    f += prism("spine", (6.3, CY, -0.5), (6.3, CY, 0.5), 1.3, 1.3, sides=8, caps=(True, True), hint=(1, 0, 0), phase=22.5)
+    f += torus("trim", (6.3, CY, 0), 1.35, 0.16, 0.55, n=8, k=4, ax="z")
+    f += gem((6.3, CY, -0.6), 0.55, 0.55, 0.2, segs=6, rings=1)
+    up = bend(stage, [(5.0, CY + 2.4, 0), (4.4, CY + 5.4, 0), (2.8, CY + 8.2, 0), (0.4, CY + 10.2, 0), (-2.2, CY + 11.0, 0)])
+    half = []
+    half += curve("acc", up, [0.95, 0.88, 0.75, 0.58, 0.4], [1.1, 1.0, 0.85, 0.66, 0.45], sides=5, caps=(False, True), hint=(0, 0, 1))
+    half += curve("main", [(x + 0.75, y, 0) for x, y, z in up[:4]], [0.3, 0.28, 0.24, 0.15], [0.8, 0.72, 0.6, 0.3], sides=4, caps=(True, True), hint=(0, 0, 1))
+    for i in range(1, 4):
+        (x0, y0, _), (x1, y1, _) = up[i], up[i + 1]
+        for t, rr in ((0.3, 0.45), (0.75, 0.32)):
+            half += ell("gem", (x0 + (x1 - x0) * t + 1.15, y0 + (y1 - y0) * t, 0), (rr, rr, rr), segs=5, rings=2)
+    tx, ty, _ = up[-1]
+    half += ell("trim", (tx, ty, 0), (0.5, 0.5, 0.5), segs=6, rings=1)
+    for a in (0, 90, 180, 270):
+        d = V(math.cos(math.radians(a + 20)), math.sin(math.radians(a + 20)), 0)
+        half += spike(BONE, "gem", tuple(V(tx, ty, 0) + d * 0.4), tuple(d), 1.1, 0.28, sides=4, rings=1, hint=(0, 0, 1))
+    f += half + mirror_faces_y(half)
+    lo = [(x, 2 * CY - y, z) for x, y, z in up]
+    return f + string_and_arrow(stage, "legend", up, lo)
+
+
+def moon_umbra_dagger(stage=0):
+    """朔影の短剣: 藍の黒の両刃 (木の葉の形)、縁を影の紫の光が走る。鍔は影の印の三つの黒い珠 (芯が光る)、柄頭は黒い三日月"""
+    f = []
+    f += prism("grip", (0, -3.2, 0), (0, 3.0, 0), 0.8, 0.76, sides=8, caps=(True, True))
+    f += prism("wrap", (0, -2.6, 0), (0, 2.4, 0), 0.92, 0.92, sides=8, caps=(False, False))
+    f += ringy("trim", -2.8, 1.05, 0.4)
+    f += prism("spine", (0, -3.2, 0), (0, -3.7, 0), 0.6, 0.5, sides=6, caps=(True, True))
+    f += crescent_x("dark", (0, -4.9, 0), 1.2, 40, 320, 0.5, n=11)
+    # 鍔: 三つの印の珠を銀の腕で
+    f += block("acc", (0, 3.4, 0), (4.6, 0.7, 1.0), taper=(0.8, 0.9))
+    for x in (-2.6, 0.0, 2.6):
+        f += ell("dark", (x, 3.5 if x else 3.9, 0), (0.75, 0.75, 0.75), segs=8, rings=3)
+        f += gem((x, 3.5 if x else 3.9, -0.62), 0.3, 0.3, 0.18, segs=5, rings=1)
+    # 刃: 木の葉 (藍の黒、縁は影の光)
+    f += blade("grip", [(4.2, -0.9, 0.9, 0.35, 0.35), (6.4, -1.55, 1.55, 0.42, 0.42), (9.4, -1.6, 1.6, 0.42, 0.42),
+                        (12.4, -1.0, 1.0, 0.34, 0.34), (14.6, 0, 0, 0, 0)], colmats=["gem", "grip", "gem", "gem", "grip", "gem"])
+    f += gbar([(0, 5.0, -0.36), (0, 12.0, -0.3)], r=0.13, mat="acc")
+    f += gbar([(0, 5.0, 0.36), (0, 12.0, 0.3)], r=0.13, mat="acc")
+    return f
+
+
+def moon_halo_bell_staff(stage=0):
+    """月暈の鈴杖: 柄の先に満月の珠、そのまわりを大きな月暈 (光の輪) が水平にめぐり、輪から銀の鈴が六つ下がる。頂に三日月"""
+    f = indigo_pole(-4.0, 14.0)
+    f += prism("spine", (0, 13.8, 0), (0, 15.2, 0), 0.9, 1.3, sides=8, caps=(True, True))
+    C = (0, 17.4, 0)
+    f += ell("main", C, (2.0, 2.0, 2.0), segs=10, rings=5)
+    f += torus("gem", C, 4.0, 0.26, 0.26, n=18, k=4, ax="y")
+    f += torus("trim", (0, 17.0, 0), 4.0, 0.3, 0.12, n=18, k=4, ax="y")
+    for k in range(4):
+        a = math.radians(45 + 90 * k)
+        f += prism("acc", (1.7 * math.cos(a), 17.2, 1.7 * math.sin(a)), (3.9 * math.cos(a), 17.1, 3.9 * math.sin(a)), 0.16, 0.16, sides=4, caps=(True, True))
+    for k in range(6):
+        a = math.radians(60 * k)
+        x, z = 4.0 * math.cos(a), 4.0 * math.sin(a)
+        f += prism("cord", (x, 16.9, z), (x, 15.8, z), 0.09, 0.09, sides=3, caps=(False, False))
+        rings = [[V(x + rr * math.cos(math.radians(30 * j)), y, z + rr * math.sin(math.radians(30 * j))) for j in range(12)]
+                 for y, rr in ((14.2, 0.62), (14.35, 0.58), (15.1, 0.45), (15.7, 0.3), (15.95, 0.12))]
+        f += loft(BONE, "spine", rings, caps=("gem", "spine"))
+    f += crescent_x("trim", (0, 21.0, 0), 1.1, 205, 335, 0.45, n=9)
+    f += prism("trim", (0, 19.3, 0), (0, 20.1, 0), 0.3, 0.25, sides=6, caps=(True, True))
+    return f
+
+
 def _w(fn, jp, tier, glow, pose, grip, cen, scale, inlay, stages=1):
     e = dict(jp=jp, tier=tier, glow=glow, pose=pose, grip=grip, cen=cen, scale=scale,
              opts={"a": ((lambda stage=0: fn(stage)), inlay, ("edge",), (fn.__doc__ or "").split(":", 1)[-1].strip())})
@@ -235,5 +376,11 @@ WEAPONS = {
     "moon_waning_bow": _w(moon_waning_bow, "下弦の弓", "rare", "shade", inlay=inlay_line(["main"], 99.0, 99.5), **BW),
     "moon_crescent_dagger": _w(moon_crescent_dagger, "欠け月の短剣", "rare", "moon", inlay=inlay_line(["dark"], 2.5, 4.0), **DG),
     "moon_starlight_bell_staff": _w(moon_starlight_bell_staff, "星灯りの鈴杖", "rare", "star", inlay=inlay_line(["grip"], 5.0, 13.0), **ST),
+    "moon_light_sword": _w(moon_light_sword, "月光の長剣", "rare", "moon", inlay=inlay_line(["spine"], 6.0, 20.0), **SW),
+    "moon_full_hammer": _w(moon_full_hammer, "望月の大鎚", "legend", "moon", inlay=inlay_line(["main"], 99.0, 99.5), **HM),
+    "moon_new_staff": _w(moon_new_staff, "朔の杖", "legend", "shade", inlay=inlay_line(["main"], 99.0, 99.5), **ST),
+    "moon_starfall_bow": _w(moon_starfall_bow, "星落ちの弓", "legend", "star", inlay=inlay_line(["acc"], 99.0, 99.5), **BW),
+    "moon_umbra_dagger": _w(moon_umbra_dagger, "朔影の短剣", "legend", "shade", inlay=inlay_line(["main"], 99.0, 99.5), **DG),
+    "moon_halo_bell_staff": _w(moon_halo_bell_staff, "月暈の鈴杖", "legend", "moon", inlay=inlay_line(["main"], 99.0, 99.5), **ST),
     "moon_waning_blade": _w(moon_waning_blade, "残月の太刀", "legend", "shade", inlay=inlay_line(["spine"], 6.0, 21.0, lambda y: _sori(y) + 0.5), **SW),
 }

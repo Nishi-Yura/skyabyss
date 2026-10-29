@@ -8,6 +8,13 @@
 - 試遊版: 0.8.0（`build/libs/skyabyss-0.8.0.jar`。確認表 `docs/review/playtest_0.8.0.md`、遊び方 `docs/beta_how_to_play.md`）。
 - 自己テスト: `bash <scratchpad>/fresh_continent.sh "<名前,…>" <世界名>`（空なら全部。大陸の新しい世界で回す）。`abyss escort` はほかと一緒に流すと時間切れで落ちることがある（単独では通る）。
 
+## 2026-10-31 朝（月の職の武器をレアとヒロイックの組に。[03](design/03_gear_and_endgame.md) の 12.2）
+
+- 声「なんで一つだけヒロイック？全部レアとヒロイックでそれぞれひとつずつ」: 6 職それぞれにレア一本とヒロイック一本。エピックだった 5 本はレアに（数値はそのまま、弓だけ矢 ×2.4 → ×2.0。残像の矢込みで近接の 0.85 倍に合わせた）、戦士のレア「月光の長剣」とヒロイック 5 本（望月の大鎚・朔の杖・星落ちの弓・朔影の短剣・月暈の鈴杖）を足した。固有効果は `MoonGearEvents`。
+- ヒロイック 5 本は巨神のヒロイック武器と同じく図鑑に入れず、月の核の別枠（`MoonGearLoot.heroicDrops`、一本ずつ 2% × (1 + 0.1 × 段)）。残月の太刀と環は図鑑の専用の逸品のまま。
+- 確かめ: `moon gear`・`gear tiers`・`moon trial`・`weapon moves` 通る。撮影 `tools/shots/moon_gear.txt`、見比べ `docs/review/moon/gear_weapons_game.jpg`（行ごとに左 2 枚がレア、右 2 枚がヒロイック）。
+- まだ: 試遊。ヒロイックの技の書き換え（巨神のヒロイックにある英雄の段のルーン）は月の 6 本には付けていない。
+
 ## 2026-10-31 未明（クリア後の位相の挑戦と月の装備。設計 [46](design/46_moon.md) の 4.8.1・[03](design/03_gear_and_endgame.md) の 12.2）
 
 - 月の装備 12 品と素材 3 つを入れた（`story/ch6/gear/`）: 月渡りの装束 4 部位（低ポリ `lowpoly/armor/moon_walker`）、武器 6 本（鎚・杖・弓・短剣・鈴杖はエピック、残月の太刀はヒロイック）、満月の環、月の涙、月の欠片・月の心核・共鳴の欠片（月）。固有効果は `MoonGearEvents`、報酬は `MoonGearLoot`（区画の主は初回にその主の鎧の一部位、核は初回に心核）。

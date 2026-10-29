@@ -2288,5 +2288,17 @@
   "moon_trial.skyabyss.cliff": "Moon Scale of the First Quarter",
   "moon_trial.skyabyss.field": "Lamp Keeper of the Full Moon",
   "moon_trial.skyabyss.rift": "Blade Keeper of the Waning Moon",
-  "moon_trial.skyabyss.core": "The Moon's Core"
+  "moon_trial.skyabyss.core": "The Moon's Core",
+  "item.skyabyss.moon_light_sword": "Moonlight Longsword",
+  "item.skyabyss.moon_light_sword.desc": "A silver longsword with a full moon at the guard. +15% damage on the moon or at night.",
+  "item.skyabyss.moon_full_hammer": "Full Moon Maul",
+  "item.skyabyss.moon_full_hammer.desc": "A full moon stone bound in silver. Every fourth hit is a full moon blow: x1.6 damage and pushes enemies back.",
+  "item.skyabyss.moon_new_staff": "New Moon Staff",
+  "item.skyabyss.moon_new_staff.desc": "A new moon orb that swallows light. Binds the target in shadow for 2 seconds (slowed); +17% damage to bound targets.",
+  "item.skyabyss.moon_starfall_bow": "Starfall Bow",
+  "item.skyabyss.moon_starfall_bow.desc": "A bow tipped with stars. 0.8 seconds after a hit, a star falls there for 40% to nearby enemies.",
+  "item.skyabyss.moon_umbra_dagger": "Umbra Dagger",
+  "item.skyabyss.moon_umbra_dagger.desc": "A black blade edged with shadow light. Each hit leaves a shadow mark; three marks burst for 90% of attack.",
+  "item.skyabyss.moon_halo_bell_staff": "Moon Halo Bell Staff",
+  "item.skyabyss.moon_halo_bell_staff.desc": "A halo circles a full moon. +10% damage; while the halo lasts, each hit heals nearby allies by 1."
 }

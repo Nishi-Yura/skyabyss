@@ -94,8 +94,8 @@ public final class GearTierSelfTest {
         row(5, H, "abyss_sinking_anchor", "abyss_pulse_dagger", "abyss_surveyor_plumb");
         // 六章 月 (story/ch6/gear)
         row(6, R, "moon_walker_helmet", "moon_walker_chestplate", "moon_walker_leggings", "moon_walker_boots");
-        row(6, E, "moon_scale_hammer", "moon_tide_staff", "moon_waning_bow", "moon_crescent_dagger", "moon_starlight_bell_staff");
-        row(6, H, "moon_waning_blade", "moon_full_ring");
+        row(6, R, "moon_light_sword", "moon_scale_hammer", "moon_tide_staff", "moon_waning_bow", "moon_crescent_dagger", "moon_starlight_bell_staff");
+        row(6, H, "moon_waning_blade", "moon_full_hammer", "moon_new_staff", "moon_starfall_bow", "moon_umbra_dagger", "moon_halo_bell_staff", "moon_full_ring");
     }
 
     private GearTierSelfTest() {
@@ -240,6 +240,14 @@ public final class GearTierSelfTest {
             case "abyss_lamp_sword" -> AbyssGear.swordDps(e);
             case "abyss_sinking_anchor" -> AbyssGear.anchorDps(e);
             case "abyss_pulse_dagger" -> AbyssGear.daggerDps(e);
+            case "moon_light_sword" -> jp.revati.skyabyss.story.ch6.gear.MoonGear.swordDps(e);
+            case "moon_full_hammer" -> jp.revati.skyabyss.story.ch6.gear.MoonGear.fullHammerDps(e);
+            case "moon_new_staff" -> jp.revati.skyabyss.story.ch6.gear.MoonGear.newStaffDps(e);
+            case "moon_umbra_dagger" -> jp.revati.skyabyss.story.ch6.gear.MoonGear.umbraDps(e);
+            case "moon_halo_bell_staff" -> jp.revati.skyabyss.story.ch6.gear.MoonGear.haloDps(e);
+            // 月の弓は残像の矢・落ちる星を込める (近接と比べるので割り戻す)
+            case "moon_waning_bow" -> ((jp.revati.skyabyss.item.ChapterBowItem) item(path)).dps(e) * (1 + jp.revati.skyabyss.story.ch6.gear.MoonGear.BOW_ECHO) / RANGED;
+            case "moon_starfall_bow" -> ((jp.revati.skyabyss.item.ChapterBowItem) item(path)).dps(e) * (1 + jp.revati.skyabyss.story.ch6.gear.MoonGear.STARFALL_SHARE) / RANGED;
             case "moon_scale_hammer" -> jp.revati.skyabyss.story.ch6.gear.MoonGear.hammerDps(e);
             case "moon_tide_staff" -> jp.revati.skyabyss.story.ch6.gear.MoonGear.staffDps(e);
             case "moon_crescent_dagger" -> jp.revati.skyabyss.story.ch6.gear.MoonGear.daggerDps(e);

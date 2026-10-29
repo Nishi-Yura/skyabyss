@@ -2288,5 +2288,17 @@
   "moon_trial.skyabyss.cliff": "上弦の月秤",
   "moon_trial.skyabyss.field": "満月の望の灯守",
   "moon_trial.skyabyss.rift": "下弦の残月の剣守",
-  "moon_trial.skyabyss.core": "月の核"
+  "moon_trial.skyabyss.core": "月の核",
+  "item.skyabyss.moon_light_sword": "月光の長剣",
+  "item.skyabyss.moon_light_sword.desc": "鍔に満月を抱いた銀の長剣。月の上か夜は傷 +15%。",
+  "item.skyabyss.moon_full_hammer": "望月の大鎚",
+  "item.skyabyss.moon_full_hammer.desc": "満月の石を銀の帯で締めた大鎚。4 度目ごとに満月の一撃 (傷 ×1.6、まわりの敵を押す)。",
+  "item.skyabyss.moon_new_staff": "朔の杖",
+  "item.skyabyss.moon_new_staff.desc": "光を呑んだ新月の珠。打った相手を 2 秒影に縛り (遅く)、縛られた相手への傷 +17%。",
+  "item.skyabyss.moon_starfall_bow": "星落ちの弓",
+  "item.skyabyss.moon_starfall_bow.desc": "先に星を灯した弓。矢が当たった所へ 0.8 秒後に星が落ち、まわりの敵に傷の 40%。",
+  "item.skyabyss.moon_umbra_dagger": "朔影の短剣",
+  "item.skyabyss.moon_umbra_dagger.desc": "影の光を縁に走らせた黒い刃。打つたびに影の印、3 つで弾けて攻撃力の 90%。",
+  "item.skyabyss.moon_halo_bell_staff": "月暈の鈴杖",
+  "item.skyabyss.moon_halo_bell_staff.desc": "満月を光の輪が巡る鈴杖。打つ傷 +10%、月暈のあいだに打つたび、まわりの仲間の体力 1。"
 }

@@ -53,7 +53,10 @@ public final class MoonGearSetup {
             MoonGear.ARMOR_TOUGHNESS,
             MoonGear.ARMOR_KNOCKBACK));
 
-    // ---------------------------------------------------------------- 図鑑の 11 品と月の涙
+    // ---------------------------------------------------------------- 図鑑の 12 品・別枠のヒロイック 5 本と月の涙
+    public static final DeferredItem<Item> SWORD = ITEMS.register("moon_light_sword",
+            () -> new MoonGearItems.Weapon(new Item.Properties().rarity(Rarity.RARE), MoonGear.SWORD_ATTACK, MoonGear.SWORD_SPEED, GearTier.RARE,
+                    "item.skyabyss.moon_light_sword.desc"));
     public static final DeferredItem<Item> HELMET = ITEMS.register("moon_walker_helmet",
             () -> new MoonWalkerArmorItem(ArmorItem.Type.HELMET, new Item.Properties().rarity(Rarity.RARE)));
     public static final DeferredItem<Item> CHESTPLATE = ITEMS.register("moon_walker_chestplate",
@@ -63,23 +66,38 @@ public final class MoonGearSetup {
     public static final DeferredItem<Item> BOOTS = ITEMS.register("moon_walker_boots",
             () -> new MoonWalkerArmorItem(ArmorItem.Type.BOOTS, new Item.Properties().rarity(Rarity.RARE)));
     public static final DeferredItem<Item> HAMMER = ITEMS.register("moon_scale_hammer",
-            () -> new MoonGearItems.Weapon(new Item.Properties().rarity(Rarity.RARE), MoonGear.HAMMER_ATTACK, MoonGear.HAMMER_SPEED, GearTier.EPIC,
+            () -> new MoonGearItems.Weapon(new Item.Properties().rarity(Rarity.RARE), MoonGear.HAMMER_ATTACK, MoonGear.HAMMER_SPEED, GearTier.RARE,
                     "item.skyabyss.moon_scale_hammer.desc"));
     public static final DeferredItem<Item> STAFF = ITEMS.register("moon_tide_staff",
-            () -> new MoonGearItems.Weapon(new Item.Properties().rarity(Rarity.RARE), MoonGear.STAFF_ATTACK, MoonGear.STAFF_SPEED, GearTier.EPIC,
+            () -> new MoonGearItems.Weapon(new Item.Properties().rarity(Rarity.RARE), MoonGear.STAFF_ATTACK, MoonGear.STAFF_SPEED, GearTier.RARE,
                     "item.skyabyss.moon_tide_staff.desc"));
     public static final DeferredItem<Item> BOW = ITEMS.register("moon_waning_bow",
-            () -> new MoonGearItems.Bow(new Item.Properties().rarity(Rarity.RARE).durability(900), MoonGear.BOW_MULTIPLIER,
+            () -> new MoonGearItems.Bow(new Item.Properties().rarity(Rarity.RARE).durability(900), MoonGear.BOW_MULTIPLIER, GearTier.RARE,
                     "item.skyabyss.moon_waning_bow.desc"));
     public static final DeferredItem<Item> DAGGER = ITEMS.register("moon_crescent_dagger",
-            () -> new MoonGearItems.Weapon(new Item.Properties().rarity(Rarity.RARE), MoonGear.DAGGER_ATTACK, MoonGear.DAGGER_SPEED, GearTier.EPIC,
+            () -> new MoonGearItems.Weapon(new Item.Properties().rarity(Rarity.RARE), MoonGear.DAGGER_ATTACK, MoonGear.DAGGER_SPEED, GearTier.RARE,
                     "item.skyabyss.moon_crescent_dagger.desc"));
     public static final DeferredItem<Item> BELL = ITEMS.register("moon_starlight_bell_staff",
-            () -> new MoonGearItems.Weapon(new Item.Properties().rarity(Rarity.RARE), MoonGear.BELL_ATTACK, MoonGear.BELL_SPEED, GearTier.EPIC,
+            () -> new MoonGearItems.Weapon(new Item.Properties().rarity(Rarity.RARE), MoonGear.BELL_ATTACK, MoonGear.BELL_SPEED, GearTier.RARE,
                     "item.skyabyss.moon_starlight_bell_staff.desc"));
     public static final DeferredItem<Item> BLADE = ITEMS.register("moon_waning_blade",
             () -> new MoonGearItems.Weapon(new Item.Properties().rarity(Rarity.EPIC), MoonGear.BLADE_ATTACK, MoonGear.BLADE_SPEED, GearTier.HEROIC,
                     "item.skyabyss.moon_waning_blade.desc"));
+    public static final DeferredItem<Item> FULL_HAMMER = ITEMS.register("moon_full_hammer",
+            () -> new MoonGearItems.Weapon(new Item.Properties().stacksTo(1).rarity(Rarity.EPIC), MoonGear.FULL_HAMMER_ATTACK, MoonGear.FULL_HAMMER_SPEED,
+                    GearTier.HEROIC, "item.skyabyss.moon_full_hammer.desc"));
+    public static final DeferredItem<Item> NEW_STAFF = ITEMS.register("moon_new_staff",
+            () -> new MoonGearItems.Weapon(new Item.Properties().stacksTo(1).rarity(Rarity.EPIC), MoonGear.NEW_STAFF_ATTACK, MoonGear.NEW_STAFF_SPEED,
+                    GearTier.HEROIC, "item.skyabyss.moon_new_staff.desc"));
+    public static final DeferredItem<Item> STARFALL_BOW = ITEMS.register("moon_starfall_bow",
+            () -> new MoonGearItems.Bow(new Item.Properties().rarity(Rarity.EPIC).durability(900), MoonGear.STARFALL_MULTIPLIER, GearTier.HEROIC,
+                    "item.skyabyss.moon_starfall_bow.desc"));
+    public static final DeferredItem<Item> UMBRA_DAGGER = ITEMS.register("moon_umbra_dagger",
+            () -> new MoonGearItems.Weapon(new Item.Properties().stacksTo(1).rarity(Rarity.EPIC), MoonGear.UMBRA_ATTACK, MoonGear.UMBRA_SPEED,
+                    GearTier.HEROIC, "item.skyabyss.moon_umbra_dagger.desc"));
+    public static final DeferredItem<Item> HALO_BELL = ITEMS.register("moon_halo_bell_staff",
+            () -> new MoonGearItems.Weapon(new Item.Properties().stacksTo(1).rarity(Rarity.EPIC), MoonGear.HALO_ATTACK, MoonGear.HALO_SPEED,
+                    GearTier.HEROIC, "item.skyabyss.moon_halo_bell_staff.desc"));
     public static final DeferredItem<Item> RING = ITEMS.register("moon_full_ring",
             () -> new MoonGearItems.Trinket(new Item.Properties().stacksTo(1).rarity(Rarity.EPIC), GearTier.HEROIC, "item.skyabyss.moon_full_ring.desc", true));
     public static final DeferredItem<Item> TEAR = ITEMS.register("moon_tear",
@@ -93,7 +111,8 @@ public final class MoonGearSetup {
     }
 
     public static List<DeferredItem<Item>> all() {
-        return List.of(HELMET, CHESTPLATE, LEGGINGS, BOOTS, HAMMER, STAFF, BOW, DAGGER, BELL, BLADE, RING, TEAR);
+        return List.of(HELMET, CHESTPLATE, LEGGINGS, BOOTS, SWORD, HAMMER, STAFF, BOW, DAGGER, BELL, BLADE, FULL_HAMMER, NEW_STAFF, STARFALL_BOW,
+                UMBRA_DAGGER, HALO_BELL, RING, TEAR);
     }
 
     public static void register(IEventBus modEventBus) {
@@ -105,8 +124,8 @@ public final class MoonGearSetup {
 
     private static void onCreativeTab(BuildCreativeModeTabContentsEvent event) {
         if (event.getTabKey().equals(ModItems.LEGACY_TAB)) {
-            for (DeferredHolder<Item, Item> item : List.of(HELMET, CHESTPLATE, LEGGINGS, BOOTS, HAMMER, STAFF, BOW, DAGGER, BELL, BLADE, RING, TEAR,
-                    SHARD, CORE, RESONANCE_SHARD)) {
+            for (DeferredHolder<Item, Item> item : List.of(HELMET, CHESTPLATE, LEGGINGS, BOOTS, SWORD, HAMMER, STAFF, BOW, DAGGER, BELL, BLADE,
+                    FULL_HAMMER, NEW_STAFF, STARFALL_BOW, UMBRA_DAGGER, HALO_BELL, RING, TEAR, SHARD, CORE, RESONANCE_SHARD)) {
                 event.accept(item.get());
             }
         }

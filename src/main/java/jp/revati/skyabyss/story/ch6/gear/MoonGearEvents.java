@@ -45,6 +45,12 @@ import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 //  - 欠け月の短剣: 背から刺すと +30%
 //  - 星灯りの鈴杖: 打った相手に星の印 4 秒 (だれの傷も +10%、光る)
 //  - 残月の太刀: 3 度に 1 度、1.5 秒後に残像の太刀 (攻撃力の 50%。相手が 5 の内)
+//  - 月光の長剣: 月の上か夜は +15%
+//  - 望月の大鎚: 4 度目ごとに満月の一撃 (×1.6、まわり 3 の敵を押す)
+//  - 朔の杖: 打った相手を 2 秒影に縛る (遅く)。縛られた相手への傷 +17%
+//  - 星落ちの弓: 矢が当たった所へ 0.8 秒後に星が落ちる (まわり 2.5 の敵に当たった傷の 40%)
+//  - 朔影の短剣: 打つたびに影の印。3 つで弾けて攻撃力の 90% (少し遅れて)
+//  - 月暈の鈴杖: 打つと月暈 5 秒。打つ傷 +10%、月暈のあいだに打つたびにまわり 6 の仲間の体力 1
 //  - 満月の環: 月の上か夜、3 秒ごと (満月 2 秒ごと) に体力 1
 //  - 月の涙: 30 秒のあいだ、次に受ける傷を一度 0 に
 @EventBusSubscriber(modid = SkyAbyss.MODID)
@@ -54,6 +60,15 @@ public final class MoonGearEvents {
     static final String STAFF_TIDE = SkyAbyss.MODID + ":moon_staff_ebb";
     static final String BLADE_COUNT = SkyAbyss.MODID + ":moon_blade_count";
     static final String BELL_MARK = SkyAbyss.MODID + ":moon_star_mark";
+    static final String FULL_COUNT = SkyAbyss.MODID + ":moon_full_count";
+    static final String NEW_BIND = SkyAbyss.MODID + ":moon_new_bind";
+    static final String UMBRA = SkyAbyss.MODID + ":moon_umbra_marks";
+    static final String HALO = SkyAbyss.MODID + ":moon_halo";
+    // 落ちる星 (星落ちの弓): 落ちる tick・所・傷・打った人
+    record Star(long at, Vec3 pos, float damage, int attacker) {
+    }
+
+    private static final List<Star> STARS = new ArrayList<>();
     // 遅れて当たる残像 (太刀と弓): 当たる tick・相手・傷・打った人
     record Echo(long at, int target, float damage, int attacker, boolean arrow) {
     }
@@ -120,6 +135,11 @@ public final class MoonGearEvents {
                     && arrow.getWeaponItem().getItem() == MoonGearSetup.BOW.get() && !arrow.getPersistentData().getBoolean("skyabyss_echo")) {
                 ECHOES.add(new Echo(level.getGameTime() + MoonGear.BOW_ECHO_TICKS, target.getId(), (float) (event.getAmount() * MoonGear.BOW_ECHO),
                         player.getId(), true));
+            } else if (source.getDirectEntity() instanceof AbstractArrow arrow && arrow.getWeaponItem() != null
+                    && arrow.getWeaponItem().getItem() == MoonGearSetup.STARFALL_BOW.get()) {
+                STARS.add(new Star(level.getGameTime() + MoonGear.STARFALL_TICKS, target.position(), (float) (event.getAmount() * MoonGear.STARFALL_SHARE),
+                        player.getId()));
+                level.sendParticles(ParticleTypes.END_ROD, target.getX(), target.getY() + 6, target.getZ(), 6, 0.2, 0.4, 0.2, 0.01);
             }
         }
         if (m != 1) {
@@ -132,6 +152,57 @@ public final class MoonGearEvents {
         ItemStack hand = player.getMainHandItem();
         if (hand.isEmpty() || !GearLevel.meets(player, hand)) {
             return 1;
+        }
+        long now = level.getGameTime();
+        if (hand.getItem() == MoonGearSetup.SWORD.get()) {
+            return level.dimension() == MoonWorld.LEVEL || level.isNight() ? 1 + MoonGear.SWORD_MOONLIT : 1;
+        }
+        if (hand.getItem() == MoonGearSetup.FULL_HAMMER.get()) {
+            int n = player.getPersistentData().getInt(FULL_COUNT) + 1;
+            if (n < MoonGear.FULL_HAMMER_EVERY) {
+                player.getPersistentData().putInt(FULL_COUNT, n);
+                return 1;
+            }
+            player.getPersistentData().putInt(FULL_COUNT, 0);
+            for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, target.getBoundingBox().inflate(3),
+                    q -> q != player && q.isAlive() && !(q instanceof Player))) {
+                Vec3 d = e.position().subtract(player.position()).multiply(1, 0, 1).normalize();
+                e.push(d.x * 0.8, 0.3, d.z * 0.8);
+                e.hurtMarked = true;
+            }
+            level.sendParticles(ParticleTypes.FLASH, target.getX(), target.getY(0.5), target.getZ(), 1, 0, 0, 0, 0);
+            level.sendParticles(ParticleTypes.END_ROD, target.getX(), target.getY(0.2), target.getZ(), 24, 1.2, 0.1, 1.2, 0.05);
+            level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.PLAYERS, 1.2f, 0.6f);
+            return 1 + MoonGear.FULL_HAMMER_BLOW;
+        }
+        if (hand.getItem() == MoonGearSetup.NEW_STAFF.get()) {
+            boolean bound = target.getPersistentData().getLong(NEW_BIND) > now;
+            target.getPersistentData().putLong(NEW_BIND, now + MoonGear.NEW_STAFF_BIND_TICKS);
+            target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, MoonGear.NEW_STAFF_BIND_TICKS, 1, true, false));
+            level.sendParticles(ParticleTypes.SQUID_INK, target.getX(), target.getY(0.1), target.getZ(), 6, 0.4, 0.05, 0.4, 0.01);
+            return bound ? 1 + MoonGear.NEW_STAFF_BOUND : 1;
+        }
+        if (hand.getItem() == MoonGearSetup.UMBRA_DAGGER.get()) {
+            int n = target.getPersistentData().getInt(UMBRA) + 1;
+            if (n >= MoonGear.UMBRA_MARKS) {
+                n = 0;
+                float dmg = (float) (player.getAttributeValue(Attributes.ATTACK_DAMAGE) * MoonGear.UMBRA_BURST);
+                ECHOES.add(new Echo(now + 4, target.getId(), dmg, player.getId(), false));
+            }
+            target.getPersistentData().putInt(UMBRA, n);
+            level.sendParticles(ParticleTypes.SMOKE, target.getX(), target.getY(0.5), target.getZ(), 3 + 3 * n, 0.2, 0.3, 0.2, 0.01);
+            return 1;
+        }
+        if (hand.getItem() == MoonGearSetup.HALO_BELL.get()) {
+            if (player.getPersistentData().getLong(HALO) > now) {
+                for (Player ally : level.getEntitiesOfClass(Player.class, player.getBoundingBox().inflate(MoonGear.HALO_RADIUS),
+                        q -> q != player && q.isAlive() && !q.isSpectator())) {
+                    ally.heal(1f);
+                }
+            }
+            player.getPersistentData().putLong(HALO, now + MoonGear.HALO_TICKS);
+            level.sendParticles(ParticleTypes.END_ROD, player.getX(), player.getY() + 2.2, player.getZ(), 8, 0.6, 0.05, 0.6, 0.01);
+            return 1 + MoonGear.HALO_BONUS;
         }
         if (hand.getItem() == MoonGearSetup.HAMMER.get()) {
             return MoonGear.heavier(target.getHealth(), target.getMaxHealth(), player.getHealth(), player.getMaxHealth()) ? 1 + MoonGear.HAMMER_BONUS : 1;
@@ -175,10 +246,14 @@ public final class MoonGearEvents {
     // 残像の当たり (太刀・弓)
     @SubscribeEvent
     static void onLevelTick(LevelTickEvent.Post event) {
-        if (ECHOES.isEmpty() || !(event.getLevel() instanceof ServerLevel level)) {
+        if (!(event.getLevel() instanceof ServerLevel level)) {
             return;
         }
         long now = level.getGameTime();
+        stars(level, now);
+        if (ECHOES.isEmpty()) {
+            return;
+        }
         for (Iterator<Echo> it = ECHOES.iterator(); it.hasNext();) {
             Echo e = it.next();
             if (e.at() > now) {
@@ -206,6 +281,39 @@ public final class MoonGearEvents {
                     e.arrow() ? 10 : 1, 0.2, 0.3, 0.2, 0.05);
             level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.AMETHYST_BLOCK_HIT, SoundSource.PLAYERS, 0.9f, e.arrow() ? 1.6f : 0.8f);
         }
+    }
+
+    // 落ちる星: 所のまわりの敵 (人でない生き物) に傷
+    static void stars(ServerLevel level, long now) {
+        for (Iterator<Star> it = STARS.iterator(); it.hasNext();) {
+            Star s = it.next();
+            if (s.at() > now) {
+                continue;
+            }
+            Entity a = level.getEntity(s.attacker());
+            if (!(a instanceof Player player)) {
+                if (now - s.at() > 200) {
+                    it.remove();
+                }
+                continue;
+            }
+            it.remove();
+            hitStar(level, player, s.pos(), s.damage());
+        }
+    }
+
+    public static int hitStar(ServerLevel level, Player player, Vec3 pos, float damage) {
+        int hit = 0;
+        for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, new net.minecraft.world.phys.AABB(pos, pos).inflate(MoonGear.STARFALL_RADIUS),
+                q -> q.isAlive() && !(q instanceof Player) && q.position().distanceTo(pos) <= MoonGear.STARFALL_RADIUS + q.getBbWidth() / 2)) {
+            e.invulnerableTime = 0;
+            e.hurt(player.damageSources().indirectMagic(e, player), damage);
+            hit++;
+        }
+        level.sendParticles(ParticleTypes.FIREWORK, pos.x, pos.y + 0.3, pos.z, 20, 0.8, 0.2, 0.8, 0.05);
+        level.sendParticles(ParticleTypes.END_ROD, pos.x, pos.y + 3, pos.z, 12, 0.1, 1.5, 0.1, 0.0);
+        level.playSound(null, pos.x, pos.y, pos.z, SoundEvents.AMETHYST_CLUSTER_BREAK, SoundSource.PLAYERS, 1.0f, 1.2f);
+        return hit;
     }
 
     public static int pendingEchoes() {

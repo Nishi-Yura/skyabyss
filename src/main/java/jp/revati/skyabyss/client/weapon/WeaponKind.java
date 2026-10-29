@@ -83,7 +83,9 @@ public enum WeaponKind {
             Map.entry("weathercock", POKER),
             // 六章「月」の武器 (story/ch6/gear。弓は WeaponClient が BowExtension で登録する)
             Map.entry("moon_scale_hammer", HAMMER), Map.entry("moon_tide_staff", POKER), Map.entry("moon_crescent_dagger", FANG),
-            Map.entry("moon_starlight_bell_staff", POKER), Map.entry("moon_waning_blade", GREATSWORD));
+            Map.entry("moon_starlight_bell_staff", POKER), Map.entry("moon_waning_blade", GREATSWORD),
+            Map.entry("moon_light_sword", GREATSWORD), Map.entry("moon_full_hammer", HAMMER), Map.entry("moon_new_staff", POKER),
+            Map.entry("moon_umbra_dagger", FANG), Map.entry("moon_halo_bell_staff", POKER));
 
     public static Iterable<Map.Entry<String, WeaponKind>> items() {
         return BY_ITEM.entrySet();

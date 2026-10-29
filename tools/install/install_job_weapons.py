@@ -65,11 +65,13 @@ REMAKE = {"waterway_fang": ("legend", 1), "captain_pike": ("legend", 1), "whaleb
           "abyss_storm_bow": ("legend", 4), "smith_hammer": ("legend", 1), "ember_war_axe": ("rare", 1), "abyss_ash_scythe": ("legend", 1)}
 for _id, (_tier, _st) in REMAKE.items():
     ITEMS[_id] = ("roughs_one", _tier, _id, _st)
-# 六章「月」の武器 (2026-10-29。tools/rough/lowpoly/weapons/one/o_moon.py。エピック 5 本は形の段 rare、残月の太刀はヒロイックで legend)
-for _id, _kind in (("moon_scale_hammer", "hammer"), ("moon_tide_staff", "staff"), ("moon_waning_bow", "bow"), ("moon_crescent_dagger", "dagger"),
-                   ("moon_starlight_bell_staff", "bell")):
+# 六章「月」の武器 (tools/rough/lowpoly/weapons/one/o_moon.py。6 職それぞれにレア (形の段 rare) とヒロイック (形の段 legend))
+for _id, _kind in (("moon_light_sword", "sword"), ("moon_scale_hammer", "hammer"), ("moon_tide_staff", "staff"), ("moon_waning_bow", "bow"),
+                   ("moon_crescent_dagger", "dagger"), ("moon_starlight_bell_staff", "bell")):
     ITEMS[_id] = ("roughs_one", "rare") + _HOLD[_kind]
-ITEMS["moon_waning_blade"] = ("roughs_one", "legend") + _HOLD["sword"]
+for _id, _kind in (("moon_waning_blade", "sword"), ("moon_full_hammer", "hammer"), ("moon_new_staff", "staff"), ("moon_starfall_bow", "bow"),
+                   ("moon_umbra_dagger", "dagger"), ("moon_halo_bell_staff", "bell")):
+    ITEMS[_id] = ("roughs_one", "legend") + _HOLD[_kind]
 # 巨神のヒロイック武器 17 本 (2026-10-28。tools/rough/lowpoly/weapons/heroic/build_heroic.py の docs/review/roughs_heroic/raw/<id>/<案>/。形の段 rare)
 HEROIC = {"whale_choir_hammer": ("hammer", "c"), "whale_star_staff": ("staff", "c"), "whale_rib_longbow": ("bow", "c"), "whale_deep_bell_staff": ("bell", "a"),
           "tide_reef_hammer": ("hammer", "c"), "tide_pearl_staff": ("staff", "b"), "tide_coral_bow": ("bow", "b"), "tide_surf_bell_staff": ("bell", "a"),

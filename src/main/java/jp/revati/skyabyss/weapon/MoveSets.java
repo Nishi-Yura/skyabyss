@@ -23,7 +23,8 @@ public final class MoveSets {
             "storm_staff", "storm_bell_staff", "ember_staff", "ember_censer", "whale_hammer", "tide_hammer", "storm_hammer", "ember_greatsword",
             "ember_dagger", "whale_dagger", "tide_dagger", "storm_sword", "storm_dagger", "shrine_sword", "shrine_hammer",
             "abyss_whale_hammer", "abyss_whale_staff", "abyss_whale_fang", "abyss_whale_bell_staff", "abyss_tide_sword", "abyss_tide_hammer", "abyss_tide_staff", "abyss_tide_dagger", "abyss_storm_sword", "abyss_storm_hammer", "abyss_storm_staff", "abyss_storm_dagger", "abyss_storm_bell_staff", "abyss_ember_sword", "abyss_ember_staff", "abyss_ember_dagger", "abyss_ember_bell_staff", "abyss_lamp_staff", "abyss_toll_bell_staff",
-            "moon_scale_hammer", "moon_tide_staff", "moon_crescent_dagger", "moon_starlight_bell_staff", "moon_waning_blade");
+            "moon_scale_hammer", "moon_tide_staff", "moon_crescent_dagger", "moon_starlight_bell_staff", "moon_waning_blade",
+            "moon_light_sword", "moon_full_hammer", "moon_new_staff", "moon_umbra_dagger", "moon_halo_bell_staff");
 
     private static Map<String, MoveSet> all;
 

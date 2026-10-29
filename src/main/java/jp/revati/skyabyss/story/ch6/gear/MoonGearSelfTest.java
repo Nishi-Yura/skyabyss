@@ -39,7 +39,7 @@ import net.minecraft.world.item.component.ItemAttributeModifiers;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.common.util.FakePlayer;
 
-// 六章「月」の装備の自己テスト (SKYABYSS_SELFTEST=1、段 "moon gear")。docs/design/03 の 12.2。
+// 六章「月」の装備の自己テスト (SKYABYSS_SELFTEST=1、段 "moon gear")。docs/design/03 の 12.2。6 職それぞれにレアとヒロイック
 //  - 表: 図鑑 11 品と涙・素材 3 つが登録され、由来が月、階級と必要 Lv (エピック以下 50・ヒロイック以上 52)、強化の燃料が月の欠片
 //  - 強さの曲線: 武器の攻撃力・速さ、+0 / +10 が月の目安 ±5% (ヒロイックは 1.10 倍まで)、深淵の段から逆転しない。鎧 26 / 16 (+4 で 20)
 //  - 一式・固有効果: 4 部位の落下 ×0.5、天秤の向き、背の向き
@@ -91,14 +91,21 @@ public final class MoonGearSelfTest {
     // ---------------------------------------------------------------- 表
     private static void table(List<String> f) {
         check(f, TitanGearSets.get(MoonGear.DUNGEON) == MoonGear.SET, "moon set is not registered in TitanGearSets");
-        check(f, MoonGear.SET.collection().size() == 11 && MoonGear.SET.exclusives().equals(List.of(MoonGear.BLADE, MoonGear.RING)),
-                "moon codex should hold 11 items with 2 exclusives: " + MoonGear.SET.collection());
+        check(f, MoonGear.SET.collection().size() == 12 && MoonGear.SET.exclusives().equals(List.of(MoonGear.BLADE, MoonGear.RING)),
+                "moon codex should hold 12 items with 2 exclusives: " + MoonGear.SET.collection());
+        // 別枠のヒロイック 5 本: 図鑑に入れず、ヒロイック・Lv 52
+        for (String id : MoonGear.HEROICS) {
+            check(f, TitanGearSet.registered(id) && !MoonGear.SET.collection().contains(id), id + " should be registered and outside the codex");
+            Item it = item(id);
+            check(f, it instanceof ModGear g && g.tier() == GearTier.HEROIC && g.dungeon().equals(MoonGear.DUNGEON) && GearLevel.required(it) == 52,
+                    id + " should be a Lv 52 heroic moon weapon");
+        }
         for (String id : MoonGear.SET.collection()) {
             check(f, TitanGearSet.registered(id), id + " is not registered");
             Item it = item(id);
             check(f, it instanceof ModGear g && g.dungeon().equals(MoonGear.DUNGEON), id + " is not moon gear");
             boolean ex = MoonGear.SET.isExclusive(id);
-            GearTier want = ex ? GearTier.HEROIC : it instanceof ArmorItem ? GearTier.RARE : GearTier.EPIC;
+            GearTier want = ex ? GearTier.HEROIC : GearTier.RARE;
             check(f, it instanceof ModGear g && g.tier() == want, id + " has the wrong tier (want " + want.key + ")");
             int lv = ex ? 52 : 50;
             check(f, GearLevel.required(it) == lv, id + " requires Lv " + GearLevel.required(it) + " (want " + lv + ")");
@@ -130,6 +137,11 @@ public final class MoonGearSelfTest {
 
     private static void curve(List<String> f, List<String> notes) {
         Object[][] weapons = {
+                {MoonGear.SWORD, MoonGear.SWORD_ATTACK, MoonGear.SWORD_SPEED},
+                {MoonGear.FULL_HAMMER, MoonGear.FULL_HAMMER_ATTACK, MoonGear.FULL_HAMMER_SPEED},
+                {MoonGear.NEW_STAFF, MoonGear.NEW_STAFF_ATTACK, MoonGear.NEW_STAFF_SPEED},
+                {MoonGear.UMBRA_DAGGER, MoonGear.UMBRA_ATTACK, MoonGear.UMBRA_SPEED},
+                {MoonGear.HALO_BELL, MoonGear.HALO_ATTACK, MoonGear.HALO_SPEED},
                 {MoonGear.HAMMER, MoonGear.HAMMER_ATTACK, MoonGear.HAMMER_SPEED},
                 {MoonGear.STAFF, MoonGear.STAFF_ATTACK, MoonGear.STAFF_SPEED},
                 {MoonGear.DAGGER, MoonGear.DAGGER_ATTACK, MoonGear.DAGGER_SPEED},
@@ -142,28 +154,41 @@ public final class MoonGearSelfTest {
         }
         var st = MoonGear.STAGE;
         var ab = AbyssGear.STAGE;
-        String[] names = {"scale hammer", "tide staff", "crescent dagger", "starlight bell", "waning blade"};
+        String[] names = {"scale hammer", "tide staff", "crescent dagger", "starlight bell", "waning blade", "light sword", "full hammer",
+                "new staff", "umbra dagger", "halo bell"};
+        boolean[] heroic = {false, false, false, false, true, false, true, true, true, true};
         double[][] dps = {
                 {MoonGear.hammerDps(0), MoonGear.hammerDps(10)},
                 {MoonGear.staffDps(0), MoonGear.staffDps(10)},
                 {MoonGear.daggerDps(0), MoonGear.daggerDps(10)},
                 {MoonGear.bellDps(0), MoonGear.bellDps(10)},
-                {MoonGear.bladeDps(0), MoonGear.bladeDps(10)}};
+                {MoonGear.bladeDps(0), MoonGear.bladeDps(10)},
+                {MoonGear.swordDps(0), MoonGear.swordDps(10)},
+                {MoonGear.fullHammerDps(0), MoonGear.fullHammerDps(10)},
+                {MoonGear.newStaffDps(0), MoonGear.newStaffDps(10)},
+                {MoonGear.umbraDps(0), MoonGear.umbraDps(10)},
+                {MoonGear.haloDps(0), MoonGear.haloDps(10)}};
         for (int i = 0; i < dps.length; i++) {
             double d0 = dps[i][0];
             double d10 = dps[i][1];
-            double top = i == 4 ? 1.10 : 1.05;
+            double top = heroic[i] ? 1.10 : 1.05;
+            // ヒロイックは同じ職のレアより強い (レアの目安の上限 1.05 倍を越える)
+            check(f, !heroic[i] || d0 > st.dps0() * 1.0, names[i] + " heroic +0 " + fmt(d0) + " is not above the stage");
             notes.add(names[i] + " dps +0 / +10 = " + fmt(d0) + " / " + fmt(d10));
             check(f, d0 >= st.dps0() * 0.95 && d0 <= st.dps0() * top, names[i] + " +0 " + fmt(d0) + " is off the moon stage " + st.dps0());
             check(f, d10 >= st.dps10() * 0.95 && d10 <= st.dps10() * top, names[i] + " +10 " + fmt(d10) + " is off the moon stage " + st.dps10());
             check(f, d0 >= ab.dps0() * 1.1 && d0 <= ab.dps10(), names[i] + " +0 " + fmt(d0) + " should sit between abyss +0 x1.1 and abyss +10");
             check(f, d10 > ab.dps10(), names[i] + " +10 " + fmt(d10) + " should beat abyss +10 " + ab.dps10());
         }
-        // 弓は残像の矢 (40%) 込みで近接の 0.85 倍の目安
+        // 弓は残像の矢 (40%)・落ちる星 (40%) 込みで近接の 0.85 倍の目安 (レア ±5%、ヒロイックは 1.10 倍まで)
         var bow = (jp.revati.skyabyss.item.ChapterBowItem) item(MoonGear.BOW);
+        var star = (jp.revati.skyabyss.item.ChapterBowItem) item(MoonGear.STARFALL_BOW);
         double b0 = bow.dps(0) * (1 + MoonGear.BOW_ECHO);
-        notes.add("waning bow dps +0 / +10 (with echo) = " + fmt(b0) + " / " + fmt(bow.dps(10) * (1 + MoonGear.BOW_ECHO)));
-        check(f, b0 >= st.dps0() * 0.85 * 0.9 && b0 <= st.dps0() * 1.1, "waning bow +0 " + fmt(b0) + " is off the ranged target");
+        double s0 = star.dps(0) * (1 + MoonGear.STARFALL_SHARE);
+        double ranged = st.dps0() * 0.85;
+        notes.add("bows +0 (with echo / star): waning " + fmt(b0) + ", starfall " + fmt(s0) + " (ranged target " + fmt(ranged) + ")");
+        check(f, b0 >= ranged * 0.95 && b0 <= ranged * 1.05, "waning bow +0 " + fmt(b0) + " is off the ranged target " + fmt(ranged));
+        check(f, s0 > b0 && s0 <= ranged * 1.10, "starfall bow +0 " + fmt(s0) + " should beat the waning bow and stay within x1.10");
         check(f, st.level() > ab.level() && st.dps0() > ab.dps0() && st.dps10() > ab.dps10() && st.armor() > ab.armor() && st.toughness() > ab.toughness(),
                 "the moon stage should grow past the abyss stage");
         double defense = 0;
@@ -226,12 +251,21 @@ public final class MoonGearSelfTest {
         MoonGearLoot.Roll roll = MoonGearLoot.rollCore(c, 0, random, TitanGearSet::registered, stacks);
         check(f, roll.core() && c.firstCleared && count(stacks, MoonGearSetup.CORE.get()) == 1, "the first core clear should give a moon heart");
         check(f, count(stacks, MoonGearSetup.RESONANCE_SHARD.get()) >= 2, "the core should give 2 resonance shards");
+        // 別枠のヒロイック: 一本ずつ 2% (段 5 で 3%)
+        int hero = 0;
+        int hero5 = 0;
+        for (int i = 0; i < 20000; i++) {
+            hero += MoonGearLoot.heroicDrops(0, random, TitanGearSet::registered).size();
+            hero5 += MoonGearLoot.heroicDrops(5, random, TitanGearSet::registered).size();
+        }
+        notes.add("heroic drops per core clear: tier 0 " + fmt(hero / 20000.0) + ", tier 5 " + fmt(hero5 / 20000.0));
+        check(f, hero > 1600 && hero < 2400 && hero5 > hero, "heroic drops should be about 0.1 per clear: " + hero + " / 20000");
         int total = 0;
         int worst = 0;
         for (int i = 0; i < 4000; i++) {
             TitanMemoryData.Record s = new TitanMemoryData.Record();
             int k = 0;
-            while (MoonGear.SET.collected(s) < 11 && k < 200) {
+            while (MoonGear.SET.collected(s) < 12 && k < 200) {
                 MoonGearLoot.rollCore(s, 0, random, TitanGearSet::registered, new ArrayList<>());
                 k++;
             }
@@ -297,8 +331,15 @@ public final class MoonGearSelfTest {
             check(f, ja.containsKey("item.skyabyss." + path) && en.containsKey("item.skyabyss." + path), "name missing (ja/en): " + path);
             check(f, ja.containsKey("item.skyabyss." + path + ".desc") || path.startsWith("moon_walker_"), "desc missing: " + path);
         }
-        for (String w : List.of("moon_scale_hammer:rare", "moon_tide_staff:rare", "moon_waning_bow:rare", "moon_waning_bow:rare_pull2",
-                "moon_crescent_dagger:rare", "moon_starlight_bell_staff:rare", "moon_waning_blade:legend")) {
+        all.addAll(MoonGear.HEROICS);
+        for (String id : MoonGear.HEROICS) {
+            String path = id.substring(id.indexOf(':') + 1);
+            check(f, exists(a + "models/item/" + path + ".json") && java.util.Arrays.equals(pngSize(a + "textures/item/" + path + ".png"), new int[] {32, 32})
+                    && ja.containsKey("item.skyabyss." + path + ".desc") && en.containsKey("item.skyabyss." + path), "heroic assets missing: " + path);
+        }
+        for (String w : List.of("moon_light_sword:rare", "moon_scale_hammer:rare", "moon_tide_staff:rare", "moon_waning_bow:rare", "moon_waning_bow:rare_pull2",
+                "moon_crescent_dagger:rare", "moon_starlight_bell_staff:rare", "moon_waning_blade:legend", "moon_full_hammer:legend", "moon_new_staff:legend",
+                "moon_starfall_bow:legend", "moon_starfall_bow:legend_pull2", "moon_umbra_dagger:legend", "moon_halo_bell_staff:legend")) {
             String[] p = w.split(":");
             check(f, exists(a + "lowpoly/items/" + p[0] + "/" + p[1] + ".json"), "low-poly mesh missing: " + w);
             check(f, exists(a + "weapon_moves/" + p[0] + ".json") || p[0].endsWith("_bow"), "weapon moves missing: " + p[0]);

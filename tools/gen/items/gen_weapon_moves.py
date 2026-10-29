@@ -651,7 +651,12 @@ for _item, _src, _label in (("shrine_staff", "abyss_bell_staff", "宿り木の�
                             ("moon_tide_staff", "abyss_bell_staff", "満ち引きの杖: 掲げて溜め、地を突く"),
                             ("moon_crescent_dagger", "waterway_fang", "欠け月の短剣: 右上から左下へ、返して X、突き抜ける"),
                             ("moon_starlight_bell_staff", "abyss_bell_staff", "星灯りの鈴杖: 掲げて溜め、地を突いて鐘を鳴らす"),
-                            ("moon_waning_blade", "whalebone_greatsword", "残月の太刀: 大きく薙ぎ、振り下ろす")):
+                            ("moon_waning_blade", "whalebone_greatsword", "残月の太刀: 大きく薙ぎ、振り下ろす"),
+                            ("moon_light_sword", "whalebone_greatsword", "月光の長剣: 大きく薙ぎ、振り下ろす"),
+                            ("moon_full_hammer", "smith_hammer", "望月の大鎚: 振りかぶって打ち下ろす"),
+                            ("moon_new_staff", "abyss_bell_staff", "朔の杖: 掲げて溜め、地を突く"),
+                            ("moon_umbra_dagger", "waterway_fang", "朔影の短剣: 右上から左下へ、返して X、突き抜ける"),
+                            ("moon_halo_bell_staff", "abyss_bell_staff", "月暈の鈴杖: 掲げて溜め、地を突いて鐘を鳴らす")):
     W[_item] = _copy.deepcopy(W[_src])
     W[_item]["item"] = _item
     W[_item]["label"] = _label
@@ -798,7 +803,9 @@ def main():
                         ("abyss_lamp_staff", "abyss_bell_staff"),
                         ("abyss_toll_bell_staff", "abyss_bell_staff"),
                         ("moon_scale_hammer", "smith_hammer"), ("moon_tide_staff", "abyss_bell_staff"), ("moon_crescent_dagger", "waterway_fang"),
-                        ("moon_starlight_bell_staff", "abyss_bell_staff"), ("moon_waning_blade", "whalebone_greatsword")):
+                        ("moon_starlight_bell_staff", "abyss_bell_staff"), ("moon_waning_blade", "whalebone_greatsword"),
+                        ("moon_light_sword", "whalebone_greatsword"), ("moon_full_hammer", "smith_hammer"), ("moon_new_staff", "abyss_bell_staff"),
+                        ("moon_umbra_dagger", "waterway_fang"), ("moon_halo_bell_staff", "abyss_bell_staff")):
         label = W[_item]["label"]
         W[_item] = _copy.deepcopy(W[_src])
         W[_item]["item"] = _item

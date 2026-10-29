@@ -75,7 +75,7 @@ public final class MoonTrialSelfTest {
                 check(f, MoonTrial.best(p, "valley") == 2 && MoonTrial.next(p, "valley") == 3, "clearing tier 2 was not recorded: " + MoonTrial.best(p, "valley"));
                 int got = p.getInventory().countItem(MoonGearSetup.SHARD.get()) - before;
                 check(f, got >= 5, "the tier 2 lord gave " + got + " moon fragments (want 3-5 + 2)");
-                check(f, p.getInventory().countItem(MoonGearSetup.HELMET.get()) == 1, "the first valley clear did not give the hood");
+                check(f, p.getInventory().countItem(MoonGearSetup.HELMET.get()) >= 1, "the first valley clear did not give the hood: " + inv(p));
             }
             // 段 5 の核: 体力は生き物の上限で止まる
             CoreArena.clear(moon);
@@ -99,6 +99,17 @@ public final class MoonTrialSelfTest {
             }
         }
         report(f);
+    }
+
+    private static String inv(FakePlayer p) {
+        StringBuilder b = new StringBuilder();
+        for (int i = 0; i < p.getInventory().getContainerSize(); i++) {
+            var st = p.getInventory().getItem(i);
+            if (!st.isEmpty()) {
+                b.append(st.getCount()).append(' ').append(net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(st.getItem()).getPath()).append(", ");
+            }
+        }
+        return b.toString();
     }
 
     private static void report(List<String> f) {

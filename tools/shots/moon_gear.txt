@@ -1,4 +1,4 @@
-# 六章「月」の装備 (docs/design/03 の 12.2): 武器 6 本の一人称と三人称の正面、月渡りの装束を着た姿、月の暦のブロック
+# 六章「月」の装備 (docs/design/03 の 12.2): 武器 12 本 (6 職のレアとヒロイック)の一人称と三人称の正面、月渡りの装束を着た姿、月の暦のブロック
 # bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/moon_gear.txt -PshotsName=moon_gear
 world shots flat
 size 960 540
@@ -17,6 +17,96 @@ close
 wait 20
 swingpose off
 mainhand right
+perspective first
+hud on
+cmd item replace entity @s weapon.mainhand with skyabyss:moon_light_sword
+close
+wait 30
+chat clear
+shot fp_moon_light_sword
+perspective front
+hud off
+wait 8
+shot tp_moon_light_sword
+bodyyaw 70
+wait 6
+shot side_moon_light_sword
+bodyyaw 0
+perspective first
+hud on
+cmd item replace entity @s weapon.mainhand with skyabyss:moon_full_hammer
+close
+wait 30
+chat clear
+shot fp_moon_full_hammer
+perspective front
+hud off
+wait 8
+shot tp_moon_full_hammer
+bodyyaw 70
+wait 6
+shot side_moon_full_hammer
+bodyyaw 0
+perspective first
+hud on
+cmd item replace entity @s weapon.mainhand with skyabyss:moon_new_staff
+close
+wait 30
+chat clear
+shot fp_moon_new_staff
+perspective front
+hud off
+wait 8
+shot tp_moon_new_staff
+bodyyaw 70
+wait 6
+shot side_moon_new_staff
+bodyyaw 0
+perspective first
+hud on
+cmd item replace entity @s weapon.mainhand with skyabyss:moon_starfall_bow
+close
+wait 30
+chat clear
+shot fp_moon_starfall_bow
+perspective front
+hud off
+wait 8
+shot tp_moon_starfall_bow
+bodyyaw 70
+wait 6
+shot side_moon_starfall_bow
+bodyyaw 0
+perspective first
+hud on
+cmd item replace entity @s weapon.mainhand with skyabyss:moon_umbra_dagger
+close
+wait 30
+chat clear
+shot fp_moon_umbra_dagger
+perspective front
+hud off
+wait 8
+shot tp_moon_umbra_dagger
+bodyyaw 70
+wait 6
+shot side_moon_umbra_dagger
+bodyyaw 0
+perspective first
+hud on
+cmd item replace entity @s weapon.mainhand with skyabyss:moon_halo_bell_staff
+close
+wait 30
+chat clear
+shot fp_moon_halo_bell_staff
+perspective front
+hud off
+wait 8
+shot tp_moon_halo_bell_staff
+bodyyaw 70
+wait 6
+shot side_moon_halo_bell_staff
+bodyyaw 0
 perspective first
 hud on
 cmd item replace entity @s weapon.mainhand with skyabyss:moon_scale_hammer

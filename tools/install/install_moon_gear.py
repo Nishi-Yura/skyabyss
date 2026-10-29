@@ -23,7 +23,8 @@ sys.path.insert(0, str(HERE.parent / "lib"))
 import install_abyss_gear as G  # noqa: E402
 
 SRC = G.SRC / "armor_moon"
-WEAPONS = ["moon_scale_hammer", "moon_tide_staff", "moon_waning_bow", "moon_crescent_dagger", "moon_starlight_bell_staff", "moon_waning_blade"]
+WEAPONS = ["moon_light_sword", "moon_scale_hammer", "moon_tide_staff", "moon_waning_bow", "moon_crescent_dagger", "moon_starlight_bell_staff",
+           "moon_waning_blade", "moon_full_hammer", "moon_new_staff", "moon_starfall_bow", "moon_umbra_dagger", "moon_halo_bell_staff"]
 
 
 def install_armor():

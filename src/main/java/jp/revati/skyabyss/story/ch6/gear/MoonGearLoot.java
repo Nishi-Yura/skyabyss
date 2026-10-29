@@ -83,7 +83,18 @@ public final class MoonGearLoot {
     }
 
     // ---------------------------------------------------------------- 月の核 (と核の挑戦)
-    public record Roll(List<String> pieces, int fragments, boolean core, boolean tear) {
+    public record Roll(List<String> pieces, int fragments, boolean core, boolean tear, List<String> heroics) {
+    }
+
+    // 別枠のヒロイック 5 本: 一本ずつ HEROIC_CHANCE × (1 + 0.1 × 段)。図鑑の周回の数には入らない (巨神のヒロイック武器と同じ)
+    public static List<String> heroicDrops(int tier, RandomSource random, Predicate<String> available) {
+        List<String> out = new ArrayList<>();
+        for (String id : MoonGear.HEROICS) {
+            if (available.test(id) && random.nextFloat() < MoonGear.HEROIC_CHANCE * (1 + 0.1 * tier)) {
+                out.add(id);
+            }
+        }
+        return out;
     }
 
     public static Roll rollCore(TitanMemoryData.Record r, int tier, RandomSource random, Predicate<String> available, List<ItemStack> stacks) {
@@ -112,7 +123,12 @@ public final class MoonGearLoot {
         }
         MoonGear.SET.record(r, got.pieces());
         r.firstCleared = true;
-        return new Roll(got.pieces(), fragments, core, tear);
+        List<String> heroics = new ArrayList<>();
+        for (String id : heroicDrops(tier, random, available)) {
+            addGear(stacks, id, random);
+            heroics.add(id);
+        }
+        return new Roll(got.pieces(), fragments, core, tear, heroics);
     }
 
     public static void core(ServerLevel level, List<ServerPlayer> players, int tier) {

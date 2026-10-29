@@ -23,8 +23,8 @@ import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 
 // 月の装備の品 (docs/design/03 の 12.2)。効果はどれも MoonGearEvents が見る (品の種類と ID で)。
-//   Weapon  近接の職の武器 5 本 (鎚・杖・短剣・鈴杖・太刀)。章の武器と同じ SwordItem の作り (強化・特性・持ち方は共通の仕組み)
-//   Bow     下弦の弓 (矢 ×2.4)
+//   Weapon  近接の職の武器 10 本 (6 職のレアとヒロイック。弓を除く)。章の武器と同じ SwordItem の作り (強化・特性・持ち方は共通の仕組み)
+//   Bow     下弦の弓 (レア、矢 ×2.0)・星落ちの弓 (ヒロイック、矢 ×2.1)
 //   Trinket 満月の環 (装飾の枠)
 //   Tear    月の涙 (飲むと 30 秒、次の傷を一度 0 に)
 public final class MoonGearItems {
@@ -43,8 +43,8 @@ public final class MoonGearItems {
     }
 
     public static class Bow extends ChapterBowItem {
-        public Bow(Item.Properties properties, double multiplier, String descKey) {
-            super(properties, MoonGear.DUNGEON, multiplier, descKey);
+        public Bow(Item.Properties properties, double multiplier, GearTier tier, String descKey) {
+            super(properties, MoonGear.DUNGEON, multiplier, tier, descKey);
         }
 
         @Override
