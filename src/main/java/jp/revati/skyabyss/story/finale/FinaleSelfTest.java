@@ -81,6 +81,7 @@ public final class FinaleSelfTest {
             check(f, FinaleSelfTest.class.getResource("/assets/skyabyss/story_reels/" + FinaleGate.REEL + ".json") != null, "reel " + FinaleGate.REEL + " is missing");
             isle1(cloud, p, f);
             isle2(cloud, p, f);
+            isle3(cloud, p, f);
         } catch (RuntimeException ex) {
             SkyAbyss.LOGGER.error("SELFTEST cloudsea crashed", ex);
             f.add("crashed: " + ex);
@@ -249,9 +250,83 @@ public final class FinaleSelfTest {
         check(f, LampArena.lords(cloud).isEmpty(), "clearing the lighthouse arena left the eye");
     }
 
+    // 島 3「炉の島」(50 の 4.2.3): 光の橋・関所 / 炉 3・扉 / 戻り石の組と巻き戻り (主の間の輪は段 2 まで石) / 巻き戻りの打ち (同じ所でもう一度) / 主
+    static void isle3(ServerLevel cloud, FakePlayer p, List<String> f) {
+        check(f, FinaleWorld.version(cloud.getServer()) >= 4, "island 3 was not poured (version " + FinaleWorld.version(cloud.getServer()) + ")");
+        FinaleTerrain t = ForgeIsle.terrain();
+        BlockPos s = t.mark("bridge_gate");
+        BlockPos e = t.mark("arrive");
+        int gaps = 0;
+        for (int z = s.getZ(); z >= e.getZ(); z--) {
+            boolean floor = false;
+            for (int y = 126; y >= 95; y--) {
+                BlockPos q = new BlockPos(s.getX(), y, z);
+                cloud.getChunk(q);
+                if (!cloud.getBlockState(q).getCollisionShape(cloud, q).isEmpty()) {
+                    floor = cloud.getBlockState(q.above()).getCollisionShape(cloud, q.above()).isEmpty()
+                            && cloud.getBlockState(q.above(2)).getCollisionShape(cloud, q.above(2)).isEmpty();
+                    break;
+                }
+            }
+            gaps += floor ? 0 : 1;
+        }
+        check(f, gaps == 0, "the light bridge has " + gaps + " gaps between the lighthouse and island 3");
+        for (String k : List.of("w", "e", "n")) {
+            check(f, cloud.getBlockState(t.mark("forge_" + k)).getBlock() instanceof net.minecraft.world.level.block.BlastFurnaceBlock, "forge " + k + " is missing");
+            check(f, ForgeIsle.groups().get(k).size() >= 9, "broken bridge " + k + " has too few rewind stones: " + ForgeIsle.groups().get(k).size());
+        }
+        check(f, ForgeIsle.groups().get("arena").size() > 100, "the arena ring has too few rewind stones: " + ForgeIsle.groups().get("arena").size());
+        for (String k : List.of("arena_entry", "door_front", "arrive", "frag_w", "frag_e", "frag_n")) {
+            BlockPos q = t.mark(k);
+            check(f, cloud.getBlockState(q.below()).isFaceSturdy(cloud, q.below(), net.minecraft.core.Direction.UP) && cloud.getBlockState(q).isAir(), k + " is not standable");
+        }
+        // 巻き戻り: 石の相は時刻どおり、主の間の輪は段 2 まで石
+        ForgeIsle.arenaRewinds = false;
+        ForgeIsle.update(cloud, true);
+        BlockPos gw = ForgeIsle.groups().get("w").get(0);
+        check(f, cloud.getBlockState(gw).getValue(RewindStoneBlock.PHASE) == ForgeIsle.phaseOf(cloud, "w"), "a broken bridge stone is not in its group's phase");
+        BlockPos ga = ForgeIsle.groups().get("arena").get(0);
+        check(f, RewindStoneBlock.solid(cloud.getBlockState(ga)), "the arena ring is not stone before the rewinder's second phase");
+        // 関所: 灯の島を終えていない人は灯台の上の入口へ戻る
+        Quests.forgetAll(p);
+        p.moveTo(s.getX() + 0.5, s.getY(), s.getZ() - 3 + 0.5, 0f, 0f);
+        ForgeIsle.gate(p);
+        check(f, p.blockPosition().closerThan(LampIsle.mark("arena_entry"), 2), "the light bridge let someone through before the lamp lord");
+        // 扉
+        check(f, !ForgeIsle.doorOpen(p), "the great forge door opened without the quest");
+        Quests.start(p, ForgeIsle.QUEST);
+        QuestLog.Entry qe = QuestLog.of(p).entry(ForgeIsle.QUEST);
+        check(f, qe != null && !ForgeIsle.doorOpen(p), "the great forge door opened before the three forges");
+        if (qe != null) {
+            qe.stage = 2;
+            check(f, ForgeIsle.doorOpen(p), "the great forge door did not open at the door stage");
+        }
+        Quests.forgetAll(p);
+        // 巻き戻りの打ち: 印の中だけが燃える (円と扇)
+        BlockPos en = t.mark("arena_entry");
+        net.minecraft.world.phys.Vec3 at = en.getCenter();
+        Echoes.clear();
+        Echoes.circle(cloud, at, 2.0, 60, 6f, null);
+        Echoes.cone(cloud, at.add(0, 0, -4), new net.minecraft.world.phys.Vec3(0, 0, 1), 5.0, 60, 60, 6f, null);
+        check(f, Echoes.pending(cloud) == 2, "the echoes were not waiting");
+        check(f, Echoes.covering(cloud, at.add(1.2, 0, 0)) == 2 && Echoes.covering(cloud, at.add(5, 0, 0)) == 0
+                && Echoes.covering(cloud, at.add(0, 0, -8)) == 0, "an echo covers the wrong place");
+        Echoes.fireAll(cloud);
+        check(f, Echoes.pending(cloud) == 0, "fired echoes were left waiting");
+        // 素材と主
+        for (String id : List.of("ash_striker", "backfire", "rewinder")) {
+            check(f, FinaleSelfTest.class.getResource("/assets/skyabyss/animations/entity/" + id + ".animation.json") != null
+                    && FinaleSelfTest.class.getResource("/assets/skyabyss/textures/lowpoly/" + id + "_s2.png") != null, "assets of " + id + " are missing");
+        }
+        jp.revati.skyabyss.story.finale.mob.Rewinder lord = ForgeArena.summon(cloud);
+        check(f, lord != null && lord.blockPosition().closerThan(t.mark("lord_spawn"), 2) && lord.getMaxHealth() > 900, "the rewinder did not appear at its spot");
+        ForgeArena.clear(cloud);
+        check(f, ForgeArena.lords(cloud).isEmpty() && !ForgeIsle.arenaRewinds, "clearing the forge arena left the rewinder");
+    }
+
     static void report(List<String> f) {
         if (f.isEmpty()) {
-            SkyAbyss.LOGGER.info("SELFTEST cloudsea PASSED (dimension, arrival island and marks, cloud layer, fall rescue, gate condition, quest and reel; island 1 bridge, bells, bell clouds ring/silence, tower door, foes, lord and arena floor; island 2 light bridge and gate, lamps, door, beam and shade, moth light, eye)");
+            SkyAbyss.LOGGER.info("SELFTEST cloudsea PASSED (dimension, arrival island and marks, cloud layer, fall rescue, gate condition, quest and reel; island 1 bridge, bells, bell clouds ring/silence, tower door, foes, lord and arena floor; island 2 light bridge and gate, lamps, door, beam and shade, moth light, eye; island 3 light bridge and gate, forges, door, rewind stones, echoes, rewinder)");
         } else {
             f.forEach(m -> SkyAbyss.LOGGER.error("SELFTEST cloudsea FAILED: {}", m));
         }

@@ -12,7 +12,7 @@
   animations/entity/<id>.animation.json, models/item/<id>_spawn_egg.json
   assets/skyabyss_finale/sounds.json            音の出来事 (既存の音の別名。字幕は lang)
 
-島 1「鐘の島」(2026-10-30): 鐘の亡者・霞鳥・最後の鐘守。島 2「灯の島」(2026-10-30): 網打ち・灯蛾・灯守の目。
+島 1「鐘の島」(2026-10-30): 鐘の亡者・霞鳥・最後の鐘守。島 2「灯の島」(2026-10-30): 網打ち・灯蛾・灯守の目。島 3「炉の島」(2026-10-30): 灰の打ち手・戻り火・戻し手。
 回転の約束は gen_moon_mobs と同じ (kf の x が負 = 前へ傾く)。
 """
 import importlib.util
@@ -34,7 +34,8 @@ A = os.path.join(ROOT, "src", "main", "resources", "assets", "skyabyss")
 AF = os.path.join(ROOT, "src", "main", "resources", "assets", "skyabyss_finale")
 ROUGH = os.path.join(ROOT, "docs", "review", "cloud_roughs")
 
-CHOICE = {"bell_mourner": "a", "mist_bird": "a", "last_bellkeeper": "a", "net_caster": "a", "lamp_moth": "a", "lamp_eye": "a"}
+CHOICE = {"bell_mourner": "a", "mist_bird": "a", "last_bellkeeper": "a", "net_caster": "a", "lamp_moth": "a", "lamp_eye": "a",
+          "ash_striker": "a", "backfire": "a", "rewinder": "a"}
 
 
 # ---------------------------------------------------------------- 鐘の亡者 (よろよろ歩く・鐘を振り上げて鳴らす)
@@ -194,8 +195,80 @@ def lamp_eye():
             p + "rain": once(1.2, rain), p + "call": once(2.0, call), p + "hurt": once(0.22, hurt_bones("cage")), p + "death": once(2.4, death, True)}
 
 
+# ---------------------------------------------------------------- 灰の打ち手 (歩く・大槌の振り下ろし)
+def ash_striker():
+    p = "animation.ash_striker."
+    idle = {"body": bone([S(0, 2, 40), "0", S(90, 2, 30)]), "head": bone([S(90, 4, 30), S(0, 8, 20), "0"]),
+            "arm_r": bone([S(0, 3, 40), "0", "0"])}
+    walk = {"leg_l": bone([S(0, 20, 200), "0", "0"]), "leg_r": bone([S(180, 20, 200), "0", "0"]),
+            "body": bone(["0", "0", S(0, 4, 200)], [0, S(0, 0.5, 400), 0]), "arm_l": bone([S(180, 14, 200), "0", "0"])}
+    # 振り下ろし (1.4): 0.8 まで頭上へ振りかぶる (予告)、0.9 で叩きつける
+    slam = {"arm_r": bone(kf({0: (0, 0, 0), 0.8: (-160, 0, 12), 0.9: (-40, 0, 5), 1.2: (-40, 0, 5), 1.4: (0, 0, 0)})),
+            "arm_l": bone(kf({0: (0, 0, 0), 0.8: (-140, 0, -25), 0.9: (-50, 0, -10), 1.2: (-50, 0, -10), 1.4: (0, 0, 0)})),
+            "hammer": bone(kf({0: (0, 0, 0), 0.8: (40, 0, 0), 0.9: (70, 0, 0), 1.2: (70, 0, 0), 1.4: (0, 0, 0)})),
+            "body": bone(kf({0: (0, 0, 0), 0.8: (-12, 0, 0), 0.9: (18, 0, 0), 1.2: (18, 0, 0), 1.4: (0, 0, 0)})),
+            "head": bone(kf({0: (0, 0, 0), 0.8: (-10, 0, 0), 0.9: (8, 0, 0), 1.4: (0, 0, 0)}))}
+    death = {"body": bone(kf({0: (0, 0, 0), 0.6: (30, 0, 0), 1.2: (85, 0, 5)}), kf({0: (0, 0, 0), 1.2: (0, -8, 0)}, False)),
+             "arm_r": bone(kf({0: (0, 0, 0), 0.6: (-40, 0, 20)}))}
+    return {p + "idle": loop(6.0, idle), p + "walk": loop(1.8, walk), p + "slam": once(1.4, slam), p + "hurt": once(0.22, hurt_bones()),
+            p + "death": once(1.2, death, True)}
+
+
+# ---------------------------------------------------------------- 戻り火 (漂う・火の玉を投げる)
+def backfire():
+    p = "animation.backfire."
+    idle = {"body": bone([S(0, 5, 90), S(90, 8, 60), S(0, 4, 70)], [0, S(0, 0.8, 90), 0]), "tail": bone([S(0, 14, 180), S(90, 18, 140), "0"]),
+            "core": dict(bone(None), scale=["1 + %s" % S(0, 0.08, 300)] * 3)}
+    walk = {"body": bone([S(0, 8, 160), "0", "0"]), "tail": bone([S(0, 20, 260), "0", "0"])}
+    # 投げる (1.2): 0.8 まで芯が膨らむ (予告)、0.85 で前へ吐く
+    throw = {"core": dict(bone(None), scale=M.scale({0: (1, 1, 1), 0.8: (1.4, 1.4, 1.4), 0.85: (0.8, 0.8, 0.8), 1.2: (1, 1, 1)})),
+             "body": bone(kf({0: (0, 0, 0), 0.8: (10, 0, 0), 0.85: (-25, 0, 0), 1.2: (0, 0, 0)})),
+             "tail": bone(kf({0: (0, 0, 0), 0.85: (30, 0, 0), 1.2: (0, 0, 0)}))}
+    death = {"body": bone(kf({0: (0, 0, 0), 0.6: (40, 0, 90), 1.0: (60, 0, 180)}), kf({0: (0, 0, 0), 1.0: (0, -8, 0)}, False)),
+             "core": dict(bone(None), scale=M.scale({0: (1, 1, 1), 0.4: (1.5, 1.5, 1.5), 0.6: (0.1, 0.1, 0.1)}))}
+    return {p + "idle": loop(2.0, idle), p + "walk": loop(1.2, walk), p + "throw": once(1.2, throw), p + "hurt": once(0.22, hurt_bones()),
+            p + "death": once(1.0, death, True)}
+
+
+# ---------------------------------------------------------------- 戻し手 (主)
+def rewinder():
+    p = "animation.rewinder."
+    # 背の歯車はいつも逆に回る (巻き戻し)
+    spin = "query.anim_time * -30"
+    idle = {"body": bone([S(0, 1.5, 30), "0", "0"], [0, S(0, 0.5, 30), 0]), "head": bone([S(90, 3, 25), S(0, 6, 18), "0"]),
+            "wheel": bone(["0", "0", spin]), "arm_l": bone([S(0, 3, 35), "0", "0"])}
+    walk = {"leg_l": bone([S(0, 18, 160), "0", "0"]), "leg_r": bone([S(180, 18, 160), "0", "0"]),
+            "body": bone(["0", "0", S(0, 2.5, 160)], [0, S(0, 0.6, 320), 0]), "wheel": bone(["0", "0", spin]),
+            "arm_l": bone([S(180, 10, 160), "0", "0"])}
+    # 打ち下ろし (2.0): 1.2 まで頭上へ振りかぶる (円の予告)、1.3 で叩きつける
+    slam = {"arm_r": bone(kf({0: (0, 0, 0), 1.2: (-165, 0, 10), 1.3: (-35, 0, 5), 1.7: (-35, 0, 5), 2.0: (0, 0, 0)})),
+            "hammer": bone(kf({0: (0, 0, 0), 1.2: (180, 0, 0), 1.3: (100, 0, 0), 1.7: (100, 0, 0), 2.0: (0, 0, 0)})),
+            "body": bone(kf({0: (0, 0, 0), 1.2: (-10, 0, 0), 1.3: (16, 0, 0), 1.7: (16, 0, 0), 2.0: (0, 0, 0)})),
+            "wheel": bone(kf({0: (0, 0, 0), 1.2: (0, 0, -90), 1.3: (0, 0, -100), 2.0: (0, 0, -120)}))}
+    # 薙ぎ (1.4): 0.9 まで右へひねる (扇の予告)、1.0 で左へ薙ぐ
+    sweep = {"arm_r": bone(kf({0: (0, 0, 0), 0.9: (-70, 70, 30), 1.0: (-70, -60, -10), 1.4: (0, 0, 0)})),
+             "arm_l": bone(kf({0: (0, 0, 0), 0.9: (-30, -30, -20), 1.0: (-30, 20, -10), 1.4: (0, 0, 0)})),
+             "body": bone(kf({0: (0, 0, 0), 0.9: (0, 35, 0), 1.0: (0, -30, 0), 1.4: (0, 0, 0)})),
+             "wheel": bone(kf({0: (0, 0, 0), 0.9: (0, 0, -60), 1.4: (0, 0, -90)}))}
+    # 足跡が燃える (1.6): 火箸で床を指し、歯車が大きく逆へ回る
+    prints = {"arm_l": bone(kf({0: (0, 0, 0), 0.5: (-60, 0, -10), 1.2: (-60, 0, -10), 1.6: (0, 0, 0)})),
+              "tongs": bone(kf({0: (0, 0, 0), 0.5: (-40, 0, 0), 1.2: (-40, 0, 0), 1.6: (0, 0, 0)})),
+              "head": bone(kf({0: (0, 0, 0), 0.5: (20, 0, 0), 1.2: (20, 0, 0), 1.6: (0, 0, 0)})),
+              "wheel": bone(kf({0: (0, 0, 0), 1.6: (0, 0, -360)}))}
+    # 呼ぶ (2.0): 槌を掲げる
+    call = {"arm_r": bone(kf({0: (0, 0, 0), 0.6: (-170, 0, 5), 1.6: (-170, 0, 5), 2.0: (0, 0, 0)})),
+            "hammer": bone(kf({0: (0, 0, 0), 0.6: (180, 0, 0), 1.6: (180, 0, 0), 2.0: (0, 0, 0)})),
+            "head": bone(kf({0: (0, 0, 0), 0.6: (-25, 0, 0), 1.6: (-25, 0, 0), 2.0: (0, 0, 0)})),
+            "wheel": bone(kf({0: (0, 0, 0), 2.0: (0, 0, -540)}))}
+    death = {"body": bone(kf({0: (0, 0, 0), 1.0: (14, 0, 0), 2.4: (75, 0, 8)}), kf({0: (0, 0, 0), 1.0: (0, -8, 0), 2.4: (0, -20, 0)}, False)),
+             "wheel": bone(kf({0: (0, 0, 0), 1.0: (0, 0, 40), 2.4: (30, 0, 90)}))}
+    return {p + "idle": loop(12.0, idle), p + "walk": loop(2.4, walk), p + "slam": once(2.0, slam), p + "sweep": once(1.4, sweep),
+            p + "prints": once(1.6, prints), p + "call": once(2.0, call), p + "hurt": once(0.22, hurt_bones()), p + "death": once(2.4, death, True)}
+
+
 ANIMS = {"bell_mourner": bell_mourner, "mist_bird": mist_bird, "last_bellkeeper": last_bellkeeper,
-         "net_caster": net_caster, "lamp_moth": lamp_moth, "lamp_eye": lamp_eye}
+         "net_caster": net_caster, "lamp_moth": lamp_moth, "lamp_eye": lamp_eye,
+         "ash_striker": ash_striker, "backfire": backfire, "rewinder": rewinder}
 
 
 # ---------------------------------------------------------------- 素材を入れる
@@ -283,6 +356,22 @@ SOUNDS = {
     "eye_rain": [ev("entity.firework_rocket.blast", 1.2, 0.9)],
     "eye_call": [ev("block.respawn_anchor.set_spawn", 1.2, 1.2)],
     "eye_roar": [ev("entity.elder_guardian.ambient", 0.6, 1.6)],
+    # 島 3「炉の島」
+    "rewind_tick": [ev("block.note_block.hat", 0.6, 0.5)],
+    "rewind_back": [ev("block.respawn_anchor.charge", 0.6, 0.7)],
+    "forge_lit": [ev("block.blastfurnace.fire_crackle", 0.8, 1.6)],
+    "echo_mark": [ev("block.fire.ambient", 1.2, 0.8)],
+    "echo_burst": [ev("entity.blaze.shoot", 0.7, 1.2)],
+    "striker_tell": [ev("block.anvil.use", 0.6, 0.7)],
+    "striker_slam": [ev("block.anvil.land", 0.7, 1.2)],
+    "backfire_tell": [ev("entity.blaze.ambient", 1.3, 0.7)],
+    "backfire_throw": [ev("item.firecharge.use", 0.8, 1.0)],
+    "rewinder_slam_tell": [ev("block.anvil.use", 0.4, 1.2)],
+    "rewinder_slam": [ev("entity.warden.attack_impact", 0.6, 1.4)],
+    "rewinder_sweep": [ev("entity.player.attack.sweep", 0.6, 1.2)],
+    "rewinder_prints": [ev("block.respawn_anchor.charge", 0.5, 1.2)],
+    "rewinder_call": [ev("block.anvil.land", 0.4, 1.4)],
+    "rewinder_roar": [ev("entity.ravager.roar", 0.5, 1.6)],
 }
 
 

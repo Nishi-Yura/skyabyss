@@ -89,6 +89,32 @@ def light_path_tex():
     return img
 
 
+def rewind_tex(phase):
+    """戻り石: 石の煉瓦に残り火の筋。0 = 灰の薄い影 (ほとんど透ける)・1 = 残り火の輪郭だけ・2 = 石・3 = 薄い石"""
+    N = 32
+    img = Image.new("RGBA", (N, N))
+    for y in range(N):
+        for x in range(N):
+            row = y // 8
+            mortar = y % 8 == 7 or (x + (8 if row % 2 else 0)) % 16 == 15
+            edge = x in (0, N - 1) or y in (0, N - 1)
+            vein = abs(((x * 0.6 + y) % 13) - 6.5) < 0.6 and hsh(x, y, 31) < 0.7
+            v = 0.42 + 0.1 * hsh(x // 2, y // 2, 30)
+            stone = (int(255 * v * 0.95), int(255 * v * 0.9), int(255 * v * 0.88))
+            ember = (255, 150, 60)
+            if phase == 0:
+                c, a = ((70, 64, 60), 40) if not edge else ((110, 90, 80), 70)
+            elif phase == 1:
+                c, a = (ember, 220) if edge or vein else ((90, 60, 40), 46)
+            else:
+                c = (60, 52, 48) if mortar else stone
+                if vein:
+                    c = (230, 120, 50)
+                a = 255 if phase == 2 else 150
+            img.putpixel((x, y), c + (a,))
+    return img
+
+
 def main():
     (A / "textures/block").mkdir(parents=True, exist_ok=True)
     cloud_tex().save(A / "textures/block/cloud.png")
@@ -116,6 +142,15 @@ def main():
     (A / "blockstates/light_path_slab.json").write_text(json.dumps({"variants": {
         "type=bottom": {"model": "skyabyss:block/light_path_slab"}, "type=top": {"model": "skyabyss:block/light_path_slab_top"},
         "type=double": {"model": "skyabyss:block/light_path"}}}, indent=2), encoding="utf-8")
+    variants = {}
+    for ph in range(4):
+        name = "rewind_stone_%d" % ph
+        rewind_tex(ph).save(A / ("textures/block/%s.png" % name))
+        (A / ("models/block/%s.json" % name)).write_text(json.dumps({
+            "parent": "minecraft:block/cube_all", "render_type": "minecraft:translucent",
+            "textures": {"all": "skyabyss:block/" + name, "particle": "skyabyss:block/rewind_stone_2"}}, indent=2), encoding="utf-8")
+        variants["phase=%d" % ph] = {"model": "skyabyss:block/" + name}
+    (A / "blockstates/rewind_stone.json").write_text(json.dumps({"variants": variants}, indent=2), encoding="utf-8")
     print("cloud assets written")
 
 

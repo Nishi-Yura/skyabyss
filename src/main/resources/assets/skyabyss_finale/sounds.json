@@ -317,5 +317,170 @@
         "volume": 1.6
       }
     ]
+  },
+  "rewind_tick": {
+    "subtitle": "subtitles.skyabyss_finale.rewind_tick",
+    "sounds": [
+      {
+        "name": "minecraft:block.note_block.hat",
+        "type": "event",
+        "pitch": 0.6,
+        "volume": 0.5
+      }
+    ]
+  },
+  "rewind_back": {
+    "subtitle": "subtitles.skyabyss_finale.rewind_back",
+    "sounds": [
+      {
+        "name": "minecraft:block.respawn_anchor.charge",
+        "type": "event",
+        "pitch": 0.6,
+        "volume": 0.7
+      }
+    ]
+  },
+  "forge_lit": {
+    "subtitle": "subtitles.skyabyss_finale.forge_lit",
+    "sounds": [
+      {
+        "name": "minecraft:block.blastfurnace.fire_crackle",
+        "type": "event",
+        "pitch": 0.8,
+        "volume": 1.6
+      }
+    ]
+  },
+  "echo_mark": {
+    "subtitle": "subtitles.skyabyss_finale.echo_mark",
+    "sounds": [
+      {
+        "name": "minecraft:block.fire.ambient",
+        "type": "event",
+        "pitch": 1.2,
+        "volume": 0.8
+      }
+    ]
+  },
+  "echo_burst": {
+    "subtitle": "subtitles.skyabyss_finale.echo_burst",
+    "sounds": [
+      {
+        "name": "minecraft:entity.blaze.shoot",
+        "type": "event",
+        "pitch": 0.7,
+        "volume": 1.2
+      }
+    ]
+  },
+  "striker_tell": {
+    "subtitle": "subtitles.skyabyss_finale.striker_tell",
+    "sounds": [
+      {
+        "name": "minecraft:block.anvil.use",
+        "type": "event",
+        "pitch": 0.6,
+        "volume": 0.7
+      }
+    ]
+  },
+  "striker_slam": {
+    "subtitle": "subtitles.skyabyss_finale.striker_slam",
+    "sounds": [
+      {
+        "name": "minecraft:block.anvil.land",
+        "type": "event",
+        "pitch": 0.7,
+        "volume": 1.2
+      }
+    ]
+  },
+  "backfire_tell": {
+    "subtitle": "subtitles.skyabyss_finale.backfire_tell",
+    "sounds": [
+      {
+        "name": "minecraft:entity.blaze.ambient",
+        "type": "event",
+        "pitch": 1.3,
+        "volume": 0.7
+      }
+    ]
+  },
+  "backfire_throw": {
+    "subtitle": "subtitles.skyabyss_finale.backfire_throw",
+    "sounds": [
+      {
+        "name": "minecraft:item.firecharge.use",
+        "type": "event",
+        "pitch": 0.8,
+        "volume": 1.0
+      }
+    ]
+  },
+  "rewinder_slam_tell": {
+    "subtitle": "subtitles.skyabyss_finale.rewinder_slam_tell",
+    "sounds": [
+      {
+        "name": "minecraft:block.anvil.use",
+        "type": "event",
+        "pitch": 0.4,
+        "volume": 1.2
+      }
+    ]
+  },
+  "rewinder_slam": {
+    "subtitle": "subtitles.skyabyss_finale.rewinder_slam",
+    "sounds": [
+      {
+        "name": "minecraft:entity.warden.attack_impact",
+        "type": "event",
+        "pitch": 0.6,
+        "volume": 1.4
+      }
+    ]
+  },
+  "rewinder_sweep": {
+    "subtitle": "subtitles.skyabyss_finale.rewinder_sweep",
+    "sounds": [
+      {
+        "name": "minecraft:entity.player.attack.sweep",
+        "type": "event",
+        "pitch": 0.6,
+        "volume": 1.2
+      }
+    ]
+  },
+  "rewinder_prints": {
+    "subtitle": "subtitles.skyabyss_finale.rewinder_prints",
+    "sounds": [
+      {
+        "name": "minecraft:block.respawn_anchor.charge",
+        "type": "event",
+        "pitch": 0.5,
+        "volume": 1.2
+      }
+    ]
+  },
+  "rewinder_call": {
+    "subtitle": "subtitles.skyabyss_finale.rewinder_call",
+    "sounds": [
+      {
+        "name": "minecraft:block.anvil.land",
+        "type": "event",
+        "pitch": 0.4,
+        "volume": 1.4
+      }
+    ]
+  },
+  "rewinder_roar": {
+    "subtitle": "subtitles.skyabyss_finale.rewinder_roar",
+    "sounds": [
+      {
+        "name": "minecraft:entity.ravager.roar",
+        "type": "event",
+        "pitch": 0.5,
+        "volume": 1.6
+      }
+    ]
   }
 }

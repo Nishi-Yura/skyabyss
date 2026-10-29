@@ -52,12 +52,26 @@ public final class CloudMobsSetup {
             () -> EntityType.Builder.of(LampEye::new, MobCategory.MONSTER).sized(2.4f, 2.8f).eyeHeight(1.4f).fireImmune()
                     .clientTrackingRange(12).build(SkyAbyss.MODID + ":" + LampEye.ID));
 
+    // 島 3「炉の島」(docs/design/50 の 4.2.3)
+    public static final DeferredHolder<EntityType<?>, EntityType<AshStriker>> ASH_STRIKER = ENTITIES.register(AshStriker.ID,
+            () -> EntityType.Builder.of(AshStriker::new, MobCategory.MONSTER).sized(1.0f, 2.1f).eyeHeight(1.8f)
+                    .clientTrackingRange(10).build(SkyAbyss.MODID + ":" + AshStriker.ID));
+    public static final DeferredHolder<EntityType<?>, EntityType<Backfire>> BACKFIRE = ENTITIES.register(Backfire.ID,
+            () -> EntityType.Builder.of(Backfire::new, MobCategory.MONSTER).sized(0.8f, 1.2f).eyeHeight(0.7f).fireImmune()
+                    .clientTrackingRange(10).build(SkyAbyss.MODID + ":" + Backfire.ID));
+    public static final DeferredHolder<EntityType<?>, EntityType<Rewinder>> REWINDER = ENTITIES.register(Rewinder.ID,
+            () -> EntityType.Builder.of(Rewinder::new, MobCategory.MONSTER).sized(1.6f, 3.7f).eyeHeight(3.2f).fireImmune()
+                    .clientTrackingRange(12).build(SkyAbyss.MODID + ":" + Rewinder.ID));
+
     public static final DeferredItem<Item> BELL_MOURNER_EGG = egg("bell_mourner_spawn_egg", BELL_MOURNER, 0xC4C0B6, 0x8C6A3E);
     public static final DeferredItem<Item> MIST_BIRD_EGG = egg("mist_bird_spawn_egg", MIST_BIRD, 0xF4F4F8, 0xDCB250);
     public static final DeferredItem<Item> LAST_BELLKEEPER_EGG = egg("last_bellkeeper_spawn_egg", LAST_BELLKEEPER, 0x343640, 0xDCB250);
     public static final DeferredItem<Item> NET_CASTER_EGG = egg("net_caster_spawn_egg", NET_CASTER, 0x2E3C3A, 0xA08860);
     public static final DeferredItem<Item> LAMP_MOTH_EGG = egg("lamp_moth_spawn_egg", LAMP_MOTH, 0xF4F2EC, 0xFFD890);
     public static final DeferredItem<Item> LAMP_EYE_EGG = egg("lamp_eye_spawn_egg", LAMP_EYE, 0xB89646, 0x5A9C88);
+    public static final DeferredItem<Item> ASH_STRIKER_EGG = egg("ash_striker_spawn_egg", ASH_STRIKER, 0x605E5A, 0xF08C32);
+    public static final DeferredItem<Item> BACKFIRE_EGG = egg("backfire_spawn_egg", BACKFIRE, 0x323238, 0xFFB45A);
+    public static final DeferredItem<Item> REWINDER_EGG = egg("rewinder_spawn_egg", REWINDER, 0x54382A, 0xB08C54);
 
     public static final DeferredHolder<SoundEvent, SoundEvent> MOURNER_IDLE = sound("mourner_idle");
     public static final DeferredHolder<SoundEvent, SoundEvent> MOURNER_TELL = sound("mourner_tell");
@@ -88,6 +102,20 @@ public final class CloudMobsSetup {
     public static final DeferredHolder<SoundEvent, SoundEvent> EYE_RAIN = sound("eye_rain");
     public static final DeferredHolder<SoundEvent, SoundEvent> EYE_CALL = sound("eye_call");
     public static final DeferredHolder<SoundEvent, SoundEvent> EYE_ROAR = sound("eye_roar");
+    public static final DeferredHolder<SoundEvent, SoundEvent> REWIND_BACK = sound("rewind_back");
+    public static final DeferredHolder<SoundEvent, SoundEvent> FORGE_LIT = sound("forge_lit");
+    public static final DeferredHolder<SoundEvent, SoundEvent> ECHO_MARK = sound("echo_mark");
+    public static final DeferredHolder<SoundEvent, SoundEvent> ECHO_BURST = sound("echo_burst");
+    public static final DeferredHolder<SoundEvent, SoundEvent> STRIKER_TELL = sound("striker_tell");
+    public static final DeferredHolder<SoundEvent, SoundEvent> STRIKER_SLAM = sound("striker_slam");
+    public static final DeferredHolder<SoundEvent, SoundEvent> BACKFIRE_TELL = sound("backfire_tell");
+    public static final DeferredHolder<SoundEvent, SoundEvent> BACKFIRE_THROW = sound("backfire_throw");
+    public static final DeferredHolder<SoundEvent, SoundEvent> REWINDER_SLAM_TELL = sound("rewinder_slam_tell");
+    public static final DeferredHolder<SoundEvent, SoundEvent> REWINDER_SLAM = sound("rewinder_slam");
+    public static final DeferredHolder<SoundEvent, SoundEvent> REWINDER_SWEEP = sound("rewinder_sweep");
+    public static final DeferredHolder<SoundEvent, SoundEvent> REWINDER_PRINTS = sound("rewinder_prints");
+    public static final DeferredHolder<SoundEvent, SoundEvent> REWINDER_CALL = sound("rewinder_call");
+    public static final DeferredHolder<SoundEvent, SoundEvent> REWINDER_ROAR = sound("rewinder_roar");
 
     private CloudMobsSetup() {
     }
@@ -116,11 +144,15 @@ public final class CloudMobsSetup {
         event.put(NET_CASTER.get(), NetCaster.createAttributes().build());
         event.put(LAMP_MOTH.get(), LampMoth.createAttributes().build());
         event.put(LAMP_EYE.get(), LampEye.createAttributes().build());
+        event.put(ASH_STRIKER.get(), AshStriker.createAttributes().build());
+        event.put(BACKFIRE.get(), Backfire.createAttributes().build());
+        event.put(REWINDER.get(), Rewinder.createAttributes().build());
     }
 
     private static void onCreativeTab(BuildCreativeModeTabContentsEvent event) {
         if (event.getTabKey().equals(ModItems.LEGACY_TAB)) {
-            for (DeferredItem<Item> i : List.of(BELL_MOURNER_EGG, MIST_BIRD_EGG, LAST_BELLKEEPER_EGG, NET_CASTER_EGG, LAMP_MOTH_EGG, LAMP_EYE_EGG)) {
+            for (DeferredItem<Item> i : List.of(BELL_MOURNER_EGG, MIST_BIRD_EGG, LAST_BELLKEEPER_EGG, NET_CASTER_EGG, LAMP_MOTH_EGG, LAMP_EYE_EGG, ASH_STRIKER_EGG,
+                    BACKFIRE_EGG, REWINDER_EGG)) {
                 event.accept(i.get());
             }
         }
@@ -135,6 +167,9 @@ public final class CloudMobsSetup {
             put(NetCaster.ID, 26);
             put(LampMoth.ID, 20);
             put(LampEye.ID, 760);
+            put(AshStriker.ID, 28);
+            put(Backfire.ID, 22);
+            put(Rewinder.ID, 800);
         });
     }
 

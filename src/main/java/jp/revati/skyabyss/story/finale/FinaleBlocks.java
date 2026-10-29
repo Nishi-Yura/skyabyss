@@ -32,6 +32,12 @@ public final class FinaleBlocks {
             () -> new net.minecraft.world.level.block.SlabBlock(BlockBehaviour.Properties.of().mapColor(MapColor.GOLD).strength(-1.0f, 3600000.0f).noLootTable()
                     .sound(SoundType.AMETHYST).pushReaction(PushReaction.BLOCK).lightLevel(s -> 11)));
 
+    // 戻り石 (崩れた橋と主の間の外の輪。巻き戻って一瞬だけ石に戻る。ForgeIsle)
+    public static final DeferredBlock<RewindStoneBlock> REWIND_STONE = BLOCKS.register("rewind_stone",
+            () -> new RewindStoneBlock(BlockBehaviour.Properties.of().mapColor(MapColor.STONE).strength(-1.0f, 3600000.0f).noLootTable()
+                    .sound(SoundType.STONE).pushReaction(PushReaction.BLOCK).noOcclusion().isViewBlocking((s, l, p) -> false)
+                    .lightLevel(s -> s.getValue(RewindStoneBlock.PHASE) == 1 ? 7 : 0)));
+
     private FinaleBlocks() {
     }
 

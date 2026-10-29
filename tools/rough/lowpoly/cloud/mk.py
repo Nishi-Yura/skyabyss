@@ -6,7 +6,8 @@
     run_one(SPEC, build, PAL, BONES, POSES)  -> docs/review/cloud_roughs/<id>/a/ と <id>.png・<id>_manifest.json
 
 色の言葉 (01 の「雲海 = 金と白」): 雲の白 CLOUDW・鐘の青銅 BRONZE・古い漆喰 PLASTER・前の都の石 STONEW・金 GOLDW・灰の外套 ROBE・朝の光 DAWN (光る)。
-灯の島: 油引きの外套 OILSKIN・海藻 SEAWEED・網の縄 ROPE・灯の籠の真鍮 BRASS・目の白 SCLERA
+灯の島: 油引きの外套 OILSKIN・海藻 SEAWEED・網の縄 ROPE・灯の籠の真鍮 BRASS・目の白 SCLERA。
+炉の島: 鉄 IRON・革の前掛け LEATHER・灰の肌 ASHSKIN・残り火 EMBER (光る)
 """
 import sys
 from pathlib import Path
@@ -43,6 +44,11 @@ SEAWEED = [(28, 40, 24), (44, 62, 34), (64, 86, 44), (90, 112, 60)]
 ROPE = [(92, 74, 50), (126, 104, 72), (160, 136, 98), (192, 170, 128)]
 BRASS = [(90, 66, 26), (140, 106, 44), (190, 150, 70), (230, 196, 110)]
 SCLERA = [(200, 196, 186), (224, 220, 210), (240, 238, 230), (252, 250, 244)]
+# 炉の島 (前の灰炉): 鉄・革の前掛け・灰の肌・残り火 (光る)
+IRON = [(30, 30, 34), (50, 50, 56), (74, 74, 80), (104, 104, 110)]
+LEATHER = [(56, 36, 24), (84, 56, 36), (112, 78, 50), (140, 104, 70)]
+ASHSKIN = [(70, 68, 66), (96, 94, 90), (124, 122, 118), (152, 150, 146)]
+EMBER = [(220, 90, 30), (250, 140, 50), (255, 190, 90), (255, 230, 160)]
 
 
 def run_one(spec, build, pal, bones, poses, hint=128):
