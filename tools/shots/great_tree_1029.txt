@@ -1,0 +1,35 @@
+# 大樹の作り直し (tools/gen/world/build_great_tree.py)
+world great_tree_a
+size 1280 720
+timeout 3000
+render 10
+cmd time set 6000
+cmd weather clear
+cmd gamemode spectator
+camera 0 -55 0 180 0
+waitchunks
+hud off
+wait 300
+cmd skyabyss cinematic stop
+close
+wait 20
+cmd skyabyss dev ch1 place poi_great_tree 0 -60 60
+wait 60
+camera 0 -48 104 180 4
+wait 40
+shot tree_south
+camera 40 -40 86 135 8
+wait 30
+shot tree_se
+camera -36 -52 40 -125 -10
+wait 30
+shot tree_nw_low
+camera 9 -50 72 160 10
+wait 30
+shot tree_stairs
+camera -2 -40 66 120 25
+wait 30
+shot tree_deck
+camera 0 -6 61 180 85
+wait 30
+shot tree_top

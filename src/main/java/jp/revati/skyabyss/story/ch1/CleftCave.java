@@ -263,6 +263,47 @@ public final class CleftCave {
         }
     }
 
+    // ---------------------------------------------------------------- 鳴り石を目立たせる (2026-10-29 の試遊「最後の謎解き、もっと押すブロック主張して」
+    // 「つるはしで壊さずに行けるように」: 格子を壊すものと思い、鳴り石に気づかなかった)。格子が閉じている間、近くの人に
+    //   鳴り石の上に光の粒 (毎秒)、格子か鳴り石に近づいたら一度だけ手がかりの帯
+    static final double SHOW_NEAR = 18;
+    private static final java.util.Set<String> HINTED = new java.util.HashSet<>();
+
+    @SubscribeEvent
+    static void onServerTick(net.neoforged.neoforge.event.tick.ServerTickEvent.Post event) {
+        MinecraftServer server = event.getServer();
+        if (server.getTickCount() % 20 != 7) {
+            return;
+        }
+        ServerLevel level = server.overworld();
+        for (SiteData.Entry cave : entries(server)) {
+            BlockPos p1 = cave.extra("plate1");
+            BlockPos gate = cave.extra("gate4");
+            if (p1 == null || !level.hasChunkAt(p1) || gateOpen(level, cave)) {
+                continue;
+            }
+            for (ServerPlayer p : Players.snapshot(level.players())) {
+                boolean nearPlates = p.distanceToSqr(p1.getX() + 0.5, p1.getY(), p1.getZ() + 0.5) < SHOW_NEAR * SHOW_NEAR;
+                boolean nearGate = gate != null && p.distanceToSqr(gate.getX() + 0.5, gate.getY(), gate.getZ() + 0.5) < 6 * 6;
+                if (!nearPlates && !nearGate) {
+                    continue;
+                }
+                if (nearPlates) {
+                    for (int n = 1; n <= PLATES; n++) {
+                        BlockPos at = cave.extra("plate" + n);
+                        if (at != null) {
+                            level.sendParticles(p, ParticleTypes.END_ROD, true, at.getX() + 0.5, at.getY() + 1.4, at.getZ() + 0.5, 2 + n, 0.25, 0.3, 0.25, 0.01);
+                            level.sendParticles(p, ParticleTypes.WAX_ON, true, at.getX() + 0.5, at.getY() + 0.5, at.getZ() + 0.5, 4, 0.45, 0.45, 0.45, 0.0);
+                        }
+                    }
+                }
+                if (HINTED.add(p.getUUID() + "@" + cave.pos.asLong())) {
+                    Notice.objective(p, nearGate && !nearPlates ? "message.skyabyss.ch1.plate.gate_hint" : "message.skyabyss.ch1.plate.tap_hint");
+                }
+            }
+        }
+    }
+
     // 自己テスト用: 進みを消す
     static void resetProgress() {
         PROGRESS.clear();

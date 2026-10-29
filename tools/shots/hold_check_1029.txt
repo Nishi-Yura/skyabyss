@@ -1,0 +1,128 @@
+world hold_1029
+size 960 540
+timeout 3000
+render 6
+cmd time set noon
+cmd weather clear
+cmd gamemode creative
+camera 0 -60 8 180 0
+waitchunks
+hud on
+wait 350
+cmd skyabyss cinematic stop
+close
+wait 20
+swingpose off
+weapontier common
+cmd item replace entity @s weapon.mainhand with skyabyss:waterway_fang
+mainhand right
+cmd item replace entity @s weapon.mainhand with skyabyss:shrine_dagger
+mainhand right
+perspective first
+bodyyaw 0
+hud on
+close
+wait 8
+chat clear
+shot shrine_dagger_fp
+perspective front
+bodyyaw 70
+hud off
+close
+wait 8
+chat clear
+shot shrine_dagger_tpSide
+perspective front
+bodyyaw 0
+hud off
+close
+wait 8
+shot shrine_dagger_tpFront
+cmd item replace entity @s weapon.mainhand with skyabyss:whale_dagger
+mainhand right
+perspective first
+bodyyaw 0
+hud on
+close
+wait 8
+chat clear
+shot whale_dagger_fp
+perspective front
+bodyyaw 70
+hud off
+close
+wait 8
+chat clear
+shot whale_dagger_tpSide
+perspective front
+bodyyaw 0
+hud off
+close
+wait 8
+shot whale_dagger_tpFront
+cmd item replace entity @s weapon.mainhand with skyabyss:gather_axe
+mainhand right
+perspective first
+bodyyaw 0
+hud on
+close
+wait 8
+chat clear
+shot gather_axe_fp
+perspective front
+bodyyaw 70
+hud off
+close
+wait 8
+chat clear
+shot gather_axe_tpSide
+perspective front
+bodyyaw 0
+hud off
+close
+wait 8
+shot gather_axe_tpFront
+cmd item replace entity @s weapon.mainhand with skyabyss:gather_pickaxe
+mainhand right
+perspective first
+bodyyaw 0
+hud on
+close
+wait 8
+chat clear
+shot gather_pickaxe_fp
+perspective front
+bodyyaw 70
+hud off
+close
+wait 8
+chat clear
+shot gather_pickaxe_tpSide
+perspective front
+bodyyaw 0
+hud off
+close
+wait 8
+shot gather_pickaxe_tpFront
+cmd item replace entity @s weapon.mainhand with skyabyss:ember_war_axe
+mainhand right
+perspective first
+bodyyaw 0
+hud on
+close
+wait 8
+chat clear
+shot ember_war_axe_fp
+perspective front
+bodyyaw 70
+hud off
+close
+wait 8
+chat clear
+shot ember_war_axe_tpSide
+perspective front
+bodyyaw 0
+hud off
+close
+wait 8
+shot ember_war_axe_tpFront

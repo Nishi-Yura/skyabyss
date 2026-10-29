@@ -14,5 +14,7 @@
   "label.skyabyss.facility.travel": "旅の館（厩舎・止まり木・地図屋）",
   "label.skyabyss.facility.training": "訓練所",
   "label.skyabyss.facility.shrine": "社（鍵の間・書庫）",
-  "label.skyabyss.facility.market": "市（道具・食料・武具・素材・薬）"
+  "label.skyabyss.facility.market": "市（道具・食料・武具・素材・薬）",
+  "message.skyabyss.chest.took": "%s を手に入れた",
+  "message.skyabyss.chest.wait": "この箱は、もう開けた。あと %s 分ほどで、また何か入っている"
 }

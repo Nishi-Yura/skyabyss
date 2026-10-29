@@ -168,11 +168,34 @@ public final class ContinentTowns {
                     jp.revati.skyabyss.town.RegionFolk.ensure(level, region(e.index), fm, at);
                 }
             }
+            // 町の案内人: 広場の目覚める所 (stand) のそばの立てる所
+            BlockPos stand = e.extra("stand");
+            BlockPos guide = stand == null ? null : guideSpot(level, stand);
+            if (guide != null) {
+                jp.revati.skyabyss.town.RegionFolk.ensure(level, region(e.index), "guide", guide);
+            }
             BlockPos chaser = e.extra(CHASER_MARK);
             if (chaser != null) {
                 jp.revati.skyabyss.npc.NpcSpawner.keepTownChaser(level, chaser, player);
             }
         }
+    }
+
+    // 広場の目覚める所から 3〜5 離れた、立てる所 (決まった順に探す。見つからなければ null)
+    @org.jetbrains.annotations.Nullable
+    static BlockPos guideSpot(ServerLevel level, BlockPos stand) {
+        for (int r = 3; r <= 5; r++) {
+            for (int[] d : new int[][] {{r, 0}, {-r, 0}, {0, r}, {0, -r}, {r, r}, {-r, -r}}) {
+                for (int dy = -2; dy <= 2; dy++) {
+                    BlockPos p = stand.offset(d[0], dy, d[1]);
+                    if (level.getBlockState(p).isAir() && level.getBlockState(p.above()).isAir()
+                            && level.getBlockState(p.below()).isFaceSturdy(level, p.below(), net.minecraft.core.Direction.UP)) {
+                        return p;
+                    }
+                }
+            }
+        }
+        return null;
     }
 
     // 鯨見の町の鯨追いの立つ所 (建っていなければ null)

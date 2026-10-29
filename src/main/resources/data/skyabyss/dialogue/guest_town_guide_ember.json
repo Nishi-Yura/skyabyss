@@ -1,0 +1,31 @@
+{
+  "npc": "skyabyss:guest_town_guide_ember",
+  "entries": [
+    {
+      "node": "ask"
+    }
+  ],
+  "nodes": {
+    "ask": {
+      "face": "smile",
+      "options": [
+        {
+          "id": "way",
+          "kind": "talk",
+          "do": [
+            {
+              "type": "facility",
+              "open": "guide"
+            }
+          ],
+          "goto": "end"
+        },
+        {
+          "id": "bye",
+          "kind": "leave",
+          "goto": "end"
+        }
+      ]
+    }
+  }
+}

@@ -121,10 +121,11 @@ public final class WhaleCarryRoom extends RaidRoom {
                 spawnOrb(ctx, i);
             }
         }
-        for (int i = 0; i < 2 + ctx.scale(); i++) {
+        // 敵は少なめ (2026-10-29 の試遊「骨玉運び、敵が多くてムズイ」。前は 2 + 規模、8 秒ごとに足して 5 + 2×規模 まで)
+        for (int i = 0; i < 1 + ctx.scale() / 2; i++) {
             spawnFoe(ctx);
         }
-        nextSpawn = ctx.now() + 200;
+        nextSpawn = ctx.now() + 300;
     }
 
     @Override
@@ -220,11 +221,9 @@ public final class WhaleCarryRoom extends RaidRoom {
             }
         }
         if (started && count < ORBS && ctx.now() >= nextSpawn) {
-            nextSpawn = ctx.now() + 160;
-            if (ctx.aliveMobs().size() < 5 + 2 * ctx.scale()) {
-                for (int i = 0; i < 1 + ctx.scale() / 2; i++) {
-                    spawnFoe(ctx);
-                }
+            nextSpawn = ctx.now() + 300;
+            if (ctx.aliveMobs().size() < 2 + ctx.scale()) {
+                spawnFoe(ctx);
             }
         }
     }

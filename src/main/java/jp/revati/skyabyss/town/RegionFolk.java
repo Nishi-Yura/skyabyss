@@ -26,7 +26,12 @@ public final class RegionFolk {
             // はじまりの島の船着き場の渡し守 (汐守の渡し守と同じ絵。同じ人かどうかは語らない。world/continent/IslandTrail)
             new Folk("island_ferryman", "sailor", "island", "dock"),
             // 内海の渡し守 (両岸の船着き場に一人ずつ。話すと向こう岸へ渡す。world/continent/ContinentFerries。2026-10-27 の声)
-            new Folk("inner_ferryman", "fisher", "ferry", "dock"));
+            new Folk("inner_ferryman", "fisher", "ferry", "dock"),
+            // 土地の町の案内人 (広場。都の案内人と同じ一覧で、店の係の人まで灯りで案内する。facility/TownGuide。2026-10-29 の声)
+            new Folk("town_guide_whale", "bellkeeper", "whale", "guide"),
+            new Folk("town_guide_tide", "bellkeeper", "tide", "guide"),
+            new Folk("town_guide_storm", "bellkeeper", "storm", "guide"),
+            new Folk("town_guide_ember", "bellkeeper", "ember", "guide"));
 
     private RegionFolk() {
     }

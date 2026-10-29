@@ -175,6 +175,44 @@ public final class TownGuide {
         return worldMarks(server, GUIDE_MARK);
     }
 
+    // ---------------------------------------------------------------- 土地の町 (2026-10-29 の試遊「最初の街以外、お店の場所教えてくれるやついない」)
+    // 土地の町は都と同じ施設を持つ (係の人の印 npc_<役>)。広場の「町の案内人」(town/RegionFolk の town_guide_<町>) が同じ一覧を開き、
+    // 係の人の立つ所まで灯りで案内する
+    static final int TOWN_RANGE = 70;
+    static final Map<String, String> TOWN_DOORS = Map.ofEntries(Map.entry("tool_shop", "npc_tool_merchant"), Map.entry("storage", "npc_storage_keeper"),
+            Map.entry("trade", "npc_trade_keeper"), Map.entry("apothecary", "npc_apothecary"), Map.entry("inn", "npc_innkeeper"),
+            Map.entry("stable", "npc_stable_keeper"), Map.entry("perch", "npc_perch_keeper"), Map.entry("guild", "npc_guild_clerk"),
+            Map.entry("smithy", "npc_smith"), Map.entry("training", "npc_training_master"), Map.entry("shrine", "npc_shrine_priest"));
+
+    @Nullable
+    static SiteData.Entry townAt(MinecraftServer server, BlockPos at) {
+        for (SiteData.Entry e : SiteData.get(server.overworld()).entries(jp.revati.skyabyss.world.continent.ContinentTowns.KIND)) {
+            if (e.built && OpeningSites.horizontal(e.pos, at) <= TOWN_RANGE) {
+                return e;
+            }
+        }
+        return null;
+    }
+
+    // いる所 (都か土地の町) の施設の戸 (施設 ID → 位置)。どちらでもなければ空
+    public static Map<String, BlockPos> doorsAt(MinecraftServer server, BlockPos at) {
+        if (inTown(server, at)) {
+            return doors(server);
+        }
+        Map<String, BlockPos> out = new LinkedHashMap<>();
+        SiteData.Entry town = townAt(server, at);
+        if (town != null) {
+            for (Place p : PLACES) {
+                String mark = TOWN_DOORS.get(p.id);
+                BlockPos d = mark == null ? null : town.extra(mark);
+                if (d != null) {
+                    out.put(p.id, d);
+                }
+            }
+        }
+        return out;
+    }
+
     public static boolean inTown(MinecraftServer server, BlockPos at) {
         BlockPos c = center(server);
         if (c == null) {
@@ -308,12 +346,13 @@ public final class TownGuide {
     // 案内人の「行き先を選ぶ」: 一覧を開く (都の中でなければ断る)
     public static void openMenu(ServerPlayer player) {
         MinecraftServer server = player.server;
-        if (player.level().dimension() != Level.OVERWORLD || !inTown(server, player.blockPosition())) {
+        Map<String, BlockPos> doors = player.level().dimension() == Level.OVERWORLD ? doorsAt(server, player.blockPosition()) : Map.of();
+        if (doors.isEmpty()) {
             Notice.hint(player, "message.skyabyss.town_guide.too_far");
             return;
         }
         List<TownGuideNetwork.Entry> list = new ArrayList<>();
-        for (Map.Entry<String, BlockPos> d : doors(server).entrySet()) {
+        for (Map.Entry<String, BlockPos> d : doors.entrySet()) {
             Place p = place(d.getKey());
             if (p != null) {
                 list.add(new TownGuideNetwork.Entry(p.id, p.group.ordinal(), d.getValue()));
@@ -331,11 +370,12 @@ public final class TownGuide {
         }
         Place p = place(id);
         MinecraftServer server = player.server;
-        if (p == null || player.level().dimension() != Level.OVERWORLD || !inTown(server, player.blockPosition())) {
+        Map<String, BlockPos> doors = player.level().dimension() == Level.OVERWORLD ? doorsAt(server, player.blockPosition()) : Map.of();
+        if (p == null || doors.isEmpty()) {
             Notice.hint(player, "message.skyabyss.town_guide.too_far");
             return null;
         }
-        BlockPos door = doors(server).get(id);
+        BlockPos door = doors.get(id);
         // 探索は重いので、一人 1 秒に一度まで (押し続けても積もらない)
         long now = server.overworld().getGameTime();
         Long last = LAST_PICK.get(player.getUUID());

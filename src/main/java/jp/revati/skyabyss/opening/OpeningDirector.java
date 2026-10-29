@@ -272,7 +272,10 @@ public final class OpeningDirector {
         long passEnd = Math.max(lastPassEnd, SkyEvents.personalEnd(player));
         boolean passEnded = passEnd >= 0 && st.awakeAt >= 0 && passEnd >= st.awakeAt && now >= passEnd
                 && now - passEnd <= OpeningLogic.PASS_END_WINDOW;
-        boolean legacy = !st.fresh && (!lore.unlocked().isEmpty() || lore.bookGiven() || NpcBonds.of(player).hasSubstance()
+        // はじまりの島でまだ渡っていない新しい人は、遊んでいた人と取り違えない (2026-10-29 の試遊。あとから入った人の開幕が飛んだ)
+        boolean islandNew = jp.revati.skyabyss.world.continent.ContinentOutskirts.onIslandTrail(player)
+                && jp.revati.skyabyss.progress.Progression.stage(player) == 0 && jp.revati.skyabyss.rpg.skill.JobChoice.chosen(player) == null;
+        boolean legacy = !st.fresh && !islandNew && (!lore.unlocked().isEmpty() || lore.bookGiven() || NpcBonds.of(player).hasSubstance()
                 || !QuestLog.of(player).quests().isEmpty()
                 // 巨神をすでに止めた人 (記録が消えていても、序盤は終えている。章の移行: chapter_per_titan_plan 2.3)
                 || jp.revati.skyabyss.progress.Progression.stage(player) > 0);

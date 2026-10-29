@@ -623,7 +623,8 @@ public final class Ch1SelfTest {
                 var sites = ChapterSites.sitesFor(server, base.getUUID(), id);
                 check(sites.size() == 1 && sites.get(0).built(), id + ": should be placed and built exactly once (" + sites.size() + ")");
                 // 跡地に置く要素 (見張りの丘・歌石) は一章の跡地の中心から、ほかは拠点から
-                BlockPos anchor = ChapterSites.anchorFor(server, id, baseAt);
+                // 一章の拠点: はじまりの島なら鐘の都の南の門の外 (ChapterSites.baseOf)
+                BlockPos anchor = ChapterSites.anchorFor(server, id, ChapterSites.baseOf(base, Chapters.WHALE));
                 for (var s : sites) {
                     double d = anchor == null ? 0 : Math.hypot(s.pos().getX() - anchor.getX(), s.pos().getZ() - anchor.getZ());
                     check(d <= 152, id + " is " + (int) d + " from its anchor " + anchor);

@@ -619,5 +619,21 @@
   "quest.skyabyss.town.grave_3.candle.candle": "Get a candle (tool shop)",
   "quest.skyabyss.town.grave_3.candle.journal": "Bring the gravekeeper a candle to light before the nameless grave.",
   "quest.skyabyss.town.grave_3.light.journal": "You have a candle. Give it to the gravekeeper.",
-  "quest.skyabyss.town.grave_3.light.light": "Give the candle to the gravekeeper"
+  "quest.skyabyss.town.grave_3.light.light": "Give the candle to the gravekeeper",
+  "entity.skyabyss.guest_town_guide_whale": "Whalewatch Guide",
+  "dialogue.skyabyss.guest_town_guide_whale.ask": "Welcome to Whalewatch. When the lookout bell rings, look up.\nLooking for a shop? Tell me where, and I'll light the way at your feet.",
+  "dialogue.skyabyss.guest_town_guide_whale.ask.way": "Show me to a shop (lit path)",
+  "dialogue.skyabyss.guest_town_guide_whale.ask.bye": "Maybe later",
+  "entity.skyabyss.guest_town_guide_tide": "Tidekeep Guide",
+  "dialogue.skyabyss.guest_town_guide_tide.ask": "Welcome to Tidekeep. Everyone gets lost in the salt smell once.\nLooking for a shop? Tell me where, and I'll light the way.",
+  "dialogue.skyabyss.guest_town_guide_tide.ask.way": "Show me to a shop (lit path)",
+  "dialogue.skyabyss.guest_town_guide_tide.ask.bye": "Maybe later",
+  "entity.skyabyss.guest_town_guide_storm": "Windwait Guide",
+  "dialogue.skyabyss.guest_town_guide_storm.ask": "You climbed all the way to Windwait. Don't let the wind push you off the street.\nLooking for a shop? Tell me where, and I'll light the way.",
+  "dialogue.skyabyss.guest_town_guide_storm.ask.way": "Show me to a shop (lit path)",
+  "dialogue.skyabyss.guest_town_guide_storm.ask.bye": "Maybe later",
+  "entity.skyabyss.guest_town_guide_ember": "Ashforge Guide",
+  "dialogue.skyabyss.guest_town_guide_ember.ask": "Welcome to Ashforge. The ash makes it hard to see your feet.\nLooking for a shop? Tell me where, and I'll light the way.",
+  "dialogue.skyabyss.guest_town_guide_ember.ask.way": "Show me to a shop (lit path)",
+  "dialogue.skyabyss.guest_town_guide_ember.ask.bye": "Maybe later"
 }

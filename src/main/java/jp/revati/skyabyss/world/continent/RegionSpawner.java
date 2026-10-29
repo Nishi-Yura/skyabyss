@@ -225,6 +225,10 @@ public final class RegionSpawner {
         if (at == null || jp.revati.skyabyss.opening.site.SiteGuard.inTown(level, at) || ContinentRoads.flattened(x + 0.5, z + 0.5)) {
             return 0;
         }
+        // はじまりの島では時間で湧かせない (浜や沖の縁が野の土地に数えられて湧いていた。2026-10-29 の試遊「最初の島に敵自然スポーンするのやめて」)
+        if (ContinentOutskirts.onIsland(level, at) || ContinentOutskirts.onIsland(level, player.blockPosition())) {
+            return 0;
+        }
         ContinentMap map = ContinentMap.get();
         Entry e = pick(map.region(x, z), map.biome(x, z), night(level), level.random.nextInt(1000), x, z);
         if (e == null) {

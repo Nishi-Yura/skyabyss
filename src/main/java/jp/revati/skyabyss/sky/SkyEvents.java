@@ -137,7 +137,8 @@ public final class SkyEvents {
                 data.schedule(now + randomGap(level, frequency));
                 return;
             }
-            if (now < data.nextPassTick() + DAY) {
+            // はじまりの島の図のある世界は、門の前に着くまで待つ (2026-10-29 の試遊「鯨さいしょっからみえちゃってる」。島で一日たつと島の上を渡っていた)
+            if (now < data.nextPassTick() + DAY || jp.revati.skyabyss.world.continent.IslandTrail.active(level)) {
                 return;
             }
         }
@@ -183,6 +184,10 @@ public final class SkyEvents {
     // その人のためだけの影 (序盤の拍子の遅れた人)。世界の影はそのまま (進行中でも起こせる)。影の通過数も数えない
     public static void startPersonal(ServerLevel level, ServerPlayer witness) {
         SkyPass current = PERSONAL.get(witness.getUUID());
+        // はじまりの島の道の間は鯨を見せない (都の門の前で初めて見る)
+        if (jp.revati.skyabyss.world.continent.ContinentOutskirts.onIslandTrail(witness)) {
+            return;
+        }
         if (current != null && current.isActive(level.getGameTime())) {
             return;
         }
@@ -299,6 +304,11 @@ public final class SkyEvents {
         Collections.shuffle(players);
         boolean anySky = first && firstOverdue >= FIRST_LOOSEN_SKY;
         for (ServerPlayer player : players) {
+            // はじまりの島の道の人 (まだ渡っていない・島の上) の上は渡らない
+            if (jp.revati.skyabyss.world.continent.ContinentOutskirts.onIslandTrail(player)
+                    || jp.revati.skyabyss.world.continent.ContinentOutskirts.onIsland(level, player.blockPosition())) {
+                continue;
+            }
             if (player.isAlive() && !player.isSpectator() && (anySky || level.canSeeSky(player.blockPosition().above()))) {
                 return player;
             }

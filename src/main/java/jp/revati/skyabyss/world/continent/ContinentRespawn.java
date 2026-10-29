@@ -79,7 +79,7 @@ public final class ContinentRespawn {
 
     @SubscribeEvent(priority = EventPriority.LOW)
     static void onRespawn(PlayerEvent.PlayerRespawnEvent event) {
-        if (!(event.getEntity() instanceof ServerPlayer player) || event.isEndConquered() || player.getRespawnPosition() != null
+        if (!(event.getEntity() instanceof ServerPlayer player) || event.isEndConquered()
                 || player.level().dimension() != Level.OVERWORLD || !(player.level() instanceof ServerLevel over)) {
             return;
         }
@@ -88,8 +88,20 @@ public final class ContinentRespawn {
             return;
         }
         // 島を出た人は、島の休み場 (野営地・道ぞいの祠) では目覚めない。まだの人は島の中だけ
-        List<BlockPos> rests = ContinentOutskirts.ferried(player) ? rests(over) : islandRests(over);
+        List<BlockPos> rests = new ArrayList<>(ContinentOutskirts.ferried(player) ? rests(over) : islandRests(over));
+        // 宿で決めた寝台も休み場の一つ。倒れた所にいちばん近い所で目覚める (2026-10-29 の試遊「ボスで死んだら、前に戻されるんじゃなくて、最初の村で蘇生した」:
+        // 寝台を持つ人は、倒れた所から遠くても寝台へ戻っていた)
+        BlockPos bed = player.getRespawnPosition();
+        if (bed != null && player.getRespawnDimension() == Level.OVERWORLD) {
+            if (rests.isEmpty()) {
+                return;
+            }
+            rests.add(bed);
+        }
         BlockPos at = nearest(rests, death.pos());
+        if (at != null && at.equals(bed)) {
+            return;
+        }
         if (at != null) {
             player.teleportTo(over, at.getX() + 0.5, at.getY(), at.getZ() + 0.5, player.getYRot(), player.getXRot());
         }

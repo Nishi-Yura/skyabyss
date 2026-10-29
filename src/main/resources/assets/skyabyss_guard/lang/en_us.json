@@ -14,5 +14,7 @@
   "label.skyabyss.facility.travel": "Travel House (stables, perch, maps)",
   "label.skyabyss.facility.training": "Training Hall",
   "label.skyabyss.facility.shrine": "Shrine (key room, archive)",
-  "label.skyabyss.facility.market": "Market (tools, food, arms, materials, medicine)"
+  "label.skyabyss.facility.market": "Market (tools, food, arms, materials, medicine)",
+  "message.skyabyss.chest.took": "Got %s",
+  "message.skyabyss.chest.wait": "You already opened this. Something will be inside again in about %s min"
 }

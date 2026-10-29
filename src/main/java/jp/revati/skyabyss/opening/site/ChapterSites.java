@@ -387,15 +387,21 @@ public final class ChapterSites {
         if (server == null) {
             return false;
         }
-        return request(server, player.getUUID(), chapter, baseOf(player));
+        return request(server, player.getUUID(), chapter, baseOf(player, chapter));
     }
 
-    static BlockPos baseOf(ServerPlayer p) {
+    public static BlockPos baseOf(ServerPlayer p, Chapters chapter) {
         BlockPos bed = p.getRespawnPosition();
-        if (bed != null && p.getRespawnDimension() == Level.OVERWORLD) {
-            return bed;
+        BlockPos base = bed != null && p.getRespawnDimension() == Level.OVERWORLD ? bed : p.blockPosition();
+        // はじまりの島には一章からの場所を置かない (島へは戻れない)。島の目覚める所なら鐘の都の南の門の外。序章の旅の跡は島のまま
+        if (chapter != Chapters.PROLOGUE && onIsland(p.getServer(), base)) {
+            return jp.revati.skyabyss.world.continent.ContinentOutskirts.arrival(p.getServer().overworld());
         }
-        return p.blockPosition();
+        return base;
+    }
+
+    static boolean onIsland(MinecraftServer server, BlockPos at) {
+        return jp.revati.skyabyss.world.continent.ContinentOutskirts.onIsland(server.overworld(), at);
     }
 
     static boolean request(MinecraftServer server, UUID player, Chapters chapter, BlockPos base) {
@@ -988,13 +994,19 @@ public final class ChapterSites {
         }
         boolean served = false;
         for (SiteData.ChapterPlan plan : data.plans()) {
+            if (!plan.chapter.equals(Chapters.PROLOGUE.id()) && plan.players.contains(p.getUUID()) && onIsland(server, plan.anchor)) {
+                // 0.9.2 までは島の道の間に一章が始まり、島のまわりに一章の場所を置いていた (島へは戻れない)。その計画から外して置き直す
+                plan.players.remove(p.getUUID());
+                data.setDirty();
+                continue;
+            }
             if (!plan.ahead && plan.chapter.equals(c.id()) && plan.players.contains(p.getUUID()) && !groundPlan(data, plan)) {
                 served = true;
                 topUp(server, data, plan, c);
             }
         }
         if (!served) {
-            request(server, p.getUUID(), c, baseOf(p));
+            request(server, p.getUUID(), c, baseOf(p, c));
             return;
         }
         if (farFromAll(pointsOf(data, c.id()), pos)) {

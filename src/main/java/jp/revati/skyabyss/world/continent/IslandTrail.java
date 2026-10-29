@@ -219,7 +219,7 @@ public final class IslandTrail {
         // 職を選ぶまでは、ほかの目的は進まない (野営地のそばで選ぶ画面が開く)
         if (jp.revati.skyabyss.rpg.skill.JobChoice.chosen(p) == null) {
             double camp = Math.hypot(p.getX() - lay.start().getX(), p.getZ() - lay.start().getZ());
-            if (camp < CAMP_NEAR) {
+            if (camp < CAMP_NEAR && openingOver(p)) {
                 jp.revati.skyabyss.rpg.skill.JobChoice.prompt(p);
             } else if (camp > CAMP_NEAR + 4) {
                 jp.revati.skyabyss.rpg.skill.JobChoice.away(p);
@@ -271,6 +271,18 @@ public final class IslandTrail {
         if (ferry != null && ferry.distToCenterSqr(p.position()) < 80 * 80) {
             jp.revati.skyabyss.town.RegionFolk.ensure(level, "island", "dock", ferry);
         }
+    }
+
+    // 開幕の絵芝居とカメラの場面が済んだ (職を選ぶ画面は、そのあとで開く。2026-10-29 の試遊「絵芝居が飛ばされて職を選ばされる」
+    // 「職を選んでいたら職選びが飛ばされた」: 絵芝居の上に職の画面が開いて絵芝居が終わり、続くカメラの場面が職の画面を閉じていた)
+    static boolean openingOver(ServerPlayer p) {
+        if (jp.revati.skyabyss.story.reel.StoryReels.watching(p) || jp.revati.skyabyss.cinematic.Cinematics.active(p)) {
+            return false;
+        }
+        var st = jp.revati.skyabyss.opening.OpeningDirector.state(p);
+        // 絵芝居のなかった版で目を覚ました人は、目覚めて 90 秒たてば
+        return st.legacy() || jp.revati.skyabyss.story.reel.StoryReels.seen(p, jp.revati.skyabyss.story.reel.StoryReels.OPENING)
+                || st.awakeAt() >= 0 && p.serverLevel().getGameTime() - st.awakeAt() > 20 * 90;
     }
 
     // ---------------------------------------------------------------- 寄り道の場所

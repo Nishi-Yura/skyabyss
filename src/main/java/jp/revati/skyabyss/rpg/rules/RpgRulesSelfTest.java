@@ -34,6 +34,42 @@ public final class RpgRulesSelfTest {
     private RpgRulesSelfTest() {
     }
 
+    // 世界の箱は人ごと (loot/SharedChests): 一人目が受け取ると箱は空、二度目は待ち、別の人は受け取れる、待ちが明けるとまた。空の箱はふつうの箱
+    static void chests(net.minecraft.server.level.ServerLevel level, FakePlayer p, BlockPos at, List<String> f) {
+        level.setBlockAndUpdate(at, Blocks.CHEST.defaultBlockState());
+        if (!(level.getBlockEntity(at) instanceof net.minecraft.world.level.block.entity.ChestBlockEntity box)) {
+            f.add("chest: no block entity");
+            return;
+        }
+        box.setItem(3, new ItemStack(Items.TORCH, 5));
+        var data = jp.revati.skyabyss.loot.SharedChests.get(level.getServer());
+        if (!jp.revati.skyabyss.loot.SharedChests.open(level, p, level.getBlockState(at), at, box) || p.getInventory().countItem(Items.TORCH) != 5 || !box.isEmpty()) {
+            f.add("chest first take: torches " + p.getInventory().countItem(Items.TORCH) + ", box empty " + box.isEmpty());
+        }
+        jp.revati.skyabyss.loot.SharedChests.open(level, p, level.getBlockState(at), at, box);
+        if (p.getInventory().countItem(Items.TORCH) != 5) {
+            f.add("chest second take inside the wait gave " + p.getInventory().countItem(Items.TORCH));
+        }
+        FakePlayer q = FakePlayerFactory.get(level, new GameProfile(UUID.fromString("7a0b1d00-0000-4000-8000-0000000c0b02"), "chest_b"));
+        q.getInventory().clearContent();
+        jp.revati.skyabyss.loot.SharedChests.open(level, q, level.getBlockState(at), at, box);
+        if (q.getInventory().countItem(Items.TORCH) != 5) {
+            f.add("chest: a second person got " + q.getInventory().countItem(Items.TORCH));
+        }
+        q.getInventory().clearContent();
+        data.forget(level, at, p.getUUID());
+        jp.revati.skyabyss.loot.SharedChests.open(level, p, level.getBlockState(at), at, box);
+        if (p.getInventory().countItem(Items.TORCH) != 10) {
+            f.add("chest after the wait: " + p.getInventory().countItem(Items.TORCH));
+        }
+        BlockPos plain = at.east(2);
+        level.setBlockAndUpdate(plain, Blocks.BARREL.defaultBlockState());
+        if (level.getBlockEntity(plain) instanceof net.minecraft.world.Container c2
+                && jp.revati.skyabyss.loot.SharedChests.open(level, p, level.getBlockState(plain), plain, c2)) {
+            f.add("an empty barrel was taken over");
+        }
+    }
+
     public static List<Step> steps() {
         return List.of(Step.once("rpg rules", RpgRulesSelfTest::run));
     }
@@ -176,6 +212,8 @@ public final class RpgRulesSelfTest {
                         + ", empty " + p.getInventory().countItem(Items.BUCKET) + ", source kept " + level.getFluidState(water).isSource());
             }
             p.getInventory().clearContent();
+            chests(level, p, c.north(3), f);
+            p.getInventory().clearContent();
             p.gameMode.changeGameModeForPlayer(GameType.SURVIVAL);
         } catch (RuntimeException e) {
             SkyAbyss.LOGGER.error("SELFTEST rpg rules crashed", e);
@@ -183,13 +221,13 @@ public final class RpgRulesSelfTest {
         } finally {
             Gathering.clearAll();
             if (c != null) {
-                for (BlockPos q : List.of(c, c.east(2), c.west(2), c.south(3), c.south(3).below())) {
+                for (BlockPos q : List.of(c, c.east(2), c.west(2), c.south(3), c.south(3).below(), c.north(3), c.north(3).east(2))) {
                     level.setBlockAndUpdate(q, Blocks.AIR.defaultBlockState());
                 }
             }
         }
         if (f.isEmpty()) {
-            SkyAbyss.LOGGER.info("SELFTEST rpg rules PASSED (rules registered, keep on death by default, log/ore gathering with tool check and regrow, no gathering of crafted blocks, bucket fill keeps the source, fake players left alone)");
+            SkyAbyss.LOGGER.info("SELFTEST rpg rules PASSED (shared chests: each person takes a copy with a personal 20-min wait, empty chests stay plain; rules registered, keep on death by default, log/ore gathering with tool check and regrow, no gathering of crafted blocks, bucket fill keeps the source, fake players left alone)");
         } else {
             for (String s : f) {
                 SkyAbyss.LOGGER.error("SELFTEST rpg rules FAILED: {}", s);

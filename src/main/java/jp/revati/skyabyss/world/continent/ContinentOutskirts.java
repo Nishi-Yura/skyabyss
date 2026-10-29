@@ -151,6 +151,24 @@ public final class ContinentOutskirts {
         return p.getPersistentData().getBoolean(FERRIED);
     }
 
+    // はじまりの島の上か (島の谷の図のある世界だけ。島の野営地と船着き場の中ほどから 300 以内。大陸の岸はその外)
+    public static boolean onIsland(ServerLevel level, BlockPos at) {
+        if (!IslandTrail.active(level)) {
+            return false;
+        }
+        ContinentLayout lay = ContinentLayout.get();
+        double cx = (lay.start().getX() + lay.dock().getX()) / 2.0;
+        double cz = (lay.start().getZ() + lay.dock().getZ()) / 2.0;
+        return Math.hypot(at.getX() - cx, at.getZ() - cz) < ISLAND_R;
+    }
+
+    static final double ISLAND_R = 300;
+
+    // 島の道を終えずに渡っていない人 (章は序章のまま。一章の頼みが始まっていても一章にしない)
+    public static boolean onIslandTrail(ServerPlayer p) {
+        return !ferried(p) && IslandTrail.active(p.serverLevel()) && !(p instanceof net.neoforged.neoforge.common.util.FakePlayer);
+    }
+
     // 鐘の都の南の門の外 (渡った人の着く所)。都の設計図の印 stand があればそこ
     public static BlockPos arrival(ServerLevel over) {
         BlockPos stand = jp.revati.skyabyss.opening.OpeningSites.shelterExtras(over.getServer(), "stand").get("stand");

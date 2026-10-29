@@ -135,4 +135,15 @@ public final class ContinentAreas {
     static void onLogout(PlayerEvent.PlayerLoggedOutEvent event) {
         SEEN.remove(event.getEntity().getUUID());
     }
+
+    // 生き返ったとき・ディメンションを移ったときは、いまの所をもう一度知らせる (画面の BGM が場所を失わないように。2026-10-29 の試遊「BGM 消える」)
+    @SubscribeEvent
+    static void onRespawn(PlayerEvent.PlayerRespawnEvent event) {
+        SEEN.remove(event.getEntity().getUUID());
+    }
+
+    @SubscribeEvent
+    static void onChangeDimension(PlayerEvent.PlayerChangedDimensionEvent event) {
+        SEEN.remove(event.getEntity().getUUID());
+    }
 }

@@ -619,5 +619,21 @@
   "quest.skyabyss.town.grave_3.candle.candle": "蝋燭を手に入れよう（道具屋）",
   "quest.skyabyss.town.grave_3.candle.journal": "名のない墓の前に灯す蝋燭を一本、墓守に届ける。",
   "quest.skyabyss.town.grave_3.light.journal": "蝋燭を作った。墓守に渡そう。",
-  "quest.skyabyss.town.grave_3.light.light": "墓守に蝋燭を渡そう"
+  "quest.skyabyss.town.grave_3.light.light": "墓守に蝋燭を渡そう",
+  "entity.skyabyss.guest_town_guide_whale": "鯨見の町の案内人",
+  "dialogue.skyabyss.guest_town_guide_whale.ask": "鯨見へようこそ。見張り台の鐘が鳴ったら、空を見上げてごらん。\n店を探しているなら、行きたい所を言って。足もとに灯りをともすよ。",
+  "dialogue.skyabyss.guest_town_guide_whale.ask.way": "店へ案内してもらう (灯りで案内)",
+  "dialogue.skyabyss.guest_town_guide_whale.ask.bye": "またにする",
+  "entity.skyabyss.guest_town_guide_tide": "汐守の町の案内人",
+  "dialogue.skyabyss.guest_town_guide_tide.ask": "汐守へようこそ。潮の匂いで、みんな一度は道に迷うの。\n店を探しているなら、行きたい所を言って。灯りで連れていくよ。",
+  "dialogue.skyabyss.guest_town_guide_tide.ask.way": "店へ案内してもらう (灯りで案内)",
+  "dialogue.skyabyss.guest_town_guide_tide.ask.bye": "またにする",
+  "entity.skyabyss.guest_town_guide_storm": "風待の町の案内人",
+  "dialogue.skyabyss.guest_town_guide_storm.ask": "風待まで、よく登ってきたね。風に押されて、通りを外れないように。\n店を探しているなら、行きたい所を言って。灯りで案内するよ。",
+  "dialogue.skyabyss.guest_town_guide_storm.ask.way": "店へ案内してもらう (灯りで案内)",
+  "dialogue.skyabyss.guest_town_guide_storm.ask.bye": "またにする",
+  "entity.skyabyss.guest_town_guide_ember": "灰炉の町の案内人",
+  "dialogue.skyabyss.guest_town_guide_ember.ask": "灰炉へようこそ。灰が積もって、足もとが見えにくいでしょう。\n店を探しているなら、行きたい所を言って。灯りで連れていくよ。",
+  "dialogue.skyabyss.guest_town_guide_ember.ask.way": "店へ案内してもらう (灯りで案内)",
+  "dialogue.skyabyss.guest_town_guide_ember.ask.bye": "またにする"
 }
