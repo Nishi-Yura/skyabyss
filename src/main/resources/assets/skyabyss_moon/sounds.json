@@ -229,5 +229,225 @@
         "volume": 0.9
       }
     ]
+  },
+  "leaper_jump": {
+    "subtitle": "subtitles.skyabyss_moon.leaper_jump",
+    "sounds": [
+      {
+        "name": "minecraft:entity.goat.long_jump",
+        "type": "event",
+        "pitch": 0.8,
+        "volume": 0.9
+      }
+    ]
+  },
+  "leaper_land": {
+    "subtitle": "subtitles.skyabyss_moon.leaper_land",
+    "sounds": [
+      {
+        "name": "minecraft:block.basalt.break",
+        "type": "event",
+        "pitch": 0.6,
+        "volume": 1.1
+      }
+    ]
+  },
+  "stone_charge": {
+    "subtitle": "subtitles.skyabyss_moon.stone_charge",
+    "sounds": [
+      {
+        "name": "minecraft:block.respawn_anchor.charge",
+        "type": "event",
+        "pitch": 1.4,
+        "volume": 0.8
+      }
+    ]
+  },
+  "stone_push": {
+    "subtitle": "subtitles.skyabyss_moon.stone_push",
+    "sounds": [
+      {
+        "name": "minecraft:entity.breeze.wind_burst",
+        "type": "event",
+        "pitch": 0.7,
+        "volume": 1.2
+      }
+    ]
+  },
+  "creeper_lift": {
+    "subtitle": "subtitles.skyabyss_moon.creeper_lift",
+    "sounds": [
+      {
+        "name": "minecraft:block.stone.break",
+        "type": "event",
+        "pitch": 0.6,
+        "volume": 0.8
+      }
+    ]
+  },
+  "creeper_rock": {
+    "subtitle": "subtitles.skyabyss_moon.creeper_rock",
+    "sounds": [
+      {
+        "name": "minecraft:block.deepslate.break",
+        "type": "event",
+        "pitch": 0.5,
+        "volume": 1.3
+      }
+    ]
+  },
+  "scale_creak": {
+    "subtitle": "subtitles.skyabyss_moon.scale_creak",
+    "sounds": [
+      {
+        "name": "minecraft:block.chain.step",
+        "type": "event",
+        "pitch": 0.5,
+        "volume": 0.7
+      }
+    ]
+  },
+  "scale_throw": {
+    "subtitle": "subtitles.skyabyss_moon.scale_throw",
+    "sounds": [
+      {
+        "name": "minecraft:entity.iron_golem.attack",
+        "type": "event",
+        "pitch": 0.6,
+        "volume": 1.0
+      }
+    ]
+  },
+  "scale_weight": {
+    "subtitle": "subtitles.skyabyss_moon.scale_weight",
+    "sounds": [
+      {
+        "name": "minecraft:block.anvil.land",
+        "type": "event",
+        "pitch": 0.6,
+        "volume": 0.9
+      }
+    ]
+  },
+  "scale_tilt": {
+    "subtitle": "subtitles.skyabyss_moon.scale_tilt",
+    "sounds": [
+      {
+        "name": "minecraft:block.grindstone.use",
+        "type": "event",
+        "pitch": 0.5,
+        "volume": 1.0
+      }
+    ]
+  },
+  "scale_slam": {
+    "subtitle": "subtitles.skyabyss_moon.scale_slam",
+    "sounds": [
+      {
+        "name": "minecraft:entity.warden.attack_impact",
+        "type": "event",
+        "pitch": 0.6,
+        "volume": 1.2
+      }
+    ]
+  },
+  "scale_sweep": {
+    "subtitle": "subtitles.skyabyss_moon.scale_sweep",
+    "sounds": [
+      {
+        "name": "minecraft:entity.player.attack.sweep",
+        "type": "event",
+        "pitch": 0.6,
+        "volume": 1.0
+      }
+    ]
+  },
+  "scale_topple": {
+    "subtitle": "subtitles.skyabyss_moon.scale_topple",
+    "sounds": [
+      {
+        "name": "minecraft:block.anvil.destroy",
+        "type": "event",
+        "pitch": 0.6,
+        "volume": 1.0
+      }
+    ]
+  },
+  "scale_roar": {
+    "subtitle": "subtitles.skyabyss_moon.scale_roar",
+    "sounds": [
+      {
+        "name": "minecraft:entity.ravager.roar",
+        "type": "event",
+        "pitch": 0.6,
+        "volume": 1.2
+      }
+    ]
+  },
+  "ledge_shake": {
+    "subtitle": "subtitles.skyabyss_moon.ledge_shake",
+    "sounds": [
+      {
+        "name": "minecraft:block.suspicious_gravel.break",
+        "type": "event",
+        "pitch": 0.8,
+        "volume": 0.7
+      }
+    ]
+  },
+  "ledge_fall": {
+    "subtitle": "subtitles.skyabyss_moon.ledge_fall",
+    "sounds": [
+      {
+        "name": "minecraft:block.tuff.break",
+        "type": "event",
+        "pitch": 0.7,
+        "volume": 1.0
+      }
+    ]
+  },
+  "ledge_back": {
+    "subtitle": "subtitles.skyabyss_moon.ledge_back",
+    "sounds": [
+      {
+        "name": "minecraft:block.tuff.place",
+        "type": "event",
+        "pitch": 1.2,
+        "volume": 0.6
+      }
+    ]
+  },
+  "plate_move": {
+    "subtitle": "subtitles.skyabyss_moon.plate_move",
+    "sounds": [
+      {
+        "name": "minecraft:block.piston.contract",
+        "type": "event",
+        "pitch": 0.6,
+        "volume": 0.7
+      }
+    ]
+  },
+  "weight_set": {
+    "subtitle": "subtitles.skyabyss_moon.weight_set",
+    "sounds": [
+      {
+        "name": "minecraft:block.anvil.place",
+        "type": "event",
+        "pitch": 1.4,
+        "volume": 0.6
+      }
+    ]
+  },
+  "light_body": {
+    "subtitle": "subtitles.skyabyss_moon.light_body",
+    "sounds": [
+      {
+        "name": "minecraft:entity.breeze.jump",
+        "type": "event",
+        "pitch": 1.4,
+        "volume": 0.8
+      }
+    ]
   }
 }

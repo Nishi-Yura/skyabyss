@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/cube_bottom_top",
+  "textures": {
+    "top": "skyabyss:block/moon_plate_top",
+    "side": "skyabyss:block/moon_plate_side",
+    "bottom": "skyabyss:block/moon_plate_side"
+  }
+}

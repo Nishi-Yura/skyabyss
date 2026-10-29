@@ -2242,5 +2242,6 @@
   "arch.skyabyss.deep.deep": "淵",
   "arch.skyabyss.past.past": "前世",
   "gui.skyabyss.tree.glyph_line": "紋: %1$s（段 %2$s）",
-  "message.skyabyss.skill.node_failed.rebirth": "転生の回数が足りない"
+  "message.skyabyss.skill.node_failed.rebirth": "転生の回数が足りない",
+  "map.skyabyss.moon.cliff": "上弦の崖"
 }

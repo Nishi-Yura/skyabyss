@@ -23,12 +23,14 @@ import net.minecraft.world.level.saveddata.SavedData;
 //   重さ    軽い (MoonGravity)
 //   行き来  都の大鐘楼の上の門 (MoonGate)。着く所の帰りの台 (天然磁石) を右クリックで都へ
 //   谷      着く所の南に区画 1「新月の谷」(valley.MoonValley。版 2 で一度だけ流し込む)
+//   崖      着く所の東に区画 2「上弦の崖」(cliff.MoonCliff。版 4 で一度だけ流し込む)
 public final class MoonWorld {
     public static final ResourceKey<Level> LEVEL = ResourceKey.create(Registries.DIMENSION, ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "moon"));
     public static final int SURFACE = 11;
     public static final BlockPos ARRIVAL = new BlockPos(0, SURFACE + 1, 0);
-    // 1 = 着く所とクレーター、2 = 新月の谷 (valley.MoonValley)、3 = 谷の踏み跡・星の溜まりの十字 (谷を流し込み直す)
-    static final int VERSION = 3;
+    // 1 = 着く所とクレーター、2 = 新月の谷 (valley.MoonValley)、3 = 谷の踏み跡・星の溜まりの十字 (谷を流し込み直す)、
+    // 4 = 上弦の崖 (cliff.MoonCliff。着く所の東 x 52〜240)
+    static final int VERSION = 4;
 
     private MoonWorld() {
     }
@@ -74,6 +76,9 @@ public final class MoonWorld {
         if (d.version < 3) {
             jp.revati.skyabyss.story.ch6.valley.MoonValley.build(level);
         }
+        if (d.version < 4) {
+            jp.revati.skyabyss.story.ch6.cliff.MoonCliff.build(level);
+        }
         d.version = VERSION;
         d.setDirty();
     }
@@ -81,6 +86,11 @@ public final class MoonWorld {
     // 新月の谷ができているか
     public static boolean valleyBuilt(MinecraftServer server) {
         return Data.get(server).version >= 2;
+    }
+
+    // 上弦の崖ができているか
+    public static boolean cliffBuilt(MinecraftServer server) {
+        return Data.get(server).version >= 4;
     }
 
     // 着く所とクレーター (版 1)

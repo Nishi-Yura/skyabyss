@@ -6,7 +6,11 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import jp.revati.skyabyss.SkyAbyss;
 import jp.revati.skyabyss.client.lowpoly.LowPoly;
 import jp.revati.skyabyss.client.lowpoly.LowPolyGeoRenderer;
+import jp.revati.skyabyss.story.ch6.mob.CliffCreeper;
 import jp.revati.skyabyss.story.ch6.mob.DustCrawler;
+import jp.revati.skyabyss.story.ch6.mob.MoonLeaper;
+import jp.revati.skyabyss.story.ch6.mob.MoonScale;
+import jp.revati.skyabyss.story.ch6.mob.PushStone;
 import jp.revati.skyabyss.story.ch6.mob.MoonMob;
 import jp.revati.skyabyss.story.ch6.mob.MoonMobsSetup;
 import jp.revati.skyabyss.story.ch6.mob.ShadowEmbracer;
@@ -20,7 +24,7 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import software.bernie.geckolib.cache.object.BakedGeoModel;
 
-// 新月の谷の敵と主の描画 (素材は tools/gen/ch6/gen_moon_mobs.py)。姿の段 (1〜3) で絵を替える: <id>・<id>_s1・<id>_s2。
+// 新月の谷・上弦の崖の敵と主の描画 (素材は tools/gen/ch6/gen_moon_mobs.py)。姿の段 (1〜3) で絵を替える: <id>・<id>_s1・<id>_s2。
 //   砂這い     潜っている間は体ごと砂の高さへ下げる (甲羅だけが出る)
 //   影の綴じ手 光の外では空ろな輪の頭 (と星の目) だけを描く
 //   影抱き     影に潜っている間は描かない (床を走る影の粒だけ)
@@ -39,6 +43,10 @@ public final class MoonMobRenderers {
         event.registerEntityRenderer(MoonMobsSetup.SHELL_HARE.get(), ctx -> new Foe<>(ctx, "shell_hare", 0.35f));
         event.registerEntityRenderer(MoonMobsSetup.SHADOW_STITCHER.get(), ctx -> new Foe<>(ctx, ShadowStitcher.ID, 0.3f));
         event.registerEntityRenderer(MoonMobsSetup.SHADOW_EMBRACER.get(), ctx -> new Foe<>(ctx, ShadowEmbracer.ID, 1.1f));
+        event.registerEntityRenderer(MoonMobsSetup.MOON_LEAPER.get(), ctx -> new Foe<>(ctx, MoonLeaper.ID, 0.4f));
+        event.registerEntityRenderer(MoonMobsSetup.PUSH_STONE.get(), ctx -> new Foe<>(ctx, PushStone.ID, 0.0f));
+        event.registerEntityRenderer(MoonMobsSetup.CLIFF_CREEPER.get(), ctx -> new Foe<>(ctx, CliffCreeper.ID, 0.45f));
+        event.registerEntityRenderer(MoonMobsSetup.MOON_SCALE.get(), ctx -> new Foe<>(ctx, MoonScale.ID, 1.2f, 1.35f));
     }
 
     static final class Model<T extends MoonMob> extends LowPolyGeoRenderer.Model<T> {
@@ -64,7 +72,11 @@ public final class MoonMobRenderers {
         private final float shadow;
 
         Foe(EntityRendererProvider.Context ctx, String name, float shadow) {
-            super(ctx, new MoonMobRenderers.Model<>(name), e -> name, 1.0f);
+            this(ctx, name, shadow, 1.0f);
+        }
+
+        Foe(EntityRendererProvider.Context ctx, String name, float shadow, float scale) {
+            super(ctx, new MoonMobRenderers.Model<>(name), e -> name, scale);
             this.shadowRadius = shadow;
             this.shadow = shadow;
         }
@@ -80,6 +92,10 @@ public final class MoonMobRenderers {
         @Override
         public void preRender(PoseStack poseStack, T mob, BakedGeoModel model, MultiBufferSource bufferSource, VertexConsumer buffer,
                               boolean isReRender, float partialTick, int packedLight, int packedOverlay, int colour) {
+            if (mob instanceof CliffCreeper cc) {
+                // 背の岩を外して落としたあとは、岩が戻るまで背は空
+                model.getBone("rock").ifPresent(bone -> bone.setHidden(cc.rockless()));
+            }
             if (mob instanceof DustCrawler c && c.buried() && !isReRender) {
                 poseStack.translate(0, -5.5 / 16.0, 0);
             }

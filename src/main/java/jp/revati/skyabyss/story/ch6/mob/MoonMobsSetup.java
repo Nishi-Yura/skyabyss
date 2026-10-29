@@ -23,7 +23,7 @@ import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
-// 六章 区画 1「新月の谷」の敵と主の登録 (docs/design/46 の 4.3)。素材は tools/gen/ch6/gen_moon_mobs.py。音は skyabyss_moon の名前空間。
+// 六章 区画 1「新月の谷」・区画 2「上弦の崖」の敵と主の登録 (docs/design/46 の 4.3・4.4)。素材は tools/gen/ch6/gen_moon_mobs.py。音は skyabyss_moon の名前空間。
 // ValleyBlocks.register から呼ぶ
 public final class MoonMobsSetup {
     public static final String SOUND_NS = "skyabyss_moon";
@@ -44,10 +44,28 @@ public final class MoonMobsSetup {
             () -> EntityType.Builder.of(ShadowEmbracer::new, MobCategory.MONSTER).sized(1.6f, 4.3f).eyeHeight(3.6f).fireImmune()
                     .clientTrackingRange(12).build(SkyAbyss.MODID + ":" + ShadowEmbracer.ID));
 
+    // 区画 2「上弦の崖」(docs/design/46 の 4.4)
+    public static final DeferredHolder<EntityType<?>, EntityType<MoonLeaper>> MOON_LEAPER = ENTITIES.register(MoonLeaper.ID,
+            () -> EntityType.Builder.of(MoonLeaper::new, MobCategory.MONSTER).sized(0.8f, 0.95f).eyeHeight(0.7f)
+                    .clientTrackingRange(10).build(SkyAbyss.MODID + ":" + MoonLeaper.ID));
+    public static final DeferredHolder<EntityType<?>, EntityType<PushStone>> PUSH_STONE = ENTITIES.register(PushStone.ID,
+            () -> EntityType.Builder.of(PushStone::new, MobCategory.MONSTER).sized(1.1f, 1.5f).eyeHeight(0.9f)
+                    .clientTrackingRange(10).build(SkyAbyss.MODID + ":" + PushStone.ID));
+    public static final DeferredHolder<EntityType<?>, EntityType<CliffCreeper>> CLIFF_CREEPER = ENTITIES.register(CliffCreeper.ID,
+            () -> EntityType.Builder.of(CliffCreeper::new, MobCategory.MONSTER).sized(0.9f, 0.7f).eyeHeight(0.4f)
+                    .clientTrackingRange(10).build(SkyAbyss.MODID + ":" + CliffCreeper.ID));
+    public static final DeferredHolder<EntityType<?>, EntityType<MoonScale>> MOON_SCALE = ENTITIES.register(MoonScale.ID,
+            () -> EntityType.Builder.of(MoonScale::new, MobCategory.MONSTER).sized(2.2f, 4.4f).eyeHeight(3.9f).fireImmune()
+                    .clientTrackingRange(12).build(SkyAbyss.MODID + ":" + MoonScale.ID));
+
     public static final DeferredItem<Item> DUST_CRAWLER_EGG = egg("dust_crawler_spawn_egg", DUST_CRAWLER, 0x1E2230, 0xA0A6B4);
     public static final DeferredItem<Item> SHELL_HARE_EGG = egg("shell_hare_spawn_egg", SHELL_HARE, 0x9AA0AE, 0xD8E4FF);
     public static final DeferredItem<Item> SHADOW_STITCHER_EGG = egg("shadow_stitcher_spawn_egg", SHADOW_STITCHER, 0x06060E, 0xBCD8FF);
     public static final DeferredItem<Item> SHADOW_EMBRACER_EGG = egg("shadow_embracer_spawn_egg", SHADOW_EMBRACER, 0x14162A, 0x8C96B0);
+    public static final DeferredItem<Item> MOON_LEAPER_EGG = egg("moon_leaper_spawn_egg", MOON_LEAPER, 0x26262E, 0xC8D8F0);
+    public static final DeferredItem<Item> PUSH_STONE_EGG = egg("push_stone_spawn_egg", PUSH_STONE, 0x5A5C64, 0xB0C8F0);
+    public static final DeferredItem<Item> CLIFF_CREEPER_EGG = egg("cliff_creeper_spawn_egg", CLIFF_CREEPER, 0x3A3A42, 0x9A9AA2);
+    public static final DeferredItem<Item> MOON_SCALE_EGG = egg("moon_scale_spawn_egg", MOON_SCALE, 0x2C2E36, 0xE0E4EC);
 
     // 落とし物 (月の材料。説明の一行は item.skyabyss.<id>.desc)
     public static final DeferredItem<Item> MOON_DUST = ITEMS.register("moon_dust", () -> new Ch4Setup.Described(new Item.Properties()));
@@ -70,6 +88,20 @@ public final class MoonMobsSetup {
     public static final DeferredHolder<SoundEvent, SoundEvent> EMBRACER_WAVE = sound("embracer_wave");
     public static final DeferredHolder<SoundEvent, SoundEvent> EMBRACER_FROZEN = sound("embracer_frozen");
     public static final DeferredHolder<SoundEvent, SoundEvent> EMBRACER_ROAR = sound("embracer_roar");
+    public static final DeferredHolder<SoundEvent, SoundEvent> LEAPER_JUMP = sound("leaper_jump");
+    public static final DeferredHolder<SoundEvent, SoundEvent> LEAPER_LAND = sound("leaper_land");
+    public static final DeferredHolder<SoundEvent, SoundEvent> STONE_CHARGE = sound("stone_charge");
+    public static final DeferredHolder<SoundEvent, SoundEvent> STONE_PUSH = sound("stone_push");
+    public static final DeferredHolder<SoundEvent, SoundEvent> CREEPER_LIFT = sound("creeper_lift");
+    public static final DeferredHolder<SoundEvent, SoundEvent> CREEPER_ROCK = sound("creeper_rock");
+    public static final DeferredHolder<SoundEvent, SoundEvent> SCALE_CREAK = sound("scale_creak");
+    public static final DeferredHolder<SoundEvent, SoundEvent> SCALE_THROW = sound("scale_throw");
+    public static final DeferredHolder<SoundEvent, SoundEvent> SCALE_WEIGHT = sound("scale_weight");
+    public static final DeferredHolder<SoundEvent, SoundEvent> SCALE_TILT = sound("scale_tilt");
+    public static final DeferredHolder<SoundEvent, SoundEvent> SCALE_SLAM = sound("scale_slam");
+    public static final DeferredHolder<SoundEvent, SoundEvent> SCALE_SWEEP = sound("scale_sweep");
+    public static final DeferredHolder<SoundEvent, SoundEvent> SCALE_TOPPLE = sound("scale_topple");
+    public static final DeferredHolder<SoundEvent, SoundEvent> SCALE_ROAR = sound("scale_roar");
 
     private MoonMobsSetup() {
     }
@@ -96,12 +128,16 @@ public final class MoonMobsSetup {
         event.put(SHELL_HARE.get(), ShellHare.createAttributes().build());
         event.put(SHADOW_STITCHER.get(), ShadowStitcher.createAttributes().build());
         event.put(SHADOW_EMBRACER.get(), ShadowEmbracer.createAttributes().build());
+        event.put(MOON_LEAPER.get(), MoonLeaper.createAttributes().build());
+        event.put(PUSH_STONE.get(), PushStone.createAttributes().build());
+        event.put(CLIFF_CREEPER.get(), CliffCreeper.createAttributes().build());
+        event.put(MOON_SCALE.get(), MoonScale.createAttributes().build());
     }
 
     private static void onCreativeTab(BuildCreativeModeTabContentsEvent event) {
         if (event.getTabKey().equals(ModItems.LEGACY_TAB)) {
-            for (DeferredItem<Item> i : List.of(DUST_CRAWLER_EGG, SHELL_HARE_EGG, SHADOW_STITCHER_EGG, SHADOW_EMBRACER_EGG, MOON_DUST, CRESCENT_SHELL,
-                    SHADOW_THREAD)) {
+            for (DeferredItem<Item> i : List.of(DUST_CRAWLER_EGG, SHELL_HARE_EGG, SHADOW_STITCHER_EGG, SHADOW_EMBRACER_EGG, MOON_LEAPER_EGG, PUSH_STONE_EGG,
+                    CLIFF_CREEPER_EGG, MOON_SCALE_EGG, MOON_DUST, CRESCENT_SHELL, SHADOW_THREAD)) {
                 event.accept(i.get());
             }
         }
@@ -114,10 +150,18 @@ public final class MoonMobsSetup {
             put(ShellHare.ID, 14);
             put(ShadowStitcher.ID, 20);
             put(ShadowEmbracer.ID, 400);
+            put2(MoonLeaper.ID, 16);
+            put2(PushStone.ID, 18);
+            put2(CliffCreeper.ID, 18);
+            put2(MoonScale.ID, 480);
         });
     }
 
     private static void put(String id, int xp) {
         GrowthRewards.MOD_ENEMIES.put(SkyAbyss.MODID + ":" + id, new GrowthRewards.Source(xp, MoonMob.MOON_LEVEL));
+    }
+
+    private static void put2(String id, int xp) {
+        GrowthRewards.MOD_ENEMIES.put(SkyAbyss.MODID + ":" + id, new GrowthRewards.Source(xp, MoonMob.MOON_LEVEL_2));
     }
 }

@@ -181,3 +181,7 @@ if __name__ == "__main__":
     for p in ids:
         sheet(p)
     print("ok", len(ids))
+
+
+# 選定 (2026-10-28): 前のループの自分 (二人目) は C (綱を担ぐ登り手)。cast の guest_moon_past2 として登録する (guestId = moon_past2)
+C.CAST["guest_moon_past2"] = C.CAST["moon_past2_c"]

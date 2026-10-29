@@ -8,6 +8,13 @@
 - 試遊版: 0.8.0（`build/libs/skyabyss-0.8.0.jar`。確認表 `docs/review/playtest_0.8.0.md`、遊び方 `docs/beta_how_to_play.md`）。
 - 自己テスト: `bash <scratchpad>/fresh_continent.sh "<名前,…>" <世界名>`（空なら全部。大陸の新しい世界で回す）。`abyss escort` はほかと一緒に流すと時間切れで落ちることがある（単独では通る）。
 
+## 2026-10-30 午後（六章 区画 2「上弦の崖」。設計 [46](design/46_moon.md) の 4.4.2）
+
+- 区画 2 を一つ通しで作った: 地形（`tools/gen/world/build_moon_cliff.py` → `data/skyabyss/moon/cliff.json`、`story/ch6/cliff/MoonCliff`。月の世界の版 4）、仕掛け（崩れる棚・天秤の皿と錘・跳び石の塔。欠片の台・星の門・溜まりは谷のブロックを置き場所で `CliffPuzzles` へ回す）、星術「軽身」（空中でもう一段跳ぶ。`LightBody`・`client/LightBodyClient`）、敵 3 種（月跳ね・押し石・崖這い）と主「月秤」（`story/ch6/mob`。模型はラフの選んだ案を `gen_moon_mobs.py` が入れ、動きを書いた）、前のループの自分（二人目「面頬の登り手」。`cast_moon.py` の案 C）、頼み `main_moon_cliff`、会話、文、地図、ブロックの絵（`gen_cliff_assets.py`）。
+- 「ここまで」の札（`MoonEnd`）は崖を終えた人に出る形に移した（谷のテストも合わせた）。
+- 気づいた決まり: 生き物の体力の上限は 1024（月秤は 850、区画 1 の影抱きの 1100 も 1024 で止まっている）。月の跳びは大きい（一段 4.7・軽身 9.4、平らなら 12〜19 先まで）ので、主の皿へは地形だけで塞がず、門を通らずに皿に立った人を押し戻す（`CliffTicker.guardPlate`）。観戦モードの人は天秤の重さに数えない。
+- 確かめ: 自己テスト `moon cliff`（道が跳ばずに登れる・跳び石と天秤の高さが軽身でだけ届く・崩れる棚・皿の守り・頼みと札・敵の数字・主）、`moon world`・`moon valley`・`npc`・`lang`。撮影 `tools/shots/moon_cliff.txt`（見比べ `docs/review/moon/cliff_2026-10-30.jpg`）。戦いの数字と難しさ、軽身の手ざわりは試遊で。
+
 ## 2026-10-30 昼（BGM 17 曲。設計 [49](design/49_bgm.md)）
 
 - マインクラフトの曲を止め、場所と戦いの曲を流す（`client/music/MusicDirector`・`LoopMusic`、`music/MusicTracks`・`MusicArea`）。地上の場所は `ContinentAreas` の読みを `MusicArea` でサーバーから知らせる。ボスの帯 16 本に `MusicArea.bossBar`（ボスの曲の印。名のある野良の敵と護衛には付けない）、心臓かどうかは帯の名前の鍵（差し込み `BossHealthOverlayAccessor`）。見る者・空の通過・雲の目の間は無音（`hushesMusic`）。
@@ -183,6 +190,7 @@
    - `docs/review` の選ばれなかった案は、モデルを入れるスクリプトが同じ品の別の案を読むものだけ消した（728 ファイル）。読む案が分からない品（引数で案を選ぶスクリプトなど）は残した。
 1. 技の木 v2（48）: 試遊で数値を詰める（節の値・点の総量・閾値・要求値）。
 2. 試遊 0.8.0（`docs/review/playtest_0.8.0.md`）の声を待つ。BGM（49）の聞き心地も試遊の声で直す（`build_all.py <id>`）。
+3a. 六章の続き（46 の 5 章）: 区画 3「満月の野」（光の満ち引き・星術「一瞬止め」）→ 区画 4「下弦の淵」（残像）→ 月の核。区画ごとに敵 3 種と主・前の自分のラフ → 選定 → 実装。
 3. クエストの見直しは済んだ（初日のお使いと風の道の旗を消し、墓守を 2 段に、大干潮と峰の足もとを時刻で閉じない形に、折れた剣は自分の得物を研ぐ形に）。
 4. 都・見どころの仕上げの撮影は 2026-10-30 に撮って見た（`docs/review/capital_dress_2026-10-30.jpg`・`poi_dress_2026-10-30.jpg`）。崩れ・抜けなし。見どころは作りが小さめ（崩れた家・見張り台）なので、作り込むなら 45 の仕上げの段で。試遊 0.7.1 の声の直しの確かめは試遊の声待ち。
 5. 大きく変えたら jar を作り直す。

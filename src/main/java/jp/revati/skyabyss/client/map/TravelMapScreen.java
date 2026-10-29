@@ -518,7 +518,7 @@ public class TravelMapScreen extends Screen {
         if (view > 600) {
             return;
         }
-        // 名前: 着く所・新月の谷
+        // 名前: 着く所・新月の谷・上弦の崖
         int[] land = project(0, -12);
         if (land[2] == 0) {
             g.drawCenteredString(font, Component.translatable("map.skyabyss.moon.landing"), land[0], land[1] - 4, 0xFFE6E8F0);
@@ -526,6 +526,10 @@ public class TravelMapScreen extends Screen {
         int[] valley = project(-60, 120);
         if (valley[2] == 0) {
             g.drawCenteredString(font, Component.translatable("map.skyabyss.moon.valley"), valley[0], valley[1] - 4, 0xFFE6E8F0);
+        }
+        int[] cliff = project(150, -78);
+        if (cliff[2] == 0) {
+            g.drawCenteredString(font, Component.translatable("map.skyabyss.moon.cliff"), cliff[0], cliff[1] - 4, 0xFFE6E8F0);
         }
     }
 

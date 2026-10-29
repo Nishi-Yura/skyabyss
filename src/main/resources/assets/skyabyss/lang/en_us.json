@@ -2242,5 +2242,6 @@
   "arch.skyabyss.deep.deep": "The Deep",
   "arch.skyabyss.past.past": "Past lives",
   "gui.skyabyss.tree.glyph_line": "Glyph: %1$s (level %2$s)",
-  "message.skyabyss.skill.node_failed.rebirth": "Not enough rebirths"
+  "message.skyabyss.skill.node_failed.rebirth": "Not enough rebirths",
+  "map.skyabyss.moon.cliff": "Waxing Cliffs"
 }

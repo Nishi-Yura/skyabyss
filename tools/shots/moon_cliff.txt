@@ -1,0 +1,91 @@
+# 六章 区画 2「上弦の崖」(docs/design/46 の 4.4): 崖の見下ろし、野営と前の自分 (二人目)、登る道、跳び石の塔、崩れる棚、天秤 (水平と、錘二つで上がった東の皿)、
+# 頂の門、主の皿と月秤、敵の構え
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/moon_cliff.txt -PshotsName=moon_cliff
+# 観戦モードで撮る (月は軽いので、ふつうのモードだと宙で落ちていく)。見やすさのため暗視をかけた絵が主
+world moon_cliff1 continent
+size 1600 900
+timeout 2400
+render 14
+clouds off
+waitchunks 300
+wait 100
+cmd skyabyss cinematic stop
+close
+cmd gamemode creative
+cmd skyabyss moonworld enter
+waitchunks 200
+wait 100
+cmd skyabyss moonworld phase 1
+cmd gamemode spectator
+hud off
+cmd tp @s 46 112 70 225 32
+waitchunks 300
+wait 80
+shot c01_overview_dark
+cmd effect give @s minecraft:night_vision 99999 0 true
+wait 10
+shot c02_overview
+cmd tp @s 76 16 28 209 12
+waitchunks 100
+wait 80
+shot c03_camp
+cmd tp @s 92 30 16 240 14
+wait 40
+shot c04_path_low
+cmd tp @s 78 50 18 226 14
+wait 40
+shot c05_tower
+cmd tp @s 92 45 10 212 10
+wait 30
+shot c05b_tower_close
+cmd tp @s 150 48 -30 70 20
+wait 40
+shot c06_ledge
+cmd tp @s 116 46 -24 -80 30
+wait 30
+shot c06b_ledge_close
+cmd tp @s 148 68 -31 270 16
+wait 40
+shot c07_balance_level
+cmd gamemode creative
+cmd tp @s 157.5 56 -43.5 -25 15
+cmd setblock 164 56 -36 skyabyss:moon_weight
+cmd setblock 162 56 -36 skyabyss:moon_weight
+wait 100
+shot c08_balance_raised
+cmd gamemode spectator
+cmd tp @s 183.4 70 -42.6 -71 5
+wait 40
+shot c09_gate
+cmd tp @s 194 92 -52 308 28
+waitchunks 100
+wait 30
+shot c10_arena
+cmd skyabyss moonworld cliff_lord
+wait 80
+shot c11_scale
+cmd tp @s 204 84 -40 290 8
+wait 20
+shot c12_scale_close
+cmd skyabyss moonworld pose tilt
+wait 30
+shot c13_scale_tilt
+cmd skyabyss moonworld pose topple
+wait 16
+shot c14_scale_topple
+cmd skyabyss moonworld cliff_clear
+cmd summon skyabyss:moon_leaper 206 81 -40 {NoAI:1b,Rotation:[90f,0f]}
+cmd summon skyabyss:push_stone 210 82.5 -40 {NoAI:1b,Rotation:[90f,0f]}
+cmd summon skyabyss:cliff_creeper 214 81 -40 {NoAI:1b,Rotation:[90f,0f]}
+cmd tp @s 210 83 -46 0 10
+wait 40
+shot c15_mobs
+cmd skyabyss moonworld pose leap
+wait 14
+shot c16_leaper_leap
+cmd skyabyss moonworld pose charge
+wait 14
+shot c17_stone_charge
+cmd skyabyss moonworld pose throw
+wait 7
+shot c18_creeper_throw

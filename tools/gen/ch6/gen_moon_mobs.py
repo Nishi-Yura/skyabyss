@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""六章 区画 1「新月の谷」の敵 3 種と主の素材を入れる (docs/design/46 の 4.3・4.3.1)。
+"""六章 区画 1「新月の谷」・区画 2「上弦の崖」の敵 3 種ずつと主の素材を入れる (docs/design/46 の 4.3・4.3.1・4.4・4.4.1)。
 
   PYTHONIOENCODING=utf-8 python -I tools/gen/ch6/gen_moon_mobs.py [名前...]   (名前を並べるとその敵だけ)
 
@@ -13,6 +13,7 @@
   assets/skyabyss_moon/sounds.json                            音の出来事 (既存の音の別名。字幕は lang)
 
 選んだ案 (2026-10-28): 砂這い A 甲殻の掘り手・殻背の兎 B 欠けた三日月・影の綴じ手 C 裂けた帯・影抱き B 影の母。
+  区画 2: 月跳ね A 岩の跳び虫・押し石 A 目のある輪石・崖這い B 岩背負いの蟹・月秤 A 天秤を担ぐ巨人。
 回転の約束: kf の値で書き、ファイルへは (-x, -y, z)。kf の x が負 = 前へ傾く (垂れた腕なら前へ上がる、前を向いた顎なら先が上がる。
   深淵の前の私の影の「手を上げる」= -110 と同じ)。bone([...]) に直接書く文字の式はファイルの値なので逆 (正 = 前へ傾く)。位置はそのまま (y が上)。
 """
@@ -28,7 +29,8 @@ A = os.path.join(ROOT, "src", "main", "resources", "assets", "skyabyss")
 AM = os.path.join(ROOT, "src", "main", "resources", "assets", "skyabyss_moon")
 ROUGH = os.path.join(ROOT, "docs", "review", "moon_roughs")
 
-CHOICE = {"dust_crawler": "a", "shell_hare": "b", "shadow_stitcher": "c", "shadow_embracer": "b"}
+CHOICE = {"dust_crawler": "a", "shell_hare": "b", "shadow_stitcher": "c", "shadow_embracer": "b",
+          "moon_leaper": "a", "push_stone": "a", "cliff_creeper": "b", "moon_scale": "a"}
 
 
 def wjson(path, data, indent=2):
@@ -214,7 +216,116 @@ def shadow_embracer():
             p + "roar": once(2.0, roar), p + "hurt": once(0.22, hurt_bones()), p + "death": once(2.0, death, True)}
 
 
-ANIMS = {"dust_crawler": dust_crawler, "shell_hare": shell_hare, "shadow_stitcher": shadow_stitcher, "shadow_embracer": shadow_embracer}
+def scale(frames):
+    return {"%.2f" % t: list(v) for t, v in frames.items()}
+
+
+# ---------------------------------------------------------------- 月跳ね (岩の跳び虫。長い後ろ脚で跳びかかる・鎌の前腕で斬る)
+def moon_leaper():
+    p = "animation.moon_leaper."
+    idle = {"head": bone([S(0, 4, 70), S(90, 8, 50), "0"]), "arm_l": bone([S(0, 5, 90), "0", "0"]), "arm_r": bone([S(180, 5, 90), "0", "0"]),
+            "body": bone(None, [0, "math.abs(%s)*0.4" % S(0, 1, 80), 0])}
+    walk = {"leg_l": bone([S(0, 22, 720), "0", "0"]), "leg_r": bone([S(180, 22, 720), "0", "0"]),
+            "arm_l": bone([S(180, 14, 720), "0", "0"]), "arm_r": bone([S(0, 14, 720), "0", "0"]),
+            "body": bone(["0", "0", S(0, 3, 720)], [0, "math.abs(%s)" % S(0, 0.8, 720), 0])}
+    # 跳びかかる (2.0 秒): 屈む → 跳ぶ → 宙で脚を畳み鎌を下へ構える → 落ちて着く
+    leap = {"body": bone(kf({0: (0, 0, 0), 0.2: (12, 0, 0), 0.3: (-25, 0, 0), 0.9: (20, 0, 0), 1.1: (35, 0, 0), 1.4: (0, 0, 0), 2.0: (0, 0, 0)}),
+                         kf({0: (0, 0, 0), 0.2: (0, -2.0, 0), 0.3: (0, 1.0, 0), 1.4: (0, 0, 0)}, False)),
+            "leg_l": bone(kf({0: (0, 0, 0), 0.2: (40, 0, 0), 0.3: (-55, 0, 0), 0.9: (60, 0, 0), 1.3: (20, 0, 0), 1.6: (0, 0, 0)})),
+            "leg_r": bone(kf({0: (0, 0, 0), 0.2: (40, 0, 0), 0.3: (-55, 0, 0), 0.9: (60, 0, 0), 1.3: (20, 0, 0), 1.6: (0, 0, 0)})),
+            "arm_l": bone(kf({0: (0, 0, 0), 0.3: (-60, 0, 10), 0.9: (-110, 0, 15), 1.3: (30, 0, 0), 1.7: (0, 0, 0)})),
+            "arm_r": bone(kf({0: (0, 0, 0), 0.3: (-60, 0, -10), 0.9: (-110, 0, -15), 1.3: (30, 0, 0), 1.7: (0, 0, 0)})),
+            "head": bone(kf({0: (0, 0, 0), 0.3: (-15, 0, 0), 1.1: (20, 0, 0), 1.6: (0, 0, 0)}))}
+    # 斬る: 右の鎌を振りかぶって下ろし、左が追う
+    slash = {"arm_r": bone(kf({0: (0, 0, 0), 0.15: (-110, 0, 20), 0.28: (35, 0, -10), 0.5: (0, 0, 0)})),
+             "arm_l": bone(kf({0: (0, 0, 0), 0.2: (-90, 0, -15), 0.35: (30, 0, 10), 0.55: (0, 0, 0)})),
+             "body": bone(kf({0: (0, 0, 0), 0.15: (0, 15, 0), 0.3: (10, -15, 0), 0.55: (0, 0, 0)}))}
+    return {p + "idle": loop(2.5, idle), p + "walk": loop(0.5, walk), p + "leap": once(2.0, leap), p + "attack": once(0.55, slash),
+            p + "hurt": once(0.22, hurt_bones()), p + "death": once(0.8, death_bones(170, -0.5), True)}
+
+
+# ---------------------------------------------------------------- 押し石 (目のある輪石。輪がいつも回り、溜めると速く、押すと輪が膨らむ)
+def push_stone():
+    p = "animation.push_stone."
+    idle = {"ring": bone(["0", "0", "query.anim_time * 40"]), "core": bone([S(0, 6, 60), S(90, 10, 40), "0"], [0, S(0, 0.5, 70), 0])}
+    walk = {"ring": bone(["0", "0", "query.anim_time * 90"]), "core": bone([S(0, 6, 90), "0", "0"])}
+    charge = {"ring": bone(["0", "0", "query.anim_time * 720"]), "core": dict(bone(kf({0: (0, 0, 0), 1.0: (0, 0, 0)})),
+                                                                             scale=scale({0: (1, 1, 1), 0.8: (1.25, 1.25, 1.25), 1.0: (1.3, 1.3, 1.3)}))}
+    push = {"ring": dict(bone(kf({0: (0, 0, 0), 0.4: (0, 0, 120)})), scale=scale({0: (1, 1, 1), 0.12: (1.45, 1.45, 1.45), 0.4: (1, 1, 1)})),
+            "core": dict(bone(kf({0: (0, 0, 0), 0.12: (0, 0, 0)})), scale=scale({0: (1.3, 1.3, 1.3), 0.12: (0.8, 0.8, 0.8), 0.4: (1, 1, 1)}))}
+    hurt = {"body": bone(kf({0: (0, 0, 0), 0.06: (0, 0, 12), 0.22: (0, 0, 0)}))}
+    death = {"body": bone(kf({0: (0, 0, 0), 0.6: (80, 0, 30), 1.0: (90, 0, 40)}), kf({0: (0, 0, 0), 0.6: (0, -6, 0), 1.0: (0, -9, 0)}, False))}
+    return {p + "idle": loop(9.0, idle), p + "walk": loop(4.0, walk), p + "charge": once(1.0, charge, True), p + "push": once(0.4, push),
+            p + "hurt": once(0.22, hurt), p + "death": once(1.0, death, True)}
+
+
+# ---------------------------------------------------------------- 崖這い (岩背負いの蟹。背の岩を鋏で外して投げる・挟む)
+def cliff_creeper():
+    p = "animation.cliff_creeper."
+    idle = {"arm_l": bone(["0", S(0, 6, 60), "0"]), "arm_r": bone(["0", S(180, 6, 60), "0"]), "head": bone([S(0, 3, 50), "0", "0"]),
+            "body": bone(None, [0, "math.abs(%s)*0.3" % S(0, 1, 60), 0])}
+    walk = {"leg_l": bone([S(0, 25, 600), "0", S(90, 8, 600)]), "leg_r": bone([S(180, 25, 600), "0", S(270, 8, 600)]),
+            "arm_l": bone([S(180, 10, 600), "0", "0"]), "arm_r": bone([S(0, 10, 600), "0", "0"]), "body": bone(["0", "0", S(0, 4, 600)])}
+    # 岩落とし: 鋏を背へ回して岩を持ち上げ (0.3)、前へ放る (0.45)。そのあと背の岩は描かない (描く側)
+    throw = {"arm_l": bone(kf({0: (0, 0, 0), 0.3: (-150, 0, 20), 0.45: (-40, 0, 10), 0.8: (0, 0, 0)})),
+             "arm_r": bone(kf({0: (0, 0, 0), 0.3: (-150, 0, -20), 0.45: (-40, 0, -10), 0.8: (0, 0, 0)})),
+             "rock": bone(kf({0: (0, 0, 0), 0.3: (-20, 0, 0), 0.45: (-60, 0, 0)}), kf({0: (0, 0, 0), 0.3: (0, 3.5, 1.0), 0.45: (0, 5.0, -6.0)}, False)),
+             "body": bone(kf({0: (0, 0, 0), 0.3: (15, 0, 0), 0.45: (-10, 0, 0), 0.8: (0, 0, 0)}))}
+    pinch = {"arm_r": bone(kf({0: (0, 0, 0), 0.15: (-35, 25, 0), 0.28: (-20, -10, 0), 0.45: (0, 0, 0)})),
+             "arm_l": bone(kf({0: (0, 0, 0), 0.15: (-35, -25, 0), 0.28: (-20, 10, 0), 0.45: (0, 0, 0)})),
+             "body": bone(kf({0: (0, 0, 0), 0.15: (-8, 0, 0), 0.45: (0, 0, 0)}))}
+    death = {"body": bone(kf({0: (0, 0, 0), 0.5: (0, 0, 170), 0.9: (0, 0, 180)}), kf({0: (0, 0, 0), 0.5: (0, 3, 0), 0.9: (0, 2, 0)}, False))}
+    return {p + "idle": loop(3.0, idle), p + "walk": loop(0.6, walk), p + "throw": once(0.8, throw), p + "attack": once(0.45, pinch),
+            p + "hurt": once(0.22, hurt_bones()), p + "death": once(0.9, death, True)}
+
+
+# ---------------------------------------------------------------- 月秤 (天秤を担ぐ巨人。錘を投げる・傾ける・叩き割る・薙ぐ・崩れる)
+def moon_scale():
+    p = "animation.moon_scale."
+    idle = {"body": bone([S(0, 1.5, 30), "0", "0"], [0, S(0, 0.4, 30), 0]), "beam": bone(["0", "0", S(0, 3, 25)]),
+            "head": bone([S(90, 3, 20), S(0, 8, 15), "0"])}
+    walk = {"leg_l": bone([S(0, 18, 240), "0", "0"]), "leg_r": bone([S(180, 18, 240), "0", "0"]),
+            "body": bone(["0", "0", S(0, 3, 240)], [0, "math.abs(%s)" % S(0, 0.8, 240), 0]), "beam": bone(["0", "0", S(90, 5, 240)])}
+    # 錘を投げる (1.3): 右の皿の側を振り上げて、前へ放る
+    throw = {"beam": bone(kf({0: (0, 0, 0), 0.5: (0, 0, 18), 0.8: (0, 0, -10), 1.3: (0, 0, 0)})),
+             "arm_r": bone(kf({0: (0, 0, 0), 0.5: (-40, 0, -20), 0.8: (30, 0, 0), 1.3: (0, 0, 0)})),
+             "body": bone(kf({0: (0, 0, 0), 0.5: (0, -20, 0), 0.8: (8, 15, 0), 1.3: (0, 0, 0)}))}
+    # 傾ける (5.0): 棹を担ぎ上げて (1.5) 一方へ傾け、保つ (4.5 まで)
+    tilt = {"beam": bone(kf({0: (0, 0, 0), 1.5: (0, 0, 28), 4.5: (0, 0, 28), 5.0: (0, 0, 0)}),
+                         kf({0: (0, 0, 0), 1.0: (0, 3, 0), 1.5: (0, 2, 0), 4.5: (0, 2, 0), 5.0: (0, 0, 0)}, False)),
+            "body": bone(kf({0: (0, 0, 0), 1.5: (8, 0, 10), 4.5: (8, 0, 10), 5.0: (0, 0, 0)})),
+            "arm_l": bone(kf({0: (0, 0, 0), 1.5: (-30, 0, 20), 4.5: (-30, 0, 20), 5.0: (0, 0, 0)})),
+            "arm_r": bone(kf({0: (0, 0, 0), 1.5: (-10, 0, -10), 4.5: (-10, 0, -10), 5.0: (0, 0, 0)})),
+            "leg_l": bone(kf({0: (0, 0, 0), 1.5: (15, 0, 0), 4.5: (15, 0, 0), 5.0: (0, 0, 0)}))}
+    # 叩き割り (2.2): 屈む → 跳ぶ → 叩きつける
+    slam = {"body": bone(kf({0: (0, 0, 0), 0.4: (15, 0, 0), 0.6: (-15, 0, 0), 1.4: (-10, 0, 0), 1.5: (25, 0, 0), 2.2: (0, 0, 0)}),
+                         kf({0: (0, 0, 0), 0.4: (0, -4, 0), 0.6: (0, 2, 0), 1.5: (0, -3, 0), 2.2: (0, 0, 0)}, False)),
+            "beam": bone(kf({0: (0, 0, 0), 0.6: (-40, 0, 0), 1.4: (-60, 0, 0), 1.5: (30, 0, 0), 2.2: (0, 0, 0)})),
+            "leg_l": bone(kf({0: (0, 0, 0), 0.4: (35, 0, 0), 0.6: (-20, 0, 0), 1.5: (30, 0, 0), 2.2: (0, 0, 0)})),
+            "leg_r": bone(kf({0: (0, 0, 0), 0.4: (35, 0, 0), 0.6: (-20, 0, 0), 1.5: (30, 0, 0), 2.2: (0, 0, 0)}))}
+    # 薙ぎ払い (1.4): 棹ごと体を引いて (0.8) 前へ振り抜く
+    sweep = {"body": bone(kf({0: (0, 0, 0), 0.8: (0, -55, 0), 1.0: (0, 65, 0), 1.4: (0, 0, 0)})),
+             "beam": bone(kf({0: (0, 0, 0), 0.8: (0, 0, -12), 1.0: (0, 0, 10), 1.4: (0, 0, 0)}))}
+    # 崩れる (5.0): 膝をつき、前へ傾いて棹が落ちる。保って (4.5)、立ち直る
+    topple = {"body": bone(kf({0: (0, 0, 0), 0.5: (30, 0, 0), 4.5: (30, 0, 0), 5.0: (0, 0, 0)}),
+                           kf({0: (0, 0, 0), 0.5: (0, -7, 0), 4.5: (0, -7, 0), 5.0: (0, 0, 0)}, False)),
+              "leg_l": bone(kf({0: (0, 0, 0), 0.5: (-70, 0, 0), 4.5: (-70, 0, 0), 5.0: (0, 0, 0)})),
+              "leg_r": bone(kf({0: (0, 0, 0), 0.5: (-20, 0, 0), 4.5: (-20, 0, 0), 5.0: (0, 0, 0)})),
+              "beam": bone(kf({0: (0, 0, 0), 0.5: (20, 0, -30), 4.5: (20, 0, -30), 5.0: (0, 0, 0)})),
+              "head": bone(kf({0: (0, 0, 0), 0.5: (25, 0, 0), 4.5: (25, 0, 0), 5.0: (0, 0, 0)}))}
+    roar = {"beam": bone(kf({0: (0, 0, 0), 0.5: (0, 0, 0), 1.6: (0, 0, 0), 2.0: (0, 0, 0)}), kf({0: (0, 0, 0), 0.5: (0, 6, 0), 1.6: (0, 6, 0), 2.0: (0, 0, 0)}, False)),
+            "arm_l": bone(kf({0: (0, 0, 0), 0.5: (-60, 0, 25), 1.6: (-60, 0, 25), 2.0: (0, 0, 0)})),
+            "arm_r": bone(kf({0: (0, 0, 0), 0.5: (-60, 0, -25), 1.6: (-60, 0, -25), 2.0: (0, 0, 0)})),
+            "head": bone(kf({0: (0, 0, 0), 0.5: (-30, 0, 0), 1.6: (-30, 0, 0), 2.0: (0, 0, 0)}))}
+    death = {"body": bone(kf({0: (0, 0, 0), 0.8: (-20, 0, 10), 2.0: (-80, 0, 15)}), kf({0: (0, 0, 0), 0.8: (0, -2, 0), 2.0: (0, -18, 0)}, False)),
+             "beam": bone(kf({0: (0, 0, 0), 0.8: (0, 0, 30), 2.0: (40, 0, 60)}))}
+    return {p + "idle": loop(6.0, idle), p + "walk": loop(1.5, walk), p + "throw": once(1.3, throw), p + "tilt": once(5.0, tilt),
+            p + "slam": once(2.2, slam), p + "sweep": once(1.4, sweep), p + "topple": once(5.0, topple), p + "roar": once(2.0, roar),
+            p + "hurt": once(0.22, hurt_bones()), p + "death": once(2.0, death, True)}
+
+
+ANIMS = {"dust_crawler": dust_crawler, "shell_hare": shell_hare, "shadow_stitcher": shadow_stitcher, "shadow_embracer": shadow_embracer,
+         "moon_leaper": moon_leaper, "push_stone": push_stone, "cliff_creeper": cliff_creeper, "moon_scale": moon_scale}
 
 
 # ---------------------------------------------------------------- 素材を入れる
@@ -314,6 +425,27 @@ SOUNDS = {
     "shadow_bridge_fade": [ev("block.sculk_vein.break", 0.7, 0.8)],
     "mirror_turn": [ev("block.grindstone.use", 1.4, 0.7)],
     "mirror_align": [ev("block.beacon.activate", 1.6, 0.9)],
+    # 区画 2「上弦の崖」
+    "leaper_jump": [ev("entity.goat.long_jump", 0.8, 0.9)],
+    "leaper_land": [ev("block.basalt.break", 0.6, 1.1)],
+    "stone_charge": [ev("block.respawn_anchor.charge", 1.4, 0.8)],
+    "stone_push": [ev("entity.breeze.wind_burst", 0.7, 1.2)],
+    "creeper_lift": [ev("block.stone.break", 0.6, 0.8)],
+    "creeper_rock": [ev("block.deepslate.break", 0.5, 1.3)],
+    "scale_creak": [ev("block.chain.step", 0.5, 0.7)],
+    "scale_throw": [ev("entity.iron_golem.attack", 0.6, 1.0)],
+    "scale_weight": [ev("block.anvil.land", 0.6, 0.9)],
+    "scale_tilt": [ev("block.grindstone.use", 0.5, 1.0)],
+    "scale_slam": [ev("entity.warden.attack_impact", 0.6, 1.2)],
+    "scale_sweep": [ev("entity.player.attack.sweep", 0.6, 1.0)],
+    "scale_topple": [ev("block.anvil.destroy", 0.6, 1.0)],
+    "scale_roar": [ev("entity.ravager.roar", 0.6, 1.2)],
+    "ledge_shake": [ev("block.suspicious_gravel.break", 0.8, 0.7)],
+    "ledge_fall": [ev("block.tuff.break", 0.7, 1.0)],
+    "ledge_back": [ev("block.tuff.place", 1.2, 0.6)],
+    "plate_move": [ev("block.piston.contract", 0.6, 0.7)],
+    "weight_set": [ev("block.anvil.place", 1.4, 0.6)],
+    "light_body": [ev("entity.breeze.jump", 1.4, 0.8)],
 }
 
 

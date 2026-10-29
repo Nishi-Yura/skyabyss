@@ -1036,5 +1036,16 @@
     "atlas": 64
    }
   }
+ },
+ "guest_moon_past2": {
+  "tris": 1556,
+  "atlas": 256,
+  "buried": [],
+  "props": {
+   "prop_l": {
+    "tris": 232,
+    "atlas": 64
+   }
+  }
  }
 }

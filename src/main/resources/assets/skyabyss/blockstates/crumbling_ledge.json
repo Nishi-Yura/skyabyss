@@ -1,0 +1,16 @@
+{
+  "variants": {
+    "fallen=false,shaking=false": {
+      "model": "skyabyss:block/crumbling_ledge"
+    },
+    "fallen=false,shaking=true": {
+      "model": "skyabyss:block/crumbling_ledge"
+    },
+    "fallen=true,shaking=false": {
+      "model": "skyabyss:block/crumbling_ledge_fallen"
+    },
+    "fallen=true,shaking=true": {
+      "model": "skyabyss:block/crumbling_ledge_fallen"
+    }
+  }
+}

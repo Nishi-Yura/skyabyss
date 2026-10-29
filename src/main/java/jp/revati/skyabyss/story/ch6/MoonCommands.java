@@ -11,6 +11,8 @@ import net.neoforged.neoforge.event.RegisterCommandsEvent;
 
 // 開発・撮影: /skyabyss moonworld enter | leave | gate (門へ行く) | phase (今の位相) | phase <0〜3> (位相の頭へ進める)
 //   新月の谷: valley <印> (谷の印へ行く。camp・arena_center・shard_bridge…) | lamp (足もとに星の印) | lord (主の間に影抱き) | clear (主の間を片付ける)
+//   上弦の崖: cliff <印> (崖の印へ行く。camp・shard_tower・ledge_a・plate_w・cliff_gate・arena_entry…) | cliff_lord (主の間に月秤) |
+//             cliff_clear (主の間を片付ける) | lightbody [off] (星術「軽身」を覚える / 忘れる)
 //   撮影: pose <動き> (まわり 24 の月の敵を止めて、その動きを流す。向きは今の向きのまま)
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class MoonCommands {
@@ -44,6 +46,35 @@ public final class MoonCommands {
                             MoonWorld.build(moon);
                             BlockPos m = jp.revati.skyabyss.story.ch6.valley.MoonValley.mark(com.mojang.brigadier.arguments.StringArgumentType.getString(c, "mark"));
                             p.teleportTo(moon, m.getX() + 0.5, m.getY(), m.getZ() + 0.5, p.getYRot(), p.getXRot());
+                            return 1;
+                        })))
+                        .then(Commands.literal("cliff").then(Commands.argument("mark", com.mojang.brigadier.arguments.StringArgumentType.word()).executes(c -> {
+                            net.minecraft.server.level.ServerPlayer p = c.getSource().getPlayerOrException();
+                            ServerLevel moon = c.getSource().getServer().getLevel(MoonWorld.LEVEL);
+                            if (moon == null) {
+                                return 0;
+                            }
+                            MoonWorld.build(moon);
+                            BlockPos m = jp.revati.skyabyss.story.ch6.cliff.MoonCliff.mark(com.mojang.brigadier.arguments.StringArgumentType.getString(c, "mark"));
+                            p.teleportTo(moon, m.getX() + 0.5, m.getY(), m.getZ() + 0.5, p.getYRot(), p.getXRot());
+                            return 1;
+                        })))
+                        .then(Commands.literal("cliff_lord").executes(c -> {
+                            ServerLevel moon = c.getSource().getServer().getLevel(MoonWorld.LEVEL);
+                            return moon != null && jp.revati.skyabyss.story.ch6.cliff.CliffArena.summon(moon) != null ? 1 : 0;
+                        }))
+                        .then(Commands.literal("cliff_clear").executes(c -> {
+                            ServerLevel moon = c.getSource().getServer().getLevel(MoonWorld.LEVEL);
+                            if (moon != null) {
+                                jp.revati.skyabyss.story.ch6.cliff.CliffArena.clear(moon);
+                            }
+                            return 1;
+                        }))
+                        .then(Commands.literal("lightbody").executes(c -> {
+                            jp.revati.skyabyss.story.ch6.cliff.LightBody.learn(c.getSource().getPlayerOrException());
+                            return 1;
+                        }).then(Commands.literal("off").executes(c -> {
+                            jp.revati.skyabyss.story.ch6.cliff.LightBody.forget(c.getSource().getPlayerOrException());
                             return 1;
                         })))
                         .then(Commands.literal("pose").then(Commands.argument("action", com.mojang.brigadier.arguments.StringArgumentType.word()).executes(c -> {
