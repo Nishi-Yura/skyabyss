@@ -39,6 +39,8 @@ public class StarGateBlock extends Block {
         if (!level.isClientSide && player instanceof ServerPlayer sp) {
             if (jp.revati.skyabyss.story.ch6.cliff.MoonCliff.inside(pos)) {
                 jp.revati.skyabyss.story.ch6.cliff.CliffPuzzles.gate(sp, pos);
+            } else if (jp.revati.skyabyss.story.ch6.field.MoonField.inside(pos)) {
+                jp.revati.skyabyss.story.ch6.field.FieldPuzzles.gate(sp, pos);
             } else {
                 ValleyPuzzles.gate(sp, pos);
             }

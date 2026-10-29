@@ -14,6 +14,7 @@
 
 選んだ案 (2026-10-28): 砂這い A 甲殻の掘り手・殻背の兎 B 欠けた三日月・影の綴じ手 C 裂けた帯・影抱き B 影の母。
   区画 2: 月跳ね A 岩の跳び虫・押し石 A 目のある輪石・崖這い B 岩背負いの蟹・月秤 A 天秤を担ぐ巨人。
+  区画 3 (一品一案。2026-10-30): 光の群れ・影の竹馬・鏡背負い・望の灯守。
 回転の約束: kf の値で書き、ファイルへは (-x, -y, z)。kf の x が負 = 前へ傾く (垂れた腕なら前へ上がる、前を向いた顎なら先が上がる。
   深淵の前の私の影の「手を上げる」= -110 と同じ)。bone([...]) に直接書く文字の式はファイルの値なので逆 (正 = 前へ傾く)。位置はそのまま (y が上)。
 """
@@ -30,7 +31,8 @@ AM = os.path.join(ROOT, "src", "main", "resources", "assets", "skyabyss_moon")
 ROUGH = os.path.join(ROOT, "docs", "review", "moon_roughs")
 
 CHOICE = {"dust_crawler": "a", "shell_hare": "b", "shadow_stitcher": "c", "shadow_embracer": "b",
-          "moon_leaper": "a", "push_stone": "a", "cliff_creeper": "b", "moon_scale": "a"}
+          "moon_leaper": "a", "push_stone": "a", "cliff_creeper": "b", "moon_scale": "a",
+          "light_swarm": "a", "shade_strider": "a", "mirror_bearer": "a", "full_keeper": "a"}
 
 
 def wjson(path, data, indent=2):
@@ -324,8 +326,153 @@ def moon_scale():
             p + "hurt": once(0.22, hurt_bones()), p + "death": once(2.0, death, True)}
 
 
+# ---------------------------------------------------------------- 光の群れ (欠けた輪の芯の群れ。結晶の輪がいつも回り、突っ込むと尾が絞れ、引きで散る)
+def light_swarm():
+    p = "animation.light_swarm."
+    idle = {"ring_f": bone(["0", "0", "query.anim_time * 60"]), "ring_m": bone(["0", "0", "-query.anim_time * 40"]),
+            "ring_t": bone([S(0, 6, 80), "0", "query.anim_time * 25"]), "core": bone([S(0, 5, 60), S(90, 8, 45), "0"], [0, S(0, 0.6, 70), 0])}
+    walk = {"ring_f": bone(["0", "0", "query.anim_time * 120"]), "ring_m": bone(["0", "0", "-query.anim_time * 90"]),
+            "ring_t": bone([S(0, 10, 160), "0", "query.anim_time * 60"]), "core": bone([S(0, 6, 120), "0", "0"])}
+    # 突っ込む (0.6): 尾を絞って後ろへ流し、芯を前へ倒す
+    dash = {"core": bone(kf({0: (0, 0, 0), 0.1: (-15, 0, 0), 0.5: (-15, 0, 0), 0.6: (0, 0, 0)})),
+            "ring_t": dict(bone(kf({0: (0, 0, 0), 0.1: (0, 0, 90), 0.6: (0, 0, 180)})), scale=scale({0: (1, 1, 1), 0.1: (0.6, 0.6, 1.4), 0.5: (0.6, 0.6, 1.4), 0.6: (1, 1, 1)})),
+            "ring_m": dict(bone(kf({0: (0, 0, 0), 0.6: (0, 0, -120)})), scale=scale({0: (1, 1, 1), 0.1: (0.75, 0.75, 1.2), 0.5: (0.75, 0.75, 1.2), 0.6: (1, 1, 1)})),
+            "ring_f": dict(bone(kf({0: (0, 0, 0), 0.6: (0, 0, 160)})), scale=scale({0: (1, 1, 1), 0.1: (0.8, 0.8, 1), 0.6: (1, 1, 1)}))}
+    # 散る (保つ): 結晶の輪が大きく広がってゆっくり回る。集まる: 戻す
+    scatter = {"ring_f": dict(bone(kf({0: (0, 0, 0), 0.6: (20, 0, 60)})), scale=scale({0: (1, 1, 1), 0.6: (1.8, 1.8, 1.6)})),
+               "ring_m": dict(bone(kf({0: (0, 0, 0), 0.6: (-15, 0, -45)})), scale=scale({0: (1, 1, 1), 0.6: (1.7, 1.7, 1.5)})),
+               "ring_t": dict(bone(kf({0: (0, 0, 0), 0.6: (25, 0, 30)})), scale=scale({0: (1, 1, 1), 0.6: (1.6, 1.6, 1.3)})),
+               "core": bone(kf({0: (0, 0, 0), 0.6: (10, 0, 0)}))}
+    gather = {"ring_f": dict(bone(kf({0: (20, 0, 60), 0.5: (0, 0, 0)})), scale=scale({0: (1.8, 1.8, 1.6), 0.5: (1, 1, 1)})),
+              "ring_m": dict(bone(kf({0: (-15, 0, -45), 0.5: (0, 0, 0)})), scale=scale({0: (1.7, 1.7, 1.5), 0.5: (1, 1, 1)})),
+              "ring_t": dict(bone(kf({0: (25, 0, 30), 0.5: (0, 0, 0)})), scale=scale({0: (1.6, 1.6, 1.3), 0.5: (1, 1, 1)}))}
+    hurt = {"core": bone(kf({0: (0, 0, 0), 0.06: (0, 0, 14), 0.22: (0, 0, 0)}))}
+    death = {"core": dict(bone(kf({0: (0, 0, 0), 0.8: (0, 0, 200)}), kf({0: (0, 0, 0), 0.8: (0, -12, 0)}, False)),
+                          scale=scale({0: (1, 1, 1), 0.8: (0.3, 0.3, 0.3)})),
+             "ring_f": dict(bone(None), scale=scale({0: (1, 1, 1), 0.5: (2.2, 2.2, 2.2), 0.8: (0.2, 0.2, 0.2)})),
+             "ring_m": dict(bone(None), scale=scale({0: (1, 1, 1), 0.5: (2.0, 2.0, 2.0), 0.8: (0.2, 0.2, 0.2)})),
+             "ring_t": dict(bone(None), scale=scale({0: (1, 1, 1), 0.5: (1.8, 1.8, 1.8), 0.8: (0.2, 0.2, 0.2)}))}
+    return {p + "idle": loop(6.0, idle), p + "walk": loop(3.0, walk), p + "dash": once(0.6, dash), p + "scatter": once(0.6, scatter, True),
+            p + "gather": once(0.5, gather), p + "hurt": once(0.22, hurt), p + "death": once(0.8, death, True)}
+
+
+# ---------------------------------------------------------------- 影の竹馬 (長い四本脚。踏みつける・畳んで像になる)
+STRIDER_LEGS = ["leg_fl", "leg_fr", "leg_bl", "leg_br"]
+
+
+def shade_strider():
+    p = "animation.shade_strider."
+    idle = {"body": bone([S(0, 2, 40), "0", S(90, 2, 30)], [0, S(0, 0.6, 40), 0]), "cloth": bone([S(0, 6, 60), "0", S(90, 6, 50)]),
+            "head": bone([S(90, 5, 30), S(0, 10, 20), "0"])}
+    walk = {"body": bone(["0", "0", S(0, 3, 300)], [0, "math.abs(%s)" % S(0, 1.2, 300), 0]), "cloth": bone([S(0, 10, 300), "0", "0"])}
+    for i, b in enumerate(STRIDER_LEGS):
+        ph = 0 if b in ("leg_fl", "leg_br") else 180
+        walk[b] = bone([S(ph, 16, 300), "0", "0"])
+        walk["shin_" + b[4:]] = bone([S(ph + 90, 10, 300), "0", "0"])
+    # 踏みつけ (1.4): 前脚を高く上げて (0.9 まで) 振り下ろす
+    stomp = {"body": bone(kf({0: (0, 0, 0), 0.9: (-10, 0, 0), 1.0: (8, 0, 0), 1.4: (0, 0, 0)})),
+             "head": bone(kf({0: (0, 0, 0), 0.9: (-20, 0, 0), 1.0: (15, 0, 0), 1.4: (0, 0, 0)}))}
+    for b in ("leg_fl", "leg_fr"):
+        stomp[b] = bone(kf({0: (0, 0, 0), 0.9: (-45, 0, 0), 1.0: (12, 0, 0), 1.4: (0, 0, 0)}))
+        stomp["shin_" + b[4:]] = bone(kf({0: (0, 0, 0), 0.9: (30, 0, 0), 1.0: (-5, 0, 0), 1.4: (0, 0, 0)}))
+    # 畳む (保つ): 脚を内へ寄せて足先を胴の下で合わせ (一本の尖塔の像)、頭を垂れ、布を下ろす。開く: 戻す
+    fold, unfold = {"head": bone(kf({0: (0, 0, 0), 0.8: (30, 0, 0)})), "cloth": bone(kf({0: (0, 0, 0), 0.8: (0, 0, 0)}))}, {}
+    for b in STRIDER_LEGS:
+        sx = -1 if b.endswith("l") else 1
+        sz = -1 if b[4] == "f" else 1
+        tgt = (sz * 9, 0, -sx * 11)
+        fold[b] = bone(kf({0: (0, 0, 0), 0.8: tgt}))
+        fold["shin_" + b[4:]] = bone(kf({0: (0, 0, 0), 0.8: (sz * 6, 0, -sx * 6)}))
+        unfold[b] = bone(kf({0: tgt, 0.6: (0, 0, 0)}))
+        unfold["shin_" + b[4:]] = bone(kf({0: (sz * 6, 0, -sx * 6), 0.6: (0, 0, 0)}))
+    unfold["head"] = bone(kf({0: (30, 0, 0), 0.6: (0, 0, 0)}))
+    death = {"body": bone(kf({0: (0, 0, 0), 0.6: (0, 0, 30), 1.2: (0, 0, 80)}), kf({0: (0, 0, 0), 0.6: (0, -8, 0), 1.2: (0, -34, 0)}, False))}
+    for b in STRIDER_LEGS:
+        death[b] = bone(kf({0: (0, 0, 0), 1.2: (30, 0, 40 if b.endswith("l") else -40)}))
+    return {p + "idle": loop(5.0, idle), p + "walk": loop(1.2, walk), p + "stomp": once(1.4, stomp), p + "fold": once(0.8, fold, True),
+            p + "unfold": once(0.6, unfold), p + "hurt": once(0.22, hurt_bones()), p + "death": once(1.2, death, True)}
+
+
+# ---------------------------------------------------------------- 鏡背負い (鏡の皿の亀。光を集める・放つ・噛む・殻にこもる)
+BEARER_LEGS = ["leg_fl", "leg_fr", "leg_bl", "leg_br"]
+
+
+def mirror_bearer():
+    p = "animation.mirror_bearer."
+    idle = {"head": bone([S(0, 4, 40), S(90, 12, 25), "0"]), "mirror": bone([S(0, 3, 30), "0", "0"]), "tail": bone(["0", S(0, 10, 50), "0"])}
+    walk = {"body": bone(["0", "0", S(0, 2, 240)], [0, "math.abs(%s)*0.5" % S(0, 1, 240), 0]), "head": bone(["0", S(0, 6, 240), "0"])}
+    for b in BEARER_LEGS:
+        ph = 0 if b in ("leg_fl", "leg_br") else 180
+        walk[b] = bone([S(ph, 20, 240), "0", "0"], [0, "math.max(0, %s)" % S(ph, 1.2, 240), 0])
+    # 光を集める (1.0, 保つ): 鏡を前へ傾け、頭を上げる
+    aim = {"mirror": bone(kf({0: (0, 0, 0), 0.5: (-20, 0, 0), 1.0: (-22, 0, 0)})), "head": bone(kf({0: (0, 0, 0), 0.5: (-12, 0, 0)}))}
+    beam = {"mirror": bone(kf({0: (-22, 0, 0), 0.08: (-30, 0, 0), 0.4: (0, 0, 0)})), "body": bone(kf({0: (0, 0, 0), 0.08: (6, 0, 0), 0.4: (0, 0, 0)}))}
+    bite = {"head": bone(kf({0: (0, 0, 0), 0.25: (-20, 0, 0), 0.35: (15, 0, 0), 0.6: (0, 0, 0)}), kf({0: (0, 0, 0), 0.35: (0, 0, -2.5), 0.6: (0, 0, 0)}, False))}
+    # こもる (保つ): 頭を殻へ引き、脚を上げ、鏡を伏せる。出る: 戻す
+    hide = {"head": bone(kf({0: (0, 0, 0), 0.5: (10, 0, 0)}), kf({0: (0, 0, 0), 0.5: (0, -1.5, 4.5)}, False)),
+            "mirror": bone(kf({0: (0, 0, 0), 0.5: (38, 0, 0)})), "tail": bone(None, [0, 0, -2]),
+            "body": bone(None, kf({0: (0, 0, 0), 0.5: (0, -2.2, 0)}, False))}
+    unhide = {"head": bone(kf({0: (10, 0, 0), 0.5: (0, 0, 0)}), kf({0: (0, -1.5, 4.5), 0.5: (0, 0, 0)}, False)),
+              "mirror": bone(kf({0: (38, 0, 0), 0.5: (0, 0, 0)})), "body": bone(None, kf({0: (0, -2.2, 0), 0.5: (0, 0, 0)}, False))}
+    for b in BEARER_LEGS:
+        sx = -1 if b.endswith("l") else 1
+        hide[b] = bone(kf({0: (0, 0, 0), 0.5: (0, 0, -sx * 50)}), kf({0: (0, 0, 0), 0.5: (-sx * 1.5, 3.0, 0)}, False))
+        unhide[b] = bone(kf({0: (0, 0, -sx * 50), 0.5: (0, 0, 0)}), kf({0: (-sx * 1.5, 3.0, 0), 0.5: (0, 0, 0)}, False))
+    death = {"body": bone(kf({0: (0, 0, 0), 0.6: (0, 0, 170), 1.0: (0, 0, 180)}), kf({0: (0, 0, 0), 0.6: (0, 8, 0), 1.0: (0, 7, 0)}, False))}
+    return {p + "idle": loop(4.0, idle), p + "walk": loop(1.5, walk), p + "aim": once(1.0, aim, True), p + "beam": once(0.4, beam),
+            p + "attack": once(0.6, bite), p + "hide": once(0.5, hide, True), p + "unhide": once(0.5, unhide),
+            p + "hurt": once(0.22, hurt_bones()), p + "death": once(1.0, death, True)}
+
+
+# ---------------------------------------------------------------- 望の灯守 (珠を抱く灯台守。光溜め・光放ち・膝をつく・灯の薙ぎ・光の球)
+def full_keeper():
+    p = "animation.full_keeper."
+    idle = {"body": bone(None, [0, S(0, 0.8, 40), 0]), "robe": bone([S(0, 2, 50), "0", S(90, 2, 40)]),
+            "head": bone([S(90, 3, 25), S(0, 8, 18), "0"]), "orb": dict(bone(None), scale=["1 + %s" % S(0, 0.03, 90)] * 3),
+            "arm_l": bone([S(0, 3, 40), "0", "0"]), "arm_r": bone([S(180, 2, 40), "0", "0"])}
+    walk = {"body": bone(["0", "0", S(0, 2, 120)], [0, S(0, 1.2, 120), 0]), "robe": bone([S(0, 5, 120), "0", S(90, 4, 120)]),
+            "arm_l": bone([S(0, 8, 120), "0", "0"])}
+    # 光溜め (保つ): 両腕で珠を抱え、頭を伏せ、珠がゆっくり膨らむ
+    charge = {"arm_l": bone(kf({0: (0, 0, 0), 0.8: (-30, 0, 18)})), "fore_l": bone(kf({0: (0, 0, 0), 0.8: (-40, 0, 30)})),
+              "arm_r": bone(kf({0: (0, 0, 0), 0.8: (-10, 0, -6)})), "head": bone(kf({0: (0, 0, 0), 0.8: (14, 0, 0)})),
+              "chest": bone(kf({0: (0, 0, 0), 0.8: (6, 0, 0)})), "orb": dict(bone(None), scale=scale({0: (1, 1, 1), 8.0: (1.15, 1.15, 1.15)}))}
+    # 光放ち (2.4): 胸を開き腕を広げ (2.0 まで)、珠が弾ける
+    release = {"arm_l": bone(kf({0: (-30, 0, 18), 1.0: (0, 0, -40), 2.0: (0, 0, -60), 2.4: (0, 0, 0)})),
+               "fore_l": bone(kf({0: (-40, 0, 30), 1.0: (0, 0, -15), 2.4: (0, 0, 0)})),
+               "arm_r": bone(kf({0: (-10, 0, -6), 1.0: (0, 0, 30), 2.0: (0, 0, 45), 2.4: (0, 0, 0)})),
+               "chest": bone(kf({0: (6, 0, 0), 1.0: (-8, 0, 0), 2.0: (-12, 0, 0), 2.1: (6, 0, 0), 2.4: (0, 0, 0)})),
+               "head": bone(kf({0: (14, 0, 0), 1.0: (-16, 0, 0), 2.0: (-20, 0, 0), 2.4: (0, 0, 0)})),
+               "orb": dict(bone(None), scale=scale({0: (1.15, 1.15, 1.15), 1.9: (1.4, 1.4, 1.4), 2.0: (1.5, 1.5, 1.5), 2.1: (0.7, 0.7, 0.7), 2.4: (1, 1, 1)}))}
+    # 膝をつく (6.0 保つ): 長衣ごと沈み、前へ折れ、杖を地につく。珠は小さく
+    kneel = {"body": bone(kf({0: (0, 0, 0), 0.5: (0, 0, 0)}), kf({0: (0, 0, 0), 0.5: (0, -9, 0), 5.6: (0, -9, 0), 6.0: (0, 0, 0)}, False)),
+             "chest": bone(kf({0: (0, 0, 0), 0.5: (28, 0, 0), 5.6: (28, 0, 0), 6.0: (0, 0, 0)})),
+             "head": bone(kf({0: (0, 0, 0), 0.5: (25, 0, 0), 5.6: (25, 0, 0), 6.0: (0, 0, 0)})),
+             "arm_l": bone(kf({0: (0, 0, 0), 0.5: (-20, 0, 10), 5.6: (-20, 0, 10), 6.0: (0, 0, 0)})),
+             "arm_r": bone(kf({0: (0, 0, 0), 0.5: (10, 0, -10), 5.6: (10, 0, -10), 6.0: (0, 0, 0)})),
+             "orb": dict(bone(None), scale=scale({0: (1, 1, 1), 0.5: (0.75, 0.75, 0.75), 5.6: (0.75, 0.75, 0.75), 6.0: (1, 1, 1)}))}
+    # 灯の薙ぎ (1.5): 杖を振りかぶって (0.9) 前を薙ぐ
+    sweep = {"arm_r": bone(kf({0: (0, 0, 0), 0.9: (-60, -40, 20), 1.05: (-50, 50, -10), 1.5: (0, 0, 0)})),
+             "fore_r": bone(kf({0: (0, 0, 0), 0.9: (-30, 0, 0), 1.05: (-10, 0, 0), 1.5: (0, 0, 0)})),
+             "chest": bone(kf({0: (0, 0, 0), 0.9: (0, 25, 0), 1.05: (0, -30, 0), 1.5: (0, 0, 0)}))}
+    # 光の球 (1.6): 左の手のひらを前へ差し出し、珠が三度脈打つ
+    orbs = {"arm_l": bone(kf({0: (0, 0, 0), 0.4: (-75, 0, 10), 1.3: (-75, 0, 10), 1.6: (0, 0, 0)})),
+            "fore_l": bone(kf({0: (0, 0, 0), 0.4: (-15, 0, 0), 1.3: (-15, 0, 0), 1.6: (0, 0, 0)})),
+            "orb": dict(bone(None), scale=scale({0: (1, 1, 1), 0.6: (1.12, 1.12, 1.12), 0.7: (1, 1, 1), 0.9: (1.12, 1.12, 1.12), 1.0: (1, 1, 1),
+                                                 1.2: (1.12, 1.12, 1.12), 1.3: (1, 1, 1)}))}
+    roar = {"arm_l": bone(kf({0: (0, 0, 0), 0.5: (-100, 0, 25), 1.6: (-100, 0, 25), 2.0: (0, 0, 0)})),
+            "arm_r": bone(kf({0: (0, 0, 0), 0.5: (-60, 0, -15), 1.6: (-60, 0, -15), 2.0: (0, 0, 0)})),
+            "head": bone(kf({0: (0, 0, 0), 0.5: (-30, 0, 0), 1.6: (-30, 0, 0), 2.0: (0, 0, 0)})),
+            "orb": dict(bone(None), scale=scale({0: (1, 1, 1), 0.5: (1.3, 1.3, 1.3), 1.6: (1.3, 1.3, 1.3), 2.0: (1, 1, 1)}))}
+    death = {"body": bone(kf({0: (0, 0, 0), 1.0: (15, 0, 0), 2.0: (70, 0, 10)}), kf({0: (0, 0, 0), 1.0: (0, -8, 0), 2.0: (0, -20, 0)}, False)),
+             "orb": dict(bone(None), scale=scale({0: (1, 1, 1), 1.0: (1.3, 1.3, 1.3), 1.3: (0.2, 0.2, 0.2), 2.0: (0.1, 0.1, 0.1)}))}
+    return {p + "idle": loop(8.0, idle), p + "walk": loop(3.0, walk), p + "charge": once(8.0, charge, True), p + "release": once(2.4, release),
+            p + "kneel": once(6.0, kneel), p + "sweep": once(1.5, sweep), p + "orbs": once(1.6, orbs), p + "roar": once(2.0, roar),
+            p + "hurt": once(0.22, hurt_bones("chest")), p + "death": once(2.0, death, True)}
+
+
 ANIMS = {"dust_crawler": dust_crawler, "shell_hare": shell_hare, "shadow_stitcher": shadow_stitcher, "shadow_embracer": shadow_embracer,
-         "moon_leaper": moon_leaper, "push_stone": push_stone, "cliff_creeper": cliff_creeper, "moon_scale": moon_scale}
+         "moon_leaper": moon_leaper, "push_stone": push_stone, "cliff_creeper": cliff_creeper, "moon_scale": moon_scale,
+         "light_swarm": light_swarm, "shade_strider": shade_strider, "mirror_bearer": mirror_bearer, "full_keeper": full_keeper}
 
 
 # ---------------------------------------------------------------- 素材を入れる
@@ -446,6 +593,27 @@ SOUNDS = {
     "plate_move": [ev("block.piston.contract", 0.6, 0.7)],
     "weight_set": [ev("block.anvil.place", 1.4, 0.6)],
     "light_body": [ev("entity.breeze.jump", 1.4, 0.8)],
+    # 区画 3「満月の野」
+    "tide_bright": [ev("block.amethyst_block.resonate", 1.6, 0.6)],
+    "tide_dim": [ev("block.respawn_anchor.deplete", 0.8, 0.5)],
+    "tide_turn": [ev("block.amethyst_cluster.step", 1.2, 0.6)],
+    "moment_stop": [ev("block.bell.resonate", 1.6, 1.0)],
+    "light_tell": [ev("block.beacon.ambient", 1.8, 0.7)],
+    "light_impact": [ev("entity.firework_rocket.blast", 0.8, 0.9)],
+    "swarm_tell": [ev("block.amethyst_block.chime", 1.6, 0.8)],
+    "swarm_dash": [ev("entity.phantom.swoop", 1.4, 0.9)],
+    "strider_fold": [ev("block.glass.place", 0.6, 0.8)],
+    "strider_stomp": [ev("block.basalt.break", 0.5, 1.2)],
+    "bearer_aim": [ev("block.beacon.power_select", 1.6, 0.7)],
+    "bearer_beam": [ev("entity.guardian.attack", 1.4, 1.0)],
+    "bearer_break": [ev("block.glass.break", 1.2, 0.9)],
+    "bearer_hide": [ev("entity.turtle.egg_crack", 0.6, 0.7)],
+    "keeper_charge": [ev("block.beacon.activate", 0.7, 1.2)],
+    "keeper_release": [ev("entity.warden.sonic_boom", 1.4, 1.2)],
+    "keeper_kneel": [ev("block.glass.break", 0.5, 1.3)],
+    "keeper_sweep": [ev("entity.player.attack.sweep", 0.7, 1.0)],
+    "keeper_orb": [ev("entity.blaze.shoot", 1.6, 0.8)],
+    "keeper_roar": [ev("block.bell.use", 0.5, 1.4)],
 }
 
 

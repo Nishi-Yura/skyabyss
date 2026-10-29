@@ -178,7 +178,8 @@ public final class CliffSelfTest {
             check(f, CliffPuzzles.stage(p) == CliffPuzzles.stageIndex("promise"), "the lord signal did not move to promise: " + CliffPuzzles.stage(p));
             Quests.onTalk(p, role, "ch6_cliff_promise3");
             check(f, QuestLog.of(p).entry(CliffPuzzles.QUEST) != null && QuestLog.of(p).entry(CliffPuzzles.QUEST).done, "the promise did not finish main_moon_cliff");
-            check(f, MoonEnd.due(p), "the moon end card is not due after the cliff");
+            // 「ここまで」の札は満月の野を終えた人に出る (崖を終えただけでは出ない)
+            check(f, !MoonEnd.due(p), "the moon end card came after the cliff, before the full moon field");
             // 敵の数字 (上弦は合った位相)
             MoonClock.skipTo(moon, 1);
             BlockPos near = MoonCliff.mark("camp").offset(0, 0, -22);
@@ -259,7 +260,7 @@ public final class CliffSelfTest {
 
     private static void report(List<String> f) {
         if (f.isEmpty()) {
-            SkyAbyss.LOGGER.info("SELFTEST moon cliff PASSED (cliff terrain, camp, plate, walkable path, puzzle blocks, leaping stones, balance lift and reach, crumbling ledge, light body, main_moon_cliff and the end card, mob numbers, scale summon, balance guard and topple)");
+            SkyAbyss.LOGGER.info("SELFTEST moon cliff PASSED (cliff terrain, camp, plate, walkable path, puzzle blocks, leaping stones, balance lift and reach, crumbling ledge, light body, main_moon_cliff and no end card yet, mob numbers, scale summon, balance guard and topple)");
         } else {
             f.forEach(m -> SkyAbyss.LOGGER.error("SELFTEST moon cliff FAILED: {}", m));
         }

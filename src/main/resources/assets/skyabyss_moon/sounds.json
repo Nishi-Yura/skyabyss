@@ -449,5 +449,225 @@
         "volume": 0.8
       }
     ]
+  },
+  "tide_bright": {
+    "subtitle": "subtitles.skyabyss_moon.tide_bright",
+    "sounds": [
+      {
+        "name": "minecraft:block.amethyst_block.resonate",
+        "type": "event",
+        "pitch": 1.6,
+        "volume": 0.6
+      }
+    ]
+  },
+  "tide_dim": {
+    "subtitle": "subtitles.skyabyss_moon.tide_dim",
+    "sounds": [
+      {
+        "name": "minecraft:block.respawn_anchor.deplete",
+        "type": "event",
+        "pitch": 0.8,
+        "volume": 0.5
+      }
+    ]
+  },
+  "tide_turn": {
+    "subtitle": "subtitles.skyabyss_moon.tide_turn",
+    "sounds": [
+      {
+        "name": "minecraft:block.amethyst_cluster.step",
+        "type": "event",
+        "pitch": 1.2,
+        "volume": 0.6
+      }
+    ]
+  },
+  "moment_stop": {
+    "subtitle": "subtitles.skyabyss_moon.moment_stop",
+    "sounds": [
+      {
+        "name": "minecraft:block.bell.resonate",
+        "type": "event",
+        "pitch": 1.6,
+        "volume": 1.0
+      }
+    ]
+  },
+  "light_tell": {
+    "subtitle": "subtitles.skyabyss_moon.light_tell",
+    "sounds": [
+      {
+        "name": "minecraft:block.beacon.ambient",
+        "type": "event",
+        "pitch": 1.8,
+        "volume": 0.7
+      }
+    ]
+  },
+  "light_impact": {
+    "subtitle": "subtitles.skyabyss_moon.light_impact",
+    "sounds": [
+      {
+        "name": "minecraft:entity.firework_rocket.blast",
+        "type": "event",
+        "pitch": 0.8,
+        "volume": 0.9
+      }
+    ]
+  },
+  "swarm_tell": {
+    "subtitle": "subtitles.skyabyss_moon.swarm_tell",
+    "sounds": [
+      {
+        "name": "minecraft:block.amethyst_block.chime",
+        "type": "event",
+        "pitch": 1.6,
+        "volume": 0.8
+      }
+    ]
+  },
+  "swarm_dash": {
+    "subtitle": "subtitles.skyabyss_moon.swarm_dash",
+    "sounds": [
+      {
+        "name": "minecraft:entity.phantom.swoop",
+        "type": "event",
+        "pitch": 1.4,
+        "volume": 0.9
+      }
+    ]
+  },
+  "strider_fold": {
+    "subtitle": "subtitles.skyabyss_moon.strider_fold",
+    "sounds": [
+      {
+        "name": "minecraft:block.glass.place",
+        "type": "event",
+        "pitch": 0.6,
+        "volume": 0.8
+      }
+    ]
+  },
+  "strider_stomp": {
+    "subtitle": "subtitles.skyabyss_moon.strider_stomp",
+    "sounds": [
+      {
+        "name": "minecraft:block.basalt.break",
+        "type": "event",
+        "pitch": 0.5,
+        "volume": 1.2
+      }
+    ]
+  },
+  "bearer_aim": {
+    "subtitle": "subtitles.skyabyss_moon.bearer_aim",
+    "sounds": [
+      {
+        "name": "minecraft:block.beacon.power_select",
+        "type": "event",
+        "pitch": 1.6,
+        "volume": 0.7
+      }
+    ]
+  },
+  "bearer_beam": {
+    "subtitle": "subtitles.skyabyss_moon.bearer_beam",
+    "sounds": [
+      {
+        "name": "minecraft:entity.guardian.attack",
+        "type": "event",
+        "pitch": 1.4,
+        "volume": 1.0
+      }
+    ]
+  },
+  "bearer_break": {
+    "subtitle": "subtitles.skyabyss_moon.bearer_break",
+    "sounds": [
+      {
+        "name": "minecraft:block.glass.break",
+        "type": "event",
+        "pitch": 1.2,
+        "volume": 0.9
+      }
+    ]
+  },
+  "bearer_hide": {
+    "subtitle": "subtitles.skyabyss_moon.bearer_hide",
+    "sounds": [
+      {
+        "name": "minecraft:entity.turtle.egg_crack",
+        "type": "event",
+        "pitch": 0.6,
+        "volume": 0.7
+      }
+    ]
+  },
+  "keeper_charge": {
+    "subtitle": "subtitles.skyabyss_moon.keeper_charge",
+    "sounds": [
+      {
+        "name": "minecraft:block.beacon.activate",
+        "type": "event",
+        "pitch": 0.7,
+        "volume": 1.2
+      }
+    ]
+  },
+  "keeper_release": {
+    "subtitle": "subtitles.skyabyss_moon.keeper_release",
+    "sounds": [
+      {
+        "name": "minecraft:entity.warden.sonic_boom",
+        "type": "event",
+        "pitch": 1.4,
+        "volume": 1.2
+      }
+    ]
+  },
+  "keeper_kneel": {
+    "subtitle": "subtitles.skyabyss_moon.keeper_kneel",
+    "sounds": [
+      {
+        "name": "minecraft:block.glass.break",
+        "type": "event",
+        "pitch": 0.5,
+        "volume": 1.3
+      }
+    ]
+  },
+  "keeper_sweep": {
+    "subtitle": "subtitles.skyabyss_moon.keeper_sweep",
+    "sounds": [
+      {
+        "name": "minecraft:entity.player.attack.sweep",
+        "type": "event",
+        "pitch": 0.7,
+        "volume": 1.0
+      }
+    ]
+  },
+  "keeper_orb": {
+    "subtitle": "subtitles.skyabyss_moon.keeper_orb",
+    "sounds": [
+      {
+        "name": "minecraft:entity.blaze.shoot",
+        "type": "event",
+        "pitch": 1.6,
+        "volume": 0.8
+      }
+    ]
+  },
+  "keeper_roar": {
+    "subtitle": "subtitles.skyabyss_moon.keeper_roar",
+    "sounds": [
+      {
+        "name": "minecraft:block.bell.use",
+        "type": "event",
+        "pitch": 0.5,
+        "volume": 1.4
+      }
+    ]
   }
 }

@@ -8,6 +8,7 @@
 """
 from __future__ import annotations
 
+import math
 import sys
 from pathlib import Path
 
@@ -158,8 +159,56 @@ moon("past2", "前のループの自分 (二人目)", [
 ])
 
 
+# ---------------------------------------------------------------- 前のループの自分 (三人目。満月の野。docs/design/46 の 4.5。一品一案)
+# 二人目より前の巻き戻りの自分。「灰歩きの旅装」が月の光で白く褪せた姿。目を布で覆い (満ち引きを光ではなく数で数える)、左手に月の砂時計
+ASHW = dict(coat=(198, 196, 190), shirt=(220, 218, 212), mantle=(172, 176, 188), trim=(120, 118, 118), hat=(190, 190, 196), hat2=(150, 152, 160),
+            trousers=(150, 150, 156), boot=(98, 94, 92), sash=(132, 144, 176), cord=(176, 170, 158), leather=(126, 118, 110), metal=(176, 184, 198),
+            metal2=(130, 138, 152), glove=(150, 144, 136))
+
+
+def apal(**kw):
+    p = dict(ASHW)
+    p.update(kw)
+    soft = {m: K.cloth(p[k], noise=0.04, streak=0.03, facevar=0.03) for m, k in (("coat", "coat"), ("mantle", "mantle"), ("trousers", "trousers"),
+                                                                                  ("shirt", "shirt"))}
+    sandglass = dict(ramp=[(90, 130, 190), (150, 190, 240), (206, 228, 255), (246, 250, 255)], base=0.6, lit=0.3, noise=0.03, crack=0, min=1)
+    p["extra_mats"] = {**STAR_LAMP, **soft, "sandglass": sandglass}
+    p["glow_mats"] = ["star", "sandglass"]
+    return p
+
+
+def hourglass_l(c):
+    """左手に提げる月の砂時計: 銀の上下の板と三本の柱、上の玉は空の光る硝子、下の玉に月の砂が溜まる"""
+    h = PR.hand(c, 1)
+    cx, cy, cz = h[0], h[1] - 3.4, h[2] - 0.4
+    F = part("hg_top", disc("prop_l", "metal", V(cx, cy + 2.5, cz), 1.25, 0.35, n=8))
+    F += part("hg_bot", disc("prop_l", "metal", V(cx, cy - 2.5, cz), 1.25, 0.35, n=8))
+    for i in range(3):
+        a = math.radians(90 + i * 120)
+        F += part(f"hg_post{i}", rod("prop_l", "metal2", V(cx + math.cos(a) * 1.0, cy - 2.3, cz + math.sin(a) * 1.0),
+                                     V(cx + math.cos(a) * 1.0, cy + 2.3, cz + math.sin(a) * 1.0), 0.14, sides=4))
+    F += part("hg_up", K.ellipsoid("prop_l", "sandglass", (cx, cy + 1.15, cz), (0.75, 1.05, 0.75), segs=7, rings=3))
+    F += part("hg_low", K.ellipsoid("prop_l", "dust", (cx, cy - 1.15, cz), (0.8, 1.05, 0.8), segs=7, rings=3))
+    F += part("hg_hook", rod("prop_l", "cord", V(cx, cy + 2.6, cz), V(h[0], h[1] - 0.2, h[2] - 0.4), 0.12, sides=3))
+    return F
+
+
+moon("past3", "前のループの自分 (三人目)", [
+    # 砂時計の数え手: 白く褪せた灰歩きの旅装に裾の長い外套、目を布で覆う (星の刺繍)、白くなった髪。腰に小瓶と袋、左手に月の砂時計
+    dict(anim="hold_l", pal=apal(skin=(192, 168, 152), hair=(170, 172, 182)),
+         face=dict(eye="closed", brow="flat", mouth="none", blindfold=(126, 138, 170)), hair=SHORT, hat=None,
+         hairline=27.4, build="slim", upper=dict(mantle=dict(bottom=11.0, clasp=True), sash=True, pouches=[(2.4, 14.6, "vial"), (-2.4, 14.6, "pouch")]),
+         lower="coat_long", sleeve="wide", arms=HOLD_L_LOW, props={"prop_l": hourglass_l}),
+])
+
+
 def sheet(pid):
     out = Path(__file__).resolve().parents[4] / "docs/review/npc_models_v2/roughs"
+    keys = [k for k in "abc" if f"moon_{pid}_{k}" in C.CAST]
+    if len(keys) == 1:
+        import shutil
+        shutil.copy(out / f"moon_{pid}_{keys[0]}.png", out / f"moon_{pid}.png")
+        return
     ims = [Image.open(out / f"moon_{pid}_{k}.png").convert("RGB") for k in "abc"]
     W = max(i.width for i in ims)
     H = sum(i.height for i in ims) + 36
@@ -177,7 +226,7 @@ def sheet(pid):
 if __name__ == "__main__":
     import build as B
     ids = sys.argv[1:] or list(MOON)
-    B.main([f"moon_{p}_{k}" for p in ids for k in "abc"])
+    B.main([f"moon_{p}_{k}" for p in ids for k in "abc" if f"moon_{p}_{k}" in C.CAST])
     for p in ids:
         sheet(p)
     print("ok", len(ids))
@@ -185,3 +234,5 @@ if __name__ == "__main__":
 
 # 選定 (2026-10-28): 前のループの自分 (二人目) は C (綱を担ぐ登り手)。cast の guest_moon_past2 として登録する (guestId = moon_past2)
 C.CAST["guest_moon_past2"] = C.CAST["moon_past2_c"]
+# 三人目は一品一案 (2026-10-30)。guestId = moon_past3
+C.CAST["guest_moon_past3"] = C.CAST["moon_past3_a"]

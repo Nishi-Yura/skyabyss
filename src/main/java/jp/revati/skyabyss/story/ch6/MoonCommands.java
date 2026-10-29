@@ -13,6 +13,8 @@ import net.neoforged.neoforge.event.RegisterCommandsEvent;
 //   新月の谷: valley <印> (谷の印へ行く。camp・arena_center・shard_bridge…) | lamp (足もとに星の印) | lord (主の間に影抱き) | clear (主の間を片付ける)
 //   上弦の崖: cliff <印> (崖の印へ行く。camp・shard_tower・ledge_a・plate_w・cliff_gate・arena_entry…) | cliff_lord (主の間に月秤) |
 //             cliff_clear (主の間を片付ける) | lightbody [off] (星術「軽身」を覚える / 忘れる)
+//   満月の野: field <印> (野の印へ行く。camp・pond_entry・gully_entry・tower_entry・field_gate・arena_entry…) | field_lord (主の間に望の灯守) |
+//             field_clear (主の間を片付ける) | stop [off] (星術「一瞬止め」を覚えて砂時計をもらう / 忘れる) | tide <bright|to_dim|dim|to_bright> (満ち引きの頭へ)
 //   撮影: pose <動き> (まわり 24 の月の敵を止めて、その動きを流す。向きは今の向きのまま)
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class MoonCommands {
@@ -70,6 +72,48 @@ public final class MoonCommands {
                             }
                             return 1;
                         }))
+                        .then(Commands.literal("field").then(Commands.argument("mark", com.mojang.brigadier.arguments.StringArgumentType.word()).executes(c -> {
+                            net.minecraft.server.level.ServerPlayer p = c.getSource().getPlayerOrException();
+                            ServerLevel moon = c.getSource().getServer().getLevel(MoonWorld.LEVEL);
+                            if (moon == null) {
+                                return 0;
+                            }
+                            MoonWorld.build(moon);
+                            BlockPos m = jp.revati.skyabyss.story.ch6.field.MoonField.mark(com.mojang.brigadier.arguments.StringArgumentType.getString(c, "mark"));
+                            p.teleportTo(moon, m.getX() + 0.5, m.getY(), m.getZ() + 0.5, p.getYRot(), p.getXRot());
+                            return 1;
+                        })))
+                        .then(Commands.literal("field_lord").executes(c -> {
+                            ServerLevel moon = c.getSource().getServer().getLevel(MoonWorld.LEVEL);
+                            return moon != null && jp.revati.skyabyss.story.ch6.field.FieldArena.summon(moon) != null ? 1 : 0;
+                        }))
+                        .then(Commands.literal("field_clear").executes(c -> {
+                            ServerLevel moon = c.getSource().getServer().getLevel(MoonWorld.LEVEL);
+                            if (moon != null) {
+                                jp.revati.skyabyss.story.ch6.field.FieldArena.clear(moon);
+                            }
+                            return 1;
+                        }))
+                        .then(Commands.literal("stop").executes(c -> {
+                            net.minecraft.server.level.ServerPlayer p = c.getSource().getPlayerOrException();
+                            jp.revati.skyabyss.story.ch6.field.MomentStop.learn(p);
+                            if (!jp.revati.skyabyss.story.ch6.field.MoonHourglassItem.carries(p)) {
+                                p.getInventory().add(new net.minecraft.world.item.ItemStack(jp.revati.skyabyss.story.ch6.field.FieldBlocks.MOON_HOURGLASS.get()));
+                            }
+                            return 1;
+                        }).then(Commands.literal("off").executes(c -> {
+                            jp.revati.skyabyss.story.ch6.field.MomentStop.forget(c.getSource().getPlayerOrException());
+                            return 1;
+                        })))
+                        .then(Commands.literal("tide").then(Commands.argument("at", com.mojang.brigadier.arguments.StringArgumentType.word()).executes(c -> {
+                            ServerLevel moon = c.getSource().getServer().getLevel(MoonWorld.LEVEL);
+                            if (moon == null) {
+                                return 0;
+                            }
+                            jp.revati.skyabyss.story.ch6.field.FieldTide.setTo(moon, jp.revati.skyabyss.story.ch6.field.FieldTide.Tide.valueOf(
+                                    com.mojang.brigadier.arguments.StringArgumentType.getString(c, "at").toUpperCase(java.util.Locale.ROOT)), 0);
+                            return 1;
+                        })))
                         .then(Commands.literal("lightbody").executes(c -> {
                             jp.revati.skyabyss.story.ch6.cliff.LightBody.learn(c.getSource().getPlayerOrException());
                             return 1;

@@ -70,3 +70,56 @@ def run(spec, build, pal, bones, poses, hint=128):
     ent = manifest_entry(spec, results, f'moon_roughs/{spec["id"]}.png')
     (OUT / f'{spec["id"]}_manifest.json').write_text(json.dumps(ent, ensure_ascii=False, indent=1), encoding="utf-8")
     return results
+
+
+def run_one(spec, build, pal, bones, poses, hint=128):
+    """一品一案: 案 a だけ作り、spec["rows"] の姿を横に並べた絵 (2 列で折り返す) と manifest を書く。"""
+    from PIL import Image, ImageDraw
+    OUT.mkdir(parents=True, exist_ok=True)
+    r = _ck.build_option(spec["id"], "a", build, pal, bones, hint)
+    print(spec["id"], "tris", r["tris"], "atlas", r["size"], "buried", r["buried"])
+    F = _ck.voxel.font
+    rows = spec["rows"]
+    PW = spec.get("pw", 560)
+    cols = spec.get("cols", 2)
+    GAP, X0, top = 14, 20, 96
+    W = X0 * 2 + cols * PW + (cols - 1) * GAP
+    nrow = (len(rows) + cols - 1) // cols
+    rh = [max(rows[i][4] for i in range(j * cols, min(len(rows), j * cols + cols))) for j in range(nrow)]
+    s = r["size"]
+    k = max(1, min(PW // s, 3))
+    total = top + sum(h + 64 for h in rh) + s * k + 80
+    cv = Image.new("RGB", (W, total), (16, 16, 22))
+    d = ImageDraw.Draw(cv)
+    d.text((24, 14), spec["title"], font=F(26), fill=_ck.WH)
+    for i, line in enumerate(spec.get("sub", [])):
+        d.text((24, 50 + 20 * i), line, font=F(15), fill=_ck.GR)
+    y = top
+    for j in range(nrow):
+        for c in range(cols):
+            i = j * cols + c
+            if i >= len(rows):
+                break
+            head, pose, yaw, pitch, ph, cen, sc = rows[i]
+            x = X0 + c * (PW + GAP)
+            d.text((x, y), head, font=F(20), fill=_ck.CY)
+            im = _ck.render_view(r, r["atlas"], r["glow"], poses[pose], bones, yaw, pitch, (PW, ph), cen, sc)
+            cv.paste(im, (x, y + 30))
+            d.rectangle([x - 1, y + 29, x + PW, y + 30 + ph], outline=(60, 60, 78))
+        y += rh[j] + 64
+    d.text((X0, y - 26), f'{spec["labels"][0]}  {r["tris"]} 三角形 / アトラス {s}x{s}', font=F(17), fill=_ck.CY)
+    at = Image.fromarray(r["atlas"], "RGBA").resize((s * k, s * k), Image.NEAREST)
+    bgp = Image.new("RGB", (s * k, s * k), (34, 34, 46))
+    bgp.paste(at, (0, 0), at)
+    cv.paste(bgp, (X0, y + 4))
+    cv = cv.crop((0, 0, W, y + s * k + 20))
+    png = OUT / f'{spec["id"]}.png'
+    cv.save(png)
+    o = spec["options"]["a"]
+    bad = ", ".join(f"{a}-{b}:{f}" for a, b, f in r["buried"]) or "なし"
+    ent = {"id": "moon_" + spec["id"], "short": spec["short"], "kind": spec["kind"], "title": spec["title"],
+           "sheets": [f'moon_roughs/{spec["id"]}.png'],
+           "extra": spec["extra"] + f' 三角形 {r["tris"]} (目安 {spec["budget"]})。埋まった部品: {bad}。生成: tools/rough/lowpoly/moon/{spec["id"]}.py。三段の姿: ' + spec.get("later", ""),
+           "options": {"a": {"name": o["name"] + f' ({r["tris"]} 三角形)', "desc": o["desc"]}}}
+    (OUT / f'{spec["id"]}_manifest.json').write_text(json.dumps(ent, ensure_ascii=False, indent=1), encoding="utf-8")
+    return r

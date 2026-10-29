@@ -1047,5 +1047,27 @@
     "atlas": 64
    }
   }
+ },
+ "moon_past3_a": {
+  "tris": 1520,
+  "atlas": 256,
+  "buried": [],
+  "props": {
+   "prop_l": {
+    "tris": 184,
+    "atlas": 64
+   }
+  }
+ },
+ "guest_moon_past3": {
+  "tris": 1520,
+  "atlas": 256,
+  "buried": [],
+  "props": {
+   "prop_l": {
+    "tris": 184,
+    "atlas": 64
+   }
+  }
  }
 }

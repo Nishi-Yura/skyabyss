@@ -1,0 +1,98 @@
+# 六章 区画 3「満月の野」(docs/design/46 の 4.5): 野の見下ろし、野営と前の自分 (三人目)、満ち引きの池 (満ちと引き)、降る光の溝、影の塔 (外と中)、
+# 満月の台と主の間 (引きの影の柱)、望の灯守の構え、敵の構え (満ちと引き)
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/moon_field.txt -PshotsName=moon_field
+# 観戦モードで撮る (月は軽いので、ふつうのモードだと宙で落ちていく)。見やすさのため暗視
+world moon_field1 continent
+size 1600 900
+timeout 2400
+render 14
+clouds off
+waitchunks 300
+wait 100
+cmd skyabyss cinematic stop
+close
+cmd gamemode creative
+cmd skyabyss moonworld enter
+waitchunks 200
+wait 100
+cmd skyabyss moonworld phase 2
+cmd gamemode spectator
+hud off
+cmd effect give @s minecraft:night_vision 99999 0 true
+cmd tp @s -70 80 10 95 32
+waitchunks 300
+wait 80
+cmd skyabyss moonworld tide bright
+wait 10
+shot f01_overview
+cmd tp @s -92 17 14 128 14
+waitchunks 100
+wait 80
+shot f02_camp
+cmd tp @s -150 34 -30 180 34
+waitchunks 100
+wait 40
+cmd skyabyss moonworld tide bright
+wait 10
+shot f03_pond_bright
+cmd skyabyss moonworld tide dim
+wait 10
+shot f04_pond_dim
+cmd tp @s -98 26 60 90 22
+waitchunks 100
+wait 40
+cmd skyabyss moonworld tide dim
+wait 10
+shot f05_gully
+cmd tp @s -186 24 -6 108 8
+waitchunks 100
+wait 40
+shot f06_tower
+cmd tp @s -212 66 -14 0 89
+wait 30
+cmd skyabyss moonworld tide dim
+wait 10
+shot f07_tower_inside_dim
+cmd skyabyss moonworld tide bright
+wait 10
+shot f08_tower_inside_bright
+cmd tp @s -108 34 4 90 10
+waitchunks 100
+wait 40
+shot f09_mesa_gate
+cmd tp @s -152 44 24 180 38
+wait 30
+cmd skyabyss moonworld field_lord
+wait 80
+cmd skyabyss moonworld tide dim
+wait 10
+shot f10_arena_dim
+cmd tp @s -146 33 -2 70 6
+wait 20
+shot f11_keeper
+cmd skyabyss moonworld pose charge
+wait 30
+shot f12_keeper_charge
+cmd skyabyss moonworld pose release
+wait 36
+shot f13_keeper_release
+cmd skyabyss moonworld pose kneel
+wait 16
+shot f14_keeper_kneel
+cmd skyabyss moonworld field_clear
+cmd skyabyss moonworld tide bright
+cmd summon skyabyss:light_swarm -156 32.3 6 {NoAI:1b,Rotation:[90f,0f]}
+cmd summon skyabyss:shade_strider -152 31 6 {NoAI:1b,Rotation:[90f,0f]}
+cmd summon skyabyss:mirror_bearer -147 31 6 {NoAI:1b,Rotation:[90f,0f]}
+cmd tp @s -152 34 -4 0 14
+wait 40
+shot f15_mobs
+cmd skyabyss moonworld pose fold
+cmd skyabyss moonworld pose aim
+wait 20
+shot f16_mobs_bright
+cmd skyabyss moonworld pose unfold
+cmd skyabyss moonworld pose hide
+cmd skyabyss moonworld pose scatter
+wait 20
+shot f17_mobs_dim

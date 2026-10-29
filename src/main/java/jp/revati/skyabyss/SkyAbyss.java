@@ -133,6 +133,7 @@ public class SkyAbyss {
         // 六章 区画 1「新月の谷」の仕掛けのブロック・星の灯・敵と主 (docs/design/46 の 4.3)
         jp.revati.skyabyss.story.ch6.valley.ValleyBlocks.register(modEventBus);
         jp.revati.skyabyss.story.ch6.cliff.CliffBlocks.register(modEventBus);
+        jp.revati.skyabyss.story.ch6.field.FieldBlocks.register(modEventBus);
         // 余燼の心臓 (最終ボス: 熾の底、三段階、灰の礫、報酬、天の鍵の四つ目の欠片)。13 の 11.2節の担当 F
         jp.revati.skyabyss.titan.ember.heart.EmberHeartSetup.register(modEventBus);
 

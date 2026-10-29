@@ -1,0 +1,22 @@
+{
+  "variants": {
+    "shade=false,state=0": {
+      "model": "skyabyss:block/tide_stone_light_off"
+    },
+    "shade=false,state=1": {
+      "model": "skyabyss:block/tide_stone_light"
+    },
+    "shade=false,state=2": {
+      "model": "skyabyss:block/tide_stone_light_blink"
+    },
+    "shade=true,state=0": {
+      "model": "skyabyss:block/tide_stone_shade_off"
+    },
+    "shade=true,state=1": {
+      "model": "skyabyss:block/tide_stone_shade"
+    },
+    "shade=true,state=2": {
+      "model": "skyabyss:block/tide_stone_shade_blink"
+    }
+  }
+}

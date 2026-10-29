@@ -8,6 +8,13 @@
 - 試遊版: 0.8.0（`build/libs/skyabyss-0.8.0.jar`。確認表 `docs/review/playtest_0.8.0.md`、遊び方 `docs/beta_how_to_play.md`）。
 - 自己テスト: `bash <scratchpad>/fresh_continent.sh "<名前,…>" <世界名>`（空なら全部。大陸の新しい世界で回す）。`abyss escort` はほかと一緒に流すと時間切れで落ちることがある（単独では通る）。
 
+## 2026-10-30 夕（六章 区画 3「満月の野」。設計 [46](design/46_moon.md) の 4.5・4.5.1）
+
+- 区画 3 を一つ通しで作った: 地形（`build_moon_field.py` → `field.json`、`story/ch6/field/MoonField`。月の世界の版 6）、光の満ち引き（`FieldTide`・`TideStoneBlock`）、星術「一瞬止め」（`MomentStop`・月の砂時計）、降る光（`FallingLight`）、敵 3 種と主「望の灯守」、前の自分（三人目「砂時計の数え手」）、頼み `main_moon_field`、会話、文、地図、絵。
+- 模型は一品一案（3 案を並べない）で作り、ラフの絵を送ったうえで入れた。直しの声が来たら `tools/rough/lowpoly/moon/<id>.py` を直して `gen_moon_mobs.py <id>`。
+- 「ここまで」の札は野を終えた人に出る形に移した（崖のテストも合わせた）。
+- 確かめ: 自己テスト `moon field`（ほか `moon world`・`moon valley`・`moon cliff`）。撮影 `tools/shots/moon_field.txt`。
+
 ## 2026-10-30 午後（六章 区画 2「上弦の崖」。設計 [46](design/46_moon.md) の 4.4.2）
 
 - 区画 2 を一つ通しで作った: 地形（`tools/gen/world/build_moon_cliff.py` → `data/skyabyss/moon/cliff.json`、`story/ch6/cliff/MoonCliff`。月の世界の版 4）、仕掛け（崩れる棚・天秤の皿と錘・跳び石の塔。欠片の台・星の門・溜まりは谷のブロックを置き場所で `CliffPuzzles` へ回す）、星術「軽身」（空中でもう一段跳ぶ。`LightBody`・`client/LightBodyClient`）、敵 3 種（月跳ね・押し石・崖這い）と主「月秤」（`story/ch6/mob`。模型はラフの選んだ案を `gen_moon_mobs.py` が入れ、動きを書いた）、前のループの自分（二人目「面頬の登り手」。`cast_moon.py` の案 C）、頼み `main_moon_cliff`、会話、文、地図、ブロックの絵（`gen_cliff_assets.py`）。
@@ -190,7 +197,7 @@
    - `docs/review` の選ばれなかった案は、モデルを入れるスクリプトが同じ品の別の案を読むものだけ消した（728 ファイル）。読む案が分からない品（引数で案を選ぶスクリプトなど）は残した。
 1. 技の木 v2（48）: 試遊で数値を詰める（節の値・点の総量・閾値・要求値）。
 2. 試遊 0.8.0（`docs/review/playtest_0.8.0.md`）の声を待つ。BGM（49）の聞き心地も試遊の声で直す（`build_all.py <id>`）。
-3a. 六章の続き（46 の 5 章）: 区画 3「満月の野」（光の満ち引き・星術「一瞬止め」）→ 区画 4「下弦の淵」（残像）→ 月の核。区画ごとに敵 3 種と主・前の自分のラフ → 選定 → 実装。
+3a. 六章の続き（46 の 5 章）: 区画 4「下弦の淵」（残像）→ 月の核。区画ごとに敵 3 種と主・前の自分を一品一案で → 実装。
 3. クエストの見直しは済んだ（初日のお使いと風の道の旗を消し、墓守を 2 段に、大干潮と峰の足もとを時刻で閉じない形に、折れた剣は自分の得物を研ぐ形に）。
 4. 都・見どころの仕上げの撮影は 2026-10-30 に撮って見た（`docs/review/capital_dress_2026-10-30.jpg`・`poi_dress_2026-10-30.jpg`）。崩れ・抜けなし。見どころは作りが小さめ（崩れた家・見張り台）なので、作り込むなら 45 の仕上げの段で。試遊 0.7.1 の声の直しの確かめは試遊の声待ち。
 5. 大きく変えたら jar を作り直す。

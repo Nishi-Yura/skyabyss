@@ -47,6 +47,11 @@ public final class MoonMobRenderers {
         event.registerEntityRenderer(MoonMobsSetup.PUSH_STONE.get(), ctx -> new Foe<>(ctx, PushStone.ID, 0.0f));
         event.registerEntityRenderer(MoonMobsSetup.CLIFF_CREEPER.get(), ctx -> new Foe<>(ctx, CliffCreeper.ID, 0.45f));
         event.registerEntityRenderer(MoonMobsSetup.MOON_SCALE.get(), ctx -> new Foe<>(ctx, MoonScale.ID, 1.2f, 1.35f));
+        event.registerEntityRenderer(MoonMobsSetup.LIGHT_SWARM.get(), ctx -> new Foe<>(ctx, jp.revati.skyabyss.story.ch6.mob.LightSwarm.ID, 0.0f));
+        event.registerEntityRenderer(MoonMobsSetup.SHADE_STRIDER.get(), ctx -> new Foe<>(ctx, jp.revati.skyabyss.story.ch6.mob.ShadeStrider.ID, 0.7f));
+        event.registerEntityRenderer(MoonMobsSetup.MIRROR_BEARER.get(), ctx -> new Foe<>(ctx, jp.revati.skyabyss.story.ch6.mob.MirrorBearer.ID, 0.7f));
+        event.registerEntityRenderer(MoonMobsSetup.FULL_KEEPER.get(), ctx -> new Foe<>(ctx, jp.revati.skyabyss.story.ch6.mob.FullKeeper.ID, 1.1f, 1.1f));
+        event.registerEntityRenderer(jp.revati.skyabyss.story.ch6.field.FieldBlocks.FALLING_LIGHT.get(), net.minecraft.client.renderer.entity.NoopRenderer::new);
     }
 
     static final class Model<T extends MoonMob> extends LowPolyGeoRenderer.Model<T> {

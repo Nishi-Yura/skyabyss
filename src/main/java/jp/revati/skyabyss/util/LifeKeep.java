@@ -34,7 +34,8 @@ public final class LifeKeep {
             "skyabyss_island_kills",                  // 島の峠で退けた野盗の数 (IslandTrail)
             "skyabyss_first_job",                     // 島の祠で選んだ職 (JobChoice)
             "skyabyss_starter_lent",                  // 師範に借りた、ほかの職の始めの武器 (JobChoice)
-            "skyabyss_moon_light_body");              // 星術「軽身」を覚えた (story/ch6/cliff/LightBody)
+            "skyabyss_moon_light_body",               // 星術「軽身」を覚えた (story/ch6/cliff/LightBody)
+            "skyabyss_moon_moment_stop");             // 星術「一瞬止め」を覚えた (story/ch6/field/MomentStop)
 
     private LifeKeep() {
     }

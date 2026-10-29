@@ -38,6 +38,8 @@ public class StarPoolBlock extends Block {
         if (!level.isClientSide && player instanceof ServerPlayer sp) {
             if (jp.revati.skyabyss.story.ch6.cliff.MoonCliff.inside(pos)) {
                 jp.revati.skyabyss.story.ch6.cliff.CliffPuzzles.pool(sp, pos);
+            } else if (jp.revati.skyabyss.story.ch6.field.MoonField.inside(pos)) {
+                jp.revati.skyabyss.story.ch6.field.FieldPuzzles.pool(sp, pos);
             } else {
                 ValleyPuzzles.pool(sp, pos);
             }

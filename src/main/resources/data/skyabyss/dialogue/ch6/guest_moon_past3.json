@@ -1,0 +1,200 @@
+{
+  "npc": "skyabyss:guest_moon_past3",
+  "entries": [
+    {
+      "node": "ch6_field_promise",
+      "if": {
+        "type": "quest",
+        "quest": "main_moon_field",
+        "is": "active",
+        "stage": "promise"
+      }
+    },
+    {
+      "node": "ch6_field_lord",
+      "if": {
+        "type": "quest",
+        "quest": "main_moon_field",
+        "is": "active",
+        "stage": "lord"
+      }
+    },
+    {
+      "node": "ch6_field_gate",
+      "if": {
+        "type": "quest",
+        "quest": "main_moon_field",
+        "is": "active",
+        "stage": "gate"
+      }
+    },
+    {
+      "node": "ch6_field_shards",
+      "if": {
+        "type": "quest",
+        "quest": "main_moon_field",
+        "is": "active",
+        "stage": "shards"
+      }
+    },
+    {
+      "node": "ch6_field_pool",
+      "if": {
+        "type": "quest",
+        "quest": "main_moon_field",
+        "is": "active",
+        "stage": "pool"
+      }
+    },
+    {
+      "node": "ch6_field_meet",
+      "if": {
+        "type": "quest",
+        "quest": "main_moon_field",
+        "is": "active",
+        "stage": "meet"
+      }
+    },
+    {
+      "node": "ch6_field_idle"
+    }
+  ],
+  "nodes": {
+    "ch6_field_meet": {
+      "face": "neutral",
+      "next": "ch6_field_meet2"
+    },
+    "ch6_field_meet2": {
+      "face": "grave",
+      "options": [
+        {
+          "id": "who",
+          "goto": "ch6_field_meet3",
+          "kind": "talk"
+        },
+        {
+          "id": "eyes",
+          "goto": "ch6_field_meet3",
+          "kind": "talk"
+        }
+      ]
+    },
+    "ch6_field_meet3": {
+      "face": "grave",
+      "next": "ch6_field_meet4"
+    },
+    "ch6_field_meet4": {
+      "face": "neutral",
+      "options": [
+        {
+          "id": "ok",
+          "goto": "end",
+          "kind": "talk"
+        }
+      ]
+    },
+    "ch6_field_pool": {
+      "face": "neutral",
+      "options": [
+        {
+          "id": "ok",
+          "goto": "end",
+          "kind": "talk"
+        }
+      ]
+    },
+    "ch6_field_shards": {
+      "face": "neutral",
+      "next": "ch6_field_shards2"
+    },
+    "ch6_field_shards2": {
+      "face": "grave",
+      "options": [
+        {
+          "id": "pond",
+          "goto": "ch6_field_tip_pond",
+          "kind": "talk"
+        },
+        {
+          "id": "gully",
+          "goto": "ch6_field_tip_gully",
+          "kind": "talk"
+        },
+        {
+          "id": "tower",
+          "goto": "ch6_field_tip_tower",
+          "kind": "talk"
+        },
+        {
+          "id": "bye",
+          "goto": "end",
+          "kind": "leave"
+        }
+      ]
+    },
+    "ch6_field_tip_pond": {
+      "face": "neutral",
+      "next": "ch6_field_shards2"
+    },
+    "ch6_field_tip_gully": {
+      "face": "grave",
+      "next": "ch6_field_shards2"
+    },
+    "ch6_field_tip_tower": {
+      "face": "neutral",
+      "next": "ch6_field_shards2"
+    },
+    "ch6_field_gate": {
+      "face": "neutral",
+      "options": [
+        {
+          "id": "ok",
+          "goto": "end",
+          "kind": "talk"
+        }
+      ]
+    },
+    "ch6_field_lord": {
+      "face": "grave",
+      "next": "ch6_field_lord2"
+    },
+    "ch6_field_lord2": {
+      "face": "neutral",
+      "options": [
+        {
+          "id": "ok",
+          "goto": "end",
+          "kind": "talk"
+        }
+      ]
+    },
+    "ch6_field_promise": {
+      "face": "neutral",
+      "next": "ch6_field_promise2"
+    },
+    "ch6_field_promise2": {
+      "face": "grave",
+      "next": "ch6_field_promise3"
+    },
+    "ch6_field_promise3": {
+      "face": "smile",
+      "options": [
+        {
+          "id": "ok",
+          "goto": "end",
+          "kind": "talk"
+        }
+      ]
+    },
+    "ch6_field_idle": {
+      "face": "neutral",
+      "options": [
+        {
+          "id": "ok",
+          "goto": "end",
+          "kind": "leave"
+        }
+      ]
+    }
+  }
+}

@@ -2,7 +2,7 @@
 """月の旅の地図 (M) に敷く、描いた地図の絵 (docs/design/46 の 3.6。2026-10-28 の試遊「月行ったらマップ変わる様にしてほしい」)。
 
   書くもの: src/main/resources/assets/skyabyss/textures/gui/map/moon.png (512 x 512 で、月の x -256..256、z -128..384)
-  読むもの: data/skyabyss/moon/valley.json (新月の谷の柱)・cliff.json (上弦の崖の柱)。上から見た高さと色
+  読むもの: data/skyabyss/moon/valley.json (新月の谷の柱)・cliff.json (上弦の崖の柱)・field.json (満月の野の柱)。上から見た高さと色
   絵: 灰青の紙に、月の砂の明るい地、着く所のクレーターの輪、谷の深さの陰と等高線、谷の門と見どころの印。
   地図の外は透かして、地図の盤の地になじませる (大陸の continent.png と同じ作り)。
 
@@ -18,6 +18,7 @@ from PIL import Image, ImageDraw, ImageFilter
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..'))
 VALLEY = os.path.join(ROOT, 'src', 'main', 'resources', 'data', 'skyabyss', 'moon', 'valley.json')
 CLIFF = os.path.join(ROOT, 'src', 'main', 'resources', 'data', 'skyabyss', 'moon', 'cliff.json')
+FIELD = os.path.join(ROOT, 'src', 'main', 'resources', 'data', 'skyabyss', 'moon', 'field.json')
 OUT = os.path.join(ROOT, 'src', 'main', 'resources', 'assets', 'skyabyss', 'textures', 'gui', 'map', 'moon.png')
 
 X0, Z0, SIZE = -256, -128, 512
@@ -33,9 +34,10 @@ def tops():
     地面 (SURFACE) より下に空気がある柱は谷: いちばん下の空気の下の床。ない柱は上面"""
     d = json.load(open(VALLEY, encoding='utf-8'))
     c = json.load(open(CLIFF, encoding='utf-8'))
+    fd = json.load(open(FIELD, encoding='utf-8'))
     low_air = np.full((SIZE, SIZE), 10 ** 6)
     top = np.full((SIZE, SIZE), -10 ** 6)
-    for src in (d, c):
+    for src in (d, c, fd):
         read_runs(src, low_air, top)
     h = np.full((SIZE, SIZE), float(SURFACE))
     h = np.where(top > -10 ** 6, top, h)
@@ -43,7 +45,8 @@ def tops():
     marks = dict(d['marks'])
     cliff = {'cliff_' + k: v for k, v in c['marks'].items()}
     marks.update(cliff)
-    return h.astype(float), marks, d['rect'], c['rect']
+    marks.update({'field_' + k: v for k, v in fd['marks'].items()})
+    return h.astype(float), marks, d['rect'], c['rect'], fd['rect']
 
 
 def read_runs(d, low_air, top):
@@ -84,6 +87,8 @@ def craters(h):
             continue
         if 50 < x < 242 and -122 < z < 64:
             continue
+        if -240 < x < -84 and -116 < z < 96:
+            continue
         out.append((x, z, rng.integers(3, 12)))
     yy, xx = np.mgrid[0:SIZE, 0:SIZE]
     for cx, cz, rad in out:
@@ -96,7 +101,7 @@ def craters(h):
 
 
 def main():
-    h, marks, rect, crect = tops()
+    h, marks, rect, crect, frect = tops()
     rings = craters(h)
     # 色: 高い所は砂、低い所 (谷) ほど深い青
     t = np.clip((SURFACE + 2 - h) / 30, 0, 1)[..., None]
@@ -137,11 +142,21 @@ def main():
         for i in range(0, n, 2):
             a0, a1 = i / n, min(1, (i + 1) / n)
             d.line([(x0 + (x1 - x0) * a0, y0 + (y1 - y0) * a0), (x0 + (x1 - x0) * a1, y0 + (y1 - y0) * a1)], fill=INK, width=2)
+    # 着く所 → 野の野営の踏み跡 (点線)
+    camp3 = marks.get('field_camp', [-104, 12, 4])
+    pts = [px(-4, 1), px(-40, 3), px(-80, 2), px(camp3[0], camp3[2])]
+    for (x0, y0), (x1, y1) in zip(pts, pts[1:]):
+        n = max(1, int(math.hypot(x1 - x0, y1 - y0) / 4))
+        for i in range(0, n, 2):
+            a0, a1 = i / n, min(1, (i + 1) / n)
+            d.line([(x0 + (x1 - x0) * a0, y0 + (y1 - y0) * a0), (x0 + (x1 - x0) * a1, y0 + (y1 - y0) * a1)], fill=INK, width=2)
     # 印: 着く所 (二重の輪)、野営の跡、谷の門、主の間
     a, b = px(0, 0)
     d.ellipse([a - 5, b - 5, a + 5, b + 5], outline=INK, width=2)
     d.ellipse([a - 2, b - 2, a + 2, b + 2], fill=INK)
-    for key, r in (('camp', 3), ('valley_gate', 3), ('arena_center', 6), ('cliff_camp', 3), ('cliff_cliff_gate', 3), ('cliff_arena_center', 7)):
+    for key, r in (('camp', 3), ('valley_gate', 3), ('arena_center', 6), ('cliff_camp', 3), ('cliff_cliff_gate', 3), ('cliff_arena_center', 7),
+                   ('field_camp', 3), ('field_field_gate', 3), ('field_arena_center', 8), ('field_shard_pond', 3), ('field_shard_gully', 3),
+                   ('field_shard_tower', 3)):
         if key in marks:
             a, b = px(marks[key][0], marks[key][2])
             d.ellipse([a - r, b - r, a + r, b + r], outline=(250, 236, 180), width=2)
@@ -151,6 +166,7 @@ def main():
     near = np.minimum(np.hypot(wx, wz) - 120, np.hypot(np.maximum(0, np.abs(wx) - 60), np.maximum(0, np.maximum(rect[1] - wz, wz - rect[3]))) - 60)
     # 崖の範囲のまわりも見せる
     near = np.minimum(near, np.hypot(np.maximum(0, np.maximum(crect[0] - wx, wx - crect[2])), np.maximum(0, np.maximum(crect[1] - wz, wz - crect[3]))) - 30)
+    near = np.minimum(near, np.hypot(np.maximum(0, np.maximum(frect[0] - wx, wx - frect[2])), np.maximum(0, np.maximum(frect[1] - wz, wz - frect[3]))) - 20)
     alpha = np.clip(1 - near / 90, 0, 1)
     a = Image.fromarray((alpha * 255).astype(np.uint8)).filter(ImageFilter.GaussianBlur(3))
     img = img.convert('RGBA')

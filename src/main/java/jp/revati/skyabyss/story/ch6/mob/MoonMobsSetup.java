@@ -23,7 +23,7 @@ import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
-// 六章 区画 1「新月の谷」・区画 2「上弦の崖」の敵と主の登録 (docs/design/46 の 4.3・4.4)。素材は tools/gen/ch6/gen_moon_mobs.py。音は skyabyss_moon の名前空間。
+// 六章 区画 1「新月の谷」・区画 2「上弦の崖」・区画 3「満月の野」の敵と主の登録 (docs/design/46 の 4.3・4.4・4.5)。素材は tools/gen/ch6/gen_moon_mobs.py。音は skyabyss_moon の名前空間。
 // ValleyBlocks.register から呼ぶ
 public final class MoonMobsSetup {
     public static final String SOUND_NS = "skyabyss_moon";
@@ -58,6 +58,20 @@ public final class MoonMobsSetup {
             () -> EntityType.Builder.of(MoonScale::new, MobCategory.MONSTER).sized(2.2f, 4.4f).eyeHeight(3.9f).fireImmune()
                     .clientTrackingRange(12).build(SkyAbyss.MODID + ":" + MoonScale.ID));
 
+    // 区画 3「満月の野」(docs/design/46 の 4.5)
+    public static final DeferredHolder<EntityType<?>, EntityType<LightSwarm>> LIGHT_SWARM = ENTITIES.register(LightSwarm.ID,
+            () -> EntityType.Builder.of(LightSwarm::new, MobCategory.MONSTER).sized(1.0f, 1.0f).eyeHeight(0.5f)
+                    .clientTrackingRange(10).build(SkyAbyss.MODID + ":" + LightSwarm.ID));
+    public static final DeferredHolder<EntityType<?>, EntityType<ShadeStrider>> SHADE_STRIDER = ENTITIES.register(ShadeStrider.ID,
+            () -> EntityType.Builder.of(ShadeStrider::new, MobCategory.MONSTER).sized(1.4f, 3.0f).eyeHeight(2.6f)
+                    .clientTrackingRange(10).build(SkyAbyss.MODID + ":" + ShadeStrider.ID));
+    public static final DeferredHolder<EntityType<?>, EntityType<MirrorBearer>> MIRROR_BEARER = ENTITIES.register(MirrorBearer.ID,
+            () -> EntityType.Builder.of(MirrorBearer::new, MobCategory.MONSTER).sized(1.4f, 1.6f).eyeHeight(0.7f)
+                    .clientTrackingRange(10).build(SkyAbyss.MODID + ":" + MirrorBearer.ID));
+    public static final DeferredHolder<EntityType<?>, EntityType<FullKeeper>> FULL_KEEPER = ENTITIES.register(FullKeeper.ID,
+            () -> EntityType.Builder.of(FullKeeper::new, MobCategory.MONSTER).sized(2.0f, 5.0f).eyeHeight(4.2f).fireImmune()
+                    .clientTrackingRange(12).build(SkyAbyss.MODID + ":" + FullKeeper.ID));
+
     public static final DeferredItem<Item> DUST_CRAWLER_EGG = egg("dust_crawler_spawn_egg", DUST_CRAWLER, 0x1E2230, 0xA0A6B4);
     public static final DeferredItem<Item> SHELL_HARE_EGG = egg("shell_hare_spawn_egg", SHELL_HARE, 0x9AA0AE, 0xD8E4FF);
     public static final DeferredItem<Item> SHADOW_STITCHER_EGG = egg("shadow_stitcher_spawn_egg", SHADOW_STITCHER, 0x06060E, 0xBCD8FF);
@@ -66,6 +80,10 @@ public final class MoonMobsSetup {
     public static final DeferredItem<Item> PUSH_STONE_EGG = egg("push_stone_spawn_egg", PUSH_STONE, 0x5A5C64, 0xB0C8F0);
     public static final DeferredItem<Item> CLIFF_CREEPER_EGG = egg("cliff_creeper_spawn_egg", CLIFF_CREEPER, 0x3A3A42, 0x9A9AA2);
     public static final DeferredItem<Item> MOON_SCALE_EGG = egg("moon_scale_spawn_egg", MOON_SCALE, 0x2C2E36, 0xE0E4EC);
+    public static final DeferredItem<Item> LIGHT_SWARM_EGG = egg("light_swarm_spawn_egg", LIGHT_SWARM, 0xB8CCEE, 0xF4F8FF);
+    public static final DeferredItem<Item> SHADE_STRIDER_EGG = egg("shade_strider_spawn_egg", SHADE_STRIDER, 0x10121E, 0x9AA8D0);
+    public static final DeferredItem<Item> MIRROR_BEARER_EGG = egg("mirror_bearer_spawn_egg", MIRROR_BEARER, 0x22263A, 0xDCE6F8);
+    public static final DeferredItem<Item> FULL_KEEPER_EGG = egg("full_keeper_spawn_egg", FULL_KEEPER, 0xB4B6C0, 0xFFFFFF);
 
     // 落とし物 (月の材料。説明の一行は item.skyabyss.<id>.desc)
     public static final DeferredItem<Item> MOON_DUST = ITEMS.register("moon_dust", () -> new Ch4Setup.Described(new Item.Properties()));
@@ -102,6 +120,20 @@ public final class MoonMobsSetup {
     public static final DeferredHolder<SoundEvent, SoundEvent> SCALE_SWEEP = sound("scale_sweep");
     public static final DeferredHolder<SoundEvent, SoundEvent> SCALE_TOPPLE = sound("scale_topple");
     public static final DeferredHolder<SoundEvent, SoundEvent> SCALE_ROAR = sound("scale_roar");
+    public static final DeferredHolder<SoundEvent, SoundEvent> SWARM_TELL = sound("swarm_tell");
+    public static final DeferredHolder<SoundEvent, SoundEvent> SWARM_DASH = sound("swarm_dash");
+    public static final DeferredHolder<SoundEvent, SoundEvent> STRIDER_FOLD = sound("strider_fold");
+    public static final DeferredHolder<SoundEvent, SoundEvent> STRIDER_STOMP = sound("strider_stomp");
+    public static final DeferredHolder<SoundEvent, SoundEvent> BEARER_AIM = sound("bearer_aim");
+    public static final DeferredHolder<SoundEvent, SoundEvent> BEARER_BEAM = sound("bearer_beam");
+    public static final DeferredHolder<SoundEvent, SoundEvent> BEARER_BREAK = sound("bearer_break");
+    public static final DeferredHolder<SoundEvent, SoundEvent> BEARER_HIDE = sound("bearer_hide");
+    public static final DeferredHolder<SoundEvent, SoundEvent> KEEPER_CHARGE = sound("keeper_charge");
+    public static final DeferredHolder<SoundEvent, SoundEvent> KEEPER_RELEASE = sound("keeper_release");
+    public static final DeferredHolder<SoundEvent, SoundEvent> KEEPER_KNEEL = sound("keeper_kneel");
+    public static final DeferredHolder<SoundEvent, SoundEvent> KEEPER_SWEEP = sound("keeper_sweep");
+    public static final DeferredHolder<SoundEvent, SoundEvent> KEEPER_ORB = sound("keeper_orb");
+    public static final DeferredHolder<SoundEvent, SoundEvent> KEEPER_ROAR = sound("keeper_roar");
 
     private MoonMobsSetup() {
     }
@@ -132,12 +164,17 @@ public final class MoonMobsSetup {
         event.put(PUSH_STONE.get(), PushStone.createAttributes().build());
         event.put(CLIFF_CREEPER.get(), CliffCreeper.createAttributes().build());
         event.put(MOON_SCALE.get(), MoonScale.createAttributes().build());
+        event.put(LIGHT_SWARM.get(), LightSwarm.createAttributes().build());
+        event.put(SHADE_STRIDER.get(), ShadeStrider.createAttributes().build());
+        event.put(MIRROR_BEARER.get(), MirrorBearer.createAttributes().build());
+        event.put(FULL_KEEPER.get(), FullKeeper.createAttributes().build());
     }
 
     private static void onCreativeTab(BuildCreativeModeTabContentsEvent event) {
         if (event.getTabKey().equals(ModItems.LEGACY_TAB)) {
             for (DeferredItem<Item> i : List.of(DUST_CRAWLER_EGG, SHELL_HARE_EGG, SHADOW_STITCHER_EGG, SHADOW_EMBRACER_EGG, MOON_LEAPER_EGG, PUSH_STONE_EGG,
-                    CLIFF_CREEPER_EGG, MOON_SCALE_EGG, MOON_DUST, CRESCENT_SHELL, SHADOW_THREAD)) {
+                    CLIFF_CREEPER_EGG, MOON_SCALE_EGG, LIGHT_SWARM_EGG, SHADE_STRIDER_EGG, MIRROR_BEARER_EGG, FULL_KEEPER_EGG, MOON_DUST, CRESCENT_SHELL,
+                    SHADOW_THREAD)) {
                 event.accept(i.get());
             }
         }
@@ -154,11 +191,19 @@ public final class MoonMobsSetup {
             put2(PushStone.ID, 18);
             put2(CliffCreeper.ID, 18);
             put2(MoonScale.ID, 480);
+            put3(LightSwarm.ID, 18);
+            put3(ShadeStrider.ID, 20);
+            put3(MirrorBearer.ID, 20);
+            put3(FullKeeper.ID, 560);
         });
     }
 
     private static void put(String id, int xp) {
         GrowthRewards.MOD_ENEMIES.put(SkyAbyss.MODID + ":" + id, new GrowthRewards.Source(xp, MoonMob.MOON_LEVEL));
+    }
+
+    private static void put3(String id, int xp) {
+        GrowthRewards.MOD_ENEMIES.put(SkyAbyss.MODID + ":" + id, new GrowthRewards.Source(xp, MoonMob.MOON_LEVEL_3));
     }
 
     private static void put2(String id, int xp) {
