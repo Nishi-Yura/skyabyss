@@ -1,0 +1,30 @@
+# 終章の雲海の着く所「巡礼の門の島」(docs/design/50 の 4.1)
+world cloudsea_b
+size 1280 720
+timeout 3000
+render 12
+cmd gamemode spectator
+camera 0 -55 0 180 0
+waitchunks
+hud off
+wait 300
+cmd skyabyss cinematic stop
+close
+wait 20
+cmd skyabyss cloudsea enter
+wait 200
+camera 0 70 18 180 8
+wait 60
+shot plaza_north
+camera 40 74 40 135 14
+wait 40
+shot island_se
+camera -60 52 -10 -100 -6
+wait 40
+shot underside
+camera 0 66 -6 0 5
+wait 40
+shot plaza_south
+camera 0 34 0 180 -60
+wait 30
+shot in_cloud

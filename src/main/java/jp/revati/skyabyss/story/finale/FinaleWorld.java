@@ -1,0 +1,187 @@
+package jp.revati.skyabyss.story.finale;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+
+import jp.revati.skyabyss.SkyAbyss;
+import jp.revati.skyabyss.notice.Notice;
+import jp.revati.skyabyss.quest.Quests;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.saveddata.SavedData;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
+import net.neoforged.neoforge.event.tick.PlayerTickEvent;
+
+// 終章の雲海 (docs/design/50 の 4.1)。別のディメンション skyabyss:cloudsea (data/skyabyss/dimension*/cloudsea.json、バイオーム skyabyss:cloudsea)。
+//   雲の海  y 36〜39 の雲 (CloudBlock)。雲の下 (FALL_Y より下) へ落ちた人は、最後に島に立っていた所へ戻し、体力の 2 割を失う
+//   空      夜明けに止めた金の空と朝日、西に止まった月 (client/CloudSkyClient)
+//   着く所  巡礼の門の島 (data/skyabyss/finale/arrival.json。tools/gen/world/build_cloud_arrival.py。版 1 で一度だけ流し込む)
+//   行き来  都の大鐘楼の門 (story/ch6/MoonGate が行き先を選ばせる。FinaleGate)。着く所の帰りの台 (天然磁石) を右クリックで都へ
+//   門の鐘  巡礼の門の下の鐘を右クリック → 合図 finale_gate (作る順 2 で雲の島 1 への橋を架ける)
+@EventBusSubscriber(modid = SkyAbyss.MODID)
+public final class FinaleWorld {
+    public static final ResourceKey<Level> LEVEL = ResourceKey.create(Registries.DIMENSION, ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "cloudsea"));
+    public static final int CLOUD_TOP = 39;
+    public static final int FALL_Y = 20;
+    public static final float FALL_COST = 0.2f;
+    public static final String GATE_SIGNAL = "finale_gate";
+    static final String ARRIVAL = "arrival";
+    // 1 = 巡礼の門の島
+    static final int VERSION = 1;
+    // 人ごとの最後に立っていた島の所 (保存しない。なければ着く所)
+    private static final Map<UUID, BlockPos> SAFE = new HashMap<>();
+
+    private FinaleWorld() {
+    }
+
+    public static boolean in(ServerPlayer p) {
+        return p.level().dimension() == LEVEL;
+    }
+
+    public static FinaleTerrain arrival() {
+        return FinaleTerrain.of(ARRIVAL);
+    }
+
+    public static BlockPos arrivalPos() {
+        return arrival().mark("arrival");
+    }
+
+    public static boolean enter(ServerPlayer p) {
+        ServerLevel level = p.server.getLevel(LEVEL);
+        if (level == null) {
+            return false;
+        }
+        build(level);
+        BlockPos at = arrivalPos();
+        level.getChunk(at);
+        p.teleportTo(level, at.getX() + 0.5, at.getY(), at.getZ() + 0.5, 180f, -5f);
+        SAFE.put(p.getUUID(), at);
+        return true;
+    }
+
+    // 地上へ戻す: 都の門のそば (なければ起きる所)
+    public static void leave(ServerPlayer p) {
+        jp.revati.skyabyss.story.ch6.MoonWorld.leave(p);
+    }
+
+    public static void build(ServerLevel level) {
+        Data d = Data.get(level.getServer());
+        if (d.version >= VERSION) {
+            return;
+        }
+        if (d.version < 1) {
+            arrival().pour(level);
+        }
+        d.version = VERSION;
+        d.setDirty();
+    }
+
+    public static boolean built(MinecraftServer server) {
+        return Data.get(server).version >= 1;
+    }
+
+    // ---------------------------------------------------------------- 雲の下へ落ちた人を戻す
+    @SubscribeEvent
+    static void onTick(PlayerTickEvent.Post event) {
+        if (!(event.getEntity() instanceof ServerPlayer p) || !in(p) || p.isSpectator() || (p.tickCount + p.getId()) % 5 != 0) {
+            return;
+        }
+        rescueCheck(p);
+    }
+
+    // 一人の見回り (自己テストからも)。戻したら true
+    public static boolean rescueCheck(ServerPlayer p) {
+        if (p.onGround() && p.getY() > CLOUD_TOP + 2) {
+            SAFE.put(p.getUUID(), p.blockPosition());
+            return false;
+        }
+        if (p.getY() >= FALL_Y) {
+            return false;
+        }
+        BlockPos back = SAFE.getOrDefault(p.getUUID(), arrivalPos());
+        p.teleportTo(p.serverLevel(), back.getX() + 0.5, back.getY(), back.getZ() + 0.5, p.getYRot(), 0f);
+        if (p instanceof net.neoforged.neoforge.common.util.FakePlayer) {
+            p.moveTo(back.getX() + 0.5, back.getY(), back.getZ() + 0.5, p.getYRot(), 0f);
+        }
+        p.resetFallDistance();
+        p.setDeltaMovement(0, 0, 0);
+        if (!p.isCreative()) {
+            // 体力の 2 割 (防具では減らない。倒れはしない)
+            p.setHealth(Math.max(1f, p.getHealth() - p.getMaxHealth() * FALL_COST));
+        }
+        p.serverLevel().playSound(null, back, SoundEvents.ENDERMAN_TELEPORT, SoundSource.PLAYERS, 0.6f, 0.7f);
+        Notice.hint(p, "message.skyabyss.cloudsea.fell");
+        return true;
+    }
+
+    // ---------------------------------------------------------------- 帰りの台・門の鐘
+    @SubscribeEvent
+    static void onUse(PlayerInteractEvent.RightClickBlock event) {
+        if (!(event.getEntity() instanceof ServerPlayer p) || event.getHand() != InteractionHand.MAIN_HAND || !in(p)) {
+            return;
+        }
+        BlockPos pos = event.getPos();
+        if (pos.equals(arrival().mark("return"))) {
+            event.setCanceled(true);
+            p.serverLevel().playSound(null, pos, SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.BLOCKS, 1f, 0.7f);
+            leave(p);
+        } else if (pos.equals(arrival().mark("gate"))) {
+            event.setCanceled(true);
+            ringGate(p, pos);
+        }
+    }
+
+    public static void ringGate(ServerPlayer p, BlockPos pos) {
+        p.serverLevel().playSound(null, pos, SoundEvents.BELL_BLOCK, SoundSource.BLOCKS, 1.4f, 0.8f);
+        p.serverLevel().playSound(null, pos, SoundEvents.BELL_RESONATE, SoundSource.BLOCKS, 1.0f, 0.8f);
+        Quests.signal(p, GATE_SIGNAL);
+        Notice.narrate(p, "message.skyabyss.cloudsea.gate");
+    }
+
+    // 開発用: /skyabyss cloudsea enter | leave (権限 2)
+    @SubscribeEvent
+    static void onCommands(net.neoforged.neoforge.event.RegisterCommandsEvent event) {
+        event.getDispatcher().register(net.minecraft.commands.Commands.literal(SkyAbyss.MODID).requires(s -> s.hasPermission(2))
+                .then(net.minecraft.commands.Commands.literal("cloudsea")
+                        .then(net.minecraft.commands.Commands.literal("enter").executes(c -> enter(c.getSource().getPlayerOrException()) ? 1 : 0))
+                        .then(net.minecraft.commands.Commands.literal("leave").executes(c -> {
+                            leave(c.getSource().getPlayerOrException());
+                            return 1;
+                        }))));
+    }
+
+    static final class Data extends SavedData {
+        private static final Factory<Data> FACTORY = new Factory<>(Data::new, Data::load);
+        int version;
+
+        static Data get(MinecraftServer server) {
+            return server.overworld().getDataStorage().computeIfAbsent(FACTORY, "skyabyss_cloudsea_world");
+        }
+
+        private static Data load(CompoundTag tag, HolderLookup.Provider registries) {
+            Data d = new Data();
+            d.version = tag.getInt("Version");
+            return d;
+        }
+
+        @Override
+        public CompoundTag save(CompoundTag tag, HolderLookup.Provider registries) {
+            tag.putInt("Version", version);
+            return tag;
+        }
+    }
+}

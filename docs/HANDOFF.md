@@ -5,8 +5,16 @@
 ## 今の形（要点）
 
 - 世界: 天と淵の大陸（40）。はじまりの島 → 渡し船 → 鐘の都の町めぐり → 土地の町から各章（42）。6 職は島の祠で選び、町の職の間（訓練場の師範）で替える（48）。技は職ごとの木 v2（Wynncraft 型。使う技は 4 本まで、基礎は木の節）。敵は Mod の敵だけ（44。バニラの敵はどの湧き方でも入らない）。
-- 試遊版: 0.9.3（`build/libs/skyabyss-0.9.6.jar`。確認表 `docs/review/playtest_0.9.4.md`（0.9.5・0.9.6 は点検の直しと章の小要素）、月は `playtest_0.9.1.md`、遊び方 `docs/beta_how_to_play.md`）。
+- 試遊版: 0.9.3（`build/libs/skyabyss-0.9.7.jar`。確認表 `docs/review/playtest_0.9.4.md`（0.9.5〜0.9.7 は点検の直し・章の小要素・終章の入口）、月は `playtest_0.9.1.md`、遊び方 `docs/beta_how_to_play.md`）。
 - 自己テスト: `bash <scratchpad>/fresh_continent.sh "<名前,…>" <世界名>`（空なら全部。大陸の新しい世界で回す）。`abyss escort` はほかと一緒に流すと時間切れで落ちることがある（単独では通る）。
+
+## 終章「雲海」その 1: 舞台と行き方（0.9.7。設計 [50](design/50_finale.md) の 4.1）
+
+- 00 の 295〜305 はすべて推奨の A（舞台 雲の上の海・四体の巨神に運ばれる・巡礼の道・01 の三形態・座で選ぶ・受け入れるは記憶 12・結末で空と都が変わり選び直せる・6 職の神器・巡礼の試し・Lv 50・結末は人ごと）。
+- ディメンション `skyabyss:cloudsea`（雲の海 y 36〜39 = `story/finale/CloudBlock`、夜明けに止めた空と霧 `client/CloudSkyClient`）。雲の下へ落ちると最後に立っていた所へ戻り体力 2 割（`FinaleWorld.rescueCheck`）。
+- 着く所「巡礼の門の島」（`tools/gen/world/build_cloud_arrival.py` → `data/skyabyss/finale/arrival.json`、流し込みは `FinaleTerrain`）: 白い広場・崩れた巡礼の門と門の鐘（合図 `finale_gate`）・四体の記念の台・帰りの台・北の橋の台（印 `bridge_n`）・まわりの雲のうねり。
+- 行き方: メイン「雲の上へ」`main_finale_ascend`（月の核のあと。語り部の数え歌のななつめ → 大鐘楼の門 → 鐘）。初めての門は紙芝居「巨神の昇り」`finale_ascend`（`tools/story/pixel/finale_ascend.py`）、二度目からは月／雲海のチャットの二択（`story/finale/FinaleGate`、`/skyabyss_gate`）。開発用 `/skyabyss cloudsea enter|leave`。撮影 `tools/shots/cloudsea_arrival.txt`。自己テスト `cloudsea`。
+- 次: 作る順 2（雲の島 1〜4 と敵）。
 
 ## 終章の前の残り（0.9.6）
 

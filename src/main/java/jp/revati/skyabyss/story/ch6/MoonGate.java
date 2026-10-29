@@ -63,6 +63,10 @@ public final class MoonGate {
         BlockPos pos = event.getPos();
         if (p.level().dimension() == Level.OVERWORLD && pos.equals(gatePos(p.server))) {
             event.setCanceled(true);
+            // 終章「雲の上へ」の人は、雲海への道を先に (初めては紙芝居、二度目からは行き先の二択。story/finale/FinaleGate)
+            if (jp.revati.skyabyss.story.finale.FinaleGate.route(p, pos)) {
+                return;
+            }
             String no = refusal(p);
             if (no != null) {
                 Notice.narrate(p, no);

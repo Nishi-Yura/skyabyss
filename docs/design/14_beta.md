@@ -6,7 +6,7 @@
 
 ## 1. ベータの範囲
 
-今の試遊版は **0.9.6**（`build/libs/skyabyss-0.9.6.jar`。大陸の世界。試遊の確認表は `docs/review/playtest_0.9.4.md`（六章は `playtest_0.9.1.md`）、遊び方は [テスター向けの遊び方](../beta_how_to_play.md)）。下の表は大陸より前の通しの順で、大陸では [40](40_rpg_world_and_start.md) の 4 章のはじめの流れのあと、土地の町から各章に入る（[42](42_story_on_the_continent.md)）。
+今の試遊版は **0.9.7**（`build/libs/skyabyss-0.9.7.jar`。大陸の世界。試遊の確認表は `docs/review/playtest_0.9.4.md`（六章は `playtest_0.9.1.md`）、遊び方は [テスター向けの遊び方](../beta_how_to_play.md)）。下の表は大陸より前の通しの順で、大陸では [40](40_rpg_world_and_start.md) の 4 章のはじめの流れのあと、土地の町から各章に入る（[42](42_story_on_the_continent.md)）。
 
 ベータの中身はそろっている。**通し（序章から天の鍵までを人が続けて遊ること）は、まだ誰もやっていない**。それが試遊の目的。
 

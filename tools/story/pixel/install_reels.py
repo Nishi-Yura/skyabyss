@@ -47,9 +47,16 @@ def moon_end_reel():
     return {"moon_core_end": [(pid, motion, 2.6, sound, ja, en) for pid, fn, motion, sound, ja, en in moon_end.PANELS]}
 
 
+def finale_ascend_reel():
+    """終章の入口の語り (finale_ascend.py の PANELS)"""
+    import finale_ascend
+    return {"finale_ascend": [(pid, motion, 2.8, sound, ja, en) for pid, fn, motion, sound, ja, en in finale_ascend.PANELS]}
+
+
 def main():
     REELS.update(chapter_reels())
     REELS.update(moon_end_reel())
+    REELS.update(finale_ascend_reel())
     # 語りの名前を並べると、その語りの絵と並びだけを入れ直す (文はいつも全部書く。絵の元を消した語りを壊さないため)
     only = set(sys.argv[1:])
     lang = {"ja_jp": {"story.skyabyss.reel.hint": HINT[0]}, "en_us": {"story.skyabyss.reel.hint": HINT[1]}}
