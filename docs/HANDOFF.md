@@ -20,7 +20,7 @@
 - 月の地図の絵が作り込みの二回目の前の地形のままだった（`gen_moon_map.py` で描き直し）。月の核の傾きの浅い輪 ring_a が、入れるときの付け根の処理で折れて裏面が透けていた（4114 画素）→ 輪を継ぎ目のない環にし、珠と留め軸二本でつないだ。残像の板のブロックの縁の面。英語の目的の一行が帯からはみ出していた。layout.json の末尾の改行。
 - 弓の技の傷の基準: 技の傷は近接の攻撃力から出していて、弓を持つと 1 のままだった（深淵の嵐の弓の天落としが 0.4、罠もほとんど効かない）。弓を持つ人は、弓の満月の一矢の傷（6 × 弓の倍率、強化込み）を基準にする（`SkillActions.attackDamage`）。技・木・職・深淵・心臓の釣り合いの自己テストは通る。
 - 書類: 01・14・README の六章の書き方を今の形に（全部できた・試遊版 0.9.5）。
-- 残したもの: 剣守の胴の真下の透け（442 画素、下からしか見えない）、ほかの古い透け（語り部・骨の迫撃・影縫い・泡ふぐ ほか 150〜630 画素）、非多様体の辺。階段の点検の 67 件はほとんど腰かけ（汐守の町の 9 件は場所を特定できていない）。01 の 4.1「まだ作っていない」（章ごとの見る者の向き・縁の音・暮らしの変化など）。穴の欠片の絵の確認待ち。終章の設計（01 の M5）はまだ。
+- 残したもの: 剣守の胴の真下の透け（442 画素、下からしか見えない）、ほかの古い透け（語り部・骨の迫撃・影縫い・泡ふぐ ほか 150〜630 画素）、非多様体の辺。階段の点検の 67 件はほとんど腰かけ（汐守の町の 9 件は場所を特定できていない）。01 の 4.1「まだ作っていない」（章ごとの見る者の向き・縁の音・暮らしの変化など）。終章の設計（01 の M5）はまだ。
 
 ## 0.9.2 の試遊のあと（二人での試遊の声への直し。試遊版 0.9.3・0.9.4）
 
@@ -169,7 +169,7 @@
 
 監査の「中」も直した（2026-10-29 深夜）:
 - 旧スキル制度のコードを消した（43 の 3 章どおり）: 天職（`SkillCalling`・`CallingScreen`・通信 2 本）、構え（`SkillStance`・キー `.`）、連鎖（枠の印）、刻み目（`Breakpoints`）、旅人の木（合図・備えの報い・野営の手・目利き・逃げ足・手帖）と橋の木（5 本）。技は 65 → 54 本、アイコンの番号は `Skill.iconIndex`（淵・前世は icons2 の 5 番から）。技の画面の「ビルド」のページは鍵石だけ。自己テスト `skills`・`jobs`・`soul`・`lang`・`skill lesson` を通した。
-- 絵: 穴の欠片 5 枚を土地ごとに別の形に（`docs/review/socket_shards_2026-10-29.png`。ユーザーの確認待ち）。技の印の同じ絵 4 組を描き分け、潮殻の `shell_slam`・`shell_sweep` の印を足した（`gen_attack_icons.py`）。`gui.skyabyss.attack.pearl_keeper.*` の古い文を消した。
+- 絵: 穴の欠片 5 枚を土地ごとに別の形に（`docs/review/socket_shards_2026-10-29.png`。2026-10-30 にユーザーが確認して決まり）。技の印の同じ絵 4 組を描き分け、潮殻の `shell_slam`・`shell_sweep` の印を足した（`gen_attack_icons.py`）。`gui.skyabyss.attack.pearl_keeper.*` の古い文を消した。
 - 係の人の見た目は A だけ（B・C の 54 枚と 2 体の骨格を消した。`AttendantLook.LOOKS = {"a"}`）。孤児の低ポリの絵 23 枚（`*_flared`・`waterway_maw`・`pearl_keeper`・古い `guest_*`・小道具の `_glow`）を消した。
 - 片付け: `run/shots`・`run/mp_check`・`run/world_all4`・dump・`config/*.bak`・`build/portraits_v2`・`build/tmp_attendant`・0.8.0 の jar。`docs/review` の古い報告（assets/gear/mod_blocks/weapon_design_base と試遊表 0.7.1〜0.8.0）、決まったラフの案（legends・ch5・voice2・survivor・warden_paint・材料。比較の絵だけ残す）、`tools/once`・`tools/misc` の 4 本・`tools/rough` の v2〜v4 と gallery_v*。消した書類を指していたコメントと README は直した。
 - 残したもの（判断）: `textures/entity/` と `lowpoly/` の同じ絵 35 組は、立方体の geo（`LowPoly.enabled = false` の控え）が残っているのでそのまま。`elder_sentry`（一章の洞窟）と `elder_sentinel`（背の試練）は役が別なので二体のまま（突進・踏みの印は同じ動きなので同じ絵）。メッシュ監査（`tools/audit/mesh_audit.py`）: 開いた辺 0、非多様体の辺 2,028、つぶれた三角 104、関節の離れ 37（主に防具の脚）。直すなら `tools/lib/mesh_close.py` から。
