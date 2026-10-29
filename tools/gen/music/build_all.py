@@ -31,7 +31,7 @@ def one(tid):
     print("==", tid)
     y = mod.build()
     out = os.path.join(REVIEW, tid + ".ogg")
-    S.write_ogg(out, y, 0.5)
+    S.write_ogg(out, y, S.QUALITY)
     y, _ = sf.read(out)
     print("  %.1f s, %.2f MB, peak %.2f" % (len(y) / S.SR, os.path.getsize(out) / 1e6, np.max(np.abs(y))))
     plan = getattr(mod, "CHORD_PLAN", None)

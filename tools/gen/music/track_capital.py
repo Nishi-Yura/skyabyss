@@ -195,5 +195,5 @@ def build(mute=(), live=True):
 if __name__ == "__main__":
     out = sys.argv[1] if len(sys.argv) > 1 else "capital.ogg"
     y = build()
-    S.write_ogg(out, y, 0.55)
+    S.write_ogg(out, y, S.QUALITY)
     print("wrote", out, "%.2f s" % (len(y) / S.SR), "peak %.2f" % np.max(np.abs(y)))

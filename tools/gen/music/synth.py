@@ -376,7 +376,11 @@ class Mix:
         return y * 0.97
 
 
-def write_ogg(path, y, quality=0.5):
+# 書き出しの品質 (2026-10-31「BGM を軽く」: 0.5 = 約 160 kbps から 0.2 = 約 96 kbps へ。17 曲で 26 MB → 約 15 MB)
+QUALITY = 0.2
+
+
+def write_ogg(path, y, quality=QUALITY):
     # quality 0〜1 (大きいほど良い)。soundfile は compression_level (0 = 最良)
     # libsndfile の Vorbis は長い配列を一度に書くとスタックがあふれて落ちる。少しずつ書く
     y = np.ascontiguousarray(y.astype(np.float32))

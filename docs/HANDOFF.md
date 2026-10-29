@@ -8,6 +8,11 @@
 - 試遊版: 0.8.0（`build/libs/skyabyss-0.8.0.jar`。確認表 `docs/review/playtest_0.8.0.md`、遊び方 `docs/beta_how_to_play.md`）。
 - 自己テスト: `bash <scratchpad>/fresh_continent.sh "<名前,…>" <世界名>`（空なら全部。大陸の新しい世界で回す）。`abyss escort` はほかと一緒に流すと時間切れで落ちることがある（単独では通る）。
 
+## 2026-10-31 夜（BGM を軽く。試遊版 0.9.2）
+
+- BGM 17 曲を音源から書き出し直した（`tools/gen/music/synth.py` の `QUALITY` = 0.2、約 96 kbps。前は 0.5 で約 160 kbps）。26 MB → 15 MB、jar 74 MB → 65 MB（`build/libs/skyabyss-0.9.2.jar`）。ループのつなぎ目は全曲で聞こえない段差のまま、自己テスト `music` 通る。聞き心地はまだ耳で確かめていない。
+- ほかの中身: プログラム 9.8 MB（うち自己テスト 2.1 MB）、低ポリの絵 7.1 MB（使っていない絵はほぼない）、画面の絵柄パック A・B・C 1.8 MB（B・C は選べる絵柄として残す）。
+
 ## 2026-10-31 夕（試遊版 0.9.0 と、試遊と並行の監査）
 
 - 試遊版 `build/libs/skyabyss-0.9.0.jar`（確かめ表 `docs/review/playtest_0.9.0.md`）。
