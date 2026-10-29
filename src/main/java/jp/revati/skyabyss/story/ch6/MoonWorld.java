@@ -29,8 +29,8 @@ public final class MoonWorld {
     public static final int SURFACE = 11;
     public static final BlockPos ARRIVAL = new BlockPos(0, SURFACE + 1, 0);
     // 1 = 着く所とクレーター、2 = 新月の谷 (valley.MoonValley)、3 = 谷の踏み跡・星の溜まりの十字 (谷を流し込み直す)、
-    // 4 = 上弦の崖 (cliff.MoonCliff。着く所の東 x 52〜240)
-    static final int VERSION = 4;
+    // 4 = 上弦の崖 (cliff.MoonCliff。着く所の東)、5 = 崖の岩山を尾根と谷筋のある形に (崖を流し込み直す)
+    static final int VERSION = 5;
 
     private MoonWorld() {
     }
@@ -76,7 +76,7 @@ public final class MoonWorld {
         if (d.version < 3) {
             jp.revati.skyabyss.story.ch6.valley.MoonValley.build(level);
         }
-        if (d.version < 4) {
+        if (d.version < 5) {
             jp.revati.skyabyss.story.ch6.cliff.MoonCliff.build(level);
         }
         d.version = VERSION;

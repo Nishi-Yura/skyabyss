@@ -198,11 +198,14 @@ for xi in range(NX):
         if de <= 21:
             top = 68 + 2 * N_CREST[xi, zi]
         else:
-            # 斜面: 2.4 ずつ下がり、6 ごとに段の棚 (平らな所) を挟む
+            # 斜面: 角度で急さが変わり、張り出した岩の筋 (尾根) と谷筋が裾へ放射に下りる。棚は不揃いに少しだけ
             run = de - 21
-            top = 68 - run * 2.4 + 2.0 * (N_CREST[xi, zi] - 0.5)
-            if (run % 6.0) < 1.6:
-                top = 68 - (run - (run % 6.0)) * 2.4 + 1.0
+            th = TH[xi, zi]
+            spur = 0.5 + 0.5 * np.sin(np.radians(7 * th + 30)) * np.sin(np.radians(3 * th + 200))
+            slope = 3.2 - 1.6 * spur + 0.6 * (N_EDGE[xi, zi] + 1) * 0.5
+            top = 68 - run * slope + 2.5 * (N_CREST[xi, zi] - 0.5)
+            if N_PATCH[xi, zi] > 0.78 and run % 9.0 < 2.0:
+                top += 1.5
         if top > TOP[xi, zi] and top > SURFACE:
             TOP[xi, zi], KIND[xi, zi] = top, 5
 
@@ -247,7 +250,11 @@ for xi in range(NX):
         for y in range(SURFACE + 1, min(Y1, top) + 1):
             yi = y - Y0
             vol[xi, yi, zi] = wall_mat(y, xi, zi, hsh(x, y, z), top)
-        # 外の崖の張り出しと抉れ (面の近くだけ)
+        # 外の崖と岩山の面の張り出しと抉れ (面の近くだけ)
+        if kind == 5 and top > SURFACE + 6:
+            for y in range(SURFACE + 3, min(Y1, top - 2)):
+                if N_WALL[xi, y - Y0, zi] > 0.62:
+                    vol[xi, y - Y0, zi] = AIR
         if kind == 1:
             for y in range(SURFACE + 2, min(Y1, top)):
                 if N_WALL[xi, y - Y0, zi] > 0.55:
