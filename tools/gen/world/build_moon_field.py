@@ -630,6 +630,95 @@ for _ in range(3000):
         put(x, t + 1, z, BUD)
         buds += 1
 
+# ---------------------------------------------------------------- 作り込みの二回目 (docs/design/46 の 4.5.3)
+# 溝の壁: まっすぐな面をやめ、層の筋 (5 ごとに 1 奥へ抉る帯)・縦の割れ目・根の崩れた石。影の窪のまわりはそのまま
+nook_x = [x for x in range(GULLY_X1 - 10, GULLY_X0 + 8, -16)]
+grooves = rubble = 0
+for x in range(GULLY_X0 + 6, GULLY_X1 - 2):
+    if any(-3 <= x - nx <= 4 for nx in nook_x):
+        continue
+    for sgn in (-1, 1):
+        wz = GULLY_Z + sgn * (GULLY_W + 1)
+        crack = hsh(x, 11, wz) % 9 == 0
+        for y in range(GULLY_FLOOR + 2, SURFACE + 1):
+            band = (y - GULLY_FLOOR) % 5 == 3 and hsh(x // 3, y, wz) % 3 != 0
+            if (band or (crack and y < SURFACE - 1)) and get(x, y, wz) != AIR and get(x, y, wz + sgn) != AIR:
+                put(x, y, wz, AIR)
+                put(x, y - 1, wz, SBASALT if band else get(x, y - 1, wz))
+                grooves += 1
+        # 根の崩れた石 (溝の縁の 1 列に、ところどころ 1〜2 段)
+        fz = GULLY_Z + sgn * GULLY_W
+        if hsh(x, 12, fz) % 4 == 0:
+            for y in range(GULLY_FLOOR + 1, GULLY_FLOOR + 2 + hsh(x, 13, fz) % 2):
+                put(x, y, fz, TUFF if hsh(x, y, fz) % 3 else GRAVEL)
+            rubble += 1
+
+# 影の塔: 外の控え壁 6 (入口の東はあける)、窓 (淡い青の硝子。通り抜けられない)、崩れた縁から突き出す梁
+tx, tz = TOWER
+butt = 0
+for k in range(6):
+    ang = 30 + k * 60
+    if abs(((ang + 180) % 360) - 180) < 40:
+        continue
+    ca, sa = math.cos(math.radians(ang)), math.sin(math.radians(ang))
+    hb = 14 + hsh(k, 1, 7) % 8
+    for j in range(hb):
+        reach = 2.6 * (1 - j / hb) + 0.6
+        for r in np.arange(TOWER_R + 0.6, TOWER_R + 0.6 + reach, 0.5):
+            for w in (-0.5, 0.5):
+                x, z = round(tx + ca * r - sa * w), round(tz + sa * r + ca * w)
+                put(x, SURFACE + 1 + j, z, TUFF_BRICKS if j % 4 else POL_TUFF)
+    butt += 1
+windows = 0
+for k in range(8):
+    ang = 22.5 + k * 45
+    if abs(((ang + 180) % 360) - 180) < 30:
+        continue
+    ca, sa = math.cos(math.radians(ang)), math.sin(math.radians(ang))
+    x, z = round(tx + ca * TOWER_R), round(tz + sa * TOWER_R)
+    for y0 in (SURFACE + 9, SURFACE + 21):
+        if get(x, y0 + 3, z) == AIR:
+            continue
+        for y in range(y0, y0 + 3):
+            put(x, y, z, LB_GLASS)
+        put(x, y0 + 3, z, SQUARTZ)
+        windows += 1
+for k in range(5):
+    ang = 50 + k * 70
+    ca, sa = math.cos(math.radians(ang)), math.sin(math.radians(ang))
+    x, z = round(tx + ca * TOWER_R), round(tz + sa * TOWER_R)
+    t = top_at(x, z)
+    if t <= SURFACE + 10:
+        continue
+    for r in range(1, 3):
+        put(round(tx + ca * (TOWER_R + r)), t - 1, round(tz + sa * (TOWER_R + r)), QPILLAR_X if abs(ca) > abs(sa) else QPILLAR_Z)
+
+# 野の小さなクレーター (縁は灰の砂、底は暗い玄武岩)。場所と踏み跡は避ける
+craters = 0
+for _ in range(2000):
+    if craters >= 14:
+        break
+    x, z = int(rng.integers(X0 + 10, X1 - 10)), int(rng.integers(Z0 + 10, Z1 - 10))
+    r = 2.5 + rng.random() * 3.0
+    if busy(x, z) or any(busy(x + dx, z + dz) for dx, dz in ((6, 0), (-6, 0), (0, 6), (0, -6))):
+        continue
+    t0 = top_at(x, z, SURFACE + 3)
+    if t0 != SURFACE:
+        continue
+    for dx in range(-8, 9):
+        for dz in range(-8, 9):
+            d = math.hypot(dx, dz) / r
+            xx, zz = x + dx, z + dz
+            if d <= 1.0:
+                dep = int(round(2 * (1 - d * d)))
+                for y in range(SURFACE - dep + 1, SURFACE + 1):
+                    put(xx, y, zz, AIR)
+                put(xx, SURFACE - dep, zz, SBASALT if d < 0.45 else POWDER_G)
+            elif d <= 1.45 and get(xx, SURFACE + 1, zz) == AIR and hsh(xx, 14, zz) % 3:
+                put(xx, SURFACE + 1, zz, POWDER_G if d < 1.25 else POWDER)
+    craters += 1
+print("pass2 grooves", grooves, "rubble", rubble, "buttresses", butt, "windows", windows, "craters", craters)
+
 # ---------------------------------------------------------------- 書き出し (野の列は全部。y 8 から上と、池・溝・塔の深い所)
 runs = []
 LOW = -34

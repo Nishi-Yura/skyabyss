@@ -593,6 +593,72 @@ for _ in range(1500):
         put(x, t + 1, z, BUD)
         buds += 1
 
+# ---------------------------------------------------------------- 作り込みの二回目 (docs/design/46 の 4.4.3)
+# 頂の尖り: 頂の線に沿って 9 ごとに岩の尖りの群れ (外へ少し傾く)。道の終わりの近く (t > 0.8) には立てない (主の皿へ跳ぶ足場にしない)
+near_marks = [(v[0], v[2]) for v in MARKS.values()]
+
+
+def near_mark(x, z, r):
+    return any(math.hypot(x - a, z - b) < r for a, b in near_marks)
+
+
+pinnacles = 0
+for a in np.arange(A_START + 4, A_START + (A_END - A_START) * 0.8, 9.0):
+    t = (a - A_START) / (A_END - A_START)
+    for k, (dr, h) in enumerate(((1.0, 7), (2.6, 4), (-0.2, 3))):
+        cx, cz = at_angle(float(a) + (k - 1) * 1.6, dr)
+        x0, z0 = round(cx), round(cz)
+        xi, zi = x0 - X0, z0 - Z0
+        if not (0 <= xi < NX and 0 <= zi < NZ) or KIND[xi, zi] != 2:
+            continue
+        hh = h + int(hsh(x0, 3, z0) % 3) - (1 if t < 0.2 else 0)
+        base = top_at(x0, z0)
+        ox, oz = math.cos(math.radians(a)), math.sin(math.radians(a))
+        for j in range(hh):
+            r = 1.3 * (1 - j / hh) + 0.3
+            lx, lz = cx + ox * j * 0.18, cz + oz * j * 0.18
+            for dx in range(-2, 3):
+                for dz in range(-2, 3):
+                    if math.hypot(x0 + dx - lx, z0 + dz - lz) <= r:
+                        put(x0 + dx, base + 1 + j, z0 + dz, ANDESITE if j > hh - 3 else TUFF if (j + dx) % 3 else BASALT)
+                        write(x0 + dx, z0 + dz)
+        pinnacles += 1
+
+# 段々の飾り: 段の縁 (となりが 2 以上低い所) に石の縁取り、段の上に崩れた岩を増やす
+lips = 0
+for xi in range(1, NX - 1):
+    for zi in range(1, NZ - 1):
+        if KIND[xi, zi] != 4:
+            continue
+        x, z = X0 + xi, Z0 + zi
+        t = TOPI[xi, zi]
+        drop = any(KIND[xi + dx, zi + dz] in (0, 4) and TOPI[xi + dx, zi + dz] <= t - 2 for dx, dz in ((1, 0), (-1, 0), (0, 1), (0, -1)))
+        if drop and get(x, t + 1, z) == AIR and hsh(x, 5, z) % 5 < 2:
+            put(x, t + 1, z, COBBLED_DS if hsh(x, 6, z) % 3 == 0 else ANDESITE)
+            lips += 1
+
+# 岩山と外の崖の裾: 平らな月の面から急に立たないよう、礫と砂の崩れた斜面 (裾から 9 まで、遠いほど低い)
+FOOT = (KIND == 1) | (KIND == 5)
+D_FOOT = ndimage.distance_transform_edt(~FOOT)
+aprons = 0
+for xi in range(NX):
+    for zi in range(NZ):
+        if KIND[xi, zi] != 0 or D_FOOT[xi, zi] > 9:
+            continue
+        x, z = X0 + xi, Z0 + zi
+        if near_mark(x, z, 12):
+            continue
+        d = D_FOOT[xi, zi]
+        h = int(round((9 - d) * (0.55 + 0.45 * N_PATCH[xi, zi]) * 0.8))
+        if h <= 0:
+            continue
+        for y in range(SURFACE + 1, SURFACE + 1 + h):
+            top = y == SURFACE + h
+            put(x, y, z, (GRAVEL if hsh(x, y, z) % 4 == 0 else POWDER_G) if top else (TUFF if hsh(x, y, z) % 3 else ANDESITE))
+        write(x, z)
+        aprons += 1
+print("pass2 pinnacles", pinnacles, "lips", lips, "apron columns", aprons)
+
 # ---------------------------------------------------------------- 書き出し (崖の列だけ。列の中は y 12 から上を全部、空気も含めて)
 LOW = SURFACE - 3
 runs = []

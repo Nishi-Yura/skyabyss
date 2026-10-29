@@ -8,6 +8,13 @@
 - 試遊版: 0.8.0（`build/libs/skyabyss-0.8.0.jar`。確認表 `docs/review/playtest_0.8.0.md`、遊び方 `docs/beta_how_to_play.md`）。
 - 自己テスト: `bash <scratchpad>/fresh_continent.sh "<名前,…>" <世界名>`（空なら全部。大陸の新しい世界で回す）。`abyss escort` はほかと一緒に流すと時間切れで落ちることがある（単独では通る）。
 
+## 2026-10-31 午後（崖・野・淵の作り込みの二回目。設計 [46](design/46_moon.md) の 4.4.3・4.5.3・4.6.3）
+
+- 崖（`build_moon_cliff.py`）: 頂の尖りの群れ 24・段の縁の石・岩山と外の崖の裾の崩れた斜面。野（`build_moon_field.py`）: 溝の壁の層の筋と割れ目と根の石・塔の控え壁と硝子の窓と梁・小さなクレーター 14。淵（`build_moon_rift.py`）: 縁の歯 106・主の間の割れた鏡の柱 7。
+- 月の世界の版 12 で三つを流し込み直し、記憶の石を置き直す（新しい世界では最初の組み立てだけ）。
+- 確かめ: 月の 10 段すべて通る。撮影 `tools/shots/moon_sections_pass2.txt`、見比べ `docs/review/moon/sections_pass2.jpg`。
+- 六章で作る残りはない。まだ: 試遊。
+
 ## 2026-10-31 昼（六章の仕上げ: 記憶の断片と伝承・位相の挑戦の段 3/5・月のヒロイックの書き換え・谷の二回目。設計 [46](design/46_moon.md) の 4.3.3・4.8.1・4.9）
 
 - 記憶の断片 12 と伝承 19 頁（`story/ch6/MoonMemories`・記憶の石 `MoonMemoryStoneBlock`・`tools/gen/ch6/gen_moon_lore.py`）。区画ごとに 前の自分と話す・記憶の石・主。十二で「見る者」、核のあとで「月の核」、段 5 の記念の札 5。`chapter3/unknown_*` の枠は消した（`LoreSelfTest` は六章も中身ありに、文は `skyabyss_moon` も読む）。

@@ -36,7 +36,8 @@ public final class MoonWorld {
     // 7 = 下弦の淵 (rift.MoonRift。着く所の南東)、8 = 月の核 (core.MoonCore。着く所の北の門と、月の奥の核の間)、
     // 9 = 月の暦 (クリア後の位相の挑戦の入口。着く所の南。MoonTrial)、10 = 記憶の石 (区画ごとに一つ。MoonMemories)、
     // 11 = 谷の作り込みの二回目 (入口の段々の下り・崩れた斜面と石柱・崖の岩棚・主の間の立ち石の輪。谷を流し込み直し、記憶の石を置き直す)
-    static final int VERSION = 11;
+    // 12 = 崖・野・淵の作り込みの二回目 (崖の頂の尖りと段の縁と裾の崩れ・野の溝の壁と塔と小さなクレーター・淵の縁の歯と主の間の鏡の柱。三つを流し込み直し、記憶の石を置き直す)
+    static final int VERSION = 12;
 
     private MoonWorld() {
     }
@@ -100,7 +101,16 @@ public final class MoonWorld {
         if (d.version >= 3 && d.version < 11) {
             jp.revati.skyabyss.story.ch6.valley.MoonValley.build(level);
         }
-        if (d.version < 11) {
+        if (d.version >= 5 && d.version < 12) {
+            jp.revati.skyabyss.story.ch6.cliff.MoonCliff.build(level);
+        }
+        if (d.version >= 6 && d.version < 12) {
+            jp.revati.skyabyss.story.ch6.field.MoonField.build(level);
+        }
+        if (d.version >= 7 && d.version < 12) {
+            jp.revati.skyabyss.story.ch6.rift.MoonRift.build(level);
+        }
+        if (d.version < 12) {
             MoonMemories.place(level);
         }
         d.version = VERSION;

@@ -68,6 +68,7 @@ DEEPSLATE = P("minecraft:deepslate")
 C_DEEPSLATE = P("minecraft:cobbled_deepslate")
 SBASALT = P("minecraft:smooth_basalt")
 BASALT = P("minecraft:basalt[axis=y]")
+PBASALT = P("minecraft:polished_basalt[axis=y]")
 BLACKSTONE = P("minecraft:blackstone")
 GRAVEL = P("minecraft:gravel")
 POL_TUFF = P("minecraft:polished_tuff")
@@ -578,6 +579,73 @@ for i, (px_, pz_) in enumerate([(122, 196), (128, 244), (164, 206), (170, 232)])
     put(px_ + 1, SURFACE + 1, pz_, PB_SLAB)
     put(px_, SURFACE + 1, pz_ + 1, PB_WALL)
     mark(f"pillar_{i}", px_, SURFACE + 1, pz_)
+
+# ---------------------------------------------------------------- 作り込みの二回目 (docs/design/46 の 4.6.3)
+# 縁の歯: 淵の両の縁に、欠けた月の縁のような岩の歯 (月の面から 2〜5)。仕掛けと野営と道の近くは避ける。縁は外へ広げない (渡りの距離を変えない)
+spots = [(v[0], v[2]) for v in MARKS.values()]
+
+
+def near_spot(x, z, r):
+    return any(math.hypot(x - a, z - b) < r for a, b in spots)
+
+
+teeth = drips = 0
+for xi in range(NX):
+    for zi in range(NZ):
+        if not edge1[xi, zi]:
+            continue
+        x, z = X0 + xi, Z0 + zi
+        if near_spot(x, z, 9) or hsh(x, 21, z) % 6:
+            continue
+        t = top_at(x, z, SURFACE + 3)
+        if not (SURFACE - 1 <= t <= SURFACE + 1):
+            continue
+        h = 2 + hsh(x, 22, z) % 4
+        for y in range(t + 1, t + 1 + h):
+            put(x, y, z, BASALT if y < t + h else SBASALT)
+        if h >= 4:
+            for dx, dz in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+                xx, zz = x + dx, z + dz
+                if 0 <= xx - X0 < NX and 0 <= zz - Z0 < NZ and not air[xx - X0, zz - Z0] and get(xx, t + 1, zz) == AIR:
+                    put(xx, t + 1, zz, BASALT)
+                    break
+        teeth += 1
+# 縁の下の垂れ: 帯の壁の上の方 (y 4〜9) から玄武岩の垂れが 1〜4 下がる
+for xi in range(NX):
+    for zi in range(NZ):
+        if not air[xi, zi] or hsh(X0 + xi, 23, Z0 + zi) % 9:
+            continue
+        x, z = X0 + xi, Z0 + zi
+        if near_spot(x, z, 12):
+            continue
+        for y in range(SURFACE - 2, 3, -1):
+            if get(x, y, z) == AIR and any(get(x + dx, y, z + dz) not in (AIR,) for dx, dz in ((1, 0), (-1, 0), (0, 1), (0, -1))) \
+                    and get(x, y + 1, z) != AIR:
+                n = 1 + hsh(x, 24, z) % 4
+                for k in range(n):
+                    if get(x, y - k, z) == AIR:
+                        put(x, y - k, z, BASALT if k < n - 1 else PBASALT)
+                drips += 1
+                break
+
+# 主の間の縁の割れた鏡の柱: 床の縁 (半径 14) に黒曜石と泣く黒曜石の柱 6 (西の橋と南の帰り口はあける)
+ax, az = ARENA
+mirrors = 0
+for k in range(8):
+    ang = 112.5 + k * 22.5
+    if abs(((ang - 180 + 180) % 360) - 180) < 14:
+        continue
+    px, pz = round(ax + math.cos(math.radians(ang)) * (ARENA_R - 1)), round(az + math.sin(math.radians(ang)) * (ARENA_R - 1))
+    if math.hypot(px - MARKS["arena_back"][0], pz - MARKS["arena_back"][2]) < 4:
+        continue
+    if get(px, ARENA_Y, pz) == AIR:
+        continue
+    h = 3 + hsh(k, 25, 1) % 3
+    for y in range(ARENA_Y + 1, ARENA_Y + 1 + h):
+        put(px, y, pz, CRYING if (y + k) % 3 == 0 else OBSIDIAN)
+    put(px, ARENA_Y + 1 + h, pz, QBRICKS if k % 2 else CALCITE)
+    mirrors += 1
+print("pass2 teeth", teeth, "drips", drips, "mirror pillars", mirrors)
 
 # ---------------------------------------------------------------- 書き出し
 runs = []
