@@ -250,7 +250,28 @@ public final class SkillActions {
     }
 
     static float attackDamage(Player player) {
-        return (float) player.getAttributeValue(Attributes.ATTACK_DAMAGE);
+        float melee = (float) player.getAttributeValue(Attributes.ATTACK_DAMAGE);
+        // 弓を持つ人は、弓の満月の一矢の傷を技の基準にする (近接の攻撃力は弓では 1 のままで、天落とし・罠などがほとんど効いていなかった。2026-10-29 の点検)
+        net.minecraft.world.item.ItemStack held = player.getMainHandItem();
+        if (held.getItem() instanceof net.minecraft.world.item.BowItem) {
+            return Math.max(melee, (float) (6.0 * bowMultiplier(held)) + (melee - 1f));
+        }
+        return melee;
+    }
+
+    // 弓の矢の傷の倍率 (強化込み。この作品の弓でなければ 1)
+    static double bowMultiplier(net.minecraft.world.item.ItemStack held) {
+        int enhance = jp.revati.skyabyss.item.ModGear.enhance(held);
+        if (held.getItem() instanceof jp.revati.skyabyss.item.ChapterBowItem b) {
+            return b.multiplier(enhance);
+        }
+        if (held.getItem() instanceof jp.revati.skyabyss.abyss.AbyssBowItem) {
+            return jp.revati.skyabyss.abyss.AbyssBowItem.DAMAGE * (1 + jp.revati.skyabyss.item.GearEvents.ATTACK_RATE_PER_LEVEL * enhance);
+        }
+        if (held.getItem() instanceof jp.revati.skyabyss.item.storm.ThunderWingBowItem) {
+            return jp.revati.skyabyss.item.storm.ThunderWingBowItem.damageMultiplier(enhance);
+        }
+        return 1.0;
     }
 
     static void sound(ServerPlayer player, SoundEvent sound, float volume, float pitch) {

@@ -135,7 +135,8 @@ public final class TownSelfTest {
         for (TownGuests.Guest g : TownGuests.ALL) {
             check(f, DialogueManager.dialogue(g.role()) != null, "dialogue missing " + g.role());
             check(f, TownQuests.byId(g.quest()) != null && QuestManager.quest(g.quest()) != null, "guest quest " + g.quest());
-            check(f, resource(a + "textures/lowpoly/guest_" + g.id() + ".png"), "texture guest_" + g.id());
+            // 体の絵は v2 (npc_guest_<人>)。古い立方体の絵 guest_<人> は 2026-10-29 に消した
+            check(f, resource(a + "textures/lowpoly/npc_guest_" + g.id() + ".png"), "texture npc_guest_" + g.id());
             for (String face : Dialogue.FACES) {
                 check(f, resource(a + "textures/gui/npc/face/guest_" + g.id() + "_" + face + ".png"), "face guest_" + g.id() + " " + face);
             }

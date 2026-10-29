@@ -140,10 +140,11 @@ public final class NpcQuestSelfTest {
                     && (jp.revati.skyabyss.town.TownGuests.byId(d.role().substring(jp.revati.skyabyss.town.TownGuests.ROLE_PREFIX.length())) != null
                     // 土地の町の人 (town/RegionFolk。都の町の人の絵を借りる)
                     || jp.revati.skyabyss.town.RegionFolk.byId(d.role().substring(jp.revati.skyabyss.town.TownGuests.ROLE_PREFIX.length())) != null
-                    // 六章の前のループの自分 (月の谷・崖・野の野営。story/ch6/valley/ValleyTicker・cliff/CliffTicker・field/FieldTicker)
+                    // 六章の前のループの自分 (月の谷・崖・野・淵の野営。story/ch6/valley/ValleyTicker・cliff/CliffTicker・field/FieldTicker)
                     || d.role().equals(jp.revati.skyabyss.town.TownGuests.ROLE_PREFIX + jp.revati.skyabyss.story.ch6.valley.ValleyTicker.PAST_SELF)
                     || d.role().equals(jp.revati.skyabyss.town.TownGuests.ROLE_PREFIX + jp.revati.skyabyss.story.ch6.cliff.CliffTicker.PAST_SELF)
-                    || d.role().equals(jp.revati.skyabyss.town.TownGuests.ROLE_PREFIX + jp.revati.skyabyss.story.ch6.field.FieldTicker.PAST_SELF)));
+                    || d.role().equals(jp.revati.skyabyss.town.TownGuests.ROLE_PREFIX + jp.revati.skyabyss.story.ch6.field.FieldTicker.PAST_SELF)
+                    || d.role().equals(jp.revati.skyabyss.town.TownGuests.ROLE_PREFIX + jp.revati.skyabyss.story.ch6.rift.RiftTicker.PAST_SELF)));
             check(known, "dialogue for unknown entity " + d.role(), failures);
             d.entries().forEach(e -> conditions.add(e.condition()));
             for (Dialogue.Node n : d.nodes().values()) {

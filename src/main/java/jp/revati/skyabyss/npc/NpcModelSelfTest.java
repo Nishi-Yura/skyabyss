@@ -37,7 +37,10 @@ public final class NpcModelSelfTest {
         out.addAll(EXTRA);
         // 土地の町の人 (島と内海の渡し守を含む 8 人。2026-10-28 から自分の体)
         for (jp.revati.skyabyss.town.RegionFolk.Folk f : jp.revati.skyabyss.town.RegionFolk.ALL) {
-            out.add("guest_" + f.id());
+            String body = "guest_" + jp.revati.skyabyss.town.RegionFolk.body(f.id());
+            if (!out.contains(body)) {
+                out.add(body);
+            }
         }
         for (TownGuests.Guest g : TownGuests.ALL) {
             out.add("guest_" + g.id());

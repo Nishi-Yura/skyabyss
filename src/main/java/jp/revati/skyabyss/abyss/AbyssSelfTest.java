@@ -327,7 +327,7 @@ public final class AbyssSelfTest {
                 check(weapons.add(r.weapon), "two legendary rewrites on " + r.weapon);
             }
         }
-        check(legends == 49, "legendary rewrites: " + legends + " (expected 49: 32 + the 17 titan heroic weapons)");
+        check(legends == 55, "legendary rewrites: " + legends + " (expected 55: 32 + the 17 titan heroic weapons + the 6 moon heroic weapons)");
         // 抽選: 天井 (LEGEND_PITY 回続けて出なければ保証)・確率・重複は欠片へ
         RandomSource rng = RandomSource.create(4242);
         int rolls = 20000;
@@ -414,6 +414,8 @@ public final class AbyssSelfTest {
         SkillData d = SkillManager.get(p);
         d.bonusPoints = 80;
         d.mana = 200;
+        // 偽の人の記録は前の段 (同じ名前の偽の人) から残ることがある。刻印が残っていると付け替え (都でだけ) になり選べない
+        d.runes.clear();
         p.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(BuiltInRegistries.ITEM.get(ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, weapon))));
         level.addFreshEntity(p);
         return p;
@@ -434,7 +436,11 @@ public final class AbyssSelfTest {
                 // 巨神斬り: 奈落断ち。選べる (大剣を持つとき)・外せば効かない・振って 1.2 秒後にもう一度
                 s.sword = wielder(level, "sword", AbyssSetup.GREATSWORD, CX, CZ);
                 SkillManager.forceRank(s.sword, Skill.TITAN_CLEAVE, 3);
-                check(SkillManager.chooseRune(s.sword, Skill.TITAN_CLEAVE, 4) == SkillManager.RuneResult.OK && SkillManager.runeOf(s.sword, Skill.TITAN_CLEAVE) == 4, "abyss cleave rune could not be chosen with the greatsword");
+                // 木 v2: 段を上げる途中の節で刻印が付く。付け替えは都でだけなので、外してから選ぶ
+                SkillManager.get(s.sword).runes.clear();
+                SkillManager.RuneResult cr = SkillManager.chooseRune(s.sword, Skill.TITAN_CLEAVE, 4);
+                check(cr == SkillManager.RuneResult.OK && SkillManager.runeOf(s.sword, Skill.TITAN_CLEAVE) == 4, "abyss cleave rune could not be chosen with the greatsword: " + cr
+                        + " (current " + SkillManager.get(s.sword).rune(Skill.TITAN_CLEAVE) + ", runes " + SkillManager.get(s.sword).runes + ", available " + SkillManager.get(s.sword).runeAvailable(Skill.TITAN_CLEAVE) + ", valid " + jp.revati.skyabyss.rpg.skill.Rune.valid(Skill.TITAN_CLEAVE, 4) + ", held " + jp.revati.skyabyss.rpg.skill.Rune.heldOf(Skill.TITAN_CLEAVE, 4, s.sword) + ")");
                 s.cleaveFoe = husk(level, CX, CZ + 2.2);
                 s.sword.setYRot(0f);
                 s.sword.getLookAngle();
@@ -450,6 +456,8 @@ public final class AbyssSelfTest {
                 // 沈む唄: 唄の終わりに残った吸収が体力へ
                 s.singer = wielder(level, "singer", AbyssSetup.BELL_STAFF, CX + 8, CZ);
                 SkillManager.forceRank(s.singer, Skill.WARD_SONG, 3);
+                // 木 v2: 段を上げる途中の節で刻印が付く。付け替えは都でだけなので、外してから選ぶ
+                SkillManager.get(s.singer).runes.clear();
                 check(SkillManager.chooseRune(s.singer, Skill.WARD_SONG, 4) == SkillManager.RuneResult.OK, "sunk song rune could not be chosen with the staff");
                 s.singer.setHealth(8f);
                 s.singerHealthBefore = 8f;
@@ -462,6 +470,8 @@ public final class AbyssSelfTest {
                 // 天落とし: 矢の止まった所へ雷
                 s.archer = wielder(level, "archer", AbyssSetup.STORM_BOW, CX - 8, CZ);
                 SkillManager.forceRank(s.archer, Skill.CLOUD_PIERCE, 3);
+                // 木 v2: 段を上げる途中の節で刻印が付く。付け替えは都でだけなので、外してから選ぶ
+                SkillManager.get(s.archer).runes.clear();
                 check(SkillManager.chooseRune(s.archer, Skill.CLOUD_PIERCE, 4) == SkillManager.RuneResult.OK, "sky fall rune could not be chosen with the bow");
                 s.fallFoe = husk(level, CX - 8, CZ + 8);
                 Arrow arrow = new Arrow(level, s.archer, new ItemStack(net.minecraft.world.item.Items.ARROW), s.archer.getMainHandItem());
@@ -475,6 +485,8 @@ public final class AbyssSelfTest {
                 // 這う灰: 灰かぶりが隣の敵へ移る
                 s.reaper = wielder(level, "reaper", AbyssSetup.ASH_SCYTHE, CX, CZ - 8);
                 SkillManager.forceRank(s.reaper, Skill.ASH_SCATTER, 2);
+                // 木 v2: 段を上げる途中の節で刻印が付く。付け替えは都でだけなので、外してから選ぶ
+                SkillManager.get(s.reaper).runes.clear();
                 check(SkillManager.chooseRune(s.reaper, Skill.ASH_SCATTER, 4) == SkillManager.RuneResult.OK, "creeping ash rune could not be chosen with the scythe");
                 s.ashNear = husk(level, CX + 3, CZ - 8);
                 s.ashFar = husk(level, CX + 3 + Abyss.ASH_RADIUS - 0.5, CZ - 8);

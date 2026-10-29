@@ -5,6 +5,8 @@
 骨: root > core (珠) > eye / ring_a / ring_b / ring_c / spire_t / spire_b。珠の高さ 3 ブロックの上 (床から 10 に浮かべる)。
 """
 import math
+
+import numpy as np
 import sys
 from pathlib import Path
 
@@ -26,15 +28,38 @@ PAL = make_pal({
 
 
 def ring(bone, r, tilt_x, tilt_z, width, n=28):
+    """継ぎ目のない環 (2026-10-29: 筒で輪を作ると始まりと終わりの口が重なり、入れるときの口塞ぎで ring_a の面が内向きに裏返っていた)。"""
+    import lpkit
     pts = []
-    for i in range(n + 1):
+    for i in range(n):
         a = 2 * math.pi * i / n
         x, y, z = math.cos(a) * r, 0.0, math.sin(a) * r
         # 傾ける (x 軸まわり、そのあと z 軸まわり)
         y, z = y * math.cos(tilt_x) - z * math.sin(tilt_x), y * math.sin(tilt_x) + z * math.cos(tilt_x)
         x, y = x * math.cos(tilt_z) - y * math.sin(tilt_z), x * math.sin(tilt_z) + y * math.cos(tilt_z)
         pts.append((x, CY + y, z))
-    return tube(bone, "silver", pts, ra=width, rb=width * 0.45, sides=4, hint=(0, 1, 0))
+    P = [np.asarray(q, float) for q in pts]
+    c = np.array([0.0, CY, 0.0])
+    sides = 4
+    rings = []
+    for i in range(n):
+        t = P[(i + 1) % n] - P[i - 1]
+        t /= np.linalg.norm(t)
+        out = P[i] - c
+        out -= np.dot(out, t) * t
+        out /= np.linalg.norm(out)
+        up = np.cross(t, out)
+        rings.append([P[i] + width * 0.45 * math.cos(math.radians(45 + 90 * k)) * out + width * math.sin(math.radians(45 + 90 * k)) * up
+                      for k in range(sides)])
+    faces = []
+    for i in range(n):
+        j = (i + 1) % n
+        for k in range(sides):
+            quad = [rings[i][k], rings[i][(k + 1) % sides], rings[j][(k + 1) % sides], rings[j][k]]
+            f = lpkit._mk(quad, bone, "silver", (P[i] + P[j]) / 2)
+            if f is not None:
+                faces.append(f)
+    return faces
 
 
 def build(k):
@@ -52,6 +77,9 @@ def build(k):
     F += part("hand", tube("eye", "silver", [(0, CY, -9.6), (0.2, CY + 2.6, -9.6)], ra=[0.35, 0.1], sides=4, hint=(0, 0, 1)))
     # 三つの輪 (天球儀): 大きさと傾きを変える。輪に星の刻み
     F += part("ring_a", ring("ring_a", 14.0, math.radians(15), math.radians(0), 0.9))
+    # ring_a の留め軸: 珠から輪へ左右に細い銀の軸 (傾きの浅い輪はどこにも触れず、入れるときの付け根の処理で形が折れていた。2026-10-29)
+    for sx in (-1, 1):
+        F += part(f"ring_a_pin{sx}", tube("ring_a", "silver", [(sx * 8.2, CY, 0), (sx * 14.0, CY, 0)], ra=0.45, sides=4, hint=(0, 1, 0), caps=(True, True)))
     F += part("ring_b", ring("ring_b", 16.5, math.radians(70), math.radians(25), 0.8))
     F += part("ring_c", ring("ring_c", 19.0, math.radians(-40), math.radians(-60), 0.7))
     for bone, r, tx, tz, n in (("ring_a", 14.0, 15, 0, 8), ("ring_b", 16.5, 70, 25, 8), ("ring_c", 19.0, -40, -60, 10)):

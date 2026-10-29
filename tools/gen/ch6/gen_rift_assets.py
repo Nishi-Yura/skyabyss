@@ -187,7 +187,9 @@ def main():
             "render_type": "minecraft:cutout",
             "textures": {"top": "skyabyss:block/%s" % name, "particle": "skyabyss:block/%s" % name},
             "elements": [{"from": [0, 0, 0], "to": [16, 0.5 if pressed else 1, 16],
-                          "faces": {"up": {"texture": "#top", "uv": [0, 0, 16, 16]}, "down": {"texture": "#top", "uv": [0, 0, 16, 16]}}}]})
+                          # 縁の四面も描く (薄い板の側が抜けて見えていた。2026-10-29 の監査)
+                          "faces": {"up": {"texture": "#top", "uv": [0, 0, 16, 16]}, "down": {"texture": "#top", "uv": [0, 0, 16, 16]},
+                                    **{d: {"texture": "#top", "uv": [0, 0, 16, 1]} for d in ("north", "south", "east", "west")}}}]})
     w("blockstates/echo_plate.json", {"variants": pv})
     print("done")
 

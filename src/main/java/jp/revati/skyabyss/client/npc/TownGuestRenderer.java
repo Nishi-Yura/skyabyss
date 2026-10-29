@@ -55,8 +55,8 @@ public final class TownGuestRenderer {
 
     // v2 (NpcModels) の名前: guest_<人>。土地の町の人は自分の体があればそれ (2026-10-28 から 8 人とも)、なければ借りた都の人
     static String v2(NpcEntity e) {
-        if (e instanceof TownGuestEntity g && NpcModels.has("guest_" + g.guestId())) {
-            return "guest_" + g.guestId();
+        if (e instanceof TownGuestEntity g && NpcModels.has("guest_" + jp.revati.skyabyss.town.RegionFolk.body(g.guestId()))) {
+            return "guest_" + jp.revati.skyabyss.town.RegionFolk.body(g.guestId());
         }
         return "guest_" + guest(e);
     }

@@ -46,6 +46,11 @@ public final class RegionFolk {
         return null;
     }
 
+    // 体 (v2 の npc_guest_<体>)。町の案内人は四つの町とも都の案内人と同じ体 (town_guide。tools/install/install_town_guide_body.py)、ほかは id のまま
+    public static String body(String id) {
+        return id.startsWith("town_guide_") ? "town_guide" : id;
+    }
+
     // 絵を借りる相手 (土地の町の人でなければ id のまま)
     public static String lookOf(String id) {
         Folk f = byId(id);
