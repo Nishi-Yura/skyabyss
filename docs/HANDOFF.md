@@ -11,7 +11,7 @@
 ## 2026-10-31 夕（試遊版 0.9.0 と、試遊と並行の監査）
 
 - 試遊版 `build/libs/skyabyss-0.9.0.jar`（確かめ表 `docs/review/playtest_0.9.0.md`）。
-- 監査で直した（0.9.0 の jar には入っていない。自己テストはまだ流していない、試遊のあとに `moon` を流す）:
+- 監査で直した（0.9.1 の jar `build/libs/skyabyss-0.9.1.jar` に入れた。確かめ表 `docs/review/playtest_0.9.1.md`。`moon memories`・`moon gear`・`gear tiers` 通る）:
   - 月のヒロイックの必要 Lv が 52 だった。レベルの上限は 50（その先は転生）なので着けなかった。`MoonGear.requiredLevel` を上限で止め、全部 50（03 の 12.2 の表も）。
   - 記憶の石が二つ置かれうる（流し直さなかった区画に前の石が残る）。`MoonMemories.place` は石がある区画を飛ばす。
   - 前の版の世界で区画を流し直したとき、もう月にいる人が岩に埋まりうる。流し直したら、ぶつかっている人を着く所へ。
