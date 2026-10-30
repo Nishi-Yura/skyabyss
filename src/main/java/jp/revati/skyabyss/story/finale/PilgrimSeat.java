@@ -145,8 +145,13 @@ public final class PilgrimSeat {
                 Notice.narrate(p, "message.skyabyss.seat.throne_shut");
                 return;
             }
-            if (SeatArena.form() != 0) {
+            if (SeatArena.form() != 0 && SeatArena.form() != 4) {
                 Notice.bar(p, net.minecraft.network.chat.Component.translatable("message.skyabyss.seat.throne_busy"));
+                return;
+            }
+            // 巡礼者を退けた人: 結末を選ぶ (選び直す)・挑み直す
+            if (FinaleEnding.mayChoose(p)) {
+                FinaleEnding.offer(p, SeatArena.form() == 0);
                 return;
             }
             level.playSound(null, pos, CloudMobsSetup.SEAT_TOUCH.get(), SoundSource.BLOCKS, 2.0f, 1.0f);

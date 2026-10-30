@@ -59,8 +59,12 @@ public final class ChapterSky {
         return STAGES.getOrDefault(chapter, Stage.NONE);
     }
 
-    // その人の章の段
+    // その人の章の段 (終章の結末を選んだ人は、結末の空。story/finale/FinaleEnding)
     public static Stage stage(ServerPlayer player) {
+        Stage ending = jp.revati.skyabyss.story.finale.FinaleEnding.stage(player);
+        if (ending != null) {
+            return ending;
+        }
         return stage(Chapters.of(player));
     }
 

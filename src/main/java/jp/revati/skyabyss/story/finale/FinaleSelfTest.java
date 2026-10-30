@@ -478,11 +478,32 @@ public final class FinaleSelfTest {
         SeatArena.clear(cloud);
         check(f, SeatArena.parts(cloud).isEmpty() && SeatArena.allies(cloud).isEmpty() && SeatArena.form() == 0, "clearing the seat left the pilgrim or the four");
         Quests.forgetAll(p);
+        ending(p, f);
+    }
+
+    // 結末 (50 の 4.4): 選べる条件・受け入れるの条件・記録と空の段・語りと伝承の素材
+    static void ending(FakePlayer p, List<String> f) {
+        p.getPersistentData().remove(FinaleEnding.KEY);
+        check(f, FinaleEnding.chosen(p) == null && FinaleEnding.stage(p) == null, "a fresh player already has an ending");
+        check(f, !FinaleEnding.mayChoose(p), "someone without the seat quest could choose an ending");
+        check(f, !FinaleEnding.mayAccept(p) && !FinaleEnding.choose(p, "accept"), "accept was open without the twelve memories and the watcher lore");
+        FinaleEnding.apply(p, "calm");
+        check(f, "calm".equals(FinaleEnding.chosen(p)) && jp.revati.skyabyss.sky.ChapterSky.stage(p).moonBias() < 0, "choosing calm did not change the sky");
+        FinaleEnding.apply(p, "break");
+        check(f, "break".equals(FinaleEnding.chosen(p)), "choosing again did not replace the ending");
+        for (String e : FinaleEnding.ENDINGS) {
+            check(f, FinaleSelfTest.class.getResource("/assets/skyabyss/story_reels/finale_end_" + e + ".json") != null
+                    && FinaleSelfTest.class.getResource("/assets/skyabyss/textures/gui/story/finale_end_" + e + "/p5.png") != null
+                    && FinaleSelfTest.class.getResource("/data/skyabyss/lore/entry/finale/ending_" + e + ".json") != null, "the " + e + " ending reel or lore is missing");
+        }
+        check(f, FinaleSelfTest.class.getResource("/assets/skyabyss/textures/environment/finale_crack.png") != null
+                && FinaleSelfTest.class.getResource("/assets/skyabyss/textures/environment/finale_wing.png") != null, "the ending sky textures are missing");
+        p.getPersistentData().remove(FinaleEnding.KEY);
     }
 
     static void report(List<String> f) {
         if (f.isEmpty()) {
-            SkyAbyss.LOGGER.info("SELFTEST cloudsea PASSED (dimension, arrival island and marks, cloud layer, fall rescue, gate condition, quest and reel; island 1 bridge, bells, bell clouds ring/silence, tower door, foes, lord and arena floor; island 2 light bridge and gate, lamps, door, beam and shade, moth light, eye; island 3 light bridge and gate, forges, door, rewind stones, echoes, rewinder; island 4 light bridge and gate, former selves, door, shield and raise, plume line, pilgrim's plume; seat bridge and gate, cloud ring and bells, three forms, the four allies)");
+            SkyAbyss.LOGGER.info("SELFTEST cloudsea PASSED (dimension, arrival island and marks, cloud layer, fall rescue, gate condition, quest and reel; island 1 bridge, bells, bell clouds ring/silence, tower door, foes, lord and arena floor; island 2 light bridge and gate, lamps, door, beam and shade, moth light, eye; island 3 light bridge and gate, forges, door, rewind stones, echoes, rewinder; island 4 light bridge and gate, former selves, door, shield and raise, plume line, pilgrim's plume; seat bridge and gate, cloud ring and bells, three forms, the four allies; endings)");
         } else {
             f.forEach(m -> SkyAbyss.LOGGER.error("SELFTEST cloudsea FAILED: {}", m));
         }

@@ -53,10 +53,17 @@ def finale_ascend_reel():
     return {"finale_ascend": [(pid, motion, 2.8, sound, ja, en) for pid, fn, motion, sound, ja, en in finale_ascend.PANELS]}
 
 
+def finale_end_reels():
+    """終章の結末の語り (finale_end.py の REELS。結末ごとに一つ)"""
+    import finale_end
+    return {f"finale_end_{e}": [(pid, motion, 3.0, sound, ja, en) for pid, fn, motion, sound, ja, en in panels] for e, panels in finale_end.REELS.items()}
+
+
 def main():
     REELS.update(chapter_reels())
     REELS.update(moon_end_reel())
     REELS.update(finale_ascend_reel())
+    REELS.update(finale_end_reels())
     # 語りの名前を並べると、その語りの絵と並びだけを入れ直す (文はいつも全部書く。絵の元を消した語りを壊さないため)
     only = set(sys.argv[1:])
     lang = {"ja_jp": {"story.skyabyss.reel.hint": HINT[0]}, "en_us": {"story.skyabyss.reel.hint": HINT[1]}}

@@ -178,7 +178,7 @@ public final class FinaleWorld {
         Notice.narrate(p, "message.skyabyss.cloudsea.gate");
     }
 
-    // 開発用: /skyabyss cloudsea enter | leave | ring <鐘の印> | lord | crumble | lamp <w|e|s> | eye | forge <w|e|n> | rewinder | selves | plume | seat <1|2|3> (権限 2)
+    // 開発用: /skyabyss cloudsea enter | leave | ring <鐘の印> | lord | crumble | lamp <w|e|s> | eye | forge <w|e|n> | rewinder | selves | plume | seat <1|2|3> | ending <calm|break|accept|none> (権限 2)
     @SubscribeEvent
     static void onCommands(net.neoforged.neoforge.event.RegisterCommandsEvent event) {
         event.getDispatcher().register(net.minecraft.commands.Commands.literal(SkyAbyss.MODID).requires(s -> s.hasPermission(2))
@@ -216,6 +216,21 @@ public final class FinaleWorld {
                         .then(net.minecraft.commands.Commands.literal("seat")
                                 .then(net.minecraft.commands.Commands.argument("form", com.mojang.brigadier.arguments.IntegerArgumentType.integer(1, 3)).executes(c -> {
                                     SeatArena.toForm(c.getSource().getServer().getLevel(LEVEL), com.mojang.brigadier.arguments.IntegerArgumentType.getInteger(c, "form"));
+                                    return 1;
+                                })))
+                        .then(net.minecraft.commands.Commands.literal("ending")
+                                .then(net.minecraft.commands.Commands.argument("which", com.mojang.brigadier.arguments.StringArgumentType.word()).executes(c -> {
+                                    ServerPlayer p = c.getSource().getPlayerOrException();
+                                    String e = com.mojang.brigadier.arguments.StringArgumentType.getString(c, "which");
+                                    if (e.equals("none")) {
+                                        p.getPersistentData().remove(FinaleEnding.KEY);
+                                        FinaleEnding.sync(p);
+                                        return 1;
+                                    }
+                                    if (!FinaleEnding.ENDINGS.contains(e)) {
+                                        return 0;
+                                    }
+                                    FinaleEnding.apply(p, e);
                                     return 1;
                                 })))));
     }

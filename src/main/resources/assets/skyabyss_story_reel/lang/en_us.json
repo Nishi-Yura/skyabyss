@@ -38,5 +38,20 @@
   "story.skyabyss.finale_ascend.p2": "Four shadows gathered above the bell tower.",
   "story.skyabyss.finale_ascend.p3": "On the stone whale's back, the city fell away beneath you.",
   "story.skyabyss.finale_ascend.p4": "The thunder wing broke through the clouds. Light poured over everything.",
-  "story.skyabyss.finale_ascend.p5": "Above the sea of clouds floated an island with a broken gate."
+  "story.skyabyss.finale_ascend.p5": "Above the sea of clouds floated an island with a broken gate.",
+  "story.skyabyss.finale_end_calm.p1": "When you laid your hand on the seat, light passed through the clouds and down into the depths.",
+  "story.skyabyss.finale_end_calm.p2": "The loosened heart began, slowly, to beat in time again. Sky and earth drew on one another once more.",
+  "story.skyabyss.finale_end_calm.p3": "The titans' song could be heard again.",
+  "story.skyabyss.finale_end_calm.p4": "The moon drew away and the sky cleared. The city's bell announced the morning.",
+  "story.skyabyss.finale_end_calm.p5": "My former selves, their promise kept, returned to the light.",
+  "story.skyabyss.finale_end_break.p1": "You struck the seat and cut the chains that bound the Pilgrim.",
+  "story.skyabyss.finale_end_break.p2": "The heart in the depths shattered, and the pull between sky and earth came undone.",
+  "story.skyabyss.finale_end_break.p3": "The Pilgrim was sealed away beyond a crack in the sky.",
+  "story.skyabyss.finale_end_break.p4": "The titans sank into a deep sleep. They sing no more.",
+  "story.skyabyss.finale_end_break.p5": "Even beneath the broken sky, people light their lamps. The world goes on, changed.",
+  "story.skyabyss.finale_end_accept.p1": "You left the seat empty, and invited the Pilgrim down to the earth.",
+  "story.skyabyss.finale_end_accept.p2": "For the first time, the Pilgrim came down beneath the clouds. ...Its whole form stayed hidden in light.",
+  "story.skyabyss.finale_end_accept.p3": "The moon it had dragged was freed of its chains, and came to rest quietly high in the sky.",
+  "story.skyabyss.finale_end_accept.p4": "The city's bell fell silent. No one need watch the sky any longer. A wing circles the daytime sky.",
+  "story.skyabyss.finale_end_accept.p5": "My former selves rode the wing beyond the sky. Past the promise, and further still."
 }

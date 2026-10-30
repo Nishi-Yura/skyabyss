@@ -288,8 +288,15 @@ public final class SeatArena {
         Quests.signalWithParty(level, here, LORD);
         for (ServerPlayer p : here) {
             Notice.narrate(p, "message.skyabyss.seat.down");
-            Notice.narrate(p, "message.skyabyss.seat.next");
         }
+        // 語りのあと、座のそばの人に結末の選び (FinaleEnding)
+        jp.revati.skyabyss.story.ch1.Tasks.later(120, () -> {
+            for (ServerPlayer p : here) {
+                if (!p.hasDisconnected() && FinaleEnding.mayChoose(p)) {
+                    FinaleEnding.offer(p, false);
+                }
+            }
+        });
         for (Entity e : level.getEntitiesOfClass(FallenPlume.class, box(), e -> e.getTags().contains(TAG))) {
             e.discard();
         }
